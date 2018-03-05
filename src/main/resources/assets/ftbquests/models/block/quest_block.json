@@ -1,0 +1,7 @@
+{
+	"parent": "block/cube_all",
+	"textures": {
+		"particle": "minecraft:blocks/crafting_table_top",
+		"all": "minecraft:blocks/crafting_table_top"
+	}
+}

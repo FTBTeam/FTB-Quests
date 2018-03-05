@@ -1,1 +1,1 @@
-# FTBQuests
+# FTB Quests [![](http://cf.way2muchnoise.eu/ftb-quests.svg)](https://minecraft.curseforge.com/projects/ftb-quests) [![](http://cf.way2muchnoise.eu/versions/ftb-quests.svg)](https://minecraft.curseforge.com/projects/ftb-quests)
