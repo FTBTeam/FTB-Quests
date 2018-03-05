@@ -1,0 +1,5 @@
+{
+	"conditions": {
+		"questblockconfig": "com.feed_the_beast.ftbquests.block.QuestBlockRegistry$RecipeCondition"
+	}
+}

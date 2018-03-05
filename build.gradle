@@ -1,0 +1,69 @@
+buildscript {
+	repositories {
+		jcenter()
+		maven { url = "http://files.minecraftforge.net/maven" }
+	}
+	dependencies {
+		classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
+	}
+}
+apply plugin: 'net.minecraftforge.gradle.forge'
+apply plugin: 'maven-publish'
+
+version = "${mod_version}"
+group = package_group
+archivesBaseName = mod_name
+
+sourceCompatibility = targetCompatibility = "1.8"
+compileJava {
+	sourceCompatibility = targetCompatibility = "1.8"
+}
+
+minecraft {
+	version = "${mc_version}-${forge_version}"
+	runDir = "run"
+	mappings = "${mappings_version}"
+
+	replace "@VERSION@", project.version
+	replaceIn "${mod_reference}"
+}
+
+repositories {
+	mavenLocal()
+	maven { url "http://maven.latmod.com/" }
+}
+
+dependencies {
+	deobfCompile "com.feed_the_beast.ftblib:FTBLib:${ftblib_version}"
+}
+
+processResources {
+	inputs.property "version", project.version
+	inputs.property "mcversion", project.minecraft.version
+
+	from(sourceSets.main.resources.srcDirs) {
+		include 'mcmod.info'
+		expand 'version': project.version, 'mcversion': project.minecraft.version
+	}
+
+	from(sourceSets.main.resources.srcDirs) {
+		exclude 'mcmod.info'
+	}
+}
+
+artifacts {
+	archives jar
+	archives sourceJar
+}
+
+publishing {
+	publications {
+		FTBQuests(MavenPublication) {
+			groupId = project.group
+			artifactId = project.archivesBaseName
+			version = project.version
+			artifact jar
+			artifact sourceJar
+		}
+	}
+}
