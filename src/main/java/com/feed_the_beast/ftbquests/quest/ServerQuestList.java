@@ -10,7 +10,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.storage.ThreadedFileIOBase;
 
 import java.io.File;
 import java.util.HashMap;
@@ -159,42 +158,30 @@ public class ServerQuestList extends QuestList
 
 	public void saveQuestsFile()
 	{
-		ThreadedFileIOBase.getThreadedIOInstance().queueIO(() ->
+		JsonObject json = new JsonObject();
+
+		if (!chapters.isEmpty())
 		{
-			JsonObject json = new JsonObject();
+			JsonArray array = new JsonArray();
 
-			if (!chapters.isEmpty())
+			for (QuestChapter chapter : chapters.values())
 			{
-				JsonArray array = new JsonArray();
-
-				for (QuestChapter chapter : chapters.values())
-				{
-					array.add(chapter.getName());
-				}
-
-				json.add("chapters", array);
+				array.add(chapter.getName());
 			}
 
-			JsonUtils.toJson(json, new File(folder, "quests.json"));
-			return false;
-		});
+			json.add("chapters", array);
+		}
+
+		JsonUtils.toJsonSafe(new File(folder, "quests.json"), json);
 	}
 
 	public void save(QuestChapter chapter)
 	{
-		ThreadedFileIOBase.getThreadedIOInstance().queueIO(() ->
-		{
-			JsonUtils.toJson(chapter.getSerializableElement(), new File(folder, chapter.getName() + "/chapter.json"));
-			return false;
-		});
+		JsonUtils.toJsonSafe(new File(folder, chapter.getName() + "/chapter.json"), chapter.getSerializableElement());
 	}
 
 	public void save(Quest quest)
 	{
-		ThreadedFileIOBase.getThreadedIOInstance().queueIO(() ->
-		{
-			JsonUtils.toJson(quest.getSerializableElement(), new File(folder, quest.chapter.getName() + "/" + quest.id.getResourcePath() + ".json"));
-			return false;
-		});
+		JsonUtils.toJsonSafe(new File(folder, quest.chapter.getName() + "/" + quest.id.getResourcePath() + ".json"), quest.getSerializableElement());
 	}
 }
