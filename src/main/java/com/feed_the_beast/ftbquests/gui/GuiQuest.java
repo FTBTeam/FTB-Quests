@@ -42,7 +42,7 @@ public class GuiQuest extends GuiBase
 		public void draw()
 		{
 			GlStateManager.pushMatrix();
-			GlStateManager.translate(getAX() + getGui().width / 2, getAY() + 20, 0);
+			GlStateManager.translate(getAX() + getGui().width / 2, getAY() + 11, 0);
 			GlStateManager.scale(2F, 2F, 1F);
 			drawString(text, 0, 0, CENTERED);
 			GlStateManager.popMatrix();
@@ -63,7 +63,7 @@ public class GuiQuest extends GuiBase
 		{
 			for (int i = 0; i < text.size(); i++)
 			{
-				drawString(text.get(i), getGui().width / 2, 5 + getAY() + i * 12, CENTERED);
+				drawString(text.get(i), getGui().width / 2, 1 + getAY() + i * 12, CENTERED);
 			}
 		}
 	}
@@ -82,7 +82,7 @@ public class GuiQuest extends GuiBase
 		{
 			for (int i = 0; i < text.size(); i++)
 			{
-				drawString(text.get(i), getGui().width / 2, 5 + getAY() + i * 12, ThemeVanilla.CONTENT_COLOR_DARK, CENTERED);
+				drawString(text.get(i), getGui().width / 2, 1 + getAY() + i * 12, ThemeVanilla.CONTENT_COLOR_DARK, CENTERED);
 			}
 		}
 	}
@@ -299,7 +299,7 @@ public class GuiQuest extends GuiBase
 			@Override
 			public void drawPanelBackground(int ax, int ay)
 			{
-				drawString(TextFormatting.RED + "Tasks:", ax + width / 2, ay + 13, CENTERED); //LANG
+				drawString(TextFormatting.RED + "Tasks:", ax + width / 2, ay + 9, CENTERED); //LANG
 			}
 		};
 
@@ -331,7 +331,7 @@ public class GuiQuest extends GuiBase
 			@Override
 			public void drawPanelBackground(int ax, int ay)
 			{
-				drawString(TextFormatting.BLUE + "Rewards:", ax + width / 2, ay + 13, CENTERED); //LANG
+				drawString(TextFormatting.BLUE + "Rewards:", ax + width / 2, ay + 9, CENTERED); //LANG
 			}
 		};
 	}

@@ -99,7 +99,7 @@ public class GuiQuestTree extends GuiBase
 
 			boolean selected = selectedChapter != null && chapter.equals(selectedChapter.chapter);
 
-			(selected ? TAB_SELECTED : TAB_UNSELECTED).draw(ax, ay, width, height);
+			(selected ? TAB_SELECTED : TAB_UNSELECTED).draw(selected ? ax : ax - 1, ay, width, height);
 
 			if (!icon.isEmpty())
 			{
@@ -582,9 +582,18 @@ public class GuiQuestTree extends GuiBase
 				prevMouseX = x;
 				prevMouseY = y;
 			}
+		}
+	}
 
+	@Override
+	public void drawForeground()
+	{
+		if (selectedChapter != null)
+		{
 			drawString(selectedChapter.getTitle(), getAX() + 8, getAY() + 8, ThemeVanilla.CONTENT_COLOR_DARK, 0);
 		}
+
+		super.drawForeground();
 	}
 
 	@Override
