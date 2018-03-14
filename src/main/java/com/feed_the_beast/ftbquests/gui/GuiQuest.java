@@ -10,7 +10,7 @@ import com.feed_the_beast.ftblib.lib.gui.PanelScrollBar;
 import com.feed_the_beast.ftblib.lib.gui.Widget;
 import com.feed_the_beast.ftblib.lib.gui.WidgetLayout;
 import com.feed_the_beast.ftblib.lib.gui.WidgetType;
-import com.feed_the_beast.ftblib.lib.gui.misc.ThemeVanilla;
+import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
@@ -80,9 +80,11 @@ public class GuiQuest extends GuiBase
 		@Override
 		public void draw()
 		{
+			Color4I col = getTheme().getInvertedContentColor();
+
 			for (int i = 0; i < text.size(); i++)
 			{
-				drawString(text.get(i), getGui().width / 2, 1 + getAY() + i * 12, ThemeVanilla.CONTENT_COLOR_DARK, CENTERED);
+				drawString(text.get(i), getGui().width / 2, 1 + getAY() + i * 12, col, CENTERED);
 			}
 		}
 	}

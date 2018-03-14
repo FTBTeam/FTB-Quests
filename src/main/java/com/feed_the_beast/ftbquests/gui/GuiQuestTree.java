@@ -11,10 +11,8 @@ import com.feed_the_beast.ftblib.lib.gui.SimpleTextButton;
 import com.feed_the_beast.ftblib.lib.gui.Widget;
 import com.feed_the_beast.ftblib.lib.gui.WidgetLayout;
 import com.feed_the_beast.ftblib.lib.gui.misc.GuiSelectors;
-import com.feed_the_beast.ftblib.lib.gui.misc.ThemeVanilla;
 import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
-import com.feed_the_beast.ftblib.lib.icon.ImageIcon;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.client.FTBQuestsClient;
 import com.feed_the_beast.ftbquests.quest.Quest;
@@ -39,10 +37,6 @@ import java.util.Map;
 
 public class GuiQuestTree extends GuiBase
 {
-	private static final ImageIcon TEXTURE_RECIPE_BOOK = (ImageIcon) Icon.getIcon("textures/gui/recipe_book.png");
-	private static final Icon TAB_UNSELECTED = TEXTURE_RECIPE_BOOK.withUVfromCoords(150, 2, 35, 26, 256, 256);
-	private static final Icon TAB_SELECTED = TEXTURE_RECIPE_BOOK.withUVfromCoords(188, 2, 35, 26, 256, 256);
-
 	public class ButtonChapter extends Button
 	{
 		public QuestChapter chapter;
@@ -98,8 +92,7 @@ public class GuiQuestTree extends GuiBase
 			int ay = getAY();
 
 			boolean selected = selectedChapter != null && chapter.equals(selectedChapter.chapter);
-
-			(selected ? TAB_SELECTED : TAB_UNSELECTED).draw(selected ? ax : ax - 1, ay, width, height);
+			getTheme().getHorizontalTab(selected).draw(selected ? ax : ax - 1, ay, width, height);
 
 			if (!icon.isEmpty())
 			{
@@ -590,7 +583,7 @@ public class GuiQuestTree extends GuiBase
 	{
 		if (selectedChapter != null)
 		{
-			drawString(selectedChapter.getTitle(), getAX() + 8, getAY() + 8, ThemeVanilla.CONTENT_COLOR_DARK, 0);
+			drawString(selectedChapter.getTitle(), getAX() + 8, getAY() + 8, getTheme().getInvertedContentColor(), 0);
 		}
 
 		super.drawForeground();
