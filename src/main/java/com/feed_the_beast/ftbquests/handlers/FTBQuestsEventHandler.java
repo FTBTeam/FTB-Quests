@@ -21,7 +21,7 @@ import java.util.List;
  * @author LatvianModder
  */
 @EventHandler
-public class FTBGuidesEventHandler
+public class FTBQuestsEventHandler
 {
 	public static final ResourceLocation RELOAD_CONFIG = new ResourceLocation(FTBQuests.MOD_ID, "config");
 	public static final ResourceLocation RELOAD_QUESTS = new ResourceLocation(FTBQuests.MOD_ID, "quests");
