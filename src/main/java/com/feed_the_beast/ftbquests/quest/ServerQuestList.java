@@ -1,5 +1,6 @@
 package com.feed_the_beast.ftbquests.quest;
 
+import com.feed_the_beast.ftblib.lib.io.DataReader;
 import com.feed_the_beast.ftblib.lib.util.FileUtils;
 import com.feed_the_beast.ftblib.lib.util.JsonUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
@@ -37,7 +38,7 @@ public class ServerQuestList extends QuestList
 
 		File chapterFolders[] = null;
 
-		JsonElement questsJson0 = JsonUtils.fromJson(new File(folder, "quests.json"));
+		JsonElement questsJson0 = DataReader.get(new File(folder, "quests.json")).safeJson();
 
 		if (questsJson0.isJsonObject())
 		{
@@ -74,7 +75,7 @@ public class ServerQuestList extends QuestList
 					{
 						if (questFile.isFile() && !questFile.getName().equals("chapter.json") && questFile.getName().endsWith(".json"))
 						{
-							Quest quest = new Quest(chapter, FileUtils.getRawFileName(questFile));
+							Quest quest = new Quest(chapter, FileUtils.getBaseName(questFile));
 							chapter.quests.put(quest.id.getResourcePath(), quest);
 							questFileMap.put(quest.id, questFile);
 						}
@@ -93,13 +94,13 @@ public class ServerQuestList extends QuestList
 		{
 			try
 			{
-				chapter.fromJson(JsonUtils.fromJson(chapterFileMap.get(chapter.getName())).getAsJsonObject());
+				chapter.fromJson(DataReader.get(chapterFileMap.get(chapter.getName())).json().getAsJsonObject());
 
 				for (Quest quest : chapter.quests.values())
 				{
 					try
 					{
-						quest.fromJson(JsonUtils.fromJson(questFileMap.get(quest.id)));
+						quest.fromJson(DataReader.get(questFileMap.get(quest.id)).json());
 					}
 					catch (Exception ex)
 					{
