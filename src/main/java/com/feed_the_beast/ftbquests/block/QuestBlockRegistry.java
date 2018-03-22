@@ -55,7 +55,7 @@ public class QuestBlockRegistry
 	{
 		if (FTBQuestsConfig.general.add_block)
 		{
-			ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(QUEST_BLOCK), 0, new ModelResourceLocation(QUEST_BLOCK.getRegistryName(), "inventory"));
+			ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(QUEST_BLOCK), 0, new ModelResourceLocation(QUEST_BLOCK.getRegistryName(), "normal"));
 		}
 	}
 
