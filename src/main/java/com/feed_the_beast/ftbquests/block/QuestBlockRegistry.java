@@ -1,14 +1,15 @@
 package com.feed_the_beast.ftbquests.block;
 
 import com.feed_the_beast.ftblib.lib.block.ItemBlockBase;
-import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.FTBQuestsConfig;
 import com.google.gson.JsonObject;
 import net.minecraft.block.Block;
+import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraftforge.client.event.ModelRegistryEvent;
+import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.common.crafting.IConditionFactory;
 import net.minecraftforge.common.crafting.JsonContext;
 import net.minecraftforge.event.RegistryEvent;
@@ -54,7 +55,7 @@ public class QuestBlockRegistry
 	{
 		if (FTBQuestsConfig.general.add_block)
 		{
-			ClientUtils.registerModel(QUEST_BLOCK);
+			ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(QUEST_BLOCK), 0, new ModelResourceLocation(QUEST_BLOCK.getRegistryName(), "inventory"));
 		}
 	}
 
