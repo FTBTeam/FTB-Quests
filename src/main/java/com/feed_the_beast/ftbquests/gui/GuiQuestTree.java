@@ -541,6 +541,8 @@ public class GuiQuestTree extends GuiBase
 	@Override
 	public void drawBackground()
 	{
+		super.drawBackground();
+
 		if (selectedChapter != null)
 		{
 			if (getMouseWheel() > 0)

@@ -2,7 +2,6 @@ package com.feed_the_beast.ftbquests.client;
 
 import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftblib.lib.gui.GuiBase;
-import com.feed_the_beast.ftblib.lib.gui.GuiWrapper;
 import com.feed_the_beast.ftbquests.FTBQuestsCommon;
 import com.feed_the_beast.ftbquests.gui.ClientQuestList;
 import com.feed_the_beast.ftbquests.gui.GuiQuestTree;
@@ -43,7 +42,7 @@ public class FTBQuestsClient extends FTBQuestsCommon
 			scrollY = questTreeGui.quests.getScrollY();
 			selectedChapter = questTreeGui.selectedChapter == null ? "" : questTreeGui.selectedChapter.chapter.getName();
 
-			if (ClientUtils.MC.currentScreen instanceof GuiWrapper && ((GuiWrapper) ClientUtils.MC.currentScreen).getWrappedGui() instanceof GuiQuestTree)
+			if (ClientUtils.getCurrentGuiAs(GuiQuestTree.class) != null)
 			{
 				guiOpen = true;
 			}
