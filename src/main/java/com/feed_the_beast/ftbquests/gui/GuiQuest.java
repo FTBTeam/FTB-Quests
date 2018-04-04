@@ -111,7 +111,7 @@ public class GuiQuest extends GuiBase
 		{
 			task.addText(list);
 
-			if (GuiScreen.isShiftKeyDown())
+			if (isShiftKeyDown())
 			{
 				list.add(task.getCompletionString(ClientQuestList.INSTANCE));
 			}
@@ -250,8 +250,7 @@ public class GuiQuest extends GuiBase
 				tasks.alignWidgets();
 				rewards.alignWidgets();
 
-				scrollBar.setElementSize(align(WidgetLayout.VERTICAL) + 10);
-				scrollBar.setSrollStepFromOneElementSize(12);
+				scrollBar.setMaxValue(align(WidgetLayout.VERTICAL) + 10);
 			}
 		};
 
@@ -269,6 +268,7 @@ public class GuiQuest extends GuiBase
 		};
 
 		scrollBar = new PanelScrollBar(this, mainPanel);
+		scrollBar.setScrollStep(12);
 		title = new QuestTitle(mainPanel);
 		shortDescription = new QuestShortDescription(mainPanel);
 		longDescription = new QuestLongDescription(mainPanel);

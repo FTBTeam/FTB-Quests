@@ -73,7 +73,7 @@ public class GuiQuestTree extends GuiBase
 			list.add(getTitle());
 			list.addAll(description);
 
-			if (GuiScreen.isShiftKeyDown())
+			if (isShiftKeyDown())
 			{
 				list.add(chapter.getCompletionString(ClientQuestList.INSTANCE));
 			}
@@ -139,7 +139,7 @@ public class GuiQuestTree extends GuiBase
 				list.add(description);
 			}
 
-			if (GuiScreen.isShiftKeyDown())
+			if (isShiftKeyDown())
 			{
 				list.add(quest.getCompletionString(ClientQuestList.INSTANCE));
 			}
@@ -182,13 +182,13 @@ public class GuiQuestTree extends GuiBase
 		@Override
 		public boolean isEnabled()
 		{
-			return GuiScreen.isCtrlKeyDown();
+			return isCtrlKeyDown();
 		}
 
 		@Override
 		public boolean shouldDraw()
 		{
-			return GuiScreen.isCtrlKeyDown() && isMouseOver();
+			return isCtrlKeyDown() && isMouseOver();
 		}
 
 		@Override
