@@ -273,8 +273,6 @@ public class GuiQuestTree extends GuiBase
 			chapterButtons.add(b);
 		}
 
-		chapterPanel.addFlags(DEFAULTS);
-
 		/*
 		chaptersScrollBar = new PanelScrollBar(this, 14, chapterPanel)
 		{
@@ -438,8 +436,6 @@ public class GuiQuestTree extends GuiBase
 			}
 		};
 
-		quests.addFlags(DEFAULTS);
-
 		zoomIn = new SimpleTextButton(this, "+", Icon.EMPTY)
 		{
 			@Override
@@ -543,9 +539,23 @@ public class GuiQuestTree extends GuiBase
 	{
 		super.drawBackground();
 
+		if (grabbed != 0)
+		{
+			int x = getMouseX();
+			int y = getMouseY();
+			quests.setScrollX(Math.max(Math.min(quests.getScrollX() + (prevMouseX - x), scrollWidth - quests.width), 0));
+			quests.setScrollY(Math.max(Math.min(quests.getScrollY() + (prevMouseY - y), scrollHeight - quests.height), 0));
+			prevMouseX = x;
+			prevMouseY = y;
+		}
+	}
+
+	@Override
+	public boolean mouseScrolled(int scroll)
+	{
 		if (selectedChapter != null)
 		{
-			if (getMouseWheel() > 0)
+			if (scroll > 0)
 			{
 				if (zoom != 24)
 				{
@@ -554,9 +564,10 @@ public class GuiQuestTree extends GuiBase
 					quests.setScrollX(0);
 					quests.setScrollY(0);
 					getGui().alignWidgets();
+					return true;
 				}
 			}
-			else if (getMouseWheel() < 0)
+			else if (scroll < 0)
 			{
 				if (zoom != 4)
 				{
@@ -565,19 +576,12 @@ public class GuiQuestTree extends GuiBase
 					quests.setScrollX(0);
 					quests.setScrollY(0);
 					getGui().alignWidgets();
+					return true;
 				}
 			}
-
-			if (grabbed != 0)
-			{
-				int x = getMouseX();
-				int y = getMouseY();
-				quests.setScrollX(Math.max(Math.min(quests.getScrollX() + (prevMouseX - x), scrollWidth - quests.width), 0));
-				quests.setScrollY(Math.max(Math.min(quests.getScrollY() + (prevMouseY - y), scrollHeight - quests.height), 0));
-				prevMouseX = x;
-				prevMouseY = y;
-			}
 		}
+
+		return super.mouseScrolled(scroll);
 	}
 
 	@Override

@@ -254,8 +254,6 @@ public class GuiQuest extends GuiBase
 			}
 		};
 
-		mainPanel.addFlags(DEFAULTS);
-
 		back = new Button(this, GuiLang.BACK.translate(), GuiIcons.LEFT)
 		{
 			@Override
