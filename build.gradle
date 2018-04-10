@@ -10,7 +10,12 @@ buildscript {
 apply plugin: 'net.minecraftforge.gradle.forge'
 apply plugin: 'maven-publish'
 
-version = "${mod_version}"
+def ENV = System.getenv()
+if (ENV.BUILD_NUMBER)
+	version = "${mod_version}.${ENV.BUILD_NUMBER}"
+else
+	version = "${mod_version}"
+
 group = package_group
 archivesBaseName = mod_name
 
