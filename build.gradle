@@ -2,16 +2,19 @@ buildscript {
 	repositories {
 		jcenter()
 		maven { url = "http://files.minecraftforge.net/maven" }
+		maven { url = "https://oss.sonatype.org/content/repositories/snapshots/" }
 	}
 	dependencies {
 		classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
+		classpath 'com.matthewprenger:CurseGradle:1.0-SNAPSHOT'
 	}
 }
 apply plugin: 'net.minecraftforge.gradle.forge'
+apply plugin: 'com.matthewprenger.cursegradle'
 apply plugin: 'maven'
 
 def ENV = System.getenv()
-version = ENV.BUILD_NUMBER ? "${mod_version}.${ENV.BUILD_NUMBER}" : "${mod_version}"
+version = ENV.BUILD_NUMBER ? "${mod_version}.${ENV.BUILD_NUMBER}" : "${mod_version}.custom"
 group = package_group
 archivesBaseName = mod_name
 
@@ -60,6 +63,20 @@ if (ENV.LOCAL_MAVEN) {
 		repositories {
 			mavenDeployer {
 				repository(url: "file://${ENV.LOCAL_MAVEN}")
+			}
+		}
+	}
+}
+
+if (ENV.CURSEFORGE_KEY) {
+	curseforge {
+		apiKey = ENV.CURSEFORGE_KEY
+		project {
+			id = "${curseforge_id}"
+			releaseType = "release"
+			addGameVersion "${mc_version}"
+			relations {
+				requiredLibrary 'ftblib'
 			}
 		}
 	}
