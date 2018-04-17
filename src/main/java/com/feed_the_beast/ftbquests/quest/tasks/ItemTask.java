@@ -3,7 +3,6 @@ package com.feed_the_beast.ftbquests.quest.tasks;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.IconAnimation;
 import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
-import com.feed_the_beast.ftblib.lib.item.FTBLibOreIngredient;
 import com.feed_the_beast.ftblib.lib.item.ItemEntry;
 import com.feed_the_beast.ftblib.lib.util.JsonUtils;
 import com.feed_the_beast.ftbquests.quest.Quest;
@@ -12,6 +11,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.items.ItemHandlerHelper;
+import net.minecraftforge.oredict.OreDictionary;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -218,9 +219,22 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 		{
 			ore = o;
 			Map<ItemEntry, ItemStack> map = new LinkedHashMap<>();
-			FTBLibOreIngredient ingredient = new FTBLibOreIngredient(ore, map);
+
+			for (ItemStack stack : OreDictionary.getOres(ore))
+			{
+				map.put(ItemEntry.get(stack), ItemHandlerHelper.copyStackWithSize(stack, 1));
+			}
+
 			entries = new ArrayList<>(map.keySet());
-			icon = IconAnimation.fromIngredient(ingredient);
+
+			List<Icon> icons = new ArrayList<>();
+
+			for (ItemEntry entry : entries)
+			{
+				icons.add(ItemIcon.getItemIcon(entry.getStack(1, false)));
+			}
+
+			icon = new IconAnimation(icons);
 		}
 
 		@Override
