@@ -24,8 +24,7 @@ public class FTBQuestsClient extends FTBQuestsCommon
 		super.postInit();
 	}
 
-	@Override
-	public void loadQuests(JsonObject json)
+	public static void loadQuests(JsonObject json)
 	{
 		ClientQuestList.INSTANCE.fromJson(json);
 
