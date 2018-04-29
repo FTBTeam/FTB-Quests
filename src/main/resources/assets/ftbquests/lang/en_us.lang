@@ -2,6 +2,7 @@ tile.ftbquests.quest_block.name=Quest Block
 
 # Config
 ftbquests.general.editing_mode=Editing Mode
+ftbquests.general.editing_mode.button=Edit Quests
 ftbquests.general.add_block=Add Block
 
 # Sidebar Buttons
@@ -11,7 +12,7 @@ sidebar_button.ftbquests.quests=Quests
 commands.ftb.edit_quests.sync.usage=/ftb edit_quests sync [player]
 commands.ftb.edit_quests.add_chapter.usage=/ftb edit_quests add_chapter <name>
 commands.ftb.edit_quests.add_chapter.success=Quest added!
-commands.ftb.edit_quests.add_quest.fail_id=Chapter with that ID already exists!
+commands.ftb.edit_quests.add_chapter.fail_id=Chapter with that ID already exists!
 commands.ftb.edit_quests.add_quest.usage=/ftb edit_quests add_quest <chapter> <name> <x> <y>
 commands.ftb.edit_quests.add_quest.success=Quest added!
 commands.ftb.edit_quests.add_quest.fail_chapter=Invalid chapter ID!
