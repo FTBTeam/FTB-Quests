@@ -9,6 +9,6 @@ public class FTBQuestsNetHandler
 
 	public static void init()
 	{
-		QUESTS.register(1, new MessageSyncQuests());
+		QUESTS.register(new MessageSyncQuests());
 	}
 }

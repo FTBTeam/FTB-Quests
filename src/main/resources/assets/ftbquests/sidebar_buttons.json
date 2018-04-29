@@ -3,7 +3,7 @@
 		"group": "ftblib:info",
 		"icon": "minecraft:items/book_enchanted",
 		"x": 610,
-		"click": "command:/ftbc quests",
+		"click": "custom:ftbquests:open_gui",
 		"required_server_mods": ["ftbquests"],
 		"config": true,
 		"custom_text": true

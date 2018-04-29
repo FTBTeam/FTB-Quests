@@ -1,16 +1,22 @@
 package com.feed_the_beast.ftbquests.handlers;
 
+import com.feed_the_beast.ftblib.events.RegisterAdminPanelActionsEvent;
 import com.feed_the_beast.ftblib.events.RegisterOptionalServerModsEvent;
 import com.feed_the_beast.ftblib.events.ServerReloadEvent;
 import com.feed_the_beast.ftblib.events.player.ForgePlayerLoggedInEvent;
 import com.feed_the_beast.ftblib.events.team.ForgeTeamDataEvent;
 import com.feed_the_beast.ftblib.lib.EventHandler;
+import com.feed_the_beast.ftblib.lib.data.Action;
+import com.feed_the_beast.ftblib.lib.data.ForgePlayer;
+import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.util.CommonUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.FTBQuestsConfig;
 import com.feed_the_beast.ftbquests.quest.ServerQuestList;
 import com.feed_the_beast.ftbquests.util.FTBQuestsTeamData;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import java.io.File;
@@ -100,4 +106,22 @@ public class FTBQuestsEventHandler
 	{
 		FTBGuidesTeamData.get(event.getTeam()).addConfig(event);
 	}*/
+
+	@SubscribeEvent
+	public static void registerAdminPanelActions(RegisterAdminPanelActionsEvent event)
+	{
+		event.register(new Action(new ResourceLocation(FTBQuests.MOD_ID, "edit_quests"), new TextComponentTranslation("ftbquests.general.editing_mode.button"), GuiIcons.BOOK_RED, 0)
+		{
+			@Override
+			public Type getType(ForgePlayer player, NBTTagCompound data)
+			{
+				return Type.INVISIBLE;
+			}
+
+			@Override
+			public void onAction(ForgePlayer player, NBTTagCompound data)
+			{
+			}
+		});
+	}
 }

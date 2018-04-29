@@ -1,8 +1,10 @@
 package com.feed_the_beast.ftbquests.handlers;
 
 import com.feed_the_beast.ftblib.events.CustomSidebarButtonTextEvent;
+import com.feed_the_beast.ftblib.events.client.CustomClickEvent;
 import com.feed_the_beast.ftblib.lib.EventHandler;
 import com.feed_the_beast.ftbquests.FTBQuests;
+import com.feed_the_beast.ftbquests.client.FTBQuestsClient;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
@@ -37,5 +39,21 @@ public class FTBQuestsClientEventHandler
 			}
 		}
 		*/
+	}
+
+	@SubscribeEvent
+	public static void onCustomClick(CustomClickEvent event)
+	{
+		if (event.getID().getResourceDomain().equals(FTBQuests.MOD_ID))
+		{
+			switch (event.getID().getResourcePath())
+			{
+				case "open_gui":
+					FTBQuestsClient.openQuestGui();
+					break;
+			}
+
+			event.setCanceled(true);
+		}
 	}
 }
