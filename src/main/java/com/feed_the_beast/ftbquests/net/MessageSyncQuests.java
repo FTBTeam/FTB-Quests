@@ -12,7 +12,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 /**
  * @author LatvianModder
  */
-public class MessageSyncQuests extends MessageToClient<MessageSyncQuests>
+public class MessageSyncQuests extends MessageToClient
 {
 	private JsonElement json;
 
