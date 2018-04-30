@@ -5,7 +5,6 @@
 		"x": 610,
 		"click": "custom:ftbquests:open_gui",
 		"required_server_mods": ["ftbquests"],
-		"config": true,
 		"custom_text": true
 	}
 }
