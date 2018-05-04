@@ -96,7 +96,7 @@ public class GuiQuestTree extends GuiBase
 
 			if (!icon.isEmpty())
 			{
-				icon.draw(ax + (selected ? 10 : 12), ay + (height - 16) / 2, 16, 16);
+				icon.draw(ax + 10, ay + (height - 16) / 2, 16, 16);
 			}
 		}
 	}
