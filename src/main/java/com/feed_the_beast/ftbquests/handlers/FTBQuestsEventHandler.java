@@ -52,7 +52,7 @@ public class FTBQuestsEventHandler
 			ServerQuestList.INSTANCE = null;
 
 			List<String> errored = new ArrayList<>();
-			ServerQuestList.INSTANCE = new ServerQuestList(new File(CommonUtils.folderConfig, FTBQuests.MOD_ID + "/quests"), errored);
+			ServerQuestList.INSTANCE = new ServerQuestList(new File(CommonUtils.folderConfig, "ftbquests/quests"), errored);
 
 			for (String s : errored)
 			{

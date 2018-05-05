@@ -1,6 +1,5 @@
 package com.feed_the_beast.ftbquests;
 
-import com.feed_the_beast.ftblib.FTBLib;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
@@ -14,7 +13,7 @@ import org.apache.logging.log4j.Logger;
 		version = FTBQuests.VERSION,
 		acceptableRemoteVersions = "*",
 		acceptedMinecraftVersions = "[1.12,)",
-		dependencies = "required-after:" + FTBLib.MOD_ID
+		dependencies = "required-after:ftblib"
 )
 public class FTBQuests
 {

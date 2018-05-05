@@ -36,7 +36,7 @@ public class QuestBlockRegistry
 		if (FTBQuestsConfig.general.add_block)
 		{
 			event.getRegistry().register(new BlockQuest(FTBQuests.MOD_ID, "quest_block"));
-			GameRegistry.registerTileEntity(TileQuest.class, FTBQuests.MOD_ID + ":quest_block");
+			GameRegistry.registerTileEntity(TileQuest.class, "ftbquests:quest_block");
 		}
 	}
 
