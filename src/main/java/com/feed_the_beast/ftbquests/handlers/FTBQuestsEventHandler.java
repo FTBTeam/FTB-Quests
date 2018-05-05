@@ -1,7 +1,6 @@
 package com.feed_the_beast.ftbquests.handlers;
 
 import com.feed_the_beast.ftblib.events.RegisterAdminPanelActionsEvent;
-import com.feed_the_beast.ftblib.events.RegisterOptionalServerModsEvent;
 import com.feed_the_beast.ftblib.events.ServerReloadEvent;
 import com.feed_the_beast.ftblib.events.player.ForgePlayerLoggedInEvent;
 import com.feed_the_beast.ftblib.events.team.ForgeTeamDataEvent;
@@ -61,12 +60,6 @@ public class FTBQuestsEventHandler
 
 			ServerQuestList.INSTANCE.sendToAll();
 		}
-	}
-
-	@SubscribeEvent
-	public static void registerOptionalServerMod(RegisterOptionalServerModsEvent event)
-	{
-		event.register(FTBQuests.MOD_ID);
 	}
 
 	@SubscribeEvent
