@@ -5,7 +5,7 @@ import com.feed_the_beast.ftblib.events.ServerReloadEvent;
 import com.feed_the_beast.ftblib.events.player.ForgePlayerLoggedInEvent;
 import com.feed_the_beast.ftblib.events.team.ForgeTeamDataEvent;
 import com.feed_the_beast.ftblib.lib.EventHandler;
-import com.feed_the_beast.ftblib.lib.data.Action;
+import com.feed_the_beast.ftblib.lib.data.AdminPanelAction;
 import com.feed_the_beast.ftblib.lib.data.ForgePlayer;
 import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.util.CommonUtils;
@@ -103,7 +103,7 @@ public class FTBQuestsEventHandler
 	@SubscribeEvent
 	public static void registerAdminPanelActions(RegisterAdminPanelActionsEvent event)
 	{
-		event.register(new Action(new ResourceLocation(FTBQuests.MOD_ID, "edit_quests"), new TextComponentTranslation("ftbquests.general.editing_mode.button"), GuiIcons.BOOK_RED, 0)
+		event.register(new AdminPanelAction(FTBQuests.MOD_ID, "edit_quests", GuiIcons.BOOK_RED, 0)
 		{
 			@Override
 			public Type getType(ForgePlayer player, NBTTagCompound data)
@@ -115,6 +115,6 @@ public class FTBQuestsEventHandler
 			public void onAction(ForgePlayer player, NBTTagCompound data)
 			{
 			}
-		});
+		}.setTitle(new TextComponentTranslation("ftbquests.general.editing_mode.button")));
 	}
 }
