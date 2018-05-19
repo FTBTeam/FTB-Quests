@@ -8,6 +8,7 @@ import net.minecraft.block.Block;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.common.crafting.IConditionFactory;
@@ -36,7 +37,7 @@ public class QuestBlockRegistry
 		if (FTBQuestsConfig.general.add_block)
 		{
 			event.getRegistry().register(new BlockQuest(FTBQuests.MOD_ID, "quest_block"));
-			GameRegistry.registerTileEntity(TileQuest.class, "ftbquests:quest_block");
+			GameRegistry.registerTileEntity(TileQuest.class, new ResourceLocation(FTBQuests.MOD_ID, "quest_block"));
 		}
 	}
 
