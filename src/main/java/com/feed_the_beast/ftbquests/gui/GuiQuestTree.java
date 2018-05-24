@@ -1,6 +1,5 @@
 package com.feed_the_beast.ftbquests.gui;
 
-import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftblib.lib.config.ConfigString;
 import com.feed_the_beast.ftblib.lib.gui.Button;
 import com.feed_the_beast.ftblib.lib.gui.GuiBase;
@@ -202,8 +201,8 @@ public class GuiQuestTree extends GuiBase
 					if (set)
 					{
 						Quest quest = new Quest(selectedChapter.chapter, value.getString());
-						ClientUtils.execClientCommand("/ftb edit_quests add_quest " + selectedChapter.chapter.getName() + " " + quest.id.getResourcePath() + " " + pos.x + " " + pos.y);
-						ClientUtils.execClientCommand("/ftb edit_quests sync @p");
+						//FIXME: ClientUtils.execClientCommand("/ftb edit_quests add_quest " + selectedChapter.chapter.getName() + " " + quest.id.getResourcePath() + " " + pos.x + " " + pos.y);
+						//FIXME: ClientUtils.execClientCommand("/ftb edit_quests sync @p");
 					}
 
 					GuiQuestTree.this.openGui();

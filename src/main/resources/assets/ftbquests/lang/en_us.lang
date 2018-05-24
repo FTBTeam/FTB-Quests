@@ -7,14 +7,3 @@ ftbquests.general.add_block=Add Block
 
 # Sidebar Buttons
 sidebar_button.ftbquests.quests=Quests
-
-# Commands
-commands.ftb.edit_quests.sync.usage=/ftb edit_quests sync [player]
-commands.ftb.edit_quests.add_chapter.usage=/ftb edit_quests add_chapter <name>
-commands.ftb.edit_quests.add_chapter.success=Quest added!
-commands.ftb.edit_quests.add_chapter.fail_id=Chapter with that ID already exists!
-commands.ftb.edit_quests.add_quest.usage=/ftb edit_quests add_quest <chapter> <name> <x> <y>
-commands.ftb.edit_quests.add_quest.success=Quest added!
-commands.ftb.edit_quests.add_quest.fail_chapter=Invalid chapter ID!
-commands.ftb.edit_quests.add_quest.fail_id=Quest with that ID already exists!
-commands.ftb.edit_quests.add_quest.fail_xy=Quest at those coordinates already exists!
