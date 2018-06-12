@@ -4,7 +4,6 @@ import com.feed_the_beast.ftblib.events.RegisterAdminPanelActionsEvent;
 import com.feed_the_beast.ftblib.events.ServerReloadEvent;
 import com.feed_the_beast.ftblib.events.player.ForgePlayerLoggedInEvent;
 import com.feed_the_beast.ftblib.events.team.ForgeTeamDataEvent;
-import com.feed_the_beast.ftblib.lib.EventHandler;
 import com.feed_the_beast.ftblib.lib.data.AdminPanelAction;
 import com.feed_the_beast.ftblib.lib.data.ForgePlayer;
 import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
@@ -16,6 +15,7 @@ import com.feed_the_beast.ftbquests.util.FTBQuestsTeamData;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import java.io.File;
@@ -25,7 +25,7 @@ import java.util.List;
 /**
  * @author LatvianModder
  */
-@EventHandler
+@Mod.EventBusSubscriber(modid = FTBQuests.MOD_ID)
 public class FTBQuestsEventHandler
 {
 	public static final ResourceLocation RELOAD_CONFIG = new ResourceLocation(FTBQuests.MOD_ID, "config");
