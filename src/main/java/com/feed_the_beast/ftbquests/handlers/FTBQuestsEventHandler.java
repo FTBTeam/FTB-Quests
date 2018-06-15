@@ -1,13 +1,11 @@
 package com.feed_the_beast.ftbquests.handlers;
 
-import com.feed_the_beast.ftblib.events.RegisterAdminPanelActionsEvent;
-import com.feed_the_beast.ftblib.events.ServerReloadEvent;
+import com.feed_the_beast.ftblib.events.FTBLibPreInitRegistryEvent;
 import com.feed_the_beast.ftblib.events.player.ForgePlayerLoggedInEvent;
 import com.feed_the_beast.ftblib.events.team.ForgeTeamDataEvent;
 import com.feed_the_beast.ftblib.lib.data.AdminPanelAction;
 import com.feed_the_beast.ftblib.lib.data.ForgePlayer;
 import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
-import com.feed_the_beast.ftblib.lib.util.CommonUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.FTBQuestsConfig;
 import com.feed_the_beast.ftbquests.quest.ServerQuestList;
@@ -18,48 +16,32 @@ import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * @author LatvianModder
  */
 @Mod.EventBusSubscriber(modid = FTBQuests.MOD_ID)
 public class FTBQuestsEventHandler
 {
-	public static final ResourceLocation RELOAD_CONFIG = new ResourceLocation(FTBQuests.MOD_ID, "config");
-	public static final ResourceLocation RELOAD_QUESTS = new ResourceLocation(FTBQuests.MOD_ID, "quests");
-
 	@SubscribeEvent
-	public static void registerReloadIds(ServerReloadEvent.RegisterIds event)
+	public static void onFTBLibPreInitRegistry(FTBLibPreInitRegistryEvent event)
 	{
-		event.register(RELOAD_CONFIG);
-		event.register(RELOAD_QUESTS);
-	}
+		FTBLibPreInitRegistryEvent.Registry registry = event.getRegistry();
+		registry.registerServerReloadHandler(new ResourceLocation(FTBQuests.MOD_ID, "config"), reloadEvent -> FTBQuestsConfig.sync());
+		registry.registerServerReloadHandler(new ResourceLocation(FTBQuests.MOD_ID, "quests"), ServerQuestList::reload);
 
-	@SubscribeEvent
-	public static void onServerReload(ServerReloadEvent event)
-	{
-		if (event.reload(RELOAD_CONFIG))
+		registry.registerAdminPanelAction(new AdminPanelAction(FTBQuests.MOD_ID, "edit_quests", GuiIcons.BOOK_RED, 0)
 		{
-			FTBQuestsConfig.sync();
-		}
-
-		if (event.reload(RELOAD_QUESTS))
-		{
-			ServerQuestList.INSTANCE = null;
-
-			List<String> errored = new ArrayList<>();
-			ServerQuestList.INSTANCE = new ServerQuestList(new File(CommonUtils.folderConfig, "ftbquests/quests"), errored);
-
-			for (String s : errored)
+			@Override
+			public Type getType(ForgePlayer player, NBTTagCompound data)
 			{
-				event.failedToReload(new ResourceLocation(FTBQuests.MOD_ID, "quests/" + s));
+				return Type.INVISIBLE;
 			}
 
-			ServerQuestList.INSTANCE.sendToAll();
-		}
+			@Override
+			public void onAction(ForgePlayer player, NBTTagCompound data)
+			{
+			}
+		}.setTitle(new TextComponentTranslation("ftbquests.general.editing_mode.button")));
 	}
 
 	@SubscribeEvent
@@ -99,22 +81,4 @@ public class FTBQuestsEventHandler
 	{
 		FTBGuidesTeamData.get(event.getTeam()).addConfig(event);
 	}*/
-
-	@SubscribeEvent
-	public static void registerAdminPanelActions(RegisterAdminPanelActionsEvent event)
-	{
-		event.register(new AdminPanelAction(FTBQuests.MOD_ID, "edit_quests", GuiIcons.BOOK_RED, 0)
-		{
-			@Override
-			public Type getType(ForgePlayer player, NBTTagCompound data)
-			{
-				return Type.INVISIBLE;
-			}
-
-			@Override
-			public void onAction(ForgePlayer player, NBTTagCompound data)
-			{
-			}
-		}.setTitle(new TextComponentTranslation("ftbquests.general.editing_mode.button")));
-	}
 }
