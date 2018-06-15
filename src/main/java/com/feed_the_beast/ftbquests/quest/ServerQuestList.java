@@ -1,6 +1,8 @@
 package com.feed_the_beast.ftbquests.quest;
 
+import com.feed_the_beast.ftblib.events.ServerReloadEvent;
 import com.feed_the_beast.ftblib.lib.io.DataReader;
+import com.feed_the_beast.ftblib.lib.util.CommonUtils;
 import com.feed_the_beast.ftblib.lib.util.FileUtils;
 import com.feed_the_beast.ftblib.lib.util.JsonUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
@@ -13,6 +15,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.ResourceLocation;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +26,20 @@ import java.util.Map;
 public class ServerQuestList extends QuestList
 {
 	public static ServerQuestList INSTANCE;
+
+	public static boolean reload(ServerReloadEvent event)
+	{
+		List<String> errored = new ArrayList<>();
+		INSTANCE = new ServerQuestList(new File(CommonUtils.folderConfig, "ftbquests/quests"), errored);
+
+		for (String s : errored)
+		{
+			event.failedToReload(new ResourceLocation(FTBQuests.MOD_ID, "quests/" + s));
+		}
+
+		INSTANCE.sendToAll();
+		return true;
+	}
 
 	public final File folder;
 

@@ -27,9 +27,10 @@ public class FTBQuestsConfig
 		public boolean add_block = true;
 	}
 
-	public static void sync()
+	public static boolean sync()
 	{
 		ConfigManager.sync(FTBQuests.MOD_ID, Config.Type.INSTANCE);
+		return true;
 	}
 
 	@SubscribeEvent
