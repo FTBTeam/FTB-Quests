@@ -5,7 +5,10 @@ import com.feed_the_beast.ftblib.lib.gui.GuiBase;
 import com.feed_the_beast.ftbquests.FTBQuestsCommon;
 import com.feed_the_beast.ftbquests.gui.ClientQuestList;
 import com.feed_the_beast.ftbquests.gui.GuiQuestTree;
+import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskKey;
 import com.google.gson.JsonObject;
+
+import java.util.Map;
 
 public class FTBQuestsClient extends FTBQuestsCommon
 {
@@ -24,9 +27,9 @@ public class FTBQuestsClient extends FTBQuestsCommon
 		super.postInit();
 	}
 
-	public static void loadQuests(JsonObject json)
+	public static void loadQuests(JsonObject json, Map<QuestTaskKey, Integer> p)
 	{
-		ClientQuestList.INSTANCE.fromJson(json);
+		ClientQuestList.INSTANCE.fromJson(json, p);
 
 		boolean oldData = false;
 		boolean guiOpen = false;

@@ -1,10 +1,13 @@
-package com.feed_the_beast.ftbquests.handlers;
+package com.feed_the_beast.ftbquests.client;
 
 import com.feed_the_beast.ftblib.events.CustomSidebarButtonTextEvent;
 import com.feed_the_beast.ftblib.events.client.CustomClickEvent;
 import com.feed_the_beast.ftbquests.FTBQuests;
-import com.feed_the_beast.ftbquests.client.FTBQuestsClient;
+import net.minecraft.client.renderer.block.model.ModelResourceLocation;
+import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.client.event.ModelRegistryEvent;
+import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
@@ -16,6 +19,12 @@ import net.minecraftforge.fml.relauncher.Side;
 public class FTBQuestsClientEventHandler
 {
 	private static final ResourceLocation QUESTS_BUTTON = new ResourceLocation(FTBQuests.MOD_ID, "quests");
+
+	@SubscribeEvent
+	public static void registerModels(ModelRegistryEvent event)
+	{
+		ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(FTBQuests.QUEST_BLOCK), 0, new ModelResourceLocation(FTBQuests.QUEST_BLOCK.getRegistryName(), "normal"));
+	}
 
 	@SubscribeEvent
 	public static void onCustomSidebarButtonText(CustomSidebarButtonTextEvent event)

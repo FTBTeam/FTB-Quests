@@ -3,10 +3,11 @@ package com.feed_the_beast.ftbquests.util;
 import com.feed_the_beast.ftblib.lib.data.ForgeTeam;
 import com.feed_the_beast.ftblib.lib.util.JsonUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
+import com.feed_the_beast.ftbquests.net.MessageUpdateQuestTaskProgress;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.rewards.QuestReward;
-import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskKey;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -114,46 +115,52 @@ public class FTBQuestsTeamData implements INBTSerializable<NBTTagCompound>, IPro
 	}
 
 	@Override
-	public int getQuestTaskProgress(QuestTask task)
+	public int getQuestTaskProgress(QuestTaskKey task)
 	{
-		Integer p = questProgress.get(task.key);
+		Integer p = questProgress.get(task);
 		return p == null ? 0 : p;
 	}
 
-	public boolean setQuestTaskProgress(QuestTask task, int progress)
+	@Override
+	public boolean setQuestTaskProgress(QuestTaskKey key, int progress)
 	{
-		if (progress <= 0)
-		{
-			Integer p = questProgress.remove(task.key);
-			if ((p == null ? 0 : p) > 0)
-			{
-				team.markDirty();
-				return true;
-			}
+		int prev = getQuestTaskProgress(key);
 
+		if (progress < 0)
+		{
+			progress = 0;
+		}
+
+		if (prev == progress)
+		{
 			return false;
 		}
 
-		Integer p = questProgress.put(task.key, progress);
-
-		if ((p == null ? 0 : p) != progress)
+		if (progress == 0)
 		{
-			team.markDirty();
-			return true;
+			questProgress.remove(key);
+		}
+		else
+		{
+			questProgress.put(key, progress);
 		}
 
-		return false;
+		team.markDirty();
+
+		for (EntityPlayerMP player : team.universe.server.getPlayerList().getPlayers())
+		{
+			if (team.universe.getPlayer(player).team.equalsTeam(team))
+			{
+				new MessageUpdateQuestTaskProgress(key, progress).sendTo(player);
+			}
+		}
+
+		return true;
 	}
 
-	/*
-	public void addConfig(ForgeTeamConfigEvent event)
+	public void reset()
 	{
-		String group = FTBGuidesFinals.MOD_ID;
-		event.getConfig().setGroupName(group, new TextComponentString(FTBGuidesFinals.MOD_NAME));
-		event.getConfig().add(group, "explosions", explosions);
-		event.getConfig().add(group, "blocks_edit", editBlocks);
-		event.getConfig().add(group, "blocks_interact", interactWithBlocks);
-		event.getConfig().add(group, "attack_entities", attackEntities);
+		rewards.clear();
+		questProgress.clear();
 	}
-	*/
 }

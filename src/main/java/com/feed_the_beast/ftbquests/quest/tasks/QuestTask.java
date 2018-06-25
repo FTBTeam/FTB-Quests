@@ -8,14 +8,19 @@ import com.feed_the_beast.ftbquests.quest.IProgressing;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumFacing;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.ICapabilityProvider;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
-import java.util.List;
 
 /**
  * @author LatvianModder
  */
-public abstract class QuestTask implements IProgressing
+public abstract class QuestTask implements IProgressing, ICapabilityProvider
 {
 	@Nullable
 	public static QuestTask createTask(Quest parent, int index, @Nullable JsonElement json0)
@@ -63,7 +68,7 @@ public abstract class QuestTask implements IProgressing
 	@Override
 	public int getProgress(IProgressData data)
 	{
-		return data.getQuestTaskProgress(this);
+		return data.getQuestTaskProgress(key);
 	}
 
 	@Override
@@ -74,10 +79,34 @@ public abstract class QuestTask implements IProgressing
 
 	public abstract Icon getIcon();
 
-	public void addText(List<String> text)
+	@SideOnly(Side.CLIENT)
+	public String getDisplayName()
 	{
-		text.add(toJson().toString());
+		return toJson().toString();
 	}
 
 	public abstract JsonObject toJson();
+
+	@Override
+	public boolean hasCapability(Capability<?> capability, @Nullable EnumFacing facing)
+	{
+		return false;
+	}
+
+	@Nullable
+	@Override
+	public <T> T getCapability(Capability<T> capability, @Nullable EnumFacing facing)
+	{
+		return null;
+	}
+
+	public ItemStack processItem(IProgressData data, ItemStack stack)
+	{
+		return stack;
+	}
+
+	public String toString()
+	{
+		return key.toString();
+	}
 }

@@ -1,7 +1,5 @@
 package com.feed_the_beast.ftbquests.quest;
 
-import net.minecraft.util.text.TextFormatting;
-
 /**
  * @author LatvianModder
  */
@@ -18,14 +16,21 @@ public interface IProgressing
 
 	default String getCompletionString(IProgressData data)
 	{
-		int maxProg = getMaxProgress();
-		int prog = Math.max(maxProg, getProgress(data));
+		return getCompletionString(getProgress(data), getMaxProgress());
+	}
 
-		if (prog <= 0 || maxProg <= 0)
+	static String getCompletionString(int prog, int maxProg)
+	{
+		if (maxProg > 0)
 		{
-			return TextFormatting.DARK_GRAY + "0/0 [0%]";
+			if (prog > maxProg)
+			{
+				prog = maxProg;
+			}
+
+			return String.format("%d/%d [%d%%]", prog, maxProg, (int) (prog * 100D / (double) maxProg));
 		}
 
-		return TextFormatting.DARK_GRAY.toString() + prog + "/" + maxProg + " [" + (int) (prog * 100D / (double) maxProg) + "%]";
+		return "0/0 [0%]";
 	}
 }

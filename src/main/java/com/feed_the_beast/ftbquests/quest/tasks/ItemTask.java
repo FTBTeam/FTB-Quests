@@ -5,18 +5,21 @@ import com.feed_the_beast.ftblib.lib.icon.IconAnimation;
 import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
 import com.feed_the_beast.ftblib.lib.item.ItemEntry;
 import com.feed_the_beast.ftblib.lib.util.JsonUtils;
+import com.feed_the_beast.ftblib.lib.util.StringJoiner;
+import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.ItemHandlerHelper;
 import net.minecraftforge.oredict.OreDictionary;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,6 +56,13 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 			public Icon getIcon()
 			{
 				return Icon.EMPTY;
+			}
+
+			@Override
+			@SideOnly(Side.CLIENT)
+			public String getDisplayName()
+			{
+				return "-";
 			}
 		};
 
@@ -113,14 +123,17 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 		public abstract JsonElement toJson();
 
 		public abstract Icon getIcon();
+
+		@SideOnly(Side.CLIENT)
+		public abstract String getDisplayName();
 	}
 
 	public static class QuestItemCombined extends QuestItem
 	{
-		public final Collection<QuestItem> items;
+		public final List<QuestItem> items;
 		public final Icon icon;
 
-		public QuestItemCombined(Collection<QuestItem> c)
+		public QuestItemCombined(List<QuestItem> c)
 		{
 			items = c;
 			List<Icon> icons = new ArrayList<>();
@@ -156,6 +169,25 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 		public Icon getIcon()
 		{
 			return icon;
+		}
+
+		@Override
+		@SideOnly(Side.CLIENT)
+		public String getDisplayName()
+		{
+			if (items.size() == 1)
+			{
+				return items.get(0).getDisplayName();
+			}
+
+			String[] s = new String[items.size()];
+
+			for (int i = 0; i < s.length; i++)
+			{
+				s[i] = items.get(i).getDisplayName();
+			}
+
+			return StringJoiner.with(", ").joinStrings(s);
 		}
 
 		@Override
@@ -200,6 +232,13 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 		public Icon getIcon()
 		{
 			return icon;
+		}
+
+		@Override
+		@SideOnly(Side.CLIENT)
+		public String getDisplayName()
+		{
+			return entry.getStack(1, false).getDisplayName();
 		}
 
 		@Override
@@ -258,6 +297,13 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 		}
 
 		@Override
+		@SideOnly(Side.CLIENT)
+		public String getDisplayName()
+		{
+			return "Any " + ore; //LANG
+		}
+
+		@Override
 		public boolean test(ItemStack stack)
 		{
 			ItemEntry item = ItemEntry.get(stack);
@@ -282,6 +328,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 		super(parent, index);
 		item = i;
 		count = c;
+		parent.hasItemTasks = true;
 
 		Icon icon = item.getIcon();
 
@@ -328,38 +375,41 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 	}
 
 	@Override
-	public void addText(List<String> text)
+	@SideOnly(Side.CLIENT)
+	public String getDisplayName()
 	{
-		String name = "Unknown";
-		Icon icon = getIcon();
-
-		if (icon instanceof ItemIcon)
-		{
-			name = ((ItemIcon) icon).getStack().getDisplayName();
-		}
-		else if (icon instanceof IconAnimation)
-		{
-			Icon icon1 = ((IconAnimation) icon).current;
-
-			if (icon1 instanceof ItemIcon)
-			{
-				name = ((ItemIcon) icon1).getStack().getDisplayName();
-			}
-		}
+		String name = item.getDisplayName();
 
 		if (count > 1)
 		{
-			text.add(count + "x " + name);
+			return count + "x " + name;
 		}
-		else
-		{
-			text.add(name);
-		}
+
+		return name;
 	}
 
 	@Override
 	public boolean test(ItemStack stack)
 	{
 		return !stack.isEmpty() && item.test(stack);
+	}
+
+	@Override
+	public ItemStack processItem(IProgressData data, ItemStack stack)
+	{
+		int progress = getProgress(data);
+		int max = getMaxProgress();
+
+		if (progress < max && test(stack))
+		{
+			int add = Math.min(stack.getCount(), Math.min(count, max - progress));
+
+			if (add > 0 && data.setQuestTaskProgress(key, progress + add))
+			{
+				return ItemHandlerHelper.copyStackWithSize(stack, stack.getCount() - add);
+			}
+		}
+
+		return stack;
 	}
 }

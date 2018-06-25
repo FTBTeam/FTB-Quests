@@ -1,5 +1,7 @@
 package com.feed_the_beast.ftbquests.quest.tasks;
 
+import com.feed_the_beast.ftblib.lib.io.DataIn;
+import com.feed_the_beast.ftblib.lib.io.DataOut;
 import net.minecraft.util.ResourceLocation;
 
 /**
@@ -7,6 +9,13 @@ import net.minecraft.util.ResourceLocation;
  */
 public class QuestTaskKey
 {
+	public static final DataOut.Serializer<QuestTaskKey> SERIALIZER = (data, object) -> {
+		data.writeResourceLocation(object.quest);
+		data.writeByte(object.index);
+	};
+
+	public static final DataIn.Deserializer<QuestTaskKey> DESERIALIZER = data -> new QuestTaskKey(data.readResourceLocation(), data.readUnsignedByte());
+
 	public final ResourceLocation quest;
 	public final int index;
 
@@ -14,6 +23,13 @@ public class QuestTaskKey
 	{
 		quest = q;
 		index = i;
+	}
+
+	public QuestTaskKey(String s)
+	{
+		String[] s1 = s.split(":", 3);
+		quest = new ResourceLocation(s1[0], s1[1]);
+		index = Integer.parseInt(s1[2]);
 	}
 
 	public String toString()
@@ -32,6 +48,7 @@ public class QuestTaskKey
 			QuestTaskKey key = (QuestTaskKey) o;
 			return index == key.index && quest.equals(key.quest);
 		}
+
 		return false;
 	}
 

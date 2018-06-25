@@ -4,10 +4,13 @@ import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.QuestList;
-import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
+import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskKey;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author LatvianModder
@@ -15,15 +18,17 @@ import com.google.gson.JsonObject;
 public class ClientQuestList extends QuestList implements IProgressData
 {
 	public static final ClientQuestList INSTANCE = new ClientQuestList();
+	private final Map<QuestTaskKey, Integer> questProgress = new HashMap<>();
 
 	private ClientQuestList()
 	{
 	}
 
-	public void fromJson(JsonObject json)
+	public void fromJson(JsonObject json, Map<QuestTaskKey, Integer> p)
 	{
 		chapters.clear();
-		editing = json.get("editing").getAsBoolean();
+		questProgress.clear();
+		questProgress.putAll(p);
 
 		JsonArray chaptersJson = json.get("chapters").getAsJsonArray();
 
@@ -57,8 +62,36 @@ public class ClientQuestList extends QuestList implements IProgressData
 	}
 
 	@Override
-	public int getQuestTaskProgress(QuestTask task)
+	public int getQuestTaskProgress(QuestTaskKey key)
 	{
-		return 0;
+		Integer p = questProgress.get(key);
+		return p == null ? 0 : p;
+	}
+
+	@Override
+	public boolean setQuestTaskProgress(QuestTaskKey key, int progress)
+	{
+		int prev = getQuestTaskProgress(key);
+
+		if (progress < 0)
+		{
+			progress = 0;
+		}
+
+		if (prev == progress)
+		{
+			return false;
+		}
+
+		if (progress == 0)
+		{
+			questProgress.remove(key);
+		}
+		else
+		{
+			questProgress.put(key, progress);
+		}
+
+		return true;
 	}
 }

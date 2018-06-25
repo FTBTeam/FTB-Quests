@@ -4,29 +4,26 @@ import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToClient;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
-import com.feed_the_beast.ftbquests.client.FTBQuestsClient;
+import com.feed_the_beast.ftbquests.gui.ClientQuestList;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskKey;
-import com.google.gson.JsonElement;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import java.util.Map;
 
 /**
  * @author LatvianModder
  */
-public class MessageSyncQuests extends MessageToClient
+public class MessageUpdateQuestTaskProgress extends MessageToClient
 {
-	private JsonElement json;
-	private Map<QuestTaskKey, Integer> progress;
+	private QuestTaskKey key;
+	private int progress;
 
-	public MessageSyncQuests()
+	public MessageUpdateQuestTaskProgress()
 	{
 	}
 
-	public MessageSyncQuests(JsonElement e, Map<QuestTaskKey, Integer> p)
+	public MessageUpdateQuestTaskProgress(QuestTaskKey k, int p)
 	{
-		json = e;
+		key = k;
 		progress = p;
 	}
 
@@ -39,21 +36,21 @@ public class MessageSyncQuests extends MessageToClient
 	@Override
 	public void writeData(DataOut data)
 	{
-		data.writeJson(json);
-		data.writeMap(progress, QuestTaskKey.SERIALIZER, DataOut.INT);
+		QuestTaskKey.SERIALIZER.write(data, key);
+		data.writeInt(progress);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
-		json = data.readJson();
-		progress = data.readMap(QuestTaskKey.DESERIALIZER, DataIn.INT);
+		key = QuestTaskKey.DESERIALIZER.read(data);
+		progress = data.readInt();
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void onMessage()
 	{
-		FTBQuestsClient.loadQuests(json.getAsJsonObject(), progress);
+		ClientQuestList.INSTANCE.setQuestTaskProgress(key, progress);
 	}
 }

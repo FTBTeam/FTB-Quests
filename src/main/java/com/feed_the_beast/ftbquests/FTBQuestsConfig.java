@@ -18,13 +18,11 @@ public class FTBQuestsConfig
 
 	public static class General
 	{
-		@Config.Comment("Set this to true to enable editing from GUI.")
-		@Config.RequiresWorldRestart
-		public boolean editing_mode = false;
+		@Config.Comment("Allow to obtain free Quest Blocks from the Quests GUI.")
+		public boolean allow_free_quest_blocks = true;
 
-		@Config.Comment("Adds 'Quest Block' where you can use to automate quest completion.")
-		@Config.RequiresMcRestart
-		public boolean add_block = true;
+		@Config.Comment("Default value for editing (selecting quest) Quest Blocks.")
+		public boolean default_can_edit = true;
 	}
 
 	public static boolean sync()
