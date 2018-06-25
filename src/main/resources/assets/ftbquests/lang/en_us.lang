@@ -1,9 +1,11 @@
 tile.ftbquests.quest_block.name=Quest Block
+tile.ftbquests.quest_block.select_chapter=Select Chapter
+tile.ftbquests.quest_block.select_quest=Select Quest
+tile.ftbquests.quest_block.select_task=Select Task
 
-# Config
-ftbquests.general.editing_mode=Editing Mode
-ftbquests.general.editing_mode.button=Edit Quests
-ftbquests.general.add_block=Add Block
+ftbquests.general.allow_free_quest_blocks=Allow Free Quest Blocks
+ftbquests.general.default_can_edit=Default 'Can Edit'
 
-# Sidebar Buttons
+admin_panel.ftbquests.edit=Edit Quests
+admin_panel.ftbquests.reset_progress=Reset Quest Progress
 sidebar_button.ftbquests.quests=Quests

@@ -32,6 +32,7 @@ public final class Quest implements IJsonSerializable, IProgressing
 	public final List<QuestDependency> dependencies;
 	public final List<QuestTask> tasks;
 	public final List<QuestReward> rewards;
+	public boolean hasItemTasks, hasFluidTasks, hasEnergyTasks;
 
 	public Quest(QuestChapter c, String _id)
 	{
@@ -195,6 +196,7 @@ public final class Quest implements IJsonSerializable, IProgressing
 		}
 
 		tasks.clear();
+		hasItemTasks = hasFluidTasks = hasEnergyTasks = false;
 
 		if (json.has("tasks"))
 		{

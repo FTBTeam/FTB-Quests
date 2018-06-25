@@ -1,13 +1,17 @@
 package com.feed_the_beast.ftbquests.quest;
 
+import com.feed_the_beast.ftblib.FTBLibConfig;
 import com.feed_the_beast.ftblib.events.ServerReloadEvent;
+import com.feed_the_beast.ftblib.lib.data.Universe;
 import com.feed_the_beast.ftblib.lib.io.DataReader;
 import com.feed_the_beast.ftblib.lib.util.CommonUtils;
 import com.feed_the_beast.ftblib.lib.util.FileUtils;
 import com.feed_the_beast.ftblib.lib.util.JsonUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
-import com.feed_the_beast.ftbquests.FTBQuestsConfig;
 import com.feed_the_beast.ftbquests.net.MessageSyncQuests;
+import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
+import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskKey;
+import com.feed_the_beast.ftbquests.util.FTBQuestsTeamData;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -47,7 +51,6 @@ public class ServerQuestList extends QuestList
 	{
 		folder = f;
 
-		editing = FTBQuestsConfig.general.editing_mode;
 		chapters.clear();
 
 		Map<String, File> chapterFileMap = new HashMap<>();
@@ -125,10 +128,10 @@ public class ServerQuestList extends QuestList
 						errored.add(fn);
 						FTBQuests.LOGGER.error("Error loading " + fn + ": " + ex);
 
-						/*if (CommonUtils.DEV_ENV)
+						if (FTBLibConfig.debugging.print_more_errors)
 						{
 							ex.printStackTrace();
-						}*/
+						}
 					}
 				}
 			}
@@ -138,10 +141,10 @@ public class ServerQuestList extends QuestList
 				errored.add(fn);
 				FTBQuests.LOGGER.error("Error loading " + fn + ": " + ex);
 
-				/*if (CommonUtils.DEV_ENV)
+				if (FTBLibConfig.debugging.print_more_errors)
 				{
 					ex.printStackTrace();
-				}*/
+				}
 			}
 		}
 	}
@@ -149,7 +152,6 @@ public class ServerQuestList extends QuestList
 	private JsonObject toJson()
 	{
 		JsonObject json = new JsonObject();
-		json.addProperty("editing", editing);
 
 		saveAll = true;
 		JsonArray chaptersJson = new JsonArray();
@@ -164,14 +166,43 @@ public class ServerQuestList extends QuestList
 		return json;
 	}
 
+	private void sendTo0(JsonElement json, EntityPlayerMP player)
+	{
+		Map<QuestTaskKey, Integer> progress = new HashMap<>();
+		FTBQuestsTeamData data = FTBQuestsTeamData.get(Universe.get().getPlayer(player).team);
+
+		for (QuestChapter chapter : chapters.values())
+		{
+			for (Quest quest : chapter.quests.values())
+			{
+				for (QuestTask task : quest.tasks)
+				{
+					int p = task.getProgress(data);
+
+					if (p > 0)
+					{
+						progress.put(task.key, p);
+					}
+				}
+			}
+		}
+
+		new MessageSyncQuests(json, progress).sendTo(player);
+	}
+
 	public void sendTo(EntityPlayerMP player)
 	{
-		new MessageSyncQuests(toJson()).sendTo(player);
+		sendTo0(toJson(), player);
 	}
 
 	public void sendToAll()
 	{
-		new MessageSyncQuests(toJson()).sendToAll();
+		JsonElement json = toJson();
+
+		for (EntityPlayerMP player : Universe.get().server.getPlayerList().getPlayers())
+		{
+			sendTo0(json, player);
+		}
 	}
 
 	public void saveQuestsFile()

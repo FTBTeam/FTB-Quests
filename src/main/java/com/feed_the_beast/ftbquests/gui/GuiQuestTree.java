@@ -1,6 +1,5 @@
 package com.feed_the_beast.ftbquests.gui;
 
-import com.feed_the_beast.ftblib.lib.config.ConfigString;
 import com.feed_the_beast.ftblib.lib.gui.Button;
 import com.feed_the_beast.ftblib.lib.gui.GuiBase;
 import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
@@ -8,8 +7,6 @@ import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.gui.SimpleTextButton;
 import com.feed_the_beast.ftblib.lib.gui.Widget;
 import com.feed_the_beast.ftblib.lib.gui.WidgetLayout;
-import com.feed_the_beast.ftblib.lib.gui.misc.GuiSelectors;
-import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.client.FTBQuestsClient;
@@ -22,7 +19,6 @@ import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextFormatting;
 import org.lwjgl.opengl.GL11;
@@ -30,7 +26,6 @@ import org.lwjgl.opengl.GL11;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -74,7 +69,7 @@ public class GuiQuestTree extends GuiBase
 
 			if (isShiftKeyDown())
 			{
-				list.add(chapter.getCompletionString(ClientQuestList.INSTANCE));
+				list.add(TextFormatting.DARK_GRAY + chapter.getCompletionString(ClientQuestList.INSTANCE));
 			}
 		}
 
@@ -140,7 +135,7 @@ public class GuiQuestTree extends GuiBase
 
 			if (isShiftKeyDown())
 			{
-				list.add(quest.getCompletionString(ClientQuestList.INSTANCE));
+				list.add(TextFormatting.DARK_GRAY + quest.getCompletionString(ClientQuestList.INSTANCE));
 			}
 		}
 
@@ -165,64 +160,6 @@ public class GuiQuestTree extends GuiBase
 				icon.draw(0, 0, zoom, zoom);
 				GlStateManager.popMatrix();
 			}
-		}
-	}
-
-	public class ButtonCreateQuest extends Widget
-	{
-		public final QuestPosition pos;
-
-		public ButtonCreateQuest(Panel panel, QuestPosition p)
-		{
-			super(panel);
-			pos = p;
-		}
-
-		@Override
-		public boolean isEnabled()
-		{
-			return isCtrlKeyDown();
-		}
-
-		@Override
-		public boolean shouldDraw()
-		{
-			return isCtrlKeyDown() && isMouseOver();
-		}
-
-		@Override
-		public boolean mousePressed(MouseButton button)
-		{
-			if (selectedChapter != null && isMouseOver())
-			{
-				GuiHelper.playClickSound();
-				GuiSelectors.selectJson(new ConfigString(), (value, set) ->
-				{
-					if (set)
-					{
-						Quest quest = new Quest(selectedChapter.chapter, value.getString());
-						//FIXME: ClientUtils.execClientCommand("/ftb edit_quests add_quest " + selectedChapter.chapter.getName() + " " + quest.id.getResourcePath() + " " + pos.x + " " + pos.y);
-						//FIXME: ClientUtils.execClientCommand("/ftb edit_quests sync @p");
-					}
-
-					GuiQuestTree.this.openGui();
-				});
-				return true;
-			}
-
-			return false;
-		}
-
-		@Override
-		public void addMouseOverText(List<String> list)
-		{
-			list.add(I18n.format("gui.add") + " @ " + pos);
-		}
-
-		@Override
-		public Icon getIcon()
-		{
-			return Color4I.WHITE.withAlpha(100);
 		}
 	}
 
@@ -304,29 +241,6 @@ public class GuiQuestTree extends GuiBase
 						my = Math.max(my, quest.pos.y);
 						add(widget);
 					}
-
-					if (ClientQuestList.INSTANCE.editing)
-					{
-						HashSet<QuestPosition> set = new HashSet<>();
-
-						for (int y = 0; y < my + 3; y++)
-						{
-							for (int x = 0; x < mx + 3; x++)
-							{
-								set.add(new QuestPosition(x, y));
-							}
-						}
-
-						for (Quest quest : selectedChapter.chapter.quests.values())
-						{
-							set.remove(quest.pos);
-						}
-
-						for (QuestPosition pos : set)
-						{
-							add(new ButtonCreateQuest(this, pos));
-						}
-					}
 				}
 			}
 
@@ -343,19 +257,9 @@ public class GuiQuestTree extends GuiBase
 
 					for (Widget widget : widgets)
 					{
-						QuestPosition pos;
-
-						if (widget instanceof ButtonQuest)
-						{
-							pos = ((ButtonQuest) widget).quest.pos;
-							mx = Math.max(mx, pos.x);
-							my = Math.max(my, pos.y);
-						}
-						else
-						{
-							pos = ((ButtonCreateQuest) widget).pos;
-						}
-
+						QuestPosition pos = ((ButtonQuest) widget).quest.pos;
+						mx = Math.max(mx, pos.x);
+						my = Math.max(my, pos.y);
 						widget.setPosAndSize(1 + pos.x * (zoom * 3 / 2), 1 + pos.y * (zoom * 3 / 2), zoom * 5 / 4, zoom * 5 / 4);
 					}
 

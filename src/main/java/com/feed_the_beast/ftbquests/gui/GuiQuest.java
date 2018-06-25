@@ -109,11 +109,11 @@ public class GuiQuest extends GuiBase
 		@Override
 		public void addMouseOverText(List<String> list)
 		{
-			task.addText(list);
+			list.add(task.getDisplayName());
 
 			if (isShiftKeyDown())
 			{
-				list.add(task.getCompletionString(ClientQuestList.INSTANCE));
+				list.add(TextFormatting.DARK_GRAY + task.getCompletionString(ClientQuestList.INSTANCE));
 			}
 		}
 
