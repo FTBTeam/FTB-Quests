@@ -5,7 +5,7 @@ import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.gui.SimpleTextButton;
 import com.feed_the_beast.ftblib.lib.gui.misc.GuiButtonListBase;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
-import com.feed_the_beast.ftbquests.net.MessageSelectQuestTask;
+import com.feed_the_beast.ftbquests.net.MessageSelectTask;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
@@ -29,7 +29,7 @@ public class GuiSelectQuestTask extends GuiButtonListBase
 	@Override
 	public void addButtons(Panel panel)
 	{
-		for (QuestChapter chapter : ClientQuestList.INSTANCE.chapters.values())
+		for (QuestChapter chapter : ClientQuestList.INSTANCE.chapters)
 		{
 			panel.add(new SimpleTextButton(panel, chapter.title.getFormattedText(), chapter.icon)
 			{
@@ -57,9 +57,9 @@ public class GuiSelectQuestTask extends GuiButtonListBase
 		@Override
 		public void addButtons(Panel panel)
 		{
-			for (Quest quest : chapter.quests.values())
+			for (Quest quest : chapter.quests)
 			{
-				panel.add(new SimpleTextButton(panel, quest.title.getFormattedText(), quest.icon)
+				panel.add(new SimpleTextButton(panel, quest.getTitle().getFormattedText(), quest.icon)
 				{
 					@Override
 					public void onClicked(MouseButton button)
@@ -94,7 +94,7 @@ public class GuiSelectQuestTask extends GuiButtonListBase
 					public void onClicked(MouseButton button)
 					{
 						GuiHelper.playClickSound();
-						new MessageSelectQuestTask(pos, task.key).sendToServer();
+						new MessageSelectTask(pos, task.id).sendToServer();
 						getGui().closeGui(false);
 					}
 				});

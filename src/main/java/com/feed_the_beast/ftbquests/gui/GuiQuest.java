@@ -1,5 +1,6 @@
 package com.feed_the_beast.ftbquests.gui;
 
+import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftblib.lib.gui.Button;
 import com.feed_the_beast.ftblib.lib.gui.GuiBase;
 import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
@@ -13,7 +14,8 @@ import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
-import com.feed_the_beast.ftbquests.client.FTBQuestsClient;
+import com.feed_the_beast.ftbquests.net.MessageClaimReward;
+import com.feed_the_beast.ftbquests.net.MessageOpenTask;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.rewards.QuestReward;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
@@ -104,17 +106,13 @@ public class GuiQuest extends GuiBase
 		public void onClicked(MouseButton button)
 		{
 			GuiHelper.playClickSound();
+			new MessageOpenTask(task.id).sendToServer();
 		}
 
 		@Override
 		public void addMouseOverText(List<String> list)
 		{
-			list.add(task.getDisplayName());
-
-			if (isShiftKeyDown())
-			{
-				list.add(TextFormatting.DARK_GRAY + task.getCompletionString(ClientQuestList.INSTANCE));
-			}
+			list.add(task.getDisplayName() + task.getCompletionSuffix(questTreeGui.questList));
 		}
 
 		@Override
@@ -130,11 +128,7 @@ public class GuiQuest extends GuiBase
 			int ay = getAY();
 
 			getButtonBackground().draw(ax, ay, width, height);
-
-			if (!icon.isEmpty())
-			{
-				icon.draw(ax + (width - 16) / 2, ay + (height - 16) / 2, 16, 16);
-			}
+			icon.draw(ax + (width - 16) / 2, ay + (height - 16) / 2, 16, 16);
 		}
 	}
 
@@ -144,7 +138,7 @@ public class GuiQuest extends GuiBase
 
 		public ButtonReward(Panel panel, QuestReward r)
 		{
-			super(panel, r.toString(), r.getIcon());
+			super(panel, r.getDisplayName(), r.getIcon());
 			setPosAndSize(0, 20, 20, 20);
 			reward = r;
 		}
@@ -153,6 +147,11 @@ public class GuiQuest extends GuiBase
 		public void onClicked(MouseButton button)
 		{
 			GuiHelper.playClickSound();
+
+			if (questTreeGui.questList.claimReward(ClientUtils.MC.player, reward))
+			{
+				new MessageClaimReward(reward.id).sendToServer();
+			}
 		}
 
 		@Override
@@ -164,7 +163,7 @@ public class GuiQuest extends GuiBase
 		@Override
 		public WidgetType getWidgetType()
 		{
-			if (!quest.isComplete(ClientQuestList.INSTANCE))
+			if (!quest.isComplete(questTreeGui.questList) || questTreeGui.questList.isRewardClaimed(ClientUtils.MC.player, reward))
 			{
 				return WidgetType.DISABLED;
 			}
@@ -187,6 +186,7 @@ public class GuiQuest extends GuiBase
 		}
 	}
 
+	public final GuiQuestTree questTreeGui;
 	public final Quest quest;
 	public final Panel mainPanel;
 	public final Button back;
@@ -196,8 +196,9 @@ public class GuiQuest extends GuiBase
 	public final QuestLongDescription longDescription;
 	public final Panel tasks, rewards;
 
-	public GuiQuest(Quest q)
+	public GuiQuest(GuiQuestTree ql, Quest q)
 	{
+		questTreeGui = ql;
 		quest = q;
 
 		mainPanel = new Panel(this)
@@ -217,12 +218,12 @@ public class GuiQuest extends GuiBase
 			{
 				setPosAndSize(0, 3, getGui().width, getGui().height - 6);
 
-				title.text = StringUtils.bold(quest.title.createCopy(), true).getFormattedText();
+				title.text = StringUtils.bold(quest.getTitle().createCopy(), true).getFormattedText();
 				title.setSize(width, 35);
 
 				shortDescription.text.clear();
 
-				for (String s : listFormattedStringToWidth(quest.description.getFormattedText(), width - 60))
+				for (String s : listFormattedStringToWidth(quest.getDescription().getFormattedText(), width - 60))
 				{
 					if (!s.trim().isEmpty())
 					{
@@ -260,8 +261,8 @@ public class GuiQuest extends GuiBase
 			public void onClicked(MouseButton button)
 			{
 				GuiHelper.playClickSound();
-				FTBQuestsClient.questGui = FTBQuestsClient.questTreeGui;
-				FTBQuestsClient.questGui.openGui();
+				questTreeGui.questList.questGui = questTreeGui.questList.questTreeGui;
+				questTreeGui.questList.questGui.openGui();
 			}
 		};
 
@@ -299,7 +300,7 @@ public class GuiQuest extends GuiBase
 			@Override
 			public void drawPanelBackground(int ax, int ay)
 			{
-				drawString(TextFormatting.RED + "Tasks:", ax + width / 2, ay + 9, CENTERED); //LANG
+				drawString(TextFormatting.RED + "Tasks", ax + width / 2, ay + 9, CENTERED); //LANG
 			}
 		};
 
@@ -331,7 +332,7 @@ public class GuiQuest extends GuiBase
 			@Override
 			public void drawPanelBackground(int ax, int ay)
 			{
-				drawString(TextFormatting.BLUE + "Rewards:", ax + width / 2, ay + 9, CENTERED); //LANG
+				drawString(TextFormatting.BLUE + "Rewards", ax + width / 2, ay + 9, CENTERED); //LANG
 			}
 		};
 	}

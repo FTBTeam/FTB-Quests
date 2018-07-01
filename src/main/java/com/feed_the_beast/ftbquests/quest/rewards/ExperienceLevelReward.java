@@ -1,32 +1,30 @@
 package com.feed_the_beast.ftbquests.quest.rewards;
 
 import com.feed_the_beast.ftblib.lib.icon.Icon;
+import com.feed_the_beast.ftbquests.quest.ProgressingQuestObject;
 import com.google.gson.JsonObject;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * @author LatvianModder
  */
 public class ExperienceLevelReward extends QuestReward
 {
-	public final int xpLevels;
+	private final int xpLevels;
 
-	public ExperienceLevelReward(int _xp)
+	public ExperienceLevelReward(ProgressingQuestObject parent, int id, int _xp)
 	{
+		super(parent, id);
 		xpLevels = _xp;
 	}
 
 	@Override
-	public boolean reward(EntityPlayerMP player)
+	public void reward(EntityPlayerMP player)
 	{
 		player.addExperienceLevel(xpLevels);
-		return true;
-	}
-
-	@Override
-	public QuestReward copy()
-	{
-		return new ExperienceLevelReward(xpLevels);
 	}
 
 	@Override
@@ -43,8 +41,10 @@ public class ExperienceLevelReward extends QuestReward
 		return json;
 	}
 
-	public String toString()
+	@Override
+	@SideOnly(Side.CLIENT)
+	public String getDisplayName()
 	{
-		return "XP Levels: +" + xpLevels; //LANG
+		return "XP Levels: " + TextFormatting.GREEN + "+" + xpLevels; //LANG
 	}
 }

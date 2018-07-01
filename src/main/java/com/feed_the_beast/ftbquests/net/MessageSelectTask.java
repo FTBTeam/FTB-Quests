@@ -8,7 +8,7 @@ import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.block.TileQuest;
 import com.feed_the_beast.ftbquests.quest.ServerQuestList;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
-import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskKey;
+import com.feed_the_beast.ftbquests.util.FTBQuestsTeamData;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
@@ -16,19 +16,19 @@ import net.minecraft.util.math.BlockPos;
 /**
  * @author LatvianModder
  */
-public class MessageSelectQuestTask extends MessageToServer
+public class MessageSelectTask extends MessageToServer
 {
 	private BlockPos pos;
-	private QuestTaskKey key;
+	private int task;
 
-	public MessageSelectQuestTask()
+	public MessageSelectTask()
 	{
 	}
 
-	public MessageSelectQuestTask(BlockPos p, QuestTaskKey k)
+	public MessageSelectTask(BlockPos p, int t)
 	{
 		pos = p;
-		key = k;
+		task = t;
 	}
 
 	@Override
@@ -41,14 +41,14 @@ public class MessageSelectQuestTask extends MessageToServer
 	public void writeData(DataOut data)
 	{
 		data.writePos(pos);
-		QuestTaskKey.SERIALIZER.write(data, key);
+		data.writeInt(task);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
 		pos = data.readPos();
-		key = QuestTaskKey.DESERIALIZER.read(data);
+		task = data.readInt();
 	}
 
 	@Override
@@ -62,13 +62,13 @@ public class MessageSelectQuestTask extends MessageToServer
 			{
 				TileQuest tile = (TileQuest) tileEntity;
 
-				if (tile.canEdit() && tile.getOwner() != null && Universe.get().getPlayer(player).team.equalsTeam(tile.getOwner().team))
+				if (tile.canEdit() && tile.getOwner() != null && Universe.get().getPlayer(player).team.equalsTeam(((FTBQuestsTeamData) tile.getOwner()).team))
 				{
-					QuestTask task = ServerQuestList.INSTANCE.getTask(key);
+					QuestTask t = ServerQuestList.INSTANCE.getTask(task);
 
-					if (task != null && task.parent.isVisible(tile.getOwner()))
+					if (t != null && t.quest.isVisible(tile.getOwner()))
 					{
-						tile.setTask(task);
+						tile.setTask(t.id);
 					}
 				}
 			}

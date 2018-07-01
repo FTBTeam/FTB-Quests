@@ -1,24 +1,26 @@
 package com.feed_the_beast.ftbquests.util;
 
+import com.feed_the_beast.ftblib.lib.data.ForgePlayer;
 import com.feed_the_beast.ftblib.lib.data.ForgeTeam;
-import com.feed_the_beast.ftblib.lib.util.JsonUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
-import com.feed_the_beast.ftbquests.net.MessageUpdateQuestTaskProgress;
+import com.feed_the_beast.ftbquests.net.MessageUpdateTaskProgress;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
+import com.feed_the_beast.ftbquests.quest.ServerQuestList;
 import com.feed_the_beast.ftbquests.quest.rewards.QuestReward;
-import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskKey;
+import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
+import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskData;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.ints.IntCollection;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.common.util.INBTSerializable;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * @author LatvianModder
@@ -31,54 +33,139 @@ public class FTBQuestsTeamData implements INBTSerializable<NBTTagCompound>, IPro
 	}
 
 	public final ForgeTeam team;
-	private final Map<QuestTaskKey, Integer> questProgress = new HashMap<>();
-	public final List<QuestReward> rewards = new ArrayList<>();
+	public final Int2ObjectMap<QuestTaskData> taskData;
+	private final IntCollection claimedRewards;
+	private final Map<UUID, IntCollection> claimedPlayerRewards;
 
 	public FTBQuestsTeamData(ForgeTeam t)
 	{
 		team = t;
+		taskData = new Int2ObjectOpenHashMap<>();
+		claimedRewards = new IntOpenHashSet();
+		claimedPlayerRewards = new HashMap<>();
+	}
+
+	@Override
+	public boolean claimReward(EntityPlayer player, QuestReward reward)
+	{
+		if (!reward.parent.isComplete(this))
+		{
+			return false;
+		}
+		else if (reward.teamReward)
+		{
+			if (!claimedRewards.contains(reward.id))
+			{
+				claimedRewards.add(reward.id);
+				reward.reward((EntityPlayerMP) player);
+				team.markDirty();
+				return true;
+			}
+		}
+		else
+		{
+			IntCollection collection = claimedPlayerRewards.get(player.getUniqueID());
+
+			if ((collection == null || !collection.contains(reward.id)))
+			{
+				if (collection == null)
+				{
+					collection = new IntOpenHashSet();
+					claimedPlayerRewards.put(player.getUniqueID(), collection);
+				}
+
+				collection.add(reward.id);
+				reward.reward((EntityPlayerMP) player);
+				team.markDirty();
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	@Override
+	public IntCollection getClaimedRewards(EntityPlayer player)
+	{
+		IntCollection rewards = claimedPlayerRewards.get(player.getUniqueID());
+
+		if (rewards != null)
+		{
+			rewards = new IntOpenHashSet(rewards);
+			rewards.addAll(claimedRewards);
+		}
+		else
+		{
+			rewards = claimedRewards;
+		}
+
+		return rewards;
+	}
+
+	@Override
+	public boolean isRewardClaimed(EntityPlayer player, QuestReward reward)
+	{
+		if (reward.teamReward)
+		{
+			return claimedRewards.contains(reward.id);
+		}
+
+		IntCollection rewards = claimedPlayerRewards.get(player.getUniqueID());
+		return rewards != null && rewards.contains(reward.id);
+	}
+
+	@Override
+	public void syncTaskProgress(QuestTask task, int progress)
+	{
+		team.markDirty();
+
+		for (EntityPlayerMP player : team.universe.server.getPlayerList().getPlayers())
+		{
+			if (team.universe.getPlayer(player).team.equalsTeam(team))
+			{
+				new MessageUpdateTaskProgress(task.id, progress).sendTo(player);
+			}
+		}
 	}
 
 	@Override
 	public NBTTagCompound serializeNBT()
 	{
 		NBTTagCompound nbt = new NBTTagCompound();
-		NBTTagCompound questProgressTag = new NBTTagCompound();
 
-		for (Map.Entry<QuestTaskKey, Integer> entry : questProgress.entrySet())
+		NBTTagCompound taskDataTag = new NBTTagCompound();
+
+		for (QuestTaskData data : taskData.values())
 		{
-			if (entry.getValue() > 0)
-			{
-				NBTTagList nbt1 = questProgressTag.getTagList(entry.getKey().quest.getResourceDomain(), Constants.NBT.TAG_COMPOUND);
+			NBTTagCompound nbt1 = new NBTTagCompound();
 
-				if (nbt1.hasNoTags())
+			if (!nbt1.hasNoTags())
+			{
+				taskDataTag.setTag(Integer.toString(data.task.id), nbt1);
+			}
+		}
+
+		nbt.setTag("TaskData", taskDataTag);
+		nbt.setIntArray("ClaimedRewards", claimedRewards.toIntArray());
+
+		NBTTagCompound claimedPlayerRewardsTag = new NBTTagCompound();
+
+		for (Map.Entry<UUID, IntCollection> entry : claimedPlayerRewards.entrySet())
+		{
+			ForgePlayer player = team.universe.getPlayer(entry.getKey());
+
+			if (player != null)
+			{
+				int[] ai = entry.getValue().toIntArray();
+
+				if (ai.length > 0)
 				{
-					questProgressTag.setTag(entry.getKey().quest.getResourceDomain(), nbt1);
+					claimedPlayerRewardsTag.setIntArray(player.getName(), ai);
 				}
-
-				NBTTagCompound nbt2 = new NBTTagCompound();
-				nbt2.setString("Quest", entry.getKey().quest.getResourcePath());
-				nbt2.setInteger("Task", entry.getKey().index);
-				nbt2.setInteger("Progress", entry.getValue());
-				nbt1.appendTag(nbt2);
 			}
 		}
 
-		nbt.setTag("Progress", questProgressTag);
-
-		NBTTagList rewardsTag = new NBTTagList();
-
-		for (QuestReward reward : rewards)
-		{
-			NBTBase base = JsonUtils.toNBT(reward.toJson());
-
-			if (base != null)
-			{
-				rewardsTag.appendTag(base);
-			}
-		}
-
-		nbt.setTag("Rewards", rewardsTag);
+		nbt.setTag("ClaimedPlayerRewards", claimedPlayerRewardsTag);
 
 		return nbt;
 	}
@@ -86,81 +173,68 @@ public class FTBQuestsTeamData implements INBTSerializable<NBTTagCompound>, IPro
 	@Override
 	public void deserializeNBT(NBTTagCompound nbt)
 	{
-		questProgress.clear();
+		NBTTagCompound taskDataTag = nbt.getCompoundTag("TaskData");
 
-		NBTTagCompound questProgressTag = nbt.getCompoundTag("Progress");
-
-		for (String s : questProgressTag.getKeySet())
+		for (QuestTaskData data : taskData.values())
 		{
-			NBTTagList nbt1 = questProgressTag.getTagList(s, Constants.NBT.TAG_COMPOUND);
-
-			for (int i = 0; i < nbt1.tagCount(); i++)
-			{
-				NBTTagCompound nbt2 = nbt1.getCompoundTagAt(i);
-				questProgress.put(new QuestTaskKey(new ResourceLocation(s, nbt2.getString("Quest")), nbt2.getInteger("Index")), nbt2.getInteger("Progress"));
-			}
+			data.readFromNBT(taskDataTag.getCompoundTag(Integer.toString(data.task.id)));
 		}
 
-		rewards.clear();
+		claimedRewards.clear();
 
-		for (NBTBase base : nbt.getTagList("Rewards", Constants.NBT.TAG_COMPOUND))
+		for (int id : nbt.getIntArray("ClaimedRewards"))
 		{
-			QuestReward reward = QuestReward.createReward(JsonUtils.toJson(base));
+			claimedRewards.add(id);
+		}
 
-			if (reward != null)
+		claimedPlayerRewards.clear();
+
+		NBTTagCompound claimedPlayerRewardsTag = nbt.getCompoundTag("ClaimedPlayerRewards");
+
+		for (String s : claimedPlayerRewardsTag.getKeySet())
+		{
+			ForgePlayer player = team.universe.getPlayer(s);
+
+			if (player != null)
 			{
-				rewards.add(reward);
+				int[] ai = claimedPlayerRewardsTag.getIntArray(s);
+
+				if (ai.length > 0)
+				{
+					claimedPlayerRewards.put(player.getId(), new IntOpenHashSet(ai));
+				}
 			}
 		}
 	}
 
 	@Override
-	public int getQuestTaskProgress(QuestTaskKey task)
+	public String getTeamID()
 	{
-		Integer p = questProgress.get(task);
-		return p == null ? 0 : p;
+		return team.getName();
 	}
 
 	@Override
-	public boolean setQuestTaskProgress(QuestTaskKey key, int progress)
+	public QuestTaskData getQuestTaskData(int task)
 	{
-		int prev = getQuestTaskProgress(key);
+		QuestTaskData data = taskData.get(task);
 
-		if (progress < 0)
+		if (data == null)
 		{
-			progress = 0;
+			data = ServerQuestList.INSTANCE.getTask(task).createData(this);
+			taskData.put(task, data);
 		}
 
-		if (prev == progress)
-		{
-			return false;
-		}
-
-		if (progress == 0)
-		{
-			questProgress.remove(key);
-		}
-		else
-		{
-			questProgress.put(key, progress);
-		}
-
-		team.markDirty();
-
-		for (EntityPlayerMP player : team.universe.server.getPlayerList().getPlayers())
-		{
-			if (team.universe.getPlayer(player).team.equalsTeam(team))
-			{
-				new MessageUpdateQuestTaskProgress(key, progress).sendTo(player);
-			}
-		}
-
-		return true;
+		return data;
 	}
 
 	public void reset()
 	{
-		rewards.clear();
-		questProgress.clear();
+		claimedRewards.clear();
+		claimedPlayerRewards.clear();
+
+		for (QuestTaskData data : taskData.values())
+		{
+			data.setProgress(0, false);
+		}
 	}
 }

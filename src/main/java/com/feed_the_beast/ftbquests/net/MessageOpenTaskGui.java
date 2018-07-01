@@ -1,30 +1,32 @@
 package com.feed_the_beast.ftbquests.net;
 
+import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToClient;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.gui.ClientQuestList;
-import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskKey;
+import com.feed_the_beast.ftbquests.gui.ContainerTaskBase;
+import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskData;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * @author LatvianModder
  */
-public class MessageUpdateQuestTaskProgress extends MessageToClient
+public class MessageOpenTaskGui extends MessageToClient
 {
-	private QuestTaskKey key;
-	private int progress;
+	private int task;
+	private int window;
 
-	public MessageUpdateQuestTaskProgress()
+	public MessageOpenTaskGui()
 	{
 	}
 
-	public MessageUpdateQuestTaskProgress(QuestTaskKey k, int p)
+	public MessageOpenTaskGui(int t, int w)
 	{
-		key = k;
-		progress = p;
+		task = t;
+		window = w;
 	}
 
 	@Override
@@ -36,21 +38,28 @@ public class MessageUpdateQuestTaskProgress extends MessageToClient
 	@Override
 	public void writeData(DataOut data)
 	{
-		QuestTaskKey.SERIALIZER.write(data, key);
-		data.writeInt(progress);
+		data.writeInt(task);
+		data.writeInt(window);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
-		key = QuestTaskKey.DESERIALIZER.read(data);
-		progress = data.readInt();
+		task = data.readInt();
+		window = data.readInt();
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void onMessage()
 	{
-		ClientQuestList.INSTANCE.setQuestTaskProgress(key, progress);
+		QuestTaskData data = ClientQuestList.INSTANCE.getQuestTaskData(task);
+		ContainerTaskBase container = data.getContainer(ClientUtils.MC.player);
+
+		if (container != null)
+		{
+			container.windowId = window;
+			data.getGui(container).openGui();
+		}
 	}
 }

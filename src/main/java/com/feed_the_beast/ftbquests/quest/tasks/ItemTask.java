@@ -4,20 +4,29 @@ import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.IconAnimation;
 import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
 import com.feed_the_beast.ftblib.lib.item.ItemEntry;
+import com.feed_the_beast.ftblib.lib.item.ItemStackSerializer;
 import com.feed_the_beast.ftblib.lib.util.JsonUtils;
 import com.feed_the_beast.ftblib.lib.util.StringJoiner;
+import com.feed_the_beast.ftbquests.gui.ContainerItemTask;
+import com.feed_the_beast.ftbquests.gui.ContainerTaskBase;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumFacing;
+import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemHandlerHelper;
 import net.minecraftforge.oredict.OreDictionary;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -28,11 +37,11 @@ import java.util.function.Predicate;
 /**
  * @author LatvianModder
  */
-public class ItemTask extends QuestTask implements Predicate<ItemStack>
+public class ItemTask extends QuestTask
 {
 	public static abstract class QuestItem implements Predicate<ItemStack>
 	{
-		public static QuestItem EMPTY = new QuestItem()
+		private static QuestItem EMPTY = new QuestItem()
 		{
 			@Override
 			public boolean isEmpty()
@@ -71,6 +80,15 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 			if (JsonUtils.isNull(element))
 			{
 				return EMPTY;
+			}
+			else if (element.isJsonPrimitive())
+			{
+				ItemEntry entry = ItemEntry.get(ItemStackSerializer.parseItem(element.getAsString()));
+
+				if (!entry.isEmpty())
+				{
+					return new QuestItemEntry(entry);
+				}
 			}
 			else if (element.isJsonArray())
 			{
@@ -131,19 +149,10 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 	public static class QuestItemCombined extends QuestItem
 	{
 		public final List<QuestItem> items;
-		public final Icon icon;
 
-		public QuestItemCombined(List<QuestItem> c)
+		private QuestItemCombined(List<QuestItem> c)
 		{
 			items = c;
-			List<Icon> icons = new ArrayList<>();
-
-			for (QuestItem item : items)
-			{
-				icons.add(item.getIcon());
-			}
-
-			icon = new IconAnimation(icons);
 		}
 
 		@Override
@@ -168,7 +177,14 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 		@Override
 		public Icon getIcon()
 		{
-			return icon;
+			List<Icon> icons = new ArrayList<>();
+
+			for (QuestItem item : items)
+			{
+				icons.add(item.getIcon());
+			}
+
+			return new IconAnimation(icons);
 		}
 
 		@Override
@@ -207,13 +223,11 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 
 	public static class QuestItemEntry extends QuestItem
 	{
-		public final ItemEntry entry;
-		private final Icon icon;
+		private final ItemEntry entry;
 
-		public QuestItemEntry(ItemEntry e)
+		private QuestItemEntry(ItemEntry e)
 		{
 			entry = e;
-			icon = ItemIcon.getItemIcon(entry.getStack(1, false));
 		}
 
 		@Override
@@ -231,14 +245,14 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 		@Override
 		public Icon getIcon()
 		{
-			return icon;
+			return ItemIcon.getItemIcon(entry.getStack(1, false));
 		}
 
 		@Override
 		@SideOnly(Side.CLIENT)
 		public String getDisplayName()
 		{
-			return entry.getStack(1, false).getDisplayName();
+			return entry.getStack(1, true).getDisplayName();
 		}
 
 		@Override
@@ -250,9 +264,8 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 
 	public static class QuestOreItem extends QuestItem
 	{
-		public final String ore;
+		private final String ore;
 		private List<ItemEntry> entries;
-		private Icon icon;
 
 		public QuestOreItem(String o)
 		{
@@ -265,15 +278,6 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 			}
 
 			entries = new ArrayList<>(map.keySet());
-
-			List<Icon> icons = new ArrayList<>();
-
-			for (ItemEntry entry : entries)
-			{
-				icons.add(ItemIcon.getItemIcon(entry.getStack(1, false)));
-			}
-
-			icon = new IconAnimation(icons);
 		}
 
 		@Override
@@ -293,7 +297,14 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 		@Override
 		public Icon getIcon()
 		{
-			return icon;
+			List<Icon> icons = new ArrayList<>();
+
+			for (ItemEntry entry : entries)
+			{
+				icons.add(ItemIcon.getItemIcon(entry.getStack(1, false)));
+			}
+
+			return new IconAnimation(icons);
 		}
 
 		@Override
@@ -320,32 +331,15 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 		}
 	}
 
-	public final QuestItem item;
-	public final int count;
+	private final QuestItem item;
+	private final int count;
+	private Icon icon = null;
 
-	public ItemTask(Quest parent, int index, QuestItem i, int c)
+	public ItemTask(Quest quest, int id, QuestItem i, int c)
 	{
-		super(parent, index);
+		super(quest, id);
 		item = i;
 		count = c;
-		parent.hasItemTasks = true;
-
-		Icon icon = item.getIcon();
-
-		if (icon instanceof IconAnimation)
-		{
-			for (Icon icon1 : ((IconAnimation) icon).list)
-			{
-				if (icon1 instanceof ItemIcon)
-				{
-					((ItemIcon) icon1).getStack().setCount(count);
-				}
-			}
-		}
-		else if (icon instanceof ItemIcon)
-		{
-			((ItemIcon) icon).getStack().setCount(count);
-		}
 	}
 
 	@Override
@@ -357,7 +351,27 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 	@Override
 	public Icon getIcon()
 	{
-		return item.getIcon();
+		if (icon == null)
+		{
+			icon = item.getIcon();
+
+			if (icon instanceof IconAnimation)
+			{
+				for (Icon icon1 : ((IconAnimation) icon).list)
+				{
+					if (icon1 instanceof ItemIcon)
+					{
+						((ItemIcon) icon1).getStack().setCount(count);
+					}
+				}
+			}
+			else if (icon instanceof ItemIcon)
+			{
+				((ItemIcon) icon).getStack().setCount(count);
+			}
+		}
+
+		return icon;
 	}
 
 	@Override
@@ -389,27 +403,75 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 	}
 
 	@Override
-	public boolean test(ItemStack stack)
+	public QuestTaskData createData(IProgressData data)
 	{
-		return !stack.isEmpty() && item.test(stack);
+		return new Data(this, data);
 	}
 
-	@Override
-	public ItemStack processItem(IProgressData data, ItemStack stack)
+	public static class Data extends QuestTaskData<ItemTask> implements IItemHandler
 	{
-		int progress = getProgress(data);
-		int max = getMaxProgress();
-
-		if (progress < max && test(stack))
+		private Data(ItemTask t, IProgressData data)
 		{
-			int add = Math.min(stack.getCount(), Math.min(count, max - progress));
-
-			if (add > 0 && data.setQuestTaskProgress(key, progress + add))
-			{
-				return ItemHandlerHelper.copyStackWithSize(stack, stack.getCount() - add);
-			}
+			super(t, data);
 		}
 
-		return stack;
+		@Override
+		public boolean hasCapability(@Nonnull Capability<?> capability, @Nullable EnumFacing facing)
+		{
+			return capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY;
+		}
+
+		@Nullable
+		@Override
+		public <T> T getCapability(@Nonnull Capability<T> capability, @Nullable EnumFacing facing)
+		{
+			return capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY ? (T) this : null;
+		}
+
+		@Override
+		public ContainerTaskBase getContainer(EntityPlayer player)
+		{
+			return new ContainerItemTask(player, this);
+		}
+
+		@Override
+		public int getSlots()
+		{
+			return 1;
+		}
+
+		@Override
+		public ItemStack getStackInSlot(int slot)
+		{
+			return ItemStack.EMPTY;
+		}
+
+		@Override
+		public ItemStack insertItem(int slot, ItemStack stack, boolean simulate)
+		{
+			if (getProgress() < task.count && !stack.isEmpty() && task.item.test(stack))
+			{
+				int add = Math.min(stack.getCount(), task.count - getProgress());
+
+				if (add > 0 && setProgress(getProgress() + add, simulate))
+				{
+					return ItemHandlerHelper.copyStackWithSize(stack, stack.getCount() - add);
+				}
+			}
+
+			return stack;
+		}
+
+		@Override
+		public ItemStack extractItem(int slot, int amount, boolean simulate)
+		{
+			return ItemStack.EMPTY;
+		}
+
+		@Override
+		public int getSlotLimit(int slot)
+		{
+			return task.count;
+		}
 	}
 }

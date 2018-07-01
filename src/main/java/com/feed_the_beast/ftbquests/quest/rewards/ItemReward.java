@@ -3,32 +3,31 @@ package com.feed_the_beast.ftbquests.quest.rewards;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
 import com.feed_the_beast.ftblib.lib.item.ItemStackSerializer;
+import com.feed_the_beast.ftblib.lib.util.InvUtils;
+import com.feed_the_beast.ftbquests.quest.ProgressingQuestObject;
 import com.google.gson.JsonObject;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * @author LatvianModder
  */
 public class ItemReward extends QuestReward
 {
-	public final ItemStack stack;
+	private final ItemStack stack;
 
-	public ItemReward(ItemStack is)
+	public ItemReward(ProgressingQuestObject parent, int id, ItemStack is)
 	{
+		super(parent, id);
 		stack = is;
 	}
 
 	@Override
-	public boolean reward(EntityPlayerMP player)
+	public void reward(EntityPlayerMP player)
 	{
-		return player.addItemStackToInventory(stack);
-	}
-
-	@Override
-	public QuestReward copy()
-	{
-		return new ItemReward(stack.copy());
+		InvUtils.giveItem(player, stack);
 	}
 
 	@Override
@@ -43,7 +42,9 @@ public class ItemReward extends QuestReward
 		return ItemStackSerializer.serialize(stack, true, false).getAsJsonObject();
 	}
 
-	public String toString()
+	@Override
+	@SideOnly(Side.CLIENT)
+	public String getDisplayName()
 	{
 		if (stack.getCount() > 1)
 		{
