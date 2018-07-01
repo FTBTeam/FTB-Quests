@@ -12,15 +12,15 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 /**
  * @author LatvianModder
  */
-public class MessageSelectQuestTaskOpenGui extends MessageToClient
+public class MessageSelectTaskGui extends MessageToClient
 {
 	private BlockPos pos;
 
-	public MessageSelectQuestTaskOpenGui()
+	public MessageSelectTaskGui()
 	{
 	}
 
-	public MessageSelectQuestTaskOpenGui(BlockPos p)
+	public MessageSelectTaskGui(BlockPos p)
 	{
 		pos = p;
 	}

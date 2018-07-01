@@ -4,30 +4,32 @@ import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToClient;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
-import com.feed_the_beast.ftbquests.client.FTBQuestsClient;
-import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskKey;
+import com.feed_the_beast.ftbquests.gui.ClientQuestList;
 import com.google.gson.JsonElement;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import java.util.Map;
 
 /**
  * @author LatvianModder
  */
 public class MessageSyncQuests extends MessageToClient
 {
-	private JsonElement json;
-	private Map<QuestTaskKey, Integer> progress;
+	public JsonElement quests;
+	public String team;
+	public NBTTagCompound taskData;
+	public int[] claimedRewards;
 
 	public MessageSyncQuests()
 	{
 	}
 
-	public MessageSyncQuests(JsonElement e, Map<QuestTaskKey, Integer> p)
+	public MessageSyncQuests(JsonElement e, String t, NBTTagCompound td, int[] r)
 	{
-		json = e;
-		progress = p;
+		quests = e;
+		team = t;
+		taskData = td;
+		claimedRewards = r;
 	}
 
 	@Override
@@ -39,21 +41,40 @@ public class MessageSyncQuests extends MessageToClient
 	@Override
 	public void writeData(DataOut data)
 	{
-		data.writeJson(json);
-		data.writeMap(progress, QuestTaskKey.SERIALIZER, DataOut.INT);
+		data.writeJson(quests);
+		data.writeString(team);
+		data.writeNBT(taskData);
+		data.writeInt(claimedRewards.length);
+
+		for (int i : claimedRewards)
+		{
+			data.writeInt(i);
+		}
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
-		json = data.readJson();
-		progress = data.readMap(QuestTaskKey.DESERIALIZER, DataIn.INT);
+		quests = data.readJson();
+		team = data.readString();
+		taskData = data.readNBT();
+		claimedRewards = new int[data.readInt()];
+
+		for (int i = 0; i < claimedRewards.length; i++)
+		{
+			claimedRewards[i] = data.readInt();
+		}
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void onMessage()
 	{
-		FTBQuestsClient.loadQuests(json.getAsJsonObject(), progress);
+		if (ClientQuestList.INSTANCE != null)
+		{
+			ClientQuestList.INSTANCE.invalidate();
+		}
+
+		ClientQuestList.INSTANCE = new ClientQuestList(this, ClientQuestList.INSTANCE);
 	}
 }

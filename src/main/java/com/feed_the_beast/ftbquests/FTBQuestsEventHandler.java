@@ -10,6 +10,7 @@ import com.feed_the_beast.ftblib.lib.data.ForgeTeam;
 import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftbquests.block.BlockQuest;
 import com.feed_the_beast.ftbquests.block.TileQuest;
+import com.feed_the_beast.ftbquests.net.MessageEditQuests;
 import com.feed_the_beast.ftbquests.quest.ServerQuestList;
 import com.feed_the_beast.ftbquests.util.FTBQuestsTeamData;
 import net.minecraft.block.Block;
@@ -52,12 +53,13 @@ public class FTBQuestsEventHandler
 			@Override
 			public Type getType(ForgePlayer player, NBTTagCompound data)
 			{
-				return Type.INVISIBLE;
+				return Type.fromBoolean(player.hasPermission(FTBQuestsCommon.PERM_EDIT));
 			}
 
 			@Override
 			public void onAction(ForgePlayer player, NBTTagCompound data)
 			{
+				new MessageEditQuests().sendTo(player.getPlayer());
 			}
 		});
 
@@ -70,7 +72,7 @@ public class FTBQuestsEventHandler
 			}
 
 			@Override
-			public void onAction(ForgePlayer player, NBTTagCompound data)
+			public void onAction(ForgePlayer player, NBTTagCompound data0)
 			{
 				for (ForgeTeam team : player.team.universe.getTeams())
 				{
@@ -85,10 +87,7 @@ public class FTBQuestsEventHandler
 	@SubscribeEvent
 	public static void playerLoggedIn(ForgePlayerLoggedInEvent event)
 	{
-		if (ServerQuestList.INSTANCE != null)
-		{
-			ServerQuestList.INSTANCE.sendTo(event.getPlayer().getPlayer());
-		}
+		ServerQuestList.INSTANCE.sendTo(event.getPlayer().getPlayer());
 	}
 
 	@SubscribeEvent
@@ -96,27 +95,4 @@ public class FTBQuestsEventHandler
 	{
 		event.register(FTBQuests.MOD_ID, new FTBQuestsTeamData(event.getTeam()));
 	}
-
-	/* TODO: Display quest book notification
-	@SubscribeEvent
-	public static void onPlayerLoggedIn(ForgePlayerLoggedInEvent event)
-	{
-		if (event.getPlayer().isFake())
-		{
-			return;
-		}
-
-		EntityPlayerMP player = event.getPlayer().getPlayer();
-
-		if (event.isFirstLogin())
-		{
-		}
-	}*/
-
-	/*
-	@SubscribeEvent
-	public static void getTeamSettings(ForgeTeamConfigEvent event)
-	{
-		FTBGuidesTeamData.get(event.getTeam()).addConfig(event);
-	}*/
 }

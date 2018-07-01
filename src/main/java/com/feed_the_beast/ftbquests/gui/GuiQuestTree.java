@@ -1,5 +1,6 @@
 package com.feed_the_beast.ftbquests.gui;
 
+import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftblib.lib.gui.Button;
 import com.feed_the_beast.ftblib.lib.gui.GuiBase;
 import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
@@ -7,13 +8,14 @@ import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.gui.SimpleTextButton;
 import com.feed_the_beast.ftblib.lib.gui.Widget;
 import com.feed_the_beast.ftblib.lib.gui.WidgetLayout;
+import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
-import com.feed_the_beast.ftbquests.client.FTBQuestsClient;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
-import com.feed_the_beast.ftbquests.quest.QuestDependency;
-import com.feed_the_beast.ftbquests.quest.QuestPosition;
+import com.feed_the_beast.ftbquests.quest.QuestObject;
+import com.feed_the_beast.ftbquests.quest.rewards.QuestReward;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
@@ -25,9 +27,7 @@ import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class GuiQuestTree extends GuiBase
 {
@@ -64,13 +64,8 @@ public class GuiQuestTree extends GuiBase
 		@Override
 		public void addMouseOverText(List<String> list)
 		{
-			list.add(getTitle());
+			list.add(getTitle() + chapter.getCompletionSuffix(questList));
 			list.addAll(description);
-
-			if (isShiftKeyDown())
-			{
-				list.add(TextFormatting.DARK_GRAY + chapter.getCompletionString(ClientQuestList.INSTANCE));
-			}
 		}
 
 		@Override
@@ -92,6 +87,33 @@ public class GuiQuestTree extends GuiBase
 			{
 				icon.draw(ax + 10, ay + (height - 16) / 2, 16, 16);
 			}
+
+			for (Quest quest : chapter.quests)
+			{
+				int r = 0;
+
+				if (quest.isComplete(questList))
+				{
+					for (QuestReward reward : quest.rewards)
+					{
+						if (!questList.isRewardClaimed(ClientUtils.MC.player, reward))
+						{
+							r++;
+						}
+					}
+				}
+
+				if (r > 0)
+				{
+					GlStateManager.pushMatrix();
+					GlStateManager.translate(0, 0, 500);
+					String s = Integer.toString(r);
+					int nw = getStringWidth(s);
+					Color4I.LIGHT_RED.draw(ax + width - nw - 7, ay + 3, nw + 1, 9);
+					drawString(s, ax + width - nw - 6, ay + 4);
+					GlStateManager.popMatrix();
+				}
+			}
 		}
 	}
 
@@ -102,10 +124,10 @@ public class GuiQuestTree extends GuiBase
 
 		public ButtonQuest(Panel panel, Quest q)
 		{
-			super(panel, q.title.getFormattedText(), q.icon);
+			super(panel, q.getTitle().getFormattedText(), q.icon);
 			setSize(20, 20);
 			quest = q;
-			ITextComponent component = quest.description.createCopy();
+			ITextComponent component = quest.getDescription().createCopy();
 			component.getStyle().setColor(TextFormatting.GRAY);
 			description = component.getFormattedText();
 
@@ -119,23 +141,18 @@ public class GuiQuestTree extends GuiBase
 		public void onClicked(MouseButton button)
 		{
 			GuiHelper.playClickSound();
-			FTBQuestsClient.questGui = new GuiQuest(quest);
-			FTBQuestsClient.questGui.openGui();
+			questList.questGui = new GuiQuest(GuiQuestTree.this, quest);
+			questList.questGui.openGui();
 		}
 
 		@Override
 		public void addMouseOverText(List<String> list)
 		{
-			list.add(getTitle());
+			list.add(getTitle() + quest.getCompletionSuffix(questList));
 
 			if (!description.isEmpty())
 			{
 				list.add(description);
-			}
-
-			if (isShiftKeyDown())
-			{
-				list.add(TextFormatting.DARK_GRAY + quest.getCompletionString(ClientQuestList.INSTANCE));
 			}
 		}
 
@@ -160,18 +177,46 @@ public class GuiQuestTree extends GuiBase
 				icon.draw(0, 0, zoom, zoom);
 				GlStateManager.popMatrix();
 			}
+
+			if (quest.isComplete(questList))
+			{
+				int r = 0;
+
+				for (QuestReward reward : quest.rewards)
+				{
+					if (!questList.isRewardClaimed(ClientUtils.MC.player, reward))
+					{
+						r++;
+					}
+				}
+
+				if (r > 0)
+				{
+					GlStateManager.pushMatrix();
+					GlStateManager.translate(0, 0, 500);
+					String s = Integer.toString(r);
+					int nw = getStringWidth(s);
+					Color4I.LIGHT_RED.draw(ax + width - nw - 1, ay, nw + 1, 9);
+					drawString(s, ax + width - nw, ay + 1);
+					GlStateManager.popMatrix();
+				}
+			}
 		}
 	}
 
-	public final Map<Quest, ButtonQuest> questButtonMap;
-	public int zoom = 16, scrollWidth, scrollHeight, prevMouseX, prevMouseY, grabbed;
+	public final ClientQuestList questList;
+	private final Int2ObjectOpenHashMap<ButtonQuest> questButtonMap;
+	public int zoom = 16;
+	private int scrollWidth, scrollHeight, prevMouseX, prevMouseY, grabbed;
 	public ButtonChapter selectedChapter;
 	public List<ButtonChapter> chapterButtons;
 	public final Panel chapterPanel, quests;
-	public final Button zoomIn, zoomOut;
+	private final Button zoomIn, zoomOut;
 
-	public GuiQuestTree()
+	public GuiQuestTree(ClientQuestList q)
 	{
+		questList = q;
+
 		chapterPanel = new Panel(this)
 		{
 			@Override
@@ -197,7 +242,7 @@ public class GuiQuestTree extends GuiBase
 		selectedChapter = null;
 		chapterButtons = new ArrayList<>();
 
-		for (QuestChapter chapter : ClientQuestList.INSTANCE.chapters.values())
+		for (QuestChapter chapter : questList.chapters)
 		{
 			ButtonChapter b = new ButtonChapter(chapterPanel, chapter);
 
@@ -219,7 +264,7 @@ public class GuiQuestTree extends GuiBase
 			}
 		};*/
 
-		questButtonMap = new HashMap<>();
+		questButtonMap = new Int2ObjectOpenHashMap<>();
 
 		quests = new Panel(this)
 		{
@@ -233,12 +278,12 @@ public class GuiQuestTree extends GuiBase
 					int mx = 0;
 					int my = 0;
 
-					for (Quest quest : selectedChapter.chapter.quests.values())
+					for (Quest quest : selectedChapter.chapter.quests)
 					{
 						ButtonQuest widget = new ButtonQuest(this, quest);
-						questButtonMap.put(quest, widget);
-						mx = Math.max(mx, quest.pos.x);
-						my = Math.max(my, quest.pos.y);
+						questButtonMap.put(quest.id, widget);
+						mx = Math.max(mx, quest.x);
+						my = Math.max(my, quest.y);
 						add(widget);
 					}
 				}
@@ -257,10 +302,10 @@ public class GuiQuestTree extends GuiBase
 
 					for (Widget widget : widgets)
 					{
-						QuestPosition pos = ((ButtonQuest) widget).quest.pos;
-						mx = Math.max(mx, pos.x);
-						my = Math.max(my, pos.y);
-						widget.setPosAndSize(1 + pos.x * (zoom * 3 / 2), 1 + pos.y * (zoom * 3 / 2), zoom * 5 / 4, zoom * 5 / 4);
+						Quest quest = ((ButtonQuest) widget).quest;
+						mx = Math.max(mx, quest.x);
+						my = Math.max(my, quest.y);
+						widget.setPosAndSize(1 + quest.x * (zoom * 3 / 2), 1 + quest.y * (zoom * 3 / 2), zoom * 5 / 4, zoom * 5 / 4);
 					}
 
 					scrollWidth = 2 + mx * (zoom * 3 / 2) + zoom * 5 / 4;
@@ -293,11 +338,13 @@ public class GuiQuestTree extends GuiBase
 					{
 						ButtonQuest buttonQuest = (ButtonQuest) widget;
 
-						for (QuestDependency dependency : buttonQuest.quest.dependencies)
+						for (int id : buttonQuest.quest.dependencies)
 						{
-							if (dependency.quest != null && buttonQuest.quest.chapter.equals(dependency.chapter))
+							QuestObject dependency = questList.get(id);
+
+							if (dependency instanceof Quest && buttonQuest.quest.chapter.equals(((Quest) dependency).chapter))
 							{
-								ButtonQuest b = questButtonMap.get(dependency.quest);
+								ButtonQuest b = questButtonMap.get(dependency.id);
 
 								if (b != null)
 								{

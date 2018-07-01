@@ -2,8 +2,9 @@ package com.feed_the_beast.ftbquests.block;
 
 import com.feed_the_beast.ftblib.lib.block.BlockBase;
 import com.feed_the_beast.ftblib.lib.data.Universe;
-import com.feed_the_beast.ftbquests.gui.FTBQuestsGuiHandler;
-import com.feed_the_beast.ftbquests.net.MessageSelectQuestTaskOpenGui;
+import com.feed_the_beast.ftbquests.net.MessageOpenTask;
+import com.feed_the_beast.ftbquests.net.MessageSelectTaskGui;
+import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskData;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -49,38 +50,46 @@ public class BlockQuest extends BlockBase
 	}
 
 	@Override
-	public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ)
+	public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer ep, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ)
 	{
-		if (!world.isRemote)
+		if (world.isRemote)
 		{
-			TileEntity tileEntity = world.getTileEntity(pos);
+			return true;
+		}
 
-			if (tileEntity instanceof TileQuest)
+		EntityPlayerMP player = (EntityPlayerMP) ep;
+		TileEntity tileEntity = world.getTileEntity(pos);
+
+		if (tileEntity instanceof TileQuest)
+		{
+			TileQuest tile = (TileQuest) tileEntity;
+
+			if (tile.getOwner() == null)
 			{
-				TileQuest tile = (TileQuest) tileEntity;
+				tile.setOwner(Universe.get().getPlayer(player).team.getName());
+			}
 
-				if (tile.getOwner() == null)
+			if (player.isSneaking())
+			{
+				if (tile.canEdit())
 				{
-					tile.setOwner(Universe.get().getPlayer(player).team.getName());
+					tile.setTask(0);
 				}
+			}
+			else
+			{
+				QuestTaskData data = tile.getTaskData();
 
-				if (player.isSneaking())
+				if (data == null && Universe.get().getPlayer(player).team.getName().equals(tile.getOwner().getTeamID()))
 				{
 					if (tile.canEdit())
 					{
-						tile.setTask(null);
+						new MessageSelectTaskGui(pos).sendTo(player);
 					}
 				}
-				else if (tile.getTask() == null && Universe.get().getPlayer(player).team.equalsTeam(tile.getOwner().team))
+				else if (data != null)
 				{
-					if (tile.canEdit())
-					{
-						new MessageSelectQuestTaskOpenGui(pos).sendTo((EntityPlayerMP) player);
-					}
-				}
-				else
-				{
-					FTBQuestsGuiHandler.BLOCK.open(player, pos);
+					MessageOpenTask.openGUI(data, player);
 				}
 			}
 		}
@@ -106,16 +115,9 @@ public class BlockQuest extends BlockBase
 					tile.setOwner(Universe.get().getPlayer(player).team.getName());
 				}
 
-				if (tile.canEdit())
+				if (tile.canEdit() && tile.getTaskData() == null && Universe.get().getPlayer(player).team.getName().equals(tile.getOwner().getTeamID()))
 				{
-					if (player.isSneaking())
-					{
-						tile.setTask(null);
-					}
-					else if (tile.getTask() == null && Universe.get().getPlayer(player).team.equalsTeam(tile.getOwner().team))
-					{
-						new MessageSelectQuestTaskOpenGui(pos).sendTo((EntityPlayerMP) player);
-					}
+					new MessageSelectTaskGui(pos).sendTo((EntityPlayerMP) player);
 				}
 			}
 		}

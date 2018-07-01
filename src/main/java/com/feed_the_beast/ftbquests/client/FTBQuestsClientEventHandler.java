@@ -2,7 +2,12 @@ package com.feed_the_beast.ftbquests.client;
 
 import com.feed_the_beast.ftblib.events.CustomSidebarButtonTextEvent;
 import com.feed_the_beast.ftblib.events.client.CustomClickEvent;
+import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
+import com.feed_the_beast.ftbquests.gui.ClientQuestList;
+import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.quest.QuestChapter;
+import com.feed_the_beast.ftbquests.quest.rewards.QuestReward;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
@@ -29,25 +34,32 @@ public class FTBQuestsClientEventHandler
 	@SubscribeEvent
 	public static void onCustomSidebarButtonText(CustomSidebarButtonTextEvent event)
 	{
-		/*
 		if (event.getButton().id.equals(QUESTS_BUTTON))
 		{
-			int i = 0;
+			int r = 0;
 
-			if (FTBGuidesClient.questTreeGui != null)
+			for (QuestChapter chapter : ClientQuestList.INSTANCE.chapters)
 			{
-				for (QuestChapter chapter : ClientQuestList.INSTANCE.chapters.values())
+				for (Quest quest : chapter.quests)
 				{
-					i += chapter.quests.size();
+					if (quest.isComplete(ClientQuestList.INSTANCE))
+					{
+						for (QuestReward reward : quest.rewards)
+						{
+							if (!ClientQuestList.INSTANCE.isRewardClaimed(ClientUtils.MC.player, reward))
+							{
+								r++;
+							}
+						}
+					}
 				}
 			}
 
-			if (i > 0)
+			if (r > 0)
 			{
-				event.setText(Integer.toString(i));
+				event.setText(Integer.toString(r));
 			}
 		}
-		*/
 	}
 
 	@SubscribeEvent
@@ -58,7 +70,11 @@ public class FTBQuestsClientEventHandler
 			switch (event.getID().getResourcePath())
 			{
 				case "open_gui":
-					FTBQuestsClient.openQuestGui();
+					if (ClientQuestList.INSTANCE != null)
+					{
+						ClientQuestList.INSTANCE.openQuestGui();
+					}
+
 					break;
 			}
 
