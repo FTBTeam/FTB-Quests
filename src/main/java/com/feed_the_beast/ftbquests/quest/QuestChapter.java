@@ -1,7 +1,7 @@
 package com.feed_the_beast.ftbquests.quest;
 
 import com.feed_the_beast.ftblib.lib.icon.Icon;
-import com.feed_the_beast.ftbquests.quest.rewards.QuestReward;
+import com.feed_the_beast.ftblib.lib.icon.IconAnimation;
 import it.unimi.dsi.fastutil.ints.IntCollection;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import net.minecraft.util.text.ITextComponent;
@@ -21,7 +21,6 @@ public final class QuestChapter extends ProgressingQuestObject
 	public Icon icon;
 	public final List<Quest> quests;
 	public final IntCollection dependencies;
-	public final List<QuestReward> rewards;
 
 	public QuestChapter(QuestList l, int id)
 	{
@@ -32,7 +31,6 @@ public final class QuestChapter extends ProgressingQuestObject
 		icon = Icon.EMPTY;
 		quests = new ArrayList<>();
 		dependencies = new IntOpenHashSet();
-		rewards = new ArrayList<>();
 	}
 
 	@Override
@@ -68,11 +66,41 @@ public final class QuestChapter extends ProgressingQuestObject
 	}
 
 	@Override
+	public double getRelativeProgress(IProgressData data)
+	{
+		double progress = 0D;
+
+		for (Quest quest : quests)
+		{
+			progress += quest.getRelativeProgress(data);
+		}
+
+		return progress / (double) quests.size();
+	}
+
+	@Override
 	public void resetProgress(IProgressData data)
 	{
 		for (Quest quest : quests)
 		{
 			quest.resetProgress(data);
 		}
+	}
+
+	public Icon getIcon()
+	{
+		if (!icon.isEmpty())
+		{
+			return icon;
+		}
+
+		List<Icon> list = new ArrayList<>();
+
+		for (Quest quest : quests)
+		{
+			list.add(quest.getIcon());
+		}
+
+		return new IconAnimation(list);
 	}
 }

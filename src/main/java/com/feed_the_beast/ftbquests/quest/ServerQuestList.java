@@ -1,6 +1,5 @@
 package com.feed_the_beast.ftbquests.quest;
 
-import com.feed_the_beast.ftblib.events.ServerReloadEvent;
 import com.feed_the_beast.ftblib.lib.data.Universe;
 import com.feed_the_beast.ftblib.lib.io.DataReader;
 import com.feed_the_beast.ftblib.lib.util.CommonUtils;
@@ -22,7 +21,9 @@ public class ServerQuestList extends QuestList
 {
 	public static ServerQuestList INSTANCE;
 
-	public static boolean reload(ServerReloadEvent event)
+	public boolean shouldSendUpdates = true;
+
+	public static boolean load()
 	{
 		File file = new File(CommonUtils.folderConfig, "ftbquests/quests.json");
 		JsonElement json;
@@ -47,7 +48,6 @@ public class ServerQuestList extends QuestList
 
 		INSTANCE = new ServerQuestList(json.getAsJsonObject());
 		INSTANCE.save();
-		INSTANCE.sendToAll();
 		return true;
 	}
 
@@ -56,7 +56,7 @@ public class ServerQuestList extends QuestList
 		super(json);
 	}
 
-	private void sendTo0(JsonElement json, EntityPlayerMP player)
+	public void sync(EntityPlayerMP player)
 	{
 		FTBQuestsTeamData data = FTBQuestsTeamData.get(Universe.get().getPlayer(player).team);
 		NBTTagCompound taskDataTag = new NBTTagCompound();
@@ -73,22 +73,7 @@ public class ServerQuestList extends QuestList
 		}
 
 		int[] claimedRewards = data.getClaimedRewards(player).toIntArray();
-		new MessageSyncQuests(json, data.team.getName(), taskDataTag, claimedRewards).sendTo(player);
-	}
-
-	public void sendTo(EntityPlayerMP player)
-	{
-		sendTo0(toJson(), player);
-	}
-
-	public void sendToAll()
-	{
-		JsonElement json = toJson();
-
-		for (EntityPlayerMP player : Universe.get().server.getPlayerList().getPlayers())
-		{
-			sendTo0(json, player);
-		}
+		new MessageSyncQuests(toJson(), data.team.getName(), taskDataTag, claimedRewards).sendTo(player);
 	}
 
 	public void save()

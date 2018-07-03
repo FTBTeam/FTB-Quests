@@ -1,10 +1,19 @@
 package com.feed_the_beast.ftbquests.util;
 
+import com.feed_the_beast.ftblib.events.team.ForgeTeamDataEvent;
+import com.feed_the_beast.ftblib.events.team.ForgeTeamLoadedEvent;
+import com.feed_the_beast.ftblib.events.team.ForgeTeamPlayerLeftEvent;
+import com.feed_the_beast.ftblib.events.team.ForgeTeamSavedEvent;
 import com.feed_the_beast.ftblib.lib.data.ForgePlayer;
 import com.feed_the_beast.ftblib.lib.data.ForgeTeam;
+import com.feed_the_beast.ftblib.lib.data.TeamData;
+import com.feed_the_beast.ftblib.lib.util.FileUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
+import com.feed_the_beast.ftbquests.net.MessageResetProgress;
 import com.feed_the_beast.ftbquests.net.MessageUpdateTaskProgress;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
+import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.ServerQuestList;
 import com.feed_the_beast.ftbquests.quest.rewards.QuestReward;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
@@ -15,9 +24,14 @@ import it.unimi.dsi.fastutil.ints.IntCollection;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.nbt.NBTBase;
+import net.minecraft.nbt.NBTPrimitive;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraftforge.common.util.INBTSerializable;
+import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -25,30 +39,92 @@ import java.util.UUID;
 /**
  * @author LatvianModder
  */
-public class FTBQuestsTeamData implements INBTSerializable<NBTTagCompound>, IProgressData
+@Mod.EventBusSubscriber(modid = FTBQuests.MOD_ID)
+public class FTBQuestsTeamData extends TeamData implements IProgressData
 {
 	public static FTBQuestsTeamData get(ForgeTeam team)
 	{
-		return team.getData(FTBQuests.MOD_ID);
+		return team.getData().get(FTBQuests.MOD_ID);
 	}
 
-	public final ForgeTeam team;
+	@SubscribeEvent
+	public static void registerTeamData(ForgeTeamDataEvent event)
+	{
+		event.register(new FTBQuestsTeamData(event.getTeam()));
+	}
+
+	@SubscribeEvent
+	public static void saveData(ForgeTeamSavedEvent event)
+	{
+		NBTTagCompound nbt = new NBTTagCompound();
+		FTBQuestsTeamData data = get(event.getTeam());
+		data.writeData(nbt);
+
+		File file = event.getTeam().getDataFile("ftbquests");
+
+		if (nbt.hasNoTags())
+		{
+			FileUtils.delete(file);
+		}
+		else
+		{
+			FileUtils.writeNBTSafe(file, nbt);
+		}
+	}
+
+	@SubscribeEvent
+	public static void loadData(ForgeTeamLoadedEvent event)
+	{
+		FTBQuestsTeamData data = get(event.getTeam());
+		NBTTagCompound nbt = FileUtils.readNBT(event.getTeam().getDataFile("ftbquests"));
+		data.readData(nbt == null ? new NBTTagCompound() : nbt);
+	}
+
+	@SubscribeEvent
+	public static void onPlayerLeftTeam(ForgeTeamPlayerLeftEvent event)
+	{
+		if (event.getPlayer().isOnline())
+		{
+			new MessageResetProgress("").sendTo(event.getPlayer().getPlayer());
+		}
+	}
+
 	public final Int2ObjectMap<QuestTaskData> taskData;
 	private final IntCollection claimedRewards;
 	private final Map<UUID, IntCollection> claimedPlayerRewards;
 
-	public FTBQuestsTeamData(ForgeTeam t)
+	private FTBQuestsTeamData(ForgeTeam team)
 	{
-		team = t;
+		super(team);
 		taskData = new Int2ObjectOpenHashMap<>();
 		claimedRewards = new IntOpenHashSet();
 		claimedPlayerRewards = new HashMap<>();
+
+		if (ServerQuestList.INSTANCE != null)
+		{
+			for (QuestChapter chapter : ServerQuestList.INSTANCE.chapters)
+			{
+				for (Quest quest : chapter.quests)
+				{
+					for (QuestTask task : quest.tasks)
+					{
+						taskData.put(task.id, task.createData(this));
+					}
+				}
+			}
+		}
+	}
+
+	@Override
+	public String getName()
+	{
+		return FTBQuests.MOD_ID;
 	}
 
 	@Override
 	public boolean claimReward(EntityPlayer player, QuestReward reward)
 	{
-		if (!reward.parent.isComplete(this))
+		if (!reward.quest.isComplete(this))
 		{
 			return false;
 		}
@@ -128,25 +204,34 @@ public class FTBQuestsTeamData implements INBTSerializable<NBTTagCompound>, IPro
 		}
 	}
 
-	@Override
-	public NBTTagCompound serializeNBT()
+	private void writeData(NBTTagCompound nbt)
 	{
-		NBTTagCompound nbt = new NBTTagCompound();
-
 		NBTTagCompound taskDataTag = new NBTTagCompound();
 
 		for (QuestTaskData data : taskData.values())
 		{
 			NBTTagCompound nbt1 = new NBTTagCompound();
+			data.writeToNBT(nbt1);
 
-			if (!nbt1.hasNoTags())
+			if (nbt1.getSize() == 1 && nbt1.hasKey("Progress", Constants.NBT.TAG_INT))
+			{
+				taskDataTag.setInteger(Integer.toString(data.task.id), nbt1.getInteger("Progress"));
+			}
+			else if (!nbt1.hasNoTags())
 			{
 				taskDataTag.setTag(Integer.toString(data.task.id), nbt1);
 			}
 		}
 
-		nbt.setTag("TaskData", taskDataTag);
-		nbt.setIntArray("ClaimedRewards", claimedRewards.toIntArray());
+		if (!taskDataTag.hasNoTags())
+		{
+			nbt.setTag("TaskData", taskDataTag);
+		}
+
+		if (claimedRewards.size() > 0)
+		{
+			nbt.setIntArray("ClaimedRewards", claimedRewards.toIntArray());
+		}
 
 		NBTTagCompound claimedPlayerRewardsTag = new NBTTagCompound();
 
@@ -165,19 +250,32 @@ public class FTBQuestsTeamData implements INBTSerializable<NBTTagCompound>, IPro
 			}
 		}
 
-		nbt.setTag("ClaimedPlayerRewards", claimedPlayerRewardsTag);
-
-		return nbt;
+		if (!claimedPlayerRewardsTag.hasNoTags())
+		{
+			nbt.setTag("ClaimedPlayerRewards", claimedPlayerRewardsTag);
+		}
 	}
 
-	@Override
-	public void deserializeNBT(NBTTagCompound nbt)
+	private void readData(NBTTagCompound nbt)
 	{
 		NBTTagCompound taskDataTag = nbt.getCompoundTag("TaskData");
 
 		for (QuestTaskData data : taskData.values())
 		{
-			data.readFromNBT(taskDataTag.getCompoundTag(Integer.toString(data.task.id)));
+			NBTBase nbt1 = taskDataTag.getTag(Integer.toString(data.task.id));
+
+			if (!(nbt1 instanceof NBTTagCompound))
+			{
+				int progress = nbt1 instanceof NBTPrimitive ? ((NBTPrimitive) nbt1).getInt() : 0;
+				nbt1 = new NBTTagCompound();
+
+				if (progress > 0)
+				{
+					((NBTTagCompound) nbt1).setInteger("Progress", progress);
+				}
+			}
+
+			data.readFromNBT((NBTTagCompound) nbt1);
 		}
 
 		claimedRewards.clear();
@@ -216,19 +314,16 @@ public class FTBQuestsTeamData implements INBTSerializable<NBTTagCompound>, IPro
 	@Override
 	public QuestTaskData getQuestTaskData(int task)
 	{
-		QuestTaskData data = taskData.get(task);
-
-		if (data == null)
-		{
-			data = ServerQuestList.INSTANCE.getTask(task).createData(this);
-			taskData.put(task, data);
-		}
-
-		return data;
+		return taskData.get(task);
 	}
 
 	public void reset()
 	{
+		if (!claimedRewards.isEmpty() || !claimedPlayerRewards.isEmpty())
+		{
+			team.markDirty();
+		}
+
 		claimedRewards.clear();
 		claimedPlayerRewards.clear();
 

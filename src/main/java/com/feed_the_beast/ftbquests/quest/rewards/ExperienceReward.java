@@ -2,7 +2,7 @@ package com.feed_the_beast.ftbquests.quest.rewards;
 
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
-import com.feed_the_beast.ftbquests.quest.ProgressingQuestObject;
+import com.feed_the_beast.ftbquests.quest.Quest;
 import com.google.gson.JsonObject;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Items;
@@ -20,9 +20,9 @@ public class ExperienceReward extends QuestReward
 
 	private final int xp;
 
-	public ExperienceReward(ProgressingQuestObject parent, int id, int _xp)
+	public ExperienceReward(Quest quest, int id, int _xp)
 	{
-		super(parent, id);
+		super(quest, id);
 		xp = _xp;
 	}
 

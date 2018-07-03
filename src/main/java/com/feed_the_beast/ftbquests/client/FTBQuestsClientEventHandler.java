@@ -34,7 +34,7 @@ public class FTBQuestsClientEventHandler
 	@SubscribeEvent
 	public static void onCustomSidebarButtonText(CustomSidebarButtonTextEvent event)
 	{
-		if (event.getButton().id.equals(QUESTS_BUTTON))
+		if (ClientQuestList.exists() && event.getButton().id.equals(QUESTS_BUTTON))
 		{
 			int r = 0;
 
@@ -70,7 +70,7 @@ public class FTBQuestsClientEventHandler
 			switch (event.getID().getResourcePath())
 			{
 				case "open_gui":
-					if (ClientQuestList.INSTANCE != null)
+					if (ClientQuestList.exists())
 					{
 						ClientQuestList.INSTANCE.openQuestGui();
 					}

@@ -1,6 +1,6 @@
 package com.feed_the_beast.ftbquests.events;
 
-import com.feed_the_beast.ftbquests.quest.ProgressingQuestObject;
+import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.rewards.QuestReward;
 import com.google.gson.JsonObject;
 import net.minecraftforge.fml.common.eventhandler.Cancelable;
@@ -13,21 +13,21 @@ import javax.annotation.Nullable;
 @Cancelable
 public class QuestRewardEvent extends FTBQuestsEvent
 {
-	private final ProgressingQuestObject parent;
+	private final Quest quest;
 	private final int id;
 	private final JsonObject json;
 	private QuestReward reward = null;
 
-	public QuestRewardEvent(ProgressingQuestObject q, int i, JsonObject j)
+	public QuestRewardEvent(Quest q, int i, JsonObject j)
 	{
-		parent = q;
+		quest = q;
 		id = i;
 		json = j;
 	}
 
-	public ProgressingQuestObject getParent()
+	public Quest getQuest()
 	{
-		return parent;
+		return quest;
 	}
 
 	public int getID()

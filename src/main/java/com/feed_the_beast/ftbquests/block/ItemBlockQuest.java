@@ -1,55 +1,60 @@
 package com.feed_the_beast.ftbquests.block;
 
 import com.feed_the_beast.ftblib.lib.block.ItemBlockBase;
-import com.feed_the_beast.ftblib.lib.util.CommonUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
+import com.feed_the_beast.ftbquests.gui.ClientQuestList;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskData;
 import net.minecraft.block.Block;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.CapabilityInject;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
+import net.minecraftforge.common.capabilities.ICapabilitySerializable;
 import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
+import java.util.List;
 
 /**
  * @author LatvianModder
  */
 public class ItemBlockQuest extends ItemBlockBase
 {
-	private static class CapabilityProvider implements ICapabilityProvider
+	public static class Data implements ICapabilitySerializable<NBTTagCompound>
 	{
-		private final ItemStack stack;
+		@CapabilityInject(Data.class)
+		public static Capability<Data> CAP;
+
+		public String owner = "";
+		public int task = 0;
 		private QuestTaskData cachedTaskData;
 
-		private CapabilityProvider(ItemStack is)
+		private Data()
 		{
-			stack = is;
 		}
 
 		@Nullable
-		private QuestTaskData getTaskData()
+		public QuestTaskData getTaskData()
 		{
 			if (cachedTaskData == null)
 			{
-				NBTTagCompound nbt = CommonUtils.getBlockData(stack);
+				IProgressData o = FTBQuests.PROXY.getOwner(owner, FMLCommonHandler.instance().getEffectiveSide().isClient());
 
-				if (nbt.hasNoTags() || !nbt.hasKey("Owner") || !nbt.hasKey("Task"))
+				if (o == null)
 				{
 					return null;
 				}
 
-				IProgressData owner = FTBQuests.PROXY.getOwner(nbt.getString("Owner"), FMLCommonHandler.instance().getEffectiveSide().isClient());
-
-				if (owner == null)
-				{
-					return null;
-				}
-
-				cachedTaskData = owner.getQuestTaskData(nbt.getInteger("Task"));
+				cachedTaskData = o.getQuestTaskData(task);
 			}
 
 			return cachedTaskData;
@@ -58,6 +63,11 @@ public class ItemBlockQuest extends ItemBlockBase
 		@Override
 		public boolean hasCapability(Capability<?> capability, @Nullable EnumFacing facing)
 		{
+			if (capability == CAP)
+			{
+				return true;
+			}
+
 			cachedTaskData = getTaskData();
 			return cachedTaskData != null && cachedTaskData.hasCapability(capability, facing);
 		}
@@ -66,8 +76,39 @@ public class ItemBlockQuest extends ItemBlockBase
 		@Nullable
 		public <T> T getCapability(Capability<T> capability, @Nullable EnumFacing facing)
 		{
+			if (capability == CAP)
+			{
+				return (T) this;
+			}
+
 			cachedTaskData = getTaskData();
 			return cachedTaskData != null ? cachedTaskData.getCapability(capability, facing) : null;
+		}
+
+		@Override
+		public NBTTagCompound serializeNBT()
+		{
+			NBTTagCompound nbt = new NBTTagCompound();
+
+			if (!owner.isEmpty())
+			{
+				nbt.setString("Owner", owner);
+			}
+
+			if (task > 0)
+			{
+				nbt.setInteger("Task", task);
+			}
+
+			return nbt;
+		}
+
+		@Override
+		public void deserializeNBT(NBTTagCompound nbt)
+		{
+			owner = nbt.getString("Owner");
+			task = nbt.getInteger("Task");
+			cachedTaskData = null;
 		}
 	}
 
@@ -79,6 +120,64 @@ public class ItemBlockQuest extends ItemBlockBase
 	@Override
 	public ICapabilityProvider initCapabilities(ItemStack stack, @Nullable NBTTagCompound nbt)
 	{
-		return new CapabilityProvider(stack);
+		return new Data();
+	}
+
+	@Override
+	public NBTTagCompound getNBTShareTag(ItemStack stack)
+	{
+		return stack.getCapability(Data.CAP, null).serializeNBT();
+	}
+
+	@Override
+	public void readNBTShareTag(ItemStack stack, @Nullable NBTTagCompound nbt)
+	{
+		if (nbt != null)
+		{
+			stack.getCapability(Data.CAP, null).deserializeNBT(nbt);
+		}
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public void addInformation(ItemStack stack, @Nullable World world, List<String> tooltip, ITooltipFlag flag)
+	{
+		if (!ClientQuestList.exists())
+		{
+			return;
+		}
+
+		QuestTaskData data = stack.getCapability(Data.CAP, null).getTaskData();
+
+		if (data == null)
+		{
+			return;
+		}
+
+		tooltip.add(I18n.format("tile.ftbquests.quest_block.tooltip.task") + ": " + TextFormatting.YELLOW + data.task.getDisplayName()); //LANG
+		int max = data.task.getMaxProgress();
+
+		if (max <= 0)
+		{
+			tooltip.add(I18n.format("tile.ftbquests.quest_block.tooltip.progress") + ": " + TextFormatting.BLUE + "0/0 [0%]"); //LANG
+		}
+		else
+		{
+			int progress = data.getProgress();
+
+			if (progress >= max)
+			{
+				tooltip.add(I18n.format("tile.ftbquests.quest_block.tooltip.progress") + ": " + TextFormatting.BLUE + max + "/" + max + " [100%]");
+			}
+			else
+			{
+				tooltip.add(I18n.format("tile.ftbquests.quest_block.tooltip.progress") + ": " + TextFormatting.BLUE + progress + "/" + max + " [" + (int) (progress * 100D / (double) max) + "%]");
+			}
+		}
+
+		if (!ClientQuestList.INSTANCE.teamId.equals(data.data.getTeamID()))
+		{
+			tooltip.add(I18n.format("tile.ftbquests.quest_block.tooltip.owner") + ": " + TextFormatting.DARK_GREEN + data.data.getTeamID()); //LANG
+		}
 	}
 }

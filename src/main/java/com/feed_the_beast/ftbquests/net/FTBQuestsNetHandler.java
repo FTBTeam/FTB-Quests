@@ -18,5 +18,6 @@ public class FTBQuestsNetHandler
 		GENERAL.register(new MessageSelectTaskGui());
 		GENERAL.register(new MessageSelectTask());
 		GENERAL.register(new MessageClaimReward());
+		GENERAL.register(new MessageResetProgress());
 	}
 }

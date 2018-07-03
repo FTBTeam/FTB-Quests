@@ -4,7 +4,7 @@ import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
 import com.feed_the_beast.ftblib.lib.item.ItemStackSerializer;
 import com.feed_the_beast.ftblib.lib.util.InvUtils;
-import com.feed_the_beast.ftbquests.quest.ProgressingQuestObject;
+import com.feed_the_beast.ftbquests.quest.Quest;
 import com.google.gson.JsonObject;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
@@ -18,9 +18,9 @@ public class ItemReward extends QuestReward
 {
 	private final ItemStack stack;
 
-	public ItemReward(ProgressingQuestObject parent, int id, ItemStack is)
+	public ItemReward(Quest quest, int id, ItemStack is)
 	{
-		super(parent, id);
+		super(quest, id);
 		stack = is;
 	}
 

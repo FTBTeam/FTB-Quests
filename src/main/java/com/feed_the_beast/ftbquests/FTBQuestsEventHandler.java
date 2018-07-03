@@ -2,15 +2,16 @@ package com.feed_the_beast.ftbquests;
 
 import com.feed_the_beast.ftblib.events.FTBLibPreInitRegistryEvent;
 import com.feed_the_beast.ftblib.events.player.ForgePlayerLoggedInEvent;
-import com.feed_the_beast.ftblib.events.team.ForgeTeamDataEvent;
-import com.feed_the_beast.ftblib.lib.block.ItemBlockBase;
+import com.feed_the_beast.ftblib.events.universe.UniverseLoadedEvent;
 import com.feed_the_beast.ftblib.lib.data.AdminPanelAction;
 import com.feed_the_beast.ftblib.lib.data.ForgePlayer;
 import com.feed_the_beast.ftblib.lib.data.ForgeTeam;
 import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftbquests.block.BlockQuest;
+import com.feed_the_beast.ftbquests.block.ItemBlockQuest;
 import com.feed_the_beast.ftbquests.block.TileQuest;
 import com.feed_the_beast.ftbquests.net.MessageEditQuests;
+import com.feed_the_beast.ftbquests.net.MessageResetProgress;
 import com.feed_the_beast.ftbquests.quest.ServerQuestList;
 import com.feed_the_beast.ftbquests.util.FTBQuestsTeamData;
 import net.minecraft.block.Block;
@@ -38,7 +39,7 @@ public class FTBQuestsEventHandler
 	@SubscribeEvent
 	public static void registerItems(RegistryEvent.Register<Item> event)
 	{
-		event.getRegistry().register(new ItemBlockBase(FTBQuests.QUEST_BLOCK));
+		event.getRegistry().register(new ItemBlockQuest(FTBQuests.QUEST_BLOCK));
 	}
 
 	@SubscribeEvent
@@ -46,7 +47,6 @@ public class FTBQuestsEventHandler
 	{
 		FTBLibPreInitRegistryEvent.Registry registry = event.getRegistry();
 		registry.registerServerReloadHandler(new ResourceLocation(FTBQuests.MOD_ID, "config"), reloadEvent -> FTBQuestsConfig.sync());
-		registry.registerServerReloadHandler(new ResourceLocation(FTBQuests.MOD_ID, "quests"), ServerQuestList::reload);
 
 		registry.registerAdminPanelAction(new AdminPanelAction(FTBQuests.MOD_ID, "edit", GuiIcons.BOOK_RED, 0)
 		{
@@ -74,25 +74,31 @@ public class FTBQuestsEventHandler
 			@Override
 			public void onAction(ForgePlayer player, NBTTagCompound data0)
 			{
+				ServerQuestList.INSTANCE.shouldSendUpdates = false;
 				for (ForgeTeam team : player.team.universe.getTeams())
 				{
 					FTBQuestsTeamData.get(team).reset();
 				}
 
-				ServerQuestList.INSTANCE.sendToAll();
+				player.team.universe.clearCache();
+				new MessageResetProgress(player.team.getName()).sendTo(player.getPlayer());
+				ServerQuestList.INSTANCE.shouldSendUpdates = true;
 			}
 		});
 	}
 
 	@SubscribeEvent
-	public static void playerLoggedIn(ForgePlayerLoggedInEvent event)
+	public static void onPlayerLoggedIn(ForgePlayerLoggedInEvent event)
 	{
-		ServerQuestList.INSTANCE.sendTo(event.getPlayer().getPlayer());
+		ServerQuestList.INSTANCE.sync(event.getPlayer().getPlayer());
 	}
 
 	@SubscribeEvent
-	public static void registerTeamData(ForgeTeamDataEvent event)
+	public static void onUniverseLoaded(UniverseLoadedEvent.Pre event)
 	{
-		event.register(FTBQuests.MOD_ID, new FTBQuestsTeamData(event.getTeam()));
+		if (!ServerQuestList.load())
+		{
+			FTBQuests.LOGGER.error("Failed to load quests!");
+		}
 	}
 }

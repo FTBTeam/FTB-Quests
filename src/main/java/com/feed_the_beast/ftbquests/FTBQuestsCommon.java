@@ -2,9 +2,12 @@ package com.feed_the_beast.ftbquests;
 
 import com.feed_the_beast.ftblib.lib.data.ForgeTeam;
 import com.feed_the_beast.ftblib.lib.data.Universe;
+import com.feed_the_beast.ftblib.lib.util.misc.NBTCapStorage;
+import com.feed_the_beast.ftbquests.block.ItemBlockQuest;
 import com.feed_the_beast.ftbquests.net.FTBQuestsNetHandler;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.util.FTBQuestsTeamData;
+import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.server.permission.DefaultPermissionLevel;
 import net.minecraftforge.server.permission.PermissionAPI;
 
@@ -19,6 +22,8 @@ public class FTBQuestsCommon
 	{
 		FTBQuestsConfig.sync();
 		FTBQuestsNetHandler.init();
+
+		CapabilityManager.INSTANCE.register(ItemBlockQuest.Data.class, new NBTCapStorage<>(), () -> null);
 	}
 
 	public void postInit()
@@ -30,7 +35,7 @@ public class FTBQuestsCommon
 	@Nullable
 	public IProgressData getOwner(String owner, boolean clientSide)
 	{
-		if (clientSide)
+		if (clientSide || !Universe.loaded())
 		{
 			return null;
 		}
