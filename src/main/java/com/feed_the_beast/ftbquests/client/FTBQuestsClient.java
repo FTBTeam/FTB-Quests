@@ -12,6 +12,6 @@ public class FTBQuestsClient extends FTBQuestsCommon
 	@Nullable
 	public IProgressData getOwner(String owner, boolean clientSide)
 	{
-		return clientSide ? (ClientQuestList.INSTANCE != null && ClientQuestList.INSTANCE.getTeamID().equals(owner) ? ClientQuestList.INSTANCE : null) : super.getOwner(owner, false);
+		return clientSide ? (ClientQuestList.exists() && ClientQuestList.INSTANCE.getTeamID().equals(owner) ? ClientQuestList.INSTANCE : null) : super.getOwner(owner, false);
 	}
 }

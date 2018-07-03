@@ -67,25 +67,7 @@ public abstract class QuestList extends ProgressingQuestObject
 				}
 			}
 
-			if (chapterJson.has("icon"))
-			{
-				chapter.icon = Icon.getIcon(chapterJson.get("icon"));
-			}
-
-			if (chapterJson.has("rewards"))
-			{
-				for (JsonElement element1 : chapterJson.get("rewards").getAsJsonArray())
-				{
-					JsonObject rewardJson = element1.getAsJsonObject();
-					QuestReward reward = QuestReward.createReward(chapter, getID(rewardJson), rewardJson);
-
-					if (reward != null)
-					{
-						chapter.rewards.add(reward);
-						objectMap.put(reward.id, reward);
-					}
-				}
-			}
+			chapter.icon = chapterJson.has("icon") ? Icon.getIcon(chapterJson.get("icon")) : Icon.EMPTY;
 
 			if (chapterJson.has("depends_on"))
 			{
@@ -298,7 +280,10 @@ public abstract class QuestList extends ProgressingQuestObject
 				chapterJson.add("description", array);
 			}
 
-			chapterJson.add("icon", chapter.icon.getJson());
+			if (!chapter.icon.isEmpty())
+			{
+				chapterJson.add("icon", chapter.icon.getJson());
+			}
 
 			if (!chapter.dependencies.isEmpty())
 			{
@@ -313,20 +298,6 @@ public abstract class QuestList extends ProgressingQuestObject
 				}
 
 				chapterJson.add("depends_on", array);
-			}
-
-			if (!chapter.rewards.isEmpty())
-			{
-				JsonArray array = new JsonArray();
-
-				for (QuestReward reward : chapter.rewards)
-				{
-					JsonObject rewardJson = reward.toJson();
-					rewardJson.addProperty("id", reward.id);
-					array.add(rewardJson);
-				}
-
-				chapterJson.add("rewards", array);
 			}
 
 			if (!chapter.quests.isEmpty())

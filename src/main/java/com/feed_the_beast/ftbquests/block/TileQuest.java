@@ -67,7 +67,12 @@ public class TileQuest extends TileBase
 		{
 			return null;
 		}
-		else if (cachedTaskData == null)
+		else if (cachedTaskData != null && cachedTaskData.task.isInvalid())
+		{
+			cachedTaskData = null;
+		}
+
+		if (cachedTaskData == null)
 		{
 			cachedOwner = getOwner();
 
@@ -103,6 +108,11 @@ public class TileQuest extends TileBase
 		sendDirtyUpdate();
 	}
 
+	public String getOwnerTeam()
+	{
+		return owner;
+	}
+
 	@Nullable
 	public IProgressData getOwner()
 	{
@@ -123,6 +133,11 @@ public class TileQuest extends TileBase
 		owner = team;
 		updateContainingBlockInfo();
 		markDirty();
+	}
+
+	public int getTaskID()
+	{
+		return task;
 	}
 
 	public void setTask(int id)

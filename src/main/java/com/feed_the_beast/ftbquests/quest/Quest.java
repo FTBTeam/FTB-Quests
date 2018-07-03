@@ -1,6 +1,7 @@
 package com.feed_the_beast.ftbquests.quest;
 
 import com.feed_the_beast.ftblib.lib.icon.Icon;
+import com.feed_the_beast.ftblib.lib.icon.IconAnimation;
 import com.feed_the_beast.ftbquests.quest.rewards.QuestReward;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import it.unimi.dsi.fastutil.ints.IntCollection;
@@ -72,6 +73,19 @@ public final class Quest extends ProgressingQuestObject
 	}
 
 	@Override
+	public double getRelativeProgress(IProgressData data)
+	{
+		double progress = 0D;
+
+		for (QuestTask quest : tasks)
+		{
+			progress += quest.getRelativeProgress(data);
+		}
+
+		return progress / (double) tasks.size();
+	}
+
+	@Override
 	public void resetProgress(IProgressData data)
 	{
 		for (QuestTask task : tasks)
@@ -123,5 +137,22 @@ public final class Quest extends ProgressingQuestObject
 	public ITextComponent getDescription()
 	{
 		return description == null ? new TextComponentString("") : description;
+	}
+
+	public Icon getIcon()
+	{
+		if (!icon.isEmpty())
+		{
+			return icon;
+		}
+
+		List<Icon> list = new ArrayList<>();
+
+		for (QuestTask task : tasks)
+		{
+			list.add(task.getIcon());
+		}
+
+		return new IconAnimation(list);
 	}
 }

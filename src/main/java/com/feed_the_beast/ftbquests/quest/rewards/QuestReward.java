@@ -3,7 +3,7 @@ package com.feed_the_beast.ftbquests.quest.rewards;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.item.ItemStackSerializer;
 import com.feed_the_beast.ftbquests.events.QuestRewardEvent;
-import com.feed_the_beast.ftbquests.quest.ProgressingQuestObject;
+import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestList;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.google.gson.JsonObject;
@@ -19,22 +19,22 @@ import javax.annotation.Nullable;
  */
 public abstract class QuestReward extends QuestObject
 {
-	public final ProgressingQuestObject parent;
+	public final Quest quest;
 
-	public QuestReward(ProgressingQuestObject p, int id)
+	public QuestReward(Quest q, int id)
 	{
 		super(id);
-		parent = p;
+		quest = q;
 	}
 
 	@Override
 	public QuestList getQuestList()
 	{
-		return parent.getQuestList();
+		return quest.getQuestList();
 	}
 
 	@Nullable
-	public static QuestReward createReward(ProgressingQuestObject parent, int id, JsonObject json)
+	public static QuestReward createReward(Quest quest, int id, JsonObject json)
 	{
 		QuestReward reward = null;
 
@@ -44,20 +44,20 @@ public abstract class QuestReward extends QuestObject
 
 			if (!stack.isEmpty())
 			{
-				reward = new ItemReward(parent, id, stack);
+				reward = new ItemReward(quest, id, stack);
 			}
 		}
 		else if (json.has("xp"))
 		{
-			reward = new ExperienceReward(parent, id, json.get("xp").getAsInt());
+			reward = new ExperienceReward(quest, id, json.get("xp").getAsInt());
 		}
 		else if (json.has("xp_levels"))
 		{
-			reward = new ExperienceLevelReward(parent, id, json.get("xp_levels").getAsInt());
+			reward = new ExperienceLevelReward(quest, id, json.get("xp_levels").getAsInt());
 		}
 		else
 		{
-			QuestRewardEvent event = new QuestRewardEvent(parent, id, json);
+			QuestRewardEvent event = new QuestRewardEvent(quest, id, json);
 			event.post();
 			reward = event.getReward();
 		}

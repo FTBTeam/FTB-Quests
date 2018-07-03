@@ -2,6 +2,9 @@ tile.ftbquests.quest_block.name=Quest Block
 tile.ftbquests.quest_block.select_chapter=Select Chapter
 tile.ftbquests.quest_block.select_quest=Select Quest
 tile.ftbquests.quest_block.select_task=Select Task
+tile.ftbquests.quest_block.tooltip.task=Task
+tile.ftbquests.quest_block.tooltip.progress=Progress
+tile.ftbquests.quest_block.tooltip.owner=Owner
 
 ftbquests.general.allow_free_quest_blocks=Allow Free Quest Blocks
 ftbquests.general.default_can_edit=Default 'Can Edit'

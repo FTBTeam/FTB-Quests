@@ -14,10 +14,15 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+
+import javax.annotation.Nullable;
 
 /**
  * @author LatvianModder
@@ -47,6 +52,13 @@ public class BlockQuest extends BlockBase
 	public boolean dropSpecial(IBlockState state)
 	{
 		return true;
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public BlockRenderLayer getBlockLayer()
+	{
+		return BlockRenderLayer.CUTOUT;
 	}
 
 	@Override
@@ -101,15 +113,21 @@ public class BlockQuest extends BlockBase
 	public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase player, ItemStack stack)
 	{
 		super.onBlockPlacedBy(world, pos, state, player, stack);
+		TileEntity tileEntity = world.getTileEntity(pos);
 
-		if (player instanceof EntityPlayerMP)
+		if (tileEntity instanceof TileQuest)
 		{
-			TileEntity tileEntity = world.getTileEntity(pos);
+			TileQuest tile = (TileQuest) tileEntity;
+			ItemBlockQuest.Data data = stack.getCapability(ItemBlockQuest.Data.CAP, null);
 
-			if (tileEntity instanceof TileQuest)
+			if (data != null)
 			{
-				TileQuest tile = (TileQuest) tileEntity;
+				tile.setOwner(data.owner);
+				tile.setTask(data.task);
+			}
 
+			if (player instanceof EntityPlayerMP)
+			{
 				if (tile.getOwner() == null)
 				{
 					tile.setOwner(Universe.get().getPlayer(player).team.getName());
@@ -121,5 +139,25 @@ public class BlockQuest extends BlockBase
 				}
 			}
 		}
+	}
+
+	@Override
+	public ItemStack createStack(IBlockState state, @Nullable TileEntity tile)
+	{
+		ItemStack stack = new ItemStack(this);
+
+		if (tile instanceof TileQuest)
+		{
+			TileQuest t = (TileQuest) tile;
+			ItemBlockQuest.Data data = stack.getCapability(ItemBlockQuest.Data.CAP, null);
+
+			if (data != null && t.getTaskData() != null)
+			{
+				data.owner = t.getOwnerTeam();
+				data.task = t.getTaskID();
+			}
+		}
+
+		return stack;
 	}
 }

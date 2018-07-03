@@ -4,6 +4,7 @@ import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftblib.lib.gui.Button;
 import com.feed_the_beast.ftblib.lib.gui.GuiBase;
 import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
+import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.gui.SimpleTextButton;
 import com.feed_the_beast.ftblib.lib.gui.Widget;
@@ -38,7 +39,7 @@ public class GuiQuestTree extends GuiBase
 
 		public ButtonChapter(Panel panel, QuestChapter c)
 		{
-			super(panel, c.title.getFormattedText(), c.icon);
+			super(panel, c.title.getFormattedText(), c.getIcon());
 			setSize(35, 26);
 			chapter = c;
 			description = new ArrayList<>();
@@ -64,7 +65,7 @@ public class GuiQuestTree extends GuiBase
 		@Override
 		public void addMouseOverText(List<String> list)
 		{
-			list.add(getTitle() + chapter.getCompletionSuffix(questList));
+			list.add(getTitle() + questList.getCompletionSuffix(chapter));
 			list.addAll(description);
 		}
 
@@ -88,10 +89,10 @@ public class GuiQuestTree extends GuiBase
 				icon.draw(ax + 10, ay + (height - 16) / 2, 16, 16);
 			}
 
+			int r = 0;
+
 			for (Quest quest : chapter.quests)
 			{
-				int r = 0;
-
 				if (quest.isComplete(questList))
 				{
 					for (QuestReward reward : quest.rewards)
@@ -102,17 +103,27 @@ public class GuiQuestTree extends GuiBase
 						}
 					}
 				}
+			}
 
-				if (r > 0)
-				{
-					GlStateManager.pushMatrix();
-					GlStateManager.translate(0, 0, 500);
-					String s = Integer.toString(r);
-					int nw = getStringWidth(s);
-					Color4I.LIGHT_RED.draw(ax + width - nw - 7, ay + 3, nw + 1, 9);
-					drawString(s, ax + width - nw - 6, ay + 4);
-					GlStateManager.popMatrix();
-				}
+			if (r > 0)
+			{
+				String s = Integer.toString(r);
+				int nw = getStringWidth(s);
+				GlStateManager.pushMatrix();
+				GlStateManager.translate(ax + width - nw, ay, 500);
+				drawString(s, -7, 4, Color4I.LIGHT_RED, 0);
+				drawString(s, -5, 4, Color4I.LIGHT_RED, 0);
+				drawString(s, -6, 3, Color4I.LIGHT_RED, 0);
+				drawString(s, -6, 5, Color4I.LIGHT_RED, 0);
+				drawString(s, -6, 4, Color4I.WHITE, 0);
+				GlStateManager.popMatrix();
+			}
+			else if (chapter.isComplete(questList))
+			{
+				GlStateManager.pushMatrix();
+				GlStateManager.translate(0, 0, 500);
+				GuiIcons.CHECK.draw(ax + width - 14, ay + 4, 8, 8);
+				GlStateManager.popMatrix();
 			}
 		}
 	}
@@ -124,7 +135,7 @@ public class GuiQuestTree extends GuiBase
 
 		public ButtonQuest(Panel panel, Quest q)
 		{
-			super(panel, q.getTitle().getFormattedText(), q.icon);
+			super(panel, q.getTitle().getFormattedText(), q.getIcon());
 			setSize(20, 20);
 			quest = q;
 			ITextComponent component = quest.getDescription().createCopy();
@@ -148,7 +159,7 @@ public class GuiQuestTree extends GuiBase
 		@Override
 		public void addMouseOverText(List<String> list)
 		{
-			list.add(getTitle() + quest.getCompletionSuffix(questList));
+			list.add(getTitle() + questList.getCompletionSuffix(quest));
 
 			if (!description.isEmpty())
 			{
@@ -178,10 +189,10 @@ public class GuiQuestTree extends GuiBase
 				GlStateManager.popMatrix();
 			}
 
+			int r = 0;
+
 			if (quest.isComplete(questList))
 			{
-				int r = 0;
-
 				for (QuestReward reward : quest.rewards)
 				{
 					if (!questList.isRewardClaimed(ClientUtils.MC.player, reward))
@@ -189,17 +200,33 @@ public class GuiQuestTree extends GuiBase
 						r++;
 					}
 				}
+			}
 
-				if (r > 0)
+			if (r > 0)
+			{
+				String s = Integer.toString(r);
+				int nw = getStringWidth(s);
+				GlStateManager.pushMatrix();
+				GlStateManager.translate(ax + width, ay, 500);
+
+				if (zoom != 16)
 				{
-					GlStateManager.pushMatrix();
-					GlStateManager.translate(0, 0, 500);
-					String s = Integer.toString(r);
-					int nw = getStringWidth(s);
-					Color4I.LIGHT_RED.draw(ax + width - nw - 1, ay, nw + 1, 9);
-					drawString(s, ax + width - nw, ay + 1);
-					GlStateManager.popMatrix();
+					GlStateManager.scale(zoom / 16D, zoom / 16D, 1D);
 				}
+
+				drawString(s, -nw + 2, 0, Color4I.LIGHT_RED, 0);
+				drawString(s, -nw, 0, Color4I.LIGHT_RED, 0);
+				drawString(s, -nw + 1, 1, Color4I.LIGHT_RED, 0);
+				drawString(s, -nw + 1, -1, Color4I.LIGHT_RED, 0);
+				drawString(s, -nw + 1, 0, Color4I.WHITE, 0);
+				GlStateManager.popMatrix();
+			}
+			else if (quest.isComplete(questList))
+			{
+				GlStateManager.pushMatrix();
+				GlStateManager.translate(0, 0, 500);
+				GuiIcons.CHECK.draw(ax + width - 1 - zoom / 2, ay + 1, zoom / 2, zoom / 2);
+				GlStateManager.popMatrix();
 			}
 		}
 	}
@@ -393,7 +420,7 @@ public class GuiQuestTree extends GuiBase
 			{
 				GuiHelper.playClickSound();
 
-				if (zoom != 24)
+				if (zoom < 24)
 				{
 					zoom += 4;
 					grabbed = 0;
@@ -426,7 +453,7 @@ public class GuiQuestTree extends GuiBase
 			{
 				GuiHelper.playClickSound();
 
-				if (zoom != 4)
+				if (zoom > 8)
 				{
 					zoom -= 4;
 					grabbed = 0;
@@ -507,7 +534,7 @@ public class GuiQuestTree extends GuiBase
 		{
 			if (scroll > 0)
 			{
-				if (zoom != 24)
+				if (zoom < 24)
 				{
 					zoom += 4;
 					grabbed = 0;
@@ -519,7 +546,7 @@ public class GuiQuestTree extends GuiBase
 			}
 			else if (scroll < 0)
 			{
-				if (zoom != 4)
+				if (zoom > 8)
 				{
 					zoom -= 4;
 					grabbed = 0;

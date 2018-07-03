@@ -15,6 +15,12 @@ public class ContainerTaskBase extends ContainerBase
 	{
 		super(player);
 		data = d;
+		addTaskSlots();
+		addPlayerSlots(8, 84);
+	}
+
+	public void addTaskSlots()
+	{
 	}
 
 	@Override

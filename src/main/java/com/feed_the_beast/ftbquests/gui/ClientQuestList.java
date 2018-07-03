@@ -4,6 +4,7 @@ import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftblib.lib.gui.GuiBase;
 import com.feed_the_beast.ftbquests.net.MessageSyncQuests;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
+import com.feed_the_beast.ftbquests.quest.ProgressingQuestObject;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.QuestList;
@@ -14,7 +15,9 @@ import com.google.gson.JsonObject;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntCollection;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.text.TextFormatting;
 
 import javax.annotation.Nullable;
 
@@ -25,7 +28,12 @@ public class ClientQuestList extends QuestList implements IProgressData
 {
 	public static ClientQuestList INSTANCE;
 
-	private final String teamId;
+	public static boolean exists()
+	{
+		return INSTANCE != null && !INSTANCE.isInvalid() && !INSTANCE.teamId.isEmpty();
+	}
+
+	public String teamId;
 	private final Int2ObjectOpenHashMap<QuestTaskData> taskData;
 	private final IntCollection claimedRewards;
 	public final GuiQuestTree questTreeGui;
@@ -135,7 +143,7 @@ public class ClientQuestList extends QuestList implements IProgressData
 	@Override
 	public boolean claimReward(EntityPlayer player, QuestReward reward)
 	{
-		if (!claimedRewards.contains(reward.id) && reward.parent.isComplete(this))
+		if (!claimedRewards.contains(reward.id) && reward.quest.isComplete(this))
 		{
 			claimedRewards.add(reward.id);
 			return true;
@@ -153,5 +161,37 @@ public class ClientQuestList extends QuestList implements IProgressData
 	@Override
 	public void syncTaskProgress(QuestTask task, int progress)
 	{
+	}
+
+	@Override
+	public void resetProgress(IProgressData data)
+	{
+		claimedRewards.clear();
+
+		for (QuestTaskData d : taskData.values())
+		{
+			d.setProgress(0, false);
+		}
+	}
+
+	public String getCompletionSuffix(ProgressingQuestObject object)
+	{
+		if (!GuiScreen.isShiftKeyDown())
+		{
+			return "";
+		}
+
+		double d = object.getRelativeProgress(this);
+
+		if (d <= 0D)
+		{
+			return TextFormatting.DARK_GRAY + " 0%";
+		}
+		else if (d >= 1D)
+		{
+			return TextFormatting.DARK_GRAY + " 100%";
+		}
+
+		return TextFormatting.DARK_GRAY + " " + (int) (d * 100D) + "%";
 	}
 }

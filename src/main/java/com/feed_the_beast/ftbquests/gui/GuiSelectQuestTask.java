@@ -31,7 +31,7 @@ public class GuiSelectQuestTask extends GuiButtonListBase
 	{
 		for (QuestChapter chapter : ClientQuestList.INSTANCE.chapters)
 		{
-			panel.add(new SimpleTextButton(panel, chapter.title.getFormattedText(), chapter.icon)
+			panel.add(new SimpleTextButton(panel, chapter.title.getFormattedText(), chapter.getIcon())
 			{
 				@Override
 				public void onClicked(MouseButton button)
@@ -59,7 +59,7 @@ public class GuiSelectQuestTask extends GuiButtonListBase
 		{
 			for (Quest quest : chapter.quests)
 			{
-				panel.add(new SimpleTextButton(panel, quest.getTitle().getFormattedText(), quest.icon)
+				panel.add(new SimpleTextButton(panel, quest.getTitle().getFormattedText(), quest.getIcon())
 				{
 					@Override
 					public void onClicked(MouseButton button)

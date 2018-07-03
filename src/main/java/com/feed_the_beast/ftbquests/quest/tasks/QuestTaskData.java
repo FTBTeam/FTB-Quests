@@ -70,4 +70,9 @@ public abstract class QuestTaskData<T extends QuestTask> implements ICapabilityP
 	{
 		return new GuiTaskBase(container);
 	}
+
+	public String toString()
+	{
+		return data + ":" + task.id;
+	}
 }

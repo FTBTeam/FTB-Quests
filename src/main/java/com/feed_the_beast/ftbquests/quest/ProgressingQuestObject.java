@@ -1,7 +1,5 @@
 package com.feed_the_beast.ftbquests.quest;
 
-import net.minecraft.util.text.TextFormatting;
-
 /**
  * @author LatvianModder
  */
@@ -18,21 +16,27 @@ public abstract class ProgressingQuestObject extends QuestObject
 
 	public abstract void resetProgress(IProgressData data);
 
-	public final boolean isComplete(IProgressData data)
-	{
-		return getProgress(data) >= getMaxProgress();
-	}
-
-	public final String getCompletionSuffix(IProgressData data)
+	public double getRelativeProgress(IProgressData data)
 	{
 		int max = getMaxProgress();
 
 		if (max == 0)
 		{
-			return TextFormatting.DARK_GRAY + " 0%";
+			return 0D;
 		}
 
-		int prog = getProgress(data);
-		return TextFormatting.DARK_GRAY + " " + (int) (Math.min(prog, max) * 100D / (double) max) + "%";
+		int progress = getProgress(data);
+
+		if (progress >= max)
+		{
+			return 1D;
+		}
+
+		return (double) progress / (double) max;
+	}
+
+	public final boolean isComplete(IProgressData data)
+	{
+		return getProgress(data) >= getMaxProgress();
 	}
 }

@@ -13,8 +13,12 @@ public class ContainerItemTask extends ContainerTaskBase
 	public ContainerItemTask(EntityPlayer player, ItemTask.Data d)
 	{
 		super(player, d);
+	}
 
-		addSlotToContainer(new SlotItemHandler(d, 0, 80, 34)
+	@Override
+	public void addTaskSlots()
+	{
+		addSlotToContainer(new SlotItemHandler((ItemTask.Data) data, 0, 80, 34)
 		{
 			@Override
 			public void putStack(ItemStack stack)
@@ -29,8 +33,6 @@ public class ContainerItemTask extends ContainerTaskBase
 				return Math.min(super.getSlotStackLimit(), data.task.getMaxProgress() - data.getProgress());
 			}
 		});
-
-		addPlayerSlots(8, 84);
 	}
 
 	@Override

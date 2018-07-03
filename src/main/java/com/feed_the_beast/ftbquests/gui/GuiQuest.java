@@ -97,7 +97,7 @@ public class GuiQuest extends GuiBase
 
 		public ButtonTask(Panel panel, QuestTask t)
 		{
-			super(panel, "", t.getIcon());
+			super(panel, t.getDisplayName(), t.getIcon());
 			setPosAndSize(0, 20, 20, 20);
 			task = t;
 		}
@@ -112,7 +112,7 @@ public class GuiQuest extends GuiBase
 		@Override
 		public void addMouseOverText(List<String> list)
 		{
-			list.add(task.getDisplayName() + task.getCompletionSuffix(questTreeGui.questList));
+			list.add(getTitle() + questTreeGui.questList.getCompletionSuffix(task));
 		}
 
 		@Override
@@ -129,6 +129,14 @@ public class GuiQuest extends GuiBase
 
 			getButtonBackground().draw(ax, ay, width, height);
 			icon.draw(ax + (width - 16) / 2, ay + (height - 16) / 2, 16, 16);
+
+			if (task.isComplete(questTreeGui.questList))
+			{
+				GlStateManager.pushMatrix();
+				GlStateManager.translate(0, 0, 500);
+				GuiIcons.CHECK.draw(ax + width - 9, ay + 1, 8, 8);
+				GlStateManager.popMatrix();
+			}
 		}
 	}
 
