@@ -1,7 +1,6 @@
 package com.feed_the_beast.ftbquests.quest;
 
 import com.feed_the_beast.ftbquests.quest.rewards.QuestReward;
-import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskData;
 import it.unimi.dsi.fastutil.ints.IntCollection;
 import net.minecraft.entity.player.EntityPlayer;
@@ -24,5 +23,5 @@ public interface IProgressData
 		return getClaimedRewards(player).contains(reward.id);
 	}
 
-	void syncTaskProgress(QuestTask task, int progress);
+	void syncTask(QuestTaskData data);
 }

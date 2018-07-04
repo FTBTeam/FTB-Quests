@@ -5,6 +5,7 @@ import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToClient;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.gui.ClientQuestList;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -14,16 +15,16 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class MessageUpdateTaskProgress extends MessageToClient
 {
 	private int task;
-	private int progress;
+	private NBTTagCompound nbt;
 
 	public MessageUpdateTaskProgress()
 	{
 	}
 
-	public MessageUpdateTaskProgress(int k, int p)
+	public MessageUpdateTaskProgress(int k, NBTTagCompound d)
 	{
 		task = k;
-		progress = p;
+		nbt = d;
 	}
 
 	@Override
@@ -36,20 +37,20 @@ public class MessageUpdateTaskProgress extends MessageToClient
 	public void writeData(DataOut data)
 	{
 		data.writeInt(task);
-		data.writeInt(progress);
+		data.writeNBT(nbt);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
 		task = data.readInt();
-		progress = data.readInt();
+		nbt = data.readNBT();
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void onMessage()
 	{
-		ClientQuestList.INSTANCE.getQuestTaskData(task).setProgress(progress, false);
+		ClientQuestList.INSTANCE.getQuestTaskData(task).readFromNBT(nbt);
 	}
 }

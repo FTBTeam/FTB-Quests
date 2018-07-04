@@ -118,13 +118,9 @@ public class BlockQuest extends BlockBase
 		if (tileEntity instanceof TileQuest)
 		{
 			TileQuest tile = (TileQuest) tileEntity;
-			ItemBlockQuest.Data data = stack.getCapability(ItemBlockQuest.Data.CAP, null);
-
-			if (data != null)
-			{
-				tile.setOwner(data.owner);
-				tile.setTask(data.task);
-			}
+			ItemBlockQuest.Data data = ItemBlockQuest.Data.get(stack);
+			tile.setOwner(data.owner);
+			tile.setTask(data.task);
 
 			if (player instanceof EntityPlayerMP)
 			{
@@ -149,9 +145,9 @@ public class BlockQuest extends BlockBase
 		if (tile instanceof TileQuest)
 		{
 			TileQuest t = (TileQuest) tile;
-			ItemBlockQuest.Data data = stack.getCapability(ItemBlockQuest.Data.CAP, null);
+			ItemBlockQuest.Data data = ItemBlockQuest.Data.get(stack);
 
-			if (data != null && t.getTaskData() != null)
+			if (t.getTaskData() != null)
 			{
 				data.owner = t.getOwnerTeam();
 				data.task = t.getTaskID();

@@ -2,20 +2,29 @@ package com.feed_the_beast.ftbquests.quest.tasks;
 
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.util.JsonUtils;
+import com.feed_the_beast.ftbquests.FTBQuests;
+import com.feed_the_beast.ftbquests.block.ItemBlockQuest;
+import com.feed_the_beast.ftbquests.gui.ContainerFluidTask;
+import com.feed_the_beast.ftbquests.gui.ContainerTaskBase;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.google.gson.JsonObject;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.FluidTankProperties;
-import net.minecraftforge.fluids.capability.IFluidHandler;
+import net.minecraftforge.fluids.capability.IFluidHandlerItem;
 import net.minecraftforge.fluids.capability.IFluidTankProperties;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.items.ItemHandlerHelper;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
@@ -102,9 +111,10 @@ public class FluidTask extends QuestTask
 		return new Data(this, data);
 	}
 
-	private static class Data extends QuestTaskData<FluidTask> implements IFluidHandler
+	public static class Data extends QuestTaskData<FluidTask> implements IFluidHandlerItem, IItemHandler
 	{
 		private final IFluidTankProperties[] properties;
+		private ItemStack outputStack = ItemStack.EMPTY;
 
 		private Data(FluidTask t, IProgressData data)
 		{
@@ -114,16 +124,45 @@ public class FluidTask extends QuestTask
 		}
 
 		@Override
-		public boolean hasCapability(@Nonnull Capability<?> capability, @Nullable EnumFacing facing)
+		public void writeToNBT(NBTTagCompound nbt)
 		{
-			return capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY;
+			super.writeToNBT(nbt);
+
+			if (!outputStack.isEmpty())
+			{
+				nbt.setTag("Output", outputStack.serializeNBT());
+			}
+		}
+
+		@Override
+		public void readFromNBT(NBTTagCompound nbt)
+		{
+			super.readFromNBT(nbt);
+
+			outputStack = nbt.hasKey("Output") ? new ItemStack(nbt.getCompoundTag("Output")) : ItemStack.EMPTY;
+		}
+
+		@Override
+		public boolean hasCapability(Capability<?> capability, @Nullable EnumFacing facing)
+		{
+			return capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY
+					|| capability == CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY
+					|| capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY;
 		}
 
 		@Nullable
 		@Override
-		public <T> T getCapability(@Nonnull Capability<T> capability, @Nullable EnumFacing facing)
+		public <T> T getCapability(Capability<T> capability, @Nullable EnumFacing facing)
 		{
-			return capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY ? (T) this : null;
+			return capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY
+					|| capability == CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY
+					|| capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY ? (T) this : null;
+		}
+
+		@Override
+		public ContainerTaskBase getContainer(EntityPlayer player)
+		{
+			return new ContainerFluidTask(player, this);
 		}
 
 		@Override
@@ -165,6 +204,104 @@ public class FluidTask extends QuestTask
 		public FluidStack drain(int maxDrain, boolean doDrain)
 		{
 			return null;
+		}
+
+		@Override
+		public ItemStack getContainer()
+		{
+			ItemStack stack = new ItemStack(FTBQuests.QUEST_BLOCK);
+			ItemBlockQuest.Data d = ItemBlockQuest.Data.get(stack);
+			d.task = task.id;
+			d.owner = data.getTeamID();
+			return stack;
+		}
+
+		@Override
+		public int getSlots()
+		{
+			return 2;
+		}
+
+		@Override
+		public ItemStack getStackInSlot(int slot)
+		{
+			return slot == 0 ? ItemStack.EMPTY : outputStack;
+		}
+
+		@Override
+		public ItemStack insertItem(int slot, ItemStack stack, boolean simulate)
+		{
+			if (slot == 1 || stack.isEmpty())
+			{
+				return stack;
+			}
+
+			int progress = getProgress();
+			int max = task.getMaxProgress();
+
+			if (progress >= max)
+			{
+				return stack;
+			}
+
+			IFluidHandlerItem item = stack.getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY, null);
+
+			if (item != null && outputStack.isEmpty())
+			{
+				FluidStack fluidStack = task.fluid.copy();
+				fluidStack.amount = max - progress;
+				fluidStack = item.drain(fluidStack, false);
+
+				if (fluidStack == null || fluidStack.amount <= 0)
+				{
+					return stack;
+				}
+
+				if (!simulate)
+				{
+					item.drain(fluidStack, true);
+					setProgress(progress + fluidStack.amount, false);
+					outputStack = item.getContainer();
+					data.syncTask(this);
+				}
+
+				return ItemStack.EMPTY;
+			}
+
+			return stack;
+		}
+
+		@Override
+		public ItemStack extractItem(int slot, int amount, boolean simulate)
+		{
+			if (slot == 0 || amount <= 0 || outputStack.isEmpty())
+			{
+				return ItemStack.EMPTY;
+			}
+
+			int taken = Math.min(amount, outputStack.getCount());
+
+			ItemStack stack = ItemHandlerHelper.copyStackWithSize(outputStack, taken);
+
+			if (!simulate)
+			{
+				outputStack.shrink(taken);
+
+				if (outputStack.isEmpty())
+				{
+					outputStack = ItemStack.EMPTY;
+				}
+
+				data.syncTask(this);
+			}
+
+			return stack;
+		}
+
+		@Override
+		public int getSlotLimit(int slot)
+		{
+			return 1;
 		}
 	}
 }

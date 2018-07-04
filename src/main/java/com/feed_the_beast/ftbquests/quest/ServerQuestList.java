@@ -5,7 +5,6 @@ import com.feed_the_beast.ftblib.lib.io.DataReader;
 import com.feed_the_beast.ftblib.lib.util.CommonUtils;
 import com.feed_the_beast.ftblib.lib.util.JsonUtils;
 import com.feed_the_beast.ftbquests.net.MessageSyncQuests;
-import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskData;
 import com.feed_the_beast.ftbquests.util.FTBQuestsTeamData;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -59,19 +58,7 @@ public class ServerQuestList extends QuestList
 	public void sync(EntityPlayerMP player)
 	{
 		FTBQuestsTeamData data = FTBQuestsTeamData.get(Universe.get().getPlayer(player).team);
-		NBTTagCompound taskDataTag = new NBTTagCompound();
-
-		for (QuestTaskData data1 : data.taskData.values())
-		{
-			NBTTagCompound nbt1 = new NBTTagCompound();
-			data1.writeToNBT(nbt1);
-
-			if (!nbt1.hasNoTags())
-			{
-				taskDataTag.setTag(Integer.toString(data1.task.id), nbt1);
-			}
-		}
-
+		NBTTagCompound taskDataTag = data.serializeTaskData();
 		int[] claimedRewards = data.getClaimedRewards(player).toIntArray();
 		new MessageSyncQuests(toJson(), data.team.getName(), taskDataTag, claimedRewards).sendTo(player);
 	}

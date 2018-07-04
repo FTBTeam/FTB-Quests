@@ -56,7 +56,7 @@ public abstract class QuestTaskData<T extends QuestTask> implements ICapabilityP
 		}
 
 		progress = p;
-		data.syncTaskProgress(task, progress);
+		data.syncTask(this);
 		return true;
 	}
 
