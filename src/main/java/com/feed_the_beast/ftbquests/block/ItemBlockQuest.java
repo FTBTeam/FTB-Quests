@@ -34,11 +34,16 @@ public class ItemBlockQuest extends ItemBlockBase
 		@CapabilityInject(Data.class)
 		public static Capability<Data> CAP;
 
+		public static Data get(ItemStack stack)
+		{
+			return stack.getCapability(CAP, null);
+		}
+
 		public String owner = "";
 		public int task = 0;
 		private QuestTaskData cachedTaskData;
 
-		private Data()
+		public Data()
 		{
 		}
 
@@ -126,7 +131,7 @@ public class ItemBlockQuest extends ItemBlockBase
 	@Override
 	public NBTTagCompound getNBTShareTag(ItemStack stack)
 	{
-		return stack.getCapability(Data.CAP, null).serializeNBT();
+		return Data.get(stack).serializeNBT();
 	}
 
 	@Override
@@ -134,7 +139,7 @@ public class ItemBlockQuest extends ItemBlockBase
 	{
 		if (nbt != null)
 		{
-			stack.getCapability(Data.CAP, null).deserializeNBT(nbt);
+			Data.get(stack).deserializeNBT(nbt);
 		}
 	}
 
@@ -147,7 +152,7 @@ public class ItemBlockQuest extends ItemBlockBase
 			return;
 		}
 
-		QuestTaskData data = stack.getCapability(Data.CAP, null).getTaskData();
+		QuestTaskData data = Data.get(stack).getTaskData();
 
 		if (data == null)
 		{

@@ -23,7 +23,7 @@ public class FTBQuestsCommon
 		FTBQuestsConfig.sync();
 		FTBQuestsNetHandler.init();
 
-		CapabilityManager.INSTANCE.register(ItemBlockQuest.Data.class, new NBTCapStorage<>(), () -> null);
+		CapabilityManager.INSTANCE.register(ItemBlockQuest.Data.class, new NBTCapStorage<>(), ItemBlockQuest.Data::new);
 	}
 
 	public void postInit()

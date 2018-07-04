@@ -10,7 +10,6 @@ public class FTBQuestsNetHandler
 	public static void init()
 	{
 		GENERAL.register(new MessageSyncQuests());
-		GENERAL.register(new MessageEditQuests());
 		GENERAL.register(new MessageOpenTaskGui());
 		GENERAL.register(new MessageOpenTask());
 		GENERAL.register(new MessageUpdateTaskProgress());

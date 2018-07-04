@@ -11,6 +11,7 @@ import com.feed_the_beast.ftbquests.quest.QuestList;
 import com.feed_the_beast.ftbquests.quest.rewards.QuestReward;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskData;
+import com.feed_the_beast.ftbquests.util.FTBQuestsTeamData;
 import com.google.gson.JsonObject;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntCollection;
@@ -58,10 +59,7 @@ public class ClientQuestList extends QuestList implements IProgressData
 			}
 		}
 
-		for (QuestTaskData data : taskData.values())
-		{
-			data.readFromNBT(message.taskData.getCompoundTag(Integer.toString(data.task.id)));
-		}
+		FTBQuestsTeamData.deserializeTaskData(taskData.values(), message.taskData);
 
 		for (int reward : message.claimedRewards)
 		{
@@ -159,7 +157,7 @@ public class ClientQuestList extends QuestList implements IProgressData
 	}
 
 	@Override
-	public void syncTaskProgress(QuestTask task, int progress)
+	public void syncTask(QuestTaskData data)
 	{
 	}
 

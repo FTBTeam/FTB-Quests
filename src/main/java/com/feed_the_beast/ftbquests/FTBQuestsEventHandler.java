@@ -10,7 +10,6 @@ import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftbquests.block.BlockQuest;
 import com.feed_the_beast.ftbquests.block.ItemBlockQuest;
 import com.feed_the_beast.ftbquests.block.TileQuest;
-import com.feed_the_beast.ftbquests.net.MessageEditQuests;
 import com.feed_the_beast.ftbquests.net.MessageResetProgress;
 import com.feed_the_beast.ftbquests.quest.ServerQuestList;
 import com.feed_the_beast.ftbquests.util.FTBQuestsTeamData;
@@ -53,13 +52,13 @@ public class FTBQuestsEventHandler
 			@Override
 			public Type getType(ForgePlayer player, NBTTagCompound data)
 			{
-				return Type.fromBoolean(player.hasPermission(FTBQuestsCommon.PERM_EDIT));
+				//return Type.fromBoolean(player.hasPermission(FTBQuestsCommon.PERM_EDIT));
+				return Type.INVISIBLE;
 			}
 
 			@Override
 			public void onAction(ForgePlayer player, NBTTagCompound data)
 			{
-				new MessageEditQuests().sendTo(player.getPlayer());
 			}
 		});
 

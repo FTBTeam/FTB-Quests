@@ -24,8 +24,6 @@ import it.unimi.dsi.fastutil.ints.IntCollection;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTPrimitive;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.common.Mod;
@@ -191,20 +189,22 @@ public class FTBQuestsTeamData extends TeamData implements IProgressData
 	}
 
 	@Override
-	public void syncTaskProgress(QuestTask task, int progress)
+	public void syncTask(QuestTaskData data)
 	{
 		team.markDirty();
+		NBTTagCompound nbt = new NBTTagCompound();
+		data.writeToNBT(nbt);
 
 		for (EntityPlayerMP player : team.universe.server.getPlayerList().getPlayers())
 		{
 			if (team.universe.getPlayer(player).team.equalsTeam(team))
 			{
-				new MessageUpdateTaskProgress(task.id, progress).sendTo(player);
+				new MessageUpdateTaskProgress(data.task.id, nbt).sendTo(player);
 			}
 		}
 	}
 
-	private void writeData(NBTTagCompound nbt)
+	public NBTTagCompound serializeTaskData()
 	{
 		NBTTagCompound taskDataTag = new NBTTagCompound();
 
@@ -213,7 +213,7 @@ public class FTBQuestsTeamData extends TeamData implements IProgressData
 			NBTTagCompound nbt1 = new NBTTagCompound();
 			data.writeToNBT(nbt1);
 
-			if (nbt1.getSize() == 1 && nbt1.hasKey("Progress", Constants.NBT.TAG_INT))
+			if (nbt1.getSize() == 1 && nbt1.hasKey("Progress", Constants.NBT.TAG_ANY_NUMERIC))
 			{
 				taskDataTag.setInteger(Integer.toString(data.task.id), nbt1.getInteger("Progress"));
 			}
@@ -222,6 +222,13 @@ public class FTBQuestsTeamData extends TeamData implements IProgressData
 				taskDataTag.setTag(Integer.toString(data.task.id), nbt1);
 			}
 		}
+
+		return taskDataTag;
+	}
+
+	private void writeData(NBTTagCompound nbt)
+	{
+		NBTTagCompound taskDataTag = serializeTaskData();
 
 		if (!taskDataTag.hasNoTags())
 		{
@@ -256,28 +263,28 @@ public class FTBQuestsTeamData extends TeamData implements IProgressData
 		}
 	}
 
+	public static void deserializeTaskData(Iterable<QuestTaskData> dataValues, NBTTagCompound taskDataTag)
+	{
+		for (QuestTaskData data : dataValues)
+		{
+			String key = Integer.toString(data.task.id);
+
+			if (taskDataTag.hasKey(key, Constants.NBT.TAG_COMPOUND))
+			{
+				data.readFromNBT(taskDataTag.getCompoundTag(key));
+			}
+			else
+			{
+				NBTTagCompound nbt = new NBTTagCompound();
+				nbt.setInteger("Progress", taskDataTag.getInteger(key));
+				data.readFromNBT(nbt);
+			}
+		}
+	}
+
 	private void readData(NBTTagCompound nbt)
 	{
-		NBTTagCompound taskDataTag = nbt.getCompoundTag("TaskData");
-
-		for (QuestTaskData data : taskData.values())
-		{
-			NBTBase nbt1 = taskDataTag.getTag(Integer.toString(data.task.id));
-
-			if (!(nbt1 instanceof NBTTagCompound))
-			{
-				int progress = nbt1 instanceof NBTPrimitive ? ((NBTPrimitive) nbt1).getInt() : 0;
-				nbt1 = new NBTTagCompound();
-
-				if (progress > 0)
-				{
-					((NBTTagCompound) nbt1).setInteger("Progress", progress);
-				}
-			}
-
-			data.readFromNBT((NBTTagCompound) nbt1);
-		}
-
+		deserializeTaskData(taskData.values(), nbt.getCompoundTag("TaskData"));
 		claimedRewards.clear();
 
 		for (int id : nbt.getIntArray("ClaimedRewards"))
