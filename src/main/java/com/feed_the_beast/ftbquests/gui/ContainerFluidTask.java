@@ -46,6 +46,6 @@ public class ContainerFluidTask extends ContainerTaskBase
 	@Override
 	public int getNonPlayerSlots()
 	{
-		return 1;
+		return 2;
 	}
 }
