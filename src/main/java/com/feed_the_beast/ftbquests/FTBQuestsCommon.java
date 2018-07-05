@@ -2,11 +2,14 @@ package com.feed_the_beast.ftbquests;
 
 import com.feed_the_beast.ftblib.lib.data.ForgeTeam;
 import com.feed_the_beast.ftblib.lib.data.Universe;
-import com.feed_the_beast.ftblib.lib.util.misc.NBTCapStorage;
 import com.feed_the_beast.ftbquests.block.ItemBlockQuest;
 import com.feed_the_beast.ftbquests.net.FTBQuestsNetHandler;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.util.FTBQuestsTeamData;
+import net.minecraft.nbt.NBTBase;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.EnumFacing;
+import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.server.permission.DefaultPermissionLevel;
 import net.minecraftforge.server.permission.PermissionAPI;
@@ -23,7 +26,23 @@ public class FTBQuestsCommon
 		FTBQuestsConfig.sync();
 		FTBQuestsNetHandler.init();
 
-		CapabilityManager.INSTANCE.register(ItemBlockQuest.Data.class, new NBTCapStorage<>(), ItemBlockQuest.Data::new);
+		CapabilityManager.INSTANCE.register(ItemBlockQuest.Data.class, new Capability.IStorage<ItemBlockQuest.Data>()
+		{
+			@Override
+			public NBTBase writeNBT(Capability<ItemBlockQuest.Data> capability, ItemBlockQuest.Data instance, EnumFacing side)
+			{
+				return instance.serializeNBT();
+			}
+
+			@Override
+			public void readNBT(Capability<ItemBlockQuest.Data> capability, ItemBlockQuest.Data instance, EnumFacing side, NBTBase nbt)
+			{
+				if (nbt instanceof NBTTagCompound)
+				{
+					instance.deserializeNBT((NBTTagCompound) nbt);
+				}
+			}
+		}, ItemBlockQuest.Data::new);
 	}
 
 	public void postInit()

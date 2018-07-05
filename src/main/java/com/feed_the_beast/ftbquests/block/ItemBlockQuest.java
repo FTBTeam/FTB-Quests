@@ -119,7 +119,7 @@ public class ItemBlockQuest extends ItemBlockBase
 
 	public ItemBlockQuest(Block block)
 	{
-		super(block, false);
+		super(block);
 	}
 
 	@Override
