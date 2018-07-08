@@ -14,14 +14,14 @@ import javax.annotation.Nullable;
 public class QuestTaskEvent extends FTBQuestsEvent
 {
 	private final Quest parent;
-	private final int index;
+	private final int id;
 	private final JsonObject json;
 	private QuestTask task = null;
 
 	public QuestTaskEvent(Quest c, int i, JsonObject j)
 	{
 		parent = c;
-		index = i;
+		id = i;
 		json = j;
 	}
 
@@ -30,9 +30,9 @@ public class QuestTaskEvent extends FTBQuestsEvent
 		return parent;
 	}
 
-	public int getIndex()
+	public int getID()
 	{
-		return index;
+		return id;
 	}
 
 	public JsonObject getJson()

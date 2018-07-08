@@ -1,11 +1,21 @@
 package com.feed_the_beast.ftbquests;
 
-import net.minecraft.block.Block;
+import com.feed_the_beast.ftbquests.block.ItemBlockQuest;
+import com.feed_the_beast.ftbquests.integration.IC2Integration;
+import com.feed_the_beast.ftbquests.net.FTBQuestsNetHandler;
+import ic2.core.IC2;
+import net.minecraft.nbt.NBTBase;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.EnumFacing;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.CapabilityManager;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.registry.GameRegistry;
+import net.minecraftforge.server.permission.DefaultPermissionLevel;
+import net.minecraftforge.server.permission.PermissionAPI;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -22,24 +32,46 @@ public class FTBQuests
 	public static final String VERSION = "@VERSION@";
 	public static final Logger LOGGER = LogManager.getLogger(MOD_NAME);
 
-	@Mod.Instance(MOD_ID)
-	public static FTBQuests MOD;
-
 	@SidedProxy(serverSide = "com.feed_the_beast.ftbquests.FTBQuestsCommon", clientSide = "com.feed_the_beast.ftbquests.client.FTBQuestsClient")
 	public static FTBQuestsCommon PROXY;
 
-	@GameRegistry.ObjectHolder(MOD_ID + ":quest_block")
-	public static Block QUEST_BLOCK;
+	public static final String PERM_EDIT = "admin_panel.ftbquests.edit";
+	public static final String PERM_RESET_PROGRESS = "admin_panel.ftbquests.reset_progress";
 
 	@Mod.EventHandler
 	public void onPreInit(FMLPreInitializationEvent event)
 	{
-		PROXY.preInit();
+		FTBQuestsConfig.sync();
+		FTBQuestsNetHandler.init();
+
+		CapabilityManager.INSTANCE.register(ItemBlockQuest.Data.class, new Capability.IStorage<ItemBlockQuest.Data>()
+		{
+			@Override
+			public NBTBase writeNBT(Capability<ItemBlockQuest.Data> capability, ItemBlockQuest.Data instance, EnumFacing side)
+			{
+				return instance.serializeNBT();
+			}
+
+			@Override
+			public void readNBT(Capability<ItemBlockQuest.Data> capability, ItemBlockQuest.Data instance, EnumFacing side, NBTBase nbt)
+			{
+				if (nbt instanceof NBTTagCompound)
+				{
+					instance.deserializeNBT((NBTTagCompound) nbt);
+				}
+			}
+		}, ItemBlockQuest.Data::new);
+
+		if (Loader.isModLoaded(IC2.MODID))
+		{
+			IC2Integration.preInit();
+		}
 	}
 
 	@Mod.EventHandler
 	public void onPostInit(FMLPostInitializationEvent event)
 	{
-		PROXY.postInit();
+		PermissionAPI.registerNode(PERM_EDIT, DefaultPermissionLevel.OP, "Permission for editing quests");
+		PermissionAPI.registerNode(PERM_RESET_PROGRESS, DefaultPermissionLevel.OP, "Permission for resetting quest progress");
 	}
 }

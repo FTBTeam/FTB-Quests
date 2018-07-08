@@ -34,10 +34,12 @@ minecraft {
 
 repositories {
 	maven { url "https://maven.latmod.com/" }
+	maven { url "http://maven.ic2.player.to/" }
 }
 
 dependencies {
 	deobfCompile "com.feed_the_beast.mods:FTBLib:${ftblib_version}"
+	deobfCompile "net.industrial-craft:industrialcraft-2:${ic2_version}"
 }
 
 processResources {
