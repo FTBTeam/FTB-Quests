@@ -2,7 +2,7 @@ package com.feed_the_beast.ftbquests.quest.tasks;
 
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.util.JsonUtils;
-import com.feed_the_beast.ftbquests.FTBQuests;
+import com.feed_the_beast.ftbquests.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.block.ItemBlockQuest;
 import com.feed_the_beast.ftbquests.gui.ContainerFluidTask;
 import com.feed_the_beast.ftbquests.gui.ContainerTaskBase;
@@ -209,7 +209,7 @@ public class FluidTask extends QuestTask
 		@Override
 		public ItemStack getContainer()
 		{
-			ItemStack stack = new ItemStack(FTBQuests.QUEST_BLOCK);
+			ItemStack stack = new ItemStack(FTBQuestsItems.QUEST_BLOCK);
 			ItemBlockQuest.Data d = ItemBlockQuest.Data.get(stack);
 			d.task = task.id;
 			d.owner = data.getTeamID();
