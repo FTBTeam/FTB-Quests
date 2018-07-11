@@ -12,7 +12,6 @@ import com.feed_the_beast.ftbquests.quest.rewards.QuestReward;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskData;
 import com.feed_the_beast.ftbquests.util.FTBQuestsTeamData;
-import com.google.gson.JsonObject;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntCollection;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
@@ -42,7 +41,7 @@ public class ClientQuestList extends QuestList implements IProgressData
 
 	public ClientQuestList(MessageSyncQuests message, @Nullable ClientQuestList prev)
 	{
-		super(message.quests.isJsonObject() ? message.quests.getAsJsonObject() : new JsonObject());
+		super(message.quests);
 		teamId = message.team;
 
 		taskData = new Int2ObjectOpenHashMap<>();
@@ -179,17 +178,33 @@ public class ClientQuestList extends QuestList implements IProgressData
 			return "";
 		}
 
+		StringBuilder builder = new StringBuilder();
+		builder.append(TextFormatting.DARK_GRAY);
+		builder.append(' ');
+
 		double d = object.getRelativeProgress(this);
 
 		if (d <= 0D)
 		{
-			return TextFormatting.DARK_GRAY + " 0%";
+			builder.append("0%");
 		}
 		else if (d >= 1D)
 		{
-			return TextFormatting.DARK_GRAY + " 100%";
+			builder.append("100%");
+		}
+		else
+		{
+			builder.append((int) (d * 100D));
+			builder.append('%');
 		}
 
-		return TextFormatting.DARK_GRAY + " " + (int) (d * 100D) + "%";
+		if (GuiScreen.isCtrlKeyDown())
+		{
+			builder.append(' ');
+			builder.append('#');
+			builder.append(object.id);
+		}
+
+		return builder.toString();
 	}
 }

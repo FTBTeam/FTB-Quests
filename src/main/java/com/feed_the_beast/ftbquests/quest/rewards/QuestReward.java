@@ -1,14 +1,13 @@
 package com.feed_the_beast.ftbquests.quest.rewards;
 
 import com.feed_the_beast.ftblib.lib.icon.Icon;
-import com.feed_the_beast.ftblib.lib.item.ItemStackSerializer;
 import com.feed_the_beast.ftbquests.events.QuestRewardEvent;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestList;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
-import com.google.gson.JsonObject;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -34,40 +33,37 @@ public abstract class QuestReward extends QuestObject
 	}
 
 	@Nullable
-	public static QuestReward createReward(Quest quest, int id, JsonObject json)
+	public static QuestReward createReward(Quest quest, int id, NBTTagCompound nbt)
 	{
 		QuestReward reward = null;
 
-		if (json.has("item"))
+		if (nbt.hasKey("item"))
 		{
-			ItemStack stack = ItemStackSerializer.deserialize(json.get("item"));
+			ItemStack stack = new ItemStack(nbt.getCompoundTag("item"));
 
 			if (!stack.isEmpty())
 			{
 				reward = new ItemReward(quest, id, stack);
 			}
 		}
-		else if (json.has("xp"))
+		else if (nbt.hasKey("xp"))
 		{
-			reward = new ExperienceReward(quest, id, json.get("xp").getAsInt());
+			reward = new ExperienceReward(quest, id, nbt.getInteger("xp"));
 		}
-		else if (json.has("xp_levels"))
+		else if (nbt.hasKey("xp_levels"))
 		{
-			reward = new ExperienceLevelReward(quest, id, json.get("xp_levels").getAsInt());
+			reward = new ExperienceLevelReward(quest, id, nbt.getInteger("xp_levels"));
 		}
 		else
 		{
-			QuestRewardEvent event = new QuestRewardEvent(quest, id, json);
+			QuestRewardEvent event = new QuestRewardEvent(quest, id, nbt);
 			event.post();
 			reward = event.getReward();
 		}
 
 		if (reward != null)
 		{
-			if (json.has("team_reward"))
-			{
-				reward.teamReward = json.get("team_reward").getAsBoolean();
-			}
+			reward.teamReward = nbt.getBoolean("team_reward");
 		}
 
 		return reward;
@@ -79,11 +75,8 @@ public abstract class QuestReward extends QuestObject
 
 	public abstract Icon getIcon();
 
-	public abstract JsonObject toJson();
+	public abstract void writeData(NBTTagCompound nbt);
 
 	@SideOnly(Side.CLIENT)
-	public String getDisplayName()
-	{
-		return toJson().toString();
-	}
+	public abstract String getDisplayName();
 }

@@ -12,7 +12,6 @@ import com.feed_the_beast.ftblib.lib.gui.WidgetLayout;
 import com.feed_the_beast.ftblib.lib.gui.WidgetType;
 import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
-import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.net.MessageClaimReward;
 import com.feed_the_beast.ftbquests.net.MessageOpenTask;
@@ -22,7 +21,6 @@ import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextFormatting;
 
 import javax.annotation.Nullable;
@@ -226,12 +224,12 @@ public class GuiQuest extends GuiBase
 			{
 				setPosAndSize(0, 3, getGui().width, getGui().height - 6);
 
-				title.text = StringUtils.bold(quest.getTitle().createCopy(), true).getFormattedText();
+				title.text = TextFormatting.BOLD + quest.title;
 				title.setSize(width, 35);
 
 				shortDescription.text.clear();
 
-				for (String s : listFormattedStringToWidth(quest.getDescription().getFormattedText(), width - 60))
+				for (String s : listFormattedStringToWidth(quest.description, width - 60))
 				{
 					if (!s.trim().isEmpty())
 					{
@@ -243,9 +241,9 @@ public class GuiQuest extends GuiBase
 
 				longDescription.text.clear();
 
-				for (ITextComponent component : quest.text)
+				for (String s0 : quest.text)
 				{
-					for (String s : listFormattedStringToWidth(component.getFormattedText(), width - 80))
+					for (String s : listFormattedStringToWidth(s0, width - 80))
 					{
 						if (!s.trim().isEmpty())
 						{
@@ -308,7 +306,7 @@ public class GuiQuest extends GuiBase
 			@Override
 			public void drawPanelBackground(int ax, int ay)
 			{
-				drawString(TextFormatting.RED + "Tasks", ax + width / 2, ay + 9, CENTERED); //LANG
+				drawString(TextFormatting.RED + I18n.format("ftbquests.gui.quest.tasks"), ax + width / 2, ay + 9, CENTERED);
 			}
 		};
 
@@ -340,7 +338,7 @@ public class GuiQuest extends GuiBase
 			@Override
 			public void drawPanelBackground(int ax, int ay)
 			{
-				drawString(TextFormatting.BLUE + "Rewards", ax + width / 2, ay + 9, CENTERED); //LANG
+				drawString(TextFormatting.BLUE + I18n.format("ftbquests.gui.quest.rewards"), ax + width / 2, ay + 9, CENTERED);
 			}
 		};
 	}

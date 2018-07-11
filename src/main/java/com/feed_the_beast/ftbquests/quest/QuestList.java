@@ -1,19 +1,17 @@
 package com.feed_the_beast.ftbquests.quest;
 
 import com.feed_the_beast.ftblib.lib.icon.Icon;
-import com.feed_the_beast.ftblib.lib.util.JsonUtils;
 import com.feed_the_beast.ftbquests.quest.rewards.QuestReward;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.NBTTagString;
+import net.minecraftforge.common.util.Constants;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -24,119 +22,95 @@ public abstract class QuestList extends ProgressingQuestObject
 	public final List<QuestChapter> chapters;
 	private boolean invalid;
 	private final Int2ObjectMap<QuestObject> objectMap;
-	private int nextID;
 
-	public QuestList(JsonObject json)
+	public QuestList(NBTTagCompound nbt)
 	{
 		super(0);
 		chapters = new ArrayList<>();
 		invalid = false;
 		objectMap = new Int2ObjectOpenHashMap<>();
 		objectMap.put(0, this);
-		nextID = json.has("next_id") ? json.get("next_id").getAsInt() : 1;
 
-		if (nextID <= 0)
-		{
-			nextID = 1;
-		}
+		NBTTagList chaptersList = nbt.getTagList("chapters", Constants.NBT.TAG_COMPOUND);
+		NBTTagList list;
 
-		for (JsonElement element : json.has("chapters") ? json.get("chapters").getAsJsonArray() : Collections.<JsonElement>emptyList())
+		for (int i = 0; i < chaptersList.tagCount(); i++)
 		{
-			JsonObject chapterJson = element.getAsJsonObject();
-			QuestChapter chapter = new QuestChapter(this, getID(chapterJson));
+			NBTTagCompound chapterTag = chaptersList.getCompoundTagAt(i);
+			QuestChapter chapter = new QuestChapter(this, getID(chapterTag));
 			chapters.add(chapter);
 			objectMap.put(chapter.id, chapter);
 
-			if (chapterJson.has("title"))
+			chapter.title = chapterTag.getString("title");
+
+			list = chapterTag.getTagList("description", Constants.NBT.TAG_STRING);
+
+			for (int j = 0; j < list.tagCount(); j++)
 			{
-				chapter.title = JsonUtils.deserializeTextComponent(chapterJson.get("title"));
+				chapter.description.add(list.getStringTagAt(j));
 			}
 
-			if (chapterJson.has("description"))
+			chapter.icon = Icon.getIcon(chapterTag.getString("icon"));
+
+			for (int d : chapterTag.getIntArray("depends_on"))
 			{
-				if (chapterJson.get("description").isJsonArray())
-				{
-					for (JsonElement element1 : chapterJson.get("description").getAsJsonArray())
-					{
-						chapter.description.add(JsonUtils.deserializeTextComponent(element1));
-					}
-				}
-				else
-				{
-					chapter.description.add(JsonUtils.deserializeTextComponent(chapterJson.get("description")));
-				}
+				chapter.dependencies.add(d);
 			}
 
-			chapter.icon = chapterJson.has("icon") ? Icon.getIcon(chapterJson.get("icon")) : Icon.EMPTY;
+			NBTTagList questsList = chapterTag.getTagList("quests", Constants.NBT.TAG_COMPOUND);
 
-			if (chapterJson.has("depends_on"))
+			for (int j = 0; j < questsList.tagCount(); j++)
 			{
-				for (JsonElement element1 : chapterJson.get("depends_on").getAsJsonArray())
-				{
-					chapter.dependencies.add(element1.getAsInt());
-				}
-			}
-
-			for (JsonElement element1 : chapterJson.has("quests") ? chapterJson.get("quests").getAsJsonArray() : Collections.<JsonElement>emptyList())
-			{
-				JsonObject questJson = element1.getAsJsonObject();
-				Quest quest = new Quest(chapter, getID(questJson));
+				NBTTagCompound questTag = questsList.getCompoundTagAt(j);
+				Quest quest = new Quest(chapter, getID(questTag));
 				chapter.quests.add(quest);
 				objectMap.put(quest.id, quest);
 
-				quest.type = questJson.has("type") ? QuestType.NAME_MAP.get(questJson.get("type").getAsString()) : QuestType.NORMAL;
-				quest.x = questJson.has("x") ? questJson.get("x").getAsInt() : 0;
-				quest.y = questJson.has("y") ? questJson.get("y").getAsInt() : 0;
-				quest.title = JsonUtils.deserializeTextComponent(questJson.get("title"));
-				quest.description = JsonUtils.deserializeTextComponent(questJson.get("description"));
-				quest.icon = questJson.has("icon") ? Icon.getIcon(questJson.get("icon")) : Icon.EMPTY;
+				quest.type = QuestType.NAME_MAP.get(questTag.getString("type"));
+				quest.x = questTag.getInteger("x");
+				quest.y = questTag.getInteger("y");
+				quest.title = questTag.getString("title");
+				quest.description = questTag.getString("description");
+				quest.icon = Icon.getIcon(questTag.getString("icon"));
 
-				quest.text.clear();
+				list = questTag.getTagList("text", Constants.NBT.TAG_STRING);
 
-				if (questJson.has("text"))
+				for (int k = 0; k < list.tagCount(); k++)
 				{
-					for (JsonElement element2 : questJson.get("text").getAsJsonArray())
+					quest.text.add(list.getStringTagAt(k));
+				}
+
+				list = questTag.getTagList("tasks", Constants.NBT.TAG_COMPOUND);
+
+				for (int k = 0; k < list.tagCount(); k++)
+				{
+					NBTTagCompound taskJson = list.getCompoundTagAt(k);
+					int id = getID(taskJson);
+					taskJson.removeTag("id");
+					QuestTask task = QuestTask.createTask(quest, id, taskJson);
+					quest.tasks.add(task);
+					objectMap.put(task.id, task);
+				}
+
+				list = questTag.getTagList("rewards", Constants.NBT.TAG_COMPOUND);
+
+				for (int k = 0; k < list.tagCount(); k++)
+				{
+					NBTTagCompound rewardJson = list.getCompoundTagAt(k);
+					int id = getID(rewardJson);
+					rewardJson.removeTag("id");
+					QuestReward reward = QuestReward.createReward(quest, id, rewardJson);
+
+					if (reward != null)
 					{
-						quest.text.add(JsonUtils.deserializeTextComponent(element2));
+						quest.rewards.add(reward);
+						objectMap.put(reward.id, reward);
 					}
 				}
 
-				if (questJson.has("tasks"))
+				for (int d : questTag.getIntArray("depends_on"))
 				{
-					for (JsonElement element2 : questJson.get("tasks").getAsJsonArray())
-					{
-						JsonObject taskJson = element2.getAsJsonObject();
-						QuestTask task = QuestTask.createTask(quest, getID(taskJson), taskJson);
-
-						if (task != null)
-						{
-							quest.tasks.add(task);
-							objectMap.put(task.id, task);
-						}
-					}
-				}
-
-				if (questJson.has("rewards"))
-				{
-					for (JsonElement element2 : questJson.get("rewards").getAsJsonArray())
-					{
-						JsonObject rewardJson = element2.getAsJsonObject();
-						QuestReward reward = QuestReward.createReward(quest, getID(rewardJson), rewardJson);
-
-						if (reward != null)
-						{
-							quest.rewards.add(reward);
-							objectMap.put(reward.id, reward);
-						}
-					}
-				}
-
-				if (questJson.has("depends_on"))
-				{
-					for (JsonElement element2 : questJson.get("depends_on").getAsJsonArray())
-					{
-						quest.dependencies.add(element2.getAsInt());
-					}
+					quest.dependencies.add(d);
 				}
 			}
 		}
@@ -231,173 +205,142 @@ public abstract class QuestList extends ProgressingQuestObject
 
 	public int requestID()
 	{
-		int id;
-
-		do
-		{
-			id = nextID++;
-		}
-		while (objectMap.containsKey(id));
-
-		return id;
+		return 0;
 	}
 
-	private int getID(JsonObject json)
+	private int getID(NBTTagCompound nbt)
 	{
-		int id = json.has("id") ? json.get("id").getAsInt() : 0;
+		int id = nbt.getInteger("id");
 
 		if (id <= 0 || objectMap.containsKey(id))
 		{
 			id = requestID();
-			json.addProperty("id", id);
+			nbt.setInteger("id", id);
 		}
 
 		return id;
 	}
 
-	public final JsonObject toJson()
+	public final NBTTagCompound toNBT()
 	{
-		JsonObject json = new JsonObject();
-		json.addProperty("next_id", nextID);
-
-		JsonArray chaptersJson = new JsonArray();
+		NBTTagCompound json = new NBTTagCompound();
+		NBTTagList chaptersJson = new NBTTagList();
+		NBTTagList array;
 
 		for (QuestChapter chapter : chapters)
 		{
-			JsonObject chapterJson = new JsonObject();
-			chapterJson.addProperty("id", chapter.id);
-			chapterJson.add("title", JsonUtils.serializeTextComponent(chapter.title));
+			NBTTagCompound chapterJson = new NBTTagCompound();
+			chapterJson.setInteger("id", chapter.id);
+			chapterJson.setString("title", chapter.title);
 
 			if (!chapter.description.isEmpty())
 			{
-				JsonArray array = new JsonArray();
+				array = new NBTTagList();
 
-				for (ITextComponent component : chapter.description)
+				for (String s : chapter.description)
 				{
-					array.add(JsonUtils.serializeTextComponent(component));
+					array.appendTag(new NBTTagString(s));
 				}
 
-				chapterJson.add("description", array);
+				chapterJson.setTag("description", array);
 			}
 
 			if (!chapter.icon.isEmpty())
 			{
-				chapterJson.add("icon", chapter.icon.getJson());
+				chapterJson.setString("icon", chapter.icon.toString());
 			}
 
 			if (!chapter.dependencies.isEmpty())
 			{
-				JsonArray array = new JsonArray();
-
-				for (int dependency : chapter.dependencies)
-				{
-					if (get(dependency) instanceof ProgressingQuestObject)
-					{
-						array.add(dependency);
-					}
-				}
-
-				chapterJson.add("depends_on", array);
+				chapterJson.setIntArray("dependencies", chapter.dependencies.toIntArray());
 			}
 
 			if (!chapter.quests.isEmpty())
 			{
-				JsonArray questsJson = new JsonArray();
+				NBTTagList questsJson = new NBTTagList();
 
 				for (Quest quest : chapter.quests)
 				{
-					JsonObject questJson = new JsonObject();
+					NBTTagCompound questJson = new NBTTagCompound();
 
-					questJson.addProperty("id", quest.id);
+					questJson.setInteger("id", quest.id);
 
 					if (quest.type != QuestType.NORMAL)
 					{
-						questJson.addProperty("type", quest.type.getName());
+						questJson.setString("type", quest.type.getName());
 					}
 
-					questJson.addProperty("x", quest.x);
-					questJson.addProperty("y", quest.y);
+					questJson.setInteger("x", quest.x);
+					questJson.setInteger("y", quest.y);
+					questJson.setString("title", quest.title);
 
-					if (quest.title != null)
+					if (!quest.description.isEmpty())
 					{
-						questJson.add("title", JsonUtils.serializeTextComponent(quest.title));
-					}
-
-					if (quest.description != null)
-					{
-						questJson.add("description", JsonUtils.serializeTextComponent(quest.description));
+						questJson.setString("description", quest.description);
 					}
 
 					if (!quest.icon.isEmpty())
 					{
-						questJson.add("icon", quest.icon.getJson());
+						questJson.setString("icon", quest.icon.toString());
 					}
 
 					if (!quest.text.isEmpty())
 					{
-						JsonArray array = new JsonArray();
+						array = new NBTTagList();
 
-						for (ITextComponent c : quest.text)
+						for (String s : quest.text)
 						{
-							array.add(JsonUtils.serializeTextComponent(c));
+							array.appendTag(new NBTTagString(s));
 						}
 
-						questJson.add("text", array);
+						questJson.setTag("text", array);
 					}
 
 					if (!quest.dependencies.isEmpty())
 					{
-						JsonArray array = new JsonArray();
-
-						for (int dependency : quest.dependencies)
-						{
-							if (get(dependency) instanceof ProgressingQuestObject)
-							{
-								array.add(dependency);
-							}
-						}
-
-						questJson.add("depends_on", array);
+						questJson.setIntArray("dependencies", quest.dependencies.toIntArray());
 					}
 
 					if (!quest.tasks.isEmpty())
 					{
-						JsonArray array = new JsonArray();
+						array = new NBTTagList();
 
 						for (QuestTask task : quest.tasks)
 						{
-							JsonObject taskJson = task.toJson();
-							taskJson.addProperty("id", task.id);
-							array.add(taskJson);
+							NBTTagCompound taskTag = new NBTTagCompound();
+							task.writeData(taskTag);
+							taskTag.setInteger("id", task.id);
+							array.appendTag(taskTag);
 						}
 
-						questJson.add("tasks", array);
+						questJson.setTag("tasks", array);
 					}
 
 					if (!quest.rewards.isEmpty())
 					{
-						JsonArray array = new JsonArray();
+						array = new NBTTagList();
 
 						for (QuestReward reward : quest.rewards)
 						{
-							JsonObject rewardJson = reward.toJson();
-							rewardJson.addProperty("id", reward.id);
-							array.add(rewardJson);
+							NBTTagCompound rewardTag = new NBTTagCompound();
+							reward.writeData(rewardTag);
+							rewardTag.setInteger("id", reward.id);
+							array.appendTag(rewardTag);
 						}
 
-						questJson.add("rewards", array);
+						questJson.setTag("rewards", array);
 					}
 
-					questsJson.add(questJson);
+					questsJson.appendTag(questJson);
 				}
 
-				chapterJson.add("quests", questsJson);
+				chapterJson.setTag("quests", questsJson);
 			}
 
-			chaptersJson.add(chapterJson);
+			chaptersJson.appendTag(chapterJson);
 		}
 
-		json.add("chapters", chaptersJson);
+		json.setTag("chapters", chaptersJson);
 		return json;
 	}
 }

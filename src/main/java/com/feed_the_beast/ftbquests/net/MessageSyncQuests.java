@@ -5,7 +5,6 @@ import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToClient;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.gui.ClientQuestList;
-import com.google.gson.JsonElement;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -15,7 +14,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  */
 public class MessageSyncQuests extends MessageToClient
 {
-	public JsonElement quests;
+	public NBTTagCompound quests;
 	public String team;
 	public NBTTagCompound taskData;
 	public int[] claimedRewards;
@@ -24,7 +23,7 @@ public class MessageSyncQuests extends MessageToClient
 	{
 	}
 
-	public MessageSyncQuests(JsonElement e, String t, NBTTagCompound td, int[] r)
+	public MessageSyncQuests(NBTTagCompound e, String t, NBTTagCompound td, int[] r)
 	{
 		quests = e;
 		team = t;
@@ -41,7 +40,7 @@ public class MessageSyncQuests extends MessageToClient
 	@Override
 	public void writeData(DataOut data)
 	{
-		data.writeJson(quests);
+		data.writeNBT(quests);
 		data.writeString(team);
 		data.writeNBT(taskData);
 		data.writeInt(claimedRewards.length);
@@ -55,7 +54,7 @@ public class MessageSyncQuests extends MessageToClient
 	@Override
 	public void readData(DataIn data)
 	{
-		quests = data.readJson();
+		quests = data.readNBT();
 		team = data.readString();
 		taskData = data.readNBT();
 		claimedRewards = new int[data.readInt()];

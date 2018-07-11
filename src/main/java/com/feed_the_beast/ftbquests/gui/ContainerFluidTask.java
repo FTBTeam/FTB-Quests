@@ -1,8 +1,17 @@
 package com.feed_the_beast.ftbquests.gui;
 
+import com.feed_the_beast.ftblib.lib.icon.Icon;
+import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
 import com.feed_the_beast.ftbquests.quest.tasks.FluidTask;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.fluids.Fluid;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.FluidUtil;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.SlotItemHandler;
 
 /**
@@ -10,9 +19,15 @@ import net.minecraftforge.items.SlotItemHandler;
  */
 public class ContainerFluidTask extends ContainerTaskBase
 {
+	private final Icon iconBucketEmpty, iconBucketFilled;
+
 	public ContainerFluidTask(EntityPlayer player, FluidTask.Data d)
 	{
 		super(player, d);
+		iconBucketEmpty = ItemIcon.getItemIcon(new ItemStack(Items.BUCKET));
+		FluidStack fluidStack = d.task.fluid.copy();
+		fluidStack.amount = Fluid.BUCKET_VOLUME;
+		iconBucketFilled = ItemIcon.getItemIcon(FluidUtil.getFilledBucket(fluidStack));
 	}
 
 	@Override
@@ -47,5 +62,36 @@ public class ContainerFluidTask extends ContainerTaskBase
 	public int getNonPlayerSlots()
 	{
 		return 2;
+	}
+
+	@Override
+	public Icon getEmptySlotIcon(int slot)
+	{
+		if (slot == 0)
+		{
+			return iconBucketFilled;
+		}
+		else if (slot == 1)
+		{
+			return iconBucketEmpty;
+		}
+
+		return Icon.EMPTY;
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public String getEmptySlotText(int slot)
+	{
+		if (slot == 0)
+		{
+			return I18n.format("ftbquests.gui.task.fluid.fluid", ((FluidTask.Data) data).task.fluid.getLocalizedName());
+		}
+		else if (slot == 1)
+		{
+			return I18n.format("ftbquests.gui.task.fluid.container");
+		}
+
+		return "";
 	}
 }

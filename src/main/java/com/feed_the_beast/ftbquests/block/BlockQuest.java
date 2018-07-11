@@ -70,38 +70,36 @@ public class BlockQuest extends BlockBase
 		}
 
 		EntityPlayerMP player = (EntityPlayerMP) ep;
-		TileEntity tileEntity = world.getTileEntity(pos);
+		QuestBlockData data = QuestBlockData.get(world.getTileEntity(pos));
 
-		if (tileEntity instanceof TileQuest)
+		if (data != null)
 		{
-			TileQuest tile = (TileQuest) tileEntity;
-
-			if (tile.getOwner() == null)
+			if (data.getOwner() == null)
 			{
-				tile.setOwner(Universe.get().getPlayer(player).team.getName());
+				data.setOwner(Universe.get().getPlayer(player).team.getName());
 			}
 
 			if (player.isSneaking())
 			{
-				if (tile.canEdit())
+				if (data.canEdit())
 				{
-					tile.setTask(0);
+					data.setTask(0);
 				}
 			}
 			else
 			{
-				QuestTaskData data = tile.getTaskData();
+				QuestTaskData taskData = data.getTaskData();
 
-				if (data == null && Universe.get().getPlayer(player).team.getName().equals(tile.getOwner().getTeamID()))
+				if (taskData == null && Universe.get().getPlayer(player).team.getName().equals(data.getOwner().getTeamID()))
 				{
-					if (tile.canEdit())
+					if (data.canEdit())
 					{
 						new MessageSelectTaskGui(pos).sendTo(player);
 					}
 				}
-				else if (data != null)
+				else if (taskData != null)
 				{
-					MessageOpenTask.openGUI(data, player);
+					MessageOpenTask.openGUI(taskData, player);
 				}
 			}
 		}
@@ -113,23 +111,20 @@ public class BlockQuest extends BlockBase
 	public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase player, ItemStack stack)
 	{
 		super.onBlockPlacedBy(world, pos, state, player, stack);
-		TileEntity tileEntity = world.getTileEntity(pos);
+		QuestBlockData data = QuestBlockData.get(world.getTileEntity(pos));
 
-		if (tileEntity instanceof TileQuest)
+		if (data != null)
 		{
-			TileQuest tile = (TileQuest) tileEntity;
-			ItemBlockQuest.Data data = ItemBlockQuest.Data.get(stack);
-			tile.setOwner(data.owner);
-			tile.setTask(data.task);
+			data.copyFrom(QuestBlockData.get(stack));
 
 			if (player instanceof EntityPlayerMP)
 			{
-				if (tile.getOwner() == null)
+				if (data.getOwner() == null)
 				{
-					tile.setOwner(Universe.get().getPlayer(player).team.getName());
+					data.setOwner(Universe.get().getPlayer(player).team.getName());
 				}
 
-				if (tile.canEdit() && tile.getTaskData() == null && Universe.get().getPlayer(player).team.getName().equals(tile.getOwner().getTeamID()))
+				if (data.canEdit() && data.getTaskData() == null && Universe.get().getPlayer(player).team.getName().equals(data.getOwner().getTeamID()))
 				{
 					new MessageSelectTaskGui(pos).sendTo((EntityPlayerMP) player);
 				}
@@ -141,17 +136,11 @@ public class BlockQuest extends BlockBase
 	public ItemStack createStack(IBlockState state, @Nullable TileEntity tile)
 	{
 		ItemStack stack = new ItemStack(this);
+		QuestBlockData data = QuestBlockData.get(tile);
 
-		if (tile instanceof TileQuest)
+		if (data != null)
 		{
-			TileQuest t = (TileQuest) tile;
-			ItemBlockQuest.Data data = ItemBlockQuest.Data.get(stack);
-
-			if (t.getTaskData() != null)
-			{
-				data.owner = t.getOwnerTeam();
-				data.task = t.getTaskID();
-			}
+			QuestBlockData.get(stack).copyFrom(data);
 		}
 
 		return stack;

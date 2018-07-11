@@ -2,12 +2,11 @@ package com.feed_the_beast.ftbquests.quest.rewards;
 
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
-import com.feed_the_beast.ftblib.lib.item.ItemStackSerializer;
 import com.feed_the_beast.ftblib.lib.util.InvUtils;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import com.google.gson.JsonObject;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -37,9 +36,9 @@ public class ItemReward extends QuestReward
 	}
 
 	@Override
-	public JsonObject toJson()
+	public void writeData(NBTTagCompound nbt)
 	{
-		return ItemStackSerializer.serialize(stack, true, false).getAsJsonObject();
+		nbt.setTag("item", stack.serializeNBT());
 	}
 
 	@Override

@@ -5,12 +5,11 @@ import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToServer;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
-import com.feed_the_beast.ftbquests.block.TileQuest;
+import com.feed_the_beast.ftbquests.block.QuestBlockData;
 import com.feed_the_beast.ftbquests.quest.ServerQuestList;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import com.feed_the_beast.ftbquests.util.FTBQuestsTeamData;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 
 /**
@@ -56,20 +55,15 @@ public class MessageSelectTask extends MessageToServer
 	{
 		if (player.world.isBlockLoaded(pos))
 		{
-			TileEntity tileEntity = player.world.getTileEntity(pos);
+			QuestBlockData data = QuestBlockData.get(player.world.getTileEntity(pos));
 
-			if (tileEntity instanceof TileQuest)
+			if (data != null && data.canEdit() && data.getOwner() != null && Universe.get().getPlayer(player).team.equalsTeam(((FTBQuestsTeamData) data.getOwner()).team))
 			{
-				TileQuest tile = (TileQuest) tileEntity;
+				QuestTask t = ServerQuestList.INSTANCE.getTask(task);
 
-				if (tile.canEdit() && tile.getOwner() != null && Universe.get().getPlayer(player).team.equalsTeam(((FTBQuestsTeamData) tile.getOwner()).team))
+				if (t != null && t.quest.isVisible(data.getOwner()))
 				{
-					QuestTask t = ServerQuestList.INSTANCE.getTask(task);
-
-					if (t != null && t.quest.isVisible(tile.getOwner()))
-					{
-						tile.setTask(t.id);
-					}
+					data.setTask(t.id);
 				}
 			}
 		}

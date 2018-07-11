@@ -1,14 +1,12 @@
 package com.feed_the_beast.ftbquests.quest.tasks;
 
 import com.feed_the_beast.ftblib.lib.icon.Icon;
-import com.feed_the_beast.ftblib.lib.util.JsonUtils;
 import com.feed_the_beast.ftbquests.FTBQuestsItems;
-import com.feed_the_beast.ftbquests.block.ItemBlockQuest;
+import com.feed_the_beast.ftbquests.block.QuestBlockData;
 import com.feed_the_beast.ftbquests.gui.ContainerFluidTask;
 import com.feed_the_beast.ftbquests.gui.ContainerTaskBase;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import com.google.gson.JsonObject;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -59,22 +57,19 @@ public class FluidTask extends QuestTask
 	}
 
 	@Override
-	public JsonObject toJson()
+	public void writeData(NBTTagCompound nbt)
 	{
-		JsonObject json = new JsonObject();
-		json.addProperty("fluid", fluid.getFluid().getName());
+		nbt.setString("fluid", fluid.getFluid().getName());
 
 		if (fluid.amount != 1000)
 		{
-			json.addProperty("amount", fluid.amount);
+			nbt.setInteger("amount", fluid.amount);
 		}
 
 		if (fluid.tag != null && !fluid.tag.hasNoTags())
 		{
-			json.add("nbt", JsonUtils.toJson(fluid.tag));
+			nbt.setTag("nbt", fluid.tag);
 		}
-
-		return json;
 	}
 
 	@Override
@@ -210,9 +205,14 @@ public class FluidTask extends QuestTask
 		public ItemStack getContainer()
 		{
 			ItemStack stack = new ItemStack(FTBQuestsItems.QUEST_BLOCK);
-			ItemBlockQuest.Data d = ItemBlockQuest.Data.get(stack);
-			d.task = task.id;
-			d.owner = data.getTeamID();
+			QuestBlockData d = QuestBlockData.get(stack);
+
+			if (d != null)
+			{
+				d.setTask(task.id);
+				d.setOwner(data.getTeamID());
+			}
+
 			return stack;
 		}
 

@@ -22,7 +22,7 @@ import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.TextFormatting;
 import org.lwjgl.opengl.GL11;
 
@@ -39,16 +39,14 @@ public class GuiQuestTree extends GuiBase
 
 		public ButtonChapter(Panel panel, QuestChapter c)
 		{
-			super(panel, c.title.getFormattedText(), c.getIcon());
+			super(panel, c.title, c.getIcon());
 			setSize(35, 26);
 			chapter = c;
 			description = new ArrayList<>();
 
-			for (ITextComponent component : chapter.description)
+			for (String s : chapter.description)
 			{
-				component = component.createCopy();
-				component.getStyle().setColor(TextFormatting.GRAY);
-				description.add(component.getFormattedText());
+				description.add(TextFormatting.GRAY + s);
 			}
 		}
 
@@ -135,12 +133,10 @@ public class GuiQuestTree extends GuiBase
 
 		public ButtonQuest(Panel panel, Quest q)
 		{
-			super(panel, q.getTitle().getFormattedText(), q.getIcon());
+			super(panel, q.title, q.getIcon());
 			setSize(20, 20);
 			quest = q;
-			ITextComponent component = quest.getDescription().createCopy();
-			component.getStyle().setColor(TextFormatting.GRAY);
-			description = component.getFormattedText();
+			description = TextFormatting.GRAY + quest.description;
 
 			if (TextFormatting.getTextWithoutFormattingCodes(description).isEmpty())
 			{
@@ -433,7 +429,7 @@ public class GuiQuestTree extends GuiBase
 			@Override
 			public void addMouseOverText(List<String> list)
 			{
-				list.add("Zoom In"); //LANG
+				list.add(I18n.format("ftbquests.gui.quest_tree.zoom_in"));
 			}
 
 			@Override
@@ -466,7 +462,7 @@ public class GuiQuestTree extends GuiBase
 			@Override
 			public void addMouseOverText(List<String> list)
 			{
-				list.add("Zoom Out"); //LANG
+				list.add(I18n.format("ftbquests.gui.quest_tree.zoom_out"));
 			}
 
 			@Override

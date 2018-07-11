@@ -4,8 +4,6 @@ import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.IconAnimation;
 import it.unimi.dsi.fastutil.ints.IntCollection;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentString;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,8 +14,8 @@ import java.util.List;
 public final class QuestChapter extends ProgressingQuestObject
 {
 	public final QuestList list;
-	public ITextComponent title;
-	public final List<ITextComponent> description;
+	public String title;
+	public final List<String> description;
 	public Icon icon;
 	public final List<Quest> quests;
 	public final IntCollection dependencies;
@@ -26,7 +24,7 @@ public final class QuestChapter extends ProgressingQuestObject
 	{
 		super(id);
 		list = l;
-		title = new TextComponentString(Integer.toString(id));
+		title = "#" + id;
 		description = new ArrayList<>();
 		icon = Icon.EMPTY;
 		quests = new ArrayList<>();

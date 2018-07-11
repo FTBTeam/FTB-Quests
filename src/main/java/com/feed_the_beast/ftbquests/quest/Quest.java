@@ -6,8 +6,6 @@ import com.feed_the_beast.ftbquests.quest.rewards.QuestReward;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import it.unimi.dsi.fastutil.ints.IntCollection;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentString;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,12 +16,12 @@ import java.util.List;
 public final class Quest extends ProgressingQuestObject
 {
 	public final QuestChapter chapter;
-	public ITextComponent title;
-	public ITextComponent description;
+	public String title;
+	public String description;
 	public Icon icon;
 	public QuestType type;
 	public int x, y;
-	public final List<ITextComponent> text;
+	public final List<String> text;
 	public final IntCollection dependencies;
 	public final List<QuestTask> tasks;
 	public final List<QuestReward> rewards;
@@ -32,6 +30,8 @@ public final class Quest extends ProgressingQuestObject
 	{
 		super(id);
 		chapter = c;
+		title = "#" + id;
+		description = "";
 		icon = Icon.EMPTY;
 		type = QuestType.NORMAL;
 		text = new ArrayList<>();
@@ -127,16 +127,6 @@ public final class Quest extends ProgressingQuestObject
 		}
 
 		return true;
-	}
-
-	public ITextComponent getTitle()
-	{
-		return title == null ? new TextComponentString("#" + id) : title;
-	}
-
-	public ITextComponent getDescription()
-	{
-		return description == null ? new TextComponentString("") : description;
 	}
 
 	public Icon getIcon()
