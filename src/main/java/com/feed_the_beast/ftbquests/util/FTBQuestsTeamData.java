@@ -8,6 +8,7 @@ import com.feed_the_beast.ftblib.lib.data.ForgePlayer;
 import com.feed_the_beast.ftblib.lib.data.ForgeTeam;
 import com.feed_the_beast.ftblib.lib.data.TeamData;
 import com.feed_the_beast.ftblib.lib.util.FileUtils;
+import com.feed_the_beast.ftblib.lib.util.NBTUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.net.MessageResetProgress;
 import com.feed_the_beast.ftbquests.net.MessageUpdateTaskProgress;
@@ -66,7 +67,7 @@ public class FTBQuestsTeamData extends TeamData implements IProgressData
 		}
 		else
 		{
-			FileUtils.writeNBTSafe(file, nbt);
+			NBTUtils.writeNBTSafe(file, nbt);
 		}
 	}
 
@@ -74,7 +75,7 @@ public class FTBQuestsTeamData extends TeamData implements IProgressData
 	public static void loadData(ForgeTeamLoadedEvent event)
 	{
 		FTBQuestsTeamData data = get(event.getTeam());
-		NBTTagCompound nbt = FileUtils.readNBT(event.getTeam().getDataFile("ftbquests"));
+		NBTTagCompound nbt = NBTUtils.readNBT(event.getTeam().getDataFile("ftbquests"));
 		data.readData(nbt == null ? new NBTTagCompound() : nbt);
 	}
 

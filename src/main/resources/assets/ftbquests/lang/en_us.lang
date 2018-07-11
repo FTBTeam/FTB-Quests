@@ -12,3 +12,16 @@ ftbquests.general.default_can_edit=Default 'Can Edit'
 admin_panel.ftbquests.edit=Edit Quests
 admin_panel.ftbquests.reset_progress=Reset Quest Progress
 sidebar_button.ftbquests.quests=Quests
+
+ftbquests.gui.quest_tree.zoom_in=Zoom In
+ftbquests.gui.quest_tree.zoom_out=Zoom Out
+ftbquests.gui.quest.tasks=Tasks
+ftbquests.gui.quest.rewards=Rewards
+ftbquests.gui.task.no_items=This task type can't accept items!
+
+ftbquests.gui.task.fluid.fluid=Insert %s container here
+ftbquests.gui.task.fluid.container=Take empty container from here
+
+ftbquests.reward.xp=XP: %s
+ftbquests.reward.xp_levels=XP Levels: %s
+ftbquests.reward.item.any_ore=Any %s

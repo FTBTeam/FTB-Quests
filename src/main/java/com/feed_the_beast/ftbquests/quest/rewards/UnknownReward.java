@@ -1,49 +1,48 @@
 package com.feed_the_beast.ftbquests.quest.rewards;
 
+import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
+import com.feed_the_beast.ftblib.lib.util.NBTUtils;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * @author LatvianModder
  */
-public class ExperienceLevelReward extends QuestReward
+public class UnknownReward extends QuestReward
 {
-	private final int xpLevels;
+	private final NBTTagCompound nbt;
 
-	public ExperienceLevelReward(Quest quest, int id, int _xp)
+	public UnknownReward(Quest parent, int id, NBTTagCompound n)
 	{
-		super(quest, id);
-		xpLevels = _xp;
+		super(parent, id);
+		nbt = n;
 	}
 
 	@Override
 	public void reward(EntityPlayerMP player)
 	{
-		player.addExperienceLevel(xpLevels);
 	}
 
 	@Override
 	public Icon getIcon()
 	{
-		return ExperienceReward.ICON;
+		return GuiIcons.CANCEL;
 	}
 
 	@Override
-	public void writeData(NBTTagCompound nbt)
+	public void writeData(NBTTagCompound n)
 	{
-		nbt.setInteger("xp_levels", xpLevels);
+		NBTUtils.copyTags(nbt, n);
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public String getDisplayName()
 	{
-		return I18n.format("ftbquests.reward.xp_levels", TextFormatting.GREEN + "+" + xpLevels);
+		return "Unkown | " + nbt;
 	}
 }

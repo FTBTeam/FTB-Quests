@@ -3,7 +3,7 @@ package com.feed_the_beast.ftbquests.quest.tasks;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import com.google.gson.JsonObject;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.energy.CapabilityEnergy;
@@ -46,11 +46,9 @@ public class ForgeEnergyTask extends QuestTask
 	}
 
 	@Override
-	public JsonObject toJson()
+	public void writeData(NBTTagCompound nbt)
 	{
-		JsonObject json = new JsonObject();
-		json.addProperty("forge_energy", energy);
-		return json;
+		nbt.setInteger("forge_energy", energy);
 	}
 
 	@Override

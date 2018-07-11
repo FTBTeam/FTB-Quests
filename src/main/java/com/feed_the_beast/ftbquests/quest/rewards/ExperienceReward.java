@@ -3,10 +3,11 @@ package com.feed_the_beast.ftbquests.quest.rewards;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import com.google.gson.JsonObject;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -39,17 +40,15 @@ public class ExperienceReward extends QuestReward
 	}
 
 	@Override
-	public JsonObject toJson()
+	public void writeData(NBTTagCompound nbt)
 	{
-		JsonObject json = new JsonObject();
-		json.addProperty("xp", xp);
-		return json;
+		nbt.setInteger("xp", xp);
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public String getDisplayName()
 	{
-		return "XP: " + TextFormatting.GREEN + "+" + xp; //LANG
+		return I18n.format("ftbquests.reward.xp", TextFormatting.GREEN + "+" + xp);
 	}
 }

@@ -2,10 +2,8 @@ package com.feed_the_beast.ftbquests.block;
 
 import com.feed_the_beast.ftblib.lib.tile.EnumSaveType;
 import com.feed_the_beast.ftblib.lib.tile.TileBase;
-import com.feed_the_beast.ftbquests.FTBQuests;
+import com.feed_the_beast.ftblib.lib.util.NBTUtils;
 import com.feed_the_beast.ftbquests.FTBQuestsConfig;
-import com.feed_the_beast.ftbquests.quest.IProgressData;
-import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskData;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.common.capabilities.Capability;
@@ -17,89 +15,40 @@ import javax.annotation.Nullable;
  */
 public class TileQuest extends TileBase
 {
-	private String owner = "";
-	private int task = 0;
-	private boolean canEdit = FTBQuestsConfig.general.default_can_edit;
-
-	private IProgressData cachedOwner;
-	private QuestTaskData cachedTaskData;
+	private final QuestBlockData data = new QuestBlockData(this);
 
 	@Override
 	protected void writeData(NBTTagCompound nbt, EnumSaveType type)
 	{
-		if (!owner.isEmpty())
-		{
-			nbt.setString("Owner", owner);
-		}
-
-		if (task > 0)
-		{
-			nbt.setInteger("Task", task);
-		}
-
-		if (canEdit != FTBQuestsConfig.general.default_can_edit)
-		{
-			nbt.setBoolean("CanEdit", canEdit);
-		}
+		NBTUtils.copyTags(data.serializeNBT(), nbt);
 	}
 
 	@Override
 	protected void readData(NBTTagCompound nbt, EnumSaveType type)
 	{
-		owner = nbt.getString("Owner");
-		task = nbt.getInteger("Task");
-		canEdit = nbt.hasKey("CanEdit") ? nbt.getBoolean("CanEdit") : FTBQuestsConfig.general.default_can_edit;
-		updateContainingBlockInfo();
+		data.deserializeNBT(nbt);
+		data.clearCache();
 	}
 
 	@Override
 	public void updateContainingBlockInfo()
 	{
 		super.updateContainingBlockInfo();
-		cachedOwner = null;
-		cachedTaskData = null;
-	}
-
-	@Nullable
-	public QuestTaskData getTaskData()
-	{
-		if (task <= 0 || owner.isEmpty())
-		{
-			return null;
-		}
-		else if (cachedTaskData != null && cachedTaskData.task.isInvalid())
-		{
-			cachedTaskData = null;
-		}
-
-		if (cachedTaskData == null)
-		{
-			cachedOwner = getOwner();
-
-			if (cachedOwner == null)
-			{
-				return null;
-			}
-
-			cachedTaskData = cachedOwner.getQuestTaskData(task);
-		}
-
-		return cachedTaskData;
+		data.clearCache();
 	}
 
 	@Override
 	public boolean hasCapability(Capability<?> capability, @Nullable EnumFacing facing)
 	{
-		cachedTaskData = getTaskData();
-		return cachedTaskData != null && cachedTaskData.hasCapability(capability, facing) || super.hasCapability(capability, facing);
+		return data.hasCapability(capability, facing) || super.hasCapability(capability, facing);
 	}
 
 	@Override
 	@Nullable
 	public <T> T getCapability(Capability<T> capability, @Nullable EnumFacing facing)
 	{
-		cachedTaskData = getTaskData();
-		return cachedTaskData != null ? cachedTaskData.getCapability(capability, facing) : super.getCapability(capability, facing);
+		T object = data.getCapability(capability, facing);
+		return object != null ? object : super.getCapability(capability, facing);
 	}
 
 	@Override
@@ -108,53 +57,9 @@ public class TileQuest extends TileBase
 		sendDirtyUpdate();
 	}
 
-	public String getOwnerTeam()
-	{
-		return owner;
-	}
-
-	@Nullable
-	public IProgressData getOwner()
-	{
-		if (owner.isEmpty())
-		{
-			return null;
-		}
-		else if (cachedOwner == null)
-		{
-			cachedOwner = FTBQuests.PROXY.getOwner(owner, !isServerSide());
-		}
-
-		return cachedOwner;
-	}
-
-	public void setOwner(String team)
-	{
-		owner = team;
-		updateContainingBlockInfo();
-		markDirty();
-	}
-
-	public int getTaskID()
-	{
-		return task;
-	}
-
-	public void setTask(int id)
-	{
-		task = id;
-		updateContainingBlockInfo();
-		markDirty();
-	}
-
-	public boolean canEdit()
-	{
-		return canEdit;
-	}
-
 	@Override
 	public boolean shouldDrop()
 	{
-		return canEdit != FTBQuestsConfig.general.default_can_edit || getTaskData() != null;
+		return data.canEdit() != FTBQuestsConfig.general.default_can_edit || data.getTaskData() != null;
 	}
 }

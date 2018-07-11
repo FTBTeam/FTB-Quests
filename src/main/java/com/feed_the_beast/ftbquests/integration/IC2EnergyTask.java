@@ -5,9 +5,10 @@ import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskData;
-import com.google.gson.JsonObject;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.CapabilityInject;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -18,6 +19,9 @@ import javax.annotation.Nullable;
  */
 public class IC2EnergyTask extends QuestTask
 {
+	@CapabilityInject(IIC2EnergyReceiver.class)
+	public static Capability<IIC2EnergyReceiver> CAP;
+
 	public final int energy;
 	private Icon icon = null;
 
@@ -45,11 +49,9 @@ public class IC2EnergyTask extends QuestTask
 	}
 
 	@Override
-	public JsonObject toJson()
+	public void writeData(NBTTagCompound nbt)
 	{
-		JsonObject json = new JsonObject();
-		json.addProperty("ic2_energy", energy);
-		return json;
+		nbt.setInteger("ic2_energy", energy);
 	}
 
 	@Override
@@ -75,14 +77,14 @@ public class IC2EnergyTask extends QuestTask
 		@Override
 		public boolean hasCapability(Capability<?> capability, @Nullable EnumFacing facing)
 		{
-			return capability == IC2Integration.CAP;
+			return capability == CAP;
 		}
 
 		@Override
 		@Nullable
 		public <T> T getCapability(Capability<T> capability, @Nullable EnumFacing facing)
 		{
-			return capability == IC2Integration.CAP ? (T) this : null;
+			return capability == CAP ? (T) this : null;
 		}
 
 		@Override

@@ -1,17 +1,15 @@
 package com.feed_the_beast.ftbquests.quest;
 
 import com.feed_the_beast.ftblib.lib.data.Universe;
-import com.feed_the_beast.ftblib.lib.io.DataReader;
 import com.feed_the_beast.ftblib.lib.util.CommonUtils;
-import com.feed_the_beast.ftblib.lib.util.JsonUtils;
+import com.feed_the_beast.ftblib.lib.util.NBTUtils;
 import com.feed_the_beast.ftbquests.net.MessageSyncQuests;
 import com.feed_the_beast.ftbquests.util.FTBQuestsTeamData;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 
 import java.io.File;
+import java.util.Random;
 
 /**
  * @author LatvianModder
@@ -21,22 +19,23 @@ public class ServerQuestList extends QuestList
 	public static ServerQuestList INSTANCE;
 
 	public boolean shouldSendUpdates = true;
+	private Random random;
 
 	public static boolean load()
 	{
-		File file = new File(CommonUtils.folderConfig, "ftbquests/quests.json");
-		JsonElement json;
+		File file = new File(CommonUtils.folderConfig, "ftbquests/quests.nbt");
+		NBTTagCompound nbt;
 
 		if (!file.exists())
 		{
-			json = new JsonObject();
+			nbt = new NBTTagCompound();
 		}
 		else
 		{
-			json = DataReader.get(file).safeJson();
+			nbt = NBTUtils.readNBT(file);
 		}
 
-		if (!json.isJsonObject())
+		if (nbt == null)
 		{
 			return false;
 		}
@@ -45,14 +44,33 @@ public class ServerQuestList extends QuestList
 			INSTANCE.invalidate();
 		}
 
-		INSTANCE = new ServerQuestList(json.getAsJsonObject());
+		INSTANCE = new ServerQuestList(nbt);
 		INSTANCE.save();
 		return true;
 	}
 
-	private ServerQuestList(JsonObject json)
+	private ServerQuestList(NBTTagCompound nbt)
 	{
-		super(json);
+		super(nbt);
+	}
+
+	@Override
+	public int requestID()
+	{
+		if (random == null)
+		{
+			random = new Random();
+		}
+
+		int id;
+
+		do
+		{
+			id = random.nextInt(Integer.MAX_VALUE - 1) + 1;
+		}
+		while (get(id) != null);
+
+		return id;
 	}
 
 	public void sync(EntityPlayerMP player)
@@ -60,11 +78,11 @@ public class ServerQuestList extends QuestList
 		FTBQuestsTeamData data = FTBQuestsTeamData.get(Universe.get().getPlayer(player).team);
 		NBTTagCompound taskDataTag = data.serializeTaskData();
 		int[] claimedRewards = data.getClaimedRewards(player).toIntArray();
-		new MessageSyncQuests(toJson(), data.team.getName(), taskDataTag, claimedRewards).sendTo(player);
+		new MessageSyncQuests(toNBT(), data.team.getName(), taskDataTag, claimedRewards).sendTo(player);
 	}
 
 	public void save()
 	{
-		JsonUtils.toJsonSafe(new File(CommonUtils.folderConfig, "ftbquests/quests.json"), toJson());
+		NBTUtils.writeNBTSafe(new File(CommonUtils.folderConfig, "ftbquests/quests.nbt"), toNBT());
 	}
 }
