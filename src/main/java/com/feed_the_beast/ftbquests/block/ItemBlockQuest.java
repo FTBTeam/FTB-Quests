@@ -57,26 +57,25 @@ public class ItemBlockQuest extends ItemBlockBase
 			return;
 		}
 
-		QuestBlockData blockData = QuestBlockData.get(stack);
-
-		if (!blockData.getOwnerTeam().isEmpty())
-		{
-			tooltip.add(I18n.format("tile.ftbquests.quest_block.tooltip.owner") + ": " + (ClientQuestList.INSTANCE.teamId.equals(blockData.getOwnerTeam()) ? TextFormatting.DARK_GREEN : TextFormatting.RED) + blockData.getOwnerTeam());
-		}
-
-		QuestTaskData data = blockData.getTaskData();
+		QuestTaskData data = QuestBlockData.get(stack).getTaskData();
 
 		if (data == null)
 		{
+			tooltip.add(TextFormatting.RED + I18n.format("tile.ftbquests.quest_block.missing_data"));
 			return;
 		}
 
-		tooltip.add(I18n.format("tile.ftbquests.quest_block.tooltip.task") + ": " + TextFormatting.YELLOW + data.task.getDisplayName());
+		if (!ClientQuestList.INSTANCE.teamId.equals(data.data.getTeamID()))
+		{
+			tooltip.add(I18n.format("ftbquests.gui.owner") + ": " + TextFormatting.DARK_GREEN + data.data.getTeamID());
+		}
+
+		tooltip.add(I18n.format("ftbquests.gui.task") + ": " + TextFormatting.YELLOW + data.task.getDisplayName());
 		int max = data.task.getMaxProgress();
 
 		if (max <= 0)
 		{
-			tooltip.add(I18n.format("tile.ftbquests.quest_block.tooltip.progress") + ": " + TextFormatting.BLUE + "0/0 [0%]");
+			tooltip.add(I18n.format("ftbquests.gui.progress") + ": " + TextFormatting.BLUE + "0/0 [0%]");
 		}
 		else
 		{
@@ -84,11 +83,11 @@ public class ItemBlockQuest extends ItemBlockBase
 
 			if (progress >= max)
 			{
-				tooltip.add(I18n.format("tile.ftbquests.quest_block.tooltip.progress") + ": " + TextFormatting.BLUE + max + "/" + max + " [100%]");
+				tooltip.add(I18n.format("ftbquests.gui.progress") + ": " + TextFormatting.BLUE + max + "/" + max + " [100%]");
 			}
 			else
 			{
-				tooltip.add(I18n.format("tile.ftbquests.quest_block.tooltip.progress") + ": " + TextFormatting.BLUE + progress + "/" + max + " [" + (int) (progress * 100D / (double) max) + "%]");
+				tooltip.add(I18n.format("ftbquests.gui.progress") + ": " + TextFormatting.BLUE + progress + "/" + max + " [" + (int) (progress * 100D / (double) max) + "%]");
 			}
 		}
 	}

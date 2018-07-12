@@ -36,7 +36,6 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 
 	private final List<ItemStack> items;
 	private final int count;
-	private Icon icon = null;
 
 	public ItemTask(Quest quest, int id, NBTTagCompound nbt)
 	{
@@ -118,24 +117,19 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 	@Override
 	public Icon getIcon()
 	{
-		if (icon == null)
+		List<Icon> icons = new ArrayList<>();
+
+		for (ItemStack stack : items)
 		{
-			List<Icon> icons = new ArrayList<>();
+			Icon icon = ItemIcon.getItemIcon(stack);
 
-			for (ItemStack stack : items)
+			if (!icon.isEmpty())
 			{
-				Icon icon = ItemIcon.getItemIcon(stack);
-
-				if (!icon.isEmpty())
-				{
-					icons.add(icon);
-				}
+				icons.add(icon);
 			}
-
-			icon = IconAnimation.fromList(icons, false);
 		}
 
-		return icon;
+		return IconAnimation.fromList(icons, false);
 	}
 
 	@Override

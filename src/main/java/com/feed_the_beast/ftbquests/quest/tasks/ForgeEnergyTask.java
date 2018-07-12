@@ -3,6 +3,7 @@ package com.feed_the_beast.ftbquests.quest.tasks;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.Quest;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.common.capabilities.Capability;
@@ -21,19 +22,18 @@ public class ForgeEnergyTask extends QuestTask
 {
 	public static final String ID = "forge_energy";
 
-	public final int energy;
-	private Icon icon = null;
+	public final int value;
 
 	public ForgeEnergyTask(Quest quest, int id, NBTTagCompound nbt)
 	{
 		super(quest, id);
-		energy = nbt.getInteger("value");
+		value = nbt.getInteger("value");
 	}
 
 	@Override
 	public int getMaxProgress()
 	{
-		return energy;
+		return value;
 	}
 
 	@Override
@@ -45,25 +45,20 @@ public class ForgeEnergyTask extends QuestTask
 	@Override
 	public void writeData(NBTTagCompound nbt)
 	{
-		nbt.setInteger("value", energy);
+		nbt.setInteger("value", value);
 	}
 
 	@Override
 	public Icon getIcon()
 	{
-		if (icon == null)
-		{
-			icon = Icon.getIcon("minecraft:blocks/beacon");
-		}
-
-		return icon;
+		return Icon.getIcon("minecraft:blocks/beacon");
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public String getDisplayName()
 	{
-		return energy + " FE";
+		return I18n.format("ftbquests.gui.task.forge_energy", value);
 	}
 
 	@Override
@@ -95,9 +90,9 @@ public class ForgeEnergyTask extends QuestTask
 		@Override
 		public int receiveEnergy(int maxReceive, boolean simulate)
 		{
-			if (maxReceive > 0 && getProgress() < task.energy)
+			if (maxReceive > 0 && getProgress() < task.value)
 			{
-				int add = Math.min(maxReceive, task.energy - getProgress());
+				int add = Math.min(maxReceive, task.value - getProgress());
 
 				if (add > 0 && setProgress(getProgress() + add, simulate))
 				{
@@ -123,7 +118,7 @@ public class ForgeEnergyTask extends QuestTask
 		@Override
 		public int getMaxEnergyStored()
 		{
-			return task.energy;
+			return task.value;
 		}
 
 		@Override

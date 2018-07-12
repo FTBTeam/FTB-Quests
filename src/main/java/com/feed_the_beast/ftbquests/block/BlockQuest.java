@@ -2,8 +2,8 @@ package com.feed_the_beast.ftbquests.block;
 
 import com.feed_the_beast.ftblib.lib.block.BlockBase;
 import com.feed_the_beast.ftblib.lib.data.Universe;
+import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.net.MessageOpenTask;
-import com.feed_the_beast.ftbquests.net.MessageSelectTaskGui;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskData;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
@@ -19,6 +19,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -70,51 +71,27 @@ public class BlockQuest extends BlockBase
 			return true;
 		}
 
-		EntityPlayerMP player = (EntityPlayerMP) ep;
 		QuestBlockData data = QuestBlockData.get(world.getTileEntity(pos));
 
 		if (data == null)
 		{
 			return true;
 		}
-		else if (data.getOwner() == null)
+
+		EntityPlayerMP player = (EntityPlayerMP) ep;
+		QuestTaskData taskData = data.getTaskData();
+
+		if (taskData == null)
 		{
-			data.setOwner(Universe.get().getPlayer(player).team.getName());
+			player.sendMessage(StringUtils.color(new TextComponentTranslation("tile.ftbquests.quest_block.missing_data"), TextFormatting.RED));
 		}
-
-		if (data.getOwner() != null && Universe.get().getPlayer(player).team.getName().equals(data.getOwner().getTeamID()))
+		else if (Universe.get().getPlayer(player).team.getName().equals(taskData.data.getTeamID()))
 		{
-			if (player.isSneaking())
-			{
-				if (data.canEdit())
-				{
-					data.setTask(0);
-				}
-				else
-				{
-					player.sendMessage(new TextComponentTranslation("tile.ftbquests.quest_block.cant_edit"));
-				}
-			}
-			else
-			{
-				QuestTaskData taskData = data.getTaskData();
-
-				if (taskData == null)
-				{
-					if (data.canEdit())
-					{
-						new MessageSelectTaskGui(pos).sendTo(player);
-					}
-					else
-					{
-						player.sendMessage(new TextComponentTranslation("tile.ftbquests.quest_block.cant_edit"));
-					}
-				}
-				else
-				{
-					MessageOpenTask.openGUI(taskData, player);
-				}
-			}
+			MessageOpenTask.openGUI(taskData, player);
+		}
+		else
+		{
+			player.sendMessage(StringUtils.color(new TextComponentTranslation("tile.ftbquests.quest_block.no_perm"), TextFormatting.RED));
 		}
 
 		return true;
@@ -124,22 +101,42 @@ public class BlockQuest extends BlockBase
 	public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase player, ItemStack stack)
 	{
 		super.onBlockPlacedBy(world, pos, state, player, stack);
-		QuestBlockData data = QuestBlockData.get(world.getTileEntity(pos));
+		QuestBlockData itemData = QuestBlockData.get(stack);
+		QuestTaskData taskData = itemData.getTaskData();
 
-		if (data != null)
+		if (taskData != null)
 		{
-			data.copyFrom(QuestBlockData.get(stack));
+			TileQuest tile = taskData.task.createCustomTileEntity(world);
+			TileEntity tileEntity = world.getTileEntity(pos);
 
-			if (player instanceof EntityPlayerMP)
+			if (tile != null)
 			{
-				if (data.getOwner() == null)
+				if (tileEntity != null)
 				{
-					data.setOwner(Universe.get().getPlayer(player).team.getName());
+					tileEntity.invalidate();
 				}
 
-				if (data.canEdit() && data.getTaskData() == null && Universe.get().getPlayer(player).team.getName().equals(data.getOwner().getTeamID()))
+				world.removeTileEntity(pos);
+				world.setTileEntity(pos, tile);
+			}
+			else
+			{
+				if (tileEntity instanceof TileQuest)
 				{
-					new MessageSelectTaskGui(pos).sendTo((EntityPlayerMP) player);
+					tile = (TileQuest) tileEntity;
+				}
+			}
+
+			if (tile != null)
+			{
+				tile.validate();
+				tile.onLoad();
+
+				QuestBlockData data = QuestBlockData.get(tile);
+
+				if (data != null)
+				{
+					data.copyFrom(itemData);
 				}
 			}
 		}

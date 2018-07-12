@@ -3,7 +3,6 @@ package com.feed_the_beast.ftbquests.block;
 import com.feed_the_beast.ftblib.lib.tile.IChangeCallback;
 import com.feed_the_beast.ftblib.lib.util.NBTUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
-import com.feed_the_beast.ftbquests.FTBQuestsConfig;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskData;
 import net.minecraft.item.ItemStack;
@@ -49,7 +48,6 @@ public class QuestBlockData implements ICapabilitySerializable<NBTTagCompound>
 
 	private String owner = "";
 	private int task = 0;
-	private boolean canEdit = FTBQuestsConfig.general.default_can_edit;
 
 	private IProgressData cachedOwner;
 	private QuestTaskData cachedTaskData;
@@ -99,11 +97,6 @@ public class QuestBlockData implements ICapabilitySerializable<NBTTagCompound>
 			nbt.setInteger("Task", task);
 		}
 
-		if (canEdit != FTBQuestsConfig.general.default_can_edit)
-		{
-			nbt.setBoolean("CanEdit", canEdit);
-		}
-
 		return nbt;
 	}
 
@@ -112,7 +105,6 @@ public class QuestBlockData implements ICapabilitySerializable<NBTTagCompound>
 	{
 		owner = nbt.getString("Owner");
 		task = nbt.getInteger("Task");
-		canEdit = nbt.hasKey("CanEdit") ? nbt.getBoolean("CanEdit") : FTBQuestsConfig.general.default_can_edit;
 		cachedTaskData = null;
 	}
 
@@ -126,7 +118,6 @@ public class QuestBlockData implements ICapabilitySerializable<NBTTagCompound>
 	{
 		owner = data.owner;
 		task = data.task;
-		canEdit = data.canEdit;
 		cachedOwner = data.cachedOwner;
 		cachedTaskData = data.cachedTaskData;
 	}
@@ -183,11 +174,6 @@ public class QuestBlockData implements ICapabilitySerializable<NBTTagCompound>
 		{
 			callback.onContentsChanged(true);
 		}
-	}
-
-	public boolean canEdit()
-	{
-		return canEdit;
 	}
 
 	@Nullable

@@ -5,28 +5,28 @@ import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToServer;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
+import com.feed_the_beast.ftbquests.FTBQuestsConfig;
+import com.feed_the_beast.ftbquests.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.block.QuestBlockData;
 import com.feed_the_beast.ftbquests.quest.ServerQuestList;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import com.feed_the_beast.ftbquests.util.FTBQuestsTeamData;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.item.ItemStack;
 
 /**
  * @author LatvianModder
  */
-public class MessageSelectTask extends MessageToServer
+public class MessageGetBlock extends MessageToServer
 {
-	private BlockPos pos;
 	private int task;
 
-	public MessageSelectTask()
+	public MessageGetBlock()
 	{
 	}
 
-	public MessageSelectTask(BlockPos p, int t)
+	public MessageGetBlock(int t)
 	{
-		pos = p;
 		task = t;
 	}
 
@@ -39,32 +39,30 @@ public class MessageSelectTask extends MessageToServer
 	@Override
 	public void writeData(DataOut data)
 	{
-		data.writePos(pos);
 		data.writeInt(task);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
-		pos = data.readPos();
 		task = data.readInt();
 	}
 
 	@Override
 	public void onMessage(EntityPlayerMP player)
 	{
-		if (player.world.isBlockLoaded(pos))
+		if (FTBQuestsConfig.general.allow_take_quest_blocks && player.inventory.getItemStack().isEmpty())
 		{
-			QuestBlockData data = QuestBlockData.get(player.world.getTileEntity(pos));
+			QuestTask t = ServerQuestList.INSTANCE.getTask(task);
+			FTBQuestsTeamData teamData = FTBQuestsTeamData.get(Universe.get().getPlayer(player).team);
 
-			if (data != null && data.canEdit() && data.getOwner() != null && Universe.get().getPlayer(player).team.equalsTeam(((FTBQuestsTeamData) data.getOwner()).team))
+			if (t != null && t.quest.isVisible(teamData) && !t.isComplete(teamData))
 			{
-				QuestTask t = ServerQuestList.INSTANCE.getTask(task);
-
-				if (t != null && !t.isInvalid() && t.quest.isVisible(data.getOwner()) && !t.isComplete(data.getOwner()))
-				{
-					data.setTask(t.id);
-				}
+				ItemStack stack = new ItemStack(FTBQuestsItems.QUEST_BLOCK);
+				QuestBlockData data = QuestBlockData.get(stack);
+				data.setTask(task);
+				data.setOwner(teamData.team.getName());
+				player.inventory.setItemStack(stack);
 			}
 		}
 	}

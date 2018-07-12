@@ -25,7 +25,7 @@ import org.apache.logging.log4j.Logger;
 		modid = FTBQuests.MOD_ID,
 		name = FTBQuests.MOD_NAME,
 		version = FTBQuests.VERSION,
-		dependencies = "required-after:ftblib"
+		dependencies = "required-after:ftblib;after:ic2"
 )
 public class FTBQuests
 {
@@ -69,7 +69,7 @@ public class FTBQuests
 
 		if (Loader.isModLoaded(IC2.MODID))
 		{
-			new IC2Integration().preInit();
+			IC2Integration.preInit();
 		}
 	}
 

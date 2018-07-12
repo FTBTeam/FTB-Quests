@@ -2,10 +2,17 @@ package com.feed_the_beast.ftbquests.gui;
 
 import com.feed_the_beast.ftblib.lib.gui.GuiBase;
 import com.feed_the_beast.ftblib.lib.gui.GuiContainerWrapper;
+import com.feed_the_beast.ftblib.lib.gui.SimpleButton;
 import com.feed_the_beast.ftblib.lib.icon.Color4I;
+import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
+import com.feed_the_beast.ftbquests.FTBQuestsConfig;
+import com.feed_the_beast.ftbquests.FTBQuestsItems;
+import com.feed_the_beast.ftbquests.block.QuestBlockData;
+import com.feed_the_beast.ftbquests.net.MessageGetBlock;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.inventory.Slot;
+import net.minecraft.item.ItemStack;
 
 import java.util.List;
 
@@ -24,6 +31,17 @@ public class GuiTaskBase extends GuiBase
 	@Override
 	public void addWidgets()
 	{
+		add(new SimpleButton(this, I18n.format("ftbquests.gui.task.get_block"), ItemIcon.getItemIcon(new ItemStack(FTBQuestsItems.QUEST_BLOCK)), (widget, button) -> {
+			if (FTBQuestsConfig.general.allow_take_quest_blocks && container.player.inventory.getItemStack().isEmpty() && container.data.task.quest.isVisible(ClientQuestList.INSTANCE) && !container.data.task.isComplete(ClientQuestList.INSTANCE))
+			{
+				ItemStack stack = new ItemStack(FTBQuestsItems.QUEST_BLOCK);
+				QuestBlockData data = QuestBlockData.get(stack);
+				data.setTask(container.data.task.id);
+				data.setOwner(ClientQuestList.INSTANCE.teamId);
+				container.player.inventory.setItemStack(stack);
+				new MessageGetBlock(container.data.task.id).sendToServer();
+			}
+		}).setPosAndSize(8, 8, 20, 20));
 	}
 
 	@Override
