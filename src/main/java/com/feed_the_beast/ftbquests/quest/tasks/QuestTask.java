@@ -1,14 +1,18 @@
 package com.feed_the_beast.ftbquests.quest.tasks;
 
 import com.feed_the_beast.ftblib.lib.icon.Icon;
+import com.feed_the_beast.ftbquests.block.TileQuest;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.ProgressingQuestObject;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestList;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.IStringSerializable;
+import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+
+import javax.annotation.Nullable;
 
 /**
  * @author LatvianModder
@@ -69,5 +73,11 @@ public abstract class QuestTask extends ProgressingQuestObject implements IStrin
 		{
 			data.removeTask(id);
 		}
+	}
+
+	@Nullable
+	public TileQuest createCustomTileEntity(World world)
+	{
+		return null;
 	}
 }

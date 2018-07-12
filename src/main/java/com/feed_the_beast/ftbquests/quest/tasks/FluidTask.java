@@ -36,7 +36,6 @@ public class FluidTask extends QuestTask
 
 	public final FluidStack fluid;
 	public final int amount;
-	private Icon icon = null;
 
 	public FluidTask(Quest quest, int id, NBTTagCompound nbt)
 	{
@@ -94,12 +93,7 @@ public class FluidTask extends QuestTask
 	@Override
 	public Icon getIcon()
 	{
-		if (icon == null)
-		{
-			icon = Icon.getIcon(fluid.getFluid().getStill(fluid).toString());
-		}
-
-		return icon;
+		return Icon.getIcon(fluid.getFluid().getStill(fluid).toString());
 	}
 
 	@Override

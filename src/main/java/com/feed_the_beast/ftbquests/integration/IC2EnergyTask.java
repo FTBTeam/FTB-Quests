@@ -1,14 +1,16 @@
 package com.feed_the_beast.ftbquests.integration;
 
 import com.feed_the_beast.ftblib.lib.icon.Icon;
+import com.feed_the_beast.ftbquests.block.TileQuest;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskData;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.CapabilityInject;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -21,22 +23,18 @@ public class IC2EnergyTask extends QuestTask
 {
 	public static final String ID = "ic2_energy";
 
-	@CapabilityInject(IIC2EnergyReceiver.class)
-	public static Capability<IIC2EnergyReceiver> CAP;
-
-	private final int energy;
-	private Icon icon = null;
+	private final int value;
 
 	public IC2EnergyTask(Quest quest, int id, NBTTagCompound nbt)
 	{
 		super(quest, id);
-		energy = nbt.getInteger("value");
+		value = nbt.getInteger("value");
 	}
 
 	@Override
 	public int getMaxProgress()
 	{
-		return energy;
+		return value;
 	}
 
 	@Override
@@ -48,25 +46,26 @@ public class IC2EnergyTask extends QuestTask
 	@Override
 	public void writeData(NBTTagCompound nbt)
 	{
-		nbt.setInteger("value", energy);
+		nbt.setInteger("value", value);
 	}
 
 	@Override
 	public Icon getIcon()
 	{
-		if (icon == null)
-		{
-			icon = Icon.getIcon("minecraft:blocks/beacon");
-		}
-
-		return icon;
+		return Icon.getIcon("item:ic2:te 1 74");
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public String getDisplayName()
 	{
-		return energy + " EU";
+		return I18n.format("ftbquests.gui.task.ic2_energy", value);
+	}
+
+	@Override
+	public TileQuest createCustomTileEntity(World world)
+	{
+		return new TileQuestIC2();
 	}
 
 	@Override
@@ -75,7 +74,7 @@ public class IC2EnergyTask extends QuestTask
 		return new Data(this, data);
 	}
 
-	public static class Data extends QuestTaskData<IC2EnergyTask> implements IIC2EnergyReceiver
+	public static class Data extends QuestTaskData<IC2EnergyTask>
 	{
 		private Data(IC2EnergyTask task, IProgressData data)
 		{
@@ -85,30 +84,30 @@ public class IC2EnergyTask extends QuestTask
 		@Override
 		public boolean hasCapability(Capability<?> capability, @Nullable EnumFacing facing)
 		{
-			return capability == CAP;
+			return false;
 		}
 
 		@Override
 		@Nullable
 		public <T> T getCapability(Capability<T> capability, @Nullable EnumFacing facing)
 		{
-			return capability == CAP ? (T) this : null;
+			return null;
 		}
 
-		@Override
-		public double receiveEnergy(double maxReceive, boolean simulate)
+		public double injectEnergy(double amount)
 		{
-			if (maxReceive > 0 && getProgress() < task.energy)
+			if (amount > 0 && getProgress() < task.value)
 			{
-				int add = (int) Math.min(maxReceive, task.energy - getProgress());
+				int add = (int) Math.min(amount, task.value - getProgress());
 
-				if (add > 0 && setProgress(getProgress() + add, simulate))
+				if (add > 0)
 				{
-					return add;
+					setProgress(getProgress() + add, false);
+					return amount - add;
 				}
 			}
 
-			return 0;
+			return amount;
 		}
 	}
 }

@@ -18,7 +18,6 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class ExperienceReward extends QuestReward
 {
 	public static final String ID = "xp";
-	public static final Icon ICON = ItemIcon.getItemIcon(new ItemStack(Items.EXPERIENCE_BOTTLE));
 
 	private final int value;
 
@@ -49,7 +48,7 @@ public class ExperienceReward extends QuestReward
 	@Override
 	public Icon getIcon()
 	{
-		return ICON;
+		return ItemIcon.getItemIcon(new ItemStack(Items.EXPERIENCE_BOTTLE));
 	}
 
 	@Override

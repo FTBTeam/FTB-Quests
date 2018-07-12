@@ -1,15 +1,9 @@
 tile.ftbquests.quest_block.name=Quest Block
-tile.ftbquests.quest_block.select_chapter=Select Chapter
-tile.ftbquests.quest_block.select_quest=Select Quest
-tile.ftbquests.quest_block.select_task=Select Task
-tile.ftbquests.quest_block.tooltip.task=Task
-tile.ftbquests.quest_block.tooltip.progress=Progress
-tile.ftbquests.quest_block.tooltip.owner=Owner
-tile.ftbquests.quest_block.cant_edit=Can't edit this Quest Block!
+tile.ftbquests.quest_block.missing_data=Broken Quest Block / Missing Data!
+tile.ftbquests.quest_block.no_perm=You are not a member of block owner team!
 
 ftbquests.general.editing_mode=Editing Mode
-ftbquests.general.allow_free_quest_blocks=Allow Free Quest Blocks
-ftbquests.general.default_can_edit=Default 'Can Edit'
+ftbquests.general.allow_take_quest_blocks=Allow to Take Quest Blocks
 
 admin_panel.ftbquests.edit=Edit Quests
 admin_panel.ftbquests.reset_progress=Reset Quest Progress
@@ -21,13 +15,18 @@ ftbquests.gui.quest_tree.zoom_in=Zoom In
 ftbquests.gui.quest_tree.zoom_out=Zoom Out
 ftbquests.gui.quest_tree.add_chapter_after=Add new chapter after this one
 ftbquests.gui.quest_tree.add_chapter_before=Add new chapter before this one
-ftbquests.gui.quest.tasks=Tasks
-ftbquests.gui.quest.tasks=Tasks
-ftbquests.gui.quest.rewards=Rewards
+ftbquests.gui.task=Task
+ftbquests.gui.owner=Owner
+ftbquests.gui.progress=Progress
+ftbquests.gui.tasks=Tasks
+ftbquests.gui.rewards=Rewards
 ftbquests.gui.task.no_items=This task type can't accept items!
+ftbquests.gui.task.get_block=Get Quest Block
 ftbquests.gui.task.unknown=Unknown Task
 ftbquests.gui.task.fluid.fluid=Insert %s container here
 ftbquests.gui.task.fluid.container=Take empty container from here
+ftbquests.gui.task.forge_energy=%d FE
+ftbquests.gui.task.ic2_energy=%d EU
 
 ftbquests.gui.reward.unknown=Unknown Reward
 ftbquests.gui.reward.xp=XP: %s

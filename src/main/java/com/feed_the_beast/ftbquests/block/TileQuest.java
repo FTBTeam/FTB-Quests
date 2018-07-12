@@ -3,7 +3,6 @@ package com.feed_the_beast.ftbquests.block;
 import com.feed_the_beast.ftblib.lib.tile.EnumSaveType;
 import com.feed_the_beast.ftblib.lib.tile.TileBase;
 import com.feed_the_beast.ftblib.lib.util.NBTUtils;
-import com.feed_the_beast.ftbquests.FTBQuestsConfig;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.common.capabilities.Capability;
@@ -15,7 +14,7 @@ import javax.annotation.Nullable;
  */
 public class TileQuest extends TileBase
 {
-	private final QuestBlockData data = new QuestBlockData(this);
+	protected final QuestBlockData data = new QuestBlockData(this);
 
 	@Override
 	protected void writeData(NBTTagCompound nbt, EnumSaveType type)
@@ -60,6 +59,6 @@ public class TileQuest extends TileBase
 	@Override
 	public boolean shouldDrop()
 	{
-		return data.canEdit() != FTBQuestsConfig.general.default_can_edit || data.getTaskData() != null;
+		return data.getTaskData() != null;
 	}
 }

@@ -21,11 +21,8 @@ public class FTBQuestsConfig
 		@Config.Comment("Enabled editing mode.")
 		public boolean editing_mode = false;
 
-		@Config.Comment("Allow to obtain free Quest Blocks from the Quests GUI.")
-		public boolean allow_free_quest_blocks = true;
-
-		@Config.Comment("Default value for editing (selecting quest) Quest Blocks.")
-		public boolean default_can_edit = true;
+		@Config.Comment("Allow to obtain Quest Blocks from the Quests GUI.")
+		public boolean allow_take_quest_blocks = true;
 	}
 
 	public static boolean sync()
