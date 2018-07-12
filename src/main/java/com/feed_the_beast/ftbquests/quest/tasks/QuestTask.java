@@ -6,13 +6,14 @@ import com.feed_the_beast.ftbquests.quest.ProgressingQuestObject;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestList;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.IStringSerializable;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * @author LatvianModder
  */
-public abstract class QuestTask extends ProgressingQuestObject
+public abstract class QuestTask extends ProgressingQuestObject implements IStringSerializable
 {
 	public final Quest quest;
 
@@ -21,6 +22,18 @@ public abstract class QuestTask extends ProgressingQuestObject
 		super(id);
 		quest = q;
 	}
+
+	@Override
+	public abstract String getName();
+
+	public abstract void writeData(NBTTagCompound nbt);
+
+	public abstract Icon getIcon();
+
+	@SideOnly(Side.CLIENT)
+	public abstract String getDisplayName();
+
+	public abstract QuestTaskData createData(IProgressData data);
 
 	@Override
 	public QuestList getQuestList()
@@ -57,13 +70,4 @@ public abstract class QuestTask extends ProgressingQuestObject
 			data.removeTask(id);
 		}
 	}
-
-	public abstract QuestTaskData createData(IProgressData data);
-
-	public abstract Icon getIcon();
-
-	@SideOnly(Side.CLIENT)
-	public abstract String getDisplayName();
-
-	public abstract void writeData(NBTTagCompound nbt);
 }

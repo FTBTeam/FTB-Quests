@@ -57,7 +57,14 @@ public class ItemBlockQuest extends ItemBlockBase
 			return;
 		}
 
-		QuestTaskData data = QuestBlockData.get(stack).getTaskData();
+		QuestBlockData blockData = QuestBlockData.get(stack);
+
+		if (!blockData.getOwnerTeam().isEmpty())
+		{
+			tooltip.add(I18n.format("tile.ftbquests.quest_block.tooltip.owner") + ": " + (ClientQuestList.INSTANCE.teamId.equals(blockData.getOwnerTeam()) ? TextFormatting.DARK_GREEN : TextFormatting.RED) + blockData.getOwnerTeam());
+		}
+
+		QuestTaskData data = blockData.getTaskData();
 
 		if (data == null)
 		{
@@ -83,11 +90,6 @@ public class ItemBlockQuest extends ItemBlockBase
 			{
 				tooltip.add(I18n.format("tile.ftbquests.quest_block.tooltip.progress") + ": " + TextFormatting.BLUE + progress + "/" + max + " [" + (int) (progress * 100D / (double) max) + "%]");
 			}
-		}
-
-		if (!ClientQuestList.INSTANCE.teamId.equals(data.data.getTeamID()))
-		{
-			tooltip.add(I18n.format("tile.ftbquests.quest_block.tooltip.owner") + ": " + TextFormatting.DARK_GREEN + data.data.getTeamID());
 		}
 	}
 }

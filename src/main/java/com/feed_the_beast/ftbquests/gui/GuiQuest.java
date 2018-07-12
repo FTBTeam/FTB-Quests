@@ -17,7 +17,9 @@ import com.feed_the_beast.ftbquests.net.MessageClaimReward;
 import com.feed_the_beast.ftbquests.net.MessageOpenTask;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.rewards.QuestReward;
+import com.feed_the_beast.ftbquests.quest.rewards.UnknownReward;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
+import com.feed_the_beast.ftbquests.quest.tasks.UnknownTask;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
@@ -111,6 +113,11 @@ public class GuiQuest extends GuiBase
 		public void addMouseOverText(List<String> list)
 		{
 			list.add(getTitle() + questTreeGui.questList.getCompletionSuffix(task));
+
+			if (task instanceof UnknownTask)
+			{
+				list.add(((UnknownTask) task).getHover());
+			}
 		}
 
 		@Override
@@ -157,6 +164,17 @@ public class GuiQuest extends GuiBase
 			if (questTreeGui.questList.claimReward(ClientUtils.MC.player, reward))
 			{
 				new MessageClaimReward(reward.id).sendToServer();
+			}
+		}
+
+		@Override
+		public void addMouseOverText(List<String> list)
+		{
+			list.add(getTitle());
+
+			if (reward instanceof UnknownReward)
+			{
+				list.add(((UnknownReward) reward).getHover());
 			}
 		}
 

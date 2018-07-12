@@ -14,6 +14,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.CapabilityItemHandler;
@@ -31,21 +32,87 @@ import java.util.function.Predicate;
  */
 public class ItemTask extends QuestTask implements Predicate<ItemStack>
 {
+	public static final String ID = "item";
+
 	private final List<ItemStack> items;
 	private final int count;
 	private Icon icon = null;
 
-	public ItemTask(Quest quest, int id, List<ItemStack> i, int c)
+	public ItemTask(Quest quest, int id, NBTTagCompound nbt)
 	{
 		super(quest, id);
-		items = i;
-		count = c;
+		items = new ArrayList<>();
+
+		if (nbt.hasKey("item", Constants.NBT.TAG_LIST))
+		{
+			NBTTagList list1 = nbt.getTagList("item", Constants.NBT.TAG_COMPOUND);
+
+			for (int i = 0; i < list1.tagCount(); i++)
+			{
+				ItemStack stack = new ItemStack(list1.getCompoundTagAt(i));
+
+				if (!stack.isEmpty())
+				{
+					items.add(stack);
+				}
+			}
+		}
+		else
+		{
+			ItemStack stack = new ItemStack(nbt.getCompoundTag("item"));
+
+			if (!stack.isEmpty())
+			{
+				items.add(stack);
+			}
+		}
+
+		count = nbt.hasKey("count") ? nbt.getInteger("count") : 1;
+	}
+
+	@Override
+	public boolean isInvalid()
+	{
+		return count <= 0 || items.isEmpty() || super.isInvalid();
 	}
 
 	@Override
 	public int getMaxProgress()
 	{
 		return count;
+	}
+
+	@Override
+	public String getName()
+	{
+		return ID;
+	}
+
+	@Override
+	public void writeData(NBTTagCompound nbt)
+	{
+		nbt.setString("type", "item");
+
+		if (items.size() == 1)
+		{
+			nbt.setTag("item", items.get(0).serializeNBT());
+		}
+		else
+		{
+			NBTTagList list = new NBTTagList();
+
+			for (ItemStack stack : items)
+			{
+				if (!stack.isEmpty())
+				{
+					list.appendTag(stack.serializeNBT());
+				}
+			}
+
+			nbt.setTag("item", list);
+		}
+
+		nbt.setInteger("count", count);
 	}
 
 	@Override
@@ -69,25 +136,6 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 		}
 
 		return icon;
-	}
-
-	@Override
-	public void writeData(NBTTagCompound nbt)
-	{
-		nbt.setString("type", "item");
-
-		NBTTagList list = new NBTTagList();
-
-		for (ItemStack stack : items)
-		{
-			if (!stack.isEmpty())
-			{
-				list.appendTag(stack.serializeNBT());
-			}
-		}
-
-		nbt.setTag("items", list);
-		nbt.setInteger("count", count);
 	}
 
 	@Override
