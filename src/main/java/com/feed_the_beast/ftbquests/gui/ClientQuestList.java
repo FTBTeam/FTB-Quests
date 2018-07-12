@@ -20,6 +20,8 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.text.TextFormatting;
 
 import javax.annotation.Nullable;
+import java.util.Collection;
+import java.util.Collections;
 
 /**
  * @author LatvianModder
@@ -36,7 +38,7 @@ public class ClientQuestList extends QuestList implements IProgressData
 	public String teamId;
 	private final Int2ObjectOpenHashMap<QuestTaskData> taskData;
 	private final IntCollection claimedRewards;
-	public final GuiQuestTree questTreeGui;
+	public GuiQuestTree questTreeGui;
 	public GuiBase questGui;
 
 	public ClientQuestList(MessageSyncQuests message, @Nullable ClientQuestList prev)
@@ -65,6 +67,11 @@ public class ClientQuestList extends QuestList implements IProgressData
 			claimedRewards.add(reward);
 		}
 
+		refreshGui(prev);
+	}
+
+	public void refreshGui(@Nullable ClientQuestList prev)
+	{
 		boolean oldData = false;
 		boolean guiOpen = false;
 		int zoom = 0, scrollX = 0, scrollY = 0;
@@ -161,6 +168,12 @@ public class ClientQuestList extends QuestList implements IProgressData
 	}
 
 	@Override
+	public void removeTask(int task)
+	{
+		taskData.remove(task);
+	}
+
+	@Override
 	public void resetProgress(IProgressData data)
 	{
 		claimedRewards.clear();
@@ -169,6 +182,19 @@ public class ClientQuestList extends QuestList implements IProgressData
 		{
 			d.setProgress(0, false);
 		}
+	}
+
+	@Nullable
+	@Override
+	public IProgressData getData(String owner)
+	{
+		return isInvalid() || !teamId.equals(owner) ? null : this;
+	}
+
+	@Override
+	public Collection<IProgressData> getAllData()
+	{
+		return Collections.singleton(this);
 	}
 
 	public String getCompletionSuffix(ProgressingQuestObject object)

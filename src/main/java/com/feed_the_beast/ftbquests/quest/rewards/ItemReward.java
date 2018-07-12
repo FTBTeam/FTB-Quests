@@ -3,6 +3,7 @@ package com.feed_the_beast.ftbquests.quest.rewards;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
 import com.feed_the_beast.ftblib.lib.util.InvUtils;
+import com.feed_the_beast.ftblib.lib.util.NBTUtils;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
@@ -38,7 +39,8 @@ public class ItemReward extends QuestReward
 	@Override
 	public void writeData(NBTTagCompound nbt)
 	{
-		nbt.setTag("item", stack.serializeNBT());
+		nbt.setString("type", "item");
+		NBTUtils.copyTags(stack.serializeNBT(), nbt);
 	}
 
 	@Override

@@ -3,6 +3,8 @@ package com.feed_the_beast.ftbquests;
 import com.feed_the_beast.ftbquests.block.QuestBlockData;
 import com.feed_the_beast.ftbquests.integration.IC2Integration;
 import com.feed_the_beast.ftbquests.net.FTBQuestsNetHandler;
+import com.feed_the_beast.ftbquests.quest.rewards.QuestRewards;
+import com.feed_the_beast.ftbquests.quest.tasks.QuestTasks;
 import ic2.core.IC2;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
@@ -35,8 +37,8 @@ public class FTBQuests
 	@SidedProxy(serverSide = "com.feed_the_beast.ftbquests.FTBQuestsCommon", clientSide = "com.feed_the_beast.ftbquests.client.FTBQuestsClient")
 	public static FTBQuestsCommon PROXY;
 
-	public static final String PERM_EDIT = "admin_panel.ftbquests.edit";
-	public static final String PERM_RESET_PROGRESS = "admin_panel.ftbquests.reset_progress";
+	public static final String PERM_EDIT = "ftbquests.edit";
+	public static final String PERM_RESET_PROGRESS = "ftbquests.reset_progress";
 
 	@Mod.EventHandler
 	public void onPreInit(FMLPreInitializationEvent event)
@@ -61,6 +63,9 @@ public class FTBQuests
 				}
 			}
 		}, () -> new QuestBlockData(null));
+
+		QuestTasks.init();
+		QuestRewards.init();
 
 		if (Loader.isModLoaded(IC2.MODID))
 		{

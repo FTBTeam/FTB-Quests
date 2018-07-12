@@ -1,10 +1,12 @@
 package com.feed_the_beast.ftbquests.quest;
 
-import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftbquests.quest.rewards.QuestReward;
+import com.feed_the_beast.ftbquests.quest.rewards.QuestRewards;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
+import com.feed_the_beast.ftbquests.quest.tasks.QuestTasks;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
@@ -12,6 +14,7 @@ import net.minecraftforge.common.util.Constants;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -21,7 +24,7 @@ public abstract class QuestList extends ProgressingQuestObject
 {
 	public final List<QuestChapter> chapters;
 	private boolean invalid;
-	private final Int2ObjectMap<QuestObject> objectMap;
+	public final Int2ObjectMap<QuestObject> objectMap;
 
 	public QuestList(NBTTagCompound nbt)
 	{
@@ -50,7 +53,12 @@ public abstract class QuestList extends ProgressingQuestObject
 				chapter.description.add(list.getStringTagAt(j));
 			}
 
-			chapter.icon = Icon.getIcon(chapterTag.getString("icon"));
+			chapter.icon = new ItemStack(chapterTag.getCompoundTag("icon"));
+
+			if (chapter.icon.isEmpty())
+			{
+				chapter.icon = ItemStack.EMPTY;
+			}
 
 			for (int d : chapterTag.getIntArray("depends_on"))
 			{
@@ -71,7 +79,12 @@ public abstract class QuestList extends ProgressingQuestObject
 				quest.y = questTag.getInteger("y");
 				quest.title = questTag.getString("title");
 				quest.description = questTag.getString("description");
-				quest.icon = Icon.getIcon(questTag.getString("icon"));
+				quest.icon = new ItemStack(questTag.getCompoundTag("icon"));
+
+				if (quest.icon.isEmpty())
+				{
+					quest.icon = ItemStack.EMPTY;
+				}
 
 				list = questTag.getTagList("text", Constants.NBT.TAG_STRING);
 
@@ -87,7 +100,7 @@ public abstract class QuestList extends ProgressingQuestObject
 					NBTTagCompound taskJson = list.getCompoundTagAt(k);
 					int id = getID(taskJson);
 					taskJson.removeTag("id");
-					QuestTask task = QuestTask.createTask(quest, id, taskJson);
+					QuestTask task = QuestTasks.createTask(quest, id, taskJson);
 					quest.tasks.add(task);
 					objectMap.put(task.id, task);
 				}
@@ -99,13 +112,9 @@ public abstract class QuestList extends ProgressingQuestObject
 					NBTTagCompound rewardJson = list.getCompoundTagAt(k);
 					int id = getID(rewardJson);
 					rewardJson.removeTag("id");
-					QuestReward reward = QuestReward.createReward(quest, id, rewardJson);
-
-					if (reward != null)
-					{
-						quest.rewards.add(reward);
-						objectMap.put(reward.id, reward);
-					}
+					QuestReward reward = QuestRewards.createReward(quest, id, rewardJson);
+					quest.rewards.add(reward);
+					objectMap.put(reward.id, reward);
 				}
 
 				for (int d : questTag.getIntArray("depends_on"))
@@ -167,6 +176,11 @@ public abstract class QuestList extends ProgressingQuestObject
 		{
 			chapter.resetProgress(data);
 		}
+	}
+
+	@Override
+	public void delete()
+	{
 	}
 
 	@Nullable
@@ -247,7 +261,7 @@ public abstract class QuestList extends ProgressingQuestObject
 
 			if (!chapter.icon.isEmpty())
 			{
-				chapterJson.setString("icon", chapter.icon.toString());
+				chapterJson.setTag("icon", chapter.icon.serializeNBT());
 			}
 
 			if (!chapter.dependencies.isEmpty())
@@ -281,7 +295,7 @@ public abstract class QuestList extends ProgressingQuestObject
 
 					if (!quest.icon.isEmpty())
 					{
-						questJson.setString("icon", quest.icon.toString());
+						questJson.setTag("icon", quest.icon.serializeNBT());
 					}
 
 					if (!quest.text.isEmpty())
@@ -343,4 +357,9 @@ public abstract class QuestList extends ProgressingQuestObject
 		json.setTag("chapters", chaptersJson);
 		return json;
 	}
+
+	@Nullable
+	public abstract IProgressData getData(String owner);
+
+	public abstract Collection<IProgressData> getAllData();
 }

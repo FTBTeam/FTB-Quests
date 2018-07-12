@@ -59,6 +59,7 @@ public class FluidTask extends QuestTask
 	@Override
 	public void writeData(NBTTagCompound nbt)
 	{
+		nbt.setString("type", "fluid");
 		nbt.setString("fluid", fluid.getFluid().getName());
 
 		if (fluid.amount != 1000)

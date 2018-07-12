@@ -12,11 +12,11 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 /**
  * @author LatvianModder
  */
-public class ExperienceLevelReward extends QuestReward
+public class ExperienceLevelsReward extends QuestReward
 {
 	private final int xpLevels;
 
-	public ExperienceLevelReward(Quest quest, int id, int _xp)
+	public ExperienceLevelsReward(Quest quest, int id, int _xp)
 	{
 		super(quest, id);
 		xpLevels = _xp;
@@ -37,7 +37,8 @@ public class ExperienceLevelReward extends QuestReward
 	@Override
 	public void writeData(NBTTagCompound nbt)
 	{
-		nbt.setInteger("xp_levels", xpLevels);
+		nbt.setString("type", "xp_levels");
+		nbt.setInteger("value", xpLevels);
 	}
 
 	@Override

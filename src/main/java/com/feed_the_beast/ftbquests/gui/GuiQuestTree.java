@@ -1,6 +1,7 @@
 package com.feed_the_beast.ftbquests.gui;
 
 import com.feed_the_beast.ftblib.lib.client.ClientUtils;
+import com.feed_the_beast.ftblib.lib.config.ConfigString;
 import com.feed_the_beast.ftblib.lib.gui.Button;
 import com.feed_the_beast.ftblib.lib.gui.GuiBase;
 import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
@@ -9,15 +10,20 @@ import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.gui.SimpleTextButton;
 import com.feed_the_beast.ftblib.lib.gui.Widget;
 import com.feed_the_beast.ftblib.lib.gui.WidgetLayout;
+import com.feed_the_beast.ftblib.lib.gui.misc.GuiSelectors;
 import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
+import com.feed_the_beast.ftbquests.FTBQuestsConfig;
+import com.feed_the_beast.ftbquests.net.edit.MessageCreateChapter;
+import com.feed_the_beast.ftbquests.net.edit.MessageDeleteObject;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.rewards.QuestReward;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.GuiYesNo;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
@@ -34,13 +40,15 @@ public class GuiQuestTree extends GuiBase
 {
 	public class ButtonChapter extends Button
 	{
+		public int index;
 		public QuestChapter chapter;
 		public List<String> description;
 
-		public ButtonChapter(Panel panel, QuestChapter c)
+		public ButtonChapter(Panel panel, int idx, QuestChapter c)
 		{
 			super(panel, c.title, c.getIcon());
 			setSize(35, 26);
+			index = idx;
 			chapter = c;
 			description = new ArrayList<>();
 
@@ -227,6 +235,33 @@ public class GuiQuestTree extends GuiBase
 		}
 	}
 
+	public abstract class ChapterOptionButton extends SimpleTextButton
+	{
+		public final String hover;
+
+		public ChapterOptionButton(Panel panel, String text, String h)
+		{
+			super(panel, text, Icon.EMPTY);
+			setSize(12, 12);
+			hover = h;
+		}
+
+		@Override
+		public void addMouseOverText(List<String> list)
+		{
+			list.add(hover);
+		}
+
+		@Override
+		public void draw()
+		{
+			int ax = getAX();
+			int ay = getAY();
+			getButtonBackground().draw(ax, ay, width, height);
+			drawString(getTitle(), ax + 3, ay + 2, SHADOW);
+		}
+	}
+
 	public final ClientQuestList questList;
 	private final Int2ObjectOpenHashMap<ButtonQuest> questButtonMap;
 	public int zoom = 16;
@@ -234,7 +269,7 @@ public class GuiQuestTree extends GuiBase
 	public ButtonChapter selectedChapter;
 	public List<ButtonChapter> chapterButtons;
 	public final Panel chapterPanel, quests;
-	private final Button zoomIn, zoomOut;
+	public final List<ChapterOptionButton> chapterOptionButtons;
 
 	public GuiQuestTree(ClientQuestList q)
 	{
@@ -265,9 +300,9 @@ public class GuiQuestTree extends GuiBase
 		selectedChapter = null;
 		chapterButtons = new ArrayList<>();
 
-		for (QuestChapter chapter : questList.chapters)
+		for (int i = 0; i < questList.chapters.size(); i++)
 		{
-			ButtonChapter b = new ButtonChapter(chapterPanel, chapter);
+			ButtonChapter b = new ButtonChapter(chapterPanel, i, questList.chapters.get(i));
 
 			if (selectedChapter == null)
 			{
@@ -409,7 +444,18 @@ public class GuiQuestTree extends GuiBase
 			}
 		};
 
-		zoomIn = new SimpleTextButton(this, "+", Icon.EMPTY)
+		chapterOptionButtons = new ArrayList<>();
+	}
+
+	@Override
+	public void addWidgets()
+	{
+		add(chapterPanel);
+		add(quests);
+
+		chapterOptionButtons.clear();
+
+		chapterOptionButtons.add(new ChapterOptionButton(this, "+", I18n.format("ftbquests.gui.quest_tree.zoom_in"))
 		{
 			@Override
 			public void onClicked(MouseButton button)
@@ -425,24 +471,9 @@ public class GuiQuestTree extends GuiBase
 					getGui().alignWidgets();
 				}
 			}
+		});
 
-			@Override
-			public void addMouseOverText(List<String> list)
-			{
-				list.add(I18n.format("ftbquests.gui.quest_tree.zoom_in"));
-			}
-
-			@Override
-			public void draw()
-			{
-				int ax = getAX();
-				int ay = getAY();
-				getButtonBackground().draw(ax, ay, width, height);
-				drawString(getTitle(), ax + 3, ay + 2, SHADOW);
-			}
-		};
-
-		zoomOut = new Button(this, "-", Icon.EMPTY)
+		chapterOptionButtons.add(new ChapterOptionButton(this, "-", I18n.format("ftbquests.gui.quest_tree.zoom_out"))
 		{
 			@Override
 			public void onClicked(MouseButton button)
@@ -458,38 +489,90 @@ public class GuiQuestTree extends GuiBase
 					getGui().alignWidgets();
 				}
 			}
+		});
 
-			@Override
-			public void addMouseOverText(List<String> list)
+		if (FTBQuestsConfig.general.editing_mode)
+		{
+			chapterOptionButtons.add(new ChapterOptionButton(this, "X", I18n.format("selectServer.delete"))
 			{
-				list.add(I18n.format("ftbquests.gui.quest_tree.zoom_out"));
-			}
+				@Override
+				public void onClicked(MouseButton button)
+				{
+					GuiHelper.playClickSound();
+					ClientUtils.MC.displayGuiScreen(new GuiYesNo((result, id) ->
+					{
+						GuiQuestTree.this.openGui();
 
-			@Override
-			public void draw()
+						if (result)
+						{
+							new MessageDeleteObject(selectedChapter.chapter.id).sendToServer();
+						}
+					}, I18n.format("delete_item", selectedChapter.chapter.title), "", 0));
+				}
+			});
+
+			chapterOptionButtons.add(new ChapterOptionButton(this, "E", I18n.format("selectWorld.edit"))
 			{
-				int ax = getAX();
-				int ay = getAY();
-				getButtonBackground().draw(ax, ay, width, height);
-				drawString(getTitle(), ax + 3, ay + 2, SHADOW);
-			}
-		};
-	}
+				@Override
+				public void onClicked(MouseButton button)
+				{
+					GuiHelper.playClickSound();
+				}
+			});
 
-	@Override
-	public void addWidgets()
-	{
-		add(chapterPanel);
-		add(quests);
-		add(zoomOut);
-		add(zoomIn);
+			chapterOptionButtons.add(new ChapterOptionButton(this, "A", I18n.format("ftbquests.gui.quest_tree.add_chapter_after"))
+			{
+				@Override
+				public void onClicked(MouseButton button)
+				{
+					GuiHelper.playClickSound();
+
+					GuiSelectors.selectJson(new ConfigString(), (value, set) ->
+					{
+						GuiQuestTree.this.openGui();
+
+						if (set)
+						{
+							new MessageCreateChapter(selectedChapter.index + 1, value.getString()).sendToServer();
+						}
+					});
+				}
+			});
+
+			if (selectedChapter.index == 0)
+			{
+				chapterOptionButtons.add(new ChapterOptionButton(this, "B", I18n.format("ftbquests.gui.quest_tree.add_chapter_before"))
+				{
+					@Override
+					public void onClicked(MouseButton button)
+					{
+						GuiHelper.playClickSound();
+
+						GuiSelectors.selectJson(new ConfigString(), (value, set) ->
+						{
+							GuiQuestTree.this.openGui();
+
+							if (set)
+							{
+								new MessageCreateChapter(0, value.getString()).sendToServer();
+							}
+						});
+					}
+				});
+			}
+		}
+
+		addAll(chapterOptionButtons);
 	}
 
 	@Override
 	public void alignWidgets()
 	{
-		zoomOut.setPosAndSize(width - 36, 7, 12, 12);
-		zoomIn.setPosAndSize(width - 19, 7, 12, 12);
+		for (int i = 0; i < chapterOptionButtons.size(); i++)
+		{
+			chapterOptionButtons.get(i).setPos(width - 2 - (i + 1) * 17, 7);
+		}
+
 		chapterPanel.alignWidgets();
 		quests.alignWidgets();
 	}

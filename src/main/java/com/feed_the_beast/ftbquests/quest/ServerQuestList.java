@@ -1,5 +1,6 @@
 package com.feed_the_beast.ftbquests.quest;
 
+import com.feed_the_beast.ftblib.lib.data.ForgeTeam;
 import com.feed_the_beast.ftblib.lib.data.Universe;
 import com.feed_the_beast.ftblib.lib.util.CommonUtils;
 import com.feed_the_beast.ftblib.lib.util.NBTUtils;
@@ -8,7 +9,12 @@ import com.feed_the_beast.ftbquests.util.FTBQuestsTeamData;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 
+import javax.annotation.Nullable;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -71,6 +77,41 @@ public class ServerQuestList extends QuestList
 		while (get(id) != null);
 
 		return id;
+	}
+
+	@Nullable
+	@Override
+	public IProgressData getData(String owner)
+	{
+		if (Universe.loaded())
+		{
+			ForgeTeam team = Universe.get().getTeam(owner);
+			return team.isValid() ? FTBQuestsTeamData.get(team) : null;
+		}
+
+		return null;
+	}
+
+	@Override
+	public Collection<IProgressData> getAllData()
+	{
+		if (Universe.loaded())
+		{
+			Collection<ForgeTeam> teams = Universe.get().getTeams();
+			List<IProgressData> list = new ArrayList<>(teams.size());
+
+			for (ForgeTeam team : teams)
+			{
+				if (team.isValid())
+				{
+					list.add(FTBQuestsTeamData.get(team));
+				}
+			}
+
+			return list;
+		}
+
+		return Collections.emptyList();
 	}
 
 	public void sync(EntityPlayerMP player)

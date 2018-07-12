@@ -1,23 +1,12 @@
 package com.feed_the_beast.ftbquests;
 
-import com.feed_the_beast.ftblib.lib.data.ForgeTeam;
-import com.feed_the_beast.ftblib.lib.data.Universe;
-import com.feed_the_beast.ftbquests.quest.IProgressData;
-import com.feed_the_beast.ftbquests.util.FTBQuestsTeamData;
-
-import javax.annotation.Nullable;
+import com.feed_the_beast.ftbquests.quest.QuestList;
+import com.feed_the_beast.ftbquests.quest.ServerQuestList;
 
 public class FTBQuestsCommon
 {
-	@Nullable
-	public IProgressData getOwner(String owner, boolean clientSide)
+	public QuestList getQuestList(boolean clientSide)
 	{
-		if (clientSide || !Universe.loaded())
-		{
-			return null;
-		}
-
-		ForgeTeam team = Universe.get().getTeam(owner);
-		return team.isValid() ? FTBQuestsTeamData.get(team) : null;
+		return ServerQuestList.INSTANCE;
 	}
 }
