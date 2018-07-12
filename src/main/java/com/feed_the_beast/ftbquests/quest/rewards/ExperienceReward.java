@@ -42,7 +42,8 @@ public class ExperienceReward extends QuestReward
 	@Override
 	public void writeData(NBTTagCompound nbt)
 	{
-		nbt.setInteger("xp", xp);
+		nbt.setString("type", "xp");
+		nbt.setInteger("value", xp);
 	}
 
 	@Override

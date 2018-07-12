@@ -2,6 +2,7 @@ package com.feed_the_beast.ftbquests.net;
 
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.FTBQuests;
+import com.feed_the_beast.ftbquests.net.edit.FTBQuestsEditNetHandler;
 
 public class FTBQuestsNetHandler
 {
@@ -18,5 +19,7 @@ public class FTBQuestsNetHandler
 		GENERAL.register(new MessageSelectTask());
 		GENERAL.register(new MessageClaimReward());
 		GENERAL.register(new MessageResetProgress());
+
+		FTBQuestsEditNetHandler.init();
 	}
 }

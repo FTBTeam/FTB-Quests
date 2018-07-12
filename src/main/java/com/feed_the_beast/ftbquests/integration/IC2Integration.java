@@ -1,6 +1,6 @@
 package com.feed_the_beast.ftbquests.integration;
 
-import com.feed_the_beast.ftbquests.events.QuestTaskEvent;
+import com.feed_the_beast.ftbquests.quest.tasks.QuestTasks;
 import ic2.api.energy.EnergyNet;
 import ic2.api.energy.IEnergyNetEventReceiver;
 import ic2.api.energy.tile.IEnergyTile;
@@ -46,6 +46,8 @@ public class IC2Integration implements IEnergyNetEventReceiver
 			{
 			}
 		}, () -> null);
+
+		QuestTasks.add("ic2_energy", (quest, id, nbt) -> new IC2EnergyTask(quest, id, nbt.getInteger("value")));
 	}
 
 	@SubscribeEvent
@@ -88,15 +90,6 @@ public class IC2Integration implements IEnergyNetEventReceiver
 	public void onWorldUnloaded(WorldEvent.Unload event)
 	{
 		energyBlocks.removeIf(tile -> tile.isInvalid() || tile.getWorld() == null || tile.getWorld() == event.getWorld());
-	}
-
-	@SubscribeEvent
-	public void createQuestTask(QuestTaskEvent event)
-	{
-		if (event.getData().hasKey("ic2_energy"))
-		{
-			event.setTask(new IC2EnergyTask(event.getQuest(), event.getID(), event.getData().getInteger("ic2_energy")));
-		}
 	}
 
 	@Override

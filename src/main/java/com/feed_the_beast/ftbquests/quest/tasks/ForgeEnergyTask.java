@@ -48,7 +48,8 @@ public class ForgeEnergyTask extends QuestTask
 	@Override
 	public void writeData(NBTTagCompound nbt)
 	{
-		nbt.setInteger("forge_energy", energy);
+		nbt.setString("type", "forge_energy");
+		nbt.setInteger("value", energy);
 	}
 
 	@Override

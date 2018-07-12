@@ -65,7 +65,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 				}
 			}
 
-			icon = icons.isEmpty() ? Icon.EMPTY : icons.size() == 1 ? icons.get(0) : new IconAnimation(icons);
+			icon = IconAnimation.fromList(icons, false);
 		}
 
 		return icon;
@@ -74,6 +74,8 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 	@Override
 	public void writeData(NBTTagCompound nbt)
 	{
+		nbt.setString("type", "item");
+
 		NBTTagList list = new NBTTagList();
 
 		for (ItemStack stack : items)

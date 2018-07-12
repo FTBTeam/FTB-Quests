@@ -2,8 +2,10 @@ package com.feed_the_beast.ftbquests.quest;
 
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.IconAnimation;
+import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
 import it.unimi.dsi.fastutil.ints.IntCollection;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import net.minecraft.item.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,9 +18,10 @@ public final class QuestChapter extends ProgressingQuestObject
 	public final QuestList list;
 	public String title;
 	public final List<String> description;
-	public Icon icon;
+	public ItemStack icon;
 	public final List<Quest> quests;
 	public final IntCollection dependencies;
+	private Icon cachedIcon;
 
 	public QuestChapter(QuestList l, int id)
 	{
@@ -26,7 +29,7 @@ public final class QuestChapter extends ProgressingQuestObject
 		list = l;
 		title = "#" + id;
 		description = new ArrayList<>();
-		icon = Icon.EMPTY;
+		icon = ItemStack.EMPTY;
 		quests = new ArrayList<>();
 		dependencies = new IntOpenHashSet();
 	}
@@ -87,18 +90,37 @@ public final class QuestChapter extends ProgressingQuestObject
 
 	public Icon getIcon()
 	{
-		if (!icon.isEmpty())
+		if (cachedIcon != null)
 		{
-			return icon;
+			return cachedIcon;
 		}
 
-		List<Icon> list = new ArrayList<>();
+		cachedIcon = ItemIcon.getItemIcon(icon);
+
+		if (cachedIcon.isEmpty())
+		{
+			List<Icon> list = new ArrayList<>();
+
+			for (Quest quest : quests)
+			{
+				list.add(quest.getIcon());
+			}
+
+			cachedIcon = IconAnimation.fromList(list, false);
+		}
+
+		return cachedIcon;
+	}
+
+	@Override
+	public void delete()
+	{
+		super.delete();
+		list.chapters.remove(this);
 
 		for (Quest quest : quests)
 		{
-			list.add(quest.getIcon());
+			quest.delete();
 		}
-
-		return new IconAnimation(list);
 	}
 }

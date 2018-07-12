@@ -88,7 +88,7 @@ public class FTBQuestsTeamData extends TeamData implements IProgressData
 		}
 	}
 
-	public final Int2ObjectMap<QuestTaskData> taskData;
+	private final Int2ObjectMap<QuestTaskData> taskData;
 	private final IntCollection claimedRewards;
 	private final Map<UUID, IntCollection> claimedPlayerRewards;
 
@@ -203,6 +203,12 @@ public class FTBQuestsTeamData extends TeamData implements IProgressData
 				new MessageUpdateTaskProgress(data.task.id, nbt).sendTo(player);
 			}
 		}
+	}
+
+	@Override
+	public void removeTask(int task)
+	{
+		taskData.remove(task);
 	}
 
 	public NBTTagCompound serializeTaskData()

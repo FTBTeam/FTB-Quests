@@ -2,16 +2,14 @@ package com.feed_the_beast.ftbquests.client;
 
 import com.feed_the_beast.ftbquests.FTBQuestsCommon;
 import com.feed_the_beast.ftbquests.gui.ClientQuestList;
-import com.feed_the_beast.ftbquests.quest.IProgressData;
-
-import javax.annotation.Nullable;
+import com.feed_the_beast.ftbquests.quest.QuestList;
+import com.feed_the_beast.ftbquests.quest.ServerQuestList;
 
 public class FTBQuestsClient extends FTBQuestsCommon
 {
 	@Override
-	@Nullable
-	public IProgressData getOwner(String owner, boolean clientSide)
+	public QuestList getQuestList(boolean clientSide)
 	{
-		return clientSide ? (ClientQuestList.exists() && ClientQuestList.INSTANCE.getTeamID().equals(owner) ? ClientQuestList.INSTANCE : null) : super.getOwner(owner, false);
+		return clientSide ? ClientQuestList.INSTANCE : ServerQuestList.INSTANCE;
 	}
 }

@@ -24,4 +24,6 @@ public interface IProgressData
 	}
 
 	void syncTask(QuestTaskData data);
+
+	void removeTask(int task);
 }

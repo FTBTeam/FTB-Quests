@@ -147,11 +147,11 @@ public class QuestBlockData implements ICapabilitySerializable<NBTTagCompound>
 		{
 			if (callback instanceof TileEntity)
 			{
-				cachedOwner = FTBQuests.PROXY.getOwner(owner, ((TileEntity) callback).getWorld().isRemote);
+				cachedOwner = FTBQuests.PROXY.getQuestList(((TileEntity) callback).getWorld().isRemote).getData(owner);
 			}
 			else
 			{
-				cachedOwner = FTBQuests.PROXY.getOwner(owner, FMLCommonHandler.instance().getEffectiveSide().isClient());
+				cachedOwner = FTBQuests.PROXY.getQuestList(FMLCommonHandler.instance().getEffectiveSide().isClient()).getData(owner);
 			}
 		}
 

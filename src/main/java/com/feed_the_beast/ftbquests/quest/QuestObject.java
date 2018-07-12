@@ -19,6 +19,11 @@ public abstract class QuestObject
 		return getQuestList().isInvalid();
 	}
 
+	public void delete()
+	{
+		getQuestList().objectMap.remove(id);
+	}
+
 	@Override
 	public String toString()
 	{

@@ -2,10 +2,12 @@ package com.feed_the_beast.ftbquests.quest;
 
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.IconAnimation;
+import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
 import com.feed_the_beast.ftbquests.quest.rewards.QuestReward;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import it.unimi.dsi.fastutil.ints.IntCollection;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import net.minecraft.item.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,13 +20,14 @@ public final class Quest extends ProgressingQuestObject
 	public final QuestChapter chapter;
 	public String title;
 	public String description;
-	public Icon icon;
+	public ItemStack icon;
 	public QuestType type;
 	public int x, y;
 	public final List<String> text;
 	public final IntCollection dependencies;
 	public final List<QuestTask> tasks;
 	public final List<QuestReward> rewards;
+	private Icon cachedIcon;
 
 	public Quest(QuestChapter c, int id)
 	{
@@ -32,7 +35,7 @@ public final class Quest extends ProgressingQuestObject
 		chapter = c;
 		title = "#" + id;
 		description = "";
-		icon = Icon.EMPTY;
+		icon = ItemStack.EMPTY;
 		type = QuestType.NORMAL;
 		text = new ArrayList<>();
 		dependencies = new IntOpenHashSet();
@@ -131,18 +134,42 @@ public final class Quest extends ProgressingQuestObject
 
 	public Icon getIcon()
 	{
-		if (!icon.isEmpty())
+		if (cachedIcon != null)
 		{
-			return icon;
+			return cachedIcon;
 		}
 
-		List<Icon> list = new ArrayList<>();
+		cachedIcon = ItemIcon.getItemIcon(icon);
+
+		if (cachedIcon.isEmpty())
+		{
+			List<Icon> list = new ArrayList<>();
+
+			for (QuestTask task : tasks)
+			{
+				list.add(task.getIcon());
+			}
+
+			cachedIcon = IconAnimation.fromList(list, false);
+		}
+
+		return cachedIcon;
+	}
+
+	@Override
+	public void delete()
+	{
+		super.delete();
+		chapter.quests.remove(this);
 
 		for (QuestTask task : tasks)
 		{
-			list.add(task.getIcon());
+			task.delete();
 		}
 
-		return new IconAnimation(list);
+		for (QuestReward reward : rewards)
+		{
+			reward.delete();
+		}
 	}
 }

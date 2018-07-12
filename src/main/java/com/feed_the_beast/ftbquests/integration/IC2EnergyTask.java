@@ -51,7 +51,8 @@ public class IC2EnergyTask extends QuestTask
 	@Override
 	public void writeData(NBTTagCompound nbt)
 	{
-		nbt.setInteger("ic2_energy", energy);
+		nbt.setString("type", "ic2_energy");
+		nbt.setInteger("value", energy);
 	}
 
 	@Override
