@@ -12,6 +12,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.fluids.Fluid;
+import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.FluidTankProperties;
@@ -30,19 +32,63 @@ import javax.annotation.Nullable;
  */
 public class FluidTask extends QuestTask
 {
+	public static final String ID = "fluid";
+
 	public final FluidStack fluid;
+	public final int amount;
 	private Icon icon = null;
 
-	public FluidTask(Quest parent, int id, FluidStack fs)
+	public FluidTask(Quest quest, int id, NBTTagCompound nbt)
 	{
-		super(parent, id);
-		fluid = fs;
+		super(quest, id);
+
+		Fluid f = FluidRegistry.getFluid(nbt.getString("fluid"));
+
+		if (f != null)
+		{
+			fluid = new FluidStack(f, 0, nbt.hasKey("nbt") ? nbt.getCompoundTag("nbt") : null);
+		}
+		else
+		{
+			fluid = null;
+		}
+
+		amount = nbt.hasKey("amount") ? nbt.getInteger("amount") : 1000;
+	}
+
+	@Override
+	public boolean isInvalid()
+	{
+		return amount <= 0 || fluid == null || super.isInvalid();
 	}
 
 	@Override
 	public int getMaxProgress()
 	{
-		return fluid.amount;
+		return amount;
+	}
+
+	@Override
+	public String getName()
+	{
+		return ID;
+	}
+
+	@Override
+	public void writeData(NBTTagCompound nbt)
+	{
+		nbt.setString("type", "fluid");
+		nbt.setString("fluid", fluid.getFluid().getName());
+
+		if (amount != 1000)
+		{
+			nbt.setInteger("amount", amount);
+		}
+
+		if (fluid.tag != null && !fluid.tag.hasNoTags())
+		{
+			nbt.setTag("nbt", fluid.tag);
+		}
 	}
 
 	@Override
@@ -57,42 +103,25 @@ public class FluidTask extends QuestTask
 	}
 
 	@Override
-	public void writeData(NBTTagCompound nbt)
-	{
-		nbt.setString("type", "fluid");
-		nbt.setString("fluid", fluid.getFluid().getName());
-
-		if (fluid.amount != 1000)
-		{
-			nbt.setInteger("amount", fluid.amount);
-		}
-
-		if (fluid.tag != null && !fluid.tag.hasNoTags())
-		{
-			nbt.setTag("nbt", fluid.tag);
-		}
-	}
-
-	@Override
 	@SideOnly(Side.CLIENT)
 	public String getDisplayName()
 	{
 		StringBuilder builder = new StringBuilder();
 
-		if (fluid.amount >= 1000)
+		if (amount >= 1000)
 		{
-			if (fluid.amount % 1000 != 0)
+			if (amount % 1000 != 0)
 			{
-				builder.append(fluid.amount / 1000D);
+				builder.append(amount / 1000D);
 			}
 			else
 			{
-				builder.append(fluid.amount / 1000);
+				builder.append(amount / 1000);
 			}
 		}
 		else
 		{
-			builder.append(fluid.amount % 1000);
+			builder.append(amount % 1000);
 			builder.append('m');
 		}
 
@@ -116,7 +145,7 @@ public class FluidTask extends QuestTask
 		{
 			super(t, data);
 			properties = new IFluidTankProperties[1];
-			properties[0] = new FluidTankProperties(task.fluid.copy(), task.fluid.amount, true, false);
+			properties[0] = new FluidTankProperties(task.fluid, task.amount, true, false);
 		}
 
 		@Override

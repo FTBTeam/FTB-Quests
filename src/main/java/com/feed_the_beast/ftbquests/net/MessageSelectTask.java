@@ -61,7 +61,7 @@ public class MessageSelectTask extends MessageToServer
 			{
 				QuestTask t = ServerQuestList.INSTANCE.getTask(task);
 
-				if (t != null && t.quest.isVisible(data.getOwner()))
+				if (t != null && !t.isInvalid() && t.quest.isVisible(data.getOwner()) && !t.isComplete(data.getOwner()))
 				{
 					data.setTask(t.id);
 				}

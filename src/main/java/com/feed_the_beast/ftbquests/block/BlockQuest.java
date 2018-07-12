@@ -18,6 +18,7 @@ import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -72,32 +73,44 @@ public class BlockQuest extends BlockBase
 		EntityPlayerMP player = (EntityPlayerMP) ep;
 		QuestBlockData data = QuestBlockData.get(world.getTileEntity(pos));
 
-		if (data != null)
+		if (data == null)
 		{
-			if (data.getOwner() == null)
-			{
-				data.setOwner(Universe.get().getPlayer(player).team.getName());
-			}
+			return true;
+		}
+		else if (data.getOwner() == null)
+		{
+			data.setOwner(Universe.get().getPlayer(player).team.getName());
+		}
 
+		if (data.getOwner() != null && Universe.get().getPlayer(player).team.getName().equals(data.getOwner().getTeamID()))
+		{
 			if (player.isSneaking())
 			{
 				if (data.canEdit())
 				{
 					data.setTask(0);
 				}
+				else
+				{
+					player.sendMessage(new TextComponentTranslation("tile.ftbquests.quest_block.cant_edit"));
+				}
 			}
 			else
 			{
 				QuestTaskData taskData = data.getTaskData();
 
-				if (taskData == null && Universe.get().getPlayer(player).team.getName().equals(data.getOwner().getTeamID()))
+				if (taskData == null)
 				{
 					if (data.canEdit())
 					{
 						new MessageSelectTaskGui(pos).sendTo(player);
 					}
+					else
+					{
+						player.sendMessage(new TextComponentTranslation("tile.ftbquests.quest_block.cant_edit"));
+					}
 				}
-				else if (taskData != null)
+				else
 				{
 					MessageOpenTask.openGUI(taskData, player);
 				}

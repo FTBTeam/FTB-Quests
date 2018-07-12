@@ -1,9 +1,12 @@
 package com.feed_the_beast.ftbquests.quest;
 
+import com.feed_the_beast.ftblib.lib.item.ItemStackSerializer;
 import com.feed_the_beast.ftbquests.quest.rewards.QuestReward;
 import com.feed_the_beast.ftbquests.quest.rewards.QuestRewards;
+import com.feed_the_beast.ftbquests.quest.rewards.UnknownReward;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTasks;
+import com.feed_the_beast.ftbquests.quest.tasks.UnknownTask;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.item.ItemStack;
@@ -53,12 +56,7 @@ public abstract class QuestList extends ProgressingQuestObject
 				chapter.description.add(list.getStringTagAt(j));
 			}
 
-			chapter.icon = new ItemStack(chapterTag.getCompoundTag("icon"));
-
-			if (chapter.icon.isEmpty())
-			{
-				chapter.icon = ItemStack.EMPTY;
-			}
+			chapter.icon = getIcon(chapterTag);
 
 			for (int d : chapterTag.getIntArray("depends_on"))
 			{
@@ -79,12 +77,7 @@ public abstract class QuestList extends ProgressingQuestObject
 				quest.y = questTag.getInteger("y");
 				quest.title = questTag.getString("title");
 				quest.description = questTag.getString("description");
-				quest.icon = new ItemStack(questTag.getCompoundTag("icon"));
-
-				if (quest.icon.isEmpty())
-				{
-					quest.icon = ItemStack.EMPTY;
-				}
+				quest.icon = getIcon(questTag);
 
 				list = questTag.getTagList("text", Constants.NBT.TAG_STRING);
 
@@ -235,6 +228,22 @@ public abstract class QuestList extends ProgressingQuestObject
 		return id;
 	}
 
+	private ItemStack getIcon(NBTTagCompound nbt)
+	{
+		ItemStack stack;
+
+		if (nbt.hasKey("icon", Constants.NBT.TAG_STRING))
+		{
+			stack = ItemStackSerializer.parseItem(nbt.getString("icon"));
+		}
+		else
+		{
+			stack = new ItemStack(nbt.getCompoundTag("icon"));
+		}
+
+		return stack.isEmpty() ? ItemStack.EMPTY : stack;
+	}
+
 	public final NBTTagCompound toNBT()
 	{
 		NBTTagCompound json = new NBTTagCompound();
@@ -324,6 +333,12 @@ public abstract class QuestList extends ProgressingQuestObject
 							NBTTagCompound taskTag = new NBTTagCompound();
 							task.writeData(taskTag);
 							taskTag.setInteger("id", task.id);
+
+							if (!(task instanceof UnknownTask))
+							{
+								taskTag.setString("type", task.getName());
+							}
+
 							array.appendTag(taskTag);
 						}
 
@@ -339,6 +354,12 @@ public abstract class QuestList extends ProgressingQuestObject
 							NBTTagCompound rewardTag = new NBTTagCompound();
 							reward.writeData(rewardTag);
 							rewardTag.setInteger("id", reward.id);
+
+							if (!(reward instanceof UnknownReward))
+							{
+								rewardTag.setString("type", reward.getName());
+							}
+
 							array.appendTag(rewardTag);
 						}
 

@@ -37,6 +37,7 @@ public abstract class ProgressingQuestObject extends QuestObject
 
 	public final boolean isComplete(IProgressData data)
 	{
-		return getProgress(data) >= getMaxProgress();
+		int max = getMaxProgress();
+		return max > 0 && getProgress(data) >= max;
 	}
 }

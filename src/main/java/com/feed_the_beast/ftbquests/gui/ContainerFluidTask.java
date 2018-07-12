@@ -7,8 +7,6 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.fluids.Fluid;
-import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -25,9 +23,7 @@ public class ContainerFluidTask extends ContainerTaskBase
 	{
 		super(player, d);
 		iconBucketEmpty = ItemIcon.getItemIcon(new ItemStack(Items.BUCKET));
-		FluidStack fluidStack = d.task.fluid.copy();
-		fluidStack.amount = Fluid.BUCKET_VOLUME;
-		iconBucketFilled = ItemIcon.getItemIcon(FluidUtil.getFilledBucket(fluidStack));
+		iconBucketFilled = ItemIcon.getItemIcon(FluidUtil.getFilledBucket(d.task.fluid));
 	}
 
 	@Override

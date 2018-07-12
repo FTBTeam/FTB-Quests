@@ -16,31 +16,37 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  */
 public class ItemReward extends QuestReward
 {
+	public static final String ID = "item";
 	private final ItemStack stack;
 
-	public ItemReward(Quest quest, int id, ItemStack is)
+	public ItemReward(Quest quest, int id, NBTTagCompound nbt)
 	{
 		super(quest, id);
-		stack = is;
+		stack = new ItemStack(nbt);
 	}
 
 	@Override
-	public void reward(EntityPlayerMP player)
+	public boolean isInvalid()
 	{
-		InvUtils.giveItem(player, stack);
+		return stack.isEmpty() || super.isInvalid();
+	}
+
+	@Override
+	public String getName()
+	{
+		return ID;
+	}
+
+	@Override
+	public void writeData(NBTTagCompound nbt)
+	{
+		NBTUtils.copyTags(stack.serializeNBT(), nbt);
 	}
 
 	@Override
 	public Icon getIcon()
 	{
 		return ItemIcon.getItemIcon(stack);
-	}
-
-	@Override
-	public void writeData(NBTTagCompound nbt)
-	{
-		nbt.setString("type", "item");
-		NBTUtils.copyTags(stack.serializeNBT(), nbt);
 	}
 
 	@Override
@@ -53,5 +59,11 @@ public class ItemReward extends QuestReward
 		}
 
 		return stack.getDisplayName();
+	}
+
+	@Override
+	public void reward(EntityPlayerMP player)
+	{
+		InvUtils.giveItem(player, stack);
 	}
 }

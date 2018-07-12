@@ -5,6 +5,7 @@ import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.util.NBTUtils;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.Quest;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.common.capabilities.Capability;
@@ -18,12 +19,21 @@ import javax.annotation.Nullable;
  */
 public class UnknownTask extends QuestTask
 {
+	public static final String ID = "unknown";
+
 	private final NBTTagCompound nbt;
+	private String hover;
 
 	public UnknownTask(Quest parent, int id, NBTTagCompound n)
 	{
 		super(parent, id);
 		nbt = n;
+	}
+
+	@Override
+	public boolean isInvalid()
+	{
+		return true;
 	}
 
 	@Override
@@ -33,9 +43,9 @@ public class UnknownTask extends QuestTask
 	}
 
 	@Override
-	public Icon getIcon()
+	public String getName()
 	{
-		return GuiIcons.CANCEL;
+		return ID;
 	}
 
 	@Override
@@ -45,10 +55,26 @@ public class UnknownTask extends QuestTask
 	}
 
 	@Override
+	public Icon getIcon()
+	{
+		return GuiIcons.CANCEL;
+	}
+
+	@Override
 	@SideOnly(Side.CLIENT)
 	public String getDisplayName()
 	{
-		return "Unkown | " + nbt;
+		return I18n.format("ftbquests.gui.task.unknown");
+	}
+
+	public String getHover()
+	{
+		if (hover == null)
+		{
+			hover = NBTUtils.getColoredNBTString(nbt);
+		}
+
+		return hover;
 	}
 
 	@Override

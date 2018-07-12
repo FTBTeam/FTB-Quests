@@ -19,22 +19,36 @@ import javax.annotation.Nullable;
  */
 public class IC2EnergyTask extends QuestTask
 {
+	public static final String ID = "ic2_energy";
+
 	@CapabilityInject(IIC2EnergyReceiver.class)
 	public static Capability<IIC2EnergyReceiver> CAP;
 
-	public final int energy;
+	private final int energy;
 	private Icon icon = null;
 
-	public IC2EnergyTask(Quest parent, int id, int e)
+	public IC2EnergyTask(Quest quest, int id, NBTTagCompound nbt)
 	{
-		super(parent, id);
-		energy = e;
+		super(quest, id);
+		energy = nbt.getInteger("value");
 	}
 
 	@Override
 	public int getMaxProgress()
 	{
 		return energy;
+	}
+
+	@Override
+	public String getName()
+	{
+		return ID;
+	}
+
+	@Override
+	public void writeData(NBTTagCompound nbt)
+	{
+		nbt.setInteger("value", energy);
 	}
 
 	@Override
@@ -46,13 +60,6 @@ public class IC2EnergyTask extends QuestTask
 		}
 
 		return icon;
-	}
-
-	@Override
-	public void writeData(NBTTagCompound nbt)
-	{
-		nbt.setString("type", "ic2_energy");
-		nbt.setInteger("value", energy);
 	}
 
 	@Override

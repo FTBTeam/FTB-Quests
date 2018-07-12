@@ -47,7 +47,7 @@ public class IC2Integration implements IEnergyNetEventReceiver
 			}
 		}, () -> null);
 
-		QuestTasks.add("ic2_energy", (quest, id, nbt) -> new IC2EnergyTask(quest, id, nbt.getInteger("value")));
+		QuestTasks.add(IC2EnergyTask.ID, IC2EnergyTask::new);
 	}
 
 	@SubscribeEvent

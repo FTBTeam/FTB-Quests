@@ -17,20 +17,33 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  */
 public class ExperienceReward extends QuestReward
 {
+	public static final String ID = "xp";
 	public static final Icon ICON = ItemIcon.getItemIcon(new ItemStack(Items.EXPERIENCE_BOTTLE));
 
-	private final int xp;
+	private final int value;
 
-	public ExperienceReward(Quest quest, int id, int _xp)
+	public ExperienceReward(Quest quest, int id, NBTTagCompound nbt)
 	{
 		super(quest, id);
-		xp = _xp;
+		value = nbt.getInteger("value");
 	}
 
 	@Override
-	public void reward(EntityPlayerMP player)
+	public boolean isInvalid()
 	{
-		player.addExperience(xp);
+		return value <= 0 || super.isInvalid();
+	}
+
+	@Override
+	public String getName()
+	{
+		return ID;
+	}
+
+	@Override
+	public void writeData(NBTTagCompound nbt)
+	{
+		nbt.setInteger("value", value);
 	}
 
 	@Override
@@ -40,16 +53,15 @@ public class ExperienceReward extends QuestReward
 	}
 
 	@Override
-	public void writeData(NBTTagCompound nbt)
-	{
-		nbt.setString("type", "xp");
-		nbt.setInteger("value", xp);
-	}
-
-	@Override
 	@SideOnly(Side.CLIENT)
 	public String getDisplayName()
 	{
-		return I18n.format("ftbquests.reward.xp", TextFormatting.GREEN + "+" + xp);
+		return I18n.format("ftbquests.gui.reward.xp", TextFormatting.GREEN + "+" + value);
+	}
+
+	@Override
+	public void reward(EntityPlayerMP player)
+	{
+		player.addExperience(value);
 	}
 }

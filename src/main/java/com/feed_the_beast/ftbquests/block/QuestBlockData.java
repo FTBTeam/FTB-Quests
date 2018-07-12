@@ -197,12 +197,7 @@ public class QuestBlockData implements ICapabilitySerializable<NBTTagCompound>
 		{
 			return null;
 		}
-		else if (cachedTaskData != null && cachedTaskData.task.isInvalid())
-		{
-			cachedTaskData = null;
-		}
-
-		if (cachedTaskData == null)
+		else if (cachedTaskData == null || cachedTaskData.task.isInvalid())
 		{
 			cachedOwner = getOwner();
 

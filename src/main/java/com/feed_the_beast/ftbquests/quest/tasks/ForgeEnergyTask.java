@@ -19,19 +19,33 @@ import javax.annotation.Nullable;
  */
 public class ForgeEnergyTask extends QuestTask
 {
+	public static final String ID = "forge_energy";
+
 	public final int energy;
 	private Icon icon = null;
 
-	public ForgeEnergyTask(Quest parent, int id, int e)
+	public ForgeEnergyTask(Quest quest, int id, NBTTagCompound nbt)
 	{
-		super(parent, id);
-		energy = e;
+		super(quest, id);
+		energy = nbt.getInteger("value");
 	}
 
 	@Override
 	public int getMaxProgress()
 	{
 		return energy;
+	}
+
+	@Override
+	public String getName()
+	{
+		return ID;
+	}
+
+	@Override
+	public void writeData(NBTTagCompound nbt)
+	{
+		nbt.setInteger("value", energy);
 	}
 
 	@Override
@@ -43,13 +57,6 @@ public class ForgeEnergyTask extends QuestTask
 		}
 
 		return icon;
-	}
-
-	@Override
-	public void writeData(NBTTagCompound nbt)
-	{
-		nbt.setString("type", "forge_energy");
-		nbt.setInteger("value", energy);
 	}
 
 	@Override
