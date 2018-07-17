@@ -28,6 +28,7 @@ public abstract class QuestList extends ProgressingQuestObject
 	public final List<QuestChapter> chapters;
 	private boolean invalid;
 	public final Int2ObjectMap<QuestObject> objectMap;
+	public final List<ItemStack> emergencyChest;
 
 	public QuestList(NBTTagCompound nbt)
 	{
@@ -42,78 +43,92 @@ public abstract class QuestList extends ProgressingQuestObject
 
 		for (int i = 0; i < chaptersList.tagCount(); i++)
 		{
-			NBTTagCompound chapterTag = chaptersList.getCompoundTagAt(i);
-			QuestChapter chapter = new QuestChapter(this, getID(chapterTag));
+			NBTTagCompound chapterNBT = chaptersList.getCompoundTagAt(i);
+			QuestChapter chapter = new QuestChapter(this, getID(chapterNBT));
 			chapters.add(chapter);
 			objectMap.put(chapter.id, chapter);
 
-			chapter.title = chapterTag.getString("title");
+			chapter.title = chapterNBT.getString("title");
 
-			list = chapterTag.getTagList("description", Constants.NBT.TAG_STRING);
+			list = chapterNBT.getTagList("description", Constants.NBT.TAG_STRING);
 
 			for (int j = 0; j < list.tagCount(); j++)
 			{
 				chapter.description.add(list.getStringTagAt(j));
 			}
 
-			chapter.icon = getIcon(chapterTag);
+			chapter.icon = getIcon(chapterNBT);
 
-			for (int d : chapterTag.getIntArray("depends_on"))
+			for (int d : chapterNBT.getIntArray("depends_on"))
 			{
 				chapter.dependencies.add(d);
 			}
 
-			NBTTagList questsList = chapterTag.getTagList("quests", Constants.NBT.TAG_COMPOUND);
+			NBTTagList questsList = chapterNBT.getTagList("quests", Constants.NBT.TAG_COMPOUND);
 
 			for (int j = 0; j < questsList.tagCount(); j++)
 			{
-				NBTTagCompound questTag = questsList.getCompoundTagAt(j);
-				Quest quest = new Quest(chapter, getID(questTag));
+				NBTTagCompound questNBT = questsList.getCompoundTagAt(j);
+				Quest quest = new Quest(chapter, getID(questNBT));
 				chapter.quests.add(quest);
 				objectMap.put(quest.id, quest);
 
-				quest.type = QuestType.NAME_MAP.get(questTag.getString("type"));
-				quest.x = questTag.getInteger("x");
-				quest.y = questTag.getInteger("y");
-				quest.title = questTag.getString("title");
-				quest.description = questTag.getString("description");
-				quest.icon = getIcon(questTag);
+				quest.type = QuestType.NAME_MAP.get(questNBT.getString("type"));
+				quest.x = questNBT.getInteger("x");
+				quest.y = questNBT.getInteger("y");
+				quest.title = questNBT.getString("title");
+				quest.description = questNBT.getString("description");
+				quest.icon = getIcon(questNBT);
 
-				list = questTag.getTagList("text", Constants.NBT.TAG_STRING);
+				list = questNBT.getTagList("text", Constants.NBT.TAG_STRING);
 
 				for (int k = 0; k < list.tagCount(); k++)
 				{
 					quest.text.add(list.getStringTagAt(k));
 				}
 
-				list = questTag.getTagList("tasks", Constants.NBT.TAG_COMPOUND);
+				list = questNBT.getTagList("tasks", Constants.NBT.TAG_COMPOUND);
 
 				for (int k = 0; k < list.tagCount(); k++)
 				{
-					NBTTagCompound taskJson = list.getCompoundTagAt(k);
-					int id = getID(taskJson);
-					taskJson.removeTag("id");
-					QuestTask task = QuestTasks.createTask(quest, id, taskJson);
+					NBTTagCompound taskNBT = list.getCompoundTagAt(k);
+					int id = getID(taskNBT);
+					taskNBT.removeTag("id");
+					QuestTask task = QuestTasks.createTask(quest, id, taskNBT);
 					quest.tasks.add(task);
 					objectMap.put(task.id, task);
 				}
 
-				list = questTag.getTagList("rewards", Constants.NBT.TAG_COMPOUND);
+				list = questNBT.getTagList("rewards", Constants.NBT.TAG_COMPOUND);
 
 				for (int k = 0; k < list.tagCount(); k++)
 				{
-					NBTTagCompound rewardJson = list.getCompoundTagAt(k);
-					int id = getID(rewardJson);
-					rewardJson.removeTag("id");
-					QuestReward reward = QuestRewards.createReward(quest, id, rewardJson);
+					NBTTagCompound rewardNBT = list.getCompoundTagAt(k);
+					int id = getID(rewardNBT);
+					rewardNBT.removeTag("id");
+					QuestReward reward = QuestRewards.createReward(quest, id, rewardNBT);
 					quest.rewards.add(reward);
 					objectMap.put(reward.id, reward);
 				}
 
-				for (int d : questTag.getIntArray("depends_on"))
+				for (int d : questNBT.getIntArray("depends_on"))
 				{
 					quest.dependencies.add(d);
 				}
+			}
+		}
+
+		emergencyChest = new ArrayList<>();
+
+		NBTTagList emergencyChestList = nbt.getTagList("emergency_chest", Constants.NBT.TAG_COMPOUND);
+
+		for (int i = 0; i < emergencyChestList.tagCount(); i++)
+		{
+			ItemStack stack = new ItemStack(emergencyChestList.getCompoundTagAt(i));
+
+			if (!stack.isEmpty())
+			{
+				emergencyChest.add(stack);
 			}
 		}
 	}
@@ -246,15 +261,15 @@ public abstract class QuestList extends ProgressingQuestObject
 
 	public final NBTTagCompound toNBT()
 	{
-		NBTTagCompound json = new NBTTagCompound();
-		NBTTagList chaptersJson = new NBTTagList();
+		NBTTagCompound nbt = new NBTTagCompound();
+		NBTTagList chaptersList = new NBTTagList();
 		NBTTagList array;
 
 		for (QuestChapter chapter : chapters)
 		{
-			NBTTagCompound chapterJson = new NBTTagCompound();
-			chapterJson.setInteger("id", chapter.id);
-			chapterJson.setString("title", chapter.title);
+			NBTTagCompound chapterNBT = new NBTTagCompound();
+			chapterNBT.setInteger("id", chapter.id);
+			chapterNBT.setString("title", chapter.title);
 
 			if (!chapter.description.isEmpty())
 			{
@@ -265,46 +280,46 @@ public abstract class QuestList extends ProgressingQuestObject
 					array.appendTag(new NBTTagString(s));
 				}
 
-				chapterJson.setTag("description", array);
+				chapterNBT.setTag("description", array);
 			}
 
 			if (!chapter.icon.isEmpty())
 			{
-				chapterJson.setTag("icon", chapter.icon.serializeNBT());
+				chapterNBT.setTag("icon", chapter.icon.serializeNBT());
 			}
 
 			if (!chapter.dependencies.isEmpty())
 			{
-				chapterJson.setIntArray("dependencies", chapter.dependencies.toIntArray());
+				chapterNBT.setIntArray("dependencies", chapter.dependencies.toIntArray());
 			}
 
 			if (!chapter.quests.isEmpty())
 			{
-				NBTTagList questsJson = new NBTTagList();
+				NBTTagList questsList = new NBTTagList();
 
 				for (Quest quest : chapter.quests)
 				{
-					NBTTagCompound questJson = new NBTTagCompound();
+					NBTTagCompound questNBT = new NBTTagCompound();
 
-					questJson.setInteger("id", quest.id);
+					questNBT.setInteger("id", quest.id);
 
 					if (quest.type != QuestType.NORMAL)
 					{
-						questJson.setString("type", quest.type.getName());
+						questNBT.setString("type", quest.type.getName());
 					}
 
-					questJson.setInteger("x", quest.x);
-					questJson.setInteger("y", quest.y);
-					questJson.setString("title", quest.title);
+					questNBT.setInteger("x", quest.x);
+					questNBT.setInteger("y", quest.y);
+					questNBT.setString("title", quest.title);
 
 					if (!quest.description.isEmpty())
 					{
-						questJson.setString("description", quest.description);
+						questNBT.setString("description", quest.description);
 					}
 
 					if (!quest.icon.isEmpty())
 					{
-						questJson.setTag("icon", quest.icon.serializeNBT());
+						questNBT.setTag("icon", quest.icon.serializeNBT());
 					}
 
 					if (!quest.text.isEmpty())
@@ -316,12 +331,12 @@ public abstract class QuestList extends ProgressingQuestObject
 							array.appendTag(new NBTTagString(s));
 						}
 
-						questJson.setTag("text", array);
+						questNBT.setTag("text", array);
 					}
 
 					if (!quest.dependencies.isEmpty())
 					{
-						questJson.setIntArray("dependencies", quest.dependencies.toIntArray());
+						questNBT.setIntArray("dependencies", quest.dependencies.toIntArray());
 					}
 
 					if (!quest.tasks.isEmpty())
@@ -330,19 +345,19 @@ public abstract class QuestList extends ProgressingQuestObject
 
 						for (QuestTask task : quest.tasks)
 						{
-							NBTTagCompound taskTag = new NBTTagCompound();
-							task.writeData(taskTag);
-							taskTag.setInteger("id", task.id);
+							NBTTagCompound taskNBT = new NBTTagCompound();
+							task.writeData(taskNBT);
+							taskNBT.setInteger("id", task.id);
 
 							if (!(task instanceof UnknownTask))
 							{
-								taskTag.setString("type", task.getName());
+								taskNBT.setString("type", task.getName());
 							}
 
-							array.appendTag(taskTag);
+							array.appendTag(taskNBT);
 						}
 
-						questJson.setTag("tasks", array);
+						questNBT.setTag("tasks", array);
 					}
 
 					if (!quest.rewards.isEmpty())
@@ -351,32 +366,41 @@ public abstract class QuestList extends ProgressingQuestObject
 
 						for (QuestReward reward : quest.rewards)
 						{
-							NBTTagCompound rewardTag = new NBTTagCompound();
-							reward.writeData(rewardTag);
-							rewardTag.setInteger("id", reward.id);
+							NBTTagCompound rewardNBT = new NBTTagCompound();
+							reward.writeData(rewardNBT);
+							rewardNBT.setInteger("id", reward.id);
 
 							if (!(reward instanceof UnknownReward))
 							{
-								rewardTag.setString("type", reward.getName());
+								rewardNBT.setString("type", reward.getName());
 							}
 
-							array.appendTag(rewardTag);
+							array.appendTag(rewardNBT);
 						}
 
-						questJson.setTag("rewards", array);
+						questNBT.setTag("rewards", array);
 					}
 
-					questsJson.appendTag(questJson);
+					questsList.appendTag(questNBT);
 				}
 
-				chapterJson.setTag("quests", questsJson);
+				chapterNBT.setTag("quests", questsList);
 			}
 
-			chaptersJson.appendTag(chapterJson);
+			chaptersList.appendTag(chapterNBT);
 		}
 
-		json.setTag("chapters", chaptersJson);
-		return json;
+		nbt.setTag("chapters", chaptersList);
+
+		NBTTagList emergencyChestList = new NBTTagList();
+
+		for (ItemStack stack : emergencyChest)
+		{
+			emergencyChestList.appendTag(stack.serializeNBT());
+		}
+
+		nbt.setTag("emergency_chest", emergencyChestList);
+		return nbt;
 	}
 
 	@Nullable

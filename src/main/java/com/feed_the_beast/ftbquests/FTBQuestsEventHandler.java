@@ -27,27 +27,12 @@ public class FTBQuestsEventHandler
 		FTBLibPreInitRegistryEvent.Registry registry = event.getRegistry();
 		registry.registerServerReloadHandler(new ResourceLocation(FTBQuests.MOD_ID, "config"), reloadEvent -> FTBQuestsConfig.sync());
 
-		registry.registerAdminPanelAction(new AdminPanelAction(FTBQuests.MOD_ID, "edit", GuiIcons.BOOK_RED, 0)
-		{
-			@Override
-			public Type getType(ForgePlayer player, NBTTagCompound data)
-			{
-				//return Type.fromBoolean(player.hasPermission(FTBQuests.PERM_EDIT));
-				return Type.INVISIBLE;
-			}
-
-			@Override
-			public void onAction(ForgePlayer player, NBTTagCompound data)
-			{
-			}
-		});
-
 		registry.registerAdminPanelAction(new AdminPanelAction(FTBQuests.MOD_ID, "reset_progress", GuiIcons.BOOK_RED.combineWith(GuiIcons.CLOSE), 0)
 		{
 			@Override
 			public Type getType(ForgePlayer player, NBTTagCompound data)
 			{
-				return Type.fromBoolean(player.hasPermission(FTBQuests.PERM_RESET_PROGRESS));
+				return FTBQuestsConfig.general.editing_mode ? Type.fromBoolean(player.hasPermission(FTBQuests.PERM_RESET_PROGRESS)) : Type.INVISIBLE;
 			}
 
 			@Override

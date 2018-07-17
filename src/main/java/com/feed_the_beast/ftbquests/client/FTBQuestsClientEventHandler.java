@@ -55,9 +55,9 @@ public class FTBQuestsClientEventHandler
 	@SubscribeEvent
 	public static void onCustomClick(CustomClickEvent event)
 	{
-		if (event.getID().getResourceDomain().equals(FTBQuests.MOD_ID))
+		if (event.getID().getNamespace().equals(FTBQuests.MOD_ID))
 		{
-			switch (event.getID().getResourcePath())
+			switch (event.getID().getPath())
 			{
 				case "open_gui":
 					if (ClientQuestList.exists())

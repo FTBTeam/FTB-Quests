@@ -18,17 +18,19 @@ public class MessageSyncQuests extends MessageToClient
 	public String team;
 	public NBTTagCompound taskData;
 	public int[] claimedRewards;
+	public boolean editingMode;
 
 	public MessageSyncQuests()
 	{
 	}
 
-	public MessageSyncQuests(NBTTagCompound e, String t, NBTTagCompound td, int[] r)
+	public MessageSyncQuests(NBTTagCompound n, String t, NBTTagCompound td, int[] r, boolean e)
 	{
-		quests = e;
+		quests = n;
 		team = t;
 		taskData = td;
 		claimedRewards = r;
+		editingMode = e;
 	}
 
 	@Override
@@ -49,6 +51,8 @@ public class MessageSyncQuests extends MessageToClient
 		{
 			data.writeInt(i);
 		}
+
+		data.writeBoolean(editingMode);
 	}
 
 	@Override
@@ -63,6 +67,8 @@ public class MessageSyncQuests extends MessageToClient
 		{
 			claimedRewards[i] = data.readInt();
 		}
+
+		editingMode = data.readBoolean();
 	}
 
 	@Override

@@ -14,7 +14,6 @@ import com.feed_the_beast.ftblib.lib.gui.misc.GuiSelectors;
 import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
-import com.feed_the_beast.ftbquests.FTBQuestsConfig;
 import com.feed_the_beast.ftbquests.net.edit.MessageCreateChapter;
 import com.feed_the_beast.ftbquests.net.edit.MessageDeleteObject;
 import com.feed_the_beast.ftbquests.quest.Quest;
@@ -491,7 +490,7 @@ public class GuiQuestTree extends GuiBase
 			}
 		});
 
-		if (FTBQuestsConfig.general.editing_mode)
+		if (ClientQuestList.INSTANCE.editingMode)
 		{
 			chapterOptionButtons.add(new ChapterOptionButton(this, "X", I18n.format("selectServer.delete"))
 			{

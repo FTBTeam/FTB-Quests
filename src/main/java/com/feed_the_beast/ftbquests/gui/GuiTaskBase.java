@@ -1,10 +1,15 @@
 package com.feed_the_beast.ftbquests.gui;
 
+import com.feed_the_beast.ftblib.lib.gui.Button;
 import com.feed_the_beast.ftblib.lib.gui.GuiBase;
 import com.feed_the_beast.ftblib.lib.gui.GuiContainerWrapper;
+import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.gui.SimpleButton;
+import com.feed_the_beast.ftblib.lib.gui.WidgetLayout;
 import com.feed_the_beast.ftblib.lib.icon.Color4I;
+import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
+import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.FTBQuestsConfig;
 import com.feed_the_beast.ftbquests.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.block.QuestBlockData;
@@ -22,26 +27,68 @@ import java.util.List;
 public class GuiTaskBase extends GuiBase
 {
 	public final ContainerTaskBase container;
+	public final boolean hasTile;
+	public final Panel tabs;
+
+	public static class Tab extends Button
+	{
+		public Tab(Panel panel, String title, Icon icon)
+		{
+			super(panel, title, icon);
+		}
+
+		@Override
+		public void onClicked(MouseButton button)
+		{
+		}
+	}
 
 	public GuiTaskBase(ContainerTaskBase c)
 	{
 		container = c;
+		hasTile = container.tile != null && !container.tile.isInvalid();
+
+		tabs = new Panel(this)
+		{
+			@Override
+			public void addWidgets()
+			{
+				if (ClientQuestList.INSTANCE.editingMode)
+				{
+				}
+
+				addTabs(this);
+			}
+
+			@Override
+			public void alignWidgets()
+			{
+				align(WidgetLayout.VERTICAL);
+			}
+		};
+	}
+
+	public void addTabs(Panel panel)
+	{
 	}
 
 	@Override
 	public void addWidgets()
 	{
-		add(new SimpleButton(this, I18n.format("ftbquests.gui.task.get_block"), ItemIcon.getItemIcon(new ItemStack(FTBQuestsItems.QUEST_BLOCK)), (widget, button) -> {
-			if (FTBQuestsConfig.general.allow_take_quest_blocks && container.player.inventory.getItemStack().isEmpty() && container.data.task.quest.isVisible(ClientQuestList.INSTANCE) && !container.data.task.isComplete(ClientQuestList.INSTANCE))
-			{
-				ItemStack stack = new ItemStack(FTBQuestsItems.QUEST_BLOCK);
-				QuestBlockData data = QuestBlockData.get(stack);
-				data.setTask(container.data.task.id);
-				data.setOwner(ClientQuestList.INSTANCE.teamId);
-				container.player.inventory.setItemStack(stack);
-				new MessageGetBlock(container.data.task.id).sendToServer();
-			}
-		}).setPosAndSize(8, 8, 20, 20));
+		if (!hasTile && FTBQuestsConfig.general.allow_take_quest_blocks)
+		{
+			add(new SimpleButton(this, I18n.format("ftbquests.gui.task.get_block"), ItemIcon.getItemIcon(new ItemStack(FTBQuestsItems.QUEST_BLOCK)), (widget, button) -> {
+				if (container.player.inventory.getItemStack().isEmpty() && container.data.task.quest.isVisible(ClientQuestList.INSTANCE) && !container.data.task.isComplete(ClientQuestList.INSTANCE))
+				{
+					ItemStack stack = new ItemStack(FTBQuestsItems.QUEST_BLOCK);
+					QuestBlockData data = QuestBlockData.get(stack);
+					data.setTask(container.data.task.id);
+					data.setOwner(ClientQuestList.INSTANCE.teamId);
+					container.player.inventory.setItemStack(stack);
+					new MessageGetBlock(container.data.task.id).sendToServer();
+				}
+			}).setPosAndSize(8, 8, 20, 20));
+		}
 	}
 
 	@Override

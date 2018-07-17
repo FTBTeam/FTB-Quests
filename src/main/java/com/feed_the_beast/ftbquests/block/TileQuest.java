@@ -3,6 +3,7 @@ package com.feed_the_beast.ftbquests.block;
 import com.feed_the_beast.ftblib.lib.tile.EnumSaveType;
 import com.feed_the_beast.ftblib.lib.tile.TileBase;
 import com.feed_the_beast.ftblib.lib.util.NBTUtils;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.common.capabilities.Capability;
@@ -60,5 +61,17 @@ public class TileQuest extends TileBase
 	public boolean shouldDrop()
 	{
 		return data.getTaskData() != null;
+	}
+
+	@Override
+	public void writeToItem(ItemStack stack)
+	{
+		QuestBlockData.get(stack).copyFrom(data);
+	}
+
+	@Override
+	public void readFromItem(ItemStack stack)
+	{
+		data.copyFrom(QuestBlockData.get(stack));
 	}
 }

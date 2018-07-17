@@ -4,10 +4,13 @@ import com.feed_the_beast.ftblib.lib.data.ForgeTeam;
 import com.feed_the_beast.ftblib.lib.data.Universe;
 import com.feed_the_beast.ftblib.lib.util.CommonUtils;
 import com.feed_the_beast.ftblib.lib.util.NBTUtils;
+import com.feed_the_beast.ftbquests.FTBQuests;
+import com.feed_the_beast.ftbquests.FTBQuestsConfig;
 import com.feed_the_beast.ftbquests.net.MessageSyncQuests;
 import com.feed_the_beast.ftbquests.util.FTBQuestsTeamData;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraftforge.server.permission.PermissionAPI;
 
 import javax.annotation.Nullable;
 import java.io.File;
@@ -119,7 +122,8 @@ public class ServerQuestList extends QuestList
 		FTBQuestsTeamData data = FTBQuestsTeamData.get(Universe.get().getPlayer(player).team);
 		NBTTagCompound taskDataTag = data.serializeTaskData();
 		int[] claimedRewards = data.getClaimedRewards(player).toIntArray();
-		new MessageSyncQuests(toNBT(), data.team.getName(), taskDataTag, claimedRewards).sendTo(player);
+		boolean e = FTBQuestsConfig.general.editing_mode && PermissionAPI.hasPermission(player, FTBQuests.PERM_EDIT);
+		new MessageSyncQuests(toNBT(), data.team.getName(), taskDataTag, claimedRewards, e).sendTo(player);
 	}
 
 	public void save()
