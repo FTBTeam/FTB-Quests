@@ -2,7 +2,6 @@ package com.feed_the_beast.ftbquests.quest.rewards;
 
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
-import com.feed_the_beast.ftblib.lib.util.InvUtils;
 import com.feed_the_beast.ftblib.lib.util.NBTUtils;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -10,6 +9,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.items.ItemHandlerHelper;
 
 /**
  * @author LatvianModder
@@ -64,6 +64,6 @@ public class ItemReward extends QuestReward
 	@Override
 	public void reward(EntityPlayerMP player)
 	{
-		InvUtils.giveItem(player, stack);
+		ItemHandlerHelper.giveItemToPlayer(player, stack.copy());
 	}
 }

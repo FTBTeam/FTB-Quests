@@ -5,11 +5,16 @@ import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToClient;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
+import com.feed_the_beast.ftbquests.block.TileQuest;
 import com.feed_the_beast.ftbquests.gui.ClientQuestList;
 import com.feed_the_beast.ftbquests.gui.ContainerTaskBase;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskData;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+
+import javax.annotation.Nullable;
 
 /**
  * @author LatvianModder
@@ -18,15 +23,19 @@ public class MessageOpenTaskGui extends MessageToClient
 {
 	private int task;
 	private int window;
+	private boolean hasPos;
+	private BlockPos pos;
 
 	public MessageOpenTaskGui()
 	{
 	}
 
-	public MessageOpenTaskGui(int t, int w)
+	public MessageOpenTaskGui(int t, int w, boolean h, @Nullable BlockPos p)
 	{
 		task = t;
 		window = w;
+		hasPos = h;
+		pos = p;
 	}
 
 	@Override
@@ -40,6 +49,12 @@ public class MessageOpenTaskGui extends MessageToClient
 	{
 		data.writeInt(task);
 		data.writeInt(window);
+		data.writeBoolean(hasPos);
+
+		if (hasPos)
+		{
+			data.writePos(pos);
+		}
 	}
 
 	@Override
@@ -47,6 +62,12 @@ public class MessageOpenTaskGui extends MessageToClient
 	{
 		task = data.readInt();
 		window = data.readInt();
+		hasPos = data.readBoolean();
+
+		if (hasPos)
+		{
+			pos = data.readPos();
+		}
 	}
 
 	@Override
@@ -59,6 +80,17 @@ public class MessageOpenTaskGui extends MessageToClient
 		if (container != null)
 		{
 			container.windowId = window;
+
+			if (hasPos)
+			{
+				TileEntity tileEntity = ClientUtils.MC.world.getTileEntity(pos);
+
+				if (tileEntity instanceof TileQuest)
+				{
+					container.tile = (TileQuest) tileEntity;
+				}
+			}
+
 			data.getGui(container).openGui();
 		}
 	}

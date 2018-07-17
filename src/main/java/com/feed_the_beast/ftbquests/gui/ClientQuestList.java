@@ -40,11 +40,13 @@ public class ClientQuestList extends QuestList implements IProgressData
 	private final IntCollection claimedRewards;
 	public GuiQuestTree questTreeGui;
 	public GuiBase questGui;
+	public boolean editingMode;
 
 	public ClientQuestList(MessageSyncQuests message, @Nullable ClientQuestList prev)
 	{
 		super(message.quests);
 		teamId = message.team;
+		editingMode = message.editingMode;
 
 		taskData = new Int2ObjectOpenHashMap<>();
 		claimedRewards = new IntOpenHashSet();

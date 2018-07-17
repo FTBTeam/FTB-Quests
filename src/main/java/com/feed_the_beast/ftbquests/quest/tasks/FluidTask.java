@@ -84,7 +84,7 @@ public class FluidTask extends QuestTask
 			nbt.setInteger("amount", amount);
 		}
 
-		if (fluid.tag != null && !fluid.tag.hasNoTags())
+		if (fluid.tag != null && !fluid.tag.isEmpty())
 		{
 			nbt.setTag("nbt", fluid.tag);
 		}

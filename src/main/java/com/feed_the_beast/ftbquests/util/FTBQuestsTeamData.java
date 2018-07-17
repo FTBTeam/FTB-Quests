@@ -61,7 +61,7 @@ public class FTBQuestsTeamData extends TeamData implements IProgressData
 
 		File file = event.getTeam().getDataFile("ftbquests");
 
-		if (nbt.hasNoTags())
+		if (nbt.isEmpty())
 		{
 			FileUtils.delete(file);
 		}
@@ -224,7 +224,7 @@ public class FTBQuestsTeamData extends TeamData implements IProgressData
 			{
 				taskDataTag.setInteger(Integer.toString(data.task.id), nbt1.getInteger("Progress"));
 			}
-			else if (!nbt1.hasNoTags())
+			else if (!nbt1.isEmpty())
 			{
 				taskDataTag.setTag(Integer.toString(data.task.id), nbt1);
 			}
@@ -237,7 +237,7 @@ public class FTBQuestsTeamData extends TeamData implements IProgressData
 	{
 		NBTTagCompound taskDataTag = serializeTaskData();
 
-		if (!taskDataTag.hasNoTags())
+		if (!taskDataTag.isEmpty())
 		{
 			nbt.setTag("TaskData", taskDataTag);
 		}
@@ -264,7 +264,7 @@ public class FTBQuestsTeamData extends TeamData implements IProgressData
 			}
 		}
 
-		if (!claimedPlayerRewardsTag.hasNoTags())
+		if (!claimedPlayerRewardsTag.isEmpty())
 		{
 			nbt.setTag("ClaimedPlayerRewards", claimedPlayerRewardsTag);
 		}

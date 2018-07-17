@@ -24,8 +24,6 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-import javax.annotation.Nullable;
-
 /**
  * @author LatvianModder
  */
@@ -58,7 +56,7 @@ public class BlockQuest extends BlockBase
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public BlockRenderLayer getBlockLayer()
+	public BlockRenderLayer getRenderLayer()
 	{
 		return BlockRenderLayer.CUTOUT;
 	}
@@ -71,15 +69,22 @@ public class BlockQuest extends BlockBase
 			return true;
 		}
 
-		QuestBlockData data = QuestBlockData.get(world.getTileEntity(pos));
+		TileEntity tileEntity = world.getTileEntity(pos);
 
-		if (data == null)
+		if (!(tileEntity instanceof TileQuest))
+		{
+			return true;
+		}
+
+		TileQuest tile = (TileQuest) tileEntity;
+
+		if (tile.data == null)
 		{
 			return true;
 		}
 
 		EntityPlayerMP player = (EntityPlayerMP) ep;
-		QuestTaskData taskData = data.getTaskData();
+		QuestTaskData taskData = tile.data.getTaskData();
 
 		if (taskData == null)
 		{
@@ -87,7 +92,7 @@ public class BlockQuest extends BlockBase
 		}
 		else if (Universe.get().getPlayer(player).team.getName().equals(taskData.data.getTeamID()))
 		{
-			MessageOpenTask.openGUI(taskData, player);
+			MessageOpenTask.openGUI(taskData, player, tile);
 		}
 		else
 		{
@@ -100,59 +105,32 @@ public class BlockQuest extends BlockBase
 	@Override
 	public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase player, ItemStack stack)
 	{
-		super.onBlockPlacedBy(world, pos, state, player, stack);
+		TileEntity tileEntity = world.getTileEntity(pos);
 		QuestBlockData itemData = QuestBlockData.get(stack);
-		QuestTaskData taskData = itemData.getTaskData();
 
-		if (taskData != null)
+		if (itemData.getTaskData() == null)
 		{
-			TileQuest tile = taskData.task.createCustomTileEntity(world);
-			TileEntity tileEntity = world.getTileEntity(pos);
-
-			if (tile != null)
-			{
-				if (tileEntity != null)
-				{
-					tileEntity.invalidate();
-				}
-
-				world.removeTileEntity(pos);
-				world.setTileEntity(pos, tile);
-			}
-			else
-			{
-				if (tileEntity instanceof TileQuest)
-				{
-					tile = (TileQuest) tileEntity;
-				}
-			}
-
-			if (tile != null)
-			{
-				tile.validate();
-				tile.onLoad();
-
-				QuestBlockData data = QuestBlockData.get(tile);
-
-				if (data != null)
-				{
-					data.copyFrom(itemData);
-				}
-			}
-		}
-	}
-
-	@Override
-	public ItemStack createStack(IBlockState state, @Nullable TileEntity tile)
-	{
-		ItemStack stack = new ItemStack(this);
-		QuestBlockData data = QuestBlockData.get(tile);
-
-		if (data != null)
-		{
-			QuestBlockData.get(stack).copyFrom(data);
+			return;
 		}
 
-		return stack;
+		TileQuest tile = itemData.getTaskData().task.createCustomTileEntity(world);
+
+		if (tile != null)
+		{
+			if (tileEntity != null)
+			{
+				tileEntity.invalidate();
+			}
+
+			tile.readFromItem(stack);
+			world.removeTileEntity(pos);
+			world.setTileEntity(pos, tile);
+			tile.validate();
+		}
+		else if (tileEntity instanceof TileQuest)
+		{
+			((TileQuest) tileEntity).readFromItem(stack);
+			tileEntity.onLoad();
+		}
 	}
 }

@@ -2,6 +2,7 @@ package com.feed_the_beast.ftbquests.gui;
 
 import com.feed_the_beast.ftblib.lib.gui.ContainerBase;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
+import com.feed_the_beast.ftbquests.block.TileQuest;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskData;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.fml.relauncher.Side;
@@ -13,6 +14,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class ContainerTaskBase extends ContainerBase
 {
 	public final QuestTaskData data;
+	public TileQuest tile;
 
 	public ContainerTaskBase(EntityPlayer player, QuestTaskData d)
 	{
