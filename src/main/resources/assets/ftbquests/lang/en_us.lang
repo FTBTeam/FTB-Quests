@@ -4,6 +4,7 @@ tile.ftbquests.quest_block.no_perm=You are not a member of block owner team!
 
 ftbquests.general.editing_mode=Editing Mode
 ftbquests.general.allow_take_quest_blocks=Allow to Take Quest Blocks
+ftbquests.general.emergency_items_cooldown=Emergency Items Cooldown
 
 admin_panel.ftbquests.edit=Edit Quests
 admin_panel.ftbquests.reset_progress=Reset Quest Progress
@@ -15,6 +16,8 @@ ftbquests.gui.quest_tree.zoom_in=Zoom In
 ftbquests.gui.quest_tree.zoom_out=Zoom Out
 ftbquests.gui.quest_tree.add_chapter_after=Add new chapter after this one
 ftbquests.gui.quest_tree.add_chapter_before=Add new chapter before this one
+ftbquests.gui.quest_tree.move_up=Move Up
+ftbquests.gui.quest_tree.move_down=Move Down
 ftbquests.gui.task=Task
 ftbquests.gui.owner=Owner
 ftbquests.gui.progress=Progress

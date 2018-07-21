@@ -1,16 +1,20 @@
 package com.feed_the_beast.ftbquests.quest.tasks;
 
+import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
+import com.feed_the_beast.ftblib.lib.config.ConfigString;
 import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.util.NBTUtils;
+import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import net.minecraft.client.resources.I18n;
+import net.minecraft.nbt.JsonToNBT;
+import net.minecraft.nbt.NBTException;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
 
@@ -21,12 +25,12 @@ public class UnknownTask extends QuestTask
 {
 	public static final String ID = "unknown";
 
-	private final NBTTagCompound nbt;
+	private NBTTagCompound nbt;
 	private String hover;
 
-	public UnknownTask(Quest parent, int id, NBTTagCompound n)
+	public UnknownTask(Quest parent, NBTTagCompound n)
 	{
-		super(parent, id);
+		super(parent, n);
 		nbt = n;
 	}
 
@@ -61,10 +65,9 @@ public class UnknownTask extends QuestTask
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
-	public String getDisplayName()
+	public ITextComponent getDisplayName()
 	{
-		return I18n.format("ftbquests.gui.task.unknown");
+		return new TextComponentTranslation("ftbquests.gui.task.unknown");
 	}
 
 	public String getHover()
@@ -75,6 +78,32 @@ public class UnknownTask extends QuestTask
 		}
 
 		return hover;
+	}
+
+	@Override
+	public void getConfig(ConfigGroup group)
+	{
+		group.add(FTBQuests.MOD_ID, "nbt", new ConfigString()
+		{
+			@Override
+			public String getString()
+			{
+				return nbt.toString();
+			}
+
+			@Override
+			public void setString(String v)
+			{
+				try
+				{
+					nbt = JsonToNBT.getTagFromJson(v);
+				}
+				catch (NBTException e)
+				{
+					e.printStackTrace();
+				}
+			}
+		});
 	}
 
 	@Override

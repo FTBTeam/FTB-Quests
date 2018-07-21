@@ -32,7 +32,12 @@ public class ClientQuestList extends QuestList implements IProgressData
 
 	public static boolean exists()
 	{
-		return INSTANCE != null && !INSTANCE.isInvalid() && !INSTANCE.teamId.isEmpty();
+		return INSTANCE != null && !INSTANCE.isInvalid();
+	}
+
+	public static boolean existsWithTeam()
+	{
+		return exists() && !INSTANCE.teamId.isEmpty();
 	}
 
 	public String teamId;

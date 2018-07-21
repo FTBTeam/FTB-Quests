@@ -9,11 +9,13 @@ public class FTBQuestsEditNetHandler
 
 	public static void init()
 	{
+		EDIT.register(new MessageCreateObject());
+		EDIT.register(new MessageCreateObjectResponse());
 		EDIT.register(new MessageDeleteObject());
 		EDIT.register(new MessageDeleteObjectResponse());
-		EDIT.register(new MessageCreateChapter());
-		EDIT.register(new MessageCreateChapterResponse());
-		EDIT.register(new MessageCreateQuest());
-		EDIT.register(new MessageCreateQuestResponse());
+		EDIT.register(new MessageEditObject());
+		EDIT.register(new MessageEditObjectResponse());
+		EDIT.register(new MessageMoveChapter());
+		EDIT.register(new MessageMoveChapterResponse());
 	}
 }

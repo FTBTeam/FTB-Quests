@@ -2,6 +2,7 @@ package com.feed_the_beast.ftbquests.gui;
 
 import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftblib.lib.config.ConfigString;
+import com.feed_the_beast.ftblib.lib.config.ConfigValue;
 import com.feed_the_beast.ftblib.lib.gui.Button;
 import com.feed_the_beast.ftblib.lib.gui.GuiBase;
 import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
@@ -10,15 +11,19 @@ import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.gui.SimpleTextButton;
 import com.feed_the_beast.ftblib.lib.gui.Widget;
 import com.feed_the_beast.ftblib.lib.gui.WidgetLayout;
+import com.feed_the_beast.ftblib.lib.gui.WidgetType;
 import com.feed_the_beast.ftblib.lib.gui.misc.GuiSelectors;
 import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
-import com.feed_the_beast.ftbquests.net.edit.MessageCreateChapter;
+import com.feed_the_beast.ftbquests.net.edit.MessageCreateObject;
 import com.feed_the_beast.ftbquests.net.edit.MessageDeleteObject;
+import com.feed_the_beast.ftbquests.net.edit.MessageEditObject;
+import com.feed_the_beast.ftbquests.net.edit.MessageMoveChapter;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
+import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.quest.rewards.QuestReward;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.client.gui.GuiScreen;
@@ -28,6 +33,7 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.TextFormatting;
 import org.lwjgl.opengl.GL11;
 
@@ -45,15 +51,15 @@ public class GuiQuestTree extends GuiBase
 
 		public ButtonChapter(Panel panel, int idx, QuestChapter c)
 		{
-			super(panel, c.title, c.getIcon());
+			super(panel, c.getDisplayName().getFormattedText(), c.getIcon());
 			setSize(35, 26);
 			index = idx;
 			chapter = c;
 			description = new ArrayList<>();
 
-			for (String s : chapter.description)
+			for (ConfigValue v : chapter.description)
 			{
-				description.add(TextFormatting.GRAY + s);
+				description.add(TextFormatting.GRAY + v.getString());
 			}
 		}
 
@@ -140,10 +146,10 @@ public class GuiQuestTree extends GuiBase
 
 		public ButtonQuest(Panel panel, Quest q)
 		{
-			super(panel, q.title, q.getIcon());
+			super(panel, q.getDisplayName().getFormattedText(), q.getIcon());
 			setSize(20, 20);
 			quest = q;
-			description = TextFormatting.GRAY + quest.description;
+			description = TextFormatting.GRAY + quest.description.getString();
 
 			if (TextFormatting.getTextWithoutFormattingCodes(description).isEmpty())
 			{
@@ -339,8 +345,8 @@ public class GuiQuestTree extends GuiBase
 					{
 						ButtonQuest widget = new ButtonQuest(this, quest);
 						questButtonMap.put(quest.id, widget);
-						mx = Math.max(mx, quest.x);
-						my = Math.max(my, quest.y);
+						mx = Math.max(mx, quest.x.getInt());
+						my = Math.max(my, quest.y.getInt());
 						add(widget);
 					}
 				}
@@ -360,9 +366,9 @@ public class GuiQuestTree extends GuiBase
 					for (Widget widget : widgets)
 					{
 						Quest quest = ((ButtonQuest) widget).quest;
-						mx = Math.max(mx, quest.x);
-						my = Math.max(my, quest.y);
-						widget.setPosAndSize(1 + quest.x * (zoom * 3 / 2), 1 + quest.y * (zoom * 3 / 2), zoom * 5 / 4, zoom * 5 / 4);
+						mx = Math.max(mx, quest.x.getInt());
+						my = Math.max(my, quest.y.getInt());
+						widget.setPosAndSize(1 + quest.x.getInt() * (zoom * 3 / 2), 1 + quest.y.getInt() * (zoom * 3 / 2), zoom * 5 / 4, zoom * 5 / 4);
 					}
 
 					scrollWidth = 2 + mx * (zoom * 3 / 2) + zoom * 5 / 4;
@@ -506,7 +512,7 @@ public class GuiQuestTree extends GuiBase
 						{
 							new MessageDeleteObject(selectedChapter.chapter.id).sendToServer();
 						}
-					}, I18n.format("delete_item", selectedChapter.chapter.title), "", 0));
+					}, I18n.format("delete_item", selectedChapter.chapter.getDisplayName().getFormattedText()), "", 0));
 				}
 			});
 
@@ -516,6 +522,7 @@ public class GuiQuestTree extends GuiBase
 				public void onClicked(MouseButton button)
 				{
 					GuiHelper.playClickSound();
+					new MessageEditObject(selectedChapter.chapter.id).sendToServer();
 				}
 			});
 
@@ -532,33 +539,68 @@ public class GuiQuestTree extends GuiBase
 
 						if (set)
 						{
-							new MessageCreateChapter(selectedChapter.index + 1, value.getString()).sendToServer();
+							NBTTagCompound nbt = new NBTTagCompound();
+							nbt.setInteger("_index", selectedChapter.index + 1);
+							nbt.setString("title", value.getString());
+							new MessageCreateObject(QuestObjectType.CHAPTER, 0, nbt).sendToServer();
 						}
 					});
 				}
 			});
 
-			if (selectedChapter.index == 0)
+			chapterOptionButtons.add(new ChapterOptionButton(this, "B", I18n.format("ftbquests.gui.quest_tree.add_chapter_before"))
 			{
-				chapterOptionButtons.add(new ChapterOptionButton(this, "B", I18n.format("ftbquests.gui.quest_tree.add_chapter_before"))
+				@Override
+				public void onClicked(MouseButton button)
 				{
-					@Override
-					public void onClicked(MouseButton button)
+					GuiHelper.playClickSound();
+
+					GuiSelectors.selectJson(new ConfigString(), (value, set) ->
 					{
-						GuiHelper.playClickSound();
+						GuiQuestTree.this.openGui();
 
-						GuiSelectors.selectJson(new ConfigString(), (value, set) ->
+						if (set)
 						{
-							GuiQuestTree.this.openGui();
+							NBTTagCompound nbt = new NBTTagCompound();
+							nbt.setInteger("_index", selectedChapter.index);
+							nbt.setString("title", value.getString());
+							new MessageCreateObject(QuestObjectType.CHAPTER, 0, nbt).sendToServer();
+						}
+					});
+				}
+			});
 
-							if (set)
-							{
-								new MessageCreateChapter(0, value.getString()).sendToServer();
-							}
-						});
-					}
-				});
-			}
+			chapterOptionButtons.add(new ChapterOptionButton(this, "^", I18n.format("ftbquests.gui.quest_tree.move_up"))
+			{
+				@Override
+				public WidgetType getWidgetType()
+				{
+					return selectedChapter.index > 0 ? super.getWidgetType() : WidgetType.DISABLED;
+				}
+
+				@Override
+				public void onClicked(MouseButton button)
+				{
+					GuiHelper.playClickSound();
+					new MessageMoveChapter(selectedChapter.chapter.id, true).sendToServer();
+				}
+			});
+
+			chapterOptionButtons.add(new ChapterOptionButton(this, "v", I18n.format("ftbquests.gui.quest_tree.move_down"))
+			{
+				@Override
+				public WidgetType getWidgetType()
+				{
+					return selectedChapter.index < questList.chapters.size() - 1 ? super.getWidgetType() : WidgetType.DISABLED;
+				}
+
+				@Override
+				public void onClicked(MouseButton button)
+				{
+					GuiHelper.playClickSound();
+					new MessageMoveChapter(selectedChapter.chapter.id, false).sendToServer();
+				}
+			});
 		}
 
 		addAll(chapterOptionButtons);

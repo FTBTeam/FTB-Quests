@@ -1,9 +1,14 @@
 package com.feed_the_beast.ftbquests.quest.tasks;
 
+import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
+import com.feed_the_beast.ftblib.lib.config.ConfigInt;
+import com.feed_the_beast.ftblib.lib.config.ConfigItemStack;
+import com.feed_the_beast.ftblib.lib.config.ConfigList;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.IconAnimation;
 import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
 import com.feed_the_beast.ftblib.lib.util.StringJoiner;
+import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.gui.ContainerItemTask;
 import com.feed_the_beast.ftbquests.gui.ContainerTaskBase;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
@@ -13,10 +18,10 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.Constants;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemHandlerHelper;
@@ -34,13 +39,13 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 {
 	public static final String ID = "item";
 
-	private final List<ItemStack> items;
-	private final int count;
+	private final ConfigList<ConfigItemStack> items;
+	private final ConfigInt count;
 
-	public ItemTask(Quest quest, int id, NBTTagCompound nbt)
+	public ItemTask(Quest quest, NBTTagCompound nbt)
 	{
-		super(quest, id);
-		items = new ArrayList<>();
+		super(quest, nbt);
+		items = new ConfigList<>(ConfigItemStack.ID);
 
 		if (nbt.hasKey("item", Constants.NBT.TAG_LIST))
 		{
@@ -52,7 +57,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 
 				if (!stack.isEmpty())
 				{
-					items.add(stack);
+					items.add(new ConfigItemStack(stack));
 				}
 			}
 		}
@@ -62,23 +67,23 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 
 			if (!stack.isEmpty())
 			{
-				items.add(stack);
+				items.add(new ConfigItemStack(stack));
 			}
 		}
 
-		count = nbt.hasKey("count") ? nbt.getInteger("count") : 1;
+		count = new ConfigInt(nbt.getInteger("count"), 1, Integer.MAX_VALUE);
 	}
 
 	@Override
 	public boolean isInvalid()
 	{
-		return count <= 0 || items.isEmpty() || super.isInvalid();
+		return items.getList().isEmpty() || super.isInvalid();
 	}
 
 	@Override
 	public int getMaxProgress()
 	{
-		return count;
+		return count.getInt();
 	}
 
 	@Override
@@ -91,27 +96,18 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 	public void writeData(NBTTagCompound nbt)
 	{
 		nbt.setString("type", "item");
+		NBTTagList list = new NBTTagList();
 
-		if (items.size() == 1)
+		for (ConfigItemStack v : items)
 		{
-			nbt.setTag("item", items.get(0).serializeNBT());
-		}
-		else
-		{
-			NBTTagList list = new NBTTagList();
-
-			for (ItemStack stack : items)
+			if (!v.getItem().isEmpty())
 			{
-				if (!stack.isEmpty())
-				{
-					list.appendTag(stack.serializeNBT());
-				}
+				list.appendTag(v.getItem().serializeNBT());
 			}
-
-			nbt.setTag("item", list);
 		}
 
-		nbt.setInteger("count", count);
+		nbt.setTag("items", list);
+		nbt.setInteger("count", count.getInt());
 	}
 
 	@Override
@@ -119,9 +115,9 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 	{
 		List<Icon> icons = new ArrayList<>();
 
-		for (ItemStack stack : items)
+		for (ConfigItemStack v : items)
 		{
-			Icon icon = ItemIcon.getItemIcon(stack);
+			Icon icon = ItemIcon.getItemIcon(v.getItem());
 
 			if (!icon.isEmpty())
 			{
@@ -133,33 +129,32 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
-	public String getDisplayName()
+	public ITextComponent getDisplayName()
 	{
 		String name;
 
-		if (items.size() == 1)
+		if (items.getList().size() == 1)
 		{
-			name = items.get(0).getDisplayName();
+			name = items.getList().get(0).getItem().getDisplayName();
 		}
 		else
 		{
-			String[] s = new String[items.size()];
+			String[] s = new String[items.getList().size()];
 
 			for (int i = 0; i < s.length; i++)
 			{
-				s[i] = items.get(i).getDisplayName();
+				s[i] = items.getList().get(i).getItem().getDisplayName();
 			}
 
 			name = StringJoiner.with(", ").joinStrings(s);
 		}
 
-		if (count > 1)
+		if (count.getInt() > 1)
 		{
-			name = name + "x " + count;
+			name = name + "x " + count.getInt();
 		}
 
-		return name;
+		return new TextComponentString(name);
 	}
 
 	@Override
@@ -174,15 +169,22 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 			stack = ItemHandlerHelper.copyStackWithSize(stack, 1);
 		}
 
-		for (ItemStack stack1 : items)
+		for (ConfigItemStack v : items)
 		{
-			if (ItemStack.areItemStacksEqual(stack, stack1))
+			if (ItemStack.areItemStacksEqual(stack, v.getItem()))
 			{
 				return true;
 			}
 		}
 
 		return false;
+	}
+
+	@Override
+	public void getConfig(ConfigGroup group)
+	{
+		group.add(FTBQuests.MOD_ID, "items", items);
+		group.add(FTBQuests.MOD_ID, "count", count);
 	}
 
 	@Override
@@ -232,9 +234,9 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 		@Override
 		public ItemStack insertItem(int slot, ItemStack stack, boolean simulate)
 		{
-			if (getProgress() < task.count && task.test(stack))
+			if (getProgress() < task.getMaxProgress() && task.test(stack))
 			{
-				int add = Math.min(stack.getCount(), task.count - getProgress());
+				int add = Math.min(stack.getCount(), task.getMaxProgress() - getProgress());
 
 				if (add > 0 && setProgress(getProgress() + add, simulate))
 				{
@@ -254,7 +256,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 		@Override
 		public int getSlotLimit(int slot)
 		{
-			return task.count;
+			return task.getMaxProgress();
 		}
 	}
 }
