@@ -23,6 +23,9 @@ public class FTBQuestsConfig
 
 		@Config.Comment("Allow to obtain Quest Blocks from the Quests GUI.")
 		public boolean allow_take_quest_blocks = true;
+
+		@Config.Comment("Cooldown timer for emergency items to respawn.")
+		public String emergency_items_cooldown = "5m";
 	}
 
 	public static boolean sync()

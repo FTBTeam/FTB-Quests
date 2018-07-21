@@ -12,20 +12,19 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 /**
  * @author LatvianModder
  */
-public class MessageCreateChapterResponse extends MessageToClient
+public class MessageMoveChapterResponse extends MessageToClient
 {
-	private int id, index;
-	private String title;
+	private int id;
+	private boolean up;
 
-	public MessageCreateChapterResponse()
+	public MessageMoveChapterResponse()
 	{
 	}
 
-	public MessageCreateChapterResponse(int i, int idx, String t)
+	public MessageMoveChapterResponse(int i, boolean u)
 	{
 		id = i;
-		index = idx;
-		title = t;
+		up = u;
 	}
 
 	@Override
@@ -38,16 +37,14 @@ public class MessageCreateChapterResponse extends MessageToClient
 	public void writeData(DataOut data)
 	{
 		data.writeInt(id);
-		data.writeInt(index);
-		data.writeString(title);
+		data.writeBoolean(up);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
 		id = data.readInt();
-		index = data.readInt();
-		title = data.readString();
+		up = data.readBoolean();
 	}
 
 	@Override
@@ -56,11 +53,19 @@ public class MessageCreateChapterResponse extends MessageToClient
 	{
 		if (ClientQuestList.INSTANCE != null)
 		{
-			QuestChapter chapter = new QuestChapter(ClientQuestList.INSTANCE, id);
-			chapter.title = title;
-			ClientQuestList.INSTANCE.objectMap.put(chapter.id, chapter);
-			ClientQuestList.INSTANCE.chapters.add(index, chapter);
-			ClientQuestList.INSTANCE.refreshGui(ClientQuestList.INSTANCE);
+			QuestChapter chapter = ClientQuestList.INSTANCE.getChapter(id);
+
+			if (chapter != null)
+			{
+				int index = ClientQuestList.INSTANCE.chapters.indexOf(chapter);
+
+				if (index != -1 && up ? (index > 0) : (index < ClientQuestList.INSTANCE.chapters.size() - 1))
+				{
+					ClientQuestList.INSTANCE.chapters.remove(index);
+					ClientQuestList.INSTANCE.chapters.add(up ? index - 1 : index + 1, chapter);
+					ClientQuestList.INSTANCE.refreshGui(ClientQuestList.INSTANCE);
+				}
+			}
 		}
 	}
 }

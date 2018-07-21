@@ -60,7 +60,7 @@ public class TileQuest extends TileBase
 	@Override
 	public boolean shouldDrop()
 	{
-		return data.getTaskData() != null;
+		return data.getTaskID() > 0 || !data.getOwnerTeam().isEmpty();
 	}
 
 	@Override

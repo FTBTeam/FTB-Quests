@@ -1,6 +1,7 @@
 package com.feed_the_beast.ftbquests.gui;
 
 import com.feed_the_beast.ftblib.lib.client.ClientUtils;
+import com.feed_the_beast.ftblib.lib.config.ConfigString;
 import com.feed_the_beast.ftblib.lib.gui.Button;
 import com.feed_the_beast.ftblib.lib.gui.GuiBase;
 import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
@@ -97,7 +98,7 @@ public class GuiQuest extends GuiBase
 
 		public ButtonTask(Panel panel, QuestTask t)
 		{
-			super(panel, t.getDisplayName(), t.getIcon());
+			super(panel, t.getDisplayName().getFormattedText(), t.getIcon());
 			setPosAndSize(0, 20, 20, 20);
 			task = t;
 		}
@@ -151,7 +152,7 @@ public class GuiQuest extends GuiBase
 
 		public ButtonReward(Panel panel, QuestReward r)
 		{
-			super(panel, r.getDisplayName(), r.getIcon());
+			super(panel, r.getDisplayName().getFormattedText(), r.getIcon());
 			setPosAndSize(0, 20, 20, 20);
 			reward = r;
 		}
@@ -242,12 +243,12 @@ public class GuiQuest extends GuiBase
 			{
 				setPosAndSize(0, 3, getGui().width, getGui().height - 6);
 
-				title.text = TextFormatting.BOLD + quest.title;
+				title.text = TextFormatting.BOLD + quest.getDisplayName().getFormattedText();
 				title.setSize(width, 35);
 
 				shortDescription.text.clear();
 
-				for (String s : listFormattedStringToWidth(quest.description, width - 60))
+				for (String s : listFormattedStringToWidth(quest.description.getString(), width - 60))
 				{
 					if (!s.trim().isEmpty())
 					{
@@ -259,9 +260,9 @@ public class GuiQuest extends GuiBase
 
 				longDescription.text.clear();
 
-				for (String s0 : quest.text)
+				for (ConfigString s0 : quest.text)
 				{
-					for (String s : listFormattedStringToWidth(s0, width - 80))
+					for (String s : listFormattedStringToWidth(s0.getString(), width - 80))
 					{
 						if (!s.trim().isEmpty())
 						{

@@ -123,11 +123,30 @@ public class ServerQuestList extends QuestList
 		NBTTagCompound taskDataTag = data.serializeTaskData();
 		int[] claimedRewards = data.getClaimedRewards(player).toIntArray();
 		boolean e = FTBQuestsConfig.general.editing_mode && PermissionAPI.hasPermission(player, FTBQuests.PERM_EDIT);
-		new MessageSyncQuests(toNBT(), data.team.getName(), taskDataTag, claimedRewards, e).sendTo(player);
+		NBTTagCompound nbt = new NBTTagCompound();
+		writeData(nbt);
+		new MessageSyncQuests(nbt, data.team.getName(), taskDataTag, claimedRewards, e).sendTo(player);
+	}
+
+	public void syncAll()
+	{
+		NBTTagCompound nbt = new NBTTagCompound();
+		writeData(nbt);
+
+		for (EntityPlayerMP player : Universe.get().server.getPlayerList().getPlayers())
+		{
+			FTBQuestsTeamData data = FTBQuestsTeamData.get(Universe.get().getPlayer(player).team);
+			NBTTagCompound taskDataTag = data.serializeTaskData();
+			int[] claimedRewards = data.getClaimedRewards(player).toIntArray();
+			boolean e = FTBQuestsConfig.general.editing_mode && PermissionAPI.hasPermission(player, FTBQuests.PERM_EDIT);
+			new MessageSyncQuests(nbt, data.team.getName(), taskDataTag, claimedRewards, e).sendTo(player);
+		}
 	}
 
 	public void save()
 	{
-		NBTUtils.writeNBTSafe(new File(CommonUtils.folderConfig, "ftbquests/quests.nbt"), toNBT());
+		NBTTagCompound nbt = new NBTTagCompound();
+		writeData(nbt);
+		NBTUtils.writeNBTSafe(new File(CommonUtils.folderConfig, "ftbquests/quests.nbt"), nbt);
 	}
 }

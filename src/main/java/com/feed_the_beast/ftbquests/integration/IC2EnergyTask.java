@@ -1,18 +1,20 @@
 package com.feed_the_beast.ftbquests.integration;
 
+import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
+import com.feed_the_beast.ftblib.lib.config.ConfigInt;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
+import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.block.TileQuest;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskData;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
 
@@ -23,18 +25,18 @@ public class IC2EnergyTask extends QuestTask
 {
 	public static final String ID = "ic2_energy";
 
-	private final int value;
+	private final ConfigInt value;
 
-	public IC2EnergyTask(Quest quest, int id, NBTTagCompound nbt)
+	public IC2EnergyTask(Quest quest, NBTTagCompound nbt)
 	{
-		super(quest, id);
-		value = nbt.getInteger("value");
+		super(quest, nbt);
+		value = new ConfigInt(nbt.getInteger("value"), 0, Integer.MAX_VALUE);
 	}
 
 	@Override
 	public int getMaxProgress()
 	{
-		return value;
+		return value.getInt();
 	}
 
 	@Override
@@ -46,7 +48,7 @@ public class IC2EnergyTask extends QuestTask
 	@Override
 	public void writeData(NBTTagCompound nbt)
 	{
-		nbt.setInteger("value", value);
+		nbt.setInteger("value", value.getInt());
 	}
 
 	@Override
@@ -56,16 +58,21 @@ public class IC2EnergyTask extends QuestTask
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
-	public String getDisplayName()
+	public ITextComponent getDisplayName()
 	{
-		return I18n.format("ftbquests.gui.task.ic2_energy", value);
+		return new TextComponentTranslation("ftbquests.gui.task.ic2_energy", value);
 	}
 
 	@Override
 	public TileQuest createCustomTileEntity(World world)
 	{
 		return new TileQuestIC2();
+	}
+
+	@Override
+	public void getConfig(ConfigGroup group)
+	{
+		group.add(FTBQuests.MOD_ID, "value", value);
 	}
 
 	@Override
@@ -96,9 +103,9 @@ public class IC2EnergyTask extends QuestTask
 
 		public double injectEnergy(double amount)
 		{
-			if (amount > 0 && getProgress() < task.value)
+			if (amount > 0 && getProgress() < task.getMaxProgress())
 			{
-				int add = (int) Math.min(amount, task.value - getProgress());
+				int add = (int) Math.min(amount, task.getMaxProgress() - getProgress());
 
 				if (add > 0)
 				{

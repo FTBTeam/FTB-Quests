@@ -52,7 +52,7 @@ public class ItemBlockQuest extends ItemBlockBase
 	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack stack, @Nullable World world, List<String> tooltip, ITooltipFlag flag)
 	{
-		if (!ClientQuestList.exists())
+		if (!ClientQuestList.existsWithTeam())
 		{
 			return;
 		}

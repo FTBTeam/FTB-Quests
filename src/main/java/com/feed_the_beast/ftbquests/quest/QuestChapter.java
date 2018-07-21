@@ -1,11 +1,22 @@
 package com.feed_the_beast.ftbquests.quest;
 
+import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
+import com.feed_the_beast.ftblib.lib.config.ConfigItemStack;
+import com.feed_the_beast.ftblib.lib.config.ConfigList;
+import com.feed_the_beast.ftblib.lib.config.ConfigString;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.IconAnimation;
 import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
+import com.feed_the_beast.ftbquests.FTBQuests;
 import it.unimi.dsi.fastutil.ints.IntCollection;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.NBTTagString;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraftforge.common.util.Constants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,28 +27,99 @@ import java.util.List;
 public final class QuestChapter extends ProgressingQuestObject
 {
 	public final QuestList list;
-	public String title;
-	public final List<String> description;
-	public ItemStack icon;
+	public final ConfigString title;
+	public final ConfigList<ConfigString> description;
+	public final ConfigItemStack icon;
 	public final List<Quest> quests;
 	public final IntCollection dependencies;
 	private Icon cachedIcon;
 
-	public QuestChapter(QuestList l, int id)
+	public QuestChapter(QuestList l, NBTTagCompound nbt)
 	{
-		super(id);
+		super(l.getID(nbt));
 		list = l;
-		title = "#" + id;
-		description = new ArrayList<>();
-		icon = ItemStack.EMPTY;
+		title = new ConfigString(nbt.getString("title"));
+		description = new ConfigList<>(ConfigString.ID);
+		icon = new ConfigItemStack(new ItemStack(nbt.getCompoundTag("icon")));
 		quests = new ArrayList<>();
+
+		NBTTagList desc = nbt.getTagList("description", Constants.NBT.TAG_STRING);
+
+		for (int i = 0; i < desc.tagCount(); i++)
+		{
+			description.add(new ConfigString(desc.getStringTagAt(i)));
+		}
+
 		dependencies = new IntOpenHashSet();
+
+		for (int d : nbt.getIntArray("depends_on"))
+		{
+			dependencies.add(d);
+		}
+
+		NBTTagList questsList = nbt.getTagList("quests", Constants.NBT.TAG_COMPOUND);
+
+		for (int j = 0; j < questsList.tagCount(); j++)
+		{
+			Quest quest = new Quest(this, questsList.getCompoundTagAt(j));
+			quests.add(quest);
+			list.objectMap.put(quest.id, quest);
+		}
 	}
 
 	@Override
 	public QuestList getQuestList()
 	{
 		return list;
+	}
+
+	@Override
+	public QuestObjectType getObjectType()
+	{
+		return QuestObjectType.CHAPTER;
+	}
+
+	@Override
+	public void writeData(NBTTagCompound nbt)
+	{
+		nbt.setInteger("id", id);
+		nbt.setString("title", title.getString());
+
+		if (!description.getList().isEmpty())
+		{
+			NBTTagList list = new NBTTagList();
+
+			for (ConfigString v : description)
+			{
+				list.appendTag(new NBTTagString(v.getString()));
+			}
+
+			nbt.setTag("description", list);
+		}
+
+		if (!icon.getItem().isEmpty())
+		{
+			nbt.setTag("icon", icon.getItem().serializeNBT());
+		}
+
+		if (!dependencies.isEmpty())
+		{
+			nbt.setIntArray("dependencies", dependencies.toIntArray());
+		}
+
+		if (!quests.isEmpty())
+		{
+			NBTTagList questsList = new NBTTagList();
+
+			for (Quest quest : quests)
+			{
+				NBTTagCompound questNBT = new NBTTagCompound();
+				quest.writeData(questNBT);
+				questsList.appendTag(questNBT);
+			}
+
+			nbt.setTag("quests", questsList);
+		}
 	}
 
 	@Override
@@ -88,6 +170,7 @@ public final class QuestChapter extends ProgressingQuestObject
 		}
 	}
 
+	@Override
 	public Icon getIcon()
 	{
 		if (cachedIcon != null)
@@ -95,7 +178,7 @@ public final class QuestChapter extends ProgressingQuestObject
 			return cachedIcon;
 		}
 
-		cachedIcon = ItemIcon.getItemIcon(icon);
+		cachedIcon = ItemIcon.getItemIcon(icon.getItem());
 
 		if (cachedIcon.isEmpty())
 		{
@@ -113,6 +196,12 @@ public final class QuestChapter extends ProgressingQuestObject
 	}
 
 	@Override
+	public ITextComponent getDisplayName()
+	{
+		return new TextComponentString(title.getString());
+	}
+
+	@Override
 	public void delete()
 	{
 		super.delete();
@@ -122,5 +211,13 @@ public final class QuestChapter extends ProgressingQuestObject
 		{
 			quest.delete();
 		}
+	}
+
+	@Override
+	public void getConfig(ConfigGroup group)
+	{
+		group.add(FTBQuests.MOD_ID, "title", title);
+		group.add(FTBQuests.MOD_ID, "description", description);
+		group.add(FTBQuests.MOD_ID, "icon", icon);
 	}
 }

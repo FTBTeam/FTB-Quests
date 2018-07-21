@@ -1,12 +1,18 @@
 package com.feed_the_beast.ftbquests.quest.rewards;
 
+import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
+import com.feed_the_beast.ftblib.lib.config.ConfigString;
 import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.util.NBTUtils;
+import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.nbt.JsonToNBT;
+import net.minecraft.nbt.NBTException;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -16,12 +22,12 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class UnknownReward extends QuestReward
 {
 	public static final String ID = "unknown";
-	private final NBTTagCompound nbt;
+	private NBTTagCompound nbt;
 	private String hover;
 
-	public UnknownReward(Quest parent, int id, NBTTagCompound n)
+	public UnknownReward(Quest parent, NBTTagCompound n)
 	{
-		super(parent, id);
+		super(parent, n);
 		nbt = n;
 	}
 
@@ -51,9 +57,9 @@ public class UnknownReward extends QuestReward
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public String getDisplayName()
+	public ITextComponent getDisplayName()
 	{
-		return I18n.format("ftbquests.gui.reward.unknown");
+		return new TextComponentTranslation("ftbquests.gui.reward.unknown");
 	}
 
 	public String getHover()
@@ -69,5 +75,31 @@ public class UnknownReward extends QuestReward
 	@Override
 	public void reward(EntityPlayerMP player)
 	{
+	}
+
+	@Override
+	public void getConfig(ConfigGroup group)
+	{
+		group.add(FTBQuests.MOD_ID, "nbt", new ConfigString()
+		{
+			@Override
+			public String getString()
+			{
+				return nbt.toString();
+			}
+
+			@Override
+			public void setString(String v)
+			{
+				try
+				{
+					nbt = JsonToNBT.getTagFromJson(v);
+				}
+				catch (NBTException e)
+				{
+					e.printStackTrace();
+				}
+			}
+		});
 	}
 }

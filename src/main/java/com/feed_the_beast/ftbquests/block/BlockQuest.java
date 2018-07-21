@@ -88,7 +88,7 @@ public class BlockQuest extends BlockBase
 
 		if (taskData == null)
 		{
-			player.sendMessage(StringUtils.color(new TextComponentTranslation("tile.ftbquests.quest_block.missing_data"), TextFormatting.RED));
+			player.sendStatusMessage(StringUtils.color(new TextComponentTranslation("tile.ftbquests.quest_block.missing_data"), TextFormatting.RED), true);
 		}
 		else if (Universe.get().getPlayer(player).team.getName().equals(taskData.data.getTeamID()))
 		{
@@ -96,7 +96,7 @@ public class BlockQuest extends BlockBase
 		}
 		else
 		{
-			player.sendMessage(StringUtils.color(new TextComponentTranslation("tile.ftbquests.quest_block.no_perm"), TextFormatting.RED));
+			player.sendStatusMessage(StringUtils.color(new TextComponentTranslation("tile.ftbquests.quest_block.no_perm"), TextFormatting.RED), true);
 		}
 
 		return true;

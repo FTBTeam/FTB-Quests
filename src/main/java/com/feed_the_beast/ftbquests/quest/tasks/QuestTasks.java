@@ -16,7 +16,7 @@ public class QuestTasks
 	public interface TaskProvider
 	{
 		@Nullable
-		QuestTask create(Quest quest, int id, NBTTagCompound nbt);
+		QuestTask create(Quest quest, NBTTagCompound nbt);
 	}
 
 	private static final Map<String, TaskProvider> MAP0 = new HashMap<>();
@@ -35,13 +35,13 @@ public class QuestTasks
 		add(ForgeEnergyTask.ID, ForgeEnergyTask::new);
 	}
 
-	public static QuestTask createTask(Quest quest, int id, NBTTagCompound nbt)
+	public static QuestTask createTask(Quest quest, NBTTagCompound nbt)
 	{
 		TaskProvider provider = MAP0.get(nbt.getString("type"));
 
 		if (provider != null)
 		{
-			QuestTask task = provider.create(quest, id, nbt);
+			QuestTask task = provider.create(quest, nbt);
 
 			if (task != null && !task.isInvalid())
 			{
@@ -49,6 +49,6 @@ public class QuestTasks
 			}
 		}
 
-		return new UnknownTask(quest, id, nbt);
+		return new UnknownTask(quest, nbt);
 	}
 }

@@ -1,6 +1,9 @@
 package com.feed_the_beast.ftbquests.quest.tasks;
 
+import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
+import com.feed_the_beast.ftblib.lib.config.ConfigInt;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
+import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.block.QuestBlockData;
 import com.feed_the_beast.ftbquests.gui.ContainerFluidTask;
@@ -11,6 +14,8 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
@@ -19,8 +24,6 @@ import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.FluidTankProperties;
 import net.minecraftforge.fluids.capability.IFluidHandlerItem;
 import net.minecraftforge.fluids.capability.IFluidTankProperties;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemHandlerHelper;
@@ -35,11 +38,11 @@ public class FluidTask extends QuestTask
 	public static final String ID = "fluid";
 
 	public final FluidStack fluid;
-	public final int amount;
+	public final ConfigInt amount;
 
-	public FluidTask(Quest quest, int id, NBTTagCompound nbt)
+	public FluidTask(Quest quest, NBTTagCompound nbt)
 	{
-		super(quest, id);
+		super(quest, nbt);
 
 		Fluid f = FluidRegistry.getFluid(nbt.getString("fluid"));
 
@@ -52,19 +55,19 @@ public class FluidTask extends QuestTask
 			fluid = null;
 		}
 
-		amount = nbt.hasKey("amount") ? nbt.getInteger("amount") : 1000;
+		amount = new ConfigInt(nbt.hasKey("amount") ? nbt.getInteger("amount") : 1000, 1, Integer.MAX_VALUE);
 	}
 
 	@Override
 	public boolean isInvalid()
 	{
-		return amount <= 0 || fluid == null || super.isInvalid();
+		return fluid == null || super.isInvalid();
 	}
 
 	@Override
 	public int getMaxProgress()
 	{
-		return amount;
+		return amount.getInt();
 	}
 
 	@Override
@@ -79,9 +82,9 @@ public class FluidTask extends QuestTask
 		nbt.setString("type", "fluid");
 		nbt.setString("fluid", fluid.getFluid().getName());
 
-		if (amount != 1000)
+		if (amount.getInt() != 1000)
 		{
-			nbt.setInteger("amount", amount);
+			nbt.setInteger("amount", amount.getInt());
 		}
 
 		if (fluid.tag != null && !fluid.tag.isEmpty())
@@ -97,10 +100,10 @@ public class FluidTask extends QuestTask
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
-	public String getDisplayName()
+	public ITextComponent getDisplayName()
 	{
 		StringBuilder builder = new StringBuilder();
+		int amount = getMaxProgress();
 
 		if (amount >= 1000)
 		{
@@ -120,8 +123,15 @@ public class FluidTask extends QuestTask
 		}
 
 		builder.append("b of ");
-		builder.append(fluid.getLocalizedName());
-		return builder.toString();
+		builder.append(fluid.getLocalizedName()); //TODO: PR Forge to fix this
+		return new TextComponentString(builder.toString());
+	}
+
+	@Override
+	public void getConfig(ConfigGroup group)
+	{
+		//group.add(FTBQuests.MOD_ID, "fluid", fluid);
+		group.add(FTBQuests.MOD_ID, "amount", amount);
 	}
 
 	@Override
@@ -139,7 +149,7 @@ public class FluidTask extends QuestTask
 		{
 			super(t, data);
 			properties = new IFluidTankProperties[1];
-			properties[0] = new FluidTankProperties(task.fluid, task.amount, true, false);
+			properties[0] = new FluidTankProperties(task.fluid, task.getMaxProgress(), true, false);
 		}
 
 		@Override

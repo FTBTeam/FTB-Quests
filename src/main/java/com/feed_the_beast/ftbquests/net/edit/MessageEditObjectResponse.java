@@ -1,35 +1,32 @@
 package com.feed_the_beast.ftbquests.net.edit;
 
+import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToClient;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.gui.ClientQuestList;
-import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.QuestChapter;
+import com.feed_the_beast.ftbquests.quest.QuestObject;
+import com.google.gson.JsonElement;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * @author LatvianModder
  */
-public class MessageCreateQuestResponse extends MessageToClient
+public class MessageEditObjectResponse extends MessageToClient
 {
-	private int id, chapter;
-	private String title;
-	private int x, y;
+	private int id;
+	private JsonElement json;
 
-	public MessageCreateQuestResponse()
+	public MessageEditObjectResponse()
 	{
 	}
 
-	public MessageCreateQuestResponse(int i, int c, String t, int _x, int _y)
+	public MessageEditObjectResponse(int i, JsonElement j)
 	{
 		id = i;
-		chapter = c;
-		title = t;
-		x = _x;
-		y = _y;
+		json = j;
 	}
 
 	@Override
@@ -42,20 +39,14 @@ public class MessageCreateQuestResponse extends MessageToClient
 	public void writeData(DataOut data)
 	{
 		data.writeInt(id);
-		data.writeInt(chapter);
-		data.writeString(title);
-		data.writeInt(x);
-		data.writeInt(y);
+		data.writeJson(json);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
 		id = data.readInt();
-		chapter = data.readInt();
-		title = data.readString();
-		x = data.readInt();
-		y = data.readInt();
+		json = data.readJson();
 	}
 
 	@Override
@@ -64,16 +55,13 @@ public class MessageCreateQuestResponse extends MessageToClient
 	{
 		if (ClientQuestList.INSTANCE != null)
 		{
-			QuestChapter c = ClientQuestList.INSTANCE.getChapter(chapter);
+			QuestObject object = ClientQuestList.INSTANCE.get(id);
 
-			if (c != null)
+			if (object != null)
 			{
-				Quest quest = new Quest(c, id);
-				quest.title = title;
-				quest.x = x;
-				quest.y = y;
-				ClientQuestList.INSTANCE.objectMap.put(quest.id, quest);
-				c.quests.add(quest);
+				ConfigGroup group = new ConfigGroup(null);
+				object.getConfig(group);
+				group.fromJson(json);
 				ClientQuestList.INSTANCE.refreshGui(ClientQuestList.INSTANCE);
 			}
 		}

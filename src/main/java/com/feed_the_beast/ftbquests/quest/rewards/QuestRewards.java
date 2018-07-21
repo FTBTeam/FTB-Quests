@@ -16,7 +16,7 @@ public class QuestRewards
 	public interface RewardProvider
 	{
 		@Nullable
-		QuestReward create(Quest quest, int id, NBTTagCompound nbt);
+		QuestReward create(Quest quest, NBTTagCompound nbt);
 	}
 
 	private static final Map<String, RewardProvider> MAP0 = new HashMap<>();
@@ -32,16 +32,16 @@ public class QuestRewards
 		add(UnknownReward.ID, UnknownReward::new);
 		add(ItemReward.ID, ItemReward::new);
 		add(ExperienceReward.ID, ExperienceReward::new);
-		add(ExperienceLevelsReward.ID, ExperienceLevelsReward::new);
+		add(ExperienceLevelsReward.ID_LEVELS, ExperienceLevelsReward::new);
 	}
 
-	public static QuestReward createReward(Quest quest, int id, NBTTagCompound nbt)
+	public static QuestReward createReward(Quest quest, NBTTagCompound nbt)
 	{
 		RewardProvider provider = MAP0.get(nbt.getString("type"));
 
 		if (provider != null)
 		{
-			QuestReward reward = provider.create(quest, id, nbt);
+			QuestReward reward = provider.create(quest, nbt);
 
 			if (reward != null && !reward.isInvalid())
 			{
@@ -50,6 +50,6 @@ public class QuestRewards
 			}
 		}
 
-		return new UnknownReward(quest, id, nbt);
+		return new UnknownReward(quest, nbt);
 	}
 }

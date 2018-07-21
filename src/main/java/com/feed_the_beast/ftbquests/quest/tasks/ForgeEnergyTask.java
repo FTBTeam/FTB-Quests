@@ -1,16 +1,18 @@
 package com.feed_the_beast.ftbquests.quest.tasks;
 
+import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
+import com.feed_the_beast.ftblib.lib.config.ConfigInt;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
+import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -22,18 +24,18 @@ public class ForgeEnergyTask extends QuestTask
 {
 	public static final String ID = "forge_energy";
 
-	public final int value;
+	public final ConfigInt value;
 
-	public ForgeEnergyTask(Quest quest, int id, NBTTagCompound nbt)
+	public ForgeEnergyTask(Quest quest, NBTTagCompound nbt)
 	{
-		super(quest, id);
-		value = nbt.getInteger("value");
+		super(quest, nbt);
+		value = new ConfigInt(nbt.getInteger("value"), 0, Integer.MAX_VALUE);
 	}
 
 	@Override
 	public int getMaxProgress()
 	{
-		return value;
+		return value.getInt();
 	}
 
 	@Override
@@ -45,7 +47,7 @@ public class ForgeEnergyTask extends QuestTask
 	@Override
 	public void writeData(NBTTagCompound nbt)
 	{
-		nbt.setInteger("value", value);
+		nbt.setInteger("value", value.getInt());
 	}
 
 	@Override
@@ -55,10 +57,15 @@ public class ForgeEnergyTask extends QuestTask
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
-	public String getDisplayName()
+	public ITextComponent getDisplayName()
 	{
-		return I18n.format("ftbquests.gui.task.forge_energy", value);
+		return new TextComponentTranslation("ftbquests.gui.task.forge_energy", value);
+	}
+
+	@Override
+	public void getConfig(ConfigGroup group)
+	{
+		group.add(FTBQuests.MOD_ID, "value", value);
 	}
 
 	@Override
@@ -90,9 +97,9 @@ public class ForgeEnergyTask extends QuestTask
 		@Override
 		public int receiveEnergy(int maxReceive, boolean simulate)
 		{
-			if (maxReceive > 0 && getProgress() < task.value)
+			if (maxReceive > 0 && getProgress() < task.getMaxProgress())
 			{
-				int add = Math.min(maxReceive, task.value - getProgress());
+				int add = Math.min(maxReceive, task.getMaxProgress() - getProgress());
 
 				if (add > 0 && setProgress(getProgress() + add, simulate))
 				{
@@ -118,7 +125,7 @@ public class ForgeEnergyTask extends QuestTask
 		@Override
 		public int getMaxEnergyStored()
 		{
-			return task.value;
+			return task.getMaxProgress();
 		}
 
 		@Override

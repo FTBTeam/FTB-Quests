@@ -1,66 +1,39 @@
 package com.feed_the_beast.ftbquests.quest.rewards;
 
-import com.feed_the_beast.ftblib.lib.icon.Icon;
-import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.init.Items;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * @author LatvianModder
  */
-public class ExperienceLevelsReward extends QuestReward
+public class ExperienceLevelsReward extends ExperienceReward
 {
-	public static final String ID = "xp_levels";
+	public static final String ID_LEVELS = "xp_levels";
 
-	private final int value;
-
-	public ExperienceLevelsReward(Quest quest, int id, NBTTagCompound nbt)
+	public ExperienceLevelsReward(Quest quest, NBTTagCompound nbt)
 	{
-		super(quest, id);
-		value = nbt.getInteger("value");
-	}
-
-	@Override
-	public boolean isInvalid()
-	{
-		return value <= 0 || super.isInvalid();
+		super(quest, nbt);
 	}
 
 	@Override
 	public String getName()
 	{
-		return ID;
+		return ID_LEVELS;
 	}
 
 	@Override
-	public void writeData(NBTTagCompound nbt)
+	public ITextComponent getDisplayName()
 	{
-		nbt.setInteger("value", value);
-	}
-
-	@Override
-	public Icon getIcon()
-	{
-		return ItemIcon.getItemIcon(new ItemStack(Items.EXPERIENCE_BOTTLE));
-	}
-
-	@Override
-	@SideOnly(Side.CLIENT)
-	public String getDisplayName()
-	{
-		return I18n.format("ftbquests.gui.reward.xp_levels", TextFormatting.GREEN + "+" + value);
+		return new TextComponentTranslation("ftbquests.gui.reward.xp_levels", TextFormatting.GREEN + "+" + value.getInt());
 	}
 
 	@Override
 	public void reward(EntityPlayerMP player)
 	{
-		player.addExperienceLevel(value);
+		player.addExperienceLevel(value.getInt());
 	}
 }
