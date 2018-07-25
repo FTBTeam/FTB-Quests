@@ -70,7 +70,7 @@ public class ItemBlockQuest extends ItemBlockBase
 			tooltip.add(I18n.format("ftbquests.gui.owner") + ": " + TextFormatting.DARK_GREEN + data.data.getTeamID());
 		}
 
-		tooltip.add(I18n.format("ftbquests.gui.task") + ": " + TextFormatting.YELLOW + data.task.getDisplayName());
+		tooltip.add(I18n.format("ftbquests.gui.task") + ": " + TextFormatting.YELLOW + data.task.getDisplayName().getFormattedText());
 		int max = data.task.getMaxProgress();
 
 		if (max <= 0)

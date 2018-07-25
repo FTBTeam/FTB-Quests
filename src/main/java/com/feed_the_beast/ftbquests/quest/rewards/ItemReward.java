@@ -4,8 +4,6 @@ import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigItemStack;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
-import com.feed_the_beast.ftblib.lib.util.NBTUtils;
-import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
@@ -25,13 +23,13 @@ public class ItemReward extends QuestReward
 	public ItemReward(Quest quest, NBTTagCompound nbt)
 	{
 		super(quest, nbt);
-		item = new ConfigItemStack(new ItemStack(nbt));
+		item = new ConfigItemStack(new ItemStack(nbt.getCompoundTag("item")));
 	}
 
 	@Override
 	public boolean isInvalid()
 	{
-		return item.getItem().isEmpty() || super.isInvalid();
+		return item.getStack().isEmpty() || super.isInvalid();
 	}
 
 	@Override
@@ -43,19 +41,19 @@ public class ItemReward extends QuestReward
 	@Override
 	public void writeData(NBTTagCompound nbt)
 	{
-		NBTUtils.copyTags(item.getItem().serializeNBT(), nbt);
+		nbt.setTag("item", item.getStack().serializeNBT());
 	}
 
 	@Override
 	public Icon getIcon()
 	{
-		return ItemIcon.getItemIcon(item.getItem());
+		return ItemIcon.getItemIcon(item.getStack());
 	}
 
 	@Override
 	public ITextComponent getDisplayName()
 	{
-		ItemStack stack = item.getItem();
+		ItemStack stack = item.getStack();
 
 		if (stack.getCount() > 1)
 		{
@@ -68,12 +66,12 @@ public class ItemReward extends QuestReward
 	@Override
 	public void reward(EntityPlayerMP player)
 	{
-		ItemHandlerHelper.giveItemToPlayer(player, item.getItem().copy());
+		ItemHandlerHelper.giveItemToPlayer(player, item.getStack().copy());
 	}
 
 	@Override
 	public void getConfig(ConfigGroup group)
 	{
-		group.add(FTBQuests.MOD_ID, "item", item);
+		group.add("item", item);
 	}
 }

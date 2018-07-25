@@ -7,6 +7,8 @@ import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.IStringSerializable;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentTranslation;
 
 /**
  * @author LatvianModder
@@ -39,6 +41,12 @@ public abstract class QuestReward extends QuestObject implements IStringSerializ
 	{
 		super.delete();
 		quest.rewards.remove(this);
+	}
+
+	@Override
+	public ITextComponent getDisplayName()
+	{
+		return new TextComponentTranslation("ftbquests.reward." + getName());
 	}
 
 	public abstract void reward(EntityPlayerMP player);

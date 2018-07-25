@@ -3,7 +3,6 @@ package com.feed_the_beast.ftbquests.integration;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigInt;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
-import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.block.TileQuest;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.Quest;
@@ -60,7 +59,7 @@ public class IC2EnergyTask extends QuestTask
 	@Override
 	public ITextComponent getDisplayName()
 	{
-		return new TextComponentTranslation("ftbquests.gui.task.ic2_energy", value);
+		return new TextComponentTranslation("ftbquests.gui.task.ic2_energy.text", value);
 	}
 
 	@Override
@@ -72,7 +71,7 @@ public class IC2EnergyTask extends QuestTask
 	@Override
 	public void getConfig(ConfigGroup group)
 	{
-		group.add(FTBQuests.MOD_ID, "value", value);
+		group.add("value", value);
 	}
 
 	@Override

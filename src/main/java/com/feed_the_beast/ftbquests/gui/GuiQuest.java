@@ -1,6 +1,8 @@
 package com.feed_the_beast.ftbquests.gui;
 
+import com.feed_the_beast.ftblib.client.GuiEditConfig;
 import com.feed_the_beast.ftblib.lib.client.ClientUtils;
+import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigString;
 import com.feed_the_beast.ftblib.lib.gui.Button;
 import com.feed_the_beast.ftblib.lib.gui.GuiBase;
@@ -8,22 +10,31 @@ import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
 import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.gui.PanelScrollBar;
+import com.feed_the_beast.ftblib.lib.gui.SimpleTextButton;
 import com.feed_the_beast.ftblib.lib.gui.Widget;
 import com.feed_the_beast.ftblib.lib.gui.WidgetLayout;
 import com.feed_the_beast.ftblib.lib.gui.WidgetType;
+import com.feed_the_beast.ftblib.lib.gui.misc.GuiButtonListBase;
 import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.net.MessageClaimReward;
 import com.feed_the_beast.ftbquests.net.MessageOpenTask;
+import com.feed_the_beast.ftbquests.net.edit.MessageCreateObject;
+import com.feed_the_beast.ftbquests.net.edit.MessageDeleteObject;
+import com.feed_the_beast.ftbquests.net.edit.MessageEditObject;
 import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.quest.rewards.QuestReward;
+import com.feed_the_beast.ftbquests.quest.rewards.QuestRewards;
 import com.feed_the_beast.ftbquests.quest.rewards.UnknownReward;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
+import com.feed_the_beast.ftbquests.quest.tasks.QuestTasks;
 import com.feed_the_beast.ftbquests.quest.tasks.UnknownTask;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.TextFormatting;
 
 import javax.annotation.Nullable;
@@ -107,7 +118,24 @@ public class GuiQuest extends GuiBase
 		public void onClicked(MouseButton button)
 		{
 			GuiHelper.playClickSound();
-			new MessageOpenTask(task.id).sendToServer();
+
+			if (questTreeGui.questList.editingMode && isCtrlKeyDown())
+			{
+				if (button.isRight())
+				{
+					new MessageDeleteObject(task.id).sendToServer();
+					task.delete();
+					getGui().refreshWidgets();
+				}
+				else
+				{
+					new MessageEditObject(task.id).sendToServer();
+				}
+			}
+			else if (!(task instanceof UnknownTask))
+			{
+				new MessageOpenTask(task.id).sendToServer();
+			}
 		}
 
 		@Override
@@ -146,6 +174,83 @@ public class GuiQuest extends GuiBase
 		}
 	}
 
+	public class ButtonAddTask extends Button
+	{
+		public ButtonAddTask(Panel panel)
+		{
+			super(panel, I18n.format("gui.add"), GuiIcons.ADD);
+			setPosAndSize(0, 20, 20, 20);
+		}
+
+		@Override
+		public void onClicked(MouseButton button)
+		{
+			GuiHelper.playClickSound();
+			new GuiSelectTaskType().openGui();
+		}
+
+		@Override
+		public void draw()
+		{
+			int ax = getAX();
+			int ay = getAY();
+
+			getButtonBackground().draw(ax, ay, width, height);
+			getIcon().draw(ax + (width - 16) / 2, ay + (height - 16) / 2, 16, 16);
+		}
+	}
+
+	public class GuiSelectTaskType extends GuiButtonListBase
+	{
+		public GuiSelectTaskType()
+		{
+			setTitle(I18n.format("ftbquests.gui.select_task_type"));
+		}
+
+		@Override
+		public void addButtons(Panel panel)
+		{
+			for (String type : QuestTasks.MAP.keySet())
+			{
+				NBTTagCompound nbt = new NBTTagCompound();
+				nbt.setString("type", type);
+				QuestTask task = QuestTasks.createTask(quest, nbt, true);
+
+				if (!(task instanceof UnknownTask))
+				{
+					Icon icon = task.getIcon();
+
+					if (icon.isEmpty())
+					{
+						icon = GuiIcons.DICE;
+					}
+
+					String key = "ftbquests.task." + type;
+					panel.add(new SimpleTextButton(panel, I18n.hasKey(key) ? I18n.format(key) : type, icon)
+					{
+						@Override
+						public void onClicked(MouseButton button)
+						{
+							GuiHelper.playClickSound();
+
+							ConfigGroup group = new ConfigGroup("ftbquests");
+							task.getConfig(group.getGroup("task").getGroup(type));
+
+							new GuiEditConfig(group, (g, sender) -> {
+								NBTTagCompound nbt = new NBTTagCompound();
+								task.writeData(nbt);
+								nbt.setString("type", type);
+								new MessageCreateObject(QuestObjectType.TASK, quest.id, nbt).sendToServer();
+								GuiQuest.this.openGui();
+								questTreeGui.questList.refreshGui(questTreeGui.questList);
+							}).openGui();
+						}
+					});
+				}
+			}
+		}
+	}
+
 	public class ButtonReward extends Button
 	{
 		public QuestReward reward;
@@ -162,7 +267,20 @@ public class GuiQuest extends GuiBase
 		{
 			GuiHelper.playClickSound();
 
-			if (questTreeGui.questList.claimReward(ClientUtils.MC.player, reward))
+			if (questTreeGui.questList.editingMode && isCtrlKeyDown())
+			{
+				if (button.isRight())
+				{
+					new MessageDeleteObject(reward.id).sendToServer();
+					reward.delete();
+					getGui().refreshWidgets();
+				}
+				else
+				{
+					new MessageEditObject(reward.id).sendToServer();
+				}
+			}
+			else if (!(reward instanceof UnknownReward) && questTreeGui.questList.claimReward(ClientUtils.MC.player, reward))
 			{
 				new MessageClaimReward(reward.id).sendToServer();
 			}
@@ -188,7 +306,11 @@ public class GuiQuest extends GuiBase
 		@Override
 		public WidgetType getWidgetType()
 		{
-			if (!quest.isComplete(questTreeGui.questList) || questTreeGui.questList.isRewardClaimed(ClientUtils.MC.player, reward))
+			if (questTreeGui.questList.editingMode && isCtrlKeyDown())
+			{
+				return super.getWidgetType();
+			}
+			else if (!quest.isComplete(questTreeGui.questList) || questTreeGui.questList.isRewardClaimed(ClientUtils.MC.player, reward))
 			{
 				return WidgetType.DISABLED;
 			}
@@ -207,6 +329,83 @@ public class GuiQuest extends GuiBase
 			if (!icon.isEmpty())
 			{
 				icon.draw(ax + (width - 16) / 2, ay + (height - 16) / 2, 16, 16);
+			}
+		}
+	}
+
+	public class ButtonAddReward extends Button
+	{
+		public ButtonAddReward(Panel panel)
+		{
+			super(panel, I18n.format("gui.add"), GuiIcons.ADD);
+			setPosAndSize(0, 20, 20, 20);
+		}
+
+		@Override
+		public void onClicked(MouseButton button)
+		{
+			GuiHelper.playClickSound();
+			new GuiSelectRewardType().openGui();
+		}
+
+		@Override
+		public void draw()
+		{
+			int ax = getAX();
+			int ay = getAY();
+
+			getButtonBackground().draw(ax, ay, width, height);
+			getIcon().draw(ax + (width - 16) / 2, ay + (height - 16) / 2, 16, 16);
+		}
+	}
+
+	public class GuiSelectRewardType extends GuiButtonListBase
+	{
+		public GuiSelectRewardType()
+		{
+			setTitle(I18n.format("ftbquests.gui.select_reward_type"));
+		}
+
+		@Override
+		public void addButtons(Panel panel)
+		{
+			for (String type : QuestRewards.MAP.keySet())
+			{
+				NBTTagCompound nbt = new NBTTagCompound();
+				nbt.setString("type", type);
+				QuestReward reward = QuestRewards.createReward(quest, nbt, true);
+
+				if (!(reward instanceof UnknownReward))
+				{
+					Icon icon = reward.getIcon();
+
+					if (icon.isEmpty())
+					{
+						icon = GuiIcons.DICE;
+					}
+
+					String key = "ftbquests.reward." + type;
+					panel.add(new SimpleTextButton(panel, I18n.hasKey(key) ? I18n.format(key) : type, icon)
+					{
+						@Override
+						public void onClicked(MouseButton button)
+						{
+							GuiHelper.playClickSound();
+
+							ConfigGroup group = new ConfigGroup("ftbquests");
+							reward.getConfig(group.getGroup("reward").getGroup(type));
+
+							new GuiEditConfig(group, (g, sender) -> {
+								NBTTagCompound nbt = new NBTTagCompound();
+								reward.writeData(nbt);
+								nbt.setString("type", type);
+								new MessageCreateObject(QuestObjectType.REWARD, quest.id, nbt).sendToServer();
+								GuiQuest.this.openGui();
+								questTreeGui.questList.refreshGui(questTreeGui.questList);
+							}).openGui();
+						}
+					});
+				}
 			}
 		}
 	}
@@ -306,6 +505,11 @@ public class GuiQuest extends GuiBase
 				{
 					add(new ButtonTask(this, task));
 				}
+
+				if (questTreeGui.questList.editingMode)
+				{
+					add(new ButtonAddTask(this));
+				}
 			}
 
 			@Override
@@ -325,7 +529,7 @@ public class GuiQuest extends GuiBase
 			@Override
 			public void drawPanelBackground(int ax, int ay)
 			{
-				drawString(TextFormatting.RED + I18n.format("ftbquests.gui.tasks"), ax + width / 2, ay + 9, CENTERED);
+				drawString(TextFormatting.RED + I18n.format("ftbquests.tasks"), ax + width / 2, ay + 9, CENTERED);
 			}
 		};
 
@@ -338,6 +542,11 @@ public class GuiQuest extends GuiBase
 				{
 					add(new ButtonReward(this, reward));
 				}
+
+				if (questTreeGui.questList.editingMode)
+				{
+					add(new ButtonAddReward(this));
+				}
 			}
 
 			@Override
@@ -357,7 +566,7 @@ public class GuiQuest extends GuiBase
 			@Override
 			public void drawPanelBackground(int ax, int ay)
 			{
-				drawString(TextFormatting.BLUE + I18n.format("ftbquests.gui.rewards"), ax + width / 2, ay + 9, CENTERED);
+				drawString(TextFormatting.BLUE + I18n.format("ftbquests.rewards"), ax + width / 2, ay + 9, CENTERED);
 			}
 		};
 	}

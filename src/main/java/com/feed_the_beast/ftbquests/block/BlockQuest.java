@@ -5,6 +5,7 @@ import com.feed_the_beast.ftblib.lib.data.Universe;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.net.MessageOpenTask;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskData;
+import com.feed_the_beast.ftbquests.quest.tasks.UnknownTask;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -86,7 +87,7 @@ public class BlockQuest extends BlockBase
 		EntityPlayerMP player = (EntityPlayerMP) ep;
 		QuestTaskData taskData = tile.data.getTaskData();
 
-		if (taskData == null)
+		if (taskData == null || taskData.task instanceof UnknownTask)
 		{
 			player.sendStatusMessage(StringUtils.color(new TextComponentTranslation("tile.ftbquests.quest_block.missing_data"), TextFormatting.RED), true);
 		}

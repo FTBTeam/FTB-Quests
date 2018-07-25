@@ -3,7 +3,6 @@ package com.feed_the_beast.ftbquests.quest.tasks;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigInt;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
-import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import net.minecraft.nbt.NBTTagCompound;
@@ -59,13 +58,13 @@ public class ForgeEnergyTask extends QuestTask
 	@Override
 	public ITextComponent getDisplayName()
 	{
-		return new TextComponentTranslation("ftbquests.gui.task.forge_energy", value);
+		return new TextComponentTranslation("ftbquests.task.forge_energy.text", value);
 	}
 
 	@Override
 	public void getConfig(ConfigGroup group)
 	{
-		group.add(FTBQuests.MOD_ID, "value", value);
+		group.add("value", value);
 	}
 
 	@Override

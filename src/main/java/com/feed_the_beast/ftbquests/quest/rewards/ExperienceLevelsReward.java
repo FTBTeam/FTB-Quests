@@ -28,7 +28,7 @@ public class ExperienceLevelsReward extends ExperienceReward
 	@Override
 	public ITextComponent getDisplayName()
 	{
-		return new TextComponentTranslation("ftbquests.gui.reward.xp_levels", TextFormatting.GREEN + "+" + value.getInt());
+		return new TextComponentTranslation("ftbquests.reward.xp_levels.text", TextFormatting.GREEN + "+" + value.getInt());
 	}
 
 	@Override

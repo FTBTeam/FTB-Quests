@@ -105,7 +105,7 @@ public class QuestBlockData implements ICapabilitySerializable<NBTTagCompound>
 	{
 		owner = nbt.getString("Owner");
 		task = nbt.getInteger("Task");
-		cachedTaskData = null;
+		clearCache();
 	}
 
 	public void clearCache()

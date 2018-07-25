@@ -8,7 +8,6 @@ import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.IconAnimation;
 import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
 import com.feed_the_beast.ftblib.lib.util.StringJoiner;
-import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.gui.ContainerItemTask;
 import com.feed_the_beast.ftbquests.gui.ContainerTaskBase;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
@@ -100,9 +99,9 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 
 		for (ConfigItemStack v : items)
 		{
-			if (!v.getItem().isEmpty())
+			if (!v.getStack().isEmpty())
 			{
-				list.appendTag(v.getItem().serializeNBT());
+				list.appendTag(v.getStack().serializeNBT());
 			}
 		}
 
@@ -117,7 +116,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 
 		for (ConfigItemStack v : items)
 		{
-			Icon icon = ItemIcon.getItemIcon(v.getItem());
+			Icon icon = ItemIcon.getItemIcon(v.getStack());
 
 			if (!icon.isEmpty())
 			{
@@ -135,7 +134,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 
 		if (items.getList().size() == 1)
 		{
-			name = items.getList().get(0).getItem().getDisplayName();
+			name = items.getList().get(0).getStack().getDisplayName();
 		}
 		else
 		{
@@ -143,7 +142,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 
 			for (int i = 0; i < s.length; i++)
 			{
-				s[i] = items.getList().get(i).getItem().getDisplayName();
+				s[i] = items.getList().get(i).getStack().getDisplayName();
 			}
 
 			name = StringJoiner.with(", ").joinStrings(s);
@@ -171,7 +170,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 
 		for (ConfigItemStack v : items)
 		{
-			if (ItemStack.areItemStacksEqual(stack, v.getItem()))
+			if (ItemStack.areItemStacksEqual(stack, v.getStack()))
 			{
 				return true;
 			}
@@ -183,8 +182,8 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 	@Override
 	public void getConfig(ConfigGroup group)
 	{
-		group.add(FTBQuests.MOD_ID, "items", items);
-		group.add(FTBQuests.MOD_ID, "count", count);
+		group.add("items", items);
+		group.add("count", count);
 	}
 
 	@Override

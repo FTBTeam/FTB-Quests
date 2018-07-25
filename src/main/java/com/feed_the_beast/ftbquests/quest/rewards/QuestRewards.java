@@ -3,7 +3,6 @@ package com.feed_the_beast.ftbquests.quest.rewards;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import net.minecraft.nbt.NBTTagCompound;
 
-import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,7 +14,6 @@ public class QuestRewards
 {
 	public interface RewardProvider
 	{
-		@Nullable
 		QuestReward create(Quest quest, NBTTagCompound nbt);
 	}
 
@@ -35,7 +33,7 @@ public class QuestRewards
 		add(ExperienceLevelsReward.ID_LEVELS, ExperienceLevelsReward::new);
 	}
 
-	public static QuestReward createReward(Quest quest, NBTTagCompound nbt)
+	public static QuestReward createReward(Quest quest, NBTTagCompound nbt, boolean allowInvalid)
 	{
 		RewardProvider provider = MAP0.get(nbt.getString("type"));
 
@@ -43,13 +41,15 @@ public class QuestRewards
 		{
 			QuestReward reward = provider.create(quest, nbt);
 
-			if (reward != null && !reward.isInvalid())
+			if (allowInvalid || !reward.isInvalid())
 			{
 				reward.teamReward = nbt.getBoolean("team_reward");
 				return reward;
 			}
 		}
 
-		return new UnknownReward(quest, nbt);
+		QuestReward reward = new UnknownReward(quest, nbt);
+		reward.teamReward = nbt.getBoolean("team_reward");
+		return reward;
 	}
 }

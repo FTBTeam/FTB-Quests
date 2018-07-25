@@ -7,7 +7,7 @@ import com.feed_the_beast.ftblib.lib.net.MessageToClient;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.gui.ClientQuestList;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
-import com.google.gson.JsonElement;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -17,16 +17,16 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class MessageEditObjectResponse extends MessageToClient
 {
 	private int id;
-	private JsonElement json;
+	private NBTTagCompound nbt;
 
 	public MessageEditObjectResponse()
 	{
 	}
 
-	public MessageEditObjectResponse(int i, JsonElement j)
+	public MessageEditObjectResponse(int i, NBTTagCompound n)
 	{
 		id = i;
-		json = j;
+		nbt = n;
 	}
 
 	@Override
@@ -39,14 +39,14 @@ public class MessageEditObjectResponse extends MessageToClient
 	public void writeData(DataOut data)
 	{
 		data.writeInt(id);
-		data.writeJson(json);
+		data.writeNBT(nbt);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
 		id = data.readInt();
-		json = data.readJson();
+		nbt = data.readNBT();
 	}
 
 	@Override
@@ -59,9 +59,9 @@ public class MessageEditObjectResponse extends MessageToClient
 
 			if (object != null)
 			{
-				ConfigGroup group = new ConfigGroup(null);
+				ConfigGroup group = new ConfigGroup("questobject");
 				object.getConfig(group);
-				group.fromJson(json);
+				group.deserializeNBT(nbt);
 				ClientQuestList.INSTANCE.refreshGui(ClientQuestList.INSTANCE);
 			}
 		}

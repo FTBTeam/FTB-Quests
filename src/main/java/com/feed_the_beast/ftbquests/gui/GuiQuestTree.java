@@ -161,8 +161,16 @@ public class GuiQuestTree extends GuiBase
 		public void onClicked(MouseButton button)
 		{
 			GuiHelper.playClickSound();
-			questList.questGui = new GuiQuest(GuiQuestTree.this, quest);
-			questList.questGui.openGui();
+
+			if (questList.editingMode && isCtrlKeyDown())
+			{
+				new MessageEditObject(quest.id).sendToServer();
+			}
+			else
+			{
+				questList.questGui = new GuiQuest(GuiQuestTree.this, quest);
+				questList.questGui.openGui();
+			}
 		}
 
 		@Override
@@ -460,7 +468,7 @@ public class GuiQuestTree extends GuiBase
 
 		chapterOptionButtons.clear();
 
-		chapterOptionButtons.add(new ChapterOptionButton(this, "+", I18n.format("ftbquests.gui.quest_tree.zoom_in"))
+		chapterOptionButtons.add(new ChapterOptionButton(this, "+", I18n.format("ftbquests.gui.zoom_in"))
 		{
 			@Override
 			public void onClicked(MouseButton button)
@@ -478,7 +486,7 @@ public class GuiQuestTree extends GuiBase
 			}
 		});
 
-		chapterOptionButtons.add(new ChapterOptionButton(this, "-", I18n.format("ftbquests.gui.quest_tree.zoom_out"))
+		chapterOptionButtons.add(new ChapterOptionButton(this, "-", I18n.format("ftbquests.gui.zoom_out"))
 		{
 			@Override
 			public void onClicked(MouseButton button)
@@ -496,9 +504,9 @@ public class GuiQuestTree extends GuiBase
 			}
 		});
 
-		if (ClientQuestList.INSTANCE.editingMode)
+		if (questList.editingMode)
 		{
-			chapterOptionButtons.add(new ChapterOptionButton(this, "X", I18n.format("selectServer.delete"))
+			chapterOptionButtons.add(new ChapterOptionButton(this, "X", I18n.format("ftbquests.gui.delete_chapter"))
 			{
 				@Override
 				public void onClicked(MouseButton button)
@@ -516,7 +524,7 @@ public class GuiQuestTree extends GuiBase
 				}
 			});
 
-			chapterOptionButtons.add(new ChapterOptionButton(this, "E", I18n.format("selectWorld.edit"))
+			chapterOptionButtons.add(new ChapterOptionButton(this, "E", I18n.format("ftbquests.gui.edit_chapter"))
 			{
 				@Override
 				public void onClicked(MouseButton button)
@@ -526,7 +534,7 @@ public class GuiQuestTree extends GuiBase
 				}
 			});
 
-			chapterOptionButtons.add(new ChapterOptionButton(this, "A", I18n.format("ftbquests.gui.quest_tree.add_chapter_after"))
+			chapterOptionButtons.add(new ChapterOptionButton(this, "A", I18n.format("ftbquests.gui.add_chapter_after"))
 			{
 				@Override
 				public void onClicked(MouseButton button)
@@ -548,7 +556,7 @@ public class GuiQuestTree extends GuiBase
 				}
 			});
 
-			chapterOptionButtons.add(new ChapterOptionButton(this, "B", I18n.format("ftbquests.gui.quest_tree.add_chapter_before"))
+			chapterOptionButtons.add(new ChapterOptionButton(this, "B", I18n.format("ftbquests.gui.add_chapter_before"))
 			{
 				@Override
 				public void onClicked(MouseButton button)
@@ -570,7 +578,7 @@ public class GuiQuestTree extends GuiBase
 				}
 			});
 
-			chapterOptionButtons.add(new ChapterOptionButton(this, "^", I18n.format("ftbquests.gui.quest_tree.move_up"))
+			chapterOptionButtons.add(new ChapterOptionButton(this, "^", I18n.format("ftbquests.gui.move_up"))
 			{
 				@Override
 				public WidgetType getWidgetType()
@@ -586,7 +594,7 @@ public class GuiQuestTree extends GuiBase
 				}
 			});
 
-			chapterOptionButtons.add(new ChapterOptionButton(this, "v", I18n.format("ftbquests.gui.quest_tree.move_down"))
+			chapterOptionButtons.add(new ChapterOptionButton(this, "v", I18n.format("ftbquests.gui.move_down"))
 			{
 				@Override
 				public WidgetType getWidgetType()
