@@ -8,7 +8,6 @@ import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.ServerQuestList;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraftforge.server.permission.PermissionAPI;
 
 /**
  * @author LatvianModder
@@ -51,7 +50,7 @@ public class MessageMoveChapter extends MessageToServer
 	@Override
 	public void onMessage(EntityPlayerMP player)
 	{
-		if (id != 0 && PermissionAPI.hasPermission(player, FTBQuests.PERM_EDIT))
+		if (id != 0 && FTBQuests.canEdit(player))
 		{
 			QuestChapter chapter = ServerQuestList.INSTANCE.getChapter(id);
 

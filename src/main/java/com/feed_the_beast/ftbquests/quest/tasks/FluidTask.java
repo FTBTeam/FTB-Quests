@@ -2,6 +2,8 @@ package com.feed_the_beast.ftbquests.quest.tasks;
 
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigInt;
+import com.feed_the_beast.ftblib.lib.config.ConfigNBT;
+import com.feed_the_beast.ftblib.lib.config.ConfigString;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftbquests.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.block.QuestBlockData;
@@ -36,24 +38,22 @@ public class FluidTask extends QuestTask
 {
 	public static final String ID = "fluid";
 
-	public final FluidStack fluid;
+	public Fluid fluid;
+	public final ConfigNBT fluidNBT;
 	public final ConfigInt amount;
 
 	public FluidTask(Quest quest, NBTTagCompound nbt)
 	{
 		super(quest, nbt);
 
-		Fluid f = FluidRegistry.getFluid(nbt.getString("fluid"));
+		fluid = FluidRegistry.getFluid(nbt.getString("fluid"));
 
-		if (f != null)
+		if (fluid == null)
 		{
-			fluid = new FluidStack(f, 0, nbt.hasKey("nbt") ? nbt.getCompoundTag("nbt") : null);
-		}
-		else
-		{
-			fluid = null;
+			fluid = FluidRegistry.WATER;
 		}
 
+		fluidNBT = new ConfigNBT(nbt.hasKey("nbt") ? nbt.getCompoundTag("nbt") : null);
 		amount = new ConfigInt(nbt.hasKey("amount") ? nbt.getInteger("amount") : 1000, 1, Integer.MAX_VALUE);
 	}
 
@@ -79,28 +79,28 @@ public class FluidTask extends QuestTask
 	public void writeData(NBTTagCompound nbt)
 	{
 		nbt.setString("type", "fluid");
-		nbt.setString("fluid", fluid.getFluid().getName());
+		nbt.setString("fluid", fluid.getName());
 
 		if (amount.getInt() != 1000)
 		{
 			nbt.setInteger("amount", amount.getInt());
 		}
 
-		if (fluid.tag != null && !fluid.tag.isEmpty())
+		if (fluidNBT.getNBT() != null)
 		{
-			nbt.setTag("nbt", fluid.tag);
+			nbt.setTag("nbt", fluidNBT.getNBT());
 		}
 	}
 
 	@Override
 	public Icon getIcon()
 	{
-		if (fluid == null)
-		{
-			return Icon.EMPTY;
-		}
+		return Icon.getIcon(fluid.getStill(createFluidStack(1000)).toString());
+	}
 
-		return Icon.getIcon(fluid.getFluid().getStill(fluid).toString());
+	public FluidStack createFluidStack(int amount)
+	{
+		return new FluidStack(fluid, amount, fluidNBT.getNBT());
 	}
 
 	@Override
@@ -127,15 +127,41 @@ public class FluidTask extends QuestTask
 		}
 
 		builder.append("b of ");
-		builder.append(fluid.getLocalizedName()); //TODO: PR Forge to fix this
+		builder.append(createFluidStack(amount).getLocalizedName()); //TODO: PR Forge to fix this
 		return new TextComponentString(builder.toString());
 	}
 
 	@Override
 	public void getConfig(ConfigGroup group)
 	{
-		//group.add("fluid", fluid);
-		group.add("amount", amount);
+		group.add("fluid", new ConfigString()
+		{
+			@Override
+			public String getString()
+			{
+				return fluid.getName();
+			}
+
+			@Override
+			public void setString(String v)
+			{
+				fluid = FluidRegistry.getFluid(v);
+
+				if (fluid == null)
+				{
+					fluid = FluidRegistry.WATER;
+				}
+			}
+
+			@Override
+			public ITextComponent getStringForGUI()
+			{
+				return new TextComponentString(createFluidStack(1000).getLocalizedName());
+			}
+		}, new ConfigString(FluidRegistry.WATER.getName()));
+
+		group.add("fluid_nbt", fluidNBT, new ConfigNBT(null));
+		group.add("amount", amount, new ConfigInt(1));
 	}
 
 	@Override
@@ -153,7 +179,7 @@ public class FluidTask extends QuestTask
 		{
 			super(t, data);
 			properties = new IFluidTankProperties[1];
-			properties[0] = new FluidTankProperties(task.fluid, task.getMaxProgress(), true, false);
+			properties[0] = new FluidTankProperties(task.createFluidStack(0), task.getMaxProgress(), true, false);
 		}
 
 		@Override
@@ -212,9 +238,11 @@ public class FluidTask extends QuestTask
 		@Override
 		public int fill(FluidStack resource, boolean doFill)
 		{
-			if (getProgress() < task.fluid.amount && task.fluid.isFluidEqual(resource))
+			FluidStack fluidStack = task.createFluidStack(0);
+
+			if (getProgress() < task.amount.getInt() && fluidStack.isFluidEqual(resource))
 			{
-				int add = Math.min(resource.amount, task.fluid.amount - getProgress());
+				int add = Math.min(resource.amount, task.amount.getInt() - getProgress());
 
 				if (add > 0 && setProgress(getProgress() + add, !doFill))
 				{
@@ -286,9 +314,7 @@ public class FluidTask extends QuestTask
 
 			if (item != null && outputStack.isEmpty())
 			{
-				FluidStack fluidStack = task.fluid.copy();
-				fluidStack.amount = max - progress;
-				fluidStack = item.drain(fluidStack, false);
+				FluidStack fluidStack = item.drain(task.createFluidStack(max - progress), false);
 
 				if (fluidStack == null || fluidStack.amount <= 0)
 				{

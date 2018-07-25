@@ -18,7 +18,6 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.IStringSerializable;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraftforge.server.permission.PermissionAPI;
 
 /**
  * @author LatvianModder
@@ -57,7 +56,7 @@ public class MessageEditObject extends MessageToServer implements IConfigCallbac
 	@Override
 	public void onMessage(EntityPlayerMP player)
 	{
-		if (id != 0 && PermissionAPI.hasPermission(player, FTBQuests.PERM_EDIT))
+		if (FTBQuests.canEdit(player))
 		{
 			QuestObject object = ServerQuestList.INSTANCE.get(id);
 

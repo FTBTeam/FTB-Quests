@@ -13,6 +13,9 @@ sidebar_button.ftbquests.quests=Quests
 ftbquests.owner=Owner
 ftbquests.progress=Progress
 
+ftbquests.list=FTB Quests
+ftbquests.list.emergency_items=Emergency Items
+
 ftbquests.chapter=Chapter
 ftbquests.chapter.title=Title
 ftbquests.chapter.description=Description
@@ -55,6 +58,7 @@ ftbquests.task.item.count=Count
 
 ftbquests.task.fluid=Fluid
 ftbquests.task.fluid.fluid=Fluid
+ftbquests.task.fluid.fluid_nbt=Fluid NBT
 ftbquests.task.fluid.amount=Amount
 ftbquests.task.fluid.slot.fluid=Insert %s container here
 ftbquests.task.fluid.slot.container=Take empty container from here

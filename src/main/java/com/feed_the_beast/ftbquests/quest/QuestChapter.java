@@ -209,8 +209,8 @@ public final class QuestChapter extends ProgressingQuestObject
 	@Override
 	public void getConfig(ConfigGroup group)
 	{
-		group.add("title", title);
-		group.add("icon", icon);
-		group.add("description", description);
+		group.add("title", title, new ConfigString(""));
+		group.add("icon", icon, new ConfigItemStack(ItemStack.EMPTY));
+		group.add("description", description, new ConfigList<>(ConfigString.ID));
 	}
 }

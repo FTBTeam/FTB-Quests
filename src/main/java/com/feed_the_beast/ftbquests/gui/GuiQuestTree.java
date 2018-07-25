@@ -27,7 +27,6 @@ import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.quest.rewards.QuestReward;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.gui.GuiYesNo;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
@@ -512,15 +511,7 @@ public class GuiQuestTree extends GuiBase
 				public void onClicked(MouseButton button)
 				{
 					GuiHelper.playClickSound();
-					ClientUtils.MC.displayGuiScreen(new GuiYesNo((result, id) ->
-					{
-						GuiQuestTree.this.openGui();
-
-						if (result)
-						{
-							new MessageDeleteObject(selectedChapter.chapter.id).sendToServer();
-						}
-					}, I18n.format("delete_item", selectedChapter.chapter.getDisplayName().getFormattedText()), "", 0));
+					getGui().openYesNo(I18n.format("delete_item", selectedChapter.chapter.getDisplayName().getFormattedText()), "", () -> new MessageDeleteObject(selectedChapter.chapter.id).sendToServer());
 				}
 			});
 

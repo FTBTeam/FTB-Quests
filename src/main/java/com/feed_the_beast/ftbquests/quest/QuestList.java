@@ -1,5 +1,8 @@
 package com.feed_the_beast.ftbquests.quest;
 
+import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
+import com.feed_the_beast.ftblib.lib.config.ConfigItemStack;
+import com.feed_the_beast.ftblib.lib.config.ConfigList;
 import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.item.ItemStackSerializer;
@@ -29,7 +32,7 @@ public abstract class QuestList extends ProgressingQuestObject
 	public final List<QuestChapter> chapters;
 	private boolean invalid;
 	public final Int2ObjectMap<QuestObject> objectMap;
-	public final List<ItemStack> emergencyItems;
+	public final ConfigList<ConfigItemStack> emergencyItems;
 
 	public QuestList(NBTTagCompound nbt)
 	{
@@ -48,7 +51,7 @@ public abstract class QuestList extends ProgressingQuestObject
 			objectMap.put(chapter.id, chapter);
 		}
 
-		emergencyItems = new ArrayList<>();
+		emergencyItems = new ConfigList<>(ConfigItemStack.ID);
 
 		NBTTagList emergencyItemsList = nbt.getTagList("emergency_items", Constants.NBT.TAG_COMPOUND);
 
@@ -58,7 +61,7 @@ public abstract class QuestList extends ProgressingQuestObject
 
 			if (!stack.isEmpty())
 			{
-				emergencyItems.add(stack);
+				emergencyItems.add(new ConfigItemStack(stack));
 			}
 		}
 	}
@@ -285,9 +288,9 @@ public abstract class QuestList extends ProgressingQuestObject
 
 		NBTTagList emergencyItemsList = new NBTTagList();
 
-		for (ItemStack stack : emergencyItems)
+		for (ConfigItemStack value : emergencyItems)
 		{
-			emergencyItemsList.appendTag(stack.serializeNBT());
+			emergencyItemsList.appendTag(value.getStack().serializeNBT());
 		}
 
 		nbt.setTag("emergency_items", emergencyItemsList);
@@ -308,5 +311,11 @@ public abstract class QuestList extends ProgressingQuestObject
 	public ITextComponent getDisplayName()
 	{
 		return new TextComponentTranslation("sidebar_button.ftbquests.quests");
+	}
+
+	@Override
+	public void getConfig(ConfigGroup config)
+	{
+		config.add("emergency_items", emergencyItems, new ConfigList<>(ConfigItemStack.ID));
 	}
 }

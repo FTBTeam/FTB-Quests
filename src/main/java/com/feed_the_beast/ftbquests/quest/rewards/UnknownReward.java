@@ -1,14 +1,12 @@
 package com.feed_the_beast.ftbquests.quest.rewards;
 
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
-import com.feed_the_beast.ftblib.lib.config.ConfigString;
+import com.feed_the_beast.ftblib.lib.config.ConfigNBT;
 import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.util.NBTUtils;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.nbt.JsonToNBT;
-import net.minecraft.nbt.NBTException;
 import net.minecraft.nbt.NBTTagCompound;
 
 /**
@@ -17,13 +15,13 @@ import net.minecraft.nbt.NBTTagCompound;
 public class UnknownReward extends QuestReward
 {
 	public static final String ID = "unknown";
-	private NBTTagCompound nbt;
+	private ConfigNBT nbt;
 	private String hover;
 
 	public UnknownReward(Quest parent, NBTTagCompound n)
 	{
 		super(parent, n);
-		nbt = n;
+		nbt = new ConfigNBT(n);
 	}
 
 	@Override
@@ -41,7 +39,7 @@ public class UnknownReward extends QuestReward
 	@Override
 	public void writeData(NBTTagCompound n)
 	{
-		NBTUtils.copyTags(nbt, n);
+		NBTUtils.copyTags(nbt.getNBT(), n);
 	}
 
 	@Override
@@ -54,7 +52,7 @@ public class UnknownReward extends QuestReward
 	{
 		if (hover == null)
 		{
-			hover = NBTUtils.getColoredNBTString(nbt);
+			hover = NBTUtils.getColoredNBTString(nbt.getNBT());
 		}
 
 		return hover;
@@ -68,26 +66,6 @@ public class UnknownReward extends QuestReward
 	@Override
 	public void getConfig(ConfigGroup group)
 	{
-		group.add("nbt", new ConfigString()
-		{
-			@Override
-			public String getString()
-			{
-				return nbt.toString();
-			}
-
-			@Override
-			public void setString(String v)
-			{
-				try
-				{
-					nbt = JsonToNBT.getTagFromJson(v);
-				}
-				catch (NBTException e)
-				{
-					e.printStackTrace();
-				}
-			}
-		});
+		group.add("nbt", nbt, new ConfigNBT(new NBTTagCompound()));
 	}
 }
