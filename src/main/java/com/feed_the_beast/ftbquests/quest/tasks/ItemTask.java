@@ -13,6 +13,7 @@ import com.feed_the_beast.ftbquests.gui.ContainerTaskBase;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -46,27 +47,22 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 		super(quest, nbt);
 		items = new ConfigList<>(ConfigItemStack.ID);
 
-		if (nbt.hasKey("item", Constants.NBT.TAG_LIST))
-		{
-			NBTTagList list1 = nbt.getTagList("item", Constants.NBT.TAG_COMPOUND);
+		NBTTagList list = nbt.getTagList("items", Constants.NBT.TAG_COMPOUND);
 
-			for (int i = 0; i < list1.tagCount(); i++)
+		if (list.isEmpty())
+		{
+			items.add(new ConfigItemStack(new ItemStack(Items.APPLE)));
+		}
+		else
+		{
+			for (int i = 0; i < list.tagCount(); i++)
 			{
-				ItemStack stack = new ItemStack(list1.getCompoundTagAt(i));
+				ItemStack stack = new ItemStack(list.getCompoundTagAt(i));
 
 				if (!stack.isEmpty())
 				{
 					items.add(new ConfigItemStack(stack));
 				}
-			}
-		}
-		else
-		{
-			ItemStack stack = new ItemStack(nbt.getCompoundTag("item"));
-
-			if (!stack.isEmpty())
-			{
-				items.add(new ConfigItemStack(stack));
 			}
 		}
 
@@ -182,8 +178,8 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 	@Override
 	public void getConfig(ConfigGroup group)
 	{
-		group.add("items", items);
-		group.add("count", count);
+		group.add("items", items, new ConfigList<>(ConfigItemStack.ID).add(new ConfigItemStack(new ItemStack(Items.APPLE))));
+		group.add("count", count, new ConfigInt(1));
 	}
 
 	@Override

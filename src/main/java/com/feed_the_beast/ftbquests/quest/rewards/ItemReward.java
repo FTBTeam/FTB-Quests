@@ -6,6 +6,7 @@ import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.ITextComponent;
@@ -23,7 +24,16 @@ public class ItemReward extends QuestReward
 	public ItemReward(Quest quest, NBTTagCompound nbt)
 	{
 		super(quest, nbt);
-		item = new ConfigItemStack(new ItemStack(nbt.getCompoundTag("item")));
+		NBTTagCompound nbt1 = nbt.getCompoundTag("item");
+
+		if (nbt1.isEmpty())
+		{
+			item = new ConfigItemStack(new ItemStack(Items.APPLE));
+		}
+		else
+		{
+			item = new ConfigItemStack(new ItemStack(nbt1));
+		}
 	}
 
 	@Override
@@ -72,6 +82,6 @@ public class ItemReward extends QuestReward
 	@Override
 	public void getConfig(ConfigGroup group)
 	{
-		group.add("item", item);
+		group.add("item", item, new ConfigItemStack(new ItemStack(Items.APPLE)));
 	}
 }

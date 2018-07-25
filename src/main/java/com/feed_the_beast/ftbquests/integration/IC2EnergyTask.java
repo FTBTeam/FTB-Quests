@@ -29,7 +29,7 @@ public class IC2EnergyTask extends QuestTask
 	public IC2EnergyTask(Quest quest, NBTTagCompound nbt)
 	{
 		super(quest, nbt);
-		value = new ConfigInt(nbt.getInteger("value"), 0, Integer.MAX_VALUE);
+		value = new ConfigInt(nbt.getInteger("value"), 1, Integer.MAX_VALUE);
 	}
 
 	@Override
@@ -71,7 +71,7 @@ public class IC2EnergyTask extends QuestTask
 	@Override
 	public void getConfig(ConfigGroup group)
 	{
-		group.add("value", value);
+		group.add("value", value, new ConfigInt(1));
 	}
 
 	@Override

@@ -23,7 +23,7 @@ public class ContainerFluidTask extends ContainerTaskBase
 	{
 		super(player, d);
 		iconBucketEmpty = ItemIcon.getItemIcon(new ItemStack(Items.BUCKET));
-		iconBucketFilled = ItemIcon.getItemIcon(FluidUtil.getFilledBucket(d.task.fluid));
+		iconBucketFilled = ItemIcon.getItemIcon(FluidUtil.getFilledBucket(d.task.createFluidStack(1000)));
 	}
 
 	@Override
@@ -81,7 +81,7 @@ public class ContainerFluidTask extends ContainerTaskBase
 	{
 		if (slot == 0)
 		{
-			return I18n.format("ftbquests.task.fluid.slot.fluid", ((FluidTask.Data) data).task.fluid.getLocalizedName());
+			return I18n.format("ftbquests.task.fluid.slot.fluid", ((FluidTask.Data) data).task.createFluidStack(1000).getLocalizedName());
 		}
 		else if (slot == 1)
 		{

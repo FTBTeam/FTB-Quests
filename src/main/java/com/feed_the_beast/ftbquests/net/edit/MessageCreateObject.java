@@ -10,7 +10,6 @@ import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.quest.ServerQuestList;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraftforge.server.permission.PermissionAPI;
 
 /**
  * @author LatvianModder
@@ -57,7 +56,7 @@ public class MessageCreateObject extends MessageToServer
 	@Override
 	public void onMessage(EntityPlayerMP player)
 	{
-		if (PermissionAPI.hasPermission(player, FTBQuests.PERM_EDIT))
+		if (FTBQuests.canEdit(player))
 		{
 			QuestObject object = ServerQuestList.INSTANCE.createAndAdd(type, parent, nbt);
 

@@ -17,6 +17,7 @@ import com.feed_the_beast.ftbquests.quest.tasks.QuestTasks;
 import com.feed_the_beast.ftbquests.quest.tasks.UnknownTask;
 import it.unimi.dsi.fastutil.ints.IntCollection;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
@@ -323,12 +324,12 @@ public final class Quest extends ProgressingQuestObject
 	@Override
 	public void getConfig(ConfigGroup group)
 	{
-		group.add("title", title);
-		group.add("x", x);
-		group.add("y", y);
-		group.add("type", type);
-		group.add("icon", icon);
-		group.add("description", description);
-		group.add("text", text);
+		group.add("title", title, new ConfigString(""));
+		group.add("x", x, new ConfigInt(0));
+		group.add("y", y, new ConfigInt(0));
+		group.add("type", type, new ConfigEnum<>(QuestType.NAME_MAP));
+		group.add("icon", icon, new ConfigItemStack(ItemStack.EMPTY));
+		group.add("description", description, new ConfigString(""));
+		group.add("text", text, new ConfigList<>(ConfigString.ID));
 	}
 }

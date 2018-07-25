@@ -6,6 +6,7 @@ import com.feed_the_beast.ftbquests.integration.IC2Integration;
 import com.feed_the_beast.ftbquests.net.FTBQuestsNetHandler;
 import com.feed_the_beast.ftbquests.quest.rewards.QuestRewards;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTasks;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
@@ -37,7 +38,7 @@ public class FTBQuests
 	@SidedProxy(serverSide = "com.feed_the_beast.ftbquests.FTBQuestsCommon", clientSide = "com.feed_the_beast.ftbquests.client.FTBQuestsClient")
 	public static FTBQuestsCommon PROXY;
 
-	public static final String PERM_EDIT = "ftbquests.edit";
+	private static final String PERM_EDIT = "ftbquests.edit";
 	public static final String PERM_RESET_PROGRESS = "ftbquests.reset_progress";
 
 	@Mod.EventHandler
@@ -78,5 +79,10 @@ public class FTBQuests
 	{
 		PermissionAPI.registerNode(PERM_EDIT, DefaultPermissionLevel.OP, "Permission for editing quests");
 		PermissionAPI.registerNode(PERM_RESET_PROGRESS, DefaultPermissionLevel.OP, "Permission for resetting quest progress");
+	}
+
+	public static boolean canEdit(EntityPlayer player)
+	{
+		return FTBQuestsConfig.general.editing_mode && PermissionAPI.hasPermission(player, PERM_EDIT);
 	}
 }
