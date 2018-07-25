@@ -12,7 +12,6 @@ import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.FTBQuestsConfig;
 import com.feed_the_beast.ftbquests.FTBQuestsItems;
-import com.feed_the_beast.ftbquests.block.QuestBlockData;
 import com.feed_the_beast.ftbquests.net.MessageGetBlock;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.I18n;
@@ -80,16 +79,11 @@ public class GuiTaskBase extends GuiBase
 	@Override
 	public void addWidgets()
 	{
-		if (!hasTile && FTBQuestsConfig.general.allow_take_quest_blocks)
+		if (!hasTile && FTBQuestsConfig.general.allow_take_quest_blocks && !container.data.task.isComplete(ClientQuestList.INSTANCE))
 		{
 			add(new SimpleButton(this, I18n.format("ftbquests.gui.task.get_block"), ItemIcon.getItemIcon(new ItemStack(FTBQuestsItems.QUEST_BLOCK)), (widget, button) -> {
-				if (container.player.inventory.getItemStack().isEmpty() && container.data.task.quest.isVisible(ClientQuestList.INSTANCE) && !container.data.task.isComplete(ClientQuestList.INSTANCE))
+				if (container.data.task.quest.isVisible(ClientQuestList.INSTANCE) && !container.data.task.isComplete(ClientQuestList.INSTANCE))
 				{
-					ItemStack stack = new ItemStack(FTBQuestsItems.QUEST_BLOCK);
-					QuestBlockData data = QuestBlockData.get(stack);
-					data.setTask(container.data.task.id);
-					data.setOwner(ClientQuestList.INSTANCE.teamId);
-					container.player.inventory.setItemStack(stack);
 					new MessageGetBlock(container.data.task.id).sendToServer();
 				}
 			}).setPosAndSize(8, 8, 20, 20));

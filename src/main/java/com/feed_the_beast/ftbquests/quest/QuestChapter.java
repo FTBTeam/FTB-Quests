@@ -7,7 +7,6 @@ import com.feed_the_beast.ftblib.lib.config.ConfigString;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.IconAnimation;
 import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
-import com.feed_the_beast.ftbquests.FTBQuests;
 import it.unimi.dsi.fastutil.ints.IntCollection;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import net.minecraft.item.ItemStack;
@@ -32,7 +31,6 @@ public final class QuestChapter extends ProgressingQuestObject
 	public final ConfigItemStack icon;
 	public final List<Quest> quests;
 	public final IntCollection dependencies;
-	private Icon cachedIcon;
 
 	public QuestChapter(QuestList l, NBTTagCompound nbt)
 	{
@@ -97,9 +95,9 @@ public final class QuestChapter extends ProgressingQuestObject
 			nbt.setTag("description", list);
 		}
 
-		if (!icon.getItem().isEmpty())
+		if (!icon.getStack().isEmpty())
 		{
-			nbt.setTag("icon", icon.getItem().serializeNBT());
+			nbt.setTag("icon", icon.getStack().serializeNBT());
 		}
 
 		if (!dependencies.isEmpty())
@@ -173,14 +171,9 @@ public final class QuestChapter extends ProgressingQuestObject
 	@Override
 	public Icon getIcon()
 	{
-		if (cachedIcon != null)
-		{
-			return cachedIcon;
-		}
+		Icon i = ItemIcon.getItemIcon(icon.getStack());
 
-		cachedIcon = ItemIcon.getItemIcon(icon.getItem());
-
-		if (cachedIcon.isEmpty())
+		if (i.isEmpty())
 		{
 			List<Icon> list = new ArrayList<>();
 
@@ -189,10 +182,10 @@ public final class QuestChapter extends ProgressingQuestObject
 				list.add(quest.getIcon());
 			}
 
-			cachedIcon = IconAnimation.fromList(list, false);
+			i = IconAnimation.fromList(list, false);
 		}
 
-		return cachedIcon;
+		return i;
 	}
 
 	@Override
@@ -216,8 +209,8 @@ public final class QuestChapter extends ProgressingQuestObject
 	@Override
 	public void getConfig(ConfigGroup group)
 	{
-		group.add(FTBQuests.MOD_ID, "title", title);
-		group.add(FTBQuests.MOD_ID, "description", description);
-		group.add(FTBQuests.MOD_ID, "icon", icon);
+		group.add("title", title);
+		group.add("icon", icon);
+		group.add("description", description);
 	}
 }

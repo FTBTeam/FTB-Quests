@@ -4,7 +4,6 @@ import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigInt;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
-import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Items;
@@ -56,7 +55,7 @@ public class ExperienceReward extends QuestReward
 	@Override
 	public ITextComponent getDisplayName()
 	{
-		return new TextComponentTranslation("ftbquests.gui.reward.xp", TextFormatting.GREEN + "+" + value);
+		return new TextComponentTranslation("ftbquests.reward.xp.text", TextFormatting.GREEN + "+" + value);
 	}
 
 	@Override
@@ -68,6 +67,6 @@ public class ExperienceReward extends QuestReward
 	@Override
 	public void getConfig(ConfigGroup group)
 	{
-		group.add(FTBQuests.MOD_ID, "value", value);
+		group.add("value", value);
 	}
 }

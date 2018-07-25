@@ -3,7 +3,6 @@ package com.feed_the_beast.ftbquests.quest.tasks;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import net.minecraft.nbt.NBTTagCompound;
 
-import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,7 +14,6 @@ public class QuestTasks
 {
 	public interface TaskProvider
 	{
-		@Nullable
 		QuestTask create(Quest quest, NBTTagCompound nbt);
 	}
 
@@ -35,7 +33,7 @@ public class QuestTasks
 		add(ForgeEnergyTask.ID, ForgeEnergyTask::new);
 	}
 
-	public static QuestTask createTask(Quest quest, NBTTagCompound nbt)
+	public static QuestTask createTask(Quest quest, NBTTagCompound nbt, boolean allowInvalid)
 	{
 		TaskProvider provider = MAP0.get(nbt.getString("type"));
 
@@ -43,7 +41,7 @@ public class QuestTasks
 		{
 			QuestTask task = provider.create(quest, nbt);
 
-			if (task != null && !task.isInvalid())
+			if (allowInvalid || !task.isInvalid())
 			{
 				return task;
 			}

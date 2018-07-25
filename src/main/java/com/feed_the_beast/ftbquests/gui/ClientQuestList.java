@@ -181,6 +181,12 @@ public class ClientQuestList extends QuestList implements IProgressData
 	}
 
 	@Override
+	public void createTaskData(int task)
+	{
+		taskData.put(task, getTask(task).createData(this));
+	}
+
+	@Override
 	public void resetProgress(IProgressData data)
 	{
 		claimedRewards.clear();

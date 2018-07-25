@@ -13,6 +13,7 @@ import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import com.feed_the_beast.ftbquests.util.FTBQuestsTeamData;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.items.ItemHandlerHelper;
 
 /**
  * @author LatvianModder
@@ -51,7 +52,7 @@ public class MessageGetBlock extends MessageToServer
 	@Override
 	public void onMessage(EntityPlayerMP player)
 	{
-		if (FTBQuestsConfig.general.allow_take_quest_blocks && player.inventory.getItemStack().isEmpty())
+		if (FTBQuestsConfig.general.allow_take_quest_blocks)
 		{
 			QuestTask t = ServerQuestList.INSTANCE.getTask(task);
 			FTBQuestsTeamData teamData = FTBQuestsTeamData.get(Universe.get().getPlayer(player).team);
@@ -62,7 +63,7 @@ public class MessageGetBlock extends MessageToServer
 				QuestBlockData data = QuestBlockData.get(stack);
 				data.setTask(task);
 				data.setOwner(teamData.team.getName());
-				player.inventory.setItemStack(stack);
+				ItemHandlerHelper.giveItemToPlayer(player, stack);
 			}
 		}
 	}

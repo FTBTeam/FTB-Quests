@@ -10,27 +10,71 @@ admin_panel.ftbquests.edit=Edit Quests
 admin_panel.ftbquests.reset_progress=Reset Quest Progress
 sidebar_button.ftbquests.quests=Quests
 
-ftbquests.gui.chapter=Chapter
-ftbquests.gui.quest=Quest
-ftbquests.gui.quest_tree.zoom_in=Zoom In
-ftbquests.gui.quest_tree.zoom_out=Zoom Out
-ftbquests.gui.quest_tree.add_chapter_after=Add new chapter after this one
-ftbquests.gui.quest_tree.add_chapter_before=Add new chapter before this one
-ftbquests.gui.quest_tree.move_up=Move Up
-ftbquests.gui.quest_tree.move_down=Move Down
-ftbquests.gui.task=Task
-ftbquests.gui.owner=Owner
-ftbquests.gui.progress=Progress
-ftbquests.gui.tasks=Tasks
-ftbquests.gui.rewards=Rewards
-ftbquests.gui.task.no_items=This task type can't accept items!
-ftbquests.gui.task.get_block=Get Quest Block
-ftbquests.gui.task.unknown=Unknown Task
-ftbquests.gui.task.fluid.fluid=Insert %s container here
-ftbquests.gui.task.fluid.container=Take empty container from here
-ftbquests.gui.task.forge_energy=%d FE
-ftbquests.gui.task.ic2_energy=%d EU
+ftbquests.owner=Owner
+ftbquests.progress=Progress
 
-ftbquests.gui.reward.unknown=Unknown Reward
-ftbquests.gui.reward.xp=XP: %s
-ftbquests.gui.reward.xp_levels=XP Levels: %s
+ftbquests.chapter=Chapter
+ftbquests.chapter.title=Title
+ftbquests.chapter.description=Description
+ftbquests.chapter.icon=Icon
+
+ftbquests.quest=Quest
+ftbquests.quest.title=Title
+ftbquests.quest.description=Description
+ftbquests.quest.icon=Icon
+ftbquests.quest.x=X
+ftbquests.quest.y=Y
+ftbquests.quest.type=Type
+ftbquests.quest.text=Text
+
+ftbquests.gui.zoom_in=Zoom In
+ftbquests.gui.zoom_out=Zoom Out
+ftbquests.gui.add_chapter_after=Add new chapter after this one
+ftbquests.gui.add_chapter_before=Add new chapter before this one
+ftbquests.gui.move_up=Move Up
+ftbquests.gui.move_down=Move Down
+ftbquests.gui.move_left=Move Left
+ftbquests.gui.move_right=Move Right
+ftbquests.gui.edit_chapter=Edit Chapter
+ftbquests.gui.delete_chapter=Delete Chapter
+ftbquests.gui.edit_quest=Edit Quest
+ftbquests.gui.delete_quest=Delete Quest
+ftbquests.gui.select_task_type=Select Task Type
+ftbquests.gui.select_reward_type=Select Reward Type
+
+ftbquests.task=Task
+ftbquests.tasks=Tasks
+ftbquests.task.no_items=This task type can't accept items!
+ftbquests.task.get_block=Get Quest Block
+
+ftbquests.task.unknown=Unknown Task
+
+ftbquests.task.item=Item
+ftbquests.task.item.items=Item List
+ftbquests.task.item.count=Count
+
+ftbquests.task.fluid=Fluid
+ftbquests.task.fluid.fluid=Fluid
+ftbquests.task.fluid.amount=Amount
+ftbquests.task.fluid.slot.fluid=Insert %s container here
+ftbquests.task.fluid.slot.container=Take empty container from here
+
+ftbquests.task.forge_energy=Forge Energy
+ftbquests.task.forge_energy.value=FE / RF
+ftbquests.task.forge_energy.text=%d FE
+
+ftbquests.task.ic2_energy=IC2 Energy
+ftbquests.task.ic2_energy.value=EU
+ftbquests.task.ic2_energy.text=%d EU
+
+ftbquests.reward=Reward
+ftbquests.rewards=Rewards
+ftbquests.reward.unknown=Unknown Reward
+ftbquests.reward.item=Item
+ftbquests.reward.item.item=Item
+ftbquests.reward.xp=XP
+ftbquests.reward.xp.value=XP
+ftbquests.reward.xp.text=XP: %s
+ftbquests.reward.xp_levels=XP Levels
+ftbquests.reward.xp_levels.value=XP Levels
+ftbquests.reward.xp_levels.text=XP Levels: %s

@@ -3,7 +3,6 @@ package com.feed_the_beast.ftbquests.quest.tasks;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigInt;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
-import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.block.QuestBlockData;
 import com.feed_the_beast.ftbquests.gui.ContainerFluidTask;
@@ -96,6 +95,11 @@ public class FluidTask extends QuestTask
 	@Override
 	public Icon getIcon()
 	{
+		if (fluid == null)
+		{
+			return Icon.EMPTY;
+		}
+
 		return Icon.getIcon(fluid.getFluid().getStill(fluid).toString());
 	}
 
@@ -130,8 +134,8 @@ public class FluidTask extends QuestTask
 	@Override
 	public void getConfig(ConfigGroup group)
 	{
-		//group.add(FTBQuests.MOD_ID, "fluid", fluid);
-		group.add(FTBQuests.MOD_ID, "amount", amount);
+		//group.add("fluid", fluid);
+		group.add("amount", amount);
 	}
 
 	@Override

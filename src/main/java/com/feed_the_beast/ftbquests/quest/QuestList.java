@@ -220,9 +220,15 @@ public abstract class QuestList extends ProgressingQuestObject
 
 				if (quest != null)
 				{
-					QuestTask task = QuestTasks.createTask(quest, nbt);
+					QuestTask task = QuestTasks.createTask(quest, nbt, false);
 					quest.tasks.add(task);
 					objectMap.put(task.id, task);
+
+					for (IProgressData data : getAllData())
+					{
+						data.createTaskData(task.id);
+					}
+
 					return task;
 				}
 
@@ -234,7 +240,7 @@ public abstract class QuestList extends ProgressingQuestObject
 
 				if (quest != null)
 				{
-					QuestReward reward = QuestRewards.createReward(quest, nbt);
+					QuestReward reward = QuestRewards.createReward(quest, nbt, false);
 					quest.rewards.add(reward);
 					objectMap.put(reward.id, reward);
 					return reward;

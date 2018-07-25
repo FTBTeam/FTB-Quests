@@ -9,7 +9,6 @@ import com.feed_the_beast.ftblib.lib.config.ConfigString;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.IconAnimation;
 import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
-import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.rewards.QuestReward;
 import com.feed_the_beast.ftbquests.quest.rewards.QuestRewards;
 import com.feed_the_beast.ftbquests.quest.rewards.UnknownReward;
@@ -43,7 +42,6 @@ public final class Quest extends ProgressingQuestObject
 	public final IntCollection dependencies;
 	public final List<QuestTask> tasks;
 	public final List<QuestReward> rewards;
-	private Icon cachedIcon;
 
 	public Quest(QuestChapter c, NBTTagCompound nbt)
 	{
@@ -73,7 +71,7 @@ public final class Quest extends ProgressingQuestObject
 
 		for (int k = 0; k < list.tagCount(); k++)
 		{
-			QuestTask task = QuestTasks.createTask(this, list.getCompoundTagAt(k));
+			QuestTask task = QuestTasks.createTask(this, list.getCompoundTagAt(k), false);
 			tasks.add(task);
 			chapter.list.objectMap.put(task.id, task);
 		}
@@ -82,7 +80,7 @@ public final class Quest extends ProgressingQuestObject
 
 		for (int k = 0; k < list.tagCount(); k++)
 		{
-			QuestReward reward = QuestRewards.createReward(this, list.getCompoundTagAt(k));
+			QuestReward reward = QuestRewards.createReward(this, list.getCompoundTagAt(k), false);
 			rewards.add(reward);
 			chapter.list.objectMap.put(reward.id, reward);
 		}
@@ -126,7 +124,7 @@ public final class Quest extends ProgressingQuestObject
 
 		if (!icon.isEmpty())
 		{
-			nbt.setTag("icon", icon.getItem().serializeNBT());
+			nbt.setTag("icon", icon.getStack().serializeNBT());
 		}
 
 		if (!text.isEmpty())
@@ -180,6 +178,11 @@ public final class Quest extends ProgressingQuestObject
 				if (!(reward instanceof UnknownReward))
 				{
 					rewardNBT.setString("type", reward.getName());
+				}
+
+				if (reward.teamReward)
+				{
+					rewardNBT.setBoolean("team_reward", true);
 				}
 
 				array.appendTag(rewardNBT);
@@ -239,7 +242,7 @@ public final class Quest extends ProgressingQuestObject
 
 	public boolean isVisible(IProgressData data)
 	{
-		if (type.getValue() == QuestType.NORMAL)
+		if (type.getValue() == QuestType.NORMAL || dependencies.isEmpty())
 		{
 			return true;
 		}
@@ -257,6 +260,8 @@ public final class Quest extends ProgressingQuestObject
 					return true;
 				}
 			}
+
+			return false;
 		}
 
 		for (int d : dependencies)
@@ -275,14 +280,9 @@ public final class Quest extends ProgressingQuestObject
 	@Override
 	public Icon getIcon()
 	{
-		if (cachedIcon != null)
-		{
-			return cachedIcon;
-		}
+		Icon i = ItemIcon.getItemIcon(icon.getStack());
 
-		cachedIcon = ItemIcon.getItemIcon(icon.getItem());
-
-		if (cachedIcon.isEmpty())
+		if (i.isEmpty())
 		{
 			List<Icon> list = new ArrayList<>();
 
@@ -291,10 +291,10 @@ public final class Quest extends ProgressingQuestObject
 				list.add(task.getIcon());
 			}
 
-			cachedIcon = IconAnimation.fromList(list, false);
+			i = IconAnimation.fromList(list, false);
 		}
 
-		return cachedIcon;
+		return i;
 	}
 
 	@Override
@@ -323,12 +323,12 @@ public final class Quest extends ProgressingQuestObject
 	@Override
 	public void getConfig(ConfigGroup group)
 	{
-		group.add(FTBQuests.MOD_ID, "title", title);
-		group.add(FTBQuests.MOD_ID, "description", description);
-		group.add(FTBQuests.MOD_ID, "icon", icon);
-		group.add(FTBQuests.MOD_ID, "type", type);
-		group.add(FTBQuests.MOD_ID, "x", x);
-		group.add(FTBQuests.MOD_ID, "y", y);
-		group.add(FTBQuests.MOD_ID, "text", text);
+		group.add("title", title);
+		group.add("x", x);
+		group.add("y", y);
+		group.add("type", type);
+		group.add("icon", icon);
+		group.add("description", description);
+		group.add("text", text);
 	}
 }

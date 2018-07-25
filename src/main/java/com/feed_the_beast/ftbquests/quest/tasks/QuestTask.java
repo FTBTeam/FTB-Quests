@@ -8,6 +8,8 @@ import com.feed_the_beast.ftbquests.quest.QuestList;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.IStringSerializable;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
@@ -67,6 +69,12 @@ public abstract class QuestTask extends ProgressingQuestObject implements IStrin
 		{
 			data.removeTask(id);
 		}
+	}
+
+	@Override
+	public ITextComponent getDisplayName()
+	{
+		return new TextComponentTranslation("ftbquests.task." + getName());
 	}
 
 	@Nullable

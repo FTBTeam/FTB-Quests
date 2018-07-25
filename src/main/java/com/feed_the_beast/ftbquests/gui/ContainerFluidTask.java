@@ -81,11 +81,11 @@ public class ContainerFluidTask extends ContainerTaskBase
 	{
 		if (slot == 0)
 		{
-			return I18n.format("ftbquests.gui.task.fluid.fluid", ((FluidTask.Data) data).task.fluid.getLocalizedName());
+			return I18n.format("ftbquests.task.fluid.slot.fluid", ((FluidTask.Data) data).task.fluid.getLocalizedName());
 		}
 		else if (slot == 1)
 		{
-			return I18n.format("ftbquests.gui.task.fluid.container");
+			return I18n.format("ftbquests.task.fluid.slot.container");
 		}
 
 		return "";
