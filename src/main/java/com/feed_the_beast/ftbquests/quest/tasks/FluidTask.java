@@ -1,9 +1,9 @@
 package com.feed_the_beast.ftbquests.quest.tasks;
 
+import com.feed_the_beast.ftblib.lib.config.ConfigFluid;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigInt;
 import com.feed_the_beast.ftblib.lib.config.ConfigNBT;
-import com.feed_the_beast.ftblib.lib.config.ConfigString;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftbquests.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.block.QuestBlockData;
@@ -38,7 +38,7 @@ public class FluidTask extends QuestTask
 {
 	public static final String ID = "fluid";
 
-	public Fluid fluid;
+	public final ConfigFluid fluid;
 	public final ConfigNBT fluidNBT;
 	public final ConfigInt amount;
 
@@ -46,12 +46,14 @@ public class FluidTask extends QuestTask
 	{
 		super(quest, nbt);
 
-		fluid = FluidRegistry.getFluid(nbt.getString("fluid"));
-
-		if (fluid == null)
+		fluid = new ConfigFluid(FluidRegistry.getFluid(nbt.getString("fluid")))
 		{
-			fluid = FluidRegistry.WATER;
-		}
+			@Override
+			public Fluid getDefaultFluid()
+			{
+				return FluidRegistry.WATER;
+			}
+		};
 
 		fluidNBT = new ConfigNBT(nbt.hasKey("nbt") ? nbt.getCompoundTag("nbt") : null);
 		amount = new ConfigInt(nbt.hasKey("amount") ? nbt.getInteger("amount") : 1000, 1, Integer.MAX_VALUE);
@@ -60,7 +62,7 @@ public class FluidTask extends QuestTask
 	@Override
 	public boolean isInvalid()
 	{
-		return fluid == null || super.isInvalid();
+		return fluid.isEmpty() || super.isInvalid();
 	}
 
 	@Override
@@ -79,7 +81,7 @@ public class FluidTask extends QuestTask
 	public void writeData(NBTTagCompound nbt)
 	{
 		nbt.setString("type", "fluid");
-		nbt.setString("fluid", fluid.getName());
+		nbt.setString("fluid", fluid.getString());
 
 		if (amount.getInt() != 1000)
 		{
@@ -95,12 +97,12 @@ public class FluidTask extends QuestTask
 	@Override
 	public Icon getIcon()
 	{
-		return Icon.getIcon(fluid.getStill(createFluidStack(1000)).toString());
+		return Icon.getIcon(fluid.getFluid().getStill(createFluidStack(Fluid.BUCKET_VOLUME)).toString());
 	}
 
 	public FluidStack createFluidStack(int amount)
 	{
-		return new FluidStack(fluid, amount, fluidNBT.getNBT());
+		return new FluidStack(fluid.getFluid(), amount, fluidNBT.getNBT());
 	}
 
 	@Override
@@ -109,57 +111,31 @@ public class FluidTask extends QuestTask
 		StringBuilder builder = new StringBuilder();
 		int amount = getMaxProgress();
 
-		if (amount >= 1000)
+		if (amount >= Fluid.BUCKET_VOLUME)
 		{
-			if (amount % 1000 != 0)
+			if (amount % Fluid.BUCKET_VOLUME != 0)
 			{
-				builder.append(amount / 1000D);
+				builder.append(amount / (double) Fluid.BUCKET_VOLUME);
 			}
 			else
 			{
-				builder.append(amount / 1000);
+				builder.append(amount / Fluid.BUCKET_VOLUME);
 			}
 		}
 		else
 		{
-			builder.append(amount % 1000);
+			builder.append(amount % Fluid.BUCKET_VOLUME);
 			builder.append('m');
 		}
 
 		builder.append("b of ");
-		builder.append(createFluidStack(amount).getLocalizedName()); //TODO: PR Forge to fix this
-		return new TextComponentString(builder.toString());
+		return new TextComponentString(builder.toString()).appendSibling(fluid.getStringForGUI());
 	}
 
 	@Override
 	public void getConfig(ConfigGroup group)
 	{
-		group.add("fluid", new ConfigString()
-		{
-			@Override
-			public String getString()
-			{
-				return fluid.getName();
-			}
-
-			@Override
-			public void setString(String v)
-			{
-				fluid = FluidRegistry.getFluid(v);
-
-				if (fluid == null)
-				{
-					fluid = FluidRegistry.WATER;
-				}
-			}
-
-			@Override
-			public ITextComponent getStringForGUI()
-			{
-				return new TextComponentString(createFluidStack(1000).getLocalizedName());
-			}
-		}, new ConfigString(FluidRegistry.WATER.getName()));
-
+		group.add("fluid", fluid, new ConfigFluid(FluidRegistry.WATER));
 		group.add("fluid_nbt", fluidNBT, new ConfigNBT(null));
 		group.add("amount", amount, new ConfigInt(1));
 	}
@@ -238,7 +214,7 @@ public class FluidTask extends QuestTask
 		@Override
 		public int fill(FluidStack resource, boolean doFill)
 		{
-			FluidStack fluidStack = task.createFluidStack(0);
+			FluidStack fluidStack = task.createFluidStack(Fluid.BUCKET_VOLUME);
 
 			if (getProgress() < task.amount.getInt() && fluidStack.isFluidEqual(resource))
 			{

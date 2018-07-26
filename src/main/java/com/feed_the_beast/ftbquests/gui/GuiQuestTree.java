@@ -26,6 +26,7 @@ import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.quest.rewards.QuestReward;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
@@ -163,7 +164,14 @@ public class GuiQuestTree extends GuiBase
 
 			if (questList.editingMode && isCtrlKeyDown())
 			{
-				new MessageEditObject(quest.id).sendToServer();
+				if (button.isRight())
+				{
+					getGui().openYesNo(I18n.format("delete_item", quest.getDisplayName().getFormattedText()), "", () -> new MessageDeleteObject(quest.id).sendToServer());
+				}
+				else
+				{
+					new MessageEditObject(quest.id).sendToServer();
+				}
 			}
 			else
 			{
@@ -282,6 +290,7 @@ public class GuiQuestTree extends GuiBase
 	public List<ButtonChapter> chapterButtons;
 	public final Panel chapterPanel, quests;
 	public final List<ChapterOptionButton> chapterOptionButtons;
+	private final IntOpenHashSet selectedQuests;
 
 	public GuiQuestTree(ClientQuestList q)
 	{
@@ -408,9 +417,9 @@ public class GuiQuestTree extends GuiBase
 					{
 						ButtonQuest buttonQuest = (ButtonQuest) widget;
 
-						for (int id : buttonQuest.quest.dependencies)
+						for (ConfigValue value : buttonQuest.quest.dependencies)
 						{
-							QuestObject dependency = questList.get(id);
+							QuestObject dependency = questList.get(value.getInt());
 
 							if (dependency instanceof Quest && buttonQuest.quest.chapter.equals(((Quest) dependency).chapter))
 							{
@@ -457,6 +466,7 @@ public class GuiQuestTree extends GuiBase
 		};
 
 		chapterOptionButtons = new ArrayList<>();
+		selectedQuests = new IntOpenHashSet();
 	}
 
 	@Override

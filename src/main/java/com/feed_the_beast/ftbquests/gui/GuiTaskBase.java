@@ -81,7 +81,7 @@ public class GuiTaskBase extends GuiBase
 	{
 		if (!hasTile && FTBQuestsConfig.general.allow_take_quest_blocks && !container.data.task.isComplete(ClientQuestList.INSTANCE))
 		{
-			add(new SimpleButton(this, I18n.format("ftbquests.gui.task.get_block"), ItemIcon.getItemIcon(new ItemStack(FTBQuestsItems.QUEST_BLOCK)), (widget, button) -> {
+			add(new SimpleButton(this, I18n.format("ftbquests.task.get_block"), ItemIcon.getItemIcon(new ItemStack(FTBQuestsItems.QUEST_BLOCK)), (widget, button) -> {
 				if (container.data.task.quest.isVisible(ClientQuestList.INSTANCE) && !container.data.task.isComplete(ClientQuestList.INSTANCE))
 				{
 					new MessageGetBlock(container.data.task.id).sendToServer();
@@ -133,7 +133,7 @@ public class GuiTaskBase extends GuiBase
 		if (container.getNonPlayerSlots() <= 0)
 		{
 			pushFontUnicode(true);
-			drawString(I18n.format("ftbquests.gui.task.no_items"), ax + width / 2, ay + 37, Color4I.LIGHT_RED, CENTERED);
+			drawString(I18n.format("ftbquests.task.no_items"), ax + width / 2, ay + 37, Color4I.LIGHT_RED, CENTERED);
 			popFontUnicode();
 		}
 	}

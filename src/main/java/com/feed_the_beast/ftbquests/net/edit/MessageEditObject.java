@@ -1,6 +1,7 @@
 package com.feed_the_beast.ftbquests.net.edit;
 
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
+import com.feed_the_beast.ftblib.lib.config.ConfigInt;
 import com.feed_the_beast.ftblib.lib.config.IConfigCallback;
 import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
@@ -66,16 +67,15 @@ public class MessageEditObject extends MessageToServer implements IConfigCallbac
 				group.setDisplayName(new TextComponentString(FTBQuests.MOD_NAME));
 				ConfigGroup group1 = group.getGroup(object.getObjectType().name().toLowerCase());
 				group1.setDisplayName(object.getDisplayName().appendSibling(StringUtils.color(new TextComponentString(" #" + object.id), TextFormatting.DARK_GRAY)));
+				ConfigGroup g = group1;
 
 				if (object instanceof QuestTask || object instanceof QuestReward)
 				{
-					ConfigGroup group2 = group1.getGroup(((IStringSerializable) object).getName());
-					object.getConfig(group2);
+					g = group1.getGroup(((IStringSerializable) object).getName());
 				}
-				else
-				{
-					object.getConfig(group1);
-				}
+
+				object.getConfig(g);
+				g.add("id", new ConfigInt(object.id), new ConfigInt(object.id)).setOrder((byte) -128).setCanEdit(false).setDisplayName(new TextComponentString("ID"));
 
 				FTBLibAPI.editServerConfig(player, group, this);
 			}
@@ -83,9 +83,16 @@ public class MessageEditObject extends MessageToServer implements IConfigCallbac
 	}
 
 	@Override
-	public void onConfigSaved(ConfigGroup group, ICommandSender sender)
+	public void onConfigSaved(ConfigGroup g, ICommandSender sender)
 	{
-		new MessageEditObjectResponse(id, group.serializeNBT()).sendToAll();
-		ServerQuestList.INSTANCE.save();
+		QuestObject object = ServerQuestList.INSTANCE.get(id);
+
+		if (object != null)
+		{
+			ConfigGroup group = new ConfigGroup("object");
+			object.getConfig(group);
+			new MessageEditObjectResponse(id, group.serializeNBT()).sendToAll();
+			ServerQuestList.INSTANCE.save();
+		}
 	}
 }

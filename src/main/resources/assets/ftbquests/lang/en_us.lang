@@ -29,6 +29,7 @@ ftbquests.quest.x=X
 ftbquests.quest.y=Y
 ftbquests.quest.type=Type
 ftbquests.quest.text=Text
+ftbquests.quest.dependencies=Dependencies
 
 ftbquests.gui.zoom_in=Zoom In
 ftbquests.gui.zoom_out=Zoom Out
