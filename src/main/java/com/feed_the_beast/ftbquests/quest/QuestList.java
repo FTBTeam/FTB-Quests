@@ -230,7 +230,7 @@ public abstract class QuestList extends ProgressingQuestObject
 
 					for (IProgressData data : getAllData())
 					{
-						data.createTaskData(task.id);
+						data.createTaskData(task);
 					}
 
 					return task;

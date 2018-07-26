@@ -212,9 +212,9 @@ public class FTBQuestsTeamData extends TeamData implements IProgressData
 	}
 
 	@Override
-	public void createTaskData(int task)
+	public void createTaskData(QuestTask task)
 	{
-		taskData.put(task, ServerQuestList.INSTANCE.getTask(task).createData(this));
+		taskData.put(task.id, task.createData(this));
 	}
 
 	public NBTTagCompound serializeTaskData()
