@@ -45,7 +45,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 	public ItemTask(Quest quest, NBTTagCompound nbt)
 	{
 		super(quest, nbt);
-		items = new ConfigList<>(ConfigItemStack.ID);
+		items = new ConfigList<>(new ConfigItemStack(new ItemStack(Items.APPLE)));
 
 		NBTTagList list = nbt.getTagList("items", Constants.NBT.TAG_COMPOUND);
 
@@ -146,7 +146,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 
 		if (count.getInt() > 1)
 		{
-			name = name + "x " + count.getInt();
+			name = count.getInt() + "x " + name;
 		}
 
 		return new TextComponentString(name);
@@ -178,7 +178,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 	@Override
 	public void getConfig(ConfigGroup group)
 	{
-		group.add("items", items, new ConfigList<>(ConfigItemStack.ID).add(new ConfigItemStack(new ItemStack(Items.APPLE))));
+		group.add("items", items, new ConfigList<>(new ConfigItemStack(new ItemStack(Items.APPLE))).add(new ConfigItemStack(new ItemStack(Items.APPLE))));
 		group.add("count", count, new ConfigInt(1));
 	}
 

@@ -15,8 +15,6 @@ import com.feed_the_beast.ftbquests.quest.rewards.UnknownReward;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTasks;
 import com.feed_the_beast.ftbquests.quest.tasks.UnknownTask;
-import it.unimi.dsi.fastutil.ints.IntCollection;
-import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -40,7 +38,7 @@ public final class Quest extends ProgressingQuestObject
 	public final ConfigEnum<QuestType> type;
 	public final ConfigInt x, y;
 	public final ConfigList<ConfigString> text;
-	public final IntCollection dependencies;
+	public final ConfigList<ConfigInt> dependencies;
 	public final List<QuestTask> tasks;
 	public final List<QuestReward> rewards;
 
@@ -55,7 +53,7 @@ public final class Quest extends ProgressingQuestObject
 		type.setValue(nbt.getString("type"));
 		x = new ConfigInt(nbt.getByte("x"), -127, 127);
 		y = new ConfigInt(nbt.getByte("y"), -127, 127);
-		text = new ConfigList<>(ConfigString.ID);
+		text = new ConfigList<>(new ConfigString(""));
 
 		NBTTagList list = nbt.getTagList("text", Constants.NBT.TAG_STRING);
 
@@ -64,7 +62,7 @@ public final class Quest extends ProgressingQuestObject
 			text.add(new ConfigString(list.getStringTagAt(k)));
 		}
 
-		dependencies = new IntOpenHashSet();
+		dependencies = new ConfigList<>(new ConfigInt(1, 1, Integer.MAX_VALUE));
 		tasks = new ArrayList<>();
 		rewards = new ArrayList<>();
 
@@ -86,9 +84,9 @@ public final class Quest extends ProgressingQuestObject
 			chapter.list.objectMap.put(reward.id, reward);
 		}
 
-		for (int d : nbt.getIntArray("depends_on"))
+		for (int d : nbt.getIntArray("dependencies"))
 		{
-			dependencies.add(d);
+			dependencies.add(new ConfigInt(d));
 		}
 	}
 
@@ -142,7 +140,14 @@ public final class Quest extends ProgressingQuestObject
 
 		if (!dependencies.isEmpty())
 		{
-			nbt.setIntArray("dependencies", dependencies.toIntArray());
+			int[] ai = new int[dependencies.getList().size()];
+
+			for (int i = 0; i < dependencies.getList().size(); i++)
+			{
+				ai[i] = dependencies.getList().get(i).getInt();
+			}
+
+			nbt.setIntArray("dependencies", ai);
 		}
 
 		if (!tasks.isEmpty())
@@ -252,9 +257,9 @@ public final class Quest extends ProgressingQuestObject
 
 		if (type.getValue() == QuestType.SECRET)
 		{
-			for (int d : dependencies)
+			for (ConfigInt value : dependencies)
 			{
-				QuestObject object = list.get(d);
+				QuestObject object = list.get(value.getInt());
 
 				if (object instanceof ProgressingQuestObject && ((ProgressingQuestObject) object).isComplete(data))
 				{
@@ -265,9 +270,9 @@ public final class Quest extends ProgressingQuestObject
 			return false;
 		}
 
-		for (int d : dependencies)
+		for (ConfigInt value : dependencies)
 		{
-			QuestObject object = list.get(d);
+			QuestObject object = list.get(value.getInt());
 
 			if (object instanceof ProgressingQuestObject && !((ProgressingQuestObject) object).isComplete(data))
 			{
@@ -330,6 +335,7 @@ public final class Quest extends ProgressingQuestObject
 		group.add("type", type, new ConfigEnum<>(QuestType.NAME_MAP));
 		group.add("icon", icon, new ConfigItemStack(ItemStack.EMPTY));
 		group.add("description", description, new ConfigString(""));
-		group.add("text", text, new ConfigList<>(ConfigString.ID));
+		group.add("text", text, new ConfigList<>(new ConfigString("")));
+		group.add("dependencies", dependencies, new ConfigList<>(new ConfigInt(1, 1, Integer.MAX_VALUE)));
 	}
 }

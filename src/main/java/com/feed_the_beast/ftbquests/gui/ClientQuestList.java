@@ -120,6 +120,22 @@ public class ClientQuestList extends QuestList implements IProgressData
 				questTreeGui.openGui();
 			}
 		}
+
+		GuiQuest guiQuest = ClientUtils.getCurrentGuiAs(GuiQuest.class);
+
+		if (guiQuest != null)
+		{
+			guiQuest.refreshWidgets();
+		}
+		else
+		{
+			GuiQuestTree guiQuestTree = ClientUtils.getCurrentGuiAs(GuiQuestTree.class);
+
+			if (guiQuestTree != null)
+			{
+				guiQuestTree.refreshWidgets();
+			}
+		}
 	}
 
 	public void openQuestGui()

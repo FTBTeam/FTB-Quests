@@ -1,6 +1,5 @@
 package com.feed_the_beast.ftbquests.gui;
 
-import com.feed_the_beast.ftblib.client.GuiEditConfig;
 import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigString;
@@ -15,6 +14,7 @@ import com.feed_the_beast.ftblib.lib.gui.Widget;
 import com.feed_the_beast.ftblib.lib.gui.WidgetLayout;
 import com.feed_the_beast.ftblib.lib.gui.WidgetType;
 import com.feed_the_beast.ftblib.lib.gui.misc.GuiButtonListBase;
+import com.feed_the_beast.ftblib.lib.gui.misc.GuiEditConfig;
 import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
@@ -123,9 +123,7 @@ public class GuiQuest extends GuiBase
 			{
 				if (button.isRight())
 				{
-					new MessageDeleteObject(task.id).sendToServer();
-					task.delete();
-					getGui().refreshWidgets();
+					getGui().openYesNo(I18n.format("delete_item", task.getDisplayName().getFormattedText()), "", () -> new MessageDeleteObject(task.id).sendToServer());
 				}
 				else
 				{
@@ -271,9 +269,7 @@ public class GuiQuest extends GuiBase
 			{
 				if (button.isRight())
 				{
-					new MessageDeleteObject(reward.id).sendToServer();
-					reward.delete();
-					getGui().refreshWidgets();
+					getGui().openYesNo(I18n.format("delete_item", reward.getDisplayName().getFormattedText()), "", () -> new MessageDeleteObject(reward.id).sendToServer());
 				}
 				else
 				{

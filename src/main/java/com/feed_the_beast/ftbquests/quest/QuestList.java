@@ -12,6 +12,7 @@ import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTasks;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -51,7 +52,7 @@ public abstract class QuestList extends ProgressingQuestObject
 			objectMap.put(chapter.id, chapter);
 		}
 
-		emergencyItems = new ConfigList<>(ConfigItemStack.ID);
+		emergencyItems = new ConfigList<>(new ConfigItemStack(new ItemStack(Items.APPLE)));
 
 		NBTTagList emergencyItemsList = nbt.getTagList("emergency_items", Constants.NBT.TAG_COMPOUND);
 
@@ -310,12 +311,12 @@ public abstract class QuestList extends ProgressingQuestObject
 	@Override
 	public ITextComponent getDisplayName()
 	{
-		return new TextComponentTranslation("sidebar_button.ftbquests.quests");
+		return new TextComponentTranslation("ftbquests.list");
 	}
 
 	@Override
 	public void getConfig(ConfigGroup config)
 	{
-		config.add("emergency_items", emergencyItems, new ConfigList<>(ConfigItemStack.ID));
+		config.add("emergency_items", emergencyItems, new ConfigList<>(new ConfigItemStack(new ItemStack(Items.APPLE))));
 	}
 }
