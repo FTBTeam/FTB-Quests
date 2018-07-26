@@ -1,5 +1,6 @@
 package com.feed_the_beast.ftbquests.util;
 
+import com.feed_the_beast.ftblib.events.team.ForgeTeamCreatedEvent;
 import com.feed_the_beast.ftblib.events.team.ForgeTeamDataEvent;
 import com.feed_the_beast.ftblib.events.team.ForgeTeamLoadedEvent;
 import com.feed_the_beast.ftblib.events.team.ForgeTeamPlayerLeftEvent;
@@ -10,7 +11,6 @@ import com.feed_the_beast.ftblib.lib.data.TeamData;
 import com.feed_the_beast.ftblib.lib.util.FileUtils;
 import com.feed_the_beast.ftblib.lib.util.NBTUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
-import com.feed_the_beast.ftbquests.net.MessageResetProgress;
 import com.feed_the_beast.ftbquests.net.MessageUpdateTaskProgress;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.Quest;
@@ -32,6 +32,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 
@@ -80,11 +81,28 @@ public class FTBQuestsTeamData extends TeamData implements IProgressData
 	}
 
 	@SubscribeEvent
+	public static void onTeamCreated(ForgeTeamCreatedEvent event)
+	{
+		FTBQuestsTeamData data = get(event.getTeam());
+
+		for (QuestChapter chapter : ServerQuestList.INSTANCE.chapters)
+		{
+			for (Quest quest : chapter.quests)
+			{
+				for (QuestTask task : quest.tasks)
+				{
+					data.createTaskData(task);
+				}
+			}
+		}
+	}
+
+	@SubscribeEvent
 	public static void onPlayerLeftTeam(ForgeTeamPlayerLeftEvent event)
 	{
 		if (event.getPlayer().isOnline())
 		{
-			new MessageResetProgress("").sendTo(event.getPlayer().getPlayer());
+			ServerQuestList.INSTANCE.sync(event.getPlayer().getPlayer());
 		}
 	}
 
@@ -337,19 +355,31 @@ public class FTBQuestsTeamData extends TeamData implements IProgressData
 		return taskData.get(task);
 	}
 
-	public void reset()
+	@Override
+	public void unclaimReward(QuestReward reward)
 	{
-		if (!claimedRewards.isEmpty() || !claimedPlayerRewards.isEmpty())
+		if (reward.teamReward)
 		{
-			team.markDirty();
+			if (claimedRewards.rem(reward.id))
+			{
+				team.markDirty();
+			}
 		}
-
-		claimedRewards.clear();
-		claimedPlayerRewards.clear();
-
-		for (QuestTaskData data : taskData.values())
+		else
 		{
-			data.setProgress(0, false);
+			Iterator<IntCollection> itr = claimedPlayerRewards.values().iterator();
+
+			while (itr.hasNext())
+			{
+				IntCollection collection = itr.next();
+				collection.rem(reward.id);
+
+				if (collection.isEmpty())
+				{
+					itr.remove();
+					team.markDirty();
+				}
+			}
 		}
 	}
 }

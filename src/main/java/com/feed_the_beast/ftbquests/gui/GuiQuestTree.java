@@ -14,7 +14,7 @@ import com.feed_the_beast.ftblib.lib.gui.Widget;
 import com.feed_the_beast.ftblib.lib.gui.WidgetLayout;
 import com.feed_the_beast.ftblib.lib.gui.WidgetType;
 import com.feed_the_beast.ftblib.lib.gui.misc.GuiEditConfig;
-import com.feed_the_beast.ftblib.lib.gui.misc.GuiSelectors;
+import com.feed_the_beast.ftblib.lib.gui.misc.GuiEditConfigValue;
 import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
@@ -23,6 +23,7 @@ import com.feed_the_beast.ftbquests.net.edit.MessageCreateObject;
 import com.feed_the_beast.ftbquests.net.edit.MessageDeleteObject;
 import com.feed_the_beast.ftbquests.net.edit.MessageEditObject;
 import com.feed_the_beast.ftbquests.net.edit.MessageMoveChapter;
+import com.feed_the_beast.ftbquests.net.edit.MessageResetProgress;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
@@ -538,6 +539,16 @@ public class GuiQuestTree extends GuiBase
 				}
 			});
 
+			chapterOptionButtons.add(new ChapterOptionButton(this, "R", I18n.format("ftbquests.gui.reset_progress"))
+			{
+				@Override
+				public void onClicked(MouseButton button)
+				{
+					GuiHelper.playClickSound();
+					getGui().openYesNo(I18n.format("ftbquests.gui.reset_progress") + "?", "", () -> new MessageResetProgress(selectedChapter.chapter.id, isShiftKeyDown()).sendToServer());
+				}
+			});
+
 			chapterOptionButtons.add(new ChapterOptionButton(this, "A", I18n.format("ftbquests.gui.add_chapter_after"))
 			{
 				@Override
@@ -545,7 +556,7 @@ public class GuiQuestTree extends GuiBase
 				{
 					GuiHelper.playClickSound();
 
-					GuiSelectors.selectJson(new ConfigString(), (value, set) ->
+					new GuiEditConfigValue("title", new ConfigString(), (value, set) ->
 					{
 						GuiQuestTree.this.openGui();
 
@@ -567,7 +578,7 @@ public class GuiQuestTree extends GuiBase
 				{
 					GuiHelper.playClickSound();
 
-					GuiSelectors.selectJson(new ConfigString(), (value, set) ->
+					new GuiEditConfigValue("title", new ConfigString(), (value, set) ->
 					{
 						GuiQuestTree.this.openGui();
 
@@ -623,8 +634,8 @@ public class GuiQuestTree extends GuiBase
 					nbt.setByte("x", (byte) x);
 					nbt.setByte("y", (byte) y);
 					Quest quest = new Quest(selectedChapter.chapter, nbt);
-					ConfigGroup group = new ConfigGroup(FTBQuests.MOD_ID);
-					quest.getConfig(group.getGroup(QuestObjectType.QUEST.name().toLowerCase()));
+					ConfigGroup group = ConfigGroup.newGroup(FTBQuests.MOD_ID);
+					quest.getConfig(group.getGroup(QuestObjectType.QUEST.getName()));
 					new GuiEditConfig(group, (group1, sender) -> {
 						NBTTagCompound nbt1 = new NBTTagCompound();
 						quest.writeData(nbt1);

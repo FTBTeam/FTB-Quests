@@ -46,15 +46,7 @@ public class FluidTask extends QuestTask
 	{
 		super(quest, nbt);
 
-		fluid = new ConfigFluid(FluidRegistry.getFluid(nbt.getString("fluid")))
-		{
-			@Override
-			public Fluid getDefaultFluid()
-			{
-				return FluidRegistry.WATER;
-			}
-		};
-
+		fluid = new ConfigFluid(FluidRegistry.getFluid(nbt.getString("fluid")), FluidRegistry.WATER);
 		fluidNBT = new ConfigNBT(nbt.hasKey("nbt") ? nbt.getCompoundTag("nbt") : null);
 		amount = new ConfigInt(nbt.hasKey("amount") ? nbt.getInteger("amount") : 1000, 1, Integer.MAX_VALUE);
 	}
@@ -135,7 +127,7 @@ public class FluidTask extends QuestTask
 	@Override
 	public void getConfig(ConfigGroup group)
 	{
-		group.add("fluid", fluid, new ConfigFluid(FluidRegistry.WATER));
+		group.add("fluid", fluid, new ConfigFluid(FluidRegistry.WATER, FluidRegistry.WATER));
 		group.add("fluid_nbt", fluidNBT, new ConfigNBT(null));
 		group.add("amount", amount, new ConfigInt(1));
 	}

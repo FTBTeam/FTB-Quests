@@ -203,14 +203,9 @@ public class ClientQuestList extends QuestList implements IProgressData
 	}
 
 	@Override
-	public void resetProgress(IProgressData data)
+	public void unclaimReward(QuestReward reward)
 	{
-		claimedRewards.clear();
-
-		for (QuestTaskData d : taskData.values())
-		{
-			d.setProgress(0, false);
-		}
+		claimedRewards.rem(reward.id);
 	}
 
 	@Nullable
