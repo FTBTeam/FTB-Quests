@@ -31,8 +31,7 @@ ftbquests.quest.dependencies=Dependencies
 
 ftbquests.gui.zoom_in=Zoom In
 ftbquests.gui.zoom_out=Zoom Out
-ftbquests.gui.add_chapter_after=Add new chapter after this one
-ftbquests.gui.add_chapter_before=Add new chapter before this one
+ftbquests.gui.add_chapter=Add Chapter
 ftbquests.gui.move_up=Move Up
 ftbquests.gui.move_down=Move Down
 ftbquests.gui.move_left=Move Left
