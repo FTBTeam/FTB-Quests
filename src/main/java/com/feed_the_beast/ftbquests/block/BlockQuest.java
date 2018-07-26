@@ -24,6 +24,9 @@ import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.items.ItemHandlerHelper;
+
+import java.util.Random;
 
 /**
  * @author LatvianModder
@@ -50,12 +53,6 @@ public class BlockQuest extends BlockBase
 	}
 
 	@Override
-	public boolean dropSpecial(IBlockState state)
-	{
-		return true;
-	}
-
-	@Override
 	@SideOnly(Side.CLIENT)
 	public BlockRenderLayer getRenderLayer()
 	{
@@ -63,13 +60,14 @@ public class BlockQuest extends BlockBase
 	}
 
 	@Override
-	public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer ep, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ)
+	public int quantityDropped(IBlockState state, int fortune, Random random)
 	{
-		if (world.isRemote)
-		{
-			return true;
-		}
+		return 0;
+	}
 
+	@Override
+	public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ)
+	{
 		TileEntity tileEntity = world.getTileEntity(pos);
 
 		if (!(tileEntity instanceof TileQuest))
@@ -84,16 +82,35 @@ public class BlockQuest extends BlockBase
 			return true;
 		}
 
-		EntityPlayerMP player = (EntityPlayerMP) ep;
+		if (player.isSneaking() && player.getHeldItem(hand).isEmpty())
+		{
+			if (!world.isRemote)
+			{
+				ItemStack stack = new ItemStack(this);
+				QuestBlockData.get(stack).copyFrom(tile.data);
+				ItemHandlerHelper.giveItemToPlayer(player, stack, player.inventory.currentItem);
+			}
+
+			world.removeTileEntity(pos);
+			world.setBlockToAir(pos);
+			return true;
+		}
+
+		if (world.isRemote)
+		{
+			return true;
+		}
+
+		EntityPlayerMP playerMP = (EntityPlayerMP) player;
 		QuestTaskData taskData = tile.data.getTaskData();
 
 		if (taskData == null || taskData.task instanceof UnknownTask)
 		{
 			player.sendStatusMessage(StringUtils.color(new TextComponentTranslation("tile.ftbquests.quest_block.missing_data"), TextFormatting.RED), true);
 		}
-		else if (Universe.get().getPlayer(player).team.getName().equals(taskData.data.getTeamID()))
+		else if (Universe.get().getPlayer(playerMP).team.getName().equals(taskData.data.getTeamID()))
 		{
-			MessageOpenTask.openGUI(taskData, player, tile);
+			MessageOpenTask.openGUI(taskData, playerMP, tile);
 		}
 		else
 		{

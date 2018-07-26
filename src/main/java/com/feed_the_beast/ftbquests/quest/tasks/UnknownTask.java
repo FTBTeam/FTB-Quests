@@ -56,7 +56,7 @@ public class UnknownTask extends QuestTask
 	@Override
 	public Icon getIcon()
 	{
-		return GuiIcons.CANCEL;
+		return GuiIcons.BARRIER;
 	}
 
 	public String getHover()

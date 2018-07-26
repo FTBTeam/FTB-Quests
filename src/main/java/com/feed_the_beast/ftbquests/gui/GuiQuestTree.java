@@ -1,6 +1,7 @@
 package com.feed_the_beast.ftbquests.gui;
 
 import com.feed_the_beast.ftblib.lib.client.ClientUtils;
+import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigString;
 import com.feed_the_beast.ftblib.lib.config.ConfigValue;
 import com.feed_the_beast.ftblib.lib.gui.Button;
@@ -12,10 +13,12 @@ import com.feed_the_beast.ftblib.lib.gui.SimpleTextButton;
 import com.feed_the_beast.ftblib.lib.gui.Widget;
 import com.feed_the_beast.ftblib.lib.gui.WidgetLayout;
 import com.feed_the_beast.ftblib.lib.gui.WidgetType;
+import com.feed_the_beast.ftblib.lib.gui.misc.GuiEditConfig;
 import com.feed_the_beast.ftblib.lib.gui.misc.GuiSelectors;
 import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
+import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.net.edit.MessageCreateObject;
 import com.feed_the_beast.ftbquests.net.edit.MessageDeleteObject;
 import com.feed_the_beast.ftbquests.net.edit.MessageEditObject;
@@ -576,6 +579,57 @@ public class GuiQuestTree extends GuiBase
 							new MessageCreateObject(QuestObjectType.CHAPTER, 0, nbt).sendToServer();
 						}
 					});
+				}
+			});
+
+			chapterOptionButtons.add(new ChapterOptionButton(this, "Q", I18n.format("ftbquests.gui.add_quest"))
+			{
+				@Override
+				public void onClicked(MouseButton button)
+				{
+					GuiHelper.playClickSound();
+					int x = 0;
+					int y = 0;
+
+					IntOpenHashSet set = new IntOpenHashSet();
+
+					for (Quest quest : selectedChapter.chapter.quests)
+					{
+						set.add((quest.x.getInt() & 0xFF) | (quest.y.getInt() & 0xFF) >> 8);
+					}
+
+					if (set.size() >= 255 * 255)
+					{
+						return;
+					}
+
+					while (set.contains((x & 0xFF) | (y & 0xFF) >> 8))
+					{
+						x++;
+
+						if (x == 128)
+						{
+							x = -127;
+							y++;
+
+							if (y == 128)
+							{
+								y = -127;
+							}
+						}
+					}
+
+					NBTTagCompound nbt = new NBTTagCompound();
+					nbt.setByte("x", (byte) x);
+					nbt.setByte("y", (byte) y);
+					Quest quest = new Quest(selectedChapter.chapter, nbt);
+					ConfigGroup group = new ConfigGroup(FTBQuests.MOD_ID);
+					quest.getConfig(group.getGroup(QuestObjectType.QUEST.name().toLowerCase()));
+					new GuiEditConfig(group, (group1, sender) -> {
+						NBTTagCompound nbt1 = new NBTTagCompound();
+						quest.writeData(nbt1);
+						new MessageCreateObject(QuestObjectType.QUEST, selectedChapter.chapter.id, nbt1).sendToServer();
+					}).openGui();
 				}
 			});
 
