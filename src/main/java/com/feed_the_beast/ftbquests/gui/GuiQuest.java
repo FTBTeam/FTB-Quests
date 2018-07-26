@@ -18,6 +18,7 @@ import com.feed_the_beast.ftblib.lib.gui.misc.GuiEditConfig;
 import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
+import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.net.MessageClaimReward;
 import com.feed_the_beast.ftbquests.net.MessageOpenTask;
 import com.feed_the_beast.ftbquests.net.edit.MessageCreateObject;
@@ -231,7 +232,7 @@ public class GuiQuest extends GuiBase
 						{
 							GuiHelper.playClickSound();
 
-							ConfigGroup group = new ConfigGroup("ftbquests");
+							ConfigGroup group = ConfigGroup.newGroup(FTBQuests.MOD_ID);
 							task.getConfig(group.getGroup("task").getGroup(type));
 
 							new GuiEditConfig(group, (g, sender) -> {
@@ -388,7 +389,7 @@ public class GuiQuest extends GuiBase
 						{
 							GuiHelper.playClickSound();
 
-							ConfigGroup group = new ConfigGroup("ftbquests");
+							ConfigGroup group = ConfigGroup.newGroup(FTBQuests.MOD_ID);
 							reward.getConfig(group.getGroup("reward").getGroup(type));
 
 							new GuiEditConfig(group, (g, sender) -> {

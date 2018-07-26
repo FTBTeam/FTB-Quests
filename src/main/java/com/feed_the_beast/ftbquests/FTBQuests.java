@@ -39,7 +39,6 @@ public class FTBQuests
 	public static FTBQuestsCommon PROXY;
 
 	private static final String PERM_EDIT = "ftbquests.edit";
-	public static final String PERM_RESET_PROGRESS = "ftbquests.reset_progress";
 
 	@Mod.EventHandler
 	public void onPreInit(FMLPreInitializationEvent event)
@@ -77,8 +76,7 @@ public class FTBQuests
 	@Mod.EventHandler
 	public void onPostInit(FMLPostInitializationEvent event)
 	{
-		PermissionAPI.registerNode(PERM_EDIT, DefaultPermissionLevel.OP, "Permission for editing quests");
-		PermissionAPI.registerNode(PERM_RESET_PROGRESS, DefaultPermissionLevel.OP, "Permission for resetting quest progress");
+		PermissionAPI.registerNode(PERM_EDIT, DefaultPermissionLevel.OP, "Permission for editing quests and resetting progress");
 	}
 
 	public static boolean canEdit(EntityPlayer player)

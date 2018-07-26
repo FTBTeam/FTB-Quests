@@ -29,4 +29,6 @@ public interface IProgressData
 	void removeTask(int task);
 
 	void createTaskData(QuestTask task);
+
+	void unclaimReward(QuestReward reward);
 }

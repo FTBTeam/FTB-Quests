@@ -244,6 +244,11 @@ public final class Quest extends ProgressingQuestObject
 		{
 			task.resetProgress(data);
 		}
+
+		for (QuestReward reward : rewards)
+		{
+			data.unclaimReward(reward);
+		}
 	}
 
 	public boolean isVisible(IProgressData data)

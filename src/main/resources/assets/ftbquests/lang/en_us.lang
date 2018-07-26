@@ -6,8 +6,6 @@ ftbquests.general.editing_mode=Editing Mode
 ftbquests.general.allow_take_quest_blocks=Allow to Take Quest Blocks
 ftbquests.general.emergency_items_cooldown=Emergency Items Cooldown
 
-admin_panel.ftbquests.edit=Edit Quests
-admin_panel.ftbquests.reset_progress=Reset Quest Progress
 sidebar_button.ftbquests.quests=Quests
 
 ftbquests.owner=Owner
@@ -46,6 +44,7 @@ ftbquests.gui.edit_quest=Edit Quest
 ftbquests.gui.delete_quest=Delete Quest
 ftbquests.gui.select_task_type=Select Task Type
 ftbquests.gui.select_reward_type=Select Reward Type
+ftbquests.gui.reset_progress=Reset Progress
 
 ftbquests.task=Task
 ftbquests.tasks=Tasks

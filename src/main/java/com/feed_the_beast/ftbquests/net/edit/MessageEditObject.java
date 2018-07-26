@@ -18,6 +18,7 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.IStringSerializable;
 import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 
 /**
@@ -63,9 +64,9 @@ public class MessageEditObject extends MessageToServer implements IConfigCallbac
 
 			if (object != null)
 			{
-				ConfigGroup group = new ConfigGroup(FTBQuests.MOD_ID);
-				group.setDisplayName(new TextComponentString(FTBQuests.MOD_NAME));
-				ConfigGroup group1 = group.getGroup(object.getObjectType().name().toLowerCase());
+				ConfigGroup group = ConfigGroup.newGroup(FTBQuests.MOD_ID);
+				group.setDisplayName(new TextComponentTranslation(object.getObjectType().getTranslationKey()));
+				ConfigGroup group1 = group.getGroup(object.getObjectType().getName());
 				group1.setDisplayName(object.getDisplayName().appendSibling(StringUtils.color(new TextComponentString(" #" + object.id), TextFormatting.DARK_GRAY)));
 				ConfigGroup g = group1;
 
@@ -89,7 +90,7 @@ public class MessageEditObject extends MessageToServer implements IConfigCallbac
 
 		if (object != null)
 		{
-			ConfigGroup group = new ConfigGroup("object");
+			ConfigGroup group = ConfigGroup.newGroup("object");
 			object.getConfig(group);
 			new MessageEditObjectResponse(id, group.serializeNBT()).sendToAll();
 			ServerQuestList.INSTANCE.save();
