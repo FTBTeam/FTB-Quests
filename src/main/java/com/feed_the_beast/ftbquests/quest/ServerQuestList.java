@@ -73,7 +73,7 @@ public class ServerQuestList extends QuestList
 
 		do
 		{
-			id = random.nextInt(Integer.MAX_VALUE - 1) + 1;
+			id = random.nextInt(9999) + 1;
 		}
 		while (get(id) != null);
 
