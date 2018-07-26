@@ -59,7 +59,7 @@ public class IC2EnergyTask extends QuestTask
 	@Override
 	public ITextComponent getDisplayName()
 	{
-		return new TextComponentTranslation("ftbquests.gui.task.ic2_energy.text", value);
+		return new TextComponentTranslation("ftbquests.task.ic2_energy.text", value);
 	}
 
 	@Override

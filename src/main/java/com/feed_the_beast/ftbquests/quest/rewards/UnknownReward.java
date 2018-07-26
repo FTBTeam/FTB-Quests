@@ -45,7 +45,7 @@ public class UnknownReward extends QuestReward
 	@Override
 	public Icon getIcon()
 	{
-		return GuiIcons.CANCEL;
+		return GuiIcons.BARRIER;
 	}
 
 	public String getHover()

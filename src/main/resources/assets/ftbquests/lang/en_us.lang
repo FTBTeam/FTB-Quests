@@ -41,6 +41,7 @@ ftbquests.gui.move_left=Move Left
 ftbquests.gui.move_right=Move Right
 ftbquests.gui.edit_chapter=Edit Chapter
 ftbquests.gui.delete_chapter=Delete Chapter
+ftbquests.gui.add_quest=Add Quest
 ftbquests.gui.edit_quest=Edit Quest
 ftbquests.gui.delete_quest=Delete Quest
 ftbquests.gui.select_task_type=Select Task Type

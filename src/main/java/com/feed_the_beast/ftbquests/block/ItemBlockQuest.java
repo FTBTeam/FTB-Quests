@@ -67,15 +67,15 @@ public class ItemBlockQuest extends ItemBlockBase
 
 		if (!ClientQuestList.INSTANCE.teamId.equals(data.data.getTeamID()))
 		{
-			tooltip.add(I18n.format("ftbquests.gui.owner") + ": " + TextFormatting.DARK_GREEN + data.data.getTeamID());
+			tooltip.add(I18n.format("ftbquests.owner") + ": " + TextFormatting.DARK_GREEN + data.data.getTeamID());
 		}
 
-		tooltip.add(I18n.format("ftbquests.gui.task") + ": " + TextFormatting.YELLOW + data.task.getDisplayName().getFormattedText());
+		tooltip.add(I18n.format("ftbquests.task") + ": " + TextFormatting.YELLOW + data.task.getDisplayName().getFormattedText());
 		int max = data.task.getMaxProgress();
 
 		if (max <= 0)
 		{
-			tooltip.add(I18n.format("ftbquests.gui.progress") + ": " + TextFormatting.BLUE + "0/0 [0%]");
+			tooltip.add(I18n.format("ftbquests.progress") + ": " + TextFormatting.BLUE + "0/0 [0%]");
 		}
 		else
 		{
@@ -83,11 +83,11 @@ public class ItemBlockQuest extends ItemBlockBase
 
 			if (progress >= max)
 			{
-				tooltip.add(I18n.format("ftbquests.gui.progress") + ": " + TextFormatting.BLUE + max + "/" + max + " [100%]");
+				tooltip.add(I18n.format("ftbquests.progress") + ": " + TextFormatting.BLUE + max + "/" + max + " [100%]");
 			}
 			else
 			{
-				tooltip.add(I18n.format("ftbquests.gui.progress") + ": " + TextFormatting.BLUE + progress + "/" + max + " [" + (int) (progress * 100D / (double) max) + "%]");
+				tooltip.add(I18n.format("ftbquests.progress") + ": " + TextFormatting.BLUE + progress + "/" + max + " [" + (int) (progress * 100D / (double) max) + "%]");
 			}
 		}
 	}

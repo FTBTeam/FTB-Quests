@@ -315,12 +315,12 @@ public final class Quest extends ProgressingQuestObject
 		super.delete();
 		chapter.quests.remove(this);
 
-		for (QuestTask task : tasks)
+		for (QuestTask task : new ArrayList<>(tasks))
 		{
 			task.delete();
 		}
 
-		for (QuestReward reward : rewards)
+		for (QuestReward reward : new ArrayList<>(rewards))
 		{
 			reward.delete();
 		}

@@ -141,7 +141,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 				s[i] = items.getList().get(i).getStack().getDisplayName();
 			}
 
-			name = StringJoiner.with(", ").joinStrings(s);
+			name = "[" + StringJoiner.with(", ").joinStrings(s) + "]";
 		}
 
 		if (count.getInt() > 1)
