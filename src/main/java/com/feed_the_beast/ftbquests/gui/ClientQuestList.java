@@ -197,9 +197,9 @@ public class ClientQuestList extends QuestList implements IProgressData
 	}
 
 	@Override
-	public void createTaskData(int task)
+	public void createTaskData(QuestTask task)
 	{
-		taskData.put(task, getTask(task).createData(this));
+		taskData.put(task.id, task.createData(this));
 	}
 
 	@Override
