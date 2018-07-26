@@ -517,7 +517,7 @@ public class GuiQuestTree extends GuiBase
 			}
 		});
 
-		if (questList.editingMode)
+		if (questList.editingMode && selectedChapter != null)
 		{
 			chapterOptionButtons.add(new ChapterOptionButton(this, "X", I18n.format("ftbquests.gui.delete_chapter"))
 			{
