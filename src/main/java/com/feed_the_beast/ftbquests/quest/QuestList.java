@@ -191,16 +191,7 @@ public abstract class QuestList extends ProgressingQuestObject
 			case CHAPTER:
 			{
 				QuestChapter chapter = new QuestChapter(this, nbt);
-
-				if (nbt.hasKey("_index"))
-				{
-					chapter.list.chapters.add(nbt.getInteger("_index"), chapter);
-				}
-				else
-				{
-					chapter.list.chapters.add(chapter);
-				}
-
+				chapter.list.chapters.add(chapter);
 				objectMap.put(chapter.id, chapter);
 				return chapter;
 			}
