@@ -48,6 +48,7 @@ public abstract class QuestList extends ProgressingQuestObject
 		for (int i = 0; i < chapterList.tagCount(); i++)
 		{
 			QuestChapter chapter = new QuestChapter(this, chapterList.getCompoundTagAt(i));
+			chapter.index = chapters.size();
 			chapters.add(chapter);
 			objectMap.put(chapter.id, chapter);
 		}
@@ -191,6 +192,7 @@ public abstract class QuestList extends ProgressingQuestObject
 			case CHAPTER:
 			{
 				QuestChapter chapter = new QuestChapter(this, nbt);
+				chapter.index = chapter.list.chapters.size();
 				chapter.list.chapters.add(chapter);
 				objectMap.put(chapter.id, chapter);
 				return chapter;

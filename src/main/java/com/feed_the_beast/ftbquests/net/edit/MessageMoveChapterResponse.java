@@ -1,10 +1,12 @@
 package com.feed_the_beast.ftbquests.net.edit;
 
+import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToClient;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.gui.ClientQuestList;
+import com.feed_the_beast.ftbquests.gui.GuiQuestTree;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -63,7 +65,18 @@ public class MessageMoveChapterResponse extends MessageToClient
 				{
 					ClientQuestList.INSTANCE.chapters.remove(index);
 					ClientQuestList.INSTANCE.chapters.add(up ? index - 1 : index + 1, chapter);
-					ClientQuestList.INSTANCE.refreshGui(ClientQuestList.INSTANCE);
+
+					for (int i = 0; i < ClientQuestList.INSTANCE.chapters.size(); i++)
+					{
+						ClientQuestList.INSTANCE.chapters.get(i).index = i;
+					}
+
+					GuiQuestTree gui = ClientUtils.getCurrentGuiAs(GuiQuestTree.class);
+
+					if (gui != null)
+					{
+						gui.chapterPanel.refreshWidgets();
+					}
 				}
 			}
 		}
