@@ -19,5 +19,7 @@ public class FTBQuestsEditNetHandler
 		EDIT.register(new MessageMoveChapterResponse());
 		EDIT.register(new MessageResetProgress());
 		EDIT.register(new MessageResetProgressResponse());
+		EDIT.register(new MessageMoveQuests());
+		EDIT.register(new MessageMoveQuestsResponse());
 	}
 }

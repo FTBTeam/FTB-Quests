@@ -26,6 +26,7 @@ import java.util.List;
 public final class QuestChapter extends ProgressingQuestObject
 {
 	public final QuestList list;
+	public int index;
 	public final ConfigString title;
 	public final ConfigList<ConfigString> description;
 	public final ConfigItemStack icon;

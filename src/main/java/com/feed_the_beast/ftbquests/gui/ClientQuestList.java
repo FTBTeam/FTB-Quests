@@ -90,7 +90,7 @@ public class ClientQuestList extends QuestList implements IProgressData
 			zoom = prev.questTreeGui.zoom;
 			scrollX = prev.questTreeGui.quests.getScrollX();
 			scrollY = prev.questTreeGui.quests.getScrollY();
-			selectedChapter = prev.questTreeGui.selectedChapter == null ? 0 : prev.questTreeGui.selectedChapter.chapter.id;
+			selectedChapter = prev.questTreeGui.selectedChapter == null ? 0 : prev.questTreeGui.selectedChapter.id;
 
 			if (ClientUtils.getCurrentGuiAs(GuiQuestTree.class) != null)
 			{
@@ -106,14 +106,7 @@ public class ClientQuestList extends QuestList implements IProgressData
 			questTreeGui.zoom = zoom;
 			questTreeGui.quests.setScrollX(scrollX);
 			questTreeGui.quests.setScrollY(scrollY);
-
-			for (GuiQuestTree.ButtonChapter b : questTreeGui.chapterButtons)
-			{
-				if (b.chapter.id == selectedChapter)
-				{
-					questTreeGui.selectedChapter = b;
-				}
-			}
+			questTreeGui.selectChapter(getChapter(selectedChapter));
 
 			if (guiOpen)
 			{
