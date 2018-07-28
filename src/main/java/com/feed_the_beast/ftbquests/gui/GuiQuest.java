@@ -4,6 +4,7 @@ import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigString;
 import com.feed_the_beast.ftblib.lib.gui.Button;
+import com.feed_the_beast.ftblib.lib.gui.ContextMenuItem;
 import com.feed_the_beast.ftblib.lib.gui.GuiBase;
 import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
 import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
@@ -24,6 +25,7 @@ import com.feed_the_beast.ftbquests.net.MessageOpenTask;
 import com.feed_the_beast.ftbquests.net.edit.MessageCreateObject;
 import com.feed_the_beast.ftbquests.net.edit.MessageDeleteObject;
 import com.feed_the_beast.ftbquests.net.edit.MessageEditObject;
+import com.feed_the_beast.ftbquests.net.edit.MessageResetProgress;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.quest.rewards.QuestReward;
@@ -116,22 +118,37 @@ public class GuiQuest extends GuiBase
 		}
 
 		@Override
+		public boolean mousePressed(MouseButton button)
+		{
+			if (isMouseOver())
+			{
+				if (button.isRight() || getWidgetType() != WidgetType.DISABLED)
+				{
+					onClicked(button);
+				}
+
+				return true;
+			}
+
+			return false;
+		}
+
+		@Override
 		public void onClicked(MouseButton button)
 		{
 			GuiHelper.playClickSound();
 
-			if (questTreeGui.questList.editingMode && isCtrlKeyDown())
+			if (button.isRight() && questTreeGui.questList.editingMode)
 			{
-				if (button.isRight())
-				{
-					getGui().openYesNo(I18n.format("delete_item", task.getDisplayName().getFormattedText()), "", () -> new MessageDeleteObject(task.id).sendToServer());
-				}
-				else
-				{
-					new MessageEditObject(task.id).sendToServer();
-				}
+				List<ContextMenuItem> contextMenu = new ArrayList<>();
+				contextMenu.add(new ContextMenuItem(I18n.format("selectServer.edit"), GuiIcons.SETTINGS, () -> new MessageEditObject(task.id).sendToServer()));
+				contextMenu.add(ContextMenuItem.SEPARATOR);
+				contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), GuiIcons.REMOVE, () -> new MessageDeleteObject(task.id)).setYesNo(I18n.format("delete_item", task.getDisplayName().getFormattedText())));
+				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.reset_progress"), GuiIcons.REFRESH, () -> new MessageResetProgress(task.id, false).sendToServer()).setYesNo(I18n.format("ftbquests.gui.reset_progress_q")));
+				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.copy_id"), GuiIcons.INFO, () -> setClipboardString(Integer.toString(task.id & 0xFFFF))));
+				getGui().openContextMenu(contextMenu);
 			}
-			else if (!(task instanceof UnknownTask))
+			else if (button.isLeft() && !(task instanceof UnknownTask))
 			{
 				new MessageOpenTask(task.id).sendToServer();
 			}
@@ -248,22 +265,36 @@ public class GuiQuest extends GuiBase
 		}
 
 		@Override
+		public boolean mousePressed(MouseButton button)
+		{
+			if (isMouseOver())
+			{
+				if (button.isRight() || getWidgetType() != WidgetType.DISABLED)
+				{
+					onClicked(button);
+				}
+
+				return true;
+			}
+
+			return false;
+		}
+
+		@Override
 		public void onClicked(MouseButton button)
 		{
 			GuiHelper.playClickSound();
 
-			if (questTreeGui.questList.editingMode && isCtrlKeyDown())
+			if (button.isRight() && questTreeGui.questList.editingMode)
 			{
-				if (button.isRight())
-				{
-					getGui().openYesNo(I18n.format("delete_item", reward.getDisplayName().getFormattedText()), "", () -> new MessageDeleteObject(reward.id).sendToServer());
-				}
-				else
-				{
-					new MessageEditObject(reward.id).sendToServer();
-				}
+				List<ContextMenuItem> contextMenu = new ArrayList<>();
+				contextMenu.add(new ContextMenuItem(I18n.format("selectServer.edit"), GuiIcons.SETTINGS, () -> new MessageEditObject(reward.id).sendToServer()));
+				contextMenu.add(ContextMenuItem.SEPARATOR);
+				contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), GuiIcons.REMOVE, () -> new MessageDeleteObject(reward.id)).setYesNo(I18n.format("delete_item", reward.getDisplayName().getFormattedText())));
+				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.copy_id"), GuiIcons.INFO, () -> setClipboardString(Integer.toString(reward.id & 0xFFFF))));
+				getGui().openContextMenu(contextMenu);
 			}
-			else if (!(reward instanceof UnknownReward) && questTreeGui.questList.claimReward(ClientUtils.MC.player, reward))
+			else if (button.isLeft() && !(reward instanceof UnknownReward) && questTreeGui.questList.claimReward(ClientUtils.MC.player, reward))
 			{
 				new MessageClaimReward(reward.id).sendToServer();
 			}
