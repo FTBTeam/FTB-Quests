@@ -27,6 +27,7 @@ public class ServerQuestList extends QuestList
 
 	public boolean shouldSendUpdates = true;
 	private Random random;
+	public boolean shouldSave = false;
 
 	public static boolean load()
 	{
@@ -62,18 +63,18 @@ public class ServerQuestList extends QuestList
 	}
 
 	@Override
-	public int requestID()
+	public short requestID()
 	{
 		if (random == null)
 		{
 			random = new Random();
 		}
 
-		int id;
+		short id;
 
 		do
 		{
-			id = random.nextInt(9999) + 1;
+			id = (short) (1 + random.nextInt(MAX_ID));
 		}
 		while (get(id) != null);
 
@@ -141,8 +142,6 @@ public class ServerQuestList extends QuestList
 
 	public void save()
 	{
-		NBTTagCompound nbt = new NBTTagCompound();
-		writeData(nbt);
-		NBTUtils.writeNBTSafe(new File(CommonUtils.folderConfig, "ftbquests/quests.nbt"), nbt);
+		shouldSave = true;
 	}
 }

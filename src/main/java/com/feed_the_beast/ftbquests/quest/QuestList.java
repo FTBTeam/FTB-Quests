@@ -10,8 +10,8 @@ import com.feed_the_beast.ftbquests.quest.rewards.QuestReward;
 import com.feed_the_beast.ftbquests.quest.rewards.QuestRewards;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTasks;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.shorts.Short2ObjectMap;
+import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -30,18 +30,50 @@ import java.util.List;
  */
 public abstract class QuestList extends ProgressingQuestObject
 {
+	public static final int MAX_ID = 65535;
+
+	public static String formatID(short id0)
+	{
+		int id = id0 & 0xFFFF;
+
+		StringBuilder builder = new StringBuilder(4);
+
+		if (id < 10000)
+		{
+			builder.append('0');
+		}
+
+		if (id < 1000)
+		{
+			builder.append('0');
+		}
+
+		if (id < 100)
+		{
+			builder.append('0');
+		}
+
+		if (id < 10)
+		{
+			builder.append('0');
+		}
+
+		builder.append(id);
+		return builder.toString();
+	}
+
 	public final List<QuestChapter> chapters;
 	private boolean invalid;
-	public final Int2ObjectMap<QuestObject> objectMap;
+	public final Short2ObjectMap<QuestObject> objectMap;
 	public final ConfigList<ConfigItemStack> emergencyItems;
 
 	public QuestList(NBTTagCompound nbt)
 	{
-		super(0);
+		super((short) 0);
 		chapters = new ArrayList<>();
 		invalid = false;
-		objectMap = new Int2ObjectOpenHashMap<>();
-		objectMap.put(0, this);
+		objectMap = new Short2ObjectOpenHashMap<>();
+		objectMap.put((short) 0, this);
 
 		NBTTagList chapterList = nbt.getTagList("chapters", Constants.NBT.TAG_COMPOUND);
 
@@ -133,59 +165,59 @@ public abstract class QuestList extends ProgressingQuestObject
 	}
 
 	@Nullable
-	public QuestObject get(int id)
+	public QuestObject get(short id)
 	{
 		return id == 0 ? this : objectMap.get(id);
 	}
 
 	@Nullable
-	public QuestChapter getChapter(int id)
+	public QuestChapter getChapter(short id)
 	{
 		QuestObject object = get(id);
 		return object instanceof QuestChapter ? (QuestChapter) object : null;
 	}
 
 	@Nullable
-	public Quest getQuest(int id)
+	public Quest getQuest(short id)
 	{
 		QuestObject object = get(id);
 		return object instanceof Quest ? (Quest) object : null;
 	}
 
 	@Nullable
-	public QuestTask getTask(int id)
+	public QuestTask getTask(short id)
 	{
 		QuestObject object = get(id);
 		return object instanceof QuestTask ? (QuestTask) object : null;
 	}
 
 	@Nullable
-	public QuestReward getReward(int id)
+	public QuestReward getReward(short id)
 	{
 		QuestObject object = get(id);
 		return object instanceof QuestReward ? (QuestReward) object : null;
 	}
 
-	public int requestID()
+	public short requestID()
 	{
 		return 0;
 	}
 
-	public int getID(NBTTagCompound nbt)
+	public short getID(NBTTagCompound nbt)
 	{
-		int id = nbt.getInteger("id");
+		short id = nbt.getShort("id");
 
-		if (id <= 0 || objectMap.containsKey(id))
+		if (id == 0 || objectMap.containsKey(id))
 		{
 			id = requestID();
-			nbt.setInteger("id", id);
+			nbt.setShort("id", id);
 		}
 
 		return id;
 	}
 
 	@Nullable
-	public QuestObject createAndAdd(QuestObjectType type, int parent, NBTTagCompound nbt)
+	public QuestObject createAndAdd(QuestObjectType type, short parent, NBTTagCompound nbt)
 	{
 		switch (type)
 		{

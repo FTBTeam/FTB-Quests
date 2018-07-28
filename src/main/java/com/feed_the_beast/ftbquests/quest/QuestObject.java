@@ -10,9 +10,9 @@ import net.minecraft.util.text.ITextComponent;
  */
 public abstract class QuestObject
 {
-	public final int id;
+	public final short id;
 
-	public QuestObject(int i)
+	public QuestObject(short i)
 	{
 		id = i;
 	}
@@ -40,7 +40,7 @@ public abstract class QuestObject
 	@Override
 	public final String toString()
 	{
-		return getClass().getSimpleName() + '#' + id;
+		return getClass().getSimpleName() + '#' + QuestList.formatID(id);
 	}
 
 	@Override

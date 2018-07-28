@@ -36,14 +36,14 @@ public class MessageUpdateTaskProgress extends MessageToClient
 	@Override
 	public void writeData(DataOut data)
 	{
-		data.writeInt(task);
+		data.writeShort(task);
 		data.writeNBT(nbt);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
-		task = data.readInt();
+		task = data.readUnsignedShort();
 		nbt = data.readNBT();
 	}
 

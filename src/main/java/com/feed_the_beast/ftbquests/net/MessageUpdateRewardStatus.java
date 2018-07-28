@@ -35,14 +35,14 @@ public class MessageUpdateRewardStatus extends MessageToClient
 	@Override
 	public void writeData(DataOut data)
 	{
-		data.writeInt(reward);
+		data.writeShort(reward);
 		data.writeBoolean(status);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
-		reward = data.readInt();
+		reward = data.readUnsignedShort();
 		status = data.readBoolean();
 	}
 

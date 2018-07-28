@@ -15,13 +15,13 @@ import net.minecraft.entity.player.EntityPlayerMP;
  */
 public class MessageClaimReward extends MessageToServer
 {
-	private int reward;
+	private short reward;
 
 	public MessageClaimReward()
 	{
 	}
 
-	public MessageClaimReward(int r)
+	public MessageClaimReward(short r)
 	{
 		reward = r;
 	}
@@ -35,13 +35,13 @@ public class MessageClaimReward extends MessageToServer
 	@Override
 	public void writeData(DataOut data)
 	{
-		data.writeInt(reward);
+		data.writeShort(reward);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
-		reward = data.readInt();
+		reward = data.readShort();
 	}
 
 	@Override

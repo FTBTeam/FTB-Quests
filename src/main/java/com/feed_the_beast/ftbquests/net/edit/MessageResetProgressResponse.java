@@ -15,13 +15,13 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  */
 public class MessageResetProgressResponse extends MessageToClient
 {
-	private int id;
+	private short id;
 
 	public MessageResetProgressResponse()
 	{
 	}
 
-	public MessageResetProgressResponse(int i)
+	public MessageResetProgressResponse(short i)
 	{
 		id = i;
 	}
@@ -35,13 +35,13 @@ public class MessageResetProgressResponse extends MessageToClient
 	@Override
 	public void writeData(DataOut data)
 	{
-		data.writeInt(id);
+		data.writeShort(id);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
-		id = data.readInt();
+		id = data.readShort();
 	}
 
 	@Override

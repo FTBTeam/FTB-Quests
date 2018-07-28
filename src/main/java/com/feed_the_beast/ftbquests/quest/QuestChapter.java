@@ -1,14 +1,13 @@
 package com.feed_the_beast.ftbquests.quest;
 
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
+import com.feed_the_beast.ftblib.lib.config.ConfigInt;
 import com.feed_the_beast.ftblib.lib.config.ConfigItemStack;
 import com.feed_the_beast.ftblib.lib.config.ConfigList;
 import com.feed_the_beast.ftblib.lib.config.ConfigString;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.IconAnimation;
 import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
-import it.unimi.dsi.fastutil.ints.IntCollection;
-import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -31,7 +30,7 @@ public final class QuestChapter extends ProgressingQuestObject
 	public final ConfigList<ConfigString> description;
 	public final ConfigItemStack icon;
 	public final List<Quest> quests;
-	public final IntCollection dependencies;
+	public final ConfigList<ConfigInt> dependencies;
 
 	public QuestChapter(QuestList l, NBTTagCompound nbt)
 	{
@@ -49,11 +48,11 @@ public final class QuestChapter extends ProgressingQuestObject
 			description.add(new ConfigString(desc.getStringTagAt(i)));
 		}
 
-		dependencies = new IntOpenHashSet();
+		dependencies = new ConfigList<>(new ConfigInt(1, 1, QuestList.MAX_ID));
 
 		for (int d : nbt.getIntArray("depends_on"))
 		{
-			dependencies.add(d);
+			dependencies.add(new ConfigInt(d));
 		}
 
 		NBTTagList questsList = nbt.getTagList("quests", Constants.NBT.TAG_COMPOUND);
@@ -81,10 +80,10 @@ public final class QuestChapter extends ProgressingQuestObject
 	@Override
 	public void writeData(NBTTagCompound nbt)
 	{
-		nbt.setInteger("id", id);
+		nbt.setShort("id", id);
 		nbt.setString("title", title.getString());
 
-		if (!description.getList().isEmpty())
+		if (!description.list.isEmpty())
 		{
 			NBTTagList list = new NBTTagList();
 
@@ -103,7 +102,14 @@ public final class QuestChapter extends ProgressingQuestObject
 
 		if (!dependencies.isEmpty())
 		{
-			nbt.setIntArray("dependencies", dependencies.toIntArray());
+			int[] ai = new int[dependencies.list.size()];
+
+			for (int i = 0; i < dependencies.list.size(); i++)
+			{
+				ai[i] = dependencies.list.get(i).getInt();
+			}
+
+			nbt.setIntArray("dependencies", ai);
 		}
 
 		if (!quests.isEmpty())

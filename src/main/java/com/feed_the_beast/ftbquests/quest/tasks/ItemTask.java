@@ -45,7 +45,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 	public ItemTask(Quest quest, NBTTagCompound nbt)
 	{
 		super(quest, nbt);
-		items = new ConfigList<>(new ConfigItemStack(new ItemStack(Items.APPLE)));
+		items = new ConfigList<>(new ConfigItemStack(new ItemStack(Items.APPLE), true));
 
 		NBTTagList list = nbt.getTagList("items", Constants.NBT.TAG_COMPOUND);
 
@@ -72,7 +72,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 	@Override
 	public boolean isInvalid()
 	{
-		return items.getList().isEmpty() || super.isInvalid();
+		return items.list.isEmpty() || super.isInvalid();
 	}
 
 	@Override
@@ -128,17 +128,17 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 	{
 		String name;
 
-		if (items.getList().size() == 1)
+		if (items.list.size() == 1)
 		{
-			name = items.getList().get(0).getStack().getDisplayName();
+			name = items.list.get(0).getStack().getDisplayName();
 		}
 		else
 		{
-			String[] s = new String[items.getList().size()];
+			String[] s = new String[items.list.size()];
 
 			for (int i = 0; i < s.length; i++)
 			{
-				s[i] = items.getList().get(i).getStack().getDisplayName();
+				s[i] = items.list.get(i).getStack().getDisplayName();
 			}
 
 			name = "[" + StringJoiner.with(", ").joinStrings(s) + "]";
@@ -178,7 +178,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 	@Override
 	public void getConfig(ConfigGroup group)
 	{
-		group.add("items", items, new ConfigList<>(new ConfigItemStack(new ItemStack(Items.APPLE))).add(new ConfigItemStack(new ItemStack(Items.APPLE))));
+		group.add("items", items, new ConfigList<>(new ConfigItemStack(ItemStack.EMPTY, true)));
 		group.add("count", count, new ConfigInt(1));
 	}
 

@@ -20,13 +20,13 @@ import net.minecraftforge.items.ItemHandlerHelper;
  */
 public class MessageGetBlock extends MessageToServer
 {
-	private int task;
+	private short task;
 
 	public MessageGetBlock()
 	{
 	}
 
-	public MessageGetBlock(int t)
+	public MessageGetBlock(short t)
 	{
 		task = t;
 	}
@@ -40,13 +40,13 @@ public class MessageGetBlock extends MessageToServer
 	@Override
 	public void writeData(DataOut data)
 	{
-		data.writeInt(task);
+		data.writeShort(task);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
-		task = data.readInt();
+		task = data.readShort();
 	}
 
 	@Override

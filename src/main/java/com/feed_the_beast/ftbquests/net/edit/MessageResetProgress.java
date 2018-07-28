@@ -19,14 +19,14 @@ import net.minecraft.entity.player.EntityPlayerMP;
  */
 public class MessageResetProgress extends MessageToServer
 {
-	private int id;
+	private short id;
 	private boolean all;
 
 	public MessageResetProgress()
 	{
 	}
 
-	public MessageResetProgress(int i, boolean a)
+	public MessageResetProgress(short i, boolean a)
 	{
 		id = i;
 		all = a;
@@ -41,14 +41,14 @@ public class MessageResetProgress extends MessageToServer
 	@Override
 	public void writeData(DataOut data)
 	{
-		data.writeInt(id);
+		data.writeShort(id);
 		data.writeBoolean(all);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
-		id = data.readInt();
+		id = data.readShort();
 		all = data.readBoolean();
 	}
 
