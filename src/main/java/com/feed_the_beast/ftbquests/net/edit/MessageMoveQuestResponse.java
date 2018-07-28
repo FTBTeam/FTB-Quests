@@ -1,32 +1,33 @@
 package com.feed_the_beast.ftbquests.net.edit;
 
-import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
+import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToClient;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.gui.ClientQuestList;
-import com.feed_the_beast.ftbquests.quest.QuestObject;
-import net.minecraft.nbt.NBTTagCompound;
+import com.feed_the_beast.ftbquests.gui.GuiQuestTree;
+import com.feed_the_beast.ftbquests.quest.Quest;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * @author LatvianModder
  */
-public class MessageEditObjectResponse extends MessageToClient
+public class MessageMoveQuestResponse extends MessageToClient
 {
 	private short id;
-	private NBTTagCompound nbt;
+	private byte x, y;
 
-	public MessageEditObjectResponse()
+	public MessageMoveQuestResponse()
 	{
 	}
 
-	public MessageEditObjectResponse(short i, NBTTagCompound n)
+	public MessageMoveQuestResponse(short i, byte _x, byte _y)
 	{
 		id = i;
-		nbt = n;
+		x = _x;
+		y = _y;
 	}
 
 	@Override
@@ -39,14 +40,16 @@ public class MessageEditObjectResponse extends MessageToClient
 	public void writeData(DataOut data)
 	{
 		data.writeShort(id);
-		data.writeNBT(nbt);
+		data.writeByte(x);
+		data.writeByte(y);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
 		id = data.readShort();
-		nbt = data.readNBT();
+		x = data.readByte();
+		y = data.readByte();
 	}
 
 	@Override
@@ -55,14 +58,19 @@ public class MessageEditObjectResponse extends MessageToClient
 	{
 		if (ClientQuestList.INSTANCE != null)
 		{
-			QuestObject object = ClientQuestList.INSTANCE.get(id);
+			Quest quest = ClientQuestList.INSTANCE.getQuest(id);
 
-			if (object != null)
+			if (quest != null)
 			{
-				ConfigGroup group = ConfigGroup.newGroup("object");
-				object.getConfig(group);
-				group.deserializeNBT(nbt);
-				ClientQuestList.INSTANCE.refreshGui(ClientQuestList.INSTANCE);
+				quest.x.setInt(x);
+				quest.y.setInt(y);
+
+				GuiQuestTree gui = ClientUtils.getCurrentGuiAs(GuiQuestTree.class);
+
+				if (gui != null)
+				{
+					gui.quests.refreshWidgets();
+				}
 			}
 		}
 	}

@@ -3,8 +3,8 @@ package com.feed_the_beast.ftbquests.gui;
 import com.feed_the_beast.ftblib.lib.gui.Button;
 import com.feed_the_beast.ftblib.lib.gui.GuiBase;
 import com.feed_the_beast.ftblib.lib.gui.GuiContainerWrapper;
+import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
 import com.feed_the_beast.ftblib.lib.gui.Panel;
-import com.feed_the_beast.ftblib.lib.gui.SimpleButton;
 import com.feed_the_beast.ftblib.lib.gui.WidgetLayout;
 import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
@@ -36,6 +36,7 @@ public class GuiTaskBase extends GuiBase
 		public Tab(Panel panel, String title, Icon icon)
 		{
 			super(panel, title, icon);
+			setSize(20, 20);
 		}
 
 		@Override
@@ -54,8 +55,17 @@ public class GuiTaskBase extends GuiBase
 			@Override
 			public void addWidgets()
 			{
-				if (ClientQuestList.INSTANCE.editingMode)
+				if (FTBQuestsConfig.general.allow_take_quest_blocks && container.data.task.quest.isVisible(ClientQuestList.INSTANCE) && !container.data.task.isComplete(ClientQuestList.INSTANCE))
 				{
+					add(new Tab(this, I18n.format("ftbquests.task.get_block"), ItemIcon.getItemIcon(new ItemStack(FTBQuestsItems.QUEST_BLOCK)))
+					{
+						@Override
+						public void onClicked(MouseButton button)
+						{
+							GuiHelper.playClickSound();
+							new MessageGetBlock(container.data.task.id).sendToServer();
+						}
+					});
 				}
 
 				addTabs(this);
@@ -64,10 +74,11 @@ public class GuiTaskBase extends GuiBase
 			@Override
 			public void alignWidgets()
 			{
-				align(WidgetLayout.VERTICAL);
+				setHeight(align(WidgetLayout.VERTICAL));
 			}
 		};
 
+		tabs.setPosAndSize(-19, 8, 20, 0);
 		taskName = container.data.task.getDisplayName().getFormattedText();
 		taskIcon = container.data.task.getIcon();
 	}
@@ -79,15 +90,7 @@ public class GuiTaskBase extends GuiBase
 	@Override
 	public void addWidgets()
 	{
-		if (!hasTile && FTBQuestsConfig.general.allow_take_quest_blocks && !container.data.task.isComplete(ClientQuestList.INSTANCE))
-		{
-			add(new SimpleButton(this, I18n.format("ftbquests.task.get_block"), ItemIcon.getItemIcon(new ItemStack(FTBQuestsItems.QUEST_BLOCK)), (widget, button) -> {
-				if (container.data.task.quest.isVisible(ClientQuestList.INSTANCE) && !container.data.task.isComplete(ClientQuestList.INSTANCE))
-				{
-					new MessageGetBlock(container.data.task.id).sendToServer();
-				}
-			}).setPosAndSize(8, 8, 20, 20));
-		}
+		add(tabs);
 	}
 
 	@Override

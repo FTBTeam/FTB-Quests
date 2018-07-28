@@ -14,14 +14,14 @@ import net.minecraft.entity.player.EntityPlayerMP;
  */
 public class MessageMoveChapter extends MessageToServer
 {
-	private int id;
+	private short id;
 	private boolean up;
 
 	public MessageMoveChapter()
 	{
 	}
 
-	public MessageMoveChapter(int i, boolean u)
+	public MessageMoveChapter(short i, boolean u)
 	{
 		id = i;
 		up = u;
@@ -36,14 +36,14 @@ public class MessageMoveChapter extends MessageToServer
 	@Override
 	public void writeData(DataOut data)
 	{
-		data.writeInt(id);
+		data.writeShort(id);
 		data.writeBoolean(up);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
-		id = data.readInt();
+		id = data.readShort();
 		up = data.readBoolean();
 	}
 

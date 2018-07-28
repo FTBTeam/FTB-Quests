@@ -47,7 +47,7 @@ public class MessageOpenTaskGui extends MessageToClient
 	@Override
 	public void writeData(DataOut data)
 	{
-		data.writeInt(task);
+		data.writeShort(task);
 		data.writeInt(window);
 		data.writeBoolean(hasPos);
 
@@ -60,7 +60,7 @@ public class MessageOpenTaskGui extends MessageToClient
 	@Override
 	public void readData(DataIn data)
 	{
-		task = data.readInt();
+		task = data.readUnsignedShort();
 		window = data.readInt();
 		hasPos = data.readBoolean();
 

@@ -5,6 +5,7 @@ import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigString;
 import com.feed_the_beast.ftblib.lib.config.ConfigValue;
 import com.feed_the_beast.ftblib.lib.gui.Button;
+import com.feed_the_beast.ftblib.lib.gui.ContextMenuItem;
 import com.feed_the_beast.ftblib.lib.gui.GuiBase;
 import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
 import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
@@ -23,8 +24,9 @@ import com.feed_the_beast.ftbquests.net.edit.MessageCreateObject;
 import com.feed_the_beast.ftbquests.net.edit.MessageDeleteObject;
 import com.feed_the_beast.ftbquests.net.edit.MessageEditObject;
 import com.feed_the_beast.ftbquests.net.edit.MessageMoveChapter;
-import com.feed_the_beast.ftbquests.net.edit.MessageMoveQuests;
+import com.feed_the_beast.ftbquests.net.edit.MessageMoveQuest;
 import com.feed_the_beast.ftbquests.net.edit.MessageResetProgress;
+import com.feed_the_beast.ftbquests.net.edit.MessageSetDep;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
@@ -40,7 +42,6 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 import org.lwjgl.input.Keyboard;
@@ -78,6 +79,21 @@ public class GuiQuestTree extends GuiBase
 		{
 			GuiHelper.playClickSound();
 			selectChapter(chapter);
+
+			if (questList.editingMode && button.isRight())
+			{
+				List<ContextMenuItem> contextMenu = new ArrayList<>();
+				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.add_quest"), GuiIcons.ADD, GuiQuestTree.this::addQuest));
+				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.add_chapter"), GuiIcons.ADD, GuiQuestTree.this::addChapter));
+				contextMenu.add(new ContextMenuItem(I18n.format("selectServer.edit"), GuiIcons.SETTINGS, () -> editObject(chapter.id)));
+				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.move_up"), GuiIcons.UP, () -> new MessageMoveChapter(chapter.id, true).sendToServer()).setEnabled(chapter.index > 0));
+				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.move_down"), GuiIcons.DOWN, () -> new MessageMoveChapter(chapter.id, false).sendToServer()).setEnabled(chapter.index < questList.chapters.size() - 1));
+				contextMenu.add(ContextMenuItem.SEPARATOR);
+				contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), GuiIcons.REMOVE, GuiQuestTree.this::deleteChapter));
+				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.reset_progress"), GuiIcons.REFRESH, () -> new MessageResetProgress(chapter.id, false).sendToServer()).setYesNo(I18n.format("ftbquests.gui.reset_progress_q")));
+				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.copy_id"), GuiIcons.INFO, () -> setClipboardString(Integer.toString(chapter.id & 0xFFFF))));
+				openContextMenu(contextMenu);
+			}
 		}
 
 		@Override
@@ -85,12 +101,6 @@ public class GuiQuestTree extends GuiBase
 		{
 			list.add(getTitle() + questList.getCompletionSuffix(chapter));
 			list.addAll(description);
-		}
-
-		@Override
-		public Icon getIcon()
-		{
-			return icon;
 		}
 
 		@Override
@@ -169,29 +179,38 @@ public class GuiQuestTree extends GuiBase
 		{
 			GuiHelper.playClickSound();
 
-			if (questList.editingMode && isCtrlKeyDown())
+			if (questList.editingMode && button.isRight())
 			{
-				if (selectedQuests.contains(quest.id))
+				List<ContextMenuItem> contextMenu = new ArrayList<>();
+				contextMenu.add(new ContextMenuItem(I18n.format("selectWorld.edit"), GuiIcons.SETTINGS, () -> editObject(quest.id)));
+
+				QuestObject object = questList.get(selectedQuest);
+
+				if (object != null && quest.hasDependency(object.id))
 				{
-					selectedQuests.rem(quest.id);
+					contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.rem_dep"), GuiIcons.REMOVE, () -> new MessageSetDep(quest.id, selectedQuest, false).sendToServer()));
 				}
 				else
 				{
-					selectedQuests.add(quest.id);
+					contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.set_dep"), GuiIcons.ADD, () -> new MessageSetDep(quest.id, selectedQuest, true).sendToServer()).setEnabled(object != quest && object instanceof Quest));
 				}
 
-				chapterOptionButtons.refreshWidgets();
-
-				/*
-				if (button.isRight())
+				contextMenu.add(ContextMenuItem.SEPARATOR);
+				contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), GuiIcons.REMOVE, () -> new MessageDeleteObject(quest.id).sendToServer()).setYesNo(I18n.format("delete_item", quest.getDisplayName().getFormattedText())));
+				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.reset_progress"), GuiIcons.REFRESH, () -> new MessageResetProgress(quest.id, false).sendToServer()).setYesNo(I18n.format("ftbquests.gui.reset_progress_q")));
+				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.copy_id"), GuiIcons.INFO, () -> setClipboardString(Integer.toString(quest.id & 0xFFFF))));
+				openContextMenu(contextMenu);
+			}
+			else if (questList.editingMode && button.isLeft() && isCtrlKeyDown())
+			{
+				if (selectedQuest == quest.id)
 				{
-					getGui().openYesNo(I18n.format("delete_item", quest.getDisplayName().getFormattedText()), "", () -> new MessageDeleteObject(quest.id).sendToServer());
+					selectedQuest = 0;
 				}
 				else
 				{
-					new MessageEditObject(quest.id).sendToServer();
+					selectedQuest = quest.id;
 				}
-				*/
 			}
 			else
 			{
@@ -220,7 +239,7 @@ public class GuiQuestTree extends GuiBase
 		@Override
 		public WidgetType getWidgetType()
 		{
-			if (selectedQuests.contains(quest.id))
+			if (selectedQuest == quest.id)
 			{
 				return WidgetType.MOUSE_OVER;
 			}
@@ -339,7 +358,7 @@ public class GuiQuestTree extends GuiBase
 	public int zoom = 16;
 	private int scrollWidth, scrollHeight, prevMouseX, prevMouseY, grabbed;
 	public QuestChapter selectedChapter = null;
-	private final IntOpenHashSet selectedQuests;
+	private short selectedQuest;
 	public final Panel chapterPanel, quests, chapterOptionButtons;
 
 	public GuiQuestTree(ClientQuestList q)
@@ -457,7 +476,7 @@ public class GuiQuestTree extends GuiBase
 
 						for (ConfigValue value : buttonQuest.quest.dependencies)
 						{
-							QuestObject dependency = questList.get(value.getInt());
+							QuestObject dependency = questList.get((short) value.getInt());
 
 							if (dependency instanceof Quest && buttonQuest.quest.chapter.equals(((Quest) dependency).chapter))
 							{
@@ -508,15 +527,6 @@ public class GuiQuestTree extends GuiBase
 			@Override
 			public void addWidgets()
 			{
-				if (questList.editingMode)
-				{
-					add(new ChapterOptionButton(this, "Q", I18n.format("ftbquests.gui.add_quest"), () -> addQuest(), () -> selectedChapter != null));
-					add(new ChapterOptionButton(this, "C", I18n.format("ftbquests.gui.add_chapter"), () -> addChapter(), () -> true));
-					add(new ChapterOptionButton(this, "E", selectedQuests.isEmpty() ? I18n.format("ftbquests.gui.edit_chapter") : I18n.format("ftbquests.gui.edit_quest"), () -> editObjects(), () -> selectedChapter != null && canEditObjects()));
-					add(new ChapterOptionButton(this, "X", selectedQuests.isEmpty() ? I18n.format("ftbquests.gui.delete_chapter") : I18n.format("ftbquests.gui.delete_quest"), () -> deleteObjects(), () -> selectedChapter != null));
-					add(new ChapterOptionButton(this, "R", I18n.format("ftbquests.gui.reset_progress"), () -> resetProgressSafe(), () -> selectedChapter != null));
-				}
-
 				add(new ChapterOptionButton(this, "-", I18n.format("ftbquests.gui.zoom_out"), () -> zoomOut(), () -> canZoomOut()));
 				add(new ChapterOptionButton(this, "+", I18n.format("ftbquests.gui.zoom_in"), () -> zoomIn(), () -> canZoomIn()));
 			}
@@ -528,8 +538,6 @@ public class GuiQuestTree extends GuiBase
 				setPosAndSize(getGui().width - width - 7, 7, width, 12);
 			}
 		};
-
-		selectedQuests = new IntOpenHashSet();
 	}
 
 	public void selectChapter(@Nullable QuestChapter chapter)
@@ -539,7 +547,7 @@ public class GuiQuestTree extends GuiBase
 			selectedChapter = chapter;
 			quests.setScrollX(0);
 			quests.setScrollY(0);
-			selectedQuests.clear();
+			selectedQuest = 0;
 			quests.refreshWidgets();
 			chapterOptionButtons.refreshWidgets();
 		}
@@ -573,90 +581,35 @@ public class GuiQuestTree extends GuiBase
 		quests.alignWidgets();
 	}
 
-	private boolean canMoveObjects(int direction)
+	private void moveObject(int direction)
 	{
-		return !selectedQuests.isEmpty() || (direction == 0 && selectedChapter.index > 0) || (direction == 4 && selectedChapter.index < questList.chapters.size() - 1);
-	}
+		Quest quest = questList.getQuest(selectedQuest);
 
-	private void moveObjects(int direction)
-	{
-		if (canMoveObjects(direction))
+		if (quest != null)
 		{
-			if (!selectedQuests.isEmpty())
-			{
-				new MessageMoveQuests(selectedQuests.toIntArray(), (byte) direction).sendToServer();
-			}
-			else if (direction == 0)
-			{
-				new MessageMoveChapter(selectedChapter.id, true).sendToServer();
-			}
-			else if (direction == 4)
-			{
-				new MessageMoveChapter(selectedChapter.id, false).sendToServer();
-			}
+			quest.move((byte) direction);
+			new MessageMoveQuest(quest.id, (byte) direction).sendToServer();
+		}
+		else if (direction == 0)
+		{
+			new MessageMoveChapter(selectedChapter.id, true).sendToServer();
+		}
+		else if (direction == 4)
+		{
+			new MessageMoveChapter(selectedChapter.id, false).sendToServer();
 		}
 	}
 
-	private boolean canEditObjects()
+	private void editObject(short id)
 	{
-		return selectedQuests.size() <= 1;
+		new MessageEditObject(id).sendToServer();
 	}
 
-	private void editObjects()
+	private void deleteChapter()
 	{
-		new MessageEditObject(selectedQuests.isEmpty() ? selectedChapter.id : selectedQuests.iterator().nextInt()).sendToServer();
-	}
-
-	private void deleteObjects()
-	{
-		ITextComponent name;
-
-		if (selectedQuests.isEmpty())
-		{
-			name = selectedChapter.getDisplayName().createCopy();
-			name.getStyle().setColor(TextFormatting.GOLD);
-		}
-		else
-		{
-			boolean first = true;
-			name = new TextComponentString("");
-
-			for (int i : selectedQuests)
-			{
-				Quest quest = questList.getQuest(i);
-
-				if (quest != null)
-				{
-					if (first)
-					{
-						first = false;
-					}
-					else
-					{
-						name.appendText(", ");
-					}
-
-					ITextComponent component = quest.getDisplayName().createCopy();
-					component.getStyle().setColor(TextFormatting.GOLD);
-					name.appendSibling(component);
-				}
-			}
-		}
-
-		getGui().openYesNo(new TextComponentTranslation("delete_item", name).getFormattedText(), "", () ->
-		{
-			if (selectedQuests.isEmpty())
-			{
-				new MessageDeleteObject(selectedChapter.id).sendToServer();
-			}
-			else
-			{
-				for (int i : selectedQuests)
-				{
-					new MessageDeleteObject(i).sendToServer();
-				}
-			}
-		});
+		ITextComponent name = selectedChapter.getDisplayName().createCopy();
+		name.getStyle().setColor(TextFormatting.GOLD);
+		getGui().openYesNo(new TextComponentTranslation("delete_item", name).getFormattedText(), "", () -> new MessageDeleteObject(selectedChapter.id).sendToServer());
 	}
 
 	private void addChapter()
@@ -669,7 +622,7 @@ public class GuiQuestTree extends GuiBase
 			{
 				NBTTagCompound nbt = new NBTTagCompound();
 				nbt.setString("title", value.getString());
-				new MessageCreateObject(QuestObjectType.CHAPTER, 0, nbt).sendToServer();
+				new MessageCreateObject(QuestObjectType.CHAPTER, (short) 0, nbt).sendToServer();
 			}
 		}).openGui();
 	}
@@ -720,16 +673,6 @@ public class GuiQuestTree extends GuiBase
 		}).openGui();
 	}
 
-	private void resetProgressSafe()
-	{
-		getGui().openYesNo(I18n.format("ftbquests.gui.reset_progress") + "?", "", this::resetProgress);
-	}
-
-	private void resetProgress()
-	{
-		new MessageResetProgress(selectedChapter.id, isShiftKeyDown()).sendToServer();
-	}
-
 	@Override
 	public boolean keyPressed(int key, char keyChar)
 	{
@@ -769,47 +712,22 @@ public class GuiQuestTree extends GuiBase
 				selectChapter(questList.chapters.get(i));
 			}
 		}
-		else if (selectedChapter != null && questList.editingMode)
+		else if (selectedChapter != null && questList.editingMode && isCtrlKeyDown() && !isShiftKeyDown() && !isAltKeyDown())
 		{
-			if (key == Keyboard.KEY_DELETE)
+			switch (key)
 			{
-				deleteObjects();
-			}
-			else if (key == Keyboard.KEY_UP)
-			{
-				moveObjects(0);
-			}
-			else if (key == Keyboard.KEY_DOWN)
-			{
-				moveObjects(4);
-			}
-			else if (key == Keyboard.KEY_LEFT)
-			{
-				moveObjects(6);
-			}
-			else if (key == Keyboard.KEY_RIGHT)
-			{
-				moveObjects(2);
-			}
-			else if (isCtrlKeyDown())
-			{
-				if (key == Keyboard.KEY_A)
-				{
-					for (Widget widget : quests.widgets)
-					{
-						if (widget instanceof ButtonQuest)
-						{
-							selectedQuests.add(((ButtonQuest) widget).quest.id);
-						}
-					}
-
-					chapterOptionButtons.refreshWidgets();
-				}
-				else if (key == Keyboard.KEY_D)
-				{
-					selectedQuests.clear();
-					chapterOptionButtons.refreshWidgets();
-				}
+				case Keyboard.KEY_UP:
+					moveObject(0);
+					break;
+				case Keyboard.KEY_DOWN:
+					moveObject(4);
+					break;
+				case Keyboard.KEY_LEFT:
+					moveObject(6);
+					break;
+				case Keyboard.KEY_RIGHT:
+					moveObject(2);
+					break;
 			}
 		}
 
@@ -842,7 +760,15 @@ public class GuiQuestTree extends GuiBase
 	public boolean onInit()
 	{
 		setSize(getScreen().getScaledWidth() - 76, getScreen().getScaledHeight() - 8);
+		Keyboard.enableRepeatEvents(true);
 		return true;
+	}
+
+	@Override
+	public void onClosed()
+	{
+		super.onClosed();
+		Keyboard.enableRepeatEvents(false);
 	}
 
 	@Override

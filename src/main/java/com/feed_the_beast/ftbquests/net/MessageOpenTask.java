@@ -40,13 +40,13 @@ public class MessageOpenTask extends MessageToServer
 	@Override
 	public void writeData(DataOut data)
 	{
-		data.writeInt(task);
+		data.writeShort(task);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
-		task = data.readInt();
+		task = data.readUnsignedShort();
 	}
 
 	@Override

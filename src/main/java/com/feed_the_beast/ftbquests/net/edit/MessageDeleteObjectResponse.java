@@ -14,13 +14,13 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  */
 public class MessageDeleteObjectResponse extends MessageToClient
 {
-	private int id;
+	private short id;
 
 	public MessageDeleteObjectResponse()
 	{
 	}
 
-	public MessageDeleteObjectResponse(int i)
+	public MessageDeleteObjectResponse(short i)
 	{
 		id = i;
 	}
@@ -34,13 +34,13 @@ public class MessageDeleteObjectResponse extends MessageToClient
 	@Override
 	public void writeData(DataOut data)
 	{
-		data.writeInt(id);
+		data.writeShort(id);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
-		id = data.readInt();
+		id = data.readShort();
 	}
 
 	@Override

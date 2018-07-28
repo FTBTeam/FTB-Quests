@@ -157,17 +157,13 @@ public class GuiQuest extends GuiBase
 		@Override
 		public void draw()
 		{
-			int ax = getAX();
-			int ay = getAY();
-
-			getButtonBackground().draw(ax, ay, width, height);
-			icon.draw(ax + (width - 16) / 2, ay + (height - 16) / 2, 16, 16);
+			super.draw();
 
 			if (task.isComplete(questTreeGui.questList))
 			{
 				GlStateManager.pushMatrix();
 				GlStateManager.translate(0, 0, 500);
-				GuiIcons.CHECK.draw(ax + width - 9, ay + 1, 8, 8);
+				GuiIcons.CHECK.draw(getAX() + width - 9, getAY() + 1, 8, 8);
 				GlStateManager.popMatrix();
 			}
 		}
@@ -186,16 +182,6 @@ public class GuiQuest extends GuiBase
 		{
 			GuiHelper.playClickSound();
 			new GuiSelectTaskType().openGui();
-		}
-
-		@Override
-		public void draw()
-		{
-			int ax = getAX();
-			int ay = getAY();
-
-			getButtonBackground().draw(ax, ay, width, height);
-			getIcon().draw(ax + (width - 16) / 2, ay + (height - 16) / 2, 16, 16);
 		}
 	}
 
@@ -295,12 +281,6 @@ public class GuiQuest extends GuiBase
 		}
 
 		@Override
-		public Icon getIcon()
-		{
-			return icon;
-		}
-
-		@Override
 		public WidgetType getWidgetType()
 		{
 			if (questTreeGui.questList.editingMode && isCtrlKeyDown())
@@ -313,20 +293,6 @@ public class GuiQuest extends GuiBase
 			}
 
 			return super.getWidgetType();
-		}
-
-		@Override
-		public void draw()
-		{
-			int ax = getAX();
-			int ay = getAY();
-
-			getButtonBackground().draw(ax, ay, width, height);
-
-			if (!icon.isEmpty())
-			{
-				icon.draw(ax + (width - 16) / 2, ay + (height - 16) / 2, 16, 16);
-			}
 		}
 	}
 
@@ -343,16 +309,6 @@ public class GuiQuest extends GuiBase
 		{
 			GuiHelper.playClickSound();
 			new GuiSelectRewardType().openGui();
-		}
-
-		@Override
-		public void draw()
-		{
-			int ax = getAX();
-			int ay = getAY();
-
-			getButtonBackground().draw(ax, ay, width, height);
-			getIcon().draw(ax + (width - 16) / 2, ay + (height - 16) / 2, 16, 16);
 		}
 	}
 
@@ -484,6 +440,12 @@ public class GuiQuest extends GuiBase
 				GuiHelper.playClickSound();
 				questTreeGui.questList.questGui = questTreeGui.questList.questTreeGui;
 				questTreeGui.questList.questGui.openGui();
+			}
+
+			@Override
+			public Icon getButtonBackground()
+			{
+				return Icon.EMPTY;
 			}
 		};
 

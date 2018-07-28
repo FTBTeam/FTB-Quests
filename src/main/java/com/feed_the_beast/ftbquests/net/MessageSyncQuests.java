@@ -45,11 +45,11 @@ public class MessageSyncQuests extends MessageToClient
 		data.writeNBT(quests);
 		data.writeString(team);
 		data.writeNBT(taskData);
-		data.writeInt(claimedRewards.length);
+		data.writeShort(claimedRewards.length);
 
 		for (int i : claimedRewards)
 		{
-			data.writeInt(i);
+			data.writeShort(i);
 		}
 
 		data.writeBoolean(editingMode);
@@ -61,11 +61,11 @@ public class MessageSyncQuests extends MessageToClient
 		quests = data.readNBT();
 		team = data.readString();
 		taskData = data.readNBT();
-		claimedRewards = new int[data.readInt()];
+		claimedRewards = new int[data.readUnsignedShort()];
 
 		for (int i = 0; i < claimedRewards.length; i++)
 		{
-			claimedRewards[i] = data.readInt();
+			claimedRewards[i] = data.readUnsignedShort();
 		}
 
 		editingMode = data.readBoolean();

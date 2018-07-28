@@ -82,7 +82,7 @@ public class ClientQuestList extends QuestList implements IProgressData
 		boolean oldData = false;
 		boolean guiOpen = false;
 		int zoom = 0, scrollX = 0, scrollY = 0;
-		int selectedChapter = 0;
+		short selectedChapter = 0;
 
 		if (prev != null)
 		{
@@ -248,29 +248,6 @@ public class ClientQuestList extends QuestList implements IProgressData
 			builder.append(formatID(object.id));
 		}
 
-		return builder.toString();
-	}
-
-	public static String formatID(int id)
-	{
-		StringBuilder builder = new StringBuilder(4);
-
-		if (id < 1000)
-		{
-			builder.append('0');
-		}
-
-		if (id < 100)
-		{
-			builder.append('0');
-		}
-
-		if (id < 10)
-		{
-			builder.append('0');
-		}
-
-		builder.append(id);
 		return builder.toString();
 	}
 }

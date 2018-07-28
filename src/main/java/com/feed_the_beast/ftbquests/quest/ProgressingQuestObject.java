@@ -5,7 +5,7 @@ package com.feed_the_beast.ftbquests.quest;
  */
 public abstract class ProgressingQuestObject extends QuestObject
 {
-	public ProgressingQuestObject(int i)
+	public ProgressingQuestObject(short i)
 	{
 		super(i);
 	}

@@ -24,6 +24,7 @@ import net.minecraft.util.text.TextComponentString;
 import net.minecraftforge.common.util.Constants;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -62,7 +63,7 @@ public final class Quest extends ProgressingQuestObject
 			text.add(new ConfigString(list.getStringTagAt(k)));
 		}
 
-		dependencies = new ConfigList<>(new ConfigInt(1, 1, Integer.MAX_VALUE));
+		dependencies = new ConfigList<>(new ConfigInt(1, 1, QuestList.MAX_ID));
 		tasks = new ArrayList<>();
 		rewards = new ArrayList<>();
 
@@ -105,7 +106,7 @@ public final class Quest extends ProgressingQuestObject
 	@Override
 	public void writeData(NBTTagCompound nbt)
 	{
-		nbt.setInteger("id", id);
+		nbt.setShort("id", id);
 
 		if (type.getValue() != QuestType.NORMAL)
 		{
@@ -140,11 +141,11 @@ public final class Quest extends ProgressingQuestObject
 
 		if (!dependencies.isEmpty())
 		{
-			int[] ai = new int[dependencies.getList().size()];
+			int[] ai = new int[dependencies.list.size()];
 
-			for (int i = 0; i < dependencies.getList().size(); i++)
+			for (int i = 0; i < dependencies.list.size(); i++)
 			{
-				ai[i] = dependencies.getList().get(i).getInt();
+				ai[i] = dependencies.list.get(i).getInt();
 			}
 
 			nbt.setIntArray("dependencies", ai);
@@ -158,7 +159,7 @@ public final class Quest extends ProgressingQuestObject
 			{
 				NBTTagCompound taskNBT = new NBTTagCompound();
 				task.writeData(taskNBT);
-				taskNBT.setInteger("id", task.id);
+				taskNBT.setShort("id", task.id);
 
 				if (!(task instanceof UnknownTask))
 				{
@@ -179,7 +180,7 @@ public final class Quest extends ProgressingQuestObject
 			{
 				NBTTagCompound rewardNBT = new NBTTagCompound();
 				reward.writeData(rewardNBT);
-				rewardNBT.setInteger("id", reward.id);
+				rewardNBT.setShort("id", reward.id);
 
 				if (!(reward instanceof UnknownReward))
 				{
@@ -264,7 +265,7 @@ public final class Quest extends ProgressingQuestObject
 		{
 			for (ConfigInt value : dependencies)
 			{
-				QuestObject object = list.get(value.getInt());
+				QuestObject object = list.get((short) value.getInt());
 
 				if (object instanceof ProgressingQuestObject && ((ProgressingQuestObject) object).isComplete(data))
 				{
@@ -277,7 +278,7 @@ public final class Quest extends ProgressingQuestObject
 
 		for (ConfigInt value : dependencies)
 		{
-			QuestObject object = list.get(value.getInt());
+			QuestObject object = list.get((short) value.getInt());
 
 			if (object instanceof ProgressingQuestObject && !((ProgressingQuestObject) object).isComplete(data))
 			{
@@ -342,5 +343,95 @@ public final class Quest extends ProgressingQuestObject
 		group.add("description", description, new ConfigString(""));
 		group.add("text", text, new ConfigList<>(new ConfigString("")));
 		group.add("dependencies", dependencies, new ConfigList<>(new ConfigInt(1, 1, Integer.MAX_VALUE)));
+	}
+
+	public void move(byte direction)
+	{
+		if (direction == 5 || direction == 6 || direction == 7)
+		{
+			int v = x.getInt() - 1;
+			x.setInt(v <= -128 ? 127 : v);
+		}
+
+		if (direction == 1 || direction == 2 || direction == 3)
+		{
+			int v = x.getInt() + 1;
+			x.setInt(v >= 128 ? -127 : v);
+		}
+
+		if (direction == 0 || direction == 1 || direction == 7)
+		{
+			int v = y.getInt() - 1;
+			y.setInt(v <= -128 ? 127 : v);
+		}
+
+		if (direction == 3 || direction == 4 || direction == 5)
+		{
+			int v = y.getInt() + 1;
+			y.setInt(v >= 128 ? -127 : v);
+		}
+
+		for (Quest quest : chapter.quests)
+		{
+			if (quest != this && quest.x.getInt() == x.getInt() && quest.y.getInt() == y.getInt())
+			{
+				move(direction);
+				return;
+			}
+		}
+	}
+
+	public boolean setDependency(short dep, boolean add)
+	{
+		if (dep == 0 || dep == id)
+		{
+			return false;
+		}
+
+		int d = dep & 0xFFFF;
+
+		if (add)
+		{
+			for (ConfigInt value : dependencies)
+			{
+				if (value.getInt() == d)
+				{
+					return false;
+				}
+			}
+
+			dependencies.add(new ConfigInt(d));
+			return true;
+		}
+		else
+		{
+			Iterator<ConfigInt> iterator = dependencies.list.iterator();
+
+			while (iterator.hasNext())
+			{
+				if (iterator.next().getInt() == d)
+				{
+					iterator.remove();
+					return true;
+				}
+			}
+
+			return false;
+		}
+	}
+
+	public boolean hasDependency(short dep)
+	{
+		int d = dep & 0xFFFF;
+
+		for (ConfigInt value : dependencies)
+		{
+			if (value.getInt() == d)
+			{
+				return true;
+			}
+		}
+
+		return false;
 	}
 }
