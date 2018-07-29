@@ -1,5 +1,6 @@
 package com.feed_the_beast.ftbquests.quest.rewards;
 
+import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestList;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
@@ -37,10 +38,20 @@ public abstract class QuestReward extends QuestObject implements IStringSerializ
 	}
 
 	@Override
-	public final void delete()
+	public void deleteSelf()
 	{
-		super.delete();
+		super.deleteSelf();
 		quest.rewards.remove(this);
+
+		for (IProgressData data : quest.chapter.list.getAllData())
+		{
+			data.unclaimReward(id);
+		}
+	}
+
+	@Override
+	public void deleteChildren()
+	{
 	}
 
 	@Override

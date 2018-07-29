@@ -47,11 +47,14 @@ import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.BooleanSupplier;
 
 public class GuiQuestTree extends GuiBase
 {
+	public static int zoom = 16;
+
 	public class ButtonChapter extends Button
 	{
 		public int index;
@@ -87,7 +90,7 @@ public class GuiQuestTree extends GuiBase
 				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.move_up"), GuiIcons.UP, () -> new MessageMoveChapter(chapter.id, true).sendToServer()).setEnabled(chapter.index > 0));
 				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.move_down"), GuiIcons.DOWN, () -> new MessageMoveChapter(chapter.id, false).sendToServer()).setEnabled(chapter.index < questList.chapters.size() - 1));
 				contextMenu.add(ContextMenuItem.SEPARATOR);
-				contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), GuiIcons.REMOVE, () -> new MessageDeleteObject(chapter.id)).setYesNo(I18n.format("delete_item", chapter.getDisplayName().getFormattedText())));
+				contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), GuiIcons.REMOVE, () -> new MessageDeleteObject(chapter.id).sendToServer()).setYesNo(I18n.format("delete_item", chapter.getDisplayName().getFormattedText())));
 				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.reset_progress"), GuiIcons.REFRESH, () -> new MessageResetProgress(chapter.id, false).sendToServer()).setYesNo(I18n.format("ftbquests.gui.reset_progress_q")));
 				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.copy_id"), GuiIcons.INFO, () -> setClipboardString(Integer.toString(chapter.id & 0xFFFF))));
 				getGui().openContextMenu(contextMenu);
@@ -158,6 +161,7 @@ public class GuiQuestTree extends GuiBase
 	{
 		public Quest quest;
 		public String description;
+		public List<ButtonQuest> dependencies = null;
 
 		public ButtonQuest(Panel panel, Quest q)
 		{
@@ -170,6 +174,34 @@ public class GuiQuestTree extends GuiBase
 			{
 				description = "";
 			}
+		}
+
+		public List<ButtonQuest> getDependencies()
+		{
+			if (dependencies == null)
+			{
+				dependencies = new ArrayList<>();
+
+				for (ConfigValue value : quest.dependencies)
+				{
+					Quest q = questList.getQuest((short) value.getInt());
+
+					if (q != null && q != quest)
+					{
+						for (Widget widget : quests.widgets)
+						{
+							if (widget instanceof ButtonQuest && q == ((ButtonQuest) widget).quest)
+							{
+								dependencies.add((ButtonQuest) widget);
+							}
+						}
+					}
+				}
+
+				dependencies = dependencies.isEmpty() ? Collections.emptyList() : dependencies;
+			}
+
+			return dependencies;
 		}
 
 		@Override
@@ -226,12 +258,6 @@ public class GuiQuestTree extends GuiBase
 			{
 				list.add(description);
 			}
-		}
-
-		@Override
-		public Icon getIcon()
-		{
-			return icon;
 		}
 
 		@Override
@@ -303,6 +329,68 @@ public class GuiQuestTree extends GuiBase
 		}
 	}
 
+	public static boolean dummyButtonsVisible = true;
+
+	public class ButtonDummyQuest extends Widget implements Runnable
+	{
+		public final byte x, y;
+
+		public ButtonDummyQuest(Panel panel, byte _x, byte _y)
+		{
+			super(panel);
+			setSize(20, 20);
+			x = _x;
+			y = _y;
+		}
+
+		@Override
+		public boolean mousePressed(MouseButton button)
+		{
+			if (isMouseOver() && button.isRight())
+			{
+				GuiHelper.playClickSound();
+				List<ContextMenuItem> contextMenu = new ArrayList<>();
+				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.add_quest"), GuiIcons.ADD, this));
+				getGui().openContextMenu(contextMenu);
+				return true;
+			}
+
+			return false;
+		}
+
+		@Override
+		public void addMouseOverText(List<String> list)
+		{
+		}
+
+		@Override
+		public void draw()
+		{
+			if (dummyButtonsVisible)
+			{
+				int ax = getAX();
+				int ay = getAY();
+				Color4I.WHITE.withAlpha(30).draw(ax, ay, width, height);
+			}
+		}
+
+		@Override
+		public void run()
+		{
+			NBTTagCompound nbt = new NBTTagCompound();
+			nbt.setByte("x", x);
+			nbt.setByte("y", y);
+			Quest quest = new Quest(selectedChapter, nbt);
+			ConfigGroup group = ConfigGroup.newGroup(FTBQuests.MOD_ID);
+			quest.getConfig(group.getGroup(QuestObjectType.QUEST.getName()));
+			new GuiEditConfig(group, (group1, sender) -> {
+				NBTTagCompound nbt1 = new NBTTagCompound();
+				quest.writeData(nbt1);
+				new MessageCreateObject(QuestObjectType.QUEST, selectedChapter.id, nbt1).sendToServer();
+			}).openGui();
+		}
+	}
+
 	public class ChapterOptionButton extends SimpleTextButton
 	{
 		private final String hover;
@@ -348,10 +436,8 @@ public class GuiQuestTree extends GuiBase
 	}
 
 	public final ClientQuestList questList;
-	private final Int2ObjectOpenHashMap<ButtonQuest> questButtonMap;
-	public int zoom = 16;
 	private int scrollWidth, scrollHeight, prevMouseX, prevMouseY, grabbed;
-	public QuestChapter selectedChapter = null;
+	public QuestChapter selectedChapter;
 	private short selectedQuest;
 	public final Panel chapterPanel, quests, chapterOptionButtons;
 
@@ -384,6 +470,8 @@ public class GuiQuestTree extends GuiBase
 			}
 		};
 
+		selectedChapter = questList.chapters.isEmpty() ? null : questList.chapters.get(0);
+
 		/*
 		chaptersScrollBar = new PanelScrollBar(this, 14, chapterPanel)
 		{
@@ -394,29 +482,56 @@ public class GuiQuestTree extends GuiBase
 			}
 		};*/
 
-		questButtonMap = new Int2ObjectOpenHashMap<>();
-
 		quests = new Panel(this)
 		{
 			@Override
 			public void addWidgets()
 			{
-				questButtonMap.clear();
-
-				if (selectedChapter != null)
+				if (selectedChapter == null)
 				{
-					int mx = 0;
-					int my = 0;
+					return;
+				}
 
+				if (!questList.editingMode)
+				{
 					for (Quest quest : selectedChapter.quests)
 					{
-						ButtonQuest widget = new ButtonQuest(this, quest);
-						questButtonMap.put(quest.id, widget);
-						mx = Math.max(mx, quest.x.getInt());
-						my = Math.max(my, quest.y.getInt());
-						add(widget);
+						add(new ButtonQuest(this, quest));
+					}
+
+					return;
+				}
+
+				Int2ObjectOpenHashMap<Widget> buttons = new Int2ObjectOpenHashMap<>();
+
+				for (Quest quest : selectedChapter.quests)
+				{
+					for (int x = -4; x <= 4; x++)
+					{
+						for (int y = -4; y <= 4; y++)
+						{
+							if (x == 0 && y == 0)
+							{
+								continue;
+							}
+
+							int ax = quest.x.getInt() + x;
+							int ay = quest.y.getInt() + y;
+
+							if (ax <= 127 && ax >= -127 && ay <= 127 && ay >= -127)
+							{
+								buttons.put(((ax & 0xFF) << 8) | (ay & 0xFF), new ButtonDummyQuest(this, (byte) ax, (byte) ay));
+							}
+						}
 					}
 				}
+
+				for (Quest quest : selectedChapter.quests)
+				{
+					buttons.put(((quest.x.getInt() & 0xFF) << 8) | (quest.y.getInt() & 0xFF), new ButtonQuest(this, quest));
+				}
+
+				addAll(buttons.values());
 			}
 
 			@Override
@@ -425,21 +540,64 @@ public class GuiQuestTree extends GuiBase
 				scrollWidth = 0;
 				scrollHeight = 0;
 
-				if (selectedChapter != null)
-				{
-					int mx = 0;
-					int my = 0;
+				int minX = 128, minY = 128, maxX = -128, maxY = -128;
 
-					for (Widget widget : widgets)
+				for (Widget widget : widgets)
+				{
+					int x, y;
+
+					if (widget instanceof ButtonQuest)
 					{
 						Quest quest = ((ButtonQuest) widget).quest;
-						mx = Math.max(mx, quest.x.getInt());
-						my = Math.max(my, quest.y.getInt());
-						widget.setPosAndSize(1 + quest.x.getInt() * (zoom * 3 / 2), 1 + quest.y.getInt() * (zoom * 3 / 2), zoom * 5 / 4, zoom * 5 / 4);
+						x = quest.x.getInt();
+						y = quest.y.getInt();
+					}
+					else
+					{
+						ButtonDummyQuest button = (ButtonDummyQuest) widget;
+						x = button.x;
+						y = button.y;
 					}
 
-					scrollWidth = 2 + mx * (zoom * 3 / 2) + zoom * 5 / 4;
-					scrollHeight = 2 + my * (zoom * 3 / 2) + zoom * 5 / 4;
+					minX = Math.min(minX, x);
+					minY = Math.min(minY, y);
+					maxX = Math.max(maxX, x);
+					maxY = Math.max(maxY, y);
+				}
+
+				if (!questList.editingMode)
+				{
+					minX -= 4;
+					minY -= 4;
+					maxX += 4;
+					maxY += 4;
+				}
+
+				int bsize = zoom * 5 / 4; //16 * 5 / 4 = 20
+				int bspace = zoom * 3 / 2; //16 * 3 / 2 = 24
+				int offset = bspace - bsize;
+
+				scrollWidth = offset + (maxX - minX + 1) * bspace;
+				scrollHeight = offset + (maxY - minY + 1) * bspace;
+
+				for (Widget widget : widgets)
+				{
+					int x, y;
+
+					if (widget instanceof ButtonQuest)
+					{
+						Quest quest = ((ButtonQuest) widget).quest;
+						x = quest.x.getInt();
+						y = quest.y.getInt();
+					}
+					else
+					{
+						ButtonDummyQuest button = (ButtonDummyQuest) widget;
+						x = button.x;
+						y = button.y;
+					}
+
+					widget.setPosAndSize(offset + (x - minX) * bspace, offset + (y - minY) * bspace, bsize, bsize);
 				}
 
 				setPosAndSize(8, 24, getGui().width - 16, getGui().height - 32);
@@ -466,22 +624,10 @@ public class GuiQuestTree extends GuiBase
 				{
 					if (widget instanceof ButtonQuest)
 					{
-						ButtonQuest buttonQuest = (ButtonQuest) widget;
-
-						for (ConfigValue value : buttonQuest.quest.dependencies)
+						for (ButtonQuest b : ((ButtonQuest) widget).getDependencies())
 						{
-							QuestObject dependency = questList.get((short) value.getInt());
-
-							if (dependency instanceof Quest && buttonQuest.quest.chapter.equals(((Quest) dependency).chapter))
-							{
-								ButtonQuest b = questButtonMap.get(dependency.id);
-
-								if (b != null)
-								{
-									buffer.pos(widget.getAX() + widget.width / 2, widget.getAY() + widget.height / 2, 0).color(100, 200, 100, 255).endVertex();
-									buffer.pos(b.getAX() + b.width / 2, b.getAY() + b.height / 2, 0).color(50, 50, 50, 255).endVertex();
-								}
-							}
+							buffer.pos(widget.getAX() + widget.width / 2D, widget.getAY() + widget.height / 2D, 0).color(100, 200, 100, 255).endVertex();
+							buffer.pos(b.getAX() + b.width / 2D, b.getAY() + b.height / 2D, 0).color(50, 50, 50, 255).endVertex();
 						}
 					}
 				}
@@ -521,6 +667,16 @@ public class GuiQuestTree extends GuiBase
 			@Override
 			public void addWidgets()
 			{
+				if (questList.editingMode)
+				{
+					if (chapterPanel.widgets.isEmpty())
+					{
+						add(new ChapterOptionButton(this, "C", I18n.format("ftbquests.gui.add_chapter"), () -> addChapter(), () -> true));
+					}
+
+					add(new ChapterOptionButton(this, "D", I18n.format("ftbquests.gui.dummy_buttons"), () -> dummyButtonsVisible = !dummyButtonsVisible, () -> true));
+				}
+
 				add(new ChapterOptionButton(this, "-", I18n.format("ftbquests.gui.zoom_out"), () -> zoomOut(), () -> canZoomOut()));
 				add(new ChapterOptionButton(this, "+", I18n.format("ftbquests.gui.zoom_in"), () -> zoomIn(), () -> canZoomIn()));
 			}
@@ -549,30 +705,37 @@ public class GuiQuestTree extends GuiBase
 
 	private boolean canZoomIn()
 	{
-		return zoom < 24;
+		return zoom < 28;
 	}
 
 	private boolean canZoomOut()
 	{
-		return zoom > 8;
+		return zoom > 4;
+	}
+
+	public void resetScroll(boolean realign)
+	{
+		if (realign)
+		{
+			quests.alignWidgets();
+		}
+
+		quests.setScrollX((scrollWidth - quests.width) / 2);
+		quests.setScrollY((scrollHeight - quests.height) / 2);
 	}
 
 	private void zoomIn()
 	{
 		zoom += 4;
 		grabbed = 0;
-		quests.setScrollX(0);
-		quests.setScrollY(0);
-		quests.alignWidgets();
+		resetScroll(true);
 	}
 
 	private void zoomOut()
 	{
 		zoom -= 4;
 		grabbed = 0;
-		quests.setScrollX(0);
-		quests.setScrollY(0);
-		quests.alignWidgets();
+		resetScroll(true);
 	}
 
 	private void moveObject(int direction)
@@ -698,6 +861,9 @@ public class GuiQuestTree extends GuiBase
 		{
 			switch (key)
 			{
+				case Keyboard.KEY_D:
+					selectedQuest = 0;
+					break;
 				case Keyboard.KEY_UP:
 					moveObject(0);
 					break;
@@ -729,7 +895,7 @@ public class GuiQuestTree extends GuiBase
 	{
 		chapterOptionButtons.alignWidgets();
 		chapterPanel.alignWidgets();
-		quests.alignWidgets();
+		resetScroll(true);
 	}
 
 	@Override
@@ -772,8 +938,25 @@ public class GuiQuestTree extends GuiBase
 		{
 			int x = getMouseX();
 			int y = getMouseY();
-			quests.setScrollX(Math.max(Math.min(quests.getScrollX() + (prevMouseX - x), scrollWidth - quests.width), 0));
-			quests.setScrollY(Math.max(Math.min(quests.getScrollY() + (prevMouseY - y), scrollHeight - quests.height), 0));
+
+			if (scrollWidth > quests.width)
+			{
+				quests.setScrollX(Math.max(Math.min(quests.getScrollX() + (prevMouseX - x), scrollWidth - quests.width), 0));
+			}
+			else
+			{
+				quests.setScrollX((scrollWidth - quests.width) / 2);
+			}
+
+			if (scrollHeight > quests.height)
+			{
+				quests.setScrollY(Math.max(Math.min(quests.getScrollY() + (prevMouseY - y), scrollHeight - quests.height), 0));
+			}
+			else
+			{
+				quests.setScrollY((scrollHeight - quests.height) / 2);
+			}
+
 			prevMouseX = x;
 			prevMouseY = y;
 		}

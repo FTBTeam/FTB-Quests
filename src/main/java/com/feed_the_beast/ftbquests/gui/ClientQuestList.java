@@ -13,8 +13,8 @@ import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskData;
 import com.feed_the_beast.ftbquests.util.FTBQuestsTeamData;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.ints.IntCollection;
-import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import it.unimi.dsi.fastutil.shorts.ShortCollection;
+import it.unimi.dsi.fastutil.shorts.ShortOpenHashSet;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.text.TextFormatting;
@@ -42,7 +42,7 @@ public class ClientQuestList extends QuestList implements IProgressData
 
 	public String teamId;
 	private final Int2ObjectOpenHashMap<QuestTaskData> taskData;
-	private final IntCollection claimedRewards;
+	private final ShortCollection claimedRewards;
 	public GuiQuestTree questTreeGui;
 	public GuiBase questGui;
 	public boolean editingMode;
@@ -54,7 +54,7 @@ public class ClientQuestList extends QuestList implements IProgressData
 		editingMode = message.editingMode;
 
 		taskData = new Int2ObjectOpenHashMap<>();
-		claimedRewards = new IntOpenHashSet();
+		claimedRewards = new ShortOpenHashSet();
 
 		for (QuestChapter chapter : chapters)
 		{
@@ -69,7 +69,7 @@ public class ClientQuestList extends QuestList implements IProgressData
 
 		FTBQuestsTeamData.deserializeTaskData(taskData.values(), message.taskData);
 
-		for (int reward : message.claimedRewards)
+		for (short reward : message.claimedRewards)
 		{
 			claimedRewards.add(reward);
 		}
@@ -79,15 +79,12 @@ public class ClientQuestList extends QuestList implements IProgressData
 
 	public void refreshGui(@Nullable ClientQuestList prev)
 	{
-		boolean oldData = false;
 		boolean guiOpen = false;
-		int zoom = 0, scrollX = 0, scrollY = 0;
+		int scrollX = 0, scrollY = 0;
 		short selectedChapter = 0;
 
 		if (prev != null)
 		{
-			oldData = true;
-			zoom = prev.questTreeGui.zoom;
 			scrollX = prev.questTreeGui.quests.getScrollX();
 			scrollY = prev.questTreeGui.quests.getScrollY();
 			selectedChapter = prev.questTreeGui.selectedChapter == null ? 0 : prev.questTreeGui.selectedChapter.id;
@@ -101,11 +98,8 @@ public class ClientQuestList extends QuestList implements IProgressData
 		questTreeGui = new GuiQuestTree(this);
 		questGui = questTreeGui;
 
-		if (oldData)
+		if (prev != null)
 		{
-			questTreeGui.zoom = zoom;
-			questTreeGui.quests.setScrollX(scrollX);
-			questTreeGui.quests.setScrollY(scrollY);
 			questTreeGui.selectChapter(getChapter(selectedChapter));
 
 			if (guiOpen)
@@ -129,6 +123,12 @@ public class ClientQuestList extends QuestList implements IProgressData
 				guiQuestTree.refreshWidgets();
 			}
 		}
+
+		if (prev != null)
+		{
+			questTreeGui.quests.setScrollX(scrollX);
+			questTreeGui.quests.setScrollY(scrollY);
+		}
 	}
 
 	public void openQuestGui()
@@ -143,12 +143,12 @@ public class ClientQuestList extends QuestList implements IProgressData
 	}
 
 	@Override
-	public QuestTaskData getQuestTaskData(int task)
+	public QuestTaskData getQuestTaskData(short task)
 	{
 		return taskData.get(task);
 	}
 
-	public void setRewardStatus(int reward, boolean status)
+	public void setRewardStatus(short reward, boolean status)
 	{
 		if (status)
 		{
@@ -173,7 +173,7 @@ public class ClientQuestList extends QuestList implements IProgressData
 	}
 
 	@Override
-	public IntCollection getClaimedRewards(EntityPlayer player)
+	public ShortCollection getClaimedRewards(EntityPlayer player)
 	{
 		return claimedRewards;
 	}
@@ -184,7 +184,7 @@ public class ClientQuestList extends QuestList implements IProgressData
 	}
 
 	@Override
-	public void removeTask(int task)
+	public void removeTask(short task)
 	{
 		taskData.remove(task);
 	}
@@ -196,9 +196,9 @@ public class ClientQuestList extends QuestList implements IProgressData
 	}
 
 	@Override
-	public void unclaimReward(QuestReward reward)
+	public void unclaimReward(short reward)
 	{
-		claimedRewards.rem(reward.id);
+		claimedRewards.rem(reward);
 	}
 
 	@Nullable

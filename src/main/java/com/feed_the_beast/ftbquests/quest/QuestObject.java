@@ -32,9 +32,13 @@ public abstract class QuestObject
 		return getQuestList().isInvalid();
 	}
 
-	public void delete()
+	public void deleteSelf()
 	{
 		getQuestList().objectMap.remove(id);
+	}
+
+	public void deleteChildren()
+	{
 	}
 
 	@Override

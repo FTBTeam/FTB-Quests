@@ -20,13 +20,13 @@ import javax.annotation.Nullable;
  */
 public class MessageOpenTask extends MessageToServer
 {
-	private int task;
+	private short task;
 
 	public MessageOpenTask()
 	{
 	}
 
-	public MessageOpenTask(int t)
+	public MessageOpenTask(short t)
 	{
 		task = t;
 	}
@@ -46,7 +46,7 @@ public class MessageOpenTask extends MessageToServer
 	@Override
 	public void readData(DataIn data)
 	{
-		task = data.readUnsignedShort();
+		task = data.readShort();
 	}
 
 	@Override

@@ -248,7 +248,7 @@ public final class Quest extends ProgressingQuestObject
 
 		for (QuestReward reward : rewards)
 		{
-			data.unclaimReward(reward);
+			data.unclaimReward(reward.id);
 		}
 	}
 
@@ -316,20 +316,28 @@ public final class Quest extends ProgressingQuestObject
 	}
 
 	@Override
-	public void delete()
+	public void deleteSelf()
 	{
-		super.delete();
+		super.deleteSelf();
 		chapter.quests.remove(this);
+	}
 
-		for (QuestTask task : new ArrayList<>(tasks))
+	@Override
+	public void deleteChildren()
+	{
+		for (QuestTask task : tasks)
 		{
-			task.delete();
+			task.deleteChildren();
 		}
 
-		for (QuestReward reward : new ArrayList<>(rewards))
+		tasks.clear();
+
+		for (QuestReward reward : rewards)
 		{
-			reward.delete();
+			reward.deleteChildren();
 		}
+
+		rewards.clear();
 	}
 
 	@Override

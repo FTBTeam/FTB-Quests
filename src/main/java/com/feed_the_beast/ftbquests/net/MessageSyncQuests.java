@@ -17,14 +17,14 @@ public class MessageSyncQuests extends MessageToClient
 	public NBTTagCompound quests;
 	public String team;
 	public NBTTagCompound taskData;
-	public int[] claimedRewards;
+	public short[] claimedRewards;
 	public boolean editingMode;
 
 	public MessageSyncQuests()
 	{
 	}
 
-	public MessageSyncQuests(NBTTagCompound n, String t, NBTTagCompound td, int[] r, boolean e)
+	public MessageSyncQuests(NBTTagCompound n, String t, NBTTagCompound td, short[] r, boolean e)
 	{
 		quests = n;
 		team = t;
@@ -47,7 +47,7 @@ public class MessageSyncQuests extends MessageToClient
 		data.writeNBT(taskData);
 		data.writeShort(claimedRewards.length);
 
-		for (int i : claimedRewards)
+		for (short i : claimedRewards)
 		{
 			data.writeShort(i);
 		}
@@ -61,11 +61,11 @@ public class MessageSyncQuests extends MessageToClient
 		quests = data.readNBT();
 		team = data.readString();
 		taskData = data.readNBT();
-		claimedRewards = new int[data.readUnsignedShort()];
+		claimedRewards = new short[data.readUnsignedShort()];
 
 		for (int i = 0; i < claimedRewards.length; i++)
 		{
-			claimedRewards[i] = data.readUnsignedShort();
+			claimedRewards[i] = data.readShort();
 		}
 
 		editingMode = data.readBoolean();

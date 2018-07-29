@@ -58,12 +58,6 @@ public class TileQuest extends TileBase
 	}
 
 	@Override
-	public boolean shouldDrop()
-	{
-		return data.getTaskID() > 0 || !data.getOwnerTeam().isEmpty();
-	}
-
-	@Override
 	public void writeToItem(ItemStack stack)
 	{
 		QuestBlockData.get(stack).copyFrom(data);

@@ -52,7 +52,8 @@ public class MessageDeleteObject extends MessageToServer
 
 			if (object != null)
 			{
-				object.delete();
+				object.deleteChildren();
+				object.deleteSelf();
 				ServerQuestList.INSTANCE.save();
 			}
 

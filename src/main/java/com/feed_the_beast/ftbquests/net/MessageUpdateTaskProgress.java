@@ -14,14 +14,14 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  */
 public class MessageUpdateTaskProgress extends MessageToClient
 {
-	private int task;
+	private short task;
 	private NBTTagCompound nbt;
 
 	public MessageUpdateTaskProgress()
 	{
 	}
 
-	public MessageUpdateTaskProgress(int k, NBTTagCompound d)
+	public MessageUpdateTaskProgress(short k, NBTTagCompound d)
 	{
 		task = k;
 		nbt = d;
@@ -43,7 +43,7 @@ public class MessageUpdateTaskProgress extends MessageToClient
 	@Override
 	public void readData(DataIn data)
 	{
-		task = data.readUnsignedShort();
+		task = data.readShort();
 		nbt = data.readNBT();
 	}
 

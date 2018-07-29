@@ -160,8 +160,19 @@ public abstract class QuestList extends ProgressingQuestObject
 	}
 
 	@Override
-	public void delete()
+	public void deleteSelf()
 	{
+	}
+
+	@Override
+	public void deleteChildren()
+	{
+		for (QuestChapter chapter : chapters)
+		{
+			chapter.deleteChildren();
+		}
+
+		chapters.clear();
 	}
 
 	@Nullable

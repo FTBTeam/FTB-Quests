@@ -202,15 +202,21 @@ public final class QuestChapter extends ProgressingQuestObject
 	}
 
 	@Override
-	public void delete()
+	public void deleteSelf()
 	{
-		super.delete();
+		super.deleteSelf();
 		list.chapters.remove(this);
+	}
 
+	@Override
+	public void deleteChildren()
+	{
 		for (Quest quest : quests)
 		{
-			quest.delete();
+			quest.deleteChildren();
 		}
+
+		quests.clear();
 	}
 
 	@Override
