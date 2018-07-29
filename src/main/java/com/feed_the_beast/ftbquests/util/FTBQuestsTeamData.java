@@ -21,8 +21,8 @@ import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskData;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.ints.IntCollection;
-import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import it.unimi.dsi.fastutil.shorts.ShortCollection;
+import it.unimi.dsi.fastutil.shorts.ShortOpenHashSet;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
@@ -107,14 +107,14 @@ public class FTBQuestsTeamData extends TeamData implements IProgressData
 	}
 
 	private final Int2ObjectMap<QuestTaskData> taskData;
-	private final IntCollection claimedRewards;
-	private final Map<UUID, IntCollection> claimedPlayerRewards;
+	private final ShortCollection claimedRewards;
+	private final Map<UUID, ShortCollection> claimedPlayerRewards;
 
 	private FTBQuestsTeamData(ForgeTeam team)
 	{
 		super(team);
 		taskData = new Int2ObjectOpenHashMap<>();
-		claimedRewards = new IntOpenHashSet();
+		claimedRewards = new ShortOpenHashSet();
 		claimedPlayerRewards = new HashMap<>();
 
 		if (ServerQuestList.INSTANCE != null)
@@ -157,13 +157,13 @@ public class FTBQuestsTeamData extends TeamData implements IProgressData
 		}
 		else
 		{
-			IntCollection collection = claimedPlayerRewards.get(player.getUniqueID());
+			ShortCollection collection = claimedPlayerRewards.get(player.getUniqueID());
 
 			if ((collection == null || !collection.contains(reward.id)))
 			{
 				if (collection == null)
 				{
-					collection = new IntOpenHashSet();
+					collection = new ShortOpenHashSet();
 					claimedPlayerRewards.put(player.getUniqueID(), collection);
 				}
 
@@ -178,13 +178,13 @@ public class FTBQuestsTeamData extends TeamData implements IProgressData
 	}
 
 	@Override
-	public IntCollection getClaimedRewards(EntityPlayer player)
+	public ShortCollection getClaimedRewards(EntityPlayer player)
 	{
-		IntCollection rewards = claimedPlayerRewards.get(player.getUniqueID());
+		ShortCollection rewards = claimedPlayerRewards.get(player.getUniqueID());
 
 		if (rewards != null)
 		{
-			rewards = new IntOpenHashSet(rewards);
+			rewards = new ShortOpenHashSet(rewards);
 			rewards.addAll(claimedRewards);
 		}
 		else
@@ -203,7 +203,7 @@ public class FTBQuestsTeamData extends TeamData implements IProgressData
 			return claimedRewards.contains(reward.id);
 		}
 
-		IntCollection rewards = claimedPlayerRewards.get(player.getUniqueID());
+		ShortCollection rewards = claimedPlayerRewards.get(player.getUniqueID());
 		return rewards != null && rewards.contains(reward.id);
 	}
 
@@ -224,7 +224,7 @@ public class FTBQuestsTeamData extends TeamData implements IProgressData
 	}
 
 	@Override
-	public void removeTask(int task)
+	public void removeTask(short task)
 	{
 		taskData.remove(task);
 	}
@@ -266,25 +266,38 @@ public class FTBQuestsTeamData extends TeamData implements IProgressData
 			nbt.setTag("TaskData", taskDataTag);
 		}
 
-		if (claimedRewards.size() > 0)
+		if (!claimedRewards.isEmpty())
 		{
-			nbt.setIntArray("ClaimedRewards", claimedRewards.toIntArray());
+			int[] ai = new int[claimedRewards.size()];
+			int i = 0;
+
+			for (short s : claimedRewards)
+			{
+				ai[i] = s & 0xFFFF;
+				i++;
+			}
+
+			nbt.setIntArray("ClaimedRewards", ai);
 		}
 
 		NBTTagCompound claimedPlayerRewardsTag = new NBTTagCompound();
 
-		for (Map.Entry<UUID, IntCollection> entry : claimedPlayerRewards.entrySet())
+		for (Map.Entry<UUID, ShortCollection> entry : claimedPlayerRewards.entrySet())
 		{
 			ForgePlayer player = team.universe.getPlayer(entry.getKey());
 
-			if (player != null)
+			if (player != null && !entry.getValue().isEmpty())
 			{
-				int[] ai = entry.getValue().toIntArray();
+				int[] ai = new int[entry.getValue().size()];
+				int i = 0;
 
-				if (ai.length > 0)
+				for (short s : entry.getValue())
 				{
-					claimedPlayerRewardsTag.setIntArray(player.getName(), ai);
+					ai[i] = s & 0xFFFF;
+					i++;
 				}
+
+				claimedPlayerRewardsTag.setIntArray(player.getName(), ai);
 			}
 		}
 
@@ -320,7 +333,7 @@ public class FTBQuestsTeamData extends TeamData implements IProgressData
 
 		for (int id : nbt.getIntArray("ClaimedRewards"))
 		{
-			claimedRewards.add(id);
+			claimedRewards.add((short) id);
 		}
 
 		claimedPlayerRewards.clear();
@@ -337,7 +350,14 @@ public class FTBQuestsTeamData extends TeamData implements IProgressData
 
 				if (ai.length > 0)
 				{
-					claimedPlayerRewards.put(player.getId(), new IntOpenHashSet(ai));
+					short[] as = new short[ai.length];
+
+					for (int i = 0; i < ai.length; i++)
+					{
+						as[i] = (short) ai[i];
+					}
+
+					claimedPlayerRewards.put(player.getId(), new ShortOpenHashSet(as));
 				}
 			}
 		}
@@ -350,29 +370,36 @@ public class FTBQuestsTeamData extends TeamData implements IProgressData
 	}
 
 	@Override
-	public QuestTaskData getQuestTaskData(int task)
+	public QuestTaskData getQuestTaskData(short task)
 	{
 		return taskData.get(task);
 	}
 
 	@Override
-	public void unclaimReward(QuestReward reward)
+	public void unclaimReward(short reward)
 	{
-		if (reward.teamReward)
+		QuestReward r = ServerQuestList.INSTANCE.getReward(reward);
+
+		if (r == null)
 		{
-			if (claimedRewards.rem(reward.id))
+			return;
+		}
+
+		if (r.teamReward)
+		{
+			if (claimedRewards.rem(reward))
 			{
 				team.markDirty();
 			}
 		}
 		else
 		{
-			Iterator<IntCollection> itr = claimedPlayerRewards.values().iterator();
+			Iterator<ShortCollection> itr = claimedPlayerRewards.values().iterator();
 
 			while (itr.hasNext())
 			{
-				IntCollection collection = itr.next();
-				collection.rem(reward.id);
+				ShortCollection collection = itr.next();
+				collection.rem(reward);
 
 				if (collection.isEmpty())
 				{

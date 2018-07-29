@@ -47,7 +47,7 @@ public class QuestBlockData implements ICapabilitySerializable<NBTTagCompound>
 	private final IChangeCallback callback;
 
 	private String owner = "";
-	private int task = 0;
+	private short task = 0;
 
 	private IProgressData cachedOwner;
 	private QuestTaskData cachedTaskData;
@@ -92,9 +92,9 @@ public class QuestBlockData implements ICapabilitySerializable<NBTTagCompound>
 			nbt.setString("Owner", owner);
 		}
 
-		if (task > 0)
+		if (task != 0)
 		{
-			nbt.setInteger("Task", task);
+			nbt.setInteger("Task", task & 0xFFFF);
 		}
 
 		return nbt;
@@ -104,7 +104,7 @@ public class QuestBlockData implements ICapabilitySerializable<NBTTagCompound>
 	public void deserializeNBT(NBTTagCompound nbt)
 	{
 		owner = nbt.getString("Owner");
-		task = nbt.getInteger("Task");
+		task = (short) nbt.getInteger("Task");
 		clearCache();
 	}
 
@@ -160,12 +160,12 @@ public class QuestBlockData implements ICapabilitySerializable<NBTTagCompound>
 		}
 	}
 
-	public int getTaskID()
+	public short getTaskID()
 	{
 		return task;
 	}
 
-	public void setTask(int id)
+	public void setTask(short id)
 	{
 		task = id;
 		clearCache();
@@ -179,7 +179,7 @@ public class QuestBlockData implements ICapabilitySerializable<NBTTagCompound>
 	@Nullable
 	public QuestTaskData getTaskData()
 	{
-		if (task <= 0 || owner.isEmpty())
+		if (task == 0 || owner.isEmpty())
 		{
 			return null;
 		}

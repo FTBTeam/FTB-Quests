@@ -60,15 +60,20 @@ public abstract class QuestTask extends ProgressingQuestObject implements IStrin
 	}
 
 	@Override
-	public final void delete()
+	public void deleteSelf()
 	{
-		super.delete();
+		super.deleteSelf();
 		quest.tasks.remove(this);
 
 		for (IProgressData data : quest.chapter.list.getAllData())
 		{
 			data.removeTask(id);
 		}
+	}
+
+	@Override
+	public void deleteChildren()
+	{
 	}
 
 	@Override

@@ -13,14 +13,14 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  */
 public class MessageUpdateRewardStatus extends MessageToClient
 {
-	private int reward;
+	private short reward;
 	private boolean status;
 
 	public MessageUpdateRewardStatus()
 	{
 	}
 
-	public MessageUpdateRewardStatus(int r, boolean s)
+	public MessageUpdateRewardStatus(short r, boolean s)
 	{
 		reward = r;
 		status = s;
@@ -42,7 +42,7 @@ public class MessageUpdateRewardStatus extends MessageToClient
 	@Override
 	public void readData(DataIn data)
 	{
-		reward = data.readUnsignedShort();
+		reward = data.readShort();
 		status = data.readBoolean();
 	}
 

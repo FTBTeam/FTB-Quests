@@ -314,11 +314,7 @@ public class GuiQuest extends GuiBase
 		@Override
 		public WidgetType getWidgetType()
 		{
-			if (questTreeGui.questList.editingMode && isCtrlKeyDown())
-			{
-				return super.getWidgetType();
-			}
-			else if (!quest.isComplete(questTreeGui.questList) || questTreeGui.questList.isRewardClaimed(ClientUtils.MC.player, reward))
+			if (!quest.isComplete(questTreeGui.questList) || questTreeGui.questList.isRewardClaimed(ClientUtils.MC.player, reward))
 			{
 				return WidgetType.DISABLED;
 			}

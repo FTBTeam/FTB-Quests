@@ -21,7 +21,7 @@ import javax.annotation.Nullable;
  */
 public class MessageOpenTaskGui extends MessageToClient
 {
-	private int task;
+	private short task;
 	private int window;
 	private boolean hasPos;
 	private BlockPos pos;
@@ -30,7 +30,7 @@ public class MessageOpenTaskGui extends MessageToClient
 	{
 	}
 
-	public MessageOpenTaskGui(int t, int w, boolean h, @Nullable BlockPos p)
+	public MessageOpenTaskGui(short t, int w, boolean h, @Nullable BlockPos p)
 	{
 		task = t;
 		window = w;
@@ -60,7 +60,7 @@ public class MessageOpenTaskGui extends MessageToClient
 	@Override
 	public void readData(DataIn data)
 	{
-		task = data.readUnsignedShort();
+		task = data.readShort();
 		window = data.readInt();
 		hasPos = data.readBoolean();
 

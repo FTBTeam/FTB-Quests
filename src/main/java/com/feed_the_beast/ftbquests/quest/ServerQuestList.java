@@ -120,24 +120,10 @@ public class ServerQuestList extends QuestList
 	{
 		FTBQuestsTeamData data = FTBQuestsTeamData.get(Universe.get().getPlayer(player).team);
 		NBTTagCompound taskDataTag = data.serializeTaskData();
-		int[] claimedRewards = data.getClaimedRewards(player).toIntArray();
+		short[] claimedRewards = data.getClaimedRewards(player).toShortArray();
 		NBTTagCompound nbt = new NBTTagCompound();
 		writeData(nbt);
 		new MessageSyncQuests(nbt, data.team.getName(), taskDataTag, claimedRewards, FTBQuests.canEdit(player)).sendTo(player);
-	}
-
-	public void syncAll()
-	{
-		NBTTagCompound nbt = new NBTTagCompound();
-		writeData(nbt);
-
-		for (EntityPlayerMP player : Universe.get().server.getPlayerList().getPlayers())
-		{
-			FTBQuestsTeamData data = FTBQuestsTeamData.get(Universe.get().getPlayer(player).team);
-			NBTTagCompound taskDataTag = data.serializeTaskData();
-			int[] claimedRewards = data.getClaimedRewards(player).toIntArray();
-			new MessageSyncQuests(nbt, data.team.getName(), taskDataTag, claimedRewards, FTBQuests.canEdit(player)).sendTo(player);
-		}
 	}
 
 	public void save()

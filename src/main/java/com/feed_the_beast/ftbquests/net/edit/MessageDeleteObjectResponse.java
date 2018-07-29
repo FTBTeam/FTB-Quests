@@ -53,10 +53,10 @@ public class MessageDeleteObjectResponse extends MessageToClient
 
 			if (object != null)
 			{
-				object.delete();
+				object.deleteChildren();
+				object.deleteSelf();
+				ClientQuestList.INSTANCE.refreshGui(ClientQuestList.INSTANCE);
 			}
-
-			ClientQuestList.INSTANCE.refreshGui(ClientQuestList.INSTANCE);
 		}
 	}
 }

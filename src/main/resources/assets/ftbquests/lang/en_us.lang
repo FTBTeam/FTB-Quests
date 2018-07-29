@@ -31,11 +31,10 @@ ftbquests.quest.dependencies=Dependencies
 
 ftbquests.gui.zoom_in=Zoom In
 ftbquests.gui.zoom_out=Zoom Out
+ftbquests.gui.dummy_buttons=Toggle Dummy Button Visibility
 ftbquests.gui.add_chapter=Add Chapter
 ftbquests.gui.move_up=Move Up
 ftbquests.gui.move_down=Move Down
-ftbquests.gui.move_left=Move Left
-ftbquests.gui.move_right=Move Right
 ftbquests.gui.add_quest=Add Quest
 ftbquests.gui.select_task_type=Select Task Type
 ftbquests.gui.select_reward_type=Select Reward Type

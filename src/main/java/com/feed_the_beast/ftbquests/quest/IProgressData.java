@@ -3,7 +3,7 @@ package com.feed_the_beast.ftbquests.quest;
 import com.feed_the_beast.ftbquests.quest.rewards.QuestReward;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskData;
-import it.unimi.dsi.fastutil.ints.IntCollection;
+import it.unimi.dsi.fastutil.shorts.ShortCollection;
 import net.minecraft.entity.player.EntityPlayer;
 
 /**
@@ -13,11 +13,11 @@ public interface IProgressData
 {
 	String getTeamID();
 
-	QuestTaskData getQuestTaskData(int task);
+	QuestTaskData getQuestTaskData(short task);
 
 	boolean claimReward(EntityPlayer player, QuestReward reward);
 
-	IntCollection getClaimedRewards(EntityPlayer player);
+	ShortCollection getClaimedRewards(EntityPlayer player);
 
 	default boolean isRewardClaimed(EntityPlayer player, QuestReward reward)
 	{
@@ -26,9 +26,9 @@ public interface IProgressData
 
 	void syncTask(QuestTaskData data);
 
-	void removeTask(int task);
+	void removeTask(short task);
 
 	void createTaskData(QuestTask task);
 
-	void unclaimReward(QuestReward reward);
+	void unclaimReward(short reward);
 }
