@@ -66,6 +66,7 @@ public class UnknownReward extends QuestReward
 	@Override
 	public void getConfig(ConfigGroup group)
 	{
+		super.getConfig(group);
 		group.add("nbt", nbt, new ConfigNBT(new NBTTagCompound()));
 	}
 }

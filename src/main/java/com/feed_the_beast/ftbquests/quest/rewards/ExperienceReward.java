@@ -67,6 +67,7 @@ public class ExperienceReward extends QuestReward
 	@Override
 	public void getConfig(ConfigGroup group)
 	{
+		super.getConfig(group);
 		group.add("value", value, new ConfigInt(1));
 	}
 }

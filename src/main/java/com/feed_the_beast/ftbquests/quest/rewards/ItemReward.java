@@ -82,6 +82,7 @@ public class ItemReward extends QuestReward
 	@Override
 	public void getConfig(ConfigGroup group)
 	{
+		super.getConfig(group);
 		group.add("item", item, new ConfigItemStack(new ItemStack(Items.APPLE)));
 	}
 }

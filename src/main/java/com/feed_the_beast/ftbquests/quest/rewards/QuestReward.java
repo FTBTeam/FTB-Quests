@@ -1,5 +1,7 @@
 package com.feed_the_beast.ftbquests.quest.rewards;
 
+import com.feed_the_beast.ftblib.lib.config.ConfigBoolean;
+import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestList;
@@ -17,12 +19,13 @@ import net.minecraft.util.text.TextComponentTranslation;
 public abstract class QuestReward extends QuestObject implements IStringSerializable
 {
 	public final Quest quest;
-	public boolean teamReward = false;
+	public final ConfigBoolean teamReward;
 
 	public QuestReward(Quest q, NBTTagCompound nbt)
 	{
 		super(q.chapter.list.getID(nbt));
 		quest = q;
+		teamReward = new ConfigBoolean(false);
 	}
 
 	@Override
@@ -58,6 +61,12 @@ public abstract class QuestReward extends QuestObject implements IStringSerializ
 	public ITextComponent getDisplayName()
 	{
 		return new TextComponentTranslation("ftbquests.reward." + getName());
+	}
+
+	@Override
+	public void getConfig(ConfigGroup group)
+	{
+		group.add("team_reward", teamReward, new ConfigBoolean(false)).setDisplayName(new TextComponentTranslation("ftbquests.reward.team_reward")).setOrder((byte) -128);
 	}
 
 	public abstract void reward(EntityPlayerMP player);

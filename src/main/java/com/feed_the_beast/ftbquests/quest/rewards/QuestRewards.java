@@ -43,13 +43,13 @@ public class QuestRewards
 
 			if (allowInvalid || !reward.isInvalid())
 			{
-				reward.teamReward = nbt.getBoolean("team_reward");
+				reward.teamReward.setBoolean(nbt.getBoolean("team_reward"));
 				return reward;
 			}
 		}
 
 		QuestReward reward = new UnknownReward(quest, nbt);
-		reward.teamReward = nbt.getBoolean("team_reward");
+		reward.teamReward.setBoolean(nbt.getBoolean("team_reward"));
 		return reward;
 	}
 }
