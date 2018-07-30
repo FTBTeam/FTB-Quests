@@ -71,6 +71,7 @@ ftbquests.task.ic2_energy.value=EU
 ftbquests.task.ic2_energy.text=%d EU
 
 ftbquests.reward=Reward
+ftbquests.reward.team_reward=Team Reward
 ftbquests.rewards=Rewards
 ftbquests.reward.unknown=Unknown Reward
 ftbquests.reward.item=Item

@@ -187,7 +187,7 @@ public final class Quest extends ProgressingQuestObject
 					rewardNBT.setString("type", reward.getName());
 				}
 
-				if (reward.teamReward)
+				if (reward.teamReward.getBoolean())
 				{
 					rewardNBT.setBoolean("team_reward", true);
 				}
