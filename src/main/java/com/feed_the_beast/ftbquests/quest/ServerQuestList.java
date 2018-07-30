@@ -129,5 +129,6 @@ public class ServerQuestList extends QuestList
 	public void save()
 	{
 		shouldSave = true;
+		Universe.get().markDirty();
 	}
 }
