@@ -49,7 +49,7 @@ public final class Quest extends ProgressingQuestObject
 		chapter = c;
 		title = new ConfigString(nbt.getString("title"));
 		description = new ConfigString(nbt.getString("description"));
-		icon = new ConfigItemStack(QuestList.getIcon(nbt));
+		icon = new ConfigItemStack(QuestList.getIcon(nbt), true);
 		type = new ConfigEnum<>(QuestType.NAME_MAP);
 		type.setValue(nbt.getString("type"));
 		x = new ConfigInt(nbt.getByte("x"), -127, 127);
@@ -347,7 +347,7 @@ public final class Quest extends ProgressingQuestObject
 		group.add("x", x, new ConfigInt(0));
 		group.add("y", y, new ConfigInt(0));
 		group.add("type", type, new ConfigEnum<>(QuestType.NAME_MAP));
-		group.add("icon", icon, new ConfigItemStack(ItemStack.EMPTY));
+		group.add("icon", icon, new ConfigItemStack(ItemStack.EMPTY, true));
 		group.add("description", description, new ConfigString(""));
 		group.add("text", text, new ConfigList<>(new ConfigString("")));
 		group.add("dependencies", dependencies, new ConfigList<>(new ConfigInt(1, 1, Integer.MAX_VALUE)));
