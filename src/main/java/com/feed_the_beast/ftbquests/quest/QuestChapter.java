@@ -38,7 +38,7 @@ public final class QuestChapter extends ProgressingQuestObject
 		list = l;
 		title = new ConfigString(nbt.getString("title"));
 		description = new ConfigList<>(new ConfigString(""));
-		icon = new ConfigItemStack(new ItemStack(nbt.getCompoundTag("icon")));
+		icon = new ConfigItemStack(new ItemStack(nbt.getCompoundTag("icon")), true);
 		quests = new ArrayList<>();
 
 		NBTTagList desc = nbt.getTagList("description", Constants.NBT.TAG_STRING);
@@ -223,7 +223,7 @@ public final class QuestChapter extends ProgressingQuestObject
 	public void getConfig(ConfigGroup group)
 	{
 		group.add("title", title, new ConfigString(""));
-		group.add("icon", icon, new ConfigItemStack(ItemStack.EMPTY));
+		group.add("icon", icon, new ConfigItemStack(ItemStack.EMPTY, true));
 		group.add("description", description, new ConfigList<>(new ConfigString("")));
 	}
 }
