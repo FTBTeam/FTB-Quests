@@ -351,6 +351,7 @@ public final class Quest extends ProgressingQuestObject
 		for (QuestTask task : tasks)
 		{
 			task.deleteChildren();
+			task.invalid = true;
 		}
 
 		tasks.clear();
@@ -358,6 +359,7 @@ public final class Quest extends ProgressingQuestObject
 		for (QuestReward reward : rewards)
 		{
 			reward.deleteChildren();
+			reward.invalid = true;
 		}
 
 		rewards.clear();

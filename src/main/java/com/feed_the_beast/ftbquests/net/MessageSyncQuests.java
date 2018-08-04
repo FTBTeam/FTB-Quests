@@ -77,7 +77,8 @@ public class MessageSyncQuests extends MessageToClient
 	{
 		if (ClientQuestFile.INSTANCE != null)
 		{
-			ClientQuestFile.INSTANCE.invalidate();
+			ClientQuestFile.INSTANCE.deleteChildren();
+			ClientQuestFile.INSTANCE.deleteSelf();
 		}
 
 		ClientQuestFile.INSTANCE = new ClientQuestFile(this, ClientQuestFile.INSTANCE);

@@ -214,6 +214,7 @@ public final class QuestChapter extends ProgressingQuestObject
 		for (Quest quest : quests)
 		{
 			quest.deleteChildren();
+			quest.invalid = true;
 		}
 
 		quests.clear();

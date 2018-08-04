@@ -29,12 +29,6 @@ public class ExperienceReward extends QuestReward
 	}
 
 	@Override
-	public boolean isInvalid()
-	{
-		return value.getInt() <= 0 || super.isInvalid();
-	}
-
-	@Override
 	public String getName()
 	{
 		return ID;

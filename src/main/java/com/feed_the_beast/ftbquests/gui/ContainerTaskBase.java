@@ -37,7 +37,7 @@ public class ContainerTaskBase extends ContainerBase
 	@Override
 	public boolean canInteractWith(EntityPlayer player)
 	{
-		return !data.task.isInvalid();
+		return !data.task.invalid;
 	}
 
 	public Icon getEmptySlotIcon(int slot)

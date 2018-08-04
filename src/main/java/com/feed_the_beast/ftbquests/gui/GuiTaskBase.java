@@ -1,6 +1,7 @@
 package com.feed_the_beast.ftbquests.gui;
 
 import com.feed_the_beast.ftblib.lib.gui.Button;
+import com.feed_the_beast.ftblib.lib.gui.ContextMenuItem;
 import com.feed_the_beast.ftblib.lib.gui.GuiBase;
 import com.feed_the_beast.ftblib.lib.gui.GuiContainerWrapper;
 import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
@@ -12,11 +13,13 @@ import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.net.MessageGetBlock;
+import com.feed_the_beast.ftbquests.net.MessageGetScreen;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -63,6 +66,25 @@ public class GuiTaskBase extends GuiBase
 						{
 							GuiHelper.playClickSound();
 							new MessageGetBlock(container.data.task.id).sendToServer();
+						}
+					});
+				}
+
+				if (ClientQuestFile.INSTANCE.editingMode)
+				{
+					add(new Tab(this, I18n.format("tile.ftbquests.screen.name"), ItemIcon.getItemIcon(new ItemStack(FTBQuestsItems.SCREEN)))
+					{
+						@Override
+						public void onClicked(MouseButton button)
+						{
+							GuiHelper.playClickSound();
+							List<ContextMenuItem> contextMenu = new ArrayList<>();
+							contextMenu.add(new ContextMenuItem("1 x 1", Icon.EMPTY, () -> new MessageGetScreen(container.data.task.id, 0).sendToServer()));
+							contextMenu.add(new ContextMenuItem("3 x 3", Icon.EMPTY, () -> new MessageGetScreen(container.data.task.id, 1).sendToServer()));
+							contextMenu.add(new ContextMenuItem("5 x 5", Icon.EMPTY, () -> new MessageGetScreen(container.data.task.id, 2).sendToServer()));
+							contextMenu.add(new ContextMenuItem("7 x 7", Icon.EMPTY, () -> new MessageGetScreen(container.data.task.id, 3).sendToServer()));
+							contextMenu.add(new ContextMenuItem("9 x 9", Icon.EMPTY, () -> new MessageGetScreen(container.data.task.id, 4).sendToServer()));
+							getGui().openContextMenu(contextMenu);
 						}
 					});
 				}

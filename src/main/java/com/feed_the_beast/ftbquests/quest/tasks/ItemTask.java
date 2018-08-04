@@ -70,12 +70,6 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 	}
 
 	@Override
-	public boolean isInvalid()
-	{
-		return items.list.isEmpty() || super.isInvalid();
-	}
-
-	@Override
 	public int getMaxProgress()
 	{
 		return count.getInt();
