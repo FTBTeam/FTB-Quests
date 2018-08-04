@@ -7,7 +7,7 @@ import net.minecraft.util.IStringSerializable;
  */
 public enum QuestObjectType implements IStringSerializable
 {
-	LIST("list"),
+	FILE("file"),
 	CHAPTER("chapter"),
 	QUEST("quest"),
 	TASK("task"),

@@ -24,7 +24,7 @@ import java.util.List;
  */
 public final class QuestChapter extends ProgressingQuestObject
 {
-	public final QuestList list;
+	public final QuestFile file;
 	public int index;
 	public final ConfigString title;
 	public final ConfigList<ConfigString> description;
@@ -32,10 +32,10 @@ public final class QuestChapter extends ProgressingQuestObject
 	public final List<Quest> quests;
 	public final ConfigList<ConfigInt> dependencies;
 
-	public QuestChapter(QuestList l, NBTTagCompound nbt)
+	public QuestChapter(QuestFile f, NBTTagCompound nbt)
 	{
-		super(l.getID(nbt));
-		list = l;
+		super(f.getID(nbt));
+		file = f;
 		title = new ConfigString(nbt.getString("title"));
 		description = new ConfigList<>(new ConfigString(""));
 		icon = new ConfigItemStack(new ItemStack(nbt.getCompoundTag("icon")), true);
@@ -48,7 +48,7 @@ public final class QuestChapter extends ProgressingQuestObject
 			description.add(new ConfigString(desc.getStringTagAt(i)));
 		}
 
-		dependencies = new ConfigList<>(new ConfigInt(1, 1, QuestList.MAX_ID));
+		dependencies = new ConfigList<>(new ConfigInt(1, 1, QuestFile.MAX_ID));
 
 		for (int d : nbt.getIntArray("depends_on"))
 		{
@@ -61,14 +61,14 @@ public final class QuestChapter extends ProgressingQuestObject
 		{
 			Quest quest = new Quest(this, questsList.getCompoundTagAt(j));
 			quests.add(quest);
-			list.objectMap.put(quest.id, quest);
+			file.map.put(quest.id, quest);
 		}
 	}
 
 	@Override
-	public QuestList getQuestList()
+	public QuestFile getQuestFile()
 	{
-		return list;
+		return file;
 	}
 
 	@Override
@@ -205,7 +205,7 @@ public final class QuestChapter extends ProgressingQuestObject
 	public void deleteSelf()
 	{
 		super.deleteSelf();
-		list.chapters.remove(this);
+		file.chapters.remove(this);
 	}
 
 	@Override
@@ -225,5 +225,6 @@ public final class QuestChapter extends ProgressingQuestObject
 		group.add("title", title, new ConfigString(""));
 		group.add("icon", icon, new ConfigItemStack(ItemStack.EMPTY, true));
 		group.add("description", description, new ConfigList<>(new ConfigString("")));
+		group.add("dependencies", dependencies, new ConfigList<>(new ConfigInt(1, 1, QuestFile.MAX_ID)));
 	}
 }

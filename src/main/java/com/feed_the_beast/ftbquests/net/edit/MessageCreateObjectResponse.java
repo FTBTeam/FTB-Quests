@@ -4,7 +4,7 @@ import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToClient;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
-import com.feed_the_beast.ftbquests.gui.ClientQuestList;
+import com.feed_the_beast.ftbquests.gui.ClientQuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import net.minecraft.nbt.NBTTagCompound;
@@ -57,13 +57,13 @@ public class MessageCreateObjectResponse extends MessageToClient
 	@SideOnly(Side.CLIENT)
 	public void onMessage()
 	{
-		if (ClientQuestList.INSTANCE != null)
+		if (ClientQuestFile.INSTANCE != null)
 		{
-			QuestObject object = ClientQuestList.INSTANCE.createAndAdd(type, parent, nbt);
+			QuestObject object = ClientQuestFile.INSTANCE.createAndAdd(type, parent, nbt);
 
 			if (object != null)
 			{
-				ClientQuestList.INSTANCE.refreshGui(ClientQuestList.INSTANCE);
+				ClientQuestFile.INSTANCE.refreshGui(ClientQuestFile.INSTANCE);
 			}
 		}
 	}

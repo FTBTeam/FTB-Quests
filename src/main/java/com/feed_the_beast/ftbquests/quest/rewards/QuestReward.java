@@ -4,7 +4,7 @@ import com.feed_the_beast.ftblib.lib.config.ConfigBoolean;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.QuestList;
+import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -23,15 +23,15 @@ public abstract class QuestReward extends QuestObject implements IStringSerializ
 
 	public QuestReward(Quest q, NBTTagCompound nbt)
 	{
-		super(q.chapter.list.getID(nbt));
+		super(q.chapter.file.getID(nbt));
 		quest = q;
 		teamReward = new ConfigBoolean(false);
 	}
 
 	@Override
-	public final QuestList getQuestList()
+	public final QuestFile getQuestFile()
 	{
-		return quest.getQuestList();
+		return quest.chapter.file;
 	}
 
 	@Override
@@ -46,7 +46,7 @@ public abstract class QuestReward extends QuestObject implements IStringSerializ
 		super.deleteSelf();
 		quest.rewards.remove(this);
 
-		for (IProgressData data : quest.chapter.list.getAllData())
+		for (IProgressData data : quest.chapter.file.getAllData())
 		{
 			data.unclaimReward(id);
 		}

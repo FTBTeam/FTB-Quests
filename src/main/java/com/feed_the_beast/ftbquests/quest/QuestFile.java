@@ -1,11 +1,14 @@
 package com.feed_the_beast.ftbquests.quest;
 
+import com.feed_the_beast.ftblib.lib.config.ConfigBoolean;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigItemStack;
 import com.feed_the_beast.ftblib.lib.config.ConfigList;
+import com.feed_the_beast.ftblib.lib.config.ConfigTimer;
 import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.item.ItemStackSerializer;
+import com.feed_the_beast.ftblib.lib.math.Ticks;
 import com.feed_the_beast.ftbquests.quest.rewards.QuestReward;
 import com.feed_the_beast.ftbquests.quest.rewards.QuestRewards;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
@@ -28,7 +31,7 @@ import java.util.List;
 /**
  * @author LatvianModder
  */
-public abstract class QuestList extends ProgressingQuestObject
+public abstract class QuestFile extends ProgressingQuestObject
 {
 	public static final int MAX_ID = 65535;
 
@@ -64,16 +67,18 @@ public abstract class QuestList extends ProgressingQuestObject
 
 	public final List<QuestChapter> chapters;
 	private boolean invalid;
-	public final Short2ObjectMap<QuestObject> objectMap;
+	public final Short2ObjectMap<QuestObject> map;
+	public final ConfigBoolean allowTakeQuestBlocks;
 	public final ConfigList<ConfigItemStack> emergencyItems;
+	public final ConfigTimer emergencyItemsCooldown;
 
-	public QuestList(NBTTagCompound nbt)
+	public QuestFile(NBTTagCompound nbt)
 	{
 		super((short) 0);
 		chapters = new ArrayList<>();
 		invalid = false;
-		objectMap = new Short2ObjectOpenHashMap<>();
-		objectMap.put((short) 0, this);
+		map = new Short2ObjectOpenHashMap<>();
+		map.put((short) 0, this);
 
 		NBTTagList chapterList = nbt.getTagList("chapters", Constants.NBT.TAG_COMPOUND);
 
@@ -82,8 +87,10 @@ public abstract class QuestList extends ProgressingQuestObject
 			QuestChapter chapter = new QuestChapter(this, chapterList.getCompoundTagAt(i));
 			chapter.index = chapters.size();
 			chapters.add(chapter);
-			objectMap.put(chapter.id, chapter);
+			map.put(chapter.id, chapter);
 		}
+
+		allowTakeQuestBlocks = new ConfigBoolean(!nbt.hasKey("allow_take_quest_blocks") || nbt.getBoolean("allow_take_quest_blocks"));
 
 		emergencyItems = new ConfigList<>(new ConfigItemStack(new ItemStack(Items.APPLE)));
 
@@ -98,10 +105,13 @@ public abstract class QuestList extends ProgressingQuestObject
 				emergencyItems.add(new ConfigItemStack(stack));
 			}
 		}
+
+		Ticks t = Ticks.get(nbt.getString("emergency_items_cooldown"));
+		emergencyItemsCooldown = new ConfigTimer(t.hasTicks() ? t : Ticks.MINUTE.x(10));
 	}
 
 	@Override
-	public QuestList getQuestList()
+	public QuestFile getQuestFile()
 	{
 		return this;
 	}
@@ -109,7 +119,7 @@ public abstract class QuestList extends ProgressingQuestObject
 	@Override
 	public QuestObjectType getObjectType()
 	{
-		return QuestObjectType.LIST;
+		return QuestObjectType.FILE;
 	}
 
 	@Override
@@ -121,7 +131,7 @@ public abstract class QuestList extends ProgressingQuestObject
 	public void invalidate()
 	{
 		invalid = true;
-		objectMap.clear();
+		map.clear();
 	}
 
 	@Override
@@ -178,7 +188,7 @@ public abstract class QuestList extends ProgressingQuestObject
 	@Nullable
 	public QuestObject get(short id)
 	{
-		return id == 0 ? this : objectMap.get(id);
+		return id == 0 ? this : map.get(id);
 	}
 
 	@Nullable
@@ -218,7 +228,7 @@ public abstract class QuestList extends ProgressingQuestObject
 	{
 		short id = nbt.getShort("id");
 
-		if (id == 0 || objectMap.containsKey(id))
+		if (id == 0 || map.containsKey(id))
 		{
 			id = requestID();
 			nbt.setShort("id", id);
@@ -235,9 +245,9 @@ public abstract class QuestList extends ProgressingQuestObject
 			case CHAPTER:
 			{
 				QuestChapter chapter = new QuestChapter(this, nbt);
-				chapter.index = chapter.list.chapters.size();
-				chapter.list.chapters.add(chapter);
-				objectMap.put(chapter.id, chapter);
+				chapter.index = chapter.file.chapters.size();
+				chapter.file.chapters.add(chapter);
+				map.put(chapter.id, chapter);
 				return chapter;
 			}
 			case QUEST:
@@ -248,7 +258,7 @@ public abstract class QuestList extends ProgressingQuestObject
 				{
 					Quest quest = new Quest(chapter, nbt);
 					chapter.quests.add(quest);
-					objectMap.put(quest.id, quest);
+					map.put(quest.id, quest);
 					return quest;
 				}
 
@@ -262,7 +272,7 @@ public abstract class QuestList extends ProgressingQuestObject
 				{
 					QuestTask task = QuestTasks.createTask(quest, nbt, false);
 					quest.tasks.add(task);
-					objectMap.put(task.id, task);
+					map.put(task.id, task);
 
 					for (IProgressData data : getAllData())
 					{
@@ -282,7 +292,7 @@ public abstract class QuestList extends ProgressingQuestObject
 				{
 					QuestReward reward = QuestRewards.createReward(quest, nbt, false);
 					quest.rewards.add(reward);
-					objectMap.put(reward.id, reward);
+					map.put(reward.id, reward);
 					return reward;
 				}
 
@@ -322,6 +332,7 @@ public abstract class QuestList extends ProgressingQuestObject
 		}
 
 		nbt.setTag("chapters", chaptersList);
+		nbt.setBoolean("allow_take_quest_blocks", allowTakeQuestBlocks.getBoolean());
 
 		NBTTagList emergencyItemsList = new NBTTagList();
 
@@ -331,6 +342,7 @@ public abstract class QuestList extends ProgressingQuestObject
 		}
 
 		nbt.setTag("emergency_items", emergencyItemsList);
+		nbt.setString("emergency_items_cooldown", emergencyItemsCooldown.getTimer().toString());
 	}
 
 	@Nullable
@@ -347,12 +359,14 @@ public abstract class QuestList extends ProgressingQuestObject
 	@Override
 	public ITextComponent getDisplayName()
 	{
-		return new TextComponentTranslation("ftbquests.list");
+		return new TextComponentTranslation("ftbquests.file");
 	}
 
 	@Override
 	public void getConfig(ConfigGroup config)
 	{
+		config.add("allow_take_quest_blocks", allowTakeQuestBlocks, new ConfigBoolean(true));
 		config.add("emergency_items", emergencyItems, new ConfigList<>(new ConfigItemStack(new ItemStack(Items.APPLE))));
+		config.add("emergency_items_cooldown", emergencyItemsCooldown, new ConfigTimer(Ticks.MINUTE.x(10)));
 	}
 }

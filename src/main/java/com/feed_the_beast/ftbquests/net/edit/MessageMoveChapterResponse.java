@@ -5,7 +5,7 @@ import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToClient;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
-import com.feed_the_beast.ftbquests.gui.ClientQuestList;
+import com.feed_the_beast.ftbquests.gui.ClientQuestFile;
 import com.feed_the_beast.ftbquests.gui.GuiQuestTree;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import net.minecraftforge.fml.relauncher.Side;
@@ -53,22 +53,22 @@ public class MessageMoveChapterResponse extends MessageToClient
 	@SideOnly(Side.CLIENT)
 	public void onMessage()
 	{
-		if (ClientQuestList.INSTANCE != null)
+		if (ClientQuestFile.INSTANCE != null)
 		{
-			QuestChapter chapter = ClientQuestList.INSTANCE.getChapter(id);
+			QuestChapter chapter = ClientQuestFile.INSTANCE.getChapter(id);
 
 			if (chapter != null)
 			{
-				int index = ClientQuestList.INSTANCE.chapters.indexOf(chapter);
+				int index = ClientQuestFile.INSTANCE.chapters.indexOf(chapter);
 
-				if (index != -1 && up ? (index > 0) : (index < ClientQuestList.INSTANCE.chapters.size() - 1))
+				if (index != -1 && up ? (index > 0) : (index < ClientQuestFile.INSTANCE.chapters.size() - 1))
 				{
-					ClientQuestList.INSTANCE.chapters.remove(index);
-					ClientQuestList.INSTANCE.chapters.add(up ? index - 1 : index + 1, chapter);
+					ClientQuestFile.INSTANCE.chapters.remove(index);
+					ClientQuestFile.INSTANCE.chapters.add(up ? index - 1 : index + 1, chapter);
 
-					for (int i = 0; i < ClientQuestList.INSTANCE.chapters.size(); i++)
+					for (int i = 0; i < ClientQuestFile.INSTANCE.chapters.size(); i++)
 					{
-						ClientQuestList.INSTANCE.chapters.get(i).index = i;
+						ClientQuestFile.INSTANCE.chapters.get(i).index = i;
 					}
 
 					GuiQuestTree gui = ClientUtils.getCurrentGuiAs(GuiQuestTree.class);

@@ -3,21 +3,24 @@ tile.ftbquests.quest_block.missing_data=Broken Quest Block / Missing Data!
 tile.ftbquests.quest_block.no_perm=You are not a member of block owner team!
 
 ftbquests.general.editing_mode=Editing Mode
-ftbquests.general.allow_take_quest_blocks=Allow to Take Quest Blocks
-ftbquests.general.emergency_items_cooldown=Emergency Items Cooldown
 
 sidebar_button.ftbquests.quests=Quests
 
 ftbquests.owner=Owner
 ftbquests.progress=Progress
 
-ftbquests.list=FTB Quests
-ftbquests.list.emergency_items=Emergency Items
+ftbquests.file=FTB Quests
+ftbquests.file.allow_take_quest_blocks=Allow to Take Quest Blocks
+ftbquests.file.allow_take_quest_blocks.tooltip=Allow to obtain Quest Blocks from the Quests GUI.
+ftbquests.file.emergency_items=Emergency Items
+ftbquests.file.emergency_items_cooldown=Emergency Items Cooldown
+ftbquests.file.emergency_items_cooldown.tooltip=Cooldown timer for emergency items to respawn.
 
 ftbquests.chapter=Chapter
 ftbquests.chapter.title=Title
 ftbquests.chapter.description=Description
 ftbquests.chapter.icon=Icon
+ftbquests.chapter.dependencies=Dependencies
 
 ftbquests.quest=Quest
 ftbquests.quest.title=Title
@@ -33,6 +36,7 @@ ftbquests.gui.zoom_in=Zoom In
 ftbquests.gui.zoom_out=Zoom Out
 ftbquests.gui.dummy_buttons=Toggle Dummy Button Visibility
 ftbquests.gui.add_chapter=Add Chapter
+ftbquests.gui.move=Move
 ftbquests.gui.move_up=Move Up
 ftbquests.gui.move_down=Move Down
 ftbquests.gui.add_quest=Add Quest

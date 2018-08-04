@@ -4,7 +4,7 @@ import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToClient;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
-import com.feed_the_beast.ftbquests.gui.ClientQuestList;
+import com.feed_the_beast.ftbquests.gui.ClientQuestFile;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -51,6 +51,6 @@ public class MessageUpdateTaskProgress extends MessageToClient
 	@SideOnly(Side.CLIENT)
 	public void onMessage()
 	{
-		ClientQuestList.INSTANCE.getQuestTaskData(task).readFromNBT(nbt);
+		ClientQuestFile.INSTANCE.getQuestTaskData(task).readFromNBT(nbt);
 	}
 }

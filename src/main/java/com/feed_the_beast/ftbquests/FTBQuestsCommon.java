@@ -1,12 +1,12 @@
 package com.feed_the_beast.ftbquests;
 
-import com.feed_the_beast.ftbquests.quest.QuestList;
-import com.feed_the_beast.ftbquests.quest.ServerQuestList;
+import com.feed_the_beast.ftbquests.quest.QuestFile;
+import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 
 public class FTBQuestsCommon
 {
-	public QuestList getQuestList(boolean clientSide)
+	public QuestFile getQuestList(boolean clientSide)
 	{
-		return ServerQuestList.INSTANCE;
+		return ServerQuestFile.INSTANCE;
 	}
 }

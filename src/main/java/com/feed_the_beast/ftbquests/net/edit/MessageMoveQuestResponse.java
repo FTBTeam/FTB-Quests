@@ -5,7 +5,7 @@ import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToClient;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
-import com.feed_the_beast.ftbquests.gui.ClientQuestList;
+import com.feed_the_beast.ftbquests.gui.ClientQuestFile;
 import com.feed_the_beast.ftbquests.gui.GuiQuestTree;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import net.minecraftforge.fml.relauncher.Side;
@@ -56,9 +56,9 @@ public class MessageMoveQuestResponse extends MessageToClient
 	@SideOnly(Side.CLIENT)
 	public void onMessage()
 	{
-		if (ClientQuestList.INSTANCE != null)
+		if (ClientQuestFile.INSTANCE != null)
 		{
-			Quest quest = ClientQuestList.INSTANCE.getQuest(id);
+			Quest quest = ClientQuestFile.INSTANCE.getQuest(id);
 
 			if (quest != null)
 			{

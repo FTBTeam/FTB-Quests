@@ -8,7 +8,7 @@ import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.ProgressingQuestObject;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
-import com.feed_the_beast.ftbquests.quest.ServerQuestList;
+import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import net.minecraft.entity.player.EntityPlayerMP;
 
 /**
@@ -58,12 +58,12 @@ public class MessageSetDep extends MessageToServer
 	{
 		if (FTBQuests.canEdit(player))
 		{
-			Quest quest = ServerQuestList.INSTANCE.getQuest(id);
-			QuestObject d = ServerQuestList.INSTANCE.get(dep);
+			Quest quest = ServerQuestFile.INSTANCE.getQuest(id);
+			QuestObject d = ServerQuestFile.INSTANCE.get(dep);
 
 			if (quest != null && d instanceof ProgressingQuestObject && quest.setDependency(d.id, add))
 			{
-				ServerQuestList.INSTANCE.save();
+				ServerQuestFile.INSTANCE.save();
 				new MessageSetDepResponse(id, dep, add).sendToAll();
 			}
 		}

@@ -6,7 +6,7 @@ import com.feed_the_beast.ftblib.lib.net.MessageToServer;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
-import com.feed_the_beast.ftbquests.quest.ServerQuestList;
+import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import net.minecraft.entity.player.EntityPlayerMP;
 
 /**
@@ -52,24 +52,24 @@ public class MessageMoveChapter extends MessageToServer
 	{
 		if (id != 0 && FTBQuests.canEdit(player))
 		{
-			QuestChapter chapter = ServerQuestList.INSTANCE.getChapter(id);
+			QuestChapter chapter = ServerQuestFile.INSTANCE.getChapter(id);
 
 			if (chapter != null)
 			{
-				int index = ServerQuestList.INSTANCE.chapters.indexOf(chapter);
+				int index = ServerQuestFile.INSTANCE.chapters.indexOf(chapter);
 
-				if (index != -1 && up ? (index > 0) : (index < ServerQuestList.INSTANCE.chapters.size() - 1))
+				if (index != -1 && up ? (index > 0) : (index < ServerQuestFile.INSTANCE.chapters.size() - 1))
 				{
-					ServerQuestList.INSTANCE.chapters.remove(index);
-					ServerQuestList.INSTANCE.chapters.add(up ? index - 1 : index + 1, chapter);
+					ServerQuestFile.INSTANCE.chapters.remove(index);
+					ServerQuestFile.INSTANCE.chapters.add(up ? index - 1 : index + 1, chapter);
 
-					for (int i = 0; i < ServerQuestList.INSTANCE.chapters.size(); i++)
+					for (int i = 0; i < ServerQuestFile.INSTANCE.chapters.size(); i++)
 					{
-						ServerQuestList.INSTANCE.chapters.get(i).index = i;
+						ServerQuestFile.INSTANCE.chapters.get(i).index = i;
 					}
 
 					new MessageMoveChapterResponse(id, up).sendToAll();
-					ServerQuestList.INSTANCE.save();
+					ServerQuestFile.INSTANCE.save();
 				}
 			}
 		}

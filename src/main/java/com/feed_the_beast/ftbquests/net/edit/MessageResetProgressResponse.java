@@ -4,7 +4,7 @@ import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToClient;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
-import com.feed_the_beast.ftbquests.gui.ClientQuestList;
+import com.feed_the_beast.ftbquests.gui.ClientQuestFile;
 import com.feed_the_beast.ftbquests.quest.ProgressingQuestObject;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import net.minecraftforge.fml.relauncher.Side;
@@ -48,16 +48,16 @@ public class MessageResetProgressResponse extends MessageToClient
 	@SideOnly(Side.CLIENT)
 	public void onMessage()
 	{
-		if (ClientQuestList.INSTANCE != null)
+		if (ClientQuestFile.INSTANCE != null)
 		{
-			QuestObject object = ClientQuestList.INSTANCE.get(id);
+			QuestObject object = ClientQuestFile.INSTANCE.get(id);
 
 			if (object instanceof ProgressingQuestObject)
 			{
-				((ProgressingQuestObject) object).resetProgress(ClientQuestList.INSTANCE);
+				((ProgressingQuestObject) object).resetProgress(ClientQuestFile.INSTANCE);
 			}
 
-			ClientQuestList.INSTANCE.refreshGui(ClientQuestList.INSTANCE);
+			ClientQuestFile.INSTANCE.refreshGui(ClientQuestFile.INSTANCE);
 		}
 	}
 }
