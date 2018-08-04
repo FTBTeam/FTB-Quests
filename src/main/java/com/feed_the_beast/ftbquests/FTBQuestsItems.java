@@ -22,6 +22,8 @@ import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * @author LatvianModder
@@ -59,6 +61,7 @@ public class FTBQuestsItems
 	}
 
 	@SubscribeEvent
+	@SideOnly(Side.CLIENT)
 	public static void registerModels(ModelRegistryEvent event)
 	{
 		ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(QUEST_BLOCK), 0, new ModelResourceLocation(QUEST_BLOCK.getRegistryName(), "normal"));
