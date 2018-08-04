@@ -30,12 +30,6 @@ public class UnknownTask extends QuestTask
 	}
 
 	@Override
-	public boolean isInvalid()
-	{
-		return true;
-	}
-
-	@Override
 	public int getMaxProgress()
 	{
 		return 0;

@@ -37,12 +37,6 @@ public class ItemReward extends QuestReward
 	}
 
 	@Override
-	public boolean isInvalid()
-	{
-		return item.getStack().isEmpty() || super.isInvalid();
-	}
-
-	@Override
 	public String getName()
 	{
 		return ID;

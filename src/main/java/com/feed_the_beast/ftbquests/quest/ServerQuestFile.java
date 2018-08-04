@@ -33,7 +33,8 @@ public class ServerQuestFile extends QuestFile
 	{
 		if (INSTANCE != null)
 		{
-			INSTANCE.invalidate();
+			INSTANCE.deleteChildren();
+			INSTANCE.deleteSelf();
 		}
 
 		File file = new File(CommonUtils.folderConfig, "ftbquests/quests.nbt");

@@ -52,12 +52,6 @@ public class FluidTask extends QuestTask
 	}
 
 	@Override
-	public boolean isInvalid()
-	{
-		return fluid.isEmpty() || super.isInvalid();
-	}
-
-	@Override
 	public int getMaxProgress()
 	{
 		return amount.getInt();

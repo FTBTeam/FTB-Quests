@@ -32,7 +32,7 @@ public class ClientQuestFile extends QuestFile implements IProgressData
 
 	public static boolean exists()
 	{
-		return INSTANCE != null && !INSTANCE.isInvalid();
+		return INSTANCE != null && !INSTANCE.invalid;
 	}
 
 	public static boolean existsWithTeam()
@@ -205,7 +205,7 @@ public class ClientQuestFile extends QuestFile implements IProgressData
 	@Override
 	public IProgressData getData(String owner)
 	{
-		return isInvalid() || !teamId.equals(owner) ? null : this;
+		return invalid || !teamId.equals(owner) ? null : this;
 	}
 
 	@Override

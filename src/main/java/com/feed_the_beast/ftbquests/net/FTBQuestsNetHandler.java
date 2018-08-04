@@ -17,6 +17,7 @@ public class FTBQuestsNetHandler
 		GENERAL.register(new MessageUpdateRewardStatus());
 		GENERAL.register(new MessageGetBlock());
 		GENERAL.register(new MessageClaimReward());
+		GENERAL.register(new MessageGetScreen());
 
 		FTBQuestsEditNetHandler.init();
 	}

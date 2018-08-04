@@ -38,12 +38,6 @@ public class CommandReward extends QuestReward
 	}
 
 	@Override
-	public boolean isInvalid()
-	{
-		return command.isEmpty() || super.isInvalid();
-	}
-
-	@Override
 	public String getName()
 	{
 		return ID;

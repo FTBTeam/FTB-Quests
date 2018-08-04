@@ -18,6 +18,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
@@ -36,7 +37,7 @@ public class BlockQuest extends BlockBase
 	public BlockQuest(String mod, String id)
 	{
 		super(mod, id, Material.WOOD, MapColor.WOOD);
-		setCreativeTab(CreativeTabs.REDSTONE);
+		setCreativeTab(CreativeTabs.DECORATIONS);
 		setHardness(0.3F);
 	}
 
@@ -63,6 +64,11 @@ public class BlockQuest extends BlockBase
 	public int quantityDropped(IBlockState state, int fortune, Random random)
 	{
 		return 0;
+	}
+
+	@Override
+	public void getSubBlocks(CreativeTabs tab, NonNullList<ItemStack> items)
+	{
 	}
 
 	@Override

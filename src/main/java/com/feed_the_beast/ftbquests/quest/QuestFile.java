@@ -66,7 +66,6 @@ public abstract class QuestFile extends ProgressingQuestObject
 	}
 
 	public final List<QuestChapter> chapters;
-	private boolean invalid;
 	public final Short2ObjectMap<QuestObject> map;
 	public final ConfigBoolean allowTakeQuestBlocks;
 	public final ConfigList<ConfigItemStack> emergencyItems;
@@ -76,7 +75,6 @@ public abstract class QuestFile extends ProgressingQuestObject
 	{
 		super((short) 0);
 		chapters = new ArrayList<>();
-		invalid = false;
 		map = new Short2ObjectOpenHashMap<>();
 		map.put((short) 0, this);
 
@@ -123,18 +121,6 @@ public abstract class QuestFile extends ProgressingQuestObject
 	}
 
 	@Override
-	public boolean isInvalid()
-	{
-		return invalid;
-	}
-
-	public void invalidate()
-	{
-		invalid = true;
-		map.clear();
-	}
-
-	@Override
 	public int getProgress(IProgressData data)
 	{
 		int progress = 0;
@@ -172,6 +158,7 @@ public abstract class QuestFile extends ProgressingQuestObject
 	@Override
 	public void deleteSelf()
 	{
+		invalid = true;
 	}
 
 	@Override
@@ -180,6 +167,7 @@ public abstract class QuestFile extends ProgressingQuestObject
 		for (QuestChapter chapter : chapters)
 		{
 			chapter.deleteChildren();
+			chapter.invalid = true;
 		}
 
 		chapters.clear();

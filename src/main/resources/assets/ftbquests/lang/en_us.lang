@@ -1,6 +1,8 @@
 tile.ftbquests.quest_block.name=Quest Block
 tile.ftbquests.quest_block.missing_data=Broken Quest Block / Missing Data!
 tile.ftbquests.quest_block.no_perm=You are not a member of block owner team!
+tile.ftbquests.screen.name=Screen
+tile.ftbquests.screen_part.name=Screen
 
 ftbquests.general.editing_mode=Editing Mode
 

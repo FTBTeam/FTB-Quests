@@ -25,12 +25,6 @@ public class UnknownReward extends QuestReward
 	}
 
 	@Override
-	public boolean isInvalid()
-	{
-		return true;
-	}
-
-	@Override
 	public String getName()
 	{
 		return ID;

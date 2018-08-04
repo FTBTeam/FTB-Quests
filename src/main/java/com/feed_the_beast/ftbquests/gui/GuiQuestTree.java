@@ -965,7 +965,7 @@ public class GuiQuestTree extends GuiBase
 	@Override
 	public void drawBackground()
 	{
-		if (selectedChapter != null && selectedChapter.isInvalid())
+		if (selectedChapter != null && selectedChapter.invalid)
 		{
 			selectChapter(null);
 		}

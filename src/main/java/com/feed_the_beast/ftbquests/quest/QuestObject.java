@@ -11,6 +11,7 @@ import net.minecraft.util.text.ITextComponent;
 public abstract class QuestObject
 {
 	public final short id;
+	public boolean invalid = false;
 
 	public QuestObject(short i)
 	{
@@ -27,14 +28,10 @@ public abstract class QuestObject
 
 	public abstract ITextComponent getDisplayName();
 
-	public boolean isInvalid()
-	{
-		return getQuestFile().isInvalid();
-	}
-
 	public void deleteSelf()
 	{
 		getQuestFile().map.remove(id);
+		invalid = true;
 	}
 
 	public void deleteChildren()

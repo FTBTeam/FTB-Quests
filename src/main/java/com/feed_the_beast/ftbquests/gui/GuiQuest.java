@@ -175,7 +175,7 @@ public class GuiQuest extends GuiBase
 		@Override
 		public WidgetType getWidgetType()
 		{
-			if (task.isInvalid() || !quest.canStartTasks(questTreeGui.questFile))
+			if (task.invalid || !quest.canStartTasks(questTreeGui.questFile))
 			{
 				return WidgetType.DISABLED;
 			}
@@ -188,7 +188,7 @@ public class GuiQuest extends GuiBase
 		{
 			super.draw();
 
-			if (task.isInvalid())
+			if (task.invalid)
 			{
 				GlStateManager.pushMatrix();
 				GlStateManager.translate(0, 0, 500);
@@ -335,7 +335,7 @@ public class GuiQuest extends GuiBase
 		@Override
 		public WidgetType getWidgetType()
 		{
-			if (reward.isInvalid() || questTreeGui.questFile.isRewardClaimed(ClientUtils.MC.player, reward) || !quest.isComplete(questTreeGui.questFile))
+			if (reward.invalid || questTreeGui.questFile.isRewardClaimed(ClientUtils.MC.player, reward) || !quest.isComplete(questTreeGui.questFile))
 			{
 				return WidgetType.DISABLED;
 			}
@@ -348,7 +348,7 @@ public class GuiQuest extends GuiBase
 		{
 			super.draw();
 
-			if (reward.isInvalid())
+			if (reward.invalid)
 			{
 				GlStateManager.pushMatrix();
 				GlStateManager.translate(0, 0, 500);
