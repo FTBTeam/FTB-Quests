@@ -31,6 +31,7 @@ public class QuestRewards
 		add(ItemReward.ID, ItemReward::new);
 		add(ExperienceReward.ID, ExperienceReward::new);
 		add(ExperienceLevelsReward.ID_LEVELS, ExperienceLevelsReward::new);
+		add(CommandReward.ID, CommandReward::new);
 	}
 
 	public static QuestReward createReward(Quest quest, NBTTagCompound nbt, boolean allowInvalid)
