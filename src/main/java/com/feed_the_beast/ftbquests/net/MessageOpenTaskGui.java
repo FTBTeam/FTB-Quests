@@ -6,7 +6,7 @@ import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToClient;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.block.TileQuest;
-import com.feed_the_beast.ftbquests.gui.ClientQuestList;
+import com.feed_the_beast.ftbquests.gui.ClientQuestFile;
 import com.feed_the_beast.ftbquests.gui.ContainerTaskBase;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskData;
 import net.minecraft.tileentity.TileEntity;
@@ -74,7 +74,7 @@ public class MessageOpenTaskGui extends MessageToClient
 	@SideOnly(Side.CLIENT)
 	public void onMessage()
 	{
-		QuestTaskData data = ClientQuestList.INSTANCE.getQuestTaskData(task);
+		QuestTaskData data = ClientQuestFile.INSTANCE.getQuestTaskData(task);
 		ContainerTaskBase container = data.getContainer(ClientUtils.MC.player);
 
 		if (container != null)

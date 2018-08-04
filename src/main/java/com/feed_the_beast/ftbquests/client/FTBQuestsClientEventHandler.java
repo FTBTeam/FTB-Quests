@@ -4,7 +4,7 @@ import com.feed_the_beast.ftblib.events.CustomSidebarButtonTextEvent;
 import com.feed_the_beast.ftblib.events.client.CustomClickEvent;
 import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
-import com.feed_the_beast.ftbquests.gui.ClientQuestList;
+import com.feed_the_beast.ftbquests.gui.ClientQuestFile;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.rewards.QuestReward;
@@ -24,19 +24,19 @@ public class FTBQuestsClientEventHandler
 	@SubscribeEvent
 	public static void onCustomSidebarButtonText(CustomSidebarButtonTextEvent event)
 	{
-		if (ClientQuestList.existsWithTeam() && event.getButton().id.equals(QUESTS_BUTTON))
+		if (ClientQuestFile.existsWithTeam() && event.getButton().id.equals(QUESTS_BUTTON))
 		{
 			int r = 0;
 
-			for (QuestChapter chapter : ClientQuestList.INSTANCE.chapters)
+			for (QuestChapter chapter : ClientQuestFile.INSTANCE.chapters)
 			{
 				for (Quest quest : chapter.quests)
 				{
-					if (quest.isComplete(ClientQuestList.INSTANCE))
+					if (quest.isComplete(ClientQuestFile.INSTANCE))
 					{
 						for (QuestReward reward : quest.rewards)
 						{
-							if (!ClientQuestList.INSTANCE.isRewardClaimed(ClientUtils.MC.player, reward))
+							if (!ClientQuestFile.INSTANCE.isRewardClaimed(ClientUtils.MC.player, reward))
 							{
 								r++;
 							}
@@ -60,9 +60,9 @@ public class FTBQuestsClientEventHandler
 			switch (event.getID().getPath())
 			{
 				case "open_gui":
-					if (ClientQuestList.existsWithTeam())
+					if (ClientQuestFile.existsWithTeam())
 					{
-						ClientQuestList.INSTANCE.openQuestGui();
+						ClientQuestFile.INSTANCE.openQuestGui();
 					}
 
 					break;

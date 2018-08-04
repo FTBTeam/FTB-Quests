@@ -27,6 +27,7 @@ import com.feed_the_beast.ftbquests.net.edit.MessageDeleteObject;
 import com.feed_the_beast.ftbquests.net.edit.MessageEditObject;
 import com.feed_the_beast.ftbquests.net.edit.MessageResetProgress;
 import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.quest.rewards.QuestReward;
 import com.feed_the_beast.ftbquests.quest.rewards.QuestRewards;
@@ -138,14 +139,14 @@ public class GuiQuest extends GuiBase
 		{
 			GuiHelper.playClickSound();
 
-			if (button.isRight() && questTreeGui.questList.editingMode)
+			if (button.isRight() && questTreeGui.questFile.editingMode)
 			{
 				List<ContextMenuItem> contextMenu = new ArrayList<>();
 				contextMenu.add(new ContextMenuItem(I18n.format("selectServer.edit"), GuiIcons.SETTINGS, () -> new MessageEditObject(task.id).sendToServer()));
 				contextMenu.add(ContextMenuItem.SEPARATOR);
 				contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), GuiIcons.REMOVE, () -> new MessageDeleteObject(task.id)).setYesNo(I18n.format("delete_item", task.getDisplayName().getFormattedText())));
 				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.reset_progress"), GuiIcons.REFRESH, () -> new MessageResetProgress(task.id, false).sendToServer()).setYesNo(I18n.format("ftbquests.gui.reset_progress_q")));
-				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.copy_id"), GuiIcons.INFO, () -> setClipboardString(Integer.toString(task.id & 0xFFFF))));
+				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.copy_id"), GuiIcons.INFO, () -> setClipboardString(QuestFile.formatID(quest.id))));
 				getGui().openContextMenu(contextMenu);
 			}
 			else if (button.isLeft() && !(task instanceof UnknownTask))
@@ -157,7 +158,7 @@ public class GuiQuest extends GuiBase
 		@Override
 		public void addMouseOverText(List<String> list)
 		{
-			list.add(getTitle() + questTreeGui.questList.getCompletionSuffix(task));
+			list.add(getTitle() + questTreeGui.questFile.getCompletionSuffix(task));
 
 			if (task instanceof UnknownTask)
 			{
@@ -176,7 +177,7 @@ public class GuiQuest extends GuiBase
 		{
 			super.draw();
 
-			if (task.isComplete(questTreeGui.questList))
+			if (task.isComplete(questTreeGui.questFile))
 			{
 				GlStateManager.pushMatrix();
 				GlStateManager.translate(0, 0, 500);
@@ -244,12 +245,14 @@ public class GuiQuest extends GuiBase
 								nbt.setString("type", type);
 								new MessageCreateObject(QuestObjectType.TASK, quest.id, nbt).sendToServer();
 								GuiQuest.this.openGui();
-								questTreeGui.questList.refreshGui(questTreeGui.questList);
+								questTreeGui.questFile.refreshGui(questTreeGui.questFile);
 							}).openGui();
 						}
 					});
 				}
 			}
+
+			panel.widgets.sort(WIDGET_TITLE_COMPARATOR);
 		}
 	}
 
@@ -285,16 +288,16 @@ public class GuiQuest extends GuiBase
 		{
 			GuiHelper.playClickSound();
 
-			if (button.isRight() && questTreeGui.questList.editingMode)
+			if (button.isRight() && questTreeGui.questFile.editingMode)
 			{
 				List<ContextMenuItem> contextMenu = new ArrayList<>();
 				contextMenu.add(new ContextMenuItem(I18n.format("selectServer.edit"), GuiIcons.SETTINGS, () -> new MessageEditObject(reward.id).sendToServer()));
 				contextMenu.add(ContextMenuItem.SEPARATOR);
 				contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), GuiIcons.REMOVE, () -> new MessageDeleteObject(reward.id)).setYesNo(I18n.format("delete_item", reward.getDisplayName().getFormattedText())));
-				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.copy_id"), GuiIcons.INFO, () -> setClipboardString(Integer.toString(reward.id & 0xFFFF))));
+				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.copy_id"), GuiIcons.INFO, () -> setClipboardString(QuestFile.formatID(quest.id))));
 				getGui().openContextMenu(contextMenu);
 			}
-			else if (button.isLeft() && !(reward instanceof UnknownReward) && questTreeGui.questList.claimReward(ClientUtils.MC.player, reward))
+			else if (button.isLeft() && !(reward instanceof UnknownReward) && questTreeGui.questFile.claimReward(ClientUtils.MC.player, reward))
 			{
 				new MessageClaimReward(reward.id).sendToServer();
 			}
@@ -314,12 +317,26 @@ public class GuiQuest extends GuiBase
 		@Override
 		public WidgetType getWidgetType()
 		{
-			if (!quest.isComplete(questTreeGui.questList) || questTreeGui.questList.isRewardClaimed(ClientUtils.MC.player, reward))
+			if (questTreeGui.questFile.isRewardClaimed(ClientUtils.MC.player, reward) || !quest.isComplete(questTreeGui.questFile))
 			{
 				return WidgetType.DISABLED;
 			}
 
 			return super.getWidgetType();
+		}
+
+		@Override
+		public void draw()
+		{
+			super.draw();
+
+			if (questTreeGui.questFile.isRewardClaimed(ClientUtils.MC.player, reward))
+			{
+				GlStateManager.pushMatrix();
+				GlStateManager.translate(0, 0, 500);
+				GuiIcons.CHECK.draw(getAX() + width - 9, getAY() + 1, 8, 8);
+				GlStateManager.popMatrix();
+			}
 		}
 	}
 
@@ -381,12 +398,14 @@ public class GuiQuest extends GuiBase
 								nbt.setString("type", type);
 								new MessageCreateObject(QuestObjectType.REWARD, quest.id, nbt).sendToServer();
 								GuiQuest.this.openGui();
-								questTreeGui.questList.refreshGui(questTreeGui.questList);
+								questTreeGui.questFile.refreshGui(questTreeGui.questFile);
 							}).openGui();
 						}
 					});
 				}
 			}
+
+			panel.widgets.sort(WIDGET_TITLE_COMPARATOR);
 		}
 	}
 
@@ -465,8 +484,8 @@ public class GuiQuest extends GuiBase
 			public void onClicked(MouseButton button)
 			{
 				GuiHelper.playClickSound();
-				questTreeGui.questList.questGui = questTreeGui.questList.questTreeGui;
-				questTreeGui.questList.questGui.openGui();
+				questTreeGui.questFile.questGui = questTreeGui.questFile.questTreeGui;
+				questTreeGui.questFile.questGui.openGui();
 			}
 
 			@Override
@@ -492,7 +511,7 @@ public class GuiQuest extends GuiBase
 					add(new ButtonTask(this, task));
 				}
 
-				if (questTreeGui.questList.editingMode)
+				if (questTreeGui.questFile.editingMode)
 				{
 					add(new ButtonAddTask(this));
 				}
@@ -529,7 +548,7 @@ public class GuiQuest extends GuiBase
 					add(new ButtonReward(this, reward));
 				}
 
-				if (questTreeGui.questList.editingMode)
+				if (questTreeGui.questFile.editingMode)
 				{
 					add(new ButtonAddReward(this));
 				}

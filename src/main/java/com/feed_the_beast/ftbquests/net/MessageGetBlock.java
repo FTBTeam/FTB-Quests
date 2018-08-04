@@ -5,10 +5,9 @@ import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToServer;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
-import com.feed_the_beast.ftbquests.FTBQuestsConfig;
 import com.feed_the_beast.ftbquests.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.block.QuestBlockData;
-import com.feed_the_beast.ftbquests.quest.ServerQuestList;
+import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import com.feed_the_beast.ftbquests.util.FTBQuestsTeamData;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -52,9 +51,9 @@ public class MessageGetBlock extends MessageToServer
 	@Override
 	public void onMessage(EntityPlayerMP player)
 	{
-		if (FTBQuestsConfig.general.allow_take_quest_blocks)
+		if (ServerQuestFile.INSTANCE.allowTakeQuestBlocks.getBoolean())
 		{
-			QuestTask t = ServerQuestList.INSTANCE.getTask(task);
+			QuestTask t = ServerQuestFile.INSTANCE.getTask(task);
 			FTBQuestsTeamData teamData = FTBQuestsTeamData.get(Universe.get().getPlayer(player).team);
 
 			if (t != null && t.quest.isVisible(teamData) && !t.isComplete(teamData))

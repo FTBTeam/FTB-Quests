@@ -15,7 +15,7 @@ import com.feed_the_beast.ftbquests.net.MessageUpdateTaskProgress;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
-import com.feed_the_beast.ftbquests.quest.ServerQuestList;
+import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.rewards.QuestReward;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskData;
@@ -85,7 +85,7 @@ public class FTBQuestsTeamData extends TeamData implements IProgressData
 	{
 		FTBQuestsTeamData data = get(event.getTeam());
 
-		for (QuestChapter chapter : ServerQuestList.INSTANCE.chapters)
+		for (QuestChapter chapter : ServerQuestFile.INSTANCE.chapters)
 		{
 			for (Quest quest : chapter.quests)
 			{
@@ -102,7 +102,7 @@ public class FTBQuestsTeamData extends TeamData implements IProgressData
 	{
 		if (event.getPlayer().isOnline())
 		{
-			ServerQuestList.INSTANCE.sync(event.getPlayer().getPlayer());
+			ServerQuestFile.INSTANCE.sync(event.getPlayer().getPlayer());
 		}
 	}
 
@@ -117,9 +117,9 @@ public class FTBQuestsTeamData extends TeamData implements IProgressData
 		claimedRewards = new ShortOpenHashSet();
 		claimedPlayerRewards = new HashMap<>();
 
-		if (ServerQuestList.INSTANCE != null)
+		if (ServerQuestFile.INSTANCE != null)
 		{
-			for (QuestChapter chapter : ServerQuestList.INSTANCE.chapters)
+			for (QuestChapter chapter : ServerQuestFile.INSTANCE.chapters)
 			{
 				for (Quest quest : chapter.quests)
 				{
@@ -378,7 +378,7 @@ public class FTBQuestsTeamData extends TeamData implements IProgressData
 	@Override
 	public void unclaimReward(short reward)
 	{
-		QuestReward r = ServerQuestList.INSTANCE.getReward(reward);
+		QuestReward r = ServerQuestFile.INSTANCE.getReward(reward);
 
 		if (r == null)
 		{

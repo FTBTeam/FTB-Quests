@@ -4,7 +4,7 @@ import com.feed_the_beast.ftbquests.block.TileQuest;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.ProgressingQuestObject;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.QuestList;
+import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.IStringSerializable;
@@ -23,16 +23,16 @@ public abstract class QuestTask extends ProgressingQuestObject implements IStrin
 
 	public QuestTask(Quest q, NBTTagCompound nbt)
 	{
-		super(q.chapter.list.getID(nbt));
+		super(q.chapter.file.getID(nbt));
 		quest = q;
 	}
 
 	public abstract QuestTaskData createData(IProgressData data);
 
 	@Override
-	public final QuestList getQuestList()
+	public final QuestFile getQuestFile()
 	{
-		return quest.getQuestList();
+		return quest.chapter.file;
 	}
 
 	@Override
@@ -65,7 +65,7 @@ public abstract class QuestTask extends ProgressingQuestObject implements IStrin
 		super.deleteSelf();
 		quest.tasks.remove(this);
 
-		for (IProgressData data : quest.chapter.list.getAllData())
+		for (IProgressData data : quest.chapter.file.getAllData())
 		{
 			data.removeTask(id);
 		}

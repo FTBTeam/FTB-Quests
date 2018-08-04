@@ -10,7 +10,6 @@ import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
-import com.feed_the_beast.ftbquests.FTBQuestsConfig;
 import com.feed_the_beast.ftbquests.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.net.MessageGetBlock;
 import net.minecraft.client.gui.GuiScreen;
@@ -55,7 +54,7 @@ public class GuiTaskBase extends GuiBase
 			@Override
 			public void addWidgets()
 			{
-				if (FTBQuestsConfig.general.allow_take_quest_blocks && container.data.task.quest.isVisible(ClientQuestList.INSTANCE) && !container.data.task.isComplete(ClientQuestList.INSTANCE))
+				if (ClientQuestFile.INSTANCE.allowTakeQuestBlocks.getBoolean() && container.data.task.quest.isVisible(ClientQuestFile.INSTANCE) && !container.data.task.isComplete(ClientQuestFile.INSTANCE))
 				{
 					add(new Tab(this, I18n.format("ftbquests.task.get_block"), ItemIcon.getItemIcon(new ItemStack(FTBQuestsItems.QUEST_BLOCK)))
 					{
@@ -123,7 +122,7 @@ public class GuiTaskBase extends GuiBase
 		}
 
 		int max = container.data.task.getMaxProgress();
-		int progress = Math.min(max, container.data.task.getProgress(ClientQuestList.INSTANCE));
+		int progress = Math.min(max, container.data.task.getProgress(ClientQuestFile.INSTANCE));
 
 		String s = max == 0 ? "0/0 [0%]" : String.format("%d/%d [%d%%]", progress, max, (int) (progress * 100D / (double) max));
 		sw = getStringWidth(s);

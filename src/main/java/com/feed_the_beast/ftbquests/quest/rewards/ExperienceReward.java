@@ -55,7 +55,7 @@ public class ExperienceReward extends QuestReward
 	@Override
 	public ITextComponent getDisplayName()
 	{
-		return new TextComponentTranslation("ftbquests.reward.xp.text", TextFormatting.GREEN + "+" + value);
+		return new TextComponentTranslation("ftbquests.reward.xp.text", TextFormatting.GREEN + "+" + value.getInt());
 	}
 
 	@Override

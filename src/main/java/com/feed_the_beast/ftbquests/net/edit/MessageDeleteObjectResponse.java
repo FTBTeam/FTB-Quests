@@ -4,7 +4,7 @@ import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToClient;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
-import com.feed_the_beast.ftbquests.gui.ClientQuestList;
+import com.feed_the_beast.ftbquests.gui.ClientQuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -47,15 +47,15 @@ public class MessageDeleteObjectResponse extends MessageToClient
 	@SideOnly(Side.CLIENT)
 	public void onMessage()
 	{
-		if (ClientQuestList.INSTANCE != null)
+		if (ClientQuestFile.INSTANCE != null)
 		{
-			QuestObject object = ClientQuestList.INSTANCE.get(id);
+			QuestObject object = ClientQuestFile.INSTANCE.get(id);
 
 			if (object != null)
 			{
 				object.deleteChildren();
 				object.deleteSelf();
-				ClientQuestList.INSTANCE.refreshGui(ClientQuestList.INSTANCE);
+				ClientQuestFile.INSTANCE.refreshGui(ClientQuestFile.INSTANCE);
 			}
 		}
 	}

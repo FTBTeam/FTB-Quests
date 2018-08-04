@@ -6,7 +6,7 @@ import com.feed_the_beast.ftblib.lib.net.MessageToServer;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.ServerQuestList;
+import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import net.minecraft.entity.player.EntityPlayerMP;
 
 /**
@@ -52,12 +52,12 @@ public class MessageMoveQuest extends MessageToServer
 	{
 		if (direction >= 0 && direction <= 7 && FTBQuests.canEdit(player))
 		{
-			Quest quest = ServerQuestList.INSTANCE.getQuest(id);
+			Quest quest = ServerQuestFile.INSTANCE.getQuest(id);
 
 			if (quest != null)
 			{
 				quest.move(direction);
-				ServerQuestList.INSTANCE.save();
+				ServerQuestFile.INSTANCE.save();
 				new MessageMoveQuestResponse(id, (byte) quest.x.getInt(), (byte) quest.y.getInt()).sendToAll();
 			}
 		}

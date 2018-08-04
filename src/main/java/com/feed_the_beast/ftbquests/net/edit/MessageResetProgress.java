@@ -10,7 +10,7 @@ import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.ProgressingQuestObject;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
-import com.feed_the_beast.ftbquests.quest.ServerQuestList;
+import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.util.FTBQuestsTeamData;
 import net.minecraft.entity.player.EntityPlayerMP;
 
@@ -57,11 +57,11 @@ public class MessageResetProgress extends MessageToServer
 	{
 		if (id != 0 && FTBQuests.canEdit(player))
 		{
-			QuestObject object = ServerQuestList.INSTANCE.get(id);
+			QuestObject object = ServerQuestFile.INSTANCE.get(id);
 
 			if (object instanceof ProgressingQuestObject)
 			{
-				ServerQuestList.INSTANCE.shouldSendUpdates = false;
+				ServerQuestFile.INSTANCE.shouldSendUpdates = false;
 				ProgressingQuestObject o = (ProgressingQuestObject) object;
 
 				if (all)
@@ -81,7 +81,7 @@ public class MessageResetProgress extends MessageToServer
 				}
 
 				Universe.get().clearCache();
-				ServerQuestList.INSTANCE.shouldSendUpdates = true;
+				ServerQuestFile.INSTANCE.shouldSendUpdates = true;
 			}
 		}
 	}

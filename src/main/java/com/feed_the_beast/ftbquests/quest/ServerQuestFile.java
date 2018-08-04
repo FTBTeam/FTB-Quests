@@ -21,9 +21,9 @@ import java.util.Random;
 /**
  * @author LatvianModder
  */
-public class ServerQuestList extends QuestList
+public class ServerQuestFile extends QuestFile
 {
-	public static ServerQuestList INSTANCE;
+	public static ServerQuestFile INSTANCE;
 
 	public boolean shouldSendUpdates = true;
 	private Random random;
@@ -52,12 +52,12 @@ public class ServerQuestList extends QuestList
 			INSTANCE.invalidate();
 		}
 
-		INSTANCE = new ServerQuestList(nbt);
+		INSTANCE = new ServerQuestFile(nbt);
 		INSTANCE.save();
 		return true;
 	}
 
-	private ServerQuestList(NBTTagCompound nbt)
+	private ServerQuestFile(NBTTagCompound nbt)
 	{
 		super(nbt);
 	}
@@ -76,7 +76,7 @@ public class ServerQuestList extends QuestList
 		{
 			id = (short) (1 + random.nextInt(MAX_ID));
 		}
-		while (get(id) != null);
+		while (map.containsKey(id));
 
 		return id;
 	}

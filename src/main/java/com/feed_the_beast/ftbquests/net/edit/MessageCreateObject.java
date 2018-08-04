@@ -7,7 +7,7 @@ import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
-import com.feed_the_beast.ftbquests.quest.ServerQuestList;
+import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 
@@ -58,13 +58,13 @@ public class MessageCreateObject extends MessageToServer
 	{
 		if (FTBQuests.canEdit(player))
 		{
-			QuestObject object = ServerQuestList.INSTANCE.createAndAdd(type, parent, nbt);
+			QuestObject object = ServerQuestFile.INSTANCE.createAndAdd(type, parent, nbt);
 
 			if (object != null)
 			{
 				object.writeData(nbt);
 				new MessageCreateObjectResponse(type, parent, nbt).sendToAll();
-				ServerQuestList.INSTANCE.save();
+				ServerQuestFile.INSTANCE.save();
 			}
 		}
 	}

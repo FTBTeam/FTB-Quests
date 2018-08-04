@@ -7,7 +7,7 @@ import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.ProgressingQuestObject;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
-import com.feed_the_beast.ftbquests.quest.QuestList;
+import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.rewards.QuestReward;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskData;
@@ -26,9 +26,9 @@ import java.util.Collections;
 /**
  * @author LatvianModder
  */
-public class ClientQuestList extends QuestList implements IProgressData
+public class ClientQuestFile extends QuestFile implements IProgressData
 {
-	public static ClientQuestList INSTANCE;
+	public static ClientQuestFile INSTANCE;
 
 	public static boolean exists()
 	{
@@ -47,7 +47,7 @@ public class ClientQuestList extends QuestList implements IProgressData
 	public GuiBase questGui;
 	public boolean editingMode;
 
-	public ClientQuestList(MessageSyncQuests message, @Nullable ClientQuestList prev)
+	public ClientQuestFile(MessageSyncQuests message, @Nullable ClientQuestFile prev)
 	{
 		super(message.quests);
 		teamId = message.team;
@@ -77,7 +77,7 @@ public class ClientQuestList extends QuestList implements IProgressData
 		refreshGui(prev);
 	}
 
-	public void refreshGui(@Nullable ClientQuestList prev)
+	public void refreshGui(@Nullable ClientQuestFile prev)
 	{
 		boolean guiOpen = false;
 		int scrollX = 0, scrollY = 0;

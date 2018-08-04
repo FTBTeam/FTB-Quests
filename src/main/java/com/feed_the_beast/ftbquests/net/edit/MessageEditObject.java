@@ -9,9 +9,9 @@ import com.feed_the_beast.ftblib.lib.net.MessageToServer;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
-import com.feed_the_beast.ftbquests.quest.QuestList;
+import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
-import com.feed_the_beast.ftbquests.quest.ServerQuestList;
+import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.rewards.QuestReward;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import net.minecraft.command.ICommandSender;
@@ -61,11 +61,11 @@ public class MessageEditObject extends MessageToServer implements IConfigCallbac
 	{
 		if (FTBQuests.canEdit(player))
 		{
-			QuestObject object = ServerQuestList.INSTANCE.get(id);
+			QuestObject object = ServerQuestFile.INSTANCE.get(id);
 
 			if (object != null)
 			{
-				ITextComponent id = new TextComponentString(" #" + QuestList.formatID(object.id));
+				ITextComponent id = new TextComponentString(" #" + QuestFile.formatID(object.id));
 				id.getStyle().setColor(TextFormatting.DARK_GRAY);
 				id.getStyle().setBold(false);
 
@@ -98,14 +98,14 @@ public class MessageEditObject extends MessageToServer implements IConfigCallbac
 	@Override
 	public void onConfigSaved(ConfigGroup g, ICommandSender sender)
 	{
-		QuestObject object = ServerQuestList.INSTANCE.get(id);
+		QuestObject object = ServerQuestFile.INSTANCE.get(id);
 
 		if (object != null)
 		{
 			ConfigGroup group = ConfigGroup.newGroup("object");
 			object.getConfig(group);
 			new MessageEditObjectResponse(id, group.serializeNBT()).sendToAll();
-			ServerQuestList.INSTANCE.save();
+			ServerQuestFile.INSTANCE.save();
 		}
 	}
 }

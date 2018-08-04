@@ -32,6 +32,8 @@ import java.util.List;
  */
 public final class Quest extends ProgressingQuestObject
 {
+	public static final int POS_LIMIT = 25;
+
 	public final QuestChapter chapter;
 	public final ConfigString title;
 	public final ConfigString description;
@@ -45,15 +47,15 @@ public final class Quest extends ProgressingQuestObject
 
 	public Quest(QuestChapter c, NBTTagCompound nbt)
 	{
-		super(c.list.getID(nbt));
+		super(c.file.getID(nbt));
 		chapter = c;
 		title = new ConfigString(nbt.getString("title"));
 		description = new ConfigString(nbt.getString("description"));
-		icon = new ConfigItemStack(QuestList.getIcon(nbt), true);
+		icon = new ConfigItemStack(QuestFile.getIcon(nbt), true);
 		type = new ConfigEnum<>(QuestType.NAME_MAP);
 		type.setValue(nbt.getString("type"));
-		x = new ConfigInt(nbt.getByte("x"), -127, 127);
-		y = new ConfigInt(nbt.getByte("y"), -127, 127);
+		x = new ConfigInt(nbt.getByte("x"), -POS_LIMIT, POS_LIMIT);
+		y = new ConfigInt(nbt.getByte("y"), -POS_LIMIT, POS_LIMIT);
 		text = new ConfigList<>(new ConfigString(""));
 
 		NBTTagList list = nbt.getTagList("text", Constants.NBT.TAG_STRING);
@@ -63,7 +65,7 @@ public final class Quest extends ProgressingQuestObject
 			text.add(new ConfigString(list.getStringTagAt(k)));
 		}
 
-		dependencies = new ConfigList<>(new ConfigInt(1, 1, QuestList.MAX_ID));
+		dependencies = new ConfigList<>(new ConfigInt(1, 1, QuestFile.MAX_ID));
 		tasks = new ArrayList<>();
 		rewards = new ArrayList<>();
 
@@ -73,7 +75,7 @@ public final class Quest extends ProgressingQuestObject
 		{
 			QuestTask task = QuestTasks.createTask(this, list.getCompoundTagAt(k), false);
 			tasks.add(task);
-			chapter.list.objectMap.put(task.id, task);
+			chapter.file.map.put(task.id, task);
 		}
 
 		list = nbt.getTagList("rewards", Constants.NBT.TAG_COMPOUND);
@@ -82,7 +84,7 @@ public final class Quest extends ProgressingQuestObject
 		{
 			QuestReward reward = QuestRewards.createReward(this, list.getCompoundTagAt(k), false);
 			rewards.add(reward);
-			chapter.list.objectMap.put(reward.id, reward);
+			chapter.file.map.put(reward.id, reward);
 		}
 
 		for (int d : nbt.getIntArray("dependencies"))
@@ -92,9 +94,9 @@ public final class Quest extends ProgressingQuestObject
 	}
 
 	@Override
-	public QuestList getQuestList()
+	public QuestFile getQuestFile()
 	{
-		return chapter.getQuestList();
+		return chapter.file;
 	}
 
 	@Override
@@ -254,39 +256,40 @@ public final class Quest extends ProgressingQuestObject
 
 	public boolean isVisible(IProgressData data)
 	{
-		if (type.getValue() == QuestType.NORMAL || dependencies.isEmpty())
+		if (dependencies.isEmpty())
 		{
 			return true;
 		}
 
-		QuestList list = getQuestList();
-
-		if (type.getValue() == QuestType.SECRET)
+		switch (type.getValue())
 		{
-			for (ConfigInt value : dependencies)
-			{
-				QuestObject object = list.get((short) value.getInt());
-
-				if (object instanceof ProgressingQuestObject && ((ProgressingQuestObject) object).isComplete(data))
+			case SECRET:
+				for (ConfigInt value : dependencies)
 				{
-					return true;
+					QuestObject object = chapter.file.get((short) value.getInt());
+
+					if (object instanceof ProgressingQuestObject && ((ProgressingQuestObject) object).isComplete(data))
+					{
+						return true;
+					}
 				}
-			}
 
-			return false;
-		}
-
-		for (ConfigInt value : dependencies)
-		{
-			QuestObject object = list.get((short) value.getInt());
-
-			if (object instanceof ProgressingQuestObject && !((ProgressingQuestObject) object).isComplete(data))
-			{
 				return false;
-			}
-		}
+			case INVISIBLE:
+				for (ConfigInt value : dependencies)
+				{
+					QuestObject object = chapter.file.get((short) value.getInt());
 
-		return true;
+					if (object instanceof ProgressingQuestObject && !((ProgressingQuestObject) object).isComplete(data))
+					{
+						return false;
+					}
+				}
+
+				return true;
+			default:
+				return true;
+		}
 	}
 
 	@Override
@@ -344,13 +347,13 @@ public final class Quest extends ProgressingQuestObject
 	public void getConfig(ConfigGroup group)
 	{
 		group.add("title", title, new ConfigString(""));
-		group.add("x", x, new ConfigInt(0));
-		group.add("y", y, new ConfigInt(0));
+		group.add("x", x, new ConfigInt(0, -POS_LIMIT, POS_LIMIT));
+		group.add("y", y, new ConfigInt(0, -POS_LIMIT, POS_LIMIT));
 		group.add("type", type, new ConfigEnum<>(QuestType.NAME_MAP));
 		group.add("icon", icon, new ConfigItemStack(ItemStack.EMPTY, true));
 		group.add("description", description, new ConfigString(""));
 		group.add("text", text, new ConfigList<>(new ConfigString("")));
-		group.add("dependencies", dependencies, new ConfigList<>(new ConfigInt(1, 1, Integer.MAX_VALUE)));
+		group.add("dependencies", dependencies, new ConfigList<>(new ConfigInt(1, 1, QuestFile.MAX_ID)));
 	}
 
 	public void move(byte direction)
@@ -358,25 +361,25 @@ public final class Quest extends ProgressingQuestObject
 		if (direction == 5 || direction == 6 || direction == 7)
 		{
 			int v = x.getInt() - 1;
-			x.setInt(v <= -128 ? 127 : v);
+			x.setInt(v <= -(POS_LIMIT + 1) ? POS_LIMIT : v);
 		}
 
 		if (direction == 1 || direction == 2 || direction == 3)
 		{
 			int v = x.getInt() + 1;
-			x.setInt(v >= 128 ? -127 : v);
+			x.setInt(v >= (POS_LIMIT + 1) ? -POS_LIMIT : v);
 		}
 
 		if (direction == 0 || direction == 1 || direction == 7)
 		{
 			int v = y.getInt() - 1;
-			y.setInt(v <= -128 ? 127 : v);
+			y.setInt(v <= -(POS_LIMIT + 1) ? POS_LIMIT : v);
 		}
 
 		if (direction == 3 || direction == 4 || direction == 5)
 		{
 			int v = y.getInt() + 1;
-			y.setInt(v >= 128 ? -127 : v);
+			y.setInt(v >= (POS_LIMIT + 1) ? -POS_LIMIT : v);
 		}
 
 		for (Quest quest : chapter.quests)

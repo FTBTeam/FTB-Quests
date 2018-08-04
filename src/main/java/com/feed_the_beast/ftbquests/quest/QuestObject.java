@@ -17,7 +17,7 @@ public abstract class QuestObject
 		id = i;
 	}
 
-	public abstract QuestList getQuestList();
+	public abstract QuestFile getQuestFile();
 
 	public abstract QuestObjectType getObjectType();
 
@@ -29,12 +29,12 @@ public abstract class QuestObject
 
 	public boolean isInvalid()
 	{
-		return getQuestList().isInvalid();
+		return getQuestFile().isInvalid();
 	}
 
 	public void deleteSelf()
 	{
-		getQuestList().objectMap.remove(id);
+		getQuestFile().map.remove(id);
 	}
 
 	public void deleteChildren()
@@ -44,7 +44,7 @@ public abstract class QuestObject
 	@Override
 	public final String toString()
 	{
-		return getClass().getSimpleName() + '#' + QuestList.formatID(id);
+		return getClass().getSimpleName() + '#' + QuestFile.formatID(id);
 	}
 
 	@Override

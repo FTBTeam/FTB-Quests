@@ -6,7 +6,7 @@ import com.feed_the_beast.ftblib.events.universe.UniverseLoadedEvent;
 import com.feed_the_beast.ftblib.events.universe.UniverseSavedEvent;
 import com.feed_the_beast.ftblib.lib.util.CommonUtils;
 import com.feed_the_beast.ftblib.lib.util.NBTUtils;
-import com.feed_the_beast.ftbquests.quest.ServerQuestList;
+import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.Mod;
@@ -30,13 +30,13 @@ public class FTBQuestsEventHandler
 	@SubscribeEvent
 	public static void onPlayerLoggedIn(ForgePlayerLoggedInEvent event)
 	{
-		ServerQuestList.INSTANCE.sync(event.getPlayer().getPlayer());
+		ServerQuestFile.INSTANCE.sync(event.getPlayer().getPlayer());
 	}
 
 	@SubscribeEvent
 	public static void onUniverseLoaded(UniverseLoadedEvent.Pre event)
 	{
-		if (!ServerQuestList.load())
+		if (!ServerQuestFile.load())
 		{
 			FTBQuests.LOGGER.error("Failed to load quests!");
 		}
@@ -45,12 +45,12 @@ public class FTBQuestsEventHandler
 	@SubscribeEvent
 	public static void onUniverseSaved(UniverseSavedEvent event)
 	{
-		if (ServerQuestList.INSTANCE.shouldSave)
+		if (ServerQuestFile.INSTANCE.shouldSave)
 		{
 			NBTTagCompound nbt = new NBTTagCompound();
-			ServerQuestList.INSTANCE.writeData(nbt);
+			ServerQuestFile.INSTANCE.writeData(nbt);
 			NBTUtils.writeNBTSafe(new File(CommonUtils.folderConfig, "ftbquests/quests.nbt"), nbt);
-			ServerQuestList.INSTANCE.shouldSave = false;
+			ServerQuestFile.INSTANCE.shouldSave = false;
 		}
 	}
 }

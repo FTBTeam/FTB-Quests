@@ -1,7 +1,7 @@
 package com.feed_the_beast.ftbquests.block;
 
 import com.feed_the_beast.ftblib.lib.block.ItemBlockBase;
-import com.feed_the_beast.ftbquests.gui.ClientQuestList;
+import com.feed_the_beast.ftbquests.gui.ClientQuestFile;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskData;
 import net.minecraft.block.Block;
 import net.minecraft.client.resources.I18n;
@@ -52,7 +52,7 @@ public class ItemBlockQuest extends ItemBlockBase
 	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack stack, @Nullable World world, List<String> tooltip, ITooltipFlag flag)
 	{
-		if (!ClientQuestList.existsWithTeam())
+		if (!ClientQuestFile.existsWithTeam())
 		{
 			return;
 		}
@@ -65,7 +65,7 @@ public class ItemBlockQuest extends ItemBlockBase
 			return;
 		}
 
-		if (!ClientQuestList.INSTANCE.teamId.equals(data.data.getTeamID()))
+		if (!ClientQuestFile.INSTANCE.teamId.equals(data.data.getTeamID()))
 		{
 			tooltip.add(I18n.format("ftbquests.owner") + ": " + TextFormatting.DARK_GREEN + data.data.getTeamID());
 		}
