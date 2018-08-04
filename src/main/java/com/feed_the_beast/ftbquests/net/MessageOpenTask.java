@@ -52,9 +52,10 @@ public class MessageOpenTask extends MessageToServer
 	@Override
 	public void onMessage(EntityPlayerMP player)
 	{
-		QuestTaskData data = FTBQuestsTeamData.get(Universe.get().getPlayer(player).team).getQuestTaskData(task);
+		FTBQuestsTeamData teamData = FTBQuestsTeamData.get(Universe.get().getPlayer(player).team);
+		QuestTaskData data = teamData.getQuestTaskData(task);
 
-		if (data != null)
+		if (data != null && data.task.quest.canStartTasks(teamData))
 		{
 			openGUI(data, player, null);
 		}

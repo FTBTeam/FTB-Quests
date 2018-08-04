@@ -33,18 +33,13 @@ public class QuestTasks
 		add(ForgeEnergyTask.ID, ForgeEnergyTask::new);
 	}
 
-	public static QuestTask createTask(Quest quest, NBTTagCompound nbt, boolean allowInvalid)
+	public static QuestTask createTask(Quest quest, NBTTagCompound nbt)
 	{
 		TaskProvider provider = MAP0.get(nbt.getString("type"));
 
 		if (provider != null)
 		{
-			QuestTask task = provider.create(quest, nbt);
-
-			if (allowInvalid || !task.isInvalid())
-			{
-				return task;
-			}
+			return provider.create(quest, nbt);
 		}
 
 		return new UnknownTask(quest, nbt);
