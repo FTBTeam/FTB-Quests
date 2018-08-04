@@ -75,6 +75,12 @@ public class MessageOpenTaskGui extends MessageToClient
 	public void onMessage()
 	{
 		QuestTaskData data = ClientQuestFile.INSTANCE.getQuestTaskData(task);
+
+		if (!data.task.quest.canStartTasks(ClientQuestFile.INSTANCE))
+		{
+			return;
+		}
+
 		ContainerTaskBase container = data.getContainer(ClientUtils.MC.player);
 
 		if (container != null)

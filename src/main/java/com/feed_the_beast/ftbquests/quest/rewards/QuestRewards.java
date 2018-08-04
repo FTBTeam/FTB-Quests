@@ -34,22 +34,20 @@ public class QuestRewards
 		add(CommandReward.ID, CommandReward::new);
 	}
 
-	public static QuestReward createReward(Quest quest, NBTTagCompound nbt, boolean allowInvalid)
+	public static QuestReward createReward(Quest quest, NBTTagCompound nbt)
 	{
 		RewardProvider provider = MAP0.get(nbt.getString("type"));
+		QuestReward reward;
 
 		if (provider != null)
 		{
-			QuestReward reward = provider.create(quest, nbt);
-
-			if (allowInvalid || !reward.isInvalid())
-			{
-				reward.teamReward.setBoolean(nbt.getBoolean("team_reward"));
-				return reward;
-			}
+			reward = provider.create(quest, nbt);
+		}
+		else
+		{
+			reward = new UnknownReward(quest, nbt);
 		}
 
-		QuestReward reward = new UnknownReward(quest, nbt);
 		reward.teamReward.setBoolean(nbt.getBoolean("team_reward"));
 		return reward;
 	}

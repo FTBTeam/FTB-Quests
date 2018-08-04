@@ -73,7 +73,7 @@ public final class Quest extends ProgressingQuestObject
 
 		for (int k = 0; k < list.tagCount(); k++)
 		{
-			QuestTask task = QuestTasks.createTask(this, list.getCompoundTagAt(k), false);
+			QuestTask task = QuestTasks.createTask(this, list.getCompoundTagAt(k));
 			tasks.add(task);
 			chapter.file.map.put(task.id, task);
 		}
@@ -82,7 +82,7 @@ public final class Quest extends ProgressingQuestObject
 
 		for (int k = 0; k < list.tagCount(); k++)
 		{
-			QuestReward reward = QuestRewards.createReward(this, list.getCompoundTagAt(k), false);
+			QuestReward reward = QuestRewards.createReward(this, list.getCompoundTagAt(k));
 			rewards.add(reward);
 			chapter.file.map.put(reward.id, reward);
 		}
@@ -290,6 +290,26 @@ public final class Quest extends ProgressingQuestObject
 			default:
 				return true;
 		}
+	}
+
+	public boolean canStartTasks(IProgressData data)
+	{
+		if (dependencies.isEmpty())
+		{
+			return true;
+		}
+
+		for (ConfigInt value : dependencies)
+		{
+			QuestObject object = chapter.file.get((short) value.getInt());
+
+			if (object instanceof ProgressingQuestObject && !((ProgressingQuestObject) object).isComplete(data))
+			{
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	@Override

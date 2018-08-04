@@ -144,7 +144,7 @@ public class GuiQuest extends GuiBase
 				List<ContextMenuItem> contextMenu = new ArrayList<>();
 				contextMenu.add(new ContextMenuItem(I18n.format("selectServer.edit"), GuiIcons.SETTINGS, () -> new MessageEditObject(task.id).sendToServer()));
 				contextMenu.add(ContextMenuItem.SEPARATOR);
-				contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), GuiIcons.REMOVE, () -> new MessageDeleteObject(task.id)).setYesNo(I18n.format("delete_item", task.getDisplayName().getFormattedText())));
+				contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), GuiIcons.REMOVE, () -> new MessageDeleteObject(task.id).sendToServer()).setYesNo(I18n.format("delete_item", task.getDisplayName().getFormattedText())));
 				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.reset_progress"), GuiIcons.REFRESH, () -> new MessageResetProgress(task.id, false).sendToServer()).setYesNo(I18n.format("ftbquests.gui.reset_progress_q")));
 				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.copy_id"), GuiIcons.INFO, () -> setClipboardString(QuestFile.formatID(quest.id))));
 				getGui().openContextMenu(contextMenu);
@@ -173,11 +173,29 @@ public class GuiQuest extends GuiBase
 		}
 
 		@Override
+		public WidgetType getWidgetType()
+		{
+			if (task.isInvalid() || !quest.canStartTasks(questTreeGui.questFile))
+			{
+				return WidgetType.DISABLED;
+			}
+
+			return super.getWidgetType();
+		}
+
+		@Override
 		public void draw()
 		{
 			super.draw();
 
-			if (task.isComplete(questTreeGui.questFile))
+			if (task.isInvalid())
+			{
+				GlStateManager.pushMatrix();
+				GlStateManager.translate(0, 0, 500);
+				GuiIcons.CLOSE.draw(getAX() + width - 9, getAY() + 1, 8, 8);
+				GlStateManager.popMatrix();
+			}
+			else if (task.isComplete(questTreeGui.questFile))
 			{
 				GlStateManager.pushMatrix();
 				GlStateManager.translate(0, 0, 500);
@@ -217,7 +235,7 @@ public class GuiQuest extends GuiBase
 			{
 				NBTTagCompound nbt = new NBTTagCompound();
 				nbt.setString("type", type);
-				QuestTask task = QuestTasks.createTask(quest, nbt, true);
+				QuestTask task = QuestTasks.createTask(quest, nbt);
 
 				if (!(task instanceof UnknownTask))
 				{
@@ -293,7 +311,7 @@ public class GuiQuest extends GuiBase
 				List<ContextMenuItem> contextMenu = new ArrayList<>();
 				contextMenu.add(new ContextMenuItem(I18n.format("selectServer.edit"), GuiIcons.SETTINGS, () -> new MessageEditObject(reward.id).sendToServer()));
 				contextMenu.add(ContextMenuItem.SEPARATOR);
-				contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), GuiIcons.REMOVE, () -> new MessageDeleteObject(reward.id)).setYesNo(I18n.format("delete_item", reward.getDisplayName().getFormattedText())));
+				contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), GuiIcons.REMOVE, () -> new MessageDeleteObject(reward.id).sendToServer()).setYesNo(I18n.format("delete_item", reward.getDisplayName().getFormattedText())));
 				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.copy_id"), GuiIcons.INFO, () -> setClipboardString(QuestFile.formatID(quest.id))));
 				getGui().openContextMenu(contextMenu);
 			}
@@ -317,7 +335,7 @@ public class GuiQuest extends GuiBase
 		@Override
 		public WidgetType getWidgetType()
 		{
-			if (questTreeGui.questFile.isRewardClaimed(ClientUtils.MC.player, reward) || !quest.isComplete(questTreeGui.questFile))
+			if (reward.isInvalid() || questTreeGui.questFile.isRewardClaimed(ClientUtils.MC.player, reward) || !quest.isComplete(questTreeGui.questFile))
 			{
 				return WidgetType.DISABLED;
 			}
@@ -330,7 +348,14 @@ public class GuiQuest extends GuiBase
 		{
 			super.draw();
 
-			if (questTreeGui.questFile.isRewardClaimed(ClientUtils.MC.player, reward))
+			if (reward.isInvalid())
+			{
+				GlStateManager.pushMatrix();
+				GlStateManager.translate(0, 0, 500);
+				GuiIcons.CLOSE.draw(getAX() + width - 9, getAY() + 1, 8, 8);
+				GlStateManager.popMatrix();
+			}
+			else if (questTreeGui.questFile.isRewardClaimed(ClientUtils.MC.player, reward))
 			{
 				GlStateManager.pushMatrix();
 				GlStateManager.translate(0, 0, 500);
@@ -370,7 +395,7 @@ public class GuiQuest extends GuiBase
 			{
 				NBTTagCompound nbt = new NBTTagCompound();
 				nbt.setString("type", type);
-				QuestReward reward = QuestRewards.createReward(quest, nbt, true);
+				QuestReward reward = QuestRewards.createReward(quest, nbt);
 
 				if (!(reward instanceof UnknownReward))
 				{

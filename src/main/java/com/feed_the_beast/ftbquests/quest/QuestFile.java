@@ -270,7 +270,7 @@ public abstract class QuestFile extends ProgressingQuestObject
 
 				if (quest != null)
 				{
-					QuestTask task = QuestTasks.createTask(quest, nbt, false);
+					QuestTask task = QuestTasks.createTask(quest, nbt);
 					quest.tasks.add(task);
 					map.put(task.id, task);
 
@@ -290,7 +290,7 @@ public abstract class QuestFile extends ProgressingQuestObject
 
 				if (quest != null)
 				{
-					QuestReward reward = QuestRewards.createReward(quest, nbt, false);
+					QuestReward reward = QuestRewards.createReward(quest, nbt);
 					quest.rewards.add(reward);
 					map.put(reward.id, reward);
 					return reward;

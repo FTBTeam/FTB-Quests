@@ -31,6 +31,11 @@ public class ServerQuestFile extends QuestFile
 
 	public static boolean load()
 	{
+		if (INSTANCE != null)
+		{
+			INSTANCE.invalidate();
+		}
+
 		File file = new File(CommonUtils.folderConfig, "ftbquests/quests.nbt");
 		NBTTagCompound nbt;
 
@@ -43,18 +48,17 @@ public class ServerQuestFile extends QuestFile
 			nbt = NBTUtils.readNBT(file);
 		}
 
-		if (nbt == null)
+		if (nbt != null)
 		{
+			INSTANCE = new ServerQuestFile(nbt);
+			INSTANCE.save();
+			return true;
+		}
+		else
+		{
+			INSTANCE = new ServerQuestFile(new NBTTagCompound());
 			return false;
 		}
-		else if (INSTANCE != null)
-		{
-			INSTANCE.invalidate();
-		}
-
-		INSTANCE = new ServerQuestFile(nbt);
-		INSTANCE.save();
-		return true;
 	}
 
 	private ServerQuestFile(NBTTagCompound nbt)

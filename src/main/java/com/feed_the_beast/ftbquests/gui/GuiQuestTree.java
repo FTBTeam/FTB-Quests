@@ -221,10 +221,10 @@ public class GuiQuestTree extends GuiBase
 			{
 				List<ContextMenuItem> contextMenu = new ArrayList<>();
 				contextMenu.add(new ContextMenuItem(I18n.format("selectWorld.edit"), GuiIcons.SETTINGS, () -> new MessageEditObject(quest.id).sendToServer()));
-				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.move"), GuiIcons.RIGHT, () ->
+				/*contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.move"), GuiIcons.RIGHT, () ->
 				{
 					//ButtonQuest
-				}));
+				}));*/
 
 				QuestObject object = questFile.get(selectedQuest);
 
@@ -656,6 +656,7 @@ public class GuiQuestTree extends GuiBase
 			{
 				super.addMouseOverText(list);
 
+				/*
 				setOffset(true);
 
 				int bsize = zoom * 5 / 4; //16 * 5 / 4 = 20
@@ -671,6 +672,7 @@ public class GuiQuestTree extends GuiBase
 				}
 
 				setOffset(false);
+				*/
 			}
 
 			@Override
@@ -714,6 +716,7 @@ public class GuiQuestTree extends GuiBase
 						add(new ChapterOptionButton(this, "C", I18n.format("ftbquests.gui.add_chapter"), () -> addChapter(), () -> true));
 					}
 
+					add(new ChapterOptionButton(this, "F", I18n.format("ftbquests.gui.edit_file"), () -> new MessageEditObject((short) 0).sendToServer(), () -> true));
 					add(new ChapterOptionButton(this, "D", I18n.format("ftbquests.gui.dummy_buttons"), () -> dummyButtonsVisible = !dummyButtonsVisible, () -> true));
 				}
 

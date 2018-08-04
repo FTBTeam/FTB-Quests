@@ -35,6 +35,7 @@ ftbquests.quest.dependencies=Dependencies
 ftbquests.gui.zoom_in=Zoom In
 ftbquests.gui.zoom_out=Zoom Out
 ftbquests.gui.dummy_buttons=Toggle Dummy Button Visibility
+ftbquests.gui.edit_file=Edit File
 ftbquests.gui.add_chapter=Add Chapter
 ftbquests.gui.move=Move
 ftbquests.gui.move_up=Move Up
@@ -78,14 +79,20 @@ ftbquests.reward=Reward
 ftbquests.reward.team_reward=Team Reward
 ftbquests.rewards=Rewards
 ftbquests.reward.unknown=Unknown Reward
+
 ftbquests.reward.item=Item
 ftbquests.reward.item.item=Item
+
 ftbquests.reward.xp=XP
 ftbquests.reward.xp.value=XP
 ftbquests.reward.xp.text=XP: %s
+
 ftbquests.reward.xp_levels=XP Levels
 ftbquests.reward.xp_levels.value=XP Levels
 ftbquests.reward.xp_levels.text=XP Levels: %s
+
 ftbquests.reward.command=Command
 ftbquests.reward.command.command=Command
 ftbquests.reward.command.text=Command: %s
+ftbquests.reward.command.title=Title
+ftbquests.reward.command.icon=Icon
