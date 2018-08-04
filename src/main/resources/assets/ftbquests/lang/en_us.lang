@@ -86,3 +86,6 @@ ftbquests.reward.xp.text=XP: %s
 ftbquests.reward.xp_levels=XP Levels
 ftbquests.reward.xp_levels.value=XP Levels
 ftbquests.reward.xp_levels.text=XP Levels: %s
+ftbquests.reward.command=Command
+ftbquests.reward.command.command=Command
+ftbquests.reward.command.text=Command: %s
