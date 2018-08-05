@@ -1,6 +1,5 @@
 package com.feed_the_beast.ftbquests.block;
 
-import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.tile.EnumSaveType;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.net.MessageOpenTask;
@@ -30,7 +29,6 @@ public class TileScreen extends TileScreenBase
 
 	private IProgressData cachedOwner;
 	private QuestTaskData cachedTaskData;
-	private Icon cachedIcon;
 
 	@Override
 	protected void writeData(NBTTagCompound nbt, EnumSaveType type)
@@ -63,7 +61,6 @@ public class TileScreen extends TileScreenBase
 		cachedFacing = null;
 		cachedOwner = null;
 		cachedTaskData = null;
-		cachedIcon = null;
 	}
 
 	public EnumFacing getFacing()
@@ -120,6 +117,14 @@ public class TileScreen extends TileScreenBase
 		return new AxisAlignedBB(pos.add(-size, 0, -size), pos.add(size + 1, size * 2 + 1, size + 1));
 	}
 
+	@Override
+	@SideOnly(Side.CLIENT)
+	public double getMaxRenderDistanceSquared()
+	{
+		double d = 32D * (2 + size);
+		return d * d;
+	}
+
 	public void onClicked(EntityPlayer player, double x, double y)
 	{
 		if (y >= 0.81D)
@@ -142,16 +147,5 @@ public class TileScreen extends TileScreenBase
 				MessageOpenTask.openGUI(cachedTaskData, (EntityPlayerMP) player, null);
 			}
 		}
-	}
-
-	public Icon getIcon()
-	{
-		if (cachedIcon == null)
-		{
-			cachedTaskData = getTaskData();
-			cachedIcon = cachedTaskData == null ? Icon.EMPTY : cachedTaskData.task.getIcon();
-		}
-
-		return cachedIcon;
 	}
 }
