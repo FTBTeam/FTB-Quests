@@ -1,6 +1,8 @@
 package com.feed_the_beast.ftbquests;
 
 import com.feed_the_beast.ftblib.lib.block.ItemBlockBase;
+import com.feed_the_beast.ftbquests.block.BlockFlatScreen;
+import com.feed_the_beast.ftbquests.block.BlockFlatScreenPart;
 import com.feed_the_beast.ftbquests.block.BlockQuest;
 import com.feed_the_beast.ftbquests.block.BlockScreen;
 import com.feed_the_beast.ftbquests.block.BlockScreenPart;
@@ -35,6 +37,8 @@ public class FTBQuestsItems
 	public static final Block QUEST_BLOCK = Blocks.AIR;
 	public static final Block SCREEN = Blocks.AIR;
 	public static final Block SCREEN_PART = Blocks.AIR;
+	public static final Block FLAT_SCREEN = Blocks.AIR;
+	public static final Block FLAT_SCREEN_PART = Blocks.AIR;
 
 	@SubscribeEvent
 	public static void registerBlocks(RegistryEvent.Register<Block> event)
@@ -42,7 +46,9 @@ public class FTBQuestsItems
 		event.getRegistry().registerAll(
 				new BlockQuest(FTBQuests.MOD_ID, "quest_block"),
 				new BlockScreen(FTBQuests.MOD_ID, "screen"),
-				new BlockScreenPart(FTBQuests.MOD_ID, "screen_part")
+				new BlockScreenPart(FTBQuests.MOD_ID, "screen_part"),
+				new BlockFlatScreen(FTBQuests.MOD_ID, "flat_screen"),
+				new BlockFlatScreenPart(FTBQuests.MOD_ID, "flat_screen_part")
 		);
 
 		GameRegistry.registerTileEntity(TileQuest.class, new ResourceLocation(FTBQuests.MOD_ID, "quest_block"));
@@ -56,7 +62,9 @@ public class FTBQuestsItems
 		event.getRegistry().registerAll(
 				new ItemBlockQuest(QUEST_BLOCK),
 				new ItemBlockScreen(SCREEN),
-				new ItemBlockBase(SCREEN_PART)
+				new ItemBlockBase(SCREEN_PART),
+				new ItemBlockScreen(FLAT_SCREEN),
+				new ItemBlockBase(FLAT_SCREEN_PART)
 		);
 	}
 
@@ -67,6 +75,8 @@ public class FTBQuestsItems
 		ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(QUEST_BLOCK), 0, new ModelResourceLocation(QUEST_BLOCK.getRegistryName(), "normal"));
 		ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(SCREEN), 0, new ModelResourceLocation(SCREEN.getRegistryName(), "facing=north"));
 		ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(SCREEN_PART), 0, new ModelResourceLocation(SCREEN_PART.getRegistryName(), "facing=north"));
+		ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(FLAT_SCREEN), 0, new ModelResourceLocation(FLAT_SCREEN.getRegistryName(), "facing=north"));
+		ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(FLAT_SCREEN_PART), 0, new ModelResourceLocation(FLAT_SCREEN_PART.getRegistryName(), "facing=north"));
 
 		ClientRegistry.bindTileEntitySpecialRenderer(TileScreen.class, new RenderScreen());
 	}

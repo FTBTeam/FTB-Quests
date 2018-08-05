@@ -9,6 +9,7 @@ import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.rewards.QuestReward;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
@@ -63,6 +64,10 @@ public class FTBQuestsClientEventHandler
 					if (ClientQuestFile.existsWithTeam())
 					{
 						ClientQuestFile.INSTANCE.openQuestGui();
+					}
+					else
+					{
+						ClientUtils.MC.player.sendStatusMessage(new TextComponentTranslation("ftblib.lang.team.error.no_team"), true);
 					}
 
 					break;

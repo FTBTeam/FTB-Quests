@@ -2,6 +2,7 @@ package com.feed_the_beast.ftbquests.client;
 
 import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
+import com.feed_the_beast.ftbquests.block.BlockFlatScreen;
 import com.feed_the_beast.ftbquests.block.TileScreen;
 import com.feed_the_beast.ftbquests.block.TileScreenBase;
 import com.feed_the_beast.ftbquests.gui.ClientQuestFile;
@@ -71,10 +72,26 @@ public class RenderScreen extends TileEntitySpecialRenderer<TileScreen>
 		font.setUnicodeFlag(true);
 
 		GlStateManager.translate(-screen.size, -screen.size * 2F, -0.01F);
+
+		if (screen.getBlockType() instanceof BlockFlatScreen)
+		{
+			GlStateManager.translate(0F, 0F, 15F / 16F);
+		}
+
 		GlStateManager.scale(screen.size * 2D + 1D, screen.size * 2D + 1D, 1D);
 
-		drawString(font, data.task.quest.getDisplayName().getFormattedText(), 0.02D, 0.15D);
-		drawString(font, data.task.getDisplayName().getFormattedText(), 0.17D, 0.07D);
+		String top1 = data.task.quest.getDisplayName().getFormattedText();
+		String top2 = data.task.getDisplayName().getFormattedText();
+
+		if (top1.isEmpty() || TextFormatting.getTextWithoutFormattingCodes(top1).equals(TextFormatting.getTextWithoutFormattingCodes(top2)))
+		{
+			drawString(font, top2, 0.02D, 0.15D);
+		}
+		else
+		{
+			drawString(font, top1, 0.02D, 0.15D);
+			drawString(font, top2, 0.17D, 0.07D);
+		}
 
 		String bottomText;
 
@@ -121,7 +138,7 @@ public class RenderScreen extends TileEntitySpecialRenderer<TileScreen>
 		GlStateManager.enableBlend();
 		GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
 		GlStateManager.color(1F, 1F, 1F, 1F);
-		screen.getIcon().draw3D(screen.getWorld(), Icon.EMPTY);
+		data.task.getIcon().draw3D(screen.getWorld(), Icon.EMPTY);
 		GlStateManager.disableRescaleNormal();
 		GlStateManager.disableLighting();
 		ClientUtils.MC.getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);

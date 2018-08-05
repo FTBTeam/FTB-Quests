@@ -15,6 +15,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.Mirror;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -29,6 +30,7 @@ public class BlockScreen extends BlockBase
 	public BlockScreen(String mod, String id)
 	{
 		super(mod, id, Material.GLASS, MapColor.BLACK);
+		setTranslationKey("ftbquests.screen");
 		setCreativeTab(CreativeTabs.DECORATIONS);
 		setHardness(0.3F);
 		setDefaultState(blockState.getBaseState().withProperty(BlockHorizontal.FACING, EnumFacing.NORTH));
@@ -50,6 +52,11 @@ public class BlockScreen extends BlockBase
 	protected BlockStateContainer createBlockState()
 	{
 		return new BlockStateContainer(this, BlockHorizontal.FACING);
+	}
+
+	@Override
+	public void getSubBlocks(CreativeTabs tab, NonNullList<ItemStack> items)
+	{
 	}
 
 	@Override
@@ -126,7 +133,7 @@ public class BlockScreen extends BlockBase
 
 			if (screen.size > 0)
 			{
-				IBlockState state1 = FTBQuestsItems.SCREEN_PART.getDefaultState().withProperty(BlockHorizontal.FACING, screen.cachedFacing);
+				IBlockState state1 = (this instanceof BlockFlatScreen ? FTBQuestsItems.FLAT_SCREEN_PART : FTBQuestsItems.SCREEN_PART).getDefaultState().withProperty(BlockHorizontal.FACING, screen.cachedFacing);
 
 				boolean xaxis = state.getValue(BlockHorizontal.FACING).getAxis() == EnumFacing.Axis.X;
 
@@ -192,7 +199,7 @@ public class BlockScreen extends BlockBase
 							BlockPos pos1 = new BlockPos(pos.getX() + offX, pos.getY() + y, pos.getZ() + offZ);
 							IBlockState state1 = world.getBlockState(pos1);
 
-							if (state1.getBlock() == FTBQuestsItems.SCREEN_PART)
+							if (state1.getBlock() instanceof BlockScreenPart)
 							{
 								world.setBlockToAir(pos1);
 							}

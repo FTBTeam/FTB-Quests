@@ -264,7 +264,14 @@ public class GuiQuestTree extends GuiBase
 		@Override
 		public void addMouseOverText(List<String> list)
 		{
-			list.add(getTitle() + questFile.getCompletionSuffix(quest));
+			if (!getTitle().isEmpty())
+			{
+				list.add(getTitle() + questFile.getCompletionSuffix(quest));
+			}
+			else if (isShiftKeyDown())
+			{
+				list.add(questFile.getCompletionSuffix(quest).trim());
+			}
 
 			if (!description.isEmpty())
 			{
