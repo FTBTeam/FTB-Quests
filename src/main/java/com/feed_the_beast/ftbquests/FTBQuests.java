@@ -71,6 +71,8 @@ public class FTBQuests
 		{
 			IC2Integration.preInit();
 		}
+
+		PROXY.preInit();
 	}
 
 	@Mod.EventHandler

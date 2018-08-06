@@ -6,6 +6,7 @@ tile.ftbquests.screen.name=Screen
 ftbquests.general.editing_mode=Editing Mode
 
 sidebar_button.ftbquests.quests=Quests
+key.ftbquests.quests=Open Quests
 
 ftbquests.owner=Owner
 ftbquests.progress=Progress
