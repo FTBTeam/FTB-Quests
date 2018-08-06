@@ -12,6 +12,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.InputEvent;
 import net.minecraftforge.fml.relauncher.Side;
 
 /**
@@ -49,6 +50,22 @@ public class FTBQuestsClientEventHandler
 			if (r > 0)
 			{
 				event.setText(Integer.toString(r));
+			}
+		}
+	}
+
+	@SubscribeEvent
+	public static void onKeyEvent(InputEvent.KeyInputEvent event)
+	{
+		if (FTBQuestsClient.KEY_QUESTS.isPressed())
+		{
+			if (ClientQuestFile.existsWithTeam())
+			{
+				ClientQuestFile.INSTANCE.openQuestGui();
+			}
+			else
+			{
+				ClientUtils.MC.player.sendStatusMessage(new TextComponentTranslation("ftblib.lang.team.error.no_team"), true);
 			}
 		}
 	}
