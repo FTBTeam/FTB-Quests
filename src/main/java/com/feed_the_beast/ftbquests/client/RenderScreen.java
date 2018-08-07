@@ -174,8 +174,23 @@ public class RenderScreen extends TileEntitySpecialRenderer<TileScreenCore>
 
 		GlStateManager.pushMatrix();
 		GlStateManager.translate(0.5D, y, 0D);
-		GlStateManager.scale(size / 9D, size / 9D, 1D); //FIXME: Strings outside block bounds
-		font.drawString(string, -font.getStringWidth(string) / 2, 0, 0xFFD8D8D8);
+		int len = font.getStringWidth(string);
+		double scale = size / 9D;
+		double w = len * scale;
+
+		if (w > 1D)
+		{
+			scale /= w;
+			w = 1D;
+		}
+
+		if (w > 0.9D)
+		{
+			scale *= 0.9D;
+		}
+
+		GlStateManager.scale(scale, scale, 1D);
+		font.drawString(string, -len / 2, 0, 0xFFD8D8D8);
 		GlStateManager.popMatrix();
 	}
 }
