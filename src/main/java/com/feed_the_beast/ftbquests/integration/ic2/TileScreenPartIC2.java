@@ -1,6 +1,8 @@
 package com.feed_the_beast.ftbquests.integration.ic2;
 
+import com.feed_the_beast.ftbquests.block.TileScreenCore;
 import com.feed_the_beast.ftbquests.block.TileScreenPart;
+import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskData;
 import ic2.api.energy.EnergyNet;
 import ic2.api.energy.tile.IEnergyEmitter;
 import ic2.api.energy.tile.IEnergySink;
@@ -40,9 +42,15 @@ public class TileScreenPartIC2 extends TileScreenPart implements IEnergySink
 	@Override
 	public double getDemandedEnergy()
 	{
-		//QuestTaskData d = getTaskData();
-		//return d == null ? 0D : d.task.getMaxProgress() - d.getProgress();
-		return 0;
+		TileScreenCore screen = getScreen();
+
+		if (screen == null)
+		{
+			return 0D;
+		}
+
+		QuestTaskData d = screen.getTaskData();
+		return d == null ? 0D : d.task.getMaxProgress() - d.getProgress();
 	}
 
 	@Override
@@ -54,13 +62,19 @@ public class TileScreenPartIC2 extends TileScreenPart implements IEnergySink
 	@Override
 	public double injectEnergy(EnumFacing facing, double amount, double voltage)
 	{
-		/*
-		QuestTaskData d = getTaskData();
+		TileScreenCore screen = getScreen();
+
+		if (screen == null)
+		{
+			return amount;
+		}
+
+		QuestTaskData d = screen.getTaskData();
 
 		if (d instanceof IC2EnergyTask.Data)
 		{
 			return ((IC2EnergyTask.Data) d).injectEnergy(amount);
-		}*/
+		}
 
 		return amount;
 	}

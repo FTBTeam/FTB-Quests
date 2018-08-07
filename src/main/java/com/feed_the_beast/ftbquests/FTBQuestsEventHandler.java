@@ -40,7 +40,7 @@ public class FTBQuestsEventHandler
 				new BlockScreenPart(FTBQuests.MOD_ID, "flat_screen_part", true)
 		);
 
-		GameRegistry.registerTileEntity(TileScreenCore.class, new ResourceLocation(FTBQuests.MOD_ID, "screen"));
+		GameRegistry.registerTileEntity(TileScreenCore.class, new ResourceLocation(FTBQuests.MOD_ID, "screen_core"));
 		GameRegistry.registerTileEntity(TileScreenPart.class, new ResourceLocation(FTBQuests.MOD_ID, "screen_part"));
 	}
 
