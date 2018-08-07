@@ -2,38 +2,64 @@ package com.feed_the_beast.ftbquests.block;
 
 import com.feed_the_beast.ftblib.lib.block.BlockBase;
 import com.feed_the_beast.ftbquests.FTBQuestsItems;
+import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import net.minecraft.block.BlockHorizontal;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.BlockFaceShape;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.Mirror;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.Rotation;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.world.Explosion;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+
+import javax.annotation.Nullable;
+import java.util.Random;
 
 /**
  * @author LatvianModder
  */
 public class BlockScreen extends BlockBase
 {
-	public static boolean BREAKING_SCREEN = false;
+	protected static boolean BREAKING_SCREEN = false;
+	public static QuestTask currentTask = null;
 
-	public BlockScreen(String mod, String id)
+	public static final AxisAlignedBB[] FLAT_BOXES = {
+			new AxisAlignedBB(0, 0, 0, 1, 1, 0.0625D),
+			new AxisAlignedBB(0.9375D, 0, 0, 1, 1, 1),
+			new AxisAlignedBB(0, 0, 0.9375D, 1, 1, 1),
+			new AxisAlignedBB(0, 0, 0, 0.0625D, 1, 1)
+	};
+
+	public final boolean flat;
+
+	public BlockScreen(String mod, String id, boolean f)
 	{
 		super(mod, id, Material.GLASS, MapColor.BLACK);
+		flat = f;
 		setTranslationKey("ftbquests.screen");
 		setCreativeTab(CreativeTabs.DECORATIONS);
 		setHardness(0.3F);
 		setDefaultState(blockState.getBaseState().withProperty(BlockHorizontal.FACING, EnumFacing.NORTH));
+		setLightOpacity(flat ? 0 : 255);
 	}
 
 	@Override
@@ -45,7 +71,7 @@ public class BlockScreen extends BlockBase
 	@Override
 	public TileEntity createTileEntity(World world, IBlockState state)
 	{
-		return new TileScreen();
+		return currentTask == null ? new TileScreenCore() : currentTask.createScreenCore(world);
 	}
 
 	@Override
@@ -57,6 +83,38 @@ public class BlockScreen extends BlockBase
 	@Override
 	public void getSubBlocks(CreativeTabs tab, NonNullList<ItemStack> items)
 	{
+	}
+
+	@Override
+	public Item getItemDropped(IBlockState state, Random rand, int fortune)
+	{
+		return Item.getItemFromBlock(flat ? FTBQuestsItems.FLAT_SCREEN : FTBQuestsItems.SCREEN);
+	}
+
+	@Override
+	public int quantityDropped(Random random)
+	{
+		return 0;
+	}
+
+	@Override
+	public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player)
+	{
+		ItemStack stack = new ItemStack(flat ? FTBQuestsItems.FLAT_SCREEN : FTBQuestsItems.SCREEN);
+
+		TileEntity tileEntity = world.getTileEntity(pos);
+
+		if (tileEntity instanceof TileScreenBase)
+		{
+			TileScreenCore screen = ((TileScreenBase) tileEntity).getScreen();
+
+			if (screen != null)
+			{
+				screen.writeToItem(stack);
+			}
+		}
+
+		return stack;
 	}
 
 	@Override
@@ -90,7 +148,55 @@ public class BlockScreen extends BlockBase
 	@Deprecated
 	public IBlockState getStateForPlacement(World world, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
 	{
-		return this.getDefaultState().withProperty(BlockHorizontal.FACING, placer.getHorizontalFacing().getOpposite());
+		return getDefaultState().withProperty(BlockHorizontal.FACING, placer.getHorizontalFacing().getOpposite());
+	}
+
+	@Override
+	@Deprecated
+	public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos)
+	{
+		return flat ? FLAT_BOXES[state.getValue(BlockHorizontal.FACING).getHorizontalIndex()] : FULL_BLOCK_AABB;
+	}
+
+	@Override
+	@Deprecated
+	@Nullable
+	public AxisAlignedBB getCollisionBoundingBox(IBlockState state, IBlockAccess world, BlockPos pos)
+	{
+		return flat ? null : state.getBoundingBox(world, pos);
+	}
+
+	@Override
+	@Deprecated
+	public boolean isFullCube(IBlockState state)
+	{
+		return !flat;
+	}
+
+	@Override
+	@Deprecated
+	public boolean isOpaqueCube(IBlockState state)
+	{
+		return !flat;
+	}
+
+	@Override
+	@Deprecated
+	public BlockFaceShape getBlockFaceShape(IBlockAccess world, IBlockState state, BlockPos pos, EnumFacing face)
+	{
+		if (flat && face != state.getValue(BlockHorizontal.FACING).getOpposite())
+		{
+			return BlockFaceShape.UNDEFINED;
+		}
+
+		return BlockFaceShape.SOLID;
+	}
+
+	@Override
+	@Deprecated
+	public EnumBlockRenderType getRenderType(IBlockState state)
+	{
+		return flat ? EnumBlockRenderType.INVISIBLE : EnumBlockRenderType.MODEL;
 	}
 
 	@Override
@@ -106,13 +212,12 @@ public class BlockScreen extends BlockBase
 		if (tileEntity instanceof TileScreenBase)
 		{
 			TileScreenBase base = (TileScreenBase) tileEntity;
-			TileScreen screen = base.getScreen();
+			TileScreenCore screen = base.getScreen();
 
 			if (screen != null)
 			{
 				double x = 0.5D; //FIXME: X coordinate
-				screen.onClicked(player, x, 1D - (base.getOffsetY() + hitY) / (screen.size * 2D + 1D));
-				return true;
+				return screen.onClicked(player, x, 1D - (base.getOffsetY() + hitY) / (screen.size * 2D + 1D));
 			}
 		}
 
@@ -122,18 +227,17 @@ public class BlockScreen extends BlockBase
 	@Override
 	public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack)
 	{
-		super.onBlockPlacedBy(world, pos, state, placer, stack);
-
 		TileEntity tileEntity = world.getTileEntity(pos);
 
-		if (tileEntity instanceof TileScreen)
+		if (tileEntity instanceof TileScreenCore)
 		{
-			TileScreen screen = (TileScreen) tileEntity;
-			screen.cachedFacing = state.getValue(BlockHorizontal.FACING);
+			TileScreenCore screen = (TileScreenCore) tileEntity;
+			screen.readFromItem(stack);
+			screen.facing = state.getValue(BlockHorizontal.FACING);
 
 			if (screen.size > 0)
 			{
-				IBlockState state1 = (this instanceof BlockFlatScreen ? FTBQuestsItems.FLAT_SCREEN_PART : FTBQuestsItems.SCREEN_PART).getDefaultState().withProperty(BlockHorizontal.FACING, screen.cachedFacing);
+				IBlockState state1 = (flat ? FTBQuestsItems.FLAT_SCREEN_PART : FTBQuestsItems.SCREEN_PART).getDefaultState().withProperty(BlockHorizontal.FACING, screen.getFacing());
 
 				boolean xaxis = state.getValue(BlockHorizontal.FACING).getAxis() == EnumFacing.Axis.X;
 
@@ -179,9 +283,9 @@ public class BlockScreen extends BlockBase
 	{
 		TileEntity tileEntity = world.getTileEntity(pos);
 
-		if (tileEntity instanceof TileScreen)
+		if (tileEntity instanceof TileScreenCore)
 		{
-			TileScreen screen = (TileScreen) tileEntity;
+			TileScreenCore screen = (TileScreenCore) tileEntity;
 
 			if (screen.size > 0)
 			{
@@ -212,5 +316,114 @@ public class BlockScreen extends BlockBase
 		}
 
 		super.breakBlock(world, pos, state);
+	}
+
+	@Override
+	@Deprecated
+	@SideOnly(Side.CLIENT)
+	public AxisAlignedBB getSelectedBoundingBox(IBlockState state, World world, BlockPos pos)
+	{
+		TileEntity tileEntity = world.getTileEntity(pos);
+
+		if (tileEntity instanceof TileScreenBase)
+		{
+			TileScreenCore screen = ((TileScreenBase) tileEntity).getScreen();
+
+			if (screen != null)
+			{
+				return getScreenAABB(screen, flat);
+			}
+		}
+
+		return new AxisAlignedBB(0D, -1D, 0D, 0D, -1D, 0D);
+	}
+
+	public static AxisAlignedBB getScreenAABB(TileScreenCore screen, boolean flat)
+	{
+		BlockPos pos = screen.getPos();
+
+		if (screen.size == 0)
+		{
+			if (flat)
+			{
+				FLAT_BOXES[screen.getFacing().getHorizontalIndex()].offset(pos);
+			}
+
+			return FULL_BLOCK_AABB.offset(pos);
+		}
+
+		boolean xaxis = screen.getFacing().getAxis() == EnumFacing.Axis.X;
+
+		if (xaxis)
+		{
+			return new AxisAlignedBB(pos.add(0, 0, -screen.size), pos.add(1, screen.size * 2 + 1, screen.size + 1));
+		}
+		else
+		{
+			return new AxisAlignedBB(pos.add(-screen.size, 0, 0), pos.add(screen.size + 1, screen.size * 2 + 1, 1));
+		}
+	}
+
+	@Override
+	@Deprecated
+	public float getBlockHardness(IBlockState state, World world, BlockPos pos)
+	{
+		TileEntity tileEntity = world.getTileEntity(pos);
+
+		if (tileEntity instanceof TileScreenBase)
+		{
+			TileScreenCore core = ((TileScreenBase) tileEntity).getScreen();
+
+			if (core != null && core.indestructible.getBoolean())
+			{
+				return -1F;
+			}
+		}
+
+		return super.getBlockHardness(state, world, pos);
+	}
+
+	@Override
+	public float getExplosionResistance(World world, BlockPos pos, @Nullable Entity exploder, Explosion explosion)
+	{
+		TileEntity tileEntity = world.getTileEntity(pos);
+
+		if (tileEntity instanceof TileScreenBase)
+		{
+			TileScreenCore core = ((TileScreenBase) tileEntity).getScreen();
+
+			if (core != null && core.indestructible.getBoolean())
+			{
+				return Float.MAX_VALUE;
+			}
+		}
+
+		return super.getExplosionResistance(world, pos, exploder, explosion);
+	}
+
+	@Override
+	@Deprecated
+	public boolean hasComparatorInputOverride(IBlockState state)
+	{
+		return true;
+	}
+
+	@Override
+	@Deprecated
+	public int getComparatorInputOverride(IBlockState state, World world, BlockPos pos)
+	{
+		TileEntity tileEntity = world.getTileEntity(pos);
+
+		if (tileEntity instanceof TileScreenBase)
+		{
+			TileScreenCore core = ((TileScreenBase) tileEntity).getScreen();
+
+			if (core != null)
+			{
+				return core.redstoneOutput;
+			}
+		}
+
+		return 0;
 	}
 }

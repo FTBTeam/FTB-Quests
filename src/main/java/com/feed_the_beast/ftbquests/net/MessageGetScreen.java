@@ -7,7 +7,7 @@ import com.feed_the_beast.ftblib.lib.net.MessageToServer;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.FTBQuestsItems;
-import com.feed_the_beast.ftbquests.block.TileScreen;
+import com.feed_the_beast.ftbquests.block.TileScreenCore;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import com.feed_the_beast.ftbquests.util.FTBQuestsTeamData;
@@ -60,7 +60,7 @@ public class MessageGetScreen extends MessageToServer
 	@Override
 	public void onMessage(EntityPlayerMP player)
 	{
-		if (size >= 0 && size <= 4 && FTBQuests.canEdit(player))
+		if (size >= 0 && size <= 4 && (size == 0 || FTBQuests.canEdit(player)))
 		{
 			QuestTask t = ServerQuestFile.INSTANCE.getTask(task);
 
@@ -68,9 +68,10 @@ public class MessageGetScreen extends MessageToServer
 			{
 				FTBQuestsTeamData teamData = FTBQuestsTeamData.get(Universe.get().getPlayer(player).team);
 				ItemStack stack = new ItemStack(type == 1 ? FTBQuestsItems.FLAT_SCREEN : FTBQuestsItems.SCREEN);
-				TileScreen tile = new TileScreen();
-				tile.task = t.id;
-				tile.owner = teamData.team.getName();
+				TileScreenCore tile = new TileScreenCore();
+				tile.quest = t.quest.id;
+				tile.taskIndex = t.quest.tasks.indexOf(t);
+				tile.owner.setString(teamData.team.getName());
 				tile.size = size;
 				tile.writeToItem(stack);
 				ItemHandlerHelper.giveItemToPlayer(player, stack);

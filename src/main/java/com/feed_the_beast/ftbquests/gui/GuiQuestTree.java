@@ -82,7 +82,7 @@ public class GuiQuestTree extends GuiBase
 			GuiHelper.playClickSound();
 			selectChapter(chapter);
 
-			if (questFile.editingMode && button.isRight())
+			if (questFile.canEdit() && button.isRight())
 			{
 				List<ContextMenuItem> contextMenu = new ArrayList<>();
 				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.add_quest"), GuiIcons.ADD, GuiQuestTree.this::addQuest));
@@ -217,7 +217,7 @@ public class GuiQuestTree extends GuiBase
 		{
 			GuiHelper.playClickSound();
 
-			if (questFile.editingMode && button.isRight())
+			if (questFile.canEdit() && button.isRight())
 			{
 				List<ContextMenuItem> contextMenu = new ArrayList<>();
 				contextMenu.add(new ContextMenuItem(I18n.format("selectWorld.edit"), GuiIcons.SETTINGS, () -> new MessageEditObject(quest.id).sendToServer()));
@@ -243,7 +243,7 @@ public class GuiQuestTree extends GuiBase
 				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.copy_id"), GuiIcons.INFO, () -> setClipboardString(QuestFile.formatID(quest.id))));
 				getGui().openContextMenu(contextMenu);
 			}
-			else if (questFile.editingMode && button.isLeft() && isCtrlKeyDown())
+			else if (questFile.canEdit() && button.isLeft() && isCtrlKeyDown())
 			{
 				if (selectedQuest == quest.id)
 				{
@@ -511,7 +511,7 @@ public class GuiQuestTree extends GuiBase
 					return;
 				}
 
-				if (!questFile.editingMode)
+				if (!questFile.canEdit())
 				{
 					for (Quest quest : selectedChapter.quests)
 					{
@@ -584,7 +584,7 @@ public class GuiQuestTree extends GuiBase
 					maxY = Math.max(maxY, y);
 				}
 
-				if (!questFile.editingMode)
+				if (!questFile.canEdit())
 				{
 					minX -= 4;
 					minY -= 4;
@@ -695,7 +695,7 @@ public class GuiQuestTree extends GuiBase
 						prevMouseY = getMouseY();
 						grabbed = 1;
 					}
-					else if (button.isRight() && questFile.editingMode)
+					else if (button.isRight() && questFile.canEdit())
 					{
 					}
 				}
@@ -716,7 +716,7 @@ public class GuiQuestTree extends GuiBase
 			@Override
 			public void addWidgets()
 			{
-				if (questFile.editingMode)
+				if (questFile.canEdit())
 				{
 					if (chapterPanel.widgets.isEmpty())
 					{
@@ -907,7 +907,7 @@ public class GuiQuestTree extends GuiBase
 				selectChapter(questFile.chapters.get(i));
 			}
 		}
-		else if (selectedChapter != null && questFile.editingMode && isCtrlKeyDown() && !isShiftKeyDown() && !isAltKeyDown())
+		else if (selectedChapter != null && questFile.canEdit() && isCtrlKeyDown() && !isShiftKeyDown() && !isAltKeyDown())
 		{
 			switch (key)
 			{

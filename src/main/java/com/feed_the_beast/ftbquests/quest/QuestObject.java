@@ -5,11 +5,15 @@ import com.feed_the_beast.ftblib.lib.icon.Icon;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.ITextComponent;
 
+import java.util.regex.Pattern;
+
 /**
  * @author LatvianModder
  */
 public abstract class QuestObject
 {
+	public static final Pattern ID_PATTERN = Pattern.compile("^[a-z0-9_]*$");
+
 	public final short id;
 	public boolean invalid = false;
 

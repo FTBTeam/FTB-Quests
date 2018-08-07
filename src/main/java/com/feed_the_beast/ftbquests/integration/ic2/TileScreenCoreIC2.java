@@ -1,6 +1,6 @@
-package com.feed_the_beast.ftbquests.integration;
+package com.feed_the_beast.ftbquests.integration.ic2;
 
-import com.feed_the_beast.ftbquests.block.TileQuest;
+import com.feed_the_beast.ftbquests.block.TileScreenCore;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskData;
 import ic2.api.energy.EnergyNet;
 import ic2.api.energy.tile.IEnergyEmitter;
@@ -10,7 +10,7 @@ import net.minecraft.util.EnumFacing;
 /**
  * @author LatvianModder
  */
-public class TileQuestIC2 extends TileQuest implements IEnergySink
+public class TileScreenCoreIC2 extends TileScreenCore implements IEnergySink
 {
 	@Override
 	public void onLoad()
@@ -41,7 +41,7 @@ public class TileQuestIC2 extends TileQuest implements IEnergySink
 	@Override
 	public double getDemandedEnergy()
 	{
-		QuestTaskData d = data.getTaskData();
+		QuestTaskData d = getTaskData();
 		return d == null ? 0D : d.task.getMaxProgress() - d.getProgress();
 	}
 
@@ -54,7 +54,7 @@ public class TileQuestIC2 extends TileQuest implements IEnergySink
 	@Override
 	public double injectEnergy(EnumFacing facing, double amount, double voltage)
 	{
-		QuestTaskData d = data.getTaskData();
+		QuestTaskData d = getTaskData();
 
 		if (d instanceof IC2EnergyTask.Data)
 		{

@@ -25,17 +25,11 @@ public abstract class TileScreenBase extends TileBase
 	}
 
 	@Nullable
-	public abstract TileScreen getScreen();
+	public abstract TileScreenCore getScreen();
 
 	@Override
 	protected boolean notifyBlock()
 	{
 		return !world.isRemote;
-	}
-
-	@Override
-	public void markDirty()
-	{
-		sendDirtyUpdate();
 	}
 }

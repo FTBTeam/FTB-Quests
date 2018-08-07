@@ -5,15 +5,17 @@ import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigInt;
 import com.feed_the_beast.ftblib.lib.config.ConfigNBT;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
-import com.feed_the_beast.ftbquests.FTBQuestsItems;
-import com.feed_the_beast.ftbquests.block.QuestBlockData;
+import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
 import com.feed_the_beast.ftbquests.gui.ContainerFluidTask;
 import com.feed_the_beast.ftbquests.gui.ContainerTaskBase;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTBase;
+import net.minecraft.nbt.NBTPrimitive;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagInt;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
@@ -21,8 +23,10 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.FluidTankProperties;
+import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandlerItem;
 import net.minecraftforge.fluids.capability.IFluidTankProperties;
 import net.minecraftforge.items.CapabilityItemHandler;
@@ -83,7 +87,17 @@ public class FluidTask extends QuestTask
 	@Override
 	public Icon getIcon()
 	{
-		return Icon.getIcon(fluid.getFluid().getStill(createFluidStack(Fluid.BUCKET_VOLUME)).toString());
+		FluidStack fluidStack = createFluidStack(Fluid.BUCKET_VOLUME);
+		ItemStack stack = FluidUtil.getFilledBucket(fluidStack);
+
+		if (stack.isEmpty())
+		{
+			return Icon.getIcon(fluid.getFluid().getStill(createFluidStack(Fluid.BUCKET_VOLUME)).toString());
+		}
+		else
+		{
+			return ItemIcon.getItemIcon(stack);
+		}
 	}
 
 	public FluidStack createFluidStack(int amount)
@@ -95,22 +109,22 @@ public class FluidTask extends QuestTask
 	public ITextComponent getDisplayName()
 	{
 		StringBuilder builder = new StringBuilder();
-		int amount = getMaxProgress();
+		int a = amount.getInt();
 
-		if (amount >= Fluid.BUCKET_VOLUME)
+		if (a >= Fluid.BUCKET_VOLUME)
 		{
-			if (amount % Fluid.BUCKET_VOLUME != 0)
+			if (a % Fluid.BUCKET_VOLUME != 0)
 			{
-				builder.append(amount / (double) Fluid.BUCKET_VOLUME);
+				builder.append(a / (double) Fluid.BUCKET_VOLUME);
 			}
 			else
 			{
-				builder.append(amount / Fluid.BUCKET_VOLUME);
+				builder.append(a / Fluid.BUCKET_VOLUME);
 			}
 		}
 		else
 		{
-			builder.append(amount % Fluid.BUCKET_VOLUME);
+			builder.append(a % Fluid.BUCKET_VOLUME);
 			builder.append('m');
 		}
 
@@ -132,52 +146,88 @@ public class FluidTask extends QuestTask
 		return new Data(this, data);
 	}
 
-	public static class Data extends QuestTaskData<FluidTask> implements IFluidHandlerItem, IItemHandler
+	public static class Data extends QuestTaskData<FluidTask> implements IFluidHandler, IItemHandler
 	{
 		private final IFluidTankProperties[] properties;
 		private ItemStack outputStack = ItemStack.EMPTY;
+		private int progress;
 
 		private Data(FluidTask t, IProgressData data)
 		{
 			super(t, data);
 			properties = new IFluidTankProperties[1];
-			properties[0] = new FluidTankProperties(task.createFluidStack(0), task.getMaxProgress(), true, false);
+			properties[0] = new FluidTankProperties(task.createFluidStack(0), task.amount.getInt(), true, false);
+		}
+
+		@Nullable
+		@Override
+		public NBTBase toNBT()
+		{
+			if (outputStack.isEmpty())
+			{
+				return progress > 0 ? new NBTTagInt(progress) : null;
+			}
+
+			NBTTagCompound nbt = new NBTTagCompound();
+
+			if (progress > 0)
+			{
+				nbt.setInteger("Progress", progress);
+			}
+
+			nbt.setTag("Output", outputStack.serializeNBT());
+			return nbt;
 		}
 
 		@Override
-		public void writeToNBT(NBTTagCompound nbt)
+		public void fromNBT(@Nullable NBTBase nbt)
 		{
-			super.writeToNBT(nbt);
-
-			if (!outputStack.isEmpty())
+			if (nbt instanceof NBTPrimitive)
 			{
-				nbt.setTag("Output", outputStack.serializeNBT());
+				progress = ((NBTPrimitive) nbt).getInt();
+				outputStack = ItemStack.EMPTY;
+			}
+			else if (nbt instanceof NBTTagCompound)
+			{
+				NBTTagCompound nbt1 = (NBTTagCompound) nbt;
+				progress = nbt1.getInteger("Progress");
+				outputStack = new ItemStack(nbt1.getCompoundTag("Output"));
+
+				if (outputStack.isEmpty())
+				{
+					outputStack = ItemStack.EMPTY;
+				}
+			}
+			else
+			{
+				progress = 0;
+				outputStack = ItemStack.EMPTY;
 			}
 		}
 
 		@Override
-		public void readFromNBT(NBTTagCompound nbt)
+		public int getProgress()
 		{
-			super.readFromNBT(nbt);
+			return progress;
+		}
 
-			outputStack = nbt.hasKey("Output") ? new ItemStack(nbt.getCompoundTag("Output")) : ItemStack.EMPTY;
+		@Override
+		public void resetProgress()
+		{
+			progress = 0;
 		}
 
 		@Override
 		public boolean hasCapability(Capability<?> capability, @Nullable EnumFacing facing)
 		{
-			return capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY
-					|| capability == CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY
-					|| capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY;
+			return capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY || capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY;
 		}
 
 		@Nullable
 		@Override
 		public <T> T getCapability(Capability<T> capability, @Nullable EnumFacing facing)
 		{
-			return capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY
-					|| capability == CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY
-					|| capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY ? (T) this : null;
+			return capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY || capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY ? (T) this : null;
 		}
 
 		@Override
@@ -191,7 +241,7 @@ public class FluidTask extends QuestTask
 		{
 			if (properties[0].getContents() != null)
 			{
-				properties[0].getContents().amount = getProgress();
+				properties[0].getContents().amount = progress;
 			}
 
 			return properties;
@@ -202,12 +252,18 @@ public class FluidTask extends QuestTask
 		{
 			FluidStack fluidStack = task.createFluidStack(Fluid.BUCKET_VOLUME);
 
-			if (getProgress() < task.amount.getInt() && fluidStack.isFluidEqual(resource))
+			if (progress < task.amount.getInt() && fluidStack.isFluidEqual(resource))
 			{
-				int add = Math.min(resource.amount, task.amount.getInt() - getProgress());
+				int add = Math.min(resource.amount, task.amount.getInt() - progress);
 
-				if (add > 0 && setProgress(getProgress() + add, !doFill))
+				if (add > 0)
 				{
+					if (doFill)
+					{
+						progress += add;
+						data.syncTask(this);
+					}
+
 					return add;
 				}
 			}
@@ -230,21 +286,6 @@ public class FluidTask extends QuestTask
 		}
 
 		@Override
-		public ItemStack getContainer()
-		{
-			ItemStack stack = new ItemStack(FTBQuestsItems.QUEST_BLOCK);
-			QuestBlockData d = QuestBlockData.get(stack);
-
-			if (d != null)
-			{
-				d.setTask(task.id);
-				d.setOwner(data.getTeamID());
-			}
-
-			return stack;
-		}
-
-		@Override
 		public int getSlots()
 		{
 			return 2;
@@ -264,10 +305,7 @@ public class FluidTask extends QuestTask
 				return stack;
 			}
 
-			int progress = getProgress();
-			int max = task.getMaxProgress();
-
-			if (progress >= max)
+			if (progress >= task.amount.getInt())
 			{
 				return stack;
 			}
@@ -276,7 +314,7 @@ public class FluidTask extends QuestTask
 
 			if (item != null && outputStack.isEmpty())
 			{
-				FluidStack fluidStack = item.drain(task.createFluidStack(max - progress), false);
+				FluidStack fluidStack = item.drain(task.createFluidStack(task.amount.getInt() - progress), false);
 
 				if (fluidStack == null || fluidStack.amount <= 0)
 				{
@@ -286,7 +324,7 @@ public class FluidTask extends QuestTask
 				if (!simulate)
 				{
 					item.drain(fluidStack, true);
-					setProgress(progress + fluidStack.amount, false);
+					progress += fluidStack.amount;
 					outputStack = item.getContainer();
 					data.syncTask(this);
 				}

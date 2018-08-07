@@ -21,6 +21,7 @@ import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.net.MessageClaimReward;
+import com.feed_the_beast.ftbquests.net.MessageGetScreen;
 import com.feed_the_beast.ftbquests.net.MessageOpenTask;
 import com.feed_the_beast.ftbquests.net.edit.MessageCreateObject;
 import com.feed_the_beast.ftbquests.net.edit.MessageDeleteObject;
@@ -139,9 +140,42 @@ public class GuiQuest extends GuiBase
 		{
 			GuiHelper.playClickSound();
 
-			if (button.isRight() && questTreeGui.questFile.editingMode)
+			if (button.isRight() && questTreeGui.questFile.canEdit())
 			{
 				List<ContextMenuItem> contextMenu = new ArrayList<>();
+
+				if (ClientQuestFile.INSTANCE.canEdit() || ClientQuestFile.INSTANCE.allowTakeQuestBlocks.getBoolean() && task.quest.isVisible(ClientQuestFile.INSTANCE) && !task.isComplete(ClientQuestFile.INSTANCE))
+				{
+					contextMenu.add(new ContextMenuItem(I18n.format("tile.ftbquests.screen.name"), Color4I.BLACK, () ->
+					{
+						List<ContextMenuItem> screenContextMenu = new ArrayList<>();
+						screenContextMenu.add(new ContextMenuItem("Screen", Icon.EMPTY, () -> {}).setEnabled(false));
+						screenContextMenu.add(new ContextMenuItem("1 x 1", Icon.EMPTY, () -> new MessageGetScreen(task.id, 0, 0).sendToServer()));
+
+						if (ClientQuestFile.INSTANCE.canEdit())
+						{
+							screenContextMenu.add(new ContextMenuItem("3 x 3", Icon.EMPTY, () -> new MessageGetScreen(task.id, 1, 0).sendToServer()));
+							screenContextMenu.add(new ContextMenuItem("5 x 5", Icon.EMPTY, () -> new MessageGetScreen(task.id, 2, 0).sendToServer()));
+							screenContextMenu.add(new ContextMenuItem("7 x 7", Icon.EMPTY, () -> new MessageGetScreen(task.id, 3, 0).sendToServer()));
+							screenContextMenu.add(new ContextMenuItem("9 x 9", Icon.EMPTY, () -> new MessageGetScreen(task.id, 4, 0).sendToServer()));
+						}
+
+						screenContextMenu.add(ContextMenuItem.SEPARATOR);
+						screenContextMenu.add(new ContextMenuItem("Flat Screen", Icon.EMPTY, () -> {}).setEnabled(false));
+						screenContextMenu.add(new ContextMenuItem("1 x 1", Icon.EMPTY, () -> new MessageGetScreen(task.id, 0, 1).sendToServer()));
+
+						if (ClientQuestFile.INSTANCE.canEdit())
+						{
+							screenContextMenu.add(new ContextMenuItem("3 x 3", Icon.EMPTY, () -> new MessageGetScreen(task.id, 1, 1).sendToServer()));
+							screenContextMenu.add(new ContextMenuItem("5 x 5", Icon.EMPTY, () -> new MessageGetScreen(task.id, 2, 1).sendToServer()));
+							screenContextMenu.add(new ContextMenuItem("7 x 7", Icon.EMPTY, () -> new MessageGetScreen(task.id, 3, 1).sendToServer()));
+							screenContextMenu.add(new ContextMenuItem("9 x 9", Icon.EMPTY, () -> new MessageGetScreen(task.id, 4, 1).sendToServer()));
+						}
+
+						getGui().openContextMenu(screenContextMenu);
+					}));
+				}
+
 				contextMenu.add(new ContextMenuItem(I18n.format("selectServer.edit"), GuiIcons.SETTINGS, () -> new MessageEditObject(task.id).sendToServer()));
 				contextMenu.add(ContextMenuItem.SEPARATOR);
 				contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), GuiIcons.REMOVE, () -> new MessageDeleteObject(task.id).sendToServer()).setYesNo(I18n.format("delete_item", task.getDisplayName().getFormattedText())));
@@ -306,7 +340,7 @@ public class GuiQuest extends GuiBase
 		{
 			GuiHelper.playClickSound();
 
-			if (button.isRight() && questTreeGui.questFile.editingMode)
+			if (button.isRight() && questTreeGui.questFile.canEdit())
 			{
 				List<ContextMenuItem> contextMenu = new ArrayList<>();
 				contextMenu.add(new ContextMenuItem(I18n.format("selectServer.edit"), GuiIcons.SETTINGS, () -> new MessageEditObject(reward.id).sendToServer()));
@@ -536,7 +570,7 @@ public class GuiQuest extends GuiBase
 					add(new ButtonTask(this, task));
 				}
 
-				if (questTreeGui.questFile.editingMode)
+				if (questTreeGui.questFile.canEdit())
 				{
 					add(new ButtonAddTask(this));
 				}
@@ -573,7 +607,7 @@ public class GuiQuest extends GuiBase
 					add(new ButtonReward(this, reward));
 				}
 
-				if (questTreeGui.questFile.editingMode)
+				if (questTreeGui.questFile.canEdit())
 				{
 					add(new ButtonAddReward(this));
 				}

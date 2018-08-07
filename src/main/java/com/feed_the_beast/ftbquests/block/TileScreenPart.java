@@ -3,6 +3,8 @@ package com.feed_the_beast.ftbquests.block;
 import com.feed_the_beast.ftblib.lib.tile.EnumSaveType;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumFacing;
+import net.minecraftforge.common.capabilities.Capability;
 
 import javax.annotation.Nullable;
 
@@ -12,7 +14,7 @@ import javax.annotation.Nullable;
 public class TileScreenPart extends TileScreenBase
 {
 	private byte offX, offY, offZ;
-	private TileScreen parent;
+	private TileScreenCore parent;
 
 	@Override
 	protected void writeData(NBTTagCompound nbt, EnumSaveType type)
@@ -28,6 +30,35 @@ public class TileScreenPart extends TileScreenBase
 		offX = nbt.getByte("OffsetX");
 		offY = nbt.getByte("OffsetY");
 		offZ = nbt.getByte("OffsetZ");
+	}
+
+	@Override
+	public boolean hasCapability(Capability<?> capability, @Nullable EnumFacing facing)
+	{
+		TileScreenCore screen = getScreen();
+		return (screen != null && screen.hasCapability(capability, facing)) || super.hasCapability(capability, facing);
+	}
+
+	@Override
+	@Nullable
+	public <T> T getCapability(Capability<T> capability, @Nullable EnumFacing facing)
+	{
+		TileScreenCore screen = getScreen();
+		T object = screen != null ? screen.getCapability(capability, facing) : null;
+		return object != null ? object : super.getCapability(capability, facing);
+	}
+
+	@Override
+	public void markDirty()
+	{
+		world.markChunkDirty(pos, this);
+
+		parent = getScreen();
+
+		if (parent != null)
+		{
+			parent.markDirty();
+		}
 	}
 
 	@Override
@@ -57,15 +88,17 @@ public class TileScreenPart extends TileScreenBase
 
 	@Override
 	@Nullable
-	public TileScreen getScreen()
+	public TileScreenCore getScreen()
 	{
-		if (parent == null)
+		if (parent == null || parent.isInvalid())
 		{
+			parent = null;
+
 			TileEntity tileEntity = world.getTileEntity(pos.add(-offX, -offY, -offZ));
 
-			if (tileEntity instanceof TileScreen)
+			if (tileEntity instanceof TileScreenCore)
 			{
-				parent = (TileScreen) tileEntity;
+				parent = (TileScreenCore) tileEntity;
 			}
 		}
 

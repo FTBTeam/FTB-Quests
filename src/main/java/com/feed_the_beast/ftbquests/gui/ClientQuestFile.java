@@ -49,9 +49,10 @@ public class ClientQuestFile extends QuestFile implements IProgressData
 
 	public ClientQuestFile(MessageSyncQuests message, @Nullable ClientQuestFile prev)
 	{
-		super(message.quests);
 		teamId = message.team;
 		editingMode = message.editingMode;
+
+		readData(message.quests);
 
 		taskData = new Int2ObjectOpenHashMap<>();
 		claimedRewards = new ShortOpenHashSet();
@@ -75,6 +76,11 @@ public class ClientQuestFile extends QuestFile implements IProgressData
 		}
 
 		refreshGui(prev);
+	}
+
+	public boolean canEdit()
+	{
+		return editingMode;
 	}
 
 	public void refreshGui(@Nullable ClientQuestFile prev)
@@ -205,7 +211,7 @@ public class ClientQuestFile extends QuestFile implements IProgressData
 	@Override
 	public IProgressData getData(String owner)
 	{
-		return invalid || !teamId.equals(owner) ? null : this;
+		return !teamId.equals(owner) ? null : this;
 	}
 
 	@Override

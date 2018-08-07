@@ -1,11 +1,16 @@
 package com.feed_the_beast.ftbquests.quest.tasks;
 
+import com.feed_the_beast.ftblib.lib.config.ConfigDouble;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigInt;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
+import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.Quest;
+import net.minecraft.nbt.NBTBase;
+import net.minecraft.nbt.NBTPrimitive;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagLong;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -23,18 +28,21 @@ public class ForgeEnergyTask extends QuestTask
 {
 	public static final String ID = "forge_energy";
 
-	public final ConfigInt value;
+	public final ConfigDouble value;
+	public final ConfigInt maxInput;
 
 	public ForgeEnergyTask(Quest quest, NBTTagCompound nbt)
 	{
 		super(quest, nbt);
-		value = new ConfigInt(nbt.getInteger("value"), 1, Integer.MAX_VALUE);
+		value = new ConfigDouble(nbt.getLong("value"), 1, Double.POSITIVE_INFINITY);
+
+		maxInput = new ConfigInt(nbt.hasKey("max_input") ? nbt.getInteger("max_input") : 10000, 100, Integer.MAX_VALUE);
 	}
 
 	@Override
 	public int getMaxProgress()
 	{
-		return value.getInt();
+		return maxInput.getInt();
 	}
 
 	@Override
@@ -46,7 +54,8 @@ public class ForgeEnergyTask extends QuestTask
 	@Override
 	public void writeData(NBTTagCompound nbt)
 	{
-		nbt.setInteger("value", value.getInt());
+		nbt.setLong("value", (long) value.getDouble());
+		nbt.setInteger("max_input", value.getInt());
 	}
 
 	@Override
@@ -58,13 +67,14 @@ public class ForgeEnergyTask extends QuestTask
 	@Override
 	public ITextComponent getDisplayName()
 	{
-		return new TextComponentTranslation("ftbquests.task.forge_energy.text", value);
+		return new TextComponentTranslation("ftbquests.task.forge_energy.text", StringUtils.formatDouble(value.getDouble(), true));
 	}
 
 	@Override
 	public void getConfig(ConfigGroup group)
 	{
-		group.add("value", value, new ConfigInt(1));
+		group.add("value", value, new ConfigDouble(1));
+		group.add("max_input", maxInput, new ConfigInt(10000));
 	}
 
 	@Override
@@ -75,9 +85,54 @@ public class ForgeEnergyTask extends QuestTask
 
 	public static class Data extends QuestTaskData<ForgeEnergyTask> implements IEnergyStorage
 	{
+		private long energy;
+
 		private Data(ForgeEnergyTask task, IProgressData data)
 		{
 			super(task, data);
+		}
+
+		@Override
+		public NBTBase toNBT()
+		{
+			return energy > 0 ? new NBTTagLong(energy) : null;
+		}
+
+		@Override
+		public void fromNBT(@Nullable NBTBase nbt)
+		{
+			if (nbt instanceof NBTPrimitive)
+			{
+				energy = ((NBTPrimitive) nbt).getLong();
+			}
+			else
+			{
+				energy = 0L;
+			}
+		}
+
+		@Override
+		public int getProgress()
+		{
+			return (int) (getRelativeProgress() * 1000000D);
+		}
+
+		@Override
+		public double getRelativeProgress()
+		{
+			return energy / task.value.getDouble();
+		}
+
+		@Override
+		public String getProgressString()
+		{
+			return StringUtils.formatDouble(energy, true) + " / " + StringUtils.formatDouble(task.value.getDouble(), true);
+		}
+
+		@Override
+		public void resetProgress()
+		{
+			energy = 0L;
 		}
 
 		@Override
@@ -96,13 +151,19 @@ public class ForgeEnergyTask extends QuestTask
 		@Override
 		public int receiveEnergy(int maxReceive, boolean simulate)
 		{
-			if (maxReceive > 0 && getProgress() < task.getMaxProgress())
+			if (maxReceive > 0 && energy < task.value.getDouble())
 			{
-				int add = Math.min(maxReceive, task.getMaxProgress() - getProgress());
+				long add = Math.min(task.maxInput.getInt(), Math.min(maxReceive, (long) (task.value.getDouble() - energy)));
 
-				if (add > 0 && setProgress(getProgress() + add, simulate))
+				if (add > 0L)
 				{
-					return add;
+					if (!simulate)
+					{
+						energy += add;
+						data.syncTask(this);
+					}
+
+					return (int) add;
 				}
 			}
 
@@ -124,7 +185,7 @@ public class ForgeEnergyTask extends QuestTask
 		@Override
 		public int getMaxEnergyStored()
 		{
-			return task.getMaxProgress();
+			return task.maxInput.getInt();
 		}
 
 		@Override

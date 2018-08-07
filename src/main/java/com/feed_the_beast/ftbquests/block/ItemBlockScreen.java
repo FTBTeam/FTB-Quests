@@ -1,8 +1,11 @@
 package com.feed_the_beast.ftbquests.block;
 
 import com.feed_the_beast.ftblib.lib.block.ItemBlockBase;
+import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.gui.ClientQuestFile;
-import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskData;
+import com.feed_the_beast.ftbquests.quest.IProgressData;
+import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockHorizontal;
 import net.minecraft.block.state.IBlockState;
@@ -10,6 +13,7 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextFormatting;
@@ -33,16 +37,23 @@ public class ItemBlockScreen extends ItemBlockBase
 	@Override
 	public boolean placeBlockAt(ItemStack stack, EntityPlayer player, World world, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ, IBlockState newState)
 	{
-		TileScreen screen = new TileScreen();
-		screen.readFromItem(stack);
+		NBTTagCompound nbt = stack.getTagCompound();
+		Quest quest = nbt == null ? null : FTBQuests.PROXY.getQuestList(world.isRemote).getQuest(nbt.getShort("Quest"));
 
-		if (screen.size > 0)
+		if (quest == null || quest.invalid || quest.tasks.isEmpty())
+		{
+			return false;
+		}
+
+		int size = nbt.getByte("Size");
+
+		if (size > 0)
 		{
 			boolean xaxis = newState.getValue(BlockHorizontal.FACING).getAxis() == EnumFacing.Axis.X;
 
-			for (int y = 0; y < screen.size * 2 + 1; y++)
+			for (int y = 0; y < size * 2 + 1; y++)
 			{
-				for (int x = -screen.size; x <= screen.size; x++)
+				for (int x = -size; x <= size; x++)
 				{
 					if (x != 0 || y != 0)
 					{
@@ -60,6 +71,7 @@ public class ItemBlockScreen extends ItemBlockBase
 			}
 		}
 
+		BlockScreen.currentTask = quest.getTask(nbt.getByte("TaskIndex"));
 		return super.placeBlockAt(stack, player, world, pos, side, hitX, hitY, hitZ, newState);
 	}
 
@@ -67,28 +79,60 @@ public class ItemBlockScreen extends ItemBlockBase
 	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack stack, @Nullable World world, List<String> tooltip, ITooltipFlag flag)
 	{
-		if (world == null || !ClientQuestFile.existsWithTeam())
+		if (world == null || !ClientQuestFile.exists())
 		{
 			return;
 		}
 
-		TileScreen screen = new TileScreen();
-		screen.setWorld(world);
-		screen.readFromItem(stack);
-		QuestTaskData data = screen.getTaskData();
+		NBTTagCompound nbt = stack.getTagCompound();
+		Quest quest = nbt == null ? null : ClientQuestFile.INSTANCE.getQuest(nbt.getShort("Quest"));
+
+		if (quest == null || quest.invalid || quest.tasks.isEmpty())
+		{
+			tooltip.add(TextFormatting.RED + I18n.format("tile.ftbquests.screen.missing_data"));
+			return;
+		}
+
+		int size = nbt.getByte("Size");
+		String owner = nbt.getString("Owner");
+
+		tooltip.add(TextFormatting.GOLD.toString() + (1 + size * 2) + " x " + (1 + size * 2));
+		tooltip.add(I18n.format("tile.ftbquests.screen.flat") + ": " + ((BlockScreen) block).flat);
+
+		if (!owner.equals(ClientQuestFile.INSTANCE.teamId))
+		{
+			tooltip.add(I18n.format("ftbquests.owner") + ": " + TextFormatting.DARK_GREEN + owner);
+		}
+
+		QuestTask task = quest.getTask(nbt.getByte("TaskIndex"));
+
+		tooltip.add(I18n.format("ftbquests.task") + ": " + TextFormatting.YELLOW + task.getDisplayName().getFormattedText());
+
+		IProgressData data = ClientQuestFile.INSTANCE.getData(owner);
 
 		if (data == null)
 		{
 			return;
 		}
 
-		tooltip.add(TextFormatting.GOLD.toString() + (1 + screen.size * 2) + " x " + (1 + screen.size * 2));
+		int max = task.getMaxProgress();
 
-		if (!ClientQuestFile.INSTANCE.teamId.equals(screen.owner))
+		if (max <= 0)
 		{
-			tooltip.add(I18n.format("ftbquests.owner") + ": " + TextFormatting.DARK_GREEN + screen.owner);
+			tooltip.add(I18n.format("ftbquests.progress") + ": " + TextFormatting.BLUE + "0/0 [0%]");
 		}
+		else
+		{
+			int progress = data.getQuestTaskData(task.id).getProgress();
 
-		tooltip.add(I18n.format("ftbquests.task") + ": " + TextFormatting.YELLOW + data.task.getDisplayName().getFormattedText());
+			if (progress >= max)
+			{
+				tooltip.add(I18n.format("ftbquests.progress") + ": " + TextFormatting.BLUE + max + "/" + max + " [100%]");
+			}
+			else
+			{
+				tooltip.add(I18n.format("ftbquests.progress") + ": " + TextFormatting.BLUE + progress + "/" + max + " [" + (int) (progress * 100D / (double) max) + "%]");
+			}
+		}
 	}
 }

@@ -10,15 +10,15 @@ import net.minecraft.world.World;
  */
 public class BlockScreenPart extends BlockScreen
 {
-	public BlockScreenPart(String mod, String id)
+	public BlockScreenPart(String mod, String id, boolean f)
 	{
-		super(mod, id);
+		super(mod, id, f);
 	}
 
 	@Override
 	public TileEntity createTileEntity(World world, IBlockState state)
 	{
-		return new TileScreenPart();
+		return currentTask == null ? new TileScreenPart() : currentTask.createScreenPart(world);
 	}
 
 	@Override
@@ -30,13 +30,13 @@ public class BlockScreenPart extends BlockScreen
 	@Override
 	public void breakBlock(World world, BlockPos pos, IBlockState state)
 	{
-		if (!BlockScreen.BREAKING_SCREEN)
+		if (!BREAKING_SCREEN)
 		{
 			TileEntity tileEntity = world.getTileEntity(pos);
 
 			if (tileEntity instanceof TileScreenPart)
 			{
-				TileScreen screen = ((TileScreenPart) tileEntity).getScreen();
+				TileScreenCore screen = ((TileScreenPart) tileEntity).getScreen();
 
 				if (screen != null)
 				{

@@ -2,7 +2,6 @@ package com.feed_the_beast.ftbquests.quest;
 
 import com.feed_the_beast.ftblib.lib.data.ForgeTeam;
 import com.feed_the_beast.ftblib.lib.data.Universe;
-import com.feed_the_beast.ftblib.lib.util.CommonUtils;
 import com.feed_the_beast.ftblib.lib.util.NBTUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.net.MessageSyncQuests;
@@ -25,46 +24,26 @@ public class ServerQuestFile extends QuestFile
 {
 	public static ServerQuestFile INSTANCE;
 
+	public final File file;
 	public boolean shouldSendUpdates = true;
 	private Random random;
 	public boolean shouldSave = false;
 
-	public static boolean load()
+	public ServerQuestFile(File f)
 	{
-		if (INSTANCE != null)
-		{
-			INSTANCE.deleteChildren();
-			INSTANCE.deleteSelf();
-		}
-
-		File file = new File(CommonUtils.folderConfig, "ftbquests/quests.nbt");
-		NBTTagCompound nbt;
-
-		if (!file.exists())
-		{
-			nbt = new NBTTagCompound();
-		}
-		else
-		{
-			nbt = NBTUtils.readNBT(file);
-		}
-
-		if (nbt != null)
-		{
-			INSTANCE = new ServerQuestFile(nbt);
-			INSTANCE.save();
-			return true;
-		}
-		else
-		{
-			INSTANCE = new ServerQuestFile(new NBTTagCompound());
-			return false;
-		}
+		file = f;
 	}
 
-	private ServerQuestFile(NBTTagCompound nbt)
+	public boolean load()
 	{
-		super(nbt);
+		if (!file.exists())
+		{
+			NBTUtils.writeNBT(file, new NBTTagCompound());
+		}
+
+		NBTTagCompound nbt = NBTUtils.readNBT(file);
+		readData(nbt == null ? new NBTTagCompound() : nbt);
+		return nbt != null;
 	}
 
 	@Override
@@ -135,5 +114,24 @@ public class ServerQuestFile extends QuestFile
 	{
 		shouldSave = true;
 		Universe.get().markDirty();
+	}
+
+	public void saveNow()
+	{
+		NBTTagCompound nbt = new NBTTagCompound();
+		writeData(nbt);
+		NBTUtils.writeNBTSafe(file, nbt);
+	}
+
+	public void unload()
+	{
+		if (shouldSave)
+		{
+			saveNow();
+			shouldSave = false;
+		}
+
+		deleteChildren();
+		deleteSelf();
 	}
 }

@@ -1,12 +1,23 @@
-tile.ftbquests.quest_block.name=Quest Block
-tile.ftbquests.quest_block.missing_data=Broken Quest Block / Missing Data!
-tile.ftbquests.quest_block.no_perm=You are not a member of block owner team!
+tile.ftbquests.screen.missing_data=Broken Block / Missing Data!
 tile.ftbquests.screen.name=Screen
-
-ftbquests.general.editing_mode=Editing Mode
+tile.ftbquests.screen.flat=Flat
+tile.ftbquests.screen.task_index=Task Index
+tile.ftbquests.screen.size=Size
+tile.ftbquests.screen.progress_display_mode=Progress Display Mode
+tile.ftbquests.screen.progress_display_mode.progress=Progress
+tile.ftbquests.screen.progress_display_mode.percent=Percent
+tile.ftbquests.screen.progress_display_mode.bar=Bar
+tile.ftbquests.screen.redstone_output_mode=Redstone Output Mode
+tile.ftbquests.screen.redstone_output_mode.disabled=Disabled
+tile.ftbquests.screen.redstone_output_mode.enabled=Enabled
+tile.ftbquests.screen.redstone_output_mode.level=Level
+tile.ftbquests.screen.indestructible=Indestructible
 
 sidebar_button.ftbquests.quests=Quests
 key.ftbquests.quests=Open Quests
+admin_panel.ftbquests.edit_settings=FTB Quests Settings
+admin_panel.ftbquests.edit_settings.editing_mode=Editing Mode
+admin_panel.ftbquests.edit_settings.extra_files=Extra Files
 
 ftbquests.owner=Owner
 ftbquests.progress=Progress
@@ -71,6 +82,7 @@ ftbquests.task.fluid.slot.container=Take empty container from here
 
 ftbquests.task.forge_energy=Forge Energy
 ftbquests.task.forge_energy.value=FE / RF
+ftbquests.task.forge_energy.max_input=Max Input
 ftbquests.task.forge_energy.text=%d FE
 
 ftbquests.task.ic2_energy=IC2 Energy
