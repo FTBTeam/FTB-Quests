@@ -57,7 +57,7 @@ public class FTBQuestsWorldData implements IConfigCallback
 
 		if (file == null)
 		{
-			file = new File(CommonUtils.folderMinecraft, "questpacks/default.nbt");
+			file = new File(CommonUtils.folderMinecraft, "questpacks/normal.nbt");
 		}
 
 		FTBQuests.LOGGER.info("Loading quests from " + file.getAbsolutePath());
