@@ -167,7 +167,16 @@ public class TileScreenCore extends TileScreenBase implements ITickable, IConfig
 	{
 		if (facing == null)
 		{
-			facing = getBlockState().getValue(BlockHorizontal.FACING);
+			IBlockState state = getBlockState();
+
+			if (state.getBlock() instanceof BlockScreen)
+			{
+				facing = getBlockState().getValue(BlockHorizontal.FACING);
+			}
+			else
+			{
+				facing = EnumFacing.NORTH;
+			}
 		}
 
 		return facing;
