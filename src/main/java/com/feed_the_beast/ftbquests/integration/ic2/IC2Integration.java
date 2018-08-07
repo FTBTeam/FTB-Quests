@@ -13,6 +13,7 @@ public class IC2Integration
 	public static void preInit()
 	{
 		QuestTasks.add(IC2EnergyTask.ID, IC2EnergyTask::new);
-		GameRegistry.registerTileEntity(TileScreenCoreIC2.class, new ResourceLocation(FTBQuests.MOD_ID, "ic2_converter"));
+		GameRegistry.registerTileEntity(TileScreenCoreIC2.class, new ResourceLocation(FTBQuests.MOD_ID, "screen_core_ic2"));
+		GameRegistry.registerTileEntity(TileScreenPartIC2.class, new ResourceLocation(FTBQuests.MOD_ID, "screen_part_ic2"));
 	}
 }
