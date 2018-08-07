@@ -35,11 +35,13 @@ minecraft {
 repositories {
 	maven { url "https://maven.latmod.com/" }
 	maven { url "http://maven.ic2.player.to/" }
+	maven { url "https://maven.blamejared.com/" }
 }
 
 dependencies {
 	deobfCompile "com.feed_the_beast.mods:FTBLib:${ftblib_version}"
 	provided "net.industrial-craft:industrialcraft-2:${ic2_version}:api"
+	deobfCompile "io.sommers:packmode:${packmode_version}"
 }
 
 processResources {
