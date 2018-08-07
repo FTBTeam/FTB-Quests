@@ -352,15 +352,30 @@ public class BlockScreen extends BlockBase
 			return FULL_BLOCK_AABB.offset(pos);
 		}
 
+		if (flat)
+		{
+			switch (screen.getFacing().getHorizontalIndex())
+			{
+				case 0:
+					return new AxisAlignedBB(pos.getX() - screen.size, pos.getY(), pos.getZ(), pos.getX() + screen.size + 1D, pos.getY() + screen.size * 2D + 1D, pos.getZ() + 0.0625D);
+				case 1:
+					return new AxisAlignedBB(pos.getX() + 0.9375D, pos.getY(), pos.getZ() - screen.size, pos.getX() + 1D, pos.getY() + screen.size * 2D + 1D, pos.getZ() + screen.size + 1D);
+				case 2:
+					return new AxisAlignedBB(pos.getX() - screen.size, pos.getY(), pos.getZ() + 0.9375D, pos.getX() + screen.size + 1D, pos.getY() + screen.size * 2D + 1D, pos.getZ() + 1D);
+				default:
+					return new AxisAlignedBB(pos.getX(), pos.getY(), pos.getZ() - screen.size, pos.getX() + 0.0625D, pos.getY() + screen.size * 2D + 1D, pos.getZ() + screen.size + 1D);
+			}
+		}
+
 		boolean xaxis = screen.getFacing().getAxis() == EnumFacing.Axis.X;
 
 		if (xaxis)
 		{
-			return new AxisAlignedBB(pos.add(0, 0, -screen.size), pos.add(1, screen.size * 2 + 1, screen.size + 1));
+			return new AxisAlignedBB(pos.getX(), pos.getY(), pos.getZ() - screen.size, pos.getX() + 1D, pos.getY() + screen.size * 2D + 1D, pos.getZ() + screen.size + 1D);
 		}
 		else
 		{
-			return new AxisAlignedBB(pos.add(-screen.size, 0, 0), pos.add(screen.size + 1, screen.size * 2 + 1, 1));
+			return new AxisAlignedBB(pos.getX() - screen.size, pos.getY(), pos.getZ(), pos.getX() + screen.size + 1D, pos.getY() + screen.size * 2D + 1D, pos.getZ() + 1D);
 		}
 	}
 
