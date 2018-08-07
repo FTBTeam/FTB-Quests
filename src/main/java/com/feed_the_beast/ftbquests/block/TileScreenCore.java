@@ -19,6 +19,7 @@ import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskData;
 import com.feed_the_beast.ftbquests.util.ProgressDisplayMode;
 import com.feed_the_beast.ftbquests.util.RedstoneOutputMode;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockHorizontal;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.command.ICommandSender;
@@ -252,7 +253,8 @@ public class TileScreenCore extends TileScreenBase implements ITickable, IConfig
 	@SideOnly(Side.CLIENT)
 	public AxisAlignedBB getRenderBoundingBox()
 	{
-		return BlockScreen.getScreenAABB(this, ((BlockScreen) getBlockType()).flat);
+		Block block = getBlockType();
+		return BlockScreen.getScreenAABB(this, block instanceof BlockScreen && ((BlockScreen) block).flat);
 	}
 
 	@Override
