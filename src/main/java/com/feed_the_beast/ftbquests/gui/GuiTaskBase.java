@@ -5,6 +5,7 @@ import com.feed_the_beast.ftblib.lib.gui.ContextMenuItem;
 import com.feed_the_beast.ftblib.lib.gui.GuiBase;
 import com.feed_the_beast.ftblib.lib.gui.GuiContainerWrapper;
 import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
+import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.gui.WidgetLayout;
 import com.feed_the_beast.ftblib.lib.icon.Color4I;
@@ -12,7 +13,6 @@ import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.FTBQuestsItems;
-import com.feed_the_beast.ftbquests.net.MessageGetBlock;
 import com.feed_the_beast.ftbquests.net.MessageGetScreen;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.I18n;
@@ -21,6 +21,7 @@ import net.minecraft.item.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * @author LatvianModder
@@ -35,64 +36,71 @@ public class GuiTaskBase extends GuiBase
 
 	public static class Tab extends Button
 	{
-		public Tab(Panel panel, String title, Icon icon)
+		public String description;
+		public final Consumer<MouseButton> callback;
+
+		public Tab(Panel panel, String title, String desc, Icon icon, Consumer<MouseButton> c)
 		{
 			super(panel, title, icon);
 			setSize(20, 20);
+			description = desc;
+			callback = c;
 		}
 
 		@Override
 		public void onClicked(MouseButton button)
 		{
+			GuiHelper.playClickSound();
+			callback.accept(button);
 		}
 	}
 
 	public GuiTaskBase(ContainerTaskBase c)
 	{
 		container = c;
-		hasTile = container.tile != null && !container.tile.isInvalid();
+		hasTile = container.screen != null && !container.screen.isInvalid();
 
 		tabs = new Panel(this)
 		{
 			@Override
 			public void addWidgets()
 			{
-				if (ClientQuestFile.INSTANCE.allowTakeQuestBlocks.getBoolean() && container.data.task.quest.isVisible(ClientQuestFile.INSTANCE) && !container.data.task.isComplete(ClientQuestFile.INSTANCE))
+				add(new Tab(this, I18n.format("gui.back"), "", GuiIcons.LEFT, button ->
 				{
-					add(new Tab(this, I18n.format("ftbquests.task.get_block"), ItemIcon.getItemIcon(new ItemStack(FTBQuestsItems.QUEST_BLOCK)))
-					{
-						@Override
-						public void onClicked(MouseButton button)
-						{
-							GuiHelper.playClickSound();
-							new MessageGetBlock(container.data.task.id).sendToServer();
-						}
-					});
-				}
+					ClientQuestFile.INSTANCE.questGui = new GuiQuest(ClientQuestFile.INSTANCE.questTreeGui, container.data.task.quest);
+					ClientQuestFile.INSTANCE.questGui.openGui();
+				}));
 
-				if (ClientQuestFile.INSTANCE.editingMode)
+				if (ClientQuestFile.INSTANCE.canEdit() || ClientQuestFile.INSTANCE.allowTakeQuestBlocks.getBoolean() && container.data.task.quest.isVisible(ClientQuestFile.INSTANCE) && !container.data.task.isComplete(ClientQuestFile.INSTANCE))
 				{
-					add(new Tab(this, I18n.format("tile.ftbquests.screen.name"), ItemIcon.getItemIcon(new ItemStack(FTBQuestsItems.SCREEN)))
+					add(new Tab(this, I18n.format("tile.ftbquests.screen.name"), "", ItemIcon.getItemIcon(new ItemStack(FTBQuestsItems.SCREEN)), button ->
 					{
-						@Override
-						public void onClicked(MouseButton button)
+						List<ContextMenuItem> contextMenu = new ArrayList<>();
+						contextMenu.add(new ContextMenuItem("Screen", Icon.EMPTY, () -> {}).setEnabled(false));
+						contextMenu.add(new ContextMenuItem("1 x 1", Icon.EMPTY, () -> new MessageGetScreen(container.data.task.id, 0, 0).sendToServer()));
+
+						if (ClientQuestFile.INSTANCE.canEdit())
 						{
-							GuiHelper.playClickSound();
-							List<ContextMenuItem> contextMenu = new ArrayList<>();
-							contextMenu.add(new ContextMenuItem("1 x 1", Icon.EMPTY, () -> new MessageGetScreen(container.data.task.id, 0, 0).sendToServer()));
 							contextMenu.add(new ContextMenuItem("3 x 3", Icon.EMPTY, () -> new MessageGetScreen(container.data.task.id, 1, 0).sendToServer()));
 							contextMenu.add(new ContextMenuItem("5 x 5", Icon.EMPTY, () -> new MessageGetScreen(container.data.task.id, 2, 0).sendToServer()));
 							contextMenu.add(new ContextMenuItem("7 x 7", Icon.EMPTY, () -> new MessageGetScreen(container.data.task.id, 3, 0).sendToServer()));
 							contextMenu.add(new ContextMenuItem("9 x 9", Icon.EMPTY, () -> new MessageGetScreen(container.data.task.id, 4, 0).sendToServer()));
-							contextMenu.add(ContextMenuItem.SEPARATOR);
-							contextMenu.add(new ContextMenuItem("1 x 1", Icon.EMPTY, () -> new MessageGetScreen(container.data.task.id, 0, 1).sendToServer()));
+						}
+
+						contextMenu.add(ContextMenuItem.SEPARATOR);
+						contextMenu.add(new ContextMenuItem("Flat Screen", Icon.EMPTY, () -> {}).setEnabled(false));
+						contextMenu.add(new ContextMenuItem("1 x 1", Icon.EMPTY, () -> new MessageGetScreen(container.data.task.id, 0, 1).sendToServer()));
+
+						if (ClientQuestFile.INSTANCE.canEdit())
+						{
 							contextMenu.add(new ContextMenuItem("3 x 3", Icon.EMPTY, () -> new MessageGetScreen(container.data.task.id, 1, 1).sendToServer()));
 							contextMenu.add(new ContextMenuItem("5 x 5", Icon.EMPTY, () -> new MessageGetScreen(container.data.task.id, 2, 1).sendToServer()));
 							contextMenu.add(new ContextMenuItem("7 x 7", Icon.EMPTY, () -> new MessageGetScreen(container.data.task.id, 3, 1).sendToServer()));
 							contextMenu.add(new ContextMenuItem("9 x 9", Icon.EMPTY, () -> new MessageGetScreen(container.data.task.id, 4, 1).sendToServer()));
-							getGui().openContextMenu(contextMenu);
 						}
-					});
+
+						getGui().openContextMenu(contextMenu);
+					}));
 				}
 
 				addTabs(this);

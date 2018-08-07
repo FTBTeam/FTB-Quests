@@ -4,10 +4,12 @@ import com.feed_the_beast.ftbquests.gui.ContainerTaskBase;
 import com.feed_the_beast.ftbquests.gui.GuiTaskBase;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTBase;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+
+import javax.annotation.Nullable;
 
 /**
  * @author LatvianModder
@@ -16,7 +18,6 @@ public abstract class QuestTaskData<T extends QuestTask> implements ICapabilityP
 {
 	public final T task;
 	public final IProgressData data;
-	private int progress = 0;
 
 	public QuestTaskData(T q, IProgressData d)
 	{
@@ -24,40 +25,37 @@ public abstract class QuestTaskData<T extends QuestTask> implements ICapabilityP
 		data = d;
 	}
 
-	public void writeToNBT(NBTTagCompound nbt)
+	@Nullable
+	public abstract NBTBase toNBT();
+
+	public abstract void fromNBT(@Nullable NBTBase nbt);
+
+	public abstract int getProgress();
+
+	public abstract void resetProgress();
+
+	public double getRelativeProgress()
 	{
-		if (progress > 0)
+		int max = task.getMaxProgress();
+
+		if (max == 0)
 		{
-			nbt.setInteger("Progress", progress);
-		}
-	}
-
-	public void readFromNBT(NBTTagCompound nbt)
-	{
-		progress = nbt.getInteger("Progress");
-	}
-
-	public final int getProgress()
-	{
-		return progress;
-	}
-
-	public final boolean setProgress(int p, boolean simulate)
-	{
-		p = Math.max(0, p);
-
-		if (progress == p)
-		{
-			return false;
-		}
-		else if (simulate)
-		{
-			return true;
+			return 0D;
 		}
 
-		progress = p;
-		data.syncTask(this);
-		return true;
+		int progress = getProgress();
+
+		if (progress >= max)
+		{
+			return 1D;
+		}
+
+		return (double) progress / (double) max;
+	}
+
+	public String getProgressString()
+	{
+		return getProgress() + " / " + task.getMaxProgress();
 	}
 
 	public ContainerTaskBase getContainer(EntityPlayer player)

@@ -7,6 +7,7 @@ import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.util.NBTUtils;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.Quest;
+import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.common.capabilities.Capability;
@@ -80,6 +81,29 @@ public class UnknownTask extends QuestTask
 		private Data(UnknownTask t, IProgressData data)
 		{
 			super(t, data);
+		}
+
+		@Nullable
+		@Override
+		public NBTBase toNBT()
+		{
+			return null;
+		}
+
+		@Override
+		public void fromNBT(@Nullable NBTBase nbt)
+		{
+		}
+
+		@Override
+		public int getProgress()
+		{
+			return 0;
+		}
+
+		@Override
+		public void resetProgress()
+		{
 		}
 
 		@Override

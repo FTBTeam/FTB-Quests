@@ -15,7 +15,10 @@ import com.feed_the_beast.ftbquests.quest.Quest;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTBase;
+import net.minecraft.nbt.NBTPrimitive;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagInt;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.text.ITextComponent;
@@ -184,9 +187,43 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 
 	public static class Data extends QuestTaskData<ItemTask> implements IItemHandler
 	{
+		public int progress = 0;
+
 		private Data(ItemTask t, IProgressData data)
 		{
 			super(t, data);
+		}
+
+		@Nullable
+		@Override
+		public NBTBase toNBT()
+		{
+			return progress > 0 ? new NBTTagInt(progress) : null;
+		}
+
+		@Override
+		public void fromNBT(@Nullable NBTBase nbt)
+		{
+			if (nbt instanceof NBTPrimitive)
+			{
+				progress = ((NBTPrimitive) nbt).getInt();
+			}
+			else
+			{
+				progress = 0;
+			}
+		}
+
+		@Override
+		public int getProgress()
+		{
+			return progress;
+		}
+
+		@Override
+		public void resetProgress()
+		{
+			progress = 0;
 		}
 
 		@Override
@@ -223,12 +260,18 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 		@Override
 		public ItemStack insertItem(int slot, ItemStack stack, boolean simulate)
 		{
-			if (getProgress() < task.getMaxProgress() && task.test(stack))
+			if (progress < task.count.getInt() && task.test(stack))
 			{
-				int add = Math.min(stack.getCount(), task.getMaxProgress() - getProgress());
+				int add = Math.min(stack.getCount(), task.count.getInt() - progress);
 
-				if (add > 0 && setProgress(getProgress() + add, simulate))
+				if (add > 0)
 				{
+					if (!simulate)
+					{
+						progress += add;
+						data.syncTask(this);
+					}
+
 					return ItemHandlerHelper.copyStackWithSize(stack, stack.getCount() - add);
 				}
 			}
@@ -245,7 +288,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 		@Override
 		public int getSlotLimit(int slot)
 		{
-			return task.getMaxProgress();
+			return task.count.getInt();
 		}
 	}
 }

@@ -5,7 +5,7 @@ import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToServer;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
-import com.feed_the_beast.ftbquests.block.TileQuest;
+import com.feed_the_beast.ftbquests.block.TileScreenCore;
 import com.feed_the_beast.ftbquests.gui.ContainerTaskBase;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskData;
 import com.feed_the_beast.ftbquests.util.FTBQuestsTeamData;
@@ -61,7 +61,7 @@ public class MessageOpenTask extends MessageToServer
 		}
 	}
 
-	public static void openGUI(QuestTaskData data, EntityPlayerMP player, @Nullable TileQuest tile)
+	public static void openGUI(QuestTaskData data, EntityPlayerMP player, @Nullable TileScreenCore tile)
 	{
 		player.getNextWindowId();
 		player.closeContainer();
@@ -70,7 +70,7 @@ public class MessageOpenTask extends MessageToServer
 
 		if (tile != null)
 		{
-			((ContainerTaskBase) player.openContainer).tile = tile;
+			((ContainerTaskBase) player.openContainer).screen = tile;
 		}
 
 		player.openContainer.addListener(player);

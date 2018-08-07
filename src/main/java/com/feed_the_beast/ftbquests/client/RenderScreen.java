@@ -1,11 +1,11 @@
 package com.feed_the_beast.ftbquests.client;
 
 import com.feed_the_beast.ftblib.lib.client.ClientUtils;
-import com.feed_the_beast.ftblib.lib.icon.Icon;
-import com.feed_the_beast.ftbquests.block.BlockFlatScreen;
-import com.feed_the_beast.ftbquests.block.TileScreen;
+import com.feed_the_beast.ftbquests.block.BlockScreen;
 import com.feed_the_beast.ftbquests.block.TileScreenBase;
+import com.feed_the_beast.ftbquests.block.TileScreenCore;
 import com.feed_the_beast.ftbquests.gui.ClientQuestFile;
+import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskData;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.GlStateManager;
@@ -21,19 +21,19 @@ import java.util.Arrays;
 /**
  * @author LatvianModder
  */
-public class RenderScreen extends TileEntitySpecialRenderer<TileScreen>
+public class RenderScreen extends TileEntitySpecialRenderer<TileScreenCore>
 {
 	@Override
-	public void render(TileScreen screen, double x, double y, double z, float partialTicks, int destroyStage, float alpha)
+	public void render(TileScreenCore screen, double x, double y, double z, float partialTicks, int destroyStage, float alpha)
 	{
 		if (!ClientQuestFile.existsWithTeam())
 		{
 			return;
 		}
 
-		QuestTaskData data = screen.getTaskData();
+		QuestTask task = screen.getTask();
 
-		if (data == null)
+		if (task == null)
 		{
 			return;
 		}
@@ -73,50 +73,63 @@ public class RenderScreen extends TileEntitySpecialRenderer<TileScreen>
 
 		GlStateManager.translate(-screen.size, -screen.size * 2F, -0.01F);
 
-		if (screen.getBlockType() instanceof BlockFlatScreen)
+		if (((BlockScreen) screen.getBlockType()).flat)
 		{
-			GlStateManager.translate(0F, 0F, 15F / 16F);
+			GlStateManager.translate(0F, 0F, 1F);
 		}
 
 		GlStateManager.scale(screen.size * 2D + 1D, screen.size * 2D + 1D, 1D);
 
-		String top1 = data.task.quest.getDisplayName().getFormattedText();
-		String top2 = data.task.getDisplayName().getFormattedText();
+		String top1 = task.quest.getDisplayName().getUnformattedText();
+		String top2 = task.getDisplayName().getUnformattedText();
 
-		if (top1.isEmpty() || TextFormatting.getTextWithoutFormattingCodes(top1).equals(TextFormatting.getTextWithoutFormattingCodes(top2)))
+		if (top1.equals(top2) || top1.isEmpty())
 		{
-			drawString(font, top2, 0.02D, 0.15D);
+			top1 = top2;
+			top2 = "";
 		}
-		else
+
+		drawString(font, top1, 0.02D, 0.15D);
+		double iconY = 0.5D;
+
+		if (!top2.isEmpty())
 		{
-			drawString(font, top1, 0.02D, 0.15D);
 			drawString(font, top2, 0.17D, 0.07D);
+			iconY = 0.54D;
 		}
+
+		QuestTaskData data = screen.getTaskData();
 
 		String bottomText;
 
-		if (screen.amountMode == 0)
+		if (data == null)
 		{
-			bottomText = data.getProgress() + " / " + data.task.getMaxProgress();
-		}
-		else if (screen.amountMode == 1)
-		{
-			bottomText = (data.getProgress() * 100 / data.task.getMaxProgress()) + "%";
+			bottomText = "???";
 		}
 		else
 		{
-			char[] c = new char[12];
-			Arrays.fill(c, ' ');
-			c[0] = '[';
-			c[11] = ']';
-			int m = data.getProgress() * 10 / data.task.getMaxProgress();
-
-			for (int i = 0; i < m; i++)
+			switch (screen.progressDisplayMode.getValue())
 			{
-				c[i + 1] = '#';
-			}
+				case PROGRESS:
+					bottomText = data.getProgressString();
+					break;
+				case PERCENT:
+					bottomText = (int) (data.getRelativeProgress() * 100D) + "%";
+					break;
+				default:
+					char[] c = new char[12];
+					Arrays.fill(c, ' ');
+					c[0] = '[';
+					c[11] = ']';
+					int m = (int) (data.getRelativeProgress() * 10D);
 
-			bottomText = new String(c);
+					for (int i = 0; i < m; i++)
+					{
+						c[i + 1] = '#';
+					}
+
+					bottomText = new String(c);
+			}
 		}
 
 		if (my >= 0.81D)
@@ -129,7 +142,7 @@ public class RenderScreen extends TileEntitySpecialRenderer<TileScreen>
 		}
 
 		GlStateManager.pushMatrix();
-		GlStateManager.translate(0.5D, 0.54D, 0D);
+		GlStateManager.translate(0.5D, iconY, 0D);
 		GlStateManager.scale(0.5D, 0.5D, 1D);
 		ClientUtils.MC.getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
 		ClientUtils.MC.getTextureManager().getTexture(TextureMap.LOCATION_BLOCKS_TEXTURE).setBlurMipmap(false, false);
@@ -138,7 +151,7 @@ public class RenderScreen extends TileEntitySpecialRenderer<TileScreen>
 		GlStateManager.enableBlend();
 		GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
 		GlStateManager.color(1F, 1F, 1F, 1F);
-		data.task.getIcon().draw3D(screen.getWorld(), Icon.EMPTY);
+		task.renderOnScreen(screen.getWorld(), data);
 		GlStateManager.disableRescaleNormal();
 		GlStateManager.disableLighting();
 		ClientUtils.MC.getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
@@ -154,9 +167,14 @@ public class RenderScreen extends TileEntitySpecialRenderer<TileScreen>
 
 	private void drawString(FontRenderer font, String string, double y, double size)
 	{
+		if (string.isEmpty())
+		{
+			return;
+		}
+
 		GlStateManager.pushMatrix();
 		GlStateManager.translate(0.5D, y, 0D);
-		GlStateManager.scale(size / 9D, size / 9D, 1D);
+		GlStateManager.scale(size / 9D, size / 9D, 1D); //FIXME: Strings outside block bounds
 		font.drawString(string, -font.getStringWidth(string) / 2, 0, 0xFFD8D8D8);
 		GlStateManager.popMatrix();
 	}

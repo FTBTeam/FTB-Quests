@@ -71,41 +71,14 @@ public abstract class QuestFile extends ProgressingQuestObject
 	public final ConfigList<ConfigItemStack> emergencyItems;
 	public final ConfigTimer emergencyItemsCooldown;
 
-	public QuestFile(NBTTagCompound nbt)
+	public QuestFile()
 	{
 		super((short) 0);
 		chapters = new ArrayList<>();
 		map = new Short2ObjectOpenHashMap<>();
-		map.put((short) 0, this);
-
-		NBTTagList chapterList = nbt.getTagList("chapters", Constants.NBT.TAG_COMPOUND);
-
-		for (int i = 0; i < chapterList.tagCount(); i++)
-		{
-			QuestChapter chapter = new QuestChapter(this, chapterList.getCompoundTagAt(i));
-			chapter.index = chapters.size();
-			chapters.add(chapter);
-			map.put(chapter.id, chapter);
-		}
-
-		allowTakeQuestBlocks = new ConfigBoolean(!nbt.hasKey("allow_take_quest_blocks") || nbt.getBoolean("allow_take_quest_blocks"));
-
+		allowTakeQuestBlocks = new ConfigBoolean(true);
 		emergencyItems = new ConfigList<>(new ConfigItemStack(new ItemStack(Items.APPLE)));
-
-		NBTTagList emergencyItemsList = nbt.getTagList("emergency_items", Constants.NBT.TAG_COMPOUND);
-
-		for (int i = 0; i < emergencyItemsList.tagCount(); i++)
-		{
-			ItemStack stack = new ItemStack(emergencyItemsList.getCompoundTagAt(i));
-
-			if (!stack.isEmpty())
-			{
-				emergencyItems.add(new ConfigItemStack(stack));
-			}
-		}
-
-		Ticks t = Ticks.get(nbt.getString("emergency_items_cooldown"));
-		emergencyItemsCooldown = new ConfigTimer(t.hasTicks() ? t : Ticks.MINUTE.x(10));
+		emergencyItemsCooldown = new ConfigTimer(Ticks.MINUTE.x(5));
 	}
 
 	@Override
@@ -258,6 +231,11 @@ public abstract class QuestFile extends ProgressingQuestObject
 
 				if (quest != null)
 				{
+					if (quest.tasks.size() >= 256)
+					{
+						return null;
+					}
+
 					QuestTask task = QuestTasks.createTask(quest, nbt);
 					quest.tasks.add(task);
 					map.put(task.id, task);
@@ -278,6 +256,11 @@ public abstract class QuestFile extends ProgressingQuestObject
 
 				if (quest != null)
 				{
+					if (quest.rewards.size() >= 256)
+					{
+						return null;
+					}
+
 					QuestReward reward = QuestRewards.createReward(quest, nbt);
 					quest.rewards.add(reward);
 					map.put(reward.id, reward);
@@ -331,6 +314,41 @@ public abstract class QuestFile extends ProgressingQuestObject
 
 		nbt.setTag("emergency_items", emergencyItemsList);
 		nbt.setString("emergency_items_cooldown", emergencyItemsCooldown.getTimer().toString());
+	}
+
+	protected void readData(NBTTagCompound nbt)
+	{
+		chapters.clear();
+		map.clear();
+		map.put((short) 0, this);
+
+		NBTTagList chapterList = nbt.getTagList("chapters", Constants.NBT.TAG_COMPOUND);
+
+		for (int i = 0; i < chapterList.tagCount(); i++)
+		{
+			QuestChapter chapter = new QuestChapter(this, chapterList.getCompoundTagAt(i));
+			chapter.index = chapters.size();
+			chapters.add(chapter);
+			map.put(chapter.id, chapter);
+		}
+
+		allowTakeQuestBlocks.setBoolean(!nbt.hasKey("allow_take_quest_blocks") || nbt.getBoolean("allow_take_quest_blocks"));
+		emergencyItems.list.clear();
+
+		NBTTagList emergencyItemsList = nbt.getTagList("emergency_items", Constants.NBT.TAG_COMPOUND);
+
+		for (int i = 0; i < emergencyItemsList.tagCount(); i++)
+		{
+			ItemStack stack = new ItemStack(emergencyItemsList.getCompoundTagAt(i));
+
+			if (!stack.isEmpty())
+			{
+				emergencyItems.add(new ConfigItemStack(stack));
+			}
+		}
+
+		Ticks t = Ticks.get(nbt.getString("emergency_items_cooldown"));
+		emergencyItemsCooldown.setTimer(t.hasTicks() ? t : Ticks.MINUTE.x(5));
 	}
 
 	@Nullable

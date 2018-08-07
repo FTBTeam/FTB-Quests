@@ -5,9 +5,12 @@ import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToClient;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.gui.ClientQuestFile;
+import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+
+import javax.annotation.Nullable;
 
 /**
  * @author LatvianModder
@@ -15,13 +18,13 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class MessageUpdateTaskProgress extends MessageToClient
 {
 	private short task;
-	private NBTTagCompound nbt;
+	private NBTBase nbt;
 
 	public MessageUpdateTaskProgress()
 	{
 	}
 
-	public MessageUpdateTaskProgress(short k, NBTTagCompound d)
+	public MessageUpdateTaskProgress(short k, @Nullable NBTBase d)
 	{
 		task = k;
 		nbt = d;
@@ -37,20 +40,50 @@ public class MessageUpdateTaskProgress extends MessageToClient
 	public void writeData(DataOut data)
 	{
 		data.writeShort(task);
-		data.writeNBT(nbt);
+
+		if (nbt == null)
+		{
+			data.writeByte(0);
+		}
+		else if (nbt instanceof NBTTagCompound)
+		{
+			data.writeByte(1);
+			data.writeNBT((NBTTagCompound) nbt);
+		}
+		else
+		{
+			data.writeByte(2);
+			NBTTagCompound nbt1 = new NBTTagCompound();
+			nbt1.setTag("_", nbt);
+			data.writeNBT(nbt1);
+		}
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
 		task = data.readShort();
-		nbt = data.readNBT();
+
+		int i = data.readByte();
+
+		if (i == 0)
+		{
+			nbt = null;
+		}
+		else if (i == 1)
+		{
+			nbt = data.readNBT();
+		}
+		else
+		{
+			nbt = data.readNBT().getTag("_");
+		}
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void onMessage()
 	{
-		ClientQuestFile.INSTANCE.getQuestTaskData(task).readFromNBT(nbt);
+		ClientQuestFile.INSTANCE.getQuestTaskData(task).fromNBT(nbt);
 	}
 }

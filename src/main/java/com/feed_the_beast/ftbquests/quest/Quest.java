@@ -467,4 +467,22 @@ public final class Quest extends ProgressingQuestObject
 
 		return false;
 	}
+
+	public QuestTask getTask(int index)
+	{
+		if (tasks.isEmpty())
+		{
+			throw new IllegalStateException("Quest has no tasks!");
+		}
+		else if (index <= 0)
+		{
+			return tasks.get(0);
+		}
+		else if (index >= tasks.size())
+		{
+			return tasks.get(tasks.size() - 1);
+		}
+
+		return tasks.get(index);
+	}
 }

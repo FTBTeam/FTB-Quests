@@ -1,6 +1,8 @@
 package com.feed_the_beast.ftbquests.quest.tasks;
 
-import com.feed_the_beast.ftbquests.block.TileQuest;
+import com.feed_the_beast.ftblib.lib.icon.Icon;
+import com.feed_the_beast.ftbquests.block.TileScreenCore;
+import com.feed_the_beast.ftbquests.block.TileScreenPart;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.ProgressingQuestObject;
 import com.feed_the_beast.ftbquests.quest.Quest;
@@ -11,6 +13,8 @@ import net.minecraft.util.IStringSerializable;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
 
@@ -48,6 +52,12 @@ public abstract class QuestTask extends ProgressingQuestObject implements IStrin
 	}
 
 	@Override
+	public final double getRelativeProgress(IProgressData data)
+	{
+		return data.getQuestTaskData(id).getRelativeProgress();
+	}
+
+	@Override
 	public int getMaxProgress()
 	{
 		return 1;
@@ -56,7 +66,7 @@ public abstract class QuestTask extends ProgressingQuestObject implements IStrin
 	@Override
 	public final void resetProgress(IProgressData data)
 	{
-		data.getQuestTaskData(id).setProgress(0, false);
+		data.getQuestTaskData(id).resetProgress();
 	}
 
 	@Override
@@ -82,9 +92,19 @@ public abstract class QuestTask extends ProgressingQuestObject implements IStrin
 		return new TextComponentTranslation("ftbquests.task." + getName());
 	}
 
-	@Nullable
-	public TileQuest createCustomTileEntity(World world)
+	public TileScreenCore createScreenCore(World world)
 	{
-		return null;
+		return new TileScreenCore();
+	}
+
+	public TileScreenPart createScreenPart(World world)
+	{
+		return new TileScreenPart();
+	}
+
+	@SideOnly(Side.CLIENT)
+	public void renderOnScreen(World world, @Nullable QuestTaskData data)
+	{
+		getIcon().draw3D(world, Icon.EMPTY);
 	}
 }

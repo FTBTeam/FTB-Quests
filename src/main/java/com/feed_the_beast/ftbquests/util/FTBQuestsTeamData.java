@@ -3,6 +3,7 @@ package com.feed_the_beast.ftbquests.util;
 import com.feed_the_beast.ftblib.events.team.ForgeTeamCreatedEvent;
 import com.feed_the_beast.ftblib.events.team.ForgeTeamDataEvent;
 import com.feed_the_beast.ftblib.events.team.ForgeTeamLoadedEvent;
+import com.feed_the_beast.ftblib.events.team.ForgeTeamPlayerJoinedEvent;
 import com.feed_the_beast.ftblib.events.team.ForgeTeamPlayerLeftEvent;
 import com.feed_the_beast.ftblib.events.team.ForgeTeamSavedEvent;
 import com.feed_the_beast.ftblib.lib.data.ForgePlayer;
@@ -25,8 +26,8 @@ import it.unimi.dsi.fastutil.shorts.ShortCollection;
 import it.unimi.dsi.fastutil.shorts.ShortOpenHashSet;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
@@ -99,6 +100,15 @@ public class FTBQuestsTeamData extends TeamData implements IProgressData
 
 	@SubscribeEvent
 	public static void onPlayerLeftTeam(ForgeTeamPlayerLeftEvent event)
+	{
+		if (event.getPlayer().isOnline())
+		{
+			ServerQuestFile.INSTANCE.sync(event.getPlayer().getPlayer());
+		}
+	}
+
+	@SubscribeEvent
+	public static void onPlayerJoinedTeam(ForgeTeamPlayerJoinedEvent event)
 	{
 		if (event.getPlayer().isOnline())
 		{
@@ -211,8 +221,7 @@ public class FTBQuestsTeamData extends TeamData implements IProgressData
 	public void syncTask(QuestTaskData data)
 	{
 		team.markDirty();
-		NBTTagCompound nbt = new NBTTagCompound();
-		data.writeToNBT(nbt);
+		NBTBase nbt = data.toNBT();
 
 		for (EntityPlayerMP player : team.universe.server.getPlayerList().getPlayers())
 		{
@@ -241,16 +250,11 @@ public class FTBQuestsTeamData extends TeamData implements IProgressData
 
 		for (QuestTaskData data : taskData.values())
 		{
-			NBTTagCompound nbt1 = new NBTTagCompound();
-			data.writeToNBT(nbt1);
+			NBTBase nbt = data.toNBT();
 
-			if (nbt1.getSize() == 1 && nbt1.hasKey("Progress", Constants.NBT.TAG_ANY_NUMERIC))
+			if (nbt != null)
 			{
-				taskDataTag.setInteger(Integer.toString(data.task.id), nbt1.getInteger("Progress"));
-			}
-			else if (!nbt1.isEmpty())
-			{
-				taskDataTag.setTag(Integer.toString(data.task.id), nbt1);
+				taskDataTag.setTag(Integer.toString(data.task.id), nbt);
 			}
 		}
 
@@ -311,18 +315,7 @@ public class FTBQuestsTeamData extends TeamData implements IProgressData
 	{
 		for (QuestTaskData data : dataValues)
 		{
-			String key = Integer.toString(data.task.id);
-
-			if (taskDataTag.hasKey(key, Constants.NBT.TAG_COMPOUND))
-			{
-				data.readFromNBT(taskDataTag.getCompoundTag(key));
-			}
-			else
-			{
-				NBTTagCompound nbt = new NBTTagCompound();
-				nbt.setInteger("Progress", taskDataTag.getInteger(key));
-				data.readFromNBT(nbt);
-			}
+			data.fromNBT(taskDataTag.getTag(Integer.toString(data.task.id)));
 		}
 	}
 

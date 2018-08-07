@@ -1,17 +1,12 @@
 package com.feed_the_beast.ftbquests;
 
 import com.feed_the_beast.ftblib.lib.OtherMods;
-import com.feed_the_beast.ftbquests.block.QuestBlockData;
-import com.feed_the_beast.ftbquests.integration.IC2Integration;
+import com.feed_the_beast.ftbquests.integration.ic2.IC2Integration;
 import com.feed_the_beast.ftbquests.net.FTBQuestsNetHandler;
 import com.feed_the_beast.ftbquests.quest.rewards.QuestRewards;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTasks;
+import com.feed_the_beast.ftbquests.util.FTBQuestsWorldData;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.EnumFacing;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
@@ -38,32 +33,13 @@ public class FTBQuests
 	@SidedProxy(serverSide = "com.feed_the_beast.ftbquests.FTBQuestsCommon", clientSide = "com.feed_the_beast.ftbquests.client.FTBQuestsClient")
 	public static FTBQuestsCommon PROXY;
 
-	private static final String PERM_EDIT = "ftbquests.edit";
+	private static final String PERM_EDIT_QUESTS = "ftbquests.edit_quests";
+	public static final String PERM_EDIT_SETTINGS = "ftbquests.edit_settings";
 
 	@Mod.EventHandler
 	public void onPreInit(FMLPreInitializationEvent event)
 	{
-		FTBQuestsConfig.sync();
 		FTBQuestsNetHandler.init();
-
-		CapabilityManager.INSTANCE.register(QuestBlockData.class, new Capability.IStorage<QuestBlockData>()
-		{
-			@Override
-			public NBTBase writeNBT(Capability<QuestBlockData> capability, QuestBlockData instance, EnumFacing side)
-			{
-				return instance.serializeNBT();
-			}
-
-			@Override
-			public void readNBT(Capability<QuestBlockData> capability, QuestBlockData instance, EnumFacing side, NBTBase nbt)
-			{
-				if (nbt instanceof NBTTagCompound)
-				{
-					instance.deserializeNBT((NBTTagCompound) nbt);
-				}
-			}
-		}, () -> new QuestBlockData(null));
-
 		QuestTasks.init();
 		QuestRewards.init();
 
@@ -78,11 +54,12 @@ public class FTBQuests
 	@Mod.EventHandler
 	public void onPostInit(FMLPostInitializationEvent event)
 	{
-		PermissionAPI.registerNode(PERM_EDIT, DefaultPermissionLevel.OP, "Permission for editing quests and resetting progress");
+		PermissionAPI.registerNode(PERM_EDIT_QUESTS, DefaultPermissionLevel.OP, "Permission for editing quests and resetting progress");
+		PermissionAPI.registerNode(PERM_EDIT_SETTINGS, DefaultPermissionLevel.OP, "Permission for editing FTBQuests server settings");
 	}
 
 	public static boolean canEdit(EntityPlayerMP player)
 	{
-		return FTBQuestsConfig.general.editing_mode && (player.server.isSinglePlayer() || PermissionAPI.hasPermission(player, PERM_EDIT));
+		return FTBQuestsWorldData.INSTANCE.editingMode.getBoolean() && (player.server.isSinglePlayer() || PermissionAPI.hasPermission(player, PERM_EDIT_QUESTS));
 	}
 }

@@ -5,7 +5,7 @@ import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToClient;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
-import com.feed_the_beast.ftbquests.block.TileQuest;
+import com.feed_the_beast.ftbquests.block.TileScreenBase;
 import com.feed_the_beast.ftbquests.gui.ClientQuestFile;
 import com.feed_the_beast.ftbquests.gui.ContainerTaskBase;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskData;
@@ -91,9 +91,9 @@ public class MessageOpenTaskGui extends MessageToClient
 			{
 				TileEntity tileEntity = ClientUtils.MC.world.getTileEntity(pos);
 
-				if (tileEntity instanceof TileQuest)
+				if (tileEntity instanceof TileScreenBase)
 				{
-					container.tile = (TileQuest) tileEntity;
+					container.screen = ((TileScreenBase) tileEntity).getScreen();
 				}
 			}
 

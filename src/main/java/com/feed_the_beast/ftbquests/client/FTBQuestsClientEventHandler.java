@@ -4,12 +4,19 @@ import com.feed_the_beast.ftblib.events.CustomSidebarButtonTextEvent;
 import com.feed_the_beast.ftblib.events.client.CustomClickEvent;
 import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
+import com.feed_the_beast.ftbquests.FTBQuestsItems;
+import com.feed_the_beast.ftbquests.block.TileScreenCore;
 import com.feed_the_beast.ftbquests.gui.ClientQuestFile;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.rewards.QuestReward;
+import net.minecraft.client.renderer.block.model.ModelResourceLocation;
+import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraftforge.client.event.ModelRegistryEvent;
+import net.minecraftforge.client.model.ModelLoader;
+import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
@@ -22,6 +29,17 @@ import net.minecraftforge.fml.relauncher.Side;
 public class FTBQuestsClientEventHandler
 {
 	private static final ResourceLocation QUESTS_BUTTON = new ResourceLocation(FTBQuests.MOD_ID, "quests");
+
+	@SubscribeEvent
+	public static void registerModels(ModelRegistryEvent event)
+	{
+		ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(FTBQuestsItems.SCREEN), 0, new ModelResourceLocation(FTBQuestsItems.SCREEN.getRegistryName(), "facing=north"));
+		ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(FTBQuestsItems.SCREEN_PART), 0, new ModelResourceLocation(FTBQuestsItems.SCREEN_PART.getRegistryName(), "facing=north"));
+		ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(FTBQuestsItems.FLAT_SCREEN), 0, new ModelResourceLocation(FTBQuestsItems.FLAT_SCREEN.getRegistryName(), "facing=north"));
+		ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(FTBQuestsItems.FLAT_SCREEN_PART), 0, new ModelResourceLocation(FTBQuestsItems.FLAT_SCREEN_PART.getRegistryName(), "facing=north"));
+
+		ClientRegistry.bindTileEntitySpecialRenderer(TileScreenCore.class, new RenderScreen());
+	}
 
 	@SubscribeEvent
 	public static void onCustomSidebarButtonText(CustomSidebarButtonTextEvent event)
