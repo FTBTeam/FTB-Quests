@@ -61,7 +61,7 @@ public class MessageEditObjectResponse extends MessageToClient
 			{
 				ConfigGroup group = ConfigGroup.newGroup("object");
 				object.getConfig(group);
-				group.deserializeNBT(nbt);
+				group.deserializeEditedNBT(nbt);
 				ClientQuestFile.INSTANCE.refreshGui(ClientQuestFile.INSTANCE);
 			}
 		}

@@ -283,8 +283,8 @@ public class TileScreenCore extends TileScreenBase implements ITickable, IConfig
 				boolean editor = FTBQuests.canEdit((EntityPlayerMP) player);
 				boolean editorOrDestructible = editor || !indestructible.getBoolean();
 				ConfigGroup group0 = ConfigGroup.newGroup("tile");
+				group0.setDisplayName(new TextComponentTranslation("tile.ftbquests.screen.name"));
 				ConfigGroup group = group0.getGroup("ftbquests.screen");
-				group.setDisplayName(new TextComponentTranslation("tile.ftbquests.screen.name"));
 
 				group.add("quest", new ConfigInt(quest & 0xFFFF), ConfigNull.INSTANCE).setCanEdit(editorOrDestructible).setDisplayName(new TextComponentTranslation("ftbquests.quest"));
 				group.add("task_index", new ConfigInt(taskIndex, 0, 255), new ConfigInt(0)).setCanEdit(editorOrDestructible);
@@ -321,6 +321,62 @@ public class TileScreenCore extends TileScreenBase implements ITickable, IConfig
 		if (cTaskData == null)
 		{
 			return false;
+		}
+
+		if (y >= 0D && y <= 0.17D && !indestructible.getBoolean() && cTaskData.task.quest.tasks.size() > 1)
+		{
+			Class currentCore = cTaskData.task.getScreenCoreClass();
+			Class currentPart = cTaskData.task.getScreenPartClass();
+
+			taskIndex++;
+
+			if (taskIndex >= cTaskData.task.quest.tasks.size())
+			{
+				taskIndex = 0;
+			}
+
+			updateContainingBlockInfo();
+			cTaskData = getTaskData();
+
+			if (currentCore != cTaskData.task.getScreenCoreClass() || currentPart != cTaskData.task.getScreenPartClass())
+			{
+				boolean xaxis = getFacing().getAxis() == EnumFacing.Axis.X;
+
+				for (int by = 0; by < size * 2 + 1; by++)
+				{
+					for (int bx = -size; bx <= size; bx++)
+					{
+						int offX = xaxis ? 0 : bx;
+						int offZ = xaxis ? bx : 0;
+						BlockPos pos1 = new BlockPos(pos.getX() + offX, pos.getY() + by, pos.getZ() + offZ);
+						world.removeTileEntity(pos1);
+
+						if (bx == 0 && by == 0)
+						{
+							TileScreenCore core = cTaskData.task.createScreenCore(world);
+							core.setWorld(world);
+							core.setPos(pos1);
+							NBTTagCompound nbt = new NBTTagCompound();
+							writeData(nbt, EnumSaveType.SAVE);
+							core.readData(nbt, EnumSaveType.SAVE);
+							core.validate();
+							world.setTileEntity(pos1, core);
+						}
+						else
+						{
+							TileScreenPart part = cTaskData.task.createScreenPart(world);
+							part.setWorld(world);
+							part.setPos(pos1);
+							part.setOffset(offX, by, offZ);
+							part.validate();
+							world.setTileEntity(pos1, part);
+						}
+					}
+				}
+			}
+
+			markDirty();
+			return true;
 		}
 
 		String top1 = cTaskData.task.quest.getDisplayName().getUnformattedText();

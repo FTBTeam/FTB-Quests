@@ -23,6 +23,8 @@ ftbquests.owner=Owner
 ftbquests.progress=Progress
 
 ftbquests.file=FTB Quests
+ftbquests.file.title=Title
+ftbquests.file.icon=Icon
 ftbquests.file.allow_take_quest_blocks=Allow to Take Quest Blocks
 ftbquests.file.allow_take_quest_blocks.tooltip=Allow to obtain Quest Blocks from the Quests GUI.
 ftbquests.file.emergency_items=Emergency Items

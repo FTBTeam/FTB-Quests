@@ -68,6 +68,18 @@ public class IC2EnergyTask extends QuestTask
 	}
 
 	@Override
+	public Class<? extends TileScreenCore> getScreenCoreClass()
+	{
+		return TileScreenCoreIC2.class;
+	}
+
+	@Override
+	public Class<? extends TileScreenPart> getScreenPartClass()
+	{
+		return TileScreenPartIC2.class;
+	}
+
+	@Override
 	public TileScreenCore createScreenCore(World world)
 	{
 		return new TileScreenCoreIC2();

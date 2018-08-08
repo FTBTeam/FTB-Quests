@@ -92,6 +92,16 @@ public abstract class QuestTask extends ProgressingQuestObject implements IStrin
 		return new TextComponentTranslation("ftbquests.task." + getName());
 	}
 
+	public Class<? extends TileScreenCore> getScreenCoreClass()
+	{
+		return TileScreenCore.class;
+	}
+
+	public Class<? extends TileScreenPart> getScreenPartClass()
+	{
+		return TileScreenPart.class;
+	}
+
 	public TileScreenCore createScreenCore(World world)
 	{
 		return new TileScreenCore();

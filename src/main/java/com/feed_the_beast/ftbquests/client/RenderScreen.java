@@ -89,6 +89,11 @@ public class RenderScreen extends TileEntitySpecialRenderer<TileScreenCore>
 			top2 = "";
 		}
 
+		if (my >= 0D && my <= 0.17D && !screen.indestructible.getBoolean() && task.quest.tasks.size() > 1)
+		{
+			top1 = TextFormatting.GOLD + top1;
+		}
+
 		drawString(font, top1, 0.02D, 0.15D);
 		double iconY = 0.5D;
 
