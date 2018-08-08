@@ -74,8 +74,8 @@ public class FTBQuestsEventHandler
 			public void onAction(ForgePlayer player, NBTTagCompound data)
 			{
 				ConfigGroup main = ConfigGroup.newGroup("admin_panel");
+				main.setDisplayName(getTitle());
 				ConfigGroup group = main.getGroup("ftbquests.edit_settings");
-				group.setDisplayName(getTitle());
 				group.add("editing_mode", FTBQuestsWorldData.INSTANCE.editingMode, new ConfigBoolean(false));
 				FTBLibAPI.editServerConfig(player.getPlayer(), main, FTBQuestsWorldData.INSTANCE);
 			}

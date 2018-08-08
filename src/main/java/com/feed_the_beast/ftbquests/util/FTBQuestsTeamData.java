@@ -77,6 +77,18 @@ public class FTBQuestsTeamData extends TeamData implements IProgressData
 	public static void loadData(ForgeTeamLoadedEvent event)
 	{
 		FTBQuestsTeamData data = get(event.getTeam());
+
+		for (QuestChapter chapter : ServerQuestFile.INSTANCE.chapters)
+		{
+			for (Quest quest : chapter.quests)
+			{
+				for (QuestTask task : quest.tasks)
+				{
+					data.createTaskData(task);
+				}
+			}
+		}
+
 		NBTTagCompound nbt = NBTUtils.readNBT(event.getTeam().getDataFile("ftbquests"));
 		data.readData(nbt == null ? new NBTTagCompound() : nbt);
 	}

@@ -6,16 +6,12 @@ import com.feed_the_beast.ftblib.events.universe.UniverseSavedEvent;
 import com.feed_the_beast.ftblib.lib.config.ConfigBoolean;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.IConfigCallback;
-import com.feed_the_beast.ftblib.lib.data.ForgeTeam;
 import com.feed_the_beast.ftblib.lib.data.Universe;
 import com.feed_the_beast.ftblib.lib.util.CommonUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.events.ModifyBaseFileLocationEvent;
 import com.feed_the_beast.ftbquests.net.MessageSyncEditingMode;
-import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
-import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
@@ -41,11 +37,7 @@ public class FTBQuestsWorldData implements IConfigCallback
 	public static void onUniversePreLoaded(UniverseLoadedEvent.Pre event)
 	{
 		INSTANCE = new FTBQuestsWorldData(event.getUniverse());
-	}
 
-	@SubscribeEvent
-	public static void onUniversePostLoaded(UniverseLoadedEvent.Post event)
-	{
 		if (ServerQuestFile.INSTANCE != null)
 		{
 			ServerQuestFile.INSTANCE.unload();
@@ -78,22 +70,6 @@ public class FTBQuestsWorldData implements IConfigCallback
 		for (int i = 0; i < list.tagCount(); i++)
 		{
 			INSTANCE.extraFiles.add(list.getStringTagAt(i));
-		}
-
-		for (ForgeTeam team : event.getUniverse().getTeams())
-		{
-			FTBQuestsTeamData data = FTBQuestsTeamData.get(team);
-
-			for (QuestChapter chapter : ServerQuestFile.INSTANCE.chapters)
-			{
-				for (Quest quest : chapter.quests)
-				{
-					for (QuestTask task : quest.tasks)
-					{
-						data.createTaskData(task);
-					}
-				}
-			}
 		}
 	}
 

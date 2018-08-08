@@ -4,6 +4,7 @@ import com.feed_the_beast.ftblib.lib.config.ConfigBoolean;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigItemStack;
 import com.feed_the_beast.ftblib.lib.config.ConfigList;
+import com.feed_the_beast.ftblib.lib.config.ConfigString;
 import com.feed_the_beast.ftblib.lib.config.ConfigTimer;
 import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
@@ -65,6 +66,8 @@ public abstract class QuestFile extends ProgressingQuestObject
 		return builder.toString();
 	}
 
+	public final ConfigString title;
+	public final ConfigItemStack icon;
 	public final List<QuestChapter> chapters;
 	public final Short2ObjectMap<QuestObject> map;
 	public final ConfigBoolean allowTakeQuestBlocks;
@@ -74,6 +77,8 @@ public abstract class QuestFile extends ProgressingQuestObject
 	public QuestFile()
 	{
 		super((short) 0);
+		title = new ConfigString("");
+		icon = new ConfigItemStack(ItemStack.EMPTY);
 		chapters = new ArrayList<>();
 		map = new Short2ObjectOpenHashMap<>();
 		allowTakeQuestBlocks = new ConfigBoolean(true);
@@ -293,6 +298,9 @@ public abstract class QuestFile extends ProgressingQuestObject
 	@Override
 	public void writeData(NBTTagCompound nbt)
 	{
+		nbt.setString("title", title.getString());
+		nbt.setTag("icon", icon.getStack().serializeNBT());
+
 		NBTTagList chaptersList = new NBTTagList();
 
 		for (QuestChapter chapter : chapters)
@@ -321,6 +329,9 @@ public abstract class QuestFile extends ProgressingQuestObject
 		chapters.clear();
 		map.clear();
 		map.put((short) 0, this);
+
+		title.setString(nbt.getString("title"));
+		icon.setStack(new ItemStack(nbt.getCompoundTag("icon")));
 
 		NBTTagList chapterList = nbt.getTagList("chapters", Constants.NBT.TAG_COMPOUND);
 
@@ -371,6 +382,8 @@ public abstract class QuestFile extends ProgressingQuestObject
 	@Override
 	public void getConfig(ConfigGroup config)
 	{
+		config.add("title", title, new ConfigString(""));
+		config.add("icon", icon, new ConfigItemStack(ItemStack.EMPTY));
 		config.add("allow_take_quest_blocks", allowTakeQuestBlocks, new ConfigBoolean(true));
 		config.add("emergency_items", emergencyItems, new ConfigList<>(new ConfigItemStack(new ItemStack(Items.APPLE))));
 		config.add("emergency_items_cooldown", emergencyItemsCooldown, new ConfigTimer(Ticks.MINUTE.x(10)));

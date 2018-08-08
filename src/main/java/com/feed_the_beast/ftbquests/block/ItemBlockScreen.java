@@ -1,6 +1,7 @@
 package com.feed_the_beast.ftbquests.block;
 
 import com.feed_the_beast.ftblib.lib.block.ItemBlockBase;
+import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.gui.ClientQuestFile;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
@@ -96,17 +97,16 @@ public class ItemBlockScreen extends ItemBlockBase
 		int size = nbt.getByte("Size");
 		String owner = nbt.getString("Owner");
 
-		tooltip.add(TextFormatting.GOLD.toString() + (1 + size * 2) + " x " + (1 + size * 2));
-		tooltip.add(I18n.format("tile.ftbquests.screen.flat") + ": " + ((BlockScreen) block).flat);
-
-		if (!owner.equals(ClientQuestFile.INSTANCE.teamId))
-		{
-			tooltip.add(I18n.format("ftbquests.owner") + ": " + TextFormatting.DARK_GREEN + owner);
-		}
+		tooltip.add(I18n.format("tile.ftbquests.screen.size") + ": " + TextFormatting.GOLD.toString() + (1 + size * 2) + " x " + (1 + size * 2));
+		boolean flat = ((BlockScreen) block).flat;
+		tooltip.add(I18n.format("tile.ftbquests.screen.flat") + ": " + (flat ? TextFormatting.GREEN : TextFormatting.RED) + flat);
+		tooltip.add(I18n.format("ftbquests.owner") + ": " + TextFormatting.DARK_GREEN + owner);
+		tooltip.add(I18n.format("ftbquests.chapter") + ": " + StringUtils.color(quest.chapter.getDisplayName(), TextFormatting.YELLOW).getFormattedText());
+		tooltip.add(I18n.format("ftbquests.quest") + ": " + StringUtils.color(quest.getDisplayName(), TextFormatting.YELLOW).getFormattedText());
 
 		QuestTask task = quest.getTask(nbt.getByte("TaskIndex"));
 
-		tooltip.add(I18n.format("ftbquests.task") + ": " + TextFormatting.YELLOW + task.getDisplayName().getFormattedText());
+		tooltip.add(I18n.format("ftbquests.task") + ": " + StringUtils.color(task.getDisplayName(), TextFormatting.YELLOW).getFormattedText());
 
 		IProgressData data = ClientQuestFile.INSTANCE.getData(owner);
 
