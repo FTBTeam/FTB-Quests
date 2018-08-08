@@ -11,6 +11,7 @@ import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
 import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.gui.SimpleTextButton;
+import com.feed_the_beast.ftblib.lib.gui.Theme;
 import com.feed_the_beast.ftblib.lib.gui.Widget;
 import com.feed_the_beast.ftblib.lib.gui.WidgetLayout;
 import com.feed_the_beast.ftblib.lib.gui.WidgetType;
@@ -727,6 +728,11 @@ public class GuiQuestTree extends GuiBase
 					add(new ChapterOptionButton(this, "D", I18n.format("ftbquests.gui.dummy_buttons"), () -> dummyButtonsVisible = !dummyButtonsVisible, () -> true));
 				}
 
+				if (!questFile.emergencyItems.isEmpty())
+				{
+					add(new ChapterOptionButton(this, "E", I18n.format("ftbquests.file.emergency_items"), () -> new GuiWaitItems().openGui(), () -> true));
+				}
+
 				add(new ChapterOptionButton(this, "-", I18n.format("ftbquests.gui.zoom_out"), () -> zoomOut(), () -> canZoomOut()));
 				add(new ChapterOptionButton(this, "+", I18n.format("ftbquests.gui.zoom_in"), () -> zoomIn(), () -> canZoomIn()));
 			}
@@ -1056,5 +1062,11 @@ public class GuiQuestTree extends GuiBase
 	public GuiScreen getPrevScreen()
 	{
 		return null;
+	}
+
+	@Override
+	public Theme getTheme()
+	{
+		return QuestsTheme.INSTANCE;
 	}
 }

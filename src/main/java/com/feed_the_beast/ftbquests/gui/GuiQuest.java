@@ -11,6 +11,7 @@ import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.gui.PanelScrollBar;
 import com.feed_the_beast.ftblib.lib.gui.SimpleTextButton;
+import com.feed_the_beast.ftblib.lib.gui.Theme;
 import com.feed_the_beast.ftblib.lib.gui.Widget;
 import com.feed_the_beast.ftblib.lib.gui.WidgetLayout;
 import com.feed_the_beast.ftblib.lib.gui.WidgetType;
@@ -663,5 +664,11 @@ public class GuiQuest extends GuiBase
 	public GuiScreen getPrevScreen()
 	{
 		return null;
+	}
+
+	@Override
+	public Theme getTheme()
+	{
+		return QuestsTheme.INSTANCE;
 	}
 }
