@@ -386,6 +386,6 @@ public abstract class QuestFile extends ProgressingQuestObject
 		config.add("icon", icon, new ConfigItemStack(ItemStack.EMPTY));
 		config.add("allow_take_quest_blocks", allowTakeQuestBlocks, new ConfigBoolean(true));
 		config.add("emergency_items", emergencyItems, new ConfigList<>(new ConfigItemStack(new ItemStack(Items.APPLE))));
-		config.add("emergency_items_cooldown", emergencyItemsCooldown, new ConfigTimer(Ticks.MINUTE.x(10)));
+		config.add("emergency_items_cooldown", emergencyItemsCooldown, new ConfigTimer(Ticks.MINUTE.x(5)));
 	}
 }

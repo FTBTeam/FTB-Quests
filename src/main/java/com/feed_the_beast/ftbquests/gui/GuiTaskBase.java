@@ -7,6 +7,7 @@ import com.feed_the_beast.ftblib.lib.gui.GuiContainerWrapper;
 import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
 import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.gui.Panel;
+import com.feed_the_beast.ftblib.lib.gui.Theme;
 import com.feed_the_beast.ftblib.lib.gui.WidgetLayout;
 import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
@@ -224,5 +225,11 @@ public class GuiTaskBase extends GuiBase
 				}
 			}
 		}
+	}
+
+	@Override
+	public Theme getTheme()
+	{
+		return QuestsTheme.INSTANCE;
 	}
 }

@@ -152,7 +152,7 @@ public class TileScreenCore extends TileScreenBase implements ITickable, IConfig
 	public boolean hasCapability(Capability<?> capability, @Nullable EnumFacing facing)
 	{
 		cTaskData = getTaskData();
-		return cTaskData != null && cTaskData.task.getMaxProgress() > 0 && cTaskData.hasCapability(capability, facing) || super.hasCapability(capability, facing);
+		return cTaskData != null && cTaskData.task.getMaxProgress() > 0 && cTaskData.hasCapability(capability, facing) && cTaskData.task.quest.canStartTasks(cTaskData.data) || super.hasCapability(capability, facing);
 	}
 
 	@Override
@@ -160,7 +160,18 @@ public class TileScreenCore extends TileScreenBase implements ITickable, IConfig
 	public <T> T getCapability(Capability<T> capability, @Nullable EnumFacing facing)
 	{
 		cTaskData = getTaskData();
-		return cTaskData != null && cTaskData.task.getMaxProgress() > 0 ? cTaskData.getCapability(capability, facing) : super.getCapability(capability, facing);
+
+		if (cTaskData != null && cTaskData.task.getMaxProgress() > 0)
+		{
+			T object = cTaskData.getCapability(capability, facing);
+
+			if (object != null && cTaskData.task.quest.canStartTasks(cTaskData.data))
+			{
+				return object;
+			}
+		}
+
+		return super.getCapability(capability, facing);
 	}
 
 	public EnumFacing getFacing()
