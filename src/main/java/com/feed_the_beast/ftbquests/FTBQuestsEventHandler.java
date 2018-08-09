@@ -34,10 +34,8 @@ public class FTBQuestsEventHandler
 	public static void registerBlocks(RegistryEvent.Register<Block> event)
 	{
 		event.getRegistry().registerAll(
-				new BlockScreen(FTBQuests.MOD_ID, "screen", false),
-				new BlockScreenPart(FTBQuests.MOD_ID, "screen_part", false),
-				new BlockScreen(FTBQuests.MOD_ID, "flat_screen", true),
-				new BlockScreenPart(FTBQuests.MOD_ID, "flat_screen_part", true)
+				new BlockScreen(FTBQuests.MOD_ID, "screen"),
+				new BlockScreenPart(FTBQuests.MOD_ID, "screen_part")
 		);
 
 		GameRegistry.registerTileEntity(TileScreenCore.class, new ResourceLocation(FTBQuests.MOD_ID, "screen_core"));
@@ -48,8 +46,7 @@ public class FTBQuestsEventHandler
 	public static void registerItems(RegistryEvent.Register<Item> event)
 	{
 		event.getRegistry().registerAll(
-				new ItemBlockScreen(FTBQuestsItems.SCREEN),
-				new ItemBlockScreen(FTBQuestsItems.FLAT_SCREEN)
+				new ItemBlockScreen(FTBQuestsItems.SCREEN)
 		);
 	}
 

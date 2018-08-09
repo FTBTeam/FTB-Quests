@@ -6,7 +6,7 @@ import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToServer;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.block.TileScreenCore;
-import com.feed_the_beast.ftbquests.gui.ContainerTaskBase;
+import com.feed_the_beast.ftbquests.gui.ContainerTask;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskData;
 import com.feed_the_beast.ftbquests.util.FTBQuestsTeamData;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -65,12 +65,12 @@ public class MessageOpenTask extends MessageToServer
 	{
 		player.getNextWindowId();
 		player.closeContainer();
-		player.openContainer = data.getContainer(player);
+		player.openContainer = new ContainerTask(player, data);
 		player.openContainer.windowId = player.currentWindowId;
 
 		if (tile != null)
 		{
-			((ContainerTaskBase) player.openContainer).screen = tile;
+			((ContainerTask) player.openContainer).screen = tile;
 		}
 
 		player.openContainer.addListener(player);

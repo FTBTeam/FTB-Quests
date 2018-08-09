@@ -1,5 +1,7 @@
 package com.feed_the_beast.ftbquests.block;
 
+import com.feed_the_beast.ftblib.lib.block.BlockFlags;
+import com.feed_the_beast.ftblib.lib.config.ConfigBlockState;
 import com.feed_the_beast.ftblib.lib.config.ConfigBoolean;
 import com.feed_the_beast.ftblib.lib.config.ConfigEnum;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
@@ -10,8 +12,10 @@ import com.feed_the_beast.ftblib.lib.config.IConfigCallback;
 import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
 import com.feed_the_beast.ftblib.lib.math.MathUtils;
 import com.feed_the_beast.ftblib.lib.tile.EnumSaveType;
+import com.feed_the_beast.ftblib.lib.util.CommonUtils;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.FTBQuests;
+import com.feed_the_beast.ftbquests.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.net.MessageOpenTask;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.Quest;
@@ -19,7 +23,6 @@ import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskData;
 import com.feed_the_beast.ftbquests.util.ProgressDisplayMode;
 import com.feed_the_beast.ftbquests.util.RedstoneOutputMode;
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockHorizontal;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.command.ICommandSender;
@@ -35,6 +38,7 @@ import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.items.CapabilityItemHandler;
 
 import javax.annotation.Nullable;
 
@@ -52,6 +56,7 @@ public class TileScreenCore extends TileScreenBase implements ITickable, IConfig
 	public ConfigEnum<RedstoneOutputMode> redstoneOutputMode = new ConfigEnum<>(RedstoneOutputMode.NAME_MAP);
 	public int redstoneOutput = 0;
 	public ConfigBoolean indestructible = new ConfigBoolean(false);
+	public ConfigBlockState skin = new ConfigBlockState(CommonUtils.AIR_STATE);
 
 	private IProgressData cOwner;
 	private QuestTask cTask;
@@ -61,7 +66,16 @@ public class TileScreenCore extends TileScreenBase implements ITickable, IConfig
 	protected void writeData(NBTTagCompound nbt, EnumSaveType type)
 	{
 		nbt.setString("Facing", getFacing().getName());
+		writeScreenData(nbt);
 
+		if (redstoneOutput > 0)
+		{
+			nbt.setByte("RedstoneOutput", (byte) redstoneOutput);
+		}
+	}
+
+	private void writeScreenData(NBTTagCompound nbt)
+	{
 		if (!owner.isEmpty())
 		{
 			nbt.setString("Owner", owner.getString());
@@ -92,14 +106,14 @@ public class TileScreenCore extends TileScreenBase implements ITickable, IConfig
 			nbt.setString("RedstoneOutputMode", redstoneOutputMode.getString());
 		}
 
-		if (redstoneOutput > 0)
-		{
-			nbt.setByte("RedstoneOutput", (byte) redstoneOutput);
-		}
-
 		if (indestructible.getBoolean())
 		{
 			nbt.setBoolean("Indestructible", true);
+		}
+
+		if (!skin.isEmpty())
+		{
+			nbt.setString("Skin", skin.getString());
 		}
 	}
 
@@ -107,24 +121,27 @@ public class TileScreenCore extends TileScreenBase implements ITickable, IConfig
 	protected void readData(NBTTagCompound nbt, EnumSaveType type)
 	{
 		facing = EnumFacing.byName(nbt.getString("Facing"));
+		readScreenData(nbt);
+		redstoneOutput = nbt.getByte("RedstoneOutput");
+	}
+
+	private void readScreenData(NBTTagCompound nbt)
+	{
 		owner.setString(nbt.getString("Owner"));
 		quest = nbt.getShort("Quest");
 		taskIndex = nbt.getByte("TaskIndex") & 0xFF;
 		size = nbt.getByte("Size");
 		progressDisplayMode.setValue(nbt.getString("ProgressDisplayMode"));
 		redstoneOutputMode.setValue(nbt.getString("RedstoneOutputMode"));
-		redstoneOutput = nbt.getByte("RedstoneOutput");
 		indestructible.setBoolean(nbt.getBoolean("Indestructible"));
+		skin.setValueFromString(nbt.getString("Skin"), false);
 	}
 
 	@Override
 	public void writeToItem(ItemStack stack)
 	{
 		NBTTagCompound nbt = new NBTTagCompound();
-		nbt.setString("Owner", owner.getString());
-		nbt.setShort("Quest", quest);
-		nbt.setByte("TaskIndex", (byte) taskIndex);
-		nbt.setByte("Size", (byte) size);
+		writeScreenData(nbt);
 
 		if (!nbt.isEmpty())
 		{
@@ -136,15 +153,7 @@ public class TileScreenCore extends TileScreenBase implements ITickable, IConfig
 	public void readFromItem(ItemStack stack)
 	{
 		NBTTagCompound nbt = stack.getTagCompound();
-
-		if (nbt != null)
-		{
-			owner.setString(nbt.getString("Owner"));
-			quest = nbt.getShort("Quest");
-			taskIndex = nbt.getByte("TaskIndex") & 0xFF;
-			size = nbt.getByte("Size");
-		}
-
+		readScreenData(nbt == null ? new NBTTagCompound() : nbt);
 		updateContainingBlockInfo();
 	}
 
@@ -152,7 +161,26 @@ public class TileScreenCore extends TileScreenBase implements ITickable, IConfig
 	public boolean hasCapability(Capability<?> capability, @Nullable EnumFacing facing)
 	{
 		cTaskData = getTaskData();
-		return cTaskData != null && cTaskData.task.getMaxProgress() > 0 && cTaskData.hasCapability(capability, facing) && cTaskData.task.quest.canStartTasks(cTaskData.data) || super.hasCapability(capability, facing);
+
+		if (cTaskData != null && cTaskData.task.getMaxProgress() > 0)
+		{
+			if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)
+			{
+				if (cTaskData.canInsertItem())
+				{
+					return true;
+				}
+			}
+			else
+			{
+				if (cTaskData.hasCapability(capability, facing) && cTaskData.task.quest.canStartTasks(cTaskData.data))
+				{
+					return true;
+				}
+			}
+		}
+
+		return super.hasCapability(capability, facing);
 	}
 
 	@Override
@@ -163,11 +191,21 @@ public class TileScreenCore extends TileScreenBase implements ITickable, IConfig
 
 		if (cTaskData != null && cTaskData.task.getMaxProgress() > 0)
 		{
-			T object = cTaskData.getCapability(capability, facing);
-
-			if (object != null && cTaskData.task.quest.canStartTasks(cTaskData.data))
+			if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)
 			{
-				return object;
+				if (cTaskData.canInsertItem())
+				{
+					return (T) cTaskData;
+				}
+			}
+			else
+			{
+				T object = cTaskData.getCapability(capability, facing);
+
+				if (object != null && cTaskData.task.quest.canStartTasks(cTaskData.data))
+				{
+					return object;
+				}
 			}
 		}
 
@@ -180,7 +218,7 @@ public class TileScreenCore extends TileScreenBase implements ITickable, IConfig
 		{
 			IBlockState state = getBlockState();
 
-			if (state.getBlock() instanceof BlockScreen)
+			if (state.getBlock() == FTBQuestsItems.SCREEN)
 			{
 				facing = getBlockState().getValue(BlockHorizontal.FACING);
 			}
@@ -273,8 +311,7 @@ public class TileScreenCore extends TileScreenBase implements ITickable, IConfig
 	@SideOnly(Side.CLIENT)
 	public AxisAlignedBB getRenderBoundingBox()
 	{
-		Block block = getBlockType();
-		return BlockScreen.getScreenAABB(this, block instanceof BlockScreen && ((BlockScreen) block).flat);
+		return BlockScreen.getScreenAABB(this);
 	}
 
 	@Override
@@ -302,10 +339,10 @@ public class TileScreenCore extends TileScreenBase implements ITickable, IConfig
 
 				if (editor)
 				{
-					group.add("size", new ConfigInt(size, 0, 4), new ConfigInt(0));
 					group.add("owner", owner, new ConfigString("")).setDisplayName(new TextComponentTranslation("ftbquests.owner"));
 				}
 
+				group.add("skin", skin, new ConfigBlockState(CommonUtils.AIR_STATE)).setCanEdit(editorOrDestructible);
 				group.add("progress_display_mode", progressDisplayMode, new ConfigEnum<>(ProgressDisplayMode.NAME_MAP));
 				group.add("redstone_output_mode", redstoneOutputMode, new ConfigEnum<>(RedstoneOutputMode.NAME_MAP)).setCanEdit(editorOrDestructible);
 
@@ -416,6 +453,7 @@ public class TileScreenCore extends TileScreenBase implements ITickable, IConfig
 	public void onConfigSaved(ConfigGroup group, ICommandSender sender)
 	{
 		markDirty();
+		world.notifyBlockUpdate(pos, getBlockState(), getBlockState(), BlockFlags.DEFAULT_AND_RERENDER);
 	}
 
 	@Override
@@ -423,6 +461,24 @@ public class TileScreenCore extends TileScreenBase implements ITickable, IConfig
 	{
 		if (world.getTotalWorldTime() % 20 == 0L)
 		{
+			if (getBlockType() != FTBQuestsItems.SCREEN)
+			{
+				boolean xaxis = getFacing().getAxis() == EnumFacing.Axis.X;
+
+				for (int y = 0; y < size * 2 + 1; y++)
+				{
+					for (int x = -size; x <= size; x++)
+					{
+						int offX = xaxis ? 0 : x;
+						int offZ = xaxis ? x : 0;
+						BlockPos pos1 = new BlockPos(pos.getX() + offX, pos.getY() + y, pos.getZ() + offZ);
+						world.removeTileEntity(pos1);
+					}
+				}
+
+				return;
+			}
+
 			int rout = redstoneOutput;
 			redstoneOutput = 0;
 
@@ -432,11 +488,11 @@ public class TileScreenCore extends TileScreenBase implements ITickable, IConfig
 
 				if (cTaskData != null)
 				{
-					int progress = cTaskData.getProgress();
+					long progress = cTaskData.getProgress();
 
 					if (progress > 0)
 					{
-						int max = cTaskData.task.getMaxProgress();
+						long max = cTaskData.task.getMaxProgress();
 
 						if (progress >= max)
 						{

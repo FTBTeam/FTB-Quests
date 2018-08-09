@@ -31,9 +31,9 @@ public class UnknownTask extends QuestTask
 	}
 
 	@Override
-	public int getMaxProgress()
+	public long getMaxProgress()
 	{
-		return 0;
+		return 0L;
 	}
 
 	@Override
@@ -96,9 +96,9 @@ public class UnknownTask extends QuestTask
 		}
 
 		@Override
-		public int getProgress()
+		public long getProgress()
 		{
-			return 0;
+			return 0L;
 		}
 
 		@Override

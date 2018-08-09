@@ -17,7 +17,6 @@ import com.feed_the_beast.ftbquests.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.net.MessageGetScreen;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 
 import java.util.ArrayList;
@@ -27,9 +26,9 @@ import java.util.function.Consumer;
 /**
  * @author LatvianModder
  */
-public class GuiTaskBase extends GuiBase
+public class GuiTask extends GuiBase
 {
-	public final ContainerTaskBase container;
+	public final ContainerTask container;
 	public final boolean hasTile;
 	public final Panel tabs;
 	public final String taskName;
@@ -56,7 +55,7 @@ public class GuiTaskBase extends GuiBase
 		}
 	}
 
-	public GuiTaskBase(ContainerTaskBase c)
+	public GuiTask(ContainerTask c)
 	{
 		container = c;
 		hasTile = container.screen != null && !container.screen.isInvalid();
@@ -78,33 +77,19 @@ public class GuiTaskBase extends GuiBase
 					{
 						List<ContextMenuItem> contextMenu = new ArrayList<>();
 						contextMenu.add(new ContextMenuItem("Screen", Icon.EMPTY, () -> {}).setEnabled(false));
-						contextMenu.add(new ContextMenuItem("1 x 1", Icon.EMPTY, () -> new MessageGetScreen(container.data.task.id, 0, 0).sendToServer()));
+						contextMenu.add(new ContextMenuItem("1 x 1", Icon.EMPTY, () -> new MessageGetScreen(container.data.task.id, 0).sendToServer()));
 
 						if (ClientQuestFile.INSTANCE.canEdit())
 						{
-							contextMenu.add(new ContextMenuItem("3 x 3", Icon.EMPTY, () -> new MessageGetScreen(container.data.task.id, 1, 0).sendToServer()));
-							contextMenu.add(new ContextMenuItem("5 x 5", Icon.EMPTY, () -> new MessageGetScreen(container.data.task.id, 2, 0).sendToServer()));
-							contextMenu.add(new ContextMenuItem("7 x 7", Icon.EMPTY, () -> new MessageGetScreen(container.data.task.id, 3, 0).sendToServer()));
-							contextMenu.add(new ContextMenuItem("9 x 9", Icon.EMPTY, () -> new MessageGetScreen(container.data.task.id, 4, 0).sendToServer()));
-						}
-
-						contextMenu.add(ContextMenuItem.SEPARATOR);
-						contextMenu.add(new ContextMenuItem("Flat Screen", Icon.EMPTY, () -> {}).setEnabled(false));
-						contextMenu.add(new ContextMenuItem("1 x 1", Icon.EMPTY, () -> new MessageGetScreen(container.data.task.id, 0, 1).sendToServer()));
-
-						if (ClientQuestFile.INSTANCE.canEdit())
-						{
-							contextMenu.add(new ContextMenuItem("3 x 3", Icon.EMPTY, () -> new MessageGetScreen(container.data.task.id, 1, 1).sendToServer()));
-							contextMenu.add(new ContextMenuItem("5 x 5", Icon.EMPTY, () -> new MessageGetScreen(container.data.task.id, 2, 1).sendToServer()));
-							contextMenu.add(new ContextMenuItem("7 x 7", Icon.EMPTY, () -> new MessageGetScreen(container.data.task.id, 3, 1).sendToServer()));
-							contextMenu.add(new ContextMenuItem("9 x 9", Icon.EMPTY, () -> new MessageGetScreen(container.data.task.id, 4, 1).sendToServer()));
+							contextMenu.add(new ContextMenuItem("3 x 3", Icon.EMPTY, () -> new MessageGetScreen(container.data.task.id, 1).sendToServer()));
+							contextMenu.add(new ContextMenuItem("5 x 5", Icon.EMPTY, () -> new MessageGetScreen(container.data.task.id, 2).sendToServer()));
+							contextMenu.add(new ContextMenuItem("7 x 7", Icon.EMPTY, () -> new MessageGetScreen(container.data.task.id, 3).sendToServer()));
+							contextMenu.add(new ContextMenuItem("9 x 9", Icon.EMPTY, () -> new MessageGetScreen(container.data.task.id, 4).sendToServer()));
 						}
 
 						getGui().openContextMenu(contextMenu);
 					}));
 				}
-
-				addTabs(this);
 			}
 
 			@Override
@@ -117,10 +102,6 @@ public class GuiTaskBase extends GuiBase
 		tabs.setPosAndSize(-19, 8, 20, 0);
 		taskName = container.data.task.getDisplayName().getFormattedText();
 		taskIcon = container.data.task.getIcon();
-	}
-
-	public void addTabs(Panel panel)
-	{
 	}
 
 	@Override
@@ -158,72 +139,22 @@ public class GuiTaskBase extends GuiBase
 			drawString(taskName, ax + width / 2, ay + 14, Color4I.WHITE, CENTERED);
 		}
 
-		int max = container.data.task.getMaxProgress();
-		int progress = Math.min(max, container.data.task.getProgress(ClientQuestFile.INSTANCE));
+		long max = container.data.task.getMaxProgress();
+		long progress = Math.min(max, container.data.task.getProgress(ClientQuestFile.INSTANCE));
 
 		String s = max == 0 ? "0/0 [0%]" : String.format("%d/%d [%d%%]", progress, max, (int) (progress * 100D / (double) max));
 		sw = getStringWidth(s);
 
 		Color4I.DARK_GRAY.draw(ax + (width - sw - 8) / 2, ay + 60, sw + 8, 13);
-		Color4I.LIGHT_BLUE.draw(ax + (width - sw - 6) / 2, ay + 61, max == 0 ? 0 : (sw + 6) * progress / max, 11);
+		Color4I.LIGHT_BLUE.draw(ax + (width - sw - 6) / 2, ay + 61, max == 0 ? 0 : (int) ((sw + 6) * progress / max), 11);
 
 		drawString(s, ax + width / 2, ay + 63, Color4I.WHITE, CENTERED);
 
-		if (container.getNonPlayerSlots() <= 0)
+		if (!container.data.canInsertItem())
 		{
 			pushFontUnicode(true);
 			drawString(I18n.format("ftbquests.task.no_items"), ax + width / 2, ay + 37, Color4I.LIGHT_RED, CENTERED);
 			popFontUnicode();
-		}
-	}
-
-	@Override
-	public void drawForeground()
-	{
-		super.drawForeground();
-
-		int ax = getAX();
-		int ay = getAY();
-		int x = getMouseX() - getAX();
-		int y = getMouseY() - getAY();
-
-		for (int i = 0; i < container.getNonPlayerSlots(); i++)
-		{
-			Slot slot = container.inventorySlots.get(i);
-
-			if (x >= slot.xPos && y >= slot.yPos && x < slot.xPos + 16 && y < slot.yPos + 16 && !slot.getHasStack())
-			{
-				container.getEmptySlotIcon(i).draw(ax + slot.xPos, ay + slot.yPos, 16, 16, Color4I.WHITE.withAlpha(70));
-			}
-		}
-	}
-
-	@Override
-	public void addMouseOverText(List<String> list)
-	{
-		super.addMouseOverText(list);
-
-		if (container.getNonPlayerSlots() > 0)
-		{
-			int x = getMouseX() - getAX();
-			int y = getMouseY() - getAY();
-
-			for (int i = 0; i < container.getNonPlayerSlots(); i++)
-			{
-				Slot slot = container.inventorySlots.get(i);
-
-				if (x >= slot.xPos && y >= slot.yPos && x < slot.xPos + 16 && y < slot.yPos + 16 && !slot.getHasStack())
-				{
-					String text = container.getEmptySlotText(i);
-
-					if (!text.isEmpty())
-					{
-						list.add(text);
-					}
-
-					return;
-				}
-			}
 		}
 	}
 

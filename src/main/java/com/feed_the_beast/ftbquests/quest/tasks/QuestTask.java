@@ -46,7 +46,7 @@ public abstract class QuestTask extends ProgressingQuestObject implements IStrin
 	}
 
 	@Override
-	public final int getProgress(IProgressData data)
+	public final long getProgress(IProgressData data)
 	{
 		return data.getQuestTaskData(id).getProgress();
 	}
@@ -58,9 +58,14 @@ public abstract class QuestTask extends ProgressingQuestObject implements IStrin
 	}
 
 	@Override
-	public int getMaxProgress()
+	public long getMaxProgress()
 	{
 		return 1;
+	}
+
+	public String getMaxProgressString()
+	{
+		return Long.toString(getMaxProgress());
 	}
 
 	@Override

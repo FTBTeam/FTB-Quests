@@ -3,19 +3,14 @@ package com.feed_the_beast.ftbquests.quest.tasks;
 import com.feed_the_beast.ftblib.lib.config.ConfigFluid;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigInt;
+import com.feed_the_beast.ftblib.lib.config.ConfigLong;
 import com.feed_the_beast.ftblib.lib.config.ConfigNBT;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
-import com.feed_the_beast.ftbquests.gui.ContainerFluidTask;
-import com.feed_the_beast.ftbquests.gui.ContainerTaskBase;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTPrimitive;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagInt;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
@@ -31,7 +26,6 @@ import net.minecraftforge.fluids.capability.IFluidHandlerItem;
 import net.minecraftforge.fluids.capability.IFluidTankProperties;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.ItemHandlerHelper;
 
 import javax.annotation.Nullable;
 
@@ -44,7 +38,7 @@ public class FluidTask extends QuestTask
 
 	public final ConfigFluid fluid;
 	public final ConfigNBT fluidNBT;
-	public final ConfigInt amount;
+	public final ConfigLong amount;
 
 	public FluidTask(Quest quest, NBTTagCompound nbt)
 	{
@@ -52,13 +46,13 @@ public class FluidTask extends QuestTask
 
 		fluid = new ConfigFluid(FluidRegistry.getFluid(nbt.getString("fluid")), FluidRegistry.WATER);
 		fluidNBT = new ConfigNBT(nbt.hasKey("nbt") ? nbt.getCompoundTag("nbt") : null);
-		amount = new ConfigInt(nbt.hasKey("amount") ? nbt.getInteger("amount") : 1000, 1, Integer.MAX_VALUE);
+		amount = new ConfigLong(nbt.hasKey("amount") ? nbt.getLong("amount") : 1000, 1, Long.MAX_VALUE);
 	}
 
 	@Override
-	public int getMaxProgress()
+	public long getMaxProgress()
 	{
-		return amount.getInt();
+		return amount.getLong();
 	}
 
 	@Override
@@ -73,9 +67,9 @@ public class FluidTask extends QuestTask
 		nbt.setString("type", "fluid");
 		nbt.setString("fluid", fluid.getString());
 
-		if (amount.getInt() != 1000)
+		if (amount.getLong() != 1000)
 		{
-			nbt.setInteger("amount", amount.getInt());
+			nbt.setLong("amount", amount.getLong());
 		}
 
 		if (fluidNBT.getNBT() != null)
@@ -92,7 +86,7 @@ public class FluidTask extends QuestTask
 
 		if (stack.isEmpty())
 		{
-			return Icon.getIcon(fluid.getFluid().getStill(createFluidStack(Fluid.BUCKET_VOLUME)).toString());
+			return Icon.getIcon(fluid.getFluid().getStill(fluidStack).toString());
 		}
 		else
 		{
@@ -146,75 +140,15 @@ public class FluidTask extends QuestTask
 		return new Data(this, data);
 	}
 
-	public static class Data extends QuestTaskData<FluidTask> implements IFluidHandler, IItemHandler
+	public static class Data extends SimpleQuestTaskData<FluidTask> implements IFluidHandler, IItemHandler
 	{
 		private final IFluidTankProperties[] properties;
-		private ItemStack outputStack = ItemStack.EMPTY;
-		private int progress;
 
 		private Data(FluidTask t, IProgressData data)
 		{
 			super(t, data);
 			properties = new IFluidTankProperties[1];
-			properties[0] = new FluidTankProperties(task.createFluidStack(0), task.amount.getInt(), true, false);
-		}
-
-		@Nullable
-		@Override
-		public NBTBase toNBT()
-		{
-			if (outputStack.isEmpty())
-			{
-				return progress > 0 ? new NBTTagInt(progress) : null;
-			}
-
-			NBTTagCompound nbt = new NBTTagCompound();
-
-			if (progress > 0)
-			{
-				nbt.setInteger("Progress", progress);
-			}
-
-			nbt.setTag("Output", outputStack.serializeNBT());
-			return nbt;
-		}
-
-		@Override
-		public void fromNBT(@Nullable NBTBase nbt)
-		{
-			if (nbt instanceof NBTPrimitive)
-			{
-				progress = ((NBTPrimitive) nbt).getInt();
-				outputStack = ItemStack.EMPTY;
-			}
-			else if (nbt instanceof NBTTagCompound)
-			{
-				NBTTagCompound nbt1 = (NBTTagCompound) nbt;
-				progress = nbt1.getInteger("Progress");
-				outputStack = new ItemStack(nbt1.getCompoundTag("Output"));
-
-				if (outputStack.isEmpty())
-				{
-					outputStack = ItemStack.EMPTY;
-				}
-			}
-			else
-			{
-				progress = 0;
-				outputStack = ItemStack.EMPTY;
-			}
-		}
-
-		@Override
-		public int getProgress()
-		{
-			return progress;
-		}
-
-		@Override
-		public void resetProgress()
-		{
-			progress = 0;
+			properties[0] = new FluidTankProperties(task.createFluidStack(0), 0, true, false);
 		}
 
 		@Override
@@ -231,19 +165,8 @@ public class FluidTask extends QuestTask
 		}
 
 		@Override
-		public ContainerTaskBase getContainer(EntityPlayer player)
-		{
-			return new ContainerFluidTask(player, this);
-		}
-
-		@Override
 		public IFluidTankProperties[] getTankProperties()
 		{
-			if (properties[0].getContents() != null)
-			{
-				properties[0].getContents().amount = progress;
-			}
-
 			return properties;
 		}
 
@@ -252,9 +175,9 @@ public class FluidTask extends QuestTask
 		{
 			FluidStack fluidStack = task.createFluidStack(Fluid.BUCKET_VOLUME);
 
-			if (progress < task.amount.getInt() && fluidStack.isFluidEqual(resource))
+			if (progress < task.amount.getLong() && fluidStack.isFluidEqual(resource))
 			{
-				int add = Math.min(resource.amount, task.amount.getInt() - progress);
+				long add = Math.min(100000000000L, Math.min(resource.amount, task.amount.getLong() - progress));
 
 				if (add > 0)
 				{
@@ -264,7 +187,7 @@ public class FluidTask extends QuestTask
 						data.syncTask(this);
 					}
 
-					return add;
+					return (int) add;
 				}
 			}
 
@@ -286,35 +209,19 @@ public class FluidTask extends QuestTask
 		}
 
 		@Override
-		public int getSlots()
+		public boolean canInsertItem()
 		{
-			return 2;
+			return true;
 		}
 
 		@Override
-		public ItemStack getStackInSlot(int slot)
+		public ItemStack insertItem(ItemStack stack, boolean simulate)
 		{
-			return slot == 0 ? ItemStack.EMPTY : outputStack;
-		}
-
-		@Override
-		public ItemStack insertItem(int slot, ItemStack stack, boolean simulate)
-		{
-			if (slot == 1 || stack.isEmpty())
-			{
-				return stack;
-			}
-
-			if (progress >= task.amount.getInt())
-			{
-				return stack;
-			}
-
 			IFluidHandlerItem item = stack.getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY, null);
 
-			if (item != null && outputStack.isEmpty())
+			if (item != null)
 			{
-				FluidStack fluidStack = item.drain(task.createFluidStack(task.amount.getInt() - progress), false);
+				FluidStack fluidStack = item.drain(task.createFluidStack((int) Math.max(1000000000, task.amount.getLong() - progress)), false);
 
 				if (fluidStack == null || fluidStack.amount <= 0)
 				{
@@ -325,38 +232,10 @@ public class FluidTask extends QuestTask
 				{
 					item.drain(fluidStack, true);
 					progress += fluidStack.amount;
-					outputStack = item.getContainer();
 					data.syncTask(this);
 				}
 
-				return ItemStack.EMPTY;
-			}
-
-			return stack;
-		}
-
-		@Override
-		public ItemStack extractItem(int slot, int amount, boolean simulate)
-		{
-			if (slot == 0 || amount <= 0 || outputStack.isEmpty())
-			{
-				return ItemStack.EMPTY;
-			}
-
-			int taken = Math.min(amount, outputStack.getCount());
-
-			ItemStack stack = ItemHandlerHelper.copyStackWithSize(outputStack, taken);
-
-			if (!simulate)
-			{
-				outputStack.shrink(taken);
-
-				if (outputStack.isEmpty())
-				{
-					outputStack = ItemStack.EMPTY;
-				}
-
-				data.syncTask(this);
+				return item.getContainer();
 			}
 
 			return stack;

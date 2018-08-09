@@ -99,9 +99,9 @@ public abstract class QuestFile extends ProgressingQuestObject
 	}
 
 	@Override
-	public int getProgress(IProgressData data)
+	public long getProgress(IProgressData data)
 	{
-		int progress = 0;
+		long progress = 0L;
 
 		for (QuestChapter chapter : chapters)
 		{
@@ -112,9 +112,9 @@ public abstract class QuestFile extends ProgressingQuestObject
 	}
 
 	@Override
-	public int getMaxProgress()
+	public long getMaxProgress()
 	{
-		int maxProgress = 0;
+		long maxProgress = 0L;
 
 		for (QuestChapter chapter : chapters)
 		{
@@ -122,6 +122,19 @@ public abstract class QuestFile extends ProgressingQuestObject
 		}
 
 		return maxProgress;
+	}
+
+	@Override
+	public double getRelativeProgress(IProgressData data)
+	{
+		double progress = 0D;
+
+		for (QuestChapter chapter : chapters)
+		{
+			progress += chapter.getRelativeProgress(data);
+		}
+
+		return progress / (double) chapters.size();
 	}
 
 	@Override

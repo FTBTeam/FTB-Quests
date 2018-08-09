@@ -1,24 +1,18 @@
 package com.feed_the_beast.ftbquests.quest.tasks;
 
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
-import com.feed_the_beast.ftblib.lib.config.ConfigInt;
 import com.feed_the_beast.ftblib.lib.config.ConfigItemStack;
 import com.feed_the_beast.ftblib.lib.config.ConfigList;
+import com.feed_the_beast.ftblib.lib.config.ConfigLong;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.IconAnimation;
 import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
 import com.feed_the_beast.ftblib.lib.util.StringJoiner;
-import com.feed_the_beast.ftbquests.gui.ContainerItemTask;
-import com.feed_the_beast.ftbquests.gui.ContainerTaskBase;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTPrimitive;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagInt;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.text.ITextComponent;
@@ -43,7 +37,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 	public static final String ID = "item";
 
 	private final ConfigList<ConfigItemStack> items;
-	private final ConfigInt count;
+	private final ConfigLong count;
 
 	public ItemTask(Quest quest, NBTTagCompound nbt)
 	{
@@ -69,13 +63,13 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 			}
 		}
 
-		count = new ConfigInt(nbt.getInteger("count"), 1, Integer.MAX_VALUE);
+		count = new ConfigLong(nbt.getInteger("count"), 1, Long.MAX_VALUE);
 	}
 
 	@Override
-	public int getMaxProgress()
+	public long getMaxProgress()
 	{
-		return count.getInt();
+		return count.getLong();
 	}
 
 	@Override
@@ -99,7 +93,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 		}
 
 		nbt.setTag("items", list);
-		nbt.setInteger("count", count.getInt());
+		nbt.setLong("count", count.getLong());
 	}
 
 	@Override
@@ -141,9 +135,9 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 			name = "[" + StringJoiner.with(", ").joinStrings(s) + "]";
 		}
 
-		if (count.getInt() > 1)
+		if (count.getLong() > 1)
 		{
-			name = count.getInt() + "x " + name;
+			name = count.getLong() + "x " + name;
 		}
 
 		return new TextComponentString(name);
@@ -176,7 +170,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 	public void getConfig(ConfigGroup group)
 	{
 		group.add("items", items, new ConfigList<>(new ConfigItemStack(ItemStack.EMPTY, true)));
-		group.add("count", count, new ConfigInt(1));
+		group.add("count", count, new ConfigLong(1));
 	}
 
 	@Override
@@ -185,45 +179,11 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 		return new Data(this, data);
 	}
 
-	public static class Data extends QuestTaskData<ItemTask> implements IItemHandler
+	public static class Data extends SimpleQuestTaskData<ItemTask> implements IItemHandler
 	{
-		public int progress = 0;
-
 		private Data(ItemTask t, IProgressData data)
 		{
 			super(t, data);
-		}
-
-		@Nullable
-		@Override
-		public NBTBase toNBT()
-		{
-			return progress > 0 ? new NBTTagInt(progress) : null;
-		}
-
-		@Override
-		public void fromNBT(@Nullable NBTBase nbt)
-		{
-			if (nbt instanceof NBTPrimitive)
-			{
-				progress = ((NBTPrimitive) nbt).getInt();
-			}
-			else
-			{
-				progress = 0;
-			}
-		}
-
-		@Override
-		public int getProgress()
-		{
-			return progress;
-		}
-
-		@Override
-		public void resetProgress()
-		{
-			progress = 0;
 		}
 
 		@Override
@@ -240,29 +200,17 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 		}
 
 		@Override
-		public ContainerTaskBase getContainer(EntityPlayer player)
+		public boolean canInsertItem()
 		{
-			return new ContainerItemTask(player, this);
+			return true;
 		}
 
 		@Override
-		public int getSlots()
+		public ItemStack insertItem(ItemStack stack, boolean simulate)
 		{
-			return 1;
-		}
-
-		@Override
-		public ItemStack getStackInSlot(int slot)
-		{
-			return ItemStack.EMPTY;
-		}
-
-		@Override
-		public ItemStack insertItem(int slot, ItemStack stack, boolean simulate)
-		{
-			if (progress < task.count.getInt() && task.test(stack))
+			if (task.test(stack))
 			{
-				int add = Math.min(stack.getCount(), task.count.getInt() - progress);
+				long add = Math.min(stack.getCount(), task.count.getInt() - progress);
 
 				if (add > 0)
 				{
@@ -272,7 +220,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 						data.syncTask(this);
 					}
 
-					return ItemHandlerHelper.copyStackWithSize(stack, stack.getCount() - add);
+					return ItemHandlerHelper.copyStackWithSize(stack, (int) (stack.getCount() - add));
 				}
 			}
 
@@ -280,15 +228,9 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 		}
 
 		@Override
-		public ItemStack extractItem(int slot, int amount, boolean simulate)
-		{
-			return ItemStack.EMPTY;
-		}
-
-		@Override
 		public int getSlotLimit(int slot)
 		{
-			return task.count.getInt();
+			return (int) Math.min(64L, task.count.getLong() - progress);
 		}
 	}
 }

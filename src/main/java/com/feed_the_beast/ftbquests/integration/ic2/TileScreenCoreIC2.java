@@ -42,7 +42,14 @@ public class TileScreenCoreIC2 extends TileScreenCore implements IEnergySink
 	public double getDemandedEnergy()
 	{
 		QuestTaskData d = getTaskData();
-		return d == null ? 0D : d.task.getMaxProgress() - d.getProgress();
+
+		if (d instanceof IC2EnergyTask.Data && d.task.quest.canStartTasks(d.data))
+		{
+			IC2EnergyTask.Data data = (IC2EnergyTask.Data) d;
+			return Math.min(data.task.maxInput.getDouble(), data.task.value.getDouble() - data.energy);
+		}
+
+		return 0D;
 	}
 
 	@Override
@@ -56,7 +63,7 @@ public class TileScreenCoreIC2 extends TileScreenCore implements IEnergySink
 	{
 		QuestTaskData d = getTaskData();
 
-		if (d instanceof IC2EnergyTask.Data)
+		if (d instanceof IC2EnergyTask.Data && d.task.quest.canStartTasks(d.data))
 		{
 			return ((IC2EnergyTask.Data) d).injectEnergy(amount);
 		}

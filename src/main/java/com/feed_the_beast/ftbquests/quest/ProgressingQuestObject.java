@@ -10,22 +10,22 @@ public abstract class ProgressingQuestObject extends QuestObject
 		super(i);
 	}
 
-	public abstract int getProgress(IProgressData data);
+	public abstract long getProgress(IProgressData data);
 
-	public abstract int getMaxProgress();
+	public abstract long getMaxProgress();
 
 	public abstract void resetProgress(IProgressData data);
 
 	public double getRelativeProgress(IProgressData data)
 	{
-		int max = getMaxProgress();
+		long max = getMaxProgress();
 
 		if (max == 0)
 		{
 			return 0D;
 		}
 
-		int progress = getProgress(data);
+		long progress = getProgress(data);
 
 		if (progress >= max)
 		{
@@ -37,7 +37,7 @@ public abstract class ProgressingQuestObject extends QuestObject
 
 	public final boolean isComplete(IProgressData data)
 	{
-		int max = getMaxProgress();
+		long max = getMaxProgress();
 		return max > 0 && getProgress(data) >= max;
 	}
 }
