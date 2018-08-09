@@ -12,6 +12,4 @@ public class FTBQuestsItems
 {
 	public static final Block SCREEN = Blocks.AIR;
 	public static final Block SCREEN_PART = Blocks.AIR;
-	public static final Block FLAT_SCREEN = Blocks.AIR;
-	public static final Block FLAT_SCREEN_PART = Blocks.AIR;
 }

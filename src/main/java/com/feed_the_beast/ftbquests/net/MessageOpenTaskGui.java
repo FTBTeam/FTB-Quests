@@ -7,7 +7,8 @@ import com.feed_the_beast.ftblib.lib.net.MessageToClient;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.block.TileScreenBase;
 import com.feed_the_beast.ftbquests.gui.ClientQuestFile;
-import com.feed_the_beast.ftbquests.gui.ContainerTaskBase;
+import com.feed_the_beast.ftbquests.gui.ContainerTask;
+import com.feed_the_beast.ftbquests.gui.GuiTask;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskData;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
@@ -76,15 +77,9 @@ public class MessageOpenTaskGui extends MessageToClient
 	{
 		QuestTaskData data = ClientQuestFile.INSTANCE.getQuestTaskData(task);
 
-		if (!data.task.quest.canStartTasks(ClientQuestFile.INSTANCE))
+		if (data.task.quest.canStartTasks(ClientQuestFile.INSTANCE))
 		{
-			return;
-		}
-
-		ContainerTaskBase container = data.getContainer(ClientUtils.MC.player);
-
-		if (container != null)
-		{
+			ContainerTask container = new ContainerTask(ClientUtils.MC.player, data);
 			container.windowId = window;
 
 			if (hasPos)
@@ -97,7 +92,7 @@ public class MessageOpenTaskGui extends MessageToClient
 				}
 			}
 
-			data.getGui(container).openGui();
+			new GuiTask(container).openGui();
 		}
 	}
 }

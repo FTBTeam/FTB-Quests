@@ -1,8 +1,8 @@
 tile.ftbquests.screen.missing_data=Broken Block / Missing Data!
 tile.ftbquests.screen.name=Screen
-tile.ftbquests.screen.flat=Flat
 tile.ftbquests.screen.task_index=Task Index
 tile.ftbquests.screen.size=Size
+tile.ftbquests.screen.skin=Skin
 tile.ftbquests.screen.progress_display_mode=Progress Display Mode
 tile.ftbquests.screen.progress_display_mode.progress=Progress
 tile.ftbquests.screen.progress_display_mode.percent=Percent
@@ -89,6 +89,7 @@ ftbquests.task.forge_energy.text=%d FE
 
 ftbquests.task.ic2_energy=IC2 Energy
 ftbquests.task.ic2_energy.value=EU
+ftbquests.task.ic2_energy.max_input=Max Input
 ftbquests.task.ic2_energy.text=%d EU
 
 ftbquests.reward=Reward

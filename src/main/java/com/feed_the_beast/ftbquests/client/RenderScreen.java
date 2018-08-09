@@ -1,7 +1,6 @@
 package com.feed_the_beast.ftbquests.client;
 
 import com.feed_the_beast.ftblib.lib.client.ClientUtils;
-import com.feed_the_beast.ftbquests.block.BlockScreen;
 import com.feed_the_beast.ftbquests.block.TileScreenBase;
 import com.feed_the_beast.ftbquests.block.TileScreenCore;
 import com.feed_the_beast.ftbquests.gui.ClientQuestFile;
@@ -72,12 +71,6 @@ public class RenderScreen extends TileEntitySpecialRenderer<TileScreenCore>
 		font.setUnicodeFlag(true);
 
 		GlStateManager.translate(-screen.size, -screen.size * 2F, -0.01F);
-
-		if (((BlockScreen) screen.getBlockType()).flat)
-		{
-			GlStateManager.translate(0F, 0F, 1F);
-		}
-
 		GlStateManager.scale(screen.size * 2D + 1D, screen.size * 2D + 1D, 1D);
 
 		String top1 = task.quest.getDisplayName().getUnformattedText();
@@ -116,7 +109,7 @@ public class RenderScreen extends TileEntitySpecialRenderer<TileScreenCore>
 			switch (screen.progressDisplayMode.getValue())
 			{
 				case PROGRESS:
-					bottomText = data.getProgressString();
+					bottomText = data.getProgressString() + " / " + data.task.getMaxProgressString();
 					break;
 				case PERCENT:
 					bottomText = (int) (data.getRelativeProgress() * 100D) + "%";
@@ -140,6 +133,10 @@ public class RenderScreen extends TileEntitySpecialRenderer<TileScreenCore>
 		if (my >= 0.81D)
 		{
 			drawString(font, TextFormatting.GOLD + bottomText, 0.83D, 0.15D);
+		}
+		else if (data != null && data.getProgress() >= data.task.getMaxProgress())
+		{
+			drawString(font, TextFormatting.GREEN + bottomText, 0.83D, 0.15D);
 		}
 		else
 		{

@@ -6,7 +6,6 @@ import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import net.minecraft.block.BlockHorizontal;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.state.BlockFaceShape;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
@@ -16,7 +15,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.Mirror;
@@ -42,24 +40,13 @@ public class BlockScreen extends BlockBase
 	protected static boolean BREAKING_SCREEN = false;
 	public static QuestTask currentTask = null;
 
-	public static final AxisAlignedBB[] FLAT_BOXES = {
-			new AxisAlignedBB(0, 0, 0, 1, 1, 0.0625D),
-			new AxisAlignedBB(0.9375D, 0, 0, 1, 1, 1),
-			new AxisAlignedBB(0, 0, 0.9375D, 1, 1, 1),
-			new AxisAlignedBB(0, 0, 0, 0.0625D, 1, 1)
-	};
-
-	public final boolean flat;
-
-	public BlockScreen(String mod, String id, boolean f)
+	public BlockScreen(String mod, String id)
 	{
 		super(mod, id, Material.GLASS, MapColor.BLACK);
-		flat = f;
 		setTranslationKey("ftbquests.screen");
 		setCreativeTab(CreativeTabs.DECORATIONS);
 		setHardness(0.3F);
 		setDefaultState(blockState.getBaseState().withProperty(BlockHorizontal.FACING, EnumFacing.NORTH));
-		setLightOpacity(flat ? 0 : 255);
 	}
 
 	@Override
@@ -88,7 +75,7 @@ public class BlockScreen extends BlockBase
 	@Override
 	public Item getItemDropped(IBlockState state, Random rand, int fortune)
 	{
-		return Item.getItemFromBlock(flat ? FTBQuestsItems.FLAT_SCREEN : FTBQuestsItems.SCREEN);
+		return Item.getItemFromBlock(FTBQuestsItems.SCREEN);
 	}
 
 	@Override
@@ -100,7 +87,7 @@ public class BlockScreen extends BlockBase
 	@Override
 	public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player)
 	{
-		ItemStack stack = new ItemStack(flat ? FTBQuestsItems.FLAT_SCREEN : FTBQuestsItems.SCREEN);
+		ItemStack stack = new ItemStack(FTBQuestsItems.SCREEN);
 
 		TileEntity tileEntity = world.getTileEntity(pos);
 
@@ -152,54 +139,6 @@ public class BlockScreen extends BlockBase
 	}
 
 	@Override
-	@Deprecated
-	public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos)
-	{
-		return flat ? FLAT_BOXES[state.getValue(BlockHorizontal.FACING).getHorizontalIndex()] : FULL_BLOCK_AABB;
-	}
-
-	@Override
-	@Deprecated
-	@Nullable
-	public AxisAlignedBB getCollisionBoundingBox(IBlockState state, IBlockAccess world, BlockPos pos)
-	{
-		return flat ? null : state.getBoundingBox(world, pos);
-	}
-
-	@Override
-	@Deprecated
-	public boolean isFullCube(IBlockState state)
-	{
-		return !flat;
-	}
-
-	@Override
-	@Deprecated
-	public boolean isOpaqueCube(IBlockState state)
-	{
-		return !flat;
-	}
-
-	@Override
-	@Deprecated
-	public BlockFaceShape getBlockFaceShape(IBlockAccess world, IBlockState state, BlockPos pos, EnumFacing face)
-	{
-		if (flat && face != state.getValue(BlockHorizontal.FACING).getOpposite())
-		{
-			return BlockFaceShape.UNDEFINED;
-		}
-
-		return BlockFaceShape.SOLID;
-	}
-
-	@Override
-	@Deprecated
-	public EnumBlockRenderType getRenderType(IBlockState state)
-	{
-		return flat ? EnumBlockRenderType.INVISIBLE : EnumBlockRenderType.MODEL;
-	}
-
-	@Override
 	public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ)
 	{
 		if (facing != state.getValue(BlockHorizontal.FACING))
@@ -237,7 +176,7 @@ public class BlockScreen extends BlockBase
 
 			if (screen.size > 0)
 			{
-				IBlockState state1 = (flat ? FTBQuestsItems.FLAT_SCREEN_PART : FTBQuestsItems.SCREEN_PART).getDefaultState().withProperty(BlockHorizontal.FACING, screen.getFacing());
+				IBlockState state1 = FTBQuestsItems.SCREEN_PART.getDefaultState().withProperty(BlockHorizontal.FACING, screen.getFacing());
 
 				boolean xaxis = state.getValue(BlockHorizontal.FACING).getAxis() == EnumFacing.Axis.X;
 
@@ -331,40 +270,20 @@ public class BlockScreen extends BlockBase
 
 			if (screen != null)
 			{
-				return getScreenAABB(screen, flat);
+				return getScreenAABB(screen);
 			}
 		}
 
 		return new AxisAlignedBB(0D, -1D, 0D, 0D, -1D, 0D);
 	}
 
-	public static AxisAlignedBB getScreenAABB(TileScreenCore screen, boolean flat)
+	public static AxisAlignedBB getScreenAABB(TileScreenCore screen)
 	{
 		BlockPos pos = screen.getPos();
 
 		if (screen.size == 0)
 		{
-			if (flat)
-			{
-				FLAT_BOXES[screen.getFacing().getHorizontalIndex()].offset(pos);
-			}
-
 			return FULL_BLOCK_AABB.offset(pos);
-		}
-
-		if (flat)
-		{
-			switch (screen.getFacing().getHorizontalIndex())
-			{
-				case 0:
-					return new AxisAlignedBB(pos.getX() - screen.size, pos.getY(), pos.getZ(), pos.getX() + screen.size + 1D, pos.getY() + screen.size * 2D + 1D, pos.getZ() + 0.0625D);
-				case 1:
-					return new AxisAlignedBB(pos.getX() + 0.9375D, pos.getY(), pos.getZ() - screen.size, pos.getX() + 1D, pos.getY() + screen.size * 2D + 1D, pos.getZ() + screen.size + 1D);
-				case 2:
-					return new AxisAlignedBB(pos.getX() - screen.size, pos.getY(), pos.getZ() + 0.9375D, pos.getX() + screen.size + 1D, pos.getY() + screen.size * 2D + 1D, pos.getZ() + 1D);
-				default:
-					return new AxisAlignedBB(pos.getX(), pos.getY(), pos.getZ() - screen.size, pos.getX() + 0.0625D, pos.getY() + screen.size * 2D + 1D, pos.getZ() + screen.size + 1D);
-			}
 		}
 
 		boolean xaxis = screen.getFacing().getAxis() == EnumFacing.Axis.X;
@@ -440,5 +359,24 @@ public class BlockScreen extends BlockBase
 		}
 
 		return 0;
+	}
+
+	@Override
+	@Deprecated
+	public IBlockState getActualState(IBlockState state, IBlockAccess world, BlockPos pos)
+	{
+		TileEntity tileEntity = world.getTileEntity(pos);
+
+		if (tileEntity instanceof TileScreenBase)
+		{
+			TileScreenCore core = ((TileScreenBase) tileEntity).getScreen();
+
+			if (core != null && !core.skin.isEmpty())
+			{
+				return core.skin.getBlockState();
+			}
+		}
+
+		return state;
 	}
 }

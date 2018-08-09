@@ -22,17 +22,15 @@ public class MessageGetScreen extends MessageToServer
 {
 	private short task;
 	private int size;
-	private int type;
 
 	public MessageGetScreen()
 	{
 	}
 
-	public MessageGetScreen(short t, int s, int ty)
+	public MessageGetScreen(short t, int s)
 	{
 		task = t;
 		size = s;
-		type = ty;
 	}
 
 	@Override
@@ -46,7 +44,6 @@ public class MessageGetScreen extends MessageToServer
 	{
 		data.writeShort(task);
 		data.writeByte(size);
-		data.writeByte(type);
 	}
 
 	@Override
@@ -54,7 +51,6 @@ public class MessageGetScreen extends MessageToServer
 	{
 		task = data.readShort();
 		size = data.readByte();
-		type = data.readByte();
 	}
 
 	@Override
@@ -67,7 +63,7 @@ public class MessageGetScreen extends MessageToServer
 			if (t != null)
 			{
 				FTBQuestsTeamData teamData = FTBQuestsTeamData.get(Universe.get().getPlayer(player).team);
-				ItemStack stack = new ItemStack(type == 1 ? FTBQuestsItems.FLAT_SCREEN : FTBQuestsItems.SCREEN);
+				ItemStack stack = new ItemStack(FTBQuestsItems.SCREEN);
 				TileScreenCore tile = new TileScreenCore();
 				tile.quest = t.quest.id;
 				tile.taskIndex = t.quest.tasks.indexOf(t);

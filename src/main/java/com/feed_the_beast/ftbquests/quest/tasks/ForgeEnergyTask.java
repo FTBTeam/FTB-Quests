@@ -1,16 +1,13 @@
 package com.feed_the_beast.ftbquests.quest.tasks;
 
-import com.feed_the_beast.ftblib.lib.config.ConfigDouble;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigInt;
+import com.feed_the_beast.ftblib.lib.config.ConfigLong;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTPrimitive;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagLong;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -28,21 +25,26 @@ public class ForgeEnergyTask extends QuestTask
 {
 	public static final String ID = "forge_energy";
 
-	public final ConfigDouble value;
+	public final ConfigLong value;
 	public final ConfigInt maxInput;
 
 	public ForgeEnergyTask(Quest quest, NBTTagCompound nbt)
 	{
 		super(quest, nbt);
-		value = new ConfigDouble(nbt.getLong("value"), 1, Double.POSITIVE_INFINITY);
-
+		value = new ConfigLong(nbt.getLong("value"), 1, Long.MAX_VALUE);
 		maxInput = new ConfigInt(nbt.hasKey("max_input") ? nbt.getInteger("max_input") : 10000, 100, Integer.MAX_VALUE);
 	}
 
 	@Override
-	public int getMaxProgress()
+	public long getMaxProgress()
 	{
-		return maxInput.getInt();
+		return value.getLong();
+	}
+
+	@Override
+	public String getMaxProgressString()
+	{
+		return StringUtils.formatDouble(value.getDouble(), true);
 	}
 
 	@Override
@@ -54,7 +56,7 @@ public class ForgeEnergyTask extends QuestTask
 	@Override
 	public void writeData(NBTTagCompound nbt)
 	{
-		nbt.setLong("value", (long) value.getDouble());
+		nbt.setLong("value", value.getLong());
 		nbt.setInteger("max_input", value.getInt());
 	}
 
@@ -67,13 +69,13 @@ public class ForgeEnergyTask extends QuestTask
 	@Override
 	public ITextComponent getDisplayName()
 	{
-		return new TextComponentTranslation("ftbquests.task.forge_energy.text", StringUtils.formatDouble(value.getDouble(), true));
+		return new TextComponentTranslation("ftbquests.task.forge_energy.text", StringUtils.formatDouble(value.getLong(), true));
 	}
 
 	@Override
 	public void getConfig(ConfigGroup group)
 	{
-		group.add("value", value, new ConfigDouble(1));
+		group.add("value", value, new ConfigLong(1));
 		group.add("max_input", maxInput, new ConfigInt(10000));
 	}
 
@@ -83,56 +85,23 @@ public class ForgeEnergyTask extends QuestTask
 		return new Data(this, data);
 	}
 
-	public static class Data extends QuestTaskData<ForgeEnergyTask> implements IEnergyStorage
+	public static class Data extends SimpleQuestTaskData<ForgeEnergyTask> implements IEnergyStorage
 	{
-		private long energy;
-
 		private Data(ForgeEnergyTask task, IProgressData data)
 		{
 			super(task, data);
 		}
 
 		@Override
-		public NBTBase toNBT()
-		{
-			return energy > 0 ? new NBTTagLong(energy) : null;
-		}
-
-		@Override
-		public void fromNBT(@Nullable NBTBase nbt)
-		{
-			if (nbt instanceof NBTPrimitive)
-			{
-				energy = ((NBTPrimitive) nbt).getLong();
-			}
-			else
-			{
-				energy = 0L;
-			}
-		}
-
-		@Override
-		public int getProgress()
-		{
-			return (int) (getRelativeProgress() * 1000000D);
-		}
-
-		@Override
 		public double getRelativeProgress()
 		{
-			return energy / task.value.getDouble();
+			return progress / (double) task.value.getLong();
 		}
 
 		@Override
 		public String getProgressString()
 		{
-			return StringUtils.formatDouble(energy, true) + " / " + StringUtils.formatDouble(task.value.getDouble(), true);
-		}
-
-		@Override
-		public void resetProgress()
-		{
-			energy = 0L;
+			return StringUtils.formatDouble(progress, true);
 		}
 
 		@Override
@@ -151,15 +120,15 @@ public class ForgeEnergyTask extends QuestTask
 		@Override
 		public int receiveEnergy(int maxReceive, boolean simulate)
 		{
-			if (maxReceive > 0 && energy < task.value.getDouble())
+			if (maxReceive > 0 && progress < task.value.getLong())
 			{
-				long add = Math.min(task.maxInput.getInt(), Math.min(maxReceive, (long) (task.value.getDouble() - energy)));
+				long add = Math.min(task.maxInput.getInt(), Math.min(maxReceive, task.value.getLong() - progress));
 
 				if (add > 0L)
 				{
 					if (!simulate)
 					{
-						energy += add;
+						progress += add;
 						data.syncTask(this);
 					}
 

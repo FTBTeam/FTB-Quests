@@ -202,9 +202,9 @@ public final class Quest extends ProgressingQuestObject
 	}
 
 	@Override
-	public int getProgress(IProgressData data)
+	public long getProgress(IProgressData data)
 	{
-		int progress = 0;
+		long progress = 0L;
 
 		for (QuestTask task : tasks)
 		{
@@ -215,9 +215,9 @@ public final class Quest extends ProgressingQuestObject
 	}
 
 	@Override
-	public int getMaxProgress()
+	public long getMaxProgress()
 	{
-		int maxProgress = 0;
+		long maxProgress = 0L;
 
 		for (QuestTask task : tasks)
 		{

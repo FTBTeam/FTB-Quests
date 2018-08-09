@@ -30,17 +30,25 @@ public class IC2EnergyTask extends QuestTask
 	public static final String ID = "ic2_energy";
 
 	public final ConfigDouble value;
+	public final ConfigDouble maxInput;
 
 	public IC2EnergyTask(Quest quest, NBTTagCompound nbt)
 	{
 		super(quest, nbt);
 		value = new ConfigDouble(nbt.getDouble("value"), 1D, Double.POSITIVE_INFINITY);
+		maxInput = new ConfigDouble(nbt.hasKey("max_input") ? nbt.getDouble("max_input") : Double.POSITIVE_INFINITY, 1D, Double.POSITIVE_INFINITY);
 	}
 
 	@Override
-	public int getMaxProgress()
+	public long getMaxProgress()
 	{
-		return 100;
+		return value.getLong();
+	}
+
+	@Override
+	public String getMaxProgressString()
+	{
+		return StringUtils.formatDouble(value.getDouble(), true);
 	}
 
 	@Override
@@ -53,6 +61,7 @@ public class IC2EnergyTask extends QuestTask
 	public void writeData(NBTTagCompound nbt)
 	{
 		nbt.setDouble("value", value.getDouble());
+		nbt.setDouble("max_input", maxInput.getDouble());
 	}
 
 	@Override
@@ -95,6 +104,7 @@ public class IC2EnergyTask extends QuestTask
 	public void getConfig(ConfigGroup group)
 	{
 		group.add("value", value, new ConfigDouble(1));
+		group.add("max_input", maxInput, new ConfigDouble(Double.POSITIVE_INFINITY));
 	}
 
 	@Override
@@ -105,7 +115,7 @@ public class IC2EnergyTask extends QuestTask
 
 	public static class Data extends QuestTaskData<IC2EnergyTask>
 	{
-		private double energy;
+		public double energy;
 
 		private Data(IC2EnergyTask task, IProgressData data)
 		{
@@ -132,9 +142,9 @@ public class IC2EnergyTask extends QuestTask
 		}
 
 		@Override
-		public int getProgress()
+		public long getProgress()
 		{
-			return (int) (getRelativeProgress() * 100D);
+			return (long) energy;
 		}
 
 		@Override
@@ -146,7 +156,7 @@ public class IC2EnergyTask extends QuestTask
 		@Override
 		public String getProgressString()
 		{
-			return StringUtils.formatDouble(energy, true) + " / " + StringUtils.formatDouble(task.value.getDouble(), true);
+			return StringUtils.formatDouble(energy, true);
 		}
 
 		@Override
@@ -172,7 +182,7 @@ public class IC2EnergyTask extends QuestTask
 		{
 			if (amount > 0 && energy < task.value.getDouble())
 			{
-				double add = Math.min(amount, task.value.getDouble() - energy);
+				double add = Math.min(task.maxInput.getDouble(), Math.min(amount, task.value.getDouble() - energy));
 
 				if (add > 0D)
 				{

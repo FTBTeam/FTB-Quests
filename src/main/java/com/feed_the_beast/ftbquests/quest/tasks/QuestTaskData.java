@@ -1,20 +1,17 @@
 package com.feed_the_beast.ftbquests.quest.tasks;
 
-import com.feed_the_beast.ftbquests.gui.ContainerTaskBase;
-import com.feed_the_beast.ftbquests.gui.GuiTaskBase;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTBase;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.items.IItemHandler;
 
 import javax.annotation.Nullable;
 
 /**
  * @author LatvianModder
  */
-public abstract class QuestTaskData<T extends QuestTask> implements ICapabilityProvider
+public abstract class QuestTaskData<T extends QuestTask> implements ICapabilityProvider, IItemHandler
 {
 	public final T task;
 	public final IProgressData data;
@@ -30,20 +27,20 @@ public abstract class QuestTaskData<T extends QuestTask> implements ICapabilityP
 
 	public abstract void fromNBT(@Nullable NBTBase nbt);
 
-	public abstract int getProgress();
+	public abstract long getProgress();
 
 	public abstract void resetProgress();
 
 	public double getRelativeProgress()
 	{
-		int max = task.getMaxProgress();
+		long max = task.getMaxProgress();
 
 		if (max == 0)
 		{
 			return 0D;
 		}
 
-		int progress = getProgress();
+		long progress = getProgress();
 
 		if (progress >= max)
 		{
@@ -55,22 +52,56 @@ public abstract class QuestTaskData<T extends QuestTask> implements ICapabilityP
 
 	public String getProgressString()
 	{
-		return getProgress() + " / " + task.getMaxProgress();
-	}
-
-	public ContainerTaskBase getContainer(EntityPlayer player)
-	{
-		return new ContainerTaskBase(player, this);
-	}
-
-	@SideOnly(Side.CLIENT)
-	public GuiTaskBase getGui(ContainerTaskBase container)
-	{
-		return new GuiTaskBase(container);
+		return Long.toString(getProgress());
 	}
 
 	public String toString()
 	{
 		return data + ":" + task.id;
+	}
+
+	public boolean canInsertItem()
+	{
+		return false;
+	}
+
+	public ItemStack insertItem(ItemStack stack, boolean simulate)
+	{
+		return stack;
+	}
+
+	@Override
+	public final int getSlots()
+	{
+		return 1;
+	}
+
+	@Override
+	public final ItemStack getStackInSlot(int slot)
+	{
+		return ItemStack.EMPTY;
+	}
+
+	@Override
+	public final ItemStack insertItem(int slot, ItemStack stack, boolean simulate)
+	{
+		if (canInsertItem() && getProgress() < task.getMaxProgress() && !stack.isEmpty())
+		{
+			return insertItem(stack, simulate);
+		}
+
+		return stack;
+	}
+
+	@Override
+	public final ItemStack extractItem(int slot, int amount, boolean simulate)
+	{
+		return ItemStack.EMPTY;
+	}
+
+	@Override
+	public int getSlotLimit(int slot)
+	{
+		return 64;
 	}
 }

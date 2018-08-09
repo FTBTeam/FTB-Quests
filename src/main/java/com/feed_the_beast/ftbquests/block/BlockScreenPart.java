@@ -10,9 +10,9 @@ import net.minecraft.world.World;
  */
 public class BlockScreenPart extends BlockScreen
 {
-	public BlockScreenPart(String mod, String id, boolean f)
+	public BlockScreenPart(String mod, String id)
 	{
-		super(mod, id, f);
+		super(mod, id);
 	}
 
 	@Override

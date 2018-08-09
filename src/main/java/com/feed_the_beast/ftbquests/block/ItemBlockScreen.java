@@ -98,8 +98,6 @@ public class ItemBlockScreen extends ItemBlockBase
 		String owner = nbt.getString("Owner");
 
 		tooltip.add(I18n.format("tile.ftbquests.screen.size") + ": " + TextFormatting.GOLD.toString() + (1 + size * 2) + " x " + (1 + size * 2));
-		boolean flat = ((BlockScreen) block).flat;
-		tooltip.add(I18n.format("tile.ftbquests.screen.flat") + ": " + (flat ? TextFormatting.GREEN : TextFormatting.RED) + flat);
 		tooltip.add(I18n.format("ftbquests.owner") + ": " + TextFormatting.DARK_GREEN + owner);
 		tooltip.add(I18n.format("ftbquests.chapter") + ": " + StringUtils.color(quest.chapter.getDisplayName(), TextFormatting.YELLOW).getFormattedText());
 		tooltip.add(I18n.format("ftbquests.quest") + ": " + StringUtils.color(quest.getDisplayName(), TextFormatting.YELLOW).getFormattedText());
@@ -115,7 +113,7 @@ public class ItemBlockScreen extends ItemBlockBase
 			return;
 		}
 
-		int max = task.getMaxProgress();
+		long max = task.getMaxProgress();
 
 		if (max <= 0)
 		{
@@ -123,7 +121,7 @@ public class ItemBlockScreen extends ItemBlockBase
 		}
 		else
 		{
-			int progress = data.getQuestTaskData(task.id).getProgress();
+			long progress = data.getQuestTaskData(task.id).getProgress();
 
 			if (progress >= max)
 			{
