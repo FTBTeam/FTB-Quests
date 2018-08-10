@@ -368,9 +368,9 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 			}
 
 			updateContainingBlockInfo();
-			cTaskData = getTaskData();
+			QuestTask task = getTaskData().task;
 
-			if (currentCore != cTaskData.task.getScreenCoreClass() || currentPart != cTaskData.task.getScreenPartClass())
+			if (currentCore != task.getScreenCoreClass() || currentPart != task.getScreenPartClass())
 			{
 				boolean xaxis = getFacing().getAxis() == EnumFacing.Axis.X;
 
@@ -385,7 +385,7 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 
 						if (bx == 0 && by == 0)
 						{
-							TileScreenCore core = cTaskData.task.createScreenCore(world);
+							TileScreenCore core = task.createScreenCore(world);
 							core.setWorld(world);
 							core.setPos(pos1);
 							NBTTagCompound nbt = new NBTTagCompound();
@@ -396,7 +396,7 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 						}
 						else
 						{
-							TileScreenPart part = cTaskData.task.createScreenPart(world);
+							TileScreenPart part = task.createScreenPart(world);
 							part.setWorld(world);
 							part.setPos(pos1);
 							part.setOffset(offX, by, offZ);
