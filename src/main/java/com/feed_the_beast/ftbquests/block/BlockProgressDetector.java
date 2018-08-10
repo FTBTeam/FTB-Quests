@@ -91,11 +91,4 @@ public class BlockProgressDetector extends Block
 
 		return 0;
 	}
-
-	@Override
-	@Deprecated
-	public int getStrongPower(IBlockState state, IBlockAccess world, BlockPos pos, EnumFacing side)
-	{
-		return state.getWeakPower(world, pos, side);
-	}
 }
