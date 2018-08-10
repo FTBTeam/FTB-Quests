@@ -96,17 +96,23 @@ public class TileProgressDetector extends TileBase implements ITickable, IConfig
 	{
 		updateContainingBlockInfo();
 		markDirty();
+		updateRedstoneOutput();
 		world.notifyBlockUpdate(pos, getBlockState(), getBlockState(), BlockFlags.DEFAULT_AND_RERENDER);
 	}
 
 	@Override
 	public void update()
 	{
-		if (world.getTotalWorldTime() % 7L != 0L)
+		if (world.getTotalWorldTime() % 7L == 0L)
 		{
-			return;
+			updateRedstoneOutput();
 		}
 
+		checkIfDirty();
+	}
+
+	public void updateRedstoneOutput()
+	{
 		int rout = redstoneOutput;
 		redstoneOutput = 0;
 
@@ -132,8 +138,6 @@ public class TileProgressDetector extends TileBase implements ITickable, IConfig
 			world.notifyNeighborsOfStateChange(pos, getBlockType(), true);
 			markDirty();
 		}
-
-		checkIfDirty();
 	}
 
 	public void editConfig(EntityPlayerMP player)
