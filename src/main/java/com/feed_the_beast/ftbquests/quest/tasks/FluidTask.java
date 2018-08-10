@@ -123,6 +123,12 @@ public class FluidTask extends QuestTask
 		else
 		{
 			builder.append(a % Fluid.BUCKET_VOLUME);
+		}
+
+		builder.append(' ');
+
+		if (a < Fluid.BUCKET_VOLUME)
+		{
 			builder.append('m');
 		}
 
@@ -231,13 +237,25 @@ public class FluidTask extends QuestTask
 		}
 
 		@Override
-		public ItemStack insertItem(ItemStack stack, boolean simulate)
+		public ItemStack insertItem(ItemStack stack, boolean singleItem, boolean simulate)
 		{
+			if (stack.getCount() != 1)
+			{
+				return stack;
+			}
+
 			IFluidHandlerItem item = stack.getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY, null);
 
 			if (item != null)
 			{
-				FluidStack fluidStack = item.drain(task.createFluidStack((int) Math.max(1000000000, task.amount.getLong() - progress)), false);
+				int drain = (int) Math.min(1000000000, task.amount.getLong() - progress);
+
+				if (singleItem && drain > 1000)
+				{
+					drain = 1000;
+				}
+
+				FluidStack fluidStack = item.drain(task.createFluidStack(drain), false);
 
 				if (fluidStack == null || fluidStack.amount <= 0)
 				{

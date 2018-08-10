@@ -1,5 +1,6 @@
 package com.feed_the_beast.ftbquests.gui;
 
+import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftblib.lib.gui.Button;
 import com.feed_the_beast.ftblib.lib.gui.ContextMenuItem;
 import com.feed_the_beast.ftblib.lib.gui.GuiBase;
@@ -18,6 +19,7 @@ import com.feed_the_beast.ftbquests.net.MessageGetScreen;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.math.MathHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -139,14 +141,13 @@ public class GuiTask extends GuiBase
 			drawString(taskName, ax + width / 2, ay + 14, Color4I.WHITE, CENTERED);
 		}
 
-		long max = container.data.task.getMaxProgress();
-		long progress = Math.min(max, container.data.task.getProgress(ClientQuestFile.INSTANCE));
+		double progress = MathHelper.clamp(container.data.getRelativeProgress(), 0D, 1D);
 
-		String s = max == 0 ? "0/0 [0%]" : String.format("%d/%d [%d%%]", progress, max, (int) (progress * 100D / (double) max));
+		String s = String.format("%s / %s [%d%%]", container.data.getProgressString(), container.data.task.getMaxProgressString(), (int) (progress * 100D));
 		sw = getStringWidth(s);
 
 		Color4I.DARK_GRAY.draw(ax + (width - sw - 8) / 2, ay + 60, sw + 8, 13);
-		Color4I.LIGHT_BLUE.draw(ax + (width - sw - 6) / 2, ay + 61, max == 0 ? 0 : (int) ((sw + 6) * progress / max), 11);
+		Color4I.LIGHT_BLUE.draw(ax + (width - sw - 6) / 2, ay + 61, (int) ((sw + 6) * progress), 11);
 
 		drawString(s, ax + width / 2, ay + 63, Color4I.WHITE, CENTERED);
 
@@ -156,6 +157,22 @@ public class GuiTask extends GuiBase
 			drawString(I18n.format("ftbquests.task.no_items"), ax + width / 2, ay + 37, Color4I.LIGHT_RED, CENTERED);
 			popFontUnicode();
 		}
+	}
+
+	@Override
+	public boolean mousePressed(MouseButton button)
+	{
+		if (super.mousePressed(button))
+		{
+			return true;
+		}
+		else if (container.enchantItem(ClientUtils.MC.player, button.isLeft() ? 0 : 1))
+		{
+			ClientUtils.MC.playerController.sendEnchantPacket(container.windowId, button.isLeft() ? 0 : 1);
+			return true;
+		}
+
+		return false;
 	}
 
 	@Override
