@@ -8,7 +8,7 @@ import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.gui.ClientQuestFile;
 import com.feed_the_beast.ftbquests.gui.ContainerTask;
 import com.feed_the_beast.ftbquests.gui.GuiTask;
-import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskData;
+import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import com.feed_the_beast.ftbquests.tile.TileScreenBase;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
@@ -75,11 +75,11 @@ public class MessageOpenTaskGui extends MessageToClient
 	@SideOnly(Side.CLIENT)
 	public void onMessage()
 	{
-		QuestTaskData data = ClientQuestFile.INSTANCE.getQuestTaskData(task);
+		QuestTask qtask = ClientQuestFile.INSTANCE.getTask(task);
 
-		if (data.task.quest.canStartTasks(ClientQuestFile.INSTANCE))
+		if (qtask != null && qtask.quest.canStartTasks(ClientQuestFile.INSTANCE))
 		{
-			ContainerTask container = new ContainerTask(ClientUtils.MC.player, data);
+			ContainerTask container = new ContainerTask(ClientUtils.MC.player, ClientQuestFile.INSTANCE.getQuestTaskData(qtask));
 			container.windowId = window;
 
 			if (hasPos)

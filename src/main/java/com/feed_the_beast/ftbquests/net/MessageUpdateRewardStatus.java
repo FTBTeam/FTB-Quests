@@ -5,6 +5,7 @@ import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToClient;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.gui.ClientQuestFile;
+import com.feed_the_beast.ftbquests.quest.rewards.QuestReward;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -50,6 +51,11 @@ public class MessageUpdateRewardStatus extends MessageToClient
 	@SideOnly(Side.CLIENT)
 	public void onMessage()
 	{
-		ClientQuestFile.INSTANCE.setRewardStatus(reward, status);
+		QuestReward qreward = ClientQuestFile.INSTANCE.getReward(reward);
+
+		if (qreward != null)
+		{
+			ClientQuestFile.INSTANCE.setRewardStatus(qreward, status);
+		}
 	}
 }

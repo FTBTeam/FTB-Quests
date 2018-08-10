@@ -13,7 +13,7 @@ public interface IProgressData
 {
 	String getTeamID();
 
-	QuestTaskData getQuestTaskData(short task);
+	QuestTaskData getQuestTaskData(QuestTask task);
 
 	boolean claimReward(EntityPlayer player, QuestReward reward);
 
@@ -26,9 +26,9 @@ public interface IProgressData
 
 	void syncTask(QuestTaskData data);
 
-	void removeTask(short task);
+	void removeTask(QuestTask task);
 
 	void createTaskData(QuestTask task);
 
-	void unclaimReward(short reward);
+	void unclaimReward(QuestReward reward);
 }

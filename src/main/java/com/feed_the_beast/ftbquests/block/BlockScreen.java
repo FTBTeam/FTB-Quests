@@ -14,6 +14,7 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagByte;
@@ -166,8 +167,13 @@ public class BlockScreen extends BlockHorizontal
 
 			if (screen != null)
 			{
-				double x = 0.5D; //FIXME: X coordinate
-				return screen.onClicked(player, hand, x, 1D - (base.getOffsetY() + hitY) / (screen.size * 2D + 1D));
+				if (player instanceof EntityPlayerMP)
+				{
+					double x = 0.5D; //FIXME: X coordinate
+					screen.onClicked((EntityPlayerMP) player, hand, x, 1D - (base.getOffsetY() + hitY) / (screen.size * 2D + 1D));
+				}
+
+				return true;
 			}
 		}
 

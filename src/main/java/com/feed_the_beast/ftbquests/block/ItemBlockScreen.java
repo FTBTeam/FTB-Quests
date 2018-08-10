@@ -6,6 +6,7 @@ import com.feed_the_beast.ftbquests.gui.ClientQuestFile;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
+import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskData;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockHorizontal;
 import net.minecraft.block.state.IBlockState;
@@ -132,29 +133,10 @@ public class ItemBlockScreen extends ItemBlock
 
 		IProgressData data = ClientQuestFile.INSTANCE.getData(owner);
 
-		if (data == null)
+		if (data != null)
 		{
-			return;
-		}
-
-		long max = task.getMaxProgress();
-
-		if (max <= 0)
-		{
-			tooltip.add(I18n.format("ftbquests.progress") + ": " + TextFormatting.BLUE + "0/0 [0%]");
-		}
-		else
-		{
-			long progress = data.getQuestTaskData(task.id).getProgress();
-
-			if (progress >= max)
-			{
-				tooltip.add(I18n.format("ftbquests.progress") + ": " + TextFormatting.BLUE + max + "/" + max + " [100%]");
-			}
-			else
-			{
-				tooltip.add(I18n.format("ftbquests.progress") + ": " + TextFormatting.BLUE + progress + "/" + max + " [" + (int) (progress * 100D / (double) max) + "%]");
-			}
+			QuestTaskData taskData = data.getQuestTaskData(task);
+			tooltip.add(I18n.format("ftbquests.progress") + ": " + TextFormatting.BLUE + String.format("%s / %s [%d%%]", taskData.getProgressString(), task.getMaxProgressString(), (int) (taskData.getRelativeProgress() * 100D)));
 		}
 	}
 }
