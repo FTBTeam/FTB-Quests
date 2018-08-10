@@ -69,6 +69,7 @@ public class MessageResetProgress extends MessageToServer
 					for (ForgeTeam team : Universe.get().getTeams())
 					{
 						o.resetProgress(FTBQuestsTeamData.get(team));
+						team.markDirty();
 					}
 
 					new MessageResetProgressResponse(id).sendToAll();
@@ -76,7 +77,13 @@ public class MessageResetProgress extends MessageToServer
 				else
 				{
 					ForgePlayer player1 = Universe.get().getPlayer(player);
-					o.resetProgress(FTBQuestsTeamData.get(player1.team));
+
+					if (player1.team.isValid())
+					{
+						o.resetProgress(FTBQuestsTeamData.get(player1.team));
+						player1.team.markDirty();
+					}
+
 					new MessageResetProgressResponse(id).sendTo(player);
 				}
 
