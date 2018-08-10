@@ -1,4 +1,4 @@
-package com.feed_the_beast.ftbquests.block;
+package com.feed_the_beast.ftbquests.tile;
 
 import com.feed_the_beast.ftblib.lib.block.BlockFlags;
 import com.feed_the_beast.ftblib.lib.config.ConfigBlockState;
@@ -10,19 +10,18 @@ import com.feed_the_beast.ftblib.lib.config.ConfigNull;
 import com.feed_the_beast.ftblib.lib.config.ConfigString;
 import com.feed_the_beast.ftblib.lib.config.IConfigCallback;
 import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
-import com.feed_the_beast.ftblib.lib.math.MathUtils;
 import com.feed_the_beast.ftblib.lib.tile.EnumSaveType;
 import com.feed_the_beast.ftblib.lib.util.CommonUtils;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.FTBQuestsItems;
+import com.feed_the_beast.ftbquests.block.BlockScreen;
 import com.feed_the_beast.ftbquests.net.MessageOpenTask;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskData;
 import com.feed_the_beast.ftbquests.util.ProgressDisplayMode;
-import com.feed_the_beast.ftbquests.util.RedstoneOutputMode;
 import net.minecraft.block.BlockHorizontal;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.command.ICommandSender;
@@ -31,7 +30,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.ITickable;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -45,18 +44,16 @@ import javax.annotation.Nullable;
 /**
  * @author LatvianModder
  */
-public class TileScreenCore extends TileScreenBase implements ITickable, IConfigCallback
+public class TileScreenCore extends TileScreenBase implements IConfigCallback
 {
 	public EnumFacing facing;
 	public short quest = 0;
 	public int taskIndex = 0;
-	public ConfigString owner = new ConfigString("");
+	public final ConfigString owner = new ConfigString("");
 	public int size = 0;
-	public ConfigEnum<ProgressDisplayMode> progressDisplayMode = new ConfigEnum<>(ProgressDisplayMode.NAME_MAP);
-	public ConfigEnum<RedstoneOutputMode> redstoneOutputMode = new ConfigEnum<>(RedstoneOutputMode.NAME_MAP);
-	public int redstoneOutput = 0;
-	public ConfigBoolean indestructible = new ConfigBoolean(false);
-	public ConfigBlockState skin = new ConfigBlockState(CommonUtils.AIR_STATE);
+	public final ConfigEnum<ProgressDisplayMode> progressDisplayMode = new ConfigEnum<>(ProgressDisplayMode.NAME_MAP);
+	public final ConfigBoolean indestructible = new ConfigBoolean(false);
+	public final ConfigBlockState skin = new ConfigBlockState(CommonUtils.AIR_STATE);
 
 	private IProgressData cOwner;
 	private QuestTask cTask;
@@ -67,11 +64,6 @@ public class TileScreenCore extends TileScreenBase implements ITickable, IConfig
 	{
 		nbt.setString("Facing", getFacing().getName());
 		writeScreenData(nbt);
-
-		if (redstoneOutput > 0)
-		{
-			nbt.setByte("RedstoneOutput", (byte) redstoneOutput);
-		}
 	}
 
 	private void writeScreenData(NBTTagCompound nbt)
@@ -101,11 +93,6 @@ public class TileScreenCore extends TileScreenBase implements ITickable, IConfig
 			nbt.setString("ProgressDisplayMode", progressDisplayMode.getString());
 		}
 
-		if (!redstoneOutputMode.isDefault())
-		{
-			nbt.setString("RedstoneOutputMode", redstoneOutputMode.getString());
-		}
-
 		if (indestructible.getBoolean())
 		{
 			nbt.setBoolean("Indestructible", true);
@@ -122,7 +109,6 @@ public class TileScreenCore extends TileScreenBase implements ITickable, IConfig
 	{
 		facing = EnumFacing.byName(nbt.getString("Facing"));
 		readScreenData(nbt);
-		redstoneOutput = nbt.getByte("RedstoneOutput");
 	}
 
 	private void readScreenData(NBTTagCompound nbt)
@@ -132,7 +118,6 @@ public class TileScreenCore extends TileScreenBase implements ITickable, IConfig
 		taskIndex = nbt.getByte("TaskIndex") & 0xFF;
 		size = nbt.getByte("Size");
 		progressDisplayMode.setValue(nbt.getString("ProgressDisplayMode"));
-		redstoneOutputMode.setValue(nbt.getString("RedstoneOutputMode"));
 		indestructible.setBoolean(nbt.getBoolean("Indestructible"));
 		skin.setValueFromString(nbt.getString("Skin"), false);
 	}
@@ -322,7 +307,7 @@ public class TileScreenCore extends TileScreenBase implements ITickable, IConfig
 		return d * d;
 	}
 
-	public boolean onClicked(EntityPlayer player, double x, double y)
+	public boolean onClicked(EntityPlayer player, EnumHand hand, double x, double y)
 	{
 		if (player.isSneaking())
 		{
@@ -344,7 +329,6 @@ public class TileScreenCore extends TileScreenBase implements ITickable, IConfig
 
 				group.add("skin", skin, new ConfigBlockState(CommonUtils.AIR_STATE)).setCanEdit(editorOrDestructible);
 				group.add("progress_display_mode", progressDisplayMode, new ConfigEnum<>(ProgressDisplayMode.NAME_MAP));
-				group.add("redstone_output_mode", redstoneOutputMode, new ConfigEnum<>(RedstoneOutputMode.NAME_MAP)).setCanEdit(editorOrDestructible);
 
 				if (editor)
 				{
@@ -440,6 +424,22 @@ public class TileScreenCore extends TileScreenBase implements ITickable, IConfig
 		{
 			if (!world.isRemote)
 			{
+				if (cTaskData.canInsertItem() && cTaskData.task.getMaxProgress() > 0L && cTaskData.getProgress() < cTaskData.task.getMaxProgress())
+				{
+					ItemStack stack = player.getHeldItem(hand);
+
+					if (!stack.isEmpty())
+					{
+						ItemStack stack1 = cTaskData.insertItem(stack, false);
+
+						if (stack != stack1)
+						{
+							player.setHeldItem(hand, stack1);
+							return true;
+						}
+					}
+				}
+
 				MessageOpenTask.openGUI(cTaskData, (EntityPlayerMP) player, this);
 			}
 
@@ -452,98 +452,35 @@ public class TileScreenCore extends TileScreenBase implements ITickable, IConfig
 	@Override
 	public void onConfigSaved(ConfigGroup group, ICommandSender sender)
 	{
+		updateContainingBlockInfo();
 		markDirty();
 		world.notifyBlockUpdate(pos, getBlockState(), getBlockState(), BlockFlags.DEFAULT_AND_RERENDER);
 	}
 
 	@Override
-	public void update()
+	public void onLoad()
 	{
-		if (world.getTotalWorldTime() % 20 == 0L)
+		if (getBlockType() != FTBQuestsItems.SCREEN)
 		{
-			if (getBlockType() != FTBQuestsItems.SCREEN)
+			boolean xaxis = getFacing().getAxis() == EnumFacing.Axis.X;
+
+			for (int y = 0; y < size * 2 + 1; y++)
 			{
-				boolean xaxis = getFacing().getAxis() == EnumFacing.Axis.X;
-
-				for (int y = 0; y < size * 2 + 1; y++)
+				for (int x = -size; x <= size; x++)
 				{
-					for (int x = -size; x <= size; x++)
-					{
-						int offX = xaxis ? 0 : x;
-						int offZ = xaxis ? x : 0;
-						BlockPos pos1 = new BlockPos(pos.getX() + offX, pos.getY() + y, pos.getZ() + offZ);
-						world.removeTileEntity(pos1);
-					}
+					int offX = xaxis ? 0 : x;
+					int offZ = xaxis ? x : 0;
+					world.setBlockToAir(new BlockPos(pos.getX() + offX, pos.getY() + y, pos.getZ() + offZ));
 				}
-
-				return;
-			}
-
-			int rout = redstoneOutput;
-			redstoneOutput = 0;
-
-			if (!redstoneOutputMode.isDefault())
-			{
-				cTaskData = getTaskData();
-
-				if (cTaskData != null)
-				{
-					long progress = cTaskData.getProgress();
-
-					if (progress > 0)
-					{
-						long max = cTaskData.task.getMaxProgress();
-
-						if (progress >= max)
-						{
-							redstoneOutput = 15;
-						}
-						else if (redstoneOutputMode.getValue() == RedstoneOutputMode.LEVEL)
-						{
-							redstoneOutput = (int) MathUtils.map(0, max, 1, 15, progress);
-						}
-					}
-				}
-			}
-
-			if (rout != redstoneOutput)
-			{
-				EnumFacing opposite = getFacing().getOpposite();
-				boolean xaxis = opposite.getAxis() == EnumFacing.Axis.X;
-
-				for (int y = 0; y < size * 2 + 1; y++)
-				{
-					for (int x = -size; x <= size; x++)
-					{
-						int offX = xaxis ? 0 : x;
-						int offZ = xaxis ? x : 0;
-						BlockPos pos1 = new BlockPos(pos.getX() + offX, pos.getY() + y, pos.getZ() + offZ);
-
-						BlockPos pos2 = pos1.offset(opposite);
-
-						if (world.isBlockLoaded(pos2))
-						{
-							IBlockState state = world.getBlockState(pos2);
-
-							state.getBlock().onNeighborChange(world, pos2, pos1);
-							if (state.getBlock().isNormalCube(state, world, pos2))
-							{
-								pos2 = pos2.offset(opposite);
-								state = world.getBlockState(pos2);
-
-								if (state.getBlock().getWeakChanges(world, pos2))
-								{
-									state.getBlock().onNeighborChange(world, pos2, pos1);
-								}
-							}
-						}
-					}
-				}
-
-				markDirty();
 			}
 		}
 
-		checkIfDirty();
+		markDirty();
+	}
+
+	@Override
+	public void markDirty()
+	{
+		sendDirtyUpdate();
 	}
 }

@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
  */
 public abstract class QuestObject
 {
+	public static final int MAX_ID = 65535;
 	public static final Pattern ID_PATTERN = Pattern.compile("^[a-z0-9_]*$");
 
 	public final short id;

@@ -85,7 +85,7 @@ public abstract class QuestTaskData<T extends QuestTask> implements ICapabilityP
 	@Override
 	public final ItemStack insertItem(int slot, ItemStack stack, boolean simulate)
 	{
-		if (canInsertItem() && getProgress() < task.getMaxProgress() && !stack.isEmpty())
+		if (canInsertItem() && task.getMaxProgress() > 0L && getProgress() < task.getMaxProgress() && !stack.isEmpty())
 		{
 			return insertItem(stack, simulate);
 		}

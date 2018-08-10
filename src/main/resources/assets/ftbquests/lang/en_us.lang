@@ -7,12 +7,12 @@ tile.ftbquests.screen.progress_display_mode=Progress Display Mode
 tile.ftbquests.screen.progress_display_mode.progress=Progress
 tile.ftbquests.screen.progress_display_mode.percent=Percent
 tile.ftbquests.screen.progress_display_mode.bar=Bar
-tile.ftbquests.screen.redstone_output_mode=Redstone Output Mode
-tile.ftbquests.screen.redstone_output_mode.disabled=Disabled
-tile.ftbquests.screen.redstone_output_mode.enabled=Enabled
-tile.ftbquests.screen.redstone_output_mode.level=Level
 tile.ftbquests.screen.indestructible=Indestructible
+tile.ftbquests.progress_detector.name=Quest Progress Detector
+tile.ftbquests.progress_detector.object=Object ID
+tile.ftbquests.progress_detector.level=Output Level
 
+itemGroup.ftbquests=FTB Quests
 sidebar_button.ftbquests.quests=Quests
 key.ftbquests.quests=Open Quests
 admin_panel.ftbquests.edit_settings=FTB Quests Settings

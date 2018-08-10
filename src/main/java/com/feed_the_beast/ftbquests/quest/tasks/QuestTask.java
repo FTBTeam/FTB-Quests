@@ -1,13 +1,13 @@
 package com.feed_the_beast.ftbquests.quest.tasks;
 
 import com.feed_the_beast.ftblib.lib.icon.Icon;
-import com.feed_the_beast.ftbquests.block.TileScreenCore;
-import com.feed_the_beast.ftbquests.block.TileScreenPart;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.ProgressingQuestObject;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
+import com.feed_the_beast.ftbquests.tile.TileScreenCore;
+import com.feed_the_beast.ftbquests.tile.TileScreenPart;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.IStringSerializable;
 import net.minecraft.util.text.ITextComponent;

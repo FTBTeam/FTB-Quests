@@ -65,7 +65,7 @@ public final class Quest extends ProgressingQuestObject
 			text.add(new ConfigString(list.getStringTagAt(k)));
 		}
 
-		dependencies = new ConfigList<>(new ConfigInt(1, 1, QuestFile.MAX_ID));
+		dependencies = new ConfigList<>(new ConfigInt(1, 1, MAX_ID));
 		tasks = new ArrayList<>();
 		rewards = new ArrayList<>();
 
@@ -375,7 +375,7 @@ public final class Quest extends ProgressingQuestObject
 		group.add("icon", icon, new ConfigItemStack(ItemStack.EMPTY, true));
 		group.add("description", description, new ConfigString(""));
 		group.add("text", text, new ConfigList<>(new ConfigString("")));
-		group.add("dependencies", dependencies, new ConfigList<>(new ConfigInt(1, 1, QuestFile.MAX_ID)));
+		group.add("dependencies", dependencies, new ConfigList<>(new ConfigInt(1, 1, MAX_ID)));
 	}
 
 	public void move(byte direction)

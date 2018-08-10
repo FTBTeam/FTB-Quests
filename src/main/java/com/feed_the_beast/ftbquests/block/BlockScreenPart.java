@@ -1,5 +1,7 @@
 package com.feed_the_beast.ftbquests.block;
 
+import com.feed_the_beast.ftbquests.tile.TileScreenCore;
+import com.feed_the_beast.ftbquests.tile.TileScreenPart;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
@@ -10,11 +12,6 @@ import net.minecraft.world.World;
  */
 public class BlockScreenPart extends BlockScreen
 {
-	public BlockScreenPart(String mod, String id)
-	{
-		super(mod, id);
-	}
-
 	@Override
 	public TileEntity createTileEntity(World world, IBlockState state)
 	{
