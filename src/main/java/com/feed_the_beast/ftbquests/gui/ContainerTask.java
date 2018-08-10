@@ -1,45 +1,40 @@
 package com.feed_the_beast.ftbquests.gui;
 
-import com.feed_the_beast.ftblib.lib.gui.ContainerBase;
-import com.feed_the_beast.ftbquests.block.TileScreenCore;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskData;
+import com.feed_the_beast.ftbquests.tile.TileScreenCore;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.ClickType;
+import net.minecraft.inventory.Container;
+import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.items.SlotItemHandler;
 
 /**
  * @author LatvianModder
  */
-public class ContainerTask extends ContainerBase
+public class ContainerTask extends Container
 {
 	public final QuestTaskData data;
 	public TileScreenCore screen;
 
 	public ContainerTask(EntityPlayer player, QuestTaskData d)
 	{
-		super(player);
 		data = d;
 
-		if (d.canInsertItem())
+		int invX = 8;
+		int invY = 84;
+
+		for (int y = 0; y < 3; y++)
 		{
-			addSlotToContainer(new SlotItemHandler(data, 0, 80, 34)
+			for (int x = 0; x < 9; x++)
 			{
-				@Override
-				public void putStack(ItemStack stack)
-				{
-					getItemHandler().insertItem(0, stack, false);
-					onSlotChanged();
-				}
-			});
+				addSlotToContainer(new Slot(player.inventory, x + y * 9 + 9, invX + x * 18, invY + y * 18));
+			}
 		}
 
-		addPlayerSlots(8, 84);
-	}
-
-	@Override
-	public int getNonPlayerSlots()
-	{
-		return data.canInsertItem() ? 1 : 0;
+		for (int x = 0; x < 9; x++)
+		{
+			addSlotToContainer(new Slot(player.inventory, x, invX + x * 18, invY + 58));
+		}
 	}
 
 	@Override
@@ -51,5 +46,60 @@ public class ContainerTask extends ContainerBase
 		}
 
 		return !data.task.invalid;
+	}
+
+	@Override
+	public ItemStack slotClick(int slotId, int dragType, ClickType clickType, EntityPlayer player)
+	{
+		if (clickType == ClickType.QUICK_MOVE)
+		{
+			if (!data.canInsertItem() || data.getProgress() >= data.task.getMaxProgress())
+			{
+				return ItemStack.EMPTY;
+			}
+
+			Slot slot = inventorySlots.get(slotId);
+
+			if (slot != null && slot.getHasStack())
+			{
+				ItemStack stack = slot.getStack();
+				ItemStack prevStack = stack.copy();
+
+				stack = data.insertItem(stack, dragType == 1, false);
+
+				if (stack.isEmpty())
+				{
+					slot.putStack(ItemStack.EMPTY);
+				}
+				else
+				{
+					slot.putStack(stack);
+				}
+
+				return prevStack;
+			}
+
+			return ItemStack.EMPTY;
+		}
+
+		return super.slotClick(slotId, dragType, clickType, player);
+	}
+
+	@Override
+	public boolean enchantItem(EntityPlayer player, int id)
+	{
+		if ((id == 0 || id == 1) && data.canInsertItem())
+		{
+			ItemStack stack = player.inventory.getItemStack();
+			ItemStack stack1 = data.insertItem(stack, id == 1, false);
+
+			if (stack != stack1)
+			{
+				player.inventory.setItemStack(stack1);
+				return true;
+			}
+		}
+
+		return false;
 	}
 }

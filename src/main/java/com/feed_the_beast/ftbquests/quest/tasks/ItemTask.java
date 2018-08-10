@@ -206,14 +206,19 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 		}
 
 		@Override
-		public ItemStack insertItem(ItemStack stack, boolean simulate)
+		public ItemStack insertItem(ItemStack stack, boolean singleItem, boolean simulate)
 		{
 			if (task.test(stack))
 			{
 				long add = Math.min(stack.getCount(), task.count.getInt() - progress);
 
-				if (add > 0)
+				if (add > 0L)
 				{
+					if (singleItem)
+					{
+						add = 1L;
+					}
+
 					if (!simulate)
 					{
 						progress += add;

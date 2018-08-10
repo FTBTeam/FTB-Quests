@@ -430,7 +430,7 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 
 					if (!stack.isEmpty())
 					{
-						ItemStack stack1 = cTaskData.insertItem(stack, false);
+						ItemStack stack1 = cTaskData.insertItem(stack, false, false);
 
 						if (stack != stack1)
 						{
