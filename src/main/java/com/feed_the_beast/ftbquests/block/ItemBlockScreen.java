@@ -1,8 +1,7 @@
 package com.feed_the_beast.ftbquests.block;
 
-import com.feed_the_beast.ftblib.lib.block.ItemBlockBase;
+import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
-import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.gui.ClientQuestFile;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.Quest;
@@ -13,6 +12,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
@@ -28,7 +28,7 @@ import java.util.List;
 /**
  * @author LatvianModder
  */
-public class ItemBlockScreen extends ItemBlockBase
+public class ItemBlockScreen extends ItemBlock
 {
 	public ItemBlockScreen(Block block)
 	{
@@ -39,14 +39,8 @@ public class ItemBlockScreen extends ItemBlockBase
 	public boolean placeBlockAt(ItemStack stack, EntityPlayer player, World world, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ, IBlockState newState)
 	{
 		NBTTagCompound nbt = stack.getTagCompound();
-		Quest quest = nbt == null ? null : FTBQuests.PROXY.getQuestList(world.isRemote).getQuest(nbt.getShort("Quest"));
 
-		if (quest == null || quest.invalid || quest.tasks.isEmpty())
-		{
-			return false;
-		}
-
-		int size = nbt.getByte("Size");
+		int size = nbt == null ? 0 : nbt.getByte("Size");
 
 		if (size > 0)
 		{
@@ -72,7 +66,18 @@ public class ItemBlockScreen extends ItemBlockBase
 			}
 		}
 
-		BlockScreen.currentTask = quest.getTask(nbt.getByte("TaskIndex"));
+		if (nbt == null || !nbt.hasKey("Owner"))
+		{
+			if (nbt == null)
+			{
+				nbt = new NBTTagCompound();
+				stack.setTagCompound(nbt);
+			}
+
+			nbt.setString("Owner", FTBLibAPI.getTeam(player.getUniqueID()));
+		}
+
+		//BlockScreen.currentTask = quest.getTask(nbt.getByte("TaskIndex"));
 		return super.placeBlockAt(stack, player, world, pos, side, hitX, hitY, hitZ, newState);
 	}
 
@@ -86,7 +91,31 @@ public class ItemBlockScreen extends ItemBlockBase
 		}
 
 		NBTTagCompound nbt = stack.getTagCompound();
-		Quest quest = nbt == null ? null : ClientQuestFile.INSTANCE.getQuest(nbt.getShort("Quest"));
+
+		if (nbt == null)
+		{
+			nbt = new NBTTagCompound();
+		}
+
+		int size = nbt.getByte("Size");
+		String owner = nbt.getString("Owner");
+
+		if (owner.isEmpty())
+		{
+			owner = ClientQuestFile.INSTANCE.teamId;
+		}
+
+		tooltip.add(I18n.format("tile.ftbquests.screen.size") + ": " + TextFormatting.GOLD.toString() + (1 + size * 2) + " x " + (1 + size * 2));
+		tooltip.add(I18n.format("ftbquests.owner") + ": " + TextFormatting.DARK_GREEN + owner);
+
+		short questID = nbt.getShort("Quest");
+
+		if (questID == 0)
+		{
+			return;
+		}
+
+		Quest quest = ClientQuestFile.INSTANCE.getQuest(questID);
 
 		if (quest == null || quest.invalid || quest.tasks.isEmpty())
 		{
@@ -94,11 +123,6 @@ public class ItemBlockScreen extends ItemBlockBase
 			return;
 		}
 
-		int size = nbt.getByte("Size");
-		String owner = nbt.getString("Owner");
-
-		tooltip.add(I18n.format("tile.ftbquests.screen.size") + ": " + TextFormatting.GOLD.toString() + (1 + size * 2) + " x " + (1 + size * 2));
-		tooltip.add(I18n.format("ftbquests.owner") + ": " + TextFormatting.DARK_GREEN + owner);
 		tooltip.add(I18n.format("ftbquests.chapter") + ": " + StringUtils.color(quest.chapter.getDisplayName(), TextFormatting.YELLOW).getFormattedText());
 		tooltip.add(I18n.format("ftbquests.quest") + ": " + StringUtils.color(quest.getDisplayName(), TextFormatting.YELLOW).getFormattedText());
 

@@ -5,11 +5,11 @@ import com.feed_the_beast.ftblib.events.client.CustomClickEvent;
 import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.FTBQuestsItems;
-import com.feed_the_beast.ftbquests.block.TileScreenCore;
 import com.feed_the_beast.ftbquests.gui.ClientQuestFile;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.rewards.QuestReward;
+import com.feed_the_beast.ftbquests.tile.TileScreenCore;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
@@ -34,7 +34,7 @@ public class FTBQuestsClientEventHandler
 	public static void registerModels(ModelRegistryEvent event)
 	{
 		ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(FTBQuestsItems.SCREEN), 0, new ModelResourceLocation(FTBQuestsItems.SCREEN.getRegistryName(), "facing=north"));
-		ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(FTBQuestsItems.SCREEN_PART), 0, new ModelResourceLocation(FTBQuestsItems.SCREEN_PART.getRegistryName(), "facing=north"));
+		ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(FTBQuestsItems.PROGRESS_DETECTOR), 0, new ModelResourceLocation(FTBQuestsItems.PROGRESS_DETECTOR.getRegistryName(), "normal"));
 
 		ClientRegistry.bindTileEntitySpecialRenderer(TileScreenCore.class, new RenderScreen());
 	}

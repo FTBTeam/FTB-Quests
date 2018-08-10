@@ -1,4 +1,4 @@
-package com.feed_the_beast.ftbquests.block;
+package com.feed_the_beast.ftbquests.tile;
 
 import com.feed_the_beast.ftblib.lib.tile.TileBase;
 

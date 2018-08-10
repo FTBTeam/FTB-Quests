@@ -56,6 +56,12 @@ public class FluidTask extends QuestTask
 	}
 
 	@Override
+	public String getMaxProgressString()
+	{
+		return getVolumeString(amount.getLong());
+	}
+
+	@Override
 	public String getName()
 	{
 		return ID;
@@ -99,15 +105,13 @@ public class FluidTask extends QuestTask
 		return new FluidStack(fluid.getFluid(), amount, fluidNBT.getNBT());
 	}
 
-	@Override
-	public ITextComponent getDisplayName()
+	public static String getVolumeString(long a)
 	{
 		StringBuilder builder = new StringBuilder();
-		int a = amount.getInt();
 
 		if (a >= Fluid.BUCKET_VOLUME)
 		{
-			if (a % Fluid.BUCKET_VOLUME != 0)
+			if (a % Fluid.BUCKET_VOLUME != 0L)
 			{
 				builder.append(a / (double) Fluid.BUCKET_VOLUME);
 			}
@@ -122,8 +126,14 @@ public class FluidTask extends QuestTask
 			builder.append('m');
 		}
 
-		builder.append("b of ");
-		return new TextComponentString(builder.toString()).appendSibling(fluid.getStringForGUI());
+		builder.append('B');
+		return builder.toString();
+	}
+
+	@Override
+	public ITextComponent getDisplayName()
+	{
+		return new TextComponentString(getVolumeString(amount.getLong())).appendText(" of ").appendSibling(fluid.getStringForGUI());
 	}
 
 	@Override
@@ -162,6 +172,12 @@ public class FluidTask extends QuestTask
 		public <T> T getCapability(Capability<T> capability, @Nullable EnumFacing facing)
 		{
 			return capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY || capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY ? (T) this : null;
+		}
+
+		@Override
+		public String getProgressString()
+		{
+			return getVolumeString(progress);
 		}
 
 		@Override

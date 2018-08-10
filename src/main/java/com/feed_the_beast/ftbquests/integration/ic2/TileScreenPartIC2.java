@@ -1,7 +1,7 @@
 package com.feed_the_beast.ftbquests.integration.ic2;
 
-import com.feed_the_beast.ftbquests.block.TileScreenCore;
-import com.feed_the_beast.ftbquests.block.TileScreenPart;
+import com.feed_the_beast.ftbquests.tile.TileScreenCore;
+import com.feed_the_beast.ftbquests.tile.TileScreenPart;
 import ic2.api.energy.EnergyNet;
 import ic2.api.energy.tile.IEnergyEmitter;
 import ic2.api.energy.tile.IEnergySink;

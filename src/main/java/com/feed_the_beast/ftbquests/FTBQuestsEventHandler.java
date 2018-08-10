@@ -8,15 +8,18 @@ import com.feed_the_beast.ftblib.lib.data.AdminPanelAction;
 import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
 import com.feed_the_beast.ftblib.lib.data.ForgePlayer;
 import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
+import com.feed_the_beast.ftbquests.block.BlockProgressDetector;
 import com.feed_the_beast.ftbquests.block.BlockScreen;
 import com.feed_the_beast.ftbquests.block.BlockScreenPart;
 import com.feed_the_beast.ftbquests.block.ItemBlockScreen;
-import com.feed_the_beast.ftbquests.block.TileScreenCore;
-import com.feed_the_beast.ftbquests.block.TileScreenPart;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
+import com.feed_the_beast.ftbquests.tile.TileProgressDetector;
+import com.feed_the_beast.ftbquests.tile.TileScreenCore;
+import com.feed_the_beast.ftbquests.tile.TileScreenPart;
 import com.feed_the_beast.ftbquests.util.FTBQuestsWorldData;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemBlock;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.event.RegistryEvent;
@@ -34,19 +37,22 @@ public class FTBQuestsEventHandler
 	public static void registerBlocks(RegistryEvent.Register<Block> event)
 	{
 		event.getRegistry().registerAll(
-				new BlockScreen(FTBQuests.MOD_ID, "screen"),
-				new BlockScreenPart(FTBQuests.MOD_ID, "screen_part")
+				new BlockScreen().setRegistryName("screen"),
+				new BlockScreenPart().setRegistryName("screen_part"),
+				new BlockProgressDetector().setRegistryName("progress_detector").setTranslationKey(FTBQuests.MOD_ID + ".progress_detector")
 		);
 
 		GameRegistry.registerTileEntity(TileScreenCore.class, new ResourceLocation(FTBQuests.MOD_ID, "screen_core"));
 		GameRegistry.registerTileEntity(TileScreenPart.class, new ResourceLocation(FTBQuests.MOD_ID, "screen_part"));
+		GameRegistry.registerTileEntity(TileProgressDetector.class, new ResourceLocation(FTBQuests.MOD_ID, "progress_detector"));
 	}
 
 	@SubscribeEvent
 	public static void registerItems(RegistryEvent.Register<Item> event)
 	{
 		event.getRegistry().registerAll(
-				new ItemBlockScreen(FTBQuestsItems.SCREEN)
+				new ItemBlockScreen(FTBQuestsItems.SCREEN).setRegistryName("screen"),
+				new ItemBlock(FTBQuestsItems.PROGRESS_DETECTOR).setRegistryName("progress_detector")
 		);
 	}
 

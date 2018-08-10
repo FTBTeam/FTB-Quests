@@ -48,7 +48,7 @@ public final class QuestChapter extends ProgressingQuestObject
 			description.add(new ConfigString(desc.getStringTagAt(i)));
 		}
 
-		dependencies = new ConfigList<>(new ConfigInt(1, 1, QuestFile.MAX_ID));
+		dependencies = new ConfigList<>(new ConfigInt(1, 1, MAX_ID));
 
 		for (int d : nbt.getIntArray("depends_on"))
 		{
@@ -226,6 +226,6 @@ public final class QuestChapter extends ProgressingQuestObject
 		group.add("title", title, new ConfigString(""));
 		group.add("icon", icon, new ConfigItemStack(ItemStack.EMPTY, true));
 		group.add("description", description, new ConfigList<>(new ConfigString("")));
-		group.add("dependencies", dependencies, new ConfigList<>(new ConfigInt(1, 1, QuestFile.MAX_ID)));
+		group.add("dependencies", dependencies, new ConfigList<>(new ConfigInt(1, 1, MAX_ID)));
 	}
 }

@@ -6,7 +6,9 @@ import com.feed_the_beast.ftbquests.net.FTBQuestsNetHandler;
 import com.feed_the_beast.ftbquests.quest.rewards.QuestRewards;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTasks;
 import com.feed_the_beast.ftbquests.util.FTBQuestsWorldData;
+import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
@@ -35,6 +37,15 @@ public class FTBQuests
 
 	private static final String PERM_EDIT_QUESTS = "ftbquests.edit_quests";
 	public static final String PERM_EDIT_SETTINGS = "ftbquests.edit_settings";
+
+	public static final CreativeTabs TAB = new CreativeTabs(FTBQuests.MOD_ID)
+	{
+		@Override
+		public ItemStack getTabIconItem()
+		{
+			return new ItemStack(FTBQuestsItems.SCREEN);
+		}
+	};
 
 	@Mod.EventHandler
 	public void onPreInit(FMLPreInitializationEvent event)

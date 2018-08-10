@@ -8,6 +8,7 @@ import com.feed_the_beast.ftblib.lib.config.ConfigString;
 import com.feed_the_beast.ftblib.lib.config.ConfigTimer;
 import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
+import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
 import com.feed_the_beast.ftblib.lib.item.ItemStackSerializer;
 import com.feed_the_beast.ftblib.lib.math.Ticks;
 import com.feed_the_beast.ftbquests.quest.rewards.QuestReward;
@@ -21,6 +22,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.common.util.Constants;
 
@@ -34,8 +36,6 @@ import java.util.List;
  */
 public abstract class QuestFile extends ProgressingQuestObject
 {
-	public static final int MAX_ID = 65535;
-
 	public static String formatID(short id0)
 	{
 		int id = id0 & 0xFFFF;
@@ -383,12 +383,22 @@ public abstract class QuestFile extends ProgressingQuestObject
 	@Override
 	public Icon getIcon()
 	{
+		if (!icon.isEmpty())
+		{
+			return ItemIcon.getItemIcon(icon.getStack());
+		}
+
 		return GuiIcons.BOOK_RED;
 	}
 
 	@Override
 	public ITextComponent getDisplayName()
 	{
+		if (!title.isEmpty())
+		{
+			return new TextComponentString(title.getString());
+		}
+
 		return new TextComponentTranslation("ftbquests.file");
 	}
 
