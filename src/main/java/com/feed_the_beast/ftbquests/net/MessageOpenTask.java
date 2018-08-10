@@ -6,6 +6,8 @@ import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToServer;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.gui.ContainerTask;
+import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
+import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskData;
 import com.feed_the_beast.ftbquests.tile.TileScreenCore;
 import com.feed_the_beast.ftbquests.util.FTBQuestsTeamData;
@@ -53,11 +55,11 @@ public class MessageOpenTask extends MessageToServer
 	public void onMessage(EntityPlayerMP player)
 	{
 		FTBQuestsTeamData teamData = FTBQuestsTeamData.get(Universe.get().getPlayer(player).team);
-		QuestTaskData data = teamData.getQuestTaskData(task);
+		QuestTask qtask = ServerQuestFile.INSTANCE.getTask(task);
 
-		if (data != null && data.task.quest.canStartTasks(teamData))
+		if (qtask != null && qtask.quest.canStartTasks(teamData))
 		{
-			openGUI(data, player, null);
+			openGUI(teamData.getQuestTaskData(qtask), player, null);
 		}
 	}
 

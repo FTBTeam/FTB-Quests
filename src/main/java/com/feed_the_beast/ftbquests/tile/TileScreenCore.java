@@ -19,6 +19,7 @@ import com.feed_the_beast.ftbquests.block.BlockScreen;
 import com.feed_the_beast.ftbquests.net.MessageOpenTask;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskData;
 import com.feed_the_beast.ftbquests.util.ProgressDisplayMode;
@@ -47,8 +48,8 @@ import javax.annotation.Nullable;
 public class TileScreenCore extends TileScreenBase implements IConfigCallback
 {
 	public EnumFacing facing;
-	public short quest = 0;
-	public int taskIndex = 0;
+	public final ConfigInt quest = new ConfigInt(1, 1, QuestObject.MAX_ID);
+	public final ConfigInt taskIndex = new ConfigInt(0, 0, 255);
 	public final ConfigString owner = new ConfigString("");
 	public int size = 0;
 	public final ConfigEnum<ProgressDisplayMode> progressDisplayMode = new ConfigEnum<>(ProgressDisplayMode.NAME_MAP);
@@ -73,14 +74,14 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 			nbt.setString("Owner", owner.getString());
 		}
 
-		if (quest != 0)
+		if (quest.getInt() != 0)
 		{
-			nbt.setShort("Quest", quest);
+			nbt.setShort("Quest", (short) quest.getInt());
 		}
 
-		if (taskIndex > 0)
+		if (taskIndex.getInt() > 0)
 		{
-			nbt.setByte("TaskIndex", (byte) taskIndex);
+			nbt.setByte("TaskIndex", (byte) taskIndex.getInt());
 		}
 
 		if (size > 0)
@@ -114,8 +115,8 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 	private void readScreenData(NBTTagCompound nbt)
 	{
 		owner.setString(nbt.getString("Owner"));
-		quest = nbt.getShort("Quest");
-		taskIndex = nbt.getByte("TaskIndex") & 0xFF;
+		quest.setInt(nbt.getShort("Quest") & 0xFFFF);
+		taskIndex.setInt(nbt.getByte("TaskIndex") & 0xFF);
 		size = nbt.getByte("Size");
 		progressDisplayMode.setValue(nbt.getString("ProgressDisplayMode"));
 		indestructible.setBoolean(nbt.getBoolean("Indestructible"));
@@ -250,14 +251,14 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 	@Nullable
 	public QuestTask getTask()
 	{
-		if (quest == 0)
+		if (quest.getInt() == 0)
 		{
 			return null;
 		}
 		else if (cTask == null || cTask.invalid)
 		{
-			Quest q = FTBQuests.PROXY.getQuestList(world.isRemote).getQuest(quest);
-			cTask = q == null || q.invalid || q.tasks.isEmpty() ? null : q.getTask(taskIndex);
+			Quest q = FTBQuests.PROXY.getQuestList(world.isRemote).getQuest((short) quest.getInt());
+			cTask = q == null || q.invalid || q.tasks.isEmpty() ? null : q.getTask(taskIndex.getInt());
 		}
 
 		return cTask;
@@ -266,7 +267,7 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 	@Nullable
 	public QuestTaskData getTaskData()
 	{
-		if (quest == 0 || owner.isEmpty())
+		if (quest.getInt() == 0 || owner.isEmpty())
 		{
 			return null;
 		}
@@ -286,7 +287,7 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 				return null;
 			}
 
-			cTaskData = cOwner.getQuestTaskData(cTask.id);
+			cTaskData = cOwner.getQuestTaskData(cTask);
 		}
 
 		return cTaskData;
@@ -307,20 +308,26 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 		return d * d;
 	}
 
-	public boolean onClicked(EntityPlayer player, EnumHand hand, double x, double y)
+	public boolean isOwner(EntityPlayer player)
 	{
+		return owner.isEmpty() || FTBLibAPI.getTeam(player.getUniqueID()).equals(owner.getString());
+	}
+
+	public void onClicked(EntityPlayerMP player, EnumHand hand, double x, double y)
+	{
+		boolean editor = FTBQuests.canEdit(player);
+
 		if (player.isSneaking())
 		{
-			if (!world.isRemote)
+			if (editor || isOwner(player))
 			{
-				boolean editor = FTBQuests.canEdit((EntityPlayerMP) player);
 				boolean editorOrDestructible = editor || !indestructible.getBoolean();
 				ConfigGroup group0 = ConfigGroup.newGroup("tile");
 				group0.setDisplayName(new TextComponentTranslation("tile.ftbquests.screen.name"));
 				ConfigGroup group = group0.getGroup("ftbquests.screen");
 
-				group.add("quest", new ConfigInt(quest & 0xFFFF), ConfigNull.INSTANCE).setCanEdit(editorOrDestructible).setDisplayName(new TextComponentTranslation("ftbquests.quest"));
-				group.add("task_index", new ConfigInt(taskIndex, 0, 255), new ConfigInt(0)).setCanEdit(editorOrDestructible);
+				group.add("quest", quest, ConfigNull.INSTANCE).setCanEdit(editorOrDestructible).setDisplayName(new TextComponentTranslation("ftbquests.quest"));
+				group.add("task_index", taskIndex, new ConfigInt(0)).setCanEdit(editorOrDestructible);
 
 				if (editor)
 				{
@@ -335,36 +342,47 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 					group.add("indestructible", indestructible, new ConfigBoolean(false));
 				}
 
-				FTBLibAPI.editServerConfig((EntityPlayerMP) player, group0, this);
+				FTBLibAPI.editServerConfig(player, group0, this);
 			}
 
-			return true;
+			return;
 		}
 
 		if (y >= 0.81D)
 		{
-			progressDisplayMode.onClicked(MouseButton.LEFT);
-			markDirty();
-			return true;
+			if (editor || isOwner(player))
+			{
+				progressDisplayMode.onClicked(MouseButton.LEFT);
+				markDirty();
+			}
+
+			return;
 		}
 
 		cTaskData = getTaskData();
 
 		if (cTaskData == null)
 		{
-			return false;
+			return;
 		}
 
 		if (y >= 0D && y <= 0.17D && !indestructible.getBoolean() && cTaskData.task.quest.tasks.size() > 1)
 		{
+			if (!editor && !isOwner(player))
+			{
+				return;
+			}
+
 			Class currentCore = cTaskData.task.getScreenCoreClass();
 			Class currentPart = cTaskData.task.getScreenPartClass();
 
-			taskIndex++;
-
-			if (taskIndex >= cTaskData.task.quest.tasks.size())
+			if (taskIndex.getInt() >= cTaskData.task.quest.tasks.size() - 1)
 			{
-				taskIndex = 0;
+				taskIndex.setInt(0);
+			}
+			else
+			{
+				taskIndex.setInt(taskIndex.getInt() + 1);
 			}
 
 			updateContainingBlockInfo();
@@ -408,7 +426,12 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 			}
 
 			markDirty();
-			return true;
+			return;
+		}
+
+		if (!isOwner(player))
+		{
+			return;
 		}
 
 		String top1 = cTaskData.task.quest.getDisplayName().getUnformattedText();
@@ -435,18 +458,14 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 						if (stack != stack1)
 						{
 							player.setHeldItem(hand, stack1);
-							return true;
+							return;
 						}
 					}
 				}
 
-				MessageOpenTask.openGUI(cTaskData, (EntityPlayerMP) player, this);
+				MessageOpenTask.openGUI(cTaskData, player, this);
 			}
-
-			return true;
 		}
-
-		return false;
 	}
 
 	@Override

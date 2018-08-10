@@ -250,7 +250,7 @@ public final class Quest extends ProgressingQuestObject
 
 		for (QuestReward reward : rewards)
 		{
-			data.unclaimReward(reward.id);
+			data.unclaimReward(reward);
 		}
 	}
 

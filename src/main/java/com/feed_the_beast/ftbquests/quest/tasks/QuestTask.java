@@ -48,13 +48,13 @@ public abstract class QuestTask extends ProgressingQuestObject implements IStrin
 	@Override
 	public final long getProgress(IProgressData data)
 	{
-		return data.getQuestTaskData(id).getProgress();
+		return data.getQuestTaskData(this).getProgress();
 	}
 
 	@Override
 	public final double getRelativeProgress(IProgressData data)
 	{
-		return data.getQuestTaskData(id).getRelativeProgress();
+		return data.getQuestTaskData(this).getRelativeProgress();
 	}
 
 	@Override
@@ -71,7 +71,7 @@ public abstract class QuestTask extends ProgressingQuestObject implements IStrin
 	@Override
 	public final void resetProgress(IProgressData data)
 	{
-		data.getQuestTaskData(id).resetProgress();
+		data.getQuestTaskData(this).resetProgress();
 	}
 
 	@Override
@@ -82,7 +82,7 @@ public abstract class QuestTask extends ProgressingQuestObject implements IStrin
 
 		for (IProgressData data : quest.chapter.file.getAllData())
 		{
-			data.removeTask(id);
+			data.removeTask(this);
 		}
 	}
 

@@ -245,9 +245,9 @@ public class FTBQuestsTeamData extends TeamData implements IProgressData
 	}
 
 	@Override
-	public void removeTask(short task)
+	public void removeTask(QuestTask task)
 	{
-		taskData.remove(task);
+		taskData.remove(task.id);
 	}
 
 	@Override
@@ -375,24 +375,17 @@ public class FTBQuestsTeamData extends TeamData implements IProgressData
 	}
 
 	@Override
-	public QuestTaskData getQuestTaskData(short task)
+	public QuestTaskData getQuestTaskData(QuestTask task)
 	{
-		return taskData.get(task);
+		return taskData.get(task.id);
 	}
 
 	@Override
-	public void unclaimReward(short reward)
+	public void unclaimReward(QuestReward reward)
 	{
-		QuestReward r = ServerQuestFile.INSTANCE.getReward(reward);
-
-		if (r == null)
+		if (reward.teamReward.getBoolean())
 		{
-			return;
-		}
-
-		if (r.teamReward.getBoolean())
-		{
-			if (claimedRewards.rem(reward))
+			if (claimedRewards.rem(reward.id))
 			{
 				team.markDirty();
 			}
@@ -404,11 +397,14 @@ public class FTBQuestsTeamData extends TeamData implements IProgressData
 			while (itr.hasNext())
 			{
 				ShortCollection collection = itr.next();
-				collection.rem(reward);
 
-				if (collection.isEmpty())
+				if (collection.rem(reward.id))
 				{
-					itr.remove();
+					if (collection.isEmpty())
+					{
+						itr.remove();
+					}
+
 					team.markDirty();
 				}
 			}

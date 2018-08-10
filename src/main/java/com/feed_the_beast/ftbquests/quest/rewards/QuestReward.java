@@ -48,7 +48,7 @@ public abstract class QuestReward extends QuestObject implements IStringSerializ
 
 		for (IProgressData data : quest.chapter.file.getAllData())
 		{
-			data.unclaimReward(id);
+			data.unclaimReward(this);
 		}
 	}
 

@@ -149,20 +149,20 @@ public class ClientQuestFile extends QuestFile implements IProgressData
 	}
 
 	@Override
-	public QuestTaskData getQuestTaskData(short task)
+	public QuestTaskData getQuestTaskData(QuestTask task)
 	{
-		return taskData.get(task);
+		return taskData.get(task.id);
 	}
 
-	public void setRewardStatus(short reward, boolean status)
+	public void setRewardStatus(QuestReward reward, boolean status)
 	{
 		if (status)
 		{
-			claimedRewards.add(reward);
+			claimedRewards.add(reward.id);
 		}
 		else
 		{
-			claimedRewards.rem(reward);
+			claimedRewards.rem(reward.id);
 		}
 	}
 
@@ -190,9 +190,9 @@ public class ClientQuestFile extends QuestFile implements IProgressData
 	}
 
 	@Override
-	public void removeTask(short task)
+	public void removeTask(QuestTask task)
 	{
-		taskData.remove(task);
+		taskData.remove(task.id);
 	}
 
 	@Override
@@ -202,9 +202,9 @@ public class ClientQuestFile extends QuestFile implements IProgressData
 	}
 
 	@Override
-	public void unclaimReward(short reward)
+	public void unclaimReward(QuestReward reward)
 	{
-		claimedRewards.rem(reward);
+		claimedRewards.rem(reward.id);
 	}
 
 	@Nullable
