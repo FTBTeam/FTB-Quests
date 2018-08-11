@@ -134,7 +134,7 @@ public class ClientQuestFile extends QuestFile
 	@Override
 	public ClientQuestProgress getData(String owner)
 	{
-		if (owner.equals(self.teamID))
+		if (self != null && owner.equals(self.teamID))
 		{
 			return self;
 		}
@@ -145,6 +145,11 @@ public class ClientQuestFile extends QuestFile
 	@Override
 	public Collection<IProgressData> getAllData()
 	{
+		if (self == null)
+		{
+			return Collections.emptyList();
+		}
+
 		return Collections.singleton(self);
 	}
 }
