@@ -16,15 +16,16 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  */
 public class MessageEditObjectResponse extends MessageToClient
 {
-	private short id;
+	private String prevId, id;
 	private NBTTagCompound nbt;
 
 	public MessageEditObjectResponse()
 	{
 	}
 
-	public MessageEditObjectResponse(short i, NBTTagCompound n)
+	public MessageEditObjectResponse(String pi, String i, NBTTagCompound n)
 	{
+		prevId = pi;
 		id = i;
 		nbt = n;
 	}
@@ -38,14 +39,16 @@ public class MessageEditObjectResponse extends MessageToClient
 	@Override
 	public void writeData(DataOut data)
 	{
-		data.writeShort(id);
+		data.writeString(prevId);
+		data.writeString(id);
 		data.writeNBT(nbt);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
-		id = data.readShort();
+		prevId = data.readString();
+		id = data.readString();
 		nbt = data.readNBT();
 	}
 
@@ -55,13 +58,21 @@ public class MessageEditObjectResponse extends MessageToClient
 	{
 		if (ClientQuestFile.INSTANCE != null)
 		{
-			QuestObject object = ClientQuestFile.INSTANCE.get(id);
+			QuestObject object = ClientQuestFile.INSTANCE.get(prevId);
 
 			if (object != null)
 			{
+				if (!prevId.equals(id))
+				{
+					object.id = id;
+					ClientQuestFile.INSTANCE.map.remove(prevId);
+					ClientQuestFile.INSTANCE.map.put(id, object);
+				}
+
 				ConfigGroup group = ConfigGroup.newGroup("object");
 				object.getConfig(group);
 				group.deserializeEditedNBT(nbt);
+				object.clearCachedData();
 				ClientQuestFile.INSTANCE.refreshGui(ClientQuestFile.INSTANCE);
 			}
 		}

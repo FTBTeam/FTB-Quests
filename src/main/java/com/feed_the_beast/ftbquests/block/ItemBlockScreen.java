@@ -109,9 +109,9 @@ public class ItemBlockScreen extends ItemBlock
 		tooltip.add(I18n.format("tile.ftbquests.screen.size") + ": " + TextFormatting.GOLD.toString() + (1 + size * 2) + " x " + (1 + size * 2));
 		tooltip.add(I18n.format("ftbquests.owner") + ": " + TextFormatting.DARK_GREEN + owner);
 
-		short questID = nbt.getShort("Quest");
+		String questID = nbt.getString("Quest");
 
-		if (questID == 0)
+		if (questID.isEmpty())
 		{
 			return;
 		}

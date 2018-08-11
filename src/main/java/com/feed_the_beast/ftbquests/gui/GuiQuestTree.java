@@ -28,9 +28,9 @@ import com.feed_the_beast.ftbquests.net.edit.MessageMoveChapter;
 import com.feed_the_beast.ftbquests.net.edit.MessageMoveQuest;
 import com.feed_the_beast.ftbquests.net.edit.MessageResetProgress;
 import com.feed_the_beast.ftbquests.net.edit.MessageSetDep;
+import com.feed_the_beast.ftbquests.quest.ProgressingQuestObject;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
-import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.quest.rewards.QuestReward;
@@ -88,13 +88,13 @@ public class GuiQuestTree extends GuiBase
 				List<ContextMenuItem> contextMenu = new ArrayList<>();
 				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.add_quest"), GuiIcons.ADD, GuiQuestTree.this::addQuest));
 				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.add_chapter"), GuiIcons.ADD, GuiQuestTree.this::addChapter));
-				contextMenu.add(new ContextMenuItem(I18n.format("selectServer.edit"), GuiIcons.SETTINGS, () -> new MessageEditObject(chapter.id).sendToServer()));
-				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.move_up"), GuiIcons.UP, () -> new MessageMoveChapter(chapter.id, true).sendToServer()).setEnabled(chapter.index > 0));
-				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.move_down"), GuiIcons.DOWN, () -> new MessageMoveChapter(chapter.id, false).sendToServer()).setEnabled(chapter.index < questFile.chapters.size() - 1));
+				contextMenu.add(new ContextMenuItem(I18n.format("selectServer.edit"), GuiIcons.SETTINGS, () -> new MessageEditObject(chapter.getID()).sendToServer()));
+				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.move_up"), GuiIcons.UP, () -> new MessageMoveChapter(chapter.getID(), true).sendToServer()).setEnabled(chapter.index > 0));
+				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.move_down"), GuiIcons.DOWN, () -> new MessageMoveChapter(chapter.getID(), false).sendToServer()).setEnabled(chapter.index < questFile.chapters.size() - 1));
 				contextMenu.add(ContextMenuItem.SEPARATOR);
-				contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), GuiIcons.REMOVE, () -> new MessageDeleteObject(chapter.id).sendToServer()).setYesNo(I18n.format("delete_item", chapter.getDisplayName().getFormattedText())));
-				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.reset_progress"), GuiIcons.REFRESH, () -> new MessageResetProgress(chapter.id, false).sendToServer()).setYesNo(I18n.format("ftbquests.gui.reset_progress_q")));
-				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.copy_id"), GuiIcons.INFO, () -> setClipboardString(QuestFile.formatID(chapter.id))));
+				contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), GuiIcons.REMOVE, () -> new MessageDeleteObject(chapter.getID()).sendToServer()).setYesNo(I18n.format("delete_item", chapter.getDisplayName().getFormattedText())));
+				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.reset_progress"), GuiIcons.REFRESH, () -> new MessageResetProgress(chapter.getID(), false).sendToServer()).setYesNo(I18n.format("ftbquests.gui.reset_progress_q")));
+				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.copy_id"), GuiIcons.INFO, () -> setClipboardString(chapter.getID())));
 				getGui().openContextMenu(contextMenu);
 			}
 		}
@@ -102,7 +102,15 @@ public class GuiQuestTree extends GuiBase
 		@Override
 		public void addMouseOverText(List<String> list)
 		{
-			list.add(getTitle() + questFile.getCompletionSuffix(chapter));
+			if (questFile.self != null)
+			{
+				list.add(getTitle() + questFile.self.getCompletionSuffix(chapter));
+			}
+			else
+			{
+				list.add(getTitle());
+			}
+
 			list.addAll(description);
 		}
 
@@ -120,15 +128,20 @@ public class GuiQuestTree extends GuiBase
 				icon.draw(ax + 10, ay + (height - 16) / 2, 16, 16);
 			}
 
+			if (questFile.self == null)
+			{
+				return;
+			}
+
 			int r = 0;
 
 			for (Quest quest : chapter.quests)
 			{
-				if (quest.isComplete(questFile))
+				if (quest.isComplete(questFile.self))
 				{
 					for (QuestReward reward : quest.rewards)
 					{
-						if (!questFile.isRewardClaimed(ClientUtils.MC.player, reward))
+						if (!questFile.self.isRewardClaimed(ClientUtils.MC.player, reward))
 						{
 							r++;
 						}
@@ -149,7 +162,7 @@ public class GuiQuestTree extends GuiBase
 				drawString(s, -6, 4, Color4I.WHITE, 0);
 				GlStateManager.popMatrix();
 			}
-			else if (chapter.isComplete(questFile))
+			else if (chapter.isComplete(questFile.self))
 			{
 				GlStateManager.pushMatrix();
 				GlStateManager.translate(0, 0, 500);
@@ -191,9 +204,9 @@ public class GuiQuestTree extends GuiBase
 			{
 				dependencies = new ArrayList<>();
 
-				for (ConfigValue value : quest.dependencies)
+				for (ConfigString value : quest.dependencies)
 				{
-					Quest q = questFile.getQuest((short) value.getInt());
+					Quest q = questFile.getQuest(value.getString());
 
 					if (q != null && q != quest)
 					{
@@ -221,7 +234,7 @@ public class GuiQuestTree extends GuiBase
 			if (questFile.canEdit() && button.isRight())
 			{
 				List<ContextMenuItem> contextMenu = new ArrayList<>();
-				contextMenu.add(new ContextMenuItem(I18n.format("selectWorld.edit"), GuiIcons.SETTINGS, () -> new MessageEditObject(quest.id).sendToServer()));
+				contextMenu.add(new ContextMenuItem(I18n.format("selectWorld.edit"), GuiIcons.SETTINGS, () -> new MessageEditObject(quest.getID()).sendToServer()));
 				/*contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.move"), GuiIcons.RIGHT, () ->
 				{
 					//ButtonQuest
@@ -229,30 +242,30 @@ public class GuiQuestTree extends GuiBase
 
 				QuestObject object = questFile.get(selectedQuest);
 
-				if (object != null && quest.hasDependency(object.id))
+				if (object instanceof ProgressingQuestObject && quest.hasDependency((ProgressingQuestObject) object))
 				{
-					contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.rem_dep"), GuiIcons.REMOVE, () -> new MessageSetDep(quest.id, selectedQuest, false).sendToServer()));
+					contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.rem_dep"), GuiIcons.REMOVE, () -> new MessageSetDep(quest.getID(), selectedQuest, false).sendToServer()));
 				}
 				else
 				{
-					contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.set_dep"), GuiIcons.ADD, () -> new MessageSetDep(quest.id, selectedQuest, true).sendToServer()).setEnabled(object != quest && object instanceof Quest));
+					contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.set_dep"), GuiIcons.ADD, () -> new MessageSetDep(quest.getID(), selectedQuest, true).sendToServer()).setEnabled(object != quest && object instanceof Quest));
 				}
 
 				contextMenu.add(ContextMenuItem.SEPARATOR);
-				contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), GuiIcons.REMOVE, () -> new MessageDeleteObject(quest.id).sendToServer()).setYesNo(I18n.format("delete_item", quest.getDisplayName().getFormattedText())));
-				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.reset_progress"), GuiIcons.REFRESH, () -> new MessageResetProgress(quest.id, false).sendToServer()).setYesNo(I18n.format("ftbquests.gui.reset_progress_q")));
-				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.copy_id"), GuiIcons.INFO, () -> setClipboardString(QuestFile.formatID(quest.id))));
+				contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), GuiIcons.REMOVE, () -> new MessageDeleteObject(quest.getID()).sendToServer()).setYesNo(I18n.format("delete_item", quest.getDisplayName().getFormattedText())));
+				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.reset_progress"), GuiIcons.REFRESH, () -> new MessageResetProgress(quest.getID(), false).sendToServer()).setYesNo(I18n.format("ftbquests.gui.reset_progress_q")));
+				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.copy_id"), GuiIcons.INFO, () -> setClipboardString(quest.getID())));
 				getGui().openContextMenu(contextMenu);
 			}
 			else if (questFile.canEdit() && button.isLeft() && isCtrlKeyDown())
 			{
-				if (selectedQuest == quest.id)
+				if (selectedQuest.equals(quest.getID()))
 				{
-					selectedQuest = 0;
+					selectedQuest = "";
 				}
 				else
 				{
-					selectedQuest = quest.id;
+					selectedQuest = quest.getID();
 				}
 			}
 			else if (button.isLeft())
@@ -265,13 +278,20 @@ public class GuiQuestTree extends GuiBase
 		@Override
 		public void addMouseOverText(List<String> list)
 		{
-			if (!getTitle().isEmpty())
+			if (questFile.self != null)
 			{
-				list.add(getTitle() + questFile.getCompletionSuffix(quest));
+				if (!getTitle().isEmpty())
+				{
+					list.add(getTitle() + questFile.self.getCompletionSuffix(quest));
+				}
+				else if (isShiftKeyDown())
+				{
+					list.add(questFile.self.getCompletionSuffix(quest).trim());
+				}
 			}
-			else if (isShiftKeyDown())
+			else if (!getTitle().isEmpty())
 			{
-				list.add(questFile.getCompletionSuffix(quest).trim());
+				list.add(getTitle());
 			}
 
 			if (!description.isEmpty())
@@ -283,12 +303,12 @@ public class GuiQuestTree extends GuiBase
 		@Override
 		public WidgetType getWidgetType()
 		{
-			if (selectedQuest == quest.id)
+			if (selectedQuest.equals(quest.getID()))
 			{
 				return WidgetType.MOUSE_OVER;
 			}
 
-			return quest.isVisible(questFile) ? WidgetType.mouseOver(isMouseOver()) : WidgetType.DISABLED;
+			return questFile.editingMode || questFile.self != null && quest.isVisible(questFile.self) ? super.getWidgetType() : WidgetType.DISABLED;
 		}
 
 		@Override
@@ -307,13 +327,18 @@ public class GuiQuestTree extends GuiBase
 				GlStateManager.popMatrix();
 			}
 
+			if (questFile.self == null)
+			{
+				return;
+			}
+
 			int r = 0;
 
-			if (quest.isComplete(questFile))
+			if (quest.isComplete(questFile.self))
 			{
 				for (QuestReward reward : quest.rewards)
 				{
-					if (!questFile.isRewardClaimed(ClientUtils.MC.player, reward))
+					if (!questFile.self.isRewardClaimed(ClientUtils.MC.player, reward))
 					{
 						r++;
 					}
@@ -339,7 +364,7 @@ public class GuiQuestTree extends GuiBase
 				drawString(s, -nw + 1, 0, Color4I.WHITE, 0);
 				GlStateManager.popMatrix();
 			}
-			else if (quest.isComplete(questFile))
+			else if (quest.isComplete(questFile.self))
 			{
 				GlStateManager.pushMatrix();
 				GlStateManager.translate(0, 0, 500);
@@ -406,7 +431,7 @@ public class GuiQuestTree extends GuiBase
 			new GuiEditConfig(group, (group1, sender) -> {
 				NBTTagCompound nbt1 = new NBTTagCompound();
 				quest.writeData(nbt1);
-				new MessageCreateObject(QuestObjectType.QUEST, selectedChapter.id, nbt1).sendToServer();
+				new MessageCreateObject(QuestObjectType.QUEST, selectedChapter.getID(), nbt1).sendToServer();
 			}).openGui();
 		}
 	}
@@ -458,7 +483,7 @@ public class GuiQuestTree extends GuiBase
 	public final ClientQuestFile questFile;
 	private int scrollWidth, scrollHeight, prevMouseX, prevMouseY, grabbed;
 	public QuestChapter selectedChapter;
-	private short selectedQuest;
+	private String selectedQuest = "";
 	public final Panel chapterPanel, quests, chapterOptionButtons;
 
 	public GuiQuestTree(ClientQuestFile q)
@@ -724,7 +749,7 @@ public class GuiQuestTree extends GuiBase
 						add(new ChapterOptionButton(this, "C", I18n.format("ftbquests.gui.add_chapter"), () -> addChapter(), () -> true));
 					}
 
-					add(new ChapterOptionButton(this, "F", I18n.format("ftbquests.gui.edit_file"), () -> new MessageEditObject((short) 0).sendToServer(), () -> true));
+					add(new ChapterOptionButton(this, "F", I18n.format("ftbquests.gui.edit_file"), () -> new MessageEditObject("").sendToServer(), () -> true));
 					add(new ChapterOptionButton(this, "D", I18n.format("ftbquests.gui.dummy_buttons"), () -> dummyButtonsVisible = !dummyButtonsVisible, () -> true));
 				}
 
@@ -753,7 +778,7 @@ public class GuiQuestTree extends GuiBase
 			selectedChapter = chapter;
 			quests.setScrollX(0);
 			quests.setScrollY(0);
-			selectedQuest = 0;
+			selectedQuest = "";
 			quests.refreshWidgets();
 			chapterOptionButtons.refreshWidgets();
 		}
@@ -801,15 +826,15 @@ public class GuiQuestTree extends GuiBase
 		if (quest != null)
 		{
 			quest.move((byte) direction);
-			new MessageMoveQuest(quest.id, (byte) direction).sendToServer();
+			new MessageMoveQuest(quest.getID(), (byte) quest.x.getInt(), (byte) quest.y.getInt()).sendToServer();
 		}
 		else if (direction == 0)
 		{
-			new MessageMoveChapter(selectedChapter.id, true).sendToServer();
+			new MessageMoveChapter(selectedChapter.getID(), true).sendToServer();
 		}
 		else if (direction == 4)
 		{
-			new MessageMoveChapter(selectedChapter.id, false).sendToServer();
+			new MessageMoveChapter(selectedChapter.getID(), false).sendToServer();
 		}
 	}
 
@@ -823,7 +848,7 @@ public class GuiQuestTree extends GuiBase
 			{
 				NBTTagCompound nbt = new NBTTagCompound();
 				nbt.setString("title", value.getString());
-				new MessageCreateObject(QuestObjectType.CHAPTER, (short) 0, nbt).sendToServer();
+				new MessageCreateObject(QuestObjectType.CHAPTER, "", nbt).sendToServer();
 			}
 		}).openGui();
 	}
@@ -870,7 +895,7 @@ public class GuiQuestTree extends GuiBase
 		new GuiEditConfig(group, (group1, sender) -> {
 			NBTTagCompound nbt1 = new NBTTagCompound();
 			quest.writeData(nbt1);
-			new MessageCreateObject(QuestObjectType.QUEST, selectedChapter.id, nbt1).sendToServer();
+			new MessageCreateObject(QuestObjectType.QUEST, selectedChapter.getID(), nbt1).sendToServer();
 		}).openGui();
 	}
 
@@ -918,7 +943,7 @@ public class GuiQuestTree extends GuiBase
 			switch (key)
 			{
 				case Keyboard.KEY_D:
-					selectedQuest = 0;
+					selectedQuest = "";
 					break;
 				case Keyboard.KEY_UP:
 					moveObject(0);

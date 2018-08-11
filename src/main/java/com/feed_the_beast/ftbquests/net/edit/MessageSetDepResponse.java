@@ -18,15 +18,15 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  */
 public class MessageSetDepResponse extends MessageToClient
 {
-	private short id;
-	private short dep;
+	private String id;
+	private String dep;
 	private boolean add;
 
 	public MessageSetDepResponse()
 	{
 	}
 
-	public MessageSetDepResponse(short i, short d, boolean a)
+	public MessageSetDepResponse(String i, String d, boolean a)
 	{
 		id = i;
 		dep = d;
@@ -42,16 +42,16 @@ public class MessageSetDepResponse extends MessageToClient
 	@Override
 	public void writeData(DataOut data)
 	{
-		data.writeShort(id);
-		data.writeShort(dep);
+		data.writeString(id);
+		data.writeString(dep);
 		data.writeBoolean(add);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
-		id = data.readShort();
-		dep = data.readShort();
+		id = data.readString();
+		dep = data.readString();
 		add = data.readBoolean();
 	}
 
@@ -64,7 +64,7 @@ public class MessageSetDepResponse extends MessageToClient
 			Quest quest = ClientQuestFile.INSTANCE.getQuest(id);
 			QuestObject d = ClientQuestFile.INSTANCE.get(dep);
 
-			if (quest != null && d instanceof ProgressingQuestObject && quest.setDependency(d.id, add))
+			if (quest != null && d instanceof ProgressingQuestObject && quest.setDependency((ProgressingQuestObject) d, add))
 			{
 				GuiQuestTree gui = ClientUtils.getCurrentGuiAs(GuiQuestTree.class);
 

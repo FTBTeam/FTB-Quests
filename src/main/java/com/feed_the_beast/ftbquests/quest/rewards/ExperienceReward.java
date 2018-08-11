@@ -24,7 +24,7 @@ public class ExperienceReward extends QuestReward
 
 	public ExperienceReward(Quest quest, NBTTagCompound nbt)
 	{
-		super(quest, nbt);
+		super(quest);
 		value = new ConfigInt(nbt.getInteger("value"), 1, Integer.MAX_VALUE);
 	}
 

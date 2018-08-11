@@ -14,13 +14,13 @@ import net.minecraft.entity.player.EntityPlayerMP;
  */
 public class MessageDeleteObject extends MessageToServer
 {
-	private short id;
+	private String id;
 
 	public MessageDeleteObject()
 	{
 	}
 
-	public MessageDeleteObject(short i)
+	public MessageDeleteObject(String i)
 	{
 		id = i;
 	}
@@ -34,19 +34,19 @@ public class MessageDeleteObject extends MessageToServer
 	@Override
 	public void writeData(DataOut data)
 	{
-		data.writeShort(id);
+		data.writeString(id);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
-		id = data.readShort();
+		id = data.readString();
 	}
 
 	@Override
 	public void onMessage(EntityPlayerMP player)
 	{
-		if (id != 0 && FTBQuests.canEdit(player))
+		if (!id.isEmpty() && FTBQuests.canEdit(player))
 		{
 			QuestObject object = ServerQuestFile.INSTANCE.get(id);
 

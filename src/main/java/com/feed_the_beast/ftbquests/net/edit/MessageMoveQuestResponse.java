@@ -16,14 +16,14 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  */
 public class MessageMoveQuestResponse extends MessageToClient
 {
-	private short id;
+	private String id;
 	private byte x, y;
 
 	public MessageMoveQuestResponse()
 	{
 	}
 
-	public MessageMoveQuestResponse(short i, byte _x, byte _y)
+	public MessageMoveQuestResponse(String i, byte _x, byte _y)
 	{
 		id = i;
 		x = _x;
@@ -39,7 +39,7 @@ public class MessageMoveQuestResponse extends MessageToClient
 	@Override
 	public void writeData(DataOut data)
 	{
-		data.writeShort(id);
+		data.writeString(id);
 		data.writeByte(x);
 		data.writeByte(y);
 	}
@@ -47,7 +47,7 @@ public class MessageMoveQuestResponse extends MessageToClient
 	@Override
 	public void readData(DataIn data)
 	{
-		id = data.readShort();
+		id = data.readString();
 		x = data.readByte();
 		y = data.readByte();
 	}

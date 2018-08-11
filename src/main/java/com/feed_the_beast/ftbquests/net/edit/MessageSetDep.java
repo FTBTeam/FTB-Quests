@@ -16,15 +16,15 @@ import net.minecraft.entity.player.EntityPlayerMP;
  */
 public class MessageSetDep extends MessageToServer
 {
-	private short id;
-	private short dep;
+	private String id;
+	private String dep;
 	private boolean add;
 
 	public MessageSetDep()
 	{
 	}
 
-	public MessageSetDep(short i, short d, boolean a)
+	public MessageSetDep(String i, String d, boolean a)
 	{
 		id = i;
 		dep = d;
@@ -40,16 +40,16 @@ public class MessageSetDep extends MessageToServer
 	@Override
 	public void writeData(DataOut data)
 	{
-		data.writeShort(id);
-		data.writeShort(dep);
+		data.writeString(id);
+		data.writeString(dep);
 		data.writeBoolean(add);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
-		id = data.readShort();
-		dep = data.readShort();
+		id = data.readString();
+		dep = data.readString();
 		add = data.readBoolean();
 	}
 
@@ -61,7 +61,7 @@ public class MessageSetDep extends MessageToServer
 			Quest quest = ServerQuestFile.INSTANCE.getQuest(id);
 			QuestObject d = ServerQuestFile.INSTANCE.get(dep);
 
-			if (quest != null && d instanceof ProgressingQuestObject && quest.setDependency(d.id, add))
+			if (quest != null && d instanceof ProgressingQuestObject && quest.setDependency((ProgressingQuestObject) d, add))
 			{
 				ServerQuestFile.INSTANCE.save();
 				new MessageSetDepResponse(id, dep, add).sendToAll();

@@ -20,14 +20,14 @@ import net.minecraftforge.items.ItemHandlerHelper;
  */
 public class MessageGetScreen extends MessageToServer
 {
-	private short task;
+	private String task;
 	private int size;
 
 	public MessageGetScreen()
 	{
 	}
 
-	public MessageGetScreen(short t, int s)
+	public MessageGetScreen(String t, int s)
 	{
 		task = t;
 		size = s;
@@ -42,14 +42,14 @@ public class MessageGetScreen extends MessageToServer
 	@Override
 	public void writeData(DataOut data)
 	{
-		data.writeShort(task);
+		data.writeString(task);
 		data.writeByte(size);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
-		task = data.readShort();
+		task = data.readString();
 		size = data.readByte();
 	}
 
@@ -65,7 +65,7 @@ public class MessageGetScreen extends MessageToServer
 				FTBQuestsTeamData teamData = FTBQuestsTeamData.get(Universe.get().getPlayer(player).team);
 				ItemStack stack = new ItemStack(FTBQuestsItems.SCREEN);
 				TileScreenCore tile = new TileScreenCore();
-				tile.quest.setInt(t.quest.id & 0xFFFF);
+				tile.quest.setString(t.quest.getID());
 				tile.taskIndex.setInt(t.quest.tasks.indexOf(t));
 				tile.owner.setString(teamData.team.getName());
 				tile.size = size;

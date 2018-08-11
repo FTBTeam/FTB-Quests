@@ -42,7 +42,7 @@ public class FTBQuestsClientEventHandler
 	@SubscribeEvent
 	public static void onCustomSidebarButtonText(CustomSidebarButtonTextEvent event)
 	{
-		if (ClientQuestFile.existsWithTeam() && event.getButton().id.equals(QUESTS_BUTTON))
+		if (ClientQuestFile.exists() && ClientQuestFile.INSTANCE.self != null && event.getButton().id.equals(QUESTS_BUTTON))
 		{
 			int r = 0;
 
@@ -50,11 +50,11 @@ public class FTBQuestsClientEventHandler
 			{
 				for (Quest quest : chapter.quests)
 				{
-					if (quest.isComplete(ClientQuestFile.INSTANCE))
+					if (quest.isComplete(ClientQuestFile.INSTANCE.self))
 					{
 						for (QuestReward reward : quest.rewards)
 						{
-							if (!ClientQuestFile.INSTANCE.isRewardClaimed(ClientUtils.MC.player, reward))
+							if (!ClientQuestFile.INSTANCE.self.isRewardClaimed(ClientUtils.MC.player, reward))
 							{
 								r++;
 							}
@@ -75,7 +75,7 @@ public class FTBQuestsClientEventHandler
 	{
 		if (FTBQuestsClient.KEY_QUESTS.isPressed())
 		{
-			if (ClientQuestFile.existsWithTeam())
+			if (ClientQuestFile.exists())
 			{
 				ClientQuestFile.INSTANCE.openQuestGui();
 			}
@@ -94,7 +94,7 @@ public class FTBQuestsClientEventHandler
 			switch (event.getID().getPath())
 			{
 				case "open_gui":
-					if (ClientQuestFile.existsWithTeam())
+					if (ClientQuestFile.exists())
 					{
 						ClientQuestFile.INSTANCE.openQuestGui();
 					}

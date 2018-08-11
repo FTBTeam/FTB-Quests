@@ -30,7 +30,7 @@ public class ForgeEnergyTask extends QuestTask
 
 	public ForgeEnergyTask(Quest quest, NBTTagCompound nbt)
 	{
-		super(quest, nbt);
+		super(quest);
 		value = new ConfigLong(nbt.getLong("value"), 1, Long.MAX_VALUE);
 		maxInput = new ConfigInt(nbt.hasKey("max_input") ? nbt.getInteger("max_input") : 10000, 100, Integer.MAX_VALUE);
 	}

@@ -41,7 +41,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 
 	public ItemTask(Quest quest, NBTTagCompound nbt)
 	{
-		super(quest, nbt);
+		super(quest);
 		items = new ConfigList<>(new ConfigItemStack(new ItemStack(Items.APPLE), true));
 
 		NBTTagList list = nbt.getTagList("items", Constants.NBT.TAG_COMPOUND);

@@ -20,7 +20,7 @@ public class UnknownReward extends QuestReward
 
 	public UnknownReward(Quest parent, NBTTagCompound n)
 	{
-		super(parent, n);
+		super(parent);
 		nbt = new ConfigNBT(n);
 	}
 

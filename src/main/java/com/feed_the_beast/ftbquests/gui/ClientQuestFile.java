@@ -2,22 +2,14 @@ package com.feed_the_beast.ftbquests.gui;
 
 import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftblib.lib.gui.GuiBase;
+import com.feed_the_beast.ftbquests.client.ClientQuestProgress;
 import com.feed_the_beast.ftbquests.net.MessageSyncQuests;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
-import com.feed_the_beast.ftbquests.quest.ProgressingQuestObject;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
-import com.feed_the_beast.ftbquests.quest.rewards.QuestReward;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
-import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskData;
 import com.feed_the_beast.ftbquests.util.FTBQuestsTeamData;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.shorts.ShortCollection;
-import it.unimi.dsi.fastutil.shorts.ShortOpenHashSet;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.text.TextFormatting;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -26,7 +18,7 @@ import java.util.Collections;
 /**
  * @author LatvianModder
  */
-public class ClientQuestFile extends QuestFile implements IProgressData
+public class ClientQuestFile extends QuestFile
 {
 	public static ClientQuestFile INSTANCE;
 
@@ -37,12 +29,11 @@ public class ClientQuestFile extends QuestFile implements IProgressData
 
 	public static boolean existsWithTeam()
 	{
-		return exists() && !INSTANCE.teamId.isEmpty();
+		return exists() && INSTANCE.self != null;
 	}
 
-	public String teamId;
-	private final Int2ObjectOpenHashMap<QuestTaskData> taskData;
-	private final ShortCollection claimedRewards;
+	public final String teamId;
+	public final ClientQuestProgress self;
 	public GuiQuestTree questTreeGui;
 	public GuiBase questGui;
 	public boolean editingMode;
@@ -50,29 +41,26 @@ public class ClientQuestFile extends QuestFile implements IProgressData
 	public ClientQuestFile(MessageSyncQuests message, @Nullable ClientQuestFile prev)
 	{
 		teamId = message.team;
+		self = teamId.isEmpty() ? null : new ClientQuestProgress(message.team);
 		editingMode = message.editingMode;
 
 		readData(message.quests);
 
-		taskData = new Int2ObjectOpenHashMap<>();
-		claimedRewards = new ShortOpenHashSet();
-
-		for (QuestChapter chapter : chapters)
+		if (self != null)
 		{
-			for (Quest quest : chapter.quests)
+			for (QuestChapter chapter : chapters)
 			{
-				for (QuestTask task : quest.tasks)
+				for (Quest quest : chapter.quests)
 				{
-					taskData.put(task.id, task.createData(this));
+					for (QuestTask task : quest.tasks)
+					{
+						self.taskData.put(task.index, task.createData(self));
+					}
 				}
 			}
-		}
 
-		FTBQuestsTeamData.deserializeTaskData(taskData.values(), message.taskData);
-
-		for (short reward : message.claimedRewards)
-		{
-			claimedRewards.add(reward);
+			FTBQuestsTeamData.deserializeTaskData(self.taskData.values(), message.taskData);
+			FTBQuestsTeamData.deserializeRewardData(this, self.claimedRewards, message.claimedRewards);
 		}
 
 		refreshGui(prev);
@@ -87,13 +75,13 @@ public class ClientQuestFile extends QuestFile implements IProgressData
 	{
 		boolean guiOpen = false;
 		int scrollX = 0, scrollY = 0;
-		short selectedChapter = 0;
+		String selectedChapter = "";
 
 		if (prev != null)
 		{
 			scrollX = prev.questTreeGui.quests.getScrollX();
 			scrollY = prev.questTreeGui.quests.getScrollY();
-			selectedChapter = prev.questTreeGui.selectedChapter == null ? 0 : prev.questTreeGui.selectedChapter.id;
+			selectedChapter = prev.questTreeGui.selectedChapter == null ? "" : prev.questTreeGui.selectedChapter.getID();
 
 			if (ClientUtils.getCurrentGuiAs(GuiQuestTree.class) != null)
 			{
@@ -142,118 +130,21 @@ public class ClientQuestFile extends QuestFile implements IProgressData
 		questGui.openGui();
 	}
 
-	@Override
-	public String getTeamID()
-	{
-		return teamId;
-	}
-
-	@Override
-	public QuestTaskData getQuestTaskData(QuestTask task)
-	{
-		return taskData.get(task.id);
-	}
-
-	public void setRewardStatus(QuestReward reward, boolean status)
-	{
-		if (status)
-		{
-			claimedRewards.add(reward.id);
-		}
-		else
-		{
-			claimedRewards.rem(reward.id);
-		}
-	}
-
-	@Override
-	public boolean claimReward(EntityPlayer player, QuestReward reward)
-	{
-		if (!claimedRewards.contains(reward.id) && reward.quest.isComplete(this))
-		{
-			claimedRewards.add(reward.id);
-			return true;
-		}
-
-		return false;
-	}
-
-	@Override
-	public ShortCollection getClaimedRewards(EntityPlayer player)
-	{
-		return claimedRewards;
-	}
-
-	@Override
-	public void syncTask(QuestTaskData data)
-	{
-	}
-
-	@Override
-	public void removeTask(QuestTask task)
-	{
-		taskData.remove(task.id);
-	}
-
-	@Override
-	public void createTaskData(QuestTask task)
-	{
-		taskData.put(task.id, task.createData(this));
-	}
-
-	@Override
-	public void unclaimReward(QuestReward reward)
-	{
-		claimedRewards.rem(reward.id);
-	}
-
 	@Nullable
 	@Override
-	public IProgressData getData(String owner)
+	public ClientQuestProgress getData(String owner)
 	{
-		return !teamId.equals(owner) ? null : this;
+		if (owner.equals(self.teamID))
+		{
+			return self;
+		}
+
+		return null;
 	}
 
 	@Override
 	public Collection<IProgressData> getAllData()
 	{
-		return Collections.singleton(this);
-	}
-
-	public String getCompletionSuffix(ProgressingQuestObject object)
-	{
-		if (!GuiScreen.isShiftKeyDown())
-		{
-			return "";
-		}
-
-		StringBuilder builder = new StringBuilder();
-		builder.append(TextFormatting.DARK_GRAY);
-		builder.append(' ');
-
-		double d = object.getRelativeProgress(this);
-
-		if (d <= 0D)
-		{
-			builder.append("0%");
-		}
-		else if (d >= 1D)
-		{
-			builder.append("100%");
-		}
-		else
-		{
-			builder.append((int) (d * 100D));
-			builder.append('%');
-		}
-
-		if (GuiScreen.isCtrlKeyDown())
-		{
-			builder.append(' ');
-			builder.append('#');
-			builder.append(formatID(object.id));
-		}
-
-		return builder.toString();
+		return Collections.singleton(self);
 	}
 }

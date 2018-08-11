@@ -19,14 +19,14 @@ import net.minecraft.entity.player.EntityPlayerMP;
  */
 public class MessageResetProgress extends MessageToServer
 {
-	private short id;
+	private String id;
 	private boolean all;
 
 	public MessageResetProgress()
 	{
 	}
 
-	public MessageResetProgress(short i, boolean a)
+	public MessageResetProgress(String i, boolean a)
 	{
 		id = i;
 		all = a;
@@ -41,21 +41,21 @@ public class MessageResetProgress extends MessageToServer
 	@Override
 	public void writeData(DataOut data)
 	{
-		data.writeShort(id);
+		data.writeString(id);
 		data.writeBoolean(all);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
-		id = data.readShort();
+		id = data.readString();
 		all = data.readBoolean();
 	}
 
 	@Override
 	public void onMessage(EntityPlayerMP player)
 	{
-		if (id != 0 && FTBQuests.canEdit(player))
+		if (id.isEmpty() && FTBQuests.canEdit(player))
 		{
 			QuestObject object = ServerQuestFile.INSTANCE.get(id);
 

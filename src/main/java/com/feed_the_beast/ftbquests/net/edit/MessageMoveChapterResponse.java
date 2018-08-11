@@ -16,14 +16,14 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  */
 public class MessageMoveChapterResponse extends MessageToClient
 {
-	private short id;
+	private String id;
 	private boolean up;
 
 	public MessageMoveChapterResponse()
 	{
 	}
 
-	public MessageMoveChapterResponse(short i, boolean u)
+	public MessageMoveChapterResponse(String i, boolean u)
 	{
 		id = i;
 		up = u;
@@ -38,14 +38,14 @@ public class MessageMoveChapterResponse extends MessageToClient
 	@Override
 	public void writeData(DataOut data)
 	{
-		data.writeShort(id);
+		data.writeString(id);
 		data.writeBoolean(up);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
-		id = data.readShort();
+		id = data.readString();
 		up = data.readBoolean();
 	}
 

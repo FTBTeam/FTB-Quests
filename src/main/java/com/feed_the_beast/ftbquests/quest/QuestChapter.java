@@ -1,7 +1,6 @@
 package com.feed_the_beast.ftbquests.quest;
 
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
-import com.feed_the_beast.ftblib.lib.config.ConfigInt;
 import com.feed_the_beast.ftblib.lib.config.ConfigItemStack;
 import com.feed_the_beast.ftblib.lib.config.ConfigList;
 import com.feed_the_beast.ftblib.lib.config.ConfigString;
@@ -30,11 +29,10 @@ public final class QuestChapter extends ProgressingQuestObject
 	public final ConfigList<ConfigString> description;
 	public final ConfigItemStack icon;
 	public final List<Quest> quests;
-	public final ConfigList<ConfigInt> dependencies;
+	public final ConfigList<ConfigString> dependencies;
 
 	public QuestChapter(QuestFile f, NBTTagCompound nbt)
 	{
-		super(f.getID(nbt));
 		file = f;
 		title = new ConfigString(nbt.getString("title"));
 		description = new ConfigList<>(new ConfigString(""));
@@ -48,12 +46,16 @@ public final class QuestChapter extends ProgressingQuestObject
 			description.add(new ConfigString(desc.getStringTagAt(i)));
 		}
 
-		dependencies = new ConfigList<>(new ConfigInt(1, 1, MAX_ID));
+		dependencies = new ConfigList<>(new ConfigString(""));
 
-		for (int d : nbt.getIntArray("depends_on"))
+		NBTTagList depList = nbt.getTagList("dependencies", Constants.NBT.TAG_STRING);
+
+		for (int i = 0; i < depList.tagCount(); i++)
 		{
-			dependencies.add(new ConfigInt(d));
+			dependencies.add(new ConfigString(depList.getStringTagAt(i)));
 		}
+
+		readID(nbt);
 
 		NBTTagList questsList = nbt.getTagList("quests", Constants.NBT.TAG_COMPOUND);
 
@@ -61,7 +63,7 @@ public final class QuestChapter extends ProgressingQuestObject
 		{
 			Quest quest = new Quest(this, questsList.getCompoundTagAt(j));
 			quests.add(quest);
-			file.map.put(quest.id, quest);
+			file.map.put(quest.getID(), quest);
 		}
 	}
 
@@ -78,9 +80,15 @@ public final class QuestChapter extends ProgressingQuestObject
 	}
 
 	@Override
+	public String getID()
+	{
+		return id;
+	}
+
+	@Override
 	public void writeData(NBTTagCompound nbt)
 	{
-		nbt.setShort("id", id);
+		nbt.setString("id", id);
 		nbt.setString("title", title.getString());
 
 		if (!description.list.isEmpty())
@@ -102,14 +110,14 @@ public final class QuestChapter extends ProgressingQuestObject
 
 		if (!dependencies.isEmpty())
 		{
-			int[] ai = new int[dependencies.list.size()];
+			NBTTagList depList = new NBTTagList();
 
-			for (int i = 0; i < dependencies.list.size(); i++)
+			for (ConfigString value : dependencies)
 			{
-				ai[i] = dependencies.list.get(i).getInt();
+				depList.appendTag(new NBTTagString(value.getString()));
 			}
 
-			nbt.setIntArray("dependencies", ai);
+			nbt.setTag("dependencies", depList);
 		}
 
 		if (!quests.isEmpty())
@@ -226,6 +234,6 @@ public final class QuestChapter extends ProgressingQuestObject
 		group.add("title", title, new ConfigString(""));
 		group.add("icon", icon, new ConfigItemStack(ItemStack.EMPTY, true));
 		group.add("description", description, new ConfigList<>(new ConfigString("")));
-		group.add("dependencies", dependencies, new ConfigList<>(new ConfigInt(1, 1, MAX_ID)));
+		group.add("dependencies", dependencies, new ConfigList<>(new ConfigString("")));
 	}
 }

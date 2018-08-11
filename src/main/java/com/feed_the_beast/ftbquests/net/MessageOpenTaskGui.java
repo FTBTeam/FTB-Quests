@@ -22,7 +22,7 @@ import javax.annotation.Nullable;
  */
 public class MessageOpenTaskGui extends MessageToClient
 {
-	private short task;
+	private String task;
 	private int window;
 	private boolean hasPos;
 	private BlockPos pos;
@@ -31,7 +31,7 @@ public class MessageOpenTaskGui extends MessageToClient
 	{
 	}
 
-	public MessageOpenTaskGui(short t, int w, boolean h, @Nullable BlockPos p)
+	public MessageOpenTaskGui(String t, int w, boolean h, @Nullable BlockPos p)
 	{
 		task = t;
 		window = w;
@@ -48,7 +48,7 @@ public class MessageOpenTaskGui extends MessageToClient
 	@Override
 	public void writeData(DataOut data)
 	{
-		data.writeShort(task);
+		data.writeString(task);
 		data.writeInt(window);
 		data.writeBoolean(hasPos);
 
@@ -61,7 +61,7 @@ public class MessageOpenTaskGui extends MessageToClient
 	@Override
 	public void readData(DataIn data)
 	{
-		task = data.readShort();
+		task = data.readString();
 		window = data.readInt();
 		hasPos = data.readBoolean();
 
@@ -75,11 +75,16 @@ public class MessageOpenTaskGui extends MessageToClient
 	@SideOnly(Side.CLIENT)
 	public void onMessage()
 	{
+		if (!ClientQuestFile.existsWithTeam())
+		{
+			return;
+		}
+
 		QuestTask qtask = ClientQuestFile.INSTANCE.getTask(task);
 
-		if (qtask != null && qtask.quest.canStartTasks(ClientQuestFile.INSTANCE))
+		if (qtask != null && qtask.quest.canStartTasks(ClientQuestFile.INSTANCE.self))
 		{
-			ContainerTask container = new ContainerTask(ClientUtils.MC.player, ClientQuestFile.INSTANCE.getQuestTaskData(qtask));
+			ContainerTask container = new ContainerTask(ClientUtils.MC.player, ClientQuestFile.INSTANCE.self.getQuestTaskData(qtask));
 			container.windowId = window;
 
 			if (hasPos)

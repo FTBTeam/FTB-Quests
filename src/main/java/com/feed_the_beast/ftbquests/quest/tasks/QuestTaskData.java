@@ -57,7 +57,7 @@ public abstract class QuestTaskData<T extends QuestTask> implements ICapabilityP
 
 	public String toString()
 	{
-		return data + ":" + task.id;
+		return data + "@" + task.getID();
 	}
 
 	public boolean canInsertItem()

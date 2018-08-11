@@ -42,7 +42,7 @@ public class FluidTask extends QuestTask
 
 	public FluidTask(Quest quest, NBTTagCompound nbt)
 	{
-		super(quest, nbt);
+		super(quest);
 
 		fluid = new ConfigFluid(FluidRegistry.getFluid(nbt.getString("fluid")), FluidRegistry.WATER);
 		fluidNBT = new ConfigNBT(nbt.hasKey("nbt") ? nbt.getCompoundTag("nbt") : null);
