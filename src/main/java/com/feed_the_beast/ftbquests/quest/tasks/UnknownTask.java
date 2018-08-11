@@ -26,7 +26,7 @@ public class UnknownTask extends QuestTask
 
 	public UnknownTask(Quest parent, NBTTagCompound n)
 	{
-		super(parent, n);
+		super(parent);
 		nbt = new ConfigNBT(n);
 	}
 

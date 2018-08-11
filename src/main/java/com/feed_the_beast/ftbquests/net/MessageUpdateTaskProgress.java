@@ -4,10 +4,12 @@ import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToClient;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
+import com.feed_the_beast.ftbquests.FTBQuests;
+import com.feed_the_beast.ftbquests.client.ClientQuestProgress;
 import com.feed_the_beast.ftbquests.gui.ClientQuestFile;
+import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -18,15 +20,17 @@ import javax.annotation.Nullable;
  */
 public class MessageUpdateTaskProgress extends MessageToClient
 {
-	private short task;
+	private String team;
+	private int task;
 	private NBTBase nbt;
 
 	public MessageUpdateTaskProgress()
 	{
 	}
 
-	public MessageUpdateTaskProgress(short k, @Nullable NBTBase d)
+	public MessageUpdateTaskProgress(String t, int k, @Nullable NBTBase d)
 	{
+		team = t;
 		task = k;
 		nbt = d;
 	}
@@ -40,56 +44,63 @@ public class MessageUpdateTaskProgress extends MessageToClient
 	@Override
 	public void writeData(DataOut data)
 	{
-		data.writeShort(task);
+		QuestFile file = FTBQuests.PROXY.getQuestList(false);
 
-		if (nbt == null)
+		data.writeString(team);
+
+		if (file.allTasks.size() <= 255)
 		{
-			data.writeByte(0);
+			data.writeByte(task);
 		}
-		else if (nbt instanceof NBTTagCompound)
+		else if (file.allTasks.size() <= 65535)
 		{
-			data.writeByte(1);
-			data.writeNBT((NBTTagCompound) nbt);
+			data.writeShort(task);
 		}
 		else
 		{
-			data.writeByte(2);
-			NBTTagCompound nbt1 = new NBTTagCompound();
-			nbt1.setTag("_", nbt);
-			data.writeNBT(nbt1);
+			data.writeInt(task);
 		}
+
+		data.writeNBTBase(nbt);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
-		task = data.readShort();
+		QuestFile file = FTBQuests.PROXY.getQuestList(true);
 
-		int i = data.readByte();
+		team = data.readString();
 
-		if (i == 0)
+		if (file.allTasks.size() <= 255)
 		{
-			nbt = null;
+			task = data.readUnsignedByte();
 		}
-		else if (i == 1)
+		else if (file.allTasks.size() <= 65535)
 		{
-			nbt = data.readNBT();
+			task = data.readUnsignedShort();
 		}
 		else
 		{
-			nbt = data.readNBT().getTag("_");
+			task = data.readInt();
 		}
+
+		nbt = data.readNBTBase();
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void onMessage()
 	{
-		QuestTask qtask = ClientQuestFile.INSTANCE.getTask(task);
+		QuestTask qtask = ClientQuestFile.INSTANCE.getTaskByIndex(task);
 
 		if (qtask != null)
 		{
-			ClientQuestFile.INSTANCE.getQuestTaskData(qtask).fromNBT(nbt);
+			ClientQuestProgress data = team.isEmpty() ? ClientQuestFile.INSTANCE.self : ClientQuestFile.INSTANCE.getData(team);
+
+			if (data != null)
+			{
+				data.getQuestTaskData(qtask).fromNBT(nbt);
+			}
 		}
 	}
 }

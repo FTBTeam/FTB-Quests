@@ -3,7 +3,6 @@ package com.feed_the_beast.ftbquests.tile;
 import com.feed_the_beast.ftblib.lib.block.BlockFlags;
 import com.feed_the_beast.ftblib.lib.config.ConfigBoolean;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
-import com.feed_the_beast.ftblib.lib.config.ConfigInt;
 import com.feed_the_beast.ftblib.lib.config.ConfigNull;
 import com.feed_the_beast.ftblib.lib.config.ConfigString;
 import com.feed_the_beast.ftblib.lib.config.IConfigCallback;
@@ -28,7 +27,7 @@ import javax.annotation.Nullable;
 public class TileProgressDetector extends TileBase implements ITickable, IConfigCallback
 {
 	public final ConfigString owner = new ConfigString("");
-	public final ConfigInt object = new ConfigInt(1, 1, QuestObject.MAX_ID);
+	public final ConfigString object = new ConfigString("");
 	public final ConfigBoolean level = new ConfigBoolean(false);
 	public int redstoneOutput = 0;
 
@@ -38,7 +37,16 @@ public class TileProgressDetector extends TileBase implements ITickable, IConfig
 	@Override
 	protected void writeData(NBTTagCompound nbt, EnumSaveType type)
 	{
-		nbt.setInteger("Object", object.getInt());
+		nbt.setString("Owner", owner.getString());
+
+		cObject = getObject();
+
+		if (cObject != null)
+		{
+			object.setString(cObject.getID());
+		}
+
+		nbt.setString("Object", object.getString());
 		nbt.setBoolean("Level", level.getBoolean());
 		nbt.setByte("RedstoneOutput", (byte) redstoneOutput);
 	}
@@ -46,7 +54,8 @@ public class TileProgressDetector extends TileBase implements ITickable, IConfig
 	@Override
 	protected void readData(NBTTagCompound nbt, EnumSaveType type)
 	{
-		object.setInt(nbt.getInteger("Object"));
+		owner.setString(nbt.getString("Owner"));
+		object.setString(nbt.getString("Object"));
 		level.setBoolean(nbt.getBoolean("Level"));
 		redstoneOutput = nbt.getByte("RedstoneOutput");
 		updateContainingBlockInfo();
@@ -69,7 +78,7 @@ public class TileProgressDetector extends TileBase implements ITickable, IConfig
 		}
 		else if (cOwner == null)
 		{
-			cOwner = FTBQuests.PROXY.getQuestList(world.isRemote).getData(owner.getString());
+			cOwner = FTBQuests.PROXY.getQuestList(world).getData(owner.getString());
 		}
 
 		return cOwner;
@@ -78,13 +87,13 @@ public class TileProgressDetector extends TileBase implements ITickable, IConfig
 	@Nullable
 	public ProgressingQuestObject getObject()
 	{
-		if (object.getInt() == 0)
+		if (object.isEmpty())
 		{
 			return null;
 		}
 		else if (cObject == null || cObject.invalid)
 		{
-			QuestObject o = FTBQuests.PROXY.getQuestList(world.isRemote).get((short) object.getInt());
+			QuestObject o = FTBQuests.PROXY.getQuestList(world).get(object.getString());
 			cObject = o instanceof ProgressingQuestObject && !o.invalid ? (ProgressingQuestObject) o : null;
 		}
 
@@ -142,6 +151,13 @@ public class TileProgressDetector extends TileBase implements ITickable, IConfig
 
 	public void editConfig(EntityPlayerMP player)
 	{
+		cObject = getObject();
+
+		if (cObject != null)
+		{
+			object.setString(cObject.getID());
+		}
+
 		ConfigGroup group0 = ConfigGroup.newGroup("tile");
 		group0.setDisplayName(new TextComponentTranslation("tile.ftbquests.progress_detector.name"));
 		ConfigGroup group = group0.getGroup("ftbquests.progress_detector");

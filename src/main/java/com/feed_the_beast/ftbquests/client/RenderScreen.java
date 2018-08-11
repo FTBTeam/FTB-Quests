@@ -25,7 +25,7 @@ public class RenderScreen extends TileEntitySpecialRenderer<TileScreenCore>
 	@Override
 	public void render(TileScreenCore screen, double x, double y, double z, float partialTicks, int destroyStage, float alpha)
 	{
-		if (!ClientQuestFile.existsWithTeam())
+		if (!ClientQuestFile.exists())
 		{
 			return;
 		}

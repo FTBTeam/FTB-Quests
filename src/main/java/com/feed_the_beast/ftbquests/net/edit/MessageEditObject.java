@@ -1,6 +1,8 @@
 package com.feed_the_beast.ftbquests.net.edit;
 
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
+import com.feed_the_beast.ftblib.lib.config.ConfigNull;
+import com.feed_the_beast.ftblib.lib.config.ConfigString;
 import com.feed_the_beast.ftblib.lib.config.IConfigCallback;
 import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
@@ -9,7 +11,6 @@ import com.feed_the_beast.ftblib.lib.net.MessageToServer;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
-import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.rewards.QuestReward;
@@ -22,18 +23,22 @@ import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 
+import java.util.regex.Pattern;
+
 /**
  * @author LatvianModder
  */
 public class MessageEditObject extends MessageToServer implements IConfigCallback
 {
-	private short id;
+	private static final Pattern ID_PATTERN = Pattern.compile("^[a-z0-9_]{1,30}$");
+
+	private String id, prevId;
 
 	public MessageEditObject()
 	{
 	}
 
-	public MessageEditObject(short i)
+	public MessageEditObject(String i)
 	{
 		id = i;
 	}
@@ -47,13 +52,13 @@ public class MessageEditObject extends MessageToServer implements IConfigCallbac
 	@Override
 	public void writeData(DataOut data)
 	{
-		data.writeShort(id);
+		data.writeString(id);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
-		id = data.readShort();
+		prevId = id = data.readString();
 	}
 
 	@Override
@@ -65,14 +70,14 @@ public class MessageEditObject extends MessageToServer implements IConfigCallbac
 
 			if (object != null)
 			{
-				ITextComponent id = new TextComponentString(" #" + QuestFile.formatID(object.id));
-				id.getStyle().setColor(TextFormatting.DARK_GRAY);
-				id.getStyle().setBold(false);
+				ITextComponent idc = new TextComponentString(" " + object.getID());
+				idc.getStyle().setColor(TextFormatting.DARK_GRAY);
+				idc.getStyle().setBold(false);
 
 				ConfigGroup group = ConfigGroup.newGroup(FTBQuests.MOD_ID);
-				group.setDisplayName(new TextComponentTranslation(object.getObjectType().getTranslationKey()).appendSibling(id));
+				group.setDisplayName(new TextComponentTranslation(object.getObjectType().getTranslationKey()).appendSibling(idc));
 				ConfigGroup group1 = group.getGroup(object.getObjectType().getName());
-				group1.setDisplayName(object.getDisplayName().appendSibling(StringUtils.color(new TextComponentString(" #" + object.id), TextFormatting.DARK_GRAY)));
+				group1.setDisplayName(object.getDisplayName().appendSibling(StringUtils.color(new TextComponentString(" " + object.getID()), TextFormatting.DARK_GRAY)));
 				ConfigGroup g = group1;
 
 				if (object instanceof QuestTask || object instanceof QuestReward)
@@ -81,15 +86,31 @@ public class MessageEditObject extends MessageToServer implements IConfigCallbac
 
 					if (object instanceof QuestTask)
 					{
-						group.setDisplayName(new TextComponentTranslation("ftbquests.task." + ((QuestTask) object).getName()).appendSibling(id));
+						group.setDisplayName(new TextComponentTranslation("ftbquests.task." + ((QuestTask) object).getName()).appendSibling(idc));
 					}
 					else
 					{
-						group.setDisplayName(new TextComponentTranslation("ftbquests.reward." + ((QuestReward) object).getName()).appendSibling(id));
+						group.setDisplayName(new TextComponentTranslation("ftbquests.reward." + ((QuestReward) object).getName()).appendSibling(idc));
 					}
 				}
 
 				object.getConfig(g);
+
+				g.add("id", new ConfigString(id, ID_PATTERN)
+				{
+					@Override
+					public String getString()
+					{
+						return object.id;
+					}
+
+					@Override
+					public void setString(String v)
+					{
+						object.id = v;
+					}
+				}, ConfigNull.INSTANCE).setOrder((byte) -127).setDisplayName(new TextComponentString("ID"));
+
 				FTBLibAPI.editServerConfig(player, group, this);
 			}
 		}
@@ -98,13 +119,21 @@ public class MessageEditObject extends MessageToServer implements IConfigCallbac
 	@Override
 	public void onConfigSaved(ConfigGroup g, ICommandSender sender)
 	{
-		QuestObject object = ServerQuestFile.INSTANCE.get(id);
+		QuestObject object = ServerQuestFile.INSTANCE.get(prevId);
 
 		if (object != null)
 		{
+			if (!prevId.equals(id))
+			{
+				object.id = id;
+				ServerQuestFile.INSTANCE.map.remove(prevId);
+				ServerQuestFile.INSTANCE.map.put(id, object);
+			}
+
+			object.clearCachedData();
 			ConfigGroup group = ConfigGroup.newGroup("object");
 			object.getConfig(group);
-			new MessageEditObjectResponse(id, group.serializeNBT()).sendToAll();
+			new MessageEditObjectResponse(prevId, id, group.serializeNBT()).sendToAll();
 			ServerQuestFile.INSTANCE.save();
 		}
 	}

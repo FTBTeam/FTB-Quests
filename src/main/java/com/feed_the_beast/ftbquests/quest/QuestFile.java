@@ -15,8 +15,6 @@ import com.feed_the_beast.ftbquests.quest.rewards.QuestReward;
 import com.feed_the_beast.ftbquests.quest.rewards.QuestRewards;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTasks;
-import it.unimi.dsi.fastutil.shorts.Short2ObjectMap;
-import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -29,58 +27,35 @@ import net.minecraftforge.common.util.Constants;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author LatvianModder
  */
 public abstract class QuestFile extends ProgressingQuestObject
 {
-	public static String formatID(short id0)
-	{
-		int id = id0 & 0xFFFF;
-
-		StringBuilder builder = new StringBuilder(4);
-
-		if (id < 10000)
-		{
-			builder.append('0');
-		}
-
-		if (id < 1000)
-		{
-			builder.append('0');
-		}
-
-		if (id < 100)
-		{
-			builder.append('0');
-		}
-
-		if (id < 10)
-		{
-			builder.append('0');
-		}
-
-		builder.append(id);
-		return builder.toString();
-	}
-
 	public final ConfigString title;
 	public final ConfigItemStack icon;
 	public final List<QuestChapter> chapters;
-	public final Short2ObjectMap<QuestObject> map;
+
+	public final Map<String, QuestObject> map;
+	public final List<QuestTask> allTasks;
+
 	public final ConfigBoolean allowTakeQuestBlocks;
 	public final ConfigList<ConfigItemStack> emergencyItems;
 	public final ConfigTimer emergencyItemsCooldown;
 
 	public QuestFile()
 	{
-		super((short) 0);
 		title = new ConfigString("");
 		icon = new ConfigItemStack(ItemStack.EMPTY);
 		chapters = new ArrayList<>();
-		map = new Short2ObjectOpenHashMap<>();
+
+		map = new HashMap<>();
+		allTasks = new ArrayList<>();
+
 		allowTakeQuestBlocks = new ConfigBoolean(true);
 		emergencyItems = new ConfigList<>(new ConfigItemStack(new ItemStack(Items.APPLE)));
 		emergencyItemsCooldown = new ConfigTimer(Ticks.MINUTE.x(5));
@@ -96,6 +71,12 @@ public abstract class QuestFile extends ProgressingQuestObject
 	public QuestObjectType getObjectType()
 	{
 		return QuestObjectType.FILE;
+	}
+
+	@Override
+	public String getID()
+	{
+		return "";
 	}
 
 	@Override
@@ -165,59 +146,64 @@ public abstract class QuestFile extends ProgressingQuestObject
 	}
 
 	@Nullable
-	public QuestObject get(short id)
+	public QuestObject get(String id)
 	{
-		return id == 0 ? this : map.get(id);
+		return id.isEmpty() ? this : map.get(id);
 	}
 
 	@Nullable
-	public QuestChapter getChapter(short id)
+	public QuestChapter getChapter(String id)
 	{
 		QuestObject object = get(id);
 		return object instanceof QuestChapter ? (QuestChapter) object : null;
 	}
 
 	@Nullable
-	public Quest getQuest(short id)
+	public Quest getQuest(String id)
 	{
 		QuestObject object = get(id);
 		return object instanceof Quest ? (Quest) object : null;
 	}
 
 	@Nullable
-	public QuestTask getTask(short id)
+	public QuestTask getTask(String id)
 	{
 		QuestObject object = get(id);
 		return object instanceof QuestTask ? (QuestTask) object : null;
 	}
 
 	@Nullable
-	public QuestReward getReward(short id)
+	public QuestReward getReward(String id)
 	{
 		QuestObject object = get(id);
 		return object instanceof QuestReward ? (QuestReward) object : null;
 	}
 
-	public short requestID()
+	public void refreshTaskList()
 	{
-		return 0;
-	}
+		allTasks.clear();
 
-	public short getID(NBTTagCompound nbt)
-	{
-		short id = nbt.getShort("id");
-
-		if (id == 0 || map.containsKey(id))
+		for (QuestChapter chapter : chapters)
 		{
-			id = requestID();
-			nbt.setShort("id", id);
+			for (Quest quest : chapter.quests)
+			{
+				for (QuestTask task : quest.tasks)
+				{
+					task.index = allTasks.size();
+					allTasks.add(task);
+				}
+			}
 		}
-
-		return id;
 	}
 
 	@Nullable
-	public QuestObject createAndAdd(QuestObjectType type, short parent, NBTTagCompound nbt)
+	public QuestTask getTaskByIndex(int index)
+	{
+		return index < 0 || index >= allTasks.size() ? null : allTasks.get(index);
+	}
+
+	@Nullable
+	public QuestObject createAndAdd(QuestObjectType type, String parent, NBTTagCompound nbt)
 	{
 		switch (type)
 		{
@@ -226,7 +212,7 @@ public abstract class QuestFile extends ProgressingQuestObject
 				QuestChapter chapter = new QuestChapter(this, nbt);
 				chapter.index = chapter.file.chapters.size();
 				chapter.file.chapters.add(chapter);
-				map.put(chapter.id, chapter);
+				map.put(chapter.getID(), chapter);
 				return chapter;
 			}
 			case QUEST:
@@ -237,7 +223,7 @@ public abstract class QuestFile extends ProgressingQuestObject
 				{
 					Quest quest = new Quest(chapter, nbt);
 					chapter.quests.add(quest);
-					map.put(quest.id, quest);
+					map.put(quest.getID(), quest);
 					return quest;
 				}
 
@@ -256,7 +242,8 @@ public abstract class QuestFile extends ProgressingQuestObject
 
 					QuestTask task = QuestTasks.createTask(quest, nbt);
 					quest.tasks.add(task);
-					map.put(task.id, task);
+					map.put(task.getID(), task);
+					refreshTaskList();
 
 					for (IProgressData data : getAllData())
 					{
@@ -281,7 +268,7 @@ public abstract class QuestFile extends ProgressingQuestObject
 
 					QuestReward reward = QuestRewards.createReward(quest, nbt);
 					quest.rewards.add(reward);
-					map.put(reward.id, reward);
+					map.put(reward.getID(), reward);
 					return reward;
 				}
 
@@ -309,7 +296,7 @@ public abstract class QuestFile extends ProgressingQuestObject
 	}
 
 	@Override
-	public void writeData(NBTTagCompound nbt)
+	public final void writeData(NBTTagCompound nbt)
 	{
 		nbt.setString("title", title.getString());
 		nbt.setTag("icon", icon.getStack().serializeNBT());
@@ -337,11 +324,11 @@ public abstract class QuestFile extends ProgressingQuestObject
 		nbt.setString("emergency_items_cooldown", emergencyItemsCooldown.getTimer().toString());
 	}
 
-	protected void readData(NBTTagCompound nbt)
+	protected final void readData(NBTTagCompound nbt)
 	{
 		chapters.clear();
 		map.clear();
-		map.put((short) 0, this);
+		map.put("", this);
 
 		title.setString(nbt.getString("title"));
 		icon.setStack(new ItemStack(nbt.getCompoundTag("icon")));
@@ -353,8 +340,10 @@ public abstract class QuestFile extends ProgressingQuestObject
 			QuestChapter chapter = new QuestChapter(this, chapterList.getCompoundTagAt(i));
 			chapter.index = chapters.size();
 			chapters.add(chapter);
-			map.put(chapter.id, chapter);
+			map.put(chapter.getID(), chapter);
 		}
+
+		refreshTaskList();
 
 		allowTakeQuestBlocks.setBoolean(!nbt.hasKey("allow_take_quest_blocks") || nbt.getBoolean("allow_take_quest_blocks"));
 		emergencyItems.list.clear();

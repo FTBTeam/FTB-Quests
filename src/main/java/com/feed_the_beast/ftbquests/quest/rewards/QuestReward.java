@@ -8,7 +8,6 @@ import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.IStringSerializable;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -21,9 +20,8 @@ public abstract class QuestReward extends QuestObject implements IStringSerializ
 	public final Quest quest;
 	public final ConfigBoolean teamReward;
 
-	public QuestReward(Quest q, NBTTagCompound nbt)
+	public QuestReward(Quest q)
 	{
-		super(q.chapter.file.getID(nbt));
 		quest = q;
 		teamReward = new ConfigBoolean(false);
 	}
@@ -38,6 +36,12 @@ public abstract class QuestReward extends QuestObject implements IStringSerializ
 	public final QuestObjectType getObjectType()
 	{
 		return QuestObjectType.REWARD;
+	}
+
+	@Override
+	public final String getID()
+	{
+		return quest.chapter.id + ':' + quest.id + '#' + id;
 	}
 
 	@Override

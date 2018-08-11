@@ -14,14 +14,14 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  */
 public class MessageUpdateRewardStatus extends MessageToClient
 {
-	private short reward;
+	private String reward;
 	private boolean status;
 
 	public MessageUpdateRewardStatus()
 	{
 	}
 
-	public MessageUpdateRewardStatus(short r, boolean s)
+	public MessageUpdateRewardStatus(String r, boolean s)
 	{
 		reward = r;
 		status = s;
@@ -36,14 +36,14 @@ public class MessageUpdateRewardStatus extends MessageToClient
 	@Override
 	public void writeData(DataOut data)
 	{
-		data.writeShort(reward);
+		data.writeString(reward);
 		data.writeBoolean(status);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
-		reward = data.readShort();
+		reward = data.readString();
 		status = data.readBoolean();
 	}
 
@@ -53,9 +53,9 @@ public class MessageUpdateRewardStatus extends MessageToClient
 	{
 		QuestReward qreward = ClientQuestFile.INSTANCE.getReward(reward);
 
-		if (qreward != null)
+		if (qreward != null && ClientQuestFile.INSTANCE.self != null)
 		{
-			ClientQuestFile.INSTANCE.setRewardStatus(qreward, status);
+			ClientQuestFile.INSTANCE.self.setRewardStatus(qreward, status);
 		}
 	}
 }

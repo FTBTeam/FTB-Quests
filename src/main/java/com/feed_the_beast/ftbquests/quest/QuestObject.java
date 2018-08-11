@@ -2,30 +2,26 @@ package com.feed_the_beast.ftbquests.quest;
 
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
+import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraftforge.common.util.Constants;
 
-import java.util.regex.Pattern;
+import java.util.UUID;
 
 /**
  * @author LatvianModder
  */
 public abstract class QuestObject
 {
-	public static final int MAX_ID = 65535;
-	public static final Pattern ID_PATTERN = Pattern.compile("^[a-z0-9_]*$");
-
-	public final short id;
+	public String id = "";
 	public boolean invalid = false;
-
-	public QuestObject(short i)
-	{
-		id = i;
-	}
 
 	public abstract QuestFile getQuestFile();
 
 	public abstract QuestObjectType getObjectType();
+
+	public abstract String getID();
 
 	public abstract void writeData(NBTTagCompound nbt);
 
@@ -35,7 +31,7 @@ public abstract class QuestObject
 
 	public void deleteSelf()
 	{
-		getQuestFile().map.remove(id);
+		getQuestFile().map.remove(getID());
 		invalid = true;
 	}
 
@@ -46,22 +42,48 @@ public abstract class QuestObject
 	@Override
 	public final String toString()
 	{
-		return getClass().getSimpleName() + '#' + QuestFile.formatID(id);
+		return getID();
 	}
 
 	@Override
 	public final int hashCode()
 	{
-		return id;
+		return super.hashCode();
 	}
 
 	@Override
 	public final boolean equals(Object o)
 	{
-		return o == this || o instanceof QuestObject && id == o.hashCode();
+		return o == this;
 	}
 
 	public void getConfig(ConfigGroup config)
+	{
+	}
+
+	public void readID(NBTTagCompound nbt)
+	{
+		id = nbt.getString("id");
+
+		if (id.isEmpty() && nbt.hasKey("id", Constants.NBT.TAG_SHORT))
+		{
+			id = Integer.toString(nbt.getShort("id") & 0xFFFF);
+		}
+
+		if (id.isEmpty())
+		{
+			id = StringUtils.getId(getDisplayName().getUnformattedText(), StringUtils.FLAG_ID_DEFAULTS);
+		}
+
+		QuestFile file = getQuestFile();
+
+		if (id.isEmpty() || file.map.containsKey(id))
+		{
+			id = StringUtils.fromUUID(UUID.randomUUID());
+		}
+	}
+
+	public void clearCachedData()
 	{
 	}
 }

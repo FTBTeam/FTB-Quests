@@ -15,13 +15,13 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  */
 public class MessageResetProgressResponse extends MessageToClient
 {
-	private short id;
+	private String id;
 
 	public MessageResetProgressResponse()
 	{
 	}
 
-	public MessageResetProgressResponse(short i)
+	public MessageResetProgressResponse(String i)
 	{
 		id = i;
 	}
@@ -35,26 +35,26 @@ public class MessageResetProgressResponse extends MessageToClient
 	@Override
 	public void writeData(DataOut data)
 	{
-		data.writeShort(id);
+		data.writeString(id);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
-		id = data.readShort();
+		id = data.readString();
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void onMessage()
 	{
-		if (ClientQuestFile.INSTANCE != null)
+		if (ClientQuestFile.existsWithTeam())
 		{
 			QuestObject object = ClientQuestFile.INSTANCE.get(id);
 
 			if (object instanceof ProgressingQuestObject)
 			{
-				((ProgressingQuestObject) object).resetProgress(ClientQuestFile.INSTANCE);
+				((ProgressingQuestObject) object).resetProgress(ClientQuestFile.INSTANCE.self);
 			}
 
 			ClientQuestFile.INSTANCE.refreshGui(ClientQuestFile.INSTANCE);

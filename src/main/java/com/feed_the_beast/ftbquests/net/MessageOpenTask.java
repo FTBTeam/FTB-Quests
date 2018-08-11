@@ -22,13 +22,13 @@ import javax.annotation.Nullable;
  */
 public class MessageOpenTask extends MessageToServer
 {
-	private short task;
+	private String task;
 
 	public MessageOpenTask()
 	{
 	}
 
-	public MessageOpenTask(short t)
+	public MessageOpenTask(String t)
 	{
 		task = t;
 	}
@@ -42,13 +42,13 @@ public class MessageOpenTask extends MessageToServer
 	@Override
 	public void writeData(DataOut data)
 	{
-		data.writeShort(task);
+		data.writeString(task);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
-		task = data.readShort();
+		task = data.readString();
 	}
 
 	@Override
@@ -76,7 +76,7 @@ public class MessageOpenTask extends MessageToServer
 		}
 
 		player.openContainer.addListener(player);
-		new MessageOpenTaskGui(data.task.id, player.currentWindowId, tile != null, tile != null ? tile.getPos() : null).sendTo(player);
+		new MessageOpenTaskGui(data.task.getID(), player.currentWindowId, tile != null, tile != null ? tile.getPos() : null).sendTo(player);
 		MinecraftForge.EVENT_BUS.post(new PlayerContainerEvent.Open(player, player.openContainer));
 	}
 }

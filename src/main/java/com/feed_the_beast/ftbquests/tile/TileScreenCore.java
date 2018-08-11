@@ -19,7 +19,6 @@ import com.feed_the_beast.ftbquests.block.BlockScreen;
 import com.feed_the_beast.ftbquests.net.MessageOpenTask;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskData;
 import com.feed_the_beast.ftbquests.util.ProgressDisplayMode;
@@ -41,16 +40,19 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.CapabilityItemHandler;
 
 import javax.annotation.Nullable;
+import java.util.regex.Pattern;
 
 /**
  * @author LatvianModder
  */
 public class TileScreenCore extends TileScreenBase implements IConfigCallback
 {
+	private static final Pattern PATTERN = Pattern.compile("");
+
 	public EnumFacing facing;
-	public final ConfigInt quest = new ConfigInt(1, 1, QuestObject.MAX_ID);
-	public final ConfigInt taskIndex = new ConfigInt(0, 0, 255);
 	public final ConfigString owner = new ConfigString("");
+	public final ConfigString quest = new ConfigString("", PATTERN);
+	public final ConfigInt taskIndex = new ConfigInt(0, 0, 255);
 	public int size = 0;
 	public final ConfigEnum<ProgressDisplayMode> progressDisplayMode = new ConfigEnum<>(ProgressDisplayMode.NAME_MAP);
 	public final ConfigBoolean indestructible = new ConfigBoolean(false);
@@ -74,10 +76,14 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 			nbt.setString("Owner", owner.getString());
 		}
 
-		if (quest.getInt() != 0)
+		cTask = getTask();
+
+		if (cTask != null)
 		{
-			nbt.setShort("Quest", (short) quest.getInt());
+			quest.setString(cTask.quest.getID());
 		}
+
+		nbt.setString("Quest", quest.getString());
 
 		if (taskIndex.getInt() > 0)
 		{
@@ -115,12 +121,13 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 	private void readScreenData(NBTTagCompound nbt)
 	{
 		owner.setString(nbt.getString("Owner"));
-		quest.setInt(nbt.getShort("Quest") & 0xFFFF);
+		quest.setString(nbt.getString("Quest"));
 		taskIndex.setInt(nbt.getByte("TaskIndex") & 0xFF);
 		size = nbt.getByte("Size");
 		progressDisplayMode.setValue(nbt.getString("ProgressDisplayMode"));
 		indestructible.setBoolean(nbt.getBoolean("Indestructible"));
 		skin.setValueFromString(nbt.getString("Skin"), false);
+		updateContainingBlockInfo();
 	}
 
 	@Override
@@ -140,7 +147,6 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 	{
 		NBTTagCompound nbt = stack.getTagCompound();
 		readScreenData(nbt == null ? new NBTTagCompound() : nbt);
-		updateContainingBlockInfo();
 	}
 
 	@Override
@@ -242,7 +248,7 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 		}
 		else if (cOwner == null)
 		{
-			cOwner = FTBQuests.PROXY.getQuestList(world.isRemote).getData(owner.getString());
+			cOwner = FTBQuests.PROXY.getQuestList(world).getData(owner.getString());
 		}
 
 		return cOwner;
@@ -251,13 +257,13 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 	@Nullable
 	public QuestTask getTask()
 	{
-		if (quest.getInt() == 0)
+		if (quest.isEmpty())
 		{
 			return null;
 		}
 		else if (cTask == null || cTask.invalid)
 		{
-			Quest q = FTBQuests.PROXY.getQuestList(world.isRemote).getQuest((short) quest.getInt());
+			Quest q = FTBQuests.PROXY.getQuestList(world).getQuest(quest.getString());
 			cTask = q == null || q.invalid || q.tasks.isEmpty() ? null : q.getTask(taskIndex.getInt());
 		}
 
@@ -267,7 +273,7 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 	@Nullable
 	public QuestTaskData getTaskData()
 	{
-		if (quest.getInt() == 0 || owner.isEmpty())
+		if (quest.isEmpty() || owner.isEmpty())
 		{
 			return null;
 		}
@@ -321,6 +327,13 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 		{
 			if (editor || isOwner(player))
 			{
+				cTask = getTask();
+
+				if (cTask != null)
+				{
+					quest.setString(cTask.quest.getID());
+				}
+
 				boolean editorOrDestructible = editor || !indestructible.getBoolean();
 				ConfigGroup group0 = ConfigGroup.newGroup("tile");
 				group0.setDisplayName(new TextComponentTranslation("tile.ftbquests.screen.name"));

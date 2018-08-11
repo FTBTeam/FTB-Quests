@@ -31,6 +31,7 @@ import java.util.function.Consumer;
 public class GuiTask extends GuiBase
 {
 	public final ContainerTask container;
+	public final ClientQuestFile questFile;
 	public final boolean hasTile;
 	public final Panel tabs;
 	public final String taskName;
@@ -60,6 +61,7 @@ public class GuiTask extends GuiBase
 	public GuiTask(ContainerTask c)
 	{
 		container = c;
+		questFile = ClientQuestFile.INSTANCE;
 		hasTile = container.screen != null && !container.screen.isInvalid();
 
 		tabs = new Panel(this)
@@ -69,24 +71,24 @@ public class GuiTask extends GuiBase
 			{
 				add(new Tab(this, I18n.format("gui.back"), "", GuiIcons.LEFT, button ->
 				{
-					ClientQuestFile.INSTANCE.questGui = new GuiQuest(ClientQuestFile.INSTANCE.questTreeGui, container.data.task.quest);
-					ClientQuestFile.INSTANCE.questGui.openGui();
+					questFile.questGui = new GuiQuest(questFile.questTreeGui, container.data.task.quest);
+					questFile.questGui.openGui();
 				}));
 
-				if (ClientQuestFile.INSTANCE.canEdit() || ClientQuestFile.INSTANCE.allowTakeQuestBlocks.getBoolean() && container.data.task.quest.isVisible(ClientQuestFile.INSTANCE) && !container.data.task.isComplete(ClientQuestFile.INSTANCE))
+				if (questFile.canEdit() || questFile.self != null && questFile.allowTakeQuestBlocks.getBoolean() && container.data.task.quest.isVisible(questFile.self) && !container.data.task.isComplete(questFile.self))
 				{
 					add(new Tab(this, I18n.format("tile.ftbquests.screen.name"), "", ItemIcon.getItemIcon(new ItemStack(FTBQuestsItems.SCREEN)), button ->
 					{
 						List<ContextMenuItem> contextMenu = new ArrayList<>();
 						contextMenu.add(new ContextMenuItem("Screen", Icon.EMPTY, () -> {}).setEnabled(false));
-						contextMenu.add(new ContextMenuItem("1 x 1", Icon.EMPTY, () -> new MessageGetScreen(container.data.task.id, 0).sendToServer()));
+						contextMenu.add(new ContextMenuItem("1 x 1", Icon.EMPTY, () -> new MessageGetScreen(container.data.task.getID(), 0).sendToServer()));
 
-						if (ClientQuestFile.INSTANCE.canEdit())
+						if (questFile.canEdit())
 						{
-							contextMenu.add(new ContextMenuItem("3 x 3", Icon.EMPTY, () -> new MessageGetScreen(container.data.task.id, 1).sendToServer()));
-							contextMenu.add(new ContextMenuItem("5 x 5", Icon.EMPTY, () -> new MessageGetScreen(container.data.task.id, 2).sendToServer()));
-							contextMenu.add(new ContextMenuItem("7 x 7", Icon.EMPTY, () -> new MessageGetScreen(container.data.task.id, 3).sendToServer()));
-							contextMenu.add(new ContextMenuItem("9 x 9", Icon.EMPTY, () -> new MessageGetScreen(container.data.task.id, 4).sendToServer()));
+							contextMenu.add(new ContextMenuItem("3 x 3", Icon.EMPTY, () -> new MessageGetScreen(container.data.task.getID(), 1).sendToServer()));
+							contextMenu.add(new ContextMenuItem("5 x 5", Icon.EMPTY, () -> new MessageGetScreen(container.data.task.getID(), 2).sendToServer()));
+							contextMenu.add(new ContextMenuItem("7 x 7", Icon.EMPTY, () -> new MessageGetScreen(container.data.task.getID(), 3).sendToServer()));
+							contextMenu.add(new ContextMenuItem("9 x 9", Icon.EMPTY, () -> new MessageGetScreen(container.data.task.getID(), 4).sendToServer()));
 						}
 
 						getGui().openContextMenu(contextMenu);

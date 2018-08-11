@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 
 /**
  * @author LatvianModder
@@ -26,7 +25,6 @@ public class ServerQuestFile extends QuestFile
 
 	public final File file;
 	public boolean shouldSendUpdates = true;
-	private Random random;
 	public boolean shouldSave = false;
 
 	public ServerQuestFile(File f)
@@ -44,25 +42,6 @@ public class ServerQuestFile extends QuestFile
 		NBTTagCompound nbt = NBTUtils.readNBT(file);
 		readData(nbt == null ? new NBTTagCompound() : nbt);
 		return nbt != null;
-	}
-
-	@Override
-	public short requestID()
-	{
-		if (random == null)
-		{
-			random = new Random();
-		}
-
-		short id;
-
-		do
-		{
-			id = (short) (1 + random.nextInt(MAX_ID));
-		}
-		while (map.containsKey(id));
-
-		return id;
 	}
 
 	@Nullable
@@ -104,7 +83,7 @@ public class ServerQuestFile extends QuestFile
 	{
 		FTBQuestsTeamData data = FTBQuestsTeamData.get(Universe.get().getPlayer(player).team);
 		NBTTagCompound taskDataTag = data.serializeTaskData();
-		short[] claimedRewards = data.getClaimedRewards(player).toShortArray();
+		NBTTagCompound claimedRewards = FTBQuestsTeamData.serializeRewardData(data.getClaimedRewards(player));
 		NBTTagCompound nbt = new NBTTagCompound();
 		writeData(nbt);
 		new MessageSyncQuests(nbt, data.team.getName(), taskDataTag, claimedRewards, FTBQuests.canEdit(player)).sendTo(player);

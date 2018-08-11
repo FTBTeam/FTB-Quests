@@ -14,17 +14,18 @@ import net.minecraft.entity.player.EntityPlayerMP;
  */
 public class MessageMoveQuest extends MessageToServer
 {
-	private short id;
-	private byte direction;
+	private String id;
+	private byte x, y;
 
 	public MessageMoveQuest()
 	{
 	}
 
-	public MessageMoveQuest(short i, byte d)
+	public MessageMoveQuest(String i, byte _x, byte _y)
 	{
 		id = i;
-		direction = d;
+		x = _x;
+		y = _y;
 	}
 
 	@Override
@@ -36,29 +37,32 @@ public class MessageMoveQuest extends MessageToServer
 	@Override
 	public void writeData(DataOut data)
 	{
-		data.writeShort(id);
-		data.writeByte(direction);
+		data.writeString(id);
+		data.writeByte(x);
+		data.writeByte(y);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
-		id = data.readShort();
-		direction = data.readByte();
+		id = data.readString();
+		x = data.readByte();
+		y = data.readByte();
 	}
 
 	@Override
 	public void onMessage(EntityPlayerMP player)
 	{
-		if (direction >= 0 && direction <= 7 && FTBQuests.canEdit(player))
+		if (x >= -Quest.POS_LIMIT && x <= Quest.POS_LIMIT && y >= -Quest.POS_LIMIT && y <= Quest.POS_LIMIT && FTBQuests.canEdit(player))
 		{
 			Quest quest = ServerQuestFile.INSTANCE.getQuest(id);
 
 			if (quest != null)
 			{
-				quest.move(direction);
+				quest.x.setInt(x);
+				quest.y.setInt(y);
 				ServerQuestFile.INSTANCE.save();
-				new MessageMoveQuestResponse(id, (byte) quest.x.getInt(), (byte) quest.y.getInt()).sendToAll();
+				new MessageMoveQuestResponse(id, x, y).sendToAll();
 			}
 		}
 	}

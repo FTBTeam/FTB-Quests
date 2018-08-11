@@ -37,11 +37,18 @@ public class QuestTasks
 	{
 		TaskProvider provider = MAP0.get(nbt.getString("type"));
 
+		QuestTask task;
+
 		if (provider != null)
 		{
-			return provider.create(quest, nbt);
+			task = provider.create(quest, nbt);
+		}
+		else
+		{
+			task = new UnknownTask(quest, nbt);
 		}
 
-		return new UnknownTask(quest, nbt);
+		task.readID(nbt);
+		return task;
 	}
 }

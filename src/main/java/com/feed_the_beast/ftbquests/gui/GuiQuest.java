@@ -29,7 +29,6 @@ import com.feed_the_beast.ftbquests.net.edit.MessageDeleteObject;
 import com.feed_the_beast.ftbquests.net.edit.MessageEditObject;
 import com.feed_the_beast.ftbquests.net.edit.MessageResetProgress;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.quest.rewards.QuestReward;
 import com.feed_the_beast.ftbquests.quest.rewards.QuestRewards;
@@ -145,43 +144,50 @@ public class GuiQuest extends GuiBase
 			{
 				List<ContextMenuItem> contextMenu = new ArrayList<>();
 
-				if (ClientQuestFile.INSTANCE.canEdit() || ClientQuestFile.INSTANCE.allowTakeQuestBlocks.getBoolean() && task.quest.isVisible(ClientQuestFile.INSTANCE) && !task.isComplete(ClientQuestFile.INSTANCE))
+				if (questTreeGui.questFile.canEdit() || questTreeGui.questFile.self != null && questTreeGui.questFile.allowTakeQuestBlocks.getBoolean() && task.quest.isVisible(questTreeGui.questFile.self) && !task.isComplete(questTreeGui.questFile.self))
 				{
 					contextMenu.add(new ContextMenuItem(I18n.format("tile.ftbquests.screen.name"), Color4I.BLACK, () ->
 					{
 						List<ContextMenuItem> screenContextMenu = new ArrayList<>();
 						screenContextMenu.add(new ContextMenuItem("Screen", Icon.EMPTY, () -> {}).setEnabled(false));
-						screenContextMenu.add(new ContextMenuItem("1 x 1", Icon.EMPTY, () -> new MessageGetScreen(task.id, 0).sendToServer()));
+						screenContextMenu.add(new ContextMenuItem("1 x 1", Icon.EMPTY, () -> new MessageGetScreen(task.getID(), 0).sendToServer()));
 
-						if (ClientQuestFile.INSTANCE.canEdit())
+						if (questTreeGui.questFile.canEdit())
 						{
-							screenContextMenu.add(new ContextMenuItem("3 x 3", Icon.EMPTY, () -> new MessageGetScreen(task.id, 1).sendToServer()));
-							screenContextMenu.add(new ContextMenuItem("5 x 5", Icon.EMPTY, () -> new MessageGetScreen(task.id, 2).sendToServer()));
-							screenContextMenu.add(new ContextMenuItem("7 x 7", Icon.EMPTY, () -> new MessageGetScreen(task.id, 3).sendToServer()));
-							screenContextMenu.add(new ContextMenuItem("9 x 9", Icon.EMPTY, () -> new MessageGetScreen(task.id, 4).sendToServer()));
+							screenContextMenu.add(new ContextMenuItem("3 x 3", Icon.EMPTY, () -> new MessageGetScreen(task.getID(), 1).sendToServer()));
+							screenContextMenu.add(new ContextMenuItem("5 x 5", Icon.EMPTY, () -> new MessageGetScreen(task.getID(), 2).sendToServer()));
+							screenContextMenu.add(new ContextMenuItem("7 x 7", Icon.EMPTY, () -> new MessageGetScreen(task.getID(), 3).sendToServer()));
+							screenContextMenu.add(new ContextMenuItem("9 x 9", Icon.EMPTY, () -> new MessageGetScreen(task.getID(), 4).sendToServer()));
 						}
 
 						getGui().openContextMenu(screenContextMenu);
 					}));
 				}
 
-				contextMenu.add(new ContextMenuItem(I18n.format("selectServer.edit"), GuiIcons.SETTINGS, () -> new MessageEditObject(task.id).sendToServer()));
+				contextMenu.add(new ContextMenuItem(I18n.format("selectServer.edit"), GuiIcons.SETTINGS, () -> new MessageEditObject(task.getID()).sendToServer()));
 				contextMenu.add(ContextMenuItem.SEPARATOR);
-				contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), GuiIcons.REMOVE, () -> new MessageDeleteObject(task.id).sendToServer()).setYesNo(I18n.format("delete_item", task.getDisplayName().getFormattedText())));
-				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.reset_progress"), GuiIcons.REFRESH, () -> new MessageResetProgress(task.id, false).sendToServer()).setYesNo(I18n.format("ftbquests.gui.reset_progress_q")));
-				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.copy_id"), GuiIcons.INFO, () -> setClipboardString(QuestFile.formatID(task.id))));
+				contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), GuiIcons.REMOVE, () -> new MessageDeleteObject(task.getID()).sendToServer()).setYesNo(I18n.format("delete_item", task.getDisplayName().getFormattedText())));
+				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.reset_progress"), GuiIcons.REFRESH, () -> new MessageResetProgress(task.getID(), false).sendToServer()).setYesNo(I18n.format("ftbquests.gui.reset_progress_q")));
+				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.copy_id"), GuiIcons.INFO, () -> setClipboardString(task.getID())));
 				getGui().openContextMenu(contextMenu);
 			}
 			else if (button.isLeft() && !(task instanceof UnknownTask))
 			{
-				new MessageOpenTask(task.id).sendToServer();
+				new MessageOpenTask(task.getID()).sendToServer();
 			}
 		}
 
 		@Override
 		public void addMouseOverText(List<String> list)
 		{
-			list.add(getTitle() + questTreeGui.questFile.getCompletionSuffix(task));
+			if (questTreeGui.questFile.self != null)
+			{
+				list.add(getTitle() + questTreeGui.questFile.self.getCompletionSuffix(task));
+			}
+			else
+			{
+				list.add(getTitle());
+			}
 
 			if (task instanceof UnknownTask)
 			{
@@ -198,7 +204,11 @@ public class GuiQuest extends GuiBase
 		@Override
 		public WidgetType getWidgetType()
 		{
-			if (task.invalid || !quest.canStartTasks(questTreeGui.questFile))
+			if (questTreeGui.questFile.editingMode)
+			{
+				return super.getWidgetType();
+			}
+			else if (task.invalid || questTreeGui.questFile.self == null || !quest.canStartTasks(questTreeGui.questFile.self))
 			{
 				return WidgetType.DISABLED;
 			}
@@ -211,14 +221,14 @@ public class GuiQuest extends GuiBase
 		{
 			super.draw();
 
-			if (task.invalid)
+			if (task.invalid || questTreeGui.questFile.self == null)
 			{
 				GlStateManager.pushMatrix();
 				GlStateManager.translate(0, 0, 500);
 				GuiIcons.CLOSE.draw(getAX() + width - 9, getAY() + 1, 8, 8);
 				GlStateManager.popMatrix();
 			}
-			else if (task.isComplete(questTreeGui.questFile))
+			else if (task.isComplete(questTreeGui.questFile.self))
 			{
 				GlStateManager.pushMatrix();
 				GlStateManager.translate(0, 0, 500);
@@ -284,7 +294,7 @@ public class GuiQuest extends GuiBase
 								NBTTagCompound nbt = new NBTTagCompound();
 								task.writeData(nbt);
 								nbt.setString("type", type);
-								new MessageCreateObject(QuestObjectType.TASK, quest.id, nbt).sendToServer();
+								new MessageCreateObject(QuestObjectType.TASK, quest.getID(), nbt).sendToServer();
 								GuiQuest.this.openGui();
 								questTreeGui.questFile.refreshGui(questTreeGui.questFile);
 							}).openGui();
@@ -332,15 +342,15 @@ public class GuiQuest extends GuiBase
 			if (button.isRight() && questTreeGui.questFile.canEdit())
 			{
 				List<ContextMenuItem> contextMenu = new ArrayList<>();
-				contextMenu.add(new ContextMenuItem(I18n.format("selectServer.edit"), GuiIcons.SETTINGS, () -> new MessageEditObject(reward.id).sendToServer()));
+				contextMenu.add(new ContextMenuItem(I18n.format("selectServer.edit"), GuiIcons.SETTINGS, () -> new MessageEditObject(reward.getID()).sendToServer()));
 				contextMenu.add(ContextMenuItem.SEPARATOR);
-				contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), GuiIcons.REMOVE, () -> new MessageDeleteObject(reward.id).sendToServer()).setYesNo(I18n.format("delete_item", reward.getDisplayName().getFormattedText())));
-				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.copy_id"), GuiIcons.INFO, () -> setClipboardString(QuestFile.formatID(reward.id))));
+				contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), GuiIcons.REMOVE, () -> new MessageDeleteObject(reward.getID()).sendToServer()).setYesNo(I18n.format("delete_item", reward.getDisplayName().getFormattedText())));
+				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.copy_id"), GuiIcons.INFO, () -> setClipboardString(reward.getID())));
 				getGui().openContextMenu(contextMenu);
 			}
-			else if (button.isLeft() && !(reward instanceof UnknownReward) && questTreeGui.questFile.claimReward(ClientUtils.MC.player, reward))
+			else if (button.isLeft() && !(reward instanceof UnknownReward) && questTreeGui.questFile.self != null && questTreeGui.questFile.self.claimReward(ClientUtils.MC.player, reward))
 			{
-				new MessageClaimReward(reward.id).sendToServer();
+				new MessageClaimReward(reward.getID()).sendToServer();
 			}
 		}
 
@@ -358,7 +368,11 @@ public class GuiQuest extends GuiBase
 		@Override
 		public WidgetType getWidgetType()
 		{
-			if (reward.invalid || questTreeGui.questFile.isRewardClaimed(ClientUtils.MC.player, reward) || !quest.isComplete(questTreeGui.questFile))
+			if (questTreeGui.questFile.editingMode)
+			{
+				return super.getWidgetType();
+			}
+			else if (reward.invalid || questTreeGui.questFile.self == null || questTreeGui.questFile.self.isRewardClaimed(ClientUtils.MC.player, reward) || !quest.isComplete(questTreeGui.questFile.self))
 			{
 				return WidgetType.DISABLED;
 			}
@@ -371,14 +385,14 @@ public class GuiQuest extends GuiBase
 		{
 			super.draw();
 
-			if (reward.invalid)
+			if (reward.invalid || questTreeGui.questFile.self == null)
 			{
 				GlStateManager.pushMatrix();
 				GlStateManager.translate(0, 0, 500);
 				GuiIcons.CLOSE.draw(getAX() + width - 9, getAY() + 1, 8, 8);
 				GlStateManager.popMatrix();
 			}
-			else if (questTreeGui.questFile.isRewardClaimed(ClientUtils.MC.player, reward))
+			else if (questTreeGui.questFile.self.isRewardClaimed(ClientUtils.MC.player, reward))
 			{
 				GlStateManager.pushMatrix();
 				GlStateManager.translate(0, 0, 500);
@@ -444,7 +458,7 @@ public class GuiQuest extends GuiBase
 								NBTTagCompound nbt = new NBTTagCompound();
 								reward.writeData(nbt);
 								nbt.setString("type", type);
-								new MessageCreateObject(QuestObjectType.REWARD, quest.id, nbt).sendToServer();
+								new MessageCreateObject(QuestObjectType.REWARD, quest.getID(), nbt).sendToServer();
 								GuiQuest.this.openGui();
 								questTreeGui.questFile.refreshGui(questTreeGui.questFile);
 							}).openGui();

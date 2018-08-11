@@ -48,6 +48,7 @@ public class QuestRewards
 			reward = new UnknownReward(quest, nbt);
 		}
 
+		reward.readID(nbt);
 		reward.teamReward.setBoolean(nbt.getBoolean("team_reward"));
 		return reward;
 	}

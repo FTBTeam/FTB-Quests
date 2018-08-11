@@ -8,7 +8,6 @@ import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.tile.TileScreenCore;
 import com.feed_the_beast.ftbquests.tile.TileScreenPart;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.IStringSerializable;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -24,10 +23,10 @@ import javax.annotation.Nullable;
 public abstract class QuestTask extends ProgressingQuestObject implements IStringSerializable
 {
 	public final Quest quest;
+	public int index;
 
-	public QuestTask(Quest q, NBTTagCompound nbt)
+	public QuestTask(Quest q)
 	{
-		super(q.chapter.file.getID(nbt));
 		quest = q;
 	}
 
@@ -43,6 +42,12 @@ public abstract class QuestTask extends ProgressingQuestObject implements IStrin
 	public final QuestObjectType getObjectType()
 	{
 		return QuestObjectType.TASK;
+	}
+
+	@Override
+	public final String getID()
+	{
+		return quest.chapter.id + ':' + quest.id + ':' + id;
 	}
 
 	@Override
@@ -84,6 +89,8 @@ public abstract class QuestTask extends ProgressingQuestObject implements IStrin
 		{
 			data.removeTask(this);
 		}
+
+		quest.chapter.file.refreshTaskList();
 	}
 
 	@Override

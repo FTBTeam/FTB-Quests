@@ -34,7 +34,7 @@ public class IC2EnergyTask extends QuestTask
 
 	public IC2EnergyTask(Quest quest, NBTTagCompound nbt)
 	{
-		super(quest, nbt);
+		super(quest);
 		value = new ConfigDouble(nbt.getDouble("value"), 1D, Double.POSITIVE_INFINITY);
 		maxInput = new ConfigDouble(nbt.hasKey("max_input") ? nbt.getDouble("max_input") : Double.POSITIVE_INFINITY, 1D, Double.POSITIVE_INFINITY);
 	}

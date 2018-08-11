@@ -23,7 +23,7 @@ public class ItemReward extends QuestReward
 
 	public ItemReward(Quest quest, NBTTagCompound nbt)
 	{
-		super(quest, nbt);
+		super(quest);
 		NBTTagCompound nbt1 = nbt.getCompoundTag("item");
 
 		if (nbt1.isEmpty())

@@ -31,7 +31,7 @@ public class CommandReward extends QuestReward
 
 	public CommandReward(Quest quest, NBTTagCompound nbt)
 	{
-		super(quest, nbt);
+		super(quest);
 		command = new ConfigString(nbt.getString("command"), CMD_PATTERN);
 		title = new ConfigString(nbt.getString("title"));
 		icon = new ConfigItemStack(nbt.hasKey("icon") ? new ItemStack(nbt.getCompoundTag("icon")) : new ItemStack(Blocks.COMMAND_BLOCK), true);

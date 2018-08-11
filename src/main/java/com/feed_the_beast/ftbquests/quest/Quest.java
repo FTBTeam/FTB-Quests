@@ -41,13 +41,12 @@ public final class Quest extends ProgressingQuestObject
 	public final ConfigEnum<QuestType> type;
 	public final ConfigInt x, y;
 	public final ConfigList<ConfigString> text;
-	public final ConfigList<ConfigInt> dependencies;
+	public final ConfigList<ConfigString> dependencies;
 	public final List<QuestTask> tasks;
 	public final List<QuestReward> rewards;
 
 	public Quest(QuestChapter c, NBTTagCompound nbt)
 	{
-		super(c.file.getID(nbt));
 		chapter = c;
 		title = new ConfigString(nbt.getString("title"));
 		description = new ConfigString(nbt.getString("description"));
@@ -65,7 +64,10 @@ public final class Quest extends ProgressingQuestObject
 			text.add(new ConfigString(list.getStringTagAt(k)));
 		}
 
-		dependencies = new ConfigList<>(new ConfigInt(1, 1, MAX_ID));
+		dependencies = new ConfigList<>(new ConfigString(""));
+
+		readID(nbt);
+
 		tasks = new ArrayList<>();
 		rewards = new ArrayList<>();
 
@@ -75,7 +77,7 @@ public final class Quest extends ProgressingQuestObject
 		{
 			QuestTask task = QuestTasks.createTask(this, list.getCompoundTagAt(k));
 			tasks.add(task);
-			chapter.file.map.put(task.id, task);
+			chapter.file.map.put(task.getID(), task);
 		}
 
 		list = nbt.getTagList("rewards", Constants.NBT.TAG_COMPOUND);
@@ -84,12 +86,14 @@ public final class Quest extends ProgressingQuestObject
 		{
 			QuestReward reward = QuestRewards.createReward(this, list.getCompoundTagAt(k));
 			rewards.add(reward);
-			chapter.file.map.put(reward.id, reward);
+			chapter.file.map.put(reward.getID(), reward);
 		}
 
-		for (int d : nbt.getIntArray("dependencies"))
+		NBTTagList depList = nbt.getTagList("dependencies", Constants.NBT.TAG_STRING);
+
+		for (int i = 0; i < depList.tagCount(); i++)
 		{
-			dependencies.add(new ConfigInt(d));
+			dependencies.add(new ConfigString(depList.getStringTagAt(i)));
 		}
 	}
 
@@ -106,9 +110,15 @@ public final class Quest extends ProgressingQuestObject
 	}
 
 	@Override
+	public String getID()
+	{
+		return chapter.id + ':' + id;
+	}
+
+	@Override
 	public void writeData(NBTTagCompound nbt)
 	{
-		nbt.setShort("id", id);
+		nbt.setString("id", id);
 
 		if (type.getValue() != QuestType.NORMAL)
 		{
@@ -143,14 +153,14 @@ public final class Quest extends ProgressingQuestObject
 
 		if (!dependencies.isEmpty())
 		{
-			int[] ai = new int[dependencies.list.size()];
+			NBTTagList depList = new NBTTagList();
 
-			for (int i = 0; i < dependencies.list.size(); i++)
+			for (ConfigString value : dependencies)
 			{
-				ai[i] = dependencies.list.get(i).getInt();
+				depList.appendTag(new NBTTagString(value.getString()));
 			}
 
-			nbt.setIntArray("dependencies", ai);
+			nbt.setTag("dependencies", depList);
 		}
 
 		if (!tasks.isEmpty())
@@ -161,7 +171,7 @@ public final class Quest extends ProgressingQuestObject
 			{
 				NBTTagCompound taskNBT = new NBTTagCompound();
 				task.writeData(taskNBT);
-				taskNBT.setShort("id", task.id);
+				taskNBT.setString("id", task.id);
 
 				if (!(task instanceof UnknownTask))
 				{
@@ -182,7 +192,7 @@ public final class Quest extends ProgressingQuestObject
 			{
 				NBTTagCompound rewardNBT = new NBTTagCompound();
 				reward.writeData(rewardNBT);
-				rewardNBT.setShort("id", reward.id);
+				rewardNBT.setString("id", reward.id);
 
 				if (!(reward instanceof UnknownReward))
 				{
@@ -264,9 +274,9 @@ public final class Quest extends ProgressingQuestObject
 		switch (type.getValue())
 		{
 			case SECRET:
-				for (ConfigInt value : dependencies)
+				for (ConfigString value : dependencies)
 				{
-					QuestObject object = chapter.file.get((short) value.getInt());
+					QuestObject object = chapter.file.get(value.getString());
 
 					if (object instanceof ProgressingQuestObject && ((ProgressingQuestObject) object).isComplete(data))
 					{
@@ -276,9 +286,9 @@ public final class Quest extends ProgressingQuestObject
 
 				return false;
 			case INVISIBLE:
-				for (ConfigInt value : dependencies)
+				for (ConfigString value : dependencies)
 				{
-					QuestObject object = chapter.file.get((short) value.getInt());
+					QuestObject object = chapter.file.get(value.getString());
 
 					if (object instanceof ProgressingQuestObject && !((ProgressingQuestObject) object).isComplete(data))
 					{
@@ -299,9 +309,9 @@ public final class Quest extends ProgressingQuestObject
 			return true;
 		}
 
-		for (ConfigInt value : dependencies)
+		for (ConfigString value : dependencies)
 		{
-			QuestObject object = chapter.file.get((short) value.getInt());
+			QuestObject object = chapter.file.get(value.getString());
 
 			if (object instanceof ProgressingQuestObject && !((ProgressingQuestObject) object).isComplete(data))
 			{
@@ -375,7 +385,7 @@ public final class Quest extends ProgressingQuestObject
 		group.add("icon", icon, new ConfigItemStack(ItemStack.EMPTY, true));
 		group.add("description", description, new ConfigString(""));
 		group.add("text", text, new ConfigList<>(new ConfigString("")));
-		group.add("dependencies", dependencies, new ConfigList<>(new ConfigInt(1, 1, MAX_ID)));
+		group.add("dependencies", dependencies, new ConfigList<>(new ConfigString("")));
 	}
 
 	public void move(byte direction)
@@ -414,35 +424,35 @@ public final class Quest extends ProgressingQuestObject
 		}
 	}
 
-	public boolean setDependency(short dep, boolean add)
+	public boolean setDependency(ProgressingQuestObject dep, boolean add)
 	{
-		if (dep == 0 || dep == id)
+		if (dep == this)
 		{
 			return false;
 		}
 
-		int d = dep & 0xFFFF;
+		String d = dep.getID();
 
 		if (add)
 		{
-			for (ConfigInt value : dependencies)
+			for (ConfigString value : dependencies)
 			{
-				if (value.getInt() == d)
+				if (value.getString().equals(d))
 				{
 					return false;
 				}
 			}
 
-			dependencies.add(new ConfigInt(d));
+			dependencies.add(new ConfigString(d));
 			return true;
 		}
 		else
 		{
-			Iterator<ConfigInt> iterator = dependencies.list.iterator();
+			Iterator<ConfigString> iterator = dependencies.list.iterator();
 
 			while (iterator.hasNext())
 			{
-				if (iterator.next().getInt() == d)
+				if (iterator.next().getString().equals(d))
 				{
 					iterator.remove();
 					return true;
@@ -453,13 +463,13 @@ public final class Quest extends ProgressingQuestObject
 		}
 	}
 
-	public boolean hasDependency(short dep)
+	public boolean hasDependency(ProgressingQuestObject dep)
 	{
-		int d = dep & 0xFFFF;
+		String d = dep.getID();
 
-		for (ConfigInt value : dependencies)
+		for (ConfigString value : dependencies)
 		{
-			if (value.getInt() == d)
+			if (value.getString().equals(d))
 			{
 				return true;
 			}
