@@ -13,4 +13,6 @@ public class FTBQuestsItems
 	public static final Block SCREEN = Blocks.AIR;
 	public static final Block SCREEN_PART = Blocks.AIR;
 	public static final Block PROGRESS_DETECTOR = Blocks.AIR;
+	public static final Block PROGRESS_SCREEN = Blocks.AIR;
+	public static final Block PROGRESS_SCREEN_PART = Blocks.AIR;
 }

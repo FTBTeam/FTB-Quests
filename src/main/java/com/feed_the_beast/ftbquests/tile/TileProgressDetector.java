@@ -161,7 +161,7 @@ public class TileProgressDetector extends TileBase implements ITickable, IConfig
 		ConfigGroup group0 = ConfigGroup.newGroup("tile");
 		group0.setDisplayName(new TextComponentTranslation("tile.ftbquests.progress_detector.name"));
 		ConfigGroup group = group0.getGroup("ftbquests.progress_detector");
-		group.add("owner", owner, new ConfigString("")).setDisplayName(new TextComponentTranslation("ftbquests.owner"));
+		group.add("team", owner, new ConfigString("")).setDisplayName(new TextComponentTranslation("ftbquests.owner"));
 		group.add("object", object, ConfigNull.INSTANCE);
 		group.add("level", level, new ConfigBoolean(false));
 		FTBLibAPI.editServerConfig(player, group0, this);

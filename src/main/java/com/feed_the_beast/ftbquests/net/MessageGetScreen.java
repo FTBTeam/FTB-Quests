@@ -67,7 +67,7 @@ public class MessageGetScreen extends MessageToServer
 				TileScreenCore tile = new TileScreenCore();
 				tile.quest.setString(t.quest.getID());
 				tile.taskIndex.setInt(t.quest.tasks.indexOf(t));
-				tile.owner.setString(teamData.team.getName());
+				tile.team.setString(teamData.team.getName());
 				tile.size = size;
 				tile.writeToItem(stack);
 				ItemHandlerHelper.giveItemToPlayer(player, stack);

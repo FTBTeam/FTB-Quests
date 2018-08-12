@@ -2,7 +2,6 @@ package com.feed_the_beast.ftbquests.block;
 
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.FTBQuestsItems;
-import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import com.feed_the_beast.ftbquests.tile.TileScreenBase;
 import com.feed_the_beast.ftbquests.tile.TileScreenCore;
 import com.feed_the_beast.ftbquests.tile.TileScreenPart;
@@ -39,22 +38,11 @@ import java.util.Random;
 /**
  * @author LatvianModder
  */
-public class BlockScreen extends BlockHorizontal
+public class BlockProgressScreen extends BlockHorizontal
 {
 	protected static boolean BREAKING_SCREEN = false;
-	public static QuestTask currentTask = null;
 
-	public static double getClickX(EnumFacing facing, int offX, int offY, double hitX, double hitZ, int size)
-	{
-		return 0.5D;
-	}
-
-	public static double getClickY(int offY, double hitY, int size)
-	{
-		return 1D - (offY + hitY) / (size * 2D + 1D);
-	}
-
-	public BlockScreen()
+	public BlockProgressScreen()
 	{
 		super(Material.IRON);
 		setCreativeTab(FTBQuests.TAB);
@@ -71,7 +59,7 @@ public class BlockScreen extends BlockHorizontal
 	@Override
 	public TileEntity createTileEntity(World world, IBlockState state)
 	{
-		return currentTask == null ? new TileScreenCore() : currentTask.createScreenCore(world);
+		return new TileScreenCore();
 	}
 
 	@Override
@@ -178,7 +166,8 @@ public class BlockScreen extends BlockHorizontal
 			{
 				if (player instanceof EntityPlayerMP)
 				{
-					screen.onClicked((EntityPlayerMP) player, hand, getClickX(facing, base.getOffsetX(), base.getOffsetZ(), hitX, hitZ, screen.size), getClickY(base.getOffsetY(), hitY, screen.size));
+					double x = 0.5D; //FIXME: X coordinate
+					screen.onClicked((EntityPlayerMP) player, hand, x, 1D - (base.getOffsetY() + hitY) / (screen.size * 2D + 1D));
 				}
 
 				return true;
@@ -295,29 +284,31 @@ public class BlockScreen extends BlockHorizontal
 
 			if (screen != null)
 			{
-				return getScreenAABB(screen.getPos(), screen.getFacing(), screen.size);
+				return getScreenAABB(screen);
 			}
 		}
 
 		return new AxisAlignedBB(0D, -1D, 0D, 0D, -1D, 0D);
 	}
 
-	public static AxisAlignedBB getScreenAABB(BlockPos pos, EnumFacing facing, int size)
+	public static AxisAlignedBB getScreenAABB(TileScreenCore screen)
 	{
-		if (size == 0)
+		BlockPos pos = screen.getPos();
+
+		if (screen.size == 0)
 		{
 			return FULL_BLOCK_AABB.offset(pos);
 		}
 
-		boolean xaxis = facing.getAxis() == EnumFacing.Axis.X;
+		boolean xaxis = screen.getFacing().getAxis() == EnumFacing.Axis.X;
 
 		if (xaxis)
 		{
-			return new AxisAlignedBB(pos.getX(), pos.getY(), pos.getZ() - size, pos.getX() + 1D, pos.getY() + size * 2D + 1D, pos.getZ() + size + 1D);
+			return new AxisAlignedBB(pos.getX(), pos.getY(), pos.getZ() - screen.size, pos.getX() + 1D, pos.getY() + screen.size * 2D + 1D, pos.getZ() + screen.size + 1D);
 		}
 		else
 		{
-			return new AxisAlignedBB(pos.getX() - size, pos.getY(), pos.getZ(), pos.getX() + size + 1D, pos.getY() + size * 2D + 1D, pos.getZ() + 1D);
+			return new AxisAlignedBB(pos.getX() - screen.size, pos.getY(), pos.getZ(), pos.getX() + screen.size + 1D, pos.getY() + screen.size * 2D + 1D, pos.getZ() + 1D);
 		}
 	}
 
