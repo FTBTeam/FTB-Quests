@@ -46,12 +46,12 @@ public class ServerQuestFile extends QuestFile
 
 	@Nullable
 	@Override
-	public IProgressData getData(String owner)
+	public IProgressData getData(String team)
 	{
 		if (Universe.loaded())
 		{
-			ForgeTeam team = Universe.get().getTeam(owner);
-			return team.isValid() ? FTBQuestsTeamData.get(team) : null;
+			ForgeTeam t = Universe.get().getTeam(team);
+			return t.isValid() ? FTBQuestsTeamData.get(t) : null;
 		}
 
 		return null;

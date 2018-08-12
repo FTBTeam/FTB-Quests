@@ -1,6 +1,7 @@
 package com.feed_the_beast.ftbquests.client;
 
 import com.feed_the_beast.ftblib.lib.client.ClientUtils;
+import com.feed_the_beast.ftbquests.block.BlockScreen;
 import com.feed_the_beast.ftbquests.gui.ClientQuestFile;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskData;
@@ -45,10 +46,15 @@ public class RenderScreen extends TileEntitySpecialRenderer<TileScreenCore>
 		{
 			TileEntity tileEntity = screen.getWorld().getTileEntity(ray.getBlockPos());
 
-			if (tileEntity == screen || tileEntity instanceof TileScreenBase && ((TileScreenBase) tileEntity).getScreen() == screen)
+			if (tileEntity == screen || tileEntity instanceof TileScreenBase)
 			{
-				mx = 0.5D; //FIXME: X coordinate
-				my = 1D - (((TileScreenBase) tileEntity).getOffsetY() + ray.hitVec.y % 1D) / (screen.size * 2D + 1D);
+				TileScreenBase base = (TileScreenBase) tileEntity;
+
+				if (base.getScreen() == screen)
+				{
+					mx = BlockScreen.getClickX(screen.facing, base.getOffsetX(), base.getOffsetZ(), ray.hitVec.x - ray.getBlockPos().getX(), ray.hitVec.z - ray.getBlockPos().getZ(), screen.size);
+					my = BlockScreen.getClickY(base.getOffsetY(), ray.hitVec.y % 1D, screen.size);
+				}
 			}
 		}
 

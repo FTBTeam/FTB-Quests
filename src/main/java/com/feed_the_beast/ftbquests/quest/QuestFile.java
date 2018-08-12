@@ -365,7 +365,7 @@ public abstract class QuestFile extends ProgressingQuestObject
 	}
 
 	@Nullable
-	public abstract IProgressData getData(String owner);
+	public abstract IProgressData getData(String team);
 
 	public abstract Collection<IProgressData> getAllData();
 

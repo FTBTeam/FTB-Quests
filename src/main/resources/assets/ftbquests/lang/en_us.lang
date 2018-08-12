@@ -11,6 +11,7 @@ tile.ftbquests.screen.indestructible=Indestructible
 tile.ftbquests.progress_detector.name=Quest Progress Detector
 tile.ftbquests.progress_detector.object=Object ID
 tile.ftbquests.progress_detector.level=Output Level
+tile.ftbquests.progress_screen.name=Progress Screen
 
 itemGroup.ftbquests=FTB Quests
 sidebar_button.ftbquests.quests=Quests

@@ -132,9 +132,9 @@ public class ClientQuestFile extends QuestFile
 
 	@Nullable
 	@Override
-	public ClientQuestProgress getData(String owner)
+	public ClientQuestProgress getData(String team)
 	{
-		if (self != null && owner.equals(self.teamID))
+		if (self != null && team.equals(self.teamID))
 		{
 			return self;
 		}

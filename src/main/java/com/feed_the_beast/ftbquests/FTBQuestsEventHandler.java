@@ -37,8 +37,8 @@ public class FTBQuestsEventHandler
 	public static void registerBlocks(RegistryEvent.Register<Block> event)
 	{
 		event.getRegistry().registerAll(
-				new BlockScreen().setRegistryName("screen"),
-				new BlockScreenPart().setRegistryName("screen_part"),
+				new BlockScreen().setRegistryName("screen").setTranslationKey(FTBQuests.MOD_ID + ".screen"),
+				new BlockScreenPart().setRegistryName("screen_part").setTranslationKey(FTBQuests.MOD_ID + ".screen"),
 				new BlockProgressDetector().setRegistryName("progress_detector").setTranslationKey(FTBQuests.MOD_ID + ".progress_detector")
 		);
 
@@ -52,7 +52,8 @@ public class FTBQuestsEventHandler
 	{
 		event.getRegistry().registerAll(
 				new ItemBlockScreen(FTBQuestsItems.SCREEN).setRegistryName("screen"),
-				new ItemBlock(FTBQuestsItems.PROGRESS_DETECTOR).setRegistryName("progress_detector")
+				new ItemBlock(FTBQuestsItems.PROGRESS_DETECTOR).setRegistryName("progress_detector"),
+				new ItemBlockScreen(FTBQuestsItems.PROGRESS_SCREEN).setRegistryName("progress_screen")
 		);
 	}
 

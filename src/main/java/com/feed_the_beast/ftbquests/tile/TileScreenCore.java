@@ -40,25 +40,22 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.CapabilityItemHandler;
 
 import javax.annotation.Nullable;
-import java.util.regex.Pattern;
 
 /**
  * @author LatvianModder
  */
 public class TileScreenCore extends TileScreenBase implements IConfigCallback
 {
-	private static final Pattern PATTERN = Pattern.compile("");
-
 	public EnumFacing facing;
-	public final ConfigString owner = new ConfigString("");
-	public final ConfigString quest = new ConfigString("", PATTERN);
+	public final ConfigString team = new ConfigString("");
+	public final ConfigString quest = new ConfigString("");
 	public final ConfigInt taskIndex = new ConfigInt(0, 0, 255);
 	public int size = 0;
 	public final ConfigEnum<ProgressDisplayMode> progressDisplayMode = new ConfigEnum<>(ProgressDisplayMode.NAME_MAP);
 	public final ConfigBoolean indestructible = new ConfigBoolean(false);
 	public final ConfigBlockState skin = new ConfigBlockState(CommonUtils.AIR_STATE);
 
-	private IProgressData cOwner;
+	private IProgressData cTeam;
 	private QuestTask cTask;
 	private QuestTaskData cTaskData;
 
@@ -71,9 +68,9 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 
 	private void writeScreenData(NBTTagCompound nbt)
 	{
-		if (!owner.isEmpty())
+		if (!team.isEmpty())
 		{
-			nbt.setString("Owner", owner.getString());
+			nbt.setString("Team", team.getString());
 		}
 
 		cTask = getTask();
@@ -120,7 +117,14 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 
 	private void readScreenData(NBTTagCompound nbt)
 	{
-		owner.setString(nbt.getString("Owner"));
+		String t = nbt.getString("Team");
+
+		if (t.isEmpty())
+		{
+			t = nbt.getString("Owner");
+		}
+
+		team.setString(t);
 		quest.setString(nbt.getString("Quest"));
 		taskIndex.setInt(nbt.getByte("TaskIndex") & 0xFF);
 		size = nbt.getByte("Size");
@@ -235,23 +239,23 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 		super.updateContainingBlockInfo();
 		facing = null;
 		cTask = null;
-		cOwner = null;
+		cTeam = null;
 		cTaskData = null;
 	}
 
 	@Nullable
-	public IProgressData getOwner()
+	public IProgressData getTeam()
 	{
-		if (owner.isEmpty())
+		if (team.isEmpty())
 		{
 			return null;
 		}
-		else if (cOwner == null)
+		else if (cTeam == null)
 		{
-			cOwner = FTBQuests.PROXY.getQuestList(world).getData(owner.getString());
+			cTeam = FTBQuests.PROXY.getQuestList(world).getData(team.getString());
 		}
 
-		return cOwner;
+		return cTeam;
 	}
 
 	@Nullable
@@ -273,7 +277,7 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 	@Nullable
 	public QuestTaskData getTaskData()
 	{
-		if (quest.isEmpty() || owner.isEmpty())
+		if (quest.isEmpty() || team.isEmpty())
 		{
 			return null;
 		}
@@ -286,14 +290,14 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 				return null;
 			}
 
-			cOwner = getOwner();
+			cTeam = getTeam();
 
-			if (cOwner == null)
+			if (cTeam == null)
 			{
 				return null;
 			}
 
-			cTaskData = cOwner.getQuestTaskData(cTask);
+			cTaskData = cTeam.getQuestTaskData(cTask);
 		}
 
 		return cTaskData;
@@ -303,7 +307,7 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 	@SideOnly(Side.CLIENT)
 	public AxisAlignedBB getRenderBoundingBox()
 	{
-		return BlockScreen.getScreenAABB(this);
+		return BlockScreen.getScreenAABB(pos, getFacing(), size);
 	}
 
 	@Override
@@ -316,7 +320,7 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 
 	public boolean isOwner(EntityPlayer player)
 	{
-		return owner.isEmpty() || FTBLibAPI.getTeam(player.getUniqueID()).equals(owner.getString());
+		return team.isEmpty() || FTBLibAPI.getTeam(player.getUniqueID()).equals(team.getString());
 	}
 
 	public void onClicked(EntityPlayerMP player, EnumHand hand, double x, double y)
@@ -344,7 +348,7 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 
 				if (editor)
 				{
-					group.add("owner", owner, new ConfigString("")).setDisplayName(new TextComponentTranslation("ftbquests.owner"));
+					group.add("team", team, new ConfigString("")).setDisplayName(new TextComponentTranslation("ftbquests.owner"));
 				}
 
 				group.add("skin", skin, new ConfigBlockState(CommonUtils.AIR_STATE)).setCanEdit(editorOrDestructible);
