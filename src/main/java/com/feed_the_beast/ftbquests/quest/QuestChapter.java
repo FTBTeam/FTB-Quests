@@ -63,7 +63,6 @@ public final class QuestChapter extends ProgressingQuestObject
 		{
 			Quest quest = new Quest(this, questsList.getCompoundTagAt(j));
 			quests.add(quest);
-			file.map.put(quest.getID(), quest);
 		}
 	}
 

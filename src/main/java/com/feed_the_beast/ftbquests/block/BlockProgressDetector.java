@@ -66,7 +66,7 @@ public class BlockProgressDetector extends Block
 
 			if (tileEntity instanceof TileProgressDetector)
 			{
-				((TileProgressDetector) tileEntity).owner.setString(FTBLibAPI.getTeam(placer.getUniqueID()));
+				((TileProgressDetector) tileEntity).team.setString(FTBLibAPI.getTeam(placer.getUniqueID()));
 			}
 		}
 	}

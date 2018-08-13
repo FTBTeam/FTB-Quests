@@ -9,13 +9,19 @@ import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
 import com.feed_the_beast.ftblib.lib.data.ForgePlayer;
 import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftbquests.block.BlockProgressDetector;
+import com.feed_the_beast.ftbquests.block.BlockProgressScreen;
+import com.feed_the_beast.ftbquests.block.BlockProgressScreenPart;
 import com.feed_the_beast.ftbquests.block.BlockScreen;
 import com.feed_the_beast.ftbquests.block.BlockScreenPart;
+import com.feed_the_beast.ftbquests.block.ItemBlockProgressScreen;
 import com.feed_the_beast.ftbquests.block.ItemBlockScreen;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.tile.TileProgressDetector;
+import com.feed_the_beast.ftbquests.tile.TileProgressScreenCore;
+import com.feed_the_beast.ftbquests.tile.TileProgressScreenPart;
 import com.feed_the_beast.ftbquests.tile.TileScreenCore;
 import com.feed_the_beast.ftbquests.tile.TileScreenPart;
+import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
 import com.feed_the_beast.ftbquests.util.FTBQuestsWorldData;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
@@ -39,12 +45,16 @@ public class FTBQuestsEventHandler
 		event.getRegistry().registerAll(
 				new BlockScreen().setRegistryName("screen").setTranslationKey(FTBQuests.MOD_ID + ".screen"),
 				new BlockScreenPart().setRegistryName("screen_part").setTranslationKey(FTBQuests.MOD_ID + ".screen"),
-				new BlockProgressDetector().setRegistryName("progress_detector").setTranslationKey(FTBQuests.MOD_ID + ".progress_detector")
+				new BlockProgressDetector().setRegistryName("progress_detector").setTranslationKey(FTBQuests.MOD_ID + ".progress_detector"),
+				new BlockProgressScreen().setRegistryName("progress_screen").setTranslationKey(FTBQuests.MOD_ID + ".progress_screen"),
+				new BlockProgressScreenPart().setRegistryName("progress_screen_part").setTranslationKey(FTBQuests.MOD_ID + ".progress_screen")
 		);
 
 		GameRegistry.registerTileEntity(TileScreenCore.class, new ResourceLocation(FTBQuests.MOD_ID, "screen_core"));
 		GameRegistry.registerTileEntity(TileScreenPart.class, new ResourceLocation(FTBQuests.MOD_ID, "screen_part"));
 		GameRegistry.registerTileEntity(TileProgressDetector.class, new ResourceLocation(FTBQuests.MOD_ID, "progress_detector"));
+		GameRegistry.registerTileEntity(TileProgressScreenCore.class, new ResourceLocation(FTBQuests.MOD_ID, "progress_screen_core"));
+		GameRegistry.registerTileEntity(TileProgressScreenPart.class, new ResourceLocation(FTBQuests.MOD_ID, "progress_screen_part"));
 	}
 
 	@SubscribeEvent
@@ -53,7 +63,7 @@ public class FTBQuestsEventHandler
 		event.getRegistry().registerAll(
 				new ItemBlockScreen(FTBQuestsItems.SCREEN).setRegistryName("screen"),
 				new ItemBlock(FTBQuestsItems.PROGRESS_DETECTOR).setRegistryName("progress_detector"),
-				new ItemBlockScreen(FTBQuestsItems.PROGRESS_SCREEN).setRegistryName("progress_screen")
+				new ItemBlockProgressScreen(FTBQuestsItems.PROGRESS_SCREEN).setRegistryName("progress_screen")
 		);
 	}
 
@@ -84,5 +94,7 @@ public class FTBQuestsEventHandler
 				FTBLibAPI.editServerConfig(player.getPlayer(), main, FTBQuestsWorldData.INSTANCE);
 			}
 		});
+
+		event.getRegistry().registerConfigValueProvider(ConfigQuestObject.ID, () -> new ConfigQuestObject(""));
 	}
 }

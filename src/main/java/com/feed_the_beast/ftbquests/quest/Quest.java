@@ -77,7 +77,6 @@ public final class Quest extends ProgressingQuestObject
 		{
 			QuestTask task = QuestTasks.createTask(this, list.getCompoundTagAt(k));
 			tasks.add(task);
-			chapter.file.map.put(task.getID(), task);
 		}
 
 		list = nbt.getTagList("rewards", Constants.NBT.TAG_COMPOUND);
@@ -86,7 +85,6 @@ public final class Quest extends ProgressingQuestObject
 		{
 			QuestReward reward = QuestRewards.createReward(this, list.getCompoundTagAt(k));
 			rewards.add(reward);
-			chapter.file.map.put(reward.getID(), reward);
 		}
 
 		NBTTagList depList = nbt.getTagList("dependencies", Constants.NBT.TAG_STRING);

@@ -19,8 +19,10 @@ import com.feed_the_beast.ftbquests.block.BlockScreen;
 import com.feed_the_beast.ftbquests.net.MessageOpenTask;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskData;
+import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
 import com.feed_the_beast.ftbquests.util.ProgressDisplayMode;
 import net.minecraft.block.BlockHorizontal;
 import net.minecraft.block.state.IBlockState;
@@ -48,7 +50,7 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 {
 	public EnumFacing facing;
 	public final ConfigString team = new ConfigString("");
-	public final ConfigString quest = new ConfigString("");
+	public final ConfigQuestObject quest = new ConfigQuestObject("").addType(QuestObjectType.QUEST);
 	public final ConfigInt taskIndex = new ConfigInt(0, 0, 255);
 	public int size = 0;
 	public final ConfigEnum<ProgressDisplayMode> progressDisplayMode = new ConfigEnum<>(ProgressDisplayMode.NAME_MAP);
@@ -130,7 +132,7 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 		size = nbt.getByte("Size");
 		progressDisplayMode.setValue(nbt.getString("ProgressDisplayMode"));
 		indestructible.setBoolean(nbt.getBoolean("Indestructible"));
-		skin.setValueFromString(nbt.getString("Skin"), false);
+		skin.setValueFromString(null, nbt.getString("Skin"), false);
 		updateContainingBlockInfo();
 	}
 
@@ -268,7 +270,7 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 		else if (cTask == null || cTask.invalid)
 		{
 			Quest q = FTBQuests.PROXY.getQuestList(world).getQuest(quest.getString());
-			cTask = q == null || q.invalid || q.tasks.isEmpty() ? null : q.getTask(taskIndex.getInt());
+			cTask = q == null || q.tasks.isEmpty() ? null : q.getTask(taskIndex.getInt());
 		}
 
 		return cTask;
@@ -348,7 +350,7 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 
 				if (editor)
 				{
-					group.add("team", team, new ConfigString("")).setDisplayName(new TextComponentTranslation("ftbquests.owner"));
+					group.add("team", team, new ConfigString("")).setDisplayName(new TextComponentTranslation("ftbquests.team"));
 				}
 
 				group.add("skin", skin, new ConfigBlockState(CommonUtils.AIR_STATE)).setCanEdit(editorOrDestructible);

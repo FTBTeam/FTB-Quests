@@ -5,8 +5,10 @@ import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToClient;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.gui.ClientQuestFile;
+import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
+import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -63,6 +65,18 @@ public class MessageCreateObjectResponse extends MessageToClient
 
 			if (object != null)
 			{
+				ClientQuestFile.INSTANCE.refreshIDMap();
+
+				if (object instanceof QuestTask)
+				{
+					ClientQuestFile.INSTANCE.refreshTaskList();
+
+					for (IProgressData data : ClientQuestFile.INSTANCE.getAllData())
+					{
+						data.createTaskData((QuestTask) object);
+					}
+				}
+
 				ClientQuestFile.INSTANCE.refreshGui(ClientQuestFile.INSTANCE);
 			}
 		}

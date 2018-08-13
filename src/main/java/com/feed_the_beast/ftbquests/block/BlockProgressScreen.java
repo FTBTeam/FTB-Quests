@@ -2,9 +2,11 @@ package com.feed_the_beast.ftbquests.block;
 
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.FTBQuestsItems;
+import com.feed_the_beast.ftbquests.tile.TileProgressScreenBase;
+import com.feed_the_beast.ftbquests.tile.TileProgressScreenCore;
+import com.feed_the_beast.ftbquests.tile.TileProgressScreenPart;
 import com.feed_the_beast.ftbquests.tile.TileScreenBase;
 import com.feed_the_beast.ftbquests.tile.TileScreenCore;
-import com.feed_the_beast.ftbquests.tile.TileScreenPart;
 import net.minecraft.block.BlockHorizontal;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.BlockStateContainer;
@@ -40,8 +42,6 @@ import java.util.Random;
  */
 public class BlockProgressScreen extends BlockHorizontal
 {
-	protected static boolean BREAKING_SCREEN = false;
-
 	public BlockProgressScreen()
 	{
 		super(Material.IRON);
@@ -96,7 +96,7 @@ public class BlockProgressScreen extends BlockHorizontal
 	@Override
 	public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player)
 	{
-		ItemStack stack = new ItemStack(FTBQuestsItems.SCREEN);
+		ItemStack stack = new ItemStack(FTBQuestsItems.PROGRESS_SCREEN);
 
 		TileEntity tileEntity = world.getTileEntity(pos);
 
@@ -190,7 +190,7 @@ public class BlockProgressScreen extends BlockHorizontal
 
 			if (screen.size > 0)
 			{
-				IBlockState state1 = FTBQuestsItems.SCREEN_PART.getDefaultState().withProperty(FACING, screen.getFacing());
+				IBlockState state1 = FTBQuestsItems.PROGRESS_SCREEN_PART.getDefaultState().withProperty(FACING, screen.getFacing());
 
 				boolean xaxis = state.getValue(FACING).getAxis() == EnumFacing.Axis.X;
 
@@ -220,9 +220,9 @@ public class BlockProgressScreen extends BlockHorizontal
 
 							TileEntity tileEntity1 = world.getTileEntity(pos1);
 
-							if (tileEntity1 instanceof TileScreenPart)
+							if (tileEntity1 instanceof TileProgressScreenPart)
 							{
-								((TileScreenPart) tileEntity1).setOffset(offX, y, offZ);
+								((TileProgressScreenPart) tileEntity1).setOffset(offX, y, offZ);
 							}
 						}
 					}
@@ -236,13 +236,13 @@ public class BlockProgressScreen extends BlockHorizontal
 	{
 		TileEntity tileEntity = world.getTileEntity(pos);
 
-		if (tileEntity instanceof TileScreenCore)
+		if (tileEntity instanceof TileProgressScreenCore)
 		{
-			TileScreenCore screen = (TileScreenCore) tileEntity;
+			TileProgressScreenCore screen = (TileProgressScreenCore) tileEntity;
 
 			if (screen.size > 0)
 			{
-				BREAKING_SCREEN = true;
+				BlockScreen.BREAKING_SCREEN = true;
 				boolean xaxis = state.getValue(FACING).getAxis() == EnumFacing.Axis.X;
 
 				for (int y = 0; y < screen.size * 2 + 1; y++)
@@ -256,7 +256,7 @@ public class BlockProgressScreen extends BlockHorizontal
 							BlockPos pos1 = new BlockPos(pos.getX() + offX, pos.getY() + y, pos.getZ() + offZ);
 							IBlockState state1 = world.getBlockState(pos1);
 
-							if (state1.getBlock() instanceof BlockScreenPart)
+							if (state1.getBlock() == FTBQuestsItems.PROGRESS_SCREEN_PART)
 							{
 								world.setBlockToAir(pos1);
 							}
@@ -264,7 +264,7 @@ public class BlockProgressScreen extends BlockHorizontal
 					}
 				}
 
-				BREAKING_SCREEN = false;
+				BlockScreen.BREAKING_SCREEN = false;
 			}
 		}
 
@@ -278,38 +278,17 @@ public class BlockProgressScreen extends BlockHorizontal
 	{
 		TileEntity tileEntity = world.getTileEntity(pos);
 
-		if (tileEntity instanceof TileScreenBase)
+		if (tileEntity instanceof TileProgressScreenBase)
 		{
-			TileScreenCore screen = ((TileScreenBase) tileEntity).getScreen();
+			TileProgressScreenCore screen = ((TileProgressScreenBase) tileEntity).getScreen();
 
 			if (screen != null)
 			{
-				return getScreenAABB(screen);
+				return BlockScreen.getScreenAABB(screen.getPos(), screen.getFacing(), screen.size);
 			}
 		}
 
 		return new AxisAlignedBB(0D, -1D, 0D, 0D, -1D, 0D);
-	}
-
-	public static AxisAlignedBB getScreenAABB(TileScreenCore screen)
-	{
-		BlockPos pos = screen.getPos();
-
-		if (screen.size == 0)
-		{
-			return FULL_BLOCK_AABB.offset(pos);
-		}
-
-		boolean xaxis = screen.getFacing().getAxis() == EnumFacing.Axis.X;
-
-		if (xaxis)
-		{
-			return new AxisAlignedBB(pos.getX(), pos.getY(), pos.getZ() - screen.size, pos.getX() + 1D, pos.getY() + screen.size * 2D + 1D, pos.getZ() + screen.size + 1D);
-		}
-		else
-		{
-			return new AxisAlignedBB(pos.getX() - screen.size, pos.getY(), pos.getZ(), pos.getX() + screen.size + 1D, pos.getY() + screen.size * 2D + 1D, pos.getZ() + 1D);
-		}
 	}
 
 	@Override
@@ -318,9 +297,9 @@ public class BlockProgressScreen extends BlockHorizontal
 	{
 		TileEntity tileEntity = world.getTileEntity(pos);
 
-		if (tileEntity instanceof TileScreenBase)
+		if (tileEntity instanceof TileProgressScreenBase)
 		{
-			TileScreenCore core = ((TileScreenBase) tileEntity).getScreen();
+			TileProgressScreenCore core = ((TileProgressScreenBase) tileEntity).getScreen();
 
 			if (core != null && core.indestructible.getBoolean())
 			{
@@ -336,9 +315,9 @@ public class BlockProgressScreen extends BlockHorizontal
 	{
 		TileEntity tileEntity = world.getTileEntity(pos);
 
-		if (tileEntity instanceof TileScreenBase)
+		if (tileEntity instanceof TileProgressScreenBase)
 		{
-			TileScreenCore core = ((TileScreenBase) tileEntity).getScreen();
+			TileProgressScreenCore core = ((TileProgressScreenBase) tileEntity).getScreen();
 
 			if (core != null && core.indestructible.getBoolean())
 			{
@@ -355,9 +334,9 @@ public class BlockProgressScreen extends BlockHorizontal
 	{
 		TileEntity tileEntity = world.getTileEntity(pos);
 
-		if (tileEntity instanceof TileScreenBase)
+		if (tileEntity instanceof TileProgressScreenBase)
 		{
-			TileScreenCore core = ((TileScreenBase) tileEntity).getScreen();
+			TileProgressScreenCore core = ((TileProgressScreenBase) tileEntity).getScreen();
 
 			if (core != null && !core.skin.isEmpty())
 			{

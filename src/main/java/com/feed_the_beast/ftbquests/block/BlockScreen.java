@@ -41,7 +41,7 @@ import java.util.Random;
  */
 public class BlockScreen extends BlockHorizontal
 {
-	protected static boolean BREAKING_SCREEN = false;
+	public static boolean BREAKING_SCREEN = false;
 	public static QuestTask currentTask = null;
 
 	public static double getClickX(EnumFacing facing, int offX, int offY, double hitX, double hitZ, int size)
@@ -267,7 +267,7 @@ public class BlockScreen extends BlockHorizontal
 							BlockPos pos1 = new BlockPos(pos.getX() + offX, pos.getY() + y, pos.getZ() + offZ);
 							IBlockState state1 = world.getBlockState(pos1);
 
-							if (state1.getBlock() instanceof BlockScreenPart)
+							if (state1.getBlock() == FTBQuestsItems.SCREEN_PART)
 							{
 								world.setBlockToAir(pos1);
 							}

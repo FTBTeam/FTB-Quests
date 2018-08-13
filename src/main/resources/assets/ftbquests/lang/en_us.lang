@@ -20,10 +20,10 @@ admin_panel.ftbquests.edit_settings=FTB Quests Settings
 admin_panel.ftbquests.edit_settings.editing_mode=Editing Mode
 admin_panel.ftbquests.edit_settings.extra_files=Extra Files
 
-ftbquests.owner=Owner
+ftbquests.team=Team
 ftbquests.progress=Progress
 
-ftbquests.file=FTB Quests
+ftbquests.file=File
 ftbquests.file.title=Title
 ftbquests.file.icon=Icon
 ftbquests.file.allow_take_quest_blocks=Allow to Take Quest Blocks

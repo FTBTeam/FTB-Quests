@@ -107,7 +107,10 @@ public class MessageEditObject extends MessageToServer implements IConfigCallbac
 					@Override
 					public void setString(String v)
 					{
-						object.id = v;
+						if (ServerQuestFile.INSTANCE.get(v) == null)
+						{
+							object.id = v;
+						}
 					}
 				}, ConfigNull.INSTANCE).setOrder((byte) -127).setDisplayName(new TextComponentString("ID"));
 
@@ -126,8 +129,7 @@ public class MessageEditObject extends MessageToServer implements IConfigCallbac
 			if (!prevId.equals(id))
 			{
 				object.id = id;
-				ServerQuestFile.INSTANCE.map.remove(prevId);
-				ServerQuestFile.INSTANCE.map.put(id, object);
+				ServerQuestFile.INSTANCE.refreshIDMap();
 			}
 
 			object.clearCachedData();
