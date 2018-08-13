@@ -40,7 +40,7 @@ public abstract class QuestFile extends ProgressingQuestObject
 	public final ConfigItemStack icon;
 	public final List<QuestChapter> chapters;
 
-	public final Map<String, QuestObject> map;
+	private final Map<String, QuestObject> map;
 	public final List<QuestTask> allTasks;
 
 	public final ConfigBoolean allowTakeQuestBlocks;
@@ -148,7 +148,34 @@ public abstract class QuestFile extends ProgressingQuestObject
 	@Nullable
 	public QuestObject get(String id)
 	{
-		return id.isEmpty() ? this : map.get(id);
+		if (id.isEmpty())
+		{
+			return null;
+		}
+
+		QuestObject object = map.get(id);
+		return object == null || object.invalid ? null : object;
+	}
+
+	@Nullable
+	public QuestObject remove(String id)
+	{
+		QuestObject object = map.remove(id);
+
+		if (object != null)
+		{
+			object.invalid = true;
+			return object;
+		}
+
+		return null;
+	}
+
+	@Nullable
+	public ProgressingQuestObject getProgressing(String id)
+	{
+		QuestObject object = get(id);
+		return object instanceof ProgressingQuestObject ? (ProgressingQuestObject) object : null;
 	}
 
 	@Nullable
@@ -196,6 +223,32 @@ public abstract class QuestFile extends ProgressingQuestObject
 		}
 	}
 
+	public void refreshIDMap()
+	{
+		map.clear();
+		map.put("", this);
+
+		for (QuestChapter chapter : chapters)
+		{
+			map.put(chapter.getID(), chapter);
+
+			for (Quest quest : chapter.quests)
+			{
+				map.put(quest.getID(), quest);
+
+				for (QuestTask task : quest.tasks)
+				{
+					map.put(task.getID(), task);
+				}
+
+				for (QuestReward reward : quest.rewards)
+				{
+					map.put(reward.getID(), reward);
+				}
+			}
+		}
+	}
+
 	@Nullable
 	public QuestTask getTaskByIndex(int index)
 	{
@@ -212,7 +265,6 @@ public abstract class QuestFile extends ProgressingQuestObject
 				QuestChapter chapter = new QuestChapter(this, nbt);
 				chapter.index = chapter.file.chapters.size();
 				chapter.file.chapters.add(chapter);
-				map.put(chapter.getID(), chapter);
 				return chapter;
 			}
 			case QUEST:
@@ -223,7 +275,6 @@ public abstract class QuestFile extends ProgressingQuestObject
 				{
 					Quest quest = new Quest(chapter, nbt);
 					chapter.quests.add(quest);
-					map.put(quest.getID(), quest);
 					return quest;
 				}
 
@@ -242,14 +293,6 @@ public abstract class QuestFile extends ProgressingQuestObject
 
 					QuestTask task = QuestTasks.createTask(quest, nbt);
 					quest.tasks.add(task);
-					map.put(task.getID(), task);
-					refreshTaskList();
-
-					for (IProgressData data : getAllData())
-					{
-						data.createTaskData(task);
-					}
-
 					return task;
 				}
 
@@ -268,7 +311,6 @@ public abstract class QuestFile extends ProgressingQuestObject
 
 					QuestReward reward = QuestRewards.createReward(quest, nbt);
 					quest.rewards.add(reward);
-					map.put(reward.getID(), reward);
 					return reward;
 				}
 
@@ -327,8 +369,6 @@ public abstract class QuestFile extends ProgressingQuestObject
 	protected final void readData(NBTTagCompound nbt)
 	{
 		chapters.clear();
-		map.clear();
-		map.put("", this);
 
 		title.setString(nbt.getString("title"));
 		icon.setStack(new ItemStack(nbt.getCompoundTag("icon")));
@@ -340,9 +380,9 @@ public abstract class QuestFile extends ProgressingQuestObject
 			QuestChapter chapter = new QuestChapter(this, chapterList.getCompoundTagAt(i));
 			chapter.index = chapters.size();
 			chapters.add(chapter);
-			map.put(chapter.getID(), chapter);
 		}
 
+		refreshIDMap();
 		refreshTaskList();
 
 		allowTakeQuestBlocks.setBoolean(!nbt.hasKey("allow_take_quest_blocks") || nbt.getBoolean("allow_take_quest_blocks"));

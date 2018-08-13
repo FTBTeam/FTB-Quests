@@ -31,7 +31,7 @@ public abstract class QuestObject
 
 	public void deleteSelf()
 	{
-		getQuestFile().map.remove(getID());
+		getQuestFile().remove(getID());
 		invalid = true;
 	}
 
@@ -77,9 +77,9 @@ public abstract class QuestObject
 
 		QuestFile file = getQuestFile();
 
-		if (id.isEmpty() || file.map.containsKey(id))
+		if (id.isEmpty() || file.get(id) != null)
 		{
-			id = StringUtils.fromUUID(UUID.randomUUID());
+			id = StringUtils.fromUUID(UUID.randomUUID()).substring(0, 20);
 		}
 	}
 

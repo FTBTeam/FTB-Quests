@@ -27,7 +27,7 @@ public class BlockProgressScreenPart extends BlockProgressScreen
 	@Override
 	public void breakBlock(World world, BlockPos pos, IBlockState state)
 	{
-		if (!BREAKING_SCREEN)
+		if (!BlockScreen.BREAKING_SCREEN)
 		{
 			TileEntity tileEntity = world.getTileEntity(pos);
 

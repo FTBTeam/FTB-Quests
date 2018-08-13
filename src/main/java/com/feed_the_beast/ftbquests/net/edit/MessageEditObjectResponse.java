@@ -65,8 +65,7 @@ public class MessageEditObjectResponse extends MessageToClient
 				if (!prevId.equals(id))
 				{
 					object.id = id;
-					ClientQuestFile.INSTANCE.map.remove(prevId);
-					ClientQuestFile.INSTANCE.map.put(id, object);
+					ClientQuestFile.INSTANCE.refreshIDMap();
 				}
 
 				ConfigGroup group = ConfigGroup.newGroup("object");

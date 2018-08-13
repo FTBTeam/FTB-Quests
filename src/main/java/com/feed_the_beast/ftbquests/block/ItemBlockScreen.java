@@ -99,15 +99,15 @@ public class ItemBlockScreen extends ItemBlock
 		}
 
 		int size = nbt.getByte("Size");
-		String owner = nbt.getString("Owner");
+		String team = nbt.getString("Team");
 
-		if (owner.isEmpty())
+		if (team.isEmpty())
 		{
-			owner = ClientQuestFile.INSTANCE.teamId;
+			team = ClientQuestFile.INSTANCE.teamId;
 		}
 
-		tooltip.add(I18n.format("tile.ftbquests.screen.size") + ": " + TextFormatting.GOLD.toString() + (1 + size * 2) + " x " + (1 + size * 2));
-		tooltip.add(I18n.format("ftbquests.owner") + ": " + TextFormatting.DARK_GREEN + owner);
+		tooltip.add(I18n.format("tile.ftbquests.screen.size") + ": " + TextFormatting.GOLD + (1 + size * 2) + " x " + (1 + size * 2));
+		tooltip.add(I18n.format("ftbquests.team") + ": " + TextFormatting.DARK_GREEN + team);
 
 		String questID = nbt.getString("Quest");
 
@@ -131,7 +131,7 @@ public class ItemBlockScreen extends ItemBlock
 
 		tooltip.add(I18n.format("ftbquests.task") + ": " + StringUtils.color(task.getDisplayName(), TextFormatting.YELLOW).getFormattedText());
 
-		IProgressData data = ClientQuestFile.INSTANCE.getData(owner);
+		IProgressData data = ClientQuestFile.INSTANCE.getData(team);
 
 		if (data != null)
 		{
