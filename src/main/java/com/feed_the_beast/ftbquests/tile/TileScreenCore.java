@@ -1,6 +1,5 @@
 package com.feed_the_beast.ftbquests.tile;
 
-import com.feed_the_beast.ftblib.lib.block.BlockFlags;
 import com.feed_the_beast.ftblib.lib.config.ConfigBlockState;
 import com.feed_the_beast.ftblib.lib.config.ConfigBoolean;
 import com.feed_the_beast.ftblib.lib.config.ConfigEnum;
@@ -11,7 +10,7 @@ import com.feed_the_beast.ftblib.lib.config.ConfigString;
 import com.feed_the_beast.ftblib.lib.config.IConfigCallback;
 import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
 import com.feed_the_beast.ftblib.lib.tile.EnumSaveType;
-import com.feed_the_beast.ftblib.lib.util.CommonUtils;
+import com.feed_the_beast.ftblib.lib.util.BlockUtils;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.FTBQuestsItems;
@@ -55,7 +54,7 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 	public int size = 0;
 	public final ConfigEnum<ProgressDisplayMode> progressDisplayMode = new ConfigEnum<>(ProgressDisplayMode.NAME_MAP);
 	public final ConfigBoolean indestructible = new ConfigBoolean(false);
-	public final ConfigBlockState skin = new ConfigBlockState(CommonUtils.AIR_STATE);
+	public final ConfigBlockState skin = new ConfigBlockState(BlockUtils.AIR_STATE);
 
 	private IProgressData cTeam;
 	private QuestTask cTask;
@@ -353,7 +352,7 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 					group.add("team", team, new ConfigString("")).setDisplayName(new TextComponentTranslation("ftbquests.team"));
 				}
 
-				group.add("skin", skin, new ConfigBlockState(CommonUtils.AIR_STATE)).setCanEdit(editorOrDestructible);
+				group.add("skin", skin, new ConfigBlockState(BlockUtils.AIR_STATE)).setCanEdit(editorOrDestructible);
 				group.add("progress_display_mode", progressDisplayMode, new ConfigEnum<>(ProgressDisplayMode.NAME_MAP));
 
 				if (editor)
@@ -492,7 +491,7 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 	{
 		updateContainingBlockInfo();
 		markDirty();
-		world.notifyBlockUpdate(pos, getBlockState(), getBlockState(), BlockFlags.DEFAULT_AND_RERENDER);
+		BlockUtils.notifyBlockUpdate(world, pos, getBlockState());
 	}
 
 	@Override
