@@ -7,7 +7,7 @@ import com.feed_the_beast.ftblib.lib.config.ConfigBoolean;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.IConfigCallback;
 import com.feed_the_beast.ftblib.lib.data.Universe;
-import com.feed_the_beast.ftblib.lib.util.CommonUtils;
+import com.feed_the_beast.ftblib.lib.util.Folders;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.events.ModifyBaseFileLocationEvent;
 import com.feed_the_beast.ftbquests.net.MessageSyncEditingMode;
@@ -49,7 +49,7 @@ public class FTBQuestsWorldData implements IConfigCallback
 
 		if (file == null)
 		{
-			file = new File(CommonUtils.folderMinecraft, "questpacks/normal.nbt");
+			file = new File(Folders.getMinecraft(), "questpacks/normal.nbt");
 		}
 
 		FTBQuests.LOGGER.info("Loading quests from " + file.getAbsolutePath());

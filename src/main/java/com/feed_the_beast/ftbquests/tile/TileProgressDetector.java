@@ -1,6 +1,5 @@
 package com.feed_the_beast.ftbquests.tile;
 
-import com.feed_the_beast.ftblib.lib.block.BlockFlags;
 import com.feed_the_beast.ftblib.lib.config.ConfigBoolean;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigNull;
@@ -9,6 +8,7 @@ import com.feed_the_beast.ftblib.lib.config.IConfigCallback;
 import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
 import com.feed_the_beast.ftblib.lib.tile.EnumSaveType;
 import com.feed_the_beast.ftblib.lib.tile.TileBase;
+import com.feed_the_beast.ftblib.lib.util.BlockUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.ProgressingQuestObject;
@@ -106,7 +106,7 @@ public class TileProgressDetector extends TileBase implements ITickable, IConfig
 		updateContainingBlockInfo();
 		markDirty();
 		updateRedstoneOutput();
-		world.notifyBlockUpdate(pos, getBlockState(), getBlockState(), BlockFlags.DEFAULT_AND_RERENDER);
+		BlockUtils.notifyBlockUpdate(world, pos, getBlockState());
 	}
 
 	@Override
