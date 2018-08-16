@@ -7,9 +7,8 @@ import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import com.feed_the_beast.ftbquests.tile.TileScreenBase;
 import com.feed_the_beast.ftbquests.tile.TileScreenCore;
 import com.feed_the_beast.ftbquests.tile.TileScreenPart;
-import net.minecraft.block.BlockHorizontal;
+import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
@@ -22,9 +21,7 @@ import net.minecraft.nbt.NBTTagByte;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
-import net.minecraft.util.Mirror;
 import net.minecraft.util.NonNullList;
-import net.minecraft.util.Rotation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
@@ -40,7 +37,7 @@ import java.util.Random;
 /**
  * @author LatvianModder
  */
-public class BlockScreen extends BlockHorizontal
+public class BlockScreen extends BlockWithHorizontalFacing
 {
 	public static boolean BREAKING_SCREEN = false;
 	public static QuestTask currentTask = null;
@@ -57,7 +54,7 @@ public class BlockScreen extends BlockHorizontal
 
 	public BlockScreen()
 	{
-		super(Material.IRON);
+		super(Material.IRON, MapColor.BLACK);
 		setCreativeTab(FTBQuests.TAB);
 		setHardness(0.3F);
 		setDefaultState(blockState.getBaseState().withProperty(FACING, EnumFacing.NORTH));
@@ -73,12 +70,6 @@ public class BlockScreen extends BlockHorizontal
 	public TileEntity createTileEntity(World world, IBlockState state)
 	{
 		return currentTask == null ? new TileScreenCore() : currentTask.createScreenCore(world);
-	}
-
-	@Override
-	protected BlockStateContainer createBlockState()
-	{
-		return new BlockStateContainer(this, FACING);
 	}
 
 	@Override
@@ -127,40 +118,6 @@ public class BlockScreen extends BlockHorizontal
 		}
 
 		return stack;
-	}
-
-	@Override
-	@Deprecated
-	public IBlockState getStateFromMeta(int meta)
-	{
-		return this.getDefaultState().withProperty(FACING, EnumFacing.byHorizontalIndex(meta));
-	}
-
-	@Override
-	public int getMetaFromState(IBlockState state)
-	{
-		return state.getValue(FACING).getHorizontalIndex();
-	}
-
-	@Override
-	@Deprecated
-	public IBlockState withRotation(IBlockState state, Rotation rotation)
-	{
-		return state.withProperty(FACING, rotation.rotate(state.getValue(FACING)));
-	}
-
-	@Override
-	@Deprecated
-	public IBlockState withMirror(IBlockState state, Mirror mirror)
-	{
-		return state.withRotation(mirror.toRotation(state.getValue(FACING)));
-	}
-
-	@Override
-	@Deprecated
-	public IBlockState getStateForPlacement(World world, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
-	{
-		return getDefaultState().withProperty(FACING, placer.getHorizontalFacing().getOpposite());
 	}
 
 	@Override

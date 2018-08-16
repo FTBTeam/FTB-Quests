@@ -12,6 +12,7 @@ tile.ftbquests.progress_detector.name=Quest Progress Detector
 tile.ftbquests.progress_detector.object=Object ID
 tile.ftbquests.progress_detector.level=Output Level
 tile.ftbquests.progress_screen.name=Progress Screen
+tile.ftbquests.chest.name=Quest Chest
 
 itemGroup.ftbquests=FTB Quests
 sidebar_button.ftbquests.quests=Quests

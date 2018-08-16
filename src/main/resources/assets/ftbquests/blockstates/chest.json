@@ -1,0 +1,8 @@
+{
+	"variants": {
+		"facing=north": {"model": "ftbquests:chest"},
+		"facing=south": {"model": "ftbquests:chest", "y": 180},
+		"facing=west": {"model": "ftbquests:chest", "y": 270},
+		"facing=east": {"model": "ftbquests:chest", "y": 90}
+	}
+}
