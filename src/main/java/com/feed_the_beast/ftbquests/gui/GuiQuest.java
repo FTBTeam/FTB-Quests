@@ -148,19 +148,21 @@ public class GuiQuest extends GuiBase
 				{
 					contextMenu.add(new ContextMenuItem(I18n.format("tile.ftbquests.screen.name"), Color4I.BLACK, () ->
 					{
-						List<ContextMenuItem> screenContextMenu = new ArrayList<>();
-						screenContextMenu.add(new ContextMenuItem("Screen", Icon.EMPTY, () -> {}).setEnabled(false));
-						screenContextMenu.add(new ContextMenuItem("1 x 1", Icon.EMPTY, () -> new MessageGetScreen(task.getID(), 0).sendToServer()));
-
 						if (questTreeGui.questFile.canEdit())
 						{
+							List<ContextMenuItem> screenContextMenu = new ArrayList<>();
+							screenContextMenu.add(new ContextMenuItem("Screen", Icon.EMPTY, () -> {}).setEnabled(false));
+							screenContextMenu.add(new ContextMenuItem("1 x 1", Icon.EMPTY, () -> new MessageGetScreen(task.getID(), 0).sendToServer()));
 							screenContextMenu.add(new ContextMenuItem("3 x 3", Icon.EMPTY, () -> new MessageGetScreen(task.getID(), 1).sendToServer()));
 							screenContextMenu.add(new ContextMenuItem("5 x 5", Icon.EMPTY, () -> new MessageGetScreen(task.getID(), 2).sendToServer()));
 							screenContextMenu.add(new ContextMenuItem("7 x 7", Icon.EMPTY, () -> new MessageGetScreen(task.getID(), 3).sendToServer()));
 							screenContextMenu.add(new ContextMenuItem("9 x 9", Icon.EMPTY, () -> new MessageGetScreen(task.getID(), 4).sendToServer()));
+							getGui().openContextMenu(screenContextMenu);
 						}
-
-						getGui().openContextMenu(screenContextMenu);
+						else
+						{
+							new MessageGetScreen(task.getID(), 0).sendToServer();
+						}
 					}));
 				}
 
