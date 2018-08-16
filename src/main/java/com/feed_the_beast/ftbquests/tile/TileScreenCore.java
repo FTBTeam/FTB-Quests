@@ -272,7 +272,19 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 		{
 			QuestFile file = FTBQuests.PROXY.getQuestFile(world);
 			Quest q = file.getQuest(quest.getString());
-			cTask = q == null || q.tasks.isEmpty() ? null : file.getTask(q.getID() + ":" + task.getString());
+
+			if (q == null || q.tasks.isEmpty())
+			{
+				cTask = null;
+			}
+			else if (task.isEmpty())
+			{
+				cTask = q.tasks.get(0);
+			}
+			else
+			{
+				cTask = file.getTask(q.getID() + ':' + task.getString());
+			}
 		}
 
 		return cTask;
