@@ -5,7 +5,7 @@ import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskData;
 import net.minecraft.entity.player.EntityPlayer;
 
-import java.util.HashSet;
+import java.util.Collection;
 
 /**
  * @author LatvianModder
@@ -16,7 +16,7 @@ public interface IProgressData
 
 	boolean claimReward(EntityPlayer player, QuestReward reward);
 
-	HashSet<QuestReward> getClaimedRewards(EntityPlayer player);
+	Collection<QuestReward> getClaimedRewards(EntityPlayer player);
 
 	default boolean isRewardClaimed(EntityPlayer player, QuestReward reward)
 	{

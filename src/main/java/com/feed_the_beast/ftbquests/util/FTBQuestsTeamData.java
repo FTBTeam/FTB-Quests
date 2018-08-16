@@ -21,8 +21,6 @@ import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.rewards.QuestReward;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskData;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTBase;
@@ -133,28 +131,22 @@ public class FTBQuestsTeamData extends TeamData implements IProgressData
 		}
 	}
 
-	private final Int2ObjectMap<QuestTaskData> taskData;
-	private final HashSet<QuestReward> claimedTeamRewards;
+	private final Map<QuestTask, QuestTaskData> taskData;
+	private final Collection<QuestReward> claimedTeamRewards;
 	private final Map<UUID, HashSet<QuestReward>> claimedPlayerRewards;
 
 	private FTBQuestsTeamData(ForgeTeam team)
 	{
 		super(team);
-		taskData = new Int2ObjectOpenHashMap<>();
+		taskData = new HashMap<>();
 		claimedTeamRewards = new HashSet<>();
 		claimedPlayerRewards = new HashMap<>();
 
 		if (ServerQuestFile.INSTANCE != null)
 		{
-			for (QuestChapter chapter : ServerQuestFile.INSTANCE.chapters)
+			for (QuestTask task : ServerQuestFile.INSTANCE.allTasks)
 			{
-				for (Quest quest : chapter.quests)
-				{
-					for (QuestTask task : quest.tasks)
-					{
-						taskData.put(task.index, task.createData(this));
-					}
-				}
+				createTaskData(task);
 			}
 		}
 	}
@@ -205,9 +197,9 @@ public class FTBQuestsTeamData extends TeamData implements IProgressData
 	}
 
 	@Override
-	public HashSet<QuestReward> getClaimedRewards(EntityPlayer player)
+	public Collection<QuestReward> getClaimedRewards(EntityPlayer player)
 	{
-		HashSet<QuestReward> rewards = claimedPlayerRewards.get(player.getUniqueID());
+		Collection<QuestReward> rewards = claimedPlayerRewards.get(player.getUniqueID());
 
 		if (rewards != null)
 		{
@@ -256,13 +248,13 @@ public class FTBQuestsTeamData extends TeamData implements IProgressData
 	@Override
 	public void removeTask(QuestTask task)
 	{
-		taskData.remove(task.index);
+		taskData.remove(task);
 	}
 
 	@Override
 	public void createTaskData(QuestTask task)
 	{
-		taskData.put(task.index, task.createData(this));
+		taskData.put(task, task.createData(this));
 	}
 
 	@Nullable
@@ -305,7 +297,7 @@ public class FTBQuestsTeamData extends TeamData implements IProgressData
 		return taskDataTag;
 	}
 
-	public static NBTTagCompound serializeRewardData(HashSet<QuestReward> rewards)
+	public static NBTTagCompound serializeRewardData(Iterable<QuestReward> rewards)
 	{
 		NBTTagCompound rewardDataTag = new NBTTagCompound();
 
@@ -385,7 +377,7 @@ public class FTBQuestsTeamData extends TeamData implements IProgressData
 		}
 	}
 
-	public static void deserializeRewardData(QuestFile file, HashSet<QuestReward> rewards, NBTTagCompound taskDataTag)
+	public static void deserializeRewardData(QuestFile file, Collection<QuestReward> rewards, NBTTagCompound taskDataTag)
 	{
 		for (String c : taskDataTag.getKeySet())
 		{
@@ -439,7 +431,14 @@ public class FTBQuestsTeamData extends TeamData implements IProgressData
 	@Override
 	public QuestTaskData getQuestTaskData(QuestTask task)
 	{
-		return taskData.get(task.index);
+		QuestTaskData data = taskData.get(task);
+
+		if (data == null)
+		{
+			throw new IllegalArgumentException("Missing data for task " + task);
+		}
+
+		return data;
 	}
 
 	@Override

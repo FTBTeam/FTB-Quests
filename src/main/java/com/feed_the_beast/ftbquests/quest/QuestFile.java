@@ -50,6 +50,7 @@ public abstract class QuestFile extends ProgressingQuestObject
 
 	public QuestFile()
 	{
+		id = "*";
 		title = new ConfigString("");
 		icon = new ConfigItemStack(ItemStack.EMPTY);
 		chapters = new ArrayList<>();
@@ -78,7 +79,7 @@ public abstract class QuestFile extends ProgressingQuestObject
 	@Override
 	public String getID()
 	{
-		return "*";
+		return id;
 	}
 
 	@Override
@@ -256,7 +257,7 @@ public abstract class QuestFile extends ProgressingQuestObject
 	public void refreshIDMap()
 	{
 		map.clear();
-		map.put("", this);
+		map.put("*", this);
 
 		for (QuestChapter chapter : chapters)
 		{

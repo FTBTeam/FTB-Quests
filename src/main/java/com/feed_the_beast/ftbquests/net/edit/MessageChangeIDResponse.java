@@ -1,32 +1,29 @@
 package com.feed_the_beast.ftbquests.net.edit;
 
-import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToClient;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.gui.ClientQuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * @author LatvianModder
  */
-public class MessageEditObjectResponse extends MessageToClient
+public class MessageChangeIDResponse extends MessageToClient
 {
-	private String id;
-	private NBTTagCompound nbt;
+	private String id, newId;
 
-	public MessageEditObjectResponse()
+	public MessageChangeIDResponse()
 	{
 	}
 
-	public MessageEditObjectResponse(String i, NBTTagCompound n)
+	public MessageChangeIDResponse(String i, String ni)
 	{
 		id = i;
-		nbt = n;
+		newId = ni;
 	}
 
 	@Override
@@ -39,14 +36,14 @@ public class MessageEditObjectResponse extends MessageToClient
 	public void writeData(DataOut data)
 	{
 		data.writeString(id);
-		data.writeNBT(nbt);
+		data.writeString(newId);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
 		id = data.readString();
-		nbt = data.readNBT();
+		newId = data.readString();
 	}
 
 	@Override
@@ -59,10 +56,9 @@ public class MessageEditObjectResponse extends MessageToClient
 
 			if (object != null)
 			{
-				ConfigGroup group = ConfigGroup.newGroup("object");
-				object.getConfig(group);
-				group.deserializeEditedNBT(nbt);
+				object.id = newId;
 				object.clearCachedData();
+				ClientQuestFile.INSTANCE.refreshIDMap();
 				ClientQuestFile.INSTANCE.refreshGui(ClientQuestFile.INSTANCE);
 			}
 		}

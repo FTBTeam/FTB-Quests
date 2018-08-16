@@ -1,8 +1,6 @@
 package com.feed_the_beast.ftbquests.net.edit;
 
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
-import com.feed_the_beast.ftblib.lib.config.ConfigNull;
-import com.feed_the_beast.ftblib.lib.config.ConfigString;
 import com.feed_the_beast.ftblib.lib.config.IConfigCallback;
 import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
@@ -23,16 +21,12 @@ import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 
-import java.util.regex.Pattern;
-
 /**
  * @author LatvianModder
  */
 public class MessageEditObject extends MessageToServer implements IConfigCallback
 {
-	private static final Pattern ID_PATTERN = Pattern.compile("^[a-z0-9_]{1,32}$");
-
-	private String id, prevId;
+	private String id;
 
 	public MessageEditObject()
 	{
@@ -58,7 +52,7 @@ public class MessageEditObject extends MessageToServer implements IConfigCallbac
 	@Override
 	public void readData(DataIn data)
 	{
-		prevId = id = data.readString();
+		id = data.readString();
 	}
 
 	@Override
@@ -95,25 +89,6 @@ public class MessageEditObject extends MessageToServer implements IConfigCallbac
 				}
 
 				object.getConfig(g);
-
-				g.add("id", new ConfigString(id, ID_PATTERN)
-				{
-					@Override
-					public String getString()
-					{
-						return object.id;
-					}
-
-					@Override
-					public void setString(String v)
-					{
-						if (ServerQuestFile.INSTANCE.get(v) == null)
-						{
-							object.id = v;
-						}
-					}
-				}, ConfigNull.INSTANCE).setOrder((byte) -127).setDisplayName(new TextComponentString("ID"));
-
 				FTBLibAPI.editServerConfig(player, group, this);
 			}
 		}
@@ -122,20 +97,14 @@ public class MessageEditObject extends MessageToServer implements IConfigCallbac
 	@Override
 	public void onConfigSaved(ConfigGroup g, ICommandSender sender)
 	{
-		QuestObject object = ServerQuestFile.INSTANCE.get(prevId);
+		QuestObject object = ServerQuestFile.INSTANCE.get(id);
 
 		if (object != null)
 		{
-			if (!prevId.equals(id))
-			{
-				object.id = id;
-				ServerQuestFile.INSTANCE.refreshIDMap();
-			}
-
 			object.clearCachedData();
 			ConfigGroup group = ConfigGroup.newGroup("object");
 			object.getConfig(group);
-			new MessageEditObjectResponse(prevId, id, group.serializeNBT()).sendToAll();
+			new MessageEditObjectResponse(id, group.serializeNBT()).sendToAll();
 			ServerQuestFile.INSTANCE.save();
 		}
 	}

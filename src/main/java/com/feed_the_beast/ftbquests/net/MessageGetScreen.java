@@ -66,7 +66,7 @@ public class MessageGetScreen extends MessageToServer
 				ItemStack stack = new ItemStack(FTBQuestsItems.SCREEN);
 				TileScreenCore tile = new TileScreenCore();
 				tile.quest.setString(t.quest.getID());
-				tile.taskIndex.setInt(t.quest.tasks.indexOf(t));
+				tile.task.setString(t.id);
 				tile.team.setString(teamData.team.getName());
 				tile.size = size;
 				tile.writeToItem(stack);

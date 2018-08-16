@@ -5,8 +5,6 @@ import com.feed_the_beast.ftblib.lib.gui.GuiBase;
 import com.feed_the_beast.ftbquests.client.ClientQuestProgress;
 import com.feed_the_beast.ftbquests.net.MessageSyncQuests;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
-import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import com.feed_the_beast.ftbquests.util.FTBQuestsTeamData;
@@ -48,15 +46,9 @@ public class ClientQuestFile extends QuestFile
 
 		if (self != null)
 		{
-			for (QuestChapter chapter : chapters)
+			for (QuestTask task : allTasks)
 			{
-				for (Quest quest : chapter.quests)
-				{
-					for (QuestTask task : quest.tasks)
-					{
-						self.taskData.put(task.index, task.createData(self));
-					}
-				}
+				self.createTaskData(task);
 			}
 
 			FTBQuestsTeamData.deserializeTaskData(self.taskData.values(), message.taskData);
