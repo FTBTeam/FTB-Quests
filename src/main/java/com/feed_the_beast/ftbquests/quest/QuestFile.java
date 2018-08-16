@@ -42,6 +42,7 @@ public abstract class QuestFile extends ProgressingQuestObject
 
 	private final Map<String, QuestObject> map;
 	public final List<QuestTask> allTasks;
+	public final List<QuestTask> allItemAcceptingTasks;
 
 	public final ConfigBoolean allowTakeQuestBlocks;
 	public final ConfigList<ConfigItemStack> emergencyItems;
@@ -55,6 +56,7 @@ public abstract class QuestFile extends ProgressingQuestObject
 
 		map = new HashMap<>();
 		allTasks = new ArrayList<>();
+		allItemAcceptingTasks = new ArrayList<>();
 
 		allowTakeQuestBlocks = new ConfigBoolean(true);
 		emergencyItems = new ConfigList<>(new ConfigItemStack(new ItemStack(Items.APPLE)));
@@ -76,7 +78,7 @@ public abstract class QuestFile extends ProgressingQuestObject
 	@Override
 	public String getID()
 	{
-		return "";
+		return "*";
 	}
 
 	@Override
@@ -119,6 +121,20 @@ public abstract class QuestFile extends ProgressingQuestObject
 	}
 
 	@Override
+	public final boolean isComplete(IProgressData data)
+	{
+		for (QuestChapter chapter : chapters)
+		{
+			if (!chapter.isComplete(data))
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	@Override
 	public void resetProgress(IProgressData data)
 	{
 		for (QuestChapter chapter : chapters)
@@ -151,6 +167,10 @@ public abstract class QuestFile extends ProgressingQuestObject
 		if (id.isEmpty())
 		{
 			return null;
+		}
+		else if (id.charAt(0) == '*')
+		{
+			return this;
 		}
 
 		QuestObject object = map.get(id);
@@ -219,6 +239,16 @@ public abstract class QuestFile extends ProgressingQuestObject
 					task.index = allTasks.size();
 					allTasks.add(task);
 				}
+			}
+		}
+
+		allItemAcceptingTasks.clear();
+
+		for (QuestTask task : allTasks)
+		{
+			if (task.canInsertItem())
+			{
+				allItemAcceptingTasks.add(task);
 			}
 		}
 	}

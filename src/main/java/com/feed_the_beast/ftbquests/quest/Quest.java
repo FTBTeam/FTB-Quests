@@ -249,6 +249,20 @@ public final class Quest extends ProgressingQuestObject
 	}
 
 	@Override
+	public boolean isComplete(IProgressData data)
+	{
+		for (QuestTask task : tasks)
+		{
+			if (!task.isComplete(data))
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	@Override
 	public void resetProgress(IProgressData data)
 	{
 		for (QuestTask task : tasks)

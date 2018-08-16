@@ -60,11 +60,6 @@ public abstract class QuestTaskData<T extends QuestTask> implements ICapabilityP
 		return data + "@" + task.getID();
 	}
 
-	public boolean canInsertItem()
-	{
-		return false;
-	}
-
 	public ItemStack insertItem(ItemStack stack, boolean singleItem, boolean simulate)
 	{
 		return stack;
@@ -85,7 +80,7 @@ public abstract class QuestTaskData<T extends QuestTask> implements ICapabilityP
 	@Override
 	public final ItemStack insertItem(int slot, ItemStack stack, boolean simulate)
 	{
-		if (canInsertItem() && task.getMaxProgress() > 0L && getProgress() < task.getMaxProgress() && !stack.isEmpty())
+		if (task.canInsertItem() && task.getMaxProgress() > 0L && getProgress() < task.getMaxProgress() && !stack.isEmpty())
 		{
 			return insertItem(stack, false, simulate);
 		}

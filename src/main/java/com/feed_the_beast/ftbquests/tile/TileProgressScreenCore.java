@@ -27,8 +27,6 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentTranslation;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
 
@@ -165,7 +163,7 @@ public class TileProgressScreenCore extends TileProgressScreenBase implements IC
 		}
 		else if (cOwner == null)
 		{
-			cOwner = FTBQuests.PROXY.getQuestList(world).getData(team.getString());
+			cOwner = FTBQuests.PROXY.getQuestFile(world).getData(team.getString());
 		}
 
 		return cOwner;
@@ -180,21 +178,19 @@ public class TileProgressScreenCore extends TileProgressScreenBase implements IC
 		}
 		else if (cChapter == null || cChapter.invalid)
 		{
-			cChapter = FTBQuests.PROXY.getQuestList(world).getChapter(chapter.getString());
+			cChapter = FTBQuests.PROXY.getQuestFile(world).getChapter(chapter.getString());
 		}
 
 		return cChapter;
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
 	public AxisAlignedBB getRenderBoundingBox()
 	{
 		return BlockScreen.getScreenAABB(pos, getFacing(), size);
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
 	public double getMaxRenderDistanceSquared()
 	{
 		double d = 32D * (2 + size);

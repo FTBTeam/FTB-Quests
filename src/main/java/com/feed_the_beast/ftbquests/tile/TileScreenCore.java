@@ -36,8 +36,6 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.CapabilityItemHandler;
 
 import javax.annotation.Nullable;
@@ -83,7 +81,10 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 			quest.setString(cTask.quest.getID());
 		}
 
-		nbt.setString("Quest", quest.getString());
+		if (!quest.isEmpty())
+		{
+			nbt.setString("Quest", quest.getString());
+		}
 
 		if (taskIndex.getInt() > 0)
 		{
@@ -152,13 +153,13 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 	@Override
 	public boolean hasCapability(Capability<?> capability, @Nullable EnumFacing facing)
 	{
-		cTaskData = getTaskData();
+		cTask = getTask();
 
-		if (cTaskData != null && cTaskData.task.getMaxProgress() > 0)
+		if (cTask != null && cTask.getMaxProgress() > 0)
 		{
 			if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)
 			{
-				if (cTaskData.canInsertItem())
+				if (cTask.canInsertItem() && getTaskData() != null)
 				{
 					return true;
 				}
@@ -179,15 +180,15 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 	@Nullable
 	public <T> T getCapability(Capability<T> capability, @Nullable EnumFacing facing)
 	{
-		cTaskData = getTaskData();
+		cTask = getTask();
 
-		if (cTaskData != null && cTaskData.task.getMaxProgress() > 0)
+		if (cTask != null && cTask.getMaxProgress() > 0)
 		{
 			if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)
 			{
-				if (cTaskData.canInsertItem())
+				if (cTask.canInsertItem() && getTaskData() != null)
 				{
-					return (T) cTaskData;
+					return (T) getTaskData();
 				}
 			}
 			else
@@ -248,7 +249,7 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 		}
 		else if (cTeam == null)
 		{
-			cTeam = FTBQuests.PROXY.getQuestList(world).getData(team.getString());
+			cTeam = FTBQuests.PROXY.getQuestFile(world).getData(team.getString());
 		}
 
 		return cTeam;
@@ -263,7 +264,7 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 		}
 		else if (cTask == null || cTask.invalid)
 		{
-			Quest q = FTBQuests.PROXY.getQuestList(world).getQuest(quest.getString());
+			Quest q = FTBQuests.PROXY.getQuestFile(world).getQuest(quest.getString());
 			cTask = q == null || q.tasks.isEmpty() ? null : q.getTask(taskIndex.getInt());
 		}
 
@@ -300,14 +301,12 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
 	public AxisAlignedBB getRenderBoundingBox()
 	{
 		return BlockScreen.getScreenAABB(pos, getFacing(), size);
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
 	public double getMaxRenderDistanceSquared()
 	{
 		double d = 32D * (2 + size);
@@ -441,7 +440,7 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 					return;
 				}
 
-				if (cTaskData.canInsertItem() && cTaskData.task.getMaxProgress() > 0L && cTaskData.getProgress() < cTaskData.task.getMaxProgress())
+				if (cTaskData.task.canInsertItem() && cTaskData.task.getMaxProgress() > 0L && cTaskData.getProgress() < cTaskData.task.getMaxProgress())
 				{
 					ItemStack stack = player.getHeldItem(hand);
 

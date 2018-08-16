@@ -44,7 +44,7 @@ public class MessageUpdateTaskProgress extends MessageToClient
 	@Override
 	public void writeData(DataOut data)
 	{
-		QuestFile file = FTBQuests.PROXY.getQuestList(false);
+		QuestFile file = FTBQuests.PROXY.getQuestFile(false);
 
 		data.writeString(team);
 
@@ -67,7 +67,7 @@ public class MessageUpdateTaskProgress extends MessageToClient
 	@Override
 	public void readData(DataIn data)
 	{
-		QuestFile file = FTBQuests.PROXY.getQuestList(true);
+		QuestFile file = FTBQuests.PROXY.getQuestFile(true);
 
 		team = data.readString();
 

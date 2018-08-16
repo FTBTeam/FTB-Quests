@@ -25,7 +25,7 @@ import java.util.regex.Pattern;
 public class ConfigQuestObject extends ConfigString
 {
 	public static final String ID = "ftbquests_object";
-	private static final Pattern PATTERN = Pattern.compile("^[a-z0-9_:#]{1}$");
+	private static final Pattern PATTERN = Pattern.compile("^(\\*|[a-z0-9_:#]{1,32})$");
 
 	private final HashSet<QuestObjectType> types;
 
@@ -120,7 +120,7 @@ public class ConfigQuestObject extends ConfigString
 			world = sender.getEntityWorld();
 		}
 
-		QuestObject object = FTBQuests.PROXY.getQuestList(world).get(string);
+		QuestObject object = FTBQuests.PROXY.getQuestFile(world).get(string);
 
 		if (object != null && types.contains(object.getObjectType()))
 		{

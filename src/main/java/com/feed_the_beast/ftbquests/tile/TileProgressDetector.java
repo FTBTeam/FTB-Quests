@@ -16,6 +16,7 @@ import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -28,7 +29,7 @@ import javax.annotation.Nullable;
 public class TileProgressDetector extends TileBase implements ITickable, IConfigCallback
 {
 	public final ConfigString team = new ConfigString("");
-	public final ConfigQuestObject object = new ConfigQuestObject("").addType(QuestObjectType.FILE).addType(QuestObjectType.CHAPTER).addType(QuestObjectType.QUEST).addType(QuestObjectType.TASK);
+	public final ConfigQuestObject object = new ConfigQuestObject("*").addType(QuestObjectType.FILE).addType(QuestObjectType.CHAPTER).addType(QuestObjectType.QUEST).addType(QuestObjectType.TASK);
 	public final ConfigBoolean level = new ConfigBoolean(false);
 	public int redstoneOutput = 0;
 
@@ -38,7 +39,10 @@ public class TileProgressDetector extends TileBase implements ITickable, IConfig
 	@Override
 	protected void writeData(NBTTagCompound nbt, EnumSaveType type)
 	{
-		nbt.setString("Team", team.getString());
+		if (!team.isEmpty())
+		{
+			nbt.setString("Team", team.getString());
+		}
 
 		cObject = getObject();
 
@@ -47,9 +51,20 @@ public class TileProgressDetector extends TileBase implements ITickable, IConfig
 			object.setString(cObject.getID());
 		}
 
-		nbt.setString("Object", object.getString());
-		nbt.setBoolean("Level", level.getBoolean());
-		nbt.setByte("RedstoneOutput", (byte) redstoneOutput);
+		if (!object.isEmpty())
+		{
+			nbt.setString("Object", object.getString());
+		}
+
+		if (level.getBoolean())
+		{
+			nbt.setBoolean("Level", true);
+		}
+
+		if (redstoneOutput > 0)
+		{
+			nbt.setByte("RedstoneOutput", (byte) redstoneOutput);
+		}
 	}
 
 	@Override
@@ -60,6 +75,25 @@ public class TileProgressDetector extends TileBase implements ITickable, IConfig
 		level.setBoolean(nbt.getBoolean("Level"));
 		redstoneOutput = nbt.getByte("RedstoneOutput");
 		updateContainingBlockInfo();
+	}
+
+	@Override
+	public void writeToItem(ItemStack stack)
+	{
+		NBTTagCompound nbt = new NBTTagCompound();
+		writeData(nbt, EnumSaveType.ITEM);
+
+		if (!nbt.isEmpty())
+		{
+			stack.setTagCompound(nbt);
+		}
+	}
+
+	@Override
+	public void readFromItem(ItemStack stack)
+	{
+		NBTTagCompound nbt = stack.getTagCompound();
+		readData(nbt == null ? new NBTTagCompound() : nbt, EnumSaveType.ITEM);
 	}
 
 	@Override
@@ -79,7 +113,7 @@ public class TileProgressDetector extends TileBase implements ITickable, IConfig
 		}
 		else if (cTeam == null)
 		{
-			cTeam = FTBQuests.PROXY.getQuestList(world).getData(team.getString());
+			cTeam = FTBQuests.PROXY.getQuestFile(world).getData(team.getString());
 		}
 
 		return cTeam;
@@ -94,7 +128,7 @@ public class TileProgressDetector extends TileBase implements ITickable, IConfig
 		}
 		else if (cObject == null || cObject.invalid)
 		{
-			cObject = FTBQuests.PROXY.getQuestList(world).getProgressing(object.getString());
+			cObject = FTBQuests.PROXY.getQuestFile(world).getProgressing(object.getString());
 		}
 
 		return cObject;

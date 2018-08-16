@@ -53,7 +53,7 @@ public class ContainerTask extends Container
 	{
 		if (clickType == ClickType.QUICK_MOVE)
 		{
-			if (!data.canInsertItem() || data.getProgress() >= data.task.getMaxProgress())
+			if (!data.task.canInsertItem() || data.getProgress() >= data.task.getMaxProgress())
 			{
 				return ItemStack.EMPTY;
 			}
@@ -88,7 +88,7 @@ public class ContainerTask extends Container
 	@Override
 	public boolean enchantItem(EntityPlayer player, int id)
 	{
-		if ((id == 0 || id == 1) && data.canInsertItem())
+		if ((id == 0 || id == 1) && data.task.canInsertItem())
 		{
 			ItemStack stack = player.inventory.getItemStack();
 			ItemStack stack1 = data.insertItem(stack, id == 1, false);

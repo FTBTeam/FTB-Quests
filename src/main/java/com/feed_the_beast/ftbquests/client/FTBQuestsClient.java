@@ -13,7 +13,7 @@ import org.lwjgl.input.Keyboard;
 
 public class FTBQuestsClient extends FTBQuestsCommon
 {
-	public static final KeyBinding KEY_QUESTS = new KeyBinding("key.ftbquests.quests", KeyConflictContext.IN_GAME, KeyModifier.NONE, Keyboard.KEY_G, FTBLib.KEY_CATEGORY);
+	public static final KeyBinding KEY_QUESTS = new KeyBinding("key.ftbquests.quests", KeyConflictContext.IN_GAME, KeyModifier.ALT, Keyboard.KEY_G, FTBLib.KEY_CATEGORY);
 
 	@Override
 	public void preInit()
@@ -22,7 +22,7 @@ public class FTBQuestsClient extends FTBQuestsCommon
 	}
 
 	@Override
-	public QuestFile getQuestList(boolean clientSide)
+	public QuestFile getQuestFile(boolean clientSide)
 	{
 		return clientSide ? ClientQuestFile.INSTANCE : ServerQuestFile.INSTANCE;
 	}

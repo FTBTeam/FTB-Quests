@@ -174,6 +174,12 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 	}
 
 	@Override
+	public boolean canInsertItem()
+	{
+		return true;
+	}
+
+	@Override
 	public QuestTaskData createData(IProgressData data)
 	{
 		return new Data(this, data);
@@ -197,12 +203,6 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 		public <T> T getCapability(@Nonnull Capability<T> capability, @Nullable EnumFacing facing)
 		{
 			return capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY ? (T) this : null;
-		}
-
-		@Override
-		public boolean canInsertItem()
-		{
-			return true;
 		}
 
 		@Override
