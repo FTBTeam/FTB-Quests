@@ -1,0 +1,23 @@
+{
+	"parent": "block/block",
+	"textures": {
+		"side": "ftbquests:blocks/chest_side",
+		"top": "ftbquests:blocks/chest_top",
+		"front": "ftbquests:blocks/chest_front",
+		"particle": "ftbquests:blocks/chest_side"
+	},
+	"elements": [
+		{
+			"from": [1, 0, 1],
+			"to": [15, 14, 15],
+			"faces": {
+				"north": {"uv": [1, 2, 15, 16], "texture": "#front"},
+				"east": {"uv": [1, 2, 15, 16], "texture": "#side"},
+				"south": {"uv": [1, 2, 15, 16], "texture": "#side"},
+				"west": {"uv": [1, 2, 15, 16], "texture": "#side"},
+				"up": {"uv": [1, 1, 15, 15], "texture": "#top"},
+				"down": {"uv": [1, 1, 15, 15], "texture": "#top", "cullface": "down"}
+			}
+		}
+	]
+}

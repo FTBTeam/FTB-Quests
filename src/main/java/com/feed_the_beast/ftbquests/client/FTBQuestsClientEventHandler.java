@@ -36,6 +36,7 @@ public class FTBQuestsClientEventHandler
 		ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(FTBQuestsItems.SCREEN), 0, new ModelResourceLocation(FTBQuestsItems.SCREEN.getRegistryName(), "facing=north"));
 		ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(FTBQuestsItems.PROGRESS_DETECTOR), 0, new ModelResourceLocation(FTBQuestsItems.PROGRESS_DETECTOR.getRegistryName(), "normal"));
 		ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(FTBQuestsItems.PROGRESS_SCREEN), 0, new ModelResourceLocation(FTBQuestsItems.PROGRESS_SCREEN.getRegistryName(), "facing=north"));
+		ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(FTBQuestsItems.CHEST), 0, new ModelResourceLocation(FTBQuestsItems.CHEST.getRegistryName(), "facing=north"));
 
 		ClientRegistry.bindTileEntitySpecialRenderer(TileScreenCore.class, new RenderScreen());
 	}
