@@ -197,6 +197,19 @@ public class BlockProgressScreen extends BlockWithHorizontalFacing
 	}
 
 	@Override
+	@Nullable
+	public String getHarvestTool(IBlockState state)
+	{
+		return null;
+	}
+
+	@Override
+	public int getHarvestLevel(IBlockState state)
+	{
+		return -1;
+	}
+
+	@Override
 	public void breakBlock(World world, BlockPos pos, IBlockState state)
 	{
 		TileEntity tileEntity = world.getTileEntity(pos);

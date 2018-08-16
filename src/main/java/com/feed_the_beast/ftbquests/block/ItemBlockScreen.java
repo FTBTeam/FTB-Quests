@@ -59,7 +59,16 @@ public class ItemBlockScreen extends ItemBlock
 
 		if (quest != null && !quest.tasks.isEmpty())
 		{
-			BlockScreen.currentTask = quest.getTask(nbt == null ? 0 : (nbt.getByte("TaskIndex") & 0xFF));
+			String task = nbt == null ? "" : nbt.getString("Task");
+
+			if (task.isEmpty())
+			{
+				BlockScreen.currentTask = quest.tasks.get(0);
+			}
+			else
+			{
+				BlockScreen.currentTask = quest.chapter.file.getTask(quest.getID() + ':' + task);
+			}
 		}
 
 		return super.placeBlockAt(stack, player, world, pos, side, hitX, hitY, hitZ, newState);
