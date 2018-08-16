@@ -2,6 +2,7 @@ package com.feed_the_beast.ftbquests.block;
 
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.FTBQuestsItems;
+import com.feed_the_beast.ftbquests.gui.ClientQuestFile;
 import com.feed_the_beast.ftbquests.tile.TileProgressScreenBase;
 import com.feed_the_beast.ftbquests.tile.TileProgressScreenCore;
 import com.feed_the_beast.ftbquests.tile.TileProgressScreenPart;
@@ -59,7 +60,7 @@ public class BlockProgressScreen extends BlockHorizontal
 	@Override
 	public TileEntity createTileEntity(World world, IBlockState state)
 	{
-		return new TileScreenCore();
+		return new TileProgressScreenCore();
 	}
 
 	@Override
@@ -73,11 +74,14 @@ public class BlockProgressScreen extends BlockHorizontal
 	{
 		items.add(new ItemStack(this));
 
-		for (int i = 1; i <= 4; i++)
+		if (ClientQuestFile.exists() && ClientQuestFile.INSTANCE.editingMode)
 		{
-			ItemStack stack = new ItemStack(this);
-			stack.setTagInfo("Size", new NBTTagByte((byte) i));
-			items.add(stack);
+			for (int i = 1; i <= 4; i++)
+			{
+				ItemStack stack = new ItemStack(this);
+				stack.setTagInfo("Size", new NBTTagByte((byte) i));
+				items.add(stack);
+			}
 		}
 	}
 

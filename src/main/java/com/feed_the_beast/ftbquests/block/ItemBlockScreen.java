@@ -2,6 +2,7 @@ package com.feed_the_beast.ftbquests.block;
 
 import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
+import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.gui.ClientQuestFile;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.Quest;
@@ -67,7 +68,7 @@ public class ItemBlockScreen extends ItemBlock
 			}
 		}
 
-		if (nbt == null || !nbt.hasKey("Owner"))
+		if (!world.isRemote && (nbt == null || !nbt.hasKey("Team")))
 		{
 			if (nbt == null)
 			{
@@ -75,10 +76,17 @@ public class ItemBlockScreen extends ItemBlock
 				stack.setTagCompound(nbt);
 			}
 
-			nbt.setString("Owner", FTBLibAPI.getTeam(player.getUniqueID()));
+			nbt.setString("Team", FTBLibAPI.getTeam(player.getUniqueID()));
 		}
 
-		//BlockScreen.currentTask = quest.getTask(nbt.getByte("TaskIndex"));
+		BlockScreen.currentTask = null;
+		Quest quest = FTBQuests.PROXY.getQuestList(world).getQuest(nbt == null ? "" : nbt.getString("Quest"));
+
+		if (quest != null && !quest.tasks.isEmpty())
+		{
+			BlockScreen.currentTask = quest.getTask(nbt == null ? 0 : (nbt.getByte("TaskIndex") & 0xFF));
+		}
+
 		return super.placeBlockAt(stack, player, world, pos, side, hitX, hitY, hitZ, newState);
 	}
 
@@ -109,25 +117,17 @@ public class ItemBlockScreen extends ItemBlock
 		tooltip.add(I18n.format("tile.ftbquests.screen.size") + ": " + TextFormatting.GOLD + (1 + size * 2) + " x " + (1 + size * 2));
 		tooltip.add(I18n.format("ftbquests.team") + ": " + TextFormatting.DARK_GREEN + team);
 
-		String questID = nbt.getString("Quest");
+		Quest quest = ClientQuestFile.INSTANCE.getQuest(nbt.getString("Quest"));
 
-		if (questID.isEmpty())
+		if (quest == null || quest.tasks.isEmpty())
 		{
-			return;
-		}
-
-		Quest quest = ClientQuestFile.INSTANCE.getQuest(questID);
-
-		if (quest == null || quest.invalid || quest.tasks.isEmpty())
-		{
-			tooltip.add(TextFormatting.RED + I18n.format("tile.ftbquests.screen.missing_data"));
 			return;
 		}
 
 		tooltip.add(I18n.format("ftbquests.chapter") + ": " + StringUtils.color(quest.chapter.getDisplayName(), TextFormatting.YELLOW).getFormattedText());
 		tooltip.add(I18n.format("ftbquests.quest") + ": " + StringUtils.color(quest.getDisplayName(), TextFormatting.YELLOW).getFormattedText());
 
-		QuestTask task = quest.getTask(nbt.getByte("TaskIndex"));
+		QuestTask task = quest.getTask(nbt.getByte("TaskIndex") & 0xFF);
 
 		tooltip.add(I18n.format("ftbquests.task") + ": " + StringUtils.color(task.getDisplayName(), TextFormatting.YELLOW).getFormattedText());
 
