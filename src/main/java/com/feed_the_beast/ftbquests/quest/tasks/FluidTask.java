@@ -151,6 +151,12 @@ public class FluidTask extends QuestTask
 	}
 
 	@Override
+	public boolean canInsertItem()
+	{
+		return true;
+	}
+
+	@Override
 	public QuestTaskData createData(IProgressData data)
 	{
 		return new Data(this, data);
@@ -228,12 +234,6 @@ public class FluidTask extends QuestTask
 		public FluidStack drain(int maxDrain, boolean doDrain)
 		{
 			return null;
-		}
-
-		@Override
-		public boolean canInsertItem()
-		{
-			return true;
 		}
 
 		@Override

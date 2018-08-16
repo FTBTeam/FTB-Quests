@@ -151,7 +151,7 @@ public class RenderScreen extends TileEntitySpecialRenderer<TileScreenCore>
 
 		GlStateManager.pushMatrix();
 		GlStateManager.translate(0.5D, iconY, 0D);
-		GlStateManager.scale(0.5D, 0.5D, 1D);
+		GlStateManager.scale(0.45D, 0.45D, 1D);
 		ClientUtils.MC.getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
 		ClientUtils.MC.getTextureManager().getTexture(TextureMap.LOCATION_BLOCKS_TEXTURE).setBlurMipmap(false, false);
 		GlStateManager.enableRescaleNormal();
@@ -159,7 +159,7 @@ public class RenderScreen extends TileEntitySpecialRenderer<TileScreenCore>
 		GlStateManager.enableBlend();
 		GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
 		GlStateManager.color(1F, 1F, 1F, 1F);
-		task.renderOnScreen(screen.getWorld(), data);
+		task.renderOnScreen(data);
 		GlStateManager.disableRescaleNormal();
 		GlStateManager.disableLighting();
 		ClientUtils.MC.getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);

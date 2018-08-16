@@ -11,28 +11,7 @@ public abstract class ProgressingQuestObject extends QuestObject
 
 	public abstract void resetProgress(IProgressData data);
 
-	public double getRelativeProgress(IProgressData data)
-	{
-		long max = getMaxProgress();
+	public abstract double getRelativeProgress(IProgressData data);
 
-		if (max == 0)
-		{
-			return 0D;
-		}
-
-		long progress = getProgress(data);
-
-		if (progress >= max)
-		{
-			return 1D;
-		}
-
-		return (double) progress / (double) max;
-	}
-
-	public final boolean isComplete(IProgressData data)
-	{
-		long max = getMaxProgress();
-		return max > 0 && getProgress(data) >= max;
-	}
+	public abstract boolean isComplete(IProgressData data);
 }

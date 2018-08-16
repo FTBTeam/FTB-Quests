@@ -1,33 +1,43 @@
 package com.feed_the_beast.ftbquests.block;
 
+import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.FTBQuestsItems;
+import com.feed_the_beast.ftbquests.gui.ClientQuestFile;
 import com.feed_the_beast.ftbquests.tile.TileQuestChest;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
+import java.util.List;
 
 /**
  * @author LatvianModder
  */
 public class BlockQuestChest extends BlockWithHorizontalFacing
 {
-	private static final AxisAlignedBB AABB = new AxisAlignedBB(0.0625D, 0.0D, 0.0625D, 0.9375D, 0.875D, 0.9375D);
+	private static final AxisAlignedBB AABB = new AxisAlignedBB(0.0625, 0, 0.0625, 0.9375, 0.875, 0.9375);
 
 	public BlockQuestChest()
 	{
@@ -86,6 +96,16 @@ public class BlockQuestChest extends BlockWithHorizontalFacing
 	@Override
 	public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ)
 	{
+		if (!world.isRemote)
+		{
+			TileEntity tileEntity = world.getTileEntity(pos);
+
+			if (tileEntity instanceof TileQuestChest)
+			{
+				((TileQuestChest) tileEntity).openGui((EntityPlayerMP) player);
+			}
+		}
+
 		return true;
 	}
 
@@ -96,7 +116,13 @@ public class BlockQuestChest extends BlockWithHorizontalFacing
 
 		if (tileEntity instanceof TileQuestChest)
 		{
-			((TileQuestChest) tileEntity).readFromItem(stack);
+			TileQuestChest tile = (TileQuestChest) tileEntity;
+			tile.readFromItem(stack);
+
+			if (tile.team.isEmpty() && placer instanceof EntityPlayerMP)
+			{
+				tile.team.setString(FTBLibAPI.getTeam(placer.getUniqueID()));
+			}
 		}
 	}
 
@@ -125,5 +151,25 @@ public class BlockQuestChest extends BlockWithHorizontalFacing
 		}
 
 		return super.getExplosionResistance(world, pos, exploder, explosion);
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public void addInformation(ItemStack stack, @Nullable World world, List<String> tooltip, ITooltipFlag flag)
+	{
+		if (world == null || !ClientQuestFile.exists())
+		{
+			return;
+		}
+
+		NBTTagCompound nbt = stack.getTagCompound();
+		String team = nbt == null ? "" : nbt.getString("Team");
+
+		if (team.isEmpty())
+		{
+			team = ClientQuestFile.INSTANCE.teamId;
+		}
+
+		tooltip.add(I18n.format("ftbquests.team") + ": " + TextFormatting.DARK_GREEN + team);
 	}
 }

@@ -1,15 +1,22 @@
 package com.feed_the_beast.ftbquests.block;
 
+import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
+import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.gui.ClientQuestFile;
+import com.feed_the_beast.ftbquests.quest.IProgressData;
+import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
+import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskData;
 import com.feed_the_beast.ftbquests.tile.TileScreenBase;
 import com.feed_the_beast.ftbquests.tile.TileScreenCore;
 import com.feed_the_beast.ftbquests.tile.TileScreenPart;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -18,6 +25,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagByte;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
@@ -25,6 +33,7 @@ import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
@@ -32,6 +41,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -77,14 +87,11 @@ public class BlockScreen extends BlockWithHorizontalFacing
 	{
 		items.add(new ItemStack(this));
 
-		if (ClientQuestFile.exists() && ClientQuestFile.INSTANCE.editingMode)
+		for (int i = 1; i <= 4; i++)
 		{
-			for (int i = 1; i <= 4; i++)
-			{
-				ItemStack stack = new ItemStack(this);
-				stack.setTagInfo("Size", new NBTTagByte((byte) i));
-				items.add(stack);
-			}
+			ItemStack stack = new ItemStack(this);
+			stack.setTagInfo("Size", new NBTTagByte((byte) i));
+			items.add(stack);
 		}
 	}
 
@@ -158,6 +165,12 @@ public class BlockScreen extends BlockWithHorizontalFacing
 		{
 			TileScreenCore screen = (TileScreenCore) tileEntity;
 			screen.readFromItem(stack);
+
+			if (screen.team.isEmpty() && placer instanceof EntityPlayerMP)
+			{
+				screen.team.setString(FTBLibAPI.getTeam(placer.getUniqueID()));
+			}
+
 			screen.facing = state.getValue(FACING);
 
 			if (screen.size > 0)
@@ -245,7 +258,6 @@ public class BlockScreen extends BlockWithHorizontalFacing
 
 	@Override
 	@Deprecated
-	@SideOnly(Side.CLIENT)
 	public AxisAlignedBB getSelectedBoundingBox(IBlockState state, World world, BlockPos pos)
 	{
 		TileEntity tileEntity = world.getTileEntity(pos);
@@ -336,5 +348,49 @@ public class BlockScreen extends BlockWithHorizontalFacing
 		}
 
 		return state;
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public void addInformation(ItemStack stack, @Nullable World world, List<String> tooltip, ITooltipFlag flag)
+	{
+		if (world == null || !ClientQuestFile.exists())
+		{
+			return;
+		}
+
+		NBTTagCompound nbt = stack.getTagCompound();
+		int size = nbt == null ? 0 : nbt.getByte("Size");
+		String team = nbt == null ? "" : nbt.getString("Team");
+
+		if (team.isEmpty())
+		{
+			team = ClientQuestFile.INSTANCE.teamId;
+		}
+
+		tooltip.add(I18n.format("tile.ftbquests.screen.size") + ": " + TextFormatting.GOLD + (1 + size * 2) + " x " + (1 + size * 2));
+		tooltip.add(I18n.format("ftbquests.team") + ": " + TextFormatting.DARK_GREEN + team);
+
+		Quest quest = ClientQuestFile.INSTANCE.getQuest(nbt == null ? "" : nbt.getString("Quest"));
+
+		if (quest == null || quest.tasks.isEmpty())
+		{
+			return;
+		}
+
+		tooltip.add(I18n.format("ftbquests.chapter") + ": " + StringUtils.color(quest.chapter.getDisplayName(), TextFormatting.YELLOW).getFormattedText());
+		tooltip.add(I18n.format("ftbquests.quest") + ": " + StringUtils.color(quest.getDisplayName(), TextFormatting.YELLOW).getFormattedText());
+
+		QuestTask task = quest.getTask(nbt == null ? 0 : nbt.getByte("TaskIndex") & 0xFF);
+
+		tooltip.add(I18n.format("ftbquests.task") + ": " + StringUtils.color(task.getDisplayName(), TextFormatting.YELLOW).getFormattedText());
+
+		IProgressData data = ClientQuestFile.INSTANCE.getData(team);
+
+		if (data != null)
+		{
+			QuestTaskData taskData = data.getQuestTaskData(task);
+			tooltip.add(I18n.format("ftbquests.progress") + ": " + TextFormatting.BLUE + String.format("%s / %s [%d%%]", taskData.getProgressString(), task.getMaxProgressString(), (int) (taskData.getRelativeProgress() * 100D)));
+		}
 	}
 }

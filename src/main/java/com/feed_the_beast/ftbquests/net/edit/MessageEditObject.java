@@ -30,7 +30,7 @@ import java.util.regex.Pattern;
  */
 public class MessageEditObject extends MessageToServer implements IConfigCallback
 {
-	private static final Pattern ID_PATTERN = Pattern.compile("^[a-z0-9_]{1,30}$");
+	private static final Pattern ID_PATTERN = Pattern.compile("^[a-z0-9_]{1,32}$");
 
 	private String id, prevId;
 

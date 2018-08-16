@@ -13,12 +13,12 @@ public class FTBQuestsCommon
 	{
 	}
 
-	public final QuestFile getQuestList(@Nullable World world)
+	public final QuestFile getQuestFile(@Nullable World world)
 	{
-		return getQuestList(world == null ? FMLCommonHandler.instance().getEffectiveSide().isClient() : world.isRemote);
+		return getQuestFile(world == null ? FMLCommonHandler.instance().getEffectiveSide().isClient() : world.isRemote);
 	}
 
-	public QuestFile getQuestList(boolean clientSide)
+	public QuestFile getQuestFile(boolean clientSide)
 	{
 		return ServerQuestFile.INSTANCE;
 	}

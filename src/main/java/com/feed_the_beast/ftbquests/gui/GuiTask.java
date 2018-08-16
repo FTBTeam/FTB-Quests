@@ -155,7 +155,7 @@ public class GuiTask extends GuiBase
 
 		drawString(s, ax + width / 2, ay + 63, Color4I.WHITE, CENTERED);
 
-		if (!container.data.canInsertItem())
+		if (!container.data.task.canInsertItem())
 		{
 			pushFontUnicode(true);
 			drawString(I18n.format("ftbquests.task.no_items"), ax + width / 2, ay + 37, Color4I.LIGHT_RED, CENTERED);

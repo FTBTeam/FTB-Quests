@@ -5,7 +5,6 @@ import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraftforge.common.util.Constants;
 
 import java.util.UUID;
 
@@ -65,21 +64,21 @@ public abstract class QuestObject
 	{
 		id = nbt.getString("id");
 
-		if (id.isEmpty() && nbt.hasKey("id", Constants.NBT.TAG_SHORT))
-		{
-			id = Integer.toString(nbt.getShort("id") & 0xFFFF);
-		}
-
 		if (id.isEmpty())
 		{
 			id = StringUtils.getId(getDisplayName().getUnformattedText(), StringUtils.FLAG_ID_DEFAULTS);
+		}
+
+		if (id.length() > 32)
+		{
+			id = id.substring(0, 32);
 		}
 
 		QuestFile file = getQuestFile();
 
 		if (id.isEmpty() || file.get(id) != null)
 		{
-			id = StringUtils.fromUUID(UUID.randomUUID()).substring(0, 20);
+			id = StringUtils.fromUUID(UUID.randomUUID());
 		}
 	}
 

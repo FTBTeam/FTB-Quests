@@ -12,8 +12,6 @@ import net.minecraft.util.IStringSerializable;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
 
@@ -60,6 +58,13 @@ public abstract class QuestTask extends ProgressingQuestObject implements IStrin
 	public final double getRelativeProgress(IProgressData data)
 	{
 		return data.getQuestTaskData(this).getRelativeProgress();
+	}
+
+	@Override
+	public final boolean isComplete(IProgressData data)
+	{
+		long max = getMaxProgress();
+		return max > 0L && getProgress(data) >= max;
 	}
 
 	@Override
@@ -124,9 +129,13 @@ public abstract class QuestTask extends ProgressingQuestObject implements IStrin
 		return new TileScreenPart();
 	}
 
-	@SideOnly(Side.CLIENT)
-	public void renderOnScreen(World world, @Nullable QuestTaskData data)
+	public void renderOnScreen(@Nullable QuestTaskData data)
 	{
-		getIcon().draw3D(world, Icon.EMPTY);
+		getIcon().draw3D(Icon.EMPTY);
+	}
+
+	public boolean canInsertItem()
+	{
+		return false;
 	}
 }
