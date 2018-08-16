@@ -12,6 +12,8 @@ import net.minecraft.util.IStringSerializable;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
 
@@ -129,6 +131,7 @@ public abstract class QuestTask extends ProgressingQuestObject implements IStrin
 		return new TileScreenPart();
 	}
 
+	@SideOnly(Side.CLIENT)
 	public void renderOnScreen(@Nullable QuestTaskData data)
 	{
 		getIcon().draw3D(Icon.EMPTY);

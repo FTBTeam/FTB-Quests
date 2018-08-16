@@ -99,6 +99,11 @@ public class BlockProgressDetector extends Block
 			{
 				tile.team.setString(FTBLibAPI.getTeam(placer.getUniqueID()));
 			}
+
+			if (tile.object.isEmpty())
+			{
+				tile.object.setString("*");
+			}
 		}
 	}
 

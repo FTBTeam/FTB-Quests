@@ -1,5 +1,6 @@
 package com.feed_the_beast.ftbquests.quest.tasks;
 
+import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftblib.lib.config.ConfigFluid;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigInt;
@@ -7,8 +8,13 @@ import com.feed_the_beast.ftblib.lib.config.ConfigLong;
 import com.feed_the_beast.ftblib.lib.config.ConfigNBT;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
+import com.feed_the_beast.ftbquests.client.FTBQuestsClientEventHandler;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.Quest;
+import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
@@ -24,8 +30,11 @@ import net.minecraftforge.fluids.capability.FluidTankProperties;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandlerItem;
 import net.minecraftforge.fluids.capability.IFluidTankProperties;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
+import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nullable;
 
@@ -154,6 +163,62 @@ public class FluidTask extends QuestTask
 	public boolean canInsertItem()
 	{
 		return true;
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public void renderOnScreen(@Nullable QuestTaskData data)
+	{
+		Tessellator tessellator = Tessellator.getInstance();
+		BufferBuilder buffer = tessellator.getBuffer();
+		buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
+		TextureAtlasSprite sprite = FTBQuestsClientEventHandler.spriteTank;
+		double x = -0.5;
+		double y = -0.5 - 1D / 32D;
+		double w = 1;
+		double h = 33D / 32D;
+		double z = 0;
+		double u0 = sprite.getMinU();
+		double v0 = sprite.getMinV();
+		double u1 = sprite.getMaxU();
+		double v1 = sprite.getMaxV();
+		buffer.pos(x, y + h, z).tex(u0, v1).endVertex();
+		buffer.pos(x + w, y + h, z).tex(u1, v1).endVertex();
+		buffer.pos(x + w, y, z).tex(u1, v0).endVertex();
+		buffer.pos(x, y, z).tex(u0, v0).endVertex();
+		tessellator.draw();
+
+		if (data != null && getMaxProgress() > 0L && data.getProgress() > 0L)
+		{
+			double r = data.getRelativeProgress();
+			x += 1D / 128D;
+			w -= 1D / 64D;
+
+			h = r * 31D / 32D;
+			y = 1D - h;
+
+			h -= 1D / 64D;
+			y -= 0.5D;
+			z = 0.003D;
+
+			FluidStack stack = createFluidStack(Fluid.BUCKET_VOLUME);
+			sprite = ClientUtils.MC.getTextureMapBlocks().getAtlasSprite(stack.getFluid().getStill(stack).toString());
+			int color = stack.getFluid().getColor(stack);
+			int alpha = (color >> 24) & 0xFF;
+			int red = (color >> 16) & 0xFF;
+			int green = (color >> 8) & 0xFF;
+			int blue = color & 0xFF;
+			u0 = sprite.getMinU();
+			v0 = sprite.getMinV() + (sprite.getMaxV() - sprite.getMinV()) * (1D - r);
+			u1 = sprite.getMaxU();
+			v1 = sprite.getMaxV();
+			buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
+			buffer.pos(x, y + h, z).tex(u0, v1).color(red, green, blue, alpha).endVertex();
+			buffer.pos(x + w, y + h, z).tex(u1, v1).color(red, green, blue, alpha).endVertex();
+			buffer.pos(x + w, y, z).tex(u1, v0).color(red, green, blue, alpha).endVertex();
+			buffer.pos(x, y, z).tex(u0, v0).color(red, green, blue, alpha).endVertex();
+			tessellator.draw();
+		}
 	}
 
 	@Override

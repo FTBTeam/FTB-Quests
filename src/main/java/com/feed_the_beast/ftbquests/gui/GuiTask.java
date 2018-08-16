@@ -16,6 +16,7 @@ import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.net.MessageGetScreen;
+import com.feed_the_beast.ftbquests.net.edit.MessageResetProgress;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
@@ -39,14 +40,14 @@ public class GuiTask extends GuiBase
 
 	public static class Tab extends Button
 	{
-		public String description;
+		public String yesNoText;
 		public final Consumer<MouseButton> callback;
 
-		public Tab(Panel panel, String title, String desc, Icon icon, Consumer<MouseButton> c)
+		public Tab(Panel panel, String title, String yn, Icon icon, Consumer<MouseButton> c)
 		{
 			super(panel, title, icon);
 			setSize(20, 20);
-			description = desc;
+			yesNoText = yn;
 			callback = c;
 		}
 
@@ -54,7 +55,15 @@ public class GuiTask extends GuiBase
 		public void onClicked(MouseButton button)
 		{
 			GuiHelper.playClickSound();
-			callback.accept(button);
+
+			if (yesNoText.isEmpty())
+			{
+				callback.accept(button);
+			}
+			else
+			{
+				getGui().openYesNo(yesNoText, "", () -> callback.accept(button));
+			}
 		}
 	}
 
@@ -79,7 +88,7 @@ public class GuiTask extends GuiBase
 				{
 					add(new Tab(this, I18n.format("tile.ftbquests.screen.name"), "", ItemIcon.getItemIcon(new ItemStack(FTBQuestsItems.SCREEN)), button ->
 					{
-						if (questFile.canEdit())
+						if (questFile.canEdit() && button.isRight())
 						{
 							List<ContextMenuItem> contextMenu = new ArrayList<>();
 							contextMenu.add(new ContextMenuItem("Screen", Icon.EMPTY, () -> {}).setEnabled(false));
@@ -95,6 +104,11 @@ public class GuiTask extends GuiBase
 							new MessageGetScreen(container.data.task.getID(), 0).sendToServer();
 						}
 					}));
+				}
+
+				if (questFile.canEdit())
+				{
+					add(new Tab(this, I18n.format("ftbquests.gui.reset_progress"), I18n.format("ftbquests.gui.reset_progress_q"), GuiIcons.REFRESH, button -> new MessageResetProgress(container.data.task.getID(), button.isRight()).sendToServer()));
 				}
 			}
 

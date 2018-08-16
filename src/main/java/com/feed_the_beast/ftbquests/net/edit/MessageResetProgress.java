@@ -55,7 +55,7 @@ public class MessageResetProgress extends MessageToServer
 	@Override
 	public void onMessage(EntityPlayerMP player)
 	{
-		if (id.isEmpty() && FTBQuests.canEdit(player))
+		if (!id.isEmpty() && FTBQuests.canEdit(player))
 		{
 			QuestObject object = ServerQuestFile.INSTANCE.get(id);
 
