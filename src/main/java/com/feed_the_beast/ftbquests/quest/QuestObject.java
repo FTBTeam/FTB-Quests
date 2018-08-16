@@ -74,9 +74,7 @@ public abstract class QuestObject
 			id = id.substring(0, 32);
 		}
 
-		QuestFile file = getQuestFile();
-
-		if (id.isEmpty() || file.get(id) != null)
+		if (id.isEmpty() || getQuestFile().get(getID()) != null)
 		{
 			id = StringUtils.fromUUID(UUID.randomUUID());
 		}

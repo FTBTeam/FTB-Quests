@@ -64,6 +64,7 @@ ftbquests.gui.reset_progress_q=Reset Progress?
 ftbquests.gui.set_dep=Set Selected as Dependency
 ftbquests.gui.rem_dep=Remove Dependency
 ftbquests.gui.copy_id=Copy ID
+ftbquests.gui.change_id=Change ID
 
 ftbquests.task=Task
 ftbquests.tasks=Tasks

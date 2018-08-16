@@ -1,7 +1,7 @@
 package com.feed_the_beast.ftbquests.tile;
 
 import com.feed_the_beast.ftblib.lib.config.ConfigBoolean;
-import com.feed_the_beast.ftblib.lib.config.ConfigString;
+import com.feed_the_beast.ftblib.lib.config.ConfigTeam;
 import com.feed_the_beast.ftblib.lib.tile.EnumSaveType;
 import com.feed_the_beast.ftblib.lib.tile.TileBase;
 import com.feed_the_beast.ftbquests.FTBQuests;
@@ -22,7 +22,7 @@ import javax.annotation.Nullable;
  */
 public class TileQuestChest extends TileBase implements IItemHandler
 {
-	public final ConfigString team = new ConfigString("");
+	public final ConfigTeam team = new ConfigTeam("");
 	public final ConfigBoolean indestructible = new ConfigBoolean(false);
 
 	private IProgressData cTeam;
@@ -96,6 +96,7 @@ public class TileQuestChest extends TileBase implements IItemHandler
 
 	public void openGui(EntityPlayerMP player)
 	{
+
 	}
 
 	@Override

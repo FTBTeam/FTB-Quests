@@ -39,7 +39,7 @@ public class GuiWaitItems extends GuiBase
 	public boolean onInit()
 	{
 		setFullscreen();
-		cancelButton.setPos((width - cancelButton.width) / 2, height * 2 / 3);
+		cancelButton.setPos((width - cancelButton.width) / 2, height * 2 / 3 + 16);
 		return true;
 	}
 
@@ -73,6 +73,11 @@ public class GuiWaitItems extends GuiBase
 		drawString(s, x, -1, Color4I.BLACK, 0);
 		drawString(s, x, 0, Color4I.WHITE, 0);
 		GlStateManager.popMatrix();
+
+		for (int i = 0; i < ClientQuestFile.INSTANCE.emergencyItems.list.size(); i++)
+		{
+			GuiHelper.drawItem(ClientQuestFile.INSTANCE.emergencyItems.list.get(i).getStack(), width / 2D - ClientQuestFile.INSTANCE.emergencyItems.list.size() * 8D - 6D + i * 24D, height * 2D / 3D - 10D, true, Icon.EMPTY);
+		}
 	}
 
 	@Override

@@ -5,6 +5,7 @@ import com.feed_the_beast.ftblib.lib.config.ConfigBoolean;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigNull;
 import com.feed_the_beast.ftblib.lib.config.ConfigString;
+import com.feed_the_beast.ftblib.lib.config.ConfigTeam;
 import com.feed_the_beast.ftblib.lib.config.IConfigCallback;
 import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
 import com.feed_the_beast.ftblib.lib.tile.EnumSaveType;
@@ -36,7 +37,7 @@ import javax.annotation.Nullable;
 public class TileProgressScreenCore extends TileProgressScreenBase implements IConfigCallback
 {
 	public EnumFacing facing;
-	public final ConfigString team = new ConfigString("");
+	public final ConfigTeam team = new ConfigTeam("");
 	public final ConfigQuestObject chapter = new ConfigQuestObject("").addType(QuestObjectType.CHAPTER);
 	public int size = 0;
 	public final ConfigBoolean indestructible = new ConfigBoolean(false);

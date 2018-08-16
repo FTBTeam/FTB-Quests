@@ -170,7 +170,8 @@ public class GuiQuest extends GuiBase
 				contextMenu.add(ContextMenuItem.SEPARATOR);
 				contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), GuiIcons.REMOVE, () -> new MessageDeleteObject(task.getID()).sendToServer()).setYesNo(I18n.format("delete_item", task.getDisplayName().getFormattedText())));
 				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.reset_progress"), GuiIcons.REFRESH, () -> new MessageResetProgress(task.getID(), false).sendToServer()).setYesNo(I18n.format("ftbquests.gui.reset_progress_q")));
-				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.copy_id"), GuiIcons.INFO, () -> setClipboardString(task.getID())));
+				contextMenu.add(questTreeGui.copyIDItem(task));
+				contextMenu.add(questTreeGui.changeIDItem(getGui(), task));
 				getGui().openContextMenu(contextMenu);
 			}
 			else if (button.isLeft() && !(task instanceof UnknownTask))
@@ -347,7 +348,8 @@ public class GuiQuest extends GuiBase
 				contextMenu.add(new ContextMenuItem(I18n.format("selectServer.edit"), GuiIcons.SETTINGS, () -> new MessageEditObject(reward.getID()).sendToServer()));
 				contextMenu.add(ContextMenuItem.SEPARATOR);
 				contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), GuiIcons.REMOVE, () -> new MessageDeleteObject(reward.getID()).sendToServer()).setYesNo(I18n.format("delete_item", reward.getDisplayName().getFormattedText())));
-				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.copy_id"), GuiIcons.INFO, () -> setClipboardString(reward.getID())));
+				contextMenu.add(questTreeGui.copyIDItem(reward));
+				contextMenu.add(questTreeGui.changeIDItem(getGui(), reward));
 				getGui().openContextMenu(contextMenu);
 			}
 			else if (button.isLeft() && !(reward instanceof UnknownReward) && questTreeGui.questFile.self != null && questTreeGui.questFile.self.claimReward(ClientUtils.MC.player, reward))

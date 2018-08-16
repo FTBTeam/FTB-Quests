@@ -4,6 +4,7 @@ import com.feed_the_beast.ftblib.lib.config.ConfigBoolean;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigNull;
 import com.feed_the_beast.ftblib.lib.config.ConfigString;
+import com.feed_the_beast.ftblib.lib.config.ConfigTeam;
 import com.feed_the_beast.ftblib.lib.config.IConfigCallback;
 import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
 import com.feed_the_beast.ftblib.lib.tile.EnumSaveType;
@@ -28,7 +29,7 @@ import javax.annotation.Nullable;
  */
 public class TileProgressDetector extends TileBase implements ITickable, IConfigCallback
 {
-	public final ConfigString team = new ConfigString("");
+	public final ConfigTeam team = new ConfigTeam("");
 	public final ConfigQuestObject object = new ConfigQuestObject("*").addType(QuestObjectType.FILE).addType(QuestObjectType.CHAPTER).addType(QuestObjectType.QUEST).addType(QuestObjectType.TASK);
 	public final ConfigBoolean level = new ConfigBoolean(false);
 	public int redstoneOutput = 0;

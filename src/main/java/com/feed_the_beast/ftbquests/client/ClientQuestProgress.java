@@ -5,12 +5,14 @@ import com.feed_the_beast.ftbquests.quest.ProgressingQuestObject;
 import com.feed_the_beast.ftbquests.quest.rewards.QuestReward;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskData;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.text.TextFormatting;
 
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 
 /**
  * @author LatvianModder
@@ -18,20 +20,27 @@ import java.util.HashSet;
 public class ClientQuestProgress implements IProgressData
 {
 	public final String teamID;
-	public final Int2ObjectOpenHashMap<QuestTaskData> taskData;
-	public final HashSet<QuestReward> claimedRewards;
+	public final Map<QuestTask, QuestTaskData> taskData;
+	public final Collection<QuestReward> claimedRewards;
 
 	public ClientQuestProgress(String t)
 	{
 		teamID = t;
-		taskData = new Int2ObjectOpenHashMap<>();
+		taskData = new HashMap<>();
 		claimedRewards = new HashSet<>();
 	}
 
 	@Override
 	public QuestTaskData getQuestTaskData(QuestTask task)
 	{
-		return taskData.get(task.index);
+		QuestTaskData data = taskData.get(task);
+
+		if (data == null)
+		{
+			throw new IllegalArgumentException("Missing data for task " + task);
+		}
+
+		return data;
 	}
 
 	public void setRewardStatus(QuestReward reward, boolean status)
@@ -59,7 +68,7 @@ public class ClientQuestProgress implements IProgressData
 	}
 
 	@Override
-	public HashSet<QuestReward> getClaimedRewards(EntityPlayer player)
+	public Collection<QuestReward> getClaimedRewards(EntityPlayer player)
 	{
 		return claimedRewards;
 	}
@@ -72,13 +81,13 @@ public class ClientQuestProgress implements IProgressData
 	@Override
 	public void removeTask(QuestTask task)
 	{
-		taskData.remove(task.index);
+		taskData.remove(task);
 	}
 
 	@Override
 	public void createTaskData(QuestTask task)
 	{
-		taskData.put(task.index, task.createData(this));
+		taskData.put(task, task.createData(this));
 	}
 
 	@Override

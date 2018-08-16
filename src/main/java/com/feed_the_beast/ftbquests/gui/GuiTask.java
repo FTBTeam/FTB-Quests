@@ -16,6 +16,7 @@ import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.net.MessageGetScreen;
+import com.feed_the_beast.ftbquests.net.edit.MessageEditObject;
 import com.feed_the_beast.ftbquests.net.edit.MessageResetProgress;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.I18n;
@@ -109,6 +110,7 @@ public class GuiTask extends GuiBase
 				if (questFile.canEdit())
 				{
 					add(new Tab(this, I18n.format("ftbquests.gui.reset_progress"), I18n.format("ftbquests.gui.reset_progress_q"), GuiIcons.REFRESH, button -> new MessageResetProgress(container.data.task.getID(), button.isRight()).sendToServer()));
+					add(new Tab(this, I18n.format("selectServer.edit"), "", GuiIcons.SETTINGS, button -> new MessageEditObject(container.data.task.getID()).sendToServer()));
 				}
 			}
 
