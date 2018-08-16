@@ -226,13 +226,12 @@ public class TileProgressScreenCore extends TileProgressScreenBase implements IC
 				group0.setDisplayName(new TextComponentTranslation("tile.ftbquests.screen.name"));
 				ConfigGroup group = group0.getGroup("ftbquests.screen");
 
-				group.add("chapter", chapter, ConfigNull.INSTANCE).setCanEdit(editorOrDestructible).setDisplayName(new TextComponentTranslation("ftbquests.quest"));
-
 				if (editor)
 				{
 					group.add("team", team, new ConfigString("")).setDisplayName(new TextComponentTranslation("ftbquests.team"));
 				}
 
+				group.add("chapter", chapter, ConfigNull.INSTANCE).setCanEdit(editorOrDestructible).setDisplayName(new TextComponentTranslation("ftbquests.quest"));
 				group.add("skin", skin, new ConfigBlockState(BlockUtils.AIR_STATE)).setCanEdit(editorOrDestructible);
 
 				if (editor)

@@ -60,6 +60,8 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 	private QuestTask cTask;
 	private QuestTaskData cTaskData;
 
+	private Class currentCoreClass, currentPartClass;
+
 	@Override
 	protected void writeData(NBTTagCompound nbt, EnumSaveType type)
 	{
@@ -118,14 +120,7 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 
 	private void readScreenData(NBTTagCompound nbt)
 	{
-		String t = nbt.getString("Team");
-
-		if (t.isEmpty())
-		{
-			t = nbt.getString("Owner");
-		}
-
-		team.setString(t);
+		team.setString(nbt.getString("Team"));
 		quest.setString(nbt.getString("Quest"));
 		taskIndex.setInt(nbt.getByte("TaskIndex") & 0xFF);
 		size = nbt.getByte("Size");
@@ -337,6 +332,13 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 				if (cTask != null)
 				{
 					quest.setString(cTask.quest.getID());
+					currentCoreClass = cTask.getScreenCoreClass();
+					currentPartClass = cTask.getScreenPartClass();
+				}
+				else
+				{
+					currentCoreClass = TileScreenCore.class;
+					currentPartClass = TileScreenPart.class;
 				}
 
 				boolean editorOrDestructible = editor || !indestructible.getBoolean();
@@ -344,14 +346,13 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 				group0.setDisplayName(new TextComponentTranslation("tile.ftbquests.screen.name"));
 				ConfigGroup group = group0.getGroup("ftbquests.screen");
 
-				group.add("quest", quest, ConfigNull.INSTANCE).setCanEdit(editorOrDestructible).setDisplayName(new TextComponentTranslation("ftbquests.quest"));
-				group.add("task_index", taskIndex, new ConfigInt(0)).setCanEdit(editorOrDestructible);
-
 				if (editor)
 				{
 					group.add("team", team, new ConfigString("")).setDisplayName(new TextComponentTranslation("ftbquests.team"));
 				}
 
+				group.add("quest", quest, ConfigNull.INSTANCE).setCanEdit(editorOrDestructible).setDisplayName(new TextComponentTranslation("ftbquests.quest"));
+				group.add("task_index", taskIndex, new ConfigInt(0)).setCanEdit(editorOrDestructible);
 				group.add("skin", skin, new ConfigBlockState(BlockUtils.AIR_STATE)).setCanEdit(editorOrDestructible);
 				group.add("progress_display_mode", progressDisplayMode, new ConfigEnum<>(ProgressDisplayMode.NAME_MAP));
 
@@ -377,24 +378,24 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 			return;
 		}
 
-		cTaskData = getTaskData();
+		cTask = getTask();
 
-		if (cTaskData == null)
+		if (cTask == null)
 		{
 			return;
 		}
 
-		if (y >= 0D && y <= 0.17D && !indestructible.getBoolean() && cTaskData.task.quest.tasks.size() > 1)
+		if (y >= 0D && y <= 0.17D && !indestructible.getBoolean() && cTask.quest.tasks.size() > 1)
 		{
 			if (!editor && !isOwner(player))
 			{
 				return;
 			}
 
-			Class currentCore = cTaskData.task.getScreenCoreClass();
-			Class currentPart = cTaskData.task.getScreenPartClass();
+			currentCoreClass = cTask.getScreenCoreClass();
+			currentPartClass = cTask.getScreenPartClass();
 
-			if (taskIndex.getInt() >= cTaskData.task.quest.tasks.size() - 1)
+			if (taskIndex.getInt() >= cTask.quest.tasks.size() - 1)
 			{
 				taskIndex.setInt(0);
 			}
@@ -404,43 +405,11 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 			}
 
 			updateContainingBlockInfo();
-			QuestTask task = getTaskData().task;
+			cTask = getTask();
 
-			if (currentCore != task.getScreenCoreClass() || currentPart != task.getScreenPartClass())
+			if (cTask != null && (currentCoreClass != cTask.getScreenCoreClass() || currentPartClass != cTask.getScreenPartClass()))
 			{
-				boolean xaxis = getFacing().getAxis() == EnumFacing.Axis.X;
-
-				for (int by = 0; by < size * 2 + 1; by++)
-				{
-					for (int bx = -size; bx <= size; bx++)
-					{
-						int offX = xaxis ? 0 : bx;
-						int offZ = xaxis ? bx : 0;
-						BlockPos pos1 = new BlockPos(pos.getX() + offX, pos.getY() + by, pos.getZ() + offZ);
-						world.removeTileEntity(pos1);
-
-						if (bx == 0 && by == 0)
-						{
-							TileScreenCore core = task.createScreenCore(world);
-							core.setWorld(world);
-							core.setPos(pos1);
-							NBTTagCompound nbt = new NBTTagCompound();
-							writeData(nbt, EnumSaveType.SAVE);
-							core.readData(nbt, EnumSaveType.SAVE);
-							core.validate();
-							world.setTileEntity(pos1, core);
-						}
-						else
-						{
-							TileScreenPart part = task.createScreenPart(world);
-							part.setWorld(world);
-							part.setPos(pos1);
-							part.setOffset(offX, by, offZ);
-							part.validate();
-							world.setTileEntity(pos1, part);
-						}
-					}
-				}
+				updateTiles(cTask);
 			}
 
 			markDirty();
@@ -452,8 +421,8 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 			return;
 		}
 
-		String top1 = cTaskData.task.quest.getDisplayName().getUnformattedText();
-		String top2 = cTaskData.task.getDisplayName().getUnformattedText();
+		String top1 = cTask.quest.getDisplayName().getUnformattedText();
+		String top2 = cTask.getDisplayName().getUnformattedText();
 		double iconY = 0.5D;
 
 		if (!top1.isEmpty() && !top1.equalsIgnoreCase(top2))
@@ -465,6 +434,13 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 		{
 			if (!world.isRemote)
 			{
+				cTaskData = getTaskData();
+
+				if (cTaskData == null)
+				{
+					return;
+				}
+
 				if (cTaskData.canInsertItem() && cTaskData.task.getMaxProgress() > 0L && cTaskData.getProgress() < cTaskData.task.getMaxProgress())
 				{
 					ItemStack stack = player.getHeldItem(hand);
@@ -486,12 +462,56 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 		}
 	}
 
+	public void updateTiles(@Nullable QuestTask task)
+	{
+		boolean xaxis = getFacing().getAxis() == EnumFacing.Axis.X;
+
+		for (int by = 0; by < size * 2 + 1; by++)
+		{
+			for (int bx = -size; bx <= size; bx++)
+			{
+				int offX = xaxis ? 0 : bx;
+				int offZ = xaxis ? bx : 0;
+				BlockPos pos1 = new BlockPos(pos.getX() + offX, pos.getY() + by, pos.getZ() + offZ);
+				world.removeTileEntity(pos1);
+
+				if (bx == 0 && by == 0)
+				{
+					TileScreenCore core = task == null ? new TileScreenCore() : task.createScreenCore(world);
+					core.setWorld(world);
+					core.setPos(pos1);
+					NBTTagCompound nbt = new NBTTagCompound();
+					writeData(nbt, EnumSaveType.SAVE);
+					core.readData(nbt, EnumSaveType.SAVE);
+					core.validate();
+					world.setTileEntity(pos1, core);
+				}
+				else
+				{
+					TileScreenPart part = task == null ? new TileScreenPart() : task.createScreenPart(world);
+					part.setWorld(world);
+					part.setPos(pos1);
+					part.setOffset(offX, by, offZ);
+					part.validate();
+					world.setTileEntity(pos1, part);
+				}
+			}
+		}
+	}
+
 	@Override
 	public void onConfigSaved(ConfigGroup group, ICommandSender sender)
 	{
 		updateContainingBlockInfo();
 		markDirty();
 		BlockUtils.notifyBlockUpdate(world, pos, getBlockState());
+
+		cTask = getTask();
+
+		if (cTask != null && (currentCoreClass != cTask.getScreenCoreClass() || currentPartClass != cTask.getScreenPartClass()))
+		{
+			updateTiles(cTask);
+		}
 	}
 
 	@Override
