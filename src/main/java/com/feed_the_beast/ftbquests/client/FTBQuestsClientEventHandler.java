@@ -2,7 +2,6 @@ package com.feed_the_beast.ftbquests.client;
 
 import com.feed_the_beast.ftblib.events.CustomSidebarButtonTextEvent;
 import com.feed_the_beast.ftblib.events.client.CustomClickEvent;
-import com.feed_the_beast.ftblib.lib.OtherMods;
 import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.FTBQuestsItems;
@@ -12,15 +11,12 @@ import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.rewards.QuestReward;
 import com.feed_the_beast.ftbquests.tile.TileScreenCore;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.client.event.ModelRegistryEvent;
-import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
-import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
@@ -33,8 +29,6 @@ import net.minecraftforge.fml.relauncher.Side;
 public class FTBQuestsClientEventHandler
 {
 	private static final ResourceLocation QUESTS_BUTTON = new ResourceLocation(FTBQuests.MOD_ID, "quests");
-
-	public static TextureAtlasSprite spriteTank, spriteBatteryEmpty, spriteBatteryFull, spriteLightningEmpty, spriteLightningFull;
 
 	@SubscribeEvent
 	public static void registerModels(ModelRegistryEvent event)
@@ -115,20 +109,6 @@ public class FTBQuestsClientEventHandler
 			}
 
 			event.setCanceled(true);
-		}
-	}
-
-	@SubscribeEvent
-	public static void onTextureStitch(TextureStitchEvent.Pre event)
-	{
-		spriteTank = event.getMap().registerSprite(new ResourceLocation(FTBQuests.MOD_ID, "tasks/tank"));
-		spriteBatteryEmpty = event.getMap().registerSprite(new ResourceLocation(FTBQuests.MOD_ID, "tasks/battery_empty"));
-		spriteBatteryFull = event.getMap().registerSprite(new ResourceLocation(FTBQuests.MOD_ID, "tasks/battery_full"));
-
-		if (Loader.isModLoaded(OtherMods.IC2))
-		{
-			spriteLightningEmpty = event.getMap().registerSprite(new ResourceLocation(FTBQuests.MOD_ID, "tasks/lightning_empty"));
-			spriteLightningFull = event.getMap().registerSprite(new ResourceLocation(FTBQuests.MOD_ID, "tasks/lightning_full"));
 		}
 	}
 }

@@ -101,7 +101,7 @@ public class TileQuestChest extends TileBase implements IItemHandler, IConfigCal
 
 	public void openGui(EntityPlayerMP player)
 	{
-		if (!FTBQuests.canEdit(player))
+		if (!FTBQuests.canEdit(player) || !player.isSneaking())
 		{
 			return;
 		}
