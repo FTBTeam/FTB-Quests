@@ -1,16 +1,22 @@
 package com.feed_the_beast.ftbquests.tile;
 
 import com.feed_the_beast.ftblib.lib.config.ConfigBoolean;
+import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
+import com.feed_the_beast.ftblib.lib.config.ConfigNull;
 import com.feed_the_beast.ftblib.lib.config.ConfigTeam;
+import com.feed_the_beast.ftblib.lib.config.IConfigCallback;
+import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
 import com.feed_the_beast.ftblib.lib.tile.EnumSaveType;
 import com.feed_the_beast.ftblib.lib.tile.TileBase;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
+import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
@@ -20,10 +26,10 @@ import javax.annotation.Nullable;
 /**
  * @author LatvianModder
  */
-public class TileQuestChest extends TileBase implements IItemHandler
+public class TileQuestChest extends TileBase implements IItemHandler, IConfigCallback
 {
-	public final ConfigTeam team = new ConfigTeam("");
-	public final ConfigBoolean indestructible = new ConfigBoolean(false);
+	public String team = "";
+	public boolean indestructible = false;
 
 	private IProgressData cTeam;
 
@@ -32,10 +38,10 @@ public class TileQuestChest extends TileBase implements IItemHandler
 	{
 		if (!team.isEmpty())
 		{
-			nbt.setString("Team", team.getString());
+			nbt.setString("Team", team);
 		}
 
-		if (indestructible.getBoolean())
+		if (indestructible)
 		{
 			nbt.setBoolean("Indestructible", true);
 		}
@@ -44,8 +50,8 @@ public class TileQuestChest extends TileBase implements IItemHandler
 	@Override
 	protected void readData(NBTTagCompound nbt, EnumSaveType type)
 	{
-		team.setString(nbt.getString("Team"));
-		indestructible.setBoolean(nbt.getBoolean("Indestructible"));
+		team = nbt.getString("Team");
+		indestructible = nbt.getBoolean("Indestructible");
 	}
 
 	@Override
@@ -87,16 +93,42 @@ public class TileQuestChest extends TileBase implements IItemHandler
 		}
 		else if (cTeam == null)
 		{
-			cTeam = FTBQuests.PROXY.getQuestFile(world).getData(team.getString());
+			cTeam = FTBQuests.PROXY.getQuestFile(world).getData(team);
 		}
 
 		return cTeam;
 	}
 
-
 	public void openGui(EntityPlayerMP player)
 	{
+		if (!FTBQuests.canEdit(player))
+		{
+			return;
+		}
 
+		ConfigGroup group0 = ConfigGroup.newGroup("tile");
+		group0.setDisplayName(new TextComponentTranslation("tile.ftbquests.chest.name"));
+		ConfigGroup group = group0.getGroup("ftbquests.chest");
+
+		group.add("team", new ConfigTeam(team)
+		{
+			@Override
+			public void setString(String v)
+			{
+				team = v;
+			}
+		}, ConfigNull.INSTANCE).setDisplayName(new TextComponentTranslation("ftbquests.team"));
+
+		group.add("indestructible", new ConfigBoolean(indestructible)
+		{
+			@Override
+			public void setBoolean(boolean v)
+			{
+				indestructible = v;
+			}
+		}, new ConfigBoolean(false)).setDisplayName(new TextComponentTranslation("tile.ftbquests.screen.indestructible"));
+
+		FTBLibAPI.editServerConfig(player, group0, this);
 	}
 
 	@Override
@@ -121,7 +153,7 @@ public class TileQuestChest extends TileBase implements IItemHandler
 			return stack;
 		}
 
-		IProgressData teamData = file.getData(team.getString());
+		IProgressData teamData = file.getData(team);
 
 		if (teamData != null)
 		{
@@ -141,5 +173,17 @@ public class TileQuestChest extends TileBase implements IItemHandler
 	public int getSlotLimit(int slot)
 	{
 		return 64;
+	}
+
+	@Override
+	public void markDirty()
+	{
+		sendDirtyUpdate();
+	}
+
+	@Override
+	public void onConfigSaved(ConfigGroup group, ICommandSender sender)
+	{
+		markDirty();
 	}
 }

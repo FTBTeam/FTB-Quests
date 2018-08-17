@@ -121,7 +121,7 @@ public class BlockQuestChest extends BlockWithHorizontalFacing
 
 			if (tile.team.isEmpty() && placer instanceof EntityPlayerMP)
 			{
-				tile.team.setString(FTBLibAPI.getTeam(placer.getUniqueID()));
+				tile.team = FTBLibAPI.getTeam(placer.getUniqueID());
 			}
 		}
 	}
@@ -132,7 +132,7 @@ public class BlockQuestChest extends BlockWithHorizontalFacing
 	{
 		TileEntity tileEntity = world.getTileEntity(pos);
 
-		if (tileEntity instanceof TileQuestChest && ((TileQuestChest) tileEntity).indestructible.getBoolean())
+		if (tileEntity instanceof TileQuestChest && ((TileQuestChest) tileEntity).indestructible)
 		{
 			return -1F;
 		}
@@ -145,7 +145,7 @@ public class BlockQuestChest extends BlockWithHorizontalFacing
 	{
 		TileEntity tileEntity = world.getTileEntity(pos);
 
-		if (tileEntity instanceof TileQuestChest && ((TileQuestChest) tileEntity).indestructible.getBoolean())
+		if (tileEntity instanceof TileQuestChest && ((TileQuestChest) tileEntity).indestructible)
 		{
 			return Float.MAX_VALUE;
 		}
@@ -167,7 +167,7 @@ public class BlockQuestChest extends BlockWithHorizontalFacing
 
 		if (team.isEmpty())
 		{
-			team = ClientQuestFile.INSTANCE.teamId;
+			team = ClientQuestFile.existsWithTeam() ? ClientQuestFile.INSTANCE.self.teamID : "";
 		}
 
 		tooltip.add(I18n.format("ftbquests.team") + ": " + TextFormatting.DARK_GREEN + team);

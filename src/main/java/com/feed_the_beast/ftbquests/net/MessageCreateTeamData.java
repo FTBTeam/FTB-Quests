@@ -4,24 +4,26 @@ import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToClient;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
+import com.feed_the_beast.ftbquests.client.ClientQuestProgress;
 import com.feed_the_beast.ftbquests.gui.ClientQuestFile;
+import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * @author LatvianModder
  */
-public class MessageSyncEditingMode extends MessageToClient
+public class MessageCreateTeamData extends MessageToClient
 {
-	public boolean editingMode;
+	public String team;
 
-	public MessageSyncEditingMode()
+	public MessageCreateTeamData()
 	{
 	}
 
-	public MessageSyncEditingMode(boolean e)
+	public MessageCreateTeamData(String t)
 	{
-		editingMode = e;
+		team = t;
 	}
 
 	@Override
@@ -33,23 +35,29 @@ public class MessageSyncEditingMode extends MessageToClient
 	@Override
 	public void writeData(DataOut data)
 	{
-		data.writeBoolean(editingMode);
+		data.writeString(team);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
-		editingMode = data.readBoolean();
+		team = data.readString();
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void onMessage()
 	{
-		if (ClientQuestFile.exists() && ClientQuestFile.INSTANCE.editingMode != editingMode)
+		if (ClientQuestFile.exists())
 		{
-			ClientQuestFile.INSTANCE.editingMode = editingMode;
-			ClientQuestFile.INSTANCE.refreshGui(ClientQuestFile.INSTANCE);
+			ClientQuestProgress data = new ClientQuestProgress(team);
+
+			for (QuestTask task : ClientQuestFile.INSTANCE.allTasks)
+			{
+				data.createTaskData(task);
+			}
+
+			ClientQuestFile.INSTANCE.teamData.put(data.teamID, data);
 		}
 	}
 }

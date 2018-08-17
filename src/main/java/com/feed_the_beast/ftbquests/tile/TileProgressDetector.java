@@ -3,7 +3,6 @@ package com.feed_the_beast.ftbquests.tile;
 import com.feed_the_beast.ftblib.lib.config.ConfigBoolean;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigNull;
-import com.feed_the_beast.ftblib.lib.config.ConfigString;
 import com.feed_the_beast.ftblib.lib.config.ConfigTeam;
 import com.feed_the_beast.ftblib.lib.config.IConfigCallback;
 import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
@@ -29,9 +28,9 @@ import javax.annotation.Nullable;
  */
 public class TileProgressDetector extends TileBase implements ITickable, IConfigCallback
 {
-	public final ConfigTeam team = new ConfigTeam("");
-	public final ConfigQuestObject object = new ConfigQuestObject("*").addType(QuestObjectType.FILE).addType(QuestObjectType.CHAPTER).addType(QuestObjectType.QUEST).addType(QuestObjectType.TASK);
-	public final ConfigBoolean level = new ConfigBoolean(false);
+	public String team = "";
+	public String object = "*";
+	public boolean level = false;
 	public int redstoneOutput = 0;
 
 	private IProgressData cTeam;
@@ -42,22 +41,22 @@ public class TileProgressDetector extends TileBase implements ITickable, IConfig
 	{
 		if (!team.isEmpty())
 		{
-			nbt.setString("Team", team.getString());
+			nbt.setString("Team", team);
 		}
 
 		cObject = getObject();
 
 		if (cObject != null)
 		{
-			object.setString(cObject.getID());
+			object = cObject.getID();
 		}
 
 		if (!object.isEmpty())
 		{
-			nbt.setString("Object", object.getString());
+			nbt.setString("Object", object);
 		}
 
-		if (level.getBoolean())
+		if (level)
 		{
 			nbt.setBoolean("Level", true);
 		}
@@ -71,9 +70,9 @@ public class TileProgressDetector extends TileBase implements ITickable, IConfig
 	@Override
 	protected void readData(NBTTagCompound nbt, EnumSaveType type)
 	{
-		team.setString(nbt.getString("Team"));
-		object.setString(nbt.getString("Object"));
-		level.setBoolean(nbt.getBoolean("Level"));
+		team = nbt.getString("Team");
+		object = nbt.getString("Object");
+		level = nbt.getBoolean("Level");
 		redstoneOutput = nbt.getByte("RedstoneOutput");
 		updateContainingBlockInfo();
 	}
@@ -114,7 +113,7 @@ public class TileProgressDetector extends TileBase implements ITickable, IConfig
 		}
 		else if (cTeam == null)
 		{
-			cTeam = FTBQuests.PROXY.getQuestFile(world).getData(team.getString());
+			cTeam = FTBQuests.PROXY.getQuestFile(world).getData(team);
 		}
 
 		return cTeam;
@@ -129,7 +128,7 @@ public class TileProgressDetector extends TileBase implements ITickable, IConfig
 		}
 		else if (cObject == null || cObject.invalid)
 		{
-			cObject = FTBQuests.PROXY.getQuestFile(world).getProgressing(object.getString());
+			cObject = FTBQuests.PROXY.getQuestFile(world).getProgressing(object);
 		}
 
 		return cObject;
@@ -171,7 +170,7 @@ public class TileProgressDetector extends TileBase implements ITickable, IConfig
 			{
 				redstoneOutput = 15;
 			}
-			else if (rel > 0D && level.getBoolean())
+			else if (rel > 0D && level)
 			{
 				redstoneOutput = 1 + (int) (rel * 14);
 			}
@@ -190,15 +189,40 @@ public class TileProgressDetector extends TileBase implements ITickable, IConfig
 
 		if (cObject != null)
 		{
-			object.setString(cObject.getID());
+			object = cObject.getID();
 		}
 
 		ConfigGroup group0 = ConfigGroup.newGroup("tile");
 		group0.setDisplayName(new TextComponentTranslation("tile.ftbquests.progress_detector.name"));
 		ConfigGroup group = group0.getGroup("ftbquests.progress_detector");
-		group.add("team", team, new ConfigString("")).setDisplayName(new TextComponentTranslation("ftbquests.team"));
-		group.add("object", object, ConfigNull.INSTANCE);
-		group.add("level", level, new ConfigBoolean(false));
+
+		group.add("team", new ConfigTeam(team)
+		{
+			@Override
+			public void setString(String v)
+			{
+				team = v;
+			}
+		}, ConfigNull.INSTANCE).setDisplayName(new TextComponentTranslation("ftbquests.team"));
+
+		group.add("object", new ConfigQuestObject(object)
+		{
+			@Override
+			public void setString(String v)
+			{
+				object = v;
+			}
+		}.addType(QuestObjectType.FILE).addType(QuestObjectType.CHAPTER).addType(QuestObjectType.QUEST).addType(QuestObjectType.TASK), new ConfigQuestObject("*"));
+
+		group.add("level", new ConfigBoolean(level)
+		{
+			@Override
+			public void setBoolean(boolean v)
+			{
+				level = v;
+			}
+		}, new ConfigBoolean(false));
+
 		FTBLibAPI.editServerConfig(player, group0, this);
 	}
 }

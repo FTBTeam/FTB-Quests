@@ -4,14 +4,15 @@ import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftblib.lib.gui.GuiBase;
 import com.feed_the_beast.ftbquests.client.ClientQuestProgress;
 import com.feed_the_beast.ftbquests.net.MessageSyncQuests;
-import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import com.feed_the_beast.ftbquests.util.FTBQuestsTeamData;
+import net.minecraft.nbt.NBTTagCompound;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author LatvianModder
@@ -30,30 +31,34 @@ public class ClientQuestFile extends QuestFile
 		return exists() && INSTANCE.self != null;
 	}
 
-	public final String teamId;
-	public final ClientQuestProgress self;
+	public final Map<String, ClientQuestProgress> teamData;
+	public ClientQuestProgress self;
 	public GuiQuestTree questTreeGui;
 	public GuiBase questGui;
 	public boolean editingMode;
 
 	public ClientQuestFile(MessageSyncQuests message, @Nullable ClientQuestFile prev)
 	{
-		teamId = message.team;
-		self = teamId.isEmpty() ? null : new ClientQuestProgress(message.team);
-		editingMode = message.editingMode;
-
 		readData(message.quests);
+		teamData = new HashMap<>();
 
-		if (self != null)
+		for (String team : message.teamData.getKeySet())
 		{
+			ClientQuestProgress data = new ClientQuestProgress(team);
+
 			for (QuestTask task : allTasks)
 			{
-				self.createTaskData(task);
+				data.createTaskData(task);
 			}
 
-			FTBQuestsTeamData.deserializeTaskData(self.taskData.values(), message.taskData);
-			FTBQuestsTeamData.deserializeRewardData(this, self.claimedRewards, message.claimedRewards);
+			NBTTagCompound nbt = message.teamData.getCompoundTag(team);
+			FTBQuestsTeamData.deserializeTaskData(data.taskData.values(), nbt.getCompoundTag("T"));
+			FTBQuestsTeamData.deserializeRewardData(this, data.claimedRewards, nbt.getCompoundTag("R"));
+			teamData.put(data.teamID, data);
 		}
+
+		self = message.team.isEmpty() ? null : teamData.get(message.team);
+		editingMode = message.editingMode;
 
 		refreshGui(prev);
 	}
@@ -126,22 +131,12 @@ public class ClientQuestFile extends QuestFile
 	@Override
 	public ClientQuestProgress getData(String team)
 	{
-		if (self != null && team.equals(self.teamID))
-		{
-			return self;
-		}
-
-		return null;
+		return teamData.get(team);
 	}
 
 	@Override
-	public Collection<IProgressData> getAllData()
+	public Collection<ClientQuestProgress> getAllData()
 	{
-		if (self == null)
-		{
-			return Collections.emptyList();
-		}
-
-		return Collections.singleton(self);
+		return teamData.values();
 	}
 }

@@ -1,5 +1,6 @@
 package com.feed_the_beast.ftbquests.block;
 
+import com.feed_the_beast.ftblib.lib.util.BlockUtils;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.FTBQuestsItems;
@@ -278,7 +279,7 @@ public class BlockProgressScreen extends BlockWithHorizontalFacing
 		{
 			TileProgressScreenCore core = ((TileProgressScreenBase) tileEntity).getScreen();
 
-			if (core != null && core.indestructible.getBoolean())
+			if (core != null && core.indestructible)
 			{
 				return -1F;
 			}
@@ -296,7 +297,7 @@ public class BlockProgressScreen extends BlockWithHorizontalFacing
 		{
 			TileProgressScreenCore core = ((TileProgressScreenBase) tileEntity).getScreen();
 
-			if (core != null && core.indestructible.getBoolean())
+			if (core != null && core.indestructible)
 			{
 				return Float.MAX_VALUE;
 			}
@@ -315,9 +316,9 @@ public class BlockProgressScreen extends BlockWithHorizontalFacing
 		{
 			TileProgressScreenCore core = ((TileProgressScreenBase) tileEntity).getScreen();
 
-			if (core != null && !core.skin.isEmpty())
+			if (core != null && core.skin != BlockUtils.AIR_STATE)
 			{
-				return core.skin.getBlockState();
+				return core.skin;
 			}
 		}
 
@@ -339,7 +340,7 @@ public class BlockProgressScreen extends BlockWithHorizontalFacing
 
 		if (team.isEmpty())
 		{
-			team = ClientQuestFile.INSTANCE.teamId;
+			team = ClientQuestFile.existsWithTeam() ? ClientQuestFile.INSTANCE.self.teamID : "";
 		}
 
 		tooltip.add(I18n.format("tile.ftbquests.screen.size") + ": " + TextFormatting.GOLD + (1 + size * 2) + " x " + (1 + size * 2));
