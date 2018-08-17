@@ -159,16 +159,23 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 
 		if (cTask != null && cTask.getMaxProgress() > 0)
 		{
+			cTaskData = getTaskData();
+
+			if (cTaskData == null)
+			{
+				return false;
+			}
+
 			if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)
 			{
-				if (cTask.canInsertItem() && getTaskData() != null)
+				if (cTask.canInsertItem() && cTaskData != null)
 				{
 					return true;
 				}
 			}
 			else
 			{
-				if (getTaskData().hasCapability(capability, facing) && cTaskData.task.quest.canStartTasks(cTaskData.data))
+				if (cTaskData.hasCapability(capability, facing) && cTaskData.task.quest.canStartTasks(cTaskData.data))
 				{
 					return true;
 				}
@@ -186,16 +193,23 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 
 		if (cTask != null && cTask.getMaxProgress() > 0)
 		{
+			cTaskData = getTaskData();
+
+			if (cTaskData == null)
+			{
+				return null;
+			}
+
 			if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)
 			{
-				if (cTask.canInsertItem() && getTaskData() != null)
+				if (cTask.canInsertItem())
 				{
-					return (T) getTaskData();
+					return (T) cTaskData;
 				}
 			}
 			else
 			{
-				T object = getTaskData().getCapability(capability, facing);
+				T object = cTaskData.getCapability(capability, facing);
 
 				if (object != null && cTaskData.task.quest.canStartTasks(cTaskData.data))
 				{
