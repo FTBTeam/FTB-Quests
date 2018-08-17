@@ -511,14 +511,7 @@ public class GuiQuest extends GuiBase
 				title.setSize(width, 35);
 
 				shortDescription.text.clear();
-
-				for (String s : listFormattedStringToWidth(quest.description.getString(), width - 60))
-				{
-					if (!s.trim().isEmpty())
-					{
-						shortDescription.text.add(s);
-					}
-				}
+				shortDescription.text.addAll(listFormattedStringToWidth(quest.description.getString(), width - 60));
 
 				shortDescription.setSize(width, shortDescription.text.size() * 12 + (shortDescription.text.isEmpty() ? 0 : 15));
 

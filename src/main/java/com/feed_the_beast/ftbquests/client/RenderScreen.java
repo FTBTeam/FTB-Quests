@@ -9,7 +9,6 @@ import com.feed_the_beast.ftbquests.tile.TileScreenBase;
 import com.feed_the_beast.ftbquests.tile.TileScreenCore;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.RayTraceResult;
@@ -152,8 +151,6 @@ public class RenderScreen extends TileEntitySpecialRenderer<TileScreenCore>
 		GlStateManager.pushMatrix();
 		GlStateManager.translate(0.5D, iconY, 0D);
 		GlStateManager.scale(0.45D, 0.45D, 1D);
-		ClientUtils.MC.getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
-		ClientUtils.MC.getTextureManager().getTexture(TextureMap.LOCATION_BLOCKS_TEXTURE).setBlurMipmap(false, false);
 		GlStateManager.enableRescaleNormal();
 		GlStateManager.alphaFunc(GL11.GL_GREATER, 0.1F);
 		GlStateManager.enableBlend();
@@ -162,8 +159,6 @@ public class RenderScreen extends TileEntitySpecialRenderer<TileScreenCore>
 		task.renderOnScreen(data);
 		GlStateManager.disableRescaleNormal();
 		GlStateManager.disableLighting();
-		ClientUtils.MC.getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
-		ClientUtils.MC.getTextureManager().getTexture(TextureMap.LOCATION_BLOCKS_TEXTURE).restoreLastBlurMipmap();
 		GlStateManager.popMatrix();
 
 		font.setUnicodeFlag(flag);

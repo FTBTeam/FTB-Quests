@@ -5,10 +5,12 @@ import com.feed_the_beast.ftblib.lib.config.ConfigInt;
 import com.feed_the_beast.ftblib.lib.config.ConfigLong;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
+import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.common.capabilities.Capability;
@@ -24,6 +26,8 @@ import javax.annotation.Nullable;
 public class ForgeEnergyTask extends QuestTask
 {
 	public static final String ID = "forge_energy";
+	private static final ResourceLocation BATTERY_EMPTY_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "textures/tasks/battery_empty.png");
+	private static final ResourceLocation BATTERY_FULL_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "textures/tasks/battery_full.png");
 
 	public final ConfigLong value;
 	public final ConfigInt maxInput;

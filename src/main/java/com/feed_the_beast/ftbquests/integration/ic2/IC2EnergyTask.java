@@ -4,6 +4,7 @@ import com.feed_the_beast.ftblib.lib.config.ConfigDouble;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
+import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
@@ -15,6 +16,7 @@ import net.minecraft.nbt.NBTPrimitive;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagDouble;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
@@ -28,6 +30,8 @@ import javax.annotation.Nullable;
 public class IC2EnergyTask extends QuestTask
 {
 	public static final String ID = "ic2_energy";
+	private static final ResourceLocation LIGHTNING_EMPTY_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "textures/tasks/lightning_empty.png");
+	private static final ResourceLocation LIGHTNING_FULL_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "textures/tasks/lightning_full.png");
 
 	public final ConfigDouble value;
 	public final ConfigDouble maxInput;

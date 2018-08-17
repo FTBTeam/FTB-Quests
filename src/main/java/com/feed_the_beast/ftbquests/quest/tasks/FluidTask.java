@@ -8,16 +8,18 @@ import com.feed_the_beast.ftblib.lib.config.ConfigLong;
 import com.feed_the_beast.ftblib.lib.config.ConfigNBT;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
-import com.feed_the_beast.ftbquests.client.FTBQuestsClientEventHandler;
+import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraftforge.common.capabilities.Capability;
@@ -44,6 +46,7 @@ import javax.annotation.Nullable;
 public class FluidTask extends QuestTask
 {
 	public static final String ID = "fluid";
+	private static final ResourceLocation TANK_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "textures/tasks/tank.png");
 
 	public final ConfigFluid fluid;
 	public final ConfigNBT fluidNBT;
@@ -171,21 +174,18 @@ public class FluidTask extends QuestTask
 	{
 		Tessellator tessellator = Tessellator.getInstance();
 		BufferBuilder buffer = tessellator.getBuffer();
+
+		ClientUtils.MC.getTextureManager().bindTexture(TANK_TEXTURE);
 		buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
-		TextureAtlasSprite sprite = FTBQuestsClientEventHandler.spriteTank;
 		double x = -0.5;
 		double y = -0.5 - 1D / 32D;
 		double w = 1;
 		double h = 33D / 32D;
 		double z = 0;
-		double u0 = sprite.getMinU();
-		double v0 = sprite.getMinV();
-		double u1 = sprite.getMaxU();
-		double v1 = sprite.getMaxV();
-		buffer.pos(x, y + h, z).tex(u0, v1).endVertex();
-		buffer.pos(x + w, y + h, z).tex(u1, v1).endVertex();
-		buffer.pos(x + w, y, z).tex(u1, v0).endVertex();
-		buffer.pos(x, y, z).tex(u0, v0).endVertex();
+		buffer.pos(x, y + h, z).tex(0, 1).endVertex();
+		buffer.pos(x + w, y + h, z).tex(1, 1).endVertex();
+		buffer.pos(x + w, y, z).tex(1, 0).endVertex();
+		buffer.pos(x, y, z).tex(0, 0).endVertex();
 		tessellator.draw();
 
 		if (data != null && getMaxProgress() > 0L && data.getProgress() > 0L)
@@ -202,22 +202,26 @@ public class FluidTask extends QuestTask
 			z = 0.003D;
 
 			FluidStack stack = createFluidStack(Fluid.BUCKET_VOLUME);
-			sprite = ClientUtils.MC.getTextureMapBlocks().getAtlasSprite(stack.getFluid().getStill(stack).toString());
+			TextureAtlasSprite sprite = ClientUtils.MC.getTextureMapBlocks().getAtlasSprite(stack.getFluid().getStill(stack).toString());
 			int color = stack.getFluid().getColor(stack);
 			int alpha = (color >> 24) & 0xFF;
 			int red = (color >> 16) & 0xFF;
 			int green = (color >> 8) & 0xFF;
 			int blue = color & 0xFF;
-			u0 = sprite.getMinU();
-			v0 = sprite.getMinV() + (sprite.getMaxV() - sprite.getMinV()) * (1D - r);
-			u1 = sprite.getMaxU();
-			v1 = sprite.getMaxV();
+			double u0 = sprite.getMinU();
+			double v0 = sprite.getMinV() + (sprite.getMaxV() - sprite.getMinV()) * (1D - r);
+			double u1 = sprite.getMaxU();
+			double v1 = sprite.getMaxV();
+
+			ClientUtils.MC.getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
+			ClientUtils.MC.getTextureManager().getTexture(TextureMap.LOCATION_BLOCKS_TEXTURE).setBlurMipmap(false, false);
 			buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
 			buffer.pos(x, y + h, z).tex(u0, v1).color(red, green, blue, alpha).endVertex();
 			buffer.pos(x + w, y + h, z).tex(u1, v1).color(red, green, blue, alpha).endVertex();
 			buffer.pos(x + w, y, z).tex(u1, v0).color(red, green, blue, alpha).endVertex();
 			buffer.pos(x, y, z).tex(u0, v0).color(red, green, blue, alpha).endVertex();
 			tessellator.draw();
+			ClientUtils.MC.getTextureManager().getTexture(TextureMap.LOCATION_BLOCKS_TEXTURE).restoreLastBlurMipmap();
 		}
 	}
 
