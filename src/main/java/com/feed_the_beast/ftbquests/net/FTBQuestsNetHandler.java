@@ -19,6 +19,9 @@ public class FTBQuestsNetHandler
 		GENERAL.register(new MessageClaimReward());
 		GENERAL.register(new MessageSyncEditingMode());
 		GENERAL.register(new MessageGetEmergencyItems());
+		GENERAL.register(new MessageCreateTeamData());
+		GENERAL.register(new MessageDeleteTeamData());
+		GENERAL.register(new MessageChangedTeam());
 
 		FTBQuestsEditNetHandler.init();
 	}

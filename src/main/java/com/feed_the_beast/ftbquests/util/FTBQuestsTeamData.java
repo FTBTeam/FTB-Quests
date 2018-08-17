@@ -2,6 +2,7 @@ package com.feed_the_beast.ftbquests.util;
 
 import com.feed_the_beast.ftblib.events.team.ForgeTeamCreatedEvent;
 import com.feed_the_beast.ftblib.events.team.ForgeTeamDataEvent;
+import com.feed_the_beast.ftblib.events.team.ForgeTeamDeletedEvent;
 import com.feed_the_beast.ftblib.events.team.ForgeTeamLoadedEvent;
 import com.feed_the_beast.ftblib.events.team.ForgeTeamPlayerJoinedEvent;
 import com.feed_the_beast.ftblib.events.team.ForgeTeamPlayerLeftEvent;
@@ -12,6 +13,9 @@ import com.feed_the_beast.ftblib.lib.data.TeamData;
 import com.feed_the_beast.ftblib.lib.util.FileUtils;
 import com.feed_the_beast.ftblib.lib.util.NBTUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
+import com.feed_the_beast.ftbquests.net.MessageChangedTeam;
+import com.feed_the_beast.ftbquests.net.MessageCreateTeamData;
+import com.feed_the_beast.ftbquests.net.MessageDeleteTeamData;
 import com.feed_the_beast.ftbquests.net.MessageUpdateTaskProgress;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.Quest;
@@ -58,7 +62,7 @@ public class FTBQuestsTeamData extends TeamData implements IProgressData
 	}
 
 	@SubscribeEvent
-	public static void saveData(ForgeTeamSavedEvent event)
+	public static void onTeamSaved(ForgeTeamSavedEvent event)
 	{
 		NBTTagCompound nbt = new NBTTagCompound();
 		FTBQuestsTeamData data = get(event.getTeam());
@@ -77,7 +81,7 @@ public class FTBQuestsTeamData extends TeamData implements IProgressData
 	}
 
 	@SubscribeEvent
-	public static void loadData(ForgeTeamLoadedEvent event)
+	public static void onTeamLoaded(ForgeTeamLoadedEvent event)
 	{
 		FTBQuestsTeamData data = get(event.getTeam());
 
@@ -101,16 +105,19 @@ public class FTBQuestsTeamData extends TeamData implements IProgressData
 	{
 		FTBQuestsTeamData data = get(event.getTeam());
 
-		for (QuestChapter chapter : ServerQuestFile.INSTANCE.chapters)
+		for (QuestTask task : ServerQuestFile.INSTANCE.allTasks)
 		{
-			for (Quest quest : chapter.quests)
-			{
-				for (QuestTask task : quest.tasks)
-				{
-					data.createTaskData(task);
-				}
-			}
+			data.createTaskData(task);
 		}
+
+		new MessageCreateTeamData(event.getTeam().getName()).sendToAll();
+	}
+
+	@SubscribeEvent
+	public static void onTeamDeleted(ForgeTeamDeletedEvent event)
+	{
+		FileUtils.delete(event.getTeam().getDataFile("ftbquests"));
+		new MessageDeleteTeamData(event.getTeam().getName()).sendToAll();
 	}
 
 	@SubscribeEvent
@@ -118,7 +125,7 @@ public class FTBQuestsTeamData extends TeamData implements IProgressData
 	{
 		if (event.getPlayer().isOnline())
 		{
-			ServerQuestFile.INSTANCE.sync(event.getPlayer().getPlayer());
+			new MessageChangedTeam("").sendTo(event.getPlayer().getPlayer());
 		}
 	}
 
@@ -127,7 +134,7 @@ public class FTBQuestsTeamData extends TeamData implements IProgressData
 	{
 		if (event.getPlayer().isOnline())
 		{
-			ServerQuestFile.INSTANCE.sync(event.getPlayer().getPlayer());
+			new MessageChangedTeam(event.getTeam().getName()).sendTo(event.getPlayer().getPlayer());
 		}
 	}
 

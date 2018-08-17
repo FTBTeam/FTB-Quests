@@ -7,6 +7,7 @@ import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.data.AdminPanelAction;
 import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
 import com.feed_the_beast.ftblib.lib.data.ForgePlayer;
+import com.feed_the_beast.ftblib.lib.data.ForgeTeam;
 import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftbquests.block.BlockProgressDetector;
 import com.feed_the_beast.ftbquests.block.BlockProgressScreen;
@@ -16,6 +17,7 @@ import com.feed_the_beast.ftbquests.block.BlockScreen;
 import com.feed_the_beast.ftbquests.block.BlockScreenPart;
 import com.feed_the_beast.ftbquests.block.ItemBlockProgressScreen;
 import com.feed_the_beast.ftbquests.block.ItemBlockScreen;
+import com.feed_the_beast.ftbquests.net.MessageSyncQuests;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.tile.TileProgressDetector;
 import com.feed_the_beast.ftbquests.tile.TileProgressScreenCore;
@@ -24,8 +26,10 @@ import com.feed_the_beast.ftbquests.tile.TileQuestChest;
 import com.feed_the_beast.ftbquests.tile.TileScreenCore;
 import com.feed_the_beast.ftbquests.tile.TileScreenPart;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
+import com.feed_the_beast.ftbquests.util.FTBQuestsTeamData;
 import com.feed_the_beast.ftbquests.util.FTBQuestsWorldData;
 import net.minecraft.block.Block;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.nbt.NBTTagCompound;
@@ -75,7 +79,33 @@ public class FTBQuestsEventHandler
 	@SubscribeEvent
 	public static void onPlayerLoggedIn(ForgePlayerLoggedInEvent event)
 	{
-		ServerQuestFile.INSTANCE.sync(event.getPlayer().getPlayer());
+		EntityPlayerMP player = event.getPlayer().getPlayer();
+		NBTTagCompound teamData = new NBTTagCompound();
+
+		for (ForgeTeam team : event.getUniverse().getTeams())
+		{
+			NBTTagCompound nbt = new NBTTagCompound();
+			FTBQuestsTeamData data = FTBQuestsTeamData.get(team);
+			NBTTagCompound taskDataTag = data.serializeTaskData();
+
+			if (!taskDataTag.isEmpty())
+			{
+				nbt.setTag("T", taskDataTag);
+			}
+
+			NBTTagCompound claimedRewards = FTBQuestsTeamData.serializeRewardData(data.getClaimedRewards(player));
+
+			if (!claimedRewards.isEmpty())
+			{
+				nbt.setTag("R", claimedRewards);
+			}
+
+			teamData.setTag(team.getName(), nbt);
+		}
+
+		NBTTagCompound nbt = new NBTTagCompound();
+		ServerQuestFile.INSTANCE.writeData(nbt);
+		new MessageSyncQuests(nbt, event.getPlayer().team.getName(), teamData, FTBQuests.canEdit(player)).sendTo(player);
 	}
 
 	@SubscribeEvent

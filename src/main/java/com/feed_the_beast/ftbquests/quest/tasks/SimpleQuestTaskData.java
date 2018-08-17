@@ -3,7 +3,10 @@ package com.feed_the_beast.ftbquests.quest.tasks;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTPrimitive;
+import net.minecraft.nbt.NBTTagByte;
+import net.minecraft.nbt.NBTTagInt;
 import net.minecraft.nbt.NBTTagLong;
+import net.minecraft.nbt.NBTTagShort;
 
 import javax.annotation.Nullable;
 
@@ -12,6 +15,29 @@ import javax.annotation.Nullable;
  */
 public abstract class SimpleQuestTaskData<T extends QuestTask> extends QuestTaskData<T>
 {
+	@Nullable
+	public static NBTBase longToNBT(long value)
+	{
+		if (value <= 0L)
+		{
+			return null;
+		}
+		else if (value <= Byte.MAX_VALUE)
+		{
+			return new NBTTagByte((byte) value);
+		}
+		else if (value <= Short.MAX_VALUE)
+		{
+			return new NBTTagShort((short) value);
+		}
+		else if (value <= Integer.MAX_VALUE)
+		{
+			return new NBTTagInt((int) value);
+		}
+
+		return new NBTTagLong(value);
+	}
+
 	public long progress = 0L;
 
 	public SimpleQuestTaskData(T q, IProgressData d)
@@ -23,7 +49,7 @@ public abstract class SimpleQuestTaskData<T extends QuestTask> extends QuestTask
 	@Override
 	public NBTBase toNBT()
 	{
-		return progress <= 0L ? null : new NBTTagLong(progress);
+		return progress <= 0L ? null : longToNBT(progress);
 	}
 
 	@Override

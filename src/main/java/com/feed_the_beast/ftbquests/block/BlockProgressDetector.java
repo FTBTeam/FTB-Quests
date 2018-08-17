@@ -97,12 +97,12 @@ public class BlockProgressDetector extends Block
 
 			if (tile.team.isEmpty() && placer instanceof EntityPlayerMP)
 			{
-				tile.team.setString(FTBLibAPI.getTeam(placer.getUniqueID()));
+				tile.team = FTBLibAPI.getTeam(placer.getUniqueID());
 			}
 
 			if (tile.object.isEmpty())
 			{
-				tile.object.setString("*");
+				tile.object = "*";
 			}
 		}
 	}
@@ -142,7 +142,7 @@ public class BlockProgressDetector extends Block
 
 		if (team.isEmpty())
 		{
-			team = ClientQuestFile.INSTANCE.teamId;
+			team = ClientQuestFile.existsWithTeam() ? ClientQuestFile.INSTANCE.self.teamID : "";
 		}
 
 		tooltip.add(I18n.format("ftbquests.team") + ": " + TextFormatting.DARK_GREEN + team);

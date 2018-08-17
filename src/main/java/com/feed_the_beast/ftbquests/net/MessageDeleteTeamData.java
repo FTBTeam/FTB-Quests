@@ -11,17 +11,17 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 /**
  * @author LatvianModder
  */
-public class MessageSyncEditingMode extends MessageToClient
+public class MessageDeleteTeamData extends MessageToClient
 {
-	public boolean editingMode;
+	public String team;
 
-	public MessageSyncEditingMode()
+	public MessageDeleteTeamData()
 	{
 	}
 
-	public MessageSyncEditingMode(boolean e)
+	public MessageDeleteTeamData(String t)
 	{
-		editingMode = e;
+		team = t;
 	}
 
 	@Override
@@ -33,23 +33,22 @@ public class MessageSyncEditingMode extends MessageToClient
 	@Override
 	public void writeData(DataOut data)
 	{
-		data.writeBoolean(editingMode);
+		data.writeString(team);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
-		editingMode = data.readBoolean();
+		team = data.readString();
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void onMessage()
 	{
-		if (ClientQuestFile.exists() && ClientQuestFile.INSTANCE.editingMode != editingMode)
+		if (ClientQuestFile.exists() && ClientQuestFile.INSTANCE.teamData.remove(team) == ClientQuestFile.INSTANCE.self)
 		{
-			ClientQuestFile.INSTANCE.editingMode = editingMode;
-			ClientQuestFile.INSTANCE.refreshGui(ClientQuestFile.INSTANCE);
+			ClientQuestFile.INSTANCE.self = null;
 		}
 	}
 }

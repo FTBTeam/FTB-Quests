@@ -770,7 +770,7 @@ public class GuiQuestTree extends GuiBase
 
 	private void addChapter()
 	{
-		new GuiEditConfigValue("title", new ConfigString("", Pattern.compile("^.{1,}$")), (value, set) ->
+		new GuiEditConfigValue("title", new ConfigString("", Pattern.compile("^.+$")), (value, set) ->
 		{
 			GuiQuestTree.this.openGui();
 

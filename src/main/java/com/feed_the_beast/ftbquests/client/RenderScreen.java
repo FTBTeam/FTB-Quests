@@ -88,7 +88,7 @@ public class RenderScreen extends TileEntitySpecialRenderer<TileScreenCore>
 			top2 = "";
 		}
 
-		if (my >= 0D && my <= 0.17D && !screen.indestructible.getBoolean() && task.quest.tasks.size() > 1)
+		if (my >= 0D && my <= 0.17D && !screen.indestructible && task.quest.tasks.size() > 1)
 		{
 			top1 = TextFormatting.GOLD + top1;
 		}

@@ -4,10 +4,8 @@ import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToClient;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
-import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.client.ClientQuestProgress;
 import com.feed_the_beast.ftbquests.gui.ClientQuestFile;
-import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import net.minecraft.nbt.NBTBase;
 import net.minecraftforge.fml.relauncher.Side;
@@ -44,46 +42,16 @@ public class MessageUpdateTaskProgress extends MessageToClient
 	@Override
 	public void writeData(DataOut data)
 	{
-		QuestFile file = FTBQuests.PROXY.getQuestFile(false);
-
 		data.writeString(team);
-
-		if (file.allTasks.size() <= 255)
-		{
-			data.writeByte(task);
-		}
-		else if (file.allTasks.size() <= 65535)
-		{
-			data.writeShort(task);
-		}
-		else
-		{
-			data.writeInt(task);
-		}
-
+		data.writeShort(task);
 		data.writeNBTBase(nbt);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
-		QuestFile file = FTBQuests.PROXY.getQuestFile(true);
-
 		team = data.readString();
-
-		if (file.allTasks.size() <= 255)
-		{
-			task = data.readUnsignedByte();
-		}
-		else if (file.allTasks.size() <= 65535)
-		{
-			task = data.readUnsignedShort();
-		}
-		else
-		{
-			task = data.readInt();
-		}
-
+		task = data.readUnsignedShort();
 		nbt = data.readNBTBase();
 	}
 

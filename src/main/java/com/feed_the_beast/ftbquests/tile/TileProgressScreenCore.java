@@ -4,7 +4,6 @@ import com.feed_the_beast.ftblib.lib.config.ConfigBlockState;
 import com.feed_the_beast.ftblib.lib.config.ConfigBoolean;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigNull;
-import com.feed_the_beast.ftblib.lib.config.ConfigString;
 import com.feed_the_beast.ftblib.lib.config.ConfigTeam;
 import com.feed_the_beast.ftblib.lib.config.IConfigCallback;
 import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
@@ -37,11 +36,11 @@ import javax.annotation.Nullable;
 public class TileProgressScreenCore extends TileProgressScreenBase implements IConfigCallback
 {
 	public EnumFacing facing;
-	public final ConfigTeam team = new ConfigTeam("");
-	public final ConfigQuestObject chapter = new ConfigQuestObject("").addType(QuestObjectType.CHAPTER);
+	public String team = "";
+	public String chapter = "";
 	public int size = 0;
-	public final ConfigBoolean indestructible = new ConfigBoolean(false);
-	public final ConfigBlockState skin = new ConfigBlockState(BlockUtils.AIR_STATE);
+	public boolean indestructible = false;
+	public IBlockState skin = BlockUtils.AIR_STATE;
 
 	private IProgressData cOwner;
 	private QuestChapter cChapter;
@@ -49,56 +48,54 @@ public class TileProgressScreenCore extends TileProgressScreenBase implements IC
 	@Override
 	protected void writeData(NBTTagCompound nbt, EnumSaveType type)
 	{
-		nbt.setString("Facing", getFacing().getName());
-		writeScreenData(nbt);
-	}
+		if (!type.item)
+		{
+			nbt.setString("Facing", getFacing().getName());
+		}
 
-	private void writeScreenData(NBTTagCompound nbt)
-	{
 		if (!team.isEmpty())
 		{
-			nbt.setString("Team", team.getString());
+			nbt.setString("Team", team);
 		}
 
 		cChapter = getChapter();
 
 		if (cChapter != null)
 		{
-			chapter.setString(cChapter.getID());
+			chapter = cChapter.getID();
 		}
 
-		nbt.setString("Chapter", chapter.getString());
+		nbt.setString("Chapter", chapter);
 
 		if (size > 0)
 		{
 			nbt.setByte("Size", (byte) size);
 		}
 
-		if (indestructible.getBoolean())
+		if (indestructible)
 		{
 			nbt.setBoolean("Indestructible", true);
 		}
 
-		if (!skin.isEmpty())
+		if (skin != BlockUtils.AIR_STATE)
 		{
-			nbt.setString("Skin", skin.getString());
+			nbt.setString("Skin", BlockUtils.getNameFromState(skin));
 		}
 	}
 
 	@Override
 	protected void readData(NBTTagCompound nbt, EnumSaveType type)
 	{
-		facing = EnumFacing.byName(nbt.getString("Facing"));
-		readScreenData(nbt);
-	}
+		if (!type.item)
+		{
+			facing = EnumFacing.byName(nbt.getString("Facing"));
+		}
 
-	private void readScreenData(NBTTagCompound nbt)
-	{
-		team.setString(nbt.getString("Owner"));
-		chapter.setString(nbt.getString("Quest"));
+		team = nbt.getString("Owner");
+		chapter = nbt.getString("Quest");
 		size = nbt.getByte("Size");
-		indestructible.setBoolean(nbt.getBoolean("Indestructible"));
-		skin.setValueFromString(null, nbt.getString("Skin"), false);
+		indestructible = nbt.getBoolean("Indestructible");
+		skin = BlockUtils.getStateFromName(nbt.getString("Skin"));
 		updateContainingBlockInfo();
 	}
 
@@ -106,7 +103,7 @@ public class TileProgressScreenCore extends TileProgressScreenBase implements IC
 	public void writeToItem(ItemStack stack)
 	{
 		NBTTagCompound nbt = new NBTTagCompound();
-		writeScreenData(nbt);
+		writeData(nbt, EnumSaveType.ITEM);
 
 		if (!nbt.isEmpty())
 		{
@@ -118,7 +115,7 @@ public class TileProgressScreenCore extends TileProgressScreenBase implements IC
 	public void readFromItem(ItemStack stack)
 	{
 		NBTTagCompound nbt = stack.getTagCompound();
-		readScreenData(nbt == null ? new NBTTagCompound() : nbt);
+		readData(nbt == null ? new NBTTagCompound() : nbt, EnumSaveType.ITEM);
 	}
 
 	public EnumFacing getFacing()
@@ -164,7 +161,7 @@ public class TileProgressScreenCore extends TileProgressScreenBase implements IC
 		}
 		else if (cOwner == null)
 		{
-			cOwner = FTBQuests.PROXY.getQuestFile(world).getData(team.getString());
+			cOwner = FTBQuests.PROXY.getQuestFile(world).getData(team);
 		}
 
 		return cOwner;
@@ -179,7 +176,7 @@ public class TileProgressScreenCore extends TileProgressScreenBase implements IC
 		}
 		else if (cChapter == null || cChapter.invalid)
 		{
-			cChapter = FTBQuests.PROXY.getQuestFile(world).getChapter(chapter.getString());
+			cChapter = FTBQuests.PROXY.getQuestFile(world).getChapter(chapter);
 		}
 
 		return cChapter;
@@ -200,7 +197,7 @@ public class TileProgressScreenCore extends TileProgressScreenBase implements IC
 
 	public boolean isOwner(EntityPlayer player)
 	{
-		return team.isEmpty() || FTBLibAPI.getTeam(player.getUniqueID()).equals(team.getString());
+		return team.isEmpty() || FTBLibAPI.getTeam(player.getUniqueID()).equals(team);
 	}
 
 	public void onClicked(EntityPlayerMP player, double x, double y)
@@ -215,25 +212,54 @@ public class TileProgressScreenCore extends TileProgressScreenBase implements IC
 
 				if (cChapter != null)
 				{
-					chapter.setString(cChapter.getID());
+					chapter = cChapter.getID();
 				}
 
-				boolean editorOrDestructible = editor || !indestructible.getBoolean();
+				boolean editorOrDestructible = editor || !indestructible;
 				ConfigGroup group0 = ConfigGroup.newGroup("tile");
-				group0.setDisplayName(new TextComponentTranslation("tile.ftbquests.screen.name"));
+				group0.setDisplayName(new TextComponentTranslation("tile.ftbquests.progress_screen.name"));
 				ConfigGroup group = group0.getGroup("ftbquests.screen");
 
 				if (editor)
 				{
-					group.add("team", team, new ConfigString("")).setDisplayName(new TextComponentTranslation("ftbquests.team"));
+					group.add("team", new ConfigTeam(team)
+					{
+						@Override
+						public void setString(String v)
+						{
+							team = v;
+						}
+					}, ConfigNull.INSTANCE).setDisplayName(new TextComponentTranslation("ftbquests.team"));
 				}
 
-				group.add("chapter", chapter, ConfigNull.INSTANCE).setCanEdit(editorOrDestructible).setDisplayName(new TextComponentTranslation("ftbquests.quest"));
-				group.add("skin", skin, new ConfigBlockState(BlockUtils.AIR_STATE)).setCanEdit(editorOrDestructible);
+				group.add("chapter", new ConfigQuestObject(chapter)
+				{
+					@Override
+					public void setString(String v)
+					{
+						chapter = v;
+					}
+				}.addType(QuestObjectType.CHAPTER), ConfigNull.INSTANCE).setCanEdit(editorOrDestructible).setDisplayName(new TextComponentTranslation("ftbquests.chapter"));
+
+				group.add("skin", new ConfigBlockState(skin)
+				{
+					@Override
+					public void setBlockState(IBlockState v)
+					{
+						skin = v;
+					}
+				}, new ConfigBlockState(BlockUtils.AIR_STATE)).setCanEdit(editorOrDestructible);
 
 				if (editor)
 				{
-					group.add("indestructible", indestructible, new ConfigBoolean(false));
+					group.add("indestructible", new ConfigBoolean(indestructible)
+					{
+						@Override
+						public void setBoolean(boolean v)
+						{
+							indestructible = v;
+						}
+					}, new ConfigBoolean(false));
 				}
 
 				FTBLibAPI.editServerConfig(player, group0, this);
