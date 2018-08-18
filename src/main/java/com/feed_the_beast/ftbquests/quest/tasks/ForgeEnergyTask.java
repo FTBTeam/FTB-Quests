@@ -1,5 +1,6 @@
 package com.feed_the_beast.ftbquests.quest.tasks;
 
+import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigInt;
 import com.feed_the_beast.ftblib.lib.config.ConfigLong;
@@ -8,6 +9,9 @@ import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.Quest;
+import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
@@ -16,6 +20,9 @@ import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -26,8 +33,8 @@ import javax.annotation.Nullable;
 public class ForgeEnergyTask extends QuestTask
 {
 	public static final String ID = "forge_energy";
-	private static final ResourceLocation BATTERY_EMPTY_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "textures/tasks/battery_empty.png");
-	private static final ResourceLocation BATTERY_FULL_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "textures/tasks/battery_full.png");
+	private static final ResourceLocation EMPTY_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "textures/tasks/fe_empty.png");
+	private static final ResourceLocation FULL_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "textures/tasks/fe_full.png");
 
 	public final ConfigLong value;
 	public final ConfigInt maxInput;
@@ -81,6 +88,55 @@ public class ForgeEnergyTask extends QuestTask
 	{
 		group.add("value", value, new ConfigLong(1));
 		group.add("max_input", maxInput, new ConfigInt(10000));
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public void renderOnScreen(@Nullable QuestTaskData data)
+	{
+		Tessellator tessellator = Tessellator.getInstance();
+		BufferBuilder buffer = tessellator.getBuffer();
+
+		ClientUtils.MC.getTextureManager().bindTexture(EMPTY_TEXTURE);
+		buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
+		double x = -0.5;
+		double y = -0.5;
+		double w = 1;
+		double h = 1;
+		double z = 0;
+		buffer.pos(x, y + h, z).tex(0, 1).endVertex();
+		buffer.pos(x + w, y + h, z).tex(1, 1).endVertex();
+		buffer.pos(x + w, y, z).tex(1, 0).endVertex();
+		buffer.pos(x, y, z).tex(0, 0).endVertex();
+		tessellator.draw();
+
+		double r = data == null ? 0D : data.getRelativeProgress();
+
+		if (r > 0D)
+		{
+			x -= 1D / 128D;
+			w += 1D / 64D;
+
+			h = r * 30D / 32D;
+			y = 1D / 32D + (1D - r) * 30D / 32D - 0.5;
+
+			y -= 1D / 128D;
+			h += 1D / 64D;
+			z = -0.003D;
+
+			double u0 = 0;
+			double v0 = 1D / 32D + (30D / 32D) * (1D - r);
+			double u1 = 1;
+			double v1 = 31D / 32D;
+
+			ClientUtils.MC.getTextureManager().bindTexture(FULL_TEXTURE);
+			buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
+			buffer.pos(x, y + h, z).tex(u0, v1).endVertex();
+			buffer.pos(x + w, y + h, z).tex(u1, v1).endVertex();
+			buffer.pos(x + w, y, z).tex(u1, v0).endVertex();
+			buffer.pos(x, y, z).tex(u0, v0).endVertex();
+			tessellator.draw();
+		}
 	}
 
 	@Override

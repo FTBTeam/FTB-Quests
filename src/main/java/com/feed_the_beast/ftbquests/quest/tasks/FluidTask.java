@@ -188,9 +188,10 @@ public class FluidTask extends QuestTask
 		buffer.pos(x, y, z).tex(0, 0).endVertex();
 		tessellator.draw();
 
-		if (data != null && getMaxProgress() > 0L && data.getProgress() > 0L)
+		double r = data == null ? 0D : data.getRelativeProgress();
+
+		if (r > 0D)
 		{
-			double r = data.getRelativeProgress();
 			x += 1D / 128D;
 			w -= 1D / 64D;
 
