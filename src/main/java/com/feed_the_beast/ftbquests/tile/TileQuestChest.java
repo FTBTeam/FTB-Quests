@@ -6,9 +6,11 @@ import com.feed_the_beast.ftblib.lib.config.ConfigNull;
 import com.feed_the_beast.ftblib.lib.config.ConfigTeam;
 import com.feed_the_beast.ftblib.lib.config.IConfigCallback;
 import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
+import com.feed_the_beast.ftblib.lib.data.Universe;
 import com.feed_the_beast.ftblib.lib.tile.EnumSaveType;
 import com.feed_the_beast.ftblib.lib.tile.TileBase;
 import com.feed_the_beast.ftbquests.FTBQuests;
+import com.feed_the_beast.ftbquests.gui.FTBQuestsGuiHandler;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import net.minecraft.command.ICommandSender;
@@ -102,7 +104,16 @@ public class TileQuestChest extends TileBase implements IItemHandler, IConfigCal
 
 	public void openGui(EntityPlayerMP player)
 	{
-		if (!FTBQuests.canEdit(player) || !player.isSneaking())
+		if (!player.isSneaking())
+		{
+			if (Universe.get().getPlayer(player).team.getName().equals(team))
+			{
+				FTBQuestsGuiHandler.CHEST.open(player, pos);
+			}
+
+			return;
+		}
+		else if (!FTBQuests.canEdit(player))
 		{
 			return;
 		}

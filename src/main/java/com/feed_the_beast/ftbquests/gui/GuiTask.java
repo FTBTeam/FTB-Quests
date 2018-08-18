@@ -11,6 +11,7 @@ import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.gui.Theme;
 import com.feed_the_beast.ftblib.lib.gui.WidgetLayout;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
+import com.feed_the_beast.ftblib.lib.icon.ImageIcon;
 import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.FTBQuests;
@@ -36,7 +37,9 @@ import java.util.function.Consumer;
  */
 public class GuiTask extends GuiBase
 {
-	private static final ResourceLocation TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "textures/gui/task.png");
+	private static final ImageIcon TEXTURE = new ImageIcon(new ResourceLocation(FTBQuests.MOD_ID, "textures/gui/task.png"));
+	private static final ImageIcon BACKGROUND = TEXTURE.withUVfromCoords(0, 0, 176, 214, 256, 256);
+	private static final ImageIcon TAB = TEXTURE.withUVfromCoords(177, 0, 21, 20, 256, 256);
 
 	public final ContainerTask container;
 	public final ClientQuestFile questFile;
@@ -78,9 +81,8 @@ public class GuiTask extends GuiBase
 		{
 			int x = getAX();
 			int y = getAY();
-			ClientUtils.MC.getTextureManager().bindTexture(TEXTURE);
 			GlStateManager.color(1F, 1F, 1F, 1F);
-			GuiScreen.drawModalRectWithCustomSizedTexture(x, y, 177, 0, width, height, 256, 256);
+			TAB.draw(x, y, width, height);
 			getIcon().draw(x + 3, y + 2, 16, 16);
 		}
 	}
@@ -162,9 +164,8 @@ public class GuiTask extends GuiBase
 		int x = getAX();
 		int y = getAY();
 
-		ClientUtils.MC.getTextureManager().bindTexture(TEXTURE);
 		GlStateManager.color(1F, 1F, 1F, 1F);
-		GuiScreen.drawModalRectWithCustomSizedTexture(x, y, 0, 0, width, height, 256, 256);
+		BACKGROUND.draw(x, y, width, height);
 
 		String top1 = TextFormatting.BOLD + container.data.task.quest.getDisplayName().getUnformattedText();
 		String top2 = TextFormatting.GRAY + container.data.task.getDisplayName().getUnformattedText();
