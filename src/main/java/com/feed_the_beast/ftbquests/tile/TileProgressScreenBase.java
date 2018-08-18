@@ -1,6 +1,7 @@
 package com.feed_the_beast.ftbquests.tile;
 
 import com.feed_the_beast.ftblib.lib.tile.TileBase;
+import net.minecraft.entity.player.EntityPlayer;
 
 import javax.annotation.Nullable;
 
@@ -34,7 +35,7 @@ public abstract class TileProgressScreenBase extends TileBase
 	}
 
 	@Override
-	public boolean canBeWrenched()
+	public boolean canBeWrenched(EntityPlayer player)
 	{
 		return false;
 	}

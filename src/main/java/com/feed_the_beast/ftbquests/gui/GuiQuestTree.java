@@ -422,7 +422,7 @@ public class GuiQuestTree extends GuiBase
 			int ax = getAX();
 			int ay = getAY();
 
-			if (Keyboard.isKeyDown(Keyboard.KEY_TAB))
+			if (isAltKeyDown())
 			{
 				Color4I.WHITE.withAlpha(30).draw(ax, ay, width, height);
 			}

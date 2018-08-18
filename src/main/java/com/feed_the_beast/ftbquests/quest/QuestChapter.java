@@ -1,13 +1,10 @@
 package com.feed_the_beast.ftbquests.quest;
 
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
-import com.feed_the_beast.ftblib.lib.config.ConfigItemStack;
 import com.feed_the_beast.ftblib.lib.config.ConfigList;
 import com.feed_the_beast.ftblib.lib.config.ConfigString;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.IconAnimation;
-import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
@@ -25,18 +22,16 @@ public final class QuestChapter extends ProgressingQuestObject
 {
 	public final QuestFile file;
 	public int index;
-	public final ConfigString title;
 	public final ConfigList<ConfigString> description;
-	public final ConfigItemStack icon;
 	public final List<Quest> quests;
 	public final ConfigList<ConfigString> dependencies;
 
 	public QuestChapter(QuestFile f, NBTTagCompound nbt)
 	{
 		file = f;
-		title = new ConfigString(nbt.getString("title"));
+		title = nbt.getString("title");
 		description = new ConfigList<>(new ConfigString(""));
-		icon = new ConfigItemStack(new ItemStack(nbt.getCompoundTag("icon")), true);
+		icon = QuestFile.getIcon(nbt);
 		quests = new ArrayList<>();
 
 		NBTTagList desc = nbt.getTagList("description", Constants.NBT.TAG_STRING);
@@ -88,7 +83,16 @@ public final class QuestChapter extends ProgressingQuestObject
 	public void writeData(NBTTagCompound nbt)
 	{
 		nbt.setString("id", id);
-		nbt.setString("title", title.getString());
+
+		if (!title.isEmpty())
+		{
+			nbt.setString("title", title);
+		}
+
+		if (!icon.isEmpty())
+		{
+			nbt.setTag("icon", icon.serializeNBT());
+		}
 
 		if (!description.list.isEmpty())
 		{
@@ -100,11 +104,6 @@ public final class QuestChapter extends ProgressingQuestObject
 			}
 
 			nbt.setTag("description", list);
-		}
-
-		if (!icon.getStack().isEmpty())
-		{
-			nbt.setTag("icon", icon.getStack().serializeNBT());
 		}
 
 		if (!dependencies.isEmpty())
@@ -197,29 +196,22 @@ public final class QuestChapter extends ProgressingQuestObject
 	}
 
 	@Override
-	public Icon getIcon()
+	public Icon getAltIcon()
 	{
-		Icon i = ItemIcon.getItemIcon(icon.getStack());
+		List<Icon> list = new ArrayList<>();
 
-		if (i.isEmpty())
+		for (Quest quest : quests)
 		{
-			List<Icon> list = new ArrayList<>();
-
-			for (Quest quest : quests)
-			{
-				list.add(quest.getIcon());
-			}
-
-			i = IconAnimation.fromList(list, false);
+			list.add(quest.getIcon());
 		}
 
-		return i;
+		return IconAnimation.fromList(list, false);
 	}
 
 	@Override
-	public ITextComponent getDisplayName()
+	public ITextComponent getAltDisplayName()
 	{
-		return new TextComponentString(title.getString());
+		return new TextComponentString("");
 	}
 
 	@Override
@@ -244,8 +236,6 @@ public final class QuestChapter extends ProgressingQuestObject
 	@Override
 	public void getConfig(ConfigGroup group)
 	{
-		group.add("title", title, new ConfigString(""));
-		group.add("icon", icon, new ConfigItemStack(ItemStack.EMPTY, true));
 		group.add("description", description, new ConfigList<>(new ConfigString("")));
 		group.add("dependencies", dependencies, new ConfigList<>(new ConfigString("")));
 	}

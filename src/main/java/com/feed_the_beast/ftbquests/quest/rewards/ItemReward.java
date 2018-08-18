@@ -18,7 +18,6 @@ import net.minecraftforge.items.ItemHandlerHelper;
  */
 public class ItemReward extends QuestReward
 {
-	public static final String ID = "item";
 	private final ConfigItemStack item;
 
 	public ItemReward(Quest quest, NBTTagCompound nbt)
@@ -37,25 +36,19 @@ public class ItemReward extends QuestReward
 	}
 
 	@Override
-	public String getName()
-	{
-		return ID;
-	}
-
-	@Override
 	public void writeData(NBTTagCompound nbt)
 	{
 		nbt.setTag("item", item.getStack().serializeNBT());
 	}
 
 	@Override
-	public Icon getIcon()
+	public Icon getAltIcon()
 	{
 		return ItemIcon.getItemIcon(item.getStack());
 	}
 
 	@Override
-	public ITextComponent getDisplayName()
+	public ITextComponent getAltDisplayName()
 	{
 		ItemStack stack = item.getStack();
 

@@ -3,8 +3,8 @@ package com.feed_the_beast.ftbquests;
 import com.feed_the_beast.ftblib.lib.OtherMods;
 import com.feed_the_beast.ftbquests.integration.ic2.IC2Integration;
 import com.feed_the_beast.ftbquests.net.FTBQuestsNetHandler;
-import com.feed_the_beast.ftbquests.quest.rewards.QuestRewards;
-import com.feed_the_beast.ftbquests.quest.tasks.QuestTasks;
+import com.feed_the_beast.ftbquests.quest.rewards.QuestRewardType;
+import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskType;
 import com.feed_the_beast.ftbquests.util.FTBQuestsWorldData;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -51,8 +51,6 @@ public class FTBQuests
 	public void onPreInit(FMLPreInitializationEvent event)
 	{
 		FTBQuestsNetHandler.init();
-		QuestTasks.init();
-		QuestRewards.init();
 
 		if (Loader.isModLoaded(OtherMods.IC2))
 		{
@@ -65,6 +63,9 @@ public class FTBQuests
 	@Mod.EventHandler
 	public void onPostInit(FMLPostInitializationEvent event)
 	{
+		QuestTaskType.createRegistry();
+		QuestRewardType.createRegistry();
+
 		PermissionAPI.registerNode(PERM_EDIT_QUESTS, DefaultPermissionLevel.OP, "Permission for editing quests and resetting progress");
 		PermissionAPI.registerNode(PERM_EDIT_SETTINGS, DefaultPermissionLevel.OP, "Permission for editing FTBQuests server settings");
 	}

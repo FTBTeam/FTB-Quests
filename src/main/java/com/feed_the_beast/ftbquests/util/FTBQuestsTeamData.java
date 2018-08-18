@@ -171,7 +171,7 @@ public class FTBQuestsTeamData extends TeamData implements IProgressData
 		{
 			return false;
 		}
-		else if (reward.teamReward.getBoolean())
+		else if (reward.teamReward)
 		{
 			if (!claimedTeamRewards.contains(reward))
 			{
@@ -224,7 +224,7 @@ public class FTBQuestsTeamData extends TeamData implements IProgressData
 	@Override
 	public boolean isRewardClaimed(EntityPlayer player, QuestReward reward)
 	{
-		if (reward.teamReward.getBoolean())
+		if (reward.teamReward)
 		{
 			return claimedTeamRewards.contains(reward);
 		}
@@ -457,7 +457,7 @@ public class FTBQuestsTeamData extends TeamData implements IProgressData
 	@Override
 	public void unclaimReward(QuestReward reward)
 	{
-		if (reward.teamReward.getBoolean())
+		if (reward.teamReward)
 		{
 			if (claimedTeamRewards.remove(reward))
 			{

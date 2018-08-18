@@ -3,19 +3,14 @@ package com.feed_the_beast.ftbquests.quest;
 import com.feed_the_beast.ftblib.lib.config.ConfigEnum;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigInt;
-import com.feed_the_beast.ftblib.lib.config.ConfigItemStack;
 import com.feed_the_beast.ftblib.lib.config.ConfigList;
 import com.feed_the_beast.ftblib.lib.config.ConfigString;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.IconAnimation;
-import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
 import com.feed_the_beast.ftbquests.quest.rewards.QuestReward;
-import com.feed_the_beast.ftbquests.quest.rewards.QuestRewards;
-import com.feed_the_beast.ftbquests.quest.rewards.UnknownReward;
+import com.feed_the_beast.ftbquests.quest.rewards.QuestRewardType;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
-import com.feed_the_beast.ftbquests.quest.tasks.QuestTasks;
-import com.feed_the_beast.ftbquests.quest.tasks.UnknownTask;
-import net.minecraft.item.ItemStack;
+import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskType;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
@@ -35,9 +30,7 @@ public final class Quest extends ProgressingQuestObject
 	public static final int POS_LIMIT = 25;
 
 	public final QuestChapter chapter;
-	public final ConfigString title;
 	public final ConfigString description;
-	public final ConfigItemStack icon;
 	public final ConfigEnum<QuestType> type;
 	public final ConfigInt x, y;
 	public final ConfigList<ConfigString> text;
@@ -48,9 +41,9 @@ public final class Quest extends ProgressingQuestObject
 	public Quest(QuestChapter c, NBTTagCompound nbt)
 	{
 		chapter = c;
-		title = new ConfigString(nbt.getString("title"));
+		title = nbt.getString("title");
 		description = new ConfigString(nbt.getString("description"));
-		icon = new ConfigItemStack(QuestFile.getIcon(nbt), true);
+		icon = QuestFile.getIcon(nbt);
 		type = new ConfigEnum<>(QuestType.NAME_MAP);
 		type.setValue(nbt.getString("type"));
 		x = new ConfigInt(nbt.getByte("x"), -POS_LIMIT, POS_LIMIT);
@@ -75,16 +68,24 @@ public final class Quest extends ProgressingQuestObject
 
 		for (int k = 0; k < list.tagCount(); k++)
 		{
-			QuestTask task = QuestTasks.createTask(this, list.getCompoundTagAt(k));
-			tasks.add(task);
+			QuestTask task = QuestTaskType.createTask(this, list.getCompoundTagAt(k));
+
+			if (task != null)
+			{
+				tasks.add(task);
+			}
 		}
 
 		list = nbt.getTagList("rewards", Constants.NBT.TAG_COMPOUND);
 
 		for (int k = 0; k < list.tagCount(); k++)
 		{
-			QuestReward reward = QuestRewards.createReward(this, list.getCompoundTagAt(k));
-			rewards.add(reward);
+			QuestReward reward = QuestRewardType.createReward(this, list.getCompoundTagAt(k));
+
+			if (reward != null)
+			{
+				rewards.add(reward);
+			}
 		}
 
 		NBTTagList depList = nbt.getTagList("dependencies", Constants.NBT.TAG_STRING);
@@ -118,6 +119,16 @@ public final class Quest extends ProgressingQuestObject
 	{
 		nbt.setString("id", id);
 
+		if (!title.isEmpty())
+		{
+			nbt.setString("title", title);
+		}
+
+		if (!icon.isEmpty())
+		{
+			nbt.setTag("icon", icon.serializeNBT());
+		}
+
 		if (type.getValue() != QuestType.NORMAL)
 		{
 			nbt.setString("type", type.getValue().getName());
@@ -125,16 +136,10 @@ public final class Quest extends ProgressingQuestObject
 
 		nbt.setByte("x", (byte) x.getInt());
 		nbt.setByte("y", (byte) y.getInt());
-		nbt.setString("title", title.getString());
 
 		if (!description.isEmpty())
 		{
 			nbt.setString("description", description.getString());
-		}
-
-		if (!icon.isEmpty())
-		{
-			nbt.setTag("icon", icon.getStack().serializeNBT());
 		}
 
 		if (!text.isEmpty())
@@ -167,16 +172,16 @@ public final class Quest extends ProgressingQuestObject
 
 			for (QuestTask task : tasks)
 			{
-				NBTTagCompound taskNBT = new NBTTagCompound();
-				task.writeData(taskNBT);
-				taskNBT.setString("id", task.id);
+				QuestTaskType type = QuestTaskType.getType(task.getClass());
 
-				if (!(task instanceof UnknownTask))
+				if (type != null)
 				{
-					taskNBT.setString("type", task.getName());
+					NBTTagCompound taskNBT = new NBTTagCompound();
+					task.writeData(taskNBT);
+					taskNBT.setString("id", task.id);
+					taskNBT.setString("type", type.getTypeForNBT());
+					array.appendTag(taskNBT);
 				}
-
-				array.appendTag(taskNBT);
 			}
 
 			nbt.setTag("tasks", array);
@@ -188,21 +193,27 @@ public final class Quest extends ProgressingQuestObject
 
 			for (QuestReward reward : rewards)
 			{
-				NBTTagCompound rewardNBT = new NBTTagCompound();
-				reward.writeData(rewardNBT);
-				rewardNBT.setString("id", reward.id);
+				QuestRewardType type = QuestRewardType.getType(reward.getClass());
 
-				if (!(reward instanceof UnknownReward))
+				if (type != null)
 				{
-					rewardNBT.setString("type", reward.getName());
-				}
+					NBTTagCompound rewardNBT = new NBTTagCompound();
+					reward.writeData(rewardNBT);
+					rewardNBT.setString("id", reward.id);
+					rewardNBT.setString("type", type.getTypeForNBT());
 
-				if (reward.teamReward.getBoolean())
-				{
-					rewardNBT.setBoolean("team_reward", true);
-				}
+					if (reward.teamReward)
+					{
+						rewardNBT.setBoolean("team_reward", true);
+					}
 
-				array.appendTag(rewardNBT);
+					if (!reward.title.isEmpty())
+					{
+						rewardNBT.setString("title", reward.title);
+					}
+
+					array.appendTag(rewardNBT);
+				}
 			}
 
 			nbt.setTag("rewards", array);
@@ -335,29 +346,22 @@ public final class Quest extends ProgressingQuestObject
 	}
 
 	@Override
-	public Icon getIcon()
+	public Icon getAltIcon()
 	{
-		Icon i = ItemIcon.getItemIcon(icon.getStack());
+		List<Icon> list = new ArrayList<>();
 
-		if (i.isEmpty())
+		for (QuestTask task : tasks)
 		{
-			List<Icon> list = new ArrayList<>();
-
-			for (QuestTask task : tasks)
-			{
-				list.add(task.getIcon());
-			}
-
-			i = IconAnimation.fromList(list, false);
+			list.add(task.getIcon());
 		}
 
-		return i;
+		return IconAnimation.fromList(list, false);
 	}
 
 	@Override
-	public ITextComponent getDisplayName()
+	public ITextComponent getAltDisplayName()
 	{
-		return new TextComponentString(title.getString());
+		return new TextComponentString("");
 	}
 
 	@Override
@@ -390,11 +394,9 @@ public final class Quest extends ProgressingQuestObject
 	@Override
 	public void getConfig(ConfigGroup group)
 	{
-		group.add("title", title, new ConfigString(""));
 		group.add("x", x, new ConfigInt(0, -POS_LIMIT, POS_LIMIT));
 		group.add("y", y, new ConfigInt(0, -POS_LIMIT, POS_LIMIT));
 		group.add("type", type, new ConfigEnum<>(QuestType.NAME_MAP));
-		group.add("icon", icon, new ConfigItemStack(ItemStack.EMPTY, true));
 		group.add("description", description, new ConfigString(""));
 		group.add("text", text, new ConfigList<>(new ConfigString("")));
 		group.add("dependencies", dependencies, new ConfigList<>(new ConfigString("")));

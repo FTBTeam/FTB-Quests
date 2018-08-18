@@ -21,7 +21,7 @@ public class ContainerTask extends Container
 		data = d;
 
 		int invX = 8;
-		int invY = 84;
+		int invY = 132;
 
 		for (int y = 0; y < 3; y++)
 		{

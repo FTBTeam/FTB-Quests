@@ -7,7 +7,6 @@ import com.feed_the_beast.ftblib.lib.config.ConfigInt;
 import com.feed_the_beast.ftblib.lib.config.ConfigLong;
 import com.feed_the_beast.ftblib.lib.config.ConfigNBT;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
-import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.Quest;
@@ -26,7 +25,6 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.FluidTankProperties;
 import net.minecraftforge.fluids.capability.IFluidHandler;
@@ -45,7 +43,6 @@ import javax.annotation.Nullable;
  */
 public class FluidTask extends QuestTask
 {
-	public static final String ID = "fluid";
 	private static final ResourceLocation TANK_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "textures/tasks/tank.png");
 
 	public final ConfigFluid fluid;
@@ -74,12 +71,6 @@ public class FluidTask extends QuestTask
 	}
 
 	@Override
-	public String getName()
-	{
-		return ID;
-	}
-
-	@Override
 	public void writeData(NBTTagCompound nbt)
 	{
 		nbt.setString("type", "fluid");
@@ -97,19 +88,9 @@ public class FluidTask extends QuestTask
 	}
 
 	@Override
-	public Icon getIcon()
+	public Icon getAltIcon()
 	{
-		FluidStack fluidStack = createFluidStack(Fluid.BUCKET_VOLUME);
-		ItemStack stack = FluidUtil.getFilledBucket(fluidStack);
-
-		if (stack.isEmpty())
-		{
-			return Icon.getIcon(fluid.getFluid().getStill(fluidStack).toString());
-		}
-		else
-		{
-			return ItemIcon.getItemIcon(stack);
-		}
+		return Icon.getIcon(fluid.getFluid().getStill(createFluidStack(Fluid.BUCKET_VOLUME)).toString()).combineWith(Icon.getIcon(TANK_TEXTURE.toString()));
 	}
 
 	public FluidStack createFluidStack(int amount)
@@ -149,7 +130,7 @@ public class FluidTask extends QuestTask
 	}
 
 	@Override
-	public ITextComponent getDisplayName()
+	public ITextComponent getAltDisplayName()
 	{
 		return new TextComponentString(getVolumeString(amount.getLong())).appendText(" of ").appendSibling(fluid.getStringForGUI());
 	}
@@ -170,7 +151,53 @@ public class FluidTask extends QuestTask
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void renderOnScreen(@Nullable QuestTaskData data)
+	public void drawGUI(@Nullable QuestTaskData data, int x, int y, int w, int h)
+	{
+		Tessellator tessellator = Tessellator.getInstance();
+		BufferBuilder buffer = tessellator.getBuffer();
+
+		double r = data == null ? 0D : data.getRelativeProgress();
+
+		if (r > 0D)
+		{
+			double h1 = (r * 30D / 32D) * h;
+			double y1 = y + (1D / 32D + (1D - r) * 30D / 32D) * h;
+
+			FluidStack stack = createFluidStack(Fluid.BUCKET_VOLUME);
+			TextureAtlasSprite sprite = ClientUtils.MC.getTextureMapBlocks().getAtlasSprite(stack.getFluid().getStill(stack).toString());
+			int color = stack.getFluid().getColor(stack);
+			int alpha = (color >> 24) & 0xFF;
+			int red = (color >> 16) & 0xFF;
+			int green = (color >> 8) & 0xFF;
+			int blue = color & 0xFF;
+			double u0 = sprite.getMinU();
+			double v0 = sprite.getMinV() + (sprite.getMaxV() - sprite.getMinV()) * (1D - r);
+			double u1 = sprite.getMaxU();
+			double v1 = sprite.getMaxV();
+
+			ClientUtils.MC.getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
+			ClientUtils.MC.getTextureManager().getTexture(TextureMap.LOCATION_BLOCKS_TEXTURE).setBlurMipmap(false, false);
+			buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
+			buffer.pos(x, y1 + h1, 0).tex(u0, v1).color(red, green, blue, alpha).endVertex();
+			buffer.pos(x + w, y1 + h1, 0).tex(u1, v1).color(red, green, blue, alpha).endVertex();
+			buffer.pos(x + w, y1, 0).tex(u1, v0).color(red, green, blue, alpha).endVertex();
+			buffer.pos(x, y1, 0).tex(u0, v0).color(red, green, blue, alpha).endVertex();
+			tessellator.draw();
+			ClientUtils.MC.getTextureManager().getTexture(TextureMap.LOCATION_BLOCKS_TEXTURE).restoreLastBlurMipmap();
+		}
+
+		ClientUtils.MC.getTextureManager().bindTexture(TANK_TEXTURE);
+		buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
+		buffer.pos(x, y + h, 0).tex(0, 1).endVertex();
+		buffer.pos(x + w, y + h, 0).tex(1, 1).endVertex();
+		buffer.pos(x + w, y, 0).tex(1, 0).endVertex();
+		buffer.pos(x, y, 0).tex(0, 0).endVertex();
+		tessellator.draw();
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public void drawScreen(@Nullable QuestTaskData data)
 	{
 		Tessellator tessellator = Tessellator.getInstance();
 		BufferBuilder buffer = tessellator.getBuffer();

@@ -168,7 +168,7 @@ public class RenderScreen extends TileEntitySpecialRenderer<TileScreenCore>
 		GlStateManager.enableBlend();
 		GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
 		GlStateManager.color(1F, 1F, 1F, 1F);
-		task.renderOnScreen(data);
+		task.drawScreen(data);
 		GlStateManager.disableRescaleNormal();
 		GlStateManager.disableLighting();
 		GlStateManager.popMatrix();

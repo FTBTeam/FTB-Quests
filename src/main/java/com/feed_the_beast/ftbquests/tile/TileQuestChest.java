@@ -12,6 +12,7 @@ import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import net.minecraft.command.ICommandSender;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -185,5 +186,11 @@ public class TileQuestChest extends TileBase implements IItemHandler, IConfigCal
 	public void onConfigSaved(ConfigGroup group, ICommandSender sender)
 	{
 		markDirty();
+	}
+
+	@Override
+	public boolean canBeWrenched(EntityPlayer player)
+	{
+		return !indestructible;
 	}
 }

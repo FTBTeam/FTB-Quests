@@ -19,6 +19,15 @@ import com.feed_the_beast.ftbquests.block.ItemBlockProgressScreen;
 import com.feed_the_beast.ftbquests.block.ItemBlockScreen;
 import com.feed_the_beast.ftbquests.net.MessageSyncQuests;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
+import com.feed_the_beast.ftbquests.quest.rewards.CommandReward;
+import com.feed_the_beast.ftbquests.quest.rewards.ExperienceLevelsReward;
+import com.feed_the_beast.ftbquests.quest.rewards.ExperienceReward;
+import com.feed_the_beast.ftbquests.quest.rewards.ItemReward;
+import com.feed_the_beast.ftbquests.quest.rewards.QuestRewardType;
+import com.feed_the_beast.ftbquests.quest.tasks.FluidTask;
+import com.feed_the_beast.ftbquests.quest.tasks.ForgeEnergyTask;
+import com.feed_the_beast.ftbquests.quest.tasks.ItemTask;
+import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskType;
 import com.feed_the_beast.ftbquests.tile.TileProgressDetector;
 import com.feed_the_beast.ftbquests.tile.TileProgressScreenCore;
 import com.feed_the_beast.ftbquests.tile.TileProgressScreenPart;
@@ -131,5 +140,26 @@ public class FTBQuestsEventHandler
 		});
 
 		event.getRegistry().registerConfigValueProvider(ConfigQuestObject.ID, () -> new ConfigQuestObject(""));
+	}
+
+	@SubscribeEvent
+	public static void registerTasks(RegistryEvent.Register<QuestTaskType> event)
+	{
+		event.getRegistry().registerAll(
+				new QuestTaskType(ItemTask.class, ItemTask::new).setRegistryName("item"),
+				new QuestTaskType(FluidTask.class, FluidTask::new).setRegistryName("fluid"),
+				new QuestTaskType(ForgeEnergyTask.class, ForgeEnergyTask::new).setRegistryName("forge_energy")
+		);
+	}
+
+	@SubscribeEvent
+	public static void registerRewards(RegistryEvent.Register<QuestRewardType> event)
+	{
+		event.getRegistry().registerAll(
+				new QuestRewardType(ItemReward.class, ItemReward::new).setRegistryName("item"),
+				new QuestRewardType(ExperienceReward.class, ExperienceReward::new).setRegistryName("xp"),
+				new QuestRewardType(ExperienceLevelsReward.class, ExperienceLevelsReward::new).setRegistryName("xp_levels"),
+				new QuestRewardType(CommandReward.class, CommandReward::new).setRegistryName("command")
+		);
 	}
 }
