@@ -685,7 +685,7 @@ public class GuiQuestTree extends GuiBase
 
 				if (!questFile.emergencyItems.isEmpty())
 				{
-					add(new ChapterOptionButton(this, "E", I18n.format("ftbquests.file.emergency_items"), () -> new GuiWaitItems().openGui(), () -> true));
+					add(new ChapterOptionButton(this, "E", I18n.format("ftbquests.file.emergency_items"), () -> new GuiEmergencyItems().openGui(), () -> true));
 				}
 
 				add(new ChapterOptionButton(this, "-", I18n.format("ftbquests.gui.zoom_out"), () -> zoomOut(), () -> canZoomOut()));

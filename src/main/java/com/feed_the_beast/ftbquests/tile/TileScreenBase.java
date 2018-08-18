@@ -32,4 +32,10 @@ public abstract class TileScreenBase extends TileBase
 	{
 		return !world.isRemote;
 	}
+
+	@Override
+	public boolean canBeWrenched()
+	{
+		return false;
+	}
 }
