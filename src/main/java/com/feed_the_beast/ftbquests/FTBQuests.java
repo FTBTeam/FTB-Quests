@@ -1,6 +1,7 @@
 package com.feed_the_beast.ftbquests;
 
 import com.feed_the_beast.ftblib.lib.OtherMods;
+import com.feed_the_beast.ftbquests.gui.FTBQuestsGuiHandler;
 import com.feed_the_beast.ftbquests.integration.ic2.IC2Integration;
 import com.feed_the_beast.ftbquests.net.FTBQuestsNetHandler;
 import com.feed_the_beast.ftbquests.quest.rewards.QuestRewardType;
@@ -14,6 +15,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.server.permission.DefaultPermissionLevel;
 import net.minecraftforge.server.permission.PermissionAPI;
 import org.apache.logging.log4j.LogManager;
@@ -31,6 +33,9 @@ public class FTBQuests
 	public static final String MOD_NAME = "FTB Quests";
 	public static final String VERSION = "@VERSION@";
 	public static final Logger LOGGER = LogManager.getLogger(MOD_NAME);
+
+	@Mod.Instance(MOD_ID)
+	public static FTBQuests MOD;
 
 	@SidedProxy(serverSide = "com.feed_the_beast.ftbquests.FTBQuestsCommon", clientSide = "com.feed_the_beast.ftbquests.client.FTBQuestsClient")
 	public static FTBQuestsCommon PROXY;
@@ -57,6 +62,7 @@ public class FTBQuests
 			IC2Integration.preInit();
 		}
 
+		NetworkRegistry.INSTANCE.registerGuiHandler(this, new FTBQuestsGuiHandler());
 		PROXY.preInit();
 	}
 
