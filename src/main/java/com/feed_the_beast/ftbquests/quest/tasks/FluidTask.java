@@ -178,9 +178,9 @@ public class FluidTask extends QuestTask
 		ClientUtils.MC.getTextureManager().bindTexture(TANK_TEXTURE);
 		buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
 		double x = -0.5;
-		double y = -0.5 - 1D / 32D;
+		double y = -0.5;
 		double w = 1;
-		double h = 33D / 32D;
+		double h = 1;
 		double z = 0;
 		buffer.pos(x, y + h, z).tex(0, 1).endVertex();
 		buffer.pos(x + w, y + h, z).tex(1, 1).endVertex();
@@ -194,11 +194,11 @@ public class FluidTask extends QuestTask
 			x += 1D / 128D;
 			w -= 1D / 64D;
 
-			h = r * 31D / 32D;
-			y = 1D - h;
+			h = r * 30D / 32D;
+			y = 1D / 32D + (1D - r) * 30D / 32D - 0.5;
 
-			h -= 1D / 64D;
-			y -= 0.5D;
+			y -= 1D / 128D;
+			h += 1D / 64D;
 			z = 0.003D;
 
 			FluidStack stack = createFluidStack(Fluid.BUCKET_VOLUME);
