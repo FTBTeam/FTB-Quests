@@ -8,6 +8,7 @@ import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.IconAnimation;
 import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
 import com.feed_the_beast.ftblib.lib.util.StringJoiner;
+import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import net.minecraft.init.Items;
@@ -15,6 +16,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraftforge.common.capabilities.Capability;
@@ -34,7 +36,7 @@ import java.util.function.Predicate;
  */
 public class ItemTask extends QuestTask implements Predicate<ItemStack>
 {
-	public static final String ID = "item";
+	public static final ResourceLocation ID = new ResourceLocation(FTBQuests.MOD_ID, "item");
 
 	private final ConfigList<ConfigItemStack> items;
 	private final ConfigLong count;
@@ -73,12 +75,6 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 	}
 
 	@Override
-	public String getName()
-	{
-		return ID;
-	}
-
-	@Override
 	public void writeData(NBTTagCompound nbt)
 	{
 		nbt.setString("type", "item");
@@ -97,7 +93,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 	}
 
 	@Override
-	public Icon getIcon()
+	public Icon getAltIcon()
 	{
 		List<Icon> icons = new ArrayList<>();
 
@@ -115,7 +111,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 	}
 
 	@Override
-	public ITextComponent getDisplayName()
+	public ITextComponent getAltDisplayName()
 	{
 		String name;
 

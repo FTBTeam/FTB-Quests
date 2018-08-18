@@ -32,7 +32,6 @@ import javax.annotation.Nullable;
  */
 public class ForgeEnergyTask extends QuestTask
 {
-	public static final String ID = "forge_energy";
 	private static final ResourceLocation EMPTY_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "textures/tasks/fe_empty.png");
 	private static final ResourceLocation FULL_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "textures/tasks/fe_full.png");
 
@@ -59,12 +58,6 @@ public class ForgeEnergyTask extends QuestTask
 	}
 
 	@Override
-	public String getName()
-	{
-		return ID;
-	}
-
-	@Override
 	public void writeData(NBTTagCompound nbt)
 	{
 		nbt.setLong("value", value.getLong());
@@ -72,15 +65,15 @@ public class ForgeEnergyTask extends QuestTask
 	}
 
 	@Override
-	public Icon getIcon()
+	public Icon getAltIcon()
 	{
-		return Icon.getIcon("minecraft:blocks/beacon");
+		return Icon.getIcon(EMPTY_TEXTURE.toString()).combineWith(Icon.getIcon(FULL_TEXTURE.toString()));
 	}
 
 	@Override
-	public ITextComponent getDisplayName()
+	public ITextComponent getAltDisplayName()
 	{
-		return new TextComponentTranslation("ftbquests.task.forge_energy.text", StringUtils.formatDouble(value.getLong(), true));
+		return new TextComponentTranslation("ftbquests.task.ftbquests.forge_energy.text", StringUtils.formatDouble(value.getLong(), true));
 	}
 
 	@Override
@@ -92,7 +85,42 @@ public class ForgeEnergyTask extends QuestTask
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void renderOnScreen(@Nullable QuestTaskData data)
+	public void drawGUI(@Nullable QuestTaskData data, int x, int y, int w, int h)
+	{
+		Tessellator tessellator = Tessellator.getInstance();
+		BufferBuilder buffer = tessellator.getBuffer();
+
+		ClientUtils.MC.getTextureManager().bindTexture(EMPTY_TEXTURE);
+		buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
+		buffer.pos(x, y + h, 0).tex(0, 1).endVertex();
+		buffer.pos(x + w, y + h, 0).tex(1, 1).endVertex();
+		buffer.pos(x + w, y, 0).tex(1, 0).endVertex();
+		buffer.pos(x, y, 0).tex(0, 0).endVertex();
+		tessellator.draw();
+
+		double r = data == null ? 0D : data.getRelativeProgress();
+
+		if (r > 0D)
+		{
+			double h1 = (r * 30D / 32D) * h;
+			double y1 = y + (1D / 32D + (1D - r) * 30D / 32D) * h;
+
+			double v0 = 1D / 32D + (30D / 32D) * (1D - r);
+			double v1 = 31D / 32D;
+
+			ClientUtils.MC.getTextureManager().bindTexture(FULL_TEXTURE);
+			buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
+			buffer.pos(x, y1 + h1, 0).tex(0, v1).endVertex();
+			buffer.pos(x + w, y1 + h1, 0).tex(1, v1).endVertex();
+			buffer.pos(x + w, y1, 0).tex(1, v0).endVertex();
+			buffer.pos(x, y1, 0).tex(0, v0).endVertex();
+			tessellator.draw();
+		}
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public void drawScreen(@Nullable QuestTaskData data)
 	{
 		Tessellator tessellator = Tessellator.getInstance();
 		BufferBuilder buffer = tessellator.getBuffer();

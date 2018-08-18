@@ -10,20 +10,24 @@ import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.gui.Theme;
 import com.feed_the_beast.ftblib.lib.gui.WidgetLayout;
-import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
+import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.net.MessageGetScreen;
 import com.feed_the_beast.ftbquests.net.edit.MessageEditObject;
 import com.feed_the_beast.ftbquests.net.edit.MessageResetProgress;
+import com.feed_the_beast.ftbquests.util.ProgressDisplayMode;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.TextFormatting;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -32,6 +36,8 @@ import java.util.function.Consumer;
  */
 public class GuiTask extends GuiBase
 {
+	private static final ResourceLocation TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "textures/gui/task.png");
+
 	public final ContainerTask container;
 	public final ClientQuestFile questFile;
 	public final boolean hasTile;
@@ -66,10 +72,22 @@ public class GuiTask extends GuiBase
 				getGui().openYesNo(yesNoText, "", () -> callback.accept(button));
 			}
 		}
+
+		@Override
+		public void draw()
+		{
+			int x = getAX();
+			int y = getAY();
+			ClientUtils.MC.getTextureManager().bindTexture(TEXTURE);
+			GlStateManager.color(1F, 1F, 1F, 1F);
+			GuiScreen.drawModalRectWithCustomSizedTexture(x, y, 177, 0, width, height, 256, 256);
+			getIcon().draw(x + 3, y + 2, 16, 16);
+		}
 	}
 
 	public GuiTask(ContainerTask c)
 	{
+		setSize(176, 214);
 		container = c;
 		questFile = ClientQuestFile.INSTANCE;
 		hasTile = container.screen != null && !container.screen.isInvalid();
@@ -117,11 +135,11 @@ public class GuiTask extends GuiBase
 			@Override
 			public void alignWidgets()
 			{
-				setHeight(align(WidgetLayout.VERTICAL));
+				setHeight(align(new WidgetLayout.Vertical(0, 1, 0)));
 			}
 		};
 
-		tabs.setPosAndSize(-19, 8, 20, 0);
+		tabs.setPosAndSize(-17, 8, 20, 0);
 		taskName = container.data.task.getDisplayName().getFormattedText();
 		taskIcon = container.data.task.getIcon();
 	}
@@ -135,47 +153,66 @@ public class GuiTask extends GuiBase
 	@Override
 	public GuiScreen getWrapper()
 	{
-		return new GuiContainerWrapper(this, container);
+		return new GuiContainerWrapper(this, container).disableSlotDrawing();
 	}
 
 	@Override
 	public void drawBackground()
 	{
-		super.drawBackground();
+		int x = getAX();
+		int y = getAY();
 
-		int ax = getAX();
-		int ay = getAY();
+		ClientUtils.MC.getTextureManager().bindTexture(TEXTURE);
+		GlStateManager.color(1F, 1F, 1F, 1F);
+		GuiScreen.drawModalRectWithCustomSizedTexture(x, y, 0, 0, width, height, 256, 256);
 
-		int sw = getStringWidth(taskName);
+		String top1 = TextFormatting.BOLD + container.data.task.quest.getDisplayName().getUnformattedText();
+		String top2 = TextFormatting.GRAY + container.data.task.getDisplayName().getUnformattedText();
 
-		if (!taskIcon.isEmpty())
+		drawString(top1, x + (width - getStringWidth(top1)) / 2, y + 14);
+		drawString(top2, x + (width - getStringWidth(top2)) / 2, y + 30);
+
+		container.data.task.drawGUI(container.data, x + (width - 64) / 2, y + 42, 64, 64);
+
+		String bottomText;
+
+		ProgressDisplayMode mode = ProgressDisplayMode.PROGRESS;
+
+		if (container.screen != null)
 		{
-			sw += 11;
-			Color4I.DARK_GRAY.draw(ax + (width - sw - 8) / 2, ay + 11, sw + 8, 14);
-			taskIcon.draw(ax + (width - sw) / 2, ay + 14, 8, 8);
-			drawString(taskName, ax + width / 2 + 6, ay + 14, Color4I.WHITE, CENTERED);
+			mode = container.screen.progressDisplayMode.getValue();
+		}
+
+		switch (mode)
+		{
+			case PROGRESS:
+				bottomText = container.data.getProgressString() + " / " + container.data.task.getMaxProgressString();
+				break;
+			case PERCENT:
+				bottomText = (int) (container.data.getRelativeProgress() * 100D) + "%";
+				break;
+			default:
+				char[] c = new char[12];
+				Arrays.fill(c, ' ');
+				c[0] = '[';
+				c[11] = ']';
+				int m = (int) (container.data.getRelativeProgress() * 10D);
+
+				for (int i = 0; i < m; i++)
+				{
+					c[i + 1] = '#';
+				}
+
+				bottomText = new String(c);
+		}
+
+		if (container.data.getProgress() >= container.data.task.getMaxProgress())
+		{
+			drawString(TextFormatting.GREEN + bottomText, x + (width - getStringWidth(bottomText)) / 2, y + 112);
 		}
 		else
 		{
-			Color4I.DARK_GRAY.draw(ax + (width - sw - 8) / 2, ay + 11, sw + 8, 13);
-			drawString(taskName, ax + width / 2, ay + 14, Color4I.WHITE, CENTERED);
-		}
-
-		double progress = MathHelper.clamp(container.data.getRelativeProgress(), 0D, 1D);
-
-		String s = String.format("%s / %s [%d%%]", container.data.getProgressString(), container.data.task.getMaxProgressString(), (int) (progress * 100D));
-		sw = getStringWidth(s);
-
-		Color4I.DARK_GRAY.draw(ax + (width - sw - 8) / 2, ay + 60, sw + 8, 13);
-		Color4I.LIGHT_BLUE.draw(ax + (width - sw - 6) / 2, ay + 61, (int) ((sw + 6) * progress), 11);
-
-		drawString(s, ax + width / 2, ay + 63, Color4I.WHITE, CENTERED);
-
-		if (!container.data.task.canInsertItem())
-		{
-			pushFontUnicode(true);
-			drawString(I18n.format("ftbquests.task.no_items"), ax + width / 2, ay + 37, Color4I.LIGHT_RED, CENTERED);
-			popFontUnicode();
+			drawString(bottomText, x + (width - getStringWidth(bottomText)) / 2, y + 112);
 		}
 	}
 

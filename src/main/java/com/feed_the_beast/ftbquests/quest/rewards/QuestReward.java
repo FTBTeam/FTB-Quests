@@ -2,29 +2,34 @@ package com.feed_the_beast.ftbquests.quest.rewards;
 
 import com.feed_the_beast.ftblib.lib.config.ConfigBoolean;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
+import com.feed_the_beast.ftblib.lib.icon.Icon;
+import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.util.IStringSerializable;
+import net.minecraft.init.Items;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
 
 /**
  * @author LatvianModder
  */
-public abstract class QuestReward extends QuestObject implements IStringSerializable
+public abstract class QuestReward extends QuestObject
 {
 	public final Quest quest;
-	public final ConfigBoolean teamReward;
+	public boolean teamReward;
 
 	public QuestReward(Quest q)
 	{
 		quest = q;
-		teamReward = new ConfigBoolean(false);
+		teamReward = false;
 	}
+
+	public abstract void reward(EntityPlayerMP player);
 
 	@Override
 	public final QuestFile getQuestFile()
@@ -62,16 +67,30 @@ public abstract class QuestReward extends QuestObject implements IStringSerializ
 	}
 
 	@Override
-	public ITextComponent getDisplayName()
+	public ITextComponent getAltDisplayName()
 	{
-		return new TextComponentTranslation("ftbquests.reward." + getName());
+		return QuestRewardType.getType(getClass()).getDisplayName();
 	}
 
 	@Override
-	public void getConfig(ConfigGroup group)
+	public final void getExtraConfig(ConfigGroup config)
 	{
-		group.add("team_reward", teamReward, new ConfigBoolean(false)).setDisplayName(new TextComponentTranslation("ftbquests.reward.team_reward")).setOrder((byte) -128);
+		super.getExtraConfig(config);
+
+		config.add("team_reward", new ConfigBoolean(teamReward)
+		{
+			@Override
+			public void setBoolean(boolean v)
+			{
+				teamReward = v;
+			}
+		}, new ConfigBoolean(false)).setDisplayName(new TextComponentTranslation("ftbquests.reward.team_reward")).setOrder((byte) -99);
 	}
 
-	public abstract void reward(EntityPlayerMP player);
+	@Override
+	public Icon getIcon()
+	{
+		Icon icon = super.getIcon();
+		return icon.isEmpty() ? ItemIcon.getItemIcon(new ItemStack(Items.GOLD_INGOT)) : icon;
+	}
 }

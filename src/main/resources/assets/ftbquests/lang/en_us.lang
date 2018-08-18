@@ -23,10 +23,10 @@ admin_panel.ftbquests.edit_settings.extra_files=Extra Files
 
 ftbquests.team=Team
 ftbquests.progress=Progress
+ftbquests.title=Title
+ftbquests.icon=Icon
 
 ftbquests.file=File
-ftbquests.file.title=Title
-ftbquests.file.icon=Icon
 ftbquests.file.allow_take_quest_blocks=Allow to Take Quest Blocks
 ftbquests.file.allow_take_quest_blocks.tooltip=Allow to obtain Quest Blocks from the Quests GUI.
 ftbquests.file.emergency_items=Emergency Items
@@ -34,15 +34,11 @@ ftbquests.file.emergency_items_cooldown=Emergency Items Cooldown
 ftbquests.file.emergency_items_cooldown.tooltip=Cooldown timer for emergency items to respawn.
 
 ftbquests.chapter=Chapter
-ftbquests.chapter.title=Title
 ftbquests.chapter.description=Description
-ftbquests.chapter.icon=Icon
 ftbquests.chapter.dependencies=Dependencies
 
 ftbquests.quest=Quest
-ftbquests.quest.title=Title
 ftbquests.quest.description=Description
-ftbquests.quest.icon=Icon
 ftbquests.quest.x=X
 ftbquests.quest.y=Y
 ftbquests.quest.type=Type
@@ -68,50 +64,43 @@ ftbquests.gui.change_id=Change ID
 
 ftbquests.task=Task
 ftbquests.tasks=Tasks
-ftbquests.task.no_items=This task type can't accept items!
 ftbquests.task.get_block=Get Quest Block
 
-ftbquests.task.unknown=Unknown Task
-
-ftbquests.task.item=Item
+ftbquests.task.ftbquests.item=Item
 ftbquests.task.item.items=Item List
 ftbquests.task.item.count=Count
 
-ftbquests.task.fluid=Fluid
-ftbquests.task.fluid.fluid=Fluid
-ftbquests.task.fluid.fluid_nbt=Fluid NBT
-ftbquests.task.fluid.amount=Amount
-ftbquests.task.fluid.slot.fluid=Insert %s container here
-ftbquests.task.fluid.slot.container=Take empty container from here
+ftbquests.task.ftbquests.fluid=Fluid
+ftbquests.task.ftbquests.fluid.fluid=Fluid
+ftbquests.task.ftbquests.fluid.fluid_nbt=Fluid NBT
+ftbquests.task.ftbquests.fluid.amount=Amount
 
-ftbquests.task.forge_energy=Forge Energy
-ftbquests.task.forge_energy.value=FE / RF
-ftbquests.task.forge_energy.max_input=Max Input
-ftbquests.task.forge_energy.text=%d FE
+ftbquests.task.ftbquests.forge_energy=Forge Energy
+ftbquests.task.ftbquests.forge_energy.value=FE / RF
+ftbquests.task.ftbquests.forge_energy.max_input=Max Input
+ftbquests.task.ftbquests.forge_energy.text=%d FE
 
-ftbquests.task.ic2_energy=IC2 Energy
-ftbquests.task.ic2_energy.value=EU
-ftbquests.task.ic2_energy.max_input=Max Input
-ftbquests.task.ic2_energy.text=%d EU
+ftbquests.task.ftbquests.ic2_energy=IC2 Energy
+ftbquests.task.ftbquests.ic2_energy.value=EU
+ftbquests.task.ftbquests.ic2_energy.max_input=Max Input
+ftbquests.task.ftbquests.ic2_energy.text=%d EU
 
 ftbquests.reward=Reward
 ftbquests.reward.team_reward=Team Reward
 ftbquests.rewards=Rewards
 ftbquests.reward.unknown=Unknown Reward
 
-ftbquests.reward.item=Item
-ftbquests.reward.item.item=Item
+ftbquests.reward.ftbquests.item=Item
+ftbquests.reward.ftbquests.item.item=Item
 
-ftbquests.reward.xp=XP
-ftbquests.reward.xp.value=XP
-ftbquests.reward.xp.text=XP: %s
+ftbquests.reward.ftbquests.xp=XP
+ftbquests.reward.ftbquests.xp.value=XP
+ftbquests.reward.ftbquests.xp.text=XP: %s
 
-ftbquests.reward.xp_levels=XP Levels
-ftbquests.reward.xp_levels.value=XP Levels
-ftbquests.reward.xp_levels.text=XP Levels: %s
+ftbquests.reward.ftbquests.xp_levels=XP Levels
+ftbquests.reward.ftbquests.xp_levels.value=XP Levels
+ftbquests.reward.ftbquests.xp_levels.text=XP Levels: %s
 
-ftbquests.reward.command=Command
-ftbquests.reward.command.command=Command
-ftbquests.reward.command.text=Command: %s
-ftbquests.reward.command.title=Title
-ftbquests.reward.command.icon=Icon
+ftbquests.reward.ftbquests.command=Command
+ftbquests.reward.ftbquests.command.command=Command
+ftbquests.reward.ftbquests.command.text=Command: %s

@@ -36,7 +36,6 @@ import javax.annotation.Nullable;
  */
 public class IC2EnergyTask extends QuestTask
 {
-	public static final String ID = "ic2_energy";
 	private static final ResourceLocation EMPTY_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "textures/tasks/ic2_empty.png");
 	private static final ResourceLocation FULL_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "textures/tasks/ic2_full.png");
 
@@ -63,12 +62,6 @@ public class IC2EnergyTask extends QuestTask
 	}
 
 	@Override
-	public String getName()
-	{
-		return ID;
-	}
-
-	@Override
 	public void writeData(NBTTagCompound nbt)
 	{
 		nbt.setDouble("value", value.getDouble());
@@ -76,15 +69,15 @@ public class IC2EnergyTask extends QuestTask
 	}
 
 	@Override
-	public Icon getIcon()
+	public Icon getAltIcon()
 	{
-		return Icon.getIcon("item:ic2:te 1 74");
+		return Icon.getIcon(FULL_TEXTURE.toString()).combineWith(Icon.getIcon(EMPTY_TEXTURE.toString()));
 	}
 
 	@Override
-	public ITextComponent getDisplayName()
+	public ITextComponent getAltDisplayName()
 	{
-		return new TextComponentTranslation("ftbquests.task.ic2_energy.text", StringUtils.formatDouble(value.getDouble(), true));
+		return new TextComponentTranslation("ftbquests.task.ftbquests.ic2_energy.text", StringUtils.formatDouble(value.getDouble(), true));
 	}
 
 	@Override
@@ -120,7 +113,42 @@ public class IC2EnergyTask extends QuestTask
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void renderOnScreen(@Nullable QuestTaskData data)
+	public void drawGUI(@Nullable QuestTaskData data, int x, int y, int w, int h)
+	{
+		Tessellator tessellator = Tessellator.getInstance();
+		BufferBuilder buffer = tessellator.getBuffer();
+
+		double r = data == null ? 0D : data.getRelativeProgress();
+
+		if (r > 0D)
+		{
+			double y1 = y + (3D / 32D + (1D - r) * 26D / 32D) * h;
+			double h1 = (r * 26D / 32D) * h;
+
+			double v0 = 3D / 32D + (26D / 32D) * (1D - r);
+			double v1 = 29D / 32D;
+
+			ClientUtils.MC.getTextureManager().bindTexture(FULL_TEXTURE);
+			buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
+			buffer.pos(x, y1 + h1, 0).tex(0, v1).endVertex();
+			buffer.pos(x + w, y1 + h1, 0).tex(1, v1).endVertex();
+			buffer.pos(x + w, y1, 0).tex(1, v0).endVertex();
+			buffer.pos(x, y1, 0).tex(0, v0).endVertex();
+			tessellator.draw();
+		}
+
+		ClientUtils.MC.getTextureManager().bindTexture(EMPTY_TEXTURE);
+		buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
+		buffer.pos(x, y + h, 0).tex(0, 1).endVertex();
+		buffer.pos(x + w, y + h, 0).tex(1, 1).endVertex();
+		buffer.pos(x + w, y, 0).tex(1, 0).endVertex();
+		buffer.pos(x, y, 0).tex(0, 0).endVertex();
+		tessellator.draw();
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public void drawScreen(@Nullable QuestTaskData data)
 	{
 		Tessellator tessellator = Tessellator.getInstance();
 		BufferBuilder buffer = tessellator.getBuffer();
@@ -145,8 +173,8 @@ public class IC2EnergyTask extends QuestTask
 			x -= 1D / 128D;
 			w += 1D / 64D;
 
-			h = r * 26D / 32D;
 			y = 3D / 32D + (1D - r) * 26D / 32D - 0.5;
+			h = r * 26D / 32D;
 
 			y -= 1D / 128D;
 			h += 1D / 64D;

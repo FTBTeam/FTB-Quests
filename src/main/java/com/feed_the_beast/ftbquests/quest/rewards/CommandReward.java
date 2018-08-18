@@ -11,7 +11,6 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 
@@ -22,50 +21,35 @@ import java.util.regex.Pattern;
  */
 public class CommandReward extends QuestReward
 {
-	public static final String ID = "command";
-	private static final Pattern CMD_PATTERN = Pattern.compile("^/.*$");
+	private static final Pattern CMD_PATTERN = Pattern.compile("^/.+$");
 
 	private final ConfigString command;
-	private final ConfigString title;
 	private final ConfigItemStack icon;
 
 	public CommandReward(Quest quest, NBTTagCompound nbt)
 	{
 		super(quest);
 		command = new ConfigString(nbt.getString("command"), CMD_PATTERN);
-		title = new ConfigString(nbt.getString("title"));
 		icon = new ConfigItemStack(nbt.hasKey("icon") ? new ItemStack(nbt.getCompoundTag("icon")) : new ItemStack(Blocks.COMMAND_BLOCK), true);
-	}
-
-	@Override
-	public String getName()
-	{
-		return ID;
 	}
 
 	@Override
 	public void writeData(NBTTagCompound nbt)
 	{
 		nbt.setString("command", command.getString());
-		nbt.setString("title", title.getString());
 		nbt.setTag("icon", icon.getStack().serializeNBT());
 	}
 
 	@Override
-	public Icon getIcon()
+	public Icon getAltIcon()
 	{
 		return ItemIcon.getItemIcon(icon.getStack());
 	}
 
 	@Override
-	public ITextComponent getDisplayName()
+	public ITextComponent getAltDisplayName()
 	{
-		if (!title.isEmpty())
-		{
-			return new TextComponentString(title.getString());
-		}
-
-		return new TextComponentTranslation("ftbquests.reward.command.text", TextFormatting.GREEN + command.getString());
+		return new TextComponentTranslation("ftbquests.reward.ftbquests.command.text", TextFormatting.GREEN + command.getString());
 	}
 
 	@Override
@@ -77,9 +61,7 @@ public class CommandReward extends QuestReward
 	@Override
 	public void getConfig(ConfigGroup group)
 	{
-		super.getConfig(group);
 		group.add("command", command, new ConfigString("", CMD_PATTERN));
-		group.add("title", title, new ConfigString(""));
 		group.add("icon", icon, new ConfigItemStack(new ItemStack(Blocks.COMMAND_BLOCK)));
 	}
 }

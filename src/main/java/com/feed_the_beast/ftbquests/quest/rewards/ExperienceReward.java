@@ -18,8 +18,6 @@ import net.minecraft.util.text.TextFormatting;
  */
 public class ExperienceReward extends QuestReward
 {
-	public static final String ID = "xp";
-
 	protected final ConfigInt value;
 
 	public ExperienceReward(Quest quest, NBTTagCompound nbt)
@@ -29,27 +27,21 @@ public class ExperienceReward extends QuestReward
 	}
 
 	@Override
-	public String getName()
-	{
-		return ID;
-	}
-
-	@Override
 	public void writeData(NBTTagCompound nbt)
 	{
 		nbt.setInteger("value", value.getInt());
 	}
 
 	@Override
-	public Icon getIcon()
+	public Icon getAltIcon()
 	{
 		return ItemIcon.getItemIcon(new ItemStack(Items.EXPERIENCE_BOTTLE));
 	}
 
 	@Override
-	public ITextComponent getDisplayName()
+	public ITextComponent getAltDisplayName()
 	{
-		return new TextComponentTranslation("ftbquests.reward.xp.text", TextFormatting.GREEN + "+" + value.getInt());
+		return new TextComponentTranslation("ftbquests.reward.ftbquests.xp.text", TextFormatting.GREEN + "+" + value.getInt());
 	}
 
 	@Override

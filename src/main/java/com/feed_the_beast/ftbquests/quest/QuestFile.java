@@ -4,23 +4,20 @@ import com.feed_the_beast.ftblib.lib.config.ConfigBoolean;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigItemStack;
 import com.feed_the_beast.ftblib.lib.config.ConfigList;
-import com.feed_the_beast.ftblib.lib.config.ConfigString;
 import com.feed_the_beast.ftblib.lib.config.ConfigTimer;
-import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
-import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
+import com.feed_the_beast.ftblib.lib.icon.IconAnimation;
 import com.feed_the_beast.ftblib.lib.item.ItemStackSerializer;
 import com.feed_the_beast.ftblib.lib.math.Ticks;
 import com.feed_the_beast.ftbquests.quest.rewards.QuestReward;
-import com.feed_the_beast.ftbquests.quest.rewards.QuestRewards;
+import com.feed_the_beast.ftbquests.quest.rewards.QuestRewardType;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
-import com.feed_the_beast.ftbquests.quest.tasks.QuestTasks;
+import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskType;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.common.util.Constants;
 
@@ -36,8 +33,6 @@ import java.util.Map;
  */
 public abstract class QuestFile extends ProgressingQuestObject
 {
-	public final ConfigString title;
-	public final ConfigItemStack icon;
 	public final List<QuestChapter> chapters;
 
 	private final Map<String, QuestObject> map;
@@ -51,8 +46,6 @@ public abstract class QuestFile extends ProgressingQuestObject
 	public QuestFile()
 	{
 		id = "*";
-		title = new ConfigString("");
-		icon = new ConfigItemStack(ItemStack.EMPTY);
 		chapters = new ArrayList<>();
 
 		map = new HashMap<>();
@@ -317,14 +310,13 @@ public abstract class QuestFile extends ProgressingQuestObject
 
 				if (quest != null)
 				{
-					if (quest.tasks.size() >= 256)
-					{
-						return null;
-					}
+					QuestTask task = QuestTaskType.createTask(quest, nbt);
 
-					QuestTask task = QuestTasks.createTask(quest, nbt);
-					quest.tasks.add(task);
-					return task;
+					if (task != null)
+					{
+						quest.tasks.add(task);
+						return task;
+					}
 				}
 
 				return null;
@@ -335,14 +327,13 @@ public abstract class QuestFile extends ProgressingQuestObject
 
 				if (quest != null)
 				{
-					if (quest.rewards.size() >= 256)
-					{
-						return null;
-					}
+					QuestReward reward = QuestRewardType.createReward(quest, nbt);
 
-					QuestReward reward = QuestRewards.createReward(quest, nbt);
-					quest.rewards.add(reward);
-					return reward;
+					if (reward != null)
+					{
+						quest.rewards.add(reward);
+						return reward;
+					}
 				}
 
 				return null;
@@ -371,8 +362,15 @@ public abstract class QuestFile extends ProgressingQuestObject
 	@Override
 	public final void writeData(NBTTagCompound nbt)
 	{
-		nbt.setString("title", title.getString());
-		nbt.setTag("icon", icon.getStack().serializeNBT());
+		if (!title.isEmpty())
+		{
+			nbt.setString("title", title);
+		}
+
+		if (!icon.isEmpty())
+		{
+			nbt.setTag("icon", icon.serializeNBT());
+		}
 
 		NBTTagList chaptersList = new NBTTagList();
 
@@ -399,10 +397,10 @@ public abstract class QuestFile extends ProgressingQuestObject
 
 	protected final void readData(NBTTagCompound nbt)
 	{
-		chapters.clear();
+		title = nbt.getString("title");
+		icon = new ItemStack(nbt.getCompoundTag("icon"));
 
-		title.setString(nbt.getString("title"));
-		icon.setStack(new ItemStack(nbt.getCompoundTag("icon")));
+		chapters.clear();
 
 		NBTTagList chapterList = nbt.getTagList("chapters", Constants.NBT.TAG_COMPOUND);
 
@@ -441,32 +439,27 @@ public abstract class QuestFile extends ProgressingQuestObject
 	public abstract Collection<? extends IProgressData> getAllData();
 
 	@Override
-	public Icon getIcon()
+	public Icon getAltIcon()
 	{
-		if (!icon.isEmpty())
+		List<Icon> list = new ArrayList<>();
+
+		for (QuestChapter chapter : chapters)
 		{
-			return ItemIcon.getItemIcon(icon.getStack());
+			list.add(chapter.getIcon());
 		}
 
-		return GuiIcons.BOOK_RED;
+		return IconAnimation.fromList(list, false);
 	}
 
 	@Override
-	public ITextComponent getDisplayName()
+	public ITextComponent getAltDisplayName()
 	{
-		if (!title.isEmpty())
-		{
-			return new TextComponentString(title.getString());
-		}
-
 		return new TextComponentTranslation("ftbquests.file");
 	}
 
 	@Override
 	public void getConfig(ConfigGroup config)
 	{
-		config.add("title", title, new ConfigString(""));
-		config.add("icon", icon, new ConfigItemStack(ItemStack.EMPTY));
 		config.add("allow_take_quest_blocks", allowTakeQuestBlocks, new ConfigBoolean(true));
 		config.add("emergency_items", emergencyItems, new ConfigList<>(new ConfigItemStack(new ItemStack(Items.APPLE))));
 		config.add("emergency_items_cooldown", emergencyItemsCooldown, new ConfigTimer(Ticks.MINUTE.x(5)));

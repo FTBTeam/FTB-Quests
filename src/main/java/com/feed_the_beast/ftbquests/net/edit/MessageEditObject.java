@@ -12,10 +12,11 @@ import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.rewards.QuestReward;
+import com.feed_the_beast.ftbquests.quest.rewards.QuestRewardType;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
+import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskType;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.util.IStringSerializable;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -74,21 +75,21 @@ public class MessageEditObject extends MessageToServer implements IConfigCallbac
 				group1.setDisplayName(object.getDisplayName().appendSibling(StringUtils.color(new TextComponentString(" " + object.getID()), TextFormatting.DARK_GRAY)));
 				ConfigGroup g = group1;
 
-				if (object instanceof QuestTask || object instanceof QuestReward)
+				if (object instanceof QuestTask)
 				{
-					g = group1.getGroup(((IStringSerializable) object).getName());
-
-					if (object instanceof QuestTask)
-					{
-						group.setDisplayName(new TextComponentTranslation("ftbquests.task." + ((QuestTask) object).getName()).appendSibling(idc));
-					}
-					else
-					{
-						group.setDisplayName(new TextComponentTranslation("ftbquests.reward." + ((QuestReward) object).getName()).appendSibling(idc));
-					}
+					QuestTaskType type = QuestTaskType.getType(object.getClass());
+					g = group1.getGroup(type.getRegistryName().getNamespace() + '.' + type.getRegistryName().getPath());
+					group.setDisplayName(type.getDisplayName().appendSibling(idc));
+				}
+				else if (object instanceof QuestReward)
+				{
+					QuestRewardType type = QuestRewardType.getType(object.getClass());
+					g = group1.getGroup(type.getRegistryName().getNamespace() + '.' + type.getRegistryName().getPath());
+					group.setDisplayName(type.getDisplayName().appendSibling(idc));
 				}
 
 				object.getConfig(g);
+				object.getExtraConfig(g);
 				FTBLibAPI.editServerConfig(player, group, this);
 			}
 		}

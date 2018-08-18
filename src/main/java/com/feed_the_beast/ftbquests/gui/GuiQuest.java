@@ -31,11 +31,9 @@ import com.feed_the_beast.ftbquests.net.edit.MessageResetProgress;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.quest.rewards.QuestReward;
-import com.feed_the_beast.ftbquests.quest.rewards.QuestRewards;
-import com.feed_the_beast.ftbquests.quest.rewards.UnknownReward;
+import com.feed_the_beast.ftbquests.quest.rewards.QuestRewardType;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
-import com.feed_the_beast.ftbquests.quest.tasks.QuestTasks;
-import com.feed_the_beast.ftbquests.quest.tasks.UnknownTask;
+import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskType;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
@@ -174,7 +172,7 @@ public class GuiQuest extends GuiBase
 				contextMenu.add(questTreeGui.changeIDItem(getGui(), task));
 				getGui().openContextMenu(contextMenu);
 			}
-			else if (button.isLeft() && !(task instanceof UnknownTask))
+			else if (button.isLeft())
 			{
 				new MessageOpenTask(task.getID()).sendToServer();
 			}
@@ -190,11 +188,6 @@ public class GuiQuest extends GuiBase
 			else
 			{
 				list.add(getTitle());
-			}
-
-			if (task instanceof UnknownTask)
-			{
-				list.add(((UnknownTask) task).getHover());
 			}
 		}
 
@@ -267,23 +260,13 @@ public class GuiQuest extends GuiBase
 		@Override
 		public void addButtons(Panel panel)
 		{
-			for (String type : QuestTasks.MAP.keySet())
+			for (QuestTaskType type : QuestTaskType.getRegistry())
 			{
-				NBTTagCompound nbt = new NBTTagCompound();
-				nbt.setString("type", type);
-				QuestTask task = QuestTasks.createTask(quest, nbt);
+				QuestTask task = type.provider.create(quest, new NBTTagCompound());
 
-				if (!(task instanceof UnknownTask))
+				if (task != null)
 				{
-					Icon icon = task.getIcon();
-
-					if (icon.isEmpty())
-					{
-						icon = GuiIcons.DICE;
-					}
-
-					String key = "ftbquests.task." + type;
-					panel.add(new SimpleTextButton(panel, I18n.hasKey(key) ? I18n.format(key) : type, icon)
+					panel.add(new SimpleTextButton(panel, type.getDisplayName().getFormattedText(), task.getIcon())
 					{
 						@Override
 						public void onClicked(MouseButton button)
@@ -291,12 +274,12 @@ public class GuiQuest extends GuiBase
 							GuiHelper.playClickSound();
 
 							ConfigGroup group = ConfigGroup.newGroup(FTBQuests.MOD_ID);
-							task.getConfig(group.getGroup("task").getGroup(type));
+							task.getConfig(group.getGroup("task." + type.getRegistryName().getNamespace() + '.' + type.getRegistryName().getPath()));
 
 							new GuiEditConfig(group, (g, sender) -> {
 								NBTTagCompound nbt = new NBTTagCompound();
 								task.writeData(nbt);
-								nbt.setString("type", type);
+								nbt.setString("type", type.getTypeForNBT());
 								new MessageCreateObject(QuestObjectType.TASK, quest.getID(), nbt).sendToServer();
 								GuiQuest.this.openGui();
 								questTreeGui.questFile.refreshGui(questTreeGui.questFile);
@@ -352,20 +335,9 @@ public class GuiQuest extends GuiBase
 				contextMenu.add(questTreeGui.changeIDItem(getGui(), reward));
 				getGui().openContextMenu(contextMenu);
 			}
-			else if (button.isLeft() && !(reward instanceof UnknownReward) && questTreeGui.questFile.self != null && questTreeGui.questFile.self.claimReward(ClientUtils.MC.player, reward))
+			else if (button.isLeft() && questTreeGui.questFile.self != null && questTreeGui.questFile.self.claimReward(ClientUtils.MC.player, reward))
 			{
 				new MessageClaimReward(reward.getID()).sendToServer();
-			}
-		}
-
-		@Override
-		public void addMouseOverText(List<String> list)
-		{
-			list.add(getTitle());
-
-			if (reward instanceof UnknownReward)
-			{
-				list.add(((UnknownReward) reward).getHover());
 			}
 		}
 
@@ -432,23 +404,13 @@ public class GuiQuest extends GuiBase
 		@Override
 		public void addButtons(Panel panel)
 		{
-			for (String type : QuestRewards.MAP.keySet())
+			for (QuestRewardType type : QuestRewardType.getRegistry())
 			{
-				NBTTagCompound nbt = new NBTTagCompound();
-				nbt.setString("type", type);
-				QuestReward reward = QuestRewards.createReward(quest, nbt);
+				QuestReward reward = type.provider.create(quest, new NBTTagCompound());
 
-				if (!(reward instanceof UnknownReward))
+				if (reward != null)
 				{
-					Icon icon = reward.getIcon();
-
-					if (icon.isEmpty())
-					{
-						icon = GuiIcons.DICE;
-					}
-
-					String key = "ftbquests.reward." + type;
-					panel.add(new SimpleTextButton(panel, I18n.hasKey(key) ? I18n.format(key) : type, icon)
+					panel.add(new SimpleTextButton(panel, reward.getDisplayName().getFormattedText(), reward.getIcon())
 					{
 						@Override
 						public void onClicked(MouseButton button)
@@ -456,12 +418,12 @@ public class GuiQuest extends GuiBase
 							GuiHelper.playClickSound();
 
 							ConfigGroup group = ConfigGroup.newGroup(FTBQuests.MOD_ID);
-							reward.getConfig(group.getGroup("reward").getGroup(type));
+							reward.getConfig(group.getGroup("reward." + type.getRegistryName().getNamespace() + '.' + type.getRegistryName().getPath()));
 
 							new GuiEditConfig(group, (g, sender) -> {
 								NBTTagCompound nbt = new NBTTagCompound();
 								reward.writeData(nbt);
-								nbt.setString("type", type);
+								nbt.setString("type", type.getTypeForNBT());
 								new MessageCreateObject(QuestObjectType.REWARD, quest.getID(), nbt).sendToServer();
 								GuiQuest.this.openGui();
 								questTreeGui.questFile.refreshGui(questTreeGui.questFile);

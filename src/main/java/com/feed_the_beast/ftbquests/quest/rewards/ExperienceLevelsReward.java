@@ -12,23 +12,15 @@ import net.minecraft.util.text.TextFormatting;
  */
 public class ExperienceLevelsReward extends ExperienceReward
 {
-	public static final String ID_LEVELS = "xp_levels";
-
 	public ExperienceLevelsReward(Quest quest, NBTTagCompound nbt)
 	{
 		super(quest, nbt);
 	}
 
 	@Override
-	public String getName()
+	public ITextComponent getAltDisplayName()
 	{
-		return ID_LEVELS;
-	}
-
-	@Override
-	public ITextComponent getDisplayName()
-	{
-		return new TextComponentTranslation("ftbquests.reward.xp_levels.text", TextFormatting.GREEN + "+" + value.getInt());
+		return new TextComponentTranslation("ftbquests.reward.ftbquests.xp_levels.text", TextFormatting.GREEN + "+" + value.getInt());
 	}
 
 	@Override
