@@ -93,7 +93,7 @@ public class RenderScreen extends TileEntitySpecialRenderer<TileScreenCore>
 		String top1 = task.quest.getDisplayName().getUnformattedText();
 		String top2 = task.getDisplayName().getUnformattedText();
 
-		if (top1.equals(top2) || top1.isEmpty())
+		if (top1.isEmpty() || top1.equals(top2))
 		{
 			top1 = top2;
 			top2 = "";

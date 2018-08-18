@@ -80,6 +80,12 @@ public abstract class QuestReward extends QuestObject
 		config.add("team_reward", new ConfigBoolean(teamReward)
 		{
 			@Override
+			public boolean getBoolean()
+			{
+				return teamReward;
+			}
+
+			@Override
 			public void setBoolean(boolean v)
 			{
 				teamReward = v;

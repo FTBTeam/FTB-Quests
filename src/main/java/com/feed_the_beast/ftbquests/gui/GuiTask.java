@@ -167,11 +167,23 @@ public class GuiTask extends GuiBase
 		GlStateManager.color(1F, 1F, 1F, 1F);
 		BACKGROUND.draw(x, y, width, height);
 
-		String top1 = TextFormatting.BOLD + container.data.task.quest.getDisplayName().getUnformattedText();
-		String top2 = TextFormatting.GRAY + container.data.task.getDisplayName().getUnformattedText();
+		String top1 = container.data.task.quest.getDisplayName().getUnformattedText();
+		String top2 = container.data.task.getDisplayName().getUnformattedText();
 
+		if (top1.isEmpty() || top1.equals(top2))
+		{
+			top1 = top2;
+			top2 = "";
+		}
+
+		top1 = TextFormatting.BOLD + top1;
 		drawString(top1, x + (width - getStringWidth(top1)) / 2, y + 14);
-		drawString(top2, x + (width - getStringWidth(top2)) / 2, y + 30);
+
+		if (!top2.isEmpty())
+		{
+			top2 = TextFormatting.GRAY + top2;
+			drawString(top2, x + (width - getStringWidth(top2)) / 2, y + 30);
+		}
 
 		container.data.task.drawGUI(container.data, x + (width - 64) / 2, y + 42, 64, 64);
 

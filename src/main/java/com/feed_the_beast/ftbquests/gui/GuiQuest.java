@@ -274,9 +274,11 @@ public class GuiQuest extends GuiBase
 							GuiHelper.playClickSound();
 
 							ConfigGroup group = ConfigGroup.newGroup(FTBQuests.MOD_ID);
-							task.getConfig(group.getGroup("task." + type.getRegistryName().getNamespace() + '.' + type.getRegistryName().getPath()));
+							ConfigGroup g = group.getGroup("task." + type.getRegistryName().getNamespace() + '.' + type.getRegistryName().getPath());
+							task.getConfig(g);
+							task.getExtraConfig(g);
 
-							new GuiEditConfig(group, (g, sender) -> {
+							new GuiEditConfig(group, (g1, sender) -> {
 								NBTTagCompound nbt = new NBTTagCompound();
 								task.writeData(nbt);
 								nbt.setString("type", type.getTypeForNBT());
@@ -418,9 +420,11 @@ public class GuiQuest extends GuiBase
 							GuiHelper.playClickSound();
 
 							ConfigGroup group = ConfigGroup.newGroup(FTBQuests.MOD_ID);
-							reward.getConfig(group.getGroup("reward." + type.getRegistryName().getNamespace() + '.' + type.getRegistryName().getPath()));
+							ConfigGroup g = group.getGroup("reward." + type.getRegistryName().getNamespace() + '.' + type.getRegistryName().getPath());
+							reward.getConfig(g);
+							reward.getExtraConfig(g);
 
-							new GuiEditConfig(group, (g, sender) -> {
+							new GuiEditConfig(group, (g1, sender) -> {
 								NBTTagCompound nbt = new NBTTagCompound();
 								reward.writeData(nbt);
 								nbt.setString("type", type.getTypeForNBT());

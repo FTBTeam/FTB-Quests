@@ -105,6 +105,7 @@ public class MessageEditObject extends MessageToServer implements IConfigCallbac
 			object.clearCachedData();
 			ConfigGroup group = ConfigGroup.newGroup("object");
 			object.getConfig(group);
+			object.getExtraConfig(group);
 			new MessageEditObjectResponse(id, group.serializeNBT()).sendToAll();
 			ServerQuestFile.INSTANCE.save();
 		}

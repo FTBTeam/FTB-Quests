@@ -1,23 +1,29 @@
 package com.feed_the_beast.ftbquests.gui;
 
 import com.feed_the_beast.ftblib.lib.client.ClientUtils;
+import com.feed_the_beast.ftblib.lib.gui.Button;
 import com.feed_the_beast.ftblib.lib.gui.GuiBase;
 import com.feed_the_beast.ftblib.lib.gui.GuiContainerWrapper;
+import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
 import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.gui.PanelScrollBar;
 import com.feed_the_beast.ftblib.lib.gui.ScrollBar;
 import com.feed_the_beast.ftblib.lib.gui.Theme;
-import com.feed_the_beast.ftblib.lib.gui.Widget;
 import com.feed_the_beast.ftblib.lib.gui.WidgetLayout;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.ImageIcon;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.FTBQuests;
+import com.feed_the_beast.ftbquests.net.MessageOpenTask;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskData;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.TextFormatting;
+
+import java.util.List;
 
 /**
  * @author LatvianModder
@@ -32,7 +38,7 @@ public class GuiQuestChest extends GuiBase
 	public final Panel tasks;
 	public final PanelScrollBar scrollBar;
 
-	private static class ButtonTask extends Widget
+	private static class ButtonTask extends Button
 	{
 		private final QuestTaskData taskData;
 
@@ -41,6 +47,21 @@ public class GuiQuestChest extends GuiBase
 			super(panel);
 			taskData = d;
 			setSize(panel.width, 8);
+		}
+
+		@Override
+		public void addMouseOverText(List<String> list)
+		{
+			list.add(TextFormatting.GRAY + I18n.format("ftbquests.chapter") + ": " + TextFormatting.YELLOW + taskData.task.quest.chapter.getDisplayName().getFormattedText());
+			list.add(TextFormatting.GRAY + I18n.format("ftbquests.quest") + ": " + TextFormatting.YELLOW + taskData.task.quest.getDisplayName().getFormattedText());
+			list.add(TextFormatting.GRAY + I18n.format("ftbquests.progress") + ": " + TextFormatting.BLUE + taskData.getProgressString() + " / " + taskData.task.getMaxProgressString());
+		}
+
+		@Override
+		public void onClicked(MouseButton button)
+		{
+			GuiHelper.playClickSound();
+			new MessageOpenTask(taskData.task.getID()).sendToServer();
 		}
 
 		@Override
@@ -74,7 +95,22 @@ public class GuiQuestChest extends GuiBase
 				{
 					for (QuestTask task : ClientQuestFile.INSTANCE.allTasks)
 					{
-						add(new ButtonTask(this, ClientQuestFile.INSTANCE.self.getQuestTaskData(task)));
+						QuestTaskData data = ClientQuestFile.INSTANCE.self.getQuestTaskData(task);
+
+						if (data.getRelativeProgress() < 1D)
+						{
+							add(new ButtonTask(this, data));
+						}
+					}
+
+					for (QuestTask task : ClientQuestFile.INSTANCE.allTasks)
+					{
+						QuestTaskData data = ClientQuestFile.INSTANCE.self.getQuestTaskData(task);
+
+						if (data.getRelativeProgress() >= 1D)
+						{
+							add(new ButtonTask(this, data));
+						}
 					}
 				}
 			}

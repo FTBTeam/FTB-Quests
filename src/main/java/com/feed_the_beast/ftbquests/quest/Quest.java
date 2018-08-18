@@ -180,6 +180,17 @@ public final class Quest extends ProgressingQuestObject
 					task.writeData(taskNBT);
 					taskNBT.setString("id", task.id);
 					taskNBT.setString("type", type.getTypeForNBT());
+
+					if (!task.title.isEmpty())
+					{
+						taskNBT.setString("title", task.title);
+					}
+
+					if (!task.icon.isEmpty())
+					{
+						taskNBT.setTag("icon", task.icon.serializeNBT());
+					}
+
 					array.appendTag(taskNBT);
 				}
 			}
@@ -210,6 +221,11 @@ public final class Quest extends ProgressingQuestObject
 					if (!reward.title.isEmpty())
 					{
 						rewardNBT.setString("title", reward.title);
+					}
+
+					if (!reward.icon.isEmpty())
+					{
+						rewardNBT.setTag("icon", reward.icon.serializeNBT());
 					}
 
 					array.appendTag(rewardNBT);
