@@ -412,7 +412,7 @@ public class GuiQuest extends GuiBase
 
 				if (reward != null)
 				{
-					panel.add(new SimpleTextButton(panel, reward.getDisplayName().getFormattedText(), reward.getIcon())
+					panel.add(new SimpleTextButton(panel, type.getDisplayName().getFormattedText(), reward.getIcon())
 					{
 						@Override
 						public void onClicked(MouseButton button)
