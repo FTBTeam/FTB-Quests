@@ -142,7 +142,7 @@ public class BlockProgressDetector extends Block
 
 		if (team.isEmpty())
 		{
-			team = ClientQuestFile.existsWithTeam() ? ClientQuestFile.INSTANCE.self.teamID : "";
+			team = ClientQuestFile.existsWithTeam() ? ClientQuestFile.INSTANCE.self.getTeamID() : "";
 		}
 
 		tooltip.add(I18n.format("ftbquests.team") + ": " + TextFormatting.DARK_GREEN + team);

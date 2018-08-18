@@ -19,7 +19,7 @@ import java.util.Map;
  */
 public class ClientQuestProgress implements IProgressData
 {
-	public final String teamID;
+	private final String teamID;
 	public final Map<QuestTask, QuestTaskData> taskData;
 	public final Collection<QuestReward> claimedRewards;
 
@@ -28,6 +28,12 @@ public class ClientQuestProgress implements IProgressData
 		teamID = t;
 		taskData = new HashMap<>();
 		claimedRewards = new HashSet<>();
+	}
+
+	@Override
+	public String getTeamID()
+	{
+		return teamID;
 	}
 
 	@Override

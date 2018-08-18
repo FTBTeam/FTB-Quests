@@ -91,8 +91,8 @@ public class TileProgressScreenCore extends TileProgressScreenBase implements IC
 			facing = EnumFacing.byName(nbt.getString("Facing"));
 		}
 
-		team = nbt.getString("Owner");
-		chapter = nbt.getString("Quest");
+		team = nbt.getString("Team");
+		chapter = nbt.getString("Chapter");
 		size = nbt.getByte("Size");
 		indestructible = nbt.getBoolean("Indestructible");
 		skin = BlockUtils.getStateFromName(nbt.getString("Skin"));

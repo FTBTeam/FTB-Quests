@@ -1,5 +1,6 @@
 package com.feed_the_beast.ftbquests.block;
 
+import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
 import com.feed_the_beast.ftblib.lib.util.BlockUtils;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
@@ -9,8 +10,6 @@ import com.feed_the_beast.ftbquests.quest.ProgressingQuestObject;
 import com.feed_the_beast.ftbquests.tile.TileProgressScreenBase;
 import com.feed_the_beast.ftbquests.tile.TileProgressScreenCore;
 import com.feed_the_beast.ftbquests.tile.TileProgressScreenPart;
-import com.feed_the_beast.ftbquests.tile.TileScreenBase;
-import com.feed_the_beast.ftbquests.tile.TileScreenCore;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -100,13 +99,13 @@ public class BlockProgressScreen extends BlockWithHorizontalFacing
 
 		TileEntity tileEntity = world.getTileEntity(pos);
 
-		if (tileEntity instanceof TileScreenBase)
+		if (tileEntity instanceof TileProgressScreenBase)
 		{
-			TileScreenCore screen = ((TileScreenBase) tileEntity).getScreen();
+			TileProgressScreenCore screen = ((TileProgressScreenBase) tileEntity).getScreen();
 
 			if (screen != null)
 			{
-				screen.writeToItem(stack);
+				screen.writeToPickBlock(stack);
 			}
 		}
 
@@ -123,17 +122,16 @@ public class BlockProgressScreen extends BlockWithHorizontalFacing
 
 		TileEntity tileEntity = world.getTileEntity(pos);
 
-		if (tileEntity instanceof TileScreenBase)
+		if (tileEntity instanceof TileProgressScreenBase)
 		{
-			TileScreenBase base = (TileScreenBase) tileEntity;
-			TileScreenCore screen = base.getScreen();
+			TileProgressScreenBase base = (TileProgressScreenBase) tileEntity;
+			TileProgressScreenCore screen = base.getScreen();
 
 			if (screen != null)
 			{
 				if (player instanceof EntityPlayerMP)
 				{
-					double x = 0.5D; //FIXME: X coordinate
-					screen.onClicked((EntityPlayerMP) player, hand, x, 1D - (base.getOffsetY() + hitY) / (screen.size * 2D + 1D));
+					screen.onClicked((EntityPlayerMP) player, BlockScreen.getClickX(facing, base.getOffsetX(), base.getOffsetZ(), hitX, hitZ, screen.size), BlockScreen.getClickY(base.getOffsetY(), hitY, screen.size));
 				}
 
 				return true;
@@ -148,17 +146,23 @@ public class BlockProgressScreen extends BlockWithHorizontalFacing
 	{
 		TileEntity tileEntity = world.getTileEntity(pos);
 
-		if (tileEntity instanceof TileScreenCore)
+		if (tileEntity instanceof TileProgressScreenCore)
 		{
-			TileScreenCore screen = (TileScreenCore) tileEntity;
+			TileProgressScreenCore screen = (TileProgressScreenCore) tileEntity;
 			screen.readFromItem(stack);
+
+			if (screen.team.isEmpty() && placer instanceof EntityPlayerMP)
+			{
+				screen.team = FTBLibAPI.getTeam(placer.getUniqueID());
+			}
+
 			screen.facing = state.getValue(FACING);
 
 			if (screen.size > 0)
 			{
 				IBlockState state1 = FTBQuestsItems.PROGRESS_SCREEN_PART.getDefaultState().withProperty(FACING, screen.getFacing());
 
-				boolean xaxis = state.getValue(FACING).getAxis() == EnumFacing.Axis.X;
+				boolean xaxis = screen.facing.getAxis() == EnumFacing.Axis.X;
 
 				for (int y = 0; y < screen.size * 2 + 1; y++)
 				{
@@ -340,7 +344,7 @@ public class BlockProgressScreen extends BlockWithHorizontalFacing
 
 		if (team.isEmpty())
 		{
-			team = ClientQuestFile.existsWithTeam() ? ClientQuestFile.INSTANCE.self.teamID : "";
+			team = ClientQuestFile.existsWithTeam() ? ClientQuestFile.INSTANCE.self.getTeamID() : "";
 		}
 
 		tooltip.add(I18n.format("tile.ftbquests.screen.size") + ": " + TextFormatting.GOLD + (1 + size * 2) + " x " + (1 + size * 2));
