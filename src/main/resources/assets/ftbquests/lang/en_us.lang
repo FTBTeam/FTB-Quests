@@ -67,8 +67,8 @@ ftbquests.tasks=Tasks
 ftbquests.task.get_block=Get Quest Block
 
 ftbquests.task.ftbquests.item=Item
-ftbquests.task.item.items=Item List
-ftbquests.task.item.count=Count
+ftbquests.task.ftbquests.item.items=Item List
+ftbquests.task.ftbquests.item.count=Count
 
 ftbquests.task.ftbquests.fluid=Fluid
 ftbquests.task.ftbquests.fluid.fluid=Fluid

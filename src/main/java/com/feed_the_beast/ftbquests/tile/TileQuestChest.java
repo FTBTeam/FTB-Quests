@@ -165,11 +165,11 @@ public class TileQuestChest extends TileBase implements IItemHandler, IConfigCal
 			return stack;
 		}
 
-		IProgressData teamData = file.getData(team);
+		cTeam = getTeam();
 
-		if (teamData != null)
+		if (cTeam != null)
 		{
-			return teamData.getQuestTaskData(file.allItemAcceptingTasks.get(slot)).insertItem(stack, false, simulate);
+			return cTeam.getQuestTaskData(file.allItemAcceptingTasks.get(slot)).insertItem(stack, false, simulate);
 		}
 
 		return stack;
