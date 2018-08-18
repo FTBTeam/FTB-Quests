@@ -54,7 +54,7 @@ public class ClientQuestFile extends QuestFile
 			NBTTagCompound nbt = message.teamData.getCompoundTag(team);
 			FTBQuestsTeamData.deserializeTaskData(data.taskData.values(), nbt.getCompoundTag("T"));
 			FTBQuestsTeamData.deserializeRewardData(this, data.claimedRewards, nbt.getCompoundTag("R"));
-			teamData.put(data.teamID, data);
+			teamData.put(data.getTeamID(), data);
 		}
 
 		self = message.team.isEmpty() ? null : teamData.get(message.team);

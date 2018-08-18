@@ -436,6 +436,12 @@ public class FTBQuestsTeamData extends TeamData implements IProgressData
 	}
 
 	@Override
+	public String getTeamID()
+	{
+		return team.getName();
+	}
+
+	@Override
 	public QuestTaskData getQuestTaskData(QuestTask task)
 	{
 		QuestTaskData data = taskData.get(task);

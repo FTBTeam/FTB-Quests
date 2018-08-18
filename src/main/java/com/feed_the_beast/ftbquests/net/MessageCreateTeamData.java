@@ -57,7 +57,7 @@ public class MessageCreateTeamData extends MessageToClient
 				data.createTaskData(task);
 			}
 
-			ClientQuestFile.INSTANCE.teamData.put(data.teamID, data);
+			ClientQuestFile.INSTANCE.teamData.put(data.getTeamID(), data);
 		}
 	}
 }

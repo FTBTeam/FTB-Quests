@@ -12,6 +12,8 @@ import java.util.Collection;
  */
 public interface IProgressData
 {
+	String getTeamID();
+
 	QuestTaskData getQuestTaskData(QuestTask task);
 
 	boolean claimReward(EntityPlayer player, QuestReward reward);

@@ -9,6 +9,7 @@ import com.feed_the_beast.ftbquests.gui.ClientQuestFile;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.rewards.QuestReward;
+import com.feed_the_beast.ftbquests.tile.TileProgressScreenCore;
 import com.feed_the_beast.ftbquests.tile.TileScreenCore;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.item.Item;
@@ -39,6 +40,7 @@ public class FTBQuestsClientEventHandler
 		ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(FTBQuestsItems.CHEST), 0, new ModelResourceLocation(FTBQuestsItems.CHEST.getRegistryName(), "facing=north"));
 
 		ClientRegistry.bindTileEntitySpecialRenderer(TileScreenCore.class, new RenderScreen());
+		ClientRegistry.bindTileEntitySpecialRenderer(TileProgressScreenCore.class, new RenderProgressScreen());
 	}
 
 	@SubscribeEvent

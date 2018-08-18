@@ -121,7 +121,7 @@ public class BlockScreen extends BlockWithHorizontalFacing
 
 			if (screen != null)
 			{
-				screen.writeToItem(stack);
+				screen.writeToPickBlock(stack);
 			}
 		}
 
@@ -379,7 +379,7 @@ public class BlockScreen extends BlockWithHorizontalFacing
 
 		if (team.isEmpty())
 		{
-			team = ClientQuestFile.existsWithTeam() ? ClientQuestFile.INSTANCE.self.teamID : "";
+			team = ClientQuestFile.existsWithTeam() ? ClientQuestFile.INSTANCE.self.getTeamID() : "";
 		}
 
 		tooltip.add(I18n.format("tile.ftbquests.screen.size") + ": " + TextFormatting.GOLD + (1 + size * 2) + " x " + (1 + size * 2));
