@@ -64,12 +64,11 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 	@Override
 	protected void writeData(NBTTagCompound nbt, EnumSaveType type)
 	{
-		nbt.setString("Facing", getFacing().getName());
-		writeScreenData(nbt);
-	}
+		if (!type.item)
+		{
+			nbt.setString("Facing", getFacing().getName());
+		}
 
-	private void writeScreenData(NBTTagCompound nbt)
-	{
 		if (!team.isEmpty())
 		{
 			nbt.setString("Team", team);
@@ -117,12 +116,11 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 	@Override
 	protected void readData(NBTTagCompound nbt, EnumSaveType type)
 	{
-		facing = EnumFacing.byName(nbt.getString("Facing"));
-		readScreenData(nbt);
-	}
+		if (!type.item)
+		{
+			facing = EnumFacing.byName(nbt.getString("Facing"));
+		}
 
-	private void readScreenData(NBTTagCompound nbt)
-	{
 		team = nbt.getString("Team");
 		quest = nbt.getString("Quest");
 		task = nbt.getString("Task");
@@ -137,7 +135,7 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 	public void writeToItem(ItemStack stack)
 	{
 		NBTTagCompound nbt = new NBTTagCompound();
-		writeScreenData(nbt);
+		writeData(nbt, EnumSaveType.ITEM);
 
 		if (!nbt.isEmpty())
 		{
@@ -149,7 +147,7 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 	public void readFromItem(ItemStack stack)
 	{
 		NBTTagCompound nbt = stack.getTagCompound();
-		readScreenData(nbt == null ? new NBTTagCompound() : nbt);
+		readData(nbt == null ? new NBTTagCompound() : nbt, EnumSaveType.ITEM);
 	}
 
 	@Override

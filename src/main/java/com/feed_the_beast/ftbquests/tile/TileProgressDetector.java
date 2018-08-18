@@ -61,7 +61,7 @@ public class TileProgressDetector extends TileBase implements ITickable, IConfig
 			nbt.setBoolean("Level", true);
 		}
 
-		if (redstoneOutput > 0)
+		if (redstoneOutput > 0 && !type.item)
 		{
 			nbt.setByte("RedstoneOutput", (byte) redstoneOutput);
 		}
@@ -73,7 +73,12 @@ public class TileProgressDetector extends TileBase implements ITickable, IConfig
 		team = nbt.getString("Team");
 		object = nbt.getString("Object");
 		level = nbt.getBoolean("Level");
-		redstoneOutput = nbt.getByte("RedstoneOutput");
+
+		if (!type.item)
+		{
+			redstoneOutput = nbt.getByte("RedstoneOutput");
+		}
+
 		updateContainingBlockInfo();
 	}
 
