@@ -7,10 +7,12 @@ import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskData;
 import com.feed_the_beast.ftbquests.tile.TileScreenBase;
 import com.feed_the_beast.ftbquests.tile.TileScreenCore;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.TextFormatting;
 import org.lwjgl.opengl.GL11;
@@ -28,6 +30,16 @@ public class RenderScreen extends TileEntitySpecialRenderer<TileScreenCore>
 		if (!ClientQuestFile.exists())
 		{
 			return;
+		}
+		else if (screen.size == 0)
+		{
+			BlockPos pos = screen.getPos().offset(screen.getFacing());
+			IBlockState state = screen.getWorld().getBlockState(pos);
+
+			if (!state.getBlock().isReplaceable(screen.getWorld(), pos))
+			{
+				return;
+			}
 		}
 
 		QuestTask task = screen.getTask();
