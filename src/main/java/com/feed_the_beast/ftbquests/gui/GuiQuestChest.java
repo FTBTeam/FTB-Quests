@@ -1,6 +1,5 @@
 package com.feed_the_beast.ftbquests.gui;
 
-import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftblib.lib.gui.Button;
 import com.feed_the_beast.ftblib.lib.gui.GuiBase;
 import com.feed_the_beast.ftblib.lib.gui.GuiContainerWrapper;
@@ -38,7 +37,7 @@ public class GuiQuestChest extends GuiBase
 	public final Panel tasks;
 	public final PanelScrollBar scrollBar;
 
-	private static class ButtonTask extends Button
+	private class ButtonTask extends Button
 	{
 		private final QuestTaskData taskData;
 
@@ -93,7 +92,7 @@ public class GuiQuestChest extends GuiBase
 			{
 				if (ClientQuestFile.existsWithTeam())
 				{
-					for (QuestTask task : ClientQuestFile.INSTANCE.allTasks)
+					for (QuestTask task : ClientQuestFile.INSTANCE.allItemAcceptingTasks)
 					{
 						QuestTaskData data = ClientQuestFile.INSTANCE.self.getQuestTaskData(task);
 
@@ -103,7 +102,7 @@ public class GuiQuestChest extends GuiBase
 						}
 					}
 
-					for (QuestTask task : ClientQuestFile.INSTANCE.allTasks)
+					for (QuestTask task : ClientQuestFile.INSTANCE.allItemAcceptingTasks)
 					{
 						QuestTaskData data = ClientQuestFile.INSTANCE.self.getQuestTaskData(task);
 
@@ -129,7 +128,7 @@ public class GuiQuestChest extends GuiBase
 			@Override
 			public int getSliderSize()
 			{
-				return 9;
+				return getMaxValue() <= 0 ? 0 : 9;
 			}
 
 			@Override
@@ -161,22 +160,6 @@ public class GuiQuestChest extends GuiBase
 	public GuiScreen getWrapper()
 	{
 		return new GuiContainerWrapper(this, container).disableSlotDrawing();
-	}
-
-	@Override
-	public boolean mousePressed(MouseButton button)
-	{
-		if (super.mousePressed(button))
-		{
-			return true;
-		}
-		else if (container.enchantItem(ClientUtils.MC.player, button.isLeft() ? 0 : 1))
-		{
-			ClientUtils.MC.playerController.sendEnchantPacket(container.windowId, button.isLeft() ? 0 : 1);
-			return true;
-		}
-
-		return false;
 	}
 
 	@Override

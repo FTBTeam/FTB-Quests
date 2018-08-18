@@ -1,5 +1,8 @@
 package com.feed_the_beast.ftbquests.gui;
 
+import com.feed_the_beast.ftbquests.FTBQuests;
+import com.feed_the_beast.ftbquests.quest.IProgressData;
+import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.tile.TileQuestChest;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.ClickType;
@@ -53,7 +56,27 @@ public class ContainerQuestChest extends Container
 				ItemStack stack = slot.getStack();
 				ItemStack prevStack = stack.copy();
 
-				//stack = data.insertItem(stack, dragType == 1, false);
+				QuestFile file = FTBQuests.PROXY.getQuestFile(chest.getWorld());
+
+				IProgressData teamData = chest.getTeam();
+
+				if (teamData != null)
+				{
+					for (int i = 0; i < file.allItemAcceptingTasks.size(); i++)
+					{
+						ItemStack stack1 = teamData.getQuestTaskData(file.allItemAcceptingTasks.get(i)).insertItem(stack, dragType == 1, false);
+
+						if (stack != stack1)
+						{
+							stack = stack1;
+
+							if (dragType == 1 || stack.isEmpty())
+							{
+								break;
+							}
+						}
+					}
+				}
 
 				if (stack.isEmpty())
 				{
@@ -71,23 +94,5 @@ public class ContainerQuestChest extends Container
 		}
 
 		return super.slotClick(slotId, dragType, clickType, player);
-	}
-
-	@Override
-	public boolean enchantItem(EntityPlayer player, int id)
-	{
-		if (id == 0 || id == 1)
-		{
-			ItemStack prevStack = player.inventory.getItemStack();
-			ItemStack stack1 = prevStack;//data.insertItem(prevStack, id == 1, false);
-
-			if (prevStack != stack1)
-			{
-				player.inventory.setItemStack(stack1);
-				return true;
-			}
-		}
-
-		return false;
 	}
 }
