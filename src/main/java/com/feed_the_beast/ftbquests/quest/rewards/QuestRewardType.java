@@ -2,6 +2,7 @@ package com.feed_the_beast.ftbquests.quest.rewards;
 
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.quest.QuestFile;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
@@ -78,6 +79,7 @@ public final class QuestRewardType extends IForgeRegistryEntry.Impl<QuestRewardT
 		reward.readID(nbt);
 		reward.teamReward = nbt.getBoolean("team_reward");
 		reward.title = nbt.getString("title");
+		reward.icon = QuestFile.getIcon(nbt);
 		return reward;
 	}
 

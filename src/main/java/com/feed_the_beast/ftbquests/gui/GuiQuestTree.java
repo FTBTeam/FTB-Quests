@@ -393,7 +393,9 @@ public class GuiQuestTree extends GuiBase
 					nbt.setByte("y", y);
 					Quest quest = new Quest(selectedChapter, nbt);
 					ConfigGroup group = ConfigGroup.newGroup(FTBQuests.MOD_ID);
-					quest.getConfig(group.getGroup(QuestObjectType.QUEST.getName()));
+					ConfigGroup g = group.getGroup(QuestObjectType.QUEST.getName());
+					quest.getConfig(g);
+					quest.getExtraConfig(g);
 					new GuiEditConfig(group, (group1, sender) -> {
 						NBTTagCompound nbt1 = new NBTTagCompound();
 						quest.writeData(nbt1);

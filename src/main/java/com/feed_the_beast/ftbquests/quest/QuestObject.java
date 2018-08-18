@@ -50,7 +50,7 @@ public abstract class QuestObject
 	{
 		if (!title.isEmpty())
 		{
-			return new TextComponentString(title);
+			return new TextComponentString(title.equals("-") ? "" : title);
 		}
 
 		return getAltDisplayName();
@@ -93,6 +93,12 @@ public abstract class QuestObject
 		config.add("title", new ConfigString(title)
 		{
 			@Override
+			public String getString()
+			{
+				return title;
+			}
+
+			@Override
 			public void setString(String v)
 			{
 				title = v;
@@ -101,6 +107,12 @@ public abstract class QuestObject
 
 		config.add("icon", new ConfigItemStack(icon, true)
 		{
+			@Override
+			public ItemStack getStack()
+			{
+				return icon;
+			}
+
 			@Override
 			public void setStack(ItemStack v)
 			{
