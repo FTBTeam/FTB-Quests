@@ -373,17 +373,14 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 				group0.setDisplayName(new TextComponentTranslation("tile.ftbquests.screen.name"));
 				ConfigGroup group = group0.getGroup("ftbquests.screen");
 
-				if (editor)
+				group.add("team", new ConfigTeam(team)
 				{
-					group.add("team", new ConfigTeam(team)
+					@Override
+					public void setString(String v)
 					{
-						@Override
-						public void setString(String v)
-						{
-							team = v;
-						}
-					}, ConfigNull.INSTANCE).setDisplayName(new TextComponentTranslation("ftbquests.team"));
-				}
+						team = v;
+					}
+				}, ConfigNull.INSTANCE).setDisplayName(new TextComponentTranslation("ftbquests.team")).setCanEdit(editor);
 
 				group.add("task", new ConfigQuestObject(getTask() == null ? "" : getTask().getID())
 				{

@@ -113,10 +113,8 @@ public class TileQuestChest extends TileBase implements IItemHandler, IConfigCal
 
 			return;
 		}
-		else if (!FTBQuests.canEdit(player))
-		{
-			return;
-		}
+
+		boolean editor = FTBQuests.canEdit(player);
 
 		ConfigGroup group0 = ConfigGroup.newGroup("tile");
 		group0.setDisplayName(new TextComponentTranslation("tile.ftbquests.chest.name"));
@@ -129,16 +127,19 @@ public class TileQuestChest extends TileBase implements IItemHandler, IConfigCal
 			{
 				team = v;
 			}
-		}, ConfigNull.INSTANCE).setDisplayName(new TextComponentTranslation("ftbquests.team"));
+		}, ConfigNull.INSTANCE).setDisplayName(new TextComponentTranslation("ftbquests.team")).setCanEdit(editor);
 
-		group.add("indestructible", new ConfigBoolean(indestructible)
+		if (editor)
 		{
-			@Override
-			public void setBoolean(boolean v)
+			group.add("indestructible", new ConfigBoolean(indestructible)
 			{
-				indestructible = v;
-			}
-		}, new ConfigBoolean(false)).setDisplayName(new TextComponentTranslation("tile.ftbquests.screen.indestructible"));
+				@Override
+				public void setBoolean(boolean v)
+				{
+					indestructible = v;
+				}
+			}, new ConfigBoolean(false)).setDisplayName(new TextComponentTranslation("tile.ftbquests.screen.indestructible"));
+		}
 
 		FTBLibAPI.editServerConfig(player, group0, this);
 	}

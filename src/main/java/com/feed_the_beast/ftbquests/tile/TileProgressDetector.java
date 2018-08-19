@@ -6,6 +6,7 @@ import com.feed_the_beast.ftblib.lib.config.ConfigNull;
 import com.feed_the_beast.ftblib.lib.config.ConfigTeam;
 import com.feed_the_beast.ftblib.lib.config.IConfigCallback;
 import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
+import com.feed_the_beast.ftblib.lib.data.Universe;
 import com.feed_the_beast.ftblib.lib.tile.EnumSaveType;
 import com.feed_the_beast.ftblib.lib.tile.TileBase;
 import com.feed_the_beast.ftblib.lib.util.BlockUtils;
@@ -190,6 +191,18 @@ public class TileProgressDetector extends TileBase implements ITickable, IConfig
 
 	public void editConfig(EntityPlayerMP player)
 	{
+		if (!player.isSneaking())
+		{
+			return;
+		}
+
+		boolean editor = FTBQuests.canEdit(player);
+
+		if (!editor && !team.equals(Universe.get().getPlayer(player).team.getName()))
+		{
+			return;
+		}
+
 		cObject = getObject();
 
 		if (cObject != null)
@@ -208,7 +221,7 @@ public class TileProgressDetector extends TileBase implements ITickable, IConfig
 			{
 				team = v;
 			}
-		}, ConfigNull.INSTANCE).setDisplayName(new TextComponentTranslation("ftbquests.team"));
+		}, ConfigNull.INSTANCE).setDisplayName(new TextComponentTranslation("ftbquests.team")).setCanEdit(editor);
 
 		group.add("object", new ConfigQuestObject(object)
 		{
