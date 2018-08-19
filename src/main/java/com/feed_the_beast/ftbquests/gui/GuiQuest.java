@@ -167,7 +167,7 @@ public class GuiQuest extends GuiBase
 				contextMenu.add(new ContextMenuItem(I18n.format("selectServer.edit"), GuiIcons.SETTINGS, () -> new MessageEditObject(task.getID()).sendToServer()));
 				contextMenu.add(ContextMenuItem.SEPARATOR);
 				contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), GuiIcons.REMOVE, () -> new MessageDeleteObject(task.getID()).sendToServer()).setYesNo(I18n.format("delete_item", task.getDisplayName().getFormattedText())));
-				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.reset_progress"), GuiIcons.REFRESH, () -> new MessageResetProgress(task.getID(), false).sendToServer()).setYesNo(I18n.format("ftbquests.gui.reset_progress_q")));
+				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.reset_progress"), GuiIcons.REFRESH, () -> new MessageResetProgress(task.getID()).sendToServer()).setYesNo(I18n.format("ftbquests.gui.reset_progress_q")));
 				contextMenu.add(questTreeGui.copyIDItem(task));
 				contextMenu.add(questTreeGui.changeIDItem(getGui(), task));
 				getGui().openContextMenu(contextMenu);

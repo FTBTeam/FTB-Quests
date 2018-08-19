@@ -1,7 +1,6 @@
 package com.feed_the_beast.ftbquests.net.edit;
 
 import com.feed_the_beast.ftblib.lib.data.ForgePlayer;
-import com.feed_the_beast.ftblib.lib.data.ForgeTeam;
 import com.feed_the_beast.ftblib.lib.data.Universe;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
@@ -20,16 +19,14 @@ import net.minecraft.entity.player.EntityPlayerMP;
 public class MessageResetProgress extends MessageToServer
 {
 	private String id;
-	private boolean all;
 
 	public MessageResetProgress()
 	{
 	}
 
-	public MessageResetProgress(String i, boolean a)
+	public MessageResetProgress(String i)
 	{
 		id = i;
-		all = a;
 	}
 
 	@Override
@@ -42,14 +39,12 @@ public class MessageResetProgress extends MessageToServer
 	public void writeData(DataOut data)
 	{
 		data.writeString(id);
-		data.writeBoolean(all);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
 		id = data.readString();
-		all = data.readBoolean();
 	}
 
 	@Override
@@ -64,28 +59,15 @@ public class MessageResetProgress extends MessageToServer
 				ServerQuestFile.INSTANCE.shouldSendUpdates = false;
 				ProgressingQuestObject o = (ProgressingQuestObject) object;
 
-				if (all)
+				ForgePlayer player1 = Universe.get().getPlayer(player);
+
+				if (player1.team.isValid())
 				{
-					for (ForgeTeam team : Universe.get().getTeams())
-					{
-						o.resetProgress(FTBQuestsTeamData.get(team));
-						team.markDirty();
-					}
-
-					new MessageResetProgressResponse(id).sendToAll();
+					o.resetProgress(FTBQuestsTeamData.get(player1.team));
+					player1.team.markDirty();
 				}
-				else
-				{
-					ForgePlayer player1 = Universe.get().getPlayer(player);
 
-					if (player1.team.isValid())
-					{
-						o.resetProgress(FTBQuestsTeamData.get(player1.team));
-						player1.team.markDirty();
-					}
-
-					new MessageResetProgressResponse(id).sendTo(player);
-				}
+				new MessageResetProgressResponse(id).sendTo(player);
 
 				Universe.get().clearCache();
 				ServerQuestFile.INSTANCE.shouldSendUpdates = true;
