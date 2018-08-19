@@ -101,3 +101,8 @@ ftbquests.reward.ftbquests.xp_levels.text=XP Levels: %s
 ftbquests.reward.ftbquests.command=Command
 ftbquests.reward.ftbquests.command.command=Command
 ftbquests.reward.ftbquests.command.text=Command: %s
+
+commands.ftbquests.usage=/ftbquests [subcommand]
+commands.ftbquests.editing_mode.usage=/ftbquests editing_mode [true|false|toggle] [player]
+commands.ftbquests.editing_mode.enabled=Editing Mode for %s Enabled
+commands.ftbquests.editing_mode.disabled=Editing Mode for %s Disabled
