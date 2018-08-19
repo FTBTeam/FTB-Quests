@@ -2,13 +2,7 @@ package com.feed_the_beast.ftbquests;
 
 import com.feed_the_beast.ftblib.events.FTBLibPreInitRegistryEvent;
 import com.feed_the_beast.ftblib.events.player.ForgePlayerLoggedInEvent;
-import com.feed_the_beast.ftblib.lib.config.ConfigBoolean;
-import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
-import com.feed_the_beast.ftblib.lib.data.AdminPanelAction;
-import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
-import com.feed_the_beast.ftblib.lib.data.ForgePlayer;
 import com.feed_the_beast.ftblib.lib.data.ForgeTeam;
-import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftbquests.block.BlockProgressDetector;
 import com.feed_the_beast.ftbquests.block.BlockProgressScreen;
 import com.feed_the_beast.ftbquests.block.BlockProgressScreenPart;
@@ -36,7 +30,6 @@ import com.feed_the_beast.ftbquests.tile.TileScreenCore;
 import com.feed_the_beast.ftbquests.tile.TileScreenPart;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
 import com.feed_the_beast.ftbquests.util.FTBQuestsTeamData;
-import com.feed_the_beast.ftbquests.util.FTBQuestsWorldData;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
@@ -120,25 +113,6 @@ public class FTBQuestsEventHandler
 	@SubscribeEvent
 	public static void onRegistryEvent(FTBLibPreInitRegistryEvent event)
 	{
-		event.getRegistry().registerAdminPanelAction(new AdminPanelAction(FTBQuests.MOD_ID, "edit_settings", GuiIcons.BOOK_RED, 0)
-		{
-			@Override
-			public Type getType(ForgePlayer player, NBTTagCompound data)
-			{
-				return Type.fromBoolean(player.hasPermission(FTBQuests.PERM_EDIT_SETTINGS));
-			}
-
-			@Override
-			public void onAction(ForgePlayer player, NBTTagCompound data)
-			{
-				ConfigGroup main = ConfigGroup.newGroup("admin_panel");
-				main.setDisplayName(getTitle());
-				ConfigGroup group = main.getGroup("ftbquests.edit_settings");
-				group.add("editing_mode", FTBQuestsWorldData.INSTANCE.editingMode, new ConfigBoolean(false));
-				FTBLibAPI.editServerConfig(player.getPlayer(), main, FTBQuestsWorldData.INSTANCE);
-			}
-		});
-
 		event.getRegistry().registerConfigValueProvider(ConfigQuestObject.ID, () -> new ConfigQuestObject(""));
 	}
 
