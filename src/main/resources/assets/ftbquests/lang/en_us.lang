@@ -106,3 +106,6 @@ commands.ftbquests.usage=/ftbquests [subcommand]
 commands.ftbquests.editing_mode.usage=/ftbquests editing_mode [true|false|toggle] [player]
 commands.ftbquests.editing_mode.enabled=Editing Mode for %s Enabled
 commands.ftbquests.editing_mode.disabled=Editing Mode for %s Disabled
+commands.ftbquests.reset_progress.usage=/ftbquests reset_progress <team> [object ID]
+commands.ftbquests.reset_progress.invalid_id=Invalid Object ID!
+commands.ftbquests.reset_progress.reset=Progress has been reset!
