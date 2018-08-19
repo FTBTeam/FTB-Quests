@@ -713,6 +713,7 @@ public class GuiQuestTree extends GuiBase
 			selectedQuest = "";
 			quests.refreshWidgets();
 			chapterOptionButtons.refreshWidgets();
+			resetScroll(true);
 		}
 	}
 
