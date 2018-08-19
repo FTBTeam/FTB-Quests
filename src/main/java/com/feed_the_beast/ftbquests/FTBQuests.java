@@ -1,12 +1,12 @@
 package com.feed_the_beast.ftbquests;
 
 import com.feed_the_beast.ftblib.lib.OtherMods;
+import com.feed_the_beast.ftbquests.command.CommandFTBQuests;
 import com.feed_the_beast.ftbquests.gui.FTBQuestsGuiHandler;
 import com.feed_the_beast.ftbquests.integration.ic2.IC2Integration;
 import com.feed_the_beast.ftbquests.net.FTBQuestsNetHandler;
 import com.feed_the_beast.ftbquests.quest.rewards.QuestRewardType;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskType;
-import com.feed_the_beast.ftbquests.util.FTBQuestsWorldData;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
@@ -15,9 +15,8 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
-import net.minecraftforge.server.permission.DefaultPermissionLevel;
-import net.minecraftforge.server.permission.PermissionAPI;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -39,9 +38,6 @@ public class FTBQuests
 
 	@SidedProxy(serverSide = "com.feed_the_beast.ftbquests.FTBQuestsCommon", clientSide = "com.feed_the_beast.ftbquests.client.FTBQuestsClient")
 	public static FTBQuestsCommon PROXY;
-
-	private static final String PERM_EDIT_QUESTS = "ftbquests.edit_quests";
-	public static final String PERM_EDIT_SETTINGS = "ftbquests.edit_settings";
 
 	public static final CreativeTabs TAB = new CreativeTabs(FTBQuests.MOD_ID)
 	{
@@ -71,13 +67,16 @@ public class FTBQuests
 	{
 		QuestTaskType.createRegistry();
 		QuestRewardType.createRegistry();
+	}
 
-		PermissionAPI.registerNode(PERM_EDIT_QUESTS, DefaultPermissionLevel.OP, "Permission for editing quests and resetting progress");
-		PermissionAPI.registerNode(PERM_EDIT_SETTINGS, DefaultPermissionLevel.OP, "Permission for editing FTBQuests server settings");
+	@Mod.EventHandler
+	public void onServerStarting(FMLServerStartingEvent event)
+	{
+		event.registerServerCommand(new CommandFTBQuests());
 	}
 
 	public static boolean canEdit(EntityPlayerMP player)
 	{
-		return FTBQuestsWorldData.INSTANCE.editingMode.getBoolean() && (player.server.isSinglePlayer() || PermissionAPI.hasPermission(player, PERM_EDIT_QUESTS));
+		return player.getEntityData().getBoolean("ftbquests_editing_mode");
 	}
 }

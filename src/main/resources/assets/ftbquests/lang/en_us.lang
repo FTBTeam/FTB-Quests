@@ -17,9 +17,6 @@ tile.ftbquests.chest.name=Quest Chest
 itemGroup.ftbquests=FTB Quests
 sidebar_button.ftbquests.quests=Quests
 key.ftbquests.quests=Open Quests
-admin_panel.ftbquests.edit_settings=FTB Quests Settings
-admin_panel.ftbquests.edit_settings.editing_mode=Editing Mode
-admin_panel.ftbquests.edit_settings.extra_files=Extra Files
 
 ftbquests.team=Team
 ftbquests.progress=Progress

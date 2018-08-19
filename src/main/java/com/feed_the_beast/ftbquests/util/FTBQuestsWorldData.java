@@ -3,7 +3,6 @@ package com.feed_the_beast.ftbquests.util;
 import com.feed_the_beast.ftblib.events.universe.UniverseClosedEvent;
 import com.feed_the_beast.ftblib.events.universe.UniverseLoadedEvent;
 import com.feed_the_beast.ftblib.events.universe.UniverseSavedEvent;
-import com.feed_the_beast.ftblib.lib.config.ConfigBoolean;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.IConfigCallback;
 import com.feed_the_beast.ftblib.lib.data.Universe;
@@ -62,7 +61,6 @@ public class FTBQuestsWorldData implements IConfigCallback
 		}
 
 		NBTTagCompound nbt = event.getData(FTBQuests.MOD_ID);
-		INSTANCE.editingMode.setBoolean(nbt.getBoolean("EditingMode"));
 		INSTANCE.extraFiles.clear();
 
 		NBTTagList list = nbt.getTagList("ExtraFiles", Constants.NBT.TAG_STRING);
@@ -83,18 +81,23 @@ public class FTBQuestsWorldData implements IConfigCallback
 		}
 
 		NBTTagCompound nbt = new NBTTagCompound();
-		nbt.setBoolean("EditingMode", INSTANCE.editingMode.getBoolean());
 
-		NBTTagList list = new NBTTagList();
-
-		for (String file : INSTANCE.extraFiles)
+		if (!INSTANCE.extraFiles.isEmpty())
 		{
-			list.appendTag(new NBTTagString(file));
+			NBTTagList list = new NBTTagList();
+
+			for (String file : INSTANCE.extraFiles)
+			{
+				list.appendTag(new NBTTagString(file));
+			}
+
+			nbt.setTag("ExtraFiles", list);
 		}
 
-		nbt.setTag("ExtraFiles", list);
-
-		event.setData(FTBQuests.MOD_ID, nbt);
+		if (!nbt.isEmpty())
+		{
+			event.setData(FTBQuests.MOD_ID, nbt);
+		}
 	}
 
 	@SubscribeEvent
@@ -110,13 +113,11 @@ public class FTBQuestsWorldData implements IConfigCallback
 	}
 
 	public final Universe universe;
-	public final ConfigBoolean editingMode;
 	public final List<String> extraFiles;
 
 	private FTBQuestsWorldData(Universe u)
 	{
 		universe = u;
-		editingMode = new ConfigBoolean(false);
 		extraFiles = new ArrayList<>();
 	}
 
