@@ -1,0 +1,106 @@
+tile.ftbquests.screen.missing_data=Остутствуют данные!
+tile.ftbquests.screen.name=Экран
+tile.ftbquests.screen.task_index=Индекс выполнения задания
+tile.ftbquests.screen.size=Размер
+tile.ftbquests.screen.skin=Вид
+tile.ftbquests.screen.progress_display_mode=Режим отображения прогресса
+tile.ftbquests.screen.progress_display_mode.progress=Прогресс
+tile.ftbquests.screen.progress_display_mode.percent=Процент
+tile.ftbquests.screen.progress_display_mode.bar=Шкала
+tile.ftbquests.screen.indestructible=Неразрушимый
+tile.ftbquests.progress_detector.name=Датчик прогресса квеста
+tile.ftbquests.progress_detector.object=ID предмета
+tile.ftbquests.progress_detector.level=Выдаваемый уровень
+tile.ftbquests.progress_screen.name=Экран прогресса
+tile.ftbquests.chest.name=Квестовый сундук
+
+itemGroup.ftbquests=Квесты FTB
+sidebar_button.ftbquests.quests=Квесты
+key.ftbquests.quests=Открыть квесты
+admin_panel.ftbquests.edit_settings=Настройки FTB Квестов
+admin_panel.ftbquests.edit_settings.editing_mode=Режим редактора
+admin_panel.ftbquests.edit_settings.extra_files=Дополнительные файлы
+
+ftbquests.team=Команда
+ftbquests.progress=Прогресс
+ftbquests.title=Название
+ftbquests.icon=Иконка
+
+ftbquests.file=Файл
+ftbquests.file.allow_take_quest_blocks=Разрешить использовать блоки квестов?
+ftbquests.file.allow_take_quest_blocks.tooltip=Разрешить брать блоки из GUI квестов?
+ftbquests.file.emergency_items=Запасные предметы
+ftbquests.file.emergency_items_cooldown=Таймер запасных предметов
+ftbquests.file.emergency_items_cooldown.tooltip=Время, требуемое для восстановления запасных предметов
+
+ftbquests.chapter=Глава
+ftbquests.chapter.description=Описание
+ftbquests.chapter.dependencies=Зависимости
+
+ftbquests.quest=Квест
+ftbquests.quest.description=Описание
+ftbquests.quest.x=X
+ftbquests.quest.y=Y
+ftbquests.quest.type=Тип
+ftbquests.quest.text=Текст
+ftbquests.quest.dependencies=Зависимости
+
+ftbquests.gui.zoom_in=Приблизить
+ftbquests.gui.zoom_out=Отдалить
+ftbquests.gui.edit_file=Редактировать файл
+ftbquests.gui.add_chapter=Добавить главу
+ftbquests.gui.move=Двигаться
+ftbquests.gui.move_up=Вверх
+ftbquests.gui.move_down=Вниз
+ftbquests.gui.add_quest=Добавить квест
+ftbquests.gui.select_task_type=Выбрать тип задания
+ftbquests.gui.select_reward_type=Выбрать тип награды
+ftbquests.gui.reset_progress=Сбросить прогресс
+ftbquests.gui.reset_progress_q=Сбросить прогресс?
+ftbquests.gui.set_dep=Назначить выбранное зависимым?
+ftbquests.gui.rem_dep=Удалить зависимость
+ftbquests.gui.copy_id=Скопировать ID
+ftbquests.gui.change_id=Изменить ID
+
+ftbquests.task=Задача
+ftbquests.tasks=Задачи
+ftbquests.task.get_block=Получить блок квеста
+
+ftbquests.task.ftbquests.item=Предмет
+ftbquests.task.ftbquests.item.items=Список предметов
+ftbquests.task.ftbquests.item.count=Количество
+
+ftbquests.task.ftbquests.fluid=Жидкость
+ftbquests.task.ftbquests.fluid.fluid=Жидкость
+ftbquests.task.ftbquests.fluid.fluid_nbt=NBT жидкости
+ftbquests.task.ftbquests.fluid.amount=Количество
+
+ftbquests.task.ftbquests.forge_energy=Энергия Forge
+ftbquests.task.ftbquests.forge_energy.value=FE / RF
+ftbquests.task.ftbquests.forge_energy.max_input=Макс. вход
+ftbquests.task.ftbquests.forge_energy.text=%d FE
+
+ftbquests.task.ftbquests.ic2_energy=Энергия IC2
+ftbquests.task.ftbquests.ic2_energy.value=EU
+ftbquests.task.ftbquests.ic2_energy.max_input=Макс. вход
+ftbquests.task.ftbquests.ic2_energy.text=%d EU
+
+ftbquests.reward=Награда
+ftbquests.reward.team_reward=Награда команде
+ftbquests.rewards=Награды
+ftbquests.reward.unknown=Неизвестная команда
+
+ftbquests.reward.ftbquests.item=Предмет
+ftbquests.reward.ftbquests.item.item=Предмет
+
+ftbquests.reward.ftbquests.xp=Опыт
+ftbquests.reward.ftbquests.xp.value=Опыт
+ftbquests.reward.ftbquests.xp.text=Опыт: %s
+
+ftbquests.reward.ftbquests.xp_levels=Уровни опыта
+ftbquests.reward.ftbquests.xp_levels.value=Уровни опыта
+ftbquests.reward.ftbquests.xp_levels.text=Уровней опыта: %s
+
+ftbquests.reward.ftbquests.command=Команда
+ftbquests.reward.ftbquests.command.command=Команда
+ftbquests.reward.ftbquests.command.text=Команда: %s
