@@ -23,6 +23,7 @@ public abstract class QuestObject
 	public boolean invalid = false;
 	public String title = "";
 	public ItemStack icon = ItemStack.EMPTY;
+	private Icon cachedIcon = null;
 
 	public abstract QuestFile getQuestFile();
 
@@ -36,12 +37,19 @@ public abstract class QuestObject
 
 	public Icon getIcon()
 	{
-		if (!icon.isEmpty())
+		if (cachedIcon == null)
 		{
-			return ItemIcon.getItemIcon(icon);
+			if (!icon.isEmpty())
+			{
+				cachedIcon = ItemIcon.getItemIcon(icon);
+			}
+			else
+			{
+				cachedIcon = getAltIcon();
+			}
 		}
 
-		return getAltIcon();
+		return cachedIcon;
 	}
 
 	public abstract ITextComponent getAltDisplayName();
@@ -63,6 +71,10 @@ public abstract class QuestObject
 	}
 
 	public void deleteChildren()
+	{
+	}
+
+	public void onCreated()
 	{
 	}
 
@@ -143,5 +155,6 @@ public abstract class QuestObject
 
 	public void clearCachedData()
 	{
+		cachedIcon = null;
 	}
 }

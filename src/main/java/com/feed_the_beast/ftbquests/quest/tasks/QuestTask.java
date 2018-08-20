@@ -8,6 +8,7 @@ import com.feed_the_beast.ftbquests.quest.ProgressingQuestObject;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
+import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.tile.TileScreenCore;
 import com.feed_the_beast.ftbquests.tile.TileScreenPart;
 import net.minecraft.util.text.ITextComponent;
@@ -90,7 +91,6 @@ public abstract class QuestTask extends ProgressingQuestObject
 	@Override
 	public void deleteSelf()
 	{
-		super.deleteSelf();
 		quest.tasks.remove(this);
 
 		for (IProgressData data : quest.chapter.file.getAllData())
@@ -98,12 +98,21 @@ public abstract class QuestTask extends ProgressingQuestObject
 			data.removeTask(this);
 		}
 
-		quest.chapter.file.refreshTaskList();
+		super.deleteSelf();
 	}
 
 	@Override
 	public void deleteChildren()
 	{
+	}
+
+	@Override
+	public void onCreated()
+	{
+		for (IProgressData data : ServerQuestFile.INSTANCE.getAllData())
+		{
+			data.createTaskData(this);
+		}
 	}
 
 	@Override

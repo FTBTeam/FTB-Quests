@@ -285,4 +285,15 @@ public final class QuestChapter extends ProgressingQuestObject
 			}
 		}, new ConfigList<>(new ConfigString("")));
 	}
+
+	@Override
+	public void clearCachedData()
+	{
+		super.clearCachedData();
+
+		for (Quest quest : quests)
+		{
+			quest.clearCachedData();
+		}
+	}
 }

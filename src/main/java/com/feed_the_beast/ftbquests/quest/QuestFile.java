@@ -180,6 +180,7 @@ public abstract class QuestFile extends ProgressingQuestObject
 		if (object != null)
 		{
 			object.invalid = true;
+			refreshIDMap();
 			return object;
 		}
 
@@ -221,33 +222,6 @@ public abstract class QuestFile extends ProgressingQuestObject
 		return object instanceof QuestReward ? (QuestReward) object : null;
 	}
 
-	public void refreshTaskList()
-	{
-		allTasks.clear();
-
-		for (QuestChapter chapter : chapters)
-		{
-			for (Quest quest : chapter.quests)
-			{
-				for (QuestTask task : quest.tasks)
-				{
-					task.index = allTasks.size();
-					allTasks.add(task);
-				}
-			}
-		}
-
-		allItemAcceptingTasks.clear();
-
-		for (QuestTask task : allTasks)
-		{
-			if (task.canInsertItem())
-			{
-				allItemAcceptingTasks.add(task);
-			}
-		}
-	}
-
 	public void refreshIDMap()
 	{
 		map.clear();
@@ -270,6 +244,30 @@ public abstract class QuestFile extends ProgressingQuestObject
 				{
 					map.put(reward.getID(), reward);
 				}
+			}
+		}
+
+		allTasks.clear();
+
+		for (QuestChapter chapter : chapters)
+		{
+			for (Quest quest : chapter.quests)
+			{
+				for (QuestTask task : quest.tasks)
+				{
+					task.index = allTasks.size();
+					allTasks.add(task);
+				}
+			}
+		}
+
+		allItemAcceptingTasks.clear();
+
+		for (QuestTask task : allTasks)
+		{
+			if (task.canInsertItem())
+			{
+				allItemAcceptingTasks.add(task);
 			}
 		}
 	}
@@ -413,7 +411,6 @@ public abstract class QuestFile extends ProgressingQuestObject
 		}
 
 		refreshIDMap();
-		refreshTaskList();
 
 		allowTakeQuestBlocks = !nbt.hasKey("allow_take_quest_blocks") || nbt.getBoolean("allow_take_quest_blocks");
 		emergencyItems.clear();
@@ -515,5 +512,16 @@ public abstract class QuestFile extends ProgressingQuestObject
 				emergencyItemsCooldown = t;
 			}
 		}, new ConfigTimer(Ticks.MINUTE.x(5)));
+	}
+
+	@Override
+	public void clearCachedData()
+	{
+		super.clearCachedData();
+
+		for (QuestChapter chapter : chapters)
+		{
+			chapter.clearCachedData();
+		}
 	}
 }

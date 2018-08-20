@@ -5,11 +5,9 @@ import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToServer;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.FTBQuests;
-import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
-import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 
@@ -65,17 +63,7 @@ public class MessageCreateObject extends MessageToServer
 			if (object != null)
 			{
 				ServerQuestFile.INSTANCE.refreshIDMap();
-
-				if (object instanceof QuestTask)
-				{
-					ServerQuestFile.INSTANCE.refreshTaskList();
-
-					for (IProgressData data : ServerQuestFile.INSTANCE.getAllData())
-					{
-						data.createTaskData((QuestTask) object);
-					}
-				}
-
+				object.onCreated();
 				object.writeData(nbt);
 				new MessageCreateObjectResponse(type, parent, nbt).sendToAll();
 				ServerQuestFile.INSTANCE.save();

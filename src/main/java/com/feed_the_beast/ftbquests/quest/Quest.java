@@ -645,4 +645,20 @@ public final class Quest extends ProgressingQuestObject
 
 		return tasks.get(index);
 	}
+
+	@Override
+	public void clearCachedData()
+	{
+		super.clearCachedData();
+
+		for (QuestTask task : tasks)
+		{
+			task.clearCachedData();
+		}
+
+		for (QuestReward reward : rewards)
+		{
+			reward.clearCachedData();
+		}
+	}
 }

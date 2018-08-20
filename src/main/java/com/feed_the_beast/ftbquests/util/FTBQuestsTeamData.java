@@ -18,8 +18,6 @@ import com.feed_the_beast.ftbquests.net.MessageCreateTeamData;
 import com.feed_the_beast.ftbquests.net.MessageDeleteTeamData;
 import com.feed_the_beast.ftbquests.net.MessageUpdateTaskProgress;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
-import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.rewards.QuestReward;
@@ -85,15 +83,9 @@ public class FTBQuestsTeamData extends TeamData implements IProgressData
 	{
 		FTBQuestsTeamData data = get(event.getTeam());
 
-		for (QuestChapter chapter : ServerQuestFile.INSTANCE.chapters)
+		for (QuestTask task : ServerQuestFile.INSTANCE.allTasks)
 		{
-			for (Quest quest : chapter.quests)
-			{
-				for (QuestTask task : quest.tasks)
-				{
-					data.createTaskData(task);
-				}
-			}
+			data.createTaskData(task);
 		}
 
 		NBTTagCompound nbt = NBTUtils.readNBT(event.getTeam().getDataFile("ftbquests"));
