@@ -12,10 +12,12 @@ import com.feed_the_beast.ftbquests.quest.rewards.QuestReward;
 import com.feed_the_beast.ftbquests.tile.TileProgressScreenCore;
 import com.feed_the_beast.ftbquests.tile.TileScreenCore;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.client.event.ModelRegistryEvent;
+import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Mod;
@@ -30,6 +32,7 @@ import net.minecraftforge.fml.relauncher.Side;
 public class FTBQuestsClientEventHandler
 {
 	private static final ResourceLocation QUESTS_BUTTON = new ResourceLocation(FTBQuests.MOD_ID, "quests");
+	public static TextureAtlasSprite inputBlockSprite;
 
 	@SubscribeEvent
 	public static void registerModels(ModelRegistryEvent event)
@@ -112,5 +115,11 @@ public class FTBQuestsClientEventHandler
 
 			event.setCanceled(true);
 		}
+	}
+
+	@SubscribeEvent
+	public static void onTextureStitchPre(TextureStitchEvent.Pre event)
+	{
+		inputBlockSprite = event.getMap().registerSprite(new ResourceLocation(FTBQuests.MOD_ID, "blocks/screen_front_input"));
 	}
 }

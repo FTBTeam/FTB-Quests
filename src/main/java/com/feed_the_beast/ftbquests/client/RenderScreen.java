@@ -1,6 +1,7 @@
 package com.feed_the_beast.ftbquests.client;
 
 import com.feed_the_beast.ftblib.lib.client.ClientUtils;
+import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
 import com.feed_the_beast.ftbquests.block.BlockScreen;
 import com.feed_the_beast.ftbquests.gui.ClientQuestFile;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
@@ -9,8 +10,13 @@ import com.feed_the_beast.ftbquests.tile.TileScreenBase;
 import com.feed_the_beast.ftbquests.tile.TileScreenCore;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
@@ -53,7 +59,7 @@ public class RenderScreen extends TileEntitySpecialRenderer<TileScreenCore>
 
 		RayTraceResult ray = ClientUtils.MC.objectMouseOver;
 
-		if (ray != null && ray.typeOfHit == RayTraceResult.Type.BLOCK && ray.sideHit == screen.getFacing())
+		if (!screen.inputOnly && ray != null && ray.typeOfHit == RayTraceResult.Type.BLOCK && ray.sideHit == screen.getFacing())
 		{
 			TileEntity tileEntity = screen.getWorld().getTileEntity(ray.getBlockPos());
 
@@ -90,8 +96,8 @@ public class RenderScreen extends TileEntitySpecialRenderer<TileScreenCore>
 		GlStateManager.translate(-screen.size, -screen.size * 2F, -0.01F);
 		GlStateManager.scale(screen.size * 2D + 1D, screen.size * 2D + 1D, 1D);
 
-		String top1 = task.quest.getDisplayName().getUnformattedText();
-		String top2 = task.getDisplayName().getUnformattedText();
+		String top1 = screen.inputOnly ? "" : task.quest.getDisplayName().getUnformattedText();
+		String top2 = screen.inputOnly ? "" : task.getDisplayName().getUnformattedText();
 
 		if (top1.isEmpty() || top1.equals(top2))
 		{
@@ -117,7 +123,11 @@ public class RenderScreen extends TileEntitySpecialRenderer<TileScreenCore>
 
 		String bottomText;
 
-		if (data == null)
+		if (screen.inputOnly)
+		{
+			bottomText = "";
+		}
+		else if (data == null)
 		{
 			bottomText = "???";
 		}
@@ -160,15 +170,40 @@ public class RenderScreen extends TileEntitySpecialRenderer<TileScreenCore>
 			drawString(font, bottomText, 0.83D, 0.15D);
 		}
 
+		GlStateManager.color(1F, 1F, 1F, 1F);
+
+		if (screen.inputOnly)
+		{
+			ClientUtils.MC.getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
+			Tessellator tessellator = Tessellator.getInstance();
+			BufferBuilder buffer = tessellator.getBuffer();
+			TextureAtlasSprite sprite = FTBQuestsClientEventHandler.inputBlockSprite;
+			buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
+			buffer.pos(0, 1, 0).tex(sprite.getMinU(), sprite.getMaxV()).endVertex();
+			buffer.pos(1, 1, 0).tex(sprite.getMaxU(), sprite.getMaxV()).endVertex();
+			buffer.pos(1, 0, 0).tex(sprite.getMaxU(), sprite.getMinV()).endVertex();
+			buffer.pos(0, 0, 0).tex(sprite.getMinU(), sprite.getMinV()).endVertex();
+			tessellator.draw();
+		}
+
 		GlStateManager.pushMatrix();
 		GlStateManager.translate(0.5D, iconY, 0D);
-		GlStateManager.scale(0.45D, 0.45D, 1D);
+		GlStateManager.scale(screen.inputOnly ? 0.5 : 0.45, screen.inputOnly ? 0.5 : 0.45, 1);
 		GlStateManager.enableRescaleNormal();
 		GlStateManager.alphaFunc(GL11.GL_GREATER, 0.1F);
 		GlStateManager.enableBlend();
 		GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
 		GlStateManager.color(1F, 1F, 1F, 1F);
-		task.drawScreen(data);
+
+		if (screen.inputOnly && !screen.inputModeIcon.isEmpty())
+		{
+			ItemIcon.drawItem3D(screen.inputModeIcon);
+		}
+		else
+		{
+			task.drawScreen(data);
+		}
+
 		GlStateManager.disableRescaleNormal();
 		GlStateManager.disableLighting();
 		GlStateManager.popMatrix();
