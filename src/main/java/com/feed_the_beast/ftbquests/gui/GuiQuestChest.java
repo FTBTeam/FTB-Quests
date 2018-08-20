@@ -51,7 +51,11 @@ public class GuiQuestChest extends GuiBase
 		@Override
 		public void addMouseOverText(List<String> list)
 		{
-			list.add(TextFormatting.GRAY + I18n.format("ftbquests.chapter") + ": " + TextFormatting.YELLOW + taskData.task.quest.chapter.getDisplayName().getFormattedText());
+			if (taskData.task.quest.chapter.file.chapters.size() > 1)
+			{
+				list.add(TextFormatting.GRAY + I18n.format("ftbquests.chapter") + ": " + TextFormatting.YELLOW + taskData.task.quest.chapter.getDisplayName().getFormattedText());
+			}
+
 			list.add(TextFormatting.GRAY + I18n.format("ftbquests.quest") + ": " + TextFormatting.YELLOW + taskData.task.quest.getDisplayName().getFormattedText());
 			list.add(TextFormatting.GRAY + I18n.format("ftbquests.progress") + ": " + TextFormatting.BLUE + taskData.getProgressString() + " / " + taskData.task.getMaxProgressString());
 		}
