@@ -1,10 +1,10 @@
 package com.feed_the_beast.ftbquests.net;
 
-import com.feed_the_beast.ftblib.lib.config.ConfigItemStack;
 import com.feed_the_beast.ftblib.lib.net.MessageToServer;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.item.ItemStack;
 import net.minecraftforge.items.ItemHandlerHelper;
 
 /**
@@ -23,9 +23,9 @@ public class MessageGetEmergencyItems extends MessageToServer
 	{
 		//TODO: Verify on server side
 
-		for (ConfigItemStack value : ServerQuestFile.INSTANCE.emergencyItems)
+		for (ItemStack stack : ServerQuestFile.INSTANCE.emergencyItems)
 		{
-			ItemHandlerHelper.giveItemToPlayer(player, value.getStack().copy());
+			ItemHandlerHelper.giveItemToPlayer(player, stack.copy());
 		}
 	}
 }

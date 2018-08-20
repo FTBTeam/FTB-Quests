@@ -105,7 +105,7 @@ public class GuiTask extends GuiBase
 					questFile.questGui.openGui();
 				}));
 
-				if (questFile.canEdit() || questFile.self != null && questFile.allowTakeQuestBlocks.getBoolean() && container.data.task.quest.isVisible(questFile.self) && !container.data.task.isComplete(questFile.self))
+				if (questFile.canEdit() || questFile.self != null && questFile.allowTakeQuestBlocks && container.data.task.quest.isVisible(questFile.self) && !container.data.task.isComplete(questFile.self))
 				{
 					add(new Tab(this, I18n.format("tile.ftbquests.screen.name"), "", ItemIcon.getItemIcon(new ItemStack(FTBQuestsItems.SCREEN)), button ->
 					{
@@ -129,7 +129,7 @@ public class GuiTask extends GuiBase
 
 				if (questFile.canEdit())
 				{
-					add(new Tab(this, I18n.format("ftbquests.gui.reset_progress"), I18n.format("ftbquests.gui.reset_progress_q"), GuiIcons.REFRESH, button -> new MessageResetProgress(container.data.task.getID(), button.isRight()).sendToServer()));
+					add(new Tab(this, I18n.format("ftbquests.gui.reset_progress"), I18n.format("ftbquests.gui.reset_progress_q"), GuiIcons.REFRESH, button -> new MessageResetProgress(container.data.task.getID()).sendToServer()));
 					add(new Tab(this, I18n.format("selectServer.edit"), "", GuiIcons.SETTINGS, button -> new MessageEditObject(container.data.task.getID()).sendToServer()));
 				}
 			}

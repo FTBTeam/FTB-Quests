@@ -9,6 +9,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
@@ -18,18 +19,18 @@ import net.minecraft.util.text.TextFormatting;
  */
 public class ExperienceReward extends QuestReward
 {
-	protected final ConfigInt value;
+	protected int value;
 
 	public ExperienceReward(Quest quest, NBTTagCompound nbt)
 	{
 		super(quest);
-		value = new ConfigInt(nbt.getInteger("value"), 1, Integer.MAX_VALUE);
+		value = MathHelper.clamp(nbt.getInteger("value"), 1, Integer.MAX_VALUE);
 	}
 
 	@Override
 	public void writeData(NBTTagCompound nbt)
 	{
-		nbt.setInteger("value", value.getInt());
+		nbt.setInteger("value", value);
 	}
 
 	@Override
@@ -41,19 +42,33 @@ public class ExperienceReward extends QuestReward
 	@Override
 	public ITextComponent getAltDisplayName()
 	{
-		return new TextComponentTranslation("ftbquests.reward.ftbquests.xp.text", TextFormatting.GREEN + "+" + value.getInt());
+		return new TextComponentTranslation("ftbquests.reward.ftbquests.xp.text", TextFormatting.GREEN + "+" + value);
 	}
 
 	@Override
 	public void reward(EntityPlayerMP player)
 	{
-		player.addExperience(value.getInt());
+		player.addExperience(value);
 	}
 
 	@Override
 	public void getConfig(ConfigGroup group)
 	{
 		super.getConfig(group);
-		group.add("value", value, new ConfigInt(1));
+
+		group.add("value", new ConfigInt(value, 1, Integer.MAX_VALUE)
+		{
+			@Override
+			public int getInt()
+			{
+				return value;
+			}
+
+			@Override
+			public void setInt(int v)
+			{
+				value = v;
+			}
+		}, new ConfigInt(1));
 	}
 }

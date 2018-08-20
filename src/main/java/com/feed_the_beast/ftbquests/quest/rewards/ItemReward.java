@@ -18,7 +18,7 @@ import net.minecraftforge.items.ItemHandlerHelper;
  */
 public class ItemReward extends QuestReward
 {
-	private final ConfigItemStack item;
+	private ItemStack item;
 
 	public ItemReward(Quest quest, NBTTagCompound nbt)
 	{
@@ -27,49 +27,66 @@ public class ItemReward extends QuestReward
 
 		if (nbt1.isEmpty())
 		{
-			item = new ConfigItemStack(new ItemStack(Items.APPLE));
+			item = new ItemStack(Items.APPLE);
 		}
 		else
 		{
-			item = new ConfigItemStack(new ItemStack(nbt1));
+			item = new ItemStack(nbt1);
+
+			if (item.isEmpty())
+			{
+				item = ItemStack.EMPTY;
+			}
 		}
 	}
 
 	@Override
 	public void writeData(NBTTagCompound nbt)
 	{
-		nbt.setTag("item", item.getStack().serializeNBT());
+		nbt.setTag("item", item.serializeNBT());
 	}
 
 	@Override
 	public Icon getAltIcon()
 	{
-		return ItemIcon.getItemIcon(item.getStack());
+		return ItemIcon.getItemIcon(item);
 	}
 
 	@Override
 	public ITextComponent getAltDisplayName()
 	{
-		ItemStack stack = item.getStack();
-
-		if (stack.getCount() > 1)
+		if (item.getCount() > 1)
 		{
-			return new TextComponentString(stack.getCount() + "x " + stack.getDisplayName()); //LANG
+			return new TextComponentString(item.getCount() + "x " + item.getDisplayName());
 		}
 
-		return new TextComponentString(stack.getDisplayName()); //LANG
+		return new TextComponentString(item.getDisplayName());
 	}
 
 	@Override
 	public void reward(EntityPlayerMP player)
 	{
-		ItemHandlerHelper.giveItemToPlayer(player, item.getStack().copy());
+		ItemHandlerHelper.giveItemToPlayer(player, item.copy());
 	}
 
 	@Override
 	public void getConfig(ConfigGroup group)
 	{
 		super.getConfig(group);
-		group.add("item", item, new ConfigItemStack(new ItemStack(Items.APPLE)));
+
+		group.add("item", new ConfigItemStack(ItemStack.EMPTY)
+		{
+			@Override
+			public ItemStack getStack()
+			{
+				return item;
+			}
+
+			@Override
+			public void setStack(ItemStack v)
+			{
+				item = v;
+			}
+		}, new ConfigItemStack(new ItemStack(Items.APPLE)));
 	}
 }

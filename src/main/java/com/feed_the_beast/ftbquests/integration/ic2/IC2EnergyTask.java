@@ -1,8 +1,8 @@
 package com.feed_the_beast.ftbquests.integration.ic2;
 
 import com.feed_the_beast.ftblib.lib.client.ClientUtils;
-import com.feed_the_beast.ftblib.lib.config.ConfigDouble;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
+import com.feed_the_beast.ftblib.lib.config.ConfigLong;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
@@ -10,15 +10,13 @@ import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskData;
+import com.feed_the_beast.ftbquests.quest.tasks.SimpleQuestTaskData;
 import com.feed_the_beast.ftbquests.tile.TileScreenCore;
 import com.feed_the_beast.ftbquests.tile.TileScreenPart;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTPrimitive;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagDouble;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
@@ -39,33 +37,43 @@ public class IC2EnergyTask extends QuestTask
 	private static final ResourceLocation EMPTY_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "textures/tasks/ic2_empty.png");
 	private static final ResourceLocation FULL_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "textures/tasks/ic2_full.png");
 
-	public final ConfigDouble value;
-	public final ConfigDouble maxInput;
+	public long value, maxInput;
 
 	public IC2EnergyTask(Quest quest, NBTTagCompound nbt)
 	{
 		super(quest);
-		value = new ConfigDouble(nbt.getDouble("value"), 1D, Double.POSITIVE_INFINITY);
-		maxInput = new ConfigDouble(nbt.hasKey("max_input") ? nbt.getDouble("max_input") : Double.POSITIVE_INFINITY, 1D, Double.POSITIVE_INFINITY);
+		value = nbt.getLong("value");
+
+		if (value < 1)
+		{
+			value = 1;
+		}
+
+		maxInput = nbt.hasKey("max_input") ? nbt.getLong("max_input") : Long.MAX_VALUE;
+
+		if (maxInput < 1)
+		{
+			maxInput = 1;
+		}
 	}
 
 	@Override
 	public long getMaxProgress()
 	{
-		return value.getLong();
+		return value;
 	}
 
 	@Override
 	public String getMaxProgressString()
 	{
-		return StringUtils.formatDouble(value.getDouble(), true);
+		return StringUtils.formatDouble(value, true);
 	}
 
 	@Override
 	public void writeData(NBTTagCompound nbt)
 	{
-		nbt.setDouble("value", value.getDouble());
-		nbt.setDouble("max_input", maxInput.getDouble());
+		nbt.setLong("value", value);
+		nbt.setLong("max_input", maxInput);
 	}
 
 	@Override
@@ -77,7 +85,7 @@ public class IC2EnergyTask extends QuestTask
 	@Override
 	public ITextComponent getAltDisplayName()
 	{
-		return new TextComponentTranslation("ftbquests.task.ftbquests.ic2_energy.text", StringUtils.formatDouble(value.getDouble(), true));
+		return new TextComponentTranslation("ftbquests.task.ftbquests.ic2_energy.text", StringUtils.formatDouble(value, true));
 	}
 
 	@Override
@@ -107,8 +115,35 @@ public class IC2EnergyTask extends QuestTask
 	@Override
 	public void getConfig(ConfigGroup group)
 	{
-		group.add("value", value, new ConfigDouble(1));
-		group.add("max_input", maxInput, new ConfigDouble(Double.POSITIVE_INFINITY));
+		group.add("value", new ConfigLong(0)
+		{
+			@Override
+			public long getLong()
+			{
+				return value;
+			}
+
+			@Override
+			public void setLong(long v)
+			{
+				value = v;
+			}
+		}, new ConfigLong(1));
+
+		group.add("max_input", new ConfigLong(0)
+		{
+			@Override
+			public long getLong()
+			{
+				return maxInput;
+			}
+
+			@Override
+			public void setLong(long v)
+			{
+				maxInput = v;
+			}
+		}, new ConfigLong(Long.MAX_VALUE));
 	}
 
 	@Override
@@ -201,56 +236,17 @@ public class IC2EnergyTask extends QuestTask
 		return new Data(this, data);
 	}
 
-	public static class Data extends QuestTaskData<IC2EnergyTask>
+	public static class Data extends SimpleQuestTaskData<IC2EnergyTask>
 	{
-		public double energy;
-
 		private Data(IC2EnergyTask task, IProgressData data)
 		{
 			super(task, data);
 		}
 
 		@Override
-		public NBTBase toNBT()
-		{
-			return energy > 0 ? new NBTTagDouble(energy) : null;
-		}
-
-		@Override
-		public void fromNBT(@Nullable NBTBase nbt)
-		{
-			if (nbt instanceof NBTPrimitive)
-			{
-				energy = ((NBTPrimitive) nbt).getDouble();
-			}
-			else
-			{
-				energy = 0D;
-			}
-		}
-
-		@Override
-		public long getProgress()
-		{
-			return (long) energy;
-		}
-
-		@Override
-		public double getRelativeProgress()
-		{
-			return energy / task.value.getDouble();
-		}
-
-		@Override
 		public String getProgressString()
 		{
-			return StringUtils.formatDouble(energy, true);
-		}
-
-		@Override
-		public void resetProgress()
-		{
-			energy = 0D;
+			return StringUtils.formatDouble(progress, true);
 		}
 
 		@Override
@@ -268,13 +264,13 @@ public class IC2EnergyTask extends QuestTask
 
 		public double injectEnergy(double amount)
 		{
-			if (amount > 0 && energy < task.value.getDouble())
+			if (amount > 0 && progress < task.value)
 			{
-				double add = Math.min(task.maxInput.getDouble(), Math.min(amount, task.value.getDouble() - energy));
+				double add = Math.min(task.maxInput, Math.min(amount, task.value - progress));
 
 				if (add > 0D)
 				{
-					energy += add;
+					progress += add;
 					data.syncTask(this);
 					return amount - add;
 				}

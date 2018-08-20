@@ -20,12 +20,12 @@ public class ExperienceLevelsReward extends ExperienceReward
 	@Override
 	public ITextComponent getAltDisplayName()
 	{
-		return new TextComponentTranslation("ftbquests.reward.ftbquests.xp_levels.text", TextFormatting.GREEN + "+" + value.getInt());
+		return new TextComponentTranslation("ftbquests.reward.ftbquests.xp_levels.text", TextFormatting.GREEN + "+" + value);
 	}
 
 	@Override
 	public void reward(EntityPlayerMP player)
 	{
-		player.addExperienceLevel(value.getInt());
+		player.addExperienceLevel(value);
 	}
 }
