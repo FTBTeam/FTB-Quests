@@ -4,6 +4,7 @@ import com.feed_the_beast.ftblib.lib.config.ConfigBlockState;
 import com.feed_the_beast.ftblib.lib.config.ConfigBoolean;
 import com.feed_the_beast.ftblib.lib.config.ConfigEnum;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
+import com.feed_the_beast.ftblib.lib.config.ConfigItemStack;
 import com.feed_the_beast.ftblib.lib.config.ConfigNull;
 import com.feed_the_beast.ftblib.lib.config.ConfigTeam;
 import com.feed_the_beast.ftblib.lib.config.IConfigCallback;
@@ -54,6 +55,8 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 	public final ConfigEnum<ProgressDisplayMode> progressDisplayMode = new ConfigEnum<>(ProgressDisplayMode.NAME_MAP);
 	public boolean indestructible = false;
 	public IBlockState skin = BlockUtils.AIR_STATE;
+	public boolean inputOnly = false;
+	public ItemStack inputModeIcon = ItemStack.EMPTY;
 
 	private IProgressData cTeam;
 	private QuestTask cTask;
@@ -111,6 +114,16 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 		{
 			nbt.setString("Skin", BlockUtils.getNameFromState(skin));
 		}
+
+		if (inputOnly)
+		{
+			nbt.setBoolean("InputOnly", true);
+		}
+
+		if (!inputModeIcon.isEmpty())
+		{
+			nbt.setTag("InputModeIcon", inputModeIcon.serializeNBT());
+		}
 	}
 
 	@Override
@@ -128,6 +141,14 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 		progressDisplayMode.setValue(nbt.getString("ProgressDisplayMode"));
 		indestructible = nbt.getBoolean("Indestructible");
 		skin = BlockUtils.getStateFromName(nbt.getString("Skin"));
+		inputOnly = nbt.getBoolean("InputOnly");
+		inputModeIcon = new ItemStack(nbt.getCompoundTag("InputModeIcon"));
+
+		if (inputModeIcon.isEmpty())
+		{
+			inputModeIcon = ItemStack.EMPTY;
+		}
+
 		updateContainingBlockInfo();
 	}
 
@@ -420,9 +441,33 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 					}, new ConfigBoolean(false));
 				}
 
+				group.add("input_only", new ConfigBoolean(inputOnly)
+				{
+					@Override
+					public void setBoolean(boolean v)
+					{
+						inputOnly = v;
+					}
+				}, new ConfigBoolean(false));
+
+				group.add("input_mode_icon", new ConfigItemStack(inputModeIcon)
+				{
+					@Override
+					public void setStack(ItemStack v)
+					{
+						inputModeIcon = v;
+					}
+				}, new ConfigItemStack(ItemStack.EMPTY));
+
 				FTBLibAPI.editServerConfig(player, group0, this);
 				return;
 			}
+		}
+
+		if (inputOnly)
+		{
+			insertItem(player, hand, x, y);
+			return;
 		}
 
 		if (y >= 0.81D)
@@ -467,6 +512,11 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 			return;
 		}
 
+		insertItem(player, hand, x, y);
+	}
+
+	private void insertItem(EntityPlayerMP player, EnumHand hand, double x, double y)
+	{
 		if (!isOwner(player))
 		{
 			return;

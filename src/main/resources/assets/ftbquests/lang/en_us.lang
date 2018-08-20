@@ -1,5 +1,5 @@
 tile.ftbquests.screen.missing_data=Broken Block / Missing Data!
-tile.ftbquests.screen.name=Screen
+tile.ftbquests.screen.name=Task Screen
 tile.ftbquests.screen.task_index=Task Index
 tile.ftbquests.screen.size=Size
 tile.ftbquests.screen.skin=Skin
@@ -8,6 +8,8 @@ tile.ftbquests.screen.progress_display_mode.progress=Progress
 tile.ftbquests.screen.progress_display_mode.percent=Percent
 tile.ftbquests.screen.progress_display_mode.bar=Bar
 tile.ftbquests.screen.indestructible=Indestructible
+tile.ftbquests.screen.input_only=Input Only
+tile.ftbquests.screen.input_mode_icon=Input Mode Icon
 tile.ftbquests.progress_detector.name=Quest Progress Detector
 tile.ftbquests.progress_detector.object=Object ID
 tile.ftbquests.progress_detector.level=Output Level
