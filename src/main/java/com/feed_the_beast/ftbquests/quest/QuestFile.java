@@ -39,9 +39,9 @@ public abstract class QuestFile extends ProgressingQuestObject
 	public final List<QuestTask> allTasks;
 	public final List<QuestTask> allItemAcceptingTasks;
 
-	public final ConfigBoolean allowTakeQuestBlocks;
-	public final ConfigList<ConfigItemStack> emergencyItems;
-	public final ConfigTimer emergencyItemsCooldown;
+	public boolean allowTakeQuestBlocks;
+	public final List<ItemStack> emergencyItems;
+	public Ticks emergencyItemsCooldown;
 
 	public QuestFile()
 	{
@@ -52,9 +52,10 @@ public abstract class QuestFile extends ProgressingQuestObject
 		allTasks = new ArrayList<>();
 		allItemAcceptingTasks = new ArrayList<>();
 
-		allowTakeQuestBlocks = new ConfigBoolean(true);
-		emergencyItems = new ConfigList<>(new ConfigItemStack(new ItemStack(Items.APPLE)));
-		emergencyItemsCooldown = new ConfigTimer(Ticks.MINUTE.x(5));
+		allowTakeQuestBlocks = true;
+		emergencyItems = new ArrayList<>();
+		emergencyItems.add(new ItemStack(Items.APPLE));
+		emergencyItemsCooldown = Ticks.MINUTE.x(5);
 	}
 
 	@Override
@@ -382,17 +383,17 @@ public abstract class QuestFile extends ProgressingQuestObject
 		}
 
 		nbt.setTag("chapters", chaptersList);
-		nbt.setBoolean("allow_take_quest_blocks", allowTakeQuestBlocks.getBoolean());
+		nbt.setBoolean("allow_take_quest_blocks", allowTakeQuestBlocks);
 
 		NBTTagList emergencyItemsList = new NBTTagList();
 
-		for (ConfigItemStack value : emergencyItems)
+		for (ItemStack stack : emergencyItems)
 		{
-			emergencyItemsList.appendTag(value.getStack().serializeNBT());
+			emergencyItemsList.appendTag(stack.serializeNBT());
 		}
 
 		nbt.setTag("emergency_items", emergencyItemsList);
-		nbt.setString("emergency_items_cooldown", emergencyItemsCooldown.getTimer().toString());
+		nbt.setString("emergency_items_cooldown", emergencyItemsCooldown.toString());
 	}
 
 	protected final void readData(NBTTagCompound nbt)
@@ -414,8 +415,8 @@ public abstract class QuestFile extends ProgressingQuestObject
 		refreshIDMap();
 		refreshTaskList();
 
-		allowTakeQuestBlocks.setBoolean(!nbt.hasKey("allow_take_quest_blocks") || nbt.getBoolean("allow_take_quest_blocks"));
-		emergencyItems.list.clear();
+		allowTakeQuestBlocks = !nbt.hasKey("allow_take_quest_blocks") || nbt.getBoolean("allow_take_quest_blocks");
+		emergencyItems.clear();
 
 		NBTTagList emergencyItemsList = nbt.getTagList("emergency_items", Constants.NBT.TAG_COMPOUND);
 
@@ -425,12 +426,12 @@ public abstract class QuestFile extends ProgressingQuestObject
 
 			if (!stack.isEmpty())
 			{
-				emergencyItems.add(new ConfigItemStack(stack));
+				emergencyItems.add(stack);
 			}
 		}
 
 		Ticks t = Ticks.get(nbt.getString("emergency_items_cooldown"));
-		emergencyItemsCooldown.setTimer(t.hasTicks() ? t : Ticks.MINUTE.x(5));
+		emergencyItemsCooldown = t.hasTicks() ? t : Ticks.MINUTE.x(5);
 	}
 
 	@Nullable
@@ -460,8 +461,59 @@ public abstract class QuestFile extends ProgressingQuestObject
 	@Override
 	public void getConfig(ConfigGroup config)
 	{
-		config.add("allow_take_quest_blocks", allowTakeQuestBlocks, new ConfigBoolean(true));
-		config.add("emergency_items", emergencyItems, new ConfigList<>(new ConfigItemStack(new ItemStack(Items.APPLE))));
-		config.add("emergency_items_cooldown", emergencyItemsCooldown, new ConfigTimer(Ticks.MINUTE.x(5)));
+		config.add("allow_take_quest_blocks", new ConfigBoolean(false)
+		{
+			@Override
+			public boolean getBoolean()
+			{
+				return allowTakeQuestBlocks;
+			}
+
+			@Override
+			public void setBoolean(boolean v)
+			{
+				allowTakeQuestBlocks = v;
+			}
+		}, new ConfigBoolean(true));
+
+		config.add("emergency_items", new ConfigList<ConfigItemStack>(new ConfigItemStack(ItemStack.EMPTY))
+		{
+			@Override
+			public void writeToList()
+			{
+				list.clear();
+
+				for (ItemStack stack : emergencyItems)
+				{
+					list.add(new ConfigItemStack(stack));
+				}
+			}
+
+			@Override
+			public void readFromList()
+			{
+				emergencyItems.clear();
+
+				for (ConfigItemStack value : list)
+				{
+					emergencyItems.add(value.getStack());
+				}
+			}
+		}, new ConfigList<>(new ConfigItemStack(new ItemStack(Items.APPLE))));
+
+		config.add("emergency_items_cooldown", new ConfigTimer(Ticks.NO_TICKS)
+		{
+			@Override
+			public Ticks getTimer()
+			{
+				return emergencyItemsCooldown;
+			}
+
+			@Override
+			public void setTimer(Ticks t)
+			{
+				emergencyItemsCooldown = t;
+			}
+		}, new ConfigTimer(Ticks.MINUTE.x(5)));
 	}
 }

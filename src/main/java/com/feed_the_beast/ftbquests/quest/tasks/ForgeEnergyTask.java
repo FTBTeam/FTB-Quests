@@ -181,12 +181,6 @@ public class ForgeEnergyTask extends QuestTask
 		}
 
 		@Override
-		public double getRelativeProgress()
-		{
-			return progress / (double) task.value.getLong();
-		}
-
-		@Override
 		public String getProgressString()
 		{
 			return StringUtils.formatDouble(progress, true);

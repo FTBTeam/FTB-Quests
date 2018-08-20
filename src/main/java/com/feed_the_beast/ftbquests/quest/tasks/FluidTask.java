@@ -3,7 +3,6 @@ package com.feed_the_beast.ftbquests.quest.tasks;
 import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftblib.lib.config.ConfigFluid;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
-import com.feed_the_beast.ftblib.lib.config.ConfigInt;
 import com.feed_the_beast.ftblib.lib.config.ConfigLong;
 import com.feed_the_beast.ftblib.lib.config.ConfigNBT;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
@@ -45,57 +44,61 @@ public class FluidTask extends QuestTask
 {
 	private static final ResourceLocation TANK_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "textures/tasks/tank.png");
 
-	public final ConfigFluid fluid;
-	public final ConfigNBT fluidNBT;
-	public final ConfigLong amount;
+	public Fluid fluid;
+	public NBTTagCompound fluidNBT;
+	public long amount;
 
 	public FluidTask(Quest quest, NBTTagCompound nbt)
 	{
 		super(quest);
 
-		fluid = new ConfigFluid(FluidRegistry.getFluid(nbt.getString("fluid")), FluidRegistry.WATER);
-		fluidNBT = new ConfigNBT(nbt.hasKey("nbt") ? nbt.getCompoundTag("nbt") : null);
-		amount = new ConfigLong(nbt.hasKey("amount") ? nbt.getLong("amount") : 1000, 1, Long.MAX_VALUE);
+		fluid = FluidRegistry.getFluid(nbt.getString("fluid"));
+		fluidNBT = (NBTTagCompound) nbt.getTag("nbt");
+		amount = nbt.hasKey("amount") ? nbt.getLong("amount") : 1000;
+
+		if (amount < 1)
+		{
+			amount = 1;
+		}
 	}
 
 	@Override
 	public long getMaxProgress()
 	{
-		return amount.getLong();
+		return amount;
 	}
 
 	@Override
 	public String getMaxProgressString()
 	{
-		return getVolumeString(amount.getLong());
+		return getVolumeString(amount);
 	}
 
 	@Override
 	public void writeData(NBTTagCompound nbt)
 	{
-		nbt.setString("type", "fluid");
-		nbt.setString("fluid", fluid.getString());
+		nbt.setString("fluid", fluid.getName());
 
-		if (amount.getLong() != 1000)
+		if (amount != 1000)
 		{
-			nbt.setLong("amount", amount.getLong());
+			nbt.setLong("amount", amount);
 		}
 
-		if (fluidNBT.getNBT() != null)
+		if (fluidNBT != null)
 		{
-			nbt.setTag("nbt", fluidNBT.getNBT());
+			nbt.setTag("nbt", fluidNBT);
 		}
 	}
 
 	@Override
 	public Icon getAltIcon()
 	{
-		return Icon.getIcon(fluid.getFluid().getStill(createFluidStack(Fluid.BUCKET_VOLUME)).toString()).combineWith(Icon.getIcon(TANK_TEXTURE.toString()));
+		return Icon.getIcon(fluid.getStill(createFluidStack(Fluid.BUCKET_VOLUME)).toString()).combineWith(Icon.getIcon(TANK_TEXTURE.toString()));
 	}
 
 	public FluidStack createFluidStack(int amount)
 	{
-		return new FluidStack(fluid.getFluid(), amount, fluidNBT.getNBT());
+		return new FluidStack(fluid, amount, fluidNBT);
 	}
 
 	public static String getVolumeString(long a)
@@ -132,15 +135,57 @@ public class FluidTask extends QuestTask
 	@Override
 	public ITextComponent getAltDisplayName()
 	{
-		return new TextComponentString(getVolumeString(amount.getLong())).appendText(" of ").appendSibling(fluid.getStringForGUI());
+		return new TextComponentString(getVolumeString(amount)).appendText(" of ").appendText(createFluidStack(1000).getLocalizedName());
 	}
 
 	@Override
 	public void getConfig(ConfigGroup group)
 	{
-		group.add("fluid", fluid, new ConfigFluid(FluidRegistry.WATER, FluidRegistry.WATER));
-		group.add("fluid_nbt", fluidNBT, new ConfigNBT(null));
-		group.add("amount", amount, new ConfigInt(1));
+		group.add("fluid", new ConfigFluid(FluidRegistry.WATER, FluidRegistry.WATER)
+		{
+			@Override
+			public Fluid getFluid()
+			{
+				return fluid;
+			}
+
+			@Override
+			public void setFluid(Fluid v)
+			{
+				fluid = v;
+			}
+		}, new ConfigFluid(FluidRegistry.WATER, FluidRegistry.WATER));
+
+		group.add("fluid_nbt", new ConfigNBT(null)
+		{
+			@Override
+			@Nullable
+			public NBTTagCompound getNBT()
+			{
+				return fluidNBT;
+			}
+
+			@Override
+			public void setNBT(@Nullable NBTTagCompound v)
+			{
+				fluidNBT = v;
+			}
+		}, new ConfigNBT(null));
+
+		group.add("amount", new ConfigLong(1, 1, Long.MAX_VALUE)
+		{
+			@Override
+			public long getLong()
+			{
+				return amount;
+			}
+
+			@Override
+			public void setLong(long v)
+			{
+				amount = v;
+			}
+		}, new ConfigLong(1000L));
 	}
 
 	@Override
@@ -300,9 +345,9 @@ public class FluidTask extends QuestTask
 		{
 			FluidStack fluidStack = task.createFluidStack(Fluid.BUCKET_VOLUME);
 
-			if (progress < task.amount.getLong() && fluidStack.isFluidEqual(resource))
+			if (progress < task.amount && fluidStack.isFluidEqual(resource))
 			{
-				long add = Math.min(100000000000L, Math.min(resource.amount, task.amount.getLong() - progress));
+				long add = Math.min(100000000000L, Math.min(resource.amount, task.amount - progress));
 
 				if (add > 0)
 				{
@@ -345,7 +390,7 @@ public class FluidTask extends QuestTask
 
 			if (item != null)
 			{
-				int drain = (int) Math.min(1000000000, task.amount.getLong() - progress);
+				int drain = (int) Math.min(1000000000, task.amount - progress);
 
 				if (singleItem && drain > 1000)
 				{

@@ -1,7 +1,6 @@
 package com.feed_the_beast.ftbquests.gui;
 
 import com.feed_the_beast.ftblib.lib.client.ClientUtils;
-import com.feed_the_beast.ftblib.lib.config.ConfigItemStack;
 import com.feed_the_beast.ftblib.lib.gui.GuiBase;
 import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
 import com.feed_the_beast.ftblib.lib.gui.Panel;
@@ -27,7 +26,8 @@ import java.util.List;
  */
 public class GuiEmergencyItems extends GuiBase
 {
-	private long endTime = System.currentTimeMillis() + ClientQuestFile.INSTANCE.emergencyItemsCooldown.getTimer().millis();
+	private long endTime = System.currentTimeMillis() + ClientQuestFile.INSTANCE.emergencyItemsCooldown.millis();
+	private boolean done = false;
 
 	private static class EmergencyItem extends Widget
 	{
@@ -74,9 +74,9 @@ public class GuiEmergencyItems extends GuiBase
 		@Override
 		public void addWidgets()
 		{
-			for (ConfigItemStack value : ClientQuestFile.INSTANCE.emergencyItems)
+			for (ItemStack stack : ClientQuestFile.INSTANCE.emergencyItems)
 			{
-				add(new EmergencyItem(this, value.getStack()));
+				add(new EmergencyItem(this, stack));
 			}
 		}
 
@@ -85,7 +85,7 @@ public class GuiEmergencyItems extends GuiBase
 		{
 			setWidth(align(new WidgetLayout.Horizontal(0, 6, 0)));
 			setHeight(16);
-			setPos((getGui().width - width) / 2, height * 2 / 3 - 10);
+			setPos((GuiEmergencyItems.this.width - itemPanel.width) / 2, GuiEmergencyItems.this.height * 2 / 3 - 10);
 		}
 	};
 
@@ -94,14 +94,13 @@ public class GuiEmergencyItems extends GuiBase
 	{
 		add(itemPanel);
 		add(cancelButton);
+		cancelButton.setPos((width - cancelButton.width) / 2, height * 2 / 3 + 16);
 	}
 
 	@Override
 	public boolean onInit()
 	{
-		setFullscreen();
-		cancelButton.setPos((width - cancelButton.width) / 2, height * 2 / 3 + 16);
-		return true;
+		return setFullscreen();
 	}
 
 	@Override
@@ -111,9 +110,14 @@ public class GuiEmergencyItems extends GuiBase
 
 		if (left <= 0L)
 		{
-			closeGui(false);
-			new MessageGetEmergencyItems().sendToServer();
-			return;
+			if (!done)
+			{
+				done = true;
+				cancelButton.setTitle(I18n.format("gui.close"));
+				new MessageGetEmergencyItems().sendToServer();
+			}
+
+			left = 0L;
 		}
 
 		GlStateManager.pushMatrix();
@@ -126,18 +130,14 @@ public class GuiEmergencyItems extends GuiBase
 		GlStateManager.pushMatrix();
 		GlStateManager.translate(width / 2F, height / 2.5F, 0F);
 		GlStateManager.scale(4F, 4F, 1F);
-		s = StringUtils.getTimeString(left / 1000L * 1000L + 1000L);
+		s = left <= 0L ? "00:00" : StringUtils.getTimeString(left / 1000L * 1000L + 1000L);
 		int x = -getStringWidth(s) / 2;
 		drawString(s, x - 1, 0, Color4I.BLACK, 0);
 		drawString(s, x + 1, 0, Color4I.BLACK, 0);
 		drawString(s, x, 1, Color4I.BLACK, 0);
 		drawString(s, x, -1, Color4I.BLACK, 0);
 		drawString(s, x, 0, Color4I.WHITE, 0);
-
-		for (int i = 0; i < ClientQuestFile.INSTANCE.emergencyItems.list.size(); i++)
-		{
-			GuiHelper.drawItem(ClientQuestFile.INSTANCE.emergencyItems.list.get(i).getStack(), width / 2D - ClientQuestFile.INSTANCE.emergencyItems.list.size() * 8D - 6D + i * 24D, height * 2D / 3D - 10D, true, Icon.EMPTY);
-		}
+		GlStateManager.popMatrix();
 	}
 
 	@Override

@@ -59,8 +59,8 @@ public class MessageMoveQuest extends MessageToServer
 
 			if (quest != null)
 			{
-				quest.x.setInt(x);
-				quest.y.setInt(y);
+				quest.x = x;
+				quest.y = y;
 				ServerQuestFile.INSTANCE.save();
 				new MessageMoveQuestResponse(id, x, y).sendToAll();
 			}

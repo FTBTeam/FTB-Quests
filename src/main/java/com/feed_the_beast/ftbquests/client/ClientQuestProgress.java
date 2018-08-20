@@ -9,6 +9,7 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.text.TextFormatting;
 
+import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -102,7 +103,7 @@ public class ClientQuestProgress implements IProgressData
 		claimedRewards.remove(reward);
 	}
 
-	public String getCompletionSuffix(ProgressingQuestObject object)
+	public static String getCompletionSuffix(@Nullable ClientQuestProgress progress, ProgressingQuestObject object)
 	{
 		if (!GuiScreen.isShiftKeyDown())
 		{
@@ -110,23 +111,30 @@ public class ClientQuestProgress implements IProgressData
 		}
 
 		StringBuilder builder = new StringBuilder();
-		builder.append(TextFormatting.DARK_GRAY);
 		builder.append(' ');
+		builder.append(TextFormatting.DARK_GRAY);
 
-		double d = object.getRelativeProgress(this);
-
-		if (d <= 0D)
+		if (progress == null)
 		{
-			builder.append("0%");
-		}
-		else if (d >= 1D)
-		{
-			builder.append("100%");
+			builder.append("???");
 		}
 		else
 		{
-			builder.append((int) (d * 100D));
-			builder.append('%');
+			double d = object.getRelativeProgress(progress);
+
+			if (d <= 0D)
+			{
+				builder.append("0%");
+			}
+			else if (d >= 1D)
+			{
+				builder.append("100%");
+			}
+			else
+			{
+				builder.append((int) (d * 100D));
+				builder.append('%');
+			}
 		}
 
 		if (GuiScreen.isCtrlKeyDown())

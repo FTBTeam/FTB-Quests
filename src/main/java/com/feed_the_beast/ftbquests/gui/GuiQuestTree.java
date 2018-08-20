@@ -3,7 +3,6 @@ package com.feed_the_beast.ftbquests.gui;
 import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigString;
-import com.feed_the_beast.ftblib.lib.config.ConfigValue;
 import com.feed_the_beast.ftblib.lib.gui.Button;
 import com.feed_the_beast.ftblib.lib.gui.ContextMenuItem;
 import com.feed_the_beast.ftblib.lib.gui.GuiBase;
@@ -21,6 +20,7 @@ import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.FTBQuests;
+import com.feed_the_beast.ftbquests.client.ClientQuestProgress;
 import com.feed_the_beast.ftbquests.net.edit.MessageChangeID;
 import com.feed_the_beast.ftbquests.net.edit.MessageCreateObject;
 import com.feed_the_beast.ftbquests.net.edit.MessageDeleteObject;
@@ -71,9 +71,9 @@ public class GuiQuestTree extends GuiBase
 			chapter = c;
 			description = new ArrayList<>();
 
-			for (ConfigValue v : chapter.description)
+			for (String v : chapter.description)
 			{
-				description.add(TextFormatting.GRAY + v.getString());
+				description.add(TextFormatting.GRAY + v);
 			}
 		}
 
@@ -102,15 +102,7 @@ public class GuiQuestTree extends GuiBase
 		@Override
 		public void addMouseOverText(List<String> list)
 		{
-			if (questFile.self != null)
-			{
-				list.add(getTitle() + questFile.self.getCompletionSuffix(chapter));
-			}
-			else
-			{
-				list.add(getTitle());
-			}
-
+			list.add(getTitle() + ClientQuestProgress.getCompletionSuffix(questFile.self, chapter));
 			list.addAll(description);
 		}
 
@@ -183,7 +175,7 @@ public class GuiQuestTree extends GuiBase
 			super(panel, q.getDisplayName().getFormattedText(), q.getIcon());
 			setSize(20, 20);
 			quest = q;
-			description = TextFormatting.GRAY + quest.description.getString();
+			description = TextFormatting.GRAY + quest.description;
 
 			if (TextFormatting.getTextWithoutFormattingCodes(description).isEmpty())
 			{
@@ -197,9 +189,9 @@ public class GuiQuestTree extends GuiBase
 			{
 				dependencies = new ArrayList<>();
 
-				for (ConfigString value : quest.dependencies)
+				for (String value : quest.dependencies)
 				{
-					Quest q = questFile.getQuest(value.getString());
+					Quest q = questFile.getQuest(value);
 
 					if (q != null && q != quest)
 					{
@@ -272,21 +264,7 @@ public class GuiQuestTree extends GuiBase
 		@Override
 		public void addMouseOverText(List<String> list)
 		{
-			if (questFile.self != null)
-			{
-				if (!getTitle().isEmpty())
-				{
-					list.add(getTitle() + questFile.self.getCompletionSuffix(quest));
-				}
-				else if (isShiftKeyDown())
-				{
-					list.add(questFile.self.getCompletionSuffix(quest).trim());
-				}
-			}
-			else if (!getTitle().isEmpty())
-			{
-				list.add(getTitle());
-			}
+			list.add((getTitle().isEmpty() ? "" : getTitle() + " ") + ClientQuestProgress.getCompletionSuffix(questFile.self, quest).trim());
 
 			if (!description.isEmpty())
 			{
@@ -302,7 +280,7 @@ public class GuiQuestTree extends GuiBase
 				return WidgetType.MOUSE_OVER;
 			}
 
-			return questFile.editingMode || questFile.self != null && quest.isVisible(questFile.self) ? super.getWidgetType() : WidgetType.DISABLED;
+			return questFile.editingMode || quest.isVisible(questFile.self) ? super.getWidgetType() : WidgetType.DISABLED;
 		}
 
 		@Override
@@ -549,7 +527,7 @@ public class GuiQuestTree extends GuiBase
 
 				for (Quest quest : selectedChapter.quests)
 				{
-					widgets.set((quest.x.getInt() + Quest.POS_LIMIT) + (quest.y.getInt() + Quest.POS_LIMIT) * s, new ButtonQuest(this, quest));
+					widgets.set((quest.x + Quest.POS_LIMIT) + (quest.y + Quest.POS_LIMIT) * s, new ButtonQuest(this, quest));
 				}
 			}
 
@@ -568,10 +546,10 @@ public class GuiQuestTree extends GuiBase
 					if (widget instanceof ButtonQuest)
 					{
 						Quest quest = ((ButtonQuest) widget).quest;
-						minX = Math.min(minX, quest.x.getInt());
-						minY = Math.min(minY, quest.y.getInt());
-						maxX = Math.max(maxX, quest.x.getInt());
-						maxY = Math.max(maxY, quest.y.getInt());
+						minX = Math.min(minX, quest.x);
+						minY = Math.min(minY, quest.y);
+						maxX = Math.max(maxX, quest.x);
+						maxY = Math.max(maxY, quest.y);
 					}
 				}
 
@@ -594,8 +572,8 @@ public class GuiQuestTree extends GuiBase
 					if (widget instanceof ButtonQuest)
 					{
 						Quest quest = ((ButtonQuest) widget).quest;
-						x = quest.x.getInt();
-						y = quest.y.getInt();
+						x = quest.x;
+						y = quest.y;
 					}
 					else
 					{
@@ -685,7 +663,7 @@ public class GuiQuestTree extends GuiBase
 					add(new ChapterOptionButton(this, "F", I18n.format("ftbquests.gui.edit_file"), () -> new MessageEditObject(questFile.getID()).sendToServer(), () -> true));
 				}
 
-				if (!questFile.emergencyItems.isEmpty())
+				if (!questFile.emergencyItems.isEmpty() && questFile.self != null)
 				{
 					add(new ChapterOptionButton(this, "E", I18n.format("ftbquests.file.emergency_items"), () -> new GuiEmergencyItems().openGui(), () -> true));
 				}
@@ -759,7 +737,7 @@ public class GuiQuestTree extends GuiBase
 		if (quest != null)
 		{
 			quest.move((byte) direction);
-			new MessageMoveQuest(quest.getID(), (byte) quest.x.getInt(), (byte) quest.y.getInt()).sendToServer();
+			new MessageMoveQuest(quest.getID(), quest.x, quest.y).sendToServer();
 		}
 		else if (direction == 0)
 		{

@@ -2,7 +2,6 @@ package com.feed_the_beast.ftbquests.gui;
 
 import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
-import com.feed_the_beast.ftblib.lib.config.ConfigString;
 import com.feed_the_beast.ftblib.lib.gui.Button;
 import com.feed_the_beast.ftblib.lib.gui.ContextMenuItem;
 import com.feed_the_beast.ftblib.lib.gui.GuiBase;
@@ -21,6 +20,7 @@ import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.FTBQuests;
+import com.feed_the_beast.ftbquests.client.ClientQuestProgress;
 import com.feed_the_beast.ftbquests.net.MessageClaimReward;
 import com.feed_the_beast.ftbquests.net.MessageGetScreen;
 import com.feed_the_beast.ftbquests.net.MessageOpenTask;
@@ -142,7 +142,7 @@ public class GuiQuest extends GuiBase
 			{
 				List<ContextMenuItem> contextMenu = new ArrayList<>();
 
-				if (questTreeGui.questFile.canEdit() || questTreeGui.questFile.self != null && questTreeGui.questFile.allowTakeQuestBlocks.getBoolean() && task.quest.isVisible(questTreeGui.questFile.self) && !task.isComplete(questTreeGui.questFile.self))
+				if (questTreeGui.questFile.canEdit() || questTreeGui.questFile.self != null && questTreeGui.questFile.allowTakeQuestBlocks && task.quest.isVisible(questTreeGui.questFile.self) && !task.isComplete(questTreeGui.questFile.self))
 				{
 					contextMenu.add(new ContextMenuItem(I18n.format("tile.ftbquests.screen.name"), Color4I.BLACK, () ->
 					{
@@ -181,14 +181,7 @@ public class GuiQuest extends GuiBase
 		@Override
 		public void addMouseOverText(List<String> list)
 		{
-			if (questTreeGui.questFile.self != null)
-			{
-				list.add(getTitle() + questTreeGui.questFile.self.getCompletionSuffix(task));
-			}
-			else
-			{
-				list.add(getTitle());
-			}
+			list.add(getTitle() + ClientQuestProgress.getCompletionSuffix(questTreeGui.questFile.self, task));
 		}
 
 		@Override
@@ -200,11 +193,7 @@ public class GuiQuest extends GuiBase
 		@Override
 		public WidgetType getWidgetType()
 		{
-			if (questTreeGui.questFile.editingMode)
-			{
-				return super.getWidgetType();
-			}
-			else if (task.invalid || questTreeGui.questFile.self == null || !quest.canStartTasks(questTreeGui.questFile.self))
+			if (task.invalid || questTreeGui.questFile.self == null || !quest.canStartTasks(questTreeGui.questFile.self))
 			{
 				return WidgetType.DISABLED;
 			}
@@ -290,8 +279,6 @@ public class GuiQuest extends GuiBase
 					});
 				}
 			}
-
-			panel.widgets.sort(WIDGET_TITLE_COMPARATOR);
 		}
 	}
 
@@ -304,6 +291,21 @@ public class GuiQuest extends GuiBase
 			super(panel, r.getDisplayName().getFormattedText(), r.getIcon());
 			setPosAndSize(0, 20, 20, 20);
 			reward = r;
+		}
+
+		@Override
+		public void addMouseOverText(List<String> list)
+		{
+			StringBuilder builder = new StringBuilder(getTitle());
+
+			if (GuiScreen.isCtrlKeyDown())
+			{
+				builder.append(' ');
+				builder.append(TextFormatting.DARK_GRAY);
+				builder.append(reward.getID());
+			}
+
+			list.add(builder.toString());
 		}
 
 		@Override
@@ -346,11 +348,7 @@ public class GuiQuest extends GuiBase
 		@Override
 		public WidgetType getWidgetType()
 		{
-			if (questTreeGui.questFile.editingMode)
-			{
-				return super.getWidgetType();
-			}
-			else if (reward.invalid || questTreeGui.questFile.self == null || questTreeGui.questFile.self.isRewardClaimed(ClientUtils.MC.player, reward) || !quest.isComplete(questTreeGui.questFile.self))
+			if (reward.invalid || questTreeGui.questFile.self == null || questTreeGui.questFile.self.isRewardClaimed(ClientUtils.MC.player, reward) || !quest.isComplete(questTreeGui.questFile.self))
 			{
 				return WidgetType.DISABLED;
 			}
@@ -436,8 +434,6 @@ public class GuiQuest extends GuiBase
 					});
 				}
 			}
-
-			panel.widgets.sort(WIDGET_TITLE_COMPARATOR);
 		}
 	}
 
@@ -477,21 +473,15 @@ public class GuiQuest extends GuiBase
 				title.setSize(width, 35);
 
 				shortDescription.text.clear();
-				shortDescription.text.addAll(listFormattedStringToWidth(quest.description.getString(), width - 60));
+				shortDescription.text.addAll(listFormattedStringToWidth(quest.description, width - 60));
 
 				shortDescription.setSize(width, shortDescription.text.size() * 12 + (shortDescription.text.isEmpty() ? 0 : 15));
 
 				longDescription.text.clear();
 
-				for (ConfigString s0 : quest.text)
+				for (String s0 : quest.text)
 				{
-					for (String s : listFormattedStringToWidth(s0.getString(), width - 80))
-					{
-						if (!s.trim().isEmpty())
-						{
-							longDescription.text.add(s);
-						}
-					}
+					longDescription.text.addAll(listFormattedStringToWidth(s0, width - 80));
 				}
 
 				longDescription.setSize(width, longDescription.text.size() * 12 + (longDescription.text.isEmpty() ? 0 : 15));

@@ -56,7 +56,7 @@ public class MessageGetScreen extends MessageToServer
 	@Override
 	public void onMessage(EntityPlayerMP player)
 	{
-		if (size >= 0 && size <= 4 && (size == 0 && ServerQuestFile.INSTANCE.allowTakeQuestBlocks.getBoolean() || FTBQuests.canEdit(player)))
+		if (size >= 0 && size <= 4 && (size == 0 && ServerQuestFile.INSTANCE.allowTakeQuestBlocks || FTBQuests.canEdit(player)))
 		{
 			QuestTask t = ServerQuestFile.INSTANCE.getTask(task);
 

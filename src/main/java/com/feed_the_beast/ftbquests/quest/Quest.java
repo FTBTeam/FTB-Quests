@@ -14,12 +14,13 @@ import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskType;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraftforge.common.util.Constants;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -30,11 +31,11 @@ public final class Quest extends ProgressingQuestObject
 	public static final int POS_LIMIT = 25;
 
 	public final QuestChapter chapter;
-	public final ConfigString description;
-	public final ConfigEnum<QuestType> type;
-	public final ConfigInt x, y;
-	public final ConfigList<ConfigString> text;
-	public final ConfigList<ConfigString> dependencies;
+	public String description;
+	public QuestType type;
+	public byte x, y;
+	public final List<String> text;
+	public final List<String> dependencies;
 	public final List<QuestTask> tasks;
 	public final List<QuestReward> rewards;
 
@@ -42,22 +43,21 @@ public final class Quest extends ProgressingQuestObject
 	{
 		chapter = c;
 		title = nbt.getString("title");
-		description = new ConfigString(nbt.getString("description"));
+		description = nbt.getString("description");
 		icon = QuestFile.getIcon(nbt);
-		type = new ConfigEnum<>(QuestType.NAME_MAP);
-		type.setValue(nbt.getString("type"));
-		x = new ConfigInt(nbt.getByte("x"), -POS_LIMIT, POS_LIMIT);
-		y = new ConfigInt(nbt.getByte("y"), -POS_LIMIT, POS_LIMIT);
-		text = new ConfigList<>(new ConfigString(""));
+		type = QuestType.NAME_MAP.get(nbt.getString("type"));
+		x = (byte) MathHelper.clamp(nbt.getByte("x"), -POS_LIMIT, POS_LIMIT);
+		y = (byte) MathHelper.clamp(nbt.getByte("y"), -POS_LIMIT, POS_LIMIT);
+		text = new ArrayList<>();
 
 		NBTTagList list = nbt.getTagList("text", Constants.NBT.TAG_STRING);
 
 		for (int k = 0; k < list.tagCount(); k++)
 		{
-			text.add(new ConfigString(list.getStringTagAt(k)));
+			text.add(list.getStringTagAt(k));
 		}
 
-		dependencies = new ConfigList<>(new ConfigString(""));
+		dependencies = new ArrayList<>();
 
 		readID(nbt);
 
@@ -92,7 +92,7 @@ public final class Quest extends ProgressingQuestObject
 
 		for (int i = 0; i < depList.tagCount(); i++)
 		{
-			dependencies.add(new ConfigString(depList.getStringTagAt(i)));
+			dependencies.add(depList.getStringTagAt(i));
 		}
 	}
 
@@ -129,26 +129,26 @@ public final class Quest extends ProgressingQuestObject
 			nbt.setTag("icon", icon.serializeNBT());
 		}
 
-		if (type.getValue() != QuestType.NORMAL)
+		if (type != QuestType.NORMAL)
 		{
-			nbt.setString("type", type.getValue().getName());
+			nbt.setString("type", type.getName());
 		}
 
-		nbt.setByte("x", (byte) x.getInt());
-		nbt.setByte("y", (byte) y.getInt());
+		nbt.setByte("x", x);
+		nbt.setByte("y", y);
 
 		if (!description.isEmpty())
 		{
-			nbt.setString("description", description.getString());
+			nbt.setString("description", description);
 		}
 
 		if (!text.isEmpty())
 		{
 			NBTTagList array = new NBTTagList();
 
-			for (ConfigString s : text)
+			for (String value : text)
 			{
-				array.appendTag(new NBTTagString(s.getString()));
+				array.appendTag(new NBTTagString(value));
 			}
 
 			nbt.setTag("text", array);
@@ -158,9 +158,9 @@ public final class Quest extends ProgressingQuestObject
 		{
 			NBTTagList depList = new NBTTagList();
 
-			for (ConfigString value : dependencies)
+			for (String value : dependencies)
 			{
-				depList.appendTag(new NBTTagString(value.getString()));
+				depList.appendTag(new NBTTagString(value));
 			}
 
 			nbt.setTag("dependencies", depList);
@@ -303,19 +303,23 @@ public final class Quest extends ProgressingQuestObject
 		}
 	}
 
-	public boolean isVisible(IProgressData data)
+	public boolean isVisible(@Nullable IProgressData data)
 	{
 		if (dependencies.isEmpty())
 		{
 			return true;
 		}
+		else if (data == null)
+		{
+			return false;
+		}
 
-		switch (type.getValue())
+		switch (type)
 		{
 			case SECRET:
-				for (ConfigString value : dependencies)
+				for (String value : dependencies)
 				{
-					QuestObject object = chapter.file.get(value.getString());
+					QuestObject object = chapter.file.get(value);
 
 					if (object instanceof ProgressingQuestObject && ((ProgressingQuestObject) object).isComplete(data))
 					{
@@ -325,9 +329,9 @@ public final class Quest extends ProgressingQuestObject
 
 				return false;
 			case INVISIBLE:
-				for (ConfigString value : dependencies)
+				for (String value : dependencies)
 				{
-					QuestObject object = chapter.file.get(value.getString());
+					QuestObject object = chapter.file.get(value);
 
 					if (object instanceof ProgressingQuestObject && !((ProgressingQuestObject) object).isComplete(data))
 					{
@@ -348,9 +352,9 @@ public final class Quest extends ProgressingQuestObject
 			return true;
 		}
 
-		for (ConfigString value : dependencies)
+		for (String value : dependencies)
 		{
-			QuestObject object = chapter.file.get(value.getString());
+			QuestObject object = chapter.file.get(value);
 
 			if (object instanceof ProgressingQuestObject && !((ProgressingQuestObject) object).isComplete(data))
 			{
@@ -410,43 +414,170 @@ public final class Quest extends ProgressingQuestObject
 	@Override
 	public void getConfig(ConfigGroup group)
 	{
-		group.add("x", x, new ConfigInt(0, -POS_LIMIT, POS_LIMIT));
-		group.add("y", y, new ConfigInt(0, -POS_LIMIT, POS_LIMIT));
-		group.add("type", type, new ConfigEnum<>(QuestType.NAME_MAP));
-		group.add("description", description, new ConfigString(""));
-		group.add("text", text, new ConfigList<>(new ConfigString("")));
-		group.add("dependencies", dependencies, new ConfigList<>(new ConfigString("")));
+		group.add("x", new ConfigInt(x, -POS_LIMIT, POS_LIMIT)
+		{
+			@Override
+			public int getInt()
+			{
+				return x;
+			}
+
+			@Override
+			public void setInt(int v)
+			{
+				x = (byte) v;
+			}
+		}, new ConfigInt(0));
+
+		group.add("y", new ConfigInt(y, -POS_LIMIT, POS_LIMIT)
+		{
+			@Override
+			public int getInt()
+			{
+				return y;
+			}
+
+			@Override
+			public void setInt(int v)
+			{
+				y = (byte) v;
+			}
+		}, new ConfigInt(0));
+
+		group.add("type", new ConfigEnum<QuestType>(QuestType.NAME_MAP)
+		{
+			@Override
+			public QuestType getValue()
+			{
+				return type;
+			}
+
+			@Override
+			public void setValue(QuestType v)
+			{
+				type = v;
+			}
+		}, new ConfigEnum<>(QuestType.NAME_MAP));
+
+		group.add("description", new ConfigString(description)
+		{
+			@Override
+			public String getString()
+			{
+				return description;
+			}
+
+			@Override
+			public void setString(String v)
+			{
+				description = v;
+			}
+		}, new ConfigString(""));
+
+		group.add("text", new ConfigList<ConfigString>(new ConfigString(""))
+		{
+			@Override
+			public void readFromList()
+			{
+				text.clear();
+
+				for (ConfigString value : list)
+				{
+					text.add(value.getString());
+				}
+			}
+
+			@Override
+			public void writeToList()
+			{
+				list.clear();
+
+				for (String value : text)
+				{
+					list.add(new ConfigString(value));
+				}
+			}
+		}, new ConfigList<>(new ConfigString("")));
+
+		group.add("dependencies", new ConfigList<ConfigString>(new ConfigString(""))
+		{
+			@Override
+			public void readFromList()
+			{
+				dependencies.clear();
+
+				for (ConfigString value : list)
+				{
+					dependencies.add(value.getString());
+				}
+			}
+
+			@Override
+			public void writeToList()
+			{
+				list.clear();
+
+				for (String value : dependencies)
+				{
+					list.add(new ConfigString(value));
+				}
+			}
+		}, new ConfigList<>(new ConfigString("")));
 	}
 
 	public void move(byte direction)
 	{
 		if (direction == 5 || direction == 6 || direction == 7)
 		{
-			int v = x.getInt() - 1;
-			x.setInt(v <= -(POS_LIMIT + 1) ? POS_LIMIT : v);
+			if (x == -POS_LIMIT)
+			{
+				x = POS_LIMIT;
+			}
+			else
+			{
+				x--;
+			}
 		}
 
 		if (direction == 1 || direction == 2 || direction == 3)
 		{
-			int v = x.getInt() + 1;
-			x.setInt(v >= (POS_LIMIT + 1) ? -POS_LIMIT : v);
+			if (x == POS_LIMIT)
+			{
+				x = -POS_LIMIT;
+			}
+			else
+			{
+				x++;
+			}
 		}
 
 		if (direction == 0 || direction == 1 || direction == 7)
 		{
-			int v = y.getInt() - 1;
-			y.setInt(v <= -(POS_LIMIT + 1) ? POS_LIMIT : v);
+			if (y == -POS_LIMIT)
+			{
+				y = POS_LIMIT;
+			}
+			else
+			{
+				y--;
+			}
 		}
 
 		if (direction == 3 || direction == 4 || direction == 5)
 		{
-			int v = y.getInt() + 1;
-			y.setInt(v >= (POS_LIMIT + 1) ? -POS_LIMIT : v);
+			if (y == POS_LIMIT)
+			{
+				y = -POS_LIMIT;
+			}
+			else
+			{
+				y++;
+			}
 		}
 
 		for (Quest quest : chapter.quests)
 		{
-			if (quest != this && quest.x.getInt() == x.getInt() && quest.y.getInt() == y.getInt())
+			if (quest != this && quest.x == x && quest.y == y)
 			{
 				move(direction);
 				return;
@@ -465,31 +596,20 @@ public final class Quest extends ProgressingQuestObject
 
 		if (add)
 		{
-			for (ConfigString value : dependencies)
+			for (String value : dependencies)
 			{
-				if (value.getString().equals(d))
+				if (value.equals(d))
 				{
 					return false;
 				}
 			}
 
-			dependencies.add(new ConfigString(d));
+			dependencies.add(d);
 			return true;
 		}
 		else
 		{
-			Iterator<ConfigString> iterator = dependencies.list.iterator();
-
-			while (iterator.hasNext())
-			{
-				if (iterator.next().getString().equals(d))
-				{
-					iterator.remove();
-					return true;
-				}
-			}
-
-			return false;
+			return dependencies.remove(d);
 		}
 	}
 
@@ -497,9 +617,9 @@ public final class Quest extends ProgressingQuestObject
 	{
 		String d = dep.getID();
 
-		for (ConfigString value : dependencies)
+		for (String value : dependencies)
 		{
-			if (value.getString().equals(d))
+			if (value.equals(d))
 			{
 				return true;
 			}
