@@ -20,7 +20,6 @@ import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.net.MessageGetScreen;
 import com.feed_the_beast.ftbquests.net.edit.MessageEditObject;
 import com.feed_the_beast.ftbquests.net.edit.MessageResetProgress;
-import com.feed_the_beast.ftbquests.util.ProgressDisplayMode;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
@@ -29,7 +28,6 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextFormatting;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -133,6 +131,10 @@ public class GuiTask extends GuiBase
 					add(new Tab(this, I18n.format("ftbquests.gui.reset_progress"), I18n.format("ftbquests.gui.reset_progress_q"), GuiIcons.REFRESH, button -> new MessageResetProgress(container.data.task.getID()).sendToServer()));
 					add(new Tab(this, I18n.format("selectServer.edit"), "", GuiIcons.SETTINGS, button -> new MessageEditObject(container.data.task.getID()).sendToServer()));
 				}
+
+				List<Tab> extra = new ArrayList<>();
+				container.data.addTabs(extra);
+				addAll(extra);
 			}
 
 			@Override
@@ -188,37 +190,7 @@ public class GuiTask extends GuiBase
 
 		container.data.task.drawGUI(container.data, x + (width - 64) / 2, y + 42, 64, 64);
 
-		String bottomText;
-
-		ProgressDisplayMode mode = ProgressDisplayMode.PROGRESS;
-
-		if (container.screen != null)
-		{
-			mode = container.screen.progressDisplayMode.getValue();
-		}
-
-		switch (mode)
-		{
-			case PROGRESS:
-				bottomText = container.data.getProgressString() + " / " + container.data.task.getMaxProgressString();
-				break;
-			case PERCENT:
-				bottomText = (int) (container.data.getRelativeProgress() * 100D) + "%";
-				break;
-			default:
-				char[] c = new char[12];
-				Arrays.fill(c, ' ');
-				c[0] = '[';
-				c[11] = ']';
-				int m = (int) (container.data.getRelativeProgress() * 10D);
-
-				for (int i = 0; i < m; i++)
-				{
-					c[i + 1] = '#';
-				}
-
-				bottomText = new String(c);
-		}
+		String bottomText = container.data.getProgressString() + " / " + container.data.task.getMaxProgressString();
 
 		if (container.data.getProgress() >= container.data.task.getMaxProgress())
 		{

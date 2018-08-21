@@ -227,24 +227,27 @@ public class GuiQuestChest extends GuiBase
 	@Override
 	public void addMouseOverText(List<String> list)
 	{
-		int mx = getAX() - getMouseX();
-		int my = getAY() - getMouseY();
-
-		for (Slot slot : container.inventorySlots)
+		if (isShiftKeyDown())
 		{
-			if (mx >= slot.xPos && my >= slot.yPos && mx < slot.xPos + 16 && my < slot.yPos + 16)
-			{
-				int i = slot.getSlotIndex();
+			int mx = getMouseX() - getAX();
+			int my = getMouseY() - getAY();
 
-				if (i == 0)
+			for (Slot slot : container.inventorySlots)
+			{
+				if (mx >= slot.xPos && my >= slot.yPos && mx < slot.xPos + 16 && my < slot.yPos + 16)
 				{
-					list.add(TextFormatting.GRAY + I18n.format("tile.ftbquests.chest.input"));
-					list.add(TextFormatting.DARK_GRAY + I18n.format("tile.ftbquests.chest.input_desc"));
-				}
-				else if (i >= 1 && i <= 7)
-				{
-					list.add(TextFormatting.GRAY + I18n.format("tile.ftbquests.chest.output"));
-					list.add(TextFormatting.DARK_GRAY + I18n.format("tile.ftbquests.chest.output_desc"));
+					int i = slot.getSlotIndex();
+
+					if (i == 0)
+					{
+						list.add(TextFormatting.GRAY + I18n.format("tile.ftbquests.chest.input"));
+						list.add(TextFormatting.DARK_GRAY + I18n.format("tile.ftbquests.chest.input_desc"));
+					}
+					else if (i >= 1 && i <= 7 && !slot.getHasStack())
+					{
+						list.add(TextFormatting.GRAY + I18n.format("tile.ftbquests.chest.output"));
+						list.add(TextFormatting.DARK_GRAY + I18n.format("tile.ftbquests.chest.output_desc"));
+					}
 				}
 			}
 		}

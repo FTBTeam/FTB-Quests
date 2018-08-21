@@ -22,8 +22,6 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.TextFormatting;
 import org.lwjgl.opengl.GL11;
 
-import java.util.Arrays;
-
 /**
  * @author LatvianModder
  */
@@ -132,35 +130,10 @@ public class RenderScreen extends TileEntitySpecialRenderer<TileScreenCore>
 		}
 		else
 		{
-			switch (screen.progressDisplayMode.getValue())
-			{
-				case PROGRESS:
-					bottomText = data.getProgressString() + " / " + data.task.getMaxProgressString();
-					break;
-				case PERCENT:
-					bottomText = (int) (data.getRelativeProgress() * 100D) + "%";
-					break;
-				default:
-					char[] c = new char[12];
-					Arrays.fill(c, ' ');
-					c[0] = '[';
-					c[11] = ']';
-					int m = (int) (data.getRelativeProgress() * 10D);
-
-					for (int i = 0; i < m; i++)
-					{
-						c[i + 1] = '#';
-					}
-
-					bottomText = new String(c);
-			}
+			bottomText = data.getProgressString() + " / " + data.task.getMaxProgressString();
 		}
 
-		if (my >= 0.81D)
-		{
-			drawString(font, TextFormatting.GOLD + bottomText, 0.83D, 0.15D);
-		}
-		else if (data != null && data.getProgress() >= data.task.getMaxProgress())
+		if (data != null && !bottomText.isEmpty() && data.getProgress() >= data.task.getMaxProgress())
 		{
 			drawString(font, TextFormatting.GREEN + bottomText, 0.83D, 0.15D);
 		}

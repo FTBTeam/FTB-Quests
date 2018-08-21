@@ -6,12 +6,15 @@ import com.feed_the_beast.ftblib.events.player.ForgePlayerLoggedInEvent;
 import com.feed_the_beast.ftblib.events.player.ForgePlayerSavedEvent;
 import com.feed_the_beast.ftblib.events.team.ForgeTeamPlayerLeftEvent;
 import com.feed_the_beast.ftblib.lib.data.ForgePlayer;
+import com.feed_the_beast.ftblib.lib.data.ForgeTeam;
 import com.feed_the_beast.ftblib.lib.data.PlayerData;
 import com.feed_the_beast.ftblib.lib.util.FileUtils;
 import com.feed_the_beast.ftblib.lib.util.NBTUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
+import com.feed_the_beast.ftbquests.net.MessageSyncQuests;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.rewards.PlayerRewards;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.common.Mod;
@@ -74,6 +77,18 @@ public class FTBQuestsPlayerData extends PlayerData
 		{
 			data.rewards = new PlayerRewards(ServerQuestFile.INSTANCE);
 		}
+
+		EntityPlayerMP player = event.getPlayer().getPlayer();
+		NBTTagCompound teamData = new NBTTagCompound();
+
+		for (ForgeTeam team : event.getUniverse().getTeams())
+		{
+			teamData.setTag(team.getName(), FTBQuestsTeamData.get(team).serializeTaskData());
+		}
+
+		NBTTagCompound nbt = new NBTTagCompound();
+		ServerQuestFile.INSTANCE.writeData(nbt);
+		new MessageSyncQuests(nbt, event.getPlayer().team.getName(), teamData, FTBQuests.canEdit(player), data.rewards.items).sendTo(player);
 	}
 
 	@SubscribeEvent

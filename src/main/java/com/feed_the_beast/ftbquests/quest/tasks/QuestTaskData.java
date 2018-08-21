@@ -1,12 +1,16 @@
 package com.feed_the_beast.ftbquests.quest.tasks;
 
+import com.feed_the_beast.ftbquests.gui.GuiTask;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTBase;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.IItemHandler;
 
 import javax.annotation.Nullable;
+import java.util.List;
 
 /**
  * @author LatvianModder
@@ -101,5 +105,10 @@ public abstract class QuestTaskData<T extends QuestTask> implements ICapabilityP
 	public int getSlotLimit(int slot)
 	{
 		return 64;
+	}
+
+	@SideOnly(Side.CLIENT)
+	public void addTabs(List<GuiTask.Tab> tabs)
+	{
 	}
 }

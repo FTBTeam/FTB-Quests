@@ -29,6 +29,7 @@ import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskData;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
@@ -285,6 +286,11 @@ public class FTBQuestsTeamData extends TeamData implements IProgressData
 		{
 			nbt.setTag("TaskData", taskDataTag);
 		}
+
+		if (!rewards.items.isEmpty())
+		{
+			nbt.setTag("Rewards", rewards.serializeNBT());
+		}
 	}
 
 	public static void deserializeTaskData(Iterable<QuestTaskData> dataValues, NBTTagCompound taskDataTag)
@@ -311,6 +317,7 @@ public class FTBQuestsTeamData extends TeamData implements IProgressData
 	private void readData(NBTTagCompound nbt)
 	{
 		deserializeTaskData(taskData.values(), nbt.getCompoundTag("TaskData"));
+		rewards.deserializeNBT(nbt.getTagList("Rewards", Constants.NBT.TAG_COMPOUND));
 	}
 
 	@Override
