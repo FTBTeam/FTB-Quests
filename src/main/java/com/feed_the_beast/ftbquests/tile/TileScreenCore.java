@@ -2,7 +2,6 @@ package com.feed_the_beast.ftbquests.tile;
 
 import com.feed_the_beast.ftblib.lib.config.ConfigBlockState;
 import com.feed_the_beast.ftblib.lib.config.ConfigBoolean;
-import com.feed_the_beast.ftblib.lib.config.ConfigEnum;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigItemStack;
 import com.feed_the_beast.ftblib.lib.config.ConfigNull;
@@ -11,7 +10,6 @@ import com.feed_the_beast.ftblib.lib.config.IConfigCallback;
 import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
 import com.feed_the_beast.ftblib.lib.tile.EnumSaveType;
 import com.feed_the_beast.ftblib.lib.util.BlockUtils;
-import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.FTBQuestsBlocks;
 import com.feed_the_beast.ftbquests.block.BlockScreen;
@@ -24,7 +22,6 @@ import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskData;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
-import com.feed_the_beast.ftbquests.util.ProgressDisplayMode;
 import net.minecraft.block.BlockHorizontal;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.command.ICommandSender;
@@ -52,7 +49,6 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 	public String quest = "";
 	public String task = "";
 	public int size = 0;
-	public final ConfigEnum<ProgressDisplayMode> progressDisplayMode = new ConfigEnum<>(ProgressDisplayMode.NAME_MAP);
 	public boolean indestructible = false;
 	public IBlockState skin = BlockUtils.AIR_STATE;
 	public boolean inputOnly = false;
@@ -100,11 +96,6 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 			nbt.setByte("Size", (byte) size);
 		}
 
-		if (!progressDisplayMode.isDefault())
-		{
-			nbt.setString("ProgressDisplayMode", progressDisplayMode.getString());
-		}
-
 		if (indestructible)
 		{
 			nbt.setBoolean("Indestructible", true);
@@ -138,7 +129,6 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 		quest = nbt.getString("Quest");
 		task = nbt.getString("Task");
 		size = nbt.getByte("Size");
-		progressDisplayMode.setValue(nbt.getString("ProgressDisplayMode"));
 		indestructible = nbt.getBoolean("Indestructible");
 		skin = BlockUtils.getStateFromName(nbt.getString("Skin"));
 		inputOnly = nbt.getBoolean("InputOnly");
@@ -427,8 +417,6 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 					}
 				}, new ConfigBlockState(BlockUtils.AIR_STATE)).setCanEdit(editorOrDestructible);
 
-				group.add("progress_display_mode", progressDisplayMode, new ConfigEnum<>(ProgressDisplayMode.NAME_MAP));
-
 				if (editor)
 				{
 					group.add("indestructible", new ConfigBoolean(indestructible)
@@ -467,17 +455,6 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 		if (inputOnly)
 		{
 			insertItem(player, hand, x, y);
-			return;
-		}
-
-		if (y >= 0.81D)
-		{
-			if (editor || isOwner(player))
-			{
-				progressDisplayMode.onClicked(MouseButton.LEFT);
-				markDirty();
-			}
-
 			return;
 		}
 
