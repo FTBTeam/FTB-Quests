@@ -62,7 +62,7 @@ public class ClientQuestFile extends QuestFile
 		self = message.team.isEmpty() ? null : teamData.get(message.team);
 		editingMode = message.editingMode;
 
-		rewards = new PlayerRewards(this, ClientUtils.MC.player.getUniqueID());
+		rewards = new PlayerRewards(this);
 		rewards.items.addAll(message.rewards);
 
 		newRewards = 0;

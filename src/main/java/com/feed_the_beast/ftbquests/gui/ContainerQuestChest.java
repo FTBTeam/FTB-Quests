@@ -69,7 +69,7 @@ public class ContainerQuestChest extends Container
 
 		for (int i = 0; i < 6; i++)
 		{
-			addSlotToContainer(new SlotOutput(rewards, 1 + i, 44 + i * 18, 84));
+			addSlotToContainer(new SlotOutput(rewards, i, 44 + i * 18, 84));
 		}
 
 		for (int y = 0; y < 3; y++)
@@ -93,8 +93,31 @@ public class ContainerQuestChest extends Container
 	}
 
 	@Override
-	public ItemStack transferStackInSlot(EntityPlayer playerIn, int index)
+	public ItemStack transferStackInSlot(EntityPlayer player, int index)
 	{
+		if (index <= 0)
+		{
+			return ItemStack.EMPTY;
+		}
+		else if (index <= 6)
+		{
+			Slot slot = inventorySlots.get(index);
+
+			if (slot.getHasStack())
+			{
+			}
+
+			return ItemStack.EMPTY;
+		}
+		else if (index < inventorySlots.size())
+		{
+			Slot slot = inventorySlots.get(index);
+
+			if (slot.getHasStack())
+			{
+			}
+		}
+
 		return ItemStack.EMPTY;
 	}
 }

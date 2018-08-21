@@ -119,3 +119,5 @@ commands.ftbquests.editing_mode.disabled=Editing Mode for %s Disabled
 commands.ftbquests.reset_progress.usage=/ftbquests reset_progress <team> [object ID]
 commands.ftbquests.reset_progress.invalid_id=Invalid Object ID!
 commands.ftbquests.reset_progress.reset=Progress has been reset!
+commands.ftbquests.complete_instantly.usage=/ftbquests complete_instantly <object ID>
+commands.ftbquests.complete_instantly.text=Completed!

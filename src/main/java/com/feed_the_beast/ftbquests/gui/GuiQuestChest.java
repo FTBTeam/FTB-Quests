@@ -194,12 +194,21 @@ public class GuiQuestChest extends GuiBase
 
 		transferAll.setPosAndSize(28, 86, 12, 12);
 
-		openRewards = new Button(this)
+		openRewards = new Button(this, I18n.format("ftbquests.rewards"), Icon.EMPTY)
 		{
 			@Override
 			public void onClicked(MouseButton button)
 			{
 				GuiHelper.playClickSound();
+			}
+
+			@Override
+			public void draw()
+			{
+				if (isMouseOver())
+				{
+					Color4I.WHITE.withAlpha(33).draw(getAX(), getAY(), width, height);
+				}
 			}
 		};
 
@@ -212,6 +221,7 @@ public class GuiQuestChest extends GuiBase
 		add(tasks);
 		add(scrollBar);
 		add(transferAll);
+		add(openRewards);
 	}
 
 	@Override

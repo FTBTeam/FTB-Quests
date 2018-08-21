@@ -26,18 +26,18 @@ import java.util.List;
 /**
  * @author LatvianModder
  */
-public class CommandResetProgress extends CommandBase
+public class CommandCompleteInstantly extends CommandBase
 {
 	@Override
 	public String getName()
 	{
-		return "reset_progress";
+		return "complete_instantly";
 	}
 
 	@Override
 	public String getUsage(ICommandSender sender)
 	{
-		return "commands.ftbquests.reset_progress.usage";
+		return "commands.ftbquests.complete_instantly.usage";
 	}
 
 	@Override
@@ -104,9 +104,9 @@ public class CommandResetProgress extends CommandBase
 
 		for (ForgeTeam team : teams)
 		{
-			object.resetProgress(FTBQuestsTeamData.get(team));
+			object.completeInstantly(FTBQuestsTeamData.get(team));
 		}
 
-		sender.sendMessage(new TextComponentTranslation("commands.ftbquests.reset_progress.reset"));
+		sender.sendMessage(new TextComponentTranslation("commands.ftbquests.complete_instantly.text"));
 	}
 }

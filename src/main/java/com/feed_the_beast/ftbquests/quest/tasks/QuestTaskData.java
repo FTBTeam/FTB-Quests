@@ -32,6 +32,8 @@ public abstract class QuestTaskData<T extends QuestTask> implements ICapabilityP
 
 	public abstract void resetProgress();
 
+	public abstract void completeInstantly();
+
 	public double getRelativeProgress()
 	{
 		long max = task.getMaxProgress();

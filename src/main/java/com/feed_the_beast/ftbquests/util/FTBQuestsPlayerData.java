@@ -2,6 +2,7 @@ package com.feed_the_beast.ftbquests.util;
 
 import com.feed_the_beast.ftblib.events.player.ForgePlayerDataEvent;
 import com.feed_the_beast.ftblib.events.player.ForgePlayerLoadedEvent;
+import com.feed_the_beast.ftblib.events.player.ForgePlayerLoggedInEvent;
 import com.feed_the_beast.ftblib.events.player.ForgePlayerSavedEvent;
 import com.feed_the_beast.ftblib.events.team.ForgeTeamPlayerLeftEvent;
 import com.feed_the_beast.ftblib.lib.data.ForgePlayer;
@@ -58,8 +59,21 @@ public class FTBQuestsPlayerData extends PlayerData
 	public static void onPlayerLoaded(ForgePlayerLoadedEvent event)
 	{
 		FTBQuestsPlayerData data = get(event.getPlayer());
+		data.rewards = new PlayerRewards(ServerQuestFile.INSTANCE);
+
 		NBTTagCompound nbt = NBTUtils.readNBT(event.getPlayer().getDataFile("ftbquests"));
 		data.readData(nbt == null ? new NBTTagCompound() : nbt);
+	}
+
+	@SubscribeEvent
+	public static void onPlayerLoggedIn(ForgePlayerLoggedInEvent event)
+	{
+		FTBQuestsPlayerData data = get(event.getPlayer());
+
+		if (data.rewards == null)
+		{
+			data.rewards = new PlayerRewards(ServerQuestFile.INSTANCE);
+		}
 	}
 
 	@SubscribeEvent
@@ -74,12 +88,11 @@ public class FTBQuestsPlayerData extends PlayerData
 		}
 	}
 
-	public final PlayerRewards rewards;
+	public PlayerRewards rewards;
 
 	private FTBQuestsPlayerData(ForgePlayer player)
 	{
 		super(player);
-		rewards = new PlayerRewards(ServerQuestFile.INSTANCE, player.getId());
 	}
 
 	@Override
