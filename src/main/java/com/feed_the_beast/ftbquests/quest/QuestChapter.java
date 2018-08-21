@@ -192,6 +192,15 @@ public final class QuestChapter extends ProgressingQuestObject
 	}
 
 	@Override
+	public void completeInstantly(IProgressData data)
+	{
+		for (Quest quest : quests)
+		{
+			quest.completeInstantly(data);
+		}
+	}
+
+	@Override
 	public Icon getAltIcon()
 	{
 		List<Icon> list = new ArrayList<>();

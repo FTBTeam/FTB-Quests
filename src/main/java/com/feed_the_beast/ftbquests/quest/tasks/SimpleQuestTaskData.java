@@ -69,4 +69,10 @@ public abstract class SimpleQuestTaskData<T extends QuestTask> extends QuestTask
 	{
 		progress = 0L;
 	}
+
+	@Override
+	public void completeInstantly()
+	{
+		progress = task.getMaxProgress();
+	}
 }

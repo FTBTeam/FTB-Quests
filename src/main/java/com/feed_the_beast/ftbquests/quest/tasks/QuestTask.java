@@ -88,6 +88,15 @@ public abstract class QuestTask extends ProgressingQuestObject
 		QuestTaskData taskData = data.getQuestTaskData(this);
 		taskData.resetProgress();
 		taskData.isComplete = false;
+		data.syncTask(taskData);
+	}
+
+	@Override
+	public void completeInstantly(IProgressData data)
+	{
+		QuestTaskData taskData = data.getQuestTaskData(this);
+		taskData.completeInstantly();
+		data.syncTask(taskData);
 	}
 
 	@Override

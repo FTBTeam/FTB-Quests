@@ -9,7 +9,6 @@ import net.minecraftforge.items.ItemHandlerHelper;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * @author LatvianModder
@@ -17,13 +16,11 @@ import java.util.UUID;
 public class PlayerRewards implements INBTSerializable<NBTTagList>, IItemHandler
 {
 	public final QuestFile file;
-	public final UUID uuid;
 	public final List<ItemStack> items;
 
-	public PlayerRewards(QuestFile f, UUID id)
+	public PlayerRewards(QuestFile f)
 	{
 		file = f;
-		uuid = id;
 		items = new ArrayList<>();
 	}
 
@@ -83,13 +80,19 @@ public class PlayerRewards implements INBTSerializable<NBTTagList>, IItemHandler
 		if (amount > 0 && slot >= 0 && slot < items.size())
 		{
 			ItemStack stack0 = items.get(slot);
-			ItemStack stack = ItemHandlerHelper.copyStackWithSize(stack0, stack0.getCount() - Math.min(stack0.getCount(), amount));
+
+			if (amount > stack0.getCount())
+			{
+				amount = stack0.getCount();
+			}
+
+			ItemStack stack = ItemHandlerHelper.copyStackWithSize(stack0, amount);
 
 			if (!simulate)
 			{
-				stack0.shrink(stack.getCount());
+				stack0.shrink(amount);
 
-				if (stack.isEmpty())
+				if (stack0.isEmpty())
 				{
 					items.remove(slot);
 				}

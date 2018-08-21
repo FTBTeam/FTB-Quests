@@ -296,6 +296,15 @@ public final class Quest extends ProgressingQuestObject
 		}
 	}
 
+	@Override
+	public void completeInstantly(IProgressData data)
+	{
+		for (QuestTask task : tasks)
+		{
+			task.completeInstantly(data);
+		}
+	}
+
 	public boolean isVisible(@Nullable IProgressData data)
 	{
 		if (dependencies.isEmpty())

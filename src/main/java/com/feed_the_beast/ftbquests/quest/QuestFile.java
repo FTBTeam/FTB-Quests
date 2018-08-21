@@ -37,7 +37,7 @@ public abstract class QuestFile extends ProgressingQuestObject
 {
 	public final List<QuestChapter> chapters;
 
-	private final Map<String, QuestObject> map;
+	public final Map<String, QuestObject> map;
 	public final List<QuestTask> allTasks;
 
 	public boolean allowTakeQuestBlocks;
@@ -135,6 +135,15 @@ public abstract class QuestFile extends ProgressingQuestObject
 		for (QuestChapter chapter : chapters)
 		{
 			chapter.resetProgress(data);
+		}
+	}
+
+	@Override
+	public void completeInstantly(IProgressData data)
+	{
+		for (QuestChapter chapter : chapters)
+		{
+			chapter.completeInstantly(data);
 		}
 	}
 

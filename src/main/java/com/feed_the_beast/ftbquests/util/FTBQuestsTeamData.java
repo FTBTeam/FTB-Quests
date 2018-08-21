@@ -22,6 +22,8 @@ import com.feed_the_beast.ftbquests.net.MessageSyncRewards;
 import com.feed_the_beast.ftbquests.net.MessageUpdateTaskProgress;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
+import com.feed_the_beast.ftbquests.quest.rewards.PlayerRewards;
+import com.feed_the_beast.ftbquests.quest.rewards.QuestReward;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskData;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -81,6 +83,8 @@ public class FTBQuestsTeamData extends TeamData implements IProgressData
 			data.createTaskData(task);
 		}
 
+		data.rewards = new PlayerRewards(ServerQuestFile.INSTANCE);
+
 		NBTTagCompound nbt = NBTUtils.readNBT(event.getTeam().getDataFile("ftbquests"));
 		data.readData(nbt == null ? new NBTTagCompound() : nbt);
 	}
@@ -94,6 +98,8 @@ public class FTBQuestsTeamData extends TeamData implements IProgressData
 		{
 			data.createTaskData(task);
 		}
+
+		data.rewards = new PlayerRewards(ServerQuestFile.INSTANCE);
 
 		new MessageCreateTeamData(event.getTeam().getName()).sendToAll();
 	}
@@ -124,19 +130,12 @@ public class FTBQuestsTeamData extends TeamData implements IProgressData
 	}
 
 	private final Map<QuestTask, QuestTaskData> taskData;
+	public PlayerRewards rewards;
 
 	private FTBQuestsTeamData(ForgeTeam team)
 	{
 		super(team);
 		taskData = new HashMap<>();
-
-		if (ServerQuestFile.INSTANCE != null)
-		{
-			for (QuestTask task : ServerQuestFile.INSTANCE.allTasks)
-			{
-				createTaskData(task);
-			}
-		}
 	}
 
 	@Override
@@ -191,16 +190,27 @@ public class FTBQuestsTeamData extends TeamData implements IProgressData
 
 					if (team.isValid())
 					{
+						FTBQuestsTeamData teamData = FTBQuestsTeamData.get(team);
+
 						for (ForgePlayer player : team.getMembers())
 						{
 							FTBQuestsPlayerData data1 = FTBQuestsPlayerData.get(player);
 
-							for (int i = 0; i < data.task.quest.rewards.size(); i++)
+							for (int i = data.task.quest.rewards.size() - 1; i >= 0; i--)
 							{
-								data1.rewards.items.add(data.task.quest.rewards.get(i).getRewardItem());
-							}
+								QuestReward reward = data.task.quest.rewards.get(i);
 
-							player.markDirty();
+								if (reward.teamReward)
+								{
+									teamData.rewards.items.add(reward.getRewardItem());
+									team.markDirty();
+								}
+								else
+								{
+									data1.rewards.items.add(reward.getRewardItem());
+									player.markDirty();
+								}
+							}
 
 							if (player.isOnline())
 							{
