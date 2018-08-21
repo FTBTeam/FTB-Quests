@@ -4,11 +4,12 @@ import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigString;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
+import com.feed_the_beast.ftbquests.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagString;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
@@ -43,15 +44,23 @@ public class CommandReward extends QuestReward
 	}
 
 	@Override
-	public ITextComponent getAltDisplayName()
+	public ItemStack getRewardItem()
 	{
-		return new TextComponentTranslation("ftbquests.reward.ftbquests.command.text", TextFormatting.GREEN + command);
+		ItemStack stack = new ItemStack(FTBQuestsItems.SCRIPT);
+
+		if (!title.isEmpty())
+		{
+			stack.setStackDisplayName(title);
+		}
+
+		stack.setTagInfo("command", new NBTTagString(command));
+		return stack;
 	}
 
 	@Override
-	public void reward(EntityPlayerMP player)
+	public ITextComponent getAltDisplayName()
 	{
-		player.server.getCommandManager().executeCommand(player.server, command.replace("@p", player.getName()));
+		return new TextComponentTranslation("ftbquests.reward.ftbquests.command.text", TextFormatting.GREEN + command);
 	}
 
 	@Override

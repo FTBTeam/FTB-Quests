@@ -21,6 +21,9 @@ tile.ftbquests.chest.input_desc=Place items here to complete quests
 tile.ftbquests.chest.output=Output Slot
 tile.ftbquests.chest.output_desc=Rewards and leftover items will appear here
 
+item.ftbquests.xp_vial.name=XP Vial
+item.ftbquests.script.name=Script
+
 itemGroup.ftbquests=FTB Quests
 sidebar_button.ftbquests.quests=Quests
 key.ftbquests.quests=Open Quests

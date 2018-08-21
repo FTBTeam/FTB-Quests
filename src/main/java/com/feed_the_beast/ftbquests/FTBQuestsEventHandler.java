@@ -11,6 +11,8 @@ import com.feed_the_beast.ftbquests.block.BlockScreen;
 import com.feed_the_beast.ftbquests.block.BlockScreenPart;
 import com.feed_the_beast.ftbquests.block.ItemBlockProgressScreen;
 import com.feed_the_beast.ftbquests.block.ItemBlockScreen;
+import com.feed_the_beast.ftbquests.item.ItemScript;
+import com.feed_the_beast.ftbquests.item.ItemXPVial;
 import com.feed_the_beast.ftbquests.net.MessageSyncQuests;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.rewards.CommandReward;
@@ -29,17 +31,21 @@ import com.feed_the_beast.ftbquests.tile.TileQuestChest;
 import com.feed_the_beast.ftbquests.tile.TileScreenCore;
 import com.feed_the_beast.ftbquests.tile.TileScreenPart;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
+import com.feed_the_beast.ftbquests.util.FTBQuestsPlayerData;
 import com.feed_the_beast.ftbquests.util.FTBQuestsTeamData;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry;
+
+import java.util.List;
 
 /**
  * @author LatvianModder
@@ -71,10 +77,13 @@ public class FTBQuestsEventHandler
 	public static void registerItems(RegistryEvent.Register<Item> event)
 	{
 		event.getRegistry().registerAll(
-				new ItemBlockScreen(FTBQuestsItems.SCREEN).setRegistryName("screen"),
-				new ItemBlock(FTBQuestsItems.PROGRESS_DETECTOR).setRegistryName("progress_detector"),
-				new ItemBlockProgressScreen(FTBQuestsItems.PROGRESS_SCREEN).setRegistryName("progress_screen"),
-				new ItemBlock(FTBQuestsItems.CHEST).setRegistryName("chest")
+				new ItemBlockScreen(FTBQuestsBlocks.SCREEN).setRegistryName("screen"),
+				new ItemBlock(FTBQuestsBlocks.PROGRESS_DETECTOR).setRegistryName("progress_detector"),
+				new ItemBlockProgressScreen(FTBQuestsBlocks.PROGRESS_SCREEN).setRegistryName("progress_screen"),
+				new ItemBlock(FTBQuestsBlocks.CHEST).setRegistryName("chest"),
+
+				new ItemXPVial().setRegistryName("xp_vial").setTranslationKey(FTBQuests.MOD_ID + ".xp_vial"),
+				new ItemScript().setRegistryName("script").setTranslationKey(FTBQuests.MOD_ID + ".script")
 		);
 	}
 
@@ -86,28 +95,13 @@ public class FTBQuestsEventHandler
 
 		for (ForgeTeam team : event.getUniverse().getTeams())
 		{
-			NBTTagCompound nbt = new NBTTagCompound();
-			FTBQuestsTeamData data = FTBQuestsTeamData.get(team);
-			NBTTagCompound taskDataTag = data.serializeTaskData();
-
-			if (!taskDataTag.isEmpty())
-			{
-				nbt.setTag("T", taskDataTag);
-			}
-
-			NBTTagCompound claimedRewards = FTBQuestsTeamData.serializeRewardData(data.getClaimedRewards(player));
-
-			if (!claimedRewards.isEmpty())
-			{
-				nbt.setTag("R", claimedRewards);
-			}
-
-			teamData.setTag(team.getName(), nbt);
+			teamData.setTag(team.getName(), FTBQuestsTeamData.get(team).serializeTaskData());
 		}
 
 		NBTTagCompound nbt = new NBTTagCompound();
 		ServerQuestFile.INSTANCE.writeData(nbt);
-		new MessageSyncQuests(nbt, event.getPlayer().team.getName(), teamData, FTBQuests.canEdit(player)).sendTo(player);
+		List<ItemStack> rewards = FTBQuestsPlayerData.get(event.getPlayer()).rewards.items;
+		new MessageSyncQuests(nbt, event.getPlayer().team.getName(), teamData, FTBQuests.canEdit(player), rewards).sendTo(player);
 	}
 
 	@SubscribeEvent

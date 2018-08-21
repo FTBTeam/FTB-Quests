@@ -4,8 +4,9 @@ import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
 import com.feed_the_beast.ftblib.lib.util.BlockUtils;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
+import com.feed_the_beast.ftbquests.FTBQuestsBlocks;
 import com.feed_the_beast.ftbquests.FTBQuestsItems;
-import com.feed_the_beast.ftbquests.gui.ClientQuestFile;
+import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
@@ -99,7 +100,7 @@ public class BlockScreen extends BlockWithHorizontalFacing
 	@Override
 	public Item getItemDropped(IBlockState state, Random rand, int fortune)
 	{
-		return Item.getItemFromBlock(FTBQuestsItems.SCREEN);
+		return FTBQuestsItems.SCREEN;
 	}
 
 	@Override
@@ -176,7 +177,7 @@ public class BlockScreen extends BlockWithHorizontalFacing
 
 			if (screen.size > 0)
 			{
-				IBlockState state1 = FTBQuestsItems.SCREEN_PART.getDefaultState().withProperty(FACING, screen.getFacing());
+				IBlockState state1 = FTBQuestsBlocks.SCREEN_PART.getDefaultState().withProperty(FACING, screen.getFacing());
 
 				boolean xaxis = state.getValue(FACING).getAxis() == EnumFacing.Axis.X;
 
@@ -255,7 +256,7 @@ public class BlockScreen extends BlockWithHorizontalFacing
 							BlockPos pos1 = new BlockPos(pos.getX() + offX, pos.getY() + y, pos.getZ() + offZ);
 							IBlockState state1 = world.getBlockState(pos1);
 
-							if (state1.getBlock() == FTBQuestsItems.SCREEN_PART)
+							if (state1.getBlock() == FTBQuestsBlocks.SCREEN_PART)
 							{
 								world.setBlockToAir(pos1);
 							}

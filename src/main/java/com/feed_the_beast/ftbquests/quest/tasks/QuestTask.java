@@ -85,7 +85,9 @@ public abstract class QuestTask extends ProgressingQuestObject
 	@Override
 	public final void resetProgress(IProgressData data)
 	{
-		data.getQuestTaskData(this).resetProgress();
+		QuestTaskData taskData = data.getQuestTaskData(this);
+		taskData.resetProgress();
+		taskData.isComplete = false;
 	}
 
 	@Override

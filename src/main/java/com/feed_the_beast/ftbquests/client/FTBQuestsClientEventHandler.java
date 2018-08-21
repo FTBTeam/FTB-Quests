@@ -5,15 +5,10 @@ import com.feed_the_beast.ftblib.events.client.CustomClickEvent;
 import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.FTBQuestsItems;
-import com.feed_the_beast.ftbquests.gui.ClientQuestFile;
-import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.QuestChapter;
-import com.feed_the_beast.ftbquests.quest.rewards.QuestReward;
 import com.feed_the_beast.ftbquests.tile.TileProgressScreenCore;
 import com.feed_the_beast.ftbquests.tile.TileScreenCore;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.client.event.ModelRegistryEvent;
@@ -37,10 +32,13 @@ public class FTBQuestsClientEventHandler
 	@SubscribeEvent
 	public static void registerModels(ModelRegistryEvent event)
 	{
-		ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(FTBQuestsItems.SCREEN), 0, new ModelResourceLocation(FTBQuestsItems.SCREEN.getRegistryName(), "facing=north"));
-		ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(FTBQuestsItems.PROGRESS_DETECTOR), 0, new ModelResourceLocation(FTBQuestsItems.PROGRESS_DETECTOR.getRegistryName(), "normal"));
-		ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(FTBQuestsItems.PROGRESS_SCREEN), 0, new ModelResourceLocation(FTBQuestsItems.PROGRESS_SCREEN.getRegistryName(), "facing=north"));
-		ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(FTBQuestsItems.CHEST), 0, new ModelResourceLocation(FTBQuestsItems.CHEST.getRegistryName(), "facing=north"));
+		ModelLoader.setCustomModelResourceLocation(FTBQuestsItems.SCREEN, 0, new ModelResourceLocation(FTBQuestsItems.SCREEN.getRegistryName(), "facing=north"));
+		ModelLoader.setCustomModelResourceLocation(FTBQuestsItems.PROGRESS_DETECTOR, 0, new ModelResourceLocation(FTBQuestsItems.PROGRESS_DETECTOR.getRegistryName(), "normal"));
+		ModelLoader.setCustomModelResourceLocation(FTBQuestsItems.PROGRESS_SCREEN, 0, new ModelResourceLocation(FTBQuestsItems.PROGRESS_SCREEN.getRegistryName(), "facing=north"));
+		ModelLoader.setCustomModelResourceLocation(FTBQuestsItems.CHEST, 0, new ModelResourceLocation(FTBQuestsItems.CHEST.getRegistryName(), "facing=north"));
+
+		ModelLoader.setCustomModelResourceLocation(FTBQuestsItems.XP_VIAL, 0, new ModelResourceLocation(FTBQuestsItems.XP_VIAL.getRegistryName(), "inventory"));
+		ModelLoader.setCustomModelResourceLocation(FTBQuestsItems.SCRIPT, 0, new ModelResourceLocation(FTBQuestsItems.SCRIPT.getRegistryName(), "inventory"));
 
 		ClientRegistry.bindTileEntitySpecialRenderer(TileScreenCore.class, new RenderScreen());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileProgressScreenCore.class, new RenderProgressScreen());
@@ -49,31 +47,9 @@ public class FTBQuestsClientEventHandler
 	@SubscribeEvent
 	public static void onCustomSidebarButtonText(CustomSidebarButtonTextEvent event)
 	{
-		if (ClientQuestFile.exists() && ClientQuestFile.INSTANCE.self != null && event.getButton().id.equals(QUESTS_BUTTON))
+		if (ClientQuestFile.exists() && ClientQuestFile.INSTANCE.newRewards > 0 && event.getButton().id.equals(QUESTS_BUTTON))
 		{
-			int r = 0;
-
-			for (QuestChapter chapter : ClientQuestFile.INSTANCE.chapters)
-			{
-				for (Quest quest : chapter.quests)
-				{
-					if (quest.isComplete(ClientQuestFile.INSTANCE.self))
-					{
-						for (QuestReward reward : quest.rewards)
-						{
-							if (!ClientQuestFile.INSTANCE.self.isRewardClaimed(ClientUtils.MC.player, reward))
-							{
-								r++;
-							}
-						}
-					}
-				}
-			}
-
-			if (r > 0)
-			{
-				event.setText(Integer.toString(r));
-			}
+			event.setText(Integer.toString(ClientQuestFile.INSTANCE.newRewards));
 		}
 	}
 

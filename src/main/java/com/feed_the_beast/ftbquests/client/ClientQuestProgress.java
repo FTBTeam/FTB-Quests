@@ -2,17 +2,13 @@ package com.feed_the_beast.ftbquests.client;
 
 import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.ProgressingQuestObject;
-import com.feed_the_beast.ftbquests.quest.rewards.QuestReward;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskData;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.text.TextFormatting;
 
 import javax.annotation.Nullable;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 
 /**
@@ -22,13 +18,11 @@ public class ClientQuestProgress implements IProgressData
 {
 	private final String teamID;
 	public final Map<QuestTask, QuestTaskData> taskData;
-	public final Collection<QuestReward> claimedRewards;
 
 	public ClientQuestProgress(String t)
 	{
 		teamID = t;
 		taskData = new HashMap<>();
-		claimedRewards = new HashSet<>();
 	}
 
 	@Override
@@ -50,36 +44,6 @@ public class ClientQuestProgress implements IProgressData
 		return data;
 	}
 
-	public void setRewardStatus(QuestReward reward, boolean status)
-	{
-		if (status)
-		{
-			claimedRewards.add(reward);
-		}
-		else
-		{
-			claimedRewards.remove(reward);
-		}
-	}
-
-	@Override
-	public boolean claimReward(EntityPlayer player, QuestReward reward)
-	{
-		if (!claimedRewards.contains(reward) && reward.quest.isComplete(this))
-		{
-			claimedRewards.add(reward);
-			return true;
-		}
-
-		return false;
-	}
-
-	@Override
-	public Collection<QuestReward> getClaimedRewards(EntityPlayer player)
-	{
-		return claimedRewards;
-	}
-
 	@Override
 	public void syncTask(QuestTaskData data)
 	{
@@ -95,12 +59,6 @@ public class ClientQuestProgress implements IProgressData
 	public void createTaskData(QuestTask task)
 	{
 		taskData.put(task, task.createData(this));
-	}
-
-	@Override
-	public void unclaimReward(QuestReward reward)
-	{
-		claimedRewards.remove(reward);
 	}
 
 	public static String getCompletionSuffix(@Nullable ClientQuestProgress progress, ProgressingQuestObject object)

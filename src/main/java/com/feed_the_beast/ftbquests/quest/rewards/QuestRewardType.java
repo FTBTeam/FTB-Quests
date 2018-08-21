@@ -79,7 +79,7 @@ public final class QuestRewardType extends IForgeRegistryEntry.Impl<QuestRewardT
 		reward.readID(nbt);
 		reward.teamReward = nbt.getBoolean("team_reward");
 		reward.title = nbt.getString("title");
-		reward.icon = QuestFile.getIcon(nbt);
+		reward.icon = QuestFile.readIcon(nbt, "icon");
 		return reward;
 	}
 

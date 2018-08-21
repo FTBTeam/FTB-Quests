@@ -13,6 +13,7 @@ import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.gui.FTBQuestsGuiHandler;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
+import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -147,7 +148,7 @@ public class TileQuestChest extends TileBase implements IItemHandler, IConfigCal
 	@Override
 	public int getSlots()
 	{
-		return FTBQuests.PROXY.getQuestFile(world).allItemAcceptingTasks.size();
+		return 1;
 	}
 
 	@Override
@@ -161,16 +162,22 @@ public class TileQuestChest extends TileBase implements IItemHandler, IConfigCal
 	{
 		QuestFile file = FTBQuests.PROXY.getQuestFile(world);
 
-		if (slot < 0 || slot >= file.allItemAcceptingTasks.size())
-		{
-			return stack;
-		}
-
 		cTeam = getTeam();
 
 		if (cTeam != null)
 		{
-			return cTeam.getQuestTaskData(file.allItemAcceptingTasks.get(slot)).insertItem(stack, false, simulate);
+			for (QuestTask task : file.allTasks)
+			{
+				if (task.canInsertItem() && task.quest.canStartTasks(cTeam))
+				{
+					stack = cTeam.getQuestTaskData(task).insertItem(stack, false, simulate);
+
+					if (stack.isEmpty())
+					{
+						return stack;
+					}
+				}
+			}
 		}
 
 		return stack;

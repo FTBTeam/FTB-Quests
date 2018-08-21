@@ -13,7 +13,7 @@ import com.feed_the_beast.ftblib.lib.tile.EnumSaveType;
 import com.feed_the_beast.ftblib.lib.util.BlockUtils;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.FTBQuests;
-import com.feed_the_beast.ftbquests.FTBQuestsItems;
+import com.feed_the_beast.ftbquests.FTBQuestsBlocks;
 import com.feed_the_beast.ftbquests.block.BlockScreen;
 import com.feed_the_beast.ftbquests.net.MessageOpenTask;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
@@ -246,7 +246,7 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 		{
 			IBlockState state = getBlockState();
 
-			if (state.getBlock() == FTBQuestsItems.SCREEN)
+			if (state.getBlock() == FTBQuestsBlocks.SCREEN)
 			{
 				facing = getBlockState().getValue(BlockHorizontal.FACING);
 			}
@@ -618,7 +618,7 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 	@Override
 	public void onLoad()
 	{
-		if (getBlockType() != FTBQuestsItems.SCREEN)
+		if (getBlockType() != FTBQuestsBlocks.SCREEN)
 		{
 			boolean xaxis = getFacing().getAxis() == EnumFacing.Axis.X;
 

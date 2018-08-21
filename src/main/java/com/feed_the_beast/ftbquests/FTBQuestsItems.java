@@ -1,7 +1,7 @@
 package com.feed_the_beast.ftbquests;
 
-import net.minecraft.block.Block;
-import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
+import net.minecraft.item.Item;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 
 /**
@@ -10,10 +10,13 @@ import net.minecraftforge.fml.common.registry.GameRegistry;
 @GameRegistry.ObjectHolder(FTBQuests.MOD_ID)
 public class FTBQuestsItems
 {
-	public static final Block SCREEN = Blocks.AIR;
-	public static final Block SCREEN_PART = Blocks.AIR;
-	public static final Block PROGRESS_DETECTOR = Blocks.AIR;
-	public static final Block PROGRESS_SCREEN = Blocks.AIR;
-	public static final Block PROGRESS_SCREEN_PART = Blocks.AIR;
-	public static final Block CHEST = Blocks.AIR;
+	public static final Item SCREEN = Items.AIR;
+	public static final Item SCREEN_PART = Items.AIR;
+	public static final Item PROGRESS_DETECTOR = Items.AIR;
+	public static final Item PROGRESS_SCREEN = Items.AIR;
+	public static final Item PROGRESS_SCREEN_PART = Items.AIR;
+	public static final Item CHEST = Items.AIR;
+
+	public static final Item XP_VIAL = Items.AIR;
+	public static final Item SCRIPT = Items.AIR;
 }

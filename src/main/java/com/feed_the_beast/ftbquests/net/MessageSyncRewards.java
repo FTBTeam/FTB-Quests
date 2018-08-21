@@ -4,27 +4,27 @@ import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToClient;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
-import com.feed_the_beast.ftbquests.gui.ClientQuestFile;
-import com.feed_the_beast.ftbquests.quest.rewards.QuestReward;
+import com.feed_the_beast.ftbquests.client.ClientQuestFile;
+import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+
+import java.util.Collection;
 
 /**
  * @author LatvianModder
  */
-public class MessageUpdateRewardStatus extends MessageToClient
+public class MessageSyncRewards extends MessageToClient
 {
-	private String reward;
-	private boolean status;
+	public Collection<ItemStack> rewards;
 
-	public MessageUpdateRewardStatus()
+	public MessageSyncRewards()
 	{
 	}
 
-	public MessageUpdateRewardStatus(String r, boolean s)
+	public MessageSyncRewards(Collection<ItemStack> r)
 	{
-		reward = r;
-		status = s;
+		rewards = r;
 	}
 
 	@Override
@@ -36,26 +36,24 @@ public class MessageUpdateRewardStatus extends MessageToClient
 	@Override
 	public void writeData(DataOut data)
 	{
-		data.writeString(reward);
-		data.writeBoolean(status);
+		data.writeCollection(rewards, DataOut.ITEM_STACK);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
-		reward = data.readString();
-		status = data.readBoolean();
+		rewards = data.readCollection(DataIn.ITEM_STACK);
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void onMessage()
 	{
-		QuestReward qreward = ClientQuestFile.INSTANCE.getReward(reward);
-
-		if (qreward != null && ClientQuestFile.INSTANCE.self != null)
+		if (ClientQuestFile.exists())
 		{
-			ClientQuestFile.INSTANCE.self.setRewardStatus(qreward, status);
+			ClientQuestFile.INSTANCE.rewards.items.clear();
+			ClientQuestFile.INSTANCE.rewards.items.addAll(rewards);
+			ClientQuestFile.INSTANCE.refreshGui(ClientQuestFile.INSTANCE);
 		}
 	}
 }

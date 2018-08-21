@@ -15,6 +15,7 @@ public abstract class QuestTaskData<T extends QuestTask> implements ICapabilityP
 {
 	public final T task;
 	public final IProgressData data;
+	public boolean isComplete = false;
 
 	public QuestTaskData(T q, IProgressData d)
 	{

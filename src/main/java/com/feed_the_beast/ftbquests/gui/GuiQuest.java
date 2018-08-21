@@ -1,6 +1,5 @@
 package com.feed_the_beast.ftbquests.gui;
 
-import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.gui.Button;
 import com.feed_the_beast.ftblib.lib.gui.ContextMenuItem;
@@ -21,7 +20,6 @@ import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.client.ClientQuestProgress;
-import com.feed_the_beast.ftbquests.net.MessageClaimReward;
 import com.feed_the_beast.ftbquests.net.MessageGetScreen;
 import com.feed_the_beast.ftbquests.net.MessageOpenTask;
 import com.feed_the_beast.ftbquests.net.edit.MessageCreateObject;
@@ -339,16 +337,12 @@ public class GuiQuest extends GuiBase
 				contextMenu.add(questTreeGui.changeIDItem(getGui(), reward));
 				getGui().openContextMenu(contextMenu);
 			}
-			else if (button.isLeft() && questTreeGui.questFile.self != null && questTreeGui.questFile.self.claimReward(ClientUtils.MC.player, reward))
-			{
-				new MessageClaimReward(reward.getID()).sendToServer();
-			}
 		}
 
 		@Override
 		public WidgetType getWidgetType()
 		{
-			if (reward.invalid || questTreeGui.questFile.self == null || questTreeGui.questFile.self.isRewardClaimed(ClientUtils.MC.player, reward) || !quest.isComplete(questTreeGui.questFile.self))
+			if (reward.invalid || questTreeGui.questFile.self == null || !quest.isComplete(questTreeGui.questFile.self))
 			{
 				return WidgetType.DISABLED;
 			}
@@ -368,7 +362,7 @@ public class GuiQuest extends GuiBase
 				GuiIcons.CLOSE.draw(getAX() + width - 9, getAY() + 1, 8, 8);
 				GlStateManager.popMatrix();
 			}
-			else if (questTreeGui.questFile.self.isRewardClaimed(ClientUtils.MC.player, reward))
+			else if (reward.quest.isComplete(questTreeGui.questFile.self))
 			{
 				GlStateManager.pushMatrix();
 				GlStateManager.translate(0, 0, 500);
