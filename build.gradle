@@ -28,7 +28,7 @@ minecraft {
 	runDir = "run"
 	mappings = "${mappings_version}"
 
-	replace "@VERSION@", project.version
+	replace "0.0.0.ftbquests", project.version
 	replaceIn "${mod_reference}"
 }
 
