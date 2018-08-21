@@ -1,5 +1,6 @@
 package com.feed_the_beast.ftbquests;
 
+import com.feed_the_beast.ftblib.FTBLib;
 import com.feed_the_beast.ftblib.lib.OtherMods;
 import com.feed_the_beast.ftbquests.command.CommandFTBQuests;
 import com.feed_the_beast.ftbquests.gui.FTBQuestsGuiHandler;
@@ -24,13 +25,13 @@ import org.apache.logging.log4j.Logger;
 		modid = FTBQuests.MOD_ID,
 		name = FTBQuests.MOD_NAME,
 		version = FTBQuests.VERSION,
-		dependencies = "required-after:ftblib;after:ic2"
+		dependencies = FTBLib.THIS_DEP + ";after:ic2"
 )
 public class FTBQuests
 {
 	public static final String MOD_ID = "ftbquests";
 	public static final String MOD_NAME = "FTB Quests";
-	public static final String VERSION = "@VERSION@";
+	public static final String VERSION = "0.0.0.ftbquests";
 	public static final Logger LOGGER = LogManager.getLogger(MOD_NAME);
 
 	@Mod.Instance(MOD_ID)
