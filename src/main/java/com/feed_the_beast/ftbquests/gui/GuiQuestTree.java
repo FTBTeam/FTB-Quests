@@ -1,6 +1,5 @@
 package com.feed_the_beast.ftbquests.gui;
 
-import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigString;
 import com.feed_the_beast.ftblib.lib.gui.Button;
@@ -20,6 +19,7 @@ import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.FTBQuests;
+import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.client.ClientQuestProgress;
 import com.feed_the_beast.ftbquests.net.edit.MessageChangeID;
 import com.feed_the_beast.ftbquests.net.edit.MessageCreateObject;
@@ -34,7 +34,6 @@ import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
-import com.feed_the_beast.ftbquests.quest.rewards.QuestReward;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
@@ -120,41 +119,7 @@ public class GuiQuestTree extends GuiBase
 				icon.draw(ax + 10, ay + (height - 16) / 2, 16, 16);
 			}
 
-			if (questFile.self == null)
-			{
-				return;
-			}
-
-			int r = 0;
-
-			for (Quest quest : chapter.quests)
-			{
-				if (quest.isComplete(questFile.self))
-				{
-					for (QuestReward reward : quest.rewards)
-					{
-						if (!questFile.self.isRewardClaimed(ClientUtils.MC.player, reward))
-						{
-							r++;
-						}
-					}
-				}
-			}
-
-			if (r > 0)
-			{
-				String s = Integer.toString(r);
-				int nw = getStringWidth(s);
-				GlStateManager.pushMatrix();
-				GlStateManager.translate(ax + width - nw, ay, 500);
-				drawString(s, -7, 4, Color4I.LIGHT_RED, 0);
-				drawString(s, -5, 4, Color4I.LIGHT_RED, 0);
-				drawString(s, -6, 3, Color4I.LIGHT_RED, 0);
-				drawString(s, -6, 5, Color4I.LIGHT_RED, 0);
-				drawString(s, -6, 4, Color4I.WHITE, 0);
-				GlStateManager.popMatrix();
-			}
-			else if (chapter.isComplete(questFile.self))
+			if (questFile.self != null && chapter.isComplete(questFile.self))
 			{
 				GlStateManager.pushMatrix();
 				GlStateManager.translate(0, 0, 500);
@@ -299,44 +264,7 @@ public class GuiQuestTree extends GuiBase
 				GlStateManager.popMatrix();
 			}
 
-			if (questFile.self == null)
-			{
-				return;
-			}
-
-			int r = 0;
-
-			if (quest.isComplete(questFile.self))
-			{
-				for (QuestReward reward : quest.rewards)
-				{
-					if (!questFile.self.isRewardClaimed(ClientUtils.MC.player, reward))
-					{
-						r++;
-					}
-				}
-			}
-
-			if (r > 0)
-			{
-				String s = Integer.toString(r);
-				int nw = getStringWidth(s);
-				GlStateManager.pushMatrix();
-				GlStateManager.translate(ax + width, ay, 500);
-
-				if (zoom != 16)
-				{
-					GlStateManager.scale(zoom / 16D, zoom / 16D, 1D);
-				}
-
-				drawString(s, -nw + 2, 0, Color4I.LIGHT_RED, 0);
-				drawString(s, -nw, 0, Color4I.LIGHT_RED, 0);
-				drawString(s, -nw + 1, 1, Color4I.LIGHT_RED, 0);
-				drawString(s, -nw + 1, -1, Color4I.LIGHT_RED, 0);
-				drawString(s, -nw + 1, 0, Color4I.WHITE, 0);
-				GlStateManager.popMatrix();
-			}
-			else if (quest.isComplete(questFile.self))
+			if (questFile.self != null && quest.isComplete(questFile.self))
 			{
 				GlStateManager.pushMatrix();
 				GlStateManager.translate(0, 0, 500);

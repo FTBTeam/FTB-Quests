@@ -10,7 +10,7 @@ import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
 import com.feed_the_beast.ftblib.lib.tile.EnumSaveType;
 import com.feed_the_beast.ftblib.lib.util.BlockUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
-import com.feed_the_beast.ftbquests.FTBQuestsItems;
+import com.feed_the_beast.ftbquests.FTBQuestsBlocks;
 import com.feed_the_beast.ftbquests.block.BlockScreen;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
@@ -124,7 +124,7 @@ public class TileProgressScreenCore extends TileProgressScreenBase implements IC
 		{
 			IBlockState state = getBlockState();
 
-			if (state.getBlock() == FTBQuestsItems.PROGRESS_SCREEN)
+			if (state.getBlock() == FTBQuestsBlocks.PROGRESS_SCREEN)
 			{
 				facing = getBlockState().getValue(BlockHorizontal.FACING);
 			}
@@ -278,7 +278,7 @@ public class TileProgressScreenCore extends TileProgressScreenBase implements IC
 	@Override
 	public void onLoad()
 	{
-		if (getBlockType() != FTBQuestsItems.PROGRESS_SCREEN)
+		if (getBlockType() != FTBQuestsBlocks.PROGRESS_SCREEN)
 		{
 			boolean xaxis = getFacing().getAxis() == EnumFacing.Axis.X;
 

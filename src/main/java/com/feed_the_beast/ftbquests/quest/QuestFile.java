@@ -9,10 +9,12 @@ import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.IconAnimation;
 import com.feed_the_beast.ftblib.lib.item.ItemStackSerializer;
 import com.feed_the_beast.ftblib.lib.math.Ticks;
+import com.feed_the_beast.ftbquests.quest.rewards.PlayerRewards;
 import com.feed_the_beast.ftbquests.quest.rewards.QuestReward;
 import com.feed_the_beast.ftbquests.quest.rewards.QuestRewardType;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskType;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -37,7 +39,6 @@ public abstract class QuestFile extends ProgressingQuestObject
 
 	private final Map<String, QuestObject> map;
 	public final List<QuestTask> allTasks;
-	public final List<QuestTask> allItemAcceptingTasks;
 
 	public boolean allowTakeQuestBlocks;
 	public final List<ItemStack> emergencyItems;
@@ -50,7 +51,6 @@ public abstract class QuestFile extends ProgressingQuestObject
 
 		map = new HashMap<>();
 		allTasks = new ArrayList<>();
-		allItemAcceptingTasks = new ArrayList<>();
 
 		allowTakeQuestBlocks = true;
 		emergencyItems = new ArrayList<>();
@@ -116,7 +116,7 @@ public abstract class QuestFile extends ProgressingQuestObject
 	}
 
 	@Override
-	public final boolean isComplete(IProgressData data)
+	public boolean isComplete(IProgressData data)
 	{
 		for (QuestChapter chapter : chapters)
 		{
@@ -260,16 +260,6 @@ public abstract class QuestFile extends ProgressingQuestObject
 				}
 			}
 		}
-
-		allItemAcceptingTasks.clear();
-
-		for (QuestTask task : allTasks)
-		{
-			if (task.canInsertItem())
-			{
-				allItemAcceptingTasks.add(task);
-			}
-		}
 	}
 
 	@Nullable
@@ -342,20 +332,37 @@ public abstract class QuestFile extends ProgressingQuestObject
 		}
 	}
 
-	public static ItemStack getIcon(NBTTagCompound nbt)
+	public static ItemStack readIcon(NBTTagCompound nbt, String key)
 	{
 		ItemStack stack;
 
-		if (nbt.hasKey("icon", Constants.NBT.TAG_STRING))
+		if (nbt.hasKey(key, Constants.NBT.TAG_STRING))
 		{
-			stack = ItemStackSerializer.parseItem(nbt.getString("icon"));
+			stack = ItemStackSerializer.parseItem(nbt.getString(key));
 		}
 		else
 		{
-			stack = new ItemStack(nbt.getCompoundTag("icon"));
+			stack = new ItemStack(nbt.getCompoundTag(key));
 		}
 
 		return stack.isEmpty() ? ItemStack.EMPTY : stack;
+	}
+
+	public static void writeIcon(NBTTagCompound nbt, String key, ItemStack icon)
+	{
+		if (!icon.isEmpty())
+		{
+			NBTTagCompound nbt1 = icon.serializeNBT();
+
+			if (!nbt1.hasKey("ForgeCaps") && !nbt1.hasKey("tag"))
+			{
+				nbt.setString(key, ItemStackSerializer.toString(icon));
+			}
+			else
+			{
+				nbt.setTag(key, nbt1);
+			}
+		}
 	}
 
 	@Override
@@ -366,10 +373,7 @@ public abstract class QuestFile extends ProgressingQuestObject
 			nbt.setString("title", title);
 		}
 
-		if (!icon.isEmpty())
-		{
-			nbt.setTag("icon", icon.serializeNBT());
-		}
+		writeIcon(nbt, "icon", icon);
 
 		NBTTagList chaptersList = new NBTTagList();
 
@@ -397,7 +401,7 @@ public abstract class QuestFile extends ProgressingQuestObject
 	protected final void readData(NBTTagCompound nbt)
 	{
 		title = nbt.getString("title");
-		icon = new ItemStack(nbt.getCompoundTag("icon"));
+		icon = readIcon(nbt, "icon");
 
 		chapters.clear();
 
@@ -435,6 +439,8 @@ public abstract class QuestFile extends ProgressingQuestObject
 	public abstract IProgressData getData(String team);
 
 	public abstract Collection<? extends IProgressData> getAllData();
+
+	public abstract PlayerRewards getRewards(EntityPlayer player);
 
 	@Override
 	public Icon getAltIcon()

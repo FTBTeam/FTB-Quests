@@ -1,13 +1,15 @@
-package com.feed_the_beast.ftbquests.gui;
+package com.feed_the_beast.ftbquests.client;
 
 import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftblib.lib.gui.GuiBase;
-import com.feed_the_beast.ftbquests.client.ClientQuestProgress;
+import com.feed_the_beast.ftbquests.gui.GuiQuest;
+import com.feed_the_beast.ftbquests.gui.GuiQuestTree;
 import com.feed_the_beast.ftbquests.net.MessageSyncQuests;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
+import com.feed_the_beast.ftbquests.quest.rewards.PlayerRewards;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import com.feed_the_beast.ftbquests.util.FTBQuestsTeamData;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.entity.player.EntityPlayer;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -36,6 +38,8 @@ public class ClientQuestFile extends QuestFile
 	public GuiQuestTree questTreeGui;
 	public GuiBase questGui;
 	public boolean editingMode;
+	public final PlayerRewards rewards;
+	public int newRewards;
 
 	public ClientQuestFile(MessageSyncQuests message, @Nullable ClientQuestFile prev)
 	{
@@ -51,14 +55,17 @@ public class ClientQuestFile extends QuestFile
 				data.createTaskData(task);
 			}
 
-			NBTTagCompound nbt = message.teamData.getCompoundTag(team);
-			FTBQuestsTeamData.deserializeTaskData(data.taskData.values(), nbt.getCompoundTag("T"));
-			FTBQuestsTeamData.deserializeRewardData(this, data.claimedRewards, nbt.getCompoundTag("R"));
+			FTBQuestsTeamData.deserializeTaskData(data.taskData.values(), message.teamData.getCompoundTag(team));
 			teamData.put(data.getTeamID(), data);
 		}
 
 		self = message.team.isEmpty() ? null : teamData.get(message.team);
 		editingMode = message.editingMode;
+
+		rewards = new PlayerRewards(this, ClientUtils.MC.player.getUniqueID());
+		rewards.items.addAll(message.rewards);
+
+		newRewards = 0;
 
 		refreshGui(prev);
 	}
@@ -138,5 +145,11 @@ public class ClientQuestFile extends QuestFile
 	public Collection<ClientQuestProgress> getAllData()
 	{
 		return teamData.values();
+	}
+
+	@Override
+	public PlayerRewards getRewards(EntityPlayer player)
+	{
+		return rewards;
 	}
 }

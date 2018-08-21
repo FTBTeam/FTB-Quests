@@ -78,7 +78,7 @@ public final class QuestTaskType extends IForgeRegistryEntry.Impl<QuestTaskType>
 
 		task.readID(nbt);
 		task.title = nbt.getString("title");
-		task.icon = QuestFile.getIcon(nbt);
+		task.icon = QuestFile.readIcon(nbt, "icon");
 		return task;
 	}
 

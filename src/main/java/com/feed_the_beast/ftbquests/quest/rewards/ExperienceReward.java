@@ -4,11 +4,12 @@ import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigInt;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
+import com.feed_the_beast.ftbquests.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagInt;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -40,15 +41,23 @@ public class ExperienceReward extends QuestReward
 	}
 
 	@Override
-	public ITextComponent getAltDisplayName()
+	public ItemStack getRewardItem()
 	{
-		return new TextComponentTranslation("ftbquests.reward.ftbquests.xp.text", TextFormatting.GREEN + "+" + value);
+		ItemStack stack = new ItemStack(FTBQuestsItems.XP_VIAL);
+
+		if (!title.isEmpty())
+		{
+			stack.setStackDisplayName(title);
+		}
+
+		stack.setTagInfo("xp", new NBTTagInt(value));
+		return stack;
 	}
 
 	@Override
-	public void reward(EntityPlayerMP player)
+	public ITextComponent getAltDisplayName()
 	{
-		player.addExperience(value);
+		return new TextComponentTranslation("ftbquests.reward.ftbquests.xp.text", TextFormatting.GREEN + "+" + value);
 	}
 
 	@Override

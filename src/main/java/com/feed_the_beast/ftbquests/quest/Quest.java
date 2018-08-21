@@ -38,13 +38,14 @@ public final class Quest extends ProgressingQuestObject
 	public final List<String> dependencies;
 	public final List<QuestTask> tasks;
 	public final List<QuestReward> rewards;
+	public int timesCompleted;
 
 	public Quest(QuestChapter c, NBTTagCompound nbt)
 	{
 		chapter = c;
 		title = nbt.getString("title");
 		description = nbt.getString("description");
-		icon = QuestFile.getIcon(nbt);
+		icon = QuestFile.readIcon(nbt, "icon");
 		type = QuestType.NAME_MAP.get(nbt.getString("type"));
 		x = (byte) MathHelper.clamp(nbt.getByte("x"), -POS_LIMIT, POS_LIMIT);
 		y = (byte) MathHelper.clamp(nbt.getByte("y"), -POS_LIMIT, POS_LIMIT);
@@ -94,6 +95,8 @@ public final class Quest extends ProgressingQuestObject
 		{
 			dependencies.add(depList.getStringTagAt(i));
 		}
+
+		timesCompleted = nbt.getInteger("times_completed");
 	}
 
 	@Override
@@ -124,10 +127,7 @@ public final class Quest extends ProgressingQuestObject
 			nbt.setString("title", title);
 		}
 
-		if (!icon.isEmpty())
-		{
-			nbt.setTag("icon", icon.serializeNBT());
-		}
+		QuestFile.writeIcon(nbt, "icon", icon);
 
 		if (type != QuestType.NORMAL)
 		{
@@ -186,11 +186,7 @@ public final class Quest extends ProgressingQuestObject
 						taskNBT.setString("title", task.title);
 					}
 
-					if (!task.icon.isEmpty())
-					{
-						taskNBT.setTag("icon", task.icon.serializeNBT());
-					}
-
+					QuestFile.writeIcon(taskNBT, "icon", task.icon);
 					array.appendTag(taskNBT);
 				}
 			}
@@ -223,16 +219,18 @@ public final class Quest extends ProgressingQuestObject
 						rewardNBT.setString("title", reward.title);
 					}
 
-					if (!reward.icon.isEmpty())
-					{
-						rewardNBT.setTag("icon", reward.icon.serializeNBT());
-					}
+					QuestFile.writeIcon(rewardNBT, "icon", reward.icon);
 
 					array.appendTag(rewardNBT);
 				}
 			}
 
 			nbt.setTag("rewards", array);
+		}
+
+		if (timesCompleted > 0)
+		{
+			nbt.setInteger("times_completed", timesCompleted);
 		}
 	}
 
@@ -295,11 +293,6 @@ public final class Quest extends ProgressingQuestObject
 		for (QuestTask task : tasks)
 		{
 			task.resetProgress(data);
-		}
-
-		for (QuestReward reward : rewards)
-		{
-			data.unclaimReward(reward);
 		}
 	}
 

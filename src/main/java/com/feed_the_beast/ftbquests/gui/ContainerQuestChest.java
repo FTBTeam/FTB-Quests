@@ -1,20 +1,59 @@
 package com.feed_the_beast.ftbquests.gui;
 
 import com.feed_the_beast.ftbquests.FTBQuests;
-import com.feed_the_beast.ftbquests.quest.IProgressData;
-import com.feed_the_beast.ftbquests.quest.QuestFile;
+import com.feed_the_beast.ftbquests.quest.rewards.PlayerRewards;
 import com.feed_the_beast.ftbquests.tile.TileQuestChest;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.ClickType;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.items.SlotItemHandler;
 
 /**
  * @author LatvianModder
  */
 public class ContainerQuestChest extends Container
 {
+	private class SlotInput extends SlotItemHandler
+	{
+		public SlotInput(IItemHandler itemHandler, int index, int xPosition, int yPosition)
+		{
+			super(itemHandler, index, xPosition, yPosition);
+		}
+
+		@Override
+		public boolean isItemValid(ItemStack stack)
+		{
+			return chest.insertItem(0, stack, true) != stack;
+		}
+
+		@Override
+		public void putStack(ItemStack stack)
+		{
+			chest.insertItem(0, stack, false);
+		}
+	}
+
+	private class SlotOutput extends SlotItemHandler
+	{
+		public SlotOutput(IItemHandler itemHandler, int index, int xPosition, int yPosition)
+		{
+			super(itemHandler, index, xPosition, yPosition);
+		}
+
+		@Override
+		public boolean isItemValid(ItemStack stack)
+		{
+			return false;
+		}
+
+		@Override
+		public void putStack(ItemStack stack)
+		{
+		}
+	}
+
 	public final TileQuestChest chest;
 
 	public ContainerQuestChest(EntityPlayer player, TileQuestChest c)
@@ -22,7 +61,16 @@ public class ContainerQuestChest extends Container
 		chest = c;
 
 		int invX = 8;
-		int invY = 84;
+		int invY = 107;
+
+		addSlotToContainer(new SlotInput(c, 0, 8, 84));
+
+		PlayerRewards rewards = FTBQuests.PROXY.getQuestFile(c.getWorld()).getRewards(player);
+
+		for (int i = 0; i < 6; i++)
+		{
+			addSlotToContainer(new SlotOutput(rewards, 1 + i, 44 + i * 18, 84));
+		}
 
 		for (int y = 0; y < 3; y++)
 		{
@@ -45,54 +93,8 @@ public class ContainerQuestChest extends Container
 	}
 
 	@Override
-	public ItemStack slotClick(int slotId, int dragType, ClickType clickType, EntityPlayer player)
+	public ItemStack transferStackInSlot(EntityPlayer playerIn, int index)
 	{
-		if (clickType == ClickType.QUICK_MOVE)
-		{
-			Slot slot = inventorySlots.get(slotId);
-
-			if (slot != null && slot.getHasStack())
-			{
-				ItemStack stack = slot.getStack();
-				ItemStack prevStack = stack.copy();
-
-				QuestFile file = FTBQuests.PROXY.getQuestFile(chest.getWorld());
-
-				IProgressData teamData = chest.getTeam();
-
-				if (teamData != null)
-				{
-					for (int i = 0; i < file.allItemAcceptingTasks.size(); i++)
-					{
-						ItemStack stack1 = teamData.getQuestTaskData(file.allItemAcceptingTasks.get(i)).insertItem(stack, dragType == 1, false);
-
-						if (stack != stack1)
-						{
-							stack = stack1;
-
-							if (dragType == 1 || stack.isEmpty())
-							{
-								break;
-							}
-						}
-					}
-				}
-
-				if (stack.isEmpty())
-				{
-					slot.putStack(ItemStack.EMPTY);
-				}
-				else
-				{
-					slot.putStack(stack);
-				}
-
-				return prevStack;
-			}
-
-			return ItemStack.EMPTY;
-		}
-
-		return super.slotClick(slotId, dragType, clickType, player);
+		return ItemStack.EMPTY;
 	}
 }

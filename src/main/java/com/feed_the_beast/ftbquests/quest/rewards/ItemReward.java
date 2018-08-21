@@ -5,13 +5,11 @@ import com.feed_the_beast.ftblib.lib.config.ConfigItemStack;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
-import net.minecraftforge.items.ItemHandlerHelper;
 
 /**
  * @author LatvianModder
@@ -53,6 +51,12 @@ public class ItemReward extends QuestReward
 	}
 
 	@Override
+	public ItemStack getRewardItem()
+	{
+		return item.copy();
+	}
+
+	@Override
 	public ITextComponent getAltDisplayName()
 	{
 		if (item.getCount() > 1)
@@ -61,12 +65,6 @@ public class ItemReward extends QuestReward
 		}
 
 		return new TextComponentString(item.getDisplayName());
-	}
-
-	@Override
-	public void reward(EntityPlayerMP player)
-	{
-		ItemHandlerHelper.giveItemToPlayer(player, item.copy());
 	}
 
 	@Override

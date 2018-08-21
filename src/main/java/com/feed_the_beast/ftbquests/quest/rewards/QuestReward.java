@@ -4,12 +4,10 @@ import com.feed_the_beast.ftblib.lib.config.ConfigBoolean;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
-import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.ITextComponent;
@@ -29,7 +27,7 @@ public abstract class QuestReward extends QuestObject
 		teamReward = false;
 	}
 
-	public abstract void reward(EntityPlayerMP player);
+	public abstract ItemStack getRewardItem();
 
 	@Override
 	public final QuestFile getQuestFile()
@@ -54,11 +52,6 @@ public abstract class QuestReward extends QuestObject
 	{
 		super.deleteSelf();
 		quest.rewards.remove(this);
-
-		for (IProgressData data : quest.chapter.file.getAllData())
-		{
-			data.unclaimReward(this);
-		}
 	}
 
 	@Override

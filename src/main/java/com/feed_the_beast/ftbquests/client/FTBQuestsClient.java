@@ -3,7 +3,6 @@ package com.feed_the_beast.ftbquests.client;
 import com.feed_the_beast.ftblib.FTBLib;
 import com.feed_the_beast.ftblib.lib.OtherMods;
 import com.feed_the_beast.ftbquests.FTBQuestsCommon;
-import com.feed_the_beast.ftbquests.gui.ClientQuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import net.minecraft.client.settings.KeyBinding;

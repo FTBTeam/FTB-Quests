@@ -3,7 +3,10 @@ package com.feed_the_beast.ftbquests.quest;
 import com.feed_the_beast.ftblib.lib.data.ForgeTeam;
 import com.feed_the_beast.ftblib.lib.data.Universe;
 import com.feed_the_beast.ftblib.lib.util.NBTUtils;
+import com.feed_the_beast.ftbquests.quest.rewards.PlayerRewards;
+import com.feed_the_beast.ftbquests.util.FTBQuestsPlayerData;
 import com.feed_the_beast.ftbquests.util.FTBQuestsTeamData;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 
 import javax.annotation.Nullable;
@@ -74,6 +77,12 @@ public class ServerQuestFile extends QuestFile
 		}
 
 		return Collections.emptyList();
+	}
+
+	@Override
+	public PlayerRewards getRewards(EntityPlayer player)
+	{
+		return FTBQuestsPlayerData.get(Universe.get().getPlayer(player)).rewards;
 	}
 
 	public void save()

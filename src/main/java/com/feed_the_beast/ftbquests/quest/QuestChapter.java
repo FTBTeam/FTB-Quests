@@ -31,7 +31,7 @@ public final class QuestChapter extends ProgressingQuestObject
 		file = f;
 		title = nbt.getString("title");
 		description = new ArrayList<>();
-		icon = QuestFile.getIcon(nbt);
+		icon = QuestFile.readIcon(nbt, "icon");
 		quests = new ArrayList<>();
 
 		NBTTagList desc = nbt.getTagList("description", Constants.NBT.TAG_STRING);
@@ -88,10 +88,7 @@ public final class QuestChapter extends ProgressingQuestObject
 			nbt.setString("title", title);
 		}
 
-		if (!icon.isEmpty())
-		{
-			nbt.setTag("icon", icon.serializeNBT());
-		}
+		QuestFile.writeIcon(nbt, "icon", icon);
 
 		if (!description.isEmpty())
 		{
