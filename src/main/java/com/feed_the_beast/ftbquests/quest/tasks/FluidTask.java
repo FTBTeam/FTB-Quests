@@ -53,6 +53,12 @@ public class FluidTask extends QuestTask
 		super(quest);
 
 		fluid = FluidRegistry.getFluid(nbt.getString("fluid"));
+
+		if (fluid == null)
+		{
+			fluid = FluidRegistry.WATER;
+		}
+
 		fluidNBT = (NBTTagCompound) nbt.getTag("nbt");
 		amount = nbt.hasKey("amount") ? nbt.getLong("amount") : 1000;
 
