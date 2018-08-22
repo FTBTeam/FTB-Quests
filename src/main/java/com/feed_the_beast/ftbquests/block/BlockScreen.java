@@ -3,7 +3,6 @@ package com.feed_the_beast.ftbquests.block;
 import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
 import com.feed_the_beast.ftblib.lib.util.BlockUtils;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
-import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.FTBQuestsBlocks;
 import com.feed_the_beast.ftbquests.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
@@ -67,7 +66,6 @@ public class BlockScreen extends BlockWithHorizontalFacing
 	public BlockScreen()
 	{
 		super(Material.IRON, MapColor.BLACK);
-		setCreativeTab(FTBQuests.TAB);
 		setHardness(0.3F);
 		setDefaultState(blockState.getBaseState().withProperty(FACING, EnumFacing.NORTH));
 	}

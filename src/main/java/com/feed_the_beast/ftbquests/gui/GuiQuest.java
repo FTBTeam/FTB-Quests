@@ -1,6 +1,8 @@
 package com.feed_the_beast.ftbquests.gui;
 
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
+import com.feed_the_beast.ftblib.lib.config.ConfigItemStack;
+import com.feed_the_beast.ftblib.lib.config.ConfigValueInstance;
 import com.feed_the_beast.ftblib.lib.gui.Button;
 import com.feed_the_beast.ftblib.lib.gui.ContextMenuItem;
 import com.feed_the_beast.ftblib.lib.gui.GuiBase;
@@ -15,26 +17,26 @@ import com.feed_the_beast.ftblib.lib.gui.WidgetLayout;
 import com.feed_the_beast.ftblib.lib.gui.WidgetType;
 import com.feed_the_beast.ftblib.lib.gui.misc.GuiButtonListBase;
 import com.feed_the_beast.ftblib.lib.gui.misc.GuiEditConfig;
+import com.feed_the_beast.ftblib.lib.gui.misc.GuiSelectItemStack;
 import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
+import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.client.ClientQuestProgress;
 import com.feed_the_beast.ftbquests.net.MessageGetScreen;
 import com.feed_the_beast.ftbquests.net.MessageOpenTask;
 import com.feed_the_beast.ftbquests.net.edit.MessageCreateObject;
-import com.feed_the_beast.ftbquests.net.edit.MessageDeleteObject;
-import com.feed_the_beast.ftbquests.net.edit.MessageEditObject;
-import com.feed_the_beast.ftbquests.net.edit.MessageResetProgress;
+import com.feed_the_beast.ftbquests.net.edit.MessageEditReward;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
-import com.feed_the_beast.ftbquests.quest.rewards.QuestReward;
-import com.feed_the_beast.ftbquests.quest.rewards.QuestRewardType;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskType;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.init.Items;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.TextFormatting;
 
@@ -160,14 +162,11 @@ public class GuiQuest extends GuiBase
 							new MessageGetScreen(task.getID(), 0).sendToServer();
 						}
 					}));
+
+					contextMenu.add(ContextMenuItem.SEPARATOR);
 				}
 
-				contextMenu.add(new ContextMenuItem(I18n.format("selectServer.edit"), GuiIcons.SETTINGS, () -> new MessageEditObject(task.getID()).sendToServer()));
-				contextMenu.add(ContextMenuItem.SEPARATOR);
-				contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), GuiIcons.REMOVE, () -> new MessageDeleteObject(task.getID()).sendToServer()).setYesNo(I18n.format("delete_item", task.getDisplayName().getFormattedText())));
-				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.reset_progress"), GuiIcons.REFRESH, () -> new MessageResetProgress(task.getID()).sendToServer()).setYesNo(I18n.format("ftbquests.gui.reset_progress_q")));
-				contextMenu.add(questTreeGui.copyIDItem(task));
-				contextMenu.add(questTreeGui.changeIDItem(getGui(), task));
+				questTreeGui.addObjectMenuItems(contextMenu, getGui(), task);
 				getGui().openContextMenu(contextMenu);
 			}
 			else if (button.isLeft())
@@ -282,44 +281,15 @@ public class GuiQuest extends GuiBase
 
 	public class ButtonReward extends Button
 	{
-		public QuestReward reward;
+		public ItemStack reward;
+		public boolean teamReward;
 
-		public ButtonReward(Panel panel, QuestReward r)
+		public ButtonReward(Panel panel, ItemStack r, boolean t)
 		{
-			super(panel, r.getDisplayName().getFormattedText(), r.getIcon());
+			super(panel, t ? TextFormatting.BLUE + r.getDisplayName() : r.getDisplayName(), ItemIcon.getItemIcon(r));
 			setPosAndSize(0, 20, 20, 20);
 			reward = r;
-		}
-
-		@Override
-		public void addMouseOverText(List<String> list)
-		{
-			StringBuilder builder = new StringBuilder(getTitle());
-
-			if (GuiScreen.isCtrlKeyDown())
-			{
-				builder.append(' ');
-				builder.append(TextFormatting.DARK_GRAY);
-				builder.append(reward.getID());
-			}
-
-			list.add(builder.toString());
-		}
-
-		@Override
-		public boolean mousePressed(MouseButton button)
-		{
-			if (isMouseOver())
-			{
-				if (button.isRight() || getWidgetType() != WidgetType.DISABLED)
-				{
-					onClicked(button);
-				}
-
-				return true;
-			}
-
-			return false;
+			teamReward = t;
 		}
 
 		@Override
@@ -330,44 +300,13 @@ public class GuiQuest extends GuiBase
 			if (button.isRight() && questTreeGui.questFile.canEdit())
 			{
 				List<ContextMenuItem> contextMenu = new ArrayList<>();
-				contextMenu.add(new ContextMenuItem(I18n.format("selectServer.edit"), GuiIcons.SETTINGS, () -> new MessageEditObject(reward.getID()).sendToServer()));
-				contextMenu.add(ContextMenuItem.SEPARATOR);
-				contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), GuiIcons.REMOVE, () -> new MessageDeleteObject(reward.getID()).sendToServer()).setYesNo(I18n.format("delete_item", reward.getDisplayName().getFormattedText())));
-				contextMenu.add(questTreeGui.copyIDItem(reward));
-				contextMenu.add(questTreeGui.changeIDItem(getGui(), reward));
+				//contextMenu.add(new ContextMenuItem(I18n.format("selectServer.edit"), GuiIcons.SETTINGS, () -> new MessageEditReward(quest.getID(), quest.playerRewards.indexOf(reward), false, ).sendToServer()));
+				contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), GuiIcons.REMOVE, () -> new MessageEditReward(quest.getID(), (teamReward ? quest.teamRewards : quest.playerRewards).indexOf(reward), teamReward, ItemStack.EMPTY).sendToServer()).setYesNo(I18n.format("delete_item", reward.getDisplayName())));
 				getGui().openContextMenu(contextMenu);
 			}
-		}
-
-		@Override
-		public WidgetType getWidgetType()
-		{
-			if (reward.invalid || questTreeGui.questFile.self == null || !quest.isComplete(questTreeGui.questFile.self))
+			else if (button.isLeft() && questTreeGui.questFile.self != null && quest.isComplete(questTreeGui.questFile.self))
 			{
-				return WidgetType.DISABLED;
-			}
-
-			return super.getWidgetType();
-		}
-
-		@Override
-		public void draw()
-		{
-			super.draw();
-
-			if (reward.invalid || questTreeGui.questFile.self == null)
-			{
-				GlStateManager.pushMatrix();
-				GlStateManager.translate(0, 0, 500);
-				GuiIcons.CLOSE.draw(getAX() + width - 9, getAY() + 1, 8, 8);
-				GlStateManager.popMatrix();
-			}
-			else if (reward.quest.isComplete(questTreeGui.questFile.self))
-			{
-				GlStateManager.pushMatrix();
-				GlStateManager.translate(0, 0, 500);
-				GuiIcons.CHECK.draw(getAX() + width - 9, getAY() + 1, 8, 8);
-				GlStateManager.popMatrix();
+				new GuiRewards().openGui();
 			}
 		}
 	}
@@ -384,50 +323,17 @@ public class GuiQuest extends GuiBase
 		public void onClicked(MouseButton button)
 		{
 			GuiHelper.playClickSound();
-			new GuiSelectRewardType().openGui();
-		}
-	}
 
-	public class GuiSelectRewardType extends GuiButtonListBase
-	{
-		public GuiSelectRewardType()
-		{
-			setTitle(I18n.format("ftbquests.gui.select_reward_type"));
-		}
-
-		@Override
-		public void addButtons(Panel panel)
-		{
-			for (QuestRewardType type : QuestRewardType.getRegistry())
+			ConfigValueInstance value = new ConfigValueInstance("item", ConfigGroup.DEFAULT, new ConfigItemStack(new ItemStack(Items.APPLE))
 			{
-				QuestReward reward = type.provider.create(quest, new NBTTagCompound());
-
-				if (reward != null)
+				@Override
+				public void setStack(ItemStack stack)
 				{
-					panel.add(new SimpleTextButton(panel, type.getDisplayName().getFormattedText(), reward.getIcon())
-					{
-						@Override
-						public void onClicked(MouseButton button)
-						{
-							GuiHelper.playClickSound();
-
-							ConfigGroup group = ConfigGroup.newGroup(FTBQuests.MOD_ID);
-							ConfigGroup g = group.getGroup("reward." + type.getRegistryName().getNamespace() + '.' + type.getRegistryName().getPath());
-							reward.getConfig(g);
-							reward.getExtraConfig(g);
-
-							new GuiEditConfig(group, (g1, sender) -> {
-								NBTTagCompound nbt = new NBTTagCompound();
-								reward.writeData(nbt);
-								nbt.setString("type", type.getTypeForNBT());
-								new MessageCreateObject(QuestObjectType.REWARD, quest.getID(), nbt).sendToServer();
-								GuiQuest.this.openGui();
-								questTreeGui.questFile.refreshGui(questTreeGui.questFile);
-							}).openGui();
-						}
-					});
+					new MessageEditReward(quest.getID(), quest.playerRewards.size(), false, stack).sendToServer();
 				}
-			}
+			});
+
+			new GuiSelectItemStack(value, this).openGui();
 		}
 	}
 
@@ -552,9 +458,14 @@ public class GuiQuest extends GuiBase
 			@Override
 			public void addWidgets()
 			{
-				for (QuestReward reward : quest.rewards)
+				for (ItemStack stack : quest.playerRewards)
 				{
-					add(new ButtonReward(this, reward));
+					add(new ButtonReward(this, stack, false));
+				}
+
+				for (ItemStack stack : quest.teamRewards)
+				{
+					add(new ButtonReward(this, stack, true));
 				}
 
 				if (questTreeGui.questFile.canEdit())

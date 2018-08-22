@@ -12,7 +12,7 @@ import com.feed_the_beast.ftblib.lib.tile.TileBase;
 import com.feed_the_beast.ftblib.lib.util.BlockUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
-import com.feed_the_beast.ftbquests.quest.ProgressingQuestObject;
+import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
 import net.minecraft.command.ICommandSender;
@@ -35,7 +35,7 @@ public class TileProgressDetector extends TileBase implements ITickable, IConfig
 	public int redstoneOutput = 0;
 
 	private IProgressData cTeam;
-	private ProgressingQuestObject cObject;
+	private QuestObject cObject;
 
 	@Override
 	protected void writeData(NBTTagCompound nbt, EnumSaveType type)
@@ -126,7 +126,7 @@ public class TileProgressDetector extends TileBase implements ITickable, IConfig
 	}
 
 	@Nullable
-	public ProgressingQuestObject getObject()
+	public QuestObject getObject()
 	{
 		if (object.isEmpty())
 		{
@@ -134,7 +134,7 @@ public class TileProgressDetector extends TileBase implements ITickable, IConfig
 		}
 		else if (cObject == null || cObject.invalid)
 		{
-			cObject = FTBQuests.PROXY.getQuestFile(world).getProgressing(object);
+			cObject = FTBQuests.PROXY.getQuestFile(world).get(object);
 		}
 
 		return cObject;

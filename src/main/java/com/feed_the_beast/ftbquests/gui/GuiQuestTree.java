@@ -22,6 +22,7 @@ import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.client.ClientQuestProgress;
 import com.feed_the_beast.ftbquests.net.edit.MessageChangeID;
+import com.feed_the_beast.ftbquests.net.edit.MessageCompleteInstantly;
 import com.feed_the_beast.ftbquests.net.edit.MessageCreateObject;
 import com.feed_the_beast.ftbquests.net.edit.MessageDeleteObject;
 import com.feed_the_beast.ftbquests.net.edit.MessageEditObject;
@@ -29,7 +30,6 @@ import com.feed_the_beast.ftbquests.net.edit.MessageMoveChapter;
 import com.feed_the_beast.ftbquests.net.edit.MessageMoveQuest;
 import com.feed_the_beast.ftbquests.net.edit.MessageResetProgress;
 import com.feed_the_beast.ftbquests.net.edit.MessageSetDep;
-import com.feed_the_beast.ftbquests.quest.ProgressingQuestObject;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
@@ -86,14 +86,10 @@ public class GuiQuestTree extends GuiBase
 			{
 				List<ContextMenuItem> contextMenu = new ArrayList<>();
 				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.add_chapter"), GuiIcons.ADD, GuiQuestTree.this::addChapter));
-				contextMenu.add(new ContextMenuItem(I18n.format("selectServer.edit"), GuiIcons.SETTINGS, () -> new MessageEditObject(chapter.getID()).sendToServer()));
 				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.move_up"), GuiIcons.UP, () -> new MessageMoveChapter(chapter.getID(), true).sendToServer()).setEnabled(chapter.index > 0));
 				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.move_down"), GuiIcons.DOWN, () -> new MessageMoveChapter(chapter.getID(), false).sendToServer()).setEnabled(chapter.index < questFile.chapters.size() - 1));
 				contextMenu.add(ContextMenuItem.SEPARATOR);
-				contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), GuiIcons.REMOVE, () -> new MessageDeleteObject(chapter.getID()).sendToServer()).setYesNo(I18n.format("delete_item", chapter.getDisplayName().getFormattedText())));
-				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.reset_progress"), GuiIcons.REFRESH, () -> new MessageResetProgress(chapter.getID()).sendToServer()).setYesNo(I18n.format("ftbquests.gui.reset_progress_q")));
-				contextMenu.add(copyIDItem(chapter));
-				contextMenu.add(changeIDItem(getGui(), chapter));
+				addObjectMenuItems(contextMenu, getGui(), chapter);
 				getGui().openContextMenu(contextMenu);
 			}
 		}
@@ -184,7 +180,6 @@ public class GuiQuestTree extends GuiBase
 			if (questFile.canEdit() && button.isRight())
 			{
 				List<ContextMenuItem> contextMenu = new ArrayList<>();
-				contextMenu.add(new ContextMenuItem(I18n.format("selectWorld.edit"), GuiIcons.SETTINGS, () -> new MessageEditObject(quest.getID()).sendToServer()));
 				/*contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.move"), GuiIcons.RIGHT, () ->
 				{
 					//ButtonQuest
@@ -192,7 +187,7 @@ public class GuiQuestTree extends GuiBase
 
 				QuestObject object = questFile.get(selectedQuest);
 
-				if (object instanceof ProgressingQuestObject && quest.hasDependency((ProgressingQuestObject) object))
+				if (object != null && quest.hasDependency(object))
 				{
 					contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.rem_dep"), GuiIcons.REMOVE, () -> new MessageSetDep(quest.getID(), selectedQuest, false).sendToServer()));
 				}
@@ -202,10 +197,7 @@ public class GuiQuestTree extends GuiBase
 				}
 
 				contextMenu.add(ContextMenuItem.SEPARATOR);
-				contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), GuiIcons.REMOVE, () -> new MessageDeleteObject(quest.getID()).sendToServer()).setYesNo(I18n.format("delete_item", quest.getDisplayName().getFormattedText())));
-				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.reset_progress"), GuiIcons.REFRESH, () -> new MessageResetProgress(quest.getID()).sendToServer()).setYesNo(I18n.format("ftbquests.gui.reset_progress_q")));
-				contextMenu.add(copyIDItem(quest));
-				contextMenu.add(changeIDItem(getGui(), quest));
+				addObjectMenuItems(contextMenu, getGui(), quest);
 				getGui().openContextMenu(contextMenu);
 			}
 			else if (questFile.canEdit() && button.isLeft() && isCtrlKeyDown())
@@ -692,21 +684,22 @@ public class GuiQuestTree extends GuiBase
 		}).openGui();
 	}
 
-	public ContextMenuItem copyIDItem(QuestObject object)
+	public void addObjectMenuItems(List<ContextMenuItem> contextMenu, GuiBase prevGui, QuestObject object)
 	{
-		return new ContextMenuItem(I18n.format("ftbquests.gui.copy_id"), GuiIcons.INFO, () -> setClipboardString(object.getID()));
-	}
-
-	public ContextMenuItem changeIDItem(GuiBase prevGui, QuestObject object)
-	{
-		return new ContextMenuItem(I18n.format("ftbquests.gui.change_id"), GuiIcons.NOTES, () -> new GuiEditConfigValue("id", new ConfigString(object.id, Pattern.compile("^[a-z0-9_]{1,32}$")), (value, set) -> {
+		contextMenu.add(new ContextMenuItem(I18n.format("selectServer.edit"), GuiIcons.SETTINGS, () -> new MessageEditObject(object.getID()).sendToServer()));
+		contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), GuiIcons.REMOVE, () -> new MessageDeleteObject(object.getID()).sendToServer()).setYesNo(I18n.format("delete_item", object.getDisplayName().getFormattedText())));
+		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.reset_progress"), GuiIcons.REFRESH, () -> new MessageResetProgress(object.getID()).sendToServer()).setYesNo(I18n.format("ftbquests.gui.reset_progress_q")));
+		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.complete_instantly"), GuiIcons.CHECK, () -> new MessageCompleteInstantly(object.getID()).sendToServer()).setYesNo(I18n.format("ftbquests.gui.complete_instantly_q")));
+		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.change_id"), GuiIcons.NOTES, () -> new GuiEditConfigValue("id", new ConfigString(object.id, Pattern.compile("^[a-z0-9_]{1,32}$")), (value, set) -> {
 			prevGui.openGui();
 
 			if (set)
 			{
 				new MessageChangeID(object.getID(), value.getString()).sendToServer();
 			}
-		}).openGui());
+		}).openGui()));
+
+		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.copy_id"), GuiIcons.INFO, () -> setClipboardString(object.getID())));
 	}
 
 	@Override

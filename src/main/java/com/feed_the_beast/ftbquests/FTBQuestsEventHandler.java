@@ -11,11 +11,6 @@ import com.feed_the_beast.ftbquests.block.ItemBlockProgressScreen;
 import com.feed_the_beast.ftbquests.block.ItemBlockScreen;
 import com.feed_the_beast.ftbquests.item.ItemScript;
 import com.feed_the_beast.ftbquests.item.ItemXPVial;
-import com.feed_the_beast.ftbquests.quest.rewards.CommandReward;
-import com.feed_the_beast.ftbquests.quest.rewards.ExperienceLevelsReward;
-import com.feed_the_beast.ftbquests.quest.rewards.ExperienceReward;
-import com.feed_the_beast.ftbquests.quest.rewards.ItemReward;
-import com.feed_the_beast.ftbquests.quest.rewards.QuestRewardType;
 import com.feed_the_beast.ftbquests.quest.tasks.FluidTask;
 import com.feed_the_beast.ftbquests.quest.tasks.ForgeEnergyTask;
 import com.feed_the_beast.ftbquests.quest.tasks.ItemTask;
@@ -42,16 +37,32 @@ import net.minecraftforge.fml.common.registry.GameRegistry;
 @Mod.EventBusSubscriber(modid = FTBQuests.MOD_ID)
 public class FTBQuestsEventHandler
 {
+	private static Block withName(Block block, String name)
+	{
+		block.setCreativeTab(FTBQuests.TAB);
+		block.setRegistryName(name);
+		block.setTranslationKey(FTBQuests.MOD_ID + "." + name);
+		return block;
+	}
+
+	private static Item withName(Item item, String name)
+	{
+		item.setCreativeTab(FTBQuests.TAB);
+		item.setRegistryName(name);
+		item.setTranslationKey(FTBQuests.MOD_ID + "." + name);
+		return item;
+	}
+
 	@SubscribeEvent
 	public static void registerBlocks(RegistryEvent.Register<Block> event)
 	{
 		event.getRegistry().registerAll(
-				new BlockScreen().setRegistryName("screen").setTranslationKey(FTBQuests.MOD_ID + ".screen"),
-				new BlockScreenPart().setRegistryName("screen_part").setTranslationKey(FTBQuests.MOD_ID + ".screen"),
-				new BlockProgressDetector().setRegistryName("progress_detector").setTranslationKey(FTBQuests.MOD_ID + ".progress_detector"),
-				new BlockProgressScreen().setRegistryName("progress_screen").setTranslationKey(FTBQuests.MOD_ID + ".progress_screen"),
-				new BlockProgressScreenPart().setRegistryName("progress_screen_part").setTranslationKey(FTBQuests.MOD_ID + ".progress_screen"),
-				new BlockQuestChest().setRegistryName("chest").setTranslationKey(FTBQuests.MOD_ID + ".chest")
+				withName(new BlockScreen(), "screen"),
+				withName(new BlockScreenPart(), "screen_part"),
+				withName(new BlockProgressDetector(), "progress_detector"),
+				withName(new BlockProgressScreen(), "progress_screen"),
+				withName(new BlockProgressScreenPart(), "progress_screen_part"),
+				withName(new BlockQuestChest(), "chest")
 		);
 
 		GameRegistry.registerTileEntity(TileScreenCore.class, new ResourceLocation(FTBQuests.MOD_ID, "screen_core"));
@@ -71,8 +82,8 @@ public class FTBQuestsEventHandler
 				new ItemBlockProgressScreen(FTBQuestsBlocks.PROGRESS_SCREEN).setRegistryName("progress_screen"),
 				new ItemBlock(FTBQuestsBlocks.CHEST).setRegistryName("chest"),
 
-				new ItemXPVial().setRegistryName("xp_vial").setTranslationKey(FTBQuests.MOD_ID + ".xp_vial"),
-				new ItemScript().setRegistryName("script").setTranslationKey(FTBQuests.MOD_ID + ".script")
+				withName(new ItemXPVial(), "xp_vial"),
+				withName(new ItemScript(), "script")
 		);
 	}
 
@@ -89,17 +100,6 @@ public class FTBQuestsEventHandler
 				new QuestTaskType(ItemTask.class, ItemTask::new).setRegistryName("item"),
 				new QuestTaskType(FluidTask.class, FluidTask::new).setRegistryName("fluid"),
 				new QuestTaskType(ForgeEnergyTask.class, ForgeEnergyTask::new).setRegistryName("forge_energy")
-		);
-	}
-
-	@SubscribeEvent
-	public static void registerRewards(RegistryEvent.Register<QuestRewardType> event)
-	{
-		event.getRegistry().registerAll(
-				new QuestRewardType(ItemReward.class, ItemReward::new).setRegistryName("item"),
-				new QuestRewardType(ExperienceReward.class, ExperienceReward::new).setRegistryName("xp"),
-				new QuestRewardType(ExperienceLevelsReward.class, ExperienceLevelsReward::new).setRegistryName("xp_levels"),
-				new QuestRewardType(CommandReward.class, CommandReward::new).setRegistryName("command")
 		);
 	}
 }

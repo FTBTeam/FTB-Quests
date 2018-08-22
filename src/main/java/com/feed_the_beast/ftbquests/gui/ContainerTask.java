@@ -65,7 +65,7 @@ public class ContainerTask extends Container
 				ItemStack stack = slot.getStack();
 				ItemStack prevStack = stack.copy();
 
-				stack = data.insertItem(stack, dragType == 1, false);
+				stack = data.insertItem(stack, dragType == 1, false, player);
 
 				if (stack.isEmpty())
 				{
@@ -91,7 +91,7 @@ public class ContainerTask extends Container
 		if ((id == 0 || id == 1) && data.task.canInsertItem())
 		{
 			ItemStack stack = player.inventory.getItemStack();
-			ItemStack stack1 = data.insertItem(stack, id == 1, false);
+			ItemStack stack1 = data.insertItem(stack, id == 1, false, player);
 
 			if (stack != stack1)
 			{

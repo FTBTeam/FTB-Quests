@@ -5,7 +5,6 @@ import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToServer;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.FTBQuests;
-import com.feed_the_beast.ftbquests.quest.ProgressingQuestObject;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
@@ -61,7 +60,7 @@ public class MessageSetDep extends MessageToServer
 			Quest quest = ServerQuestFile.INSTANCE.getQuest(id);
 			QuestObject d = ServerQuestFile.INSTANCE.get(dep);
 
-			if (quest != null && d instanceof ProgressingQuestObject && quest.setDependency((ProgressingQuestObject) d, add))
+			if (quest != null && d != null && quest.setDependency(d, add))
 			{
 				ServerQuestFile.INSTANCE.save();
 				new MessageSetDepResponse(id, dep, add).sendToAll();

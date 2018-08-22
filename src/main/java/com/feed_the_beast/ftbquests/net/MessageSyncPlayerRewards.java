@@ -1,62 +1,58 @@
-package com.feed_the_beast.ftbquests.net.edit;
+package com.feed_the_beast.ftbquests.net;
 
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToClient;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
-import com.feed_the_beast.ftbquests.quest.ProgressingQuestObject;
-import com.feed_the_beast.ftbquests.quest.QuestObject;
+import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+
+import java.util.Collection;
 
 /**
  * @author LatvianModder
  */
-public class MessageResetProgressResponse extends MessageToClient
+public class MessageSyncPlayerRewards extends MessageToClient
 {
-	private String id;
+	public Collection<ItemStack> rewards;
 
-	public MessageResetProgressResponse()
+	public MessageSyncPlayerRewards()
 	{
 	}
 
-	public MessageResetProgressResponse(String i)
+	public MessageSyncPlayerRewards(Collection<ItemStack> r)
 	{
-		id = i;
+		rewards = r;
 	}
 
 	@Override
 	public NetworkWrapper getWrapper()
 	{
-		return FTBQuestsEditNetHandler.EDIT;
+		return FTBQuestsNetHandler.GENERAL;
 	}
 
 	@Override
 	public void writeData(DataOut data)
 	{
-		data.writeString(id);
+		data.writeCollection(rewards, DataOut.ITEM_STACK);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
-		id = data.readString();
+		rewards = data.readCollection(DataIn.ITEM_STACK);
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void onMessage()
 	{
-		if (ClientQuestFile.existsWithTeam())
+		if (ClientQuestFile.exists())
 		{
-			QuestObject object = ClientQuestFile.INSTANCE.get(id);
-
-			if (object instanceof ProgressingQuestObject)
-			{
-				((ProgressingQuestObject) object).resetProgress(ClientQuestFile.INSTANCE.self);
-			}
-
+			ClientQuestFile.INSTANCE.rewards.items.clear();
+			ClientQuestFile.INSTANCE.rewards.items.addAll(rewards);
 			ClientQuestFile.INSTANCE.refreshGui(ClientQuestFile.INSTANCE);
 		}
 	}

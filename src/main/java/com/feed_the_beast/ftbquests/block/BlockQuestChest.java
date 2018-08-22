@@ -1,7 +1,6 @@
 package com.feed_the_beast.ftbquests.block;
 
 import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
-import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.tile.TileQuestChest;
@@ -42,7 +41,6 @@ public class BlockQuestChest extends BlockWithHorizontalFacing
 	public BlockQuestChest()
 	{
 		super(Material.IRON, MapColor.GRAY);
-		setCreativeTab(FTBQuests.TAB);
 		setHardness(1F);
 	}
 

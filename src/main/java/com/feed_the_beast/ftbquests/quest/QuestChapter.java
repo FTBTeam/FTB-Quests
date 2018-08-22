@@ -18,7 +18,7 @@ import java.util.List;
 /**
  * @author LatvianModder
  */
-public final class QuestChapter extends ProgressingQuestObject
+public final class QuestChapter extends QuestObject
 {
 	public final QuestFile file;
 	public int index;

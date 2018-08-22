@@ -3,11 +3,10 @@ package com.feed_the_beast.ftbquests.block;
 import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
 import com.feed_the_beast.ftblib.lib.util.BlockUtils;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
-import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.FTBQuestsBlocks;
 import com.feed_the_beast.ftbquests.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
-import com.feed_the_beast.ftbquests.quest.ProgressingQuestObject;
+import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.tile.TileProgressScreenBase;
 import com.feed_the_beast.ftbquests.tile.TileProgressScreenCore;
 import com.feed_the_beast.ftbquests.tile.TileProgressScreenPart;
@@ -51,7 +50,6 @@ public class BlockProgressScreen extends BlockWithHorizontalFacing
 	public BlockProgressScreen()
 	{
 		super(Material.IRON, MapColor.BLACK);
-		setCreativeTab(FTBQuests.TAB);
 		setHardness(0.3F);
 		setDefaultState(blockState.getBaseState().withProperty(FACING, EnumFacing.NORTH));
 	}
@@ -351,7 +349,7 @@ public class BlockProgressScreen extends BlockWithHorizontalFacing
 		tooltip.add(I18n.format("tile.ftbquests.screen.size") + ": " + TextFormatting.GOLD + (1 + size * 2) + " x " + (1 + size * 2));
 		tooltip.add(I18n.format("ftbquests.team") + ": " + TextFormatting.DARK_GREEN + team);
 
-		ProgressingQuestObject object = ClientQuestFile.INSTANCE.getProgressing(nbt == null ? "" : nbt.getString("Object"));
+		QuestObject object = ClientQuestFile.INSTANCE.get(nbt == null ? "" : nbt.getString("Object"));
 
 		if (object != null)
 		{

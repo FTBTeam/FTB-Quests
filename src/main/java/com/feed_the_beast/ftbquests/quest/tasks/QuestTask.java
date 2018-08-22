@@ -4,9 +4,9 @@ import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
-import com.feed_the_beast.ftbquests.quest.ProgressingQuestObject;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
+import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.tile.TileScreenCore;
@@ -21,7 +21,7 @@ import javax.annotation.Nullable;
 /**
  * @author LatvianModder
  */
-public abstract class QuestTask extends ProgressingQuestObject
+public abstract class QuestTask extends QuestObject
 {
 	public final Quest quest;
 	public int index;

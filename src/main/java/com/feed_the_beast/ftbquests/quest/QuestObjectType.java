@@ -10,8 +10,7 @@ public enum QuestObjectType implements IStringSerializable
 	FILE("file", 1),
 	CHAPTER("chapter", 2),
 	QUEST("quest", 4),
-	TASK("task", 8),
-	REWARD("reward", 16);
+	TASK("task", 8);
 
 	public static final QuestObjectType[] VALUES = values();
 

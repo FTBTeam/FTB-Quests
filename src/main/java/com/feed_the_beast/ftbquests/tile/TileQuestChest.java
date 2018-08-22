@@ -6,14 +6,17 @@ import com.feed_the_beast.ftblib.lib.config.ConfigNull;
 import com.feed_the_beast.ftblib.lib.config.ConfigTeam;
 import com.feed_the_beast.ftblib.lib.config.IConfigCallback;
 import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
+import com.feed_the_beast.ftblib.lib.data.ForgePlayer;
 import com.feed_the_beast.ftblib.lib.data.Universe;
 import com.feed_the_beast.ftblib.lib.tile.EnumSaveType;
 import com.feed_the_beast.ftblib.lib.tile.TileBase;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.gui.FTBQuestsGuiHandler;
+import com.feed_the_beast.ftbquests.net.MessageSyncPlayerRewards;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
+import com.feed_the_beast.ftbquests.util.FTBQuestsPlayerData;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -107,8 +110,11 @@ public class TileQuestChest extends TileBase implements IItemHandler, IConfigCal
 	{
 		if (!player.isSneaking())
 		{
-			if (Universe.get().getPlayer(player).team.getName().equals(team))
+			ForgePlayer p = Universe.get().getPlayer(player);
+
+			if (p.team.getName().equals(team))
 			{
+				new MessageSyncPlayerRewards(FTBQuestsPlayerData.get(p).rewards.items).sendTo(player);
 				FTBQuestsGuiHandler.CHEST.open(player, pos);
 			}
 
@@ -160,6 +166,11 @@ public class TileQuestChest extends TileBase implements IItemHandler, IConfigCal
 	@Override
 	public ItemStack insertItem(int slot, ItemStack stack, boolean simulate)
 	{
+		return insert(stack, simulate, null);
+	}
+
+	public ItemStack insert(ItemStack stack, boolean simulate, @Nullable EntityPlayer player)
+	{
 		QuestFile file = FTBQuests.PROXY.getQuestFile(world);
 
 		cTeam = getTeam();
@@ -170,11 +181,11 @@ public class TileQuestChest extends TileBase implements IItemHandler, IConfigCal
 			{
 				if (task.canInsertItem() && task.quest.canStartTasks(cTeam))
 				{
-					stack = cTeam.getQuestTaskData(task).insertItem(stack, false, simulate);
+					stack = cTeam.getQuestTaskData(task).insertItem(stack, false, simulate, player);
 
 					if (stack.isEmpty())
 					{
-						return stack;
+						return ItemStack.EMPTY;
 					}
 				}
 			}

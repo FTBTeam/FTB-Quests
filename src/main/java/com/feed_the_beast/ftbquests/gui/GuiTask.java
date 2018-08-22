@@ -18,6 +18,7 @@ import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.net.MessageGetScreen;
+import com.feed_the_beast.ftbquests.net.edit.MessageCompleteInstantly;
 import com.feed_the_beast.ftbquests.net.edit.MessageEditObject;
 import com.feed_the_beast.ftbquests.net.edit.MessageResetProgress;
 import net.minecraft.client.gui.GuiScreen;
@@ -126,10 +127,49 @@ public class GuiTask extends GuiBase
 					}));
 				}
 
+				if (!container.data.task.quest.playerRewards.isEmpty() || !container.data.task.quest.teamRewards.isEmpty())
+				{
+					add(new Tab(this, I18n.format("ftbquests.rewards") + ":", "", GuiIcons.MONEY_BAG, button -> new GuiRewards().openGui())
+					{
+						@Override
+						public void addMouseOverText(List<String> list)
+						{
+							super.addMouseOverText(list);
+
+							for (ItemStack stack : container.data.task.quest.playerRewards)
+							{
+								list.add("- " + stack.getCount() + "x " + stack.getRarity().rarityColor + stack.getDisplayName());
+							}
+
+							for (ItemStack stack : container.data.task.quest.teamRewards)
+							{
+								list.add(TextFormatting.BLUE + "- " + stack.getCount() + "x " + stack.getRarity().rarityColor + stack.getDisplayName());
+							}
+						}
+					});
+				}
+
 				if (questFile.canEdit())
 				{
-					add(new Tab(this, I18n.format("ftbquests.gui.reset_progress"), I18n.format("ftbquests.gui.reset_progress_q"), GuiIcons.REFRESH, button -> new MessageResetProgress(container.data.task.getID()).sendToServer()));
 					add(new Tab(this, I18n.format("selectServer.edit"), "", GuiIcons.SETTINGS, button -> new MessageEditObject(container.data.task.getID()).sendToServer()));
+
+					if (container.data.getProgress() > 0L)
+					{
+						add(new Tab(this, I18n.format("ftbquests.gui.reset_progress"), I18n.format("ftbquests.gui.reset_progress_q"), GuiIcons.REFRESH, button -> {
+							new MessageResetProgress(container.data.task.getID()).sendToServer();
+							container.data.resetProgress();
+							tabs.refreshWidgets();
+						}));
+					}
+
+					if (container.data.getProgress() < container.data.task.getMaxProgress())
+					{
+						add(new Tab(this, I18n.format("ftbquests.gui.complete_instantly"), I18n.format("ftbquests.gui.complete_instantly_q"), GuiIcons.CHECK, button -> {
+							new MessageCompleteInstantly(container.data.task.getID()).sendToServer();
+							container.data.completeInstantly();
+							tabs.refreshWidgets();
+						}));
+					}
 				}
 
 				List<Tab> extra = new ArrayList<>();

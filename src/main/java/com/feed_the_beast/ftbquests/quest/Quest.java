@@ -3,15 +3,17 @@ package com.feed_the_beast.ftbquests.quest;
 import com.feed_the_beast.ftblib.lib.config.ConfigEnum;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigInt;
+import com.feed_the_beast.ftblib.lib.config.ConfigItemStack;
 import com.feed_the_beast.ftblib.lib.config.ConfigList;
 import com.feed_the_beast.ftblib.lib.config.ConfigString;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.IconAnimation;
-import com.feed_the_beast.ftbquests.quest.rewards.QuestReward;
-import com.feed_the_beast.ftbquests.quest.rewards.QuestRewardType;
+import com.feed_the_beast.ftbquests.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskType;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagInt;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
 import net.minecraft.util.math.MathHelper;
@@ -26,7 +28,7 @@ import java.util.List;
 /**
  * @author LatvianModder
  */
-public final class Quest extends ProgressingQuestObject
+public final class Quest extends QuestObject
 {
 	public static final int POS_LIMIT = 25;
 
@@ -37,7 +39,8 @@ public final class Quest extends ProgressingQuestObject
 	public final List<String> text;
 	public final List<String> dependencies;
 	public final List<QuestTask> tasks;
-	public final List<QuestReward> rewards;
+	public final List<ItemStack> playerRewards;
+	public final List<ItemStack> teamRewards;
 	public int timesCompleted;
 
 	public Quest(QuestChapter c, NBTTagCompound nbt)
@@ -63,13 +66,14 @@ public final class Quest extends ProgressingQuestObject
 		readID(nbt);
 
 		tasks = new ArrayList<>();
-		rewards = new ArrayList<>();
+		playerRewards = new ArrayList<>();
+		teamRewards = new ArrayList<>();
 
 		list = nbt.getTagList("tasks", Constants.NBT.TAG_COMPOUND);
 
-		for (int k = 0; k < list.tagCount(); k++)
+		for (int i = 0; i < list.tagCount(); i++)
 		{
-			QuestTask task = QuestTaskType.createTask(this, list.getCompoundTagAt(k));
+			QuestTask task = QuestTaskType.createTask(this, list.getCompoundTagAt(i));
 
 			if (task != null)
 			{
@@ -79,13 +83,70 @@ public final class Quest extends ProgressingQuestObject
 
 		list = nbt.getTagList("rewards", Constants.NBT.TAG_COMPOUND);
 
-		for (int k = 0; k < list.tagCount(); k++)
+		for (int i = 0; i < list.tagCount(); i++)
 		{
-			QuestReward reward = QuestRewardType.createReward(this, list.getCompoundTagAt(k));
+			ItemStack stack = ItemStack.EMPTY;
 
-			if (reward != null)
+			NBTTagCompound nbt1 = list.getCompoundTagAt(i);
+
+			switch (nbt1.getString("type"))
 			{
-				rewards.add(reward);
+				case "item":
+					stack = new ItemStack(nbt1.getCompoundTag("item"));
+					break;
+				case "xp":
+					stack = new ItemStack(FTBQuestsItems.XP_VIAL);
+					stack.setTagInfo("xp", new NBTTagInt(nbt1.getInteger("xp")));
+					break;
+				case "xp_levels":
+					stack = new ItemStack(FTBQuestsItems.XP_VIAL);
+					stack.setTagInfo("xp_levels", new NBTTagInt(nbt1.getInteger("xp_levels")));
+					break;
+				case "command":
+					stack = new ItemStack(FTBQuestsItems.SCRIPT);
+					stack.setTagInfo("command", new NBTTagString(nbt1.getString("command")));
+					break;
+			}
+
+			if (!stack.isEmpty())
+			{
+				if (nbt1.hasKey("title"))
+				{
+					stack.setStackDisplayName(nbt1.getString("title"));
+				}
+
+				if (nbt1.getBoolean("team_reward"))
+				{
+					teamRewards.add(stack);
+				}
+				else
+				{
+					playerRewards.add(stack);
+				}
+			}
+		}
+
+		list = nbt.getTagList("player_rewards", Constants.NBT.TAG_COMPOUND);
+
+		for (int i = 0; i < list.tagCount(); i++)
+		{
+			ItemStack stack = new ItemStack(list.getCompoundTagAt(i));
+
+			if (!stack.isEmpty())
+			{
+				playerRewards.add(stack);
+			}
+		}
+
+		list = nbt.getTagList("team_rewards", Constants.NBT.TAG_COMPOUND);
+
+		for (int i = 0; i < list.tagCount(); i++)
+		{
+			ItemStack stack = new ItemStack(list.getCompoundTagAt(i));
+
+			if (!stack.isEmpty())
+			{
+				teamRewards.add(stack);
 			}
 		}
 
@@ -194,38 +255,28 @@ public final class Quest extends ProgressingQuestObject
 			nbt.setTag("tasks", array);
 		}
 
-		if (!rewards.isEmpty())
+		if (!playerRewards.isEmpty())
 		{
 			NBTTagList array = new NBTTagList();
 
-			for (QuestReward reward : rewards)
+			for (ItemStack stack : playerRewards)
 			{
-				QuestRewardType type = QuestRewardType.getType(reward.getClass());
-
-				if (type != null)
-				{
-					NBTTagCompound rewardNBT = new NBTTagCompound();
-					reward.writeData(rewardNBT);
-					rewardNBT.setString("id", reward.id);
-					rewardNBT.setString("type", type.getTypeForNBT());
-
-					if (reward.teamReward)
-					{
-						rewardNBT.setBoolean("team_reward", true);
-					}
-
-					if (!reward.title.isEmpty())
-					{
-						rewardNBT.setString("title", reward.title);
-					}
-
-					QuestFile.writeIcon(rewardNBT, "icon", reward.icon);
-
-					array.appendTag(rewardNBT);
-				}
+				array.appendTag(stack.serializeNBT());
 			}
 
-			nbt.setTag("rewards", array);
+			nbt.setTag("player_rewards", array);
+		}
+
+		if (!teamRewards.isEmpty())
+		{
+			NBTTagList array = new NBTTagList();
+
+			for (ItemStack stack : teamRewards)
+			{
+				array.appendTag(stack.serializeNBT());
+			}
+
+			nbt.setTag("team_rewards", array);
 		}
 
 		if (timesCompleted > 0)
@@ -323,7 +374,7 @@ public final class Quest extends ProgressingQuestObject
 				{
 					QuestObject object = chapter.file.get(value);
 
-					if (object instanceof ProgressingQuestObject && ((ProgressingQuestObject) object).isComplete(data))
+					if (object != null && object.isComplete(data))
 					{
 						return true;
 					}
@@ -335,7 +386,7 @@ public final class Quest extends ProgressingQuestObject
 				{
 					QuestObject object = chapter.file.get(value);
 
-					if (object instanceof ProgressingQuestObject && !((ProgressingQuestObject) object).isComplete(data))
+					if (object != null && !object.isComplete(data))
 					{
 						return false;
 					}
@@ -358,7 +409,7 @@ public final class Quest extends ProgressingQuestObject
 		{
 			QuestObject object = chapter.file.get(value);
 
-			if (object instanceof ProgressingQuestObject && !((ProgressingQuestObject) object).isComplete(data))
+			if (object != null && !object.isComplete(data))
 			{
 				return false;
 			}
@@ -403,14 +454,6 @@ public final class Quest extends ProgressingQuestObject
 		}
 
 		tasks.clear();
-
-		for (QuestReward reward : rewards)
-		{
-			reward.deleteChildren();
-			reward.invalid = true;
-		}
-
-		rewards.clear();
 	}
 
 	@Override
@@ -525,6 +568,56 @@ public final class Quest extends ProgressingQuestObject
 				}
 			}
 		}, new ConfigList<>(new ConfigString("")));
+
+		group.add("player_rewards", new ConfigList<ConfigItemStack>(new ConfigItemStack(ItemStack.EMPTY))
+		{
+			@Override
+			public void readFromList()
+			{
+				playerRewards.clear();
+
+				for (ConfigItemStack value : list)
+				{
+					playerRewards.add(value.getStack());
+				}
+			}
+
+			@Override
+			public void writeToList()
+			{
+				list.clear();
+
+				for (ItemStack stack : playerRewards)
+				{
+					list.add(new ConfigItemStack(stack));
+				}
+			}
+		}, new ConfigList<>(new ConfigItemStack(ItemStack.EMPTY)));
+
+		group.add("team_rewards", new ConfigList<ConfigItemStack>(new ConfigItemStack(ItemStack.EMPTY))
+		{
+			@Override
+			public void readFromList()
+			{
+				teamRewards.clear();
+
+				for (ConfigItemStack value : list)
+				{
+					teamRewards.add(value.getStack());
+				}
+			}
+
+			@Override
+			public void writeToList()
+			{
+				list.clear();
+
+				for (ItemStack stack : teamRewards)
+				{
+					list.add(new ConfigItemStack(stack));
+				}
+			}
+		}, new ConfigList<>(new ConfigItemStack(ItemStack.EMPTY)));
 	}
 
 	public void move(byte direction)
@@ -587,7 +680,7 @@ public final class Quest extends ProgressingQuestObject
 		}
 	}
 
-	public boolean setDependency(ProgressingQuestObject dep, boolean add)
+	public boolean setDependency(QuestObject dep, boolean add)
 	{
 		if (dep == this)
 		{
@@ -615,7 +708,7 @@ public final class Quest extends ProgressingQuestObject
 		}
 	}
 
-	public boolean hasDependency(ProgressingQuestObject dep)
+	public boolean hasDependency(QuestObject dep)
 	{
 		String d = dep.getID();
 
@@ -656,11 +749,6 @@ public final class Quest extends ProgressingQuestObject
 		for (QuestTask task : tasks)
 		{
 			task.clearCachedData();
-		}
-
-		for (QuestReward reward : rewards)
-		{
-			reward.clearCachedData();
 		}
 	}
 }

@@ -35,6 +35,18 @@ public abstract class QuestObject
 
 	public abstract Icon getAltIcon();
 
+	public abstract long getProgress(IProgressData data);
+
+	public abstract long getMaxProgress();
+
+	public abstract void resetProgress(IProgressData data);
+
+	public abstract void completeInstantly(IProgressData data);
+
+	public abstract double getRelativeProgress(IProgressData data);
+
+	public abstract boolean isComplete(IProgressData data);
+
 	public Icon getIcon()
 	{
 		if (cachedIcon == null)
