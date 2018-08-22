@@ -1,11 +1,13 @@
 package com.feed_the_beast.ftbquests.util;
 
+import com.feed_the_beast.ftblib.lib.item.ItemStackSerializer;
+import com.feed_the_beast.ftblib.lib.util.InvUtils;
 import com.feed_the_beast.ftbquests.net.MessageSyncPlayerRewards;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraftforge.common.util.INBTSerializable;
-import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.items.IItemHandlerModifiable;
 import net.minecraftforge.items.ItemHandlerHelper;
 
 import java.util.ArrayList;
@@ -14,7 +16,7 @@ import java.util.List;
 /**
  * @author LatvianModder
  */
-public class PlayerRewards implements INBTSerializable<NBTTagList>, IItemHandler
+public class PlayerRewards implements INBTSerializable<NBTTagList>, IItemHandlerModifiable
 {
 	public final QuestFile file;
 	public final List<ItemStack> items;
@@ -35,7 +37,7 @@ public class PlayerRewards implements INBTSerializable<NBTTagList>, IItemHandler
 		{
 			if (!stack.isEmpty())
 			{
-				list.appendTag(stack.serializeNBT());
+				list.appendTag(ItemStackSerializer.write(stack));
 			}
 		}
 
@@ -49,7 +51,7 @@ public class PlayerRewards implements INBTSerializable<NBTTagList>, IItemHandler
 
 		for (int i = 0; i < nbt.tagCount(); i++)
 		{
-			ItemStack stack = new ItemStack(nbt.getCompoundTagAt(i));
+			ItemStack stack = ItemStackSerializer.read(nbt.getCompoundTagAt(i));
 
 			if (!stack.isEmpty())
 			{
@@ -93,7 +95,7 @@ public class PlayerRewards implements INBTSerializable<NBTTagList>, IItemHandler
 			if (!simulate)
 			{
 				stack.shrink(amount);
-				set(slot, stack);
+				setStackInSlot(slot, stack);
 			}
 
 			return stack1;
@@ -108,17 +110,16 @@ public class PlayerRewards implements INBTSerializable<NBTTagList>, IItemHandler
 		return 64;
 	}
 
-	public void set(int index, ItemStack stack)
+	@Override
+	public void setStackInSlot(int index, ItemStack stack)
 	{
 		if (index >= items.size())
 		{
 			if (!stack.isEmpty())
 			{
-				for (int i = 0; i < items.size(); i++)
+				for (ItemStack stack1 : items)
 				{
-					ItemStack stack1 = items.get(i);
-
-					if (ItemStack.areItemStacksEqual(stack, stack1))
+					if (InvUtils.stacksAreEqual(stack, stack1))
 					{
 						int add = Math.min(stack.getCount(), stack1.getMaxStackSize() - stack1.getCount());
 
@@ -165,6 +166,6 @@ public class PlayerRewards implements INBTSerializable<NBTTagList>, IItemHandler
 
 	public void add(ItemStack stack)
 	{
-		set(Short.MAX_VALUE, stack);
+		setStackInSlot(Short.MAX_VALUE, stack);
 	}
 }

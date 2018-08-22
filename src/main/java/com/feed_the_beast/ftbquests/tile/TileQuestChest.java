@@ -179,7 +179,7 @@ public class TileQuestChest extends TileBase implements IItemHandler, IConfigCal
 		{
 			for (QuestTask task : file.allTasks)
 			{
-				if (task.canInsertItem() && task.quest.canStartTasks(cTeam))
+				if (task.canInsertItem() && !task.isComplete(cTeam) && task.quest.canStartTasks(cTeam))
 				{
 					stack = cTeam.getQuestTaskData(task).insertItem(stack, false, simulate, player);
 

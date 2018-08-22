@@ -5,6 +5,7 @@ import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.tile.TileQuestChest;
 import com.feed_the_beast.ftbquests.util.PlayerRewards;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.ClickType;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
@@ -26,13 +27,18 @@ public class ContainerQuestChest extends Container
 		@Override
 		public boolean isItemValid(ItemStack stack)
 		{
-			return !ItemStack.areItemStacksEqual(chest.insert(stack, true, player), stack);
+			return true;
 		}
 
 		@Override
 		public void putStack(ItemStack stack)
 		{
-			chest.insert(stack, false, player);
+		}
+
+		@Override
+		public int getSlotStackLimit()
+		{
+			return 64;
 		}
 	}
 
@@ -50,9 +56,15 @@ public class ContainerQuestChest extends Container
 		}
 
 		@Override
+		public void putStack(ItemStack stack)
+		{
+			rewards.setStackInSlot(getSlotIndex(), stack.isEmpty() ? ItemStack.EMPTY : getStack().copy());
+		}
+
+		@Override
 		public void onSlotChanged()
 		{
-			rewards.set(getSlotIndex(), getStack().isEmpty() ? ItemStack.EMPTY : getStack().copy());
+			putStack(getStack());
 		}
 	}
 
@@ -96,6 +108,25 @@ public class ContainerQuestChest extends Container
 	public boolean canInteractWith(EntityPlayer player)
 	{
 		return !chest.isInvalid();
+	}
+
+	@Override
+	public ItemStack slotClick(int slot, int button, ClickType type, EntityPlayer player)
+	{
+		if (slot == 0 && (button == 0 || button == 1) && (type == ClickType.PICKUP || type == ClickType.QUICK_CRAFT))
+		{
+			if (!player.inventory.getItemStack().isEmpty())
+			{
+				player.inventory.setItemStack(chest.insert(player.inventory.getItemStack(), false, player));
+				player.inventory.markDirty();
+			}
+
+			return ItemStack.EMPTY;
+		}
+		else
+		{
+			return super.slotClick(slot, button, type, player);
+		}
 	}
 
 	@Override

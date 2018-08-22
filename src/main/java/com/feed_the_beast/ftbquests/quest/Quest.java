@@ -8,6 +8,7 @@ import com.feed_the_beast.ftblib.lib.config.ConfigList;
 import com.feed_the_beast.ftblib.lib.config.ConfigString;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.IconAnimation;
+import com.feed_the_beast.ftblib.lib.item.ItemStackSerializer;
 import com.feed_the_beast.ftbquests.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskType;
@@ -48,7 +49,7 @@ public final class Quest extends QuestObject
 		chapter = c;
 		title = nbt.getString("title");
 		description = nbt.getString("description");
-		icon = QuestFile.readIcon(nbt, "icon");
+		icon = ItemStackSerializer.read(nbt.getCompoundTag("icon"));
 		type = QuestType.NAME_MAP.get(nbt.getString("type"));
 		x = (byte) MathHelper.clamp(nbt.getByte("x"), -POS_LIMIT, POS_LIMIT);
 		y = (byte) MathHelper.clamp(nbt.getByte("y"), -POS_LIMIT, POS_LIMIT);
@@ -92,7 +93,7 @@ public final class Quest extends QuestObject
 			switch (nbt1.getString("type"))
 			{
 				case "item":
-					stack = new ItemStack(nbt1.getCompoundTag("item"));
+					stack = ItemStackSerializer.read(nbt1.getCompoundTag("item"));
 					break;
 				case "xp":
 					stack = new ItemStack(FTBQuestsItems.XP_VIAL);
@@ -130,7 +131,7 @@ public final class Quest extends QuestObject
 
 		for (int i = 0; i < list.tagCount(); i++)
 		{
-			ItemStack stack = new ItemStack(list.getCompoundTagAt(i));
+			ItemStack stack = ItemStackSerializer.read(list.getCompoundTagAt(i));
 
 			if (!stack.isEmpty())
 			{
@@ -142,7 +143,7 @@ public final class Quest extends QuestObject
 
 		for (int i = 0; i < list.tagCount(); i++)
 		{
-			ItemStack stack = new ItemStack(list.getCompoundTagAt(i));
+			ItemStack stack = ItemStackSerializer.read(list.getCompoundTagAt(i));
 
 			if (!stack.isEmpty())
 			{
@@ -188,7 +189,10 @@ public final class Quest extends QuestObject
 			nbt.setString("title", title);
 		}
 
-		QuestFile.writeIcon(nbt, "icon", icon);
+		if (!icon.isEmpty())
+		{
+			nbt.setTag("icon", ItemStackSerializer.write(icon));
+		}
 
 		if (type != QuestType.NORMAL)
 		{
@@ -247,7 +251,11 @@ public final class Quest extends QuestObject
 						taskNBT.setString("title", task.title);
 					}
 
-					QuestFile.writeIcon(taskNBT, "icon", task.icon);
+					if (!task.icon.isEmpty())
+					{
+						nbt.setTag("icon", ItemStackSerializer.write(task.icon));
+					}
+
 					array.appendTag(taskNBT);
 				}
 			}
@@ -261,7 +269,7 @@ public final class Quest extends QuestObject
 
 			for (ItemStack stack : playerRewards)
 			{
-				array.appendTag(stack.serializeNBT());
+				array.appendTag(ItemStackSerializer.write(stack));
 			}
 
 			nbt.setTag("player_rewards", array);
@@ -273,7 +281,10 @@ public final class Quest extends QuestObject
 
 			for (ItemStack stack : teamRewards)
 			{
-				array.appendTag(stack.serializeNBT());
+				if (!stack.isEmpty())
+				{
+					array.appendTag(ItemStackSerializer.write(stack));
+				}
 			}
 
 			nbt.setTag("team_rewards", array);

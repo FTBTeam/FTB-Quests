@@ -35,36 +35,47 @@ public class ForgeEnergyTask extends QuestTask
 	private static final ResourceLocation EMPTY_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "textures/tasks/fe_empty.png");
 	private static final ResourceLocation FULL_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "textures/tasks/fe_full.png");
 
-	public final ConfigLong value;
-	public final ConfigInt maxInput;
+	public long value;
+	public int maxInput;
 
 	public ForgeEnergyTask(Quest quest, NBTTagCompound nbt)
 	{
 		super(quest);
-		value = new ConfigLong(nbt.getLong("value"), 1, Long.MAX_VALUE);
-		maxInput = new ConfigInt(nbt.hasKey("max_input") ? nbt.getInteger("max_input") : Integer.MAX_VALUE, 100, Integer.MAX_VALUE);
+		value = nbt.hasKey("value") ? nbt.getLong("value") : 10000;
+
+		if (value < 1)
+		{
+			value = 1;
+		}
+
+		maxInput = nbt.hasKey("max_input") ? nbt.getInteger("max_input") : Integer.MAX_VALUE;
+
+		if (maxInput < 1)
+		{
+			maxInput = 1;
+		}
 	}
 
 	@Override
 	public long getMaxProgress()
 	{
-		return value.getLong();
+		return value;
 	}
 
 	@Override
 	public String getMaxProgressString()
 	{
-		return StringUtils.formatDouble(value.getDouble(), true);
+		return StringUtils.formatDouble(value, true);
 	}
 
 	@Override
 	public void writeData(NBTTagCompound nbt)
 	{
-		nbt.setLong("value", value.getLong());
+		nbt.setLong("value", value);
 
-		if (value.getInt() != Integer.MAX_VALUE)
+		if (maxInput != Integer.MAX_VALUE)
 		{
-			nbt.setInteger("max_input", value.getInt());
+			nbt.setInteger("max_input", maxInput);
 		}
 	}
 
@@ -77,14 +88,28 @@ public class ForgeEnergyTask extends QuestTask
 	@Override
 	public ITextComponent getAltDisplayName()
 	{
-		return new TextComponentTranslation("ftbquests.task.ftbquests.forge_energy.text", StringUtils.formatDouble(value.getLong(), true));
+		return new TextComponentTranslation("ftbquests.task.ftbquests.forge_energy.text", StringUtils.formatDouble(value, true));
 	}
 
 	@Override
 	public void getConfig(ConfigGroup group)
 	{
-		group.add("value", value, new ConfigLong(1));
-		group.add("max_input", maxInput, new ConfigInt(Integer.MAX_VALUE));
+		group.add("value", new ConfigLong(1, 1, Long.MAX_VALUE)
+		{
+			@Override
+			public long getLong()
+			{
+				return value;
+			}
+
+			@Override
+			public void setLong(long v)
+			{
+				value = v;
+			}
+		}, new ConfigLong(10000));
+
+		group.add("max_input", new ConfigInt(maxInput, 100, Integer.MAX_VALUE), new ConfigInt(Integer.MAX_VALUE));
 	}
 
 	@Override
@@ -206,9 +231,9 @@ public class ForgeEnergyTask extends QuestTask
 		@Override
 		public int receiveEnergy(int maxReceive, boolean simulate)
 		{
-			if (maxReceive > 0 && progress < task.value.getLong())
+			if (maxReceive > 0 && progress < task.value)
 			{
-				long add = Math.min(task.maxInput.getInt(), Math.min(maxReceive, task.value.getLong() - progress));
+				long add = Math.min(task.maxInput, Math.min(maxReceive, task.value - progress));
 
 				if (add > 0L)
 				{
@@ -240,7 +265,7 @@ public class ForgeEnergyTask extends QuestTask
 		@Override
 		public int getMaxEnergyStored()
 		{
-			return task.maxInput.getInt();
+			return task.maxInput;
 		}
 
 		@Override

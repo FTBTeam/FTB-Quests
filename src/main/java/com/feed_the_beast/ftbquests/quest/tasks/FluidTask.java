@@ -312,7 +312,7 @@ public class FluidTask extends QuestTask
 		return new Data(this, data);
 	}
 
-	public static class Data extends SimpleQuestTaskData<FluidTask> implements IFluidHandler, IItemHandler
+	public static class Data extends SimpleQuestTaskData<FluidTask> implements IFluidHandler
 	{
 		private final IFluidTankProperties[] properties;
 
@@ -409,7 +409,7 @@ public class FluidTask extends QuestTask
 				result = FluidUtil.tryEmptyContainerAndStow(stack1, this, inv, Integer.MAX_VALUE, player, !simulate);
 			}
 
-			return result.isSuccess() ? result.getResult().copy() : stack;
+			return result.isSuccess() ? result.getResult() : stack;
 		}
 
 		@Override
