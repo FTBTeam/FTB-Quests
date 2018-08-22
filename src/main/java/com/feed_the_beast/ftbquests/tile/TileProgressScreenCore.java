@@ -11,7 +11,7 @@ import com.feed_the_beast.ftblib.lib.tile.EnumSaveType;
 import com.feed_the_beast.ftblib.lib.util.BlockUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.FTBQuestsBlocks;
-import com.feed_the_beast.ftbquests.block.BlockScreen;
+import com.feed_the_beast.ftbquests.block.BlockProgressScreen;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
@@ -38,7 +38,7 @@ public class TileProgressScreenCore extends TileProgressScreenBase implements IC
 	public EnumFacing facing;
 	public String team = "";
 	public String chapter = "";
-	public int size = 0;
+	public int width = 0, height = 0;
 	public boolean indestructible = false;
 	public IBlockState skin = BlockUtils.AIR_STATE;
 
@@ -67,9 +67,14 @@ public class TileProgressScreenCore extends TileProgressScreenBase implements IC
 
 		nbt.setString("Chapter", chapter);
 
-		if (size > 0)
+		if (width > 0)
 		{
-			nbt.setByte("Size", (byte) size);
+			nbt.setByte("Width", (byte) width);
+		}
+
+		if (height > 0)
+		{
+			nbt.setByte("Height", (byte) width);
 		}
 
 		if (indestructible)
@@ -93,7 +98,8 @@ public class TileProgressScreenCore extends TileProgressScreenBase implements IC
 
 		team = nbt.getString("Team");
 		chapter = nbt.getString("Chapter");
-		size = nbt.getByte("Size");
+		width = nbt.getByte("Width");
+		height = nbt.getByte("Height");
 		indestructible = nbt.getBoolean("Indestructible");
 		skin = BlockUtils.getStateFromName(nbt.getString("Skin"));
 		updateContainingBlockInfo();
@@ -185,13 +191,13 @@ public class TileProgressScreenCore extends TileProgressScreenBase implements IC
 	@Override
 	public AxisAlignedBB getRenderBoundingBox()
 	{
-		return BlockScreen.getScreenAABB(pos, getFacing(), size);
+		return BlockProgressScreen.getScreenAABB(pos, getFacing(), width, height);
 	}
 
 	@Override
 	public double getMaxRenderDistanceSquared()
 	{
-		double d = 32D * (2 + size);
+		double d = 32D * (2 + height);
 		return d * d;
 	}
 
@@ -282,9 +288,9 @@ public class TileProgressScreenCore extends TileProgressScreenBase implements IC
 		{
 			boolean xaxis = getFacing().getAxis() == EnumFacing.Axis.X;
 
-			for (int y = 0; y < size * 2 + 1; y++)
+			for (int y = 0; y < height + 1; y++)
 			{
-				for (int x = -size; x <= size; x++)
+				for (int x = -width; x <= width; x++)
 				{
 					int offX = xaxis ? 0 : x;
 					int offZ = xaxis ? x : 0;

@@ -27,7 +27,7 @@ public class RenderProgressScreen extends TileEntitySpecialRenderer<TileProgress
 		{
 			return;
 		}
-		else if (screen.size == 0)
+		else if (screen.width == 0 && screen.height == 0)
 		{
 			BlockPos pos = screen.getPos().offset(screen.getFacing());
 			IBlockState state = screen.getWorld().getBlockState(pos);
@@ -59,8 +59,8 @@ public class RenderProgressScreen extends TileEntitySpecialRenderer<TileProgress
 
 				if (base.getScreen() == screen)
 				{
-					mx = BlockScreen.getClickX(screen.facing, base.getOffsetX(), base.getOffsetZ(), ray.hitVec.x - ray.getBlockPos().getX(), ray.hitVec.z - ray.getBlockPos().getZ(), screen.size);
-					my = BlockScreen.getClickY(base.getOffsetY(), ray.hitVec.y % 1D, screen.size);
+					mx = BlockScreen.getClickX(screen.facing, base.getOffsetX(), base.getOffsetZ(), ray.hitVec.x - ray.getBlockPos().getX(), ray.hitVec.z - ray.getBlockPos().getZ(), screen.width);
+					my = BlockScreen.getClickY(base.getOffsetY(), ray.hitVec.y % 1D, screen.height);
 				}
 			}
 		}
@@ -83,8 +83,8 @@ public class RenderProgressScreen extends TileEntitySpecialRenderer<TileProgress
 		boolean flag = font.getUnicodeFlag();
 		font.setUnicodeFlag(true);
 
-		GlStateManager.translate(-screen.size, -screen.size * 2F, -0.01F);
-		GlStateManager.scale(screen.size * 2 + 1, screen.size * 2 + 1, 1);
+		GlStateManager.translate(-screen.width, -screen.height - 1, -0.01F);
+		GlStateManager.scale(screen.width * 2 + 1, screen.height + 2, 1);
 
 		String top1 = chapter.getDisplayName().getUnformattedText();
 

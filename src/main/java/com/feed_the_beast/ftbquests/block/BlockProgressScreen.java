@@ -74,9 +74,15 @@ public class BlockProgressScreen extends BlockWithHorizontalFacing
 		for (int i = 1; i <= 4; i++)
 		{
 			ItemStack stack = new ItemStack(this);
-			stack.setTagInfo("Size", new NBTTagByte((byte) i));
+			stack.setTagInfo("Width", new NBTTagByte((byte) i));
+			stack.setTagInfo("Height", new NBTTagByte((byte) (i * 2)));
 			items.add(stack);
 		}
+
+		ItemStack stack = new ItemStack(this);
+		stack.setTagInfo("Width", new NBTTagByte((byte) 2));
+		stack.setTagInfo("Height", new NBTTagByte((byte) 3));
+		items.add(stack);
 	}
 
 	@Override
@@ -130,7 +136,7 @@ public class BlockProgressScreen extends BlockWithHorizontalFacing
 			{
 				if (player instanceof EntityPlayerMP)
 				{
-					screen.onClicked((EntityPlayerMP) player, BlockScreen.getClickX(facing, base.getOffsetX(), base.getOffsetZ(), hitX, hitZ, screen.size), BlockScreen.getClickY(base.getOffsetY(), hitY, screen.size));
+					screen.onClicked((EntityPlayerMP) player, BlockScreen.getClickX(facing, base.getOffsetX(), base.getOffsetZ(), hitX, hitZ, screen.width), BlockScreen.getClickY(base.getOffsetY(), hitY, screen.height));
 				}
 
 				return true;
@@ -157,15 +163,15 @@ public class BlockProgressScreen extends BlockWithHorizontalFacing
 
 			screen.facing = state.getValue(FACING);
 
-			if (screen.size > 0)
+			if (screen.width > 0 || screen.height > 0)
 			{
 				IBlockState state1 = FTBQuestsBlocks.PROGRESS_SCREEN_PART.getDefaultState().withProperty(FACING, screen.getFacing());
 
 				boolean xaxis = screen.facing.getAxis() == EnumFacing.Axis.X;
 
-				for (int y = 0; y < screen.size * 2 + 1; y++)
+				for (int y = 0; y < screen.height + 1; y++)
 				{
-					for (int x = -screen.size; x <= screen.size; x++)
+					for (int x = -screen.width; x <= screen.width; x++)
 					{
 						if (x != 0 || y != 0)
 						{
@@ -176,9 +182,9 @@ public class BlockProgressScreen extends BlockWithHorizontalFacing
 					}
 				}
 
-				for (int y = 0; y < screen.size * 2 + 1; y++)
+				for (int y = 0; y < screen.height + 1; y++)
 				{
-					for (int x = -screen.size; x <= screen.size; x++)
+					for (int x = -screen.width; x <= screen.width; x++)
 					{
 						if (x != 0 || y != 0)
 						{
@@ -222,14 +228,14 @@ public class BlockProgressScreen extends BlockWithHorizontalFacing
 		{
 			TileProgressScreenCore screen = (TileProgressScreenCore) tileEntity;
 
-			if (screen.size > 0)
+			if (screen.width > 0 || screen.height > 0)
 			{
 				BlockScreen.BREAKING_SCREEN = true;
 				boolean xaxis = state.getValue(FACING).getAxis() == EnumFacing.Axis.X;
 
-				for (int y = 0; y < screen.size * 2 + 1; y++)
+				for (int y = 0; y < screen.height + 1; y++)
 				{
-					for (int x = -screen.size; x <= screen.size; x++)
+					for (int x = -screen.width; x <= screen.width; x++)
 					{
 						if (x != 0 || y != 0)
 						{
@@ -265,11 +271,30 @@ public class BlockProgressScreen extends BlockWithHorizontalFacing
 
 			if (screen != null)
 			{
-				return BlockScreen.getScreenAABB(screen.getPos(), screen.getFacing(), screen.size);
+				return getScreenAABB(screen.getPos(), screen.getFacing(), screen.width, screen.height);
 			}
 		}
 
 		return new AxisAlignedBB(0D, -1D, 0D, 0D, -1D, 0D);
+	}
+
+	public static AxisAlignedBB getScreenAABB(BlockPos pos, EnumFacing facing, int w, int h)
+	{
+		if (w == 0 && h == 0)
+		{
+			return FULL_BLOCK_AABB.offset(pos);
+		}
+
+		boolean xaxis = facing.getAxis() == EnumFacing.Axis.X;
+
+		if (xaxis)
+		{
+			return new AxisAlignedBB(pos.getX(), pos.getY(), pos.getZ() - w, pos.getX() + 1D, pos.getY() + h + 2D, pos.getZ() + w + 1D);
+		}
+		else
+		{
+			return new AxisAlignedBB(pos.getX() - w, pos.getY(), pos.getZ(), pos.getX() + w + 1D, pos.getY() + h + 2D, pos.getZ() + 1D);
+		}
 	}
 
 	@Override
@@ -338,7 +363,8 @@ public class BlockProgressScreen extends BlockWithHorizontalFacing
 		}
 
 		NBTTagCompound nbt = stack.getTagCompound();
-		int size = nbt == null ? 0 : nbt.getByte("Size");
+		int width = nbt == null ? 0 : nbt.getByte("Width");
+		int height = nbt == null ? 0 : nbt.getByte("Height");
 		String team = nbt == null ? "" : nbt.getString("Team");
 
 		if (team.isEmpty())
@@ -346,7 +372,7 @@ public class BlockProgressScreen extends BlockWithHorizontalFacing
 			team = ClientQuestFile.existsWithTeam() ? ClientQuestFile.INSTANCE.self.getTeamID() : "";
 		}
 
-		tooltip.add(I18n.format("tile.ftbquests.screen.size") + ": " + TextFormatting.GOLD + (1 + size * 2) + " x " + (1 + size * 2));
+		tooltip.add(I18n.format("tile.ftbquests.screen.size") + ": " + TextFormatting.GOLD + (1 + width * 2) + " x " + (1 + height));
 		tooltip.add(I18n.format("ftbquests.team") + ": " + TextFormatting.DARK_GREEN + team);
 
 		QuestObject object = ClientQuestFile.INSTANCE.get(nbt == null ? "" : nbt.getString("Object"));
