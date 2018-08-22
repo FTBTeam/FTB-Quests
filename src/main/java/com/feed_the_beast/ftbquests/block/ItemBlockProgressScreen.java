@@ -26,15 +26,16 @@ public class ItemBlockProgressScreen extends ItemBlock
 	{
 		NBTTagCompound nbt = stack.getTagCompound();
 
-		int size = nbt == null ? 0 : nbt.getByte("Size");
+		int width = nbt == null ? 0 : nbt.getByte("Width");
+		int height = nbt == null ? 0 : nbt.getByte("Height");
 
-		if (size > 0)
+		if (width > 0 || height > 0)
 		{
 			boolean xaxis = newState.getValue(BlockHorizontal.FACING).getAxis() == EnumFacing.Axis.X;
 
-			for (int y = 0; y < size * 2 + 1; y++)
+			for (int y = 0; y < height + 1; y++)
 			{
-				for (int x = -size; x <= size; x++)
+				for (int x = -width; x <= width; x++)
 				{
 					if (x != 0 || y != 0)
 					{
