@@ -80,7 +80,8 @@ if (ENV.CURSEFORGE_KEY) {
 			releaseType = "release"
 			addGameVersion "${mc_version}"
 			relations {
-				requiredLibrary 'ftblib'
+				requiredDependency 'ftblib'
+				optionalDependency 'packmode'
 			}
 		}
 	}
