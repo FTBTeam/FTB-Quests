@@ -303,39 +303,6 @@ public abstract class QuestFile extends QuestObject
 		}
 	}
 
-	public static ItemStack readIcon(NBTTagCompound nbt, String key)
-	{
-		ItemStack stack;
-
-		if (nbt.hasKey(key, Constants.NBT.TAG_STRING))
-		{
-			stack = ItemStackSerializer.parseItem(nbt.getString(key));
-		}
-		else
-		{
-			stack = new ItemStack(nbt.getCompoundTag(key));
-		}
-
-		return stack.isEmpty() ? ItemStack.EMPTY : stack;
-	}
-
-	public static void writeIcon(NBTTagCompound nbt, String key, ItemStack icon)
-	{
-		if (!icon.isEmpty())
-		{
-			NBTTagCompound nbt1 = icon.serializeNBT();
-
-			if (!nbt1.hasKey("ForgeCaps") && !nbt1.hasKey("tag"))
-			{
-				nbt.setString(key, ItemStackSerializer.toString(icon));
-			}
-			else
-			{
-				nbt.setTag(key, nbt1);
-			}
-		}
-	}
-
 	@Override
 	public final void writeData(NBTTagCompound nbt)
 	{
@@ -344,7 +311,10 @@ public abstract class QuestFile extends QuestObject
 			nbt.setString("title", title);
 		}
 
-		writeIcon(nbt, "icon", icon);
+		if (!icon.isEmpty())
+		{
+			nbt.setTag("icon", ItemStackSerializer.write(icon));
+		}
 
 		NBTTagList chaptersList = new NBTTagList();
 
@@ -362,7 +332,7 @@ public abstract class QuestFile extends QuestObject
 
 		for (ItemStack stack : emergencyItems)
 		{
-			emergencyItemsList.appendTag(stack.serializeNBT());
+			emergencyItemsList.appendTag(ItemStackSerializer.write(stack));
 		}
 
 		nbt.setTag("emergency_items", emergencyItemsList);
@@ -372,7 +342,7 @@ public abstract class QuestFile extends QuestObject
 	protected final void readData(NBTTagCompound nbt)
 	{
 		title = nbt.getString("title");
-		icon = readIcon(nbt, "icon");
+		icon = ItemStackSerializer.read(nbt.getCompoundTag("icon"));
 
 		chapters.clear();
 
@@ -394,7 +364,7 @@ public abstract class QuestFile extends QuestObject
 
 		for (int i = 0; i < emergencyItemsList.tagCount(); i++)
 		{
-			ItemStack stack = new ItemStack(emergencyItemsList.getCompoundTagAt(i));
+			ItemStack stack = ItemStackSerializer.read(emergencyItemsList.getCompoundTagAt(i));
 
 			if (!stack.isEmpty())
 			{

@@ -7,11 +7,11 @@ import com.feed_the_beast.ftblib.lib.config.ConfigLong;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.IconAnimation;
 import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
+import com.feed_the_beast.ftblib.lib.item.ItemStackSerializer;
 import com.feed_the_beast.ftblib.lib.util.StringJoiner;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -21,7 +21,6 @@ import net.minecraft.util.text.TextComponentString;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.items.CapabilityItemHandler;
-import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemHandlerHelper;
 
 import javax.annotation.Nonnull;
@@ -47,13 +46,18 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 
 		if (list.isEmpty())
 		{
-			items.add(new ItemStack(Items.APPLE));
+			ItemStack stack = ItemStackSerializer.read(nbt.getCompoundTag("item"));
+
+			if (!stack.isEmpty())
+			{
+				items.add(stack);
+			}
 		}
 		else
 		{
 			for (int i = 0; i < list.tagCount(); i++)
 			{
-				ItemStack stack = new ItemStack(list.getCompoundTagAt(i));
+				ItemStack stack = ItemStackSerializer.read(list.getCompoundTagAt(i));
 
 				if (!stack.isEmpty())
 				{
@@ -62,7 +66,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 			}
 		}
 
-		count = nbt.getInteger("count");
+		count = nbt.getLong("count");
 
 		if (count < 1)
 		{
@@ -79,18 +83,29 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 	@Override
 	public void writeData(NBTTagCompound nbt)
 	{
-		NBTTagList list = new NBTTagList();
-
-		for (ItemStack stack : items)
+		if (items.size() == 1)
 		{
-			if (!stack.isEmpty())
+			nbt.setTag("item", ItemStackSerializer.write(items.get(0)));
+		}
+		else
+		{
+			NBTTagList list = new NBTTagList();
+
+			for (ItemStack stack : items)
 			{
-				list.appendTag(stack.serializeNBT());
+				if (!stack.isEmpty())
+				{
+					list.appendTag(ItemStackSerializer.write(stack));
+				}
 			}
+
+			nbt.setTag("items", list);
 		}
 
-		nbt.setTag("items", list);
-		nbt.setLong("count", count);
+		if (count > 1)
+		{
+			nbt.setLong("count", count);
+		}
 	}
 
 	@Override
@@ -219,7 +234,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 		return new Data(this, data);
 	}
 
-	public static class Data extends SimpleQuestTaskData<ItemTask> implements IItemHandler
+	public static class Data extends SimpleQuestTaskData<ItemTask>
 	{
 		private Data(ItemTask t, IProgressData data)
 		{

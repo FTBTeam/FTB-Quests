@@ -5,6 +5,7 @@ import com.feed_the_beast.ftblib.lib.config.ConfigList;
 import com.feed_the_beast.ftblib.lib.config.ConfigString;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.IconAnimation;
+import com.feed_the_beast.ftblib.lib.item.ItemStackSerializer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
@@ -31,7 +32,7 @@ public final class QuestChapter extends QuestObject
 		file = f;
 		title = nbt.getString("title");
 		description = new ArrayList<>();
-		icon = QuestFile.readIcon(nbt, "icon");
+		icon = ItemStackSerializer.read(nbt.getCompoundTag("icon"));
 		quests = new ArrayList<>();
 
 		NBTTagList desc = nbt.getTagList("description", Constants.NBT.TAG_STRING);
@@ -88,7 +89,10 @@ public final class QuestChapter extends QuestObject
 			nbt.setString("title", title);
 		}
 
-		QuestFile.writeIcon(nbt, "icon", icon);
+		if (!icon.isEmpty())
+		{
+			nbt.setTag("icon", ItemStackSerializer.write(icon));
+		}
 
 		if (!description.isEmpty())
 		{
