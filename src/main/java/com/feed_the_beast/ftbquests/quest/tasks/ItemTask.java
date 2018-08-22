@@ -10,6 +10,7 @@ import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
 import com.feed_the_beast.ftblib.lib.util.StringJoiner;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.Quest;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -239,7 +240,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 		}
 
 		@Override
-		public ItemStack insertItem(ItemStack stack, boolean singleItem, boolean simulate)
+		public ItemStack insertItem(ItemStack stack, boolean singleItem, boolean simulate, @Nullable EntityPlayer player)
 		{
 			if (task.test(stack))
 			{

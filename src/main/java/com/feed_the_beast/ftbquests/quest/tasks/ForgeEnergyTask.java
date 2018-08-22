@@ -42,7 +42,7 @@ public class ForgeEnergyTask extends QuestTask
 	{
 		super(quest);
 		value = new ConfigLong(nbt.getLong("value"), 1, Long.MAX_VALUE);
-		maxInput = new ConfigInt(nbt.hasKey("max_input") ? nbt.getInteger("max_input") : 10000, 100, Integer.MAX_VALUE);
+		maxInput = new ConfigInt(nbt.hasKey("max_input") ? nbt.getInteger("max_input") : Integer.MAX_VALUE, 100, Integer.MAX_VALUE);
 	}
 
 	@Override
@@ -61,7 +61,11 @@ public class ForgeEnergyTask extends QuestTask
 	public void writeData(NBTTagCompound nbt)
 	{
 		nbt.setLong("value", value.getLong());
-		nbt.setInteger("max_input", value.getInt());
+
+		if (value.getInt() != Integer.MAX_VALUE)
+		{
+			nbt.setInteger("max_input", value.getInt());
+		}
 	}
 
 	@Override
@@ -80,7 +84,7 @@ public class ForgeEnergyTask extends QuestTask
 	public void getConfig(ConfigGroup group)
 	{
 		group.add("value", value, new ConfigLong(1));
-		group.add("max_input", maxInput, new ConfigInt(10000));
+		group.add("max_input", maxInput, new ConfigInt(Integer.MAX_VALUE));
 	}
 
 	@Override

@@ -177,7 +177,7 @@ public class GuiQuestChest extends GuiBase
 				{
 					if (slot.getHasStack() && !(slot instanceof SlotItemHandler))
 					{
-						ClientUtils.MC.playerController.windowClick(container.windowId, slot.getSlotIndex(), 0, ClickType.QUICK_MOVE, ClientUtils.MC.player);
+						ClientUtils.MC.playerController.windowClick(container.windowId, slot.slotNumber, 0, ClickType.QUICK_MOVE, ClientUtils.MC.player);
 					}
 				}
 			}
@@ -200,6 +200,7 @@ public class GuiQuestChest extends GuiBase
 			public void onClicked(MouseButton button)
 			{
 				GuiHelper.playClickSound();
+				new GuiRewards().openGui();
 			}
 
 			@Override
@@ -227,7 +228,7 @@ public class GuiQuestChest extends GuiBase
 	@Override
 	public void addMouseOverText(List<String> list)
 	{
-		if (isShiftKeyDown())
+		if (ClientUtils.MC.player.inventory.getItemStack().isEmpty())
 		{
 			int mx = getMouseX() - getAX();
 			int my = getMouseY() - getAY();
@@ -236,14 +237,12 @@ public class GuiQuestChest extends GuiBase
 			{
 				if (mx >= slot.xPos && my >= slot.yPos && mx < slot.xPos + 16 && my < slot.yPos + 16)
 				{
-					int i = slot.getSlotIndex();
-
-					if (i == 0)
+					if (slot.slotNumber == 0)
 					{
 						list.add(TextFormatting.GRAY + I18n.format("tile.ftbquests.chest.input"));
 						list.add(TextFormatting.DARK_GRAY + I18n.format("tile.ftbquests.chest.input_desc"));
 					}
-					else if (i >= 1 && i <= 7 && !slot.getHasStack())
+					else if (slot.slotNumber >= 1 && slot.slotNumber <= 7 && !slot.getHasStack())
 					{
 						list.add(TextFormatting.GRAY + I18n.format("tile.ftbquests.chest.output"));
 						list.add(TextFormatting.DARK_GRAY + I18n.format("tile.ftbquests.chest.output_desc"));

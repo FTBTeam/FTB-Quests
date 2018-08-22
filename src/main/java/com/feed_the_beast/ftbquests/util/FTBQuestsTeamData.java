@@ -18,24 +18,22 @@ import com.feed_the_beast.ftbquests.events.ObjectCompletedEvent;
 import com.feed_the_beast.ftbquests.net.MessageChangedTeam;
 import com.feed_the_beast.ftbquests.net.MessageCreateTeamData;
 import com.feed_the_beast.ftbquests.net.MessageDeleteTeamData;
-import com.feed_the_beast.ftbquests.net.MessageSyncRewards;
 import com.feed_the_beast.ftbquests.net.MessageUpdateTaskProgress;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
-import com.feed_the_beast.ftbquests.quest.rewards.PlayerRewards;
-import com.feed_the_beast.ftbquests.quest.rewards.QuestReward;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskData;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import javax.annotation.Nullable;
 import java.io.File;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -84,8 +82,6 @@ public class FTBQuestsTeamData extends TeamData implements IProgressData
 			data.createTaskData(task);
 		}
 
-		data.rewards = new PlayerRewards(ServerQuestFile.INSTANCE);
-
 		NBTTagCompound nbt = NBTUtils.readNBT(event.getTeam().getDataFile("ftbquests"));
 		data.readData(nbt == null ? new NBTTagCompound() : nbt);
 	}
@@ -99,8 +95,6 @@ public class FTBQuestsTeamData extends TeamData implements IProgressData
 		{
 			data.createTaskData(task);
 		}
-
-		data.rewards = new PlayerRewards(ServerQuestFile.INSTANCE);
 
 		new MessageCreateTeamData(event.getTeam().getName()).sendToAll();
 	}
@@ -131,7 +125,6 @@ public class FTBQuestsTeamData extends TeamData implements IProgressData
 	}
 
 	private final Map<QuestTask, QuestTaskData> taskData;
-	public PlayerRewards rewards;
 
 	private FTBQuestsTeamData(ForgeTeam team)
 	{
@@ -175,6 +168,7 @@ public class FTBQuestsTeamData extends TeamData implements IProgressData
 
 				if (data.task.quest.isComplete(this))
 				{
+					data.task.quest.timesCompleted++;
 					new ObjectCompletedEvent(this, data.task.quest).post();
 
 					if (data.task.quest.chapter.isComplete(this))
@@ -191,37 +185,73 @@ public class FTBQuestsTeamData extends TeamData implements IProgressData
 
 					if (team.isValid())
 					{
-						FTBQuestsTeamData teamData = FTBQuestsTeamData.get(team);
-
-						for (ForgePlayer player : team.getMembers())
+						if (!data.task.quest.teamRewards.isEmpty())
 						{
-							FTBQuestsPlayerData data1 = FTBQuestsPlayerData.get(player);
+							PlayerRewards rewards = getTeamRewards(team);
 
-							for (int i = data.task.quest.rewards.size() - 1; i >= 0; i--)
+							if (rewards != null)
 							{
-								QuestReward reward = data.task.quest.rewards.get(i);
-
-								if (reward.teamReward)
+								for (ItemStack stack : data.task.quest.teamRewards)
 								{
-									teamData.rewards.items.add(reward.getRewardItem());
-									team.markDirty();
-								}
-								else
-								{
-									data1.rewards.items.add(reward.getRewardItem());
-									player.markDirty();
+									rewards.add(stack);
 								}
 							}
+						}
 
-							if (player.isOnline())
+						if (!data.task.quest.playerRewards.isEmpty())
+						{
+							for (ForgePlayer player : team.getMembers())
 							{
-								new MessageSyncRewards(data1.rewards.items).sendTo(player.getPlayer());
+								FTBQuestsPlayerData playerData = FTBQuestsPlayerData.get(player);
+
+								for (ItemStack stack : data.task.quest.playerRewards)
+								{
+									playerData.rewards.add(stack.copy());
+								}
 							}
 						}
 					}
 				}
 			}
 		}
+	}
+
+	@Nullable
+	public static PlayerRewards getTeamRewards(ForgeTeam team)
+	{
+		ForgePlayer player = team.owner;
+
+		if (player == null)
+		{
+			List<ForgePlayer> members = team.getMembers();
+
+			for (ForgePlayer player1 : members)
+			{
+				if (player1.isOnline())
+				{
+					player = player1;
+					break;
+				}
+			}
+
+			if (player == null)
+			{
+				for (ForgePlayer player1 : members)
+				{
+					if (player == null || team.getHighestStatus(player1).isEqualOrGreaterThan(team.getHighestStatus(player)))
+					{
+						player = player1;
+					}
+				}
+			}
+		}
+
+		if (player == null)
+		{
+			return null;
+		}
+
+		return FTBQuestsPlayerData.get(player).rewards;
 	}
 
 	@Override
@@ -286,11 +316,6 @@ public class FTBQuestsTeamData extends TeamData implements IProgressData
 		{
 			nbt.setTag("TaskData", taskDataTag);
 		}
-
-		if (!rewards.items.isEmpty())
-		{
-			nbt.setTag("Rewards", rewards.serializeNBT());
-		}
 	}
 
 	public static void deserializeTaskData(Iterable<QuestTaskData> dataValues, NBTTagCompound taskDataTag)
@@ -317,7 +342,6 @@ public class FTBQuestsTeamData extends TeamData implements IProgressData
 	private void readData(NBTTagCompound nbt)
 	{
 		deserializeTaskData(taskData.values(), nbt.getCompoundTag("TaskData"));
-		rewards.deserializeNBT(nbt.getTagList("Rewards", Constants.NBT.TAG_COMPOUND));
 	}
 
 	@Override

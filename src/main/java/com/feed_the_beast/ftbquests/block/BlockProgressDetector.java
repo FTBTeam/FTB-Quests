@@ -2,9 +2,8 @@ package com.feed_the_beast.ftbquests.block;
 
 import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
-import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
-import com.feed_the_beast.ftbquests.quest.ProgressingQuestObject;
+import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.tile.TileProgressDetector;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -38,7 +37,6 @@ public class BlockProgressDetector extends Block
 	public BlockProgressDetector()
 	{
 		super(Material.IRON);
-		setCreativeTab(FTBQuests.TAB);
 		setHardness(1F);
 	}
 
@@ -147,7 +145,7 @@ public class BlockProgressDetector extends Block
 
 		tooltip.add(I18n.format("ftbquests.team") + ": " + TextFormatting.DARK_GREEN + team);
 
-		ProgressingQuestObject object = ClientQuestFile.INSTANCE.getProgressing(nbt == null ? "" : nbt.getString("Object"));
+		QuestObject object = ClientQuestFile.INSTANCE.get(nbt == null ? "" : nbt.getString("Object"));
 
 		if (object != null)
 		{

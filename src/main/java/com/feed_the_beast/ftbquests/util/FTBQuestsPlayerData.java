@@ -13,7 +13,6 @@ import com.feed_the_beast.ftblib.lib.util.NBTUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.net.MessageSyncQuests;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
-import com.feed_the_beast.ftbquests.quest.rewards.PlayerRewards;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.common.util.Constants;
@@ -63,6 +62,7 @@ public class FTBQuestsPlayerData extends PlayerData
 	{
 		FTBQuestsPlayerData data = get(event.getPlayer());
 		data.rewards = new PlayerRewards(ServerQuestFile.INSTANCE);
+		data.rewards.playerData = data;
 
 		NBTTagCompound nbt = NBTUtils.readNBT(event.getPlayer().getDataFile("ftbquests"));
 		data.readData(nbt == null ? new NBTTagCompound() : nbt);
@@ -76,6 +76,7 @@ public class FTBQuestsPlayerData extends PlayerData
 		if (data.rewards == null)
 		{
 			data.rewards = new PlayerRewards(ServerQuestFile.INSTANCE);
+			data.rewards.playerData = data;
 		}
 
 		EntityPlayerMP player = event.getPlayer().getPlayer();

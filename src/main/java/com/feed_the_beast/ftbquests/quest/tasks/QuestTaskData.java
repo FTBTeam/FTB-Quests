@@ -2,6 +2,7 @@ package com.feed_the_beast.ftbquests.quest.tasks;
 
 import com.feed_the_beast.ftbquests.gui.GuiTask;
 import com.feed_the_beast.ftbquests.quest.IProgressData;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTBase;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
@@ -67,7 +68,7 @@ public abstract class QuestTaskData<T extends QuestTask> implements ICapabilityP
 		return data + "@" + task.getID();
 	}
 
-	public ItemStack insertItem(ItemStack stack, boolean singleItem, boolean simulate)
+	public ItemStack insertItem(ItemStack stack, boolean singleItem, boolean simulate, @Nullable EntityPlayer player)
 	{
 		return stack;
 	}
@@ -89,7 +90,7 @@ public abstract class QuestTaskData<T extends QuestTask> implements ICapabilityP
 	{
 		if (task.canInsertItem() && task.getMaxProgress() > 0L && getProgress() < task.getMaxProgress() && !stack.isEmpty())
 		{
-			return insertItem(stack, false, simulate);
+			return insertItem(stack, false, simulate, null);
 		}
 
 		return stack;

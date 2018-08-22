@@ -3,9 +3,9 @@ package com.feed_the_beast.ftbquests.quest;
 import com.feed_the_beast.ftblib.lib.data.ForgeTeam;
 import com.feed_the_beast.ftblib.lib.data.Universe;
 import com.feed_the_beast.ftblib.lib.util.NBTUtils;
-import com.feed_the_beast.ftbquests.quest.rewards.PlayerRewards;
 import com.feed_the_beast.ftbquests.util.FTBQuestsPlayerData;
 import com.feed_the_beast.ftbquests.util.FTBQuestsTeamData;
+import com.feed_the_beast.ftbquests.util.PlayerRewards;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 
@@ -24,7 +24,6 @@ public class ServerQuestFile extends QuestFile
 	public static ServerQuestFile INSTANCE;
 
 	public final File file;
-	public boolean shouldSendUpdates = true;
 	public boolean shouldSave = false;
 
 	public ServerQuestFile(File f)

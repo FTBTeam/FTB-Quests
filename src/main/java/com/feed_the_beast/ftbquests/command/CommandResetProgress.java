@@ -6,13 +6,14 @@ import com.feed_the_beast.ftblib.lib.data.ForgeTeam;
 import com.feed_the_beast.ftblib.lib.data.Universe;
 import com.feed_the_beast.ftblib.lib.util.SidedUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
-import com.feed_the_beast.ftbquests.quest.ProgressingQuestObject;
+import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.util.FTBQuestsTeamData;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -49,7 +50,7 @@ public class CommandResetProgress extends CommandBase
 	@Override
 	public boolean checkPermission(MinecraftServer server, ICommandSender sender)
 	{
-		return server.isSinglePlayer() || super.checkPermission(server, sender);
+		return sender instanceof EntityPlayerMP ? FTBQuests.canEdit((EntityPlayerMP) sender) : super.checkPermission(server, sender);
 	}
 
 	@Override
@@ -95,7 +96,7 @@ public class CommandResetProgress extends CommandBase
 			teams = Collections.singleton(team);
 		}
 
-		ProgressingQuestObject object = args.length == 1 ? ServerQuestFile.INSTANCE : ServerQuestFile.INSTANCE.getProgressing(args[1]);
+		QuestObject object = args.length == 1 ? ServerQuestFile.INSTANCE : ServerQuestFile.INSTANCE.get(args[1]);
 
 		if (object == null)
 		{

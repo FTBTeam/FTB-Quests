@@ -9,11 +9,9 @@ import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.IconAnimation;
 import com.feed_the_beast.ftblib.lib.item.ItemStackSerializer;
 import com.feed_the_beast.ftblib.lib.math.Ticks;
-import com.feed_the_beast.ftbquests.quest.rewards.PlayerRewards;
-import com.feed_the_beast.ftbquests.quest.rewards.QuestReward;
-import com.feed_the_beast.ftbquests.quest.rewards.QuestRewardType;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskType;
+import com.feed_the_beast.ftbquests.util.PlayerRewards;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
@@ -33,7 +31,7 @@ import java.util.Map;
 /**
  * @author LatvianModder
  */
-public abstract class QuestFile extends ProgressingQuestObject
+public abstract class QuestFile extends QuestObject
 {
 	public final List<QuestChapter> chapters;
 
@@ -197,13 +195,6 @@ public abstract class QuestFile extends ProgressingQuestObject
 	}
 
 	@Nullable
-	public ProgressingQuestObject getProgressing(String id)
-	{
-		QuestObject object = get(id);
-		return object instanceof ProgressingQuestObject ? (ProgressingQuestObject) object : null;
-	}
-
-	@Nullable
 	public QuestChapter getChapter(String id)
 	{
 		QuestObject object = get(id);
@@ -224,13 +215,6 @@ public abstract class QuestFile extends ProgressingQuestObject
 		return object instanceof QuestTask ? (QuestTask) object : null;
 	}
 
-	@Nullable
-	public QuestReward getReward(String id)
-	{
-		QuestObject object = get(id);
-		return object instanceof QuestReward ? (QuestReward) object : null;
-	}
-
 	public void refreshIDMap()
 	{
 		map.clear();
@@ -247,11 +231,6 @@ public abstract class QuestFile extends ProgressingQuestObject
 				for (QuestTask task : quest.tasks)
 				{
 					map.put(task.getID(), task);
-				}
-
-				for (QuestReward reward : quest.rewards)
-				{
-					map.put(reward.getID(), reward);
 				}
 			}
 		}
@@ -314,23 +293,6 @@ public abstract class QuestFile extends ProgressingQuestObject
 					{
 						quest.tasks.add(task);
 						return task;
-					}
-				}
-
-				return null;
-			}
-			case REWARD:
-			{
-				Quest quest = getQuest(parent);
-
-				if (quest != null)
-				{
-					QuestReward reward = QuestRewardType.createReward(quest, nbt);
-
-					if (reward != null)
-					{
-						quest.rewards.add(reward);
-						return reward;
 					}
 				}
 

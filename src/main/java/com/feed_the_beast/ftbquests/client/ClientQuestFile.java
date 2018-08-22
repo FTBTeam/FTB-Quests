@@ -6,9 +6,9 @@ import com.feed_the_beast.ftbquests.gui.GuiQuest;
 import com.feed_the_beast.ftbquests.gui.GuiQuestTree;
 import com.feed_the_beast.ftbquests.net.MessageSyncQuests;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
-import com.feed_the_beast.ftbquests.quest.rewards.PlayerRewards;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import com.feed_the_beast.ftbquests.util.FTBQuestsTeamData;
+import com.feed_the_beast.ftbquests.util.PlayerRewards;
 import net.minecraft.entity.player.EntityPlayer;
 
 import javax.annotation.Nullable;

@@ -73,7 +73,11 @@ public class IC2EnergyTask extends QuestTask
 	public void writeData(NBTTagCompound nbt)
 	{
 		nbt.setLong("value", value);
-		nbt.setLong("max_input", maxInput);
+
+		if (maxInput != Long.MAX_VALUE)
+		{
+			nbt.setLong("max_input", maxInput);
+		}
 	}
 
 	@Override

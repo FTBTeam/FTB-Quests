@@ -45,7 +45,7 @@ public class ItemScript extends Item
 				vec3d1 = vec3d1.rotatePitch(-player.rotationPitch * 0.017453292F);
 				vec3d1 = vec3d1.rotateYaw(-player.rotationYaw * 0.017453292F);
 				vec3d1 = vec3d1.add(player.posX, player.posY + (double) player.getEyeHeight(), player.posZ);
-				world.spawnParticle(EnumParticleTypes.ITEM_CRACK, vec3d1.x, vec3d1.y, vec3d1.z, vec3d.x, vec3d.y + 0.05D, vec3d.z, Item.getIdFromItem(stack.getItem()), stack.getMetadata());
+				world.spawnParticle(EnumParticleTypes.ITEM_CRACK, vec3d1.x, vec3d1.y, vec3d1.z, vec3d.x, vec3d.y + 0.05D, vec3d.z, Item.getIdFromItem(this), 0);
 			}
 		}
 		else

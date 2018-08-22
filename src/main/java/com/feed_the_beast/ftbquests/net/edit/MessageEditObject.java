@@ -11,8 +11,6 @@ import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
-import com.feed_the_beast.ftbquests.quest.rewards.QuestReward;
-import com.feed_the_beast.ftbquests.quest.rewards.QuestRewardType;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskType;
 import net.minecraft.command.ICommandSender;
@@ -78,12 +76,6 @@ public class MessageEditObject extends MessageToServer implements IConfigCallbac
 				if (object instanceof QuestTask)
 				{
 					QuestTaskType type = QuestTaskType.getType(object.getClass());
-					g = group1.getGroup(type.getRegistryName().getNamespace() + '.' + type.getRegistryName().getPath());
-					group.setDisplayName(type.getDisplayName().appendSibling(idc));
-				}
-				else if (object instanceof QuestReward)
-				{
-					QuestRewardType type = QuestRewardType.getType(object.getClass());
 					g = group1.getGroup(type.getRegistryName().getNamespace() + '.' + type.getRegistryName().getPath());
 					group.setDisplayName(type.getDisplayName().appendSibling(idc));
 				}

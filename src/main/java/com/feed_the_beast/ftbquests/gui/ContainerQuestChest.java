@@ -1,8 +1,9 @@
 package com.feed_the_beast.ftbquests.gui;
 
 import com.feed_the_beast.ftbquests.FTBQuests;
-import com.feed_the_beast.ftbquests.quest.rewards.PlayerRewards;
+import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.tile.TileQuestChest;
+import com.feed_the_beast.ftbquests.util.PlayerRewards;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.Slot;
@@ -25,13 +26,13 @@ public class ContainerQuestChest extends Container
 		@Override
 		public boolean isItemValid(ItemStack stack)
 		{
-			return chest.insertItem(0, stack, true) != stack;
+			return !ItemStack.areItemStacksEqual(chest.insert(stack, true, player), stack);
 		}
 
 		@Override
 		public void putStack(ItemStack stack)
 		{
-			chest.insertItem(0, stack, false);
+			chest.insert(stack, false, player);
 		}
 	}
 
@@ -49,23 +50,28 @@ public class ContainerQuestChest extends Container
 		}
 
 		@Override
-		public void putStack(ItemStack stack)
+		public void onSlotChanged()
 		{
+			rewards.set(getSlotIndex(), getStack().isEmpty() ? ItemStack.EMPTY : getStack().copy());
 		}
 	}
 
+	public final EntityPlayer player;
+	public final QuestFile questFile;
+	public final PlayerRewards rewards;
 	public final TileQuestChest chest;
 
-	public ContainerQuestChest(EntityPlayer player, TileQuestChest c)
+	public ContainerQuestChest(EntityPlayer ep, TileQuestChest c)
 	{
+		player = ep;
+		questFile = FTBQuests.PROXY.getQuestFile(player.world);
+		rewards = questFile.getRewards(player);
 		chest = c;
 
 		int invX = 8;
 		int invY = 107;
 
 		addSlotToContainer(new SlotInput(c, 0, 8, 84));
-
-		PlayerRewards rewards = FTBQuests.PROXY.getQuestFile(c.getWorld()).getRewards(player);
 
 		for (int i = 0; i < 6; i++)
 		{
@@ -95,26 +101,31 @@ public class ContainerQuestChest extends Container
 	@Override
 	public ItemStack transferStackInSlot(EntityPlayer player, int index)
 	{
-		if (index <= 0)
-		{
-			return ItemStack.EMPTY;
-		}
-		else if (index <= 6)
-		{
-			Slot slot = inventorySlots.get(index);
+		Slot slot = this.inventorySlots.get(index);
 
-			if (slot.getHasStack())
+		if (slot != null && slot.getHasStack())
+		{
+			if (slot instanceof SlotInput)
 			{
+				return ItemStack.EMPTY;
 			}
-
-			return ItemStack.EMPTY;
-		}
-		else if (index < inventorySlots.size())
-		{
-			Slot slot = inventorySlots.get(index);
-
-			if (slot.getHasStack())
+			else if (slot instanceof SlotOutput)
 			{
+				ItemStack stack = slot.getStack();
+				ItemStack prevStack = stack.copy();
+
+				if (!mergeItemStack(stack, 7, 36 + 7, true))
+				{
+					return ItemStack.EMPTY;
+				}
+
+				slot.onSlotChanged();
+				return prevStack;
+			}
+			else
+			{
+				slot.putStack(chest.insert(slot.getStack(), false, player));
+				return ItemStack.EMPTY;
 			}
 		}
 

@@ -1,5 +1,6 @@
-package com.feed_the_beast.ftbquests.quest.rewards;
+package com.feed_the_beast.ftbquests.util;
 
+import com.feed_the_beast.ftbquests.net.MessageSyncPlayerRewards;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagList;
@@ -17,6 +18,7 @@ public class PlayerRewards implements INBTSerializable<NBTTagList>, IItemHandler
 {
 	public final QuestFile file;
 	public final List<ItemStack> items;
+	public FTBQuestsPlayerData playerData;
 
 	public PlayerRewards(QuestFile f)
 	{
@@ -79,26 +81,22 @@ public class PlayerRewards implements INBTSerializable<NBTTagList>, IItemHandler
 	{
 		if (amount > 0 && slot >= 0 && slot < items.size())
 		{
-			ItemStack stack0 = items.get(slot);
+			ItemStack stack = items.get(slot);
 
-			if (amount > stack0.getCount())
+			if (amount > stack.getCount())
 			{
-				amount = stack0.getCount();
+				amount = stack.getCount();
 			}
 
-			ItemStack stack = ItemHandlerHelper.copyStackWithSize(stack0, amount);
+			ItemStack stack1 = ItemHandlerHelper.copyStackWithSize(stack, amount);
 
 			if (!simulate)
 			{
-				stack0.shrink(amount);
-
-				if (stack0.isEmpty())
-				{
-					items.remove(slot);
-				}
+				stack.shrink(amount);
+				set(slot, stack);
 			}
 
-			return stack;
+			return stack1;
 		}
 
 		return ItemStack.EMPTY;
@@ -108,5 +106,65 @@ public class PlayerRewards implements INBTSerializable<NBTTagList>, IItemHandler
 	public int getSlotLimit(int slot)
 	{
 		return 64;
+	}
+
+	public void set(int index, ItemStack stack)
+	{
+		if (index >= items.size())
+		{
+			if (!stack.isEmpty())
+			{
+				for (int i = 0; i < items.size(); i++)
+				{
+					ItemStack stack1 = items.get(i);
+
+					if (ItemStack.areItemStacksEqual(stack, stack1))
+					{
+						int add = Math.min(stack.getCount(), stack1.getMaxStackSize() - stack1.getCount());
+
+						if (add > 0)
+						{
+							stack1.grow(add);
+							stack.shrink(add);
+
+							if (stack.isEmpty())
+							{
+								break;
+							}
+						}
+					}
+				}
+
+				if (!stack.isEmpty())
+				{
+					items.add(stack);
+				}
+			}
+		}
+		else if (stack.isEmpty())
+		{
+			items.remove(index);
+		}
+		else
+		{
+			items.set(index, stack);
+		}
+
+		items.removeIf(ItemStack::isEmpty);
+
+		if (playerData != null)
+		{
+			playerData.player.markDirty();
+
+			if (playerData.player.isOnline())
+			{
+				new MessageSyncPlayerRewards(items).sendTo(playerData.player.getPlayer());
+			}
+		}
+	}
+
+	public void add(ItemStack stack)
+	{
+		set(Short.MAX_VALUE, stack);
 	}
 }

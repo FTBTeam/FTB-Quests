@@ -14,6 +14,7 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
@@ -22,12 +23,13 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.fluids.Fluid;
+import net.minecraftforge.fluids.FluidActionResult;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.FluidTankProperties;
 import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.fluids.capability.IFluidHandlerItem;
 import net.minecraftforge.fluids.capability.IFluidTankProperties;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -385,42 +387,29 @@ public class FluidTask extends QuestTask
 		}
 
 		@Override
-		public ItemStack insertItem(ItemStack stack, boolean singleItem, boolean simulate)
+		public ItemStack insertItem(ItemStack stack, boolean singleItem, boolean simulate, @Nullable EntityPlayer player)
 		{
-			if (stack.getCount() != 1)
+			if (player == null)
 			{
 				return stack;
 			}
 
-			IFluidHandlerItem item = stack.getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY, null);
+			IItemHandler inv = player.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
 
-			if (item != null)
+			if (inv == null)
 			{
-				int drain = (int) Math.min(1000000000, task.amount - progress);
-
-				if (singleItem && drain > 1000)
-				{
-					drain = 1000;
-				}
-
-				FluidStack fluidStack = item.drain(task.createFluidStack(drain), false);
-
-				if (fluidStack == null || fluidStack.amount <= 0)
-				{
-					return stack;
-				}
-
-				if (!simulate)
-				{
-					item.drain(fluidStack, true);
-					progress += fluidStack.amount;
-					data.syncTask(this);
-				}
-
-				return item.getContainer();
+				return stack;
 			}
 
-			return stack;
+			ItemStack stack1 = stack.copy();
+			FluidActionResult result = FluidUtil.tryFillContainerAndStow(stack1, this, inv, Integer.MAX_VALUE, player, !simulate);
+
+			if (!result.isSuccess())
+			{
+				result = FluidUtil.tryEmptyContainerAndStow(stack1, this, inv, Integer.MAX_VALUE, player, !simulate);
+			}
+
+			return result.isSuccess() ? result.getResult().copy() : stack;
 		}
 
 		@Override
