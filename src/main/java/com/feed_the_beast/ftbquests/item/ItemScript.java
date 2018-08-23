@@ -10,6 +10,7 @@ import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.SoundCategory;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
@@ -29,7 +30,12 @@ public class ItemScript extends Item
 
 			if (nbt != null)
 			{
-				player.getServer().getCommandManager().executeCommand(player.getServer(), nbt.getString("command").replace("@p", player.getName()));
+				BlockPos pos = player.getPosition();
+				player.getServer().getCommandManager().executeCommand(player.getServer(), nbt.getString("command")
+						.replace("@p", player.getName())
+						.replace("@x", Integer.toString(pos.getX()))
+						.replace("@y", Integer.toString(pos.getY()))
+						.replace("@z", Integer.toString(pos.getZ())));
 			}
 		}
 

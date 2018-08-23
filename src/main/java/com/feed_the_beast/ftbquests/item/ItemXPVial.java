@@ -1,5 +1,7 @@
 package com.feed_the_beast.ftbquests.item;
 
+import net.minecraft.client.resources.I18n;
+import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.item.Item;
@@ -11,7 +13,11 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
+
+import javax.annotation.Nullable;
+import java.util.List;
 
 /**
  * @author LatvianModder
@@ -63,5 +69,25 @@ public class ItemXPVial extends Item
 
 		stack.shrink(size);
 		return new ActionResult<>(EnumActionResult.SUCCESS, stack);
+	}
+
+	@Override
+	public void addInformation(ItemStack stack, @Nullable World world, List<String> tooltip, ITooltipFlag flag)
+	{
+		NBTTagCompound nbt = stack.getTagCompound();
+
+		if (nbt != null)
+		{
+			int xpLevels = nbt.getInteger("xp_levels");
+
+			if (xpLevels > 0)
+			{
+				tooltip.add(I18n.format("ftbquests.reward.ftbquests.xp_levels.text", TextFormatting.GREEN + "+" + xpLevels));
+			}
+			else
+			{
+				tooltip.add(I18n.format("ftbquests.reward.ftbquests.xp.text", TextFormatting.GREEN + "+" + nbt.getInteger("xp")));
+			}
+		}
 	}
 }
