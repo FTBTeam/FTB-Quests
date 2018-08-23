@@ -3,10 +3,13 @@ package com.feed_the_beast.ftbquests.util;
 import com.feed_the_beast.ftblib.lib.config.ConfigString;
 import com.feed_the_beast.ftblib.lib.config.ConfigValue;
 import com.feed_the_beast.ftblib.lib.config.ConfigValueInstance;
+import com.feed_the_beast.ftblib.lib.gui.IOpenableGui;
 import com.feed_the_beast.ftblib.lib.io.Bits;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
+import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.FTBQuests;
+import com.feed_the_beast.ftbquests.gui.GuiSelectQuestObject;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import net.minecraft.client.resources.I18n;
@@ -41,6 +44,11 @@ public class ConfigQuestObject extends ConfigString
 		return this;
 	}
 
+	public boolean hasValidType(QuestObjectType type)
+	{
+		return types.contains(type);
+	}
+
 	@Override
 	public String getName()
 	{
@@ -65,6 +73,15 @@ public class ConfigQuestObject extends ConfigString
 		ConfigQuestObject object = new ConfigQuestObject(getString());
 		object.types.addAll(types);
 		return object;
+	}
+
+	@Override
+	public void onClicked(IOpenableGui gui, ConfigValueInstance inst, MouseButton button)
+	{
+		if (inst.getCanEdit())
+		{
+			new GuiSelectQuestObject(this, gui).openGui();
+		}
 	}
 
 	@Override

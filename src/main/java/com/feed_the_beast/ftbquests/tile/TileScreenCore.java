@@ -177,7 +177,7 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 
 			if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)
 			{
-				if (cTask.canInsertItem() && cTaskData != null)
+				if (cTask.canInsertItem())
 				{
 					return true;
 				}
