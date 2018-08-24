@@ -33,9 +33,9 @@ minecraft {
 }
 
 repositories {
-	maven { url "https://maven.latmod.com/" }
-	maven { url "http://maven.ic2.player.to/" }
-	maven { url "https://maven.blamejared.com/" }
+	maven { url "https://maven.latmod.com/" } //FTBLib
+	maven { url "http://maven.ic2.player.to/" } //IC2
+	maven { url "https://maven.blamejared.com/" } //PackMode
 }
 
 dependencies {
