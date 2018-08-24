@@ -54,9 +54,9 @@ public class GuiEmergencyItems extends GuiBase
 		}
 
 		@Override
-		public void draw()
+		public void draw(Theme theme, int x, int y, int w, int h)
 		{
-			GuiHelper.drawItem(stack, getAX(), getAY(), true, Icon.EMPTY);
+			GuiHelper.drawItem(stack, x, y, true, Icon.EMPTY);
 		}
 	}
 
@@ -105,7 +105,7 @@ public class GuiEmergencyItems extends GuiBase
 	}
 
 	@Override
-	public void drawBackground()
+	public void drawBackground(Theme theme, int x, int y, int w, int h)
 	{
 		long left = endTime - System.currentTimeMillis();
 
@@ -122,22 +122,22 @@ public class GuiEmergencyItems extends GuiBase
 		}
 
 		GlStateManager.pushMatrix();
-		GlStateManager.translate(width / 2F, height / 5F, 0F);
+		GlStateManager.translate(w / 2F, h / 5F, 0F);
 		GlStateManager.scale(2F, 2F, 1F);
 		String s = I18n.format("ftbquests.file.emergency_items");
-		drawString(s, -getStringWidth(s) / 2, 0, Color4I.WHITE, 0);
+		theme.drawString(s, -theme.getStringWidth(s) / 2, 0, Color4I.WHITE, 0);
 		GlStateManager.popMatrix();
 
 		GlStateManager.pushMatrix();
-		GlStateManager.translate(width / 2F, height / 2.5F, 0F);
+		GlStateManager.translate(w / 2F, h / 2.5F, 0F);
 		GlStateManager.scale(4F, 4F, 1F);
 		s = left <= 0L ? "00:00" : StringUtils.getTimeString(left / 1000L * 1000L + 1000L);
-		int x = -getStringWidth(s) / 2;
-		drawString(s, x - 1, 0, Color4I.BLACK, 0);
-		drawString(s, x + 1, 0, Color4I.BLACK, 0);
-		drawString(s, x, 1, Color4I.BLACK, 0);
-		drawString(s, x, -1, Color4I.BLACK, 0);
-		drawString(s, x, 0, Color4I.WHITE, 0);
+		int x1 = -theme.getStringWidth(s) / 2;
+		theme.drawString(s, x1 - 1, 0, Color4I.BLACK, 0);
+		theme.drawString(s, x1 + 1, 0, Color4I.BLACK, 0);
+		theme.drawString(s, x1, 1, Color4I.BLACK, 0);
+		theme.drawString(s, x1, -1, Color4I.BLACK, 0);
+		theme.drawString(s, x1, 0, Color4I.WHITE, 0);
 		GlStateManager.popMatrix();
 	}
 

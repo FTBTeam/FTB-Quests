@@ -70,20 +70,17 @@ public class GuiQuestChest extends GuiBase
 		}
 
 		@Override
-		public void draw()
+		public void draw(Theme theme, int x, int y, int w, int h)
 		{
-			int x = getAX();
-			int y = getAY();
-
 			double r = taskData.getRelativeProgress();
 
 			if (r > 0D)
 			{
-				TEXTURE.withUVfromCoords(0, r >= 1D ? 199 : 190, (int) (148 * r), 8, 256, 256).draw(x, y, (int) (width * r), 8);
+				TEXTURE.withUVfromCoords(0, r >= 1D ? 199 : 190, (int) (148 * r), 8, 256, 256).draw(x, y, (int) (w * r), 8);
 			}
 
 			taskData.task.getIcon().draw(x + 1, y, 8, 8);
-			drawString(taskData.task.getDisplayName().getFormattedText(), x + 11, y, getTheme().getContentColor(getWidgetType()), SHADOW);
+			theme.drawString(taskData.task.getDisplayName().getFormattedText(), x + 11, y, theme.getContentColor(getWidgetType()), Theme.SHADOW);
 		}
 	}
 
@@ -150,15 +147,14 @@ public class GuiQuestChest extends GuiBase
 			}
 
 			@Override
-			public Icon getIcon()
+			public void drawScrollBar(Theme theme, int x, int y, int w, int h)
 			{
-				return SCROLL_BAR;
+				SCROLL_BAR.draw(x, y, w, h);
 			}
 
 			@Override
-			public Icon getBackground()
+			public void drawBackground(Theme theme, int x, int y, int w, int h)
 			{
-				return Icon.EMPTY;
 			}
 		};
 
@@ -183,11 +179,11 @@ public class GuiQuestChest extends GuiBase
 			}
 
 			@Override
-			public void draw()
+			public void draw(Theme theme, int x, int y, int w, int h)
 			{
 				if (isMouseOver())
 				{
-					Color4I.WHITE.withAlpha(33).draw(getAX(), getAY(), width, height);
+					Color4I.WHITE.withAlpha(33).draw(x, y, w, h);
 				}
 			}
 		};
@@ -204,11 +200,11 @@ public class GuiQuestChest extends GuiBase
 			}
 
 			@Override
-			public void draw()
+			public void draw(Theme theme, int x, int y, int w, int h)
 			{
 				if (isMouseOver())
 				{
-					Color4I.WHITE.withAlpha(33).draw(getAX(), getAY(), width, height);
+					Color4I.WHITE.withAlpha(33).draw(x, y, w, h);
 				}
 			}
 		};
@@ -230,8 +226,8 @@ public class GuiQuestChest extends GuiBase
 	{
 		if (ClientUtils.MC.player.inventory.getItemStack().isEmpty())
 		{
-			int mx = getMouseX() - getAX();
-			int my = getMouseY() - getAY();
+			int mx = getMouseX() - getX();
+			int my = getMouseY() - getY();
 
 			for (Slot slot : container.inventorySlots)
 			{
@@ -261,13 +257,10 @@ public class GuiQuestChest extends GuiBase
 	}
 
 	@Override
-	public void drawBackground()
+	public void drawBackground(Theme theme, int x, int y, int w, int h)
 	{
-		int x = getAX();
-		int y = getAY();
-
 		GlStateManager.color(1F, 1F, 1F, 1F);
-		BACKGROUND.draw(x, y, width, height);
+		BACKGROUND.draw(x, y, w, h);
 	}
 
 	@Override

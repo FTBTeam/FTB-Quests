@@ -56,12 +56,12 @@ public class GuiQuest extends GuiBase
 		}
 
 		@Override
-		public void draw()
+		public void draw(Theme theme, int x, int y, int w, int h)
 		{
 			GlStateManager.pushMatrix();
-			GlStateManager.translate(getAX() + getGui().width / 2, getAY() + 11, 0);
+			GlStateManager.translate(x + getGui().width / 2F, y + 11, 0);
 			GlStateManager.scale(2F, 2F, 1F);
-			drawString(text, 0, 0, CENTERED);
+			theme.drawString(text, 0, 0, Theme.CENTERED);
 			GlStateManager.popMatrix();
 		}
 	}
@@ -76,11 +76,13 @@ public class GuiQuest extends GuiBase
 		}
 
 		@Override
-		public void draw()
+		public void draw(Theme theme, int x, int y, int w, int h)
 		{
+			int gw2 = getGui().width / 2;
+
 			for (int i = 0; i < text.size(); i++)
 			{
-				drawString(text.get(i), getGui().width / 2, 1 + getAY() + i * 12, CENTERED);
+				theme.drawString(text.get(i), gw2, 1 + y + i * 12, Theme.CENTERED);
 			}
 		}
 	}
@@ -95,13 +97,14 @@ public class GuiQuest extends GuiBase
 		}
 
 		@Override
-		public void draw()
+		public void draw(Theme theme, int x, int y, int w, int h)
 		{
 			Color4I col = getTheme().getInvertedContentColor();
+			int gw2 = getGui().width / 2;
 
 			for (int i = 0; i < text.size(); i++)
 			{
-				drawString(text.get(i), getGui().width / 2, 1 + getAY() + i * 12, col, CENTERED);
+				theme.drawString(text.get(i), gw2, 1 + y + i * 12, col, Theme.CENTERED);
 			}
 		}
 	}
@@ -182,12 +185,6 @@ public class GuiQuest extends GuiBase
 		}
 
 		@Override
-		public Icon getIcon()
-		{
-			return icon;
-		}
-
-		@Override
 		public WidgetType getWidgetType()
 		{
 			if (task.invalid || questTreeGui.questFile.self == null || !quest.canStartTasks(questTreeGui.questFile.self))
@@ -199,22 +196,22 @@ public class GuiQuest extends GuiBase
 		}
 
 		@Override
-		public void draw()
+		public void draw(Theme theme, int x, int y, int w, int h)
 		{
-			super.draw();
+			super.draw(theme, x, y, w, h);
 
 			if (task.invalid || questTreeGui.questFile.self == null)
 			{
 				GlStateManager.pushMatrix();
 				GlStateManager.translate(0, 0, 500);
-				GuiIcons.CLOSE.draw(getAX() + width - 9, getAY() + 1, 8, 8);
+				GuiIcons.CLOSE.draw(x + w - 9, y + 1, 8, 8);
 				GlStateManager.popMatrix();
 			}
 			else if (task.isComplete(questTreeGui.questFile.self))
 			{
 				GlStateManager.pushMatrix();
 				GlStateManager.translate(0, 0, 500);
-				GuiIcons.CHECK.draw(getAX() + width - 9, getAY() + 1, 8, 8);
+				GuiIcons.CHECK.draw(x + w - 9, y + 1, 8, 8);
 				GlStateManager.popMatrix();
 			}
 		}
@@ -367,13 +364,14 @@ public class GuiQuest extends GuiBase
 			@Override
 			public void alignWidgets()
 			{
+				Theme theme = getTheme();
 				setPosAndSize(0, 3, getGui().width, getGui().height - 6);
 
 				title.text = TextFormatting.BOLD + quest.getDisplayName().getFormattedText();
 				title.setSize(width, 35);
 
 				shortDescription.text.clear();
-				shortDescription.text.addAll(listFormattedStringToWidth(quest.description, width - 60));
+				shortDescription.text.addAll(theme.listFormattedStringToWidth(quest.description, width - 60));
 
 				shortDescription.setSize(width, shortDescription.text.size() * 12 + (shortDescription.text.isEmpty() ? 0 : 15));
 
@@ -381,7 +379,7 @@ public class GuiQuest extends GuiBase
 
 				for (String s0 : quest.text)
 				{
-					longDescription.text.addAll(listFormattedStringToWidth(s0, width - 80));
+					longDescription.text.addAll(theme.listFormattedStringToWidth(s0, width - 80));
 				}
 
 				longDescription.setSize(width, longDescription.text.size() * 12 + (longDescription.text.isEmpty() ? 0 : 15));
@@ -404,9 +402,8 @@ public class GuiQuest extends GuiBase
 			}
 
 			@Override
-			public Icon getButtonBackground()
+			public void drawBackground(Theme theme, int x, int y, int w, int h)
 			{
-				return Icon.EMPTY;
 			}
 		};
 
@@ -447,9 +444,9 @@ public class GuiQuest extends GuiBase
 			}
 
 			@Override
-			public void drawPanelBackground(int ax, int ay)
+			public void drawBackground(Theme theme, int x, int y, int w, int h)
 			{
-				drawString(TextFormatting.RED + I18n.format("ftbquests.tasks"), ax + width / 2, ay + 9, CENTERED);
+				theme.drawString(TextFormatting.RED + I18n.format("ftbquests.tasks"), x + w / 2, y + 9, Theme.CENTERED);
 			}
 		};
 
@@ -489,9 +486,9 @@ public class GuiQuest extends GuiBase
 			}
 
 			@Override
-			public void drawPanelBackground(int ax, int ay)
+			public void drawBackground(Theme theme, int x, int y, int w, int h)
 			{
-				drawString(TextFormatting.BLUE + I18n.format("ftbquests.rewards"), ax + width / 2, ay + 9, CENTERED);
+				theme.drawString(TextFormatting.BLUE + I18n.format("ftbquests.rewards"), x + w / 2, y + 9, Theme.CENTERED);
 			}
 		};
 	}
