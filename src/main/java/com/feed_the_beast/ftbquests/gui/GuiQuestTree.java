@@ -880,4 +880,10 @@ public class GuiQuestTree extends GuiBase
 	{
 		return QuestsTheme.INSTANCE;
 	}
+
+	@Override
+	public boolean drawDefaultBackground()
+	{
+		return false;
+	}
 }

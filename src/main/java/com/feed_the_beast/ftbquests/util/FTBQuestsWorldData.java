@@ -6,7 +6,6 @@ import com.feed_the_beast.ftblib.events.universe.UniverseSavedEvent;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.IConfigCallback;
 import com.feed_the_beast.ftblib.lib.data.Universe;
-import com.feed_the_beast.ftblib.lib.util.Folders;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.events.ModifyBaseFileLocationEvent;
 import com.feed_the_beast.ftbquests.net.MessageSyncEditingMode;
@@ -42,13 +41,13 @@ public class FTBQuestsWorldData implements IConfigCallback
 			ServerQuestFile.INSTANCE.unload();
 		}
 
-		ModifyBaseFileLocationEvent fileEvent = new ModifyBaseFileLocationEvent();
+		ModifyBaseFileLocationEvent fileEvent = new ModifyBaseFileLocationEvent(event.getUniverse().server);
 		fileEvent.post();
 		File file = fileEvent.getFile();
 
 		if (file == null)
 		{
-			file = new File(Folders.getMinecraft(), "questpacks/normal.nbt");
+			file = new File(event.getUniverse().server.getDataDirectory(), "questpacks/normal.nbt");
 		}
 
 		FTBQuests.LOGGER.info("Loading quests from " + file.getAbsolutePath());
