@@ -102,24 +102,21 @@ public class GuiQuestTree extends GuiBase
 		}
 
 		@Override
-		public void draw()
+		public void draw(Theme theme, int x, int y, int w, int h)
 		{
-			int ax = getAX();
-			int ay = getAY();
-
 			boolean selected = chapter.equals(selectedChapter);
-			getTheme().getHorizontalTab(selected).draw(selected ? ax : ax - 1, ay, width, height);
+			theme.drawHorizontalTab(selected ? x : x - 1, y, w, h, selected);
 
 			if (!icon.isEmpty())
 			{
-				icon.draw(ax + 10, ay + (height - 16) / 2, 16, 16);
+				icon.draw(x + 10, y + (h - 16) / 2, 16, 16);
 			}
 
 			if (questFile.self != null && chapter.isComplete(questFile.self))
 			{
 				GlStateManager.pushMatrix();
 				GlStateManager.translate(0, 0, 500);
-				GuiIcons.CHECK.draw(ax + width - 14, ay + 4, 8, 8);
+				GuiIcons.CHECK.draw(x + w - 14, y + 4, 8, 8);
 				GlStateManager.popMatrix();
 			}
 		}
@@ -241,17 +238,14 @@ public class GuiQuestTree extends GuiBase
 		}
 
 		@Override
-		public void draw()
+		public void draw(Theme theme, int x, int y, int w, int h)
 		{
-			int ax = getAX();
-			int ay = getAY();
-
-			getButtonBackground().draw(ax, ay, width, height);
+			drawBackground(theme, x, y, w, h);
 
 			if (!icon.isEmpty())
 			{
 				GlStateManager.pushMatrix();
-				GlStateManager.translate(ax + (width - zoom) / 2F, ay + (height - zoom) / 2F, 0F);
+				GlStateManager.translate(x + (width - zoom) / 2F, y + (h - zoom) / 2F, 0F);
 				icon.draw(0, 0, zoom, zoom);
 				GlStateManager.popMatrix();
 			}
@@ -260,7 +254,7 @@ public class GuiQuestTree extends GuiBase
 			{
 				GlStateManager.pushMatrix();
 				GlStateManager.translate(0, 0, 500);
-				GuiIcons.CHECK.draw(ax + width - 1 - zoom / 2, ay + 1, zoom / 2, zoom / 2);
+				GuiIcons.CHECK.draw(x + width - 1 - zoom / 2, y + 1, zoom / 2, zoom / 2);
 				GlStateManager.popMatrix();
 			}
 		}
@@ -317,19 +311,16 @@ public class GuiQuestTree extends GuiBase
 		}
 
 		@Override
-		public void draw()
+		public void draw(Theme theme, int x, int y, int w, int h)
 		{
-			int ax = getAX();
-			int ay = getAY();
-
 			if (isAltKeyDown())
 			{
-				Color4I.WHITE.withAlpha(30).draw(ax, ay, width, height);
+				Color4I.WHITE.withAlpha(30).draw(x, y, w, h);
 			}
 
 			if (isMouseOver())
 			{
-				Color4I.WHITE.withAlpha(30).draw(ax, ay, width, height);
+				Color4I.WHITE.withAlpha(30).draw(x, y, w, h);
 			}
 		}
 	}
@@ -356,12 +347,10 @@ public class GuiQuestTree extends GuiBase
 		}
 
 		@Override
-		public void draw()
+		public void draw(Theme theme, int x, int y, int w, int h)
 		{
-			int ax = getAX();
-			int ay = getAY();
-			getButtonBackground().draw(ax, ay, width, height);
-			drawString(getTitle(), ax + 3, ay + 2, SHADOW);
+			drawBackground(theme, x, y, w, h);
+			theme.drawString(getTitle(), x + 3, y + 2, Theme.SHADOW);
 		}
 
 		@Override
@@ -404,12 +393,6 @@ public class GuiQuestTree extends GuiBase
 			{
 				setPosAndSize(-32, 3, 35, getGui().height - 8);
 				align(new WidgetLayout.Vertical(0, 1, 0));
-			}
-
-			@Override
-			public Icon getIcon()
-			{
-				return Icon.EMPTY;
 			}
 		};
 
@@ -509,13 +492,13 @@ public class GuiQuestTree extends GuiBase
 			}
 
 			@Override
-			public Icon getIcon()
+			public void drawBackground(Theme theme, int x, int y, int w, int h)
 			{
-				return getTheme().getPanelBackground();
+				theme.drawPanelBackground(x, y, w, h);
 			}
 
 			@Override
-			protected void drawOffsetPanelBackground(int ax, int ay)
+			public void drawOffsetBackground(Theme theme, int x, int y, int w, int h)
 			{
 				GlStateManager.disableTexture2D();
 				GlStateManager.color(1F, 1F, 1F, 1F);
@@ -531,8 +514,8 @@ public class GuiQuestTree extends GuiBase
 					{
 						for (ButtonQuest b : ((ButtonQuest) widget).getDependencies())
 						{
-							buffer.pos(widget.getAX() + widget.width / 2D, widget.getAY() + widget.height / 2D, 0).color(100, 200, 100, 255).endVertex();
-							buffer.pos(b.getAX() + b.width / 2D, b.getAY() + b.height / 2D, 0).color(50, 50, 50, 255).endVertex();
+							buffer.pos(widget.getX() + widget.width / 2D, widget.getY() + widget.height / 2D, 0).color(100, 200, 100, 255).endVertex();
+							buffer.pos(b.getX() + b.width / 2D, b.getY() + b.height / 2D, 0).color(50, 50, 50, 255).endVertex();
 						}
 					}
 				}
@@ -783,7 +766,7 @@ public class GuiQuestTree extends GuiBase
 	}
 
 	@Override
-	public int getAX()
+	public int getX()
 	{
 		return 36;
 	}
@@ -804,7 +787,7 @@ public class GuiQuestTree extends GuiBase
 	}
 
 	@Override
-	public void drawBackground()
+	public void drawBackground(Theme theme, int x, int y, int w, int h)
 	{
 		if (selectedChapter != null && selectedChapter.invalid)
 		{
@@ -816,16 +799,16 @@ public class GuiQuestTree extends GuiBase
 			selectChapter(questFile.chapters.get(0));
 		}
 
-		super.drawBackground();
+		super.drawBackground(theme, x, y, w, h);
 
 		if (grabbed != 0)
 		{
-			int x = getMouseX();
-			int y = getMouseY();
+			int mx = getMouseX();
+			int my = getMouseY();
 
 			if (scrollWidth > quests.width)
 			{
-				quests.setScrollX(Math.max(Math.min(quests.getScrollX() + (prevMouseX - x), scrollWidth - quests.width), 0));
+				quests.setScrollX(Math.max(Math.min(quests.getScrollX() + (prevMouseX - mx), scrollWidth - quests.width), 0));
 			}
 			else
 			{
@@ -834,15 +817,15 @@ public class GuiQuestTree extends GuiBase
 
 			if (scrollHeight > quests.height)
 			{
-				quests.setScrollY(Math.max(Math.min(quests.getScrollY() + (prevMouseY - y), scrollHeight - quests.height), 0));
+				quests.setScrollY(Math.max(Math.min(quests.getScrollY() + (prevMouseY - my), scrollHeight - quests.height), 0));
 			}
 			else
 			{
 				quests.setScrollY((scrollHeight - quests.height) / 2);
 			}
 
-			prevMouseX = x;
-			prevMouseY = y;
+			prevMouseX = mx;
+			prevMouseY = my;
 		}
 	}
 
@@ -873,16 +856,16 @@ public class GuiQuestTree extends GuiBase
 	}
 
 	@Override
-	public void drawForeground()
+	public void drawForeground(Theme theme, int x, int y, int w, int h)
 	{
 		Widget widget = selectedChapter == null ? null : chapterPanel.getWidget(selectedChapter.index);
 
 		if (widget instanceof ButtonChapter)
 		{
-			drawString(widget.getTitle(), getAX() + 8, getAY() + 8, getTheme().getInvertedContentColor(), 0);
+			theme.drawString(widget.getTitle(), x + 8, y + 8, theme.getInvertedContentColor(), 0);
 		}
 
-		super.drawForeground();
+		super.drawForeground(theme, x, y, w, h);
 	}
 
 	@Override

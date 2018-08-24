@@ -20,9 +20,9 @@ public class GuiRewards extends GuiBase
 	}
 
 	@Override
-	public void drawBackground()
+	public void drawBackground(Theme theme, int x, int y, int w, int h)
 	{
 		String text = "Rewards GUI is still WIP! Use Quest Chest to get collect rewards.";
-		drawString(text, getAX() + (width - getStringWidth(text)) / 2, getAY() + 8);
+		theme.drawString(text, x + (w - theme.getStringWidth(text)) / 2, y + 8);
 	}
 }

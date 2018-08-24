@@ -77,13 +77,11 @@ public class GuiTask extends GuiBase
 		}
 
 		@Override
-		public void draw()
+		public void draw(Theme theme, int x, int y, int w, int h)
 		{
-			int x = getAX();
-			int y = getAY();
 			GlStateManager.color(1F, 1F, 1F, 1F);
-			TAB.draw(x, y, width, height);
-			getIcon().draw(x + 3, y + 2, 16, 16);
+			TAB.draw(x, y, w, h);
+			drawIcon(theme, x + 3, y + 2, 16, 16);
 		}
 	}
 
@@ -202,13 +200,10 @@ public class GuiTask extends GuiBase
 	}
 
 	@Override
-	public void drawBackground()
+	public void drawBackground(Theme theme, int x, int y, int w, int h)
 	{
-		int x = getAX();
-		int y = getAY();
-
 		GlStateManager.color(1F, 1F, 1F, 1F);
-		BACKGROUND.draw(x, y, width, height);
+		BACKGROUND.draw(x, y, w, h);
 
 		String top1 = container.data.task.quest.getDisplayName().getUnformattedText();
 		String top2 = container.data.task.getDisplayName().getUnformattedText();
@@ -220,25 +215,25 @@ public class GuiTask extends GuiBase
 		}
 
 		top1 = TextFormatting.BOLD + top1;
-		drawString(top1, x + (width - getStringWidth(top1)) / 2, y + 14);
+		theme.drawString(top1, x + (w - theme.getStringWidth(top1)) / 2, y + 14);
 
 		if (!top2.isEmpty())
 		{
 			top2 = TextFormatting.GRAY + top2;
-			drawString(top2, x + (width - getStringWidth(top2)) / 2, y + 30);
+			theme.drawString(top2, x + (w - theme.getStringWidth(top2)) / 2, y + 30);
 		}
 
-		container.data.task.drawGUI(container.data, x + (width - 64) / 2, y + 42, 64, 64);
+		container.data.task.drawGUI(container.data, x + (w - 64) / 2, y + 42, 64, 64);
 
 		String bottomText = container.data.getProgressString() + " / " + container.data.task.getMaxProgressString();
 
 		if (container.data.getProgress() >= container.data.task.getMaxProgress())
 		{
-			drawString(TextFormatting.GREEN + bottomText, x + (width - getStringWidth(bottomText)) / 2, y + 112);
+			theme.drawString(TextFormatting.GREEN + bottomText, x + (w - theme.getStringWidth(bottomText)) / 2, y + 112);
 		}
 		else
 		{
-			drawString(bottomText, x + (width - getStringWidth(bottomText)) / 2, y + 112);
+			theme.drawString(bottomText, x + (w - theme.getStringWidth(bottomText)) / 2, y + 112);
 		}
 	}
 
