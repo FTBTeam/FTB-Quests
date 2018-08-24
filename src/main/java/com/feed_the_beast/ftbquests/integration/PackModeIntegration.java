@@ -1,6 +1,5 @@
 package com.feed_the_beast.ftbquests.integration;
 
-import com.feed_the_beast.ftblib.lib.util.Folders;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.events.ModifyBaseFileLocationEvent;
 import io.sommers.packmode.api.PackModeAPI;
@@ -27,6 +26,6 @@ public class PackModeIntegration
 
 	private static void modifyBaseFileLocation0(ModifyBaseFileLocationEvent event)
 	{
-		event.setFile(new File(Folders.getMinecraft(), "questpacks/" + PackModeAPI.getInstance().getCurrentPackMode() + ".nbt"));
+		event.setFile(new File(event.getServer().getDataDirectory(), "questpacks/" + PackModeAPI.getInstance().getCurrentPackMode() + ".nbt"));
 	}
 }
