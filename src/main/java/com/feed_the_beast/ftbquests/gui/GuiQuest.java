@@ -10,12 +10,10 @@ import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
 import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.gui.PanelScrollBar;
-import com.feed_the_beast.ftblib.lib.gui.SimpleTextButton;
 import com.feed_the_beast.ftblib.lib.gui.Theme;
 import com.feed_the_beast.ftblib.lib.gui.Widget;
 import com.feed_the_beast.ftblib.lib.gui.WidgetLayout;
 import com.feed_the_beast.ftblib.lib.gui.WidgetType;
-import com.feed_the_beast.ftblib.lib.gui.misc.GuiButtonListBase;
 import com.feed_the_beast.ftblib.lib.gui.misc.GuiEditConfig;
 import com.feed_the_beast.ftblib.lib.gui.misc.GuiSelectItemStack;
 import com.feed_the_beast.ftblib.lib.icon.Color4I;
@@ -39,6 +37,7 @@ import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.TextFormatting;
+import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -109,7 +108,29 @@ public class GuiQuest extends GuiBase
 		}
 	}
 
-	public class ButtonTask extends Button
+	public abstract class SmallButton extends Button
+	{
+		public SmallButton(Panel panel, String title, Icon icon)
+		{
+			super(panel, title, icon);
+		}
+
+		@Override
+		public void drawBackground(Theme theme, int x, int y, int w, int h)
+		{
+			GlStateManager.alphaFunc(GL11.GL_GREATER, 0F);
+			QuestsTheme.BUTTON.draw(x - 3, y - 3, w + 6, h + 6);
+
+			if (isMouseOver())
+			{
+				QuestsTheme.BUTTON.draw(x - 3, y - 3, w + 6, h + 6);
+			}
+
+			GlStateManager.alphaFunc(GL11.GL_GREATER, 0.1F);
+		}
+	}
+
+	public class ButtonTask extends SmallButton
 	{
 		public QuestTask task;
 
@@ -211,17 +232,17 @@ public class GuiQuest extends GuiBase
 			{
 				GlStateManager.pushMatrix();
 				GlStateManager.translate(0, 0, 500);
-				GuiIcons.CHECK.draw(x + w - 9, y + 1, 8, 8);
+				QuestsTheme.COMPLETED.draw(x + w - 9, y + 1, 8, 8);
 				GlStateManager.popMatrix();
 			}
 		}
 	}
 
-	public class ButtonAddTask extends Button
+	public class ButtonAddTask extends SmallButton
 	{
 		public ButtonAddTask(Panel panel)
 		{
-			super(panel, I18n.format("gui.add"), GuiIcons.ADD);
+			super(panel, I18n.format("gui.add"), QuestsTheme.ADD);
 			setPosAndSize(0, 20, 20, 20);
 		}
 
@@ -229,54 +250,39 @@ public class GuiQuest extends GuiBase
 		public void onClicked(MouseButton button)
 		{
 			GuiHelper.playClickSound();
-			new GuiSelectTaskType().openGui();
-		}
-	}
+			List<ContextMenuItem> contextMenu = new ArrayList<>();
 
-	public class GuiSelectTaskType extends GuiButtonListBase
-	{
-		public GuiSelectTaskType()
-		{
-			setTitle(I18n.format("ftbquests.gui.select_task_type"));
-		}
-
-		@Override
-		public void addButtons(Panel panel)
-		{
 			for (QuestTaskType type : QuestTaskType.getRegistry())
 			{
 				QuestTask task = type.provider.create(quest, new NBTTagCompound());
 
 				if (task != null)
 				{
-					panel.add(new SimpleTextButton(panel, type.getDisplayName().getFormattedText(), task.getIcon())
-					{
-						@Override
-						public void onClicked(MouseButton button)
-						{
-							GuiHelper.playClickSound();
+					contextMenu.add(new ContextMenuItem(type.getDisplayName().getFormattedText(), task.getIcon(), () -> {
+						GuiHelper.playClickSound();
 
-							ConfigGroup group = ConfigGroup.newGroup(FTBQuests.MOD_ID);
-							ConfigGroup g = group.getGroup("task." + type.getRegistryName().getNamespace() + '.' + type.getRegistryName().getPath());
-							task.getConfig(g);
-							task.getExtraConfig(g);
+						ConfigGroup group = ConfigGroup.newGroup(FTBQuests.MOD_ID);
+						ConfigGroup g = group.getGroup("task." + type.getRegistryName().getNamespace() + '.' + type.getRegistryName().getPath());
+						task.getConfig(g);
+						task.getExtraConfig(g);
 
-							new GuiEditConfig(group, (g1, sender) -> {
-								NBTTagCompound nbt = new NBTTagCompound();
-								task.writeData(nbt);
-								nbt.setString("type", type.getTypeForNBT());
-								new MessageCreateObject(QuestObjectType.TASK, quest.getID(), nbt).sendToServer();
-								GuiQuest.this.openGui();
-								questTreeGui.questFile.refreshGui(questTreeGui.questFile);
-							}).openGui();
-						}
-					});
+						new GuiEditConfig(group, (g1, sender) -> {
+							NBTTagCompound nbt = new NBTTagCompound();
+							task.writeData(nbt);
+							nbt.setString("type", type.getTypeForNBT());
+							new MessageCreateObject(QuestObjectType.TASK, quest.getID(), nbt).sendToServer();
+							GuiQuest.this.openGui();
+							questTreeGui.questFile.refreshGui(questTreeGui.questFile);
+						}).openGui();
+					}));
 				}
 			}
+
+			getGui().openContextMenu(contextMenu);
 		}
 	}
 
-	public class ButtonReward extends Button
+	public class ButtonReward extends SmallButton
 	{
 		public ItemStack reward;
 		public boolean teamReward;
@@ -297,22 +303,39 @@ public class GuiQuest extends GuiBase
 			if (button.isRight() && questTreeGui.questFile.canEdit())
 			{
 				List<ContextMenuItem> contextMenu = new ArrayList<>();
-				//contextMenu.add(new ContextMenuItem(I18n.format("selectServer.edit"), GuiIcons.SETTINGS, () -> new MessageEditReward(quest.getID(), quest.playerRewards.indexOf(reward), false, ).sendToServer()));
+				contextMenu.add(new ContextMenuItem(I18n.format("selectServer.edit"), GuiIcons.SETTINGS, () -> {
+					ConfigValueInstance value = new ConfigValueInstance("item", ConfigGroup.DEFAULT, new ConfigItemStack(ItemStack.EMPTY)
+					{
+						@Override
+						public ItemStack getStack()
+						{
+							return reward;
+						}
+
+						@Override
+						public void setStack(ItemStack stack)
+						{
+							new MessageEditReward(quest.getID(), (teamReward ? quest.teamRewards : quest.playerRewards).indexOf(reward), teamReward, stack).sendToServer();
+						}
+					});
+
+					new GuiSelectItemStack(value, this).openGui();
+				}));
 				contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), GuiIcons.REMOVE, () -> new MessageEditReward(quest.getID(), (teamReward ? quest.teamRewards : quest.playerRewards).indexOf(reward), teamReward, ItemStack.EMPTY).sendToServer()).setYesNo(I18n.format("delete_item", reward.getDisplayName())));
 				getGui().openContextMenu(contextMenu);
 			}
-			else if (button.isLeft() && questTreeGui.questFile.self != null && quest.isComplete(questTreeGui.questFile.self))
+			else if (button.isLeft() && questTreeGui.questFile.self != null)
 			{
 				new GuiRewards().openGui();
 			}
 		}
 	}
 
-	public class ButtonAddReward extends Button
+	public class ButtonAddReward extends SmallButton
 	{
 		public ButtonAddReward(Panel panel)
 		{
-			super(panel, I18n.format("gui.add"), GuiIcons.ADD);
+			super(panel, I18n.format("gui.add"), QuestsTheme.ADD);
 			setPosAndSize(0, 20, 20, 20);
 		}
 
@@ -438,7 +461,7 @@ public class GuiQuest extends GuiBase
 				}
 				else
 				{
-					setSize(align(new WidgetLayout.Horizontal(0, 4, 0)), 40);
+					setSize(align(new WidgetLayout.Horizontal(3, 8, 3)), 50);
 					setX((getGui().width - width) / 2);
 				}
 			}
@@ -480,7 +503,7 @@ public class GuiQuest extends GuiBase
 				}
 				else
 				{
-					setSize(align(new WidgetLayout.Horizontal(0, 4, 0)), 40);
+					setSize(align(new WidgetLayout.Horizontal(3, 8, 3)), 50);
 					setX((getGui().width - width) / 2);
 				}
 			}
@@ -512,8 +535,7 @@ public class GuiQuest extends GuiBase
 	@Override
 	public boolean onInit()
 	{
-		setSize(getScreen().getScaledWidth() - 8, getScreen().getScaledHeight() - 8);
-		return true;
+		return setFullscreen();
 	}
 
 	@Override
@@ -527,5 +549,11 @@ public class GuiQuest extends GuiBase
 	public Theme getTheme()
 	{
 		return QuestsTheme.INSTANCE;
+	}
+
+	@Override
+	public boolean drawDefaultBackground()
+	{
+		return false;
 	}
 }
