@@ -19,6 +19,7 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.TextFormatting;
+import org.lwjgl.opengl.GL11;
 
 import java.util.List;
 
@@ -37,6 +38,7 @@ public class GuiEmergencyItems extends GuiBase
 		public EmergencyItem(Panel p, ItemStack is)
 		{
 			super(p);
+			setY(3);
 			stack = is;
 			setSize(16, 16);
 		}
@@ -56,6 +58,9 @@ public class GuiEmergencyItems extends GuiBase
 		@Override
 		public void draw(Theme theme, int x, int y, int w, int h)
 		{
+			GlStateManager.alphaFunc(GL11.GL_GREATER, 0F);
+			QuestsTheme.BUTTON.draw(x - 3, y - 3, w + 6, h + 6);
+			GlStateManager.alphaFunc(GL11.GL_GREATER, 0.1F);
 			GuiHelper.drawItem(stack, x, y, true, Icon.EMPTY);
 		}
 	}
@@ -84,8 +89,8 @@ public class GuiEmergencyItems extends GuiBase
 		@Override
 		public void alignWidgets()
 		{
-			setWidth(align(new WidgetLayout.Horizontal(0, 6, 0)));
-			setHeight(16);
+			setWidth(align(new WidgetLayout.Horizontal(3, 7, 3)));
+			setHeight(22);
 			setPos((GuiEmergencyItems.this.width - itemPanel.width) / 2, GuiEmergencyItems.this.height * 2 / 3 - 10);
 		}
 	};

@@ -15,16 +15,16 @@ import net.minecraft.entity.player.EntityPlayerMP;
 public class MessageMoveChapter extends MessageToServer
 {
 	private String id;
-	private boolean up;
+	private boolean left;
 
 	public MessageMoveChapter()
 	{
 	}
 
-	public MessageMoveChapter(String i, boolean u)
+	public MessageMoveChapter(String i, boolean l)
 	{
 		id = i;
-		up = u;
+		left = l;
 	}
 
 	@Override
@@ -37,14 +37,14 @@ public class MessageMoveChapter extends MessageToServer
 	public void writeData(DataOut data)
 	{
 		data.writeString(id);
-		data.writeBoolean(up);
+		data.writeBoolean(left);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
 		id = data.readString();
-		up = data.readBoolean();
+		left = data.readBoolean();
 	}
 
 	@Override
@@ -58,17 +58,17 @@ public class MessageMoveChapter extends MessageToServer
 			{
 				int index = ServerQuestFile.INSTANCE.chapters.indexOf(chapter);
 
-				if (index != -1 && up ? (index > 0) : (index < ServerQuestFile.INSTANCE.chapters.size() - 1))
+				if (index != -1 && left ? (index > 0) : (index < ServerQuestFile.INSTANCE.chapters.size() - 1))
 				{
 					ServerQuestFile.INSTANCE.chapters.remove(index);
-					ServerQuestFile.INSTANCE.chapters.add(up ? index - 1 : index + 1, chapter);
+					ServerQuestFile.INSTANCE.chapters.add(left ? index - 1 : index + 1, chapter);
 
 					for (int i = 0; i < ServerQuestFile.INSTANCE.chapters.size(); i++)
 					{
 						ServerQuestFile.INSTANCE.chapters.get(i).index = i;
 					}
 
-					new MessageMoveChapterResponse(id, up).sendToAll();
+					new MessageMoveChapterResponse(id, left).sendToAll();
 					ServerQuestFile.INSTANCE.save();
 				}
 			}

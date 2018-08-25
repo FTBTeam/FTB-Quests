@@ -162,7 +162,7 @@ public class GuiTask extends GuiBase
 
 					if (container.data.getProgress() < container.data.task.getMaxProgress())
 					{
-						add(new Tab(this, I18n.format("ftbquests.gui.complete_instantly"), I18n.format("ftbquests.gui.complete_instantly_q"), GuiIcons.CHECK, button -> {
+						add(new Tab(this, I18n.format("ftbquests.gui.complete_instantly"), I18n.format("ftbquests.gui.complete_instantly_q"), QuestsTheme.COMPLETED, button -> {
 							new MessageCompleteInstantly(container.data.task.getID()).sendToServer();
 							container.data.completeInstantly();
 							tabs.refreshWidgets();
