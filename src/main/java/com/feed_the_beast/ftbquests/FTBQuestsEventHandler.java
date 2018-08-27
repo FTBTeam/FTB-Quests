@@ -9,6 +9,7 @@ import com.feed_the_beast.ftbquests.block.BlockScreen;
 import com.feed_the_beast.ftbquests.block.BlockScreenPart;
 import com.feed_the_beast.ftbquests.block.ItemBlockProgressScreen;
 import com.feed_the_beast.ftbquests.block.ItemBlockScreen;
+import com.feed_the_beast.ftbquests.item.ItemQuestBook;
 import com.feed_the_beast.ftbquests.item.ItemScript;
 import com.feed_the_beast.ftbquests.item.ItemXPVial;
 import com.feed_the_beast.ftbquests.quest.tasks.FluidTask;
@@ -82,6 +83,7 @@ public class FTBQuestsEventHandler
 				new ItemBlockProgressScreen(FTBQuestsBlocks.PROGRESS_SCREEN).setRegistryName("progress_screen"),
 				new ItemBlock(FTBQuestsBlocks.CHEST).setRegistryName("chest"),
 
+				withName(new ItemQuestBook(), "book"),
 				withName(new ItemXPVial(), "xp_vial"),
 				withName(new ItemScript(), "script")
 		);

@@ -17,6 +17,7 @@ public class FTBQuestsItems
 	public static final Item PROGRESS_SCREEN_PART = Items.AIR;
 	public static final Item CHEST = Items.AIR;
 
+	public static final Item BOOK = Items.AIR;
 	public static final Item XP_VIAL = Items.AIR;
 	public static final Item SCRIPT = Items.AIR;
 }
