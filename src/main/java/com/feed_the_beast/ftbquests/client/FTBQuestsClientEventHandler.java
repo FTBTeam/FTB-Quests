@@ -37,6 +37,7 @@ public class FTBQuestsClientEventHandler
 		ModelLoader.setCustomModelResourceLocation(FTBQuestsItems.PROGRESS_SCREEN, 0, new ModelResourceLocation(FTBQuestsItems.PROGRESS_SCREEN.getRegistryName(), "facing=north"));
 		ModelLoader.setCustomModelResourceLocation(FTBQuestsItems.CHEST, 0, new ModelResourceLocation(FTBQuestsItems.CHEST.getRegistryName(), "facing=north"));
 
+		ModelLoader.setCustomModelResourceLocation(FTBQuestsItems.BOOK, 0, new ModelResourceLocation(FTBQuestsItems.BOOK.getRegistryName(), "inventory"));
 		ModelLoader.setCustomModelResourceLocation(FTBQuestsItems.XP_VIAL, 0, new ModelResourceLocation(FTBQuestsItems.XP_VIAL.getRegistryName(), "inventory"));
 		ModelLoader.setCustomModelResourceLocation(FTBQuestsItems.SCRIPT, 0, new ModelResourceLocation(FTBQuestsItems.SCRIPT.getRegistryName(), "inventory"));
 
