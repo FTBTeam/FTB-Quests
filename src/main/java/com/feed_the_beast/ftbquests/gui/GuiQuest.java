@@ -506,7 +506,7 @@ public class GuiQuest extends GuiBase
 			@Override
 			public void drawBackground(Theme theme, int x, int y, int w, int h)
 			{
-				theme.drawString(TextFormatting.RED + I18n.format("ftbquests.tasks"), x + w / 2, y + 9, Theme.CENTERED);
+				theme.drawString(TextFormatting.RED + I18n.format("ftbquests.tasks"), x + w / 2, y + 5, Theme.CENTERED);
 			}
 		};
 
@@ -543,7 +543,7 @@ public class GuiQuest extends GuiBase
 			@Override
 			public void drawBackground(Theme theme, int x, int y, int w, int h)
 			{
-				theme.drawString(TextFormatting.BLUE + I18n.format("ftbquests.rewards"), x + w / 2, y + 9, Theme.CENTERED);
+				theme.drawString(TextFormatting.BLUE + I18n.format("ftbquests.rewards"), x + w / 2, y + 5, Theme.CENTERED);
 			}
 		};
 	}

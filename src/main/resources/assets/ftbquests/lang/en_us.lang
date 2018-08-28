@@ -91,7 +91,7 @@ ftbquests.task.ftbquests.ic2_energy.text=%d EU
 ftbquests.reward=Reward
 ftbquests.reward.team_reward=Team Reward
 ftbquests.rewards=Rewards
-ftbquests.reward.unknown=Unknown Reward
+ftbquests.reward.claim_all=Claim All Rewards
 
 ftbquests.reward.ftbquests.item=Item
 

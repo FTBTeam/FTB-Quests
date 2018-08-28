@@ -76,7 +76,7 @@ public class MessageOpenTask extends MessageToServer
 		}
 
 		player.openContainer.addListener(player);
-		new MessageOpenTaskGui(data.task.getID(), player.currentWindowId, tile != null, tile != null ? tile.getPos() : null).sendTo(player);
+		new MessageOpenTaskResponse(data.task.getID(), player.currentWindowId, tile != null, tile != null ? tile.getPos() : null).sendTo(player);
 		MinecraftForge.EVENT_BUS.post(new PlayerContainerEvent.Open(player, player.openContainer));
 	}
 }
