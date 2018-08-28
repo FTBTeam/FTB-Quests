@@ -86,20 +86,29 @@ public class GuiSelectQuestObject extends GuiButtonListBase
 			panel.add(new Widget(panel).setPosAndSize(0, 0, 0, 4));
 		}
 
+		boolean addTasks = config.hasValidType(QuestObjectType.TASK);
+		boolean addQuests = addTasks | config.hasValidType(QuestObjectType.QUEST);
+
 		for (QuestChapter chapter : ClientQuestFile.INSTANCE.chapters)
 		{
 			panel.add(new ButtonQuestObject(panel, chapter));
 
 			for (Quest quest : chapter.quests)
 			{
-				panel.add(new ButtonQuestObject(panel, quest));
-
-				for (QuestTask task : quest.tasks)
+				if (addQuests)
 				{
-					panel.add(new ButtonQuestObject(panel, task));
-				}
+					panel.add(new ButtonQuestObject(panel, quest));
 
-				panel.add(new Widget(panel).setPosAndSize(0, 0, 0, 4));
+					if (addTasks)
+					{
+						for (QuestTask task : quest.tasks)
+						{
+							panel.add(new ButtonQuestObject(panel, task));
+						}
+
+						panel.add(new Widget(panel).setPosAndSize(0, 0, 0, 4));
+					}
+				}
 			}
 		}
 	}

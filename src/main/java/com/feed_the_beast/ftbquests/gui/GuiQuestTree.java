@@ -249,7 +249,7 @@ public class GuiQuestTree extends GuiBase
 
 			if (FTBLibConfig.debugging.gui_widget_bounds)
 			{
-				contextMenu.add(new ContextMenuItem("Reload GUI", GuiIcons.REFRESH, () -> questFile.refreshGui(questFile)));
+				contextMenu.add(new ContextMenuItem("Reload GUI", GuiIcons.REFRESH, () -> questFile.refreshGui(questFile))); //LANG
 			}
 
 			Panel panel = getGui().openContextMenu(contextMenu);

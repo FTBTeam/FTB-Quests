@@ -78,11 +78,11 @@ public class GuiQuestChest extends GuiBase
 		@Override
 		public void draw(Theme theme, int x, int y, int w, int h)
 		{
-			double r = taskData.getRelativeProgress();
+			int r = (int) (taskData.getRelativeProgress() * width / 100L);
 
-			if (r > 0D)
+			if (r > 0L)
 			{
-				TEXTURE.withUVfromCoords(0, r >= 1D ? 199 : 190, (int) (148 * r), 8, 256, 256).draw(x, y, (int) (w * r), 8);
+				TEXTURE.withUVfromCoords(0, r >= width ? 199 : 190, r, 8, 256, 256).draw(x, y, r, 8);
 			}
 
 			taskData.task.getIcon().draw(x + 1, y, 8, 8);
@@ -170,7 +170,7 @@ public class GuiQuestChest extends GuiBase
 						{
 							QuestTaskData data = ClientQuestFile.INSTANCE.self.getQuestTaskData(task);
 
-							if (data.getRelativeProgress() < 1D && data.task.quest.canStartTasks(ClientQuestFile.INSTANCE.self))
+							if (data.getRelativeProgress() == 0L && data.task.quest.canStartTasks(ClientQuestFile.INSTANCE.self))
 							{
 								add(new ButtonTask(this, data));
 							}
@@ -183,7 +183,7 @@ public class GuiQuestChest extends GuiBase
 						{
 							QuestTaskData data = ClientQuestFile.INSTANCE.self.getQuestTaskData(task);
 
-							if (data.getRelativeProgress() >= 1D)
+							if (data.getRelativeProgress() == 100L)
 							{
 								add(new ButtonTask(this, data));
 							}

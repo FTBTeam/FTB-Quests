@@ -102,16 +102,16 @@ public abstract class QuestFile extends QuestObject
 	}
 
 	@Override
-	public double getRelativeProgress(ITeamData data)
+	public int getRelativeProgress(ITeamData data)
 	{
-		double progress = 0D;
+		int progress = 0;
 
 		for (QuestChapter chapter : chapters)
 		{
 			progress += chapter.getRelativeProgress(data);
 		}
 
-		return progress / (double) chapters.size();
+		return fixRelativeProgress(progress, chapters.size());
 	}
 
 	@Override
