@@ -1,6 +1,7 @@
 package com.feed_the_beast.ftbquests.gui;
 
 import com.feed_the_beast.ftblib.FTBLibConfig;
+import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigString;
 import com.feed_the_beast.ftblib.lib.gui.Button;
@@ -17,33 +18,29 @@ import com.feed_the_beast.ftblib.lib.gui.misc.GuiEditConfig;
 import com.feed_the_beast.ftblib.lib.gui.misc.GuiEditConfigValue;
 import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
-import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.client.ClientQuestProgress;
+import com.feed_the_beast.ftbquests.net.MessageCompleteInstantly;
+import com.feed_the_beast.ftbquests.net.MessageResetProgress;
 import com.feed_the_beast.ftbquests.net.edit.MessageChangeID;
-import com.feed_the_beast.ftbquests.net.edit.MessageCompleteInstantly;
 import com.feed_the_beast.ftbquests.net.edit.MessageCreateObject;
 import com.feed_the_beast.ftbquests.net.edit.MessageDeleteObject;
 import com.feed_the_beast.ftbquests.net.edit.MessageEditObject;
 import com.feed_the_beast.ftbquests.net.edit.MessageMoveChapter;
 import com.feed_the_beast.ftbquests.net.edit.MessageMoveQuest;
-import com.feed_the_beast.ftbquests.net.edit.MessageResetProgress;
 import com.feed_the_beast.ftbquests.net.edit.MessageSetDep;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
-import net.minecraft.client.gui.GuiScreen;
+import com.feed_the_beast.ftbquests.quest.QuestReward;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.init.Enchantments;
-import net.minecraft.init.Items;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.TextFormatting;
 import org.lwjgl.input.Keyboard;
@@ -53,35 +50,19 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import java.util.regex.Pattern;
 
 public class GuiQuestTree extends GuiBase
 {
-	public static int zoom = 16;
+	public static int zoom = 24;
 
-	public class ButtonTab extends Button
+	public abstract class ButtonTab extends Button
 	{
 		public ButtonTab(Panel panel, String title, Icon icon)
 		{
 			super(panel, title, icon);
-			setSize(22, 28);
-		}
-
-		@Override
-		public void onClicked(MouseButton button)
-		{
-		}
-
-		@Override
-		public void draw(Theme theme, int x, int y, int w, int h)
-		{
-			borderColor.draw(x + w, y + 1, 1, h - 2);
-			icon.draw(x + (w - 16) / 2, y + (h - 16) / 2, 16, 16);
-
-			if (isMouseOver())
-			{
-				backgroundColor.draw(x, y + 1, w, h - 2);
-			}
+			setSize(20, chapterPanel.height);
 		}
 	}
 
@@ -131,6 +112,16 @@ public class GuiQuestTree extends GuiBase
 		@Override
 		public void draw(Theme theme, int x, int y, int w, int h)
 		{
+			if (selectedChapter != chapter)
+			{
+				borderColor.draw(x, y + h - 1, w + 1, 1);
+				backgroundColor.draw(x, y + 1, w, h - 2);
+			}
+			else
+			{
+				borderColor.draw(x + w, y + h - 1, 1, 1);
+			}
+
 			borderColor.draw(x + w, y + 1, 1, h - 2);
 			icon.draw(x + (w - 16) / 2, y + (h - 16) / 2, 16, 16);
 
@@ -139,7 +130,42 @@ public class GuiQuestTree extends GuiBase
 				backgroundColor.draw(x, y + 1, w, h - (selectedChapter == chapter ? 1 : 2));
 			}
 
-			if (questFile.self != null && chapter.isComplete(questFile.self))
+			if (questFile.self == null)
+			{
+				return;
+			}
+
+			int r = 0;
+			UUID playerId = ClientUtils.MC.player.getUniqueID();
+
+			for (Quest quest : chapter.quests)
+			{
+				if (quest.isComplete(questFile.self))
+				{
+					for (QuestReward reward : quest.rewards)
+					{
+						if (!questFile.self.isRewardClaimed(playerId, reward))
+						{
+							r++;
+						}
+					}
+				}
+			}
+
+			if (r > 0)
+			{
+				String s = Integer.toString(r);
+				int nw = theme.getStringWidth(s);
+				GlStateManager.pushMatrix();
+				GlStateManager.translate(x + w - nw, y + 2, 500);
+				theme.drawString(s, -1, 0, Color4I.LIGHT_RED, 0);
+				theme.drawString(s, 1, 0, Color4I.LIGHT_RED, 0);
+				theme.drawString(s, 0, -1, Color4I.LIGHT_RED, 0);
+				theme.drawString(s, 0, 1, Color4I.LIGHT_RED, 0);
+				theme.drawString(s, 0, 0, Color4I.WHITE, 0);
+				GlStateManager.popMatrix();
+			}
+			else if (chapter.isComplete(questFile.self))
 			{
 				GlStateManager.pushMatrix();
 				GlStateManager.translate(0, 0, 500);
@@ -173,105 +199,20 @@ public class GuiQuestTree extends GuiBase
 				}
 			}).openGui();
 		}
-	}
-
-	public class ButtonScrollLeft extends ButtonTab
-	{
-		public ButtonScrollLeft(Panel panel)
-		{
-			super(panel, "", Icon.EMPTY);
-			setWidth(16);
-		}
-
-		@Override
-		public void onClicked(MouseButton button)
-		{
-			GuiHelper.playClickSound();
-		}
 
 		@Override
 		public void draw(Theme theme, int x, int y, int w, int h)
 		{
+			borderColor.draw(x, y + h - 1, w + 1, 1);
+			backgroundColor.draw(x, y + 1, w, h - 2);
+
 			borderColor.draw(x + w, y + 1, 1, h - 2);
-
-			GlStateManager.disableTexture2D();
-			Tessellator tessellator = Tessellator.getInstance();
-			BufferBuilder buffer = tessellator.getBuffer();
-			buffer.begin(GL11.GL_TRIANGLES, DefaultVertexFormats.POSITION_COLOR);
-			int r = borderColor.redi();
-			int g = borderColor.greeni();
-			int b = borderColor.bluei();
-			int a = borderColor.alphai();
-			buffer.pos(x + 4, y + h / 2D, 0).color(r, g, b, a).endVertex();
-			buffer.pos(x + w - 4, y + h / 2D + 5, 0).color(r, g, b, a).endVertex();
-			buffer.pos(x + w - 4, y + h / 2D - 5, 0).color(r, g, b, a).endVertex();
-			tessellator.draw();
-			GlStateManager.enableTexture2D();
-
-			if (isMouseOver())
-			{
-				backgroundColor.draw(x, y, w, h);
-			}
-		}
-	}
-
-	public class ButtonScrollRight extends ButtonTab
-	{
-		public ButtonScrollRight(Panel panel)
-		{
-			super(panel, "", Icon.EMPTY);
-			setWidth(16);
-		}
-
-		@Override
-		public void onClicked(MouseButton button)
-		{
-			GuiHelper.playClickSound();
-		}
-
-		@Override
-		public void draw(Theme theme, int x, int y, int w, int h)
-		{
-			borderColor.draw(x - 1, y + 1, 1, h - 2);
-			borderColor.draw(x + w, y + 1, 1, h - 2);
-
-			GlStateManager.disableTexture2D();
-			Tessellator tessellator = Tessellator.getInstance();
-			BufferBuilder buffer = tessellator.getBuffer();
-			buffer.begin(GL11.GL_TRIANGLES, DefaultVertexFormats.POSITION_COLOR);
-			int r = borderColor.redi();
-			int g = borderColor.greeni();
-			int b = borderColor.bluei();
-			int a = borderColor.alphai();
-			buffer.pos(x + w - 4, y + h / 2D, 0).color(r, g, b, a).endVertex();
-			buffer.pos(x + 4, y + h / 2D - 5, 0).color(r, g, b, a).endVertex();
-			buffer.pos(x + 4, y + h / 2D + 5, 0).color(r, g, b, a).endVertex();
-			tessellator.draw();
-			GlStateManager.enableTexture2D();
+			icon.draw(x + (w - 16) / 2, y + (h - 16) / 2, 16, 16);
 
 			if (isMouseOver())
 			{
 				backgroundColor.draw(x, y + 1, w, h - 2);
 			}
-		}
-	}
-
-	public class ButtonRewards extends ButtonTab
-	{
-		public ButtonRewards(Panel panel)
-		{
-			super(panel, I18n.format("ftbquests.rewards"), Icon.EMPTY);
-
-			ItemStack iconStack = new ItemStack(Items.EMERALD);
-			iconStack.addEnchantment(Enchantments.UNBREAKING, 1);
-			setIcon(ItemIcon.getItemIcon(iconStack));
-		}
-
-		@Override
-		public void onClicked(MouseButton button)
-		{
-			GuiHelper.playClickSound();
-			new GuiRewards().openGui();
 		}
 	}
 
@@ -322,7 +263,9 @@ public class GuiQuestTree extends GuiBase
 		@Override
 		public void draw(Theme theme, int x, int y, int w, int h)
 		{
-			borderColor.draw(x + w, y + 1, 1, h - 2);
+			borderColor.draw(x - 1, y + h - 1, w + 1, 1);
+			borderColor.draw(x - 1, y + 1, 1, h - 2);
+			backgroundColor.draw(x, y + 1, w, h - 2);
 
 			int x1 = x + w / 2 - 1;
 			int y1 = y + h / 2 - 1;
@@ -433,7 +376,7 @@ public class GuiQuestTree extends GuiBase
 		@Override
 		public void addMouseOverText(List<String> list)
 		{
-			list.add((getTitle().isEmpty() ? "" : getTitle() + " ") + ClientQuestProgress.getCompletionSuffix(questFile.self, quest).trim());
+			list.add(getTitle() + ClientQuestProgress.getCompletionSuffix(questFile.self, quest));
 
 			if (!description.isEmpty())
 			{
@@ -480,10 +423,37 @@ public class GuiQuestTree extends GuiBase
 
 			if (questFile.self != null && quest.isComplete(questFile.self))
 			{
-				GlStateManager.pushMatrix();
-				GlStateManager.translate(0, 0, 500);
-				QuestsTheme.COMPLETED.draw(x + width - 1 - zoom / 2, y + 1, zoom / 2, zoom / 2);
-				GlStateManager.popMatrix();
+				int r = 0;
+				UUID playerId = ClientUtils.MC.player.getUniqueID();
+
+				for (QuestReward reward : quest.rewards)
+				{
+					if (!questFile.self.isRewardClaimed(playerId, reward))
+					{
+						r++;
+					}
+				}
+
+				if (r > 0)
+				{
+					String s = Integer.toString(r);
+					int nw = theme.getStringWidth(s);
+					GlStateManager.pushMatrix();
+					GlStateManager.translate(x + width - nw - zoom / 8F, y + zoom / 8F, 500);
+					theme.drawString(s, -1, 0, Color4I.LIGHT_RED, 0);
+					theme.drawString(s, 1, 0, Color4I.LIGHT_RED, 0);
+					theme.drawString(s, 0, -1, Color4I.LIGHT_RED, 0);
+					theme.drawString(s, 0, 1, Color4I.LIGHT_RED, 0);
+					theme.drawString(s, 0, 0, Color4I.WHITE, 0);
+					GlStateManager.popMatrix();
+				}
+				else
+				{
+					GlStateManager.pushMatrix();
+					GlStateManager.translate(0, 0, 500);
+					QuestsTheme.COMPLETED.draw(x + width - 1 - zoom / 2, y + 1, zoom / 2, zoom / 2);
+					GlStateManager.popMatrix();
+				}
 			}
 		}
 	}
@@ -559,7 +529,7 @@ public class GuiQuestTree extends GuiBase
 	private String selectedQuest = "";
 	public final Panel chapterPanel, quests;
 	public Color4I borderColor, backgroundColor;
-	public final Button scrollLeft, scrollRight, rewards, otherOptions;
+	public final Button otherOptions;
 
 	public GuiQuestTree(ClientQuestFile q)
 	{
@@ -575,7 +545,7 @@ public class GuiQuestTree extends GuiBase
 					add(new ButtonChapter(this, i, questFile.chapters.get(i)));
 				}
 
-				if (questFile.canEdit())
+				if (questFile.canEdit() && questFile.chapters.size() < 14)
 				{
 					add(new ButtonAddChapter(this));
 				}
@@ -584,10 +554,13 @@ public class GuiQuestTree extends GuiBase
 			@Override
 			public void alignWidgets()
 			{
-				setPosAndSize(scrollLeft.width + 1, 0, getGui().width - otherOptions.width - rewards.width - scrollRight.width - scrollLeft.width - 4, 28);
+				setX(1);
+				setWidth(getGui().width - otherOptions.width - 2);
 				align(new WidgetLayout.Horizontal(0, 1, 0));
 			}
 		};
+
+		chapterPanel.setHeight(20);
 
 		selectedChapter = questFile.chapters.isEmpty() ? null : questFile.chapters.get(0);
 		borderColor = Color4I.WHITE.withAlpha(88);
@@ -728,9 +701,6 @@ public class GuiQuestTree extends GuiBase
 			}
 		};
 
-		scrollLeft = new ButtonScrollLeft(this);
-		scrollRight = new ButtonScrollRight(this);
-		rewards = new ButtonRewards(this);
 		otherOptions = new ButtonOtherOptions(this);
 	}
 
@@ -739,18 +709,13 @@ public class GuiQuestTree extends GuiBase
 	{
 		add(chapterPanel);
 		add(quests);
-		add(scrollLeft);
-		add(scrollRight);
-		add(rewards);
 		add(otherOptions);
 	}
 
 	@Override
 	public void alignWidgets()
 	{
-		scrollRight.setX(width - otherOptions.width - rewards.width - scrollRight.width - 2);
-		rewards.setX(width - otherOptions.width - rewards.width - 1);
-		otherOptions.setX(width - otherOptions.width);
+		otherOptions.setX(width - otherOptions.width - 1);
 		chapterPanel.alignWidgets();
 		resetScroll(true);
 	}
@@ -992,40 +957,18 @@ public class GuiQuestTree extends GuiBase
 	{
 		GuiHelper.drawHollowRect(x, y, w, h, borderColor, false);
 
-		if (selectedChapter != null)
-		{
-			for (Widget widget : chapterPanel.widgets)
-			{
-				if (widget instanceof ButtonChapter)
-				{
-					if (((ButtonChapter) widget).chapter == selectedChapter)
-					{
-						int cut = widget.getX() - 1;
+		int start = 1;
 
-						backgroundColor.draw(x + 1, y + 1, cut - 1, chapterPanel.height - 2);
-						backgroundColor.draw(x + cut + widget.width + 1, y + 1, w - cut - widget.width - 2, chapterPanel.height - 2);
-
-						borderColor.draw(x + 1, y + chapterPanel.height - 1, cut, 1);
-						borderColor.draw(x + cut + widget.width + 1, y + chapterPanel.height - 1, w - cut - widget.width - 2, 1);
-						break;
-					}
-				}
-			}
-		}
-		else
+		if (!chapterPanel.widgets.isEmpty())
 		{
-			backgroundColor.draw(x + 1, y + 1, w - 2, chapterPanel.height - 2);
-			borderColor.draw(x + 1, y + chapterPanel.height - 1, w - 2, 1);
+			Widget last = chapterPanel.widgets.get(chapterPanel.widgets.size() - 1);
+			start = last.getX() + last.width + 1;
 		}
+
+		backgroundColor.draw(start, y + 1, w - start - otherOptions.width - 2, chapterPanel.height - 2);
+		borderColor.draw(start, y + chapterPanel.height - 1, w - start - otherOptions.width - 2, 1);
 
 		super.drawForeground(theme, x, y, w, h);
-	}
-
-	@Override
-	@Nullable
-	public GuiScreen getPrevScreen()
-	{
-		return null;
 	}
 
 	@Override

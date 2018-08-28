@@ -94,7 +94,7 @@ public class MessageEditObject extends MessageToServer implements IConfigCallbac
 
 		if (object != null)
 		{
-			object.clearCachedData();
+			ServerQuestFile.INSTANCE.clearCachedData();
 			ConfigGroup group = ConfigGroup.newGroup("object");
 			object.getConfig(group);
 			object.getExtraConfig(group);

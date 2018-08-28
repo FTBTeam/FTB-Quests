@@ -127,14 +127,14 @@ public class GuiEmergencyItems extends GuiBase
 		}
 
 		GlStateManager.pushMatrix();
-		GlStateManager.translate(w / 2F, h / 5F, 0F);
+		GlStateManager.translate((int) (w / 2F), (int) (h / 5F), 0F);
 		GlStateManager.scale(2F, 2F, 1F);
 		String s = I18n.format("ftbquests.file.emergency_items");
 		theme.drawString(s, -theme.getStringWidth(s) / 2, 0, Color4I.WHITE, 0);
 		GlStateManager.popMatrix();
 
 		GlStateManager.pushMatrix();
-		GlStateManager.translate(w / 2F, h / 2.5F, 0F);
+		GlStateManager.translate((int) (w / 2F), (int) (h / 2.5F), 0F);
 		GlStateManager.scale(4F, 4F, 1F);
 		s = left <= 0L ? "00:00" : StringUtils.getTimeString(left / 1000L * 1000L + 1000L);
 		int x1 = -theme.getStringWidth(s) / 2;

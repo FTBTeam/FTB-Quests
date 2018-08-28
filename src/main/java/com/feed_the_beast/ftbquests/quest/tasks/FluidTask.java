@@ -7,7 +7,7 @@ import com.feed_the_beast.ftblib.lib.config.ConfigLong;
 import com.feed_the_beast.ftblib.lib.config.ConfigNBT;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftbquests.FTBQuests;
-import com.feed_the_beast.ftbquests.quest.IProgressData;
+import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
@@ -307,7 +307,7 @@ public class FluidTask extends QuestTask
 	}
 
 	@Override
-	public QuestTaskData createData(IProgressData data)
+	public QuestTaskData createData(ITeamData data)
 	{
 		return new Data(this, data);
 	}
@@ -316,7 +316,7 @@ public class FluidTask extends QuestTask
 	{
 		private final IFluidTankProperties[] properties;
 
-		private Data(FluidTask t, IProgressData data)
+		private Data(FluidTask t, ITeamData data)
 		{
 			super(t, data);
 			properties = new IFluidTankProperties[1];

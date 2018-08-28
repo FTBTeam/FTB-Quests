@@ -12,7 +12,7 @@ import com.feed_the_beast.ftblib.lib.util.BlockUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.FTBQuestsBlocks;
 import com.feed_the_beast.ftbquests.block.BlockProgressScreen;
-import com.feed_the_beast.ftbquests.quest.IProgressData;
+import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
@@ -42,7 +42,7 @@ public class TileProgressScreenCore extends TileProgressScreenBase implements IC
 	public boolean indestructible = false;
 	public IBlockState skin = BlockUtils.AIR_STATE;
 
-	private IProgressData cOwner;
+	private ITeamData cOwner;
 	private QuestChapter cChapter;
 
 	@Override
@@ -159,7 +159,7 @@ public class TileProgressScreenCore extends TileProgressScreenBase implements IC
 	}
 
 	@Nullable
-	public IProgressData getTeam()
+	public ITeamData getTeam()
 	{
 		if (team.isEmpty())
 		{

@@ -5,6 +5,7 @@ import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToServer;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.FTBQuests;
+import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestReward;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -14,19 +15,19 @@ import net.minecraft.nbt.NBTTagCompound;
 /**
  * @author LatvianModder
  */
-public class MessageEditReward extends MessageToServer
+public class MessageAddReward extends MessageToServer
 {
-	private int uid;
+	private String quest;
 	private boolean team;
 	private ItemStack stack;
 
-	public MessageEditReward()
+	public MessageAddReward()
 	{
 	}
 
-	public MessageEditReward(int i, boolean t, ItemStack is)
+	public MessageAddReward(String q, boolean t, ItemStack is)
 	{
-		uid = i;
+		quest = q;
 		team = t;
 		stack = is;
 	}
@@ -40,7 +41,7 @@ public class MessageEditReward extends MessageToServer
 	@Override
 	public void writeData(DataOut data)
 	{
-		data.writeInt(uid);
+		data.writeString(quest);
 		data.writeBoolean(team);
 		data.writeNBT(stack.isEmpty() ? null : stack.serializeNBT());
 	}
@@ -48,7 +49,7 @@ public class MessageEditReward extends MessageToServer
 	@Override
 	public void readData(DataIn data)
 	{
-		uid = data.readInt();
+		quest = data.readString();
 		team = data.readBoolean();
 		NBTTagCompound nbt = data.readNBT();
 		stack = nbt == null ? ItemStack.EMPTY : new ItemStack(nbt);
@@ -57,23 +58,19 @@ public class MessageEditReward extends MessageToServer
 	@Override
 	public void onMessage(EntityPlayerMP player)
 	{
-		if (FTBQuests.canEdit(player))
+		if (!stack.isEmpty() && !quest.isEmpty() && FTBQuests.canEdit(player))
 		{
-			QuestReward q = ServerQuestFile.INSTANCE.allRewards.get(uid);
+			Quest q = ServerQuestFile.INSTANCE.getQuest(quest);
 
 			if (q != null)
 			{
-				q.team = team;
-				q.stack = stack;
-
-				if (q.stack.isEmpty())
-				{
-					q.quest.rewards.remove(q);
-					ServerQuestFile.INSTANCE.allRewards.remove(q.uid);
-				}
-
+				QuestReward r = new QuestReward(q, System.identityHashCode(stack));
+				r.team = team;
+				r.stack = stack;
+				q.rewards.add(r);
+				ServerQuestFile.INSTANCE.allRewards.put(r.uid, r);
 				ServerQuestFile.INSTANCE.save();
-				new MessageEditRewardResponse(uid, team, stack).sendToAll();
+				new MessageAddRewardResponse(quest, r.uid, team, stack).sendToAll();
 			}
 		}
 	}

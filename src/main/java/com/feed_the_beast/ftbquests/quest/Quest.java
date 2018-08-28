@@ -3,7 +3,6 @@ package com.feed_the_beast.ftbquests.quest;
 import com.feed_the_beast.ftblib.lib.config.ConfigEnum;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigInt;
-import com.feed_the_beast.ftblib.lib.config.ConfigItemStack;
 import com.feed_the_beast.ftblib.lib.config.ConfigList;
 import com.feed_the_beast.ftblib.lib.config.ConfigString;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
@@ -40,8 +39,7 @@ public final class Quest extends QuestObject
 	public final List<String> text;
 	public final List<String> dependencies;
 	public final List<QuestTask> tasks;
-	public final List<ItemStack> playerRewards;
-	public final List<ItemStack> teamRewards;
+	public final List<QuestReward> rewards;
 	public int timesCompleted;
 
 	public Quest(QuestChapter c, NBTTagCompound nbt)
@@ -67,8 +65,7 @@ public final class Quest extends QuestObject
 		readID(nbt);
 
 		tasks = new ArrayList<>();
-		playerRewards = new ArrayList<>();
-		teamRewards = new ArrayList<>();
+		rewards = new ArrayList<>();
 
 		list = nbt.getTagList("tasks", Constants.NBT.TAG_COMPOUND);
 
@@ -87,26 +84,32 @@ public final class Quest extends QuestObject
 		for (int i = 0; i < list.tagCount(); i++)
 		{
 			ItemStack stack = ItemStack.EMPTY;
-
 			NBTTagCompound nbt1 = list.getCompoundTagAt(i);
 
-			switch (nbt1.getString("type"))
+			if (nbt1.hasKey("type"))
 			{
-				case "item":
-					stack = ItemStackSerializer.read(nbt1.getCompoundTag("item"));
-					break;
-				case "xp":
-					stack = new ItemStack(FTBQuestsItems.XP_VIAL);
-					stack.setTagInfo("xp", new NBTTagInt(nbt1.getInteger("xp")));
-					break;
-				case "xp_levels":
-					stack = new ItemStack(FTBQuestsItems.XP_VIAL);
-					stack.setTagInfo("xp_levels", new NBTTagInt(nbt1.getInteger("xp_levels")));
-					break;
-				case "command":
-					stack = new ItemStack(FTBQuestsItems.SCRIPT);
-					stack.setTagInfo("command", new NBTTagString(nbt1.getString("command")));
-					break;
+				switch (nbt1.getString("type"))
+				{
+					case "item":
+						stack = ItemStackSerializer.read(nbt1.getCompoundTag("item"));
+						break;
+					case "xp":
+						stack = new ItemStack(FTBQuestsItems.XP_VIAL);
+						stack.setTagInfo("xp", new NBTTagInt(nbt1.getInteger("xp")));
+						break;
+					case "xp_levels":
+						stack = new ItemStack(FTBQuestsItems.XP_VIAL);
+						stack.setTagInfo("xp_levels", new NBTTagInt(nbt1.getInteger("xp_levels")));
+						break;
+					case "command":
+						stack = new ItemStack(FTBQuestsItems.SCRIPT);
+						stack.setTagInfo("command", new NBTTagString(nbt1.getString("command")));
+						break;
+				}
+			}
+			else
+			{
+				stack = ItemStackSerializer.read(nbt1);
 			}
 
 			if (!stack.isEmpty())
@@ -116,14 +119,17 @@ public final class Quest extends QuestObject
 					stack.setStackDisplayName(nbt1.getString("title"));
 				}
 
-				if (nbt1.getBoolean("team_reward"))
+				int uid = nbt1.getInteger("uid");
+
+				if (uid == 0)
 				{
-					teamRewards.add(stack);
+					uid = System.identityHashCode(stack);
 				}
-				else
-				{
-					playerRewards.add(stack);
-				}
+
+				QuestReward reward = new QuestReward(this, uid);
+				reward.stack = stack;
+				reward.team = nbt1.getBoolean("team_reward");
+				rewards.add(reward);
 			}
 		}
 
@@ -131,11 +137,15 @@ public final class Quest extends QuestObject
 
 		for (int i = 0; i < list.tagCount(); i++)
 		{
-			ItemStack stack = ItemStackSerializer.read(list.getCompoundTagAt(i));
+			NBTTagCompound nbt1 = list.getCompoundTagAt(i);
+			ItemStack stack = ItemStackSerializer.read(nbt1);
 
 			if (!stack.isEmpty())
 			{
-				playerRewards.add(stack);
+				QuestReward reward = new QuestReward(this, System.identityHashCode(stack));
+				reward.stack = stack;
+				reward.team = false;
+				rewards.add(reward);
 			}
 		}
 
@@ -143,11 +153,15 @@ public final class Quest extends QuestObject
 
 		for (int i = 0; i < list.tagCount(); i++)
 		{
-			ItemStack stack = ItemStackSerializer.read(list.getCompoundTagAt(i));
+			NBTTagCompound nbt1 = list.getCompoundTagAt(i);
+			ItemStack stack = ItemStackSerializer.read(nbt1);
 
 			if (!stack.isEmpty())
 			{
-				teamRewards.add(stack);
+				QuestReward reward = new QuestReward(this, System.identityHashCode(stack));
+				reward.stack = stack;
+				reward.team = true;
+				rewards.add(reward);
 			}
 		}
 
@@ -263,31 +277,27 @@ public final class Quest extends QuestObject
 			nbt.setTag("tasks", array);
 		}
 
-		if (!playerRewards.isEmpty())
+		if (!rewards.isEmpty())
 		{
 			NBTTagList array = new NBTTagList();
 
-			for (ItemStack stack : playerRewards)
+			for (QuestReward reward : rewards)
 			{
-				array.appendTag(ItemStackSerializer.write(stack));
-			}
-
-			nbt.setTag("player_rewards", array);
-		}
-
-		if (!teamRewards.isEmpty())
-		{
-			NBTTagList array = new NBTTagList();
-
-			for (ItemStack stack : teamRewards)
-			{
-				if (!stack.isEmpty())
+				if (!reward.stack.isEmpty())
 				{
-					array.appendTag(ItemStackSerializer.write(stack));
+					NBTTagCompound nbt1 = ItemStackSerializer.write(reward.stack);
+					nbt1.setInteger("uid", reward.uid);
+
+					if (reward.team)
+					{
+						nbt1.setBoolean("team_reward", true);
+					}
+
+					array.appendTag(nbt1);
 				}
 			}
 
-			nbt.setTag("team_rewards", array);
+			nbt.setTag("rewards", array);
 		}
 
 		if (timesCompleted > 0)
@@ -297,7 +307,7 @@ public final class Quest extends QuestObject
 	}
 
 	@Override
-	public long getProgress(IProgressData data)
+	public long getProgress(ITeamData data)
 	{
 		long progress = 0L;
 
@@ -323,7 +333,7 @@ public final class Quest extends QuestObject
 	}
 
 	@Override
-	public double getRelativeProgress(IProgressData data)
+	public double getRelativeProgress(ITeamData data)
 	{
 		double progress = 0D;
 
@@ -336,7 +346,7 @@ public final class Quest extends QuestObject
 	}
 
 	@Override
-	public boolean isComplete(IProgressData data)
+	public boolean isComplete(ITeamData data)
 	{
 		for (QuestTask task : tasks)
 		{
@@ -350,16 +360,18 @@ public final class Quest extends QuestObject
 	}
 
 	@Override
-	public void resetProgress(IProgressData data)
+	public void resetProgress(ITeamData data)
 	{
 		for (QuestTask task : tasks)
 		{
 			task.resetProgress(data);
 		}
+
+		data.unclaimRewards(rewards);
 	}
 
 	@Override
-	public void completeInstantly(IProgressData data)
+	public void completeInstantly(ITeamData data)
 	{
 		for (QuestTask task : tasks)
 		{
@@ -367,7 +379,7 @@ public final class Quest extends QuestObject
 		}
 	}
 
-	public boolean isVisible(@Nullable IProgressData data)
+	public boolean isVisible(@Nullable ITeamData data)
 	{
 		if (dependencies.isEmpty())
 		{
@@ -409,7 +421,7 @@ public final class Quest extends QuestObject
 		}
 	}
 
-	public boolean canStartTasks(IProgressData data)
+	public boolean canStartTasks(ITeamData data)
 	{
 		if (dependencies.isEmpty())
 		{
@@ -579,56 +591,6 @@ public final class Quest extends QuestObject
 				}
 			}
 		}, new ConfigList<>(new ConfigString("")));
-
-		group.add("player_rewards", new ConfigList<ConfigItemStack>(new ConfigItemStack(ItemStack.EMPTY))
-		{
-			@Override
-			public void readFromList()
-			{
-				playerRewards.clear();
-
-				for (ConfigItemStack value : list)
-				{
-					playerRewards.add(value.getStack());
-				}
-			}
-
-			@Override
-			public void writeToList()
-			{
-				list.clear();
-
-				for (ItemStack stack : playerRewards)
-				{
-					list.add(new ConfigItemStack(stack));
-				}
-			}
-		}, new ConfigList<>(new ConfigItemStack(ItemStack.EMPTY)));
-
-		group.add("team_rewards", new ConfigList<ConfigItemStack>(new ConfigItemStack(ItemStack.EMPTY))
-		{
-			@Override
-			public void readFromList()
-			{
-				teamRewards.clear();
-
-				for (ConfigItemStack value : list)
-				{
-					teamRewards.add(value.getStack());
-				}
-			}
-
-			@Override
-			public void writeToList()
-			{
-				list.clear();
-
-				for (ItemStack stack : teamRewards)
-				{
-					list.add(new ConfigItemStack(stack));
-				}
-			}
-		}, new ConfigList<>(new ConfigItemStack(ItemStack.EMPTY)));
 	}
 
 	public void move(byte direction)

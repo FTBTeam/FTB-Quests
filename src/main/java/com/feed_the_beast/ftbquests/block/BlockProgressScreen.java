@@ -134,12 +134,25 @@ public class BlockProgressScreen extends BlockWithHorizontalFacing
 
 			if (screen != null)
 			{
-				if (player instanceof EntityPlayerMP)
+				if (player.isSneaking())
 				{
-					screen.onClicked((EntityPlayerMP) player, BlockScreen.getClickX(facing, base.getOffsetX(), base.getOffsetZ(), hitX, hitZ, screen.width), BlockScreen.getClickY(base.getOffsetY(), hitY, screen.height));
+					if (player instanceof EntityPlayerMP)
+					{
+						screen.onClicked((EntityPlayerMP) player, 0F, 0F);
+					}
+
+					return true;
 				}
 
-				return true;
+				if (facing == state.getValue(FACING))
+				{
+					if (player instanceof EntityPlayerMP)
+					{
+						screen.onClicked((EntityPlayerMP) player, BlockScreen.getClickX(facing, base.getOffsetX(), base.getOffsetZ(), hitX, hitZ, screen.width), BlockScreen.getClickY(base.getOffsetY(), hitY, screen.height));
+					}
+
+					return true;
+				}
 			}
 		}
 

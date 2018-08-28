@@ -121,7 +121,7 @@ public class QuestsTheme extends Theme
 	@Override
 	public void drawGui(int x, int y, int w, int h, WidgetType type)
 	{
-		Color4I.BLACK.withAlpha(220).draw(x, y, w, h);
+		Color4I.DARK_GRAY.withAlpha(220).draw(x, y, w, h);
 	}
 
 	@Override
@@ -147,7 +147,7 @@ public class QuestsTheme extends Theme
 		GlStateManager.alphaFunc(GL11.GL_GREATER, 0.1F);
 		*/
 
-		GuiHelper.drawHollowRect(x, y, w, h, Color4I.WHITE.withAlpha(150), true);
+		GuiHelper.drawHollowRect(x, y, w, h, type == WidgetType.DISABLED ? Color4I.GRAY.withAlpha(150) : Color4I.WHITE.withAlpha(150), true);
 
 		if (type == WidgetType.MOUSE_OVER)
 		{
@@ -165,5 +165,17 @@ public class QuestsTheme extends Theme
 	public void drawContextMenuBackground(int x, int y, int w, int h)
 	{
 		Color4I.DARK_GRAY.withAlpha(200).withOutline(Color4I.GRAY.withAlpha(200), true).draw(x, y, w, h);
+	}
+
+	@Override
+	public void drawScrollBarBackground(int x, int y, int w, int h, WidgetType type)
+	{
+		Color4I.BLACK.withAlpha(70).draw(x, y, w, h);
+	}
+
+	@Override
+	public void drawScrollBar(int x, int y, int w, int h, WidgetType type, boolean vertical)
+	{
+		getContentColor(WidgetType.NORMAL).withAlpha(100).withOutline(Color4I.GRAY.withAlpha(100), false).draw(x, y, w, h);
 	}
 }

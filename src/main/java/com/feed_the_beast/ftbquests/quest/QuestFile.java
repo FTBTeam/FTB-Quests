@@ -11,8 +11,7 @@ import com.feed_the_beast.ftblib.lib.item.ItemStackSerializer;
 import com.feed_the_beast.ftblib.lib.math.Ticks;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskType;
-import com.feed_the_beast.ftbquests.util.PlayerRewards;
-import net.minecraft.entity.player.EntityPlayer;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -37,6 +36,7 @@ public abstract class QuestFile extends QuestObject
 
 	public final Map<String, QuestObject> map;
 	public final List<QuestTask> allTasks;
+	public final Int2ObjectOpenHashMap<QuestReward> allRewards;
 
 	public boolean allowTakeQuestBlocks;
 	public final List<ItemStack> emergencyItems;
@@ -49,6 +49,7 @@ public abstract class QuestFile extends QuestObject
 
 		map = new HashMap<>();
 		allTasks = new ArrayList<>();
+		allRewards = new Int2ObjectOpenHashMap<>();
 
 		allowTakeQuestBlocks = true;
 		emergencyItems = new ArrayList<>();
@@ -75,7 +76,7 @@ public abstract class QuestFile extends QuestObject
 	}
 
 	@Override
-	public long getProgress(IProgressData data)
+	public long getProgress(ITeamData data)
 	{
 		long progress = 0L;
 
@@ -101,7 +102,7 @@ public abstract class QuestFile extends QuestObject
 	}
 
 	@Override
-	public double getRelativeProgress(IProgressData data)
+	public double getRelativeProgress(ITeamData data)
 	{
 		double progress = 0D;
 
@@ -114,7 +115,7 @@ public abstract class QuestFile extends QuestObject
 	}
 
 	@Override
-	public boolean isComplete(IProgressData data)
+	public boolean isComplete(ITeamData data)
 	{
 		for (QuestChapter chapter : chapters)
 		{
@@ -128,7 +129,7 @@ public abstract class QuestFile extends QuestObject
 	}
 
 	@Override
-	public void resetProgress(IProgressData data)
+	public void resetProgress(ITeamData data)
 	{
 		for (QuestChapter chapter : chapters)
 		{
@@ -137,7 +138,7 @@ public abstract class QuestFile extends QuestObject
 	}
 
 	@Override
-	public void completeInstantly(IProgressData data)
+	public void completeInstantly(ITeamData data)
 	{
 		for (QuestChapter chapter : chapters)
 		{
@@ -245,6 +246,19 @@ public abstract class QuestFile extends QuestObject
 				{
 					task.index = allTasks.size();
 					allTasks.add(task);
+				}
+			}
+		}
+
+		allRewards.clear();
+
+		for (QuestChapter chapter : chapters)
+		{
+			for (Quest quest : chapter.quests)
+			{
+				for (QuestReward reward : quest.rewards)
+				{
+					allRewards.put(reward.uid, reward);
 				}
 			}
 		}
@@ -377,11 +391,9 @@ public abstract class QuestFile extends QuestObject
 	}
 
 	@Nullable
-	public abstract IProgressData getData(String team);
+	public abstract ITeamData getData(String team);
 
-	public abstract Collection<? extends IProgressData> getAllData();
-
-	public abstract PlayerRewards getRewards(EntityPlayer player);
+	public abstract Collection<? extends ITeamData> getAllData();
 
 	@Override
 	public Icon getAltIcon()

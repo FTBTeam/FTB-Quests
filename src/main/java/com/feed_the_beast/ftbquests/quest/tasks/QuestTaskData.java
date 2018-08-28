@@ -1,7 +1,7 @@
 package com.feed_the_beast.ftbquests.quest.tasks;
 
 import com.feed_the_beast.ftbquests.gui.GuiTask;
-import com.feed_the_beast.ftbquests.quest.IProgressData;
+import com.feed_the_beast.ftbquests.quest.ITeamData;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTBase;
@@ -19,10 +19,10 @@ import java.util.List;
 public abstract class QuestTaskData<T extends QuestTask> implements ICapabilityProvider, IItemHandler
 {
 	public final T task;
-	public final IProgressData data;
+	public final ITeamData data;
 	public boolean isComplete = false;
 
-	public QuestTaskData(T q, IProgressData d)
+	public QuestTaskData(T q, ITeamData d)
 	{
 		task = q;
 		data = d;

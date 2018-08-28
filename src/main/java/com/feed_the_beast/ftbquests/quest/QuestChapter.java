@@ -134,7 +134,7 @@ public final class QuestChapter extends QuestObject
 	}
 
 	@Override
-	public long getProgress(IProgressData data)
+	public long getProgress(ITeamData data)
 	{
 		long progress = 0L;
 
@@ -160,7 +160,7 @@ public final class QuestChapter extends QuestObject
 	}
 
 	@Override
-	public double getRelativeProgress(IProgressData data)
+	public double getRelativeProgress(ITeamData data)
 	{
 		double progress = 0D;
 
@@ -173,7 +173,7 @@ public final class QuestChapter extends QuestObject
 	}
 
 	@Override
-	public boolean isComplete(IProgressData data)
+	public boolean isComplete(ITeamData data)
 	{
 		for (Quest quest : quests)
 		{
@@ -187,7 +187,7 @@ public final class QuestChapter extends QuestObject
 	}
 
 	@Override
-	public void resetProgress(IProgressData data)
+	public void resetProgress(ITeamData data)
 	{
 		for (Quest quest : quests)
 		{
@@ -196,7 +196,7 @@ public final class QuestChapter extends QuestObject
 	}
 
 	@Override
-	public void completeInstantly(IProgressData data)
+	public void completeInstantly(ITeamData data)
 	{
 		for (Quest quest : quests)
 		{

@@ -1,4 +1,4 @@
-package com.feed_the_beast.ftbquests.net.edit;
+package com.feed_the_beast.ftbquests.net;
 
 import com.feed_the_beast.ftblib.lib.data.ForgePlayer;
 import com.feed_the_beast.ftblib.lib.data.Universe;
@@ -15,15 +15,15 @@ import net.minecraft.entity.player.EntityPlayerMP;
 /**
  * @author LatvianModder
  */
-public class MessageCompleteInstantly extends MessageToServer
+public class MessageResetProgress extends MessageToServer
 {
 	private String id;
 
-	public MessageCompleteInstantly()
+	public MessageResetProgress()
 	{
 	}
 
-	public MessageCompleteInstantly(String i)
+	public MessageResetProgress(String i)
 	{
 		id = i;
 	}
@@ -31,7 +31,7 @@ public class MessageCompleteInstantly extends MessageToServer
 	@Override
 	public NetworkWrapper getWrapper()
 	{
-		return FTBQuestsEditNetHandler.EDIT;
+		return FTBQuestsNetHandler.GENERAL;
 	}
 
 	@Override
@@ -59,7 +59,7 @@ public class MessageCompleteInstantly extends MessageToServer
 
 				if (player1.team.isValid())
 				{
-					object.completeInstantly(FTBQuestsTeamData.get(player1.team));
+					object.resetProgress(FTBQuestsTeamData.get(player1.team));
 					player1.team.markDirty();
 				}
 

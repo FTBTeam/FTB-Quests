@@ -14,13 +14,16 @@ public class FTBQuestsNetHandler
 		GENERAL.register(new MessageOpenTaskGui());
 		GENERAL.register(new MessageOpenTask());
 		GENERAL.register(new MessageUpdateTaskProgress());
-		GENERAL.register(new MessageSyncPlayerRewards());
+		GENERAL.register(new MessageClaimReward());
+		GENERAL.register(new MessageClaimRewardResponse());
 		GENERAL.register(new MessageGetScreen());
 		GENERAL.register(new MessageSyncEditingMode());
 		GENERAL.register(new MessageGetEmergencyItems());
 		GENERAL.register(new MessageCreateTeamData());
 		GENERAL.register(new MessageDeleteTeamData());
 		GENERAL.register(new MessageChangedTeam());
+		GENERAL.register(new MessageResetProgress());
+		GENERAL.register(new MessageCompleteInstantly());
 
 		FTBQuestsEditNetHandler.init();
 	}

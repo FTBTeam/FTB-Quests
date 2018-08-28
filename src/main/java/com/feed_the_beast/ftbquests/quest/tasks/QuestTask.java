@@ -3,7 +3,7 @@ package com.feed_the_beast.ftbquests.quest.tasks;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
-import com.feed_the_beast.ftbquests.quest.IProgressData;
+import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
@@ -32,7 +32,7 @@ public abstract class QuestTask extends QuestObject
 		index = -1;
 	}
 
-	public abstract QuestTaskData createData(IProgressData data);
+	public abstract QuestTaskData createData(ITeamData data);
 
 	@Override
 	public final QuestFile getQuestFile()
@@ -53,19 +53,19 @@ public abstract class QuestTask extends QuestObject
 	}
 
 	@Override
-	public final long getProgress(IProgressData data)
+	public final long getProgress(ITeamData data)
 	{
 		return data.getQuestTaskData(this).getProgress();
 	}
 
 	@Override
-	public final double getRelativeProgress(IProgressData data)
+	public final double getRelativeProgress(ITeamData data)
 	{
 		return data.getQuestTaskData(this).getRelativeProgress();
 	}
 
 	@Override
-	public final boolean isComplete(IProgressData data)
+	public final boolean isComplete(ITeamData data)
 	{
 		long max = getMaxProgress();
 		return max > 0L && getProgress(data) >= max;
@@ -83,7 +83,7 @@ public abstract class QuestTask extends QuestObject
 	}
 
 	@Override
-	public final void resetProgress(IProgressData data)
+	public final void resetProgress(ITeamData data)
 	{
 		QuestTaskData taskData = data.getQuestTaskData(this);
 		taskData.resetProgress();
@@ -92,7 +92,7 @@ public abstract class QuestTask extends QuestObject
 	}
 
 	@Override
-	public void completeInstantly(IProgressData data)
+	public void completeInstantly(ITeamData data)
 	{
 		QuestTaskData taskData = data.getQuestTaskData(this);
 		taskData.completeInstantly();
@@ -104,7 +104,7 @@ public abstract class QuestTask extends QuestObject
 	{
 		quest.tasks.remove(this);
 
-		for (IProgressData data : quest.chapter.file.getAllData())
+		for (ITeamData data : quest.chapter.file.getAllData())
 		{
 			data.removeTask(this);
 		}
@@ -120,7 +120,7 @@ public abstract class QuestTask extends QuestObject
 	@Override
 	public void onCreated()
 	{
-		for (IProgressData data : ServerQuestFile.INSTANCE.getAllData())
+		for (ITeamData data : ServerQuestFile.INSTANCE.getAllData())
 		{
 			data.createTaskData(this);
 		}

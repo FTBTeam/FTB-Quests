@@ -5,6 +5,9 @@ import com.feed_the_beast.ftblib.events.client.CustomClickEvent;
 import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.FTBQuestsItems;
+import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.quest.QuestChapter;
+import com.feed_the_beast.ftbquests.quest.QuestReward;
 import com.feed_the_beast.ftbquests.tile.TileProgressScreenCore;
 import com.feed_the_beast.ftbquests.tile.TileScreenCore;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
@@ -19,6 +22,8 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
 import net.minecraftforge.fml.relauncher.Side;
+
+import java.util.UUID;
 
 /**
  * @author LatvianModder
@@ -48,9 +53,32 @@ public class FTBQuestsClientEventHandler
 	@SubscribeEvent
 	public static void onCustomSidebarButtonText(CustomSidebarButtonTextEvent event)
 	{
-		if (ClientQuestFile.exists() && ClientQuestFile.INSTANCE.newRewards > 0 && event.getButton().id.equals(QUESTS_BUTTON))
+		if (ClientQuestFile.existsWithTeam() && event.getButton().id.equals(QUESTS_BUTTON))
 		{
-			event.setText(Integer.toString(ClientQuestFile.INSTANCE.newRewards));
+			int r = 0;
+			UUID playerId = ClientUtils.MC.player.getUniqueID();
+
+			for (QuestChapter chapter : ClientQuestFile.INSTANCE.chapters)
+			{
+				for (Quest quest : chapter.quests)
+				{
+					if (quest.isComplete(ClientQuestFile.INSTANCE.self))
+					{
+						for (QuestReward reward : quest.rewards)
+						{
+							if (!ClientQuestFile.INSTANCE.self.isRewardClaimed(playerId, reward))
+							{
+								r++;
+							}
+						}
+					}
+				}
+			}
+
+			if (r > 0)
+			{
+				event.setText(Integer.toString(r));
+			}
 		}
 	}
 

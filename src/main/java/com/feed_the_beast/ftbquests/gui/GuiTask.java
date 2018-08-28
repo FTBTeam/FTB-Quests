@@ -17,10 +17,11 @@ import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
+import com.feed_the_beast.ftbquests.net.MessageCompleteInstantly;
 import com.feed_the_beast.ftbquests.net.MessageGetScreen;
-import com.feed_the_beast.ftbquests.net.edit.MessageCompleteInstantly;
+import com.feed_the_beast.ftbquests.net.MessageResetProgress;
 import com.feed_the_beast.ftbquests.net.edit.MessageEditObject;
-import com.feed_the_beast.ftbquests.net.edit.MessageResetProgress;
+import com.feed_the_beast.ftbquests.quest.QuestReward;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
@@ -97,11 +98,7 @@ public class GuiTask extends GuiBase
 			@Override
 			public void addWidgets()
 			{
-				add(new Tab(this, I18n.format("gui.back"), "", GuiIcons.LEFT, button ->
-				{
-					questFile.questGui = new GuiQuest(questFile.questTreeGui, container.data.task.quest);
-					questFile.questGui.openGui();
-				}));
+				add(new Tab(this, I18n.format("gui.back"), "", GuiIcons.LEFT, button -> onBack()));
 
 				if (questFile.canEdit() || questFile.self != null && questFile.allowTakeQuestBlocks && container.data.task.quest.isVisible(questFile.self) && !container.data.task.isComplete(questFile.self))
 				{
@@ -125,7 +122,7 @@ public class GuiTask extends GuiBase
 					}));
 				}
 
-				if (!container.data.task.quest.playerRewards.isEmpty() || !container.data.task.quest.teamRewards.isEmpty())
+				if (!container.data.task.quest.rewards.isEmpty())
 				{
 					add(new Tab(this, I18n.format("ftbquests.rewards") + ":", "", GuiIcons.MONEY_BAG, button -> new GuiRewards().openGui())
 					{
@@ -134,14 +131,9 @@ public class GuiTask extends GuiBase
 						{
 							super.addMouseOverText(list);
 
-							for (ItemStack stack : container.data.task.quest.playerRewards)
+							for (QuestReward reward : container.data.task.quest.rewards)
 							{
-								list.add("- " + stack.getCount() + "x " + stack.getRarity().rarityColor + stack.getDisplayName());
-							}
-
-							for (ItemStack stack : container.data.task.quest.teamRewards)
-							{
-								list.add(TextFormatting.BLUE + "- " + stack.getCount() + "x " + stack.getRarity().rarityColor + stack.getDisplayName());
+								list.add((reward.team ? (TextFormatting.BLUE + "- ") : "- ") + reward.stack.getCount() + "x " + reward.stack.getRarity().rarityColor + reward.stack.getDisplayName());
 							}
 						}
 					});
@@ -257,5 +249,12 @@ public class GuiTask extends GuiBase
 	public Theme getTheme()
 	{
 		return QuestsTheme.INSTANCE;
+	}
+
+	@Override
+	public void onBack()
+	{
+		questFile.questGui = new GuiQuest(questFile.questTreeGui, container.data.task.quest);
+		questFile.questGui.openGui();
 	}
 }
