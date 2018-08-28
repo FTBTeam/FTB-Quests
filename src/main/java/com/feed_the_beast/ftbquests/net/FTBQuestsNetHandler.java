@@ -11,9 +11,9 @@ public class FTBQuestsNetHandler
 	public static void init()
 	{
 		GENERAL.register(new MessageSyncQuests());
-		GENERAL.register(new MessageOpenTaskGui());
-		GENERAL.register(new MessageOpenTask());
 		GENERAL.register(new MessageUpdateTaskProgress());
+		GENERAL.register(new MessageOpenTask());
+		GENERAL.register(new MessageOpenTaskResponse());
 		GENERAL.register(new MessageClaimReward());
 		GENERAL.register(new MessageClaimRewardResponse());
 		GENERAL.register(new MessageGetScreen());
@@ -23,6 +23,7 @@ public class FTBQuestsNetHandler
 		GENERAL.register(new MessageDeleteTeamData());
 		GENERAL.register(new MessageChangedTeam());
 		GENERAL.register(new MessageResetProgress());
+		GENERAL.register(new MessageResetProgressResponse());
 		GENERAL.register(new MessageCompleteInstantly());
 
 		FTBQuestsEditNetHandler.init();

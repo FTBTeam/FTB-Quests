@@ -235,16 +235,12 @@ public class GuiQuestTree extends GuiBase
 			}
 
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
+			contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.file.emergency_items"), GuiIcons.LOCK_OPEN, () -> new GuiEmergencyItems().openGui()).setEnabled(!questFile.emergencyItems.isEmpty() && (questFile.self != null || questFile.canEdit())));
+			contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.rewards"), GuiIcons.MONEY_BAG, () -> new GuiRewards().openGui()));
 
 			if (questFile.canEdit())
 			{
 				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.edit_file"), GuiIcons.SETTINGS, () -> new MessageEditObject(questFile.getID()).sendToServer()));
-			}
-
-			contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.file.emergency_items"), GuiIcons.LOCK_OPEN, () -> new GuiEmergencyItems().openGui()).setEnabled(!questFile.emergencyItems.isEmpty() && (questFile.self != null || questFile.canEdit())));
-
-			if (questFile.canEdit())
-			{
 				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.reset_progress"), GuiIcons.REFRESH, () -> new MessageResetProgress(questFile.getID()).sendToServer()).setYesNo(I18n.format("ftbquests.gui.reset_progress_q")));
 				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.complete_instantly"), QuestsTheme.COMPLETED, () -> new MessageCompleteInstantly(questFile.getID()).sendToServer()).setYesNo(I18n.format("ftbquests.gui.complete_instantly_q")));
 			}

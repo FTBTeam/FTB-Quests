@@ -20,18 +20,18 @@ import javax.annotation.Nullable;
 /**
  * @author LatvianModder
  */
-public class MessageOpenTaskGui extends MessageToClient
+public class MessageOpenTaskResponse extends MessageToClient
 {
 	private String task;
 	private int window;
 	private boolean hasPos;
 	private BlockPos pos;
 
-	public MessageOpenTaskGui()
+	public MessageOpenTaskResponse()
 	{
 	}
 
-	public MessageOpenTaskGui(String t, int w, boolean h, @Nullable BlockPos p)
+	public MessageOpenTaskResponse(String t, int w, boolean h, @Nullable BlockPos p)
 	{
 		task = t;
 		window = w;
