@@ -110,21 +110,8 @@ public class ClientQuestProgress implements ITeamData
 		}
 		else
 		{
-			double d = object.getRelativeProgress(progress);
-
-			if (d <= 0D)
-			{
-				builder.append("0%");
-			}
-			else if (d >= 1D)
-			{
-				builder.append("100%");
-			}
-			else
-			{
-				builder.append((int) (d * 100D));
-				builder.append('%');
-			}
+			builder.append(object.getRelativeProgress(progress));
+			builder.append('%');
 		}
 
 		if (GuiScreen.isCtrlKeyDown())

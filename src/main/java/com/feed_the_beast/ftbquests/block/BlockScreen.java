@@ -411,7 +411,7 @@ public class BlockScreen extends BlockWithHorizontalFacing
 		if (data != null)
 		{
 			QuestTaskData taskData = data.getQuestTaskData(task);
-			tooltip.add(I18n.format("ftbquests.progress") + ": " + TextFormatting.BLUE + String.format("%s / %s [%d%%]", taskData.getProgressString(), task.getMaxProgressString(), (int) (taskData.getRelativeProgress() * 100D)));
+			tooltip.add(I18n.format("ftbquests.progress") + ": " + TextFormatting.BLUE + String.format("%s / %s [%d%%]", taskData.getProgressString(), task.getMaxProgressString(), taskData.getRelativeProgress()));
 		}
 	}
 }

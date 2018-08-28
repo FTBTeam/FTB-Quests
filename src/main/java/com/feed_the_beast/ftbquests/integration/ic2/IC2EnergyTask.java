@@ -157,7 +157,7 @@ public class IC2EnergyTask extends QuestTask
 		Tessellator tessellator = Tessellator.getInstance();
 		BufferBuilder buffer = tessellator.getBuffer();
 
-		double r = data == null ? 0D : data.getRelativeProgress();
+		double r = data == null ? 0D : data.getRelativeProgress() / 100D;
 
 		if (r > 0D)
 		{
@@ -205,7 +205,7 @@ public class IC2EnergyTask extends QuestTask
 		buffer.pos(x, y, z).tex(0, 0).endVertex();
 		tessellator.draw();
 
-		double r = data == null ? 0D : data.getRelativeProgress();
+		double r = data == null ? 0D : data.getRelativeProgress() / 100D;
 
 		if (r > 0D)
 		{

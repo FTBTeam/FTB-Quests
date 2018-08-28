@@ -59,7 +59,7 @@ public abstract class QuestTask extends QuestObject
 	}
 
 	@Override
-	public final double getRelativeProgress(ITeamData data)
+	public final int getRelativeProgress(ITeamData data)
 	{
 		return data.getQuestTaskData(this).getRelativeProgress();
 	}

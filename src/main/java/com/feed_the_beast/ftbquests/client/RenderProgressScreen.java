@@ -1,25 +1,30 @@
 package com.feed_the_beast.ftbquests.client;
 
-import com.feed_the_beast.ftblib.lib.client.ClientUtils;
-import com.feed_the_beast.ftbquests.block.BlockScreen;
+import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
+import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
-import com.feed_the_beast.ftbquests.tile.TileProgressScreenBase;
 import com.feed_the_beast.ftbquests.tile.TileProgressScreenCore;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
-import net.minecraft.tileentity.TileEntity;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.TextFormatting;
+import org.lwjgl.opengl.GL11;
 
 /**
  * @author LatvianModder
  */
 public class RenderProgressScreen extends TileEntitySpecialRenderer<TileProgressScreenCore>
 {
+	public static final Color4I COLOR_NOT_STARTED = Color4I.rgb(0xFF4747);
+	public static final Color4I COLOR_IN_PROGRESS = Color4I.rgb(0xFFDF42);
+	public static final Color4I COLOR_COMPLETED = Color4I.rgb(0x68D341);
+
 	@Override
 	public void render(TileProgressScreenCore screen, double x, double y, double z, float partialTicks, int destroyStage, float alpha)
 	{
@@ -45,24 +50,11 @@ public class RenderProgressScreen extends TileEntitySpecialRenderer<TileProgress
 			return;
 		}
 
-		double mx = -1D, my = -1D;
+		ITeamData team = screen.getTeam();
 
-		RayTraceResult ray = ClientUtils.MC.objectMouseOver;
-
-		if (ray != null && ray.typeOfHit == RayTraceResult.Type.BLOCK && ray.sideHit == screen.getFacing())
+		if (team == null)
 		{
-			TileEntity tileEntity = screen.getWorld().getTileEntity(ray.getBlockPos());
-
-			if (tileEntity == screen || tileEntity instanceof TileProgressScreenBase)
-			{
-				TileProgressScreenBase base = (TileProgressScreenBase) tileEntity;
-
-				if (base.getScreen() == screen)
-				{
-					mx = BlockScreen.getClickX(screen.facing, base.getOffsetX(), base.getOffsetZ(), ray.hitVec.x - ray.getBlockPos().getX(), ray.hitVec.z - ray.getBlockPos().getZ(), screen.width);
-					my = BlockScreen.getClickY(base.getOffsetY(), ray.hitVec.y % 1D, screen.height);
-				}
-			}
+			return;
 		}
 
 		GlStateManager.color(1F, 1F, 1F, alpha);
@@ -86,16 +78,73 @@ public class RenderProgressScreen extends TileEntitySpecialRenderer<TileProgress
 		GlStateManager.translate(-screen.width, -screen.height - 1, -0.01F);
 		GlStateManager.scale(screen.width * 2 + 1, screen.height + 2, 1);
 
-		String top1 = chapter.getDisplayName().getUnformattedText();
+		drawString(font, TextFormatting.DARK_GREEN + team.getTeamID(), 0.02, 0.12);
+		drawString(font, chapter.getRelativeProgress(team) + "%", 0.86, 0.12);
 
-		drawString(font, top1, 0.02, 0.15);
+		if (!chapter.quests.isEmpty())
+		{
+			int minX = Quest.POS_LIMIT + 1, minY = Quest.POS_LIMIT + 1, maxX = -(Quest.POS_LIMIT + 1), maxY = -(Quest.POS_LIMIT + 1);
 
-		drawString(font, TextFormatting.DARK_PURPLE + "WIP", 0.35, 0.3);
+			for (Quest quest : chapter.quests)
+			{
+				minX = Math.min(minX, quest.x);
+				minY = Math.min(minY, quest.y);
+				maxX = Math.max(maxX, quest.x);
+				maxY = Math.max(maxY, quest.y);
+			}
 
-		ITeamData team = screen.getTeam();
+			int sizeX = maxX - minX + 1;
+			int sizeY = maxY - minY + 1;
 
-		String bottomText = team == null ? "???" : team.getTeamID();
-		drawString(font, TextFormatting.DARK_GREEN + bottomText, 0.83, 0.15);
+			GlStateManager.pushMatrix();
+			GlStateManager.translate(0.1F, 0.2F, 0F);
+			GlStateManager.scale(0.8F, 0.6F, 1F);
+			GlStateManager.disableTexture2D();
+			Tessellator tessellator = Tessellator.getInstance();
+			BufferBuilder buffer = tessellator.getBuffer();
+			buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
+
+			int r, g, b, a = 255;
+
+			for (Quest quest : chapter.quests)
+			{
+				int p = quest.getRelativeProgress(team);
+
+				if (p == 0)
+				{
+					r = COLOR_NOT_STARTED.redi();
+					g = COLOR_NOT_STARTED.greeni();
+					b = COLOR_NOT_STARTED.bluei();
+				}
+				else if (p == 100)
+				{
+					r = COLOR_COMPLETED.redi();
+					g = COLOR_COMPLETED.greeni();
+					b = COLOR_COMPLETED.bluei();
+				}
+				else
+				{
+					r = COLOR_IN_PROGRESS.redi();
+					g = COLOR_IN_PROGRESS.greeni();
+					b = COLOR_IN_PROGRESS.bluei();
+				}
+
+				double rx = (quest.x - minX) / (double) sizeX + 0.0025D;
+				double ry = (quest.y - minY) / (double) sizeY + 0.0025D;
+				double rw = 1D / (double) sizeX - 0.005D;
+				double rh = 1D / (double) sizeY - 0.005D;
+
+				buffer.pos(rx, ry, 0).color(r, g, b, a).endVertex();
+				buffer.pos(rx, ry + rh, 0).color(r, g, b, a).endVertex();
+				buffer.pos(rx + rw, ry + rh, 0).color(r, g, b, a).endVertex();
+				buffer.pos(rx + rw, ry, 0).color(r, g, b, a).endVertex();
+			}
+
+			tessellator.draw();
+
+			GlStateManager.enableTexture2D();
+			GlStateManager.popMatrix();
+		}
 
 		font.setUnicodeFlag(flag);
 		setLightmapDisabled(false);

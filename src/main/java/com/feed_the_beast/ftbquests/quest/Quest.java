@@ -333,16 +333,16 @@ public final class Quest extends QuestObject
 	}
 
 	@Override
-	public double getRelativeProgress(ITeamData data)
+	public int getRelativeProgress(ITeamData data)
 	{
-		double progress = 0D;
+		int progress = 0;
 
 		for (QuestTask quest : tasks)
 		{
 			progress += quest.getRelativeProgress(data);
 		}
 
-		return progress / (double) tasks.size();
+		return fixRelativeProgress(progress, tasks.size());
 	}
 
 	@Override

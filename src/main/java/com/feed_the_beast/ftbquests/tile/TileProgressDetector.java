@@ -170,15 +170,15 @@ public class TileProgressDetector extends TileBase implements ITickable, IConfig
 
 		if (cTeam != null && cObject != null)
 		{
-			double rel = cObject.getRelativeProgress(cTeam);
+			int rel = cObject.getRelativeProgress(cTeam);
 
-			if (rel >= 1D)
+			if (rel >= 100)
 			{
 				redstoneOutput = 15;
 			}
-			else if (rel > 0D && level)
+			else if (rel > 0 && level)
 			{
-				redstoneOutput = 1 + (int) (rel * 14);
+				redstoneOutput = 1 + (int) (rel * 14D / 100D);
 			}
 		}
 

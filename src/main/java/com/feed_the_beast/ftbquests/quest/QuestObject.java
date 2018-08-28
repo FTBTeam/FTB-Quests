@@ -43,7 +43,26 @@ public abstract class QuestObject
 
 	public abstract void completeInstantly(ITeamData data);
 
-	public abstract double getRelativeProgress(ITeamData data);
+	public abstract int getRelativeProgress(ITeamData data);
+
+	public static int fixRelativeProgress(int progress, int max)
+	{
+		if (max <= 0)
+		{
+			return 100;
+		}
+		else if (progress <= 0)
+		{
+			return 0;
+		}
+
+		if (progress >= max * 100)
+		{
+			return 100;
+		}
+
+		return (int) (progress / (double) max);
+	}
 
 	public abstract boolean isComplete(ITeamData data);
 

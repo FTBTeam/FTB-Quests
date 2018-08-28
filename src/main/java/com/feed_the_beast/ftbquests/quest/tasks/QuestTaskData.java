@@ -39,23 +39,27 @@ public abstract class QuestTaskData<T extends QuestTask> implements ICapabilityP
 
 	public abstract void completeInstantly();
 
-	public double getRelativeProgress()
+	public int getRelativeProgress()
 	{
 		long max = task.getMaxProgress();
 
-		if (max == 0)
+		if (max <= 0L)
 		{
-			return 0D;
+			return 0;
 		}
 
 		long progress = getProgress();
 
-		if (progress >= max)
+		if (progress <= 0L)
 		{
-			return 1D;
+			return 0;
+		}
+		else if (progress >= max)
+		{
+			return 100;
 		}
 
-		return (double) progress / (double) max;
+		return (int) (progress * 100D / (double) max);
 	}
 
 	public String getProgressString()
