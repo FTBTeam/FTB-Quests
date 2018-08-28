@@ -11,7 +11,7 @@ import com.feed_the_beast.ftblib.lib.tile.EnumSaveType;
 import com.feed_the_beast.ftblib.lib.tile.TileBase;
 import com.feed_the_beast.ftblib.lib.util.BlockUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
-import com.feed_the_beast.ftbquests.quest.IProgressData;
+import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
@@ -34,7 +34,7 @@ public class TileProgressDetector extends TileBase implements ITickable, IConfig
 	public boolean level = false;
 	public int redstoneOutput = 0;
 
-	private IProgressData cTeam;
+	private ITeamData cTeam;
 	private QuestObject cObject;
 
 	@Override
@@ -111,7 +111,7 @@ public class TileProgressDetector extends TileBase implements ITickable, IConfig
 	}
 
 	@Nullable
-	public IProgressData getTeam()
+	public ITeamData getTeam()
 	{
 		if (team.isEmpty())
 		{

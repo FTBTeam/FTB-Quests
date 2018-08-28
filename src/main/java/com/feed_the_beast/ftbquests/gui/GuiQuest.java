@@ -1,5 +1,6 @@
 package com.feed_the_beast.ftbquests.gui;
 
+import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigItemStack;
 import com.feed_the_beast.ftblib.lib.config.ConfigValueInstance;
@@ -22,15 +23,17 @@ import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.client.ClientQuestProgress;
+import com.feed_the_beast.ftbquests.net.MessageClaimReward;
 import com.feed_the_beast.ftbquests.net.MessageGetScreen;
 import com.feed_the_beast.ftbquests.net.MessageOpenTask;
+import com.feed_the_beast.ftbquests.net.edit.MessageAddReward;
 import com.feed_the_beast.ftbquests.net.edit.MessageCreateObject;
 import com.feed_the_beast.ftbquests.net.edit.MessageEditReward;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
+import com.feed_the_beast.ftbquests.quest.QuestReward;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskType;
-import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.init.Items;
@@ -39,7 +42,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.TextFormatting;
 import org.lwjgl.opengl.GL11;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -58,7 +60,7 @@ public class GuiQuest extends GuiBase
 		public void draw(Theme theme, int x, int y, int w, int h)
 		{
 			GlStateManager.pushMatrix();
-			GlStateManager.translate(x + getGui().width / 2F, y + 11, 0);
+			GlStateManager.translate((int) (x + getGui().width / 2F), y + 11, 0);
 			GlStateManager.scale(2F, 2F, 1F);
 			theme.drawString(text, 0, 0, Theme.CENTERED);
 			GlStateManager.popMatrix();
@@ -284,15 +286,26 @@ public class GuiQuest extends GuiBase
 
 	public class ButtonReward extends SmallButton
 	{
-		public ItemStack reward;
-		public boolean teamReward;
+		public final QuestReward reward;
 
-		public ButtonReward(Panel panel, ItemStack r, boolean t)
+		public ButtonReward(Panel panel, QuestReward r)
 		{
-			super(panel, t ? TextFormatting.BLUE + r.getDisplayName() : r.getDisplayName(), ItemIcon.getItemIcon(r));
+			super(panel, r.stack.getDisplayName() + (r.team ? TextFormatting.BLUE + " [" + I18n.format("ftbquests.reward.team_reward") + "]" : ""), ItemIcon.getItemIcon(r.stack));
 			setPosAndSize(0, 20, 20, 20);
 			reward = r;
-			teamReward = t;
+		}
+
+		@Override
+		public void addMouseOverText(List<String> list)
+		{
+			if (isShiftKeyDown() && isCtrlKeyDown())
+			{
+				list.add(getTitle() + " " + TextFormatting.DARK_GRAY + reward);
+			}
+			else
+			{
+				list.add(getTitle());
+			}
 		}
 
 		@Override
@@ -309,24 +322,48 @@ public class GuiQuest extends GuiBase
 						@Override
 						public ItemStack getStack()
 						{
-							return reward;
+							return reward.stack;
 						}
 
 						@Override
 						public void setStack(ItemStack stack)
 						{
-							new MessageEditReward(quest.getID(), (teamReward ? quest.teamRewards : quest.playerRewards).indexOf(reward), teamReward, stack).sendToServer();
+							reward.stack = stack;
+							new MessageEditReward(reward.uid, reward.team, stack).sendToServer();
 						}
 					});
 
 					new GuiSelectItemStack(value, this).openGui();
 				}));
-				contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), GuiIcons.REMOVE, () -> new MessageEditReward(quest.getID(), (teamReward ? quest.teamRewards : quest.playerRewards).indexOf(reward), teamReward, ItemStack.EMPTY).sendToServer()).setYesNo(I18n.format("delete_item", reward.getDisplayName())));
+
+				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.reward.team_reward") + ": " + (reward.team ? TextFormatting.BLUE + "true" : "false"), reward.team ? GuiIcons.LOCK : GuiIcons.LOCK_OPEN, () -> new MessageEditReward(reward.uid, !reward.team, reward.stack).sendToServer()));
+				contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), GuiIcons.REMOVE, () -> new MessageEditReward(reward.uid, reward.team, ItemStack.EMPTY).sendToServer()).setYesNo(I18n.format("delete_item", reward.stack.getDisplayName())));
 				getGui().openContextMenu(contextMenu);
 			}
 			else if (button.isLeft() && questTreeGui.questFile.self != null)
 			{
-				new GuiRewards().openGui();
+				new MessageClaimReward(reward.uid).sendToServer();
+			}
+		}
+
+		@Override
+		public void draw(Theme theme, int x, int y, int w, int h)
+		{
+			super.draw(theme, x, y, w, h);
+
+			if (questTreeGui.questFile.self == null)
+			{
+				GlStateManager.pushMatrix();
+				GlStateManager.translate(0, 0, 500);
+				GuiIcons.CLOSE.draw(x + w - 9, y + 1, 8, 8);
+				GlStateManager.popMatrix();
+			}
+			else if (questTreeGui.questFile.self.isRewardClaimed(ClientUtils.MC.player.getUniqueID(), reward))
+			{
+				GlStateManager.pushMatrix();
+				GlStateManager.translate(0, 0, 500);
+				QuestsTheme.COMPLETED.draw(x + w - 9, y + 1, 8, 8);
+				GlStateManager.popMatrix();
 			}
 		}
 	}
@@ -349,7 +386,7 @@ public class GuiQuest extends GuiBase
 				@Override
 				public void setStack(ItemStack stack)
 				{
-					new MessageEditReward(quest.getID(), quest.playerRewards.size(), false, stack).sendToServer();
+					new MessageAddReward(quest.getID(), false, stack).sendToServer();
 				}
 			});
 
@@ -478,14 +515,9 @@ public class GuiQuest extends GuiBase
 			@Override
 			public void addWidgets()
 			{
-				for (ItemStack stack : quest.playerRewards)
+				for (QuestReward reward : quest.rewards)
 				{
-					add(new ButtonReward(this, stack, false));
-				}
-
-				for (ItemStack stack : quest.teamRewards)
-				{
-					add(new ButtonReward(this, stack, true));
+					add(new ButtonReward(this, reward));
 				}
 
 				if (questTreeGui.questFile.canEdit())
@@ -539,13 +571,6 @@ public class GuiQuest extends GuiBase
 	}
 
 	@Override
-	@Nullable
-	public GuiScreen getPrevScreen()
-	{
-		return null;
-	}
-
-	@Override
 	public Theme getTheme()
 	{
 		return QuestsTheme.INSTANCE;
@@ -555,5 +580,11 @@ public class GuiQuest extends GuiBase
 	public boolean drawDefaultBackground()
 	{
 		return false;
+	}
+
+	@Override
+	public void onBack()
+	{
+		questTreeGui.openGui();
 	}
 }

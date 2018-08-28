@@ -63,7 +63,7 @@ public class MessageEditObjectResponse extends MessageToClient
 				object.getConfig(group);
 				object.getExtraConfig(group);
 				group.deserializeEditedNBT(nbt);
-				object.clearCachedData();
+				ClientQuestFile.INSTANCE.clearCachedData();
 				ClientQuestFile.INSTANCE.refreshGui(ClientQuestFile.INSTANCE);
 			}
 		}

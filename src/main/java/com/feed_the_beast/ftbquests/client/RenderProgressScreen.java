@@ -2,7 +2,7 @@ package com.feed_the_beast.ftbquests.client;
 
 import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftbquests.block.BlockScreen;
-import com.feed_the_beast.ftbquests.quest.IProgressData;
+import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.tile.TileProgressScreenBase;
 import com.feed_the_beast.ftbquests.tile.TileProgressScreenCore;
@@ -92,7 +92,7 @@ public class RenderProgressScreen extends TileEntitySpecialRenderer<TileProgress
 
 		drawString(font, TextFormatting.DARK_PURPLE + "WIP", 0.35, 0.3);
 
-		IProgressData team = screen.getTeam();
+		ITeamData team = screen.getTeam();
 
 		String bottomText = team == null ? "???" : team.getTeamID();
 		drawString(font, TextFormatting.DARK_GREEN + bottomText, 0.83, 0.15);

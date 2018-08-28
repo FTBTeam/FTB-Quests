@@ -8,8 +8,8 @@ import com.feed_the_beast.ftbquests.net.MessageSyncQuests;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import com.feed_the_beast.ftbquests.util.FTBQuestsTeamData;
-import com.feed_the_beast.ftbquests.util.PlayerRewards;
-import net.minecraft.entity.player.EntityPlayer;
+import it.unimi.dsi.fastutil.ints.IntCollection;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -38,8 +38,7 @@ public class ClientQuestFile extends QuestFile
 	public GuiQuestTree questTreeGui;
 	public GuiBase questGui;
 	public boolean editingMode;
-	public final PlayerRewards rewards;
-	public int newRewards;
+	public final IntCollection rewards;
 
 	public ClientQuestFile(MessageSyncQuests message, @Nullable ClientQuestFile prev)
 	{
@@ -62,10 +61,7 @@ public class ClientQuestFile extends QuestFile
 		self = message.team.isEmpty() ? null : teamData.get(message.team);
 		editingMode = message.editingMode;
 
-		rewards = new PlayerRewards(this);
-		rewards.items.addAll(message.rewards);
-
-		newRewards = 0;
+		rewards = new IntOpenHashSet(message.rewards);
 
 		refreshGui(prev);
 	}
@@ -145,11 +141,5 @@ public class ClientQuestFile extends QuestFile
 	public Collection<ClientQuestProgress> getAllData()
 	{
 		return teamData.values();
-	}
-
-	@Override
-	public PlayerRewards getRewards(EntityPlayer player)
-	{
-		return rewards;
 	}
 }

@@ -6,7 +6,7 @@ import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.FTBQuestsBlocks;
 import com.feed_the_beast.ftbquests.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
-import com.feed_the_beast.ftbquests.quest.IProgressData;
+import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskData;
@@ -130,11 +130,6 @@ public class BlockScreen extends BlockWithHorizontalFacing
 	@Override
 	public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ)
 	{
-		if (facing != state.getValue(FACING))
-		{
-			return false;
-		}
-
 		TileEntity tileEntity = world.getTileEntity(pos);
 
 		if (tileEntity instanceof TileScreenBase)
@@ -144,12 +139,25 @@ public class BlockScreen extends BlockWithHorizontalFacing
 
 			if (screen != null)
 			{
-				if (player instanceof EntityPlayerMP)
+				if (player.isSneaking())
 				{
-					screen.onClicked((EntityPlayerMP) player, hand, getClickX(facing, base.getOffsetX(), base.getOffsetZ(), hitX, hitZ, screen.size), getClickY(base.getOffsetY(), hitY, screen.size));
+					if (player instanceof EntityPlayerMP)
+					{
+						screen.onClicked((EntityPlayerMP) player, hand, 0F, 0F);
+					}
+
+					return true;
 				}
 
-				return true;
+				if (facing == state.getValue(FACING))
+				{
+					if (player instanceof EntityPlayerMP)
+					{
+						screen.onClicked((EntityPlayerMP) player, hand, getClickX(facing, base.getOffsetX(), base.getOffsetZ(), hitX, hitZ, screen.size), getClickY(base.getOffsetY(), hitY, screen.size));
+					}
+
+					return true;
+				}
 			}
 		}
 
@@ -398,7 +406,7 @@ public class BlockScreen extends BlockWithHorizontalFacing
 
 		tooltip.add(I18n.format("ftbquests.task") + ": " + StringUtils.color(task.getDisplayName(), TextFormatting.YELLOW).getFormattedText());
 
-		IProgressData data = ClientQuestFile.INSTANCE.getData(team);
+		ITeamData data = ClientQuestFile.INSTANCE.getData(team);
 
 		if (data != null)
 		{

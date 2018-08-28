@@ -35,17 +35,17 @@ public abstract class QuestObject
 
 	public abstract Icon getAltIcon();
 
-	public abstract long getProgress(IProgressData data);
+	public abstract long getProgress(ITeamData data);
 
 	public abstract long getMaxProgress();
 
-	public abstract void resetProgress(IProgressData data);
+	public abstract void resetProgress(ITeamData data);
 
-	public abstract void completeInstantly(IProgressData data);
+	public abstract void completeInstantly(ITeamData data);
 
-	public abstract double getRelativeProgress(IProgressData data);
+	public abstract double getRelativeProgress(ITeamData data);
 
-	public abstract boolean isComplete(IProgressData data);
+	public abstract boolean isComplete(ITeamData data);
 
 	public Icon getIcon()
 	{
@@ -161,7 +161,7 @@ public abstract class QuestObject
 
 		if (id.isEmpty() || getQuestFile().get(getID()) != null)
 		{
-			id = StringUtils.fromUUID(UUID.randomUUID());
+			id = StringUtils.fromUUID(UUID.randomUUID()).substring(0, 8);
 		}
 	}
 

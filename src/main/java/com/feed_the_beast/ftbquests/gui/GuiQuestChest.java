@@ -16,12 +16,17 @@ import com.feed_the_beast.ftblib.lib.icon.ImageIcon;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
+import com.feed_the_beast.ftbquests.net.MessageClaimReward;
 import com.feed_the_beast.ftbquests.net.MessageOpenTask;
+import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.quest.QuestChapter;
+import com.feed_the_beast.ftbquests.quest.QuestReward;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskData;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.inventory.ClickType;
 import net.minecraft.inventory.Slot;
 import net.minecraft.util.ResourceLocation;
@@ -29,6 +34,7 @@ import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.items.SlotItemHandler;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * @author LatvianModder
@@ -84,10 +90,67 @@ public class GuiQuestChest extends GuiBase
 		}
 	}
 
+	private class ButtonReward extends Button
+	{
+		public QuestReward reward = null;
+
+		public ButtonReward(Panel panel)
+		{
+			super(panel);
+		}
+
+		@Override
+		public void onClicked(MouseButton button)
+		{
+			if (reward != null && reward.quest.isComplete(ClientQuestFile.INSTANCE.self) && !ClientQuestFile.INSTANCE.self.isRewardClaimed(ClientUtils.MC.player.getUniqueID(), reward))
+			{
+				new MessageClaimReward(reward.uid).sendToServer();
+			}
+		}
+
+		@Override
+		public void addMouseOverText(List<String> list)
+		{
+			if (reward == null)
+			{
+				list.add(TextFormatting.GRAY + I18n.format("tile.ftbquests.chest.output"));
+				list.add(TextFormatting.DARK_GRAY + I18n.format("tile.ftbquests.chest.output_desc"));
+			}
+			else
+			{
+				List<String> tooltip = reward.stack.getTooltip(ClientUtils.MC.player, ITooltipFlag.TooltipFlags.NORMAL);
+				list.add(reward.stack.getRarity().rarityColor + tooltip.get(0));
+
+				for (int i = 1; i < tooltip.size(); i++)
+				{
+					list.add(TextFormatting.GRAY + tooltip.get(i));
+				}
+			}
+		}
+
+		@Override
+		public void draw(Theme theme, int x, int y, int w, int h)
+		{
+			if (reward != null)
+			{
+				GuiHelper.drawItem(reward.stack, x, y, true, Icon.EMPTY);
+			}
+
+			if (isMouseOver())
+			{
+				GlStateManager.pushMatrix();
+				GlStateManager.translate(0, 0, 500);
+				Color4I.WHITE.withAlpha(150).draw(x, y, w, h);
+				GlStateManager.popMatrix();
+			}
+		}
+	}
+
 	private final ContainerQuestChest container;
 	private final Panel tasks;
 	private final PanelScrollBar scrollBar;
-	private final Button transferAll, openRewards;
+	private final Button transferAll, openRewards, inputSlot;
+	private final ButtonReward outputSlots[];
 
 	public GuiQuestChest(ContainerQuestChest c)
 	{
@@ -210,6 +273,44 @@ public class GuiQuestChest extends GuiBase
 		};
 
 		openRewards.setPosAndSize(154, 86, 12, 12);
+
+		inputSlot = new Button(this)
+		{
+			@Override
+			public void onClicked(MouseButton button)
+			{
+				if (container.enchantItem(ClientUtils.MC.player, 0))
+				{
+					ClientUtils.MC.playerController.sendEnchantPacket(container.windowId, 0);
+				}
+			}
+
+			@Override
+			public void addMouseOverText(List<String> list)
+			{
+				list.add(TextFormatting.GRAY + I18n.format("tile.ftbquests.chest.input"));
+				list.add(TextFormatting.DARK_GRAY + I18n.format("tile.ftbquests.chest.input_desc"));
+			}
+
+			@Override
+			public void draw(Theme theme, int x, int y, int w, int h)
+			{
+				if (isMouseOver())
+				{
+					Color4I.WHITE.withAlpha(150).draw(x, y, w, h);
+				}
+			}
+		};
+
+		inputSlot.setPosAndSize(8, 84, 16, 16);
+
+		outputSlots = new ButtonReward[6];
+
+		for (int i = 0; i < outputSlots.length; i++)
+		{
+			outputSlots[i] = new ButtonReward(this);
+			outputSlots[i].setPosAndSize(44 + i * 18, 84, 16, 16);
+		}
 	}
 
 	@Override
@@ -219,35 +320,51 @@ public class GuiQuestChest extends GuiBase
 		add(scrollBar);
 		add(transferAll);
 		add(openRewards);
+		add(inputSlot);
+
+		for (ButtonReward b : outputSlots)
+		{
+			add(b);
+		}
+
+		updateRewards();
 	}
 
-	@Override
-	public void addMouseOverText(List<String> list)
+	public void updateRewards()
 	{
-		if (ClientUtils.MC.player.inventory.getItemStack().isEmpty())
+		for (ButtonReward b : outputSlots)
 		{
-			int mx = getMouseX() - getX();
-			int my = getMouseY() - getY();
+			b.reward = null;
+		}
 
-			for (Slot slot : container.inventorySlots)
+		if (ClientQuestFile.existsWithTeam())
+		{
+			int index = 0;
+			UUID playerId = ClientUtils.MC.player.getUniqueID();
+
+			for (QuestChapter chapter : ClientQuestFile.INSTANCE.chapters)
 			{
-				if (mx >= slot.xPos && my >= slot.yPos && mx < slot.xPos + 16 && my < slot.yPos + 16)
+				for (Quest quest : chapter.quests)
 				{
-					if (slot.slotNumber == 0)
+					if (quest.isComplete(ClientQuestFile.INSTANCE.self))
 					{
-						list.add(TextFormatting.GRAY + I18n.format("tile.ftbquests.chest.input"));
-						list.add(TextFormatting.DARK_GRAY + I18n.format("tile.ftbquests.chest.input_desc"));
-					}
-					else if (slot.slotNumber >= 1 && slot.slotNumber <= 7 && !slot.getHasStack())
-					{
-						list.add(TextFormatting.GRAY + I18n.format("tile.ftbquests.chest.output"));
-						list.add(TextFormatting.DARK_GRAY + I18n.format("tile.ftbquests.chest.output_desc"));
+						for (QuestReward reward : quest.rewards)
+						{
+							if (!ClientQuestFile.INSTANCE.self.isRewardClaimed(playerId, reward))
+							{
+								outputSlots[index].reward = reward;
+								index++;
+
+								if (index == 6)
+								{
+									return;
+								}
+							}
+						}
 					}
 				}
 			}
 		}
-
-		super.addMouseOverText(list);
 	}
 
 	@Override

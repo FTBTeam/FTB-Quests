@@ -7,7 +7,7 @@ import com.feed_the_beast.ftblib.lib.config.ConfigLong;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
-import com.feed_the_beast.ftbquests.quest.IProgressData;
+import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
@@ -197,14 +197,14 @@ public class ForgeEnergyTask extends QuestTask
 	}
 
 	@Override
-	public QuestTaskData createData(IProgressData data)
+	public QuestTaskData createData(ITeamData data)
 	{
 		return new Data(this, data);
 	}
 
 	public static class Data extends SimpleQuestTaskData<ForgeEnergyTask> implements IEnergyStorage
 	{
-		private Data(ForgeEnergyTask task, IProgressData data)
+		private Data(ForgeEnergyTask task, ITeamData data)
 		{
 			super(task, data);
 		}

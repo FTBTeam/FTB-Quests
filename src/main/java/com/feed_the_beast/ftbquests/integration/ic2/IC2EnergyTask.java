@@ -6,7 +6,7 @@ import com.feed_the_beast.ftblib.lib.config.ConfigLong;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
-import com.feed_the_beast.ftbquests.quest.IProgressData;
+import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskData;
@@ -235,14 +235,14 @@ public class IC2EnergyTask extends QuestTask
 	}
 
 	@Override
-	public QuestTaskData createData(IProgressData data)
+	public QuestTaskData createData(ITeamData data)
 	{
 		return new Data(this, data);
 	}
 
 	public static class Data extends SimpleQuestTaskData<IC2EnergyTask>
 	{
-		private Data(IC2EnergyTask task, IProgressData data)
+		private Data(IC2EnergyTask task, ITeamData data)
 		{
 			super(task, data);
 		}

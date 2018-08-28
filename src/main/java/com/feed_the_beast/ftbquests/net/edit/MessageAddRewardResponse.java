@@ -7,6 +7,7 @@ import com.feed_the_beast.ftblib.lib.net.MessageToClient;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.gui.GuiQuest;
+import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestReward;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -16,18 +17,20 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 /**
  * @author LatvianModder
  */
-public class MessageEditRewardResponse extends MessageToClient
+public class MessageAddRewardResponse extends MessageToClient
 {
+	private String quest;
 	private int uid;
 	private boolean team;
 	private ItemStack stack;
 
-	public MessageEditRewardResponse()
+	public MessageAddRewardResponse()
 	{
 	}
 
-	public MessageEditRewardResponse(int i, boolean t, ItemStack is)
+	public MessageAddRewardResponse(String q, int i, boolean t, ItemStack is)
 	{
+		quest = q;
 		uid = i;
 		team = t;
 		stack = is;
@@ -42,6 +45,7 @@ public class MessageEditRewardResponse extends MessageToClient
 	@Override
 	public void writeData(DataOut data)
 	{
+		data.writeString(quest);
 		data.writeInt(uid);
 		data.writeBoolean(team);
 		data.writeNBT(stack.isEmpty() ? null : stack.serializeNBT());
@@ -50,6 +54,7 @@ public class MessageEditRewardResponse extends MessageToClient
 	@Override
 	public void readData(DataIn data)
 	{
+		quest = data.readString();
 		uid = data.readInt();
 		team = data.readBoolean();
 		NBTTagCompound nbt = data.readNBT();
@@ -62,18 +67,15 @@ public class MessageEditRewardResponse extends MessageToClient
 	{
 		if (ClientQuestFile.INSTANCE != null)
 		{
-			QuestReward q = ClientQuestFile.INSTANCE.allRewards.get(uid);
+			Quest q = ClientQuestFile.INSTANCE.getQuest(quest);
 
 			if (q != null)
 			{
-				q.team = team;
-				q.stack = stack;
-
-				if (q.stack.isEmpty())
-				{
-					q.quest.rewards.remove(q);
-					ClientQuestFile.INSTANCE.allRewards.remove(q.uid);
-				}
+				QuestReward r = new QuestReward(q, uid);
+				r.team = team;
+				r.stack = stack;
+				q.rewards.add(r);
+				ClientQuestFile.INSTANCE.allRewards.put(r.uid, r);
 
 				GuiQuest gui = ClientUtils.getCurrentGuiAs(GuiQuest.class);
 

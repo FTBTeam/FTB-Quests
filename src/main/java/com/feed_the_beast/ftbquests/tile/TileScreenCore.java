@@ -14,7 +14,7 @@ import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.FTBQuestsBlocks;
 import com.feed_the_beast.ftbquests.block.BlockScreen;
 import com.feed_the_beast.ftbquests.net.MessageOpenTask;
-import com.feed_the_beast.ftbquests.quest.IProgressData;
+import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
@@ -54,7 +54,7 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 	public boolean inputOnly = false;
 	public ItemStack inputModeIcon = ItemStack.EMPTY;
 
-	private IProgressData cTeam;
+	private ITeamData cTeam;
 	private QuestTask cTask;
 	private QuestTaskData cTaskData;
 
@@ -266,7 +266,7 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 	}
 
 	@Nullable
-	public IProgressData getTeam()
+	public ITeamData getTeam()
 	{
 		if (team.isEmpty())
 		{
@@ -353,7 +353,7 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 
 	public boolean isOwner(EntityPlayer player)
 	{
-		return team.isEmpty() || FTBLibAPI.getTeam(player.getUniqueID()).equals(team);
+		return team.isEmpty() || FTBLibAPI.isPlayerInTeam(player.getUniqueID(), team);
 	}
 
 	public void onClicked(EntityPlayerMP player, EnumHand hand, double x, double y)
@@ -448,8 +448,9 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 				}, new ConfigItemStack(ItemStack.EMPTY));
 
 				FTBLibAPI.editServerConfig(player, group0, this);
-				return;
 			}
+
+			return;
 		}
 
 		if (inputOnly)
