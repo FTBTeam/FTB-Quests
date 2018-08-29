@@ -302,11 +302,11 @@ public class BlockProgressScreen extends BlockWithHorizontalFacing
 
 		if (xaxis)
 		{
-			return new AxisAlignedBB(pos.getX(), pos.getY(), pos.getZ() - w, pos.getX() + 1D, pos.getY() + h + 2D, pos.getZ() + w + 1D);
+			return new AxisAlignedBB(pos.getX(), pos.getY(), pos.getZ() - w, pos.getX() + 1D, pos.getY() + h + 1D, pos.getZ() + w + 1D);
 		}
 		else
 		{
-			return new AxisAlignedBB(pos.getX() - w, pos.getY(), pos.getZ(), pos.getX() + w + 1D, pos.getY() + h + 2D, pos.getZ() + 1D);
+			return new AxisAlignedBB(pos.getX() - w, pos.getY(), pos.getZ(), pos.getX() + w + 1D, pos.getY() + h + 1D, pos.getZ() + 1D);
 		}
 	}
 
