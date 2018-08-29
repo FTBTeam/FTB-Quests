@@ -360,6 +360,18 @@ public final class Quest extends QuestObject
 	}
 
 	@Override
+	public void onCompleted(ITeamData data)
+	{
+		timesCompleted++;
+		super.onCompleted(data);
+
+		if (chapter.isComplete(data))
+		{
+			chapter.onCompleted(data);
+		}
+	}
+
+	@Override
 	public void resetProgress(ITeamData data)
 	{
 		for (QuestTask task : tasks)

@@ -32,6 +32,7 @@ ftbquests.team=Team
 ftbquests.progress=Progress
 ftbquests.title=Title
 ftbquests.icon=Icon
+ftbquests.completion_command=Completion Command
 
 ftbquests.file=File
 ftbquests.file.allow_take_quest_blocks=Allow to Take Quest Blocks

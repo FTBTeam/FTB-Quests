@@ -3,9 +3,11 @@ package com.feed_the_beast.ftbquests.quest;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigItemStack;
 import com.feed_the_beast.ftblib.lib.config.ConfigString;
+import com.feed_the_beast.ftblib.lib.data.Universe;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
+import com.feed_the_beast.ftbquests.events.ObjectCompletedEvent;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.ITextComponent;
@@ -24,6 +26,7 @@ public abstract class QuestObject
 	public String title = "";
 	public ItemStack icon = ItemStack.EMPTY;
 	private Icon cachedIcon = null;
+	public String completionCommand = "";
 
 	public abstract QuestFile getQuestFile();
 
@@ -65,6 +68,18 @@ public abstract class QuestObject
 	}
 
 	public abstract boolean isComplete(ITeamData data);
+
+	public void onCompleted(ITeamData data)
+	{
+		new ObjectCompletedEvent(data, this).post();
+
+		if (!completionCommand.isEmpty())
+		{
+			Universe.get().server.commandManager.executeCommand(Universe.get().server, completionCommand
+					.replace("@team", data.getTeamID())
+					.replace("@id", getID()));
+		}
+	}
 
 	public Icon getIcon()
 	{
@@ -162,6 +177,21 @@ public abstract class QuestObject
 				icon = v;
 			}
 		}, new ConfigItemStack(ItemStack.EMPTY)).setDisplayName(new TextComponentTranslation("ftbquests.icon")).setOrder((byte) -126);
+
+		config.add("completion_command", new ConfigString(completionCommand)
+		{
+			@Override
+			public String getString()
+			{
+				return completionCommand;
+			}
+
+			@Override
+			public void setString(String v)
+			{
+				completionCommand = v;
+			}
+		}, new ConfigString("")).setDisplayName(new TextComponentTranslation("ftbquests.completion_command")).setOrder((byte) 150);
 	}
 
 	public void readID(NBTTagCompound nbt)

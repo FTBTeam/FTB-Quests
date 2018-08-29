@@ -72,6 +72,17 @@ public abstract class QuestTask extends QuestObject
 	}
 
 	@Override
+	public void onCompleted(ITeamData data)
+	{
+		super.onCompleted(data);
+
+		if (quest.isComplete(data))
+		{
+			quest.onCompleted(data);
+		}
+	}
+
+	@Override
 	public long getMaxProgress()
 	{
 		return 1;

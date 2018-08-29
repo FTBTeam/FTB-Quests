@@ -15,7 +15,6 @@ import com.feed_the_beast.ftblib.lib.util.FileUtils;
 import com.feed_the_beast.ftblib.lib.util.NBTUtils;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
-import com.feed_the_beast.ftbquests.events.ObjectCompletedEvent;
 import com.feed_the_beast.ftbquests.net.MessageChangedTeam;
 import com.feed_the_beast.ftbquests.net.MessageClaimRewardResponse;
 import com.feed_the_beast.ftbquests.net.MessageCreateTeamData;
@@ -195,23 +194,7 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 
 			if (data.task.isComplete(this))
 			{
-				new ObjectCompletedEvent(this, data.task).post();
-
-				if (data.task.quest.isComplete(this))
-				{
-					data.task.quest.timesCompleted++;
-					new ObjectCompletedEvent(this, data.task.quest).post();
-
-					if (data.task.quest.chapter.isComplete(this))
-					{
-						new ObjectCompletedEvent(this, data.task.quest.chapter).post();
-
-						if (data.task.quest.chapter.file.isComplete(this))
-						{
-							new ObjectCompletedEvent(this, data.task.quest.chapter.file).post();
-						}
-					}
-				}
+				data.task.onCompleted(this);
 			}
 		}
 	}

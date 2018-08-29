@@ -187,6 +187,17 @@ public final class QuestChapter extends QuestObject
 	}
 
 	@Override
+	public void onCompleted(ITeamData data)
+	{
+		super.onCompleted(data);
+
+		if (file.isComplete(data))
+		{
+			file.onCompleted(data);
+		}
+	}
+
+	@Override
 	public void resetProgress(ITeamData data)
 	{
 		for (Quest quest : quests)
