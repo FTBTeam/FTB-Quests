@@ -14,6 +14,8 @@ apply plugin: 'net.minecraftforge.gradle.forge'
 apply plugin: 'com.matthewprenger.cursegradle'
 apply plugin: 'maven'
 
+apply from: 'https://raw.githubusercontent.com/MinecraftModDevelopment/Gradle-Collection/master/generic/markdown-git-changelog.gradle'
+
 def ENV = System.getenv()
 version = ENV.BUILD_NUMBER ? "${mod_version}.${ENV.BUILD_NUMBER}" : "${mod_version}.custom"
 group = package_group
@@ -84,6 +86,9 @@ if (ENV.CURSEFORGE_KEY) {
 				requiredDependency 'ftblib'
 				optionalDependency 'packmode'
 			}
+			changelog = getGitChangelog
+			changelogType = 'markdown'
+			addArtifact(sourceJar)
 		}
 	}
 }
