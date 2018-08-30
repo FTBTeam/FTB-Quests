@@ -33,6 +33,7 @@ public final class QuestChapter extends QuestObject
 		title = nbt.getString("title");
 		description = new ArrayList<>();
 		icon = ItemStackSerializer.read(nbt.getCompoundTag("icon"));
+		completionCommand = nbt.getString("completion_command");
 		quests = new ArrayList<>();
 
 		NBTTagList desc = nbt.getTagList("description", Constants.NBT.TAG_STRING);
@@ -92,6 +93,11 @@ public final class QuestChapter extends QuestObject
 		if (!icon.isEmpty())
 		{
 			nbt.setTag("icon", ItemStackSerializer.write(icon));
+		}
+
+		if (!completionCommand.isEmpty())
+		{
+			nbt.setString("completion_command", completionCommand);
 		}
 
 		if (!description.isEmpty())

@@ -79,6 +79,7 @@ public final class QuestTaskType extends IForgeRegistryEntry.Impl<QuestTaskType>
 		task.readID(nbt);
 		task.title = nbt.getString("title");
 		task.icon = ItemStackSerializer.read(nbt.getCompoundTag("icon"));
+		task.completionCommand = nbt.getString("completion_command");
 		return task;
 	}
 
