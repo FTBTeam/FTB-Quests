@@ -1,6 +1,5 @@
 package com.feed_the_beast.ftbquests.gui;
 
-import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigItemStack;
 import com.feed_the_beast.ftblib.lib.config.ConfigValueInstance;
@@ -99,7 +98,7 @@ public class GuiQuest extends GuiBase
 		@Override
 		public void draw(Theme theme, int x, int y, int w, int h)
 		{
-			Color4I col = getTheme().getInvertedContentColor();
+			Color4I col = getTheme().getContentColor(WidgetType.NORMAL).withAlpha(200);
 			int gw2 = getGui().width / 2;
 
 			for (int i = 0; i < text.size(); i++)
@@ -332,7 +331,7 @@ public class GuiQuest extends GuiBase
 				GuiIcons.CLOSE.draw(x + w - 9, y + 1, 8, 8);
 				GlStateManager.popMatrix();
 			}
-			else if (questTreeGui.questFile.self.isRewardClaimed(ClientUtils.MC.player.getUniqueID(), reward))
+			else if (questTreeGui.questFile.isRewardClaimed(reward))
 			{
 				GlStateManager.pushMatrix();
 				GlStateManager.translate(0, 0, 500);

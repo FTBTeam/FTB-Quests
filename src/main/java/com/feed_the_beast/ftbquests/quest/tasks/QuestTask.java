@@ -99,7 +99,7 @@ public abstract class QuestTask extends QuestObject
 		QuestTaskData taskData = data.getQuestTaskData(this);
 		taskData.resetProgress();
 		taskData.isComplete = false;
-		data.syncTask(taskData);
+		taskData.sync();
 	}
 
 	@Override
@@ -107,7 +107,7 @@ public abstract class QuestTask extends QuestObject
 	{
 		QuestTaskData taskData = data.getQuestTaskData(this);
 		taskData.completeInstantly();
-		data.syncTask(taskData);
+		taskData.sync();
 	}
 
 	@Override

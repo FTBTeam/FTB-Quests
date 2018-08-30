@@ -184,7 +184,7 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 			}
 			else
 			{
-				if (cTaskData.hasCapability(capability, facing) && cTaskData.task.quest.canStartTasks(cTaskData.data))
+				if (cTaskData.hasCapability(capability, facing) && cTaskData.task.quest.canStartTasks(cTaskData.teamData))
 				{
 					return true;
 				}
@@ -220,7 +220,7 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 			{
 				T object = cTaskData.getCapability(capability, facing);
 
-				if (object != null && cTaskData.task.quest.canStartTasks(cTaskData.data))
+				if (object != null && cTaskData.task.quest.canStartTasks(cTaskData.teamData))
 				{
 					return object;
 				}

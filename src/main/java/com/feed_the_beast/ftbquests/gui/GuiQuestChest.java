@@ -28,18 +28,22 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.inventory.ClickType;
+import net.minecraft.inventory.Container;
+import net.minecraft.inventory.IContainerListener;
+import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.items.SlotItemHandler;
 
 import java.util.List;
-import java.util.UUID;
 
 /**
  * @author LatvianModder
  */
-public class GuiQuestChest extends GuiBase
+public class GuiQuestChest extends GuiBase implements IContainerListener
 {
 	private static final ImageIcon TEXTURE = new ImageIcon(new ResourceLocation(FTBQuests.MOD_ID, "textures/gui/chest.png"));
 	private static final ImageIcon BACKGROUND = TEXTURE.withUVfromCoords(0, 0, 176, 189, 256, 256);
@@ -102,7 +106,7 @@ public class GuiQuestChest extends GuiBase
 		@Override
 		public void onClicked(MouseButton button)
 		{
-			if (reward != null && reward.quest.isComplete(ClientQuestFile.INSTANCE.self) && !ClientQuestFile.INSTANCE.self.isRewardClaimed(ClientUtils.MC.player.getUniqueID(), reward))
+			if (reward != null && reward.quest.isComplete(ClientQuestFile.INSTANCE.self) && !ClientQuestFile.INSTANCE.isRewardClaimed(reward))
 			{
 				new MessageClaimReward(reward.uid).sendToServer();
 			}
@@ -149,13 +153,15 @@ public class GuiQuestChest extends GuiBase
 	private final ContainerQuestChest container;
 	private final Panel tasks;
 	private final PanelScrollBar scrollBar;
-	private final Button transferAll, openRewards, inputSlot;
+	private final Button transferAll, claimAllRewards, inputSlot;
 	private final ButtonReward outputSlots[];
 
 	public GuiQuestChest(ContainerQuestChest c)
 	{
 		setSize(176, 189);
 		container = c;
+
+		c.addListener(this);
 
 		tasks = new Panel(this)
 		{
@@ -253,13 +259,58 @@ public class GuiQuestChest extends GuiBase
 
 		transferAll.setPosAndSize(28, 86, 12, 12);
 
-		openRewards = new Button(this, I18n.format("ftbquests.rewards"), Icon.EMPTY)
+		claimAllRewards = new Button(this, I18n.format("ftbquests.reward.claim_all"), Icon.EMPTY)
 		{
 			@Override
 			public void onClicked(MouseButton button)
 			{
 				GuiHelper.playClickSound();
-				new GuiRewards().openGui();
+
+				if (ClientQuestFile.existsWithTeam())
+				{
+					for (QuestChapter chapter : ClientQuestFile.INSTANCE.chapters)
+					{
+						for (Quest quest : chapter.quests)
+						{
+							if (quest.isComplete(ClientQuestFile.INSTANCE.self))
+							{
+								for (QuestReward reward : quest.rewards)
+								{
+									if (!ClientQuestFile.INSTANCE.isRewardClaimed(reward))
+									{
+										new MessageClaimReward(reward.uid).sendToServer();
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+
+			@Override
+			public void addMouseOverText(List<String> list)
+			{
+				list.add(getTitle());
+
+				if (ClientQuestFile.existsWithTeam())
+				{
+					for (QuestChapter chapter : ClientQuestFile.INSTANCE.chapters)
+					{
+						for (Quest quest : chapter.quests)
+						{
+							if (quest.isComplete(ClientQuestFile.INSTANCE.self))
+							{
+								for (QuestReward reward : quest.rewards)
+								{
+									if (!ClientQuestFile.INSTANCE.isRewardClaimed(reward))
+									{
+										list.add(TextFormatting.GRAY + "- " + reward.stack.getCount() + "x " + TextFormatting.getTextWithoutFormattingCodes(reward.stack.getDisplayName()) + (reward.team ? (TextFormatting.BLUE + " [" + I18n.format("ftbquests.reward.team_reward") + "]") : ""));
+									}
+								}
+							}
+						}
+					}
+				}
 			}
 
 			@Override
@@ -272,7 +323,7 @@ public class GuiQuestChest extends GuiBase
 			}
 		};
 
-		openRewards.setPosAndSize(154, 86, 12, 12);
+		claimAllRewards.setPosAndSize(154, 86, 12, 12);
 
 		inputSlot = new Button(this)
 		{
@@ -319,7 +370,7 @@ public class GuiQuestChest extends GuiBase
 		add(tasks);
 		add(scrollBar);
 		add(transferAll);
-		add(openRewards);
+		add(claimAllRewards);
 		add(inputSlot);
 
 		for (ButtonReward b : outputSlots)
@@ -340,7 +391,6 @@ public class GuiQuestChest extends GuiBase
 		if (ClientQuestFile.existsWithTeam())
 		{
 			int index = 0;
-			UUID playerId = ClientUtils.MC.player.getUniqueID();
 
 			for (QuestChapter chapter : ClientQuestFile.INSTANCE.chapters)
 			{
@@ -350,7 +400,7 @@ public class GuiQuestChest extends GuiBase
 					{
 						for (QuestReward reward : quest.rewards)
 						{
-							if (!ClientQuestFile.INSTANCE.self.isRewardClaimed(playerId, reward))
+							if (!ClientQuestFile.INSTANCE.isRewardClaimed(reward))
 							{
 								outputSlots[index].reward = reward;
 								index++;
@@ -384,5 +434,33 @@ public class GuiQuestChest extends GuiBase
 	public Theme getTheme()
 	{
 		return QuestsTheme.INSTANCE;
+	}
+
+	@Override
+	public void sendAllContents(Container containerToSend, NonNullList<ItemStack> itemsList)
+	{
+		if (outputSlots != null)
+		{
+			updateRewards();
+		}
+	}
+
+	@Override
+	public void sendSlotContents(Container containerToSend, int slotInd, ItemStack stack)
+	{
+		if (outputSlots != null)
+		{
+			updateRewards();
+		}
+	}
+
+	@Override
+	public void sendWindowProperty(Container containerIn, int varToUpdate, int newValue)
+	{
+	}
+
+	@Override
+	public void sendAllWindowProperties(Container containerIn, IInventory inventory)
+	{
 	}
 }

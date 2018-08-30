@@ -77,7 +77,8 @@ public abstract class QuestObject
 		{
 			Universe.get().server.commandManager.executeCommand(Universe.get().server, completionCommand
 					.replace("@team", data.getTeamID())
-					.replace("@id", getID()));
+					.replace("@id", getID())
+					.replace("@idn", getID().replace(':', '_')));
 		}
 	}
 

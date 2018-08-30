@@ -23,8 +23,6 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
 import net.minecraftforge.fml.relauncher.Side;
 
-import java.util.UUID;
-
 /**
  * @author LatvianModder
  */
@@ -56,7 +54,6 @@ public class FTBQuestsClientEventHandler
 		if (ClientQuestFile.existsWithTeam() && event.getButton().id.equals(QUESTS_BUTTON))
 		{
 			int r = 0;
-			UUID playerId = ClientUtils.MC.player.getUniqueID();
 
 			for (QuestChapter chapter : ClientQuestFile.INSTANCE.chapters)
 			{
@@ -66,7 +63,7 @@ public class FTBQuestsClientEventHandler
 					{
 						for (QuestReward reward : quest.rewards)
 						{
-							if (!ClientQuestFile.INSTANCE.self.isRewardClaimed(playerId, reward))
+							if (!ClientQuestFile.INSTANCE.isRewardClaimed(reward))
 							{
 								r++;
 							}

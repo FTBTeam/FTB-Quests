@@ -1,13 +1,11 @@
 package com.feed_the_beast.ftbquests.net;
 
-import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToClient;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.client.ClientQuestProgress;
-import com.feed_the_beast.ftbquests.gui.GuiQuestChest;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import net.minecraft.nbt.NBTBase;
 import net.minecraftforge.fml.relauncher.Side;
@@ -70,13 +68,6 @@ public class MessageUpdateTaskProgress extends MessageToClient
 			if (data != null)
 			{
 				data.getQuestTaskData(qtask).fromNBT(nbt);
-
-				GuiQuestChest gui = ClientUtils.getCurrentGuiAs(GuiQuestChest.class);
-
-				if (gui != null)
-				{
-					gui.updateRewards();
-				}
 			}
 		}
 	}

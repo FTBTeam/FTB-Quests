@@ -1,7 +1,6 @@
 package com.feed_the_beast.ftbquests.gui;
 
 import com.feed_the_beast.ftblib.FTBLibConfig;
-import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigString;
 import com.feed_the_beast.ftblib.lib.gui.Button;
@@ -50,7 +49,6 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
 import java.util.regex.Pattern;
 
 public class GuiQuestTree extends GuiBase
@@ -136,7 +134,6 @@ public class GuiQuestTree extends GuiBase
 			}
 
 			int r = 0;
-			UUID playerId = ClientUtils.MC.player.getUniqueID();
 
 			for (Quest quest : chapter.quests)
 			{
@@ -144,7 +141,7 @@ public class GuiQuestTree extends GuiBase
 				{
 					for (QuestReward reward : quest.rewards)
 					{
-						if (!questFile.self.isRewardClaimed(playerId, reward))
+						if (!questFile.isRewardClaimed(reward))
 						{
 							r++;
 						}
@@ -236,7 +233,6 @@ public class GuiQuestTree extends GuiBase
 
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
 			contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.file.emergency_items"), GuiIcons.LOCK_OPEN, () -> new GuiEmergencyItems().openGui()).setEnabled(!questFile.emergencyItems.isEmpty() && (questFile.self != null || questFile.canEdit())));
-			contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.rewards"), GuiIcons.MONEY_BAG, () -> new GuiRewards().openGui()));
 
 			if (questFile.canEdit())
 			{
@@ -402,9 +398,9 @@ public class GuiQuestTree extends GuiBase
 				QuestsTheme.BUTTON.draw(x - zoom / 6, y - zoom / 6, w + zoom / 3, h + zoom / 3);
 			}
 
-			if (!selectedQuest.isEmpty() && selectedQuest.equals(quest.getID()) && System.currentTimeMillis() % 900L >= 450L)
+			if (!selectedQuest.isEmpty() && selectedQuest.equals(quest.getID()))
 			{
-				QuestsTheme.BUTTON.draw(x - zoom / 6, y - zoom / 6, w + zoom / 3, h + zoom / 3);
+				QuestsTheme.BUTTON.draw(x - zoom / 6, y - zoom / 6, w + zoom / 3, h + zoom / 3, Color4I.WHITE.withAlpha((int) (Math.sin(System.currentTimeMillis() * 0.005D) * 127D + 127)));
 			}
 
 			GlStateManager.alphaFunc(GL11.GL_GREATER, 0.1F);
@@ -420,11 +416,10 @@ public class GuiQuestTree extends GuiBase
 			if (questFile.self != null && quest.isComplete(questFile.self))
 			{
 				int r = 0;
-				UUID playerId = ClientUtils.MC.player.getUniqueID();
 
 				for (QuestReward reward : quest.rewards)
 				{
-					if (!questFile.self.isRewardClaimed(playerId, reward))
+					if (!questFile.isRewardClaimed(reward))
 					{
 						r++;
 					}
@@ -490,9 +485,11 @@ public class GuiQuestTree extends GuiBase
 
 					return true;
 				}
-				else if (button.isLeft())
+				else if (button.isLeft() && !selectedQuest.isEmpty())
 				{
-					//Move quest here
+					GuiHelper.playClickSound();
+					new MessageMoveQuest(selectedQuest, x, y).sendToServer();
+					return true;
 				}
 			}
 

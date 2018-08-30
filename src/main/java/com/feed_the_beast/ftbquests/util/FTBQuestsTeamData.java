@@ -26,7 +26,6 @@ import com.feed_the_beast.ftbquests.quest.QuestReward;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskData;
-import it.unimi.dsi.fastutil.ints.IntCollection;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -128,7 +127,19 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 		NBTTagCompound nbt = new NBTTagCompound();
 		ServerQuestFile.INSTANCE.writeData(nbt);
 
-		IntCollection rewards = FTBQuestsTeamData.get(event.getTeam()).getClaimedRewards(event.getPlayer().getId());
+		FTBQuestsTeamData team = FTBQuestsTeamData.get(event.getTeam());
+		IntOpenHashSet rewards = team.claimedPlayerRewards.get(event.getPlayer().getId());
+
+		if (rewards == null)
+		{
+			rewards = team.claimedTeamRewards;
+		}
+		else
+		{
+			rewards = new IntOpenHashSet(rewards);
+			rewards.addAll(team.claimedTeamRewards);
+		}
+
 		new MessageSyncQuests(nbt, event.getPlayer().team.getName(), teamData, FTBQuests.canEdit(player), rewards).sendTo(player);
 	}
 
@@ -213,42 +224,6 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 		data.isComplete = data.getProgress() >= data.task.getMaxProgress();
 	}
 
-	@Override
-	public IntCollection getClaimedRewards(UUID player)
-	{
-		IntOpenHashSet p = claimedPlayerRewards.get(player);
-
-		if (p == null)
-		{
-			return claimedTeamRewards;
-		}
-
-		IntOpenHashSet s = new IntOpenHashSet(claimedTeamRewards);
-		s.addAll(p);
-		return s;
-	}
-
-	@Override
-	public boolean isRewardClaimed(UUID player, QuestReward reward)
-	{
-		if (reward.team)
-		{
-			return claimedTeamRewards.contains(reward.uid);
-		}
-		else
-		{
-			IntOpenHashSet set = claimedPlayerRewards.get(player);
-
-			if (set != null)
-			{
-				return set.contains(reward.uid);
-			}
-		}
-
-		return false;
-	}
-
-	@Override
 	public void claimReward(EntityPlayer player, QuestReward reward)
 	{
 		if (reward.team)

@@ -271,7 +271,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 					if (!simulate)
 					{
 						progress += add;
-						data.syncTask(this);
+						sync();
 					}
 
 					return ItemHandlerHelper.copyStackWithSize(stack, (int) (stack.getCount() - add));

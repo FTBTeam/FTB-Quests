@@ -19,13 +19,13 @@ import java.util.List;
 public abstract class QuestTaskData<T extends QuestTask> implements ICapabilityProvider, IItemHandler
 {
 	public final T task;
-	public final ITeamData data;
+	public final ITeamData teamData;
 	public boolean isComplete = false;
 
 	public QuestTaskData(T q, ITeamData d)
 	{
 		task = q;
-		data = d;
+		teamData = d;
 	}
 
 	@Nullable
@@ -69,7 +69,7 @@ public abstract class QuestTaskData<T extends QuestTask> implements ICapabilityP
 
 	public String toString()
 	{
-		return data + "@" + task.getID();
+		return teamData + "@" + task.getID();
 	}
 
 	public ItemStack insertItem(ItemStack stack, boolean singleItem, boolean simulate, @Nullable EntityPlayer player)
@@ -115,5 +115,10 @@ public abstract class QuestTaskData<T extends QuestTask> implements ICapabilityP
 	@SideOnly(Side.CLIENT)
 	public void addTabs(List<GuiTask.Tab> tabs)
 	{
+	}
+
+	public final void sync()
+	{
+		teamData.syncTask(this);
 	}
 }

@@ -275,7 +275,7 @@ public class IC2EnergyTask extends QuestTask
 				if (add > 0D)
 				{
 					progress += add;
-					data.syncTask(this);
+					sync();
 					return amount - add;
 				}
 			}
