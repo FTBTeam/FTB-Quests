@@ -7,6 +7,7 @@ tile.ftbquests.screen.indestructible=Indestructible
 tile.ftbquests.screen.input_only=Input Only
 tile.ftbquests.screen.input_mode_icon=Input Mode Icon
 tile.ftbquests.screen.fullscreen=Fullscreen
+tile.ftbquests.screen.hide_icons=Hide Icons
 
 tile.ftbquests.progress_detector.name=Quest Progress Detector
 tile.ftbquests.progress_detector.object=Object ID

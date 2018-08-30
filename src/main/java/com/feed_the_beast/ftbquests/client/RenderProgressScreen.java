@@ -1,6 +1,7 @@
 package com.feed_the_beast.ftbquests.client;
 
 import com.feed_the_beast.ftblib.lib.icon.Color4I;
+import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
@@ -155,6 +156,24 @@ public class RenderProgressScreen extends TileEntitySpecialRenderer<TileProgress
 			tessellator.draw();
 
 			GlStateManager.enableTexture2D();
+
+			if (!screen.hideIcons)
+			{
+				for (Quest quest : chapter.quests)
+				{
+					double rx = (quest.x - minX + 0.5D) / (double) sizeX;
+					double ry = (quest.y - minY + 0.5D) / (double) sizeY;
+					int s = Math.max(sizeX, sizeY);
+					double rw = 0.75D / (double) s;
+					double rh = 0.75D / (double) s;
+
+					GlStateManager.pushMatrix();
+					GlStateManager.translate(rx, ry, -0.01F);
+					GlStateManager.scale(rw, rh, 1F);
+					quest.getIcon().draw3D(Icon.EMPTY);
+					GlStateManager.popMatrix();
+				}
+			}
 
 			if (!screen.fullscreen)
 			{

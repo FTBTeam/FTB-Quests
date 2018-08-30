@@ -69,7 +69,11 @@ public class MessageMoveQuestResponse extends MessageToClient
 
 				if (gui != null)
 				{
+					int sx = gui.quests.getScrollX();
+					int sy = gui.quests.getScrollY();
 					gui.quests.refreshWidgets();
+					gui.quests.setScrollX(sx);
+					gui.quests.setScrollY(sy);
 				}
 			}
 		}

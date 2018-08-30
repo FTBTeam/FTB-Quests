@@ -42,6 +42,7 @@ public class TileProgressScreenCore extends TileProgressScreenBase implements IC
 	public boolean indestructible = false;
 	public IBlockState skin = BlockUtils.AIR_STATE;
 	public boolean fullscreen = false;
+	public boolean hideIcons = false;
 
 	private ITeamData cOwner;
 	private QuestChapter cChapter;
@@ -90,7 +91,12 @@ public class TileProgressScreenCore extends TileProgressScreenBase implements IC
 
 		if (fullscreen)
 		{
-			nbt.setBoolean("Fullscreen", fullscreen);
+			nbt.setBoolean("Fullscreen", true);
+		}
+
+		if (hideIcons)
+		{
+			nbt.setBoolean("HideIcons", true);
 		}
 	}
 
@@ -109,6 +115,7 @@ public class TileProgressScreenCore extends TileProgressScreenBase implements IC
 		indestructible = nbt.getBoolean("Indestructible");
 		skin = BlockUtils.getStateFromName(nbt.getString("Skin"));
 		fullscreen = nbt.getBoolean("Fullscreen");
+		hideIcons = nbt.getBoolean("HideIcons");
 		updateContainingBlockInfo();
 	}
 
@@ -269,6 +276,15 @@ public class TileProgressScreenCore extends TileProgressScreenBase implements IC
 					public void setBoolean(boolean v)
 					{
 						fullscreen = v;
+					}
+				}, new ConfigBoolean(false)).setCanEdit(editorOrDestructible);
+
+				group.add("hide_icons", new ConfigBoolean(hideIcons)
+				{
+					@Override
+					public void setBoolean(boolean v)
+					{
+						hideIcons = v;
 					}
 				}, new ConfigBoolean(false)).setCanEdit(editorOrDestructible);
 
