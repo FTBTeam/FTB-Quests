@@ -1,6 +1,5 @@
 package com.feed_the_beast.ftbquests.quest;
 
-import com.feed_the_beast.ftblib.lib.config.ConfigBoolean;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigItemStack;
 import com.feed_the_beast.ftblib.lib.config.ConfigList;
@@ -38,7 +37,6 @@ public abstract class QuestFile extends QuestObject
 	public final List<QuestTask> allTasks;
 	public final Int2ObjectOpenHashMap<QuestReward> allRewards;
 
-	public boolean allowTakeQuestBlocks;
 	public final List<ItemStack> emergencyItems;
 	public Ticks emergencyItemsCooldown;
 
@@ -51,7 +49,6 @@ public abstract class QuestFile extends QuestObject
 		allTasks = new ArrayList<>();
 		allRewards = new Int2ObjectOpenHashMap<>();
 
-		allowTakeQuestBlocks = true;
 		emergencyItems = new ArrayList<>();
 		emergencyItems.add(new ItemStack(Items.APPLE));
 		emergencyItemsCooldown = Ticks.MINUTE.x(5);
@@ -330,6 +327,11 @@ public abstract class QuestFile extends QuestObject
 			nbt.setTag("icon", ItemStackSerializer.write(icon));
 		}
 
+		if (!completionCommand.isEmpty())
+		{
+			nbt.setString("completion_command", completionCommand);
+		}
+
 		NBTTagList chaptersList = new NBTTagList();
 
 		for (QuestChapter chapter : chapters)
@@ -340,7 +342,6 @@ public abstract class QuestFile extends QuestObject
 		}
 
 		nbt.setTag("chapters", chaptersList);
-		nbt.setBoolean("allow_take_quest_blocks", allowTakeQuestBlocks);
 
 		NBTTagList emergencyItemsList = new NBTTagList();
 
@@ -357,6 +358,7 @@ public abstract class QuestFile extends QuestObject
 	{
 		title = nbt.getString("title");
 		icon = ItemStackSerializer.read(nbt.getCompoundTag("icon"));
+		completionCommand = nbt.getString("completion_command");
 
 		chapters.clear();
 
@@ -371,7 +373,6 @@ public abstract class QuestFile extends QuestObject
 
 		refreshIDMap();
 
-		allowTakeQuestBlocks = !nbt.hasKey("allow_take_quest_blocks") || nbt.getBoolean("allow_take_quest_blocks");
 		emergencyItems.clear();
 
 		NBTTagList emergencyItemsList = nbt.getTagList("emergency_items", Constants.NBT.TAG_COMPOUND);
@@ -417,21 +418,6 @@ public abstract class QuestFile extends QuestObject
 	@Override
 	public void getConfig(ConfigGroup config)
 	{
-		config.add("allow_take_quest_blocks", new ConfigBoolean(false)
-		{
-			@Override
-			public boolean getBoolean()
-			{
-				return allowTakeQuestBlocks;
-			}
-
-			@Override
-			public void setBoolean(boolean v)
-			{
-				allowTakeQuestBlocks = v;
-			}
-		}, new ConfigBoolean(true));
-
 		config.add("emergency_items", new ConfigList<ConfigItemStack>(new ConfigItemStack(ItemStack.EMPTY))
 		{
 			@Override

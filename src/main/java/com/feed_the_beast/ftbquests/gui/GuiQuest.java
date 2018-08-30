@@ -24,7 +24,6 @@ import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.client.ClientQuestProgress;
 import com.feed_the_beast.ftbquests.net.MessageClaimReward;
-import com.feed_the_beast.ftbquests.net.MessageGetScreen;
 import com.feed_the_beast.ftbquests.net.MessageOpenTask;
 import com.feed_the_beast.ftbquests.net.edit.MessageAddReward;
 import com.feed_the_beast.ftbquests.net.edit.MessageCreateObject;
@@ -167,31 +166,6 @@ public class GuiQuest extends GuiBase
 			if (button.isRight() && questTreeGui.questFile.canEdit())
 			{
 				List<ContextMenuItem> contextMenu = new ArrayList<>();
-
-				if (questTreeGui.questFile.canEdit() || questTreeGui.questFile.self != null && questTreeGui.questFile.allowTakeQuestBlocks && task.quest.isVisible(questTreeGui.questFile.self) && !task.isComplete(questTreeGui.questFile.self))
-				{
-					contextMenu.add(new ContextMenuItem(I18n.format("tile.ftbquests.screen.name"), Color4I.BLACK, () ->
-					{
-						if (questTreeGui.questFile.canEdit())
-						{
-							List<ContextMenuItem> screenContextMenu = new ArrayList<>();
-							screenContextMenu.add(new ContextMenuItem("Screen", Icon.EMPTY, () -> {}).setEnabled(false));
-							screenContextMenu.add(new ContextMenuItem("1 x 1", Icon.EMPTY, () -> new MessageGetScreen(task.getID(), 0).sendToServer()));
-							screenContextMenu.add(new ContextMenuItem("3 x 3", Icon.EMPTY, () -> new MessageGetScreen(task.getID(), 1).sendToServer()));
-							screenContextMenu.add(new ContextMenuItem("5 x 5", Icon.EMPTY, () -> new MessageGetScreen(task.getID(), 2).sendToServer()));
-							screenContextMenu.add(new ContextMenuItem("7 x 7", Icon.EMPTY, () -> new MessageGetScreen(task.getID(), 3).sendToServer()));
-							screenContextMenu.add(new ContextMenuItem("9 x 9", Icon.EMPTY, () -> new MessageGetScreen(task.getID(), 4).sendToServer()));
-							getGui().openContextMenu(screenContextMenu);
-						}
-						else
-						{
-							new MessageGetScreen(task.getID(), 0).sendToServer();
-						}
-					}));
-
-					contextMenu.add(ContextMenuItem.SEPARATOR);
-				}
-
 				questTreeGui.addObjectMenuItems(contextMenu, getGui(), task);
 				getGui().openContextMenu(contextMenu);
 			}

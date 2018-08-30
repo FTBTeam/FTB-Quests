@@ -2,7 +2,6 @@ package com.feed_the_beast.ftbquests.gui;
 
 import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftblib.lib.gui.Button;
-import com.feed_the_beast.ftblib.lib.gui.ContextMenuItem;
 import com.feed_the_beast.ftblib.lib.gui.GuiBase;
 import com.feed_the_beast.ftblib.lib.gui.GuiContainerWrapper;
 import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
@@ -12,20 +11,16 @@ import com.feed_the_beast.ftblib.lib.gui.Theme;
 import com.feed_the_beast.ftblib.lib.gui.WidgetLayout;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.ImageIcon;
-import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.FTBQuests;
-import com.feed_the_beast.ftbquests.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.net.MessageCompleteInstantly;
-import com.feed_the_beast.ftbquests.net.MessageGetScreen;
 import com.feed_the_beast.ftbquests.net.MessageResetProgress;
 import com.feed_the_beast.ftbquests.net.edit.MessageEditObject;
 import com.feed_the_beast.ftbquests.quest.QuestReward;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextFormatting;
 
@@ -100,28 +95,6 @@ public class GuiTask extends GuiBase
 			{
 				add(new Tab(this, I18n.format("gui.back"), "", GuiIcons.LEFT, button -> onBack()));
 
-				if (questFile.canEdit() || questFile.self != null && questFile.allowTakeQuestBlocks && container.data.task.quest.isVisible(questFile.self) && !container.data.task.isComplete(questFile.self))
-				{
-					add(new Tab(this, I18n.format("tile.ftbquests.screen.name"), "", ItemIcon.getItemIcon(new ItemStack(FTBQuestsItems.SCREEN)), button ->
-					{
-						if (questFile.canEdit() && button.isRight())
-						{
-							List<ContextMenuItem> contextMenu = new ArrayList<>();
-							contextMenu.add(new ContextMenuItem("Screen", Icon.EMPTY, () -> {}).setEnabled(false));
-							contextMenu.add(new ContextMenuItem("1 x 1", Icon.EMPTY, () -> new MessageGetScreen(container.data.task.getID(), 0).sendToServer()));
-							contextMenu.add(new ContextMenuItem("3 x 3", Icon.EMPTY, () -> new MessageGetScreen(container.data.task.getID(), 1).sendToServer()));
-							contextMenu.add(new ContextMenuItem("5 x 5", Icon.EMPTY, () -> new MessageGetScreen(container.data.task.getID(), 2).sendToServer()));
-							contextMenu.add(new ContextMenuItem("7 x 7", Icon.EMPTY, () -> new MessageGetScreen(container.data.task.getID(), 3).sendToServer()));
-							contextMenu.add(new ContextMenuItem("9 x 9", Icon.EMPTY, () -> new MessageGetScreen(container.data.task.getID(), 4).sendToServer()));
-							getGui().openContextMenu(contextMenu);
-						}
-						else
-						{
-							new MessageGetScreen(container.data.task.getID(), 0).sendToServer();
-						}
-					}));
-				}
-
 				if (!container.data.task.quest.rewards.isEmpty())
 				{
 					add(new Tab(this, I18n.format("ftbquests.rewards") + ":", "", GuiIcons.MONEY_BAG, button -> new GuiRewards().openGui())
@@ -133,7 +106,7 @@ public class GuiTask extends GuiBase
 
 							for (QuestReward reward : container.data.task.quest.rewards)
 							{
-								list.add((reward.team ? (TextFormatting.BLUE + "- ") : "- ") + reward.stack.getCount() + "x " + reward.stack.getRarity().rarityColor + reward.stack.getDisplayName());
+								list.add("- " + reward.stack.getCount() + "x " + reward.stack.getRarity().rarityColor + reward.stack.getDisplayName() + (reward.team ? (TextFormatting.BLUE + " [" + I18n.format("ftbquests.reward.team_reward") + "]") : ""));
 							}
 						}
 					});

@@ -48,6 +48,7 @@ public final class Quest extends QuestObject
 		title = nbt.getString("title");
 		description = nbt.getString("description");
 		icon = ItemStackSerializer.read(nbt.getCompoundTag("icon"));
+		completionCommand = nbt.getString("completion_command");
 		type = QuestType.NAME_MAP.get(nbt.getString("type"));
 		x = (byte) MathHelper.clamp(nbt.getByte("x"), -POS_LIMIT, POS_LIMIT);
 		y = (byte) MathHelper.clamp(nbt.getByte("y"), -POS_LIMIT, POS_LIMIT);
@@ -208,6 +209,11 @@ public final class Quest extends QuestObject
 			nbt.setTag("icon", ItemStackSerializer.write(icon));
 		}
 
+		if (!completionCommand.isEmpty())
+		{
+			nbt.setString("completion_command", completionCommand);
+		}
+
 		if (type != QuestType.NORMAL)
 		{
 			nbt.setString("type", type.getName());
@@ -267,7 +273,12 @@ public final class Quest extends QuestObject
 
 					if (!task.icon.isEmpty())
 					{
-						nbt.setTag("icon", ItemStackSerializer.write(task.icon));
+						taskNBT.setTag("icon", ItemStackSerializer.write(task.icon));
+					}
+
+					if (!task.completionCommand.isEmpty())
+					{
+						taskNBT.setString("completion_command", task.completionCommand);
 					}
 
 					array.appendTag(taskNBT);
