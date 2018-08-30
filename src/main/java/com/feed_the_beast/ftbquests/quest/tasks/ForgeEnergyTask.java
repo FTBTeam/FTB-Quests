@@ -240,7 +240,7 @@ public class ForgeEnergyTask extends QuestTask
 					if (!simulate)
 					{
 						progress += add;
-						data.syncTask(this);
+						sync();
 					}
 
 					return (int) add;

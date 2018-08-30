@@ -362,7 +362,7 @@ public class FluidTask extends QuestTask
 					if (doFill)
 					{
 						progress += add;
-						data.syncTask(this);
+						sync();
 					}
 
 					return (int) add;

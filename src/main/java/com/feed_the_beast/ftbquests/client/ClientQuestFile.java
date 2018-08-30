@@ -6,6 +6,7 @@ import com.feed_the_beast.ftbquests.gui.GuiQuest;
 import com.feed_the_beast.ftbquests.gui.GuiQuestTree;
 import com.feed_the_beast.ftbquests.net.MessageSyncQuests;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
+import com.feed_the_beast.ftbquests.quest.QuestReward;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import com.feed_the_beast.ftbquests.util.FTBQuestsTeamData;
 import it.unimi.dsi.fastutil.ints.IntCollection;
@@ -141,5 +142,10 @@ public class ClientQuestFile extends QuestFile
 	public Collection<ClientQuestProgress> getAllData()
 	{
 		return teamData.values();
+	}
+
+	public boolean isRewardClaimed(QuestReward reward)
+	{
+		return rewards.contains(reward.uid);
 	}
 }

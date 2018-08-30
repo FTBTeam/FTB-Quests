@@ -1,3 +1,6 @@
 {
-	"parent": "item/experience_bottle"
+	"parent": "item/generated",
+	"textures": {
+		"layer0": "ftbquests:items/xp_vial"
+	}
 }

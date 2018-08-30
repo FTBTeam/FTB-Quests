@@ -54,6 +54,7 @@ public class ContainerQuestChest extends Container
 		if (slot != null && slot.getHasStack())
 		{
 			slot.putStack(chest.insert(slot.getStack(), false, player));
+			detectAndSendChanges();
 			return ItemStack.EMPTY;
 		}
 
@@ -66,6 +67,7 @@ public class ContainerQuestChest extends Container
 		if (id == 0)
 		{
 			player.inventory.setItemStack(chest.insert(player.inventory.getItemStack(), false, player));
+			detectAndSendChanges();
 			return true;
 		}
 

@@ -14,6 +14,7 @@ import com.feed_the_beast.ftblib.lib.icon.ImageIcon;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
+import com.feed_the_beast.ftbquests.net.MessageClaimReward;
 import com.feed_the_beast.ftbquests.net.MessageCompleteInstantly;
 import com.feed_the_beast.ftbquests.net.MessageResetProgress;
 import com.feed_the_beast.ftbquests.net.edit.MessageEditObject;
@@ -97,7 +98,15 @@ public class GuiTask extends GuiBase
 
 				if (!container.data.task.quest.rewards.isEmpty())
 				{
-					add(new Tab(this, I18n.format("ftbquests.rewards") + ":", "", GuiIcons.MONEY_BAG, button -> new GuiRewards().openGui())
+					add(new Tab(this, I18n.format("ftbquests.rewards") + ":", "", GuiIcons.MONEY_BAG, button -> {
+						if (container.data.task.isComplete(container.data.teamData))
+						{
+							for (QuestReward reward : container.data.task.quest.rewards)
+							{
+								new MessageClaimReward(reward.uid).sendToServer();
+							}
+						}
+					})
 					{
 						@Override
 						public void addMouseOverText(List<String> list)
@@ -106,7 +115,7 @@ public class GuiTask extends GuiBase
 
 							for (QuestReward reward : container.data.task.quest.rewards)
 							{
-								list.add("- " + reward.stack.getCount() + "x " + reward.stack.getRarity().rarityColor + reward.stack.getDisplayName() + (reward.team ? (TextFormatting.BLUE + " [" + I18n.format("ftbquests.reward.team_reward") + "]") : ""));
+								list.add(TextFormatting.GRAY + (ClientQuestFile.INSTANCE.isRewardClaimed(reward) ? TextFormatting.STRIKETHROUGH.toString() : "") + "- " + reward.stack.getCount() + "x " + TextFormatting.getTextWithoutFormattingCodes(reward.stack.getDisplayName()) + (reward.team ? (TextFormatting.BLUE + " [" + I18n.format("ftbquests.reward.team_reward") + "]") : ""));
 							}
 						}
 					});
