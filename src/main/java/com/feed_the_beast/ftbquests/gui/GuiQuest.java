@@ -457,8 +457,7 @@ public class GuiQuest extends GuiBase
 			public void onClicked(MouseButton button)
 			{
 				GuiHelper.playClickSound();
-				questTreeGui.questFile.questGui = questTreeGui.questFile.questTreeGui;
-				questTreeGui.questFile.questGui.openGui();
+				getGui().onBack();
 			}
 
 			@Override
@@ -585,6 +584,7 @@ public class GuiQuest extends GuiBase
 	@Override
 	public void onBack()
 	{
-		questTreeGui.openGui();
+		questTreeGui.questFile.questGui = questTreeGui.questFile.questTreeGui;
+		questTreeGui.questFile.questGui.openGui();
 	}
 }
