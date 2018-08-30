@@ -507,7 +507,7 @@ public class GuiQuestTree extends GuiBase
 		@Override
 		public void draw(Theme theme, int x, int y, int w, int h)
 		{
-			if (isAltKeyDown())
+			if (questFile.canEdit() && isAltKeyDown())
 			{
 				Color4I.WHITE.withAlpha(30).draw(x, y, w, h);
 			}
