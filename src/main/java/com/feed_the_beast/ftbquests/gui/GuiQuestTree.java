@@ -374,6 +374,22 @@ public class GuiQuestTree extends GuiBase
 			{
 				list.add(description);
 			}
+
+			if (!quest.dependencies.isEmpty())
+			{
+				list.add("");
+				list.add(TextFormatting.GRAY + I18n.format("ftbquests.chapter.dependencies") + ":");
+
+				for (String s : quest.dependencies)
+				{
+					QuestObject object = questFile.get(s);
+
+					if (object != null)
+					{
+						list.add(TextFormatting.DARK_GRAY + "- " + object.getDisplayName().getFormattedText());
+					}
+				}
+			}
 		}
 
 		@Override
@@ -499,6 +515,10 @@ public class GuiQuestTree extends GuiBase
 		@Override
 		public void addMouseOverText(List<String> list)
 		{
+			if (!selectedQuest.isEmpty())
+			{
+				list.add(I18n.format("ftbquests.gui.move"));
+			}
 		}
 
 		@Override
