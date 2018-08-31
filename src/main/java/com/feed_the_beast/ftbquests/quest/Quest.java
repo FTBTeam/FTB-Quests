@@ -503,6 +503,12 @@ public final class Quest extends QuestObject
 	}
 
 	@Override
+	public void onCreated()
+	{
+		chapter.quests.add(this);
+	}
+
+	@Override
 	public void getConfig(ConfigGroup group)
 	{
 		group.add("x", new ConfigInt(x, -POS_LIMIT, POS_LIMIT)

@@ -302,7 +302,6 @@ public abstract class QuestFile extends QuestObject
 
 					if (task != null)
 					{
-						quest.tasks.add(task);
 						return task;
 					}
 				}
