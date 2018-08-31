@@ -8,7 +8,6 @@ import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
-import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.tile.TileScreenCore;
 import com.feed_the_beast.ftbquests.tile.TileScreenPart;
 import net.minecraft.util.text.ITextComponent;
@@ -131,7 +130,9 @@ public abstract class QuestTask extends QuestObject
 	@Override
 	public void onCreated()
 	{
-		for (ITeamData data : ServerQuestFile.INSTANCE.getAllData())
+		quest.tasks.add(this);
+
+		for (ITeamData data : quest.chapter.file.getAllData())
 		{
 			data.createTaskData(this);
 		}

@@ -63,8 +63,8 @@ public class MessageCreateObjectResponse extends MessageToClient
 
 			if (object != null)
 			{
-				ClientQuestFile.INSTANCE.refreshIDMap();
 				object.onCreated();
+				ClientQuestFile.INSTANCE.refreshIDMap();
 				ClientQuestFile.INSTANCE.refreshGui(ClientQuestFile.INSTANCE);
 			}
 		}

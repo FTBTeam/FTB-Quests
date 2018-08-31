@@ -260,6 +260,12 @@ public final class QuestChapter extends QuestObject
 	}
 
 	@Override
+	public void onCreated()
+	{
+		file.chapters.add(this);
+	}
+
+	@Override
 	public void getConfig(ConfigGroup group)
 	{
 		group.add("description", new ConfigList<ConfigString>(new ConfigString(""))
