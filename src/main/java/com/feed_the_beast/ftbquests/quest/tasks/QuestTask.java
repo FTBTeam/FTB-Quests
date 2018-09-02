@@ -213,4 +213,9 @@ public abstract class QuestTask extends QuestObject
 	{
 		return null;
 	}
+
+	public boolean reeeeMyModDoesntUseNumbers()
+	{
+		return false;
+	}
 }
