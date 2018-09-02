@@ -148,6 +148,19 @@ public class QuestVariable extends QuestObject
 	}
 
 	@Override
+	public void deleteSelf()
+	{
+		super.deleteSelf();
+		file.variables.remove(this);
+	}
+
+	@Override
+	public void onCreated()
+	{
+		file.variables.add(this);
+	}
+
+	@Override
 	public void clearCachedData()
 	{
 		super.clearCachedData();

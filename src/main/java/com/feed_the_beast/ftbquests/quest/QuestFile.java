@@ -296,20 +296,14 @@ public abstract class QuestFile extends QuestObject
 		switch (type)
 		{
 			case CHAPTER:
-			{
-				QuestChapter chapter = new QuestChapter(this, nbt);
-				chapter.file.chapters.add(chapter);
-				return chapter;
-			}
+				return new QuestChapter(this, nbt);
 			case QUEST:
 			{
 				QuestChapter chapter = getChapter(parent);
 
 				if (chapter != null)
 				{
-					Quest quest = new Quest(chapter, nbt);
-					chapter.quests.add(quest);
-					return quest;
+					return new Quest(chapter, nbt);
 				}
 
 				return null;
@@ -331,11 +325,7 @@ public abstract class QuestFile extends QuestObject
 				return null;
 			}
 			case VARIABLE:
-			{
-				QuestVariable variable = new QuestVariable(this, nbt);
-				variables.add(variable);
-				return variable;
-			}
+				return new QuestVariable(this, nbt);
 			default:
 				return null;
 		}
