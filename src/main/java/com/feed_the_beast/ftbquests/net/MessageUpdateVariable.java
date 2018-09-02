@@ -6,31 +6,28 @@ import com.feed_the_beast.ftblib.lib.net.MessageToClient;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.client.ClientQuestProgress;
-import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
-import net.minecraft.nbt.NBTBase;
+import com.feed_the_beast.ftbquests.quest.QuestVariable;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import javax.annotation.Nullable;
 
 /**
  * @author LatvianModder
  */
-public class MessageUpdateTaskProgress extends MessageToClient
+public class MessageUpdateVariable extends MessageToClient
 {
 	private String team;
-	private int task;
-	private NBTBase nbt;
+	private int variable;
+	private long value;
 
-	public MessageUpdateTaskProgress()
+	public MessageUpdateVariable()
 	{
 	}
 
-	public MessageUpdateTaskProgress(String t, int k, @Nullable NBTBase d)
+	public MessageUpdateVariable(String t, int k, long v)
 	{
 		team = t;
-		task = k;
-		nbt = d;
+		variable = k;
+		value = v;
 	}
 
 	@Override
@@ -43,31 +40,31 @@ public class MessageUpdateTaskProgress extends MessageToClient
 	public void writeData(DataOut data)
 	{
 		data.writeString(team);
-		data.writeShort(task);
-		data.writeNBTBase(nbt);
+		data.writeShort(variable);
+		data.writeLong(value);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
 		team = data.readString();
-		task = data.readUnsignedShort();
-		nbt = data.readNBTBase();
+		variable = data.readUnsignedShort();
+		value = data.readLong();
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void onMessage()
 	{
-		QuestTask qtask = task < 0 || task >= ClientQuestFile.INSTANCE.allTasks.length ? null : ClientQuestFile.INSTANCE.allTasks[task];
+		QuestVariable v = variable < 0 || variable >= ClientQuestFile.INSTANCE.variables.size() ? null : ClientQuestFile.INSTANCE.variables.get(variable);
 
-		if (qtask != null)
+		if (v != null)
 		{
 			ClientQuestProgress data = team.isEmpty() ? ClientQuestFile.INSTANCE.self : ClientQuestFile.INSTANCE.getData(team);
 
 			if (data != null)
 			{
-				data.getQuestTaskData(qtask).fromNBT(nbt);
+				data.setVariable(v, value);
 			}
 		}
 	}

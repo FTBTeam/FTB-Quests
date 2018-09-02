@@ -4,8 +4,6 @@ import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
 import com.feed_the_beast.ftblib.lib.gui.IOpenableGui;
 import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.gui.SimpleTextButton;
-import com.feed_the_beast.ftblib.lib.gui.Widget;
-import com.feed_the_beast.ftblib.lib.gui.WidgetType;
 import com.feed_the_beast.ftblib.lib.gui.misc.GuiButtonListBase;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
@@ -13,9 +11,13 @@ import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
+import com.feed_the_beast.ftbquests.quest.QuestVariable;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.util.text.TextFormatting;
+
+import java.util.List;
 
 /**
  * @author LatvianModder
@@ -28,33 +30,27 @@ public class GuiSelectQuestObject extends GuiButtonListBase
 
 		public ButtonQuestObject(Panel panel, QuestObject o)
 		{
-			super(panel, o.getDisplayName().getFormattedText(), o.getIcon());
+			super(panel, o.getObjectType().getColor() + o.getDisplayName().getUnformattedText(), o.getIcon());
 			object = o;
-
-			switch (object.getObjectType())
-			{
-				case FILE:
-				case CHAPTER:
-					setHeight(24);
-					break;
-				case QUEST:
-					setHeight(20);
-					break;
-				case TASK:
-					setHeight(12);
-					break;
-			}
+			setSize(200, 14);
 		}
 
 		@Override
-		public WidgetType getWidgetType()
+		public void addMouseOverText(List<String> list)
 		{
-			if (!config.hasValidType(object.getObjectType()))
-			{
-				return WidgetType.DISABLED;
-			}
+			list.add(object.getDisplayName().getFormattedText());
+			list.add(TextFormatting.GRAY + "ID: " + TextFormatting.DARK_GRAY + object.getID());
+			list.add(TextFormatting.GRAY + "Type: " + object.getObjectType().getColor() + I18n.format(object.getObjectType().getTranslationKey()));
 
-			return super.getWidgetType();
+			if (object instanceof Quest)
+			{
+				list.add(TextFormatting.GRAY + I18n.format("ftbquests.chapter") + ": " + QuestObjectType.CHAPTER.getColor() + ((Quest) object).chapter.getDisplayName().getUnformattedText());
+			}
+			else if (object instanceof QuestTask)
+			{
+				list.add(TextFormatting.GRAY + I18n.format("ftbquests.chapter") + ": " + QuestObjectType.CHAPTER.getColor() + ((QuestTask) object).quest.chapter.getDisplayName().getUnformattedText());
+				list.add(TextFormatting.GRAY + I18n.format("ftbquests.quest") + ": " + QuestObjectType.QUEST.getColor() + ((QuestTask) object).quest.getDisplayName().getUnformattedText());
+			}
 		}
 
 		@Override
@@ -83,30 +79,39 @@ public class GuiSelectQuestObject extends GuiButtonListBase
 		if (config.hasValidType(QuestObjectType.FILE))
 		{
 			panel.add(new ButtonQuestObject(panel, ClientQuestFile.INSTANCE));
-			panel.add(new Widget(panel).setPosAndSize(0, 0, 0, 4));
 		}
 
+		if (config.hasValidType(QuestObjectType.VARIABLE))
+		{
+			for (QuestVariable variable : ClientQuestFile.INSTANCE.variables)
+			{
+				panel.add(new ButtonQuestObject(panel, variable));
+			}
+		}
+
+		boolean addChapters = config.hasValidType(QuestObjectType.CHAPTER);
+		boolean addQuests = config.hasValidType(QuestObjectType.QUEST);
 		boolean addTasks = config.hasValidType(QuestObjectType.TASK);
-		boolean addQuests = addTasks | config.hasValidType(QuestObjectType.QUEST);
 
 		for (QuestChapter chapter : ClientQuestFile.INSTANCE.chapters)
 		{
-			panel.add(new ButtonQuestObject(panel, chapter));
+			if (addChapters)
+			{
+				panel.add(new ButtonQuestObject(panel, chapter));
+			}
 
 			for (Quest quest : chapter.quests)
 			{
 				if (addQuests)
 				{
 					panel.add(new ButtonQuestObject(panel, quest));
+				}
 
-					if (addTasks)
+				if (addTasks)
+				{
+					for (QuestTask task : quest.tasks)
 					{
-						for (QuestTask task : quest.tasks)
-						{
-							panel.add(new ButtonQuestObject(panel, task));
-						}
-
-						panel.add(new Widget(panel).setPosAndSize(0, 0, 0, 4));
+						panel.add(new ButtonQuestObject(panel, task));
 					}
 				}
 			}

@@ -1,28 +1,32 @@
 package com.feed_the_beast.ftbquests.quest;
 
 import net.minecraft.util.IStringSerializable;
+import net.minecraft.util.text.TextFormatting;
 
 /**
  * @author LatvianModder
  */
 public enum QuestObjectType implements IStringSerializable
 {
-	FILE("file", 1),
-	CHAPTER("chapter", 2),
-	QUEST("quest", 4),
-	TASK("task", 8);
+	FILE("file", 1, TextFormatting.RED),
+	CHAPTER("chapter", 2, TextFormatting.GOLD),
+	QUEST("quest", 4, TextFormatting.GREEN),
+	TASK("task", 8, TextFormatting.BLUE),
+	VARIABLE("variable", 16, TextFormatting.DARK_PURPLE);
 
 	public static final QuestObjectType[] VALUES = values();
 
 	private final String name;
 	private final String translationKey;
 	private final int flag;
+	private final TextFormatting color;
 
-	QuestObjectType(String n, int f)
+	QuestObjectType(String n, int f, TextFormatting c)
 	{
 		name = n;
 		translationKey = "ftbquests." + name;
 		flag = f;
+		color = c;
 	}
 
 	@Override
@@ -39,5 +43,10 @@ public enum QuestObjectType implements IStringSerializable
 	public int getFlag()
 	{
 		return flag;
+	}
+
+	public TextFormatting getColor()
+	{
+		return color;
 	}
 }

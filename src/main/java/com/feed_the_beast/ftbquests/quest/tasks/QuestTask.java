@@ -23,7 +23,9 @@ import javax.annotation.Nullable;
 public abstract class QuestTask extends QuestObject
 {
 	public final Quest quest;
-	public int index;
+	public short index;
+
+	private String cachedID = "";
 
 	public QuestTask(Quest q)
 	{
@@ -48,7 +50,12 @@ public abstract class QuestTask extends QuestObject
 	@Override
 	public final String getID()
 	{
-		return quest.chapter.id + ':' + quest.id + ':' + id;
+		if (cachedID.isEmpty())
+		{
+			cachedID = quest.chapter.id + ':' + quest.id + ':' + id;
+		}
+
+		return cachedID;
 	}
 
 	@Override
@@ -192,5 +199,18 @@ public abstract class QuestTask extends QuestObject
 	{
 		Icon icon = super.getIcon();
 		return icon.isEmpty() ? GuiIcons.DICE : icon;
+	}
+
+	@Override
+	public void clearCachedData()
+	{
+		super.clearCachedData();
+		cachedID = "";
+	}
+
+	@Nullable
+	public QuestObject getDependency()
+	{
+		return null;
 	}
 }

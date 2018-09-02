@@ -32,26 +32,33 @@ import java.util.Map;
 public abstract class QuestFile extends QuestObject
 {
 	public final List<QuestChapter> chapters;
+	public final List<QuestVariable> variables;
 
 	public final Map<String, QuestObject> map;
-	public final List<QuestTask> allTasks;
+	public QuestTask[] allTasks;
 	public final Int2ObjectOpenHashMap<QuestReward> allRewards;
 
 	public final List<ItemStack> emergencyItems;
 	public Ticks emergencyItemsCooldown;
+	public String soundTask, soundQuest, soundChapter, soundFile;
 
 	public QuestFile()
 	{
 		id = "*";
 		chapters = new ArrayList<>();
+		variables = new ArrayList<>();
 
 		map = new HashMap<>();
-		allTasks = new ArrayList<>();
+		allTasks = new QuestTask[0];
 		allRewards = new Int2ObjectOpenHashMap<>();
 
 		emergencyItems = new ArrayList<>();
 		emergencyItems.add(new ItemStack(Items.APPLE));
 		emergencyItemsCooldown = Ticks.MINUTE.x(5);
+		soundTask = "";
+		soundQuest = "";
+		soundChapter = "";
+		soundFile = "minecraft:ui.toast.challenge_complete";
 	}
 
 	@Override
@@ -159,6 +166,14 @@ public abstract class QuestFile extends QuestObject
 		}
 
 		chapters.clear();
+
+		for (QuestVariable variable : variables)
+		{
+			variable.deleteChildren();
+			variable.invalid = true;
+		}
+
+		variables.clear();
 	}
 
 	@Nullable
@@ -213,6 +228,13 @@ public abstract class QuestFile extends QuestObject
 		return object instanceof QuestTask ? (QuestTask) object : null;
 	}
 
+	@Nullable
+	public QuestVariable getVariable(String id)
+	{
+		QuestObject object = get(id);
+		return object instanceof QuestVariable ? (QuestVariable) object : null;
+	}
+
 	public void refreshIDMap()
 	{
 		map.clear();
@@ -233,7 +255,7 @@ public abstract class QuestFile extends QuestObject
 			}
 		}
 
-		allTasks.clear();
+		List<QuestTask> tasks = new ArrayList<>();
 
 		for (QuestChapter chapter : chapters)
 		{
@@ -241,10 +263,17 @@ public abstract class QuestFile extends QuestObject
 			{
 				for (QuestTask task : quest.tasks)
 				{
-					task.index = allTasks.size();
-					allTasks.add(task);
+					task.index = (short) tasks.size();
+					tasks.add(task);
 				}
 			}
+		}
+
+		allTasks = tasks.toArray(new QuestTask[0]);
+
+		for (int i = 0; i < variables.size(); i++)
+		{
+			variables.get(i).index = (short) i;
 		}
 
 		allRewards.clear();
@@ -262,12 +291,6 @@ public abstract class QuestFile extends QuestObject
 	}
 
 	@Nullable
-	public QuestTask getTaskByIndex(int index)
-	{
-		return index < 0 || index >= allTasks.size() ? null : allTasks.get(index);
-	}
-
-	@Nullable
 	public QuestObject createAndAdd(QuestObjectType type, String parent, NBTTagCompound nbt)
 	{
 		switch (type)
@@ -275,7 +298,6 @@ public abstract class QuestFile extends QuestObject
 			case CHAPTER:
 			{
 				QuestChapter chapter = new QuestChapter(this, nbt);
-				chapter.index = chapter.file.chapters.size();
 				chapter.file.chapters.add(chapter);
 				return chapter;
 			}
@@ -308,6 +330,12 @@ public abstract class QuestFile extends QuestObject
 
 				return null;
 			}
+			case VARIABLE:
+			{
+				QuestVariable variable = new QuestVariable(this, nbt);
+				variables.add(variable);
+				return variable;
+			}
 			default:
 				return null;
 		}
@@ -331,25 +359,36 @@ public abstract class QuestFile extends QuestObject
 			nbt.setString("completion_command", completionCommand);
 		}
 
-		NBTTagList chaptersList = new NBTTagList();
+		NBTTagList list = new NBTTagList();
 
 		for (QuestChapter chapter : chapters)
 		{
 			NBTTagCompound chapterNBT = new NBTTagCompound();
 			chapter.writeData(chapterNBT);
-			chaptersList.appendTag(chapterNBT);
+			list.appendTag(chapterNBT);
 		}
 
-		nbt.setTag("chapters", chaptersList);
+		nbt.setTag("chapters", list);
 
-		NBTTagList emergencyItemsList = new NBTTagList();
+		list = new NBTTagList();
+
+		for (QuestVariable variable : variables)
+		{
+			NBTTagCompound nbt1 = new NBTTagCompound();
+			variable.writeData(nbt1);
+			list.appendTag(nbt1);
+		}
+
+		nbt.setTag("variables", list);
+
+		list = new NBTTagList();
 
 		for (ItemStack stack : emergencyItems)
 		{
-			emergencyItemsList.appendTag(ItemStackSerializer.write(stack));
+			list.appendTag(ItemStackSerializer.write(stack));
 		}
 
-		nbt.setTag("emergency_items", emergencyItemsList);
+		nbt.setTag("emergency_items", list);
 		nbt.setString("emergency_items_cooldown", emergencyItemsCooldown.toString());
 	}
 
@@ -361,24 +400,35 @@ public abstract class QuestFile extends QuestObject
 
 		chapters.clear();
 
-		NBTTagList chapterList = nbt.getTagList("chapters", Constants.NBT.TAG_COMPOUND);
+		NBTTagList list = nbt.getTagList("chapters", Constants.NBT.TAG_COMPOUND);
 
-		for (int i = 0; i < chapterList.tagCount(); i++)
+		for (int i = 0; i < list.tagCount(); i++)
 		{
-			QuestChapter chapter = new QuestChapter(this, chapterList.getCompoundTagAt(i));
-			chapter.index = chapters.size();
+			QuestChapter chapter = new QuestChapter(this, list.getCompoundTagAt(i));
+			chapter.chapterIndex = chapters.size();
 			chapters.add(chapter);
+		}
+
+		variables.clear();
+
+		list = nbt.getTagList("variables", Constants.NBT.TAG_COMPOUND);
+
+		for (int i = 0; i < list.tagCount(); i++)
+		{
+			QuestVariable variable = new QuestVariable(this, list.getCompoundTagAt(i));
+			variable.index = (short) variables.size();
+			variables.add(variable);
 		}
 
 		refreshIDMap();
 
 		emergencyItems.clear();
 
-		NBTTagList emergencyItemsList = nbt.getTagList("emergency_items", Constants.NBT.TAG_COMPOUND);
+		list = nbt.getTagList("emergency_items", Constants.NBT.TAG_COMPOUND);
 
-		for (int i = 0; i < emergencyItemsList.tagCount(); i++)
+		for (int i = 0; i < list.tagCount(); i++)
 		{
-			ItemStack stack = ItemStackSerializer.read(emergencyItemsList.getCompoundTagAt(i));
+			ItemStack stack = ItemStackSerializer.read(list.getCompoundTagAt(i));
 
 			if (!stack.isEmpty())
 			{

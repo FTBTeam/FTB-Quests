@@ -8,7 +8,6 @@ import com.feed_the_beast.ftbquests.net.MessageSyncQuests;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestReward;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
-import com.feed_the_beast.ftbquests.util.FTBQuestsTeamData;
 import it.unimi.dsi.fastutil.ints.IntCollection;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 
@@ -46,16 +45,25 @@ public class ClientQuestFile extends QuestFile
 		readData(message.quests);
 		teamData = new HashMap<>();
 
-		for (String team : message.teamData.getKeySet())
+		for (MessageSyncQuests.TeamInst team : message.teamData)
 		{
-			ClientQuestProgress data = new ClientQuestProgress(team);
+			ClientQuestProgress data = new ClientQuestProgress(team.name);
 
 			for (QuestTask task : allTasks)
 			{
 				data.createTaskData(task);
 			}
 
-			FTBQuestsTeamData.deserializeTaskData(data.taskData.values(), message.teamData.getCompoundTag(team));
+			for (int i = 0; i < team.taskKeys.length; i++)
+			{
+				data.getQuestTaskData(allTasks[team.taskKeys[i]]).fromNBT(team.taskValues[i]);
+			}
+
+			for (int i = 0; i < team.variableKeys.length; i++)
+			{
+				data.variables.put(variables.get(team.variableKeys[i]), team.variableValues[i]);
+			}
+
 			teamData.put(data.getTeamID(), data);
 		}
 
