@@ -230,7 +230,7 @@ public class TileProgressDetector extends TileBase implements ITickable, IConfig
 			{
 				object = v;
 			}
-		}.addType(QuestObjectType.FILE).addType(QuestObjectType.CHAPTER).addType(QuestObjectType.QUEST).addType(QuestObjectType.TASK), new ConfigQuestObject("*"));
+		}.addType(QuestObjectType.FILE).addType(QuestObjectType.CHAPTER).addType(QuestObjectType.QUEST).addType(QuestObjectType.TASK).addType(QuestObjectType.VARIABLE), new ConfigQuestObject("*"));
 
 		group.add("level", new ConfigBoolean(level)
 		{

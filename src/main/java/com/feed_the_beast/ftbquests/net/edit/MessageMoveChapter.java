@@ -65,7 +65,7 @@ public class MessageMoveChapter extends MessageToServer
 
 					for (int i = 0; i < ServerQuestFile.INSTANCE.chapters.size(); i++)
 					{
-						ServerQuestFile.INSTANCE.chapters.get(i).index = i;
+						ServerQuestFile.INSTANCE.chapters.get(i).chapterIndex = i;
 					}
 
 					new MessageMoveChapterResponse(id, left).sendToAll();

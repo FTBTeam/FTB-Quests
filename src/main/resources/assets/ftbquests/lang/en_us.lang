@@ -29,11 +29,14 @@ itemGroup.ftbquests=FTB Quests
 sidebar_button.ftbquests.quests=Quests
 key.ftbquests.quests=Open Quests
 
+ftbquests.unnamed=Unnamed
 ftbquests.team=Team
 ftbquests.progress=Progress
 ftbquests.title=Title
 ftbquests.icon=Icon
 ftbquests.completion_command=Completion Command
+ftbquests.dependencies=Dependencies
+ftbquests.dependency=Dependency
 
 ftbquests.file=File
 ftbquests.file.allow_take_quest_blocks=Allow to Take Quest Blocks
@@ -44,15 +47,13 @@ ftbquests.file.emergency_items_cooldown.tooltip=Cooldown timer for emergency ite
 
 ftbquests.chapter=Chapter
 ftbquests.chapter.description=Description
-ftbquests.chapter.dependencies=Dependencies
 
 ftbquests.quest=Quest
 ftbquests.quest.description=Description
 ftbquests.quest.x=X
 ftbquests.quest.y=Y
-ftbquests.quest.type=Type
+ftbquests.quest.visibility=Visibility
 ftbquests.quest.text=Text
-ftbquests.quest.dependencies=Dependencies
 
 ftbquests.gui.edit_file=Edit File
 ftbquests.gui.move=Move
@@ -70,7 +71,11 @@ ftbquests.gui.change_id=Change ID
 
 ftbquests.task=Task
 ftbquests.tasks=Tasks
-ftbquests.task.get_block=Get Quest Block
+
+ftbquests.task.ftbquests.task=Task Dependency
+ftbquests.task.ftbquests.quest=Quest Dependency
+ftbquests.task.ftbquests.chapter=Chapter Dependency
+ftbquests.task.ftbquests.variable=Variable Dependency
 
 ftbquests.task.ftbquests.item=Item
 ftbquests.task.ftbquests.item.items=Item List
@@ -110,6 +115,10 @@ ftbquests.reward.ftbquests.command=Command
 ftbquests.reward.ftbquests.command.command=Command
 ftbquests.reward.ftbquests.command.text=Command: %s
 
+ftbquests.variable=Variable
+ftbquests.variables=Variables
+ftbquests.variable.max=Max Value
+
 commands.ftbquests.usage=/ftbquests [subcommand]
 commands.ftbquests.editing_mode.usage=/ftbquests editing_mode [true|false|toggle] [player]
 commands.ftbquests.editing_mode.enabled=Editing Mode for %s Enabled
@@ -119,3 +128,6 @@ commands.ftbquests.reset_progress.invalid_id=Invalid Object ID!
 commands.ftbquests.reset_progress.reset=Progress has been reset!
 commands.ftbquests.complete_instantly.usage=/ftbquests complete_instantly <object ID>
 commands.ftbquests.complete_instantly.text=Completed!
+commands.ftbquests.set_variable.usage=/ftbquests set_variable <team> <variable ID> <value>
+commands.ftbquests.set_variable.invalid_id=Invalid Variable ID!
+commands.ftbquests.set_variable.set=Variable set!

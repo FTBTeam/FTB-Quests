@@ -18,11 +18,12 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.common.util.Constants;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -34,22 +35,25 @@ public final class Quest extends QuestObject
 
 	public final QuestChapter chapter;
 	public String description;
-	public QuestType type;
+	public EnumQuestVisibilityType visibilityType;
 	public byte x, y;
 	public final List<String> text;
-	public final List<String> dependencies;
 	public final List<QuestTask> tasks;
 	public final List<QuestReward> rewards;
 	public int timesCompleted;
 
+	private String cachedID = "";
+	private Collection<QuestObject> cachedDependencies;
+
 	public Quest(QuestChapter c, NBTTagCompound nbt)
 	{
 		chapter = c;
+		readID(nbt);
 		title = nbt.getString("title");
 		description = nbt.getString("description");
 		icon = ItemStackSerializer.read(nbt.getCompoundTag("icon"));
 		completionCommand = nbt.getString("completion_command");
-		type = QuestType.NAME_MAP.get(nbt.getString("type"));
+		visibilityType = EnumQuestVisibilityType.NAME_MAP.get(nbt.getString("visibility"));
 		x = (byte) MathHelper.clamp(nbt.getByte("x"), -POS_LIMIT, POS_LIMIT);
 		y = (byte) MathHelper.clamp(nbt.getByte("y"), -POS_LIMIT, POS_LIMIT);
 		text = new ArrayList<>();
@@ -60,10 +64,6 @@ public final class Quest extends QuestObject
 		{
 			text.add(list.getStringTagAt(k));
 		}
-
-		dependencies = new ArrayList<>();
-
-		readID(nbt);
 
 		tasks = new ArrayList<>();
 		rewards = new ArrayList<>();
@@ -166,13 +166,6 @@ public final class Quest extends QuestObject
 			}
 		}
 
-		NBTTagList depList = nbt.getTagList("dependencies", Constants.NBT.TAG_STRING);
-
-		for (int i = 0; i < depList.tagCount(); i++)
-		{
-			dependencies.add(depList.getStringTagAt(i));
-		}
-
 		timesCompleted = nbt.getInteger("times_completed");
 	}
 
@@ -191,7 +184,12 @@ public final class Quest extends QuestObject
 	@Override
 	public String getID()
 	{
-		return chapter.id + ':' + id;
+		if (cachedID.isEmpty())
+		{
+			cachedID = chapter.id + ':' + id;
+		}
+
+		return cachedID;
 	}
 
 	@Override
@@ -214,9 +212,9 @@ public final class Quest extends QuestObject
 			nbt.setString("completion_command", completionCommand);
 		}
 
-		if (type != QuestType.NORMAL)
+		if (visibilityType != EnumQuestVisibilityType.NORMAL)
 		{
-			nbt.setString("type", type.getName());
+			nbt.setString("type", visibilityType.getName());
 		}
 
 		nbt.setByte("x", x);
@@ -237,18 +235,6 @@ public final class Quest extends QuestObject
 			}
 
 			nbt.setTag("text", array);
-		}
-
-		if (!dependencies.isEmpty())
-		{
-			NBTTagList depList = new NBTTagList();
-
-			for (String value : dependencies)
-			{
-				depList.appendTag(new NBTTagString(value));
-			}
-
-			nbt.setTag("dependencies", depList);
 		}
 
 		if (!tasks.isEmpty())
@@ -402,65 +388,8 @@ public final class Quest extends QuestObject
 		}
 	}
 
-	public boolean isVisible(@Nullable ITeamData data)
-	{
-		if (dependencies.isEmpty())
-		{
-			return true;
-		}
-		else if (data == null)
-		{
-			return false;
-		}
-
-		switch (type)
-		{
-			case SECRET:
-				for (String value : dependencies)
-				{
-					QuestObject object = chapter.file.get(value);
-
-					if (object != null && object.isComplete(data))
-					{
-						return true;
-					}
-				}
-
-				return false;
-			case INVISIBLE:
-				for (String value : dependencies)
-				{
-					QuestObject object = chapter.file.get(value);
-
-					if (object != null && !object.isComplete(data))
-					{
-						return false;
-					}
-				}
-
-				return true;
-			default:
-				return true;
-		}
-	}
-
 	public boolean canStartTasks(ITeamData data)
 	{
-		if (dependencies.isEmpty())
-		{
-			return true;
-		}
-
-		for (String value : dependencies)
-		{
-			QuestObject object = chapter.file.get(value);
-
-			if (object != null && !object.isComplete(data))
-			{
-				return false;
-			}
-		}
-
 		return true;
 	}
 
@@ -471,7 +400,10 @@ public final class Quest extends QuestObject
 
 		for (QuestTask task : tasks)
 		{
-			list.add(task.getIcon());
+			if (task.getDependency() == null)
+			{
+				list.add(task.getIcon());
+			}
 		}
 
 		return IconAnimation.fromList(list, false);
@@ -480,7 +412,17 @@ public final class Quest extends QuestObject
 	@Override
 	public ITextComponent getAltDisplayName()
 	{
-		return new TextComponentString("");
+		for (QuestTask task : tasks)
+		{
+			QuestObject dep = task.getDependency();
+
+			if (dep != null)
+			{
+				return dep.getDisplayName();
+			}
+		}
+
+		return new TextComponentTranslation("ftbquests.unnamed");
 	}
 
 	@Override
@@ -541,20 +483,20 @@ public final class Quest extends QuestObject
 			}
 		}, new ConfigInt(0));
 
-		group.add("type", new ConfigEnum<QuestType>(QuestType.NAME_MAP)
+		group.add("visibility", new ConfigEnum<EnumQuestVisibilityType>(EnumQuestVisibilityType.NAME_MAP)
 		{
 			@Override
-			public QuestType getValue()
+			public EnumQuestVisibilityType getValue()
 			{
-				return type;
+				return visibilityType;
 			}
 
 			@Override
-			public void setValue(QuestType v)
+			public void setValue(EnumQuestVisibilityType v)
 			{
-				type = v;
+				visibilityType = v;
 			}
-		}, new ConfigEnum<>(QuestType.NAME_MAP));
+		}, new ConfigEnum<>(EnumQuestVisibilityType.NAME_MAP));
 
 		group.add("description", new ConfigString(description)
 		{
@@ -595,134 +537,57 @@ public final class Quest extends QuestObject
 				}
 			}
 		}, new ConfigList<>(new ConfigString("")));
+	}
 
-		group.add("dependencies", new ConfigList<ConfigString>(new ConfigString(""))
+	public EnumVisibility getVisibility(@Nullable ITeamData data)
+	{
+		EnumVisibility v = EnumVisibility.VISIBLE;
+
+		/*
+		for (QuestObject object : getDependencies())
 		{
-			@Override
-			public void readFromList()
-			{
-				dependencies.clear();
+			v = v.weakest(object.getVisibility(data));
 
-				for (ConfigString value : list)
-				{
-					dependencies.add(value.getString());
-				}
+			if (v.isInvisible())
+			{
+				return EnumVisibility.INVISIBLE;
 			}
+		}
+		*/
 
-			@Override
-			public void writeToList()
-			{
-				list.clear();
-
+		/*
+		switch (getVisibilityType())
+		{
+			case SECRET_ONE:
 				for (String value : dependencies)
 				{
-					list.add(new ConfigString(value));
+					QuestObject object = chapter.file.get(value);
+
+					if (object != null && object.isComplete(data))
+					{
+						return true;
+					}
 				}
-			}
-		}, new ConfigList<>(new ConfigString("")));
-	}
 
-	public void move(byte direction)
-	{
-		if (direction == 5 || direction == 6 || direction == 7)
-		{
-			if (x == -POS_LIMIT)
-			{
-				x = POS_LIMIT;
-			}
-			else
-			{
-				x--;
-			}
-		}
-
-		if (direction == 1 || direction == 2 || direction == 3)
-		{
-			if (x == POS_LIMIT)
-			{
-				x = -POS_LIMIT;
-			}
-			else
-			{
-				x++;
-			}
-		}
-
-		if (direction == 0 || direction == 1 || direction == 7)
-		{
-			if (y == -POS_LIMIT)
-			{
-				y = POS_LIMIT;
-			}
-			else
-			{
-				y--;
-			}
-		}
-
-		if (direction == 3 || direction == 4 || direction == 5)
-		{
-			if (y == POS_LIMIT)
-			{
-				y = -POS_LIMIT;
-			}
-			else
-			{
-				y++;
-			}
-		}
-
-		for (Quest quest : chapter.quests)
-		{
-			if (quest != this && quest.x == x && quest.y == y)
-			{
-				move(direction);
-				return;
-			}
-		}
-	}
-
-	public boolean setDependency(QuestObject dep, boolean add)
-	{
-		if (dep == this)
-		{
-			return false;
-		}
-
-		String d = dep.getID();
-
-		if (add)
-		{
-			for (String value : dependencies)
-			{
-				if (value.equals(d))
+				return false;
+			case INVISIBLE:
+				for (String value : dependencies)
 				{
-					return false;
+					QuestObject object = chapter.file.get(value);
+
+					if (object != null && !object.isComplete(data))
+					{
+						return false;
+					}
 				}
-			}
 
-			dependencies.add(d);
-			return true;
-		}
-		else
-		{
-			return dependencies.remove(d);
-		}
-	}
-
-	public boolean hasDependency(QuestObject dep)
-	{
-		String d = dep.getID();
-
-		for (String value : dependencies)
-		{
-			if (value.equals(d))
-			{
 				return true;
-			}
+			default:
+				return true;
 		}
+		*/
 
-		return false;
+		return v;
 	}
 
 	public QuestTask getTask(int index)
@@ -747,6 +612,8 @@ public final class Quest extends QuestObject
 	public void clearCachedData()
 	{
 		super.clearCachedData();
+		cachedID = "";
+		cachedDependencies = null;
 
 		for (QuestTask task : tasks)
 		{

@@ -1,5 +1,6 @@
 package com.feed_the_beast.ftbquests.quest;
 
+import com.feed_the_beast.ftblib.lib.config.ConfigEnum;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigList;
 import com.feed_the_beast.ftblib.lib.config.ConfigString;
@@ -10,9 +11,10 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.common.util.Constants;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,18 +24,20 @@ import java.util.List;
 public final class QuestChapter extends QuestObject
 {
 	public final QuestFile file;
-	public int index;
+	public int chapterIndex;
+	public EnumQuestVisibilityType visibilityType;
 	public final List<Quest> quests;
 	public final List<String> description;
-	public final List<String> dependencies;
 
 	public QuestChapter(QuestFile f, NBTTagCompound nbt)
 	{
 		file = f;
+		readID(nbt);
 		title = nbt.getString("title");
 		description = new ArrayList<>();
 		icon = ItemStackSerializer.read(nbt.getCompoundTag("icon"));
 		completionCommand = nbt.getString("completion_command");
+		visibilityType = EnumQuestVisibilityType.NAME_MAP.get(nbt.getString("visibility"));
 		quests = new ArrayList<>();
 
 		NBTTagList desc = nbt.getTagList("description", Constants.NBT.TAG_STRING);
@@ -42,17 +46,6 @@ public final class QuestChapter extends QuestObject
 		{
 			description.add(desc.getStringTagAt(i));
 		}
-
-		dependencies = new ArrayList<>();
-
-		NBTTagList depList = nbt.getTagList("dependencies", Constants.NBT.TAG_STRING);
-
-		for (int i = 0; i < depList.tagCount(); i++)
-		{
-			dependencies.add(depList.getStringTagAt(i));
-		}
-
-		readID(nbt);
 
 		NBTTagList questsList = nbt.getTagList("quests", Constants.NBT.TAG_COMPOUND);
 
@@ -100,6 +93,11 @@ public final class QuestChapter extends QuestObject
 			nbt.setString("completion_command", completionCommand);
 		}
 
+		if (visibilityType != EnumQuestVisibilityType.NORMAL)
+		{
+			nbt.setString("type", visibilityType.getName());
+		}
+
 		if (!description.isEmpty())
 		{
 			NBTTagList list = new NBTTagList();
@@ -110,18 +108,6 @@ public final class QuestChapter extends QuestObject
 			}
 
 			nbt.setTag("description", list);
-		}
-
-		if (!dependencies.isEmpty())
-		{
-			NBTTagList depList = new NBTTagList();
-
-			for (String value : dependencies)
-			{
-				depList.appendTag(new NBTTagString(value));
-			}
-
-			nbt.setTag("dependencies", depList);
 		}
 
 		if (!quests.isEmpty())
@@ -237,7 +223,7 @@ public final class QuestChapter extends QuestObject
 	@Override
 	public ITextComponent getAltDisplayName()
 	{
-		return new TextComponentString("");
+		return new TextComponentTranslation("ftbquests.unnamed");
 	}
 
 	@Override
@@ -293,30 +279,37 @@ public final class QuestChapter extends QuestObject
 			}
 		}, new ConfigList<>(new ConfigString("")));
 
-		group.add("dependencies", new ConfigList<ConfigString>(new ConfigString(""))
+		group.add("visibility", new ConfigEnum<EnumQuestVisibilityType>(EnumQuestVisibilityType.NAME_MAP)
 		{
 			@Override
-			public void readFromList()
+			public EnumQuestVisibilityType getValue()
 			{
-				dependencies.clear();
-
-				for (ConfigString value : list)
-				{
-					dependencies.add(value.getString());
-				}
+				return visibilityType;
 			}
 
 			@Override
-			public void writeToList()
+			public void setValue(EnumQuestVisibilityType v)
 			{
-				list.clear();
-
-				for (String value : dependencies)
-				{
-					list.add(new ConfigString(value));
-				}
+				visibilityType = v;
 			}
-		}, new ConfigList<>(new ConfigString("")));
+		}, new ConfigEnum<>(EnumQuestVisibilityType.NAME_MAP));
+	}
+
+	public EnumVisibility getVisibility(@Nullable ITeamData data)
+	{
+		EnumVisibility v = EnumVisibility.VISIBLE;
+
+		for (Quest quest : quests)
+		{
+			v = v.weakest(quest.getVisibility(data));
+
+			if (v.isInvisible())
+			{
+				break;
+			}
+		}
+
+		return v;
 	}
 
 	@Override

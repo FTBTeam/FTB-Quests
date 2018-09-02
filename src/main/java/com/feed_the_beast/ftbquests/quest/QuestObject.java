@@ -197,17 +197,7 @@ public abstract class QuestObject
 
 	public void readID(NBTTagCompound nbt)
 	{
-		id = nbt.getString("id");
-
-		if (id.isEmpty())
-		{
-			id = StringUtils.getId(getDisplayName().getUnformattedText(), StringUtils.FLAG_ID_DEFAULTS);
-		}
-
-		if (id.length() > 32)
-		{
-			id = id.substring(0, 32);
-		}
+		id = nbt.getString("id").trim();
 
 		if (id.isEmpty() || getQuestFile().get(getID()) != null)
 		{

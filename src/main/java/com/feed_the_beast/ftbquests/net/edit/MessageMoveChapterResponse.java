@@ -68,7 +68,7 @@ public class MessageMoveChapterResponse extends MessageToClient
 
 					for (int i = 0; i < ClientQuestFile.INSTANCE.chapters.size(); i++)
 					{
-						ClientQuestFile.INSTANCE.chapters.get(i).index = i;
+						ClientQuestFile.INSTANCE.chapters.get(i).chapterIndex = i;
 					}
 
 					GuiQuestTree gui = ClientUtils.getCurrentGuiAs(GuiQuestTree.class);

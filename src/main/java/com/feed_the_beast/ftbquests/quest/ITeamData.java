@@ -21,4 +21,8 @@ public interface ITeamData
 	void createTaskData(QuestTask task);
 
 	void unclaimRewards(Collection<QuestReward> rewards);
+
+	long getVariable(QuestVariable variable);
+
+	void setVariable(QuestVariable variable, long value);
 }
