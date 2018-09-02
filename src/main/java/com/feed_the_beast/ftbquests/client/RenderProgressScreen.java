@@ -76,16 +76,12 @@ public class RenderProgressScreen extends TileEntitySpecialRenderer<TileProgress
 		boolean flag = font.getUnicodeFlag();
 		font.setUnicodeFlag(true);
 
-		if (screen.fullscreen)
+		int size = Math.min(screen.width * 2, screen.height);
+		GlStateManager.translate(-size / 2F, -size, -0.01F);
+		GlStateManager.scale(size + 1F, size + 1F, 1F);
+
+		if (!screen.fullscreen)
 		{
-			GlStateManager.translate(-screen.width, -screen.height, -0.01F);
-			GlStateManager.scale(screen.width * 2F + 1F, screen.height + 1F, 1F);
-		}
-		else
-		{
-			int size = Math.min(screen.width * 2, screen.height);
-			GlStateManager.translate(-size / 2F, -size, -0.01F);
-			GlStateManager.scale(size + 1F, size + 1F, 1F);
 			drawString(font, TextFormatting.DARK_GREEN + team.getTeamID(), 0.02, 0.12);
 			drawString(font, chapter.getRelativeProgress(team) + "%", 0.86, 0.12);
 		}
@@ -108,8 +104,8 @@ public class RenderProgressScreen extends TileEntitySpecialRenderer<TileProgress
 			if (!screen.fullscreen)
 			{
 				GlStateManager.pushMatrix();
-				GlStateManager.translate(0.05F, 0.15F, 0F);
-				GlStateManager.scale(0.9F, 0.7F, 1F);
+				GlStateManager.translate(0.15F, 0.15F, 0F);
+				GlStateManager.scale(0.7F, 0.7F, 1F);
 			}
 
 			GlStateManager.disableTexture2D();
