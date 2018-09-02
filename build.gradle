@@ -38,13 +38,16 @@ minecraft {
 repositories {
 	maven { url "https://maven.latmod.com/" } //FTBLib
 	maven { url "http://maven.ic2.player.to/" } //IC2
-	maven { url "https://maven.blamejared.com/" } //PackMode
+	maven { url "https://maven.blamejared.com/" } //PackMode & Botania
+	maven { url "http://maven.thiakil.com/" } //Baubles
 }
 
 dependencies {
 	deobfCompile "com.feed_the_beast.mods:FTBLib:${ftblib_version}"
 	provided "net.industrial-craft:industrialcraft-2:${ic2_version}:api"
 	deobfCompile "io.sommers:packmode:${packmode_version}"
+	deobfCompile "vazkii.botania:Botania:${botania_version}"
+	deobfCompile "com.azanor.baubles:Baubles:${baubles_version}"
 }
 
 processResources {

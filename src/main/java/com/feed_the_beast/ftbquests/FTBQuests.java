@@ -4,6 +4,7 @@ import com.feed_the_beast.ftblib.FTBLib;
 import com.feed_the_beast.ftblib.lib.OtherMods;
 import com.feed_the_beast.ftbquests.command.CommandFTBQuests;
 import com.feed_the_beast.ftbquests.gui.FTBQuestsGuiHandler;
+import com.feed_the_beast.ftbquests.integration.botania.BotaniaIntegration;
 import com.feed_the_beast.ftbquests.integration.ic2.IC2Integration;
 import com.feed_the_beast.ftbquests.net.FTBQuestsNetHandler;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskType;
@@ -56,6 +57,11 @@ public class FTBQuests
 		if (Loader.isModLoaded(OtherMods.IC2))
 		{
 			IC2Integration.preInit();
+		}
+
+		if (Loader.isModLoaded(OtherMods.BOTANIA))
+		{
+			BotaniaIntegration.preInit();
 		}
 
 		NetworkRegistry.INSTANCE.registerGuiHandler(this, new FTBQuestsGuiHandler());

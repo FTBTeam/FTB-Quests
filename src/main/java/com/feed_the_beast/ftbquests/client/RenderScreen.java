@@ -130,7 +130,7 @@ public class RenderScreen extends TileEntitySpecialRenderer<TileScreenCore>
 		}
 		else
 		{
-			bottomText = data.getProgressString() + " / " + data.task.getMaxProgressString();
+			bottomText = data.task.reeeeMyModDoesntUseNumbers() ? "" : (data.getProgressString() + " / " + data.task.getMaxProgressString());
 		}
 
 		if (data != null && !bottomText.isEmpty() && data.getProgress() >= data.task.getMaxProgress())
