@@ -59,7 +59,7 @@ public class MessageCreateObjectResponse extends MessageToClient
 	{
 		if (ClientQuestFile.INSTANCE != null)
 		{
-			QuestObject object = ClientQuestFile.INSTANCE.createAndAdd(type, parent, nbt);
+			QuestObject object = ClientQuestFile.INSTANCE.create(type, parent, nbt);
 
 			if (object != null)
 			{

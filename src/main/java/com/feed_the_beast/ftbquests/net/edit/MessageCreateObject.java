@@ -58,7 +58,7 @@ public class MessageCreateObject extends MessageToServer
 	{
 		if (FTBQuests.canEdit(player))
 		{
-			QuestObject object = ServerQuestFile.INSTANCE.createAndAdd(type, parent, nbt);
+			QuestObject object = ServerQuestFile.INSTANCE.create(type, parent, nbt);
 
 			if (object != null)
 			{

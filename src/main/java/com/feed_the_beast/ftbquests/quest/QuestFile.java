@@ -291,7 +291,7 @@ public abstract class QuestFile extends QuestObject
 	}
 
 	@Nullable
-	public QuestObject createAndAdd(QuestObjectType type, String parent, NBTTagCompound nbt)
+	public QuestObject create(QuestObjectType type, String parent, NBTTagCompound nbt)
 	{
 		switch (type)
 		{
@@ -314,12 +314,7 @@ public abstract class QuestFile extends QuestObject
 
 				if (quest != null)
 				{
-					QuestTask task = QuestTaskType.createTask(quest, nbt);
-
-					if (task != null)
-					{
-						return task;
-					}
+					return QuestTaskType.createTask(quest, nbt);
 				}
 
 				return null;
