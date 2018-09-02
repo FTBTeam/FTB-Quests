@@ -99,6 +99,7 @@ ftbquests.task.ftbquests.ic2_energy.text=%d EU
 ftbquests.task.ftbquests.botania_mana=Botania Mana
 ftbquests.task.ftbquests.botania_mana.value=Mana
 ftbquests.task.ftbquests.botania_mana.max_input=Max Input
+ftbquests.task.ftbquests.botania_mana.show_numbers=Show Numbers
 ftbquests.task.ftbquests.botania_mana.text=%d Mana
 
 ftbquests.reward=Reward

@@ -1,6 +1,7 @@
 package com.feed_the_beast.ftbquests.integration.botania;
 
 import com.feed_the_beast.ftblib.lib.client.ClientUtils;
+import com.feed_the_beast.ftblib.lib.config.ConfigBoolean;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigLong;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
@@ -39,6 +40,7 @@ public class ManaTask extends QuestTask
 	private static final ResourceLocation FULL_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "textures/tasks/botania_mana_full.png");
 
 	public long value, maxInput;
+	public boolean showNumbers;
 
 	public ManaTask(Quest quest, NBTTagCompound nbt)
 	{
@@ -56,6 +58,8 @@ public class ManaTask extends QuestTask
 		{
 			maxInput = 1;
 		}
+
+		showNumbers = nbt.getBoolean("show_numbers");
 	}
 
 	@Override
@@ -79,6 +83,11 @@ public class ManaTask extends QuestTask
 		{
 			nbt.setLong("max_input", maxInput);
 		}
+
+		if (showNumbers)
+		{
+			nbt.setBoolean("show_numbers", true);
+		}
 	}
 
 	@Override
@@ -90,7 +99,7 @@ public class ManaTask extends QuestTask
 	@Override
 	public ITextComponent getAltDisplayName()
 	{
-		return new TextComponentTranslation("ftbquests.task.ftbquests.botania_mana.text", StringUtils.formatDouble(value, true));
+		return showNumbers ? new TextComponentTranslation("ftbquests.task.ftbquests.botania_mana.text", StringUtils.formatDouble(value, true)) : new TextComponentTranslation("ftbquests.task.ftbquests.botania_mana.value");
 	}
 
 	@Override
@@ -149,6 +158,21 @@ public class ManaTask extends QuestTask
 				maxInput = v;
 			}
 		}, new ConfigLong(Long.MAX_VALUE));
+
+		group.add("show_numbers", new ConfigBoolean(false)
+		{
+			@Override
+			public boolean getBoolean()
+			{
+				return showNumbers;
+			}
+
+			@Override
+			public void setBoolean(boolean v)
+			{
+				showNumbers = v;
+			}
+		}, new ConfigBoolean(false));
 	}
 
 	@Override
@@ -238,7 +262,7 @@ public class ManaTask extends QuestTask
 	@Override
 	public boolean reeeeMyModDoesntUseNumbers()
 	{
-		return true;
+		return !showNumbers;
 	}
 
 	@Override
