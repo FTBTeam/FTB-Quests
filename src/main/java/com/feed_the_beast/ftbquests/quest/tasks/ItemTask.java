@@ -34,8 +34,8 @@ import java.util.function.Predicate;
  */
 public class ItemTask extends QuestTask implements Predicate<ItemStack>
 {
-	private final List<ItemStack> items;
-	private long count;
+	public final List<ItemStack> items;
+	public long count;
 
 	public ItemTask(Quest quest, NBTTagCompound nbt)
 	{

@@ -30,6 +30,7 @@ import com.feed_the_beast.ftbquests.net.edit.MessageEditReward;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.quest.QuestReward;
+import com.feed_the_beast.ftbquests.quest.tasks.ItemTask;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskType;
 import net.minecraft.client.renderer.GlStateManager;
@@ -222,9 +223,35 @@ public class GuiQuest extends GuiBase
 		}
 
 		@Override
+		public void addMouseOverText(List<String> list)
+		{
+			list.add(isCtrlKeyDown() ? I18n.format("ftbquests.task.ftbquests.item") : getTitle());
+		}
+
+		@Override
 		public void onClicked(MouseButton button)
 		{
 			GuiHelper.playClickSound();
+
+			if (GuiQuest.isCtrlKeyDown())
+			{
+				new GuiSelectItemStack(new ConfigValueInstance("item", ConfigGroup.DEFAULT, new ConfigItemStack(ItemStack.EMPTY)
+				{
+					@Override
+					public void setStack(ItemStack stack)
+					{
+						NBTTagCompound nbt = new NBTTagCompound();
+						ItemTask itemTask = new ItemTask(quest, nbt);
+						itemTask.items.add(stack);
+						itemTask.count = 1L;
+						itemTask.writeData(nbt);
+						nbt.setString("type", QuestTaskType.getType(ItemTask.class).getTypeForNBT());
+						new MessageCreateObject(QuestObjectType.TASK, quest.getID(), nbt).sendToServer();
+					}
+				}), this).openGui();
+				return;
+			}
+
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
 
 			for (QuestTaskType type : QuestTaskType.getRegistry())
@@ -452,7 +479,10 @@ public class GuiQuest extends GuiBase
 			{
 				for (QuestTask task : quest.tasks)
 				{
-					add(new ButtonTask(this, task));
+					if (questTreeGui.questFile.canEdit() || task.getDependency() == null)
+					{
+						add(new ButtonTask(this, task));
+					}
 				}
 
 				if (questTreeGui.questFile.canEdit())
