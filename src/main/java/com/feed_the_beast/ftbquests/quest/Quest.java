@@ -414,11 +414,9 @@ public final class Quest extends QuestObject
 	{
 		for (QuestTask task : tasks)
 		{
-			QuestObject dep = task.getDependency();
-
-			if (dep != null)
+			if (task.getDependency() == null)
 			{
-				return dep.getDisplayName();
+				return task.getDisplayName();
 			}
 		}
 
@@ -619,5 +617,18 @@ public final class Quest extends QuestObject
 		{
 			task.clearCachedData();
 		}
+	}
+
+	public int hasDependency(QuestObject object)
+	{
+		for (int i = 0; i < tasks.size(); i++)
+		{
+			if (tasks.get(i).getDependency() == object)
+			{
+				return i;
+			}
+		}
+
+		return -1;
 	}
 }

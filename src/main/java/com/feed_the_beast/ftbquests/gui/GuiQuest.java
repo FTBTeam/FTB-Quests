@@ -245,7 +245,7 @@ public class GuiQuest extends GuiBase
 						itemTask.items.add(stack);
 						itemTask.count = 1L;
 						itemTask.writeData(nbt);
-						nbt.setString("type", QuestTaskType.getType(ItemTask.class).getTypeForNBT());
+						nbt.setString("type", QuestTaskType.getTypeForNBT(ItemTask.class));
 						new MessageCreateObject(QuestObjectType.TASK, quest.getID(), nbt).sendToServer();
 					}
 				}), this).openGui();

@@ -35,7 +35,9 @@ import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.quest.QuestReward;
+import com.feed_the_beast.ftbquests.quest.tasks.DependencyTask;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
+import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskType;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
@@ -352,25 +354,30 @@ public class GuiQuestTree extends GuiBase
 			if (questFile.canEdit() && button.isRight())
 			{
 				List<ContextMenuItem> contextMenu = new ArrayList<>();
-				/*contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.move"), GuiIcons.RIGHT, () ->
-				{
-					//ButtonQuest
-				}));*/
+				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.move"), GuiIcons.UP, () -> {
+					selectedQuest = quest.getID();
+					movingQuest = true;
+				}));
 
-				/*
-				QuestObject object = questFile.get(selectedQuest);
+				Quest object = questFile.getQuest(selectedQuest);
 
-				if (object != null && quest.hasDependency(object))
+				int index = object == null || object == quest ? -1 : quest.hasDependency(object);
+
+				if (index != -1)
 				{
-					contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.rem_dep"), GuiIcons.REMOVE, () -> new MessageSetDep(quest.getID(), selectedQuest, false).sendToServer()));
+					contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.rem_dep"), GuiIcons.REMOVE, () -> new MessageDeleteObject(quest.tasks.get(index).getID()).sendToServer()));
 				}
 				else
 				{
-					contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.set_dep"), QuestsTheme.ADD, () -> new MessageSetDep(quest.getID(), selectedQuest, true).sendToServer()).setEnabled(object != quest && object instanceof Quest));
+					contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.set_dep"), QuestsTheme.ADD, () -> {
+						NBTTagCompound nbt = new NBTTagCompound();
+						nbt.setString("object", selectedQuest);
+						nbt.setString("type", QuestTaskType.getTypeForNBT(DependencyTask.QuestDep.class));
+						new MessageCreateObject(QuestObjectType.TASK, quest.getID(), nbt).sendToServer();
+					}).setEnabled(object != null && object != quest));
 				}
 
 				contextMenu.add(ContextMenuItem.SEPARATOR);
-				*/
 				addObjectMenuItems(contextMenu, getGui(), quest);
 				getGui().openContextMenu(contextMenu);
 			}
@@ -531,9 +538,10 @@ public class GuiQuestTree extends GuiBase
 
 					return true;
 				}
-				else if (button.isLeft() && !selectedQuest.isEmpty())
+				else if (button.isLeft() && movingQuest && !selectedQuest.isEmpty())
 				{
 					GuiHelper.playClickSound();
+					movingQuest = false;
 					new MessageMoveQuest(selectedQuest, x, y).sendToServer();
 					return true;
 				}
@@ -545,7 +553,7 @@ public class GuiQuestTree extends GuiBase
 		@Override
 		public void addMouseOverText(List<String> list)
 		{
-			if (!selectedQuest.isEmpty())
+			if (movingQuest && !selectedQuest.isEmpty())
 			{
 				list.add(I18n.format("ftbquests.gui.move"));
 			}
