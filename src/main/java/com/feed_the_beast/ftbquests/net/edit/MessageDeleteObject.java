@@ -54,6 +54,7 @@ public class MessageDeleteObject extends MessageToServer
 			{
 				object.deleteChildren();
 				object.deleteSelf();
+				ServerQuestFile.INSTANCE.clearCachedData();
 				ServerQuestFile.INSTANCE.save();
 			}
 
