@@ -3,6 +3,7 @@ package com.feed_the_beast.ftbquests.quest.tasks;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
+import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
@@ -176,7 +177,25 @@ public abstract class DependencyTask extends QuestTask
 		public long getProgress()
 		{
 			QuestObject object = task.getDependency();
-			return object != null && object.isComplete(teamData) ? 1L : 0L;
+
+			if (object != null)
+			{
+				try
+				{
+					if (object.isComplete(teamData))
+					{
+						return 1L;
+					}
+				}
+				catch (StackOverflowError error)
+				{
+					FTBQuests.LOGGER.error("Dependency loop in " + task.getID() + " (ID erroring: " + task.objectId + ")!");
+					task.objectId = "";
+					task.cachedDep = null;
+				}
+			}
+
+			return 0L;
 		}
 
 		@Override
