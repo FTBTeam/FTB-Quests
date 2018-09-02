@@ -48,7 +48,7 @@ public class TileScreenPartIC2 extends TileScreenPart implements IEnergySink
 	@Override
 	public int getSinkTier()
 	{
-		return 4;
+		return Integer.MAX_VALUE;
 	}
 
 	@Override
