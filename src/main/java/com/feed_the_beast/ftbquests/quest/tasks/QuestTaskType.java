@@ -89,6 +89,12 @@ public final class QuestTaskType extends IForgeRegistryEntry.Impl<QuestTaskType>
 		return TYPE_MAP.get(clazz);
 	}
 
+	public static String getTypeForNBT(Class clazz)
+	{
+		QuestTaskType type = getType(clazz);
+		return type == null ? "" : type.getTypeForNBT();
+	}
+
 	public interface Provider
 	{
 		@Nullable
