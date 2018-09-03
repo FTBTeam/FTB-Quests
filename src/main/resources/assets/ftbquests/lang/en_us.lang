@@ -24,6 +24,13 @@ tile.ftbquests.chest.output_desc=Rewards will appear here
 item.ftbquests.book.name=Quest Book
 item.ftbquests.xp_vial.name=XP Vial
 item.ftbquests.script.name=Script
+item.ftbquests.lootcrate.name=Loot Crate
+
+ftbquests.rarity.common=Common
+ftbquests.rarity.uncommon=Uncommon
+ftbquests.rarity.rare=Rare
+ftbquests.rarity.epic=Epic
+ftbquests.rarity.legendary=Legendary
 
 itemGroup.ftbquests=FTB Quests
 sidebar_button.ftbquests.quests=Quests
@@ -44,6 +51,8 @@ ftbquests.file.allow_take_quest_blocks.tooltip=Allow to obtain Quest Blocks from
 ftbquests.file.emergency_items=Emergency Items
 ftbquests.file.emergency_items_cooldown=Emergency Items Cooldown
 ftbquests.file.emergency_items_cooldown.tooltip=Cooldown timer for emergency items to respawn.
+ftbquests.file.loot_tables=Loot Tables
+ftbquests.file.loot_size=Loot Size
 
 ftbquests.chapter=Chapter
 ftbquests.chapter.description=Description

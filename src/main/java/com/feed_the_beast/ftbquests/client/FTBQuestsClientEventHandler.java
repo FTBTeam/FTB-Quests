@@ -4,7 +4,7 @@ import com.feed_the_beast.ftblib.events.CustomSidebarButtonTextEvent;
 import com.feed_the_beast.ftblib.events.client.CustomClickEvent;
 import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
-import com.feed_the_beast.ftbquests.FTBQuestsItems;
+import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.QuestReward;
@@ -43,6 +43,11 @@ public class FTBQuestsClientEventHandler
 		ModelLoader.setCustomModelResourceLocation(FTBQuestsItems.BOOK, 0, new ModelResourceLocation(FTBQuestsItems.BOOK.getRegistryName(), "inventory"));
 		ModelLoader.setCustomModelResourceLocation(FTBQuestsItems.XP_VIAL, 0, new ModelResourceLocation(FTBQuestsItems.XP_VIAL.getRegistryName(), "inventory"));
 		ModelLoader.setCustomModelResourceLocation(FTBQuestsItems.SCRIPT, 0, new ModelResourceLocation(FTBQuestsItems.SCRIPT.getRegistryName(), "inventory"));
+		ModelLoader.setCustomModelResourceLocation(FTBQuestsItems.COMMON_LOOTCRATE, 0, new ModelResourceLocation(FTBQuestsItems.COMMON_LOOTCRATE.getRegistryName(), "inventory"));
+		ModelLoader.setCustomModelResourceLocation(FTBQuestsItems.UNCOMMON_LOOTCRATE, 0, new ModelResourceLocation(FTBQuestsItems.UNCOMMON_LOOTCRATE.getRegistryName(), "inventory"));
+		ModelLoader.setCustomModelResourceLocation(FTBQuestsItems.RARE_LOOTCRATE, 0, new ModelResourceLocation(FTBQuestsItems.RARE_LOOTCRATE.getRegistryName(), "inventory"));
+		ModelLoader.setCustomModelResourceLocation(FTBQuestsItems.EPIC_LOOTCRATE, 0, new ModelResourceLocation(FTBQuestsItems.EPIC_LOOTCRATE.getRegistryName(), "inventory"));
+		ModelLoader.setCustomModelResourceLocation(FTBQuestsItems.LEGENDARY_LOOTCRATE, 0, new ModelResourceLocation(FTBQuestsItems.LEGENDARY_LOOTCRATE.getRegistryName(), "inventory"));
 
 		ClientRegistry.bindTileEntitySpecialRenderer(TileScreenCore.class, new RenderScreen());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileProgressScreenCore.class, new RenderProgressScreen());

@@ -37,9 +37,10 @@ public class ItemScript extends Item
 						.replace("@y", Integer.toString(pos.getY()))
 						.replace("@z", Integer.toString(pos.getZ())));
 			}
-		}
 
-		if (world.isRemote)
+			world.playSound(null, player.posX, player.posY, player.posZ, SoundEvents.ENTITY_ITEM_BREAK, SoundCategory.PLAYERS, 0.8F, 0.8F + world.rand.nextFloat() * 0.4F);
+		}
+		else
 		{
 			for (int i = 0; i < 5; i++)
 			{
@@ -53,10 +54,6 @@ public class ItemScript extends Item
 				vec3d1 = vec3d1.add(player.posX, player.posY + (double) player.getEyeHeight(), player.posZ);
 				world.spawnParticle(EnumParticleTypes.ITEM_CRACK, vec3d1.x, vec3d1.y, vec3d1.z, vec3d.x, vec3d.y + 0.05D, vec3d.z, Item.getIdFromItem(this), 0);
 			}
-		}
-		else
-		{
-			world.playSound(null, player.posX, player.posY, player.posZ, SoundEvents.ENTITY_ITEM_BREAK, SoundCategory.PLAYERS, 0.8F, 0.8F + world.rand.nextFloat() * 0.4F);
 		}
 
 		stack.shrink(1);

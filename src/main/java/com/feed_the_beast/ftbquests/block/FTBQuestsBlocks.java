@@ -1,5 +1,6 @@
-package com.feed_the_beast.ftbquests;
+package com.feed_the_beast.ftbquests.block;
 
+import com.feed_the_beast.ftbquests.FTBQuests;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraftforge.fml.common.registry.GameRegistry;
