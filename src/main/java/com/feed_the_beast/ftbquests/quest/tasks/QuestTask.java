@@ -3,6 +3,7 @@ package com.feed_the_beast.ftbquests.quest.tasks;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
+import com.feed_the_beast.ftbquests.net.MessageOpenTask;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
@@ -10,12 +11,15 @@ import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.tile.TileScreenCore;
 import com.feed_the_beast.ftbquests.tile.TileScreenPart;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
+import java.util.List;
 
 /**
  * @author LatvianModder
@@ -195,10 +199,9 @@ public abstract class QuestTask extends QuestObject
 	}
 
 	@Override
-	public Icon getIcon()
+	public Icon getAltIcon()
 	{
-		Icon icon = super.getIcon();
-		return icon.isEmpty() ? GuiIcons.DICE : icon;
+		return GuiIcons.DICE;
 	}
 
 	@Override
@@ -214,8 +217,26 @@ public abstract class QuestTask extends QuestObject
 		return null;
 	}
 
-	public boolean reeeeMyModDoesntUseNumbers()
+	public boolean hideProgressNumbers()
 	{
 		return false;
+	}
+
+	@SideOnly(Side.CLIENT)
+	public void addMouseOverText(List<String> list)
+	{
+		if (canInsertItem())
+		{
+			list.add(TextFormatting.DARK_GRAY + I18n.format("ftbquests.task.click_to_submit"));
+		}
+	}
+
+	@SideOnly(Side.CLIENT)
+	public void onButtonClicked()
+	{
+		if (canInsertItem())
+		{
+			new MessageOpenTask(getID()).sendToServer();
+		}
 	}
 }

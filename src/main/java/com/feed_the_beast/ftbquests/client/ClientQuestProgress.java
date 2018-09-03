@@ -98,23 +98,41 @@ public class ClientQuestProgress implements ITeamData
 
 	public static String getCompletionSuffix(@Nullable ClientQuestProgress progress, QuestObject object)
 	{
-		if (!GuiScreen.isShiftKeyDown())
+		if (!GuiScreen.isShiftKeyDown() && !(object instanceof QuestTask))
 		{
 			return "";
 		}
 
 		StringBuilder builder = new StringBuilder();
-		builder.append(' ');
 		builder.append(TextFormatting.DARK_GRAY);
 
 		if (progress == null)
 		{
+			builder.append(' ');
 			builder.append("???");
 		}
 		else
 		{
-			builder.append(object.getRelativeProgress(progress));
-			builder.append('%');
+			if (object instanceof QuestTask)
+			{
+				QuestTask task = (QuestTask) object;
+
+				if (!task.hideProgressNumbers())
+				{
+					QuestTaskData data = progress.getQuestTaskData(task);
+					builder.append(" [");
+					builder.append(data.getProgressString());
+					builder.append(" / ");
+					builder.append(task.getMaxProgressString());
+					builder.append(']');
+				}
+			}
+			else
+			{
+				builder.append(' ');
+				builder.append(object.getRelativeProgress(progress));
+				builder.append('%');
+			}
 		}
 
 		if (GuiScreen.isCtrlKeyDown())

@@ -4,20 +4,29 @@ import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftbquests.FTBQuests;
+import com.feed_the_beast.ftbquests.client.ClientQuestFile;
+import com.feed_the_beast.ftbquests.gui.GuiQuest;
+import com.feed_the_beast.ftbquests.gui.GuiVariables;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.List;
 
 /**
  * @author LatvianModder
@@ -36,6 +45,30 @@ public abstract class DependencyTask extends QuestTask
 		{
 			return QuestObjectType.TASK;
 		}
+
+		@Override
+		@SideOnly(Side.CLIENT)
+		public void addMouseOverText(List<String> list)
+		{
+			super.addMouseOverText(list);
+
+			if (getDependency() instanceof QuestTask)
+			{
+				list.add(TextFormatting.GRAY + I18n.format("ftbquests.task") + ": " + QuestObjectType.TASK.getColor() + getDependency().getDisplayName().getUnformattedText());
+				list.add(TextFormatting.GRAY + I18n.format("ftbquests.quest") + ": " + QuestObjectType.QUEST.getColor() + ((QuestTask) getDependency()).quest.getDisplayName().getUnformattedText());
+				list.add(TextFormatting.GRAY + I18n.format("ftbquests.chapter") + ": " + QuestObjectType.CHAPTER.getColor() + ((QuestTask) getDependency()).quest.chapter.getDisplayName().getUnformattedText());
+			}
+		}
+
+		@Override
+		@SideOnly(Side.CLIENT)
+		public void onButtonClicked()
+		{
+			if (getDependency() instanceof QuestTask)
+			{
+				new GuiQuest(ClientQuestFile.INSTANCE.questTreeGui, ((QuestTask) getDependency()).quest).openGui();
+			}
+		}
 	}
 
 	public static class QuestDep extends DependencyTask
@@ -49,6 +82,29 @@ public abstract class DependencyTask extends QuestTask
 		public QuestObjectType getType()
 		{
 			return QuestObjectType.QUEST;
+		}
+
+		@Override
+		@SideOnly(Side.CLIENT)
+		public void addMouseOverText(List<String> list)
+		{
+			super.addMouseOverText(list);
+
+			if (getDependency() instanceof Quest)
+			{
+				list.add(TextFormatting.GRAY + I18n.format("ftbquests.quest") + ": " + QuestObjectType.QUEST.getColor() + getDependency().getDisplayName().getUnformattedText());
+				list.add(TextFormatting.GRAY + I18n.format("ftbquests.chapter") + ": " + QuestObjectType.CHAPTER.getColor() + ((Quest) getDependency()).chapter.getDisplayName().getUnformattedText());
+			}
+		}
+
+		@Override
+		@SideOnly(Side.CLIENT)
+		public void onButtonClicked()
+		{
+			if (getDependency() instanceof Quest)
+			{
+				new GuiQuest(ClientQuestFile.INSTANCE.questTreeGui, (Quest) getDependency()).openGui();
+			}
 		}
 	}
 
@@ -64,6 +120,29 @@ public abstract class DependencyTask extends QuestTask
 		{
 			return QuestObjectType.CHAPTER;
 		}
+
+		@Override
+		@SideOnly(Side.CLIENT)
+		public void addMouseOverText(List<String> list)
+		{
+			super.addMouseOverText(list);
+
+			if (getDependency() instanceof QuestChapter)
+			{
+				list.add(TextFormatting.GRAY + I18n.format("ftbquests.chapter") + ": " + QuestObjectType.CHAPTER.getColor() + getDependency().getDisplayName().getUnformattedText());
+			}
+		}
+
+		@Override
+		@SideOnly(Side.CLIENT)
+		public void onButtonClicked()
+		{
+			if (getDependency() instanceof QuestChapter)
+			{
+				ClientQuestFile.INSTANCE.questTreeGui.openGui();
+				ClientQuestFile.INSTANCE.questTreeGui.selectChapter((QuestChapter) getDependency());
+			}
+		}
 	}
 
 	public static class VariableDep extends DependencyTask
@@ -77,6 +156,25 @@ public abstract class DependencyTask extends QuestTask
 		public QuestObjectType getType()
 		{
 			return QuestObjectType.VARIABLE;
+		}
+
+		@Override
+		@SideOnly(Side.CLIENT)
+		public void addMouseOverText(List<String> list)
+		{
+			super.addMouseOverText(list);
+
+			if (getDependency() instanceof QuestChapter)
+			{
+				list.add(TextFormatting.GRAY + I18n.format("ftbquests.variable") + ": " + QuestObjectType.VARIABLE.getColor() + getDependency().getDisplayName().getUnformattedText());
+			}
+		}
+
+		@Override
+		@SideOnly(Side.CLIENT)
+		public void onButtonClicked()
+		{
+			new GuiVariables().openGui();
 		}
 	}
 
@@ -95,9 +193,19 @@ public abstract class DependencyTask extends QuestTask
 	@Nullable
 	public QuestObject getDependency()
 	{
+		if (objectId.isEmpty())
+		{
+			return null;
+		}
+		else if (cachedDep == null || cachedDep.invalid)
+		{
+			cachedDep = quest.chapter.file.get(objectId);
+		}
+
 		if (cachedDep == null)
 		{
-			cachedDep = quest.chapter.file.getQuest(objectId);
+			FTBQuests.LOGGER.warn("Removed dependency '" + getID() + "' with missing ID '" + objectId + "'");
+			quest.chapter.file.deleteObject(getID());
 		}
 
 		return cachedDep;
@@ -112,6 +220,11 @@ public abstract class DependencyTask extends QuestTask
 	@Override
 	public void writeData(NBTTagCompound nbt)
 	{
+		if (cachedDep != null)
+		{
+			objectId = cachedDep.getID();
+		}
+
 		nbt.setString("object", objectId);
 	}
 
@@ -132,7 +245,12 @@ public abstract class DependencyTask extends QuestTask
 	@Override
 	public void getConfig(ConfigGroup group)
 	{
-		group.add("object", new ConfigQuestObject(objectId)
+		if (cachedDep != null)
+		{
+			objectId = cachedDep.getID();
+		}
+
+		group.add("object", new ConfigQuestObject("")
 		{
 			@Override
 			public String getString()
@@ -146,6 +264,18 @@ public abstract class DependencyTask extends QuestTask
 				objectId = v;
 			}
 		}.addType(getType()), new ConfigQuestObject("")).setDisplayName(new TextComponentTranslation(getType().getTranslationKey()));
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public void addMouseOverText(List<String> list)
+	{
+		if (cachedDep != null)
+		{
+			objectId = cachedDep.getID();
+		}
+
+		list.add(TextFormatting.DARK_GRAY + objectId);
 	}
 
 	@Override
@@ -189,9 +319,8 @@ public abstract class DependencyTask extends QuestTask
 				}
 				catch (StackOverflowError error)
 				{
-					FTBQuests.LOGGER.error("Dependency loop in " + task.getID() + " (ID erroring: " + task.objectId + ")!");
-					task.objectId = "";
-					task.cachedDep = null;
+					FTBQuests.LOGGER.error("Removed looping dependency '" + task.getID() + "' with erroring ID '" + task.objectId + "'");
+					task.quest.chapter.file.deleteObject(task.getID());
 				}
 			}
 

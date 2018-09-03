@@ -1,5 +1,6 @@
 package com.feed_the_beast.ftbquests.quest.tasks;
 
+import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigItemStack;
 import com.feed_the_beast.ftblib.lib.config.ConfigList;
@@ -11,6 +12,7 @@ import com.feed_the_beast.ftblib.lib.item.ItemStackSerializer;
 import com.feed_the_beast.ftblib.lib.util.StringJoiner;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
+import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -18,8 +20,11 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemHandlerHelper;
 
@@ -226,6 +231,25 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 	public boolean canInsertItem()
 	{
 		return true;
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public void addMouseOverText(List<String> list)
+	{
+		super.addMouseOverText(list);
+
+		for (ItemStack stack : items)
+		{
+			list.add("---");
+			List<String> l = stack.getTooltip(ClientUtils.MC.player, ITooltipFlag.TooltipFlags.NORMAL);
+			list.add(stack.getRarity().rarityColor + l.get(0));
+
+			for (int i = 1; i < l.size(); i++)
+			{
+				list.add(TextFormatting.GRAY + l.get(i));
+			}
+		}
 	}
 
 	@Override

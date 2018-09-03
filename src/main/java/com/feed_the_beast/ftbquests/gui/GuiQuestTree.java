@@ -26,7 +26,6 @@ import com.feed_the_beast.ftbquests.net.MessageCompleteInstantly;
 import com.feed_the_beast.ftbquests.net.MessageResetProgress;
 import com.feed_the_beast.ftbquests.net.edit.MessageChangeID;
 import com.feed_the_beast.ftbquests.net.edit.MessageCreateObject;
-import com.feed_the_beast.ftbquests.net.edit.MessageDeleteObject;
 import com.feed_the_beast.ftbquests.net.edit.MessageEditObject;
 import com.feed_the_beast.ftbquests.net.edit.MessageMoveChapter;
 import com.feed_the_beast.ftbquests.net.edit.MessageMoveQuest;
@@ -365,7 +364,7 @@ public class GuiQuestTree extends GuiBase
 
 				if (index != -1)
 				{
-					contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.rem_dep"), GuiIcons.REMOVE, () -> new MessageDeleteObject(quest.tasks.get(index).getID()).sendToServer()));
+					contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.rem_dep"), GuiIcons.REMOVE, () -> questFile.deleteObject(quest.tasks.get(index).getID())));
 				}
 				else
 				{
@@ -543,6 +542,7 @@ public class GuiQuestTree extends GuiBase
 					GuiHelper.playClickSound();
 					movingQuest = false;
 					new MessageMoveQuest(selectedQuest, x, y).sendToServer();
+					selectedQuest = "";
 					return true;
 				}
 			}
@@ -819,6 +819,7 @@ public class GuiQuestTree extends GuiBase
 			quests.setScrollX(0);
 			quests.setScrollY(0);
 			selectedQuest = "";
+			movingQuest = false;
 			quests.refreshWidgets();
 			resetScroll(true);
 		}
@@ -862,10 +863,10 @@ public class GuiQuestTree extends GuiBase
 	public void addObjectMenuItems(List<ContextMenuItem> contextMenu, GuiBase prevGui, QuestObject object)
 	{
 		contextMenu.add(new ContextMenuItem(I18n.format("selectServer.edit"), GuiIcons.SETTINGS, () -> new MessageEditObject(object.getID()).sendToServer()));
-		contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), GuiIcons.REMOVE, () -> new MessageDeleteObject(object.getID()).sendToServer()).setYesNo(I18n.format("delete_item", object.getDisplayName().getFormattedText())));
+		contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), GuiIcons.REMOVE, () -> questFile.deleteObject(object.getID())).setYesNo(I18n.format("delete_item", object.getDisplayName().getFormattedText())));
 		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.reset_progress"), GuiIcons.REFRESH, () -> new MessageResetProgress(object.getID()).sendToServer()).setYesNo(I18n.format("ftbquests.gui.reset_progress_q")));
 		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.complete_instantly"), QuestsTheme.COMPLETED, () -> new MessageCompleteInstantly(object.getID()).sendToServer()).setYesNo(I18n.format("ftbquests.gui.complete_instantly_q")));
-		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.change_id"), GuiIcons.NOTES, () -> new GuiEditConfigValue("id", new ConfigString(object.id, Pattern.compile("^[a-z0-9_]{1,32}$")), (value, set) -> {
+		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.change_id"), GuiIcons.NOTES, () -> new GuiEditConfigValue("id", new ConfigString(object.id, QuestObject.ID_PATTERN), (value, set) -> {
 			prevGui.openGui();
 
 			if (set)
@@ -922,6 +923,7 @@ public class GuiQuestTree extends GuiBase
 			{
 				case Keyboard.KEY_D:
 					selectedQuest = "";
+					movingQuest = false;
 					break;
 			}
 		}

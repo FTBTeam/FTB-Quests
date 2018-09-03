@@ -199,7 +199,7 @@ public class GuiTask extends GuiBase
 
 		container.data.task.drawGUI(container.data, x + (w - 64) / 2, y + 42, 64, 64);
 
-		if (!container.data.task.reeeeMyModDoesntUseNumbers())
+		if (!container.data.task.hideProgressNumbers())
 		{
 			String bottomText = container.data.getProgressString() + " / " + container.data.task.getMaxProgressString();
 

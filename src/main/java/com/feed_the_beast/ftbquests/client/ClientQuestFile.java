@@ -4,7 +4,9 @@ import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftblib.lib.gui.GuiBase;
 import com.feed_the_beast.ftbquests.gui.GuiQuest;
 import com.feed_the_beast.ftbquests.gui.GuiQuestTree;
+import com.feed_the_beast.ftbquests.gui.GuiVariables;
 import com.feed_the_beast.ftbquests.net.MessageSyncQuests;
+import com.feed_the_beast.ftbquests.net.edit.MessageDeleteObject;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestReward;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
@@ -125,6 +127,15 @@ public class ClientQuestFile extends QuestFile
 			{
 				guiQuestTree.refreshWidgets();
 			}
+			else
+			{
+				GuiVariables guiVariables = ClientUtils.getCurrentGuiAs(GuiVariables.class);
+
+				if (guiVariables != null)
+				{
+					guiVariables.refreshWidgets();
+				}
+			}
 		}
 
 		if (prev != null)
@@ -150,6 +161,12 @@ public class ClientQuestFile extends QuestFile
 	public Collection<ClientQuestProgress> getAllData()
 	{
 		return teamData.values();
+	}
+
+	@Override
+	public void deleteObject(String id)
+	{
+		new MessageDeleteObject(id).sendToServer();
 	}
 
 	public boolean isRewardClaimed(QuestReward reward)

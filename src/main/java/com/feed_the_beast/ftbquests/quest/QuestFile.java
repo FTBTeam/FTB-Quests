@@ -255,6 +255,11 @@ public abstract class QuestFile extends QuestObject
 			}
 		}
 
+		for (QuestVariable variable : variables)
+		{
+			map.put(variable.getID(), variable);
+		}
+
 		List<QuestTask> tasks = new ArrayList<>();
 
 		for (QuestChapter chapter : chapters)
@@ -429,6 +434,8 @@ public abstract class QuestFile extends QuestObject
 	public abstract ITeamData getData(String team);
 
 	public abstract Collection<? extends ITeamData> getAllData();
+
+	public abstract void deleteObject(String id);
 
 	@Override
 	public Icon getAltIcon()

@@ -15,12 +15,15 @@ import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 /**
  * @author LatvianModder
  */
 public abstract class QuestObject
 {
+	public static final Pattern ID_PATTERN = Pattern.compile("^[a-z0-9_]{1,32}$");
+
 	public String id = "";
 	public boolean invalid = false;
 	public String title = "";
@@ -82,7 +85,7 @@ public abstract class QuestObject
 		}
 	}
 
-	public Icon getIcon()
+	public final Icon getIcon()
 	{
 		if (cachedIcon == null)
 		{
