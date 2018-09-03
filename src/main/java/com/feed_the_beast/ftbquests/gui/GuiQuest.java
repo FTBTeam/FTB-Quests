@@ -225,7 +225,7 @@ public class GuiQuest extends GuiBase
 		@Override
 		public void addMouseOverText(List<String> list)
 		{
-			list.add(isCtrlKeyDown() ? I18n.format("ftbquests.task.ftbquests.item") : getTitle());
+			list.add(isCtrlKeyDown() ? (getTitle() + ": " + I18n.format("ftbquests.task.ftbquests.item")) : getTitle());
 		}
 
 		@Override

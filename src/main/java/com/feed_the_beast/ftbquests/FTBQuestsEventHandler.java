@@ -7,11 +7,14 @@ import com.feed_the_beast.ftbquests.block.BlockProgressScreenPart;
 import com.feed_the_beast.ftbquests.block.BlockQuestChest;
 import com.feed_the_beast.ftbquests.block.BlockScreen;
 import com.feed_the_beast.ftbquests.block.BlockScreenPart;
+import com.feed_the_beast.ftbquests.block.FTBQuestsBlocks;
 import com.feed_the_beast.ftbquests.block.ItemBlockProgressScreen;
 import com.feed_the_beast.ftbquests.block.ItemBlockScreen;
+import com.feed_the_beast.ftbquests.item.ItemLootcrate;
 import com.feed_the_beast.ftbquests.item.ItemQuestBook;
 import com.feed_the_beast.ftbquests.item.ItemScript;
 import com.feed_the_beast.ftbquests.item.ItemXPVial;
+import com.feed_the_beast.ftbquests.item.LootRarity;
 import com.feed_the_beast.ftbquests.quest.tasks.DependencyTask;
 import com.feed_the_beast.ftbquests.quest.tasks.FluidTask;
 import com.feed_the_beast.ftbquests.quest.tasks.ForgeEnergyTask;
@@ -86,7 +89,12 @@ public class FTBQuestsEventHandler
 
 				withName(new ItemQuestBook(), "book"),
 				withName(new ItemXPVial(), "xp_vial"),
-				withName(new ItemScript(), "script")
+				withName(new ItemScript(), "script"),
+				withName(new ItemLootcrate(LootRarity.COMMON), "common_lootcrate").setTranslationKey(FTBQuests.MOD_ID + ".lootcrate"),
+				withName(new ItemLootcrate(LootRarity.UNCOMMON), "uncommon_lootcrate").setTranslationKey(FTBQuests.MOD_ID + ".lootcrate"),
+				withName(new ItemLootcrate(LootRarity.RARE), "rare_lootcrate").setTranslationKey(FTBQuests.MOD_ID + ".lootcrate"),
+				withName(new ItemLootcrate(LootRarity.EPIC), "epic_lootcrate").setTranslationKey(FTBQuests.MOD_ID + ".lootcrate"),
+				withName(new ItemLootcrate(LootRarity.LEGENDARY), "legendary_lootcrate").setTranslationKey(FTBQuests.MOD_ID + ".lootcrate")
 		);
 	}
 

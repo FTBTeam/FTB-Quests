@@ -1,13 +1,16 @@
 package com.feed_the_beast.ftbquests.quest;
 
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
+import com.feed_the_beast.ftblib.lib.config.ConfigInt;
 import com.feed_the_beast.ftblib.lib.config.ConfigItemStack;
 import com.feed_the_beast.ftblib.lib.config.ConfigList;
+import com.feed_the_beast.ftblib.lib.config.ConfigString;
 import com.feed_the_beast.ftblib.lib.config.ConfigTimer;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.IconAnimation;
 import com.feed_the_beast.ftblib.lib.item.ItemStackSerializer;
 import com.feed_the_beast.ftblib.lib.math.Ticks;
+import com.feed_the_beast.ftbquests.item.LootRarity;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskType;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -15,6 +18,7 @@ import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.common.util.Constants;
@@ -25,6 +29,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * @author LatvianModder
@@ -41,6 +46,8 @@ public abstract class QuestFile extends QuestObject
 	public final List<ItemStack> emergencyItems;
 	public Ticks emergencyItemsCooldown;
 	public String soundTask, soundQuest, soundChapter, soundFile;
+	public final ResourceLocation[] lootTables;
+	public int lootSize;
 
 	public QuestFile()
 	{
@@ -59,6 +66,15 @@ public abstract class QuestFile extends QuestObject
 		soundQuest = "";
 		soundChapter = "";
 		soundFile = "minecraft:ui.toast.challenge_complete";
+
+		lootTables = new ResourceLocation[LootRarity.VALUES.length];
+
+		for (LootRarity rarity : LootRarity.VALUES)
+		{
+			lootTables[rarity.ordinal()] = rarity.getLootTable();
+		}
+
+		lootSize = 9;
 	}
 
 	@Override
@@ -380,6 +396,16 @@ public abstract class QuestFile extends QuestObject
 
 		nbt.setTag("emergency_items", list);
 		nbt.setString("emergency_items_cooldown", emergencyItemsCooldown.toString());
+
+		for (LootRarity rarity : LootRarity.VALUES)
+		{
+			if (!lootTables[rarity.ordinal()].equals(rarity.getLootTable()))
+			{
+				nbt.setString(rarity.getName() + "_loot_table", lootTables[rarity.ordinal()].toString());
+			}
+		}
+
+		nbt.setShort("loot_size", (short) lootSize);
 	}
 
 	protected final void readData(NBTTagCompound nbt)
@@ -428,6 +454,19 @@ public abstract class QuestFile extends QuestObject
 
 		Ticks t = Ticks.get(nbt.getString("emergency_items_cooldown"));
 		emergencyItemsCooldown = t.hasTicks() ? t : Ticks.MINUTE.x(5);
+
+		for (LootRarity rarity : LootRarity.VALUES)
+		{
+			String s = nbt.getString(rarity.getName() + "_loot_table");
+			lootTables[rarity.ordinal()] = s.isEmpty() ? rarity.getLootTable() : new ResourceLocation(s);
+		}
+
+		lootSize = nbt.getShort("loot_size") & 0xFFFF;
+
+		if (lootSize == 0)
+		{
+			lootSize = 9;
+		}
 	}
 
 	@Nullable
@@ -498,6 +537,42 @@ public abstract class QuestFile extends QuestObject
 				emergencyItemsCooldown = t;
 			}
 		}, new ConfigTimer(Ticks.MINUTE.x(5)));
+
+		ConfigGroup lootGroup = config.getGroup("loot_tables");
+		Pattern pattern = Pattern.compile("[a-z0-9_]+:.+");
+
+		for (LootRarity rarity : LootRarity.VALUES)
+		{
+			lootGroup.add(rarity.getName(), new ConfigString("", pattern)
+			{
+				@Override
+				public String getString()
+				{
+					return lootTables[rarity.ordinal()].toString();
+				}
+
+				@Override
+				public void setString(String v)
+				{
+					lootTables[rarity.ordinal()] = v.equals(rarity.getLootTable().toString()) ? rarity.getLootTable() : new ResourceLocation(v);
+				}
+			}, new ConfigString(rarity.getLootTable().toString())).setDisplayName(new TextComponentTranslation(rarity.getTranslationKey()));
+		}
+
+		config.add("loot_size", new ConfigInt(0, 1, 1024)
+		{
+			@Override
+			public int getInt()
+			{
+				return lootSize;
+			}
+
+			@Override
+			public void setInt(int v)
+			{
+				lootSize = v;
+			}
+		}, new ConfigInt(9));
 	}
 
 	@Override

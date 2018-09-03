@@ -1,8 +1,8 @@
 package com.feed_the_beast.ftbquests.block;
 
 import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
-import com.feed_the_beast.ftbquests.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
+import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.tile.TileQuestChest;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;

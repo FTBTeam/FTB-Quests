@@ -6,6 +6,7 @@ import com.feed_the_beast.ftbquests.command.CommandFTBQuests;
 import com.feed_the_beast.ftbquests.gui.FTBQuestsGuiHandler;
 import com.feed_the_beast.ftbquests.integration.botania.BotaniaIntegration;
 import com.feed_the_beast.ftbquests.integration.ic2.IC2Integration;
+import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.net.FTBQuestsNetHandler;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskType;
 import net.minecraft.creativetab.CreativeTabs;
@@ -45,7 +46,7 @@ public class FTBQuests
 		@Override
 		public ItemStack getTabIconItem()
 		{
-			return new ItemStack(FTBQuestsItems.SCREEN);
+			return new ItemStack(FTBQuestsItems.LEGENDARY_LOOTCRATE);
 		}
 	};
 
