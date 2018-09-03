@@ -310,7 +310,10 @@ public final class Quest extends QuestObject
 
 		for (QuestTask task : tasks)
 		{
-			progress += task.getProgress(data);
+			if (!task.invalid)
+			{
+				progress += task.getProgress(data);
+			}
 		}
 
 		return progress;
@@ -323,7 +326,10 @@ public final class Quest extends QuestObject
 
 		for (QuestTask task : tasks)
 		{
-			maxProgress += task.getMaxProgress();
+			if (!task.invalid)
+			{
+				maxProgress += task.getMaxProgress();
+			}
 		}
 
 		return maxProgress;
@@ -334,12 +340,18 @@ public final class Quest extends QuestObject
 	{
 		int progress = 0;
 
-		for (QuestTask quest : tasks)
+		int s = 0;
+
+		for (QuestTask task : tasks)
 		{
-			progress += quest.getRelativeProgress(data);
+			if (!task.invalid)
+			{
+				progress += task.getRelativeProgress(data);
+				s++;
+			}
 		}
 
-		return fixRelativeProgress(progress, tasks.size());
+		return fixRelativeProgress(progress, s);
 	}
 
 	@Override
@@ -347,7 +359,7 @@ public final class Quest extends QuestObject
 	{
 		for (QuestTask task : tasks)
 		{
-			if (!task.isComplete(data))
+			if (!task.invalid && !task.isComplete(data))
 			{
 				return false;
 			}

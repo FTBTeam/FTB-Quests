@@ -5,7 +5,6 @@ import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToServer;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.FTBQuests;
-import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import net.minecraft.entity.player.EntityPlayerMP;
 
@@ -48,17 +47,7 @@ public class MessageDeleteObject extends MessageToServer
 	{
 		if (!id.isEmpty() && FTBQuests.canEdit(player))
 		{
-			QuestObject object = ServerQuestFile.INSTANCE.get(id);
-
-			if (object != null)
-			{
-				object.deleteChildren();
-				object.deleteSelf();
-				ServerQuestFile.INSTANCE.clearCachedData();
-				ServerQuestFile.INSTANCE.save();
-			}
-
-			new MessageDeleteObjectResponse(id).sendToAll();
+			ServerQuestFile.INSTANCE.deleteObject(id);
 		}
 	}
 }

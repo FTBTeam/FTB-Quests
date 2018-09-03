@@ -3,6 +3,7 @@ package com.feed_the_beast.ftbquests.quest;
 import com.feed_the_beast.ftblib.lib.data.ForgeTeam;
 import com.feed_the_beast.ftblib.lib.data.Universe;
 import com.feed_the_beast.ftblib.lib.util.NBTUtils;
+import com.feed_the_beast.ftbquests.net.edit.MessageDeleteObjectResponse;
 import com.feed_the_beast.ftbquests.util.FTBQuestsTeamData;
 import net.minecraft.nbt.NBTTagCompound;
 
@@ -73,6 +74,22 @@ public class ServerQuestFile extends QuestFile
 		}
 
 		return Collections.emptyList();
+	}
+
+	@Override
+	public void deleteObject(String id)
+	{
+		QuestObject object = get(id);
+
+		if (object != null)
+		{
+			object.deleteChildren();
+			object.deleteSelf();
+			clearCachedData();
+			save();
+		}
+
+		new MessageDeleteObjectResponse(id).sendToAll();
 	}
 
 	public void save()

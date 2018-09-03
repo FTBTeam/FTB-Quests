@@ -23,7 +23,6 @@ import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.client.ClientQuestProgress;
 import com.feed_the_beast.ftbquests.net.MessageClaimReward;
-import com.feed_the_beast.ftbquests.net.MessageOpenTask;
 import com.feed_the_beast.ftbquests.net.edit.MessageAddReward;
 import com.feed_the_beast.ftbquests.net.edit.MessageCreateObject;
 import com.feed_the_beast.ftbquests.net.edit.MessageEditReward;
@@ -161,17 +160,17 @@ public class GuiQuest extends GuiBase
 		@Override
 		public void onClicked(MouseButton button)
 		{
-			GuiHelper.playClickSound();
-
 			if (button.isRight() && questTreeGui.questFile.canEdit())
 			{
+				GuiHelper.playClickSound();
 				List<ContextMenuItem> contextMenu = new ArrayList<>();
 				questTreeGui.addObjectMenuItems(contextMenu, getGui(), task);
 				getGui().openContextMenu(contextMenu);
 			}
 			else if (button.isLeft())
 			{
-				new MessageOpenTask(task.getID()).sendToServer();
+				GuiHelper.playClickSound();
+				task.onButtonClicked();
 			}
 		}
 
@@ -179,6 +178,7 @@ public class GuiQuest extends GuiBase
 		public void addMouseOverText(List<String> list)
 		{
 			list.add(getTitle() + ClientQuestProgress.getCompletionSuffix(questTreeGui.questFile.self, task));
+			task.addMouseOverText(list);
 		}
 
 		@Override
@@ -311,10 +311,9 @@ public class GuiQuest extends GuiBase
 		@Override
 		public void onClicked(MouseButton button)
 		{
-			GuiHelper.playClickSound();
-
 			if (button.isRight() && questTreeGui.questFile.canEdit())
 			{
+				GuiHelper.playClickSound();
 				List<ContextMenuItem> contextMenu = new ArrayList<>();
 				contextMenu.add(new ContextMenuItem(I18n.format("selectServer.edit"), GuiIcons.SETTINGS, () -> {
 					ConfigValueInstance value = new ConfigValueInstance("item", ConfigGroup.DEFAULT, new ConfigItemStack(ItemStack.EMPTY)
@@ -342,6 +341,7 @@ public class GuiQuest extends GuiBase
 			}
 			else if (button.isLeft() && questTreeGui.questFile.self != null)
 			{
+				GuiHelper.playClickSound();
 				new MessageClaimReward(reward.uid).sendToServer();
 			}
 		}
@@ -481,6 +481,11 @@ public class GuiQuest extends GuiBase
 				{
 					if (questTreeGui.questFile.canEdit() || task.getDependency() == null)
 					{
+						if (task.getDependency() instanceof Quest && ((Quest) task.getDependency()).chapter == quest.chapter)
+						{
+							continue;
+						}
+
 						add(new ButtonTask(this, task));
 					}
 				}

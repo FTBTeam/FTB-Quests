@@ -260,7 +260,7 @@ public class ManaTask extends QuestTask
 	}
 
 	@Override
-	public boolean reeeeMyModDoesntUseNumbers()
+	public boolean hideProgressNumbers()
 	{
 		return !showNumbers;
 	}

@@ -71,6 +71,8 @@ ftbquests.gui.change_id=Change ID
 
 ftbquests.task=Task
 ftbquests.tasks=Tasks
+ftbquests.task.click_to_submit=Click to submit items
+ftbquests.task.click_to_submit_all=Click to submit all items
 
 ftbquests.task.ftbquests.task=Task Dependency
 ftbquests.task.ftbquests.quest=Quest Dependency

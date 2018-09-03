@@ -26,6 +26,12 @@ public class QuestVariable extends QuestObject
 		icon = ItemStackSerializer.read(nbt.getCompoundTag("icon"));
 		completionCommand = nbt.getString("completion_command");
 		maxValue = nbt.getLong("max");
+
+		if (maxValue < 1L)
+		{
+			maxValue = 1L;
+		}
+
 		team = nbt.getBoolean("team");
 		index = -1;
 
