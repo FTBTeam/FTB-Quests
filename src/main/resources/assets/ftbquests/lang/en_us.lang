@@ -102,6 +102,11 @@ ftbquests.task.ftbquests.forge_energy.value=FE / RF
 ftbquests.task.ftbquests.forge_energy.max_input=Max Input
 ftbquests.task.ftbquests.forge_energy.text=%d FE
 
+ftbquests.task.ftbquests.buildcraft_mj=BuildCraft Energy
+ftbquests.task.ftbquests.buildcraft_mj.value=MJ
+ftbquests.task.ftbquests.buildcraft_mj.max_input=Max Input
+ftbquests.task.ftbquests.buildcraft_mj.text=%d MJ
+
 ftbquests.task.ftbquests.ic2_energy=IC2 Energy
 ftbquests.task.ftbquests.ic2_energy.value=EU
 ftbquests.task.ftbquests.ic2_energy.max_input=Max Input

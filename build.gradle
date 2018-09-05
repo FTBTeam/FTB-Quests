@@ -40,14 +40,16 @@ repositories {
 	maven { url "http://maven.ic2.player.to/" } //IC2
 	maven { url "https://maven.blamejared.com/" } //PackMode & Botania
 	maven { url "http://maven.thiakil.com/" } //Baubles
+	maven { url "https://mod-buildcraft.com/maven/" } //Buildcraft
 }
 
 dependencies {
 	deobfCompile "com.feed_the_beast.mods:FTBLib:${ftblib_version}"
 	provided "net.industrial-craft:industrialcraft-2:${ic2_version}:api"
 	deobfCompile "io.sommers:packmode:${packmode_version}"
-	deobfCompile "vazkii.botania:Botania:${botania_version}"
-	deobfCompile "com.azanor.baubles:Baubles:${baubles_version}"
+	deobfProvided "vazkii.botania:Botania:${botania_version}"
+	deobfProvided "com.azanor.baubles:Baubles:${baubles_version}"
+	provided "com.mod-buildcraft:buildcraft-api:${buildcraft_version}"
 }
 
 processResources {
