@@ -825,16 +825,6 @@ public class GuiQuestTree extends GuiBase
 		}
 	}
 
-	private boolean canZoomIn()
-	{
-		return zoom < 24;
-	}
-
-	private boolean canZoomOut()
-	{
-		return zoom > 8;
-	}
-
 	public void resetScroll(boolean realign)
 	{
 		if (realign)
@@ -844,20 +834,6 @@ public class GuiQuestTree extends GuiBase
 
 		quests.setScrollX((scrollWidth - quests.width) / 2);
 		quests.setScrollY((scrollHeight - quests.height) / 2);
-	}
-
-	private void zoomIn()
-	{
-		zoom += 4;
-		grabbed = 0;
-		resetScroll(true);
-	}
-
-	private void zoomOut()
-	{
-		zoom -= 4;
-		grabbed = 0;
-		resetScroll(true);
 	}
 
 	public void addObjectMenuItems(List<ContextMenuItem> contextMenu, GuiBase prevGui, QuestObject object)
@@ -884,22 +860,6 @@ public class GuiQuestTree extends GuiBase
 		if (super.keyPressed(key, keyChar))
 		{
 			return true;
-		}
-		else if (keyChar == '+' || key == Keyboard.KEY_EQUALS)
-		{
-			if (canZoomIn())
-			{
-				zoomIn();
-				return true;
-			}
-		}
-		else if (keyChar == '-' || key == Keyboard.KEY_MINUS)
-		{
-			if (canZoomOut())
-			{
-				zoomOut();
-				return true;
-			}
 		}
 		else if (key == Keyboard.KEY_TAB)
 		{
@@ -981,17 +941,21 @@ public class GuiQuestTree extends GuiBase
 		{
 			if (scroll > 0)
 			{
-				if (canZoomIn())
+				if (zoom < 24)
 				{
-					zoomIn();
+					zoom += 4;
+					grabbed = 0;
+					resetScroll(true);
 					return true;
 				}
 			}
 			else if (scroll < 0)
 			{
-				if (canZoomOut())
+				if (zoom > 8)
 				{
-					zoomOut();
+					zoom -= 4;
+					grabbed = 0;
+					resetScroll(true);
 					return true;
 				}
 			}

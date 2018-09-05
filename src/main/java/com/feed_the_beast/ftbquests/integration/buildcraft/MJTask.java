@@ -1,14 +1,19 @@
-package com.feed_the_beast.ftbquests.quest.tasks;
+package com.feed_the_beast.ftbquests.integration.buildcraft;
 
+import buildcraft.api.mj.IMjConnector;
+import buildcraft.api.mj.IMjReceiver;
+import buildcraft.api.mj.MjAPI;
 import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
-import com.feed_the_beast.ftblib.lib.config.ConfigInt;
 import com.feed_the_beast.ftblib.lib.config.ConfigLong;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
+import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskData;
+import com.feed_the_beast.ftbquests.quest.tasks.SimpleQuestTaskData;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
@@ -18,8 +23,6 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.energy.CapabilityEnergy;
-import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.opengl.GL11;
@@ -30,29 +33,28 @@ import javax.annotation.Nullable;
 /**
  * @author LatvianModder
  */
-public class ForgeEnergyTask extends QuestTask
+public class MJTask extends QuestTask
 {
 	private static final ResourceLocation EMPTY_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "textures/tasks/fe_empty.png");
 	private static final ResourceLocation FULL_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "textures/tasks/fe_full.png");
 
-	public long value;
-	public int maxInput;
+	public long value, maxInput;
 
-	public ForgeEnergyTask(Quest quest, NBTTagCompound nbt)
+	public MJTask(Quest quest, NBTTagCompound nbt)
 	{
 		super(quest);
-		value = nbt.hasKey("value") ? nbt.getLong("value") : 10000L;
+		value = nbt.hasKey("value") ? nbt.getLong("value") : 10000000000L;
 
 		if (value < 1L)
 		{
 			value = 1L;
 		}
 
-		maxInput = nbt.hasKey("max_input") ? nbt.getInteger("max_input") : Integer.MAX_VALUE;
+		maxInput = nbt.hasKey("max_input") ? nbt.getLong("max_input") : Long.MAX_VALUE;
 
-		if (maxInput < 1)
+		if (maxInput < 1L)
 		{
-			maxInput = 1;
+			maxInput = 1L;
 		}
 	}
 
@@ -65,7 +67,7 @@ public class ForgeEnergyTask extends QuestTask
 	@Override
 	public String getMaxProgressString()
 	{
-		return StringUtils.formatDouble(value, true);
+		return StringUtils.formatDouble(value / 1000000D, true);
 	}
 
 	@Override
@@ -73,9 +75,9 @@ public class ForgeEnergyTask extends QuestTask
 	{
 		nbt.setLong("value", value);
 
-		if (maxInput != Integer.MAX_VALUE)
+		if (maxInput != Long.MAX_VALUE)
 		{
-			nbt.setInteger("max_input", maxInput);
+			nbt.setLong("max_input", maxInput);
 		}
 	}
 
@@ -88,7 +90,7 @@ public class ForgeEnergyTask extends QuestTask
 	@Override
 	public ITextComponent getAltDisplayName()
 	{
-		return new TextComponentTranslation("ftbquests.task.ftbquests.forge_energy.text", StringUtils.formatDouble(value, true));
+		return new TextComponentTranslation("ftbquests.task.ftbquests.buildcraft_mj.text", StringUtils.formatDouble(value / 1000000D, true));
 	}
 
 	@Override
@@ -107,9 +109,9 @@ public class ForgeEnergyTask extends QuestTask
 			{
 				value = v;
 			}
-		}, new ConfigLong(10000L));
+		}, new ConfigLong(10000000000L));
 
-		group.add("max_input", new ConfigInt(maxInput, 1, Integer.MAX_VALUE), new ConfigInt(Integer.MAX_VALUE));
+		group.add("max_input", new ConfigLong(maxInput, 1L, Long.MAX_VALUE), new ConfigLong(Integer.MAX_VALUE));
 	}
 
 	@Override
@@ -202,9 +204,9 @@ public class ForgeEnergyTask extends QuestTask
 		return new Data(this, data);
 	}
 
-	public static class Data extends SimpleQuestTaskData<ForgeEnergyTask> implements IEnergyStorage
+	public static class Data extends SimpleQuestTaskData<MJTask> implements IMjReceiver
 	{
-		private Data(ForgeEnergyTask task, ITeamData data)
+		private Data(MJTask task, ITeamData data)
 		{
 			super(task, data);
 		}
@@ -212,28 +214,34 @@ public class ForgeEnergyTask extends QuestTask
 		@Override
 		public String getProgressString()
 		{
-			return StringUtils.formatDouble(progress, true);
+			return StringUtils.formatDouble(progress / 1000000D, true);
 		}
 
 		@Override
-		public boolean hasCapability(@Nonnull Capability<?> capability, @Nullable EnumFacing facing)
+		public boolean hasCapability(Capability<?> capability, @Nullable EnumFacing facing)
 		{
-			return capability == CapabilityEnergy.ENERGY;
+			return capability == MjAPI.CAP_RECEIVER || capability == MjAPI.CAP_CONNECTOR;
 		}
 
+		@Override
 		@Nullable
-		@Override
-		public <T> T getCapability(@Nonnull Capability<T> capability, @Nullable EnumFacing facing)
+		public <T> T getCapability(Capability<T> capability, @Nullable EnumFacing facing)
 		{
-			return capability == CapabilityEnergy.ENERGY ? (T) this : null;
+			return capability == MjAPI.CAP_RECEIVER || capability == MjAPI.CAP_CONNECTOR ? (T) this : null;
 		}
 
 		@Override
-		public int receiveEnergy(int maxReceive, boolean simulate)
+		public long getPowerRequested()
 		{
-			if (maxReceive > 0 && progress < task.value)
+			return Math.min(task.maxInput, task.value - progress);
+		}
+
+		@Override
+		public long receivePower(long microJoules, boolean simulate)
+		{
+			if (microJoules > 0L && progress < task.value)
 			{
-				long add = Math.min(task.maxInput, Math.min(maxReceive, task.value - progress));
+				long add = Math.min(microJoules, getPowerRequested());
 
 				if (add > 0L)
 				{
@@ -243,39 +251,15 @@ public class ForgeEnergyTask extends QuestTask
 						sync();
 					}
 
-					return (int) add;
+					return microJoules - add;
 				}
 			}
 
-			return 0;
+			return microJoules;
 		}
 
 		@Override
-		public int extractEnergy(int maxExtract, boolean simulate)
-		{
-			return 0;
-		}
-
-		@Override
-		public int getEnergyStored()
-		{
-			return 0;
-		}
-
-		@Override
-		public int getMaxEnergyStored()
-		{
-			return task.maxInput;
-		}
-
-		@Override
-		public boolean canExtract()
-		{
-			return false;
-		}
-
-		@Override
-		public boolean canReceive()
+		public boolean canConnect(@Nonnull IMjConnector other)
 		{
 			return true;
 		}
