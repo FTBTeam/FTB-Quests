@@ -201,7 +201,7 @@ public abstract class QuestTask extends QuestObject
 	@Override
 	public Icon getAltIcon()
 	{
-		return GuiIcons.DICE;
+		return GuiIcons.ACCEPT;
 	}
 
 	@Override

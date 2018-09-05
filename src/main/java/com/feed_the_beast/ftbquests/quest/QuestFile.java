@@ -371,6 +371,7 @@ public abstract class QuestFile extends QuestObject
 		{
 			NBTTagCompound chapterNBT = new NBTTagCompound();
 			chapter.writeData(chapterNBT);
+			chapterNBT.setString("id", chapter.id);
 			list.appendTag(chapterNBT);
 		}
 
@@ -380,9 +381,10 @@ public abstract class QuestFile extends QuestObject
 
 		for (QuestVariable variable : variables)
 		{
-			NBTTagCompound nbt1 = new NBTTagCompound();
-			variable.writeData(nbt1);
-			list.appendTag(nbt1);
+			NBTTagCompound variableNBT = new NBTTagCompound();
+			variable.writeData(variableNBT);
+			variableNBT.setString("id", variable.id);
+			list.appendTag(variableNBT);
 		}
 
 		nbt.setTag("variables", list);

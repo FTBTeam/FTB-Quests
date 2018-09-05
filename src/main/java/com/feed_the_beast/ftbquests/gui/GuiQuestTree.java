@@ -1,7 +1,6 @@
 package com.feed_the_beast.ftbquests.gui;
 
 import com.feed_the_beast.ftblib.FTBLibConfig;
-import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigString;
 import com.feed_the_beast.ftblib.lib.gui.Button;
 import com.feed_the_beast.ftblib.lib.gui.ContextMenuItem;
@@ -13,13 +12,11 @@ import com.feed_the_beast.ftblib.lib.gui.Theme;
 import com.feed_the_beast.ftblib.lib.gui.Widget;
 import com.feed_the_beast.ftblib.lib.gui.WidgetLayout;
 import com.feed_the_beast.ftblib.lib.gui.WidgetType;
-import com.feed_the_beast.ftblib.lib.gui.misc.GuiEditConfig;
 import com.feed_the_beast.ftblib.lib.gui.misc.GuiEditConfigValue;
 import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
-import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.client.ClientQuestProgress;
 import com.feed_the_beast.ftbquests.net.MessageCompleteInstantly;
@@ -209,6 +206,7 @@ public class GuiQuestTree extends GuiBase
 				{
 					NBTTagCompound nbt = new NBTTagCompound();
 					nbt.setString("title", value.getString());
+					nbt.setString("id", QuestObject.customId(value.getString()));
 					new MessageCreateObject(QuestObjectType.CHAPTER, "", nbt).sendToServer();
 				}
 			}).openGui();
@@ -372,6 +370,7 @@ public class GuiQuestTree extends GuiBase
 						NBTTagCompound nbt = new NBTTagCompound();
 						nbt.setString("object", selectedQuest);
 						nbt.setString("type", QuestTaskType.getTypeForNBT(DependencyTask.QuestDep.class));
+						nbt.setString("id", QuestObject.customId("dep_" + selectedQuest));
 						new MessageCreateObject(QuestObjectType.TASK, quest.getID(), nbt).sendToServer();
 					}).setEnabled(object != null && object != quest));
 				}
@@ -521,18 +520,19 @@ public class GuiQuestTree extends GuiBase
 				if (button.isRight())
 				{
 					GuiHelper.playClickSound();
-					NBTTagCompound nbt = new NBTTagCompound();
-					nbt.setByte("x", x);
-					nbt.setByte("y", y);
-					Quest quest = new Quest(selectedChapter, nbt);
-					ConfigGroup group = ConfigGroup.newGroup(FTBQuests.MOD_ID);
-					ConfigGroup g = group.getGroup(QuestObjectType.QUEST.getName());
-					quest.getConfig(g);
-					quest.getExtraConfig(g);
-					new GuiEditConfig(group, (group1, sender) -> {
-						NBTTagCompound nbt1 = new NBTTagCompound();
-						quest.writeData(nbt1);
-						new MessageCreateObject(QuestObjectType.QUEST, selectedChapter.getID(), nbt1).sendToServer();
+					new GuiEditConfigValue("title", new ConfigString(""), (value, set) ->
+					{
+						GuiQuestTree.this.openGui();
+
+						if (set)
+						{
+							NBTTagCompound nbt = new NBTTagCompound();
+							nbt.setByte("x", x);
+							nbt.setByte("y", y);
+							nbt.setString("title", value.getString());
+							nbt.setString("id", QuestObject.customId(value.getString()));
+							new MessageCreateObject(QuestObjectType.QUEST, selectedChapter.getID(), nbt).sendToServer();
+						}
 					}).openGui();
 
 					return true;

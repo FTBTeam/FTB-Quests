@@ -5,6 +5,7 @@ import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigItemStack;
 import com.feed_the_beast.ftblib.lib.config.ConfigList;
 import com.feed_the_beast.ftblib.lib.config.ConfigLong;
+import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.IconAnimation;
 import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
@@ -126,6 +127,11 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 			{
 				icons.add(icon);
 			}
+		}
+
+		if (icons.isEmpty())
+		{
+			return GuiIcons.ACCEPT;
 		}
 
 		return IconAnimation.fromList(icons, false);

@@ -62,10 +62,11 @@ public class MessageCreateObject extends MessageToServer
 
 			if (object != null)
 			{
-				ServerQuestFile.INSTANCE.clearCachedData();
 				object.onCreated();
 				ServerQuestFile.INSTANCE.refreshIDMap();
+				ServerQuestFile.INSTANCE.clearCachedData();
 				object.writeData(nbt);
+				nbt.setString("id", object.id);
 				new MessageCreateObjectResponse(type, parent, nbt).sendToAll();
 				ServerQuestFile.INSTANCE.save();
 			}

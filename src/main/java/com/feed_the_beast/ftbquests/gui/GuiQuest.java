@@ -27,6 +27,7 @@ import com.feed_the_beast.ftbquests.net.edit.MessageAddReward;
 import com.feed_the_beast.ftbquests.net.edit.MessageCreateObject;
 import com.feed_the_beast.ftbquests.net.edit.MessageEditReward;
 import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.quest.QuestReward;
 import com.feed_the_beast.ftbquests.quest.tasks.ItemTask;
@@ -246,6 +247,7 @@ public class GuiQuest extends GuiBase
 						itemTask.count = 1L;
 						itemTask.writeData(nbt);
 						nbt.setString("type", QuestTaskType.getTypeForNBT(ItemTask.class));
+						nbt.setString("id", QuestObject.customId(stack.getDisplayName()));
 						new MessageCreateObject(QuestObjectType.TASK, quest.getID(), nbt).sendToServer();
 					}
 				}), this).openGui();

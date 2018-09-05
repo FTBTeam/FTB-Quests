@@ -76,8 +76,6 @@ public final class QuestChapter extends QuestObject
 	@Override
 	public void writeData(NBTTagCompound nbt)
 	{
-		nbt.setString("id", id);
-
 		if (!title.isEmpty())
 		{
 			nbt.setString("title", title);
@@ -118,6 +116,7 @@ public final class QuestChapter extends QuestObject
 			{
 				NBTTagCompound questNBT = new NBTTagCompound();
 				quest.writeData(questNBT);
+				questNBT.setString("id", quest.id);
 				questsList.appendTag(questNBT);
 			}
 
