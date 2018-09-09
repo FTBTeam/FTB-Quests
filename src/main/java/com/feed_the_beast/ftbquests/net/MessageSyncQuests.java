@@ -125,6 +125,6 @@ public class MessageSyncQuests extends MessageToClient
 			ClientQuestFile.INSTANCE.deleteSelf();
 		}
 
-		ClientQuestFile.INSTANCE = new ClientQuestFile(this, ClientQuestFile.INSTANCE);
+		ClientQuestFile.INSTANCE = new ClientQuestFile(this);
 	}
 }

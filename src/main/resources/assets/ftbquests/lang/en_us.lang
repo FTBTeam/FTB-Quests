@@ -61,7 +61,7 @@ ftbquests.quest=Quest
 ftbquests.quest.description=Description
 ftbquests.quest.x=X
 ftbquests.quest.y=Y
-ftbquests.quest.visibility=Visibility
+ftbquests.quest.visibility=Visibility [WIP!]
 ftbquests.quest.text=Text
 
 ftbquests.gui.edit_file=Edit File
@@ -103,7 +103,7 @@ ftbquests.task.ftbquests.forge_energy.max_input=Max Input
 ftbquests.task.ftbquests.forge_energy.text=%d FE
 
 ftbquests.task.ftbquests.buildcraft_mj=BuildCraft Energy
-ftbquests.task.ftbquests.buildcraft_mj.value=MJ
+ftbquests.task.ftbquests.buildcraft_mj.value=mJ
 ftbquests.task.ftbquests.buildcraft_mj.max_input=Max Input
 ftbquests.task.ftbquests.buildcraft_mj.text=%d MJ
 

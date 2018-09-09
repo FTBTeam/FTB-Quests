@@ -42,7 +42,7 @@ public class ClientQuestFile extends QuestFile
 	public boolean editingMode;
 	public final IntCollection rewards;
 
-	public ClientQuestFile(MessageSyncQuests message, @Nullable ClientQuestFile prev)
+	public ClientQuestFile(MessageSyncQuests message)
 	{
 		readData(message.quests);
 		teamData = new HashMap<>();
@@ -74,7 +74,7 @@ public class ClientQuestFile extends QuestFile
 
 		rewards = new IntOpenHashSet(message.rewards);
 
-		refreshGui(prev);
+		refreshGui();
 	}
 
 	public boolean canEdit()
@@ -82,17 +82,23 @@ public class ClientQuestFile extends QuestFile
 		return editingMode;
 	}
 
-	public void refreshGui(@Nullable ClientQuestFile prev)
+	public void refreshGui()
 	{
+		clearCachedData();
+
+		boolean hasPrev = false;
 		boolean guiOpen = false;
 		int scrollX = 0, scrollY = 0;
 		String selectedChapter = "";
+		String selectedQuest = "";
 
-		if (prev != null)
+		if (questTreeGui != null)
 		{
-			scrollX = prev.questTreeGui.quests.getScrollX();
-			scrollY = prev.questTreeGui.quests.getScrollY();
-			selectedChapter = prev.questTreeGui.selectedChapter == null ? "" : prev.questTreeGui.selectedChapter.getID();
+			hasPrev = true;
+			scrollX = questTreeGui.quests.getScrollX();
+			scrollY = questTreeGui.quests.getScrollY();
+			selectedChapter = questTreeGui.selectedChapter == null ? "" : questTreeGui.selectedChapter.getID();
+			selectedQuest = questTreeGui.selectedQuest == null ? "" : questTreeGui.selectedQuest.getID();
 
 			if (ClientUtils.getCurrentGuiAs(GuiQuestTree.class) != null)
 			{
@@ -103,9 +109,10 @@ public class ClientQuestFile extends QuestFile
 		questTreeGui = new GuiQuestTree(this);
 		questGui = questTreeGui;
 
-		if (prev != null)
+		if (hasPrev)
 		{
 			questTreeGui.selectChapter(getChapter(selectedChapter));
+			questTreeGui.selectQuest(getQuest(selectedQuest));
 
 			if (guiOpen)
 			{
@@ -138,7 +145,7 @@ public class ClientQuestFile extends QuestFile
 			}
 		}
 
-		if (prev != null)
+		if (hasPrev)
 		{
 			questTreeGui.quests.setScrollX(scrollX);
 			questTreeGui.quests.setScrollY(scrollY);

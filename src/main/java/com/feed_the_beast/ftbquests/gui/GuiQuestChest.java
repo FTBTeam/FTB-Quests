@@ -17,7 +17,7 @@ import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.net.MessageClaimReward;
-import com.feed_the_beast.ftbquests.net.MessageOpenTask;
+import com.feed_the_beast.ftbquests.net.MessageSubmitItems;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.QuestReward;
@@ -76,7 +76,7 @@ public class GuiQuestChest extends GuiBase implements IContainerListener
 		public void onClicked(MouseButton button)
 		{
 			GuiHelper.playClickSound();
-			new MessageOpenTask(taskData.task.getID()).sendToServer();
+			new MessageSubmitItems(taskData.task.getID()).sendToServer();
 		}
 
 		@Override

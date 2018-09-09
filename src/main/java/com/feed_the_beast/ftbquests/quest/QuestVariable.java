@@ -64,8 +64,6 @@ public class QuestVariable extends QuestObject
 	@Override
 	public void writeData(NBTTagCompound nbt)
 	{
-		nbt.setString("id", id);
-
 		if (!title.isEmpty())
 		{
 			nbt.setString("title", title);

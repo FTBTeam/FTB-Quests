@@ -7,6 +7,7 @@ import com.feed_the_beast.ftblib.lib.config.ConfigString;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.IconAnimation;
 import com.feed_the_beast.ftblib.lib.item.ItemStackSerializer;
+import com.feed_the_beast.ftblib.lib.util.ListUtils;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
@@ -248,6 +249,14 @@ public final class QuestChapter extends QuestObject
 	public void onCreated()
 	{
 		file.chapters.add(this);
+
+		if (!quests.isEmpty())
+		{
+			for (Quest quest : ListUtils.clearAndCopy(quests))
+			{
+				quest.onCreated();
+			}
+		}
 	}
 
 	@Override

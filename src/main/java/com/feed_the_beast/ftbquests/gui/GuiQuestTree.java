@@ -1,7 +1,10 @@
 package com.feed_the_beast.ftbquests.gui;
 
 import com.feed_the_beast.ftblib.FTBLibConfig;
+import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
+import com.feed_the_beast.ftblib.lib.config.ConfigItemStack;
 import com.feed_the_beast.ftblib.lib.config.ConfigString;
+import com.feed_the_beast.ftblib.lib.config.ConfigValueInstance;
 import com.feed_the_beast.ftblib.lib.gui.Button;
 import com.feed_the_beast.ftblib.lib.gui.ContextMenuItem;
 import com.feed_the_beast.ftblib.lib.gui.GuiBase;
@@ -13,6 +16,7 @@ import com.feed_the_beast.ftblib.lib.gui.Widget;
 import com.feed_the_beast.ftblib.lib.gui.WidgetLayout;
 import com.feed_the_beast.ftblib.lib.gui.WidgetType;
 import com.feed_the_beast.ftblib.lib.gui.misc.GuiEditConfigValue;
+import com.feed_the_beast.ftblib.lib.gui.misc.GuiSelectItemStack;
 import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
@@ -32,6 +36,7 @@ import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.quest.QuestReward;
 import com.feed_the_beast.ftbquests.quest.tasks.DependencyTask;
+import com.feed_the_beast.ftbquests.quest.tasks.ItemTask;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskType;
 import net.minecraft.client.renderer.BufferBuilder;
@@ -243,11 +248,26 @@ public class GuiQuestTree extends GuiBase
 		}
 	}
 
+	public class ButtonWiki extends ButtonTab
+	{
+		public ButtonWiki(Panel panel)
+		{
+			super(panel, "Wiki", GuiIcons.INFO);
+		}
+
+		@Override
+		public void onClicked(MouseButton button)
+		{
+			GuiHelper.playClickSound();
+			handleClick("https://minecraft.curseforge.com/projects/ftb-quests/pages");
+		}
+	}
+
 	public class ButtonEditSettings extends ButtonTab
 	{
 		public ButtonEditSettings(Panel panel)
 		{
-			super(panel, "", GuiIcons.SETTINGS);
+			super(panel, I18n.format("gui.settings"), GuiIcons.SETTINGS);
 		}
 
 		@Override
@@ -270,29 +290,11 @@ public class GuiQuestTree extends GuiBase
 
 			if (FTBLibConfig.debugging.gui_widget_bounds)
 			{
-				contextMenu.add(new ContextMenuItem("Reload GUI", GuiIcons.REFRESH, () -> { //LANG
-					ClientQuestFile.INSTANCE.clearCachedData();
-					questFile.refreshGui(questFile);
-				}));
+				contextMenu.add(new ContextMenuItem("Reload GUI", GuiIcons.REFRESH, questFile::refreshGui));
 			}
 
 			Panel panel = gui.openContextMenu(contextMenu);
 			panel.setPos(gui.width - panel.width - 2, height + 1);
-		}
-	}
-
-	public class ButtonWiki extends ButtonTab
-	{
-		public ButtonWiki(Panel panel)
-		{
-			super(panel, "Wiki", GuiIcons.INFO);
-		}
-
-		@Override
-		public void onClicked(MouseButton button)
-		{
-			GuiHelper.playClickSound();
-			handleClick("https://minecraft.curseforge.com/projects/ftb-quests/pages");
 		}
 	}
 
@@ -352,13 +354,11 @@ public class GuiQuestTree extends GuiBase
 			{
 				List<ContextMenuItem> contextMenu = new ArrayList<>();
 				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.move"), GuiIcons.UP, () -> {
-					selectedQuest = quest.getID();
 					movingQuest = true;
+					selectQuest(quest);
 				}));
 
-				Quest object = questFile.getQuest(selectedQuest);
-
-				int index = object == null || object == quest ? -1 : quest.hasDependency(object);
+				int index = selectedQuest == null || selectedQuest == quest ? -1 : quest.hasDependency(selectedQuest);
 
 				if (index != -1)
 				{
@@ -368,11 +368,11 @@ public class GuiQuestTree extends GuiBase
 				{
 					contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.set_dep"), QuestsTheme.ADD, () -> {
 						NBTTagCompound nbt = new NBTTagCompound();
-						nbt.setString("object", selectedQuest);
+						nbt.setString("object", selectedQuest.getID());
 						nbt.setString("type", QuestTaskType.getTypeForNBT(DependencyTask.QuestDep.class));
 						nbt.setString("id", QuestObject.customId("dep_" + selectedQuest));
 						new MessageCreateObject(QuestObjectType.TASK, quest.getID(), nbt).sendToServer();
-					}).setEnabled(object != null && object != quest));
+					}).setEnabled(selectedQuest != null && selectedQuest != quest));
 				}
 
 				contextMenu.add(ContextMenuItem.SEPARATOR);
@@ -381,13 +381,13 @@ public class GuiQuestTree extends GuiBase
 			}
 			else if (questFile.canEdit() && button.isLeft() && isCtrlKeyDown())
 			{
-				if (selectedQuest.equals(quest.getID()))
+				if (selectedQuest == quest)
 				{
-					selectedQuest = "";
+					selectQuest(null);
 				}
 				else
 				{
-					selectedQuest = quest.getID();
+					selectQuest(quest);
 				}
 			}
 			else if (button.isLeft())
@@ -430,7 +430,7 @@ public class GuiQuestTree extends GuiBase
 		@Override
 		public WidgetType getWidgetType()
 		{
-			if (selectedQuest.equals(quest.getID()))
+			if (selectedQuest == quest)
 			{
 				return WidgetType.MOUSE_OVER;
 			}
@@ -449,7 +449,7 @@ public class GuiQuestTree extends GuiBase
 				QuestsTheme.BUTTON.draw(x - zoom / 6, y - zoom / 6, w + zoom / 3, h + zoom / 3);
 			}
 
-			if (!selectedQuest.isEmpty() && selectedQuest.equals(quest.getID()))
+			if (selectedQuest == quest)
 			{
 				QuestsTheme.BUTTON.draw(x - zoom / 6, y - zoom / 6, w + zoom / 3, h + zoom / 3, Color4I.WHITE.withAlpha((int) (Math.sin(System.currentTimeMillis() * 0.005D) * 127D + 127)));
 			}
@@ -520,6 +520,31 @@ public class GuiQuestTree extends GuiBase
 				if (button.isRight())
 				{
 					GuiHelper.playClickSound();
+
+					if (isCtrlKeyDown())
+					{
+						new GuiSelectItemStack(new ConfigValueInstance("item", ConfigGroup.DEFAULT, new ConfigItemStack(ItemStack.EMPTY)
+						{
+							@Override
+							public void setStack(ItemStack stack)
+							{
+								NBTTagCompound nbt = new NBTTagCompound();
+								nbt.setByte("x", x);
+								nbt.setByte("y", y);
+								Quest quest = new Quest(selectedChapter, nbt);
+								ItemTask itemTask = new ItemTask(quest, new NBTTagCompound());
+								itemTask.items.add(stack);
+								itemTask.count = 1L;
+								itemTask.id = QuestObject.customId(stack.getDisplayName());
+								quest.tasks.add(itemTask);
+								quest.writeData(nbt);
+								nbt.setString("id", itemTask.id);
+								new MessageCreateObject(QuestObjectType.QUEST, selectedChapter.getID(), nbt).sendToServer();
+							}
+						}), this).openGui();
+						return true;
+					}
+
 					new GuiEditConfigValue("title", new ConfigString(""), (value, set) ->
 					{
 						GuiQuestTree.this.openGui();
@@ -537,12 +562,12 @@ public class GuiQuestTree extends GuiBase
 
 					return true;
 				}
-				else if (button.isLeft() && movingQuest && !selectedQuest.isEmpty())
+				else if (button.isLeft() && movingQuest && selectedQuest != null)
 				{
 					GuiHelper.playClickSound();
+					new MessageMoveQuest(selectedQuest.getID(), x, y).sendToServer();
 					movingQuest = false;
-					new MessageMoveQuest(selectedQuest, x, y).sendToServer();
-					selectedQuest = "";
+					selectQuest(null);
 					return true;
 				}
 			}
@@ -553,7 +578,7 @@ public class GuiQuestTree extends GuiBase
 		@Override
 		public void addMouseOverText(List<String> list)
 		{
-			if (movingQuest && !selectedQuest.isEmpty())
+			if (movingQuest && selectedQuest != null)
 			{
 				list.add(I18n.format("ftbquests.gui.move"));
 			}
@@ -562,14 +587,18 @@ public class GuiQuestTree extends GuiBase
 		@Override
 		public void draw(Theme theme, int x, int y, int w, int h)
 		{
-			if (questFile.canEdit() && isAltKeyDown())
+			if (selectedQuest != null && movingQuest || questFile.canEdit() && isAltKeyDown())
 			{
-				Color4I.WHITE.withAlpha(30).draw(x, y, w, h);
+				GlStateManager.alphaFunc(GL11.GL_GREATER, 0F);
+				QuestsTheme.BUTTON.draw(x - zoom / 6, y - zoom / 6, w + zoom / 3, h + zoom / 3, Color4I.WHITE.withAlpha(30));
+				GlStateManager.alphaFunc(GL11.GL_GREATER, 0.1F);
 			}
 
 			if (isMouseOver())
 			{
-				Color4I.WHITE.withAlpha(30).draw(x, y, w, h);
+				GlStateManager.alphaFunc(GL11.GL_GREATER, 0F);
+				QuestsTheme.BUTTON.draw(x - zoom / 6, y - zoom / 6, w + zoom / 3, h + zoom / 3, Color4I.WHITE.withAlpha(100));
+				GlStateManager.alphaFunc(GL11.GL_GREATER, 0.1F);
 			}
 		}
 	}
@@ -577,7 +606,7 @@ public class GuiQuestTree extends GuiBase
 	public final ClientQuestFile questFile;
 	private int scrollWidth, scrollHeight, prevMouseX, prevMouseY, grabbed;
 	public QuestChapter selectedChapter;
-	private String selectedQuest = "";
+	public Quest selectedQuest;
 	public final Panel chapterPanel, quests;
 	public Color4I borderColor, backgroundColor;
 	public final Panel otherButtons;
@@ -818,10 +847,18 @@ public class GuiQuestTree extends GuiBase
 			selectedChapter = chapter;
 			quests.setScrollX(0);
 			quests.setScrollY(0);
-			selectedQuest = "";
+			selectQuest(null);
 			movingQuest = false;
 			quests.refreshWidgets();
 			resetScroll(true);
+		}
+	}
+
+	public void selectQuest(@Nullable Quest quest)
+	{
+		if (selectedQuest != quest)
+		{
+			selectedQuest = quest;
 		}
 	}
 
@@ -882,8 +919,8 @@ public class GuiQuestTree extends GuiBase
 			switch (key)
 			{
 				case Keyboard.KEY_D:
-					selectedQuest = "";
 					movingQuest = false;
+					selectQuest(null);
 					break;
 			}
 		}
