@@ -65,8 +65,7 @@ public class MessageCreateObjectResponse extends MessageToClient
 			{
 				object.onCreated();
 				ClientQuestFile.INSTANCE.refreshIDMap();
-				ClientQuestFile.INSTANCE.clearCachedData();
-				ClientQuestFile.INSTANCE.refreshGui(ClientQuestFile.INSTANCE);
+				ClientQuestFile.INSTANCE.refreshGui();
 			}
 		}
 	}

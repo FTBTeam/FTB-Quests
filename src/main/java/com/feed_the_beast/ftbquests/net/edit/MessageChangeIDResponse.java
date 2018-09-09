@@ -57,9 +57,8 @@ public class MessageChangeIDResponse extends MessageToClient
 			if (object != null)
 			{
 				object.id = newId;
-				object.clearCachedData();
 				ClientQuestFile.INSTANCE.refreshIDMap();
-				ClientQuestFile.INSTANCE.refreshGui(ClientQuestFile.INSTANCE);
+				ClientQuestFile.INSTANCE.refreshGui();
 			}
 		}
 	}

@@ -49,7 +49,7 @@ public class MessageSyncEditingMode extends MessageToClient
 		if (ClientQuestFile.exists() && ClientQuestFile.INSTANCE.editingMode != editingMode)
 		{
 			ClientQuestFile.INSTANCE.editingMode = editingMode;
-			ClientQuestFile.INSTANCE.refreshGui(ClientQuestFile.INSTANCE);
+			ClientQuestFile.INSTANCE.refreshGui();
 		}
 	}
 }

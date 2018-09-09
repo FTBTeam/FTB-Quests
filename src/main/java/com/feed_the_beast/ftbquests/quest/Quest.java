@@ -8,6 +8,7 @@ import com.feed_the_beast.ftblib.lib.config.ConfigString;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.IconAnimation;
 import com.feed_the_beast.ftblib.lib.item.ItemStackSerializer;
+import com.feed_the_beast.ftblib.lib.util.ListUtils;
 import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskType;
@@ -195,8 +196,6 @@ public final class Quest extends QuestObject
 	@Override
 	public void writeData(NBTTagCompound nbt)
 	{
-		nbt.setString("id", id);
-
 		if (!title.isEmpty())
 		{
 			nbt.setString("title", title);
@@ -458,6 +457,14 @@ public final class Quest extends QuestObject
 	public void onCreated()
 	{
 		chapter.quests.add(this);
+
+		if (!tasks.isEmpty())
+		{
+			for (QuestTask task : ListUtils.clearAndCopy(tasks))
+			{
+				task.onCreated();
+			}
+		}
 	}
 
 	@Override

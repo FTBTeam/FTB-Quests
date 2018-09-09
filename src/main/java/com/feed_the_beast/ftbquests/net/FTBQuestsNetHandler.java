@@ -12,8 +12,8 @@ public class FTBQuestsNetHandler
 	{
 		GENERAL.register(new MessageSyncQuests());
 		GENERAL.register(new MessageUpdateTaskProgress());
-		GENERAL.register(new MessageOpenTask());
-		GENERAL.register(new MessageOpenTaskResponse());
+		GENERAL.register(new MessageSubmitItems());
+		GENERAL.register(new MessageSubmitAllItems());
 		GENERAL.register(new MessageClaimReward());
 		GENERAL.register(new MessageClaimRewardResponse());
 		GENERAL.register(new MessageUpdateVariable());

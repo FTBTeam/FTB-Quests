@@ -13,7 +13,6 @@ import com.feed_the_beast.ftblib.lib.util.BlockUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.block.BlockScreen;
 import com.feed_the_beast.ftbquests.block.FTBQuestsBlocks;
-import com.feed_the_beast.ftbquests.net.MessageOpenTask;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
@@ -536,7 +535,7 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 					}
 				}
 
-				MessageOpenTask.openGUI(cTaskData, player, this);
+				//FIXME: MessageSubmitItems.openGUI(cTaskData, player, this);
 			}
 		}
 	}

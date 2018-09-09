@@ -194,6 +194,12 @@ public class GuiQuest extends GuiBase
 		}
 
 		@Override
+		public void drawIcon(Theme theme, int x, int y, int w, int h)
+		{
+			task.drawGUI(questTreeGui.questFile.self.getQuestTaskData(task), x, y, w, h);
+		}
+
+		@Override
 		public void draw(Theme theme, int x, int y, int w, int h)
 		{
 			super.draw(theme, x, y, w, h);
@@ -276,7 +282,7 @@ public class GuiQuest extends GuiBase
 							nbt.setString("type", type.getTypeForNBT());
 							new MessageCreateObject(QuestObjectType.TASK, quest.getID(), nbt).sendToServer();
 							GuiQuest.this.openGui();
-							questTreeGui.questFile.refreshGui(questTreeGui.questFile);
+							questTreeGui.questFile.refreshGui();
 						}).openGui();
 					}));
 				}

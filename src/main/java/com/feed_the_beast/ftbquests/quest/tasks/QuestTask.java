@@ -3,7 +3,7 @@ package com.feed_the_beast.ftbquests.quest.tasks;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
-import com.feed_the_beast.ftbquests.net.MessageOpenTask;
+import com.feed_the_beast.ftbquests.net.MessageSubmitItems;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
@@ -236,7 +236,7 @@ public abstract class QuestTask extends QuestObject
 	{
 		if (canInsertItem())
 		{
-			new MessageOpenTask(getID()).sendToServer();
+			new MessageSubmitItems(getID()).sendToServer();
 		}
 	}
 }

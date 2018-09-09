@@ -55,8 +55,7 @@ public class MessageDeleteObjectResponse extends MessageToClient
 			{
 				object.deleteChildren();
 				object.deleteSelf();
-				ClientQuestFile.INSTANCE.clearCachedData();
-				ClientQuestFile.INSTANCE.refreshGui(ClientQuestFile.INSTANCE);
+				ClientQuestFile.INSTANCE.refreshGui();
 			}
 		}
 	}
