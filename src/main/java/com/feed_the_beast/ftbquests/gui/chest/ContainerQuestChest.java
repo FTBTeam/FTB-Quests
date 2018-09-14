@@ -1,4 +1,4 @@
-package com.feed_the_beast.ftbquests.gui;
+package com.feed_the_beast.ftbquests.gui.chest;
 
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.QuestFile;

@@ -6,6 +6,7 @@ import com.feed_the_beast.ftblib.lib.config.ConfigItemStack;
 import com.feed_the_beast.ftblib.lib.config.ConfigList;
 import com.feed_the_beast.ftblib.lib.config.ConfigString;
 import com.feed_the_beast.ftblib.lib.config.ConfigTimer;
+import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.IconAnimation;
 import com.feed_the_beast.ftblib.lib.item.ItemStackSerializer;
@@ -48,6 +49,7 @@ public abstract class QuestFile extends QuestObject
 	public String soundTask, soundQuest, soundChapter, soundFile;
 	public final ResourceLocation[] lootTables;
 	public int lootSize;
+	public Color4I colCompleted, colStarted, colNotStarted, colCantStart, colHasRewards;
 
 	public QuestFile()
 	{
@@ -75,6 +77,12 @@ public abstract class QuestFile extends QuestObject
 		}
 
 		lootSize = 9;
+
+		colCompleted = Color4I.rgb(0x56FF56);
+		colStarted = Color4I.rgb(0x00FFFF);
+		colNotStarted = Color4I.rgb(0xFFFFFF);
+		colCantStart = Color4I.rgb(0x999999);
+		colHasRewards = Color4I.rgb(0x88C9DC);
 	}
 
 	@Override
@@ -278,8 +286,11 @@ public abstract class QuestFile extends QuestObject
 
 		List<QuestTask> tasks = new ArrayList<>();
 
-		for (QuestChapter chapter : chapters)
+		for (int i = 0; i < chapters.size(); i++)
 		{
+			QuestChapter chapter = chapters.get(i);
+			chapter.chapterIndex = i;
+
 			for (Quest quest : chapter.quests)
 			{
 				for (QuestTask task : quest.tasks)

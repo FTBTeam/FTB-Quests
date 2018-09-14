@@ -244,10 +244,22 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 	public void addMouseOverText(List<String> list)
 	{
 		super.addMouseOverText(list);
+		list.add("");
+		list.add(TextFormatting.GRAY + "Valid items:");
+
+		boolean first = true;
 
 		for (ItemStack stack : items)
 		{
-			list.add("---");
+			if (first)
+			{
+				first = false;
+			}
+			else
+			{
+				list.add("---");
+			}
+
 			List<String> l = stack.getTooltip(ClientUtils.MC.player, ITooltipFlag.TooltipFlags.NORMAL);
 			list.add(stack.getRarity().rarityColor + l.get(0));
 

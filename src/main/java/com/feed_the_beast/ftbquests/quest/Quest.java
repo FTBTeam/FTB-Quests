@@ -24,7 +24,6 @@ import net.minecraftforge.common.util.Constants;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -38,13 +37,13 @@ public final class Quest extends QuestObject
 	public String description;
 	public EnumQuestVisibilityType visibilityType;
 	public byte x, y;
+	public EnumQuestShape shape;
 	public final List<String> text;
 	public final List<QuestTask> tasks;
 	public final List<QuestReward> rewards;
 	public int timesCompleted;
 
 	private String cachedID = "";
-	private Collection<QuestObject> cachedDependencies;
 
 	public Quest(QuestChapter c, NBTTagCompound nbt)
 	{
@@ -57,6 +56,7 @@ public final class Quest extends QuestObject
 		visibilityType = EnumQuestVisibilityType.NAME_MAP.get(nbt.getString("visibility"));
 		x = (byte) MathHelper.clamp(nbt.getByte("x"), -POS_LIMIT, POS_LIMIT);
 		y = (byte) MathHelper.clamp(nbt.getByte("y"), -POS_LIMIT, POS_LIMIT);
+		shape = EnumQuestShape.NAME_MAP.get(nbt.getString("shape"));
 		text = new ArrayList<>();
 
 		NBTTagList list = nbt.getTagList("text", Constants.NBT.TAG_STRING);
@@ -219,6 +219,11 @@ public final class Quest extends QuestObject
 		nbt.setByte("x", x);
 		nbt.setByte("y", y);
 
+		if (shape != EnumQuestShape.CIRCLE)
+		{
+			nbt.setString("shape", shape.getName());
+		}
+
 		if (!description.isEmpty())
 		{
 			nbt.setString("description", description);
@@ -343,7 +348,7 @@ public final class Quest extends QuestObject
 
 		for (QuestTask task : tasks)
 		{
-			if (!task.invalid)
+			if (!task.invalid && task.getDependency() == null)
 			{
 				progress += task.getRelativeProgress(data);
 				s++;
@@ -401,6 +406,16 @@ public final class Quest extends QuestObject
 
 	public boolean canStartTasks(ITeamData data)
 	{
+		for (QuestTask task : tasks)
+		{
+			QuestObject object = task.getDependency();
+
+			if (object != null && !object.isComplete(data))
+			{
+				return false;
+			}
+		}
+
 		return true;
 	}
 
@@ -499,6 +514,28 @@ public final class Quest extends QuestObject
 				y = (byte) v;
 			}
 		}, new ConfigInt(0));
+
+		group.add("shape", new ConfigEnum<EnumQuestShape>(EnumQuestShape.NAME_MAP)
+		{
+			@Override
+			public EnumQuestShape getValue()
+			{
+				return shape;
+			}
+
+			@Override
+			public void setValue(EnumQuestShape v)
+			{
+				shape = v;
+			}
+		}, new ConfigEnum<EnumQuestShape>(EnumQuestShape.NAME_MAP)
+		{
+			@Override
+			public EnumQuestShape getValue()
+			{
+				return EnumQuestShape.CIRCLE;
+			}
+		});
 
 		group.add("visibility", new ConfigEnum<EnumQuestVisibilityType>(EnumQuestVisibilityType.NAME_MAP)
 		{
@@ -630,7 +667,6 @@ public final class Quest extends QuestObject
 	{
 		super.clearCachedData();
 		cachedID = "";
-		cachedDependencies = null;
 
 		for (QuestTask task : tasks)
 		{

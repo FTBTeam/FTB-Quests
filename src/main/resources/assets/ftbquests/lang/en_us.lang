@@ -61,6 +61,12 @@ ftbquests.quest=Quest
 ftbquests.quest.description=Description
 ftbquests.quest.x=X
 ftbquests.quest.y=Y
+ftbquests.quest.shape=Shape
+ftbquests.quest.shape.circle=Circle
+ftbquests.quest.shape.square=Square
+ftbquests.quest.shape.pentagon=Pentagon
+ftbquests.quest.shape.hexagon=Hexagon
+ftbquests.quest.shape.octagon=Octagon
 ftbquests.quest.visibility=Visibility [WIP!]
 ftbquests.quest.text=Text
 
@@ -77,6 +83,10 @@ ftbquests.gui.set_dep=Set Selected as Dependency
 ftbquests.gui.rem_dep=Remove Dependency
 ftbquests.gui.copy_id=Copy ID
 ftbquests.gui.change_id=Change ID
+ftbquests.gui.no_tasks=There are no tasks.
+ftbquests.gui.no_rewards=There are no rewards.
+ftbquests.gui.requires=Requires
+ftbquests.gui.required_by=Required by
 
 ftbquests.task=Task
 ftbquests.tasks=Tasks

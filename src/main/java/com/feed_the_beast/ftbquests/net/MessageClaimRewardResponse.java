@@ -6,8 +6,8 @@ import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToClient;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
-import com.feed_the_beast.ftbquests.gui.GuiQuest;
-import com.feed_the_beast.ftbquests.gui.GuiQuestChest;
+import com.feed_the_beast.ftbquests.gui.chest.GuiQuestChest;
+import com.feed_the_beast.ftbquests.gui.tree.GuiQuestTree;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -53,11 +53,11 @@ public class MessageClaimRewardResponse extends MessageToClient
 		{
 			ClientQuestFile.INSTANCE.rewards.add(uid);
 
-			GuiQuest guiQuest = ClientUtils.getCurrentGuiAs(GuiQuest.class);
+			GuiQuestTree treeGui = ClientUtils.getCurrentGuiAs(GuiQuestTree.class);
 
-			if (guiQuest != null)
+			if (treeGui != null)
 			{
-				guiQuest.rewards.refreshWidgets();
+				treeGui.questRight.refreshWidgets();
 			}
 			else
 			{

@@ -23,13 +23,6 @@ import java.util.regex.Pattern;
 public abstract class QuestObject
 {
 	public static final Pattern ID_PATTERN = Pattern.compile("^[a-z0-9_]{1,32}$");
-	private static final Pattern CUSTOM_ID_1 = Pattern.compile("[^a-z0-9_]");
-	private static final Pattern CUSTOM_ID_2 = Pattern.compile("_+");
-
-	public static String customId(String string)
-	{
-		return CUSTOM_ID_2.matcher(CUSTOM_ID_1.matcher(string.toLowerCase()).replaceAll("_")).replaceAll("_");
-	}
 
 	public String id = "";
 	public boolean invalid = false;

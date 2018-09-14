@@ -6,7 +6,7 @@ import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToClient;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
-import com.feed_the_beast.ftbquests.gui.GuiQuest;
+import com.feed_the_beast.ftbquests.gui.tree.GuiQuestTree;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestReward;
 import net.minecraft.item.ItemStack;
@@ -77,11 +77,11 @@ public class MessageAddRewardResponse extends MessageToClient
 				q.rewards.add(r);
 				ClientQuestFile.INSTANCE.allRewards.put(r.uid, r);
 
-				GuiQuest gui = ClientUtils.getCurrentGuiAs(GuiQuest.class);
+				GuiQuestTree gui = ClientUtils.getCurrentGuiAs(GuiQuestTree.class);
 
 				if (gui != null)
 				{
-					gui.rewards.refreshWidgets();
+					gui.questRight.refreshWidgets();
 				}
 			}
 		}

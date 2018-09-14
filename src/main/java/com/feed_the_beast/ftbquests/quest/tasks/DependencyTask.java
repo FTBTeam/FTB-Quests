@@ -5,8 +5,6 @@ import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
-import com.feed_the_beast.ftbquests.gui.GuiQuest;
-import com.feed_the_beast.ftbquests.gui.GuiVariables;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
@@ -59,16 +57,6 @@ public abstract class DependencyTask extends QuestTask
 				list.add(TextFormatting.GRAY + I18n.format("ftbquests.chapter") + ": " + QuestObjectType.CHAPTER.getColor() + ((QuestTask) getDependency()).quest.chapter.getDisplayName().getUnformattedText());
 			}
 		}
-
-		@Override
-		@SideOnly(Side.CLIENT)
-		public void onButtonClicked()
-		{
-			if (getDependency() instanceof QuestTask)
-			{
-				new GuiQuest(ClientQuestFile.INSTANCE.questTreeGui, ((QuestTask) getDependency()).quest).openGui();
-			}
-		}
 	}
 
 	public static class QuestDep extends DependencyTask
@@ -94,16 +82,6 @@ public abstract class DependencyTask extends QuestTask
 			{
 				list.add(TextFormatting.GRAY + I18n.format("ftbquests.quest") + ": " + QuestObjectType.QUEST.getColor() + getDependency().getDisplayName().getUnformattedText());
 				list.add(TextFormatting.GRAY + I18n.format("ftbquests.chapter") + ": " + QuestObjectType.CHAPTER.getColor() + ((Quest) getDependency()).chapter.getDisplayName().getUnformattedText());
-			}
-		}
-
-		@Override
-		@SideOnly(Side.CLIENT)
-		public void onButtonClicked()
-		{
-			if (getDependency() instanceof Quest)
-			{
-				new GuiQuest(ClientQuestFile.INSTANCE.questTreeGui, (Quest) getDependency()).openGui();
 			}
 		}
 	}
@@ -132,17 +110,6 @@ public abstract class DependencyTask extends QuestTask
 				list.add(TextFormatting.GRAY + I18n.format("ftbquests.chapter") + ": " + QuestObjectType.CHAPTER.getColor() + getDependency().getDisplayName().getUnformattedText());
 			}
 		}
-
-		@Override
-		@SideOnly(Side.CLIENT)
-		public void onButtonClicked()
-		{
-			if (getDependency() instanceof QuestChapter)
-			{
-				ClientQuestFile.INSTANCE.questTreeGui.openGui();
-				ClientQuestFile.INSTANCE.questTreeGui.selectChapter((QuestChapter) getDependency());
-			}
-		}
 	}
 
 	public static class VariableDep extends DependencyTask
@@ -168,13 +135,6 @@ public abstract class DependencyTask extends QuestTask
 			{
 				list.add(TextFormatting.GRAY + I18n.format("ftbquests.variable") + ": " + QuestObjectType.VARIABLE.getColor() + getDependency().getDisplayName().getUnformattedText());
 			}
-		}
-
-		@Override
-		@SideOnly(Side.CLIENT)
-		public void onButtonClicked()
-		{
-			new GuiVariables().openGui();
 		}
 	}
 
@@ -276,6 +236,13 @@ public abstract class DependencyTask extends QuestTask
 		}
 
 		list.add(TextFormatting.DARK_GRAY + objectId);
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public void onButtonClicked()
+	{
+		ClientQuestFile.INSTANCE.questTreeGui.open(getDependency());
 	}
 
 	@Override
