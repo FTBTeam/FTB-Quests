@@ -227,7 +227,7 @@ public abstract class QuestTask extends QuestObject
 	{
 		if (canInsertItem())
 		{
-			list.add(TextFormatting.DARK_GRAY + I18n.format("ftbquests.task.click_to_submit"));
+			list.add(TextFormatting.GRAY + I18n.format("ftbquests.task.click_to_submit"));
 		}
 	}
 

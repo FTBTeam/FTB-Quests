@@ -14,6 +14,7 @@ import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.net.MessageGetEmergencyItems;
+import com.feed_the_beast.ftbquests.quest.EnumQuestShape;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
@@ -59,7 +60,7 @@ public class GuiEmergencyItems extends GuiBase
 		public void draw(Theme theme, int x, int y, int w, int h)
 		{
 			GlStateManager.alphaFunc(GL11.GL_GREATER, 0F);
-			QuestsTheme.BUTTON.draw(x - 3, y - 3, w + 6, h + 6);
+			EnumQuestShape.CIRCLE.draw(x - 3, y - 3, w + 6, h + 6);
 			GlStateManager.alphaFunc(GL11.GL_GREATER, 0.1F);
 			GuiHelper.drawItem(stack, x, y, true, Icon.EMPTY);
 		}

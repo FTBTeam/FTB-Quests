@@ -3,6 +3,8 @@ package com.feed_the_beast.ftbquests.gui;
 import com.feed_the_beast.ftblib.lib.gui.misc.BlockGuiHandler;
 import com.feed_the_beast.ftblib.lib.gui.misc.BlockGuiSupplier;
 import com.feed_the_beast.ftbquests.FTBQuests;
+import com.feed_the_beast.ftbquests.gui.chest.ContainerQuestChest;
+import com.feed_the_beast.ftbquests.gui.chest.GuiQuestChest;
 import com.feed_the_beast.ftbquests.tile.TileQuestChest;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;

@@ -5,7 +5,6 @@ import com.feed_the_beast.ftblib.lib.gui.Theme;
 import com.feed_the_beast.ftblib.lib.gui.WidgetType;
 import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
-import com.feed_the_beast.ftbquests.FTBQuests;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
@@ -18,7 +17,6 @@ import org.lwjgl.opengl.GL11;
 public class QuestsTheme extends Theme
 {
 	public static final QuestsTheme INSTANCE = new QuestsTheme();
-	public static final Icon BUTTON = Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/button.png");
 	public static final Color4I GREEN_IN = Color4I.rgb(0x9BC600);
 	public static final Color4I GREEN_OUT = Color4I.rgb(0x408300);
 
@@ -121,7 +119,30 @@ public class QuestsTheme extends Theme
 	@Override
 	public void drawGui(int x, int y, int w, int h, WidgetType type)
 	{
-		Color4I.DARK_GRAY.withAlpha(220).draw(x, y, w, h);
+		int r, g, b, a;
+
+		if (type == WidgetType.DISABLED)
+		{
+			r = g = b = 180;
+			a = 255;
+		}
+		else
+		{
+			r = g = b = 255;
+			a = 220;
+		}
+
+		double m = 64D;
+
+		BACKGROUND_SQUARES.bindTexture();
+		Tessellator tessellator = Tessellator.getInstance();
+		BufferBuilder buffer = tessellator.getBuffer();
+		buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
+		buffer.pos(x, y + h, 0).tex(x / m, (y + h) / m).color(r, g, b, a).endVertex();
+		buffer.pos(x + w, y + h, 0).tex((x + w) / m, (y + h) / m).color(r, g, b, a).endVertex();
+		buffer.pos(x + w, y, 0).tex((x + w) / m, y / m).color(r, g, b, a).endVertex();
+		buffer.pos(x, y, 0).tex(x / m, y / m).color(r, g, b, a).endVertex();
+		tessellator.draw();
 	}
 
 	@Override

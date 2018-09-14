@@ -2,9 +2,8 @@ package com.feed_the_beast.ftbquests.client;
 
 import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftblib.lib.gui.GuiBase;
-import com.feed_the_beast.ftbquests.gui.GuiQuest;
-import com.feed_the_beast.ftbquests.gui.GuiQuestTree;
 import com.feed_the_beast.ftbquests.gui.GuiVariables;
+import com.feed_the_beast.ftbquests.gui.tree.GuiQuestTree;
 import com.feed_the_beast.ftbquests.net.MessageSyncQuests;
 import com.feed_the_beast.ftbquests.net.edit.MessageDeleteObject;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
@@ -114,35 +113,20 @@ public class ClientQuestFile extends QuestFile
 			questTreeGui.selectChapter(getChapter(selectedChapter));
 			questTreeGui.selectQuest(getQuest(selectedQuest));
 
+
 			if (guiOpen)
 			{
 				questTreeGui.openGui();
 			}
 		}
 
-		GuiQuest guiQuest = ClientUtils.getCurrentGuiAs(GuiQuest.class);
+		questTreeGui.refreshWidgets();
 
-		if (guiQuest != null)
+		GuiVariables guiVariables = ClientUtils.getCurrentGuiAs(GuiVariables.class);
+
+		if (guiVariables != null)
 		{
-			guiQuest.refreshWidgets();
-		}
-		else
-		{
-			GuiQuestTree guiQuestTree = ClientUtils.getCurrentGuiAs(GuiQuestTree.class);
-
-			if (guiQuestTree != null)
-			{
-				guiQuestTree.refreshWidgets();
-			}
-			else
-			{
-				GuiVariables guiVariables = ClientUtils.getCurrentGuiAs(GuiVariables.class);
-
-				if (guiVariables != null)
-				{
-					guiVariables.refreshWidgets();
-				}
-			}
+			guiVariables.refreshWidgets();
 		}
 
 		if (hasPrev)
