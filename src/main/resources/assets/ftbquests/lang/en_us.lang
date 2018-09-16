@@ -83,8 +83,8 @@ ftbquests.gui.set_dep=Set Selected as Dependency
 ftbquests.gui.rem_dep=Remove Dependency
 ftbquests.gui.copy_id=Copy ID
 ftbquests.gui.change_id=Change ID
-ftbquests.gui.no_tasks=There are no tasks.
-ftbquests.gui.no_rewards=There are no rewards.
+ftbquests.gui.no_tasks=No tasks
+ftbquests.gui.no_rewards=No rewards
 ftbquests.gui.requires=Requires
 ftbquests.gui.required_by=Required by
 

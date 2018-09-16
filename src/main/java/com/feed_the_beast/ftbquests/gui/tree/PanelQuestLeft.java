@@ -39,9 +39,7 @@ public class PanelQuestLeft extends Panel
 	{
 		if (treeGui.selectedQuest != null && !treeGui.movingQuest)
 		{
-			setPos(2, treeGui.chapterPanel.height + 1);
-			add(new TextField(this).setScale(1.5F).addFlags(Theme.CENTERED).setText(treeGui.selectedQuest.getDisplayName().getFormattedText()));
-			add(new WidgetVerticalSpace(this, 2));
+			setPos(2, treeGui.chapterPanel.height + 16);
 			add(new TextField(this).setText(TextFormatting.BLUE + I18n.format("ftbquests.tasks") + ":"));
 
 			for (QuestTask task : treeGui.selectedQuest.tasks)
@@ -96,14 +94,14 @@ public class PanelQuestLeft extends Panel
 				add(new TextField(this).setSpacing(10).setText(StringJoiner.with('\n').join(dependants)));
 			}
 
-			setWidth(100);
+			setWidth(20);
 
 			for (Widget widget : widgets)
 			{
 				setWidth(Math.max(width, widget.width + 6));
 			}
 
-			setHeight(Math.min(treeGui.height - treeGui.chapterPanel.height - 3, align(new WidgetLayout.Vertical(3, 3, 3))));
+			setHeight(Math.min(treeGui.height - treeGui.chapterPanel.height - 18, align(new WidgetLayout.Vertical(3, 3, 3))));
 
 			for (Widget widget : widgets)
 			{
