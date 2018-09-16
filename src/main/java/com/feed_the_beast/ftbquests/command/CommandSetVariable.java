@@ -102,11 +102,21 @@ public class CommandSetVariable extends CommandBase
 			throw CommandUtils.error(SidedUtils.lang(sender, FTBQuests.MOD_ID, "commands.ftbquests.set_variable.invalid_id", args[1]));
 		}
 
-		long value = parseLong(args[2]);
+		boolean add = args[2].startsWith("~");
+		long value = parseLong(add ? args[2].substring(1) : args[2]);
 
 		for (ForgeTeam team : teams)
 		{
-			FTBQuestsTeamData.get(team).setVariable(var, value);
+			FTBQuestsTeamData teamData = FTBQuestsTeamData.get(team);
+
+			if (add)
+			{
+				teamData.setVariable(var, teamData.getVariable(var) + value);
+			}
+			else
+			{
+				teamData.setVariable(var, value);
+			}
 		}
 
 		sender.sendMessage(new TextComponentTranslation("commands.ftbquests.set_variable.set"));

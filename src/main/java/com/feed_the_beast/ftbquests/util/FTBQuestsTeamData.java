@@ -372,6 +372,7 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 		}
 		else
 		{
+			value = Math.min(value, variable.maxValue);
 			variables.put(variable, value);
 		}
 
