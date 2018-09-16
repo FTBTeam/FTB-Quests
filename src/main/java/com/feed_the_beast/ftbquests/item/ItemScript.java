@@ -1,5 +1,6 @@
 package com.feed_the_beast.ftbquests.item;
 
+import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.item.Item;
@@ -35,7 +36,8 @@ public class ItemScript extends Item
 						.replace("@p", player.getName())
 						.replace("@x", Integer.toString(pos.getX()))
 						.replace("@y", Integer.toString(pos.getY()))
-						.replace("@z", Integer.toString(pos.getZ())));
+						.replace("@z", Integer.toString(pos.getZ()))
+						.replace("@team", FTBLibAPI.getTeam(player.getUniqueID())));
 			}
 
 			world.playSound(null, player.posX, player.posY, player.posZ, SoundEvents.ENTITY_ITEM_BREAK, SoundCategory.PLAYERS, 0.8F, 0.8F + world.rand.nextFloat() * 0.4F);
