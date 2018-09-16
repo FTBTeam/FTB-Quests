@@ -25,7 +25,10 @@ import net.minecraftforge.common.util.Constants;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author LatvianModder
@@ -40,11 +43,13 @@ public final class Quest extends QuestObject
 	public byte x, y;
 	public EnumQuestShape shape;
 	public final List<String> text;
+	public final Set<String> dependencies;
 	public final List<QuestTask> tasks;
 	public final List<QuestReward> rewards;
 	public int timesCompleted;
 
 	private String cachedID = "";
+	private Set<QuestObject> cachedDependencies = null;
 
 	public Quest(QuestChapter c, NBTTagCompound nbt)
 	{
@@ -67,18 +72,36 @@ public final class Quest extends QuestObject
 			text.add(list.getStringTagAt(k));
 		}
 
+		dependencies = new HashSet<>();
 		tasks = new ArrayList<>();
 		rewards = new ArrayList<>();
+
+		list = nbt.getTagList("dependencies", Constants.NBT.TAG_STRING);
+
+		for (int i = 0; i < list.tagCount(); i++)
+		{
+			dependencies.add(list.getStringTagAt(i));
+		}
 
 		list = nbt.getTagList("tasks", Constants.NBT.TAG_COMPOUND);
 
 		for (int i = 0; i < list.tagCount(); i++)
 		{
-			QuestTask task = QuestTaskType.createTask(this, list.getCompoundTagAt(i));
+			NBTTagCompound nbt1 = list.getCompoundTagAt(i);
+			String type = nbt1.getString("type");
 
-			if (task != null)
+			if (type.equals("quest") || type.equals("variable") || type.equals("chapter") || type.equals("task"))
 			{
-				tasks.add(task);
+				dependencies.add(nbt1.getString("object"));
+			}
+			else
+			{
+				QuestTask task = QuestTaskType.createTask(this, nbt1);
+
+				if (task != null)
+				{
+					tasks.add(task);
+				}
 			}
 		}
 
@@ -242,6 +265,21 @@ public final class Quest extends QuestObject
 			nbt.setTag("text", array);
 		}
 
+		if (!getDependencies().isEmpty())
+		{
+			NBTTagList array = new NBTTagList();
+
+			for (QuestObject object : getDependencies())
+			{
+				if (!object.invalid)
+				{
+					array.appendTag(new NBTTagString(object.getID()));
+				}
+			}
+
+			nbt.setTag("dependencies", array);
+		}
+
 		if (!tasks.isEmpty())
 		{
 			NBTTagList array = new NBTTagList();
@@ -349,7 +387,7 @@ public final class Quest extends QuestObject
 
 		for (QuestTask task : tasks)
 		{
-			if (!task.invalid && task.getDependency() == null)
+			if (!task.invalid)
 			{
 				progress += task.getRelativeProgress(data);
 				s++;
@@ -406,19 +444,9 @@ public final class Quest extends QuestObject
 		}
 	}
 
-	public boolean canStartTasks(ITeamData data)
+	public boolean canStartTasks(@Nullable ITeamData data)
 	{
-		for (QuestTask task : tasks)
-		{
-			QuestObject object = task.getDependency();
-
-			if (object != null && !object.isComplete(data))
-			{
-				return false;
-			}
-		}
-
-		return true;
+		return getVisibility(data).isVisible();
 	}
 
 	@Override
@@ -428,10 +456,7 @@ public final class Quest extends QuestObject
 
 		for (QuestTask task : tasks)
 		{
-			if (task.getDependency() == null)
-			{
-				list.add(task.getIcon());
-			}
+			list.add(task.getIcon());
 		}
 
 		return IconAnimation.fromList(list, false);
@@ -442,10 +467,7 @@ public final class Quest extends QuestObject
 	{
 		for (QuestTask task : tasks)
 		{
-			if (task.getDependency() == null)
-			{
-				return task.getDisplayName();
-			}
+			return task.getDisplayName();
 		}
 
 		return new TextComponentTranslation("ftbquests.unnamed");
@@ -599,17 +621,23 @@ public final class Quest extends QuestObject
 	{
 		EnumVisibility v = EnumVisibility.VISIBLE;
 
-		/*
 		for (QuestObject object : getDependencies())
 		{
-			v = v.weakest(object.getVisibility(data));
-
-			if (v.isInvisible())
+			if (object instanceof Quest)
 			{
-				return EnumVisibility.INVISIBLE;
+				v = v.weakest(((Quest) object).getVisibility(data));
+
+				if (v.isInvisible())
+				{
+					return EnumVisibility.INVISIBLE;
+				}
 			}
 		}
-		*/
+
+		if (data == null && visibilityType != EnumQuestVisibilityType.NORMAL)
+		{
+			return visibilityType == EnumQuestVisibilityType.SECRET_ONE || visibilityType == EnumQuestVisibilityType.SECRET_ALL ? EnumVisibility.SECRET : EnumVisibility.INVISIBLE;
+		}
 
 		/*
 		switch (getVisibilityType())
@@ -669,6 +697,7 @@ public final class Quest extends QuestObject
 	{
 		super.clearCachedData();
 		cachedID = "";
+		cachedDependencies = null;
 
 		for (QuestTask task : tasks)
 		{
@@ -676,16 +705,38 @@ public final class Quest extends QuestObject
 		}
 	}
 
-	public int hasDependency(QuestObject object)
+	public boolean hasDependency(QuestObject object)
 	{
-		for (int i = 0; i < tasks.size(); i++)
+		return getDependencies().contains(object);
+	}
+
+	public Set<QuestObject> getDependencies()
+	{
+		if (cachedDependencies == null)
 		{
-			if (tasks.get(i).getDependency() == object)
+			cachedDependencies = new HashSet<>();
+
+			for (String id : dependencies)
 			{
-				return i;
+				QuestObject object = chapter.file.get(id);
+
+				if (object != null)
+				{
+					cachedDependencies.add(object);
+				}
+			}
+
+			if (cachedDependencies.isEmpty())
+			{
+				cachedDependencies = Collections.emptySet();
 			}
 		}
 
-		return -1;
+		return cachedDependencies;
+	}
+
+	public void verifyDependencies()
+	{
+		//FTBQuests.LOGGER.error("Removed looping dependency '" + task.getID() + "' with erroring ID '" + task.objectId + "'");
 	}
 }

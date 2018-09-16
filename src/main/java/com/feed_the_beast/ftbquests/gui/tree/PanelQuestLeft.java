@@ -46,15 +46,7 @@ public class PanelQuestLeft extends Panel
 
 			for (QuestTask task : treeGui.selectedQuest.tasks)
 			{
-				if (treeGui.questFile.canEdit() || task.getDependency() == null)
-				{
-					if (task.getDependency() instanceof Quest && ((Quest) task.getDependency()).chapter == treeGui.selectedQuest.chapter)
-					{
-						continue;
-					}
-
-					add(new ButtonTask(this, task));
-				}
+				add(new ButtonTask(this, task));
 			}
 
 			if (treeGui.questFile.canEdit())
@@ -64,20 +56,15 @@ public class PanelQuestLeft extends Panel
 
 			List<String> dependencies = new ArrayList<>();
 
-			for (QuestTask task : treeGui.selectedQuest.tasks)
+			for (QuestObject object : treeGui.selectedQuest.getDependencies())
 			{
-				QuestObject dep = task.getDependency();
-
-				if (dep != null)
+				if (dependencies.isEmpty())
 				{
-					if (dependencies.isEmpty())
-					{
-						add(new WidgetVerticalSpace(this, 2));
-						add(new TextField(this).setText(TextFormatting.AQUA + I18n.format("ftbquests.gui.requires") + ":"));
-					}
-
-					dependencies.add(TextFormatting.GRAY + dep.getDisplayName().getUnformattedText());
+					add(new WidgetVerticalSpace(this, 2));
+					add(new TextField(this).setText(TextFormatting.AQUA + I18n.format("ftbquests.gui.requires") + ":"));
 				}
+
+				dependencies.add(TextFormatting.GRAY + object.getDisplayName().getUnformattedText());
 			}
 
 			if (!dependencies.isEmpty())
@@ -91,7 +78,7 @@ public class PanelQuestLeft extends Panel
 			{
 				for (Quest quest : chapter.quests)
 				{
-					if (quest.hasDependency(treeGui.selectedQuest) != -1)
+					if (quest.hasDependency(treeGui.selectedQuest))
 					{
 						if (dependants.isEmpty())
 						{

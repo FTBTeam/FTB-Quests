@@ -13,17 +13,12 @@ import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.client.ClientQuestProgress;
 import com.feed_the_beast.ftbquests.gui.QuestsTheme;
-import com.feed_the_beast.ftbquests.net.edit.MessageCreateObject;
+import com.feed_the_beast.ftbquests.net.edit.MessageEditDependency;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
-import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.quest.QuestReward;
-import com.feed_the_beast.ftbquests.quest.tasks.DependencyTask;
-import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
-import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskType;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.TextFormatting;
 import org.lwjgl.opengl.GL11;
 
@@ -72,15 +67,13 @@ public class ButtonQuest extends Button
 		{
 			dependencies = new ArrayList<>();
 
-			for (QuestTask task : quest.tasks)
+			for (QuestObject object : quest.getDependencies())
 			{
-				QuestObject dep = task.getDependency();
-
-				if (dep instanceof Quest)
+				if (object instanceof Quest)
 				{
 					for (Widget widget : treeGui.quests.widgets)
 					{
-						if (widget instanceof ButtonQuest && dep == ((ButtonQuest) widget).quest)
+						if (widget instanceof ButtonQuest && object == ((ButtonQuest) widget).quest)
 						{
 							dependencies.add((ButtonQuest) widget);
 						}
@@ -108,21 +101,16 @@ public class ButtonQuest extends Button
 
 			}));
 
-			int index = treeGui.selectedQuest == null || treeGui.selectedQuest == quest ? -1 : quest.hasDependency(treeGui.selectedQuest);
-
-			if (index != -1)
+			if (treeGui.selectedQuest != null && treeGui.selectedQuest != quest)
 			{
-				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.rem_dep"), GuiIcons.REMOVE, () -> treeGui.questFile.deleteObject(quest.tasks.get(index).getID())));
-			}
-			else
-			{
-				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.set_dep"), QuestsTheme.ADD, () -> {
-					NBTTagCompound nbt = new NBTTagCompound();
-					nbt.setString("object", treeGui.selectedQuest.getID());
-					nbt.setString("type", QuestTaskType.getTypeForNBT(DependencyTask.QuestDep.class));
-					nbt.setString("id", StringUtils.toSnakeCase("dep_" + treeGui.selectedQuest));
-					new MessageCreateObject(QuestObjectType.TASK, quest.getID(), nbt).sendToServer();
-				}).setEnabled(treeGui.selectedQuest != null && treeGui.selectedQuest != quest));
+				if (quest.hasDependency(treeGui.selectedQuest))
+				{
+					contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.rem_dep"), GuiIcons.REMOVE, () -> new MessageEditDependency(quest.getID(), treeGui.selectedQuest.getID(), false).sendToServer()));
+				}
+				else
+				{
+					contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.set_dep"), QuestsTheme.ADD, () -> new MessageEditDependency(quest.getID(), treeGui.selectedQuest.getID(), true).sendToServer()).setEnabled(treeGui.selectedQuest != null && treeGui.selectedQuest != quest));
+				}
 			}
 
 			contextMenu.add(ContextMenuItem.SEPARATOR);
