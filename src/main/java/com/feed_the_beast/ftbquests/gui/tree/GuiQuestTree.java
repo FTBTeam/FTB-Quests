@@ -8,6 +8,7 @@ import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.gui.Theme;
 import com.feed_the_beast.ftblib.lib.gui.Widget;
+import com.feed_the_beast.ftblib.lib.gui.WidgetType;
 import com.feed_the_beast.ftblib.lib.gui.misc.GuiEditConfigValue;
 import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
@@ -22,6 +23,7 @@ import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.QuestVariable;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import org.lwjgl.input.Keyboard;
 
@@ -231,6 +233,18 @@ public class GuiQuestTree extends GuiBase
 
 		backgroundColor.draw(start, y + 1, w - start - otherButtons.width - 1, chapterPanel.height - 2);
 		borderColor.draw(start, y + chapterPanel.height - 1, w - start - 1, 1);
+
+		if (selectedQuest != null && !movingQuest)
+		{
+			GlStateManager.pushMatrix();
+			GlStateManager.translate(0F, 0F, 500F);
+			String txt = selectedQuest.getDisplayName().getFormattedText();
+			int txts = theme.getStringWidth(txt);
+			GuiHelper.drawHollowRect(2, chapterPanel.height + 1, txts + 6, 14, borderColor, false);
+			theme.drawGui(3, chapterPanel.height + 2, txts + 4, 12, WidgetType.DISABLED);
+			theme.drawString(txt, 5, chapterPanel.height + 4);
+			GlStateManager.popMatrix();
+		}
 
 		super.drawForeground(theme, x, y, w, h);
 	}
