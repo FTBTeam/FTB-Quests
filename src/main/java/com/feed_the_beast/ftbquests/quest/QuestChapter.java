@@ -8,6 +8,7 @@ import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.IconAnimation;
 import com.feed_the_beast.ftblib.lib.item.ItemStackSerializer;
 import com.feed_the_beast.ftblib.lib.util.ListUtils;
+import com.feed_the_beast.ftbquests.events.ObjectCompletedEvent;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
@@ -182,6 +183,7 @@ public final class QuestChapter extends QuestObject
 	public void onCompleted(ITeamData data)
 	{
 		super.onCompleted(data);
+		new ObjectCompletedEvent.ChapterEvent(data, this).post();
 
 		if (file.isComplete(data))
 		{

@@ -11,6 +11,7 @@ import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.IconAnimation;
 import com.feed_the_beast.ftblib.lib.item.ItemStackSerializer;
 import com.feed_the_beast.ftblib.lib.math.Ticks;
+import com.feed_the_beast.ftbquests.events.ObjectCompletedEvent;
 import com.feed_the_beast.ftbquests.item.LootRarity;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskType;
@@ -154,6 +155,13 @@ public abstract class QuestFile extends QuestObject
 		}
 
 		return true;
+	}
+
+	@Override
+	public void onCompleted(ITeamData data)
+	{
+		super.onCompleted(data);
+		new ObjectCompletedEvent.FileEvent(data, this).post();
 	}
 
 	@Override

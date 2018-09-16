@@ -7,7 +7,6 @@ import com.feed_the_beast.ftblib.lib.data.Universe;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
-import com.feed_the_beast.ftbquests.events.ObjectCompletedEvent;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.ITextComponent;
@@ -74,8 +73,6 @@ public abstract class QuestObject
 
 	public void onCompleted(ITeamData data)
 	{
-		new ObjectCompletedEvent(data, this).post();
-
 		if (!completionCommand.isEmpty())
 		{
 			Universe.get().server.commandManager.executeCommand(Universe.get().server, completionCommand
