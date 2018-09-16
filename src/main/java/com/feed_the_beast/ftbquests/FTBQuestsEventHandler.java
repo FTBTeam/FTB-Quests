@@ -15,7 +15,6 @@ import com.feed_the_beast.ftbquests.item.ItemQuestBook;
 import com.feed_the_beast.ftbquests.item.ItemScript;
 import com.feed_the_beast.ftbquests.item.ItemXPVial;
 import com.feed_the_beast.ftbquests.item.LootRarity;
-import com.feed_the_beast.ftbquests.quest.tasks.DependencyTask;
 import com.feed_the_beast.ftbquests.quest.tasks.FluidTask;
 import com.feed_the_beast.ftbquests.quest.tasks.ForgeEnergyTask;
 import com.feed_the_beast.ftbquests.quest.tasks.ItemTask;
@@ -110,11 +109,7 @@ public class FTBQuestsEventHandler
 		event.getRegistry().registerAll(
 				new QuestTaskType(ItemTask.class, ItemTask::new).setRegistryName("item"),
 				new QuestTaskType(FluidTask.class, FluidTask::new).setRegistryName("fluid"),
-				new QuestTaskType(ForgeEnergyTask.class, ForgeEnergyTask::new).setRegistryName("forge_energy"),
-				new QuestTaskType(DependencyTask.TaskDep.class, DependencyTask.TaskDep::new).setRegistryName("task"),
-				new QuestTaskType(DependencyTask.QuestDep.class, DependencyTask.QuestDep::new).setRegistryName("quest"),
-				new QuestTaskType(DependencyTask.ChapterDep.class, DependencyTask.ChapterDep::new).setRegistryName("chapter"),
-				new QuestTaskType(DependencyTask.VariableDep.class, DependencyTask.VariableDep::new).setRegistryName("variable")
+				new QuestTaskType(ForgeEnergyTask.class, ForgeEnergyTask::new).setRegistryName("forge_energy")
 		);
 	}
 }

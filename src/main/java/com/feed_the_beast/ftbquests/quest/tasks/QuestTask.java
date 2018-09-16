@@ -213,12 +213,6 @@ public abstract class QuestTask extends QuestObject
 		cachedID = "";
 	}
 
-	@Nullable
-	public QuestObject getDependency()
-	{
-		return null;
-	}
-
 	public boolean hideProgressNumbers()
 	{
 		return false;

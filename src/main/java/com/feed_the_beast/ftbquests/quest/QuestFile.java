@@ -457,6 +457,14 @@ public abstract class QuestFile extends QuestObject
 			variables.add(variable);
 		}
 
+		for (QuestChapter chapter : chapters)
+		{
+			for (Quest quest : chapter.quests)
+			{
+				quest.verifyDependencies();
+			}
+		}
+
 		refreshIDMap();
 
 		emergencyItems.clear();
