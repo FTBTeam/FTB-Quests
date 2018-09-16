@@ -3,6 +3,7 @@ package com.feed_the_beast.ftbquests.quest.tasks;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
+import com.feed_the_beast.ftbquests.events.ObjectCompletedEvent;
 import com.feed_the_beast.ftbquests.net.MessageSubmitItems;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
@@ -85,6 +86,7 @@ public abstract class QuestTask extends QuestObject
 	public void onCompleted(ITeamData data)
 	{
 		super.onCompleted(data);
+		new ObjectCompletedEvent.TaskEvent(data, this).post();
 
 		if (quest.isComplete(data))
 		{
