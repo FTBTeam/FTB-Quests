@@ -1,6 +1,5 @@
 package com.feed_the_beast.ftbquests.gui.chest;
 
-import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftblib.lib.gui.Button;
 import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
 import com.feed_the_beast.ftblib.lib.gui.Panel;
@@ -13,7 +12,6 @@ import com.feed_the_beast.ftbquests.net.MessageClaimReward;
 import com.feed_the_beast.ftbquests.quest.QuestReward;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.util.text.TextFormatting;
 
 import java.util.List;
@@ -49,13 +47,7 @@ public class ButtonReward extends Button
 		}
 		else
 		{
-			List<String> tooltip = reward.stack.getTooltip(ClientUtils.MC.player, ITooltipFlag.TooltipFlags.NORMAL);
-			list.add(reward.stack.getRarity().rarityColor + tooltip.get(0));
-
-			for (int i = 1; i < tooltip.size(); i++)
-			{
-				list.add(TextFormatting.GRAY + tooltip.get(i));
-			}
+			GuiHelper.addStackTooltip(reward.stack, list, "");
 		}
 	}
 

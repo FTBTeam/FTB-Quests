@@ -219,9 +219,9 @@ public abstract class QuestTask extends QuestObject
 	}
 
 	@SideOnly(Side.CLIENT)
-	public void addMouseOverText(List<String> list)
+	public void addMouseOverText(List<String> list, @Nullable QuestTaskData data)
 	{
-		if (canInsertItem())
+		if (data != null && canInsertItem())
 		{
 			list.add(TextFormatting.GRAY + I18n.format("ftbquests.task.click_to_submit"));
 		}

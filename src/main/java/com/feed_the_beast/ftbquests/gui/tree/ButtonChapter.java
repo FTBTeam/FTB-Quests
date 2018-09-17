@@ -87,6 +87,15 @@ public class ButtonChapter extends ButtonTab
 			treeGui.backgroundColor.draw(x, y + 1, w, h - (treeGui.selectedChapter == chapter ? 1 : 2));
 		}
 
+		if (chapter.quests.isEmpty())
+		{
+			GlStateManager.pushMatrix();
+			GlStateManager.translate(0, 0, 500);
+			GuiIcons.CLOSE.draw(x + w - 10, y + 2, 8, 8);
+			GlStateManager.popMatrix();
+			return;
+		}
+
 		if (treeGui.questFile.self == null)
 		{
 			return;
