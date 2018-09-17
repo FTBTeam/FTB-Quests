@@ -96,22 +96,8 @@ public class MJTask extends QuestTask
 	@Override
 	public void getConfig(ConfigGroup group)
 	{
-		group.add("value", new ConfigLong(1L, 1L, Long.MAX_VALUE)
-		{
-			@Override
-			public long getLong()
-			{
-				return value;
-			}
-
-			@Override
-			public void setLong(long v)
-			{
-				value = v;
-			}
-		}, new ConfigLong(10000000000L));
-
-		group.add("max_input", new ConfigLong(maxInput, 1L, Long.MAX_VALUE), new ConfigLong(Integer.MAX_VALUE));
+		group.add("value", new ConfigLong.SimpleLong(1, Long.MAX_VALUE, () -> value, v -> value = v), new ConfigLong(10000000000L));
+		group.add("max_input", new ConfigLong.SimpleLong(1, Long.MAX_VALUE, () -> maxInput, v -> maxInput = v), new ConfigLong(Long.MAX_VALUE));
 	}
 
 	@Override

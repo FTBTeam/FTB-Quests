@@ -94,14 +94,12 @@ ftbquests.tasks=Tasks
 ftbquests.task.click_to_submit=Click to submit items
 ftbquests.task.click_to_submit_all=Click to submit all items
 
-ftbquests.task.ftbquests.task=Task Dependency
-ftbquests.task.ftbquests.quest=Quest Dependency
-ftbquests.task.ftbquests.chapter=Chapter Dependency
-ftbquests.task.ftbquests.variable=Variable Dependency
-
 ftbquests.task.ftbquests.item=Item
 ftbquests.task.ftbquests.item.items=Item List
 ftbquests.task.ftbquests.item.count=Count
+ftbquests.task.ftbquests.item.check_only=Don't consume item
+ftbquests.task.ftbquests.item.ignore_damage=Ignore Damage
+ftbquests.task.ftbquests.item.ignore_nbt=Ignore NBT
 
 ftbquests.task.ftbquests.fluid=Fluid
 ftbquests.task.ftbquests.fluid.fluid=Fluid

@@ -270,34 +270,12 @@ public class TileProgressScreenCore extends TileProgressScreenBase implements IC
 					}
 				}, new ConfigBlockState(BlockUtils.AIR_STATE)).setCanEdit(editorOrDestructible);
 
-				group.add("fullscreen", new ConfigBoolean(fullscreen)
-				{
-					@Override
-					public void setBoolean(boolean v)
-					{
-						fullscreen = v;
-					}
-				}, new ConfigBoolean(false)).setCanEdit(editorOrDestructible);
-
-				group.add("hide_icons", new ConfigBoolean(hideIcons)
-				{
-					@Override
-					public void setBoolean(boolean v)
-					{
-						hideIcons = v;
-					}
-				}, new ConfigBoolean(false)).setCanEdit(editorOrDestructible);
+				group.add("fullscreen", new ConfigBoolean.SimpleBoolean(() -> fullscreen, v -> fullscreen = v), new ConfigBoolean(false)).setCanEdit(editorOrDestructible);
+				group.add("hide_icons", new ConfigBoolean.SimpleBoolean(() -> hideIcons, v -> hideIcons = v), new ConfigBoolean(false)).setCanEdit(editorOrDestructible);
 
 				if (editor)
 				{
-					group.add("indestructible", new ConfigBoolean(indestructible)
-					{
-						@Override
-						public void setBoolean(boolean v)
-						{
-							indestructible = v;
-						}
-					}, new ConfigBoolean(false));
+					group.add("indestructible", new ConfigBoolean.SimpleBoolean(() -> indestructible, v -> indestructible = v), new ConfigBoolean(false));
 				}
 
 				FTBLibAPI.editServerConfig(player, group0, this);

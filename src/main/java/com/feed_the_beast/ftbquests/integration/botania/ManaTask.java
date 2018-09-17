@@ -129,50 +129,9 @@ public class ManaTask extends QuestTask
 	@Override
 	public void getConfig(ConfigGroup group)
 	{
-		group.add("value", new ConfigLong(0)
-		{
-			@Override
-			public long getLong()
-			{
-				return value;
-			}
-
-			@Override
-			public void setLong(long v)
-			{
-				value = v;
-			}
-		}, new ConfigLong(1));
-
-		group.add("max_input", new ConfigLong(0)
-		{
-			@Override
-			public long getLong()
-			{
-				return maxInput;
-			}
-
-			@Override
-			public void setLong(long v)
-			{
-				maxInput = v;
-			}
-		}, new ConfigLong(Long.MAX_VALUE));
-
-		group.add("show_numbers", new ConfigBoolean(false)
-		{
-			@Override
-			public boolean getBoolean()
-			{
-				return showNumbers;
-			}
-
-			@Override
-			public void setBoolean(boolean v)
-			{
-				showNumbers = v;
-			}
-		}, new ConfigBoolean(false));
+		group.add("value", new ConfigLong.SimpleLong(1, Long.MAX_VALUE, () -> value, v -> value = v), new ConfigLong(1));
+		group.add("max_input", new ConfigLong.SimpleLong(1, Long.MAX_VALUE, () -> maxInput, v -> maxInput = v), new ConfigLong(Long.MAX_VALUE));
+		group.add("show_numbers", new ConfigBoolean.SimpleBoolean(() -> showNumbers, v -> showNumbers = v), new ConfigBoolean(false));
 	}
 
 	@Override

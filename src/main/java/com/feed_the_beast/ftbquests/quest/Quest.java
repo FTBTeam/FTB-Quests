@@ -485,35 +485,8 @@ public final class Quest extends QuestObject
 	@Override
 	public void getConfig(ConfigGroup group)
 	{
-		group.add("x", new ConfigInt(x, -POS_LIMIT, POS_LIMIT)
-		{
-			@Override
-			public int getInt()
-			{
-				return x;
-			}
-
-			@Override
-			public void setInt(int v)
-			{
-				x = (byte) v;
-			}
-		}, new ConfigInt(0));
-
-		group.add("y", new ConfigInt(y, -POS_LIMIT, POS_LIMIT)
-		{
-			@Override
-			public int getInt()
-			{
-				return y;
-			}
-
-			@Override
-			public void setInt(int v)
-			{
-				y = (byte) v;
-			}
-		}, new ConfigInt(0));
+		group.add("x", new ConfigInt.SimpleInt(-POS_LIMIT, POS_LIMIT, () -> x, v -> x = (byte) v), new ConfigInt(0));
+		group.add("y", new ConfigInt.SimpleInt(-POS_LIMIT, POS_LIMIT, () -> y, v -> y = (byte) v), new ConfigInt(0));
 
 		group.add("shape", new ConfigEnum<EnumQuestShape>(EnumQuestShape.NAME_MAP)
 		{

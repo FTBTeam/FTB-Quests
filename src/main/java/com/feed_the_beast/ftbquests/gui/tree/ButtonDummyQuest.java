@@ -65,9 +65,9 @@ public class ButtonDummyQuest extends Widget
 					public void setStack(ItemStack stack)
 					{
 						NBTTagCompound nbt = new NBTTagCompound();
-						nbt.setByte("x", x);
-						nbt.setByte("y", y);
 						Quest quest = new Quest(treeGui.selectedChapter, nbt);
+						quest.x = x;
+						quest.y = y;
 						ItemTask itemTask = new ItemTask(quest, new NBTTagCompound());
 						itemTask.items.add(stack);
 						itemTask.count = 1L;

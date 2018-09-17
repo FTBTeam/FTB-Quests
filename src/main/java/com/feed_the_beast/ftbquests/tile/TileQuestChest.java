@@ -136,14 +136,7 @@ public class TileQuestChest extends TileBase implements IItemHandler, IConfigCal
 
 		if (editor)
 		{
-			group.add("indestructible", new ConfigBoolean(indestructible)
-			{
-				@Override
-				public void setBoolean(boolean v)
-				{
-					indestructible = v;
-				}
-			}, new ConfigBoolean(false)).setDisplayName(new TextComponentTranslation("tile.ftbquests.screen.indestructible"));
+			group.add("indestructible", new ConfigBoolean.SimpleBoolean(() -> indestructible, v -> indestructible = v), new ConfigBoolean(false)).setDisplayName(new TextComponentTranslation("tile.ftbquests.screen.indestructible"));
 		}
 
 		FTBLibAPI.editServerConfig(player, group0, this);

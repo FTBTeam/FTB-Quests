@@ -573,20 +573,7 @@ public abstract class QuestFile extends QuestObject
 			}, new ConfigString(rarity.getLootTable().toString())).setDisplayName(new TextComponentTranslation(rarity.getTranslationKey()));
 		}
 
-		config.add("loot_size", new ConfigInt(0, 1, 1024)
-		{
-			@Override
-			public int getInt()
-			{
-				return lootSize;
-			}
-
-			@Override
-			public void setInt(int v)
-			{
-				lootSize = v;
-			}
-		}, new ConfigInt(9));
+		config.add("loot_size", new ConfigInt.SimpleInt(1, 1024, () -> lootSize, v -> lootSize = v), new ConfigInt(9));
 	}
 
 	@Override
