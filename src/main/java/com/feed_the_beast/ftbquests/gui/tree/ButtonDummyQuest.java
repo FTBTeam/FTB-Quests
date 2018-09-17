@@ -126,12 +126,14 @@ public class ButtonDummyQuest extends Widget
 
 		if (treeGui.selectedQuest != null && treeGui.movingQuest)
 		{
-			treeGui.selectedQuest.shape.draw(x, y, w, h, Color4I.WHITE.withAlpha(30));
+			int s = treeGui.zoom * 3 / 2;
+			treeGui.selectedQuest.shape.draw(x + (w - s) / 2, y + (h - s) / 2, s, s, Color4I.WHITE.withAlpha(30));
 		}
 
 		if (isMouseOver())
 		{
-			Color4I.WHITE.withAlpha(30).draw(x, y, w, h);
+			int s = treeGui.zoom * 3 / 2;
+			Color4I.WHITE.withAlpha(30).draw(x + (w - s) / 2, y + (h - s) / 2, s, s);
 		}
 	}
 }

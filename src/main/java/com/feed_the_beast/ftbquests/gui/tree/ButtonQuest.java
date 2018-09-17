@@ -20,7 +20,6 @@ import com.feed_the_beast.ftbquests.quest.QuestReward;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.TextFormatting;
-import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -162,8 +161,6 @@ public class ButtonQuest extends Button
 	@Override
 	public void draw(Theme theme, int x, int y, int w, int h)
 	{
-		GlStateManager.alphaFunc(GL11.GL_GREATER, 0F);
-
 		Color4I col;
 
 		if (treeGui.questFile.self == null || !quest.canStartTasks(treeGui.questFile.self))
@@ -205,19 +202,21 @@ public class ButtonQuest extends Button
 			}
 		}
 
-		quest.shape.draw(x, y, w, h, col);
+		int s = treeGui.zoom * 3 / 2;
+		int sx = x + (w - s) / 2;
+		int sy = y + (h - s) / 2;
+
+		quest.shape.draw(sx, sy, s, s, col);
 
 		if (isMouseOver())
 		{
-			quest.shape.draw(x, y, w, h);
+			quest.shape.draw(sx, sy, s, s);
 		}
 
 		if (treeGui.selectedQuest == quest)
 		{
-			quest.shape.draw(x, y, w, h);
+			quest.shape.draw(sx, sy, s, s);
 		}
-
-		GlStateManager.alphaFunc(GL11.GL_GREATER, 0.1F);
 
 		if (!icon.isEmpty())
 		{
