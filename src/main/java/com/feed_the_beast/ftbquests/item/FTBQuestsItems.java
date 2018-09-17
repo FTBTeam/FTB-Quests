@@ -24,4 +24,5 @@ public class FTBQuestsItems
 	public static final Item RARE_LOOTCRATE = Items.AIR;
 	public static final Item EPIC_LOOTCRATE = Items.AIR;
 	public static final Item LEGENDARY_LOOTCRATE = Items.AIR;
+	public static final Item MISSING = Items.AIR;
 }

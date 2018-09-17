@@ -48,6 +48,7 @@ public class FTBQuestsClientEventHandler
 		ModelLoader.setCustomModelResourceLocation(FTBQuestsItems.RARE_LOOTCRATE, 0, new ModelResourceLocation(FTBQuestsItems.RARE_LOOTCRATE.getRegistryName(), "inventory"));
 		ModelLoader.setCustomModelResourceLocation(FTBQuestsItems.EPIC_LOOTCRATE, 0, new ModelResourceLocation(FTBQuestsItems.EPIC_LOOTCRATE.getRegistryName(), "inventory"));
 		ModelLoader.setCustomModelResourceLocation(FTBQuestsItems.LEGENDARY_LOOTCRATE, 0, new ModelResourceLocation(FTBQuestsItems.LEGENDARY_LOOTCRATE.getRegistryName(), "inventory"));
+		ModelLoader.setCustomModelResourceLocation(FTBQuestsItems.MISSING, 0, new ModelResourceLocation(FTBQuestsItems.MISSING.getRegistryName(), "inventory"));
 
 		ClientRegistry.bindTileEntitySpecialRenderer(TileScreenCore.class, new RenderScreen());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileProgressScreenCore.class, new RenderProgressScreen());

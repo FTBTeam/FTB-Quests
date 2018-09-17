@@ -23,6 +23,34 @@ public abstract class QuestObject
 {
 	public static final Pattern ID_PATTERN = Pattern.compile("^[a-z0-9_]{1,32}$");
 
+	public static ItemStack readOrDummy(NBTTagCompound nbt)
+	{
+		if (nbt.isEmpty())
+		{
+			return ItemStack.EMPTY;
+		}
+
+		ItemStack stack = ItemStackSerializer.read(nbt);
+
+		if (stack.getItem() == FTBQuestsItems.MISSING)
+		{
+			ItemStack stack1 = ItemMissing.getContainedStack(stack);
+
+			if (!stack1.isEmpty())
+			{
+				return stack1;
+			}
+		}
+		else if (stack.isEmpty())
+		{
+			ItemStack stack1 = new ItemStack(FTBQuestsItems.MISSING);
+			ItemMissing.setContainedStack(stack1, nbt);
+			return stack1;
+		}
+
+		return stack;
+	}
+
 	public String id = "";
 	public boolean invalid = false;
 	public String title = "";
