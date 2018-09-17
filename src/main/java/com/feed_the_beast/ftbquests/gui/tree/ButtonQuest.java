@@ -130,6 +130,11 @@ public class ButtonQuest extends Button
 				treeGui.open(quest);
 			}
 		}
+		else if (treeGui.questFile.canEdit() && button.isMiddle())
+		{
+			treeGui.movingQuest = true;
+			treeGui.selectQuest(quest);
+		}
 	}
 
 	@Override
