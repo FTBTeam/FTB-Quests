@@ -52,7 +52,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 
 		if (list.isEmpty())
 		{
-			ItemStack stack = ItemStackSerializer.read(nbt.getCompoundTag("item"));
+			ItemStack stack = readOrDummy(nbt.getCompoundTag("item"));
 
 			if (!stack.isEmpty())
 			{
@@ -63,7 +63,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 		{
 			for (int i = 0; i < list.tagCount(); i++)
 			{
-				ItemStack stack = ItemStackSerializer.read(list.getCompoundTagAt(i));
+				ItemStack stack = readOrDummy(list.getCompoundTagAt(i));
 
 				if (!stack.isEmpty())
 				{

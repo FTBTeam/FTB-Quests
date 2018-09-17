@@ -11,6 +11,7 @@ import com.feed_the_beast.ftbquests.block.FTBQuestsBlocks;
 import com.feed_the_beast.ftbquests.block.ItemBlockProgressScreen;
 import com.feed_the_beast.ftbquests.block.ItemBlockScreen;
 import com.feed_the_beast.ftbquests.item.ItemLootcrate;
+import com.feed_the_beast.ftbquests.item.ItemMissing;
 import com.feed_the_beast.ftbquests.item.ItemQuestBook;
 import com.feed_the_beast.ftbquests.item.ItemScript;
 import com.feed_the_beast.ftbquests.item.ItemXPVial;
@@ -93,7 +94,8 @@ public class FTBQuestsEventHandler
 				withName(new ItemLootcrate(LootRarity.UNCOMMON), "uncommon_lootcrate").setTranslationKey(FTBQuests.MOD_ID + ".lootcrate"),
 				withName(new ItemLootcrate(LootRarity.RARE), "rare_lootcrate").setTranslationKey(FTBQuests.MOD_ID + ".lootcrate"),
 				withName(new ItemLootcrate(LootRarity.EPIC), "epic_lootcrate").setTranslationKey(FTBQuests.MOD_ID + ".lootcrate"),
-				withName(new ItemLootcrate(LootRarity.LEGENDARY), "legendary_lootcrate").setTranslationKey(FTBQuests.MOD_ID + ".lootcrate")
+				withName(new ItemLootcrate(LootRarity.LEGENDARY), "legendary_lootcrate").setTranslationKey(FTBQuests.MOD_ID + ".lootcrate"),
+				withName(new ItemMissing(), "missing")
 		);
 	}
 

@@ -33,4 +33,16 @@ public final class QuestReward
 	{
 		return String.format("%s#%08x", quest.getID(), uid);
 	}
+
+	public void claim(EntityPlayer player)
+	{
+		if (stack.getItem() instanceof IRewardItem)
+		{
+			((IRewardItem) stack.getItem()).reward(player, stack);
+		}
+		else
+		{
+			ItemHandlerHelper.giveItemToPlayer(player, stack.copy());
+		}
+	}
 }

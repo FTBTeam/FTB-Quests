@@ -25,6 +25,7 @@ item.ftbquests.book.name=Quest Book
 item.ftbquests.xp_vial.name=XP Vial
 item.ftbquests.script.name=Script
 item.ftbquests.lootcrate.name=Loot Crate
+item.ftbquests.missing.name=Missing Item
 
 ftbquests.rarity.common=Common
 ftbquests.rarity.uncommon=Uncommon

@@ -1,46 +1,42 @@
 package com.feed_the_beast.ftbquests.item;
 
-import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.SoundCategory;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
 /**
  * @author LatvianModder
  */
-public class ItemScript extends ItemReward
+public abstract class ItemReward extends Item implements IRewardItem
 {
+	public ItemReward()
+	{
+		setMaxStackSize(1);
+	}
+
+	public SoundEvent getSoundEvent()
+	{
+		return SoundEvents.ENTITY_ITEM_BREAK;
+	}
+
 	@Override
 	public ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer player, EnumHand hand)
 	{
 		ItemStack stack = player.getHeldItem(hand);
+		reward(player, stack);
 
 		if (!world.isRemote)
 		{
-			NBTTagCompound nbt = stack.getTagCompound();
-
-			if (nbt != null)
-			{
-				BlockPos pos = player.getPosition();
-				player.getServer().getCommandManager().executeCommand(player.getServer(), nbt.getString("command")
-						.replace("@p", player.getName())
-						.replace("@x", Integer.toString(pos.getX()))
-						.replace("@y", Integer.toString(pos.getY()))
-						.replace("@z", Integer.toString(pos.getZ()))
-						.replace("@team", FTBLibAPI.getTeam(player.getUniqueID())));
-			}
-
-			world.playSound(null, player.posX, player.posY, player.posZ, SoundEvents.ENTITY_ITEM_BREAK, SoundCategory.PLAYERS, 0.8F, 0.8F + world.rand.nextFloat() * 0.4F);
+			world.playSound(null, player.posX, player.posY, player.posZ, getSoundEvent(), SoundCategory.PLAYERS, 0.8F, 0.8F + world.rand.nextFloat() * 0.4F);
 		}
 		else
 		{
@@ -60,25 +56,5 @@ public class ItemScript extends ItemReward
 
 		stack.shrink(1);
 		return new ActionResult<>(EnumActionResult.SUCCESS, stack);
-	}
-
-	@Override
-	public void reward(EntityPlayer player, ItemStack stack)
-	{
-		if (!player.world.isRemote)
-		{
-			NBTTagCompound nbt = stack.getTagCompound();
-
-			if (nbt != null)
-			{
-				BlockPos pos = player.getPosition();
-				player.getServer().getCommandManager().executeCommand(player.getServer(), nbt.getString("command")
-						.replace("@p", player.getName())
-						.replace("@x", Integer.toString(pos.getX()))
-						.replace("@y", Integer.toString(pos.getY()))
-						.replace("@z", Integer.toString(pos.getZ()))
-						.replace("@team", FTBLibAPI.getTeam(player.getUniqueID())));
-			}
-		}
 	}
 }

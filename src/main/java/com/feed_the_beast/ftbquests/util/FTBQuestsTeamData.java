@@ -36,7 +36,6 @@ import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.items.ItemHandlerHelper;
 
 import javax.annotation.Nullable;
 import java.io.File;
@@ -291,7 +290,7 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 		{
 			if (claimedTeamRewards.add(reward.uid))
 			{
-				ItemHandlerHelper.giveItemToPlayer(player, reward.stack.copy());
+				reward.claim(player);
 				team.markDirty();
 
 				for (ForgePlayer player1 : team.getMembers())
@@ -319,7 +318,7 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 					claimedPlayerRewards.put(player.getUniqueID(), set);
 				}
 
-				ItemHandlerHelper.giveItemToPlayer(player, reward.stack.copy());
+				reward.claim(player);
 				team.markDirty();
 				new MessageClaimRewardResponse(reward.uid).sendTo((EntityPlayerMP) player);
 			}
