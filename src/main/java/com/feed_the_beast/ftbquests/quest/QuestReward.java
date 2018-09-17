@@ -1,6 +1,9 @@
 package com.feed_the_beast.ftbquests.quest;
 
+import com.feed_the_beast.ftbquests.item.IRewardItem;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.items.ItemHandlerHelper;
 
 /**
  * @author LatvianModder

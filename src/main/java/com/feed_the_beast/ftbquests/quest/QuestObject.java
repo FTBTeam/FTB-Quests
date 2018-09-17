@@ -6,7 +6,10 @@ import com.feed_the_beast.ftblib.lib.config.ConfigString;
 import com.feed_the_beast.ftblib.lib.data.Universe;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
+import com.feed_the_beast.ftblib.lib.item.ItemStackSerializer;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
+import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
+import com.feed_the_beast.ftbquests.item.ItemMissing;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.ITextComponent;
@@ -65,6 +68,45 @@ public abstract class QuestObject
 	public abstract String getID();
 
 	public abstract void writeData(NBTTagCompound nbt);
+
+	public final void writeCommonData(NBTTagCompound nbt)
+	{
+		if (!title.isEmpty())
+		{
+			nbt.setString("title", title);
+		}
+
+		if (!icon.isEmpty())
+		{
+			nbt.setTag("icon", ItemStackSerializer.write(icon));
+		}
+
+		if (!completionCommand.isEmpty())
+		{
+			nbt.setString("completion_command", completionCommand);
+		}
+	}
+
+	public final void readCommonData(NBTTagCompound nbt)
+	{
+		if (getObjectType() != QuestObjectType.FILE)
+		{
+			id = nbt.getString("id").trim();
+
+			if (id.isEmpty() || getQuestFile().get(getID()) != null)
+			{
+				id = StringUtils.fromUUID(UUID.randomUUID()).substring(0, 8);
+			}
+		}
+		else
+		{
+			id = "*";
+		}
+
+		title = nbt.getString("title");
+		icon = readOrDummy(nbt.getCompoundTag("icon"));
+		completionCommand = nbt.getString("completion_command");
+	}
 
 	public abstract Icon getAltIcon();
 
@@ -221,16 +263,6 @@ public abstract class QuestObject
 				completionCommand = v;
 			}
 		}, new ConfigString("")).setDisplayName(new TextComponentTranslation("ftbquests.completion_command")).setOrder((byte) 150);
-	}
-
-	public void readID(NBTTagCompound nbt)
-	{
-		id = nbt.getString("id").trim();
-
-		if (id.isEmpty() || getQuestFile().get(getID()) != null)
-		{
-			id = StringUtils.fromUUID(UUID.randomUUID()).substring(0, 8);
-		}
 	}
 
 	public void clearCachedData()

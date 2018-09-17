@@ -369,20 +369,7 @@ public abstract class QuestFile extends QuestObject
 	@Override
 	public final void writeData(NBTTagCompound nbt)
 	{
-		if (!title.isEmpty())
-		{
-			nbt.setString("title", title);
-		}
-
-		if (!icon.isEmpty())
-		{
-			nbt.setTag("icon", ItemStackSerializer.write(icon));
-		}
-
-		if (!completionCommand.isEmpty())
-		{
-			nbt.setString("completion_command", completionCommand);
-		}
+		writeCommonData(nbt);
 
 		NBTTagList list = new NBTTagList();
 
@@ -429,11 +416,9 @@ public abstract class QuestFile extends QuestObject
 		nbt.setShort("loot_size", (short) lootSize);
 	}
 
-	protected final void readData(NBTTagCompound nbt)
+	public final void readData(NBTTagCompound nbt)
 	{
-		title = nbt.getString("title");
-		icon = ItemStackSerializer.read(nbt.getCompoundTag("icon"));
-		completionCommand = nbt.getString("completion_command");
+		readCommonData(nbt);
 
 		chapters.clear();
 
@@ -473,7 +458,7 @@ public abstract class QuestFile extends QuestObject
 
 		for (int i = 0; i < list.tagCount(); i++)
 		{
-			ItemStack stack = ItemStackSerializer.read(list.getCompoundTagAt(i));
+			ItemStack stack = readOrDummy(list.getCompoundTagAt(i));
 
 			if (!stack.isEmpty())
 			{

@@ -54,11 +54,8 @@ public final class Quest extends QuestObject
 	public Quest(QuestChapter c, NBTTagCompound nbt)
 	{
 		chapter = c;
-		readID(nbt);
-		title = nbt.getString("title");
+		readCommonData(nbt);
 		description = nbt.getString("description");
-		icon = ItemStackSerializer.read(nbt.getCompoundTag("icon"));
-		completionCommand = nbt.getString("completion_command");
 		visibilityType = EnumQuestVisibilityType.NAME_MAP.get(nbt.getString("visibility"));
 		x = (byte) MathHelper.clamp(nbt.getByte("x"), -POS_LIMIT, POS_LIMIT);
 		y = (byte) MathHelper.clamp(nbt.getByte("y"), -POS_LIMIT, POS_LIMIT);
@@ -117,7 +114,7 @@ public final class Quest extends QuestObject
 				switch (nbt1.getString("type"))
 				{
 					case "item":
-						stack = ItemStackSerializer.read(nbt1.getCompoundTag("item"));
+						stack = readOrDummy(nbt1.getCompoundTag("item"));
 						break;
 					case "xp":
 						stack = new ItemStack(FTBQuestsItems.XP_VIAL);
@@ -135,16 +132,14 @@ public final class Quest extends QuestObject
 			}
 			else
 			{
-				stack = ItemStackSerializer.read(nbt1);
+				NBTTagCompound nbt2 = nbt1.copy();
+				nbt2.removeTag("uid");
+				nbt2.removeTag("team_reward");
+				stack = readOrDummy(nbt2);
 			}
 
 			if (!stack.isEmpty())
 			{
-				if (nbt1.hasKey("title"))
-				{
-					stack.setStackDisplayName(nbt1.getString("title"));
-				}
-
 				int uid = nbt1.getInteger("uid");
 
 				if (uid == 0)
@@ -164,15 +159,11 @@ public final class Quest extends QuestObject
 		for (int i = 0; i < list.tagCount(); i++)
 		{
 			NBTTagCompound nbt1 = list.getCompoundTagAt(i);
-			ItemStack stack = ItemStackSerializer.read(nbt1);
-
-			if (!stack.isEmpty())
-			{
-				QuestReward reward = new QuestReward(this, System.identityHashCode(stack));
-				reward.stack = stack;
-				reward.team = false;
-				rewards.add(reward);
-			}
+			ItemStack stack = readOrDummy(nbt1);
+			QuestReward reward = new QuestReward(this, System.identityHashCode(stack));
+			reward.stack = stack;
+			reward.team = false;
+			rewards.add(reward);
 		}
 
 		list = nbt.getTagList("team_rewards", Constants.NBT.TAG_COMPOUND);
@@ -180,15 +171,11 @@ public final class Quest extends QuestObject
 		for (int i = 0; i < list.tagCount(); i++)
 		{
 			NBTTagCompound nbt1 = list.getCompoundTagAt(i);
-			ItemStack stack = ItemStackSerializer.read(nbt1);
-
-			if (!stack.isEmpty())
-			{
-				QuestReward reward = new QuestReward(this, System.identityHashCode(stack));
-				reward.stack = stack;
-				reward.team = true;
-				rewards.add(reward);
-			}
+			ItemStack stack = readOrDummy(nbt1);
+			QuestReward reward = new QuestReward(this, System.identityHashCode(stack));
+			reward.stack = stack;
+			reward.team = true;
+			rewards.add(reward);
 		}
 
 		timesCompleted = nbt.getInteger("times_completed");
@@ -220,20 +207,7 @@ public final class Quest extends QuestObject
 	@Override
 	public void writeData(NBTTagCompound nbt)
 	{
-		if (!title.isEmpty())
-		{
-			nbt.setString("title", title);
-		}
-
-		if (!icon.isEmpty())
-		{
-			nbt.setTag("icon", ItemStackSerializer.write(icon));
-		}
-
-		if (!completionCommand.isEmpty())
-		{
-			nbt.setString("completion_command", completionCommand);
-		}
+		writeCommonData(nbt);
 
 		if (visibilityType != EnumQuestVisibilityType.NORMAL)
 		{
@@ -294,22 +268,7 @@ public final class Quest extends QuestObject
 					task.writeData(taskNBT);
 					taskNBT.setString("id", task.id);
 					taskNBT.setString("type", type.getTypeForNBT());
-
-					if (!task.title.isEmpty())
-					{
-						taskNBT.setString("title", task.title);
-					}
-
-					if (!task.icon.isEmpty())
-					{
-						taskNBT.setTag("icon", ItemStackSerializer.write(task.icon));
-					}
-
-					if (!task.completionCommand.isEmpty())
-					{
-						taskNBT.setString("completion_command", task.completionCommand);
-					}
-
+					task.writeCommonData(taskNBT);
 					array.appendTag(taskNBT);
 				}
 			}
@@ -408,6 +367,14 @@ public final class Quest extends QuestObject
 			}
 		}
 
+		for (QuestObject object : getDependencies())
+		{
+			if (!object.isComplete(data))
+			{
+				return false;
+			}
+		}
+
 		return true;
 	}
 
@@ -444,8 +411,16 @@ public final class Quest extends QuestObject
 		}
 	}
 
-	public boolean canStartTasks(@Nullable ITeamData data)
+	public boolean canStartTasks(ITeamData data)
 	{
+		for (QuestObject object : getDependencies())
+		{
+			if (!object.isComplete(data))
+			{
+				return false;
+			}
+		}
+
 		return getVisibility(data).isVisible();
 	}
 
