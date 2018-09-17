@@ -78,29 +78,34 @@ public class ButtonTask extends SimpleTextButton
 			list.add(TextFormatting.DARK_GRAY + task.getID());
 		}
 
-		if (task.invalid || treeGui.questFile.self == null || !task.quest.canStartTasks(treeGui.questFile.self))
-		{
-			return;
-		}
+		QuestTaskData data;
 
-		QuestTaskData data = treeGui.questFile.self.getQuestTaskData(task);
-
-		if (task.hideProgressNumbers())
+		if (treeGui.questFile.self != null && task.quest.canStartTasks(treeGui.questFile.self))
 		{
-			list.add(TextFormatting.DARK_GREEN + "[" + data.getRelativeProgress() + "%]");
+			data = treeGui.questFile.self.getQuestTaskData(task);
+
+			if (task.hideProgressNumbers())
+			{
+				list.add(TextFormatting.DARK_GREEN + "[" + data.getRelativeProgress() + "%]");
+			}
+			else
+			{
+				list.add(TextFormatting.DARK_GREEN + data.getProgressString() + " / " + task.getMaxProgressString() + " [" + data.getRelativeProgress() + "%]");
+			}
 		}
 		else
 		{
-			list.add(TextFormatting.DARK_GREEN + data.getProgressString() + " / " + task.getMaxProgressString() + " [" + data.getRelativeProgress() + "%]");
+			data = null;
+			list.add(TextFormatting.DARK_GRAY + "[0%]");
 		}
 
-		task.addMouseOverText(list);
+		task.addMouseOverText(list, data);
 	}
 
 	@Override
 	public WidgetType getWidgetType()
 	{
-		if (task.invalid || treeGui.questFile.self == null || treeGui.selectedQuest == null || !treeGui.selectedQuest.canStartTasks(treeGui.questFile.self))
+		if (task.invalid || treeGui.questFile.self == null || !task.quest.canStartTasks(treeGui.questFile.self))
 		{
 			return WidgetType.DISABLED;
 		}

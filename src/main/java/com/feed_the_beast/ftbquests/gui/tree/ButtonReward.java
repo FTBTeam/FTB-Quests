@@ -1,6 +1,5 @@
 package com.feed_the_beast.ftbquests.gui.tree;
 
-import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigItemStack;
 import com.feed_the_beast.ftblib.lib.config.ConfigValueInstance;
@@ -21,7 +20,6 @@ import com.feed_the_beast.ftbquests.net.edit.MessageEditReward;
 import com.feed_the_beast.ftbquests.quest.QuestReward;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.TextFormatting;
 
@@ -54,14 +52,7 @@ public class ButtonReward extends SimpleTextButton
 			list.add(TextFormatting.GRAY + I18n.format("ftbquests.reward.team_reward"));
 		}
 
-		List<String> tooltip = reward.stack.getTooltip(ClientUtils.MC.player, ITooltipFlag.TooltipFlags.NORMAL);
-
-		list.add(reward.stack.getRarity().rarityColor + tooltip.get(0));
-
-		for (int i = 1; i < tooltip.size(); i++)
-		{
-			list.add(TextFormatting.GRAY + tooltip.get(i));
-		}
+		GuiHelper.addStackTooltip(reward.stack, list, "");
 	}
 
 	@Override
@@ -83,7 +74,7 @@ public class ButtonReward extends SimpleTextButton
 	@Override
 	public WidgetType getWidgetType()
 	{
-		if (!ClientQuestFile.existsWithTeam() || !reward.quest.canStartTasks(ClientQuestFile.INSTANCE.self))
+		if (!ClientQuestFile.existsWithTeam() || !reward.quest.isComplete(ClientQuestFile.INSTANCE.self))
 		{
 			return WidgetType.DISABLED;
 		}

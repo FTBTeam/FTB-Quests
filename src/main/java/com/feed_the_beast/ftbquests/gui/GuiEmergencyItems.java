@@ -1,6 +1,5 @@
 package com.feed_the_beast.ftbquests.gui;
 
-import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftblib.lib.gui.GuiBase;
 import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
 import com.feed_the_beast.ftblib.lib.gui.Panel;
@@ -17,10 +16,7 @@ import com.feed_the_beast.ftbquests.net.MessageGetEmergencyItems;
 import com.feed_the_beast.ftbquests.quest.EnumQuestShape;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.text.TextFormatting;
-import org.lwjgl.opengl.GL11;
 
 import java.util.List;
 
@@ -47,21 +43,13 @@ public class GuiEmergencyItems extends GuiBase
 		@Override
 		public void addMouseOverText(List<String> list)
 		{
-			List<String> l = stack.getTooltip(ClientUtils.MC.player, ITooltipFlag.TooltipFlags.NORMAL);
-			list.add(stack.getRarity().rarityColor + l.get(0));
-
-			for (int i = 1; i < l.size(); i++)
-			{
-				list.add(TextFormatting.GRAY + l.get(i));
-			}
+			GuiHelper.addStackTooltip(stack, list, "");
 		}
 
 		@Override
 		public void draw(Theme theme, int x, int y, int w, int h)
 		{
-			GlStateManager.alphaFunc(GL11.GL_GREATER, 0F);
 			EnumQuestShape.CIRCLE.draw(x - 3, y - 3, w + 6, h + 6);
-			GlStateManager.alphaFunc(GL11.GL_GREATER, 0.1F);
 			GuiHelper.drawItem(stack, x, y, true, Icon.EMPTY);
 		}
 	}

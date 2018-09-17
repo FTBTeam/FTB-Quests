@@ -4,6 +4,7 @@ import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigItemStack;
 import com.feed_the_beast.ftblib.lib.config.ConfigString;
 import com.feed_the_beast.ftblib.lib.config.ConfigValueInstance;
+import com.feed_the_beast.ftblib.lib.gui.ContextMenuItem;
 import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
 import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.gui.Theme;
@@ -18,10 +19,12 @@ import com.feed_the_beast.ftbquests.net.edit.MessageMoveQuest;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.quest.tasks.ItemTask;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -52,6 +55,7 @@ public class ButtonDummyQuest extends Widget
 		if (button.isRight() && treeGui.questFile.canEdit())
 		{
 			GuiHelper.playClickSound();
+			List<ContextMenuItem> contextMenu = new ArrayList<>();
 
 			if (isCtrlKeyDown())
 			{
@@ -92,6 +96,7 @@ public class ButtonDummyQuest extends Widget
 				}
 			}).openGui();
 
+			getGui().openContextMenu(contextMenu);
 			return true;
 		}
 		else if (button.isLeft() && treeGui.movingQuest && treeGui.selectedQuest != null && treeGui.questFile.canEdit())
@@ -124,16 +129,25 @@ public class ButtonDummyQuest extends Widget
 			return;
 		}
 
+		int s = treeGui.zoom * 3 / 2;
+		int sx = x + (w - s) / 2;
+		int sy = y + (h - s) / 2;
+
 		if (treeGui.selectedQuest != null && treeGui.movingQuest)
 		{
-			int s = treeGui.zoom * 3 / 2;
-			treeGui.selectedQuest.shape.draw(x + (w - s) / 2, y + (h - s) / 2, s, s, Color4I.WHITE.withAlpha(30));
+			treeGui.selectedQuest.shape.draw(sx, sy, s, s, Color4I.WHITE.withAlpha(30));
 		}
 
 		if (isMouseOver())
 		{
-			int s = treeGui.zoom * 3 / 2;
-			Color4I.WHITE.withAlpha(30).draw(x + (w - s) / 2, y + (h - s) / 2, s, s);
+			Color4I.WHITE.withAlpha(30).draw(sx, sy, s, s);
+
+			GlStateManager.pushMatrix();
+			GlStateManager.translate(sx, sy, 0);
+			GlStateManager.scale(treeGui.zoom / 24D, treeGui.zoom / 24D, 1D);
+			theme.drawString("X" + this.x, 2, 2);
+			theme.drawString("Y" + this.y, 2, 12);
+			GlStateManager.popMatrix();
 		}
 	}
 }

@@ -1,10 +1,10 @@
 package com.feed_the_beast.ftbquests.quest.tasks;
 
-import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigItemStack;
 import com.feed_the_beast.ftblib.lib.config.ConfigList;
 import com.feed_the_beast.ftblib.lib.config.ConfigLong;
+import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
 import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.IconAnimation;
@@ -13,7 +13,6 @@ import com.feed_the_beast.ftblib.lib.item.ItemStackSerializer;
 import com.feed_the_beast.ftblib.lib.util.StringJoiner;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -241,9 +240,10 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void addMouseOverText(List<String> list)
+	public void addMouseOverText(List<String> list, @Nullable QuestTaskData data)
 	{
-		super.addMouseOverText(list);
+		super.addMouseOverText(list, data);
+
 		list.add("");
 		list.add(TextFormatting.GRAY + "Valid items:");
 
@@ -260,13 +260,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 				list.add("---");
 			}
 
-			List<String> l = stack.getTooltip(ClientUtils.MC.player, ITooltipFlag.TooltipFlags.NORMAL);
-			list.add(stack.getRarity().rarityColor + l.get(0));
-
-			for (int i = 1; i < l.size(); i++)
-			{
-				list.add(TextFormatting.GRAY + l.get(i));
-			}
+			GuiHelper.addStackTooltip(stack, list, "");
 		}
 	}
 
