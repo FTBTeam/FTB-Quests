@@ -2,6 +2,7 @@ package com.feed_the_beast.ftbquests.gui.tree;
 
 import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.gui.WidgetLayout;
+import com.feed_the_beast.ftbquests.quest.QuestChapter;
 
 /**
  * @author LatvianModder
@@ -19,12 +20,19 @@ public class PanelChapters extends Panel
 	@Override
 	public void addWidgets()
 	{
+		boolean canEdit = treeGui.questFile.canEdit();
+
 		for (int i = 0; i < treeGui.questFile.chapters.size(); i++)
 		{
-			add(new ButtonChapter(this, i, treeGui.questFile.chapters.get(i)));
+			QuestChapter chapter = treeGui.questFile.chapters.get(i);
+
+			if (canEdit || !chapter.quests.isEmpty())
+			{
+				add(new ButtonChapter(this, i, chapter));
+			}
 		}
 
-		if (treeGui.questFile.canEdit())// && treeGui.questFile.chapters.size() < 14)
+		if (canEdit)
 		{
 			add(new ButtonAddChapter(this));
 		}
