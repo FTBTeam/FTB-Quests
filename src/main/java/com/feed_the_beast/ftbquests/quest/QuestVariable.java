@@ -2,7 +2,6 @@ package com.feed_the_beast.ftbquests.quest;
 
 import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
-import com.feed_the_beast.ftblib.lib.item.ItemStackSerializer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
@@ -10,7 +9,7 @@ import net.minecraft.util.text.TextComponentString;
 /**
  * @author LatvianModder
  */
-public class QuestVariable extends QuestObject
+public final class QuestVariable extends QuestObject
 {
 	public final QuestFile file;
 	public long maxValue;
@@ -22,9 +21,7 @@ public class QuestVariable extends QuestObject
 	public QuestVariable(QuestFile f, NBTTagCompound nbt)
 	{
 		file = f;
-		title = nbt.getString("title");
-		icon = ItemStackSerializer.read(nbt.getCompoundTag("icon"));
-		completionCommand = nbt.getString("completion_command");
+		readCommonData(nbt);
 		maxValue = nbt.getLong("max");
 
 		if (maxValue < 1L)
@@ -34,8 +31,6 @@ public class QuestVariable extends QuestObject
 
 		team = nbt.getBoolean("team");
 		index = -1;
-
-		readID(nbt);
 	}
 
 	@Override
@@ -64,20 +59,7 @@ public class QuestVariable extends QuestObject
 	@Override
 	public void writeData(NBTTagCompound nbt)
 	{
-		if (!title.isEmpty())
-		{
-			nbt.setString("title", title);
-		}
-
-		if (!icon.isEmpty())
-		{
-			nbt.setTag("icon", ItemStackSerializer.write(icon));
-		}
-
-		if (!completionCommand.isEmpty())
-		{
-			nbt.setString("completion_command", completionCommand);
-		}
+		writeCommonData(nbt);
 
 		nbt.setLong("max", maxValue);
 

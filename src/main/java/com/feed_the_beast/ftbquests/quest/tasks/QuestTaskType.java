@@ -1,6 +1,5 @@
 package com.feed_the_beast.ftbquests.quest.tasks;
 
-import com.feed_the_beast.ftblib.lib.item.ItemStackSerializer;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import net.minecraft.nbt.NBTTagCompound;
@@ -76,10 +75,7 @@ public final class QuestTaskType extends IForgeRegistryEntry.Impl<QuestTaskType>
 			return null;
 		}
 
-		task.readID(nbt);
-		task.title = nbt.getString("title");
-		task.icon = ItemStackSerializer.read(nbt.getCompoundTag("icon"));
-		task.completionCommand = nbt.getString("completion_command");
+		task.readCommonData(nbt);
 		return task;
 	}
 

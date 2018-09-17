@@ -6,7 +6,6 @@ import com.feed_the_beast.ftblib.lib.config.ConfigList;
 import com.feed_the_beast.ftblib.lib.config.ConfigString;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.IconAnimation;
-import com.feed_the_beast.ftblib.lib.item.ItemStackSerializer;
 import com.feed_the_beast.ftblib.lib.util.ListUtils;
 import com.feed_the_beast.ftbquests.events.ObjectCompletedEvent;
 import net.minecraft.nbt.NBTTagCompound;
@@ -34,11 +33,8 @@ public final class QuestChapter extends QuestObject
 	public QuestChapter(QuestFile f, NBTTagCompound nbt)
 	{
 		file = f;
-		readID(nbt);
-		title = nbt.getString("title");
+		readCommonData(nbt);
 		description = new ArrayList<>();
-		icon = ItemStackSerializer.read(nbt.getCompoundTag("icon"));
-		completionCommand = nbt.getString("completion_command");
 		visibilityType = EnumQuestVisibilityType.NAME_MAP.get(nbt.getString("visibility"));
 		quests = new ArrayList<>();
 
@@ -78,20 +74,7 @@ public final class QuestChapter extends QuestObject
 	@Override
 	public void writeData(NBTTagCompound nbt)
 	{
-		if (!title.isEmpty())
-		{
-			nbt.setString("title", title);
-		}
-
-		if (!icon.isEmpty())
-		{
-			nbt.setTag("icon", ItemStackSerializer.write(icon));
-		}
-
-		if (!completionCommand.isEmpty())
-		{
-			nbt.setString("completion_command", completionCommand);
-		}
+		writeCommonData(nbt);
 
 		if (visibilityType != EnumQuestVisibilityType.NORMAL)
 		{
