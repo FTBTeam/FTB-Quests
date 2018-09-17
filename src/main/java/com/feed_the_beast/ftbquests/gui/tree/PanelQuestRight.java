@@ -60,7 +60,7 @@ public class PanelQuestRight extends Panel
 				afterText.add(new ButtonAddReward(this, treeGui.selectedQuest));
 			}
 
-			setWidth(100);
+			setWidth(20);
 
 			for (Widget widget : afterText)
 			{

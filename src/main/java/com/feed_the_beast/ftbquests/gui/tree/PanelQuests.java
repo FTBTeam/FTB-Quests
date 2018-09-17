@@ -78,7 +78,7 @@ public class PanelQuests extends Panel
 		maxX += 6;
 		maxY += 6;
 
-		int bsize = treeGui.zoom * 3 / 2;
+		int bsize = treeGui.zoom * 9 / 5;
 
 		treeGui.scrollWidth = (maxX - minX + 1) * bsize;
 		treeGui.scrollHeight = (maxY - minY + 1) * bsize;
