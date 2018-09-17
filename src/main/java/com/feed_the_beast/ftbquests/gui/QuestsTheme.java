@@ -185,7 +185,8 @@ public class QuestsTheme extends Theme
 	@Override
 	public void drawContextMenuBackground(int x, int y, int w, int h)
 	{
-		Color4I.DARK_GRAY.withAlpha(200).withOutline(Color4I.GRAY.withAlpha(200), true).draw(x, y, w, h);
+		GuiHelper.drawHollowRect(x, y, w, h, Color4I.GRAY, true);
+		drawGui(x + 1, y + 1, w - 2, h - 2, WidgetType.DISABLED);
 	}
 
 	@Override

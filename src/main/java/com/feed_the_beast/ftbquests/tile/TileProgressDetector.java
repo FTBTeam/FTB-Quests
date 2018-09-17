@@ -232,14 +232,7 @@ public class TileProgressDetector extends TileBase implements ITickable, IConfig
 			}
 		}.addType(QuestObjectType.FILE).addType(QuestObjectType.CHAPTER).addType(QuestObjectType.QUEST).addType(QuestObjectType.TASK).addType(QuestObjectType.VARIABLE), new ConfigQuestObject("*"));
 
-		group.add("level", new ConfigBoolean(level)
-		{
-			@Override
-			public void setBoolean(boolean v)
-			{
-				level = v;
-			}
-		}, new ConfigBoolean(false));
+		group.add("level", new ConfigBoolean.SimpleBoolean(() -> level, v -> level = v), new ConfigBoolean(false));
 
 		FTBLibAPI.editServerConfig(player, group0, this);
 	}

@@ -418,24 +418,10 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 
 				if (editor)
 				{
-					group.add("indestructible", new ConfigBoolean(indestructible)
-					{
-						@Override
-						public void setBoolean(boolean v)
-						{
-							indestructible = v;
-						}
-					}, new ConfigBoolean(false));
+					group.add("indestructible", new ConfigBoolean.SimpleBoolean(() -> indestructible, v -> indestructible = v), new ConfigBoolean(false));
 				}
 
-				group.add("input_only", new ConfigBoolean(inputOnly)
-				{
-					@Override
-					public void setBoolean(boolean v)
-					{
-						inputOnly = v;
-					}
-				}, new ConfigBoolean(false));
+				group.add("input_only", new ConfigBoolean.SimpleBoolean(() -> inputOnly, v -> inputOnly = v), new ConfigBoolean(false));
 
 				group.add("input_mode_icon", new ConfigItemStack(inputModeIcon)
 				{

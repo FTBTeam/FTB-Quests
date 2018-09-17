@@ -1,5 +1,6 @@
 package com.feed_the_beast.ftbquests.quest.tasks;
 
+import com.feed_the_beast.ftblib.lib.config.ConfigBoolean;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigItemStack;
 import com.feed_the_beast.ftblib.lib.config.ConfigList;
@@ -14,6 +15,8 @@ import com.feed_the_beast.ftblib.lib.util.StringJoiner;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -26,12 +29,14 @@ import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemHandlerHelper;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Predicate;
 
 /**
@@ -41,6 +46,9 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 {
 	public final List<ItemStack> items;
 	public long count;
+	public boolean checkOnly;
+	public boolean ignoreDamage;
+	public boolean ignoreNBT;
 
 	public ItemTask(Quest quest, NBTTagCompound nbt)
 	{
@@ -77,6 +85,10 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 		{
 			count = 1;
 		}
+
+		checkOnly = nbt.getBoolean("check_only");
+		ignoreDamage = nbt.getBoolean("ignore_damage");
+		ignoreNBT = nbt.getBoolean("ignore_nbt");
 	}
 
 	@Override
@@ -110,6 +122,21 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 		if (count > 1)
 		{
 			nbt.setLong("count", count);
+		}
+
+		if (checkOnly)
+		{
+			nbt.setBoolean("check_only", true);
+		}
+
+		if (ignoreDamage)
+		{
+			nbt.setBoolean("ignore_damage", true);
+		}
+
+		if (ignoreNBT)
+		{
+			nbt.setBoolean("ignore_nbt", true);
 		}
 	}
 
@@ -172,16 +199,22 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 		{
 			return false;
 		}
-		else if (stack.getCount() != 1)
-		{
-			stack = ItemHandlerHelper.copyStackWithSize(stack, 1);
-		}
+
+		Item item = stack.getItem();
+		int meta = ignoreDamage ? 0 : stack.getMetadata();
+		NBTTagCompound nbt = item.getNBTShareTag(stack);
 
 		for (ItemStack stack1 : items)
 		{
-			if (ItemStack.areItemStacksEqualUsingNBTShareTag(stack, stack1))
+			if (item == stack1.getItem())
 			{
-				return true;
+				if (ignoreDamage || meta == stack1.getMetadata())
+				{
+					if (ignoreNBT || Objects.equals(nbt, stack1.getItem().getNBTShareTag(stack1)))
+					{
+						return true;
+					}
+				}
 			}
 		}
 
@@ -216,26 +249,16 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 			}
 		}, new ConfigList<>(new ConfigItemStack(ItemStack.EMPTY, true)));
 
-		group.add("count", new ConfigLong(1, 1, Long.MAX_VALUE)
-		{
-			@Override
-			public long getLong()
-			{
-				return count;
-			}
-
-			@Override
-			public void setLong(long v)
-			{
-				count = v;
-			}
-		}, new ConfigLong(1));
+		group.add("count", new ConfigLong.SimpleLong(1, Long.MAX_VALUE, () -> count, v -> count = v), new ConfigLong(1));
+		group.add("check_only", new ConfigBoolean.SimpleBoolean(() -> checkOnly, v -> checkOnly = v), new ConfigBoolean(false));
+		group.add("ignore_damage", new ConfigBoolean.SimpleBoolean(() -> ignoreDamage, v -> ignoreDamage = v), new ConfigBoolean(false));
+		group.add("ignore_nbt", new ConfigBoolean.SimpleBoolean(() -> ignoreNBT, v -> ignoreNBT = v), new ConfigBoolean(false));
 	}
 
 	@Override
 	public boolean canInsertItem()
 	{
-		return true;
+		return !checkOnly;
 	}
 
 	@Override
@@ -321,6 +344,66 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 		public int getSlotLimit(int slot)
 		{
 			return (int) Math.min(64L, task.count - progress);
+		}
+
+		@Override
+		public boolean submitItems(EntityPlayerMP player)
+		{
+			if (task.checkOnly)
+			{
+				long count = 0;
+
+				for (int i = 0; i < player.inventory.mainInventory.size(); i++)
+				{
+					ItemStack stack = player.inventory.mainInventory.get(i);
+
+					if (task.test(stack))
+					{
+						count += stack.getCount();
+					}
+					else
+					{
+						IItemHandler itemHandler = stack.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
+
+						if (itemHandler != null)
+						{
+							for (int j = 0; j < itemHandler.getSlots(); j++)
+							{
+								ItemStack stack1 = itemHandler.getStackInSlot(j);
+
+								if (task.test(stack1))
+								{
+									count += stack1.getCount();
+								}
+							}
+						}
+					}
+				}
+
+				if (count > progress)
+				{
+					progress = Math.min(task.count, count);
+					sync();
+				}
+
+				return false;
+			}
+
+			boolean changed = false;
+
+			for (int i = 0; i < player.inventory.mainInventory.size(); i++)
+			{
+				ItemStack stack = player.inventory.mainInventory.get(i);
+				ItemStack stack1 = insertItem(stack, false, false, player);
+
+				if (!ItemStack.areItemStacksEqual(stack, stack1))
+				{
+					changed = true;
+					player.inventory.mainInventory.set(i, stack1);
+				}
+			}
+
+			return changed;
 		}
 	}
 }

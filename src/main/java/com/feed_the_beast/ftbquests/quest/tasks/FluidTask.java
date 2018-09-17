@@ -180,20 +180,7 @@ public class FluidTask extends QuestTask
 			}
 		}, new ConfigNBT(null));
 
-		group.add("amount", new ConfigLong(1, 1, Long.MAX_VALUE)
-		{
-			@Override
-			public long getLong()
-			{
-				return amount;
-			}
-
-			@Override
-			public void setLong(long v)
-			{
-				amount = v;
-			}
-		}, new ConfigLong(1000L));
+		group.add("amount", new ConfigLong.SimpleLong(1, Long.MAX_VALUE, () -> amount, v -> amount = v), new ConfigLong(1000L));
 	}
 
 	@Override
