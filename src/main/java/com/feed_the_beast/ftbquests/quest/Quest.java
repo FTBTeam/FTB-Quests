@@ -13,6 +13,7 @@ import com.feed_the_beast.ftbquests.events.ObjectCompletedEvent;
 import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskType;
+import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagInt;
@@ -590,6 +591,32 @@ public final class Quest extends QuestObject
 				}
 			}
 		}, new ConfigList<>(new ConfigString("")));
+
+		group.add("dependencies", new ConfigList<ConfigQuestObject>(new ConfigQuestObject("").addType(QuestObjectType.QUEST).addType(QuestObjectType.CHAPTER).addType(QuestObjectType.VARIABLE))
+
+		{
+			@Override
+			public void readFromList()
+			{
+				dependencies.clear();
+
+				for (ConfigQuestObject value : list)
+				{
+					dependencies.add(value.getString());
+				}
+			}
+
+			@Override
+			public void writeToList()
+			{
+				list.clear();
+
+				for (String value : dependencies)
+				{
+					list.add(new ConfigQuestObject(value).addType(QuestObjectType.QUEST).addType(QuestObjectType.CHAPTER).addType(QuestObjectType.VARIABLE));
+				}
+			}
+		}, new ConfigList<>(new ConfigQuestObject(""))).setDisplayName(new TextComponentTranslation("ftbquests.dependencies"));
 	}
 
 	public EnumVisibility getVisibility(@Nullable ITeamData data)
