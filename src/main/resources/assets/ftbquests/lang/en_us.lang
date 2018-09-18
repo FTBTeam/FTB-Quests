@@ -57,6 +57,7 @@ ftbquests.file.loot_size=Loot Size
 
 ftbquests.chapter=Chapter
 ftbquests.chapter.description=Description
+ftbquests.chapter.visibility=Visibility [WIP!]
 
 ftbquests.quest=Quest
 ftbquests.quest.description=Description

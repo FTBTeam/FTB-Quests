@@ -12,6 +12,7 @@ import com.feed_the_beast.ftblib.lib.icon.IconAnimation;
 import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
 import com.feed_the_beast.ftblib.lib.item.ItemStackSerializer;
 import com.feed_the_beast.ftblib.lib.util.StringJoiner;
+import com.feed_the_beast.ftbquests.net.MessageSubmitItems;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import net.minecraft.entity.player.EntityPlayer;
@@ -263,6 +264,13 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 
 	@Override
 	@SideOnly(Side.CLIENT)
+	public void onButtonClicked()
+	{
+		new MessageSubmitItems(getID()).sendToServer();
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
 	public void addMouseOverText(List<String> list, @Nullable QuestTaskData data)
 	{
 		super.addMouseOverText(list, data);
@@ -361,7 +369,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 					{
 						count += stack.getCount();
 					}
-					else
+					else if (!stack.isEmpty())
 					{
 						IItemHandler itemHandler = stack.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
 

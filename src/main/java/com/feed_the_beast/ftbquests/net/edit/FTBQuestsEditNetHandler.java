@@ -27,5 +27,7 @@ public class FTBQuestsEditNetHandler
 		EDIT.register(new MessageEditRewardResponse());
 		EDIT.register(new MessageEditDependency());
 		EDIT.register(new MessageEditDependencyResponse());
+		EDIT.register(new MessageEditObjectQuick());
+		EDIT.register(new MessageEditObjectQuickResponse());
 	}
 }
