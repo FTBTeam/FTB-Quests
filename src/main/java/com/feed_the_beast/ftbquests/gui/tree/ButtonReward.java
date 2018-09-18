@@ -117,7 +117,21 @@ public class ButtonReward extends SimpleTextButton
 				new GuiSelectItemStack(value, this).openGui();
 			}));
 
-			contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.reward.team_reward") + ": " + (reward.team ? TextFormatting.BLUE + "true" : "false"), reward.team ? GuiIcons.LOCK : GuiIcons.LOCK_OPEN, () -> new MessageEditReward(reward.uid, !reward.team, reward.stack).sendToServer()));
+			contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.reward.team_reward"), GuiIcons.LOCK, null)
+			{
+				@Override
+				public void addMouseOverText(List<String> list)
+				{
+					list.add(reward.team ? TextFormatting.BLUE + "true" : "false");
+				}
+
+				@Override
+				public void onClicked(Panel panel, MouseButton button)
+				{
+					new MessageEditReward(reward.uid, !reward.team, reward.stack).sendToServer();
+				}
+			});
+
 			contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), GuiIcons.REMOVE, () -> new MessageEditReward(reward.uid, reward.team, ItemStack.EMPTY).sendToServer()).setYesNo(I18n.format("delete_item", reward.stack.getDisplayName())));
 			getGui().openContextMenu(contextMenu);
 		}

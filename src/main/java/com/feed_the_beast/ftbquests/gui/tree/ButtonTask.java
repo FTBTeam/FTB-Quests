@@ -56,17 +56,17 @@ public class ButtonTask extends SimpleTextButton
 	@Override
 	public void onClicked(MouseButton button)
 	{
-		if (button.isRight() && treeGui.questFile.canEdit())
+		if (button.isLeft())
+		{
+			GuiHelper.playClickSound();
+			task.onButtonClicked();
+		}
+		else if (button.isRight() && treeGui.questFile.canEdit())
 		{
 			GuiHelper.playClickSound();
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
 			treeGui.addObjectMenuItems(contextMenu, getGui(), task);
 			getGui().openContextMenu(contextMenu);
-		}
-		else if (button.isLeft())
-		{
-			GuiHelper.playClickSound();
-			task.onButtonClicked();
 		}
 	}
 

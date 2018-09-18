@@ -4,7 +4,6 @@ import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigItemStack;
 import com.feed_the_beast.ftblib.lib.config.ConfigString;
 import com.feed_the_beast.ftblib.lib.config.ConfigValueInstance;
-import com.feed_the_beast.ftblib.lib.gui.ContextMenuItem;
 import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
 import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.gui.Theme;
@@ -24,7 +23,6 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -55,7 +53,7 @@ public class ButtonDummyQuest extends Widget
 		if (button.isRight() && treeGui.questFile.canEdit())
 		{
 			GuiHelper.playClickSound();
-			List<ContextMenuItem> contextMenu = new ArrayList<>();
+			//List<ContextMenuItem> contextMenu = new ArrayList<>();
 
 			if (isCtrlKeyDown())
 			{
@@ -96,7 +94,7 @@ public class ButtonDummyQuest extends Widget
 				}
 			}).openGui();
 
-			getGui().openContextMenu(contextMenu);
+			//getGui().openContextMenu(contextMenu);
 			return true;
 		}
 		else if (button.isLeft() && treeGui.movingQuest && treeGui.selectedQuest != null && treeGui.questFile.canEdit())
@@ -128,6 +126,8 @@ public class ButtonDummyQuest extends Widget
 		{
 			return;
 		}
+
+		GlStateManager.color(1F, 1F, 1F, 1F);
 
 		int s = treeGui.zoom * 3 / 2;
 		int sx = x + (w - s) / 2;

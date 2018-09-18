@@ -113,7 +113,6 @@ public class ClientQuestFile extends QuestFile
 			questTreeGui.selectChapter(getChapter(selectedChapter));
 			questTreeGui.selectQuest(getQuest(selectedQuest));
 
-
 			if (guiOpen)
 			{
 				questTreeGui.openGui();

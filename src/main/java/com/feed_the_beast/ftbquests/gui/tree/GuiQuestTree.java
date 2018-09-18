@@ -1,6 +1,9 @@
 package com.feed_the_beast.ftbquests.gui.tree;
 
+import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigString;
+import com.feed_the_beast.ftblib.lib.config.ConfigValueInstance;
+import com.feed_the_beast.ftblib.lib.config.IIteratingConfig;
 import com.feed_the_beast.ftblib.lib.gui.ContextMenuItem;
 import com.feed_the_beast.ftblib.lib.gui.GuiBase;
 import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
@@ -11,6 +14,8 @@ import com.feed_the_beast.ftblib.lib.gui.Widget;
 import com.feed_the_beast.ftblib.lib.gui.WidgetType;
 import com.feed_the_beast.ftblib.lib.gui.misc.GuiEditConfigValue;
 import com.feed_the_beast.ftblib.lib.icon.Color4I;
+import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
+import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.gui.GuiVariables;
 import com.feed_the_beast.ftbquests.gui.QuestsTheme;
@@ -18,16 +23,19 @@ import com.feed_the_beast.ftbquests.net.MessageCompleteInstantly;
 import com.feed_the_beast.ftbquests.net.MessageResetProgress;
 import com.feed_the_beast.ftbquests.net.edit.MessageChangeID;
 import com.feed_the_beast.ftbquests.net.edit.MessageEditObject;
+import com.feed_the_beast.ftbquests.net.edit.MessageEditObjectQuick;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.QuestVariable;
 import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
+import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskType;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import org.lwjgl.input.Keyboard;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.List;
 
 public class GuiQuestTree extends GuiBase
@@ -120,6 +128,53 @@ public class GuiQuestTree extends GuiBase
 
 	public void addObjectMenuItems(List<ContextMenuItem> contextMenu, GuiBase prevGui, QuestObject object)
 	{
+		ConfigGroup group = ConfigGroup.newGroup(FTBQuests.MOD_ID);
+		ConfigGroup group1 = group.getGroup(object.getObjectType().getName());
+		ConfigGroup g = group1;
+
+		if (object instanceof QuestTask)
+		{
+			QuestTaskType type = QuestTaskType.getType(object.getClass());
+			g = group1.getGroup(type.getRegistryName().getNamespace()).getGroup(type.getRegistryName().getPath());
+		}
+
+		object.getConfig(g);
+		object.getExtraConfig(g);
+
+		if (!g.getValues().isEmpty())
+		{
+			List<ContextMenuItem> list = new ArrayList<>();
+
+			for (ConfigValueInstance inst : g.getValues())
+			{
+				if (inst.getValue() instanceof IIteratingConfig)
+				{
+					list.add(new ContextMenuItem(inst.getDisplayName().getFormattedText(), GuiIcons.SETTINGS_RED, null)
+					{
+						@Override
+						public void addMouseOverText(List<String> list)
+						{
+							list.add(inst.getValue().getStringForGUI().getFormattedText());
+						}
+
+						@Override
+						public void onClicked(Panel panel, MouseButton button)
+						{
+							//panel.getGui().closeContextMenu();
+							new MessageEditObjectQuick(object.getID(), inst.getName(), button.isLeft()).sendToServer();
+						}
+					});
+				}
+			}
+
+			if (!list.isEmpty())
+			{
+				list.sort(null);
+				contextMenu.addAll(list);
+				contextMenu.add(ContextMenuItem.SEPARATOR);
+			}
+		}
+
 		contextMenu.add(new ContextMenuItem(I18n.format("selectServer.edit"), GuiIcons.SETTINGS, () -> new MessageEditObject(object.getID()).sendToServer()));
 		contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), GuiIcons.REMOVE, () -> questFile.deleteObject(object.getID())).setYesNo(I18n.format("delete_item", object.getDisplayName().getFormattedText())));
 		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.reset_progress"), GuiIcons.REFRESH, () -> new MessageResetProgress(object.getID()).sendToServer()).setYesNo(I18n.format("ftbquests.gui.reset_progress_q")));
