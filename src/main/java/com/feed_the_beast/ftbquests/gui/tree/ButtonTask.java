@@ -116,7 +116,7 @@ public class ButtonTask extends SimpleTextButton
 	@Override
 	public void drawIcon(Theme theme, int x, int y, int w, int h)
 	{
-		task.drawGUI(treeGui.questFile.self.getQuestTaskData(task), x, y, w, h);
+		task.drawGUI(treeGui.questFile.self == null ? null : treeGui.questFile.self.getQuestTaskData(task), x, y, w, h);
 	}
 
 	@Override
