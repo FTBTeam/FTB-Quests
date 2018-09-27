@@ -1,9 +1,7 @@
-package com.feed_the_beast.ftbquests.quest.tasks;
+package com.feed_the_beast.ftbquests.quest.task;
 
 import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
-import com.feed_the_beast.ftblib.lib.config.ConfigInt;
-import com.feed_the_beast.ftblib.lib.config.ConfigLong;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
@@ -92,10 +90,10 @@ public class ForgeEnergyTask extends QuestTask
 	}
 
 	@Override
-	public void getConfig(ConfigGroup group)
+	public void getConfig(ConfigGroup config)
 	{
-		group.add("value", new ConfigLong.SimpleLong(1, Long.MAX_VALUE, () -> value, v -> value = v), new ConfigLong(10000L));
-		group.add("max_input", new ConfigInt.SimpleInt(1, Integer.MAX_VALUE, () -> maxInput, v -> maxInput = v), new ConfigInt(Integer.MAX_VALUE));
+		config.addLong("value", () -> value, v -> value = v, 10000, 1, Long.MAX_VALUE);
+		config.addInt("max_input", () -> maxInput, v -> maxInput = v, Integer.MAX_VALUE, 1, Integer.MAX_VALUE);
 	}
 
 	@Override

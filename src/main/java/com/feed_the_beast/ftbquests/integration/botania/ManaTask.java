@@ -1,17 +1,15 @@
 package com.feed_the_beast.ftbquests.integration.botania;
 
 import com.feed_the_beast.ftblib.lib.client.ClientUtils;
-import com.feed_the_beast.ftblib.lib.config.ConfigBoolean;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
-import com.feed_the_beast.ftblib.lib.config.ConfigLong;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
-import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskData;
-import com.feed_the_beast.ftbquests.quest.tasks.SimpleQuestTaskData;
+import com.feed_the_beast.ftbquests.quest.task.QuestTask;
+import com.feed_the_beast.ftbquests.quest.task.QuestTaskData;
+import com.feed_the_beast.ftbquests.quest.task.SimpleQuestTaskData;
 import com.feed_the_beast.ftbquests.tile.TileScreenCore;
 import com.feed_the_beast.ftbquests.tile.TileScreenPart;
 import net.minecraft.client.renderer.BufferBuilder;
@@ -127,11 +125,11 @@ public class ManaTask extends QuestTask
 	}
 
 	@Override
-	public void getConfig(ConfigGroup group)
+	public void getConfig(ConfigGroup config)
 	{
-		group.add("value", new ConfigLong.SimpleLong(1, Long.MAX_VALUE, () -> value, v -> value = v), new ConfigLong(1));
-		group.add("max_input", new ConfigLong.SimpleLong(1, Long.MAX_VALUE, () -> maxInput, v -> maxInput = v), new ConfigLong(Long.MAX_VALUE));
-		group.add("show_numbers", new ConfigBoolean.SimpleBoolean(() -> showNumbers, v -> showNumbers = v), new ConfigBoolean(false));
+		config.addLong("value", () -> value, v -> value = v, 1, 1, Long.MAX_VALUE);
+		config.addLong("max_input", () -> maxInput, v -> maxInput = v, Long.MAX_VALUE, 1, Long.MAX_VALUE);
+		config.addBool("show_numbers", () -> showNumbers, v -> showNumbers = v, false);
 	}
 
 	@Override

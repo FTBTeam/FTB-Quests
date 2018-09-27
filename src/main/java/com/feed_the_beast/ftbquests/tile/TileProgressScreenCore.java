@@ -1,7 +1,6 @@
 package com.feed_the_beast.ftbquests.tile;
 
 import com.feed_the_beast.ftblib.lib.config.ConfigBlockState;
-import com.feed_the_beast.ftblib.lib.config.ConfigBoolean;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigNull;
 import com.feed_the_beast.ftblib.lib.config.ConfigTeam;
@@ -29,6 +28,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentTranslation;
 
 import javax.annotation.Nullable;
+import java.util.Collections;
 
 /**
  * @author LatvianModder
@@ -238,30 +238,23 @@ public class TileProgressScreenCore extends TileProgressScreenBase implements IC
 				boolean editorOrDestructible = editor || !indestructible;
 				ConfigGroup group0 = ConfigGroup.newGroup("tile");
 				group0.setDisplayName(new TextComponentTranslation("tile.ftbquests.progress_screen.name"));
-				ConfigGroup group = group0.getGroup("ftbquests.screen");
+				ConfigGroup config = group0.getGroup("ftbquests.screen");
 
 				if (editor)
 				{
-					group.add("team", new ConfigTeam(team)
-					{
-						@Override
-						public void setString(String v)
-						{
-							team = v;
-						}
-					}, ConfigNull.INSTANCE).setDisplayName(new TextComponentTranslation("ftbquests.team"));
+					config.add("team", new ConfigTeam(() -> team, v -> team = v), ConfigNull.INSTANCE).setDisplayName(new TextComponentTranslation("ftbquests.team"));
 				}
 
-				group.add("chapter", new ConfigQuestObject(chapter)
+				config.add("chapter", new ConfigQuestObject(chapter, Collections.singleton(QuestObjectType.CHAPTER))
 				{
 					@Override
 					public void setString(String v)
 					{
 						chapter = v;
 					}
-				}.addType(QuestObjectType.CHAPTER), ConfigNull.INSTANCE).setCanEdit(editorOrDestructible).setDisplayName(new TextComponentTranslation("ftbquests.chapter"));
+				}, ConfigNull.INSTANCE).setCanEdit(editorOrDestructible).setDisplayName(new TextComponentTranslation("ftbquests.chapter"));
 
-				group.add("skin", new ConfigBlockState(skin)
+				config.add("skin", new ConfigBlockState(skin)
 				{
 					@Override
 					public void setBlockState(IBlockState v)
@@ -270,12 +263,12 @@ public class TileProgressScreenCore extends TileProgressScreenBase implements IC
 					}
 				}, new ConfigBlockState(BlockUtils.AIR_STATE)).setCanEdit(editorOrDestructible);
 
-				group.add("fullscreen", new ConfigBoolean.SimpleBoolean(() -> fullscreen, v -> fullscreen = v), new ConfigBoolean(false)).setCanEdit(editorOrDestructible);
-				group.add("hide_icons", new ConfigBoolean.SimpleBoolean(() -> hideIcons, v -> hideIcons = v), new ConfigBoolean(false)).setCanEdit(editorOrDestructible);
+				config.addBool("fullscreen", () -> fullscreen, v -> fullscreen = v, false).setCanEdit(editorOrDestructible);
+				config.addBool("hide_icons", () -> hideIcons, v -> hideIcons = v, false).setCanEdit(editorOrDestructible);
 
 				if (editor)
 				{
-					group.add("indestructible", new ConfigBoolean.SimpleBoolean(() -> indestructible, v -> indestructible = v), new ConfigBoolean(false));
+					config.addBool("indestructible", () -> indestructible, v -> indestructible = v, false);
 				}
 
 				FTBLibAPI.editServerConfig(player, group0, this);

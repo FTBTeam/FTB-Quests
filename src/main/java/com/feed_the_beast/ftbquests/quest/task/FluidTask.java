@@ -1,9 +1,8 @@
-package com.feed_the_beast.ftbquests.quest.tasks;
+package com.feed_the_beast.ftbquests.quest.task;
 
 import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftblib.lib.config.ConfigFluid;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
-import com.feed_the_beast.ftblib.lib.config.ConfigLong;
 import com.feed_the_beast.ftblib.lib.config.ConfigNBT;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftbquests.FTBQuests;
@@ -147,9 +146,9 @@ public class FluidTask extends QuestTask
 	}
 
 	@Override
-	public void getConfig(ConfigGroup group)
+	public void getConfig(ConfigGroup config)
 	{
-		group.add("fluid", new ConfigFluid(FluidRegistry.WATER, FluidRegistry.WATER)
+		config.add("fluid", new ConfigFluid(FluidRegistry.WATER, FluidRegistry.WATER)
 		{
 			@Override
 			public Fluid getFluid()
@@ -164,7 +163,7 @@ public class FluidTask extends QuestTask
 			}
 		}, new ConfigFluid(FluidRegistry.WATER, FluidRegistry.WATER));
 
-		group.add("fluid_nbt", new ConfigNBT(null)
+		config.add("fluid_nbt", new ConfigNBT(null)
 		{
 			@Override
 			@Nullable
@@ -180,7 +179,7 @@ public class FluidTask extends QuestTask
 			}
 		}, new ConfigNBT(null));
 
-		group.add("amount", new ConfigLong.SimpleLong(1, Long.MAX_VALUE, () -> amount, v -> amount = v), new ConfigLong(1000L));
+		config.addLong("amount", () -> amount, v -> amount = v, 1000L, 1, Long.MAX_VALUE);
 	}
 
 	@Override

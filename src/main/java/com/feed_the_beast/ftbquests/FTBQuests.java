@@ -9,7 +9,8 @@ import com.feed_the_beast.ftbquests.integration.buildcraft.BuildCraftIntegration
 import com.feed_the_beast.ftbquests.integration.ic2.IC2Integration;
 import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.net.FTBQuestsNetHandler;
-import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskType;
+import com.feed_the_beast.ftbquests.quest.reward.QuestRewardType;
+import com.feed_the_beast.ftbquests.quest.task.QuestTaskType;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
@@ -79,6 +80,7 @@ public class FTBQuests
 	public void onPostInit(FMLPostInitializationEvent event)
 	{
 		QuestTaskType.createRegistry();
+		QuestRewardType.createRegistry();
 	}
 
 	@Mod.EventHandler

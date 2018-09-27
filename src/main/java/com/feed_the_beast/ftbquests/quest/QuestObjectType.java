@@ -3,6 +3,9 @@ package com.feed_the_beast.ftbquests.quest;
 import net.minecraft.util.IStringSerializable;
 import net.minecraft.util.text.TextFormatting;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * @author LatvianModder
  */
@@ -15,6 +18,7 @@ public enum QuestObjectType implements IStringSerializable
 	VARIABLE("variable", 16, TextFormatting.DARK_PURPLE);
 
 	public static final QuestObjectType[] VALUES = values();
+	public static final List<QuestObjectType> ALL = Arrays.asList(VALUES);
 
 	private final String name;
 	private final String translationKey;

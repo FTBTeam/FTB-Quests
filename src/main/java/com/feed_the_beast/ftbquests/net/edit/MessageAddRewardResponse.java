@@ -8,8 +8,8 @@ import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.gui.tree.GuiQuestTree;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.QuestReward;
-import net.minecraft.item.ItemStack;
+import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
+import com.feed_the_beast.ftbquests.quest.reward.QuestRewardType;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -21,19 +21,17 @@ public class MessageAddRewardResponse extends MessageToClient
 {
 	private String quest;
 	private int uid;
-	private boolean team;
-	private ItemStack stack;
+	private NBTTagCompound nbt;
 
 	public MessageAddRewardResponse()
 	{
 	}
 
-	public MessageAddRewardResponse(String q, int i, boolean t, ItemStack is)
+	public MessageAddRewardResponse(String q, int i, NBTTagCompound n)
 	{
 		quest = q;
 		uid = i;
-		team = t;
-		stack = is;
+		nbt = n;
 	}
 
 	@Override
@@ -47,8 +45,7 @@ public class MessageAddRewardResponse extends MessageToClient
 	{
 		data.writeString(quest);
 		data.writeInt(uid);
-		data.writeBoolean(team);
-		data.writeNBT(stack.isEmpty() ? null : stack.serializeNBT());
+		data.writeNBT(nbt);
 	}
 
 	@Override
@@ -56,9 +53,7 @@ public class MessageAddRewardResponse extends MessageToClient
 	{
 		quest = data.readString();
 		uid = data.readInt();
-		team = data.readBoolean();
-		NBTTagCompound nbt = data.readNBT();
-		stack = nbt == null ? ItemStack.EMPTY : new ItemStack(nbt);
+		nbt = data.readNBT();
 	}
 
 	@Override
@@ -71,17 +66,19 @@ public class MessageAddRewardResponse extends MessageToClient
 
 			if (q != null)
 			{
-				QuestReward r = new QuestReward(q, uid);
-				r.team = team;
-				r.stack = stack;
-				q.rewards.add(r);
-				ClientQuestFile.INSTANCE.allRewards.put(r.uid, r);
+				QuestReward r = QuestRewardType.createReward(q, uid, nbt);
 
-				GuiQuestTree gui = ClientUtils.getCurrentGuiAs(GuiQuestTree.class);
-
-				if (gui != null)
+				if (r != null)
 				{
-					gui.questRight.refreshWidgets();
+					q.rewards.add(r);
+					ClientQuestFile.INSTANCE.allRewards.put(r.uid, r);
+
+					GuiQuestTree gui = ClientUtils.getCurrentGuiAs(GuiQuestTree.class);
+
+					if (gui != null)
+					{
+						gui.questRight.refreshWidgets();
+					}
 				}
 			}
 		}

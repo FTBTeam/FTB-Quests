@@ -1,8 +1,6 @@
 package com.feed_the_beast.ftbquests.gui.tree;
 
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
-import com.feed_the_beast.ftblib.lib.config.ConfigItemStack;
-import com.feed_the_beast.ftblib.lib.config.ConfigValueInstance;
 import com.feed_the_beast.ftblib.lib.gui.ContextMenuItem;
 import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
 import com.feed_the_beast.ftblib.lib.gui.Panel;
@@ -16,12 +14,12 @@ import com.feed_the_beast.ftbquests.gui.QuestsTheme;
 import com.feed_the_beast.ftbquests.net.edit.MessageCreateObject;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
-import com.feed_the_beast.ftbquests.quest.tasks.ItemTask;
-import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
-import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskType;
+import com.feed_the_beast.ftbquests.quest.task.ItemTask;
+import com.feed_the_beast.ftbquests.quest.task.QuestTask;
+import com.feed_the_beast.ftbquests.quest.task.QuestTaskType;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraftforge.items.ItemHandlerHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,21 +50,19 @@ public class ButtonAddTask extends SimpleTextButton
 
 		if (isCtrlKeyDown())
 		{
-			new GuiSelectItemStack(new ConfigValueInstance("item", ConfigGroup.DEFAULT, new ConfigItemStack(ItemStack.EMPTY)
-			{
-				@Override
-				public void setStack(ItemStack stack)
+			new GuiSelectItemStack(this, stack -> {
+				if (!stack.isEmpty())
 				{
 					NBTTagCompound nbt = new NBTTagCompound();
 					ItemTask itemTask = new ItemTask(quest, nbt);
-					itemTask.items.add(stack);
-					itemTask.count = 1L;
+					itemTask.items.add(ItemHandlerHelper.copyStackWithSize(stack, 1));
+					itemTask.count = stack.getCount();
 					itemTask.writeData(nbt);
 					nbt.setString("type", QuestTaskType.getTypeForNBT(ItemTask.class));
 					nbt.setString("id", StringUtils.toSnakeCase(stack.getDisplayName()));
 					new MessageCreateObject(QuestObjectType.TASK, quest.getID(), nbt).sendToServer();
 				}
-			}), this).openGui();
+			}).openGui();
 			return;
 		}
 

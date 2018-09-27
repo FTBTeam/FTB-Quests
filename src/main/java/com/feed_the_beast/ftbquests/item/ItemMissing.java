@@ -2,14 +2,14 @@ package com.feed_the_beast.ftbquests.item;
 
 import com.feed_the_beast.ftblib.lib.item.ItemStackSerializer;
 import net.minecraft.client.util.ITooltipFlag;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.EnumRarity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.EnumActionResult;
-import net.minecraft.util.EnumHand;
+import net.minecraft.nbt.NBTTagString;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.TextFormatting;
@@ -28,14 +28,61 @@ import java.util.List;
  */
 public class ItemMissing extends Item
 {
-	public static ItemStack getContainedStack(ItemStack stack)
+	private static ItemStack getContainedStack(ItemStack stack)
 	{
-		return stack.hasTagCompound() ? ItemStackSerializer.read(stack.getTagCompound().getCompoundTag("item")) : ItemStack.EMPTY;
+		return stack.hasTagCompound() ? ItemStackSerializer.read(stack.getTagCompound().getTag("item")) : ItemStack.EMPTY;
 	}
 
-	public static void setContainedStack(ItemStack stack, NBTTagCompound nbt)
+	public static ItemStack read(@Nullable NBTBase nbt)
 	{
-		stack.setTagInfo("item", nbt);
+		if (nbt == null || nbt.isEmpty())
+		{
+			return ItemStack.EMPTY;
+		}
+
+		ItemStack stack = ItemStackSerializer.read(nbt);
+
+		if (stack.getItem() == FTBQuestsItems.MISSING)
+		{
+			ItemStack stack1 = getContainedStack(stack);
+
+			if (!stack1.isEmpty())
+			{
+				return stack1;
+			}
+		}
+		else if (stack.isEmpty())
+		{
+			ItemStack stack1 = new ItemStack(FTBQuestsItems.MISSING);
+			stack1.setTagInfo("item", nbt.copy());
+			return stack1;
+		}
+
+		return stack;
+	}
+
+	public static NBTBase write(ItemStack stack, boolean forceCompound)
+	{
+		if (stack.getItem() == FTBQuestsItems.MISSING)
+		{
+			NBTBase base = stack.hasTagCompound() ? stack.getTagCompound().getTag("item") : null;
+
+			if (forceCompound)
+			{
+				NBTTagCompound nbt = new NBTTagCompound();
+
+				if (base != null && !base.isEmpty())
+				{
+					nbt.setTag("item", base);
+				}
+
+				return nbt;
+			}
+
+			return base == null || base.isEmpty() ? new NBTTagString("") : base;
+		}
+
+		return ItemStackSerializer.write(stack, forceCompound);
 	}
 
 	public ItemMissing()
@@ -44,22 +91,24 @@ public class ItemMissing extends Item
 	}
 
 	@Override
-	public ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer player, EnumHand hand)
+	public void onUpdate(ItemStack stack, World world, Entity entity, int slot, boolean isSelected)
 	{
-		ItemStack stack = player.getHeldItem(hand);
+		if (!(entity instanceof EntityPlayer))
+		{
+			return;
+		}
+
 		ItemStack stack1 = getContainedStack(stack);
 
 		if (!stack1.isEmpty())
 		{
 			if (!world.isRemote)
 			{
-				ItemHandlerHelper.giveItemToPlayer(player, stack1);
+				ItemHandlerHelper.giveItemToPlayer((EntityPlayer) entity, stack1, slot);
 			}
 
 			stack.shrink(1);
 		}
-
-		return new ActionResult<>(EnumActionResult.SUCCESS, stack);
 	}
 
 	@Override
@@ -83,7 +132,13 @@ public class ItemMissing extends Item
 			return;
 		}
 
-		NBTTagCompound nbt = stack.getTagCompound().getCompoundTag("item");
+		NBTBase nbt = stack.getTagCompound().getTag("item");
+
+		if (nbt == null || nbt.isEmpty())
+		{
+			return;
+		}
+
 		ItemStack stack1 = ItemStackSerializer.read(nbt);
 		ResourceLocation name;
 		int meta = 0, count = 1;
@@ -92,13 +147,25 @@ public class ItemMissing extends Item
 		{
 			name = stack1.getItem().getRegistryName();
 			count = stack1.getCount();
-			meta = 0;
+			meta = stack1.getMetadata();
 		}
 		else
 		{
-			if (nbt.hasKey("item", Constants.NBT.TAG_STRING))
+			NBTTagCompound nbt1;
+
+			if (nbt instanceof NBTTagString)
 			{
-				String[] sa = nbt.getString("item").split(" ", 4);
+				nbt1 = new NBTTagCompound();
+				nbt1.setTag("item", nbt);
+			}
+			else
+			{
+				nbt1 = (NBTTagCompound) nbt;
+			}
+
+			if (nbt1.hasKey("item", Constants.NBT.TAG_STRING))
+			{
+				String[] sa = nbt1.getString("item").split(" ", 4);
 				name = new ResourceLocation(sa[0]);
 
 				if (sa.length >= 2)
@@ -113,9 +180,9 @@ public class ItemMissing extends Item
 			}
 			else
 			{
-				name = new ResourceLocation(nbt.getString("id"));
-				count = nbt.getByte("Count");
-				meta = nbt.getShort("Damage");
+				name = new ResourceLocation(nbt1.getString("id"));
+				count = nbt1.getByte("Count");
+				meta = nbt1.getShort("Damage");
 			}
 		}
 

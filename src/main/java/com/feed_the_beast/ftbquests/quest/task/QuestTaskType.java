@@ -1,4 +1,4 @@
-package com.feed_the_beast.ftbquests.quest.tasks;
+package com.feed_the_beast.ftbquests.quest.task;
 
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.Quest;
@@ -53,7 +53,7 @@ public final class QuestTaskType extends IForgeRegistryEntry.Impl<QuestTaskType>
 
 		if (id.isEmpty())
 		{
-			return null;
+			id = "item";
 		}
 
 		if (id.indexOf(':') == -1)
