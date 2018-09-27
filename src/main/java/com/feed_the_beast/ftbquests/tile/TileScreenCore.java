@@ -1,7 +1,6 @@
 package com.feed_the_beast.ftbquests.tile;
 
 import com.feed_the_beast.ftblib.lib.config.ConfigBlockState;
-import com.feed_the_beast.ftblib.lib.config.ConfigBoolean;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigItemStack;
 import com.feed_the_beast.ftblib.lib.config.ConfigNull;
@@ -18,8 +17,8 @@ import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
-import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
-import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskData;
+import com.feed_the_beast.ftbquests.quest.task.QuestTask;
+import com.feed_the_beast.ftbquests.quest.task.QuestTaskData;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
 import net.minecraft.block.BlockHorizontal;
 import net.minecraft.block.state.IBlockState;
@@ -37,6 +36,7 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.items.CapabilityItemHandler;
 
 import javax.annotation.Nullable;
+import java.util.Collections;
 
 /**
  * @author LatvianModder
@@ -381,18 +381,11 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 				boolean editorOrDestructible = editor || !indestructible;
 				ConfigGroup group0 = ConfigGroup.newGroup("tile");
 				group0.setDisplayName(new TextComponentTranslation("tile.ftbquests.screen.name"));
-				ConfigGroup group = group0.getGroup("ftbquests.screen");
+				ConfigGroup config = group0.getGroup("ftbquests.screen");
 
-				group.add("team", new ConfigTeam(team)
-				{
-					@Override
-					public void setString(String v)
-					{
-						team = v;
-					}
-				}, ConfigNull.INSTANCE).setDisplayName(new TextComponentTranslation("ftbquests.team")).setCanEdit(editor);
+				config.add("team", new ConfigTeam(() -> team, v -> team = v), ConfigNull.INSTANCE).setDisplayName(new TextComponentTranslation("ftbquests.team")).setCanEdit(editor);
 
-				group.add("task", new ConfigQuestObject(getTask() == null ? "" : getTask().getID())
+				config.add("task", new ConfigQuestObject(getTask() == null ? "" : getTask().getID(), Collections.singleton(QuestObjectType.TASK))
 				{
 					@Override
 					public void setString(String v)
@@ -405,9 +398,9 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 							task = t.id;
 						}
 					}
-				}.addType(QuestObjectType.TASK), ConfigNull.INSTANCE).setCanEdit(editorOrDestructible).setDisplayName(new TextComponentTranslation("ftbquests.task"));
+				}, ConfigNull.INSTANCE).setCanEdit(editorOrDestructible).setDisplayName(new TextComponentTranslation("ftbquests.task"));
 
-				group.add("skin", new ConfigBlockState(skin)
+				config.add("skin", new ConfigBlockState(skin)
 				{
 					@Override
 					public void setBlockState(IBlockState v)
@@ -418,19 +411,11 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 
 				if (editor)
 				{
-					group.add("indestructible", new ConfigBoolean.SimpleBoolean(() -> indestructible, v -> indestructible = v), new ConfigBoolean(false));
+					config.addBool("indestructible", () -> indestructible, v -> indestructible = v, false);
 				}
 
-				group.add("input_only", new ConfigBoolean.SimpleBoolean(() -> inputOnly, v -> inputOnly = v), new ConfigBoolean(false));
-
-				group.add("input_mode_icon", new ConfigItemStack(inputModeIcon)
-				{
-					@Override
-					public void setStack(ItemStack v)
-					{
-						inputModeIcon = v;
-					}
-				}, new ConfigItemStack(ItemStack.EMPTY));
+				config.addBool("input_only", () -> inputOnly, v -> inputOnly = v, false);
+				config.add("input_mode_icon", new ConfigItemStack.SimpleStack(() -> inputModeIcon, v -> inputModeIcon = v), new ConfigItemStack(ItemStack.EMPTY));
 
 				FTBLibAPI.editServerConfig(player, group0, this);
 			}

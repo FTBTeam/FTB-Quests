@@ -7,7 +7,7 @@ import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
-import com.feed_the_beast.ftbquests.quest.QuestReward;
+import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
 import com.feed_the_beast.ftbquests.tile.TileProgressScreenCore;
 import com.feed_the_beast.ftbquests.tile.TileScreenCore;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;

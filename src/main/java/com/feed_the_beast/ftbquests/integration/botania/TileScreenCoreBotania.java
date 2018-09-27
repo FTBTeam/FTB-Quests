@@ -1,6 +1,6 @@
 package com.feed_the_beast.ftbquests.integration.botania;
 
-import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskData;
+import com.feed_the_beast.ftbquests.quest.task.QuestTaskData;
 import com.feed_the_beast.ftbquests.tile.TileScreenCore;
 import vazkii.botania.api.mana.IManaReceiver;
 

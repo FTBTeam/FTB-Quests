@@ -1,8 +1,6 @@
 package com.feed_the_beast.ftbquests.quest;
 
-import com.feed_the_beast.ftblib.lib.config.ConfigEnum;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
-import com.feed_the_beast.ftblib.lib.config.ConfigList;
 import com.feed_the_beast.ftblib.lib.config.ConfigString;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.IconAnimation;
@@ -245,47 +243,10 @@ public final class QuestChapter extends QuestObject
 	}
 
 	@Override
-	public void getConfig(ConfigGroup group)
+	public void getConfig(ConfigGroup config)
 	{
-		group.add("description", new ConfigList<ConfigString>(new ConfigString(""))
-		{
-			@Override
-			public void readFromList()
-			{
-				description.clear();
-
-				for (ConfigString value : list)
-				{
-					description.add(value.getString());
-				}
-			}
-
-			@Override
-			public void writeToList()
-			{
-				list.clear();
-
-				for (String value : description)
-				{
-					list.add(new ConfigString(value));
-				}
-			}
-		}, new ConfigList<>(new ConfigString("")));
-
-		group.add("visibility", new ConfigEnum<EnumQuestVisibilityType>(EnumQuestVisibilityType.NAME_MAP)
-		{
-			@Override
-			public EnumQuestVisibilityType getValue()
-			{
-				return visibilityType;
-			}
-
-			@Override
-			public void setValue(EnumQuestVisibilityType v)
-			{
-				visibilityType = v;
-			}
-		}, new ConfigEnum<>(EnumQuestVisibilityType.NAME_MAP));
+		config.addList("description", description, new ConfigString(""), ConfigString::new, ConfigString::getString);
+		config.addEnum("visibility", () -> visibilityType, v -> visibilityType = v, EnumQuestVisibilityType.NAME_MAP);
 	}
 
 	public EnumVisibility getVisibility(@Nullable ITeamData data)

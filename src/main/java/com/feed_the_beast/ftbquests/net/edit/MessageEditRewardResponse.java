@@ -7,11 +7,12 @@ import com.feed_the_beast.ftblib.lib.net.MessageToClient;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.gui.tree.GuiQuestTree;
-import com.feed_the_beast.ftbquests.quest.QuestReward;
-import net.minecraft.item.ItemStack;
+import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+
+import javax.annotation.Nullable;
 
 /**
  * @author LatvianModder
@@ -19,18 +20,16 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class MessageEditRewardResponse extends MessageToClient
 {
 	private int uid;
-	private boolean team;
-	private ItemStack stack;
+	private NBTTagCompound nbt;
 
 	public MessageEditRewardResponse()
 	{
 	}
 
-	public MessageEditRewardResponse(int i, boolean t, ItemStack is)
+	public MessageEditRewardResponse(int id, @Nullable NBTTagCompound n)
 	{
-		uid = i;
-		team = t;
-		stack = is;
+		uid = id;
+		nbt = n;
 	}
 
 	@Override
@@ -43,17 +42,14 @@ public class MessageEditRewardResponse extends MessageToClient
 	public void writeData(DataOut data)
 	{
 		data.writeInt(uid);
-		data.writeBoolean(team);
-		data.writeNBT(stack.isEmpty() ? null : stack.serializeNBT());
+		data.writeNBT(nbt);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
 		uid = data.readInt();
-		team = data.readBoolean();
-		NBTTagCompound nbt = data.readNBT();
-		stack = nbt == null ? ItemStack.EMPTY : new ItemStack(nbt);
+		nbt = data.readNBT();
 	}
 
 	@Override
@@ -62,17 +58,18 @@ public class MessageEditRewardResponse extends MessageToClient
 	{
 		if (ClientQuestFile.INSTANCE != null)
 		{
-			QuestReward q = ClientQuestFile.INSTANCE.allRewards.get(uid);
+			QuestReward r = ClientQuestFile.INSTANCE.allRewards.get(uid);
 
-			if (q != null)
+			if (r != null)
 			{
-				q.team = team;
-				q.stack = stack;
-
-				if (q.stack.isEmpty())
+				if (nbt == null)
 				{
-					q.quest.rewards.remove(q);
-					ClientQuestFile.INSTANCE.allRewards.remove(q.uid);
+					r.quest.rewards.remove(r);
+					ClientQuestFile.INSTANCE.allRewards.remove(r.uid);
+				}
+				else
+				{
+					r.readCommonData(nbt);
 				}
 
 				GuiQuestTree gui = ClientUtils.getCurrentGuiAs(GuiQuestTree.class);

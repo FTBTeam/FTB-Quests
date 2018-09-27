@@ -5,15 +5,14 @@ import buildcraft.api.mj.IMjReceiver;
 import buildcraft.api.mj.MjAPI;
 import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
-import com.feed_the_beast.ftblib.lib.config.ConfigLong;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
-import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskData;
-import com.feed_the_beast.ftbquests.quest.tasks.SimpleQuestTaskData;
+import com.feed_the_beast.ftbquests.quest.task.QuestTask;
+import com.feed_the_beast.ftbquests.quest.task.QuestTaskData;
+import com.feed_the_beast.ftbquests.quest.task.SimpleQuestTaskData;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
@@ -94,10 +93,10 @@ public class MJTask extends QuestTask
 	}
 
 	@Override
-	public void getConfig(ConfigGroup group)
+	public void getConfig(ConfigGroup config)
 	{
-		group.add("value", new ConfigLong.SimpleLong(1, Long.MAX_VALUE, () -> value, v -> value = v), new ConfigLong(10000000000L));
-		group.add("max_input", new ConfigLong.SimpleLong(1, Long.MAX_VALUE, () -> maxInput, v -> maxInput = v), new ConfigLong(Long.MAX_VALUE));
+		config.addLong("value", () -> value, v -> value = v, 10000000000L, 1L, Long.MAX_VALUE);
+		config.addLong("max_input", () -> maxInput, v -> maxInput = v, Long.MAX_VALUE, 1L, Long.MAX_VALUE);
 	}
 
 	@Override

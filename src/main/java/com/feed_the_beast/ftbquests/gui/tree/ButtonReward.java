@@ -1,8 +1,8 @@
 package com.feed_the_beast.ftbquests.gui.tree;
 
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
-import com.feed_the_beast.ftblib.lib.config.ConfigItemStack;
 import com.feed_the_beast.ftblib.lib.config.ConfigValueInstance;
+import com.feed_the_beast.ftblib.lib.config.IIteratingConfig;
 import com.feed_the_beast.ftblib.lib.gui.ContextMenuItem;
 import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
 import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
@@ -10,17 +10,16 @@ import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.gui.SimpleTextButton;
 import com.feed_the_beast.ftblib.lib.gui.Theme;
 import com.feed_the_beast.ftblib.lib.gui.WidgetType;
-import com.feed_the_beast.ftblib.lib.gui.misc.GuiSelectItemStack;
-import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
+import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
+import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.gui.QuestsTheme;
 import com.feed_the_beast.ftbquests.net.MessageClaimReward;
-import com.feed_the_beast.ftbquests.net.edit.MessageEditReward;
-import com.feed_the_beast.ftbquests.quest.QuestReward;
+import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
+import com.feed_the_beast.ftbquests.quest.reward.QuestRewardType;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.TextFormatting;
 
 import java.util.ArrayList;
@@ -35,7 +34,7 @@ public class ButtonReward extends SimpleTextButton
 
 	public ButtonReward(Panel panel, QuestReward r)
 	{
-		super(panel, (r.team ? TextFormatting.BLUE.toString() : "") + r.stack.getDisplayName(), ItemIcon.getItemIcon(r.stack));
+		super(panel, (r.team ? StringUtils.color(r.getDisplayName(), TextFormatting.BLUE) : r.getDisplayName()).getFormattedText(), r.getIcon());
 		reward = r;
 	}
 
@@ -52,7 +51,7 @@ public class ButtonReward extends SimpleTextButton
 			list.add(TextFormatting.GRAY + I18n.format("ftbquests.reward.team_reward"));
 		}
 
-		GuiHelper.addStackTooltip(reward.stack, list, "");
+		reward.addMouseOverText(list);
 	}
 
 	@Override
@@ -97,42 +96,50 @@ public class ButtonReward extends SimpleTextButton
 		{
 			GuiHelper.playClickSound();
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
-			contextMenu.add(new ContextMenuItem(I18n.format("selectServer.edit"), GuiIcons.SETTINGS, () -> {
-				ConfigValueInstance value = new ConfigValueInstance("item", ConfigGroup.DEFAULT, new ConfigItemStack(ItemStack.EMPTY)
-				{
-					@Override
-					public ItemStack getStack()
-					{
-						return reward.stack;
-					}
+			QuestRewardType type = QuestRewardType.getType(reward.getClass());
 
-					@Override
-					public void setStack(ItemStack stack)
-					{
-						reward.stack = stack;
-						new MessageEditReward(reward.uid, reward.team, stack).sendToServer();
-					}
-				});
+			ConfigGroup group = ConfigGroup.newGroup(FTBQuests.MOD_ID);
+			ConfigGroup g = group.getGroup("reward").getGroup(type.getRegistryName().getNamespace()).getGroup(type.getRegistryName().getPath());
 
-				new GuiSelectItemStack(value, this).openGui();
-			}));
+			reward.getConfig(g);
+			reward.getExtraConfig(g);
 
-			contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.reward.team_reward"), GuiIcons.LOCK, null)
+			if (!g.getValues().isEmpty())
 			{
-				@Override
-				public void addMouseOverText(List<String> list)
+				List<ContextMenuItem> list = new ArrayList<>();
+
+				for (ConfigValueInstance inst : g.getValues())
 				{
-					list.add(reward.team ? TextFormatting.BLUE + "true" : "false");
+					if (inst.getValue() instanceof IIteratingConfig)
+					{
+						list.add(new ContextMenuItem(inst.getDisplayName().getFormattedText(), inst.getIcon(), null)
+						{
+							@Override
+							public void addMouseOverText(List<String> list)
+							{
+								list.add(inst.getValue().getStringForGUI().getFormattedText());
+							}
+
+							@Override
+							public void onClicked(Panel panel, MouseButton button)
+							{
+								//FIXME: new MessageEditObjectQuick(object.getID(), inst.getName(), button.isLeft()).sendToServer();
+							}
+						});
+					}
 				}
 
-				@Override
-				public void onClicked(Panel panel, MouseButton button)
+				if (!list.isEmpty())
 				{
-					new MessageEditReward(reward.uid, !reward.team, reward.stack).sendToServer();
+					list.sort(null);
+					contextMenu.addAll(list);
+					contextMenu.add(ContextMenuItem.SEPARATOR);
 				}
-			});
+			}
 
-			contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), GuiIcons.REMOVE, () -> new MessageEditReward(reward.uid, reward.team, ItemStack.EMPTY).sendToServer()).setYesNo(I18n.format("delete_item", reward.stack.getDisplayName())));
+			contextMenu.add(new ContextMenuItem(I18n.format("selectServer.edit"), GuiIcons.SETTINGS, () -> {}/*FIXME: new MessageEditObject(reward.uid).sendToServer()*/));
+			contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), GuiIcons.REMOVE, () -> {}/*FIXME: questFile.deleteObject(reward.uid)).setYesNo(I18n.format("delete_item", reward.getDisplayName().getFormattedText())*/));
+
 			getGui().openContextMenu(contextMenu);
 		}
 	}

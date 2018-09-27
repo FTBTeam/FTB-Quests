@@ -13,13 +13,16 @@ import com.feed_the_beast.ftbquests.block.ItemBlockScreen;
 import com.feed_the_beast.ftbquests.item.ItemLootcrate;
 import com.feed_the_beast.ftbquests.item.ItemMissing;
 import com.feed_the_beast.ftbquests.item.ItemQuestBook;
-import com.feed_the_beast.ftbquests.item.ItemScript;
-import com.feed_the_beast.ftbquests.item.ItemXPVial;
 import com.feed_the_beast.ftbquests.item.LootRarity;
-import com.feed_the_beast.ftbquests.quest.tasks.FluidTask;
-import com.feed_the_beast.ftbquests.quest.tasks.ForgeEnergyTask;
-import com.feed_the_beast.ftbquests.quest.tasks.ItemTask;
-import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskType;
+import com.feed_the_beast.ftbquests.quest.reward.CommandReward;
+import com.feed_the_beast.ftbquests.quest.reward.ItemReward;
+import com.feed_the_beast.ftbquests.quest.reward.QuestRewardType;
+import com.feed_the_beast.ftbquests.quest.reward.XPLevelsReward;
+import com.feed_the_beast.ftbquests.quest.reward.XPReward;
+import com.feed_the_beast.ftbquests.quest.task.FluidTask;
+import com.feed_the_beast.ftbquests.quest.task.ForgeEnergyTask;
+import com.feed_the_beast.ftbquests.quest.task.ItemTask;
+import com.feed_the_beast.ftbquests.quest.task.QuestTaskType;
 import com.feed_the_beast.ftbquests.tile.TileProgressDetector;
 import com.feed_the_beast.ftbquests.tile.TileProgressScreenCore;
 import com.feed_the_beast.ftbquests.tile.TileProgressScreenPart;
@@ -35,6 +38,8 @@ import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry;
+
+import java.util.Collections;
 
 /**
  * @author LatvianModder
@@ -88,8 +93,6 @@ public class FTBQuestsEventHandler
 				new ItemBlock(FTBQuestsBlocks.CHEST).setRegistryName("chest"),
 
 				withName(new ItemQuestBook(), "book"),
-				withName(new ItemXPVial(), "xp_vial"),
-				withName(new ItemScript(), "script"),
 				withName(new ItemLootcrate(LootRarity.COMMON), "common_lootcrate").setTranslationKey(FTBQuests.MOD_ID + ".lootcrate"),
 				withName(new ItemLootcrate(LootRarity.UNCOMMON), "uncommon_lootcrate").setTranslationKey(FTBQuests.MOD_ID + ".lootcrate"),
 				withName(new ItemLootcrate(LootRarity.RARE), "rare_lootcrate").setTranslationKey(FTBQuests.MOD_ID + ".lootcrate"),
@@ -102,7 +105,7 @@ public class FTBQuestsEventHandler
 	@SubscribeEvent
 	public static void registerFTBLib(FTBLibPreInitRegistryEvent event)
 	{
-		event.getRegistry().registerConfigValueProvider(ConfigQuestObject.ID, () -> new ConfigQuestObject(""));
+		event.getRegistry().registerConfigValueProvider(ConfigQuestObject.QO_ID, () -> new ConfigQuestObject("", Collections.emptyList()));
 	}
 
 	@SubscribeEvent
@@ -112,6 +115,17 @@ public class FTBQuestsEventHandler
 				new QuestTaskType(ItemTask.class, ItemTask::new).setRegistryName("item"),
 				new QuestTaskType(FluidTask.class, FluidTask::new).setRegistryName("fluid"),
 				new QuestTaskType(ForgeEnergyTask.class, ForgeEnergyTask::new).setRegistryName("forge_energy")
+		);
+	}
+
+	@SubscribeEvent
+	public static void registerRewards(RegistryEvent.Register<QuestRewardType> event)
+	{
+		event.getRegistry().registerAll(
+				new QuestRewardType(ItemReward.class, ItemReward::new).setRegistryName("item"),
+				new QuestRewardType(XPReward.class, XPReward::new).setRegistryName("xp"),
+				new QuestRewardType(XPLevelsReward.class, XPLevelsReward::new).setRegistryName("xp_levels"),
+				new QuestRewardType(CommandReward.class, CommandReward::new).setRegistryName("command")
 		);
 	}
 }

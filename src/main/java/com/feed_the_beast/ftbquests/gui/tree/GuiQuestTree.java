@@ -28,8 +28,8 @@ import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.QuestVariable;
-import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
-import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskType;
+import com.feed_the_beast.ftbquests.quest.task.QuestTask;
+import com.feed_the_beast.ftbquests.quest.task.QuestTaskType;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import org.lwjgl.input.Keyboard;
@@ -149,7 +149,7 @@ public class GuiQuestTree extends GuiBase
 			{
 				if (inst.getValue() instanceof IIteratingConfig)
 				{
-					list.add(new ContextMenuItem(inst.getDisplayName().getFormattedText(), GuiIcons.SETTINGS_RED, null)
+					list.add(new ContextMenuItem(inst.getDisplayName().getFormattedText(), inst.getIcon(), null)
 					{
 						@Override
 						public void addMouseOverText(List<String> list)
@@ -187,8 +187,6 @@ public class GuiQuestTree extends GuiBase
 				new MessageChangeID(object.getID(), value.getString()).sendToServer();
 			}
 		}).openGui()));
-
-		//contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.copy_id"), GuiIcons.INFO, () -> setClipboardString(object.getID())));
 	}
 
 	@Override

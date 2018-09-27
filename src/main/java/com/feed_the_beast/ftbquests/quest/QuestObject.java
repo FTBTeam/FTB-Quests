@@ -2,13 +2,10 @@ package com.feed_the_beast.ftbquests.quest;
 
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigItemStack;
-import com.feed_the_beast.ftblib.lib.config.ConfigString;
 import com.feed_the_beast.ftblib.lib.data.Universe;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
-import com.feed_the_beast.ftblib.lib.item.ItemStackSerializer;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
-import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.item.ItemMissing;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -25,34 +22,6 @@ import java.util.regex.Pattern;
 public abstract class QuestObject
 {
 	public static final Pattern ID_PATTERN = Pattern.compile("^[a-z0-9_]{1,32}$");
-
-	public static ItemStack readOrDummy(NBTTagCompound nbt)
-	{
-		if (nbt.isEmpty())
-		{
-			return ItemStack.EMPTY;
-		}
-
-		ItemStack stack = ItemStackSerializer.read(nbt);
-
-		if (stack.getItem() == FTBQuestsItems.MISSING)
-		{
-			ItemStack stack1 = ItemMissing.getContainedStack(stack);
-
-			if (!stack1.isEmpty())
-			{
-				return stack1;
-			}
-		}
-		else if (stack.isEmpty())
-		{
-			ItemStack stack1 = new ItemStack(FTBQuestsItems.MISSING);
-			ItemMissing.setContainedStack(stack1, nbt);
-			return stack1;
-		}
-
-		return stack;
-	}
 
 	public String id = "";
 	public boolean invalid = false;
@@ -78,7 +47,7 @@ public abstract class QuestObject
 
 		if (!icon.isEmpty())
 		{
-			nbt.setTag("icon", ItemStackSerializer.write(icon));
+			nbt.setTag("icon", ItemMissing.write(icon, false));
 		}
 
 		if (!completionCommand.isEmpty())
@@ -104,7 +73,7 @@ public abstract class QuestObject
 		}
 
 		title = nbt.getString("title");
-		icon = readOrDummy(nbt.getCompoundTag("icon"));
+		icon = ItemMissing.read(nbt.getTag("icon"));
 		completionCommand = nbt.getString("completion_command");
 	}
 
@@ -219,50 +188,9 @@ public abstract class QuestObject
 
 	public void getExtraConfig(ConfigGroup config)
 	{
-		config.add("title", new ConfigString(title)
-		{
-			@Override
-			public String getString()
-			{
-				return title;
-			}
-
-			@Override
-			public void setString(String v)
-			{
-				title = v;
-			}
-		}, new ConfigString("")).setDisplayName(new TextComponentTranslation("ftbquests.title")).setOrder((byte) -127);
-
-		config.add("icon", new ConfigItemStack(icon, true)
-		{
-			@Override
-			public ItemStack getStack()
-			{
-				return icon;
-			}
-
-			@Override
-			public void setStack(ItemStack v)
-			{
-				icon = v;
-			}
-		}, new ConfigItemStack(ItemStack.EMPTY)).setDisplayName(new TextComponentTranslation("ftbquests.icon")).setOrder((byte) -126);
-
-		config.add("completion_command", new ConfigString(completionCommand)
-		{
-			@Override
-			public String getString()
-			{
-				return completionCommand;
-			}
-
-			@Override
-			public void setString(String v)
-			{
-				completionCommand = v;
-			}
-		}, new ConfigString("")).setDisplayName(new TextComponentTranslation("ftbquests.completion_command")).setOrder((byte) 150);
+		config.addString("title", () -> title, v -> title = v, "").setDisplayName(new TextComponentTranslation("ftbquests.title")).setOrder((byte) -127);
+		config.add("icon", new ConfigItemStack.SimpleStack(() -> icon, v -> icon = v), new ConfigItemStack(ItemStack.EMPTY)).setDisplayName(new TextComponentTranslation("ftbquests.icon")).setOrder((byte) -126);
+		config.addString("completion_command", () -> completionCommand, v -> completionCommand = v, "").setDisplayName(new TextComponentTranslation("ftbquests.completion_command")).setOrder((byte) 150);
 	}
 
 	public void clearCachedData()

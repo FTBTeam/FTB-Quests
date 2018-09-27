@@ -13,7 +13,7 @@ import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
-import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
+import com.feed_the_beast.ftbquests.quest.task.QuestTask;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.TextFormatting;

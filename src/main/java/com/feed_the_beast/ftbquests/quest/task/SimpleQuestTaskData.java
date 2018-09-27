@@ -1,4 +1,4 @@
-package com.feed_the_beast.ftbquests.quest.tasks;
+package com.feed_the_beast.ftbquests.quest.task;
 
 import com.feed_the_beast.ftbquests.quest.ITeamData;
 import net.minecraft.nbt.NBTBase;

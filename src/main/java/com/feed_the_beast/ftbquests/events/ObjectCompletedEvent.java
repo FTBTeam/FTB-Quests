@@ -5,7 +5,7 @@ import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
-import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
+import com.feed_the_beast.ftbquests.quest.task.QuestTask;
 
 /**
  * @author LatvianModder

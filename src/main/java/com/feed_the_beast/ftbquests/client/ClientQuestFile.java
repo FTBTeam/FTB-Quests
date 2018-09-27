@@ -7,8 +7,8 @@ import com.feed_the_beast.ftbquests.gui.tree.GuiQuestTree;
 import com.feed_the_beast.ftbquests.net.MessageSyncQuests;
 import com.feed_the_beast.ftbquests.net.edit.MessageDeleteObject;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
-import com.feed_the_beast.ftbquests.quest.QuestReward;
-import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
+import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
+import com.feed_the_beast.ftbquests.quest.task.QuestTask;
 import it.unimi.dsi.fastutil.ints.IntCollection;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 

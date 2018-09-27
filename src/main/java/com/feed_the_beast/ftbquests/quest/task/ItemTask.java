@@ -1,20 +1,17 @@
-package com.feed_the_beast.ftbquests.quest.tasks;
+package com.feed_the_beast.ftbquests.quest.task;
 
-import com.feed_the_beast.ftblib.lib.config.ConfigBoolean;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigItemStack;
-import com.feed_the_beast.ftblib.lib.config.ConfigList;
-import com.feed_the_beast.ftblib.lib.config.ConfigLong;
 import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
-import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.IconAnimation;
 import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
-import com.feed_the_beast.ftblib.lib.item.ItemStackSerializer;
 import com.feed_the_beast.ftblib.lib.util.StringJoiner;
+import com.feed_the_beast.ftbquests.item.ItemMissing;
 import com.feed_the_beast.ftbquests.net.MessageSubmitItems;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
@@ -60,7 +57,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 
 		if (list.isEmpty())
 		{
-			ItemStack stack = readOrDummy(nbt.getCompoundTag("item"));
+			ItemStack stack = ItemMissing.read(nbt.getTag("item"));
 
 			if (!stack.isEmpty())
 			{
@@ -71,7 +68,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 		{
 			for (int i = 0; i < list.tagCount(); i++)
 			{
-				ItemStack stack = readOrDummy(list.getCompoundTagAt(i));
+				ItemStack stack = ItemMissing.read(list.getCompoundTagAt(i));
 
 				if (!stack.isEmpty())
 				{
@@ -103,7 +100,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 	{
 		if (items.size() == 1)
 		{
-			nbt.setTag("item", ItemStackSerializer.write(items.get(0)));
+			nbt.setTag("item", ItemMissing.write(items.get(0), false));
 		}
 		else
 		{
@@ -113,7 +110,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 			{
 				if (!stack.isEmpty())
 				{
-					list.appendTag(ItemStackSerializer.write(stack));
+					list.appendTag(ItemMissing.write(stack, true));
 				}
 			}
 
@@ -158,7 +155,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 
 		if (icons.isEmpty())
 		{
-			return GuiIcons.ACCEPT;
+			return Icon.getIcon("minecraft:items/diamond");
 		}
 
 		return IconAnimation.fromList(icons, false);
@@ -223,37 +220,13 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 	}
 
 	@Override
-	public void getConfig(ConfigGroup group)
+	public void getConfig(ConfigGroup config)
 	{
-		group.add("items", new ConfigList<ConfigItemStack>(new ConfigItemStack(ItemStack.EMPTY, true))
-		{
-			@Override
-			public void readFromList()
-			{
-				items.clear();
-
-				for (ConfigItemStack value : list)
-				{
-					items.add(value.getStack());
-				}
-			}
-
-			@Override
-			public void writeToList()
-			{
-				list.clear();
-
-				for (ItemStack stack : items)
-				{
-					list.add(new ConfigItemStack(stack, true));
-				}
-			}
-		}, new ConfigList<>(new ConfigItemStack(ItemStack.EMPTY, true)));
-
-		group.add("count", new ConfigLong.SimpleLong(1, Long.MAX_VALUE, () -> count, v -> count = v), new ConfigLong(1));
-		group.add("check_only", new ConfigBoolean.SimpleBoolean(() -> checkOnly, v -> checkOnly = v), new ConfigBoolean(false));
-		group.add("ignore_damage", new ConfigBoolean.SimpleBoolean(() -> ignoreDamage, v -> ignoreDamage = v), new ConfigBoolean(false));
-		group.add("ignore_nbt", new ConfigBoolean.SimpleBoolean(() -> ignoreNBT, v -> ignoreNBT = v), new ConfigBoolean(false));
+		config.addList("items", items, new ConfigItemStack(ItemStack.EMPTY, true), v -> new ConfigItemStack(v, true), ConfigItemStack::getStack);
+		config.addLong("count", () -> count, v -> count = v, 1, 1, Long.MAX_VALUE);
+		config.addBool("check_only", () -> checkOnly, v -> checkOnly = v, false);
+		config.addBool("ignore_damage", () -> ignoreDamage, v -> ignoreDamage = v, false);
+		config.addBool("ignore_nbt", () -> ignoreNBT, v -> ignoreNBT = v, false);
 	}
 
 	@Override
@@ -273,25 +246,33 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 	@SideOnly(Side.CLIENT)
 	public void addMouseOverText(List<String> list, @Nullable QuestTaskData data)
 	{
-		super.addMouseOverText(list, data);
-
+		list.add(TextFormatting.GRAY + (checkOnly ? I18n.format("ftbquests.task.ftbquests.item.consume_false") : I18n.format("ftbquests.task.ftbquests.item.consume_true")));
+		list.add(TextFormatting.GRAY + I18n.format("ftbquests.task.click_to_submit"));
 		list.add("");
-		list.add(TextFormatting.GRAY + "Valid items:");
 
-		boolean first = true;
-
-		for (ItemStack stack : items)
+		if (items.size() == 1)
 		{
-			if (first)
-			{
-				first = false;
-			}
-			else
-			{
-				list.add("---");
-			}
+			GuiHelper.addStackTooltip(items.get(0), list, "");
+		}
+		else
+		{
+			list.add(TextFormatting.GRAY + I18n.format("ftbquests.task.ftbquests.item.valid_items"));
 
-			GuiHelper.addStackTooltip(stack, list, "");
+			boolean first = true;
+
+			for (ItemStack stack : items)
+			{
+				if (first)
+				{
+					first = false;
+				}
+				else
+				{
+					list.add(" - - -");
+				}
+
+				GuiHelper.addStackTooltip(stack, list, "");
+			}
 		}
 	}
 

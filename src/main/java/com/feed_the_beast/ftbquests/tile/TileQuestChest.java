@@ -1,6 +1,5 @@
 package com.feed_the_beast.ftbquests.tile;
 
-import com.feed_the_beast.ftblib.lib.config.ConfigBoolean;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigNull;
 import com.feed_the_beast.ftblib.lib.config.ConfigTeam;
@@ -12,7 +11,7 @@ import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.gui.FTBQuestsGuiHandler;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
-import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
+import com.feed_the_beast.ftbquests.quest.task.QuestTask;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -125,18 +124,11 @@ public class TileQuestChest extends TileBase implements IItemHandler, IConfigCal
 		group0.setDisplayName(new TextComponentTranslation("tile.ftbquests.chest.name"));
 		ConfigGroup group = group0.getGroup("ftbquests.chest");
 
-		group.add("team", new ConfigTeam(team)
-		{
-			@Override
-			public void setString(String v)
-			{
-				team = v;
-			}
-		}, ConfigNull.INSTANCE).setDisplayName(new TextComponentTranslation("ftbquests.team")).setCanEdit(editor);
+		group.add("team", new ConfigTeam(() -> team, v -> team = v), ConfigNull.INSTANCE).setDisplayName(new TextComponentTranslation("ftbquests.team")).setCanEdit(editor);
 
 		if (editor)
 		{
-			group.add("indestructible", new ConfigBoolean.SimpleBoolean(() -> indestructible, v -> indestructible = v), new ConfigBoolean(false)).setDisplayName(new TextComponentTranslation("tile.ftbquests.screen.indestructible"));
+			group.addBool("indestructible", () -> indestructible, v -> indestructible = v, false).setDisplayName(new TextComponentTranslation("tile.ftbquests.screen.indestructible"));
 		}
 
 		FTBLibAPI.editServerConfig(player, group0, this);

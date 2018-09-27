@@ -6,7 +6,7 @@ import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.gui.Theme;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.net.MessageSubmitItems;
-import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskData;
+import com.feed_the_beast.ftbquests.quest.task.QuestTaskData;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.TextFormatting;
 

@@ -2,10 +2,10 @@ package com.feed_the_beast.ftbquests.client;
 
 import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
-import com.feed_the_beast.ftbquests.quest.QuestReward;
 import com.feed_the_beast.ftbquests.quest.QuestVariable;
-import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
-import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskData;
+import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
+import com.feed_the_beast.ftbquests.quest.task.QuestTask;
+import com.feed_the_beast.ftbquests.quest.task.QuestTaskData;
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.util.text.TextFormatting;

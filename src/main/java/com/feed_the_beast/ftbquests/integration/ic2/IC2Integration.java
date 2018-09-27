@@ -1,7 +1,7 @@
 package com.feed_the_beast.ftbquests.integration.ic2;
 
 import com.feed_the_beast.ftbquests.FTBQuests;
-import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskType;
+import com.feed_the_beast.ftbquests.quest.task.QuestTaskType;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;

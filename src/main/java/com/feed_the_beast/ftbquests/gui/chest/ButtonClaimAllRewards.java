@@ -6,14 +6,16 @@ import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.gui.Theme;
 import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
-import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.net.MessageClaimReward;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
-import com.feed_the_beast.ftbquests.quest.QuestReward;
+import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 
 import java.util.List;
@@ -71,7 +73,22 @@ public class ButtonClaimAllRewards extends Button
 						{
 							if (!ClientQuestFile.INSTANCE.isRewardClaimed(reward))
 							{
-								list.add(TextFormatting.GRAY + "- " + reward.stack.getCount() + "x " + StringUtils.unformatted(reward.stack.getDisplayName()) + (reward.team ? (TextFormatting.BLUE + " [" + I18n.format("ftbquests.reward.team_reward") + "]") : ""));
+								ITextComponent component = new TextComponentString("");
+								component.getStyle().setColor(TextFormatting.GRAY);
+								component.appendText("- ");
+								component.appendSibling(reward.getDisplayName());
+
+								if (reward.team)
+								{
+									ITextComponent component1 = new TextComponentString("");
+									component1.getStyle().setColor(TextFormatting.BLUE);
+									component1.appendText(" [");
+									component1.appendSibling(new TextComponentTranslation("ftbquests.reward.team_reward"));
+									component1.appendText("]");
+									component.appendSibling(component1);
+								}
+
+								list.add(component.getFormattedText());
 							}
 						}
 					}

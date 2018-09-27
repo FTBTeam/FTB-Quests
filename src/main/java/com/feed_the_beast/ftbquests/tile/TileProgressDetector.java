@@ -1,6 +1,5 @@
 package com.feed_the_beast.ftbquests.tile;
 
-import com.feed_the_beast.ftblib.lib.config.ConfigBoolean;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigNull;
 import com.feed_the_beast.ftblib.lib.config.ConfigTeam;
@@ -212,27 +211,20 @@ public class TileProgressDetector extends TileBase implements ITickable, IConfig
 
 		ConfigGroup group0 = ConfigGroup.newGroup("tile");
 		group0.setDisplayName(new TextComponentTranslation("tile.ftbquests.progress_detector.name"));
-		ConfigGroup group = group0.getGroup("ftbquests.progress_detector");
+		ConfigGroup config = group0.getGroup("ftbquests.progress_detector");
 
-		group.add("team", new ConfigTeam(team)
-		{
-			@Override
-			public void setString(String v)
-			{
-				team = v;
-			}
-		}, ConfigNull.INSTANCE).setDisplayName(new TextComponentTranslation("ftbquests.team")).setCanEdit(editor);
+		config.add("team", new ConfigTeam(() -> team, v -> team = v), ConfigNull.INSTANCE).setDisplayName(new TextComponentTranslation("ftbquests.team")).setCanEdit(editor);
 
-		group.add("object", new ConfigQuestObject(object)
+		config.add("object", new ConfigQuestObject(object, QuestObjectType.ALL)
 		{
 			@Override
 			public void setString(String v)
 			{
 				object = v;
 			}
-		}.addType(QuestObjectType.FILE).addType(QuestObjectType.CHAPTER).addType(QuestObjectType.QUEST).addType(QuestObjectType.TASK).addType(QuestObjectType.VARIABLE), new ConfigQuestObject("*"));
+		}, new ConfigQuestObject("*", QuestObjectType.ALL));
 
-		group.add("level", new ConfigBoolean.SimpleBoolean(() -> level, v -> level = v), new ConfigBoolean(false));
+		config.addBool("level", () -> level, v -> level = v, false);
 
 		FTBLibAPI.editServerConfig(player, group0, this);
 	}

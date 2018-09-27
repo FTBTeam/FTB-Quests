@@ -18,6 +18,7 @@ import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -27,21 +28,15 @@ import java.util.regex.Pattern;
  */
 public class ConfigQuestObject extends ConfigString
 {
-	public static final String ID = "ftbquests_object";
+	public static final String QO_ID = "ftbquests_object";
 	private static final Pattern PATTERN = Pattern.compile("^(\\*|[a-z0-9_:#]{1,32})$");
 
 	private final HashSet<QuestObjectType> types;
 
-	public ConfigQuestObject(String s)
+	public ConfigQuestObject(String s, Collection<QuestObjectType> t)
 	{
 		super(s, PATTERN);
-		types = new HashSet<>();
-	}
-
-	public ConfigQuestObject addType(QuestObjectType type)
-	{
-		types.add(type);
-		return this;
+		types = new HashSet<>(t);
 	}
 
 	public boolean hasValidType(QuestObjectType type)
@@ -52,27 +47,13 @@ public class ConfigQuestObject extends ConfigString
 	@Override
 	public String getName()
 	{
-		return ID;
-	}
-
-	@Override
-	public boolean getBoolean()
-	{
-		return false;
-	}
-
-	@Override
-	public int getInt()
-	{
-		return 0;
+		return QO_ID;
 	}
 
 	@Override
 	public ConfigQuestObject copy()
 	{
-		ConfigQuestObject object = new ConfigQuestObject(getString());
-		object.types.addAll(types);
-		return object;
+		return new ConfigQuestObject(getString(), types);
 	}
 
 	@Override

@@ -101,6 +101,9 @@ ftbquests.task.ftbquests.item.count=Count
 ftbquests.task.ftbquests.item.check_only=Don't consume item
 ftbquests.task.ftbquests.item.ignore_damage=Ignore Damage
 ftbquests.task.ftbquests.item.ignore_nbt=Ignore NBT
+ftbquests.task.ftbquests.item.consume_true=Consumes item
+ftbquests.task.ftbquests.item.consume_false=Doesn't consume item
+ftbquests.task.ftbquests.item.valid_items=Valid items:
 
 ftbquests.task.ftbquests.fluid=Fluid
 ftbquests.task.ftbquests.fluid.fluid=Fluid
@@ -130,21 +133,19 @@ ftbquests.task.ftbquests.botania_mana.text=%d Mana
 
 ftbquests.reward=Reward
 ftbquests.reward.team_reward=Team Reward
+ftbquests.reward.emergency=Emergency Item
 ftbquests.rewards=Rewards
 ftbquests.reward.claim_all=Claim All Rewards
 
 ftbquests.reward.ftbquests.item=Item
 
 ftbquests.reward.ftbquests.xp=XP
-ftbquests.reward.ftbquests.xp.value=XP
 ftbquests.reward.ftbquests.xp.text=XP: %s
 
 ftbquests.reward.ftbquests.xp_levels=XP Levels
-ftbquests.reward.ftbquests.xp_levels.value=XP Levels
 ftbquests.reward.ftbquests.xp_levels.text=XP Levels: %s
 
 ftbquests.reward.ftbquests.command=Command
-ftbquests.reward.ftbquests.command.command=Command
 ftbquests.reward.ftbquests.command.text=Command: %s
 
 ftbquests.variable=Variable

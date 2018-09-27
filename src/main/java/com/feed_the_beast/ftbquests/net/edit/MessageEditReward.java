@@ -5,10 +5,9 @@ import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToServer;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.FTBQuests;
-import com.feed_the_beast.ftbquests.quest.QuestReward;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
+import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
 /**
@@ -17,18 +16,17 @@ import net.minecraft.nbt.NBTTagCompound;
 public class MessageEditReward extends MessageToServer
 {
 	private int uid;
-	private boolean team;
-	private ItemStack stack;
+	private NBTTagCompound nbt;
 
 	public MessageEditReward()
 	{
 	}
 
-	public MessageEditReward(int i, boolean t, ItemStack is)
+	public MessageEditReward(QuestReward reward)
 	{
-		uid = i;
-		team = t;
-		stack = is;
+		uid = reward.uid;
+		nbt = new NBTTagCompound();
+		reward.writeData(nbt);
 	}
 
 	@Override
@@ -41,17 +39,14 @@ public class MessageEditReward extends MessageToServer
 	public void writeData(DataOut data)
 	{
 		data.writeInt(uid);
-		data.writeBoolean(team);
-		data.writeNBT(stack.isEmpty() ? null : stack.serializeNBT());
+		data.writeNBT(nbt);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
 		uid = data.readInt();
-		team = data.readBoolean();
-		NBTTagCompound nbt = data.readNBT();
-		stack = nbt == null ? ItemStack.EMPTY : new ItemStack(nbt);
+		nbt = data.readNBT();
 	}
 
 	@Override
@@ -63,17 +58,18 @@ public class MessageEditReward extends MessageToServer
 
 			if (q != null)
 			{
-				q.team = team;
-				q.stack = stack;
-
-				if (q.stack.isEmpty())
+				if (nbt == null)
 				{
 					q.quest.rewards.remove(q);
 					ServerQuestFile.INSTANCE.allRewards.remove(q.uid);
 				}
+				else
+				{
+
+				}
 
 				ServerQuestFile.INSTANCE.save();
-				new MessageEditRewardResponse(uid, team, stack).sendToAll();
+				new MessageEditRewardResponse(uid, nbt).sendToAll();
 			}
 		}
 	}

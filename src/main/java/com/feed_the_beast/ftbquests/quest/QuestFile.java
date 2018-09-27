@@ -1,20 +1,18 @@
 package com.feed_the_beast.ftbquests.quest;
 
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
-import com.feed_the_beast.ftblib.lib.config.ConfigInt;
 import com.feed_the_beast.ftblib.lib.config.ConfigItemStack;
-import com.feed_the_beast.ftblib.lib.config.ConfigList;
-import com.feed_the_beast.ftblib.lib.config.ConfigString;
 import com.feed_the_beast.ftblib.lib.config.ConfigTimer;
 import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.IconAnimation;
-import com.feed_the_beast.ftblib.lib.item.ItemStackSerializer;
 import com.feed_the_beast.ftblib.lib.math.Ticks;
 import com.feed_the_beast.ftbquests.events.ObjectCompletedEvent;
+import com.feed_the_beast.ftbquests.item.ItemMissing;
 import com.feed_the_beast.ftbquests.item.LootRarity;
-import com.feed_the_beast.ftbquests.quest.tasks.QuestTask;
-import com.feed_the_beast.ftbquests.quest.tasks.QuestTaskType;
+import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
+import com.feed_the_beast.ftbquests.quest.task.QuestTask;
+import com.feed_the_beast.ftbquests.quest.task.QuestTaskType;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
@@ -383,26 +381,33 @@ public abstract class QuestFile extends QuestObject
 
 		nbt.setTag("chapters", list);
 
-		list = new NBTTagList();
-
-		for (QuestVariable variable : variables)
+		if (!variables.isEmpty())
 		{
-			NBTTagCompound variableNBT = new NBTTagCompound();
-			variable.writeData(variableNBT);
-			variableNBT.setString("id", variable.id);
-			list.appendTag(variableNBT);
+			list = new NBTTagList();
+
+			for (QuestVariable variable : variables)
+			{
+				NBTTagCompound variableNBT = new NBTTagCompound();
+				variable.writeData(variableNBT);
+				variableNBT.setString("id", variable.id);
+				list.appendTag(variableNBT);
+			}
+
+			nbt.setTag("variables", list);
 		}
 
-		nbt.setTag("variables", list);
-
-		list = new NBTTagList();
-
-		for (ItemStack stack : emergencyItems)
+		if (!emergencyItems.isEmpty())
 		{
-			list.appendTag(ItemStackSerializer.write(stack));
+			list = new NBTTagList();
+
+			for (ItemStack stack : emergencyItems)
+			{
+				list.appendTag(ItemMissing.write(stack, true));
+			}
+
+			nbt.setTag("emergency_items", list);
 		}
 
-		nbt.setTag("emergency_items", list);
 		nbt.setString("emergency_items_cooldown", emergencyItemsCooldown.toString());
 
 		for (LootRarity rarity : LootRarity.VALUES)
@@ -458,7 +463,7 @@ public abstract class QuestFile extends QuestObject
 
 		for (int i = 0; i < list.tagCount(); i++)
 		{
-			ItemStack stack = readOrDummy(list.getCompoundTagAt(i));
+			ItemStack stack = ItemMissing.read(list.getCompoundTagAt(i));
 
 			if (!stack.isEmpty())
 			{
@@ -512,30 +517,7 @@ public abstract class QuestFile extends QuestObject
 	@Override
 	public void getConfig(ConfigGroup config)
 	{
-		config.add("emergency_items", new ConfigList<ConfigItemStack>(new ConfigItemStack(ItemStack.EMPTY))
-		{
-			@Override
-			public void writeToList()
-			{
-				list.clear();
-
-				for (ItemStack stack : emergencyItems)
-				{
-					list.add(new ConfigItemStack(stack));
-				}
-			}
-
-			@Override
-			public void readFromList()
-			{
-				emergencyItems.clear();
-
-				for (ConfigItemStack value : list)
-				{
-					emergencyItems.add(value.getStack());
-				}
-			}
-		}, new ConfigList<>(new ConfigItemStack(new ItemStack(Items.APPLE))));
+		config.addList("emergency_items", emergencyItems, new ConfigItemStack(ItemStack.EMPTY), ConfigItemStack::new, ConfigItemStack::getStack);
 
 		config.add("emergency_items_cooldown", new ConfigTimer(Ticks.NO_TICKS)
 		{
@@ -555,25 +537,12 @@ public abstract class QuestFile extends QuestObject
 		ConfigGroup lootGroup = config.getGroup("loot_tables");
 		Pattern pattern = Pattern.compile("[a-z0-9_]+:.+");
 
-		for (LootRarity rarity : LootRarity.VALUES)
+		for (LootRarity r : LootRarity.VALUES)
 		{
-			lootGroup.add(rarity.getName(), new ConfigString("", pattern)
-			{
-				@Override
-				public String getString()
-				{
-					return lootTables[rarity.ordinal()].toString();
-				}
-
-				@Override
-				public void setString(String v)
-				{
-					lootTables[rarity.ordinal()] = v.equals(rarity.getLootTable().toString()) ? rarity.getLootTable() : new ResourceLocation(v);
-				}
-			}, new ConfigString(rarity.getLootTable().toString())).setDisplayName(new TextComponentTranslation(rarity.getTranslationKey()));
+			lootGroup.addString(r.getName(), () -> lootTables[r.ordinal()].toString(), v -> lootTables[r.ordinal()] = v.equals(r.getLootTable().toString()) ? r.getLootTable() : new ResourceLocation(v), r.getLootTable().toString(), pattern).setDisplayName(new TextComponentTranslation(r.getTranslationKey()));
 		}
 
-		config.add("loot_size", new ConfigInt.SimpleInt(1, 1024, () -> lootSize, v -> lootSize = v), new ConfigInt(9));
+		config.addInt("loot_size", () -> lootSize, v -> lootSize = v, 9, 1, 1024);
 	}
 
 	@Override
