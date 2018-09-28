@@ -5,7 +5,7 @@ import com.feed_the_beast.ftblib.lib.gui.Theme;
 import com.feed_the_beast.ftblib.lib.gui.WidgetType;
 import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
-import com.feed_the_beast.ftbquests.quest.EnumQuestShape;
+import com.feed_the_beast.ftbquests.FTBQuests;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
@@ -117,66 +117,7 @@ public class QuestsTheme extends Theme
 		}
 	};
 
-	public static final Icon ALERT = new Icon()
-	{
-		@Override
-		public void draw(int x, int y, int w, int h, Color4I col)
-		{
-			EnumQuestShape.CIRCLE.draw(x, y, w, h, Color4I.RED);
-
-			GlStateManager.disableTexture2D();
-
-			GL11.glEnable(GL11.GL_POLYGON_SMOOTH);
-			Tessellator tessellator = Tessellator.getInstance();
-			BufferBuilder buffer = tessellator.getBuffer();
-
-			double dw = w / 16D;
-			double dh = h / 16D;
-
-			if (col.isEmpty())
-			{
-				col = Color4I.LIGHT_RED;
-			}
-
-			final int r = col.redi();
-			final int g = col.greeni();
-			final int b = col.bluei();
-			final int a = col.alphai();
-
-			double w2 = w / 2D;
-			double h2 = h / 2D;
-
-			buffer.begin(GL11.GL_TRIANGLE_FAN, DefaultVertexFormats.POSITION_COLOR);
-			buffer.pos(x + w2, y + h2, 0).color(r, g, b, a).endVertex();
-
-			for (int i = 12; i >= 0; i--)
-			{
-				buffer.pos(x + w2 + Math.cos(i * Math.PI / 6D) * w2, y + h2 + Math.sin(i * Math.PI / 6D) * h2, 0).color(r, g, b, a).endVertex();
-			}
-
-			tessellator.draw();
-
-			buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
-			buffer.pos(x + dw * 5, y + dh * 2, 0).color(255, 255, 255, 255).endVertex();
-			buffer.pos(x + dw * 7, y + dh * 9, 0).color(255, 255, 255, 255).endVertex();
-			buffer.pos(x + dw * 9, y + dh * 9, 0).color(255, 255, 255, 255).endVertex();
-			buffer.pos(x + dw * 11, y + dh * 2, 0).color(255, 255, 255, 255).endVertex();
-
-			buffer.pos(x + dw * 7, y + dh * 10, 0).color(255, 255, 255, 255).endVertex();
-			buffer.pos(x + dw * 7, y + dh * 14, 0).color(255, 255, 255, 255).endVertex();
-			buffer.pos(x + dw * 9, y + dh * 14, 0).color(255, 255, 255, 255).endVertex();
-			buffer.pos(x + dw * 9, y + dh * 10, 0).color(255, 255, 255, 255).endVertex();
-
-			buffer.pos(x + dw * 6, y + dh * 11, 0).color(255, 255, 255, 255).endVertex();
-			buffer.pos(x + dw * 6, y + dh * 13, 0).color(255, 255, 255, 255).endVertex();
-			buffer.pos(x + dw * 10, y + dh * 13, 0).color(255, 255, 255, 255).endVertex();
-			buffer.pos(x + dw * 10, y + dh * 11, 0).color(255, 255, 255, 255).endVertex();
-			tessellator.draw();
-
-			GL11.glDisable(GL11.GL_POLYGON_SMOOTH);
-			GlStateManager.enableTexture2D();
-		}
-	};
+	public static final Icon ALERT = Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/alert.png");
 
 	@Override
 	public void drawGui(int x, int y, int w, int h, WidgetType type)
