@@ -53,10 +53,9 @@ public final class QuestRewardType extends IForgeRegistryEntry.Impl<QuestRewardT
 
 		if (id.isEmpty())
 		{
-			id = "item";
+			id = FTBQuests.MOD_ID + ":item";
 		}
-
-		if (id.indexOf(':') == -1)
+		else if (id.indexOf(':') == -1)
 		{
 			id = FTBQuests.MOD_ID + ':' + id;
 		}

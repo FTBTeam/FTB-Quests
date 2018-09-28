@@ -7,10 +7,10 @@ import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.gui.SimpleTextButton;
 import com.feed_the_beast.ftblib.lib.gui.misc.GuiEditConfig;
 import com.feed_the_beast.ftblib.lib.gui.misc.GuiSelectItemStack;
-import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.gui.QuestsTheme;
+import com.feed_the_beast.ftbquests.net.edit.MessageAddReward;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.reward.ItemReward;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
@@ -51,12 +51,11 @@ public class ButtonAddReward extends SimpleTextButton
 				if (!stack.isEmpty())
 				{
 					NBTTagCompound nbt = new NBTTagCompound();
-					ItemReward itemReward = new ItemReward(quest, 0, nbt);
-					itemReward.stack = stack;
-					itemReward.writeData(nbt);
-					nbt.setString("type", QuestRewardType.getTypeForNBT(ItemReward.class));
-					nbt.setString("id", StringUtils.toSnakeCase(stack.getDisplayName()));
-					//FIXME: new MessageCreateObject(QuestObjectType.REWARD, quest.getID(), nbt).sendToServer();
+					ItemReward reward = new ItemReward(quest, 0, nbt);
+					reward.stack = stack;
+					reward.writeData(nbt);
+					reward.writeCommonData(nbt);
+					new MessageAddReward(quest.getID(), nbt).sendToServer();
 				}
 			}).openGui();
 			return;
@@ -81,11 +80,10 @@ public class ButtonAddReward extends SimpleTextButton
 					new GuiEditConfig(group, (g1, sender) -> {
 						NBTTagCompound nbt = new NBTTagCompound();
 						reward.writeData(nbt);
+						reward.writeCommonData(nbt);
 						nbt.setString("type", type.getTypeForNBT());
-						nbt.setString("id", StringUtils.toSnakeCase(reward.getDisplayName().getUnformattedText()));
-						//FIXME: new MessageCreateObject(QuestObjectType.REWARD, quest.getID(), nbt).sendToServer();
-						//FIXME: GuiQuest.this.openGui();
-						//questTreeGui.questFile.refreshGui();
+						ButtonAddReward.this.getGui().openGui();
+						new MessageAddReward(quest.getID(), nbt).sendToServer();
 					}).openGui();
 				}));
 			}
