@@ -30,7 +30,6 @@ import com.feed_the_beast.ftbquests.quest.task.QuestTask;
 import com.feed_the_beast.ftbquests.quest.task.QuestTaskData;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
@@ -284,7 +283,7 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 		data.isComplete = data.getProgress() >= data.task.getMaxProgress();
 	}
 
-	public void claimReward(EntityPlayer player, QuestReward reward)
+	public void claimReward(EntityPlayerMP player, QuestReward reward)
 	{
 		if (reward.team)
 		{
@@ -320,7 +319,7 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 
 				reward.claim(player);
 				team.markDirty();
-				new MessageClaimRewardResponse(reward.uid).sendTo((EntityPlayerMP) player);
+				new MessageClaimRewardResponse(reward.uid).sendTo(player);
 			}
 		}
 	}

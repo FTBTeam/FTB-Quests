@@ -114,7 +114,7 @@ public abstract class QuestTaskData<T extends QuestTask> implements ICapabilityP
 		teamData.syncTask(this);
 	}
 
-	public boolean submitItems(EntityPlayerMP player)
+	public boolean submitItems(EntityPlayerMP player, boolean simulate)
 	{
 		if (!task.canInsertItem())
 		{
@@ -126,12 +126,16 @@ public abstract class QuestTaskData<T extends QuestTask> implements ICapabilityP
 		for (int i = 0; i < player.inventory.mainInventory.size(); i++)
 		{
 			ItemStack stack = player.inventory.mainInventory.get(i);
-			ItemStack stack1 = insertItem(stack, false, false, player);
+			ItemStack stack1 = insertItem(stack, false, simulate, player);
 
 			if (!ItemStack.areItemStacksEqual(stack, stack1))
 			{
 				changed = true;
-				player.inventory.mainInventory.set(i, stack1);
+
+				if (!simulate)
+				{
+					player.inventory.mainInventory.set(i, stack1);
+				}
 			}
 		}
 

@@ -52,7 +52,7 @@ public class MessageSubmitItems extends MessageToServer
 
 		if (t != null && t.quest.canStartTasks(teamData))
 		{
-			if (teamData.getQuestTaskData(t).submitItems(player))
+			if (teamData.getQuestTaskData(t).submitItems(player, false))
 			{
 				player.inventory.markDirty();
 				player.openContainer.detectAndSendChanges();

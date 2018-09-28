@@ -91,18 +91,13 @@ public abstract class QuestObject
 
 	public static int fixRelativeProgress(int progress, int max)
 	{
-		if (max <= 0)
+		if (max <= 0 || progress >= max * 100)
 		{
 			return 100;
 		}
 		else if (progress <= 0)
 		{
 			return 0;
-		}
-
-		if (progress >= max * 100)
-		{
-			return 100;
 		}
 
 		return (int) (progress / (double) max);

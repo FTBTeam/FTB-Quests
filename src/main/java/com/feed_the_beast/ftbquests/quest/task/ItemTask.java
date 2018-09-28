@@ -224,7 +224,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 	{
 		config.addList("items", items, new ConfigItemStack(ItemStack.EMPTY, true), v -> new ConfigItemStack(v, true), ConfigItemStack::getStack);
 		config.addLong("count", () -> count, v -> count = v, 1, 1, Long.MAX_VALUE);
-		config.addBool("check_only", () -> checkOnly, v -> checkOnly = v, false);
+		config.addBool("check_only", () -> checkOnly, v -> checkOnly = v, false).setCanEdit(!quest.canRepeat);
 		config.addBool("ignore_damage", () -> ignoreDamage, v -> ignoreDamage = v, false);
 		config.addBool("ignore_nbt", () -> ignoreNBT, v -> ignoreNBT = v, false);
 	}
@@ -232,6 +232,11 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 	@Override
 	public boolean canInsertItem()
 	{
+		if (quest.canRepeat)
+		{
+			return false;
+		}
+
 		return !checkOnly;
 	}
 
@@ -246,7 +251,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 	@SideOnly(Side.CLIENT)
 	public void addMouseOverText(List<String> list, @Nullable QuestTaskData data)
 	{
-		list.add(TextFormatting.GRAY + (checkOnly ? I18n.format("ftbquests.task.ftbquests.item.consume_false") : I18n.format("ftbquests.task.ftbquests.item.consume_true")));
+		list.add(TextFormatting.GRAY + (canInsertItem() ? I18n.format("ftbquests.task.ftbquests.item.consume_true") : I18n.format("ftbquests.task.ftbquests.item.consume_false")));
 		list.add(TextFormatting.GRAY + I18n.format("ftbquests.task.click_to_submit"));
 		list.add("");
 
@@ -336,9 +341,9 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 		}
 
 		@Override
-		public boolean submitItems(EntityPlayerMP player)
+		public boolean submitItems(EntityPlayerMP player, boolean simulate)
 		{
-			if (task.checkOnly)
+			if (!task.canInsertItem())
 			{
 				long count = 0;
 
@@ -371,8 +376,13 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 
 				if (count > progress)
 				{
-					progress = Math.min(task.count, count);
-					sync();
+					if (!simulate)
+					{
+						progress = Math.min(task.count, count);
+						sync();
+					}
+
+					return true;
 				}
 
 				return false;
@@ -383,12 +393,16 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 			for (int i = 0; i < player.inventory.mainInventory.size(); i++)
 			{
 				ItemStack stack = player.inventory.mainInventory.get(i);
-				ItemStack stack1 = insertItem(stack, false, false, player);
+				ItemStack stack1 = insertItem(stack, false, simulate, player);
 
 				if (!ItemStack.areItemStacksEqual(stack, stack1))
 				{
 					changed = true;
-					player.inventory.mainInventory.set(i, stack1);
+
+					if (!simulate)
+					{
+						player.inventory.mainInventory.set(i, stack1);
+					}
 				}
 			}
 

@@ -6,27 +6,17 @@ import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToServer;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
-import com.feed_the_beast.ftbquests.quest.task.QuestTask;
+import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
 import com.feed_the_beast.ftbquests.util.FTBQuestsTeamData;
 import net.minecraft.entity.player.EntityPlayerMP;
 
 /**
  * @author LatvianModder
  */
-public class MessageSubmitAllItems extends MessageToServer
+public class MessageClaimAllRewards extends MessageToServer
 {
-	private String quest;
-
-	public MessageSubmitAllItems()
-	{
-	}
-
-	public MessageSubmitAllItems(String q)
-	{
-		quest = q;
-	}
-
 	@Override
 	public NetworkWrapper getWrapper()
 	{
@@ -36,37 +26,29 @@ public class MessageSubmitAllItems extends MessageToServer
 	@Override
 	public void writeData(DataOut data)
 	{
-		data.writeString(quest);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
-		quest = data.readString();
 	}
 
 	@Override
 	public void onMessage(EntityPlayerMP player)
 	{
 		FTBQuestsTeamData teamData = FTBQuestsTeamData.get(Universe.get().getPlayer(player).team);
-		Quest q = ServerQuestFile.INSTANCE.getQuest(quest);
 
-		if (q != null && q.canStartTasks(teamData))
+		for (QuestChapter chapter : ServerQuestFile.INSTANCE.chapters)
 		{
-			boolean changed = false;
-
-			for (QuestTask t : q.tasks)
+			for (Quest quest : chapter.quests)
 			{
-				if (teamData.getQuestTaskData(t).submitItems(player, false))
+				if (quest.isComplete(teamData))
 				{
-					changed = true;
+					for (QuestReward reward : quest.rewards)
+					{
+						teamData.claimReward(player, reward);
+					}
 				}
-			}
-
-			if (changed)
-			{
-				player.inventory.markDirty();
-				player.openContainer.detectAndSendChanges();
 			}
 		}
 	}

@@ -6,7 +6,7 @@ import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.ITextComponent;
@@ -42,7 +42,7 @@ public abstract class QuestReward
 
 	public abstract void getConfig(ConfigGroup config);
 
-	public abstract void claim(EntityPlayer player);
+	public abstract void claim(EntityPlayerMP player);
 
 	public final String toString()
 	{

@@ -85,15 +85,10 @@ public class ItemMissing extends Item
 		return ItemStackSerializer.write(stack, forceCompound);
 	}
 
-	public ItemMissing()
-	{
-		setMaxStackSize(1);
-	}
-
 	@Override
 	public void onUpdate(ItemStack stack, World world, Entity entity, int slot, boolean isSelected)
 	{
-		if (!(entity instanceof EntityPlayer))
+		if (!(entity instanceof EntityPlayer) || world.getTotalWorldTime() % 100L != 65L)
 		{
 			return;
 		}
@@ -124,19 +119,18 @@ public class ItemMissing extends Item
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
-	public void addInformation(ItemStack stack, @Nullable World world, List<String> tooltip, ITooltipFlag flag)
+	public String getItemStackDisplayName(ItemStack stack)
 	{
 		if (!stack.hasTagCompound())
 		{
-			return;
+			return super.getItemStackDisplayName(stack);
 		}
 
 		NBTBase nbt = stack.getTagCompound().getTag("item");
 
 		if (nbt == null || nbt.isEmpty())
 		{
-			return;
+			return super.getItemStackDisplayName(stack);
 		}
 
 		ItemStack stack1 = ItemStackSerializer.read(nbt);
@@ -211,6 +205,13 @@ public class ItemMissing extends Item
 			out.append(meta);
 		}
 
-		tooltip.add(out.toString());
+		return out.toString();
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public void addInformation(ItemStack stack, @Nullable World world, List<String> tooltip, ITooltipFlag flag)
+	{
+		tooltip.add(TextFormatting.LIGHT_PURPLE + super.getItemStackDisplayName(stack));
 	}
 }
