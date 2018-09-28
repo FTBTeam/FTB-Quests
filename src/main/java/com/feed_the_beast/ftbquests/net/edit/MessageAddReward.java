@@ -60,7 +60,14 @@ public class MessageAddReward extends MessageToServer
 
 			if (q != null)
 			{
-				QuestReward r = QuestRewardType.createReward(q, MathUtils.RAND.nextInt(), nbt);
+				int id = 0;
+
+				while (id == 0 || ServerQuestFile.INSTANCE.allRewards.containsKey(id))
+				{
+					id = MathUtils.RAND.nextInt();
+				}
+
+				QuestReward r = QuestRewardType.createReward(q, id, nbt);
 
 				if (r != null)
 				{
