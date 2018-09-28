@@ -5,7 +5,6 @@ import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
 import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.gui.Theme;
-import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.client.ClientQuestProgress;
 import com.feed_the_beast.ftbquests.gui.QuestsTheme;
@@ -64,6 +63,28 @@ public class ButtonChapter extends ButtonTab
 	{
 		list.add(getTitle() + ClientQuestProgress.getCompletionSuffix(treeGui.questFile.self, chapter));
 		list.addAll(description);
+
+		int r = 0;
+
+		for (Quest quest : chapter.quests)
+		{
+			if (quest.isComplete(treeGui.questFile.self))
+			{
+				for (QuestReward reward : quest.rewards)
+				{
+					if (!treeGui.questFile.isRewardClaimed(reward))
+					{
+						r++;
+					}
+				}
+			}
+		}
+
+		if (r > 0)
+		{
+			list.add("");
+			list.add(I18n.format("ftbquests.gui.unclaimed_rewards") + ": " + TextFormatting.GOLD + r);
+		}
 	}
 
 	@Override
@@ -90,7 +111,7 @@ public class ButtonChapter extends ButtonTab
 		if (chapter.quests.isEmpty())
 		{
 			GlStateManager.pushMatrix();
-			GlStateManager.translate(0, 0, 500);
+			GlStateManager.translate(0, 0, 300);
 			GuiIcons.CLOSE.draw(x + w - 10, y + 2, 8, 8);
 			GlStateManager.popMatrix();
 			return;
@@ -101,7 +122,7 @@ public class ButtonChapter extends ButtonTab
 			return;
 		}
 
-		int r = 0;
+		boolean hasRewards = false;
 
 		for (Quest quest : chapter.quests)
 		{
@@ -111,30 +132,30 @@ public class ButtonChapter extends ButtonTab
 				{
 					if (!treeGui.questFile.isRewardClaimed(reward))
 					{
-						r++;
+						hasRewards = true;
+						break;
 					}
+				}
+
+				if (hasRewards)
+				{
+					break;
 				}
 			}
 		}
 
-		if (r > 0)
+		if (hasRewards)
 		{
-			String s = Integer.toString(r);
-			int nw = theme.getStringWidth(s);
 			GlStateManager.pushMatrix();
-			GlStateManager.translate(x + w - nw, y + 2, 500);
-			theme.drawString(s, -1, 0, Color4I.LIGHT_RED, 0);
-			theme.drawString(s, 1, 0, Color4I.LIGHT_RED, 0);
-			theme.drawString(s, 0, -1, Color4I.LIGHT_RED, 0);
-			theme.drawString(s, 0, 1, Color4I.LIGHT_RED, 0);
-			theme.drawString(s, 0, 0, Color4I.WHITE, 0);
+			GlStateManager.translate(0, 0, 500);
+			QuestsTheme.ALERT.draw(x + w - 9, y + 2, 8, 8);
 			GlStateManager.popMatrix();
 		}
 		else if (chapter.isComplete(treeGui.questFile.self))
 		{
 			GlStateManager.pushMatrix();
 			GlStateManager.translate(0, 0, 500);
-			QuestsTheme.COMPLETED.draw(x + w - 10, y + 2, 8, 8);
+			QuestsTheme.COMPLETED.draw(x + w - 8, y + 1, 8, 8);
 			GlStateManager.popMatrix();
 		}
 	}

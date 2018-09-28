@@ -8,7 +8,7 @@ import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
-import com.feed_the_beast.ftbquests.net.MessageClaimReward;
+import com.feed_the_beast.ftbquests.net.MessageClaimAllRewards;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
@@ -34,26 +34,7 @@ public class ButtonClaimAllRewards extends Button
 	public void onClicked(MouseButton button)
 	{
 		GuiHelper.playClickSound();
-
-		if (ClientQuestFile.existsWithTeam())
-		{
-			for (QuestChapter chapter : ClientQuestFile.INSTANCE.chapters)
-			{
-				for (Quest quest : chapter.quests)
-				{
-					if (quest.isComplete(ClientQuestFile.INSTANCE.self))
-					{
-						for (QuestReward reward : quest.rewards)
-						{
-							if (!ClientQuestFile.INSTANCE.isRewardClaimed(reward))
-							{
-								new MessageClaimReward(reward.uid).sendToServer();
-							}
-						}
-					}
-				}
-			}
-		}
+		new MessageClaimAllRewards().sendToServer();
 	}
 
 	@Override

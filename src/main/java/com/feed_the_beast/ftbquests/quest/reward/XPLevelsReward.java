@@ -3,7 +3,7 @@ package com.feed_the_beast.ftbquests.quest.reward;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
@@ -21,6 +21,11 @@ public class XPLevelsReward extends QuestReward
 	{
 		super(q, id);
 		xpLevels = nbt.getInteger("xp_levels");
+
+		if (xpLevels < 1)
+		{
+			xpLevels = 1;
+		}
 	}
 
 	@Override
@@ -36,9 +41,9 @@ public class XPLevelsReward extends QuestReward
 	}
 
 	@Override
-	public void claim(EntityPlayer player)
+	public void claim(EntityPlayerMP player)
 	{
-		player.addExperience(xpLevels);
+		player.addExperienceLevel(xpLevels);
 	}
 
 	@Override

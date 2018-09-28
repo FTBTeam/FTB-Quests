@@ -32,6 +32,7 @@ import com.feed_the_beast.ftbquests.quest.task.QuestTask;
 import com.feed_the_beast.ftbquests.quest.task.QuestTaskType;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.util.text.TextFormatting;
 import org.lwjgl.input.Keyboard;
 
 import javax.annotation.Nullable;
@@ -47,7 +48,7 @@ public class GuiQuestTree extends GuiBase
 	public final Panel chapterPanel, quests, questLeft, questRight, otherButtons;
 	public Color4I borderColor, backgroundColor;
 	public boolean movingQuest = false;
-	public int zoom = 24;
+	public int zoom = 16;
 
 	public GuiQuestTree(ClientQuestFile q)
 	{
@@ -81,7 +82,7 @@ public class GuiQuestTree extends GuiBase
 	@Override
 	public void alignWidgets()
 	{
-		otherButtons.setX(width - otherButtons.width - 1);
+		otherButtons.alignWidgets();
 		chapterPanel.alignWidgets();
 	}
 
@@ -149,7 +150,14 @@ public class GuiQuestTree extends GuiBase
 			{
 				if (inst.getValue() instanceof IIteratingConfig)
 				{
-					list.add(new ContextMenuItem(inst.getDisplayName().getFormattedText(), inst.getIcon(), null)
+					String name = inst.getDisplayName().getFormattedText();
+
+					if (!inst.getCanEdit())
+					{
+						name = TextFormatting.GRAY + name;
+					}
+
+					list.add(new ContextMenuItem(name, inst.getIcon(), null)
 					{
 						@Override
 						public void addMouseOverText(List<String> list)
@@ -160,8 +168,10 @@ public class GuiQuestTree extends GuiBase
 						@Override
 						public void onClicked(Panel panel, MouseButton button)
 						{
-							//panel.getGui().closeContextMenu();
-							new MessageEditObjectQuick(object.getID(), inst.getName(), button.isLeft()).sendToServer();
+							if (inst.getCanEdit())
+							{
+								new MessageEditObjectQuick(object.getID(), inst.getName(), button.isLeft()).sendToServer();
+							}
 						}
 					});
 				}

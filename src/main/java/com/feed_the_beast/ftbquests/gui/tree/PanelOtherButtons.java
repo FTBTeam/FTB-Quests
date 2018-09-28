@@ -36,5 +36,6 @@ public class PanelOtherButtons extends Panel
 	public void alignWidgets()
 	{
 		setSize(align(new WidgetLayout.Horizontal(1, 1, 0)), treeGui.chapterPanel.height);
+		setX(getGui().width - width - 1);
 	}
 }

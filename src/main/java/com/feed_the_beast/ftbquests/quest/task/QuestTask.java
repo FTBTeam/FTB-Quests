@@ -115,7 +115,7 @@ public abstract class QuestTask extends QuestObject
 	}
 
 	@Override
-	public void completeInstantly(ITeamData data)
+	public final void completeInstantly(ITeamData data)
 	{
 		QuestTaskData taskData = data.getQuestTaskData(this);
 		taskData.completeInstantly();

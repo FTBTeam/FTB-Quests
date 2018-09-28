@@ -163,5 +163,12 @@ public class ButtonReward extends SimpleTextButton
 			QuestsTheme.COMPLETED.draw(x + w - 9, y + 1, 8, 8);
 			GlStateManager.popMatrix();
 		}
+		else if (reward.quest.isComplete(ClientQuestFile.INSTANCE.self))
+		{
+			GlStateManager.pushMatrix();
+			GlStateManager.translate(0, 0, 500);
+			QuestsTheme.ALERT.draw(x + w - 9, y + 1, 8, 8);
+			GlStateManager.popMatrix();
+		}
 	}
 }

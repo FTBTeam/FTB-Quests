@@ -48,7 +48,7 @@ public abstract class QuestFile extends QuestObject
 	public String soundTask, soundQuest, soundChapter, soundFile;
 	public final ResourceLocation[] lootTables;
 	public int lootSize;
-	public Color4I colCompleted, colStarted, colNotStarted, colCantStart, colHasRewards;
+	public Color4I colCompleted, colStarted, colNotStarted, colCantStart;
 
 	public QuestFile()
 	{
@@ -81,7 +81,6 @@ public abstract class QuestFile extends QuestObject
 		colStarted = Color4I.rgb(0x00FFFF);
 		colNotStarted = Color4I.rgb(0xFFFFFF);
 		colCantStart = Color4I.rgb(0x999999);
-		colHasRewards = Color4I.rgb(0x88C9DC);
 	}
 
 	@Override

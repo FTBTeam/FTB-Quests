@@ -71,6 +71,7 @@ ftbquests.quest.shape.hexagon=Hexagon
 ftbquests.quest.shape.octagon=Octagon
 ftbquests.quest.visibility=Visibility [WIP!]
 ftbquests.quest.text=Text
+ftbquests.quest.can_repeat=Can be repeated [WIP!]
 
 ftbquests.gui.edit_file=Edit File
 ftbquests.gui.move=Move
@@ -89,6 +90,8 @@ ftbquests.gui.no_tasks=No tasks
 ftbquests.gui.no_rewards=No rewards
 ftbquests.gui.requires=Requires
 ftbquests.gui.required_by=Required by
+ftbquests.gui.unclaimed_rewards=Unclaimed rewards
+ftbquests.gui.times_completed=Times completed
 
 ftbquests.task=Task
 ftbquests.tasks=Tasks

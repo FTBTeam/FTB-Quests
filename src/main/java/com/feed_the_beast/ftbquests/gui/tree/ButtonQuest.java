@@ -145,6 +145,34 @@ public class ButtonQuest extends Button
 		{
 			list.add(description);
 		}
+
+		if (treeGui.questFile.self != null && quest.isComplete(treeGui.questFile.self))
+		{
+			int r = 0;
+
+			for (QuestReward reward : quest.rewards)
+			{
+				if (!treeGui.questFile.isRewardClaimed(reward))
+				{
+					r++;
+				}
+			}
+
+			if (r > 0 || quest.canRepeat)
+			{
+				list.add("");
+			}
+
+			if (r > 0)
+			{
+				list.add(I18n.format("ftbquests.gui.unclaimed_rewards") + ": " + TextFormatting.GOLD + r);
+			}
+
+			if (quest.canRepeat)
+			{
+				list.add(I18n.format("ftbquests.gui.times_completed") + ": " + TextFormatting.GOLD + quest.timesCompleted);
+			}
+		}
 	}
 
 	@Override
@@ -162,6 +190,7 @@ public class ButtonQuest extends Button
 	public void draw(Theme theme, int x, int y, int w, int h)
 	{
 		Color4I col;
+		int r = 0;
 
 		if (treeGui.questFile.self == null || !quest.canStartTasks(treeGui.questFile.self))
 		{
@@ -173,8 +202,6 @@ public class ButtonQuest extends Button
 
 			if (progress >= 100)
 			{
-				int r = 0;
-
 				for (QuestReward reward : quest.rewards)
 				{
 					if (!treeGui.questFile.isRewardClaimed(reward))
@@ -183,14 +210,7 @@ public class ButtonQuest extends Button
 					}
 				}
 
-				if (r > 0)
-				{
-					col = treeGui.questFile.colHasRewards;
-				}
-				else
-				{
-					col = treeGui.questFile.colCompleted;
-				}
+				col = treeGui.questFile.colCompleted;
 			}
 			else if (progress > 0)
 			{
@@ -221,8 +241,18 @@ public class ButtonQuest extends Button
 		if (!icon.isEmpty())
 		{
 			GlStateManager.pushMatrix();
-			GlStateManager.translate(x + (width - treeGui.zoom) / 2F, y + (h - treeGui.zoom) / 2F, 0F);
+			GlStateManager.translate((int) (x + (w - treeGui.zoom) / 2F), (int) (y + (h - treeGui.zoom) / 2F), 0F);
 			icon.draw(0, 0, treeGui.zoom, treeGui.zoom);
+			GlStateManager.popMatrix();
+		}
+
+		if (r > 0)
+		{
+			GlStateManager.pushMatrix();
+			GlStateManager.translate(0, 0, 500);
+			int s1 = treeGui.zoom / 2;
+			int os1 = s1 / 4;
+			QuestsTheme.ALERT.draw(x + w - s1 - os1, y + os1, s1, s1);
 			GlStateManager.popMatrix();
 		}
 	}

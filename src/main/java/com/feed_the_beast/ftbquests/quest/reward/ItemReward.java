@@ -4,9 +4,10 @@ import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigItemStack;
 import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
+import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
 import com.feed_the_beast.ftbquests.item.ItemMissing;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.ITextComponent;
@@ -44,7 +45,7 @@ public class ItemReward extends QuestReward
 	}
 
 	@Override
-	public void claim(EntityPlayer player)
+	public void claim(EntityPlayerMP player)
 	{
 		ItemHandlerHelper.giveItemToPlayer(player, stack.copy());
 	}
@@ -52,7 +53,12 @@ public class ItemReward extends QuestReward
 	@Override
 	public Icon getAltIcon()
 	{
-		return Icon.getIcon("minecraft:items/diamond");
+		if (stack.isEmpty())
+		{
+			return Icon.getIcon("minecraft:items/diamond");
+		}
+
+		return ItemIcon.getItemIcon(stack);
 	}
 
 	@Override

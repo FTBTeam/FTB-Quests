@@ -40,7 +40,8 @@ public class PanelQuestLeft extends Panel
 		if (treeGui.selectedQuest != null && !treeGui.movingQuest)
 		{
 			setPos(2, treeGui.chapterPanel.height + 16);
-			add(new TextField(this).setText(TextFormatting.BLUE + I18n.format("ftbquests.tasks") + ":"));
+			TextField tasksTextField = new TextField(this).setText(TextFormatting.BLUE + I18n.format("ftbquests.tasks") + ":");
+			add(tasksTextField);
 
 			for (QuestTask task : treeGui.selectedQuest.tasks)
 			{
@@ -101,12 +102,22 @@ public class PanelQuestLeft extends Panel
 				setWidth(Math.max(width, widget.width + 6));
 			}
 
+			if (width > 150)
+			{
+				setWidth(150);
+			}
+
 			setHeight(Math.min(treeGui.height - treeGui.chapterPanel.height - 18, align(new WidgetLayout.Vertical(3, 3, 3))));
 
 			for (Widget widget : widgets)
 			{
 				widget.setWidth(width - 6);
 				widget.setX(3);
+			}
+
+			if (treeGui.selectedQuest.canRepeat)
+			{
+				add(new ButtonRestartQuest(this).setPosAndSize(width - 11, tasksTextField.posY, 8, 8));
 			}
 		}
 

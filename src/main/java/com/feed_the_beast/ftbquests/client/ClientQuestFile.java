@@ -87,6 +87,7 @@ public class ClientQuestFile extends QuestFile
 
 		boolean hasPrev = false;
 		boolean guiOpen = false;
+		int zoom = 0;
 		int scrollX = 0, scrollY = 0;
 		String selectedChapter = "";
 		String selectedQuest = "";
@@ -94,6 +95,7 @@ public class ClientQuestFile extends QuestFile
 		if (questTreeGui != null)
 		{
 			hasPrev = true;
+			zoom = questTreeGui.zoom;
 			scrollX = questTreeGui.quests.getScrollX();
 			scrollY = questTreeGui.quests.getScrollY();
 			selectedChapter = questTreeGui.selectedChapter == null ? "" : questTreeGui.selectedChapter.getID();
@@ -110,6 +112,7 @@ public class ClientQuestFile extends QuestFile
 
 		if (hasPrev)
 		{
+			questTreeGui.zoom = zoom;
 			questTreeGui.selectChapter(getChapter(selectedChapter));
 			questTreeGui.selectQuest(getQuest(selectedQuest));
 

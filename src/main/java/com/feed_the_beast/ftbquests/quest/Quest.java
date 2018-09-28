@@ -47,6 +47,7 @@ public final class Quest extends QuestObject
 	public EnumQuestShape shape;
 	public final List<String> text;
 	public final Set<String> dependencies;
+	public boolean canRepeat;
 	public final List<QuestTask> tasks;
 	public final List<QuestReward> rewards;
 	public int timesCompleted;
@@ -71,6 +72,8 @@ public final class Quest extends QuestObject
 		{
 			text.add(list.getStringTagAt(k));
 		}
+
+		canRepeat = nbt.getBoolean("can_repeat");
 
 		dependencies = new HashSet<>();
 		tasks = new ArrayList<>();
@@ -235,6 +238,11 @@ public final class Quest extends QuestObject
 			nbt.setTag("text", array);
 		}
 
+		if (canRepeat)
+		{
+			nbt.setBoolean("can_repeat", true);
+		}
+
 		if (!getDependencies().isEmpty())
 		{
 			NBTTagList array = new NBTTagList();
@@ -303,7 +311,7 @@ public final class Quest extends QuestObject
 				{
 					NBTTagCompound nbt1 = new NBTTagCompound();
 					reward.writeData(nbt1);
-					nbt1.setInteger("id", reward.uid);
+					nbt1.setInteger("uid", reward.uid);
 
 					if (reward.getClass() != ItemReward.class)
 					{
@@ -334,6 +342,11 @@ public final class Quest extends QuestObject
 	@Override
 	public long getProgress(ITeamData data)
 	{
+		if (timesCompleted > 0)
+		{
+			return getMaxProgress();
+		}
+
 		long progress = 0L;
 
 		for (QuestTask task : tasks)
@@ -366,6 +379,11 @@ public final class Quest extends QuestObject
 	@Override
 	public int getRelativeProgress(ITeamData data)
 	{
+		if (timesCompleted > 0)
+		{
+			return 100;
+		}
+
 		int progress = 0;
 
 		int s = 0;
@@ -385,6 +403,11 @@ public final class Quest extends QuestObject
 	@Override
 	public boolean isComplete(ITeamData data)
 	{
+		if (timesCompleted > 0)
+		{
+			return true;
+		}
+
 		for (QuestTask task : tasks)
 		{
 			if (!task.invalid && !task.isComplete(data))
@@ -420,6 +443,16 @@ public final class Quest extends QuestObject
 	@Override
 	public void resetProgress(ITeamData data)
 	{
+		timesCompleted = 0;
+
+		for (QuestObject dep : getDependencies())
+		{
+			if (!dep.invalid)
+			{
+				dep.resetProgress(data);
+			}
+		}
+
 		for (QuestTask task : tasks)
 		{
 			task.resetProgress(data);
@@ -431,6 +464,14 @@ public final class Quest extends QuestObject
 	@Override
 	public void completeInstantly(ITeamData data)
 	{
+		for (QuestObject dep : getDependencies())
+		{
+			if (!dep.invalid)
+			{
+				dep.completeInstantly(data);
+			}
+		}
+
 		for (QuestTask task : tasks)
 		{
 			task.completeInstantly(data);
@@ -517,6 +558,7 @@ public final class Quest extends QuestObject
 		config.addString("description", () -> description, v -> description = v, "");
 		config.addList("text", text, new ConfigString(""), ConfigString::new, ConfigString::getString);
 		config.addList("dependencies", dependencies, new ConfigQuestObject("", DEP_TYPES), v -> new ConfigQuestObject(v, DEP_TYPES), ConfigQuestObject::getString).setDisplayName(new TextComponentTranslation("ftbquests.dependencies"));
+		config.addBool("can_repeat", () -> canRepeat, v -> canRepeat = v, false);
 	}
 
 	public EnumVisibility getVisibility(@Nullable ITeamData data)

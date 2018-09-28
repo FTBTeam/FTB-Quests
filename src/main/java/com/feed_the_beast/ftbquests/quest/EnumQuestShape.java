@@ -108,7 +108,6 @@ public class EnumQuestShape extends Icon implements IStringSerializable
 		Tessellator tessellator = Tessellator.getInstance();
 		BufferBuilder buffer = tessellator.getBuffer();
 
-
 		int r = col.redi();
 		int g = col.greeni();
 		int b = col.bluei();
