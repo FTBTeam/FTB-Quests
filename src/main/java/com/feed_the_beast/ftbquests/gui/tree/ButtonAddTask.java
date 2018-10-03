@@ -53,12 +53,12 @@ public class ButtonAddTask extends SimpleTextButton
 			new GuiSelectItemStack(this, stack -> {
 				if (!stack.isEmpty())
 				{
-					NBTTagCompound nbt = new NBTTagCompound();
-					ItemTask itemTask = new ItemTask(quest, nbt);
+					ItemTask itemTask = new ItemTask(quest);
 					itemTask.items.add(ItemHandlerHelper.copyStackWithSize(stack, 1));
 					itemTask.count = stack.getCount();
+					NBTTagCompound nbt = new NBTTagCompound();
 					itemTask.writeData(nbt);
-					nbt.setString("type", QuestTaskType.getTypeForNBT(ItemTask.class));
+					nbt.setString("type", QuestTaskType.getType(ItemTask.class).getTypeForNBT());
 					nbt.setString("id", StringUtils.toSnakeCase(stack.getDisplayName()));
 					new MessageCreateObject(QuestObjectType.TASK, quest.getID(), nbt).sendToServer();
 				}
@@ -70,7 +70,7 @@ public class ButtonAddTask extends SimpleTextButton
 
 		for (QuestTaskType type : QuestTaskType.getRegistry())
 		{
-			QuestTask task = type.provider.create(quest, new NBTTagCompound());
+			QuestTask task = type.provider.create(quest);
 
 			if (task != null)
 			{

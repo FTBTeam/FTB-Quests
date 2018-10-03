@@ -47,7 +47,7 @@ public class MessageDeleteObjectResponse extends MessageToClient
 	@SideOnly(Side.CLIENT)
 	public void onMessage()
 	{
-		if (ClientQuestFile.INSTANCE != null)
+		if (ClientQuestFile.exists())
 		{
 			QuestObject object = ClientQuestFile.INSTANCE.get(id);
 

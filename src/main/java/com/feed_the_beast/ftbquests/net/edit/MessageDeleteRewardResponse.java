@@ -1,36 +1,35 @@
 package com.feed_the_beast.ftbquests.net.edit;
 
 import com.feed_the_beast.ftblib.lib.client.ClientUtils;
-import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToClient;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.gui.tree.GuiQuestTree;
+import com.feed_the_beast.ftbquests.quest.ITeamData;
+import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-import javax.annotation.Nullable;
+import java.util.Collection;
+import java.util.Collections;
 
 /**
  * @author LatvianModder
  */
-public class MessageEditRewardResponse extends MessageToClient
+public class MessageDeleteRewardResponse extends MessageToClient
 {
-	private int uid;
-	private NBTTagCompound nbt;
+	private int id;
 
-	public MessageEditRewardResponse()
+	public MessageDeleteRewardResponse()
 	{
 	}
 
-	public MessageEditRewardResponse(int id, @Nullable NBTTagCompound n)
+	public MessageDeleteRewardResponse(int i)
 	{
-		uid = id;
-		nbt = n;
+		id = i;
 	}
 
 	@Override
@@ -42,36 +41,38 @@ public class MessageEditRewardResponse extends MessageToClient
 	@Override
 	public void writeData(DataOut data)
 	{
-		data.writeInt(uid);
-		data.writeNBT(nbt);
+		data.writeInt(id);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
-		uid = data.readInt();
-		nbt = data.readNBT();
+		id = data.readInt();
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void onMessage()
 	{
-		if (ClientQuestFile.INSTANCE != null)
+		if (ClientQuestFile.exists())
 		{
-			QuestReward reward = ClientQuestFile.INSTANCE.getReward(uid);
+			QuestReward reward = ClientQuestFile.INSTANCE.getReward(id);
 
 			if (reward != null)
 			{
-				ClientQuestFile.INSTANCE.clearCachedData();
-				ConfigGroup group = ConfigGroup.newGroup("reward");
-				reward.getConfig(group);
-				reward.getExtraConfig(group);
-				group.deserializeEditedNBT(nbt);
+				Collection<QuestReward> collection = Collections.singleton(reward);
+
+				for (ITeamData data : ServerQuestFile.INSTANCE.getAllData())
+				{
+					data.unclaimRewards(collection);
+				}
+
+				reward.quest.rewards.remove(reward);
+				ClientQuestFile.INSTANCE.allRewards.remove(id);
 
 				GuiQuestTree gui = ClientUtils.getCurrentGuiAs(GuiQuestTree.class);
 
-				if (gui != null)
+				if (gui != null && gui.selectedQuest != null)
 				{
 					gui.questRight.refreshWidgets();
 				}

@@ -49,24 +49,10 @@ public class FluidTask extends QuestTask
 	public NBTTagCompound fluidNBT;
 	public long amount;
 
-	public FluidTask(Quest quest, NBTTagCompound nbt)
+	public FluidTask(Quest quest)
 	{
 		super(quest);
-
-		fluid = FluidRegistry.getFluid(nbt.getString("fluid"));
-
-		if (fluid == null)
-		{
-			fluid = FluidRegistry.WATER;
-		}
-
-		fluidNBT = (NBTTagCompound) nbt.getTag("nbt");
-		amount = nbt.hasKey("amount") ? nbt.getLong("amount") : 1000;
-
-		if (amount < 1)
-		{
-			amount = 1;
-		}
+		fluid = FluidRegistry.WATER;
 	}
 
 	@Override
@@ -94,6 +80,25 @@ public class FluidTask extends QuestTask
 		if (fluidNBT != null)
 		{
 			nbt.setTag("nbt", fluidNBT);
+		}
+	}
+
+	@Override
+	public void readData(NBTTagCompound nbt)
+	{
+		fluid = FluidRegistry.getFluid(nbt.getString("fluid"));
+
+		if (fluid == null)
+		{
+			fluid = FluidRegistry.WATER;
+		}
+
+		fluidNBT = (NBTTagCompound) nbt.getTag("nbt");
+		amount = nbt.hasKey("amount") ? nbt.getLong("amount") : 1000;
+
+		if (amount < 1)
+		{
+			amount = 1;
 		}
 	}
 

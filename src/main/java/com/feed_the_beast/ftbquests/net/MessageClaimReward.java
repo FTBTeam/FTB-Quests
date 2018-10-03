@@ -47,7 +47,7 @@ public class MessageClaimReward extends MessageToServer
 	@Override
 	public void onMessage(EntityPlayerMP player)
 	{
-		QuestReward reward = ServerQuestFile.INSTANCE.allRewards.get(uid);
+		QuestReward reward = ServerQuestFile.INSTANCE.getReward(uid);
 
 		if (reward != null)
 		{

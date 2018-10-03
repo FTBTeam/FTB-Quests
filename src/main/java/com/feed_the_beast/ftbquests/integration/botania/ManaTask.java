@@ -40,24 +40,9 @@ public class ManaTask extends QuestTask
 	public long value, maxInput;
 	public boolean showNumbers;
 
-	public ManaTask(Quest quest, NBTTagCompound nbt)
+	public ManaTask(Quest quest)
 	{
 		super(quest);
-		value = nbt.getLong("value");
-
-		if (value < 1)
-		{
-			value = 1;
-		}
-
-		maxInput = nbt.hasKey("max_input") ? nbt.getLong("max_input") : Long.MAX_VALUE;
-
-		if (maxInput < 1)
-		{
-			maxInput = 1;
-		}
-
-		showNumbers = nbt.getBoolean("show_numbers");
 	}
 
 	@Override
@@ -86,6 +71,26 @@ public class ManaTask extends QuestTask
 		{
 			nbt.setBoolean("show_numbers", true);
 		}
+	}
+
+	@Override
+	public void readData(NBTTagCompound nbt)
+	{
+		value = nbt.getLong("value");
+
+		if (value < 1)
+		{
+			value = 1;
+		}
+
+		maxInput = nbt.hasKey("max_input") ? nbt.getLong("max_input") : Long.MAX_VALUE;
+
+		if (maxInput < 1)
+		{
+			maxInput = 1;
+		}
+
+		showNumbers = nbt.getBoolean("show_numbers");
 	}
 
 	@Override

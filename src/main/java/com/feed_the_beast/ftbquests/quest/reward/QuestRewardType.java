@@ -67,7 +67,7 @@ public final class QuestRewardType extends IForgeRegistryEntry.Impl<QuestRewardT
 			return null;
 		}
 
-		QuestReward reward = type.provider.create(quest, uid, nbt);
+		QuestReward reward = type.provider.create(quest, uid);
 
 		if (reward == null)
 		{
@@ -75,6 +75,7 @@ public final class QuestRewardType extends IForgeRegistryEntry.Impl<QuestRewardT
 		}
 
 		reward.readCommonData(nbt);
+		reward.readData(nbt);
 		return reward;
 	}
 
@@ -84,16 +85,10 @@ public final class QuestRewardType extends IForgeRegistryEntry.Impl<QuestRewardT
 		return TYPE_MAP.get(clazz);
 	}
 
-	public static String getTypeForNBT(Class clazz)
-	{
-		QuestRewardType type = getType(clazz);
-		return type == null ? "" : type.getTypeForNBT();
-	}
-
 	public interface Provider
 	{
 		@Nullable
-		QuestReward create(Quest quest, int uid, NBTTagCompound nbt);
+		QuestReward create(Quest quest, int uid);
 	}
 
 	public final Class typeClass;

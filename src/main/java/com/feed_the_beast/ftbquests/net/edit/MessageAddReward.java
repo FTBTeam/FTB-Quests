@@ -62,7 +62,7 @@ public class MessageAddReward extends MessageToServer
 			{
 				int id = 0;
 
-				while (id == 0 || ServerQuestFile.INSTANCE.allRewards.containsKey(id))
+				while (id == 0 || ServerQuestFile.INSTANCE.getReward(id) != null)
 				{
 					id = MathUtils.RAND.nextInt();
 				}

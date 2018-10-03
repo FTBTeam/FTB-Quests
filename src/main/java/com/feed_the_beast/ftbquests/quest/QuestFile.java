@@ -264,6 +264,12 @@ public abstract class QuestFile extends QuestObject
 		return object instanceof QuestVariable ? (QuestVariable) object : null;
 	}
 
+	@Nullable
+	public QuestReward getReward(int id)
+	{
+		return allRewards.get(id);
+	}
+
 	public void refreshIDMap()
 	{
 		map.clear();
@@ -300,7 +306,7 @@ public abstract class QuestFile extends QuestObject
 			{
 				for (QuestTask task : quest.tasks)
 				{
-					task.index = (short) tasks.size();
+					task.uid = tasks.size();
 					tasks.add(task);
 				}
 			}
@@ -325,6 +331,8 @@ public abstract class QuestFile extends QuestObject
 				}
 			}
 		}
+
+		clearCachedData();
 	}
 
 	@Nullable

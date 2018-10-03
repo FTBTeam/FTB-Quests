@@ -17,21 +17,26 @@ public class XPReward extends QuestReward
 {
 	private int xp;
 
-	public XPReward(Quest q, int id, NBTTagCompound nbt)
+	public XPReward(Quest quest, int id)
 	{
-		super(q, id);
-		xp = nbt.getInteger("xp");
-
-		if (xp < 1)
-		{
-			xp = 1;
-		}
+		super(quest, id);
 	}
 
 	@Override
 	public void writeData(NBTTagCompound nbt)
 	{
 		nbt.setInteger("xp", xp);
+	}
+
+	@Override
+	public void readData(NBTTagCompound nbt)
+	{
+		xp = nbt.getInteger("xp");
+
+		if (xp < 1)
+		{
+			xp = 1;
+		}
 	}
 
 	@Override

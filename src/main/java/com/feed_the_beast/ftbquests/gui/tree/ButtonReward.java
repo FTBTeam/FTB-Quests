@@ -1,8 +1,5 @@
 package com.feed_the_beast.ftbquests.gui.tree;
 
-import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
-import com.feed_the_beast.ftblib.lib.config.ConfigValueInstance;
-import com.feed_the_beast.ftblib.lib.config.IIteratingConfig;
 import com.feed_the_beast.ftblib.lib.gui.ContextMenuItem;
 import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
 import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
@@ -12,13 +9,12 @@ import com.feed_the_beast.ftblib.lib.gui.Theme;
 import com.feed_the_beast.ftblib.lib.gui.WidgetType;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
-import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.gui.QuestsTheme;
 import com.feed_the_beast.ftbquests.net.MessageClaimReward;
+import com.feed_the_beast.ftbquests.net.edit.MessageDeleteReward;
+import com.feed_the_beast.ftbquests.net.edit.MessageEditReward;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
-import com.feed_the_beast.ftbquests.quest.reward.QuestRewardType;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.TextFormatting;
 
@@ -96,6 +92,8 @@ public class ButtonReward extends SimpleTextButton
 		{
 			GuiHelper.playClickSound();
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
+			
+			/*
 			QuestRewardType type = QuestRewardType.getType(reward.getClass());
 
 			ConfigGroup group = ConfigGroup.newGroup(FTBQuests.MOD_ID);
@@ -136,9 +134,10 @@ public class ButtonReward extends SimpleTextButton
 					contextMenu.add(ContextMenuItem.SEPARATOR);
 				}
 			}
+			*/
 
-			contextMenu.add(new ContextMenuItem(I18n.format("selectServer.edit"), GuiIcons.SETTINGS, () -> {}/*FIXME: new MessageEditObject(reward.uid).sendToServer()*/));
-			contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), GuiIcons.REMOVE, () -> {}/*FIXME: questFile.deleteObject(reward.uid)).setYesNo(I18n.format("delete_item", reward.getDisplayName().getFormattedText())*/));
+			contextMenu.add(new ContextMenuItem(I18n.format("selectServer.edit"), GuiIcons.SETTINGS, () -> new MessageEditReward(reward.uid).sendToServer()));
+			contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), GuiIcons.REMOVE, () -> new MessageDeleteReward(reward.uid).sendToServer()).setYesNo(I18n.format("delete_item", reward.getDisplayName().getFormattedText())));
 
 			getGui().openContextMenu(contextMenu);
 		}
@@ -151,24 +150,15 @@ public class ButtonReward extends SimpleTextButton
 
 		if (!ClientQuestFile.existsWithTeam())
 		{
-			GlStateManager.pushMatrix();
-			GlStateManager.translate(0, 0, 500);
 			GuiIcons.CLOSE.draw(x + w - 9, y + 1, 8, 8);
-			GlStateManager.popMatrix();
 		}
 		else if (ClientQuestFile.INSTANCE.isRewardClaimed(reward))
 		{
-			GlStateManager.pushMatrix();
-			GlStateManager.translate(0, 0, 500);
 			QuestsTheme.COMPLETED.draw(x + w - 9, y + 1, 8, 8);
-			GlStateManager.popMatrix();
 		}
 		else if (reward.quest.isComplete(ClientQuestFile.INSTANCE.self))
 		{
-			GlStateManager.pushMatrix();
-			GlStateManager.translate(0, 0, 500);
 			QuestsTheme.ALERT.draw(x + w - 9, y + 1, 8, 8);
-			GlStateManager.popMatrix();
 		}
 	}
 }

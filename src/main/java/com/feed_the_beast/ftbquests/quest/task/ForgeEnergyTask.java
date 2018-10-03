@@ -36,22 +36,9 @@ public class ForgeEnergyTask extends QuestTask
 	public long value;
 	public int maxInput;
 
-	public ForgeEnergyTask(Quest quest, NBTTagCompound nbt)
+	public ForgeEnergyTask(Quest quest)
 	{
 		super(quest);
-		value = nbt.hasKey("value") ? nbt.getLong("value") : 10000L;
-
-		if (value < 1L)
-		{
-			value = 1L;
-		}
-
-		maxInput = nbt.hasKey("max_input") ? nbt.getInteger("max_input") : Integer.MAX_VALUE;
-
-		if (maxInput < 1)
-		{
-			maxInput = 1;
-		}
 	}
 
 	@Override
@@ -74,6 +61,24 @@ public class ForgeEnergyTask extends QuestTask
 		if (maxInput != Integer.MAX_VALUE)
 		{
 			nbt.setInteger("max_input", maxInput);
+		}
+	}
+
+	@Override
+	public void readData(NBTTagCompound nbt)
+	{
+		value = nbt.hasKey("value") ? nbt.getLong("value") : 10000L;
+
+		if (value < 1L)
+		{
+			value = 1L;
+		}
+
+		maxInput = nbt.hasKey("max_input") ? nbt.getInteger("max_input") : Integer.MAX_VALUE;
+
+		if (maxInput < 1)
+		{
+			maxInput = 1;
 		}
 	}
 

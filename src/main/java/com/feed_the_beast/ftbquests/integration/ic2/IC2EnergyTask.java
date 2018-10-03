@@ -38,22 +38,9 @@ public class IC2EnergyTask extends QuestTask
 
 	public long value, maxInput;
 
-	public IC2EnergyTask(Quest quest, NBTTagCompound nbt)
+	public IC2EnergyTask(Quest quest)
 	{
 		super(quest);
-		value = nbt.getLong("value");
-
-		if (value < 1)
-		{
-			value = 1;
-		}
-
-		maxInput = nbt.hasKey("max_input") ? nbt.getLong("max_input") : Long.MAX_VALUE;
-
-		if (maxInput < 1)
-		{
-			maxInput = 1;
-		}
 	}
 
 	@Override
@@ -76,6 +63,24 @@ public class IC2EnergyTask extends QuestTask
 		if (maxInput != Long.MAX_VALUE)
 		{
 			nbt.setLong("max_input", maxInput);
+		}
+	}
+
+	@Override
+	public void readData(NBTTagCompound nbt)
+	{
+		value = nbt.getLong("value");
+
+		if (value < 1)
+		{
+			value = 1;
+		}
+
+		maxInput = nbt.hasKey("max_input") ? nbt.getLong("max_input") : Long.MAX_VALUE;
+
+		if (maxInput < 1)
+		{
+			maxInput = 1;
 		}
 	}
 

@@ -48,45 +48,10 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 	public boolean ignoreDamage;
 	public boolean ignoreNBT;
 
-	public ItemTask(Quest quest, NBTTagCompound nbt)
+	public ItemTask(Quest quest)
 	{
 		super(quest);
 		items = new ArrayList<>();
-
-		NBTTagList list = nbt.getTagList("items", Constants.NBT.TAG_COMPOUND);
-
-		if (list.isEmpty())
-		{
-			ItemStack stack = ItemMissing.read(nbt.getTag("item"));
-
-			if (!stack.isEmpty())
-			{
-				items.add(stack);
-			}
-		}
-		else
-		{
-			for (int i = 0; i < list.tagCount(); i++)
-			{
-				ItemStack stack = ItemMissing.read(list.getCompoundTagAt(i));
-
-				if (!stack.isEmpty())
-				{
-					items.add(stack);
-				}
-			}
-		}
-
-		count = nbt.getLong("count");
-
-		if (count < 1)
-		{
-			count = 1;
-		}
-
-		checkOnly = nbt.getBoolean("check_only");
-		ignoreDamage = nbt.getBoolean("ignore_damage");
-		ignoreNBT = nbt.getBoolean("ignore_nbt");
 	}
 
 	@Override
@@ -136,6 +101,45 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 		{
 			nbt.setBoolean("ignore_nbt", true);
 		}
+	}
+
+	@Override
+	public void readData(NBTTagCompound nbt)
+	{
+		NBTTagList list = nbt.getTagList("items", Constants.NBT.TAG_COMPOUND);
+
+		if (list.isEmpty())
+		{
+			ItemStack stack = ItemMissing.read(nbt.getTag("item"));
+
+			if (!stack.isEmpty())
+			{
+				items.add(stack);
+			}
+		}
+		else
+		{
+			for (int i = 0; i < list.tagCount(); i++)
+			{
+				ItemStack stack = ItemMissing.read(list.getCompoundTagAt(i));
+
+				if (!stack.isEmpty())
+				{
+					items.add(stack);
+				}
+			}
+		}
+
+		count = nbt.getLong("count");
+
+		if (count < 1)
+		{
+			count = 1;
+		}
+
+		checkOnly = nbt.getBoolean("check_only");
+		ignoreDamage = nbt.getBoolean("ignore_damage");
+		ignoreNBT = nbt.getBoolean("ignore_nbt");
 	}
 
 	@Override

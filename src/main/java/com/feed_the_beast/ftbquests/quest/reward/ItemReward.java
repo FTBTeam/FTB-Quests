@@ -26,16 +26,21 @@ public class ItemReward extends QuestReward
 {
 	public ItemStack stack;
 
-	public ItemReward(Quest q, int id, NBTTagCompound nbt)
+	public ItemReward(Quest quest, int id)
 	{
-		super(q, id);
-		stack = ItemMissing.read(nbt.getTag("item"));
+		super(quest, id);
 	}
 
 	@Override
 	public void writeData(NBTTagCompound nbt)
 	{
 		nbt.setTag("item", ItemMissing.write(stack, false));
+	}
+
+	@Override
+	public void readData(NBTTagCompound nbt)
+	{
+		stack = ItemMissing.read(nbt.getTag("item"));
 	}
 
 	@Override
@@ -64,7 +69,7 @@ public class ItemReward extends QuestReward
 	@Override
 	public ITextComponent getAltDisplayName()
 	{
-		return new TextComponentString((stack.getCount() == 1 ? "" : (stack.getCount() + "x ")) + stack.getDisplayName());
+		return new TextComponentString(stack.getDisplayName());
 	}
 
 	@Override

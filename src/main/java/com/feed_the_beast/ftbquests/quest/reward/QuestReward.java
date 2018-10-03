@@ -5,6 +5,7 @@ import com.feed_the_beast.ftblib.lib.config.ConfigItemStack;
 import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
+import com.feed_the_beast.ftbquests.item.ItemMissing;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
@@ -40,6 +41,8 @@ public abstract class QuestReward
 
 	public abstract void writeData(NBTTagCompound nbt);
 
+	public abstract void readData(NBTTagCompound nbt);
+
 	public abstract void getConfig(ConfigGroup config);
 
 	public abstract void claim(EntityPlayerMP player);
@@ -63,10 +66,22 @@ public abstract class QuestReward
 	{
 		config.addString("title", () -> title, v -> title = v, "").setDisplayName(new TextComponentTranslation("ftbquests.title")).setOrder((byte) -127);
 		config.add("icon", new ConfigItemStack.SimpleStack(() -> icon, v -> icon = v), new ConfigItemStack(ItemStack.EMPTY)).setDisplayName(new TextComponentTranslation("ftbquests.icon")).setOrder((byte) -126);
+		config.addBool("team", () -> team, v -> team = v, false).setDisplayName(new TextComponentTranslation("ftbquests.reward.team_reward"));
+		//config.addBool("emergency", () -> emergency, v -> emergency = v, false).setDisplayName(new TextComponentTranslation("ftbquests.reward.emergency"));
 	}
 
 	public final void writeCommonData(NBTTagCompound nbt)
 	{
+		if (!title.isEmpty())
+		{
+			nbt.setString("title", title);
+		}
+
+		if (!icon.isEmpty())
+		{
+			nbt.setTag("icon", ItemMissing.write(icon, false));
+		}
+
 		if (team)
 		{
 			nbt.setBoolean("team_reward", true);
@@ -80,6 +95,8 @@ public abstract class QuestReward
 
 	public final void readCommonData(NBTTagCompound nbt)
 	{
+		title = nbt.getString("title");
+		icon = ItemMissing.read(nbt.getTag("icon"));
 		team = nbt.getBoolean("team_reward");
 		emergency = nbt.getBoolean("emergency");
 	}
