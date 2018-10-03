@@ -46,7 +46,7 @@ public class FTBQuests
 	public static final CreativeTabs TAB = new CreativeTabs(FTBQuests.MOD_ID)
 	{
 		@Override
-		public ItemStack getTabIconItem()
+		public ItemStack createIcon()
 		{
 			return new ItemStack(FTBQuestsItems.LEGENDARY_LOOTCRATE);
 		}
