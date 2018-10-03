@@ -50,8 +50,8 @@ public class ButtonChapter extends ButtonTab
 		if (treeGui.questFile.canEdit() && button.isRight())
 		{
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
-			contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.move"), GuiIcons.LEFT, () -> new MessageMoveChapter(chapter.getID(), true).sendToServer()).setEnabled(chapter.chapterIndex > 0));
-			contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.move"), GuiIcons.RIGHT, () -> new MessageMoveChapter(chapter.getID(), false).sendToServer()).setEnabled(chapter.chapterIndex < treeGui.questFile.chapters.size() - 1));
+			contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.move"), GuiIcons.LEFT, () -> new MessageMoveChapter(chapter.getID(), true).sendToServer()).setEnabled(chapter.chapterIndex > 0).setCloseMenu(false));
+			contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.move"), GuiIcons.RIGHT, () -> new MessageMoveChapter(chapter.getID(), false).sendToServer()).setEnabled(chapter.chapterIndex < treeGui.questFile.chapters.size() - 1).setCloseMenu(false));
 			contextMenu.add(ContextMenuItem.SEPARATOR);
 			treeGui.addObjectMenuItems(contextMenu, getGui(), chapter);
 			getGui().openContextMenu(contextMenu);
@@ -148,7 +148,7 @@ public class ButtonChapter extends ButtonTab
 		{
 			GlStateManager.pushMatrix();
 			GlStateManager.translate(0, 0, 500);
-			QuestsTheme.ALERT.draw(x + w - 9, y + 2, 8, 8);
+			QuestsTheme.ALERT.draw(x + w - 7, y + 2, 6, 6);
 			GlStateManager.popMatrix();
 		}
 		else if (chapter.isComplete(treeGui.questFile.self))
