@@ -1,5 +1,8 @@
 package com.feed_the_beast.ftbquests.net.edit;
 
+import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
+import com.feed_the_beast.ftblib.lib.config.IConfigCallback;
+import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToServer;
@@ -7,26 +10,24 @@ import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
+import com.feed_the_beast.ftbquests.quest.reward.QuestRewardType;
+import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.nbt.NBTTagCompound;
 
 /**
  * @author LatvianModder
  */
-public class MessageEditReward extends MessageToServer
+public class MessageEditReward extends MessageToServer implements IConfigCallback
 {
 	private int uid;
-	private NBTTagCompound nbt;
 
 	public MessageEditReward()
 	{
 	}
 
-	public MessageEditReward(QuestReward reward)
+	public MessageEditReward(int id)
 	{
-		uid = reward.uid;
-		nbt = new NBTTagCompound();
-		reward.writeData(nbt);
+		uid = id;
 	}
 
 	@Override
@@ -39,14 +40,12 @@ public class MessageEditReward extends MessageToServer
 	public void writeData(DataOut data)
 	{
 		data.writeInt(uid);
-		data.writeNBT(nbt);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
 		uid = data.readInt();
-		nbt = data.readNBT();
 	}
 
 	@Override
@@ -54,23 +53,34 @@ public class MessageEditReward extends MessageToServer
 	{
 		if (FTBQuests.canEdit(player))
 		{
-			QuestReward q = ServerQuestFile.INSTANCE.allRewards.get(uid);
+			QuestReward reward = ServerQuestFile.INSTANCE.getReward(uid);
 
-			if (q != null)
+			if (reward != null)
 			{
-				if (nbt == null)
-				{
-					q.quest.rewards.remove(q);
-					ServerQuestFile.INSTANCE.allRewards.remove(q.uid);
-				}
-				else
-				{
-
-				}
-
-				ServerQuestFile.INSTANCE.save();
-				new MessageEditRewardResponse(uid, nbt).sendToAll();
+				QuestRewardType type = QuestRewardType.getType(reward.getClass());
+				ConfigGroup group = ConfigGroup.newGroup(FTBQuests.MOD_ID);
+				group.setDisplayName(type.getDisplayName());
+				ConfigGroup g = group.getGroup("reward").getGroup(type.getRegistryName().getNamespace()).getGroup(type.getRegistryName().getPath());
+				reward.getConfig(g);
+				reward.getExtraConfig(g);
+				FTBLibAPI.editServerConfig(player, group, this);
 			}
+		}
+	}
+
+	@Override
+	public void onConfigSaved(ConfigGroup g, ICommandSender sender)
+	{
+		QuestReward reward = ServerQuestFile.INSTANCE.getReward(uid);
+
+		if (reward != null)
+		{
+			ServerQuestFile.INSTANCE.clearCachedData();
+			ConfigGroup group = ConfigGroup.newGroup("reward");
+			reward.getConfig(group);
+			reward.getExtraConfig(group);
+			new MessageEditRewardResponse(uid, group.serializeNBT()).sendToAll();
+			ServerQuestFile.INSTANCE.save();
 		}
 	}
 }

@@ -68,15 +68,15 @@ public class ButtonDummyQuest extends Widget
 				new GuiSelectItemStack(this, stack -> {
 					if (!stack.isEmpty())
 					{
-						NBTTagCompound nbt = new NBTTagCompound();
-						Quest quest = new Quest(treeGui.selectedChapter, nbt);
+						Quest quest = new Quest(treeGui.selectedChapter, new NBTTagCompound());
 						quest.x = x;
 						quest.y = y;
-						ItemTask itemTask = new ItemTask(quest, new NBTTagCompound());
+						ItemTask itemTask = new ItemTask(quest);
 						itemTask.items.add(ItemHandlerHelper.copyStackWithSize(stack, 1));
 						itemTask.count = stack.getCount();
 						itemTask.id = StringUtils.toSnakeCase(stack.getDisplayName());
 						quest.tasks.add(itemTask);
+						NBTTagCompound nbt = new NBTTagCompound();
 						quest.writeData(nbt);
 						nbt.setString("id", itemTask.id);
 						new MessageCreateObject(QuestObjectType.QUEST, treeGui.selectedChapter.getID(), nbt).sendToServer();

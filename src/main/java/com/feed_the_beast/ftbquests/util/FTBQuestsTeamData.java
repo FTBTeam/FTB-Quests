@@ -147,7 +147,7 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 
 				if (nbt != null)
 				{
-					t.taskKeys[i] = taskData.task.index;
+					t.taskKeys[i] = (short) taskData.task.uid;
 					t.taskValues[i] = nbt;
 					i++;
 				}
@@ -250,11 +250,11 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 		{
 			if (team.universe.getPlayer(player).team.equalsTeam(team))
 			{
-				new MessageUpdateTaskProgress("", data.task.index, nbt).sendTo(player);
+				new MessageUpdateTaskProgress("", data.task.uid, nbt).sendTo(player);
 			}
 			else
 			{
-				new MessageUpdateTaskProgress(team.getName(), data.task.index, nbt).sendTo(player);
+				new MessageUpdateTaskProgress(team.getName(), data.task.uid, nbt).sendTo(player);
 			}
 		}
 

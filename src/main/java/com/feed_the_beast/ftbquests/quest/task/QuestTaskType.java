@@ -67,7 +67,7 @@ public final class QuestTaskType extends IForgeRegistryEntry.Impl<QuestTaskType>
 			return null;
 		}
 
-		QuestTask task = type.provider.create(quest, nbt);
+		QuestTask task = type.provider.create(quest);
 
 		if (task == null)
 		{
@@ -75,6 +75,7 @@ public final class QuestTaskType extends IForgeRegistryEntry.Impl<QuestTaskType>
 		}
 
 		task.readCommonData(nbt);
+		task.readData(nbt);
 		return task;
 	}
 
@@ -84,16 +85,10 @@ public final class QuestTaskType extends IForgeRegistryEntry.Impl<QuestTaskType>
 		return TYPE_MAP.get(clazz);
 	}
 
-	public static String getTypeForNBT(Class clazz)
-	{
-		QuestTaskType type = getType(clazz);
-		return type == null ? "" : type.getTypeForNBT();
-	}
-
 	public interface Provider
 	{
 		@Nullable
-		QuestTask create(Quest quest, NBTTagCompound nbt);
+		QuestTask create(Quest quest);
 	}
 
 	public final Class typeClass;

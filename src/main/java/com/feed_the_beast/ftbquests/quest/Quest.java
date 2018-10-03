@@ -154,7 +154,7 @@ public final class Quest extends QuestObject
 			{
 				nbt1.removeTag("uid");
 
-				ItemReward reward = new ItemReward(this, id, new NBTTagCompound());
+				ItemReward reward = new ItemReward(this, id);
 				reward.team = nbt1.getBoolean("team_reward");
 				nbt1.removeTag("team_reward");
 				reward.stack = ItemMissing.read(nbt1);
@@ -311,6 +311,7 @@ public final class Quest extends QuestObject
 				{
 					NBTTagCompound nbt1 = new NBTTagCompound();
 					reward.writeData(nbt1);
+					reward.writeCommonData(nbt1);
 					nbt1.setInteger("uid", reward.uid);
 
 					if (reward.getClass() != ItemReward.class)
@@ -318,7 +319,6 @@ public final class Quest extends QuestObject
 						nbt1.setString("type", type.getTypeForNBT());
 					}
 
-					reward.writeCommonData(nbt1);
 					array.appendTag(nbt1);
 				}
 			}
@@ -646,6 +646,11 @@ public final class Quest extends QuestObject
 		for (QuestTask task : tasks)
 		{
 			task.clearCachedData();
+		}
+
+		for (QuestReward reward : rewards)
+		{
+			reward.clearCachedData();
 		}
 	}
 

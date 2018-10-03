@@ -19,16 +19,21 @@ public class CommandReward extends QuestReward
 {
 	private String command;
 
-	public CommandReward(Quest q, int id, NBTTagCompound nbt)
+	public CommandReward(Quest quest, int id)
 	{
-		super(q, id);
-		command = nbt.getString("command");
+		super(quest, id);
 	}
 
 	@Override
 	public void writeData(NBTTagCompound nbt)
 	{
 		nbt.setString("command", command);
+	}
+
+	@Override
+	public void readData(NBTTagCompound nbt)
+	{
+		command = nbt.getString("command");
 	}
 
 	@Override

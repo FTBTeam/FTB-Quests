@@ -39,22 +39,9 @@ public class MJTask extends QuestTask
 
 	public long value, maxInput;
 
-	public MJTask(Quest quest, NBTTagCompound nbt)
+	public MJTask(Quest quest)
 	{
 		super(quest);
-		value = nbt.hasKey("value") ? nbt.getLong("value") : 10000000000L;
-
-		if (value < 1L)
-		{
-			value = 1L;
-		}
-
-		maxInput = nbt.hasKey("max_input") ? nbt.getLong("max_input") : Long.MAX_VALUE;
-
-		if (maxInput < 1L)
-		{
-			maxInput = 1L;
-		}
 	}
 
 	@Override
@@ -77,6 +64,24 @@ public class MJTask extends QuestTask
 		if (maxInput != Long.MAX_VALUE)
 		{
 			nbt.setLong("max_input", maxInput);
+		}
+	}
+
+	@Override
+	public void readData(NBTTagCompound nbt)
+	{
+		value = nbt.hasKey("value") ? nbt.getLong("value") : 10000000000L;
+
+		if (value < 1L)
+		{
+			value = 1L;
+		}
+
+		maxInput = nbt.hasKey("max_input") ? nbt.getLong("max_input") : Long.MAX_VALUE;
+
+		if (maxInput < 1L)
+		{
+			maxInput = 1L;
 		}
 	}
 

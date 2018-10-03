@@ -50,9 +50,9 @@ public class ButtonAddReward extends SimpleTextButton
 			new GuiSelectItemStack(this, stack -> {
 				if (!stack.isEmpty())
 				{
-					NBTTagCompound nbt = new NBTTagCompound();
-					ItemReward reward = new ItemReward(quest, 0, nbt);
+					ItemReward reward = new ItemReward(quest, 0);
 					reward.stack = stack;
+					NBTTagCompound nbt = new NBTTagCompound();
 					reward.writeData(nbt);
 					reward.writeCommonData(nbt);
 					new MessageAddReward(quest.getID(), nbt).sendToServer();
@@ -65,7 +65,7 @@ public class ButtonAddReward extends SimpleTextButton
 
 		for (QuestRewardType type : QuestRewardType.getRegistry())
 		{
-			QuestReward reward = type.provider.create(quest, 0, new NBTTagCompound());
+			QuestReward reward = type.provider.create(quest, 0);
 
 			if (reward != null)
 			{

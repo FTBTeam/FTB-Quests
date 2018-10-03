@@ -13,6 +13,7 @@ import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.tile.TileScreenCore;
 import com.feed_the_beast.ftbquests.tile.TileScreenPart;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
@@ -28,15 +29,20 @@ import java.util.List;
 public abstract class QuestTask extends QuestObject
 {
 	public final Quest quest;
-	public short index;
+	public int uid;
 
 	private String cachedID = "";
 
 	public QuestTask(Quest q)
 	{
 		quest = q;
-		index = -1;
+		uid = -1;
 	}
+
+	@Override
+	public abstract void writeData(NBTTagCompound nbt);
+
+	public abstract void readData(NBTTagCompound nbt);
 
 	public abstract QuestTaskData createData(ITeamData data);
 
