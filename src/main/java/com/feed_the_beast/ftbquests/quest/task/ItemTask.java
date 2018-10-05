@@ -238,7 +238,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 	{
 		if (quest.canRepeat)
 		{
-			return false;
+			return true;
 		}
 
 		return !checkOnly;
