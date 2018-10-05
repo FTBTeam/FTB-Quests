@@ -100,7 +100,7 @@ public class ButtonQuest extends Button
 
 			}));
 
-			if (treeGui.selectedQuest != null && treeGui.selectedQuest != quest)
+			if (treeGui.selectedQuest != null && treeGui.selectedQuest != quest && !treeGui.selectedQuest.canRepeat)
 			{
 				if (quest.hasDependency(treeGui.selectedQuest))
 				{
