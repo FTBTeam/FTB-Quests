@@ -22,6 +22,7 @@ public class CommandReward extends QuestReward
 	public CommandReward(Quest quest, int id)
 	{
 		super(quest, id);
+		command = "";
 	}
 
 	@Override

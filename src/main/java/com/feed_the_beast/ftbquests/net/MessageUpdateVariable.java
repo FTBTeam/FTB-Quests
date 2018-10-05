@@ -60,7 +60,7 @@ public class MessageUpdateVariable extends MessageToClient
 
 		if (v != null)
 		{
-			ClientQuestProgress data = team.isEmpty() ? ClientQuestFile.INSTANCE.self : ClientQuestFile.INSTANCE.getData(team);
+			ClientQuestProgress data = ClientQuestFile.INSTANCE.getData(team);
 
 			if (data != null)
 			{

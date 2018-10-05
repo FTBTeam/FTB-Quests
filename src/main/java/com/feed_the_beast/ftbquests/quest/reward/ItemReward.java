@@ -29,6 +29,7 @@ public class ItemReward extends QuestReward
 	public ItemReward(Quest quest, int id)
 	{
 		super(quest, id);
+		stack = ItemStack.EMPTY;
 	}
 
 	@Override

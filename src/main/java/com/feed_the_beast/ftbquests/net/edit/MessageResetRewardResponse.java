@@ -18,15 +18,15 @@ import java.util.Collections;
 /**
  * @author LatvianModder
  */
-public class MessageDeleteRewardResponse extends MessageToClient
+public class MessageResetRewardResponse extends MessageToClient
 {
 	private int id;
 
-	public MessageDeleteRewardResponse()
+	public MessageResetRewardResponse()
 	{
 	}
 
-	public MessageDeleteRewardResponse(int i)
+	public MessageResetRewardResponse(int i)
 	{
 		id = i;
 	}
@@ -65,9 +65,6 @@ public class MessageDeleteRewardResponse extends MessageToClient
 				{
 					data.unclaimRewards(collection);
 				}
-
-				reward.quest.rewards.remove(reward);
-				ClientQuestFile.INSTANCE.allRewards.remove(id);
 
 				GuiQuestTree gui = ClientUtils.getCurrentGuiAs(GuiQuestTree.class);
 
