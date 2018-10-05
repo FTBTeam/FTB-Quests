@@ -14,6 +14,7 @@ import com.feed_the_beast.ftbquests.gui.QuestsTheme;
 import com.feed_the_beast.ftbquests.net.MessageClaimReward;
 import com.feed_the_beast.ftbquests.net.edit.MessageDeleteReward;
 import com.feed_the_beast.ftbquests.net.edit.MessageEditReward;
+import com.feed_the_beast.ftbquests.net.edit.MessageResetReward;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.TextFormatting;
@@ -138,6 +139,7 @@ public class ButtonReward extends SimpleTextButton
 
 			contextMenu.add(new ContextMenuItem(I18n.format("selectServer.edit"), GuiIcons.SETTINGS, () -> new MessageEditReward(reward.uid).sendToServer()));
 			contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), GuiIcons.REMOVE, () -> new MessageDeleteReward(reward.uid).sendToServer()).setYesNo(I18n.format("delete_item", reward.getDisplayName().getFormattedText())));
+			contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.reset_progress"), GuiIcons.REFRESH, () -> new MessageResetReward(reward.uid).sendToServer()).setYesNo(I18n.format("ftbquests.gui.reset_progress_q")));
 
 			getGui().openContextMenu(contextMenu);
 		}

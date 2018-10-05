@@ -31,5 +31,7 @@ public class FTBQuestsEditNetHandler
 		EDIT.register(new MessageEditObjectQuickResponse());
 		EDIT.register(new MessageDeleteReward());
 		EDIT.register(new MessageDeleteRewardResponse());
+		EDIT.register(new MessageResetReward());
+		EDIT.register(new MessageResetRewardResponse());
 	}
 }

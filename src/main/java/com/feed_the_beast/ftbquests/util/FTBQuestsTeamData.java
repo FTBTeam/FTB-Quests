@@ -244,19 +244,7 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 	public void syncTask(QuestTaskData data)
 	{
 		team.markDirty();
-		NBTBase nbt = data.toNBT();
-
-		for (EntityPlayerMP player : team.universe.server.getPlayerList().getPlayers())
-		{
-			if (team.universe.getPlayer(player).team.equalsTeam(team))
-			{
-				new MessageUpdateTaskProgress("", data.task.uid, nbt).sendTo(player);
-			}
-			else
-			{
-				new MessageUpdateTaskProgress(team.getName(), data.task.uid, nbt).sendTo(player);
-			}
-		}
+		new MessageUpdateTaskProgress(team.getName(), data.task.uid, data.toNBT()).sendToAll();
 
 		if (!data.isComplete && data.task.isComplete(this))
 		{
@@ -351,6 +339,8 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 				}
 			}
 		}
+
+		team.markDirty();
 	}
 
 	@Override
@@ -377,18 +367,7 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 		if (prevValue != value)
 		{
 			team.markDirty();
-
-			for (EntityPlayerMP player : team.universe.server.getPlayerList().getPlayers())
-			{
-				if (team.universe.getPlayer(player).team.equalsTeam(team))
-				{
-					new MessageUpdateVariable("", variable.index, value).sendTo(player);
-				}
-				else
-				{
-					new MessageUpdateVariable(team.getName(), variable.index, value).sendTo(player);
-				}
-			}
+			new MessageUpdateVariable(team.getName(), variable.index, value).sendToAll();
 		}
 	}
 
