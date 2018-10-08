@@ -59,17 +59,7 @@ public class MessageResetProgress extends MessageToServer
 
 				if (player1.team.isValid())
 				{
-					FTBQuestsTeamData teamData = FTBQuestsTeamData.get(player1.team);
-					object.resetProgress(teamData);
-					player1.team.markDirty();
-
-					for (ForgePlayer player2 : teamData.team.getMembers())
-					{
-						if (player2.isOnline())
-						{
-							new MessageResetProgressResponse(id).sendTo(player2.getPlayer());
-						}
-					}
+					object.resetProgress(FTBQuestsTeamData.get(player1.team));
 				}
 
 				Universe.get().clearCache();

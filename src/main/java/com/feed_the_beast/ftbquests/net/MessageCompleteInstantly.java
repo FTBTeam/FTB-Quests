@@ -60,7 +60,6 @@ public class MessageCompleteInstantly extends MessageToServer
 				if (player1.team.isValid())
 				{
 					object.completeInstantly(FTBQuestsTeamData.get(player1.team));
-					player1.team.markDirty();
 				}
 
 				Universe.get().clearCache();
