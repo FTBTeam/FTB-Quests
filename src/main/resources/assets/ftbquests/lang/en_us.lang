@@ -71,7 +71,7 @@ ftbquests.quest.shape.hexagon=Hexagon
 ftbquests.quest.shape.octagon=Octagon
 ftbquests.quest.visibility=Visibility [WIP!]
 ftbquests.quest.text=Text
-ftbquests.quest.can_repeat=Can be repeated [WIP!]
+ftbquests.quest.can_repeat=Can be repeated
 
 ftbquests.gui.edit_file=Edit File
 ftbquests.gui.move=Move
