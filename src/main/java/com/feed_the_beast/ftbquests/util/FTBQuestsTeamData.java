@@ -11,6 +11,7 @@ import com.feed_the_beast.ftblib.events.team.ForgeTeamSavedEvent;
 import com.feed_the_beast.ftblib.lib.data.ForgePlayer;
 import com.feed_the_beast.ftblib.lib.data.ForgeTeam;
 import com.feed_the_beast.ftblib.lib.data.TeamData;
+import com.feed_the_beast.ftblib.lib.data.Universe;
 import com.feed_the_beast.ftblib.lib.util.FileUtils;
 import com.feed_the_beast.ftblib.lib.util.NBTUtils;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
@@ -220,9 +221,9 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 	}
 
 	private final Map<QuestTask, QuestTaskData> taskData;
-	public final Map<UUID, IntOpenHashSet> claimedPlayerRewards;
-	public final IntOpenHashSet claimedTeamRewards;
-	public final Object2LongOpenHashMap<QuestVariable> variables;
+	private final Map<UUID, IntOpenHashSet> claimedPlayerRewards;
+	private final IntOpenHashSet claimedTeamRewards;
+	private final Object2LongOpenHashMap<QuestVariable> variables;
 
 	private FTBQuestsTeamData(ForgeTeam team)
 	{
@@ -310,6 +311,30 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 				new MessageClaimRewardResponse(reward.uid).sendTo(player);
 			}
 		}
+
+		if (reward.quest.canRepeat)
+		{
+			for (QuestReward reward1 : reward.quest.rewards)
+			{
+				if (!isRewardClaimed(player, reward1))
+				{
+					return;
+				}
+			}
+
+			reward.quest.resetProgress(FTBQuestsTeamData.get(Universe.get().getPlayer(player).team));
+		}
+	}
+
+	public boolean isRewardClaimed(EntityPlayerMP player, QuestReward reward)
+	{
+		if (reward.team)
+		{
+			return claimedTeamRewards.contains(reward.uid);
+		}
+
+		IntOpenHashSet rewards = claimedPlayerRewards.get(player.getUniqueID());
+		return rewards != null && rewards.contains(reward.uid);
 	}
 
 	@Override
