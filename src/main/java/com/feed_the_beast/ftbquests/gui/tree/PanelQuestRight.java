@@ -77,8 +77,6 @@ public class PanelQuestRight extends Panel
 				setWidth(Math.max(width, widget.width + 6));
 			}
 
-			setX(treeGui.width - width - 2);
-
 			if (!treeGui.selectedQuest.description.isEmpty())
 			{
 				add(new TextField(this).setMaxWidth(width).setSpacing(9).setText(TextFormatting.GRAY.toString() + TextFormatting.ITALIC + StringUtils.unformatted(treeGui.selectedQuest.description)));
@@ -91,15 +89,22 @@ public class PanelQuestRight extends Panel
 				add(new WidgetVerticalSpace(this, 10));
 			}
 
+			if (width > 150)
+			{
+				setWidth(150);
+			}
+
 			addAll(afterText);
 
 			setHeight(Math.min(treeGui.height - treeGui.chapterPanel.height - 3, align(new WidgetLayout.Vertical(3, 3, 3))));
 
 			for (Widget widget : widgets)
 			{
-				widget.setX(3);
 				widget.setWidth(width - 6);
+				widget.setX(3);
 			}
+
+			setX(treeGui.width - width - 2);
 		}
 
 		if (widgets.isEmpty())
