@@ -54,6 +54,7 @@ ftbquests.file.emergency_items_cooldown=Emergency Items Cooldown
 ftbquests.file.emergency_items_cooldown.tooltip=Cooldown timer for emergency items to respawn.
 ftbquests.file.loot_tables=Loot Tables
 ftbquests.file.loot_size=Loot Size
+ftbquests.file.default_reward_team=Default for Team Rewards
 
 ftbquests.chapter=Chapter
 ftbquests.chapter.description=Description
