@@ -9,6 +9,7 @@ import com.feed_the_beast.ftblib.lib.gui.misc.GuiEditConfig;
 import com.feed_the_beast.ftblib.lib.gui.misc.GuiSelectItemStack;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.FTBQuests;
+import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.gui.QuestsTheme;
 import com.feed_the_beast.ftbquests.net.edit.MessageAddReward;
 import com.feed_the_beast.ftbquests.quest.Quest;
@@ -52,6 +53,7 @@ public class ButtonAddReward extends SimpleTextButton
 				{
 					ItemReward reward = new ItemReward(quest, 0);
 					reward.stack = stack;
+					reward.team = ClientQuestFile.INSTANCE.defaultRewardTeam;
 					NBTTagCompound nbt = new NBTTagCompound();
 					reward.writeData(nbt);
 					reward.writeCommonData(nbt);
@@ -69,6 +71,8 @@ public class ButtonAddReward extends SimpleTextButton
 
 			if (reward != null)
 			{
+				reward.team = ClientQuestFile.INSTANCE.defaultRewardTeam;
+
 				contextMenu.add(new ContextMenuItem(type.getDisplayName().getFormattedText(), reward.getIcon(), () -> {
 					GuiHelper.playClickSound();
 

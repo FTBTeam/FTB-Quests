@@ -49,6 +49,7 @@ public abstract class QuestFile extends QuestObject
 	public final ResourceLocation[] lootTables;
 	public int lootSize;
 	public Color4I colCompleted, colStarted, colNotStarted, colCantStart;
+	public boolean defaultRewardTeam;
 
 	public QuestFile()
 	{
@@ -81,6 +82,8 @@ public abstract class QuestFile extends QuestObject
 		colStarted = Color4I.rgb(0x00FFFF);
 		colNotStarted = Color4I.rgb(0xFFFFFF);
 		colCantStart = Color4I.rgb(0x999999);
+
+		defaultRewardTeam = false;
 	}
 
 	@Override
@@ -426,6 +429,7 @@ public abstract class QuestFile extends QuestObject
 		}
 
 		nbt.setShort("loot_size", (short) lootSize);
+		nbt.setBoolean("default_reward_team", defaultRewardTeam);
 	}
 
 	public final void readData(NBTTagCompound nbt)
@@ -493,6 +497,8 @@ public abstract class QuestFile extends QuestObject
 		{
 			lootSize = 9;
 		}
+
+		defaultRewardTeam = nbt.getBoolean("default_reward_team");
 	}
 
 	@Nullable
@@ -550,6 +556,7 @@ public abstract class QuestFile extends QuestObject
 		}
 
 		config.addInt("loot_size", () -> lootSize, v -> lootSize = v, 9, 1, 1024);
+		config.addBool("default_reward_team", () -> defaultRewardTeam, v -> defaultRewardTeam = v, false);
 	}
 
 	@Override
