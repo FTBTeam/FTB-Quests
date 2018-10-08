@@ -9,6 +9,8 @@ import com.feed_the_beast.ftblib.lib.data.Universe;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.events.ModifyBaseFileLocationEvent;
 import com.feed_the_beast.ftbquests.net.MessageSyncEditingMode;
+import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -57,6 +59,27 @@ public class FTBQuestsWorldData implements IConfigCallback
 		if (!ServerQuestFile.INSTANCE.load())
 		{
 			FTBQuests.LOGGER.error("Failed to load quests!");
+		}
+		else
+		{
+			int c = ServerQuestFile.INSTANCE.chapters.size();
+			int v = ServerQuestFile.INSTANCE.variables.size();
+			int q = 0;
+			int t = 0;
+			int r = 0;
+
+			for (QuestChapter chapter : ServerQuestFile.INSTANCE.chapters)
+			{
+				q += chapter.quests.size();
+
+				for (Quest quest : chapter.quests)
+				{
+					t += quest.tasks.size();
+					r += quest.rewards.size();
+				}
+			}
+
+			FTBQuests.LOGGER.info(String.format("Loaded %d chapters, %d quests, %d tasks, %d rewards and %d variables. In total, %d objects", c, q, t, r, v, c + q + t + r + v));
 		}
 
 		NBTTagCompound nbt = event.getData(FTBQuests.MOD_ID);
