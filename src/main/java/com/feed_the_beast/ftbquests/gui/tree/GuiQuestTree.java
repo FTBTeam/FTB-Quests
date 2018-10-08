@@ -1,5 +1,6 @@
 package com.feed_the_beast.ftbquests.gui.tree;
 
+import com.feed_the_beast.ftblib.lib.config.ConfigBoolean;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigString;
 import com.feed_the_beast.ftblib.lib.config.ConfigValueInstance;
@@ -171,6 +172,19 @@ public class GuiQuestTree extends GuiBase
 							if (inst.getCanEdit())
 							{
 								new MessageEditObjectQuick(object.getID(), inst.getName(), button.isLeft()).sendToServer();
+							}
+						}
+
+						@Override
+						public void drawIcon(Theme theme, int x, int y, int w, int h)
+						{
+							if (inst.getValue() instanceof ConfigBoolean)
+							{
+								(inst.getValue().getBoolean() ? GuiIcons.ACCEPT : GuiIcons.ACCEPT_GRAY).draw(x, y, w, h);
+							}
+							else
+							{
+								super.drawIcon(theme, x, y, w, h);
 							}
 						}
 					});

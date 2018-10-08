@@ -259,29 +259,17 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 		list.add(TextFormatting.GRAY + I18n.format("ftbquests.task.click_to_submit"));
 		list.add("");
 
-		if (items.size() == 1)
-		{
-			GuiHelper.addStackTooltip(items.get(0), list, "");
-		}
-		else
+		if (list.size() > 1)
 		{
 			list.add(TextFormatting.GRAY + I18n.format("ftbquests.task.ftbquests.item.valid_items"));
+		}
 
-			boolean first = true;
+		GuiHelper.addStackTooltip(items.get(0), list, "");
 
-			for (ItemStack stack : items)
-			{
-				if (first)
-				{
-					first = false;
-				}
-				else
-				{
-					list.add(" - - -");
-				}
-
-				GuiHelper.addStackTooltip(stack, list, "");
-			}
+		for (int i = 1; i < items.size(); i++)
+		{
+			list.add(" - - -");
+			GuiHelper.addStackTooltip(items.get(i), list, "");
 		}
 	}
 
