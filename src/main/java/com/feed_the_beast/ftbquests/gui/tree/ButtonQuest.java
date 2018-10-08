@@ -168,10 +168,12 @@ public class ButtonQuest extends Button
 				list.add(I18n.format("ftbquests.gui.unclaimed_rewards") + ": " + TextFormatting.GOLD + r);
 			}
 
+			/*
 			if (quest.canRepeat)
 			{
-				list.add(I18n.format("ftbquests.gui.times_completed") + ": " + TextFormatting.GOLD + quest.timesCompleted);
+				list.add(I18n.format("ftbquests.gui.times_completed") + ": " + TextFormatting.GOLD + treeGui.questFile.self.getTimesCompleted(quest));
 			}
+			*/
 		}
 	}
 

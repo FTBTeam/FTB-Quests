@@ -50,7 +50,6 @@ public final class Quest extends QuestObject
 	public boolean canRepeat;
 	public final List<QuestTask> tasks;
 	public final List<QuestReward> rewards;
-	public int timesCompleted;
 
 	private String cachedID = "";
 	private Set<QuestObject> cachedDependencies = null;
@@ -169,8 +168,6 @@ public final class Quest extends QuestObject
 				rewards.add(reward);
 			}
 		}
-
-		timesCompleted = nbt.getInteger("times_completed");
 	}
 
 	@Override
@@ -332,20 +329,15 @@ public final class Quest extends QuestObject
 				nbt.setTag("rewards", array);
 			}
 		}
-
-		if (timesCompleted > 0)
-		{
-			nbt.setInteger("times_completed", timesCompleted);
-		}
 	}
 
 	@Override
 	public long getProgress(ITeamData data)
 	{
-		if (timesCompleted > 0)
+		/*if (data.getTimesCompleted(this) > 0)
 		{
 			return getMaxProgress();
-		}
+		}*/
 
 		long progress = 0L;
 
@@ -379,10 +371,10 @@ public final class Quest extends QuestObject
 	@Override
 	public int getRelativeProgress(ITeamData data)
 	{
-		if (timesCompleted > 0)
+		/*if (data.getTimesCompleted(this) > 0)
 		{
 			return 100;
-		}
+		}*/
 
 		int progress = 0;
 
@@ -403,10 +395,10 @@ public final class Quest extends QuestObject
 	@Override
 	public boolean isComplete(ITeamData data)
 	{
-		if (timesCompleted > 0)
+		/*if (data.getTimesCompleted(this) > 0)
 		{
 			return true;
-		}
+		}*/
 
 		for (QuestTask task : tasks)
 		{
@@ -430,7 +422,7 @@ public final class Quest extends QuestObject
 	@Override
 	public void onCompleted(ITeamData data)
 	{
-		timesCompleted++;
+		//data.setTimesCompleted(this, data.getTimesCompleted(this) + 1);
 		super.onCompleted(data);
 		new ObjectCompletedEvent.QuestEvent(data, this).post();
 
@@ -443,7 +435,7 @@ public final class Quest extends QuestObject
 	@Override
 	public void resetProgress(ITeamData data)
 	{
-		timesCompleted = 0;
+		//data.setTimesCompleted(this, -1);
 
 		for (QuestObject dep : getDependencies())
 		{
