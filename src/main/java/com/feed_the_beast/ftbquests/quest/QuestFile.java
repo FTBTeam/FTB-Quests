@@ -76,7 +76,7 @@ public abstract class QuestFile extends QuestObject
 			lootTables[rarity.ordinal()] = rarity.getLootTable();
 		}
 
-		lootSize = 9;
+		lootSize = 27;
 
 		colCompleted = Color4I.rgb(0x56FF56);
 		colStarted = Color4I.rgb(0x00FFFF);
@@ -495,7 +495,7 @@ public abstract class QuestFile extends QuestObject
 
 		if (lootSize == 0)
 		{
-			lootSize = 9;
+			lootSize = 27;
 		}
 
 		defaultRewardTeam = nbt.getBoolean("default_reward_team");
@@ -555,7 +555,7 @@ public abstract class QuestFile extends QuestObject
 			lootGroup.addString(r.getName(), () -> lootTables[r.ordinal()].toString(), v -> lootTables[r.ordinal()] = v.equals(r.getLootTable().toString()) ? r.getLootTable() : new ResourceLocation(v), r.getLootTable().toString(), pattern).setDisplayName(new TextComponentTranslation(r.getTranslationKey()));
 		}
 
-		config.addInt("loot_size", () -> lootSize, v -> lootSize = v, 9, 1, 1024);
+		config.addInt("loot_size", () -> lootSize, v -> lootSize = v, 27, 1, 1024);
 		config.addBool("default_reward_team", () -> defaultRewardTeam, v -> defaultRewardTeam = v, false);
 	}
 
