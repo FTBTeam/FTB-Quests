@@ -173,20 +173,20 @@ public final class QuestChapter extends QuestObject
 	}
 
 	@Override
-	public void resetProgress(ITeamData data)
+	public void resetProgress(ITeamData data, boolean dependencies)
 	{
 		for (Quest quest : quests)
 		{
-			quest.resetProgress(data);
+			quest.resetProgress(data, dependencies);
 		}
 	}
 
 	@Override
-	public void completeInstantly(ITeamData data)
+	public void completeInstantly(ITeamData data, boolean dependencies)
 	{
 		for (Quest quest : quests)
 		{
-			quest.completeInstantly(data);
+			quest.completeInstantly(data, dependencies);
 		}
 	}
 

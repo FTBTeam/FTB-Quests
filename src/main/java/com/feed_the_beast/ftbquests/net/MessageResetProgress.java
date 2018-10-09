@@ -59,7 +59,7 @@ public class MessageResetProgress extends MessageToServer
 
 				if (player1.team.isValid())
 				{
-					object.resetProgress(FTBQuestsTeamData.get(player1.team));
+					object.resetProgress(FTBQuestsTeamData.get(player1.team), true);
 				}
 
 				Universe.get().clearCache();

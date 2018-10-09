@@ -105,7 +105,7 @@ public class CommandCompleteInstantly extends CommandBase
 
 		for (ForgeTeam team : teams)
 		{
-			object.completeInstantly(FTBQuestsTeamData.get(team));
+			object.completeInstantly(FTBQuestsTeamData.get(team), true);
 		}
 
 		sender.sendMessage(new TextComponentTranslation("commands.ftbquests.complete_instantly.text"));

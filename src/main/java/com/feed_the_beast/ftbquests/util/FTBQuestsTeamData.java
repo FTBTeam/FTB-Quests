@@ -322,7 +322,7 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 				}
 			}
 
-			reward.quest.resetProgress(FTBQuestsTeamData.get(Universe.get().getPlayer(player).team));
+			reward.quest.resetProgress(FTBQuestsTeamData.get(Universe.get().getPlayer(player).team), false);
 		}
 	}
 

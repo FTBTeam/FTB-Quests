@@ -105,7 +105,7 @@ public class CommandResetProgress extends CommandBase
 
 		for (ForgeTeam team : teams)
 		{
-			object.resetProgress(FTBQuestsTeamData.get(team));
+			object.resetProgress(FTBQuestsTeamData.get(team), true);
 		}
 
 		sender.sendMessage(new TextComponentTranslation("commands.ftbquests.reset_progress.reset"));

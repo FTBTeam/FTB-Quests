@@ -83,9 +83,9 @@ public abstract class QuestObject
 
 	public abstract long getMaxProgress();
 
-	public abstract void resetProgress(ITeamData data);
+	public abstract void resetProgress(ITeamData data, boolean dependencies);
 
-	public abstract void completeInstantly(ITeamData data);
+	public abstract void completeInstantly(ITeamData data, boolean dependencies);
 
 	public abstract int getRelativeProgress(ITeamData data);
 
