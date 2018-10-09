@@ -4,7 +4,6 @@ import com.feed_the_beast.ftbquests.FTBQuests;
 import net.minecraft.util.IStringSerializable;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraft.world.storage.loot.LootTableList;
 
 /**
  * @author LatvianModder
@@ -29,7 +28,7 @@ public enum LootRarity implements IStringSerializable
 		name = n;
 		color = c;
 		translationKey = "ftbquests.rarity." + name;
-		lootTable = LootTableList.register(new ResourceLocation(FTBQuests.MOD_ID, "lootcrate/" + name));
+		lootTable = new ResourceLocation(FTBQuests.MOD_ID, "lootcrate/" + name);
 	}
 
 	@Override
