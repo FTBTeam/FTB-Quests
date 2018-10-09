@@ -112,7 +112,7 @@ public abstract class QuestTask extends QuestObject
 	}
 
 	@Override
-	public final void resetProgress(ITeamData data)
+	public final void resetProgress(ITeamData data, boolean dependencies)
 	{
 		QuestTaskData taskData = data.getQuestTaskData(this);
 		taskData.resetProgress();
@@ -121,7 +121,7 @@ public abstract class QuestTask extends QuestObject
 	}
 
 	@Override
-	public final void completeInstantly(ITeamData data)
+	public final void completeInstantly(ITeamData data, boolean dependencies)
 	{
 		QuestTaskData taskData = data.getQuestTaskData(this);
 		taskData.completeInstantly();

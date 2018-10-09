@@ -433,40 +433,46 @@ public final class Quest extends QuestObject
 	}
 
 	@Override
-	public void resetProgress(ITeamData data)
+	public void resetProgress(ITeamData data, boolean dependencies)
 	{
 		//data.setTimesCompleted(this, -1);
 
-		for (QuestObject dep : getDependencies())
+		if (dependencies)
 		{
-			if (!dep.invalid)
+			for (QuestObject dep : getDependencies())
 			{
-				dep.resetProgress(data);
+				if (!dep.invalid)
+				{
+					dep.resetProgress(data, true);
+				}
 			}
 		}
 
 		for (QuestTask task : tasks)
 		{
-			task.resetProgress(data);
+			task.resetProgress(data, dependencies);
 		}
 
 		data.unclaimRewards(rewards);
 	}
 
 	@Override
-	public void completeInstantly(ITeamData data)
+	public void completeInstantly(ITeamData data, boolean dependencies)
 	{
-		for (QuestObject dep : getDependencies())
+		if (dependencies)
 		{
-			if (!dep.invalid)
+			for (QuestObject dep : getDependencies())
 			{
-				dep.completeInstantly(data);
+				if (!dep.invalid)
+				{
+					dep.completeInstantly(data, true);
+				}
 			}
 		}
 
 		for (QuestTask task : tasks)
 		{
-			task.completeInstantly(data);
+			task.completeInstantly(data, dependencies);
 		}
 	}
 
