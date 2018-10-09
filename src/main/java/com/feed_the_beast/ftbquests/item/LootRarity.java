@@ -28,7 +28,7 @@ public enum LootRarity implements IStringSerializable
 		name = n;
 		color = c;
 		translationKey = "ftbquests.rarity." + name;
-		lootTable = new ResourceLocation(FTBQuests.MOD_ID, "lootcrate/" + name);
+		lootTable = new ResourceLocation(FTBQuests.MOD_ID, "lootcrates/" + name);
 	}
 
 	@Override

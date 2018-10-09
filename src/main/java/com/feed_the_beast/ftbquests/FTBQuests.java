@@ -19,7 +19,6 @@ import net.minecraft.world.storage.loot.LootTableList;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
-import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
@@ -76,16 +75,13 @@ public class FTBQuests
 		}
 
 		NetworkRegistry.INSTANCE.registerGuiHandler(this, new FTBQuestsGuiHandler());
-		PROXY.preInit();
-	}
 
-	@Mod.EventHandler
-	public void onInit(FMLInitializationEvent event)
-	{
 		for (LootRarity lootRarity : LootRarity.VALUES)
 		{
 			LootTableList.register(lootRarity.getLootTable());
 		}
+
+		PROXY.preInit();
 	}
 
 	@Mod.EventHandler
