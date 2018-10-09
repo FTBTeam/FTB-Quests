@@ -90,7 +90,7 @@ public class ButtonTask extends SimpleTextButton
 			}
 			else
 			{
-				list.add(TextFormatting.DARK_GREEN + data.getProgressString() + " / " + task.getMaxProgressString() + " [" + data.getRelativeProgress() + "%]");
+				list.add(TextFormatting.DARK_GREEN + (data.getProgress() > task.getMaxProgress() ? task.getMaxProgressString() : data.getProgressString()) + " / " + task.getMaxProgressString() + " [" + data.getRelativeProgress() + "%]");
 			}
 		}
 		else
