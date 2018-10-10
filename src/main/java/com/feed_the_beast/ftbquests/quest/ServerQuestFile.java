@@ -41,6 +41,12 @@ public class ServerQuestFile extends QuestFile
 		return nbt != null;
 	}
 
+	@Override
+	public boolean isClient()
+	{
+		return false;
+	}
+
 	@Nullable
 	@Override
 	public ITeamData getData(String team)

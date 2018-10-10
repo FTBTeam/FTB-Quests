@@ -86,6 +86,8 @@ public abstract class QuestFile extends QuestObject
 		defaultRewardTeam = false;
 	}
 
+	public abstract boolean isClient();
+
 	@Override
 	public QuestFile getQuestFile()
 	{

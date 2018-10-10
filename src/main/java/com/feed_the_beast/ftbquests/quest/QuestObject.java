@@ -107,7 +107,7 @@ public abstract class QuestObject
 
 	public void onCompleted(ITeamData data)
 	{
-		if (!completionCommand.isEmpty())
+		if (!completionCommand.isEmpty() && !getQuestFile().isClient())
 		{
 			Universe.get().server.commandManager.executeCommand(Universe.get().server, completionCommand
 					.replace("@team", data.getTeamID())
