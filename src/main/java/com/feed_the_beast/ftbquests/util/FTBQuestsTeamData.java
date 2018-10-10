@@ -20,10 +20,12 @@ import com.feed_the_beast.ftbquests.net.MessageChangedTeam;
 import com.feed_the_beast.ftbquests.net.MessageClaimRewardResponse;
 import com.feed_the_beast.ftbquests.net.MessageCreateTeamData;
 import com.feed_the_beast.ftbquests.net.MessageDeleteTeamData;
+import com.feed_the_beast.ftbquests.net.MessageRepeatQuest;
 import com.feed_the_beast.ftbquests.net.MessageSyncQuests;
 import com.feed_the_beast.ftbquests.net.MessageUpdateTaskProgress;
 import com.feed_the_beast.ftbquests.net.MessageUpdateVariable;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
+import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestVariable;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
@@ -322,7 +324,16 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 				}
 			}
 
-			reward.quest.resetProgress(FTBQuestsTeamData.get(Universe.get().getPlayer(player).team), false);
+			ForgeTeam team = Universe.get().getPlayer(player).team;
+			reward.quest.resetProgress(FTBQuestsTeamData.get(team), false);
+
+			for (ForgePlayer member : team.getMembers())
+			{
+				if (member.isOnline())
+				{
+					new MessageRepeatQuest(reward.quest.getID()).sendTo(member.getPlayer());
+				}
+			}
 		}
 	}
 
@@ -548,6 +559,12 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 	public String getTeamID()
 	{
 		return team.getName();
+	}
+
+	@Override
+	public QuestFile getFile()
+	{
+		return ServerQuestFile.INSTANCE;
 	}
 
 	@Override

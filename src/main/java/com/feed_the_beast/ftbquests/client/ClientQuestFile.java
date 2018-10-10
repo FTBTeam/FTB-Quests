@@ -143,6 +143,12 @@ public class ClientQuestFile extends QuestFile
 		questGui.openGui();
 	}
 
+	@Override
+	public boolean isClient()
+	{
+		return true;
+	}
+
 	@Nullable
 	@Override
 	public ClientQuestProgress getData(String team)

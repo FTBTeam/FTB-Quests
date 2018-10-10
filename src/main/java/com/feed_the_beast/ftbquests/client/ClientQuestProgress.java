@@ -1,6 +1,7 @@
 package com.feed_the_beast.ftbquests.client;
 
 import com.feed_the_beast.ftbquests.quest.ITeamData;
+import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.QuestVariable;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
@@ -36,6 +37,12 @@ public class ClientQuestProgress implements ITeamData
 	public String getTeamID()
 	{
 		return teamID;
+	}
+
+	@Override
+	public QuestFile getFile()
+	{
+		return ClientQuestFile.INSTANCE;
 	}
 
 	@Override

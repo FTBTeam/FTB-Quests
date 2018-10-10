@@ -13,6 +13,8 @@ public interface ITeamData
 {
 	String getTeamID();
 
+	QuestFile getFile();
+
 	QuestTaskData getQuestTaskData(QuestTask task);
 
 	void syncTask(QuestTaskData data);
