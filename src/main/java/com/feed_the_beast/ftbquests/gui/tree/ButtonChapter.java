@@ -64,6 +64,11 @@ public class ButtonChapter extends ButtonTab
 		list.add(getTitle() + ClientQuestProgress.getCompletionSuffix(treeGui.questFile.self, chapter));
 		list.addAll(description);
 
+		if (treeGui.questFile.self == null)
+		{
+			return;
+		}
+
 		int r = 0;
 
 		for (Quest quest : chapter.quests)
