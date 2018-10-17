@@ -259,7 +259,11 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 		list.add(TextFormatting.GRAY + I18n.format("ftbquests.task.click_to_submit"));
 		list.add("");
 
-		if (list.size() > 1)
+		if (items.isEmpty())
+		{
+			return;
+		}
+		else if (items.size() > 1)
 		{
 			list.add(TextFormatting.GRAY + I18n.format("ftbquests.task.ftbquests.item.valid_items"));
 		}
