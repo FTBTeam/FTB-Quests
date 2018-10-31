@@ -35,6 +35,7 @@ ftbquests.rarity.legendary=Legendary
 
 itemGroup.ftbquests=FTB Quests
 sidebar_button.ftbquests.quests=Quests
+sidebar_button.ftbquests.quests.no_team=Join a team to complete quests!
 key.ftbquests.quests=Open Quests
 
 ftbquests.unnamed=Unnamed
