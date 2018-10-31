@@ -1,6 +1,6 @@
 package com.feed_the_beast.ftbquests.client;
 
-import com.feed_the_beast.ftblib.events.CustomSidebarButtonTextEvent;
+import com.feed_the_beast.ftblib.events.SidebarButtonCreatedEvent;
 import com.feed_the_beast.ftblib.events.client.CustomClickEvent;
 import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
@@ -12,8 +12,10 @@ import com.feed_the_beast.ftbquests.tile.TileProgressScreenCore;
 import com.feed_the_beast.ftbquests.tile.TileScreenCore;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.client.model.ModelLoader;
@@ -55,33 +57,53 @@ public class FTBQuestsClientEventHandler
 	}
 
 	@SubscribeEvent
-	public static void onCustomSidebarButtonText(CustomSidebarButtonTextEvent event)
+	public static void onSidebarButtonCreated(SidebarButtonCreatedEvent event)
 	{
-		if (ClientQuestFile.existsWithTeam() && event.getButton().id.equals(QUESTS_BUTTON))
+		if (event.getButton().id.equals(QUESTS_BUTTON))
 		{
-			int r = 0;
-
-			for (QuestChapter chapter : ClientQuestFile.INSTANCE.chapters)
+			event.getButton().setCustomTextHandler(() ->
 			{
-				for (Quest quest : chapter.quests)
+				if (ClientQuestFile.exists())
 				{
-					if (quest.isComplete(ClientQuestFile.INSTANCE.self))
+					if (!ClientQuestFile.existsWithTeam())
 					{
-						for (QuestReward reward : quest.rewards)
+						return "[!]";
+					}
+
+					int r = 0;
+
+					for (QuestChapter chapter : ClientQuestFile.INSTANCE.chapters)
+					{
+						for (Quest quest : chapter.quests)
 						{
-							if (!ClientQuestFile.INSTANCE.isRewardClaimed(reward))
+							if (quest.isComplete(ClientQuestFile.INSTANCE.self))
 							{
-								r++;
+								for (QuestReward reward : quest.rewards)
+								{
+									if (!ClientQuestFile.INSTANCE.isRewardClaimed(reward))
+									{
+										r++;
+									}
+								}
 							}
 						}
 					}
-				}
-			}
 
-			if (r > 0)
-			{
-				event.setText(Integer.toString(r));
-			}
+					if (r > 0)
+					{
+						return Integer.toString(r);
+					}
+				}
+
+				return "";
+			});
+
+			event.getButton().setTooltipHandler(list -> {
+				if (ClientQuestFile.exists() && !ClientQuestFile.existsWithTeam())
+				{
+					list.add(TextFormatting.GRAY + I18n.format("sidebar_button.ftbquests.quests.no_team"));
+				}
+			});
 		}
 	}
 
@@ -90,7 +112,7 @@ public class FTBQuestsClientEventHandler
 	{
 		if (FTBQuestsClient.KEY_QUESTS.isPressed())
 		{
-			if (ClientQuestFile.exists())
+			if (ClientQuestFile.existsWithTeam() || ClientQuestFile.exists() && ClientQuestFile.INSTANCE.canEdit())
 			{
 				ClientQuestFile.INSTANCE.openQuestGui();
 			}
@@ -109,7 +131,7 @@ public class FTBQuestsClientEventHandler
 			switch (event.getID().getPath())
 			{
 				case "open_gui":
-					if (ClientQuestFile.exists())
+					if (ClientQuestFile.existsWithTeam() || ClientQuestFile.exists() && ClientQuestFile.INSTANCE.canEdit())
 					{
 						ClientQuestFile.INSTANCE.openQuestGui();
 					}
