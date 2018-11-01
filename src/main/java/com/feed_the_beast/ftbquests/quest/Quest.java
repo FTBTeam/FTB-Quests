@@ -332,7 +332,8 @@ public final class Quest extends QuestObject
 			{
 				nbt1.removeTag("uid");
 
-				ItemReward reward = new ItemReward(this, id);
+				ItemReward reward = new ItemReward(this);
+				reward.uid = id;
 				reward.team = nbt1.getBoolean("team_reward");
 				nbt1.removeTag("team_reward");
 				reward.stack = ItemMissing.read(nbt1);
@@ -340,7 +341,7 @@ public final class Quest extends QuestObject
 				continue;
 			}
 
-			QuestReward reward = QuestRewardType.createReward(this, id, nbt1);
+			QuestReward reward = QuestRewardType.createReward(this, nbt1);
 
 			if (reward != null)
 			{

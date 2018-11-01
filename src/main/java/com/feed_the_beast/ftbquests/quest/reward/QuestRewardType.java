@@ -47,7 +47,7 @@ public final class QuestRewardType extends IForgeRegistryEntry.Impl<QuestRewardT
 	}
 
 	@Nullable
-	public static QuestReward createReward(Quest quest, int uid, NBTTagCompound nbt)
+	public static QuestReward createReward(Quest quest, NBTTagCompound nbt)
 	{
 		String id = nbt.getString("type");
 
@@ -67,7 +67,7 @@ public final class QuestRewardType extends IForgeRegistryEntry.Impl<QuestRewardT
 			return null;
 		}
 
-		QuestReward reward = type.provider.create(quest, uid);
+		QuestReward reward = type.provider.create(quest);
 
 		if (reward == null)
 		{
@@ -88,7 +88,7 @@ public final class QuestRewardType extends IForgeRegistryEntry.Impl<QuestRewardT
 	public interface Provider
 	{
 		@Nullable
-		QuestReward create(Quest quest, int uid);
+		QuestReward create(Quest quest);
 	}
 
 	public final Class typeClass;

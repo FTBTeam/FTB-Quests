@@ -2,7 +2,6 @@ package com.feed_the_beast.ftbquests.net.edit;
 
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
-import com.feed_the_beast.ftblib.lib.math.MathUtils;
 import com.feed_the_beast.ftblib.lib.net.MessageToServer;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.FTBQuests;
@@ -60,17 +59,11 @@ public class MessageAddReward extends MessageToServer
 
 			if (q != null)
 			{
-				int id = 0;
-
-				while (id == 0 || ServerQuestFile.INSTANCE.getReward(id) != null)
-				{
-					id = MathUtils.RAND.nextInt();
-				}
-
-				QuestReward r = QuestRewardType.createReward(q, id, nbt);
+				QuestReward r = QuestRewardType.createReward(q, nbt);
 
 				if (r != null)
 				{
+					r.uid = ServerQuestFile.INSTANCE.getNewID();
 					q.rewards.add(r);
 					ServerQuestFile.INSTANCE.allRewards.put(r.uid, r);
 					ServerQuestFile.INSTANCE.save();

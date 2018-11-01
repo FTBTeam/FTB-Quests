@@ -19,9 +19,9 @@ public class CommandReward extends QuestReward
 {
 	private String command;
 
-	public CommandReward(Quest quest, int id)
+	public CommandReward(Quest quest)
 	{
-		super(quest, id);
+		super(quest);
 		command = "";
 	}
 
