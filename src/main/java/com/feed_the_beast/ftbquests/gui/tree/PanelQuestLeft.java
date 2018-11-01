@@ -54,17 +54,26 @@ public class PanelQuestLeft extends Panel
 				add(new ButtonAddTask(this, treeGui.selectedQuest));
 			}
 
+			if (!treeGui.selectedQuest.isComplete(ClientQuestFile.INSTANCE.self))
+			{
+				add(new WidgetVerticalSpace(this, 2));
+				add(new ButtonQuickComplete(this));
+			}
+
 			List<String> dependencies = new ArrayList<>();
 
 			for (QuestObject object : treeGui.selectedQuest.getDependencies())
 			{
-				if (dependencies.isEmpty())
+				if (object.getQuestChapter() != treeGui.selectedQuest.chapter)
 				{
-					add(new WidgetVerticalSpace(this, 2));
-					add(new TextField(this).setText(TextFormatting.AQUA + I18n.format("ftbquests.gui.requires") + ":"));
-				}
+					if (dependencies.isEmpty())
+					{
+						add(new WidgetVerticalSpace(this, 2));
+						add(new TextField(this).setText(TextFormatting.AQUA + I18n.format("ftbquests.gui.requires") + ":"));
+					}
 
-				dependencies.add(TextFormatting.GRAY + object.getDisplayName().getUnformattedText());
+					dependencies.add(TextFormatting.GRAY + object.getDisplayName().getUnformattedText());
+				}
 			}
 
 			if (!dependencies.isEmpty())
@@ -78,7 +87,7 @@ public class PanelQuestLeft extends Panel
 			{
 				for (Quest quest : chapter.quests)
 				{
-					if (quest.hasDependency(treeGui.selectedQuest))
+					if (quest.chapter != treeGui.selectedQuest.chapter && quest.hasDependency(treeGui.selectedQuest))
 					{
 						if (dependants.isEmpty())
 						{
@@ -116,14 +125,9 @@ public class PanelQuestLeft extends Panel
 				widget.setX(3);
 			}
 
-			if (!treeGui.selectedQuest.isComplete(ClientQuestFile.INSTANCE.self))
-			{
-				add(new ButtonSubmitAll(this).setPosAndSize(width - 11, tasksTextField.posY, 8, 8));
-			}
-
 			if (treeGui.selectedQuest.canRepeat)
 			{
-				add(new LabelCanRepeatQuest(this).setPosAndSize(width - 21, tasksTextField.posY, 8, 8));
+				add(new LabelCanRepeatQuest(this).setPosAndSize(width - 11, tasksTextField.posY, 8, 8));
 			}
 		}
 

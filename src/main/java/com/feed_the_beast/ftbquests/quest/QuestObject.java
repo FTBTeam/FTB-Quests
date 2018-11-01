@@ -18,8 +18,6 @@ public abstract class QuestObject extends QuestObjectBase
 	public boolean invalid = false;
 	public String completionCommand = "";
 
-	public abstract QuestFile getQuestFile();
-
 	public abstract QuestObjectType getObjectType();
 
 	public abstract String getID();

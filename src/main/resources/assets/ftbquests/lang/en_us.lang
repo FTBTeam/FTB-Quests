@@ -94,7 +94,9 @@ ftbquests.gui.requires=Requires
 ftbquests.gui.required_by=Required by
 ftbquests.gui.unclaimed_rewards=Unclaimed rewards
 ftbquests.gui.times_completed=Times completed
-ftbquests.gui.submit_all=Click to submit all items and claim rewards
+ftbquests.gui.quick_complete=Quick Complete
+ftbquests.gui.quick_complete.info_1=Submit all items
+ftbquests.gui.quick_complete.info_2=Claim all rewards
 
 ftbquests.task=Task
 ftbquests.tasks=Tasks
