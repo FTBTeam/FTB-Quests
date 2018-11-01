@@ -155,6 +155,8 @@ ftbquests.reward.ftbquests.command=Command
 ftbquests.reward.ftbquests.command.text=Command: %s
 
 ftbquests.variable=Variable
+ftbquests.variable.max_value=Max Value
+ftbquests.variable.team=Team can set it's own value
 ftbquests.variables=Variables
 ftbquests.variable.max=Max Value
 
