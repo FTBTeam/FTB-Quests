@@ -62,8 +62,6 @@ public class MessageResetReward extends MessageToServer
 				{
 					data.unclaimRewards(collection);
 				}
-
-				new MessageResetRewardResponse(id).sendToAll();
 			}
 		}
 	}
