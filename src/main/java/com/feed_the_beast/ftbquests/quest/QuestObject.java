@@ -1,33 +1,21 @@
 package com.feed_the_beast.ftbquests.quest;
 
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
-import com.feed_the_beast.ftblib.lib.config.ConfigItemStack;
 import com.feed_the_beast.ftblib.lib.data.Universe;
-import com.feed_the_beast.ftblib.lib.icon.Icon;
-import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
-import com.feed_the_beast.ftbquests.item.ItemMissing;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 
 import java.util.UUID;
-import java.util.regex.Pattern;
 
 /**
  * @author LatvianModder
  */
-public abstract class QuestObject
+public abstract class QuestObject extends QuestObjectBase
 {
-	public static final Pattern ID_PATTERN = Pattern.compile("^[a-z0-9_]{1,32}$");
-
 	public String id = "";
 	public boolean invalid = false;
-	public String title = "";
-	public ItemStack icon = ItemStack.EMPTY;
-	private Icon cachedIcon = null;
 	public String completionCommand = "";
 
 	public abstract QuestFile getQuestFile();
@@ -36,19 +24,16 @@ public abstract class QuestObject
 
 	public abstract String getID();
 
+	@Override
 	public abstract void writeData(NBTTagCompound nbt);
 
+	@Override
+	public abstract void readData(NBTTagCompound nbt);
+
+	@Override
 	public final void writeCommonData(NBTTagCompound nbt)
 	{
-		if (!title.isEmpty())
-		{
-			nbt.setString("title", title);
-		}
-
-		if (!icon.isEmpty())
-		{
-			nbt.setTag("icon", ItemMissing.write(icon, false));
-		}
+		super.writeCommonData(nbt);
 
 		if (!completionCommand.isEmpty())
 		{
@@ -56,6 +41,7 @@ public abstract class QuestObject
 		}
 	}
 
+	@Override
 	public final void readCommonData(NBTTagCompound nbt)
 	{
 		if (getObjectType() != QuestObjectType.FILE)
@@ -72,12 +58,10 @@ public abstract class QuestObject
 			id = "*";
 		}
 
-		title = nbt.getString("title");
-		icon = ItemMissing.read(nbt.getTag("icon"));
+		super.readCommonData(nbt);
+
 		completionCommand = nbt.getString("completion_command");
 	}
-
-	public abstract Icon getAltIcon();
 
 	public abstract long getProgress(ITeamData data);
 
@@ -116,34 +100,8 @@ public abstract class QuestObject
 		}
 	}
 
-	public final Icon getIcon()
-	{
-		if (cachedIcon == null)
-		{
-			if (!icon.isEmpty())
-			{
-				cachedIcon = ItemIcon.getItemIcon(icon);
-			}
-			else
-			{
-				cachedIcon = getAltIcon();
-			}
-		}
-
-		return cachedIcon;
-	}
-
+	@Override
 	public abstract ITextComponent getAltDisplayName();
-
-	public final ITextComponent getDisplayName()
-	{
-		if (!title.isEmpty())
-		{
-			return new TextComponentString(title.equals("-") ? "" : title);
-		}
-
-		return getAltDisplayName();
-	}
 
 	public void deleteSelf()
 	{
@@ -177,19 +135,10 @@ public abstract class QuestObject
 		return o == this;
 	}
 
-	public void getConfig(ConfigGroup config)
+	@Override
+	public final void getExtraConfig(ConfigGroup config)
 	{
-	}
-
-	public void getExtraConfig(ConfigGroup config)
-	{
-		config.addString("title", () -> title, v -> title = v, "").setDisplayName(new TextComponentTranslation("ftbquests.title")).setOrder((byte) -127);
-		config.add("icon", new ConfigItemStack.SimpleStack(() -> icon, v -> icon = v), new ConfigItemStack(ItemStack.EMPTY)).setDisplayName(new TextComponentTranslation("ftbquests.icon")).setOrder((byte) -126);
+		super.getExtraConfig(config);
 		config.addString("completion_command", () -> completionCommand, v -> completionCommand = v, "").setDisplayName(new TextComponentTranslation("ftbquests.completion_command")).setOrder((byte) 150);
-	}
-
-	public void clearCachedData()
-	{
-		cachedIcon = null;
 	}
 }

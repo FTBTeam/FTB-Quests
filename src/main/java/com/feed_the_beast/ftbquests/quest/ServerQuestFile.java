@@ -11,7 +11,6 @@ import javax.annotation.Nullable;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -21,11 +20,13 @@ public class ServerQuestFile extends QuestFile
 {
 	public static ServerQuestFile INSTANCE;
 
+	public final Universe universe;
 	public final File file;
 	public boolean shouldSave = false;
 
-	public ServerQuestFile(File f)
+	public ServerQuestFile(Universe u, File f)
 	{
+		universe = u;
 		file = f;
 	}
 
@@ -51,35 +52,25 @@ public class ServerQuestFile extends QuestFile
 	@Override
 	public ITeamData getData(String team)
 	{
-		if (Universe.loaded())
-		{
-			ForgeTeam t = Universe.get().getTeam(team);
-			return t.isValid() ? FTBQuestsTeamData.get(t) : null;
-		}
-
-		return null;
+		ForgeTeam t = universe.getTeam(team);
+		return t.isValid() ? FTBQuestsTeamData.get(t) : null;
 	}
 
 	@Override
 	public Collection<FTBQuestsTeamData> getAllData()
 	{
-		if (Universe.loaded())
+		Collection<ForgeTeam> teams = universe.getTeams();
+		List<FTBQuestsTeamData> list = new ArrayList<>(teams.size());
+
+		for (ForgeTeam team : teams)
 		{
-			Collection<ForgeTeam> teams = Universe.get().getTeams();
-			List<FTBQuestsTeamData> list = new ArrayList<>(teams.size());
-
-			for (ForgeTeam team : teams)
+			if (team.isValid())
 			{
-				if (team.isValid())
-				{
-					list.add(FTBQuestsTeamData.get(team));
-				}
+				list.add(FTBQuestsTeamData.get(team));
 			}
-
-			return list;
 		}
 
-		return Collections.emptyList();
+		return list;
 	}
 
 	@Override
@@ -101,7 +92,7 @@ public class ServerQuestFile extends QuestFile
 	public void save()
 	{
 		shouldSave = true;
-		Universe.get().markDirty();
+		universe.markDirty();
 	}
 
 	public void saveNow()

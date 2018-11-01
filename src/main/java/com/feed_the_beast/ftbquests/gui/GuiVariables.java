@@ -11,7 +11,7 @@ import com.feed_the_beast.ftblib.lib.gui.misc.GuiEditConfigValue;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.net.edit.MessageCreateObject;
-import com.feed_the_beast.ftbquests.quest.QuestObject;
+import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.quest.QuestVariable;
 import net.minecraft.client.resources.I18n;
@@ -41,7 +41,7 @@ public class GuiVariables extends GuiButtonListBase
 			{
 				GuiHelper.playClickSound();
 
-				new GuiEditConfigValue("id", new ConfigString("", QuestObject.ID_PATTERN), (value, set) -> {
+				new GuiEditConfigValue("id", new ConfigString("", QuestObjectBase.ID_PATTERN), (value, set) -> {
 					if (set && ClientQuestFile.INSTANCE.get('#' + value.getString()) == null)
 					{
 						NBTTagCompound nbt = new NBTTagCompound();

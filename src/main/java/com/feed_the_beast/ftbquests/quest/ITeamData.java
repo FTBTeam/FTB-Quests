@@ -5,6 +5,7 @@ import com.feed_the_beast.ftbquests.quest.task.QuestTask;
 import com.feed_the_beast.ftbquests.quest.task.QuestTaskData;
 
 import java.util.Collection;
+import java.util.UUID;
 
 /**
  * @author LatvianModder
@@ -28,4 +29,6 @@ public interface ITeamData
 	long getVariable(QuestVariable variable);
 
 	void setVariable(QuestVariable variable, long value);
+
+	boolean isRewardClaimed(UUID player, QuestReward reward);
 }

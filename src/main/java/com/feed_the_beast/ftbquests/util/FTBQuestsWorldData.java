@@ -54,7 +54,7 @@ public class FTBQuestsWorldData implements IConfigCallback
 
 		FTBQuests.LOGGER.info("Loading quests from " + file.getAbsolutePath());
 
-		ServerQuestFile.INSTANCE = new ServerQuestFile(file);
+		ServerQuestFile.INSTANCE = new ServerQuestFile(event.getUniverse(), file);
 
 		if (!ServerQuestFile.INSTANCE.load())
 		{
@@ -90,6 +90,12 @@ public class FTBQuestsWorldData implements IConfigCallback
 		for (int i = 0; i < list.tagCount(); i++)
 		{
 			INSTANCE.extraFiles.add(list.getStringTagAt(i));
+		}
+
+		if (ServerQuestFile.INSTANCE.fileVersion != ServerQuestFile.VERSION)
+		{
+			FTBQuests.LOGGER.info("File version changed " + ServerQuestFile.INSTANCE.fileVersion + " -> " + ServerQuestFile.VERSION);
+			ServerQuestFile.INSTANCE.save();
 		}
 	}
 

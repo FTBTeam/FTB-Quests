@@ -28,27 +28,12 @@ public final class QuestChapter extends QuestObject
 	public final List<Quest> quests;
 	public final List<String> description;
 
-	public QuestChapter(QuestFile f, NBTTagCompound nbt)
+	public QuestChapter(QuestFile f)
 	{
 		file = f;
-		readCommonData(nbt);
 		description = new ArrayList<>();
-		visibilityType = EnumQuestVisibilityType.NAME_MAP.get(nbt.getString("visibility"));
+		visibilityType = EnumQuestVisibilityType.NORMAL;
 		quests = new ArrayList<>();
-
-		NBTTagList desc = nbt.getTagList("description", Constants.NBT.TAG_STRING);
-
-		for (int i = 0; i < desc.tagCount(); i++)
-		{
-			description.add(desc.getStringTagAt(i));
-		}
-
-		NBTTagList questsList = nbt.getTagList("quests", Constants.NBT.TAG_COMPOUND);
-
-		for (int j = 0; j < questsList.tagCount(); j++)
-		{
-			quests.add(new Quest(this, questsList.getCompoundTagAt(j)));
-		}
 	}
 
 	@Override
@@ -104,6 +89,31 @@ public final class QuestChapter extends QuestObject
 			}
 
 			nbt.setTag("quests", questsList);
+		}
+	}
+
+	@Override
+	public void readData(NBTTagCompound nbt)
+	{
+		readCommonData(nbt);
+		description.clear();
+		visibilityType = EnumQuestVisibilityType.NAME_MAP.get(nbt.getString("visibility"));
+		quests.clear();
+
+		NBTTagList desc = nbt.getTagList("description", Constants.NBT.TAG_STRING);
+
+		for (int i = 0; i < desc.tagCount(); i++)
+		{
+			description.add(desc.getStringTagAt(i));
+		}
+
+		NBTTagList questsList = nbt.getTagList("quests", Constants.NBT.TAG_COMPOUND);
+
+		for (int j = 0; j < questsList.tagCount(); j++)
+		{
+			Quest quest = new Quest(this);
+			quest.readData(questsList.getCompoundTagAt(j));
+			quests.add(quest);
 		}
 	}
 

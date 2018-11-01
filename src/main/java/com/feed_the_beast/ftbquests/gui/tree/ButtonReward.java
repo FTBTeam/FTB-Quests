@@ -11,7 +11,6 @@ import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.gui.QuestsTheme;
-import com.feed_the_beast.ftbquests.net.MessageClaimReward;
 import com.feed_the_beast.ftbquests.net.edit.MessageDeleteReward;
 import com.feed_the_beast.ftbquests.net.edit.MessageEditReward;
 import com.feed_the_beast.ftbquests.net.edit.MessageResetReward;
@@ -31,7 +30,7 @@ public class ButtonReward extends SimpleTextButton
 
 	public ButtonReward(Panel panel, QuestReward r)
 	{
-		super(panel, (r.team ? StringUtils.color(r.getDisplayName(), TextFormatting.BLUE) : r.getDisplayName()).getFormattedText(), r.getIcon());
+		super(panel, (r.isTeamReward() ? StringUtils.color(r.getDisplayName(), TextFormatting.BLUE) : r.getDisplayName()).getFormattedText(), r.getIcon());
 		reward = r;
 	}
 
@@ -43,9 +42,9 @@ public class ButtonReward extends SimpleTextButton
 			list.add(TextFormatting.DARK_GRAY + reward.toString());
 		}
 
-		if (reward.team)
+		if (reward.isTeamReward())
 		{
-			list.add(TextFormatting.GRAY + I18n.format("ftbquests.reward.team_reward"));
+			list.add(TextFormatting.BLUE + "[" + I18n.format("ftbquests.reward.team_reward") + "]");
 		}
 
 		reward.addMouseOverText(list);
@@ -83,10 +82,10 @@ public class ButtonReward extends SimpleTextButton
 	{
 		if (button.isLeft())
 		{
-			if (ClientQuestFile.existsWithTeam())
+			if (ClientQuestFile.existsWithTeam() && reward.quest.isComplete(ClientQuestFile.INSTANCE.self) && !ClientQuestFile.INSTANCE.isRewardClaimed(reward))
 			{
 				GuiHelper.playClickSound();
-				new MessageClaimReward(reward.uid).sendToServer();
+				reward.onButtonClicked();
 			}
 		}
 		else if (button.isRight() && ClientQuestFile.exists() && ClientQuestFile.INSTANCE.canEdit())

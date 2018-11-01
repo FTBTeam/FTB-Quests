@@ -2,7 +2,6 @@ package com.feed_the_beast.ftbquests.quest.task;
 
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -47,10 +46,8 @@ public final class QuestTaskType extends IForgeRegistryEntry.Impl<QuestTaskType>
 	}
 
 	@Nullable
-	public static QuestTask createTask(Quest quest, NBTTagCompound nbt)
+	public static QuestTask createTask(Quest quest, String id)
 	{
-		String id = nbt.getString("type");
-
 		if (id.isEmpty())
 		{
 			id = FTBQuests.MOD_ID + ":item";
@@ -74,8 +71,6 @@ public final class QuestTaskType extends IForgeRegistryEntry.Impl<QuestTaskType>
 			return null;
 		}
 
-		task.readCommonData(nbt);
-		task.readData(nbt);
 		return task;
 	}
 

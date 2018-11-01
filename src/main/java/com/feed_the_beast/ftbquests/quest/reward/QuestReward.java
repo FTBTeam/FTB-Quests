@@ -1,17 +1,14 @@
 package com.feed_the_beast.ftbquests.quest.reward;
 
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
-import com.feed_the_beast.ftblib.lib.config.ConfigItemStack;
 import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
-import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
-import com.feed_the_beast.ftbquests.item.ItemMissing;
+import com.feed_the_beast.ftbquests.net.MessageClaimReward;
 import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -21,17 +18,13 @@ import java.util.List;
 /**
  * @author LatvianModder
  */
-public abstract class QuestReward
+public abstract class QuestReward extends QuestObjectBase
 {
 	public final Quest quest;
 	public final int uid;
 
-	public String title = "";
-	public ItemStack icon = ItemStack.EMPTY;
 	public boolean team = false;
-	public boolean emergency = false;
-
-	private Icon cachedIcon = null;
+	private boolean emergency = false;
 
 	public QuestReward(Quest q, int id)
 	{
@@ -39,10 +32,13 @@ public abstract class QuestReward
 		uid = id;
 	}
 
+	@Override
 	public abstract void writeData(NBTTagCompound nbt);
 
+	@Override
 	public abstract void readData(NBTTagCompound nbt);
 
+	@Override
 	public abstract void getConfig(ConfigGroup config);
 
 	public abstract void claim(EntityPlayerMP player);
@@ -62,29 +58,22 @@ public abstract class QuestReward
 		return uid;
 	}
 
+	@Override
 	public final void getExtraConfig(ConfigGroup config)
 	{
-		config.addString("title", () -> title, v -> title = v, "").setDisplayName(new TextComponentTranslation("ftbquests.title")).setOrder((byte) -127);
-		config.add("icon", new ConfigItemStack.SimpleStack(() -> icon, v -> icon = v), new ConfigItemStack(ItemStack.EMPTY)).setDisplayName(new TextComponentTranslation("ftbquests.icon")).setOrder((byte) -126);
-		config.addBool("team", () -> team, v -> team = v, false).setDisplayName(new TextComponentTranslation("ftbquests.reward.team_reward"));
+		super.getExtraConfig(config);
+		config.addBool("team", () -> team, v -> team = v, false).setDisplayName(new TextComponentTranslation("ftbquests.reward.team_reward")).setCanEdit(!quest.canRepeat);
 		//config.addBool("emergency", () -> emergency, v -> emergency = v, false).setDisplayName(new TextComponentTranslation("ftbquests.reward.emergency"));
 	}
 
+	@Override
 	public final void writeCommonData(NBTTagCompound nbt)
 	{
-		if (!title.isEmpty())
-		{
-			nbt.setString("title", title);
-		}
+		super.writeCommonData(nbt);
 
-		if (!icon.isEmpty())
+		if (team != quest.chapter.file.defaultRewardTeam)
 		{
-			nbt.setTag("icon", ItemMissing.write(icon, false));
-		}
-
-		if (team)
-		{
-			nbt.setBoolean("team_reward", true);
+			nbt.setBoolean("team_reward", team);
 		}
 
 		if (emergency)
@@ -93,58 +82,45 @@ public abstract class QuestReward
 		}
 	}
 
+	@Override
 	public final void readCommonData(NBTTagCompound nbt)
 	{
-		title = nbt.getString("title");
-		icon = ItemMissing.read(nbt.getTag("icon"));
+		super.readCommonData(nbt);
+
 		team = nbt.getBoolean("team_reward");
 		emergency = nbt.getBoolean("emergency");
 	}
 
-	public final Icon getIcon()
+	public final boolean isTeamReward()
 	{
-		if (cachedIcon == null)
-		{
-			if (!icon.isEmpty())
-			{
-				cachedIcon = ItemIcon.getItemIcon(icon);
-			}
-			else
-			{
-				cachedIcon = getAltIcon();
-			}
-		}
-
-		return cachedIcon;
+		return team || quest.canRepeat;
 	}
 
-	public final ITextComponent getDisplayName()
+	public final boolean addToEmergencyItems()
 	{
-		if (!title.isEmpty())
-		{
-			return new TextComponentString(title.equals("-") ? "" : title);
-		}
-
-		return getAltDisplayName();
+		return emergency;
 	}
 
+	@Override
 	public Icon getAltIcon()
 	{
 		return GuiIcons.MONEY_BAG;
 	}
 
+	@Override
 	public ITextComponent getAltDisplayName()
 	{
 		return QuestRewardType.getType(getClass()).getDisplayName();
 	}
 
-	public void clearCachedData()
-	{
-		cachedIcon = null;
-	}
-
 	@SideOnly(Side.CLIENT)
 	public void addMouseOverText(List<String> list)
 	{
+	}
+
+	@SideOnly(Side.CLIENT)
+	public void onButtonClicked()
+	{
+		new MessageClaimReward(uid).sendToServer();
 	}
 }

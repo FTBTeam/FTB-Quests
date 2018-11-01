@@ -11,7 +11,6 @@ import com.feed_the_beast.ftblib.events.team.ForgeTeamSavedEvent;
 import com.feed_the_beast.ftblib.lib.data.ForgePlayer;
 import com.feed_the_beast.ftblib.lib.data.ForgeTeam;
 import com.feed_the_beast.ftblib.lib.data.TeamData;
-import com.feed_the_beast.ftblib.lib.data.Universe;
 import com.feed_the_beast.ftblib.lib.util.FileUtils;
 import com.feed_the_beast.ftblib.lib.util.NBTUtils;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
@@ -20,7 +19,6 @@ import com.feed_the_beast.ftbquests.net.MessageChangedTeam;
 import com.feed_the_beast.ftbquests.net.MessageClaimRewardResponse;
 import com.feed_the_beast.ftbquests.net.MessageCreateTeamData;
 import com.feed_the_beast.ftbquests.net.MessageDeleteTeamData;
-import com.feed_the_beast.ftbquests.net.MessageRepeatQuest;
 import com.feed_the_beast.ftbquests.net.MessageSyncQuests;
 import com.feed_the_beast.ftbquests.net.MessageUpdateTaskProgress;
 import com.feed_the_beast.ftbquests.net.MessageUpdateVariable;
@@ -276,7 +274,7 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 
 	public void claimReward(EntityPlayerMP player, QuestReward reward)
 	{
-		if (reward.team)
+		if (reward.isTeamReward())
 		{
 			if (claimedTeamRewards.add(reward.uid))
 			{
@@ -314,37 +312,18 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 			}
 		}
 
-		if (reward.quest.canRepeat)
-		{
-			for (QuestReward reward1 : reward.quest.rewards)
-			{
-				if (!isRewardClaimed(player, reward1))
-				{
-					return;
-				}
-			}
-
-			ForgeTeam team = Universe.get().getPlayer(player).team;
-			reward.quest.resetProgress(FTBQuestsTeamData.get(team), false);
-
-			for (ForgePlayer member : team.getMembers())
-			{
-				if (member.isOnline())
-				{
-					new MessageRepeatQuest(reward.quest.getID()).sendTo(member.getPlayer());
-				}
-			}
-		}
+		reward.quest.checkRepeatableQuests(FTBQuestsTeamData.get(team), player.getUniqueID());
 	}
 
-	public boolean isRewardClaimed(EntityPlayerMP player, QuestReward reward)
+	@Override
+	public boolean isRewardClaimed(UUID player, QuestReward reward)
 	{
-		if (reward.team)
+		if (reward.isTeamReward())
 		{
 			return claimedTeamRewards.contains(reward.uid);
 		}
 
-		IntOpenHashSet rewards = claimedPlayerRewards.get(player.getUniqueID());
+		IntOpenHashSet rewards = claimedPlayerRewards.get(player);
 		return rewards != null && rewards.contains(reward.uid);
 	}
 
@@ -353,7 +332,7 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 	{
 		for (QuestReward reward : rewards)
 		{
-			if (reward.team)
+			if (reward.isTeamReward())
 			{
 				claimedTeamRewards.rem(reward.uid);
 			}

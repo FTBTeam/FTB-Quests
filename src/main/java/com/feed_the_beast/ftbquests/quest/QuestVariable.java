@@ -1,5 +1,6 @@
 package com.feed_the_beast.ftbquests.quest;
 
+import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import net.minecraft.nbt.NBTTagCompound;
@@ -18,18 +19,11 @@ public final class QuestVariable extends QuestObject
 
 	private String cachedID = "";
 
-	public QuestVariable(QuestFile f, NBTTagCompound nbt)
+	public QuestVariable(QuestFile f)
 	{
 		file = f;
-		readCommonData(nbt);
-		maxValue = nbt.getLong("max");
-
-		if (maxValue < 1L)
-		{
-			maxValue = 1L;
-		}
-
-		team = nbt.getBoolean("team");
+		maxValue = 1L;
+		team = false;
 		index = -1;
 	}
 
@@ -67,6 +61,27 @@ public final class QuestVariable extends QuestObject
 		{
 			nbt.setBoolean("team", true);
 		}
+	}
+
+	@Override
+	public void readData(NBTTagCompound nbt)
+	{
+		readCommonData(nbt);
+		maxValue = nbt.getLong("max");
+
+		if (maxValue < 1L)
+		{
+			maxValue = 1L;
+		}
+
+		team = nbt.getBoolean("team");
+	}
+
+	@Override
+	public void getConfig(ConfigGroup config)
+	{
+		config.addLong("max_value", () -> maxValue, v -> maxValue = v, 1L, 1L, Long.MAX_VALUE);
+		config.addBool("team", () -> team, v -> team = v, false);
 	}
 
 	@Override
