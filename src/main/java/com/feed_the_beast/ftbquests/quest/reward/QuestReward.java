@@ -5,6 +5,8 @@ import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftbquests.net.MessageClaimReward;
 import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.quest.QuestChapter;
+import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
@@ -29,6 +31,18 @@ public abstract class QuestReward extends QuestObjectBase
 	public QuestReward(Quest q)
 	{
 		quest = q;
+	}
+
+	@Override
+	public final QuestFile getQuestFile()
+	{
+		return quest.chapter.file;
+	}
+
+	@Override
+	public final QuestChapter getQuestChapter()
+	{
+		return quest.chapter;
 	}
 
 	@Override

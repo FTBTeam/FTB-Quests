@@ -6,6 +6,7 @@ import com.feed_the_beast.ftbquests.events.ObjectCompletedEvent;
 import com.feed_the_beast.ftbquests.net.MessageSubmitItems;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
@@ -50,6 +51,12 @@ public abstract class QuestTask extends QuestObject
 	public final QuestFile getQuestFile()
 	{
 		return quest.chapter.file;
+	}
+
+	@Override
+	public final QuestChapter getQuestChapter()
+	{
+		return quest.chapter;
 	}
 
 	@Override

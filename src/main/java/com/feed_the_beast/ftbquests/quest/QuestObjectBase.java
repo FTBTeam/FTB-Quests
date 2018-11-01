@@ -11,6 +11,7 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 
+import javax.annotation.Nullable;
 import java.util.regex.Pattern;
 
 /**
@@ -24,6 +25,8 @@ public abstract class QuestObjectBase
 	private ItemStack icon = ItemStack.EMPTY;
 
 	private Icon cachedIcon = null;
+
+	public abstract QuestFile getQuestFile();
 
 	public abstract void writeData(NBTTagCompound nbt);
 
@@ -85,6 +88,12 @@ public abstract class QuestObjectBase
 		}
 
 		return getAltDisplayName();
+	}
+
+	@Nullable
+	public QuestChapter getQuestChapter()
+	{
+		return null;
 	}
 
 	public void clearCachedData()

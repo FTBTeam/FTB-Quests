@@ -43,6 +43,12 @@ public final class QuestChapter extends QuestObject
 	}
 
 	@Override
+	public QuestChapter getQuestChapter()
+	{
+		return this;
+	}
+
+	@Override
 	public QuestObjectType getObjectType()
 	{
 		return QuestObjectType.CHAPTER;
@@ -124,7 +130,10 @@ public final class QuestChapter extends QuestObject
 
 		for (Quest quest : quests)
 		{
-			progress += quest.getProgress(data);
+			if (!quest.canRepeat)
+			{
+				progress += quest.getProgress(data);
+			}
 		}
 
 		return progress;
@@ -137,7 +146,10 @@ public final class QuestChapter extends QuestObject
 
 		for (Quest quest : quests)
 		{
-			maxProgress += quest.getMaxProgress();
+			if (!quest.canRepeat)
+			{
+				maxProgress += quest.getMaxProgress();
+			}
 		}
 
 		return maxProgress;
@@ -150,7 +162,10 @@ public final class QuestChapter extends QuestObject
 
 		for (Quest quest : quests)
 		{
-			progress += quest.getRelativeProgress(data);
+			if (!quest.canRepeat)
+			{
+				progress += quest.getRelativeProgress(data);
+			}
 		}
 
 		return fixRelativeProgress(progress, quests.size());
@@ -161,7 +176,7 @@ public final class QuestChapter extends QuestObject
 	{
 		for (Quest quest : quests)
 		{
-			if (!quest.isComplete(data))
+			if (!quest.canRepeat && !quest.isComplete(data))
 			{
 				return false;
 			}

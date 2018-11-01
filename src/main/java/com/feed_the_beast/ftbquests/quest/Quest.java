@@ -77,6 +77,12 @@ public final class Quest extends QuestObject
 	}
 
 	@Override
+	public QuestChapter getQuestChapter()
+	{
+		return chapter;
+	}
+
+	@Override
 	public QuestObjectType getObjectType()
 	{
 		return QuestObjectType.QUEST;
@@ -345,6 +351,7 @@ public final class Quest extends QuestObject
 
 			if (reward != null)
 			{
+				reward.uid = id;
 				rewards.add(reward);
 			}
 		}
