@@ -8,6 +8,7 @@ import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
 import com.feed_the_beast.ftbquests.item.ItemMissing;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.ITextComponent;
@@ -29,7 +30,7 @@ public class ItemReward extends QuestReward
 	public ItemReward(Quest quest)
 	{
 		super(quest);
-		stack = ItemStack.EMPTY;
+		stack = new ItemStack(Items.APPLE);
 	}
 
 	@Override

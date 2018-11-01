@@ -22,7 +22,7 @@ public class CommandReward extends QuestReward
 	public CommandReward(Quest quest)
 	{
 		super(quest);
-		command = "";
+		command = "/say Hi, @team!";
 	}
 
 	@Override
