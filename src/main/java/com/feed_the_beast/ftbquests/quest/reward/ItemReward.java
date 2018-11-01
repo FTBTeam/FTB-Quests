@@ -26,9 +26,9 @@ public class ItemReward extends QuestReward
 {
 	public ItemStack stack;
 
-	public ItemReward(Quest quest, int id)
+	public ItemReward(Quest quest)
 	{
-		super(quest, id);
+		super(quest);
 		stack = ItemStack.EMPTY;
 	}
 

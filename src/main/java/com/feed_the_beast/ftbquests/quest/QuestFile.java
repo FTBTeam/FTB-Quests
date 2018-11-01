@@ -6,6 +6,7 @@ import com.feed_the_beast.ftblib.lib.config.ConfigTimer;
 import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.IconAnimation;
+import com.feed_the_beast.ftblib.lib.math.MathUtils;
 import com.feed_the_beast.ftblib.lib.math.Ticks;
 import com.feed_the_beast.ftbquests.events.ObjectCompletedEvent;
 import com.feed_the_beast.ftbquests.item.ItemMissing;
@@ -580,5 +581,17 @@ public abstract class QuestFile extends QuestObject
 		{
 			chapter.clearCachedData();
 		}
+	}
+
+	public int getNewID()
+	{
+		int id = 0;
+
+		while (id == 0 || getReward(id) != null)
+		{
+			id = MathUtils.RAND.nextInt();
+		}
+
+		return 0;
 	}
 }

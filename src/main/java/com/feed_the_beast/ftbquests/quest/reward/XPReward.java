@@ -17,9 +17,9 @@ public class XPReward extends QuestReward
 {
 	private int xp;
 
-	public XPReward(Quest quest, int id)
+	public XPReward(Quest quest)
 	{
-		super(quest, id);
+		super(quest);
 	}
 
 	@Override

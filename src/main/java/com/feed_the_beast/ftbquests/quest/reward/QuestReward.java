@@ -21,15 +21,14 @@ import java.util.List;
 public abstract class QuestReward extends QuestObjectBase
 {
 	public final Quest quest;
-	public final int uid;
+	public int uid;
 
 	public boolean team = false;
 	private boolean emergency = false;
 
-	public QuestReward(Quest q, int id)
+	public QuestReward(Quest q)
 	{
 		quest = q;
-		uid = id;
 	}
 
 	@Override
