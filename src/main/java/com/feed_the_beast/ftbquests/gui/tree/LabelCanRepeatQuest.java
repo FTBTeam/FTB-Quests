@@ -11,9 +11,9 @@ import java.util.List;
 /**
  * @author LatvianModder
  */
-public class ButtonRestartQuest extends Widget
+public class LabelCanRepeatQuest extends Widget
 {
-	public ButtonRestartQuest(Panel panel)
+	public LabelCanRepeatQuest(Panel panel)
 	{
 		super(panel);
 	}
