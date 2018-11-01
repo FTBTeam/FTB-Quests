@@ -116,7 +116,7 @@ public class TileProgressDetector extends TileBase implements ITickable, IConfig
 		{
 			return null;
 		}
-		else if (cTeam == null)
+		else if (cTeam == null && world != null)
 		{
 			cTeam = FTBQuests.PROXY.getQuestFile(world).getData(team);
 		}
