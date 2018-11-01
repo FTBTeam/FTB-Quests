@@ -15,7 +15,7 @@ import net.minecraft.util.text.TextFormatting;
  */
 public class XPReward extends QuestReward
 {
-	private int xp;
+	private int xp = 1;
 
 	public XPReward(Quest quest)
 	{
