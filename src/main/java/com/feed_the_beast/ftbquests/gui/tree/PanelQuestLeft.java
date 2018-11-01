@@ -10,6 +10,7 @@ import com.feed_the_beast.ftblib.lib.gui.WidgetType;
 import com.feed_the_beast.ftblib.lib.gui.WidgetVerticalSpace;
 import com.feed_the_beast.ftblib.lib.util.StringJoiner;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
+import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
@@ -115,9 +116,14 @@ public class PanelQuestLeft extends Panel
 				widget.setX(3);
 			}
 
+			if (!treeGui.selectedQuest.isComplete(ClientQuestFile.INSTANCE.self))
+			{
+				add(new ButtonSubmitAll(this).setPosAndSize(width - 11, tasksTextField.posY, 8, 8));
+			}
+
 			if (treeGui.selectedQuest.canRepeat)
 			{
-				add(new ButtonRestartQuest(this).setPosAndSize(width - 11, tasksTextField.posY, 8, 8));
+				add(new LabelCanRepeatQuest(this).setPosAndSize(width - 21, tasksTextField.posY, 8, 8));
 			}
 		}
 
