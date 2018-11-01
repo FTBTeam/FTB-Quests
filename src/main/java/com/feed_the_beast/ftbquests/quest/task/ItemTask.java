@@ -245,6 +245,12 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 	}
 
 	@Override
+	public boolean submitItemsOnInventoryChange()
+	{
+		return !canInsertItem();
+	}
+
+	@Override
 	@SideOnly(Side.CLIENT)
 	public void onButtonClicked()
 	{

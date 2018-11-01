@@ -242,4 +242,9 @@ public abstract class QuestTask extends QuestObject
 			new MessageSubmitItems(getID()).sendToServer();
 		}
 	}
+
+	public boolean submitItemsOnInventoryChange()
+	{
+		return false;
+	}
 }
