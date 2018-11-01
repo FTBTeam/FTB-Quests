@@ -31,6 +31,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * @author LatvianModder
@@ -54,120 +55,19 @@ public final class Quest extends QuestObject
 	private String cachedID = "";
 	private Set<QuestObject> cachedDependencies = null;
 
-	public Quest(QuestChapter c, NBTTagCompound nbt)
+	public Quest(QuestChapter c)
 	{
 		chapter = c;
-		readCommonData(nbt);
-		description = nbt.getString("description");
-		visibilityType = EnumQuestVisibilityType.NAME_MAP.get(nbt.getString("visibility"));
-		x = (byte) MathHelper.clamp(nbt.getByte("x"), -POS_LIMIT, POS_LIMIT);
-		y = (byte) MathHelper.clamp(nbt.getByte("y"), -POS_LIMIT, POS_LIMIT);
-		shape = EnumQuestShape.NAME_MAP.get(nbt.getString("shape"));
+		description = "";
+		visibilityType = EnumQuestVisibilityType.NORMAL;
+		x = 0;
+		y = 0;
+		shape = EnumQuestShape.CIRCLE;
 		text = new ArrayList<>();
-
-		NBTTagList list = nbt.getTagList("text", Constants.NBT.TAG_STRING);
-
-		for (int k = 0; k < list.tagCount(); k++)
-		{
-			text.add(list.getStringTagAt(k));
-		}
-
-		canRepeat = nbt.getBoolean("can_repeat");
-
+		canRepeat = false;
 		dependencies = new HashSet<>();
 		tasks = new ArrayList<>();
 		rewards = new ArrayList<>();
-
-		list = nbt.getTagList("dependencies", Constants.NBT.TAG_STRING);
-
-		if (list.isEmpty())
-		{
-			NBTBase nbt1 = nbt.getTag("dependency");
-
-			if (nbt1 != null)
-			{
-				list.appendTag(nbt1);
-			}
-		}
-
-		for (int i = 0; i < list.tagCount(); i++)
-		{
-			dependencies.add(list.getStringTagAt(i));
-		}
-
-		list = nbt.getTagList("tasks", Constants.NBT.TAG_COMPOUND);
-
-		if (list.isEmpty())
-		{
-			NBTBase nbt1 = nbt.getTag("task");
-
-			if (nbt1 != null)
-			{
-				list.appendTag(nbt1);
-			}
-		}
-
-		for (int i = 0; i < list.tagCount(); i++)
-		{
-			NBTTagCompound nbt1 = list.getCompoundTagAt(i);
-			String type = nbt1.getString("type");
-
-			if (type.equals("quest") || type.equals("variable") || type.equals("chapter") || type.equals("task"))
-			{
-				dependencies.add(nbt1.getString("object"));
-			}
-			else
-			{
-				QuestTask task = QuestTaskType.createTask(this, nbt1);
-
-				if (task != null)
-				{
-					tasks.add(task);
-				}
-			}
-		}
-
-		list = nbt.getTagList("rewards", Constants.NBT.TAG_COMPOUND);
-
-		if (list.isEmpty())
-		{
-			NBTBase nbt1 = nbt.getTag("reward");
-
-			if (nbt1 != null)
-			{
-				list.appendTag(nbt1);
-			}
-		}
-
-		for (int i = 0; i < list.tagCount(); i++)
-		{
-			NBTTagCompound nbt1 = list.getCompoundTagAt(i);
-			int id = nbt1.getInteger("uid");
-
-			while (id == 0)
-			{
-				id = MathUtils.RAND.nextInt();
-			}
-
-			if (!nbt1.hasKey("type") && !nbt1.hasKey("item"))
-			{
-				nbt1.removeTag("uid");
-
-				ItemReward reward = new ItemReward(this, id);
-				reward.team = nbt1.getBoolean("team_reward");
-				nbt1.removeTag("team_reward");
-				reward.stack = ItemMissing.read(nbt1);
-				rewards.add(reward);
-				continue;
-			}
-
-			QuestReward reward = QuestRewardType.createReward(this, id, nbt1);
-
-			if (reward != null)
-			{
-				rewards.add(reward);
-			}
-		}
 	}
 
 	@Override
@@ -327,6 +227,124 @@ public final class Quest extends QuestObject
 			else if (!array.isEmpty())
 			{
 				nbt.setTag("rewards", array);
+			}
+		}
+	}
+
+	@Override
+	public void readData(NBTTagCompound nbt)
+	{
+		readCommonData(nbt);
+		description = nbt.getString("description");
+		visibilityType = EnumQuestVisibilityType.NAME_MAP.get(nbt.getString("visibility"));
+		x = (byte) MathHelper.clamp(nbt.getByte("x"), -POS_LIMIT, POS_LIMIT);
+		y = (byte) MathHelper.clamp(nbt.getByte("y"), -POS_LIMIT, POS_LIMIT);
+		shape = EnumQuestShape.NAME_MAP.get(nbt.getString("shape"));
+		text.clear();
+
+		NBTTagList list = nbt.getTagList("text", Constants.NBT.TAG_STRING);
+
+		for (int k = 0; k < list.tagCount(); k++)
+		{
+			text.add(list.getStringTagAt(k));
+		}
+
+		canRepeat = nbt.getBoolean("can_repeat");
+
+		dependencies.clear();
+		tasks.clear();
+		rewards.clear();
+
+		list = nbt.getTagList("dependencies", Constants.NBT.TAG_STRING);
+
+		if (list.isEmpty())
+		{
+			NBTBase nbt1 = nbt.getTag("dependency");
+
+			if (nbt1 != null)
+			{
+				list.appendTag(nbt1);
+			}
+		}
+
+		for (int i = 0; i < list.tagCount(); i++)
+		{
+			dependencies.add(list.getStringTagAt(i));
+		}
+
+		list = nbt.getTagList("tasks", Constants.NBT.TAG_COMPOUND);
+
+		if (list.isEmpty())
+		{
+			NBTBase nbt1 = nbt.getTag("task");
+
+			if (nbt1 != null)
+			{
+				list.appendTag(nbt1);
+			}
+		}
+
+		for (int i = 0; i < list.tagCount(); i++)
+		{
+			NBTTagCompound nbt1 = list.getCompoundTagAt(i);
+			String type = nbt1.getString("type");
+
+			if (type.equals("quest") || type.equals("variable") || type.equals("chapter") || type.equals("task"))
+			{
+				dependencies.add(nbt1.getString("object"));
+			}
+			else
+			{
+				QuestTask task = QuestTaskType.createTask(this, type);
+
+				if (task != null)
+				{
+					task.readCommonData(nbt1);
+					task.readData(nbt1);
+					tasks.add(task);
+				}
+			}
+		}
+
+		list = nbt.getTagList("rewards", Constants.NBT.TAG_COMPOUND);
+
+		if (list.isEmpty())
+		{
+			NBTBase nbt1 = nbt.getTag("reward");
+
+			if (nbt1 != null)
+			{
+				list.appendTag(nbt1);
+			}
+		}
+
+		for (int i = 0; i < list.tagCount(); i++)
+		{
+			NBTTagCompound nbt1 = list.getCompoundTagAt(i);
+			int id = nbt1.getInteger("uid");
+
+			while (id == 0)
+			{
+				id = MathUtils.RAND.nextInt();
+			}
+
+			if (!nbt1.hasKey("type") && !nbt1.hasKey("item"))
+			{
+				nbt1.removeTag("uid");
+
+				ItemReward reward = new ItemReward(this, id);
+				reward.team = nbt1.getBoolean("team_reward");
+				nbt1.removeTag("team_reward");
+				reward.stack = ItemMissing.read(nbt1);
+				rewards.add(reward);
+				continue;
+			}
+
+			QuestReward reward = QuestRewardType.createReward(this, id, nbt1);
+
+			if (reward != null)
+			{
+				rewards.add(reward);
 			}
 		}
 	}
@@ -685,5 +703,23 @@ public final class Quest extends QuestObject
 	public void verifyDependencies()
 	{
 		//FTBQuests.LOGGER.error("Removed looping dependency '" + task.getID() + "' with erroring ID '" + task.objectId + "'");
+	}
+
+	public void checkRepeatableQuests(ITeamData data, UUID player)
+	{
+		if (!canRepeat)
+		{
+			return;
+		}
+
+		for (QuestReward reward1 : rewards)
+		{
+			if (!data.isRewardClaimed(player, reward1))
+			{
+				return;
+			}
+		}
+
+		resetProgress(data, false);
 	}
 }

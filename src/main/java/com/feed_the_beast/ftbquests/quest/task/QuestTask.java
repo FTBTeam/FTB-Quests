@@ -1,6 +1,5 @@
 package com.feed_the_beast.ftbquests.quest.task;
 
-import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftbquests.events.ObjectCompletedEvent;
@@ -42,6 +41,7 @@ public abstract class QuestTask extends QuestObject
 	@Override
 	public abstract void writeData(NBTTagCompound nbt);
 
+	@Override
 	public abstract void readData(NBTTagCompound nbt);
 
 	public abstract QuestTaskData createData(ITeamData data);
@@ -198,12 +198,6 @@ public abstract class QuestTask extends QuestObject
 	public boolean canInsertItem()
 	{
 		return false;
-	}
-
-	@Override
-	public final void getExtraConfig(ConfigGroup config)
-	{
-		super.getExtraConfig(config);
 	}
 
 	@Override

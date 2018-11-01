@@ -15,6 +15,7 @@ import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * @author LatvianModder
@@ -101,6 +102,12 @@ public class ClientQuestProgress implements ITeamData
 		{
 			variables.put(variable, value);
 		}
+	}
+
+	@Override
+	public boolean isRewardClaimed(UUID player, QuestReward reward)
+	{
+		return ClientQuestFile.INSTANCE.rewards.contains(reward.uid);
 	}
 
 	public static String getCompletionSuffix(@Nullable ClientQuestProgress progress, QuestObject object)

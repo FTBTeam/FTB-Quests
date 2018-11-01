@@ -68,7 +68,7 @@ public class ButtonDummyQuest extends Widget
 				new GuiSelectItemStack(this, stack -> {
 					if (!stack.isEmpty())
 					{
-						Quest quest = new Quest(treeGui.selectedChapter, new NBTTagCompound());
+						Quest quest = new Quest(treeGui.selectedChapter);
 						quest.x = x;
 						quest.y = y;
 						ItemTask itemTask = new ItemTask(quest);

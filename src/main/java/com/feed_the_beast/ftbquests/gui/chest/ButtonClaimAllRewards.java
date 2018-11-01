@@ -59,7 +59,7 @@ public class ButtonClaimAllRewards extends Button
 								component.appendText("- ");
 								component.appendSibling(reward.getDisplayName());
 
-								if (reward.team)
+								if (reward.isTeamReward())
 								{
 									ITextComponent component1 = new TextComponentString("");
 									component1.getStyle().setColor(TextFormatting.BLUE);

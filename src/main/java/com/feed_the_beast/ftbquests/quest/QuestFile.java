@@ -36,9 +36,12 @@ import java.util.regex.Pattern;
  */
 public abstract class QuestFile extends QuestObject
 {
+	public static final int VERSION = 1;
+
 	public final List<QuestChapter> chapters;
 	public final List<QuestVariable> variables;
 
+	public final Int2ObjectOpenHashMap<QuestObject> intMap;
 	public final Map<String, QuestObject> map;
 	public QuestTask[] allTasks;
 	public final Int2ObjectOpenHashMap<QuestReward> allRewards;
@@ -50,6 +53,7 @@ public abstract class QuestFile extends QuestObject
 	public int lootSize;
 	public Color4I colCompleted, colStarted, colNotStarted, colCantStart;
 	public boolean defaultRewardTeam;
+	public int fileVersion;
 
 	public QuestFile()
 	{
@@ -57,6 +61,7 @@ public abstract class QuestFile extends QuestObject
 		chapters = new ArrayList<>();
 		variables = new ArrayList<>();
 
+		intMap = new Int2ObjectOpenHashMap<>();
 		map = new HashMap<>();
 		allTasks = new QuestTask[0];
 		allRewards = new Int2ObjectOpenHashMap<>();
@@ -84,6 +89,7 @@ public abstract class QuestFile extends QuestObject
 		colCantStart = Color4I.rgb(0x999999);
 
 		defaultRewardTeam = false;
+		fileVersion = 0;
 	}
 
 	public abstract boolean isClient();
@@ -346,14 +352,14 @@ public abstract class QuestFile extends QuestObject
 		switch (type)
 		{
 			case CHAPTER:
-				return new QuestChapter(this, nbt);
+				return new QuestChapter(this);
 			case QUEST:
 			{
 				QuestChapter chapter = getChapter(parent);
 
 				if (chapter != null)
 				{
-					return new Quest(chapter, nbt);
+					return new Quest(chapter);
 				}
 
 				return null;
@@ -364,13 +370,13 @@ public abstract class QuestFile extends QuestObject
 
 				if (quest != null)
 				{
-					return QuestTaskType.createTask(quest, nbt);
+					return QuestTaskType.createTask(quest, nbt.getString("type"));
 				}
 
 				return null;
 			}
 			case VARIABLE:
-				return new QuestVariable(this, nbt);
+				return new QuestVariable(this);
 			default:
 				return null;
 		}
@@ -380,6 +386,8 @@ public abstract class QuestFile extends QuestObject
 	public final void writeData(NBTTagCompound nbt)
 	{
 		writeCommonData(nbt);
+		nbt.setInteger("version", VERSION);
+		nbt.setBoolean("default_reward_team", defaultRewardTeam);
 
 		NBTTagList list = new NBTTagList();
 
@@ -431,12 +439,14 @@ public abstract class QuestFile extends QuestObject
 		}
 
 		nbt.setShort("loot_size", (short) lootSize);
-		nbt.setBoolean("default_reward_team", defaultRewardTeam);
 	}
 
+	@Override
 	public final void readData(NBTTagCompound nbt)
 	{
 		readCommonData(nbt);
+		fileVersion = nbt.getInteger("version");
+		defaultRewardTeam = nbt.getBoolean("default_reward_team");
 
 		chapters.clear();
 
@@ -444,7 +454,8 @@ public abstract class QuestFile extends QuestObject
 
 		for (int i = 0; i < list.tagCount(); i++)
 		{
-			QuestChapter chapter = new QuestChapter(this, list.getCompoundTagAt(i));
+			QuestChapter chapter = new QuestChapter(this);
+			chapter.readData(list.getCompoundTagAt(i));
 			chapter.chapterIndex = chapters.size();
 			chapters.add(chapter);
 		}
@@ -455,7 +466,8 @@ public abstract class QuestFile extends QuestObject
 
 		for (int i = 0; i < list.tagCount(); i++)
 		{
-			QuestVariable variable = new QuestVariable(this, list.getCompoundTagAt(i));
+			QuestVariable variable = new QuestVariable(this);
+			variable.readData(list.getCompoundTagAt(i));
 			variable.index = (short) variables.size();
 			variables.add(variable);
 		}
@@ -499,8 +511,6 @@ public abstract class QuestFile extends QuestObject
 		{
 			lootSize = 27;
 		}
-
-		defaultRewardTeam = nbt.getBoolean("default_reward_team");
 	}
 
 	@Nullable
