@@ -212,6 +212,9 @@ public class ItemMissing extends Item
 	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack stack, @Nullable World world, List<String> tooltip, ITooltipFlag flag)
 	{
-		tooltip.add(TextFormatting.LIGHT_PURPLE + super.getItemStackDisplayName(stack));
+		if (stack.hasTagCompound() && stack.getTagCompound().getTag("item") != null)
+		{
+			tooltip.add(TextFormatting.LIGHT_PURPLE + super.getItemStackDisplayName(stack));
+		}
 	}
 }
