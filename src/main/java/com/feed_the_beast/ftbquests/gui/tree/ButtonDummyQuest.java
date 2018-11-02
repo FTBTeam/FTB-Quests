@@ -79,7 +79,7 @@ public class ButtonDummyQuest extends Widget
 						NBTTagCompound nbt = new NBTTagCompound();
 						quest.writeData(nbt);
 						nbt.setString("id", itemTask.id);
-						new MessageCreateObject(QuestObjectType.QUEST, treeGui.selectedChapter.getID(), nbt).sendToServer();
+						new MessageCreateObject(QuestObjectType.QUEST, treeGui.selectedChapter.uid, nbt).sendToServer();
 					}
 				}).openGui();
 				return true;
@@ -96,7 +96,7 @@ public class ButtonDummyQuest extends Widget
 					nbt.setByte("y", y);
 					nbt.setString("title", value.getString());
 					nbt.setString("id", StringUtils.toSnakeCase(value.getString()));
-					new MessageCreateObject(QuestObjectType.QUEST, treeGui.selectedChapter.getID(), nbt).sendToServer();
+					new MessageCreateObject(QuestObjectType.QUEST, treeGui.selectedChapter.uid, nbt).sendToServer();
 				}
 			}).openGui();
 
@@ -106,7 +106,7 @@ public class ButtonDummyQuest extends Widget
 		else if (button.isLeft() && treeGui.movingQuest && treeGui.selectedQuest != null && treeGui.questFile.canEdit())
 		{
 			GuiHelper.playClickSound();
-			new MessageMoveQuest(treeGui.selectedQuest.getID(), x, y).sendToServer();
+			new MessageMoveQuest(treeGui.selectedQuest.uid, x, y).sendToServer();
 			treeGui.movingQuest = false;
 			treeGui.selectQuest(null);
 			return true;

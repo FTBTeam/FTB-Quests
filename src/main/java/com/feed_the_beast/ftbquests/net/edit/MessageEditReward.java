@@ -19,15 +19,15 @@ import net.minecraft.entity.player.EntityPlayerMP;
  */
 public class MessageEditReward extends MessageToServer implements IConfigCallback
 {
-	private int uid;
+	private int id;
 
 	public MessageEditReward()
 	{
 	}
 
-	public MessageEditReward(int id)
+	public MessageEditReward(int i)
 	{
-		uid = id;
+		id = i;
 	}
 
 	@Override
@@ -39,13 +39,13 @@ public class MessageEditReward extends MessageToServer implements IConfigCallbac
 	@Override
 	public void writeData(DataOut data)
 	{
-		data.writeInt(uid);
+		data.writeInt(id);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
-		uid = data.readInt();
+		id = data.readInt();
 	}
 
 	@Override
@@ -53,7 +53,7 @@ public class MessageEditReward extends MessageToServer implements IConfigCallbac
 	{
 		if (FTBQuests.canEdit(player))
 		{
-			QuestReward reward = ServerQuestFile.INSTANCE.getReward(uid);
+			QuestReward reward = ServerQuestFile.INSTANCE.getReward(id);
 
 			if (reward != null)
 			{
@@ -71,7 +71,7 @@ public class MessageEditReward extends MessageToServer implements IConfigCallbac
 	@Override
 	public void onConfigSaved(ConfigGroup g, ICommandSender sender)
 	{
-		QuestReward reward = ServerQuestFile.INSTANCE.getReward(uid);
+		QuestReward reward = ServerQuestFile.INSTANCE.getReward(id);
 
 		if (reward != null)
 		{
@@ -79,7 +79,7 @@ public class MessageEditReward extends MessageToServer implements IConfigCallbac
 			ConfigGroup group = ConfigGroup.newGroup("reward");
 			reward.getConfig(group);
 			reward.getExtraConfig(group);
-			new MessageEditRewardResponse(uid, group.serializeNBT()).sendToAll();
+			new MessageEditRewardResponse(id, group.serializeNBT()).sendToAll();
 			ServerQuestFile.INSTANCE.save();
 		}
 	}

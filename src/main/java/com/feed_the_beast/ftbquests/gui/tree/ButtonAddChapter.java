@@ -39,7 +39,7 @@ public class ButtonAddChapter extends ButtonTab
 				NBTTagCompound nbt = new NBTTagCompound();
 				nbt.setString("title", value.getString());
 				nbt.setString("id", StringUtils.toSnakeCase(value.getString()));
-				new MessageCreateObject(QuestObjectType.CHAPTER, "", nbt).sendToServer();
+				new MessageCreateObject(QuestObjectType.CHAPTER, 0, nbt).sendToServer();
 			}
 		}).openGui();
 	}

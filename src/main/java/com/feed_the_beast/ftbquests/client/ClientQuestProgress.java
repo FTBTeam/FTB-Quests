@@ -152,7 +152,7 @@ public class ClientQuestProgress implements ITeamData
 		if (GuiScreen.isCtrlKeyDown())
 		{
 			builder.append(' ');
-			builder.append(object.getID());
+			builder.append(object.toString());
 		}
 
 		return builder.toString();

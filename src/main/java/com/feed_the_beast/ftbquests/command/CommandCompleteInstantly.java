@@ -19,7 +19,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentTranslation;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -59,12 +58,6 @@ public class CommandCompleteInstantly extends CommandBase
 		if (args.length == 1)
 		{
 			return getListOfStringsMatchingLastWord(args, Universe.get().getTeams());
-		}
-		else if (args.length == 2)
-		{
-			List<String> list = new ArrayList<>(ServerQuestFile.INSTANCE.map.keySet());
-			list.sort(null);
-			return getListOfStringsMatchingLastWord(args, list);
 		}
 
 		return super.getTabCompletions(server, sender, args, pos);

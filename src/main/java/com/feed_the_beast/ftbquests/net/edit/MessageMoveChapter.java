@@ -14,14 +14,14 @@ import net.minecraft.entity.player.EntityPlayerMP;
  */
 public class MessageMoveChapter extends MessageToServer
 {
-	private String id;
+	private int id;
 	private boolean left;
 
 	public MessageMoveChapter()
 	{
 	}
 
-	public MessageMoveChapter(String i, boolean l)
+	public MessageMoveChapter(int i, boolean l)
 	{
 		id = i;
 		left = l;
@@ -36,21 +36,21 @@ public class MessageMoveChapter extends MessageToServer
 	@Override
 	public void writeData(DataOut data)
 	{
-		data.writeString(id);
+		data.writeInt(id);
 		data.writeBoolean(left);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
-		id = data.readString();
+		id = data.readInt();
 		left = data.readBoolean();
 	}
 
 	@Override
 	public void onMessage(EntityPlayerMP player)
 	{
-		if (!id.isEmpty() && FTBQuests.canEdit(player))
+		if (FTBQuests.canEdit(player))
 		{
 			QuestChapter chapter = ServerQuestFile.INSTANCE.getChapter(id);
 

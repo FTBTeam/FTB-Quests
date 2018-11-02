@@ -60,7 +60,7 @@ public class ButtonAddTask extends SimpleTextButton
 					itemTask.writeData(nbt);
 					nbt.setString("type", QuestTaskType.getType(ItemTask.class).getTypeForNBT());
 					nbt.setString("id", StringUtils.toSnakeCase(stack.getDisplayName()));
-					new MessageCreateObject(QuestObjectType.TASK, quest.getID(), nbt).sendToServer();
+					new MessageCreateObject(QuestObjectType.TASK, quest.uid, nbt).sendToServer();
 				}
 			}).openGui();
 			return;
@@ -87,7 +87,7 @@ public class ButtonAddTask extends SimpleTextButton
 						task.writeData(nbt);
 						nbt.setString("type", type.getTypeForNBT());
 						nbt.setString("id", StringUtils.toSnakeCase(task.getDisplayName().getUnformattedText()));
-						new MessageCreateObject(QuestObjectType.TASK, quest.getID(), nbt).sendToServer();
+						new MessageCreateObject(QuestObjectType.TASK, quest.uid, nbt).sendToServer();
 						//FIXME: GuiQuest.this.openGui();
 						//questTreeGui.questFile.refreshGui();
 					}).openGui();

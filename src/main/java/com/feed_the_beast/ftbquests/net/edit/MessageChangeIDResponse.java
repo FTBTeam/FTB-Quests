@@ -14,13 +14,14 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  */
 public class MessageChangeIDResponse extends MessageToClient
 {
-	private String id, newId;
+	private int id;
+	private String newId;
 
 	public MessageChangeIDResponse()
 	{
 	}
 
-	public MessageChangeIDResponse(String i, String ni)
+	public MessageChangeIDResponse(int i, String ni)
 	{
 		id = i;
 		newId = ni;
@@ -35,14 +36,14 @@ public class MessageChangeIDResponse extends MessageToClient
 	@Override
 	public void writeData(DataOut data)
 	{
-		data.writeString(id);
+		data.writeInt(id);
 		data.writeString(newId);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
-		id = data.readString();
+		id = data.readInt();
 		newId = data.readString();
 	}
 

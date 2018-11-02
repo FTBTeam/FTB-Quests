@@ -40,9 +40,9 @@ public class ButtonEditSettings extends ButtonTab
 		}
 
 		List<ContextMenuItem> contextMenu = new ArrayList<>();
-		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.edit_file"), GuiIcons.SETTINGS, () -> new MessageEditObject(treeGui.questFile.getID()).sendToServer()));
-		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.reset_progress"), GuiIcons.REFRESH, () -> new MessageResetProgress(treeGui.questFile.getID()).sendToServer()).setYesNo(I18n.format("ftbquests.gui.reset_progress_q")));
-		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.complete_instantly"), QuestsTheme.COMPLETED, () -> new MessageCompleteInstantly(treeGui.questFile.getID()).sendToServer()).setYesNo(I18n.format("ftbquests.gui.complete_instantly_q")));
+		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.edit_file"), GuiIcons.SETTINGS, () -> new MessageEditObject(treeGui.questFile.uid).sendToServer()));
+		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.reset_progress"), GuiIcons.REFRESH, () -> new MessageResetProgress(treeGui.questFile.uid).sendToServer()).setYesNo(I18n.format("ftbquests.gui.reset_progress_q")));
+		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.complete_instantly"), QuestsTheme.COMPLETED, () -> new MessageCompleteInstantly(treeGui.questFile.uid).sendToServer()).setYesNo(I18n.format("ftbquests.gui.complete_instantly_q")));
 		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.variables"), GuiIcons.CONTROLLER, () -> new GuiVariables().openGui()));
 
 		if (FTBLibConfig.debugging.gui_widget_bounds)

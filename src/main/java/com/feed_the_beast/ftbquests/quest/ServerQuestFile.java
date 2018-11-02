@@ -74,9 +74,9 @@ public class ServerQuestFile extends QuestFile
 	}
 
 	@Override
-	public void deleteObject(String id)
+	public void deleteObject(int id)
 	{
-		QuestObject object = get(id);
+		QuestObjectBase object = getBase(id);
 
 		if (object != null)
 		{

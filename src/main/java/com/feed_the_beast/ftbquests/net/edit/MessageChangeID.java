@@ -17,13 +17,14 @@ import net.minecraft.entity.player.EntityPlayerMP;
  */
 public class MessageChangeID extends MessageToServer
 {
-	private String id, newId;
+	private int id;
+	private String newId;
 
 	public MessageChangeID()
 	{
 	}
 
-	public MessageChangeID(String i, String n)
+	public MessageChangeID(int i, String n)
 	{
 		id = i;
 		newId = n;
@@ -38,14 +39,14 @@ public class MessageChangeID extends MessageToServer
 	@Override
 	public void writeData(DataOut data)
 	{
-		data.writeString(id);
+		data.writeInt(id);
 		data.writeString(newId);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
-		id = data.readString();
+		id = data.readInt();
 		newId = data.readString();
 	}
 

@@ -19,18 +19,18 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  */
 public class MessageAddRewardResponse extends MessageToClient
 {
-	private String quest;
-	private int uid;
+	private int quest;
+	private int id;
 	private NBTTagCompound nbt;
 
 	public MessageAddRewardResponse()
 	{
 	}
 
-	public MessageAddRewardResponse(String q, int i, NBTTagCompound n)
+	public MessageAddRewardResponse(int q, int i, NBTTagCompound n)
 	{
 		quest = q;
-		uid = i;
+		id = i;
 		nbt = n;
 	}
 
@@ -43,16 +43,16 @@ public class MessageAddRewardResponse extends MessageToClient
 	@Override
 	public void writeData(DataOut data)
 	{
-		data.writeString(quest);
-		data.writeInt(uid);
+		data.writeInt(quest);
+		data.writeInt(id);
 		data.writeNBT(nbt);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
-		quest = data.readString();
-		uid = data.readInt();
+		quest = data.readInt();
+		id = data.readInt();
 		nbt = data.readNBT();
 	}
 
@@ -70,9 +70,9 @@ public class MessageAddRewardResponse extends MessageToClient
 
 				if (r != null)
 				{
-					r.uid = uid;
+					r.uid = id;
 					q.rewards.add(r);
-					ClientQuestFile.INSTANCE.allRewards.put(r.uid, r);
+					ClientQuestFile.INSTANCE.refreshIDMap();
 
 					GuiQuestTree gui = ClientUtils.getCurrentGuiAs(GuiQuestTree.class);
 

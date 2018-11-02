@@ -15,15 +15,15 @@ import net.minecraft.entity.player.EntityPlayerMP;
  */
 public class MessageEditDependency extends MessageToServer
 {
-	private String quest;
-	private String object;
+	private int quest;
+	private int object;
 	private boolean add;
 
 	public MessageEditDependency()
 	{
 	}
 
-	public MessageEditDependency(String q, String o, boolean a)
+	public MessageEditDependency(int q, int o, boolean a)
 	{
 		quest = q;
 		object = o;
@@ -39,16 +39,16 @@ public class MessageEditDependency extends MessageToServer
 	@Override
 	public void writeData(DataOut data)
 	{
-		data.writeString(quest);
-		data.writeString(object);
+		data.writeInt(quest);
+		data.writeInt(object);
 		data.writeBoolean(add);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
-		quest = data.readString();
-		object = data.readString();
+		quest = data.readInt();
+		object = data.readInt();
 		add = data.readBoolean();
 	}
 

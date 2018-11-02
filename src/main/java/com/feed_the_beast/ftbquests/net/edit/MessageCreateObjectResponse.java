@@ -17,14 +17,14 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class MessageCreateObjectResponse extends MessageToClient
 {
 	private QuestObjectType type;
-	private String parent;
+	private int parent;
 	private NBTTagCompound nbt;
 
 	public MessageCreateObjectResponse()
 	{
 	}
 
-	public MessageCreateObjectResponse(QuestObjectType t, String p, NBTTagCompound n)
+	public MessageCreateObjectResponse(QuestObjectType t, int p, NBTTagCompound n)
 	{
 		type = t;
 		parent = p;
@@ -41,7 +41,7 @@ public class MessageCreateObjectResponse extends MessageToClient
 	public void writeData(DataOut data)
 	{
 		data.writeByte(type.ordinal());
-		data.writeString(parent);
+		data.writeInt(parent);
 		data.writeNBT(nbt);
 	}
 
@@ -49,7 +49,7 @@ public class MessageCreateObjectResponse extends MessageToClient
 	public void readData(DataIn data)
 	{
 		type = QuestObjectType.VALUES[data.readUnsignedByte()];
-		parent = data.readString();
+		parent = data.readInt();
 		nbt = data.readNBT();
 	}
 

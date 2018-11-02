@@ -19,7 +19,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
  */
 public class MessageEditObjectQuick extends MessageToServer
 {
-	private String id;
+	private int id;
 	private String configId;
 	private boolean next;
 
@@ -27,7 +27,7 @@ public class MessageEditObjectQuick extends MessageToServer
 	{
 	}
 
-	public MessageEditObjectQuick(String i, String c, boolean n)
+	public MessageEditObjectQuick(int i, String c, boolean n)
 	{
 		id = i;
 		configId = c;
@@ -43,7 +43,7 @@ public class MessageEditObjectQuick extends MessageToServer
 	@Override
 	public void writeData(DataOut data)
 	{
-		data.writeString(id);
+		data.writeInt(id);
 		data.writeString(configId);
 		data.writeBoolean(next);
 	}
@@ -51,7 +51,7 @@ public class MessageEditObjectQuick extends MessageToServer
 	@Override
 	public void readData(DataIn data)
 	{
-		id = data.readString();
+		id = data.readInt();
 		configId = data.readString();
 		next = data.readBoolean();
 	}

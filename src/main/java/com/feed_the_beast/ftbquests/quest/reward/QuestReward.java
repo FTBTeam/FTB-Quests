@@ -4,6 +4,7 @@ import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftbquests.net.MessageClaimReward;
+import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
@@ -15,6 +16,7 @@ import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -23,7 +25,6 @@ import java.util.List;
 public abstract class QuestReward extends QuestObjectBase
 {
 	public final Quest quest;
-	public int uid;
 
 	public boolean team = false;
 	private boolean emergency = false;
@@ -56,27 +57,18 @@ public abstract class QuestReward extends QuestObjectBase
 
 	public abstract void claim(EntityPlayerMP player);
 
-	public final String toString()
-	{
-		return String.format("%s#%08x", quest.getID(), uid);
-	}
-
-	public final boolean equals(Object object)
-	{
-		return object == this || object != null && uid == object.hashCode();
-	}
-
-	public final int hashCode()
-	{
-		return uid;
-	}
-
 	@Override
 	public final void getExtraConfig(ConfigGroup config)
 	{
 		super.getExtraConfig(config);
 		config.addBool("team", () -> team, v -> team = v, false).setDisplayName(new TextComponentTranslation("ftbquests.reward.team_reward")).setCanEdit(!quest.canRepeat);
 		//config.addBool("emergency", () -> emergency, v -> emergency = v, false).setDisplayName(new TextComponentTranslation("ftbquests.reward.emergency"));
+	}
+
+	@Override
+	public void resetProgress(ITeamData data, boolean dependencies)
+	{
+		data.unclaimRewards(Collections.singleton(this));
 	}
 
 	@Override

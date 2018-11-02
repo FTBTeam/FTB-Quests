@@ -67,7 +67,7 @@ public class MessageDeleteRewardResponse extends MessageToClient
 				}
 
 				reward.quest.rewards.remove(reward);
-				ClientQuestFile.INSTANCE.allRewards.remove(id);
+				ClientQuestFile.INSTANCE.refreshIDMap();
 
 				GuiQuestTree gui = ClientUtils.getCurrentGuiAs(GuiQuestTree.class);
 

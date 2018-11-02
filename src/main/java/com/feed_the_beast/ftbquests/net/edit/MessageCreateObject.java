@@ -17,14 +17,14 @@ import net.minecraft.nbt.NBTTagCompound;
 public class MessageCreateObject extends MessageToServer
 {
 	private QuestObjectType type;
-	private String parent;
+	private int parent;
 	private NBTTagCompound nbt;
 
 	public MessageCreateObject()
 	{
 	}
 
-	public MessageCreateObject(QuestObjectType t, String p, NBTTagCompound n)
+	public MessageCreateObject(QuestObjectType t, int p, NBTTagCompound n)
 	{
 		type = t;
 		parent = p;
@@ -41,7 +41,7 @@ public class MessageCreateObject extends MessageToServer
 	public void writeData(DataOut data)
 	{
 		data.writeByte(type.ordinal());
-		data.writeString(parent);
+		data.writeInt(parent);
 		data.writeNBT(nbt);
 	}
 
@@ -49,7 +49,7 @@ public class MessageCreateObject extends MessageToServer
 	public void readData(DataIn data)
 	{
 		type = QuestObjectType.VALUES[data.readUnsignedByte()];
-		parent = data.readString();
+		parent = data.readInt();
 		nbt = data.readNBT();
 	}
 
@@ -69,6 +69,7 @@ public class MessageCreateObject extends MessageToServer
 				ServerQuestFile.INSTANCE.clearCachedData();
 				object.writeData(nbt);
 				nbt.setString("id", object.id);
+				nbt.setInteger("uid", object.uid);
 				new MessageCreateObjectResponse(type, parent, nbt).sendToAll();
 				ServerQuestFile.INSTANCE.save();
 			}

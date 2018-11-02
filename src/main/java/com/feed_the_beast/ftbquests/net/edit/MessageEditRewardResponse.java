@@ -20,16 +20,16 @@ import javax.annotation.Nullable;
  */
 public class MessageEditRewardResponse extends MessageToClient
 {
-	private int uid;
+	private int id;
 	private NBTTagCompound nbt;
 
 	public MessageEditRewardResponse()
 	{
 	}
 
-	public MessageEditRewardResponse(int id, @Nullable NBTTagCompound n)
+	public MessageEditRewardResponse(int i, @Nullable NBTTagCompound n)
 	{
-		uid = id;
+		id = i;
 		nbt = n;
 	}
 
@@ -42,14 +42,14 @@ public class MessageEditRewardResponse extends MessageToClient
 	@Override
 	public void writeData(DataOut data)
 	{
-		data.writeInt(uid);
+		data.writeInt(id);
 		data.writeNBT(nbt);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
-		uid = data.readInt();
+		id = data.readInt();
 		nbt = data.readNBT();
 	}
 
@@ -59,7 +59,7 @@ public class MessageEditRewardResponse extends MessageToClient
 	{
 		if (ClientQuestFile.INSTANCE != null)
 		{
-			QuestReward reward = ClientQuestFile.INSTANCE.getReward(uid);
+			QuestReward reward = ClientQuestFile.INSTANCE.getReward(id);
 
 			if (reward != null)
 			{

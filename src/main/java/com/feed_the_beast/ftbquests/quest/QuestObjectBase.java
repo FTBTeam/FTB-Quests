@@ -21,10 +21,27 @@ public abstract class QuestObjectBase
 {
 	public static final Pattern ID_PATTERN = Pattern.compile("^[a-z0-9_]{1,32}$");
 
+	public int uid = 0;
+	public boolean invalid = false;
 	private String title = "";
 	private ItemStack icon = ItemStack.EMPTY;
 
 	private Icon cachedIcon = null;
+
+	public final String toString()
+	{
+		return String.format("#%08x", uid);
+	}
+
+	public final boolean equals(Object object)
+	{
+		return object == this;
+	}
+
+	public final int hashCode()
+	{
+		return uid;
+	}
 
 	public abstract QuestFile getQuestFile();
 
@@ -33,6 +50,8 @@ public abstract class QuestObjectBase
 	public abstract void readData(NBTTagCompound nbt);
 
 	public abstract void getConfig(ConfigGroup config);
+
+	public abstract void resetProgress(ITeamData data, boolean dependencies);
 
 	public abstract Icon getAltIcon();
 
@@ -59,6 +78,15 @@ public abstract class QuestObjectBase
 
 	public void readCommonData(NBTTagCompound nbt)
 	{
+		if (this instanceof QuestFile)
+		{
+			uid = 0;
+		}
+		else
+		{
+			uid = getQuestFile().readID(nbt.getInteger("uid"));
+		}
+
 		title = nbt.getString("title");
 		icon = ItemMissing.read(nbt.getTag("icon"));
 	}
@@ -94,6 +122,19 @@ public abstract class QuestObjectBase
 	public QuestChapter getQuestChapter()
 	{
 		return null;
+	}
+
+	public void deleteSelf()
+	{
+		getQuestFile().remove(uid);
+	}
+
+	public void deleteChildren()
+	{
+	}
+
+	public void onCreated()
+	{
 	}
 
 	public void clearCachedData()

@@ -254,7 +254,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 	@SideOnly(Side.CLIENT)
 	public void onButtonClicked()
 	{
-		new MessageSubmitItems(getID()).sendToServer();
+		new MessageSubmitItems(uid).sendToServer();
 	}
 
 	@Override

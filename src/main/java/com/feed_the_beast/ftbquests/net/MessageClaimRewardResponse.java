@@ -17,15 +17,15 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  */
 public class MessageClaimRewardResponse extends MessageToClient
 {
-	private int uid;
+	private int id;
 
 	public MessageClaimRewardResponse()
 	{
 	}
 
-	public MessageClaimRewardResponse(int id)
+	public MessageClaimRewardResponse(int i)
 	{
-		uid = id;
+		id = i;
 	}
 
 	@Override
@@ -37,13 +37,13 @@ public class MessageClaimRewardResponse extends MessageToClient
 	@Override
 	public void writeData(DataOut data)
 	{
-		data.writeInt(uid);
+		data.writeInt(id);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
-		uid = data.readInt();
+		id = data.readInt();
 	}
 
 	@Override
@@ -52,9 +52,9 @@ public class MessageClaimRewardResponse extends MessageToClient
 	{
 		if (ClientQuestFile.existsWithTeam())
 		{
-			ClientQuestFile.INSTANCE.rewards.add(uid);
+			ClientQuestFile.INSTANCE.rewards.add(id);
 
-			QuestReward reward = ClientQuestFile.INSTANCE.getReward(uid);
+			QuestReward reward = ClientQuestFile.INSTANCE.getReward(id);
 
 			if (reward != null)
 			{

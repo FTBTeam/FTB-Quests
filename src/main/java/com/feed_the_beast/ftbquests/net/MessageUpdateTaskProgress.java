@@ -43,7 +43,7 @@ public class MessageUpdateTaskProgress extends MessageToClient
 	public void writeData(DataOut data)
 	{
 		data.writeString(team);
-		data.writeShort(task);
+		data.writeInt(task);
 		data.writeNBTBase(nbt);
 	}
 
@@ -51,7 +51,7 @@ public class MessageUpdateTaskProgress extends MessageToClient
 	public void readData(DataIn data)
 	{
 		team = data.readString();
-		task = data.readUnsignedShort();
+		task = data.readInt();
 		nbt = data.readNBTBase();
 	}
 
@@ -59,7 +59,7 @@ public class MessageUpdateTaskProgress extends MessageToClient
 	@SideOnly(Side.CLIENT)
 	public void onMessage()
 	{
-		QuestTask qtask = task < 0 || task >= ClientQuestFile.INSTANCE.allTasks.length ? null : ClientQuestFile.INSTANCE.allTasks[task];
+		QuestTask qtask = ClientQuestFile.INSTANCE.getTask(task);
 
 		if (qtask != null)
 		{

@@ -15,15 +15,15 @@ import net.minecraft.entity.player.EntityPlayerMP;
  */
 public class MessageClaimReward extends MessageToServer
 {
-	private int uid;
+	private int id;
 
 	public MessageClaimReward()
 	{
 	}
 
-	public MessageClaimReward(int id)
+	public MessageClaimReward(int i)
 	{
-		uid = id;
+		id = i;
 	}
 
 	@Override
@@ -35,19 +35,19 @@ public class MessageClaimReward extends MessageToServer
 	@Override
 	public void writeData(DataOut data)
 	{
-		data.writeInt(uid);
+		data.writeInt(id);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
-		uid = data.readInt();
+		id = data.readInt();
 	}
 
 	@Override
 	public void onMessage(EntityPlayerMP player)
 	{
-		QuestReward reward = ServerQuestFile.INSTANCE.getReward(uid);
+		QuestReward reward = ServerQuestFile.INSTANCE.getReward(id);
 
 		if (reward != null)
 		{

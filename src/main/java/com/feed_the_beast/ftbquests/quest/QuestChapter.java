@@ -88,10 +88,11 @@ public final class QuestChapter extends QuestObject
 
 			for (Quest quest : quests)
 			{
-				NBTTagCompound questNBT = new NBTTagCompound();
-				quest.writeData(questNBT);
-				questNBT.setString("id", quest.id);
-				questsList.appendTag(questNBT);
+				NBTTagCompound nbt1 = new NBTTagCompound();
+				quest.writeData(nbt1);
+				nbt1.setString("id", quest.id);
+				nbt1.setInteger("uid", quest.uid);
+				questsList.appendTag(nbt1);
 			}
 
 			nbt.setTag("quests", questsList);
