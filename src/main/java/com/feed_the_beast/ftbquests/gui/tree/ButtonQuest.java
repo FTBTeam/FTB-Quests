@@ -104,11 +104,11 @@ public class ButtonQuest extends Button
 			{
 				if (quest.hasDependency(treeGui.selectedQuest))
 				{
-					contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.rem_dep"), GuiIcons.REMOVE, () -> new MessageEditDependency(quest.getID(), treeGui.selectedQuest.getID(), false).sendToServer()));
+					contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.rem_dep"), GuiIcons.REMOVE, () -> new MessageEditDependency(quest.uid, treeGui.selectedQuest.uid, false).sendToServer()));
 				}
 				else
 				{
-					contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.set_dep"), QuestsTheme.ADD, () -> new MessageEditDependency(quest.getID(), treeGui.selectedQuest.getID(), true).sendToServer()).setEnabled(treeGui.selectedQuest != null && treeGui.selectedQuest != quest));
+					contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.set_dep"), QuestsTheme.ADD, () -> new MessageEditDependency(quest.uid, treeGui.selectedQuest.uid, true).sendToServer()).setEnabled(treeGui.selectedQuest != null && treeGui.selectedQuest != quest));
 				}
 			}
 

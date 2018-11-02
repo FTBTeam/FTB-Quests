@@ -16,13 +16,13 @@ import net.minecraft.entity.player.EntityPlayerMP;
  */
 public class MessageSubmitAllItems extends MessageToServer
 {
-	private String quest;
+	private int quest;
 
 	public MessageSubmitAllItems()
 	{
 	}
 
-	public MessageSubmitAllItems(String q)
+	public MessageSubmitAllItems(int q)
 	{
 		quest = q;
 	}
@@ -36,13 +36,13 @@ public class MessageSubmitAllItems extends MessageToServer
 	@Override
 	public void writeData(DataOut data)
 	{
-		data.writeString(quest);
+		data.writeInt(quest);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
-		quest = data.readString();
+		quest = data.readInt();
 	}
 
 	@Override

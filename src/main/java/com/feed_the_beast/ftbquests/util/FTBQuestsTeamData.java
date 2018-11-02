@@ -139,7 +139,7 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 				}
 			}
 
-			t.taskKeys = new short[size];
+			t.taskKeys = new int[size];
 			t.taskValues = new NBTBase[size];
 			int i = 0;
 
@@ -149,7 +149,7 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 
 				if (nbt != null)
 				{
-					t.taskKeys[i] = (short) taskData.task.uid;
+					t.taskKeys[i] = taskData.task.uid;
 					t.taskValues[i] = nbt;
 					i++;
 				}

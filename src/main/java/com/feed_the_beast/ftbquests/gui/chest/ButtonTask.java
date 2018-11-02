@@ -42,7 +42,7 @@ public class ButtonTask extends Button
 	public void onClicked(MouseButton button)
 	{
 		GuiHelper.playClickSound();
-		new MessageSubmitItems(taskData.task.getID()).sendToServer();
+		new MessageSubmitItems(taskData.task.uid).sendToServer();
 	}
 
 	@Override

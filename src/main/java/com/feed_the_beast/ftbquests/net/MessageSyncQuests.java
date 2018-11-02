@@ -22,11 +22,11 @@ public class MessageSyncQuests extends MessageToClient
 	{
 		public static final DataOut.Serializer<TeamInst> SERIALIZER = (data, t) -> {
 			data.writeString(t.name);
-			data.writeShort(t.taskKeys.length);
+			data.writeInt(t.taskKeys.length);
 
 			for (int i = 0; i < t.taskKeys.length; i++)
 			{
-				data.writeShort(t.taskKeys[i]);
+				data.writeInt(t.taskKeys[i]);
 				data.writeNBTBase(t.taskValues[i]);
 			}
 
@@ -42,12 +42,12 @@ public class MessageSyncQuests extends MessageToClient
 		public static final DataIn.Deserializer<TeamInst> DESERIALIZER = data -> {
 			TeamInst t = new TeamInst();
 			t.name = data.readString();
-			t.taskKeys = new short[data.readUnsignedShort()];
+			t.taskKeys = new int[data.readInt()];
 			t.taskValues = new NBTBase[t.taskKeys.length];
 
 			for (int i = 0; i < t.taskKeys.length; i++)
 			{
-				t.taskKeys[i] = data.readShort();
+				t.taskKeys[i] = data.readInt();
 				t.taskValues[i] = data.readNBTBase();
 			}
 
@@ -64,7 +64,7 @@ public class MessageSyncQuests extends MessageToClient
 		};
 
 		public String name;
-		public short[] taskKeys;
+		public int[] taskKeys;
 		public NBTBase[] taskValues;
 		public short[] variableKeys;
 		public long[] variableValues;

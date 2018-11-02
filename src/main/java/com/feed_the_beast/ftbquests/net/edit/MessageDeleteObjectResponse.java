@@ -5,7 +5,7 @@ import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToClient;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
-import com.feed_the_beast.ftbquests.quest.QuestObject;
+import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -14,13 +14,13 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  */
 public class MessageDeleteObjectResponse extends MessageToClient
 {
-	private String id;
+	private int id;
 
 	public MessageDeleteObjectResponse()
 	{
 	}
 
-	public MessageDeleteObjectResponse(String i)
+	public MessageDeleteObjectResponse(int i)
 	{
 		id = i;
 	}
@@ -34,13 +34,13 @@ public class MessageDeleteObjectResponse extends MessageToClient
 	@Override
 	public void writeData(DataOut data)
 	{
-		data.writeString(id);
+		data.writeInt(id);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
-		id = data.readString();
+		id = data.readInt();
 	}
 
 	@Override
@@ -49,7 +49,7 @@ public class MessageDeleteObjectResponse extends MessageToClient
 	{
 		if (ClientQuestFile.exists())
 		{
-			QuestObject object = ClientQuestFile.INSTANCE.get(id);
+			QuestObjectBase object = ClientQuestFile.INSTANCE.getBase(id);
 
 			if (object != null)
 			{

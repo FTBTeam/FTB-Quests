@@ -25,13 +25,13 @@ import net.minecraft.util.text.TextFormatting;
  */
 public class MessageEditObject extends MessageToServer implements IConfigCallback
 {
-	private String id;
+	private int id;
 
 	public MessageEditObject()
 	{
 	}
 
-	public MessageEditObject(String i)
+	public MessageEditObject(int i)
 	{
 		id = i;
 	}
@@ -45,13 +45,13 @@ public class MessageEditObject extends MessageToServer implements IConfigCallbac
 	@Override
 	public void writeData(DataOut data)
 	{
-		data.writeString(id);
+		data.writeInt(id);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
-		id = data.readString();
+		id = data.readInt();
 	}
 
 	@Override

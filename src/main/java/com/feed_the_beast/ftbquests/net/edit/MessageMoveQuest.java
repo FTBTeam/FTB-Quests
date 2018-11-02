@@ -14,14 +14,14 @@ import net.minecraft.entity.player.EntityPlayerMP;
  */
 public class MessageMoveQuest extends MessageToServer
 {
-	private String id;
+	private int id;
 	private byte x, y;
 
 	public MessageMoveQuest()
 	{
 	}
 
-	public MessageMoveQuest(String i, byte _x, byte _y)
+	public MessageMoveQuest(int i, byte _x, byte _y)
 	{
 		id = i;
 		x = _x;
@@ -37,7 +37,7 @@ public class MessageMoveQuest extends MessageToServer
 	@Override
 	public void writeData(DataOut data)
 	{
-		data.writeString(id);
+		data.writeInt(id);
 		data.writeByte(x);
 		data.writeByte(y);
 	}
@@ -45,7 +45,7 @@ public class MessageMoveQuest extends MessageToServer
 	@Override
 	public void readData(DataIn data)
 	{
-		id = data.readString();
+		id = data.readInt();
 		x = data.readByte();
 		y = data.readByte();
 	}

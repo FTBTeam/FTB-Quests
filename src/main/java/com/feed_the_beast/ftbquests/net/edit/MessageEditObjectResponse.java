@@ -16,14 +16,14 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  */
 public class MessageEditObjectResponse extends MessageToClient
 {
-	private String id;
+	private int id;
 	private NBTTagCompound nbt;
 
 	public MessageEditObjectResponse()
 	{
 	}
 
-	public MessageEditObjectResponse(String i, NBTTagCompound n)
+	public MessageEditObjectResponse(int i, NBTTagCompound n)
 	{
 		id = i;
 		nbt = n;
@@ -38,14 +38,14 @@ public class MessageEditObjectResponse extends MessageToClient
 	@Override
 	public void writeData(DataOut data)
 	{
-		data.writeString(id);
+		data.writeInt(id);
 		data.writeNBT(nbt);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
-		id = data.readString();
+		id = data.readInt();
 		nbt = data.readNBT();
 	}
 

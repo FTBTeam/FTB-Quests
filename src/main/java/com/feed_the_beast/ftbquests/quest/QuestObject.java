@@ -1,13 +1,9 @@
 package com.feed_the_beast.ftbquests.quest;
 
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
-import com.feed_the_beast.ftblib.lib.data.Universe;
-import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
-
-import java.util.UUID;
 
 /**
  * @author LatvianModder
@@ -15,7 +11,6 @@ import java.util.UUID;
 public abstract class QuestObject extends QuestObjectBase
 {
 	public String id = "";
-	public boolean invalid = false;
 	public String completionCommand = "";
 
 	public abstract QuestObjectType getObjectType();
@@ -42,21 +37,21 @@ public abstract class QuestObject extends QuestObjectBase
 	@Override
 	public final void readCommonData(NBTTagCompound nbt)
 	{
-		if (getObjectType() != QuestObjectType.FILE)
+		super.readCommonData(nbt);
+
+		if (getObjectType() == QuestObjectType.FILE)
+		{
+			id = "*";
+		}
+		else
 		{
 			id = nbt.getString("id").trim();
 
 			if (id.isEmpty() || getQuestFile().get(getID()) != null)
 			{
-				id = StringUtils.fromUUID(UUID.randomUUID()).substring(0, 8);
+				id = String.format("%08x", uid);
 			}
 		}
-		else
-		{
-			id = "*";
-		}
-
-		super.readCommonData(nbt);
 
 		completionCommand = nbt.getString("completion_command");
 	}
@@ -64,8 +59,6 @@ public abstract class QuestObject extends QuestObjectBase
 	public abstract long getProgress(ITeamData data);
 
 	public abstract long getMaxProgress();
-
-	public abstract void resetProgress(ITeamData data, boolean dependencies);
 
 	public abstract void completeInstantly(ITeamData data, boolean dependencies);
 
@@ -91,7 +84,7 @@ public abstract class QuestObject extends QuestObjectBase
 	{
 		if (!completionCommand.isEmpty() && !getQuestFile().isClient())
 		{
-			Universe.get().server.commandManager.executeCommand(Universe.get().server, completionCommand
+			ServerQuestFile.INSTANCE.universe.server.commandManager.executeCommand(ServerQuestFile.INSTANCE.universe.server, completionCommand
 					.replace("@team", data.getTeamID())
 					.replace("@id", getID())
 					.replace("@idn", getID().replace(':', '_')));
@@ -100,38 +93,6 @@ public abstract class QuestObject extends QuestObjectBase
 
 	@Override
 	public abstract ITextComponent getAltDisplayName();
-
-	public void deleteSelf()
-	{
-		getQuestFile().remove(getID());
-		invalid = true;
-	}
-
-	public void deleteChildren()
-	{
-	}
-
-	public void onCreated()
-	{
-	}
-
-	@Override
-	public final String toString()
-	{
-		return getID();
-	}
-
-	@Override
-	public final int hashCode()
-	{
-		return super.hashCode();
-	}
-
-	@Override
-	public final boolean equals(Object o)
-	{
-		return o == this;
-	}
 
 	@Override
 	public final void getExtraConfig(ConfigGroup config)

@@ -7,7 +7,7 @@ import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToServer;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.FTBQuests;
-import com.feed_the_beast.ftbquests.quest.QuestObject;
+import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.util.FTBQuestsTeamData;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -17,13 +17,13 @@ import net.minecraft.entity.player.EntityPlayerMP;
  */
 public class MessageResetProgress extends MessageToServer
 {
-	private String id;
+	private int id;
 
 	public MessageResetProgress()
 	{
 	}
 
-	public MessageResetProgress(String i)
+	public MessageResetProgress(int i)
 	{
 		id = i;
 	}
@@ -37,21 +37,21 @@ public class MessageResetProgress extends MessageToServer
 	@Override
 	public void writeData(DataOut data)
 	{
-		data.writeString(id);
+		data.writeInt(id);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
-		id = data.readString();
+		id = data.readInt();
 	}
 
 	@Override
 	public void onMessage(EntityPlayerMP player)
 	{
-		if (!id.isEmpty() && FTBQuests.canEdit(player))
+		if (FTBQuests.canEdit(player))
 		{
-			QuestObject object = ServerQuestFile.INSTANCE.get(id);
+			QuestObjectBase object = ServerQuestFile.INSTANCE.getBase(id);
 
 			if (object != null)
 			{

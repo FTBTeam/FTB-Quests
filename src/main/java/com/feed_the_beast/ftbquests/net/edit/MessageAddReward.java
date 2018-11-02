@@ -17,14 +17,14 @@ import net.minecraft.nbt.NBTTagCompound;
  */
 public class MessageAddReward extends MessageToServer
 {
-	private String quest;
+	private int quest;
 	private NBTTagCompound nbt;
 
 	public MessageAddReward()
 	{
 	}
 
-	public MessageAddReward(String q, NBTTagCompound n)
+	public MessageAddReward(int q, NBTTagCompound n)
 	{
 		quest = q;
 		nbt = n;
@@ -39,21 +39,21 @@ public class MessageAddReward extends MessageToServer
 	@Override
 	public void writeData(DataOut data)
 	{
-		data.writeString(quest);
+		data.writeInt(quest);
 		data.writeNBT(nbt);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
-		quest = data.readString();
+		quest = data.readInt();
 		nbt = data.readNBT();
 	}
 
 	@Override
 	public void onMessage(EntityPlayerMP player)
 	{
-		if (!quest.isEmpty() && nbt != null && FTBQuests.canEdit(player))
+		if (nbt != null && FTBQuests.canEdit(player))
 		{
 			Quest q = ServerQuestFile.INSTANCE.getQuest(quest);
 
@@ -63,9 +63,9 @@ public class MessageAddReward extends MessageToServer
 
 				if (r != null)
 				{
-					r.uid = ServerQuestFile.INSTANCE.getNewID();
+					r.uid = ServerQuestFile.INSTANCE.readID(0);
 					q.rewards.add(r);
-					ServerQuestFile.INSTANCE.allRewards.put(r.uid, r);
+					ServerQuestFile.INSTANCE.refreshIDMap();
 					ServerQuestFile.INSTANCE.save();
 					new MessageAddRewardResponse(quest, r.uid, nbt).sendToAll();
 				}

@@ -64,7 +64,7 @@ public class MessageDeleteReward extends MessageToServer
 				}
 
 				reward.quest.rewards.remove(reward);
-				ServerQuestFile.INSTANCE.allRewards.remove(id);
+				ServerQuestFile.INSTANCE.refreshIDMap();
 				ServerQuestFile.INSTANCE.save();
 				new MessageDeleteRewardResponse(id).sendToAll();
 			}

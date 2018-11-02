@@ -46,7 +46,7 @@ public class GuiVariables extends GuiButtonListBase
 					{
 						NBTTagCompound nbt = new NBTTagCompound();
 						nbt.setString("id", value.getString());
-						new MessageCreateObject(QuestObjectType.VARIABLE, "", nbt).sendToServer();
+						new MessageCreateObject(QuestObjectType.VARIABLE, 0, nbt).sendToServer();
 					}
 
 					GuiVariables.this.openGui();

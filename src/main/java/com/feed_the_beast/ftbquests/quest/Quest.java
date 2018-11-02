@@ -4,7 +4,6 @@ import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigString;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.IconAnimation;
-import com.feed_the_beast.ftblib.lib.math.MathUtils;
 import com.feed_the_beast.ftblib.lib.util.ListUtils;
 import com.feed_the_beast.ftbquests.events.ObjectCompletedEvent;
 import com.feed_the_beast.ftbquests.item.ItemMissing;
@@ -181,6 +180,7 @@ public final class Quest extends QuestObject
 					NBTTagCompound nbt1 = new NBTTagCompound();
 					task.writeData(nbt1);
 					nbt1.setString("id", task.id);
+					nbt1.setInteger("uid", task.uid);
 
 					if (task.getClass() != ItemTask.class)
 					{
@@ -327,20 +327,13 @@ public final class Quest extends QuestObject
 		for (int i = 0; i < list.tagCount(); i++)
 		{
 			NBTTagCompound nbt1 = list.getCompoundTagAt(i);
-			int id = nbt1.getInteger("uid");
-
-			while (id == 0)
-			{
-				id = MathUtils.RAND.nextInt();
-			}
 
 			if (!nbt1.hasKey("type") && !nbt1.hasKey("item"))
 			{
-				nbt1.removeTag("uid");
-
 				ItemReward reward = new ItemReward(this);
-				reward.uid = id;
+				reward.uid = chapter.file.readID(nbt1.getInteger("uid"));
 				reward.team = nbt1.getBoolean("team_reward");
+				nbt1.removeTag("uid");
 				nbt1.removeTag("team_reward");
 				reward.stack = ItemMissing.read(nbt1);
 				rewards.add(reward);
@@ -351,7 +344,7 @@ public final class Quest extends QuestObject
 
 			if (reward != null)
 			{
-				reward.uid = id;
+				reward.uid = chapter.file.readID(nbt1.getInteger("uid"));
 				rewards.add(reward);
 			}
 		}

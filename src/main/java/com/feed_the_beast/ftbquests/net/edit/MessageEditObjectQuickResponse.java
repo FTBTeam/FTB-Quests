@@ -20,7 +20,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  */
 public class MessageEditObjectQuickResponse extends MessageToClient
 {
-	private String id;
+	private int id;
 	private String configId;
 	private boolean next;
 
@@ -28,7 +28,7 @@ public class MessageEditObjectQuickResponse extends MessageToClient
 	{
 	}
 
-	public MessageEditObjectQuickResponse(String i, String c, boolean n)
+	public MessageEditObjectQuickResponse(int i, String c, boolean n)
 	{
 		id = i;
 		configId = c;
@@ -44,7 +44,7 @@ public class MessageEditObjectQuickResponse extends MessageToClient
 	@Override
 	public void writeData(DataOut data)
 	{
-		data.writeString(id);
+		data.writeInt(id);
 		data.writeString(configId);
 		data.writeBoolean(next);
 	}
@@ -52,7 +52,7 @@ public class MessageEditObjectQuickResponse extends MessageToClient
 	@Override
 	public void readData(DataIn data)
 	{
-		id = data.readString();
+		id = data.readInt();
 		configId = data.readString();
 		next = data.readBoolean();
 	}

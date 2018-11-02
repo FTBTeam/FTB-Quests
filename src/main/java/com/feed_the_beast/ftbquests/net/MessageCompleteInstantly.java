@@ -17,13 +17,13 @@ import net.minecraft.entity.player.EntityPlayerMP;
  */
 public class MessageCompleteInstantly extends MessageToServer
 {
-	private String id;
+	private int id;
 
 	public MessageCompleteInstantly()
 	{
 	}
 
-	public MessageCompleteInstantly(String i)
+	public MessageCompleteInstantly(int i)
 	{
 		id = i;
 	}
@@ -37,19 +37,19 @@ public class MessageCompleteInstantly extends MessageToServer
 	@Override
 	public void writeData(DataOut data)
 	{
-		data.writeString(id);
+		data.writeInt(id);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
-		id = data.readString();
+		id = data.readInt();
 	}
 
 	@Override
 	public void onMessage(EntityPlayerMP player)
 	{
-		if (!id.isEmpty() && FTBQuests.canEdit(player))
+		if (FTBQuests.canEdit(player))
 		{
 			QuestObject object = ServerQuestFile.INSTANCE.get(id);
 

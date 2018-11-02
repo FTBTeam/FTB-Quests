@@ -6,6 +6,8 @@ import com.feed_the_beast.ftbquests.gui.GuiVariables;
 import com.feed_the_beast.ftbquests.gui.tree.GuiQuestTree;
 import com.feed_the_beast.ftbquests.net.MessageSyncQuests;
 import com.feed_the_beast.ftbquests.net.edit.MessageDeleteObject;
+import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
 import com.feed_the_beast.ftbquests.quest.task.QuestTask;
@@ -50,14 +52,25 @@ public class ClientQuestFile extends QuestFile
 		{
 			ClientQuestProgress data = new ClientQuestProgress(team.name);
 
-			for (QuestTask task : allTasks)
+			for (QuestChapter chapter : chapters)
 			{
-				data.createTaskData(task);
+				for (Quest quest : chapter.quests)
+				{
+					for (QuestTask task : quest.tasks)
+					{
+						data.createTaskData(task);
+					}
+				}
 			}
 
 			for (int i = 0; i < team.taskKeys.length; i++)
 			{
-				data.getQuestTaskData(allTasks[team.taskKeys[i]]).fromNBT(team.taskValues[i]);
+				QuestTask task = getTask(team.taskKeys[i]);
+
+				if (task != null)
+				{
+					data.getQuestTaskData(task).fromNBT(team.taskValues[i]);
+				}
 			}
 
 			for (int i = 0; i < team.variableKeys.length; i++)
@@ -163,7 +176,7 @@ public class ClientQuestFile extends QuestFile
 	}
 
 	@Override
-	public void deleteObject(String id)
+	public void deleteObject(int id)
 	{
 		new MessageDeleteObject(id).sendToServer();
 	}

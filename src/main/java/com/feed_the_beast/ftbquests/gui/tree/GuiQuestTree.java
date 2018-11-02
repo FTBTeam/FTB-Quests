@@ -172,7 +172,7 @@ public class GuiQuestTree extends GuiBase
 						{
 							if (inst.getCanEdit())
 							{
-								new MessageEditObjectQuick(object.getID(), inst.getName(), button.isLeft()).sendToServer();
+								new MessageEditObjectQuick(object.uid, inst.getName(), button.isLeft()).sendToServer();
 							}
 						}
 
@@ -200,16 +200,16 @@ public class GuiQuestTree extends GuiBase
 			}
 		}
 
-		contextMenu.add(new ContextMenuItem(I18n.format("selectServer.edit"), GuiIcons.SETTINGS, () -> new MessageEditObject(object.getID()).sendToServer()));
-		contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), GuiIcons.REMOVE, () -> questFile.deleteObject(object.getID())).setYesNo(I18n.format("delete_item", object.getDisplayName().getFormattedText())));
-		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.reset_progress"), GuiIcons.REFRESH, () -> new MessageResetProgress(object.getID()).sendToServer()).setYesNo(I18n.format("ftbquests.gui.reset_progress_q")));
-		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.complete_instantly"), QuestsTheme.COMPLETED, () -> new MessageCompleteInstantly(object.getID()).sendToServer()).setYesNo(I18n.format("ftbquests.gui.complete_instantly_q")));
+		contextMenu.add(new ContextMenuItem(I18n.format("selectServer.edit"), GuiIcons.SETTINGS, () -> new MessageEditObject(object.uid).sendToServer()));
+		contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), GuiIcons.REMOVE, () -> questFile.deleteObject(object.uid)).setYesNo(I18n.format("delete_item", object.getDisplayName().getFormattedText())));
+		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.reset_progress"), GuiIcons.REFRESH, () -> new MessageResetProgress(object.uid).sendToServer()).setYesNo(I18n.format("ftbquests.gui.reset_progress_q")));
+		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.complete_instantly"), QuestsTheme.COMPLETED, () -> new MessageCompleteInstantly(object.uid).sendToServer()).setYesNo(I18n.format("ftbquests.gui.complete_instantly_q")));
 		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.change_id"), GuiIcons.NOTES, () -> new GuiEditConfigValue("id", new ConfigString(object.id, QuestObjectBase.ID_PATTERN), (value, set) -> {
 			prevGui.openGui();
 
 			if (set)
 			{
-				new MessageChangeID(object.getID(), value.getString()).sendToServer();
+				new MessageChangeID(object.uid, value.getString()).sendToServer();
 			}
 		}).openGui()));
 	}

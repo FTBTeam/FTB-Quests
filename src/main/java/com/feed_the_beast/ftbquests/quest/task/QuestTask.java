@@ -29,14 +29,12 @@ import java.util.List;
 public abstract class QuestTask extends QuestObject
 {
 	public final Quest quest;
-	public int uid;
 
 	private String cachedID = "";
 
 	public QuestTask(Quest q)
 	{
 		quest = q;
-		uid = -1;
 	}
 
 	@Override
@@ -239,7 +237,7 @@ public abstract class QuestTask extends QuestObject
 	{
 		if (canInsertItem())
 		{
-			new MessageSubmitItems(getID()).sendToServer();
+			new MessageSubmitItems(uid).sendToServer();
 		}
 	}
 

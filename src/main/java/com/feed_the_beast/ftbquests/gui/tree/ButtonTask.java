@@ -75,7 +75,7 @@ public class ButtonTask extends SimpleTextButton
 	{
 		if (isShiftKeyDown() && isCtrlKeyDown())
 		{
-			list.add(TextFormatting.DARK_GRAY + task.getID());
+			list.add(TextFormatting.DARK_GRAY + task.toString());
 		}
 
 		QuestTaskData data;

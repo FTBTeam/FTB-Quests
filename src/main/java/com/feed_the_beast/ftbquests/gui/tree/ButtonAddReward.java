@@ -57,7 +57,7 @@ public class ButtonAddReward extends SimpleTextButton
 					NBTTagCompound nbt = new NBTTagCompound();
 					reward.writeData(nbt);
 					reward.writeCommonData(nbt);
-					new MessageAddReward(quest.getID(), nbt).sendToServer();
+					new MessageAddReward(quest.uid, nbt).sendToServer();
 				}
 			}).openGui();
 			return;
@@ -87,7 +87,7 @@ public class ButtonAddReward extends SimpleTextButton
 						reward.writeCommonData(nbt);
 						nbt.setString("type", type.getTypeForNBT());
 						ButtonAddReward.this.getGui().openGui();
-						new MessageAddReward(quest.getID(), nbt).sendToServer();
+						new MessageAddReward(quest.uid, nbt).sendToServer();
 					}).openGui();
 				}));
 			}
