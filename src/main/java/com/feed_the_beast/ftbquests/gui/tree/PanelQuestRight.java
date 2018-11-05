@@ -84,13 +84,13 @@ public class PanelQuestRight extends Panel
 
 			if (!treeGui.selectedQuest.description.isEmpty())
 			{
-				add(new TextField(this).setMaxWidth(width - 3).setSpacing(9).setText(TextFormatting.GRAY.toString() + TextFormatting.ITALIC + StringUtils.unformatted(treeGui.selectedQuest.description)));
+				add(new TextField(this).setMaxWidth(width - 3).setSpacing(9).setText(TextFormatting.GRAY.toString() + TextFormatting.ITALIC + StringUtils.unformatted(treeGui.selectedQuest.description).replace("&(\\S)", StringUtils.FORMATTING_CHAR + "$1")));
 				add(new WidgetVerticalSpace(this, 5));
 			}
 
 			if (!treeGui.selectedQuest.text.isEmpty())
 			{
-				add(new TextField(this).setMaxWidth(width - 3).setSpacing(9).setText(StringJoiner.with('\n').join(treeGui.selectedQuest.text)));
+				add(new TextField(this).setMaxWidth(width - 3).setSpacing(9).setText(StringJoiner.with('\n').join(treeGui.selectedQuest.text).replace("&(\\S)", StringUtils.FORMATTING_CHAR + "$1")));
 				add(new WidgetVerticalSpace(this, 10));
 			}
 
