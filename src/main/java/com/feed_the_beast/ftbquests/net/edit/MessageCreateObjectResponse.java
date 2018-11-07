@@ -63,6 +63,8 @@ public class MessageCreateObjectResponse extends MessageToClient
 
 			if (object != null)
 			{
+				object.readCommonData(nbt);
+				object.readData(nbt);
 				object.onCreated();
 				ClientQuestFile.INSTANCE.refreshIDMap();
 				ClientQuestFile.INSTANCE.refreshGui();
