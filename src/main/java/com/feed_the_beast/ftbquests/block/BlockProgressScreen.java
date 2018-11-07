@@ -387,7 +387,7 @@ public class BlockProgressScreen extends BlockWithHorizontalFacing
 		tooltip.add(I18n.format("tile.ftbquests.screen.size") + ": " + TextFormatting.GOLD + (1 + width * 2) + " x " + (1 + height));
 		tooltip.add(I18n.format("ftbquests.team") + ": " + TextFormatting.DARK_GREEN + team);
 
-		QuestObject object = ClientQuestFile.INSTANCE.get(nbt == null ? "" : nbt.getString("Object"));
+		QuestObject object = ClientQuestFile.INSTANCE.get(nbt == null ? null : nbt.getTag("Object"));
 
 		if (object != null)
 		{

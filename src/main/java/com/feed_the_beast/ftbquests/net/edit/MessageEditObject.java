@@ -63,14 +63,14 @@ public class MessageEditObject extends MessageToServer implements IConfigCallbac
 
 			if (object != null)
 			{
-				ITextComponent idc = new TextComponentString(" " + object.getID());
+				ITextComponent idc = new TextComponentString(" " + object);
 				idc.getStyle().setColor(TextFormatting.DARK_GRAY);
 				idc.getStyle().setBold(false);
 
 				ConfigGroup group = ConfigGroup.newGroup(FTBQuests.MOD_ID);
 				group.setDisplayName(new TextComponentTranslation(object.getObjectType().getTranslationKey()).appendSibling(idc));
 				ConfigGroup group1 = group.getGroup(object.getObjectType().getName());
-				group1.setDisplayName(object.getDisplayName().appendSibling(StringUtils.color(new TextComponentString(" " + object.getID()), TextFormatting.DARK_GRAY)));
+				group1.setDisplayName(object.getDisplayName().appendSibling(StringUtils.color(new TextComponentString(" " + object), TextFormatting.DARK_GRAY)));
 				ConfigGroup g = group1;
 
 				if (object instanceof QuestTask)
