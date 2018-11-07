@@ -197,7 +197,7 @@ public class TileProgressDetector extends TileBase implements ITickable, IConfig
 
 		boolean editor = FTBQuests.canEdit(player);
 
-		if (!editor && !team.equals(Universe.get().getPlayer(player).team.getName()))
+		if (!editor && !team.equals(Universe.get().getPlayer(player).team.getID()))
 		{
 			return;
 		}

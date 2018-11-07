@@ -107,14 +107,14 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 			data.createTaskData(task);
 		}
 
-		new MessageCreateTeamData(event.getTeam().getName()).sendToAll();
+		new MessageCreateTeamData(event.getTeam().getID()).sendToAll();
 	}
 
 	@SubscribeEvent
 	public static void onTeamDeleted(ForgeTeamDeletedEvent event)
 	{
 		FileUtils.delete(event.getTeam().getDataFile("ftbquests"));
-		new MessageDeleteTeamData(event.getTeam().getName()).sendToAll();
+		new MessageDeleteTeamData(event.getTeam().getID()).sendToAll();
 	}
 
 	@SubscribeEvent
@@ -127,7 +127,7 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 		{
 			FTBQuestsTeamData data = get(team);
 			MessageSyncQuests.TeamInst t = new MessageSyncQuests.TeamInst();
-			t.name = team.getName();
+			t.name = team.getID();
 
 			int size = 0;
 
@@ -200,7 +200,7 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 			rewards.addAll(team.claimedTeamRewards);
 		}
 
-		new MessageSyncQuests(nbt, event.getPlayer().team.getName(), teamData, FTBQuests.canEdit(player), rewards).sendTo(player);
+		new MessageSyncQuests(nbt, event.getPlayer().team.getID(), teamData, FTBQuests.canEdit(player), rewards).sendTo(player);
 	}
 
 	@SubscribeEvent
@@ -217,7 +217,7 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 	{
 		if (event.getPlayer().isOnline())
 		{
-			new MessageChangedTeam(event.getTeam().getName()).sendTo(event.getPlayer().getPlayer());
+			new MessageChangedTeam(event.getTeam().getID()).sendTo(event.getPlayer().getPlayer());
 		}
 	}
 
@@ -237,7 +237,7 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 	}
 
 	@Override
-	public String getName()
+	public String getID()
 	{
 		return FTBQuests.MOD_ID;
 	}
@@ -246,7 +246,7 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 	public void syncTask(QuestTaskData data)
 	{
 		team.markDirty();
-		new MessageUpdateTaskProgress(team.getName(), data.task.uid, data.toNBT()).sendToAll();
+		new MessageUpdateTaskProgress(team.getID(), data.task.uid, data.toNBT()).sendToAll();
 
 		if (!data.isComplete && data.task.isComplete(this))
 		{
@@ -394,7 +394,7 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 		if (prevValue != value)
 		{
 			team.markDirty();
-			new MessageUpdateVariable(team.getName(), variable.index, value).sendToAll();
+			new MessageUpdateVariable(team.getID(), variable.index, value).sendToAll();
 		}
 	}
 
@@ -549,7 +549,7 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 	@Override
 	public String getTeamID()
 	{
-		return team.getName();
+		return team.getID();
 	}
 
 	@Override
