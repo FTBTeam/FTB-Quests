@@ -18,8 +18,11 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTBase;
+import net.minecraft.nbt.NBTPrimitive;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.NBTTagString;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -232,6 +235,21 @@ public abstract class QuestFile extends QuestObject
 
 		QuestObject object = map.get(id);
 		return object == null || object.invalid ? null : object;
+	}
+
+	@Nullable
+	public QuestObject get(@Nullable NBTBase nbt)
+	{
+		if (nbt instanceof NBTTagString)
+		{
+			return get(((NBTTagString) nbt).getString());
+		}
+		else if (nbt instanceof NBTPrimitive)
+		{
+			return get(((NBTPrimitive) nbt).getInt());
+		}
+
+		return null;
 	}
 
 	@Nullable
@@ -639,6 +657,19 @@ public abstract class QuestFile extends QuestObject
 
 	public int getID(String stringID)
 	{
-		return 0;
+		if (stringID.isEmpty())
+		{
+			return 0;
+		}
+
+		try
+		{
+			return Integer.decode(stringID);
+		}
+		catch (Exception ex)
+		{
+			QuestObjectBase object = get(stringID);
+			return object == null ? 0 : object.uid;
+		}
 	}
 }

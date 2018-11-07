@@ -145,7 +145,7 @@ public class BlockProgressDetector extends Block
 
 		tooltip.add(I18n.format("ftbquests.team") + ": " + TextFormatting.DARK_GREEN + team);
 
-		QuestObject object = ClientQuestFile.INSTANCE.get(nbt == null ? "" : nbt.getString("Object"));
+		QuestObject object = ClientQuestFile.INSTANCE.get(nbt == null ? null : nbt.getTag("Object"));
 
 		if (object != null)
 		{

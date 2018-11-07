@@ -30,8 +30,6 @@ public abstract class QuestTask extends QuestObject
 {
 	public final Quest quest;
 
-	private String cachedID = "";
-
 	public QuestTask(Quest q)
 	{
 		quest = q;
@@ -66,12 +64,7 @@ public abstract class QuestTask extends QuestObject
 	@Override
 	public final String getID()
 	{
-		if (cachedID.isEmpty())
-		{
-			cachedID = quest.chapter.id + ':' + quest.id + ':' + id;
-		}
-
-		return cachedID;
+		return quest.chapter.id + ':' + quest.id + ':' + id;
 	}
 
 	@Override
@@ -209,13 +202,6 @@ public abstract class QuestTask extends QuestObject
 	public Icon getAltIcon()
 	{
 		return GuiIcons.ACCEPT;
-	}
-
-	@Override
-	public void clearCachedData()
-	{
-		super.clearCachedData();
-		cachedID = "";
 	}
 
 	public boolean hideProgressNumbers()

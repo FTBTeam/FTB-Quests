@@ -15,6 +15,7 @@ public abstract class QuestObject extends QuestObjectBase
 
 	public abstract QuestObjectType getObjectType();
 
+	@Deprecated
 	public abstract String getID();
 
 	@Override

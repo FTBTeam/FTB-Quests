@@ -39,7 +39,7 @@ public class GuiSelectQuestObject extends GuiButtonListBase
 		public void addMouseOverText(List<String> list)
 		{
 			list.add(object.getDisplayName().getFormattedText());
-			list.add(TextFormatting.GRAY + "ID: " + TextFormatting.DARK_GRAY + object.getID());
+			list.add(TextFormatting.GRAY + "ID: " + TextFormatting.DARK_GRAY + object);
 			list.add(TextFormatting.GRAY + "Type: " + object.getObjectType().getColor() + I18n.format(object.getObjectType().getTranslationKey()));
 
 			if (object instanceof Quest)

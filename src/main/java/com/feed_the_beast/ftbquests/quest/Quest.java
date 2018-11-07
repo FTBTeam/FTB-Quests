@@ -51,7 +51,6 @@ public final class Quest extends QuestObject
 	public final List<QuestTask> tasks;
 	public final List<QuestReward> rewards;
 
-	private String cachedID = "";
 	private Set<QuestObject> cachedDependencies = null;
 
 	public Quest(QuestChapter c)
@@ -90,12 +89,7 @@ public final class Quest extends QuestObject
 	@Override
 	public String getID()
 	{
-		if (cachedID.isEmpty())
-		{
-			cachedID = chapter.id + ':' + id;
-		}
-
-		return cachedID;
+		return chapter.id + ':' + id;
 	}
 
 	@Override
@@ -657,7 +651,6 @@ public final class Quest extends QuestObject
 	public void clearCachedData()
 	{
 		super.clearCachedData();
-		cachedID = "";
 		cachedDependencies = null;
 
 		for (QuestTask task : tasks)
