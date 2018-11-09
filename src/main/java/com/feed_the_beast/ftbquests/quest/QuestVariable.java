@@ -3,6 +3,8 @@ package com.feed_the_beast.ftbquests.quest;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
+import com.feed_the_beast.ftblib.lib.io.DataIn;
+import com.feed_the_beast.ftblib.lib.io.DataOut;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
@@ -15,16 +17,12 @@ public final class QuestVariable extends QuestObject
 	public final QuestFile file;
 	public long maxValue;
 	public boolean team;
-	public short index;
-
-	private String cachedID = "";
 
 	public QuestVariable(QuestFile f)
 	{
 		file = f;
 		maxValue = 1L;
 		team = false;
-		index = -1;
 	}
 
 	@Override
@@ -40,21 +38,16 @@ public final class QuestVariable extends QuestObject
 	}
 
 	@Override
+	@Deprecated
 	public String getID()
 	{
-		if (cachedID.isEmpty())
-		{
-			cachedID = '#' + id;
-		}
-
-		return cachedID;
+		return '#' + id;
 	}
 
 	@Override
 	public void writeData(NBTTagCompound nbt)
 	{
-		writeCommonData(nbt);
-
+		super.writeData(nbt);
 		nbt.setLong("max", maxValue);
 
 		if (team)
@@ -66,7 +59,7 @@ public final class QuestVariable extends QuestObject
 	@Override
 	public void readData(NBTTagCompound nbt)
 	{
-		readCommonData(nbt);
+		super.readData(nbt);
 		maxValue = nbt.getLong("max");
 
 		if (maxValue < 1L)
@@ -75,6 +68,22 @@ public final class QuestVariable extends QuestObject
 		}
 
 		team = nbt.getBoolean("team");
+	}
+
+	@Override
+	public void writeNetData(DataOut data)
+	{
+		super.writeNetData(data);
+		data.writeVarLong(maxValue);
+		data.writeBoolean(team);
+	}
+
+	@Override
+	public void readNetData(DataIn data)
+	{
+		super.readNetData(data);
+		maxValue = data.readVarLong();
+		team = data.readBoolean();
 	}
 
 	@Override
@@ -93,7 +102,7 @@ public final class QuestVariable extends QuestObject
 	@Override
 	public long getProgress(ITeamData data)
 	{
-		return data.getVariable(this);
+		return data.getVariable(uid);
 	}
 
 	@Override
@@ -105,13 +114,13 @@ public final class QuestVariable extends QuestObject
 	@Override
 	public void resetProgress(ITeamData data, boolean dependencies)
 	{
-		data.setVariable(this, 0L);
+		data.setVariable(uid, 0L);
 	}
 
 	@Override
 	public void completeInstantly(ITeamData data, boolean dependencies)
 	{
-		data.setVariable(this, maxValue);
+		data.setVariable(uid, maxValue);
 	}
 
 	@Override
@@ -122,7 +131,7 @@ public final class QuestVariable extends QuestObject
 			return 100;
 		}
 
-		long value = data.getVariable(this);
+		long value = data.getVariable(uid);
 
 		if (value <= 0L)
 		{
@@ -139,7 +148,7 @@ public final class QuestVariable extends QuestObject
 	@Override
 	public boolean isComplete(ITeamData data)
 	{
-		return data.getVariable(this) >= maxValue;
+		return data.getVariable(uid) >= maxValue;
 	}
 
 	@Override
@@ -159,12 +168,5 @@ public final class QuestVariable extends QuestObject
 	public void onCreated()
 	{
 		file.variables.add(this);
-	}
-
-	@Override
-	public void clearCachedData()
-	{
-		super.clearCachedData();
-		cachedID = "";
 	}
 }

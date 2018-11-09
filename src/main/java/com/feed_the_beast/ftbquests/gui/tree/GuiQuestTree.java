@@ -2,7 +2,6 @@ package com.feed_the_beast.ftbquests.gui.tree;
 
 import com.feed_the_beast.ftblib.lib.config.ConfigBoolean;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
-import com.feed_the_beast.ftblib.lib.config.ConfigString;
 import com.feed_the_beast.ftblib.lib.config.ConfigValueInstance;
 import com.feed_the_beast.ftblib.lib.config.IIteratingConfig;
 import com.feed_the_beast.ftblib.lib.gui.ContextMenuItem;
@@ -13,7 +12,6 @@ import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.gui.Theme;
 import com.feed_the_beast.ftblib.lib.gui.Widget;
 import com.feed_the_beast.ftblib.lib.gui.WidgetType;
-import com.feed_the_beast.ftblib.lib.gui.misc.GuiEditConfigValue;
 import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.FTBQuests;
@@ -22,13 +20,11 @@ import com.feed_the_beast.ftbquests.gui.GuiVariables;
 import com.feed_the_beast.ftbquests.gui.QuestsTheme;
 import com.feed_the_beast.ftbquests.net.MessageCompleteInstantly;
 import com.feed_the_beast.ftbquests.net.MessageResetProgress;
-import com.feed_the_beast.ftbquests.net.edit.MessageChangeID;
 import com.feed_the_beast.ftbquests.net.edit.MessageEditObject;
 import com.feed_the_beast.ftbquests.net.edit.MessageEditObjectQuick;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
-import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.quest.QuestVariable;
 import com.feed_the_beast.ftbquests.quest.task.QuestTask;
 import com.feed_the_beast.ftbquests.quest.task.QuestTaskType;
@@ -137,7 +133,7 @@ public class GuiQuestTree extends GuiBase
 
 		if (object instanceof QuestTask)
 		{
-			QuestTaskType type = QuestTaskType.getType(object.getClass());
+			QuestTaskType type = ((QuestTask) object).getType();
 			g = group1.getGroup(type.getRegistryName().getNamespace()).getGroup(type.getRegistryName().getPath());
 		}
 
@@ -204,14 +200,6 @@ public class GuiQuestTree extends GuiBase
 		contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), GuiIcons.REMOVE, () -> questFile.deleteObject(object.uid)).setYesNo(I18n.format("delete_item", object.getDisplayName().getFormattedText())));
 		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.reset_progress"), GuiIcons.REFRESH, () -> new MessageResetProgress(object.uid).sendToServer()).setYesNo(I18n.format("ftbquests.gui.reset_progress_q")));
 		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.complete_instantly"), QuestsTheme.COMPLETED, () -> new MessageCompleteInstantly(object.uid).sendToServer()).setYesNo(I18n.format("ftbquests.gui.complete_instantly_q")));
-		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.change_id"), GuiIcons.NOTES, () -> new GuiEditConfigValue("id", new ConfigString(object.id, QuestObjectBase.ID_PATTERN), (value, set) -> {
-			prevGui.openGui();
-
-			if (set)
-			{
-				new MessageChangeID(object.uid, value.getString()).sendToServer();
-			}
-		}).openGui()));
 	}
 
 	@Override
@@ -225,7 +213,7 @@ public class GuiQuestTree extends GuiBase
 		{
 			if (selectedChapter != null && !questFile.chapters.isEmpty())
 			{
-				selectChapter(questFile.chapters.get((selectedChapter.chapterIndex + 1) % questFile.chapters.size()));
+				selectChapter(questFile.chapters.get((selectedChapter.getIndex() + 1) % questFile.chapters.size()));
 				return true;
 			}
 		}

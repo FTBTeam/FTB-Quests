@@ -73,7 +73,7 @@ public class MessageEditObjectQuickResponse extends MessageToClient
 
 				if (object instanceof QuestTask)
 				{
-					QuestTaskType type = QuestTaskType.getType(object.getClass());
+					QuestTaskType type = ((QuestTask) object).getType();
 					g = group1.getGroup(type.getRegistryName().getNamespace()).getGroup(type.getRegistryName().getPath());
 				}
 

@@ -95,7 +95,7 @@ public class FTBQuestsWorldData implements IConfigCallback
 		if (ServerQuestFile.INSTANCE.fileVersion != ServerQuestFile.VERSION)
 		{
 			FTBQuests.LOGGER.info("File version changed " + ServerQuestFile.INSTANCE.fileVersion + " -> " + ServerQuestFile.VERSION);
-			ServerQuestFile.INSTANCE.save();
+			ServerQuestFile.INSTANCE.saveNow();
 		}
 	}
 

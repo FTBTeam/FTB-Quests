@@ -62,7 +62,7 @@ public class PanelQuestLeft extends Panel
 
 			List<String> dependencies = new ArrayList<>();
 
-			for (QuestObject object : treeGui.selectedQuest.getDependencies())
+			for (QuestObject object : treeGui.selectedQuest.dependencies)
 			{
 				if (object.getQuestChapter() != treeGui.selectedQuest.chapter)
 				{

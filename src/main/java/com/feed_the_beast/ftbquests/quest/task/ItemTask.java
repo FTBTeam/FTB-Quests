@@ -6,6 +6,9 @@ import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.IconAnimation;
 import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
+import com.feed_the_beast.ftblib.lib.io.Bits;
+import com.feed_the_beast.ftblib.lib.io.DataIn;
+import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.util.StringJoiner;
 import com.feed_the_beast.ftbquests.item.ItemMissing;
 import com.feed_the_beast.ftbquests.net.MessageSubmitItems;
@@ -52,6 +55,13 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 	{
 		super(quest);
 		items = new ArrayList<>();
+		checkOnly = quest.chapter.file.defaultCheckOnly;
+	}
+
+	@Override
+	public QuestTaskType getType()
+	{
+		return FTBQuestsTasks.ITEM;
 	}
 
 	@Override
@@ -63,6 +73,8 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 	@Override
 	public void writeData(NBTTagCompound nbt)
 	{
+		super.writeData(nbt);
+
 		if (items.size() == 1)
 		{
 			nbt.setTag("item", ItemMissing.write(items.get(0), false));
@@ -87,9 +99,9 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 			nbt.setLong("count", count);
 		}
 
-		if (checkOnly)
+		if (checkOnly != quest.chapter.file.defaultCheckOnly)
 		{
-			nbt.setBoolean("check_only", true);
+			nbt.setBoolean("check_only", checkOnly);
 		}
 
 		if (ignoreDamage)
@@ -106,6 +118,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 	@Override
 	public void readData(NBTTagCompound nbt)
 	{
+		super.readData(nbt);
 		NBTTagList list = nbt.getTagList("items", Constants.NBT.TAG_COMPOUND);
 
 		if (list.isEmpty())
@@ -137,9 +150,34 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 			count = 1;
 		}
 
-		checkOnly = nbt.getBoolean("check_only");
+		checkOnly = nbt.hasKey("check_only") ? nbt.getBoolean("check_only") : quest.chapter.file.defaultCheckOnly;
 		ignoreDamage = nbt.getBoolean("ignore_damage");
 		ignoreNBT = nbt.getBoolean("ignore_nbt");
+	}
+
+	@Override
+	public void writeNetData(DataOut data)
+	{
+		super.writeNetData(data);
+		data.writeCollection(items, DataOut.ITEM_STACK);
+		data.writeVarLong(count);
+		int flags = 0;
+		flags = Bits.setFlag(flags, 1, checkOnly);
+		flags = Bits.setFlag(flags, 2, ignoreDamage);
+		flags = Bits.setFlag(flags, 4, ignoreNBT);
+		data.writeVarInt(flags);
+	}
+
+	@Override
+	public void readNetData(DataIn data)
+	{
+		super.readNetData(data);
+		data.readCollection(items, DataIn.ITEM_STACK);
+		count = data.readVarLong();
+		int flags = data.readVarInt();
+		checkOnly = Bits.getFlag(flags, 1);
+		ignoreDamage = Bits.getFlag(flags, 2);
+		ignoreNBT = Bits.getFlag(flags, 4);
 	}
 
 	@Override

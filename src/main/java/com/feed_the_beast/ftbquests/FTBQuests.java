@@ -1,7 +1,6 @@
 package com.feed_the_beast.ftbquests;
 
 import com.feed_the_beast.ftblib.FTBLib;
-import com.feed_the_beast.ftblib.lib.OtherMods;
 import com.feed_the_beast.ftbquests.command.CommandFTBQuests;
 import com.feed_the_beast.ftbquests.gui.FTBQuestsGuiHandler;
 import com.feed_the_beast.ftbquests.integration.botania.BotaniaIntegration;
@@ -59,12 +58,12 @@ public class FTBQuests
 	{
 		FTBQuestsNetHandler.init();
 
-		if (Loader.isModLoaded(OtherMods.IC2))
+		if (Loader.isModLoaded("ic2"))
 		{
 			IC2Integration.preInit();
 		}
 
-		if (Loader.isModLoaded(OtherMods.BOTANIA))
+		if (Loader.isModLoaded("botania"))
 		{
 			BotaniaIntegration.preInit();
 		}

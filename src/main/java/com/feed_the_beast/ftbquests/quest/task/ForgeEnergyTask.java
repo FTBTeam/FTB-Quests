@@ -2,7 +2,8 @@ package com.feed_the_beast.ftbquests.quest.task;
 
 import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
-import com.feed_the_beast.ftblib.lib.icon.Icon;
+import com.feed_the_beast.ftblib.lib.io.DataIn;
+import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
@@ -30,8 +31,8 @@ import javax.annotation.Nullable;
  */
 public class ForgeEnergyTask extends QuestTask
 {
-	private static final ResourceLocation EMPTY_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "textures/tasks/fe_empty.png");
-	private static final ResourceLocation FULL_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "textures/tasks/fe_full.png");
+	public static final ResourceLocation EMPTY_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "textures/tasks/fe_empty.png");
+	public static final ResourceLocation FULL_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "textures/tasks/fe_full.png");
 
 	public long value;
 	public int maxInput;
@@ -39,6 +40,12 @@ public class ForgeEnergyTask extends QuestTask
 	public ForgeEnergyTask(Quest quest)
 	{
 		super(quest);
+	}
+
+	@Override
+	public QuestTaskType getType()
+	{
+		return FTBQuestsTasks.FORGE_ENERGY;
 	}
 
 	@Override
@@ -56,6 +63,7 @@ public class ForgeEnergyTask extends QuestTask
 	@Override
 	public void writeData(NBTTagCompound nbt)
 	{
+		super.writeData(nbt);
 		nbt.setLong("value", value);
 
 		if (maxInput != Integer.MAX_VALUE)
@@ -67,6 +75,7 @@ public class ForgeEnergyTask extends QuestTask
 	@Override
 	public void readData(NBTTagCompound nbt)
 	{
+		super.readData(nbt);
 		value = nbt.hasKey("value") ? nbt.getLong("value") : 10000L;
 
 		if (value < 1L)
@@ -83,9 +92,19 @@ public class ForgeEnergyTask extends QuestTask
 	}
 
 	@Override
-	public Icon getAltIcon()
+	public void writeNetData(DataOut data)
 	{
-		return Icon.getIcon(EMPTY_TEXTURE.toString()).combineWith(Icon.getIcon(FULL_TEXTURE.toString()));
+		super.writeNetData(data);
+		data.writeVarLong(value);
+		data.writeInt(maxInput);
+	}
+
+	@Override
+	public void readNetData(DataIn data)
+	{
+		super.readNetData(data);
+		value = data.readVarLong();
+		maxInput = data.readInt();
 	}
 
 	@Override

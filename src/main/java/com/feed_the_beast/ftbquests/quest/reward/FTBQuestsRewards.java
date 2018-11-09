@@ -1,0 +1,12 @@
+package com.feed_the_beast.ftbquests.quest.reward;
+
+/**
+ * @author LatvianModder
+ */
+public class FTBQuestsRewards
+{
+	public static QuestRewardType ITEM;
+	public static QuestRewardType XP;
+	public static QuestRewardType XP_LEVELS;
+	public static QuestRewardType COMMAND;
+}

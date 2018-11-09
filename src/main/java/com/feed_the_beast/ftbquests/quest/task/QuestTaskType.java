@@ -1,46 +1,46 @@
 package com.feed_the_beast.ftbquests.quest.task;
 
+import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
+import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
+import com.feed_the_beast.ftblib.lib.gui.IOpenableGui;
+import com.feed_the_beast.ftblib.lib.gui.misc.GuiEditConfig;
+import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftbquests.FTBQuests;
+import com.feed_the_beast.ftbquests.net.edit.MessageCreateObject;
 import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.quest.QuestObjectType;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.registries.IForgeRegistry;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.registries.ForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import net.minecraftforge.registries.RegistryBuilder;
 
 import javax.annotation.Nullable;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author LatvianModder
  */
 public final class QuestTaskType extends IForgeRegistryEntry.Impl<QuestTaskType>
 {
-	private static IForgeRegistry<QuestTaskType> REGISTRY;
-	private static Map<Class, QuestTaskType> TYPE_MAP;
+	private static ForgeRegistry<QuestTaskType> REGISTRY;
 
 	public static void createRegistry()
 	{
 		if (REGISTRY == null)
 		{
 			ResourceLocation registryName = new ResourceLocation(FTBQuests.MOD_ID, "tasks");
-			REGISTRY = new RegistryBuilder<QuestTaskType>().setType(QuestTaskType.class).setName(registryName).create();
+			REGISTRY = (ForgeRegistry<QuestTaskType>) new RegistryBuilder<QuestTaskType>().setType(QuestTaskType.class).setName(registryName).create();
 			MinecraftForge.EVENT_BUS.post(new RegistryEvent.Register<>(registryName, REGISTRY));
-
-			TYPE_MAP = new HashMap<>();
-
-			for (QuestTaskType type : REGISTRY)
-			{
-				TYPE_MAP.put(type.typeClass, type);
-			}
 		}
 	}
 
-	public static IForgeRegistry<QuestTaskType> getRegistry()
+	public static ForgeRegistry<QuestTaskType> getRegistry()
 	{
 		return REGISTRY;
 	}
@@ -74,27 +74,58 @@ public final class QuestTaskType extends IForgeRegistryEntry.Impl<QuestTaskType>
 		return task;
 	}
 
-	@Nullable
-	public static QuestTaskType getType(Class clazz)
-	{
-		return TYPE_MAP.get(clazz);
-	}
-
+	@FunctionalInterface
 	public interface Provider
 	{
 		@Nullable
 		QuestTask create(Quest quest);
 	}
 
+	public interface GuiProvider
+	{
+		@SideOnly(Side.CLIENT)
+		void openCreationGui(IOpenableGui gui, Quest quest);
+	}
+
 	public final Class typeClass;
 	public final Provider provider;
 	private ITextComponent displayName;
+	private Icon icon;
+	private GuiProvider guiProvider;
 
 	public QuestTaskType(Class<? extends QuestTask> c, Provider p)
 	{
 		typeClass = c;
 		provider = p;
 		displayName = null;
+		icon = GuiIcons.ACCEPT;
+		guiProvider = new GuiProvider()
+		{
+			@Override
+			@SideOnly(Side.CLIENT)
+			public void openCreationGui(IOpenableGui gui, Quest quest)
+			{
+				QuestTask task = provider.create(quest);
+
+				if (task == null)
+				{
+					return;
+				}
+
+				ConfigGroup group = ConfigGroup.newGroup(FTBQuests.MOD_ID);
+				ConfigGroup g = group.getGroup("task").getGroup(getRegistryName().getNamespace()).getGroup(getRegistryName().getPath());
+
+				task.getConfig(g);
+				task.getExtraConfig(g);
+
+				new GuiEditConfig(group, (g1, sender) -> {
+					NBTTagCompound nbt = new NBTTagCompound();
+					task.writeData(nbt);
+					nbt.setString("type", getTypeForNBT());
+					new MessageCreateObject(QuestObjectType.TASK, quest.uid, nbt).sendToServer();
+				}).openGui();
+			}
+		};
 	}
 
 	public String getTypeForNBT()
@@ -117,5 +148,27 @@ public final class QuestTaskType extends IForgeRegistryEntry.Impl<QuestTaskType>
 
 		ResourceLocation id = getRegistryName();
 		return new TextComponentTranslation("ftbquests.task." + id.getNamespace() + '.' + id.getPath());
+	}
+
+	public QuestTaskType setIcon(Icon i)
+	{
+		icon = i;
+		return this;
+	}
+
+	public Icon getIcon()
+	{
+		return icon;
+	}
+
+	public QuestTaskType setGuiProvider(GuiProvider p)
+	{
+		guiProvider = p;
+		return this;
+	}
+
+	public GuiProvider getGuiProvider()
+	{
+		return guiProvider;
 	}
 }

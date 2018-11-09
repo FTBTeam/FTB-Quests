@@ -4,7 +4,8 @@ import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftblib.lib.config.ConfigFluid;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigNBT;
-import com.feed_the_beast.ftblib.lib.icon.Icon;
+import com.feed_the_beast.ftblib.lib.io.DataIn;
+import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
@@ -43,7 +44,7 @@ import javax.annotation.Nullable;
  */
 public class FluidTask extends QuestTask
 {
-	private static final ResourceLocation TANK_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "textures/tasks/tank.png");
+	public static final ResourceLocation TANK_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "textures/tasks/tank.png");
 
 	public Fluid fluid;
 	public NBTTagCompound fluidNBT;
@@ -53,6 +54,12 @@ public class FluidTask extends QuestTask
 	{
 		super(quest);
 		fluid = FluidRegistry.WATER;
+	}
+
+	@Override
+	public QuestTaskType getType()
+	{
+		return FTBQuestsTasks.FLUID;
 	}
 
 	@Override
@@ -70,6 +77,7 @@ public class FluidTask extends QuestTask
 	@Override
 	public void writeData(NBTTagCompound nbt)
 	{
+		super.writeData(nbt);
 		nbt.setString("fluid", fluid.getName());
 
 		if (amount != 1000)
@@ -86,6 +94,8 @@ public class FluidTask extends QuestTask
 	@Override
 	public void readData(NBTTagCompound nbt)
 	{
+		super.readData(nbt);
+
 		fluid = FluidRegistry.getFluid(nbt.getString("fluid"));
 
 		if (fluid == null)
@@ -103,9 +113,27 @@ public class FluidTask extends QuestTask
 	}
 
 	@Override
-	public Icon getAltIcon()
+	public void writeNetData(DataOut data)
 	{
-		return Icon.getIcon(fluid.getStill(createFluidStack(Fluid.BUCKET_VOLUME)).toString()).combineWith(Icon.getIcon(TANK_TEXTURE.toString()));
+		super.writeNetData(data);
+		data.writeString(fluid.getName());
+		data.writeNBT(fluidNBT);
+		data.writeVarLong(amount);
+	}
+
+	@Override
+	public void readNetData(DataIn data)
+	{
+		super.readNetData(data);
+		fluid = FluidRegistry.getFluid(data.readString());
+
+		if (fluid == null)
+		{
+			fluid = FluidRegistry.WATER;
+		}
+
+		fluidNBT = data.readNBT();
+		amount = data.readVarLong();
 	}
 
 	public FluidStack createFluidStack(int amount)

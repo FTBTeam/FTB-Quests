@@ -15,7 +15,8 @@ public enum QuestObjectType implements IStringSerializable
 	CHAPTER("chapter", 2, TextFormatting.GOLD),
 	QUEST("quest", 4, TextFormatting.GREEN),
 	TASK("task", 8, TextFormatting.BLUE),
-	VARIABLE("variable", 16, TextFormatting.DARK_PURPLE);
+	VARIABLE("variable", 16, TextFormatting.DARK_PURPLE),
+	NULL("null", 128, TextFormatting.BLACK);
 
 	public static final QuestObjectType[] VALUES = values();
 	public static final List<QuestObjectType> ALL = Arrays.asList(VALUES);

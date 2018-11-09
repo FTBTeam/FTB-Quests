@@ -1,6 +1,5 @@
 package com.feed_the_beast.ftbquests.quest.task;
 
-import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftbquests.events.ObjectCompletedEvent;
 import com.feed_the_beast.ftbquests.net.MessageSubmitItems;
@@ -13,7 +12,6 @@ import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.tile.TileScreenCore;
 import com.feed_the_beast.ftbquests.tile.TileScreenPart;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
@@ -35,11 +33,7 @@ public abstract class QuestTask extends QuestObject
 		quest = q;
 	}
 
-	@Override
-	public abstract void writeData(NBTTagCompound nbt);
-
-	@Override
-	public abstract void readData(NBTTagCompound nbt);
+	public abstract QuestTaskType getType();
 
 	public abstract QuestTaskData createData(ITeamData data);
 
@@ -62,6 +56,7 @@ public abstract class QuestTask extends QuestObject
 	}
 
 	@Override
+	@Deprecated
 	public final String getID()
 	{
 		return quest.chapter.id + ':' + quest.id + ':' + id;
@@ -156,9 +151,15 @@ public abstract class QuestTask extends QuestObject
 	}
 
 	@Override
+	public Icon getAltIcon()
+	{
+		return getType().getIcon();
+	}
+
+	@Override
 	public ITextComponent getAltDisplayName()
 	{
-		return QuestTaskType.getType(getClass()).getDisplayName();
+		return getType().getDisplayName();
 	}
 
 	public Class<? extends TileScreenCore> getScreenCoreClass()
@@ -198,11 +199,6 @@ public abstract class QuestTask extends QuestObject
 		return false;
 	}
 
-	@Override
-	public Icon getAltIcon()
-	{
-		return GuiIcons.ACCEPT;
-	}
 
 	public boolean hideProgressNumbers()
 	{

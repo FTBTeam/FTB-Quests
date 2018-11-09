@@ -1,6 +1,8 @@
 package com.feed_the_beast.ftbquests.quest;
 
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
+import com.feed_the_beast.ftblib.lib.io.DataIn;
+import com.feed_the_beast.ftblib.lib.io.DataOut;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -19,15 +21,9 @@ public abstract class QuestObject extends QuestObjectBase
 	public abstract String getID();
 
 	@Override
-	public abstract void writeData(NBTTagCompound nbt);
-
-	@Override
-	public abstract void readData(NBTTagCompound nbt);
-
-	@Override
-	public final void writeCommonData(NBTTagCompound nbt)
+	public void writeData(NBTTagCompound nbt)
 	{
-		super.writeCommonData(nbt);
+		super.writeData(nbt);
 
 		if (!completionCommand.isEmpty())
 		{
@@ -36,25 +32,24 @@ public abstract class QuestObject extends QuestObjectBase
 	}
 
 	@Override
-	public final void readCommonData(NBTTagCompound nbt)
+	public void readData(NBTTagCompound nbt)
 	{
-		super.readCommonData(nbt);
-
-		if (getObjectType() == QuestObjectType.FILE)
-		{
-			id = "*";
-		}
-		else
-		{
-			id = nbt.getString("id").trim();
-
-			if (id.isEmpty() || getQuestFile().get(getID()) != null)
-			{
-				id = String.format("%08x", uid);
-			}
-		}
-
+		super.readData(nbt);
 		completionCommand = nbt.getString("completion_command");
+	}
+
+	@Override
+	public void writeNetData(DataOut data)
+	{
+		super.writeNetData(data);
+		//data.writeString(completionCommand);
+	}
+
+	@Override
+	public void readNetData(DataIn data)
+	{
+		super.readNetData(data);
+		//completionCommand = data.readString();
 	}
 
 	public abstract long getProgress(ITeamData data);
@@ -87,8 +82,9 @@ public abstract class QuestObject extends QuestObjectBase
 		{
 			ServerQuestFile.INSTANCE.universe.server.commandManager.executeCommand(ServerQuestFile.INSTANCE.universe.server, completionCommand
 					.replace("@team", data.getTeamID())
-					.replace("@id", getID())
-					.replace("@idn", getID().replace(':', '_')));
+					.replace("@teamuid", String.format("%04X", data.getTeamUID()))
+					.replace("@id", toString())
+			);
 		}
 	}
 
@@ -99,6 +95,6 @@ public abstract class QuestObject extends QuestObjectBase
 	public final void getExtraConfig(ConfigGroup config)
 	{
 		super.getExtraConfig(config);
-		config.addString("completion_command", () -> completionCommand, v -> completionCommand = v, "").setDisplayName(new TextComponentTranslation("ftbquests.completion_command")).setOrder((byte) 150);
+		config.addString("completion_command", () -> completionCommand, v -> completionCommand = v, "").setDisplayName(new TextComponentTranslation("ftbquests.completion_command")).setOrder(150);
 	}
 }

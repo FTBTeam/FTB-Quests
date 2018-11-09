@@ -2,13 +2,17 @@ package com.feed_the_beast.ftbquests.block;
 
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.quest.QuestFile;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockHorizontal;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTBase;
+import net.minecraft.nbt.NBTPrimitive;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagString;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -55,19 +59,24 @@ public class ItemBlockScreen extends ItemBlock
 		}
 
 		BlockScreen.currentTask = null;
-		Quest quest = FTBQuests.PROXY.getQuestFile(world).getQuest(nbt == null ? "" : nbt.getString("Quest"));
+		QuestFile file = FTBQuests.PROXY.getQuestFile(world);
+		Quest quest = file.getQuest(file.getID(nbt == null ? null : nbt.getTag("Quest")));
 
 		if (quest != null && !quest.tasks.isEmpty())
 		{
-			String task = nbt == null ? "" : nbt.getString("Task");
+			NBTBase task = nbt == null ? null : nbt.getTag("Task");
 
-			if (task.isEmpty())
+			if (task == null || task.isEmpty())
 			{
 				BlockScreen.currentTask = quest.tasks.get(0);
 			}
-			else
+			else if (task instanceof NBTTagString)
 			{
-				BlockScreen.currentTask = quest.chapter.file.getTask(quest.getID() + ':' + task);
+				BlockScreen.currentTask = file.getTask(file.getID(quest.getID() + ':' + task));
+			}
+			else if (task instanceof NBTPrimitive)
+			{
+				BlockScreen.currentTask = file.getTask(((NBTPrimitive) task).getInt());
 			}
 		}
 

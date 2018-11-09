@@ -64,7 +64,7 @@ public class MessageEditDependencyResponse extends MessageToClient
 			{
 				QuestObject o = ClientQuestFile.INSTANCE.get(object);
 
-				if (o != null && (add ? q.dependencies.add(o.getID()) : q.dependencies.remove(o.getID())))
+				if (o != null && (add ? q.dependencies.add(o) : q.dependencies.remove(o)))
 				{
 					q.clearCachedData();
 					q.verifyDependencies();

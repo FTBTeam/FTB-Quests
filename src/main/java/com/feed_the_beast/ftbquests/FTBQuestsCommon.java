@@ -22,4 +22,12 @@ public class FTBQuestsCommon
 	{
 		return ServerQuestFile.INSTANCE;
 	}
+
+	public void setTaskGuiProviders()
+	{
+	}
+
+	public void setRewardGuiProviders()
+	{
+	}
 }

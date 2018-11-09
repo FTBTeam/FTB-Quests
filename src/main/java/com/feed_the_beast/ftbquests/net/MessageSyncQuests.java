@@ -5,9 +5,9 @@ import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToClient;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
+import com.feed_the_beast.ftbquests.quest.QuestFile;
 import it.unimi.dsi.fastutil.ints.IntCollection;
 import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -21,8 +21,9 @@ public class MessageSyncQuests extends MessageToClient
 	public static class TeamInst
 	{
 		public static final DataOut.Serializer<TeamInst> SERIALIZER = (data, t) -> {
+			data.writeShort(t.uid);
 			data.writeString(t.name);
-			data.writeInt(t.taskKeys.length);
+			data.writeVarInt(t.taskKeys.length);
 
 			for (int i = 0; i < t.taskKeys.length; i++)
 			{
@@ -30,19 +31,20 @@ public class MessageSyncQuests extends MessageToClient
 				data.writeNBTBase(t.taskValues[i]);
 			}
 
-			data.writeShort(t.variableKeys.length);
+			data.writeVarInt(t.variableKeys.length);
 
 			for (int i = 0; i < t.variableKeys.length; i++)
 			{
-				data.writeShort(t.variableKeys[i]);
-				data.writeLong(t.variableValues[i]);
+				data.writeInt(t.variableKeys[i]);
+				data.writeVarLong(t.variableValues[i]);
 			}
 		};
 
 		public static final DataIn.Deserializer<TeamInst> DESERIALIZER = data -> {
 			TeamInst t = new TeamInst();
+			t.uid = data.readShort();
 			t.name = data.readString();
-			t.taskKeys = new int[data.readInt()];
+			t.taskKeys = new int[data.readVarInt()];
 			t.taskValues = new NBTBase[t.taskKeys.length];
 
 			for (int i = 0; i < t.taskKeys.length; i++)
@@ -51,27 +53,28 @@ public class MessageSyncQuests extends MessageToClient
 				t.taskValues[i] = data.readNBTBase();
 			}
 
-			t.variableKeys = new short[data.readUnsignedShort()];
+			t.variableKeys = new int[data.readVarInt()];
 			t.variableValues = new long[t.variableKeys.length];
 
 			for (int i = 0; i < t.variableKeys.length; i++)
 			{
-				t.variableKeys[i] = data.readShort();
-				t.variableValues[i] = data.readLong();
+				t.variableKeys[i] = data.readInt();
+				t.variableValues[i] = data.readVarLong();
 			}
 
 			return t;
 		};
 
+		public short uid;
 		public String name;
 		public int[] taskKeys;
 		public NBTBase[] taskValues;
-		public short[] variableKeys;
+		public int[] variableKeys;
 		public long[] variableValues;
 	}
 
-	public NBTTagCompound quests;
-	public String team;
+	public QuestFile file;
+	public short team;
 	public Collection<TeamInst> teamData;
 	public boolean editingMode;
 	public IntCollection rewards;
@@ -80,9 +83,9 @@ public class MessageSyncQuests extends MessageToClient
 	{
 	}
 
-	public MessageSyncQuests(NBTTagCompound n, String t, Collection<TeamInst> td, boolean e, IntCollection r)
+	public MessageSyncQuests(QuestFile f, short t, Collection<TeamInst> td, boolean e, IntCollection r)
 	{
-		quests = n;
+		file = f;
 		team = t;
 		teamData = td;
 		editingMode = e;
@@ -98,8 +101,8 @@ public class MessageSyncQuests extends MessageToClient
 	@Override
 	public void writeData(DataOut data)
 	{
-		data.writeNBT(quests);
-		data.writeString(team);
+		file.writeNetDataFull(data);
+		data.writeShort(team);
 		data.writeCollection(teamData, TeamInst.SERIALIZER);
 		data.writeBoolean(editingMode);
 		data.writeIntList(rewards);
@@ -108,8 +111,9 @@ public class MessageSyncQuests extends MessageToClient
 	@Override
 	public void readData(DataIn data)
 	{
-		quests = data.readNBT();
-		team = data.readString();
+		file = new ClientQuestFile();
+		file.readNetDataFull(data);
+		team = data.readShort();
 		teamData = data.readCollection(TeamInst.DESERIALIZER);
 		editingMode = data.readBoolean();
 		rewards = data.readIntList();
@@ -119,12 +123,6 @@ public class MessageSyncQuests extends MessageToClient
 	@SideOnly(Side.CLIENT)
 	public void onMessage()
 	{
-		if (ClientQuestFile.INSTANCE != null)
-		{
-			ClientQuestFile.INSTANCE.deleteChildren();
-			ClientQuestFile.INSTANCE.deleteSelf();
-		}
-
-		ClientQuestFile.INSTANCE = new ClientQuestFile(this);
+		((ClientQuestFile) file).load(this);
 	}
 }

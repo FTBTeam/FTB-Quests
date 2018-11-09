@@ -66,7 +66,7 @@ public class CommandChangeTeamRewards extends CommandBase
 
 			for (QuestChapter chapter : ServerQuestFile.INSTANCE.chapters)
 			{
-				list.add(chapter.getID());
+				list.add(chapter.toString());
 			}
 
 			list.sort(null);
@@ -92,7 +92,7 @@ public class CommandChangeTeamRewards extends CommandBase
 		}
 		else
 		{
-			QuestChapter chapter = ServerQuestFile.INSTANCE.getChapter(args[0]);
+			QuestChapter chapter = ServerQuestFile.INSTANCE.getChapter(ServerQuestFile.INSTANCE.getID(args[0]));
 
 			if (chapter == null)
 			{

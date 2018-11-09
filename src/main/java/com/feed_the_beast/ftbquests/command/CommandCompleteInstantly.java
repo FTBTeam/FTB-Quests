@@ -89,7 +89,7 @@ public class CommandCompleteInstantly extends CommandBase
 			teams = Collections.singleton(team);
 		}
 
-		QuestObject object = args.length == 1 ? ServerQuestFile.INSTANCE : ServerQuestFile.INSTANCE.get(args[1]);
+		QuestObject object = args.length == 1 ? ServerQuestFile.INSTANCE : ServerQuestFile.INSTANCE.get(ServerQuestFile.INSTANCE.getID(args[1]));
 
 		if (object == null)
 		{

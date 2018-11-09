@@ -1,6 +1,7 @@
 package com.feed_the_beast.ftbquests;
 
 import com.feed_the_beast.ftblib.events.FTBLibPreInitRegistryEvent;
+import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftbquests.block.BlockProgressDetector;
 import com.feed_the_beast.ftbquests.block.BlockProgressScreen;
 import com.feed_the_beast.ftbquests.block.BlockProgressScreenPart;
@@ -15,10 +16,12 @@ import com.feed_the_beast.ftbquests.item.ItemMissing;
 import com.feed_the_beast.ftbquests.item.ItemQuestBook;
 import com.feed_the_beast.ftbquests.item.LootRarity;
 import com.feed_the_beast.ftbquests.quest.reward.CommandReward;
+import com.feed_the_beast.ftbquests.quest.reward.FTBQuestsRewards;
 import com.feed_the_beast.ftbquests.quest.reward.ItemReward;
 import com.feed_the_beast.ftbquests.quest.reward.QuestRewardType;
 import com.feed_the_beast.ftbquests.quest.reward.XPLevelsReward;
 import com.feed_the_beast.ftbquests.quest.reward.XPReward;
+import com.feed_the_beast.ftbquests.quest.task.FTBQuestsTasks;
 import com.feed_the_beast.ftbquests.quest.task.FluidTask;
 import com.feed_the_beast.ftbquests.quest.task.ForgeEnergyTask;
 import com.feed_the_beast.ftbquests.quest.task.ItemTask;
@@ -35,6 +38,9 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.fluids.Fluid;
+import net.minecraftforge.fluids.FluidRegistry;
+import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry;
@@ -105,27 +111,31 @@ public class FTBQuestsEventHandler
 	@SubscribeEvent
 	public static void registerFTBLib(FTBLibPreInitRegistryEvent event)
 	{
-		event.getRegistry().registerConfigValueProvider(ConfigQuestObject.QO_ID, () -> new ConfigQuestObject("", Collections.emptyList()));
+		event.getRegistry().registerConfigValueProvider(ConfigQuestObject.ID, () -> new ConfigQuestObject(null, null, Collections.emptyList()));
 	}
 
 	@SubscribeEvent
 	public static void registerTasks(RegistryEvent.Register<QuestTaskType> event)
 	{
 		event.getRegistry().registerAll(
-				new QuestTaskType(ItemTask.class, ItemTask::new).setRegistryName("item"),
-				new QuestTaskType(FluidTask.class, FluidTask::new).setRegistryName("fluid"),
-				new QuestTaskType(ForgeEnergyTask.class, ForgeEnergyTask::new).setRegistryName("forge_energy")
+				FTBQuestsTasks.ITEM = new QuestTaskType(ItemTask.class, ItemTask::new).setRegistryName("item").setIcon(Icon.getIcon("minecraft:items/diamond")),
+				FTBQuestsTasks.FLUID = new QuestTaskType(FluidTask.class, FluidTask::new).setRegistryName("fluid").setIcon(Icon.getIcon(FluidRegistry.WATER.getStill(new FluidStack(FluidRegistry.WATER, Fluid.BUCKET_VOLUME)).toString()).combineWith(Icon.getIcon(FluidTask.TANK_TEXTURE.toString()))),
+				FTBQuestsTasks.FORGE_ENERGY = new QuestTaskType(ForgeEnergyTask.class, ForgeEnergyTask::new).setRegistryName("forge_energy").setIcon(Icon.getIcon(ForgeEnergyTask.EMPTY_TEXTURE.toString()).combineWith(Icon.getIcon(ForgeEnergyTask.FULL_TEXTURE.toString())))
 		);
+
+		FTBQuests.PROXY.setTaskGuiProviders();
 	}
 
 	@SubscribeEvent
 	public static void registerRewards(RegistryEvent.Register<QuestRewardType> event)
 	{
 		event.getRegistry().registerAll(
-				new QuestRewardType(ItemReward.class, ItemReward::new).setRegistryName("item"),
-				new QuestRewardType(XPReward.class, XPReward::new).setRegistryName("xp"),
-				new QuestRewardType(XPLevelsReward.class, XPLevelsReward::new).setRegistryName("xp_levels"),
-				new QuestRewardType(CommandReward.class, CommandReward::new).setRegistryName("command")
+				FTBQuestsRewards.ITEM = new QuestRewardType(ItemReward.class, ItemReward::new).setRegistryName("item").setIcon(Icon.getIcon("minecraft:items/diamond")),
+				FTBQuestsRewards.XP = new QuestRewardType(XPReward.class, XPReward::new).setRegistryName("xp"),
+				FTBQuestsRewards.XP_LEVELS = new QuestRewardType(XPLevelsReward.class, XPLevelsReward::new).setRegistryName("xp_levels"),
+				FTBQuestsRewards.COMMAND = new QuestRewardType(CommandReward.class, CommandReward::new).setRegistryName("command")
 		);
+
+		FTBQuests.PROXY.setRewardGuiProviders();
 	}
 }

@@ -15,14 +15,16 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  */
 public class MessageCreateTeamData extends MessageToClient
 {
-	public String team;
+	private short uid;
+	private String team;
 
 	public MessageCreateTeamData()
 	{
 	}
 
-	public MessageCreateTeamData(String t)
+	public MessageCreateTeamData(short id, String t)
 	{
+		uid = id;
 		team = t;
 	}
 
@@ -35,12 +37,14 @@ public class MessageCreateTeamData extends MessageToClient
 	@Override
 	public void writeData(DataOut data)
 	{
+		data.writeShort(uid);
 		data.writeString(team);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
+		uid = data.readShort();
 		team = data.readString();
 	}
 
@@ -50,14 +54,14 @@ public class MessageCreateTeamData extends MessageToClient
 	{
 		if (ClientQuestFile.exists())
 		{
-			ClientQuestProgress data = new ClientQuestProgress(team);
+			ClientQuestProgress data = new ClientQuestProgress(team, uid);
 
 			for (QuestTask task : ClientQuestFile.INSTANCE.allTasks)
 			{
 				data.createTaskData(task);
 			}
 
-			ClientQuestFile.INSTANCE.teamData.put(data.getTeamID(), data);
+			ClientQuestFile.INSTANCE.addData(data);
 		}
 	}
 }

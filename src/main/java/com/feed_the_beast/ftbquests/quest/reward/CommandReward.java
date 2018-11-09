@@ -3,6 +3,8 @@ package com.feed_the_beast.ftbquests.quest.reward;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
+import com.feed_the_beast.ftblib.lib.io.DataIn;
+import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
@@ -26,6 +28,12 @@ public class CommandReward extends QuestReward
 	}
 
 	@Override
+	public QuestRewardType getType()
+	{
+		return FTBQuestsRewards.COMMAND;
+	}
+
+	@Override
 	public void writeData(NBTTagCompound nbt)
 	{
 		nbt.setString("command", command);
@@ -35,6 +43,20 @@ public class CommandReward extends QuestReward
 	public void readData(NBTTagCompound nbt)
 	{
 		command = nbt.getString("command");
+	}
+
+	@Override
+	public void writeNetData(DataOut data)
+	{
+		super.writeNetData(data);
+		data.writeString(command);
+	}
+
+	@Override
+	public void readNetData(DataIn data)
+	{
+		super.readNetData(data);
+		command = data.readString();
 	}
 
 	@Override
@@ -52,8 +74,8 @@ public class CommandReward extends QuestReward
 				.replace("@x", Integer.toString(pos.getX()))
 				.replace("@y", Integer.toString(pos.getY()))
 				.replace("@z", Integer.toString(pos.getZ()))
-				.replace("@chapter", quest.chapter.id)
-				.replace("@quest", quest.id)
+				.replace("@chapter", quest.chapter.toString())
+				.replace("@quest", quest.toString())
 				.replace("@team", FTBLibAPI.getTeam(player.getUniqueID())));
 	}
 
