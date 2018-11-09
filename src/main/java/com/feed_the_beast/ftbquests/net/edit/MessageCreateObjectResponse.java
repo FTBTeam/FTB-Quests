@@ -17,6 +17,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class MessageCreateObjectResponse extends MessageToClient
 {
 	private QuestObjectType type;
+	private int id;
 	private int parent;
 	private NBTTagCompound nbt;
 
@@ -24,9 +25,10 @@ public class MessageCreateObjectResponse extends MessageToClient
 	{
 	}
 
-	public MessageCreateObjectResponse(QuestObjectType t, int p, NBTTagCompound n)
+	public MessageCreateObjectResponse(QuestObjectType t, int i, int p, NBTTagCompound n)
 	{
 		type = t;
+		id = i;
 		parent = p;
 		nbt = n;
 	}
@@ -41,6 +43,7 @@ public class MessageCreateObjectResponse extends MessageToClient
 	public void writeData(DataOut data)
 	{
 		data.writeByte(type.ordinal());
+		data.writeInt(id);
 		data.writeInt(parent);
 		data.writeNBT(nbt);
 	}
@@ -49,6 +52,7 @@ public class MessageCreateObjectResponse extends MessageToClient
 	public void readData(DataIn data)
 	{
 		type = QuestObjectType.VALUES[data.readUnsignedByte()];
+		id = data.readInt();
 		parent = data.readInt();
 		nbt = data.readNBT();
 	}
@@ -63,7 +67,8 @@ public class MessageCreateObjectResponse extends MessageToClient
 
 			if (object != null)
 			{
-				object.readCommonData(nbt);
+				object.uid = id;
+				object.id = object.getCodeString();
 				object.readData(nbt);
 				object.onCreated();
 				ClientQuestFile.INSTANCE.refreshIDMap();

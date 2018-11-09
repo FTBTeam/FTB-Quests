@@ -62,18 +62,15 @@ public class MessageCreateObject extends MessageToServer
 
 			if (object != null)
 			{
-				nbt.setInteger("uid", ServerQuestFile.INSTANCE.readID(0));
-				object.readCommonData(nbt);
 				object.readData(nbt);
+				object.uid = ServerQuestFile.INSTANCE.readID(0);
+				object.id = object.getCodeString();
 				object.onCreated();
 				ServerQuestFile.INSTANCE.refreshIDMap();
 				ServerQuestFile.INSTANCE.clearCachedData();
 				NBTTagCompound nbt1 = new NBTTagCompound();
 				object.writeData(nbt1);
-				object.writeCommonData(nbt1);
-				nbt1.setString("id", object.id);
-				nbt1.setInteger("uid", object.uid);
-				new MessageCreateObjectResponse(type, parent, nbt1).sendToAll();
+				new MessageCreateObjectResponse(type, object.uid, parent, nbt1).sendToAll();
 				ServerQuestFile.INSTANCE.save();
 			}
 		}

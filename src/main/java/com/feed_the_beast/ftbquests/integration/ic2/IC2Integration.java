@@ -1,6 +1,7 @@
 package com.feed_the_beast.ftbquests.integration.ic2;
 
 import com.feed_the_beast.ftbquests.FTBQuests;
+import com.feed_the_beast.ftbquests.quest.task.FTBQuestsTasks;
 import com.feed_the_beast.ftbquests.quest.task.QuestTaskType;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
@@ -23,6 +24,6 @@ public class IC2Integration
 	@SubscribeEvent
 	public static void registerTasks(RegistryEvent.Register<QuestTaskType> event)
 	{
-		event.getRegistry().register(new QuestTaskType(IC2EnergyTask.class, IC2EnergyTask::new).setRegistryName("ic2_energy"));
+		event.getRegistry().register(FTBQuestsTasks.IC2_ENERGY = new QuestTaskType(IC2EnergyTask.class, IC2EnergyTask::new).setRegistryName("ic2_energy"));
 	}
 }

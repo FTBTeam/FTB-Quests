@@ -4,18 +4,18 @@ import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigString;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.IconAnimation;
+import com.feed_the_beast.ftblib.lib.io.DataIn;
+import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.util.ListUtils;
 import com.feed_the_beast.ftbquests.events.ObjectCompletedEvent;
-import com.feed_the_beast.ftbquests.item.ItemMissing;
-import com.feed_the_beast.ftbquests.quest.reward.ItemReward;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
-import com.feed_the_beast.ftbquests.quest.reward.QuestRewardType;
-import com.feed_the_beast.ftbquests.quest.task.ItemTask;
 import com.feed_the_beast.ftbquests.quest.task.QuestTask;
-import com.feed_the_beast.ftbquests.quest.task.QuestTaskType;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagIntArray;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
 import net.minecraft.util.math.MathHelper;
@@ -26,8 +26,6 @@ import net.minecraftforge.common.util.Constants;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -46,12 +44,10 @@ public final class Quest extends QuestObject
 	public byte x, y;
 	public EnumQuestShape shape;
 	public final List<String> text;
-	public final Set<String> dependencies;
+	public final Set<QuestObject> dependencies;
 	public boolean canRepeat;
 	public final List<QuestTask> tasks;
 	public final List<QuestReward> rewards;
-
-	private Set<QuestObject> cachedDependencies = null;
 
 	public Quest(QuestChapter c)
 	{
@@ -61,11 +57,11 @@ public final class Quest extends QuestObject
 		x = 0;
 		y = 0;
 		shape = EnumQuestShape.CIRCLE;
-		text = new ArrayList<>();
+		text = new ObjectArrayList<>();
 		canRepeat = false;
-		dependencies = new HashSet<>();
-		tasks = new ArrayList<>();
-		rewards = new ArrayList<>();
+		dependencies = new ObjectOpenHashSet<>();
+		tasks = new ObjectArrayList<>();
+		rewards = new ObjectArrayList<>();
 	}
 
 	@Override
@@ -87,6 +83,7 @@ public final class Quest extends QuestObject
 	}
 
 	@Override
+	@Deprecated
 	public String getID()
 	{
 		return chapter.id + ':' + id;
@@ -95,7 +92,7 @@ public final class Quest extends QuestObject
 	@Override
 	public void writeData(NBTTagCompound nbt)
 	{
-		writeCommonData(nbt);
+		super.writeData(nbt);
 
 		if (visibilityType != EnumQuestVisibilityType.NORMAL)
 		{
@@ -139,94 +136,26 @@ public final class Quest extends QuestObject
 			nbt.setBoolean("can_repeat", true);
 		}
 
-		if (!getDependencies().isEmpty())
+		dependencies.removeIf(QuestObjectBase.PREDICATE_INVALID);
+
+		if (!dependencies.isEmpty())
 		{
-			NBTTagList array = new NBTTagList();
-
-			for (QuestObject object : getDependencies())
+			if (dependencies.size() == 1)
 			{
-				if (!object.invalid)
+				nbt.setInteger("dependency", dependencies.iterator().next().uid);
+			}
+			else
+			{
+				int[] ai = new int[dependencies.size()];
+				int i = 0;
+
+				for (QuestObject object : dependencies)
 				{
-					array.appendTag(new NBTTagString(object.getID()));
+					ai[i] = object.uid;
+					i++;
 				}
-			}
 
-			if (array.tagCount() == 1)
-			{
-				nbt.setTag("dependency", array.get(0));
-			}
-			else if (!array.isEmpty())
-			{
-				nbt.setTag("dependencies", array);
-			}
-		}
-
-		if (!tasks.isEmpty())
-		{
-			NBTTagList array = new NBTTagList();
-
-			for (QuestTask task : tasks)
-			{
-				QuestTaskType type = QuestTaskType.getType(task.getClass());
-
-				if (type != null)
-				{
-					NBTTagCompound nbt1 = new NBTTagCompound();
-					task.writeData(nbt1);
-					nbt1.setString("id", task.id);
-					nbt1.setInteger("uid", task.uid);
-
-					if (task.getClass() != ItemTask.class)
-					{
-						nbt1.setString("type", type.getTypeForNBT());
-					}
-
-					task.writeCommonData(nbt1);
-					array.appendTag(nbt1);
-				}
-			}
-
-			if (array.tagCount() == 1)
-			{
-				nbt.setTag("task", array.get(0));
-			}
-			else if (!array.isEmpty())
-			{
-				nbt.setTag("tasks", array);
-			}
-		}
-
-		if (!rewards.isEmpty())
-		{
-			NBTTagList array = new NBTTagList();
-
-			for (QuestReward reward : rewards)
-			{
-				QuestRewardType type = QuestRewardType.getType(reward.getClass());
-
-				if (type != null)
-				{
-					NBTTagCompound nbt1 = new NBTTagCompound();
-					reward.writeData(nbt1);
-					reward.writeCommonData(nbt1);
-					nbt1.setInteger("uid", reward.uid);
-
-					if (reward.getClass() != ItemReward.class)
-					{
-						nbt1.setString("type", type.getTypeForNBT());
-					}
-
-					array.appendTag(nbt1);
-				}
-			}
-
-			if (array.tagCount() == 1)
-			{
-				nbt.setTag("reward", array.get(0));
-			}
-			else if (!array.isEmpty())
-			{
-				nbt.setTag("rewards", array);
+				nbt.setIntArray("dependencies", ai);
 			}
 		}
 	}
@@ -234,7 +163,7 @@ public final class Quest extends QuestObject
 	@Override
 	public void readData(NBTTagCompound nbt)
 	{
-		readCommonData(nbt);
+		super.readData(nbt);
 		description = nbt.getString("description");
 		visibilityType = EnumQuestVisibilityType.NAME_MAP.get(nbt.getString("visibility"));
 		x = (byte) MathHelper.clamp(nbt.getByte("x"), -POS_LIMIT, POS_LIMIT);
@@ -252,94 +181,91 @@ public final class Quest extends QuestObject
 		canRepeat = nbt.getBoolean("can_repeat");
 
 		dependencies.clear();
-		tasks.clear();
-		rewards.clear();
 
-		list = nbt.getTagList("dependencies", Constants.NBT.TAG_STRING);
+		NBTBase deps = nbt.getTag("dependencies");
 
-		if (list.isEmpty())
+		if (deps == null)
 		{
-			NBTBase nbt1 = nbt.getTag("dependency");
-
-			if (nbt1 != null)
-			{
-				list.appendTag(nbt1);
-			}
+			deps = nbt.getTag("dependency");
 		}
 
-		for (int i = 0; i < list.tagCount(); i++)
+		if (deps instanceof NBTTagList)
 		{
-			dependencies.add(list.getStringTagAt(i));
-		}
+			list = (NBTTagList) deps;
 
-		list = nbt.getTagList("tasks", Constants.NBT.TAG_COMPOUND);
-
-		if (list.isEmpty())
-		{
-			NBTBase nbt1 = nbt.getTag("task");
-
-			if (nbt1 != null)
+			for (int i = 0; i < list.tagCount(); i++)
 			{
-				list.appendTag(nbt1);
-			}
-		}
+				QuestObject o = chapter.file.get(chapter.file.getID(list.get(i)));
 
-		for (int i = 0; i < list.tagCount(); i++)
-		{
-			NBTTagCompound nbt1 = list.getCompoundTagAt(i);
-			String type = nbt1.getString("type");
-
-			if (type.equals("quest") || type.equals("variable") || type.equals("chapter") || type.equals("task"))
-			{
-				dependencies.add(nbt1.getString("object"));
-			}
-			else
-			{
-				QuestTask task = QuestTaskType.createTask(this, type);
-
-				if (task != null)
+				if (o != null)
 				{
-					task.readCommonData(nbt1);
-					task.readData(nbt1);
-					tasks.add(task);
+					dependencies.add(o);
 				}
 			}
 		}
-
-		list = nbt.getTagList("rewards", Constants.NBT.TAG_COMPOUND);
-
-		if (list.isEmpty())
+		else if (deps instanceof NBTTagIntArray)
 		{
-			NBTBase nbt1 = nbt.getTag("reward");
-
-			if (nbt1 != null)
+			for (int i : ((NBTTagIntArray) deps).getIntArray())
 			{
-				list.appendTag(nbt1);
+				QuestObject o = chapter.file.get(i);
+
+				if (o != null)
+				{
+					dependencies.add(o);
+				}
 			}
 		}
-
-		for (int i = 0; i < list.tagCount(); i++)
+		else
 		{
-			NBTTagCompound nbt1 = list.getCompoundTagAt(i);
+			QuestObject o = chapter.file.get(chapter.file.getID(deps));
 
-			if (!nbt1.hasKey("type") && !nbt1.hasKey("item"))
+			if (o != null)
 			{
-				ItemReward reward = new ItemReward(this);
-				reward.uid = chapter.file.readID(nbt1.getInteger("uid"));
-				reward.team = nbt1.getBoolean("team_reward");
-				nbt1.removeTag("uid");
-				nbt1.removeTag("team_reward");
-				reward.stack = ItemMissing.read(nbt1);
-				rewards.add(reward);
-				continue;
+				dependencies.add(o);
 			}
+		}
+	}
 
-			QuestReward reward = QuestRewardType.createReward(this, nbt1);
+	@Override
+	public void writeNetData(DataOut data)
+	{
+		super.writeNetData(data);
+		data.writeString(description);
+		data.write(visibilityType, EnumQuestVisibilityType.NAME_MAP);
+		data.writeByte(x);
+		data.writeByte(y);
+		data.write(shape, EnumQuestShape.NAME_MAP);
+		data.writeCollection(text, DataOut.STRING);
+		data.writeBoolean(canRepeat);
+		data.writeVarInt(dependencies.size());
 
-			if (reward != null)
+		for (QuestObject d : dependencies)
+		{
+			data.writeInt(d.uid);
+		}
+	}
+
+	@Override
+	public void readNetData(DataIn data)
+	{
+		super.readNetData(data);
+		description = data.readString();
+		visibilityType = data.read(EnumQuestVisibilityType.NAME_MAP);
+		x = data.readByte();
+		y = data.readByte();
+		shape = data.read(EnumQuestShape.NAME_MAP);
+		data.readCollection(text, DataIn.STRING);
+		canRepeat = data.readBoolean();
+
+		int d = data.readVarInt();
+
+		for (int i = 0; i < d; i++)
+		{
+			QuestObject object = chapter.file.get(data.readInt());
+
+			if (object != null && !object.invalid)
 			{
-				reward.uid = chapter.file.readID(nbt1.getInteger("uid"));
-				rewards.add(reward);
+				dependencies.add(object);
 			}
 		}
 	}
@@ -421,7 +347,7 @@ public final class Quest extends QuestObject
 			}
 		}
 
-		for (QuestObject object : getDependencies())
+		for (QuestObject object : dependencies)
 		{
 			if (!object.isComplete(data))
 			{
@@ -446,13 +372,13 @@ public final class Quest extends QuestObject
 	}
 
 	@Override
-	public void resetProgress(ITeamData data, boolean dependencies)
+	public void resetProgress(ITeamData data, boolean deps)
 	{
 		//data.setTimesCompleted(this, -1);
 
-		if (dependencies)
+		if (deps)
 		{
-			for (QuestObject dep : getDependencies())
+			for (QuestObject dep : dependencies)
 			{
 				if (!dep.invalid)
 				{
@@ -463,18 +389,18 @@ public final class Quest extends QuestObject
 
 		for (QuestTask task : tasks)
 		{
-			task.resetProgress(data, dependencies);
+			task.resetProgress(data, deps);
 		}
 
 		data.unclaimRewards(rewards);
 	}
 
 	@Override
-	public void completeInstantly(ITeamData data, boolean dependencies)
+	public void completeInstantly(ITeamData data, boolean deps)
 	{
-		if (dependencies)
+		if (deps)
 		{
-			for (QuestObject dep : getDependencies())
+			for (QuestObject dep : dependencies)
 			{
 				if (!dep.invalid)
 				{
@@ -485,13 +411,13 @@ public final class Quest extends QuestObject
 
 		for (QuestTask task : tasks)
 		{
-			task.completeInstantly(data, dependencies);
+			task.completeInstantly(data, deps);
 		}
 	}
 
 	public boolean canStartTasks(ITeamData data)
 	{
-		for (QuestObject object : getDependencies())
+		for (QuestObject object : dependencies)
 		{
 			if (!object.isComplete(data))
 			{
@@ -568,7 +494,7 @@ public final class Quest extends QuestObject
 		config.addEnum("visibility", () -> visibilityType, v -> visibilityType = v, EnumQuestVisibilityType.NAME_MAP);
 		config.addString("description", () -> description, v -> description = v, "");
 		config.addList("text", text, new ConfigString(""), ConfigString::new, ConfigString::getString);
-		config.addList("dependencies", dependencies, new ConfigQuestObject("", DEP_TYPES), v -> new ConfigQuestObject(v, DEP_TYPES), ConfigQuestObject::getString).setDisplayName(new TextComponentTranslation("ftbquests.dependencies"));
+		config.addList("dependencies", dependencies, new ConfigQuestObject(null, null, DEP_TYPES), v -> new ConfigQuestObject(null, v, DEP_TYPES), ConfigQuestObject::getObject).setDisplayName(new TextComponentTranslation("ftbquests.dependencies"));
 		config.addBool("can_repeat", () -> canRepeat, v -> canRepeat = v, false);
 	}
 
@@ -576,7 +502,7 @@ public final class Quest extends QuestObject
 	{
 		EnumVisibility v = EnumVisibility.VISIBLE;
 
-		for (QuestObject object : getDependencies())
+		for (QuestObject object : dependencies)
 		{
 			if (object instanceof Quest)
 			{
@@ -651,7 +577,6 @@ public final class Quest extends QuestObject
 	public void clearCachedData()
 	{
 		super.clearCachedData();
-		cachedDependencies = null;
 
 		for (QuestTask task : tasks)
 		{
@@ -666,36 +591,12 @@ public final class Quest extends QuestObject
 
 	public boolean hasDependency(QuestObject object)
 	{
-		return getDependencies().contains(object);
-	}
-
-	public Set<QuestObject> getDependencies()
-	{
-		if (cachedDependencies == null)
-		{
-			cachedDependencies = new HashSet<>();
-
-			for (String id : dependencies)
-			{
-				QuestObject object = chapter.file.get(id);
-
-				if (object != null)
-				{
-					cachedDependencies.add(object);
-				}
-			}
-
-			if (cachedDependencies.isEmpty())
-			{
-				cachedDependencies = Collections.emptySet();
-			}
-		}
-
-		return cachedDependencies;
+		return !object.invalid && dependencies.contains(object);
 	}
 
 	public void verifyDependencies()
 	{
+		dependencies.removeIf(QuestObjectBase.PREDICATE_INVALID);
 		//FTBQuests.LOGGER.error("Removed looping dependency '" + task.getID() + "' with erroring ID '" + task.objectId + "'");
 	}
 

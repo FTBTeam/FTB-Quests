@@ -3,18 +3,16 @@ package com.feed_the_beast.ftbquests.client;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
-import com.feed_the_beast.ftbquests.quest.QuestVariable;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
 import com.feed_the_beast.ftbquests.quest.task.QuestTask;
 import com.feed_the_beast.ftbquests.quest.task.QuestTaskData;
-import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
+import it.unimi.dsi.fastutil.ints.Int2LongOpenHashMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.util.text.TextFormatting;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -23,15 +21,23 @@ import java.util.UUID;
 public class ClientQuestProgress implements ITeamData
 {
 	private final String teamID;
-	public final Map<QuestTask, QuestTaskData> taskData;
-	public final Object2LongOpenHashMap<QuestVariable> variables;
+	private final short teamUID;
+	public final Int2ObjectOpenHashMap<QuestTaskData> taskData;
+	public final Int2LongOpenHashMap variables;
 
-	public ClientQuestProgress(String t)
+	public ClientQuestProgress(String t, short id)
 	{
 		teamID = t;
-		taskData = new HashMap<>();
-		variables = new Object2LongOpenHashMap<>();
+		teamUID = id;
+		taskData = new Int2ObjectOpenHashMap<>();
+		variables = new Int2LongOpenHashMap();
 		variables.defaultReturnValue(0L);
+	}
+
+	@Override
+	public short getTeamUID()
+	{
+		return teamUID;
 	}
 
 	@Override
@@ -49,7 +55,7 @@ public class ClientQuestProgress implements ITeamData
 	@Override
 	public QuestTaskData getQuestTaskData(QuestTask task)
 	{
-		QuestTaskData data = taskData.get(task);
+		QuestTaskData data = taskData.get(task.uid);
 
 		if (data == null)
 		{
@@ -67,13 +73,13 @@ public class ClientQuestProgress implements ITeamData
 	@Override
 	public void removeTask(QuestTask task)
 	{
-		taskData.remove(task);
+		taskData.remove(task.uid);
 	}
 
 	@Override
 	public void createTaskData(QuestTask task)
 	{
-		taskData.put(task, task.createData(this));
+		taskData.put(task.uid, task.createData(this));
 	}
 
 	@Override
@@ -86,17 +92,17 @@ public class ClientQuestProgress implements ITeamData
 	}
 
 	@Override
-	public long getVariable(QuestVariable variable)
+	public long getVariable(int variable)
 	{
-		return variables.getLong(variable);
+		return variables.get(variable);
 	}
 
 	@Override
-	public void setVariable(QuestVariable variable, long value)
+	public void setVariable(int variable, long value)
 	{
 		if (value <= 0L)
 		{
-			variables.removeLong(variable);
+			variables.remove(variable);
 		}
 		else
 		{

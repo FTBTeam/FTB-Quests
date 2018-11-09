@@ -12,6 +12,8 @@ import java.util.UUID;
  */
 public interface ITeamData
 {
+	short getTeamUID();
+
 	String getTeamID();
 
 	QuestFile getFile();
@@ -26,9 +28,9 @@ public interface ITeamData
 
 	void unclaimRewards(Collection<QuestReward> rewards);
 
-	long getVariable(QuestVariable variable);
+	long getVariable(int variable);
 
-	void setVariable(QuestVariable variable, long value);
+	void setVariable(int variable, long value);
 
 	boolean isRewardClaimed(UUID player, QuestReward reward);
 }

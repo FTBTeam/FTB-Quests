@@ -391,7 +391,7 @@ public class BlockScreen extends BlockWithHorizontalFacing
 		tooltip.add(I18n.format("tile.ftbquests.screen.size") + ": " + TextFormatting.GOLD + (1 + size * 2) + " x " + (1 + size * 2));
 		tooltip.add(I18n.format("ftbquests.team") + ": " + TextFormatting.DARK_GREEN + team);
 
-		Quest quest = ClientQuestFile.INSTANCE.getQuest(nbt == null ? "" : nbt.getString("Quest"));
+		Quest quest = ClientQuestFile.INSTANCE.getQuest(ClientQuestFile.INSTANCE.getID(nbt == null ? null : nbt.getTag("Quest")));
 
 		if (quest == null || quest.tasks.isEmpty())
 		{

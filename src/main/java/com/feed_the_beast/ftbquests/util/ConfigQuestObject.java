@@ -1,6 +1,5 @@
 package com.feed_the_beast.ftbquests.util;
 
-import com.feed_the_beast.ftblib.lib.config.ConfigString;
 import com.feed_the_beast.ftblib.lib.config.ConfigValue;
 import com.feed_the_beast.ftblib.lib.config.ConfigValueInstance;
 import com.feed_the_beast.ftblib.lib.gui.IOpenableGui;
@@ -10,50 +9,88 @@ import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.gui.GuiSelectQuestObject;
+import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.command.ICommandSender;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.regex.Pattern;
 
 /**
  * @author LatvianModder
  */
-public class ConfigQuestObject extends ConfigString
+public class ConfigQuestObject extends ConfigValue
 {
-	public static final String QO_ID = "ftbquests_object";
-	private static final Pattern PATTERN = Pattern.compile("^(\\*|[a-z0-9_:#]{1,32})$");
+	public static final String ID = "ftbquests_object";
 
+	private final QuestFile file;
 	private final HashSet<QuestObjectType> types;
+	private QuestObject object;
 
-	public ConfigQuestObject(String s, Collection<QuestObjectType> t)
+	public ConfigQuestObject(@Nullable QuestFile f, @Nullable QuestObject o, Collection<QuestObjectType> t)
 	{
-		super(s, PATTERN);
+		file = f == null ? FTBQuests.PROXY.getQuestFile(null) : f;
+		object = o;
 		types = new HashSet<>(t);
 	}
 
-	public boolean hasValidType(QuestObjectType type)
+	public boolean isValid(QuestObjectType type)
 	{
 		return types.contains(type);
 	}
 
-	@Override
-	public String getName()
+	public boolean isValid(@Nullable QuestObject object)
 	{
-		return QO_ID;
+		return isValid(object == null ? QuestObjectType.NULL : object.getObjectType());
+	}
+
+	@Override
+	public String getID()
+	{
+		return ID;
+	}
+
+	public void setObject(@Nullable QuestObject v)
+	{
+		object = v;
+	}
+
+	@Nullable
+	public QuestObject getObject()
+	{
+		return object;
+	}
+
+	@Override
+	public String getString()
+	{
+		object = getObject();
+		return object == null ? "" : object.toString();
+	}
+
+	@Override
+	public boolean getBoolean()
+	{
+		return getObject() != null;
+	}
+
+	@Override
+	public int getInt()
+	{
+		object = getObject();
+		return object == null ? 0 : object.uid;
 	}
 
 	@Override
 	public ConfigQuestObject copy()
 	{
-		return new ConfigQuestObject(getString(), types);
+		return new ConfigQuestObject(file, object, types);
 	}
 
 	@Override
@@ -68,8 +105,6 @@ public class ConfigQuestObject extends ConfigString
 	@Override
 	public void writeData(DataOut data)
 	{
-		data.writeString(getString());
-
 		int i = 0;
 
 		for (QuestObjectType type : types)
@@ -78,13 +113,12 @@ public class ConfigQuestObject extends ConfigString
 		}
 
 		data.writeByte(i);
+		data.writeInt(getInt());
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
-		setString(data.readString());
-
 		types.clear();
 
 		int i = data.readUnsignedByte();
@@ -96,35 +130,25 @@ public class ConfigQuestObject extends ConfigString
 				types.add(type);
 			}
 		}
+
+		object = file.get(data.readInt());
+
+		if (isValid(object))
+		{
+			setObject(object);
+		}
 	}
 
 	@Override
 	public boolean setValueFromString(@Nullable ICommandSender sender, String string, boolean simulate)
 	{
-		if (string.isEmpty() && types.contains(QuestObjectType.FILE))
+		object = file.get(file.getID(string));
+
+		if (isValid(object))
 		{
 			if (!simulate)
 			{
-				setString("");
-			}
-
-			return true;
-		}
-
-		World world = null;
-
-		if (sender != null)
-		{
-			world = sender.getEntityWorld();
-		}
-
-		QuestObject object = FTBQuests.PROXY.getQuestFile(world).get(string);
-
-		if (object != null && types.contains(object.getObjectType()))
-		{
-			if (!simulate)
-			{
-				setString(object.getID());
+				setObject(object);
 			}
 
 			return true;
@@ -159,12 +183,39 @@ public class ConfigQuestObject extends ConfigString
 	@Override
 	public void setValueFromOtherValue(ConfigValue value)
 	{
-		setString(value.getString());
-
 		if (value instanceof ConfigQuestObject)
 		{
 			types.clear();
 			types.addAll(((ConfigQuestObject) value).types);
+		}
+
+		object = file.get(value.getInt());
+
+		if (isValid(object))
+		{
+			setObject(object);
+		}
+	}
+
+	@Override
+	public void writeToNBT(NBTTagCompound nbt, String key)
+	{
+		object = getObject();
+
+		if (object != null)
+		{
+			nbt.setInteger(key, object.uid);
+		}
+	}
+
+	@Override
+	public void readFromNBT(NBTTagCompound nbt, String key)
+	{
+		object = file.get(nbt.getInteger(key));
+
+		if (isValid(object))
+		{
+			setObject(object);
 		}
 	}
 }

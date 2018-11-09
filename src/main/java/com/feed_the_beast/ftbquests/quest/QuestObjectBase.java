@@ -4,6 +4,8 @@ import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigItemStack;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
+import com.feed_the_beast.ftblib.lib.io.DataIn;
+import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftbquests.item.ItemMissing;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -12,25 +14,30 @@ import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 
 import javax.annotation.Nullable;
-import java.util.regex.Pattern;
+import java.util.function.Predicate;
 
 /**
  * @author LatvianModder
  */
 public abstract class QuestObjectBase
 {
-	public static final Pattern ID_PATTERN = Pattern.compile("^[a-z0-9_]{1,32}$");
+	public static final Predicate<? super QuestObjectBase> PREDICATE_INVALID = o -> o.invalid;
 
 	public int uid = 0;
 	public boolean invalid = false;
-	private String title = "";
-	private ItemStack icon = ItemStack.EMPTY;
+	public String title = "";
+	public ItemStack icon = ItemStack.EMPTY;
 
 	private Icon cachedIcon = null;
 
 	public final String toString()
 	{
-		return String.format("#%08x", uid);
+		return String.format("#%08X", uid);
+	}
+
+	public final String getCodeString()
+	{
+		return String.format("%08X", uid);
 	}
 
 	public final boolean equals(Object object)
@@ -45,25 +52,7 @@ public abstract class QuestObjectBase
 
 	public abstract QuestFile getQuestFile();
 
-	public abstract void writeData(NBTTagCompound nbt);
-
-	public abstract void readData(NBTTagCompound nbt);
-
-	public abstract void getConfig(ConfigGroup config);
-
-	public abstract void resetProgress(ITeamData data, boolean dependencies);
-
-	public abstract Icon getAltIcon();
-
-	public abstract ITextComponent getAltDisplayName();
-
-	public void getExtraConfig(ConfigGroup config)
-	{
-		config.addString("title", () -> title, v -> title = v, "").setDisplayName(new TextComponentTranslation("ftbquests.title")).setOrder((byte) -127);
-		config.add("icon", new ConfigItemStack.SimpleStack(() -> icon, v -> icon = v), new ConfigItemStack(ItemStack.EMPTY)).setDisplayName(new TextComponentTranslation("ftbquests.icon")).setOrder((byte) -126);
-	}
-
-	public void writeCommonData(NBTTagCompound nbt)
+	public void writeData(NBTTagCompound nbt)
 	{
 		if (!title.isEmpty())
 		{
@@ -76,19 +65,36 @@ public abstract class QuestObjectBase
 		}
 	}
 
-	public void readCommonData(NBTTagCompound nbt)
+	public void readData(NBTTagCompound nbt)
 	{
-		if (this instanceof QuestFile)
-		{
-			uid = 0;
-		}
-		else
-		{
-			uid = getQuestFile().readID(nbt.getInteger("uid"));
-		}
-
 		title = nbt.getString("title");
 		icon = ItemMissing.read(nbt.getTag("icon"));
+	}
+
+	public void writeNetData(DataOut data)
+	{
+		data.writeString(title);
+		data.writeItemStack(icon);
+	}
+
+	public void readNetData(DataIn data)
+	{
+		title = data.readString();
+		icon = data.readItemStack();
+	}
+
+	public abstract void getConfig(ConfigGroup config);
+
+	public abstract void resetProgress(ITeamData data, boolean dependencies);
+
+	public abstract Icon getAltIcon();
+
+	public abstract ITextComponent getAltDisplayName();
+
+	public void getExtraConfig(ConfigGroup config)
+	{
+		config.addString("title", () -> title, v -> title = v, "").setDisplayName(new TextComponentTranslation("ftbquests.title")).setOrder(-127);
+		config.add("icon", new ConfigItemStack.SimpleStack(() -> icon, v -> icon = v), new ConfigItemStack(ItemStack.EMPTY)).setDisplayName(new TextComponentTranslation("ftbquests.icon")).setOrder(-126);
 	}
 
 	public final Icon getIcon()

@@ -2,6 +2,8 @@ package com.feed_the_beast.ftbquests.quest.reward;
 
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
+import com.feed_the_beast.ftblib.lib.io.DataIn;
+import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
@@ -23,6 +25,12 @@ public class XPReward extends QuestReward
 	}
 
 	@Override
+	public QuestRewardType getType()
+	{
+		return FTBQuestsRewards.XP;
+	}
+
+	@Override
 	public void writeData(NBTTagCompound nbt)
 	{
 		nbt.setInteger("xp", xp);
@@ -37,6 +45,20 @@ public class XPReward extends QuestReward
 		{
 			xp = 1;
 		}
+	}
+
+	@Override
+	public void writeNetData(DataOut data)
+	{
+		super.writeNetData(data);
+		data.writeVarInt(xp);
+	}
+
+	@Override
+	public void readNetData(DataIn data)
+	{
+		super.readNetData(data);
+		xp = data.readVarInt();
 	}
 
 	@Override

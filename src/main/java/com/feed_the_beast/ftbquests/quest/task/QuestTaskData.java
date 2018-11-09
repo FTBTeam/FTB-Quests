@@ -66,7 +66,7 @@ public abstract class QuestTaskData<T extends QuestTask> implements ICapabilityP
 
 	public String toString()
 	{
-		return teamData + "@" + task.getID();
+		return teamData.toString() + task;
 	}
 
 	public ItemStack insertItem(ItemStack stack, boolean singleItem, boolean simulate, @Nullable EntityPlayer player)

@@ -3,12 +3,16 @@ package com.feed_the_beast.ftbquests.integration.botania;
 import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
+import com.feed_the_beast.ftblib.lib.io.DataIn;
+import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.quest.task.FTBQuestsTasks;
 import com.feed_the_beast.ftbquests.quest.task.QuestTask;
 import com.feed_the_beast.ftbquests.quest.task.QuestTaskData;
+import com.feed_the_beast.ftbquests.quest.task.QuestTaskType;
 import com.feed_the_beast.ftbquests.quest.task.SimpleQuestTaskData;
 import com.feed_the_beast.ftbquests.tile.TileScreenCore;
 import com.feed_the_beast.ftbquests.tile.TileScreenPart;
@@ -46,6 +50,12 @@ public class ManaTask extends QuestTask
 	}
 
 	@Override
+	public QuestTaskType getType()
+	{
+		return FTBQuestsTasks.BOTANIA_MANA;
+	}
+
+	@Override
 	public long getMaxProgress()
 	{
 		return value;
@@ -60,6 +70,7 @@ public class ManaTask extends QuestTask
 	@Override
 	public void writeData(NBTTagCompound nbt)
 	{
+		super.writeData(nbt);
 		nbt.setLong("value", value);
 
 		if (maxInput != Long.MAX_VALUE)
@@ -76,6 +87,7 @@ public class ManaTask extends QuestTask
 	@Override
 	public void readData(NBTTagCompound nbt)
 	{
+		super.readData(nbt);
 		value = nbt.getLong("value");
 
 		if (value < 1)
@@ -91,6 +103,24 @@ public class ManaTask extends QuestTask
 		}
 
 		showNumbers = nbt.getBoolean("show_numbers");
+	}
+
+	@Override
+	public void writeNetData(DataOut data)
+	{
+		super.writeNetData(data);
+		data.writeVarLong(value);
+		data.writeLong(maxInput);
+		data.writeBoolean(showNumbers);
+	}
+
+	@Override
+	public void readNetData(DataIn data)
+	{
+		super.readNetData(data);
+		value = data.readVarLong();
+		maxInput = data.readLong();
+		showNumbers = data.readBoolean();
 	}
 
 	@Override

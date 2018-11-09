@@ -59,11 +59,12 @@ public class MessageAddReward extends MessageToServer
 
 			if (q != null)
 			{
-				QuestReward r = QuestRewardType.createReward(q, nbt);
+				QuestReward r = QuestRewardType.createReward(q, nbt.getString("type"));
 
 				if (r != null)
 				{
 					r.uid = ServerQuestFile.INSTANCE.readID(0);
+					r.readData(nbt);
 					q.rewards.add(r);
 					ServerQuestFile.INSTANCE.refreshIDMap();
 					ServerQuestFile.INSTANCE.save();

@@ -57,7 +57,7 @@ public class MessageEditReward extends MessageToServer implements IConfigCallbac
 
 			if (reward != null)
 			{
-				QuestRewardType type = QuestRewardType.getType(reward.getClass());
+				QuestRewardType type = reward.getType();
 				ConfigGroup group = ConfigGroup.newGroup(FTBQuests.MOD_ID);
 				group.setDisplayName(type.getDisplayName());
 				ConfigGroup g = group.getGroup("reward").getGroup(type.getRegistryName().getNamespace()).getGroup(type.getRegistryName().getPath());

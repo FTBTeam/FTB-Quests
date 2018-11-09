@@ -5,10 +5,10 @@ import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
 import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.gui.Theme;
 import com.feed_the_beast.ftblib.lib.gui.misc.GuiEditConfigValue;
-import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.gui.QuestsTheme;
 import com.feed_the_beast.ftbquests.net.edit.MessageCreateObject;
+import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.nbt.NBTTagCompound;
@@ -36,9 +36,10 @@ public class ButtonAddChapter extends ButtonTab
 
 			if (set)
 			{
+				QuestChapter chapter = new QuestChapter(treeGui.questFile);
+				chapter.title = value.getString();
 				NBTTagCompound nbt = new NBTTagCompound();
-				nbt.setString("title", value.getString());
-				nbt.setString("id", StringUtils.toSnakeCase(value.getString()));
+				chapter.writeData(nbt);
 				new MessageCreateObject(QuestObjectType.CHAPTER, 0, nbt).sendToServer();
 			}
 		}).openGui();

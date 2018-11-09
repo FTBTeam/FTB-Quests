@@ -13,7 +13,10 @@ import com.feed_the_beast.ftbquests.block.BlockProgressScreen;
 import com.feed_the_beast.ftbquests.block.FTBQuestsBlocks;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
+import com.feed_the_beast.ftbquests.quest.QuestFile;
+import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
+import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
 import net.minecraft.block.BlockHorizontal;
 import net.minecraft.block.state.IBlockState;
@@ -21,7 +24,9 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagInt;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -37,7 +42,7 @@ public class TileProgressScreenCore extends TileProgressScreenBase implements IC
 {
 	public EnumFacing facing;
 	public String team = "";
-	public String chapter = "";
+	public NBTBase chapter = null;
 	public int width = 0, height = 0;
 	public boolean indestructible = false;
 	public IBlockState skin = BlockUtils.AIR_STATE;
@@ -64,10 +69,13 @@ public class TileProgressScreenCore extends TileProgressScreenBase implements IC
 
 		if (cChapter != null)
 		{
-			chapter = cChapter.getID();
+			chapter = new NBTTagInt(cChapter.uid);
 		}
 
-		nbt.setString("Chapter", chapter);
+		if (chapter != null)
+		{
+			nbt.setTag("Chapter", chapter);
+		}
 
 		if (width > 0)
 		{
@@ -109,7 +117,7 @@ public class TileProgressScreenCore extends TileProgressScreenBase implements IC
 		}
 
 		team = nbt.getString("Team");
-		chapter = nbt.getString("Chapter");
+		chapter = nbt.getTag("Chapter");
 		width = nbt.getByte("Width");
 		height = nbt.getByte("Height");
 		indestructible = nbt.getBoolean("Indestructible");
@@ -196,7 +204,14 @@ public class TileProgressScreenCore extends TileProgressScreenBase implements IC
 		}
 		else if (cChapter == null || cChapter.invalid)
 		{
-			cChapter = FTBQuests.PROXY.getQuestFile(world).getChapter(chapter);
+			QuestFile file = FTBQuests.PROXY.getQuestFile(world);
+
+			if (file == null)
+			{
+				return null;
+			}
+
+			cChapter = file.getChapter(file.getID(chapter));
 		}
 
 		return cChapter;
@@ -230,11 +245,6 @@ public class TileProgressScreenCore extends TileProgressScreenBase implements IC
 			{
 				cChapter = getChapter();
 
-				if (cChapter != null)
-				{
-					chapter = cChapter.getID();
-				}
-
 				boolean editorOrDestructible = editor || !indestructible;
 				ConfigGroup group0 = ConfigGroup.newGroup("tile");
 				group0.setDisplayName(new TextComponentTranslation("tile.ftbquests.progress_screen.name"));
@@ -245,12 +255,16 @@ public class TileProgressScreenCore extends TileProgressScreenBase implements IC
 					config.add("team", new ConfigTeam(() -> team, v -> team = v), ConfigNull.INSTANCE).setDisplayName(new TextComponentTranslation("ftbquests.team"));
 				}
 
-				config.add("chapter", new ConfigQuestObject(chapter, Collections.singleton(QuestObjectType.CHAPTER))
+				config.add("chapter", new ConfigQuestObject(ServerQuestFile.INSTANCE, cChapter, Collections.singleton(QuestObjectType.CHAPTER))
 				{
 					@Override
-					public void setString(String v)
+					public void setObject(@Nullable QuestObject v)
 					{
-						chapter = v;
+						if (v instanceof QuestChapter)
+						{
+							cChapter = (QuestChapter) v;
+							chapter = new NBTTagInt(cChapter.uid);
+						}
 					}
 				}, ConfigNull.INSTANCE).setCanEdit(editorOrDestructible).setDisplayName(new TextComponentTranslation("ftbquests.chapter"));
 

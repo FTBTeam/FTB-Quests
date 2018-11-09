@@ -66,7 +66,7 @@ public class ButtonQuest extends Button
 		{
 			dependencies = new ArrayList<>();
 
-			for (QuestObject object : quest.getDependencies())
+			for (QuestObject object : quest.dependencies)
 			{
 				if (object instanceof Quest)
 				{

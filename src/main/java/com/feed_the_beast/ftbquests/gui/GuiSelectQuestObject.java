@@ -57,7 +57,7 @@ public class GuiSelectQuestObject extends GuiButtonListBase
 		public void onClicked(MouseButton button)
 		{
 			GuiHelper.playClickSound();
-			config.setString(object.getID());
+			config.setObject(object);
 			callback.openGui();
 		}
 	}
@@ -76,12 +76,12 @@ public class GuiSelectQuestObject extends GuiButtonListBase
 	@Override
 	public void addButtons(Panel panel)
 	{
-		if (config.hasValidType(QuestObjectType.FILE))
+		if (config.isValid(QuestObjectType.FILE))
 		{
 			panel.add(new ButtonQuestObject(panel, ClientQuestFile.INSTANCE));
 		}
 
-		if (config.hasValidType(QuestObjectType.VARIABLE))
+		if (config.isValid(QuestObjectType.VARIABLE))
 		{
 			for (QuestVariable variable : ClientQuestFile.INSTANCE.variables)
 			{
@@ -89,9 +89,9 @@ public class GuiSelectQuestObject extends GuiButtonListBase
 			}
 		}
 
-		boolean addChapters = config.hasValidType(QuestObjectType.CHAPTER);
-		boolean addQuests = config.hasValidType(QuestObjectType.QUEST);
-		boolean addTasks = config.hasValidType(QuestObjectType.TASK);
+		boolean addChapters = config.isValid(QuestObjectType.CHAPTER);
+		boolean addQuests = config.isValid(QuestObjectType.QUEST);
+		boolean addTasks = config.isValid(QuestObjectType.TASK);
 
 		for (QuestChapter chapter : ClientQuestFile.INSTANCE.chapters)
 		{

@@ -1,5 +1,6 @@
 package com.feed_the_beast.ftbquests.integration.buildcraft;
 
+import com.feed_the_beast.ftbquests.quest.task.FTBQuestsTasks;
 import com.feed_the_beast.ftbquests.quest.task.QuestTaskType;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
@@ -18,6 +19,6 @@ public class BuildCraftIntegration
 	@SubscribeEvent
 	public static void registerTasks(RegistryEvent.Register<QuestTaskType> event)
 	{
-		event.getRegistry().register(new QuestTaskType(MJTask.class, MJTask::new).setRegistryName("buildcraft_mj"));
+		event.getRegistry().register(FTBQuestsTasks.BUILDCRAFT_MJ = new QuestTaskType(MJTask.class, MJTask::new).setRegistryName("buildcraft_mj"));
 	}
 }

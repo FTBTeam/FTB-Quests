@@ -18,7 +18,7 @@ import javax.annotation.Nullable;
  */
 public class MessageUpdateTaskProgress extends MessageToClient
 {
-	private String team;
+	private short team;
 	private int task;
 	private NBTBase nbt;
 
@@ -26,7 +26,7 @@ public class MessageUpdateTaskProgress extends MessageToClient
 	{
 	}
 
-	public MessageUpdateTaskProgress(String t, int k, @Nullable NBTBase d)
+	public MessageUpdateTaskProgress(short t, int k, @Nullable NBTBase d)
 	{
 		team = t;
 		task = k;
@@ -42,7 +42,7 @@ public class MessageUpdateTaskProgress extends MessageToClient
 	@Override
 	public void writeData(DataOut data)
 	{
-		data.writeString(team);
+		data.writeShort(team);
 		data.writeInt(task);
 		data.writeNBTBase(nbt);
 	}
@@ -50,7 +50,7 @@ public class MessageUpdateTaskProgress extends MessageToClient
 	@Override
 	public void readData(DataIn data)
 	{
-		team = data.readString();
+		team = data.readShort();
 		task = data.readInt();
 		nbt = data.readNBTBase();
 	}

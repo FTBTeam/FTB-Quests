@@ -6,7 +6,6 @@ import com.feed_the_beast.ftblib.lib.net.MessageToClient;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.client.ClientQuestProgress;
-import com.feed_the_beast.ftbquests.quest.QuestVariable;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -15,7 +14,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  */
 public class MessageUpdateVariable extends MessageToClient
 {
-	private String team;
+	private short team;
 	private int variable;
 	private long value;
 
@@ -23,7 +22,7 @@ public class MessageUpdateVariable extends MessageToClient
 	{
 	}
 
-	public MessageUpdateVariable(String t, int k, long v)
+	public MessageUpdateVariable(short t, int k, long v)
 	{
 		team = t;
 		variable = k;
@@ -39,7 +38,7 @@ public class MessageUpdateVariable extends MessageToClient
 	@Override
 	public void writeData(DataOut data)
 	{
-		data.writeString(team);
+		data.writeShort(team);
 		data.writeShort(variable);
 		data.writeLong(value);
 	}
@@ -47,7 +46,7 @@ public class MessageUpdateVariable extends MessageToClient
 	@Override
 	public void readData(DataIn data)
 	{
-		team = data.readString();
+		team = data.readShort();
 		variable = data.readUnsignedShort();
 		value = data.readLong();
 	}
@@ -56,16 +55,11 @@ public class MessageUpdateVariable extends MessageToClient
 	@SideOnly(Side.CLIENT)
 	public void onMessage()
 	{
-		QuestVariable v = variable < 0 || variable >= ClientQuestFile.INSTANCE.variables.size() ? null : ClientQuestFile.INSTANCE.variables.get(variable);
+		ClientQuestProgress data = ClientQuestFile.INSTANCE.getData(team);
 
-		if (v != null)
+		if (data != null)
 		{
-			ClientQuestProgress data = ClientQuestFile.INSTANCE.getData(team);
-
-			if (data != null)
-			{
-				data.setVariable(v, value);
-			}
+			data.setVariable(variable, value);
 		}
 	}
 }

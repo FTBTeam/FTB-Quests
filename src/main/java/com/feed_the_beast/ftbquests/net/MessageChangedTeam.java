@@ -13,13 +13,13 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  */
 public class MessageChangedTeam extends MessageToClient
 {
-	public String team;
+	public short team;
 
 	public MessageChangedTeam()
 	{
 	}
 
-	public MessageChangedTeam(String t)
+	public MessageChangedTeam(short t)
 	{
 		team = t;
 	}
@@ -33,13 +33,13 @@ public class MessageChangedTeam extends MessageToClient
 	@Override
 	public void writeData(DataOut data)
 	{
-		data.writeString(team);
+		data.writeShort(team);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
-		team = data.readString();
+		team = data.readShort();
 	}
 
 	@Override
@@ -48,7 +48,7 @@ public class MessageChangedTeam extends MessageToClient
 	{
 		if (ClientQuestFile.exists())
 		{
-			ClientQuestFile.INSTANCE.self = team.isEmpty() ? null : ClientQuestFile.INSTANCE.teamData.get(team);
+			ClientQuestFile.INSTANCE.self = ClientQuestFile.INSTANCE.getData(team);
 		}
 	}
 }

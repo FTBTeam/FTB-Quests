@@ -4,6 +4,8 @@ import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigString;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.IconAnimation;
+import com.feed_the_beast.ftblib.lib.io.DataIn;
+import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.util.ListUtils;
 import com.feed_the_beast.ftbquests.events.ObjectCompletedEvent;
 import net.minecraft.nbt.NBTTagCompound;
@@ -23,7 +25,6 @@ import java.util.List;
 public final class QuestChapter extends QuestObject
 {
 	public final QuestFile file;
-	public int chapterIndex;
 	public EnumQuestVisibilityType visibilityType;
 	public final List<Quest> quests;
 	public final List<String> description;
@@ -55,6 +56,7 @@ public final class QuestChapter extends QuestObject
 	}
 
 	@Override
+	@Deprecated
 	public String getID()
 	{
 		return id;
@@ -63,7 +65,7 @@ public final class QuestChapter extends QuestObject
 	@Override
 	public void writeData(NBTTagCompound nbt)
 	{
-		writeCommonData(nbt);
+		super.writeData(nbt);
 
 		if (visibilityType != EnumQuestVisibilityType.NORMAL)
 		{
@@ -81,31 +83,14 @@ public final class QuestChapter extends QuestObject
 
 			nbt.setTag("description", list);
 		}
-
-		if (!quests.isEmpty())
-		{
-			NBTTagList questsList = new NBTTagList();
-
-			for (Quest quest : quests)
-			{
-				NBTTagCompound nbt1 = new NBTTagCompound();
-				quest.writeData(nbt1);
-				nbt1.setString("id", quest.id);
-				nbt1.setInteger("uid", quest.uid);
-				questsList.appendTag(nbt1);
-			}
-
-			nbt.setTag("quests", questsList);
-		}
 	}
 
 	@Override
 	public void readData(NBTTagCompound nbt)
 	{
-		readCommonData(nbt);
+		super.readData(nbt);
 		description.clear();
 		visibilityType = EnumQuestVisibilityType.NAME_MAP.get(nbt.getString("visibility"));
-		quests.clear();
 
 		NBTTagList desc = nbt.getTagList("description", Constants.NBT.TAG_STRING);
 
@@ -113,15 +98,27 @@ public final class QuestChapter extends QuestObject
 		{
 			description.add(desc.getStringTagAt(i));
 		}
+	}
 
-		NBTTagList questsList = nbt.getTagList("quests", Constants.NBT.TAG_COMPOUND);
+	@Override
+	public void writeNetData(DataOut data)
+	{
+		super.writeNetData(data);
+		data.write(visibilityType, EnumQuestVisibilityType.NAME_MAP);
+		data.writeCollection(description, DataOut.STRING);
+	}
 
-		for (int j = 0; j < questsList.tagCount(); j++)
-		{
-			Quest quest = new Quest(this);
-			quest.readData(questsList.getCompoundTagAt(j));
-			quests.add(quest);
-		}
+	@Override
+	public void readNetData(DataIn data)
+	{
+		super.readNetData(data);
+		visibilityType = data.read(EnumQuestVisibilityType.NAME_MAP);
+		data.readCollection(description, DataIn.STRING);
+	}
+
+	public int getIndex()
+	{
+		return file.chapters.indexOf(this);
 	}
 
 	@Override

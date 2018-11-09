@@ -8,7 +8,6 @@ import com.feed_the_beast.ftblib.lib.gui.Widget;
 import com.feed_the_beast.ftblib.lib.gui.misc.GuiEditConfigValue;
 import com.feed_the_beast.ftblib.lib.gui.misc.GuiSelectItemStack;
 import com.feed_the_beast.ftblib.lib.icon.Color4I;
-import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.net.edit.MessageCreateObject;
 import com.feed_the_beast.ftbquests.net.edit.MessageMoveQuest;
@@ -63,7 +62,7 @@ public class ButtonDummyQuest extends Widget
 			GuiHelper.playClickSound();
 			//List<ContextMenuItem> contextMenu = new ArrayList<>();
 
-			if (isCtrlKeyDown())
+			if (!isCtrlKeyDown())
 			{
 				new GuiSelectItemStack(this, stack -> {
 					if (!stack.isEmpty())
@@ -74,11 +73,8 @@ public class ButtonDummyQuest extends Widget
 						ItemTask itemTask = new ItemTask(quest);
 						itemTask.items.add(ItemHandlerHelper.copyStackWithSize(stack, 1));
 						itemTask.count = stack.getCount();
-						itemTask.id = StringUtils.toSnakeCase(stack.getDisplayName());
-						quest.tasks.add(itemTask);
 						NBTTagCompound nbt = new NBTTagCompound();
 						quest.writeData(nbt);
-						nbt.setString("id", itemTask.id);
 						new MessageCreateObject(QuestObjectType.QUEST, treeGui.selectedChapter.uid, nbt).sendToServer();
 					}
 				}).openGui();
@@ -91,11 +87,12 @@ public class ButtonDummyQuest extends Widget
 
 				if (set)
 				{
+					Quest quest = new Quest(treeGui.selectedChapter);
+					quest.x = x;
+					quest.y = y;
+					quest.title = value.getString();
 					NBTTagCompound nbt = new NBTTagCompound();
-					nbt.setByte("x", x);
-					nbt.setByte("y", y);
-					nbt.setString("title", value.getString());
-					nbt.setString("id", StringUtils.toSnakeCase(value.getString()));
+					quest.writeData(nbt);
 					new MessageCreateObject(QuestObjectType.QUEST, treeGui.selectedChapter.uid, nbt).sendToServer();
 				}
 			}).openGui();

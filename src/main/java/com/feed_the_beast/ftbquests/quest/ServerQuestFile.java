@@ -38,14 +38,28 @@ public class ServerQuestFile extends QuestFile
 		}
 
 		NBTTagCompound nbt = NBTUtils.readNBT(file);
-		readData(nbt == null ? new NBTTagCompound() : nbt);
-		return nbt != null;
+
+		if (nbt == null)
+		{
+			return false;
+		}
+
+		readDataFull(nbt);
+		return true;
 	}
 
 	@Override
 	public boolean isClient()
 	{
 		return false;
+	}
+
+	@Nullable
+	@Override
+	public ITeamData getData(short team)
+	{
+		ForgeTeam t = universe.getTeam(team);
+		return t.isValid() ? FTBQuestsTeamData.get(t) : null;
 	}
 
 	@Nullable
@@ -98,7 +112,7 @@ public class ServerQuestFile extends QuestFile
 	public void saveNow()
 	{
 		NBTTagCompound nbt = new NBTTagCompound();
-		writeData(nbt);
+		writeDataFull(nbt);
 		NBTUtils.writeNBTSafe(file, nbt);
 	}
 

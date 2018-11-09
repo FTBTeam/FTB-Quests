@@ -30,15 +30,15 @@ import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
 import com.feed_the_beast.ftbquests.quest.task.QuestTask;
 import com.feed_the_beast.ftbquests.quest.task.QuestTaskData;
+import it.unimi.dsi.fastutil.ints.Int2LongOpenHashMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
-import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
-import javax.annotation.Nullable;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -107,14 +107,14 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 			data.createTaskData(task);
 		}
 
-		new MessageCreateTeamData(event.getTeam().getID()).sendToAll();
+		new MessageCreateTeamData(event.getTeam().getUID(), event.getTeam().getID()).sendToAll();
 	}
 
 	@SubscribeEvent
 	public static void onTeamDeleted(ForgeTeamDeletedEvent event)
 	{
 		FileUtils.delete(event.getTeam().getDataFile("ftbquests"));
-		new MessageDeleteTeamData(event.getTeam().getID()).sendToAll();
+		new MessageDeleteTeamData(event.getTeam().getUID()).sendToAll();
 	}
 
 	@SubscribeEvent
@@ -127,6 +127,7 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 		{
 			FTBQuestsTeamData data = get(team);
 			MessageSyncQuests.TeamInst t = new MessageSyncQuests.TeamInst();
+			t.uid = team.getUID();
 			t.name = team.getID();
 
 			int size = 0;
@@ -157,7 +158,7 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 
 			size = 0;
 
-			for (Object2LongOpenHashMap.Entry<QuestVariable> entry : data.variables.object2LongEntrySet())
+			for (Int2LongOpenHashMap.Entry entry : data.variables.int2LongEntrySet())
 			{
 				if (entry.getLongValue() > 0L)
 				{
@@ -165,17 +166,17 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 				}
 			}
 
-			t.variableKeys = new short[size];
+			t.variableKeys = new int[size];
 			t.variableValues = new long[size];
 			i = 0;
 
-			for (Object2LongOpenHashMap.Entry<QuestVariable> entry : data.variables.object2LongEntrySet())
+			for (Int2LongOpenHashMap.Entry entry : data.variables.int2LongEntrySet())
 			{
 				long value = entry.getLongValue();
 
 				if (value > 0L)
 				{
-					t.variableKeys[i] = entry.getKey().index;
+					t.variableKeys[i] = entry.getIntKey();
 					t.variableValues[i] = value;
 					i++;
 				}
@@ -183,9 +184,6 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 
 			teamData.add(t);
 		}
-
-		NBTTagCompound nbt = new NBTTagCompound();
-		ServerQuestFile.INSTANCE.writeData(nbt);
 
 		FTBQuestsTeamData team = FTBQuestsTeamData.get(event.getTeam());
 		IntOpenHashSet rewards = team.claimedPlayerRewards.get(event.getPlayer().getId());
@@ -200,7 +198,7 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 			rewards.addAll(team.claimedTeamRewards);
 		}
 
-		new MessageSyncQuests(nbt, event.getPlayer().team.getID(), teamData, FTBQuests.canEdit(player), rewards).sendTo(player);
+		new MessageSyncQuests(ServerQuestFile.INSTANCE, event.getPlayer().team.getUID(), teamData, FTBQuests.canEdit(player), rewards).sendTo(player);
 	}
 
 	@SubscribeEvent
@@ -208,7 +206,7 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 	{
 		if (event.getPlayer().isOnline())
 		{
-			new MessageChangedTeam("").sendTo(event.getPlayer().getPlayer());
+			new MessageChangedTeam((short) 0).sendTo(event.getPlayer().getPlayer());
 		}
 	}
 
@@ -217,22 +215,22 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 	{
 		if (event.getPlayer().isOnline())
 		{
-			new MessageChangedTeam(event.getTeam().getID()).sendTo(event.getPlayer().getPlayer());
+			new MessageChangedTeam(event.getTeam().getUID()).sendTo(event.getPlayer().getPlayer());
 		}
 	}
 
-	private final Map<QuestTask, QuestTaskData> taskData;
+	private final Int2ObjectOpenHashMap<QuestTaskData> taskData;
 	private final Map<UUID, IntOpenHashSet> claimedPlayerRewards;
 	private final IntOpenHashSet claimedTeamRewards;
-	private final Object2LongOpenHashMap<QuestVariable> variables;
+	private final Int2LongOpenHashMap variables;
 
 	private FTBQuestsTeamData(ForgeTeam team)
 	{
 		super(team);
-		taskData = new HashMap<>();
+		taskData = new Int2ObjectOpenHashMap<>();
 		claimedPlayerRewards = new HashMap<>();
 		claimedTeamRewards = new IntOpenHashSet();
-		variables = new Object2LongOpenHashMap<>();
+		variables = new Int2LongOpenHashMap();
 		variables.defaultReturnValue(0L);
 	}
 
@@ -246,7 +244,7 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 	public void syncTask(QuestTaskData data)
 	{
 		team.markDirty();
-		new MessageUpdateTaskProgress(team.getID(), data.task.uid, data.toNBT()).sendToAll();
+		new MessageUpdateTaskProgress(team.getUID(), data.task.uid, data.toNBT()).sendToAll();
 
 		if (!data.isComplete && data.task.isComplete(this))
 		{
@@ -262,14 +260,14 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 	@Override
 	public void removeTask(QuestTask task)
 	{
-		taskData.remove(task);
+		taskData.remove(task.uid);
 	}
 
 	@Override
 	public void createTaskData(QuestTask task)
 	{
 		QuestTaskData data = task.createData(this);
-		taskData.put(task, data);
+		taskData.put(task.uid, data);
 		data.isComplete = data.getProgress() >= data.task.getMaxProgress();
 	}
 
@@ -371,38 +369,37 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 	}
 
 	@Override
-	public long getVariable(QuestVariable variable)
+	public long getVariable(int variable)
 	{
-		return variables.getLong(variable);
+		return variables.get(variable);
 	}
 
 	@Override
-	public void setVariable(QuestVariable variable, long value)
+	public void setVariable(int variable, long value)
 	{
 		long prevValue = getVariable(variable);
 
 		if (value <= 0L)
 		{
-			variables.removeLong(variable);
+			variables.remove(variable);
 		}
 		else
 		{
-			value = Math.min(value, variable.maxValue);
+			QuestVariable v = ServerQuestFile.INSTANCE.getVariable(variable);
+
+			if (v != null)
+			{
+				value = Math.min(value, v.maxValue);
+			}
+
 			variables.put(variable, value);
 		}
 
 		if (prevValue != value)
 		{
 			team.markDirty();
-			new MessageUpdateVariable(team.getID(), variable.index, value).sendToAll();
+			new MessageUpdateVariable(team.getUID(), variable, value).sendToAll();
 		}
-	}
-
-	@Nullable
-	private static NBTTagCompound getTagCompound(NBTTagCompound nbt, String key)
-	{
-		NBTBase nbt1 = nbt.getTag(key);
-		return nbt1 instanceof NBTTagCompound ? (NBTTagCompound) nbt1 : null;
 	}
 
 	private void writeData(NBTTagCompound nbt)
@@ -415,30 +412,11 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 
 			if (nbt2 != null)
 			{
-				NBTTagCompound chapterTag = getTagCompound(nbt1, data.task.quest.chapter.id);
-
-				if (chapterTag == null)
-				{
-					chapterTag = new NBTTagCompound();
-					nbt1.setTag(data.task.quest.chapter.id, chapterTag);
-				}
-
-				NBTTagCompound questTag = getTagCompound(chapterTag, data.task.quest.id);
-
-				if (questTag == null)
-				{
-					questTag = new NBTTagCompound();
-					chapterTag.setTag(data.task.quest.id, questTag);
-				}
-
-				questTag.setTag(data.task.id, nbt2);
+				nbt1.setTag(data.task.getCodeString(), nbt2);
 			}
 		}
 
-		if (!nbt1.isEmpty())
-		{
-			nbt.setTag("TaskData", nbt1);
-		}
+		nbt.setTag("Tasks", nbt1);
 
 		if (!claimedTeamRewards.isEmpty())
 		{
@@ -467,9 +445,14 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 		{
 			nbt1 = new NBTTagCompound();
 
-			for (Object2LongOpenHashMap.Entry<QuestVariable> entry : variables.object2LongEntrySet())
+			for (Int2LongOpenHashMap.Entry entry : variables.int2LongEntrySet())
 			{
-				nbt1.setLong(entry.getKey().id, entry.getLongValue());
+				QuestVariable variable = ServerQuestFile.INSTANCE.getVariable(entry.getIntKey());
+
+				if (variable != null)
+				{
+					nbt1.setLong(variable.id, entry.getLongValue());
+				}
 			}
 
 			nbt.setTag("Variables", nbt1);
@@ -478,24 +461,44 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 
 	private void readData(NBTTagCompound nbt)
 	{
-		NBTTagCompound nbt1 = nbt.getCompoundTag("TaskData");
+		NBTTagCompound nbt1 = nbt.getCompoundTag("Tasks");
 
-		for (QuestTaskData data : taskData.values())
+		if (!nbt1.isEmpty())
 		{
-			NBTBase nbt2 = null;
-			NBTTagCompound chapterTag = getTagCompound(nbt1, data.task.quest.chapter.id);
-
-			if (chapterTag != null)
+			for (QuestTaskData data : taskData.values())
 			{
-				NBTTagCompound questTag = getTagCompound(chapterTag, data.task.quest.id);
+				data.fromNBT(nbt1.getTag(data.task.getCodeString()));
+			}
+		}
+		else
+		{
+			team.markDirty();
+			nbt1 = nbt.getCompoundTag("TaskData");
 
-				if (questTag != null)
-				{
-					nbt2 = questTag.getTag(data.task.id);
-				}
+			for (QuestTaskData data : taskData.values())
+			{
+				data.fromNBT(null);
 			}
 
-			data.fromNBT(nbt2);
+			for (String c : nbt1.getKeySet())
+			{
+				NBTTagCompound nbt2 = nbt1.getCompoundTag(c);
+
+				for (String q : nbt2.getKeySet())
+				{
+					NBTTagCompound nbt3 = nbt2.getCompoundTag(q);
+
+					for (String t : nbt3.getKeySet())
+					{
+						QuestTaskData data = taskData.get(ServerQuestFile.INSTANCE.getID(c + ':' + q + ':' + t));
+
+						if (data != null)
+						{
+							data.fromNBT(nbt3.getTag(t));
+						}
+					}
+				}
+			}
 		}
 
 		claimedTeamRewards.clear();
@@ -537,13 +540,19 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 
 		for (String s : nbt1.getKeySet())
 		{
-			QuestVariable variable = ServerQuestFile.INSTANCE.getVariable('#' + s);
+			QuestVariable variable = ServerQuestFile.INSTANCE.getVariable(ServerQuestFile.INSTANCE.getID('#' + s));
 
 			if (variable != null)
 			{
-				variables.put(variable, nbt1.getLong(s));
+				variables.put(variable.uid, nbt1.getLong(s));
 			}
 		}
+	}
+
+	@Override
+	public short getTeamUID()
+	{
+		return team.getUID();
 	}
 
 	@Override
@@ -561,7 +570,7 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 	@Override
 	public QuestTaskData getQuestTaskData(QuestTask task)
 	{
-		QuestTaskData data = taskData.get(task);
+		QuestTaskData data = taskData.get(task.uid);
 
 		if (data == null)
 		{

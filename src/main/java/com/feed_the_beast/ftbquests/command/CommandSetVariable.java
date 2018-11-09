@@ -95,9 +95,9 @@ public class CommandSetVariable extends CommandBase
 			teams = Collections.singleton(team);
 		}
 
-		QuestVariable var = ServerQuestFile.INSTANCE.getVariable(args[1]);
+		int var = ServerQuestFile.INSTANCE.getID(args[1]);
 
-		if (var == null)
+		if (ServerQuestFile.INSTANCE.getVariable(var) == null)
 		{
 			throw CommandUtils.error(SidedUtils.lang(sender, FTBQuests.MOD_ID, "commands.ftbquests.set_variable.invalid_id", args[1]));
 		}

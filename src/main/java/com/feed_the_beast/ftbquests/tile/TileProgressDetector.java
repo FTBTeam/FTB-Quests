@@ -11,13 +11,17 @@ import com.feed_the_beast.ftblib.lib.tile.TileBase;
 import com.feed_the_beast.ftblib.lib.util.BlockUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
+import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
+import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagInt;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.text.TextComponentTranslation;
 
@@ -29,7 +33,7 @@ import javax.annotation.Nullable;
 public class TileProgressDetector extends TileBase implements ITickable, IConfigCallback
 {
 	public String team = "";
-	public String object = "*";
+	public NBTBase object = new NBTTagInt(0);
 	public boolean level = false;
 	public int redstoneOutput = 0;
 
@@ -48,12 +52,12 @@ public class TileProgressDetector extends TileBase implements ITickable, IConfig
 
 		if (cObject != null)
 		{
-			object = cObject.getID();
+			object = new NBTTagInt(cObject.uid);
 		}
 
-		if (!object.isEmpty())
+		if (object != null)
 		{
-			nbt.setString("Object", object);
+			nbt.setTag("Object", object);
 		}
 
 		if (level)
@@ -71,7 +75,7 @@ public class TileProgressDetector extends TileBase implements ITickable, IConfig
 	protected void readData(NBTTagCompound nbt, EnumSaveType type)
 	{
 		team = nbt.getString("Team");
-		object = nbt.getString("Object");
+		object = nbt.getTag("Object");
 		level = nbt.getBoolean("Level");
 
 		if (!type.item)
@@ -127,13 +131,20 @@ public class TileProgressDetector extends TileBase implements ITickable, IConfig
 	@Nullable
 	public QuestObject getObject()
 	{
-		if (object.isEmpty())
+		if (object == null)
 		{
 			return null;
 		}
 		else if (cObject == null || cObject.invalid)
 		{
-			cObject = FTBQuests.PROXY.getQuestFile(world).get(object);
+			QuestFile file = FTBQuests.PROXY.getQuestFile(world);
+
+			if (file == null)
+			{
+				return null;
+			}
+
+			cObject = file.get(file.getID(object));
 		}
 
 		return cObject;
@@ -204,25 +215,21 @@ public class TileProgressDetector extends TileBase implements ITickable, IConfig
 
 		cObject = getObject();
 
-		if (cObject != null)
-		{
-			object = cObject.getID();
-		}
-
 		ConfigGroup group0 = ConfigGroup.newGroup("tile");
 		group0.setDisplayName(new TextComponentTranslation("tile.ftbquests.progress_detector.name"));
 		ConfigGroup config = group0.getGroup("ftbquests.progress_detector");
 
 		config.add("team", new ConfigTeam(() -> team, v -> team = v), ConfigNull.INSTANCE).setDisplayName(new TextComponentTranslation("ftbquests.team")).setCanEdit(editor);
 
-		config.add("object", new ConfigQuestObject(object, QuestObjectType.ALL)
+		config.add("object", new ConfigQuestObject(ServerQuestFile.INSTANCE, cObject, QuestObjectType.ALL)
 		{
 			@Override
-			public void setString(String v)
+			public void setObject(@Nullable QuestObject v)
 			{
-				object = v;
+				cObject = v;
+				object = cObject == null ? null : new NBTTagInt(cObject.uid);
 			}
-		}, new ConfigQuestObject("*", QuestObjectType.ALL));
+		}, new ConfigQuestObject(ServerQuestFile.INSTANCE, ServerQuestFile.INSTANCE, QuestObjectType.ALL));
 
 		config.addBool("level", () -> level, v -> level = v, false);
 
