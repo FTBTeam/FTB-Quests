@@ -4,24 +4,24 @@ import com.feed_the_beast.ftblib.FTBLib;
 import com.feed_the_beast.ftblib.lib.OtherMods;
 import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
 import com.feed_the_beast.ftblib.lib.gui.IOpenableGui;
+import com.feed_the_beast.ftblib.lib.gui.misc.GuiSelectFluid;
 import com.feed_the_beast.ftblib.lib.gui.misc.GuiSelectItemStack;
 import com.feed_the_beast.ftbquests.FTBQuestsCommon;
-import com.feed_the_beast.ftbquests.net.edit.MessageAddReward;
 import com.feed_the_beast.ftbquests.net.edit.MessageCreateObject;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
-import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.reward.FTBQuestsRewards;
 import com.feed_the_beast.ftbquests.quest.reward.ItemReward;
 import com.feed_the_beast.ftbquests.quest.reward.QuestRewardType;
 import com.feed_the_beast.ftbquests.quest.task.FTBQuestsTasks;
+import com.feed_the_beast.ftbquests.quest.task.FluidTask;
 import com.feed_the_beast.ftbquests.quest.task.ItemTask;
-import com.feed_the_beast.ftbquests.quest.task.QuestTaskType;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.client.settings.KeyConflictContext;
 import net.minecraftforge.client.settings.KeyModifier;
+import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.relauncher.Side;
@@ -49,25 +49,26 @@ public class FTBQuestsClient extends FTBQuestsCommon
 	@Override
 	public void setTaskGuiProviders()
 	{
-		FTBQuestsTasks.ITEM.setGuiProvider(new QuestTaskType.GuiProvider()
-		{
-			@Override
-			@SideOnly(Side.CLIENT)
-			public void openCreationGui(IOpenableGui gui, Quest quest)
+		FTBQuestsTasks.ITEM.setGuiProvider((gui, quest) -> new GuiSelectItemStack(gui, stack -> {
+			if (!stack.isEmpty())
 			{
-				new GuiSelectItemStack(gui, stack -> {
-					if (!stack.isEmpty())
-					{
-						ItemTask itemTask = new ItemTask(quest);
-						itemTask.items.add(ItemHandlerHelper.copyStackWithSize(stack, 1));
-						itemTask.count = stack.getCount();
-						NBTTagCompound nbt = new NBTTagCompound();
-						itemTask.writeData(nbt);
-						new MessageCreateObject(QuestObjectType.TASK, quest.uid, nbt).sendToServer();
-					}
-				}).openGui();
+				ItemTask itemTask = new ItemTask(quest);
+				itemTask.items.add(ItemHandlerHelper.copyStackWithSize(stack, 1));
+				itemTask.count = stack.getCount();
+				new MessageCreateObject(quest.uid, itemTask, null).sendToServer();
 			}
-		});
+		}).openGui());
+
+		FTBQuestsTasks.FLUID.setGuiProvider((gui, quest) -> new GuiSelectFluid(gui, () -> FluidRegistry.WATER, fluid -> {
+			if (fluid != null)
+			{
+				FluidTask fluidTask = new FluidTask(quest);
+				fluidTask.fluid = fluid;
+				NBTTagCompound extra = new NBTTagCompound();
+				extra.setString("type", FTBQuestsTasks.FLUID.getTypeForNBT());
+				new MessageCreateObject(quest.uid, fluidTask, extra).sendToServer();
+			}
+		}).openGui());
 	}
 
 	@Override
@@ -85,9 +86,7 @@ public class FTBQuestsClient extends FTBQuestsCommon
 					{
 						ItemReward reward = new ItemReward(quest);
 						reward.stack = stack;
-						NBTTagCompound nbt = new NBTTagCompound();
-						reward.writeData(nbt);
-						new MessageAddReward(quest.uid, nbt).sendToServer();
+						new MessageCreateObject(quest.uid, reward, null).sendToServer();
 					}
 				}).openGui();
 			}

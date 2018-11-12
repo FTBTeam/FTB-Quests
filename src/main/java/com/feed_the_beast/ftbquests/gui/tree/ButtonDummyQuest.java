@@ -12,7 +12,6 @@ import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.net.edit.MessageCreateObject;
 import com.feed_the_beast.ftbquests.net.edit.MessageMoveQuest;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.quest.task.ItemTask;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
@@ -73,9 +72,9 @@ public class ButtonDummyQuest extends Widget
 						ItemTask itemTask = new ItemTask(quest);
 						itemTask.items.add(ItemHandlerHelper.copyStackWithSize(stack, 1));
 						itemTask.count = stack.getCount();
-						NBTTagCompound nbt = new NBTTagCompound();
-						quest.writeData(nbt);
-						new MessageCreateObject(QuestObjectType.QUEST, treeGui.selectedChapter.uid, nbt).sendToServer();
+						NBTTagCompound extra = new NBTTagCompound();
+						itemTask.writeData(extra);
+						new MessageCreateObject(treeGui.selectedChapter.uid, quest, extra).sendToServer();
 					}
 				}).openGui();
 				return true;
@@ -91,9 +90,7 @@ public class ButtonDummyQuest extends Widget
 					quest.x = x;
 					quest.y = y;
 					quest.title = value.getString();
-					NBTTagCompound nbt = new NBTTagCompound();
-					quest.writeData(nbt);
-					new MessageCreateObject(QuestObjectType.QUEST, treeGui.selectedChapter.uid, nbt).sendToServer();
+					new MessageCreateObject(treeGui.selectedChapter.uid, quest, null).sendToServer();
 				}
 			}).openGui();
 

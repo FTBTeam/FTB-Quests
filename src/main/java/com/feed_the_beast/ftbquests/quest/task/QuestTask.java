@@ -1,5 +1,6 @@
 package com.feed_the_beast.ftbquests.quest.task;
 
+import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftbquests.events.ObjectCompletedEvent;
 import com.feed_the_beast.ftbquests.net.MessageSubmitItems;
@@ -162,6 +163,13 @@ public abstract class QuestTask extends QuestObject
 		return getType().getDisplayName();
 	}
 
+	@Override
+	public final ConfigGroup createSubGroup(ConfigGroup group)
+	{
+		QuestTaskType type = getType();
+		return group.getGroup(getObjectType().getName()).getGroup(type.getRegistryName().getNamespace()).getGroup(type.getRegistryName().getPath());
+	}
+
 	public Class<? extends TileScreenCore> getScreenCoreClass()
 	{
 		return TileScreenCore.class;
@@ -198,7 +206,6 @@ public abstract class QuestTask extends QuestObject
 	{
 		return false;
 	}
-
 
 	public boolean hideProgressNumbers()
 	{

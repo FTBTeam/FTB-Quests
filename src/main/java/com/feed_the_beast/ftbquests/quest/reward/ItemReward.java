@@ -3,14 +3,11 @@ package com.feed_the_beast.ftbquests.quest.reward;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigItemStack;
 import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
-import com.feed_the_beast.ftblib.lib.gui.IOpenableGui;
-import com.feed_the_beast.ftblib.lib.gui.misc.GuiSelectItemStack;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftbquests.item.ItemMissing;
-import com.feed_the_beast.ftbquests.net.edit.MessageAddReward;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Items;
@@ -80,22 +77,6 @@ public class ItemReward extends QuestReward
 	public void claim(EntityPlayerMP player)
 	{
 		ItemHandlerHelper.giveItemToPlayer(player, stack.copy());
-	}
-
-	@Override
-	@SideOnly(Side.CLIENT)
-	public void openCreationGui(IOpenableGui gui, QuestRewardType type)
-	{
-		new GuiSelectItemStack(gui, stack -> {
-			if (!stack.isEmpty())
-			{
-				ItemReward reward = new ItemReward(quest);
-				reward.stack = stack;
-				NBTTagCompound nbt = new NBTTagCompound();
-				reward.writeData(nbt);
-				new MessageAddReward(quest.uid, nbt).sendToServer();
-			}
-		}).openGui();
 	}
 
 	@Override

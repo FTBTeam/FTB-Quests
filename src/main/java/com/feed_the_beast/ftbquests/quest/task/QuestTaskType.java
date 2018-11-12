@@ -8,7 +8,6 @@ import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.net.edit.MessageCreateObject;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
@@ -113,16 +112,14 @@ public final class QuestTaskType extends IForgeRegistryEntry.Impl<QuestTaskType>
 				}
 
 				ConfigGroup group = ConfigGroup.newGroup(FTBQuests.MOD_ID);
-				ConfigGroup g = group.getGroup("task").getGroup(getRegistryName().getNamespace()).getGroup(getRegistryName().getPath());
-
+				ConfigGroup g = task.createSubGroup(group);
 				task.getConfig(g);
 				task.getExtraConfig(g);
 
 				new GuiEditConfig(group, (g1, sender) -> {
-					NBTTagCompound nbt = new NBTTagCompound();
-					task.writeData(nbt);
-					nbt.setString("type", getTypeForNBT());
-					new MessageCreateObject(QuestObjectType.TASK, quest.uid, nbt).sendToServer();
+					NBTTagCompound extra = new NBTTagCompound();
+					extra.setString("type", getTypeForNBT());
+					new MessageCreateObject(quest.uid, task, extra).sendToServer();
 				}).openGui();
 			}
 		};

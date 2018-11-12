@@ -1,9 +1,9 @@
 package com.feed_the_beast.ftbquests.command;
 
 import com.feed_the_beast.ftblib.FTBLib;
-import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
+import com.feed_the_beast.ftblib.lib.config.ConfigBoolean;
 import com.feed_the_beast.ftbquests.FTBQuests;
-import com.feed_the_beast.ftbquests.net.edit.MessageEditRewardResponse;
+import com.feed_the_beast.ftbquests.net.edit.MessageEditObjectQuickResponse;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
@@ -102,7 +102,7 @@ public class CommandChangeTeamRewards extends CommandBase
 			chapters = Collections.singleton(chapter);
 		}
 
-		boolean value = parseBoolean(args[1]);
+		ConfigBoolean value = new ConfigBoolean(parseBoolean(args[1]));
 
 		ServerQuestFile.INSTANCE.clearCachedData();
 		int r = 0;
@@ -113,14 +113,11 @@ public class CommandChangeTeamRewards extends CommandBase
 			{
 				for (QuestReward reward : quest.rewards)
 				{
-					if (reward.team != value)
+					if (reward.team != value.getBoolean())
 					{
-						reward.team = value;
+						reward.team = value.getBoolean();
 						r++;
-						ConfigGroup group = ConfigGroup.newGroup("reward");
-						reward.getConfig(group);
-						reward.getExtraConfig(group);
-						new MessageEditRewardResponse(reward.uid, group.serializeNBT()).sendToAll();
+						new MessageEditObjectQuickResponse(reward.uid, "team", value).sendToAll();
 					}
 				}
 			}
@@ -128,6 +125,6 @@ public class CommandChangeTeamRewards extends CommandBase
 
 		ServerQuestFile.INSTANCE.save();
 
-		sender.sendMessage(new TextComponentTranslation("commands.ftbquests.change_team_rewards.text", r, Boolean.toString(value)));
+		sender.sendMessage(new TextComponentTranslation("commands.ftbquests.change_team_rewards.text", r, value.toString()));
 	}
 }

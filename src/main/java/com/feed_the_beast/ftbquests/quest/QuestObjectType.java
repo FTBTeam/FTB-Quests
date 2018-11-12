@@ -16,6 +16,7 @@ public enum QuestObjectType implements IStringSerializable
 	QUEST("quest", 4, TextFormatting.GREEN),
 	TASK("task", 8, TextFormatting.BLUE),
 	VARIABLE("variable", 16, TextFormatting.DARK_PURPLE),
+	REWARD("reward", 32, TextFormatting.LIGHT_PURPLE),
 	NULL("null", 128, TextFormatting.BLACK);
 
 	public static final QuestObjectType[] VALUES = values();

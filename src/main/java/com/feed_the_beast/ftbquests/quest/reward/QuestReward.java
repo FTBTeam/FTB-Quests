@@ -1,7 +1,6 @@
 package com.feed_the_beast.ftbquests.quest.reward;
 
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
-import com.feed_the_beast.ftblib.lib.gui.IOpenableGui;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.io.Bits;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
@@ -12,6 +11,7 @@ import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
+import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.ITextComponent;
@@ -19,6 +19,7 @@ import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -37,6 +38,12 @@ public abstract class QuestReward extends QuestObjectBase
 		quest = q;
 		team = quest.chapter.file.defaultRewardTeam;
 		emergency = false;
+	}
+
+	@Override
+	public final QuestObjectType getObjectType()
+	{
+		return QuestObjectType.REWARD;
 	}
 
 	@Override
@@ -115,6 +122,19 @@ public abstract class QuestReward extends QuestObjectBase
 		data.unclaimRewards(Collections.singleton(this));
 	}
 
+	@Override
+	public final void deleteSelf()
+	{
+		super.deleteSelf();
+
+		Collection<QuestReward> c = Collections.singleton(this);
+
+		for (ITeamData data : quest.chapter.file.getAllData())
+		{
+			data.unclaimRewards(c);
+		}
+	}
+
 	public final boolean isTeamReward()
 	{
 		return team || quest.canRepeat;
@@ -123,11 +143,6 @@ public abstract class QuestReward extends QuestObjectBase
 	public final boolean addToEmergencyItems()
 	{
 		return emergency;
-	}
-
-	@SideOnly(Side.CLIENT)
-	public void openCreationGui(IOpenableGui gui, QuestRewardType type)
-	{
 	}
 
 	@Override
@@ -140,6 +155,13 @@ public abstract class QuestReward extends QuestObjectBase
 	public ITextComponent getAltDisplayName()
 	{
 		return getType().getDisplayName();
+	}
+
+	@Override
+	public final ConfigGroup createSubGroup(ConfigGroup group)
+	{
+		QuestRewardType type = getType();
+		return group.getGroup(getObjectType().getName()).getGroup(type.getRegistryName().getNamespace()).getGroup(type.getRegistryName().getPath());
 	}
 
 	@SideOnly(Side.CLIENT)

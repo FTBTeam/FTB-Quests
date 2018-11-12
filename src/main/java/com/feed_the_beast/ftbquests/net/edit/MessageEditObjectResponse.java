@@ -6,7 +6,7 @@ import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToClient;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
-import com.feed_the_beast.ftbquests.quest.QuestObject;
+import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -55,7 +55,7 @@ public class MessageEditObjectResponse extends MessageToClient
 	{
 		if (ClientQuestFile.INSTANCE != null)
 		{
-			QuestObject object = ClientQuestFile.INSTANCE.get(id);
+			QuestObjectBase object = ClientQuestFile.INSTANCE.getBase(id);
 
 			if (object != null)
 			{
