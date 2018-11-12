@@ -54,6 +54,7 @@ public class FluidTask extends QuestTask
 	{
 		super(quest);
 		fluid = FluidRegistry.WATER;
+		amount = 1000L;
 	}
 
 	@Override

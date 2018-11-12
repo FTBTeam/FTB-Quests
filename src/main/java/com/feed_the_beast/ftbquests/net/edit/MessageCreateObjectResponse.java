@@ -6,31 +6,34 @@ import com.feed_the_beast.ftblib.lib.net.MessageToClient;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
+import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+
+import javax.annotation.Nullable;
 
 /**
  * @author LatvianModder
  */
 public class MessageCreateObjectResponse extends MessageToClient
 {
-	private QuestObjectType type;
 	private int id;
 	private int parent;
-	private NBTTagCompound nbt;
+	private QuestObjectBase object;
+	private NBTTagCompound extra;
 
 	public MessageCreateObjectResponse()
 	{
 	}
 
-	public MessageCreateObjectResponse(QuestObjectType t, int i, int p, NBTTagCompound n)
+	public MessageCreateObjectResponse(int p, QuestObjectBase o, @Nullable NBTTagCompound e)
 	{
-		type = t;
-		id = i;
+		id = o.uid;
 		parent = p;
-		nbt = n;
+		object = o;
+		extra = e;
 	}
 
 	@Override
@@ -42,38 +45,37 @@ public class MessageCreateObjectResponse extends MessageToClient
 	@Override
 	public void writeData(DataOut data)
 	{
-		data.writeByte(type.ordinal());
 		data.writeInt(id);
+		data.writeNBT(extra);
 		data.writeInt(parent);
-		data.writeNBT(nbt);
+		data.writeByte(object.getObjectType().ordinal());
+		object.writeNetData(data);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
-		type = QuestObjectType.VALUES[data.readUnsignedByte()];
 		id = data.readInt();
+		extra = data.readNBT();
 		parent = data.readInt();
-		nbt = data.readNBT();
+		QuestObjectType type = QuestObjectType.VALUES[data.readUnsignedByte()];
+		object = ClientQuestFile.INSTANCE.create(type, parent, extra == null ? new NBTTagCompound() : extra);
+		object.readNetData(data);
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void onMessage()
 	{
-		if (ClientQuestFile.INSTANCE != null)
-		{
-			QuestObject object = ClientQuestFile.INSTANCE.create(type, parent, nbt);
+		object.uid = id;
 
-			if (object != null)
-			{
-				object.uid = id;
-				object.id = object.getCodeString();
-				object.readData(nbt);
-				object.onCreated();
-				ClientQuestFile.INSTANCE.refreshIDMap();
-				ClientQuestFile.INSTANCE.refreshGui();
-			}
+		if (object instanceof QuestObject)
+		{
+			((QuestObject) object).id = object.getCodeString();
 		}
+
+		object.onCreated();
+		ClientQuestFile.INSTANCE.refreshIDMap();
+		ClientQuestFile.INSTANCE.refreshGui();
 	}
 }

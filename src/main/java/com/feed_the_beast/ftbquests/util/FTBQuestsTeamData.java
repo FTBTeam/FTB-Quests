@@ -22,7 +22,6 @@ import com.feed_the_beast.ftbquests.net.MessageDeleteTeamData;
 import com.feed_the_beast.ftbquests.net.MessageSyncQuests;
 import com.feed_the_beast.ftbquests.net.MessageUpdateTaskProgress;
 import com.feed_the_beast.ftbquests.net.MessageUpdateVariable;
-import com.feed_the_beast.ftbquests.net.edit.MessageResetRewardResponse;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestVariable;
@@ -360,7 +359,7 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 			{
 				for (QuestReward reward : rewards)
 				{
-					new MessageResetRewardResponse(reward.uid).sendTo(player.getPlayer());
+					//FIXME: new MessageResetProgress(reward.uid).sendTo(player.getPlayer());
 				}
 			}
 		}

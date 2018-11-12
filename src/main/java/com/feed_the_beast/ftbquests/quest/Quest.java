@@ -468,7 +468,14 @@ public final class Quest extends QuestObject
 			task.invalid = true;
 		}
 
+		for (QuestReward reward : rewards)
+		{
+			reward.deleteChildren();
+			reward.invalid = true;
+		}
+
 		tasks.clear();
+		rewards.clear();
 	}
 
 	@Override

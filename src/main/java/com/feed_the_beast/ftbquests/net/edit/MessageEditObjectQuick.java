@@ -1,17 +1,16 @@
 package com.feed_the_beast.ftbquests.net.edit;
 
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
+import com.feed_the_beast.ftblib.lib.config.ConfigValue;
 import com.feed_the_beast.ftblib.lib.config.ConfigValueInstance;
-import com.feed_the_beast.ftblib.lib.config.IIteratingConfig;
+import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToServer;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.FTBQuests;
-import com.feed_the_beast.ftbquests.quest.QuestObject;
+import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
-import com.feed_the_beast.ftbquests.quest.task.QuestTask;
-import com.feed_the_beast.ftbquests.quest.task.QuestTaskType;
 import net.minecraft.entity.player.EntityPlayerMP;
 
 /**
@@ -21,17 +20,17 @@ public class MessageEditObjectQuick extends MessageToServer
 {
 	private int id;
 	private String configId;
-	private boolean next;
+	private ConfigValue value;
 
 	public MessageEditObjectQuick()
 	{
 	}
 
-	public MessageEditObjectQuick(int i, String c, boolean n)
+	public MessageEditObjectQuick(int i, String c, ConfigValue v)
 	{
 		id = i;
 		configId = c;
-		next = n;
+		value = v;
 	}
 
 	@Override
@@ -45,7 +44,8 @@ public class MessageEditObjectQuick extends MessageToServer
 	{
 		data.writeInt(id);
 		data.writeString(configId);
-		data.writeBoolean(next);
+		data.writeString(value.getID());
+		value.writeData(data);
 	}
 
 	@Override
@@ -53,7 +53,8 @@ public class MessageEditObjectQuick extends MessageToServer
 	{
 		id = data.readInt();
 		configId = data.readString();
-		next = data.readBoolean();
+		ConfigValue value = FTBLibAPI.createConfigValueFromId(data.readString());
+		value.readData(data);
 	}
 
 	@Override
@@ -61,29 +62,21 @@ public class MessageEditObjectQuick extends MessageToServer
 	{
 		if (FTBQuests.canEdit(player))
 		{
-			QuestObject object = ServerQuestFile.INSTANCE.get(id);
+			QuestObjectBase object = ServerQuestFile.INSTANCE.getBase(id);
 
 			if (object != null)
 			{
 				ConfigGroup group = ConfigGroup.newGroup(FTBQuests.MOD_ID);
-				ConfigGroup group1 = group.getGroup(object.getObjectType().getName());
-				ConfigGroup g = group1;
-
-				if (object instanceof QuestTask)
-				{
-					QuestTaskType type = ((QuestTask) object).getType();
-					g = group1.getGroup(type.getRegistryName().getNamespace()).getGroup(type.getRegistryName().getPath());
-				}
-
+				ConfigGroup g = object.createSubGroup(group);
 				object.getConfig(g);
 				object.getExtraConfig(g);
 
 				ConfigValueInstance inst = g.getValueInstance(configId);
 
-				if (inst != null && inst.getValue() instanceof IIteratingConfig)
+				if (inst != null)
 				{
-					((IIteratingConfig) inst.getValue()).iterate(inst, next);
-					new MessageEditObjectQuickResponse(id, configId, next).sendToAll();
+					inst.getValue().setValueFromOtherValue(value);
+					new MessageEditObjectQuickResponse(id, configId, value).sendToAll();
 					ServerQuestFile.INSTANCE.save();
 				}
 			}

@@ -11,14 +11,11 @@ import com.feed_the_beast.ftblib.lib.gui.misc.GuiEditConfigValue;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.net.edit.MessageCreateObject;
-import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.quest.QuestVariable;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.nbt.NBTTagCompound;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Pattern;
 
 /**
  * @author LatvianModder
@@ -41,15 +38,15 @@ public class GuiVariables extends GuiButtonListBase
 			{
 				GuiHelper.playClickSound();
 
-				new GuiEditConfigValue("id", new ConfigString("", Pattern.compile("^[a-z0-9_]{1,32}$")), (value, set) -> {
-					if (set && ClientQuestFile.INSTANCE.get(ClientQuestFile.INSTANCE.getID('#' + value.getString())) == null)
-					{
-						NBTTagCompound nbt = new NBTTagCompound();
-						nbt.setString("id", value.getString());
-						new MessageCreateObject(QuestObjectType.VARIABLE, 0, nbt).sendToServer();
-					}
-
+				new GuiEditConfigValue("id", new ConfigString(""), (value, set) -> {
 					GuiVariables.this.openGui();
+
+					if (set)
+					{
+						QuestVariable variable = new QuestVariable(ClientQuestFile.INSTANCE);
+						variable.title = value.getString();
+						new MessageCreateObject(0, variable, null).sendToServer();
+					}
 				}).openGui();
 			}
 		};

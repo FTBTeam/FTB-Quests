@@ -368,7 +368,7 @@ public abstract class QuestFile extends QuestObject
 	}
 
 	@Nullable
-	public QuestObject create(QuestObjectType type, int parent, NBTTagCompound nbt)
+	public QuestObjectBase create(QuestObjectType type, int parent, NBTTagCompound extra)
 	{
 		switch (type)
 		{
@@ -391,13 +391,22 @@ public abstract class QuestFile extends QuestObject
 
 				if (quest != null)
 				{
-					return QuestTaskType.createTask(quest, nbt.getString("type"));
+					return QuestTaskType.createTask(quest, extra.getString("type"));
 				}
 
 				return null;
 			}
 			case VARIABLE:
 				return new QuestVariable(this);
+			case REWARD:
+				Quest quest = getQuest(parent);
+
+				if (quest != null)
+				{
+					return QuestRewardType.createReward(quest, extra.getString("type"));
+				}
+
+				return null;
 			default:
 				return null;
 		}

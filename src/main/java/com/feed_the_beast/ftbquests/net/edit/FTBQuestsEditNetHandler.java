@@ -19,17 +19,11 @@ public class FTBQuestsEditNetHandler
 		EDIT.register(new MessageMoveChapterResponse());
 		EDIT.register(new MessageMoveQuest());
 		EDIT.register(new MessageMoveQuestResponse());
-		EDIT.register(new MessageAddReward());
-		EDIT.register(new MessageAddRewardResponse());
-		EDIT.register(new MessageEditReward());
-		EDIT.register(new MessageEditRewardResponse());
 		EDIT.register(new MessageEditDependency());
 		EDIT.register(new MessageEditDependencyResponse());
 		EDIT.register(new MessageEditObjectQuick());
 		EDIT.register(new MessageEditObjectQuickResponse());
 		EDIT.register(new MessageDeleteReward());
 		EDIT.register(new MessageDeleteRewardResponse());
-		EDIT.register(new MessageResetReward());
-		EDIT.register(new MessageResetRewardResponse());
 	}
 }

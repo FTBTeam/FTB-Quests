@@ -55,6 +55,7 @@ public class MessageDeleteObjectResponse extends MessageToClient
 			{
 				object.deleteChildren();
 				object.deleteSelf();
+				ClientQuestFile.INSTANCE.refreshIDMap();
 				ClientQuestFile.INSTANCE.refreshGui();
 			}
 		}

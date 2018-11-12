@@ -14,6 +14,8 @@ import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 
 import javax.annotation.Nullable;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.function.Predicate;
 
 /**
@@ -49,6 +51,8 @@ public abstract class QuestObjectBase
 	{
 		return uid;
 	}
+
+	public abstract QuestObjectType getObjectType();
 
 	public abstract QuestFile getQuestFile();
 
@@ -146,5 +150,15 @@ public abstract class QuestObjectBase
 	public void clearCachedData()
 	{
 		cachedIcon = null;
+	}
+
+	public ConfigGroup createSubGroup(ConfigGroup group)
+	{
+		return group.getGroup(getObjectType().getName());
+	}
+
+	public Collection<QuestObjectBase> createExtras(NBTTagCompound extra)
+	{
+		return Collections.emptyList();
 	}
 }

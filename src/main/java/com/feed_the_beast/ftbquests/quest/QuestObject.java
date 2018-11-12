@@ -15,8 +15,6 @@ public abstract class QuestObject extends QuestObjectBase
 	public String id = "";
 	public String completionCommand = "";
 
-	public abstract QuestObjectType getObjectType();
-
 	@Deprecated
 	public abstract String getID();
 

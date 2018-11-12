@@ -9,9 +9,7 @@ import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.gui.QuestsTheme;
 import com.feed_the_beast.ftbquests.net.edit.MessageCreateObject;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
-import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.nbt.NBTTagCompound;
 
 import java.util.regex.Pattern;
 
@@ -38,9 +36,7 @@ public class ButtonAddChapter extends ButtonTab
 			{
 				QuestChapter chapter = new QuestChapter(treeGui.questFile);
 				chapter.title = value.getString();
-				NBTTagCompound nbt = new NBTTagCompound();
-				chapter.writeData(nbt);
-				new MessageCreateObject(QuestObjectType.CHAPTER, 0, nbt).sendToServer();
+				new MessageCreateObject(0, chapter, null).sendToServer();
 			}
 		}).openGui();
 	}

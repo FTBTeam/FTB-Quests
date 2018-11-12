@@ -168,7 +168,7 @@ public class GuiQuestTree extends GuiBase
 						{
 							if (inst.getCanEdit())
 							{
-								new MessageEditObjectQuick(object.uid, inst.getID(), button.isLeft()).sendToServer();
+								new MessageEditObjectQuick(object.uid, inst.getID(), ((IIteratingConfig) inst.getValue()).getIteration(button.isLeft())).sendToServer();
 							}
 						}
 

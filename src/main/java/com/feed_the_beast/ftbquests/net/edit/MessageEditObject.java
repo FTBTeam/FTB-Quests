@@ -10,7 +10,10 @@ import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
+import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
+import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
+import com.feed_the_beast.ftbquests.quest.reward.QuestRewardType;
 import com.feed_the_beast.ftbquests.quest.task.QuestTask;
 import com.feed_the_beast.ftbquests.quest.task.QuestTaskType;
 import net.minecraft.command.ICommandSender;
@@ -59,7 +62,7 @@ public class MessageEditObject extends MessageToServer implements IConfigCallbac
 	{
 		if (FTBQuests.canEdit(player))
 		{
-			QuestObject object = ServerQuestFile.INSTANCE.get(id);
+			QuestObjectBase object = ServerQuestFile.INSTANCE.getBase(id);
 
 			if (object != null)
 			{
@@ -76,6 +79,12 @@ public class MessageEditObject extends MessageToServer implements IConfigCallbac
 				if (object instanceof QuestTask)
 				{
 					QuestTaskType type = ((QuestTask) object).getType();
+					g = group1.getGroup(type.getRegistryName().getNamespace()).getGroup(type.getRegistryName().getPath());
+					group.setDisplayName(type.getDisplayName().appendSibling(idc));
+				}
+				else if (object instanceof QuestReward)
+				{
+					QuestRewardType type = ((QuestReward) object).getType();
 					g = group1.getGroup(type.getRegistryName().getNamespace()).getGroup(type.getRegistryName().getPath());
 					group.setDisplayName(type.getDisplayName().appendSibling(idc));
 				}
