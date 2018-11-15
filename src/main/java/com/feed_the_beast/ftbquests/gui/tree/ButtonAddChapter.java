@@ -36,7 +36,7 @@ public class ButtonAddChapter extends ButtonTab
 			{
 				QuestChapter chapter = new QuestChapter(treeGui.questFile);
 				chapter.title = value.getString();
-				new MessageCreateObject(0, chapter, null).sendToServer();
+				new MessageCreateObject(chapter, null).sendToServer();
 			}
 		}).openGui();
 	}

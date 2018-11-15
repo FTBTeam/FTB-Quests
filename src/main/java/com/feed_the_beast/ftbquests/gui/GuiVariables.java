@@ -45,7 +45,7 @@ public class GuiVariables extends GuiButtonListBase
 					{
 						QuestVariable variable = new QuestVariable(ClientQuestFile.INSTANCE);
 						variable.title = value.getString();
-						new MessageCreateObject(0, variable, null).sendToServer();
+						new MessageCreateObject(variable, null).sendToServer();
 					}
 				}).openGui();
 			}

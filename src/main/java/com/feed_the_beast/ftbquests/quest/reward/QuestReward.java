@@ -58,6 +58,12 @@ public abstract class QuestReward extends QuestObjectBase
 		return quest.chapter;
 	}
 
+	@Override
+	public final int getParentID()
+	{
+		return quest.uid;
+	}
+
 	public abstract QuestRewardType getType();
 
 	@Override

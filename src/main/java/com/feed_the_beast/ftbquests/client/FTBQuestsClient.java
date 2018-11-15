@@ -55,7 +55,7 @@ public class FTBQuestsClient extends FTBQuestsCommon
 				ItemTask itemTask = new ItemTask(quest);
 				itemTask.items.add(ItemHandlerHelper.copyStackWithSize(stack, 1));
 				itemTask.count = stack.getCount();
-				new MessageCreateObject(quest.uid, itemTask, null).sendToServer();
+				new MessageCreateObject(itemTask, null).sendToServer();
 			}
 		}).openGui());
 
@@ -66,7 +66,7 @@ public class FTBQuestsClient extends FTBQuestsCommon
 				fluidTask.fluid = fluid;
 				NBTTagCompound extra = new NBTTagCompound();
 				extra.setString("type", FTBQuestsTasks.FLUID.getTypeForNBT());
-				new MessageCreateObject(quest.uid, fluidTask, extra).sendToServer();
+				new MessageCreateObject(fluidTask, extra).sendToServer();
 			}
 		}).openGui());
 	}
@@ -86,7 +86,7 @@ public class FTBQuestsClient extends FTBQuestsCommon
 					{
 						ItemReward reward = new ItemReward(quest);
 						reward.stack = stack;
-						new MessageCreateObject(quest.uid, reward, null).sendToServer();
+						new MessageCreateObject(reward, null).sendToServer();
 					}
 				}).openGui();
 			}

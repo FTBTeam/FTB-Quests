@@ -28,10 +28,10 @@ public class MessageCreateObjectResponse extends MessageToClient
 	{
 	}
 
-	public MessageCreateObjectResponse(int p, QuestObjectBase o, @Nullable NBTTagCompound e)
+	public MessageCreateObjectResponse(QuestObjectBase o, @Nullable NBTTagCompound e)
 	{
 		id = o.uid;
-		parent = p;
+		parent = o.getParentID();
 		object = o;
 		extra = e;
 	}

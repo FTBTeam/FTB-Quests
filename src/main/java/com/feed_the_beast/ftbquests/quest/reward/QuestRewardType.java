@@ -118,7 +118,7 @@ public final class QuestRewardType extends IForgeRegistryEntry.Impl<QuestRewardT
 				new GuiEditConfig(group, (g1, sender) -> {
 					NBTTagCompound extra = new NBTTagCompound();
 					extra.setString("type", getTypeForNBT());
-					new MessageCreateObject(quest.uid, reward, extra).sendToServer();
+					new MessageCreateObject(reward, extra).sendToServer();
 				}).openGui();
 			}
 		};

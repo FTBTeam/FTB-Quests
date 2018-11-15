@@ -17,6 +17,8 @@ import net.minecraftforge.common.util.Constants;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -38,6 +40,12 @@ public final class QuestChapter extends QuestObject
 	}
 
 	@Override
+	public QuestObjectType getObjectType()
+	{
+		return QuestObjectType.CHAPTER;
+	}
+
+	@Override
 	public QuestFile getQuestFile()
 	{
 		return file;
@@ -47,12 +55,6 @@ public final class QuestChapter extends QuestObject
 	public QuestChapter getQuestChapter()
 	{
 		return this;
-	}
-
-	@Override
-	public QuestObjectType getObjectType()
-	{
-		return QuestObjectType.CHAPTER;
 	}
 
 	@Override
@@ -298,5 +300,13 @@ public final class QuestChapter extends QuestObject
 		{
 			quest.clearCachedData();
 		}
+	}
+
+	@Override
+	public Collection<QuestObjectBase> createExtras(NBTTagCompound extra)
+	{
+		Quest quest = new Quest(this);
+		quest.readData(extra);
+		return Collections.singleton(quest);
 	}
 }

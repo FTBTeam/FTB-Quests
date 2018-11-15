@@ -56,6 +56,17 @@ public abstract class QuestObjectBase
 
 	public abstract QuestFile getQuestFile();
 
+	@Nullable
+	public QuestChapter getQuestChapter()
+	{
+		return null;
+	}
+
+	public int getParentID()
+	{
+		return 0;
+	}
+
 	public void writeData(NBTTagCompound nbt)
 	{
 		if (!title.isEmpty())
@@ -126,12 +137,6 @@ public abstract class QuestObjectBase
 		}
 
 		return getAltDisplayName();
-	}
-
-	@Nullable
-	public QuestChapter getQuestChapter()
-	{
-		return null;
 	}
 
 	public void deleteSelf()
