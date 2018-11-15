@@ -119,7 +119,7 @@ public final class QuestTaskType extends IForgeRegistryEntry.Impl<QuestTaskType>
 				new GuiEditConfig(group, (g1, sender) -> {
 					NBTTagCompound extra = new NBTTagCompound();
 					extra.setString("type", getTypeForNBT());
-					new MessageCreateObject(quest.uid, task, extra).sendToServer();
+					new MessageCreateObject(task, extra).sendToServer();
 				}).openGui();
 			}
 		};

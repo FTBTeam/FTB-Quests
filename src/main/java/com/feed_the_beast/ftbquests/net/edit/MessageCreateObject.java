@@ -27,9 +27,9 @@ public class MessageCreateObject extends MessageToServer
 	{
 	}
 
-	public MessageCreateObject(int p, QuestObjectBase o, @Nullable NBTTagCompound e)
+	public MessageCreateObject(QuestObjectBase o, @Nullable NBTTagCompound e)
 	{
-		parent = p;
+		parent = o.getParentID();
 		object = o;
 		extra = e;
 	}
@@ -72,7 +72,7 @@ public class MessageCreateObject extends MessageToServer
 			}
 
 			object.onCreated();
-			new MessageCreateObjectResponse(parent, object, extra).sendToAll();
+			new MessageCreateObjectResponse(object, extra).sendToAll();
 
 			if (extra != null && !extra.isEmpty())
 			{
@@ -86,7 +86,7 @@ public class MessageCreateObject extends MessageToServer
 					}
 
 					o.onCreated();
-					new MessageCreateObjectResponse(object.uid, o, null).sendToAll();
+					new MessageCreateObjectResponse(o, null).sendToAll();
 				}
 			}
 

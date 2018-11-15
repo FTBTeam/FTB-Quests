@@ -10,6 +10,7 @@ import com.feed_the_beast.ftblib.lib.util.ListUtils;
 import com.feed_the_beast.ftbquests.events.ObjectCompletedEvent;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
 import com.feed_the_beast.ftbquests.quest.task.QuestTask;
+import com.feed_the_beast.ftbquests.quest.task.QuestTaskType;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
@@ -26,6 +27,8 @@ import net.minecraftforge.common.util.Constants;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -65,6 +68,12 @@ public final class Quest extends QuestObject
 	}
 
 	@Override
+	public QuestObjectType getObjectType()
+	{
+		return QuestObjectType.QUEST;
+	}
+
+	@Override
 	public QuestFile getQuestFile()
 	{
 		return chapter.file;
@@ -77,9 +86,9 @@ public final class Quest extends QuestObject
 	}
 
 	@Override
-	public QuestObjectType getObjectType()
+	public int getParentID()
 	{
-		return QuestObjectType.QUEST;
+		return chapter.uid;
 	}
 
 	@Override
@@ -623,5 +632,19 @@ public final class Quest extends QuestObject
 		}
 
 		resetProgress(data, false);
+	}
+
+	@Override
+	public Collection<QuestObjectBase> createExtras(NBTTagCompound extra)
+	{
+		QuestTask task = QuestTaskType.createTask(this, extra.getString("type"));
+
+		if (task != null)
+		{
+			task.readData(extra);
+			return Collections.singleton(task);
+		}
+
+		return Collections.emptyList();
 	}
 }

@@ -34,9 +34,11 @@ public abstract class QuestTask extends QuestObject
 		quest = q;
 	}
 
-	public abstract QuestTaskType getType();
-
-	public abstract QuestTaskData createData(ITeamData data);
+	@Override
+	public final QuestObjectType getObjectType()
+	{
+		return QuestObjectType.TASK;
+	}
 
 	@Override
 	public final QuestFile getQuestFile()
@@ -51,10 +53,14 @@ public abstract class QuestTask extends QuestObject
 	}
 
 	@Override
-	public final QuestObjectType getObjectType()
+	public final int getParentID()
 	{
-		return QuestObjectType.TASK;
+		return quest.uid;
 	}
+
+	public abstract QuestTaskType getType();
+
+	public abstract QuestTaskData createData(ITeamData data);
 
 	@Override
 	@Deprecated

@@ -74,7 +74,7 @@ public class ButtonDummyQuest extends Widget
 						itemTask.count = stack.getCount();
 						NBTTagCompound extra = new NBTTagCompound();
 						itemTask.writeData(extra);
-						new MessageCreateObject(treeGui.selectedChapter.uid, quest, extra).sendToServer();
+						new MessageCreateObject(quest, extra).sendToServer();
 					}
 				}).openGui();
 				return true;
@@ -90,7 +90,7 @@ public class ButtonDummyQuest extends Widget
 					quest.x = x;
 					quest.y = y;
 					quest.title = value.getString();
-					new MessageCreateObject(treeGui.selectedChapter.uid, quest, null).sendToServer();
+					new MessageCreateObject(quest, null).sendToServer();
 				}
 			}).openGui();
 
