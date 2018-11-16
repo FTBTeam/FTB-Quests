@@ -141,6 +141,12 @@ public abstract class QuestReward extends QuestObjectBase
 		}
 	}
 
+	@Override
+	public void onCreated()
+	{
+		quest.rewards.add(this);
+	}
+
 	public final boolean isTeamReward()
 	{
 		return team || quest.canRepeat;
