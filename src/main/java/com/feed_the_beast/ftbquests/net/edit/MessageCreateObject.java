@@ -72,10 +72,10 @@ public class MessageCreateObject extends MessageToServer
 			}
 
 			object.onCreated();
-			new MessageCreateObjectResponse(object, extra).sendToAll();
 			ServerQuestFile.INSTANCE.refreshIDMap();
 			ServerQuestFile.INSTANCE.clearCachedData();
 			ServerQuestFile.INSTANCE.save();
+			new MessageCreateObjectResponse(object, extra).sendToAll();
 		}
 	}
 }

@@ -142,11 +142,6 @@ public abstract class QuestTask extends QuestObject
 	}
 
 	@Override
-	public void deleteChildren()
-	{
-	}
-
-	@Override
 	public void onCreated()
 	{
 		quest.tasks.add(this);
