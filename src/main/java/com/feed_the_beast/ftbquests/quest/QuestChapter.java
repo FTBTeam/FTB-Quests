@@ -17,8 +17,6 @@ import net.minecraftforge.common.util.Constants;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -302,11 +300,17 @@ public final class QuestChapter extends QuestObject
 		}
 	}
 
-	@Override
-	public Collection<QuestObjectBase> createExtras(NBTTagCompound extra)
+	@Nullable
+	public Quest getQuestAt(byte x, byte y)
 	{
-		Quest quest = new Quest(this);
-		quest.readData(extra);
-		return Collections.singleton(quest);
+		for (Quest quest : quests)
+		{
+			if (quest.x == x && quest.y == y)
+			{
+				return quest;
+			}
+		}
+
+		return null;
 	}
 }

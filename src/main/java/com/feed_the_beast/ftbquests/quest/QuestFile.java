@@ -367,7 +367,6 @@ public abstract class QuestFile extends QuestObject
 		clearCachedData();
 	}
 
-	@Nullable
 	public QuestObjectBase create(QuestObjectType type, int parent, NBTTagCompound extra)
 	{
 		switch (type)
@@ -383,7 +382,7 @@ public abstract class QuestFile extends QuestObject
 					return new Quest(chapter);
 				}
 
-				return null;
+				throw new IllegalArgumentException("Parent chapter not found!");
 			}
 			case TASK:
 			{
@@ -391,10 +390,17 @@ public abstract class QuestFile extends QuestObject
 
 				if (quest != null)
 				{
-					return QuestTaskType.createTask(quest, extra.getString("type"));
+					QuestTask task = QuestTaskType.createTask(quest, extra.getString("type"));
+
+					if (task != null)
+					{
+						return task;
+					}
+
+					throw new IllegalArgumentException("Unknown task type!");
 				}
 
-				return null;
+				throw new IllegalArgumentException("Parent quest not found!");
 			}
 			case VARIABLE:
 				return new QuestVariable(this);
@@ -403,12 +409,19 @@ public abstract class QuestFile extends QuestObject
 
 				if (quest != null)
 				{
-					return QuestRewardType.createReward(quest, extra.getString("type"));
+					QuestReward reward = QuestRewardType.createReward(quest, extra.getString("type"));
+
+					if (reward != null)
+					{
+						return reward;
+					}
+
+					throw new IllegalArgumentException("Unknown reward type!");
 				}
 
-				return null;
+				throw new IllegalArgumentException("Parent quest not found!");
 			default:
-				return null;
+				throw new IllegalArgumentException("Unknown type: " + type);
 		}
 	}
 

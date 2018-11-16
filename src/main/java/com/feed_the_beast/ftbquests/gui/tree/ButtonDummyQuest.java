@@ -15,7 +15,6 @@ import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.task.ItemTask;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.items.ItemHandlerHelper;
 
 import java.util.List;
@@ -59,22 +58,23 @@ public class ButtonDummyQuest extends Widget
 		if (button.isRight() && treeGui.questFile.canEdit())
 		{
 			GuiHelper.playClickSound();
-			//List<ContextMenuItem> contextMenu = new ArrayList<>();
 
 			if (!isCtrlKeyDown())
 			{
+				Quest quest = new Quest(treeGui.selectedChapter);
+				quest.x = x;
+				quest.y = y;
+				new MessageCreateObject(quest, null).sendToServer();
+
 				new GuiSelectItemStack(this, stack -> {
-					if (!stack.isEmpty())
+					Quest q = treeGui.selectedChapter.getQuestAt(x, y);
+
+					if (q != null && !stack.isEmpty())
 					{
-						Quest quest = new Quest(treeGui.selectedChapter);
-						quest.x = x;
-						quest.y = y;
-						ItemTask itemTask = new ItemTask(quest);
+						ItemTask itemTask = new ItemTask(q);
 						itemTask.items.add(ItemHandlerHelper.copyStackWithSize(stack, 1));
 						itemTask.count = stack.getCount();
-						NBTTagCompound extra = new NBTTagCompound();
-						itemTask.writeData(extra);
-						new MessageCreateObject(quest, extra).sendToServer();
+						new MessageCreateObject(itemTask, null).sendToServer();
 					}
 				}).openGui();
 				return true;

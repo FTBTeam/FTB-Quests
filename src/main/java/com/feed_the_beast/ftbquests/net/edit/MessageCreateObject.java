@@ -73,23 +73,6 @@ public class MessageCreateObject extends MessageToServer
 
 			object.onCreated();
 			new MessageCreateObjectResponse(object, extra).sendToAll();
-
-			if (extra != null && !extra.isEmpty())
-			{
-				for (QuestObjectBase o : object.createExtras(extra))
-				{
-					o.uid = ServerQuestFile.INSTANCE.readID(0);
-
-					if (o instanceof QuestObject)
-					{
-						((QuestObject) o).id = o.getCodeString();
-					}
-
-					o.onCreated();
-					new MessageCreateObjectResponse(o, null).sendToAll();
-				}
-			}
-
 			ServerQuestFile.INSTANCE.refreshIDMap();
 			ServerQuestFile.INSTANCE.clearCachedData();
 			ServerQuestFile.INSTANCE.save();

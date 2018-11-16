@@ -198,7 +198,7 @@ public class TileProgressScreenCore extends TileProgressScreenBase implements IC
 	@Nullable
 	public QuestChapter getChapter()
 	{
-		if (chapter.isEmpty())
+		if (chapter == null || chapter.isEmpty())
 		{
 			return null;
 		}
