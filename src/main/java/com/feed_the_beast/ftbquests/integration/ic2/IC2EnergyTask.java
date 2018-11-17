@@ -40,7 +40,7 @@ public class IC2EnergyTask extends QuestTask
 	private static final ResourceLocation EMPTY_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "textures/tasks/ic2_empty.png");
 	private static final ResourceLocation FULL_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "textures/tasks/ic2_full.png");
 
-	public long value, maxInput;
+	public long value = 2500, maxInput = Long.MAX_VALUE;
 
 	public IC2EnergyTask(Quest quest)
 	{
@@ -151,7 +151,7 @@ public class IC2EnergyTask extends QuestTask
 	@Override
 	public void getConfig(ConfigGroup config)
 	{
-		config.addLong("value", () -> value, v -> value = v, 1, 1, Long.MAX_VALUE);
+		config.addLong("value", () -> value, v -> value = v, 2500, 1, Long.MAX_VALUE);
 		config.addLong("max_input", () -> maxInput, v -> maxInput = v, Long.MAX_VALUE, 1, Long.MAX_VALUE);
 	}
 
