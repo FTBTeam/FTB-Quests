@@ -46,15 +46,13 @@ public class FluidTask extends QuestTask
 {
 	public static final ResourceLocation TANK_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "textures/tasks/tank.png");
 
-	public Fluid fluid;
-	public NBTTagCompound fluidNBT;
-	public long amount;
+	public Fluid fluid = FluidRegistry.WATER;
+	public NBTTagCompound fluidNBT = null;
+	public long amount = 1000;
 
 	public FluidTask(Quest quest)
 	{
 		super(quest);
-		fluid = FluidRegistry.WATER;
-		amount = 1000L;
 	}
 
 	@Override

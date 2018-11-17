@@ -41,7 +41,7 @@ public class ManaTask extends QuestTask
 	private static final ResourceLocation EMPTY_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "textures/tasks/botania_mana_empty.png");
 	private static final ResourceLocation FULL_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "textures/tasks/botania_mana_full.png");
 
-	public long value, maxInput;
+	public long value = 1, maxInput = Long.MAX_VALUE;
 	public boolean showNumbers;
 
 	public ManaTask(Quest quest)

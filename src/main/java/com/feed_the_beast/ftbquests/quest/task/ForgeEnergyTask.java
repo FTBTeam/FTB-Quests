@@ -34,8 +34,8 @@ public class ForgeEnergyTask extends QuestTask
 	public static final ResourceLocation EMPTY_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "textures/tasks/fe_empty.png");
 	public static final ResourceLocation FULL_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "textures/tasks/fe_full.png");
 
-	public long value;
-	public int maxInput;
+	public long value = 10000;
+	public int maxInput = Integer.MAX_VALUE;
 
 	public ForgeEnergyTask(Quest quest)
 	{
@@ -76,7 +76,7 @@ public class ForgeEnergyTask extends QuestTask
 	public void readData(NBTTagCompound nbt)
 	{
 		super.readData(nbt);
-		value = nbt.hasKey("value") ? nbt.getLong("value") : 10000L;
+		value = nbt.getLong("value");
 
 		if (value < 1L)
 		{
