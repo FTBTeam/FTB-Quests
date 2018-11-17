@@ -1,9 +1,6 @@
 package com.feed_the_beast.ftbquests.quest.task;
 
 import com.feed_the_beast.ftblib.lib.client.ClientUtils;
-import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
-import com.feed_the_beast.ftblib.lib.io.DataIn;
-import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
@@ -11,7 +8,6 @@ import com.feed_the_beast.ftbquests.quest.Quest;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
@@ -29,13 +25,10 @@ import javax.annotation.Nullable;
 /**
  * @author LatvianModder
  */
-public class ForgeEnergyTask extends QuestTask
+public class ForgeEnergyTask extends EnergyTask
 {
 	public static final ResourceLocation EMPTY_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "textures/tasks/fe_empty.png");
 	public static final ResourceLocation FULL_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "textures/tasks/fe_full.png");
-
-	public long value = 10000;
-	public int maxInput = Integer.MAX_VALUE;
 
 	public ForgeEnergyTask(Quest quest)
 	{
@@ -49,75 +42,9 @@ public class ForgeEnergyTask extends QuestTask
 	}
 
 	@Override
-	public long getMaxProgress()
-	{
-		return value;
-	}
-
-	@Override
-	public String getMaxProgressString()
-	{
-		return StringUtils.formatDouble(value, true);
-	}
-
-	@Override
-	public void writeData(NBTTagCompound nbt)
-	{
-		super.writeData(nbt);
-		nbt.setLong("value", value);
-
-		if (maxInput != Integer.MAX_VALUE)
-		{
-			nbt.setInteger("max_input", maxInput);
-		}
-	}
-
-	@Override
-	public void readData(NBTTagCompound nbt)
-	{
-		super.readData(nbt);
-		value = nbt.getLong("value");
-
-		if (value < 1L)
-		{
-			value = 1L;
-		}
-
-		maxInput = nbt.hasKey("max_input") ? nbt.getInteger("max_input") : Integer.MAX_VALUE;
-
-		if (maxInput < 1)
-		{
-			maxInput = 1;
-		}
-	}
-
-	@Override
-	public void writeNetData(DataOut data)
-	{
-		super.writeNetData(data);
-		data.writeVarLong(value);
-		data.writeInt(maxInput);
-	}
-
-	@Override
-	public void readNetData(DataIn data)
-	{
-		super.readNetData(data);
-		value = data.readVarLong();
-		maxInput = data.readInt();
-	}
-
-	@Override
 	public ITextComponent getAltDisplayName()
 	{
 		return new TextComponentTranslation("ftbquests.task.ftbquests.forge_energy.text", StringUtils.formatDouble(value, true));
-	}
-
-	@Override
-	public void getConfig(ConfigGroup config)
-	{
-		config.addLong("value", () -> value, v -> value = v, 10000, 1, Long.MAX_VALUE);
-		config.addInt("max_input", () -> maxInput, v -> maxInput = v, Integer.MAX_VALUE, 1, Integer.MAX_VALUE);
 	}
 
 	@Override
@@ -218,12 +145,6 @@ public class ForgeEnergyTask extends QuestTask
 		}
 
 		@Override
-		public String getProgressString()
-		{
-			return StringUtils.formatDouble(progress, true);
-		}
-
-		@Override
 		public boolean hasCapability(@Nonnull Capability<?> capability, @Nullable EnumFacing facing)
 		{
 			return capability == CapabilityEnergy.ENERGY;
@@ -241,7 +162,12 @@ public class ForgeEnergyTask extends QuestTask
 		{
 			if (maxReceive > 0 && progress < task.value)
 			{
-				long add = Math.min(task.maxInput, Math.min(maxReceive, task.value - progress));
+				long add = Math.min(maxReceive, task.value - progress);
+
+				if (task.maxInput > 0)
+				{
+					add = Math.min(add, task.maxInput);
+				}
 
 				if (add > 0L)
 				{
@@ -273,7 +199,7 @@ public class ForgeEnergyTask extends QuestTask
 		@Override
 		public int getMaxEnergyStored()
 		{
-			return task.maxInput;
+			return (int) Math.min(task.maxInput, Integer.MAX_VALUE);
 		}
 
 		@Override

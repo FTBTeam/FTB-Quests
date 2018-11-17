@@ -1,16 +1,13 @@
 package com.feed_the_beast.ftbquests.integration.ic2;
 
 import com.feed_the_beast.ftblib.lib.client.ClientUtils;
-import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
-import com.feed_the_beast.ftblib.lib.io.DataIn;
-import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.quest.task.EnergyTask;
 import com.feed_the_beast.ftbquests.quest.task.FTBQuestsTasks;
-import com.feed_the_beast.ftbquests.quest.task.QuestTask;
 import com.feed_the_beast.ftbquests.quest.task.QuestTaskData;
 import com.feed_the_beast.ftbquests.quest.task.QuestTaskType;
 import com.feed_the_beast.ftbquests.quest.task.SimpleQuestTaskData;
@@ -19,7 +16,6 @@ import com.feed_the_beast.ftbquests.tile.TileScreenPart;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
@@ -35,12 +31,10 @@ import javax.annotation.Nullable;
 /**
  * @author LatvianModder
  */
-public class IC2EnergyTask extends QuestTask
+public class IC2EnergyTask extends EnergyTask
 {
 	private static final ResourceLocation EMPTY_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "textures/tasks/ic2_empty.png");
 	private static final ResourceLocation FULL_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "textures/tasks/ic2_full.png");
-
-	public long value = 2500, maxInput = Long.MAX_VALUE;
 
 	public IC2EnergyTask(Quest quest)
 	{
@@ -51,65 +45,6 @@ public class IC2EnergyTask extends QuestTask
 	public QuestTaskType getType()
 	{
 		return FTBQuestsTasks.IC2_ENERGY;
-	}
-
-	@Override
-	public long getMaxProgress()
-	{
-		return value;
-	}
-
-	@Override
-	public String getMaxProgressString()
-	{
-		return StringUtils.formatDouble(value, true);
-	}
-
-	@Override
-	public void writeData(NBTTagCompound nbt)
-	{
-		super.writeData(nbt);
-		nbt.setLong("value", value);
-
-		if (maxInput != Long.MAX_VALUE)
-		{
-			nbt.setLong("max_input", maxInput);
-		}
-	}
-
-	@Override
-	public void readData(NBTTagCompound nbt)
-	{
-		super.readData(nbt);
-		value = nbt.getLong("value");
-
-		if (value < 1)
-		{
-			value = 1;
-		}
-
-		maxInput = nbt.hasKey("max_input") ? nbt.getLong("max_input") : Long.MAX_VALUE;
-
-		if (maxInput < 1)
-		{
-			maxInput = 1;
-		}
-	}
-
-	@Override
-	public void writeNetData(DataOut data)
-	{
-		super.writeNetData(data);
-		data.writeVarLong(value);
-		data.writeLong(maxInput);
-	}
-
-	@Override
-	public void readNetData(DataIn data)
-	{
-		super.readNetData(data);
-		value = data.readVarLong();
-		maxInput = data.readLong();
 	}
 
 	@Override
@@ -146,13 +81,6 @@ public class IC2EnergyTask extends QuestTask
 	public TileScreenPart createScreenPart(World world)
 	{
 		return new TileScreenPartIC2();
-	}
-
-	@Override
-	public void getConfig(ConfigGroup config)
-	{
-		config.addLong("value", () -> value, v -> value = v, 2500, 1, Long.MAX_VALUE);
-		config.addLong("max_input", () -> maxInput, v -> maxInput = v, Long.MAX_VALUE, 1, Long.MAX_VALUE);
 	}
 
 	@Override
@@ -253,12 +181,6 @@ public class IC2EnergyTask extends QuestTask
 		}
 
 		@Override
-		public String getProgressString()
-		{
-			return StringUtils.formatDouble(progress, true);
-		}
-
-		@Override
 		public boolean hasCapability(Capability<?> capability, @Nullable EnumFacing facing)
 		{
 			return false;
@@ -275,7 +197,12 @@ public class IC2EnergyTask extends QuestTask
 		{
 			if (amount > 0 && progress < task.value)
 			{
-				double add = Math.min(task.maxInput, Math.min(amount, task.value - progress));
+				double add = Math.min(amount, task.value - progress);
+
+				if (task.maxInput > 0)
+				{
+					add = Math.min(add, task.maxInput);
+				}
 
 				if (add > 0D)
 				{

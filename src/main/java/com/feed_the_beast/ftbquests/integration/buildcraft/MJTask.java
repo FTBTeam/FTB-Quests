@@ -4,23 +4,19 @@ import buildcraft.api.mj.IMjConnector;
 import buildcraft.api.mj.IMjReceiver;
 import buildcraft.api.mj.MjAPI;
 import com.feed_the_beast.ftblib.lib.client.ClientUtils;
-import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
-import com.feed_the_beast.ftblib.lib.io.DataIn;
-import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.quest.task.EnergyTask;
 import com.feed_the_beast.ftbquests.quest.task.FTBQuestsTasks;
-import com.feed_the_beast.ftbquests.quest.task.QuestTask;
 import com.feed_the_beast.ftbquests.quest.task.QuestTaskData;
 import com.feed_the_beast.ftbquests.quest.task.QuestTaskType;
 import com.feed_the_beast.ftbquests.quest.task.SimpleQuestTaskData;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
@@ -36,16 +32,15 @@ import javax.annotation.Nullable;
 /**
  * @author LatvianModder
  */
-public class MJTask extends QuestTask
+public class MJTask extends EnergyTask
 {
 	private static final ResourceLocation EMPTY_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "textures/tasks/fe_empty.png");
 	private static final ResourceLocation FULL_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "textures/tasks/fe_full.png");
 
-	public long value, maxInput;
-
 	public MJTask(Quest quest)
 	{
 		super(quest);
+		value = 10000000000L;
 	}
 
 	@Override
@@ -55,62 +50,9 @@ public class MJTask extends QuestTask
 	}
 
 	@Override
-	public long getMaxProgress()
-	{
-		return value;
-	}
-
-	@Override
 	public String getMaxProgressString()
 	{
 		return StringUtils.formatDouble(value / 1000000D, true);
-	}
-
-	@Override
-	public void writeData(NBTTagCompound nbt)
-	{
-		super.writeData(nbt);
-		nbt.setLong("value", value);
-
-		if (maxInput != Long.MAX_VALUE)
-		{
-			nbt.setLong("max_input", maxInput);
-		}
-	}
-
-	@Override
-	public void readData(NBTTagCompound nbt)
-	{
-		super.readData(nbt);
-		value = nbt.hasKey("value") ? nbt.getLong("value") : 10000000000L;
-
-		if (value < 1L)
-		{
-			value = 1L;
-		}
-
-		maxInput = nbt.hasKey("max_input") ? nbt.getLong("max_input") : Long.MAX_VALUE;
-
-		if (maxInput < 1L)
-		{
-			maxInput = 1L;
-		}
-	}
-
-	@Override
-	public void writeNetData(DataOut data)
-	{
-		super.writeNetData(data);
-		data.writeVarLong(value);
-		data.writeLong(maxInput);
-	}
-
-	@Override
-	public void readNetData(DataIn data)
-	{
-		super.readNetData(data);
-		value = data.readVarLong();
-		maxInput = data.readLong();
 	}
 
 	@Override
@@ -123,13 +65,6 @@ public class MJTask extends QuestTask
 	public ITextComponent getAltDisplayName()
 	{
 		return new TextComponentTranslation("ftbquests.task.ftbquests.buildcraft_mj.text", StringUtils.formatDouble(value / 1000000D, true));
-	}
-
-	@Override
-	public void getConfig(ConfigGroup config)
-	{
-		config.addLong("value", () -> value, v -> value = v, 10000000000L, 1L, Long.MAX_VALUE);
-		config.addLong("max_input", () -> maxInput, v -> maxInput = v, Long.MAX_VALUE, 1L, Long.MAX_VALUE);
 	}
 
 	@Override
@@ -251,7 +186,14 @@ public class MJTask extends QuestTask
 		@Override
 		public long getPowerRequested()
 		{
-			return Math.min(task.maxInput, task.value - progress);
+			long add = task.value - progress;
+
+			if (task.maxInput > 0)
+			{
+				add = Math.min(add, task.maxInput);
+			}
+
+			return add;
 		}
 
 		@Override

@@ -17,7 +17,7 @@ import net.minecraft.util.text.TextFormatting;
  */
 public class XPReward extends QuestReward
 {
-	private int xp = 1;
+	public int xp = 100;
 
 	public XPReward(Quest quest)
 	{
@@ -64,7 +64,7 @@ public class XPReward extends QuestReward
 	@Override
 	public void getConfig(ConfigGroup config)
 	{
-		config.addInt("xp", () -> xp, v -> xp = v, 1, 1, Integer.MAX_VALUE).setDisplayName(new TextComponentTranslation("ftbquests.reward.ftbquests.xp"));
+		config.addInt("xp", () -> xp, v -> xp = v, 100, 1, Integer.MAX_VALUE).setDisplayName(new TextComponentTranslation("ftbquests.reward.ftbquests.xp"));
 	}
 
 	@Override

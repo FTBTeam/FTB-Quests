@@ -1,5 +1,6 @@
 package com.feed_the_beast.ftbquests.quest.task;
 
+import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -61,7 +62,7 @@ public abstract class QuestTaskData<T extends QuestTask> implements ICapabilityP
 
 	public String getProgressString()
 	{
-		return Long.toString(getProgress());
+		return StringUtils.formatDouble(getProgress(), true);
 	}
 
 	public String toString()

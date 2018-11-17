@@ -1,9 +1,11 @@
 package com.feed_the_beast.ftbquests.quest.task;
 
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
+import com.feed_the_beast.ftblib.lib.config.ConfigLong;
 import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.gui.IOpenableGui;
 import com.feed_the_beast.ftblib.lib.gui.misc.GuiEditConfig;
+import com.feed_the_beast.ftblib.lib.gui.misc.GuiEditConfigValue;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.net.edit.MessageCreateObject;
@@ -108,6 +110,21 @@ public final class QuestTaskType extends IForgeRegistryEntry.Impl<QuestTaskType>
 
 				if (task == null)
 				{
+					return;
+				}
+
+				if (task instanceof EnergyTask)
+				{
+					new GuiEditConfigValue("value", new ConfigLong(((EnergyTask) task).value), (value, set) -> {
+						gui.openGui();
+						if (set)
+						{
+							((EnergyTask) task).value = value.getLong();
+							NBTTagCompound extra = new NBTTagCompound();
+							extra.setString("type", getTypeForNBT());
+							new MessageCreateObject(task, extra).sendToServer();
+						}
+					}).openGui();
 					return;
 				}
 
