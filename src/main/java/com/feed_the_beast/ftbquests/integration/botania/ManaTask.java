@@ -9,8 +9,8 @@ import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.quest.task.EnergyTask;
 import com.feed_the_beast.ftbquests.quest.task.FTBQuestsTasks;
-import com.feed_the_beast.ftbquests.quest.task.QuestTask;
 import com.feed_the_beast.ftbquests.quest.task.QuestTaskData;
 import com.feed_the_beast.ftbquests.quest.task.QuestTaskType;
 import com.feed_the_beast.ftbquests.quest.task.SimpleQuestTaskData;
@@ -36,12 +36,11 @@ import javax.annotation.Nullable;
 /**
  * @author LatvianModder
  */
-public class ManaTask extends QuestTask
+public class ManaTask extends EnergyTask
 {
 	private static final ResourceLocation EMPTY_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "textures/tasks/botania_mana_empty.png");
 	private static final ResourceLocation FULL_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "textures/tasks/botania_mana_full.png");
 
-	public long value = 1, maxInput = Long.MAX_VALUE;
 	public boolean showNumbers;
 
 	public ManaTask(Quest quest)
@@ -56,28 +55,9 @@ public class ManaTask extends QuestTask
 	}
 
 	@Override
-	public long getMaxProgress()
-	{
-		return value;
-	}
-
-	@Override
-	public String getMaxProgressString()
-	{
-		return StringUtils.formatDouble(value, true);
-	}
-
-	@Override
 	public void writeData(NBTTagCompound nbt)
 	{
 		super.writeData(nbt);
-		nbt.setLong("value", value);
-
-		if (maxInput != Long.MAX_VALUE)
-		{
-			nbt.setLong("max_input", maxInput);
-		}
-
 		if (showNumbers)
 		{
 			nbt.setBoolean("show_numbers", true);
@@ -88,20 +68,6 @@ public class ManaTask extends QuestTask
 	public void readData(NBTTagCompound nbt)
 	{
 		super.readData(nbt);
-		value = nbt.getLong("value");
-
-		if (value < 1)
-		{
-			value = 1;
-		}
-
-		maxInput = nbt.hasKey("max_input") ? nbt.getLong("max_input") : Long.MAX_VALUE;
-
-		if (maxInput < 1)
-		{
-			maxInput = 1;
-		}
-
 		showNumbers = nbt.getBoolean("show_numbers");
 	}
 
@@ -109,8 +75,6 @@ public class ManaTask extends QuestTask
 	public void writeNetData(DataOut data)
 	{
 		super.writeNetData(data);
-		data.writeVarLong(value);
-		data.writeLong(maxInput);
 		data.writeBoolean(showNumbers);
 	}
 
@@ -118,8 +82,6 @@ public class ManaTask extends QuestTask
 	public void readNetData(DataIn data)
 	{
 		super.readNetData(data);
-		value = data.readVarLong();
-		maxInput = data.readLong();
 		showNumbers = data.readBoolean();
 	}
 
@@ -162,8 +124,7 @@ public class ManaTask extends QuestTask
 	@Override
 	public void getConfig(ConfigGroup config)
 	{
-		config.addLong("value", () -> value, v -> value = v, 1, 1, Long.MAX_VALUE);
-		config.addLong("max_input", () -> maxInput, v -> maxInput = v, Long.MAX_VALUE, 1, Long.MAX_VALUE);
+		super.getConfig(config);
 		config.addBool("show_numbers", () -> showNumbers, v -> showNumbers = v, false);
 	}
 
@@ -271,12 +232,6 @@ public class ManaTask extends QuestTask
 		}
 
 		@Override
-		public String getProgressString()
-		{
-			return StringUtils.formatDouble(progress, true);
-		}
-
-		@Override
 		public boolean hasCapability(Capability<?> capability, @Nullable EnumFacing facing)
 		{
 			return false;
@@ -300,7 +255,12 @@ public class ManaTask extends QuestTask
 		{
 			if (mana > 0 && progress < task.value)
 			{
-				long add = Math.min(task.maxInput, Math.min(mana, task.value - progress));
+				long add = Math.min(mana, task.value - progress);
+
+				if (task.maxInput > 0)
+				{
+					add = Math.min(add, task.maxInput);
+				}
 
 				if (add > 0L)
 				{

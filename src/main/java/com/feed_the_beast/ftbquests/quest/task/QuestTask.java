@@ -2,6 +2,7 @@ package com.feed_the_beast.ftbquests.quest.task;
 
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
+import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.events.ObjectCompletedEvent;
 import com.feed_the_beast.ftbquests.net.MessageSubmitItems;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
@@ -108,7 +109,7 @@ public abstract class QuestTask extends QuestObject
 
 	public String getMaxProgressString()
 	{
-		return Long.toString(getMaxProgress());
+		return StringUtils.formatDouble(getMaxProgress(), true);
 	}
 
 	@Override
