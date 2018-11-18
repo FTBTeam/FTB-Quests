@@ -128,14 +128,27 @@ public abstract class QuestReward extends QuestObjectBase
 	@Override
 	public final void deleteSelf()
 	{
-		super.deleteSelf();
-
 		Collection<QuestReward> c = Collections.singleton(this);
 
 		for (ITeamData data : quest.chapter.file.getAllData())
 		{
 			data.unclaimRewards(c);
 		}
+
+		super.deleteSelf();
+	}
+
+	@Override
+	public final void deleteChildren()
+	{
+		Collection<QuestReward> c = Collections.singleton(this);
+
+		for (ITeamData data : quest.chapter.file.getAllData())
+		{
+			data.unclaimRewards(c);
+		}
+
+		super.deleteChildren();
 	}
 
 	@Override

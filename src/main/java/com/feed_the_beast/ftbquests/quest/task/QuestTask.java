@@ -90,7 +90,7 @@ public abstract class QuestTask extends QuestObject
 	}
 
 	@Override
-	public void onCompleted(ITeamData data)
+	public final void onCompleted(ITeamData data)
 	{
 		super.onCompleted(data);
 		new ObjectCompletedEvent.TaskEvent(data, this).post();
@@ -130,7 +130,7 @@ public abstract class QuestTask extends QuestObject
 	}
 
 	@Override
-	public void deleteSelf()
+	public final void deleteSelf()
 	{
 		quest.tasks.remove(this);
 
@@ -143,7 +143,18 @@ public abstract class QuestTask extends QuestObject
 	}
 
 	@Override
-	public void onCreated()
+	public final void deleteChildren()
+	{
+		for (ITeamData data : quest.chapter.file.getAllData())
+		{
+			data.removeTask(this);
+		}
+
+		super.deleteChildren();
+	}
+
+	@Override
+	public final void onCreated()
 	{
 		quest.tasks.add(this);
 
