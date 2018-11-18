@@ -1,7 +1,6 @@
 package com.feed_the_beast.ftbquests.block;
 
 import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
-import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.tile.TileProgressDetector;
@@ -150,7 +149,7 @@ public class BlockProgressDetector extends Block
 
 		if (object != null)
 		{
-			tooltip.add(StringUtils.color(object.getDisplayName(), TextFormatting.YELLOW).getFormattedText());
+			tooltip.add(object.getYellowDisplayName().getFormattedText());
 		}
 	}
 }

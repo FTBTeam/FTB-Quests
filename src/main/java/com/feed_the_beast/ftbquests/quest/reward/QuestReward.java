@@ -110,17 +110,14 @@ public abstract class QuestReward extends QuestObjectBase
 	}
 
 	@Override
-	public abstract void getConfig(ConfigGroup config);
-
-	public abstract void claim(EntityPlayerMP player);
-
-	@Override
-	public final void getExtraConfig(ConfigGroup config)
+	public void getConfig(ConfigGroup config)
 	{
-		super.getExtraConfig(config);
+		super.getConfig(config);
 		config.addBool("team", () -> team, v -> team = v, false).setDisplayName(new TextComponentTranslation("ftbquests.reward.team_reward")).setCanEdit(!quest.canRepeat);
 		//config.addBool("emergency", () -> emergency, v -> emergency = v, false).setDisplayName(new TextComponentTranslation("ftbquests.reward.emergency"));
 	}
+
+	public abstract void claim(EntityPlayerMP player);
 
 	@Override
 	public void resetProgress(ITeamData data, boolean dependencies)

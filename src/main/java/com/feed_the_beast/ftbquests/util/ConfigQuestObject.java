@@ -94,11 +94,11 @@ public class ConfigQuestObject extends ConfigValue
 	}
 
 	@Override
-	public void onClicked(IOpenableGui gui, ConfigValueInstance inst, MouseButton button)
+	public void onClicked(IOpenableGui gui, ConfigValueInstance inst, MouseButton button, Runnable callback)
 	{
 		if (inst.getCanEdit())
 		{
-			new GuiSelectQuestObject(this, gui).openGui();
+			new GuiSelectQuestObject(this, gui, callback).openGui();
 		}
 	}
 

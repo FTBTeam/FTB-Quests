@@ -57,20 +57,23 @@ public class GuiSelectQuestObject extends GuiButtonListBase
 		public void onClicked(MouseButton button)
 		{
 			GuiHelper.playClickSound();
+			callbackGui.openGui();
 			config.setObject(object);
-			callback.openGui();
+			callback.run();
 		}
 	}
 
-	public final ConfigQuestObject config;
-	public final IOpenableGui callback;
+	private final ConfigQuestObject config;
+	private final IOpenableGui callbackGui;
+	private final Runnable callback;
 
-	public GuiSelectQuestObject(ConfigQuestObject c, IOpenableGui g)
+	public GuiSelectQuestObject(ConfigQuestObject c, IOpenableGui g, Runnable cb)
 	{
 		setTitle(I18n.format("ftbquests.gui.select_quest_object"));
 		setHasSearchBox(true);
 		config = c;
-		callback = g;
+		callbackGui = g;
+		callback = cb;
 	}
 
 	@Override

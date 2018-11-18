@@ -180,6 +180,8 @@ public class FluidTask extends QuestTask
 	@Override
 	public void getConfig(ConfigGroup config)
 	{
+		super.getConfig(config);
+
 		config.add("fluid", new ConfigFluid(FluidRegistry.WATER, FluidRegistry.WATER)
 		{
 			@Override

@@ -113,7 +113,7 @@ public class ButtonQuest extends Button
 			}
 
 			contextMenu.add(ContextMenuItem.SEPARATOR);
-			treeGui.addObjectMenuItems(contextMenu, getGui(), quest);
+			GuiQuestTree.addObjectMenuItems(contextMenu, getGui(), quest);
 			getGui().openContextMenu(contextMenu);
 		}
 		else if (button.isLeft())

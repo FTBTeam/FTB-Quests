@@ -62,6 +62,7 @@ public class CommandReward extends QuestReward
 	@Override
 	public void getConfig(ConfigGroup config)
 	{
+		super.getConfig(config);
 		config.addString("command", () -> command, v -> command = v, "").setDisplayName(new TextComponentTranslation("ftbquests.reward.ftbquests.command"));
 	}
 

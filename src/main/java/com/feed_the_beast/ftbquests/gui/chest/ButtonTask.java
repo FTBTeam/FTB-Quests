@@ -30,10 +30,10 @@ public class ButtonTask extends Button
 	{
 		if (taskData.task.quest.chapter.file.chapters.size() > 1)
 		{
-			list.add(TextFormatting.GRAY + I18n.format("ftbquests.chapter") + ": " + TextFormatting.YELLOW + taskData.task.quest.chapter.getDisplayName().getFormattedText());
+			list.add(TextFormatting.GRAY + I18n.format("ftbquests.chapter") + ": " + taskData.task.quest.chapter.getYellowDisplayName().getFormattedText());
 		}
 
-		list.add(TextFormatting.GRAY + I18n.format("ftbquests.quest") + ": " + TextFormatting.YELLOW + taskData.task.quest.getDisplayName().getFormattedText());
+		list.add(TextFormatting.GRAY + I18n.format("ftbquests.quest") + ": " + taskData.task.quest.getYellowDisplayName().getFormattedText());
 		list.add(TextFormatting.GRAY + I18n.format("ftbquests.progress") + ": " + TextFormatting.BLUE + taskData.getProgressString() + " / " + taskData.task.getMaxProgressString());
 	}
 

@@ -8,6 +8,7 @@ import com.feed_the_beast.ftblib.lib.gui.ContextMenuItem;
 import com.feed_the_beast.ftblib.lib.gui.GuiBase;
 import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
 import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
+import com.feed_the_beast.ftblib.lib.gui.IOpenableGui;
 import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.gui.Theme;
 import com.feed_the_beast.ftblib.lib.gui.Widget;
@@ -25,9 +26,9 @@ import com.feed_the_beast.ftbquests.net.edit.MessageEditObjectQuick;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
+import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.quest.QuestVariable;
 import com.feed_the_beast.ftbquests.quest.task.QuestTask;
-import com.feed_the_beast.ftbquests.quest.task.QuestTaskType;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.TextFormatting;
@@ -125,20 +126,11 @@ public class GuiQuestTree extends GuiBase
 		quests.setScrollY((scrollHeight - quests.height) / 2);
 	}
 
-	public void addObjectMenuItems(List<ContextMenuItem> contextMenu, GuiBase prevGui, QuestObject object)
+	public static void addObjectMenuItems(List<ContextMenuItem> contextMenu, IOpenableGui gui, QuestObjectBase object)
 	{
 		ConfigGroup group = ConfigGroup.newGroup(FTBQuests.MOD_ID);
-		ConfigGroup group1 = group.getGroup(object.getObjectType().getName());
-		ConfigGroup g = group1;
-
-		if (object instanceof QuestTask)
-		{
-			QuestTaskType type = ((QuestTask) object).getType();
-			g = group1.getGroup(type.getRegistryName().getNamespace()).getGroup(type.getRegistryName().getPath());
-		}
-
+		ConfigGroup g = object.createSubGroup(group);
 		object.getConfig(g);
-		object.getExtraConfig(g);
 
 		if (!g.getValues().isEmpty())
 		{
@@ -166,10 +158,7 @@ public class GuiQuestTree extends GuiBase
 						@Override
 						public void onClicked(Panel panel, MouseButton button)
 						{
-							if (inst.getCanEdit())
-							{
-								new MessageEditObjectQuick(object.uid, inst.getID(), ((IIteratingConfig) inst.getValue()).getIteration(button.isLeft())).sendToServer();
-							}
+							inst.getValue().onClicked(gui, inst, button, () -> new MessageEditObjectQuick(object.uid, inst.getID(), inst.getValue()).sendToServer());
 						}
 
 						@Override
@@ -197,9 +186,13 @@ public class GuiQuestTree extends GuiBase
 		}
 
 		contextMenu.add(new ContextMenuItem(I18n.format("selectServer.edit"), GuiIcons.SETTINGS, () -> new MessageEditObject(object.uid).sendToServer()));
-		contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), GuiIcons.REMOVE, () -> questFile.deleteObject(object.uid)).setYesNo(I18n.format("delete_item", object.getDisplayName().getFormattedText())));
+		contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), GuiIcons.REMOVE, () -> ClientQuestFile.INSTANCE.deleteObject(object.uid)).setYesNo(I18n.format("delete_item", object.getDisplayName().getFormattedText())));
 		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.reset_progress"), GuiIcons.REFRESH, () -> new MessageResetProgress(object.uid).sendToServer()).setYesNo(I18n.format("ftbquests.gui.reset_progress_q")));
-		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.complete_instantly"), QuestsTheme.COMPLETED, () -> new MessageCompleteInstantly(object.uid).sendToServer()).setYesNo(I18n.format("ftbquests.gui.complete_instantly_q")));
+
+		if (object instanceof QuestObject)
+		{
+			contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.complete_instantly"), QuestsTheme.COMPLETED, () -> new MessageCompleteInstantly(object.uid).sendToServer()).setYesNo(I18n.format("ftbquests.gui.complete_instantly_q")));
+		}
 	}
 
 	@Override

@@ -85,6 +85,7 @@ public abstract class EnergyTask extends QuestTask
 	@Override
 	public void getConfig(ConfigGroup config)
 	{
+		super.getConfig(config);
 		config.addLong("value", () -> value, v -> value = v, 1000L, 1L, Long.MAX_VALUE);
 		config.addLong("max_input", () -> maxInput, v -> maxInput = v, 0L, 0L, Integer.MAX_VALUE);
 	}

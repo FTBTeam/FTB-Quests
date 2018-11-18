@@ -7,13 +7,9 @@ import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.gui.SimpleTextButton;
 import com.feed_the_beast.ftblib.lib.gui.Theme;
 import com.feed_the_beast.ftblib.lib.gui.WidgetType;
-import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.gui.QuestsTheme;
-import com.feed_the_beast.ftbquests.net.MessageResetProgress;
-import com.feed_the_beast.ftbquests.net.edit.MessageDeleteReward;
-import com.feed_the_beast.ftbquests.net.edit.MessageEditObject;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.TextFormatting;
@@ -30,8 +26,19 @@ public class ButtonReward extends SimpleTextButton
 
 	public ButtonReward(Panel panel, QuestReward r)
 	{
-		super(panel, (r.isTeamReward() ? StringUtils.color(r.getDisplayName(), TextFormatting.BLUE) : r.getDisplayName()).getFormattedText(), r.getIcon());
+		super(panel, r.getDisplayName().getFormattedText(), r.getIcon());
 		reward = r;
+	}
+
+	@Override
+	public String getTitle()
+	{
+		if (reward.isTeamReward())
+		{
+			return TextFormatting.BLUE + super.getTitle();
+		}
+
+		return super.getTitle();
 	}
 
 	@Override
@@ -92,54 +99,7 @@ public class ButtonReward extends SimpleTextButton
 		{
 			GuiHelper.playClickSound();
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
-			
-			/*
-			QuestRewardType type = QuestRewardType.getType(reward.getClass());
-
-			ConfigGroup group = ConfigGroup.newGroup(FTBQuests.MOD_ID);
-			ConfigGroup g = group.getGroup("reward").getGroup(type.getRegistryName().getNamespace()).getGroup(type.getRegistryName().getPath());
-
-			reward.getConfig(g);
-			reward.getExtraConfig(g);
-
-			if (!g.getValues().isEmpty())
-			{
-				List<ContextMenuItem> list = new ArrayList<>();
-
-				for (ConfigValueInstance inst : g.getValues())
-				{
-					if (inst.getValue() instanceof IIteratingConfig)
-					{
-						list.add(new ContextMenuItem(inst.getDisplayName().getFormattedText(), inst.getIcon(), null)
-						{
-							@Override
-							public void addMouseOverText(List<String> list)
-							{
-								list.add(inst.getValue().getStringForGUI().getFormattedText());
-							}
-
-							@Override
-							public void onClicked(Panel panel, MouseButton button)
-							{
-								//FIXME: new MessageEditObjectQuick(object.getID(), inst.getName(), button.isLeft()).sendToServer();
-							}
-						});
-					}
-				}
-
-				if (!list.isEmpty())
-				{
-					list.sort(null);
-					contextMenu.addAll(list);
-					contextMenu.add(ContextMenuItem.SEPARATOR);
-				}
-			}
-			*/
-
-			contextMenu.add(new ContextMenuItem(I18n.format("selectServer.edit"), GuiIcons.SETTINGS, () -> new MessageEditObject(reward.uid).sendToServer()));
-			contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), GuiIcons.REMOVE, () -> new MessageDeleteReward(reward.uid).sendToServer()).setYesNo(I18n.format("delete_item", reward.getDisplayName().getFormattedText())));
-			contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.reset_progress"), GuiIcons.REFRESH, () -> new MessageResetProgress(reward.uid).sendToServer()).setYesNo(I18n.format("ftbquests.gui.reset_progress_q")));
-
+			GuiQuestTree.addObjectMenuItems(contextMenu, getGui(), reward);
 			getGui().openContextMenu(contextMenu);
 		}
 	}

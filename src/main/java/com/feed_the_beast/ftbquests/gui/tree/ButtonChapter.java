@@ -53,7 +53,7 @@ public class ButtonChapter extends ButtonTab
 			contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.move"), GuiIcons.LEFT, () -> new MessageMoveChapter(chapter.uid, true).sendToServer()).setEnabled(() -> chapter.getIndex() > 0).setCloseMenu(false));
 			contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.move"), GuiIcons.RIGHT, () -> new MessageMoveChapter(chapter.uid, false).sendToServer()).setEnabled(() -> chapter.getIndex() < treeGui.questFile.chapters.size() - 1).setCloseMenu(false));
 			contextMenu.add(ContextMenuItem.SEPARATOR);
-			treeGui.addObjectMenuItems(contextMenu, getGui(), chapter);
+			GuiQuestTree.addObjectMenuItems(contextMenu, getGui(), chapter);
 			getGui().openContextMenu(contextMenu);
 		}
 	}

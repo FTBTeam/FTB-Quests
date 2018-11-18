@@ -54,7 +54,7 @@ public class MessageEditObjectQuickResponse extends MessageToClient
 	{
 		id = data.readInt();
 		configId = data.readString();
-		ConfigValue value = FTBLibAPI.createConfigValueFromId(data.readString());
+		value = FTBLibAPI.createConfigValueFromId(data.readString());
 		value.readData(data);
 	}
 
@@ -71,7 +71,6 @@ public class MessageEditObjectQuickResponse extends MessageToClient
 				ConfigGroup group = ConfigGroup.newGroup(FTBQuests.MOD_ID);
 				ConfigGroup g = object.createSubGroup(group);
 				object.getConfig(g);
-				object.getExtraConfig(g);
 
 				ConfigValueInstance inst = g.getValueInstance(configId);
 
@@ -79,6 +78,8 @@ public class MessageEditObjectQuickResponse extends MessageToClient
 				{
 					inst.getValue().setValueFromOtherValue(value);
 				}
+
+				ClientQuestFile.INSTANCE.clearCachedData();
 			}
 		}
 	}
