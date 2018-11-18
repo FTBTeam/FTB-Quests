@@ -65,7 +65,7 @@ public class ButtonTask extends SimpleTextButton
 		{
 			GuiHelper.playClickSound();
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
-			treeGui.addObjectMenuItems(contextMenu, getGui(), task);
+			GuiQuestTree.addObjectMenuItems(contextMenu, getGui(), task);
 			getGui().openContextMenu(contextMenu);
 		}
 	}

@@ -131,7 +131,6 @@ public final class QuestTaskType extends IForgeRegistryEntry.Impl<QuestTaskType>
 				ConfigGroup group = ConfigGroup.newGroup(FTBQuests.MOD_ID);
 				ConfigGroup g = task.createSubGroup(group);
 				task.getConfig(g);
-				task.getExtraConfig(g);
 
 				new GuiEditConfig(group, (g1, sender) -> {
 					NBTTagCompound extra = new NBTTagCompound();

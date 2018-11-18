@@ -6,12 +6,14 @@ import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
+import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.item.ItemMissing;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TextFormatting;
 
 import javax.annotation.Nullable;
 import java.util.function.Predicate;
@@ -29,6 +31,7 @@ public abstract class QuestObjectBase
 	public ItemStack icon = ItemStack.EMPTY;
 
 	private Icon cachedIcon = null;
+	private ITextComponent cachedDisplayName = null;
 
 	public final String toString()
 	{
@@ -96,19 +99,17 @@ public abstract class QuestObjectBase
 		icon = data.readItemStack();
 	}
 
-	public abstract void getConfig(ConfigGroup config);
+	public void getConfig(ConfigGroup config)
+	{
+		config.addString("title", () -> title, v -> title = v, "").setDisplayName(new TextComponentTranslation("ftbquests.title")).setOrder(-127);
+		config.add("icon", new ConfigItemStack.SimpleStack(() -> icon, v -> icon = v), new ConfigItemStack(ItemStack.EMPTY)).setDisplayName(new TextComponentTranslation("ftbquests.icon")).setOrder(-126);
+	}
 
 	public abstract void resetProgress(ITeamData data, boolean dependencies);
 
 	public abstract Icon getAltIcon();
 
 	public abstract ITextComponent getAltDisplayName();
-
-	public void getExtraConfig(ConfigGroup config)
-	{
-		config.addString("title", () -> title, v -> title = v, "").setDisplayName(new TextComponentTranslation("ftbquests.title")).setOrder(-127);
-		config.add("icon", new ConfigItemStack.SimpleStack(() -> icon, v -> icon = v), new ConfigItemStack(ItemStack.EMPTY)).setDisplayName(new TextComponentTranslation("ftbquests.icon")).setOrder(-126);
-	}
 
 	public final Icon getIcon()
 	{
@@ -129,12 +130,28 @@ public abstract class QuestObjectBase
 
 	public final ITextComponent getDisplayName()
 	{
-		if (!title.isEmpty())
+		if (cachedDisplayName != null)
 		{
-			return new TextComponentString(title.equals("-") ? "" : title);
+			return cachedDisplayName;
 		}
 
-		return getAltDisplayName();
+		if (!title.isEmpty())
+		{
+			cachedDisplayName = new TextComponentString(title.equals("-") ? "" : StringUtils.unformatted(title).replace("&(\\S)", StringUtils.FORMATTING_CHAR + "$1"));
+		}
+		else
+		{
+			cachedDisplayName = getAltDisplayName();
+		}
+
+		return cachedDisplayName;
+	}
+
+	public final ITextComponent getYellowDisplayName()
+	{
+		ITextComponent component = getDisplayName().createCopy();
+		component.getStyle().setColor(TextFormatting.YELLOW);
+		return component;
 	}
 
 	public void deleteSelf()
@@ -153,6 +170,7 @@ public abstract class QuestObjectBase
 	public void clearCachedData()
 	{
 		cachedIcon = null;
+		cachedDisplayName = null;
 	}
 
 	public ConfigGroup createSubGroup(ConfigGroup group)

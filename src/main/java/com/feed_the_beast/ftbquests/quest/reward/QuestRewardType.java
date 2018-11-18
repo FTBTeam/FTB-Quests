@@ -113,7 +113,6 @@ public final class QuestRewardType extends IForgeRegistryEntry.Impl<QuestRewardT
 				ConfigGroup group = ConfigGroup.newGroup(FTBQuests.MOD_ID);
 				ConfigGroup g = reward.createSubGroup(group);
 				reward.getConfig(g);
-				reward.getExtraConfig(g);
 
 				new GuiEditConfig(group, (g1, sender) -> {
 					NBTTagCompound extra = new NBTTagCompound();

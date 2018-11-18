@@ -2,7 +2,6 @@ package com.feed_the_beast.ftbquests.block;
 
 import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
 import com.feed_the_beast.ftblib.lib.util.BlockUtils;
-import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
@@ -391,7 +390,7 @@ public class BlockProgressScreen extends BlockWithHorizontalFacing
 
 		if (object != null)
 		{
-			tooltip.add(StringUtils.color(object.getDisplayName(), TextFormatting.YELLOW).getFormattedText());
+			tooltip.add(object.getYellowDisplayName().getFormattedText());
 		}
 	}
 }

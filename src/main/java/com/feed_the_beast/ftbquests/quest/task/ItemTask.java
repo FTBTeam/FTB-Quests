@@ -264,6 +264,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 	@Override
 	public void getConfig(ConfigGroup config)
 	{
+		super.getConfig(config);
 		config.addList("items", items, new ConfigItemStack(ItemStack.EMPTY, true), v -> new ConfigItemStack(v, true), ConfigItemStack::getStack);
 		config.addLong("count", () -> count, v -> count = v, 1, 1, Long.MAX_VALUE);
 		config.addBool("check_only", () -> checkOnly, v -> checkOnly = v, false).setCanEdit(!quest.canRepeat);

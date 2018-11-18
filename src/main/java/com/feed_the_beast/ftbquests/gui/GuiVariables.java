@@ -10,6 +10,7 @@ import com.feed_the_beast.ftblib.lib.gui.misc.GuiButtonListBase;
 import com.feed_the_beast.ftblib.lib.gui.misc.GuiEditConfigValue;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
+import com.feed_the_beast.ftbquests.gui.tree.GuiQuestTree;
 import com.feed_the_beast.ftbquests.net.edit.MessageCreateObject;
 import com.feed_the_beast.ftbquests.quest.QuestVariable;
 import net.minecraft.client.resources.I18n;
@@ -63,7 +64,7 @@ public class GuiVariables extends GuiButtonListBase
 				{
 					GuiHelper.playClickSound();
 					List<ContextMenuItem> contextMenu = new ArrayList<>();
-					ClientQuestFile.INSTANCE.questTreeGui.addObjectMenuItems(contextMenu, getGui(), variable);
+					GuiQuestTree.addObjectMenuItems(contextMenu, getGui(), variable);
 					getGui().openContextMenu(contextMenu);
 				}
 			};

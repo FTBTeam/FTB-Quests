@@ -70,6 +70,7 @@ public class ItemReward extends QuestReward
 	@Override
 	public void getConfig(ConfigGroup config)
 	{
+		super.getConfig(config);
 		config.add("item", new ConfigItemStack.SimpleStack(() -> stack, v -> stack = v), new ConfigItemStack(ItemStack.EMPTY)).setDisplayName(new TextComponentTranslation("ftbquests.reward.ftbquests.item"));
 	}
 

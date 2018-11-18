@@ -452,7 +452,7 @@ public final class Quest extends QuestObject
 	{
 		for (QuestTask task : tasks)
 		{
-			return task.getDisplayName();
+			return task.getDisplayName().createCopy();
 		}
 
 		return new TextComponentTranslation("ftbquests.unnamed");

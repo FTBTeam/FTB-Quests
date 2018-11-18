@@ -12,10 +12,6 @@ import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
-import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
-import com.feed_the_beast.ftbquests.quest.reward.QuestRewardType;
-import com.feed_the_beast.ftbquests.quest.task.QuestTask;
-import com.feed_the_beast.ftbquests.quest.task.QuestTaskType;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.text.ITextComponent;
@@ -72,25 +68,9 @@ public class MessageEditObject extends MessageToServer implements IConfigCallbac
 
 				ConfigGroup group = ConfigGroup.newGroup(FTBQuests.MOD_ID);
 				group.setDisplayName(new TextComponentTranslation(object.getObjectType().getTranslationKey()).appendSibling(idc));
-				ConfigGroup group1 = group.getGroup(object.getObjectType().getName());
-				group1.setDisplayName(object.getDisplayName().appendSibling(StringUtils.color(new TextComponentString(" " + object), TextFormatting.DARK_GRAY)));
-				ConfigGroup g = group1;
-
-				if (object instanceof QuestTask)
-				{
-					QuestTaskType type = ((QuestTask) object).getType();
-					g = group1.getGroup(type.getRegistryName().getNamespace()).getGroup(type.getRegistryName().getPath());
-					group.setDisplayName(type.getDisplayName().appendSibling(idc));
-				}
-				else if (object instanceof QuestReward)
-				{
-					QuestRewardType type = ((QuestReward) object).getType();
-					g = group1.getGroup(type.getRegistryName().getNamespace()).getGroup(type.getRegistryName().getPath());
-					group.setDisplayName(type.getDisplayName().appendSibling(idc));
-				}
-
+				ConfigGroup g = object.createSubGroup(group);
+				g.setDisplayName(object.getDisplayName().createCopy().appendSibling(StringUtils.color(new TextComponentString(" " + object), TextFormatting.DARK_GRAY)));
 				object.getConfig(g);
-				object.getExtraConfig(g);
 				FTBLibAPI.editServerConfig(player, group, this);
 			}
 		}
@@ -106,7 +86,6 @@ public class MessageEditObject extends MessageToServer implements IConfigCallbac
 			ServerQuestFile.INSTANCE.clearCachedData();
 			ConfigGroup group = ConfigGroup.newGroup("object");
 			object.getConfig(group);
-			object.getExtraConfig(group);
 			new MessageEditObjectResponse(id, group.serializeNBT()).sendToAll();
 			ServerQuestFile.INSTANCE.save();
 		}

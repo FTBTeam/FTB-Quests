@@ -2,7 +2,6 @@ package com.feed_the_beast.ftbquests.block;
 
 import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
 import com.feed_the_beast.ftblib.lib.util.BlockUtils;
-import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
@@ -398,12 +397,12 @@ public class BlockScreen extends BlockWithHorizontalFacing
 			return;
 		}
 
-		tooltip.add(I18n.format("ftbquests.chapter") + ": " + StringUtils.color(quest.chapter.getDisplayName(), TextFormatting.YELLOW).getFormattedText());
-		tooltip.add(I18n.format("ftbquests.quest") + ": " + StringUtils.color(quest.getDisplayName(), TextFormatting.YELLOW).getFormattedText());
+		tooltip.add(I18n.format("ftbquests.chapter") + ": " + quest.chapter.getYellowDisplayName().getFormattedText());
+		tooltip.add(I18n.format("ftbquests.quest") + ": " + quest.getYellowDisplayName().getFormattedText());
 
 		QuestTask task = quest.getTask(nbt == null ? 0 : nbt.getByte("TaskIndex") & 0xFF);
 
-		tooltip.add(I18n.format("ftbquests.task") + ": " + StringUtils.color(task.getDisplayName(), TextFormatting.YELLOW).getFormattedText());
+		tooltip.add(I18n.format("ftbquests.task") + ": " + task.getYellowDisplayName().getFormattedText());
 
 		ITeamData data = ClientQuestFile.INSTANCE.getData(team);
 

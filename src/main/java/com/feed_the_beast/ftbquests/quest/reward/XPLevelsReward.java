@@ -64,6 +64,7 @@ public class XPLevelsReward extends QuestReward
 	@Override
 	public void getConfig(ConfigGroup config)
 	{
+		super.getConfig(config);
 		config.addInt("xp_levels", () -> xpLevels, v -> xpLevels = v, 1, 1, Integer.MAX_VALUE).setDisplayName(new TextComponentTranslation("ftbquests.reward.ftbquests.xp_levels"));
 	}
 

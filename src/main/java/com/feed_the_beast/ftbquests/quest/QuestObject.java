@@ -50,6 +50,13 @@ public abstract class QuestObject extends QuestObjectBase
 		//completionCommand = data.readString();
 	}
 
+	@Override
+	public void getConfig(ConfigGroup config)
+	{
+		super.getConfig(config);
+		config.addString("completion_command", () -> completionCommand, v -> completionCommand = v, "").setDisplayName(new TextComponentTranslation("ftbquests.completion_command")).setOrder(150);
+	}
+
 	public abstract long getProgress(ITeamData data);
 
 	public abstract long getMaxProgress();
@@ -88,11 +95,4 @@ public abstract class QuestObject extends QuestObjectBase
 
 	@Override
 	public abstract ITextComponent getAltDisplayName();
-
-	@Override
-	public final void getExtraConfig(ConfigGroup config)
-	{
-		super.getExtraConfig(config);
-		config.addString("completion_command", () -> completionCommand, v -> completionCommand = v, "").setDisplayName(new TextComponentTranslation("ftbquests.completion_command")).setOrder(150);
-	}
 }
