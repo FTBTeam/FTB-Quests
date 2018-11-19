@@ -3,7 +3,7 @@ package com.feed_the_beast.ftbquests.command;
 import com.feed_the_beast.ftblib.FTBLib;
 import com.feed_the_beast.ftblib.lib.config.ConfigBoolean;
 import com.feed_the_beast.ftbquests.FTBQuests;
-import com.feed_the_beast.ftbquests.net.edit.MessageEditObjectQuickResponse;
+import com.feed_the_beast.ftbquests.net.edit.MessageEditObjectResponse;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
@@ -117,7 +117,7 @@ public class CommandChangeTeamRewards extends CommandBase
 					{
 						reward.team = value.getBoolean();
 						r++;
-						new MessageEditObjectQuickResponse(reward.uid, "team", value).sendToAll();
+						new MessageEditObjectResponse(reward).sendToAll();
 					}
 				}
 			}

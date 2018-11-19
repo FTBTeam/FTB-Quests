@@ -1,10 +1,12 @@
 package com.feed_the_beast.ftbquests.quest.reward;
 
+import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.io.Bits;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
+import com.feed_the_beast.ftbquests.gui.tree.GuiQuestTree;
 import com.feed_the_beast.ftbquests.net.MessageClaimReward;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
@@ -128,6 +130,8 @@ public abstract class QuestReward extends QuestObjectBase
 	@Override
 	public final void deleteSelf()
 	{
+		quest.rewards.remove(this);
+
 		Collection<QuestReward> c = Collections.singleton(this);
 
 		for (ITeamData data : quest.chapter.file.getAllData())
@@ -149,6 +153,18 @@ public abstract class QuestReward extends QuestObjectBase
 		}
 
 		super.deleteChildren();
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public void editedFromGUI()
+	{
+		GuiQuestTree gui = ClientUtils.getCurrentGuiAs(GuiQuestTree.class);
+
+		if (gui != null && gui.selectedQuest != null)
+		{
+			gui.questRight.refreshWidgets();
+		}
 	}
 
 	@Override

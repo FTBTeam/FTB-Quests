@@ -7,6 +7,7 @@ import com.feed_the_beast.ftblib.lib.icon.IconAnimation;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.util.ListUtils;
+import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.events.ObjectCompletedEvent;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
 import com.feed_the_beast.ftbquests.quest.task.QuestTask;
@@ -22,6 +23,8 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -629,5 +632,17 @@ public final class Quest extends QuestObject
 		}
 
 		resetProgress(data, false);
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public void editedFromGUI()
+	{
+		super.editedFromGUI();
+
+		if (chapter.quests.size() == 1) //Edge case, need to figure out better way
+		{
+			ClientQuestFile.INSTANCE.questTreeGui.resetScroll(true);
+		}
 	}
 }

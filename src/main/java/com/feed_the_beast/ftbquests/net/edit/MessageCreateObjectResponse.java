@@ -5,7 +5,6 @@ import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToClient;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
-import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
@@ -77,11 +76,6 @@ public class MessageCreateObjectResponse extends MessageToClient
 
 		object.onCreated();
 		ClientQuestFile.INSTANCE.refreshIDMap();
-		ClientQuestFile.INSTANCE.refreshGui();
-
-		if (object instanceof Quest && ((Quest) object).chapter.quests.size() == 1) //Edge case, need to figure out better way
-		{
-			ClientQuestFile.INSTANCE.questTreeGui.resetScroll(true);
-		}
+		object.editedFromGUI();
 	}
 }

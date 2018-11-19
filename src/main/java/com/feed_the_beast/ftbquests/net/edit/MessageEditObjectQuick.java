@@ -77,7 +77,7 @@ public class MessageEditObjectQuick extends MessageToServer
 					inst.getValue().setValueFromOtherValue(value);
 					ServerQuestFile.INSTANCE.clearCachedData();
 					ServerQuestFile.INSTANCE.save();
-					new MessageEditObjectQuickResponse(id, configId, value).sendToAll();
+					new MessageEditObjectResponse(object).sendToAll();
 				}
 			}
 		}
