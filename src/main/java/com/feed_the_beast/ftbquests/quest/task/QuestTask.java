@@ -1,9 +1,11 @@
 package com.feed_the_beast.ftbquests.quest.task;
 
+import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.events.ObjectCompletedEvent;
+import com.feed_the_beast.ftbquests.gui.tree.GuiQuestTree;
 import com.feed_the_beast.ftbquests.net.MessageSubmitItems;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
@@ -151,6 +153,18 @@ public abstract class QuestTask extends QuestObject
 		}
 
 		super.deleteChildren();
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public void editedFromGUI()
+	{
+		GuiQuestTree gui = ClientUtils.getCurrentGuiAs(GuiQuestTree.class);
+
+		if (gui != null && gui.selectedQuest != null)
+		{
+			gui.questLeft.refreshWidgets();
+		}
 	}
 
 	@Override

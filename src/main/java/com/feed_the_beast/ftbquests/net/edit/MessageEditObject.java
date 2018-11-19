@@ -9,7 +9,6 @@ import com.feed_the_beast.ftblib.lib.net.MessageToServer;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
-import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import net.minecraft.command.ICommandSender;
@@ -79,14 +78,14 @@ public class MessageEditObject extends MessageToServer implements IConfigCallbac
 	@Override
 	public void onConfigSaved(ConfigGroup g, ICommandSender sender)
 	{
-		QuestObject object = ServerQuestFile.INSTANCE.get(id);
+		QuestObjectBase object = ServerQuestFile.INSTANCE.getBase(id);
 
 		if (object != null)
 		{
 			ServerQuestFile.INSTANCE.clearCachedData();
 			ConfigGroup group = ConfigGroup.newGroup("object");
 			object.getConfig(group);
-			new MessageEditObjectResponse(id, group.serializeNBT()).sendToAll();
+			new MessageEditObjectResponse(object).sendToAll();
 			ServerQuestFile.INSTANCE.save();
 		}
 	}
