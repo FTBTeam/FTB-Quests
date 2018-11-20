@@ -287,7 +287,7 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 	@Nullable
 	public QuestTask getTask()
 	{
-		if (quest.isEmpty())
+		if (quest == null || quest.isEmpty())
 		{
 			return null;
 		}
