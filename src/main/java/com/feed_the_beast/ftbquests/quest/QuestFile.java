@@ -63,7 +63,6 @@ public abstract class QuestFile extends QuestObject
 
 	public final List<ItemStack> emergencyItems;
 	public Ticks emergencyItemsCooldown;
-	public String soundTask, soundQuest, soundChapter, soundFile;
 	public final ResourceLocation[] lootTables;
 	public int lootSize;
 	public Color4I colCompleted, colStarted, colNotStarted, colCantStart;
@@ -84,10 +83,6 @@ public abstract class QuestFile extends QuestObject
 		emergencyItems = new ObjectArrayList<>();
 		emergencyItems.add(new ItemStack(Items.APPLE));
 		emergencyItemsCooldown = Ticks.MINUTE.x(5);
-		soundTask = "";
-		soundQuest = "";
-		soundChapter = "";
-		soundFile = "minecraft:ui.toast.challenge_complete";
 
 		lootTables = new ResourceLocation[LootRarity.VALUES.length];
 
@@ -361,8 +356,6 @@ public abstract class QuestFile extends QuestObject
 		}
 
 		allTasks = Collections.unmodifiableList(Arrays.asList(tasks.toArray(new QuestTask[0])));
-		map.put("*", this);
-		intMap.put(1, this);
 
 		clearCachedData();
 	}
@@ -747,10 +740,6 @@ public abstract class QuestFile extends QuestObject
 		super.writeNetData(data);
 		data.writeCollection(emergencyItems, DataOut.ITEM_STACK);
 		data.writeVarLong(emergencyItemsCooldown.ticks());
-		data.writeString(soundTask);
-		data.writeString(soundQuest);
-		data.writeString(soundChapter);
-		data.writeString(soundFile);
 
 		for (LootRarity rarity : LootRarity.VALUES)
 		{
@@ -772,10 +761,6 @@ public abstract class QuestFile extends QuestObject
 		super.readNetData(data);
 		data.readCollection(emergencyItems, DataIn.ITEM_STACK);
 		emergencyItemsCooldown = Ticks.get(data.readVarLong());
-		soundTask = data.readString();
-		soundQuest = data.readString();
-		soundChapter = data.readString();
-		soundFile = data.readString();
 
 		for (LootRarity rarity : LootRarity.VALUES)
 		{
@@ -1049,6 +1034,10 @@ public abstract class QuestFile extends QuestObject
 		if (id.isEmpty())
 		{
 			return 0;
+		}
+		else if (id.charAt(0) == '*')
+		{
+			return 1;
 		}
 
 		try
