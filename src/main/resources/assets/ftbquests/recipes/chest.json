@@ -1,0 +1,13 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"group": "ftbquests:chest",
+	"result": {"item": "chest"},
+	"pattern": [
+		"B",
+		"C"
+	],
+	"key": {
+		"B": {"item": "book"},
+		"C": {"type": "forge:ore_dict", "ore": "chest"}
+	}
+}

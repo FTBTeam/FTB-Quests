@@ -32,4 +32,16 @@ public class ItemQuestBook extends Item
 			ClientQuestFile.INSTANCE.openQuestGui();
 		}
 	}
+
+	@Override
+	public ItemStack getContainerItem(ItemStack stack)
+	{
+		return stack.copy();
+	}
+
+	@Override
+	public boolean hasContainerItem(ItemStack stack)
+	{
+		return true;
+	}
 }
