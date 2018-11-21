@@ -978,6 +978,7 @@ public abstract class QuestFile extends QuestObject
 	@Override
 	public void getConfig(ConfigGroup config)
 	{
+		super.getConfig(config);
 		config.addList("emergency_items", emergencyItems, new ConfigItemStack(ItemStack.EMPTY), ConfigItemStack::new, ConfigItemStack::getStack);
 
 		config.add("emergency_items_cooldown", new ConfigTimer(Ticks.NO_TICKS)

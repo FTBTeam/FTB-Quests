@@ -504,6 +504,7 @@ public final class Quest extends QuestObject
 	@Override
 	public void getConfig(ConfigGroup config)
 	{
+		super.getConfig(config);
 		config.addInt("x", () -> x, v -> x = (byte) v, 0, -POS_LIMIT, POS_LIMIT);
 		config.addInt("y", () -> y, v -> y = (byte) v, 0, -POS_LIMIT, POS_LIMIT);
 		config.addEnum("shape", () -> shape, v -> shape = v, EnumQuestShape.NAME_MAP);
