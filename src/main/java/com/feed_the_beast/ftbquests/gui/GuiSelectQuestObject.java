@@ -12,6 +12,7 @@ import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.quest.QuestVariable;
+import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
 import com.feed_the_beast.ftbquests.quest.task.QuestTask;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
 import net.minecraft.client.resources.I18n;
@@ -44,12 +45,42 @@ public class GuiSelectQuestObject extends GuiButtonListBase
 
 			if (object instanceof Quest)
 			{
-				list.add(TextFormatting.GRAY + I18n.format("ftbquests.chapter") + ": " + QuestObjectType.CHAPTER.getColor() + ((Quest) object).chapter.getDisplayName().getUnformattedText());
+				Quest quest = (Quest) object;
+				list.add(TextFormatting.GRAY + I18n.format("ftbquests.chapter") + ": " + QuestObjectType.CHAPTER.getColor() + quest.chapter.getDisplayName().getUnformattedText());
+
+				if (quest.rewards.size() == 1)
+				{
+					list.add(TextFormatting.GRAY + I18n.format("ftbquests.reward") + ": " + QuestObjectType.REWARD.getColor() + quest.rewards.get(0).getDisplayName().getUnformattedText());
+				}
+				else if (!quest.rewards.isEmpty())
+				{
+					list.add(TextFormatting.GRAY + I18n.format("ftbquests.rewards"));
+
+					for (QuestReward reward : quest.rewards)
+					{
+						list.add("  " + QuestObjectType.REWARD.getColor() + reward.getDisplayName().getUnformattedText());
+					}
+				}
 			}
 			else if (object instanceof QuestTask)
 			{
-				list.add(TextFormatting.GRAY + I18n.format("ftbquests.chapter") + ": " + QuestObjectType.CHAPTER.getColor() + ((QuestTask) object).quest.chapter.getDisplayName().getUnformattedText());
-				list.add(TextFormatting.GRAY + I18n.format("ftbquests.quest") + ": " + QuestObjectType.QUEST.getColor() + ((QuestTask) object).quest.getDisplayName().getUnformattedText());
+				Quest quest = ((QuestTask) object).quest;
+				list.add(TextFormatting.GRAY + I18n.format("ftbquests.chapter") + ": " + QuestObjectType.CHAPTER.getColor() + quest.chapter.getDisplayName().getUnformattedText());
+				list.add(TextFormatting.GRAY + I18n.format("ftbquests.quest") + ": " + QuestObjectType.QUEST.getColor() + quest.getDisplayName().getUnformattedText());
+
+				if (quest.rewards.size() == 1)
+				{
+					list.add(TextFormatting.GRAY + I18n.format("ftbquests.reward") + ": " + QuestObjectType.REWARD.getColor() + quest.rewards.get(0).getDisplayName().getUnformattedText());
+				}
+				else if (!quest.rewards.isEmpty())
+				{
+					list.add(TextFormatting.GRAY + I18n.format("ftbquests.rewards"));
+
+					for (QuestReward reward : quest.rewards)
+					{
+						list.add("  " + QuestObjectType.REWARD.getColor() + reward.getDisplayName().getUnformattedText());
+					}
+				}
 			}
 		}
 

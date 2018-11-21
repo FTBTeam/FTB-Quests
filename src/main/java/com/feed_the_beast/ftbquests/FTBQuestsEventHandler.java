@@ -26,6 +26,7 @@ import com.feed_the_beast.ftbquests.quest.task.FluidTask;
 import com.feed_the_beast.ftbquests.quest.task.ForgeEnergyTask;
 import com.feed_the_beast.ftbquests.quest.task.ItemTask;
 import com.feed_the_beast.ftbquests.quest.task.QuestTaskType;
+import com.feed_the_beast.ftbquests.quest.task.XPTask;
 import com.feed_the_beast.ftbquests.tile.TileProgressDetector;
 import com.feed_the_beast.ftbquests.tile.TileProgressScreenCore;
 import com.feed_the_beast.ftbquests.tile.TileProgressScreenPart;
@@ -120,7 +121,8 @@ public class FTBQuestsEventHandler
 		event.getRegistry().registerAll(
 				FTBQuestsTasks.ITEM = new QuestTaskType(ItemTask.class, ItemTask::new).setRegistryName("item").setIcon(Icon.getIcon("minecraft:items/diamond")),
 				FTBQuestsTasks.FLUID = new QuestTaskType(FluidTask.class, FluidTask::new).setRegistryName("fluid").setIcon(Icon.getIcon(FluidRegistry.WATER.getStill(new FluidStack(FluidRegistry.WATER, Fluid.BUCKET_VOLUME)).toString()).combineWith(Icon.getIcon(FluidTask.TANK_TEXTURE.toString()))),
-				FTBQuestsTasks.FORGE_ENERGY = new QuestTaskType(ForgeEnergyTask.class, ForgeEnergyTask::new).setRegistryName("forge_energy").setIcon(Icon.getIcon(ForgeEnergyTask.EMPTY_TEXTURE.toString()).combineWith(Icon.getIcon(ForgeEnergyTask.FULL_TEXTURE.toString())))
+				FTBQuestsTasks.FORGE_ENERGY = new QuestTaskType(ForgeEnergyTask.class, ForgeEnergyTask::new).setRegistryName("forge_energy").setIcon(Icon.getIcon(ForgeEnergyTask.EMPTY_TEXTURE.toString()).combineWith(Icon.getIcon(ForgeEnergyTask.FULL_TEXTURE.toString()))),
+				FTBQuestsTasks.XP = new QuestTaskType(XPTask.class, XPTask::new).setRegistryName("xp").setIcon(Icon.getIcon("minecraft:items/experience_bottle"))
 		);
 
 		FTBQuests.PROXY.setTaskGuiProviders();

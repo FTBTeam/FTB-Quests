@@ -15,6 +15,8 @@ import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
 
 import javax.annotation.Nullable;
@@ -94,6 +96,19 @@ public class ConfigQuestObject extends ConfigValue
 	}
 
 	@Override
+	public ITextComponent getStringForGUI()
+	{
+		object = getObject();
+
+		if (object == null)
+		{
+			return new TextComponentString("");
+		}
+
+		return object.getDisplayName().createCopy();
+	}
+
+	@Override
 	public void onClicked(IOpenableGui gui, ConfigValueInstance inst, MouseButton button, Runnable callback)
 	{
 		if (inst.getCanEdit())
@@ -163,6 +178,11 @@ public class ConfigQuestObject extends ConfigValue
 		if (inst.getCanEdit() && !inst.getDefaultValue().isNull())
 		{
 			list.add(TextFormatting.AQUA + "Default: " + TextFormatting.RESET + inst.getDefaultValue().getStringForGUI().getFormattedText());
+		}
+
+		if (object != null)
+		{
+			list.add(TextFormatting.AQUA + "ID: " + TextFormatting.RESET + object);
 		}
 
 		if (types.size() == 1)

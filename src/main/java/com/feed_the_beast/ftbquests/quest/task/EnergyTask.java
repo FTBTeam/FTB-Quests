@@ -1,6 +1,7 @@
 package com.feed_the_beast.ftbquests.quest.task;
 
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
+import com.feed_the_beast.ftblib.lib.config.ConfigLong;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
@@ -12,7 +13,7 @@ import net.minecraft.util.text.TextComponentString;
 /**
  * @author LatvianModder
  */
-public abstract class EnergyTask extends QuestTask
+public abstract class EnergyTask extends QuestTask implements ISingleLongValueTask
 {
 	public long value = 1000L;
 	public long maxInput = 0L;
@@ -74,6 +75,18 @@ public abstract class EnergyTask extends QuestTask
 		super.readNetData(data);
 		value = data.readVarLong();
 		maxInput = data.readVarLong();
+	}
+
+	@Override
+	public ConfigLong getDefaultValue()
+	{
+		return new ConfigLong(value, 1L, Long.MAX_VALUE);
+	}
+
+	@Override
+	public void setValue(long v)
+	{
+		value = v;
 	}
 
 	@Override

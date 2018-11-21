@@ -1,7 +1,6 @@
 package com.feed_the_beast.ftbquests.quest.reward;
 
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
-import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftbquests.quest.Quest;
@@ -72,12 +71,6 @@ public class XPLevelsReward extends QuestReward
 	public void claim(EntityPlayerMP player)
 	{
 		player.addExperienceLevel(xpLevels);
-	}
-
-	@Override
-	public Icon getAltIcon()
-	{
-		return Icon.getIcon("minecraft:items/experience_bottle");
 	}
 
 	@Override

@@ -5,7 +5,6 @@ import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToServer;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
-import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.task.QuestTask;
 import com.feed_the_beast.ftbquests.util.FTBQuestsTeamData;
@@ -14,17 +13,17 @@ import net.minecraft.entity.player.EntityPlayerMP;
 /**
  * @author LatvianModder
  */
-public class MessageSubmitAllItems extends MessageToServer
+public class MessageSubmitTask extends MessageToServer
 {
-	private int quest;
+	private int task;
 
-	public MessageSubmitAllItems()
+	public MessageSubmitTask()
 	{
 	}
 
-	public MessageSubmitAllItems(int q)
+	public MessageSubmitTask(int t)
 	{
-		quest = q;
+		task = t;
 	}
 
 	@Override
@@ -36,34 +35,24 @@ public class MessageSubmitAllItems extends MessageToServer
 	@Override
 	public void writeData(DataOut data)
 	{
-		data.writeInt(quest);
+		data.writeInt(task);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
-		quest = data.readInt();
+		task = data.readInt();
 	}
 
 	@Override
 	public void onMessage(EntityPlayerMP player)
 	{
 		FTBQuestsTeamData teamData = FTBQuestsTeamData.get(Universe.get().getPlayer(player).team);
-		Quest q = ServerQuestFile.INSTANCE.getQuest(quest);
+		QuestTask t = ServerQuestFile.INSTANCE.getTask(task);
 
-		if (q != null && q.canStartTasks(teamData))
+		if (t != null && t.quest.canStartTasks(teamData))
 		{
-			boolean changed = false;
-
-			for (QuestTask t : q.tasks)
-			{
-				if (teamData.getQuestTaskData(t).submitItems(player, false))
-				{
-					changed = true;
-				}
-			}
-
-			if (changed)
+			if (teamData.getQuestTaskData(t).submitTask(player, false))
 			{
 				player.inventory.markDirty();
 				player.openContainer.detectAndSendChanges();
