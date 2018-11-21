@@ -519,7 +519,7 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 					}
 				}
 
-				cTaskData.submitItems(player, false);
+				cTaskData.submitTask(player, false);
 			}
 		}
 	}

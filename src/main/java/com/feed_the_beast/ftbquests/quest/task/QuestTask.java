@@ -6,7 +6,7 @@ import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.events.ObjectCompletedEvent;
 import com.feed_the_beast.ftbquests.gui.tree.GuiQuestTree;
-import com.feed_the_beast.ftbquests.net.MessageSubmitItems;
+import com.feed_the_beast.ftbquests.net.MessageSubmitTask;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
@@ -251,10 +251,7 @@ public abstract class QuestTask extends QuestObject
 	@SideOnly(Side.CLIENT)
 	public void onButtonClicked()
 	{
-		if (canInsertItem())
-		{
-			new MessageSubmitItems(uid).sendToServer();
-		}
+		new MessageSubmitTask(uid).sendToServer();
 	}
 
 	public boolean submitItemsOnInventoryChange()

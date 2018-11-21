@@ -11,7 +11,7 @@ import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.util.StringJoiner;
 import com.feed_the_beast.ftbquests.item.ItemMissing;
-import com.feed_the_beast.ftbquests.net.MessageSubmitItems;
+import com.feed_the_beast.ftbquests.net.MessageSubmitTask;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import net.minecraft.client.resources.I18n;
@@ -293,7 +293,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 	@SideOnly(Side.CLIENT)
 	public void onButtonClicked()
 	{
-		new MessageSubmitItems(uid).sendToServer();
+		new MessageSubmitTask(uid).sendToServer();
 	}
 
 	@Override
@@ -382,7 +382,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 		}
 
 		@Override
-		public boolean submitItems(EntityPlayerMP player, boolean simulate)
+		public boolean submitTask(EntityPlayerMP player, boolean simulate)
 		{
 			if (!task.canInsertItem())
 			{

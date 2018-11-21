@@ -115,7 +115,7 @@ public abstract class QuestTaskData<T extends QuestTask> implements ICapabilityP
 		teamData.syncTask(this);
 	}
 
-	public boolean submitItems(EntityPlayerMP player, boolean simulate)
+	public boolean submitTask(EntityPlayerMP player, boolean simulate)
 	{
 		if (!task.canInsertItem())
 		{

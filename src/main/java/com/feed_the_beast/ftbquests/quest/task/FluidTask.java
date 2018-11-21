@@ -375,7 +375,7 @@ public class FluidTask extends QuestTask
 
 			if (progress < task.amount && fluidStack.isFluidEqual(resource))
 			{
-				long add = Math.min(100000000000L, Math.min(resource.amount, task.amount - progress));
+				int add = (int) Math.min(Integer.MAX_VALUE, Math.min(resource.amount, task.amount - progress));
 
 				if (add > 0)
 				{
@@ -385,7 +385,7 @@ public class FluidTask extends QuestTask
 						sync();
 					}
 
-					return (int) add;
+					return add;
 				}
 			}
 
