@@ -100,15 +100,19 @@ public class ButtonQuest extends Button
 
 			}));
 
-			if (treeGui.selectedQuest != null && treeGui.selectedQuest != quest && !treeGui.selectedQuest.canRepeat)
+			if (treeGui.selectedQuest != null && treeGui.selectedQuest != quest)
 			{
-				if (quest.hasDependency(treeGui.selectedQuest))
+				if (treeGui.selectedQuest.hasDependency(quest))
+				{
+					contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.rem_dep"), GuiIcons.REMOVE, () -> new MessageEditDependency(treeGui.selectedQuest.uid, quest.uid, false).sendToServer()));
+				}
+				else if (quest.hasDependency(treeGui.selectedQuest))
 				{
 					contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.rem_dep"), GuiIcons.REMOVE, () -> new MessageEditDependency(quest.uid, treeGui.selectedQuest.uid, false).sendToServer()));
 				}
 				else
 				{
-					contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.set_dep"), QuestsTheme.ADD, () -> new MessageEditDependency(quest.uid, treeGui.selectedQuest.uid, true).sendToServer()).setEnabled(treeGui.selectedQuest != null && treeGui.selectedQuest != quest));
+					contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.set_dep"), QuestsTheme.ADD, () -> new MessageEditDependency(quest.uid, treeGui.selectedQuest.uid, true).sendToServer()).setEnabled(treeGui.selectedQuest != null && treeGui.selectedQuest != quest && !treeGui.selectedQuest.canRepeat));
 				}
 			}
 
