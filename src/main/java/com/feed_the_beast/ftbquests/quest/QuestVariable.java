@@ -89,6 +89,7 @@ public final class QuestVariable extends QuestObject
 	@Override
 	public void getConfig(ConfigGroup config)
 	{
+		super.getConfig(config);
 		config.addLong("max_value", () -> maxValue, v -> maxValue = v, 1L, 1L, Long.MAX_VALUE);
 		config.addBool("team", () -> team, v -> team = v, false);
 	}

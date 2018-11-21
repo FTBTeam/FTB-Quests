@@ -268,6 +268,7 @@ public final class QuestChapter extends QuestObject
 	@Override
 	public void getConfig(ConfigGroup config)
 	{
+		super.getConfig(config);
 		config.addList("description", description, new ConfigString(""), ConfigString::new, ConfigString::getString);
 		config.addEnum("visibility", () -> visibilityType, v -> visibilityType = v, EnumQuestVisibilityType.NAME_MAP);
 	}
