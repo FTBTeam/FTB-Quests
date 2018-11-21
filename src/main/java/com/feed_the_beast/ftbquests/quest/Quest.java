@@ -1,5 +1,6 @@
 package com.feed_the_beast.ftbquests.quest;
 
+import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigString;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
@@ -9,6 +10,7 @@ import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.util.ListUtils;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.events.ObjectCompletedEvent;
+import com.feed_the_beast.ftbquests.gui.tree.GuiQuestTree;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
 import com.feed_the_beast.ftbquests.quest.task.QuestTask;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
@@ -639,7 +641,14 @@ public final class Quest extends QuestObject
 	@SideOnly(Side.CLIENT)
 	public void editedFromGUI()
 	{
-		super.editedFromGUI();
+		GuiQuestTree gui = ClientUtils.getCurrentGuiAs(GuiQuestTree.class);
+
+		if (gui != null)
+		{
+			gui.quests.refreshWidgets();
+			gui.questLeft.refreshWidgets();
+			gui.questRight.refreshWidgets();
+		}
 
 		if (chapter.quests.size() == 1) //Edge case, need to figure out better way
 		{

@@ -7,9 +7,9 @@ import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToServer;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
-import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
+import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -61,14 +61,22 @@ public class MessageEditObject extends MessageToServer implements IConfigCallbac
 
 			if (object != null)
 			{
-				ITextComponent idc = new TextComponentString(" " + object);
-				idc.getStyle().setColor(TextFormatting.DARK_GRAY);
-				idc.getStyle().setBold(false);
-
 				ConfigGroup group = ConfigGroup.newGroup(FTBQuests.MOD_ID);
-				group.setDisplayName(new TextComponentTranslation(object.getObjectType().getTranslationKey()).appendSibling(idc));
+
+				if (object.getObjectType() != QuestObjectType.FILE)
+				{
+					ITextComponent idc = new TextComponentString(" " + object);
+					idc.getStyle().setColor(TextFormatting.DARK_GRAY);
+					idc.getStyle().setBold(false);
+					group.setDisplayName(new TextComponentTranslation(object.getObjectType().getTranslationKey()).appendSibling(idc));
+				}
+				else
+				{
+					group.setDisplayName(new TextComponentTranslation(object.getObjectType().getTranslationKey()));
+				}
+
 				ConfigGroup g = object.createSubGroup(group);
-				g.setDisplayName(object.getDisplayName().createCopy().appendSibling(StringUtils.color(new TextComponentString(" " + object), TextFormatting.DARK_GRAY)));
+				//g.setDisplayName(object.getDisplayName().createCopy().appendSibling(StringUtils.color(new TextComponentString(" " + object), TextFormatting.DARK_GRAY)));
 				object.getConfig(g);
 				FTBLibAPI.editServerConfig(player, group, this);
 			}

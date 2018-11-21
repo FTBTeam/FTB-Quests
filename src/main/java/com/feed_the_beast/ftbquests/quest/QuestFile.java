@@ -996,17 +996,19 @@ public abstract class QuestFile extends QuestObject
 			}
 		}, new ConfigTimer(Ticks.MINUTE.x(5)));
 
-		ConfigGroup lootGroup = config.getGroup("loot_tables");
+		ConfigGroup defaultsGroup = config.getGroup("defaults");
+		defaultsGroup.addBool("reward_team", () -> defaultRewardTeam, v -> defaultRewardTeam = v, false);
+		defaultsGroup.addBool("check_only", () -> defaultCheckOnly, v -> defaultCheckOnly = v, false);
+
+		ConfigGroup lootGroup = config.getGroup("loot");
+		lootGroup.addInt("size", () -> lootSize, v -> lootSize = v, 27, 1, 1024);
+
 		Pattern pattern = Pattern.compile("[a-z0-9_]+:.+");
 
 		for (LootRarity r : LootRarity.VALUES)
 		{
 			lootGroup.addString(r.getName(), () -> lootTables[r.ordinal()].toString(), v -> lootTables[r.ordinal()] = v.equals(r.getLootTable().toString()) ? r.getLootTable() : new ResourceLocation(v), r.getLootTable().toString(), pattern).setDisplayName(new TextComponentTranslation(r.getTranslationKey()));
 		}
-
-		config.addInt("loot_size", () -> lootSize, v -> lootSize = v, 27, 1, 1024);
-		config.addBool("default_reward_team", () -> defaultRewardTeam, v -> defaultRewardTeam = v, false);
-		config.addBool("default_check_only", () -> defaultCheckOnly, v -> defaultCheckOnly = v, false);
 	}
 
 	@Override
