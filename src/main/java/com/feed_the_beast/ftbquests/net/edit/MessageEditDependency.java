@@ -67,8 +67,8 @@ public class MessageEditDependency extends MessageToServer
 				{
 					q.clearCachedData();
 					q.verifyDependencies();
-					new MessageEditDependencyResponse(quest, object, add).sendToAll();
 					ServerQuestFile.INSTANCE.save();
+					new MessageEditDependencyResponse(quest, object, add).sendToAll();
 				}
 			}
 		}
