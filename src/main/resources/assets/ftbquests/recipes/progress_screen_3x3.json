@@ -1,7 +1,7 @@
 {
 	"type": "minecraft:crafting_shaped",
 	"group": "ftbquests:screen",
-	"result": {"item": "progress_screen", "nbt": {"Size": 1}},
+	"result": {"item": "progress_screen", "nbt": {"Width": 1, "Height": 2}},
 	"pattern": [
 		"SSS",
 		"SSS",
