@@ -1,0 +1,14 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"group": "ftbquests:screen",
+	"result": {"item": "progress_screen"},
+	"pattern": [
+		"CCC",
+		"CBC",
+		"CCC"
+	],
+	"key": {
+		"B": {"item": "book"},
+		"C": {"item": "screen"}
+	}
+}

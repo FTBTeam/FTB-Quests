@@ -1,0 +1,14 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"group": "ftbquests:screen",
+	"result": {"item": "screen"},
+	"pattern": [
+		"CCC",
+		"CBC",
+		"CCC"
+	],
+	"key": {
+		"B": {"item": "book"},
+		"C": {"type": "forge:ore_dict", "ore": "stone"}
+	}
+}

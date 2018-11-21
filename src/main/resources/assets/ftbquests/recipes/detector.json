@@ -1,0 +1,15 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"group": "ftbquests:detector",
+	"result": {"item": "progress_detector"},
+	"pattern": [
+		"CRC",
+		"RBR",
+		"CRC"
+	],
+	"key": {
+		"B": {"item": "book"},
+		"R": {"type": "forge:ore_dict", "ore": "dustRedstone"},
+		"C": {"type": "forge:ore_dict", "ore": "cobblestone"}
+	}
+}

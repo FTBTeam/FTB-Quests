@@ -1,0 +1,13 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"group": "ftbquests:screen",
+	"result": {"item": "screen", "nbt": {"Size": 1}},
+	"pattern": [
+		"SSS",
+		"SSS",
+		"SSS"
+	],
+	"key": {
+		"S": {"item": "screen"}
+	}
+}
