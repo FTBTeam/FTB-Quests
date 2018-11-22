@@ -10,6 +10,8 @@ import com.feed_the_beast.ftblib.lib.tile.TileBase;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.gui.FTBQuestsGuiHandler;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
+import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.task.QuestTask;
 import net.minecraft.command.ICommandSender;
@@ -160,15 +162,21 @@ public class TileQuestChest extends TileBase implements IItemHandler, IConfigCal
 
 		if (cTeam != null)
 		{
-			for (QuestTask task : file.allTasks)
+			for (QuestChapter chapter : file.chapters)
 			{
-				if (task.canInsertItem() && !task.isComplete(cTeam) && task.quest.canStartTasks(cTeam))
+				for (Quest quest : chapter.quests)
 				{
-					stack = cTeam.getQuestTaskData(task).insertItem(stack, false, simulate, player);
-
-					if (stack.isEmpty())
+					for (QuestTask task : quest.tasks)
 					{
-						return ItemStack.EMPTY;
+						if (task.canInsertItem() && !task.isComplete(cTeam) && task.quest.canStartTasks(cTeam))
+						{
+							stack = cTeam.getQuestTaskData(task).insertItem(stack, false, simulate, player);
+
+							if (stack.isEmpty())
+							{
+								return ItemStack.EMPTY;
+							}
+						}
 					}
 				}
 			}

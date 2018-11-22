@@ -55,28 +55,40 @@ public class GuiQuestChest extends GuiBase implements IContainerListener
 			{
 				if (ClientQuestFile.existsWithTeam())
 				{
-					for (QuestTask task : ClientQuestFile.INSTANCE.allTasks)
+					for (QuestChapter chapter : ClientQuestFile.INSTANCE.chapters)
 					{
-						if (task.canInsertItem())
+						for (Quest quest : chapter.quests)
 						{
-							QuestTaskData data = ClientQuestFile.INSTANCE.self.getQuestTaskData(task);
-
-							if (data.getRelativeProgress() == 0L && data.task.quest.canStartTasks(ClientQuestFile.INSTANCE.self))
+							for (QuestTask task : quest.tasks)
 							{
-								add(new ButtonTask(this, data));
+								if (task.canInsertItem())
+								{
+									QuestTaskData data = ClientQuestFile.INSTANCE.self.getQuestTaskData(task);
+
+									if (data.getRelativeProgress() == 0L && data.task.quest.canStartTasks(ClientQuestFile.INSTANCE.self))
+									{
+										add(new ButtonTask(this, data));
+									}
+								}
 							}
 						}
 					}
 
-					for (QuestTask task : ClientQuestFile.INSTANCE.allTasks)
+					for (QuestChapter chapter : ClientQuestFile.INSTANCE.chapters)
 					{
-						if (task.canInsertItem())
+						for (Quest quest : chapter.quests)
 						{
-							QuestTaskData data = ClientQuestFile.INSTANCE.self.getQuestTaskData(task);
-
-							if (data.getRelativeProgress() == 100L)
+							for (QuestTask task : quest.tasks)
 							{
-								add(new ButtonTask(this, data));
+								if (task.canInsertItem())
+								{
+									QuestTaskData data = ClientQuestFile.INSTANCE.self.getQuestTaskData(task);
+
+									if (data.getRelativeProgress() == 100L)
+									{
+										add(new ButtonTask(this, data));
+									}
+								}
 							}
 						}
 					}

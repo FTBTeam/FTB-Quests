@@ -40,9 +40,7 @@ import net.minecraftforge.registries.ForgeRegistry;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -57,9 +55,8 @@ public abstract class QuestFile extends QuestObject
 	public final List<QuestChapter> chapters;
 	public final List<QuestVariable> variables;
 
-	private final Int2ObjectOpenHashMap<QuestObjectBase> intMap;
-	private final Map<String, QuestObject> map;
-	public Collection<QuestTask> allTasks;
+	private final Int2ObjectOpenHashMap<QuestObjectBase> map;
+	private final Map<String, QuestObject> oldMap;
 
 	public final List<ItemStack> emergencyItems;
 	public Ticks emergencyItemsCooldown;
@@ -77,8 +74,8 @@ public abstract class QuestFile extends QuestObject
 		chapters = new ObjectArrayList<>();
 		variables = new ObjectArrayList<>();
 
-		intMap = new Int2ObjectOpenHashMap<>();
-		map = new Object2ObjectOpenHashMap<>();
+		map = new Int2ObjectOpenHashMap<>();
+		oldMap = new Object2ObjectOpenHashMap<>();
 
 		emergencyItems = new ObjectArrayList<>();
 		emergencyItems.add(new ItemStack(Items.APPLE));
@@ -240,7 +237,7 @@ public abstract class QuestFile extends QuestObject
 			return this;
 		}
 
-		QuestObjectBase object = intMap.get(id);
+		QuestObjectBase object = map.get(id);
 		return object == null || object.invalid ? null : object;
 	}
 
@@ -255,14 +252,14 @@ public abstract class QuestFile extends QuestObject
 	@SuppressWarnings("deprecation")
 	public QuestObjectBase remove(int id)
 	{
-		QuestObjectBase object = intMap.remove(id);
+		QuestObjectBase object = map.remove(id);
 
 		if (object != null)
 		{
 			if (object instanceof QuestObject)
 			{
 				QuestObject o = (QuestObject) object;
-				map.remove(o.getID());
+				oldMap.remove(o.getID());
 
 				for (QuestChapter chapter : chapters)
 				{
@@ -321,41 +318,37 @@ public abstract class QuestFile extends QuestObject
 	{
 		clearCachedData();
 
+		oldMap.clear();
 		map.clear();
-		intMap.clear();
-		List<QuestTask> tasks = new ObjectArrayList<>();
 
 		for (QuestChapter chapter : chapters)
 		{
-			map.put(chapter.getID(), chapter);
-			intMap.put(chapter.uid, chapter);
+			oldMap.put(chapter.getID(), chapter);
+			map.put(chapter.uid, chapter);
 
 			for (Quest quest : chapter.quests)
 			{
-				map.put(quest.getID(), quest);
-				intMap.put(quest.uid, quest);
+				oldMap.put(quest.getID(), quest);
+				map.put(quest.uid, quest);
 
 				for (QuestTask task : quest.tasks)
 				{
-					map.put(task.getID(), task);
-					intMap.put(task.uid, task);
-					tasks.add(task);
+					oldMap.put(task.getID(), task);
+					map.put(task.uid, task);
 				}
 
 				for (QuestReward reward : quest.rewards)
 				{
-					intMap.put(reward.uid, reward);
+					map.put(reward.uid, reward);
 				}
 			}
 		}
 
 		for (QuestVariable variable : variables)
 		{
-			map.put(variable.getID(), variable);
-			intMap.put(variable.uid, variable);
+			oldMap.put(variable.getID(), variable);
+			map.put(variable.uid, variable);
 		}
-
-		allTasks = Collections.unmodifiableList(Arrays.asList(tasks.toArray(new QuestTask[0])));
 
 		clearCachedData();
 	}
@@ -1024,7 +1017,7 @@ public abstract class QuestFile extends QuestObject
 
 	public int readID(int id)
 	{
-		while (id == 0 || id == 1 || intMap.get(id) != null)
+		while (id == 0 || id == 1 || map.get(id) != null)
 		{
 			id = MathUtils.RAND.nextInt();
 		}
@@ -1049,7 +1042,7 @@ public abstract class QuestFile extends QuestObject
 		}
 		catch (Exception ex)
 		{
-			QuestObjectBase object = map.get(id);
+			QuestObjectBase object = oldMap.get(id);
 			return object == null ? 0 : object.uid;
 		}
 	}
@@ -1070,5 +1063,18 @@ public abstract class QuestFile extends QuestObject
 		}
 
 		return 0;
+	}
+
+	public String getOldID(QuestObject object)
+	{
+		for (Map.Entry<String, QuestObject> entry : oldMap.entrySet())
+		{
+			if (entry.getValue() == object)
+			{
+				return entry.getKey();
+			}
+		}
+
+		return object.toString();
 	}
 }

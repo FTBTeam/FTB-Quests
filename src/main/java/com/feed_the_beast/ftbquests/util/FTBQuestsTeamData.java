@@ -23,6 +23,8 @@ import com.feed_the_beast.ftbquests.net.MessageSyncQuests;
 import com.feed_the_beast.ftbquests.net.MessageUpdateTaskProgress;
 import com.feed_the_beast.ftbquests.net.MessageUpdateVariable;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
+import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestVariable;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
@@ -87,9 +89,15 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 	{
 		FTBQuestsTeamData data = get(event.getTeam());
 
-		for (QuestTask task : ServerQuestFile.INSTANCE.allTasks)
+		for (QuestChapter chapter : ServerQuestFile.INSTANCE.chapters)
 		{
-			data.createTaskData(task);
+			for (Quest quest : chapter.quests)
+			{
+				for (QuestTask task : quest.tasks)
+				{
+					data.createTaskData(task);
+				}
+			}
 		}
 
 		NBTTagCompound nbt = NBTUtils.readNBT(event.getTeam().getDataFile("ftbquests"));
@@ -101,9 +109,15 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 	{
 		FTBQuestsTeamData data = get(event.getTeam());
 
-		for (QuestTask task : ServerQuestFile.INSTANCE.allTasks)
+		for (QuestChapter chapter : ServerQuestFile.INSTANCE.chapters)
 		{
-			data.createTaskData(task);
+			for (Quest quest : chapter.quests)
+			{
+				for (QuestTask task : quest.tasks)
+				{
+					data.createTaskData(task);
+				}
+			}
 		}
 
 		new MessageCreateTeamData(event.getTeam().getUID(), event.getTeam().getID()).sendToAll();
