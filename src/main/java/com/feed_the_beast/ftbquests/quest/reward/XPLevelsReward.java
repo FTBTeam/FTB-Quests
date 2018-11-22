@@ -32,18 +32,15 @@ public class XPLevelsReward extends QuestReward
 	@Override
 	public void writeData(NBTTagCompound nbt)
 	{
+		super.writeData(nbt);
 		nbt.setInteger("xp_levels", xpLevels);
 	}
 
 	@Override
 	public void readData(NBTTagCompound nbt)
 	{
+		super.readData(nbt);
 		xpLevels = nbt.getInteger("xp_levels");
-
-		if (xpLevels < 1)
-		{
-			xpLevels = 1;
-		}
 	}
 
 	@Override
