@@ -2,7 +2,6 @@ package com.feed_the_beast.ftbquests.integration.botania;
 
 import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
-import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
@@ -38,8 +37,8 @@ import javax.annotation.Nullable;
  */
 public class ManaTask extends EnergyTask
 {
-	private static final ResourceLocation EMPTY_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "textures/tasks/botania_mana_empty.png");
-	private static final ResourceLocation FULL_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "textures/tasks/botania_mana_full.png");
+	public static final ResourceLocation EMPTY_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "textures/tasks/botania_mana_empty.png");
+	public static final ResourceLocation FULL_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "textures/tasks/botania_mana_full.png");
 
 	public boolean showNumbers;
 
@@ -83,12 +82,6 @@ public class ManaTask extends EnergyTask
 	{
 		super.readNetData(data);
 		showNumbers = data.readBoolean();
-	}
-
-	@Override
-	public Icon getAltIcon()
-	{
-		return Icon.getIcon(FULL_TEXTURE.toString()).combineWith(Icon.getIcon(EMPTY_TEXTURE.toString()));
 	}
 
 	@Override

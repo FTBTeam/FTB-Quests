@@ -72,7 +72,7 @@ public class ItemBlockScreen extends ItemBlock
 			}
 			else if (task instanceof NBTTagString)
 			{
-				BlockScreen.currentTask = file.getTask(file.getID(quest.getID() + ':' + task));
+				BlockScreen.currentTask = file.getTask(file.getID(file.getOldID(quest) + ':' + task));
 			}
 			else if (task instanceof NBTPrimitive)
 			{

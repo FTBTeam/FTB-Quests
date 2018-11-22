@@ -9,6 +9,7 @@ import com.feed_the_beast.ftbquests.quest.Quest;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
 
 /**
  * @author LatvianModder
@@ -100,6 +101,6 @@ public abstract class EnergyTask extends QuestTask implements ISingleLongValueTa
 	{
 		super.getConfig(config);
 		config.addLong("value", () -> value, v -> value = v, 1000L, 1L, Long.MAX_VALUE);
-		config.addLong("max_input", () -> maxInput, v -> maxInput = v, 0L, 0L, Integer.MAX_VALUE);
+		config.addLong("max_input", () -> maxInput, v -> maxInput = v, 0L, 0L, Integer.MAX_VALUE).setDisplayName(new TextComponentTranslation("ftbquests.task.max_input"));
 	}
 }

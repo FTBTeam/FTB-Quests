@@ -315,7 +315,7 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 			}
 			else if (task instanceof NBTTagString)
 			{
-				cTask = file.getTask(file.getID(q.getID() + ':' + ((NBTTagString) task).getString()));
+				cTask = file.getTask(file.getID(file.getOldID(q) + ':' + ((NBTTagString) task).getString()));
 			}
 		}
 

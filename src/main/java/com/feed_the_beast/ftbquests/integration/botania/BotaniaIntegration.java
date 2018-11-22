@@ -1,5 +1,6 @@
 package com.feed_the_beast.ftbquests.integration.botania;
 
+import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.task.FTBQuestsTasks;
 import com.feed_the_beast.ftbquests.quest.task.QuestTaskType;
@@ -24,6 +25,6 @@ public class BotaniaIntegration
 	@SubscribeEvent
 	public static void registerTasks(RegistryEvent.Register<QuestTaskType> event)
 	{
-		event.getRegistry().register(FTBQuestsTasks.BOTANIA_MANA = new QuestTaskType(ManaTask.class, ManaTask::new).setRegistryName("botania_mana"));
+		event.getRegistry().register(FTBQuestsTasks.BOTANIA_MANA = new QuestTaskType(ManaTask.class, ManaTask::new).setRegistryName("botania_mana").setIcon(Icon.getIcon(ManaTask.FULL_TEXTURE.toString()).combineWith(Icon.getIcon(ManaTask.EMPTY_TEXTURE.toString()))));
 	}
 }
