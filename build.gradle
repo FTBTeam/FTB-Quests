@@ -36,7 +36,7 @@ minecraft {
 }
 
 repositories {
-	maven { url "https://maven.latmod.com/" } //FTBLib
+	maven { url "https://maven.latmod.com/" } //FTBLib, FTB Money
 	maven { url "http://maven.ic2.player.to/" } //IC2
 	maven { url "https://maven.blamejared.com/" } //PackMode & Botania
 	maven { url "http://maven.thiakil.com/" } //Baubles
@@ -45,6 +45,7 @@ repositories {
 
 dependencies {
 	deobfCompile "com.feed_the_beast.mods:FTBLib:${ftblib_version}"
+	deobfProvided "com.feed_the_beast.mods:FTBMoney:${ftbmoney_version}"
 	provided "net.industrial-craft:industrialcraft-2:${ic2_version}:api"
 	deobfCompile "io.sommers:packmode:${packmode_version}"
 	deobfProvided "vazkii.botania:Botania:${botania_version}"

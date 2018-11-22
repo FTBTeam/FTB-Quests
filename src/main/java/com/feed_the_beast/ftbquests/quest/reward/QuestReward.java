@@ -122,7 +122,7 @@ public abstract class QuestReward extends QuestObjectBase
 	public abstract void claim(EntityPlayerMP player);
 
 	@Override
-	public void resetProgress(ITeamData data, boolean dependencies)
+	public final void resetProgress(ITeamData data, boolean dependencies)
 	{
 		data.unclaimRewards(Collections.singleton(this));
 	}

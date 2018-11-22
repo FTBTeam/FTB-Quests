@@ -1,7 +1,6 @@
 package com.feed_the_beast.ftbquests.integration.ic2;
 
 import com.feed_the_beast.ftblib.lib.client.ClientUtils;
-import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
@@ -33,8 +32,8 @@ import javax.annotation.Nullable;
  */
 public class IC2EnergyTask extends EnergyTask
 {
-	private static final ResourceLocation EMPTY_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "textures/tasks/ic2_empty.png");
-	private static final ResourceLocation FULL_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "textures/tasks/ic2_full.png");
+	public static final ResourceLocation EMPTY_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "textures/tasks/ic2_empty.png");
+	public static final ResourceLocation FULL_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "textures/tasks/ic2_full.png");
 
 	public IC2EnergyTask(Quest quest)
 	{
@@ -45,12 +44,6 @@ public class IC2EnergyTask extends EnergyTask
 	public QuestTaskType getType()
 	{
 		return FTBQuestsTasks.IC2_ENERGY;
-	}
-
-	@Override
-	public Icon getAltIcon()
-	{
-		return Icon.getIcon(FULL_TEXTURE.toString()).combineWith(Icon.getIcon(EMPTY_TEXTURE.toString()));
 	}
 
 	@Override
