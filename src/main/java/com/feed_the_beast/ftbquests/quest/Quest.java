@@ -252,7 +252,14 @@ public final class Quest extends QuestObject
 
 		for (QuestObject d : dependencies)
 		{
-			data.writeInt(d.uid);
+			if (d == null || d.invalid)
+			{
+				data.writeInt(0);
+			}
+			else
+			{
+				data.writeInt(d.uid);
+			}
 		}
 	}
 
@@ -274,7 +281,7 @@ public final class Quest extends QuestObject
 		{
 			QuestObject object = chapter.file.get(data.readInt());
 
-			if (object != null && !object.invalid)
+			if (object != null)
 			{
 				dependencies.add(object);
 			}
