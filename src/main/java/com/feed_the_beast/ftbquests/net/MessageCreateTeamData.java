@@ -6,6 +6,8 @@ import com.feed_the_beast.ftblib.lib.net.MessageToClient;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.client.ClientQuestProgress;
+import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.task.QuestTask;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -56,9 +58,15 @@ public class MessageCreateTeamData extends MessageToClient
 		{
 			ClientQuestProgress data = new ClientQuestProgress(team, uid);
 
-			for (QuestTask task : ClientQuestFile.INSTANCE.allTasks)
+			for (QuestChapter chapter : ClientQuestFile.INSTANCE.chapters)
 			{
-				data.createTaskData(task);
+				for (Quest quest : chapter.quests)
+				{
+					for (QuestTask task : quest.tasks)
+					{
+						data.createTaskData(task);
+					}
+				}
 			}
 
 			ClientQuestFile.INSTANCE.addData(data);
