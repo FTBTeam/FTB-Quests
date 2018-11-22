@@ -44,12 +44,14 @@ public class ItemReward extends QuestReward
 	@Override
 	public void writeData(NBTTagCompound nbt)
 	{
+		super.writeData(nbt);
 		nbt.setTag("item", ItemMissing.write(stack, false));
 	}
 
 	@Override
 	public void readData(NBTTagCompound nbt)
 	{
+		super.readData(nbt);
 		stack = ItemMissing.read(nbt.getTag("item"));
 	}
 

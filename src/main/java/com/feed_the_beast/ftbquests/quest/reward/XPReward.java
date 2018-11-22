@@ -1,7 +1,6 @@
 package com.feed_the_beast.ftbquests.quest.reward;
 
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
-import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftbquests.quest.Quest;
@@ -33,18 +32,15 @@ public class XPReward extends QuestReward
 	@Override
 	public void writeData(NBTTagCompound nbt)
 	{
+		super.writeData(nbt);
 		nbt.setInteger("xp", xp);
 	}
 
 	@Override
 	public void readData(NBTTagCompound nbt)
 	{
+		super.readData(nbt);
 		xp = nbt.getInteger("xp");
-
-		if (xp < 1)
-		{
-			xp = 1;
-		}
 	}
 
 	@Override
@@ -72,12 +68,6 @@ public class XPReward extends QuestReward
 	public void claim(EntityPlayerMP player)
 	{
 		player.addExperience(xp);
-	}
-
-	@Override
-	public Icon getAltIcon()
-	{
-		return Icon.getIcon("minecraft:items/experience_bottle");
 	}
 
 	@Override

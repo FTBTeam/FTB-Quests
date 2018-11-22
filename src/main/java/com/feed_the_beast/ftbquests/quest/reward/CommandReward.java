@@ -36,12 +36,14 @@ public class CommandReward extends QuestReward
 	@Override
 	public void writeData(NBTTagCompound nbt)
 	{
+		super.writeData(nbt);
 		nbt.setString("command", command);
 	}
 
 	@Override
 	public void readData(NBTTagCompound nbt)
 	{
+		super.readData(nbt);
 		command = nbt.getString("command");
 	}
 
