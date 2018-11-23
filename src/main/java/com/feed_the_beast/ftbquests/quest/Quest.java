@@ -31,6 +31,8 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -42,6 +44,40 @@ public final class Quest extends QuestObject
 {
 	public static final int POS_LIMIT = 25;
 	private static final List<QuestObjectType> DEP_TYPES = Arrays.asList(QuestObjectType.QUEST, QuestObjectType.CHAPTER, QuestObjectType.VARIABLE);
+
+	public static final Quest FAKE_QUEST = new Quest(new QuestChapter(new QuestFile()
+	{
+		@Override
+		public boolean isClient()
+		{
+			return false;
+		}
+
+		@Nullable
+		@Override
+		public ITeamData getData(short team)
+		{
+			return null;
+		}
+
+		@Nullable
+		@Override
+		public ITeamData getData(String team)
+		{
+			return null;
+		}
+
+		@Override
+		public Collection<? extends ITeamData> getAllData()
+		{
+			return Collections.emptyList();
+		}
+
+		@Override
+		public void deleteObject(int id)
+		{
+		}
+	}));
 
 	public final QuestChapter chapter;
 	public String description;

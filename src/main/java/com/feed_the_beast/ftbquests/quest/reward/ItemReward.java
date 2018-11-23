@@ -87,7 +87,7 @@ public class ItemReward extends QuestReward
 	{
 		if (stack.isEmpty())
 		{
-			return Icon.getIcon("minecraft:items/diamond");
+			return super.getIcon();
 		}
 
 		return ItemIcon.getItemIcon(stack);
