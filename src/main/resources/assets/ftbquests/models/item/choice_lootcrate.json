@@ -1,0 +1,9 @@
+{
+	"parent": "ftbquests:block/chest",
+	"textures": {
+		"front": "ftbquests:items/lootcrates/choice/front",
+		"side": "ftbquests:items/lootcrates/choice/side",
+		"top": "ftbquests:items/lootcrates/choice/top",
+		"particle": "ftbquests:items/lootcrates/choice/side"
+	}
+}

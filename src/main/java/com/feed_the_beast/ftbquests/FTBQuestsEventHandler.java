@@ -11,9 +11,11 @@ import com.feed_the_beast.ftbquests.block.BlockScreenPart;
 import com.feed_the_beast.ftbquests.block.FTBQuestsBlocks;
 import com.feed_the_beast.ftbquests.block.ItemBlockProgressScreen;
 import com.feed_the_beast.ftbquests.block.ItemBlockScreen;
+import com.feed_the_beast.ftbquests.item.ItemChoiceLootcrate;
 import com.feed_the_beast.ftbquests.item.ItemLootcrate;
 import com.feed_the_beast.ftbquests.item.ItemMissing;
 import com.feed_the_beast.ftbquests.item.ItemQuestBook;
+import com.feed_the_beast.ftbquests.item.ItemRandomLootcrate;
 import com.feed_the_beast.ftbquests.item.LootRarity;
 import com.feed_the_beast.ftbquests.quest.reward.CommandReward;
 import com.feed_the_beast.ftbquests.quest.reward.FTBQuestsRewards;
@@ -105,6 +107,8 @@ public class FTBQuestsEventHandler
 				withName(new ItemLootcrate(LootRarity.RARE), "rare_lootcrate").setTranslationKey(FTBQuests.MOD_ID + ".lootcrate"),
 				withName(new ItemLootcrate(LootRarity.EPIC), "epic_lootcrate").setTranslationKey(FTBQuests.MOD_ID + ".lootcrate"),
 				withName(new ItemLootcrate(LootRarity.LEGENDARY), "legendary_lootcrate").setTranslationKey(FTBQuests.MOD_ID + ".lootcrate"),
+				withName(new ItemChoiceLootcrate(), "choice_lootcrate").setTranslationKey(FTBQuests.MOD_ID + ".choice_lootcrate"),
+				withName(new ItemRandomLootcrate(), "random_lootcrate").setTranslationKey(FTBQuests.MOD_ID + ".random_lootcrate"),
 				withName(new ItemMissing(), "missing")
 		);
 	}

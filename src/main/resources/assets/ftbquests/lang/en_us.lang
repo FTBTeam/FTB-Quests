@@ -23,6 +23,8 @@ tile.ftbquests.chest.output_desc=Rewards will appear here
 
 item.ftbquests.book.name=Quest Book
 item.ftbquests.lootcrate.name=Loot Crate
+item.ftbquests.choice_lootcrate.name=Choice Loot Crate
+item.ftbquests.random_lootcrate.name=Random Loot Crate
 item.ftbquests.missing.name=Missing Item
 
 ftbquests.rarity.common=Common

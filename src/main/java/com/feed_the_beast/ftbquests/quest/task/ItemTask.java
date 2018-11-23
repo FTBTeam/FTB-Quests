@@ -197,7 +197,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 
 		if (icons.isEmpty())
 		{
-			return Icon.getIcon("minecraft:items/diamond");
+			return super.getIcon();
 		}
 
 		return IconAnimation.fromList(icons, false);
