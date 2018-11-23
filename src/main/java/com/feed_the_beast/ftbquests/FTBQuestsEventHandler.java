@@ -1,6 +1,7 @@
 package com.feed_the_beast.ftbquests;
 
 import com.feed_the_beast.ftblib.events.FTBLibPreInitRegistryEvent;
+import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftbquests.block.BlockProgressDetector;
 import com.feed_the_beast.ftbquests.block.BlockProgressScreen;
@@ -11,16 +12,16 @@ import com.feed_the_beast.ftbquests.block.BlockScreenPart;
 import com.feed_the_beast.ftbquests.block.FTBQuestsBlocks;
 import com.feed_the_beast.ftbquests.block.ItemBlockProgressScreen;
 import com.feed_the_beast.ftbquests.block.ItemBlockScreen;
-import com.feed_the_beast.ftbquests.item.ItemChoiceLootcrate;
 import com.feed_the_beast.ftbquests.item.ItemLootcrate;
 import com.feed_the_beast.ftbquests.item.ItemMissing;
 import com.feed_the_beast.ftbquests.item.ItemQuestBook;
-import com.feed_the_beast.ftbquests.item.ItemRandomLootcrate;
 import com.feed_the_beast.ftbquests.item.LootRarity;
+import com.feed_the_beast.ftbquests.quest.reward.ChoiceReward;
 import com.feed_the_beast.ftbquests.quest.reward.CommandReward;
 import com.feed_the_beast.ftbquests.quest.reward.FTBQuestsRewards;
 import com.feed_the_beast.ftbquests.quest.reward.ItemReward;
 import com.feed_the_beast.ftbquests.quest.reward.QuestRewardType;
+import com.feed_the_beast.ftbquests.quest.reward.RandomReward;
 import com.feed_the_beast.ftbquests.quest.reward.XPLevelsReward;
 import com.feed_the_beast.ftbquests.quest.reward.XPReward;
 import com.feed_the_beast.ftbquests.quest.task.FTBQuestsTasks;
@@ -107,8 +108,6 @@ public class FTBQuestsEventHandler
 				withName(new ItemLootcrate(LootRarity.RARE), "rare_lootcrate").setTranslationKey(FTBQuests.MOD_ID + ".lootcrate"),
 				withName(new ItemLootcrate(LootRarity.EPIC), "epic_lootcrate").setTranslationKey(FTBQuests.MOD_ID + ".lootcrate"),
 				withName(new ItemLootcrate(LootRarity.LEGENDARY), "legendary_lootcrate").setTranslationKey(FTBQuests.MOD_ID + ".lootcrate"),
-				withName(new ItemChoiceLootcrate(), "choice_lootcrate").setTranslationKey(FTBQuests.MOD_ID + ".choice_lootcrate"),
-				withName(new ItemRandomLootcrate(), "random_lootcrate").setTranslationKey(FTBQuests.MOD_ID + ".random_lootcrate"),
 				withName(new ItemMissing(), "missing")
 		);
 	}
@@ -137,6 +136,8 @@ public class FTBQuestsEventHandler
 	{
 		event.getRegistry().registerAll(
 				FTBQuestsRewards.ITEM = new QuestRewardType(ItemReward.class, ItemReward::new).setRegistryName("item").setIcon(Icon.getIcon("minecraft:items/diamond")),
+				FTBQuestsRewards.CHOICE = new QuestRewardType(ChoiceReward.class, ChoiceReward::new).setRegistryName("choice").setIcon(GuiIcons.COLOR_RGB),
+				FTBQuestsRewards.RANDOM = new QuestRewardType(RandomReward.class, RandomReward::new).setRegistryName("random").setIcon(GuiIcons.DICE),
 				FTBQuestsRewards.XP = new QuestRewardType(XPReward.class, XPReward::new).setRegistryName("xp").setIcon(Icon.getIcon("minecraft:items/experience_bottle")),
 				FTBQuestsRewards.XP_LEVELS = new QuestRewardType(XPLevelsReward.class, XPLevelsReward::new).setRegistryName("xp_levels").setIcon(Icon.getIcon("minecraft:items/experience_bottle")),
 				FTBQuestsRewards.COMMAND = new QuestRewardType(CommandReward.class, CommandReward::new).setRegistryName("command").setIcon(Icon.getIcon("minecraft:blocks/command_block_back"))

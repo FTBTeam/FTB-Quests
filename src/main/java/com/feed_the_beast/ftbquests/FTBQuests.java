@@ -8,8 +8,6 @@ import com.feed_the_beast.ftbquests.integration.buildcraft.BuildCraftIntegration
 import com.feed_the_beast.ftbquests.integration.ftbmoney.FTBMoneyIntegration;
 import com.feed_the_beast.ftbquests.integration.ic2.IC2Integration;
 import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
-import com.feed_the_beast.ftbquests.item.ItemChoiceLootcrate;
-import com.feed_the_beast.ftbquests.item.ItemRandomLootcrate;
 import com.feed_the_beast.ftbquests.item.LootRarity;
 import com.feed_the_beast.ftbquests.net.FTBQuestsNetHandler;
 import com.feed_the_beast.ftbquests.quest.reward.QuestRewardType;
@@ -17,12 +15,7 @@ import com.feed_the_beast.ftbquests.quest.task.QuestTaskType;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.world.storage.loot.LootTableList;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
@@ -92,42 +85,6 @@ public class FTBQuests
 		{
 			LootTableList.register(lootRarity.getLootTable());
 		}
-
-		CapabilityManager.INSTANCE.register(ItemChoiceLootcrate.Data.class, new Capability.IStorage<ItemChoiceLootcrate.Data>()
-		{
-			@Override
-			public NBTBase writeNBT(Capability<ItemChoiceLootcrate.Data> capability, ItemChoiceLootcrate.Data instance, EnumFacing side)
-			{
-				return instance.serializeNBT();
-			}
-
-			@Override
-			public void readNBT(Capability<ItemChoiceLootcrate.Data> capability, ItemChoiceLootcrate.Data instance, EnumFacing side, NBTBase nbt)
-			{
-				if (nbt instanceof NBTTagCompound)
-				{
-					instance.deserializeNBT((NBTTagCompound) nbt);
-				}
-			}
-		}, ItemChoiceLootcrate.Data::new);
-
-		CapabilityManager.INSTANCE.register(ItemRandomLootcrate.Data.class, new Capability.IStorage<ItemRandomLootcrate.Data>()
-		{
-			@Override
-			public NBTBase writeNBT(Capability<ItemRandomLootcrate.Data> capability, ItemRandomLootcrate.Data instance, EnumFacing side)
-			{
-				return instance.serializeNBT();
-			}
-
-			@Override
-			public void readNBT(Capability<ItemRandomLootcrate.Data> capability, ItemRandomLootcrate.Data instance, EnumFacing side, NBTBase nbt)
-			{
-				if (nbt instanceof NBTTagCompound)
-				{
-					instance.deserializeNBT((NBTTagCompound) nbt);
-				}
-			}
-		}, ItemRandomLootcrate.Data::new);
 
 		PROXY.preInit();
 	}
