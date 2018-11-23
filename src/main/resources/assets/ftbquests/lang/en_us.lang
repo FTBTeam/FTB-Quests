@@ -23,8 +23,6 @@ tile.ftbquests.chest.output_desc=Rewards will appear here
 
 item.ftbquests.book.name=Quest Book
 item.ftbquests.lootcrate.name=Loot Crate
-item.ftbquests.choice_lootcrate.name=Choice Loot Crate
-item.ftbquests.random_lootcrate.name=Random Loot Crate
 item.ftbquests.missing.name=Missing Item
 
 ftbquests.rarity.common=Common
@@ -159,6 +157,10 @@ ftbquests.reward.ftbquests.xp_levels.text=XP Levels: %s
 
 ftbquests.reward.ftbquests.command=Command
 ftbquests.reward.ftbquests.command.text=Command: %s
+
+ftbquests.reward.ftbquests.choice=Choice Reward [WIP!]
+
+ftbquests.reward.ftbquests.random=Random Reward [WIP!]
 
 ftbquests.reward.ftbquests.ftb_money=Money
 ftbquests.reward.ftbquests.ftb_money.value=Money

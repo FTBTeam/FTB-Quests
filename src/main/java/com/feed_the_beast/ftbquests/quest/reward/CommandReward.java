@@ -2,7 +2,6 @@ package com.feed_the_beast.ftbquests.quest.reward;
 
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
-import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftbquests.quest.Quest;
@@ -80,12 +79,6 @@ public class CommandReward extends QuestReward
 				.replace("@chapter", quest.chapter.toString())
 				.replace("@quest", quest.toString())
 				.replace("@team", FTBLibAPI.getTeam(player.getUniqueID())));
-	}
-
-	@Override
-	public Icon getAltIcon()
-	{
-		return Icon.getIcon("minecraft:blocks/command_block_back");
 	}
 
 	@Override

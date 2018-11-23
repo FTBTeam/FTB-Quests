@@ -9,6 +9,7 @@ import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.item.ItemMissing;
+import com.feed_the_beast.ftbquests.net.edit.MessageEditObject;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.ITextComponent;
@@ -185,5 +186,11 @@ public abstract class QuestObjectBase
 	public ConfigGroup createSubGroup(ConfigGroup group)
 	{
 		return group.getGroup(getObjectType().getName());
+	}
+
+	@SideOnly(Side.CLIENT)
+	public void onEditButtonClicked()
+	{
+		new MessageEditObject(uid).sendToServer();
 	}
 }
