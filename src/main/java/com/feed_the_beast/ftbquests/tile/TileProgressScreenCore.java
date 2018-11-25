@@ -3,7 +3,6 @@ package com.feed_the_beast.ftbquests.tile;
 import com.feed_the_beast.ftblib.lib.config.ConfigBlockState;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigNull;
-import com.feed_the_beast.ftblib.lib.config.ConfigTeam;
 import com.feed_the_beast.ftblib.lib.config.IConfigCallback;
 import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
 import com.feed_the_beast.ftblib.lib.tile.EnumSaveType;
@@ -11,7 +10,6 @@ import com.feed_the_beast.ftblib.lib.util.BlockUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.block.BlockProgressScreen;
 import com.feed_the_beast.ftbquests.block.FTBQuestsBlocks;
-import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
@@ -23,7 +21,6 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagInt;
@@ -38,31 +35,25 @@ import java.util.Collections;
 /**
  * @author LatvianModder
  */
-public class TileProgressScreenCore extends TileProgressScreenBase implements IConfigCallback
+public class TileProgressScreenCore extends TileWithTeam implements IConfigCallback, IProgressScreen
 {
 	public EnumFacing facing;
-	public String team = "";
 	public NBTBase chapter = null;
 	public int width = 0, height = 0;
-	public boolean indestructible = false;
 	public IBlockState skin = BlockUtils.AIR_STATE;
 	public boolean fullscreen = false;
 	public boolean hideIcons = false;
 
-	private ITeamData cOwner;
 	private QuestChapter cChapter;
 
 	@Override
 	protected void writeData(NBTTagCompound nbt, EnumSaveType type)
 	{
+		super.writeData(nbt, type);
+
 		if (!type.item)
 		{
 			nbt.setString("Facing", getFacing().getName());
-		}
-
-		if (!team.isEmpty())
-		{
-			nbt.setString("Team", team);
 		}
 
 		cChapter = getChapter();
@@ -85,11 +76,6 @@ public class TileProgressScreenCore extends TileProgressScreenBase implements IC
 		if (height > 0)
 		{
 			nbt.setByte("Height", (byte) height);
-		}
-
-		if (indestructible)
-		{
-			nbt.setBoolean("Indestructible", true);
 		}
 
 		if (skin != BlockUtils.AIR_STATE)
@@ -116,34 +102,13 @@ public class TileProgressScreenCore extends TileProgressScreenBase implements IC
 			facing = EnumFacing.byName(nbt.getString("Facing"));
 		}
 
-		team = nbt.getString("Team");
 		chapter = nbt.getTag("Chapter");
 		width = nbt.getByte("Width");
 		height = nbt.getByte("Height");
-		indestructible = nbt.getBoolean("Indestructible");
 		skin = BlockUtils.getStateFromName(nbt.getString("Skin"));
 		fullscreen = nbt.getBoolean("Fullscreen");
 		hideIcons = nbt.getBoolean("HideIcons");
 		updateContainingBlockInfo();
-	}
-
-	@Override
-	public void writeToItem(ItemStack stack)
-	{
-		NBTTagCompound nbt = new NBTTagCompound();
-		writeData(nbt, EnumSaveType.ITEM);
-
-		if (!nbt.isEmpty())
-		{
-			stack.setTagCompound(nbt);
-		}
-	}
-
-	@Override
-	public void readFromItem(ItemStack stack)
-	{
-		NBTTagCompound nbt = stack.getTagCompound();
-		readData(nbt == null ? new NBTTagCompound() : nbt, EnumSaveType.ITEM);
 	}
 
 	public EnumFacing getFacing()
@@ -177,22 +142,18 @@ public class TileProgressScreenCore extends TileProgressScreenBase implements IC
 		super.updateContainingBlockInfo();
 		facing = null;
 		cChapter = null;
-		cOwner = null;
 	}
 
-	@Nullable
-	public ITeamData getTeam()
+	@Override
+	protected boolean notifyBlock()
 	{
-		if (team.isEmpty())
-		{
-			return null;
-		}
-		else if (cOwner == null)
-		{
-			cOwner = FTBQuests.PROXY.getQuestFile(world).getData(team);
-		}
+		return !world.isRemote;
+	}
 
-		return cOwner;
+	@Override
+	public boolean canBeWrenched(EntityPlayer player)
+	{
+		return false;
 	}
 
 	@Nullable
@@ -230,11 +191,6 @@ public class TileProgressScreenCore extends TileProgressScreenBase implements IC
 		return d * d;
 	}
 
-	public boolean isOwner(EntityPlayer player)
-	{
-		return team.isEmpty() || FTBLibAPI.getTeam(player.getUniqueID()).equals(team);
-	}
-
 	public void onClicked(EntityPlayerMP player, double x, double y)
 	{
 		boolean editor = FTBQuests.canEdit(player);
@@ -252,7 +208,7 @@ public class TileProgressScreenCore extends TileProgressScreenBase implements IC
 
 				if (editor)
 				{
-					config.add("team", new ConfigTeam(() -> team, v -> team = v), ConfigNull.INSTANCE).setDisplayName(new TextComponentTranslation("ftbquests.team"));
+					config.add("team", createTeamConfig(), ConfigNull.INSTANCE).setDisplayName(new TextComponentTranslation("ftbquests.team"));
 				}
 
 				config.add("chapter", new ConfigQuestObject(ServerQuestFile.INSTANCE, cChapter, Collections.singleton(QuestObjectType.CHAPTER))

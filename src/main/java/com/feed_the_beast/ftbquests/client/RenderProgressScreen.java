@@ -82,7 +82,7 @@ public class RenderProgressScreen extends TileEntitySpecialRenderer<TileProgress
 
 		if (!screen.fullscreen)
 		{
-			drawString(font, TextFormatting.DARK_GREEN + team.getTeamID(), 0.02, 0.12);
+			drawString(font, TextFormatting.DARK_GREEN + team.getDisplayName().getFormattedText(), 0.02, 0.12);
 			drawString(font, chapter.getRelativeProgress(team) + "%", 0.86, 0.12);
 		}
 

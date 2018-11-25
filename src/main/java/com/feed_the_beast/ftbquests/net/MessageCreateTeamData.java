@@ -1,5 +1,6 @@
 package com.feed_the_beast.ftbquests.net;
 
+import com.feed_the_beast.ftblib.lib.data.ForgeTeam;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToClient;
@@ -9,6 +10,7 @@ import com.feed_the_beast.ftbquests.client.ClientQuestProgress;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.task.QuestTask;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -18,16 +20,18 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class MessageCreateTeamData extends MessageToClient
 {
 	private short uid;
-	private String team;
+	private String id;
+	private ITextComponent name;
 
 	public MessageCreateTeamData()
 	{
 	}
 
-	public MessageCreateTeamData(short id, String t)
+	public MessageCreateTeamData(ForgeTeam team)
 	{
-		uid = id;
-		team = t;
+		uid = team.getUID();
+		id = team.getID();
+		name = team.getTitle();
 	}
 
 	@Override
@@ -40,14 +44,16 @@ public class MessageCreateTeamData extends MessageToClient
 	public void writeData(DataOut data)
 	{
 		data.writeShort(uid);
-		data.writeString(team);
+		data.writeString(id);
+		data.writeTextComponent(name);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
 		uid = data.readShort();
-		team = data.readString();
+		id = data.readString();
+		name = data.readTextComponent();
 	}
 
 	@Override
@@ -56,7 +62,7 @@ public class MessageCreateTeamData extends MessageToClient
 	{
 		if (ClientQuestFile.exists())
 		{
-			ClientQuestProgress data = new ClientQuestProgress(team, uid);
+			ClientQuestProgress data = new ClientQuestProgress(uid, id, name);
 
 			for (QuestChapter chapter : ClientQuestFile.INSTANCE.chapters)
 			{

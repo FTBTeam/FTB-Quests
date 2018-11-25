@@ -37,6 +37,7 @@ import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
@@ -120,7 +121,7 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 			}
 		}
 
-		new MessageCreateTeamData(event.getTeam().getUID(), event.getTeam().getID()).sendToAll();
+		new MessageCreateTeamData(event.getTeam()).sendToAll();
 	}
 
 	@SubscribeEvent
@@ -141,7 +142,8 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 			FTBQuestsTeamData data = get(team);
 			MessageSyncQuests.TeamInst t = new MessageSyncQuests.TeamInst();
 			t.uid = team.getUID();
-			t.name = team.getID();
+			t.id = team.getID();
+			t.name = team.getTitle();
 
 			int size = 0;
 
@@ -572,6 +574,12 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 	public String getTeamID()
 	{
 		return team.getID();
+	}
+
+	@Override
+	public ITextComponent getDisplayName()
+	{
+		return team.getTitle();
 	}
 
 	@Override

@@ -9,6 +9,7 @@ import com.feed_the_beast.ftbquests.quest.task.QuestTaskData;
 import it.unimi.dsi.fastutil.ints.Int2LongOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextFormatting;
 
 import javax.annotation.Nullable;
@@ -20,15 +21,17 @@ import java.util.UUID;
  */
 public class ClientQuestProgress implements ITeamData
 {
-	private final String teamID;
 	private final short teamUID;
+	private final String teamID;
+	private final ITextComponent displayName;
 	public final Int2ObjectOpenHashMap<QuestTaskData> taskData;
 	public final Int2LongOpenHashMap variables;
 
-	public ClientQuestProgress(String t, short id)
+	public ClientQuestProgress(short uid, String id, ITextComponent n)
 	{
-		teamID = t;
-		teamUID = id;
+		teamUID = uid;
+		teamID = id;
+		displayName = n;
 		taskData = new Int2ObjectOpenHashMap<>();
 		variables = new Int2LongOpenHashMap();
 		variables.defaultReturnValue(0L);
@@ -44,6 +47,12 @@ public class ClientQuestProgress implements ITeamData
 	public String getTeamID()
 	{
 		return teamID;
+	}
+
+	@Override
+	public ITextComponent getDisplayName()
+	{
+		return displayName;
 	}
 
 	@Override

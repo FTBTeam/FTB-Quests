@@ -2,15 +2,11 @@ package com.feed_the_beast.ftbquests.tile;
 
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigNull;
-import com.feed_the_beast.ftblib.lib.config.ConfigTeam;
 import com.feed_the_beast.ftblib.lib.config.IConfigCallback;
 import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
-import com.feed_the_beast.ftblib.lib.data.Universe;
 import com.feed_the_beast.ftblib.lib.tile.EnumSaveType;
-import com.feed_the_beast.ftblib.lib.tile.TileBase;
 import com.feed_the_beast.ftblib.lib.util.BlockUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
-import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
@@ -18,7 +14,6 @@ import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagInt;
@@ -30,24 +25,18 @@ import javax.annotation.Nullable;
 /**
  * @author LatvianModder
  */
-public class TileProgressDetector extends TileBase implements ITickable, IConfigCallback
+public class TileProgressDetector extends TileWithTeam implements ITickable, IConfigCallback
 {
-	public String team = "";
 	public NBTBase object = new NBTTagInt(0);
 	public boolean level = false;
 	public int redstoneOutput = 0;
 
-	private ITeamData cTeam;
 	private QuestObject cObject;
 
 	@Override
 	protected void writeData(NBTTagCompound nbt, EnumSaveType type)
 	{
-		if (!team.isEmpty())
-		{
-			nbt.setString("Team", team);
-		}
-
+		super.writeData(nbt, type);
 		cObject = getObject();
 
 		if (cObject != null)
@@ -74,7 +63,7 @@ public class TileProgressDetector extends TileBase implements ITickable, IConfig
 	@Override
 	protected void readData(NBTTagCompound nbt, EnumSaveType type)
 	{
-		team = nbt.getString("Team");
+		super.readData(nbt, type);
 		object = nbt.getTag("Object");
 		level = nbt.getBoolean("Level");
 
@@ -87,45 +76,10 @@ public class TileProgressDetector extends TileBase implements ITickable, IConfig
 	}
 
 	@Override
-	public void writeToItem(ItemStack stack)
-	{
-		NBTTagCompound nbt = new NBTTagCompound();
-		writeData(nbt, EnumSaveType.ITEM);
-
-		if (!nbt.isEmpty())
-		{
-			stack.setTagCompound(nbt);
-		}
-	}
-
-	@Override
-	public void readFromItem(ItemStack stack)
-	{
-		NBTTagCompound nbt = stack.getTagCompound();
-		readData(nbt == null ? new NBTTagCompound() : nbt, EnumSaveType.ITEM);
-	}
-
-	@Override
 	public void updateContainingBlockInfo()
 	{
 		super.updateContainingBlockInfo();
-		cTeam = null;
 		cObject = null;
-	}
-
-	@Nullable
-	public ITeamData getTeam()
-	{
-		if (team.isEmpty())
-		{
-			return null;
-		}
-		else if (cTeam == null && world != null)
-		{
-			cTeam = FTBQuests.PROXY.getQuestFile(world).getData(team);
-		}
-
-		return cTeam;
 	}
 
 	@Nullable
@@ -208,7 +162,7 @@ public class TileProgressDetector extends TileBase implements ITickable, IConfig
 
 		boolean editor = FTBQuests.canEdit(player);
 
-		if (!editor && !team.equals(Universe.get().getPlayer(player).team.getID()))
+		if (!editor && !isOwner(player))
 		{
 			return;
 		}
@@ -219,7 +173,7 @@ public class TileProgressDetector extends TileBase implements ITickable, IConfig
 		group0.setDisplayName(new TextComponentTranslation("tile.ftbquests.progress_detector.name"));
 		ConfigGroup config = group0.getGroup("ftbquests.progress_detector");
 
-		config.add("team", new ConfigTeam(() -> team, v -> team = v), ConfigNull.INSTANCE).setDisplayName(new TextComponentTranslation("ftbquests.team")).setCanEdit(editor);
+		config.add("team", createTeamConfig(), ConfigNull.INSTANCE).setDisplayName(new TextComponentTranslation("ftbquests.team")).setCanEdit(editor);
 
 		config.add("object", new ConfigQuestObject(ServerQuestFile.INSTANCE, cObject, QuestObjectType.ALL)
 		{

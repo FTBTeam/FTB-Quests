@@ -18,8 +18,8 @@ public class BotaniaIntegration
 	public static void preInit()
 	{
 		MinecraftForge.EVENT_BUS.register(BotaniaIntegration.class);
-		GameRegistry.registerTileEntity(TileScreenCoreBotania.class, new ResourceLocation(FTBQuests.MOD_ID, "screen_core_botania"));
-		GameRegistry.registerTileEntity(TileScreenPartBotania.class, new ResourceLocation(FTBQuests.MOD_ID, "screen_part_botania"));
+		GameRegistry.registerTileEntity(TileTaskScreenCoreBotania.class, new ResourceLocation(FTBQuests.MOD_ID, "screen_core_botania"));
+		GameRegistry.registerTileEntity(TileTaskScreenPartBotania.class, new ResourceLocation(FTBQuests.MOD_ID, "screen_part_botania"));
 	}
 
 	@SubscribeEvent

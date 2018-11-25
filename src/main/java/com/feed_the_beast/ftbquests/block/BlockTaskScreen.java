@@ -1,6 +1,5 @@
 package com.feed_the_beast.ftbquests.block;
 
-import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
 import com.feed_the_beast.ftblib.lib.util.BlockUtils;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
@@ -8,9 +7,9 @@ import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.task.QuestTask;
 import com.feed_the_beast.ftbquests.quest.task.QuestTaskData;
-import com.feed_the_beast.ftbquests.tile.TileScreenBase;
-import com.feed_the_beast.ftbquests.tile.TileScreenCore;
-import com.feed_the_beast.ftbquests.tile.TileScreenPart;
+import com.feed_the_beast.ftbquests.tile.ITaskScreen;
+import com.feed_the_beast.ftbquests.tile.TileTaskScreenCore;
+import com.feed_the_beast.ftbquests.tile.TileTaskScreenPart;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -46,7 +45,7 @@ import java.util.Random;
 /**
  * @author LatvianModder
  */
-public class BlockScreen extends BlockWithHorizontalFacing
+public class BlockTaskScreen extends BlockWithHorizontalFacing
 {
 	public static boolean BREAKING_SCREEN = false;
 	public static QuestTask currentTask = null;
@@ -61,7 +60,7 @@ public class BlockScreen extends BlockWithHorizontalFacing
 		return 1D - (offY + hitY) / (size * 2D + 1D);
 	}
 
-	public BlockScreen()
+	public BlockTaskScreen()
 	{
 		super(Material.IRON, MapColor.BLACK);
 		setHardness(0.3F);
@@ -77,7 +76,7 @@ public class BlockScreen extends BlockWithHorizontalFacing
 	@Override
 	public TileEntity createTileEntity(World world, IBlockState state)
 	{
-		return currentTask == null ? new TileScreenCore() : currentTask.createScreenCore(world);
+		return currentTask == null ? new TileTaskScreenCore() : currentTask.createScreenCore(world);
 	}
 
 	@Override
@@ -112,9 +111,9 @@ public class BlockScreen extends BlockWithHorizontalFacing
 
 		TileEntity tileEntity = world.getTileEntity(pos);
 
-		if (tileEntity instanceof TileScreenBase)
+		if (tileEntity instanceof ITaskScreen)
 		{
-			TileScreenCore screen = ((TileScreenBase) tileEntity).getScreen();
+			TileTaskScreenCore screen = ((ITaskScreen) tileEntity).getScreen();
 
 			if (screen != null)
 			{
@@ -130,10 +129,10 @@ public class BlockScreen extends BlockWithHorizontalFacing
 	{
 		TileEntity tileEntity = world.getTileEntity(pos);
 
-		if (tileEntity instanceof TileScreenBase)
+		if (tileEntity instanceof ITaskScreen)
 		{
-			TileScreenBase base = (TileScreenBase) tileEntity;
-			TileScreenCore screen = base.getScreen();
+			ITaskScreen base = (ITaskScreen) tileEntity;
+			TileTaskScreenCore screen = base.getScreen();
 
 			if (screen != null)
 			{
@@ -167,15 +166,11 @@ public class BlockScreen extends BlockWithHorizontalFacing
 	{
 		TileEntity tileEntity = world.getTileEntity(pos);
 
-		if (tileEntity instanceof TileScreenCore)
+		if (tileEntity instanceof TileTaskScreenCore)
 		{
-			TileScreenCore screen = (TileScreenCore) tileEntity;
+			TileTaskScreenCore screen = (TileTaskScreenCore) tileEntity;
 			screen.readFromItem(stack);
-
-			if (screen.team.isEmpty() && placer instanceof EntityPlayerMP)
-			{
-				screen.team = FTBLibAPI.getTeam(placer.getUniqueID());
-			}
+			screen.setIDFromPlacer(placer);
 
 			screen.facing = state.getValue(FACING);
 
@@ -211,9 +206,9 @@ public class BlockScreen extends BlockWithHorizontalFacing
 
 							TileEntity tileEntity1 = world.getTileEntity(pos1);
 
-							if (tileEntity1 instanceof TileScreenPart)
+							if (tileEntity1 instanceof TileTaskScreenPart)
 							{
-								((TileScreenPart) tileEntity1).setOffset(offX, y, offZ);
+								((TileTaskScreenPart) tileEntity1).setOffset(offX, y, offZ);
 							}
 						}
 					}
@@ -240,9 +235,9 @@ public class BlockScreen extends BlockWithHorizontalFacing
 	{
 		TileEntity tileEntity = world.getTileEntity(pos);
 
-		if (tileEntity instanceof TileScreenCore)
+		if (tileEntity instanceof TileTaskScreenCore)
 		{
-			TileScreenCore screen = (TileScreenCore) tileEntity;
+			TileTaskScreenCore screen = (TileTaskScreenCore) tileEntity;
 
 			if (screen.size > 0)
 			{
@@ -281,9 +276,9 @@ public class BlockScreen extends BlockWithHorizontalFacing
 	{
 		TileEntity tileEntity = world.getTileEntity(pos);
 
-		if (tileEntity instanceof TileScreenBase)
+		if (tileEntity instanceof ITaskScreen)
 		{
-			TileScreenCore screen = ((TileScreenBase) tileEntity).getScreen();
+			TileTaskScreenCore screen = ((ITaskScreen) tileEntity).getScreen();
 
 			if (screen != null)
 			{
@@ -319,9 +314,9 @@ public class BlockScreen extends BlockWithHorizontalFacing
 	{
 		TileEntity tileEntity = world.getTileEntity(pos);
 
-		if (tileEntity instanceof TileScreenBase)
+		if (tileEntity instanceof ITaskScreen)
 		{
-			TileScreenCore core = ((TileScreenBase) tileEntity).getScreen();
+			TileTaskScreenCore core = ((ITaskScreen) tileEntity).getScreen();
 
 			if (core != null && core.indestructible)
 			{
@@ -337,9 +332,9 @@ public class BlockScreen extends BlockWithHorizontalFacing
 	{
 		TileEntity tileEntity = world.getTileEntity(pos);
 
-		if (tileEntity instanceof TileScreenBase)
+		if (tileEntity instanceof ITaskScreen)
 		{
-			TileScreenCore core = ((TileScreenBase) tileEntity).getScreen();
+			TileTaskScreenCore core = ((ITaskScreen) tileEntity).getScreen();
 
 			if (core != null && core.indestructible)
 			{
@@ -356,9 +351,9 @@ public class BlockScreen extends BlockWithHorizontalFacing
 	{
 		TileEntity tileEntity = world.getTileEntity(pos);
 
-		if (tileEntity instanceof TileScreenBase)
+		if (tileEntity instanceof ITaskScreen)
 		{
-			TileScreenCore core = ((TileScreenBase) tileEntity).getScreen();
+			TileTaskScreenCore core = ((ITaskScreen) tileEntity).getScreen();
 
 			if (core != null && core.skin != BlockUtils.AIR_STATE)
 			{
@@ -380,15 +375,19 @@ public class BlockScreen extends BlockWithHorizontalFacing
 
 		NBTTagCompound nbt = stack.getTagCompound();
 		int size = nbt == null ? 0 : nbt.getByte("Size");
-		String team = nbt == null ? "" : nbt.getString("Team");
+		ITeamData team = nbt == null ? null : ClientQuestFile.INSTANCE.getData(nbt.getShort("Team"));
 
-		if (team.isEmpty())
+		if (team == null)
 		{
-			team = ClientQuestFile.existsWithTeam() ? ClientQuestFile.INSTANCE.self.getTeamID() : "";
+			team = ClientQuestFile.INSTANCE.self;
 		}
 
 		tooltip.add(I18n.format("tile.ftbquests.screen.size") + ": " + TextFormatting.GOLD + (1 + size * 2) + " x " + (1 + size * 2));
-		tooltip.add(I18n.format("ftbquests.team") + ": " + TextFormatting.DARK_GREEN + team);
+
+		if (team != null)
+		{
+			tooltip.add(I18n.format("ftbquests.team") + ": " + TextFormatting.DARK_GREEN + team.getDisplayName().getFormattedText());
+		}
 
 		Quest quest = ClientQuestFile.INSTANCE.getQuest(ClientQuestFile.INSTANCE.getID(nbt == null ? null : nbt.getTag("Quest")));
 
@@ -404,11 +403,9 @@ public class BlockScreen extends BlockWithHorizontalFacing
 
 		tooltip.add(I18n.format("ftbquests.task") + ": " + task.getYellowDisplayName().getFormattedText());
 
-		ITeamData data = ClientQuestFile.INSTANCE.getData(team);
-
-		if (data != null)
+		if (team != null)
 		{
-			QuestTaskData taskData = data.getQuestTaskData(task);
+			QuestTaskData taskData = team.getQuestTaskData(task);
 			tooltip.add(I18n.format("ftbquests.progress") + ": " + TextFormatting.BLUE + String.format("%s / %s [%d%%]", taskData.getProgressString(), task.getMaxProgressString(), taskData.getRelativeProgress()));
 		}
 	}

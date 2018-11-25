@@ -13,8 +13,8 @@ import com.feed_the_beast.ftbquests.quest.task.FTBQuestsTasks;
 import com.feed_the_beast.ftbquests.quest.task.QuestTaskData;
 import com.feed_the_beast.ftbquests.quest.task.QuestTaskType;
 import com.feed_the_beast.ftbquests.quest.task.SimpleQuestTaskData;
-import com.feed_the_beast.ftbquests.tile.TileScreenCore;
-import com.feed_the_beast.ftbquests.tile.TileScreenPart;
+import com.feed_the_beast.ftbquests.tile.TileTaskScreenCore;
+import com.feed_the_beast.ftbquests.tile.TileTaskScreenPart;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
@@ -91,27 +91,27 @@ public class ManaTask extends EnergyTask
 	}
 
 	@Override
-	public Class<? extends TileScreenCore> getScreenCoreClass()
+	public Class<? extends TileTaskScreenCore> getScreenCoreClass()
 	{
-		return TileScreenCoreBotania.class;
+		return TileTaskScreenCoreBotania.class;
 	}
 
 	@Override
-	public Class<? extends TileScreenPart> getScreenPartClass()
+	public Class<? extends TileTaskScreenPart> getScreenPartClass()
 	{
-		return TileScreenPartBotania.class;
+		return TileTaskScreenPartBotania.class;
 	}
 
 	@Override
-	public TileScreenCore createScreenCore(World world)
+	public TileTaskScreenCore createScreenCore(World world)
 	{
-		return new TileScreenCoreBotania();
+		return new TileTaskScreenCoreBotania();
 	}
 
 	@Override
-	public TileScreenPart createScreenPart(World world)
+	public TileTaskScreenPart createScreenPart(World world)
 	{
-		return new TileScreenPartBotania();
+		return new TileTaskScreenPartBotania();
 	}
 
 	@Override

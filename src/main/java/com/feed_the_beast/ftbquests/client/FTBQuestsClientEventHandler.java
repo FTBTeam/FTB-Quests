@@ -9,7 +9,7 @@ import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
 import com.feed_the_beast.ftbquests.tile.TileProgressScreenCore;
-import com.feed_the_beast.ftbquests.tile.TileScreenCore;
+import com.feed_the_beast.ftbquests.tile.TileTaskScreenCore;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.I18n;
@@ -52,7 +52,7 @@ public class FTBQuestsClientEventHandler
 		ModelLoader.setCustomModelResourceLocation(FTBQuestsItems.LEGENDARY_LOOTCRATE, 0, new ModelResourceLocation(FTBQuestsItems.LEGENDARY_LOOTCRATE.getRegistryName(), "inventory"));
 		ModelLoader.setCustomModelResourceLocation(FTBQuestsItems.MISSING, 0, new ModelResourceLocation(FTBQuestsItems.MISSING.getRegistryName(), "inventory"));
 
-		ClientRegistry.bindTileEntitySpecialRenderer(TileScreenCore.class, new RenderScreen());
+		ClientRegistry.bindTileEntitySpecialRenderer(TileTaskScreenCore.class, new RenderTaskScreen());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileProgressScreenCore.class, new RenderProgressScreen());
 	}
 

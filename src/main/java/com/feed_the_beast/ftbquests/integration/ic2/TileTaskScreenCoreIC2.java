@@ -1,7 +1,7 @@
 package com.feed_the_beast.ftbquests.integration.ic2;
 
 import com.feed_the_beast.ftbquests.quest.task.QuestTaskData;
-import com.feed_the_beast.ftbquests.tile.TileScreenCore;
+import com.feed_the_beast.ftbquests.tile.TileTaskScreenCore;
 import ic2.api.energy.EnergyNet;
 import ic2.api.energy.tile.IEnergyEmitter;
 import ic2.api.energy.tile.IEnergySink;
@@ -10,7 +10,7 @@ import net.minecraft.util.EnumFacing;
 /**
  * @author LatvianModder
  */
-public class TileScreenCoreIC2 extends TileScreenCore implements IEnergySink
+public class TileTaskScreenCoreIC2 extends TileTaskScreenCore implements IEnergySink
 {
 	@Override
 	public void onLoad()

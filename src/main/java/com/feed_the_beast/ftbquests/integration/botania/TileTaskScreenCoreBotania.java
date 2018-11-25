@@ -1,13 +1,13 @@
 package com.feed_the_beast.ftbquests.integration.botania;
 
 import com.feed_the_beast.ftbquests.quest.task.QuestTaskData;
-import com.feed_the_beast.ftbquests.tile.TileScreenCore;
+import com.feed_the_beast.ftbquests.tile.TileTaskScreenCore;
 import vazkii.botania.api.mana.IManaReceiver;
 
 /**
  * @author LatvianModder
  */
-public class TileScreenCoreBotania extends TileScreenCore implements IManaReceiver
+public class TileTaskScreenCoreBotania extends TileTaskScreenCore implements IManaReceiver
 {
 	@Override
 	public boolean isFull()

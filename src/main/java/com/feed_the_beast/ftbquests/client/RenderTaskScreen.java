@@ -2,11 +2,11 @@ package com.feed_the_beast.ftbquests.client;
 
 import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
-import com.feed_the_beast.ftbquests.block.BlockScreen;
+import com.feed_the_beast.ftbquests.block.BlockTaskScreen;
 import com.feed_the_beast.ftbquests.quest.task.QuestTask;
 import com.feed_the_beast.ftbquests.quest.task.QuestTaskData;
-import com.feed_the_beast.ftbquests.tile.TileScreenBase;
-import com.feed_the_beast.ftbquests.tile.TileScreenCore;
+import com.feed_the_beast.ftbquests.tile.ITaskScreen;
+import com.feed_the_beast.ftbquests.tile.TileTaskScreenCore;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.BufferBuilder;
@@ -25,10 +25,10 @@ import org.lwjgl.opengl.GL11;
 /**
  * @author LatvianModder
  */
-public class RenderScreen extends TileEntitySpecialRenderer<TileScreenCore>
+public class RenderTaskScreen extends TileEntitySpecialRenderer<TileTaskScreenCore>
 {
 	@Override
-	public void render(TileScreenCore screen, double x, double y, double z, float partialTicks, int destroyStage, float alpha)
+	public void render(TileTaskScreenCore screen, double x, double y, double z, float partialTicks, int destroyStage, float alpha)
 	{
 		if (!ClientQuestFile.exists())
 		{
@@ -60,14 +60,14 @@ public class RenderScreen extends TileEntitySpecialRenderer<TileScreenCore>
 		{
 			TileEntity tileEntity = screen.getWorld().getTileEntity(ray.getBlockPos());
 
-			if (tileEntity == screen || tileEntity instanceof TileScreenBase)
+			if (tileEntity == screen || tileEntity instanceof ITaskScreen)
 			{
-				TileScreenBase base = (TileScreenBase) tileEntity;
+				ITaskScreen base = (ITaskScreen) tileEntity;
 
 				if (base.getScreen() == screen)
 				{
-					mx = BlockScreen.getClickX(screen.facing, base.getOffsetX(), base.getOffsetZ(), ray.hitVec.x - ray.getBlockPos().getX(), ray.hitVec.z - ray.getBlockPos().getZ(), screen.size);
-					my = BlockScreen.getClickY(base.getOffsetY(), ray.hitVec.y % 1D, screen.size);
+					mx = BlockTaskScreen.getClickX(screen.facing, base.getOffsetX(), base.getOffsetZ(), ray.hitVec.x - ray.getBlockPos().getX(), ray.hitVec.z - ray.getBlockPos().getZ(), screen.size);
+					my = BlockTaskScreen.getClickY(base.getOffsetY(), ray.hitVec.y % 1D, screen.size);
 				}
 			}
 		}

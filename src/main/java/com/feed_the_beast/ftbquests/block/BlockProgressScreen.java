@@ -1,11 +1,11 @@
 package com.feed_the_beast.ftbquests.block;
 
-import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
 import com.feed_the_beast.ftblib.lib.util.BlockUtils;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
+import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
-import com.feed_the_beast.ftbquests.tile.TileProgressScreenBase;
+import com.feed_the_beast.ftbquests.tile.IProgressScreen;
 import com.feed_the_beast.ftbquests.tile.TileProgressScreenCore;
 import com.feed_the_beast.ftbquests.tile.TileProgressScreenPart;
 import net.minecraft.block.material.MapColor;
@@ -102,9 +102,9 @@ public class BlockProgressScreen extends BlockWithHorizontalFacing
 
 		TileEntity tileEntity = world.getTileEntity(pos);
 
-		if (tileEntity instanceof TileProgressScreenBase)
+		if (tileEntity instanceof IProgressScreen)
 		{
-			TileProgressScreenCore screen = ((TileProgressScreenBase) tileEntity).getScreen();
+			TileProgressScreenCore screen = ((IProgressScreen) tileEntity).getScreen();
 
 			if (screen != null)
 			{
@@ -125,9 +125,9 @@ public class BlockProgressScreen extends BlockWithHorizontalFacing
 
 		TileEntity tileEntity = world.getTileEntity(pos);
 
-		if (tileEntity instanceof TileProgressScreenBase)
+		if (tileEntity instanceof IProgressScreen)
 		{
-			TileProgressScreenBase base = (TileProgressScreenBase) tileEntity;
+			IProgressScreen base = (IProgressScreen) tileEntity;
 			TileProgressScreenCore screen = base.getScreen();
 
 			if (screen != null)
@@ -146,7 +146,7 @@ public class BlockProgressScreen extends BlockWithHorizontalFacing
 				{
 					if (player instanceof EntityPlayerMP)
 					{
-						screen.onClicked((EntityPlayerMP) player, BlockScreen.getClickX(facing, base.getOffsetX(), base.getOffsetZ(), hitX, hitZ, screen.width), BlockScreen.getClickY(base.getOffsetY(), hitY, screen.height));
+						screen.onClicked((EntityPlayerMP) player, BlockTaskScreen.getClickX(facing, base.getOffsetX(), base.getOffsetZ(), hitX, hitZ, screen.width), BlockTaskScreen.getClickY(base.getOffsetY(), hitY, screen.height));
 					}
 
 					return true;
@@ -166,11 +166,7 @@ public class BlockProgressScreen extends BlockWithHorizontalFacing
 		{
 			TileProgressScreenCore screen = (TileProgressScreenCore) tileEntity;
 			screen.readFromItem(stack);
-
-			if (screen.team.isEmpty() && placer instanceof EntityPlayerMP)
-			{
-				screen.team = FTBLibAPI.getTeam(placer.getUniqueID());
-			}
+			screen.setIDFromPlacer(placer);
 
 			screen.facing = state.getValue(FACING);
 
@@ -241,7 +237,7 @@ public class BlockProgressScreen extends BlockWithHorizontalFacing
 
 			if (screen.width > 0 || screen.height > 0)
 			{
-				BlockScreen.BREAKING_SCREEN = true;
+				BlockTaskScreen.BREAKING_SCREEN = true;
 				boolean xaxis = state.getValue(FACING).getAxis() == EnumFacing.Axis.X;
 
 				for (int y = 0; y < screen.height + 1; y++)
@@ -263,7 +259,7 @@ public class BlockProgressScreen extends BlockWithHorizontalFacing
 					}
 				}
 
-				BlockScreen.BREAKING_SCREEN = false;
+				BlockTaskScreen.BREAKING_SCREEN = false;
 			}
 		}
 
@@ -276,9 +272,9 @@ public class BlockProgressScreen extends BlockWithHorizontalFacing
 	{
 		TileEntity tileEntity = world.getTileEntity(pos);
 
-		if (tileEntity instanceof TileProgressScreenBase)
+		if (tileEntity instanceof IProgressScreen)
 		{
-			TileProgressScreenCore screen = ((TileProgressScreenBase) tileEntity).getScreen();
+			TileProgressScreenCore screen = ((IProgressScreen) tileEntity).getScreen();
 
 			if (screen != null)
 			{
@@ -314,9 +310,9 @@ public class BlockProgressScreen extends BlockWithHorizontalFacing
 	{
 		TileEntity tileEntity = world.getTileEntity(pos);
 
-		if (tileEntity instanceof TileProgressScreenBase)
+		if (tileEntity instanceof IProgressScreen)
 		{
-			TileProgressScreenCore core = ((TileProgressScreenBase) tileEntity).getScreen();
+			TileProgressScreenCore core = ((IProgressScreen) tileEntity).getScreen();
 
 			if (core != null && core.indestructible)
 			{
@@ -332,9 +328,9 @@ public class BlockProgressScreen extends BlockWithHorizontalFacing
 	{
 		TileEntity tileEntity = world.getTileEntity(pos);
 
-		if (tileEntity instanceof TileProgressScreenBase)
+		if (tileEntity instanceof IProgressScreen)
 		{
-			TileProgressScreenCore core = ((TileProgressScreenBase) tileEntity).getScreen();
+			TileProgressScreenCore core = ((IProgressScreen) tileEntity).getScreen();
 
 			if (core != null && core.indestructible)
 			{
@@ -351,9 +347,9 @@ public class BlockProgressScreen extends BlockWithHorizontalFacing
 	{
 		TileEntity tileEntity = world.getTileEntity(pos);
 
-		if (tileEntity instanceof TileProgressScreenBase)
+		if (tileEntity instanceof IProgressScreen)
 		{
-			TileProgressScreenCore core = ((TileProgressScreenBase) tileEntity).getScreen();
+			TileProgressScreenCore core = ((IProgressScreen) tileEntity).getScreen();
 
 			if (core != null && core.skin != BlockUtils.AIR_STATE)
 			{
@@ -374,17 +370,22 @@ public class BlockProgressScreen extends BlockWithHorizontalFacing
 		}
 
 		NBTTagCompound nbt = stack.getTagCompound();
+
 		int width = nbt == null ? 0 : nbt.getByte("Width");
 		int height = nbt == null ? 0 : nbt.getByte("Height");
-		String team = nbt == null ? "" : nbt.getString("Team");
+		tooltip.add(I18n.format("tile.ftbquests.screen.size") + ": " + TextFormatting.GOLD + (1 + width * 2) + " x " + (1 + height));
 
-		if (team.isEmpty())
+		ITeamData team = nbt == null ? null : ClientQuestFile.INSTANCE.getData(nbt.getShort("Team"));
+
+		if (team == null)
 		{
-			team = ClientQuestFile.existsWithTeam() ? ClientQuestFile.INSTANCE.self.getTeamID() : "";
+			team = ClientQuestFile.INSTANCE.self;
 		}
 
-		tooltip.add(I18n.format("tile.ftbquests.screen.size") + ": " + TextFormatting.GOLD + (1 + width * 2) + " x " + (1 + height));
-		tooltip.add(I18n.format("ftbquests.team") + ": " + TextFormatting.DARK_GREEN + team);
+		if (team != null)
+		{
+			tooltip.add(I18n.format("ftbquests.team") + ": " + TextFormatting.DARK_GREEN + team.getDisplayName().getFormattedText());
+		}
 
 		QuestObject object = ClientQuestFile.INSTANCE.get(ClientQuestFile.INSTANCE.getID(nbt == null ? null : nbt.getTag("Object")));
 

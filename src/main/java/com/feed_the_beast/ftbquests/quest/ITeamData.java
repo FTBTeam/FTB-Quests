@@ -3,6 +3,7 @@ package com.feed_the_beast.ftbquests.quest;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
 import com.feed_the_beast.ftbquests.quest.task.QuestTask;
 import com.feed_the_beast.ftbquests.quest.task.QuestTaskData;
+import net.minecraft.util.text.ITextComponent;
 
 import java.util.Collection;
 import java.util.UUID;
@@ -15,6 +16,8 @@ public interface ITeamData
 	short getTeamUID();
 
 	String getTeamID();
+
+	ITextComponent getDisplayName();
 
 	QuestFile getFile();
 

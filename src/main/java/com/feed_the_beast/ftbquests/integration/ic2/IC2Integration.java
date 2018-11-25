@@ -18,8 +18,8 @@ public class IC2Integration
 	public static void preInit()
 	{
 		MinecraftForge.EVENT_BUS.register(IC2Integration.class);
-		GameRegistry.registerTileEntity(TileScreenCoreIC2.class, new ResourceLocation(FTBQuests.MOD_ID, "screen_core_ic2"));
-		GameRegistry.registerTileEntity(TileScreenPartIC2.class, new ResourceLocation(FTBQuests.MOD_ID, "screen_part_ic2"));
+		GameRegistry.registerTileEntity(TileTaskScreenCoreIC2.class, new ResourceLocation(FTBQuests.MOD_ID, "screen_core_ic2"));
+		GameRegistry.registerTileEntity(TileTaskScreenPartIC2.class, new ResourceLocation(FTBQuests.MOD_ID, "screen_part_ic2"));
 	}
 
 	@SubscribeEvent
