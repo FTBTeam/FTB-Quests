@@ -1,7 +1,7 @@
 package com.feed_the_beast.ftbquests.block;
 
-import com.feed_the_beast.ftbquests.tile.TileScreenCore;
-import com.feed_the_beast.ftbquests.tile.TileScreenPart;
+import com.feed_the_beast.ftbquests.tile.TileTaskScreenCore;
+import com.feed_the_beast.ftbquests.tile.TileTaskScreenPart;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
@@ -10,12 +10,12 @@ import net.minecraft.world.World;
 /**
  * @author LatvianModder
  */
-public class BlockScreenPart extends BlockScreen
+public class BlockTaskScreenPart extends BlockTaskScreen
 {
 	@Override
 	public TileEntity createTileEntity(World world, IBlockState state)
 	{
-		return currentTask == null ? new TileScreenPart() : currentTask.createScreenPart(world);
+		return currentTask == null ? new TileTaskScreenPart() : currentTask.createScreenPart(world);
 	}
 
 	@Override
@@ -31,9 +31,9 @@ public class BlockScreenPart extends BlockScreen
 		{
 			TileEntity tileEntity = world.getTileEntity(pos);
 
-			if (tileEntity instanceof TileScreenPart)
+			if (tileEntity instanceof TileTaskScreenPart)
 			{
-				TileScreenCore screen = ((TileScreenPart) tileEntity).getScreen();
+				TileTaskScreenCore screen = ((TileTaskScreenPart) tileEntity).getScreen();
 
 				if (screen != null)
 				{

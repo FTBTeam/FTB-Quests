@@ -13,8 +13,8 @@ import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
-import com.feed_the_beast.ftbquests.tile.TileScreenCore;
-import com.feed_the_beast.ftbquests.tile.TileScreenPart;
+import com.feed_the_beast.ftbquests.tile.TileTaskScreenCore;
+import com.feed_the_beast.ftbquests.tile.TileTaskScreenPart;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextFormatting;
@@ -197,24 +197,24 @@ public abstract class QuestTask extends QuestObject
 		return group.getGroup(getObjectType().getName()).getGroup(type.getRegistryName().getNamespace()).getGroup(type.getRegistryName().getPath());
 	}
 
-	public Class<? extends TileScreenCore> getScreenCoreClass()
+	public Class<? extends TileTaskScreenCore> getScreenCoreClass()
 	{
-		return TileScreenCore.class;
+		return TileTaskScreenCore.class;
 	}
 
-	public Class<? extends TileScreenPart> getScreenPartClass()
+	public Class<? extends TileTaskScreenPart> getScreenPartClass()
 	{
-		return TileScreenPart.class;
+		return TileTaskScreenPart.class;
 	}
 
-	public TileScreenCore createScreenCore(World world)
+	public TileTaskScreenCore createScreenCore(World world)
 	{
-		return new TileScreenCore();
+		return new TileTaskScreenCore();
 	}
 
-	public TileScreenPart createScreenPart(World world)
+	public TileTaskScreenPart createScreenPart(World world)
 	{
-		return new TileScreenPart();
+		return new TileTaskScreenPart();
 	}
 
 	@SideOnly(Side.CLIENT)

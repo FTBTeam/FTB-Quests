@@ -1,6 +1,8 @@
 package com.feed_the_beast.ftbquests.tile;
 
 import com.feed_the_beast.ftblib.lib.tile.EnumSaveType;
+import com.feed_the_beast.ftblib.lib.tile.TileBase;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
@@ -11,10 +13,10 @@ import javax.annotation.Nullable;
 /**
  * @author LatvianModder
  */
-public class TileScreenPart extends TileScreenBase
+public class TileTaskScreenPart extends TileBase implements ITaskScreen
 {
 	private byte offX, offY, offZ;
-	private TileScreenCore parent;
+	private TileTaskScreenCore parent;
 
 	@Override
 	protected void writeData(NBTTagCompound nbt, EnumSaveType type)
@@ -35,7 +37,7 @@ public class TileScreenPart extends TileScreenBase
 	@Override
 	public boolean hasCapability(Capability<?> capability, @Nullable EnumFacing facing)
 	{
-		TileScreenCore screen = getScreen();
+		TileTaskScreenCore screen = getScreen();
 		return (screen != null && screen.hasCapability(capability, facing)) || super.hasCapability(capability, facing);
 	}
 
@@ -43,7 +45,7 @@ public class TileScreenPart extends TileScreenBase
 	@Nullable
 	public <T> T getCapability(Capability<T> capability, @Nullable EnumFacing facing)
 	{
-		TileScreenCore screen = getScreen();
+		TileTaskScreenCore screen = getScreen();
 		T object = screen != null ? screen.getCapability(capability, facing) : null;
 		return object != null ? object : super.getCapability(capability, facing);
 	}
@@ -69,6 +71,18 @@ public class TileScreenPart extends TileScreenBase
 	}
 
 	@Override
+	protected boolean notifyBlock()
+	{
+		return !world.isRemote;
+	}
+
+	@Override
+	public boolean canBeWrenched(EntityPlayer player)
+	{
+		return false;
+	}
+
+	@Override
 	public int getOffsetX()
 	{
 		return offX;
@@ -88,7 +102,7 @@ public class TileScreenPart extends TileScreenBase
 
 	@Override
 	@Nullable
-	public TileScreenCore getScreen()
+	public TileTaskScreenCore getScreen()
 	{
 		if (parent == null || parent.isInvalid())
 		{
@@ -96,9 +110,9 @@ public class TileScreenPart extends TileScreenBase
 
 			TileEntity tileEntity = world.getTileEntity(pos.add(-offX, -offY, -offZ));
 
-			if (tileEntity instanceof TileScreenCore)
+			if (tileEntity instanceof TileTaskScreenCore)
 			{
-				parent = (TileScreenCore) tileEntity;
+				parent = (TileTaskScreenCore) tileEntity;
 			}
 		}
 

@@ -58,7 +58,7 @@ public class ItemBlockScreen extends ItemBlock
 			}
 		}
 
-		BlockScreen.currentTask = null;
+		BlockTaskScreen.currentTask = null;
 		QuestFile file = FTBQuests.PROXY.getQuestFile(world);
 		Quest quest = file.getQuest(file.getID(nbt == null ? null : nbt.getTag("Quest")));
 
@@ -68,15 +68,15 @@ public class ItemBlockScreen extends ItemBlock
 
 			if (task == null || task.isEmpty())
 			{
-				BlockScreen.currentTask = quest.tasks.get(0);
+				BlockTaskScreen.currentTask = quest.tasks.get(0);
 			}
 			else if (task instanceof NBTTagString)
 			{
-				BlockScreen.currentTask = file.getTask(file.getID(file.getOldID(quest) + ':' + task));
+				BlockTaskScreen.currentTask = file.getTask(file.getID(file.getOldID(quest) + ':' + task));
 			}
 			else if (task instanceof NBTPrimitive)
 			{
-				BlockScreen.currentTask = file.getTask(((NBTPrimitive) task).getInt());
+				BlockTaskScreen.currentTask = file.getTask(((NBTPrimitive) task).getInt());
 			}
 		}
 

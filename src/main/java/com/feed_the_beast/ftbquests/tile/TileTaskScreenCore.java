@@ -4,15 +4,13 @@ import com.feed_the_beast.ftblib.lib.config.ConfigBlockState;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigItemStack;
 import com.feed_the_beast.ftblib.lib.config.ConfigNull;
-import com.feed_the_beast.ftblib.lib.config.ConfigTeam;
 import com.feed_the_beast.ftblib.lib.config.IConfigCallback;
 import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
 import com.feed_the_beast.ftblib.lib.tile.EnumSaveType;
 import com.feed_the_beast.ftblib.lib.util.BlockUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
-import com.feed_the_beast.ftbquests.block.BlockScreen;
+import com.feed_the_beast.ftbquests.block.BlockTaskScreen;
 import com.feed_the_beast.ftbquests.block.FTBQuestsBlocks;
-import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
@@ -46,19 +44,16 @@ import java.util.Collections;
 /**
  * @author LatvianModder
  */
-public class TileScreenCore extends TileScreenBase implements IConfigCallback
+public class TileTaskScreenCore extends TileWithTeam implements IConfigCallback, ITaskScreen
 {
 	public EnumFacing facing;
-	public String team = "";
 	public NBTBase quest = null;
 	public NBTBase task = null;
 	public int size = 0;
-	public boolean indestructible = false;
 	public IBlockState skin = BlockUtils.AIR_STATE;
 	public boolean inputOnly = false;
 	public ItemStack inputModeIcon = ItemStack.EMPTY;
 
-	private ITeamData cTeam;
 	private QuestTask cTask;
 	private QuestTaskData cTaskData;
 
@@ -67,14 +62,11 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 	@Override
 	protected void writeData(NBTTagCompound nbt, EnumSaveType type)
 	{
+		super.writeData(nbt, type);
+
 		if (!type.item)
 		{
 			nbt.setString("Facing", getFacing().getName());
-		}
-
-		if (!team.isEmpty())
-		{
-			nbt.setString("Team", team);
 		}
 
 		cTask = getTask();
@@ -100,11 +92,6 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 			nbt.setByte("Size", (byte) size);
 		}
 
-		if (indestructible)
-		{
-			nbt.setBoolean("Indestructible", true);
-		}
-
 		if (skin != BlockUtils.AIR_STATE)
 		{
 			nbt.setString("Skin", BlockUtils.getNameFromState(skin));
@@ -124,16 +111,16 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 	@Override
 	protected void readData(NBTTagCompound nbt, EnumSaveType type)
 	{
+		super.readData(nbt, type);
+
 		if (!type.item)
 		{
 			facing = EnumFacing.byName(nbt.getString("Facing"));
 		}
 
-		team = nbt.getString("Team");
 		quest = nbt.getTag("Quest");
 		task = nbt.getTag("Task");
 		size = nbt.getByte("Size");
-		indestructible = nbt.getBoolean("Indestructible");
 		skin = BlockUtils.getStateFromName(nbt.getString("Skin"));
 		inputOnly = nbt.getBoolean("InputOnly");
 		inputModeIcon = new ItemStack(nbt.getCompoundTag("InputModeIcon"));
@@ -144,25 +131,6 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 		}
 
 		updateContainingBlockInfo();
-	}
-
-	@Override
-	public void writeToItem(ItemStack stack)
-	{
-		NBTTagCompound nbt = new NBTTagCompound();
-		writeData(nbt, EnumSaveType.ITEM);
-
-		if (!nbt.isEmpty())
-		{
-			stack.setTagCompound(nbt);
-		}
-	}
-
-	@Override
-	public void readFromItem(ItemStack stack)
-	{
-		NBTTagCompound nbt = stack.getTagCompound();
-		readData(nbt == null ? new NBTTagCompound() : nbt, EnumSaveType.ITEM);
 	}
 
 	@Override
@@ -254,7 +222,7 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 	}
 
 	@Override
-	public TileScreenCore getScreen()
+	public TileTaskScreenCore getScreen()
 	{
 		return this;
 	}
@@ -265,23 +233,19 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 		super.updateContainingBlockInfo();
 		facing = null;
 		cTask = null;
-		cTeam = null;
 		cTaskData = null;
 	}
 
-	@Nullable
-	public ITeamData getTeam()
+	@Override
+	protected boolean notifyBlock()
 	{
-		if (team.isEmpty())
-		{
-			return null;
-		}
-		else if (cTeam == null)
-		{
-			cTeam = FTBQuests.PROXY.getQuestFile(world).getData(team);
-		}
+		return !world.isRemote;
+	}
 
-		return cTeam;
+	@Override
+	public boolean canBeWrenched(EntityPlayer player)
+	{
+		return false;
 	}
 
 	@Nullable
@@ -354,7 +318,7 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 	@Override
 	public AxisAlignedBB getRenderBoundingBox()
 	{
-		return BlockScreen.getScreenAABB(pos, getFacing(), size);
+		return BlockTaskScreen.getScreenAABB(pos, getFacing(), size);
 	}
 
 	@Override
@@ -362,11 +326,6 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 	{
 		double d = 32D * (2 + size);
 		return d * d;
-	}
-
-	public boolean isOwner(EntityPlayer player)
-	{
-		return team.isEmpty() || FTBLibAPI.isPlayerInTeam(player.getUniqueID(), team);
 	}
 
 	public void onClicked(EntityPlayerMP player, EnumHand hand, double x, double y)
@@ -388,8 +347,8 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 				}
 				else
 				{
-					currentCoreClass = TileScreenCore.class;
-					currentPartClass = TileScreenPart.class;
+					currentCoreClass = TileTaskScreenCore.class;
+					currentPartClass = TileTaskScreenPart.class;
 				}
 
 				boolean editorOrDestructible = editor || !indestructible;
@@ -397,7 +356,7 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 				group0.setDisplayName(new TextComponentTranslation("tile.ftbquests.screen.name"));
 				ConfigGroup config = group0.getGroup("ftbquests.screen");
 
-				config.add("team", new ConfigTeam(() -> team, v -> team = v), ConfigNull.INSTANCE).setDisplayName(new TextComponentTranslation("ftbquests.team")).setCanEdit(editor);
+				config.add("team", createTeamConfig(), ConfigNull.INSTANCE).setDisplayName(new TextComponentTranslation("ftbquests.team")).setCanEdit(editor);
 
 				config.add("task", new ConfigQuestObject(ServerQuestFile.INSTANCE, getTask(), Collections.singleton(QuestObjectType.TASK))
 				{
@@ -539,7 +498,7 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 
 				if (bx == 0 && by == 0)
 				{
-					TileScreenCore core = task == null ? new TileScreenCore() : task.createScreenCore(world);
+					TileTaskScreenCore core = task == null ? new TileTaskScreenCore() : task.createScreenCore(world);
 					core.setWorld(world);
 					core.setPos(pos1);
 					NBTTagCompound nbt = new NBTTagCompound();
@@ -550,7 +509,7 @@ public class TileScreenCore extends TileScreenBase implements IConfigCallback
 				}
 				else
 				{
-					TileScreenPart part = task == null ? new TileScreenPart() : task.createScreenPart(world);
+					TileTaskScreenPart part = task == null ? new TileTaskScreenPart() : task.createScreenPart(world);
 					part.setWorld(world);
 					part.setPos(pos1);
 					part.setOffset(offX, by, offZ);

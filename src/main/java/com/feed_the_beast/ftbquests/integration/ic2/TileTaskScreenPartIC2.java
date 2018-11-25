@@ -1,7 +1,7 @@
 package com.feed_the_beast.ftbquests.integration.ic2;
 
-import com.feed_the_beast.ftbquests.tile.TileScreenCore;
-import com.feed_the_beast.ftbquests.tile.TileScreenPart;
+import com.feed_the_beast.ftbquests.tile.TileTaskScreenCore;
+import com.feed_the_beast.ftbquests.tile.TileTaskScreenPart;
 import ic2.api.energy.EnergyNet;
 import ic2.api.energy.tile.IEnergyEmitter;
 import ic2.api.energy.tile.IEnergySink;
@@ -10,7 +10,7 @@ import net.minecraft.util.EnumFacing;
 /**
  * @author LatvianModder
  */
-public class TileScreenPartIC2 extends TileScreenPart implements IEnergySink
+public class TileTaskScreenPartIC2 extends TileTaskScreenPart implements IEnergySink
 {
 	@Override
 	public void onLoad()
@@ -41,8 +41,8 @@ public class TileScreenPartIC2 extends TileScreenPart implements IEnergySink
 	@Override
 	public double getDemandedEnergy()
 	{
-		TileScreenCore screen = getScreen();
-		return screen instanceof TileScreenCoreIC2 ? ((TileScreenCoreIC2) screen).getDemandedEnergy() : 0D;
+		TileTaskScreenCore screen = getScreen();
+		return screen instanceof TileTaskScreenCoreIC2 ? ((TileTaskScreenCoreIC2) screen).getDemandedEnergy() : 0D;
 	}
 
 	@Override
@@ -54,7 +54,7 @@ public class TileScreenPartIC2 extends TileScreenPart implements IEnergySink
 	@Override
 	public double injectEnergy(EnumFacing facing, double amount, double voltage)
 	{
-		TileScreenCore screen = getScreen();
-		return screen instanceof TileScreenCoreIC2 ? ((TileScreenCoreIC2) screen).injectEnergy(facing, amount, voltage) : amount;
+		TileTaskScreenCore screen = getScreen();
+		return screen instanceof TileTaskScreenCoreIC2 ? ((TileTaskScreenCoreIC2) screen).injectEnergy(facing, amount, voltage) : amount;
 	}
 }

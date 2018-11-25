@@ -7,8 +7,8 @@ import com.feed_the_beast.ftbquests.block.BlockProgressDetector;
 import com.feed_the_beast.ftbquests.block.BlockProgressScreen;
 import com.feed_the_beast.ftbquests.block.BlockProgressScreenPart;
 import com.feed_the_beast.ftbquests.block.BlockQuestChest;
-import com.feed_the_beast.ftbquests.block.BlockScreen;
-import com.feed_the_beast.ftbquests.block.BlockScreenPart;
+import com.feed_the_beast.ftbquests.block.BlockTaskScreen;
+import com.feed_the_beast.ftbquests.block.BlockTaskScreenPart;
 import com.feed_the_beast.ftbquests.block.FTBQuestsBlocks;
 import com.feed_the_beast.ftbquests.block.ItemBlockProgressScreen;
 import com.feed_the_beast.ftbquests.block.ItemBlockScreen;
@@ -34,8 +34,8 @@ import com.feed_the_beast.ftbquests.tile.TileProgressDetector;
 import com.feed_the_beast.ftbquests.tile.TileProgressScreenCore;
 import com.feed_the_beast.ftbquests.tile.TileProgressScreenPart;
 import com.feed_the_beast.ftbquests.tile.TileQuestChest;
-import com.feed_the_beast.ftbquests.tile.TileScreenCore;
-import com.feed_the_beast.ftbquests.tile.TileScreenPart;
+import com.feed_the_beast.ftbquests.tile.TileTaskScreenCore;
+import com.feed_the_beast.ftbquests.tile.TileTaskScreenPart;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
@@ -77,16 +77,16 @@ public class FTBQuestsEventHandler
 	public static void registerBlocks(RegistryEvent.Register<Block> event)
 	{
 		event.getRegistry().registerAll(
-				withName(new BlockScreen(), "screen"),
-				withName(new BlockScreenPart(), "screen_part"),
+				withName(new BlockTaskScreen(), "screen"),
+				withName(new BlockTaskScreenPart(), "screen_part"),
 				withName(new BlockProgressDetector(), "progress_detector"),
 				withName(new BlockProgressScreen(), "progress_screen"),
 				withName(new BlockProgressScreenPart(), "progress_screen_part"),
 				withName(new BlockQuestChest(), "chest")
 		);
 
-		GameRegistry.registerTileEntity(TileScreenCore.class, new ResourceLocation(FTBQuests.MOD_ID, "screen_core"));
-		GameRegistry.registerTileEntity(TileScreenPart.class, new ResourceLocation(FTBQuests.MOD_ID, "screen_part"));
+		GameRegistry.registerTileEntity(TileTaskScreenCore.class, new ResourceLocation(FTBQuests.MOD_ID, "screen_core"));
+		GameRegistry.registerTileEntity(TileTaskScreenPart.class, new ResourceLocation(FTBQuests.MOD_ID, "screen_part"));
 		GameRegistry.registerTileEntity(TileProgressDetector.class, new ResourceLocation(FTBQuests.MOD_ID, "progress_detector"));
 		GameRegistry.registerTileEntity(TileProgressScreenCore.class, new ResourceLocation(FTBQuests.MOD_ID, "progress_screen_core"));
 		GameRegistry.registerTileEntity(TileProgressScreenPart.class, new ResourceLocation(FTBQuests.MOD_ID, "progress_screen_part"));

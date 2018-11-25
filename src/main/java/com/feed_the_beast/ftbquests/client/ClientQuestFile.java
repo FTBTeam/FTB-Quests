@@ -60,7 +60,7 @@ public class ClientQuestFile extends QuestFile
 
 		for (MessageSyncQuests.TeamInst team : message.teamData)
 		{
-			ClientQuestProgress data = new ClientQuestProgress(team.name, team.uid);
+			ClientQuestProgress data = new ClientQuestProgress(team.uid, team.id, team.name);
 
 			for (QuestChapter chapter : chapters)
 			{

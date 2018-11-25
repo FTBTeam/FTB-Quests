@@ -1,8 +1,8 @@
 package com.feed_the_beast.ftbquests.block;
 
-import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
+import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.tile.TileQuestChest;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
@@ -116,11 +116,7 @@ public class BlockQuestChest extends BlockWithHorizontalFacing
 		{
 			TileQuestChest tile = (TileQuestChest) tileEntity;
 			tile.readFromItem(stack);
-
-			if (tile.team.isEmpty() && placer instanceof EntityPlayerMP)
-			{
-				tile.team = FTBLibAPI.getTeam(placer.getUniqueID());
-			}
+			tile.setIDFromPlacer(placer);
 		}
 	}
 
@@ -161,13 +157,16 @@ public class BlockQuestChest extends BlockWithHorizontalFacing
 		}
 
 		NBTTagCompound nbt = stack.getTagCompound();
-		String team = nbt == null ? "" : nbt.getString("Team");
+		ITeamData team = nbt == null ? null : ClientQuestFile.INSTANCE.getData(nbt.getShort("Team"));
 
-		if (team.isEmpty())
+		if (team == null)
 		{
-			team = ClientQuestFile.existsWithTeam() ? ClientQuestFile.INSTANCE.self.getTeamID() : "";
+			team = ClientQuestFile.INSTANCE.self;
 		}
 
-		tooltip.add(I18n.format("ftbquests.team") + ": " + TextFormatting.DARK_GREEN + team);
+		if (team != null)
+		{
+			tooltip.add(I18n.format("ftbquests.team") + ": " + TextFormatting.DARK_GREEN + team.getDisplayName().getFormattedText());
+		}
 	}
 }

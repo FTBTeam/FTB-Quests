@@ -8,6 +8,7 @@ import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import it.unimi.dsi.fastutil.ints.IntCollection;
 import net.minecraft.nbt.NBTBase;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -22,7 +23,8 @@ public class MessageSyncQuests extends MessageToClient
 	{
 		public static final DataOut.Serializer<TeamInst> SERIALIZER = (data, t) -> {
 			data.writeShort(t.uid);
-			data.writeString(t.name);
+			data.writeString(t.id);
+			data.writeTextComponent(t.name);
 			data.writeVarInt(t.taskKeys.length);
 
 			for (int i = 0; i < t.taskKeys.length; i++)
@@ -43,7 +45,8 @@ public class MessageSyncQuests extends MessageToClient
 		public static final DataIn.Deserializer<TeamInst> DESERIALIZER = data -> {
 			TeamInst t = new TeamInst();
 			t.uid = data.readShort();
-			t.name = data.readString();
+			t.id = data.readString();
+			t.name = data.readTextComponent();
 			t.taskKeys = new int[data.readVarInt()];
 			t.taskValues = new NBTBase[t.taskKeys.length];
 
@@ -66,7 +69,8 @@ public class MessageSyncQuests extends MessageToClient
 		};
 
 		public short uid;
-		public String name;
+		public String id;
+		public ITextComponent name;
 		public int[] taskKeys;
 		public NBTBase[] taskValues;
 		public int[] variableKeys;
