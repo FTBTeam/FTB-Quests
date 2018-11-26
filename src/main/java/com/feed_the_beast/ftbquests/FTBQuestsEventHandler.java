@@ -136,8 +136,8 @@ public class FTBQuestsEventHandler
 	{
 		event.getRegistry().registerAll(
 				FTBQuestsRewards.ITEM = new QuestRewardType(ItemReward.class, ItemReward::new).setRegistryName("item").setIcon(Icon.getIcon("minecraft:items/diamond")),
-				FTBQuestsRewards.CHOICE = new QuestRewardType(ChoiceReward.class, ChoiceReward::new).setRegistryName("choice").setIcon(GuiIcons.COLOR_RGB),
-				FTBQuestsRewards.RANDOM = new QuestRewardType(RandomReward.class, RandomReward::new).setRegistryName("random").setIcon(GuiIcons.DICE),
+				FTBQuestsRewards.CHOICE = new QuestRewardType(ChoiceReward.class, ChoiceReward::new).setRegistryName("choice").setIcon(GuiIcons.COLOR_RGB).setExcludeFromListRewards(true),
+				FTBQuestsRewards.RANDOM = new QuestRewardType(RandomReward.class, RandomReward::new).setRegistryName("random").setIcon(GuiIcons.DICE).setExcludeFromListRewards(true),
 				FTBQuestsRewards.XP = new QuestRewardType(XPReward.class, XPReward::new).setRegistryName("xp").setIcon(Icon.getIcon("minecraft:items/experience_bottle")),
 				FTBQuestsRewards.XP_LEVELS = new QuestRewardType(XPLevelsReward.class, XPLevelsReward::new).setRegistryName("xp_levels").setIcon(Icon.getIcon("minecraft:items/experience_bottle")),
 				FTBQuestsRewards.COMMAND = new QuestRewardType(CommandReward.class, CommandReward::new).setRegistryName("command").setIcon(Icon.getIcon("minecraft:blocks/command_block_back"))

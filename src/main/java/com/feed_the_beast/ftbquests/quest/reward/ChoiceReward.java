@@ -1,5 +1,7 @@
 package com.feed_the_beast.ftbquests.quest.reward;
 
+import com.feed_the_beast.ftblib.lib.icon.Icon;
+import com.feed_the_beast.ftblib.lib.icon.IconAnimation;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftbquests.quest.Quest;
@@ -14,6 +16,7 @@ import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -128,12 +131,30 @@ public class ChoiceReward extends QuestReward
 	}
 
 	@Override
+	public Icon getAltIcon()
+	{
+		if (rewards.isEmpty())
+		{
+			return super.getIcon();
+		}
+
+		List<Icon> icons = new ArrayList<>();
+
+		for (QuestReward reward : rewards)
+		{
+			icons.add(reward.getIcon());
+		}
+
+		return IconAnimation.fromList(icons, false);
+	}
+
+	@Override
 	@SideOnly(Side.CLIENT)
 	public void addMouseOverText(List<String> list)
 	{
 		for (QuestReward reward : rewards)
 		{
-			list.add(TextFormatting.GRAY + "  - " + reward.getDisplayName().getFormattedText());
+			list.add(TextFormatting.GRAY + "- " + reward.getDisplayName().getFormattedText());
 		}
 	}
 }

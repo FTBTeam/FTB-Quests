@@ -6,9 +6,11 @@ import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.gui.SimpleTextButton;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.gui.QuestsTheme;
+import com.feed_the_beast.ftbquests.net.edit.MessageCreateObject;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.reward.QuestRewardType;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.nbt.NBTTagCompound;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +38,11 @@ public class ButtonAddReward extends SimpleTextButton
 		{
 			contextMenu.add(new ContextMenuItem(type.getDisplayName().getFormattedText(), type.getIcon(), () -> {
 				GuiHelper.playClickSound();
-				type.getGuiProvider().openCreationGui(this, quest);
+				type.getGuiProvider().openCreationGui(this, quest, reward -> {
+					NBTTagCompound extra = new NBTTagCompound();
+					extra.setString("type", type.getTypeForNBT());
+					new MessageCreateObject(reward, extra).sendToServer();
+				});
 			}));
 		}
 
