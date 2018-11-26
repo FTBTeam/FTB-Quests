@@ -138,7 +138,7 @@ public class RandomReward extends QuestReward
 			totalWeight += reward.weight;
 		}
 
-		int number = player.world.rand.nextInt(totalWeight);
+		int number = player.world.rand.nextInt(totalWeight) + 1;
 		int currentWeight = 0;
 
 		for (WeightedReward reward : rewards)
