@@ -4,11 +4,12 @@ import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.IconAnimation;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
+import com.feed_the_beast.ftbquests.gui.GuiEditChoiceReward;
+import com.feed_the_beast.ftbquests.gui.GuiSelectChoiceReward;
+import com.feed_the_beast.ftbquests.net.edit.MessageEditObjectDirect;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.init.Items;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.text.TextFormatting;
@@ -30,22 +31,6 @@ public class ChoiceReward extends QuestReward
 	{
 		super(quest);
 		rewards = new ObjectArrayList<>();
-
-		ItemReward reward1 = new ItemReward(quest);
-		reward1.stack = new ItemStack(Items.POTATO);
-		rewards.add(reward1);
-
-		ItemReward reward2 = new ItemReward(quest);
-		reward2.stack = new ItemStack(Items.CARROT);
-		rewards.add(reward2);
-
-		ItemReward reward3 = new ItemReward(quest);
-		reward3.stack = new ItemStack(Items.APPLE);
-		rewards.add(reward3);
-
-		XPLevelsReward reward4 = new XPLevelsReward(quest);
-		reward4.xpLevels = 5;
-		rewards.add(reward4);
 	}
 
 	@Override
@@ -156,5 +141,19 @@ public class ChoiceReward extends QuestReward
 		{
 			list.add(TextFormatting.GRAY + "- " + reward.getDisplayName().getFormattedText());
 		}
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public void onButtonClicked()
+	{
+		new GuiSelectChoiceReward(this).openGui();
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public void onEditButtonClicked()
+	{
+		new GuiEditChoiceReward(this, () -> new MessageEditObjectDirect(this).sendToServer()).openGui();
 	}
 }

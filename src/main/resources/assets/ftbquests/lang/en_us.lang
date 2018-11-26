@@ -158,7 +158,7 @@ ftbquests.reward.ftbquests.xp_levels.text=XP Levels: %s
 ftbquests.reward.ftbquests.command=Command
 ftbquests.reward.ftbquests.command.text=Command: %s
 
-ftbquests.reward.ftbquests.choice=Choice Reward [WIP!]
+ftbquests.reward.ftbquests.choice=Choice Reward
 
 ftbquests.reward.ftbquests.random=Random Reward
 ftbquests.reward.ftbquests.random.weight=Weight
