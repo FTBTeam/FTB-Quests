@@ -5,6 +5,7 @@ import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
 import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.gui.SimpleTextButton;
+import com.feed_the_beast.ftblib.lib.gui.Theme;
 import com.feed_the_beast.ftblib.lib.gui.WidgetVerticalSpace;
 import com.feed_the_beast.ftblib.lib.gui.misc.GuiButtonListBase;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
@@ -127,6 +128,7 @@ public class GuiEditChoiceReward extends GuiButtonListBase
 		choiceReward = r;
 		callback = c;
 		setTitle(I18n.format("ftbquests.reward.ftbquests.choice"));
+		setBorder(1, 1, 1);
 	}
 
 	@Override
@@ -141,5 +143,11 @@ public class GuiEditChoiceReward extends GuiButtonListBase
 		{
 			panel.add(new ButtonChoiceReward(panel, r));
 		}
+	}
+
+	@Override
+	public Theme getTheme()
+	{
+		return QuestsTheme.INSTANCE;
 	}
 }

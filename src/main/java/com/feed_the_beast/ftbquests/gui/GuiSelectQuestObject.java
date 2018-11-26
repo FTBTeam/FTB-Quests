@@ -4,6 +4,7 @@ import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
 import com.feed_the_beast.ftblib.lib.gui.IOpenableGui;
 import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.gui.SimpleTextButton;
+import com.feed_the_beast.ftblib.lib.gui.Theme;
 import com.feed_the_beast.ftblib.lib.gui.misc.GuiButtonListBase;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
@@ -102,6 +103,7 @@ public class GuiSelectQuestObject extends GuiButtonListBase
 	{
 		setTitle(I18n.format("ftbquests.gui.select_quest_object"));
 		setHasSearchBox(true);
+		setBorder(1, 1, 1);
 		config = c;
 		callbackGui = g;
 		callback = cb;
@@ -150,5 +152,11 @@ public class GuiSelectQuestObject extends GuiButtonListBase
 				}
 			}
 		}
+	}
+
+	@Override
+	public Theme getTheme()
+	{
+		return QuestsTheme.INSTANCE;
 	}
 }
