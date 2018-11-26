@@ -46,7 +46,10 @@ public class MessageClaimAllRewards extends MessageToServer
 				{
 					for (QuestReward reward : quest.rewards)
 					{
-						teamData.claimReward(player, reward);
+						if (!reward.getType().getExcludeFromListRewards())
+						{
+							teamData.claimReward(player, reward);
+						}
 					}
 				}
 			}
