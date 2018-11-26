@@ -13,7 +13,7 @@ import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.client.ClientQuestProgress;
 import com.feed_the_beast.ftbquests.gui.QuestsTheme;
-import com.feed_the_beast.ftbquests.net.edit.MessageEditDependency;
+import com.feed_the_beast.ftbquests.net.edit.MessageEditObjectDirect;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
@@ -104,15 +104,15 @@ public class ButtonQuest extends Button
 			{
 				if (treeGui.selectedQuest.hasDependency(quest))
 				{
-					contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.rem_dep"), GuiIcons.REMOVE, () -> new MessageEditDependency(treeGui.selectedQuest.uid, quest.uid, false).sendToServer()));
+					contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.rem_dep"), GuiIcons.REMOVE, () -> editDependency(treeGui.selectedQuest, quest, false)));
 				}
 				else if (quest.hasDependency(treeGui.selectedQuest))
 				{
-					contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.rem_dep"), GuiIcons.REMOVE, () -> new MessageEditDependency(quest.uid, treeGui.selectedQuest.uid, false).sendToServer()));
+					contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.rem_dep"), GuiIcons.REMOVE, () -> editDependency(quest, treeGui.selectedQuest, false)));
 				}
 				else
 				{
-					contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.set_dep"), QuestsTheme.ADD, () -> new MessageEditDependency(quest.uid, treeGui.selectedQuest.uid, true).sendToServer()).setEnabled(treeGui.selectedQuest != null && treeGui.selectedQuest != quest && !treeGui.selectedQuest.canRepeat));
+					contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.set_dep"), QuestsTheme.ADD, () -> editDependency(quest, treeGui.selectedQuest, true)).setEnabled(treeGui.selectedQuest != null && treeGui.selectedQuest != quest && !treeGui.selectedQuest.canRepeat));
 				}
 			}
 
@@ -137,6 +137,16 @@ public class ButtonQuest extends Button
 		{
 			treeGui.movingQuest = true;
 			treeGui.selectQuest(quest);
+		}
+	}
+
+	private void editDependency(Quest quest, QuestObject object, boolean add)
+	{
+		if (add ? quest.dependencies.add(object) : quest.dependencies.remove(object))
+		{
+			quest.verifyDependencies();
+			new MessageEditObjectDirect(quest).sendToServer();
+			treeGui.quests.refreshWidgets();
 		}
 	}
 

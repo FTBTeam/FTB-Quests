@@ -6,9 +6,7 @@ import com.feed_the_beast.ftblib.lib.gui.IOpenableGui;
 import com.feed_the_beast.ftblib.lib.gui.misc.GuiEditConfig;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftbquests.FTBQuests;
-import com.feed_the_beast.ftbquests.net.edit.MessageCreateObject;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -21,6 +19,7 @@ import net.minecraftforge.registries.IForgeRegistryEntry;
 import net.minecraftforge.registries.RegistryBuilder;
 
 import javax.annotation.Nullable;
+import java.util.function.Consumer;
 
 /**
  * @author LatvianModder
@@ -82,7 +81,7 @@ public final class QuestRewardType extends IForgeRegistryEntry.Impl<QuestRewardT
 	public interface GuiProvider
 	{
 		@SideOnly(Side.CLIENT)
-		void openCreationGui(IOpenableGui gui, Quest quest);
+		void openCreationGui(IOpenableGui gui, Quest quest, Consumer<QuestReward> callback);
 	}
 
 	public final Class typeClass;
@@ -90,6 +89,7 @@ public final class QuestRewardType extends IForgeRegistryEntry.Impl<QuestRewardT
 	private ITextComponent displayName;
 	private Icon icon;
 	private GuiProvider guiProvider;
+	private boolean excludeFromListRewards;
 
 	public QuestRewardType(Class<? extends QuestReward> c, Provider p)
 	{
@@ -101,7 +101,7 @@ public final class QuestRewardType extends IForgeRegistryEntry.Impl<QuestRewardT
 		{
 			@Override
 			@SideOnly(Side.CLIENT)
-			public void openCreationGui(IOpenableGui gui, Quest quest)
+			public void openCreationGui(IOpenableGui gui, Quest quest, Consumer<QuestReward> callback)
 			{
 				QuestReward reward = provider.create(quest);
 
@@ -111,14 +111,8 @@ public final class QuestRewardType extends IForgeRegistryEntry.Impl<QuestRewardT
 				}
 
 				ConfigGroup group = ConfigGroup.newGroup(FTBQuests.MOD_ID);
-				ConfigGroup g = reward.createSubGroup(group);
-				reward.getConfig(g);
-
-				new GuiEditConfig(group, (g1, sender) -> {
-					NBTTagCompound extra = new NBTTagCompound();
-					extra.setString("type", getTypeForNBT());
-					new MessageCreateObject(reward, extra).sendToServer();
-				}).openGui();
+				reward.getConfig(reward.createSubGroup(group));
+				new GuiEditConfig(group, (g1, sender) -> callback.accept(reward)).openGui();
 			}
 		};
 	}
@@ -165,5 +159,16 @@ public final class QuestRewardType extends IForgeRegistryEntry.Impl<QuestRewardT
 	public GuiProvider getGuiProvider()
 	{
 		return guiProvider;
+	}
+
+	public QuestRewardType setExcludeFromListRewards(boolean v)
+	{
+		excludeFromListRewards = v;
+		return this;
+	}
+
+	public boolean getExcludeFromListRewards()
+	{
+		return excludeFromListRewards;
 	}
 }

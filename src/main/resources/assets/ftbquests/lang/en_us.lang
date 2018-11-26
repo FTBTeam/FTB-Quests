@@ -160,7 +160,9 @@ ftbquests.reward.ftbquests.command.text=Command: %s
 
 ftbquests.reward.ftbquests.choice=Choice Reward [WIP!]
 
-ftbquests.reward.ftbquests.random=Random Reward [WIP!]
+ftbquests.reward.ftbquests.random=Random Reward
+ftbquests.reward.ftbquests.random.weight=Weight
+ftbquests.reward.ftbquests.random.setweight=Set Weight
 
 ftbquests.reward.ftbquests.ftb_money=Money
 ftbquests.reward.ftbquests.ftb_money.value=Money

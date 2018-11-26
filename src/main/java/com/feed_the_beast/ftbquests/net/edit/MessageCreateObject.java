@@ -20,7 +20,8 @@ import javax.annotation.Nullable;
 public class MessageCreateObject extends MessageToServer
 {
 	private int parent;
-	private QuestObjectBase object;
+	private QuestObjectType type;
+	private NBTTagCompound nbt;
 	private NBTTagCompound extra;
 
 	public MessageCreateObject()
@@ -30,7 +31,9 @@ public class MessageCreateObject extends MessageToServer
 	public MessageCreateObject(QuestObjectBase o, @Nullable NBTTagCompound e)
 	{
 		parent = o.getParentID();
-		object = o;
+		type = o.getObjectType();
+		nbt = new NBTTagCompound();
+		o.writeData(nbt);
 		extra = e;
 	}
 
@@ -43,20 +46,19 @@ public class MessageCreateObject extends MessageToServer
 	@Override
 	public void writeData(DataOut data)
 	{
-		data.writeNBT(extra);
 		data.writeInt(parent);
-		data.writeByte(object.getObjectType().ordinal());
-		object.writeNetData(data);
+		data.writeByte(type.ordinal());
+		data.writeNBT(nbt);
+		data.writeNBT(extra);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
-		extra = data.readNBT();
 		parent = data.readInt();
-		QuestObjectType type = QuestObjectType.VALUES[data.readUnsignedByte()];
-		object = ServerQuestFile.INSTANCE.create(type, parent, extra == null ? new NBTTagCompound() : extra);
-		object.readNetData(data);
+		type = QuestObjectType.VALUES[data.readUnsignedByte()];
+		nbt = data.readNBT();
+		extra = data.readNBT();
 	}
 
 	@Override
@@ -64,6 +66,8 @@ public class MessageCreateObject extends MessageToServer
 	{
 		if (FTBQuests.canEdit(player))
 		{
+			QuestObjectBase object = ServerQuestFile.INSTANCE.create(type, parent, extra == null ? new NBTTagCompound() : extra);
+			object.readData(nbt);
 			object.uid = ServerQuestFile.INSTANCE.readID(0);
 
 			if (object instanceof QuestObject)

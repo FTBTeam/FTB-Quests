@@ -1,12 +1,14 @@
 package com.feed_the_beast.ftbquests.quest.reward;
 
+import com.feed_the_beast.ftblib.lib.icon.Icon;
+import com.feed_the_beast.ftblib.lib.icon.IconAnimation;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
+import com.feed_the_beast.ftbquests.gui.GuiEditRandomReward;
+import com.feed_the_beast.ftbquests.net.edit.MessageEditObjectDirect;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.init.Items;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.text.TextFormatting;
@@ -14,6 +16,7 @@ import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -39,26 +42,6 @@ public class RandomReward extends QuestReward
 	{
 		super(quest);
 		rewards = new ObjectArrayList<>();
-
-		ItemReward reward1 = new ItemReward(quest);
-		reward1.stack = new ItemStack(Items.POTATO);
-		rewards.add(new WeightedReward(reward1, 5));
-
-		ItemReward reward2 = new ItemReward(quest);
-		reward2.stack = new ItemStack(Items.CARROT);
-		rewards.add(new WeightedReward(reward2, 5));
-
-		ItemReward reward3 = new ItemReward(quest);
-		reward3.stack = new ItemStack(Items.APPLE);
-		rewards.add(new WeightedReward(reward3, 12));
-
-		ItemReward reward4 = new ItemReward(quest);
-		reward4.stack = new ItemStack(Items.POISONOUS_POTATO);
-		rewards.add(new WeightedReward(reward4, 1));
-
-		XPLevelsReward reward5 = new XPLevelsReward(quest);
-		reward5.xpLevels = 5;
-		rewards.add(new WeightedReward(reward5, 3));
 	}
 
 	@Override
@@ -171,6 +154,24 @@ public class RandomReward extends QuestReward
 	}
 
 	@Override
+	public Icon getAltIcon()
+	{
+		if (rewards.isEmpty())
+		{
+			return super.getAltIcon();
+		}
+
+		List<Icon> icons = new ArrayList<>();
+
+		for (WeightedReward reward : rewards)
+		{
+			icons.add(reward.reward.getIcon());
+		}
+
+		return IconAnimation.fromList(icons, false);
+	}
+
+	@Override
 	@SideOnly(Side.CLIENT)
 	public void addMouseOverText(List<String> list)
 	{
@@ -183,7 +184,14 @@ public class RandomReward extends QuestReward
 
 		for (WeightedReward reward : rewards)
 		{
-			list.add(TextFormatting.GRAY + "  - " + reward.reward.getDisplayName().getFormattedText() + TextFormatting.DARK_GRAY + " [" + (reward.weight * 100 / totalWeight) + "%]");
+			list.add(TextFormatting.GRAY + "- " + reward.reward.getDisplayName().getFormattedText() + TextFormatting.DARK_GRAY + " [" + (reward.weight * 100 / totalWeight) + "%]");
 		}
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public void onEditButtonClicked()
+	{
+		new GuiEditRandomReward(this, () -> new MessageEditObjectDirect(this).sendToServer()).openGui();
 	}
 }

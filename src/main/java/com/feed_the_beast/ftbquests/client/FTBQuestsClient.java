@@ -7,18 +7,18 @@ import com.feed_the_beast.ftblib.lib.gui.misc.GuiEditConfigValue;
 import com.feed_the_beast.ftblib.lib.gui.misc.GuiSelectFluid;
 import com.feed_the_beast.ftblib.lib.gui.misc.GuiSelectItemStack;
 import com.feed_the_beast.ftbquests.FTBQuestsCommon;
-import com.feed_the_beast.ftbquests.net.edit.MessageCreateObject;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
+import com.feed_the_beast.ftbquests.quest.reward.ChoiceReward;
 import com.feed_the_beast.ftbquests.quest.reward.FTBQuestsRewards;
 import com.feed_the_beast.ftbquests.quest.reward.ItemReward;
+import com.feed_the_beast.ftbquests.quest.reward.RandomReward;
 import com.feed_the_beast.ftbquests.quest.reward.XPLevelsReward;
 import com.feed_the_beast.ftbquests.quest.reward.XPReward;
 import com.feed_the_beast.ftbquests.quest.task.FTBQuestsTasks;
 import com.feed_the_beast.ftbquests.quest.task.FluidTask;
 import com.feed_the_beast.ftbquests.quest.task.ItemTask;
 import net.minecraft.client.settings.KeyBinding;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.client.settings.KeyConflictContext;
 import net.minecraftforge.client.settings.KeyModifier;
 import net.minecraftforge.fluids.FluidRegistry;
@@ -47,24 +47,22 @@ public class FTBQuestsClient extends FTBQuestsCommon
 	@Override
 	public void setTaskGuiProviders()
 	{
-		FTBQuestsTasks.ITEM.setGuiProvider((gui, quest) -> new GuiSelectItemStack(gui, stack -> {
+		FTBQuestsTasks.ITEM.setGuiProvider((gui, quest, callback) -> new GuiSelectItemStack(gui, stack -> {
 			if (!stack.isEmpty())
 			{
 				ItemTask itemTask = new ItemTask(quest);
 				itemTask.items.add(ItemHandlerHelper.copyStackWithSize(stack, 1));
 				itemTask.count = stack.getCount();
-				new MessageCreateObject(itemTask, null).sendToServer();
+				callback.accept(itemTask);
 			}
 		}).openGui());
 
-		FTBQuestsTasks.FLUID.setGuiProvider((gui, quest) -> new GuiSelectFluid(gui, () -> FluidRegistry.WATER, fluid -> {
+		FTBQuestsTasks.FLUID.setGuiProvider((gui, quest, callback) -> new GuiSelectFluid(gui, () -> FluidRegistry.WATER, fluid -> {
 			if (fluid != null)
 			{
 				FluidTask fluidTask = new FluidTask(quest);
 				fluidTask.fluid = fluid;
-				NBTTagCompound extra = new NBTTagCompound();
-				extra.setString("type", FTBQuestsTasks.FLUID.getTypeForNBT());
-				new MessageCreateObject(fluidTask, extra).sendToServer();
+				callback.accept(fluidTask);
 			}
 		}).openGui());
 	}
@@ -72,37 +70,36 @@ public class FTBQuestsClient extends FTBQuestsCommon
 	@Override
 	public void setRewardGuiProviders()
 	{
-		FTBQuestsRewards.ITEM.setGuiProvider((gui, quest) -> new GuiSelectItemStack(gui, stack -> {
+		FTBQuestsRewards.ITEM.setGuiProvider((gui, quest, callback) -> new GuiSelectItemStack(gui, stack -> {
 			if (!stack.isEmpty())
 			{
 				ItemReward reward = new ItemReward(quest);
 				reward.stack = stack;
-				new MessageCreateObject(reward, null).sendToServer();
+				callback.accept(reward);
 			}
 		}).openGui());
 
-		FTBQuestsRewards.XP.setGuiProvider((gui, quest) -> new GuiEditConfigValue("value", new ConfigInt(100, 1, Integer.MAX_VALUE), (value, set) -> {
+		FTBQuestsRewards.XP.setGuiProvider((gui, quest, callback) -> new GuiEditConfigValue("value", new ConfigInt(100, 1, Integer.MAX_VALUE), (value, set) -> {
 			gui.openGui();
 			if (set)
 			{
 				XPReward reward = new XPReward(quest);
 				reward.xp = value.getInt();
-				NBTTagCompound extra = new NBTTagCompound();
-				extra.setString("type", FTBQuestsRewards.XP.getTypeForNBT());
-				new MessageCreateObject(reward, extra).sendToServer();
+				callback.accept(reward);
 			}
 		}).openGui());
 
-		FTBQuestsRewards.XP_LEVELS.setGuiProvider((gui, quest) -> new GuiEditConfigValue("value", new ConfigInt(1, 1, Integer.MAX_VALUE), (value, set) -> {
+		FTBQuestsRewards.XP_LEVELS.setGuiProvider((gui, quest, callback) -> new GuiEditConfigValue("value", new ConfigInt(1, 1, Integer.MAX_VALUE), (value, set) -> {
 			gui.openGui();
 			if (set)
 			{
 				XPLevelsReward reward = new XPLevelsReward(quest);
 				reward.xpLevels = value.getInt();
-				NBTTagCompound extra = new NBTTagCompound();
-				extra.setString("type", FTBQuestsRewards.XP_LEVELS.getTypeForNBT());
-				new MessageCreateObject(reward, extra).sendToServer();
+				callback.accept(reward);
 			}
 		}).openGui());
+
+		FTBQuestsRewards.CHOICE.setGuiProvider((gui, quest, callback) -> callback.accept(new ChoiceReward(quest)));
+		FTBQuestsRewards.RANDOM.setGuiProvider((gui, quest, callback) -> callback.accept(new RandomReward(quest)));
 	}
 }

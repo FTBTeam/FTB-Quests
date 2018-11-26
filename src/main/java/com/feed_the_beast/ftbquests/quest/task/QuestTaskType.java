@@ -7,9 +7,7 @@ import com.feed_the_beast.ftblib.lib.gui.misc.GuiEditConfig;
 import com.feed_the_beast.ftblib.lib.gui.misc.GuiEditConfigValue;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftbquests.FTBQuests;
-import com.feed_the_beast.ftbquests.net.edit.MessageCreateObject;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -22,6 +20,7 @@ import net.minecraftforge.registries.IForgeRegistryEntry;
 import net.minecraftforge.registries.RegistryBuilder;
 
 import javax.annotation.Nullable;
+import java.util.function.Consumer;
 
 /**
  * @author LatvianModder
@@ -84,7 +83,7 @@ public final class QuestTaskType extends IForgeRegistryEntry.Impl<QuestTaskType>
 	public interface GuiProvider
 	{
 		@SideOnly(Side.CLIENT)
-		void openCreationGui(IOpenableGui gui, Quest quest);
+		void openCreationGui(IOpenableGui gui, Quest quest, Consumer<QuestTask> callback);
 	}
 
 	public final Class typeClass;
@@ -103,7 +102,7 @@ public final class QuestTaskType extends IForgeRegistryEntry.Impl<QuestTaskType>
 		{
 			@Override
 			@SideOnly(Side.CLIENT)
-			public void openCreationGui(IOpenableGui gui, Quest quest)
+			public void openCreationGui(IOpenableGui gui, Quest quest, Consumer<QuestTask> callback)
 			{
 				QuestTask task = provider.create(quest);
 
@@ -119,23 +118,15 @@ public final class QuestTaskType extends IForgeRegistryEntry.Impl<QuestTaskType>
 						if (set)
 						{
 							((ISingleLongValueTask) task).setValue(value.getLong());
-							NBTTagCompound extra = new NBTTagCompound();
-							extra.setString("type", getTypeForNBT());
-							new MessageCreateObject(task, extra).sendToServer();
+							callback.accept(task);
 						}
 					}).openGui();
 					return;
 				}
 
 				ConfigGroup group = ConfigGroup.newGroup(FTBQuests.MOD_ID);
-				ConfigGroup g = task.createSubGroup(group);
-				task.getConfig(g);
-
-				new GuiEditConfig(group, (g1, sender) -> {
-					NBTTagCompound extra = new NBTTagCompound();
-					extra.setString("type", getTypeForNBT());
-					new MessageCreateObject(task, extra).sendToServer();
-				}).openGui();
+				task.getConfig(task.createSubGroup(group));
+				new GuiEditConfig(group, (g1, sender) -> callback.accept(task)).openGui();
 			}
 		};
 	}
