@@ -9,7 +9,9 @@ import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
 import com.feed_the_beast.ftblib.lib.io.Bits;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
+import com.feed_the_beast.ftblib.lib.util.IWithID;
 import com.feed_the_beast.ftblib.lib.util.StringJoiner;
+import com.feed_the_beast.ftblib.lib.util.misc.NameMap;
 import com.feed_the_beast.ftbquests.item.ItemMissing;
 import com.feed_the_beast.ftbquests.net.MessageSubmitTask;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
@@ -45,17 +47,40 @@ import java.util.function.Predicate;
  */
 public class ItemTask extends QuestTask implements Predicate<ItemStack>
 {
+	public enum NBTMatchingMode implements IWithID
+	{
+		MATCH("match"),
+		IGNORE("ignore"),
+		CONTAIN("contain");
+
+		public static final NameMap<NBTMatchingMode> NAME_MAP = NameMap.create(MATCH, values());
+
+		private final String id;
+
+		NBTMatchingMode(String i)
+		{
+			id = i;
+		}
+
+		@Override
+		public String getID()
+		{
+			return id;
+		}
+	}
+
 	public final List<ItemStack> items;
 	public long count;
 	public boolean checkOnly;
 	public boolean ignoreDamage;
-	public boolean ignoreNBT;
+	public NBTMatchingMode nbtMode;
 
 	public ItemTask(Quest quest)
 	{
 		super(quest);
 		items = new ArrayList<>();
 		checkOnly = quest.chapter.file.defaultCheckOnly;
+		nbtMode = NBTMatchingMode.MATCH;
 	}
 
 	@Override
@@ -109,9 +134,9 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 			nbt.setBoolean("ignore_damage", true);
 		}
 
-		if (ignoreNBT)
+		if (nbtMode != NBTMatchingMode.MATCH)
 		{
-			nbt.setBoolean("ignore_nbt", true);
+			nbt.setByte("ignore_nbt", (byte) nbtMode.ordinal());
 		}
 	}
 
@@ -152,7 +177,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 
 		checkOnly = nbt.hasKey("check_only") ? nbt.getBoolean("check_only") : quest.chapter.file.defaultCheckOnly;
 		ignoreDamage = nbt.getBoolean("ignore_damage");
-		ignoreNBT = nbt.getBoolean("ignore_nbt");
+		nbtMode = NBTMatchingMode.NAME_MAP.get(nbt.getByte("ignore_nbt"));
 	}
 
 	@Override
@@ -164,7 +189,8 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 		int flags = 0;
 		flags = Bits.setFlag(flags, 1, checkOnly);
 		flags = Bits.setFlag(flags, 2, ignoreDamage);
-		flags = Bits.setFlag(flags, 4, ignoreNBT);
+		flags = Bits.setFlag(flags, 4, nbtMode != NBTMatchingMode.MATCH);
+		flags = Bits.setFlag(flags, 8, nbtMode == NBTMatchingMode.CONTAIN);
 		data.writeVarInt(flags);
 	}
 
@@ -177,7 +203,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 		int flags = data.readVarInt();
 		checkOnly = Bits.getFlag(flags, 1);
 		ignoreDamage = Bits.getFlag(flags, 2);
-		ignoreNBT = Bits.getFlag(flags, 4);
+		nbtMode = Bits.getFlag(flags, 4) ? Bits.getFlag(flags, 8) ? NBTMatchingMode.CONTAIN : NBTMatchingMode.IGNORE : NBTMatchingMode.MATCH;
 	}
 
 	@Override
@@ -242,7 +268,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 
 		Item item = stack.getItem();
 		int meta = ignoreDamage ? 0 : stack.getMetadata();
-		NBTTagCompound nbt = item.getNBTShareTag(stack);
+		NBTTagCompound nbt = nbtMode == NBTMatchingMode.CONTAIN ? stack.getTagCompound() : item.getNBTShareTag(stack);
 
 		for (ItemStack stack1 : items)
 		{
@@ -250,9 +276,35 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 			{
 				if (ignoreDamage || meta == stack1.getMetadata())
 				{
-					if (ignoreNBT || Objects.equals(nbt, stack1.getItem().getNBTShareTag(stack1)))
+					switch (nbtMode)
 					{
-						return true;
+						case MATCH:
+							return Objects.equals(nbt, stack1.getItem().getNBTShareTag(stack1));
+						case IGNORE:
+							return true;
+						case CONTAIN:
+						{
+							NBTTagCompound nbt1 = stack1.getTagCompound();
+
+							if (nbt1 == null || nbt1.isEmpty())
+							{
+								return true;
+							}
+							else if (nbt == null || nbt.isEmpty())
+							{
+								return false;
+							}
+
+							for (String s : nbt1.getKeySet())
+							{
+								if (!Objects.equals(nbt.getTag(s), nbt1.getTag(s)))
+								{
+									return false;
+								}
+							}
+
+							return true;
+						}
 					}
 				}
 			}
@@ -269,7 +321,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 		config.addLong("count", () -> count, v -> count = v, 1, 1, Long.MAX_VALUE);
 		config.addBool("check_only", () -> checkOnly, v -> checkOnly = v, false).setCanEdit(!quest.canRepeat);
 		config.addBool("ignore_damage", () -> ignoreDamage, v -> ignoreDamage = v, false);
-		config.addBool("ignore_nbt", () -> ignoreNBT, v -> ignoreNBT = v, false);
+		config.addEnum("nbt_mode", () -> nbtMode, v -> nbtMode = v, NBTMatchingMode.NAME_MAP);
 	}
 
 	@Override
