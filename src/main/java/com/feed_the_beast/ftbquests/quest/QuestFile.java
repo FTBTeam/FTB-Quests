@@ -4,7 +4,6 @@ import com.feed_the_beast.ftblib.FTBLibConfig;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigItemStack;
 import com.feed_the_beast.ftblib.lib.config.ConfigTimer;
-import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.IconAnimation;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
@@ -62,7 +61,6 @@ public abstract class QuestFile extends QuestObject
 	public Ticks emergencyItemsCooldown;
 	public final ResourceLocation[] lootTables;
 	public int lootSize;
-	public Color4I colCompleted, colStarted, colNotStarted, colCantStart;
 	public boolean defaultRewardTeam;
 	public boolean defaultCheckOnly;
 	public int fileVersion;
@@ -89,12 +87,6 @@ public abstract class QuestFile extends QuestObject
 		}
 
 		lootSize = 27;
-
-		colCompleted = Color4I.rgb(0x56FF56);
-		colStarted = Color4I.rgb(0x00FFFF);
-		colNotStarted = Color4I.rgb(0xFFFFFF);
-		colCantStart = Color4I.rgb(0x999999);
-
 		defaultRewardTeam = false;
 		defaultCheckOnly = false;
 		fileVersion = 0;
@@ -740,10 +732,6 @@ public abstract class QuestFile extends QuestObject
 		}
 
 		data.writeVarInt(lootSize);
-		data.writeInt(colCompleted.rgba());
-		data.writeInt(colStarted.rgba());
-		data.writeInt(colNotStarted.rgba());
-		data.writeInt(colCantStart.rgba());
 		data.writeBoolean(defaultRewardTeam);
 		data.writeBoolean(defaultCheckOnly);
 	}
@@ -761,10 +749,6 @@ public abstract class QuestFile extends QuestObject
 		}
 
 		lootSize = data.readVarInt();
-		colCompleted = Color4I.rgba(data.readInt());
-		colStarted = Color4I.rgba(data.readInt());
-		colNotStarted = Color4I.rgba(data.readInt());
-		colCantStart = Color4I.rgba(data.readInt());
 		defaultRewardTeam = data.readBoolean();
 		defaultCheckOnly = data.readBoolean();
 	}

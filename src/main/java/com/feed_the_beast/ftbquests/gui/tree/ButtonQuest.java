@@ -9,6 +9,7 @@ import com.feed_the_beast.ftblib.lib.gui.Theme;
 import com.feed_the_beast.ftblib.lib.gui.Widget;
 import com.feed_the_beast.ftblib.lib.gui.WidgetType;
 import com.feed_the_beast.ftblib.lib.icon.Color4I;
+import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.client.ClientQuestProgress;
@@ -30,6 +31,9 @@ import java.util.List;
  */
 public class ButtonQuest extends Button
 {
+	public static final Color4I COL_COMPLETED = Color4I.rgb(0x56FF56);
+	public static final Color4I COL_STARTED = Color4I.rgb(0x00FFFF);
+
 	public GuiQuestTree treeGui;
 	public Quest quest;
 	public String description;
@@ -205,16 +209,15 @@ public class ButtonQuest extends Button
 	@Override
 	public void draw(Theme theme, int x, int y, int w, int h)
 	{
-		Color4I col;
+		Color4I col = Icon.EMPTY;
 		int r = 0;
+		int progress = 0;
 
-		if (treeGui.questFile.self == null || !quest.canStartTasks(treeGui.questFile.self))
+		boolean cantStart = treeGui.questFile.self == null || !quest.canStartTasks(treeGui.questFile.self);
+
+		if (!cantStart)
 		{
-			col = treeGui.questFile.colCantStart;
-		}
-		else
-		{
-			int progress = quest.getRelativeProgress(treeGui.questFile.self);
+			progress = quest.getRelativeProgress(treeGui.questFile.self);
 
 			if (progress >= 100)
 			{
@@ -225,16 +228,10 @@ public class ButtonQuest extends Button
 						r++;
 					}
 				}
-
-				col = treeGui.questFile.colCompleted;
 			}
 			else if (progress > 0)
 			{
-				col = treeGui.questFile.colStarted;
-			}
-			else
-			{
-				col = treeGui.questFile.colNotStarted;
+				col = COL_STARTED;
 			}
 		}
 
@@ -262,13 +259,29 @@ public class ButtonQuest extends Button
 			GlStateManager.popMatrix();
 		}
 
-		if (r > 0)
+		if (cantStart)
+		{
+			GlStateManager.pushMatrix();
+			GlStateManager.translate(0, 0, 500);
+			quest.shape.draw(sx, sy, s, s, Color4I.BLACK.withAlpha(100));
+			GlStateManager.popMatrix();
+		}
+		else if (r > 0)
 		{
 			GlStateManager.pushMatrix();
 			GlStateManager.translate(0, 0, 500);
 			int s1 = treeGui.zoom / 2;
 			int os1 = s1 / 4;
 			QuestsTheme.ALERT.draw(x + w - s1 - os1, y + os1, s1, s1);
+			GlStateManager.popMatrix();
+		}
+		else if (progress >= 100)
+		{
+			GlStateManager.pushMatrix();
+			GlStateManager.translate(0, 0, 500);
+			int s1 = treeGui.zoom / 2;
+			int os1 = s1 / 4;
+			QuestsTheme.COMPLETED.draw(x + w - s1 - os1, y + os1, s1, s1);
 			GlStateManager.popMatrix();
 		}
 	}

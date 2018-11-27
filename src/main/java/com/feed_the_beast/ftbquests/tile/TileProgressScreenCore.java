@@ -97,6 +97,8 @@ public class TileProgressScreenCore extends TileWithTeam implements IConfigCallb
 	@Override
 	protected void readData(NBTTagCompound nbt, EnumSaveType type)
 	{
+		super.readData(nbt, type);
+
 		if (!type.item)
 		{
 			facing = EnumFacing.byName(nbt.getString("Facing"));
@@ -242,6 +244,18 @@ public class TileProgressScreenCore extends TileWithTeam implements IConfigCallb
 				}
 
 				FTBLibAPI.editServerConfig(player, group0, this);
+			}
+		}
+		else if (!indestructible)
+		{
+			cChapter = getChapter();
+
+			if (cChapter != null)
+			{
+				chapter = new NBTTagInt(cChapter.file.chapters.get((cChapter.file.chapters.indexOf(cChapter) + 1) % cChapter.file.chapters.size()).uid);
+				updateContainingBlockInfo();
+				markDirty();
+				BlockUtils.notifyBlockUpdate(world, pos, getBlockState());
 			}
 		}
 	}

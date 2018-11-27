@@ -120,7 +120,7 @@ public class ChoiceReward extends QuestReward
 	{
 		if (rewards.isEmpty())
 		{
-			return super.getIcon();
+			return super.getAltIcon();
 		}
 
 		List<Icon> icons = new ArrayList<>();
