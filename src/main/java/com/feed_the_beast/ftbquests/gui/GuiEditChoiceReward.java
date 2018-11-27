@@ -17,10 +17,10 @@ import com.feed_the_beast.ftbquests.net.edit.MessageEditObject;
 import com.feed_the_beast.ftbquests.quest.reward.ChoiceReward;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
 import com.feed_the_beast.ftbquests.quest.reward.QuestRewardType;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.nbt.NBTTagCompound;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -76,7 +76,7 @@ public class GuiEditChoiceReward extends GuiButtonListBase
 		public void onClicked(MouseButton button)
 		{
 			GuiHelper.playClickSound();
-			List<ContextMenuItem> contextMenu = new ObjectArrayList<>();
+			List<ContextMenuItem> contextMenu = new ArrayList<>();
 
 			for (QuestRewardType type : QuestRewardType.getRegistry())
 			{
@@ -117,14 +117,14 @@ public class GuiEditChoiceReward extends GuiButtonListBase
 		public void onClicked(MouseButton button)
 		{
 			GuiHelper.playClickSound();
-			List<ContextMenuItem> contextMenu = new ObjectArrayList<>();
+			List<ContextMenuItem> contextMenu = new ArrayList<>();
 			contextMenu.add(new ContextMenuItem(I18n.format("selectServer.edit"), GuiIcons.SETTINGS, () -> {
 				ConfigGroup group = ConfigGroup.newGroup(FTBQuests.MOD_ID);
 				ConfigGroup g = reward.createSubGroup(group);
 				reward.getConfig(g);
 				new GuiEditConfig(group, IConfigCallback.DEFAULT).openGui();
 			}));
-			
+
 			contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), GuiIcons.REMOVE, () -> {
 				choiceReward.rewards.remove(reward);
 				GuiEditChoiceReward.this.refreshWidgets();

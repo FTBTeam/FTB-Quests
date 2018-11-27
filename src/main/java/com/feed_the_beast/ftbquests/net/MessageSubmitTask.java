@@ -10,6 +10,8 @@ import com.feed_the_beast.ftbquests.quest.task.QuestTask;
 import com.feed_the_beast.ftbquests.util.FTBQuestsTeamData;
 import net.minecraft.entity.player.EntityPlayerMP;
 
+import java.util.Collections;
+
 /**
  * @author LatvianModder
  */
@@ -52,7 +54,7 @@ public class MessageSubmitTask extends MessageToServer
 
 		if (t != null && t.quest.canStartTasks(teamData))
 		{
-			if (teamData.getQuestTaskData(t).submitTask(player, false))
+			if (teamData.getQuestTaskData(t).submitTask(player, Collections.emptyList(), false))
 			{
 				player.inventory.markDirty();
 				player.openContainer.detectAndSendChanges();

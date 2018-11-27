@@ -8,7 +8,6 @@ import com.feed_the_beast.ftbquests.gui.GuiEditChoiceReward;
 import com.feed_the_beast.ftbquests.gui.GuiSelectChoiceReward;
 import com.feed_the_beast.ftbquests.net.edit.MessageEditObjectDirect;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -30,7 +29,7 @@ public class ChoiceReward extends QuestReward
 	public ChoiceReward(Quest quest)
 	{
 		super(quest);
-		rewards = new ObjectArrayList<>();
+		rewards = new ArrayList<>();
 	}
 
 	@Override

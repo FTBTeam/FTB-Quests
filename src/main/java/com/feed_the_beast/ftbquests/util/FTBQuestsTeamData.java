@@ -35,9 +35,12 @@ import it.unimi.dsi.fastutil.ints.Int2LongOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.inventory.ContainerPlayer;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraftforge.event.entity.player.PlayerContainerEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
@@ -214,6 +217,25 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 		}
 
 		new MessageSyncQuests(ServerQuestFile.INSTANCE, event.getPlayer().team.getUID(), teamData, FTBQuests.canEdit(player), rewards).sendTo(player);
+		event.getPlayer().getPlayer().inventoryContainer.addListener(new FTBQuestsInventoryListener(event.getPlayer().getPlayer()));
+	}
+
+	@SubscribeEvent
+	public static void onPlayerClone(PlayerEvent.Clone event)
+	{
+		if (event.getEntityPlayer() instanceof EntityPlayerMP)
+		{
+			event.getEntityPlayer().inventoryContainer.addListener(new FTBQuestsInventoryListener((EntityPlayerMP) event.getEntityPlayer()));
+		}
+	}
+
+	@SubscribeEvent
+	public static void onContainerOpened(PlayerContainerEvent.Open event)
+	{
+		if (event.getEntityPlayer() instanceof EntityPlayerMP && !(event.getContainer() instanceof ContainerPlayer))
+		{
+			event.getContainer().addListener(new FTBQuestsInventoryListener((EntityPlayerMP) event.getEntityPlayer()));
+		}
 	}
 
 	@SubscribeEvent

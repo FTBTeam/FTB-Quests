@@ -15,6 +15,7 @@ import com.feed_the_beast.ftbquests.quest.task.QuestTaskType;
 import com.feed_the_beast.ftbquests.quest.task.SimpleQuestTaskData;
 import com.feed_the_beast.mods.money.FTBMoney;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.text.ITextComponent;
@@ -22,6 +23,7 @@ import net.minecraftforge.common.capabilities.Capability;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Collection;
 
 /**
  * @author LatvianModder
@@ -133,7 +135,7 @@ public class MoneyTask extends QuestTask implements ISingleLongValueTask
 		}
 
 		@Override
-		public boolean submitTask(EntityPlayerMP player, boolean simulate)
+		public boolean submitTask(EntityPlayerMP player, Collection<ItemStack> itemsToCheck, boolean simulate)
 		{
 			long money = FTBMoney.getMoney(player);
 			long add = Math.min(money, task.value - progress);
