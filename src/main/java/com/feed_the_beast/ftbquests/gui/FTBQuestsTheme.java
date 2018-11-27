@@ -151,26 +151,6 @@ public class FTBQuestsTheme extends Theme
 	@Override
 	public void drawButton(int x, int y, int w, int h, WidgetType type)
 	{
-		/*
-		GlStateManager.alphaFunc(GL11.GL_GREATER, 0F);
-
-		if (type == WidgetType.DISABLED)
-		{
-			BUTTON.draw(x, y, w, h, Color4I.BLACK.withAlpha(200));
-		}
-		else
-		{
-			BUTTON.draw(x, y, w, h);
-
-			if (type == WidgetType.MOUSE_OVER)
-			{
-				BUTTON.draw(x, y, w, h);
-			}
-		}
-
-		GlStateManager.alphaFunc(GL11.GL_GREATER, 0.1F);
-		*/
-
 		GuiHelper.drawHollowRect(x, y, w, h, type == WidgetType.DISABLED ? Color4I.GRAY.withAlpha(80) : Color4I.WHITE.withAlpha(150), false);
 
 		if (type == WidgetType.MOUSE_OVER)
