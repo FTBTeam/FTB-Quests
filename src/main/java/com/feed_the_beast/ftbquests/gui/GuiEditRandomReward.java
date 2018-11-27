@@ -1,7 +1,9 @@
 package com.feed_the_beast.ftbquests.gui;
 
+import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigInt;
 import com.feed_the_beast.ftblib.lib.config.ConfigValue;
+import com.feed_the_beast.ftblib.lib.config.IConfigCallback;
 import com.feed_the_beast.ftblib.lib.gui.ContextMenuItem;
 import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
 import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
@@ -10,14 +12,17 @@ import com.feed_the_beast.ftblib.lib.gui.SimpleTextButton;
 import com.feed_the_beast.ftblib.lib.gui.Theme;
 import com.feed_the_beast.ftblib.lib.gui.WidgetVerticalSpace;
 import com.feed_the_beast.ftblib.lib.gui.misc.GuiButtonListBase;
+import com.feed_the_beast.ftblib.lib.gui.misc.GuiEditConfig;
 import com.feed_the_beast.ftblib.lib.gui.misc.GuiEditConfigValue;
 import com.feed_the_beast.ftblib.lib.gui.misc.IConfigValueEditCallback;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
+import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.net.edit.MessageEditObject;
 import com.feed_the_beast.ftbquests.quest.reward.QuestRewardType;
 import com.feed_the_beast.ftbquests.quest.reward.RandomReward;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.TextFormatting;
 
 import java.util.List;
@@ -56,6 +61,9 @@ public class GuiEditRandomReward extends GuiButtonListBase
 		{
 			GuiHelper.playClickSound();
 			closeGui();
+			NBTTagCompound nbt = new NBTTagCompound();
+			randomReward.writeData(nbt);
+			original.readData(nbt);
 			callback.run();
 		}
 	}
@@ -123,33 +131,44 @@ public class GuiEditRandomReward extends GuiButtonListBase
 		{
 			GuiHelper.playClickSound();
 			List<ContextMenuItem> contextMenu = new ObjectArrayList<>();
-			contextMenu.add(new ContextMenuItem(I18n.format("selectServer.edit"), GuiIcons.SETTINGS, reward.reward::onEditButtonClicked));
+			contextMenu.add(new ContextMenuItem(I18n.format("selectServer.edit"), GuiIcons.SETTINGS, () -> {
+				ConfigGroup group = ConfigGroup.newGroup(FTBQuests.MOD_ID);
+				ConfigGroup g = reward.reward.createSubGroup(group);
+				reward.reward.getConfig(g);
+				new GuiEditConfig(group, IConfigCallback.DEFAULT).openGui();
+			}));
+
 			contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.reward.ftbquests.random.setweight"), GuiIcons.SETTINGS, () -> new GuiEditConfigValue("value", new ConfigInt(reward.weight, 1, Integer.MAX_VALUE), this).openGui()));
 			contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), GuiIcons.REMOVE, () -> {
 				randomReward.rewards.remove(reward);
 				GuiEditRandomReward.this.refreshWidgets();
 			}).setYesNo(I18n.format("delete_item", reward.reward.getDisplayName().getFormattedText())));
-			//GuiQuestTree.addObjectMenuItems(contextMenu, getGui(), reward.reward);
 			GuiEditRandomReward.this.openContextMenu(contextMenu);
 		}
 
 		@Override
 		public void onCallback(ConfigValue value, boolean set)
 		{
+			openGui();
+
 			if (set)
 			{
 				reward.weight = value.getInt();
-				openGui();
 			}
 		}
 	}
 
+	private final RandomReward original;
 	private final RandomReward randomReward;
 	private final Runnable callback;
 
 	public GuiEditRandomReward(RandomReward r, Runnable c)
 	{
-		randomReward = r;
+		original = r;
+		randomReward = new RandomReward(original.quest);
+		NBTTagCompound nbt = new NBTTagCompound();
+		original.writeData(nbt);
+		randomReward.readData(nbt);
 		callback = c;
 		setTitle(I18n.format("ftbquests.reward.ftbquests.random"));
 		setBorder(1, 1, 1);

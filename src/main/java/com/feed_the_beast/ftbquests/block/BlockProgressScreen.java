@@ -5,6 +5,7 @@ import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
+import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.tile.IProgressScreen;
 import com.feed_the_beast.ftbquests.tile.TileProgressScreenCore;
 import com.feed_the_beast.ftbquests.tile.TileProgressScreenPart;
@@ -22,6 +23,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagByte;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagInt;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
@@ -167,6 +169,11 @@ public class BlockProgressScreen extends BlockWithHorizontalFacing
 			TileProgressScreenCore screen = (TileProgressScreenCore) tileEntity;
 			screen.readFromItem(stack);
 			screen.setIDFromPlacer(placer);
+
+			if (!world.isRemote && !ServerQuestFile.INSTANCE.chapters.isEmpty())
+			{
+				screen.chapter = new NBTTagInt(ServerQuestFile.INSTANCE.chapters.get(0).uid);
+			}
 
 			screen.facing = state.getValue(FACING);
 
