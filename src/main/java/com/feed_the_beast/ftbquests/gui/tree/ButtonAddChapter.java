@@ -6,7 +6,7 @@ import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.gui.Theme;
 import com.feed_the_beast.ftblib.lib.gui.misc.GuiEditConfigValue;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
-import com.feed_the_beast.ftbquests.gui.QuestsTheme;
+import com.feed_the_beast.ftbquests.gui.FTBQuestsTheme;
 import com.feed_the_beast.ftbquests.net.edit.MessageCreateObject;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import net.minecraft.client.resources.I18n;
@@ -20,7 +20,7 @@ public class ButtonAddChapter extends ButtonTab
 {
 	public ButtonAddChapter(Panel panel)
 	{
-		super(panel, I18n.format("gui.add"), QuestsTheme.ADD);
+		super(panel, I18n.format("gui.add"), FTBQuestsTheme.ADD);
 	}
 
 	@Override

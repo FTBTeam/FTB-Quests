@@ -5,7 +5,7 @@ import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
 import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.gui.SimpleTextButton;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
-import com.feed_the_beast.ftbquests.gui.QuestsTheme;
+import com.feed_the_beast.ftbquests.gui.FTBQuestsTheme;
 import com.feed_the_beast.ftbquests.net.edit.MessageCreateObject;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.task.QuestTaskType;
@@ -24,7 +24,7 @@ public class ButtonAddTask extends SimpleTextButton
 
 	public ButtonAddTask(Panel panel, Quest q)
 	{
-		super(panel, I18n.format("gui.add"), QuestsTheme.ADD);
+		super(panel, I18n.format("gui.add"), FTBQuestsTheme.ADD);
 		quest = q;
 	}
 

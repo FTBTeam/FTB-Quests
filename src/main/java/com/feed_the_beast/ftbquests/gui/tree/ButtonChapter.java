@@ -7,7 +7,7 @@ import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.gui.Theme;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.client.ClientQuestProgress;
-import com.feed_the_beast.ftbquests.gui.QuestsTheme;
+import com.feed_the_beast.ftbquests.gui.FTBQuestsTheme;
 import com.feed_the_beast.ftbquests.net.edit.MessageMoveChapter;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
@@ -153,14 +153,14 @@ public class ButtonChapter extends ButtonTab
 		{
 			GlStateManager.pushMatrix();
 			GlStateManager.translate(0, 0, 500);
-			QuestsTheme.ALERT.draw(x + w - 7, y + 2, 6, 6);
+			FTBQuestsTheme.ALERT.draw(x + w - 7, y + 2, 6, 6);
 			GlStateManager.popMatrix();
 		}
 		else if (chapter.isComplete(treeGui.questFile.self))
 		{
 			GlStateManager.pushMatrix();
 			GlStateManager.translate(0, 0, 500);
-			QuestsTheme.COMPLETED.draw(x + w - 8, y + 1, 8, 8);
+			FTBQuestsTheme.COMPLETED.draw(x + w - 8, y + 1, 8, 8);
 			GlStateManager.popMatrix();
 		}
 	}

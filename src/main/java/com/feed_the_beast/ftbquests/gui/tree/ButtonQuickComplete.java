@@ -5,7 +5,7 @@ import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.gui.SimpleTextButton;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
-import com.feed_the_beast.ftbquests.gui.QuestsTheme;
+import com.feed_the_beast.ftbquests.gui.FTBQuestsTheme;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
 import com.feed_the_beast.ftbquests.quest.task.QuestTask;
 import net.minecraft.client.resources.I18n;
@@ -20,7 +20,7 @@ public class ButtonQuickComplete extends SimpleTextButton
 {
 	public ButtonQuickComplete(Panel panel)
 	{
-		super(panel, I18n.format("ftbquests.gui.quick_complete"), QuestsTheme.COMPLETED);
+		super(panel, I18n.format("ftbquests.gui.quick_complete"), FTBQuestsTheme.COMPLETED);
 		setHeight(14);
 	}
 

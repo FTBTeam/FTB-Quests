@@ -133,8 +133,8 @@ public class PanelQuests extends Panel
 
 					if (button.quest == treeGui.selectedQuest)
 					{
-						r = unavailable ? 120 : 200;
-						g = unavailable ? 120 : 200;
+						r = 200;
+						g = 200;
 						b = 0;
 						a = 255;
 						off = moving;
@@ -142,8 +142,8 @@ public class PanelQuests extends Panel
 					else if (wquest == treeGui.selectedQuest)
 					{
 						r = 0;
-						g = unavailable ? 120 : 200;
-						b = unavailable ? 120 : 200;
+						g = 200;
+						b = 200;
 						a = 255;
 						off = moving;
 					}

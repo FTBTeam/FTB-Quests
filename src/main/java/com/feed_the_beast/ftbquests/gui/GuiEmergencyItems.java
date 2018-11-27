@@ -138,6 +138,6 @@ public class GuiEmergencyItems extends GuiBase
 	@Override
 	public Theme getTheme()
 	{
-		return QuestsTheme.INSTANCE;
+		return FTBQuestsTheme.INSTANCE;
 	}
 }

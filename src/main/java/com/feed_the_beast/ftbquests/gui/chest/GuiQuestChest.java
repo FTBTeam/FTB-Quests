@@ -11,7 +11,7 @@ import com.feed_the_beast.ftblib.lib.gui.WidgetLayout;
 import com.feed_the_beast.ftblib.lib.icon.ImageIcon;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
-import com.feed_the_beast.ftbquests.gui.QuestsTheme;
+import com.feed_the_beast.ftbquests.gui.FTBQuestsTheme;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
@@ -39,7 +39,7 @@ public class GuiQuestChest extends GuiBase implements IContainerListener
 	private final Panel tasks;
 	private final PanelScrollBar scrollBar;
 	private final Button transferAll, claimAllRewards, inputSlot;
-	private final ButtonReward outputSlots[];
+	private final ButtonReward[] outputSlots;
 
 	public GuiQuestChest(ContainerQuestChest c)
 	{
@@ -215,7 +215,7 @@ public class GuiQuestChest extends GuiBase implements IContainerListener
 	@Override
 	public Theme getTheme()
 	{
-		return QuestsTheme.INSTANCE;
+		return FTBQuestsTheme.INSTANCE;
 	}
 
 	@Override

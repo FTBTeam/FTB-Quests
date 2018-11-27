@@ -8,7 +8,7 @@ import com.feed_the_beast.ftblib.lib.gui.SimpleTextButton;
 import com.feed_the_beast.ftblib.lib.gui.Theme;
 import com.feed_the_beast.ftblib.lib.gui.WidgetType;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
-import com.feed_the_beast.ftbquests.gui.QuestsTheme;
+import com.feed_the_beast.ftbquests.gui.FTBQuestsTheme;
 import com.feed_the_beast.ftbquests.quest.task.QuestTask;
 import com.feed_the_beast.ftbquests.quest.task.QuestTaskData;
 import net.minecraft.util.text.TextFormatting;
@@ -105,7 +105,7 @@ public class ButtonTask extends SimpleTextButton
 	@Override
 	public WidgetType getWidgetType()
 	{
-		if (task.invalid || treeGui.questFile.self == null || !task.quest.canStartTasks(treeGui.questFile.self))
+		if (task.invalid || treeGui.questFile.self == null || !task.quest.canStartTasks(treeGui.questFile.self) || task.isComplete(treeGui.questFile.self))
 		{
 			return WidgetType.DISABLED;
 		}
@@ -126,7 +126,7 @@ public class ButtonTask extends SimpleTextButton
 
 		if (treeGui.questFile.self != null && task.isComplete(treeGui.questFile.self))
 		{
-			QuestsTheme.COMPLETED.draw(x + w - 9, y + 1, 8, 8);
+			FTBQuestsTheme.COMPLETED.draw(x + w - 9, y + 1, 8, 8);
 		}
 	}
 }
