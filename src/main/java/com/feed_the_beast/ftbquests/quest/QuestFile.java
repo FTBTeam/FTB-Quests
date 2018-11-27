@@ -22,8 +22,6 @@ import com.feed_the_beast.ftbquests.quest.task.FTBQuestsTasks;
 import com.feed_the_beast.ftbquests.quest.task.QuestTask;
 import com.feed_the_beast.ftbquests.quest.task.QuestTaskType;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTBase;
@@ -40,6 +38,7 @@ import net.minecraftforge.registries.ForgeRegistry;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -69,13 +68,13 @@ public abstract class QuestFile extends QuestObject
 	{
 		id = "*";
 		uid = 1;
-		chapters = new ObjectArrayList<>();
-		variables = new ObjectArrayList<>();
+		chapters = new ArrayList<>();
+		variables = new ArrayList<>();
 
 		map = new Int2ObjectOpenHashMap<>();
-		oldMap = new Object2ObjectOpenHashMap<>();
+		oldMap = new HashMap<>();
 
-		emergencyItems = new ObjectArrayList<>();
+		emergencyItems = new ArrayList<>();
 		emergencyItems.add(new ItemStack(Items.APPLE));
 		emergencyItemsCooldown = Ticks.MINUTE.x(5);
 

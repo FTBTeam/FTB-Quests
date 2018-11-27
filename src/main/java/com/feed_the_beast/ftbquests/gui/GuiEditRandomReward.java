@@ -20,11 +20,11 @@ import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.net.edit.MessageEditObject;
 import com.feed_the_beast.ftbquests.quest.reward.QuestRewardType;
 import com.feed_the_beast.ftbquests.quest.reward.RandomReward;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.TextFormatting;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -80,7 +80,7 @@ public class GuiEditRandomReward extends GuiButtonListBase
 		public void onClicked(MouseButton button)
 		{
 			GuiHelper.playClickSound();
-			List<ContextMenuItem> contextMenu = new ObjectArrayList<>();
+			List<ContextMenuItem> contextMenu = new ArrayList<>();
 
 			for (QuestRewardType type : QuestRewardType.getRegistry())
 			{
@@ -130,7 +130,7 @@ public class GuiEditRandomReward extends GuiButtonListBase
 		public void onClicked(MouseButton button)
 		{
 			GuiHelper.playClickSound();
-			List<ContextMenuItem> contextMenu = new ObjectArrayList<>();
+			List<ContextMenuItem> contextMenu = new ArrayList<>();
 			contextMenu.add(new ContextMenuItem(I18n.format("selectServer.edit"), GuiIcons.SETTINGS, () -> {
 				ConfigGroup group = ConfigGroup.newGroup(FTBQuests.MOD_ID);
 				ConfigGroup g = reward.reward.createSubGroup(group);

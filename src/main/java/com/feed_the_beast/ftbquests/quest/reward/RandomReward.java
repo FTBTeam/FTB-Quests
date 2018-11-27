@@ -7,7 +7,6 @@ import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftbquests.gui.GuiEditRandomReward;
 import com.feed_the_beast.ftbquests.net.edit.MessageEditObjectDirect;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -41,7 +40,7 @@ public class RandomReward extends QuestReward
 	public RandomReward(Quest quest)
 	{
 		super(quest);
-		rewards = new ObjectArrayList<>();
+		rewards = new ArrayList<>();
 	}
 
 	@Override
@@ -189,7 +188,8 @@ public class RandomReward extends QuestReward
 
 		for (WeightedReward reward : rewards)
 		{
-			list.add(TextFormatting.GRAY + "- " + reward.reward.getDisplayName().getFormattedText() + TextFormatting.DARK_GRAY + " [" + (reward.weight * 100 / totalWeight) + "%]");
+			int chance = reward.weight * 100 / totalWeight;
+			list.add(TextFormatting.GRAY + "- " + reward.reward.getDisplayName().getFormattedText() + TextFormatting.DARK_GRAY + " [" + (chance == 0 ? (reward.weight * 100D / (double) totalWeight) : chance) + "%]");
 		}
 	}
 

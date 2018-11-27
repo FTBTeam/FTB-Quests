@@ -58,6 +58,11 @@ public class ServerQuestFile extends QuestFile
 	@Override
 	public ITeamData getData(short team)
 	{
+		if (team == 0)
+		{
+			return null;
+		}
+
 		ForgeTeam t = universe.getTeam(team);
 		return t.isValid() ? FTBQuestsTeamData.get(t) : null;
 	}
@@ -66,6 +71,11 @@ public class ServerQuestFile extends QuestFile
 	@Override
 	public ITeamData getData(String team)
 	{
+		if (team.isEmpty())
+		{
+			return null;
+		}
+
 		ForgeTeam t = universe.getTeam(team);
 		return t.isValid() ? FTBQuestsTeamData.get(t) : null;
 	}

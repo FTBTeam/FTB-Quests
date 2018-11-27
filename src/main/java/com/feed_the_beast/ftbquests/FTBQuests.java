@@ -1,6 +1,7 @@
 package com.feed_the_beast.ftbquests;
 
 import com.feed_the_beast.ftblib.FTBLib;
+import com.feed_the_beast.ftblib.lib.util.NBTUtils;
 import com.feed_the_beast.ftbquests.command.CommandFTBQuests;
 import com.feed_the_beast.ftbquests.gui.FTBQuestsGuiHandler;
 import com.feed_the_beast.ftbquests.integration.botania.BotaniaIntegration;
@@ -104,6 +105,6 @@ public class FTBQuests
 
 	public static boolean canEdit(EntityPlayerMP player)
 	{
-		return player.getEntityData().getBoolean("ftbquests_editing_mode");
+		return NBTUtils.getPersistedData(player, false).getBoolean("ftbquests_editing_mode");
 	}
 }

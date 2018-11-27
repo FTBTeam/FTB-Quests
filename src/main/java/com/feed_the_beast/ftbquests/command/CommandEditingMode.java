@@ -1,5 +1,6 @@
 package com.feed_the_beast.ftbquests.command;
 
+import com.feed_the_beast.ftblib.lib.util.NBTUtils;
 import com.feed_the_beast.ftbquests.net.MessageSyncEditingMode;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
@@ -61,14 +62,14 @@ public class CommandEditingMode extends CommandBase
 
 		if (args.length == 0 || args[0].equals("toggle"))
 		{
-			mode = !player.getEntityData().getBoolean("ftbquests_editing_mode");
+			mode = !NBTUtils.getPersistedData(player, false).getBoolean("ftbquests_editing_mode");
 		}
 		else
 		{
 			mode = parseBoolean(args[0]);
 		}
 
-		player.getEntityData().setBoolean("ftbquests_editing_mode", mode);
+		NBTUtils.getPersistedData(player, mode).setBoolean("ftbquests_editing_mode", mode);
 		new MessageSyncEditingMode(mode).sendTo(player);
 
 		if (mode)

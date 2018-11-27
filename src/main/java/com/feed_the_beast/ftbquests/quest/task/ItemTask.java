@@ -38,6 +38,7 @@ import net.minecraftforge.items.ItemHandlerHelper;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
@@ -434,29 +435,37 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 		}
 
 		@Override
-		public boolean submitTask(EntityPlayerMP player, boolean simulate)
+		public boolean submitTask(EntityPlayerMP player, Collection<ItemStack> itemsToCheck, boolean simulate)
 		{
 			if (!task.canInsertItem())
 			{
 				long count = 0;
 
-				for (int i = 0; i < player.inventory.mainInventory.size(); i++)
+				if (itemsToCheck.isEmpty())
 				{
-					ItemStack stack = player.inventory.mainInventory.get(i);
+					itemsToCheck = player.inventory.mainInventory;
+				}
+
+				for (ItemStack stack : itemsToCheck)
+				{
+					if (stack.isEmpty())
+					{
+						continue;
+					}
 
 					if (task.test(stack))
 					{
 						count += stack.getCount();
 					}
-					else if (!stack.isEmpty())
+					else
 					{
 						IItemHandler itemHandler = stack.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
 
 						if (itemHandler != null)
 						{
-							for (int j = 0; j < itemHandler.getSlots(); j++)
+							for (int slot = 0; slot < itemHandler.getSlots(); slot++)
 							{
-								ItemStack stack1 = itemHandler.getStackInSlot(j);
+								ItemStack stack1 = itemHandler.getStackInSlot(slot);
 
 								if (task.test(stack1))
 								{

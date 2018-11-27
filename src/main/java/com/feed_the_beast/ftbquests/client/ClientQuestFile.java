@@ -174,7 +174,7 @@ public class ClientQuestFile extends QuestFile
 	@Override
 	public ClientQuestProgress getData(short team)
 	{
-		return teamData.get(team);
+		return team == 0 ? null : teamData.get(team);
 	}
 
 	public ClientQuestProgress removeData(short team)
@@ -191,6 +191,11 @@ public class ClientQuestFile extends QuestFile
 	@Override
 	public ClientQuestProgress getData(String team)
 	{
+		if (team.isEmpty())
+		{
+			return null;
+		}
+
 		for (ClientQuestProgress data : teamData.values())
 		{
 			if (team.equals(data.getTeamID()))

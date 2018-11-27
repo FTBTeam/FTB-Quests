@@ -14,8 +14,6 @@ import com.feed_the_beast.ftbquests.gui.tree.GuiQuestTree;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
 import com.feed_the_beast.ftbquests.quest.task.QuestTask;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagIntArray;
@@ -31,6 +29,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -62,11 +61,11 @@ public final class Quest extends QuestObject
 		x = 0;
 		y = 0;
 		shape = EnumQuestShape.CIRCLE;
-		text = new ObjectArrayList<>();
+		text = new ArrayList<>();
 		canRepeat = false;
-		dependencies = new ObjectOpenHashSet<>();
-		tasks = new ObjectArrayList<>();
-		rewards = new ObjectArrayList<>();
+		dependencies = new HashSet<>();
+		tasks = new ArrayList<>();
+		rewards = new ArrayList<>();
 	}
 
 	@Override

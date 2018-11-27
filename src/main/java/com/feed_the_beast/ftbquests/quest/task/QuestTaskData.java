@@ -10,6 +10,7 @@ import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.items.IItemHandler;
 
 import javax.annotation.Nullable;
+import java.util.Collection;
 
 /**
  * @author LatvianModder
@@ -115,7 +116,7 @@ public abstract class QuestTaskData<T extends QuestTask> implements ICapabilityP
 		teamData.syncTask(this);
 	}
 
-	public boolean submitTask(EntityPlayerMP player, boolean simulate)
+	public boolean submitTask(EntityPlayerMP player, Collection<ItemStack> itemsToCheck, boolean simulate)
 	{
 		if (!task.canInsertItem())
 		{

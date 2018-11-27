@@ -478,7 +478,7 @@ public class TileTaskScreenCore extends TileWithTeam implements IConfigCallback,
 					}
 				}
 
-				cTaskData.submitTask(player, false);
+				cTaskData.submitTask(player, Collections.emptyList(), false);
 			}
 		}
 	}
