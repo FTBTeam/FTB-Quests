@@ -270,7 +270,7 @@ public final class QuestChapter extends QuestObject
 	{
 		super.getConfig(config);
 		config.addList("description", description, new ConfigString(""), ConfigString::new, ConfigString::getString);
-		config.addEnum("visibility", () -> visibilityType, v -> visibilityType = v, EnumQuestVisibilityType.NAME_MAP);
+		//config.addEnum("visibility", () -> visibilityType, v -> visibilityType = v, EnumQuestVisibilityType.NAME_MAP);
 	}
 
 	public EnumVisibility getVisibility(@Nullable ITeamData data)
