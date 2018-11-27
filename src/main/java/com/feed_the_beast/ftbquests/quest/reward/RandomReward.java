@@ -189,7 +189,15 @@ public class RandomReward extends QuestReward
 		for (WeightedReward reward : rewards)
 		{
 			int chance = reward.weight * 100 / totalWeight;
-			list.add(TextFormatting.GRAY + "- " + reward.reward.getDisplayName().getFormattedText() + TextFormatting.DARK_GRAY + " [" + (chance == 0 ? (reward.weight * 100D / (double) totalWeight) : chance) + "%]");
+
+			if (chance == 0)
+			{
+				list.add(TextFormatting.GRAY + "- " + reward.reward.getDisplayName().getFormattedText() + TextFormatting.DARK_GRAY + " [" + String.format("%.2f", reward.weight * 100D / (double) totalWeight) + "%]");
+			}
+			else
+			{
+				list.add(TextFormatting.GRAY + "- " + reward.reward.getDisplayName().getFormattedText() + TextFormatting.DARK_GRAY + " [" + chance + "%]");
+			}
 		}
 	}
 

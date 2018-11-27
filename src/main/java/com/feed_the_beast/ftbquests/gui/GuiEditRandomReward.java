@@ -123,7 +123,16 @@ public class GuiEditRandomReward extends GuiButtonListBase
 				totalWeight += r.weight;
 			}
 
-			list.add(I18n.format("ftbquests.reward.ftbquests.random.weight") + ": " + reward.weight + TextFormatting.DARK_GRAY + " [" + (reward.weight * 100 / totalWeight) + "%]");
+			int chance = reward.weight * 100 / totalWeight;
+
+			if (chance == 0)
+			{
+				list.add(I18n.format("ftbquests.reward.ftbquests.random.weight") + ": " + reward.weight + TextFormatting.DARK_GRAY + " [" + String.format("%.2f", reward.weight * 100D / (double) totalWeight) + "%]");
+			}
+			else
+			{
+				list.add(I18n.format("ftbquests.reward.ftbquests.random.weight") + ": " + reward.weight + TextFormatting.DARK_GRAY + " [" + (reward.weight * 100 / totalWeight) + "%]");
+			}
 		}
 
 		@Override
