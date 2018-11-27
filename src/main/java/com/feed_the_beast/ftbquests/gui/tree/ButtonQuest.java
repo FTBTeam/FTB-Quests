@@ -13,7 +13,7 @@ import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.client.ClientQuestProgress;
-import com.feed_the_beast.ftbquests.gui.QuestsTheme;
+import com.feed_the_beast.ftbquests.gui.FTBQuestsTheme;
 import com.feed_the_beast.ftbquests.net.edit.MessageEditObjectDirect;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
@@ -116,7 +116,7 @@ public class ButtonQuest extends Button
 				}
 				else
 				{
-					contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.set_dep"), QuestsTheme.ADD, () -> editDependency(quest, treeGui.selectedQuest, true)).setEnabled(treeGui.selectedQuest != null && treeGui.selectedQuest != quest && !treeGui.selectedQuest.canRepeat));
+					contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.set_dep"), FTBQuestsTheme.ADD, () -> editDependency(quest, treeGui.selectedQuest, true)).setEnabled(treeGui.selectedQuest != null && treeGui.selectedQuest != quest && !treeGui.selectedQuest.canRepeat));
 				}
 			}
 
@@ -209,7 +209,8 @@ public class ButtonQuest extends Button
 	@Override
 	public void draw(Theme theme, int x, int y, int w, int h)
 	{
-		Color4I col = Icon.EMPTY;
+		Color4I backgroundColor = Color4I.WHITE.withAlpha(100);
+		Color4I outlineColor = Icon.EMPTY;
 		int r = 0;
 		int progress = 0;
 
@@ -228,33 +229,46 @@ public class ButtonQuest extends Button
 						r++;
 					}
 				}
+
+				outlineColor = COL_COMPLETED;
 			}
 			else if (progress > 0)
 			{
-				col = COL_STARTED;
+				outlineColor = COL_STARTED;
 			}
 		}
-
-		int s = treeGui.zoom * 3 / 2;
-		int sx = x + (w - s) / 2;
-		int sy = y + (h - s) / 2;
-
-		quest.shape.draw(sx, sy, s, s, col);
-
-		if (isMouseOver())
+		else
 		{
-			quest.shape.draw(sx, sy, s, s);
+			outlineColor = Color4I.GRAY;
 		}
+
+		double s = treeGui.zoom * 3D / 2D;
+		double sx = x + (w - s) / 2D;
+		double sy = y + (h - s) / 2D;
 
 		if (treeGui.selectedQuest == quest)
 		{
-			quest.shape.draw(sx, sy, s, s);
+			double s1 = s + treeGui.zoom / 5D;
+			double sx1 = x + (w - s1) / 2D;
+			double sy1 = y + (h - s1) / 2D;
+			GlStateManager.pushMatrix();
+			GlStateManager.translate(sx1, sy1, 0D);
+			GlStateManager.scale(s1, s1, 1D);
+			quest.shape.outline.draw(0, 0, 1, 1);
+			GlStateManager.popMatrix();
 		}
+
+		GlStateManager.pushMatrix();
+		GlStateManager.translate(sx, sy, 0D);
+		GlStateManager.scale(s, s, 1D);
+		quest.shape.background.draw(0, 0, 1, 1, backgroundColor);
+		quest.shape.outline.draw(0, 0, 1, 1, outlineColor);
+		GlStateManager.popMatrix();
 
 		if (!icon.isEmpty())
 		{
 			GlStateManager.pushMatrix();
-			GlStateManager.translate((int) (x + (w - treeGui.zoom) / 2F), (int) (y + (h - treeGui.zoom) / 2F), 0F);
+			GlStateManager.translate(x + (w - treeGui.zoom) / 2D, y + (h - treeGui.zoom) / 2D, 0D);
 			icon.draw(0, 0, treeGui.zoom, treeGui.zoom);
 			GlStateManager.popMatrix();
 		}
@@ -262,26 +276,39 @@ public class ButtonQuest extends Button
 		if (cantStart)
 		{
 			GlStateManager.pushMatrix();
-			GlStateManager.translate(0, 0, 500);
-			quest.shape.draw(sx, sy, s, s, Color4I.BLACK.withAlpha(100));
+			GlStateManager.translate(sx, sy, 500);
+			GlStateManager.scale(s, s, 1D);
+			quest.shape.shape.draw(0, 0, 1, 1, Color4I.BLACK.withAlpha(100));
 			GlStateManager.popMatrix();
 		}
-		else if (r > 0)
+
+		if (isMouseOver())
 		{
 			GlStateManager.pushMatrix();
-			GlStateManager.translate(0, 0, 500);
-			int s1 = treeGui.zoom / 2;
-			int os1 = s1 / 4;
-			QuestsTheme.ALERT.draw(x + w - s1 - os1, y + os1, s1, s1);
+			GlStateManager.translate(sx, sy, 500);
+			GlStateManager.scale(s, s, 1D);
+			quest.shape.shape.draw(0, 0, 1, 1, Color4I.WHITE.withAlpha(80));
+			GlStateManager.popMatrix();
+		}
+
+		if (r > 0)
+		{
+			double s1 = treeGui.zoom / 2D;
+			double os1 = s1 / 4;
+			GlStateManager.pushMatrix();
+			GlStateManager.translate(x + w - s1 - os1, y + os1, 500);
+			GlStateManager.scale(s1, s1, 1D);
+			FTBQuestsTheme.ALERT.draw(0, 0, 1, 1);
 			GlStateManager.popMatrix();
 		}
 		else if (progress >= 100)
 		{
+			double s1 = treeGui.zoom / 2D;
+			double os1 = s1 / 4D;
 			GlStateManager.pushMatrix();
-			GlStateManager.translate(0, 0, 500);
-			int s1 = treeGui.zoom / 2;
-			int os1 = s1 / 4;
-			QuestsTheme.COMPLETED.draw(x + w - s1 - os1, y + os1, s1, s1);
+			GlStateManager.translate(x + w - s1 - os1, y + os1, 500);
+			GlStateManager.scale(s1, s1, 1D);
+			FTBQuestsTheme.COMPLETED.draw(0, 0, 1, 1);
 			GlStateManager.popMatrix();
 		}
 	}

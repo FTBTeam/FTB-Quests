@@ -17,8 +17,8 @@ import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
+import com.feed_the_beast.ftbquests.gui.FTBQuestsTheme;
 import com.feed_the_beast.ftbquests.gui.GuiVariables;
-import com.feed_the_beast.ftbquests.gui.QuestsTheme;
 import com.feed_the_beast.ftbquests.net.MessageCompleteInstantly;
 import com.feed_the_beast.ftbquests.net.MessageResetProgress;
 import com.feed_the_beast.ftbquests.net.edit.MessageEditObjectQuick;
@@ -190,7 +190,7 @@ public class GuiQuestTree extends GuiBase
 
 		if (object instanceof QuestObject)
 		{
-			contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.complete_instantly"), QuestsTheme.COMPLETED, () -> new MessageCompleteInstantly(object.uid).sendToServer()).setYesNo(I18n.format("ftbquests.gui.complete_instantly_q")));
+			contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.complete_instantly"), FTBQuestsTheme.COMPLETED, () -> new MessageCompleteInstantly(object.uid).sendToServer()).setYesNo(I18n.format("ftbquests.gui.complete_instantly_q")));
 		}
 	}
 
@@ -310,7 +310,7 @@ public class GuiQuestTree extends GuiBase
 	@Override
 	public Theme getTheme()
 	{
-		return QuestsTheme.INSTANCE;
+		return FTBQuestsTheme.INSTANCE;
 	}
 
 	@Override

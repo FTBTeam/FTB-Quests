@@ -9,7 +9,7 @@ import com.feed_the_beast.ftblib.lib.gui.Theme;
 import com.feed_the_beast.ftblib.lib.gui.WidgetType;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
-import com.feed_the_beast.ftbquests.gui.QuestsTheme;
+import com.feed_the_beast.ftbquests.gui.FTBQuestsTheme;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.TextFormatting;
@@ -115,11 +115,11 @@ public class ButtonReward extends SimpleTextButton
 		}
 		else if (ClientQuestFile.INSTANCE.isRewardClaimed(reward))
 		{
-			QuestsTheme.COMPLETED.draw(x + w - 9, y + 1, 8, 8);
+			FTBQuestsTheme.COMPLETED.draw(x + w - 9, y + 1, 8, 8);
 		}
 		else if (reward.quest.isComplete(ClientQuestFile.INSTANCE.self))
 		{
-			QuestsTheme.ALERT.draw(x + w - 9, y + 1, 8, 8);
+			FTBQuestsTheme.ALERT.draw(x + w - 9, y + 1, 8, 8);
 		}
 	}
 }

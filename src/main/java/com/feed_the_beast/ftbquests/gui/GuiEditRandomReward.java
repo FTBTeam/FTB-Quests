@@ -191,6 +191,6 @@ public class GuiEditRandomReward extends GuiButtonListBase
 	@Override
 	public Theme getTheme()
 	{
-		return QuestsTheme.INSTANCE;
+		return FTBQuestsTheme.INSTANCE;
 	}
 }

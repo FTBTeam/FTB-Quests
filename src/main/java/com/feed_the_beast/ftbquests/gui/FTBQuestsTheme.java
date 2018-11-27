@@ -15,9 +15,9 @@ import org.lwjgl.opengl.GL11;
 /**
  * @author LatvianModder
  */
-public class QuestsTheme extends Theme
+public class FTBQuestsTheme extends Theme
 {
-	public static final QuestsTheme INSTANCE = new QuestsTheme();
+	public static final FTBQuestsTheme INSTANCE = new FTBQuestsTheme();
 	public static final Color4I GREEN_IN = Color4I.rgb(0x9BC600);
 	public static final Color4I GREEN_OUT = Color4I.rgb(0x408300);
 
@@ -171,7 +171,7 @@ public class QuestsTheme extends Theme
 		GlStateManager.alphaFunc(GL11.GL_GREATER, 0.1F);
 		*/
 
-		GuiHelper.drawHollowRect(x, y, w, h, type == WidgetType.DISABLED ? Color4I.GRAY.withAlpha(150) : Color4I.WHITE.withAlpha(150), true);
+		GuiHelper.drawHollowRect(x, y, w, h, type == WidgetType.DISABLED ? Color4I.GRAY.withAlpha(80) : Color4I.WHITE.withAlpha(150), false);
 
 		if (type == WidgetType.MOUSE_OVER)
 		{

@@ -122,7 +122,7 @@ public final class Quest extends QuestObject
 
 		if (shape != EnumQuestShape.CIRCLE)
 		{
-			nbt.setString("shape", shape.getName());
+			nbt.setString("shape", shape.getID());
 		}
 
 		if (!description.isEmpty())
