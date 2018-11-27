@@ -476,11 +476,13 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 					}
 				}
 
+				count = Math.min(task.count, count);
+
 				if (count > progress)
 				{
 					if (!simulate)
 					{
-						progress = Math.min(task.count, count);
+						progress = count;
 						sync();
 					}
 

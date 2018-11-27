@@ -30,6 +30,8 @@ public class FTBQuestsInventoryListener implements IContainerListener
 
 	public void detect(Collection<ItemStack> itemsToCheck)
 	{
+		//FTBQuests.LOGGER.info("Running auto-completion with list: " + itemsToCheck);
+
 		ITeamData data = null;
 		boolean redo = false;
 
@@ -75,7 +77,7 @@ public class FTBQuestsInventoryListener implements IContainerListener
 	@Override
 	public void sendSlotContents(Container container, int index, ItemStack stack)
 	{
-		if (container.getSlot(index).inventory == player.inventory)
+		if (!stack.isEmpty() && container.getSlot(index).inventory == player.inventory)
 		{
 			detect(Collections.singleton(stack));
 		}
