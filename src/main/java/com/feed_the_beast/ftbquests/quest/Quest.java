@@ -517,7 +517,7 @@ public final class Quest extends QuestObject
 		config.addInt("x", () -> x, v -> x = (byte) v, 0, -POS_LIMIT, POS_LIMIT);
 		config.addInt("y", () -> y, v -> y = (byte) v, 0, -POS_LIMIT, POS_LIMIT);
 		config.addEnum("shape", () -> shape, v -> shape = v, EnumQuestShape.NAME_MAP);
-		config.addEnum("visibility", () -> visibilityType, v -> visibilityType = v, EnumQuestVisibilityType.NAME_MAP);
+		//config.addEnum("visibility", () -> visibilityType, v -> visibilityType = v, EnumQuestVisibilityType.NAME_MAP);
 		config.addString("description", () -> description, v -> description = v, "");
 		config.addList("text", text, new ConfigString(""), ConfigString::new, ConfigString::getString);
 		config.addList("dependencies", dependencies, new ConfigQuestObject(null, null, DEP_TYPES), v -> new ConfigQuestObject(null, v, DEP_TYPES), ConfigQuestObject::getObject).setDisplayName(new TextComponentTranslation("ftbquests.dependencies"));
