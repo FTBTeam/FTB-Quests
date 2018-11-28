@@ -127,7 +127,7 @@ public class ButtonChapter extends ButtonTab
 		if (chapter.quests.isEmpty())
 		{
 			GlStateManager.pushMatrix();
-			GlStateManager.translate(0, 0, 300);
+			GlStateManager.translate(0, 0, 500);
 			GuiIcons.CLOSE.draw(x + w - 10, y + 2, 8, 8);
 			GlStateManager.popMatrix();
 			return;
