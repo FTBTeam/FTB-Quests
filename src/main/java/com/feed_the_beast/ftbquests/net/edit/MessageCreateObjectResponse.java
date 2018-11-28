@@ -58,7 +58,7 @@ public class MessageCreateObjectResponse extends MessageToClient
 		id = data.readInt();
 		extra = data.readNBT();
 		parent = data.readInt();
-		QuestObjectType type = QuestObjectType.VALUES[data.readUnsignedByte()];
+		QuestObjectType type = QuestObjectType.ALL.get(data.readUnsignedByte());
 		object = ClientQuestFile.INSTANCE.create(type, parent, extra == null ? new NBTTagCompound() : extra);
 		object.readNetData(data);
 	}

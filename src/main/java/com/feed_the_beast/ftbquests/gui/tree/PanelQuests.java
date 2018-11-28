@@ -157,10 +157,10 @@ public class PanelQuests extends Panel
 					}
 					else
 					{
-						r = unavailable ? 50 : 255;
-						g = unavailable ? 50 : 255;
-						b = unavailable ? 50 : 255;
-						a = 100;
+						r = unavailable ? 60 : 200;
+						g = unavailable ? 60 : 200;
+						b = unavailable ? 60 : 200;
+						a = 180;
 						off = 0D;
 					}
 

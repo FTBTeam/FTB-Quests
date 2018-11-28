@@ -17,10 +17,11 @@ public enum QuestObjectType implements IStringSerializable
 	TASK("task", 8, TextFormatting.BLUE),
 	VARIABLE("variable", 16, TextFormatting.DARK_PURPLE),
 	REWARD("reward", 32, TextFormatting.LIGHT_PURPLE),
+	REWARD_TABLE("reward_table", 64, TextFormatting.YELLOW),
 	NULL("null", 128, TextFormatting.BLACK);
 
-	public static final QuestObjectType[] VALUES = values();
-	public static final List<QuestObjectType> ALL = Arrays.asList(VALUES);
+	public static final List<QuestObjectType> ALL = Arrays.asList(values());
+	public static final List<QuestObjectType> ALL_PROGRESSING = Arrays.asList(FILE, CHAPTER, FILE, TASK, VARIABLE);
 
 	private final String name;
 	private final String translationKey;

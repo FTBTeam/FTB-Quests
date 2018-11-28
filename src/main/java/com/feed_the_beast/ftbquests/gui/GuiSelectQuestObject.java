@@ -10,10 +10,11 @@ import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
-import com.feed_the_beast.ftbquests.quest.QuestObject;
+import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.quest.QuestVariable;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
+import com.feed_the_beast.ftbquests.quest.reward.RewardTable;
 import com.feed_the_beast.ftbquests.quest.task.QuestTask;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
 import net.minecraft.client.resources.I18n;
@@ -28,9 +29,9 @@ public class GuiSelectQuestObject extends GuiButtonListBase
 {
 	public class ButtonQuestObject extends SimpleTextButton
 	{
-		public final QuestObject object;
+		public final QuestObjectBase object;
 
-		public ButtonQuestObject(Panel panel, QuestObject o)
+		public ButtonQuestObject(Panel panel, QuestObjectBase o)
 		{
 			super(panel, o.getObjectType().getColor() + o.getDisplayName().getUnformattedText(), o.getIcon());
 			object = o;
@@ -83,6 +84,10 @@ public class GuiSelectQuestObject extends GuiButtonListBase
 					}
 				}
 			}
+			else if (object instanceof RewardTable)
+			{
+				((RewardTable) object).addMouseOverText(list, true, true);
+			}
 		}
 
 		@Override
@@ -125,9 +130,18 @@ public class GuiSelectQuestObject extends GuiButtonListBase
 			}
 		}
 
+		if (config.isValid(QuestObjectType.REWARD_TABLE))
+		{
+			for (RewardTable table : ClientQuestFile.INSTANCE.rewardTables)
+			{
+				panel.add(new ButtonQuestObject(panel, table));
+			}
+		}
+
 		boolean addChapters = config.isValid(QuestObjectType.CHAPTER);
 		boolean addQuests = config.isValid(QuestObjectType.QUEST);
 		boolean addTasks = config.isValid(QuestObjectType.TASK);
+		boolean addRewards = config.isValid(QuestObjectType.REWARD);
 
 		for (QuestChapter chapter : ClientQuestFile.INSTANCE.chapters)
 		{
@@ -148,6 +162,14 @@ public class GuiSelectQuestObject extends GuiButtonListBase
 					for (QuestTask task : quest.tasks)
 					{
 						panel.add(new ButtonQuestObject(panel, task));
+					}
+				}
+
+				if (addRewards)
+				{
+					for (QuestReward reward : quest.rewards)
+					{
+						panel.add(new ButtonQuestObject(panel, reward));
 					}
 				}
 			}

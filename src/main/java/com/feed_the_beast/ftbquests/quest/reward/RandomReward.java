@@ -1,21 +1,24 @@
 package com.feed_the_beast.ftbquests.quest.reward;
 
+import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
-import com.feed_the_beast.ftblib.lib.icon.IconAnimation;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
-import com.feed_the_beast.ftbquests.gui.GuiEditRandomReward;
-import com.feed_the_beast.ftbquests.net.edit.MessageEditObjectDirect;
 import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
+import com.feed_the_beast.ftbquests.quest.QuestObjectType;
+import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-import java.util.ArrayList;
+import javax.annotation.Nullable;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -23,24 +26,12 @@ import java.util.List;
  */
 public class RandomReward extends QuestReward
 {
-	public static class WeightedReward
-	{
-		public final QuestReward reward;
-		public int weight;
-
-		public WeightedReward(QuestReward r, int w)
-		{
-			reward = r;
-			weight = Math.max(w, 1);
-		}
-	}
-
-	public final List<WeightedReward> rewards;
+	public RewardTable table;
 
 	public RandomReward(Quest quest)
 	{
 		super(quest);
-		rewards = new ArrayList<>();
+		table = quest.chapter.file.dummyTable;
 	}
 
 	@Override
@@ -53,89 +44,92 @@ public class RandomReward extends QuestReward
 	public void writeData(NBTTagCompound nbt)
 	{
 		super.writeData(nbt);
-		NBTTagList list = new NBTTagList();
 
-		for (WeightedReward reward : rewards)
+		if (getTable().uid != 0 && !getTable().invalid)
 		{
-			NBTTagCompound nbt1 = new NBTTagCompound();
-			reward.reward.writeData(nbt1);
-
-			if (reward.reward.getType() != FTBQuestsRewards.ITEM)
-			{
-				nbt1.setString("type", reward.reward.getType().getTypeForNBT());
-			}
-
-			if (reward.weight > 1)
-			{
-				nbt1.setInteger("weight", reward.weight);
-			}
-
-			list.appendTag(nbt1);
+			nbt.setInteger("table", quest.chapter.file.rewardTables.indexOf(getTable()));
 		}
-
-		nbt.setTag("rewards", list);
 	}
 
 	@Override
 	public void readData(NBTTagCompound nbt)
 	{
 		super.readData(nbt);
-		rewards.clear();
-		NBTTagList list = nbt.getTagList("rewards", Constants.NBT.TAG_COMPOUND);
+		int index = nbt.hasKey("table") ? nbt.getInteger("table") : -1;
 
-		for (int i = 0; i < list.tagCount(); i++)
+		if (index >= 0 && index < quest.chapter.file.rewardTables.size())
 		{
-			NBTTagCompound nbt1 = list.getCompoundTagAt(i);
-			QuestReward reward = QuestRewardType.createReward(quest, nbt1.getString("type"));
-
-			if (reward != null)
-			{
-				reward.readData(nbt1);
-				rewards.add(new WeightedReward(reward, nbt1.getInteger("weight")));
-			}
+			table = quest.chapter.file.rewardTables.get(index);
 		}
+		else
+		{
+			table = new RewardTable(quest.chapter.file);
+			NBTTagList list = nbt.getTagList("rewards", Constants.NBT.TAG_COMPOUND);
+
+			for (int i = 0; i < list.tagCount(); i++)
+			{
+				NBTTagCompound nbt1 = list.getCompoundTagAt(i);
+				QuestReward reward = QuestRewardType.createReward(table.fakeQuest, nbt1.getString("type"));
+
+				if (reward != null)
+				{
+					reward.readData(nbt1);
+					table.rewards.add(new WeightedReward(reward, nbt1.getInteger("weight")));
+				}
+			}
+
+			table.uid = quest.chapter.file.readID(0);
+			table.title = getDisplayName().getUnformattedText() + " " + toString();
+			quest.chapter.file.rewardTables.add(table);
+		}
+	}
+
+	public RewardTable getTable()
+	{
+		if (table == null || table.invalid)
+		{
+			table = quest.chapter.file.dummyTable;
+		}
+
+		return table;
 	}
 
 	@Override
 	public void writeNetData(DataOut data)
 	{
 		super.writeNetData(data);
-		data.writeVarInt(rewards.size());
-
-		for (WeightedReward reward : rewards)
-		{
-			data.writeVarInt(QuestRewardType.getRegistry().getID(reward.reward.getType()));
-			reward.reward.writeNetData(data);
-			data.writeVarInt(reward.weight);
-		}
+		data.writeInt(getTable().uid);
 	}
 
 	@Override
 	public void readNetData(DataIn data)
 	{
 		super.readNetData(data);
-		rewards.clear();
-		int s = data.readVarInt();
+		table = quest.chapter.file.getRewardTable(data.readInt());
+	}
 
-		for (int i = 0; i < s; i++)
+	@Override
+	public void getConfig(ConfigGroup config)
+	{
+		super.getConfig(config);
+		Collection<QuestObjectType> set = Collections.singleton(QuestObjectType.REWARD_TABLE);
+		config.add("table", new ConfigQuestObject(quest.chapter.file, getTable(), set)
 		{
-			QuestRewardType type = QuestRewardType.getRegistry().getValue(data.readVarInt());
-			QuestReward reward = type.provider.create(quest);
-			reward.readNetData(data);
-			int w = data.readVarInt();
-			rewards.add(new WeightedReward(reward, w));
-		}
+			@Override
+			public void setObject(@Nullable QuestObjectBase object)
+			{
+				if (object instanceof RewardTable)
+				{
+					table = (RewardTable) object;
+				}
+			}
+		}, new ConfigQuestObject(quest.chapter.file, quest.chapter.file.dummyTable, set)).setDisplayName(new TextComponentTranslation("ftbquests.reward_table"));
 	}
 
 	@Override
 	public void claim(EntityPlayerMP player)
 	{
-		int totalWeight = 0;
-
-		for (WeightedReward reward : rewards)
-		{
-			totalWeight += reward.weight;
-		}
+		int totalWeight = getTable().getTotalWeight(false);
 
 		if (totalWeight <= 0)
 		{
@@ -145,14 +139,14 @@ public class RandomReward extends QuestReward
 		int number = player.world.rand.nextInt(totalWeight) + 1;
 		int currentWeight = 0;
 
-		for (WeightedReward reward : rewards)
+		for (WeightedReward reward : getTable().rewards)
 		{
 			currentWeight += reward.weight;
 
 			if (currentWeight >= number)
 			{
 				reward.reward.claim(player);
-				break;
+				return;
 			}
 		}
 	}
@@ -160,51 +154,13 @@ public class RandomReward extends QuestReward
 	@Override
 	public Icon getAltIcon()
 	{
-		if (rewards.isEmpty())
-		{
-			return super.getAltIcon();
-		}
-
-		List<Icon> icons = new ArrayList<>();
-
-		for (WeightedReward reward : rewards)
-		{
-			icons.add(reward.reward.getIcon());
-		}
-
-		return IconAnimation.fromList(icons, false);
+		return getTable().getIcon();
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void addMouseOverText(List<String> list)
 	{
-		int totalWeight = 0;
-
-		for (WeightedReward reward : rewards)
-		{
-			totalWeight += reward.weight;
-		}
-
-		for (WeightedReward reward : rewards)
-		{
-			int chance = reward.weight * 100 / totalWeight;
-
-			if (chance == 0)
-			{
-				list.add(TextFormatting.GRAY + "- " + reward.reward.getDisplayName().getFormattedText() + TextFormatting.DARK_GRAY + " [" + String.format("%.2f", reward.weight * 100D / (double) totalWeight) + "%]");
-			}
-			else
-			{
-				list.add(TextFormatting.GRAY + "- " + reward.reward.getDisplayName().getFormattedText() + TextFormatting.DARK_GRAY + " [" + chance + "%]");
-			}
-		}
-	}
-
-	@Override
-	@SideOnly(Side.CLIENT)
-	public void onEditButtonClicked()
-	{
-		new GuiEditRandomReward(this, () -> new MessageEditObjectDirect(this).sendToServer()).openGui();
+		getTable().addMouseOverText(list, true, false);
 	}
 }

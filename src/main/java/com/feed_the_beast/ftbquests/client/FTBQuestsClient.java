@@ -9,10 +9,8 @@ import com.feed_the_beast.ftblib.lib.gui.misc.GuiSelectItemStack;
 import com.feed_the_beast.ftbquests.FTBQuestsCommon;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
-import com.feed_the_beast.ftbquests.quest.reward.ChoiceReward;
 import com.feed_the_beast.ftbquests.quest.reward.FTBQuestsRewards;
 import com.feed_the_beast.ftbquests.quest.reward.ItemReward;
-import com.feed_the_beast.ftbquests.quest.reward.RandomReward;
 import com.feed_the_beast.ftbquests.quest.reward.XPLevelsReward;
 import com.feed_the_beast.ftbquests.quest.reward.XPReward;
 import com.feed_the_beast.ftbquests.quest.task.FTBQuestsTasks;
@@ -79,7 +77,7 @@ public class FTBQuestsClient extends FTBQuestsCommon
 			}
 		}).openGui());
 
-		FTBQuestsRewards.XP.setGuiProvider((gui, quest, callback) -> new GuiEditConfigValue("value", new ConfigInt(100, 1, Integer.MAX_VALUE), (value, set) -> {
+		FTBQuestsRewards.XP.setGuiProvider((gui, quest, callback) -> new GuiEditConfigValue("xp", new ConfigInt(100, 1, Integer.MAX_VALUE), (value, set) -> {
 			gui.openGui();
 			if (set)
 			{
@@ -89,7 +87,7 @@ public class FTBQuestsClient extends FTBQuestsCommon
 			}
 		}).openGui());
 
-		FTBQuestsRewards.XP_LEVELS.setGuiProvider((gui, quest, callback) -> new GuiEditConfigValue("value", new ConfigInt(1, 1, Integer.MAX_VALUE), (value, set) -> {
+		FTBQuestsRewards.XP_LEVELS.setGuiProvider((gui, quest, callback) -> new GuiEditConfigValue("xp_levels", new ConfigInt(1, 1, Integer.MAX_VALUE), (value, set) -> {
 			gui.openGui();
 			if (set)
 			{
@@ -98,8 +96,5 @@ public class FTBQuestsClient extends FTBQuestsCommon
 				callback.accept(reward);
 			}
 		}).openGui());
-
-		FTBQuestsRewards.CHOICE.setGuiProvider((gui, quest, callback) -> callback.accept(new ChoiceReward(quest)));
-		FTBQuestsRewards.RANDOM.setGuiProvider((gui, quest, callback) -> callback.accept(new RandomReward(quest)));
 	}
 }

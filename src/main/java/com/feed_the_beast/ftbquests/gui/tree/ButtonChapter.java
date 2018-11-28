@@ -6,7 +6,6 @@ import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.gui.Theme;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
-import com.feed_the_beast.ftbquests.client.ClientQuestProgress;
 import com.feed_the_beast.ftbquests.gui.FTBQuestsTheme;
 import com.feed_the_beast.ftbquests.net.edit.MessageMoveChapter;
 import com.feed_the_beast.ftbquests.quest.Quest;
@@ -61,7 +60,19 @@ public class ButtonChapter extends ButtonTab
 	@Override
 	public void addMouseOverText(List<String> list)
 	{
-		list.add(getTitle() + ClientQuestProgress.getCompletionSuffix(treeGui.questFile.self, chapter));
+		String title = getTitle();
+
+		if (treeGui.questFile.self != null)
+		{
+			int p = chapter.getRelativeProgress(treeGui.questFile.self);
+
+			if (p > 0 && p < 100)
+			{
+				title += " " + TextFormatting.DARK_GRAY + p + "%";
+			}
+		}
+
+		list.add(title);
 		list.addAll(description);
 
 		if (treeGui.questFile.self == null)

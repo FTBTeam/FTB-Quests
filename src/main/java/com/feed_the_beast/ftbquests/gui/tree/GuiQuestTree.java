@@ -27,6 +27,7 @@ import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.quest.QuestVariable;
+import com.feed_the_beast.ftbquests.quest.reward.RandomReward;
 import com.feed_the_beast.ftbquests.quest.task.QuestTask;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
@@ -185,6 +186,12 @@ public class GuiQuestTree extends GuiBase
 		}
 
 		contextMenu.add(new ContextMenuItem(I18n.format("selectServer.edit"), GuiIcons.SETTINGS, object::onEditButtonClicked));
+
+		if (object instanceof RandomReward && ((RandomReward) object).getTable().uid != 0)
+		{
+			contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.reward_table.edit"), GuiIcons.SETTINGS, () -> ((RandomReward) object).getTable().onEditButtonClicked()));
+		}
+
 		contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), GuiIcons.REMOVE, () -> ClientQuestFile.INSTANCE.deleteObject(object.uid)).setYesNo(I18n.format("delete_item", object.getDisplayName().getFormattedText())));
 		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.reset_progress"), GuiIcons.REFRESH, () -> new MessageResetProgress(object.uid).sendToServer()).setYesNo(I18n.format("ftbquests.gui.reset_progress_q")));
 

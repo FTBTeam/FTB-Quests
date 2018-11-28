@@ -9,6 +9,7 @@ import com.feed_the_beast.ftblib.lib.util.BlockUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
+import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
@@ -175,15 +176,15 @@ public class TileProgressDetector extends TileWithTeam implements ITickable, ICo
 
 		config.add("team", createTeamConfig(), ConfigNull.INSTANCE).setDisplayName(new TextComponentTranslation("ftbquests.team")).setCanEdit(editor);
 
-		config.add("object", new ConfigQuestObject(ServerQuestFile.INSTANCE, cObject, QuestObjectType.ALL)
+		config.add("object", new ConfigQuestObject(ServerQuestFile.INSTANCE, cObject, QuestObjectType.ALL_PROGRESSING)
 		{
 			@Override
-			public void setObject(@Nullable QuestObject v)
+			public void setObject(@Nullable QuestObjectBase v)
 			{
-				cObject = v;
+				cObject = (QuestObject) v;
 				object = cObject == null ? null : new NBTTagInt(cObject.uid);
 			}
-		}, new ConfigQuestObject(ServerQuestFile.INSTANCE, ServerQuestFile.INSTANCE, QuestObjectType.ALL));
+		}, new ConfigQuestObject(ServerQuestFile.INSTANCE, ServerQuestFile.INSTANCE, QuestObjectType.ALL_PROGRESSING));
 
 		config.addBool("level", () -> level, v -> level = v, false);
 
