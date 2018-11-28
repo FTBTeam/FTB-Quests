@@ -63,7 +63,7 @@ public abstract class QuestReward extends QuestObjectBase
 	@Override
 	public final int getParentID()
 	{
-		return quest.uid;
+		return quest.id;
 	}
 
 	public abstract QuestRewardType getType();
@@ -210,6 +210,6 @@ public abstract class QuestReward extends QuestObjectBase
 	@SideOnly(Side.CLIENT)
 	public void onButtonClicked()
 	{
-		new MessageClaimReward(uid).sendToServer();
+		new MessageClaimReward(id).sendToServer();
 	}
 }

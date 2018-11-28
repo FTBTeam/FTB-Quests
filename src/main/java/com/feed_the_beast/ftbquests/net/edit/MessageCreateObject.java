@@ -67,7 +67,7 @@ public class MessageCreateObject extends MessageToServer
 		{
 			QuestObjectBase object = ServerQuestFile.INSTANCE.create(type, parent, extra == null ? new NBTTagCompound() : extra);
 			object.readData(nbt);
-			object.uid = ServerQuestFile.INSTANCE.readID(0);
+			object.id = ServerQuestFile.INSTANCE.readID(0);
 			object.onCreated();
 			ServerQuestFile.INSTANCE.refreshIDMap();
 			ServerQuestFile.INSTANCE.clearCachedData();

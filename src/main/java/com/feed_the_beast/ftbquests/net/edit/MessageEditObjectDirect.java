@@ -24,7 +24,7 @@ public class MessageEditObjectDirect extends MessageToServer
 
 	public MessageEditObjectDirect(QuestObjectBase o)
 	{
-		id = o.uid;
+		id = o.id;
 		nbt = new NBTTagCompound();
 		o.writeData(nbt);
 	}

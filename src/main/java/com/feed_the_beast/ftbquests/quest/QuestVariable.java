@@ -96,7 +96,7 @@ public final class QuestVariable extends QuestObject
 	@Override
 	public long getProgress(ITeamData data)
 	{
-		return data.getVariable(uid);
+		return data.getVariable(id);
 	}
 
 	@Override
@@ -108,13 +108,13 @@ public final class QuestVariable extends QuestObject
 	@Override
 	public void resetProgress(ITeamData data, boolean dependencies)
 	{
-		data.setVariable(uid, 0L);
+		data.setVariable(id, 0L);
 	}
 
 	@Override
 	public void completeInstantly(ITeamData data, boolean dependencies)
 	{
-		data.setVariable(uid, maxValue);
+		data.setVariable(id, maxValue);
 	}
 
 	@Override
@@ -125,7 +125,7 @@ public final class QuestVariable extends QuestObject
 			return 100;
 		}
 
-		long value = data.getVariable(uid);
+		long value = data.getVariable(id);
 
 		if (value <= 0L)
 		{
@@ -142,7 +142,7 @@ public final class QuestVariable extends QuestObject
 	@Override
 	public boolean isComplete(ITeamData data)
 	{
-		return data.getVariable(uid) >= maxValue;
+		return data.getVariable(id) >= maxValue;
 	}
 
 	@Override

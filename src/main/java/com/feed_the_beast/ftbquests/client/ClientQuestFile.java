@@ -119,8 +119,8 @@ public class ClientQuestFile extends QuestFile
 			zoom = questTreeGui.zoom;
 			scrollX = questTreeGui.quests.getScrollX();
 			scrollY = questTreeGui.quests.getScrollY();
-			selectedChapter = questTreeGui.selectedChapter == null ? 0 : questTreeGui.selectedChapter.uid;
-			selectedQuest = questTreeGui.selectedQuest == null ? 0 : questTreeGui.selectedQuest.uid;
+			selectedChapter = questTreeGui.selectedChapter == null ? 0 : questTreeGui.selectedChapter.id;
+			selectedQuest = questTreeGui.selectedQuest == null ? 0 : questTreeGui.selectedQuest.id;
 
 			if (ClientUtils.getCurrentGuiAs(GuiQuestTree.class) != null)
 			{
@@ -221,6 +221,6 @@ public class ClientQuestFile extends QuestFile
 
 	public boolean isRewardClaimed(QuestReward reward)
 	{
-		return rewards.contains(reward.uid);
+		return rewards.contains(reward.id);
 	}
 }

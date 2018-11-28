@@ -89,7 +89,7 @@ public final class Quest extends QuestObject
 	@Override
 	public int getParentID()
 	{
-		return chapter.uid;
+		return chapter.id;
 	}
 
 	@Override
@@ -145,7 +145,7 @@ public final class Quest extends QuestObject
 		{
 			if (dependencies.size() == 1)
 			{
-				nbt.setInteger("dependency", dependencies.iterator().next().uid);
+				nbt.setInteger("dependency", dependencies.iterator().next().id);
 			}
 			else
 			{
@@ -154,7 +154,7 @@ public final class Quest extends QuestObject
 
 				for (QuestObject object : dependencies)
 				{
-					ai[i] = object.uid;
+					ai[i] = object.id;
 					i++;
 				}
 
@@ -250,7 +250,7 @@ public final class Quest extends QuestObject
 			}
 			else
 			{
-				data.writeInt(d.uid);
+				data.writeInt(d.id);
 			}
 		}
 	}

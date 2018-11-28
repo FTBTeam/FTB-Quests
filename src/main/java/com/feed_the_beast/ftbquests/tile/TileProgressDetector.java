@@ -42,7 +42,7 @@ public class TileProgressDetector extends TileWithTeam implements ITickable, ICo
 
 		if (cObject != null)
 		{
-			object = new NBTTagInt(cObject.uid);
+			object = new NBTTagInt(cObject.id);
 		}
 
 		if (object != null)
@@ -182,7 +182,7 @@ public class TileProgressDetector extends TileWithTeam implements ITickable, ICo
 			public void setObject(@Nullable QuestObjectBase v)
 			{
 				cObject = (QuestObject) v;
-				object = cObject == null ? null : new NBTTagInt(cObject.uid);
+				object = cObject == null ? null : new NBTTagInt(cObject.id);
 			}
 		}, new ConfigQuestObject(ServerQuestFile.INSTANCE, ServerQuestFile.INSTANCE, QuestObjectType.ALL_PROGRESSING));
 

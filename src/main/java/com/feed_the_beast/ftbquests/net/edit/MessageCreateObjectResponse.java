@@ -20,7 +20,8 @@ public class MessageCreateObjectResponse extends MessageToClient
 {
 	private int id;
 	private int parent;
-	private QuestObjectBase object;
+	private QuestObjectType type;
+	private NBTTagCompound nbt;
 	private NBTTagCompound extra;
 
 	public MessageCreateObjectResponse()
@@ -29,9 +30,11 @@ public class MessageCreateObjectResponse extends MessageToClient
 
 	public MessageCreateObjectResponse(QuestObjectBase o, @Nullable NBTTagCompound e)
 	{
-		id = o.uid;
+		id = o.id;
 		parent = o.getParentID();
-		object = o;
+		type = o.getObjectType();
+		nbt = new NBTTagCompound();
+		o.writeData(nbt);
 		extra = e;
 	}
 
@@ -45,28 +48,29 @@ public class MessageCreateObjectResponse extends MessageToClient
 	public void writeData(DataOut data)
 	{
 		data.writeInt(id);
-		data.writeNBT(extra);
 		data.writeInt(parent);
-		data.writeByte(object.getObjectType().ordinal());
-		object.writeNetData(data);
+		data.writeByte(type.ordinal());
+		data.writeNBT(nbt);
+		data.writeNBT(extra);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
 		id = data.readInt();
-		extra = data.readNBT();
 		parent = data.readInt();
-		QuestObjectType type = QuestObjectType.ALL.get(data.readUnsignedByte());
-		object = ClientQuestFile.INSTANCE.create(type, parent, extra == null ? new NBTTagCompound() : extra);
-		object.readNetData(data);
+		type = QuestObjectType.ALL.get(data.readUnsignedByte());
+		nbt = data.readNBT();
+		extra = data.readNBT();
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void onMessage()
 	{
-		object.uid = id;
+		QuestObjectBase object = ClientQuestFile.INSTANCE.create(type, parent, extra == null ? new NBTTagCompound() : extra);
+		object.readData(nbt);
+		object.id = id;
 		object.onCreated();
 		ClientQuestFile.INSTANCE.refreshIDMap();
 		object.editedFromGUI();

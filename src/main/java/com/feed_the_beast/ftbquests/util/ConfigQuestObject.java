@@ -91,7 +91,7 @@ public class ConfigQuestObject extends ConfigValue
 	public int getInt()
 	{
 		object = getObject();
-		return object == null ? 0 : object.uid;
+		return object == null ? 0 : object.id;
 	}
 
 	@Override
@@ -229,7 +229,7 @@ public class ConfigQuestObject extends ConfigValue
 
 		if (object != null)
 		{
-			nbt.setInteger(key, object.uid);
+			nbt.setInteger(key, object.id);
 		}
 	}
 

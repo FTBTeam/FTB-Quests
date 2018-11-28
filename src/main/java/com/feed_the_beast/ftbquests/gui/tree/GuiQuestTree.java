@@ -158,7 +158,7 @@ public class GuiQuestTree extends GuiBase
 						@Override
 						public void onClicked(Panel panel, MouseButton button)
 						{
-							inst.getValue().onClicked(gui, inst, button, () -> new MessageEditObjectQuick(object.uid, inst.getID(), inst.getValue()).sendToServer());
+							inst.getValue().onClicked(gui, inst, button, () -> new MessageEditObjectQuick(object.id, inst.getID(), inst.getValue()).sendToServer());
 						}
 
 						@Override
@@ -187,17 +187,17 @@ public class GuiQuestTree extends GuiBase
 
 		contextMenu.add(new ContextMenuItem(I18n.format("selectServer.edit"), GuiIcons.SETTINGS, object::onEditButtonClicked));
 
-		if (object instanceof RandomReward && ((RandomReward) object).getTable().uid != 0)
+		if (object instanceof RandomReward && ((RandomReward) object).getTable().id != 0)
 		{
 			contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.reward_table.edit"), GuiIcons.SETTINGS, () -> ((RandomReward) object).getTable().onEditButtonClicked()));
 		}
 
-		contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), GuiIcons.REMOVE, () -> ClientQuestFile.INSTANCE.deleteObject(object.uid)).setYesNo(I18n.format("delete_item", object.getDisplayName().getFormattedText())));
-		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.reset_progress"), GuiIcons.REFRESH, () -> new MessageResetProgress(object.uid).sendToServer()).setYesNo(I18n.format("ftbquests.gui.reset_progress_q")));
+		contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), GuiIcons.REMOVE, () -> ClientQuestFile.INSTANCE.deleteObject(object.id)).setYesNo(I18n.format("delete_item", object.getDisplayName().getFormattedText())));
+		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.reset_progress"), GuiIcons.REFRESH, () -> new MessageResetProgress(object.id).sendToServer()).setYesNo(I18n.format("ftbquests.gui.reset_progress_q")));
 
 		if (object instanceof QuestObject)
 		{
-			contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.complete_instantly"), FTBQuestsTheme.COMPLETED, () -> new MessageCompleteInstantly(object.uid).sendToServer()).setYesNo(I18n.format("ftbquests.gui.complete_instantly_q")));
+			contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.complete_instantly"), FTBQuestsTheme.COMPLETED, () -> new MessageCompleteInstantly(object.id).sendToServer()).setYesNo(I18n.format("ftbquests.gui.complete_instantly_q")));
 		}
 	}
 

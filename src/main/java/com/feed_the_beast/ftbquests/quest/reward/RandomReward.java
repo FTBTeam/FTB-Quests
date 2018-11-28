@@ -45,7 +45,7 @@ public class RandomReward extends QuestReward
 	{
 		super.writeData(nbt);
 
-		if (getTable().uid != 0 && !getTable().invalid)
+		if (getTable().id != 0 && !getTable().invalid)
 		{
 			nbt.setInteger("table", quest.chapter.file.rewardTables.indexOf(getTable()));
 		}
@@ -78,7 +78,7 @@ public class RandomReward extends QuestReward
 				}
 			}
 
-			table.uid = quest.chapter.file.readID(0);
+			table.id = quest.chapter.file.readID(0);
 			table.title = getDisplayName().getUnformattedText() + " " + toString();
 			quest.chapter.file.rewardTables.add(table);
 		}
@@ -98,7 +98,7 @@ public class RandomReward extends QuestReward
 	public void writeNetData(DataOut data)
 	{
 		super.writeNetData(data);
-		data.writeInt(getTable().uid);
+		data.writeInt(getTable().id);
 	}
 
 	@Override

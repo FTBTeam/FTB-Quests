@@ -60,7 +60,7 @@ public class TileProgressScreenCore extends TileWithTeam implements IConfigCallb
 
 		if (cChapter != null)
 		{
-			chapter = new NBTTagInt(cChapter.uid);
+			chapter = new NBTTagInt(cChapter.id);
 		}
 
 		if (chapter != null)
@@ -221,7 +221,7 @@ public class TileProgressScreenCore extends TileWithTeam implements IConfigCallb
 						if (v instanceof QuestChapter)
 						{
 							cChapter = (QuestChapter) v;
-							chapter = new NBTTagInt(cChapter.uid);
+							chapter = new NBTTagInt(cChapter.id);
 						}
 					}
 				}, ConfigNull.INSTANCE).setCanEdit(editorOrDestructible).setDisplayName(new TextComponentTranslation("ftbquests.chapter"));
@@ -252,7 +252,7 @@ public class TileProgressScreenCore extends TileWithTeam implements IConfigCallb
 
 			if (cChapter != null)
 			{
-				chapter = new NBTTagInt(cChapter.file.chapters.get((cChapter.file.chapters.indexOf(cChapter) + 1) % cChapter.file.chapters.size()).uid);
+				chapter = new NBTTagInt(cChapter.file.chapters.get((cChapter.file.chapters.indexOf(cChapter) + 1) % cChapter.file.chapters.size()).id);
 				updateContainingBlockInfo();
 				markDirty();
 				BlockUtils.notifyBlockUpdate(world, pos, getBlockState());
