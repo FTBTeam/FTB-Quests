@@ -7,11 +7,6 @@ import net.minecraft.util.text.ITextComponent;
  */
 public abstract class QuestObject extends QuestObjectBase
 {
-	public String id = "";
-
-	@Deprecated
-	public abstract String getID();
-
 	public abstract long getProgress(ITeamData data);
 
 	public abstract long getMaxProgress();

@@ -517,7 +517,7 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 
 				if (variable != null)
 				{
-					nbt1.setLong(variable.id, entry.getLongValue());
+					nbt1.setLong(variable.getCodeString(), entry.getLongValue());
 				}
 			}
 
@@ -606,7 +606,7 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 
 		for (String s : nbt1.getKeySet())
 		{
-			QuestVariable variable = ServerQuestFile.INSTANCE.getVariable(ServerQuestFile.INSTANCE.getID('#' + s));
+			QuestVariable variable = ServerQuestFile.INSTANCE.getVariable(ServerQuestFile.INSTANCE.getID(s));
 
 			if (variable != null)
 			{

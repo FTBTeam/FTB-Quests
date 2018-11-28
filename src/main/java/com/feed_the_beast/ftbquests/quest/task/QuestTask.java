@@ -66,13 +66,6 @@ public abstract class QuestTask extends QuestObject
 	public abstract QuestTaskData createData(ITeamData data);
 
 	@Override
-	@Deprecated
-	public final String getID()
-	{
-		return quest.chapter.id + ':' + quest.id + ':' + id;
-	}
-
-	@Override
 	public final long getProgress(ITeamData data)
 	{
 		return data.getQuestTaskData(this).getProgress();

@@ -56,13 +56,6 @@ public final class QuestChapter extends QuestObject
 	}
 
 	@Override
-	@Deprecated
-	public String getID()
-	{
-		return id;
-	}
-
-	@Override
 	public void writeData(NBTTagCompound nbt)
 	{
 		super.writeData(nbt);

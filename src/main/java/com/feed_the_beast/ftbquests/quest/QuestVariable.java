@@ -7,7 +7,7 @@ import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
 
 /**
  * @author LatvianModder
@@ -35,13 +35,6 @@ public final class QuestVariable extends QuestObject
 	public QuestObjectType getObjectType()
 	{
 		return QuestObjectType.VARIABLE;
-	}
-
-	@Override
-	@Deprecated
-	public String getID()
-	{
-		return '#' + id;
 	}
 
 	@Override
@@ -155,7 +148,7 @@ public final class QuestVariable extends QuestObject
 	@Override
 	public ITextComponent getAltDisplayName()
 	{
-		return new TextComponentString(getID());
+		return new TextComponentTranslation("ftbquests.variable");
 	}
 
 	@Override

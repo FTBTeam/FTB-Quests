@@ -59,7 +59,7 @@ public class CommandSetVariable extends CommandBase
 
 			for (QuestVariable variable : ServerQuestFile.INSTANCE.variables)
 			{
-				list.add(variable.id);
+				list.add(variable.toString());
 			}
 
 			list.sort(null);
