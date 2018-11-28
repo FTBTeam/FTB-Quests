@@ -75,6 +75,6 @@ public class XPLevelsReward extends QuestReward
 	{
 		ITextComponent text = new TextComponentString("+" + xpLevels);
 		text.getStyle().setColor(TextFormatting.GREEN);
-		return new TextComponentTranslation("ftbquests.reward.ftbquests.xp_levels.text", text);
+		return new TextComponentTranslation("ftbquests.reward.ftbquests.xp_levels").appendText(": ").appendSibling(text);
 	}
 }

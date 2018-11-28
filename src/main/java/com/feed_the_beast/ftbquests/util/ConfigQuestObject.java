@@ -52,6 +52,11 @@ public class ConfigQuestObject extends ConfigValue
 		return isValid(object == null ? QuestObjectType.NULL : object.getObjectType());
 	}
 
+	public HashSet<QuestObjectType> getTypes()
+	{
+		return new HashSet<>(types);
+	}
+
 	@Override
 	public String getID()
 	{

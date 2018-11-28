@@ -86,6 +86,6 @@ public class CommandReward extends QuestReward
 	{
 		ITextComponent text = new TextComponentString(command);
 		text.getStyle().setColor(TextFormatting.RED);
-		return new TextComponentTranslation("ftbquests.reward.ftbquests.command.text", text);
+		return new TextComponentTranslation("ftbquests.reward.ftbquests.command").appendText(": ").appendSibling(text);
 	}
 }

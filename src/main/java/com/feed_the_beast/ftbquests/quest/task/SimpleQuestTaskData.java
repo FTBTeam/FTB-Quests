@@ -7,6 +7,8 @@ import net.minecraft.nbt.NBTTagByte;
 import net.minecraft.nbt.NBTTagInt;
 import net.minecraft.nbt.NBTTagLong;
 import net.minecraft.nbt.NBTTagShort;
+import net.minecraft.util.EnumFacing;
+import net.minecraftforge.common.capabilities.Capability;
 
 import javax.annotation.Nullable;
 
@@ -74,5 +76,18 @@ public abstract class SimpleQuestTaskData<T extends QuestTask> extends QuestTask
 	public void completeInstantly()
 	{
 		progress = task.getMaxProgress();
+	}
+
+	@Override
+	public boolean hasCapability(Capability<?> capability, @Nullable EnumFacing facing)
+	{
+		return false;
+	}
+
+	@Nullable
+	@Override
+	public <C> C getCapability(Capability<C> capability, @Nullable EnumFacing facing)
+	{
+		return null;
 	}
 }

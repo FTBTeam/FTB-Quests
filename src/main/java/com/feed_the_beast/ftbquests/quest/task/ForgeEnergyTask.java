@@ -19,7 +19,6 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.opengl.GL11;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
@@ -145,14 +144,14 @@ public class ForgeEnergyTask extends EnergyTask
 		}
 
 		@Override
-		public boolean hasCapability(@Nonnull Capability<?> capability, @Nullable EnumFacing facing)
+		public boolean hasCapability(Capability<?> capability, @Nullable EnumFacing facing)
 		{
 			return capability == CapabilityEnergy.ENERGY;
 		}
 
 		@Nullable
 		@Override
-		public <T> T getCapability(@Nonnull Capability<T> capability, @Nullable EnumFacing facing)
+		public <T> T getCapability(Capability<T> capability, @Nullable EnumFacing facing)
 		{
 			return capability == CapabilityEnergy.ENERGY ? (T) this : null;
 		}

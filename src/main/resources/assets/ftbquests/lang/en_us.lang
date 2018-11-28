@@ -129,6 +129,7 @@ ftbquests.task.ftbquests.forge_energy.value=FE / RF
 ftbquests.task.ftbquests.forge_energy.text=%d FE
 
 ftbquests.task.ftbquests.xp=XP Levels
+ftbquests.task.ftbquests.dimension=Visit Dimension
 
 ftbquests.task.ftbquests.buildcraft_mj=BuildCraft Energy
 ftbquests.task.ftbquests.buildcraft_mj.value=mJ
@@ -153,22 +154,14 @@ ftbquests.rewards=Rewards
 ftbquests.reward.claim_all=Claim All Rewards
 
 ftbquests.reward.ftbquests.item=Item
-
-ftbquests.reward.ftbquests.xp=XP
-ftbquests.reward.ftbquests.xp.text=XP: %s
-
-ftbquests.reward.ftbquests.xp_levels=XP Levels
-ftbquests.reward.ftbquests.xp_levels.text=XP Levels: %s
-
-ftbquests.reward.ftbquests.command=Command
-ftbquests.reward.ftbquests.command.text=Command: %s
-
+ftbquests.reward.ftbquests.item.random_bonus=Random Bonus
 ftbquests.reward.ftbquests.choice=Choice Reward
 ftbquests.reward.ftbquests.random=Random Reward
 ftbquests.reward.ftbquests.loot=Loot Reward
-
+ftbquests.reward.ftbquests.xp=XP
+ftbquests.reward.ftbquests.xp_levels=XP Levels
+ftbquests.reward.ftbquests.command=Command
 ftbquests.reward.ftbquests.ftb_money=Money
-ftbquests.reward.ftbquests.ftb_money.value=Money
 
 ftbquests.variable=Variable
 ftbquests.variable.max_value=Max Value

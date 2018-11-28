@@ -1,34 +1,29 @@
-package com.feed_the_beast.ftbquests.integration.ftbmoney;
+package com.feed_the_beast.ftbquests.quest.task;
 
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigLong;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
-import com.feed_the_beast.ftblib.lib.util.StringUtils;
+import com.feed_the_beast.ftblib.lib.util.ServerUtils;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.task.FTBQuestsTasks;
-import com.feed_the_beast.ftbquests.quest.task.ISingleLongValueTask;
-import com.feed_the_beast.ftbquests.quest.task.QuestTask;
-import com.feed_the_beast.ftbquests.quest.task.QuestTaskData;
-import com.feed_the_beast.ftbquests.quest.task.QuestTaskType;
-import com.feed_the_beast.ftbquests.quest.task.SimpleQuestTaskData;
-import com.feed_the_beast.mods.money.FTBMoney;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TextFormatting;
 
 import java.util.Collection;
 
 /**
  * @author LatvianModder
  */
-public class MoneyTask extends QuestTask implements ISingleLongValueTask
+public class DimensionTask extends QuestTask implements ISingleLongValueTask
 {
-	public long value = 1L;
+	public int dimension = 1;
 
-	public MoneyTask(Quest quest)
+	public DimensionTask(Quest quest)
 	{
 		super(quest);
 	}
@@ -36,72 +31,74 @@ public class MoneyTask extends QuestTask implements ISingleLongValueTask
 	@Override
 	public QuestTaskType getType()
 	{
-		return FTBQuestsTasks.FTB_MONEY;
+		return FTBQuestsTasks.DIMENSION;
 	}
 
 	@Override
 	public long getMaxProgress()
 	{
-		return value;
+		return 1;
 	}
 
 	@Override
-	public String getMaxProgressString()
+	public boolean hideProgressNumbers()
 	{
-		return StringUtils.formatDouble(value, true);
+		return true;
 	}
 
 	@Override
 	public void writeData(NBTTagCompound nbt)
 	{
 		super.writeData(nbt);
-		nbt.setLong("value", value);
+		nbt.setInteger("dim", dimension);
 	}
 
 	@Override
 	public void readData(NBTTagCompound nbt)
 	{
 		super.readData(nbt);
-		value = nbt.getLong("value");
+		dimension = nbt.getInteger("dim");
 	}
 
 	@Override
 	public void writeNetData(DataOut data)
 	{
 		super.writeNetData(data);
-		data.writeVarLong(value);
+		data.writeVarInt(dimension);
 	}
 
 	@Override
 	public void readNetData(DataIn data)
 	{
 		super.readNetData(data);
-		value = data.readVarLong();
+		dimension = data.readVarInt();
 	}
 
 	@Override
 	public ConfigLong getDefaultValue()
 	{
-		return new ConfigLong(value, 1L, Long.MAX_VALUE);
+		return new ConfigLong(dimension, Integer.MIN_VALUE, Integer.MAX_VALUE);
 	}
 
 	@Override
 	public void setValue(long v)
 	{
-		value = v;
+		dimension = (int) v;
 	}
 
 	@Override
 	public void getConfig(ConfigGroup config)
 	{
 		super.getConfig(config);
-		config.addLong("value", () -> value, v -> value = v, 1L, 1L, Long.MAX_VALUE);
+		config.addInt("dim", () -> dimension, v -> dimension = v, -1, Integer.MIN_VALUE, Integer.MAX_VALUE).setDisplayName(new TextComponentTranslation("ftbquests.task.ftbquests.dimension"));
 	}
 
 	@Override
 	public ITextComponent getAltDisplayName()
 	{
-		return FTBMoney.moneyComponent(value);
+		ITextComponent text = ServerUtils.getDimensionName(dimension);
+		text.getStyle().setColor(TextFormatting.DARK_GREEN);
+		return new TextComponentTranslation("ftbquests.task.ftbquests.dimension", text).appendText(": ").appendSibling(text);
 	}
 
 	@Override
@@ -110,9 +107,9 @@ public class MoneyTask extends QuestTask implements ISingleLongValueTask
 		return new Data(this, data);
 	}
 
-	public static class Data extends SimpleQuestTaskData<MoneyTask>
+	public static class Data extends SimpleQuestTaskData<DimensionTask>
 	{
-		private Data(MoneyTask task, ITeamData data)
+		private Data(DimensionTask task, ITeamData data)
 		{
 			super(task, data);
 		}
@@ -120,15 +117,11 @@ public class MoneyTask extends QuestTask implements ISingleLongValueTask
 		@Override
 		public boolean submitTask(EntityPlayerMP player, Collection<ItemStack> itemsToCheck, boolean simulate)
 		{
-			long money = FTBMoney.getMoney(player);
-			long add = Math.min(money, task.value - progress);
-
-			if (add > 0)
+			if (progress < 1L && player.dimension == task.dimension)
 			{
 				if (!simulate)
 				{
-					FTBMoney.setMoney(player, money - add);
-					progress += add;
+					progress = 1L;
 					sync();
 				}
 
