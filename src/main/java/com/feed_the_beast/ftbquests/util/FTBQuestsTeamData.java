@@ -171,7 +171,7 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 
 				if (nbt != null)
 				{
-					t.taskKeys[i] = taskData.task.uid;
+					t.taskKeys[i] = taskData.task.id;
 					t.taskValues[i] = nbt;
 					i++;
 				}
@@ -310,7 +310,7 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 	public void syncTask(QuestTaskData data)
 	{
 		team.markDirty();
-		new MessageUpdateTaskProgress(team.getUID(), data.task.uid, data.toNBT()).sendToAll();
+		new MessageUpdateTaskProgress(team.getUID(), data.task.id, data.toNBT()).sendToAll();
 
 		if (!data.isComplete && data.task.isComplete(this))
 		{
@@ -326,14 +326,14 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 	@Override
 	public void removeTask(QuestTask task)
 	{
-		taskData.remove(task.uid);
+		taskData.remove(task.id);
 	}
 
 	@Override
 	public void createTaskData(QuestTask task)
 	{
 		QuestTaskData data = task.createData(this);
-		taskData.put(task.uid, data);
+		taskData.put(task.id, data);
 		data.isComplete = data.getProgress() >= data.task.getMaxProgress();
 	}
 
@@ -341,7 +341,7 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 	{
 		if (reward.isTeamReward())
 		{
-			if (claimedTeamRewards.add(reward.uid))
+			if (claimedTeamRewards.add(reward.id))
 			{
 				reward.claim(player);
 				team.markDirty();
@@ -350,7 +350,7 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 				{
 					if (player1.isOnline())
 					{
-						new MessageClaimRewardResponse(reward.uid).sendTo(player1.getPlayer());
+						new MessageClaimRewardResponse(reward.id).sendTo(player1.getPlayer());
 					}
 				}
 			}
@@ -364,7 +364,7 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 				set = new IntOpenHashSet();
 			}
 
-			if (set.add(reward.uid))
+			if (set.add(reward.id))
 			{
 				if (set.size() == 1)
 				{
@@ -373,7 +373,7 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 
 				reward.claim(player);
 				team.markDirty();
-				new MessageClaimRewardResponse(reward.uid).sendTo(player);
+				new MessageClaimRewardResponse(reward.id).sendTo(player);
 			}
 		}
 
@@ -385,11 +385,11 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 	{
 		if (reward.isTeamReward())
 		{
-			return claimedTeamRewards.contains(reward.uid);
+			return claimedTeamRewards.contains(reward.id);
 		}
 
 		IntOpenHashSet rewards = claimedPlayerRewards.get(player);
-		return rewards != null && rewards.contains(reward.uid);
+		return rewards != null && rewards.contains(reward.id);
 	}
 
 	@Override
@@ -399,7 +399,7 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 		{
 			if (reward.isTeamReward())
 			{
-				claimedTeamRewards.rem(reward.uid);
+				claimedTeamRewards.rem(reward.id);
 			}
 			else
 			{
@@ -409,7 +409,7 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 				{
 					IntOpenHashSet set = iterator.next();
 
-					if (set != null && set.rem(reward.uid))
+					if (set != null && set.rem(reward.id))
 					{
 						if (set.isEmpty())
 						{
@@ -610,7 +610,7 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 
 			if (variable != null)
 			{
-				variables.put(variable.uid, nbt1.getLong(s));
+				variables.put(variable.id, nbt1.getLong(s));
 			}
 		}
 	}
@@ -642,7 +642,7 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 	@Override
 	public QuestTaskData getQuestTaskData(QuestTask task)
 	{
-		QuestTaskData data = taskData.get(task.uid);
+		QuestTaskData data = taskData.get(task.id);
 
 		if (data == null)
 		{

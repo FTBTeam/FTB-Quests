@@ -6,6 +6,7 @@ import com.feed_the_beast.ftblib.lib.net.MessageToClient;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -14,7 +15,8 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  */
 public class MessageEditObjectResponse extends MessageToClient
 {
-	private QuestObjectBase object;
+	private int id;
+	private NBTTagCompound nbt;
 
 	public MessageEditObjectResponse()
 	{
@@ -22,7 +24,9 @@ public class MessageEditObjectResponse extends MessageToClient
 
 	public MessageEditObjectResponse(QuestObjectBase o)
 	{
-		object = o;
+		id = o.id;
+		nbt = new NBTTagCompound();
+		o.writeData(nbt);
 	}
 
 	@Override
@@ -34,15 +38,15 @@ public class MessageEditObjectResponse extends MessageToClient
 	@Override
 	public void writeData(DataOut data)
 	{
-		data.writeInt(object.uid);
-		object.writeNetData(data);
+		data.writeInt(id);
+		data.writeNBT(nbt);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
-		object = ClientQuestFile.INSTANCE.getBase(data.readInt());
-		object.readNetData(data);
+		id = data.readInt();
+		nbt = data.readNBT();
 	}
 
 	@Override
@@ -50,6 +54,12 @@ public class MessageEditObjectResponse extends MessageToClient
 	public void onMessage()
 	{
 		ClientQuestFile.INSTANCE.clearCachedData();
-		object.editedFromGUI();
+		QuestObjectBase object = ClientQuestFile.INSTANCE.getBase(id);
+
+		if (object != null)
+		{
+			object.readData(nbt);
+			object.editedFromGUI();
+		}
 	}
 }

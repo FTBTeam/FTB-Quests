@@ -172,7 +172,7 @@ public class BlockProgressScreen extends BlockWithHorizontalFacing
 
 			if (!world.isRemote && !ServerQuestFile.INSTANCE.chapters.isEmpty())
 			{
-				screen.chapter = new NBTTagInt(ServerQuestFile.INSTANCE.chapters.get(0).uid);
+				screen.chapter = new NBTTagInt(ServerQuestFile.INSTANCE.chapters.get(0).id);
 			}
 
 			screen.facing = state.getValue(FACING);

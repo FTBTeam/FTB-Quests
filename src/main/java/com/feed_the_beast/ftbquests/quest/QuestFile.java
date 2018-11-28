@@ -68,7 +68,7 @@ public abstract class QuestFile extends QuestObject
 
 	public QuestFile()
 	{
-		uid = 1;
+		id = 1;
 		chapters = new ArrayList<>();
 		variables = new ArrayList<>();
 		rewardTables = new ArrayList<>();
@@ -325,32 +325,32 @@ public abstract class QuestFile extends QuestObject
 
 		for (RewardTable table : rewardTables)
 		{
-			map.put(table.uid, table);
+			map.put(table.id, table);
 		}
 
 		for (QuestChapter chapter : chapters)
 		{
-			map.put(chapter.uid, chapter);
+			map.put(chapter.id, chapter);
 
 			for (Quest quest : chapter.quests)
 			{
-				map.put(quest.uid, quest);
+				map.put(quest.id, quest);
 
 				for (QuestTask task : quest.tasks)
 				{
-					map.put(task.uid, task);
+					map.put(task.id, task);
 				}
 
 				for (QuestReward reward : quest.rewards)
 				{
-					map.put(reward.uid, reward);
+					map.put(reward.id, reward);
 				}
 			}
 		}
 
 		for (QuestVariable variable : variables)
 		{
-			map.put(variable.uid, variable);
+			map.put(variable.id, variable);
 		}
 
 		clearCachedData();
@@ -508,7 +508,7 @@ public abstract class QuestFile extends QuestObject
 		{
 			NBTTagCompound nbt1 = new NBTTagCompound();
 			table.writeData(nbt1);
-			nbt1.setInteger("uid", table.uid);
+			nbt1.setInteger("uid", table.id);
 			rt.appendTag(nbt1);
 		}
 
@@ -520,7 +520,7 @@ public abstract class QuestFile extends QuestObject
 		{
 			NBTTagCompound nbt1 = new NBTTagCompound();
 			chapter.writeData(nbt1);
-			nbt1.setInteger("uid", chapter.uid);
+			nbt1.setInteger("uid", chapter.id);
 			c.appendTag(nbt1);
 
 			if (!chapter.quests.isEmpty())
@@ -531,7 +531,7 @@ public abstract class QuestFile extends QuestObject
 				{
 					NBTTagCompound nbt2 = new NBTTagCompound();
 					quest.writeData(nbt2);
-					nbt2.setInteger("uid", quest.uid);
+					nbt2.setInteger("uid", quest.id);
 					q.appendTag(nbt2);
 
 					if (!quest.tasks.isEmpty())
@@ -543,7 +543,7 @@ public abstract class QuestFile extends QuestObject
 							QuestTaskType type = task.getType();
 							NBTTagCompound nbt3 = new NBTTagCompound();
 							task.writeData(nbt3);
-							nbt3.setInteger("uid", task.uid);
+							nbt3.setInteger("uid", task.id);
 
 							if (type != FTBQuestsTasks.ITEM)
 							{
@@ -572,7 +572,7 @@ public abstract class QuestFile extends QuestObject
 							QuestRewardType type = reward.getType();
 							NBTTagCompound nbt3 = new NBTTagCompound();
 							reward.writeData(nbt3);
-							nbt3.setInteger("uid", reward.uid);
+							nbt3.setInteger("uid", reward.id);
 
 							if (type != FTBQuestsRewards.ITEM)
 							{
@@ -605,7 +605,7 @@ public abstract class QuestFile extends QuestObject
 		{
 			NBTTagCompound nbt1 = new NBTTagCompound();
 			variable.writeData(nbt1);
-			nbt1.setInteger("uid", variable.uid);
+			nbt1.setInteger("uid", variable.id);
 			v.appendTag(nbt1);
 		}
 
@@ -614,7 +614,7 @@ public abstract class QuestFile extends QuestObject
 
 	private void readIDs(QuestObjectBase object, NBTTagCompound nbt)
 	{
-		object.uid = readID(nbt.getInteger("uid"));
+		object.id = readID(nbt.getInteger("uid"));
 
 		if (object instanceof QuestObject)
 		{
@@ -625,11 +625,11 @@ public abstract class QuestFile extends QuestObject
 			{
 				if (o instanceof QuestVariable)
 				{
-					oldMap.put("#" + id, o.uid);
+					oldMap.put("#" + id, o.id);
 				}
 				else if (o instanceof QuestChapter)
 				{
-					oldMap.put(id, o.uid);
+					oldMap.put(id, o.id);
 				}
 				else if (o instanceof Quest)
 				{
@@ -637,7 +637,7 @@ public abstract class QuestFile extends QuestObject
 
 					if (!c.isEmpty())
 					{
-						oldMap.put(c + ":" + id, o.uid);
+						oldMap.put(c + ":" + id, o.id);
 					}
 				}
 				else if (o instanceof QuestTask)
@@ -646,7 +646,7 @@ public abstract class QuestFile extends QuestObject
 
 					if (!q.isEmpty())
 					{
-						oldMap.put(q + ":" + id, o.uid);
+						oldMap.put(q + ":" + id, o.id);
 					}
 				}
 			}
@@ -744,7 +744,7 @@ public abstract class QuestFile extends QuestObject
 					if (!rt.hasKey("type") && !rt.hasKey("item"))
 					{
 						ItemReward reward = new ItemReward(quest);
-						reward.uid = readID(rt.getInteger("uid"));
+						reward.id = readID(rt.getInteger("uid"));
 						reward.team = rt.getBoolean("team_reward");
 						rt.removeTag("uid");
 						rt.removeTag("team_reward");
@@ -853,7 +853,7 @@ public abstract class QuestFile extends QuestObject
 
 		for (RewardTable table : rewardTables)
 		{
-			data.writeInt(table.uid);
+			data.writeInt(table.id);
 		}
 
 		data.writeVarInt(chapters.size());
@@ -863,18 +863,18 @@ public abstract class QuestFile extends QuestObject
 
 		for (QuestChapter chapter : chapters)
 		{
-			data.writeInt(chapter.uid);
+			data.writeInt(chapter.id);
 			data.writeVarInt(chapter.quests.size());
 
 			for (Quest quest : chapter.quests)
 			{
-				data.writeInt(quest.uid);
+				data.writeInt(quest.id);
 				data.writeVarInt(quest.tasks.size());
 
 				for (QuestTask task : quest.tasks)
 				{
 					data.writeVarInt(taskTypes.getID(task.getType()));
-					data.writeInt(task.uid);
+					data.writeInt(task.id);
 				}
 
 				data.writeVarInt(quest.rewards.size());
@@ -882,7 +882,7 @@ public abstract class QuestFile extends QuestObject
 				for (QuestReward reward : quest.rewards)
 				{
 					data.writeVarInt(rewardTypes.getID(reward.getType()));
-					data.writeInt(reward.uid);
+					data.writeInt(reward.id);
 				}
 			}
 		}
@@ -891,7 +891,7 @@ public abstract class QuestFile extends QuestObject
 
 		for (QuestVariable variable : variables)
 		{
-			data.writeInt(variable.uid);
+			data.writeInt(variable.id);
 		}
 
 		for (RewardTable table : rewardTables)
@@ -954,7 +954,7 @@ public abstract class QuestFile extends QuestObject
 		for (int i = 0; i < rtl; i++)
 		{
 			RewardTable table = new RewardTable(this);
-			table.uid = data.readInt();
+			table.id = data.readInt();
 			rewardTables.add(table);
 		}
 
@@ -966,7 +966,7 @@ public abstract class QuestFile extends QuestObject
 		for (int i = 0; i < c; i++)
 		{
 			QuestChapter chapter = new QuestChapter(this);
-			chapter.uid = data.readInt();
+			chapter.id = data.readInt();
 			chapters.add(chapter);
 
 			int q = data.readVarInt();
@@ -974,7 +974,7 @@ public abstract class QuestFile extends QuestObject
 			for (int j = 0; j < q; j++)
 			{
 				Quest quest = new Quest(chapter);
-				quest.uid = data.readInt();
+				quest.id = data.readInt();
 				chapter.quests.add(quest);
 
 				int t = data.readVarInt();
@@ -983,7 +983,7 @@ public abstract class QuestFile extends QuestObject
 				{
 					QuestTaskType type = taskTypes.getValue(data.readVarInt());
 					QuestTask task = type.provider.create(quest);
-					task.uid = data.readInt();
+					task.id = data.readInt();
 					quest.tasks.add(task);
 				}
 
@@ -993,7 +993,7 @@ public abstract class QuestFile extends QuestObject
 				{
 					QuestRewardType type = rewardTypes.getValue(data.readVarInt());
 					QuestReward reward = type.provider.create(quest);
-					reward.uid = data.readInt();
+					reward.id = data.readInt();
 					quest.rewards.add(reward);
 				}
 			}
@@ -1004,7 +1004,7 @@ public abstract class QuestFile extends QuestObject
 		for (int i = 0; i < v; i++)
 		{
 			QuestVariable variable = new QuestVariable(this);
-			variable.uid = data.readInt();
+			variable.id = data.readInt();
 			variables.add(variable);
 		}
 
@@ -1175,7 +1175,7 @@ public abstract class QuestFile extends QuestObject
 	{
 		for (Object2IntOpenHashMap.Entry<String> entry : oldMap.object2IntEntrySet())
 		{
-			if (entry.getIntValue() == object.uid)
+			if (entry.getIntValue() == object.id)
 			{
 				return entry.getKey();
 			}

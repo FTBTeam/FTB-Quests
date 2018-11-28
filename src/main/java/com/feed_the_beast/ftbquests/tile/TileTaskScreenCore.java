@@ -73,8 +73,8 @@ public class TileTaskScreenCore extends TileWithTeam implements IConfigCallback,
 
 		if (cTask != null)
 		{
-			quest = new NBTTagInt(cTask.quest.uid);
-			task = new NBTTagInt(cTask.uid);
+			quest = new NBTTagInt(cTask.quest.id);
+			task = new NBTTagInt(cTask.id);
 		}
 
 		if (quest != null)
@@ -274,7 +274,7 @@ public class TileTaskScreenCore extends TileWithTeam implements IConfigCallback,
 
 				if (cTask != null)
 				{
-					quest = new NBTTagInt(cTask.quest.uid);
+					quest = new NBTTagInt(cTask.quest.id);
 				}
 			}
 			else if (task instanceof NBTTagString)
@@ -340,8 +340,8 @@ public class TileTaskScreenCore extends TileWithTeam implements IConfigCallback,
 
 				if (cTask != null)
 				{
-					quest = new NBTTagInt(cTask.quest.uid);
-					task = new NBTTagInt(cTask.uid);
+					quest = new NBTTagInt(cTask.quest.id);
+					task = new NBTTagInt(cTask.id);
 					currentCoreClass = cTask.getScreenCoreClass();
 					currentPartClass = cTask.getScreenPartClass();
 				}
@@ -366,8 +366,8 @@ public class TileTaskScreenCore extends TileWithTeam implements IConfigCallback,
 						if (v instanceof QuestTask)
 						{
 							cTask = (QuestTask) v;
-							quest = new NBTTagInt(cTask.quest.uid);
-							task = new NBTTagInt(cTask.uid);
+							quest = new NBTTagInt(cTask.quest.id);
+							task = new NBTTagInt(cTask.id);
 						}
 					}
 				}, ConfigNull.INSTANCE).setCanEdit(editorOrDestructible).setDisplayName(new TextComponentTranslation("ftbquests.task"));
@@ -418,7 +418,7 @@ public class TileTaskScreenCore extends TileWithTeam implements IConfigCallback,
 			currentCoreClass = cTask.getScreenCoreClass();
 			currentPartClass = cTask.getScreenPartClass();
 			cTask = cTask.quest.tasks.get((cTask.quest.tasks.indexOf(cTask) + 1) % cTask.quest.tasks.size());
-			task = new NBTTagInt(cTask.uid);
+			task = new NBTTagInt(cTask.id);
 
 			updateContainingBlockInfo();
 			cTask = getTask();

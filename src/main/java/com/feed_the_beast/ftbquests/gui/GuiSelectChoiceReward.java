@@ -40,7 +40,7 @@ public class GuiSelectChoiceReward extends GuiButtonListBase
 		{
 			GuiHelper.playClickSound();
 			closeGui();
-			new MessageClaimChoiceReward(choiceReward.uid, choiceReward.getTable().rewards.indexOf(weightedReward)).sendToServer();
+			new MessageClaimChoiceReward(choiceReward.id, choiceReward.getTable().rewards.indexOf(weightedReward)).sendToServer();
 		}
 	}
 

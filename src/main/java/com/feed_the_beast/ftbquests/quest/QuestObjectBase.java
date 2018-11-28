@@ -29,7 +29,7 @@ public abstract class QuestObjectBase
 {
 	public static final Predicate<? super QuestObjectBase> PREDICATE_INVALID = o -> o == null || o.invalid;
 
-	public int uid = 0;
+	public int id = 0;
 	public boolean invalid = false;
 	public String title = "";
 	public ItemStack icon = ItemStack.EMPTY;
@@ -39,12 +39,12 @@ public abstract class QuestObjectBase
 
 	public final String toString()
 	{
-		return String.format("#%08X", uid);
+		return String.format("#%08X", id);
 	}
 
 	public final String getCodeString()
 	{
-		return String.format("%08X", uid);
+		return String.format("%08X", id);
 	}
 
 	public final boolean equals(Object object)
@@ -54,7 +54,7 @@ public abstract class QuestObjectBase
 
 	public final int hashCode()
 	{
-		return uid;
+		return id;
 	}
 
 	public abstract QuestObjectType getObjectType();
@@ -160,7 +160,7 @@ public abstract class QuestObjectBase
 
 	public void deleteSelf()
 	{
-		getQuestFile().remove(uid);
+		getQuestFile().remove(id);
 	}
 
 	public void deleteChildren()
@@ -191,6 +191,6 @@ public abstract class QuestObjectBase
 	@SideOnly(Side.CLIENT)
 	public void onEditButtonClicked()
 	{
-		new MessageEditObject(uid).sendToServer();
+		new MessageEditObject(id).sendToServer();
 	}
 }

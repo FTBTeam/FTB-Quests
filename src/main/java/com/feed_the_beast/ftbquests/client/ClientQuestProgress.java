@@ -60,7 +60,7 @@ public class ClientQuestProgress implements ITeamData
 	@Override
 	public QuestTaskData getQuestTaskData(QuestTask task)
 	{
-		QuestTaskData data = taskData.get(task.uid);
+		QuestTaskData data = taskData.get(task.id);
 
 		if (data == null)
 		{
@@ -78,13 +78,13 @@ public class ClientQuestProgress implements ITeamData
 	@Override
 	public void removeTask(QuestTask task)
 	{
-		taskData.remove(task.uid);
+		taskData.remove(task.id);
 	}
 
 	@Override
 	public void createTaskData(QuestTask task)
 	{
-		taskData.put(task.uid, task.createData(this));
+		taskData.put(task.id, task.createData(this));
 	}
 
 	@Override
@@ -92,7 +92,7 @@ public class ClientQuestProgress implements ITeamData
 	{
 		for (QuestReward reward : rewards)
 		{
-			ClientQuestFile.INSTANCE.rewards.rem(reward.uid);
+			ClientQuestFile.INSTANCE.rewards.rem(reward.id);
 		}
 	}
 
@@ -118,6 +118,6 @@ public class ClientQuestProgress implements ITeamData
 	@Override
 	public boolean isRewardClaimed(UUID player, QuestReward reward)
 	{
-		return ClientQuestFile.INSTANCE.rewards.contains(reward.uid);
+		return ClientQuestFile.INSTANCE.rewards.contains(reward.id);
 	}
 }

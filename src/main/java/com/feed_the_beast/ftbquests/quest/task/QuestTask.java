@@ -58,7 +58,7 @@ public abstract class QuestTask extends QuestObject
 	@Override
 	public final int getParentID()
 	{
-		return quest.uid;
+		return quest.id;
 	}
 
 	public abstract QuestTaskType getType();
@@ -244,7 +244,7 @@ public abstract class QuestTask extends QuestObject
 	@SideOnly(Side.CLIENT)
 	public void onButtonClicked()
 	{
-		new MessageSubmitTask(uid).sendToServer();
+		new MessageSubmitTask(id).sendToServer();
 	}
 
 	public boolean submitItemsOnInventoryChange()

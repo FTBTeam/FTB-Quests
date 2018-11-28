@@ -47,8 +47,8 @@ public class ButtonEditSettings extends ButtonTab
 
 		List<ContextMenuItem> contextMenu = new ArrayList<>();
 		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.edit_file"), GuiIcons.SETTINGS, treeGui.questFile::onEditButtonClicked));
-		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.reset_progress"), GuiIcons.REFRESH, () -> new MessageResetProgress(treeGui.questFile.uid).sendToServer()).setYesNo(I18n.format("ftbquests.gui.reset_progress_q")));
-		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.complete_instantly"), FTBQuestsTheme.COMPLETED, () -> new MessageCompleteInstantly(treeGui.questFile.uid).sendToServer()).setYesNo(I18n.format("ftbquests.gui.complete_instantly_q")));
+		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.reset_progress"), GuiIcons.REFRESH, () -> new MessageResetProgress(treeGui.questFile.id).sendToServer()).setYesNo(I18n.format("ftbquests.gui.reset_progress_q")));
+		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.complete_instantly"), FTBQuestsTheme.COMPLETED, () -> new MessageCompleteInstantly(treeGui.questFile.id).sendToServer()).setYesNo(I18n.format("ftbquests.gui.complete_instantly_q")));
 		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.variables"), GuiIcons.CONTROLLER, () -> new GuiVariables().openGui()));
 		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.reward_tables"), GuiIcons.MONEY_BAG, () -> new GuiRewardTables().openGui()));
 		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.save_as_file"), GuiIcons.DOWN, () -> {

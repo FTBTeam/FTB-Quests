@@ -100,7 +100,7 @@ public class ButtonDummyQuest extends Widget
 		else if (button.isLeft() && treeGui.movingQuest && treeGui.selectedQuest != null && treeGui.questFile.canEdit())
 		{
 			GuiHelper.playClickSound();
-			new MessageMoveQuest(treeGui.selectedQuest.uid, x, y).sendToServer();
+			new MessageMoveQuest(treeGui.selectedQuest.id, x, y).sendToServer();
 			treeGui.movingQuest = false;
 			treeGui.selectQuest(null);
 			return true;
