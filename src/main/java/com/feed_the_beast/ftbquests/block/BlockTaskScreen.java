@@ -368,13 +368,15 @@ public class BlockTaskScreen extends BlockWithHorizontalFacing
 	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack stack, @Nullable World world, List<String> tooltip, ITooltipFlag flag)
 	{
-		if (world == null || !ClientQuestFile.exists())
+		NBTTagCompound nbt = stack.getTagCompound();
+		int size = nbt == null ? 0 : nbt.getByte("Size");
+		tooltip.add(I18n.format("tile.ftbquests.screen.size") + ": " + TextFormatting.GOLD + (1 + size * 2) + " x " + (1 + size * 2));
+
+		if (!ClientQuestFile.exists())
 		{
 			return;
 		}
 
-		NBTTagCompound nbt = stack.getTagCompound();
-		int size = nbt == null ? 0 : nbt.getByte("Size");
 		ITeamData team = nbt == null ? null : ClientQuestFile.INSTANCE.getData(nbt.getShort("Team"));
 
 		if (team == null)
@@ -382,11 +384,9 @@ public class BlockTaskScreen extends BlockWithHorizontalFacing
 			team = ClientQuestFile.INSTANCE.self;
 		}
 
-		tooltip.add(I18n.format("tile.ftbquests.screen.size") + ": " + TextFormatting.GOLD + (1 + size * 2) + " x " + (1 + size * 2));
-
 		if (team != null)
 		{
-			tooltip.add(I18n.format("ftbquests.team") + ": " + TextFormatting.DARK_GREEN + team.getDisplayName().getFormattedText());
+			tooltip.add(I18n.format("ftbquests.team") + ": " + team.getDisplayName().getFormattedText());
 		}
 
 		Quest quest = ClientQuestFile.INSTANCE.getQuest(ClientQuestFile.INSTANCE.getID(nbt == null ? null : nbt.getTag("Quest")));
