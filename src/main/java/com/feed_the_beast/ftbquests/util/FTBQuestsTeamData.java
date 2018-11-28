@@ -8,6 +8,7 @@ import com.feed_the_beast.ftblib.events.team.ForgeTeamLoadedEvent;
 import com.feed_the_beast.ftblib.events.team.ForgeTeamPlayerJoinedEvent;
 import com.feed_the_beast.ftblib.events.team.ForgeTeamPlayerLeftEvent;
 import com.feed_the_beast.ftblib.events.team.ForgeTeamSavedEvent;
+import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
 import com.feed_the_beast.ftblib.lib.data.ForgePlayer;
 import com.feed_the_beast.ftblib.lib.data.ForgeTeam;
 import com.feed_the_beast.ftblib.lib.data.TeamData;
@@ -29,6 +30,7 @@ import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestVariable;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
+import com.feed_the_beast.ftbquests.quest.task.DimensionTask;
 import com.feed_the_beast.ftbquests.quest.task.QuestTask;
 import com.feed_the_beast.ftbquests.quest.task.QuestTaskData;
 import it.unimi.dsi.fastutil.ints.Int2LongOpenHashMap;
@@ -47,6 +49,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -226,6 +229,32 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 		if (event.getEntityPlayer() instanceof EntityPlayerMP)
 		{
 			event.getEntityPlayer().inventoryContainer.addListener(new FTBQuestsInventoryListener((EntityPlayerMP) event.getEntityPlayer()));
+		}
+	}
+
+	@SubscribeEvent
+	public static void onPlayerChangedDimension(net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerChangedDimensionEvent event)
+	{
+		if (event.player instanceof EntityPlayerMP)
+		{
+			ITeamData data = ServerQuestFile.INSTANCE.getData(FTBLibAPI.getTeamID(event.player.getUniqueID()));
+
+			if (data != null)
+			{
+				for (QuestChapter chapter : ServerQuestFile.INSTANCE.chapters)
+				{
+					for (Quest quest : chapter.quests)
+					{
+						for (QuestTask task : quest.tasks)
+						{
+							if (task instanceof DimensionTask)
+							{
+								data.getQuestTaskData(task).submitTask((EntityPlayerMP) event.player, Collections.emptyList(), false);
+							}
+						}
+					}
+				}
+			}
 		}
 	}
 

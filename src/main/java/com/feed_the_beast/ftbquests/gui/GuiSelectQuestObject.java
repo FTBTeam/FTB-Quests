@@ -106,7 +106,27 @@ public class GuiSelectQuestObject extends GuiButtonListBase
 
 	public GuiSelectQuestObject(ConfigQuestObject c, IOpenableGui g, Runnable cb)
 	{
-		setTitle(I18n.format("ftbquests.gui.select_quest_object"));
+		StringBuilder builder = new StringBuilder(I18n.format("ftbquests.gui.select_quest_object"));
+		builder.append(" [");
+
+		boolean first = true;
+
+		for (QuestObjectType type : c.getTypes())
+		{
+			if (first)
+			{
+				first = false;
+			}
+			else
+			{
+				builder.append(", ");
+			}
+
+			builder.append(I18n.format(type.getTranslationKey()));
+		}
+
+		builder.append(']');
+		setTitle(builder.toString());
 		setHasSearchBox(true);
 		setBorder(1, 1, 1);
 		config = c;

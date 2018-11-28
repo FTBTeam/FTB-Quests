@@ -35,7 +35,6 @@ import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemHandlerHelper;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -389,14 +388,14 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 		}
 
 		@Override
-		public boolean hasCapability(@Nonnull Capability<?> capability, @Nullable EnumFacing facing)
+		public boolean hasCapability(Capability<?> capability, @Nullable EnumFacing facing)
 		{
 			return capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY;
 		}
 
 		@Nullable
 		@Override
-		public <T> T getCapability(@Nonnull Capability<T> capability, @Nullable EnumFacing facing)
+		public <T> T getCapability(Capability<T> capability, @Nullable EnumFacing facing)
 		{
 			return capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY ? (T) this : null;
 		}

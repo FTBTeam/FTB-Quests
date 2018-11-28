@@ -19,12 +19,10 @@ import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
-import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.opengl.GL11;
@@ -222,19 +220,6 @@ public class ManaTask extends EnergyTask
 		private Data(ManaTask task, ITeamData data)
 		{
 			super(task, data);
-		}
-
-		@Override
-		public boolean hasCapability(Capability<?> capability, @Nullable EnumFacing facing)
-		{
-			return false;
-		}
-
-		@Override
-		@Nullable
-		public <T> T getCapability(Capability<T> capability, @Nullable EnumFacing facing)
-		{
-			return null;
 		}
 
 		@Override

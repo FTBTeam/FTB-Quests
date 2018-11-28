@@ -28,11 +28,13 @@ import java.util.List;
 public class ItemReward extends QuestReward
 {
 	public ItemStack stack;
+	public int randomBonus;
 
 	public ItemReward(Quest quest)
 	{
 		super(quest);
 		stack = new ItemStack(Items.APPLE);
+		randomBonus = 0;
 	}
 
 	@Override
@@ -46,6 +48,11 @@ public class ItemReward extends QuestReward
 	{
 		super.writeData(nbt);
 		nbt.setTag("item", ItemMissing.write(stack, false));
+
+		if (randomBonus > 0)
+		{
+			nbt.setInteger("random_bonus", randomBonus);
+		}
 	}
 
 	@Override
@@ -53,6 +60,7 @@ public class ItemReward extends QuestReward
 	{
 		super.readData(nbt);
 		stack = ItemMissing.read(nbt.getTag("item"));
+		randomBonus = nbt.getInteger("random_bonus");
 	}
 
 	@Override
@@ -60,6 +68,7 @@ public class ItemReward extends QuestReward
 	{
 		super.writeNetData(data);
 		data.writeItemStack(stack);
+		data.writeVarInt(randomBonus);
 	}
 
 	@Override
@@ -67,6 +76,7 @@ public class ItemReward extends QuestReward
 	{
 		super.readNetData(data);
 		stack = data.readItemStack();
+		randomBonus = data.readVarInt();
 	}
 
 	@Override
@@ -74,12 +84,15 @@ public class ItemReward extends QuestReward
 	{
 		super.getConfig(config);
 		config.add("item", new ConfigItemStack.SimpleStack(() -> stack, v -> stack = v), new ConfigItemStack(ItemStack.EMPTY)).setDisplayName(new TextComponentTranslation("ftbquests.reward.ftbquests.item"));
+		config.addInt("random_bonus", () -> randomBonus, v -> randomBonus = v, 0, 0, Integer.MAX_VALUE);
 	}
 
 	@Override
 	public void claim(EntityPlayerMP player)
 	{
-		ItemHandlerHelper.giveItemToPlayer(player, stack.copy());
+		ItemStack stack1 = stack.copy();
+		stack1.grow(player.world.rand.nextInt(randomBonus + 1));
+		ItemHandlerHelper.giveItemToPlayer(player, stack1);
 	}
 
 	@Override
@@ -87,7 +100,7 @@ public class ItemReward extends QuestReward
 	{
 		if (stack.isEmpty())
 		{
-			return super.getIcon();
+			return super.getAltIcon();
 		}
 
 		return ItemIcon.getItemIcon(stack);
@@ -96,13 +109,13 @@ public class ItemReward extends QuestReward
 	@Override
 	public ITextComponent getAltDisplayName()
 	{
-		return new TextComponentString(stack.getDisplayName());
+		return new TextComponentString((stack.getCount() > 1 ? (randomBonus > 0 ? (stack.getCount() + "-" + (stack.getCount() + randomBonus) + "x ") : (stack.getCount() + "x ")) : "") + stack.getDisplayName());
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void addMouseOverText(List<String> list)
 	{
-		GuiHelper.addStackTooltip(stack, list, "");
+		GuiHelper.addStackTooltip(stack, list, stack.getCount() > 1 ? (randomBonus > 0 ? (stack.getCount() + "-" + (stack.getCount() + randomBonus) + "x ") : (stack.getCount() + "x ")) : "");
 	}
 }
