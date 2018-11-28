@@ -371,16 +371,15 @@ public class BlockProgressScreen extends BlockWithHorizontalFacing
 	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack stack, @Nullable World world, List<String> tooltip, ITooltipFlag flag)
 	{
-		if (world == null || !ClientQuestFile.exists())
-		{
-			return;
-		}
-
 		NBTTagCompound nbt = stack.getTagCompound();
-
 		int width = nbt == null ? 0 : nbt.getByte("Width");
 		int height = nbt == null ? 0 : nbt.getByte("Height");
 		tooltip.add(I18n.format("tile.ftbquests.screen.size") + ": " + TextFormatting.GOLD + (1 + width * 2) + " x " + (1 + height));
+
+		if (!ClientQuestFile.exists())
+		{
+			return;
+		}
 
 		ITeamData team = nbt == null ? null : ClientQuestFile.INSTANCE.getData(nbt.getShort("Team"));
 
@@ -391,7 +390,7 @@ public class BlockProgressScreen extends BlockWithHorizontalFacing
 
 		if (team != null)
 		{
-			tooltip.add(I18n.format("ftbquests.team") + ": " + TextFormatting.DARK_GREEN + team.getDisplayName().getFormattedText());
+			tooltip.add(I18n.format("ftbquests.team") + ": " + team.getDisplayName().getFormattedText());
 		}
 
 		QuestObject object = ClientQuestFile.INSTANCE.get(ClientQuestFile.INSTANCE.getID(nbt == null ? null : nbt.getTag("Object")));
