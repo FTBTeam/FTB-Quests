@@ -75,9 +75,7 @@ public class MessageEditObject extends MessageToServer implements IConfigCallbac
 					group.setDisplayName(new TextComponentTranslation(object.getObjectType().getTranslationKey()));
 				}
 
-				ConfigGroup g = object.createSubGroup(group);
-				//g.setDisplayName(object.getDisplayName().createCopy().appendSibling(StringUtils.color(new TextComponentString(" " + object), TextFormatting.DARK_GRAY)));
-				object.getConfig(g);
+				object.getConfig(object.createSubGroup(group));
 				FTBLibAPI.editServerConfig(player, group, this);
 			}
 		}
