@@ -486,51 +486,6 @@ public abstract class QuestFile extends QuestObject
 		}
 	}
 
-	private NBTTagCompound getOldIDTag(NBTTagCompound nbt, String id)
-	{
-		int idx = id.indexOf(':');
-
-		if (idx == -1)
-		{
-			NBTTagCompound nbt1 = nbt.getCompoundTag(id);
-
-			if (nbt1.isEmpty())
-			{
-				nbt.setTag(id, nbt1);
-			}
-
-			return nbt1;
-		}
-
-		String id1 = id.substring(0, idx);
-		NBTTagCompound nbt1 = nbt.getCompoundTag(id1);
-
-		if (nbt1.isEmpty())
-		{
-			nbt.setTag(id1, nbt1);
-		}
-
-		return getOldIDTag(nbt1, id.substring(idx + 1));
-	}
-
-	private void cleanupOldIDTags(String key, NBTTagCompound parent, NBTTagCompound nbt)
-	{
-		for (String s : new ArrayList<>(nbt.getKeySet()))
-		{
-			NBTBase base = nbt.getTag(s);
-
-			if (base instanceof NBTTagCompound)
-			{
-				cleanupOldIDTags(s, nbt, (NBTTagCompound) base);
-			}
-		}
-
-		if (nbt.getSize() == 1 && nbt.hasKey("$", Constants.NBT.TAG_INT))
-		{
-			parent.setInteger(key, nbt.getInteger("$"));
-		}
-	}
-
 	public final void writeDataFull(NBTTagCompound nbt)
 	{
 		writeData(nbt);
@@ -541,12 +496,7 @@ public abstract class QuestFile extends QuestObject
 
 			for (Object2IntOpenHashMap.Entry<String> entry : oldMap.object2IntEntrySet())
 			{
-				getOldIDTag(oids, entry.getKey()).setInteger("$", entry.getIntValue());
-			}
-
-			for (String s : new ArrayList<>(oids.getKeySet()))
-			{
-				cleanupOldIDTags(s, oids, oids.getCompoundTag(s));
+				oids.setInteger(entry.getKey(), entry.getIntValue());
 			}
 
 			nbt.setTag("old_ids", oids);
@@ -703,27 +653,6 @@ public abstract class QuestFile extends QuestObject
 		}
 	}
 
-	private void readOldIDsMap(String parent, String key, NBTBase nbt)
-	{
-		if (nbt instanceof NBTTagCompound)
-		{
-			NBTTagCompound nbt1 = (NBTTagCompound) nbt;
-
-			for (String s : nbt1.getKeySet())
-			{
-				readOldIDsMap(parent + ":" + key, s, nbt1.getTag(s));
-			}
-		}
-		else if (key.equals("$"))
-		{
-			oldMap.put(parent, ((NBTPrimitive) nbt).getInt());
-		}
-		else
-		{
-			oldMap.put(parent + ":" + key, ((NBTPrimitive) nbt).getInt());
-		}
-	}
-
 	public final void readDataFull(NBTTagCompound nbt)
 	{
 		fileVersion = nbt.getInteger("version");
@@ -739,7 +668,7 @@ public abstract class QuestFile extends QuestObject
 
 		for (String s : oids.getKeySet())
 		{
-			readOldIDsMap(s, s, oids.getTag(s));
+			oldMap.put(s, oids.getInteger(s));
 		}
 
 		NBTTagList rtl = nbt.getTagList("reward_tables", Constants.NBT.TAG_COMPOUND);
@@ -912,26 +841,12 @@ public abstract class QuestFile extends QuestObject
 	{
 		int pos = data.getPosition();
 		writeNetData(data);
+		data.writeVarInt(oldMap.size());
 
-		if (!oldMap.isEmpty())
+		for (Object2IntOpenHashMap.Entry<String> entry : oldMap.object2IntEntrySet())
 		{
-			NBTTagCompound oids = new NBTTagCompound();
-
-			for (Object2IntOpenHashMap.Entry<String> entry : oldMap.object2IntEntrySet())
-			{
-				getOldIDTag(oids, entry.getKey()).setInteger("$", entry.getIntValue());
-			}
-
-			for (String s : new ArrayList<>(oids.getKeySet()))
-			{
-				cleanupOldIDTags(s, oids, oids.getCompoundTag(s));
-			}
-
-			data.writeNBT(oids);
-		}
-		else
-		{
-			data.writeNBT(null);
+			data.writeString(entry.getKey());
+			data.writeInt(entry.getIntValue());
 		}
 
 		data.writeVarInt(rewardTables.size());
@@ -1021,14 +936,13 @@ public abstract class QuestFile extends QuestObject
 		readNetData(data);
 
 		oldMap.clear();
-		NBTTagCompound oids = data.readNBT();
+		int oids = data.readVarInt();
 
-		if (oids != null && !oids.isEmpty())
+		for (int i = 0; i < oids; i++)
 		{
-			for (String s : oids.getKeySet())
-			{
-				readOldIDsMap(s, s, oids.getTag(s));
-			}
+			String k = data.readString();
+			int v = data.readInt();
+			oldMap.put(k, v);
 		}
 
 		chapters.clear();
