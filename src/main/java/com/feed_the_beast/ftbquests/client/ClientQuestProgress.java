@@ -2,17 +2,13 @@ package com.feed_the_beast.ftbquests.client;
 
 import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
-import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
 import com.feed_the_beast.ftbquests.quest.task.QuestTask;
 import com.feed_the_beast.ftbquests.quest.task.QuestTaskData;
 import it.unimi.dsi.fastutil.ints.Int2LongOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextFormatting;
 
-import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.UUID;
 
@@ -123,53 +119,5 @@ public class ClientQuestProgress implements ITeamData
 	public boolean isRewardClaimed(UUID player, QuestReward reward)
 	{
 		return ClientQuestFile.INSTANCE.rewards.contains(reward.uid);
-	}
-
-	public static String getCompletionSuffix(@Nullable ClientQuestProgress progress, QuestObject object)
-	{
-		if (!GuiScreen.isShiftKeyDown() && !(object instanceof QuestTask))
-		{
-			return "";
-		}
-
-		StringBuilder builder = new StringBuilder();
-		builder.append(TextFormatting.DARK_GRAY);
-
-		if (progress == null)
-		{
-			builder.append(' ');
-			builder.append("???");
-		}
-		else
-		{
-			if (object instanceof QuestTask)
-			{
-				QuestTask task = (QuestTask) object;
-
-				if (!task.hideProgressNumbers())
-				{
-					QuestTaskData data = progress.getQuestTaskData(task);
-					builder.append(" [");
-					builder.append(data.getProgressString());
-					builder.append(" / ");
-					builder.append(task.getMaxProgressString());
-					builder.append(']');
-				}
-			}
-			else
-			{
-				builder.append(' ');
-				builder.append(object.getRelativeProgress(progress));
-				builder.append('%');
-			}
-		}
-
-		if (GuiScreen.isCtrlKeyDown())
-		{
-			builder.append(' ');
-			builder.append(object.toString());
-		}
-
-		return builder.toString();
 	}
 }

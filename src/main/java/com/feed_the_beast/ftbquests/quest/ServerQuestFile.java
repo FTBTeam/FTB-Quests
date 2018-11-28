@@ -23,6 +23,7 @@ public class ServerQuestFile extends QuestFile
 	public final Universe universe;
 	public final File file;
 	public boolean shouldSave = false;
+	private boolean isLoading = false;
 
 	public ServerQuestFile(Universe u, File f)
 	{
@@ -44,7 +45,9 @@ public class ServerQuestFile extends QuestFile
 			return false;
 		}
 
+		isLoading = true;
 		readDataFull(nbt);
+		isLoading = false;
 		return true;
 	}
 
@@ -52,6 +55,12 @@ public class ServerQuestFile extends QuestFile
 	public boolean isClient()
 	{
 		return false;
+	}
+
+	@Override
+	public boolean isLoading()
+	{
+		return isLoading;
 	}
 
 	@Nullable

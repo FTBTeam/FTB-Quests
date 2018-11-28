@@ -12,7 +12,7 @@ import com.feed_the_beast.ftbquests.block.BlockProgressScreen;
 import com.feed_the_beast.ftbquests.block.FTBQuestsBlocks;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
-import com.feed_the_beast.ftbquests.quest.QuestObject;
+import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
@@ -216,7 +216,7 @@ public class TileProgressScreenCore extends TileWithTeam implements IConfigCallb
 				config.add("chapter", new ConfigQuestObject(ServerQuestFile.INSTANCE, cChapter, Collections.singleton(QuestObjectType.CHAPTER))
 				{
 					@Override
-					public void setObject(@Nullable QuestObject v)
+					public void setObject(@Nullable QuestObjectBase v)
 					{
 						if (v instanceof QuestChapter)
 						{

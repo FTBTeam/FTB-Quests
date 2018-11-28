@@ -8,7 +8,7 @@ import com.feed_the_beast.ftblib.lib.gui.misc.GuiButtonListBase;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.net.MessageClaimChoiceReward;
 import com.feed_the_beast.ftbquests.quest.reward.ChoiceReward;
-import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
+import com.feed_the_beast.ftbquests.quest.reward.WeightedReward;
 import net.minecraft.client.resources.I18n;
 
 import java.util.List;
@@ -20,19 +20,19 @@ public class GuiSelectChoiceReward extends GuiButtonListBase
 {
 	private class ButtonChoiceReward extends SimpleTextButton
 	{
-		private final QuestReward reward;
+		private final WeightedReward weightedReward;
 
-		private ButtonChoiceReward(Panel panel, QuestReward r)
+		private ButtonChoiceReward(Panel panel, WeightedReward r)
 		{
-			super(panel, r.getDisplayName().getFormattedText(), r.getIcon());
-			reward = r;
+			super(panel, r.reward.getDisplayName().getFormattedText(), r.reward.getIcon());
+			weightedReward = r;
 		}
 
 		@Override
 		public void addMouseOverText(List<String> list)
 		{
 			super.addMouseOverText(list);
-			reward.addMouseOverText(list);
+			weightedReward.reward.addMouseOverText(list);
 		}
 
 		@Override
@@ -40,7 +40,7 @@ public class GuiSelectChoiceReward extends GuiButtonListBase
 		{
 			GuiHelper.playClickSound();
 			closeGui();
-			new MessageClaimChoiceReward(choiceReward.uid, choiceReward.rewards.indexOf(reward)).sendToServer();
+			new MessageClaimChoiceReward(choiceReward.uid, choiceReward.getTable().rewards.indexOf(weightedReward)).sendToServer();
 		}
 	}
 
@@ -56,7 +56,7 @@ public class GuiSelectChoiceReward extends GuiButtonListBase
 	@Override
 	public void addButtons(Panel panel)
 	{
-		for (QuestReward r : choiceReward.rewards)
+		for (WeightedReward r : choiceReward.getTable().rewards)
 		{
 			panel.add(new ButtonChoiceReward(panel, r));
 		}

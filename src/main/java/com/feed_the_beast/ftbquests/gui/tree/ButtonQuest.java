@@ -12,7 +12,6 @@ import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
-import com.feed_the_beast.ftbquests.client.ClientQuestProgress;
 import com.feed_the_beast.ftbquests.gui.FTBQuestsTheme;
 import com.feed_the_beast.ftbquests.net.edit.MessageEditObjectDirect;
 import com.feed_the_beast.ftbquests.quest.Quest;
@@ -157,7 +156,19 @@ public class ButtonQuest extends Button
 	@Override
 	public void addMouseOverText(List<String> list)
 	{
-		list.add(getTitle() + ClientQuestProgress.getCompletionSuffix(treeGui.questFile.self, quest));
+		String title = getTitle();
+
+		if (treeGui.questFile.self != null)
+		{
+			int p = quest.getRelativeProgress(treeGui.questFile.self);
+
+			if (p > 0 && p < 100)
+			{
+				title += " " + TextFormatting.DARK_GRAY + p + "%";
+			}
+		}
+
+		list.add(title);
 
 		if (!description.isEmpty())
 		{
@@ -210,31 +221,42 @@ public class ButtonQuest extends Button
 	public void draw(Theme theme, int x, int y, int w, int h)
 	{
 		Color4I backgroundColor = Color4I.WHITE.withAlpha(100);
-		Color4I outlineColor = Icon.EMPTY;
-		int r = 0;
-		int progress = 0;
+		Color4I outlineColor = Color4I.WHITE.withAlpha(150);
+		Icon qicon = Icon.EMPTY;
 
 		boolean cantStart = treeGui.questFile.self == null || !quest.canStartTasks(treeGui.questFile.self);
 
 		if (!cantStart)
 		{
-			progress = quest.getRelativeProgress(treeGui.questFile.self);
+			int progress = quest.getRelativeProgress(treeGui.questFile.self);
 
 			if (progress >= 100)
 			{
+				boolean hasRewards = false;
+
 				for (QuestReward reward : quest.rewards)
 				{
 					if (!treeGui.questFile.isRewardClaimed(reward))
 					{
-						r++;
+						hasRewards = true;
+						break;
 					}
 				}
 
-				outlineColor = COL_COMPLETED;
+				if (hasRewards)
+				{
+					qicon = FTBQuestsTheme.ALERT;
+				}
+				else
+				{
+					qicon = FTBQuestsTheme.COMPLETED;
+				}
+
+				outlineColor = COL_COMPLETED.withAlpha(200);
 			}
 			else if (progress > 0)
 			{
-				outlineColor = COL_STARTED;
+				outlineColor = COL_STARTED.withAlpha(200);
 			}
 		}
 		else
@@ -254,7 +276,7 @@ public class ButtonQuest extends Button
 			GlStateManager.pushMatrix();
 			GlStateManager.translate(sx1, sy1, 0D);
 			GlStateManager.scale(s1, s1, 1D);
-			quest.shape.outline.draw(0, 0, 1, 1);
+			quest.shape.outline.draw(0, 0, 1, 1, Color4I.WHITE.withAlpha(150 + (int) (Math.sin(System.currentTimeMillis() * 0.003D) * 80)));
 			GlStateManager.popMatrix();
 		}
 
@@ -291,24 +313,14 @@ public class ButtonQuest extends Button
 			GlStateManager.popMatrix();
 		}
 
-		if (r > 0)
-		{
-			double s1 = treeGui.zoom / 2D;
-			double os1 = s1 / 4;
-			GlStateManager.pushMatrix();
-			GlStateManager.translate(x + w - s1 - os1, y + os1, 500);
-			GlStateManager.scale(s1, s1, 1D);
-			FTBQuestsTheme.ALERT.draw(0, 0, 1, 1);
-			GlStateManager.popMatrix();
-		}
-		else if (progress >= 100)
+		if (!qicon.isEmpty())
 		{
 			double s1 = treeGui.zoom / 2D;
 			double os1 = s1 / 4D;
 			GlStateManager.pushMatrix();
 			GlStateManager.translate(x + w - s1 - os1, y + os1, 500);
 			GlStateManager.scale(s1, s1, 1D);
-			FTBQuestsTheme.COMPLETED.draw(0, 0, 1, 1);
+			qicon.draw(0, 0, 1, 1);
 			GlStateManager.popMatrix();
 		}
 	}

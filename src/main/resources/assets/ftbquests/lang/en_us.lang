@@ -79,6 +79,8 @@ ftbquests.quest.text=Text
 ftbquests.quest.can_repeat=Can be repeated
 
 ftbquests.gui.edit_file=Edit File
+ftbquests.gui.save_as_file=Save as File
+ftbquests.gui.saved_as_file=Saved as %s
 ftbquests.gui.move=Move
 ftbquests.gui.select_quest_object=Select Quest Object
 ftbquests.gui.select_task_type=Select Task Type
@@ -162,10 +164,8 @@ ftbquests.reward.ftbquests.command=Command
 ftbquests.reward.ftbquests.command.text=Command: %s
 
 ftbquests.reward.ftbquests.choice=Choice Reward
-
 ftbquests.reward.ftbquests.random=Random Reward
-ftbquests.reward.ftbquests.random.weight=Weight
-ftbquests.reward.ftbquests.random.setweight=Set Weight
+ftbquests.reward.ftbquests.loot=Loot Reward
 
 ftbquests.reward.ftbquests.ftb_money=Money
 ftbquests.reward.ftbquests.ftb_money.value=Money
@@ -175,6 +175,15 @@ ftbquests.variable.max_value=Max Value
 ftbquests.variable.team=Team can set it's own value
 ftbquests.variables=Variables
 ftbquests.variable.max=Max Value
+
+ftbquests.reward_table=Reward Table
+ftbquests.reward_table.edit=Edit Reward Table
+ftbquests.reward_tables=Reward Tables
+ftbquests.reward_table.nothing=Nothing
+ftbquests.reward_table.empty_weight=Empty Weight
+ftbquests.reward_table.loot_size=Loot Size
+ftbquests.reward_table.weight=Weight
+ftbquests.reward_table.set_weight=Set Weight
 
 commands.ftbquests.usage=/ftbquests [subcommand]
 commands.ftbquests.editing_mode.usage=/ftbquests editing_mode [true|false|toggle] [player]

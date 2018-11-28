@@ -10,7 +10,7 @@ import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.gui.GuiSelectQuestObject;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
-import com.feed_the_beast.ftbquests.quest.QuestObject;
+import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.command.ICommandSender;
@@ -33,9 +33,9 @@ public class ConfigQuestObject extends ConfigValue
 
 	private final QuestFile file;
 	private final HashSet<QuestObjectType> types;
-	private QuestObject object;
+	private QuestObjectBase object;
 
-	public ConfigQuestObject(@Nullable QuestFile f, @Nullable QuestObject o, Collection<QuestObjectType> t)
+	public ConfigQuestObject(@Nullable QuestFile f, @Nullable QuestObjectBase o, Collection<QuestObjectType> t)
 	{
 		file = f == null ? FTBQuests.PROXY.getQuestFile(null) : f;
 		object = o;
@@ -47,7 +47,7 @@ public class ConfigQuestObject extends ConfigValue
 		return types.contains(type);
 	}
 
-	public boolean isValid(@Nullable QuestObject object)
+	public boolean isValid(@Nullable QuestObjectBase object)
 	{
 		return isValid(object == null ? QuestObjectType.NULL : object.getObjectType());
 	}
@@ -58,13 +58,13 @@ public class ConfigQuestObject extends ConfigValue
 		return ID;
 	}
 
-	public void setObject(@Nullable QuestObject v)
+	public void setObject(@Nullable QuestObjectBase v)
 	{
 		object = v;
 	}
 
 	@Nullable
-	public QuestObject getObject()
+	public QuestObjectBase getObject()
 	{
 		return object;
 	}
@@ -138,7 +138,7 @@ public class ConfigQuestObject extends ConfigValue
 
 		int i = data.readUnsignedByte();
 
-		for (QuestObjectType type : QuestObjectType.VALUES)
+		for (QuestObjectType type : QuestObjectType.ALL)
 		{
 			if (Bits.getFlag(i, type.getFlag()))
 			{
@@ -146,7 +146,7 @@ public class ConfigQuestObject extends ConfigValue
 			}
 		}
 
-		object = file.get(data.readInt());
+		object = file.getBase(data.readInt());
 
 		if (isValid(object))
 		{
@@ -157,7 +157,7 @@ public class ConfigQuestObject extends ConfigValue
 	@Override
 	public boolean setValueFromString(@Nullable ICommandSender sender, String string, boolean simulate)
 	{
-		object = file.get(file.getID(string));
+		object = file.getBase(file.getID(string));
 
 		if (isValid(object))
 		{
@@ -209,7 +209,7 @@ public class ConfigQuestObject extends ConfigValue
 			types.addAll(((ConfigQuestObject) value).types);
 		}
 
-		object = file.get(value.getInt());
+		object = file.getBase(value.getInt());
 
 		if (isValid(object))
 		{
@@ -231,7 +231,7 @@ public class ConfigQuestObject extends ConfigValue
 	@Override
 	public void readFromNBT(NBTTagCompound nbt, String key)
 	{
-		object = file.get(nbt.getInteger(key));
+		object = file.getBase(nbt.getInteger(key));
 
 		if (isValid(object))
 		{

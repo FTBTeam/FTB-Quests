@@ -18,6 +18,7 @@ import com.feed_the_beast.ftbquests.quest.reward.FTBQuestsRewards;
 import com.feed_the_beast.ftbquests.quest.reward.ItemReward;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
 import com.feed_the_beast.ftbquests.quest.reward.QuestRewardType;
+import com.feed_the_beast.ftbquests.quest.reward.RewardTable;
 import com.feed_the_beast.ftbquests.quest.task.FTBQuestsTasks;
 import com.feed_the_beast.ftbquests.quest.task.QuestTask;
 import com.feed_the_beast.ftbquests.quest.task.QuestTaskType;
@@ -52,6 +53,7 @@ public abstract class QuestFile extends QuestObject
 
 	public final List<QuestChapter> chapters;
 	public final List<QuestVariable> variables;
+	public final List<RewardTable> rewardTables;
 
 	private final Int2ObjectOpenHashMap<QuestObjectBase> map;
 	private final Map<String, QuestObject> oldMap;
@@ -63,6 +65,7 @@ public abstract class QuestFile extends QuestObject
 	public boolean defaultRewardTeam;
 	public boolean defaultCheckOnly;
 	public int fileVersion;
+	public final RewardTable dummyTable;
 
 	public QuestFile()
 	{
@@ -70,6 +73,7 @@ public abstract class QuestFile extends QuestObject
 		uid = 1;
 		chapters = new ArrayList<>();
 		variables = new ArrayList<>();
+		rewardTables = new ArrayList<>();
 
 		map = new Int2ObjectOpenHashMap<>();
 		oldMap = new HashMap<>();
@@ -89,6 +93,7 @@ public abstract class QuestFile extends QuestObject
 		defaultRewardTeam = false;
 		defaultCheckOnly = false;
 		fileVersion = 0;
+		dummyTable = new RewardTable(this);
 	}
 
 	public abstract boolean isClient();
@@ -110,6 +115,11 @@ public abstract class QuestFile extends QuestObject
 	public String getID()
 	{
 		return id;
+	}
+
+	public boolean isLoading()
+	{
+		return false;
 	}
 
 	@Override
@@ -214,6 +224,14 @@ public abstract class QuestFile extends QuestObject
 		}
 
 		variables.clear();
+
+		for (RewardTable table : rewardTables)
+		{
+			table.deleteChildren();
+			table.invalid = true;
+		}
+
+		rewardTables.clear();
 	}
 
 	@Nullable
@@ -304,6 +322,13 @@ public abstract class QuestFile extends QuestObject
 		return object instanceof QuestReward ? (QuestReward) object : null;
 	}
 
+	@Nullable
+	public RewardTable getRewardTable(int id)
+	{
+		QuestObjectBase object = getBase(id);
+		return object instanceof RewardTable ? (RewardTable) object : null;
+	}
+
 	@SuppressWarnings("deprecation")
 	public void refreshIDMap()
 	{
@@ -311,6 +336,11 @@ public abstract class QuestFile extends QuestObject
 
 		oldMap.clear();
 		map.clear();
+
+		for (RewardTable table : rewardTables)
+		{
+			map.put(table.uid, table);
+		}
 
 		for (QuestChapter chapter : chapters)
 		{
@@ -397,6 +427,8 @@ public abstract class QuestFile extends QuestObject
 				}
 
 				throw new IllegalArgumentException("Parent quest not found!");
+			case REWARD_TABLE:
+				return new RewardTable(this);
 			default:
 				throw new IllegalArgumentException("Unknown type: " + type);
 		}
@@ -475,6 +507,18 @@ public abstract class QuestFile extends QuestObject
 	public final void writeDataFull(NBTTagCompound nbt)
 	{
 		writeData(nbt);
+
+		NBTTagList rt = new NBTTagList();
+
+		for (RewardTable table : rewardTables)
+		{
+			NBTTagCompound nbt1 = new NBTTagCompound();
+			table.writeData(nbt1);
+			nbt1.setInteger("uid", table.uid);
+			rt.appendTag(nbt1);
+		}
+
+		nbt.setTag("reward_tables", rt);
 
 		NBTTagList c = new NBTTagList();
 
@@ -596,6 +640,18 @@ public abstract class QuestFile extends QuestObject
 
 		chapters.clear();
 		variables.clear();
+		rewardTables.clear();
+
+		NBTTagList rtl = nbt.getTagList("reward_tables", Constants.NBT.TAG_COMPOUND);
+
+		for (int i = 0; i < rtl.tagCount(); i++)
+		{
+			RewardTable table = new RewardTable(this);
+			NBTTagCompound nbt1 = rtl.getCompoundTagAt(i);
+			readIDs(table, nbt1);
+			table.readData(nbt1);
+			rewardTables.add(table);
+		}
 
 		NBTTagList c = nbt.getTagList("chapters", Constants.NBT.TAG_COMPOUND);
 
@@ -757,6 +813,13 @@ public abstract class QuestFile extends QuestObject
 		int pos = data.getPosition();
 
 		writeNetData(data);
+		data.writeVarInt(rewardTables.size());
+
+		for (RewardTable table : rewardTables)
+		{
+			data.writeInt(table.uid);
+		}
+
 		data.writeVarInt(chapters.size());
 
 		ForgeRegistry<QuestTaskType> taskTypes = QuestTaskType.getRegistry();
@@ -799,6 +862,11 @@ public abstract class QuestFile extends QuestObject
 			data.writeString(variable.id);
 		}
 
+		for (RewardTable table : rewardTables)
+		{
+			table.writeNetData(data);
+		}
+
 		for (QuestChapter chapter : chapters)
 		{
 			chapter.writeNetData(data);
@@ -835,6 +903,20 @@ public abstract class QuestFile extends QuestObject
 		int pos = data.getPosition();
 
 		readNetData(data);
+
+		chapters.clear();
+		variables.clear();
+		rewardTables.clear();
+
+		int rtl = data.readVarInt();
+
+		for (int i = 0; i < rtl; i++)
+		{
+			RewardTable table = new RewardTable(this);
+			table.uid = data.readInt();
+			rewardTables.add(table);
+		}
+
 		ForgeRegistry<QuestTaskType> taskTypes = QuestTaskType.getRegistry();
 		ForgeRegistry<QuestRewardType> rewardTypes = QuestRewardType.getRegistry();
 
@@ -890,6 +972,11 @@ public abstract class QuestFile extends QuestObject
 		}
 
 		refreshIDMap();
+
+		for (RewardTable table : rewardTables)
+		{
+			table.readNetData(data);
+		}
 
 		for (QuestChapter chapter : chapters)
 		{

@@ -6,7 +6,10 @@ import com.feed_the_beast.ftblib.lib.gui.IOpenableGui;
 import com.feed_the_beast.ftblib.lib.gui.misc.GuiEditConfig;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftbquests.FTBQuests;
+import com.feed_the_beast.ftbquests.gui.GuiSelectQuestObject;
 import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.quest.QuestObjectType;
+import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -19,6 +22,7 @@ import net.minecraftforge.registries.IForgeRegistryEntry;
 import net.minecraftforge.registries.RegistryBuilder;
 
 import javax.annotation.Nullable;
+import java.util.Collections;
 import java.util.function.Consumer;
 
 /**
@@ -107,6 +111,16 @@ public final class QuestRewardType extends IForgeRegistryEntry.Impl<QuestRewardT
 
 				if (reward == null)
 				{
+					return;
+				}
+
+				if (reward instanceof RandomReward)
+				{
+					ConfigQuestObject config = new ConfigQuestObject(quest.chapter.file, null, Collections.singleton(QuestObjectType.REWARD_TABLE));
+					new GuiSelectQuestObject(config, gui, () -> {
+						((RandomReward) reward).table = (RewardTable) config.getObject();
+						callback.accept(reward);
+					}).openGui();
 					return;
 				}
 

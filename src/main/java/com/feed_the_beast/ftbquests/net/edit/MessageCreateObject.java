@@ -56,7 +56,7 @@ public class MessageCreateObject extends MessageToServer
 	public void readData(DataIn data)
 	{
 		parent = data.readInt();
-		type = QuestObjectType.VALUES[data.readUnsignedByte()];
+		type = QuestObjectType.ALL.get(data.readUnsignedByte());
 		nbt = data.readNBT();
 		extra = data.readNBT();
 	}

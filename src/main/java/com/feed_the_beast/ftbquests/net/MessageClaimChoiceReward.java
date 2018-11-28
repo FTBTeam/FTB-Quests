@@ -62,9 +62,9 @@ public class MessageClaimChoiceReward extends MessageToServer
 			{
 				ChoiceReward r = (ChoiceReward) reward;
 
-				if (index >= 0 && index < r.rewards.size())
+				if (index >= 0 && index < r.getTable().rewards.size())
 				{
-					r.rewards.get(index).claim(player);
+					r.getTable().rewards.get(index).reward.claim(player);
 					teamData.claimReward(player, reward);
 				}
 			}

@@ -519,7 +519,7 @@ public final class Quest extends QuestObject
 		//config.addEnum("visibility", () -> visibilityType, v -> visibilityType = v, EnumQuestVisibilityType.NAME_MAP);
 		config.addString("description", () -> description, v -> description = v, "");
 		config.addList("text", text, new ConfigString(""), ConfigString::new, ConfigString::getString);
-		config.addList("dependencies", dependencies, new ConfigQuestObject(null, null, DEP_TYPES), v -> new ConfigQuestObject(null, v, DEP_TYPES), ConfigQuestObject::getObject).setDisplayName(new TextComponentTranslation("ftbquests.dependencies"));
+		config.addList("dependencies", dependencies, new ConfigQuestObject(null, null, DEP_TYPES), v -> new ConfigQuestObject(null, v, DEP_TYPES), c -> (QuestObject) c.getObject()).setDisplayName(new TextComponentTranslation("ftbquests.dependencies"));
 		config.addBool("can_repeat", () -> canRepeat, v -> canRepeat = v, false);
 	}
 

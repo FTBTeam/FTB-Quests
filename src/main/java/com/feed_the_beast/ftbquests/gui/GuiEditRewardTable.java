@@ -17,9 +17,9 @@ import com.feed_the_beast.ftblib.lib.gui.misc.GuiEditConfigValue;
 import com.feed_the_beast.ftblib.lib.gui.misc.IConfigValueEditCallback;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.FTBQuests;
-import com.feed_the_beast.ftbquests.net.edit.MessageEditObject;
 import com.feed_the_beast.ftbquests.quest.reward.QuestRewardType;
-import com.feed_the_beast.ftbquests.quest.reward.RandomReward;
+import com.feed_the_beast.ftbquests.quest.reward.RewardTable;
+import com.feed_the_beast.ftbquests.quest.reward.WeightedReward;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.TextFormatting;
@@ -30,11 +30,11 @@ import java.util.List;
 /**
  * @author LatvianModder
  */
-public class GuiEditRandomReward extends GuiButtonListBase
+public class GuiEditRewardTable extends GuiButtonListBase
 {
-	private class ButtonEditRandomReward extends SimpleTextButton
+	private class ButtonRewardTableSettings extends SimpleTextButton
 	{
-		private ButtonEditRandomReward(Panel panel)
+		private ButtonRewardTableSettings(Panel panel)
 		{
 			super(panel, I18n.format("gui.settings"), GuiIcons.SETTINGS);
 			setHeight(12);
@@ -44,13 +44,15 @@ public class GuiEditRandomReward extends GuiButtonListBase
 		public void onClicked(MouseButton button)
 		{
 			GuiHelper.playClickSound();
-			new MessageEditObject(randomReward.uid).sendToServer();
+			ConfigGroup group = ConfigGroup.newGroup(FTBQuests.MOD_ID);
+			rewardTable.getConfig(rewardTable.createSubGroup(group));
+			new GuiEditConfig(group, IConfigCallback.DEFAULT).openGui();
 		}
 	}
 
-	private class ButtonAcceptRandomReward extends SimpleTextButton
+	private class ButtonSaveRewardTable extends SimpleTextButton
 	{
-		private ButtonAcceptRandomReward(Panel panel)
+		private ButtonSaveRewardTable(Panel panel)
 		{
 			super(panel, I18n.format("gui.accept"), GuiIcons.ACCEPT);
 			setHeight(12);
@@ -62,15 +64,15 @@ public class GuiEditRandomReward extends GuiButtonListBase
 			GuiHelper.playClickSound();
 			closeGui();
 			NBTTagCompound nbt = new NBTTagCompound();
-			randomReward.writeData(nbt);
-			original.readData(nbt);
+			rewardTable.writeData(nbt);
+			originalTable.readData(nbt);
 			callback.run();
 		}
 	}
 
-	private class ButtonAddRandomReward extends SimpleTextButton
+	private class ButtonAddWeightedReward extends SimpleTextButton
 	{
-		private ButtonAddRandomReward(Panel panel)
+		private ButtonAddWeightedReward(Panel panel)
 		{
 			super(panel, I18n.format("gui.add"), GuiIcons.ADD);
 			setHeight(12);
@@ -88,8 +90,8 @@ public class GuiEditRandomReward extends GuiButtonListBase
 				{
 					contextMenu.add(new ContextMenuItem(type.getDisplayName().getFormattedText(), type.getIcon(), () -> {
 						GuiHelper.playClickSound();
-						type.getGuiProvider().openCreationGui(this, randomReward.quest, reward -> {
-							randomReward.rewards.add(new RandomReward.WeightedReward(reward, 1));
+						type.getGuiProvider().openCreationGui(this, rewardTable.fakeQuest, reward -> {
+							rewardTable.rewards.add(new WeightedReward(reward, 1));
 							openGui();
 						});
 					}));
@@ -100,11 +102,11 @@ public class GuiEditRandomReward extends GuiButtonListBase
 		}
 	}
 
-	private class ButtonRandomReward extends SimpleTextButton implements IConfigValueEditCallback
+	private class ButtonWeightedReward extends SimpleTextButton implements IConfigValueEditCallback
 	{
-		private final RandomReward.WeightedReward reward;
+		private final WeightedReward reward;
 
-		private ButtonRandomReward(Panel panel, RandomReward.WeightedReward r)
+		private ButtonWeightedReward(Panel panel, WeightedReward r)
 		{
 			super(panel, r.reward.getDisplayName().getFormattedText(), r.reward.getIcon());
 			reward = r;
@@ -115,24 +117,7 @@ public class GuiEditRandomReward extends GuiButtonListBase
 		{
 			super.addMouseOverText(list);
 			reward.reward.addMouseOverText(list);
-
-			int totalWeight = 0;
-
-			for (RandomReward.WeightedReward r : randomReward.rewards)
-			{
-				totalWeight += r.weight;
-			}
-
-			int chance = reward.weight * 100 / totalWeight;
-
-			if (chance == 0)
-			{
-				list.add(I18n.format("ftbquests.reward.ftbquests.random.weight") + ": " + reward.weight + TextFormatting.DARK_GRAY + " [" + String.format("%.2f", reward.weight * 100D / (double) totalWeight) + "%]");
-			}
-			else
-			{
-				list.add(I18n.format("ftbquests.reward.ftbquests.random.weight") + ": " + reward.weight + TextFormatting.DARK_GRAY + " [" + (reward.weight * 100 / totalWeight) + "%]");
-			}
+			list.add(I18n.format("ftbquests.reward_table.weight") + ": " + reward.weight + TextFormatting.DARK_GRAY + " [" + WeightedReward.chanceString(reward.weight, rewardTable.getTotalWeight(true)) + "]");
 		}
 
 		@Override
@@ -142,17 +127,16 @@ public class GuiEditRandomReward extends GuiButtonListBase
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
 			contextMenu.add(new ContextMenuItem(I18n.format("selectServer.edit"), GuiIcons.SETTINGS, () -> {
 				ConfigGroup group = ConfigGroup.newGroup(FTBQuests.MOD_ID);
-				ConfigGroup g = reward.reward.createSubGroup(group);
-				reward.reward.getConfig(g);
+				reward.reward.getConfig(reward.reward.createSubGroup(group));
 				new GuiEditConfig(group, IConfigCallback.DEFAULT).openGui();
 			}));
 
-			contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.reward.ftbquests.random.setweight"), GuiIcons.SETTINGS, () -> new GuiEditConfigValue("value", new ConfigInt(reward.weight, 1, Integer.MAX_VALUE), this).openGui()));
+			contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.reward_table.set_weight"), GuiIcons.SETTINGS, () -> new GuiEditConfigValue("value", new ConfigInt(reward.weight, 1, Integer.MAX_VALUE), this).openGui()));
 			contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), GuiIcons.REMOVE, () -> {
-				randomReward.rewards.remove(reward);
-				GuiEditRandomReward.this.refreshWidgets();
+				rewardTable.rewards.remove(reward);
+				GuiEditRewardTable.this.refreshWidgets();
 			}).setYesNo(I18n.format("delete_item", reward.reward.getDisplayName().getFormattedText())));
-			GuiEditRandomReward.this.openContextMenu(contextMenu);
+			GuiEditRewardTable.this.openContextMenu(contextMenu);
 		}
 
 		@Override
@@ -167,33 +151,33 @@ public class GuiEditRandomReward extends GuiButtonListBase
 		}
 	}
 
-	private final RandomReward original;
-	private final RandomReward randomReward;
+	private final RewardTable originalTable;
+	private final RewardTable rewardTable;
 	private final Runnable callback;
 
-	public GuiEditRandomReward(RandomReward r, Runnable c)
+	public GuiEditRewardTable(RewardTable r, Runnable c)
 	{
-		original = r;
-		randomReward = new RandomReward(original.quest);
+		originalTable = r;
+		rewardTable = new RewardTable(originalTable.file);
 		NBTTagCompound nbt = new NBTTagCompound();
-		original.writeData(nbt);
-		randomReward.readData(nbt);
+		originalTable.writeData(nbt);
+		rewardTable.readData(nbt);
 		callback = c;
-		setTitle(I18n.format("ftbquests.reward.ftbquests.random"));
+		setTitle(I18n.format("ftbquests.reward_table"));
 		setBorder(1, 1, 1);
 	}
 
 	@Override
 	public void addButtons(Panel panel)
 	{
-		panel.add(new ButtonEditRandomReward(panel));
-		panel.add(new ButtonAcceptRandomReward(panel));
-		panel.add(new ButtonAddRandomReward(panel));
+		panel.add(new ButtonRewardTableSettings(panel));
+		panel.add(new ButtonSaveRewardTable(panel));
+		panel.add(new ButtonAddWeightedReward(panel));
 		panel.add(new WidgetVerticalSpace(panel, 1));
 
-		for (RandomReward.WeightedReward r : randomReward.rewards)
+		for (WeightedReward r : rewardTable.rewards)
 		{
-			panel.add(new ButtonRandomReward(panel, r));
+			panel.add(new ButtonWeightedReward(panel, r));
 		}
 	}
 

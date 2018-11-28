@@ -13,7 +13,7 @@ import com.feed_the_beast.ftbquests.block.BlockTaskScreen;
 import com.feed_the_beast.ftbquests.block.FTBQuestsBlocks;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
-import com.feed_the_beast.ftbquests.quest.QuestObject;
+import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.task.QuestTask;
@@ -361,7 +361,7 @@ public class TileTaskScreenCore extends TileWithTeam implements IConfigCallback,
 				config.add("task", new ConfigQuestObject(ServerQuestFile.INSTANCE, getTask(), Collections.singleton(QuestObjectType.TASK))
 				{
 					@Override
-					public void setObject(QuestObject v)
+					public void setObject(QuestObjectBase v)
 					{
 						if (v instanceof QuestTask)
 						{
