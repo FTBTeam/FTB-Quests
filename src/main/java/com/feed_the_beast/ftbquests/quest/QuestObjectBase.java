@@ -27,7 +27,7 @@ import java.util.function.Predicate;
  */
 public abstract class QuestObjectBase
 {
-	public static final Predicate<? super QuestObjectBase> PREDICATE_INVALID = o -> o.invalid;
+	public static final Predicate<? super QuestObjectBase> PREDICATE_INVALID = o -> o == null || o.invalid;
 
 	public int uid = 0;
 	public boolean invalid = false;

@@ -5,7 +5,6 @@ import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToServer;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.FTBQuests;
-import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
@@ -69,12 +68,6 @@ public class MessageCreateObject extends MessageToServer
 			QuestObjectBase object = ServerQuestFile.INSTANCE.create(type, parent, extra == null ? new NBTTagCompound() : extra);
 			object.readData(nbt);
 			object.uid = ServerQuestFile.INSTANCE.readID(0);
-
-			if (object instanceof QuestObject)
-			{
-				((QuestObject) object).id = object.getCodeString();
-			}
-
 			object.onCreated();
 			ServerQuestFile.INSTANCE.refreshIDMap();
 			ServerQuestFile.INSTANCE.clearCachedData();

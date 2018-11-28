@@ -23,6 +23,7 @@ import com.feed_the_beast.ftbquests.quest.task.FTBQuestsTasks;
 import com.feed_the_beast.ftbquests.quest.task.QuestTask;
 import com.feed_the_beast.ftbquests.quest.task.QuestTaskType;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTBase;
@@ -39,9 +40,7 @@ import net.minecraftforge.registries.ForgeRegistry;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
@@ -49,14 +48,14 @@ import java.util.regex.Pattern;
  */
 public abstract class QuestFile extends QuestObject
 {
-	public static final int VERSION = 2;
+	public static final int VERSION = 3;
 
 	public final List<QuestChapter> chapters;
 	public final List<QuestVariable> variables;
 	public final List<RewardTable> rewardTables;
 
 	private final Int2ObjectOpenHashMap<QuestObjectBase> map;
-	private final Map<String, QuestObject> oldMap;
+	private final Object2IntOpenHashMap<String> oldMap;
 
 	public final List<ItemStack> emergencyItems;
 	public Ticks emergencyItemsCooldown;
@@ -69,14 +68,13 @@ public abstract class QuestFile extends QuestObject
 
 	public QuestFile()
 	{
-		id = "*";
 		uid = 1;
 		chapters = new ArrayList<>();
 		variables = new ArrayList<>();
 		rewardTables = new ArrayList<>();
 
 		map = new Int2ObjectOpenHashMap<>();
-		oldMap = new HashMap<>();
+		oldMap = new Object2IntOpenHashMap<>();
 
 		emergencyItems = new ArrayList<>();
 		emergencyItems.add(new ItemStack(Items.APPLE));
@@ -108,13 +106,6 @@ public abstract class QuestFile extends QuestObject
 	public QuestObjectType getObjectType()
 	{
 		return QuestObjectType.FILE;
-	}
-
-	@Override
-	@Deprecated
-	public String getID()
-	{
-		return id;
 	}
 
 	public boolean isLoading()
@@ -258,7 +249,6 @@ public abstract class QuestFile extends QuestObject
 	}
 
 	@Nullable
-	@SuppressWarnings("deprecation")
 	public QuestObjectBase remove(int id)
 	{
 		QuestObjectBase object = map.remove(id);
@@ -268,7 +258,6 @@ public abstract class QuestFile extends QuestObject
 			if (object instanceof QuestObject)
 			{
 				QuestObject o = (QuestObject) object;
-				oldMap.remove(o.getID());
 
 				for (QuestChapter chapter : chapters)
 				{
@@ -329,12 +318,9 @@ public abstract class QuestFile extends QuestObject
 		return object instanceof RewardTable ? (RewardTable) object : null;
 	}
 
-	@SuppressWarnings("deprecation")
 	public void refreshIDMap()
 	{
 		clearCachedData();
-
-		oldMap.clear();
 		map.clear();
 
 		for (RewardTable table : rewardTables)
@@ -344,17 +330,14 @@ public abstract class QuestFile extends QuestObject
 
 		for (QuestChapter chapter : chapters)
 		{
-			oldMap.put(chapter.getID(), chapter);
 			map.put(chapter.uid, chapter);
 
 			for (Quest quest : chapter.quests)
 			{
-				oldMap.put(quest.getID(), quest);
 				map.put(quest.uid, quest);
 
 				for (QuestTask task : quest.tasks)
 				{
-					oldMap.put(task.getID(), task);
 					map.put(task.uid, task);
 				}
 
@@ -367,7 +350,6 @@ public abstract class QuestFile extends QuestObject
 
 		for (QuestVariable variable : variables)
 		{
-			oldMap.put(variable.getID(), variable);
 			map.put(variable.uid, variable);
 		}
 
@@ -504,9 +486,71 @@ public abstract class QuestFile extends QuestObject
 		}
 	}
 
+	private NBTTagCompound getOldIDTag(NBTTagCompound nbt, String id)
+	{
+		int idx = id.indexOf(':');
+
+		if (idx == -1)
+		{
+			NBTTagCompound nbt1 = nbt.getCompoundTag(id);
+
+			if (nbt1.isEmpty())
+			{
+				nbt.setTag(id, nbt1);
+			}
+
+			return nbt1;
+		}
+
+		String id1 = id.substring(0, idx);
+		NBTTagCompound nbt1 = nbt.getCompoundTag(id1);
+
+		if (nbt1.isEmpty())
+		{
+			nbt.setTag(id1, nbt1);
+		}
+
+		return getOldIDTag(nbt1, id.substring(idx + 1));
+	}
+
+	private void cleanupOldIDTags(String key, NBTTagCompound parent, NBTTagCompound nbt)
+	{
+		for (String s : new ArrayList<>(nbt.getKeySet()))
+		{
+			NBTBase base = nbt.getTag(s);
+
+			if (base instanceof NBTTagCompound)
+			{
+				cleanupOldIDTags(s, nbt, (NBTTagCompound) base);
+			}
+		}
+
+		if (nbt.getSize() == 1 && nbt.hasKey("$", Constants.NBT.TAG_INT))
+		{
+			parent.setInteger(key, nbt.getInteger("$"));
+		}
+	}
+
 	public final void writeDataFull(NBTTagCompound nbt)
 	{
 		writeData(nbt);
+
+		if (!oldMap.isEmpty())
+		{
+			NBTTagCompound oids = new NBTTagCompound();
+
+			for (Object2IntOpenHashMap.Entry<String> entry : oldMap.object2IntEntrySet())
+			{
+				getOldIDTag(oids, entry.getKey()).setInteger("$", entry.getIntValue());
+			}
+
+			for (String s : new ArrayList<>(oids.getKeySet()))
+			{
+				cleanupOldIDTags(s, oids, oids.getCompoundTag(s));
+			}
+
+			nbt.setTag("old_ids", oids);
+		}
 
 		NBTTagList rt = new NBTTagList();
 
@@ -527,7 +571,6 @@ public abstract class QuestFile extends QuestObject
 			NBTTagCompound nbt1 = new NBTTagCompound();
 			chapter.writeData(nbt1);
 			nbt1.setInteger("uid", chapter.uid);
-			nbt1.setString("id", chapter.id);
 			c.appendTag(nbt1);
 
 			if (!chapter.quests.isEmpty())
@@ -539,7 +582,6 @@ public abstract class QuestFile extends QuestObject
 					NBTTagCompound nbt2 = new NBTTagCompound();
 					quest.writeData(nbt2);
 					nbt2.setInteger("uid", quest.uid);
-					nbt2.setString("id", quest.id);
 					q.appendTag(nbt2);
 
 					if (!quest.tasks.isEmpty())
@@ -552,7 +594,6 @@ public abstract class QuestFile extends QuestObject
 							NBTTagCompound nbt3 = new NBTTagCompound();
 							task.writeData(nbt3);
 							nbt3.setInteger("uid", task.uid);
-							nbt3.setString("id", task.id);
 
 							if (type != FTBQuestsTasks.ITEM)
 							{
@@ -615,21 +656,71 @@ public abstract class QuestFile extends QuestObject
 			NBTTagCompound nbt1 = new NBTTagCompound();
 			variable.writeData(nbt1);
 			nbt1.setInteger("uid", variable.uid);
-			nbt1.setString("id", variable.id);
 			v.appendTag(nbt1);
 		}
 
 		nbt.setTag("variables", v);
 	}
 
-	@SuppressWarnings("deprecation")
 	private void readIDs(QuestObjectBase object, NBTTagCompound nbt)
 	{
 		object.uid = readID(nbt.getInteger("uid"));
 
 		if (object instanceof QuestObject)
 		{
-			((QuestObject) object).id = nbt.getString("id").trim();
+			QuestObject o = (QuestObject) object;
+			String id = nbt.getString("id").trim();
+
+			if (!id.isEmpty() && !id.equalsIgnoreCase(object.getCodeString()))
+			{
+				if (o instanceof QuestVariable)
+				{
+					oldMap.put("#" + id, o.uid);
+				}
+				else if (o instanceof QuestChapter)
+				{
+					oldMap.put(id, o.uid);
+				}
+				else if (o instanceof Quest)
+				{
+					String c = getOldID(((Quest) o).chapter);
+
+					if (!c.isEmpty())
+					{
+						oldMap.put(c + ":" + id, o.uid);
+					}
+				}
+				else if (o instanceof QuestTask)
+				{
+					String q = getOldID(((QuestTask) o).quest);
+
+					if (!q.isEmpty())
+					{
+						oldMap.put(q + ":" + id, o.uid);
+					}
+				}
+			}
+		}
+	}
+
+	private void readOldIDsMap(String parent, String key, NBTBase nbt)
+	{
+		if (nbt instanceof NBTTagCompound)
+		{
+			NBTTagCompound nbt1 = (NBTTagCompound) nbt;
+
+			for (String s : nbt1.getKeySet())
+			{
+				readOldIDsMap(parent + ":" + key, s, nbt1.getTag(s));
+			}
+		}
+		else if (key.equals("$"))
+		{
+			oldMap.put(parent, ((NBTPrimitive) nbt).getInt());
+		}
+		else
+		{
+			oldMap.put(parent + ":" + key, ((NBTPrimitive) nbt).getInt());
 		}
 	}
 
@@ -641,6 +732,15 @@ public abstract class QuestFile extends QuestObject
 		chapters.clear();
 		variables.clear();
 		rewardTables.clear();
+
+		oldMap.clear();
+
+		NBTTagCompound oids = nbt.getCompoundTag("old_ids");
+
+		for (String s : oids.getKeySet())
+		{
+			readOldIDsMap(s, s, oids.getTag(s));
+		}
 
 		NBTTagList rtl = nbt.getTagList("reward_tables", Constants.NBT.TAG_COMPOUND);
 
@@ -811,8 +911,29 @@ public abstract class QuestFile extends QuestObject
 	public final void writeNetDataFull(DataOut data)
 	{
 		int pos = data.getPosition();
-
 		writeNetData(data);
+
+		if (!oldMap.isEmpty())
+		{
+			NBTTagCompound oids = new NBTTagCompound();
+
+			for (Object2IntOpenHashMap.Entry<String> entry : oldMap.object2IntEntrySet())
+			{
+				getOldIDTag(oids, entry.getKey()).setInteger("$", entry.getIntValue());
+			}
+
+			for (String s : new ArrayList<>(oids.getKeySet()))
+			{
+				cleanupOldIDTags(s, oids, oids.getCompoundTag(s));
+			}
+
+			data.writeNBT(oids);
+		}
+		else
+		{
+			data.writeNBT(null);
+		}
+
 		data.writeVarInt(rewardTables.size());
 
 		for (RewardTable table : rewardTables)
@@ -828,20 +949,17 @@ public abstract class QuestFile extends QuestObject
 		for (QuestChapter chapter : chapters)
 		{
 			data.writeInt(chapter.uid);
-			data.writeString(chapter.id);
 			data.writeVarInt(chapter.quests.size());
 
 			for (Quest quest : chapter.quests)
 			{
 				data.writeInt(quest.uid);
-				data.writeString(quest.id);
 				data.writeVarInt(quest.tasks.size());
 
 				for (QuestTask task : quest.tasks)
 				{
 					data.writeVarInt(taskTypes.getID(task.getType()));
 					data.writeInt(task.uid);
-					data.writeString(task.id);
 				}
 
 				data.writeVarInt(quest.rewards.size());
@@ -859,7 +977,6 @@ public abstract class QuestFile extends QuestObject
 		for (QuestVariable variable : variables)
 		{
 			data.writeInt(variable.uid);
-			data.writeString(variable.id);
 		}
 
 		for (RewardTable table : rewardTables)
@@ -901,8 +1018,18 @@ public abstract class QuestFile extends QuestObject
 	public final void readNetDataFull(DataIn data)
 	{
 		int pos = data.getPosition();
-
 		readNetData(data);
+
+		oldMap.clear();
+		NBTTagCompound oids = data.readNBT();
+
+		if (oids != null && !oids.isEmpty())
+		{
+			for (String s : oids.getKeySet())
+			{
+				readOldIDsMap(s, s, oids.getTag(s));
+			}
+		}
 
 		chapters.clear();
 		variables.clear();
@@ -926,7 +1053,6 @@ public abstract class QuestFile extends QuestObject
 		{
 			QuestChapter chapter = new QuestChapter(this);
 			chapter.uid = data.readInt();
-			chapter.id = data.readString();
 			chapters.add(chapter);
 
 			int q = data.readVarInt();
@@ -935,7 +1061,6 @@ public abstract class QuestFile extends QuestObject
 			{
 				Quest quest = new Quest(chapter);
 				quest.uid = data.readInt();
-				quest.id = data.readString();
 				chapter.quests.add(quest);
 
 				int t = data.readVarInt();
@@ -945,7 +1070,6 @@ public abstract class QuestFile extends QuestObject
 					QuestTaskType type = taskTypes.getValue(data.readVarInt());
 					QuestTask task = type.provider.create(quest);
 					task.uid = data.readInt();
-					task.id = data.readString();
 					quest.tasks.add(task);
 				}
 
@@ -967,7 +1091,6 @@ public abstract class QuestFile extends QuestObject
 		{
 			QuestVariable variable = new QuestVariable(this);
 			variable.uid = data.readInt();
-			variable.id = data.readString();
 			variables.add(variable);
 		}
 
@@ -1108,12 +1231,11 @@ public abstract class QuestFile extends QuestObject
 
 		try
 		{
-			return Long.decode(id).intValue();
+			return Long.valueOf(id.charAt(0) == '#' ? id.substring(1) : id, 16).intValue();
 		}
 		catch (Exception ex)
 		{
-			QuestObjectBase object = oldMap.get(id);
-			return object == null ? 0 : object.uid;
+			return oldMap.getInt(id);
 		}
 	}
 
@@ -1137,14 +1259,14 @@ public abstract class QuestFile extends QuestObject
 
 	public String getOldID(QuestObject object)
 	{
-		for (Map.Entry<String, QuestObject> entry : oldMap.entrySet())
+		for (Object2IntOpenHashMap.Entry<String> entry : oldMap.object2IntEntrySet())
 		{
-			if (entry.getValue() == object)
+			if (entry.getIntValue() == object.uid)
 			{
 				return entry.getKey();
 			}
 		}
 
-		return object.toString();
+		return "";
 	}
 }

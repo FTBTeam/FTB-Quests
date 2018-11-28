@@ -220,7 +220,6 @@ public class ButtonQuest extends Button
 	@Override
 	public void draw(Theme theme, int x, int y, int w, int h)
 	{
-		Color4I backgroundColor = Color4I.WHITE.withAlpha(100);
 		Color4I outlineColor = Color4I.WHITE.withAlpha(150);
 		Icon qicon = Icon.EMPTY;
 
@@ -283,7 +282,8 @@ public class ButtonQuest extends Button
 		GlStateManager.pushMatrix();
 		GlStateManager.translate(sx, sy, 0D);
 		GlStateManager.scale(s, s, 1D);
-		quest.shape.background.draw(0, 0, 1, 1, backgroundColor);
+		quest.shape.shape.draw(0, 0, 1, 1, Color4I.DARK_GRAY);
+		quest.shape.background.draw(0, 0, 1, 1, Color4I.WHITE.withAlpha(150));
 		quest.shape.outline.draw(0, 0, 1, 1, outlineColor);
 		GlStateManager.popMatrix();
 
@@ -309,7 +309,7 @@ public class ButtonQuest extends Button
 			GlStateManager.pushMatrix();
 			GlStateManager.translate(sx, sy, 500);
 			GlStateManager.scale(s, s, 1D);
-			quest.shape.shape.draw(0, 0, 1, 1, Color4I.WHITE.withAlpha(80));
+			quest.shape.shape.draw(0, 0, 1, 1, Color4I.WHITE.withAlpha(50));
 			GlStateManager.popMatrix();
 		}
 
