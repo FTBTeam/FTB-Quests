@@ -3,6 +3,7 @@ package com.feed_the_beast.ftbquests.gui.tree;
 import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.gui.Theme;
 import com.feed_the_beast.ftblib.lib.gui.Widget;
+import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.ImageIcon;
 import com.feed_the_beast.ftblib.lib.math.MathUtils;
@@ -128,40 +129,27 @@ public class PanelQuests extends Panel
 
 				for (ButtonQuest button : ((ButtonQuest) widget).getDependencies())
 				{
-					int r, g, b, a;
-					double off;
+					if (button.quest == treeGui.selectedQuest || wquest == treeGui.selectedQuest)
+					{
+						continue;
+					}
 
-					if (button.quest == treeGui.selectedQuest)
-					{
-						r = 200;
-						g = 200;
-						b = 0;
-						a = 255;
-						off = moving;
-					}
-					else if (wquest == treeGui.selectedQuest)
-					{
-						r = 0;
-						g = 200;
-						b = 200;
-						a = 255;
-						off = moving;
-					}
-					else if (complete)
+					int r, g, b, a;
+
+					if (complete)
 					{
 						r = 100;
 						g = 220;
 						b = 100;
 						a = 255;
-						off = 0D;
 					}
 					else
 					{
-						r = unavailable ? 60 : 200;
-						g = unavailable ? 60 : 200;
-						b = unavailable ? 60 : 200;
+						Color4I c = Color4I.hsb(button.quest.id / 1000F, 0.2F, unavailable ? 0.3F : 0.8F);
+						r = c.redi();
+						g = c.greeni();
+						b = c.bluei();
 						a = 180;
-						off = 0D;
 					}
 
 					double sx = widget.getX() + widget.width / 2D;
@@ -174,10 +162,57 @@ public class PanelQuests extends Panel
 					GlStateManager.translate(sx, sy, 0);
 					GlStateManager.rotate((float) (Math.atan2(ey - sy, ex - sx) * 180D / Math.PI), 0F, 0F, 1F);
 					buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
-					buffer.pos(0, -s, 0).tex(len / s / 2D + off, 0).color(r, g, b, a).endVertex();
-					buffer.pos(0, s, 0).tex(len / s / 2D + off, 1).color(r, g, b, a).endVertex();
-					buffer.pos(len, s, 0).tex(off, 1).color(r * 3 / 4, g * 3 / 4, b * 3 / 4, a).endVertex();
-					buffer.pos(len, -s, 0).tex(off, 0).color(r * 3 / 4, g * 3 / 4, b * 3 / 4, a).endVertex();
+					buffer.pos(0, -s, 0).tex(len / s / 2D, 0).color(r, g, b, a).endVertex();
+					buffer.pos(0, s, 0).tex(len / s / 2D, 1).color(r, g, b, a).endVertex();
+					buffer.pos(len, s, 0).tex(0D, 1).color(r * 3 / 4, g * 3 / 4, b * 3 / 4, a).endVertex();
+					buffer.pos(len, -s, 0).tex(0D, 0).color(r * 3 / 4, g * 3 / 4, b * 3 / 4, a).endVertex();
+					tessellator.draw();
+					GlStateManager.popMatrix();
+				}
+			}
+		}
+
+		for (Widget widget : widgets)
+		{
+			if (widget instanceof ButtonQuest)
+			{
+				Quest wquest = ((ButtonQuest) widget).quest;
+
+				for (ButtonQuest button : ((ButtonQuest) widget).getDependencies())
+				{
+					int r, g, b;
+
+					if (button.quest == treeGui.selectedQuest)
+					{
+						r = 200;
+						g = 200;
+						b = 0;
+					}
+					else if (wquest == treeGui.selectedQuest)
+					{
+						r = 0;
+						g = 200;
+						b = 200;
+					}
+					else
+					{
+						continue;
+					}
+
+					double sx = widget.getX() + widget.width / 2D;
+					double sy = widget.getY() + widget.height / 2D;
+					double ex = button.getX() + button.width / 2D;
+					double ey = button.getY() + button.height / 2D;
+					double len = MathUtils.dist(sx, sy, ex, ey);
+
+					GlStateManager.pushMatrix();
+					GlStateManager.translate(sx, sy, 0);
+					GlStateManager.rotate((float) (Math.atan2(ey - sy, ex - sx) * 180D / Math.PI), 0F, 0F, 1F);
+					buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
+					buffer.pos(0, -s, 0).tex(len / s / 2D + moving, 0).color(r, g, b, 255).endVertex();
+					buffer.pos(0, s, 0).tex(len / s / 2D + moving, 1).color(r, g, b, 255).endVertex();
+					buffer.pos(len, s, 0).tex(moving, 1).color(r * 3 / 4, g * 3 / 4, b * 3 / 4, 255).endVertex();
+					buffer.pos(len, -s, 0).tex(moving, 0).color(r * 3 / 4, g * 3 / 4, b * 3 / 4, 255).endVertex();
 					tessellator.draw();
 					GlStateManager.popMatrix();
 				}
