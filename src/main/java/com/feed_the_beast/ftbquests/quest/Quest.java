@@ -5,6 +5,7 @@ import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigString;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.IconAnimation;
+import com.feed_the_beast.ftblib.lib.io.Bits;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.util.ListUtils;
@@ -143,6 +144,11 @@ public final class Quest extends QuestObject
 			nbt.setBoolean("can_repeat", true);
 		}
 
+		if (tasksIgnoreDependencies)
+		{
+			nbt.setBoolean("tasks_ignore_deps", true);
+		}
+
 		dependencies.removeIf(QuestObjectBase.PREDICATE_INVALID);
 
 		if (!dependencies.isEmpty())
@@ -186,6 +192,7 @@ public final class Quest extends QuestObject
 		}
 
 		canRepeat = nbt.getBoolean("can_repeat");
+		tasksIgnoreDependencies = nbt.getBoolean("tasks_ignore_deps");
 
 		dependencies.clear();
 
@@ -243,7 +250,10 @@ public final class Quest extends QuestObject
 		data.writeByte(y);
 		data.write(shape, EnumQuestShape.NAME_MAP);
 		data.writeCollection(text, DataOut.STRING);
-		data.writeBoolean(canRepeat);
+		int flags = 0;
+		flags = Bits.setFlag(flags, 1, canRepeat);
+		flags = Bits.setFlag(flags, 2, tasksIgnoreDependencies);
+		data.writeVarInt(flags);
 		data.writeVarInt(dependencies.size());
 
 		for (QuestObject d : dependencies)
@@ -269,7 +279,9 @@ public final class Quest extends QuestObject
 		y = data.readByte();
 		shape = data.read(EnumQuestShape.NAME_MAP);
 		data.readCollection(text, DataIn.STRING);
-		canRepeat = data.readBoolean();
+		int flags = data.readVarInt();
+		canRepeat = Bits.getFlag(flags, 1);
+		tasksIgnoreDependencies = Bits.getFlag(flags, 2);
 
 		int d = data.readVarInt();
 
