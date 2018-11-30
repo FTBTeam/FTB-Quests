@@ -52,6 +52,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -318,7 +319,17 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 
 			if (data.task.isComplete(this))
 			{
-				data.task.onCompleted(this);
+				List<EntityPlayerMP> onlinePlayers = new ArrayList<>();
+
+				for (ForgePlayer player : team.getMembers())
+				{
+					if (player.isOnline())
+					{
+						onlinePlayers.add(player.getPlayer());
+					}
+				}
+
+				data.task.onCompleted(this, onlinePlayers);
 			}
 		}
 	}

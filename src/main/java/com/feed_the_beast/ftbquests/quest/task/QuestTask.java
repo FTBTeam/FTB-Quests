@@ -6,6 +6,7 @@ import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.events.ObjectCompletedEvent;
 import com.feed_the_beast.ftbquests.gui.tree.GuiQuestTree;
+import com.feed_the_beast.ftbquests.net.MessageDisplayToast;
 import com.feed_the_beast.ftbquests.net.MessageSubmitTask;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
@@ -16,6 +17,7 @@ import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.tile.TileTaskScreenCore;
 import com.feed_the_beast.ftbquests.tile.TileTaskScreenPart;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
@@ -85,14 +87,23 @@ public abstract class QuestTask extends QuestObject
 	}
 
 	@Override
-	public final void onCompleted(ITeamData data)
+	public final void onCompleted(ITeamData data, List<EntityPlayerMP> onlineMembers)
 	{
-		super.onCompleted(data);
+		super.onCompleted(data, onlineMembers);
 		new ObjectCompletedEvent.TaskEvent(data, this).post();
+		boolean questComplete = quest.isComplete(data);
 
-		if (quest.isComplete(data))
+		if (quest.tasks.size() > 1 && !questComplete)
 		{
-			quest.onCompleted(data);
+			for (EntityPlayerMP player : onlineMembers)
+			{
+				new MessageDisplayToast(id).sendTo(player);
+			}
+		}
+
+		if (questComplete)
+		{
+			quest.onCompleted(data, onlineMembers);
 		}
 	}
 

@@ -1,6 +1,9 @@
 package com.feed_the_beast.ftbquests.quest;
 
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.text.ITextComponent;
+
+import java.util.List;
 
 /**
  * @author LatvianModder
@@ -31,7 +34,7 @@ public abstract class QuestObject extends QuestObjectBase
 
 	public abstract boolean isComplete(ITeamData data);
 
-	public void onCompleted(ITeamData data)
+	public void onCompleted(ITeamData data, List<EntityPlayerMP> onlineMembers)
 	{
 	}
 
