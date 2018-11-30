@@ -25,6 +25,7 @@ public class FTBQuestsNetHandler
 		GENERAL.register(new MessageCompleteInstantly());
 		GENERAL.register(new MessageClaimAllRewards());
 		GENERAL.register(new MessageClaimChoiceReward());
+		GENERAL.register(new MessageDisplayToast());
 
 		FTBQuestsEditNetHandler.init();
 	}

@@ -46,6 +46,7 @@ ftbquests.dependencies=Dependencies
 ftbquests.dependency=Dependency
 
 ftbquests.file=File
+ftbquests.file.completed=All chapters completed!
 ftbquests.file.allow_take_quest_blocks=Allow to Take Quest Blocks
 ftbquests.file.allow_take_quest_blocks.tooltip=Allow to obtain Quest Blocks from the Quests GUI.
 ftbquests.file.emergency_items=Emergency Items
@@ -58,10 +59,12 @@ ftbquests.file.loot=Loot
 ftbquests.file.loot.size=Loot Size
 
 ftbquests.chapter=Chapter
+ftbquests.chapter.completed=Chapter completed!
 ftbquests.chapter.description=Description
 ftbquests.chapter.visibility=Visibility [WIP!]
 
 ftbquests.quest=Quest
+ftbquests.quest.completed=Quest completed!
 ftbquests.quest.description=Description
 ftbquests.quest.x=X
 ftbquests.quest.y=Y
@@ -105,6 +108,7 @@ ftbquests.gui.quick_complete.info_2=Claim all rewards
 
 ftbquests.task=Task
 ftbquests.tasks=Tasks
+ftbquests.task.completed=Task completed!
 ftbquests.task.click_to_submit=Click to submit items
 ftbquests.task.click_to_submit_all=Click to submit all items
 ftbquests.task.max_input=Max Input
