@@ -81,6 +81,8 @@ ftbquests.quest.shape.heart=Heart
 ftbquests.quest.visibility=Visibility [WIP!]
 ftbquests.quest.text=Text
 ftbquests.quest.can_repeat=Can be repeated
+ftbquests.quest.tasks_ignore_dependencies=Tasks Ignore Dependencies
+ftbquests.quest.tasks_ignore_dependencies.tooltip=Allow to start tasks without completing dependencies
 
 ftbquests.gui.edit_file=Edit File
 ftbquests.gui.save_as_file=Save as File

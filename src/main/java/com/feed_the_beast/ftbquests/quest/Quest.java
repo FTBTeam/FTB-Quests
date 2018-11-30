@@ -54,6 +54,7 @@ public final class Quest extends QuestObject
 	public boolean canRepeat;
 	public final List<QuestTask> tasks;
 	public final List<QuestReward> rewards;
+	public boolean tasksIgnoreDependencies;
 
 	public Quest(QuestChapter c)
 	{
@@ -68,6 +69,7 @@ public final class Quest extends QuestObject
 		dependencies = new HashSet<>();
 		tasks = new ArrayList<>();
 		rewards = new ArrayList<>();
+		tasksIgnoreDependencies = false;
 	}
 
 	@Override
@@ -434,11 +436,14 @@ public final class Quest extends QuestObject
 
 	public boolean canStartTasks(ITeamData data)
 	{
-		for (QuestObject object : dependencies)
+		if (!tasksIgnoreDependencies)
 		{
-			if (!object.isComplete(data))
+			for (QuestObject object : dependencies)
 			{
-				return false;
+				if (!object.isComplete(data))
+				{
+					return false;
+				}
 			}
 		}
 
@@ -521,6 +526,7 @@ public final class Quest extends QuestObject
 		config.addList("text", text, new ConfigString(""), ConfigString::new, ConfigString::getString);
 		config.addList("dependencies", dependencies, new ConfigQuestObject(chapter.file, null, DEP_TYPES), v -> new ConfigQuestObject(chapter.file, v, DEP_TYPES), c -> (QuestObject) c.getObject()).setDisplayName(new TextComponentTranslation("ftbquests.dependencies"));
 		config.addBool("can_repeat", () -> canRepeat, v -> canRepeat = v, false);
+		config.addBool("tasks_ignore_dependencies", () -> tasksIgnoreDependencies, v -> tasksIgnoreDependencies = v, false);
 	}
 
 	public EnumVisibility getVisibility(@Nullable ITeamData data)
