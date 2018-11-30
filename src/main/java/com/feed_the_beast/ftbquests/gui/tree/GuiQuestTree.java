@@ -18,6 +18,7 @@ import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.gui.FTBQuestsTheme;
+import com.feed_the_beast.ftbquests.gui.GuiSelectQuestObject;
 import com.feed_the_beast.ftbquests.gui.GuiVariables;
 import com.feed_the_beast.ftbquests.net.MessageCompleteInstantly;
 import com.feed_the_beast.ftbquests.net.MessageResetProgress;
@@ -26,9 +27,11 @@ import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
+import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.quest.QuestVariable;
 import com.feed_the_beast.ftbquests.quest.reward.RandomReward;
 import com.feed_the_beast.ftbquests.quest.task.QuestTask;
+import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.TextFormatting;
@@ -36,6 +39,7 @@ import org.lwjgl.input.Keyboard;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class GuiQuestTree extends GuiBase
@@ -48,6 +52,7 @@ public class GuiQuestTree extends GuiBase
 	public Color4I borderColor, backgroundColor;
 	public boolean movingQuest = false;
 	public int zoom = 16;
+	public long lastShiftPress = 0L;
 
 	public GuiQuestTree(ClientQuestFile q)
 	{
@@ -110,6 +115,7 @@ public class GuiQuestTree extends GuiBase
 		if (selectedQuest != quest)
 		{
 			selectedQuest = quest;
+			quests.refreshWidgets();
 			questLeft.refreshWidgets();
 			questRight.refreshWidgets();
 		}
@@ -234,6 +240,42 @@ public class GuiQuestTree extends GuiBase
 					movingQuest = false;
 					selectQuest(null);
 					return true;
+			}
+		}
+		else if (key == Keyboard.KEY_LSHIFT)
+		{
+			long now = System.currentTimeMillis();
+
+			if (lastShiftPress == 0L)
+			{
+				lastShiftPress = now;
+			}
+			else
+			{
+				if (now - lastShiftPress <= 400L)
+				{
+					ConfigQuestObject c = new ConfigQuestObject(questFile, null, Arrays.asList(QuestObjectType.CHAPTER, QuestObjectType.QUEST));
+					GuiSelectQuestObject gui = new GuiSelectQuestObject(c, this, () -> {
+						QuestObjectBase o = c.getObject();
+
+						if (o instanceof QuestChapter)
+						{
+							selectChapter((QuestChapter) o);
+						}
+						else if (o instanceof Quest)
+						{
+							zoom = 20;
+							selectChapter(((Quest) o).chapter);
+							selectQuest((Quest) o);
+						}
+					});
+
+					gui.focus();
+					gui.setTitle(I18n.format("gui.search_box"));
+					gui.openGui();
+				}
+
+				lastShiftPress = 0L;
 			}
 		}
 
