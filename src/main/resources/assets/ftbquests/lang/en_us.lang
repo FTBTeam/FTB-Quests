@@ -55,6 +55,7 @@ ftbquests.file.emergency_items_cooldown.tooltip=Cooldown timer for emergency ite
 ftbquests.file.defaults=Defaults
 ftbquests.file.defaults.reward_team=Reward 'Team Reward'
 ftbquests.file.defaults.check_only=Task 'Don't consume item'
+ftbquests.file.defaults.quest_shape=Quest Shape
 ftbquests.file.loot=Loot
 ftbquests.file.loot.size=Loot Size
 

@@ -2,12 +2,15 @@ package com.feed_the_beast.ftbquests.quest;
 
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigString;
+import com.feed_the_beast.ftblib.lib.data.ForgePlayer;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.IconAnimation;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.util.ListUtils;
 import com.feed_the_beast.ftbquests.events.ObjectCompletedEvent;
+import com.feed_the_beast.ftbquests.net.MessageDisplayToast;
+import com.feed_the_beast.ftbquests.util.FTBQuestsTeamData;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
@@ -185,6 +188,17 @@ public final class QuestChapter extends QuestObject
 		if (file.isComplete(data))
 		{
 			file.onCompleted(data);
+		}
+
+		if (!getQuestFile().isClient())
+		{
+			for (ForgePlayer player : ((FTBQuestsTeamData) data).team.getMembers())
+			{
+				if (player.isOnline())
+				{
+					new MessageDisplayToast(id).sendTo(player.getPlayer());
+				}
+			}
 		}
 	}
 

@@ -4,6 +4,7 @@ import com.feed_the_beast.ftblib.FTBLibConfig;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigItemStack;
 import com.feed_the_beast.ftblib.lib.config.ConfigTimer;
+import com.feed_the_beast.ftblib.lib.data.ForgePlayer;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.IconAnimation;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
@@ -14,6 +15,7 @@ import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.events.ObjectCompletedEvent;
 import com.feed_the_beast.ftbquests.item.ItemMissing;
 import com.feed_the_beast.ftbquests.item.LootRarity;
+import com.feed_the_beast.ftbquests.net.MessageDisplayToast;
 import com.feed_the_beast.ftbquests.quest.reward.FTBQuestsRewards;
 import com.feed_the_beast.ftbquests.quest.reward.ItemReward;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
@@ -22,6 +24,7 @@ import com.feed_the_beast.ftbquests.quest.reward.RewardTable;
 import com.feed_the_beast.ftbquests.quest.task.FTBQuestsTasks;
 import com.feed_the_beast.ftbquests.quest.task.QuestTask;
 import com.feed_the_beast.ftbquests.quest.task.QuestTaskType;
+import com.feed_the_beast.ftbquests.util.FTBQuestsTeamData;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.init.Items;
@@ -56,25 +59,28 @@ public abstract class QuestFile extends QuestObject
 
 	private final Int2ObjectOpenHashMap<QuestObjectBase> map;
 	private final Object2IntOpenHashMap<String> oldMap;
+	public final RewardTable dummyTable;
 
 	public final List<ItemStack> emergencyItems;
 	public Ticks emergencyItemsCooldown;
 	public final ResourceLocation[] lootTables;
+	public int fileVersion;
 	public int lootSize;
 	public boolean defaultRewardTeam;
 	public boolean defaultCheckOnly;
-	public int fileVersion;
-	public final RewardTable dummyTable;
+	public EnumQuestShape defaultShape;
 
 	public QuestFile()
 	{
 		id = 1;
+		fileVersion = 0;
 		chapters = new ArrayList<>();
 		variables = new ArrayList<>();
 		rewardTables = new ArrayList<>();
 
 		map = new Int2ObjectOpenHashMap<>();
 		oldMap = new Object2IntOpenHashMap<>();
+		dummyTable = new RewardTable(this);
 
 		emergencyItems = new ArrayList<>();
 		emergencyItems.add(new ItemStack(Items.APPLE));
@@ -90,8 +96,7 @@ public abstract class QuestFile extends QuestObject
 		lootSize = 27;
 		defaultRewardTeam = false;
 		defaultCheckOnly = false;
-		fileVersion = 0;
-		dummyTable = new RewardTable(this);
+		defaultShape = EnumQuestShape.CIRCLE;
 	}
 
 	public abstract boolean isClient();
@@ -171,6 +176,17 @@ public abstract class QuestFile extends QuestObject
 	{
 		super.onCompleted(data);
 		new ObjectCompletedEvent.FileEvent(data, this).post();
+
+		if (!getQuestFile().isClient())
+		{
+			for (ForgePlayer player : ((FTBQuestsTeamData) data).team.getMembers())
+			{
+				if (player.isOnline())
+				{
+					new MessageDisplayToast(id).sendTo(player.getPlayer());
+				}
+			}
+		}
 	}
 
 	@Override
@@ -423,6 +439,7 @@ public abstract class QuestFile extends QuestObject
 		nbt.setInteger("version", VERSION);
 		nbt.setBoolean("default_reward_team", defaultRewardTeam);
 		nbt.setBoolean("default_check_only", defaultCheckOnly);
+		nbt.setString("default_quest_shape", defaultShape.getID());
 
 		if (!emergencyItems.isEmpty())
 		{
@@ -455,6 +472,7 @@ public abstract class QuestFile extends QuestObject
 		super.readData(nbt);
 		defaultRewardTeam = nbt.getBoolean("default_reward_team");
 		defaultCheckOnly = nbt.getBoolean("default_check_only");
+		defaultShape = EnumQuestShape.NAME_MAP.get(nbt.getString("default_quest_shape"));
 		emergencyItems.clear();
 
 		NBTTagList list = nbt.getTagList("emergency_items", Constants.NBT.TAG_COMPOUND);
@@ -818,6 +836,7 @@ public abstract class QuestFile extends QuestObject
 		data.writeVarInt(lootSize);
 		data.writeBoolean(defaultRewardTeam);
 		data.writeBoolean(defaultCheckOnly);
+		data.write(defaultShape, EnumQuestShape.NAME_MAP);
 	}
 
 	@Override
@@ -835,6 +854,7 @@ public abstract class QuestFile extends QuestObject
 		lootSize = data.readVarInt();
 		defaultRewardTeam = data.readBoolean();
 		defaultCheckOnly = data.readBoolean();
+		defaultShape = data.read(EnumQuestShape.NAME_MAP);
 	}
 
 	public final void writeNetDataFull(DataOut data)
@@ -1099,6 +1119,7 @@ public abstract class QuestFile extends QuestObject
 		ConfigGroup defaultsGroup = config.getGroup("defaults");
 		defaultsGroup.addBool("reward_team", () -> defaultRewardTeam, v -> defaultRewardTeam = v, false);
 		defaultsGroup.addBool("check_only", () -> defaultCheckOnly, v -> defaultCheckOnly = v, false);
+		defaultsGroup.addEnum("quest_shape", () -> defaultShape, v -> defaultShape = v, EnumQuestShape.NAME_MAP);
 
 		ConfigGroup lootGroup = config.getGroup("loot");
 		lootGroup.addInt("size", () -> lootSize, v -> lootSize = v, 27, 1, 1024);
