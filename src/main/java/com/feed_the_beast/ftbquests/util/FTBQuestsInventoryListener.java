@@ -32,28 +32,24 @@ public class FTBQuestsInventoryListener implements IContainerListener
 	{
 		//FTBQuests.LOGGER.info("Running auto-completion with list: " + itemsToCheck);
 
-		ITeamData data = null;
+		ITeamData data = ServerQuestFile.INSTANCE.getData(FTBLibAPI.getTeamID(player.getUniqueID()));
+
+		if (data == null)
+		{
+			return;
+		}
+
 		boolean redo = false;
 
 		for (QuestChapter chapter : ServerQuestFile.INSTANCE.chapters)
 		{
 			for (Quest quest : chapter.quests)
 			{
-				for (QuestTask task : quest.tasks)
+				if (hasSubmitTasks(quest) && quest.canStartTasks(data))
 				{
-					if (task.submitItemsOnInventoryChange())
+					for (QuestTask task : quest.tasks)
 					{
-						if (data == null)
-						{
-							data = ServerQuestFile.INSTANCE.getData(FTBLibAPI.getTeamID(player.getUniqueID()));
-
-							if (data == null)
-							{
-								return;
-							}
-						}
-
-						if (data.getQuestTaskData(task).submitTask(player, itemsToCheck, false))
+						if (task.submitItemsOnInventoryChange() && data.getQuestTaskData(task).submitTask(player, itemsToCheck, false))
 						{
 							redo = true;
 						}
@@ -66,6 +62,19 @@ public class FTBQuestsInventoryListener implements IContainerListener
 		{
 			detect(Collections.emptyList());
 		}
+	}
+
+	private boolean hasSubmitTasks(Quest quest)
+	{
+		for (QuestTask task : quest.tasks)
+		{
+			if (task.submitItemsOnInventoryChange())
+			{
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	@Override
