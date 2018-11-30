@@ -3,9 +3,14 @@ package com.feed_the_beast.ftbquests.client;
 import com.feed_the_beast.ftblib.FTBLib;
 import com.feed_the_beast.ftblib.lib.OtherMods;
 import com.feed_the_beast.ftblib.lib.config.ConfigInt;
+import com.feed_the_beast.ftblib.lib.gui.Panel;
+import com.feed_the_beast.ftblib.lib.gui.SimpleTextButton;
+import com.feed_the_beast.ftblib.lib.gui.misc.GuiButtonListBase;
 import com.feed_the_beast.ftblib.lib.gui.misc.GuiEditConfigValue;
 import com.feed_the_beast.ftblib.lib.gui.misc.GuiSelectFluid;
 import com.feed_the_beast.ftblib.lib.gui.misc.GuiSelectItemStack;
+import com.feed_the_beast.ftblib.lib.icon.Icon;
+import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.FTBQuestsCommon;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
@@ -13,10 +18,12 @@ import com.feed_the_beast.ftbquests.quest.reward.FTBQuestsRewards;
 import com.feed_the_beast.ftbquests.quest.reward.ItemReward;
 import com.feed_the_beast.ftbquests.quest.reward.XPLevelsReward;
 import com.feed_the_beast.ftbquests.quest.reward.XPReward;
+import com.feed_the_beast.ftbquests.quest.task.DimensionTask;
 import com.feed_the_beast.ftbquests.quest.task.FTBQuestsTasks;
 import com.feed_the_beast.ftbquests.quest.task.FluidTask;
 import com.feed_the_beast.ftbquests.quest.task.ItemTask;
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.world.DimensionType;
 import net.minecraftforge.client.settings.KeyConflictContext;
 import net.minecraftforge.client.settings.KeyModifier;
 import net.minecraftforge.fluids.FluidRegistry;
@@ -63,6 +70,33 @@ public class FTBQuestsClient extends FTBQuestsCommon
 				callback.accept(fluidTask);
 			}
 		}).openGui());
+
+		FTBQuestsTasks.DIMENSION.setGuiProvider((gui, quest, callback) -> {
+			GuiButtonListBase g = new GuiButtonListBase()
+			{
+				@Override
+				public void addButtons(Panel panel)
+				{
+					for (DimensionType type : DimensionType.values())
+					{
+						panel.add(new SimpleTextButton(panel, type.getName(), Icon.EMPTY)
+						{
+							@Override
+							public void onClicked(MouseButton button)
+							{
+								gui.openGui();
+								DimensionTask task = new DimensionTask(quest);
+								task.dimension = type;
+								callback.accept(task);
+							}
+						});
+					}
+				}
+			};
+
+			g.focus();
+			g.openGui();
+		});
 	}
 
 	@Override
