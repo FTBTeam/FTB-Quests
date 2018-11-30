@@ -99,7 +99,7 @@ public class XPTask extends QuestTask implements ISingleLongValueTask
 	{
 		ITextComponent text = new TextComponentString(getMaxProgressString());
 		text.getStyle().setColor(TextFormatting.RED);
-		return new TextComponentTranslation("ftbquests.reward.ftbquests.xp_levels.text", text);
+		return new TextComponentTranslation("ftbquests.reward.ftbquests.xp_levels").appendText(": ").appendSibling(text);
 	}
 
 	@Override
