@@ -14,6 +14,7 @@ import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.TextFormatting;
 
 import java.util.ArrayList;
@@ -25,6 +26,7 @@ import java.util.List;
 public class PanelQuestRight extends Panel
 {
 	public final GuiQuestTree treeGui;
+	private int maxScroll = 0;
 
 	public PanelQuestRight(Panel panel)
 	{
@@ -105,6 +107,13 @@ public class PanelQuestRight extends Panel
 			}
 
 			setX(treeGui.width - width - 2);
+
+			maxScroll = 0;
+
+			for (Widget widget : widgets)
+			{
+				maxScroll = Math.max(maxScroll, widget.posY + widget.height + 3);
+			}
 		}
 
 		if (widgets.isEmpty())
@@ -122,6 +131,18 @@ public class PanelQuestRight extends Panel
 	public boolean mousePressed(MouseButton button)
 	{
 		return super.mousePressed(button) || isMouseOver();
+	}
+
+	@Override
+	public boolean mouseScrolled(int scroll)
+	{
+		if (isMouseOver())
+		{
+			setScrollY(MathHelper.clamp(getScrollY() - scroll / 10, 0, maxScroll - height));
+			return true;
+		}
+
+		return super.mouseScrolled(scroll);
 	}
 
 	@Override
