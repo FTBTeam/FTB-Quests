@@ -6,7 +6,6 @@ import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
-import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.item.ItemMissing;
 import com.feed_the_beast.ftbquests.net.edit.MessageEditObject;
@@ -141,7 +140,7 @@ public abstract class QuestObjectBase
 
 		if (!title.isEmpty())
 		{
-			cachedDisplayName = new TextComponentString(title.equals("-") ? "" : StringUtils.unformatted(title).replace("&(\\S)", StringUtils.FORMATTING_CHAR + "$1"));
+			cachedDisplayName = new TextComponentString(title);
 		}
 		else
 		{
@@ -191,6 +190,7 @@ public abstract class QuestObjectBase
 	@SideOnly(Side.CLIENT)
 	public void onEditButtonClicked()
 	{
+		
 		new MessageEditObject(id).sendToServer();
 	}
 }

@@ -44,7 +44,7 @@ public class ButtonQuest extends Button
 		treeGui = (GuiQuestTree) panel.getGui();
 		setSize(20, 20);
 		quest = q;
-		description = TextFormatting.GRAY + StringUtils.unformatted(quest.description).replace("&(\\S)", StringUtils.FORMATTING_CHAR + "$1");
+		description = TextFormatting.GRAY + StringUtils.addFormatting(quest.description);
 
 		if (StringUtils.unformatted(description).isEmpty())
 		{
