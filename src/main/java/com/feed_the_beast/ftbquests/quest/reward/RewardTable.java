@@ -78,7 +78,12 @@ public final class RewardTable extends QuestObjectBase
 	public void writeData(NBTTagCompound nbt)
 	{
 		super.writeData(nbt);
-		nbt.setInteger("empty_weight", emptyWeight);
+
+		if (emptyWeight > 0)
+		{
+			nbt.setInteger("empty_weight", emptyWeight);
+		}
+
 		nbt.setInteger("loot_size", lootSize);
 
 		NBTTagList list = new NBTTagList();
