@@ -144,6 +144,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 	public void readData(NBTTagCompound nbt)
 	{
 		super.readData(nbt);
+		items.clear();
 		NBTTagList list = nbt.getTagList("items", Constants.NBT.TAG_COMPOUND);
 
 		if (list.isEmpty())
