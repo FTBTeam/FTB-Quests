@@ -3,6 +3,7 @@ package com.feed_the_beast.ftbquests.quest;
 import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigString;
+import com.feed_the_beast.ftblib.lib.data.ForgePlayer;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.IconAnimation;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
@@ -11,9 +12,11 @@ import com.feed_the_beast.ftblib.lib.util.ListUtils;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.events.ObjectCompletedEvent;
 import com.feed_the_beast.ftbquests.gui.tree.GuiQuestTree;
+import com.feed_the_beast.ftbquests.net.MessageDisplayToast;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
 import com.feed_the_beast.ftbquests.quest.task.QuestTask;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
+import com.feed_the_beast.ftbquests.util.FTBQuestsTeamData;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagIntArray;
@@ -60,7 +63,7 @@ public final class Quest extends QuestObject
 		visibilityType = EnumQuestVisibilityType.NORMAL;
 		x = 0;
 		y = 0;
-		shape = EnumQuestShape.CIRCLE;
+		shape = chapter.file.defaultShape;
 		text = new ArrayList<>();
 		canRepeat = false;
 		dependencies = new HashSet<>();
@@ -112,7 +115,7 @@ public final class Quest extends QuestObject
 			nbt.setByte("y", y);
 		}
 
-		if (shape != EnumQuestShape.CIRCLE)
+		if (shape != chapter.file.defaultShape)
 		{
 			nbt.setString("shape", shape.getID());
 		}
@@ -171,7 +174,7 @@ public final class Quest extends QuestObject
 		visibilityType = EnumQuestVisibilityType.NAME_MAP.get(nbt.getString("visibility"));
 		x = (byte) MathHelper.clamp(nbt.getByte("x"), -POS_LIMIT, POS_LIMIT);
 		y = (byte) MathHelper.clamp(nbt.getByte("y"), -POS_LIMIT, POS_LIMIT);
-		shape = EnumQuestShape.NAME_MAP.get(nbt.getString("shape"));
+		shape = nbt.hasKey("shape") ? EnumQuestShape.NAME_MAP.get(nbt.getString("shape")) : chapter.file.defaultShape;
 		text.clear();
 
 		NBTTagList list = nbt.getTagList("text", Constants.NBT.TAG_STRING);
@@ -378,6 +381,17 @@ public final class Quest extends QuestObject
 		if (chapter.isComplete(data))
 		{
 			chapter.onCompleted(data);
+		}
+
+		if (!getQuestFile().isClient())
+		{
+			for (ForgePlayer player : ((FTBQuestsTeamData) data).team.getMembers())
+			{
+				if (player.isOnline())
+				{
+					new MessageDisplayToast(id).sendTo(player.getPlayer());
+				}
+			}
 		}
 	}
 
