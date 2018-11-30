@@ -4,7 +4,6 @@ import com.feed_the_beast.ftblib.FTBLibConfig;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigItemStack;
 import com.feed_the_beast.ftblib.lib.config.ConfigTimer;
-import com.feed_the_beast.ftblib.lib.data.ForgePlayer;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.IconAnimation;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
@@ -24,9 +23,9 @@ import com.feed_the_beast.ftbquests.quest.reward.RewardTable;
 import com.feed_the_beast.ftbquests.quest.task.FTBQuestsTasks;
 import com.feed_the_beast.ftbquests.quest.task.QuestTask;
 import com.feed_the_beast.ftbquests.quest.task.QuestTaskType;
-import com.feed_the_beast.ftbquests.util.FTBQuestsTeamData;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTBase;
@@ -172,20 +171,14 @@ public abstract class QuestFile extends QuestObject
 	}
 
 	@Override
-	public void onCompleted(ITeamData data)
+	public void onCompleted(ITeamData data, List<EntityPlayerMP> onlineMembers)
 	{
-		super.onCompleted(data);
+		super.onCompleted(data, onlineMembers);
 		new ObjectCompletedEvent.FileEvent(data, this).post();
 
-		if (!getQuestFile().isClient())
+		for (EntityPlayerMP player : onlineMembers)
 		{
-			for (ForgePlayer player : ((FTBQuestsTeamData) data).team.getMembers())
-			{
-				if (player.isOnline())
-				{
-					new MessageDisplayToast(id).sendTo(player.getPlayer());
-				}
-			}
+			new MessageDisplayToast(id).sendTo(player);
 		}
 	}
 
