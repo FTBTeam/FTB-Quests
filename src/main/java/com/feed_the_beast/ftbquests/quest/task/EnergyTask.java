@@ -31,12 +31,6 @@ public abstract class EnergyTask extends QuestTask implements ISingleLongValueTa
 	}
 
 	@Override
-	public String getMaxProgressString()
-	{
-		return StringUtils.formatDouble(value, true);
-	}
-
-	@Override
 	public void writeData(NBTTagCompound nbt)
 	{
 		super.writeData(nbt);

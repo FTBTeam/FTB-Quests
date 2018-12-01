@@ -4,7 +4,6 @@ import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigLong;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
-import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.task.FTBQuestsTasks;
@@ -18,6 +17,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentTranslation;
 
 import java.util.Collection;
 
@@ -48,7 +48,7 @@ public class MoneyTask extends QuestTask implements ISingleLongValueTask
 	@Override
 	public String getMaxProgressString()
 	{
-		return StringUtils.formatDouble(value, true);
+		return FTBMoney.moneyString(value);
 	}
 
 	@Override
@@ -95,7 +95,7 @@ public class MoneyTask extends QuestTask implements ISingleLongValueTask
 	public void getConfig(ConfigGroup config)
 	{
 		super.getConfig(config);
-		config.addLong("value", () -> value, v -> value = v, 1L, 1L, Long.MAX_VALUE);
+		config.addLong("value", () -> value, v -> value = v, 1L, 1L, Long.MAX_VALUE).setDisplayName(new TextComponentTranslation("ftbquests.task.ftbquests.ftb_money"));
 	}
 
 	@Override
@@ -115,6 +115,12 @@ public class MoneyTask extends QuestTask implements ISingleLongValueTask
 		private Data(MoneyTask task, ITeamData data)
 		{
 			super(task, data);
+		}
+
+		@Override
+		public String getProgressString()
+		{
+			return FTBMoney.moneyString(progress);
 		}
 
 		@Override

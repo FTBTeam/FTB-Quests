@@ -152,7 +152,7 @@ ftbquests.task.ftbquests.botania_mana.show_numbers=Show Numbers
 ftbquests.task.ftbquests.botania_mana.text=%d Mana
 
 ftbquests.task.ftbquests.ftb_money=Money
-ftbquests.task.ftbquests.ftb_money.value=Money
+ftbquests.task.ftbquests.emc=EMC
 
 ftbquests.reward=Reward
 ftbquests.reward.team_reward=Team Reward
