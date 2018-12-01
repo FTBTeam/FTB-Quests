@@ -40,6 +40,7 @@ public final class RewardTable extends QuestObjectBase
 	public final Quest fakeQuest;
 	public int emptyWeight;
 	public int lootSize;
+	public boolean hideTooltip;
 
 	public RewardTable(QuestFile f)
 	{
@@ -48,6 +49,7 @@ public final class RewardTable extends QuestObjectBase
 		fakeQuest = new Quest(new QuestChapter(file));
 		emptyWeight = 0;
 		lootSize = 27;
+		hideTooltip = false;
 	}
 
 	@Override
@@ -86,6 +88,11 @@ public final class RewardTable extends QuestObjectBase
 
 		nbt.setInteger("loot_size", lootSize);
 
+		if (hideTooltip)
+		{
+			nbt.setBoolean("hide_tooltip", true);
+		}
+
 		NBTTagList list = new NBTTagList();
 
 		for (WeightedReward reward : rewards)
@@ -115,6 +122,7 @@ public final class RewardTable extends QuestObjectBase
 		super.readData(nbt);
 		emptyWeight = nbt.getInteger("empty_weight");
 		lootSize = nbt.getInteger("loot_size");
+		hideTooltip = nbt.getBoolean("hide_tooltip");
 
 		rewards.clear();
 		NBTTagList list = nbt.getTagList("rewards", Constants.NBT.TAG_COMPOUND);
@@ -138,6 +146,7 @@ public final class RewardTable extends QuestObjectBase
 		super.writeNetData(data);
 		data.writeVarInt(emptyWeight);
 		data.writeVarInt(lootSize);
+		data.writeBoolean(hideTooltip);
 		data.writeVarInt(rewards.size());
 
 		for (WeightedReward reward : rewards)
@@ -154,6 +163,7 @@ public final class RewardTable extends QuestObjectBase
 		super.readNetData(data);
 		emptyWeight = data.readVarInt();
 		lootSize = data.readVarInt();
+		hideTooltip = data.readBoolean();
 		rewards.clear();
 		int s = data.readVarInt();
 
@@ -173,6 +183,7 @@ public final class RewardTable extends QuestObjectBase
 		super.getConfig(config);
 		config.addInt("empty_weight", () -> emptyWeight, v -> emptyWeight = v, 0, 0, Integer.MAX_VALUE);
 		config.addInt("loot_size", () -> lootSize, v -> lootSize = v, 27, 1, Integer.MAX_VALUE);
+		config.addBool("hide_tooltip", () -> hideTooltip, v -> hideTooltip = v, false);
 	}
 
 	@Override
@@ -248,6 +259,11 @@ public final class RewardTable extends QuestObjectBase
 	@SideOnly(Side.CLIENT)
 	public void addMouseOverText(List<String> list, boolean includeWeight, boolean includeEmpty)
 	{
+		if (hideTooltip)
+		{
+			return;
+		}
+
 		int totalWeight = getTotalWeight(includeEmpty);
 
 		if (includeWeight && includeEmpty && emptyWeight > 0)
