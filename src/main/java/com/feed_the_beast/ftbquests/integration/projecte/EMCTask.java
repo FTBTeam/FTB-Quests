@@ -1,4 +1,4 @@
-package com.feed_the_beast.ftbquests.quest.task;
+package com.feed_the_beast.ftbquests.integration.projecte;
 
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigLong;
@@ -6,6 +6,13 @@ import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.quest.task.FTBQuestsTasks;
+import com.feed_the_beast.ftbquests.quest.task.ISingleLongValueTask;
+import com.feed_the_beast.ftbquests.quest.task.QuestTask;
+import com.feed_the_beast.ftbquests.quest.task.QuestTaskData;
+import com.feed_the_beast.ftbquests.quest.task.QuestTaskType;
+import com.feed_the_beast.ftbquests.quest.task.SimpleQuestTaskData;
+import moze_intel.projecte.api.capabilities.IKnowledgeProvider;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -13,17 +20,22 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.CapabilityInject;
 
 import java.util.Collection;
 
 /**
  * @author LatvianModder
  */
-public class XPTask extends QuestTask implements ISingleLongValueTask
+public class EMCTask extends QuestTask implements ISingleLongValueTask
 {
-	public long value = 1L;
+	@CapabilityInject(IKnowledgeProvider.class)
+	public static Capability<IKnowledgeProvider> KNOWLEDGE_CAP;
 
-	public XPTask(Quest quest)
+	public long value = 8192L;
+
+	public EMCTask(Quest quest)
 	{
 		super(quest);
 	}
@@ -31,13 +43,19 @@ public class XPTask extends QuestTask implements ISingleLongValueTask
 	@Override
 	public QuestTaskType getType()
 	{
-		return FTBQuestsTasks.XP;
+		return FTBQuestsTasks.EMC;
 	}
 
 	@Override
 	public long getMaxProgress()
 	{
 		return value;
+	}
+
+	@Override
+	public String getMaxProgressString()
+	{
+		return String.format("%,d", value);
 	}
 
 	@Override
@@ -84,15 +102,15 @@ public class XPTask extends QuestTask implements ISingleLongValueTask
 	public void getConfig(ConfigGroup config)
 	{
 		super.getConfig(config);
-		config.addLong("value", () -> value, v -> value = v, 1000L, 1L, Long.MAX_VALUE).setDisplayName(new TextComponentTranslation("ftbquests.reward.ftbquests.xp_levels"));
+		config.addLong("value", () -> value, v -> value = v, 8192L, 1L, Long.MAX_VALUE).setDisplayName(new TextComponentTranslation("ftbquests.task.ftbquests.emc"));
 	}
 
 	@Override
 	public ITextComponent getAltDisplayName()
 	{
 		ITextComponent text = new TextComponentString(getMaxProgressString());
-		text.getStyle().setColor(TextFormatting.RED);
-		return new TextComponentTranslation("ftbquests.reward.ftbquests.xp_levels").appendText(": ").appendSibling(text);
+		text.getStyle().setColor(TextFormatting.AQUA);
+		return new TextComponentTranslation("ftbquests.task.ftbquests.emc").appendText(": ").appendSibling(text);
 	}
 
 	@Override
@@ -101,23 +119,38 @@ public class XPTask extends QuestTask implements ISingleLongValueTask
 		return new Data(this, data);
 	}
 
-	public static class Data extends SimpleQuestTaskData<XPTask>
+	public static class Data extends SimpleQuestTaskData<EMCTask>
 	{
-		private Data(XPTask task, ITeamData data)
+		private Data(EMCTask task, ITeamData data)
 		{
 			super(task, data);
 		}
 
 		@Override
+		public String getProgressString()
+		{
+			return String.format("%,d", progress);
+		}
+
+		@Override
 		public boolean submitTask(EntityPlayerMP player, Collection<ItemStack> itemsToCheck, boolean simulate)
 		{
-			int add = (int) Math.min(player.experienceLevel, Math.min(task.value - progress, Integer.MAX_VALUE));
+			IKnowledgeProvider knowledge = player.getCapability(KNOWLEDGE_CAP, null);
 
-			if (add > 0)
+			if (knowledge == null)
+			{
+				return false;
+			}
+
+			double emc = knowledge.getEmc();
+			double add = Math.min(emc, task.value - progress);
+
+			if (add > 0D)
 			{
 				if (!simulate)
 				{
-					player.addExperienceLevel(-add);
+					knowledge.setEmc(emc - add);
+					knowledge.sync(player);
 					progress += add;
 					sync();
 				}

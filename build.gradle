@@ -37,6 +37,7 @@ minecraft {
 
 repositories {
 	maven { url "https://maven.latmod.com/" } //FTBLib, FTB Money
+	maven { url "https://minecraft.curseforge.com/api/maven/" } //ProjectE
 	maven { url "http://maven.ic2.player.to/" } //IC2
 	maven { url "https://maven.blamejared.com/" } //PackMode & Botania
 	maven { url "http://maven.thiakil.com/" } //Baubles
@@ -51,6 +52,7 @@ dependencies {
 	deobfProvided "vazkii.botania:Botania:${botania_version}"
 	deobfProvided "com.azanor.baubles:Baubles:${baubles_version}"
 	provided "com.mod-buildcraft:buildcraft-api:${buildcraft_version}"
+	deobfCompile "projecte:ProjectE:1.12:${projecte_version}"
 }
 
 processResources {
