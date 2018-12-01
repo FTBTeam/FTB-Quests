@@ -177,6 +177,7 @@ ftbquests.variables=Variables
 ftbquests.variable.max=Max Value
 
 ftbquests.reward_table=Reward Table
+ftbquests.reward_table.hide_tooltip=Hide Tooltip
 ftbquests.reward_table.edit=Edit Reward Table
 ftbquests.reward_tables=Reward Tables
 ftbquests.reward_table.nothing=Nothing
