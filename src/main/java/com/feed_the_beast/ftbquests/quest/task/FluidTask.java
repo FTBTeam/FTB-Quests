@@ -4,6 +4,7 @@ import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftblib.lib.config.ConfigFluid;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigNBT;
+import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftbquests.FTBQuests;
@@ -48,7 +49,7 @@ public class FluidTask extends QuestTask
 
 	public Fluid fluid = FluidRegistry.WATER;
 	public NBTTagCompound fluidNBT = null;
-	public long amount = 1000;
+	public long amount = Fluid.BUCKET_VOLUME;
 
 	public FluidTask(Quest quest)
 	{
@@ -79,7 +80,7 @@ public class FluidTask extends QuestTask
 		super.writeData(nbt);
 		nbt.setString("fluid", fluid.getName());
 
-		if (amount != 1000)
+		if (amount != Fluid.BUCKET_VOLUME)
 		{
 			nbt.setLong("amount", amount);
 		}
@@ -103,7 +104,7 @@ public class FluidTask extends QuestTask
 		}
 
 		fluidNBT = (NBTTagCompound) nbt.getTag("nbt");
-		amount = nbt.hasKey("amount") ? nbt.getLong("amount") : 1000;
+		amount = nbt.hasKey("amount") ? nbt.getLong("amount") : Fluid.BUCKET_VOLUME;
 
 		if (amount < 1)
 		{
@@ -172,9 +173,15 @@ public class FluidTask extends QuestTask
 	}
 
 	@Override
+	public Icon getAltIcon()
+	{
+		return Icon.getIcon(fluid.getStill(createFluidStack(Fluid.BUCKET_VOLUME)).toString()).combineWith(Icon.getIcon(FluidTask.TANK_TEXTURE.toString()));
+	}
+
+	@Override
 	public ITextComponent getAltDisplayName()
 	{
-		return new TextComponentString(getVolumeString(amount)).appendText(" of ").appendText(createFluidStack(1000).getLocalizedName());
+		return new TextComponentString(getVolumeString(amount)).appendText(" of ").appendText(createFluidStack(Fluid.BUCKET_VOLUME).getLocalizedName());
 	}
 
 	@Override
@@ -213,7 +220,7 @@ public class FluidTask extends QuestTask
 			}
 		}, new ConfigNBT(null));
 
-		config.addLong("amount", () -> amount, v -> amount = v, 1000L, 1, Long.MAX_VALUE);
+		config.addLong("amount", () -> amount, v -> amount = v, Fluid.BUCKET_VOLUME, 1, Long.MAX_VALUE);
 	}
 
 	@Override
