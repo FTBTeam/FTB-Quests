@@ -1,13 +1,9 @@
 {
-	"type": "minecraft:crafting_shaped",
+	"type": "minecraft:crafting_shapeless",
 	"group": "ftbquests:chest",
 	"result": {"item": "chest"},
-	"pattern": [
-		"B",
-		"C"
-	],
-	"key": {
-		"B": {"item": "book"},
-		"C": {"type": "forge:ore_dict", "ore": "chest"}
-	}
+	"ingredients": [
+		{"item": "book"},
+		{"type": "forge:ore_dict", "ore": "chest"}
+	]
 }
