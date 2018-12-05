@@ -86,15 +86,13 @@ public final class QuestTaskType extends IForgeRegistryEntry.Impl<QuestTaskType>
 		void openCreationGui(IOpenableGui gui, Quest quest, Consumer<QuestTask> callback);
 	}
 
-	public final Class typeClass;
 	public final Provider provider;
 	private ITextComponent displayName;
 	private Icon icon;
 	private GuiProvider guiProvider;
 
-	public QuestTaskType(Class<? extends QuestTask> c, Provider p)
+	public QuestTaskType(Provider p)
 	{
-		typeClass = c;
 		provider = p;
 		displayName = null;
 		icon = GuiIcons.ACCEPT;

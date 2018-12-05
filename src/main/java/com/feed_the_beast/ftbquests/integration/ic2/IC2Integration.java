@@ -25,6 +25,6 @@ public class IC2Integration
 	@SubscribeEvent
 	public static void registerTasks(RegistryEvent.Register<QuestTaskType> event)
 	{
-		event.getRegistry().register(FTBQuestsTasks.IC2_ENERGY = new QuestTaskType(IC2EnergyTask.class, IC2EnergyTask::new).setRegistryName("ic2_energy").setIcon(Icon.getIcon(IC2EnergyTask.FULL_TEXTURE.toString()).combineWith(Icon.getIcon(IC2EnergyTask.EMPTY_TEXTURE.toString()))));
+		event.getRegistry().register(FTBQuestsTasks.IC2_ENERGY = new QuestTaskType(IC2EnergyTask::new).setRegistryName("ic2_energy").setIcon(Icon.getIcon(IC2EnergyTask.FULL_TEXTURE.toString()).combineWith(Icon.getIcon(IC2EnergyTask.EMPTY_TEXTURE.toString()))));
 	}
 }

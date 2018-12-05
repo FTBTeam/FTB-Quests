@@ -88,16 +88,14 @@ public final class QuestRewardType extends IForgeRegistryEntry.Impl<QuestRewardT
 		void openCreationGui(IOpenableGui gui, Quest quest, Consumer<QuestReward> callback);
 	}
 
-	public final Class typeClass;
 	public final Provider provider;
 	private ITextComponent displayName;
 	private Icon icon;
 	private GuiProvider guiProvider;
 	private boolean excludeFromListRewards;
 
-	public QuestRewardType(Class<? extends QuestReward> c, Provider p)
+	public QuestRewardType(Provider p)
 	{
-		typeClass = c;
 		provider = p;
 		displayName = null;
 		icon = GuiIcons.MONEY_BAG;

@@ -135,7 +135,7 @@ public class ButtonDummyQuest extends Widget
 
 		if (treeGui.selectedQuest != null && treeGui.movingQuest)
 		{
-			treeGui.selectedQuest.shape.draw(sx, sy, s, s, Color4I.WHITE.withAlpha(30));
+			treeGui.selectedQuest.shape.shape.draw(sx, sy, s, s, Color4I.WHITE.withAlpha(20));
 		}
 
 		if (isMouseOver())

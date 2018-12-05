@@ -1,6 +1,6 @@
 package com.feed_the_beast.ftbquests.integration.ftbmoney;
 
-import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
+import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftbquests.quest.reward.FTBQuestsRewards;
 import com.feed_the_beast.ftbquests.quest.reward.QuestRewardType;
 import com.feed_the_beast.ftbquests.quest.task.FTBQuestsTasks;
@@ -22,12 +22,12 @@ public class FTBMoneyIntegration
 	@SubscribeEvent
 	public static void registerTasks(RegistryEvent.Register<QuestTaskType> event)
 	{
-		event.getRegistry().register(FTBQuestsTasks.FTB_MONEY = new QuestTaskType(MoneyTask.class, MoneyTask::new).setRegistryName("ftb_money").setIcon(GuiIcons.MONEY));
+		event.getRegistry().register(FTBQuestsTasks.FTB_MONEY = new QuestTaskType(MoneyTask::new).setRegistryName("ftb_money").setIcon(Icon.getIcon("ftbmoney:textures/beastcoin.png")));
 	}
 
 	@SubscribeEvent
 	public static void registerRewards(RegistryEvent.Register<QuestRewardType> event)
 	{
-		event.getRegistry().register(FTBQuestsRewards.FTB_MONEY = new QuestRewardType(MoneyReward.class, MoneyReward::new).setRegistryName("ftb_money").setIcon(GuiIcons.MONEY));
+		event.getRegistry().register(FTBQuestsRewards.FTB_MONEY = new QuestRewardType(MoneyReward::new).setRegistryName("ftb_money").setIcon(Icon.getIcon("ftbmoney:textures/beastcoin.png")));
 	}
 }

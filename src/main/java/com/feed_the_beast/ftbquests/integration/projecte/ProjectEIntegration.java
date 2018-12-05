@@ -20,6 +20,6 @@ public class ProjectEIntegration
 	@SubscribeEvent
 	public static void registerTasks(RegistryEvent.Register<QuestTaskType> event)
 	{
-		event.getRegistry().register(FTBQuestsTasks.EMC = new QuestTaskType(EMCTask.class, EMCTask::new).setRegistryName("emc").setIcon(Icon.getIcon("projecte:items/transmute_tablet")));
+		event.getRegistry().register(FTBQuestsTasks.EMC = new QuestTaskType(EMCTask::new).setRegistryName("emc").setIcon(Icon.getIcon("projecte:items/transmute_tablet")));
 	}
 }
