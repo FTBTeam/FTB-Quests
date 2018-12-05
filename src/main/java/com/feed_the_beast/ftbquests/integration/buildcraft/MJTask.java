@@ -75,7 +75,7 @@ public class MJTask extends EnergyTask
 		buffer.pos(x, y, 0).tex(0, 0).endVertex();
 		tessellator.draw();
 
-		double r = data == null ? 0D : data.getRelativeProgress() / 100D;
+		double r = data == null ? 0D : data.getProgress() / (double) data.task.getMaxProgress();
 
 		if (r > 0D)
 		{
@@ -115,7 +115,7 @@ public class MJTask extends EnergyTask
 		buffer.pos(x, y, z).tex(0, 0).endVertex();
 		tessellator.draw();
 
-		double r = data == null ? 0D : data.getRelativeProgress() / 100D;
+		double r = data == null ? 0D : data.getProgress() / (double) data.task.getMaxProgress();
 
 		if (r > 0D)
 		{
