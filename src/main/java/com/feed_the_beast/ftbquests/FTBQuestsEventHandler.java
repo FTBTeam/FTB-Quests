@@ -124,11 +124,11 @@ public class FTBQuestsEventHandler
 	public static void registerTasks(RegistryEvent.Register<QuestTaskType> event)
 	{
 		event.getRegistry().registerAll(
-				FTBQuestsTasks.ITEM = new QuestTaskType(ItemTask.class, ItemTask::new).setRegistryName("item").setIcon(Icon.getIcon("minecraft:items/diamond")),
-				FTBQuestsTasks.FLUID = new QuestTaskType(FluidTask.class, FluidTask::new).setRegistryName("fluid").setIcon(Icon.getIcon(FluidRegistry.WATER.getStill(new FluidStack(FluidRegistry.WATER, Fluid.BUCKET_VOLUME)).toString()).combineWith(Icon.getIcon(FluidTask.TANK_TEXTURE.toString()))),
-				FTBQuestsTasks.FORGE_ENERGY = new QuestTaskType(ForgeEnergyTask.class, ForgeEnergyTask::new).setRegistryName("forge_energy").setIcon(Icon.getIcon(ForgeEnergyTask.EMPTY_TEXTURE.toString()).combineWith(Icon.getIcon(ForgeEnergyTask.FULL_TEXTURE.toString()))),
-				FTBQuestsTasks.XP = new QuestTaskType(XPTask.class, XPTask::new).setRegistryName("xp").setIcon(Icon.getIcon("minecraft:items/experience_bottle")),
-				FTBQuestsTasks.DIMENSION = new QuestTaskType(DimensionTask.class, DimensionTask::new).setRegistryName("dimension").setIcon(Icon.getIcon("minecraft:items/ender_pearl"))
+				FTBQuestsTasks.ITEM = new QuestTaskType(ItemTask::new).setRegistryName("item").setIcon(Icon.getIcon("minecraft:items/diamond")),
+				FTBQuestsTasks.FLUID = new QuestTaskType(FluidTask::new).setRegistryName("fluid").setIcon(Icon.getIcon(FluidRegistry.WATER.getStill(new FluidStack(FluidRegistry.WATER, Fluid.BUCKET_VOLUME)).toString()).combineWith(Icon.getIcon(FluidTask.TANK_TEXTURE.toString()))),
+				FTBQuestsTasks.FORGE_ENERGY = new QuestTaskType(ForgeEnergyTask::new).setRegistryName("forge_energy").setIcon(Icon.getIcon(ForgeEnergyTask.EMPTY_TEXTURE.toString()).combineWith(Icon.getIcon(ForgeEnergyTask.FULL_TEXTURE.toString()))),
+				FTBQuestsTasks.XP = new QuestTaskType(XPTask::new).setRegistryName("xp").setIcon(Icon.getIcon("minecraft:items/experience_bottle")),
+				FTBQuestsTasks.DIMENSION = new QuestTaskType(DimensionTask::new).setRegistryName("dimension").setIcon(Icon.getIcon("minecraft:blocks/portal"))
 		);
 
 		FTBQuests.PROXY.setTaskGuiProviders();
@@ -138,13 +138,13 @@ public class FTBQuestsEventHandler
 	public static void registerRewards(RegistryEvent.Register<QuestRewardType> event)
 	{
 		event.getRegistry().registerAll(
-				FTBQuestsRewards.ITEM = new QuestRewardType(ItemReward.class, ItemReward::new).setRegistryName("item").setIcon(Icon.getIcon("minecraft:items/diamond")),
-				FTBQuestsRewards.CHOICE = new QuestRewardType(ChoiceReward.class, ChoiceReward::new).setRegistryName("choice").setIcon(GuiIcons.COLOR_RGB).setExcludeFromListRewards(true),
-				FTBQuestsRewards.RANDOM = new QuestRewardType(RandomReward.class, RandomReward::new).setRegistryName("random").setIcon(GuiIcons.DICE).setExcludeFromListRewards(true),
-				FTBQuestsRewards.LOOT = new QuestRewardType(LootReward.class, LootReward::new).setRegistryName("loot").setIcon(GuiIcons.MONEY_BAG).setExcludeFromListRewards(true),
-				FTBQuestsRewards.XP = new QuestRewardType(XPReward.class, XPReward::new).setRegistryName("xp").setIcon(Icon.getIcon("minecraft:items/experience_bottle")),
-				FTBQuestsRewards.XP_LEVELS = new QuestRewardType(XPLevelsReward.class, XPLevelsReward::new).setRegistryName("xp_levels").setIcon(Icon.getIcon("minecraft:items/experience_bottle")),
-				FTBQuestsRewards.COMMAND = new QuestRewardType(CommandReward.class, CommandReward::new).setRegistryName("command").setIcon(Icon.getIcon("minecraft:blocks/command_block_back"))
+				FTBQuestsRewards.ITEM = new QuestRewardType(ItemReward::new).setRegistryName("item").setIcon(Icon.getIcon("minecraft:items/diamond")),
+				FTBQuestsRewards.CHOICE = new QuestRewardType(ChoiceReward::new).setRegistryName("choice").setIcon(GuiIcons.COLOR_RGB).setExcludeFromListRewards(true),
+				FTBQuestsRewards.RANDOM = new QuestRewardType(RandomReward::new).setRegistryName("random").setIcon(GuiIcons.DICE).setExcludeFromListRewards(true),
+				FTBQuestsRewards.LOOT = new QuestRewardType(LootReward::new).setRegistryName("loot").setIcon(GuiIcons.MONEY_BAG).setExcludeFromListRewards(true),
+				FTBQuestsRewards.XP = new QuestRewardType(XPReward::new).setRegistryName("xp").setIcon(Icon.getIcon("minecraft:items/experience_bottle")),
+				FTBQuestsRewards.XP_LEVELS = new QuestRewardType(XPLevelsReward::new).setRegistryName("xp_levels").setIcon(Icon.getIcon("minecraft:items/experience_bottle")),
+				FTBQuestsRewards.COMMAND = new QuestRewardType(CommandReward::new).setRegistryName("command").setIcon(Icon.getIcon("minecraft:blocks/command_block_back"))
 		);
 
 		FTBQuests.PROXY.setRewardGuiProviders();

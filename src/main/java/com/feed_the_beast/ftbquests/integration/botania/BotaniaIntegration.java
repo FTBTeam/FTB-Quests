@@ -25,6 +25,6 @@ public class BotaniaIntegration
 	@SubscribeEvent
 	public static void registerTasks(RegistryEvent.Register<QuestTaskType> event)
 	{
-		event.getRegistry().register(FTBQuestsTasks.BOTANIA_MANA = new QuestTaskType(ManaTask.class, ManaTask::new).setRegistryName("botania_mana").setIcon(Icon.getIcon(ManaTask.FULL_TEXTURE.toString()).combineWith(Icon.getIcon(ManaTask.EMPTY_TEXTURE.toString()))));
+		event.getRegistry().register(FTBQuestsTasks.BOTANIA_MANA = new QuestTaskType(ManaTask::new).setRegistryName("botania_mana").setIcon(Icon.getIcon(ManaTask.FULL_TEXTURE.toString()).combineWith(Icon.getIcon(ManaTask.EMPTY_TEXTURE.toString()))));
 	}
 }

@@ -20,6 +20,6 @@ public class BuildCraftIntegration
 	@SubscribeEvent
 	public static void registerTasks(RegistryEvent.Register<QuestTaskType> event)
 	{
-		event.getRegistry().register(FTBQuestsTasks.BUILDCRAFT_MJ = new QuestTaskType(MJTask.class, MJTask::new).setRegistryName("buildcraft_mj").setIcon(Icon.getIcon(MJTask.EMPTY_TEXTURE.toString()).combineWith(Icon.getIcon(MJTask.FULL_TEXTURE.toString()))));
+		event.getRegistry().register(FTBQuestsTasks.BUILDCRAFT_MJ = new QuestTaskType(MJTask::new).setRegistryName("buildcraft_mj").setIcon(Icon.getIcon(MJTask.EMPTY_TEXTURE.toString()).combineWith(Icon.getIcon(MJTask.FULL_TEXTURE.toString()))));
 	}
 }
