@@ -13,13 +13,20 @@ import com.feed_the_beast.ftbquests.quest.task.QuestTaskData;
 import com.feed_the_beast.ftbquests.quest.task.QuestTaskType;
 import com.feed_the_beast.ftbquests.quest.task.SimpleQuestTaskData;
 import com.feed_the_beast.mods.money.FTBMoney;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
+import javax.annotation.Nullable;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * @author LatvianModder
@@ -108,6 +115,13 @@ public class MoneyTask extends QuestTask implements ISingleLongValueTask
 	public QuestTaskData createData(ITeamData data)
 	{
 		return new Data(this, data);
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public void addMouseOverText(List<String> list, @Nullable QuestTaskData data)
+	{
+		list.add(TextFormatting.GRAY + I18n.format("ftbmoney.balance") + ": " + TextFormatting.GOLD + FTBMoney.moneyString(FTBMoney.getMoney(Minecraft.getMinecraft().player)));
 	}
 
 	public static class Data extends SimpleQuestTaskData<MoneyTask>
