@@ -155,7 +155,7 @@ public class RandomReward extends QuestReward
 	@Override
 	public Icon getAltIcon()
 	{
-		return getTable().useIcon ? getTable().getIcon() : super.getAltIcon();
+		return getTable().getIcon();
 	}
 
 	@Override

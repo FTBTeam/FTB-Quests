@@ -42,7 +42,6 @@ public final class RewardTable extends QuestObjectBase
 	public int emptyWeight;
 	public int lootSize;
 	public boolean hideTooltip;
-	public boolean useIcon;
 	public boolean useTitle;
 
 	public RewardTable(QuestFile f)
@@ -53,7 +52,6 @@ public final class RewardTable extends QuestObjectBase
 		emptyWeight = 0;
 		lootSize = 27;
 		hideTooltip = false;
-		useIcon = false;
 		useTitle = false;
 	}
 
@@ -98,11 +96,6 @@ public final class RewardTable extends QuestObjectBase
 			nbt.setBoolean("hide_tooltip", true);
 		}
 
-		if (useIcon)
-		{
-			nbt.setBoolean("use_icon", true);
-		}
-
 		if (useTitle)
 		{
 			nbt.setBoolean("use_title", true);
@@ -138,7 +131,6 @@ public final class RewardTable extends QuestObjectBase
 		emptyWeight = nbt.getInteger("empty_weight");
 		lootSize = nbt.getInteger("loot_size");
 		hideTooltip = nbt.getBoolean("hide_tooltip");
-		useIcon = nbt.getBoolean("use_icon");
 		useTitle = nbt.getBoolean("use_title");
 
 		rewards.clear();
@@ -165,8 +157,7 @@ public final class RewardTable extends QuestObjectBase
 		data.writeVarInt(lootSize);
 		int flags = 0;
 		flags = Bits.setFlag(flags, 1, hideTooltip);
-		flags = Bits.setFlag(flags, 2, useIcon);
-		flags = Bits.setFlag(flags, 4, useTitle);
+		flags = Bits.setFlag(flags, 2, useTitle);
 		data.writeVarInt(flags);
 		data.writeVarInt(rewards.size());
 
@@ -186,8 +177,7 @@ public final class RewardTable extends QuestObjectBase
 		lootSize = data.readVarInt();
 		int flags = data.readVarInt();
 		hideTooltip = Bits.getFlag(flags, 1);
-		useIcon = Bits.getFlag(flags, 2);
-		useTitle = Bits.getFlag(flags, 4);
+		useTitle = Bits.getFlag(flags, 2);
 		rewards.clear();
 		int s = data.readVarInt();
 
@@ -208,7 +198,6 @@ public final class RewardTable extends QuestObjectBase
 		config.addInt("empty_weight", () -> emptyWeight, v -> emptyWeight = v, 0, 0, Integer.MAX_VALUE);
 		config.addInt("loot_size", () -> lootSize, v -> lootSize = v, 27, 1, Integer.MAX_VALUE);
 		config.addBool("hide_tooltip", () -> hideTooltip, v -> hideTooltip = v, false);
-		config.addBool("use_icon", () -> useIcon, v -> useIcon = v, false);
 		config.addBool("use_title", () -> useTitle, v -> useTitle = v, false);
 	}
 
@@ -230,7 +219,7 @@ public final class RewardTable extends QuestObjectBase
 	{
 		GuiQuestTree gui = ClientUtils.getCurrentGuiAs(GuiQuestTree.class);
 
-		if (gui != null && gui.selectedQuest != null)
+		if (gui != null && gui.getSelectedQuest() != null)
 		{
 			gui.questRight.refreshWidgets();
 		}
@@ -272,6 +261,11 @@ public final class RewardTable extends QuestObjectBase
 	@Override
 	public ITextComponent getAltDisplayName()
 	{
+		if (rewards.size() == 1)
+		{
+			return rewards.get(0).reward.getDisplayName();
+		}
+
 		return new TextComponentTranslation("ftbquests.reward_table");
 	}
 

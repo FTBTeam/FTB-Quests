@@ -40,6 +40,7 @@ import org.lwjgl.input.Keyboard;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
 public class GuiQuestTree extends GuiBase
@@ -47,7 +48,7 @@ public class GuiQuestTree extends GuiBase
 	public final ClientQuestFile questFile;
 	public int scrollWidth, scrollHeight, prevMouseX, prevMouseY, grabbed;
 	public QuestChapter selectedChapter;
-	public Quest selectedQuest;
+	public final HashSet<Quest> selectedQuests;
 	public final Panel chapterPanel, quests, questLeft, questRight, otherButtons;
 	public Color4I borderColor, backgroundColor;
 	public boolean movingQuest = false;
@@ -57,6 +58,7 @@ public class GuiQuestTree extends GuiBase
 	public GuiQuestTree(ClientQuestFile q)
 	{
 		questFile = q;
+		selectedQuests = new HashSet<>();
 
 		chapterPanel = new PanelChapters(this);
 		chapterPanel.setHeight(20);
@@ -71,6 +73,12 @@ public class GuiQuestTree extends GuiBase
 		otherButtons = new PanelOtherButtons(this);
 
 		selectChapter(null);
+	}
+
+	@Nullable
+	public Quest getSelectedQuest()
+	{
+		return selectedQuests.size() == 1 ? selectedQuests.iterator().next() : null;
 	}
 
 	@Override
@@ -112,9 +120,16 @@ public class GuiQuestTree extends GuiBase
 
 	public void selectQuest(@Nullable Quest quest)
 	{
-		if (selectedQuest != quest)
+		Quest prev = getSelectedQuest();
+		selectedQuests.clear();
+
+		if (prev != quest)
 		{
-			selectedQuest = quest;
+			if (quest != null)
+			{
+				selectedQuests.add(quest);
+			}
+
 			quests.refreshWidgets();
 			questLeft.refreshWidgets();
 			questRight.refreshWidgets();
@@ -219,8 +234,9 @@ public class GuiQuestTree extends GuiBase
 			if (selectedChapter != null && !questFile.chapters.isEmpty())
 			{
 				selectChapter(questFile.chapters.get((selectedChapter.getIndex() + 1) % questFile.chapters.size()));
-				return true;
 			}
+
+			return true;
 		}
 		else if (keyChar >= '1' && keyChar <= '9')
 		{
@@ -229,18 +245,26 @@ public class GuiQuestTree extends GuiBase
 			if (i < questFile.chapters.size())
 			{
 				selectChapter(questFile.chapters.get(i));
-				return true;
 			}
+
+			return true;
 		}
 		else if (selectedChapter != null && questFile.canEdit() && isCtrlKeyDown() && !isShiftKeyDown() && !isAltKeyDown())
 		{
 			switch (key)
 			{
+				case Keyboard.KEY_A:
+					movingQuest = false;
+					selectQuest(null);
+					selectedQuests.addAll(selectedChapter.quests);
+					break;
 				case Keyboard.KEY_D:
 					movingQuest = false;
 					selectQuest(null);
-					return true;
+					break;
 			}
+
+			return true;
 		}
 		else if (key == Keyboard.KEY_LSHIFT)
 		{
@@ -340,6 +364,8 @@ public class GuiQuestTree extends GuiBase
 
 		backgroundColor.draw(start, y + 1, w - start - otherButtons.width - 1, chapterPanel.height - 2);
 		borderColor.draw(start, y + chapterPanel.height - 1, w - start - 1, 1);
+
+		Quest selectedQuest = getSelectedQuest();
 
 		if (selectedQuest != null && !movingQuest)
 		{

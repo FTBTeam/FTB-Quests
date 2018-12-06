@@ -40,23 +40,25 @@ public class PanelQuestLeft extends Panel
 	@Override
 	public void addWidgets()
 	{
-		if (treeGui.selectedQuest != null && !treeGui.movingQuest)
+		Quest selectedQuest = treeGui.getSelectedQuest();
+
+		if (!treeGui.movingQuest && selectedQuest != null)
 		{
 			setPos(2, treeGui.chapterPanel.height + 16);
 			TextField tasksTextField = new TextField(this).setText(TextFormatting.BLUE + I18n.format("ftbquests.tasks") + ":");
 			add(tasksTextField);
 
-			for (QuestTask task : treeGui.selectedQuest.tasks)
+			for (QuestTask task : selectedQuest.tasks)
 			{
 				add(new ButtonTask(this, task));
 			}
 
 			if (treeGui.questFile.canEdit())
 			{
-				add(new ButtonAddTask(this, treeGui.selectedQuest));
+				add(new ButtonAddTask(this, selectedQuest));
 			}
 
-			if (!treeGui.selectedQuest.isComplete(ClientQuestFile.INSTANCE.self))
+			if (!selectedQuest.isComplete(ClientQuestFile.INSTANCE.self))
 			{
 				add(new WidgetVerticalSpace(this, 2));
 				add(new ButtonQuickComplete(this));
@@ -64,9 +66,9 @@ public class PanelQuestLeft extends Panel
 
 			List<String> dependencies = new ArrayList<>();
 
-			for (QuestObject object : treeGui.selectedQuest.dependencies)
+			for (QuestObject object : selectedQuest.dependencies)
 			{
-				if (object.getQuestChapter() != treeGui.selectedQuest.chapter)
+				if (object.getQuestChapter() != selectedQuest.chapter)
 				{
 					if (dependencies.isEmpty())
 					{
@@ -89,7 +91,7 @@ public class PanelQuestLeft extends Panel
 			{
 				for (Quest quest : chapter.quests)
 				{
-					if (quest.chapter != treeGui.selectedQuest.chapter && quest.hasDependency(treeGui.selectedQuest))
+					if (quest.chapter != selectedQuest.chapter && quest.hasDependency(selectedQuest))
 					{
 						if (dependants.isEmpty())
 						{
@@ -127,7 +129,7 @@ public class PanelQuestLeft extends Panel
 				widget.setX(3);
 			}
 
-			if (treeGui.selectedQuest.canRepeat)
+			if (selectedQuest.canRepeat)
 			{
 				add(new LabelCanRepeatQuest(this).setPosAndSize(width - 11, tasksTextField.posY, 8, 8));
 			}

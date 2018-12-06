@@ -11,6 +11,7 @@ import com.feed_the_beast.ftblib.lib.gui.WidgetVerticalSpace;
 import com.feed_the_beast.ftblib.lib.util.StringJoiner;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
+import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
@@ -37,7 +38,9 @@ public class PanelQuestRight extends Panel
 	@Override
 	public void addWidgets()
 	{
-		if (treeGui.selectedQuest != null && !treeGui.movingQuest)
+		Quest quest = treeGui.getSelectedQuest();
+
+		if (quest != null && !treeGui.movingQuest)
 		{
 			setY(treeGui.chapterPanel.height + 1);
 
@@ -45,13 +48,13 @@ public class PanelQuestRight extends Panel
 
 			afterText.add(new TextField(this).setText(TextFormatting.GOLD + I18n.format("ftbquests.rewards") + ":"));
 
-			if (treeGui.selectedQuest.rewards.isEmpty())
+			if (quest.rewards.isEmpty())
 			{
 				afterText.add(new TextField(this).setText(TextFormatting.GRAY + I18n.format("ftbquests.gui.no_rewards")));
 			}
 			else
 			{
-				for (QuestReward reward : treeGui.selectedQuest.rewards)
+				for (QuestReward reward : quest.rewards)
 				{
 					afterText.add(new ButtonReward(this, reward));
 				}
@@ -59,17 +62,17 @@ public class PanelQuestRight extends Panel
 
 			if (treeGui.questFile.canEdit())
 			{
-				afterText.add(new ButtonAddReward(this, treeGui.selectedQuest));
+				afterText.add(new ButtonAddReward(this, quest));
 			}
 
 			setWidth(80);
 
-			if (!treeGui.selectedQuest.description.isEmpty())
+			if (!quest.description.isEmpty())
 			{
-				setWidth(Math.max(width, Math.min(180, treeGui.getTheme().getStringWidth(treeGui.selectedQuest.description) + 6)));
+				setWidth(Math.max(width, Math.min(180, treeGui.getTheme().getStringWidth(quest.description) + 6)));
 			}
 
-			if (!treeGui.selectedQuest.text.isEmpty())
+			if (!quest.text.isEmpty())
 			{
 				setWidth(Math.max(width, 180));
 			}
@@ -84,15 +87,15 @@ public class PanelQuestRight extends Panel
 				setWidth(150);
 			}
 
-			if (!treeGui.selectedQuest.description.isEmpty())
+			if (!quest.description.isEmpty())
 			{
-				add(new TextField(this).setMaxWidth(width - 3).setSpacing(9).setText(TextFormatting.GRAY.toString() + TextFormatting.ITALIC + StringUtils.addFormatting(treeGui.selectedQuest.description)));
+				add(new TextField(this).setMaxWidth(width - 3).setSpacing(9).setText(TextFormatting.GRAY.toString() + TextFormatting.ITALIC + StringUtils.addFormatting(quest.description)));
 				add(new WidgetVerticalSpace(this, 5));
 			}
 
-			if (!treeGui.selectedQuest.text.isEmpty())
+			if (!quest.text.isEmpty())
 			{
-				add(new TextField(this).setMaxWidth(width - 3).setSpacing(9).setText(StringUtils.addFormatting(StringJoiner.with('\n').join(treeGui.selectedQuest.text))));
+				add(new TextField(this).setMaxWidth(width - 3).setSpacing(9).setText(StringUtils.addFormatting(StringJoiner.with('\n').join(quest.text))));
 				add(new WidgetVerticalSpace(this, 10));
 			}
 

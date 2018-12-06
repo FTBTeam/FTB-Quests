@@ -165,7 +165,7 @@ public abstract class QuestTask extends QuestObject
 	{
 		GuiQuestTree gui = ClientUtils.getCurrentGuiAs(GuiQuestTree.class);
 
-		if (gui != null && gui.selectedQuest != null)
+		if (gui != null && gui.getSelectedQuest() != null)
 		{
 			gui.questLeft.refreshWidgets();
 		}

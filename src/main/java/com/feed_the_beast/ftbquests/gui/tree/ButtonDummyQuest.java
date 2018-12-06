@@ -97,10 +97,10 @@ public class ButtonDummyQuest extends Widget
 			//getGui().openContextMenu(contextMenu);
 			return true;
 		}
-		else if (button.isLeft() && treeGui.movingQuest && treeGui.selectedQuest != null && treeGui.questFile.canEdit())
+		else if (button.isLeft() && treeGui.movingQuest && treeGui.getSelectedQuest() != null && treeGui.questFile.canEdit())
 		{
 			GuiHelper.playClickSound();
-			new MessageMoveQuest(treeGui.selectedQuest.id, x, y).sendToServer();
+			new MessageMoveQuest(treeGui.getSelectedQuest().id, x, y).sendToServer();
 			treeGui.movingQuest = false;
 			treeGui.selectQuest(null);
 			return true;
@@ -113,7 +113,7 @@ public class ButtonDummyQuest extends Widget
 	@Override
 	public void addMouseOverText(List<String> list)
 	{
-		if (treeGui.movingQuest && treeGui.selectedQuest != null)
+		if (treeGui.movingQuest && treeGui.getSelectedQuest() != null)
 		{
 			list.add(I18n.format("ftbquests.gui.move"));
 		}
@@ -133,9 +133,9 @@ public class ButtonDummyQuest extends Widget
 		int sx = x + (w - s) / 2;
 		int sy = y + (h - s) / 2;
 
-		if (treeGui.selectedQuest != null && treeGui.movingQuest)
+		if (treeGui.getSelectedQuest() != null && treeGui.movingQuest)
 		{
-			treeGui.selectedQuest.shape.shape.draw(sx, sy, s, s, Color4I.WHITE.withAlpha(20));
+			treeGui.getSelectedQuest().shape.shape.draw(sx, sy, s, s, Color4I.WHITE.withAlpha(20));
 		}
 
 		if (isMouseOver())
