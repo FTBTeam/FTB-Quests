@@ -38,10 +38,11 @@ minecraft {
 repositories {
 	maven { url "https://maven.latmod.com/" } //FTBLib, FTB Money
 	maven { url "https://minecraft.curseforge.com/api/maven/" } //ProjectE
-	maven { url "http://maven.ic2.player.to/" } //IC2
+	maven { url "http://maven.ic2.player.to/" } //IC2, Forestry
 	maven { url "https://maven.blamejared.com/" } //PackMode & Botania
 	maven { url "http://maven.thiakil.com/" } //Baubles
 	maven { url "https://mod-buildcraft.com/maven/" } //Buildcraft
+	maven { url "http://dvs1.progwml6.com/files/maven" } //JEI
 }
 
 dependencies {
@@ -53,6 +54,8 @@ dependencies {
 	deobfProvided "com.azanor.baubles:Baubles:${baubles_version}"
 	provided "com.mod-buildcraft:buildcraft-api:${buildcraft_version}"
 	deobfCompile "projecte:ProjectE:1.12:${projecte_version}"
+	provided "mezz.jei:jei_${mc_version}:${jei_version}:api"
+	provided "net.sengir.forestry:forestry_${mc_version}:${forestry_version}"
 }
 
 processResources {

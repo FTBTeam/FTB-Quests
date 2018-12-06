@@ -1,6 +1,6 @@
 package com.feed_the_beast.ftbquests.integration.ftbmoney;
 
-import com.feed_the_beast.ftblib.lib.config.ConfigLong;
+import com.feed_the_beast.ftblib.lib.config.ConfigString;
 import com.feed_the_beast.ftblib.lib.gui.IOpenableGui;
 import com.feed_the_beast.ftblib.lib.gui.misc.GuiEditConfigValue;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
@@ -45,13 +45,31 @@ public class FTBMoneyIntegration
 			@SideOnly(Side.CLIENT)
 			public void openCreationGui(IOpenableGui gui, Quest quest, Consumer<QuestReward> callback)
 			{
-				new GuiEditConfigValue("ftb_money", new ConfigLong(1, 1, Long.MAX_VALUE), (value, set) -> {
+				new GuiEditConfigValue("ftb_money", new ConfigString(""), (value, set) -> {
 					gui.openGui();
 					if (set)
 					{
-						MoneyReward reward = new MoneyReward(quest);
-						reward.value = value.getLong();
-						callback.accept(reward);
+						try
+						{
+							String[] s = value.getString().split("-", 2);
+							MoneyReward reward = new MoneyReward(quest);
+							reward.value = Long.parseLong(s[0].trim());
+
+							if (s.length == 2)
+							{
+								long max = Long.parseLong(s[1].trim());
+
+								if (max - reward.value <= Integer.MAX_VALUE)
+								{
+									reward.randomBonus = (int) (max - reward.value);
+								}
+							}
+
+							callback.accept(reward);
+						}
+						catch (Exception ex)
+						{
+						}
 					}
 				}).openGui();
 			}
