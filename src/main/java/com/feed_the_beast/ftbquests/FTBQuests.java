@@ -6,6 +6,7 @@ import com.feed_the_beast.ftbquests.command.CommandFTBQuests;
 import com.feed_the_beast.ftbquests.gui.FTBQuestsGuiHandler;
 import com.feed_the_beast.ftbquests.integration.botania.BotaniaIntegration;
 import com.feed_the_beast.ftbquests.integration.buildcraft.BuildCraftIntegration;
+import com.feed_the_beast.ftbquests.integration.forestry.ForestryIntegration;
 import com.feed_the_beast.ftbquests.integration.ftbmoney.FTBMoneyIntegration;
 import com.feed_the_beast.ftbquests.integration.ic2.IC2Integration;
 import com.feed_the_beast.ftbquests.integration.projecte.ProjectEIntegration;
@@ -84,6 +85,11 @@ public class FTBQuests
 		if (Loader.isModLoaded("projecte"))
 		{
 			ProjectEIntegration.preInit();
+		}
+
+		if (Loader.isModLoaded("forestry"))
+		{
+			ForestryIntegration.preInit();
 		}
 
 		NetworkRegistry.INSTANCE.registerGuiHandler(this, new FTBQuestsGuiHandler());
