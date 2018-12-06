@@ -86,6 +86,7 @@ ftbquests.quest.tasks_ignore_dependencies.tooltip=Allow to start tasks without c
 
 ftbquests.gui.edit_file=Edit File
 ftbquests.gui.save_as_file=Save as File
+ftbquests.gui.export_spreadsheet=Export Spreadsheet
 ftbquests.gui.saved_as_file=Saved as %s
 ftbquests.gui.move=Move
 ftbquests.gui.select_quest_object=Select Quest Object
@@ -178,6 +179,8 @@ ftbquests.variable.max=Max Value
 
 ftbquests.reward_table=Reward Table
 ftbquests.reward_table.hide_tooltip=Hide Tooltip
+ftbquests.reward_table.use_icon=Use Icon
+ftbquests.reward_table.use_title=Use Title
 ftbquests.reward_table.edit=Edit Reward Table
 ftbquests.reward_tables=Reward Tables
 ftbquests.reward_table.nothing=Nothing

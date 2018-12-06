@@ -5,6 +5,7 @@ import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.IconAnimation;
+import com.feed_the_beast.ftblib.lib.io.Bits;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftbquests.gui.GuiEditRewardTable;
@@ -41,6 +42,8 @@ public final class RewardTable extends QuestObjectBase
 	public int emptyWeight;
 	public int lootSize;
 	public boolean hideTooltip;
+	public boolean useIcon;
+	public boolean useTitle;
 
 	public RewardTable(QuestFile f)
 	{
@@ -50,6 +53,8 @@ public final class RewardTable extends QuestObjectBase
 		emptyWeight = 0;
 		lootSize = 27;
 		hideTooltip = false;
+		useIcon = false;
+		useTitle = false;
 	}
 
 	@Override
@@ -93,6 +98,16 @@ public final class RewardTable extends QuestObjectBase
 			nbt.setBoolean("hide_tooltip", true);
 		}
 
+		if (useIcon)
+		{
+			nbt.setBoolean("use_icon", true);
+		}
+
+		if (useTitle)
+		{
+			nbt.setBoolean("use_title", true);
+		}
+
 		NBTTagList list = new NBTTagList();
 
 		for (WeightedReward reward : rewards)
@@ -123,6 +138,8 @@ public final class RewardTable extends QuestObjectBase
 		emptyWeight = nbt.getInteger("empty_weight");
 		lootSize = nbt.getInteger("loot_size");
 		hideTooltip = nbt.getBoolean("hide_tooltip");
+		useIcon = nbt.getBoolean("use_icon");
+		useTitle = nbt.getBoolean("use_title");
 
 		rewards.clear();
 		NBTTagList list = nbt.getTagList("rewards", Constants.NBT.TAG_COMPOUND);
@@ -146,7 +163,11 @@ public final class RewardTable extends QuestObjectBase
 		super.writeNetData(data);
 		data.writeVarInt(emptyWeight);
 		data.writeVarInt(lootSize);
-		data.writeBoolean(hideTooltip);
+		int flags = 0;
+		flags = Bits.setFlag(flags, 1, hideTooltip);
+		flags = Bits.setFlag(flags, 2, useIcon);
+		flags = Bits.setFlag(flags, 4, useTitle);
+		data.writeVarInt(flags);
 		data.writeVarInt(rewards.size());
 
 		for (WeightedReward reward : rewards)
@@ -163,7 +184,10 @@ public final class RewardTable extends QuestObjectBase
 		super.readNetData(data);
 		emptyWeight = data.readVarInt();
 		lootSize = data.readVarInt();
-		hideTooltip = data.readBoolean();
+		int flags = data.readVarInt();
+		hideTooltip = Bits.getFlag(flags, 1);
+		useIcon = Bits.getFlag(flags, 2);
+		useTitle = Bits.getFlag(flags, 4);
 		rewards.clear();
 		int s = data.readVarInt();
 
@@ -184,6 +208,8 @@ public final class RewardTable extends QuestObjectBase
 		config.addInt("empty_weight", () -> emptyWeight, v -> emptyWeight = v, 0, 0, Integer.MAX_VALUE);
 		config.addInt("loot_size", () -> lootSize, v -> lootSize = v, 27, 1, Integer.MAX_VALUE);
 		config.addBool("hide_tooltip", () -> hideTooltip, v -> hideTooltip = v, false);
+		config.addBool("use_icon", () -> useIcon, v -> useIcon = v, false);
+		config.addBool("use_title", () -> useTitle, v -> useTitle = v, false);
 	}
 
 	@Override
