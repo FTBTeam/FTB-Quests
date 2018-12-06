@@ -155,13 +155,13 @@ public class RandomReward extends QuestReward
 	@Override
 	public Icon getAltIcon()
 	{
-		return getTable().useIcon ? getTable().getIcon() : getTable().getIcon();
+		return getTable().useIcon ? getTable().getIcon() : super.getAltIcon();
 	}
 
 	@Override
 	public ITextComponent getAltDisplayName()
 	{
-		return getTable().useTitle ? getTable().getDisplayName() : getType().getDisplayName();
+		return getTable().useTitle ? getTable().getDisplayName() : super.getAltDisplayName();
 	}
 
 	@Override

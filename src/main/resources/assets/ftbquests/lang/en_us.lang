@@ -170,6 +170,7 @@ ftbquests.reward.ftbquests.xp=XP
 ftbquests.reward.ftbquests.xp_levels=XP Levels
 ftbquests.reward.ftbquests.command=Command
 ftbquests.reward.ftbquests.ftb_money=Money
+ftbquests.reward.ftbquests.ftb_money.random_bonus=Random Bonus
 
 ftbquests.variable=Variable
 ftbquests.variable.max_value=Max Value
