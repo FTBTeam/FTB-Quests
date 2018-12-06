@@ -11,6 +11,7 @@ import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.relauncher.Side;
@@ -154,7 +155,13 @@ public class RandomReward extends QuestReward
 	@Override
 	public Icon getAltIcon()
 	{
-		return getTable().getIcon();
+		return getTable().useIcon ? getTable().getIcon() : getTable().getIcon();
+	}
+
+	@Override
+	public ITextComponent getAltDisplayName()
+	{
+		return getTable().useTitle ? getTable().getDisplayName() : getType().getDisplayName();
 	}
 
 	@Override
