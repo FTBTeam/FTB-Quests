@@ -118,6 +118,7 @@ public class PanelQuests extends Panel
 		GlStateManager.shadeModel(GL11.GL_SMOOTH);
 		double moving = -(System.currentTimeMillis() * 0.001D) % 1D;
 		double s = treeGui.zoom / 8D;
+		Quest selectedQuest = treeGui.getSelectedQuest();
 
 		for (Widget widget : widgets)
 		{
@@ -129,7 +130,7 @@ public class PanelQuests extends Panel
 
 				for (ButtonQuest button : ((ButtonQuest) widget).getDependencies())
 				{
-					if (button.quest == treeGui.selectedQuest || wquest == treeGui.selectedQuest)
+					if (button.quest == selectedQuest || wquest == selectedQuest)
 					{
 						continue;
 					}
@@ -182,13 +183,13 @@ public class PanelQuests extends Panel
 				{
 					int r, g, b;
 
-					if (button.quest == treeGui.selectedQuest)
+					if (button.quest == selectedQuest)
 					{
 						r = 200;
 						g = 200;
 						b = 0;
 					}
-					else if (wquest == treeGui.selectedQuest)
+					else if (wquest == selectedQuest)
 					{
 						r = 0;
 						g = 200;

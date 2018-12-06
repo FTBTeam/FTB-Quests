@@ -13,12 +13,15 @@ import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.gui.FTBQuestsTheme;
+import com.feed_the_beast.ftbquests.net.edit.MessageCreateObject;
 import com.feed_the_beast.ftbquests.net.edit.MessageEditObjectDirect;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
+import com.feed_the_beast.ftbquests.quest.reward.QuestRewardType;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.TextFormatting;
 
 import java.util.ArrayList;
@@ -93,47 +96,95 @@ public class ButtonQuest extends Button
 	public void onClicked(MouseButton button)
 	{
 		GuiHelper.playClickSound();
+		Quest selectedQuest = treeGui.getSelectedQuest();
 
 		if (treeGui.questFile.canEdit() && button.isRight())
 		{
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
-			contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.move"), GuiIcons.UP, () -> {
-				treeGui.movingQuest = true;
-				treeGui.selectQuest(quest);
 
-			}));
-
-			if (treeGui.selectedQuest != null && treeGui.selectedQuest != quest)
+			if (treeGui.selectedQuests.size() > 1)
 			{
-				if (treeGui.selectedQuest.hasDependency(quest))
+				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.add_reward_all"), FTBQuestsTheme.ADD, () -> {
+					List<ContextMenuItem> contextMenu2 = new ArrayList<>();
+
+					for (QuestRewardType type : QuestRewardType.getRegistry())
+					{
+						contextMenu2.add(new ContextMenuItem(type.getDisplayName().getFormattedText(), type.getIcon(), () -> {
+							GuiHelper.playClickSound();
+							type.getGuiProvider().openCreationGui(this, quest, reward -> {
+								for (Quest quest1 : treeGui.selectedQuests)
+								{
+									QuestReward r = type.provider.create(quest1);
+									NBTTagCompound nbt1 = new NBTTagCompound();
+									reward.writeData(nbt1);
+									r.readData(nbt1);
+									NBTTagCompound extra = new NBTTagCompound();
+									extra.setString("type", type.getTypeForNBT());
+									new MessageCreateObject(r, extra).sendToServer();
+								}
+							});
+						}));
+					}
+
+					getGui().openContextMenu(contextMenu2);
+				}));
+			}
+			else
+			{
+				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.move"), GuiIcons.UP, () -> {
+					treeGui.movingQuest = true;
+					treeGui.selectQuest(quest);
+
+				}));
+
+				if (selectedQuest != null && selectedQuest != quest)
 				{
-					contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.rem_dep"), GuiIcons.REMOVE, () -> editDependency(treeGui.selectedQuest, quest, false)));
+					if (selectedQuest.hasDependency(quest))
+					{
+						contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.rem_dep"), GuiIcons.REMOVE, () -> editDependency(selectedQuest, quest, false)));
+					}
+					else if (quest.hasDependency(selectedQuest))
+					{
+						contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.rem_dep"), GuiIcons.REMOVE, () -> editDependency(quest, selectedQuest, false)));
+					}
+					else
+					{
+						contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.set_dep"), FTBQuestsTheme.ADD, () -> editDependency(quest, selectedQuest, true)).setEnabled(selectedQuest != null && selectedQuest != quest && !selectedQuest.canRepeat));
+					}
 				}
-				else if (quest.hasDependency(treeGui.selectedQuest))
-				{
-					contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.rem_dep"), GuiIcons.REMOVE, () -> editDependency(quest, treeGui.selectedQuest, false)));
-				}
-				else
-				{
-					contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.set_dep"), FTBQuestsTheme.ADD, () -> editDependency(quest, treeGui.selectedQuest, true)).setEnabled(treeGui.selectedQuest != null && treeGui.selectedQuest != quest && !treeGui.selectedQuest.canRepeat));
-				}
+
+				contextMenu.add(ContextMenuItem.SEPARATOR);
+				GuiQuestTree.addObjectMenuItems(contextMenu, getGui(), quest);
 			}
 
-			contextMenu.add(ContextMenuItem.SEPARATOR);
-			GuiQuestTree.addObjectMenuItems(contextMenu, getGui(), quest);
 			getGui().openContextMenu(contextMenu);
 		}
 		else if (button.isLeft())
 		{
-			if (treeGui.movingQuest && treeGui.selectedQuest == quest)
+			if (treeGui.movingQuest && selectedQuest == quest)
 			{
 				treeGui.movingQuest = false;
-				treeGui.selectedQuest = null;
+				treeGui.selectQuest(null);
 				treeGui.selectQuest(quest);
 			}
 			else
 			{
-				treeGui.open(quest);
+				if (isCtrlKeyDown())
+				{
+					Quest q = treeGui.getSelectedQuest();
+
+					if (q != null)
+					{
+						treeGui.selectQuest(null);
+						treeGui.selectedQuests.add(q);
+					}
+
+					treeGui.selectedQuests.add(quest);
+				}
+				else
+				{
+					treeGui.open(quest);
+				}
 			}
 		}
 		else if (treeGui.questFile.canEdit() && button.isMiddle())
@@ -209,7 +260,7 @@ public class ButtonQuest extends Button
 	@Override
 	public WidgetType getWidgetType()
 	{
-		if (treeGui.selectedQuest == quest)
+		if (treeGui.getSelectedQuest() == quest)
 		{
 			return WidgetType.MOUSE_OVER;
 		}
@@ -267,7 +318,7 @@ public class ButtonQuest extends Button
 		double sx = x + (w - s) / 2D;
 		double sy = y + (h - s) / 2D;
 
-		if (treeGui.selectedQuest == quest)
+		if (treeGui.selectedQuests.contains(quest))
 		{
 			double s1 = s + treeGui.zoom / 5D;
 			double sx1 = x + (w - s1) / 2D;

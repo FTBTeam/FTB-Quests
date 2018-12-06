@@ -6,6 +6,7 @@ import com.feed_the_beast.ftblib.lib.gui.SimpleTextButton;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.gui.FTBQuestsTheme;
+import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
 import com.feed_the_beast.ftbquests.quest.task.QuestTask;
 import net.minecraft.client.resources.I18n;
@@ -35,19 +36,26 @@ public class ButtonQuickComplete extends SimpleTextButton
 	@Override
 	public void onClicked(MouseButton button)
 	{
-		if (!ClientQuestFile.existsWithTeam() || ClientQuestFile.INSTANCE.questTreeGui.selectedQuest == null)
+		if (!ClientQuestFile.existsWithTeam())
+		{
+			return;
+		}
+
+		Quest selectedQuest = ClientQuestFile.INSTANCE.questTreeGui.getSelectedQuest();
+
+		if (selectedQuest == null)
 		{
 			return;
 		}
 
 		GuiHelper.playClickSound();
 
-		for (QuestTask task : ClientQuestFile.INSTANCE.questTreeGui.selectedQuest.tasks)
+		for (QuestTask task : selectedQuest.tasks)
 		{
 			task.onButtonClicked();
 		}
 
-		for (QuestReward reward : ClientQuestFile.INSTANCE.questTreeGui.selectedQuest.rewards)
+		for (QuestReward reward : selectedQuest.rewards)
 		{
 			reward.onButtonClicked();
 		}
