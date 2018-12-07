@@ -39,7 +39,7 @@ public class ButtonDummyQuest extends Widget
 	@Override
 	public boolean checkMouseOver(int mouseX, int mouseY)
 	{
-		if (treeGui.questLeft.isMouseOver() || treeGui.questRight.isMouseOver())
+		if (treeGui.questLeft.isMouseOver() || treeGui.questRight.isMouseOver() || treeGui.patreon.isMouseOver())
 		{
 			return false;
 		}
