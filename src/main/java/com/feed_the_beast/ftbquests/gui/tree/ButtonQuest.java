@@ -12,6 +12,7 @@ import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
+import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.gui.FTBQuestsTheme;
 import com.feed_the_beast.ftbquests.net.edit.MessageCreateObject;
 import com.feed_the_beast.ftbquests.net.edit.MessageEditObjectDirect;
@@ -128,6 +129,11 @@ public class ButtonQuest extends Button
 
 					getGui().openContextMenu(contextMenu2);
 				}));
+
+				contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), GuiIcons.REMOVE, () -> {
+					treeGui.selectedQuests.forEach(q -> ClientQuestFile.INSTANCE.deleteObject(q.id));
+					treeGui.selectQuest(null);
+				}).setYesNo(I18n.format("delete_item", I18n.format("ftbquests.quests") + " [" + treeGui.selectedQuests.size() + "]")));
 			}
 			else
 			{
@@ -169,7 +175,7 @@ public class ButtonQuest extends Button
 			}
 			else
 			{
-				if (isCtrlKeyDown())
+				if (isCtrlKeyDown() && treeGui.questFile.canEdit())
 				{
 					Quest q = treeGui.getSelectedQuest();
 
