@@ -1,22 +1,22 @@
 package com.feed_the_beast.ftbquests.gui.tree;
 
-import com.feed_the_beast.ftblib.lib.config.ConfigString;
+import com.feed_the_beast.ftblib.lib.gui.ContextMenuItem;
 import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
 import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.gui.Theme;
 import com.feed_the_beast.ftblib.lib.gui.Widget;
-import com.feed_the_beast.ftblib.lib.gui.misc.GuiEditConfigValue;
-import com.feed_the_beast.ftblib.lib.gui.misc.GuiSelectItemStack;
 import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.net.edit.MessageCreateObject;
 import com.feed_the_beast.ftbquests.net.edit.MessageMoveQuest;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.task.ItemTask;
+import com.feed_the_beast.ftbquests.quest.task.QuestTask;
+import com.feed_the_beast.ftbquests.quest.task.QuestTaskType;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
-import net.minecraftforge.items.ItemHandlerHelper;
+import net.minecraft.nbt.NBTTagCompound;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -58,43 +58,30 @@ public class ButtonDummyQuest extends Widget
 		if (button.isRight() && treeGui.questFile.canEdit())
 		{
 			GuiHelper.playClickSound();
+			List<ContextMenuItem> contextMenu = new ArrayList<>();
 
-			if (!isCtrlKeyDown())
+			for (QuestTaskType type : QuestTaskType.getRegistry())
 			{
-				Quest quest = new Quest(treeGui.selectedChapter);
-				quest.x = x;
-				quest.y = y;
-				new MessageCreateObject(quest, null).sendToServer();
-
-				new GuiSelectItemStack(this, stack -> {
-					Quest q = treeGui.selectedChapter.getQuestAt(x, y);
-
-					if (q != null && !stack.isEmpty())
-					{
-						ItemTask itemTask = new ItemTask(q);
-						itemTask.items.add(ItemHandlerHelper.copyStackWithSize(stack, 1));
-						itemTask.count = stack.getCount();
-						new MessageCreateObject(itemTask, null).sendToServer();
-					}
-				}).openGui();
-				return true;
-			}
-
-			new GuiEditConfigValue("title", new ConfigString(""), (value, set) ->
-			{
-				treeGui.openGui();
-
-				if (set)
-				{
+				contextMenu.add(new ContextMenuItem(type.getDisplayName().getFormattedText(), type.getIcon(), () -> {
+					GuiHelper.playClickSound();
 					Quest quest = new Quest(treeGui.selectedChapter);
 					quest.x = x;
 					quest.y = y;
-					quest.title = value.getString();
 					new MessageCreateObject(quest, null).sendToServer();
-				}
-			}).openGui();
+					type.getGuiProvider().openCreationGui(this, quest, task -> {
+						Quest q = treeGui.selectedChapter.getQuestAt(x, y);
+						QuestTask t = type.provider.create(q);
+						NBTTagCompound nbt = new NBTTagCompound();
+						task.writeData(nbt);
+						t.readData(nbt);
+						NBTTagCompound extra = new NBTTagCompound();
+						extra.setString("type", type.getTypeForNBT());
+						new MessageCreateObject(t, extra).sendToServer();
+					});
+				}));
+			}
 
-			//getGui().openContextMenu(contextMenu);
+			getGui().openContextMenu(contextMenu);
 			return true;
 		}
 		else if (button.isLeft() && treeGui.movingQuest && treeGui.getSelectedQuest() != null && treeGui.questFile.canEdit())

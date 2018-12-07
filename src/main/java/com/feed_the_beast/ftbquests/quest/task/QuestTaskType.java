@@ -63,20 +63,12 @@ public final class QuestTaskType extends IForgeRegistryEntry.Impl<QuestTaskType>
 			return null;
 		}
 
-		QuestTask task = type.provider.create(quest);
-
-		if (task == null)
-		{
-			return null;
-		}
-
-		return task;
+		return type.provider.create(quest);
 	}
 
 	@FunctionalInterface
 	public interface Provider
 	{
-		@Nullable
 		QuestTask create(Quest quest);
 	}
 
@@ -103,11 +95,6 @@ public final class QuestTaskType extends IForgeRegistryEntry.Impl<QuestTaskType>
 			public void openCreationGui(IOpenableGui gui, Quest quest, Consumer<QuestTask> callback)
 			{
 				QuestTask task = provider.create(quest);
-
-				if (task == null)
-				{
-					return;
-				}
 
 				if (task instanceof ISingleLongValueTask)
 				{

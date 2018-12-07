@@ -66,19 +66,12 @@ public final class QuestRewardType extends IForgeRegistryEntry.Impl<QuestRewardT
 			return null;
 		}
 
-		QuestReward reward = type.provider.create(quest);
-
-		if (reward == null)
-		{
-			return null;
-		}
-
-		return reward;
+		return type.provider.create(quest);
 	}
 
+	@FunctionalInterface
 	public interface Provider
 	{
-		@Nullable
 		QuestReward create(Quest quest);
 	}
 
@@ -106,11 +99,6 @@ public final class QuestRewardType extends IForgeRegistryEntry.Impl<QuestRewardT
 			public void openCreationGui(IOpenableGui gui, Quest quest, Consumer<QuestReward> callback)
 			{
 				QuestReward reward = provider.create(quest);
-
-				if (reward == null)
-				{
-					return;
-				}
 
 				if (reward instanceof RandomReward)
 				{
