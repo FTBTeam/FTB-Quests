@@ -60,11 +60,13 @@ ftbquests.file.loot=Loot
 ftbquests.file.loot.size=Loot Size
 
 ftbquests.chapter=Chapter
+ftbquests.chapters=Chapters
 ftbquests.chapter.completed=Chapter completed!
 ftbquests.chapter.description=Description
 ftbquests.chapter.visibility=Visibility [WIP!]
 
 ftbquests.quest=Quest
+ftbquests.quests=Quests
 ftbquests.quest.completed=Quest completed!
 ftbquests.quest.description=Description
 ftbquests.quest.x=X
