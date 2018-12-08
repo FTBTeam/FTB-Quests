@@ -43,7 +43,7 @@ public class GuiEmergencyItems extends GuiBase
 		@Override
 		public void addMouseOverText(List<String> list)
 		{
-			GuiHelper.addStackTooltip(stack, list, "");
+			GuiHelper.addStackTooltip(stack, list);
 		}
 
 		@Override
