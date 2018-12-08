@@ -68,6 +68,8 @@ public abstract class QuestFile extends QuestObject
 	public boolean defaultRewardTeam;
 	public boolean defaultCheckOnly;
 	public EnumQuestShape defaultShape;
+	public boolean entityLootEnabled;
+	public EntityLootTable entityLootPassive, entityLootMonster, entityLootBoss;
 
 	public QuestFile()
 	{
@@ -96,6 +98,10 @@ public abstract class QuestFile extends QuestObject
 		defaultRewardTeam = false;
 		defaultCheckOnly = false;
 		defaultShape = EnumQuestShape.CIRCLE;
+		entityLootEnabled = false;
+		entityLootPassive = new EntityLootTable(4000, 350, 200, 50, 9, 1);
+		entityLootMonster = new EntityLootTable(600, 10, 90, 200, 10, 1);
+		entityLootBoss = new EntityLootTable(0, 0, 0, 0, 10, 190);
 	}
 
 	public abstract boolean isClient();
@@ -452,11 +458,15 @@ public abstract class QuestFile extends QuestObject
 		{
 			if (!lootTables[rarity.ordinal()].equals(rarity.getLootTable()))
 			{
-				nbt.setString(rarity.getName() + "_loot_table", lootTables[rarity.ordinal()].toString());
+				nbt.setString(rarity.getID() + "_loot_table", lootTables[rarity.ordinal()].toString());
 			}
 		}
 
 		nbt.setShort("loot_size", (short) lootSize);
+		nbt.setBoolean("entity_loot_enabled", entityLootEnabled);
+		nbt.setIntArray("entity_loot_passive", entityLootPassive.values);
+		nbt.setIntArray("entity_loot_monster", entityLootMonster.values);
+		nbt.setIntArray("entity_loot_boss", entityLootBoss.values);
 	}
 
 	@Override
@@ -485,7 +495,7 @@ public abstract class QuestFile extends QuestObject
 
 		for (LootRarity rarity : LootRarity.VALUES)
 		{
-			String s = nbt.getString(rarity.getName() + "_loot_table");
+			String s = nbt.getString(rarity.getID() + "_loot_table");
 			lootTables[rarity.ordinal()] = s.isEmpty() ? rarity.getLootTable() : new ResourceLocation(s);
 		}
 
@@ -495,6 +505,11 @@ public abstract class QuestFile extends QuestObject
 		{
 			lootSize = 27;
 		}
+
+		entityLootEnabled = nbt.getBoolean("entity_loot_enabled");
+		entityLootPassive.set(nbt.getIntArray("entity_loot_passive"));
+		entityLootMonster.set(nbt.getIntArray("entity_loot_monster"));
+		entityLootBoss.set(nbt.getIntArray("entity_loot_boss"));
 	}
 
 	public final void writeDataFull(NBTTagCompound nbt)
@@ -1121,8 +1136,14 @@ public abstract class QuestFile extends QuestObject
 
 		for (LootRarity r : LootRarity.VALUES)
 		{
-			lootGroup.addString(r.getName(), () -> lootTables[r.ordinal()].toString(), v -> lootTables[r.ordinal()] = v.equals(r.getLootTable().toString()) ? r.getLootTable() : new ResourceLocation(v), r.getLootTable().toString(), pattern).setDisplayName(new TextComponentTranslation(r.getTranslationKey()));
+			lootGroup.addString(r.getID(), () -> lootTables[r.ordinal()].toString(), v -> lootTables[r.ordinal()] = v.equals(r.getLootTable().toString()) ? r.getLootTable() : new ResourceLocation(v), r.getLootTable().toString(), pattern).setDisplayName(new TextComponentTranslation(r.getTranslationKey()));
 		}
+
+		ConfigGroup entityLoot = config.getGroup("entity_loot");
+		entityLoot.addBool("enabled", () -> entityLootEnabled, v -> entityLootEnabled = v, false);
+		entityLootPassive.getConfig(entityLoot.getGroup("passive"));
+		entityLootMonster.getConfig(entityLoot.getGroup("monster"));
+		entityLootBoss.getConfig(entityLoot.getGroup("boss"));
 	}
 
 	@Override

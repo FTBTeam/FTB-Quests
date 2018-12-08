@@ -1,14 +1,15 @@
 package com.feed_the_beast.ftbquests.item;
 
+import com.feed_the_beast.ftblib.lib.util.IWithID;
 import com.feed_the_beast.ftbquests.FTBQuests;
-import net.minecraft.util.IStringSerializable;
+import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextFormatting;
 
 /**
  * @author LatvianModder
  */
-public enum LootRarity implements IStringSerializable
+public enum LootRarity implements IWithID
 {
 	COMMON("common", TextFormatting.WHITE),
 	UNCOMMON("uncommon", TextFormatting.DARK_GREEN),
@@ -18,23 +19,23 @@ public enum LootRarity implements IStringSerializable
 
 	public static final LootRarity[] VALUES = values();
 
-	private final String name;
+	private final String id;
 	private final TextFormatting color;
 	private final String translationKey;
 	private final ResourceLocation lootTable;
 
 	LootRarity(String n, TextFormatting c)
 	{
-		name = n;
+		id = n;
 		color = c;
-		translationKey = "ftbquests.rarity." + name;
-		lootTable = new ResourceLocation(FTBQuests.MOD_ID, "lootcrates/" + name);
+		translationKey = "ftbquests.rarity." + id;
+		lootTable = new ResourceLocation(FTBQuests.MOD_ID, "lootcrates/" + id);
 	}
 
 	@Override
-	public String getName()
+	public String getID()
 	{
-		return name;
+		return id;
 	}
 
 	public TextFormatting getColor()
@@ -50,5 +51,22 @@ public enum LootRarity implements IStringSerializable
 	public ResourceLocation getLootTable()
 	{
 		return lootTable;
+	}
+
+	public Item getItem()
+	{
+		switch (this)
+		{
+			case UNCOMMON:
+				return FTBQuestsItems.UNCOMMON_LOOTCRATE;
+			case RARE:
+				return FTBQuestsItems.RARE_LOOTCRATE;
+			case EPIC:
+				return FTBQuestsItems.EPIC_LOOTCRATE;
+			case LEGENDARY:
+				return FTBQuestsItems.LEGENDARY_LOOTCRATE;
+		}
+
+		return FTBQuestsItems.COMMON_LOOTCRATE;
 	}
 }
