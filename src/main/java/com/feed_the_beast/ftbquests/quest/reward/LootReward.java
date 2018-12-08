@@ -1,5 +1,6 @@
 package com.feed_the_beast.ftbquests.quest.reward;
 
+import com.feed_the_beast.ftbquests.gui.GuiRewardNotifications;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraftforge.fml.relauncher.Side;
@@ -59,5 +60,13 @@ public class LootReward extends RandomReward
 	public void addMouseOverText(List<String> list)
 	{
 		getTable().addMouseOverText(list, true, true);
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public void onButtonClicked()
+	{
+		new GuiRewardNotifications().openGui();
+		super.onButtonClicked();
 	}
 }

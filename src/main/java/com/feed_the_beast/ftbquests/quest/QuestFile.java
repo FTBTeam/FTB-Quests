@@ -876,6 +876,11 @@ public abstract class QuestFile extends QuestObject
 		}
 
 		data.writeBoolean(lootCratesUseRewardTables);
+
+		for (int i = 0; i < LootRarity.VALUES.length; i++)
+		{
+			data.writeVarInt(defaultLootCrateTables[i]);
+		}
 	}
 
 	@Override
@@ -904,6 +909,11 @@ public abstract class QuestFile extends QuestObject
 		}
 
 		lootCratesUseRewardTables = data.readBoolean();
+
+		for (int i = 0; i < LootRarity.VALUES.length; i++)
+		{
+			defaultLootCrateTables[i] = data.readVarInt();
+		}
 	}
 
 	public final void writeNetDataFull(DataOut data)
