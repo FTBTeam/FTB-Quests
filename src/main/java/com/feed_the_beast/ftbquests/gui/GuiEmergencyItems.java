@@ -49,7 +49,7 @@ public class GuiEmergencyItems extends GuiBase
 		@Override
 		public void draw(Theme theme, int x, int y, int w, int h)
 		{
-			EnumQuestShape.CIRCLE.draw(x - 3, y - 3, w + 6, h + 6);
+			EnumQuestShape.RSQUARE.outline.draw(x - 3, y - 3, w + 6, h + 6);
 			GuiHelper.drawItem(stack, x, y, true, Icon.EMPTY);
 		}
 	}

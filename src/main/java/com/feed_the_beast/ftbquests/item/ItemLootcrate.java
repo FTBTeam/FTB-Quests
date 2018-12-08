@@ -2,6 +2,7 @@ package com.feed_the_beast.ftbquests.item;
 
 import com.feed_the_beast.ftblib.lib.item.ItemEntry;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
+import com.feed_the_beast.ftbquests.gui.GuiRewardNotifications;
 import com.feed_the_beast.ftbquests.net.MessageDisplayItemRewardToast;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.reward.RewardTable;
@@ -59,12 +60,6 @@ public class ItemLootcrate extends Item
 		if (!world.isRemote)
 		{
 			NBTTagCompound nbt = stack.getTagCompound();
-			int lootSize = nbt != null ? nbt.getShort("loot_size") & 0xFFFF : 0;
-
-			if (lootSize == 0)
-			{
-				lootSize = ServerQuestFile.INSTANCE.lootSize;
-			}
 
 			if (nbt != null && nbt.hasKey("use_reward_table") ? nbt.getBoolean("use_reward_table") : ServerQuestFile.INSTANCE.lootCratesUseRewardTables)
 			{
@@ -83,7 +78,7 @@ public class ItemLootcrate extends Item
 
 					if (totalWeight > 0)
 					{
-						for (int i = 0; i < table.lootSize; i++)
+						for (int j = 0; j < size * table.lootSize; j++)
 						{
 							int number = player.world.rand.nextInt(totalWeight) + 1;
 							int currentWeight = table.emptyWeight;
@@ -107,6 +102,13 @@ public class ItemLootcrate extends Item
 			}
 			else
 			{
+				int lootSize = nbt != null ? nbt.getShort("loot_size") & 0xFFFF : 0;
+
+				if (lootSize == 0)
+				{
+					lootSize = ServerQuestFile.INSTANCE.lootSize;
+				}
+
 				String lootTable = nbt != null ? nbt.getString("loot_table") : "";
 				ResourceLocation lootTableLocation = lootTable.isEmpty() ? ServerQuestFile.INSTANCE.lootTables[rarity.ordinal()] : new ResourceLocation(lootTable);
 
@@ -145,6 +147,8 @@ public class ItemLootcrate extends Item
 		}
 		else
 		{
+			new GuiRewardNotifications().openGui();
+
 			for (int i = 0; i < 5; i++)
 			{
 				Vec3d vec3d = new Vec3d(((double) world.rand.nextFloat() - 0.5D) * 0.1D, Math.random() * 0.1D + 0.1D, 0.0D);
