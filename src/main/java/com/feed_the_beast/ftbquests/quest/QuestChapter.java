@@ -8,7 +8,7 @@ import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.util.ListUtils;
 import com.feed_the_beast.ftbquests.events.ObjectCompletedEvent;
-import com.feed_the_beast.ftbquests.net.MessageDisplayToast;
+import com.feed_the_beast.ftbquests.net.MessageDisplayCompletionToast;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -186,7 +186,7 @@ public final class QuestChapter extends QuestObject
 
 		for (EntityPlayerMP player : onlineMembers)
 		{
-			new MessageDisplayToast(id).sendTo(player);
+			new MessageDisplayCompletionToast(id).sendTo(player);
 		}
 
 		if (file.isComplete(data))

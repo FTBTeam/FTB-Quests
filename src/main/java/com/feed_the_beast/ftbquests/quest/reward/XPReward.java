@@ -3,6 +3,7 @@ package com.feed_the_beast.ftbquests.quest.reward;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
+import com.feed_the_beast.ftbquests.net.MessageDisplayRewardToast;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
@@ -68,6 +69,7 @@ public class XPReward extends QuestReward
 	public void claim(EntityPlayerMP player)
 	{
 		player.addExperience(xp);
+		new MessageDisplayRewardToast(getAltDisplayName(), getIcon()).sendTo(player);
 	}
 
 	@Override

@@ -12,7 +12,7 @@ import com.feed_the_beast.ftblib.lib.util.ListUtils;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.events.ObjectCompletedEvent;
 import com.feed_the_beast.ftbquests.gui.tree.GuiQuestTree;
-import com.feed_the_beast.ftbquests.net.MessageDisplayToast;
+import com.feed_the_beast.ftbquests.net.MessageDisplayCompletionToast;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
 import com.feed_the_beast.ftbquests.quest.task.QuestTask;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
@@ -393,7 +393,7 @@ public final class Quest extends QuestObject
 
 		for (EntityPlayerMP player : onlineMembers)
 		{
-			new MessageDisplayToast(id).sendTo(player);
+			new MessageDisplayCompletionToast(id).sendTo(player);
 		}
 
 		if (chapter.isComplete(data))

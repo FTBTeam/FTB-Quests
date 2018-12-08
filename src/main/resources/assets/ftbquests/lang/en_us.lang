@@ -167,10 +167,11 @@ ftbquests.task.ftbquests.ftb_money=Money
 ftbquests.task.ftbquests.emc=EMC
 
 ftbquests.reward=Reward
+ftbquests.rewards=Rewards
 ftbquests.reward.team_reward=Team Reward
 ftbquests.reward.emergency=Emergency Item
-ftbquests.rewards=Rewards
 ftbquests.reward.claim_all=Claim All Rewards
+ftbquests.reward.collected=Reward Collected!
 
 ftbquests.reward.ftbquests.item=Item
 ftbquests.reward.ftbquests.item.random_bonus=Random Bonus

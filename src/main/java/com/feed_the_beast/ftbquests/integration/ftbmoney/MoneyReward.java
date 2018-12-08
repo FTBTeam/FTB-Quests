@@ -1,8 +1,10 @@
 package com.feed_the_beast.ftbquests.integration.ftbmoney;
 
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
+import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
+import com.feed_the_beast.ftbquests.net.MessageDisplayRewardToast;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.reward.FTBQuestsRewards;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
@@ -79,7 +81,7 @@ public class MoneyReward extends QuestReward
 	{
 		long added = value + player.world.rand.nextInt(randomBonus + 1);
 		FTBMoney.setMoney(player, FTBMoney.getMoney(player) + added);
-		player.sendStatusMessage(FTBMoney.moneyComponent(added), true);
+		new MessageDisplayRewardToast(FTBMoney.moneyComponent(added), Icon.getIcon("ftbmoney:textures/beastcoinmini.png")).sendTo(player);
 	}
 
 	@Override

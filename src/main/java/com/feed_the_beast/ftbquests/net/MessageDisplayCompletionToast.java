@@ -14,15 +14,15 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 /**
  * @author LatvianModder
  */
-public class MessageDisplayToast extends MessageToClient
+public class MessageDisplayCompletionToast extends MessageToClient
 {
 	public int id;
 
-	public MessageDisplayToast()
+	public MessageDisplayCompletionToast()
 	{
 	}
 
-	public MessageDisplayToast(int i)
+	public MessageDisplayCompletionToast(int i)
 	{
 		id = i;
 	}
