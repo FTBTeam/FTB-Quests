@@ -1,15 +1,17 @@
 package com.feed_the_beast.ftbquests.gui.tree;
 
 import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
-import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.gui.Panel;
+import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
+import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.net.MessageClaimAllRewards;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.TextFormatting;
 
 import java.util.List;
@@ -21,7 +23,7 @@ public class ButtonClaimAllRewards extends ButtonTab
 {
 	public ButtonClaimAllRewards(Panel panel)
 	{
-		super(panel, I18n.format("ftbquests.reward.claim_all"), GuiIcons.MONEY_BAG);
+		super(panel, I18n.format("ftbquests.reward.claim_all"), ItemIcon.getItemIcon(new ItemStack(FTBQuestsItems.LEGENDARY_LOOTCRATE)));
 	}
 
 	@Override
