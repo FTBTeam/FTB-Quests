@@ -1,10 +1,16 @@
 package com.feed_the_beast.ftbquests.item;
 
+import com.feed_the_beast.ftblib.lib.item.ItemEntry;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
+import com.feed_the_beast.ftbquests.net.MessageDisplayItemRewardToast;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
+import com.feed_the_beast.ftbquests.quest.reward.RewardTable;
+import com.feed_the_beast.ftbquests.quest.reward.WeightedReward;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryBasic;
@@ -51,9 +57,6 @@ public class ItemLootcrate extends Item
 
 		if (!world.isRemote)
 		{
-			String lootTable = stack.hasTagCompound() ? stack.getTagCompound().getString("loot_table") : "";
-			ResourceLocation lootTableLocation = lootTable.isEmpty() ? ServerQuestFile.INSTANCE.lootTables[rarity.ordinal()] : new ResourceLocation(lootTable);
-
 			int lootSize = stack.hasTagCompound() ? stack.getTagCompound().getShort("loot_size") & 0xFFFF : 0;
 
 			if (lootSize == 0)
@@ -61,25 +64,79 @@ public class ItemLootcrate extends Item
 				lootSize = ServerQuestFile.INSTANCE.lootSize;
 			}
 
-			LootTable table = world.getLootTableManager().getLootTableFromLocation(lootTableLocation);
-			IInventory inventory = new InventoryBasic("", true, lootSize);
-			LootContext context = new LootContext.Builder((WorldServer) world).withLuck(player.getLuck()).withPlayer(player).build();
-
-			for (int i = 0; i < size; i++)
+			if (stack.hasTagCompound() && stack.getTagCompound().hasKey("use_reward_table") ? stack.getTagCompound().getBoolean("use_reward_table") : ServerQuestFile.INSTANCE.lootCratesUseRewardTables)
 			{
-				table.fillInventory(inventory, world.rand, context);
+				int tableid = stack.hasTagCompound() ? stack.getTagCompound().getInteger("reward_table") : 0;
 
-				for (int j = 0; j < lootSize; j++)
+				if (tableid == 0)
 				{
-					ItemStack stack1 = inventory.getStackInSlot(j);
-
-					if (!stack1.isEmpty())
-					{
-						ItemHandlerHelper.giveItemToPlayer(player, stack1);
-					}
+					tableid = ServerQuestFile.INSTANCE.defaultLootCrateTables[rarity.ordinal()];
 				}
 
-				inventory.clear();
+				RewardTable table = ServerQuestFile.INSTANCE.getRewardTable(tableid);
+
+				if (table != null)
+				{
+					int totalWeight = table.getTotalWeight(true);
+
+					if (totalWeight > 0)
+					{
+						for (int i = 0; i < table.lootSize; i++)
+						{
+							int number = player.world.rand.nextInt(totalWeight) + 1;
+							int currentWeight = table.emptyWeight;
+
+							if (currentWeight < number)
+							{
+								for (WeightedReward reward : table.rewards)
+								{
+									currentWeight += reward.weight;
+
+									if (currentWeight >= number)
+									{
+										reward.reward.claim((EntityPlayerMP) player);
+										break;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			else
+			{
+				String lootTable = stack.hasTagCompound() ? stack.getTagCompound().getString("loot_table") : "";
+				ResourceLocation lootTableLocation = lootTable.isEmpty() ? ServerQuestFile.INSTANCE.lootTables[rarity.ordinal()] : new ResourceLocation(lootTable);
+
+				LootTable table = world.getLootTableManager().getLootTableFromLocation(lootTableLocation);
+				IInventory inventory = new InventoryBasic("", true, lootSize);
+				LootContext context = new LootContext.Builder((WorldServer) world).withLuck(player.getLuck()).withPlayer(player).build();
+				Object2IntOpenHashMap<ItemEntry> map = new Object2IntOpenHashMap<>();
+				map.defaultReturnValue(0);
+
+				for (int i = 0; i < size; i++)
+				{
+					table.fillInventory(inventory, world.rand, context);
+
+					for (int j = 0; j < lootSize; j++)
+					{
+						ItemStack stack1 = inventory.getStackInSlot(j);
+
+						if (!stack1.isEmpty())
+						{
+							ItemEntry entry = ItemEntry.get(stack1);
+							map.put(entry, map.getInt(entry) + stack1.getCount());
+							ItemHandlerHelper.giveItemToPlayer(player, stack1);
+						}
+					}
+
+					inventory.clear();
+				}
+
+				for (Object2IntOpenHashMap.Entry<ItemEntry> entry : map.object2IntEntrySet())
+				{
+					new MessageDisplayItemRewardToast(entry.getKey().getStack(entry.getIntValue(), false)).sendTo((EntityPlayerMP) player);
+				}
 			}
 
 			world.playSound(null, player.posX, player.posY, player.posZ, SoundEvents.ENTITY_ITEM_BREAK, SoundCategory.PLAYERS, 0.8F, 0.8F + world.rand.nextFloat() * 0.4F);
@@ -122,7 +179,29 @@ public class ItemLootcrate extends Item
 	{
 		tooltip.add(rarity.getColor() + I18n.format(rarity.getTranslationKey()));
 
-		if (ClientQuestFile.exists() && ClientQuestFile.INSTANCE.canEdit())
+		if (!ClientQuestFile.exists())
+		{
+			return;
+		}
+
+		if (stack.hasTagCompound() && stack.getTagCompound().hasKey("use_reward_table") ? stack.getTagCompound().getBoolean("use_reward_table") : ClientQuestFile.INSTANCE.lootCratesUseRewardTables)
+		{
+			int tableid = stack.hasTagCompound() ? stack.getTagCompound().getInteger("reward_table") : 0;
+
+			if (tableid == 0)
+			{
+				tableid = ClientQuestFile.INSTANCE.defaultLootCrateTables[rarity.ordinal()];
+			}
+
+			RewardTable table = ClientQuestFile.INSTANCE.getRewardTable(tableid);
+
+			if (table != null)
+			{
+				table.addMouseOverText(tooltip, true, true);
+			}
+		}
+
+		if (ClientQuestFile.INSTANCE.canEdit())
 		{
 			String lootTable = stack.hasTagCompound() ? stack.getTagCompound().getString("loot_table") : "";
 
