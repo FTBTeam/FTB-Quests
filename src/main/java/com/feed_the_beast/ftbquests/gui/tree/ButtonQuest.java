@@ -23,10 +23,12 @@ import com.feed_the_beast.ftbquests.quest.reward.QuestRewardType;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -202,11 +204,20 @@ public class ButtonQuest extends Button
 
 	private void editDependency(Quest quest, QuestObject object, boolean add)
 	{
+		HashSet<QuestObject> prevDeps = new HashSet<>(quest.dependencies);
+
 		if (add ? quest.dependencies.add(object) : quest.dependencies.remove(object))
 		{
-			quest.verifyDependencies();
-			new MessageEditObjectDirect(quest).sendToServer();
-			treeGui.quests.refreshWidgets();
+			if (quest.verifyDependencies())
+			{
+				new MessageEditObjectDirect(quest).sendToServer();
+				treeGui.quests.refreshWidgets();
+			}
+			else
+			{
+				quest.dependencies.addAll(prevDeps);
+				GuiQuestTree.displayError(new TextComponentTranslation("ftbquests.gui.looping_dependencies"));
+			}
 		}
 	}
 
