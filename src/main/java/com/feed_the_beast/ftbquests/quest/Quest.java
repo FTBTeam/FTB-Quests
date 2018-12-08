@@ -637,10 +637,46 @@ public final class Quest extends QuestObject
 		return !object.invalid && dependencies.contains(object);
 	}
 
-	public void verifyDependencies()
+	public boolean verifyDependencies()
 	{
 		dependencies.removeIf(QuestObjectBase.PREDICATE_INVALID);
-		//FTBQuests.LOGGER.error("Removed looping dependency '" + task.getID() + "' with erroring ID '" + task.objectId + "'");
+
+		if (dependencies.isEmpty())
+		{
+			return true;
+		}
+
+		if (verifyDependenciesInternal(this, true))
+		{
+			return true;
+		}
+
+		dependencies.clear();
+
+		if (!chapter.file.isClient())
+		{
+			ServerQuestFile.INSTANCE.save();
+		}
+
+		return false;
+	}
+
+	private boolean verifyDependenciesInternal(Quest original, boolean firstLoop)
+	{
+		if (this == original && !firstLoop)
+		{
+			return false;
+		}
+
+		for (QuestObject object : dependencies)
+		{
+			if (object instanceof Quest && !((Quest) object).verifyDependenciesInternal(original, false))
+			{
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	public void checkRepeatableQuests(ITeamData data, UUID player)

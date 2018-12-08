@@ -32,8 +32,12 @@ import com.feed_the_beast.ftbquests.quest.QuestVariable;
 import com.feed_the_beast.ftbquests.quest.reward.RandomReward;
 import com.feed_the_beast.ftbquests.quest.task.QuestTask;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.toasts.SystemToast;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 import org.lwjgl.input.Keyboard;
 
@@ -225,6 +229,11 @@ public class GuiQuestTree extends GuiBase
 		{
 			contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.complete_instantly"), FTBQuestsTheme.COMPLETED, () -> new MessageCompleteInstantly(object.id).sendToServer()).setYesNo(I18n.format("ftbquests.gui.complete_instantly_q")));
 		}
+	}
+
+	public static void displayError(ITextComponent error)
+	{
+		Minecraft.getMinecraft().getToastGui().add(new SystemToast(SystemToast.Type.TUTORIAL_HINT, new TextComponentTranslation("ftbquests.gui.error"), error));
 	}
 
 	@Override

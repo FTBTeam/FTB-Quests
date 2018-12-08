@@ -95,6 +95,7 @@ ftbquests.gui.edit_file=Edit File
 ftbquests.gui.save_as_file=Save as File
 ftbquests.gui.export_spreadsheet=Export Spreadsheet
 ftbquests.gui.saved_as_file=Saved as %s
+ftbquests.gui.error=Error!
 ftbquests.gui.move=Move
 ftbquests.gui.add_reward_all=Add reward to all
 ftbquests.gui.select_quest_object=Select Quest Object
@@ -118,6 +119,7 @@ ftbquests.gui.quick_complete=Quick Complete
 ftbquests.gui.quick_complete.info_1=Submit all items
 ftbquests.gui.quick_complete.info_2=Claim all rewards
 ftbquests.gui.patreon=Like this mod? Consider supporting me on Patreon!
+ftbquests.gui.looping_dependencies=Looping dependencies!
 
 ftbquests.task=Task
 ftbquests.tasks=Tasks
