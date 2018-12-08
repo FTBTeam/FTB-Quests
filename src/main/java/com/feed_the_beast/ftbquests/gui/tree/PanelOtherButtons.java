@@ -5,6 +5,7 @@ import com.feed_the_beast.ftblib.lib.gui.WidgetLayout;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
+import net.minecraftforge.fml.common.Loader;
 
 /**
  * @author LatvianModder
@@ -52,6 +53,11 @@ public class PanelOtherButtons extends Panel
 		if (hasRewards())
 		{
 			add(new ButtonClaimAllRewards(this));
+		}
+
+		if (Loader.isModLoaded("ftbmoney"))
+		{
+			add(new ButtonOpenShop(this));
 		}
 
 		if (!treeGui.questFile.emergencyItems.isEmpty() && (treeGui.questFile.self != null || treeGui.questFile.canEdit()))
