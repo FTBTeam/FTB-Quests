@@ -16,6 +16,8 @@ import com.feed_the_beast.ftbquests.item.ItemLootcrate;
 import com.feed_the_beast.ftbquests.item.ItemMissing;
 import com.feed_the_beast.ftbquests.item.ItemQuestBook;
 import com.feed_the_beast.ftbquests.item.LootRarity;
+import com.feed_the_beast.ftbquests.quest.EntityLootTable;
+import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.reward.ChoiceReward;
 import com.feed_the_beast.ftbquests.quest.reward.CommandReward;
 import com.feed_the_beast.ftbquests.quest.reward.FTBQuestsRewards;
@@ -40,10 +42,16 @@ import com.feed_the_beast.ftbquests.tile.TileTaskScreenCore;
 import com.feed_the_beast.ftbquests.tile.TileTaskScreenPart;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
 import net.minecraft.block.Block;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.monster.IMob;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
@@ -148,5 +156,45 @@ public class FTBQuestsEventHandler
 		);
 
 		FTBQuests.PROXY.setRewardGuiProviders();
+	}
+
+	@SubscribeEvent
+	public static void onLivingDrops(LivingDropsEvent event)
+	{
+		EntityLivingBase e = event.getEntityLiving();
+
+		if (e.world.isRemote || e instanceof EntityPlayer)
+		{
+			return;
+		}
+
+		if (!ServerQuestFile.INSTANCE.entityLootEnabled)
+		{
+			return;
+		}
+
+		EntityLootTable rt;
+
+		if (!e.isNonBoss())
+		{
+			rt = ServerQuestFile.INSTANCE.entityLootBoss;
+		}
+		else if (e instanceof IMob)
+		{
+			rt = ServerQuestFile.INSTANCE.entityLootMonster;
+		}
+		else
+		{
+			rt = ServerQuestFile.INSTANCE.entityLootPassive;
+		}
+
+		LootRarity r = rt.getRarity(e.world.rand);
+
+		if (r != null)
+		{
+			EntityItem ei = new EntityItem(e.world, e.posX, e.posY, e.posZ, new ItemStack(r.getItem()));
+			ei.setPickupDelay(10);
+			event.getDrops().add(ei);
+		}
 	}
 }

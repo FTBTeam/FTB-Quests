@@ -58,6 +58,11 @@ ftbquests.file.defaults.check_only=Task 'Don't consume item'
 ftbquests.file.defaults.quest_shape=Quest Shape
 ftbquests.file.loot=Loot
 ftbquests.file.loot.size=Loot Size
+ftbquests.file.entity_loot=Entity Loot Crate Drops
+ftbquests.file.entity_loot.enabled=Enabled
+ftbquests.file.entity_loot.passive=Passive
+ftbquests.file.entity_loot.monster=Monster
+ftbquests.file.entity_loot.boss=Boss
 
 ftbquests.chapter=Chapter
 ftbquests.chapters=Chapters
