@@ -1,81 +1,56 @@
 package com.feed_the_beast.ftbquests.gui.tree;
 
+import com.feed_the_beast.ftblib.lib.gui.misc.SimpleToast;
+import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
-import net.minecraft.client.gui.toasts.GuiToast;
-import net.minecraft.client.gui.toasts.IToast;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.RenderHelper;
+import net.minecraft.client.audio.SoundHandler;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.init.SoundEvents;
-import net.minecraft.util.math.MathHelper;
-
-import java.util.List;
 
 /**
  * @author LatvianModder
  */
-public class ToastQuestObject implements IToast
+public class ToastQuestObject extends SimpleToast
 {
-	public final QuestObject quest;
-	public boolean hasPlayedSound;
+	private final QuestObject object;
 
 	public ToastQuestObject(QuestObject q)
 	{
-		quest = q;
-		hasPlayedSound = false;
+		object = q;
 	}
 
 	@Override
-	public Visibility draw(GuiToast gui, long delta)
+	public String getTitle()
 	{
-		Minecraft mc = gui.getMinecraft();
-		mc.getTextureManager().bindTexture(TEXTURE_TOASTS);
-		GlStateManager.color(1F, 1F, 1F);
-		gui.drawTexturedModalRect(0, 0, 0, 0, 160, 32);
+		return I18n.format(object.getObjectType().getTranslationKey() + ".completed");
+	}
 
-		List<String> list = mc.fontRenderer.listFormattedStringToWidth(quest.getDisplayName().getFormattedText(), 125);
-		int i = quest instanceof QuestChapter ? 16746751 : 16776960;
+	@Override
+	public String getSubtitle()
+	{
+		return object.getDisplayName().getFormattedText();
+	}
 
-		if (list.size() == 1)
+	@Override
+	public boolean isImportant()
+	{
+		return object instanceof QuestChapter;
+	}
+
+	@Override
+	public Icon getIcon()
+	{
+		return object.getIcon();
+	}
+
+	@Override
+	public void playSound(SoundHandler handler)
+	{
+		if (object instanceof QuestChapter)
 		{
-			mc.fontRenderer.drawString(I18n.format(quest.getObjectType().getTranslationKey() + ".completed"), 30, 7, i | -16777216);
-			mc.fontRenderer.drawString(quest.getDisplayName().getFormattedText(), 30, 18, -1);
+			handler.playSound(PositionedSoundRecord.getRecord(SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, 1F, 1F));
 		}
-		else
-		{
-			if (delta < 1500L)
-			{
-				int k = MathHelper.floor(MathHelper.clamp((float) (1500L - delta) / 300F, 0F, 1F) * 255F) << 24 | 67108864;
-				mc.fontRenderer.drawString(I18n.format(quest.getObjectType().getTranslationKey() + ".completed"), 30, 11, i | k);
-			}
-			else
-			{
-				int i1 = MathHelper.floor(MathHelper.clamp((float) (delta - 1500L) / 300F, 0F, 1F) * 252F) << 24 | 67108864;
-				int l = 16 - list.size() * mc.fontRenderer.FONT_HEIGHT / 2;
-
-				for (String s : list)
-				{
-					mc.fontRenderer.drawString(s, 30, l, 16777215 | i1);
-					l += mc.fontRenderer.FONT_HEIGHT;
-				}
-			}
-		}
-
-		if (!hasPlayedSound && delta > 0L)
-		{
-			hasPlayedSound = true;
-
-			if (quest instanceof QuestChapter)
-			{
-				mc.getSoundHandler().playSound(PositionedSoundRecord.getRecord(SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, 1F, 1F));
-			}
-		}
-
-		RenderHelper.enableGUIStandardItemLighting();
-		quest.getIcon().draw(8, 8, 16, 16);
-		return delta >= 5000L ? IToast.Visibility.HIDE : IToast.Visibility.SHOW;
 	}
 }

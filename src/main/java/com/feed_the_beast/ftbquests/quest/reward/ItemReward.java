@@ -8,6 +8,7 @@ import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftbquests.item.ItemMissing;
+import com.feed_the_beast.ftbquests.net.MessageDisplayItemRewardToast;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Items;
@@ -93,6 +94,7 @@ public class ItemReward extends QuestReward
 		ItemStack stack1 = stack.copy();
 		stack1.grow(player.world.rand.nextInt(randomBonus + 1));
 		ItemHandlerHelper.giveItemToPlayer(player, stack1);
+		new MessageDisplayItemRewardToast(stack1).sendTo(player);
 	}
 
 	@Override
