@@ -17,6 +17,7 @@ import net.minecraft.inventory.InventoryBasic;
 import net.minecraft.item.EnumRarity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumHand;
@@ -57,16 +58,17 @@ public class ItemLootcrate extends Item
 
 		if (!world.isRemote)
 		{
-			int lootSize = stack.hasTagCompound() ? stack.getTagCompound().getShort("loot_size") & 0xFFFF : 0;
+			NBTTagCompound nbt = stack.getTagCompound();
+			int lootSize = nbt != null ? nbt.getShort("loot_size") & 0xFFFF : 0;
 
 			if (lootSize == 0)
 			{
 				lootSize = ServerQuestFile.INSTANCE.lootSize;
 			}
 
-			if (stack.hasTagCompound() && stack.getTagCompound().hasKey("use_reward_table") ? stack.getTagCompound().getBoolean("use_reward_table") : ServerQuestFile.INSTANCE.lootCratesUseRewardTables)
+			if (nbt != null && nbt.hasKey("use_reward_table") ? nbt.getBoolean("use_reward_table") : ServerQuestFile.INSTANCE.lootCratesUseRewardTables)
 			{
-				int tableid = stack.hasTagCompound() ? stack.getTagCompound().getInteger("reward_table") : 0;
+				int tableid = nbt != null ? nbt.getInteger("reward_table") : 0;
 
 				if (tableid == 0)
 				{
@@ -105,7 +107,7 @@ public class ItemLootcrate extends Item
 			}
 			else
 			{
-				String lootTable = stack.hasTagCompound() ? stack.getTagCompound().getString("loot_table") : "";
+				String lootTable = nbt != null ? nbt.getString("loot_table") : "";
 				ResourceLocation lootTableLocation = lootTable.isEmpty() ? ServerQuestFile.INSTANCE.lootTables[rarity.ordinal()] : new ResourceLocation(lootTable);
 
 				LootTable table = world.getLootTableManager().getLootTableFromLocation(lootTableLocation);
@@ -184,9 +186,11 @@ public class ItemLootcrate extends Item
 			return;
 		}
 
-		if (stack.hasTagCompound() && stack.getTagCompound().hasKey("use_reward_table") ? stack.getTagCompound().getBoolean("use_reward_table") : ClientQuestFile.INSTANCE.lootCratesUseRewardTables)
+		NBTTagCompound nbt = stack.getTagCompound();
+
+		if (nbt != null && nbt.hasKey("use_reward_table") ? nbt.getBoolean("use_reward_table") : ClientQuestFile.INSTANCE.lootCratesUseRewardTables)
 		{
-			int tableid = stack.hasTagCompound() ? stack.getTagCompound().getInteger("reward_table") : 0;
+			int tableid = nbt != null ? nbt.getInteger("reward_table") : 0;
 
 			if (tableid == 0)
 			{
@@ -203,14 +207,14 @@ public class ItemLootcrate extends Item
 
 		if (ClientQuestFile.INSTANCE.canEdit())
 		{
-			String lootTable = stack.hasTagCompound() ? stack.getTagCompound().getString("loot_table") : "";
+			String lootTable = nbt != null ? nbt.getString("loot_table") : "";
 
 			if (lootTable.isEmpty())
 			{
 				lootTable = ClientQuestFile.INSTANCE.lootTables[rarity.ordinal()].toString();
 			}
 
-			int lootSize = stack.hasTagCompound() ? stack.getTagCompound().getShort("loot_size") & 0xFFFF : 0;
+			int lootSize = nbt != null ? nbt.getShort("loot_size") & 0xFFFF : 0;
 
 			if (lootSize == 0)
 			{

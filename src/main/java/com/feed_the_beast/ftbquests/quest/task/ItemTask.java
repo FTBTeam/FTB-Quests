@@ -366,12 +366,12 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 			list.add(TextFormatting.GRAY + I18n.format("ftbquests.task.ftbquests.item.valid_items"));
 		}
 
-		GuiHelper.addStackTooltip(items.get(0), list, "");
+		GuiHelper.addStackTooltip(items.get(0), list);
 
 		for (int i = 1; i < items.size(); i++)
 		{
 			list.add(" - - -");
-			GuiHelper.addStackTooltip(items.get(i), list, "");
+			GuiHelper.addStackTooltip(items.get(i), list);
 		}
 	}
 
