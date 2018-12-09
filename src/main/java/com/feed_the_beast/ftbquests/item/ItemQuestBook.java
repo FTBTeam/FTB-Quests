@@ -14,6 +14,11 @@ import net.minecraft.world.World;
  */
 public class ItemQuestBook extends Item
 {
+	public ItemQuestBook()
+	{
+		setMaxStackSize(1);
+	}
+
 	@Override
 	public ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer player, EnumHand hand)
 	{
