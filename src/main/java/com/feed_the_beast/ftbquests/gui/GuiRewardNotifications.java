@@ -1,6 +1,5 @@
 package com.feed_the_beast.ftbquests.gui;
 
-import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftblib.lib.gui.GuiBase;
 import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
 import com.feed_the_beast.ftblib.lib.gui.Panel;
@@ -16,7 +15,6 @@ import com.feed_the_beast.ftbquests.quest.EnumQuestShape;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.TextFormatting;
 
@@ -26,50 +24,8 @@ import java.util.List;
 /**
  * @author LatvianModder
  */
-public class GuiRewardNotifications extends GuiBase
+public class GuiRewardNotifications extends GuiBase implements IRewardListenerGui
 {
-	public static class RewardKey
-	{
-		public final String title;
-		public final Icon icon;
-		public ItemStack stack;
-
-		public RewardKey(String t, Icon i)
-		{
-			title = t;
-			icon = i;
-			stack = ItemStack.EMPTY;
-		}
-
-		public int hashCode()
-		{
-			return title.hashCode();
-		}
-
-		public boolean equals(Object o)
-		{
-			if (o == this)
-			{
-				return true;
-			}
-			else if (o instanceof RewardKey)
-			{
-				RewardKey e = (RewardKey) o;
-
-				if (!stack.isEmpty())
-				{
-					return ItemStack.areItemStacksEqualUsingNBTShareTag(stack, e.stack);
-				}
-				else
-				{
-					return title.equals(e.title) && icon.equals(e.icon);
-				}
-			}
-
-			return false;
-		}
-	}
-
 	private class RewardNotification extends Widget
 	{
 		private final RewardKey key;
@@ -202,17 +158,10 @@ public class GuiRewardNotifications extends GuiBase
 		return FTBQuestsTheme.INSTANCE;
 	}
 
-	public static boolean add(RewardKey e, int c)
+	@Override
+	public void rewardReceived(RewardKey key, int count)
 	{
-		GuiRewardNotifications gui = ClientUtils.getCurrentGuiAs(GuiRewardNotifications.class);
-
-		if (gui != null)
-		{
-			gui.rewards.put(e, gui.rewards.getInt(e) + c);
-			gui.itemPanel.refreshWidgets();
-			return true;
-		}
-
-		return false;
+		rewards.put(key, rewards.getInt(key) + count);
+		itemPanel.refreshWidgets();
 	}
 }

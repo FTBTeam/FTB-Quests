@@ -5,7 +5,8 @@ import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToClient;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
-import com.feed_the_beast.ftbquests.gui.GuiRewardNotifications;
+import com.feed_the_beast.ftbquests.gui.IRewardListenerGui;
+import com.feed_the_beast.ftbquests.gui.RewardKey;
 import com.feed_the_beast.ftbquests.gui.tree.ToastReward;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.text.ITextComponent;
@@ -54,9 +55,7 @@ public class MessageDisplayRewardToast extends MessageToClient
 	@SideOnly(Side.CLIENT)
 	public void onMessage()
 	{
-		GuiRewardNotifications.RewardKey key = new GuiRewardNotifications.RewardKey(text.getUnformattedText(), icon);
-
-		if (!GuiRewardNotifications.add(key, 1))
+		if (!IRewardListenerGui.add(new RewardKey(text.getUnformattedText(), icon), 1))
 		{
 			Minecraft.getMinecraft().getToastGui().add(new ToastReward(text.getFormattedText(), icon));
 		}

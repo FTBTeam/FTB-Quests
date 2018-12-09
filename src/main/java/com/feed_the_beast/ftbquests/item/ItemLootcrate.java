@@ -61,13 +61,13 @@ public class ItemLootcrate extends Item
 		{
 			NBTTagCompound nbt = stack.getTagCompound();
 
-			if (nbt != null && nbt.hasKey("use_reward_table") ? nbt.getBoolean("use_reward_table") : ServerQuestFile.INSTANCE.lootCratesUseRewardTables)
+			if (nbt != null && nbt.hasKey("use_reward_table") ? nbt.getBoolean("use_reward_table") : ServerQuestFile.INSTANCE.lootCrateTables[rarity.ordinal()] != 0)
 			{
 				int tableid = nbt != null ? nbt.getInteger("reward_table") : 0;
 
 				if (tableid == 0)
 				{
-					tableid = ServerQuestFile.INSTANCE.defaultLootCrateTables[rarity.ordinal()];
+					tableid = ServerQuestFile.INSTANCE.lootCrateTables[rarity.ordinal()];
 				}
 
 				RewardTable table = ServerQuestFile.INSTANCE.getRewardTable(tableid);
@@ -192,13 +192,13 @@ public class ItemLootcrate extends Item
 
 		NBTTagCompound nbt = stack.getTagCompound();
 
-		if (nbt != null && nbt.hasKey("use_reward_table") ? nbt.getBoolean("use_reward_table") : ClientQuestFile.INSTANCE.lootCratesUseRewardTables)
+		if (nbt != null && nbt.hasKey("use_reward_table") ? nbt.getBoolean("use_reward_table") : ClientQuestFile.INSTANCE.lootCrateTables[rarity.ordinal()] != 0)
 		{
 			int tableid = nbt != null ? nbt.getInteger("reward_table") : 0;
 
 			if (tableid == 0)
 			{
-				tableid = ClientQuestFile.INSTANCE.defaultLootCrateTables[rarity.ordinal()];
+				tableid = ClientQuestFile.INSTANCE.lootCrateTables[rarity.ordinal()];
 			}
 
 			RewardTable table = ClientQuestFile.INSTANCE.getRewardTable(tableid);
