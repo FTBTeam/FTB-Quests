@@ -73,8 +73,7 @@ public abstract class QuestFile extends QuestObject
 	public EnumQuestShape defaultShape;
 	public boolean entityLootEnabled;
 	public EntityLootTable entityLootPassive, entityLootMonster, entityLootBoss;
-	public boolean lootCratesUseRewardTables;
-	public final int[] defaultLootCrateTables;
+	public final int[] lootCrateTables;
 
 	public QuestFile()
 	{
@@ -107,8 +106,7 @@ public abstract class QuestFile extends QuestObject
 		entityLootPassive = new EntityLootTable(4000, 350, 200, 50, 9, 1);
 		entityLootMonster = new EntityLootTable(600, 10, 90, 200, 10, 1);
 		entityLootBoss = new EntityLootTable(0, 0, 0, 0, 10, 190);
-		lootCratesUseRewardTables = false;
-		defaultLootCrateTables = new int[LootRarity.VALUES.length];
+		lootCrateTables = new int[LootRarity.VALUES.length];
 	}
 
 	public abstract boolean isClient();
@@ -474,8 +472,7 @@ public abstract class QuestFile extends QuestObject
 		nbt.setIntArray("entity_loot_passive", entityLootPassive.values);
 		nbt.setIntArray("entity_loot_monster", entityLootMonster.values);
 		nbt.setIntArray("entity_loot_boss", entityLootBoss.values);
-		nbt.setBoolean("loot_crates_use_reward_tables", lootCratesUseRewardTables);
-		nbt.setIntArray("default_loot_crate_tables", defaultLootCrateTables);
+		nbt.setIntArray("loot_crate_tables", lootCrateTables);
 	}
 
 	@Override
@@ -519,16 +516,15 @@ public abstract class QuestFile extends QuestObject
 		entityLootPassive.set(nbt.getIntArray("entity_loot_passive"));
 		entityLootMonster.set(nbt.getIntArray("entity_loot_monster"));
 		entityLootBoss.set(nbt.getIntArray("entity_loot_boss"));
-		lootCratesUseRewardTables = nbt.getBoolean("loot_crates_use_reward_tables");
-		int[] ai = nbt.getIntArray("default_loot_crate_tables");
+		int[] ai = nbt.getIntArray("loot_crate_tables");
 
 		if (ai.length == LootRarity.VALUES.length)
 		{
-			System.arraycopy(ai, 0, defaultLootCrateTables, 0, ai.length);
+			System.arraycopy(ai, 0, lootCrateTables, 0, ai.length);
 		}
 		else
 		{
-			Arrays.fill(defaultLootCrateTables, 0);
+			Arrays.fill(lootCrateTables, 0);
 		}
 	}
 
@@ -875,11 +871,9 @@ public abstract class QuestFile extends QuestObject
 			data.writeVarInt(entityLootBoss.values[i]);
 		}
 
-		data.writeBoolean(lootCratesUseRewardTables);
-
 		for (int i = 0; i < LootRarity.VALUES.length; i++)
 		{
-			data.writeVarInt(defaultLootCrateTables[i]);
+			data.writeVarInt(lootCrateTables[i]);
 		}
 	}
 
@@ -908,11 +902,9 @@ public abstract class QuestFile extends QuestObject
 			entityLootBoss.values[i] = data.readVarInt();
 		}
 
-		lootCratesUseRewardTables = data.readBoolean();
-
 		for (int i = 0; i < LootRarity.VALUES.length; i++)
 		{
-			defaultLootCrateTables[i] = data.readVarInt();
+			lootCrateTables[i] = data.readVarInt();
 		}
 	}
 
@@ -1182,7 +1174,6 @@ public abstract class QuestFile extends QuestObject
 
 		ConfigGroup lootGroup = config.getGroup("loot");
 		lootGroup.addInt("size", () -> lootSize, v -> lootSize = v, 27, 1, 1024);
-		lootGroup.addBool("loot_crates_use_reward_tables", () -> lootCratesUseRewardTables, v -> lootCratesUseRewardTables = v, false);
 
 		Pattern pattern = Pattern.compile("[a-z0-9_]+:.+");
 
@@ -1198,23 +1189,23 @@ public abstract class QuestFile extends QuestObject
 		entityLootBoss.getConfig(entityLoot.getGroup("boss"));
 
 		Collection<QuestObjectType> rewardTableType = Collections.singleton(QuestObjectType.REWARD_TABLE);
-		ConfigGroup crateTables = lootGroup.getGroup("default_crate_tables");
+		ConfigGroup crateTables = lootGroup.getGroup("loot_crate_tables");
 
 		for (LootRarity rarity : LootRarity.VALUES)
 		{
-			crateTables.add(rarity.getID(), new ConfigQuestObject(this, getRewardTable(defaultLootCrateTables[rarity.ordinal()]), rewardTableType)
+			crateTables.add(rarity.getID(), new ConfigQuestObject(this, getRewardTable(lootCrateTables[rarity.ordinal()]), rewardTableType)
 			{
 				@Override
 				public void setObject(@Nullable QuestObjectBase v)
 				{
-					defaultLootCrateTables[rarity.ordinal()] = v == null ? 0 : v.id;
+					lootCrateTables[rarity.ordinal()] = v == null ? 0 : v.id;
 				}
 
 				@Override
 				@Nullable
 				public QuestObjectBase getObject()
 				{
-					return getRewardTable(defaultLootCrateTables[rarity.ordinal()]);
+					return getRewardTable(lootCrateTables[rarity.ordinal()]);
 				}
 			}, new ConfigQuestObject(this, null, rewardTableType)).setDisplayName(new TextComponentTranslation(rarity.getTranslationKey()));
 		}

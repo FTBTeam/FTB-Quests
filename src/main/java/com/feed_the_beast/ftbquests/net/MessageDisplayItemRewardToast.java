@@ -6,7 +6,8 @@ import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToClient;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
-import com.feed_the_beast.ftbquests.gui.GuiRewardNotifications;
+import com.feed_the_beast.ftbquests.gui.IRewardListenerGui;
+import com.feed_the_beast.ftbquests.gui.RewardKey;
 import com.feed_the_beast.ftbquests.gui.tree.ToastReward;
 import net.minecraft.client.Minecraft;
 import net.minecraft.item.ItemStack;
@@ -54,10 +55,8 @@ public class MessageDisplayItemRewardToast extends MessageToClient
 	{
 		ItemStack stack1 = ItemHandlerHelper.copyStackWithSize(stack, 1);
 		Icon icon = ItemIcon.getItemIcon(stack1);
-		GuiRewardNotifications.RewardKey key = new GuiRewardNotifications.RewardKey(stack.getDisplayName(), icon);
-		key.stack = stack1;
 
-		if (!GuiRewardNotifications.add(key, stack.getCount()))
+		if (!IRewardListenerGui.add(new RewardKey(stack.getDisplayName(), icon).setStack(stack1), stack.getCount()))
 		{
 			String s = stack.getDisplayName();
 
