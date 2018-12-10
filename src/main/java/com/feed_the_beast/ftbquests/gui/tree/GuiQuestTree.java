@@ -229,6 +229,11 @@ public class GuiQuestTree extends GuiBase
 		{
 			contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.complete_instantly"), FTBQuestsTheme.COMPLETED, () -> new MessageCompleteInstantly(object.id).sendToServer()).setYesNo(I18n.format("ftbquests.gui.complete_instantly_q")));
 		}
+
+		if (isCtrlKeyDown())
+		{
+			contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.copy_id"), GuiIcons.INFO, () -> setClipboardString(object.getCodeString())));
+		}
 	}
 
 	public static void displayError(ITextComponent error)
