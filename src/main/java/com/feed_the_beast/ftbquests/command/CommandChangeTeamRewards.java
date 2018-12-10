@@ -68,7 +68,6 @@ public class CommandChangeTeamRewards extends CommandBase
 				list.add(chapter.toString());
 			}
 
-			list.sort(null);
 			return getListOfStringsMatchingLastWord(args, list);
 		}
 

@@ -1,10 +1,10 @@
 package com.feed_the_beast.ftbquests.quest.task;
 
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
-import com.feed_the_beast.ftblib.lib.config.ConfigString;
-import com.feed_the_beast.ftblib.lib.config.ConfigStringEnum;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
+import com.feed_the_beast.ftblib.lib.util.ServerUtils;
+import com.feed_the_beast.ftblib.lib.util.misc.NameMap;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -16,9 +16,7 @@ import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.DimensionType;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 /**
  * @author LatvianModder
@@ -108,31 +106,7 @@ public class DimensionTask extends QuestTask
 	public void getConfig(ConfigGroup config)
 	{
 		super.getConfig(config);
-
-		List<String> list = new ArrayList<>();
-
-		for (DimensionType type : DimensionType.values())
-		{
-			list.add(type.getName());
-		}
-
-		config.add("dim", new ConfigStringEnum(list, dimension.getName())
-		{
-			@Override
-			public void setString(String v)
-			{
-				super.setString(v);
-
-				try
-				{
-					dimension = DimensionType.byName(v);
-				}
-				catch (Exception ex)
-				{
-					dimension = DimensionType.NETHER;
-				}
-			}
-		}, new ConfigString(DimensionType.NETHER.getName())).setDisplayName(new TextComponentTranslation("ftbquests.task.ftbquests.dimension"));
+		config.addEnum("dim", () -> dimension, v -> dimension = v, NameMap.create(DimensionType.NETHER, NameMap.ObjectProperties.withName((sender, dim) -> ServerUtils.getDimensionName(dim.getId())), DimensionType.values())).setDisplayName(new TextComponentTranslation("ftbquests.task.ftbquests.dimension"));
 	}
 
 	@Override

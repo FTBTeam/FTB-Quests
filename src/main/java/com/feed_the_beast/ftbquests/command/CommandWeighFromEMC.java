@@ -6,6 +6,7 @@ import com.feed_the_beast.ftbquests.net.edit.MessageEditObjectResponse;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
+import com.feed_the_beast.ftbquests.quest.reward.RewardTable;
 import com.feed_the_beast.ftbquests.quest.task.ItemTask;
 import com.feed_the_beast.ftbquests.quest.task.QuestTask;
 import net.minecraft.command.CommandBase;
@@ -26,18 +27,18 @@ import java.util.List;
 /**
  * @author LatvianModder
  */
-public class CommandChangeConsumable extends CommandBase
+public class CommandWeighFromEMC extends CommandBase
 {
 	@Override
 	public String getName()
 	{
-		return "change_consumable";
+		return "weigh_from_emc";
 	}
 
 	@Override
 	public String getUsage(ICommandSender sender)
 	{
-		return "commands.ftbquests.change_consumable.usage";
+		return "commands.ftbquests.weigh_from_emc.usage";
 	}
 
 	@Override
@@ -55,18 +56,13 @@ public class CommandChangeConsumable extends CommandBase
 	@Override
 	public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos)
 	{
-		if (args.length == 2)
+		if (args.length == 1)
 		{
-			return getListOfStringsMatchingLastWord(args, "true", "false");
-		}
-		else if (args.length == 1)
-		{
-			List<String> list = new ArrayList<>(ServerQuestFile.INSTANCE.chapters.size() + 1);
-			list.add("*");
+			List<String> list = new ArrayList<>(ServerQuestFile.INSTANCE.rewardTables.size() + 1);
 
-			for (QuestChapter chapter : ServerQuestFile.INSTANCE.chapters)
+			for (RewardTable table : ServerQuestFile.INSTANCE.rewardTables)
 			{
-				list.add(chapter.toString());
+				list.add(table.getCodeString());
 			}
 
 			return getListOfStringsMatchingLastWord(args, list);
@@ -83,6 +79,13 @@ public class CommandChangeConsumable extends CommandBase
 			throw new WrongUsageException(getUsage(sender));
 		}
 
+		RewardTable table = ServerQuestFile.INSTANCE.getRewardTable(ServerQuestFile.INSTANCE.getID(args[0]));
+
+		if (table == null)
+		{
+			throw FTBLib.error(sender, "commands.ftbquests.weigh_from_emc.invalid_id", args[0]);
+		}
+
 		Collection<QuestChapter> chapters;
 
 		if (args[0].equals("*"))
@@ -95,7 +98,7 @@ public class CommandChangeConsumable extends CommandBase
 
 			if (chapter == null)
 			{
-				throw FTBLib.error(sender, "commands.ftbquests.change_team_rewards.invalid_id", args[0]);
+
 			}
 
 			chapters = Collections.singleton(chapter);
