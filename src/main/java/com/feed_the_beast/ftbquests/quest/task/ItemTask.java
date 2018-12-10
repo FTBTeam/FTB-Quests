@@ -354,7 +354,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 	public void addMouseOverText(List<String> list, @Nullable QuestTaskData data)
 	{
 		list.add(TextFormatting.GRAY + (canInsertItem() ? I18n.format("ftbquests.task.ftbquests.item.consume_true") : I18n.format("ftbquests.task.ftbquests.item.consume_false")));
-		list.add(TextFormatting.GRAY + I18n.format("ftbquests.task.click_to_submit"));
+		list.add(TextFormatting.GRAY + (canInsertItem() ? I18n.format("ftbquests.task.click_to_submit") : I18n.format("ftbquests.task.auto_detected")));
 		list.add("");
 
 		if (items.isEmpty())
