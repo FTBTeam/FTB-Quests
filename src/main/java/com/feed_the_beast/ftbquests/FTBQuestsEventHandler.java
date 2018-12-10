@@ -32,7 +32,9 @@ import com.feed_the_beast.ftbquests.quest.task.FTBQuestsTasks;
 import com.feed_the_beast.ftbquests.quest.task.FluidTask;
 import com.feed_the_beast.ftbquests.quest.task.ForgeEnergyTask;
 import com.feed_the_beast.ftbquests.quest.task.ItemTask;
+import com.feed_the_beast.ftbquests.quest.task.KillTask;
 import com.feed_the_beast.ftbquests.quest.task.QuestTaskType;
+import com.feed_the_beast.ftbquests.quest.task.StatTask;
 import com.feed_the_beast.ftbquests.quest.task.XPTask;
 import com.feed_the_beast.ftbquests.tile.TileProgressDetector;
 import com.feed_the_beast.ftbquests.tile.TileProgressScreenCore;
@@ -136,7 +138,9 @@ public class FTBQuestsEventHandler
 				FTBQuestsTasks.FLUID = new QuestTaskType(FluidTask::new).setRegistryName("fluid").setIcon(Icon.getIcon(FluidRegistry.WATER.getStill(new FluidStack(FluidRegistry.WATER, Fluid.BUCKET_VOLUME)).toString()).combineWith(Icon.getIcon(FluidTask.TANK_TEXTURE.toString()))),
 				FTBQuestsTasks.FORGE_ENERGY = new QuestTaskType(ForgeEnergyTask::new).setRegistryName("forge_energy").setIcon(Icon.getIcon(ForgeEnergyTask.EMPTY_TEXTURE.toString()).combineWith(Icon.getIcon(ForgeEnergyTask.FULL_TEXTURE.toString()))),
 				FTBQuestsTasks.XP = new QuestTaskType(XPTask::new).setRegistryName("xp").setIcon(Icon.getIcon("minecraft:items/experience_bottle")),
-				FTBQuestsTasks.DIMENSION = new QuestTaskType(DimensionTask::new).setRegistryName("dimension").setIcon(Icon.getIcon("minecraft:blocks/portal"))
+				FTBQuestsTasks.DIMENSION = new QuestTaskType(DimensionTask::new).setRegistryName("dimension").setIcon(Icon.getIcon("minecraft:blocks/portal")),
+				FTBQuestsTasks.STAT = new QuestTaskType(StatTask::new).setRegistryName("stat").setIcon(Icon.getIcon("minecraft:items/iron_sword")),
+				FTBQuestsTasks.KILL = new QuestTaskType(KillTask::new).setRegistryName("kill").setIcon(Icon.getIcon("minecraft:items/diamond_sword"))
 		);
 
 		FTBQuests.PROXY.setTaskGuiProviders();

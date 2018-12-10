@@ -2,6 +2,7 @@ package com.feed_the_beast.ftbquests.command;
 
 import net.minecraft.command.ICommandSender;
 import net.minecraft.server.MinecraftServer;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.server.command.CommandTreeBase;
 
 /**
@@ -17,6 +18,12 @@ public class CommandFTBQuests extends CommandTreeBase
 		addSubcommand(new CommandSetVariable());
 		addSubcommand(new CommandChangeTeamRewards());
 		addSubcommand(new CommandChangeConsumable());
+		addSubcommand(new CommandImportRewardsFromChest());
+
+		if (Loader.isModLoaded("projecte"))
+		{
+			//addSubcommand(new CommandWeighFromEMC());
+		}
 	}
 
 	@Override

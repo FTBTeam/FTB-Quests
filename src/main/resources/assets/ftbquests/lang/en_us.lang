@@ -150,6 +150,14 @@ ftbquests.task.ftbquests.forge_energy.text=%d FE
 ftbquests.task.ftbquests.xp=XP Levels
 ftbquests.task.ftbquests.dimension=Visit Dimension
 
+ftbquests.task.ftbquests.stat=Stat
+ftbquests.task.ftbquests.stat.stat=Stat Name
+ftbquests.task.ftbquests.stat.value=Value
+
+ftbquests.task.ftbquests.kill=Kill Entity
+ftbquests.task.ftbquests.kill.stat=Entity Name
+ftbquests.task.ftbquests.kill.value=Count
+
 ftbquests.task.ftbquests.buildcraft_mj=BuildCraft Energy
 ftbquests.task.ftbquests.buildcraft_mj.value=mJ
 ftbquests.task.ftbquests.buildcraft_mj.text=%d MJ
@@ -218,3 +226,6 @@ commands.ftbquests.change_team_rewards.invalid_id=Invalid Chapter ID!
 commands.ftbquests.change_team_rewards.text=Changed %d reward team setting to %s
 commands.ftbquests.change_consumable.usage=/ftbquests change_consumable <*|chapter> <true|false>
 commands.ftbquests.change_consumable.text=Changed %d item task consumable setting to %s
+commands.ftbquests.import_rewards_from_chest.usage=/ftbquests import_rewards_from_chest <reward_table> [weight]
+commands.ftbquests.import_rewards_from_chest.invalid_id=Invalid Reward Table ID!
+commands.ftbquests.import_rewards_from_chest.text=Imported %d items in %s
