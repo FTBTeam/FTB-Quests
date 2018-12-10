@@ -139,7 +139,7 @@ public class ButtonQuest extends Button
 			}
 			else
 			{
-				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.move"), GuiIcons.UP, () -> {
+				contextMenu.add(new ContextMenuItem(I18n.format("gui.move"), GuiIcons.UP, () -> {
 					treeGui.movingQuest = true;
 					treeGui.selectQuest(quest);
 

@@ -102,7 +102,7 @@ public class ButtonDummyQuest extends Widget
 	{
 		if (treeGui.movingQuest && treeGui.getSelectedQuest() != null)
 		{
-			list.add(I18n.format("ftbquests.gui.move"));
+			list.add(I18n.format("gui.move"));
 		}
 	}
 
