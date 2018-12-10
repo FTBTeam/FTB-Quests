@@ -58,7 +58,7 @@ public abstract class QuestTaskData<T extends QuestTask> implements ICapabilityP
 			return 100;
 		}
 
-		return (int) (progress * 100D / (double) max);
+		return Math.max(1, (int) (progress * 100D / (double) max));
 	}
 
 	public String getProgressString()

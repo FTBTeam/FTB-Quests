@@ -29,7 +29,7 @@ public abstract class QuestObject extends QuestObjectBase
 			return 0;
 		}
 
-		return (int) (progress / (double) max);
+		return Math.max(1, (int) (progress / (double) max));
 	}
 
 	public abstract boolean isComplete(ITeamData data);

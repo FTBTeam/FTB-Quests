@@ -97,7 +97,6 @@ ftbquests.gui.save_as_file=Save as File
 ftbquests.gui.export_spreadsheet=Export Spreadsheet
 ftbquests.gui.saved_as_file=Saved as %s
 ftbquests.gui.error=Error!
-ftbquests.gui.move=Move
 ftbquests.gui.add_reward_all=Add reward to all
 ftbquests.gui.select_quest_object=Select Quest Object
 ftbquests.gui.select_task_type=Select Task Type

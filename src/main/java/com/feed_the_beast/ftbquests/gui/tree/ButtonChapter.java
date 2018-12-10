@@ -50,8 +50,8 @@ public class ButtonChapter extends ButtonTab
 		if (treeGui.questFile.canEdit() && button.isRight())
 		{
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
-			contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.move"), GuiIcons.LEFT, () -> new MessageMoveChapter(chapter.id, true).sendToServer()).setEnabled(() -> chapter.getIndex() > 0).setCloseMenu(false));
-			contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.move"), GuiIcons.RIGHT, () -> new MessageMoveChapter(chapter.id, false).sendToServer()).setEnabled(() -> chapter.getIndex() < treeGui.questFile.chapters.size() - 1).setCloseMenu(false));
+			contextMenu.add(new ContextMenuItem(I18n.format("gui.move"), GuiIcons.LEFT, () -> new MessageMoveChapter(chapter.id, true).sendToServer()).setEnabled(() -> chapter.getIndex() > 0).setCloseMenu(false));
+			contextMenu.add(new ContextMenuItem(I18n.format("gui.move"), GuiIcons.RIGHT, () -> new MessageMoveChapter(chapter.id, false).sendToServer()).setEnabled(() -> chapter.getIndex() < treeGui.questFile.chapters.size() - 1).setCloseMenu(false));
 			contextMenu.add(ContextMenuItem.SEPARATOR);
 			GuiQuestTree.addObjectMenuItems(contextMenu, getGui(), chapter);
 			getGui().openContextMenu(contextMenu);
