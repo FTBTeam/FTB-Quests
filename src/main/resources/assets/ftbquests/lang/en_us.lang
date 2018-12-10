@@ -155,7 +155,7 @@ ftbquests.task.ftbquests.stat.stat=Stat Name
 ftbquests.task.ftbquests.stat.value=Value
 
 ftbquests.task.ftbquests.kill=Kill Entity
-ftbquests.task.ftbquests.kill.stat=Entity Name
+ftbquests.task.ftbquests.kill.entity=Entity Name
 ftbquests.task.ftbquests.kill.value=Count
 
 ftbquests.task.ftbquests.buildcraft_mj=BuildCraft Energy
