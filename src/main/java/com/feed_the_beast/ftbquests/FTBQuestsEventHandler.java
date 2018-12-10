@@ -1,8 +1,11 @@
 package com.feed_the_beast.ftbquests;
 
 import com.feed_the_beast.ftblib.events.FTBLibPreInitRegistryEvent;
+import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
+import com.feed_the_beast.ftblib.lib.data.Universe;
 import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
+import com.feed_the_beast.ftblib.lib.util.misc.TimeType;
 import com.feed_the_beast.ftbquests.block.BlockProgressDetector;
 import com.feed_the_beast.ftbquests.block.BlockProgressScreen;
 import com.feed_the_beast.ftbquests.block.BlockProgressScreenPart;
@@ -17,6 +20,9 @@ import com.feed_the_beast.ftbquests.item.ItemMissing;
 import com.feed_the_beast.ftbquests.item.ItemQuestBook;
 import com.feed_the_beast.ftbquests.item.LootRarity;
 import com.feed_the_beast.ftbquests.quest.EntityLootTable;
+import com.feed_the_beast.ftbquests.quest.ITeamData;
+import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.reward.ChoiceReward;
 import com.feed_the_beast.ftbquests.quest.reward.CommandReward;
@@ -33,6 +39,7 @@ import com.feed_the_beast.ftbquests.quest.task.FluidTask;
 import com.feed_the_beast.ftbquests.quest.task.ForgeEnergyTask;
 import com.feed_the_beast.ftbquests.quest.task.ItemTask;
 import com.feed_the_beast.ftbquests.quest.task.KillTask;
+import com.feed_the_beast.ftbquests.quest.task.QuestTask;
 import com.feed_the_beast.ftbquests.quest.task.QuestTaskType;
 import com.feed_the_beast.ftbquests.quest.task.StatTask;
 import com.feed_the_beast.ftbquests.quest.task.XPTask;
@@ -48,11 +55,13 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.monster.IMob;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
@@ -200,5 +209,52 @@ public class FTBQuestsEventHandler
 			ei.setPickupDelay(10);
 			event.getDrops().add(ei);
 		}
+	}
+
+	@SubscribeEvent
+	public static void onPlayerKillEvent(LivingDeathEvent event)
+	{
+		if (event.getSource().getTrueSource() instanceof EntityPlayerMP)
+		{
+			EntityPlayerMP player = (EntityPlayerMP) event.getSource().getTrueSource();
+			ITeamData data = ServerQuestFile.INSTANCE.getData(FTBLibAPI.getTeamID(player.getUniqueID()));
+
+			if (data == null)
+			{
+				return;
+			}
+
+			Universe.get().scheduleTask(TimeType.TICKS, 1L, universe -> {
+				for (QuestChapter chapter : ServerQuestFile.INSTANCE.chapters)
+				{
+					for (Quest quest : chapter.quests)
+					{
+						if (hasKillTasks(quest) && quest.canStartTasks(data))
+						{
+							for (QuestTask task : quest.tasks)
+							{
+								if (task instanceof KillTask || task instanceof StatTask)
+								{
+									data.getQuestTaskData(task).submitTask(player, Collections.emptyList(), false);
+								}
+							}
+						}
+					}
+				}
+			});
+		}
+	}
+
+	private static boolean hasKillTasks(Quest quest)
+	{
+		for (QuestTask task : quest.tasks)
+		{
+			if (task instanceof KillTask || task instanceof StatTask)
+			{
+				return true;
+			}
+		}
+
+		return false;
 	}
 }

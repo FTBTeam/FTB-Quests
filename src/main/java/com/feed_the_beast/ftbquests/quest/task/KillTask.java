@@ -3,7 +3,6 @@ package com.feed_the_beast.ftbquests.quest.task;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
-import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftblib.lib.util.misc.NameMap;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
@@ -15,6 +14,7 @@ import net.minecraft.stats.StatBase;
 import net.minecraft.stats.StatList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentTranslation;
 
 import java.util.Collection;
 
@@ -110,14 +110,14 @@ public class KillTask extends QuestTask
 	public void getConfig(ConfigGroup config)
 	{
 		super.getConfig(config);
-		config.addEnum("entity", () -> entity, v -> entity = v, NameMap.create(EntityList.ENTITY_EGGS.get(new ResourceLocation("minecraft:zombie")), NameMap.ObjectProperties.withName((sender, s) -> s.killEntityStat.getStatName()), EntityList.ENTITY_EGGS.values().toArray(new EntityList.EntityEggInfo[0])));
+		config.addEnum("entity", () -> entity, v -> entity = v, NameMap.create(EntityList.ENTITY_EGGS.get(new ResourceLocation("minecraft:zombie")), NameMap.ObjectProperties.withName((sender, s) -> new TextComponentTranslation("entity." + EntityList.getTranslationName(s.spawnedID) + ".name")), EntityList.ENTITY_EGGS.values().toArray(new EntityList.EntityEggInfo[0])));
 		config.addInt("value", () -> value, v -> value = v, 1, 1, Integer.MAX_VALUE);
 	}
 
 	@Override
 	public ITextComponent getAltDisplayName()
 	{
-		return StringUtils.color(entity.killEntityStat.getStatName(), null);
+		return new TextComponentTranslation("entity." + EntityList.getTranslationName(entity.spawnedID) + ".name");
 	}
 
 	@Override
