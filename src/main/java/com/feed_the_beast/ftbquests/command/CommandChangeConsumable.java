@@ -6,7 +6,8 @@ import com.feed_the_beast.ftbquests.net.edit.MessageEditObjectResponse;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
-import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
+import com.feed_the_beast.ftbquests.quest.task.ItemTask;
+import com.feed_the_beast.ftbquests.quest.task.QuestTask;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -25,18 +26,18 @@ import java.util.List;
 /**
  * @author LatvianModder
  */
-public class CommandChangeTeamRewards extends CommandBase
+public class CommandChangeConsumable extends CommandBase
 {
 	@Override
 	public String getName()
 	{
-		return "change_team_rewards";
+		return "change_consumable";
 	}
 
 	@Override
 	public String getUsage(ICommandSender sender)
 	{
-		return "commands.ftbquests.change_team_rewards.usage";
+		return "commands.ftbquests.change_consumable.usage";
 	}
 
 	@Override
@@ -110,13 +111,13 @@ public class CommandChangeTeamRewards extends CommandBase
 		{
 			for (Quest quest : chapter.quests)
 			{
-				for (QuestReward reward : quest.rewards)
+				for (QuestTask task : quest.tasks)
 				{
-					if (reward.team != value)
+					if (task instanceof ItemTask && ((ItemTask) task).checkOnly == value)
 					{
-						reward.team = value;
+						((ItemTask) task).checkOnly = !value;
 						r++;
-						new MessageEditObjectResponse(reward).sendToAll();
+						new MessageEditObjectResponse(task).sendToAll();
 					}
 				}
 			}
@@ -124,6 +125,6 @@ public class CommandChangeTeamRewards extends CommandBase
 
 		ServerQuestFile.INSTANCE.save();
 
-		sender.sendMessage(new TextComponentTranslation("commands.ftbquests.change_team_rewards.text", r, Boolean.toString(value)));
+		sender.sendMessage(new TextComponentTranslation("commands.ftbquests.change_consumable.text", r, Boolean.toString(value)));
 	}
 }

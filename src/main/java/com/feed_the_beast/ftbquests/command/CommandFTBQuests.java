@@ -16,6 +16,7 @@ public class CommandFTBQuests extends CommandTreeBase
 		addSubcommand(new CommandCompleteInstantly());
 		addSubcommand(new CommandSetVariable());
 		addSubcommand(new CommandChangeTeamRewards());
+		addSubcommand(new CommandChangeConsumable());
 	}
 
 	@Override
