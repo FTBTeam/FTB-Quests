@@ -69,7 +69,7 @@ public abstract class QuestFile extends QuestObject
 	public int fileVersion;
 	public int lootSize;
 	public boolean defaultRewardTeam;
-	public boolean defaultCheckOnly;
+	public boolean defaultConsumeItems;
 	public EnumQuestShape defaultShape;
 	public boolean entityLootEnabled;
 	public EntityLootTable entityLootPassive, entityLootMonster, entityLootBoss;
@@ -100,7 +100,7 @@ public abstract class QuestFile extends QuestObject
 
 		lootSize = 27;
 		defaultRewardTeam = false;
-		defaultCheckOnly = false;
+		defaultConsumeItems = false;
 		defaultShape = EnumQuestShape.CIRCLE;
 		entityLootEnabled = false;
 		entityLootPassive = new EntityLootTable(4000, 350, 200, 50, 9, 1);
@@ -442,7 +442,7 @@ public abstract class QuestFile extends QuestObject
 		super.writeData(nbt);
 		nbt.setInteger("version", VERSION);
 		nbt.setBoolean("default_reward_team", defaultRewardTeam);
-		nbt.setBoolean("default_check_only", defaultCheckOnly);
+		nbt.setBoolean("default_consume", defaultConsumeItems);
 		nbt.setString("default_quest_shape", defaultShape.getID());
 
 		if (!emergencyItems.isEmpty())
@@ -480,7 +480,7 @@ public abstract class QuestFile extends QuestObject
 	{
 		super.readData(nbt);
 		defaultRewardTeam = nbt.getBoolean("default_reward_team");
-		defaultCheckOnly = nbt.getBoolean("default_check_only");
+		defaultConsumeItems = nbt.hasKey("default_check_only") ? nbt.getBoolean("default_check_only") : nbt.getBoolean("default_consume_items");
 		defaultShape = EnumQuestShape.NAME_MAP.get(nbt.getString("default_quest_shape"));
 		emergencyItems.clear();
 
@@ -859,7 +859,7 @@ public abstract class QuestFile extends QuestObject
 
 		data.writeVarInt(lootSize);
 		data.writeBoolean(defaultRewardTeam);
-		data.writeBoolean(defaultCheckOnly);
+		data.writeBoolean(defaultConsumeItems);
 		data.write(defaultShape, EnumQuestShape.NAME_MAP);
 
 		data.writeBoolean(entityLootEnabled);
@@ -891,7 +891,7 @@ public abstract class QuestFile extends QuestObject
 
 		lootSize = data.readVarInt();
 		defaultRewardTeam = data.readBoolean();
-		defaultCheckOnly = data.readBoolean();
+		defaultConsumeItems = data.readBoolean();
 		defaultShape = data.read(EnumQuestShape.NAME_MAP);
 		entityLootEnabled = data.readBoolean();
 
@@ -1169,7 +1169,7 @@ public abstract class QuestFile extends QuestObject
 
 		ConfigGroup defaultsGroup = config.getGroup("defaults");
 		defaultsGroup.addBool("reward_team", () -> defaultRewardTeam, v -> defaultRewardTeam = v, false);
-		defaultsGroup.addBool("check_only", () -> defaultCheckOnly, v -> defaultCheckOnly = v, false);
+		defaultsGroup.addBool("consume_items", () -> defaultConsumeItems, v -> defaultConsumeItems = v, false);
 		defaultsGroup.addEnum("quest_shape", () -> defaultShape, v -> defaultShape = v, EnumQuestShape.NAME_MAP);
 
 		ConfigGroup lootGroup = config.getGroup("loot");

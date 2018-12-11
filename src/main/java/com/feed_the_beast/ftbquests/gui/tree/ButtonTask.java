@@ -61,7 +61,7 @@ public class ButtonTask extends SimpleTextButton
 			GuiHelper.playClickSound();
 			task.onButtonClicked();
 		}
-		else if (button.isRight() && treeGui.questFile.canEdit())
+		else if (button.isRight() && treeGui.file.canEdit())
 		{
 			GuiHelper.playClickSound();
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
@@ -80,9 +80,9 @@ public class ButtonTask extends SimpleTextButton
 
 		QuestTaskData data;
 
-		if (treeGui.questFile.self != null && task.quest.canStartTasks(treeGui.questFile.self))
+		if (treeGui.file.self != null && task.quest.canStartTasks(treeGui.file.self))
 		{
-			data = treeGui.questFile.self.getQuestTaskData(task);
+			data = treeGui.file.self.getQuestTaskData(task);
 
 			if (task.hideProgressNumbers())
 			{
@@ -105,7 +105,7 @@ public class ButtonTask extends SimpleTextButton
 	@Override
 	public WidgetType getWidgetType()
 	{
-		if (task.invalid || treeGui.questFile.self == null || !task.quest.canStartTasks(treeGui.questFile.self) || task.isComplete(treeGui.questFile.self))
+		if (task.invalid || treeGui.file.self == null || !task.quest.canStartTasks(treeGui.file.self) || task.isComplete(treeGui.file.self))
 		{
 			return WidgetType.DISABLED;
 		}
@@ -116,7 +116,7 @@ public class ButtonTask extends SimpleTextButton
 	@Override
 	public void drawIcon(Theme theme, int x, int y, int w, int h)
 	{
-		task.drawGUI(treeGui.questFile.self == null ? null : treeGui.questFile.self.getQuestTaskData(task), x, y, w, h);
+		task.drawGUI(treeGui.file.self == null ? null : treeGui.file.self.getQuestTaskData(task), x, y, w, h);
 	}
 
 	@Override
@@ -124,7 +124,7 @@ public class ButtonTask extends SimpleTextButton
 	{
 		super.draw(theme, x, y, w, h);
 
-		if (treeGui.questFile.self != null && task.isComplete(treeGui.questFile.self))
+		if (treeGui.file.self != null && task.isComplete(treeGui.file.self))
 		{
 			FTBQuestsTheme.COMPLETED.draw(x + w - 9, y + 1, 8, 8);
 		}

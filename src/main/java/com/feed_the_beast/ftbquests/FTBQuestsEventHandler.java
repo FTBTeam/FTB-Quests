@@ -2,10 +2,8 @@ package com.feed_the_beast.ftbquests;
 
 import com.feed_the_beast.ftblib.events.FTBLibPreInitRegistryEvent;
 import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
-import com.feed_the_beast.ftblib.lib.data.Universe;
 import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
-import com.feed_the_beast.ftblib.lib.util.misc.TimeType;
 import com.feed_the_beast.ftbquests.block.BlockProgressDetector;
 import com.feed_the_beast.ftbquests.block.BlockProgressScreen;
 import com.feed_the_beast.ftbquests.block.BlockProgressScreenPart;
@@ -224,24 +222,22 @@ public class FTBQuestsEventHandler
 				return;
 			}
 
-			Universe.get().scheduleTask(TimeType.TICKS, 1L, universe -> {
-				for (QuestChapter chapter : ServerQuestFile.INSTANCE.chapters)
+			for (QuestChapter chapter : ServerQuestFile.INSTANCE.chapters)
+			{
+				for (Quest quest : chapter.quests)
 				{
-					for (Quest quest : chapter.quests)
+					if (hasKillTasks(quest) && quest.canStartTasks(data))
 					{
-						if (hasKillTasks(quest) && quest.canStartTasks(data))
+						for (QuestTask task : quest.tasks)
 						{
-							for (QuestTask task : quest.tasks)
+							if (task instanceof KillTask)
 							{
-								if (task instanceof KillTask || task instanceof StatTask)
-								{
-									data.getQuestTaskData(task).submitTask(player, Collections.emptyList(), false);
-								}
+								((KillTask.Data) data.getQuestTaskData(task)).kill(event.getEntityLiving());
 							}
 						}
 					}
 				}
-			});
+			}
 		}
 	}
 
@@ -249,7 +245,7 @@ public class FTBQuestsEventHandler
 	{
 		for (QuestTask task : quest.tasks)
 		{
-			if (task instanceof KillTask || task instanceof StatTask)
+			if (task instanceof KillTask)
 			{
 				return true;
 			}

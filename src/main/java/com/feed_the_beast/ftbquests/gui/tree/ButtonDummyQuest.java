@@ -55,7 +55,7 @@ public class ButtonDummyQuest extends Widget
 			return false;
 		}
 
-		if (button.isRight() && treeGui.questFile.canEdit())
+		if (button.isRight() && treeGui.file.canEdit())
 		{
 			GuiHelper.playClickSound();
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
@@ -84,7 +84,7 @@ public class ButtonDummyQuest extends Widget
 			getGui().openContextMenu(contextMenu);
 			return true;
 		}
-		else if (button.isLeft() && treeGui.movingQuest && treeGui.getSelectedQuest() != null && treeGui.questFile.canEdit())
+		else if (button.isLeft() && treeGui.movingQuest && treeGui.getSelectedQuest() != null && treeGui.file.canEdit())
 		{
 			GuiHelper.playClickSound();
 			new MessageMoveQuest(treeGui.getSelectedQuest().id, x, y).sendToServer();
@@ -109,7 +109,7 @@ public class ButtonDummyQuest extends Widget
 	@Override
 	public void draw(Theme theme, int x, int y, int w, int h)
 	{
-		if (!treeGui.questFile.canEdit())
+		if (!treeGui.file.canEdit())
 		{
 			return;
 		}

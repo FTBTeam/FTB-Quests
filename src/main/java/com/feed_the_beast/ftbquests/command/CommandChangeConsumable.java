@@ -112,9 +112,9 @@ public class CommandChangeConsumable extends CommandBase
 			{
 				for (QuestTask task : quest.tasks)
 				{
-					if (task instanceof ItemTask && ((ItemTask) task).checkOnly == value)
+					if (task instanceof ItemTask && ((ItemTask) task).consumeItems != value)
 					{
-						((ItemTask) task).checkOnly = !value;
+						((ItemTask) task).consumeItems = value;
 						r++;
 						new MessageEditObjectResponse(task).sendToAll();
 					}

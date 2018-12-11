@@ -101,7 +101,7 @@ public class ButtonQuest extends Button
 		GuiHelper.playClickSound();
 		Quest selectedQuest = treeGui.getSelectedQuest();
 
-		if (treeGui.questFile.canEdit() && button.isRight())
+		if (treeGui.file.canEdit() && button.isRight())
 		{
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
 
@@ -177,7 +177,7 @@ public class ButtonQuest extends Button
 			}
 			else
 			{
-				if (isCtrlKeyDown() && treeGui.questFile.canEdit())
+				if (isCtrlKeyDown() && treeGui.file.canEdit())
 				{
 					Quest q = treeGui.getSelectedQuest();
 
@@ -195,7 +195,7 @@ public class ButtonQuest extends Button
 				}
 			}
 		}
-		else if (treeGui.questFile.canEdit() && button.isMiddle())
+		else if (treeGui.file.canEdit() && button.isMiddle())
 		{
 			treeGui.movingQuest = true;
 			treeGui.selectQuest(quest);
@@ -226,9 +226,9 @@ public class ButtonQuest extends Button
 	{
 		String title = getTitle();
 
-		if (treeGui.questFile.self != null)
+		if (treeGui.file.self != null)
 		{
-			int p = quest.getRelativeProgress(treeGui.questFile.self);
+			int p = quest.getRelativeProgress(treeGui.file.self);
 
 			if (p > 0 && p < 100)
 			{
@@ -243,13 +243,13 @@ public class ButtonQuest extends Button
 			list.add(description);
 		}
 
-		if (treeGui.questFile.self != null && quest.isComplete(treeGui.questFile.self))
+		if (treeGui.file.self != null && quest.isComplete(treeGui.file.self))
 		{
 			int r = 0;
 
 			for (QuestReward reward : quest.rewards)
 			{
-				if (!treeGui.questFile.isRewardClaimed(reward))
+				if (!treeGui.file.isRewardClaimed(reward))
 				{
 					r++;
 				}
@@ -282,7 +282,7 @@ public class ButtonQuest extends Button
 			return WidgetType.MOUSE_OVER;
 		}
 
-		return treeGui.questFile.editingMode || quest.getVisibility(treeGui.questFile.self).isVisible() ? super.getWidgetType() : WidgetType.DISABLED;
+		return treeGui.file.editingMode || quest.getVisibility(treeGui.file.self).isVisible() ? super.getWidgetType() : WidgetType.DISABLED;
 	}
 
 	@Override
@@ -291,11 +291,11 @@ public class ButtonQuest extends Button
 		Color4I outlineColor = Color4I.WHITE.withAlpha(150);
 		Icon qicon = Icon.EMPTY;
 
-		boolean cantStart = treeGui.questFile.self == null || !quest.canStartTasks(treeGui.questFile.self);
+		boolean cantStart = treeGui.file.self == null || !quest.canStartTasks(treeGui.file.self);
 
 		if (!cantStart)
 		{
-			int progress = quest.getRelativeProgress(treeGui.questFile.self);
+			int progress = quest.getRelativeProgress(treeGui.file.self);
 
 			if (progress >= 100)
 			{
@@ -303,7 +303,7 @@ public class ButtonQuest extends Button
 
 				for (QuestReward reward : quest.rewards)
 				{
-					if (!treeGui.questFile.isRewardClaimed(reward))
+					if (!treeGui.file.isRewardClaimed(reward))
 					{
 						hasRewards = true;
 						break;

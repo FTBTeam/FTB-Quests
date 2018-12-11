@@ -125,8 +125,8 @@ public class PanelQuests extends Panel
 			if (widget instanceof ButtonQuest)
 			{
 				Quest wquest = ((ButtonQuest) widget).quest;
-				boolean unavailable = treeGui.questFile.self == null || !wquest.canStartTasks(treeGui.questFile.self);
-				boolean complete = !unavailable && treeGui.questFile.self != null && wquest.isComplete(treeGui.questFile.self);
+				boolean unavailable = treeGui.file.self == null || !wquest.canStartTasks(treeGui.file.self);
+				boolean complete = !unavailable && treeGui.file.self != null && wquest.isComplete(treeGui.file.self);
 
 				for (ButtonQuest button : ((ButtonQuest) widget).getDependencies())
 				{

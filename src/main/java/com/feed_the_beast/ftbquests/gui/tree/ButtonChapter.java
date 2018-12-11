@@ -47,11 +47,11 @@ public class ButtonChapter extends ButtonTab
 		GuiHelper.playClickSound();
 		treeGui.selectChapter(chapter);
 
-		if (treeGui.questFile.canEdit() && button.isRight())
+		if (treeGui.file.canEdit() && button.isRight())
 		{
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
 			contextMenu.add(new ContextMenuItem(I18n.format("gui.move"), GuiIcons.LEFT, () -> new MessageMoveChapter(chapter.id, true).sendToServer()).setEnabled(() -> chapter.getIndex() > 0).setCloseMenu(false));
-			contextMenu.add(new ContextMenuItem(I18n.format("gui.move"), GuiIcons.RIGHT, () -> new MessageMoveChapter(chapter.id, false).sendToServer()).setEnabled(() -> chapter.getIndex() < treeGui.questFile.chapters.size() - 1).setCloseMenu(false));
+			contextMenu.add(new ContextMenuItem(I18n.format("gui.move"), GuiIcons.RIGHT, () -> new MessageMoveChapter(chapter.id, false).sendToServer()).setEnabled(() -> chapter.getIndex() < treeGui.file.chapters.size() - 1).setCloseMenu(false));
 			contextMenu.add(ContextMenuItem.SEPARATOR);
 			GuiQuestTree.addObjectMenuItems(contextMenu, getGui(), chapter);
 			getGui().openContextMenu(contextMenu);
@@ -63,9 +63,9 @@ public class ButtonChapter extends ButtonTab
 	{
 		String title = getTitle();
 
-		if (treeGui.questFile.self != null)
+		if (treeGui.file.self != null)
 		{
-			int p = chapter.getRelativeProgress(treeGui.questFile.self);
+			int p = chapter.getRelativeProgress(treeGui.file.self);
 
 			if (p > 0 && p < 100)
 			{
@@ -76,7 +76,7 @@ public class ButtonChapter extends ButtonTab
 		list.add(title);
 		list.addAll(description);
 
-		if (treeGui.questFile.self == null)
+		if (treeGui.file.self == null)
 		{
 			return;
 		}
@@ -85,11 +85,11 @@ public class ButtonChapter extends ButtonTab
 
 		for (Quest quest : chapter.quests)
 		{
-			if (quest.isComplete(treeGui.questFile.self))
+			if (quest.isComplete(treeGui.file.self))
 			{
 				for (QuestReward reward : quest.rewards)
 				{
-					if (!treeGui.questFile.isRewardClaimed(reward))
+					if (!treeGui.file.isRewardClaimed(reward))
 					{
 						r++;
 					}
@@ -118,7 +118,9 @@ public class ButtonChapter extends ButtonTab
 		}
 
 		treeGui.borderColor.draw(x + w, y + 1, 1, h - 2);
-		icon.draw(x + (w - 16) / 2, y + (h - 16) / 2, 16, 16);
+
+		int is = width < 18 ? 8 : 16;
+		icon.draw(x + (w - is) / 2, y + (h - is) / 2, is, is);
 
 		if (isMouseOver())
 		{
@@ -134,7 +136,7 @@ public class ButtonChapter extends ButtonTab
 			return;
 		}
 
-		if (treeGui.questFile.self == null)
+		if (treeGui.file.self == null)
 		{
 			return;
 		}
@@ -143,11 +145,11 @@ public class ButtonChapter extends ButtonTab
 
 		for (Quest quest : chapter.quests)
 		{
-			if (quest.isComplete(treeGui.questFile.self))
+			if (quest.isComplete(treeGui.file.self))
 			{
 				for (QuestReward reward : quest.rewards)
 				{
-					if (!treeGui.questFile.isRewardClaimed(reward))
+					if (!treeGui.file.isRewardClaimed(reward))
 					{
 						hasRewards = true;
 						break;
@@ -168,7 +170,7 @@ public class ButtonChapter extends ButtonTab
 			FTBQuestsTheme.ALERT.draw(x + w - 7, y + 2, 6, 6);
 			GlStateManager.popMatrix();
 		}
-		else if (chapter.isComplete(treeGui.questFile.self))
+		else if (chapter.isComplete(treeGui.file.self))
 		{
 			GlStateManager.pushMatrix();
 			GlStateManager.translate(0, 0, 500);

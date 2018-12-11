@@ -49,7 +49,7 @@ import java.util.List;
 
 public class GuiQuestTree extends GuiBase
 {
-	public final ClientQuestFile questFile;
+	public final ClientQuestFile file;
 	public int scrollWidth, scrollHeight, prevMouseX, prevMouseY, grabbed;
 	public QuestChapter selectedChapter;
 	public final HashSet<Quest> selectedQuests;
@@ -62,13 +62,13 @@ public class GuiQuestTree extends GuiBase
 
 	public GuiQuestTree(ClientQuestFile q)
 	{
-		questFile = q;
+		file = q;
 		selectedQuests = new HashSet<>();
 
 		chapterPanel = new PanelChapters(this);
 		chapterPanel.setHeight(20);
 
-		selectedChapter = questFile.chapters.isEmpty() ? null : questFile.chapters.get(0);
+		selectedChapter = file.chapters.isEmpty() ? null : file.chapters.get(0);
 		borderColor = Color4I.WHITE.withAlpha(88);
 		backgroundColor = Color4I.WHITE.withAlpha(33);
 
@@ -223,18 +223,14 @@ public class GuiQuestTree extends GuiBase
 		}
 
 		contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), GuiIcons.REMOVE, () -> ClientQuestFile.INSTANCE.deleteObject(object.id)).setYesNo(I18n.format("delete_item", object.getDisplayName().getFormattedText())));
+		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.reset_progress"), GuiIcons.REFRESH, () -> new MessageResetProgress(object.id).sendToServer()).setYesNo(I18n.format("ftbquests.gui.reset_progress_q")));
 
-		if (isCtrlKeyDown())
+		if (object instanceof QuestObject)
 		{
-			contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.reset_progress"), GuiIcons.REFRESH, () -> new MessageResetProgress(object.id).sendToServer()).setYesNo(I18n.format("ftbquests.gui.reset_progress_q")));
-
-			if (object instanceof QuestObject)
-			{
-				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.complete_instantly"), FTBQuestsTheme.COMPLETED, () -> new MessageCompleteInstantly(object.id).sendToServer()).setYesNo(I18n.format("ftbquests.gui.complete_instantly_q")));
-			}
-
-			contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.copy_id"), GuiIcons.INFO, () -> setClipboardString(object.getCodeString())));
+			contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.complete_instantly"), FTBQuestsTheme.COMPLETED, () -> new MessageCompleteInstantly(object.id).sendToServer()).setYesNo(I18n.format("ftbquests.gui.complete_instantly_q")));
 		}
+
+		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.copy_id"), GuiIcons.INFO, () -> setClipboardString(object.getCodeString())));
 	}
 
 	public static void displayError(ITextComponent error)
@@ -251,9 +247,9 @@ public class GuiQuestTree extends GuiBase
 		}
 		else if (key == Keyboard.KEY_TAB)
 		{
-			if (selectedChapter != null && !questFile.chapters.isEmpty())
+			if (selectedChapter != null && !file.chapters.isEmpty())
 			{
-				selectChapter(questFile.chapters.get((selectedChapter.getIndex() + 1) % questFile.chapters.size()));
+				selectChapter(file.chapters.get((selectedChapter.getIndex() + 1) % file.chapters.size()));
 			}
 
 			return true;
@@ -262,14 +258,14 @@ public class GuiQuestTree extends GuiBase
 		{
 			int i = keyChar - '1';
 
-			if (i < questFile.chapters.size())
+			if (i < file.chapters.size())
 			{
-				selectChapter(questFile.chapters.get(i));
+				selectChapter(file.chapters.get(i));
 			}
 
 			return true;
 		}
-		else if (selectedChapter != null && questFile.canEdit() && isCtrlKeyDown() && !isShiftKeyDown() && !isAltKeyDown())
+		else if (selectedChapter != null && file.canEdit() && isCtrlKeyDown() && !isShiftKeyDown() && !isAltKeyDown())
 		{
 			switch (key)
 			{
@@ -298,7 +294,7 @@ public class GuiQuestTree extends GuiBase
 			{
 				if (now - lastShiftPress <= 400L)
 				{
-					ConfigQuestObject c = new ConfigQuestObject(questFile, null, Arrays.asList(QuestObjectType.CHAPTER, QuestObjectType.QUEST));
+					ConfigQuestObject c = new ConfigQuestObject(file, null, Arrays.asList(QuestObjectType.CHAPTER, QuestObjectType.QUEST));
 					GuiSelectQuestObject gui = new GuiSelectQuestObject(c, this, () -> {
 						QuestObjectBase o = c.getObject();
 
@@ -334,9 +330,9 @@ public class GuiQuestTree extends GuiBase
 			selectChapter(null);
 		}
 
-		if (selectedChapter == null && !questFile.chapters.isEmpty())
+		if (selectedChapter == null && !file.chapters.isEmpty())
 		{
-			selectChapter(questFile.chapters.get(0));
+			selectChapter(file.chapters.get(0));
 		}
 
 		super.drawBackground(theme, x, y, w, h);

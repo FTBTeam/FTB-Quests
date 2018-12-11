@@ -58,7 +58,11 @@ public class CommandImportRewardsFromChest extends CommandBase
 	@Override
 	public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos)
 	{
-		if (args.length == 1)
+		if (args.length == 3)
+		{
+			return getListOfStringsMatchingLastWord(args, "true", "false");
+		}
+		else if (args.length == 1)
 		{
 			List<String> list = new ArrayList<>(ServerQuestFile.INSTANCE.rewardTables.size() + 1);
 
@@ -90,7 +94,8 @@ public class CommandImportRewardsFromChest extends CommandBase
 			throw FTBLib.error(sender, "commands.ftbquests.import_rewards_from_chest.invalid_id", args[0]);
 		}
 
-		int weight = args.length >= 2 ? parseInt(args[0], 1, Integer.MAX_VALUE) : 1;
+		int weight = args.length >= 2 ? parseInt(args[1], 1, Integer.MAX_VALUE) : 1;
+		boolean replace = args.length >= 3 && parseBoolean(args[2]);
 
 		RayTraceResult ray = MathUtils.rayTrace(player, false);
 
@@ -104,6 +109,11 @@ public class CommandImportRewardsFromChest extends CommandBase
 
 				if (handler != null)
 				{
+					if (replace)
+					{
+						table.rewards.clear();
+					}
+
 					int r = 0;
 
 					for (int i = 0; i < handler.getSlots(); i++)
