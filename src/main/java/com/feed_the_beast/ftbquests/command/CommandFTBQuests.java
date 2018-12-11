@@ -22,7 +22,7 @@ public class CommandFTBQuests extends CommandTreeBase
 
 		if (Loader.isModLoaded("projecte"))
 		{
-			//addSubcommand(new CommandWeighFromEMC());
+			addSubcommand(new CommandWeighFromEMC());
 		}
 	}
 

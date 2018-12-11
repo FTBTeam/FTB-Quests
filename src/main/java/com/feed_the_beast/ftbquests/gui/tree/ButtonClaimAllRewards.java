@@ -31,15 +31,15 @@ public class ButtonClaimAllRewards extends ButtonTab
 	{
 		int r = 0;
 
-		for (QuestChapter chapter : treeGui.questFile.chapters)
+		for (QuestChapter chapter : treeGui.file.chapters)
 		{
 			for (Quest quest : chapter.quests)
 			{
-				if (quest.isComplete(treeGui.questFile.self))
+				if (quest.isComplete(treeGui.file.self))
 				{
 					for (QuestReward reward : quest.rewards)
 					{
-						if (!treeGui.questFile.isRewardClaimed(reward))
+						if (!treeGui.file.isRewardClaimed(reward))
 						{
 							r++;
 						}

@@ -60,7 +60,7 @@ public class PanelQuestRight extends Panel
 				}
 			}
 
-			if (treeGui.questFile.canEdit())
+			if (treeGui.file.canEdit())
 			{
 				afterText.add(new ButtonAddReward(this, quest));
 			}

@@ -7,6 +7,7 @@ import com.feed_the_beast.ftblib.lib.util.misc.NameMap;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import net.minecraft.entity.EntityList;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -15,16 +16,21 @@ import net.minecraft.stats.StatList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraftforge.fml.common.registry.EntityEntry;
+import net.minecraftforge.fml.common.registry.ForgeRegistries;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * @author LatvianModder
  */
 public class KillTask extends QuestTask
 {
-	public EntityList.EntityEggInfo entity = EntityList.ENTITY_EGGS.get(new ResourceLocation("minecraft:zombie"));
-	public int value = 100;
+	public static final ResourceLocation ZOMBIE = new ResourceLocation("minecraft:zombie");
+	public ResourceLocation entity = ZOMBIE;
+	public long value = 100L;
 
 	public static StatBase get(String id)
 	{
@@ -59,28 +65,22 @@ public class KillTask extends QuestTask
 	@Override
 	public String getMaxProgressString()
 	{
-		return Integer.toString(value);
+		return Long.toUnsignedString(value);
 	}
 
 	@Override
 	public void writeData(NBTTagCompound nbt)
 	{
 		super.writeData(nbt);
-		nbt.setString("entity", entity.spawnedID.toString());
-		nbt.setInteger("value", value);
+		nbt.setString("entity", entity.toString());
+		nbt.setLong("value", value);
 	}
 
 	@Override
 	public void readData(NBTTagCompound nbt)
 	{
 		super.readData(nbt);
-		entity = EntityList.ENTITY_EGGS.get(new ResourceLocation(nbt.getString("entity")));
-
-		if (entity == null)
-		{
-			entity = EntityList.ENTITY_EGGS.get(new ResourceLocation("minecraft:zombie"));
-		}
-
+		entity = new ResourceLocation(nbt.getString("entity"));
 		value = nbt.getInteger("value");
 	}
 
@@ -88,21 +88,15 @@ public class KillTask extends QuestTask
 	public void writeNetData(DataOut data)
 	{
 		super.writeNetData(data);
-		data.writeString(entity.spawnedID.toString());
-		data.writeVarInt(value);
+		data.writeString(entity.toString());
+		data.writeVarLong(value);
 	}
 
 	@Override
 	public void readNetData(DataIn data)
 	{
 		super.readNetData(data);
-		entity = EntityList.ENTITY_EGGS.get(new ResourceLocation(data.readString()));
-
-		if (entity == null)
-		{
-			entity = EntityList.ENTITY_EGGS.get(new ResourceLocation("minecraft:zombie"));
-		}
-
+		entity = new ResourceLocation(data.readString());
 		value = data.readVarInt();
 	}
 
@@ -110,14 +104,24 @@ public class KillTask extends QuestTask
 	public void getConfig(ConfigGroup config)
 	{
 		super.getConfig(config);
-		config.addEnum("entity", () -> entity, v -> entity = v, NameMap.create(EntityList.ENTITY_EGGS.get(new ResourceLocation("minecraft:zombie")), NameMap.ObjectProperties.withName((sender, s) -> new TextComponentTranslation("entity." + EntityList.getTranslationName(s.spawnedID) + ".name")), EntityList.ENTITY_EGGS.values().toArray(new EntityList.EntityEggInfo[0])));
-		config.addInt("value", () -> value, v -> value = v, 1, 1, Integer.MAX_VALUE);
+		List<ResourceLocation> ids = new ArrayList<>();
+
+		for (EntityEntry entry : ForgeRegistries.ENTITIES)
+		{
+			if (EntityLivingBase.class.isAssignableFrom(entry.getEntityClass()))
+			{
+				ids.add(entry.getRegistryName());
+			}
+		}
+
+		config.addEnum("entity", () -> entity, v -> entity = v, NameMap.create(ZOMBIE, NameMap.ObjectProperties.withName((sender, s) -> new TextComponentTranslation("entity." + EntityList.getTranslationName(s) + ".name")), ids.toArray(new ResourceLocation[0])));
+		config.addLong("value", () -> value, v -> value = v, 1L, 1L, Long.MAX_VALUE);
 	}
 
 	@Override
 	public ITextComponent getAltDisplayName()
 	{
-		return new TextComponentTranslation("entity." + EntityList.getTranslationName(entity.spawnedID) + ".name");
+		return new TextComponentTranslation("entity." + EntityList.getTranslationName(entity) + ".name");
 	}
 
 	@Override
@@ -136,30 +140,21 @@ public class KillTask extends QuestTask
 		@Override
 		public String getProgressString()
 		{
-			return Integer.toString((int) progress);
+			return Long.toUnsignedString(progress);
+		}
+
+		public void kill(EntityLivingBase entity)
+		{
+			if (progress < task.value && task.entity.equals(EntityList.getKey(entity)))
+			{
+				progress++;
+				sync();
+			}
 		}
 
 		@Override
 		public boolean submitTask(EntityPlayerMP player, Collection<ItemStack> itemsToCheck, boolean simulate)
 		{
-			if (progress >= task.value)
-			{
-				return false;
-			}
-
-			int set = Math.min(task.value, player.getStatFile().readStat(task.entity.killEntityStat));
-
-			if (set > progress)
-			{
-				if (!simulate)
-				{
-					progress = set;
-					sync();
-				}
-
-				return true;
-			}
-
 			return false;
 		}
 	}

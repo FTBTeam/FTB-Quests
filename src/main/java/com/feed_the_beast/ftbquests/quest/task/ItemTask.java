@@ -71,7 +71,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 
 	public final List<ItemStack> items;
 	public long count;
-	public boolean checkOnly;
+	public boolean consumeItems;
 	public boolean ignoreDamage;
 	public NBTMatchingMode nbtMode;
 
@@ -79,7 +79,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 	{
 		super(quest);
 		items = new ArrayList<>();
-		checkOnly = quest.chapter.file.defaultCheckOnly;
+		consumeItems = quest.chapter.file.defaultConsumeItems;
 		nbtMode = NBTMatchingMode.MATCH;
 	}
 
@@ -124,9 +124,9 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 			nbt.setLong("count", count);
 		}
 
-		if (checkOnly != quest.chapter.file.defaultCheckOnly)
+		if (consumeItems != quest.chapter.file.defaultConsumeItems)
 		{
-			nbt.setBoolean("check_only", checkOnly);
+			nbt.setBoolean("consume_items", consumeItems);
 		}
 
 		if (ignoreDamage)
@@ -176,7 +176,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 			count = 1;
 		}
 
-		checkOnly = nbt.hasKey("check_only") ? nbt.getBoolean("check_only") : quest.chapter.file.defaultCheckOnly;
+		consumeItems = nbt.hasKey("consume_items") ? nbt.getBoolean("consume_items") : nbt.hasKey("check_only") ? nbt.getBoolean("check_only") : quest.chapter.file.defaultConsumeItems;
 		ignoreDamage = nbt.getBoolean("ignore_damage");
 		nbtMode = NBTMatchingMode.NAME_MAP.get(nbt.getByte("ignore_nbt"));
 	}
@@ -188,7 +188,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 		data.writeCollection(items, DataOut.ITEM_STACK);
 		data.writeVarLong(count);
 		int flags = 0;
-		flags = Bits.setFlag(flags, 1, checkOnly);
+		flags = Bits.setFlag(flags, 1, consumeItems);
 		flags = Bits.setFlag(flags, 2, ignoreDamage);
 		flags = Bits.setFlag(flags, 4, nbtMode != NBTMatchingMode.MATCH);
 		flags = Bits.setFlag(flags, 8, nbtMode == NBTMatchingMode.CONTAIN);
@@ -202,7 +202,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 		data.readCollection(items, DataIn.ITEM_STACK);
 		count = data.readVarLong();
 		int flags = data.readVarInt();
-		checkOnly = Bits.getFlag(flags, 1);
+		consumeItems = Bits.getFlag(flags, 1);
 		ignoreDamage = Bits.getFlag(flags, 2);
 		nbtMode = Bits.getFlag(flags, 4) ? Bits.getFlag(flags, 8) ? NBTMatchingMode.CONTAIN : NBTMatchingMode.IGNORE : NBTMatchingMode.MATCH;
 	}
@@ -320,7 +320,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 		super.getConfig(config);
 		config.addList("items", items, new ConfigItemStack(ItemStack.EMPTY, true), v -> new ConfigItemStack(v, true), ConfigItemStack::getStack);
 		config.addLong("count", () -> count, v -> count = v, 1, 1, Long.MAX_VALUE);
-		config.addBool("check_only", () -> checkOnly, v -> checkOnly = v, false).setCanEdit(!quest.canRepeat);
+		config.addBool("consume_items", () -> consumeItems, v -> consumeItems = v, quest.chapter.file.defaultConsumeItems).setCanEdit(!quest.canRepeat);
 		config.addBool("ignore_damage", () -> ignoreDamage, v -> ignoreDamage = v, false);
 		config.addEnum("nbt_mode", () -> nbtMode, v -> nbtMode = v, NBTMatchingMode.NAME_MAP);
 	}
@@ -328,12 +328,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 	@Override
 	public boolean canInsertItem()
 	{
-		if (quest.canRepeat)
-		{
-			return true;
-		}
-
-		return !checkOnly;
+		return quest.canRepeat || consumeItems;
 	}
 
 	@Override

@@ -22,20 +22,20 @@ public class PanelOtherButtons extends Panel
 
 	private boolean hasRewards()
 	{
-		if (treeGui.questFile.self == null)
+		if (treeGui.file.self == null)
 		{
 			return false;
 		}
 
-		for (QuestChapter chapter : treeGui.questFile.chapters)
+		for (QuestChapter chapter : treeGui.file.chapters)
 		{
 			for (Quest quest : chapter.quests)
 			{
-				if (quest.isComplete(treeGui.questFile.self))
+				if (quest.isComplete(treeGui.file.self))
 				{
 					for (QuestReward reward : quest.rewards)
 					{
-						if (!treeGui.questFile.isRewardClaimed(reward))
+						if (!treeGui.file.isRewardClaimed(reward))
 						{
 							return true;
 						}
@@ -50,6 +50,11 @@ public class PanelOtherButtons extends Panel
 	@Override
 	public void addWidgets()
 	{
+		if (treeGui.file.canEdit())
+		{
+			add(new ButtonAddChapter(this));
+		}
+
 		if (hasRewards())
 		{
 			add(new ButtonClaimAllRewards(this));
@@ -60,14 +65,14 @@ public class PanelOtherButtons extends Panel
 			add(new ButtonOpenShop(this));
 		}
 
-		if (!treeGui.questFile.emergencyItems.isEmpty() && (treeGui.questFile.self != null || treeGui.questFile.canEdit()))
+		if (!treeGui.file.emergencyItems.isEmpty() && (treeGui.file.self != null || treeGui.file.canEdit()))
 		{
 			add(new ButtonEmergencyItems(this));
 		}
 
 		add(new ButtonWiki(this));
 
-		if (treeGui.questFile.canEdit())
+		if (treeGui.file.canEdit())
 		{
 			add(new ButtonEditSettings(this));
 		}

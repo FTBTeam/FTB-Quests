@@ -53,7 +53,7 @@ public class PanelQuestLeft extends Panel
 				add(new ButtonTask(this, task));
 			}
 
-			if (treeGui.questFile.canEdit())
+			if (treeGui.file.canEdit())
 			{
 				add(new ButtonAddTask(this, selectedQuest));
 			}
@@ -87,7 +87,7 @@ public class PanelQuestLeft extends Panel
 
 			List<String> dependants = new ArrayList<>();
 
-			for (QuestChapter chapter : treeGui.questFile.chapters)
+			for (QuestChapter chapter : treeGui.file.chapters)
 			{
 				for (Quest quest : chapter.quests)
 				{
