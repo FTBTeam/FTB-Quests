@@ -1,7 +1,6 @@
 package com.feed_the_beast.ftbquests.gui.tree;
 
 import com.feed_the_beast.ftblib.lib.gui.Panel;
-import com.feed_the_beast.ftblib.lib.gui.Widget;
 import com.feed_the_beast.ftblib.lib.gui.WidgetLayout;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
 
@@ -42,12 +41,12 @@ public class PanelChapters extends Panel
 
 		if (!widgets.isEmpty())
 		{
-			int w = width / widgets.size();
+			/*int w = width / widgets.size();
 
 			for (Widget widget : widgets)
 			{
 				widget.setWidth(w);
-			}
+			}*/
 
 			align(new WidgetLayout.Horizontal(0, 1, 0));
 		}
