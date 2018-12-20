@@ -18,6 +18,7 @@ import com.feed_the_beast.ftbquests.net.edit.MessageEditObjectDirect;
 import com.feed_the_beast.ftbquests.quest.loot.LootCrate;
 import com.feed_the_beast.ftbquests.quest.loot.RewardTable;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.util.text.TextFormatting;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +39,11 @@ public class GuiRewardTables extends GuiButtonListBase
 			super(panel, t.getDisplayName().getFormattedText(), t.getIcon());
 			table = t;
 			setHeight(14);
+
+			if (table.lootCrate != null)
+			{
+				title = TextFormatting.YELLOW + title;
+			}
 		}
 
 		@Override
@@ -88,10 +94,13 @@ public class GuiRewardTables extends GuiButtonListBase
 							table.lootCrate.drops.boss = 190;
 							break;
 					}
+
+					title = TextFormatting.YELLOW + table.getDisplayName().getFormattedText();
 				}
 				else
 				{
 					table.lootCrate = null;
+					title = table.getDisplayName().getFormattedText();
 				}
 
 				new MessageEditObjectDirect(table).sendToServer();
