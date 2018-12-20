@@ -63,6 +63,11 @@ public final class QuestRewardType extends IForgeRegistryEntry.Impl<QuestRewardT
 
 		if (type == null)
 		{
+			if (id.equals("ftbquests:ftb_money"))
+			{
+				return createReward(quest, "ftbmoney:money");
+			}
+
 			return null;
 		}
 
@@ -119,7 +124,7 @@ public final class QuestRewardType extends IForgeRegistryEntry.Impl<QuestRewardT
 
 	public String getTypeForNBT()
 	{
-		return getRegistryName().getNamespace().equals(FTBQuests.MOD_ID) ? getRegistryName().getPath() : toString();
+		return getRegistryName().getNamespace().equals(FTBQuests.MOD_ID) ? getRegistryName().getPath() : getRegistryName().toString();
 	}
 
 	public QuestRewardType setDisplayName(ITextComponent name)
