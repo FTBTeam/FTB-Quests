@@ -1,39 +1,31 @@
 package com.feed_the_beast.ftbquests.item;
 
-import com.feed_the_beast.ftblib.lib.item.ItemEntry;
+import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.gui.GuiRewardNotifications;
-import com.feed_the_beast.ftbquests.net.MessageDisplayItemRewardToast;
-import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
-import com.feed_the_beast.ftbquests.quest.reward.RewardTable;
-import com.feed_the_beast.ftbquests.quest.reward.WeightedReward;
-import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
-import net.minecraft.client.resources.I18n;
+import com.feed_the_beast.ftbquests.quest.QuestFile;
+import com.feed_the_beast.ftbquests.quest.loot.LootCrate;
+import com.feed_the_beast.ftbquests.quest.loot.RewardTable;
+import com.feed_the_beast.ftbquests.quest.loot.WeightedReward;
 import net.minecraft.client.util.ITooltipFlag;
+import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.SoundEvents;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.InventoryBasic;
 import net.minecraft.item.EnumRarity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagString;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumParticleTypes;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
-import net.minecraft.world.storage.loot.LootContext;
-import net.minecraft.world.storage.loot.LootTable;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import net.minecraftforge.items.ItemHandlerHelper;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -41,105 +33,60 @@ import java.util.List;
 /**
  * @author LatvianModder
  */
-public class ItemLootcrate extends Item
+public class ItemLootCrate extends Item
 {
-	public final LootRarity rarity;
-
-	public ItemLootcrate(LootRarity r)
+	@Nullable
+	public static LootCrate getCrate(@Nullable World world, ItemStack stack)
 	{
-		rarity = r;
+		if (stack.hasTagCompound())
+		{
+			QuestFile file = FTBQuests.PROXY.getQuestFile(world);
+			return file == null ? null : file.getLootCrate(stack.getTagCompound().getString("type"));
+		}
+
+		return null;
 	}
 
 	@Override
 	public ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer player, EnumHand hand)
 	{
 		ItemStack stack = player.getHeldItem(hand);
+		LootCrate crate = getCrate(world, stack);
+
+		if (crate == null)
+		{
+			return new ActionResult<>(EnumActionResult.SUCCESS, stack);
+		}
 
 		int size = player.isSneaking() ? stack.getCount() : 1;
 
 		if (!world.isRemote)
 		{
-			NBTTagCompound nbt = stack.getTagCompound();
-
-			if (nbt != null && nbt.hasKey("use_reward_table") ? nbt.getBoolean("use_reward_table") : ServerQuestFile.INSTANCE.lootCrateTables[rarity.ordinal()] != 0)
+			if (crate.table != null)
 			{
-				int tableid = nbt != null ? nbt.getInteger("reward_table") : 0;
+				int totalWeight = crate.table.getTotalWeight(true);
 
-				if (tableid == 0)
+				if (totalWeight > 0)
 				{
-					tableid = ServerQuestFile.INSTANCE.lootCrateTables[rarity.ordinal()];
-				}
-
-				RewardTable table = ServerQuestFile.INSTANCE.getRewardTable(tableid);
-
-				if (table != null)
-				{
-					int totalWeight = table.getTotalWeight(true);
-
-					if (totalWeight > 0)
+					for (int j = 0; j < size * crate.table.lootSize; j++)
 					{
-						for (int j = 0; j < size * table.lootSize; j++)
+						int number = player.world.rand.nextInt(totalWeight) + 1;
+						int currentWeight = crate.table.emptyWeight;
+
+						if (currentWeight < number)
 						{
-							int number = player.world.rand.nextInt(totalWeight) + 1;
-							int currentWeight = table.emptyWeight;
-
-							if (currentWeight < number)
+							for (WeightedReward reward : crate.table.rewards)
 							{
-								for (WeightedReward reward : table.rewards)
-								{
-									currentWeight += reward.weight;
+								currentWeight += reward.weight;
 
-									if (currentWeight >= number)
-									{
-										reward.reward.claim((EntityPlayerMP) player);
-										break;
-									}
+								if (currentWeight >= number)
+								{
+									reward.reward.claim((EntityPlayerMP) player);
+									break;
 								}
 							}
 						}
 					}
-				}
-			}
-			else
-			{
-				int lootSize = nbt != null ? nbt.getShort("loot_size") & 0xFFFF : 0;
-
-				if (lootSize == 0)
-				{
-					lootSize = ServerQuestFile.INSTANCE.lootSize;
-				}
-
-				String lootTable = nbt != null ? nbt.getString("loot_table") : "";
-				ResourceLocation lootTableLocation = lootTable.isEmpty() ? ServerQuestFile.INSTANCE.lootTables[rarity.ordinal()] : new ResourceLocation(lootTable);
-
-				LootTable table = world.getLootTableManager().getLootTableFromLocation(lootTableLocation);
-				IInventory inventory = new InventoryBasic("", true, lootSize);
-				LootContext context = new LootContext.Builder((WorldServer) world).withLuck(player.getLuck()).withPlayer(player).build();
-				Object2IntOpenHashMap<ItemEntry> map = new Object2IntOpenHashMap<>();
-				map.defaultReturnValue(0);
-
-				for (int i = 0; i < size; i++)
-				{
-					table.fillInventory(inventory, world.rand, context);
-
-					for (int j = 0; j < lootSize; j++)
-					{
-						ItemStack stack1 = inventory.getStackInSlot(j);
-
-						if (!stack1.isEmpty())
-						{
-							ItemEntry entry = ItemEntry.get(stack1);
-							map.put(entry, map.getInt(entry) + stack1.getCount());
-							ItemHandlerHelper.giveItemToPlayer(player, stack1);
-						}
-					}
-
-					inventory.clear();
-				}
-
-				for (Object2IntOpenHashMap.Entry<ItemEntry> entry : map.object2IntEntrySet())
-				{
-					new MessageDisplayItemRewardToast(entry.getKey().getStack(entry.getIntValue(), false)).sendTo((EntityPlayerMP) player);
 				}
 			}
 
@@ -170,7 +117,15 @@ public class ItemLootcrate extends Item
 	@Override
 	public boolean hasEffect(ItemStack stack)
 	{
-		return rarity == LootRarity.RARE || rarity == LootRarity.EPIC || rarity == LootRarity.LEGENDARY;
+		LootCrate crate = getCrate(null, stack);
+		return crate != null && crate.glow;
+	}
+
+	@Override
+	public String getItemStackDisplayName(ItemStack stack)
+	{
+		LootCrate crate = getCrate(null, stack);
+		return crate != null && !crate.itemName.isEmpty() ? crate.itemName : super.getItemStackDisplayName(stack);
 	}
 
 	@Override
@@ -180,52 +135,57 @@ public class ItemLootcrate extends Item
 	}
 
 	@Override
+	public void getSubItems(CreativeTabs tab, NonNullList<ItemStack> items)
+	{
+		if (isInCreativeTab(tab))
+		{
+			QuestFile file = FTBQuests.PROXY.getQuestFile(null);
+			boolean hasItem = false;
+
+			if (file != null)
+			{
+				for (RewardTable table : file.rewardTables)
+				{
+					if (table.lootCrate != null)
+					{
+						hasItem = true;
+						ItemStack stack = new ItemStack(this);
+						stack.setTagInfo("type", new NBTTagString(table.lootCrate.stringID.isEmpty() ? table.toString() : table.lootCrate.stringID));
+						items.add(stack);
+					}
+				}
+			}
+
+			if (!hasItem)
+			{
+				items.add(new ItemStack(this));
+			}
+		}
+	}
+
+	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack stack, @Nullable World world, List<String> tooltip, ITooltipFlag flag)
 	{
-		tooltip.add(rarity.getColor() + I18n.format(rarity.getTranslationKey()));
-
-		if (!ClientQuestFile.exists())
+		if (world == null || !ClientQuestFile.exists())
 		{
 			return;
 		}
 
-		NBTTagCompound nbt = stack.getTagCompound();
+		LootCrate crate = getCrate(world, stack);
 
-		if (nbt != null && nbt.hasKey("use_reward_table") ? nbt.getBoolean("use_reward_table") : ClientQuestFile.INSTANCE.lootCrateTables[rarity.ordinal()] != 0)
+		if (crate != null)
 		{
-			int tableid = nbt != null ? nbt.getInteger("reward_table") : 0;
-
-			if (tableid == 0)
+			if (crate.itemName.isEmpty())
 			{
-				tableid = ClientQuestFile.INSTANCE.lootCrateTables[rarity.ordinal()];
+				tooltip.add(crate.table.getDisplayName().getFormattedText());
 			}
 
-			RewardTable table = ClientQuestFile.INSTANCE.getRewardTable(tableid);
-
-			if (table != null)
-			{
-				table.addMouseOverText(tooltip, true, true);
-			}
+			crate.table.addMouseOverText(tooltip, true, true);
 		}
-
-		if (ClientQuestFile.INSTANCE.canEdit())
+		else if (stack.hasTagCompound() && stack.getTagCompound().hasKey("type"))
 		{
-			String lootTable = nbt != null ? nbt.getString("loot_table") : "";
-
-			if (lootTable.isEmpty())
-			{
-				lootTable = ClientQuestFile.INSTANCE.lootTables[rarity.ordinal()].toString();
-			}
-
-			int lootSize = nbt != null ? nbt.getShort("loot_size") & 0xFFFF : 0;
-
-			if (lootSize == 0)
-			{
-				lootSize = ClientQuestFile.INSTANCE.lootSize;
-			}
-
-			tooltip.add(TextFormatting.DARK_GRAY + lootTable + " x " + lootSize);
+			tooltip.add(stack.getTagCompound().getString("type"));
 		}
 	}
 }

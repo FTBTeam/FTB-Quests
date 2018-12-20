@@ -7,8 +7,8 @@ import com.feed_the_beast.ftblib.lib.gui.Theme;
 import com.feed_the_beast.ftblib.lib.gui.misc.GuiButtonListBase;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.net.MessageClaimChoiceReward;
+import com.feed_the_beast.ftbquests.quest.loot.WeightedReward;
 import com.feed_the_beast.ftbquests.quest.reward.ChoiceReward;
-import com.feed_the_beast.ftbquests.quest.reward.WeightedReward;
 import net.minecraft.client.resources.I18n;
 
 import java.util.List;

@@ -9,15 +9,20 @@ import com.feed_the_beast.ftblib.lib.gui.SimpleTextButton;
 import com.feed_the_beast.ftblib.lib.gui.Theme;
 import com.feed_the_beast.ftblib.lib.gui.misc.GuiButtonListBase;
 import com.feed_the_beast.ftblib.lib.gui.misc.GuiEditConfigValue;
+import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.gui.tree.GuiQuestTree;
 import com.feed_the_beast.ftbquests.net.edit.MessageCreateObject;
-import com.feed_the_beast.ftbquests.quest.reward.RewardTable;
+import com.feed_the_beast.ftbquests.net.edit.MessageEditObjectDirect;
+import com.feed_the_beast.ftbquests.quest.loot.LootCrate;
+import com.feed_the_beast.ftbquests.quest.loot.RewardTable;
 import net.minecraft.client.resources.I18n;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author LatvianModder
@@ -41,6 +46,63 @@ public class GuiRewardTables extends GuiButtonListBase
 			GuiHelper.playClickSound();
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
 			GuiQuestTree.addObjectMenuItems(contextMenu, GuiRewardTables.this, table);
+			contextMenu.add(new ContextMenuItem(I18n.format("item.ftbquests.lootcrate.name"), GuiIcons.ACCEPT, () -> {
+				if (table.lootCrate == null)
+				{
+					table.lootCrate = new LootCrate(table);
+					Matcher matcher = Pattern.compile("[^a-z0-9_]").matcher(table.getDisplayName().getUnformattedText().trim().toLowerCase());
+					Matcher matcher1 = Pattern.compile("_{2,}").matcher(matcher.replaceAll("_"));
+					table.lootCrate.stringID = matcher1.replaceAll("_");
+
+					switch (table.lootCrate.stringID)
+					{
+						case "common":
+							table.lootCrate.color = Color4I.rgb(0x92999A);
+							table.lootCrate.drops.passive = 350;
+							table.lootCrate.drops.monster = 10;
+							table.lootCrate.drops.boss = 0;
+							break;
+						case "uncommon":
+							table.lootCrate.color = Color4I.rgb(0x37AA69);
+							table.lootCrate.drops.passive = 200;
+							table.lootCrate.drops.monster = 90;
+							table.lootCrate.drops.boss = 0;
+							break;
+						case "rare":
+							table.lootCrate.color = Color4I.rgb(0x0094FF);
+							table.lootCrate.drops.passive = 50;
+							table.lootCrate.drops.monster = 200;
+							table.lootCrate.drops.boss = 0;
+							break;
+						case "epic":
+							table.lootCrate.color = Color4I.rgb(0x8000FF);
+							table.lootCrate.drops.passive = 9;
+							table.lootCrate.drops.monster = 10;
+							table.lootCrate.drops.boss = 10;
+							break;
+						case "legendary":
+							table.lootCrate.color = Color4I.rgb(0xFFC147);
+							table.lootCrate.glow = true;
+							table.lootCrate.drops.passive = 1;
+							table.lootCrate.drops.monster = 1;
+							table.lootCrate.drops.boss = 190;
+							break;
+					}
+				}
+				else
+				{
+					table.lootCrate = null;
+				}
+
+				new MessageEditObjectDirect(table).sendToServer();
+			})
+			{
+				@Override
+				public void drawIcon(Theme theme, int x, int y, int w, int h)
+				{
+					(table.lootCrate != null ? GuiIcons.ACCEPT : GuiIcons.ACCEPT_GRAY).draw(x, y, w, h);
+				}
+			});
 			getGui().openContextMenu(contextMenu);
 		}
 

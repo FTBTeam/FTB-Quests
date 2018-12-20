@@ -77,7 +77,7 @@ public class RenderProgressScreen extends TileEntitySpecialRenderer<TileProgress
 		font.setUnicodeFlag(true);
 
 		int size = Math.min(screen.width * 2, screen.height);
-		GlStateManager.translate(-size / 2F, -size, -0.01F);
+		GlStateManager.translate(-size / 2F, -size, -0.001F);
 		GlStateManager.scale(size + 1F, size + 1F, 1F);
 
 		if (!screen.fullscreen)
@@ -164,7 +164,7 @@ public class RenderProgressScreen extends TileEntitySpecialRenderer<TileProgress
 					double rh = 0.75D / (double) s;
 
 					GlStateManager.pushMatrix();
-					GlStateManager.translate(rx, ry, -0.01F);
+					GlStateManager.translate(rx, ry, -0.009F);
 					GlStateManager.scale(rw, rh, 1F);
 					quest.getIcon().draw3D(Icon.EMPTY);
 					GlStateManager.popMatrix();

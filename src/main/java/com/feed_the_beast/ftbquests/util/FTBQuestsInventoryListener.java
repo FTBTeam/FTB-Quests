@@ -28,7 +28,7 @@ public class FTBQuestsInventoryListener implements IContainerListener
 		player = p;
 	}
 
-	public void detect(Collection<ItemStack> itemsToCheck)
+	public static void detect(EntityPlayerMP player, Collection<ItemStack> itemsToCheck)
 	{
 		//FTBQuests.LOGGER.info("Running auto-completion with list: " + itemsToCheck);
 
@@ -60,11 +60,11 @@ public class FTBQuestsInventoryListener implements IContainerListener
 
 		if (redo)
 		{
-			detect(Collections.emptyList());
+			detect(player, Collections.emptyList());
 		}
 	}
 
-	private boolean hasSubmitTasks(Quest quest)
+	private static boolean hasSubmitTasks(Quest quest)
 	{
 		for (QuestTask task : quest.tasks)
 		{
@@ -80,7 +80,7 @@ public class FTBQuestsInventoryListener implements IContainerListener
 	@Override
 	public void sendAllContents(Container container, NonNullList<ItemStack> itemsList)
 	{
-		detect(Collections.emptyList());
+		detect(player, Collections.emptyList());
 	}
 
 	@Override
@@ -88,7 +88,7 @@ public class FTBQuestsInventoryListener implements IContainerListener
 	{
 		if (!stack.isEmpty() && container.getSlot(index).inventory == player.inventory)
 		{
-			detect(Collections.singleton(stack));
+			detect(player, Collections.singleton(stack));
 		}
 	}
 

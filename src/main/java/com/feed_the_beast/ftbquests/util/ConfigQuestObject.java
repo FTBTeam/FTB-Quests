@@ -132,7 +132,7 @@ public class ConfigQuestObject extends ConfigValue
 			i |= type.getFlag();
 		}
 
-		data.writeByte(i);
+		data.writeVarInt(i);
 		data.writeInt(getInt());
 	}
 
@@ -141,7 +141,7 @@ public class ConfigQuestObject extends ConfigValue
 	{
 		types.clear();
 
-		int i = data.readUnsignedByte();
+		int i = data.readVarInt();
 
 		for (QuestObjectType type : QuestObjectType.ALL)
 		{

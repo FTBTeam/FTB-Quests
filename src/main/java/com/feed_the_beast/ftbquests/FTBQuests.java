@@ -93,6 +93,7 @@ public class FTBQuests
 	{
 		QuestTaskType.createRegistry();
 		QuestRewardType.createRegistry();
+		PROXY.postInit();
 	}
 
 	@Mod.EventHandler

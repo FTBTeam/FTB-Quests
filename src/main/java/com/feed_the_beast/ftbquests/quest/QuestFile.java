@@ -13,19 +13,20 @@ import com.feed_the_beast.ftblib.lib.math.Ticks;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.events.ObjectCompletedEvent;
 import com.feed_the_beast.ftbquests.item.ItemMissing;
-import com.feed_the_beast.ftbquests.item.LootRarity;
 import com.feed_the_beast.ftbquests.net.MessageDisplayCompletionToast;
+import com.feed_the_beast.ftbquests.quest.loot.EntityWeight;
+import com.feed_the_beast.ftbquests.quest.loot.LootCrate;
+import com.feed_the_beast.ftbquests.quest.loot.RewardTable;
 import com.feed_the_beast.ftbquests.quest.reward.FTBQuestsRewards;
 import com.feed_the_beast.ftbquests.quest.reward.ItemReward;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
 import com.feed_the_beast.ftbquests.quest.reward.QuestRewardType;
-import com.feed_the_beast.ftbquests.quest.reward.RewardTable;
 import com.feed_the_beast.ftbquests.quest.task.FTBQuestsTasks;
 import com.feed_the_beast.ftbquests.quest.task.QuestTask;
 import com.feed_the_beast.ftbquests.quest.task.QuestTaskType;
-import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
@@ -34,7 +35,6 @@ import net.minecraft.nbt.NBTPrimitive;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.common.util.Constants;
@@ -42,11 +42,9 @@ import net.minecraftforge.registries.ForgeRegistry;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
-import java.util.regex.Pattern;
+import java.util.Random;
 
 /**
  * @author LatvianModder
@@ -65,15 +63,12 @@ public abstract class QuestFile extends QuestObject
 
 	public final List<ItemStack> emergencyItems;
 	public Ticks emergencyItemsCooldown;
-	public final ResourceLocation[] lootTables;
 	public int fileVersion;
-	public int lootSize;
 	public boolean defaultRewardTeam;
 	public boolean defaultConsumeItems;
 	public EnumQuestShape defaultShape;
-	public boolean entityLootEnabled;
-	public EntityLootTable entityLootPassive, entityLootMonster, entityLootBoss;
-	public final int[] lootCrateTables;
+	public boolean dropLootCrates;
+	public final EntityWeight lootCrateNoDrop;
 
 	public QuestFile()
 	{
@@ -91,22 +86,14 @@ public abstract class QuestFile extends QuestObject
 		emergencyItems.add(new ItemStack(Items.APPLE));
 		emergencyItemsCooldown = Ticks.MINUTE.x(5);
 
-		lootTables = new ResourceLocation[LootRarity.VALUES.length];
-
-		for (LootRarity rarity : LootRarity.VALUES)
-		{
-			lootTables[rarity.ordinal()] = rarity.getLootTable();
-		}
-
-		lootSize = 27;
 		defaultRewardTeam = false;
 		defaultConsumeItems = false;
 		defaultShape = EnumQuestShape.CIRCLE;
-		entityLootEnabled = false;
-		entityLootPassive = new EntityLootTable(4000, 350, 200, 50, 9, 1);
-		entityLootMonster = new EntityLootTable(600, 10, 90, 200, 10, 1);
-		entityLootBoss = new EntityLootTable(0, 0, 0, 0, 10, 190);
-		lootCrateTables = new int[LootRarity.VALUES.length];
+		dropLootCrates = false;
+		lootCrateNoDrop = new EntityWeight();
+		lootCrateNoDrop.passive = 4000;
+		lootCrateNoDrop.monster = 600;
+		lootCrateNoDrop.boss = 0;
 	}
 
 	public abstract boolean isClient();
@@ -338,6 +325,24 @@ public abstract class QuestFile extends QuestObject
 		return object instanceof RewardTable ? (RewardTable) object : null;
 	}
 
+	@Nullable
+	public LootCrate getLootCrate(String id)
+	{
+		if (!id.startsWith("#"))
+		{
+			for (RewardTable table : rewardTables)
+			{
+				if (table.lootCrate != null && table.lootCrate.stringID.equals(id))
+				{
+					return table.lootCrate;
+				}
+			}
+		}
+
+		RewardTable table = getRewardTable(getID(id));
+		return table == null ? null : table.lootCrate;
+	}
+
 	public void refreshIDMap()
 	{
 		clearCachedData();
@@ -458,21 +463,11 @@ public abstract class QuestFile extends QuestObject
 		}
 
 		nbt.setString("emergency_items_cooldown", emergencyItemsCooldown.toString());
+		nbt.setBoolean("drop_loot_crates", dropLootCrates);
 
-		for (LootRarity rarity : LootRarity.VALUES)
-		{
-			if (!lootTables[rarity.ordinal()].equals(rarity.getLootTable()))
-			{
-				nbt.setString(rarity.getID() + "_loot_table", lootTables[rarity.ordinal()].toString());
-			}
-		}
-
-		nbt.setShort("loot_size", (short) lootSize);
-		nbt.setBoolean("entity_loot_enabled", entityLootEnabled);
-		nbt.setIntArray("entity_loot_passive", entityLootPassive.values);
-		nbt.setIntArray("entity_loot_monster", entityLootMonster.values);
-		nbt.setIntArray("entity_loot_boss", entityLootBoss.values);
-		nbt.setIntArray("loot_crate_tables", lootCrateTables);
+		NBTTagCompound nbt1 = new NBTTagCompound();
+		lootCrateNoDrop.writeData(nbt1);
+		nbt.setTag("loot_crate_no_drop", nbt1);
 	}
 
 	@Override
@@ -498,33 +493,11 @@ public abstract class QuestFile extends QuestObject
 
 		Ticks t = Ticks.get(nbt.getString("emergency_items_cooldown"));
 		emergencyItemsCooldown = t.hasTicks() ? t : Ticks.MINUTE.x(5);
+		dropLootCrates = nbt.getBoolean("drop_loot_crates");
 
-		for (LootRarity rarity : LootRarity.VALUES)
+		if (nbt.hasKey("loot_crate_no_drop"))
 		{
-			String s = nbt.getString(rarity.getID() + "_loot_table");
-			lootTables[rarity.ordinal()] = s.isEmpty() ? rarity.getLootTable() : new ResourceLocation(s);
-		}
-
-		lootSize = nbt.getShort("loot_size") & 0xFFFF;
-
-		if (lootSize == 0)
-		{
-			lootSize = 27;
-		}
-
-		entityLootEnabled = nbt.getBoolean("entity_loot_enabled");
-		entityLootPassive.set(nbt.getIntArray("entity_loot_passive"));
-		entityLootMonster.set(nbt.getIntArray("entity_loot_monster"));
-		entityLootBoss.set(nbt.getIntArray("entity_loot_boss"));
-		int[] ai = nbt.getIntArray("loot_crate_tables");
-
-		if (ai.length == LootRarity.VALUES.length)
-		{
-			System.arraycopy(ai, 0, lootCrateTables, 0, ai.length);
-		}
-		else
-		{
-			Arrays.fill(lootCrateTables, 0);
+			lootCrateNoDrop.readData(nbt.getCompoundTag("loot_crate_no_drop"));
 		}
 	}
 
@@ -851,30 +824,12 @@ public abstract class QuestFile extends QuestObject
 		super.writeNetData(data);
 		data.writeCollection(emergencyItems, DataOut.ITEM_STACK);
 		data.writeVarLong(emergencyItemsCooldown.ticks());
-
-		for (LootRarity rarity : LootRarity.VALUES)
-		{
-			data.writeResourceLocation(lootTables[rarity.ordinal()]);
-		}
-
-		data.writeVarInt(lootSize);
 		data.writeBoolean(defaultRewardTeam);
 		data.writeBoolean(defaultConsumeItems);
 		data.write(defaultShape, EnumQuestShape.NAME_MAP);
 
-		data.writeBoolean(entityLootEnabled);
-
-		for (int i = 0; i < LootRarity.VALUES.length + 1; i++)
-		{
-			data.writeVarInt(entityLootPassive.values[i]);
-			data.writeVarInt(entityLootMonster.values[i]);
-			data.writeVarInt(entityLootBoss.values[i]);
-		}
-
-		for (int i = 0; i < LootRarity.VALUES.length; i++)
-		{
-			data.writeVarInt(lootCrateTables[i]);
-		}
+		data.writeBoolean(dropLootCrates);
+		lootCrateNoDrop.writeNetData(data);
 	}
 
 	@Override
@@ -883,29 +838,11 @@ public abstract class QuestFile extends QuestObject
 		super.readNetData(data);
 		data.readCollection(emergencyItems, DataIn.ITEM_STACK);
 		emergencyItemsCooldown = Ticks.get(data.readVarLong());
-
-		for (LootRarity rarity : LootRarity.VALUES)
-		{
-			lootTables[rarity.ordinal()] = data.readResourceLocation();
-		}
-
-		lootSize = data.readVarInt();
 		defaultRewardTeam = data.readBoolean();
 		defaultConsumeItems = data.readBoolean();
 		defaultShape = data.read(EnumQuestShape.NAME_MAP);
-		entityLootEnabled = data.readBoolean();
-
-		for (int i = 0; i < LootRarity.VALUES.length + 1; i++)
-		{
-			entityLootPassive.values[i] = data.readVarInt();
-			entityLootMonster.values[i] = data.readVarInt();
-			entityLootBoss.values[i] = data.readVarInt();
-		}
-
-		for (int i = 0; i < LootRarity.VALUES.length; i++)
-		{
-			lootCrateTables[i] = data.readVarInt();
-		}
+		dropLootCrates = data.readBoolean();
+		lootCrateNoDrop.readNetData(data);
 	}
 
 	public final void writeNetDataFull(DataOut data)
@@ -1167,48 +1104,17 @@ public abstract class QuestFile extends QuestObject
 			}
 		}, new ConfigTimer(Ticks.MINUTE.x(5)));
 
+		config.addBool("drop_loot_crates", () -> dropLootCrates, v -> dropLootCrates = v, false);
+
 		ConfigGroup defaultsGroup = config.getGroup("defaults");
 		defaultsGroup.addBool("reward_team", () -> defaultRewardTeam, v -> defaultRewardTeam = v, false);
 		defaultsGroup.addBool("consume_items", () -> defaultConsumeItems, v -> defaultConsumeItems = v, false);
 		defaultsGroup.addEnum("quest_shape", () -> defaultShape, v -> defaultShape = v, EnumQuestShape.NAME_MAP);
 
-		ConfigGroup lootGroup = config.getGroup("loot");
-		lootGroup.addInt("size", () -> lootSize, v -> lootSize = v, 27, 1, 1024);
-
-		Pattern pattern = Pattern.compile("[a-z0-9_]+:.+");
-
-		for (LootRarity r : LootRarity.VALUES)
-		{
-			lootGroup.addString(r.getID(), () -> lootTables[r.ordinal()].toString(), v -> lootTables[r.ordinal()] = v.equals(r.getLootTable().toString()) ? r.getLootTable() : new ResourceLocation(v), r.getLootTable().toString(), pattern).setDisplayName(new TextComponentTranslation(r.getTranslationKey()));
-		}
-
-		ConfigGroup entityLoot = lootGroup.getGroup("entity");
-		entityLoot.addBool("enabled", () -> entityLootEnabled, v -> entityLootEnabled = v, false);
-		entityLootPassive.getConfig(entityLoot.getGroup("passive"));
-		entityLootMonster.getConfig(entityLoot.getGroup("monster"));
-		entityLootBoss.getConfig(entityLoot.getGroup("boss"));
-
-		Collection<QuestObjectType> rewardTableType = Collections.singleton(QuestObjectType.REWARD_TABLE);
-		ConfigGroup crateTables = lootGroup.getGroup("loot_crate_tables");
-
-		for (LootRarity rarity : LootRarity.VALUES)
-		{
-			crateTables.add(rarity.getID(), new ConfigQuestObject(this, getRewardTable(lootCrateTables[rarity.ordinal()]), rewardTableType)
-			{
-				@Override
-				public void setObject(@Nullable QuestObjectBase v)
-				{
-					lootCrateTables[rarity.ordinal()] = v == null ? 0 : v.id;
-				}
-
-				@Override
-				@Nullable
-				public QuestObjectBase getObject()
-				{
-					return getRewardTable(lootCrateTables[rarity.ordinal()]);
-				}
-			}, new ConfigQuestObject(this, null, rewardTableType)).setDisplayName(new TextComponentTranslation(rarity.getTranslationKey()));
-		}
+		ConfigGroup d = config.getGroup("loot_crate_no_drop");
+		d.addInt("passive", () -> lootCrateNoDrop.passive, v -> lootCrateNoDrop.passive = v, 0, 0, Integer.MAX_VALUE).setDisplayName(new TextComponentTranslation("ftbquests.loot.entitytype.passive"));
+		d.addInt("monster", () -> lootCrateNoDrop.monster, v -> lootCrateNoDrop.monster = v, 0, 0, Integer.MAX_VALUE).setDisplayName(new TextComponentTranslation("ftbquests.loot.entitytype.monster"));
+		d.addInt("boss", () -> lootCrateNoDrop.boss, v -> lootCrateNoDrop.boss = v, 0, 0, Integer.MAX_VALUE).setDisplayName(new TextComponentTranslation("ftbquests.loot.entitytype.boss"));
 	}
 
 	@Override
@@ -1282,5 +1188,45 @@ public abstract class QuestFile extends QuestObject
 		}
 
 		return "";
+	}
+
+	@Nullable
+	public LootCrate getRandomLootCrate(Entity entity, Random random)
+	{
+		int totalWeight = lootCrateNoDrop.getWeight(entity);
+
+		for (RewardTable table : rewardTables)
+		{
+			if (table.lootCrate != null)
+			{
+				totalWeight += table.lootCrate.drops.getWeight(entity);
+			}
+		}
+
+		if (totalWeight <= 0)
+		{
+			return null;
+		}
+
+		int number = random.nextInt(totalWeight) + 1;
+		int currentWeight = lootCrateNoDrop.getWeight(entity);
+
+		if (currentWeight < number)
+		{
+			for (RewardTable table : rewardTables)
+			{
+				if (table.lootCrate != null)
+				{
+					currentWeight += table.lootCrate.drops.getWeight(entity);
+
+					if (currentWeight >= number)
+					{
+						return table.lootCrate;
+					}
+				}
+			}
+		}
+
+		return null;
 	}
 }

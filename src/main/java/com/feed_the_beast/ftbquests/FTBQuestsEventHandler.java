@@ -13,15 +13,16 @@ import com.feed_the_beast.ftbquests.block.BlockTaskScreenPart;
 import com.feed_the_beast.ftbquests.block.FTBQuestsBlocks;
 import com.feed_the_beast.ftbquests.block.ItemBlockProgressScreen;
 import com.feed_the_beast.ftbquests.block.ItemBlockScreen;
-import com.feed_the_beast.ftbquests.item.ItemLootcrate;
+import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
+import com.feed_the_beast.ftbquests.item.ItemLootCrate;
+import com.feed_the_beast.ftbquests.item.ItemLootCrateOld;
 import com.feed_the_beast.ftbquests.item.ItemMissing;
 import com.feed_the_beast.ftbquests.item.ItemQuestBook;
-import com.feed_the_beast.ftbquests.item.LootRarity;
-import com.feed_the_beast.ftbquests.quest.EntityLootTable;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
+import com.feed_the_beast.ftbquests.quest.loot.LootCrate;
 import com.feed_the_beast.ftbquests.quest.reward.ChoiceReward;
 import com.feed_the_beast.ftbquests.quest.reward.CommandReward;
 import com.feed_the_beast.ftbquests.quest.reward.FTBQuestsRewards;
@@ -48,15 +49,16 @@ import com.feed_the_beast.ftbquests.tile.TileQuestChest;
 import com.feed_the_beast.ftbquests.tile.TileTaskScreenCore;
 import com.feed_the_beast.ftbquests.tile.TileTaskScreenPart;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
+import com.feed_the_beast.ftbquests.util.FTBQuestsInventoryListener;
 import net.minecraft.block.Block;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.monster.IMob;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagString;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
@@ -66,6 +68,7 @@ import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 
 import java.util.Collections;
@@ -122,11 +125,12 @@ public class FTBQuestsEventHandler
 				new ItemBlock(FTBQuestsBlocks.CHEST).setRegistryName("chest"),
 
 				withName(new ItemQuestBook(), "book"),
-				withName(new ItemLootcrate(LootRarity.COMMON), "common_lootcrate").setTranslationKey(FTBQuests.MOD_ID + ".lootcrate"),
-				withName(new ItemLootcrate(LootRarity.UNCOMMON), "uncommon_lootcrate").setTranslationKey(FTBQuests.MOD_ID + ".lootcrate"),
-				withName(new ItemLootcrate(LootRarity.RARE), "rare_lootcrate").setTranslationKey(FTBQuests.MOD_ID + ".lootcrate"),
-				withName(new ItemLootcrate(LootRarity.EPIC), "epic_lootcrate").setTranslationKey(FTBQuests.MOD_ID + ".lootcrate"),
-				withName(new ItemLootcrate(LootRarity.LEGENDARY), "legendary_lootcrate").setTranslationKey(FTBQuests.MOD_ID + ".lootcrate"),
+				withName(new ItemLootCrate(), "lootcrate").setTranslationKey(FTBQuests.MOD_ID + ".lootcrate"),
+				withName(new ItemLootCrateOld("common"), "common_lootcrate").setTranslationKey(FTBQuests.MOD_ID + ".old_lootcrate"),
+				withName(new ItemLootCrateOld("uncommon"), "uncommon_lootcrate").setTranslationKey(FTBQuests.MOD_ID + ".old_lootcrate"),
+				withName(new ItemLootCrateOld("rare"), "rare_lootcrate").setTranslationKey(FTBQuests.MOD_ID + ".old_lootcrate"),
+				withName(new ItemLootCrateOld("epic"), "epic_lootcrate").setTranslationKey(FTBQuests.MOD_ID + ".old_lootcrate"),
+				withName(new ItemLootCrateOld("legendary"), "legendary_lootcrate").setTranslationKey(FTBQuests.MOD_ID + ".old_lootcrate"),
 				withName(new ItemMissing(), "missing")
 		);
 	}
@@ -179,31 +183,18 @@ public class FTBQuestsEventHandler
 			return;
 		}
 
-		if (!ServerQuestFile.INSTANCE.entityLootEnabled)
+		if (!ServerQuestFile.INSTANCE.dropLootCrates)
 		{
 			return;
 		}
 
-		EntityLootTable rt;
+		LootCrate crate = ServerQuestFile.INSTANCE.getRandomLootCrate(e, e.world.rand);
 
-		if (!e.isNonBoss())
+		if (crate != null)
 		{
-			rt = ServerQuestFile.INSTANCE.entityLootBoss;
-		}
-		else if (e instanceof IMob)
-		{
-			rt = ServerQuestFile.INSTANCE.entityLootMonster;
-		}
-		else
-		{
-			rt = ServerQuestFile.INSTANCE.entityLootPassive;
-		}
-
-		LootRarity r = rt.getRarity(e.world.rand);
-
-		if (r != null)
-		{
-			EntityItem ei = new EntityItem(e.world, e.posX, e.posY, e.posZ, new ItemStack(r.getItem()));
+			ItemStack stack = new ItemStack(FTBQuestsItems.LOOTCRATE);
+			stack.setTagInfo("type", new NBTTagString(crate.stringID.isEmpty() ? crate.table.getCodeString() : crate.stringID));
+			EntityItem ei = new EntityItem(e.world, e.posX, e.posY, e.posZ, stack);
 			ei.setPickupDelay(10);
 			event.getDrops().add(ei);
 		}
@@ -252,5 +243,25 @@ public class FTBQuestsEventHandler
 		}
 
 		return false;
+	}
+
+	@SubscribeEvent
+	public static void onItemCraftedEvent(PlayerEvent.ItemCraftedEvent event)
+	{
+		if (event.player instanceof EntityPlayerMP && !event.crafting.isEmpty())
+		{
+			System.out.println("Crafted!");
+			FTBQuestsInventoryListener.detect((EntityPlayerMP) event.player, Collections.singleton(event.crafting));
+		}
+	}
+
+	@SubscribeEvent
+	public static void onItemSmeltEvent(PlayerEvent.ItemSmeltedEvent event)
+	{
+		if (event.player instanceof EntityPlayerMP && !event.smelting.isEmpty())
+		{
+			System.out.println("Smelting!");
+			FTBQuestsInventoryListener.detect((EntityPlayerMP) event.player, Collections.singleton(event.smelting));
+		}
 	}
 }

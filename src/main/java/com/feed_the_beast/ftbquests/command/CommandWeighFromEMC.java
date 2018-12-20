@@ -4,7 +4,7 @@ import com.feed_the_beast.ftblib.FTBLib;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.net.edit.MessageEditObjectResponse;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
-import com.feed_the_beast.ftbquests.quest.reward.RewardTable;
+import com.feed_the_beast.ftbquests.quest.loot.RewardTable;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;

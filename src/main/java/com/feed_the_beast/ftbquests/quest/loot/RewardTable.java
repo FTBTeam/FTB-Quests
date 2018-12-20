@@ -1,4 +1,4 @@
-package com.feed_the_beast.ftbquests.quest.reward;
+package com.feed_the_beast.ftbquests.quest.loot;
 
 import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
@@ -18,6 +18,9 @@ import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
+import com.feed_the_beast.ftbquests.quest.reward.FTBQuestsRewards;
+import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
+import com.feed_the_beast.ftbquests.quest.reward.QuestRewardType;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -43,6 +46,7 @@ public final class RewardTable extends QuestObjectBase
 	public int lootSize;
 	public boolean hideTooltip;
 	public boolean useTitle;
+	public LootCrate lootCrate;
 
 	public RewardTable(QuestFile f)
 	{
@@ -53,6 +57,7 @@ public final class RewardTable extends QuestObjectBase
 		lootSize = 27;
 		hideTooltip = false;
 		useTitle = false;
+		lootCrate = null;
 	}
 
 	@Override
@@ -122,6 +127,13 @@ public final class RewardTable extends QuestObjectBase
 		}
 
 		nbt.setTag("rewards", list);
+
+		if (lootCrate != null)
+		{
+			NBTTagCompound nbt1 = new NBTTagCompound();
+			lootCrate.writeData(nbt1);
+			nbt.setTag("loot_crate", nbt1);
+		}
 	}
 
 	@Override
@@ -147,6 +159,14 @@ public final class RewardTable extends QuestObjectBase
 				rewards.add(new WeightedReward(reward, nbt1.getInteger("weight")));
 			}
 		}
+
+		lootCrate = null;
+
+		if (nbt.hasKey("loot_crate"))
+		{
+			lootCrate = new LootCrate(this);
+			lootCrate.readData(nbt.getCompoundTag("loot_crate"));
+		}
 	}
 
 	@Override
@@ -158,6 +178,7 @@ public final class RewardTable extends QuestObjectBase
 		int flags = 0;
 		flags = Bits.setFlag(flags, 1, hideTooltip);
 		flags = Bits.setFlag(flags, 2, useTitle);
+		flags = Bits.setFlag(flags, 4, lootCrate != null);
 		data.writeVarInt(flags);
 		data.writeVarInt(rewards.size());
 
@@ -166,6 +187,11 @@ public final class RewardTable extends QuestObjectBase
 			data.writeVarInt(QuestRewardType.getRegistry().getID(reward.reward.getType()));
 			reward.reward.writeNetData(data);
 			data.writeVarInt(reward.weight);
+		}
+
+		if (lootCrate != null)
+		{
+			lootCrate.writeNetData(data);
 		}
 	}
 
@@ -178,6 +204,7 @@ public final class RewardTable extends QuestObjectBase
 		int flags = data.readVarInt();
 		hideTooltip = Bits.getFlag(flags, 1);
 		useTitle = Bits.getFlag(flags, 2);
+		boolean hasCrate = Bits.getFlag(flags, 4);
 		rewards.clear();
 		int s = data.readVarInt();
 
@@ -189,6 +216,14 @@ public final class RewardTable extends QuestObjectBase
 			int w = data.readVarInt();
 			rewards.add(new WeightedReward(reward, w));
 		}
+
+		lootCrate = null;
+
+		if (hasCrate)
+		{
+			lootCrate = new LootCrate(this);
+			lootCrate.readNetData(data);
+		}
 	}
 
 	@Override
@@ -199,6 +234,13 @@ public final class RewardTable extends QuestObjectBase
 		config.addInt("loot_size", () -> lootSize, v -> lootSize = v, 27, 1, Integer.MAX_VALUE);
 		config.addBool("hide_tooltip", () -> hideTooltip, v -> hideTooltip = v, false);
 		config.addBool("use_title", () -> useTitle, v -> useTitle = v, false);
+
+		if (lootCrate != null)
+		{
+			ConfigGroup lc = config.getGroup("loot_crate");
+			lc.setDisplayName(new TextComponentTranslation("item.ftbquests.lootcrate.name"));
+			lootCrate.getConfig(lc);
+		}
 	}
 
 	@Override
@@ -291,8 +333,28 @@ public final class RewardTable extends QuestObjectBase
 			list.add(TextFormatting.GRAY + "- " + I18n.format("ftbquests.reward_table.nothing") + TextFormatting.DARK_GRAY + " [" + WeightedReward.chanceString(emptyWeight, totalWeight) + "]");
 		}
 
-		for (WeightedReward r : rewards)
+		List<WeightedReward> rewards1;
+
+		if (rewards.size() > 1)
 		{
+			rewards1 = new ArrayList<>(rewards);
+			rewards1.sort(null);
+		}
+		else
+		{
+			rewards1 = rewards;
+		}
+
+		for (int i = 0; i < rewards1.size(); i++)
+		{
+			if (i == 20)
+			{
+				list.add(TextFormatting.GRAY + "- " + I18n.format("ftbquests.reward_table.and_more", rewards1.size() - 20));
+				return;
+			}
+
+			WeightedReward r = rewards1.get(i);
+
 			if (includeWeight)
 			{
 				list.add(TextFormatting.GRAY + "- " + r.reward.getDisplayName().getFormattedText() + TextFormatting.DARK_GRAY + " [" + WeightedReward.chanceString(r.weight, totalWeight) + "]");

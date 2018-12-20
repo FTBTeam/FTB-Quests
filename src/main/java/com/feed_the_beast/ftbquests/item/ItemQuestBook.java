@@ -24,18 +24,15 @@ public class ItemQuestBook extends Item
 	{
 		if (world.isRemote)
 		{
-			openGui();
+			openGui(player);
 		}
 
 		return new ActionResult<>(EnumActionResult.SUCCESS, player.getHeldItem(hand));
 	}
 
-	private void openGui()
+	private void openGui(EntityPlayer player)
 	{
-		if (ClientQuestFile.exists())
-		{
-			ClientQuestFile.INSTANCE.openQuestGui();
-		}
+		ClientQuestFile.INSTANCE.openQuestGui(player);
 	}
 
 	@Override

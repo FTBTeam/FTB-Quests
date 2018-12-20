@@ -73,7 +73,7 @@ public abstract class QuestReward extends QuestObjectBase
 	{
 		super.writeData(nbt);
 
-		if (team != quest.chapter.file.defaultRewardTeam)
+		if (team != getQuestFile().defaultRewardTeam)
 		{
 			nbt.setBoolean("team_reward", team);
 		}
@@ -88,7 +88,7 @@ public abstract class QuestReward extends QuestObjectBase
 	public void readData(NBTTagCompound nbt)
 	{
 		super.readData(nbt);
-		team = nbt.hasKey("team_reward") ? nbt.getBoolean("team_reward") : quest.chapter.file.defaultRewardTeam;
+		team = nbt.hasKey("team_reward") ? nbt.getBoolean("team_reward") : getQuestFile().defaultRewardTeam;
 		emergency = nbt.getBoolean("emergency");
 	}
 
@@ -134,7 +134,7 @@ public abstract class QuestReward extends QuestObjectBase
 
 		Collection<QuestReward> c = Collections.singleton(this);
 
-		for (ITeamData data : quest.chapter.file.getAllData())
+		for (ITeamData data : getQuestFile().getAllData())
 		{
 			data.unclaimRewards(c);
 		}
@@ -147,7 +147,7 @@ public abstract class QuestReward extends QuestObjectBase
 	{
 		Collection<QuestReward> c = Collections.singleton(this);
 
-		for (ITeamData data : quest.chapter.file.getAllData())
+		for (ITeamData data : getQuestFile().getAllData())
 		{
 			data.unclaimRewards(c);
 		}
@@ -211,5 +211,10 @@ public abstract class QuestReward extends QuestObjectBase
 	public void onButtonClicked()
 	{
 		new MessageClaimReward(id).sendToServer();
+	}
+
+	public boolean getExcludeFromClaimAll()
+	{
+		return getType().getExcludeFromListRewards();
 	}
 }

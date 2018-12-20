@@ -19,6 +19,7 @@ public class FTBQuestsItems
 	public static final Item BOOK = Items.AIR;
 	public static final Item XP_VIAL = Items.AIR;
 	public static final Item SCRIPT = Items.AIR;
+	public static final Item LOOTCRATE = Items.AIR;
 	public static final Item COMMON_LOOTCRATE = Items.AIR;
 	public static final Item UNCOMMON_LOOTCRATE = Items.AIR;
 	public static final Item RARE_LOOTCRATE = Items.AIR;
