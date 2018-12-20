@@ -12,6 +12,7 @@ import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.util.IWithID;
 import com.feed_the_beast.ftblib.lib.util.StringJoiner;
 import com.feed_the_beast.ftblib.lib.util.misc.NameMap;
+import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.item.ItemMissing;
 import com.feed_the_beast.ftbquests.net.MessageSubmitTask;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
@@ -262,7 +263,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 	@Override
 	public boolean test(ItemStack stack)
 	{
-		if (stack.isEmpty())
+		if (stack.isEmpty() || stack.getItem() == FTBQuestsItems.MISSING)
 		{
 			return false;
 		}
