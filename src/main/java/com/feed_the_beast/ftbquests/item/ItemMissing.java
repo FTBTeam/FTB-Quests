@@ -28,6 +28,11 @@ import java.util.List;
  */
 public class ItemMissing extends Item
 {
+	public ItemMissing()
+	{
+		setMaxStackSize(1);
+	}
+
 	private static ItemStack getContainedStack(ItemStack stack)
 	{
 		return stack.hasTagCompound() ? ItemStackSerializer.read(stack.getTagCompound().getTag("item")) : ItemStack.EMPTY;

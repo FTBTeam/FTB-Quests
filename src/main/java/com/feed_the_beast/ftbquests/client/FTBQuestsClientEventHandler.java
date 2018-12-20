@@ -2,19 +2,21 @@ package com.feed_the_beast.ftbquests.client;
 
 import com.feed_the_beast.ftblib.events.SidebarButtonCreatedEvent;
 import com.feed_the_beast.ftblib.events.client.CustomClickEvent;
-import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
+import com.feed_the_beast.ftbquests.item.ItemLootCrate;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
+import com.feed_the_beast.ftbquests.quest.loot.LootCrate;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
 import com.feed_the_beast.ftbquests.tile.TileProgressScreenCore;
 import com.feed_the_beast.ftbquests.tile.TileTaskScreenCore;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
+import net.minecraft.client.renderer.color.ItemColors;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
@@ -32,6 +34,7 @@ import net.minecraftforge.fml.relauncher.Side;
 public class FTBQuestsClientEventHandler
 {
 	private static final ResourceLocation QUESTS_BUTTON = new ResourceLocation(FTBQuests.MOD_ID, "quests");
+
 	public static TextureAtlasSprite inputBlockSprite;
 
 	@SubscribeEvent
@@ -45,15 +48,34 @@ public class FTBQuestsClientEventHandler
 		ModelLoader.setCustomModelResourceLocation(FTBQuestsItems.BOOK, 0, new ModelResourceLocation(FTBQuestsItems.BOOK.getRegistryName(), "inventory"));
 		ModelLoader.setCustomModelResourceLocation(FTBQuestsItems.XP_VIAL, 0, new ModelResourceLocation(FTBQuestsItems.XP_VIAL.getRegistryName(), "inventory"));
 		ModelLoader.setCustomModelResourceLocation(FTBQuestsItems.SCRIPT, 0, new ModelResourceLocation(FTBQuestsItems.SCRIPT.getRegistryName(), "inventory"));
-		ModelLoader.setCustomModelResourceLocation(FTBQuestsItems.COMMON_LOOTCRATE, 0, new ModelResourceLocation(FTBQuestsItems.COMMON_LOOTCRATE.getRegistryName(), "inventory"));
-		ModelLoader.setCustomModelResourceLocation(FTBQuestsItems.UNCOMMON_LOOTCRATE, 0, new ModelResourceLocation(FTBQuestsItems.UNCOMMON_LOOTCRATE.getRegistryName(), "inventory"));
-		ModelLoader.setCustomModelResourceLocation(FTBQuestsItems.RARE_LOOTCRATE, 0, new ModelResourceLocation(FTBQuestsItems.RARE_LOOTCRATE.getRegistryName(), "inventory"));
-		ModelLoader.setCustomModelResourceLocation(FTBQuestsItems.EPIC_LOOTCRATE, 0, new ModelResourceLocation(FTBQuestsItems.EPIC_LOOTCRATE.getRegistryName(), "inventory"));
-		ModelLoader.setCustomModelResourceLocation(FTBQuestsItems.LEGENDARY_LOOTCRATE, 0, new ModelResourceLocation(FTBQuestsItems.LEGENDARY_LOOTCRATE.getRegistryName(), "inventory"));
+
+		ModelResourceLocation lootCrateModel = new ModelResourceLocation(FTBQuestsItems.LOOTCRATE.getRegistryName(), "#inventory");
+		ModelLoader.setCustomModelResourceLocation(FTBQuestsItems.LOOTCRATE, 0, lootCrateModel);
+		ModelLoader.setCustomModelResourceLocation(FTBQuestsItems.COMMON_LOOTCRATE, 0, lootCrateModel);
+		ModelLoader.setCustomModelResourceLocation(FTBQuestsItems.UNCOMMON_LOOTCRATE, 0, lootCrateModel);
+		ModelLoader.setCustomModelResourceLocation(FTBQuestsItems.RARE_LOOTCRATE, 0, lootCrateModel);
+		ModelLoader.setCustomModelResourceLocation(FTBQuestsItems.EPIC_LOOTCRATE, 0, lootCrateModel);
+		ModelLoader.setCustomModelResourceLocation(FTBQuestsItems.LEGENDARY_LOOTCRATE, 0, lootCrateModel);
 		ModelLoader.setCustomModelResourceLocation(FTBQuestsItems.MISSING, 0, new ModelResourceLocation(FTBQuestsItems.MISSING.getRegistryName(), "inventory"));
 
 		ClientRegistry.bindTileEntitySpecialRenderer(TileTaskScreenCore.class, new RenderTaskScreen());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileProgressScreenCore.class, new RenderProgressScreen());
+	}
+
+	public static void postInit()
+	{
+		ItemColors c = Minecraft.getMinecraft().getItemColors();
+
+		c.registerItemColorHandler((stack, tintIndex) -> {
+			LootCrate crate = ItemLootCrate.getCrate(null, stack);
+			return crate == null ? 0xFFFFFFFF : (0xFF000000 | crate.color.rgb());
+		}, FTBQuestsItems.LOOTCRATE);
+
+		c.registerItemColorHandler((stack, tintIndex) -> 0xFF92999A, FTBQuestsItems.COMMON_LOOTCRATE);
+		c.registerItemColorHandler((stack, tintIndex) -> 0xFF37AA69, FTBQuestsItems.UNCOMMON_LOOTCRATE);
+		c.registerItemColorHandler((stack, tintIndex) -> 0xFF0094FF, FTBQuestsItems.RARE_LOOTCRATE);
+		c.registerItemColorHandler((stack, tintIndex) -> 0xFF8000FF, FTBQuestsItems.EPIC_LOOTCRATE);
+		c.registerItemColorHandler((stack, tintIndex) -> 0xFFFFC147, FTBQuestsItems.LEGENDARY_LOOTCRATE);
 	}
 
 	@SubscribeEvent
@@ -112,14 +134,7 @@ public class FTBQuestsClientEventHandler
 	{
 		if (FTBQuestsClient.KEY_QUESTS.isPressed())
 		{
-			if (ClientQuestFile.existsWithTeam() || ClientQuestFile.exists() && ClientQuestFile.INSTANCE.canEdit())
-			{
-				ClientQuestFile.INSTANCE.openQuestGui();
-			}
-			else
-			{
-				ClientUtils.MC.player.sendStatusMessage(new TextComponentTranslation("ftblib.lang.team.error.no_team"), true);
-			}
+			ClientQuestFile.INSTANCE.openQuestGui(Minecraft.getMinecraft().player);
 		}
 	}
 
@@ -131,15 +146,7 @@ public class FTBQuestsClientEventHandler
 			switch (event.getID().getPath())
 			{
 				case "open_gui":
-					if (ClientQuestFile.existsWithTeam() || ClientQuestFile.exists() && ClientQuestFile.INSTANCE.canEdit())
-					{
-						ClientQuestFile.INSTANCE.openQuestGui();
-					}
-					else
-					{
-						ClientUtils.MC.player.sendStatusMessage(new TextComponentTranslation("ftblib.lang.team.error.no_team"), true);
-					}
-
+					ClientQuestFile.INSTANCE.openQuestGui(Minecraft.getMinecraft().player);
 					break;
 			}
 

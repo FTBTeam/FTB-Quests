@@ -13,6 +13,10 @@ public class FTBQuestsCommon
 	{
 	}
 
+	public void postInit()
+	{
+	}
+
 	public final QuestFile getQuestFile(@Nullable World world)
 	{
 		return getQuestFile(world == null ? FMLCommonHandler.instance().getEffectiveSide().isClient() : world.isRemote);

@@ -5,9 +5,9 @@ import com.feed_the_beast.ftblib.lib.math.MathUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.net.edit.MessageEditObjectResponse;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
+import com.feed_the_beast.ftbquests.quest.loot.RewardTable;
+import com.feed_the_beast.ftbquests.quest.loot.WeightedReward;
 import com.feed_the_beast.ftbquests.quest.reward.ItemReward;
-import com.feed_the_beast.ftbquests.quest.reward.RewardTable;
-import com.feed_the_beast.ftbquests.quest.reward.WeightedReward;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -64,7 +64,7 @@ public class CommandImportRewardsFromChest extends CommandBase
 		}
 		else if (args.length == 1)
 		{
-			List<String> list = new ArrayList<>(ServerQuestFile.INSTANCE.rewardTables.size() + 1);
+			List<String> list = new ArrayList<>(ServerQuestFile.INSTANCE.rewardTables.size());
 
 			for (RewardTable table : ServerQuestFile.INSTANCE.rewardTables)
 			{

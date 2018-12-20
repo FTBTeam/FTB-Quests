@@ -5,6 +5,7 @@ import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
+import com.feed_the_beast.ftbquests.gui.GuiRewardNotifications;
 import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.net.MessageClaimAllRewards;
 import com.feed_the_beast.ftbquests.quest.Quest;
@@ -58,6 +59,7 @@ public class ButtonClaimAllRewards extends ButtonTab
 
 		if (ClientQuestFile.existsWithTeam())
 		{
+			new GuiRewardNotifications().openGui();
 			new MessageClaimAllRewards().sendToServer();
 		}
 	}

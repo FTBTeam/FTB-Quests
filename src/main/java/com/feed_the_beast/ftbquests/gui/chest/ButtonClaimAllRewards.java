@@ -8,6 +8,7 @@ import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
+import com.feed_the_beast.ftbquests.gui.GuiRewardNotifications;
 import com.feed_the_beast.ftbquests.net.MessageClaimAllRewards;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
@@ -34,6 +35,7 @@ public class ButtonClaimAllRewards extends Button
 	public void onClicked(MouseButton button)
 	{
 		GuiHelper.playClickSound();
+		new GuiRewardNotifications().openGui();
 		new MessageClaimAllRewards().sendToServer();
 	}
 

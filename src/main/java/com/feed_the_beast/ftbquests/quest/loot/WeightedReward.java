@@ -1,9 +1,11 @@
-package com.feed_the_beast.ftbquests.quest.reward;
+package com.feed_the_beast.ftbquests.quest.loot;
+
+import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
 
 /**
  * @author LatvianModder
  */
-public class WeightedReward
+public class WeightedReward implements Comparable<WeightedReward>
 {
 	public final QuestReward reward;
 	public int weight;
@@ -29,5 +31,11 @@ public class WeightedReward
 		}
 
 		return chance + "%";
+	}
+
+	@Override
+	public int compareTo(WeightedReward o)
+	{
+		return Integer.compare(weight, o.weight);
 	}
 }

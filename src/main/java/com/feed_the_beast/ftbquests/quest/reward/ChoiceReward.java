@@ -42,4 +42,10 @@ public class ChoiceReward extends RandomReward
 	{
 		new GuiSelectChoiceReward(this).openGui();
 	}
+
+	@Override
+	public boolean getExcludeFromClaimAll()
+	{
+		return true;
+	}
 }

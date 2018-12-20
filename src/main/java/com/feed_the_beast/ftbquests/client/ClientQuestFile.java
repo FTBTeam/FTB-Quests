@@ -14,6 +14,8 @@ import com.feed_the_beast.ftbquests.quest.task.QuestTask;
 import it.unimi.dsi.fastutil.ints.IntCollection;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.text.TextComponentTranslation;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -170,9 +172,16 @@ public class ClientQuestFile extends QuestFile
 		}
 	}
 
-	public void openQuestGui()
+	public void openQuestGui(EntityPlayer player)
 	{
-		questGui.openGui();
+		if (existsWithTeam())
+		{
+			questGui.openGui();
+		}
+		else
+		{
+			player.sendStatusMessage(new TextComponentTranslation("ftblib.lang.team.error.no_team"), true);
+		}
 	}
 
 	@Override

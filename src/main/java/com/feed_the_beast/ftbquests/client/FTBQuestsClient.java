@@ -44,6 +44,12 @@ public class FTBQuestsClient extends FTBQuestsCommon
 	}
 
 	@Override
+	public void postInit()
+	{
+		FTBQuestsClientEventHandler.postInit();
+	}
+
+	@Override
 	public QuestFile getQuestFile(boolean clientSide)
 	{
 		return clientSide ? ClientQuestFile.INSTANCE : ServerQuestFile.INSTANCE;

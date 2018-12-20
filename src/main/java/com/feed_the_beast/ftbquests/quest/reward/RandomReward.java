@@ -7,6 +7,8 @@ import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
+import com.feed_the_beast.ftbquests.quest.loot.RewardTable;
+import com.feed_the_beast.ftbquests.quest.loot.WeightedReward;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
@@ -169,5 +171,11 @@ public class RandomReward extends QuestReward
 	public void addMouseOverText(List<String> list)
 	{
 		getTable().addMouseOverText(list, true, false);
+	}
+
+	@Override
+	public boolean getExcludeFromClaimAll()
+	{
+		return false;
 	}
 }

@@ -2,6 +2,7 @@ package com.feed_the_beast.ftbquests.quest.reward;
 
 import com.feed_the_beast.ftbquests.gui.GuiRewardNotifications;
 import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.quest.loot.WeightedReward;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -68,5 +69,11 @@ public class LootReward extends RandomReward
 	{
 		new GuiRewardNotifications().openGui();
 		super.onButtonClicked();
+	}
+
+	@Override
+	public boolean getExcludeFromClaimAll()
+	{
+		return true;
 	}
 }
