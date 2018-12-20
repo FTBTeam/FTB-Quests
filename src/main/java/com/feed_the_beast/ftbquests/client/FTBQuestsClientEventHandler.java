@@ -4,7 +4,7 @@ import com.feed_the_beast.ftblib.events.SidebarButtonCreatedEvent;
 import com.feed_the_beast.ftblib.events.client.CustomClickEvent;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
-import com.feed_the_beast.ftbquests.item.ItemLootCrateNew;
+import com.feed_the_beast.ftbquests.item.ItemLootCrate;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.loot.LootCrate;
@@ -67,7 +67,7 @@ public class FTBQuestsClientEventHandler
 		ItemColors c = Minecraft.getMinecraft().getItemColors();
 
 		c.registerItemColorHandler((stack, tintIndex) -> {
-			LootCrate crate = ItemLootCrateNew.getCrate(null, stack);
+			LootCrate crate = ItemLootCrate.getCrate(null, stack);
 			return crate == null ? 0xFFFFFFFF : (0xFF000000 | crate.color.rgb());
 		}, FTBQuestsItems.LOOTCRATE);
 

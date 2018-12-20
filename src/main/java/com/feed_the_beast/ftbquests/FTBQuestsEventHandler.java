@@ -14,7 +14,7 @@ import com.feed_the_beast.ftbquests.block.FTBQuestsBlocks;
 import com.feed_the_beast.ftbquests.block.ItemBlockProgressScreen;
 import com.feed_the_beast.ftbquests.block.ItemBlockScreen;
 import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
-import com.feed_the_beast.ftbquests.item.ItemLootCrateNew;
+import com.feed_the_beast.ftbquests.item.ItemLootCrate;
 import com.feed_the_beast.ftbquests.item.ItemLootCrateOld;
 import com.feed_the_beast.ftbquests.item.ItemMissing;
 import com.feed_the_beast.ftbquests.item.ItemQuestBook;
@@ -125,7 +125,7 @@ public class FTBQuestsEventHandler
 				new ItemBlock(FTBQuestsBlocks.CHEST).setRegistryName("chest"),
 
 				withName(new ItemQuestBook(), "book"),
-				withName(new ItemLootCrateNew(), "lootcrate").setTranslationKey(FTBQuests.MOD_ID + ".lootcrate"),
+				withName(new ItemLootCrate(), "lootcrate").setTranslationKey(FTBQuests.MOD_ID + ".lootcrate"),
 				withName(new ItemLootCrateOld("common"), "common_lootcrate").setTranslationKey(FTBQuests.MOD_ID + ".old_lootcrate"),
 				withName(new ItemLootCrateOld("uncommon"), "uncommon_lootcrate").setTranslationKey(FTBQuests.MOD_ID + ".old_lootcrate"),
 				withName(new ItemLootCrateOld("rare"), "rare_lootcrate").setTranslationKey(FTBQuests.MOD_ID + ".old_lootcrate"),
