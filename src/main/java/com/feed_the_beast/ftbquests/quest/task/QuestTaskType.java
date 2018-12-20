@@ -60,6 +60,11 @@ public final class QuestTaskType extends IForgeRegistryEntry.Impl<QuestTaskType>
 
 		if (type == null)
 		{
+			if (id.equals("ftbquests:ftb_money"))
+			{
+				return createTask(quest, "ftbmoney:money");
+			}
+
 			return null;
 		}
 
@@ -118,7 +123,7 @@ public final class QuestTaskType extends IForgeRegistryEntry.Impl<QuestTaskType>
 
 	public String getTypeForNBT()
 	{
-		return getRegistryName().getNamespace().equals(FTBQuests.MOD_ID) ? getRegistryName().getPath() : toString();
+		return getRegistryName().getNamespace().equals(FTBQuests.MOD_ID) ? getRegistryName().getPath() : getRegistryName().toString();
 	}
 
 	public QuestTaskType setDisplayName(ITextComponent name)

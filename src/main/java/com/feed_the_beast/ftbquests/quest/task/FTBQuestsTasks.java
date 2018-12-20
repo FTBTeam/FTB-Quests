@@ -16,6 +16,5 @@ public class FTBQuestsTasks
 	public static QuestTaskType IC2_ENERGY;
 	public static QuestTaskType BUILDCRAFT_MJ;
 	public static QuestTaskType BOTANIA_MANA;
-	public static QuestTaskType FTB_MONEY;
 	public static QuestTaskType EMC;
 }
