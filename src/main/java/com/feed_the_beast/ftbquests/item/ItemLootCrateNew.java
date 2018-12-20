@@ -33,7 +33,7 @@ import java.util.List;
 /**
  * @author LatvianModder
  */
-public class ItemLootCrate extends Item
+public class ItemLootCrateNew extends Item
 {
 	@Nullable
 	public static LootCrate getCrate(@Nullable World world, ItemStack stack)
