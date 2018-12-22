@@ -64,6 +64,13 @@ public class FTBQuestsClient extends FTBQuestsCommon
 				ItemTask itemTask = new ItemTask(quest);
 				itemTask.items.add(ItemHandlerHelper.copyStackWithSize(stack, 1));
 				itemTask.count = stack.getCount();
+
+				if (!stack.isStackable())
+				{
+					itemTask.nbtMode = ItemTask.NBTMatchingMode.IGNORE;
+					itemTask.ignoreDamage = !stack.getHasSubtypes();
+				}
+
 				callback.accept(itemTask);
 			}
 		}).openGui());
