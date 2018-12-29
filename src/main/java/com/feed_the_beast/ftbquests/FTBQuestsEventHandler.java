@@ -250,7 +250,6 @@ public class FTBQuestsEventHandler
 	{
 		if (event.player instanceof EntityPlayerMP && !event.crafting.isEmpty())
 		{
-			System.out.println("Crafted!");
 			FTBQuestsInventoryListener.detect((EntityPlayerMP) event.player, Collections.singleton(event.crafting));
 		}
 	}
@@ -260,7 +259,6 @@ public class FTBQuestsEventHandler
 	{
 		if (event.player instanceof EntityPlayerMP && !event.smelting.isEmpty())
 		{
-			System.out.println("Smelting!");
 			FTBQuestsInventoryListener.detect((EntityPlayerMP) event.player, Collections.singleton(event.smelting));
 		}
 	}
