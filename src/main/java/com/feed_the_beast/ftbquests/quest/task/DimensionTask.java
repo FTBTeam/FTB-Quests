@@ -149,7 +149,7 @@ public class DimensionTask extends QuestTask
 		@Override
 		public boolean submitTask(EntityPlayerMP player, Collection<ItemStack> itemsToCheck, boolean simulate)
 		{
-			if (progress < 1L && player.dimension == task.dimension.getId())
+			if (progress < 1L && !player.isSpectator() && player.dimension == task.dimension.getId())
 			{
 				if (!simulate)
 				{
