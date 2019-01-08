@@ -18,6 +18,7 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.TextFormatting;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -66,6 +67,13 @@ public class GuiRewardNotifications extends GuiBase implements IRewardListenerGu
 				theme.drawString(TextFormatting.YELLOW + s, x + 22 - theme.getStringWidth(s), y + 12, Theme.SHADOW);
 				GlStateManager.popMatrix();
 			}
+		}
+
+		@Override
+		@Nullable
+		public Object getJEIFocus()
+		{
+			return key.stack.isEmpty() ? null : key.stack;
 		}
 	}
 

@@ -11,6 +11,7 @@ import com.feed_the_beast.ftbquests.quest.loot.WeightedReward;
 import com.feed_the_beast.ftbquests.quest.reward.ChoiceReward;
 import net.minecraft.client.resources.I18n;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 /**
@@ -41,6 +42,13 @@ public class GuiSelectChoiceReward extends GuiButtonListBase
 			GuiHelper.playClickSound();
 			closeGui();
 			new MessageClaimChoiceReward(choiceReward.id, choiceReward.getTable().rewards.indexOf(weightedReward)).sendToServer();
+		}
+
+		@Override
+		@Nullable
+		public Object getJEIFocus()
+		{
+			return weightedReward.reward.getJEIFocus();
 		}
 	}
 

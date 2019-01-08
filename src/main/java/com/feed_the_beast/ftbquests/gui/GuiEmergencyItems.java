@@ -18,6 +18,7 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 /**
@@ -51,6 +52,13 @@ public class GuiEmergencyItems extends GuiBase
 		{
 			EnumQuestShape.RSQUARE.outline.draw(x - 3, y - 3, w + 6, h + 6);
 			GuiHelper.drawItem(stack, x, y, true);
+		}
+
+		@Override
+		@Nullable
+		public Object getJEIFocus()
+		{
+			return stack;
 		}
 	}
 

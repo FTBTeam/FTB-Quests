@@ -14,7 +14,6 @@ import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.gui.FTBQuestsTheme;
-import com.feed_the_beast.ftbquests.integration.jei.JEIIntegration;
 import com.feed_the_beast.ftbquests.net.edit.MessageCreateObject;
 import com.feed_the_beast.ftbquests.net.edit.MessageEditObjectDirect;
 import com.feed_the_beast.ftbquests.quest.Quest;
@@ -26,9 +25,8 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraftforge.fml.common.Loader;
-import org.lwjgl.input.Keyboard;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -225,20 +223,10 @@ public class ButtonQuest extends Button
 	}
 
 	@Override
-	public boolean keyPressed(int key, char keyChar)
+	@Nullable
+	public Object getJEIFocus()
 	{
-		if (isMouseOver() && (key == Keyboard.KEY_R || key == Keyboard.KEY_U) && quest.tasks.size() == 1 && Loader.isModLoaded("jei"))
-		{
-			openFocus(key == Keyboard.KEY_R);
-			return true;
-		}
-
-		return super.keyPressed(key, keyChar);
-	}
-
-	private void openFocus(boolean recipe)
-	{
-		JEIIntegration.openFocus(recipe, quest.tasks.get(0).createJEIFocus());
+		return quest.tasks.size() == 1 ? quest.tasks.get(0).getJEIFocus() : null;
 	}
 
 	@Override

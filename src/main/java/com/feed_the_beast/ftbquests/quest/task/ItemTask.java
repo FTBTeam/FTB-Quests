@@ -374,7 +374,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 	@Override
 	@Nullable
 	@SideOnly(Side.CLIENT)
-	public Object createJEIFocus()
+	public Object getJEIFocus()
 	{
 		for (ItemStack stack : items)
 		{
