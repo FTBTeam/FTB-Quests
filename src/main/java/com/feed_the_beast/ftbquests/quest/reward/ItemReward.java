@@ -21,6 +21,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.ItemHandlerHelper;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 /**
@@ -119,5 +120,13 @@ public class ItemReward extends QuestReward
 	public void addMouseOverText(List<String> list)
 	{
 		GuiHelper.addStackTooltip(stack, list, stack.getCount() > 1 ? (randomBonus > 0 ? (stack.getCount() + "-" + (stack.getCount() + randomBonus) + "x ") : (stack.getCount() + "x ")) : "");
+	}
+
+	@Override
+	@Nullable
+	@SideOnly(Side.CLIENT)
+	public Object createJEIFocus()
+	{
+		return stack;
 	}
 }

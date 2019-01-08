@@ -334,6 +334,14 @@ public class FluidTask extends QuestTask
 	}
 
 	@Override
+	@Nullable
+	@SideOnly(Side.CLIENT)
+	public Object createJEIFocus()
+	{
+		return createFluidStack(Fluid.BUCKET_VOLUME);
+	}
+
+	@Override
 	public QuestTaskData createData(ITeamData data)
 	{
 		return new Data(this, data);

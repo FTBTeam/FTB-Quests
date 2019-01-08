@@ -10,9 +10,12 @@ import com.feed_the_beast.ftblib.lib.gui.WidgetType;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.gui.FTBQuestsTheme;
+import com.feed_the_beast.ftbquests.integration.jei.JEIIntegration;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraftforge.fml.common.Loader;
+import org.lwjgl.input.Keyboard;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -102,6 +105,23 @@ public class ButtonReward extends SimpleTextButton
 			GuiQuestTree.addObjectMenuItems(contextMenu, getGui(), reward);
 			getGui().openContextMenu(contextMenu);
 		}
+	}
+
+	@Override
+	public boolean keyPressed(int key, char keyChar)
+	{
+		if (isMouseOver() && (key == Keyboard.KEY_R || key == Keyboard.KEY_U) && Loader.isModLoaded("jei"))
+		{
+			openFocus(key == Keyboard.KEY_R);
+			return true;
+		}
+
+		return super.keyPressed(key, keyChar);
+	}
+
+	private void openFocus(boolean recipe)
+	{
+		JEIIntegration.openFocus(recipe, reward.createJEIFocus());
 	}
 
 	@Override

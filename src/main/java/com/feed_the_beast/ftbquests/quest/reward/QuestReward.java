@@ -21,6 +21,7 @@ import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -216,5 +217,12 @@ public abstract class QuestReward extends QuestObjectBase
 	public boolean getExcludeFromClaimAll()
 	{
 		return getType().getExcludeFromListRewards();
+	}
+
+	@Nullable
+	@SideOnly(Side.CLIENT)
+	public Object createJEIFocus()
+	{
+		return null;
 	}
 }
