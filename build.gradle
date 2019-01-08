@@ -47,6 +47,7 @@ repositories {
 
 dependencies {
 	deobfCompile "com.feed_the_beast.mods:FTBLib:${ftblib_version}"
+	deobfCompile "com.latmod.mods:ItemFilters:${itemfilters_version}"
 	provided "net.industrial-craft:industrialcraft-2:${ic2_version}:api"
 	deobfCompile "io.sommers:packmode:${packmode_version}"
 	deobfProvided "vazkii.botania:Botania:${botania_version}"
@@ -94,6 +95,7 @@ if (ENV.CURSEFORGE_KEY) {
 			addGameVersion "${mc_version}"
 			relations {
 				requiredDependency 'ftblib'
+				requiredDependency 'item-filters'
 				optionalDependency 'packmode'
 			}
 			changelog = getGitChangelog
