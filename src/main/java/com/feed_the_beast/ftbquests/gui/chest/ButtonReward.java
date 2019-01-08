@@ -12,6 +12,7 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.TextFormatting;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 /**
@@ -65,5 +66,12 @@ public class ButtonReward extends Button
 			Color4I.WHITE.withAlpha(150).draw(x, y, w, h);
 			GlStateManager.popMatrix();
 		}
+	}
+
+	@Override
+	@Nullable
+	public Object getJEIFocus()
+	{
+		return reward.getJEIFocus();
 	}
 }

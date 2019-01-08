@@ -221,7 +221,7 @@ public abstract class QuestReward extends QuestObjectBase
 
 	@Nullable
 	@SideOnly(Side.CLIENT)
-	public Object createJEIFocus()
+	public Object getJEIFocus()
 	{
 		return null;
 	}

@@ -24,6 +24,7 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.TextFormatting;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -148,6 +149,13 @@ public class GuiEditRewardTable extends GuiButtonListBase
 			{
 				reward.weight = value.getInt();
 			}
+		}
+
+		@Override
+		@Nullable
+		public Object getJEIFocus()
+		{
+			return reward.reward.getJEIFocus();
 		}
 	}
 

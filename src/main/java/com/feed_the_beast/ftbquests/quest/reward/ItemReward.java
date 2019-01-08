@@ -125,7 +125,7 @@ public class ItemReward extends QuestReward
 	@Override
 	@Nullable
 	@SideOnly(Side.CLIENT)
-	public Object createJEIFocus()
+	public Object getJEIFocus()
 	{
 		return stack;
 	}

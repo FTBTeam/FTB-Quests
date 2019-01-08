@@ -9,6 +9,7 @@ import com.feed_the_beast.ftbquests.quest.task.QuestTaskData;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.TextFormatting;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 /**
@@ -56,5 +57,12 @@ public class ButtonTask extends Button
 
 		taskData.task.getIcon().draw(x + 1, y, 8, 8);
 		theme.drawString(taskData.task.getDisplayName().getFormattedText(), x + 11, y, theme.getContentColor(getWidgetType()), Theme.SHADOW);
+	}
+
+	@Override
+	@Nullable
+	public Object getJEIFocus()
+	{
+		return taskData.task.getJEIFocus();
 	}
 }
