@@ -262,4 +262,11 @@ public abstract class QuestTask extends QuestObject
 	{
 		return false;
 	}
+
+	@Nullable
+	@SideOnly(Side.CLIENT)
+	public Object createJEIFocus()
+	{
+		return null;
+	}
 }
