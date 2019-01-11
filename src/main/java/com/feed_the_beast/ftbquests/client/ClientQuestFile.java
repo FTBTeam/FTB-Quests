@@ -101,6 +101,7 @@ public class ClientQuestFile extends QuestFile
 		FTBQuestsJEIHelper.refresh(this);
 	}
 
+	@Override
 	public boolean canEdit()
 	{
 		return editingMode;

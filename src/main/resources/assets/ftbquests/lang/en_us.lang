@@ -31,7 +31,6 @@ item.ftbquests.book.name=Quest Book
 item.ftbquests.lootcrate.name=Loot Crate
 item.ftbquests.old_lootcrate.name=Old Loot Crate
 item.ftbquests.old_lootcrate.tooltip=Place in Crafting Table to convert to new one
-item.ftbquests.missing.name=Missing Item
 
 ftbquests.rarity.common=Common
 ftbquests.rarity.uncommon=Uncommon

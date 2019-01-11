@@ -25,7 +25,6 @@ item.ftbquests.book.name=Livro de Quests
 item.ftbquests.xp_vial.name=Frasco de Experiência
 item.ftbquests.script.name=Script
 item.ftbquests.lootcrate.name=Caixa de loot
-item.ftbquests.missing.name=Item Inexistente
 
 ftbquests.rarity.common=Comum
 ftbquests.rarity.uncommon=Incomum

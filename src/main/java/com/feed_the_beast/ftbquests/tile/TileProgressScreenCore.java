@@ -30,7 +30,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentTranslation;
 
 import javax.annotation.Nullable;
-import java.util.Collections;
 
 /**
  * @author LatvianModder
@@ -213,7 +212,7 @@ public class TileProgressScreenCore extends TileWithTeam implements IConfigCallb
 					config.add("team", createTeamConfig(), ConfigNull.INSTANCE).setDisplayName(new TextComponentTranslation("ftbquests.team"));
 				}
 
-				config.add("chapter", new ConfigQuestObject(ServerQuestFile.INSTANCE, cChapter, Collections.singleton(QuestObjectType.CHAPTER))
+				config.add("chapter", new ConfigQuestObject(ServerQuestFile.INSTANCE, cChapter, QuestObjectType.CHAPTER)
 				{
 					@Override
 					public void setObject(@Nullable QuestObjectBase v)

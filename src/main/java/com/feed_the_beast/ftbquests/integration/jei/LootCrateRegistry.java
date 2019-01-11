@@ -14,6 +14,7 @@ public enum LootCrateRegistry
 
 	public final ArrayList<LootCrateEntry> list = new ArrayList<>();
 
+	@SuppressWarnings("deprecation")
 	public void refresh()
 	{
 		if (FTBQuestsJEIIntegration.RUNTIME != null && !list.isEmpty())
