@@ -1,5 +1,7 @@
 package com.feed_the_beast.ftbquests.tile;
 
+import com.feed_the_beast.ftblib.lib.item.ItemEntry;
+import com.feed_the_beast.ftblib.lib.item.ItemEntryWithCount;
 import com.feed_the_beast.ftblib.lib.tile.EnumSaveType;
 import com.feed_the_beast.ftblib.lib.tile.TileBase;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
@@ -11,7 +13,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.ITickable;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.items.CapabilityItemHandler;
@@ -25,9 +26,9 @@ import java.util.UUID;
 /**
  * @author LatvianModder
  */
-public class TileLootCrateOpener extends TileBase implements IItemHandler, ITickable
+public class TileLootCrateOpener extends TileBase implements IItemHandler
 {
-	public List<ItemStack> items = new ArrayList<>();
+	public List<ItemEntryWithCount> items = new ArrayList<>();
 	public UUID owner = null;
 
 	@Override
@@ -40,9 +41,12 @@ public class TileLootCrateOpener extends TileBase implements IItemHandler, ITick
 
 		NBTTagList itemsTag = new NBTTagList();
 
-		for (ItemStack stack : items)
+		for (ItemEntryWithCount entry : items)
 		{
-			itemsTag.appendTag(stack.serializeNBT());
+			if (!entry.isEmpty())
+			{
+				itemsTag.appendTag(entry.serializeNBT());
+			}
 		}
 
 		nbt.setTag("items", itemsTag);
@@ -67,11 +71,11 @@ public class TileLootCrateOpener extends TileBase implements IItemHandler, ITick
 
 		for (int i = 0; i < itemsTag.tagCount(); i++)
 		{
-			ItemStack stack = new ItemStack(itemsTag.getCompoundTagAt(i));
+			ItemEntryWithCount entry = new ItemEntryWithCount(itemsTag.get(i));
 
-			if (!stack.isEmpty())
+			if (!entry.isEmpty())
 			{
-				items.add(stack);
+				items.add(entry);
 			}
 		}
 
@@ -100,7 +104,7 @@ public class TileLootCrateOpener extends TileBase implements IItemHandler, ITick
 	@Override
 	public ItemStack getStackInSlot(int slot)
 	{
-		return slot == 0 || items.isEmpty() ? ItemStack.EMPTY : items.get(0);
+		return slot == 0 || items.isEmpty() ? ItemStack.EMPTY : items.get(0).getStack(false);
 	}
 
 	@Override
@@ -142,7 +146,7 @@ public class TileLootCrateOpener extends TileBase implements IItemHandler, ITick
 
 								if (!stack1.isEmpty())
 								{
-									items.add(stack1);
+									insertItem(stack1);
 								}
 
 								break;
@@ -156,6 +160,22 @@ public class TileLootCrateOpener extends TileBase implements IItemHandler, ITick
 		}
 
 		return ItemStack.EMPTY;
+	}
+
+	private void insertItem(ItemStack stack)
+	{
+		ItemEntry entry = ItemEntry.get(stack);
+
+		for (ItemEntryWithCount entry1 : items)
+		{
+			if (entry1.entry.equalsEntry(entry))
+			{
+				entry1.count += stack.getCount();
+				return;
+			}
+		}
+
+		items.add(new ItemEntryWithCount(entry, stack.getCount()));
 	}
 
 	@Override
@@ -172,17 +192,16 @@ public class TileLootCrateOpener extends TileBase implements IItemHandler, ITick
 			return ItemStack.EMPTY;
 		}
 
-		ItemStack stack = items.get(0);
-		int a = Math.min(stack.getCount(), amount);
-
-		ItemStack stack1 = stack.copy();
+		ItemEntryWithCount entry = items.get(0);
+		ItemStack stack1 = entry.getStack(true);
+		int a = Math.min(entry.count, Math.min(amount, stack1.getMaxStackSize()));
 		stack1.setCount(a);
 
 		if (!simulate && !world.isRemote)
 		{
-			stack.shrink(a);
+			entry.count -= a;
 
-			if (stack.isEmpty())
+			if (entry.isEmpty())
 			{
 				items.remove(0);
 			}
@@ -203,13 +222,5 @@ public class TileLootCrateOpener extends TileBase implements IItemHandler, ITick
 	public void markDirty()
 	{
 		sendDirtyUpdate();
-	}
-
-	@Override
-	public void update()
-	{
-		if (world.isRemote && world.getTotalWorldTime() % 20L == 14L)
-		{
-		}
 	}
 }

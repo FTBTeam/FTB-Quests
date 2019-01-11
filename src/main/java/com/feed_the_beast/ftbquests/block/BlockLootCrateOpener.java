@@ -1,6 +1,7 @@
 package com.feed_the_beast.ftbquests.block;
 
 import com.feed_the_beast.ftblib.lib.block.BlockSpecialDrop;
+import com.feed_the_beast.ftblib.lib.item.ItemEntryWithCount;
 import com.feed_the_beast.ftbquests.tile.TileLootCrateOpener;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
@@ -61,7 +62,14 @@ public class BlockLootCrateOpener extends BlockSpecialDrop
 
 			if (tileEntity instanceof TileLootCrateOpener)
 			{
-				player.sendStatusMessage(new TextComponentTranslation("tile.ftbquests.loot_crate_opener.rightclick", ((TileLootCrateOpener) tileEntity).items.size()), true);
+				int items = 0;
+
+				for (ItemEntryWithCount entry : ((TileLootCrateOpener) tileEntity).items)
+				{
+					items += entry.count;
+				}
+
+				player.sendStatusMessage(new TextComponentTranslation("tile.ftbquests.loot_crate_opener.rightclick", items), true);
 			}
 		}
 
