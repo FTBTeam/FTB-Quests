@@ -92,14 +92,14 @@ public class FTBQuestsClient extends FTBQuestsCommon
 				{
 					for (DimensionType type : DimensionType.values())
 					{
-						panel.add(new SimpleTextButton(panel, type.getName(), Icon.EMPTY)
+						panel.add(new SimpleTextButton(panel, DimensionTask.getName(type.getId()).getFormattedText(), Icon.EMPTY)
 						{
 							@Override
 							public void onClicked(MouseButton button)
 							{
 								gui.openGui();
 								DimensionTask task = new DimensionTask(quest);
-								task.dimension = type;
+								task.dimension = type.getId();
 								callback.accept(task);
 							}
 						});
