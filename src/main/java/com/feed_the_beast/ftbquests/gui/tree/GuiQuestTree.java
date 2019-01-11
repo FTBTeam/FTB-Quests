@@ -286,6 +286,30 @@ public class GuiQuestTree extends GuiBase
 					}
 					movingQuest = false;
 					break;
+				case Keyboard.KEY_UP:
+					movingQuest = true;
+					for (Quest quest : selectedQuests)
+					{
+						new MessageMoveQuest(quest.id, quest.x, (byte) (quest.y - 1)).sendToServer();
+					}
+					movingQuest = false;
+					break;
+				case Keyboard.KEY_LEFT:
+					movingQuest = true;
+					for (Quest quest : selectedQuests)
+					{
+						new MessageMoveQuest(quest.id, (byte) (quest.x - 1), quest.y).sendToServer();
+					}
+					movingQuest = false;
+					break;
+				case Keyboard.KEY_RIGHT:
+					movingQuest = true;
+					for (Quest quest : selectedQuests)
+					{
+						new MessageMoveQuest(quest.id, (byte) (quest.x + 1), quest.y).sendToServer();
+					}
+					movingQuest = false;
+					break;
 			}
 
 			return true;
