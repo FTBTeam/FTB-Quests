@@ -48,14 +48,14 @@ repositories {
 dependencies {
 	deobfCompile "com.feed_the_beast.mods:FTBLib:${ftblib_version}"
 	deobfCompile "com.latmod.mods:ItemFilters:${itemfilters_version}"
+	deobfCompile "projecte:ProjectE:1.12:${projecte_version}"
 	provided "net.industrial-craft:industrialcraft-2:${ic2_version}:api"
+	provided "net.sengir.forestry:forestry_${mc_version}:${forestry_version}"
 	deobfCompile "io.sommers:packmode:${packmode_version}"
 	deobfProvided "vazkii.botania:Botania:${botania_version}"
 	deobfProvided "com.azanor.baubles:Baubles:${baubles_version}"
 	provided "com.mod-buildcraft:buildcraft-api:${buildcraft_version}"
-	deobfCompile "projecte:ProjectE:1.12:${projecte_version}"
-	provided "mezz.jei:jei_${mc_version}:${jei_version}:api"
-	provided "net.sengir.forestry:forestry_${mc_version}:${forestry_version}"
+	compile "mezz.jei:jei_${mc_version}:${jei_version}:api"
 }
 
 processResources {
