@@ -190,7 +190,11 @@ public abstract class QuestObjectBase
 	@SideOnly(Side.CLIENT)
 	public void onEditButtonClicked()
 	{
-		
 		new MessageEditObject(id).sendToServer();
+	}
+
+	public boolean refreshJEI()
+	{
+		return false;
 	}
 }

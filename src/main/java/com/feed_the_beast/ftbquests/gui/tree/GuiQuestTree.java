@@ -23,6 +23,7 @@ import com.feed_the_beast.ftbquests.gui.GuiVariables;
 import com.feed_the_beast.ftbquests.net.MessageCompleteInstantly;
 import com.feed_the_beast.ftbquests.net.MessageResetProgress;
 import com.feed_the_beast.ftbquests.net.edit.MessageEditObjectQuick;
+import com.feed_the_beast.ftbquests.net.edit.MessageMoveQuest;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
@@ -277,6 +278,14 @@ public class GuiQuestTree extends GuiBase
 				case Keyboard.KEY_D:
 					movingQuest = false;
 					selectQuest(null);
+					break;
+				case Keyboard.KEY_DOWN:
+					movingQuest = true;
+					for (Quest quest : selectedQuests)
+					{
+						new MessageMoveQuest(quest.id, quest.x, (byte) (quest.y + 1)).sendToServer();
+					}
+					movingQuest = false;
 					break;
 			}
 

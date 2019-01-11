@@ -5,6 +5,7 @@ import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToServer;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.FTBQuests;
+import com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIHelper;
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -27,6 +28,7 @@ public class MessageEditObjectDirect extends MessageToServer
 		id = o.id;
 		nbt = new NBTTagCompound();
 		o.writeData(nbt);
+		FTBQuestsJEIHelper.refresh(o);
 	}
 
 	@Override

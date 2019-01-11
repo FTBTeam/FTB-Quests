@@ -1229,4 +1229,10 @@ public abstract class QuestFile extends QuestObject
 
 		return null;
 	}
+
+	@Override
+	public boolean refreshJEI()
+	{
+		return true;
+	}
 }

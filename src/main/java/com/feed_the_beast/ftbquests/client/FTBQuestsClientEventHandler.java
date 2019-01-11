@@ -16,6 +16,7 @@ import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.renderer.color.ItemColors;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.client.event.ModelRegistryEvent;
@@ -37,17 +38,24 @@ public class FTBQuestsClientEventHandler
 
 	public static TextureAtlasSprite inputBlockSprite;
 
+	private static void addModel(Item item, String variant)
+	{
+		ModelLoader.setCustomModelResourceLocation(item, 0, new ModelResourceLocation(item.getRegistryName(), variant));
+	}
+
 	@SubscribeEvent
 	public static void registerModels(ModelRegistryEvent event)
 	{
-		ModelLoader.setCustomModelResourceLocation(FTBQuestsItems.SCREEN, 0, new ModelResourceLocation(FTBQuestsItems.SCREEN.getRegistryName(), "facing=north"));
-		ModelLoader.setCustomModelResourceLocation(FTBQuestsItems.PROGRESS_DETECTOR, 0, new ModelResourceLocation(FTBQuestsItems.PROGRESS_DETECTOR.getRegistryName(), "normal"));
-		ModelLoader.setCustomModelResourceLocation(FTBQuestsItems.PROGRESS_SCREEN, 0, new ModelResourceLocation(FTBQuestsItems.PROGRESS_SCREEN.getRegistryName(), "facing=north"));
-		ModelLoader.setCustomModelResourceLocation(FTBQuestsItems.CHEST, 0, new ModelResourceLocation(FTBQuestsItems.CHEST.getRegistryName(), "facing=north"));
+		addModel(FTBQuestsItems.SCREEN, "facing=north");
+		addModel(FTBQuestsItems.PROGRESS_DETECTOR, "normal");
+		addModel(FTBQuestsItems.PROGRESS_SCREEN, "facing=north");
+		addModel(FTBQuestsItems.CHEST, "facing=north");
+		addModel(FTBQuestsItems.LOOT_CRATE_STORAGE, "normal");
+		addModel(FTBQuestsItems.LOOT_CRATE_OPENER, "normal");
 
-		ModelLoader.setCustomModelResourceLocation(FTBQuestsItems.BOOK, 0, new ModelResourceLocation(FTBQuestsItems.BOOK.getRegistryName(), "inventory"));
-		ModelLoader.setCustomModelResourceLocation(FTBQuestsItems.XP_VIAL, 0, new ModelResourceLocation(FTBQuestsItems.XP_VIAL.getRegistryName(), "inventory"));
-		ModelLoader.setCustomModelResourceLocation(FTBQuestsItems.SCRIPT, 0, new ModelResourceLocation(FTBQuestsItems.SCRIPT.getRegistryName(), "inventory"));
+		addModel(FTBQuestsItems.BOOK, "inventory");
+		addModel(FTBQuestsItems.XP_VIAL, "inventory");
+		addModel(FTBQuestsItems.SCRIPT, "inventory");
 
 		ModelResourceLocation lootCrateModel = new ModelResourceLocation(FTBQuestsItems.LOOTCRATE.getRegistryName(), "#inventory");
 		ModelLoader.setCustomModelResourceLocation(FTBQuestsItems.LOOTCRATE, 0, lootCrateModel);
@@ -56,7 +64,7 @@ public class FTBQuestsClientEventHandler
 		ModelLoader.setCustomModelResourceLocation(FTBQuestsItems.RARE_LOOTCRATE, 0, lootCrateModel);
 		ModelLoader.setCustomModelResourceLocation(FTBQuestsItems.EPIC_LOOTCRATE, 0, lootCrateModel);
 		ModelLoader.setCustomModelResourceLocation(FTBQuestsItems.LEGENDARY_LOOTCRATE, 0, lootCrateModel);
-		ModelLoader.setCustomModelResourceLocation(FTBQuestsItems.MISSING, 0, new ModelResourceLocation(FTBQuestsItems.MISSING.getRegistryName(), "inventory"));
+		addModel(FTBQuestsItems.MISSING, "inventory");
 
 		ClientRegistry.bindTileEntitySpecialRenderer(TileTaskScreenCore.class, new RenderTaskScreen());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileProgressScreenCore.class, new RenderProgressScreen());

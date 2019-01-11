@@ -38,7 +38,7 @@ public class ItemLootCrate extends Item
 	@Nullable
 	public static LootCrate getCrate(@Nullable World world, ItemStack stack)
 	{
-		if (stack.hasTagCompound())
+		if (stack.hasTagCompound() && stack.getItem() instanceof ItemLootCrate)
 		{
 			QuestFile file = FTBQuests.PROXY.getQuestFile(world);
 			return file == null ? null : file.getLootCrate(stack.getTagCompound().getString("type"));
@@ -62,28 +62,25 @@ public class ItemLootCrate extends Item
 
 		if (!world.isRemote)
 		{
-			if (crate.table != null)
+			int totalWeight = crate.table.getTotalWeight(true);
+
+			if (totalWeight > 0)
 			{
-				int totalWeight = crate.table.getTotalWeight(true);
-
-				if (totalWeight > 0)
+				for (int j = 0; j < size * crate.table.lootSize; j++)
 				{
-					for (int j = 0; j < size * crate.table.lootSize; j++)
+					int number = player.world.rand.nextInt(totalWeight) + 1;
+					int currentWeight = crate.table.emptyWeight;
+
+					if (currentWeight < number)
 					{
-						int number = player.world.rand.nextInt(totalWeight) + 1;
-						int currentWeight = crate.table.emptyWeight;
-
-						if (currentWeight < number)
+						for (WeightedReward reward : crate.table.rewards)
 						{
-							for (WeightedReward reward : crate.table.rewards)
-							{
-								currentWeight += reward.weight;
+							currentWeight += reward.weight;
 
-								if (currentWeight >= number)
-								{
-									reward.reward.claim((EntityPlayerMP) player);
-									break;
-								}
+							if (currentWeight >= number)
+							{
+								reward.reward.claim((EntityPlayerMP) player);
+								break;
 							}
 						}
 					}
@@ -180,8 +177,6 @@ public class ItemLootCrate extends Item
 			{
 				tooltip.add(crate.table.getDisplayName().getFormattedText());
 			}
-
-			crate.table.addMouseOverText(tooltip, true, true);
 		}
 		else if (stack.hasTagCompound() && stack.getTagCompound().hasKey("type"))
 		{

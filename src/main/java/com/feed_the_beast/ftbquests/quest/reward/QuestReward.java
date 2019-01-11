@@ -8,6 +8,7 @@ import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftbquests.gui.tree.GuiQuestTree;
 import com.feed_the_beast.ftbquests.net.MessageClaimReward;
+import com.feed_the_beast.ftbquests.net.MessageDisplayRewardToast;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
@@ -15,7 +16,9 @@ import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.fml.relauncher.Side;
@@ -121,6 +124,18 @@ public abstract class QuestReward extends QuestObjectBase
 	}
 
 	public abstract void claim(EntityPlayerMP player);
+
+	public ItemStack claimAutomated(TileEntity tileEntity, @Nullable EntityPlayerMP player)
+	{
+		if (player != null)
+		{
+			MessageDisplayRewardToast.ENABLED = false;
+			claim(player);
+			MessageDisplayRewardToast.ENABLED = true;
+		}
+
+		return ItemStack.EMPTY;
+	}
 
 	@Override
 	public final void resetProgress(ITeamData data, boolean dependencies)

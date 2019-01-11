@@ -16,6 +16,7 @@ import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.DimensionType;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 /**
@@ -106,7 +107,18 @@ public class DimensionTask extends QuestTask
 	public void getConfig(ConfigGroup config)
 	{
 		super.getConfig(config);
-		config.addEnum("dim", () -> dimension, v -> dimension = v, NameMap.create(DimensionType.NETHER, NameMap.ObjectProperties.withName((sender, dim) -> ServerUtils.getDimensionName(dim.getId())), DimensionType.values())).setDisplayName(new TextComponentTranslation("ftbquests.task.ftbquests.dimension"));
+
+		ArrayList<DimensionType> dims = new ArrayList<>();
+
+		for (DimensionType types : DimensionType.values())
+		{
+			if (types != null)
+			{
+				dims.add(types);
+			}
+		}
+
+		config.addEnum("dim", () -> dimension, v -> dimension = v, NameMap.create(DimensionType.NETHER, NameMap.ObjectProperties.withName((sender, dim) -> ServerUtils.getDimensionName(dim)), dims.toArray(new DimensionType[0]))).setDisplayName(new TextComponentTranslation("ftbquests.task.ftbquests.dimension"));
 	}
 
 	@Override

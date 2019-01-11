@@ -5,6 +5,7 @@ import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToClient;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
+import com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIHelper;
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -57,6 +58,7 @@ public class MessageDeleteObjectResponse extends MessageToClient
 				object.deleteSelf();
 				ClientQuestFile.INSTANCE.refreshIDMap();
 				object.editedFromGUI();
+				FTBQuestsJEIHelper.refresh(object);
 			}
 		}
 	}
