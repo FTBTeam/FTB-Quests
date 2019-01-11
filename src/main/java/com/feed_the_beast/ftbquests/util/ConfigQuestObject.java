@@ -20,7 +20,9 @@ import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
 
 import javax.annotation.Nullable;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
@@ -40,6 +42,11 @@ public class ConfigQuestObject extends ConfigValue
 		file = f == null ? FTBQuests.PROXY.getQuestFile(null) : f;
 		object = o;
 		types = new HashSet<>(t);
+	}
+
+	public ConfigQuestObject(@Nullable QuestFile f, @Nullable QuestObjectBase o, QuestObjectType... t)
+	{
+		this(f, o, t.length == 0 ? Collections.emptyList() : t.length == 1 ? Collections.singletonList(t[0]) : Arrays.asList(t));
 	}
 
 	public boolean isValid(QuestObjectType type)

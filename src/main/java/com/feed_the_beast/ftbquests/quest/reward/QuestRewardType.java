@@ -23,7 +23,6 @@ import net.minecraftforge.registries.IForgeRegistryEntry;
 import net.minecraftforge.registries.RegistryBuilder;
 
 import javax.annotation.Nullable;
-import java.util.Collections;
 import java.util.function.Consumer;
 
 /**
@@ -108,7 +107,7 @@ public final class QuestRewardType extends IForgeRegistryEntry.Impl<QuestRewardT
 
 				if (reward instanceof RandomReward)
 				{
-					ConfigQuestObject config = new ConfigQuestObject(quest.chapter.file, null, Collections.singleton(QuestObjectType.REWARD_TABLE));
+					ConfigQuestObject config = new ConfigQuestObject(quest.chapter.file, null, QuestObjectType.REWARD_TABLE);
 					new GuiSelectQuestObject(config, gui, () -> {
 						((RandomReward) reward).table = (RewardTable) config.getObject();
 						callback.accept(reward);

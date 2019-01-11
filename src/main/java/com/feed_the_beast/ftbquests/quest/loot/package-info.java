@@ -1,3 +1,3 @@
 @javax.annotation.ParametersAreNonnullByDefault
 @mcp.MethodsReturnNonnullByDefault
-package com.feed_the_beast.ftbquests.integration.forestry;
+package com.feed_the_beast.ftbquests.quest.loot;

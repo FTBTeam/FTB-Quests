@@ -18,7 +18,6 @@ import com.feed_the_beast.ftbquests.block.ItemBlockScreen;
 import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.item.ItemLootCrate;
 import com.feed_the_beast.ftbquests.item.ItemLootCrateOld;
-import com.feed_the_beast.ftbquests.item.ItemMissing;
 import com.feed_the_beast.ftbquests.item.ItemQuestBook;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
@@ -140,15 +139,14 @@ public class FTBQuestsEventHandler
 				withName(new ItemLootCrateOld("uncommon"), "uncommon_lootcrate").setTranslationKey(FTBQuests.MOD_ID + ".old_lootcrate"),
 				withName(new ItemLootCrateOld("rare"), "rare_lootcrate").setTranslationKey(FTBQuests.MOD_ID + ".old_lootcrate"),
 				withName(new ItemLootCrateOld("epic"), "epic_lootcrate").setTranslationKey(FTBQuests.MOD_ID + ".old_lootcrate"),
-				withName(new ItemLootCrateOld("legendary"), "legendary_lootcrate").setTranslationKey(FTBQuests.MOD_ID + ".old_lootcrate"),
-				withName(new ItemMissing(), "missing")
+				withName(new ItemLootCrateOld("legendary"), "legendary_lootcrate").setTranslationKey(FTBQuests.MOD_ID + ".old_lootcrate")
 		);
 	}
 
 	@SubscribeEvent
 	public static void registerFTBLib(FTBLibPreInitRegistryEvent event)
 	{
-		event.getRegistry().registerConfigValueProvider(ConfigQuestObject.ID, () -> new ConfigQuestObject(null, null, Collections.emptyList()));
+		event.getRegistry().registerConfigValueProvider(ConfigQuestObject.ID, () -> new ConfigQuestObject(null, null));
 	}
 
 	@SubscribeEvent

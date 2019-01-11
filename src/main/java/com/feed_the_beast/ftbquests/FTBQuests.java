@@ -6,7 +6,6 @@ import com.feed_the_beast.ftbquests.command.CommandFTBQuests;
 import com.feed_the_beast.ftbquests.gui.FTBQuestsGuiHandler;
 import com.feed_the_beast.ftbquests.integration.botania.BotaniaIntegration;
 import com.feed_the_beast.ftbquests.integration.buildcraft.BuildCraftIntegration;
-import com.feed_the_beast.ftbquests.integration.forestry.ForestryIntegration;
 import com.feed_the_beast.ftbquests.integration.ic2.IC2Integration;
 import com.feed_the_beast.ftbquests.integration.projecte.ProjectEIntegration;
 import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
@@ -30,7 +29,7 @@ import org.apache.logging.log4j.Logger;
 		modid = FTBQuests.MOD_ID,
 		name = FTBQuests.MOD_NAME,
 		version = FTBQuests.VERSION,
-		dependencies = FTBLib.THIS_DEP + ";after:ic2"
+		dependencies = FTBLib.THIS_DEP + ";required-after:itemfilters;after:ic2"
 )
 public class FTBQuests
 {
@@ -77,11 +76,6 @@ public class FTBQuests
 		if (Loader.isModLoaded("projecte"))
 		{
 			ProjectEIntegration.preInit();
-		}
-
-		if (Loader.isModLoaded("forestry"))
-		{
-			ForestryIntegration.preInit();
 		}
 
 		NetworkRegistry.INSTANCE.registerGuiHandler(this, new FTBQuestsGuiHandler());

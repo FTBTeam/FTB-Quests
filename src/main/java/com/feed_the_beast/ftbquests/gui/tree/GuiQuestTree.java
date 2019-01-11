@@ -44,7 +44,6 @@ import org.lwjgl.input.Keyboard;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
@@ -303,7 +302,7 @@ public class GuiQuestTree extends GuiBase
 			{
 				if (now - lastShiftPress <= 400L)
 				{
-					ConfigQuestObject c = new ConfigQuestObject(file, null, Arrays.asList(QuestObjectType.CHAPTER, QuestObjectType.QUEST));
+					ConfigQuestObject c = new ConfigQuestObject(file, null, QuestObjectType.CHAPTER, QuestObjectType.QUEST);
 					GuiSelectQuestObject gui = new GuiSelectQuestObject(c, this, () -> {
 						QuestObjectBase o = c.getObject();
 

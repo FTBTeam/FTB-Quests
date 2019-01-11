@@ -358,7 +358,7 @@ public class TileTaskScreenCore extends TileWithTeam implements IConfigCallback,
 
 				config.add("team", createTeamConfig(), ConfigNull.INSTANCE).setDisplayName(new TextComponentTranslation("ftbquests.team")).setCanEdit(editor);
 
-				config.add("task", new ConfigQuestObject(ServerQuestFile.INSTANCE, getTask(), Collections.singleton(QuestObjectType.TASK))
+				config.add("task", new ConfigQuestObject(ServerQuestFile.INSTANCE, getTask(), QuestObjectType.TASK)
 				{
 					@Override
 					public void setObject(QuestObjectBase v)
