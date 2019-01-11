@@ -22,12 +22,26 @@ public class WeightedReward implements Comparable<WeightedReward>
 		{
 			return "??%";
 		}
+		else if (weight <= 0)
+		{
+			return "0%";
+		}
+		else if (weight >= totalWeight)
+		{
+			return "100%";
+		}
 
 		int chance = weight * 100 / totalWeight;
+		double chanced = weight * 100D / (double) totalWeight;
 
-		if (chance == 0)
+		if (chance != chanced)
 		{
-			return String.format("%.2f%%", weight * 100D / (double) totalWeight);
+			if (chanced < 0.01D)
+			{
+				return "<0.01%";
+			}
+
+			return String.format("%.2f%%", chanced);
 		}
 
 		return chance + "%";

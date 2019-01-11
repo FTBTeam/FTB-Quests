@@ -4,6 +4,7 @@ import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftblib.lib.gui.GuiBase;
 import com.feed_the_beast.ftbquests.gui.GuiVariables;
 import com.feed_the_beast.ftbquests.gui.tree.GuiQuestTree;
+import com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIHelper;
 import com.feed_the_beast.ftbquests.net.MessageSyncQuests;
 import com.feed_the_beast.ftbquests.net.edit.MessageDeleteObject;
 import com.feed_the_beast.ftbquests.quest.Quest;
@@ -97,6 +98,7 @@ public class ClientQuestFile extends QuestFile
 		editingMode = message.editingMode;
 		rewards.addAll(message.rewards);
 		refreshGui();
+		FTBQuestsJEIHelper.refresh(this);
 	}
 
 	public boolean canEdit()

@@ -5,6 +5,7 @@ import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToClient;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
+import com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIHelper;
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.fml.relauncher.Side;
@@ -60,6 +61,7 @@ public class MessageEditObjectResponse extends MessageToClient
 		{
 			object.readData(nbt);
 			object.editedFromGUI();
+			FTBQuestsJEIHelper.refresh(object);
 		}
 	}
 }

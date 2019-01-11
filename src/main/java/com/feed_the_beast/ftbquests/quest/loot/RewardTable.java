@@ -53,7 +53,7 @@ public final class RewardTable extends QuestObjectBase
 		file = f;
 		rewards = new ArrayList<>();
 		fakeQuest = new Quest(new QuestChapter(file));
-		emptyWeight = 0;
+		emptyWeight = 9;
 		lootSize = 27;
 		hideTooltip = false;
 		useTitle = false;
@@ -347,9 +347,9 @@ public final class RewardTable extends QuestObjectBase
 
 		for (int i = 0; i < rewards1.size(); i++)
 		{
-			if (i == 20)
+			if (i == 10)
 			{
-				list.add(TextFormatting.GRAY + "- " + I18n.format("ftbquests.reward_table.and_more", rewards1.size() - 20));
+				list.add(TextFormatting.GRAY + "- " + I18n.format("ftbquests.reward_table.and_more", rewards1.size() - 10));
 				return;
 			}
 
@@ -364,5 +364,11 @@ public final class RewardTable extends QuestObjectBase
 				list.add(TextFormatting.GRAY + "- " + r.reward.getDisplayName().getFormattedText());
 			}
 		}
+	}
+
+	@Override
+	public boolean refreshJEI()
+	{
+		return true;
 	}
 }

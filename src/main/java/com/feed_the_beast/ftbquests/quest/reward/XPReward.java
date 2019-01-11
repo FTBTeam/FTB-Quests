@@ -69,7 +69,11 @@ public class XPReward extends QuestReward
 	public void claim(EntityPlayerMP player)
 	{
 		player.addExperience(xp);
-		new MessageDisplayRewardToast(getAltDisplayName(), getIcon()).sendTo(player);
+
+		if (MessageDisplayRewardToast.ENABLED)
+		{
+			new MessageDisplayRewardToast(getAltDisplayName(), getIcon()).sendTo(player);
+		}
 	}
 
 	@Override

@@ -15,6 +15,8 @@ public class FTBQuestsItems
 	public static final Item PROGRESS_DETECTOR = Items.AIR;
 	public static final Item PROGRESS_SCREEN = Items.AIR;
 	public static final Item CHEST = Items.AIR;
+	public static final Item LOOT_CRATE_STORAGE = Items.AIR;
+	public static final Item LOOT_CRATE_OPENER = Items.AIR;
 
 	public static final Item BOOK = Items.AIR;
 	public static final Item XP_VIAL = Items.AIR;

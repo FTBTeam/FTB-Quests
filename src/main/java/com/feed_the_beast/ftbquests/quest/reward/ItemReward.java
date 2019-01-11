@@ -9,11 +9,13 @@ import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftbquests.item.ItemMissing;
 import com.feed_the_beast.ftbquests.net.MessageDisplayItemRewardToast;
+import com.feed_the_beast.ftbquests.net.MessageDisplayRewardToast;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -95,7 +97,19 @@ public class ItemReward extends QuestReward
 		ItemStack stack1 = stack.copy();
 		stack1.grow(player.world.rand.nextInt(randomBonus + 1));
 		ItemHandlerHelper.giveItemToPlayer(player, stack1);
-		new MessageDisplayItemRewardToast(stack1).sendTo(player);
+
+		if (MessageDisplayRewardToast.ENABLED)
+		{
+			new MessageDisplayItemRewardToast(stack1).sendTo(player);
+		}
+	}
+
+	@Override
+	public ItemStack claimAutomated(TileEntity tileEntity, @Nullable EntityPlayerMP player)
+	{
+		ItemStack stack1 = stack.copy();
+		stack1.grow(tileEntity.getWorld().rand.nextInt(randomBonus + 1));
+		return stack1;
 	}
 
 	@Override

@@ -4,6 +4,8 @@ import com.feed_the_beast.ftblib.events.FTBLibPreInitRegistryEvent;
 import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
 import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
+import com.feed_the_beast.ftbquests.block.BlockLootCrateOpener;
+import com.feed_the_beast.ftbquests.block.BlockLootCrateStorage;
 import com.feed_the_beast.ftbquests.block.BlockProgressDetector;
 import com.feed_the_beast.ftbquests.block.BlockProgressScreen;
 import com.feed_the_beast.ftbquests.block.BlockProgressScreenPart;
@@ -42,6 +44,8 @@ import com.feed_the_beast.ftbquests.quest.task.QuestTask;
 import com.feed_the_beast.ftbquests.quest.task.QuestTaskType;
 import com.feed_the_beast.ftbquests.quest.task.StatTask;
 import com.feed_the_beast.ftbquests.quest.task.XPTask;
+import com.feed_the_beast.ftbquests.tile.TileLootCrateOpener;
+import com.feed_the_beast.ftbquests.tile.TileLootCrateStorage;
 import com.feed_the_beast.ftbquests.tile.TileProgressDetector;
 import com.feed_the_beast.ftbquests.tile.TileProgressScreenCore;
 import com.feed_the_beast.ftbquests.tile.TileProgressScreenPart;
@@ -104,7 +108,9 @@ public class FTBQuestsEventHandler
 				withName(new BlockProgressDetector(), "progress_detector"),
 				withName(new BlockProgressScreen(), "progress_screen"),
 				withName(new BlockProgressScreenPart(), "progress_screen_part"),
-				withName(new BlockQuestChest(), "chest")
+				withName(new BlockQuestChest(), "chest"),
+				withName(new BlockLootCrateStorage(), "loot_crate_storage"),
+				withName(new BlockLootCrateOpener(), "loot_crate_opener")
 		);
 
 		GameRegistry.registerTileEntity(TileTaskScreenCore.class, new ResourceLocation(FTBQuests.MOD_ID, "screen_core"));
@@ -113,6 +119,8 @@ public class FTBQuestsEventHandler
 		GameRegistry.registerTileEntity(TileProgressScreenCore.class, new ResourceLocation(FTBQuests.MOD_ID, "progress_screen_core"));
 		GameRegistry.registerTileEntity(TileProgressScreenPart.class, new ResourceLocation(FTBQuests.MOD_ID, "progress_screen_part"));
 		GameRegistry.registerTileEntity(TileQuestChest.class, new ResourceLocation(FTBQuests.MOD_ID, "chest"));
+		GameRegistry.registerTileEntity(TileLootCrateStorage.class, new ResourceLocation(FTBQuests.MOD_ID, "loot_crate_storage"));
+		GameRegistry.registerTileEntity(TileLootCrateOpener.class, new ResourceLocation(FTBQuests.MOD_ID, "loot_crate_opener"));
 	}
 
 	@SubscribeEvent
@@ -123,6 +131,8 @@ public class FTBQuestsEventHandler
 				new ItemBlock(FTBQuestsBlocks.PROGRESS_DETECTOR).setRegistryName("progress_detector"),
 				new ItemBlockProgressScreen(FTBQuestsBlocks.PROGRESS_SCREEN).setRegistryName("progress_screen"),
 				new ItemBlock(FTBQuestsBlocks.CHEST).setRegistryName("chest"),
+				new ItemBlock(FTBQuestsBlocks.LOOT_CRATE_STORAGE).setRegistryName("loot_crate_storage"),
+				new ItemBlock(FTBQuestsBlocks.LOOT_CRATE_OPENER).setRegistryName("loot_crate_opener"),
 
 				withName(new ItemQuestBook(), "book"),
 				withName(new ItemLootCrate(), "lootcrate").setTranslationKey(FTBQuests.MOD_ID + ".lootcrate"),
