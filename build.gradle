@@ -38,7 +38,7 @@ minecraft {
 repositories {
 	maven { url "https://maven.latmod.com/" } //FTBLib
 	maven { url "https://minecraft.curseforge.com/api/maven/" } //ProjectE
-	maven { url "http://maven.ic2.player.to/" } //IC2, Forestry
+	maven { url "http://maven.ic2.player.to/" } //IC2
 	maven { url "https://maven.blamejared.com/" } //PackMode & Botania
 	maven { url "http://maven.thiakil.com/" } //Baubles
 	maven { url "https://mod-buildcraft.com/maven/" } //Buildcraft
@@ -50,7 +50,6 @@ dependencies {
 	deobfCompile "com.latmod.mods:ItemFilters:${itemfilters_version}"
 	deobfCompile "projecte:ProjectE:1.12:${projecte_version}"
 	provided "net.industrial-craft:industrialcraft-2:${ic2_version}:api"
-	provided "net.sengir.forestry:forestry_${mc_version}:${forestry_version}"
 	deobfCompile "io.sommers:packmode:${packmode_version}"
 	deobfProvided "vazkii.botania:Botania:${botania_version}"
 	deobfProvided "com.azanor.baubles:Baubles:${baubles_version}"
