@@ -6,6 +6,7 @@ import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.events.ObjectCompletedEvent;
 import com.feed_the_beast.ftbquests.gui.tree.GuiQuestTree;
+import com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIHelper;
 import com.feed_the_beast.ftbquests.net.MessageDisplayCompletionToast;
 import com.feed_the_beast.ftbquests.net.MessageSubmitTask;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
@@ -268,5 +269,11 @@ public abstract class QuestTask extends QuestObject
 	public Object getJEIFocus()
 	{
 		return null;
+	}
+
+	@Override
+	public final int refreshJEI()
+	{
+		return FTBQuestsJEIHelper.QUESTS;
 	}
 }

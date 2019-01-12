@@ -6,6 +6,7 @@ import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.gui.SimpleTextButton;
 import com.feed_the_beast.ftblib.lib.gui.Theme;
 import com.feed_the_beast.ftblib.lib.gui.misc.GuiButtonListBase;
+import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.quest.Quest;
@@ -20,6 +21,7 @@ import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.TextFormatting;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 /**
@@ -31,9 +33,9 @@ public class GuiSelectQuestObject extends GuiButtonListBase
 	{
 		public final QuestObjectBase object;
 
-		public ButtonQuestObject(Panel panel, QuestObjectBase o)
+		public ButtonQuestObject(Panel panel, @Nullable QuestObjectBase o)
 		{
-			super(panel, o.getObjectType().getColor() + o.getDisplayName().getUnformattedText(), o.getIcon());
+			super(panel, o == null ? I18n.format("ftbquests.null") : o.getObjectType().getColor() + o.getDisplayName().getUnformattedText(), o == null ? Icon.EMPTY : o.getIcon());
 			object = o;
 			setSize(200, 14);
 		}
@@ -41,6 +43,11 @@ public class GuiSelectQuestObject extends GuiButtonListBase
 		@Override
 		public void addMouseOverText(List<String> list)
 		{
+			if (object == null)
+			{
+				return;
+			}
+
 			list.add(object.getDisplayName().getFormattedText());
 			list.add(TextFormatting.GRAY + "ID: " + TextFormatting.DARK_GRAY + object);
 			list.add(TextFormatting.GRAY + "Type: " + object.getObjectType().getColor() + I18n.format(object.getObjectType().getTranslationKey()));
@@ -137,6 +144,11 @@ public class GuiSelectQuestObject extends GuiButtonListBase
 	@Override
 	public void addButtons(Panel panel)
 	{
+		if (config.isValid(QuestObjectType.NULL))
+		{
+			panel.add(new ButtonQuestObject(panel, null));
+		}
+
 		if (config.isValid(QuestObjectType.FILE))
 		{
 			panel.add(new ButtonQuestObject(panel, ClientQuestFile.INSTANCE));

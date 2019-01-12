@@ -8,16 +8,34 @@ import net.minecraftforge.fml.common.Loader;
  */
 public class FTBQuestsJEIHelper
 {
+	public static int QUESTS = 1;
+	public static int LOOTCRATES = 2;
+
 	public static void refresh(QuestObjectBase object)
 	{
-		if (object.refreshJEI() && Loader.isModLoaded("jei"))
+		int i = object.refreshJEI();
+
+		if (i != 0 && Loader.isModLoaded("jei"))
 		{
-			reload0();
+			if ((i & QUESTS) != 0)
+			{
+				refreshQuests();
+			}
+
+			if ((i & LOOTCRATES) != 0)
+			{
+				refreshLootcrates();
+			}
 		}
 	}
 
-	private static void reload0()
+	private static void refreshQuests()
 	{
-		FTBQuestsJEIIntegration.refresh();
+		QuestRegistry.INSTANCE.refresh();
+	}
+
+	private static void refreshLootcrates()
+	{
+		LootCrateRegistry.INSTANCE.refresh();
 	}
 }

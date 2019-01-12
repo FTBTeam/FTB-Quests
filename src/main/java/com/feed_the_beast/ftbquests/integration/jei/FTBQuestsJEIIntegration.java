@@ -25,6 +25,9 @@ public class FTBQuestsJEIIntegration implements IModPlugin
 	@Override
 	public void register(IModRegistry r)
 	{
+		r.handleRecipes(QuestEntry.class, recipe -> recipe, QuestCategory.UID);
+		r.addRecipeCatalyst(new ItemStack(FTBQuestsItems.BOOK), QuestCategory.UID);
+
 		r.handleRecipes(LootCrateEntry.class, recipe -> recipe, LootCrateCategory.UID);
 		r.addRecipeCatalyst(new ItemStack(FTBQuestsItems.LOOTCRATE), LootCrateCategory.UID);
 	}
@@ -32,11 +35,7 @@ public class FTBQuestsJEIIntegration implements IModPlugin
 	@Override
 	public void registerCategories(IRecipeCategoryRegistration r)
 	{
+		r.addRecipeCategories(new QuestCategory(r.getJeiHelpers().getGuiHelper()));
 		r.addRecipeCategories(new LootCrateCategory(r.getJeiHelpers().getGuiHelper()));
-	}
-
-	public static void refresh()
-	{
-		LootCrateRegistry.INSTANCE.refresh();
 	}
 }
