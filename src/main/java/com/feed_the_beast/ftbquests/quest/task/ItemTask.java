@@ -225,7 +225,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 
 		if (icons.isEmpty())
 		{
-			return super.getIcon();
+			return super.getAltIcon();
 		}
 
 		return IconAnimation.fromList(icons, false);
