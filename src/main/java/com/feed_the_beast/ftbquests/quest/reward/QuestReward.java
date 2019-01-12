@@ -7,6 +7,7 @@ import com.feed_the_beast.ftblib.lib.io.Bits;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftbquests.gui.tree.GuiQuestTree;
+import com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIHelper;
 import com.feed_the_beast.ftbquests.net.MessageClaimReward;
 import com.feed_the_beast.ftbquests.net.MessageDisplayRewardToast;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
@@ -239,5 +240,11 @@ public abstract class QuestReward extends QuestObjectBase
 	public Object getJEIFocus()
 	{
 		return null;
+	}
+
+	@Override
+	public final int refreshJEI()
+	{
+		return FTBQuestsJEIHelper.QUESTS;
 	}
 }

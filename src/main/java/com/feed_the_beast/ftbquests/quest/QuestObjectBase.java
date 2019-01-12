@@ -193,8 +193,8 @@ public abstract class QuestObjectBase
 		new MessageEditObject(id).sendToServer();
 	}
 
-	public boolean refreshJEI()
+	public int refreshJEI()
 	{
-		return false;
+		return 0;
 	}
 }

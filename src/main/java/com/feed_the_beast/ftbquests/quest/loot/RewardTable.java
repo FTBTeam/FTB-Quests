@@ -11,6 +11,7 @@ import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftbquests.gui.GuiEditRewardTable;
 import com.feed_the_beast.ftbquests.gui.GuiRewardTables;
 import com.feed_the_beast.ftbquests.gui.tree.GuiQuestTree;
+import com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIHelper;
 import com.feed_the_beast.ftbquests.net.edit.MessageEditObjectDirect;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
@@ -367,8 +368,8 @@ public final class RewardTable extends QuestObjectBase
 	}
 
 	@Override
-	public boolean refreshJEI()
+	public int refreshJEI()
 	{
-		return true;
+		return FTBQuestsJEIHelper.LOOTCRATES;
 	}
 }

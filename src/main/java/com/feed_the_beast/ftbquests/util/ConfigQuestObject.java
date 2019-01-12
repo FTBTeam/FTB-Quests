@@ -22,7 +22,6 @@ import net.minecraft.util.text.TextFormatting;
 import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
@@ -46,7 +45,7 @@ public class ConfigQuestObject extends ConfigValue
 
 	public ConfigQuestObject(@Nullable QuestFile f, @Nullable QuestObjectBase o, QuestObjectType... t)
 	{
-		this(f, o, t.length == 0 ? Collections.emptyList() : t.length == 1 ? Collections.singletonList(t[0]) : Arrays.asList(t));
+		this(f, o, Arrays.asList(t));
 	}
 
 	public boolean isValid(QuestObjectType type)
@@ -205,9 +204,12 @@ public class ConfigQuestObject extends ConfigValue
 		{
 			list.add(TextFormatting.AQUA + "Types:");
 
-			for (QuestObjectType type : types)
+			for (QuestObjectType type : QuestObjectType.ALL)
 			{
-				list.add("> " + I18n.format(type.getTranslationKey()));
+				if (isValid(type))
+				{
+					list.add("> " + I18n.format(type.getTranslationKey()));
+				}
 			}
 		}
 	}

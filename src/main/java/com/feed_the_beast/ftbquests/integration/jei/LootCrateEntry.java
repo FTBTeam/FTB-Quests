@@ -6,7 +6,6 @@ import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.quest.loot.LootCrate;
 import com.feed_the_beast.ftbquests.quest.loot.RewardTable;
 import com.feed_the_beast.ftbquests.quest.loot.WeightedReward;
-import com.feed_the_beast.ftbquests.quest.reward.ItemReward;
 import mezz.jei.api.gui.ITooltipCallback;
 import mezz.jei.api.ingredients.IIngredients;
 import mezz.jei.api.recipe.IRecipeWrapper;
@@ -42,7 +41,8 @@ public class LootCrateEntry implements IRecipeWrapper, ITooltipCallback<ItemStac
 
 		for (WeightedReward reward : list)
 		{
-			ItemStack stack = reward.reward instanceof ItemReward ? ((ItemReward) reward.reward).stack : ItemStack.EMPTY;
+			Object object = reward.reward.getJEIFocus();
+			ItemStack stack = object instanceof ItemStack ? (ItemStack) object : ItemStack.EMPTY;
 
 			if (!stack.isEmpty())
 			{
@@ -69,7 +69,9 @@ public class LootCrateEntry implements IRecipeWrapper, ITooltipCallback<ItemStac
 	public void getIngredients(IIngredients ingredients)
 	{
 		ingredients.setInput(ItemStack.class, itemStack);
-		ingredients.setOutputs(ItemStack.class, items);
+		ArrayList<ItemStack> stacks = new ArrayList<>(items);
+		stacks.add(itemStack);
+		ingredients.setOutputs(ItemStack.class, stacks);
 	}
 
 	@Override

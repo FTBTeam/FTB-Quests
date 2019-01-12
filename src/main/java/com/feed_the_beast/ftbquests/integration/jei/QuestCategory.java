@@ -16,22 +16,21 @@ import net.minecraft.item.ItemStack;
 /**
  * @author LatvianModder
  */
-public class LootCrateCategory implements IRecipeCategory<LootCrateEntry>
+public class QuestCategory implements IRecipeCategory<QuestEntry>
 {
-	public static final String UID = "ftbquests.lootcrates";
-
-	public static final int ITEMSX = 10;
-	public static final int ITEMSY = 7;
+	public static final String UID = "ftbquests.quests";
 
 	private final IDrawable background;
 	//private final IDrawable arrow;
+	private final ItemStack iconStack;
 	private final IDrawable icon;
 	private final String localizedName;
 
-	public LootCrateCategory(IGuiHelper guiHelper)
+	public QuestCategory(IGuiHelper guiHelper)
 	{
-		background = guiHelper.createBlankDrawable(ITEMSX * 18 + 2, ITEMSY * 18);
+		background = guiHelper.createBlankDrawable(8 * 18 + 2, 3 * 18 + 2);
 		//arrow = guiHelper.createDrawable(new ResourceLocation("ftbquests", "textures/gui/arrow.png"), 0, 0, 22, 15);
+		iconStack = new ItemStack(FTBQuestsItems.BOOK);
 		icon = new IDrawable()
 		{
 			@Override
@@ -49,18 +48,11 @@ public class LootCrateCategory implements IRecipeCategory<LootCrateEntry>
 			@Override
 			public void draw(Minecraft minecraft, int xOffset, int yOffset)
 			{
-				if (!LootCrateRegistry.INSTANCE.list.isEmpty())
-				{
-					GuiHelper.drawItem(LootCrateRegistry.INSTANCE.list.get((int) ((System.currentTimeMillis() / 1000L) % LootCrateRegistry.INSTANCE.list.size())).itemStack, xOffset, yOffset, true);
-				}
-				else
-				{
-					GuiHelper.drawItem(new ItemStack(FTBQuestsItems.LOOTCRATE), xOffset, yOffset, true);
-				}
+				GuiHelper.drawItem(iconStack, xOffset, yOffset, true);
 			}
 		};
 
-		localizedName = I18n.format("jei.ftbquests.lootcrates");
+		localizedName = I18n.format("ftbquests.quests") + " [WIP]";
 	}
 
 	@Override
@@ -100,25 +92,35 @@ public class LootCrateCategory implements IRecipeCategory<LootCrateEntry>
 	}
 
 	@Override
-	public void setRecipe(IRecipeLayout layout, LootCrateEntry entry, IIngredients ingredients)
+	public void setRecipe(IRecipeLayout layout, QuestEntry entry, IIngredients ingredients)
 	{
 		IGuiItemStackGroup stacks = layout.getItemStacks();
 
-		stacks.addTooltipCallback(entry);
-		stacks.init(0, true, 0, 0);
-		stacks.set(0, entry.itemStack);
-
-		int slot = 1;
-
-		for (ItemStack stack : entry.items)
+		for (int i = 0; i < 9; i++)
 		{
-			stacks.init(slot, false, (slot % ITEMSX) * 18, (slot / ITEMSX) * 18);
-			stacks.set(slot, stack);
-			slot++;
+			stacks.init(i, true, (i % 3) * 18, (i / 3) * 18);
 
-			if (slot == ITEMSX * ITEMSY)
+			if (i < entry.input.size())
 			{
-				break;
+				stacks.set(i, entry.input.get(i));
+			}
+			else
+			{
+				stacks.set(i, ItemStack.EMPTY);
+			}
+		}
+
+		for (int i = 0; i < 9; i++)
+		{
+			stacks.init(i + 9, false, (i % 3) * 18 + (5 * 18), (i / 3) * 18);
+
+			if (i < entry.output.size())
+			{
+				stacks.set(i + 9, entry.output.get(i));
+			}
+			else
+			{
+				stacks.set(i + 9, ItemStack.EMPTY);
 			}
 		}
 	}

@@ -1236,8 +1236,8 @@ public abstract class QuestFile extends QuestObject
 	}
 
 	@Override
-	public boolean refreshJEI()
+	public final int refreshJEI()
 	{
-		return true;
+		return 255;
 	}
 }
