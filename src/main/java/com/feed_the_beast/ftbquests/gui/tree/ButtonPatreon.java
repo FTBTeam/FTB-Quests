@@ -6,6 +6,7 @@ import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.gui.Theme;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 
 /**
@@ -33,5 +34,14 @@ public class ButtonPatreon extends Button
 		{
 			super.drawBackground(theme, x, y, w, h);
 		}
+	}
+
+	@Override
+	public void draw(Theme theme, int x, int y, int w, int h)
+	{
+		GlStateManager.pushMatrix();
+		GlStateManager.translate(0, 0, 500);
+		super.draw(theme, x, y, w, h);
+		GlStateManager.popMatrix();
 	}
 }

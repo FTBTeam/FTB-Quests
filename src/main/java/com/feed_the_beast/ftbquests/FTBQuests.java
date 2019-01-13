@@ -6,12 +6,14 @@ import com.feed_the_beast.ftbquests.command.CommandFTBQuests;
 import com.feed_the_beast.ftbquests.gui.FTBQuestsGuiHandler;
 import com.feed_the_beast.ftbquests.integration.botania.BotaniaIntegration;
 import com.feed_the_beast.ftbquests.integration.buildcraft.BuildCraftIntegration;
+import com.feed_the_beast.ftbquests.integration.ftbutilities.FTBUtilitiesIntegration;
 import com.feed_the_beast.ftbquests.integration.ic2.IC2Integration;
 import com.feed_the_beast.ftbquests.integration.projecte.ProjectEIntegration;
 import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.net.FTBQuestsNetHandler;
 import com.feed_the_beast.ftbquests.quest.reward.QuestRewardType;
 import com.feed_the_beast.ftbquests.quest.task.QuestTaskType;
+import com.feed_the_beast.ftbutilities.FTBUtilities;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
@@ -29,7 +31,7 @@ import org.apache.logging.log4j.Logger;
 		modid = FTBQuests.MOD_ID,
 		name = FTBQuests.MOD_NAME,
 		version = FTBQuests.VERSION,
-		dependencies = FTBLib.THIS_DEP + ";required-after:itemfilters;after:ic2"
+		dependencies = FTBLib.THIS_DEP + ";required-after:itemfilters;after:ic2;after:ftbutilities;after:botania;after:buildcraftcore;after:projecte"
 )
 public class FTBQuests
 {
@@ -76,6 +78,11 @@ public class FTBQuests
 		if (Loader.isModLoaded("projecte"))
 		{
 			ProjectEIntegration.preInit();
+		}
+
+		if (Loader.isModLoaded(FTBUtilities.MOD_ID))
+		{
+			FTBUtilitiesIntegration.preInit();
 		}
 
 		NetworkRegistry.INSTANCE.registerGuiHandler(this, new FTBQuestsGuiHandler());

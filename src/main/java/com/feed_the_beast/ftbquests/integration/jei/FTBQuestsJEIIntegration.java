@@ -32,10 +32,11 @@ public class FTBQuestsJEIIntegration implements IModPlugin
 	@Override
 	public void register(IModRegistry r)
 	{
-		r.handleRecipes(QuestEntry.class, recipe -> recipe, QuestCategory.UID);
+		r.handleRecipes(QuestWrapper.class, recipe -> recipe, QuestCategory.UID);
 		r.addRecipeCatalyst(new ItemStack(FTBQuestsItems.BOOK), QuestCategory.UID);
 
-		r.handleRecipes(LootCrateEntry.class, recipe -> recipe, LootCrateCategory.UID);
+		r.handleRecipes(LootCrateWrapper.class, recipe -> recipe, LootCrateCategory.UID);
+		r.addRecipeCatalyst(new ItemStack(FTBQuestsItems.BOOK), LootCrateCategory.UID);
 		r.addRecipeCatalyst(new ItemStack(FTBQuestsItems.LOOTCRATE), LootCrateCategory.UID);
 	}
 

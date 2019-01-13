@@ -12,16 +12,16 @@ public enum LootCrateRegistry
 {
 	INSTANCE;
 
-	public final ArrayList<LootCrateEntry> list = new ArrayList<>();
+	public final ArrayList<LootCrateWrapper> list = new ArrayList<>();
 
 	@SuppressWarnings("deprecation")
 	public void refresh()
 	{
 		if (FTBQuestsJEIIntegration.RUNTIME != null && !list.isEmpty())
 		{
-			for (LootCrateEntry entry : list)
+			for (LootCrateWrapper wrapper : list)
 			{
-				FTBQuestsJEIIntegration.RUNTIME.getRecipeRegistry().removeRecipe(entry, LootCrateCategory.UID);
+				FTBQuestsJEIIntegration.RUNTIME.getRecipeRegistry().removeRecipe(wrapper, LootCrateCategory.UID);
 			}
 		}
 
@@ -33,9 +33,9 @@ public enum LootCrateRegistry
 			{
 				if (table.lootCrate != null && !table.lootCrate.stringID.isEmpty())
 				{
-					LootCrateEntry entry = new LootCrateEntry(table.lootCrate);
-					list.add(entry);
-					FTBQuestsJEIIntegration.RUNTIME.getRecipeRegistry().addRecipe(entry, LootCrateCategory.UID);
+					LootCrateWrapper wrapper = new LootCrateWrapper(table.lootCrate);
+					list.add(wrapper);
+					FTBQuestsJEIIntegration.RUNTIME.getRecipeRegistry().addRecipe(wrapper, LootCrateCategory.UID);
 				}
 			}
 		}

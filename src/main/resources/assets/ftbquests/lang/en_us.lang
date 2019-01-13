@@ -222,6 +222,7 @@ ftbquests.reward_table.loot_crate.passive_weight=Weight (Passive)
 ftbquests.reward_table.loot_crate.monster_weight=Weight (Monster)
 ftbquests.reward_table.loot_crate.boss_weight=Weight (Boss)
 
+ftbquests.leaderboard_progress=FTB Quests Progress
 jei.ftbquests.lootcrates=Loot Crates
 jei.ftbquests.lootcrates.chance=Chance: %s
 jei.ftbquests.lootcrates.no_chance=No item chance: %s
