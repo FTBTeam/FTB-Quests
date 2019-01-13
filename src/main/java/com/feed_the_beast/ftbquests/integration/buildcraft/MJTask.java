@@ -3,7 +3,6 @@ package com.feed_the_beast.ftbquests.integration.buildcraft;
 import buildcraft.api.mj.IMjConnector;
 import buildcraft.api.mj.IMjReceiver;
 import buildcraft.api.mj.MjAPI;
-import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
@@ -13,6 +12,7 @@ import com.feed_the_beast.ftbquests.quest.task.FTBQuestsTasks;
 import com.feed_the_beast.ftbquests.quest.task.QuestTaskData;
 import com.feed_the_beast.ftbquests.quest.task.QuestTaskType;
 import com.feed_the_beast.ftbquests.quest.task.SimpleQuestTaskData;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
@@ -66,8 +66,9 @@ public class MJTask extends EnergyTask
 	{
 		Tessellator tessellator = Tessellator.getInstance();
 		BufferBuilder buffer = tessellator.getBuffer();
+		Minecraft mc = Minecraft.getMinecraft();
 
-		ClientUtils.MC.getTextureManager().bindTexture(EMPTY_TEXTURE);
+		mc.getTextureManager().bindTexture(EMPTY_TEXTURE);
 		buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
 		buffer.pos(x, y + h, 0).tex(0, 1).endVertex();
 		buffer.pos(x + w, y + h, 0).tex(1, 1).endVertex();
@@ -85,7 +86,7 @@ public class MJTask extends EnergyTask
 			double v0 = 1D / 32D + (30D / 32D) * (1D - r);
 			double v1 = 31D / 32D;
 
-			ClientUtils.MC.getTextureManager().bindTexture(FULL_TEXTURE);
+			mc.getTextureManager().bindTexture(FULL_TEXTURE);
 			buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
 			buffer.pos(x, y1 + h1, 0).tex(0, v1).endVertex();
 			buffer.pos(x + w, y1 + h1, 0).tex(1, v1).endVertex();
@@ -101,8 +102,9 @@ public class MJTask extends EnergyTask
 	{
 		Tessellator tessellator = Tessellator.getInstance();
 		BufferBuilder buffer = tessellator.getBuffer();
+		Minecraft mc = Minecraft.getMinecraft();
 
-		ClientUtils.MC.getTextureManager().bindTexture(EMPTY_TEXTURE);
+		mc.getTextureManager().bindTexture(EMPTY_TEXTURE);
 		buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
 		double x = -0.5;
 		double y = -0.5;
@@ -134,7 +136,7 @@ public class MJTask extends EnergyTask
 			double u1 = 1;
 			double v1 = 31D / 32D;
 
-			ClientUtils.MC.getTextureManager().bindTexture(FULL_TEXTURE);
+			mc.getTextureManager().bindTexture(FULL_TEXTURE);
 			buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
 			buffer.pos(x, y + h, z).tex(u0, v1).endVertex();
 			buffer.pos(x + w, y + h, z).tex(u1, v1).endVertex();

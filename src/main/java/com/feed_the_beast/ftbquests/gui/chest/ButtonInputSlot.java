@@ -1,11 +1,11 @@
 package com.feed_the_beast.ftbquests.gui.chest;
 
-import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftblib.lib.gui.Button;
 import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.gui.Theme;
 import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.TextFormatting;
 
@@ -26,9 +26,9 @@ public class ButtonInputSlot extends Button
 	{
 		GuiQuestChest gui = (GuiQuestChest) getGui();
 
-		if (gui.container.enchantItem(ClientUtils.MC.player, 0))
+		if (gui.container.enchantItem(Minecraft.getMinecraft().player, 0))
 		{
-			ClientUtils.MC.playerController.sendEnchantPacket(gui.container.windowId, 0);
+			Minecraft.getMinecraft().playerController.sendEnchantPacket(gui.container.windowId, 0);
 		}
 	}
 
