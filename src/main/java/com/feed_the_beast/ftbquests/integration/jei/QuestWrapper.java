@@ -16,14 +16,14 @@ import java.util.List;
 /**
  * @author LatvianModder
  */
-public class QuestEntry implements IRecipeWrapper
+public class QuestWrapper implements IRecipeWrapper
 {
 	public final Quest quest;
 	public final String name;
 	public final List<ItemStack> input;
 	public final List<ItemStack> output;
 
-	public QuestEntry(Quest q)
+	public QuestWrapper(Quest q)
 	{
 		quest = q;
 		name = quest.getDisplayName().getFormattedText();

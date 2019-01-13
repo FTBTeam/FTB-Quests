@@ -13,16 +13,16 @@ public enum QuestRegistry
 {
 	INSTANCE;
 
-	public final ArrayList<QuestEntry> list = new ArrayList<>();
+	public final ArrayList<QuestWrapper> list = new ArrayList<>();
 
 	@SuppressWarnings("deprecation")
 	public void refresh()
 	{
 		if (FTBQuestsJEIIntegration.RUNTIME != null && !list.isEmpty())
 		{
-			for (QuestEntry entry : list)
+			for (QuestWrapper wrapper : list)
 			{
-				FTBQuestsJEIIntegration.RUNTIME.getRecipeRegistry().removeRecipe(entry, QuestCategory.UID);
+				FTBQuestsJEIIntegration.RUNTIME.getRecipeRegistry().removeRecipe(wrapper, QuestCategory.UID);
 			}
 		}
 
@@ -34,9 +34,9 @@ public enum QuestRegistry
 			{
 				for (Quest quest : chapter.quests)
 				{
-					QuestEntry entry = new QuestEntry(quest);
-					list.add(entry);
-					FTBQuestsJEIIntegration.RUNTIME.getRecipeRegistry().addRecipe(entry, QuestCategory.UID);
+					QuestWrapper wrapper = new QuestWrapper(quest);
+					list.add(wrapper);
+					FTBQuestsJEIIntegration.RUNTIME.getRecipeRegistry().addRecipe(wrapper, QuestCategory.UID);
 				}
 			}
 		}

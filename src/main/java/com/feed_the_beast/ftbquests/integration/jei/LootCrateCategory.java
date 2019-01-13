@@ -16,22 +16,19 @@ import net.minecraft.item.ItemStack;
 /**
  * @author LatvianModder
  */
-public class LootCrateCategory implements IRecipeCategory<LootCrateEntry>
+public class LootCrateCategory implements IRecipeCategory<LootCrateWrapper>
 {
 	public static final String UID = "ftbquests.lootcrates";
 
 	public static final int ITEMSX = 10;
-	public static final int ITEMSY = 7;
+	public static final int ITEMSY = 6;
 
 	private final IDrawable background;
-	//private final IDrawable arrow;
 	private final IDrawable icon;
-	private final String localizedName;
 
 	public LootCrateCategory(IGuiHelper guiHelper)
 	{
-		background = guiHelper.createBlankDrawable(ITEMSX * 18 + 2, ITEMSY * 18);
-		//arrow = guiHelper.createDrawable(new ResourceLocation("ftbquests", "textures/gui/arrow.png"), 0, 0, 22, 15);
+		background = guiHelper.createBlankDrawable(ITEMSX * 18 + 2, (ITEMSY + 1) * 18);
 		icon = new IDrawable()
 		{
 			@Override
@@ -59,8 +56,6 @@ public class LootCrateCategory implements IRecipeCategory<LootCrateEntry>
 				}
 			}
 		};
-
-		localizedName = I18n.format("jei.ftbquests.lootcrates");
 	}
 
 	@Override
@@ -72,7 +67,7 @@ public class LootCrateCategory implements IRecipeCategory<LootCrateEntry>
 	@Override
 	public String getTitle()
 	{
-		return localizedName;
+		return I18n.format("jei.ftbquests.lootcrates");
 	}
 
 	@Override
@@ -94,32 +89,18 @@ public class LootCrateCategory implements IRecipeCategory<LootCrateEntry>
 	}
 
 	@Override
-	public void drawExtras(Minecraft minecraft)
-	{
-		//arrow.draw(minecraft, 75, 18);
-	}
-
-	@Override
-	public void setRecipe(IRecipeLayout layout, LootCrateEntry entry, IIngredients ingredients)
+	public void setRecipe(IRecipeLayout layout, LootCrateWrapper entry, IIngredients ingredients)
 	{
 		IGuiItemStackGroup stacks = layout.getItemStacks();
 
 		stacks.addTooltipCallback(entry);
-		stacks.init(0, true, 0, 0);
-		stacks.set(0, entry.itemStack);
+		stacks.init(0, true, 81, 0);
 
-		int slot = 1;
-
-		for (ItemStack stack : entry.items)
+		for (int slot = 0; slot < Math.min(ITEMSX * ITEMSY, entry.items.size()); slot++)
 		{
-			stacks.init(slot, false, (slot % ITEMSX) * 18, (slot / ITEMSX) * 18);
-			stacks.set(slot, stack);
-			slot++;
-
-			if (slot == ITEMSX * ITEMSY)
-			{
-				break;
-			}
+			stacks.init(slot + 1, false, (slot % ITEMSX) * 18, (slot / ITEMSX) * 18 + 18);
 		}
+
+		stacks.set(ingredients);
 	}
 }

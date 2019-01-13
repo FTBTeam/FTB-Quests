@@ -21,14 +21,14 @@ import java.util.List;
 /**
  * @author LatvianModder
  */
-public class LootCrateEntry implements IRecipeWrapper, ITooltipCallback<ItemStack>
+public class LootCrateWrapper implements IRecipeWrapper, ITooltipCallback<ItemStack>
 {
 	public final LootCrate crate;
 	public final String name;
 	public final ItemStack itemStack;
 	public final List<ItemStack> items;
 
-	public LootCrateEntry(LootCrate c)
+	public LootCrateWrapper(LootCrate c)
 	{
 		crate = c;
 		name = crate.table.getDisplayName().getFormattedText();
@@ -69,9 +69,7 @@ public class LootCrateEntry implements IRecipeWrapper, ITooltipCallback<ItemStac
 	public void getIngredients(IIngredients ingredients)
 	{
 		ingredients.setInput(ItemStack.class, itemStack);
-		ArrayList<ItemStack> stacks = new ArrayList<>(items);
-		stacks.add(itemStack);
-		ingredients.setOutputs(ItemStack.class, stacks);
+		ingredients.setOutputs(ItemStack.class, items);
 	}
 
 	@Override
