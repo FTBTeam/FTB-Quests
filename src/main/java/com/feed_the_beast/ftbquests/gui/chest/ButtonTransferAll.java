@@ -1,6 +1,5 @@
 package com.feed_the_beast.ftbquests.gui.chest;
 
-import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftblib.lib.gui.Button;
 import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
 import com.feed_the_beast.ftblib.lib.gui.Panel;
@@ -8,6 +7,7 @@ import com.feed_the_beast.ftblib.lib.gui.Theme;
 import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.inventory.ClickType;
 import net.minecraft.inventory.Slot;
@@ -33,7 +33,7 @@ public class ButtonTransferAll extends Button
 		{
 			if (slot.getHasStack() && !(slot instanceof SlotItemHandler))
 			{
-				ClientUtils.MC.playerController.windowClick(gui.container.windowId, slot.slotNumber, 0, ClickType.QUICK_MOVE, ClientUtils.MC.player);
+				Minecraft.getMinecraft().playerController.windowClick(gui.container.windowId, slot.slotNumber, 0, ClickType.QUICK_MOVE, Minecraft.getMinecraft().player);
 			}
 		}
 	}

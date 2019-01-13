@@ -9,6 +9,7 @@ import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.gui.chest.GuiQuestChest;
 import com.feed_the_beast.ftbquests.gui.tree.GuiQuestTree;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
+import net.minecraft.client.Minecraft;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -58,7 +59,7 @@ public class MessageClaimRewardResponse extends MessageToClient
 
 			if (reward != null)
 			{
-				reward.quest.checkRepeatableQuests(ClientQuestFile.INSTANCE.self, ClientUtils.MC.player.getUniqueID());
+				reward.quest.checkRepeatableQuests(ClientQuestFile.INSTANCE.self, Minecraft.getMinecraft().player.getUniqueID());
 			}
 
 			GuiQuestTree treeGui = ClientUtils.getCurrentGuiAs(GuiQuestTree.class);

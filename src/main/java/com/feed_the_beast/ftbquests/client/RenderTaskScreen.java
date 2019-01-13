@@ -1,6 +1,5 @@
 package com.feed_the_beast.ftbquests.client;
 
-import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
 import com.feed_the_beast.ftbquests.block.BlockTaskScreen;
 import com.feed_the_beast.ftbquests.quest.task.QuestTask;
@@ -8,6 +7,7 @@ import com.feed_the_beast.ftbquests.quest.task.QuestTaskData;
 import com.feed_the_beast.ftbquests.tile.ITaskScreen;
 import com.feed_the_beast.ftbquests.tile.TileTaskScreenCore;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
@@ -54,7 +54,7 @@ public class RenderTaskScreen extends TileEntitySpecialRenderer<TileTaskScreenCo
 
 		double mx = -1D, my = -1D;
 
-		RayTraceResult ray = ClientUtils.MC.objectMouseOver;
+		RayTraceResult ray = Minecraft.getMinecraft().objectMouseOver;
 
 		if (!screen.inputOnly && ray != null && ray.typeOfHit == RayTraceResult.Type.BLOCK && ray.sideHit == screen.getFacing())
 		{
@@ -146,7 +146,7 @@ public class RenderTaskScreen extends TileEntitySpecialRenderer<TileTaskScreenCo
 
 		if (screen.inputOnly)
 		{
-			ClientUtils.MC.getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
+			Minecraft.getMinecraft().getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
 			Tessellator tessellator = Tessellator.getInstance();
 			BufferBuilder buffer = tessellator.getBuffer();
 			TextureAtlasSprite sprite = FTBQuestsClientEventHandler.inputBlockSprite;
