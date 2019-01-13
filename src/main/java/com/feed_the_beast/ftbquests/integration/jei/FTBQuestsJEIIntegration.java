@@ -4,6 +4,7 @@ import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
 import mezz.jei.api.IJeiRuntime;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.IModRegistry;
+import mezz.jei.api.ISubtypeRegistry;
 import mezz.jei.api.JEIPlugin;
 import mezz.jei.api.recipe.IRecipeCategoryRegistration;
 import net.minecraft.item.ItemStack;
@@ -20,6 +21,12 @@ public class FTBQuestsJEIIntegration implements IModPlugin
 	public void onRuntimeAvailable(IJeiRuntime r)
 	{
 		RUNTIME = r;
+	}
+
+	@Override
+	public void registerItemSubtypes(ISubtypeRegistry r)
+	{
+		r.registerSubtypeInterpreter(FTBQuestsItems.LOOTCRATE, stack -> stack.hasTagCompound() ? stack.getTagCompound().getString("type") : "");
 	}
 
 	@Override
