@@ -15,6 +15,7 @@ import com.feed_the_beast.ftblib.lib.util.misc.NameMap;
 import com.feed_the_beast.ftbquests.net.MessageSubmitTask;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
+import com.latmod.mods.itemfilters.api.ItemFiltersAPI;
 import com.latmod.mods.itemfilters.item.ItemFiltersItems;
 import com.latmod.mods.itemfilters.item.ItemMissing;
 import net.minecraft.client.resources.I18n;
@@ -213,13 +214,31 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 	{
 		List<Icon> icons = new ArrayList<>();
 
-		for (ItemStack stack : items)
+		if (items.size() == 1 && ItemFiltersAPI.isFilter(items.get(0)))
 		{
-			Icon icon = ItemIcon.getItemIcon(stack);
+			List<ItemStack> iconStacks = new ArrayList<>();
+			ItemFiltersAPI.getValidItems(items.get(0), iconStacks);
 
-			if (!icon.isEmpty())
+			for (ItemStack stack : iconStacks)
 			{
-				icons.add(icon);
+				Icon icon = ItemIcon.getItemIcon(stack);
+
+				if (!icon.isEmpty())
+				{
+					icons.add(icon);
+				}
+			}
+		}
+		else
+		{
+			for (ItemStack stack : items)
+			{
+				Icon icon = ItemIcon.getItemIcon(stack);
+
+				if (!icon.isEmpty())
+				{
+					icons.add(icon);
+				}
 			}
 		}
 
@@ -266,6 +285,10 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 		if (stack.isEmpty() || stack.getItem() == ItemFiltersItems.MISSING)
 		{
 			return false;
+		}
+		else if (items.size() == 1 && ItemFiltersAPI.isFilter(items.get(0)))
+		{
+			return ItemFiltersAPI.filter(items.get(0), stack);
 		}
 
 		Item item = stack.getItem();
