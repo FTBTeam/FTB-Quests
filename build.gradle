@@ -52,7 +52,7 @@ repositories {
 
 dependencies {
 	deobfCompile "com.feed_the_beast.mods:FTBLib:${ftblib_version}"
-	deobfCompile "com.feed_the_beast.mods:FTBUtilities:${ftbutlities_version}"
+	deobfCompile "com.feed_the_beast.mods:FTBUtilities:${ftbutilities_version}"
 	deobfCompile "com.latmod.mods:ItemFilters:${itemfilters_version}"
 	deobfCompile "projecte:ProjectE:1.12:${projecte_version}"
 	provided "net.industrial-craft:industrialcraft-2:${ic2_version}:api"
