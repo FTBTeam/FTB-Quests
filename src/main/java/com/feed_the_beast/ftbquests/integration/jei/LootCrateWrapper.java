@@ -77,6 +77,8 @@ public class LootCrateWrapper implements IRecipeWrapper, ITooltipCallback<ItemSt
 	{
 		if (slot == 0)
 		{
+			tooltip.add(TextFormatting.GOLD + crate.table.getDisplayName().getUnformattedText());
+
 			if (crate.table.emptyWeight > 0)
 			{
 				tooltip.add(TextFormatting.GRAY + I18n.format("jei.ftbquests.lootcrates.no_chance", TextFormatting.GOLD + WeightedReward.chanceString(crate.table.emptyWeight, crate.table.getTotalWeight(true))));
