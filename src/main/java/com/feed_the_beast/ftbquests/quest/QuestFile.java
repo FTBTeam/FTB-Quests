@@ -348,6 +348,13 @@ public abstract class QuestFile extends QuestObject
 		return table == null ? null : table.lootCrate;
 	}
 
+	@Nullable
+	public RewardTable getRewardTable(String id)
+	{
+		LootCrate crate = getLootCrate(id);
+		return crate != null ? crate.table : getRewardTable(getID(id));
+	}
+
 	public void refreshIDMap()
 	{
 		clearCachedData();
