@@ -1,17 +1,14 @@
 package com.feed_the_beast.ftbquests.command;
 
 import com.feed_the_beast.ftblib.FTBLib;
-import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.net.edit.MessageEditObjectResponse;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
-import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -25,30 +22,12 @@ import java.util.List;
 /**
  * @author LatvianModder
  */
-public class CommandChangeTeamRewards extends CommandBase
+public class CommandChangeTeamRewards extends CommandEditorBase
 {
 	@Override
 	public String getName()
 	{
 		return "change_team_rewards";
-	}
-
-	@Override
-	public String getUsage(ICommandSender sender)
-	{
-		return "commands.ftbquests.change_team_rewards.usage";
-	}
-
-	@Override
-	public int getRequiredPermissionLevel()
-	{
-		return 2;
-	}
-
-	@Override
-	public boolean checkPermission(MinecraftServer server, ICommandSender sender)
-	{
-		return sender instanceof EntityPlayerMP ? FTBQuests.canEdit((EntityPlayerMP) sender) : super.checkPermission(server, sender);
 	}
 
 	@Override
