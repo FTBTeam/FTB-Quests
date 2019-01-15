@@ -2,11 +2,9 @@ package com.feed_the_beast.ftbquests.command;
 
 import com.feed_the_beast.ftblib.FTBLib;
 import com.feed_the_beast.ftblib.lib.math.MathUtils;
-import com.feed_the_beast.ftbquests.net.edit.MessageEditObjectResponse;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.loot.RewardTable;
 import com.feed_the_beast.ftbquests.quest.loot.WeightedReward;
-import com.feed_the_beast.ftbquests.quest.reward.ItemReward;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
@@ -19,6 +17,7 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.items.ItemHandlerHelper;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -27,22 +26,18 @@ import java.util.List;
 /**
  * @author LatvianModder
  */
-public class CommandImportRewardsFromChest extends CommandEditorBase
+public class CommandExportRewardsToChest extends CommandEditorBase
 {
 	@Override
 	public String getName()
 	{
-		return "import_rewards_from_chest";
+		return "export_rewards_to_chest";
 	}
 
 	@Override
 	public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos)
 	{
-		if (args.length == 3)
-		{
-			return getListOfStringsMatchingLastWord(args, "true", "false");
-		}
-		else if (args.length == 1)
+		if (args.length == 1)
 		{
 			List<String> list = new ArrayList<>(ServerQuestFile.INSTANCE.rewardTables.size());
 
@@ -74,9 +69,6 @@ public class CommandImportRewardsFromChest extends CommandEditorBase
 			throw FTBLib.error(sender, "commands.ftbquests.import_rewards_from_chest.invalid_id", args[0]);
 		}
 
-		int weight = args.length >= 2 ? parseInt(args[1], 1, Integer.MAX_VALUE) : 1;
-		boolean replace = args.length >= 3 && parseBoolean(args[2]);
-
 		RayTraceResult ray = MathUtils.rayTrace(player, false);
 
 		if (ray != null && ray.typeOfHit == RayTraceResult.Type.BLOCK)
@@ -89,30 +81,25 @@ public class CommandImportRewardsFromChest extends CommandEditorBase
 
 				if (handler != null)
 				{
-					if (replace)
-					{
-						table.rewards.clear();
-					}
-
 					int r = 0;
 
-					for (int i = 0; i < handler.getSlots(); i++)
+					for (WeightedReward reward : table.rewards)
 					{
-						ItemStack stack = handler.getStackInSlot(i);
+						Object object = reward.reward.getJEIFocus();
 
-						if (!stack.isEmpty())
+						if (object instanceof ItemStack && !((ItemStack) object).isEmpty())
 						{
-							ItemReward itemReward = new ItemReward(table.fakeQuest);
-							itemReward.stack = stack.copy();
-							table.rewards.add(new WeightedReward(itemReward, weight));
-							r++;
+							ItemStack stack1 = ((ItemStack) object).copy();
+							stack1.setCount(1);
+
+							if (ItemHandlerHelper.insertItem(handler, stack1, false).isEmpty())
+							{
+								r++;
+							}
 						}
 					}
 
-					ServerQuestFile.INSTANCE.clearCachedData();
-					new MessageEditObjectResponse(table).sendToAll();
-					ServerQuestFile.INSTANCE.save();
-					sender.sendMessage(new TextComponentTranslation("commands.ftbquests.import_rewards_from_chest.text", r, table.getDisplayName()));
+					sender.sendMessage(new TextComponentTranslation("commands.ftbquests.export_rewards_to_chest.text", Integer.toString(r), Integer.toString(table.rewards.size()), table.getDisplayName()));
 				}
 			}
 		}
