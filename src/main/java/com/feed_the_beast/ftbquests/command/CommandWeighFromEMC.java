@@ -31,11 +31,22 @@ public class CommandWeighFromEMC extends CommandEditorBase
 	{
 		if (args.length == 1)
 		{
-			List<String> list = new ArrayList<>(ServerQuestFile.INSTANCE.rewardTables.size() + 1);
+			List<String> list = new ArrayList<>(ServerQuestFile.INSTANCE.rewardTables.size());
 
 			for (RewardTable table : ServerQuestFile.INSTANCE.rewardTables)
 			{
-				list.add(table.getCodeString());
+				if (table.lootCrate != null)
+				{
+					list.add(table.lootCrate.stringID);
+				}
+			}
+
+			for (RewardTable table : ServerQuestFile.INSTANCE.rewardTables)
+			{
+				if (table.lootCrate == null)
+				{
+					list.add(table.getCodeString());
+				}
 			}
 
 			return getListOfStringsMatchingLastWord(args, list);
@@ -52,7 +63,7 @@ public class CommandWeighFromEMC extends CommandEditorBase
 			throw new WrongUsageException(getUsage(sender));
 		}
 
-		RewardTable table = ServerQuestFile.INSTANCE.getRewardTable(ServerQuestFile.INSTANCE.getID(args[0]));
+		RewardTable table = ServerQuestFile.INSTANCE.getRewardTable(args[0]);
 
 		if (table == null)
 		{

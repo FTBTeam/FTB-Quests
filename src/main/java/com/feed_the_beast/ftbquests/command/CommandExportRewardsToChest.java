@@ -43,7 +43,18 @@ public class CommandExportRewardsToChest extends CommandEditorBase
 
 			for (RewardTable table : ServerQuestFile.INSTANCE.rewardTables)
 			{
-				list.add(table.getCodeString());
+				if (table.lootCrate != null)
+				{
+					list.add(table.lootCrate.stringID);
+				}
+			}
+
+			for (RewardTable table : ServerQuestFile.INSTANCE.rewardTables)
+			{
+				if (table.lootCrate == null)
+				{
+					list.add(table.getCodeString());
+				}
 			}
 
 			return getListOfStringsMatchingLastWord(args, list);
@@ -62,7 +73,7 @@ public class CommandExportRewardsToChest extends CommandEditorBase
 			throw new WrongUsageException(getUsage(sender));
 		}
 
-		RewardTable table = ServerQuestFile.INSTANCE.getRewardTable(ServerQuestFile.INSTANCE.getID(args[0]));
+		RewardTable table = ServerQuestFile.INSTANCE.getRewardTable(args[0]);
 
 		if (table == null)
 		{
