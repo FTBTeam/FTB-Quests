@@ -19,6 +19,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
+import java.io.File;
 import java.util.function.Predicate;
 
 /**
@@ -38,12 +39,12 @@ public abstract class QuestObjectBase
 
 	public final String toString()
 	{
-		return String.format("#%08X", id);
+		return String.format("#%08x", id);
 	}
 
 	public final String getCodeString()
 	{
-		return String.format("%08X", id);
+		return String.format("%08x", id);
 	}
 
 	public final boolean equals(Object object)
@@ -174,6 +175,12 @@ public abstract class QuestObjectBase
 
 	public void onCreated()
 	{
+	}
+
+	@Nullable
+	public File getFile(File folder)
+	{
+		return null;
 	}
 
 	public void clearCachedData()

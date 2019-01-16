@@ -10,6 +10,7 @@ import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.math.MathUtils;
 import com.feed_the_beast.ftblib.lib.math.Ticks;
+import com.feed_the_beast.ftblib.lib.util.NBTUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.events.ObjectCompletedEvent;
 import com.feed_the_beast.ftbquests.net.MessageDisplayCompletionToast;
@@ -25,7 +26,6 @@ import com.feed_the_beast.ftbquests.quest.task.QuestTask;
 import com.feed_the_beast.ftbquests.quest.task.QuestTaskType;
 import com.latmod.mods.itemfilters.item.ItemMissing;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Items;
@@ -41,6 +41,7 @@ import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.registries.ForgeRegistry;
 
 import javax.annotation.Nullable;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -51,14 +52,13 @@ import java.util.Random;
  */
 public abstract class QuestFile extends QuestObject
 {
-	public static final int VERSION = 3;
+	public static final int VERSION = 4;
 
 	public final List<QuestChapter> chapters;
 	public final List<QuestVariable> variables;
 	public final List<RewardTable> rewardTables;
 
 	private final Int2ObjectOpenHashMap<QuestObjectBase> map;
-	private final Object2IntOpenHashMap<String> oldMap;
 	public final RewardTable dummyTable;
 
 	public final List<ItemStack> emergencyItems;
@@ -79,7 +79,6 @@ public abstract class QuestFile extends QuestObject
 		rewardTables = new ArrayList<>();
 
 		map = new Int2ObjectOpenHashMap<>();
-		oldMap = new Object2IntOpenHashMap<>();
 		dummyTable = new RewardTable(this);
 
 		emergencyItems = new ArrayList<>();
@@ -513,53 +512,49 @@ public abstract class QuestFile extends QuestObject
 		}
 	}
 
-	public final void writeDataFull(NBTTagCompound nbt)
+	private NBTTagCompound createIndex(List<? extends QuestObjectBase> list)
 	{
-		writeData(nbt);
+		int[] index = new int[list.size()];
 
-		if (!oldMap.isEmpty())
+		for (int i = 0; i < index.length; i++)
 		{
-			NBTTagCompound oids = new NBTTagCompound();
-
-			for (Object2IntOpenHashMap.Entry<String> entry : oldMap.object2IntEntrySet())
-			{
-				oids.setInteger(entry.getKey(), entry.getIntValue());
-			}
-
-			nbt.setTag("old_ids", oids);
+			index[i] = list.get(i).id;
 		}
 
-		NBTTagList rt = new NBTTagList();
+		NBTTagCompound nbt = new NBTTagCompound();
+		nbt.setIntArray("index", index);
+		return nbt;
+	}
 
-		for (RewardTable table : rewardTables)
-		{
-			NBTTagCompound nbt1 = new NBTTagCompound();
-			table.writeData(nbt1);
-			nbt1.setInteger("uid", table.id);
-			rt.appendTag(nbt1);
-		}
+	public int[] readIndex(File file)
+	{
+		NBTTagCompound nbt = NBTUtils.readNBT(file);
+		return nbt == null ? new int[0] : nbt.getIntArray("index");
+	}
 
-		nbt.setTag("reward_tables", rt);
+	public final void writeDataFull(File folder)
+	{
+		NBTTagCompound out = new NBTTagCompound();
+		writeData(out);
+		NBTUtils.writeNBTSafe(new File(folder, "file.nbt"), out);
 
-		NBTTagList c = new NBTTagList();
+		NBTUtils.writeNBTSafe(new File(folder, "chapters/index.nbt"), createIndex(chapters));
+		NBTUtils.writeNBTSafe(new File(folder, "variables/index.nbt"), createIndex(variables));
+		NBTUtils.writeNBTSafe(new File(folder, "reward_tables/index.nbt"), createIndex(rewardTables));
 
 		for (QuestChapter chapter : chapters)
 		{
-			NBTTagCompound nbt1 = new NBTTagCompound();
-			chapter.writeData(nbt1);
-			nbt1.setInteger("uid", chapter.id);
-			c.appendTag(nbt1);
+			out = new NBTTagCompound();
+			chapter.writeData(out);
+			String chapterPath = "chapters/" + chapter.getCodeString() + "/";
+			NBTUtils.writeNBTSafe(new File(folder, chapterPath + "chapter.nbt"), out);
 
 			if (!chapter.quests.isEmpty())
 			{
-				NBTTagList q = new NBTTagList();
-
 				for (Quest quest : chapter.quests)
 				{
-					NBTTagCompound nbt2 = new NBTTagCompound();
-					quest.writeData(nbt2);
-					nbt2.setInteger("uid", quest.id);
-					q.appendTag(nbt2);
+					out = new NBTTagCompound();
+					quest.writeData(out);
 
 					if (!quest.tasks.isEmpty())
 					{
@@ -580,13 +575,9 @@ public abstract class QuestFile extends QuestObject
 							t.appendTag(nbt3);
 						}
 
-						if (t.tagCount() == 1)
+						if (!t.isEmpty())
 						{
-							nbt2.setTag("task", t.get(0));
-						}
-						else if (!t.isEmpty())
-						{
-							nbt2.setTag("tasks", t);
+							out.setTag("tasks", t);
 						}
 					}
 
@@ -609,78 +600,38 @@ public abstract class QuestFile extends QuestObject
 							r.appendTag(nbt3);
 						}
 
-						if (r.tagCount() == 1)
+						if (!r.isEmpty())
 						{
-							nbt2.setTag("reward", r.get(0));
-						}
-						else if (!r.isEmpty())
-						{
-							nbt2.setTag("rewards", r);
+							out.setTag("rewards", r);
 						}
 					}
-				}
 
-				nbt1.setTag("quests", q);
+					NBTUtils.writeNBTSafe(new File(folder, chapterPath + quest.getCodeString() + ".nbt"), out);
+				}
 			}
 		}
 
-		nbt.setTag("chapters", c);
-
-		NBTTagList v = new NBTTagList();
-
 		for (QuestVariable variable : variables)
 		{
-			NBTTagCompound nbt1 = new NBTTagCompound();
-			variable.writeData(nbt1);
-			nbt1.setInteger("uid", variable.id);
-			v.appendTag(nbt1);
+			out = new NBTTagCompound();
+			variable.writeData(out);
+			NBTUtils.writeNBTSafe(new File(folder, "variables/" + variable.getCodeString() + ".nbt"), out);
 		}
 
-		nbt.setTag("variables", v);
+		for (RewardTable table : rewardTables)
+		{
+			NBTTagCompound nbt1 = new NBTTagCompound();
+			table.writeData(nbt1);
+			NBTUtils.writeNBTSafe(new File(folder, "reward_tables/" + table.getCodeString() + ".nbt"), nbt1);
+		}
 	}
 
 	private void readIDs(QuestObjectBase object, NBTTagCompound nbt)
 	{
 		object.id = readID(nbt.getInteger("uid"));
-
-		if (object instanceof QuestObject)
-		{
-			QuestObject o = (QuestObject) object;
-			String id = nbt.getString("id").trim();
-
-			if (!id.isEmpty() && !id.equalsIgnoreCase(object.getCodeString()))
-			{
-				if (o instanceof QuestVariable)
-				{
-					oldMap.put("#" + id, o.id);
-				}
-				else if (o instanceof QuestChapter)
-				{
-					oldMap.put(id, o.id);
-				}
-				else if (o instanceof Quest)
-				{
-					String c = getOldID(((Quest) o).chapter);
-
-					if (!c.isEmpty())
-					{
-						oldMap.put(c + ":" + id, o.id);
-					}
-				}
-				else if (o instanceof QuestTask)
-				{
-					String q = getOldID(((QuestTask) o).quest);
-
-					if (!q.isEmpty())
-					{
-						oldMap.put(q + ":" + id, o.id);
-					}
-				}
-			}
-		}
 	}
 
-	public final void readDataFull(NBTTagCompound nbt)
+	public final void readDataOld(NBTTagCompound nbt)
 	{
 		fileVersion = nbt.getInteger("version");
 		readData(nbt);
@@ -688,15 +639,6 @@ public abstract class QuestFile extends QuestObject
 		chapters.clear();
 		variables.clear();
 		rewardTables.clear();
-
-		oldMap.clear();
-
-		NBTTagCompound oids = nbt.getCompoundTag("old_ids");
-
-		for (String s : oids.getKeySet())
-		{
-			oldMap.put(s, oids.getInteger(s));
-		}
 
 		NBTTagList rtl = nbt.getTagList("reward_tables", Constants.NBT.TAG_COMPOUND);
 
@@ -830,6 +772,160 @@ public abstract class QuestFile extends QuestObject
 		}
 	}
 
+	public final void readDataFull(File folder)
+	{
+		NBTTagCompound nbt = NBTUtils.readNBT(new File(folder, "file.nbt"));
+
+		if (nbt != null)
+		{
+			fileVersion = nbt.getInteger("version");
+			readData(nbt);
+		}
+
+		chapters.clear();
+		variables.clear();
+		rewardTables.clear();
+
+		for (int i : readIndex(new File(folder, "chapters/index.nbt")))
+		{
+			QuestChapter chapter = new QuestChapter(this);
+			chapter.id = i;
+			chapters.add(chapter);
+
+			File[] files = new File(folder, "chapters/" + chapter.getCodeString()).listFiles();
+
+			if (files != null && files.length > 0)
+			{
+				for (File f : files)
+				{
+					if (!f.getName().equals("chapter.nbt"))
+					{
+						try
+						{
+							Quest quest = new Quest(chapter);
+							quest.id = Long.decode("#" + f.getName().replace(".nbt", "")).intValue();
+							chapter.quests.add(quest);
+						}
+						catch (Exception ex)
+						{
+							FTBQuests.LOGGER.warn("Failed to read quest ID " + f.getName());
+						}
+					}
+				}
+			}
+		}
+
+		for (int i : readIndex(new File(folder, "variables/index.nbt")))
+		{
+			QuestVariable variable = new QuestVariable(this);
+			variable.id = i;
+			variables.add(variable);
+		}
+
+		for (int i : readIndex(new File(folder, "reward_tables/index.nbt")))
+		{
+			RewardTable table = new RewardTable(this);
+			table.id = i;
+			rewardTables.add(table);
+		}
+
+		refreshIDMap();
+
+		for (QuestChapter chapter : chapters)
+		{
+			String chapterPath = "chapters/" + chapter.getCodeString() + "/";
+			nbt = NBTUtils.readNBT(new File(folder, chapterPath + "chapter.nbt"));
+
+			if (nbt != null)
+			{
+				chapter.readData(nbt);
+			}
+
+			for (Quest quest : chapter.quests)
+			{
+				nbt = NBTUtils.readNBT(new File(folder, chapterPath + quest.getCodeString() + ".nbt"));
+
+				if (nbt == null)
+				{
+					continue;
+				}
+
+				quest.readData(nbt);
+
+				NBTTagList t = nbt.getTagList("tasks", Constants.NBT.TAG_COMPOUND);
+
+				for (int k = 0; k < t.tagCount(); k++)
+				{
+					NBTTagCompound tt = t.getCompoundTagAt(k);
+					QuestTask task = QuestTaskType.createTask(quest, tt.getString("type"));
+
+					if (task != null)
+					{
+						readIDs(task, tt);
+						task.readData(tt);
+						quest.tasks.add(task);
+					}
+				}
+
+				NBTTagList r = nbt.getTagList("rewards", Constants.NBT.TAG_COMPOUND);
+
+				for (int k = 0; k < r.tagCount(); k++)
+				{
+					NBTTagCompound rt = r.getCompoundTagAt(k);
+
+					if (!rt.hasKey("type") && !rt.hasKey("item"))
+					{
+						ItemReward reward = new ItemReward(quest);
+						reward.id = readID(rt.getInteger("uid"));
+						reward.team = rt.getBoolean("team_reward");
+						rt.removeTag("uid");
+						rt.removeTag("team_reward");
+						reward.stack = ItemMissing.read(rt);
+						quest.rewards.add(reward);
+						continue;
+					}
+
+					QuestReward reward = QuestRewardType.createReward(quest, rt.getString("type"));
+
+					if (reward != null)
+					{
+						readIDs(reward, rt);
+						reward.readData(rt);
+						quest.rewards.add(reward);
+					}
+				}
+			}
+		}
+
+		for (QuestVariable variable : variables)
+		{
+			nbt = NBTUtils.readNBT(new File(folder, "variables/" + variable.getCodeString() + ".nbt"));
+
+			if (nbt != null)
+			{
+				variable.readData(nbt);
+			}
+		}
+
+		for (RewardTable table : rewardTables)
+		{
+			nbt = NBTUtils.readNBT(new File(folder, "reward_tables/" + table.getCodeString() + ".nbt"));
+
+			if (nbt != null)
+			{
+				table.readData(nbt);
+			}
+		}
+
+		for (QuestChapter chapter : chapters)
+		{
+			for (Quest quest : chapter.quests)
+			{
+				quest.verifyDependencies();
+			}
+		}
+	}
+
 	@Override
 	public final void writeNetData(DataOut data)
 	{
@@ -861,13 +957,6 @@ public abstract class QuestFile extends QuestObject
 	{
 		int pos = data.getPosition();
 		writeNetData(data);
-		data.writeVarInt(oldMap.size());
-
-		for (Object2IntOpenHashMap.Entry<String> entry : oldMap.object2IntEntrySet())
-		{
-			data.writeString(entry.getKey());
-			data.writeInt(entry.getIntValue());
-		}
 
 		data.writeVarInt(rewardTables.size());
 
@@ -954,16 +1043,6 @@ public abstract class QuestFile extends QuestObject
 	{
 		int pos = data.getPosition();
 		readNetData(data);
-
-		oldMap.clear();
-		int oids = data.readVarInt();
-
-		for (int i = 0; i < oids; i++)
-		{
-			String k = data.readString();
-			int v = data.readInt();
-			oldMap.put(k, v);
-		}
 
 		chapters.clear();
 		variables.clear();
@@ -1167,7 +1246,7 @@ public abstract class QuestFile extends QuestObject
 		}
 		catch (Exception ex)
 		{
-			return oldMap.getInt(id);
+			return 0;
 		}
 	}
 
@@ -1187,19 +1266,6 @@ public abstract class QuestFile extends QuestObject
 		}
 
 		return 0;
-	}
-
-	public String getOldID(QuestObject object)
-	{
-		for (Object2IntOpenHashMap.Entry<String> entry : oldMap.object2IntEntrySet())
-		{
-			if (entry.getIntValue() == object.id)
-			{
-				return entry.getKey();
-			}
-		}
-
-		return "";
 	}
 
 	@Nullable

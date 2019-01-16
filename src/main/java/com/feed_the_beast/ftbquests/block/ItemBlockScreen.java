@@ -12,7 +12,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTPrimitive;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagString;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -69,10 +68,6 @@ public class ItemBlockScreen extends ItemBlock
 			if (task == null || task.isEmpty())
 			{
 				BlockTaskScreen.currentTask = quest.tasks.get(0);
-			}
-			else if (task instanceof NBTTagString)
-			{
-				BlockTaskScreen.currentTask = file.getTask(file.getID(file.getOldID(quest) + ':' + task));
 			}
 			else if (task instanceof NBTPrimitive)
 			{

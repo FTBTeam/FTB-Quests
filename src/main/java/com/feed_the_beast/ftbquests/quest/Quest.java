@@ -30,6 +30,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -524,6 +525,12 @@ public final class Quest extends QuestObject
 				task.onCreated();
 			}
 		}
+	}
+
+	@Override
+	public File getFile(File folder)
+	{
+		return new File(folder, "chapters/" + chapter.getCodeString() + "/" + getCodeString() + ".nbt");
 	}
 
 	@Override

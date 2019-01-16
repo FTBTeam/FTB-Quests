@@ -7,21 +7,21 @@ import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.IConfigCallback;
 import com.feed_the_beast.ftblib.lib.data.Universe;
 import com.feed_the_beast.ftbquests.FTBQuests;
-import com.feed_the_beast.ftbquests.events.ModifyBaseFileLocationEvent;
 import com.feed_the_beast.ftbquests.net.MessageSyncEditingMode;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
+import io.sommers.packmode.api.PackModeAPI;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
 import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,44 +43,27 @@ public class FTBQuestsWorldData implements IConfigCallback
 			ServerQuestFile.INSTANCE.unload();
 		}
 
-		ModifyBaseFileLocationEvent fileEvent = new ModifyBaseFileLocationEvent(event.getUniverse().server);
-		fileEvent.post();
-		File file = fileEvent.getFile();
+		ServerQuestFile.INSTANCE = new ServerQuestFile(event.getUniverse());
+		ServerQuestFile.INSTANCE.load();
 
-		if (file == null)
+		int c = ServerQuestFile.INSTANCE.chapters.size();
+		int v = ServerQuestFile.INSTANCE.variables.size();
+		int q = 0;
+		int t = 0;
+		int r = 0;
+
+		for (QuestChapter chapter : ServerQuestFile.INSTANCE.chapters)
 		{
-			file = new File(event.getUniverse().server.getDataDirectory(), "questpacks/normal.nbt");
-		}
+			q += chapter.quests.size();
 
-		FTBQuests.LOGGER.info("Loading quests from " + file.getAbsolutePath());
-
-		ServerQuestFile.INSTANCE = new ServerQuestFile(event.getUniverse(), file);
-
-		if (!ServerQuestFile.INSTANCE.load())
-		{
-			FTBQuests.LOGGER.error("Failed to load quests!");
-		}
-		else
-		{
-			int c = ServerQuestFile.INSTANCE.chapters.size();
-			int v = ServerQuestFile.INSTANCE.variables.size();
-			int q = 0;
-			int t = 0;
-			int r = 0;
-
-			for (QuestChapter chapter : ServerQuestFile.INSTANCE.chapters)
+			for (Quest quest : chapter.quests)
 			{
-				q += chapter.quests.size();
-
-				for (Quest quest : chapter.quests)
-				{
-					t += quest.tasks.size();
-					r += quest.rewards.size();
-				}
+				t += quest.tasks.size();
+				r += quest.rewards.size();
 			}
-
-			FTBQuests.LOGGER.info(String.format("Loaded %d chapters, %d quests, %d tasks, %d rewards and %d variables. In total, %d objects", c, q, t, r, v, c + q + t + r + v));
 		}
+
+		FTBQuests.LOGGER.info(String.format("Loaded %d chapters, %d quests, %d tasks, %d rewards and %d variables. In total, %d objects", c, q, t, r, v, c + q + t + r + v));
 
 		NBTTagCompound nbt = event.getData(FTBQuests.MOD_ID);
 		INSTANCE.extraFiles.clear();
@@ -97,6 +80,21 @@ public class FTBQuestsWorldData implements IConfigCallback
 			FTBQuests.LOGGER.info("File version changed " + ServerQuestFile.INSTANCE.fileVersion + " -> " + ServerQuestFile.VERSION);
 			ServerQuestFile.INSTANCE.saveNow();
 		}
+	}
+
+	private static String getFolderName()
+	{
+		if (Loader.isModLoaded("packmode"))
+		{
+			return getPackmodeFolderName();
+		}
+
+		return "normal";
+	}
+
+	private static String getPackmodeFolderName()
+	{
+		return PackModeAPI.getInstance().getCurrentPackMode();
 	}
 
 	@SubscribeEvent

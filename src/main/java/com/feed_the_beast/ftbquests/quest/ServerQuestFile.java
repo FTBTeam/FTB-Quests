@@ -2,10 +2,15 @@ package com.feed_the_beast.ftbquests.quest;
 
 import com.feed_the_beast.ftblib.lib.data.ForgeTeam;
 import com.feed_the_beast.ftblib.lib.data.Universe;
+import com.feed_the_beast.ftblib.lib.util.FileUtils;
 import com.feed_the_beast.ftblib.lib.util.NBTUtils;
+import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.net.edit.MessageDeleteObjectResponse;
 import com.feed_the_beast.ftbquests.util.FTBQuestsTeamData;
+import io.sommers.packmode.api.PackModeAPI;
+import net.minecraft.launchwrapper.Launch;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraftforge.fml.common.Loader;
 
 import javax.annotation.Nullable;
 import java.io.File;
@@ -21,34 +26,68 @@ public class ServerQuestFile extends QuestFile
 	public static ServerQuestFile INSTANCE;
 
 	public final Universe universe;
-	public final File file;
 	public boolean shouldSave = false;
 	private boolean isLoading = false;
 
-	public ServerQuestFile(Universe u, File f)
+	public ServerQuestFile(Universe u)
 	{
 		universe = u;
-		file = f;
 	}
 
-	public boolean load()
+	private static String getFolderName()
 	{
-		if (!file.exists())
+		if (Loader.isModLoaded("packmode"))
 		{
-			NBTUtils.writeNBT(file, new NBTTagCompound());
+			return getPackmodeFolderName();
 		}
 
-		NBTTagCompound nbt = NBTUtils.readNBT(file);
+		return "normal";
+	}
 
-		if (nbt == null)
+	private static String getPackmodeFolderName()
+	{
+		return PackModeAPI.getInstance().getCurrentPackMode();
+	}
+
+	public void load()
+	{
+		File folder = new File(Loader.instance().getConfigDir(), "ftbquests/" + getFolderName());
+
+		if (folder.exists())
 		{
-			return false;
+			FTBQuests.LOGGER.info("Loading quests from " + folder.getAbsolutePath());
+			isLoading = true;
+			readDataFull(folder);
+			isLoading = false;
 		}
+		else
+		{
+			File old = new File(universe.server.getDataDirectory(), "questpacks/" + getFolderName() + ".nbt");
 
-		isLoading = true;
-		readDataFull(nbt);
-		isLoading = false;
-		return true;
+			if (old.exists())
+			{
+				NBTTagCompound nbt = NBTUtils.readNBT(old);
+
+				if (nbt != null)
+				{
+					FTBQuests.LOGGER.info("Loading old quests file from " + old.getAbsolutePath());
+					isLoading = true;
+					readDataOld(nbt);
+					isLoading = false;
+					FileUtils.delete(old);
+
+					if (!(Boolean) Launch.blackboard.get("fml.deobfuscatedEnvironment"))
+					{
+						File[] p = old.getParentFile().listFiles();
+
+						if (p == null || p.length == 0)
+						{
+							FileUtils.delete(old.getParentFile());
+						}
+					}
+				}
+			}
+		}
 	}
 
 	@Override
@@ -117,6 +156,13 @@ public class ServerQuestFile extends QuestFile
 			object.deleteSelf();
 			clearCachedData();
 			save();
+
+			File file = object.getFile(new File(Loader.instance().getConfigDir(), "ftbquests/" + getFolderName()));
+
+			if (file != null)
+			{
+				FileUtils.delete(file);
+			}
 		}
 
 		new MessageDeleteObjectResponse(id).sendToAll();
@@ -130,9 +176,7 @@ public class ServerQuestFile extends QuestFile
 
 	public void saveNow()
 	{
-		NBTTagCompound nbt = new NBTTagCompound();
-		writeDataFull(nbt);
-		NBTUtils.writeNBTSafe(file, nbt);
+		writeDataFull(new File(Loader.instance().getConfigDir(), "ftbquests/" + getFolderName()));
 	}
 
 	public void unload()

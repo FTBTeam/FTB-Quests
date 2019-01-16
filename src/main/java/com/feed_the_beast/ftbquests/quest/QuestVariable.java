@@ -9,6 +9,8 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
 
+import java.io.File;
+
 /**
  * @author LatvianModder
  */
@@ -162,5 +164,11 @@ public final class QuestVariable extends QuestObject
 	public void onCreated()
 	{
 		file.variables.add(this);
+	}
+
+	@Override
+	public File getFile(File folder)
+	{
+		return new File(folder, "variables/" + getCodeString() + ".nbt");
 	}
 }
