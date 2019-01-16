@@ -54,16 +54,7 @@ public class FTBQuestsClientEventHandler
 		addModel(FTBQuestsItems.LOOT_CRATE_OPENER, "normal");
 
 		addModel(FTBQuestsItems.BOOK, "inventory");
-		addModel(FTBQuestsItems.XP_VIAL, "inventory");
-		addModel(FTBQuestsItems.SCRIPT, "inventory");
-
-		ModelResourceLocation lootCrateModel = new ModelResourceLocation(FTBQuestsItems.LOOTCRATE.getRegistryName(), "#inventory");
-		ModelLoader.setCustomModelResourceLocation(FTBQuestsItems.LOOTCRATE, 0, lootCrateModel);
-		ModelLoader.setCustomModelResourceLocation(FTBQuestsItems.COMMON_LOOTCRATE, 0, lootCrateModel);
-		ModelLoader.setCustomModelResourceLocation(FTBQuestsItems.UNCOMMON_LOOTCRATE, 0, lootCrateModel);
-		ModelLoader.setCustomModelResourceLocation(FTBQuestsItems.RARE_LOOTCRATE, 0, lootCrateModel);
-		ModelLoader.setCustomModelResourceLocation(FTBQuestsItems.EPIC_LOOTCRATE, 0, lootCrateModel);
-		ModelLoader.setCustomModelResourceLocation(FTBQuestsItems.LEGENDARY_LOOTCRATE, 0, lootCrateModel);
+		addModel(FTBQuestsItems.LOOTCRATE, "inventory");
 
 		ClientRegistry.bindTileEntitySpecialRenderer(TileTaskScreenCore.class, new RenderTaskScreen());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileProgressScreenCore.class, new RenderProgressScreen());
@@ -77,12 +68,6 @@ public class FTBQuestsClientEventHandler
 			LootCrate crate = ItemLootCrate.getCrate(null, stack);
 			return crate == null ? 0xFFFFFFFF : (0xFF000000 | crate.color.rgb());
 		}, FTBQuestsItems.LOOTCRATE);
-
-		c.registerItemColorHandler((stack, tintIndex) -> 0xFF92999A, FTBQuestsItems.COMMON_LOOTCRATE);
-		c.registerItemColorHandler((stack, tintIndex) -> 0xFF37AA69, FTBQuestsItems.UNCOMMON_LOOTCRATE);
-		c.registerItemColorHandler((stack, tintIndex) -> 0xFF0094FF, FTBQuestsItems.RARE_LOOTCRATE);
-		c.registerItemColorHandler((stack, tintIndex) -> 0xFF8000FF, FTBQuestsItems.EPIC_LOOTCRATE);
-		c.registerItemColorHandler((stack, tintIndex) -> 0xFFFFC147, FTBQuestsItems.LEGENDARY_LOOTCRATE);
 	}
 
 	@SubscribeEvent

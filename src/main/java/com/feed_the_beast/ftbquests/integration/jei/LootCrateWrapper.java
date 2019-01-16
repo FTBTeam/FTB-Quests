@@ -1,6 +1,7 @@
 package com.feed_the_beast.ftbquests.integration.jei;
 
 import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
+import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.quest.loot.LootCrate;
@@ -72,6 +73,18 @@ public class LootCrateWrapper implements IRecipeWrapper, ITooltipCallback<ItemSt
 		ingredients.setOutputs(ItemStack.class, items);
 	}
 
+	private String chance(String type, int w, int t)
+	{
+		String s = TextFormatting.GRAY + "- " + I18n.format("ftbquests.loot.entitytype." + type) + ": " + TextFormatting.GOLD + WeightedReward.chanceString(w, t);
+
+		if (w > 0)
+		{
+			s += TextFormatting.DARK_GRAY + " (1 in " + StringUtils.formatDouble00(1D / ((double) w / (double) t)) + ")";
+		}
+
+		return s;
+	}
+
 	@Override
 	public void onTooltip(int slot, boolean input, ItemStack ingredient, List<String> tooltip)
 	{
@@ -96,7 +109,7 @@ public class LootCrateWrapper implements IRecipeWrapper, ITooltipCallback<ItemSt
 				}
 			}
 
-			tooltip.add(TextFormatting.GRAY + "- " + I18n.format("ftbquests.loot.entitytype.passive") + ": " + TextFormatting.GOLD + WeightedReward.chanceString(crate.drops.passive, total));
+			tooltip.add(chance("passive", crate.drops.passive, total));
 
 			total = ClientQuestFile.INSTANCE.lootCrateNoDrop.monster;
 
@@ -108,7 +121,7 @@ public class LootCrateWrapper implements IRecipeWrapper, ITooltipCallback<ItemSt
 				}
 			}
 
-			tooltip.add(TextFormatting.GRAY + "- " + I18n.format("ftbquests.loot.entitytype.monster") + ": " + TextFormatting.GOLD + WeightedReward.chanceString(crate.drops.monster, total));
+			tooltip.add(chance("monster", crate.drops.monster, total));
 
 			total = ClientQuestFile.INSTANCE.lootCrateNoDrop.boss;
 
@@ -120,7 +133,7 @@ public class LootCrateWrapper implements IRecipeWrapper, ITooltipCallback<ItemSt
 				}
 			}
 
-			tooltip.add(TextFormatting.GRAY + "- " + I18n.format("ftbquests.loot.entitytype.boss") + ": " + TextFormatting.GOLD + WeightedReward.chanceString(crate.drops.boss, total));
+			tooltip.add(chance("boss", crate.drops.boss, total));
 		}
 		else if (slot > 0 && slot - 1 < items.size())
 		{
