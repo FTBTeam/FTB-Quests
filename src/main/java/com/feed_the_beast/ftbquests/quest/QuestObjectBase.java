@@ -141,7 +141,7 @@ public abstract class QuestObjectBase
 
 		if (!title.isEmpty())
 		{
-			cachedDisplayName = new TextComponentString(title);
+			cachedDisplayName = title.startsWith("{") && title.endsWith("}") ? new TextComponentTranslation(title.substring(1, title.length() - 1)) : new TextComponentString(title);
 		}
 		else
 		{

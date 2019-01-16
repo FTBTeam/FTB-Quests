@@ -1,6 +1,0 @@
-{
-	"type": "minecraft:crafting_shapeless",
-	"group": "ftbquests:old_lootcrate",
-	"result": {"item": "lootcrate", "nbt": {"type": "common"}},
-	"ingredients": [{"item": "common_lootcrate"}]
-}
