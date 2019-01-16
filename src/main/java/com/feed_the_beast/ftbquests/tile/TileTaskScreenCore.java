@@ -29,7 +29,6 @@ import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTPrimitive;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagInt;
-import net.minecraft.nbt.NBTTagString;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -276,10 +275,6 @@ public class TileTaskScreenCore extends TileWithTeam implements IConfigCallback,
 				{
 					quest = new NBTTagInt(cTask.quest.id);
 				}
-			}
-			else if (task instanceof NBTTagString)
-			{
-				cTask = file.getTask(file.getID(file.getOldID(q) + ':' + ((NBTTagString) task).getString()));
 			}
 		}
 

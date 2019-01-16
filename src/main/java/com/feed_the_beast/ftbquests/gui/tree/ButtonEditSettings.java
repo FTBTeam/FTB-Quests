@@ -6,7 +6,6 @@ import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
 import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.util.FileUtils;
-import com.feed_the_beast.ftblib.lib.util.NBTUtils;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.gui.FTBQuestsTheme;
@@ -18,7 +17,6 @@ import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.TextComponentTranslation;
 
 import java.io.File;
@@ -57,8 +55,6 @@ public class ButtonEditSettings extends ButtonTab
 		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.save_as_file"), GuiIcons.DOWN, () -> {
 			try
 			{
-				NBTTagCompound nbt = new NBTTagCompound();
-				ClientQuestFile.INSTANCE.writeDataFull(nbt);
 				Calendar time = Calendar.getInstance();
 				StringBuilder fileName = new StringBuilder("local/ftbquests/saved/");
 				appendNum(fileName, time.get(Calendar.YEAR), '-');
@@ -67,9 +63,7 @@ public class ButtonEditSettings extends ButtonTab
 				appendNum(fileName, time.get(Calendar.HOUR_OF_DAY), '-');
 				appendNum(fileName, time.get(Calendar.MINUTE), '-');
 				appendNum(fileName, time.get(Calendar.SECOND), '\0');
-				fileName.append(".nbt");
-				File file = new File(Minecraft.getMinecraft().gameDir, fileName.toString());
-				NBTUtils.writeNBT(file, nbt);
+				ClientQuestFile.INSTANCE.writeDataFull(new File(Minecraft.getMinecraft().gameDir, fileName.toString()));
 				Minecraft.getMinecraft().player.sendMessage(new TextComponentTranslation("ftbquests.gui.saved_as_file", fileName.toString()));
 			}
 			catch (Exception ex)

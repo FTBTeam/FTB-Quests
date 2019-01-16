@@ -32,6 +32,7 @@ import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -281,6 +282,12 @@ public final class RewardTable extends QuestObjectBase
 	public void onCreated()
 	{
 		file.rewardTables.add(this);
+	}
+
+	@Override
+	public File getFile(File folder)
+	{
+		return new File(folder, "reward_tables/" + getCodeString() + ".nbt");
 	}
 
 	@Override
