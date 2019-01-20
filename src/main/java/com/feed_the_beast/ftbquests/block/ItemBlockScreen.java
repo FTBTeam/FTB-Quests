@@ -9,8 +9,6 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTPrimitive;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
@@ -59,19 +57,19 @@ public class ItemBlockScreen extends ItemBlock
 
 		BlockTaskScreen.currentTask = null;
 		QuestFile file = FTBQuests.PROXY.getQuestFile(world);
-		Quest quest = file.getQuest(file.getID(nbt == null ? null : nbt.getTag("Quest")));
+		Quest quest = nbt == null ? null : file.getQuest(nbt.getInteger("Quest"));
 
 		if (quest != null && !quest.tasks.isEmpty())
 		{
-			NBTBase task = nbt == null ? null : nbt.getTag("Task");
+			int task = nbt.getInteger("Task");
 
-			if (task == null || task.isEmpty())
+			if (task == 0)
 			{
 				BlockTaskScreen.currentTask = quest.tasks.get(0);
 			}
-			else if (task instanceof NBTPrimitive)
+			else
 			{
-				BlockTaskScreen.currentTask = file.getTask(((NBTPrimitive) task).getInt());
+				BlockTaskScreen.currentTask = file.getTask(task);
 			}
 		}
 

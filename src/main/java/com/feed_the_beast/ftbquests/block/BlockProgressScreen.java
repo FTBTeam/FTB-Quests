@@ -23,7 +23,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagByte;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagInt;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
@@ -172,7 +171,7 @@ public class BlockProgressScreen extends BlockWithHorizontalFacing
 
 			if (!world.isRemote && !ServerQuestFile.INSTANCE.chapters.isEmpty())
 			{
-				screen.chapter = new NBTTagInt(ServerQuestFile.INSTANCE.chapters.get(0).id);
+				screen.chapter = ServerQuestFile.INSTANCE.chapters.get(0).id;
 			}
 
 			screen.facing = state.getValue(FACING);
@@ -393,7 +392,7 @@ public class BlockProgressScreen extends BlockWithHorizontalFacing
 			tooltip.add(I18n.format("ftbquests.team") + ": " + team.getDisplayName().getFormattedText());
 		}
 
-		QuestObject object = ClientQuestFile.INSTANCE.get(ClientQuestFile.INSTANCE.getID(nbt == null ? null : nbt.getTag("Object")));
+		QuestObject object = nbt == null ? null : ClientQuestFile.INSTANCE.get(nbt.getInteger("Object"));
 
 		if (object != null)
 		{

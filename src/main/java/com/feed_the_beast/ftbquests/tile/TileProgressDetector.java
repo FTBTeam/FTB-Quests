@@ -15,9 +15,7 @@ import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagInt;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.text.TextComponentTranslation;
 
@@ -28,7 +26,7 @@ import javax.annotation.Nullable;
  */
 public class TileProgressDetector extends TileWithTeam implements ITickable, IConfigCallback
 {
-	public NBTBase object = new NBTTagInt(0);
+	public int object = 0;
 	public boolean level = false;
 	public int redstoneOutput = 0;
 
@@ -42,12 +40,12 @@ public class TileProgressDetector extends TileWithTeam implements ITickable, ICo
 
 		if (cObject != null)
 		{
-			object = new NBTTagInt(cObject.id);
+			object = cObject.id;
 		}
 
-		if (object != null)
+		if (object != 0)
 		{
-			nbt.setTag("Object", object);
+			nbt.setInteger("Object", object);
 		}
 
 		if (level)
@@ -65,7 +63,7 @@ public class TileProgressDetector extends TileWithTeam implements ITickable, ICo
 	protected void readData(NBTTagCompound nbt, EnumSaveType type)
 	{
 		super.readData(nbt, type);
-		object = nbt.getTag("Object");
+		object = nbt.getInteger("Object");
 		level = nbt.getBoolean("Level");
 
 		if (!type.item)
@@ -86,7 +84,7 @@ public class TileProgressDetector extends TileWithTeam implements ITickable, ICo
 	@Nullable
 	public QuestObject getObject()
 	{
-		if (object == null)
+		if (object == 0)
 		{
 			return null;
 		}
@@ -99,7 +97,7 @@ public class TileProgressDetector extends TileWithTeam implements ITickable, ICo
 				return null;
 			}
 
-			cObject = file.get(file.getID(object));
+			cObject = file.get(object);
 		}
 
 		return cObject;
@@ -182,7 +180,7 @@ public class TileProgressDetector extends TileWithTeam implements ITickable, ICo
 			public void setObject(@Nullable QuestObjectBase v)
 			{
 				cObject = (QuestObject) v;
-				object = cObject == null ? null : new NBTTagInt(cObject.id);
+				object = cObject == null ? 0 : cObject.id;
 			}
 		}, new ConfigQuestObject(ServerQuestFile.INSTANCE, ServerQuestFile.INSTANCE, QuestObjectType.ALL_PROGRESSING));
 

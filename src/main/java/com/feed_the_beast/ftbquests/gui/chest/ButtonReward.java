@@ -72,6 +72,6 @@ public class ButtonReward extends Button
 	@Nullable
 	public Object getJEIFocus()
 	{
-		return reward.getJEIFocus();
+		return reward == null ? null : reward.getJEIFocus();
 	}
 }

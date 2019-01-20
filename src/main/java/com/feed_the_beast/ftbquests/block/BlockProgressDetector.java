@@ -14,7 +14,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagInt;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
@@ -94,9 +93,9 @@ public class BlockProgressDetector extends Block
 			tile.readFromItem(stack);
 			tile.setIDFromPlacer(placer);
 
-			if (tile.object == null)
+			if (tile.object == 0)
 			{
-				tile.object = new NBTTagInt(1);
+				tile.object = 1;
 			}
 		}
 	}
@@ -144,7 +143,7 @@ public class BlockProgressDetector extends Block
 			tooltip.add(I18n.format("ftbquests.team") + ": " + TextFormatting.DARK_GREEN + team.getDisplayName().getFormattedText());
 		}
 
-		QuestObject object = ClientQuestFile.INSTANCE.get(ClientQuestFile.INSTANCE.getID(nbt == null ? null : nbt.getTag("Object")));
+		QuestObject object = nbt == null ? null : ClientQuestFile.INSTANCE.get(nbt.getInteger("Object"));
 
 		if (object != null)
 		{

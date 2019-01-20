@@ -21,9 +21,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagInt;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -37,7 +35,7 @@ import javax.annotation.Nullable;
 public class TileProgressScreenCore extends TileWithTeam implements IConfigCallback, IProgressScreen
 {
 	public EnumFacing facing;
-	public NBTBase chapter = null;
+	public int chapter = 0;
 	public int width = 0, height = 0;
 	public IBlockState skin = BlockUtils.AIR_STATE;
 	public boolean fullscreen = false;
@@ -59,12 +57,12 @@ public class TileProgressScreenCore extends TileWithTeam implements IConfigCallb
 
 		if (cChapter != null)
 		{
-			chapter = new NBTTagInt(cChapter.id);
+			chapter = cChapter.id;
 		}
 
-		if (chapter != null)
+		if (chapter != 0)
 		{
-			nbt.setTag("Chapter", chapter);
+			nbt.setInteger("Chapter", chapter);
 		}
 
 		if (width > 0)
@@ -103,7 +101,7 @@ public class TileProgressScreenCore extends TileWithTeam implements IConfigCallb
 			facing = EnumFacing.byName(nbt.getString("Facing"));
 		}
 
-		chapter = nbt.getTag("Chapter");
+		chapter = nbt.getInteger("Chapter");
 		width = nbt.getByte("Width");
 		height = nbt.getByte("Height");
 		skin = BlockUtils.getStateFromName(nbt.getString("Skin"));
@@ -160,7 +158,7 @@ public class TileProgressScreenCore extends TileWithTeam implements IConfigCallb
 	@Nullable
 	public QuestChapter getChapter()
 	{
-		if (chapter == null || chapter.isEmpty())
+		if (chapter == 0)
 		{
 			return null;
 		}
@@ -173,7 +171,7 @@ public class TileProgressScreenCore extends TileWithTeam implements IConfigCallb
 				return null;
 			}
 
-			cChapter = file.getChapter(file.getID(chapter));
+			cChapter = file.getChapter(chapter);
 		}
 
 		return cChapter;
@@ -220,7 +218,7 @@ public class TileProgressScreenCore extends TileWithTeam implements IConfigCallb
 						if (v instanceof QuestChapter)
 						{
 							cChapter = (QuestChapter) v;
-							chapter = new NBTTagInt(cChapter.id);
+							chapter = cChapter.id;
 						}
 					}
 				}, ConfigNull.INSTANCE).setCanEdit(editorOrDestructible).setDisplayName(new TextComponentTranslation("ftbquests.chapter"));
@@ -251,7 +249,7 @@ public class TileProgressScreenCore extends TileWithTeam implements IConfigCallb
 
 			if (cChapter != null)
 			{
-				chapter = new NBTTagInt(cChapter.file.chapters.get((cChapter.file.chapters.indexOf(cChapter) + 1) % cChapter.file.chapters.size()).id);
+				chapter = cChapter.file.chapters.get((cChapter.file.chapters.indexOf(cChapter) + 1) % cChapter.file.chapters.size()).id;
 				updateContainingBlockInfo();
 				markDirty();
 				BlockUtils.notifyBlockUpdate(world, pos, getBlockState());

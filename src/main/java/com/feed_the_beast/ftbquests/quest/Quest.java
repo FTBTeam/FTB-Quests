@@ -17,9 +17,7 @@ import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
 import com.feed_the_beast.ftbquests.quest.task.QuestTask;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagIntArray;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
 import net.minecraft.util.math.MathHelper;
@@ -197,42 +195,16 @@ public final class Quest extends QuestObject
 
 		dependencies.clear();
 
-		NBTBase deps = nbt.getTag("dependencies");
+		int[] deps = nbt.getIntArray("dependencies");
 
-		if (deps == null)
+		if (deps.length == 0)
 		{
-			deps = nbt.getTag("dependency");
+			deps = new int[] {nbt.getInteger("dependency")};
 		}
 
-		if (deps instanceof NBTTagList)
+		for (int i : deps)
 		{
-			list = (NBTTagList) deps;
-
-			for (int i = 0; i < list.tagCount(); i++)
-			{
-				QuestObject o = chapter.file.get(chapter.file.getID(list.get(i)));
-
-				if (o != null)
-				{
-					dependencies.add(o);
-				}
-			}
-		}
-		else if (deps instanceof NBTTagIntArray)
-		{
-			for (int i : ((NBTTagIntArray) deps).getIntArray())
-			{
-				QuestObject o = chapter.file.get(i);
-
-				if (o != null)
-				{
-					dependencies.add(o);
-				}
-			}
-		}
-		else
-		{
-			QuestObject o = chapter.file.get(chapter.file.getID(deps));
+			QuestObject o = chapter.file.get(i);
 
 			if (o != null)
 			{
@@ -479,9 +451,9 @@ public final class Quest extends QuestObject
 	@Override
 	public ITextComponent getAltDisplayName()
 	{
-		for (QuestTask task : tasks)
+		if (!tasks.isEmpty())
 		{
-			return task.getDisplayName().createCopy();
+			return tasks.get(0).getDisplayName().createCopy();
 		}
 
 		return new TextComponentTranslation("ftbquests.unnamed");

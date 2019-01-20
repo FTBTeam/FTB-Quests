@@ -76,6 +76,10 @@ ftbquests.chapter.completed=Chapter completed!
 ftbquests.chapter.description=Description
 ftbquests.chapter.visibility=Visibility [WIP!]
 
+ftbquests.chapter.widget=Widget
+ftbquests.chapter.widget.text_field=Text Field
+ftbquests.chapter.widget.button=Button
+
 ftbquests.quest=Quest
 ftbquests.quests=Quests
 ftbquests.quest.completed=Quest completed!

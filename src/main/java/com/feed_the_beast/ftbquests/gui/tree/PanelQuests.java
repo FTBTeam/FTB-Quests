@@ -10,6 +10,8 @@ import com.feed_the_beast.ftblib.lib.math.MathUtils;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.quest.widget.QuestWidget;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
@@ -30,6 +32,11 @@ public class PanelQuests extends Panel
 		treeGui = (GuiQuestTree) panel.getGui();
 	}
 
+	private int getxy(int x, int y)
+	{
+		return ((x + Quest.POS_LIMIT) << 16) | (y + Quest.POS_LIMIT);
+	}
+
 	@Override
 	public void addWidgets()
 	{
@@ -38,20 +45,44 @@ public class PanelQuests extends Panel
 			return;
 		}
 
+		IntOpenHashSet set = new IntOpenHashSet();
+
+		for (Quest quest : treeGui.selectedChapter.quests)
+		{
+			widgets.add(new ButtonQuest(this, quest));
+			set.add(getxy(quest.x, quest.y));
+		}
+
+		for (QuestWidget qw : treeGui.selectedChapter.widgets)
+		{
+			Widget w = qw.createWidget(this);
+
+			if (w instanceof IQuestWidget)
+			{
+				widgets.add(w);
+
+				for (int x = 0; x < qw.w; x++)
+				{
+					for (int y = 0; y < qw.h; y++)
+					{
+						set.add(getxy(qw.x + x, qw.y + y));
+					}
+				}
+			}
+		}
+
 		for (int y = -Quest.POS_LIMIT; y <= Quest.POS_LIMIT; y++)
 		{
 			for (int x = -Quest.POS_LIMIT; x <= Quest.POS_LIMIT; x++)
 			{
-				add(new ButtonDummyQuest(this, (byte) x, (byte) y));
+				if (!set.contains(getxy(x, y)))
+				{
+					add(new ButtonDummyQuest(this, (byte) x, (byte) y));
+				}
 			}
 		}
 
-		int s = Quest.POS_LIMIT * 2 + 1;
-
-		for (Quest quest : treeGui.selectedChapter.quests)
-		{
-			widgets.set((quest.x + Quest.POS_LIMIT) + (quest.y + Quest.POS_LIMIT) * s, new ButtonQuest(this, quest));
-		}
+		alignWidgets();
 	}
 
 	@Override
@@ -72,6 +103,14 @@ public class PanelQuests extends Panel
 				maxX = Math.max(maxX, quest.x);
 				maxY = Math.max(maxY, quest.y);
 			}
+			else if (widget instanceof IQuestWidget)
+			{
+				QuestWidget w = ((IQuestWidget) widget).getQuestWidget();
+				minX = Math.min(minX, w.x);
+				minY = Math.min(minY, w.y);
+				maxX = Math.max(maxX, w.x);
+				maxY = Math.max(maxY, w.y);
+			}
 		}
 
 		minX -= 6;
@@ -86,22 +125,39 @@ public class PanelQuests extends Panel
 
 		for (Widget widget : widgets)
 		{
-			int x, y;
+			int x, y, w, h;
 
 			if (widget instanceof ButtonQuest)
 			{
 				Quest quest = ((ButtonQuest) widget).quest;
 				x = quest.x;
 				y = quest.y;
+				w = 1;
+				h = 1;
+			}
+			else if (widget instanceof IQuestWidget)
+			{
+				QuestWidget qw = ((IQuestWidget) widget).getQuestWidget();
+				x = qw.x;
+				y = qw.y;
+				w = qw.w;
+				h = qw.h;
 			}
 			else
 			{
 				ButtonDummyQuest button = (ButtonDummyQuest) widget;
 				x = button.x;
 				y = button.y;
+				w = 1;
+				h = 1;
 			}
 
-			widget.setPosAndSize((x - minX) * bsize, (y - minY) * bsize, bsize, bsize);
+			widget.setPosAndSize((x - minX) * bsize, (y - minY) * bsize, bsize * w, bsize * h);
+
+			if (widget instanceof IQuestWidget)
+			{
+				((IQuestWidget) widget).updateScale(treeGui);
+			}
 		}
 
 		setPosAndSize(0, treeGui.chapterPanel.height, treeGui.width, treeGui.height - treeGui.chapterPanel.height);

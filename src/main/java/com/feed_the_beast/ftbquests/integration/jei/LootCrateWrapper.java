@@ -9,6 +9,7 @@ import com.feed_the_beast.ftbquests.quest.loot.RewardTable;
 import com.feed_the_beast.ftbquests.quest.loot.WeightedReward;
 import mezz.jei.api.gui.ITooltipCallback;
 import mezz.jei.api.ingredients.IIngredients;
+import mezz.jei.api.ingredients.VanillaTypes;
 import mezz.jei.api.recipe.IRecipeWrapper;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.init.Items;
@@ -66,11 +67,10 @@ public class LootCrateWrapper implements IRecipeWrapper, ITooltipCallback<ItemSt
 	}
 
 	@Override
-	@SuppressWarnings("deprecation")
 	public void getIngredients(IIngredients ingredients)
 	{
-		ingredients.setInput(ItemStack.class, itemStack);
-		ingredients.setOutputs(ItemStack.class, items);
+		ingredients.setInput(VanillaTypes.ITEM, itemStack);
+		ingredients.setOutputs(VanillaTypes.ITEM, items);
 	}
 
 	private String chance(String type, int w, int t)

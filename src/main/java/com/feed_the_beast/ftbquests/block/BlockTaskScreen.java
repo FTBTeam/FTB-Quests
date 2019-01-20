@@ -389,7 +389,7 @@ public class BlockTaskScreen extends BlockWithHorizontalFacing
 			tooltip.add(I18n.format("ftbquests.team") + ": " + team.getDisplayName().getFormattedText());
 		}
 
-		Quest quest = ClientQuestFile.INSTANCE.getQuest(ClientQuestFile.INSTANCE.getID(nbt == null ? null : nbt.getTag("Quest")));
+		Quest quest = nbt == null ? null : ClientQuestFile.INSTANCE.getQuest(nbt.getInteger("Quest"));
 
 		if (quest == null || quest.tasks.isEmpty())
 		{
