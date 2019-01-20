@@ -5,6 +5,7 @@ import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
 import com.feed_the_beast.ftbquests.quest.task.QuestTask;
 import mezz.jei.api.ingredients.IIngredients;
+import mezz.jei.api.ingredients.VanillaTypes;
 import mezz.jei.api.recipe.IRecipeWrapper;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
@@ -81,10 +82,9 @@ public class QuestWrapper implements IRecipeWrapper
 	}
 
 	@Override
-	@SuppressWarnings("deprecation")
 	public void getIngredients(IIngredients ingredients)
 	{
-		ingredients.setInputs(ItemStack.class, input);
-		ingredients.setOutputs(ItemStack.class, output);
+		ingredients.setInputs(VanillaTypes.ITEM, input);
+		ingredients.setOutputs(VanillaTypes.ITEM, output);
 	}
 }

@@ -25,10 +25,7 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTPrimitive;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagInt;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -46,8 +43,8 @@ import java.util.Collections;
 public class TileTaskScreenCore extends TileWithTeam implements IConfigCallback, ITaskScreen
 {
 	public EnumFacing facing;
-	public NBTBase quest = null;
-	public NBTBase task = null;
+	public int quest = 0;
+	public int task = 0;
 	public int size = 0;
 	public IBlockState skin = BlockUtils.AIR_STATE;
 	public boolean inputOnly = false;
@@ -72,18 +69,18 @@ public class TileTaskScreenCore extends TileWithTeam implements IConfigCallback,
 
 		if (cTask != null)
 		{
-			quest = new NBTTagInt(cTask.quest.id);
-			task = new NBTTagInt(cTask.id);
+			quest = cTask.quest.id;
+			task = cTask.id;
 		}
 
-		if (quest != null)
+		if (quest != 0)
 		{
-			nbt.setTag("Quest", quest);
+			nbt.setInteger("Quest", quest);
 		}
 
-		if (task != null)
+		if (task != 0)
 		{
-			nbt.setTag("Task", task);
+			nbt.setInteger("Task", task);
 		}
 
 		if (size > 0)
@@ -117,8 +114,8 @@ public class TileTaskScreenCore extends TileWithTeam implements IConfigCallback,
 			facing = EnumFacing.byName(nbt.getString("Facing"));
 		}
 
-		quest = nbt.getTag("Quest");
-		task = nbt.getTag("Task");
+		quest = nbt.getInteger("Quest");
+		task = nbt.getInteger("Task");
 		size = nbt.getByte("Size");
 		skin = BlockUtils.getStateFromName(nbt.getString("Skin"));
 		inputOnly = nbt.getBoolean("InputOnly");
@@ -250,30 +247,30 @@ public class TileTaskScreenCore extends TileWithTeam implements IConfigCallback,
 	@Nullable
 	public QuestTask getTask()
 	{
-		if (quest == null || quest.isEmpty())
+		if (quest == 0)
 		{
 			return null;
 		}
 		else if (cTask == null || cTask.invalid)
 		{
 			QuestFile file = FTBQuests.PROXY.getQuestFile(world);
-			Quest q = file.getQuest(file.getID(quest));
+			Quest q = file.getQuest(quest);
 
 			if (q == null || q.tasks.isEmpty())
 			{
 				cTask = null;
 			}
-			else if (task == null || task.isEmpty())
+			else if (task == 0)
 			{
 				cTask = q.tasks.get(0);
 			}
-			else if (task instanceof NBTPrimitive)
+			else
 			{
-				cTask = file.getTask(file.getID(task));
+				cTask = file.getTask(task);
 
 				if (cTask != null)
 				{
-					quest = new NBTTagInt(cTask.quest.id);
+					quest = cTask.quest.id;
 				}
 			}
 		}
@@ -284,7 +281,7 @@ public class TileTaskScreenCore extends TileWithTeam implements IConfigCallback,
 	@Nullable
 	public QuestTaskData getTaskData()
 	{
-		if (quest.isEmpty() || team.isEmpty())
+		if (quest == 0 || team.isEmpty())
 		{
 			return null;
 		}
@@ -335,8 +332,8 @@ public class TileTaskScreenCore extends TileWithTeam implements IConfigCallback,
 
 				if (cTask != null)
 				{
-					quest = new NBTTagInt(cTask.quest.id);
-					task = new NBTTagInt(cTask.id);
+					quest = cTask.quest.id;
+					task = cTask.id;
 					currentCoreClass = cTask.getScreenCoreClass();
 					currentPartClass = cTask.getScreenPartClass();
 				}
@@ -361,8 +358,8 @@ public class TileTaskScreenCore extends TileWithTeam implements IConfigCallback,
 						if (v instanceof QuestTask)
 						{
 							cTask = (QuestTask) v;
-							quest = new NBTTagInt(cTask.quest.id);
-							task = new NBTTagInt(cTask.id);
+							quest = cTask.quest.id;
+							task = cTask.id;
 						}
 					}
 				}, ConfigNull.INSTANCE).setCanEdit(editorOrDestructible).setDisplayName(new TextComponentTranslation("ftbquests.task"));
@@ -413,7 +410,7 @@ public class TileTaskScreenCore extends TileWithTeam implements IConfigCallback,
 			currentCoreClass = cTask.getScreenCoreClass();
 			currentPartClass = cTask.getScreenPartClass();
 			cTask = cTask.quest.tasks.get((cTask.quest.tasks.indexOf(cTask) + 1) % cTask.quest.tasks.size());
-			task = new NBTTagInt(cTask.id);
+			task = cTask.id;
 
 			updateContainingBlockInfo();
 			cTask = getTask();

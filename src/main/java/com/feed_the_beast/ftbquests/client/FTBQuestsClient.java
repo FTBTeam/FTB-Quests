@@ -22,6 +22,7 @@ import com.feed_the_beast.ftbquests.quest.task.DimensionTask;
 import com.feed_the_beast.ftbquests.quest.task.FTBQuestsTasks;
 import com.feed_the_beast.ftbquests.quest.task.FluidTask;
 import com.feed_the_beast.ftbquests.quest.task.ItemTask;
+import com.latmod.mods.itemfilters.filters.NBTMatchingMode;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.world.DimensionType;
 import net.minecraftforge.client.settings.KeyConflictContext;
@@ -67,7 +68,7 @@ public class FTBQuestsClient extends FTBQuestsCommon
 
 				if (!stack.isStackable())
 				{
-					itemTask.nbtMode = ItemTask.NBTMatchingMode.IGNORE;
+					itemTask.nbtMode = NBTMatchingMode.IGNORE;
 					itemTask.ignoreDamage = !stack.getHasSubtypes();
 				}
 

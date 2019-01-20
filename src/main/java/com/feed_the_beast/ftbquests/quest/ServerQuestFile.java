@@ -34,8 +34,13 @@ public class ServerQuestFile extends QuestFile
 		universe = u;
 	}
 
-	private static String getFolderName()
+	private String getFolderName()
 	{
+		if (universe.world.getGameRules().hasRule("questfile"))
+		{
+			return universe.world.getGameRules().getString("questfile");
+		}
+
 		if (Loader.isModLoaded("packmode"))
 		{
 			return getPackmodeFolderName();

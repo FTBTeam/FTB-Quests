@@ -9,13 +9,13 @@ import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
 import com.feed_the_beast.ftblib.lib.io.Bits;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
-import com.feed_the_beast.ftblib.lib.util.IWithID;
 import com.feed_the_beast.ftblib.lib.util.StringJoiner;
 import com.feed_the_beast.ftblib.lib.util.misc.NameMap;
 import com.feed_the_beast.ftbquests.net.MessageSubmitTask;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.latmod.mods.itemfilters.api.ItemFiltersAPI;
+import com.latmod.mods.itemfilters.filters.NBTMatchingMode;
 import com.latmod.mods.itemfilters.item.ItemFiltersItems;
 import com.latmod.mods.itemfilters.item.ItemMissing;
 import net.minecraft.client.resources.I18n;
@@ -49,28 +49,6 @@ import java.util.function.Predicate;
  */
 public class ItemTask extends QuestTask implements Predicate<ItemStack>
 {
-	public enum NBTMatchingMode implements IWithID
-	{
-		MATCH("match"),
-		IGNORE("ignore"),
-		CONTAIN("contain");
-
-		public static final NameMap<NBTMatchingMode> NAME_MAP = NameMap.create(MATCH, values());
-
-		private final String id;
-
-		NBTMatchingMode(String i)
-		{
-			id = i;
-		}
-
-		@Override
-		public String getID()
-		{
-			return id;
-		}
-	}
-
 	public final List<ItemStack> items;
 	public long count;
 	public boolean consumeItems;
@@ -178,9 +156,9 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 			count = 1;
 		}
 
-		consumeItems = nbt.hasKey("consume_items") ? nbt.getBoolean("consume_items") : nbt.hasKey("check_only") ? nbt.getBoolean("check_only") : quest.chapter.file.defaultConsumeItems;
+		consumeItems = nbt.hasKey("consume_items") ? nbt.getBoolean("consume_items") : quest.chapter.file.defaultConsumeItems;
 		ignoreDamage = nbt.getBoolean("ignore_damage");
-		nbtMode = NBTMatchingMode.NAME_MAP.get(nbt.getByte("ignore_nbt"));
+		nbtMode = NBTMatchingMode.VALUES[nbt.getByte("ignore_nbt")];
 	}
 
 	@Override
@@ -346,7 +324,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 		config.addLong("count", () -> count, v -> count = v, 1, 1, Long.MAX_VALUE);
 		config.addBool("consume_items", () -> consumeItems, v -> consumeItems = v, quest.chapter.file.defaultConsumeItems).setCanEdit(!quest.canRepeat);
 		config.addBool("ignore_damage", () -> ignoreDamage, v -> ignoreDamage = v, false);
-		config.addEnum("nbt_mode", () -> nbtMode, v -> nbtMode = v, NBTMatchingMode.NAME_MAP);
+		config.addEnum("nbt_mode", () -> nbtMode, v -> nbtMode = v, NameMap.create(NBTMatchingMode.MATCH, NBTMatchingMode.VALUES));
 	}
 
 	@Override

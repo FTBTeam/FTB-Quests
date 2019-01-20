@@ -9,6 +9,8 @@ import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.util.ListUtils;
 import com.feed_the_beast.ftbquests.events.ObjectCompletedEvent;
 import com.feed_the_beast.ftbquests.net.MessageDisplayCompletionToast;
+import com.feed_the_beast.ftbquests.quest.widget.QuestWidget;
+import com.feed_the_beast.ftbquests.quest.widget.QuestWidgetType;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -31,6 +33,7 @@ public final class QuestChapter extends QuestObject
 	public EnumQuestVisibilityType visibilityType;
 	public final List<Quest> quests;
 	public final List<String> description;
+	public final List<QuestWidget> widgets;
 
 	public QuestChapter(QuestFile f)
 	{
@@ -38,6 +41,7 @@ public final class QuestChapter extends QuestObject
 		description = new ArrayList<>();
 		visibilityType = EnumQuestVisibilityType.NORMAL;
 		quests = new ArrayList<>();
+		widgets = new ArrayList<>();
 	}
 
 	@Override
@@ -79,6 +83,22 @@ public final class QuestChapter extends QuestObject
 
 			nbt.setTag("description", list);
 		}
+
+		if (!widgets.isEmpty())
+		{
+			NBTTagList list = new NBTTagList();
+
+			for (QuestWidget w : widgets)
+			{
+				NBTTagCompound nbt1 = new NBTTagCompound();
+				w.writeData(nbt1);
+				nbt1.setString("type", w.getType().getID());
+				nbt1.setIntArray("location", new int[] {w.x, w.y, w.w, w.h});
+				list.appendTag(nbt1);
+			}
+
+			nbt.setTag("widgets", list);
+		}
 	}
 
 	@Override
@@ -94,6 +114,25 @@ public final class QuestChapter extends QuestObject
 		{
 			description.add(desc.getStringTagAt(i));
 		}
+
+		NBTTagList wlist = nbt.getTagList("widgets", Constants.NBT.TAG_COMPOUND);
+
+		for (int i = 0; i < wlist.tagCount(); i++)
+		{
+			nbt = wlist.getCompoundTagAt(i);
+			int[] loc = nbt.getIntArray("location");
+
+			if (loc.length == 4)
+			{
+				QuestWidget widget = QuestWidgetType.NAME_MAP.get(nbt.getString("type")).supplier.get();
+				widget.x = loc[0];
+				widget.y = loc[1];
+				widget.w = loc[2];
+				widget.h = loc[3];
+				widget.readData(nbt);
+				widgets.add(widget);
+			}
+		}
 	}
 
 	@Override
@@ -102,6 +141,17 @@ public final class QuestChapter extends QuestObject
 		super.writeNetData(data);
 		data.write(visibilityType, EnumQuestVisibilityType.NAME_MAP);
 		data.writeCollection(description, DataOut.STRING);
+		data.writeVarInt(widgets.size());
+
+		for (QuestWidget w : widgets)
+		{
+			data.write(w.getType(), QuestWidgetType.NAME_MAP);
+			data.writeVarInt(w.x);
+			data.writeVarInt(w.y);
+			data.writeVarInt(w.w);
+			data.writeVarInt(w.h);
+			w.writeNetData(data);
+		}
 	}
 
 	@Override
@@ -110,6 +160,19 @@ public final class QuestChapter extends QuestObject
 		super.readNetData(data);
 		visibilityType = data.read(EnumQuestVisibilityType.NAME_MAP);
 		data.readCollection(description, DataIn.STRING);
+		int s = data.readVarInt();
+		widgets.clear();
+
+		for (int i = 0; i < s; i++)
+		{
+			QuestWidget w = data.read(QuestWidgetType.NAME_MAP).supplier.get();
+			w.x = data.readVarInt();
+			w.y = data.readVarInt();
+			w.w = data.readVarInt();
+			w.h = data.readVarInt();
+			w.readNetData(data);
+			widgets.add(w);
+		}
 	}
 
 	public int getIndex()
