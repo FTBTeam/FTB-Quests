@@ -116,22 +116,28 @@ public class ButtonDummyQuest extends Widget
 
 		GlStateManager.color(1F, 1F, 1F, 1F);
 
-		int s = treeGui.zoom * 3 / 2;
-		int sx = x + (w - s) / 2;
-		int sy = y + (h - s) / 2;
+		double s = treeGui.zoomd * 3D / 2D;
+		double sx = x + (w - s) / 2D;
+		double sy = y + (h - s) / 2D;
 
 		if (treeGui.getSelectedQuest() != null && treeGui.movingQuest)
 		{
-			treeGui.getSelectedQuest().shape.shape.draw(sx, sy, s, s, Color4I.WHITE.withAlpha(20));
+			GlStateManager.pushMatrix();
+			GlStateManager.translate(sx, sy, 0);
+			GlStateManager.scale(s, s, 1D);
+			treeGui.getSelectedQuest().shape.shape.draw(0, 0, 1, 1, Color4I.WHITE.withAlpha(20));
+			GlStateManager.popMatrix();
 		}
 
 		if (isMouseOver())
 		{
-			Color4I.WHITE.withAlpha(30).draw(sx, sy, s, s);
-
 			GlStateManager.pushMatrix();
 			GlStateManager.translate(sx, sy, 0);
-			GlStateManager.scale(treeGui.zoom / 24D, treeGui.zoom / 24D, 1D);
+			GlStateManager.pushMatrix();
+			GlStateManager.scale(s, s, 1D);
+			Color4I.WHITE.withAlpha(30).draw(0, 0, 1, 1);
+			GlStateManager.popMatrix();
+			GlStateManager.scale(treeGui.zoomd / 24D, treeGui.zoomd / 24D, 1D);
 			theme.drawString("X" + this.x, 2, 2);
 			theme.drawString("Y" + this.y, 2, 12);
 			GlStateManager.popMatrix();
