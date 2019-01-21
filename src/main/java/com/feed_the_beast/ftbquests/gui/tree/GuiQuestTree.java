@@ -37,6 +37,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.toasts.SystemToast;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
@@ -58,6 +59,7 @@ public class GuiQuestTree extends GuiBase
 	public Color4I borderColor, backgroundColor;
 	public boolean movingQuest = false;
 	public int zoom = 16;
+	public double zoomd = 16D;
 	public long lastShiftPress = 0L;
 
 	public GuiQuestTree(ClientQuestFile q)
@@ -364,6 +366,33 @@ public class GuiQuestTree extends GuiBase
 	@Override
 	public void drawBackground(Theme theme, int x, int y, int w, int h)
 	{
+		if (zoomd < zoom)
+		{
+			zoomd += MathHelper.clamp((zoom - zoomd) / 8D, 0.1D, 0.8D);
+
+			if (zoomd > zoom)
+			{
+				zoomd = zoom;
+			}
+
+			grabbed = 0;
+			resetScroll(true);
+			//quests.alignWidgets();
+		}
+		else if (zoomd > zoom)
+		{
+			zoomd -= MathHelper.clamp((zoomd - zoom) / 8D, 0.1D, 0.8D);
+
+			if (zoomd < zoom)
+			{
+				zoomd = zoom;
+			}
+
+			grabbed = 0;
+			resetScroll(true);
+			//quests.alignWidgets();
+		}
+
 		if (selectedChapter != null && selectedChapter.invalid)
 		{
 			selectChapter(null);

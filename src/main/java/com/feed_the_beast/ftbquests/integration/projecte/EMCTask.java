@@ -12,6 +12,7 @@ import com.feed_the_beast.ftbquests.quest.task.QuestTask;
 import com.feed_the_beast.ftbquests.quest.task.QuestTaskData;
 import com.feed_the_beast.ftbquests.quest.task.QuestTaskType;
 import com.feed_the_beast.ftbquests.quest.task.SimpleQuestTaskData;
+import moze_intel.projecte.api.ProjectEAPI;
 import moze_intel.projecte.api.capabilities.IKnowledgeProvider;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
@@ -20,8 +21,6 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.CapabilityInject;
 
 import java.util.Collection;
 
@@ -30,9 +29,6 @@ import java.util.Collection;
  */
 public class EMCTask extends QuestTask implements ISingleLongValueTask
 {
-	@CapabilityInject(IKnowledgeProvider.class)
-	public static Capability<IKnowledgeProvider> KNOWLEDGE_CAP;
-
 	public long value = 8192L;
 
 	public EMCTask(Quest quest)
@@ -135,12 +131,7 @@ public class EMCTask extends QuestTask implements ISingleLongValueTask
 		@Override
 		public boolean submitTask(EntityPlayerMP player, Collection<ItemStack> itemsToCheck, boolean simulate)
 		{
-			IKnowledgeProvider knowledge = player.getCapability(KNOWLEDGE_CAP, null);
-
-			if (knowledge == null)
-			{
-				return false;
-			}
+			IKnowledgeProvider knowledge = ProjectEAPI.getTransmutationProxy().getKnowledgeProviderFor(player.getUniqueID());
 
 			double emc = knowledge.getEmc();
 			double add = Math.min(emc, task.value - progress);

@@ -339,13 +339,13 @@ public class ButtonQuest extends Button
 			outlineColor = Color4I.GRAY;
 		}
 
-		double s = treeGui.zoom * 3D / 2D;
+		double s = treeGui.zoomd * 3D / 2D;
 		double sx = x + (w - s) / 2D;
 		double sy = y + (h - s) / 2D;
 
 		if (treeGui.selectedQuests.contains(quest))
 		{
-			double s1 = s + treeGui.zoom / 5D;
+			double s1 = s + treeGui.zoomd / 5D;
 			double sx1 = x + (w - s1) / 2D;
 			double sy1 = y + (h - s1) / 2D;
 			GlStateManager.pushMatrix();
@@ -366,8 +366,9 @@ public class ButtonQuest extends Button
 		if (!icon.isEmpty())
 		{
 			GlStateManager.pushMatrix();
-			GlStateManager.translate(x + (w - treeGui.zoom) / 2D, y + (h - treeGui.zoom) / 2D, 0D);
-			icon.draw(0, 0, treeGui.zoom, treeGui.zoom);
+			GlStateManager.translate(x + (w - treeGui.zoomd) / 2D, y + (h - treeGui.zoomd) / 2D, 0D);
+			GlStateManager.scale(treeGui.zoomd, treeGui.zoomd, 1D);
+			icon.draw(0, 0, 1, 1);
 			GlStateManager.popMatrix();
 		}
 
@@ -391,7 +392,7 @@ public class ButtonQuest extends Button
 
 		if (!qicon.isEmpty())
 		{
-			double s1 = treeGui.zoom / 2D;
+			double s1 = treeGui.zoomd / 2D;
 			double os1 = s1 / 4D;
 			GlStateManager.pushMatrix();
 			GlStateManager.translate(x + w - s1 - os1, y + os1, 500);

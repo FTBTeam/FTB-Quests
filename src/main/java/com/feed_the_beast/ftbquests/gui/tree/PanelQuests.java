@@ -118,10 +118,10 @@ public class PanelQuests extends Panel
 		maxX += 6;
 		maxY += 6;
 
-		int bsize = treeGui.zoom * 9 / 5;
+		double bsize = treeGui.zoomd * 9D / 5D;
 
-		treeGui.scrollWidth = (maxX - minX + 1) * bsize;
-		treeGui.scrollHeight = (maxY - minY + 1) * bsize;
+		treeGui.scrollWidth = (int) ((maxX - minX + 1) * bsize);
+		treeGui.scrollHeight = (int) ((maxY - minY + 1) * bsize);
 
 		for (Widget widget : widgets)
 		{
@@ -152,7 +152,7 @@ public class PanelQuests extends Panel
 				h = 1;
 			}
 
-			widget.setPosAndSize((x - minX) * bsize, (y - minY) * bsize, bsize * w, bsize * h);
+			widget.setPosAndSize((int) ((x - minX) * bsize), (int) ((y - minY) * bsize), (int) (bsize * w), (int) (bsize * h));
 
 			if (widget instanceof IQuestWidget)
 			{
@@ -173,7 +173,7 @@ public class PanelQuests extends Panel
 		DEPENDENCY.bindTexture();
 		GlStateManager.shadeModel(GL11.GL_SMOOTH);
 		double moving = -(System.currentTimeMillis() * 0.001D) % 1D;
-		double s = treeGui.zoom / 8D;
+		double s = treeGui.zoomd / 8D;
 		Quest selectedQuest = treeGui.getSelectedQuest();
 
 		for (Widget widget : widgets)
@@ -313,8 +313,6 @@ public class PanelQuests extends Panel
 				if (treeGui.zoom < 24)
 				{
 					treeGui.zoom += 4;
-					treeGui.grabbed = 0;
-					treeGui.resetScroll(true);
 					return true;
 				}
 			}
@@ -323,8 +321,6 @@ public class PanelQuests extends Panel
 				if (treeGui.zoom > 8)
 				{
 					treeGui.zoom -= 4;
-					treeGui.grabbed = 0;
-					treeGui.resetScroll(true);
 					return true;
 				}
 			}
