@@ -84,7 +84,7 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 
 		if (nbt.isEmpty())
 		{
-			FileUtils.delete(file);
+			FileUtils.deleteSafe(file);
 		}
 		else
 		{
@@ -134,7 +134,7 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 	@SubscribeEvent
 	public static void onTeamDeleted(ForgeTeamDeletedEvent event)
 	{
-		FileUtils.delete(event.getTeam().getDataFile("ftbquests"));
+		FileUtils.deleteSafe(event.getTeam().getDataFile("ftbquests"));
 		new MessageDeleteTeamData(event.getTeam().getUID()).sendToAll();
 	}
 

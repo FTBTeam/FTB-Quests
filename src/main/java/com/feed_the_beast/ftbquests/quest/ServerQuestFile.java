@@ -85,7 +85,7 @@ public class ServerQuestFile extends QuestFile
 					isLoading = true;
 					readDataOld(nbt);
 					isLoading = false;
-					FileUtils.delete(old);
+					FileUtils.deleteSafe(old);
 
 					if (!(Boolean) Launch.blackboard.get("fml.deobfuscatedEnvironment"))
 					{
@@ -93,7 +93,7 @@ public class ServerQuestFile extends QuestFile
 
 						if (p == null || p.length == 0)
 						{
-							FileUtils.delete(old.getParentFile());
+							FileUtils.deleteSafe(old.getParentFile());
 						}
 					}
 				}
