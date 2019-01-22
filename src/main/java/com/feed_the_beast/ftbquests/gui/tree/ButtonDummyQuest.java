@@ -7,14 +7,12 @@ import com.feed_the_beast.ftblib.lib.gui.Theme;
 import com.feed_the_beast.ftblib.lib.gui.Widget;
 import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
-import com.feed_the_beast.ftbquests.net.edit.MessageCreateObject;
+import com.feed_the_beast.ftbquests.net.edit.MessageCreateTaskAt;
 import com.feed_the_beast.ftbquests.net.edit.MessageMoveQuest;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.task.QuestTask;
 import com.feed_the_beast.ftbquests.quest.task.QuestTaskType;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.nbt.NBTTagCompound;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,20 +62,7 @@ public class ButtonDummyQuest extends Widget
 			{
 				contextMenu.add(new ContextMenuItem(type.getDisplayName().getFormattedText(), type.getIcon(), () -> {
 					GuiHelper.playClickSound();
-					Quest quest = new Quest(treeGui.selectedChapter);
-					quest.x = x;
-					quest.y = y;
-					new MessageCreateObject(quest, null).sendToServer();
-					type.getGuiProvider().openCreationGui(this, quest, task -> {
-						Quest q = treeGui.selectedChapter.getQuestAt(x, y);
-						QuestTask t = type.provider.create(q);
-						NBTTagCompound nbt = new NBTTagCompound();
-						task.writeData(nbt);
-						t.readData(nbt);
-						NBTTagCompound extra = new NBTTagCompound();
-						extra.setString("type", type.getTypeForNBT());
-						new MessageCreateObject(t, extra).sendToServer();
-					});
+					type.getGuiProvider().openCreationGui(this, new Quest(treeGui.selectedChapter), task -> new MessageCreateTaskAt(treeGui.selectedChapter, x, y, task).sendToServer());
 				}));
 			}
 

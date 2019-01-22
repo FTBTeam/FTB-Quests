@@ -1,7 +1,7 @@
 package com.feed_the_beast.ftbquests.quest.reward;
 
 import com.feed_the_beast.ftbquests.gui.GuiSelectChoiceReward;
-import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -13,9 +13,9 @@ import java.util.List;
  */
 public class ChoiceReward extends RandomReward
 {
-	public ChoiceReward(Quest quest)
+	public ChoiceReward(QuestObjectBase parent)
 	{
-		super(quest);
+		super(parent);
 	}
 
 	@Override

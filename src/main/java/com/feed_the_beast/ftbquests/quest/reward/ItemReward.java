@@ -9,7 +9,7 @@ import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftbquests.net.MessageDisplayItemRewardToast;
 import com.feed_the_beast.ftbquests.net.MessageDisplayRewardToast;
-import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.latmod.mods.itemfilters.item.ItemMissing;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Items;
@@ -34,9 +34,9 @@ public class ItemReward extends QuestReward
 	public ItemStack stack;
 	public int randomBonus;
 
-	public ItemReward(Quest quest)
+	public ItemReward(QuestObjectBase parent)
 	{
-		super(quest);
+		super(parent);
 		stack = new ItemStack(Items.APPLE);
 		randomBonus = 0;
 	}

@@ -388,7 +388,10 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 			}
 		}
 
-		reward.quest.checkRepeatableQuests(FTBQuestsTeamData.get(team), player.getUniqueID());
+		if (reward.parent instanceof Quest)
+		{
+			((Quest) reward.parent).checkRepeatableQuests(FTBQuestsTeamData.get(team), player.getUniqueID());
+		}
 	}
 
 	@Override

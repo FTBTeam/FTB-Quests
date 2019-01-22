@@ -12,6 +12,7 @@ public class FTBQuestsTasks
 	public static QuestTaskType DIMENSION;
 	public static QuestTaskType STAT;
 	public static QuestTaskType KILL;
+	public static QuestTaskType LOCATION;
 
 	public static QuestTaskType IC2_ENERGY;
 	public static QuestTaskType BUILDCRAFT_MJ;

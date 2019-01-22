@@ -5,6 +5,7 @@ import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToServer;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
+import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.reward.ChoiceReward;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
@@ -58,7 +59,7 @@ public class MessageClaimChoiceReward extends MessageToServer
 		{
 			FTBQuestsTeamData teamData = FTBQuestsTeamData.get(Universe.get().getPlayer(player).team);
 
-			if (reward.quest.isComplete(teamData))
+			if (reward.parent instanceof QuestObject && ((QuestObject) reward.parent).isComplete(teamData))
 			{
 				ChoiceReward r = (ChoiceReward) reward;
 
