@@ -19,8 +19,6 @@ import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.item.ItemLootCrate;
 import com.feed_the_beast.ftbquests.item.ItemQuestBook;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
-import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.loot.LootCrate;
 import com.feed_the_beast.ftbquests.quest.reward.ChoiceReward;
@@ -38,7 +36,8 @@ import com.feed_the_beast.ftbquests.quest.task.FluidTask;
 import com.feed_the_beast.ftbquests.quest.task.ForgeEnergyTask;
 import com.feed_the_beast.ftbquests.quest.task.ItemTask;
 import com.feed_the_beast.ftbquests.quest.task.KillTask;
-import com.feed_the_beast.ftbquests.quest.task.QuestTask;
+import com.feed_the_beast.ftbquests.quest.task.LocationTask;
+import com.feed_the_beast.ftbquests.quest.task.QuestTaskData;
 import com.feed_the_beast.ftbquests.quest.task.QuestTaskType;
 import com.feed_the_beast.ftbquests.quest.task.StatTask;
 import com.feed_the_beast.ftbquests.quest.task.XPTask;
@@ -71,9 +70,11 @@ import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 
 import java.util.Collections;
+import java.util.List;
 
 /**
  * @author LatvianModder
@@ -153,7 +154,8 @@ public class FTBQuestsEventHandler
 				FTBQuestsTasks.XP = new QuestTaskType(XPTask::new).setRegistryName("xp").setIcon(Icon.getIcon("minecraft:items/experience_bottle")),
 				FTBQuestsTasks.DIMENSION = new QuestTaskType(DimensionTask::new).setRegistryName("dimension").setIcon(Icon.getIcon("minecraft:blocks/portal")),
 				FTBQuestsTasks.STAT = new QuestTaskType(StatTask::new).setRegistryName("stat").setIcon(Icon.getIcon("minecraft:items/iron_sword")),
-				FTBQuestsTasks.KILL = new QuestTaskType(KillTask::new).setRegistryName("kill").setIcon(Icon.getIcon("minecraft:items/diamond_sword"))
+				FTBQuestsTasks.KILL = new QuestTaskType(KillTask::new).setRegistryName("kill").setIcon(Icon.getIcon("minecraft:items/diamond_sword")),
+				FTBQuestsTasks.LOCATION = new QuestTaskType(LocationTask::new).setRegistryName("location").setIcon(Icon.getIcon("minecraft:items/compass_00"))
 		);
 
 		FTBQuests.PROXY.setTaskGuiProviders();
@@ -207,6 +209,13 @@ public class FTBQuestsEventHandler
 	{
 		if (event.getSource().getTrueSource() instanceof EntityPlayerMP)
 		{
+			List<KillTask> killTasks = ServerQuestFile.INSTANCE.getKillTasks();
+
+			if (killTasks.isEmpty())
+			{
+				return;
+			}
+
 			EntityPlayerMP player = (EntityPlayerMP) event.getSource().getTrueSource();
 			ITeamData data = ServerQuestFile.INSTANCE.getData(FTBLibAPI.getTeamID(player.getUniqueID()));
 
@@ -215,36 +224,47 @@ public class FTBQuestsEventHandler
 				return;
 			}
 
-			for (QuestChapter chapter : ServerQuestFile.INSTANCE.chapters)
+			for (KillTask task : killTasks)
 			{
-				for (Quest quest : chapter.quests)
+				QuestTaskData taskData = data.getQuestTaskData(task);
+
+				if (taskData.getProgress() < task.getMaxProgress() && task.quest.canStartTasks(data))
 				{
-					if (hasKillTasks(quest) && quest.canStartTasks(data))
-					{
-						for (QuestTask task : quest.tasks)
-						{
-							if (task instanceof KillTask)
-							{
-								((KillTask.Data) data.getQuestTaskData(task)).kill(event.getEntityLiving());
-							}
-						}
-					}
+					((KillTask.Data) taskData).kill(event.getEntityLiving());
 				}
 			}
 		}
 	}
 
-	private static boolean hasKillTasks(Quest quest)
+	@SubscribeEvent
+	public static void onPlayerTick(TickEvent.PlayerTickEvent event)
 	{
-		for (QuestTask task : quest.tasks)
+		if (event.phase == TickEvent.Phase.END && !event.player.world.isRemote)
 		{
-			if (task instanceof KillTask)
+			List<LocationTask> locationTasks = ServerQuestFile.INSTANCE.getLocationTasks();
+
+			if (locationTasks.isEmpty())
 			{
-				return true;
+				return;
+			}
+
+			ITeamData data = ServerQuestFile.INSTANCE.getData(FTBLibAPI.getTeamID(event.player.getUniqueID()));
+
+			if (data == null)
+			{
+				return;
+			}
+
+			for (LocationTask task : locationTasks)
+			{
+				QuestTaskData taskData = data.getQuestTaskData(task);
+
+				if (taskData.getProgress() == 0L && task.quest.canStartTasks(data))
+				{
+					taskData.submitTask((EntityPlayerMP) event.player, Collections.emptyList(), false);
+				}
 			}
 		}
-
-		return false;
 	}
 
 	@SubscribeEvent

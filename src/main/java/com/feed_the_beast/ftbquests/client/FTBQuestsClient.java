@@ -2,15 +2,18 @@ package com.feed_the_beast.ftbquests.client;
 
 import com.feed_the_beast.ftblib.FTBLib;
 import com.feed_the_beast.ftblib.lib.OtherMods;
+import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigInt;
 import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.gui.SimpleTextButton;
 import com.feed_the_beast.ftblib.lib.gui.misc.GuiButtonListBase;
+import com.feed_the_beast.ftblib.lib.gui.misc.GuiEditConfig;
 import com.feed_the_beast.ftblib.lib.gui.misc.GuiEditConfigValue;
 import com.feed_the_beast.ftblib.lib.gui.misc.GuiSelectFluid;
 import com.feed_the_beast.ftblib.lib.gui.misc.GuiSelectItemStack;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
+import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.FTBQuestsCommon;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
@@ -22,8 +25,14 @@ import com.feed_the_beast.ftbquests.quest.task.DimensionTask;
 import com.feed_the_beast.ftbquests.quest.task.FTBQuestsTasks;
 import com.feed_the_beast.ftbquests.quest.task.FluidTask;
 import com.feed_the_beast.ftbquests.quest.task.ItemTask;
+import com.feed_the_beast.ftbquests.quest.task.LocationTask;
 import com.latmod.mods.itemfilters.filters.NBTMatchingMode;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.tileentity.TileEntityStructure;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.DimensionType;
 import net.minecraftforge.client.settings.KeyConflictContext;
 import net.minecraftforge.client.settings.KeyModifier;
@@ -110,6 +119,35 @@ public class FTBQuestsClient extends FTBQuestsCommon
 
 			g.focus();
 			g.openGui();
+		});
+
+		FTBQuestsTasks.LOCATION.setGuiProvider((gui, quest, callback) -> {
+			LocationTask task = new LocationTask(quest);
+			Minecraft mc = Minecraft.getMinecraft();
+
+			if (mc.objectMouseOver != null && mc.objectMouseOver.typeOfHit == RayTraceResult.Type.BLOCK)
+			{
+				TileEntity tileEntity = mc.world.getTileEntity(mc.objectMouseOver.getBlockPos());
+
+				if (tileEntity instanceof TileEntityStructure)
+				{
+					BlockPos pos = ((TileEntityStructure) tileEntity).getPosition();
+					BlockPos size = ((TileEntityStructure) tileEntity).getStructureSize();
+					task.dimension = mc.world.provider.getDimension();
+					task.x = pos.getX() + tileEntity.getPos().getX();
+					task.y = pos.getY() + tileEntity.getPos().getY();
+					task.z = pos.getZ() + tileEntity.getPos().getZ();
+					task.w = Math.max(1, size.getX());
+					task.h = Math.max(1, size.getY());
+					task.d = Math.max(1, size.getZ());
+					callback.accept(task);
+					return;
+				}
+			}
+
+			ConfigGroup group = ConfigGroup.newGroup(FTBQuests.MOD_ID);
+			task.getConfig(task.createSubGroup(group));
+			new GuiEditConfig(group, (g1, sender) -> callback.accept(task)).openGui();
 		});
 	}
 

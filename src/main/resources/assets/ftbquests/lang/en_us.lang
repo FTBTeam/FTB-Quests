@@ -167,6 +167,16 @@ ftbquests.task.ftbquests.kill=Kill Entity
 ftbquests.task.ftbquests.kill.entity=Entity Name
 ftbquests.task.ftbquests.kill.value=Count
 
+ftbquests.task.ftbquests.location=Location
+ftbquests.task.ftbquests.location.dim=Dimension
+ftbquests.task.ftbquests.location.ignore_dim=Ignore Dimension
+ftbquests.task.ftbquests.location.x=X
+ftbquests.task.ftbquests.location.y=Y
+ftbquests.task.ftbquests.location.z=Z
+ftbquests.task.ftbquests.location.w=W
+ftbquests.task.ftbquests.location.h=H
+ftbquests.task.ftbquests.location.d=D
+
 ftbquests.task.ftbquests.buildcraft_mj=BuildCraft Energy
 ftbquests.task.ftbquests.buildcraft_mj.value=mJ
 ftbquests.task.ftbquests.buildcraft_mj.text=%d MJ

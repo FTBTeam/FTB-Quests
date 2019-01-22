@@ -8,6 +8,7 @@ import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.gui.GuiSelectQuestObject;
 import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.quest.loot.RewardTable;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
@@ -77,13 +78,13 @@ public final class QuestRewardType extends IForgeRegistryEntry.Impl<QuestRewardT
 	@FunctionalInterface
 	public interface Provider
 	{
-		QuestReward create(Quest quest);
+		QuestReward create(QuestObjectBase parent);
 	}
 
 	public interface GuiProvider
 	{
 		@SideOnly(Side.CLIENT)
-		void openCreationGui(IOpenableGui gui, Quest quest, Consumer<QuestReward> callback);
+		void openCreationGui(IOpenableGui gui, QuestObjectBase parent, Consumer<QuestReward> callback);
 	}
 
 	public final Provider provider;
@@ -101,13 +102,13 @@ public final class QuestRewardType extends IForgeRegistryEntry.Impl<QuestRewardT
 		{
 			@Override
 			@SideOnly(Side.CLIENT)
-			public void openCreationGui(IOpenableGui gui, Quest quest, Consumer<QuestReward> callback)
+			public void openCreationGui(IOpenableGui gui, QuestObjectBase parent, Consumer<QuestReward> callback)
 			{
-				QuestReward reward = provider.create(quest);
+				QuestReward reward = provider.create(parent);
 
 				if (reward instanceof RandomReward)
 				{
-					ConfigQuestObject config = new ConfigQuestObject(quest.chapter.file, null, QuestObjectType.REWARD_TABLE);
+					ConfigQuestObject config = new ConfigQuestObject(parent.getQuestFile(), null, QuestObjectType.REWARD_TABLE);
 					new GuiSelectQuestObject(config, gui, () -> {
 						((RandomReward) reward).table = (RewardTable) config.getObject();
 						callback.accept(reward);

@@ -170,6 +170,11 @@ public abstract class QuestTask extends QuestObject
 		{
 			gui.questLeft.refreshWidgets();
 		}
+
+		if (gui != null)
+		{
+			gui.quests.refreshWidgets();
+		}
 	}
 
 	@Override

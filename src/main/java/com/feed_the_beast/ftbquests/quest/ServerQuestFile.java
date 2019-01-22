@@ -6,6 +6,9 @@ import com.feed_the_beast.ftblib.lib.util.FileUtils;
 import com.feed_the_beast.ftblib.lib.util.NBTUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.net.edit.MessageDeleteObjectResponse;
+import com.feed_the_beast.ftbquests.quest.task.KillTask;
+import com.feed_the_beast.ftbquests.quest.task.LocationTask;
+import com.feed_the_beast.ftbquests.quest.task.QuestTask;
 import com.feed_the_beast.ftbquests.util.FTBQuestsTeamData;
 import io.sommers.packmode.api.PackModeAPI;
 import net.minecraft.launchwrapper.Launch;
@@ -28,6 +31,9 @@ public class ServerQuestFile extends QuestFile
 	public final Universe universe;
 	public boolean shouldSave = false;
 	private boolean isLoading = false;
+
+	private List<KillTask> killTasks = null;
+	private List<LocationTask> locationTasks = null;
 
 	public ServerQuestFile(Universe u)
 	{
@@ -159,14 +165,14 @@ public class ServerQuestFile extends QuestFile
 		{
 			object.deleteChildren();
 			object.deleteSelf();
-			clearCachedData();
+			refreshIDMap();
 			save();
 
 			File file = object.getFile(new File(Loader.instance().getConfigDir(), "ftbquests/" + getFolderName()));
 
 			if (file != null)
 			{
-				FileUtils.delete(file);
+				FileUtils.deleteSafe(file);
 			}
 		}
 
@@ -194,5 +200,61 @@ public class ServerQuestFile extends QuestFile
 
 		deleteChildren();
 		deleteSelf();
+	}
+
+	@Override
+	public void clearCachedData()
+	{
+		super.clearCachedData();
+		killTasks = null;
+		locationTasks = null;
+	}
+
+	public final List<KillTask> getKillTasks()
+	{
+		if (killTasks == null)
+		{
+			killTasks = new ArrayList<>();
+
+			for (QuestChapter chapter : chapters)
+			{
+				for (Quest quest : chapter.quests)
+				{
+					for (QuestTask task : quest.tasks)
+					{
+						if (task instanceof KillTask)
+						{
+							killTasks.add((KillTask) task);
+						}
+					}
+				}
+			}
+		}
+
+		return killTasks;
+	}
+
+	public final List<LocationTask> getLocationTasks()
+	{
+		if (locationTasks == null)
+		{
+			locationTasks = new ArrayList<>();
+
+			for (QuestChapter chapter : chapters)
+			{
+				for (Quest quest : chapter.quests)
+				{
+					for (QuestTask task : quest.tasks)
+					{
+						if (task instanceof LocationTask)
+						{
+							locationTasks.add((LocationTask) task);
+						}
+					}
+				}
+			}
+		}
+
+		return locationTasks;
 	}
 }

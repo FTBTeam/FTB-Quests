@@ -11,6 +11,7 @@ public class FTBQuestsEditNetHandler
 	{
 		EDIT.register(new MessageCreateObject());
 		EDIT.register(new MessageCreateObjectResponse());
+		EDIT.register(new MessageCreateTaskAt());
 		EDIT.register(new MessageDeleteObject());
 		EDIT.register(new MessageDeleteObjectResponse());
 		EDIT.register(new MessageEditObject());

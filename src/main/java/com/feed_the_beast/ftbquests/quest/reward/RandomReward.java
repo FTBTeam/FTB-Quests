@@ -4,7 +4,6 @@ import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
-import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.quest.loot.RewardTable;
@@ -31,10 +30,10 @@ public class RandomReward extends QuestReward
 {
 	public RewardTable table;
 
-	public RandomReward(Quest quest)
+	public RandomReward(QuestObjectBase parent)
 	{
-		super(quest);
-		table = quest.chapter.file.dummyTable;
+		super(parent);
+		table = parent.getQuestFile().dummyTable;
 	}
 
 	@Override
@@ -50,7 +49,7 @@ public class RandomReward extends QuestReward
 
 		if (getTable().id != 0 && !getTable().invalid)
 		{
-			nbt.setInteger("table", quest.chapter.file.rewardTables.indexOf(getTable()));
+			nbt.setInteger("table", getQuestFile().rewardTables.indexOf(getTable()));
 		}
 	}
 
@@ -60,13 +59,13 @@ public class RandomReward extends QuestReward
 		super.readData(nbt);
 		int index = nbt.hasKey("table") ? nbt.getInteger("table") : -1;
 
-		if (index >= 0 && index < quest.chapter.file.rewardTables.size())
+		if (index >= 0 && index < getQuestFile().rewardTables.size())
 		{
-			table = quest.chapter.file.rewardTables.get(index);
+			table = getQuestFile().rewardTables.get(index);
 		}
 		else
 		{
-			table = new RewardTable(quest.chapter.file);
+			table = new RewardTable(getQuestFile());
 			NBTTagList list = nbt.getTagList("rewards", Constants.NBT.TAG_COMPOUND);
 
 			for (int i = 0; i < list.tagCount(); i++)
@@ -81,9 +80,9 @@ public class RandomReward extends QuestReward
 				}
 			}
 
-			table.id = quest.chapter.file.readID(0);
+			table.id = getQuestFile().readID(0);
 			table.title = getDisplayName().getUnformattedText() + " " + toString();
-			quest.chapter.file.rewardTables.add(table);
+			getQuestFile().rewardTables.add(table);
 		}
 	}
 
@@ -91,7 +90,7 @@ public class RandomReward extends QuestReward
 	{
 		if (table == null || table.invalid)
 		{
-			table = quest.chapter.file.dummyTable;
+			table = getQuestFile().dummyTable;
 		}
 
 		return table;
@@ -108,7 +107,7 @@ public class RandomReward extends QuestReward
 	public void readNetData(DataIn data)
 	{
 		super.readNetData(data);
-		table = quest.chapter.file.getRewardTable(data.readInt());
+		table = getQuestFile().getRewardTable(data.readInt());
 	}
 
 	@Override
@@ -116,7 +115,7 @@ public class RandomReward extends QuestReward
 	{
 		super.getConfig(config);
 		Collection<QuestObjectType> set = Collections.singleton(QuestObjectType.REWARD_TABLE);
-		config.add("table", new ConfigQuestObject(quest.chapter.file, getTable(), set)
+		config.add("table", new ConfigQuestObject(getQuestFile(), getTable(), set)
 		{
 			@Override
 			public void setObject(@Nullable QuestObjectBase object)
@@ -126,7 +125,7 @@ public class RandomReward extends QuestReward
 					table = (RewardTable) object;
 				}
 			}
-		}, new ConfigQuestObject(quest.chapter.file, quest.chapter.file.dummyTable, set)).setDisplayName(new TextComponentTranslation("ftbquests.reward_table"));
+		}, new ConfigQuestObject(getQuestFile(), getQuestFile().dummyTable, set)).setDisplayName(new TextComponentTranslation("ftbquests.reward_table"));
 	}
 
 	@Override

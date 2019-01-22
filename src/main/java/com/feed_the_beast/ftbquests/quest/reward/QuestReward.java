@@ -35,15 +35,15 @@ import java.util.List;
  */
 public abstract class QuestReward extends QuestObjectBase
 {
-	public final Quest quest;
+	public QuestObjectBase parent;
 
 	public boolean team;
 	private boolean emergency;
 
-	public QuestReward(Quest q)
+	public QuestReward(QuestObjectBase q)
 	{
-		quest = q;
-		team = quest.chapter.file.defaultRewardTeam;
+		parent = q;
+		team = parent.getQuestFile().defaultRewardTeam;
 		emergency = false;
 	}
 
@@ -56,19 +56,20 @@ public abstract class QuestReward extends QuestObjectBase
 	@Override
 	public final QuestFile getQuestFile()
 	{
-		return quest.chapter.file;
+		return parent.getQuestFile();
 	}
 
 	@Override
+	@Nullable
 	public final QuestChapter getQuestChapter()
 	{
-		return quest.chapter;
+		return parent.getQuestChapter();
 	}
 
 	@Override
 	public final int getParentID()
 	{
-		return quest.id;
+		return parent.id;
 	}
 
 	public abstract QuestRewardType getType();
@@ -120,7 +121,7 @@ public abstract class QuestReward extends QuestObjectBase
 	public void getConfig(ConfigGroup config)
 	{
 		super.getConfig(config);
-		config.addBool("team", () -> team, v -> team = v, false).setDisplayName(new TextComponentTranslation("ftbquests.reward.team_reward")).setCanEdit(!quest.canRepeat);
+		config.addBool("team", this::isTeamReward, v -> team = v, false).setDisplayName(new TextComponentTranslation("ftbquests.reward.team_reward")).setCanEdit(!(parent instanceof Quest) || !((Quest) parent).canRepeat);
 		//config.addBool("emergency", () -> emergency, v -> emergency = v, false).setDisplayName(new TextComponentTranslation("ftbquests.reward.emergency"));
 	}
 
@@ -147,7 +148,10 @@ public abstract class QuestReward extends QuestObjectBase
 	@Override
 	public final void deleteSelf()
 	{
-		quest.rewards.remove(this);
+		if (parent instanceof Quest)
+		{
+			((Quest) parent).rewards.remove(this);
+		}
 
 		Collection<QuestReward> c = Collections.singleton(this);
 
@@ -182,17 +186,25 @@ public abstract class QuestReward extends QuestObjectBase
 		{
 			gui.questRight.refreshWidgets();
 		}
+
+		if (gui != null)
+		{
+			gui.quests.refreshWidgets();
+		}
 	}
 
 	@Override
 	public void onCreated()
 	{
-		quest.rewards.add(this);
+		if (parent instanceof Quest)
+		{
+			((Quest) parent).rewards.add(this);
+		}
 	}
 
 	public final boolean isTeamReward()
 	{
-		return team || quest.canRepeat;
+		return team || parent instanceof Quest && ((Quest) parent).canRepeat;
 	}
 
 	public final boolean addToEmergencyItems()

@@ -4,7 +4,7 @@ import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftbquests.net.MessageDisplayRewardToast;
-import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.ITextComponent;
@@ -19,9 +19,9 @@ public class XPReward extends QuestReward
 {
 	public int xp = 100;
 
-	public XPReward(Quest quest)
+	public XPReward(QuestObjectBase parent)
 	{
-		super(quest);
+		super(parent);
 	}
 
 	@Override

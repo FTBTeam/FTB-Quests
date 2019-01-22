@@ -549,6 +549,11 @@ public abstract class QuestFile extends QuestObject
 			{
 				for (Quest quest : chapter.quests)
 				{
+					if (quest.invalid)
+					{
+						continue;
+					}
+
 					out = new NBTTagCompound();
 					quest.writeData(out);
 
