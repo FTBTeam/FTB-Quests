@@ -21,14 +21,15 @@ public class LootCrateCategory implements IRecipeCategory<LootCrateWrapper>
 	public static final String UID = "ftbquests.lootcrates";
 
 	public static final int ITEMSX = 10;
-	public static final int ITEMSY = 6;
+	public static final int ITEMSY = 5;
+	public static final int ITEMS = ITEMSX * ITEMSY;
 
 	private final IDrawable background;
 	private final IDrawable icon;
 
 	public LootCrateCategory(IGuiHelper guiHelper)
 	{
-		background = guiHelper.createBlankDrawable(ITEMSX * 18 + 2, (ITEMSY + 1) * 18);
+		background = guiHelper.createBlankDrawable(ITEMSX * 18, ITEMSY * 18 + 36);
 		icon = new IDrawable()
 		{
 			@Override
@@ -92,13 +93,11 @@ public class LootCrateCategory implements IRecipeCategory<LootCrateWrapper>
 	public void setRecipe(IRecipeLayout layout, LootCrateWrapper entry, IIngredients ingredients)
 	{
 		IGuiItemStackGroup stacks = layout.getItemStacks();
-
 		stacks.addTooltipCallback(entry);
-		stacks.init(0, true, 81, 0);
 
-		for (int slot = 0; slot < Math.min(ITEMSX * ITEMSY, entry.items.size()); slot++)
+		for (int slot = 0; slot < Math.min(ITEMS, entry.items.size()); slot++)
 		{
-			stacks.init(slot + 1, false, (slot % ITEMSX) * 18, (slot / ITEMSX) * 18 + 18);
+			stacks.init(slot + 1, false, (slot % ITEMSX) * 18, (slot / ITEMSX) * 18 + 36);
 		}
 
 		stacks.set(ingredients);

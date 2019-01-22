@@ -1,5 +1,6 @@
 package com.feed_the_beast.ftbquests.integration.jei;
 
+import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
 import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
@@ -11,6 +12,7 @@ import mezz.jei.api.gui.ITooltipCallback;
 import mezz.jei.api.ingredients.IIngredients;
 import mezz.jei.api.ingredients.VanillaTypes;
 import mezz.jei.api.recipe.IRecipeWrapper;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
@@ -18,6 +20,7 @@ import net.minecraft.nbt.NBTTagString;
 import net.minecraft.util.text.TextFormatting;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -29,6 +32,8 @@ public class LootCrateWrapper implements IRecipeWrapper, ITooltipCallback<ItemSt
 	public final String name;
 	public final ItemStack itemStack;
 	public final List<ItemStack> items;
+	public final List<WeightedReward> rewards;
+	public final List<List<ItemStack>> itemLists;
 
 	public LootCrateWrapper(LootCrate c)
 	{
@@ -38,10 +43,10 @@ public class LootCrateWrapper implements IRecipeWrapper, ITooltipCallback<ItemSt
 		itemStack.setTagInfo("type", new NBTTagString(crate.stringID));
 		items = new ArrayList<>(c.table.rewards.size());
 
-		ArrayList<WeightedReward> list = new ArrayList<>(c.table.rewards);
-		list.sort(null);
+		rewards = new ArrayList<>(c.table.rewards);
+		rewards.sort(null);
 
-		for (WeightedReward reward : list)
+		for (WeightedReward reward : rewards)
 		{
 			Object object = reward.reward.getJEIFocus();
 			ItemStack stack = object instanceof ItemStack ? (ItemStack) object : ItemStack.EMPTY;
@@ -64,80 +69,107 @@ public class LootCrateWrapper implements IRecipeWrapper, ITooltipCallback<ItemSt
 				items.add(stack);
 			}
 		}
+
+		if (items.size() <= LootCrateCategory.ITEMS)
+		{
+			itemLists = new ArrayList<>(items.size());
+
+			for (ItemStack stack : items)
+			{
+				itemLists.add(Collections.singletonList(stack));
+			}
+		}
+		else
+		{
+			itemLists = new ArrayList<>(LootCrateCategory.ITEMS);
+
+			for (int i = 0; i < LootCrateCategory.ITEMS; i++)
+			{
+				itemLists.add(new ArrayList<>());
+			}
+
+			for (int i = 0; i < items.size(); i++)
+			{
+				itemLists.get(i % LootCrateCategory.ITEMS).add(items.get(i));
+			}
+		}
 	}
 
 	@Override
 	public void getIngredients(IIngredients ingredients)
 	{
 		ingredients.setInput(VanillaTypes.ITEM, itemStack);
-		ingredients.setOutputs(VanillaTypes.ITEM, items);
+		ingredients.setOutputLists(VanillaTypes.ITEM, itemLists);
 	}
 
 	private String chance(String type, int w, int t)
 	{
-		String s = TextFormatting.GRAY + "- " + I18n.format("ftbquests.loot.entitytype." + type) + ": " + TextFormatting.GOLD + WeightedReward.chanceString(w, t);
+		String s = I18n.format("ftbquests.loot.entitytype." + type) + ": " + WeightedReward.chanceString(w, t);
 
 		if (w > 0)
 		{
-			s += TextFormatting.DARK_GRAY + " (1 in " + StringUtils.formatDouble00(1D / ((double) w / (double) t)) + ")";
+			s += " (1 in " + StringUtils.formatDouble00(1D / ((double) w / (double) t)) + ")";
 		}
 
 		return s;
 	}
 
 	@Override
+	public void drawInfo(Minecraft mc, int recipeWidth, int recipeHeight, int mouseX, int mouseY)
+	{
+		GuiHelper.drawItem(itemStack, 0, 0, 2, 2, true);
+		mc.fontRenderer.drawString(TextFormatting.UNDERLINE + crate.table.getDisplayName().getUnformattedText(), 36, 0, 0xFF222222);
+
+		int total = ClientQuestFile.INSTANCE.lootCrateNoDrop.passive;
+
+		for (RewardTable table : ClientQuestFile.INSTANCE.rewardTables)
+		{
+			if (table.lootCrate != null)
+			{
+				total += table.lootCrate.drops.passive;
+			}
+		}
+
+		mc.fontRenderer.drawString(chance("passive", crate.drops.passive, total), 36, 10, 0xFF222222);
+
+		total = ClientQuestFile.INSTANCE.lootCrateNoDrop.monster;
+
+		for (RewardTable table : ClientQuestFile.INSTANCE.rewardTables)
+		{
+			if (table.lootCrate != null)
+			{
+				total += table.lootCrate.drops.monster;
+			}
+		}
+
+		mc.fontRenderer.drawString(chance("monster", crate.drops.monster, total), 36, 19, 0xFF222222);
+
+		total = ClientQuestFile.INSTANCE.lootCrateNoDrop.boss;
+
+		for (RewardTable table : ClientQuestFile.INSTANCE.rewardTables)
+		{
+			if (table.lootCrate != null)
+			{
+				total += table.lootCrate.drops.boss;
+			}
+		}
+
+		mc.fontRenderer.drawString(chance("boss", crate.drops.boss, total), 36, 28, 0xFF222222);
+	}
+
+	@Override
 	public void onTooltip(int slot, boolean input, ItemStack ingredient, List<String> tooltip)
 	{
-		if (slot == 0)
+		if (slot > 0 && slot - 1 < items.size())
 		{
-			tooltip.add(TextFormatting.GOLD + crate.table.getDisplayName().getUnformattedText());
-
-			if (crate.table.emptyWeight > 0)
+			for (int i = 0; i < items.size(); i++)
 			{
-				tooltip.add(TextFormatting.GRAY + I18n.format("jei.ftbquests.lootcrates.no_chance", TextFormatting.GOLD + WeightedReward.chanceString(crate.table.emptyWeight, crate.table.getTotalWeight(true))));
-			}
-
-			tooltip.add(TextFormatting.GRAY + I18n.format("jei.ftbquests.lootcrates.dropped_by"));
-
-			int total = ClientQuestFile.INSTANCE.lootCrateNoDrop.passive;
-
-			for (RewardTable table : ClientQuestFile.INSTANCE.rewardTables)
-			{
-				if (table.lootCrate != null)
+				if (items.get(i) == ingredient)
 				{
-					total += table.lootCrate.drops.passive;
+					tooltip.add(TextFormatting.GRAY + I18n.format("jei.ftbquests.lootcrates.chance", TextFormatting.GOLD + WeightedReward.chanceString(rewards.get(i).weight, crate.table.getTotalWeight(true))));
+					return;
 				}
 			}
-
-			tooltip.add(chance("passive", crate.drops.passive, total));
-
-			total = ClientQuestFile.INSTANCE.lootCrateNoDrop.monster;
-
-			for (RewardTable table : ClientQuestFile.INSTANCE.rewardTables)
-			{
-				if (table.lootCrate != null)
-				{
-					total += table.lootCrate.drops.monster;
-				}
-			}
-
-			tooltip.add(chance("monster", crate.drops.monster, total));
-
-			total = ClientQuestFile.INSTANCE.lootCrateNoDrop.boss;
-
-			for (RewardTable table : ClientQuestFile.INSTANCE.rewardTables)
-			{
-				if (table.lootCrate != null)
-				{
-					total += table.lootCrate.drops.boss;
-				}
-			}
-
-			tooltip.add(chance("boss", crate.drops.boss, total));
-		}
-		else if (slot > 0 && slot - 1 < items.size())
-		{
-			tooltip.add(TextFormatting.GRAY + I18n.format("jei.ftbquests.lootcrates.chance", TextFormatting.GOLD + WeightedReward.chanceString(crate.table.rewards.get(slot - 1).weight, crate.table.getTotalWeight(true))));
 		}
 	}
 }

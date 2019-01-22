@@ -34,9 +34,12 @@ public enum QuestRegistry
 			{
 				for (Quest quest : chapter.quests)
 				{
-					QuestWrapper wrapper = new QuestWrapper(quest);
-					list.add(wrapper);
-					FTBQuestsJEIIntegration.RUNTIME.getRecipeRegistry().addRecipe(wrapper, QuestCategory.UID);
+					if (!quest.tasks.isEmpty() || !quest.rewards.isEmpty())
+					{
+						QuestWrapper wrapper = new QuestWrapper(quest);
+						list.add(wrapper);
+						FTBQuestsJEIIntegration.RUNTIME.getRecipeRegistry().addRecipe(wrapper, QuestCategory.UID);
+					}
 				}
 			}
 		}
