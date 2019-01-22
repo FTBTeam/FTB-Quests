@@ -1,7 +1,6 @@
 package com.feed_the_beast.ftbquests.gui.tree;
 
 import com.feed_the_beast.ftblib.lib.gui.ContextMenuItem;
-import com.feed_the_beast.ftblib.lib.gui.GuiBase;
 import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
 import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.gui.Panel;
@@ -38,11 +37,10 @@ public class ButtonEditSettings extends ButtonTab
 	public void onClicked(MouseButton button)
 	{
 		GuiHelper.playClickSound();
-		GuiBase gui = getGui();
 
-		if (gui.contextMenu != null)
+		if (treeGui.contextMenu != null)
 		{
-			gui.closeContextMenu();
+			treeGui.closeContextMenu();
 			return;
 		}
 
@@ -136,8 +134,8 @@ public class ButtonEditSettings extends ButtonTab
 			}
 		}));
 
-		Panel panel = gui.openContextMenu(contextMenu);
-		panel.setPos(gui.width - panel.width - 2, height + 1);
+		Panel panel = treeGui.openContextMenu(contextMenu);
+		panel.setPos(treeGui.width - panel.width - 2, height + 1);
 	}
 
 	private void appendNum(StringBuilder sb, int num, char c)
