@@ -21,8 +21,6 @@ public class FTBQuestsNetHandler
 		GENERAL.register(new MessageCreateTeamData());
 		GENERAL.register(new MessageDeleteTeamData());
 		GENERAL.register(new MessageChangedTeam());
-		GENERAL.register(new MessageResetProgress());
-		GENERAL.register(new MessageCompleteInstantly());
 		GENERAL.register(new MessageClaimAllRewards());
 		GENERAL.register(new MessageClaimChoiceReward());
 		GENERAL.register(new MessageDisplayCompletionToast());

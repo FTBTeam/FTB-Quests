@@ -13,8 +13,7 @@ public class CommandFTBQuests extends CommandTreeBase
 	public CommandFTBQuests()
 	{
 		addSubcommand(new CommandEditingMode());
-		addSubcommand(new CommandResetProgress());
-		addSubcommand(new CommandCompleteInstantly());
+		addSubcommand(new CommandChangeProgress());
 		addSubcommand(new CommandSetVariable());
 		addSubcommand(new CommandChangeTeamRewards());
 		addSubcommand(new CommandChangeConsumable());

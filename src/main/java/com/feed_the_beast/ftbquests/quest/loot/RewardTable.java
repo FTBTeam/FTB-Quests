@@ -13,7 +13,6 @@ import com.feed_the_beast.ftbquests.gui.GuiRewardTables;
 import com.feed_the_beast.ftbquests.gui.tree.GuiQuestTree;
 import com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIHelper;
 import com.feed_the_beast.ftbquests.net.edit.MessageEditObjectDirect;
-import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
@@ -243,11 +242,6 @@ public final class RewardTable extends QuestObjectBase
 			lc.setDisplayName(new TextComponentTranslation("item.ftbquests.lootcrate.name"));
 			lootCrate.getConfig(lc);
 		}
-	}
-
-	@Override
-	public void resetProgress(ITeamData data, boolean dependencies)
-	{
 	}
 
 	@Override

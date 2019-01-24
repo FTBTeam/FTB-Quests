@@ -1,6 +1,7 @@
 package com.feed_the_beast.ftbquests.quest.task;
 
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
+import com.feed_the_beast.ftbquests.quest.EnumChangeProgress;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -34,9 +35,7 @@ public abstract class QuestTaskData<T extends QuestTask> implements ICapabilityP
 
 	public abstract long getProgress();
 
-	public abstract void resetProgress();
-
-	public abstract void completeInstantly();
+	public abstract void changeProgress(EnumChangeProgress type);
 
 	public int getRelativeProgress()
 	{

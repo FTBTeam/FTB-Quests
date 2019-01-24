@@ -9,6 +9,7 @@ import com.feed_the_beast.ftbquests.gui.tree.GuiQuestTree;
 import com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIHelper;
 import com.feed_the_beast.ftbquests.net.MessageDisplayCompletionToast;
 import com.feed_the_beast.ftbquests.net.MessageSubmitTask;
+import com.feed_the_beast.ftbquests.quest.EnumChangeProgress;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
@@ -120,19 +121,17 @@ public abstract class QuestTask extends QuestObject
 	}
 
 	@Override
-	public final void resetProgress(ITeamData data, boolean dependencies)
+	public final void changeProgress(ITeamData data, EnumChangeProgress type)
 	{
 		QuestTaskData taskData = data.getQuestTaskData(this);
-		taskData.resetProgress();
-		taskData.isComplete = false;
-		taskData.sync();
-	}
 
-	@Override
-	public final void completeInstantly(ITeamData data, boolean dependencies)
-	{
-		QuestTaskData taskData = data.getQuestTaskData(this);
-		taskData.completeInstantly();
+		taskData.changeProgress(type);
+
+		if (type.reset)
+		{
+			taskData.isComplete = false;
+		}
+
 		taskData.sync();
 	}
 
