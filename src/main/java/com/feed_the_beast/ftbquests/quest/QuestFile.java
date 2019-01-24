@@ -181,20 +181,11 @@ public abstract class QuestFile extends QuestObject
 	}
 
 	@Override
-	public void resetProgress(ITeamData data, boolean dependencies)
+	public void changeProgress(ITeamData data, EnumChangeProgress type)
 	{
 		for (QuestChapter chapter : chapters)
 		{
-			chapter.resetProgress(data, dependencies);
-		}
-	}
-
-	@Override
-	public void completeInstantly(ITeamData data, boolean dependencies)
-	{
-		for (QuestChapter chapter : chapters)
-		{
-			chapter.completeInstantly(data, dependencies);
+			chapter.changeProgress(data, type);
 		}
 	}
 

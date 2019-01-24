@@ -260,20 +260,11 @@ public final class QuestChapter extends QuestObject
 	}
 
 	@Override
-	public void resetProgress(ITeamData data, boolean dependencies)
+	public void changeProgress(ITeamData data, EnumChangeProgress type)
 	{
 		for (Quest quest : quests)
 		{
-			quest.resetProgress(data, dependencies);
-		}
-	}
-
-	@Override
-	public void completeInstantly(ITeamData data, boolean dependencies)
-	{
-		for (Quest quest : quests)
-		{
-			quest.completeInstantly(data, dependencies);
+			quest.changeProgress(data, type);
 		}
 	}
 

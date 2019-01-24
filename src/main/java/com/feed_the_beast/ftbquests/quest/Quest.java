@@ -376,46 +376,29 @@ public final class Quest extends QuestObject
 	}
 
 	@Override
-	public void resetProgress(ITeamData data, boolean deps)
+	public void changeProgress(ITeamData data, EnumChangeProgress type)
 	{
 		//data.setTimesCompleted(this, -1);
 
-		if (deps)
+		if (type.dependencies)
 		{
 			for (QuestObject dep : dependencies)
 			{
 				if (!dep.invalid)
 				{
-					dep.resetProgress(data, true);
+					dep.changeProgress(data, type);
 				}
 			}
 		}
 
 		for (QuestTask task : tasks)
 		{
-			task.resetProgress(data, deps);
+			task.changeProgress(data, type);
 		}
 
-		data.unclaimRewards(rewards);
-	}
-
-	@Override
-	public void completeInstantly(ITeamData data, boolean deps)
-	{
-		if (deps)
+		if (type == EnumChangeProgress.RESET || type == EnumChangeProgress.RESET_DEPS)
 		{
-			for (QuestObject dep : dependencies)
-			{
-				if (!dep.invalid)
-				{
-					dep.completeInstantly(data, true);
-				}
-			}
-		}
-
-		for (QuestTask task : tasks)
-		{
-			task.completeInstantly(data, deps);
+			data.unclaimRewards(rewards);
 		}
 	}
 
@@ -673,7 +656,7 @@ public final class Quest extends QuestObject
 			}
 		}
 
-		resetProgress(data, false);
+		changeProgress(data, EnumChangeProgress.RESET);
 	}
 
 	@Override

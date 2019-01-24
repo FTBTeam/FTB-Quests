@@ -1,5 +1,6 @@
 package com.feed_the_beast.ftbquests.quest.task;
 
+import com.feed_the_beast.ftbquests.quest.EnumChangeProgress;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTPrimitive;
@@ -67,15 +68,16 @@ public abstract class SimpleQuestTaskData<T extends QuestTask> extends QuestTask
 	}
 
 	@Override
-	public void resetProgress()
+	public void changeProgress(EnumChangeProgress type)
 	{
-		progress = 0L;
-	}
-
-	@Override
-	public void completeInstantly()
-	{
-		progress = task.getMaxProgress();
+		if (type.reset)
+		{
+			progress = 0L;
+		}
+		else if (type.complete)
+		{
+			progress = task.getMaxProgress();
+		}
 	}
 
 	@Override

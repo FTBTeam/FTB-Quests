@@ -140,12 +140,6 @@ public abstract class QuestReward extends QuestObjectBase
 	}
 
 	@Override
-	public final void resetProgress(ITeamData data, boolean dependencies)
-	{
-		data.unclaimRewards(Collections.singleton(this));
-	}
-
-	@Override
 	public final void deleteSelf()
 	{
 		if (parent instanceof Quest)

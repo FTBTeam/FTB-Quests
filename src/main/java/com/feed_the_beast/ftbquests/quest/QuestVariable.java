@@ -108,15 +108,16 @@ public final class QuestVariable extends QuestObject
 	}
 
 	@Override
-	public void resetProgress(ITeamData data, boolean dependencies)
+	public void changeProgress(ITeamData data, EnumChangeProgress type)
 	{
-		data.setVariable(id, 0L);
-	}
-
-	@Override
-	public void completeInstantly(ITeamData data, boolean dependencies)
-	{
-		data.setVariable(id, maxValue);
+		if (type.reset)
+		{
+			data.setVariable(id, 0L);
+		}
+		else if (type.complete)
+		{
+			data.setVariable(id, maxValue);
+		}
 	}
 
 	@Override

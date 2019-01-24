@@ -23,6 +23,7 @@ import com.feed_the_beast.ftbquests.net.MessageDeleteTeamData;
 import com.feed_the_beast.ftbquests.net.MessageSyncQuests;
 import com.feed_the_beast.ftbquests.net.MessageUpdateTaskProgress;
 import com.feed_the_beast.ftbquests.net.MessageUpdateVariable;
+import com.feed_the_beast.ftbquests.quest.EnumChangeProgress;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
@@ -311,26 +312,26 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 	public void syncTask(QuestTaskData data)
 	{
 		team.markDirty();
-		new MessageUpdateTaskProgress(team.getUID(), data.task.id, data.toNBT()).sendToAll();
+
+		if (EnumChangeProgress.sendUpdates)
+		{
+			new MessageUpdateTaskProgress(team.getUID(), data.task.id, data.toNBT()).sendToAll();
+		}
 
 		if (!data.isComplete && data.task.isComplete(this))
 		{
 			data.isComplete = true;
+			List<EntityPlayerMP> onlinePlayers = new ArrayList<>();
 
-			if (data.task.isComplete(this))
+			for (ForgePlayer player : team.getMembers())
 			{
-				List<EntityPlayerMP> onlinePlayers = new ArrayList<>();
-
-				for (ForgePlayer player : team.getMembers())
+				if (player.isOnline())
 				{
-					if (player.isOnline())
-					{
-						onlinePlayers.add(player.getPlayer());
-					}
+					onlinePlayers.add(player.getPlayer());
 				}
-
-				data.task.onCompleted(this, onlinePlayers);
 			}
+
+			data.task.onCompleted(this, onlinePlayers);
 		}
 	}
 
@@ -478,7 +479,11 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 		if (prevValue != value)
 		{
 			team.markDirty();
-			new MessageUpdateVariable(team.getUID(), variable, value).sendToAll();
+
+			if (EnumChangeProgress.sendUpdates)
+			{
+				new MessageUpdateVariable(team.getUID(), variable, value).sendToAll();
+			}
 		}
 	}
 

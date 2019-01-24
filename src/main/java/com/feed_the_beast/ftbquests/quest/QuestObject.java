@@ -14,7 +14,7 @@ public abstract class QuestObject extends QuestObjectBase
 
 	public abstract long getMaxProgress();
 
-	public abstract void completeInstantly(ITeamData data, boolean dependencies);
+	public abstract void changeProgress(ITeamData data, EnumChangeProgress type);
 
 	public abstract int getRelativeProgress(ITeamData data);
 

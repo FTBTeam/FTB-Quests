@@ -109,8 +109,6 @@ public abstract class QuestObjectBase
 		config.add("icon", new ConfigItemStack.SimpleStack(() -> icon, v -> icon = v), new ConfigItemStack(ItemStack.EMPTY)).setDisplayName(new TextComponentTranslation("ftbquests.icon")).setOrder(-126);
 	}
 
-	public abstract void resetProgress(ITeamData data, boolean dependencies);
-
 	public abstract Icon getAltIcon();
 
 	public abstract ITextComponent getAltDisplayName();

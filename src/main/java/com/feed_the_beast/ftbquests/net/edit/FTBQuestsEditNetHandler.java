@@ -9,6 +9,8 @@ public class FTBQuestsEditNetHandler
 
 	public static void init()
 	{
+		EDIT.register(new MessageChangeProgress());
+		EDIT.register(new MessageChangeProgressResponse());
 		EDIT.register(new MessageCreateObject());
 		EDIT.register(new MessageCreateObjectResponse());
 		EDIT.register(new MessageCreateTaskAt());
