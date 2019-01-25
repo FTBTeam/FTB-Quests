@@ -4,8 +4,11 @@ import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
+import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
 import com.google.gson.JsonPrimitive;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagString;
 import net.minecraft.util.text.TextComponentTranslation;
 
 import java.util.regex.Pattern;
@@ -92,5 +95,12 @@ public final class LootCrate
 		d.addInt("passive", () -> drops.passive, v -> drops.passive = v, 0, 0, Integer.MAX_VALUE).setDisplayName(new TextComponentTranslation("ftbquests.loot.entitytype.passive"));
 		d.addInt("monster", () -> drops.monster, v -> drops.monster = v, 0, 0, Integer.MAX_VALUE).setDisplayName(new TextComponentTranslation("ftbquests.loot.entitytype.monster"));
 		d.addInt("boss", () -> drops.boss, v -> drops.boss = v, 0, 0, Integer.MAX_VALUE).setDisplayName(new TextComponentTranslation("ftbquests.loot.entitytype.boss"));
+	}
+
+	public ItemStack createStack()
+	{
+		ItemStack stack = new ItemStack(FTBQuestsItems.LOOTCRATE);
+		stack.setTagInfo("type", new NBTTagString(stringID.isEmpty() ? table.getCodeString() : stringID));
+		return stack;
 	}
 }

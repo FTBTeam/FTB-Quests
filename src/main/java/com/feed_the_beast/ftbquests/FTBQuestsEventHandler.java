@@ -15,7 +15,6 @@ import com.feed_the_beast.ftbquests.block.BlockTaskScreenPart;
 import com.feed_the_beast.ftbquests.block.FTBQuestsBlocks;
 import com.feed_the_beast.ftbquests.block.ItemBlockProgressScreen;
 import com.feed_the_beast.ftbquests.block.ItemBlockScreen;
-import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.item.ItemLootCrate;
 import com.feed_the_beast.ftbquests.item.ItemQuestBook;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
@@ -58,8 +57,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagString;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
@@ -196,9 +193,7 @@ public class FTBQuestsEventHandler
 
 		if (crate != null)
 		{
-			ItemStack stack = new ItemStack(FTBQuestsItems.LOOTCRATE);
-			stack.setTagInfo("type", new NBTTagString(crate.stringID.isEmpty() ? crate.table.getCodeString() : crate.stringID));
-			EntityItem ei = new EntityItem(e.world, e.posX, e.posY, e.posZ, stack);
+			EntityItem ei = new EntityItem(e.world, e.posX, e.posY, e.posZ, crate.createStack());
 			ei.setPickupDelay(10);
 			event.getDrops().add(ei);
 		}
