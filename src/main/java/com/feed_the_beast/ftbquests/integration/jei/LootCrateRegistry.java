@@ -31,7 +31,7 @@ public enum LootCrateRegistry
 		{
 			for (RewardTable table : ClientQuestFile.INSTANCE.rewardTables)
 			{
-				if (table.lootCrate != null && !table.lootCrate.stringID.isEmpty())
+				if (table.lootCrate != null)
 				{
 					LootCrateWrapper wrapper = new LootCrateWrapper(table.lootCrate);
 					list.add(wrapper);

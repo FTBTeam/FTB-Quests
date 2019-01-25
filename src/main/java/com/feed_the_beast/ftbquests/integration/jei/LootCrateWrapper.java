@@ -4,7 +4,6 @@ import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
 import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
-import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.quest.loot.LootCrate;
 import com.feed_the_beast.ftbquests.quest.loot.RewardTable;
 import com.feed_the_beast.ftbquests.quest.loot.WeightedReward;
@@ -39,8 +38,7 @@ public class LootCrateWrapper implements IRecipeWrapper, ITooltipCallback<ItemSt
 	{
 		crate = c;
 		name = crate.table.getDisplayName().getFormattedText();
-		itemStack = new ItemStack(FTBQuestsItems.LOOTCRATE);
-		itemStack.setTagInfo("type", new NBTTagString(crate.stringID));
+		itemStack = crate.createStack();
 		items = new ArrayList<>(c.table.rewards.size());
 
 		rewards = new ArrayList<>(c.table.rewards);

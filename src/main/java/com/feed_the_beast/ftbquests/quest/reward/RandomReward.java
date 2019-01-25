@@ -177,4 +177,12 @@ public class RandomReward extends QuestReward
 	{
 		return false;
 	}
+
+	@Override
+	@Nullable
+	@SideOnly(Side.CLIENT)
+	public Object getJEIFocus()
+	{
+		return getTable().lootCrate != null ? getTable().lootCrate.createStack() : null;
+	}
 }

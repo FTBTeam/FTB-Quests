@@ -5,6 +5,7 @@ import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.IconAnimation;
+import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
 import com.feed_the_beast.ftblib.lib.io.Bits;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
@@ -287,6 +288,11 @@ public final class RewardTable extends QuestObjectBase
 	@Override
 	public Icon getAltIcon()
 	{
+		if (lootCrate != null)
+		{
+			return ItemIcon.getItemIcon(lootCrate.createStack());
+		}
+
 		if (rewards.isEmpty())
 		{
 			return GuiIcons.DICE;
