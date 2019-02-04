@@ -98,7 +98,9 @@ public class ButtonTask extends SimpleTextButton
 			}
 			else
 			{
-				list.add(TextFormatting.DARK_GREEN + (data.getProgress() > task.getMaxProgress() ? task.getMaxProgressString() : data.getProgressString()) + " / " + task.getMaxProgressString() + " [" + data.getRelativeProgress() + "%]");
+				String max = isShiftKeyDown() ? Long.toUnsignedString(task.getMaxProgress()) : task.getMaxProgressString();
+				String prog = isShiftKeyDown() ? Long.toUnsignedString(data.getProgress()) : data.getProgressString();
+				list.add(TextFormatting.DARK_GREEN + (data.getProgress() > task.getMaxProgress() ? max : prog) + " / " + max + " [" + data.getRelativeProgress() + "%]");
 			}
 		}
 		else
