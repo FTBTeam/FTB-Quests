@@ -46,7 +46,14 @@ public class TileTaskScreenCoreIC2 extends TileTaskScreenCore implements IEnergy
 		if (d instanceof IC2EnergyTask.Data && d.task.quest.canStartTasks(d.teamData))
 		{
 			IC2EnergyTask.Data data = (IC2EnergyTask.Data) d;
-			return Math.min(data.task.maxInput, data.task.value - data.progress);
+			long e = data.task.value - data.progress;
+
+			if (data.task.maxInput > 0L)
+			{
+				e = Math.min(data.task.maxInput, e);
+			}
+
+			return e;
 		}
 
 		return 0D;
@@ -55,7 +62,7 @@ public class TileTaskScreenCoreIC2 extends TileTaskScreenCore implements IEnergy
 	@Override
 	public int getSinkTier()
 	{
-		return Integer.MAX_VALUE;
+		return 4;
 	}
 
 	@Override
