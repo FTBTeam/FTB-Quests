@@ -88,12 +88,6 @@ public class TileWithTeam extends TileBase
 		return cTeam;
 	}
 
-	@Override
-	public boolean canBeWrenched(EntityPlayer player)
-	{
-		return !indestructible;
-	}
-
 	public final boolean isOwner(EntityPlayer player)
 	{
 		return team.isEmpty() || FTBLibAPI.getTeam(player.getUniqueID()).equals(team);

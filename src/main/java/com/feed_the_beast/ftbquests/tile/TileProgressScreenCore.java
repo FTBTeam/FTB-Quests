@@ -19,7 +19,6 @@ import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
 import net.minecraft.block.BlockHorizontal;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.command.ICommandSender;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
@@ -147,12 +146,6 @@ public class TileProgressScreenCore extends TileWithTeam implements IConfigCallb
 	protected boolean notifyBlock()
 	{
 		return !world.isRemote;
-	}
-
-	@Override
-	public boolean canBeWrenched(EntityPlayer player)
-	{
-		return false;
 	}
 
 	@Nullable
