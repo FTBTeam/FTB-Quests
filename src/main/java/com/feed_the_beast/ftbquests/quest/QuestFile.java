@@ -65,6 +65,7 @@ public abstract class QuestFile extends QuestObject
 	public EnumQuestShape defaultShape;
 	public boolean dropLootCrates;
 	public final EntityWeight lootCrateNoDrop;
+	public boolean disableGui;
 
 	public QuestFile()
 	{
@@ -89,6 +90,7 @@ public abstract class QuestFile extends QuestObject
 		lootCrateNoDrop.passive = 4000;
 		lootCrateNoDrop.monster = 600;
 		lootCrateNoDrop.boss = 0;
+		disableGui = false;
 	}
 
 	public abstract boolean isClient();
@@ -466,6 +468,7 @@ public abstract class QuestFile extends QuestObject
 		NBTTagCompound nbt1 = new NBTTagCompound();
 		lootCrateNoDrop.writeData(nbt1);
 		nbt.setTag("loot_crate_no_drop", nbt1);
+		nbt.setBoolean("disable_gui", disableGui);
 	}
 
 	@Override
@@ -497,6 +500,8 @@ public abstract class QuestFile extends QuestObject
 		{
 			lootCrateNoDrop.readData(nbt.getCompoundTag("loot_crate_no_drop"));
 		}
+
+		disableGui = nbt.getBoolean("disable_gui");
 	}
 
 	private NBTTagCompound createIndex(List<? extends QuestObjectBase> list)
@@ -934,6 +939,7 @@ public abstract class QuestFile extends QuestObject
 
 		data.writeBoolean(dropLootCrates);
 		lootCrateNoDrop.writeNetData(data);
+		data.writeBoolean(disableGui);
 	}
 
 	@Override
@@ -947,6 +953,7 @@ public abstract class QuestFile extends QuestObject
 		defaultShape = data.read(EnumQuestShape.NAME_MAP);
 		dropLootCrates = data.readBoolean();
 		lootCrateNoDrop.readNetData(data);
+		disableGui = data.readBoolean();
 	}
 
 	public final void writeNetDataFull(DataOut data)
@@ -1192,6 +1199,7 @@ public abstract class QuestFile extends QuestObject
 		}, new ConfigTimer(Ticks.MINUTE.x(5)));
 
 		config.addBool("drop_loot_crates", () -> dropLootCrates, v -> dropLootCrates = v, false);
+		config.addBool("disable_gui", () -> disableGui, v -> disableGui = v, false);
 
 		ConfigGroup defaultsGroup = config.getGroup("defaults");
 		defaultsGroup.addBool("reward_team", () -> defaultRewardTeam, v -> defaultRewardTeam = v, false);

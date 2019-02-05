@@ -180,7 +180,11 @@ public class ClientQuestFile extends QuestFile
 
 	public void openQuestGui(EntityPlayer player)
 	{
-		if (existsWithTeam())
+		if (disableGui && !editingMode)
+		{
+			player.sendStatusMessage(new TextComponentTranslation("item.ftbquests.book.disabled"), true);
+		}
+		else if (existsWithTeam())
 		{
 			questGui.openGui();
 		}
