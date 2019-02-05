@@ -2,7 +2,6 @@ package com.feed_the_beast.ftbquests.tile;
 
 import com.feed_the_beast.ftblib.lib.tile.EnumSaveType;
 import com.feed_the_beast.ftblib.lib.tile.TileBase;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
@@ -74,12 +73,6 @@ public class TileTaskScreenPart extends TileBase implements ITaskScreen
 	protected boolean notifyBlock()
 	{
 		return !world.isRemote;
-	}
-
-	@Override
-	public boolean canBeWrenched(EntityPlayer player)
-	{
-		return false;
 	}
 
 	@Override

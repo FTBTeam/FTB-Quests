@@ -1,11 +1,9 @@
 package com.feed_the_beast.ftbquests.tile;
 
-import com.feed_the_beast.ftblib.lib.tile.IItemWritableTile;
-
 /**
  * @author LatvianModder
  */
-public interface IScreen extends IItemWritableTile
+public interface IScreen
 {
 	default int getOffsetX()
 	{
