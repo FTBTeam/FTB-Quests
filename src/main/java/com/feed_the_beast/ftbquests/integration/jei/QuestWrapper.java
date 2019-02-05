@@ -163,7 +163,7 @@ public class QuestWrapper implements IRecipeWrapper
 	@Override
 	public boolean handleClick(Minecraft minecraft, int mouseX, int mouseY, int mouseButton)
 	{
-		if (mouseY < 20)
+		if (mouseY >= 0 && mouseY < 20 && !ClientQuestFile.INSTANCE.disableGui)
 		{
 			ClientQuestFile.INSTANCE.questTreeGui.open(quest);
 			return true;
