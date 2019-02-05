@@ -179,6 +179,8 @@ ftbquests.task.ftbquests.location.w=W
 ftbquests.task.ftbquests.location.h=H
 ftbquests.task.ftbquests.location.d=D
 
+ftbquests.task.ftbquests.checkmark=Checkmark
+
 ftbquests.task.ftbquests.buildcraft_mj=BuildCraft Energy
 ftbquests.task.ftbquests.buildcraft_mj.value=mJ
 ftbquests.task.ftbquests.buildcraft_mj.text=%d MJ
