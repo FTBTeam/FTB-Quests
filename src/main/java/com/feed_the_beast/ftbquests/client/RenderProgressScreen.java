@@ -6,14 +6,12 @@ import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.tile.TileProgressScreenCore;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextFormatting;
 import org.lwjgl.opengl.GL11;
 
@@ -32,16 +30,6 @@ public class RenderProgressScreen extends TileEntitySpecialRenderer<TileProgress
 		if (!ClientQuestFile.exists())
 		{
 			return;
-		}
-		else if (screen.width == 0 && screen.height == 0)
-		{
-			BlockPos pos = screen.getPos().offset(screen.getFacing());
-			IBlockState state = screen.getWorld().getBlockState(pos);
-
-			if (!state.getBlock().isReplaceable(screen.getWorld(), pos))
-			{
-				return;
-			}
 		}
 
 		QuestChapter chapter = screen.getChapter();
