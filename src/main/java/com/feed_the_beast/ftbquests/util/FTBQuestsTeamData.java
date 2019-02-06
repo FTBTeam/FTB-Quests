@@ -550,9 +550,14 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 
 		if (!nbt1.isEmpty())
 		{
-			for (QuestTaskData data : taskData.values())
+			for (String s : nbt1.getKeySet())
 			{
-				data.fromNBT(nbt1.getTag(data.task.getCodeString()));
+				QuestTask task = ServerQuestFile.INSTANCE.getTask(ServerQuestFile.INSTANCE.getID(s));
+
+				if (task != null)
+				{
+					taskData.get(task.id).fromNBT(nbt1.getTag(s));
+				}
 			}
 		}
 		else
