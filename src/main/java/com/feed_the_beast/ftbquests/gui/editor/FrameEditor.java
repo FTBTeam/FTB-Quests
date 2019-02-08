@@ -1,9 +1,12 @@
 package com.feed_the_beast.ftbquests.gui.editor;
 
 import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
+import com.feed_the_beast.ftblib.lib.util.StringUtils;
+import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
-import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.text.ITextComponent;
 
 import javax.annotation.Nullable;
 import javax.swing.*;
@@ -18,6 +21,8 @@ public final class FrameEditor extends JFrame
 
 	public static void open(boolean reload)
 	{
+		IconWrapper.clearCache();
+
 		if (editor == null || reload)
 		{
 			if (editor != null)
@@ -25,7 +30,16 @@ public final class FrameEditor extends JFrame
 				editor.dispose();
 			}
 
-			editor = new FrameEditor();
+			try
+			{
+				UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+				//UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
+			}
+			catch (Exception ex)
+			{
+			}
+
+			editor = new FrameEditor(ClientQuestFile.INSTANCE);
 			editor.setLocationRelativeTo(null);
 		}
 
@@ -33,12 +47,26 @@ public final class FrameEditor extends JFrame
 		editor.setLocationRelativeTo(null);
 	}
 
-	private FrameEditor()
+	public final ClientQuestFile file;
+
+	public static String toString(ITextComponent component)
+	{
+		return StringUtils.unformatted(component.getFormattedText());
+	}
+
+	public static String toString(ItemStack stack)
+	{
+		return StringUtils.unformatted(stack.getDisplayName());
+	}
+
+	private FrameEditor(ClientQuestFile f)
 	{
 		super("FTB Quests Editor");
+		file = f;
 		setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
 		setMinimumSize(new Dimension(500, 300));
 		setResizable(true);
+		setIconImage(IconWrapper.from(com.feed_the_beast.ftblib.lib.icon.Icon.getIcon(FTBQuests.MOD_ID + ":textures/logotransparent.png")).getImage());
 
 		JMenuBar menuBar = new JMenuBar();
 		JMenu menuSettings = new JMenu("Settings");
@@ -52,15 +80,12 @@ public final class FrameEditor extends JFrame
 		setJMenuBar(menuBar);
 
 		JTabbedPane tabs = new JTabbedPane();
-
-		for (QuestChapter chapter : ClientQuestFile.INSTANCE.chapters)
-		{
-			JPanel panel = new JPanel();
-			tabs.addTab(chapter.getDisplayName().getUnformattedText(), panel);
-		}
-
+		tabs.addTab(I18n.format("ftbquests.chapters"), new TabChapters(this));
+		tabs.addTab(I18n.format("ftbquests.reward_tables"), new TabRewardTables(this));
+		tabs.addTab(I18n.format("ftbquests.variables"), new TabVariables(this));
 		setContentPane(tabs);
 		pack();
+		setSize(new Dimension(1000, 600));
 	}
 
 	private JMenuItem menuItem(String title, @Nullable com.feed_the_beast.ftblib.lib.icon.Icon icon, Runnable action)
