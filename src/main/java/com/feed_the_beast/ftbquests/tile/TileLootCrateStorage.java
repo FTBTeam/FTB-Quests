@@ -37,11 +37,14 @@ public class TileLootCrateStorage extends TileBase implements IItemHandler
 	{
 		QuestFile file = FTBQuests.PROXY.getQuestFile(world);
 
-		for (RewardTable table : file.rewardTables)
+		if (file != null && !file.rewardTables.isEmpty())
 		{
-			if (table.lootCrate != null && !table.lootCrate.stringID.isEmpty())
+			for (RewardTable table : file.rewardTables)
 			{
-				crates.put(table.lootCrate.stringID, 0);
+				if (table.lootCrate != null && !table.lootCrate.stringID.isEmpty())
+				{
+					crates.put(table.lootCrate.stringID, 0);
+				}
 			}
 		}
 	}
