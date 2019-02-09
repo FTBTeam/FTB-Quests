@@ -7,6 +7,7 @@ import com.feed_the_beast.ftblib.lib.tile.EnumSaveType;
 import com.feed_the_beast.ftblib.lib.tile.TileBase;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
+import com.feed_the_beast.ftbquests.quest.QuestFile;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -82,7 +83,8 @@ public class TileWithTeam extends TileBase
 		}
 		else if (cTeam == null && world != null)
 		{
-			cTeam = FTBQuests.PROXY.getQuestFile(world).getData(team);
+			QuestFile file = FTBQuests.PROXY.getQuestFile(world);
+			cTeam = file == null ? null : file.getData(team);
 		}
 
 		return cTeam;
