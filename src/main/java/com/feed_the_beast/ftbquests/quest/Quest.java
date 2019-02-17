@@ -9,6 +9,7 @@ import com.feed_the_beast.ftblib.lib.io.Bits;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.util.ListUtils;
+import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.events.ObjectCompletedEvent;
 import com.feed_the_beast.ftbquests.gui.tree.GuiQuestTree;
@@ -608,9 +609,16 @@ public final class Quest extends QuestObject
 			return true;
 		}
 
-		if (verifyDependenciesInternal(this, true))
+		try
 		{
-			return true;
+			if (verifyDependenciesInternal(this, true))
+			{
+				return true;
+			}
+		}
+		catch (StackOverflowError error)
+		{
+			FTBQuests.LOGGER.error("Looping dependencies found! Deleting all dependencies for quest " + this);
 		}
 
 		dependencies.clear();
