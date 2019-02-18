@@ -21,7 +21,7 @@ public class TabObjectList<T extends QuestObjectBase> extends TabBase implements
 	public final JPanel panel;
 	public T selected = null;
 
-	public TabObjectList(FrameEditor e, Class<T> o, String title, Icon icon)
+	public TabObjectList(EditorFrame e, Class<T> o, String title, Icon icon)
 	{
 		super(e);
 		objectClass = o;

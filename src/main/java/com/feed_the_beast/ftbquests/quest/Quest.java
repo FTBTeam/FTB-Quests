@@ -16,9 +16,10 @@ import com.feed_the_beast.ftbquests.gui.tree.GuiQuestTree;
 import com.feed_the_beast.ftbquests.net.MessageDisplayCompletionToast;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
 import com.feed_the_beast.ftbquests.quest.task.QuestTask;
-import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagIntArray;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
 import net.minecraft.util.math.MathHelper;
@@ -32,9 +33,7 @@ import javax.annotation.Nullable;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -47,11 +46,10 @@ public final class Quest extends QuestObject
 
 	public final QuestChapter chapter;
 	public String description;
-	public EnumQuestVisibilityType visibilityType;
 	public byte x, y;
 	public EnumQuestShape shape;
 	public final List<String> text;
-	public final Set<QuestObject> dependencies;
+	public final List<Dependency> dependencies;
 	public boolean canRepeat;
 	public final List<QuestTask> tasks;
 	public final List<QuestReward> rewards;
@@ -61,15 +59,14 @@ public final class Quest extends QuestObject
 	{
 		chapter = c;
 		description = "";
-		visibilityType = EnumQuestVisibilityType.NORMAL;
 		x = 0;
 		y = 0;
 		shape = chapter.file.defaultShape;
 		text = new ArrayList<>();
 		canRepeat = false;
-		dependencies = new HashSet<>();
-		tasks = new ArrayList<>();
-		rewards = new ArrayList<>();
+		dependencies = new ArrayList<>(0);
+		tasks = new ArrayList<>(1);
+		rewards = new ArrayList<>(1);
 		tasksIgnoreDependencies = false;
 	}
 
@@ -101,11 +98,6 @@ public final class Quest extends QuestObject
 	public void writeData(NBTTagCompound nbt)
 	{
 		super.writeData(nbt);
-
-		if (visibilityType != EnumQuestVisibilityType.NORMAL)
-		{
-			nbt.setString("type", visibilityType.getName());
-		}
 
 		if (x != 0)
 		{
@@ -149,26 +141,57 @@ public final class Quest extends QuestObject
 			nbt.setBoolean("tasks_ignore_deps", true);
 		}
 
-		dependencies.removeIf(QuestObjectBase.PREDICATE_INVALID);
+		dependencies.removeIf(Dependency.PREDICATE_INVALID);
 
 		if (!dependencies.isEmpty())
 		{
-			if (dependencies.size() == 1)
+			boolean allRequired = true;
+
+			for (Dependency dependency : dependencies)
 			{
-				nbt.setInteger("dependency", dependencies.iterator().next().id);
+				if (dependency.type != EnumDependencyType.REQUIRED)
+				{
+					allRequired = false;
+					break;
+				}
+			}
+
+			if (allRequired)
+			{
+				int[] ai = new int[dependencies.size()];
+
+				for (int i = 0; i < dependencies.size(); i++)
+				{
+					ai[i] = dependencies.get(i).object.id;
+				}
+
+				if (ai.length == 1)
+				{
+					nbt.setInteger("dependency", ai[0]);
+				}
+				else
+				{
+					nbt.setIntArray("dependencies", ai);
+				}
 			}
 			else
 			{
-				int[] ai = new int[dependencies.size()];
-				int i = 0;
+				NBTTagList list = new NBTTagList();
 
-				for (QuestObject object : dependencies)
+				for (Dependency dependency : dependencies)
 				{
-					ai[i] = object.id;
-					i++;
+					NBTTagCompound nbt1 = new NBTTagCompound();
+					nbt1.setInteger("id", dependency.object.id);
+
+					if (dependency.type != EnumDependencyType.REQUIRED)
+					{
+						nbt1.setString("type", dependency.type.getID());
+					}
+
+					list.appendTag(nbt1);
 				}
 
-				nbt.setIntArray("dependencies", ai);
+				nbt.setTag("dependencies", list);
 			}
 		}
 	}
@@ -178,7 +201,6 @@ public final class Quest extends QuestObject
 	{
 		super.readData(nbt);
 		description = nbt.getString("description");
-		visibilityType = EnumQuestVisibilityType.NAME_MAP.get(nbt.getString("visibility"));
 		x = (byte) MathHelper.clamp(nbt.getByte("x"), -POS_LIMIT, POS_LIMIT);
 		y = (byte) MathHelper.clamp(nbt.getByte("y"), -POS_LIMIT, POS_LIMIT);
 		shape = nbt.hasKey("shape") ? EnumQuestShape.NAME_MAP.get(nbt.getString("shape")) : chapter.file.defaultShape;
@@ -196,20 +218,51 @@ public final class Quest extends QuestObject
 
 		dependencies.clear();
 
-		int[] deps = nbt.getIntArray("dependencies");
+		NBTBase depsTag = nbt.getTag("dependencies");
 
-		if (deps.length == 0)
+		if (depsTag instanceof NBTTagIntArray)
 		{
-			deps = new int[] {nbt.getInteger("dependency")};
-		}
-
-		for (int i : deps)
-		{
-			QuestObject o = chapter.file.get(i);
-
-			if (o != null)
+			for (int i : nbt.getIntArray("dependencies"))
 			{
-				dependencies.add(o);
+				QuestObject object = chapter.file.get(i);
+
+				if (object != null)
+				{
+					Dependency dependency = new Dependency();
+					dependency.object = object;
+					dependency.type = EnumDependencyType.REQUIRED;
+					dependencies.add(dependency);
+				}
+			}
+		}
+		else if (depsTag instanceof NBTTagList)
+		{
+			list = (NBTTagList) depsTag;
+
+			for (int i = 0; i < list.tagCount(); i++)
+			{
+				NBTTagCompound nbt1 = list.getCompoundTagAt(i);
+				QuestObject object = chapter.file.get(nbt1.getInteger("id"));
+
+				if (object != null)
+				{
+					Dependency dependency = new Dependency();
+					dependency.object = object;
+					dependency.type = EnumDependencyType.NAME_MAP.get(nbt1.getString("type"));
+					dependencies.add(dependency);
+				}
+			}
+		}
+		else
+		{
+			QuestObject object = chapter.file.get(nbt.getInteger("dependency"));
+
+			if (object != null)
+			{
+				Dependency dependency = new Dependency();
+				dependency.object = object;
+				dependency.type = EnumDependencyType.REQUIRED;
+				dependencies.add(dependency);
 			}
 		}
 	}
@@ -219,7 +272,6 @@ public final class Quest extends QuestObject
 	{
 		super.writeNetData(data);
 		data.writeString(description);
-		data.write(visibilityType, EnumQuestVisibilityType.NAME_MAP);
 		data.writeByte(x);
 		data.writeByte(y);
 		data.write(shape, EnumQuestShape.NAME_MAP);
@@ -230,15 +282,16 @@ public final class Quest extends QuestObject
 		data.writeVarInt(flags);
 		data.writeVarInt(dependencies.size());
 
-		for (QuestObject d : dependencies)
+		for (Dependency d : dependencies)
 		{
-			if (d == null || d.invalid)
+			if (d.isInvalid())
 			{
 				data.writeInt(0);
 			}
 			else
 			{
-				data.writeInt(d.id);
+				data.writeInt(d.object.id);
+				data.write(d.type, EnumDependencyType.NAME_MAP);
 			}
 		}
 	}
@@ -248,7 +301,6 @@ public final class Quest extends QuestObject
 	{
 		super.readNetData(data);
 		description = data.readString();
-		visibilityType = data.read(EnumQuestVisibilityType.NAME_MAP);
 		x = data.readByte();
 		y = data.readByte();
 		shape = data.read(EnumQuestShape.NAME_MAP);
@@ -257,6 +309,7 @@ public final class Quest extends QuestObject
 		canRepeat = Bits.getFlag(flags, 1);
 		tasksIgnoreDependencies = Bits.getFlag(flags, 2);
 
+		dependencies.clear();
 		int d = data.readVarInt();
 
 		for (int i = 0; i < d; i++)
@@ -265,7 +318,10 @@ public final class Quest extends QuestObject
 
 			if (object != null)
 			{
-				dependencies.add(object);
+				Dependency dependency = new Dependency();
+				dependency.object = object;
+				dependency.type = data.read(EnumDependencyType.NAME_MAP);
+				dependencies.add(dependency);
 			}
 		}
 	}
@@ -347,9 +403,9 @@ public final class Quest extends QuestObject
 			}
 		}
 
-		for (QuestObject object : dependencies)
+		for (Dependency dependency : dependencies)
 		{
-			if (!object.isComplete(data))
+			if (!dependency.isInvalid() && !dependency.type.checkFunction.check(data, dependency.object))
 			{
 				return false;
 			}
@@ -383,11 +439,11 @@ public final class Quest extends QuestObject
 
 		if (type.dependencies)
 		{
-			for (QuestObject dep : dependencies)
+			for (Dependency dependency : dependencies)
 			{
-				if (!dep.invalid)
+				if (!dependency.isInvalid())
 				{
-					dep.changeProgress(data, type);
+					dependency.object.changeProgress(data, type);
 				}
 			}
 		}
@@ -407,9 +463,9 @@ public final class Quest extends QuestObject
 	{
 		if (!tasksIgnoreDependencies)
 		{
-			for (QuestObject object : dependencies)
+			for (Dependency dependency : dependencies)
 			{
-				if (!object.isComplete(data))
+				if (!dependency.object.isComplete(data))
 				{
 					return false;
 				}
@@ -496,10 +552,8 @@ public final class Quest extends QuestObject
 		config.addInt("x", () -> x, v -> x = (byte) v, 0, -POS_LIMIT, POS_LIMIT);
 		config.addInt("y", () -> y, v -> y = (byte) v, 0, -POS_LIMIT, POS_LIMIT);
 		config.addEnum("shape", () -> shape, v -> shape = v, EnumQuestShape.NAME_MAP);
-		//config.addEnum("visibility", () -> visibilityType, v -> visibilityType = v, EnumQuestVisibilityType.NAME_MAP);
 		config.addString("description", () -> description, v -> description = v, "");
 		config.addList("text", text, new ConfigString(""), ConfigString::new, ConfigString::getString);
-		config.addList("dependencies", dependencies, new ConfigQuestObject(chapter.file, null, DEP_TYPES), v -> new ConfigQuestObject(chapter.file, v, DEP_TYPES), c -> (QuestObject) c.getObject()).setDisplayName(new TextComponentTranslation("ftbquests.dependencies"));
 		config.addBool("can_repeat", () -> canRepeat, v -> canRepeat = v, false);
 		config.addBool("tasks_ignore_dependencies", () -> tasksIgnoreDependencies, v -> tasksIgnoreDependencies = v, false);
 	}
@@ -508,11 +562,12 @@ public final class Quest extends QuestObject
 	{
 		EnumVisibility v = EnumVisibility.VISIBLE;
 
+		/*
 		for (QuestObject object : dependencies)
 		{
 			if (object instanceof Quest)
 			{
-				v = v.weakest(((Quest) object).getVisibility(data));
+				v = v.strongest(((Quest) object).getVisibility(data));
 
 				if (v.isInvisible())
 				{
@@ -521,10 +576,11 @@ public final class Quest extends QuestObject
 			}
 		}
 
-		if (data == null && visibilityType != EnumQuestVisibilityType.NORMAL)
+		if (data == null && visibilityType != EnumDependencyType.NORMAL)
 		{
-			return visibilityType == EnumQuestVisibilityType.SECRET_ONE || visibilityType == EnumQuestVisibilityType.SECRET_ALL ? EnumVisibility.SECRET : EnumVisibility.INVISIBLE;
+			return visibilityType == EnumDependencyType.SECRET_ONE || visibilityType == EnumDependencyType.SECRET_ALL ? EnumVisibility.SECRET : EnumVisibility.INVISIBLE;
 		}
+		*/
 
 		/*
 		switch (getVisibilityType())
@@ -602,7 +658,7 @@ public final class Quest extends QuestObject
 
 	public boolean verifyDependencies()
 	{
-		dependencies.removeIf(QuestObjectBase.PREDICATE_INVALID);
+		dependencies.removeIf(Dependency.PREDICATE_INVALID);
 
 		if (dependencies.isEmpty())
 		{
@@ -638,9 +694,9 @@ public final class Quest extends QuestObject
 			return false;
 		}
 
-		for (QuestObject object : dependencies)
+		for (Dependency dependency : dependencies)
 		{
-			if (object instanceof Quest && !((Quest) object).verifyDependenciesInternal(original, false))
+			if (dependency.object instanceof Quest && !((Quest) dependency.object).verifyDependenciesInternal(original, false))
 			{
 				return false;
 			}

@@ -11,7 +11,7 @@ import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.gui.FTBQuestsTheme;
 import com.feed_the_beast.ftbquests.gui.GuiRewardTables;
 import com.feed_the_beast.ftbquests.gui.GuiVariables;
-import com.feed_the_beast.ftbquests.gui.editor.FrameEditor;
+import com.feed_the_beast.ftbquests.gui.editor.EditorFrame;
 import com.feed_the_beast.ftbquests.net.edit.MessageChangeProgress;
 import com.feed_the_beast.ftbquests.quest.EnumChangeProgress;
 import com.feed_the_beast.ftbquests.quest.Quest;
@@ -42,7 +42,7 @@ public class ButtonEditSettings extends ButtonTab
 
 		if (FTBLibConfig.debugging.gui_widget_bounds && isAltKeyDown())
 		{
-			FrameEditor.open(isCtrlKeyDown());
+			EditorFrame.open(isCtrlKeyDown());
 			return;
 		}
 
