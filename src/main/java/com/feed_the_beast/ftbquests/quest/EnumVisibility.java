@@ -26,7 +26,7 @@ public enum EnumVisibility
 		return visibility <= 0;
 	}
 
-	public EnumVisibility weakest(EnumVisibility other)
+	public EnumVisibility strongest(EnumVisibility other)
 	{
 		return visibility <= other.visibility ? this : other;
 	}

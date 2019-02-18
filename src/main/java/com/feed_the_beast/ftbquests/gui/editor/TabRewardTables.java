@@ -12,7 +12,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
  */
 public class TabRewardTables extends TabObjectList<RewardTable>
 {
-	public TabRewardTables(FrameEditor e)
+	public TabRewardTables(EditorFrame e)
 	{
 		super(e, RewardTable.class, I18n.format("ftbquests.reward_tables"), IconWrapper.from(GuiIcons.MONEY_BAG));
 	}

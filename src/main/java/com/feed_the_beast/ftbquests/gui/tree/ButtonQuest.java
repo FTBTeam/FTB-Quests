@@ -15,7 +15,8 @@ import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.gui.FTBQuestsTheme;
 import com.feed_the_beast.ftbquests.net.edit.MessageCreateObject;
-import com.feed_the_beast.ftbquests.net.edit.MessageEditObjectDirect;
+import com.feed_the_beast.ftbquests.quest.Dependency;
+import com.feed_the_beast.ftbquests.quest.EnumDependencyType;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
@@ -23,13 +24,11 @@ import com.feed_the_beast.ftbquests.quest.reward.QuestRewardType;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -76,13 +75,13 @@ public class ButtonQuest extends Button
 		{
 			dependencies = new ArrayList<>();
 
-			for (QuestObject object : quest.dependencies)
+			for (Dependency dependency : quest.dependencies)
 			{
-				if (object instanceof Quest)
+				if (!dependency.isInvalid() && dependency.object instanceof Quest && dependency.type != EnumDependencyType.NOT_REQUIRED)
 				{
 					for (Widget widget : treeGui.quests.widgets)
 					{
-						if (widget instanceof ButtonQuest && object == ((ButtonQuest) widget).quest)
+						if (widget instanceof ButtonQuest && dependency.object == ((ButtonQuest) widget).quest)
 						{
 							dependencies.add((ButtonQuest) widget);
 						}
@@ -205,6 +204,7 @@ public class ButtonQuest extends Button
 
 	private void editDependency(Quest quest, QuestObject object, boolean add)
 	{
+		/* FIXME
 		HashSet<QuestObject> prevDeps = new HashSet<>(quest.dependencies);
 
 		if (add ? quest.dependencies.add(object) : quest.dependencies.remove(object))
@@ -219,7 +219,7 @@ public class ButtonQuest extends Button
 				quest.dependencies.addAll(prevDeps);
 				GuiQuestTree.displayError(new TextComponentTranslation("ftbquests.gui.looping_dependencies"));
 			}
-		}
+		}*/
 	}
 
 	@Override

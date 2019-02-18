@@ -7,9 +7,9 @@ import javax.swing.*;
  */
 public class TabBase extends JPanel
 {
-	public final FrameEditor editor;
+	public final EditorFrame editor;
 
-	public TabBase(FrameEditor e)
+	public TabBase(EditorFrame e)
 	{
 		editor = e;
 	}

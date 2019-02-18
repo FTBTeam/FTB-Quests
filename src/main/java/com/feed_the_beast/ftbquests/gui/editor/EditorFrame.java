@@ -15,9 +15,9 @@ import java.awt.*;
 /**
  * @author LatvianModder
  */
-public final class FrameEditor extends JFrame
+public final class EditorFrame extends JFrame
 {
-	private static FrameEditor editor = null;
+	private static EditorFrame editor = null;
 
 	public static void open(boolean reload)
 	{
@@ -39,7 +39,7 @@ public final class FrameEditor extends JFrame
 			{
 			}
 
-			editor = new FrameEditor(ClientQuestFile.INSTANCE);
+			editor = new EditorFrame(ClientQuestFile.INSTANCE);
 			editor.setLocationRelativeTo(null);
 		}
 
@@ -59,7 +59,7 @@ public final class FrameEditor extends JFrame
 		return StringUtils.unformatted(stack.getDisplayName());
 	}
 
-	private FrameEditor(ClientQuestFile f)
+	private EditorFrame(ClientQuestFile f)
 	{
 		super("FTB Quests Editor");
 		file = f;
@@ -69,20 +69,18 @@ public final class FrameEditor extends JFrame
 		setIconImage(IconWrapper.from(com.feed_the_beast.ftblib.lib.icon.Icon.getIcon(FTBQuests.MOD_ID + ":textures/logotransparent.png")).getImage());
 
 		JMenuBar menuBar = new JMenuBar();
-		JMenu menuSettings = new JMenu("Settings");
-		menuSettings.add(menuItem(I18n.format("ftbquests.gui.edit_file"), GuiIcons.SETTINGS, () -> System.out.println("Hi")));
+		JMenu menuSettings = new JMenu(I18n.format("ftbquests.file"));
 		menuSettings.add(menuItem(I18n.format("ftbquests.gui.reset_progress"), GuiIcons.REFRESH, () -> System.out.println("Hi")));
 		menuSettings.add(menuItem(I18n.format("ftbquests.gui.complete_instantly"), GuiIcons.ACCEPT, () -> System.out.println("Hi")));
-		menuSettings.add(menuItem(I18n.format("ftbquests.variables"), GuiIcons.CONTROLLER, () -> System.out.println("Hi")));
-		menuSettings.add(menuItem(I18n.format("ftbquests.reward_tables"), GuiIcons.MONEY_BAG, () -> System.out.println("Hi")));
 		menuSettings.add(menuItem(I18n.format("ftbquests.gui.save_as_file"), GuiIcons.DOWN, () -> System.out.println("Hi")));
 		menuBar.add(menuSettings);
 		setJMenuBar(menuBar);
 
 		JTabbedPane tabs = new JTabbedPane();
-		tabs.addTab(I18n.format("ftbquests.chapters"), new TabChapters(this));
-		tabs.addTab(I18n.format("ftbquests.reward_tables"), new TabRewardTables(this));
-		tabs.addTab(I18n.format("ftbquests.variables"), new TabVariables(this));
+		tabs.addTab(I18n.format("ftbquests.gui.edit_file"), IconWrapper.from(GuiIcons.SETTINGS), new TabSettings(this));
+		tabs.addTab(I18n.format("ftbquests.chapters"), IconWrapper.from(GuiIcons.COLOR_RGB), new TabChapters(this));
+		tabs.addTab(I18n.format("ftbquests.reward_tables"), IconWrapper.from(GuiIcons.MONEY_BAG), new TabRewardTables(this));
+		tabs.addTab(I18n.format("ftbquests.variables"), IconWrapper.from(GuiIcons.CONTROLLER), new TabVariables(this));
 		setContentPane(tabs);
 		pack();
 		setSize(new Dimension(1000, 600));

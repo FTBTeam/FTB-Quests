@@ -30,7 +30,7 @@ import java.util.List;
 public final class QuestChapter extends QuestObject
 {
 	public final QuestFile file;
-	public EnumQuestVisibilityType visibilityType;
+	public final List<Dependency> dependencies;
 	public final List<Quest> quests;
 	public final List<String> description;
 	public final List<QuestWidget> widgets;
@@ -38,10 +38,10 @@ public final class QuestChapter extends QuestObject
 	public QuestChapter(QuestFile f)
 	{
 		file = f;
-		description = new ArrayList<>();
-		visibilityType = EnumQuestVisibilityType.NORMAL;
+		description = new ArrayList<>(0);
+		dependencies = new ArrayList<>(0);
 		quests = new ArrayList<>();
-		widgets = new ArrayList<>();
+		widgets = new ArrayList<>(0);
 	}
 
 	@Override
@@ -66,11 +66,6 @@ public final class QuestChapter extends QuestObject
 	public void writeData(NBTTagCompound nbt)
 	{
 		super.writeData(nbt);
-
-		if (visibilityType != EnumQuestVisibilityType.NORMAL)
-		{
-			nbt.setString("type", visibilityType.getName());
-		}
 
 		if (!description.isEmpty())
 		{
@@ -106,7 +101,6 @@ public final class QuestChapter extends QuestObject
 	{
 		super.readData(nbt);
 		description.clear();
-		visibilityType = EnumQuestVisibilityType.NAME_MAP.get(nbt.getString("visibility"));
 
 		NBTTagList desc = nbt.getTagList("description", Constants.NBT.TAG_STRING);
 
@@ -139,7 +133,6 @@ public final class QuestChapter extends QuestObject
 	public void writeNetData(DataOut data)
 	{
 		super.writeNetData(data);
-		data.write(visibilityType, EnumQuestVisibilityType.NAME_MAP);
 		data.writeCollection(description, DataOut.STRING);
 		data.writeVarInt(widgets.size());
 
@@ -158,7 +151,6 @@ public final class QuestChapter extends QuestObject
 	public void readNetData(DataIn data)
 	{
 		super.readNetData(data);
-		visibilityType = data.read(EnumQuestVisibilityType.NAME_MAP);
 		data.readCollection(description, DataIn.STRING);
 		int s = data.readVarInt();
 		widgets.clear();
@@ -331,7 +323,6 @@ public final class QuestChapter extends QuestObject
 	{
 		super.getConfig(config);
 		config.addList("description", description, new ConfigString(""), ConfigString::new, ConfigString::getString);
-		//config.addEnum("visibility", () -> visibilityType, v -> visibilityType = v, EnumQuestVisibilityType.NAME_MAP);
 	}
 
 	public EnumVisibility getVisibility(@Nullable ITeamData data)
@@ -340,7 +331,7 @@ public final class QuestChapter extends QuestObject
 
 		for (Quest quest : quests)
 		{
-			v = v.weakest(quest.getVisibility(data));
+			v = v.strongest(quest.getVisibility(data));
 
 			if (v.isInvisible())
 			{
@@ -360,19 +351,5 @@ public final class QuestChapter extends QuestObject
 		{
 			quest.clearCachedData();
 		}
-	}
-
-	@Nullable
-	public Quest getQuestAt(byte x, byte y)
-	{
-		for (Quest quest : quests)
-		{
-			if (quest.x == x && quest.y == y)
-			{
-				return quest;
-			}
-		}
-
-		return null;
 	}
 }

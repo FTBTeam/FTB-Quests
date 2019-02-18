@@ -34,7 +34,7 @@ public class IconTreeCellRenderer extends DefaultTreeCellRenderer
 			{
 				QuestObjectBase o = (QuestObjectBase) info;
 
-				setText(FrameEditor.toString(o.getDisplayName()));
+				setText(EditorFrame.toString(o.getDisplayName()));
 				setToolTipText(o.getCodeString());
 				setIcon(IconWrapper.from(o.getIcon()));
 			}

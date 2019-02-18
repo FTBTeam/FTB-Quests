@@ -12,7 +12,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
  */
 public class TabVariables extends TabObjectList<QuestVariable>
 {
-	public TabVariables(FrameEditor e)
+	public TabVariables(EditorFrame e)
 	{
 		super(e, QuestVariable.class, I18n.format("ftbquests.variables"), IconWrapper.from(GuiIcons.CONTROLLER));
 	}

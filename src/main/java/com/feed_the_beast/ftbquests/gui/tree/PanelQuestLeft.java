@@ -11,9 +11,9 @@ import com.feed_the_beast.ftblib.lib.gui.WidgetVerticalSpace;
 import com.feed_the_beast.ftblib.lib.util.StringJoiner;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
+import com.feed_the_beast.ftbquests.quest.Dependency;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
-import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.task.QuestTask;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
@@ -66,9 +66,9 @@ public class PanelQuestLeft extends Panel
 
 			List<String> dependencies = new ArrayList<>();
 
-			for (QuestObject object : selectedQuest.dependencies)
+			for (Dependency dependency : selectedQuest.dependencies)
 			{
-				if (object.getQuestChapter() != selectedQuest.chapter)
+				if (!dependency.isInvalid() && dependency.object.getQuestChapter() != selectedQuest.chapter)
 				{
 					if (dependencies.isEmpty())
 					{
@@ -76,7 +76,7 @@ public class PanelQuestLeft extends Panel
 						add(new TextField(this).setText(TextFormatting.AQUA + I18n.format("ftbquests.gui.requires") + ":"));
 					}
 
-					dependencies.add(TextFormatting.GRAY + object.getDisplayName().getUnformattedText());
+					dependencies.add(TextFormatting.GRAY + dependency.object.getDisplayName().getUnformattedText());
 				}
 			}
 
