@@ -22,7 +22,7 @@ import java.util.List;
 /**
  * @author LatvianModder
  */
-public class CommandChangeTeamRewards extends CommandEditorBase
+public class CommandChangeTeamRewards extends CommandFTBQuestsBase
 {
 	@Override
 	public String getName()

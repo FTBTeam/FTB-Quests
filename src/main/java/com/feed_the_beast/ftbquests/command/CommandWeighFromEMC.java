@@ -18,7 +18,7 @@ import java.util.List;
 /**
  * @author LatvianModder
  */
-public class CommandWeighFromEMC extends CommandEditorBase
+public class CommandWeighFromEMC extends CommandFTBQuestsBase
 {
 	@Override
 	public String getName()

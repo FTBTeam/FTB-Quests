@@ -2,7 +2,6 @@ package com.feed_the_beast.ftbquests.command;
 
 import com.feed_the_beast.ftblib.lib.util.NBTUtils;
 import com.feed_the_beast.ftbquests.net.MessageSyncEditingMode;
-import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -17,24 +16,12 @@ import java.util.List;
 /**
  * @author LatvianModder
  */
-public class CommandEditingMode extends CommandBase
+public class CommandEditingMode extends CommandFTBQuestsBase
 {
 	@Override
 	public String getName()
 	{
 		return "editing_mode";
-	}
-
-	@Override
-	public String getUsage(ICommandSender sender)
-	{
-		return "commands.ftbquests.editing_mode.usage";
-	}
-
-	@Override
-	public int getRequiredPermissionLevel()
-	{
-		return 2;
 	}
 
 	@Override

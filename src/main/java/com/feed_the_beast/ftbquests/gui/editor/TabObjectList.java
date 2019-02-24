@@ -44,6 +44,12 @@ public class TabObjectList<T extends QuestObjectBase> extends TabBase implements
 		add(splitPane);
 	}
 
+	@Override
+	public boolean scrollPage()
+	{
+		return false;
+	}
+
 	public void addElements(DefaultMutableTreeNode root)
 	{
 	}

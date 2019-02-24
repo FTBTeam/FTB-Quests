@@ -14,7 +14,7 @@ public class TabVariables extends TabObjectList<QuestVariable>
 {
 	public TabVariables(EditorFrame e)
 	{
-		super(e, QuestVariable.class, I18n.format("ftbquests.variables"), IconWrapper.from(GuiIcons.CONTROLLER));
+		super(e, QuestVariable.class, I18n.format("ftbquests.variables"), GuiIcons.CONTROLLER.getWrappedIcon());
 	}
 
 	@Override

@@ -14,7 +14,7 @@ public class TabChapters extends TabObjectList<QuestChapter>
 {
 	public TabChapters(EditorFrame e)
 	{
-		super(e, QuestChapter.class, I18n.format("ftbquests.chapters"), IconWrapper.from(GuiIcons.COLOR_RGB));
+		super(e, QuestChapter.class, I18n.format("ftbquests.chapters"), GuiIcons.COLOR_RGB.getWrappedIcon());
 	}
 
 	@Override

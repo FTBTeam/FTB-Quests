@@ -26,7 +26,7 @@ import java.util.List;
 /**
  * @author LatvianModder
  */
-public class CommandExportRewardsToChest extends CommandEditorBase
+public class CommandExportRewardsToChest extends CommandFTBQuestsBase
 {
 	@Override
 	public String getName()

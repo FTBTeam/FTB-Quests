@@ -36,7 +36,7 @@ public class IconTreeCellRenderer extends DefaultTreeCellRenderer
 
 				setText(EditorFrame.toString(o.getDisplayName()));
 				setToolTipText(o.getCodeString());
-				setIcon(IconWrapper.from(o.getIcon()));
+				setIcon(o.getIcon().getWrappedIcon());
 			}
 		}
 

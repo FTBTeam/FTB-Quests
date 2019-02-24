@@ -14,7 +14,7 @@ public class TabRewardTables extends TabObjectList<RewardTable>
 {
 	public TabRewardTables(EditorFrame e)
 	{
-		super(e, RewardTable.class, I18n.format("ftbquests.reward_tables"), IconWrapper.from(GuiIcons.MONEY_BAG));
+		super(e, RewardTable.class, I18n.format("ftbquests.reward_tables"), GuiIcons.MONEY_BAG.getWrappedIcon());
 	}
 
 	@Override
