@@ -42,8 +42,7 @@ configurations.all {
 repositories {
 	mavenLocal()
 	maven { url "https://maven.latmod.com/" } //FTBLib
-	maven { url "https://minecraft.curseforge.com/api/maven/" } //ProjectE
-	maven { url "http://maven.ic2.player.to/" } //IC2
+	maven { url "https://minecraft.curseforge.com/api/maven/" } //ProjectE, IC2
 	maven { url "https://maven.blamejared.com/" } //PackMode & Botania
 	maven { url "http://maven.thiakil.com/" } //Baubles
 	maven { url "https://mod-buildcraft.com/maven/" } //Buildcraft
@@ -55,7 +54,7 @@ dependencies {
 	deobfCompile "com.feed_the_beast.mods:FTBUtilities:${ftbutilities_version}"
 	deobfCompile "com.latmod.mods:ItemFilters:${itemfilters_version}"
 	deobfCompile "projecte:ProjectE:1.12:${projecte_version}"
-	provided "net.industrial-craft:industrialcraft-2:${ic2_version}:api"
+	deobfCompile "industrial-craft:industrialcraft-2-${ic2_version}:ex112:api"
 	deobfCompile "io.sommers:packmode:${packmode_version}"
 	deobfProvided "vazkii.botania:Botania:${botania_version}"
 	deobfProvided "com.azanor.baubles:Baubles:${baubles_version}"

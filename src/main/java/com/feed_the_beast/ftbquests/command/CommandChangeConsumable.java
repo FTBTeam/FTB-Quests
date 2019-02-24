@@ -23,7 +23,7 @@ import java.util.List;
 /**
  * @author LatvianModder
  */
-public class CommandChangeConsumable extends CommandEditorBase
+public class CommandChangeConsumable extends CommandFTBQuestsBase
 {
 	@Override
 	public String getName()

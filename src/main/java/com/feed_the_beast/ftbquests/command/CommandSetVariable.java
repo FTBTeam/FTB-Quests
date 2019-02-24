@@ -9,7 +9,6 @@ import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.QuestVariable;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.util.FTBQuestsTeamData;
-import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
@@ -26,24 +25,12 @@ import java.util.List;
 /**
  * @author LatvianModder
  */
-public class CommandSetVariable extends CommandBase
+public class CommandSetVariable extends CommandFTBQuestsBase
 {
 	@Override
 	public String getName()
 	{
 		return "set_variable";
-	}
-
-	@Override
-	public String getUsage(ICommandSender sender)
-	{
-		return "commands.ftbquests.set_variable.usage";
-	}
-
-	@Override
-	public int getRequiredPermissionLevel()
-	{
-		return 2;
 	}
 
 	@Override

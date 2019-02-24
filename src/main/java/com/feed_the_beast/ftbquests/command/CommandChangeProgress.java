@@ -26,7 +26,7 @@ import java.util.List;
 /**
  * @author LatvianModder
  */
-public class CommandChangeProgress extends CommandEditorBase
+public class CommandChangeProgress extends CommandFTBQuestsBase
 {
 	@Override
 	public String getName()

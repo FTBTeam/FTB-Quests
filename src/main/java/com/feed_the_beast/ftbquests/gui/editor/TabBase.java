@@ -13,4 +13,9 @@ public class TabBase extends JPanel
 	{
 		editor = e;
 	}
+
+	public boolean scrollPage()
+	{
+		return true;
+	}
 }
