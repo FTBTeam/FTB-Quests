@@ -68,7 +68,7 @@ public class PanelQuestLeft extends Panel
 
 			for (Dependency dependency : selectedQuest.dependencies)
 			{
-				if (!dependency.isInvalid() && dependency.object.getQuestChapter() != selectedQuest.chapter)
+				if (!dependency.isInvalid())
 				{
 					if (dependencies.isEmpty())
 					{
@@ -91,7 +91,7 @@ public class PanelQuestLeft extends Panel
 			{
 				for (Quest quest : chapter.quests)
 				{
-					if (quest.chapter != selectedQuest.chapter && quest.hasDependency(selectedQuest))
+					if (quest.hasDependency(selectedQuest))
 					{
 						if (dependants.isEmpty())
 						{

@@ -46,6 +46,12 @@ public class PanelQuestRight extends Panel
 
 			List<Widget> afterText = new ArrayList<>();
 
+			if (!quest.guidePage.isEmpty())
+			{
+				afterText.add(new ButtonOpenInGuide(this, quest));
+				afterText.add(new WidgetVerticalSpace(this, 4));
+			}
+
 			afterText.add(new TextField(this).setText(TextFormatting.GOLD + I18n.format("ftbquests.rewards") + ":"));
 
 			if (quest.rewards.isEmpty())

@@ -127,7 +127,7 @@ public class FTBQuestsTheme extends Theme
 		if (type == WidgetType.DISABLED)
 		{
 			r = g = b = 180;
-			a = 255;
+			a = 240;
 		}
 		else
 		{

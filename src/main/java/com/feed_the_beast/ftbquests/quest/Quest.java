@@ -54,6 +54,7 @@ public final class Quest extends QuestObject
 	public final List<QuestTask> tasks;
 	public final List<QuestReward> rewards;
 	public boolean tasksIgnoreDependencies;
+	public String guidePage;
 
 	public Quest(QuestChapter c)
 	{
@@ -68,6 +69,7 @@ public final class Quest extends QuestObject
 		tasks = new ArrayList<>(1);
 		rewards = new ArrayList<>(1);
 		tasksIgnoreDependencies = false;
+		guidePage = "";
 	}
 
 	@Override
@@ -139,6 +141,11 @@ public final class Quest extends QuestObject
 		if (tasksIgnoreDependencies)
 		{
 			nbt.setBoolean("tasks_ignore_deps", true);
+		}
+
+		if (!guidePage.isEmpty())
+		{
+			nbt.setString("guide_page", guidePage);
 		}
 
 		dependencies.removeIf(Dependency.PREDICATE_INVALID);
@@ -215,6 +222,7 @@ public final class Quest extends QuestObject
 
 		canRepeat = nbt.getBoolean("can_repeat");
 		tasksIgnoreDependencies = nbt.getBoolean("tasks_ignore_deps");
+		guidePage = nbt.getString("guide_page");
 
 		dependencies.clear();
 
@@ -271,15 +279,33 @@ public final class Quest extends QuestObject
 	public void writeNetData(DataOut data)
 	{
 		super.writeNetData(data);
-		data.writeString(description);
-		data.writeByte(x);
-		data.writeByte(y);
-		data.write(shape, EnumQuestShape.NAME_MAP);
-		data.writeCollection(text, DataOut.STRING);
 		int flags = 0;
 		flags = Bits.setFlag(flags, 1, canRepeat);
 		flags = Bits.setFlag(flags, 2, tasksIgnoreDependencies);
+		flags = Bits.setFlag(flags, 4, !guidePage.isEmpty());
+		flags = Bits.setFlag(flags, 8, !description.isEmpty());
+		flags = Bits.setFlag(flags, 16, !text.isEmpty());
 		data.writeVarInt(flags);
+
+		if (!description.isEmpty())
+		{
+			data.writeString(description);
+		}
+
+		data.writeByte(x);
+		data.writeByte(y);
+		data.write(shape, EnumQuestShape.NAME_MAP);
+
+		if (!text.isEmpty())
+		{
+			data.writeCollection(text, DataOut.STRING);
+		}
+
+		if (!guidePage.isEmpty())
+		{
+			data.writeString(guidePage);
+		}
+
 		data.writeVarInt(dependencies.size());
 
 		for (Dependency d : dependencies)
@@ -300,14 +326,24 @@ public final class Quest extends QuestObject
 	public void readNetData(DataIn data)
 	{
 		super.readNetData(data);
-		description = data.readString();
+		int flags = data.readVarInt();
+		description = Bits.getFlag(flags, 8) ? data.readString() : "";
 		x = data.readByte();
 		y = data.readByte();
 		shape = data.read(EnumQuestShape.NAME_MAP);
-		data.readCollection(text, DataIn.STRING);
-		int flags = data.readVarInt();
+
+		if (Bits.getFlag(flags, 16))
+		{
+			data.readCollection(text, DataIn.STRING);
+		}
+		else
+		{
+			text.clear();
+		}
+
 		canRepeat = Bits.getFlag(flags, 1);
 		tasksIgnoreDependencies = Bits.getFlag(flags, 2);
+		guidePage = Bits.getFlag(flags, 4) ? data.readString() : "";
 
 		dependencies.clear();
 		int d = data.readVarInt();
@@ -556,6 +592,7 @@ public final class Quest extends QuestObject
 		config.addList("text", text, new ConfigString(""), ConfigString::new, ConfigString::getString);
 		config.addBool("can_repeat", () -> canRepeat, v -> canRepeat = v, false);
 		config.addBool("tasks_ignore_dependencies", () -> tasksIgnoreDependencies, v -> tasksIgnoreDependencies = v, false);
+		config.addString("guide_page", () -> guidePage, v -> guidePage = v, "");
 	}
 
 	public EnumVisibility getVisibility(@Nullable ITeamData data)
@@ -653,10 +690,23 @@ public final class Quest extends QuestObject
 
 	public boolean hasDependency(QuestObject object)
 	{
-		return !object.invalid && dependencies.contains(object);
+		if (object.invalid)
+		{
+			return false;
+		}
+
+		for (Dependency dependency : dependencies)
+		{
+			if (dependency.object == object && !dependency.isInvalid())
+			{
+				return true;
+			}
+		}
+
+		return false;
 	}
 
-	public boolean verifyDependencies()
+	public boolean verifyDependencies(boolean autofix)
 	{
 		dependencies.removeIf(Dependency.PREDICATE_INVALID);
 
@@ -674,14 +724,20 @@ public final class Quest extends QuestObject
 		}
 		catch (StackOverflowError error)
 		{
-			FTBQuests.LOGGER.error("Looping dependencies found! Deleting all dependencies for quest " + this);
+			if (autofix)
+			{
+				FTBQuests.LOGGER.error("Looping dependencies found! Deleting all dependencies for quest " + this);
+			}
 		}
 
-		dependencies.clear();
-
-		if (!chapter.file.isClient())
+		if (autofix)
 		{
-			ServerQuestFile.INSTANCE.save();
+			dependencies.clear();
+
+			if (!chapter.file.isClient())
+			{
+				ServerQuestFile.INSTANCE.save();
+			}
 		}
 
 		return false;

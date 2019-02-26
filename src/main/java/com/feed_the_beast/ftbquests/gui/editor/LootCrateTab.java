@@ -2,7 +2,6 @@ package com.feed_the_beast.ftbquests.gui.editor;
 
 import com.feed_the_beast.ftbquests.net.edit.MessageEditObjectDirect;
 import com.feed_the_beast.ftbquests.quest.loot.RewardTable;
-import net.minecraft.client.Minecraft;
 
 import javax.swing.*;
 import java.awt.*;
@@ -12,9 +11,9 @@ import java.util.function.Predicate;
 /**
  * @author LatvianModder
  */
-public class TabLootCrates extends TabBase
+public class LootCrateTab extends Tab
 {
-	public TabLootCrates(EditorFrame e)
+	public LootCrateTab(EditorFrame e)
 	{
 		super(e);
 		JPanel mainPanel = new JPanel();
@@ -51,26 +50,22 @@ public class TabLootCrates extends TabBase
 			{
 				JButton button = new JButton(table.getDisplayName().getUnformattedText());
 				button.setToolTipText(table.lootCrate.stringID + " | " + table.getCodeString());
-
-				button.addActionListener(e1 -> {
-
-				});
-
+				button.addActionListener(e1 -> new LootCrateDialog(editor, table.lootCrate).setVisible(true));
 				dropPanel.add(button);
 
 				dropPanel.add(textField(table.lootCrate.drops.passive, IntVerifier.NON_NEGATIVE, s -> {
 					table.lootCrate.drops.passive = Integer.parseInt(s);
-					new MessageEditObjectDirect(table).sendToServer();
+					EditorFrame.scheduleObjectEdit(table);
 				}));
 
 				dropPanel.add(textField(table.lootCrate.drops.monster, IntVerifier.NON_NEGATIVE, s -> {
 					table.lootCrate.drops.monster = Integer.parseInt(s);
-					new MessageEditObjectDirect(table).sendToServer();
+					EditorFrame.scheduleObjectEdit(table);
 				}));
 
 				dropPanel.add(textField(table.lootCrate.drops.boss, IntVerifier.NON_NEGATIVE, s -> {
 					table.lootCrate.drops.boss = Integer.parseInt(s);
-					new MessageEditObjectDirect(table).sendToServer();
+					EditorFrame.scheduleObjectEdit(table);
 				}));
 			}
 		}
@@ -107,7 +102,7 @@ public class TabLootCrates extends TabBase
 
 			if (verifier.test(txt))
 			{
-				Minecraft.getMinecraft().addScheduledTask(() -> callback.accept(txt));
+				callback.accept(txt);
 			}
 		});
 

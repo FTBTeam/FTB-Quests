@@ -12,7 +12,6 @@ import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.init.Items;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.TextFormatting;
 
 import java.util.List;
@@ -24,7 +23,7 @@ public class ButtonClaimAllRewards extends ButtonTab
 {
 	public ButtonClaimAllRewards(Panel panel)
 	{
-		super(panel, I18n.format("ftbquests.reward.claim_all"), ItemIcon.getItemIcon(new ItemStack(Items.GOLDEN_APPLE)));
+		super(panel, I18n.format("ftbquests.reward.claim_all"), ItemIcon.getItemIcon(Items.GOLDEN_APPLE));
 	}
 
 	@Override

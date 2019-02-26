@@ -785,7 +785,7 @@ public abstract class QuestFile extends QuestObject
 		{
 			for (Quest quest : chapter.quests)
 			{
-				quest.verifyDependencies();
+				quest.verifyDependencies(true);
 			}
 		}
 	}
@@ -958,7 +958,7 @@ public abstract class QuestFile extends QuestObject
 		{
 			for (Quest quest : chapter.quests)
 			{
-				quest.verifyDependencies();
+				quest.verifyDependencies(true);
 			}
 		}
 	}
