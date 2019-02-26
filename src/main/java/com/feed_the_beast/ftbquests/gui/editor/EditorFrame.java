@@ -7,6 +7,9 @@ import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
+import com.feed_the_beast.ftbquests.net.edit.MessageEditObjectDirect;
+import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.ITextComponent;
@@ -36,26 +39,29 @@ public final class EditorFrame extends JFrame
 
 		if (editor == null || reload)
 		{
-			if (editor != null)
-			{
-				editor.dispose();
-			}
+			new Thread(() -> {
+				if (editor != null)
+				{
+					editor.dispose();
+				}
 
-			try
-			{
-				//UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-				UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
-			}
-			catch (Exception ex)
-			{
-			}
+				try
+				{
+					//UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+					UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
+					editor = new EditorFrame(ClientQuestFile.INSTANCE);
+					editor.setLocationRelativeTo(null);
+					editor.setVisible(true);
+				}
+				catch (Exception ex)
+				{
+				}
 
-			editor = new EditorFrame(ClientQuestFile.INSTANCE);
-			editor.setLocationRelativeTo(null);
+			}, "FTB Quests Editor").start();
+			return;
 		}
 
 		editor.setVisible(true);
-		editor.setLocationRelativeTo(null);
 	}
 
 	public final ClientQuestFile file;
@@ -72,7 +78,7 @@ public final class EditorFrame extends JFrame
 
 	private EditorFrame(ClientQuestFile f)
 	{
-		super("FTB Quests Editor");
+		super("FTB Quests Editor [Warning: Nearly nothing works properly yet!]");
 		file = f;
 		setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
 		setMinimumSize(new Dimension(500, 300));
@@ -88,17 +94,17 @@ public final class EditorFrame extends JFrame
 		setJMenuBar(menuBar);
 
 		JTabbedPane tabs = new JTabbedPane();
-		addTab(tabs, I18n.format("ftbquests.gui.edit_file"), GuiIcons.SETTINGS.getWrappedIcon(), new TabSettings(this));
-		addTab(tabs, I18n.format("ftbquests.chapters"), GuiIcons.COLOR_RGB.getWrappedIcon(), new TabChapters(this));
-		addTab(tabs, I18n.format("ftbquests.reward_tables"), GuiIcons.MONEY_BAG.getWrappedIcon(), new TabRewardTables(this));
-		addTab(tabs, I18n.format("jei.ftbquests.lootcrates"), ItemIcon.getItemIcon(new ItemStack(FTBQuestsItems.LOOTCRATE)).getWrappedIcon(), new TabLootCrates(this));
-		addTab(tabs, I18n.format("ftbquests.variables"), GuiIcons.CONTROLLER.getWrappedIcon(), new TabVariables(this));
+		addTab(tabs, I18n.format("ftbquests.gui.edit_file"), GuiIcons.SETTINGS.getWrappedIcon(), new SettingsTab(this));
+		addTab(tabs, I18n.format("ftbquests.chapters"), GuiIcons.COLOR_RGB.getWrappedIcon(), new ChaptersTab(this));
+		addTab(tabs, I18n.format("ftbquests.reward_tables"), GuiIcons.MONEY_BAG.getWrappedIcon(), new RewardTableTab(this));
+		addTab(tabs, I18n.format("jei.ftbquests.lootcrates"), ItemIcon.getItemIcon(FTBQuestsItems.LOOTCRATE).getWrappedIcon(), new LootCrateTab(this));
+		addTab(tabs, I18n.format("ftbquests.variables"), GuiIcons.CONTROLLER.getWrappedIcon(), new VariableTab(this));
 		setContentPane(tabs);
 		pack();
 		setSize(new Dimension(1000, 600));
 	}
 
-	private void addTab(JTabbedPane tabs, String title, Icon icon, TabBase tab)
+	private void addTab(JTabbedPane tabs, String title, Icon icon, Tab tab)
 	{
 		tabs.addTab(title, icon, tab.scrollPage() ? new JScrollPane(tab) : tab);
 	}
@@ -171,5 +177,30 @@ public final class EditorFrame extends JFrame
 		{
 			d.addDocumentListener(dl);
 		}
+	}
+
+	public static Component add(Panel panel, String key, Component component)
+	{
+		JLabel label = new JLabel(I18n.format(key), SwingConstants.CENTER);
+
+		if (I18n.hasKey(key + ".tooltip"))
+		{
+			label.setToolTipText(I18n.format(key + ".tooltip"));
+		}
+
+		label.setLabelFor(component);
+		panel.add(label);
+		panel.add(component);
+		return component;
+	}
+
+	public static void schedule(Runnable runnable)
+	{
+		Minecraft.getMinecraft().addScheduledTask(runnable);
+	}
+
+	public static void scheduleObjectEdit(QuestObjectBase object)
+	{
+		schedule(() -> new MessageEditObjectDirect(object).sendToServer());
 	}
 }

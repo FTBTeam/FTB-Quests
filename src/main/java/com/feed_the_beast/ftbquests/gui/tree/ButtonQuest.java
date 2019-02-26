@@ -15,6 +15,7 @@ import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.gui.FTBQuestsTheme;
 import com.feed_the_beast.ftbquests.net.edit.MessageCreateObject;
+import com.feed_the_beast.ftbquests.net.edit.MessageEditObjectDirect;
 import com.feed_the_beast.ftbquests.quest.Dependency;
 import com.feed_the_beast.ftbquests.quest.EnumDependencyType;
 import com.feed_the_beast.ftbquests.quest.Quest;
@@ -24,6 +25,7 @@ import com.feed_the_beast.ftbquests.quest.reward.QuestRewardType;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 
 import javax.annotation.Nullable;
@@ -204,22 +206,41 @@ public class ButtonQuest extends Button
 
 	private void editDependency(Quest quest, QuestObject object, boolean add)
 	{
-		/* FIXME
-		HashSet<QuestObject> prevDeps = new HashSet<>(quest.dependencies);
+		List<Dependency> prevDeps = new ArrayList<>(quest.dependencies);
 
-		if (add ? quest.dependencies.add(object) : quest.dependencies.remove(object))
+		if (add != quest.hasDependency(object))
 		{
-			if (quest.verifyDependencies())
+			if (add)
 			{
-				new MessageEditObjectDirect(quest).sendToServer();
-				treeGui.quests.refreshWidgets();
+				Dependency d = new Dependency();
+				d.object = object;
+				d.type = EnumDependencyType.REQUIRED;
+				quest.dependencies.add(d);
 			}
 			else
 			{
-				quest.dependencies.addAll(prevDeps);
-				GuiQuestTree.displayError(new TextComponentTranslation("ftbquests.gui.looping_dependencies"));
+				for (int i = 0; i < quest.dependencies.size(); i++)
+				{
+					if (quest.dependencies.get(i).object == object)
+					{
+						quest.dependencies.remove(i);
+						break;
+					}
+				}
 			}
-		}*/
+		}
+
+		if (quest.verifyDependencies(false))
+		{
+			new MessageEditObjectDirect(quest).sendToServer();
+			treeGui.quests.refreshWidgets();
+		}
+		else
+		{
+			quest.dependencies.clear();
+			quest.dependencies.addAll(prevDeps);
+			GuiQuestTree.displayError(new TextComponentTranslation("ftbquests.gui.looping_dependencies"));
+		}
 	}
 
 	@Override

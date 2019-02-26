@@ -1,7 +1,7 @@
 package com.feed_the_beast.ftbquests.gui.editor;
 
 import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
-import com.feed_the_beast.ftbquests.quest.loot.RewardTable;
+import com.feed_the_beast.ftbquests.quest.QuestVariable;
 import net.minecraft.client.resources.I18n;
 
 import javax.swing.*;
@@ -10,19 +10,19 @@ import javax.swing.tree.DefaultMutableTreeNode;
 /**
  * @author LatvianModder
  */
-public class TabRewardTables extends TabObjectList<RewardTable>
+public class VariableTab extends ObjectListTab<QuestVariable>
 {
-	public TabRewardTables(EditorFrame e)
+	public VariableTab(EditorFrame e)
 	{
-		super(e, RewardTable.class, I18n.format("ftbquests.reward_tables"), GuiIcons.MONEY_BAG.getWrappedIcon());
+		super(e, QuestVariable.class, I18n.format("ftbquests.variables"), GuiIcons.CONTROLLER.getWrappedIcon());
 	}
 
 	@Override
 	public void addElements(DefaultMutableTreeNode root)
 	{
-		for (RewardTable table : editor.file.rewardTables)
+		for (QuestVariable variable : editor.file.variables)
 		{
-			root.add(new DefaultMutableTreeNode(table));
+			root.add(new DefaultMutableTreeNode(variable));
 		}
 	}
 

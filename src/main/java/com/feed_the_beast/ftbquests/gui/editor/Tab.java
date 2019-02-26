@@ -5,11 +5,11 @@ import javax.swing.*;
 /**
  * @author LatvianModder
  */
-public class TabBase extends JPanel
+public class Tab extends JPanel
 {
 	public final EditorFrame editor;
 
-	public TabBase(EditorFrame e)
+	public Tab(EditorFrame e)
 	{
 		editor = e;
 	}

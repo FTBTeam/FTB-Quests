@@ -14,14 +14,14 @@ import java.awt.*;
 /**
  * @author LatvianModder
  */
-public class TabObjectList<T extends QuestObjectBase> extends TabBase implements TreeSelectionListener
+public class ObjectListTab<T extends QuestObjectBase> extends Tab implements TreeSelectionListener
 {
 	public final Class<T> objectClass;
 	public final JTree tree;
 	public final JPanel panel;
 	public T selected = null;
 
-	public TabObjectList(EditorFrame e, Class<T> o, String title, Icon icon)
+	public ObjectListTab(EditorFrame e, Class<T> o, String title, Icon icon)
 	{
 		super(e);
 		objectClass = o;
@@ -72,6 +72,8 @@ public class TabObjectList<T extends QuestObjectBase> extends TabBase implements
 			selected = c;
 			panel.removeAll();
 			onSelected();
+			panel.revalidate();
+			panel.repaint();
 		}
 	}
 }

@@ -10,9 +10,9 @@ import javax.swing.tree.DefaultMutableTreeNode;
 /**
  * @author LatvianModder
  */
-public class TabChapters extends TabObjectList<QuestChapter>
+public class ChaptersTab extends ObjectListTab<QuestChapter>
 {
-	public TabChapters(EditorFrame e)
+	public ChaptersTab(EditorFrame e)
 	{
 		super(e, QuestChapter.class, I18n.format("ftbquests.chapters"), GuiIcons.COLOR_RGB.getWrappedIcon());
 	}
