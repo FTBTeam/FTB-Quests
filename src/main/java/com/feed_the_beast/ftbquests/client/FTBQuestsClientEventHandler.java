@@ -13,12 +13,12 @@ import com.feed_the_beast.ftbquests.tile.TileProgressScreenCore;
 import com.feed_the_beast.ftbquests.tile.TileTaskScreenCore;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
-import net.minecraft.client.renderer.color.ItemColors;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraftforge.client.event.ColorHandlerEvent;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.client.model.ModelLoader;
@@ -60,11 +60,10 @@ public class FTBQuestsClientEventHandler
 		ClientRegistry.bindTileEntitySpecialRenderer(TileProgressScreenCore.class, new RenderProgressScreen());
 	}
 
-	public static void postInit()
+	@SubscribeEvent
+	public static void registerItemColors(ColorHandlerEvent.Item event)
 	{
-		ItemColors c = Minecraft.getMinecraft().getItemColors();
-
-		c.registerItemColorHandler((stack, tintIndex) -> {
+		event.getItemColors().registerItemColorHandler((stack, tintIndex) -> {
 			LootCrate crate = ItemLootCrate.getCrate(null, stack);
 			return crate == null ? 0xFFFFFFFF : (0xFF000000 | crate.color.rgb());
 		}, FTBQuestsItems.LOOTCRATE);
