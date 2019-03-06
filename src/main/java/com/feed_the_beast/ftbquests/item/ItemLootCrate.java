@@ -15,7 +15,6 @@ import net.minecraft.init.SoundEvents;
 import net.minecraft.item.EnumRarity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagString;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumHand;
@@ -137,7 +136,6 @@ public class ItemLootCrate extends Item
 		if (isInCreativeTab(tab))
 		{
 			QuestFile file = FTBQuests.PROXY.getQuestFile(null);
-			boolean hasItem = false;
 
 			if (file != null)
 			{
@@ -145,17 +143,9 @@ public class ItemLootCrate extends Item
 				{
 					if (table.lootCrate != null)
 					{
-						hasItem = true;
-						ItemStack stack = new ItemStack(this);
-						stack.setTagInfo("type", new NBTTagString(table.lootCrate.stringID.isEmpty() ? table.toString() : table.lootCrate.stringID));
-						items.add(stack);
+						items.add(table.lootCrate.createStack());
 					}
 				}
-			}
-
-			if (!hasItem)
-			{
-				items.add(new ItemStack(this));
 			}
 		}
 	}

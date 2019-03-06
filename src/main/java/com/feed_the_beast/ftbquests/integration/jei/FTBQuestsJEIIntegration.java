@@ -15,12 +15,13 @@ import net.minecraft.item.ItemStack;
 @JEIPlugin
 public class FTBQuestsJEIIntegration implements IModPlugin
 {
-	public static IJeiRuntime RUNTIME;
+	public static IJeiRuntime runtime;
+	public static IModRegistry registry;
 
 	@Override
 	public void onRuntimeAvailable(IJeiRuntime r)
 	{
-		RUNTIME = r;
+		runtime = r;
 	}
 
 	@Override
@@ -32,6 +33,7 @@ public class FTBQuestsJEIIntegration implements IModPlugin
 	@Override
 	public void register(IModRegistry r)
 	{
+		registry = r;
 		r.handleRecipes(QuestWrapper.class, recipe -> recipe, QuestCategory.UID);
 		r.addRecipeCatalyst(new ItemStack(FTBQuestsItems.BOOK), QuestCategory.UID);
 
