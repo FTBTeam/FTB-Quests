@@ -97,10 +97,15 @@ public final class LootCrate
 		d.addInt("boss", () -> drops.boss, v -> drops.boss = v, 0, 0, Integer.MAX_VALUE).setDisplayName(new TextComponentTranslation("ftbquests.loot.entitytype.boss"));
 	}
 
+	public String getStringID()
+	{
+		return stringID.isEmpty() ? table.getCodeString() : stringID;
+	}
+
 	public ItemStack createStack()
 	{
 		ItemStack stack = new ItemStack(FTBQuestsItems.LOOTCRATE);
-		stack.setTagInfo("type", new NBTTagString(stringID.isEmpty() ? table.getCodeString() : stringID));
+		stack.setTagInfo("type", new NBTTagString(getStringID()));
 		return stack;
 	}
 }
