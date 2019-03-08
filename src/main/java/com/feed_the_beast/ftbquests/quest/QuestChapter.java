@@ -234,15 +234,31 @@ public final class QuestChapter extends QuestObject
 		return true;
 	}
 
+	public boolean getOnlyHasRepeatableQuests()
+	{
+		for (Quest quest : quests)
+		{
+			if (!quest.canRepeat)
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+
 	@Override
 	public void onCompleted(ITeamData data, List<EntityPlayerMP> onlineMembers)
 	{
 		super.onCompleted(data, onlineMembers);
 		new ObjectCompletedEvent.ChapterEvent(data, this).post();
 
-		for (EntityPlayerMP player : onlineMembers)
+		if (!getOnlyHasRepeatableQuests())
 		{
-			new MessageDisplayCompletionToast(id).sendTo(player);
+			for (EntityPlayerMP player : onlineMembers)
+			{
+				new MessageDisplayCompletionToast(id).sendTo(player);
+			}
 		}
 
 		if (file.isComplete(data))

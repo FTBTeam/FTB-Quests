@@ -457,9 +457,12 @@ public final class Quest extends QuestObject
 		super.onCompleted(data, onlineMembers);
 		new ObjectCompletedEvent.QuestEvent(data, this).post();
 
-		for (EntityPlayerMP player : onlineMembers)
+		if (!canRepeat)
 		{
-			new MessageDisplayCompletionToast(id).sendTo(player);
+			for (EntityPlayerMP player : onlineMembers)
+			{
+				new MessageDisplayCompletionToast(id).sendTo(player);
+			}
 		}
 
 		if (chapter.isComplete(data))
