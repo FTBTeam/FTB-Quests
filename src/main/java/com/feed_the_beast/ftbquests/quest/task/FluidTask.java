@@ -36,6 +36,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.items.ItemStackHandler;
 import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nullable;
@@ -352,6 +353,7 @@ public class FluidTask extends QuestTask
 	public static class Data extends SimpleQuestTaskData<FluidTask> implements IFluidHandler
 	{
 		private final IFluidTankProperties[] properties;
+		private ItemStackHandler returnInventory = null;
 
 		private Data(FluidTask t, ITeamData data)
 		{
@@ -426,16 +428,16 @@ public class FluidTask extends QuestTask
 		@Override
 		public ItemStack insertItem(ItemStack stack, boolean singleItem, boolean simulate, @Nullable EntityPlayer player)
 		{
-			if (player == null)
-			{
-				return stack;
-			}
-
-			IItemHandler inv = player.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
+			IItemHandler inv = player == null ? null : player.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
 
 			if (inv == null)
 			{
-				return stack;
+				if (returnInventory == null)
+				{
+					returnInventory = new ItemStackHandler(1);
+				}
+
+				inv = returnInventory;
 			}
 
 			ItemStack stack1 = stack.copy();
@@ -444,6 +446,11 @@ public class FluidTask extends QuestTask
 			if (!result.isSuccess())
 			{
 				result = FluidUtil.tryEmptyContainerAndStow(stack1, this, inv, Integer.MAX_VALUE, player, !simulate);
+			}
+
+			if (!simulate && returnInventory != null)
+			{
+				returnInventory.setStackInSlot(0, ItemStack.EMPTY);
 			}
 
 			return result.isSuccess() ? result.getResult() : stack;
