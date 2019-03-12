@@ -239,6 +239,7 @@ ftbquests.reward_table.loot_crate.glow=Glow
 ftbquests.reward_table.loot_crate.passive_weight=Weight (Passive)
 ftbquests.reward_table.loot_crate.monster_weight=Weight (Monster)
 ftbquests.reward_table.loot_crate.boss_weight=Weight (Boss)
+ftbquests.reward_table.used_in=Used in %d Quest Rewards
 
 ftbquests.leaderboard_progress=FTB Quests Progress
 jei.ftbquests.lootcrates=Loot Crates

@@ -15,8 +15,12 @@ import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.gui.tree.GuiQuestTree;
 import com.feed_the_beast.ftbquests.net.edit.MessageCreateObject;
 import com.feed_the_beast.ftbquests.net.edit.MessageEditObjectDirect;
+import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.loot.LootCrate;
 import com.feed_the_beast.ftbquests.quest.loot.RewardTable;
+import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
+import com.feed_the_beast.ftbquests.quest.reward.RandomReward;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.TextFormatting;
 
@@ -119,6 +123,28 @@ public class GuiRewardTables extends GuiButtonListBase
 		public void addMouseOverText(List<String> list)
 		{
 			super.addMouseOverText(list);
+
+			int usedIn = 0;
+
+			for (QuestChapter chapter : table.file.chapters)
+			{
+				for (Quest quest : chapter.quests)
+				{
+					for (QuestReward reward : quest.rewards)
+					{
+						if (reward instanceof RandomReward && ((RandomReward) reward).table == table)
+						{
+							usedIn++;
+						}
+					}
+				}
+			}
+
+			if (usedIn > 0)
+			{
+				list.add(TextFormatting.GRAY + I18n.format("ftbquests.reward_table.used_in", usedIn));
+			}
+
 			table.addMouseOverText(list, true, true);
 		}
 	}
