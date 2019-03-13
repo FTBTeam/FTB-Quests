@@ -78,10 +78,6 @@ ftbquests.chapter.completed=Chapter completed!
 ftbquests.chapter.description=Description
 ftbquests.chapter.visibility=Visibility [WIP!]
 
-ftbquests.chapter.widget=Widget
-ftbquests.chapter.widget.text_field=Text Field
-ftbquests.chapter.widget.button=Button
-
 ftbquests.quest=Quest
 ftbquests.quests=Quests
 ftbquests.quest.completed=Quest completed!
@@ -103,6 +99,7 @@ ftbquests.quest.can_repeat=Can be repeated
 ftbquests.quest.tasks_ignore_dependencies=Tasks Ignore Dependencies
 ftbquests.quest.tasks_ignore_dependencies.tooltip=Allow to start tasks without completing dependencies
 ftbquests.quest.guide_page=Guide Page
+ftbquests.quest.custom_click=Custom Click
 
 ftbquests.gui.edit_file=Edit File
 ftbquests.gui.save_as_file=Save as File
