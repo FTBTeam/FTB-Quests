@@ -33,12 +33,14 @@ public class ItemReward extends QuestReward
 {
 	public ItemStack stack;
 	public int randomBonus;
+	public boolean onlyOne;
 
 	public ItemReward(QuestObjectBase parent)
 	{
 		super(parent);
 		stack = new ItemStack(Items.APPLE);
 		randomBonus = 0;
+		onlyOne = false;
 	}
 
 	@Override
@@ -57,6 +59,11 @@ public class ItemReward extends QuestReward
 		{
 			nbt.setInteger("random_bonus", randomBonus);
 		}
+
+		if (onlyOne)
+		{
+			nbt.setBoolean("only_one", true);
+		}
 	}
 
 	@Override
@@ -65,6 +72,7 @@ public class ItemReward extends QuestReward
 		super.readData(nbt);
 		stack = ItemMissing.read(nbt.getTag("item"));
 		randomBonus = nbt.getInteger("random_bonus");
+		onlyOne = nbt.getBoolean("only_one");
 	}
 
 	@Override
@@ -73,6 +81,7 @@ public class ItemReward extends QuestReward
 		super.writeNetData(data);
 		data.writeItemStack(stack);
 		data.writeVarInt(randomBonus);
+		data.writeBoolean(onlyOne);
 	}
 
 	@Override
@@ -81,6 +90,7 @@ public class ItemReward extends QuestReward
 		super.readNetData(data);
 		stack = data.readItemStack();
 		randomBonus = data.readVarInt();
+		onlyOne = data.readBoolean();
 	}
 
 	@Override
@@ -89,11 +99,17 @@ public class ItemReward extends QuestReward
 		super.getConfig(config);
 		config.add("item", new ConfigItemStack.SimpleStack(() -> stack, v -> stack = v), new ConfigItemStack(ItemStack.EMPTY)).setDisplayName(new TextComponentTranslation("ftbquests.reward.ftbquests.item"));
 		config.addInt("random_bonus", () -> randomBonus, v -> randomBonus = v, 0, 0, Integer.MAX_VALUE).setDisplayName(new TextComponentTranslation("ftbquests.reward.random_bonus"));
+		config.addBool("only_one", () -> onlyOne, v -> onlyOne = v, false);
 	}
 
 	@Override
 	public void claim(EntityPlayerMP player)
 	{
+		if (onlyOne && player.inventory.hasItemStack(stack))
+		{
+			return;
+		}
+
 		ItemStack stack1 = stack.copy();
 		stack1.grow(player.world.rand.nextInt(randomBonus + 1));
 		ItemHandlerHelper.giveItemToPlayer(player, stack1);
