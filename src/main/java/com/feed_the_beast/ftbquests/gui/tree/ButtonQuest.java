@@ -191,7 +191,7 @@ public class ButtonQuest extends Button
 
 					treeGui.selectedQuests.add(quest);
 				}
-				else
+				else if (quest.customClick.isEmpty() || !handleClick(quest.customClick))
 				{
 					treeGui.open(quest);
 				}

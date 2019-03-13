@@ -10,7 +10,6 @@ import com.feed_the_beast.ftblib.lib.math.MathUtils;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.widget.QuestWidget;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
@@ -53,24 +52,6 @@ public class PanelQuests extends Panel
 			set.add(getxy(quest.x, quest.y));
 		}
 
-		for (QuestWidget qw : treeGui.selectedChapter.widgets)
-		{
-			Widget w = qw.createWidget(this);
-
-			if (w instanceof IQuestWidget)
-			{
-				widgets.add(w);
-
-				for (int x = 0; x < qw.w; x++)
-				{
-					for (int y = 0; y < qw.h; y++)
-					{
-						set.add(getxy(qw.x + x, qw.y + y));
-					}
-				}
-			}
-		}
-
 		for (int y = -Quest.POS_LIMIT; y <= Quest.POS_LIMIT; y++)
 		{
 			for (int x = -Quest.POS_LIMIT; x <= Quest.POS_LIMIT; x++)
@@ -103,14 +84,6 @@ public class PanelQuests extends Panel
 				maxX = Math.max(maxX, quest.x);
 				maxY = Math.max(maxY, quest.y);
 			}
-			else if (widget instanceof IQuestWidget)
-			{
-				QuestWidget w = ((IQuestWidget) widget).getQuestWidget();
-				minX = Math.min(minX, w.x);
-				minY = Math.min(minY, w.y);
-				maxX = Math.max(maxX, w.x);
-				maxY = Math.max(maxY, w.y);
-			}
 		}
 
 		minX -= 6;
@@ -135,14 +108,6 @@ public class PanelQuests extends Panel
 				w = 1;
 				h = 1;
 			}
-			else if (widget instanceof IQuestWidget)
-			{
-				QuestWidget qw = ((IQuestWidget) widget).getQuestWidget();
-				x = qw.x;
-				y = qw.y;
-				w = qw.w;
-				h = qw.h;
-			}
 			else
 			{
 				ButtonDummyQuest button = (ButtonDummyQuest) widget;
@@ -153,11 +118,6 @@ public class PanelQuests extends Panel
 			}
 
 			widget.setPosAndSize((int) ((x - minX) * bsize), (int) ((y - minY) * bsize), (int) (bsize * w), (int) (bsize * h));
-
-			if (widget instanceof IQuestWidget)
-			{
-				((IQuestWidget) widget).updateScale(treeGui);
-			}
 		}
 
 		setPosAndSize(0, treeGui.chapterPanel.height, treeGui.width, treeGui.height - treeGui.chapterPanel.height);
