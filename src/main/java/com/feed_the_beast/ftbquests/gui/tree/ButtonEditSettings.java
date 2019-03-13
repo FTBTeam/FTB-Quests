@@ -1,6 +1,5 @@
 package com.feed_the_beast.ftbquests.gui.tree;
 
-import com.feed_the_beast.ftblib.FTBLibConfig;
 import com.feed_the_beast.ftblib.lib.gui.ContextMenuItem;
 import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
 import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
@@ -40,7 +39,7 @@ public class ButtonEditSettings extends ButtonTab
 	{
 		GuiHelper.playClickSound();
 
-		if (FTBLibConfig.debugging.gui_widget_bounds && isAltKeyDown())
+		if (isAltKeyDown())
 		{
 			EditorFrame.open(isCtrlKeyDown());
 			return;
