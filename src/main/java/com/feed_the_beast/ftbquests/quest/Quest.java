@@ -2,6 +2,7 @@ package com.feed_the_beast.ftbquests.quest;
 
 import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
+import com.feed_the_beast.ftblib.lib.config.ConfigList;
 import com.feed_the_beast.ftblib.lib.config.ConfigString;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.IconAnimation;
@@ -16,6 +17,7 @@ import com.feed_the_beast.ftbquests.gui.tree.GuiQuestTree;
 import com.feed_the_beast.ftbquests.net.MessageDisplayCompletionToast;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
 import com.feed_the_beast.ftbquests.quest.task.QuestTask;
+import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
@@ -609,6 +611,15 @@ public final class Quest extends QuestObject
 		config.addString("description", () -> description, v -> description = v, "");
 		config.addList("text", text, new ConfigString(""), ConfigString::new, ConfigString::getString);
 		config.addBool("can_repeat", () -> canRepeat, v -> canRepeat = v, false);
+		config.add("dependencies", new ConfigList.SimpleList<>(dependencies,
+				new ConfigQuestObject(chapter.file, null, DEP_TYPES),
+				dep -> new ConfigQuestObject(chapter.file, dep.object, DEP_TYPES),
+				object -> {
+					Dependency dependency = new Dependency();
+					dependency.object = (QuestObject) object.getObject();
+					return dependency;
+				}), new ConfigList<>(new ConfigQuestObject(chapter.file, null, DEP_TYPES))).setDisplayName(new TextComponentTranslation("ftbquests.dependencies"));
+
 		config.addBool("tasks_ignore_dependencies", () -> tasksIgnoreDependencies, v -> tasksIgnoreDependencies = v, false);
 		config.addString("guide_page", () -> guidePage, v -> guidePage = v, "");
 		config.addString("custom_click", () -> customClick, v -> customClick = v, "");
