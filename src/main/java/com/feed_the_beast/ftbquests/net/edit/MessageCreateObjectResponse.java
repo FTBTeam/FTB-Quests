@@ -50,7 +50,7 @@ public class MessageCreateObjectResponse extends MessageToClient
 	{
 		data.writeInt(id);
 		data.writeInt(parent);
-		data.writeByte(type.ordinal());
+		data.write(type, QuestObjectType.NAME_MAP);
 		data.writeNBT(nbt);
 		data.writeNBT(extra);
 	}
@@ -60,7 +60,7 @@ public class MessageCreateObjectResponse extends MessageToClient
 	{
 		id = data.readInt();
 		parent = data.readInt();
-		type = QuestObjectType.ALL.get(data.readUnsignedByte());
+		type = QuestObjectType.NAME_MAP.read(data);
 		nbt = data.readNBT();
 		extra = data.readNBT();
 	}

@@ -1,5 +1,6 @@
 package com.feed_the_beast.ftbquests.quest;
 
+import com.feed_the_beast.ftblib.lib.util.misc.NameMap;
 import net.minecraft.util.IStringSerializable;
 import net.minecraft.util.text.TextFormatting;
 
@@ -20,8 +21,9 @@ public enum QuestObjectType implements IStringSerializable
 	REWARD("reward", 64, TextFormatting.LIGHT_PURPLE),
 	REWARD_TABLE("reward_table", 128, TextFormatting.YELLOW);
 
-	public static final List<QuestObjectType> ALL = Arrays.asList(values());
+	public static final NameMap<QuestObjectType> NAME_MAP = NameMap.create(NULL, values());
 	public static final List<QuestObjectType> ALL_PROGRESSING = Arrays.asList(FILE, CHAPTER, FILE, TASK, VARIABLE);
+	public static final List<QuestObjectType> ALL_PROGRESSING_OR_NULL = Arrays.asList(NULL, FILE, CHAPTER, FILE, TASK, VARIABLE);
 
 	private final String name;
 	private final String translationKey;

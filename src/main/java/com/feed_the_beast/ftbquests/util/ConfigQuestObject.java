@@ -149,7 +149,7 @@ public class ConfigQuestObject extends ConfigValue
 
 		int i = data.readVarInt();
 
-		for (QuestObjectType type : QuestObjectType.ALL)
+		for (QuestObjectType type : QuestObjectType.NAME_MAP)
 		{
 			if (Bits.getFlag(i, type.getFlag()))
 			{
@@ -204,7 +204,7 @@ public class ConfigQuestObject extends ConfigValue
 		{
 			list.add(TextFormatting.AQUA + "Types:");
 
-			for (QuestObjectType type : QuestObjectType.ALL)
+			for (QuestObjectType type : QuestObjectType.NAME_MAP)
 			{
 				if (isValid(type))
 				{
