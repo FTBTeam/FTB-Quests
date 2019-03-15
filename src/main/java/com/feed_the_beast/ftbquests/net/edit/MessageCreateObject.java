@@ -46,7 +46,7 @@ public class MessageCreateObject extends MessageToServer
 	public void writeData(DataOut data)
 	{
 		data.writeInt(parent);
-		data.writeByte(type.ordinal());
+		data.write(type, QuestObjectType.NAME_MAP);
 		data.writeNBT(nbt);
 		data.writeNBT(extra);
 	}
@@ -55,7 +55,7 @@ public class MessageCreateObject extends MessageToServer
 	public void readData(DataIn data)
 	{
 		parent = data.readInt();
-		type = QuestObjectType.ALL.get(data.readUnsignedByte());
+		type = QuestObjectType.NAME_MAP.read(data);
 		nbt = data.readNBT();
 		extra = data.readNBT();
 	}
