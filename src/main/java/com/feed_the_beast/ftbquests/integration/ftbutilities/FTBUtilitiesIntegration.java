@@ -1,6 +1,7 @@
 package com.feed_the_beast.ftbquests.integration.ftbutilities;
 
 import com.feed_the_beast.ftbquests.FTBQuests;
+import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbutilities.data.Leaderboard;
 import com.feed_the_beast.ftbutilities.events.LeaderboardRegistryEvent;
@@ -11,7 +12,6 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import java.util.Comparator;
-import java.util.Objects;
 
 /**
  * @author LatvianModder
@@ -29,8 +29,18 @@ public class FTBUtilitiesIntegration
 		event.register(new Leaderboard(
 				new ResourceLocation(FTBQuests.MOD_ID, "progress"),
 				new TextComponentTranslation("ftbquests.leaderboard_progress"),
-				player -> new TextComponentString(ServerQuestFile.INSTANCE.getRelativeProgress(Objects.requireNonNull(ServerQuestFile.INSTANCE.getData(player.team.getUID()))) + "%"),
-				Comparator.comparingLong(player -> ServerQuestFile.INSTANCE.getProgress(Objects.requireNonNull(ServerQuestFile.INSTANCE.getData(player.team.getUID())))),
-				player -> ServerQuestFile.INSTANCE.getProgress(Objects.requireNonNull(ServerQuestFile.INSTANCE.getData(player.team.getUID()))) > 0L));
+				player -> {
+					ITeamData data = ServerQuestFile.INSTANCE.getData(player.team.getUID());
+					return new TextComponentString((data == null ? 0 : ServerQuestFile.INSTANCE.getRelativeProgress(data)) + "%");
+				},
+				Comparator.comparingLong(player -> {
+					ITeamData data = ServerQuestFile.INSTANCE.getData(player.team.getUID());
+					return data == null ? 0L : ServerQuestFile.INSTANCE.getProgress(data);
+				}),
+				player -> {
+					ITeamData data = ServerQuestFile.INSTANCE.getData(player.team.getUID());
+					return data != null && ServerQuestFile.INSTANCE.getProgress(data) > 0L;
+				})
+		);
 	}
 }
