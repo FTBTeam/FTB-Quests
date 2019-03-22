@@ -90,9 +90,12 @@ public class ClientQuestProgress implements ITeamData
 	@Override
 	public void unclaimRewards(Collection<QuestReward> rewards)
 	{
-		for (QuestReward reward : rewards)
+		if (ClientQuestFile.INSTANCE.self != null && teamUID == ClientQuestFile.INSTANCE.self.teamUID)
 		{
-			ClientQuestFile.INSTANCE.rewards.rem(reward.id);
+			for (QuestReward reward : rewards)
+			{
+				ClientQuestFile.INSTANCE.rewards.rem(reward.id);
+			}
 		}
 	}
 
@@ -118,6 +121,6 @@ public class ClientQuestProgress implements ITeamData
 	@Override
 	public boolean isRewardClaimed(UUID player, QuestReward reward)
 	{
-		return ClientQuestFile.INSTANCE.rewards.contains(reward.id);
+		return ClientQuestFile.INSTANCE.self != null && teamUID == ClientQuestFile.INSTANCE.self.teamUID && ClientQuestFile.INSTANCE.rewards.contains(reward.id);
 	}
 }
