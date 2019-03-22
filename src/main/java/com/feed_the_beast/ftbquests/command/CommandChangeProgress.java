@@ -1,6 +1,5 @@
 package com.feed_the_beast.ftbquests.command;
 
-import com.feed_the_beast.ftblib.FTBLib;
 import com.feed_the_beast.ftblib.lib.command.CommandUtils;
 import com.feed_the_beast.ftblib.lib.data.ForgeTeam;
 import com.feed_the_beast.ftblib.lib.data.Universe;
@@ -52,7 +51,7 @@ public class CommandChangeProgress extends CommandFTBQuestsBase
 	@Override
 	public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
 	{
-		if (args.length < 2)
+		if (args.length < 1)
 		{
 			throw new WrongUsageException(getUsage(sender));
 		}
@@ -61,7 +60,11 @@ public class CommandChangeProgress extends CommandFTBQuestsBase
 
 		Collection<ForgeTeam> teams;
 
-		if (args[1].equals("*"))
+		if (args.length == 1)
+		{
+			teams = Collections.singleton(Universe.get().getPlayer(getCommandSenderAsPlayer(sender)).team);
+		}
+		else if (args[1].equals("*"))
 		{
 			teams = Universe.get().getTeams();
 		}
@@ -71,7 +74,7 @@ public class CommandChangeProgress extends CommandFTBQuestsBase
 
 			if (!team.isValid())
 			{
-				throw FTBLib.error(sender, "ftblib.lang.team.error.not_found", args[1]);
+				throw new CommandException("ftblib.lang.team.error.not_found", args[1]);
 			}
 
 			teams = Collections.singleton(team);
