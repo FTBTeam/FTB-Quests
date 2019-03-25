@@ -8,7 +8,6 @@ import com.feed_the_beast.ftblib.lib.gui.Widget;
 import com.feed_the_beast.ftblib.lib.gui.WidgetLayout;
 import com.feed_the_beast.ftblib.lib.gui.WidgetType;
 import com.feed_the_beast.ftblib.lib.gui.WidgetVerticalSpace;
-import com.feed_the_beast.ftblib.lib.util.StringJoiner;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.quest.Dependency;
@@ -18,10 +17,11 @@ import com.feed_the_beast.ftbquests.quest.task.QuestTask;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
-
-import java.util.ArrayList;
-import java.util.List;
+import net.minecraft.util.text.event.ClickEvent;
+import net.minecraft.util.text.event.HoverEvent;
 
 /**
  * @author LatvianModder
@@ -64,28 +64,28 @@ public class PanelQuestLeft extends Panel
 				add(new ButtonQuickComplete(this));
 			}
 
-			List<String> dependencies = new ArrayList<>();
+			boolean addedText = false;
 
 			for (Dependency dependency : selectedQuest.dependencies)
 			{
 				if (!dependency.isInvalid())
 				{
-					if (dependencies.isEmpty())
+					if (!addedText)
 					{
+						addedText = true;
 						add(new WidgetVerticalSpace(this, 2));
 						add(new TextField(this).setText(TextFormatting.AQUA + I18n.format("ftbquests.gui.requires") + ":"));
 					}
 
-					dependencies.add(TextFormatting.GRAY + dependency.object.getDisplayName().getUnformattedText());
+					ITextComponent component = dependency.object.getDisplayName().createCopy();
+					component.getStyle().setColor(TextFormatting.GRAY);
+					component.getStyle().setClickEvent(new ClickEvent(ClickEvent.Action.CHANGE_PAGE, dependency.object.toString()));
+					component.getStyle().setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponentTranslation("gui.open")));
+					add(new TextField(this).setText(component));
 				}
 			}
 
-			if (!dependencies.isEmpty())
-			{
-				add(new TextField(this).setSpacing(10).setText(StringJoiner.with('\n').join(dependencies)));
-			}
-
-			List<String> dependants = new ArrayList<>();
+			addedText = false;
 
 			for (QuestChapter chapter : treeGui.file.chapters)
 			{
@@ -93,20 +93,20 @@ public class PanelQuestLeft extends Panel
 				{
 					if (quest.hasDependency(selectedQuest))
 					{
-						if (dependants.isEmpty())
+						if (!addedText)
 						{
+							addedText = true;
 							add(new WidgetVerticalSpace(this, 2));
 							add(new TextField(this).setText(TextFormatting.YELLOW + I18n.format("ftbquests.gui.required_by") + ":"));
 						}
 
-						dependants.add(TextFormatting.GRAY + quest.getDisplayName().getUnformattedText());
+						ITextComponent component = quest.getDisplayName().createCopy();
+						component.getStyle().setColor(TextFormatting.GRAY);
+						component.getStyle().setClickEvent(new ClickEvent(ClickEvent.Action.CHANGE_PAGE, quest.toString()));
+						component.getStyle().setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponentTranslation("gui.open")));
+						add(new TextField(this).setText(component));
 					}
 				}
-			}
-
-			if (!dependants.isEmpty())
-			{
-				add(new TextField(this).setSpacing(10).setText(StringJoiner.with('\n').join(dependants)));
 			}
 
 			setWidth(20);

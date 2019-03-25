@@ -502,4 +502,16 @@ public class GuiQuestTree extends GuiBase
 
 		openGui();
 	}
+
+	@Override
+	public boolean handleClick(String scheme, String path)
+	{
+		if (scheme.isEmpty() && path.startsWith("#"))
+		{
+			open(file.get(file.getID(path)));
+			return true;
+		}
+
+		return super.handleClick(scheme, path);
+	}
 }
