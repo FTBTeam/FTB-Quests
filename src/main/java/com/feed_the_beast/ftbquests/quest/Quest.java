@@ -58,6 +58,7 @@ public final class Quest extends QuestObject
 	public boolean tasksIgnoreDependencies;
 	public String guidePage;
 	public String customClick;
+	public boolean hideDependencyLines;
 
 	public Quest(QuestChapter c)
 	{
@@ -74,6 +75,7 @@ public final class Quest extends QuestObject
 		tasksIgnoreDependencies = false;
 		guidePage = "";
 		customClick = "";
+		hideDependencyLines = false;
 	}
 
 	@Override
@@ -157,6 +159,11 @@ public final class Quest extends QuestObject
 			nbt.setString("custom_click", customClick);
 		}
 
+		if (hideDependencyLines)
+		{
+			nbt.setBoolean("hide_dependency_lines", true);
+		}
+
 		dependencies.removeIf(Dependency.PREDICATE_INVALID);
 
 		if (!dependencies.isEmpty())
@@ -233,6 +240,7 @@ public final class Quest extends QuestObject
 		tasksIgnoreDependencies = nbt.getBoolean("tasks_ignore_deps");
 		guidePage = nbt.getString("guide_page");
 		customClick = nbt.getString("custom_click");
+		hideDependencyLines = nbt.getBoolean("hide_dependency_lines");
 
 		dependencies.clear();
 
@@ -296,6 +304,7 @@ public final class Quest extends QuestObject
 		flags = Bits.setFlag(flags, 8, !description.isEmpty());
 		flags = Bits.setFlag(flags, 16, !text.isEmpty());
 		flags = Bits.setFlag(flags, 32, !customClick.isEmpty());
+		flags = Bits.setFlag(flags, 64, hideDependencyLines);
 		data.writeVarInt(flags);
 
 		if (!description.isEmpty())
@@ -361,6 +370,7 @@ public final class Quest extends QuestObject
 		tasksIgnoreDependencies = Bits.getFlag(flags, 2);
 		guidePage = Bits.getFlag(flags, 4) ? data.readString() : "";
 		customClick = Bits.getFlag(flags, 32) ? data.readString() : "";
+		hideDependencyLines = Bits.getFlag(flags, 64);
 
 		dependencies.clear();
 		int d = data.readVarInt();
@@ -623,6 +633,7 @@ public final class Quest extends QuestObject
 		config.addBool("tasks_ignore_dependencies", () -> tasksIgnoreDependencies, v -> tasksIgnoreDependencies = v, false);
 		config.addString("guide_page", () -> guidePage, v -> guidePage = v, "");
 		config.addString("custom_click", () -> customClick, v -> customClick = v, "");
+		config.addBool("hide_dependency_lines", () -> hideDependencyLines, v -> hideDependencyLines = v, false);
 	}
 
 	public EnumVisibility getVisibility(@Nullable ITeamData data)
