@@ -141,12 +141,18 @@ public class PanelQuests extends Panel
 			if (widget instanceof ButtonQuest)
 			{
 				Quest wquest = ((ButtonQuest) widget).quest;
+
+				if (wquest.hideDependencyLines)
+				{
+					continue;
+				}
+
 				boolean unavailable = treeGui.file.self == null || !wquest.canStartTasks(treeGui.file.self);
 				boolean complete = !unavailable && treeGui.file.self != null && wquest.isComplete(treeGui.file.self);
 
 				for (ButtonQuest button : ((ButtonQuest) widget).getDependencies())
 				{
-					if (button.quest == selectedQuest || wquest == selectedQuest)
+					if (button.quest == selectedQuest || wquest == selectedQuest || button.quest.hideDependencyLines)
 					{
 						continue;
 					}
@@ -195,8 +201,18 @@ public class PanelQuests extends Panel
 			{
 				Quest wquest = ((ButtonQuest) widget).quest;
 
+				if (wquest.hideDependencyLines)
+				{
+					continue;
+				}
+
 				for (ButtonQuest button : ((ButtonQuest) widget).getDependencies())
 				{
+					if (button.quest.hideDependencyLines)
+					{
+						continue;
+					}
+
 					int r, g, b;
 
 					if (button.quest == selectedQuest)
