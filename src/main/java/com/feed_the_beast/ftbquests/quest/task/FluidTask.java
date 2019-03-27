@@ -36,7 +36,6 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.ItemStackHandler;
 import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nullable;
@@ -350,10 +349,44 @@ public class FluidTask extends QuestTask
 		return new Data(this, data);
 	}
 
+	public enum ItemDestroyingInventory implements IItemHandler
+	{
+		INSTANCE;
+
+		@Override
+		public int getSlots()
+		{
+			return 1;
+		}
+
+		@Override
+		public ItemStack getStackInSlot(int slot)
+		{
+			return ItemStack.EMPTY;
+		}
+
+		@Override
+		public ItemStack insertItem(int slot, ItemStack stack, boolean simulate)
+		{
+			return ItemStack.EMPTY;
+		}
+
+		@Override
+		public ItemStack extractItem(int slot, int amount, boolean simulate)
+		{
+			return ItemStack.EMPTY;
+		}
+
+		@Override
+		public int getSlotLimit(int slot)
+		{
+			return 64;
+		}
+	}
+
 	public static class Data extends SimpleQuestTaskData<FluidTask> implements IFluidHandler
 	{
 		private final IFluidTankProperties[] properties;
-		private ItemStackHandler returnInventory = null;
 
 		private Data(FluidTask t, ITeamData data)
 		{
@@ -432,12 +465,7 @@ public class FluidTask extends QuestTask
 
 			if (inv == null)
 			{
-				if (returnInventory == null)
-				{
-					returnInventory = new ItemStackHandler(1);
-				}
-
-				inv = returnInventory;
+				inv = ItemDestroyingInventory.INSTANCE;
 			}
 
 			ItemStack stack1 = stack.copy();
@@ -448,12 +476,12 @@ public class FluidTask extends QuestTask
 				result = FluidUtil.tryEmptyContainerAndStow(stack1, this, inv, Integer.MAX_VALUE, player, !simulate);
 			}
 
-			if (!simulate && returnInventory != null)
+			if (result.isSuccess())
 			{
-				returnInventory.setStackInSlot(0, ItemStack.EMPTY);
+				return player == null ? ItemStack.EMPTY : result.getResult();
 			}
 
-			return result.isSuccess() ? result.getResult() : stack;
+			return stack;
 		}
 
 		@Override
