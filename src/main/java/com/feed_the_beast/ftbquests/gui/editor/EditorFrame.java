@@ -35,10 +35,28 @@ public final class EditorFrame extends JFrame
 
 	public static void open(boolean reload)
 	{
-		IconWrapper.clearCache();
+		/*
+		new JFXPanel();
+
+		Platform.runLater(() -> {
+			Stage stage = new Stage();
+			stage.setTitle("Test");
+
+			javafx.scene.control.Button btn = new javafx.scene.control.Button();
+			btn.setText("click me");
+			BorderPane pane = new BorderPane();
+			pane.setCenter(btn);
+
+			Scene scene = new Scene(pane, 300, 250);
+			stage.setScene(scene);
+			stage.show();
+		});
+		*/
 
 		if (editor == null || reload)
 		{
+			IconWrapper.clearCache();
+
 			new Thread(() -> {
 				if (editor != null)
 				{
