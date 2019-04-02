@@ -31,6 +31,7 @@ import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.FluidTankProperties;
 import net.minecraftforge.fluids.capability.IFluidHandler;
+import net.minecraftforge.fluids.capability.IFluidHandlerItem;
 import net.minecraftforge.fluids.capability.IFluidTankProperties;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -386,13 +387,9 @@ public class FluidTask extends QuestTask
 
 	public static class Data extends SimpleQuestTaskData<FluidTask> implements IFluidHandler
 	{
-		private final IFluidTankProperties[] properties;
-
 		private Data(FluidTask t, ITeamData data)
 		{
 			super(t, data);
-			properties = new IFluidTankProperties[1];
-			properties[0] = new FluidTankProperties(task.createFluidStack(0), 0, true, false);
 		}
 
 		@Override
@@ -417,7 +414,7 @@ public class FluidTask extends QuestTask
 		@Override
 		public IFluidTankProperties[] getTankProperties()
 		{
-			return properties;
+			return new FluidTankProperties[] {new FluidTankProperties(task.createFluidStack((int) (progress * (long) Fluid.BUCKET_VOLUME / task.amount)), Fluid.BUCKET_VOLUME, true, false)};
 		}
 
 		@Override
@@ -461,6 +458,21 @@ public class FluidTask extends QuestTask
 		@Override
 		public ItemStack insertItem(ItemStack stack, boolean singleItem, boolean simulate, @Nullable EntityPlayer player)
 		{
+			IFluidHandlerItem handlerItem = stack.getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY, null);
+
+			if (handlerItem == null)
+			{
+				return stack;
+			}
+
+			FluidStack toDrain = task.createFluidStack(Fluid.BUCKET_VOLUME);
+			FluidStack drainedFluid = handlerItem.drain(toDrain, false);
+
+			if (drainedFluid == null || drainedFluid.amount <= 0)
+			{
+				return stack;
+			}
+
 			IItemHandler inv = player == null ? null : player.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
 
 			if (inv == null)
