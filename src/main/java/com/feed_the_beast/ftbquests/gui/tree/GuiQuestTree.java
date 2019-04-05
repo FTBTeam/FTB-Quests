@@ -14,6 +14,7 @@ import com.feed_the_beast.ftblib.lib.gui.Theme;
 import com.feed_the_beast.ftblib.lib.gui.Widget;
 import com.feed_the_beast.ftblib.lib.gui.WidgetType;
 import com.feed_the_beast.ftblib.lib.icon.Color4I;
+import com.feed_the_beast.ftblib.lib.math.MathUtils;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
@@ -256,9 +257,9 @@ public class GuiQuestTree extends GuiBase
 		}
 		else if (key == Keyboard.KEY_TAB)
 		{
-			if (selectedChapter != null && !file.chapters.isEmpty())
+			if (selectedChapter != null && file.chapters.size() > 1)
 			{
-				selectChapter(file.chapters.get((selectedChapter.getIndex() + 1) % file.chapters.size()));
+				selectChapter(file.chapters.get(MathUtils.mod(selectedChapter.getIndex() + (isShiftKeyDown() ? -1 : 1), file.chapters.size())));
 			}
 
 			return true;
