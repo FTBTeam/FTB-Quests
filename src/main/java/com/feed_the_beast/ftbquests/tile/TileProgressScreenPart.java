@@ -4,6 +4,8 @@ import com.feed_the_beast.ftblib.lib.tile.EnumSaveType;
 import com.feed_the_beast.ftblib.lib.tile.TileBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumFacing;
+import net.minecraftforge.common.capabilities.Capability;
 
 import javax.annotation.Nullable;
 
@@ -29,6 +31,22 @@ public class TileProgressScreenPart extends TileBase implements IProgressScreen
 		offX = nbt.getByte("OffsetX");
 		offY = nbt.getByte("OffsetY");
 		offZ = nbt.getByte("OffsetZ");
+	}
+
+	@Override
+	public boolean hasCapability(Capability<?> capability, @Nullable EnumFacing facing)
+	{
+		TileProgressScreenCore screen = getScreen();
+		return (screen != null && screen.hasCapability(capability, facing)) || super.hasCapability(capability, facing);
+	}
+
+	@Override
+	@Nullable
+	public <T> T getCapability(Capability<T> capability, @Nullable EnumFacing facing)
+	{
+		TileProgressScreenCore screen = getScreen();
+		T object = screen != null ? screen.getCapability(capability, facing) : null;
+		return object != null ? object : super.getCapability(capability, facing);
 	}
 
 	@Override
