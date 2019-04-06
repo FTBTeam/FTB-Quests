@@ -21,6 +21,8 @@ import java.util.Collections;
  */
 public class FTBQuestsInventoryListener implements IContainerListener
 {
+	private static int detectCounter = 0;
+
 	public final EntityPlayerMP player;
 
 	public FTBQuestsInventoryListener(EntityPlayerMP p)
@@ -30,6 +32,17 @@ public class FTBQuestsInventoryListener implements IContainerListener
 
 	public static void detect(EntityPlayerMP player, Collection<ItemStack> itemsToCheck)
 	{
+		detectCounter = 0;
+		detect0(player, itemsToCheck);
+	}
+
+	private static void detect0(EntityPlayerMP player, Collection<ItemStack> itemsToCheck)
+	{
+		if (++detectCounter >= 10)
+		{
+			return;
+		}
+
 		//FTBQuests.LOGGER.info("Running auto-completion with list: " + itemsToCheck);
 
 		ITeamData data = ServerQuestFile.INSTANCE.getData(FTBLibAPI.getTeamID(player.getUniqueID()));
