@@ -1,9 +1,11 @@
 package com.feed_the_beast.ftbquests.tile;
 
+import com.latmod.mods.itemfilters.api.IPaintable;
+
 /**
  * @author LatvianModder
  */
-public interface IScreen
+public interface IScreen extends IPaintable
 {
 	default int getOffsetX()
 	{

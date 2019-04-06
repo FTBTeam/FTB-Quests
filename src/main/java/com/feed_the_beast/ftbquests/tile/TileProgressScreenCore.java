@@ -16,6 +16,7 @@ import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
+import com.latmod.mods.itemfilters.api.PaintAPI;
 import net.minecraft.block.BlockHorizontal;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.command.ICommandSender;
@@ -25,6 +26,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraftforge.common.capabilities.Capability;
 
 import javax.annotation.Nullable;
 
@@ -107,6 +109,29 @@ public class TileProgressScreenCore extends TileWithTeam implements IConfigCallb
 		fullscreen = nbt.getBoolean("Fullscreen");
 		hideIcons = nbt.getBoolean("HideIcons");
 		updateContainingBlockInfo();
+	}
+
+	@Override
+	public boolean hasCapability(Capability<?> capability, @Nullable EnumFacing facing)
+	{
+		if (capability == PaintAPI.CAPABILITY)
+		{
+			return true;
+		}
+
+		return super.hasCapability(capability, facing);
+	}
+
+	@Nullable
+	@Override
+	public <T> T getCapability(Capability<T> capability, @Nullable EnumFacing facing)
+	{
+		if (capability == PaintAPI.CAPABILITY)
+		{
+			return (T) this;
+		}
+
+		return super.getCapability(capability, facing);
 	}
 
 	public EnumFacing getFacing()

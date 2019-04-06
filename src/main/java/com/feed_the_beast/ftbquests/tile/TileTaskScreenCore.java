@@ -19,6 +19,7 @@ import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.task.QuestTask;
 import com.feed_the_beast.ftbquests.quest.task.QuestTaskData;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
+import com.latmod.mods.itemfilters.api.PaintAPI;
 import net.minecraft.block.BlockHorizontal;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.command.ICommandSender;
@@ -131,6 +132,11 @@ public class TileTaskScreenCore extends TileWithTeam implements IConfigCallback,
 	@Override
 	public boolean hasCapability(Capability<?> capability, @Nullable EnumFacing facing)
 	{
+		if (capability == PaintAPI.CAPABILITY)
+		{
+			return true;
+		}
+
 		cTask = getTask();
 
 		if (cTask != null && cTask.getMaxProgress() > 0)
@@ -165,6 +171,11 @@ public class TileTaskScreenCore extends TileWithTeam implements IConfigCallback,
 	@Nullable
 	public <T> T getCapability(Capability<T> capability, @Nullable EnumFacing facing)
 	{
+		if (capability == PaintAPI.CAPABILITY)
+		{
+			return (T) this;
+		}
+
 		cTask = getTask();
 
 		if (cTask != null && cTask.getMaxProgress() > 0)
