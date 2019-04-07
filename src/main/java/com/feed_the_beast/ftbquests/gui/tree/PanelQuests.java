@@ -152,7 +152,7 @@ public class PanelQuests extends Panel
 
 				for (ButtonQuest button : ((ButtonQuest) widget).getDependencies())
 				{
-					if (button.quest == selectedQuest || wquest == selectedQuest || button.quest.hideDependencyLines)
+					if (button.quest == selectedQuest || wquest == selectedQuest)
 					{
 						continue;
 					}
@@ -208,11 +208,6 @@ public class PanelQuests extends Panel
 
 				for (ButtonQuest button : ((ButtonQuest) widget).getDependencies())
 				{
-					if (button.quest.hideDependencyLines)
-					{
-						continue;
-					}
-
 					int r, g, b;
 
 					if (button.quest == selectedQuest)
