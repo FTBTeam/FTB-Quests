@@ -6,6 +6,7 @@ import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -22,6 +23,7 @@ import java.util.Collection;
 public class XPTask extends QuestTask implements ISingleLongValueTask
 {
 	public long value = 1L;
+	public boolean points = false;
 
 	public XPTask(Quest quest)
 	{
@@ -41,10 +43,17 @@ public class XPTask extends QuestTask implements ISingleLongValueTask
 	}
 
 	@Override
+	public String getMaxProgressString()
+	{
+		return Long.toUnsignedString(points && value <= Integer.MAX_VALUE ? getLevelForExperience((int) value) : value);
+	}
+
+	@Override
 	public void writeData(NBTTagCompound nbt)
 	{
 		super.writeData(nbt);
 		nbt.setLong("value", value);
+		nbt.setBoolean("points", points);
 	}
 
 	@Override
@@ -52,6 +61,7 @@ public class XPTask extends QuestTask implements ISingleLongValueTask
 	{
 		super.readData(nbt);
 		value = nbt.getLong("value");
+		points = nbt.getBoolean("points");
 	}
 
 	@Override
@@ -59,6 +69,7 @@ public class XPTask extends QuestTask implements ISingleLongValueTask
 	{
 		super.writeNetData(data);
 		data.writeVarLong(value);
+		data.writeBoolean(points);
 	}
 
 	@Override
@@ -66,6 +77,7 @@ public class XPTask extends QuestTask implements ISingleLongValueTask
 	{
 		super.readNetData(data);
 		value = data.readVarLong();
+		points = data.readBoolean();
 	}
 
 	@Override
@@ -84,7 +96,8 @@ public class XPTask extends QuestTask implements ISingleLongValueTask
 	public void getConfig(ConfigGroup config)
 	{
 		super.getConfig(config);
-		config.addLong("value", () -> value, v -> value = v, 1000L, 1L, Long.MAX_VALUE).setDisplayName(new TextComponentTranslation("ftbquests.reward.ftbquests.xp_levels"));
+		config.addLong("value", () -> value, v -> value = v, 1L, 1L, Long.MAX_VALUE);
+		config.addBool("points", () -> points, v -> points = v, false);
 	}
 
 	@Override
@@ -101,6 +114,78 @@ public class XPTask extends QuestTask implements ISingleLongValueTask
 		return new Data(this, data);
 	}
 
+	public static int getPlayerXP(EntityPlayer player)
+	{
+		return (int) (getExperienceForLevel(player.experienceLevel) + (player.experience * player.xpBarCap()));
+	}
+
+	public static void addPlayerXP(EntityPlayer player, int amount)
+	{
+		int experience = getPlayerXP(player) + amount;
+		player.experienceTotal = experience;
+		player.experienceLevel = getLevelForExperience(experience);
+		int expForLevel = getExperienceForLevel(player.experienceLevel);
+		player.experience = (float) (experience - expForLevel) / (float) player.xpBarCap();
+	}
+
+	public static int xpBarCap(int level)
+	{
+		if (level >= 30)
+		{
+			return 112 + (level - 30) * 9;
+		}
+
+		if (level >= 15)
+		{
+			return 37 + (level - 15) * 5;
+		}
+
+		return 7 + level * 2;
+	}
+
+	private static int sum(int n, int a0, int d)
+	{
+		return n * (2 * a0 + (n - 1) * d) / 2;
+	}
+
+	public static int getExperienceForLevel(int level)
+	{
+		if (level == 0)
+		{
+			return 0;
+		}
+
+		if (level <= 15)
+		{
+			return sum(level, 7, 2);
+		}
+
+		if (level <= 30)
+		{
+			return 315 + sum(level - 15, 37, 5);
+		}
+
+		return 1395 + sum(level - 30, 112, 9);
+	}
+
+	public static int getLevelForExperience(int targetXp)
+	{
+		int level = 0;
+
+		while (true)
+		{
+			final int xpToNextLevel = xpBarCap(level);
+
+			if (targetXp < xpToNextLevel)
+			{
+				return level;
+			}
+
+			level++;
+			targetXp -= xpToNextLevel;
+		}
+	}
+
 	public static class Data extends SimpleQuestTaskData<XPTask>
 	{
 		private Data(XPTask task, ITeamData data)
@@ -109,15 +194,30 @@ public class XPTask extends QuestTask implements ISingleLongValueTask
 		}
 
 		@Override
+		public String getProgressString()
+		{
+			return Long.toUnsignedString(task.points && task.value <= Integer.MAX_VALUE ? getLevelForExperience((int) progress) : progress);
+		}
+
+		@Override
 		public boolean submitTask(EntityPlayerMP player, Collection<ItemStack> itemsToCheck, boolean simulate)
 		{
-			int add = (int) Math.min(player.experienceLevel, Math.min(task.value - progress, Integer.MAX_VALUE));
+			int add = (int) Math.min(task.points ? getPlayerXP(player) : player.experienceLevel, Math.min(task.value - progress, Integer.MAX_VALUE));
 
 			if (add > 0)
 			{
 				if (!simulate)
 				{
-					player.addExperienceLevel(-add);
+					if (task.points)
+					{
+						addPlayerXP(player, -add);
+						player.addExperienceLevel(0);
+					}
+					else
+					{
+						player.addExperienceLevel(-add);
+					}
+
 					progress += add;
 					sync();
 				}
