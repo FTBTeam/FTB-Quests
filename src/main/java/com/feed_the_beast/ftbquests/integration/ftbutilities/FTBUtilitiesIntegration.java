@@ -31,15 +31,21 @@ public class FTBUtilitiesIntegration
 				new TextComponentTranslation("ftbquests.leaderboard_progress"),
 				player -> {
 					ITeamData data = ServerQuestFile.INSTANCE.getData(player.team.getUID());
-					return new TextComponentString((data == null ? 0 : ServerQuestFile.INSTANCE.getRelativeProgress(data)) + "%");
+
+					if (data == null)
+					{
+						return new TextComponentString("0%");
+					}
+
+					return new TextComponentString(ServerQuestFile.INSTANCE.getRelativeProgress(data) + "%");
 				},
 				Comparator.comparingLong(player -> {
 					ITeamData data = ServerQuestFile.INSTANCE.getData(player.team.getUID());
-					return data == null ? 0L : ServerQuestFile.INSTANCE.getProgress(data);
+					return data == null ? 0L : -ServerQuestFile.INSTANCE.getRelativeProgress(data);
 				}),
 				player -> {
 					ITeamData data = ServerQuestFile.INSTANCE.getData(player.team.getUID());
-					return data != null && ServerQuestFile.INSTANCE.getProgress(data) > 0L;
+					return data != null && ServerQuestFile.INSTANCE.getRelativeProgress(data) > 0L;
 				})
 		);
 	}
