@@ -245,7 +245,7 @@ public abstract class QuestReward extends QuestObjectBase
 	@SideOnly(Side.CLIENT)
 	public Object getJEIFocus()
 	{
-		return null;
+		return getIcon().getJEIFocus();
 	}
 
 	@Override

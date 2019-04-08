@@ -73,7 +73,7 @@ public class GuiRewardNotifications extends GuiBase implements IRewardListenerGu
 		@Nullable
 		public Object getJEIFocus()
 		{
-			return key.stack.isEmpty() ? null : key.stack;
+			return key.icon.getJEIFocus();
 		}
 	}
 

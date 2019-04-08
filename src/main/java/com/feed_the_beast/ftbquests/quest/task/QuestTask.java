@@ -272,7 +272,7 @@ public abstract class QuestTask extends QuestObject
 	@SideOnly(Side.CLIENT)
 	public Object getJEIFocus()
 	{
-		return null;
+		return getIcon().getJEIFocus();
 	}
 
 	@Override

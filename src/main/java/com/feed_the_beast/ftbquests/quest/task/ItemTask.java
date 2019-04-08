@@ -373,22 +373,6 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 	}
 
 	@Override
-	@Nullable
-	@SideOnly(Side.CLIENT)
-	public Object getJEIFocus()
-	{
-		for (ItemStack stack : items)
-		{
-			if (!stack.isEmpty())
-			{
-				return stack;
-			}
-		}
-
-		return null;
-	}
-
-	@Override
 	public QuestTaskData createData(ITeamData data)
 	{
 		return new Data(this, data);
