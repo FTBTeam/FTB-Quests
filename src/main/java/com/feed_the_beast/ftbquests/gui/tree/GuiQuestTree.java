@@ -56,7 +56,7 @@ public class GuiQuestTree extends GuiBase
 	public QuestChapter selectedChapter;
 	public final HashSet<Quest> selectedQuests;
 	public final Panel chapterPanel, quests, questLeft, questRight, otherButtons;
-	public final ButtonPatreon patreon;
+	public final ButtonSubscribe subscribe;
 	public Color4I borderColor, backgroundColor;
 	public boolean movingQuest = false;
 	public int zoom = 16;
@@ -80,7 +80,7 @@ public class GuiQuestTree extends GuiBase
 		questRight = new PanelQuestRight(this);
 		otherButtons = new PanelOtherButtons(this);
 
-		patreon = new ButtonPatreon(this);
+		subscribe = new ButtonSubscribe(this);
 
 		selectChapter(null);
 	}
@@ -99,7 +99,7 @@ public class GuiQuestTree extends GuiBase
 		add(otherButtons);
 		add(questLeft);
 		add(questRight);
-		add(patreon);
+		add(subscribe);
 	}
 
 	@Override
@@ -107,7 +107,7 @@ public class GuiQuestTree extends GuiBase
 	{
 		otherButtons.alignWidgets();
 		chapterPanel.alignWidgets();
-		patreon.setPos(width - 13, height - 13);
+		subscribe.setPos(width - 13, height - 13);
 	}
 
 	@Override

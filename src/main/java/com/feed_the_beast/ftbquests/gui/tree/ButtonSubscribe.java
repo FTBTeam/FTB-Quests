@@ -1,10 +1,11 @@
 package com.feed_the_beast.ftbquests.gui.tree;
 
+import com.feed_the_beast.ftblib.FTBLib;
 import com.feed_the_beast.ftblib.lib.gui.Button;
 import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
-import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.gui.Theme;
+import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
@@ -12,11 +13,11 @@ import net.minecraft.client.resources.I18n;
 /**
  * @author LatvianModder
  */
-public class ButtonPatreon extends Button
+public class ButtonSubscribe extends Button
 {
-	public ButtonPatreon(Panel panel)
+	public ButtonSubscribe(Panel panel)
 	{
-		super(panel, I18n.format("ftbquests.gui.patreon"), GuiIcons.PATREON);
+		super(panel, I18n.format("ftbquests.gui.subscribe"), Icon.getIcon(FTBLib.MOD_ID + ":textures/icons/twitch.png"));
 		setSize(12, 12);
 	}
 
@@ -24,7 +25,7 @@ public class ButtonPatreon extends Button
 	public void onClicked(MouseButton button)
 	{
 		GuiHelper.playClickSound();
-		handleClick("https://www.patreon.com/LatvianModder");
+		handleClick("https://www.twitch.tv/latvianmodder/subscribe");
 	}
 
 	@Override

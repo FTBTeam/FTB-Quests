@@ -127,7 +127,7 @@ ftbquests.gui.times_completed=Times completed
 ftbquests.gui.quick_complete=Quick Complete
 ftbquests.gui.quick_complete.info_1=Submit all items
 ftbquests.gui.quick_complete.info_2=Claim all rewards
-ftbquests.gui.patreon=Like this mod? Consider supporting me on Patreon!
+ftbquests.gui.subscribe=Like this mod? Consider supporting me on twitch.tv!
 ftbquests.gui.looping_dependencies=Looping dependencies!
 ftbquests.gui.open_in_guide=Open in Guide
 
