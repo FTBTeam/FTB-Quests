@@ -24,8 +24,9 @@ public final class EnumQuestShape extends Icon implements IWithID
 	public static final EnumQuestShape HEXAGON = new EnumQuestShape("hexagon");
 	public static final EnumQuestShape OCTAGON = new EnumQuestShape("octagon");
 	public static final EnumQuestShape HEART = new EnumQuestShape("heart");
+	public static final EnumQuestShape GEAR = new EnumQuestShape("gear");
 
-	public static final NameMap<EnumQuestShape> NAME_MAP = NameMap.create(CIRCLE, NameMap.ObjectProperties.withName((sender, o) -> new TextComponentTranslation(o.langKey)), CIRCLE, SQUARE, DIAMOND, RSQUARE, PENTAGON, HEXAGON, OCTAGON, HEART);
+	public static final NameMap<EnumQuestShape> NAME_MAP = NameMap.create(CIRCLE, NameMap.ObjectProperties.withName((sender, o) -> new TextComponentTranslation(o.langKey)), CIRCLE, SQUARE, DIAMOND, RSQUARE, PENTAGON, HEXAGON, OCTAGON, HEART, GEAR);
 
 	public final String id;
 	public final String langKey;
