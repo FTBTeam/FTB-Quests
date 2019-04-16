@@ -99,8 +99,6 @@ public class ButtonDummyQuest extends Widget
 			return;
 		}
 
-		GlStateManager.color(1F, 1F, 1F, 1F);
-
 		double s = treeGui.zoomd * 3D / 2D;
 		double sx = x + (w - s) / 2D;
 		double sy = y + (h - s) / 2D;
@@ -110,6 +108,9 @@ public class ButtonDummyQuest extends Widget
 			GlStateManager.pushMatrix();
 			GlStateManager.translate(sx, sy, 0);
 			GlStateManager.scale(s, s, 1D);
+			GlStateManager.color(1F, 1F, 1F, 1F);
+			GlStateManager.enableBlend();
+			GlStateManager.disableAlpha();
 			treeGui.getSelectedQuest().shape.shape.draw(0, 0, 1, 1, Color4I.WHITE.withAlpha(20));
 			GlStateManager.popMatrix();
 		}
@@ -120,6 +121,9 @@ public class ButtonDummyQuest extends Widget
 			GlStateManager.translate(sx, sy, 0);
 			GlStateManager.pushMatrix();
 			GlStateManager.scale(s, s, 1D);
+			GlStateManager.color(1F, 1F, 1F, 1F);
+			GlStateManager.enableBlend();
+			GlStateManager.disableAlpha();
 			Color4I.WHITE.withAlpha(30).draw(0, 0, 1, 1);
 			GlStateManager.popMatrix();
 			GlStateManager.scale(treeGui.zoomd / 24D, treeGui.zoomd / 24D, 1D);
