@@ -34,7 +34,6 @@ import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.CapabilityItemHandler;
-import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemHandlerHelper;
 
 import javax.annotation.Nullable;
@@ -445,31 +444,9 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 
 				for (ItemStack stack : itemsToCheck)
 				{
-					if (stack.isEmpty())
-					{
-						continue;
-					}
-
-					if (task.test(stack))
+					if (!stack.isEmpty() && task.test(stack))
 					{
 						count += stack.getCount();
-					}
-					else
-					{
-						IItemHandler itemHandler = stack.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
-
-						if (itemHandler != null)
-						{
-							for (int slot = 0; slot < itemHandler.getSlots(); slot++)
-							{
-								ItemStack stack1 = itemHandler.getStackInSlot(slot);
-
-								if (task.test(stack1))
-								{
-									count += stack1.getCount();
-								}
-							}
-						}
 					}
 				}
 
