@@ -41,25 +41,22 @@ configurations.all {
 
 repositories {
 	mavenLocal()
-	maven { url "https://maven.latmod.com/" } //FTBLib
-	maven { url "https://minecraft.curseforge.com/api/maven/" } //ProjectE, IC2
-	maven { url "https://maven.blamejared.com/" } //PackMode & Botania
-	maven { url "http://maven.thiakil.com/" } //Baubles
-	maven { url "https://mod-buildcraft.com/maven/" } //Buildcraft
+	maven { url "https://maven.latmod.com/" } //FTB Library, Item Filters, FTB Utilities
 	maven { url "http://dvs1.progwml6.com/files/maven" } //JEI
+	maven { url "https://minecraft.curseforge.com/api/maven/" } //ProjectE, IC2, PackMode, Botania, Baubles, BuildCraft
 }
 
 dependencies {
 	deobfCompile "com.feed_the_beast.mods:FTBLib:${ftblib_version}"
-	deobfCompile "com.feed_the_beast.mods:FTBUtilities:${ftbutilities_version}"
 	deobfCompile "com.latmod.mods:ItemFilters:${itemfilters_version}"
-	deobfCompile "projecte:ProjectE:1.12:${projecte_version}"
-	deobfCompile "industrial-craft:industrialcraft-2-${ic2_version}:ex112:api"
-	deobfCompile "io.sommers:packmode:${packmode_version}"
-	deobfProvided "vazkii.botania:Botania:${botania_version}"
-	deobfProvided "com.azanor.baubles:Baubles:${baubles_version}"
-	provided "com.mod-buildcraft:buildcraft-api:${buildcraft_version}"
+	deobfProvided "com.feed_the_beast.mods:FTBUtilities:${ftbutilities_version}"
 	compile "mezz.jei:jei_${mc_version}:${jei_version}:api"
+	deobfProvided "projecte:ProjectE:1.12:${projecte_version}"
+	deobfProvided "industrial-craft:industrialcraft-2-${ic2_version}:ex112:api"
+	deobfProvided "packmode:packmode:1.12.2:${packmode_version}"
+	deobfProvided "botania:Botania r1.10:${botania_version}"
+	deobfProvided "baubles:Baubles:1.12:${baubles_version}"
+	deobfProvided "buildcraft-core:buildcraft:core:${buildcraft_version}"
 }
 
 processResources {
@@ -100,7 +97,6 @@ if (ENV.CURSEFORGE_KEY) {
 			relations {
 				requiredDependency 'ftblib'
 				requiredDependency 'item-filters'
-				optionalDependency 'packmode'
 			}
 			changelog = getGitChangelog
 			changelogType = 'markdown'
