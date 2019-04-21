@@ -2,7 +2,6 @@ package com.feed_the_beast.ftbquests.quest;
 
 import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
-import com.feed_the_beast.ftblib.lib.config.ConfigList;
 import com.feed_the_beast.ftblib.lib.config.ConfigString;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.IconAnimation;
@@ -51,7 +50,7 @@ public final class Quest extends QuestObject
 	public byte x, y;
 	public EnumQuestShape shape;
 	public final List<String> text;
-	public final List<Dependency> dependencies;
+	public final List<QuestObject> dependencies;
 	public boolean canRepeat;
 	public final List<QuestTask> tasks;
 	public final List<QuestReward> rewards;
@@ -164,57 +163,24 @@ public final class Quest extends QuestObject
 			nbt.setBoolean("hide_dependency_lines", true);
 		}
 
-		dependencies.removeIf(Dependency.PREDICATE_INVALID);
+		dependencies.removeIf(QuestObject.PREDICATE_INVALID);
 
 		if (!dependencies.isEmpty())
 		{
-			boolean allRequired = true;
+			int[] ai = new int[dependencies.size()];
 
-			for (Dependency dependency : dependencies)
+			for (int i = 0; i < dependencies.size(); i++)
 			{
-				if (dependency.type != EnumDependencyType.REQUIRED)
-				{
-					allRequired = false;
-					break;
-				}
+				ai[i] = dependencies.get(i).id;
 			}
 
-			if (allRequired)
+			if (ai.length == 1)
 			{
-				int[] ai = new int[dependencies.size()];
-
-				for (int i = 0; i < dependencies.size(); i++)
-				{
-					ai[i] = dependencies.get(i).object.id;
-				}
-
-				if (ai.length == 1)
-				{
-					nbt.setInteger("dependency", ai[0]);
-				}
-				else
-				{
-					nbt.setIntArray("dependencies", ai);
-				}
+				nbt.setInteger("dependency", ai[0]);
 			}
 			else
 			{
-				NBTTagList list = new NBTTagList();
-
-				for (Dependency dependency : dependencies)
-				{
-					NBTTagCompound nbt1 = new NBTTagCompound();
-					nbt1.setInteger("id", dependency.object.id);
-
-					if (dependency.type != EnumDependencyType.REQUIRED)
-					{
-						nbt1.setString("type", dependency.type.getID());
-					}
-
-					list.appendTag(nbt1);
-				}
-
-				nbt.setTag("dependencies", list);
+				nbt.setIntArray("dependencies", ai);
 			}
 		}
 	}
@@ -254,10 +220,7 @@ public final class Quest extends QuestObject
 
 				if (object != null)
 				{
-					Dependency dependency = new Dependency();
-					dependency.object = object;
-					dependency.type = EnumDependencyType.REQUIRED;
-					dependencies.add(dependency);
+					dependencies.add(object);
 				}
 			}
 		}
@@ -272,10 +235,7 @@ public final class Quest extends QuestObject
 
 				if (object != null)
 				{
-					Dependency dependency = new Dependency();
-					dependency.object = object;
-					dependency.type = EnumDependencyType.NAME_MAP.get(nbt1.getString("type"));
-					dependencies.add(dependency);
+					dependencies.add(object);
 				}
 			}
 		}
@@ -285,10 +245,7 @@ public final class Quest extends QuestObject
 
 			if (object != null)
 			{
-				Dependency dependency = new Dependency();
-				dependency.object = object;
-				dependency.type = EnumDependencyType.REQUIRED;
-				dependencies.add(dependency);
+				dependencies.add(object);
 			}
 		}
 	}
@@ -333,16 +290,15 @@ public final class Quest extends QuestObject
 
 		data.writeVarInt(dependencies.size());
 
-		for (Dependency d : dependencies)
+		for (QuestObject d : dependencies)
 		{
-			if (d.isInvalid())
+			if (d.invalid)
 			{
 				data.writeInt(0);
 			}
 			else
 			{
-				data.writeInt(d.object.id);
-				data.write(d.type, EnumDependencyType.NAME_MAP);
+				data.writeInt(d.id);
 			}
 		}
 	}
@@ -381,10 +337,7 @@ public final class Quest extends QuestObject
 
 			if (object != null)
 			{
-				Dependency dependency = new Dependency();
-				dependency.object = object;
-				dependency.type = data.read(EnumDependencyType.NAME_MAP);
-				dependencies.add(dependency);
+				dependencies.add(object);
 			}
 		}
 	}
@@ -466,9 +419,9 @@ public final class Quest extends QuestObject
 			}
 		}
 
-		for (Dependency dependency : dependencies)
+		for (QuestObject dependency : dependencies)
 		{
-			if (!dependency.isInvalid() && !dependency.type.checkFunction.check(data, dependency.object))
+			if (!dependency.invalid && !dependency.isComplete(data))
 			{
 				return false;
 			}
@@ -505,11 +458,11 @@ public final class Quest extends QuestObject
 
 		if (type.dependencies)
 		{
-			for (Dependency dependency : dependencies)
+			for (QuestObject dependency : dependencies)
 			{
-				if (!dependency.isInvalid())
+				if (!dependency.invalid)
 				{
-					dependency.object.changeProgress(data, type);
+					dependency.changeProgress(data, type);
 				}
 			}
 		}
@@ -529,9 +482,9 @@ public final class Quest extends QuestObject
 	{
 		if (!tasksIgnoreDependencies)
 		{
-			for (Dependency dependency : dependencies)
+			for (QuestObject dependency : dependencies)
 			{
-				if (!dependency.object.isComplete(data))
+				if (!dependency.isComplete(data))
 				{
 					return false;
 				}
@@ -621,15 +574,7 @@ public final class Quest extends QuestObject
 		config.addString("description", () -> description, v -> description = v, "");
 		config.addList("text", text, new ConfigString(""), ConfigString::new, ConfigString::getString);
 		config.addBool("can_repeat", () -> canRepeat, v -> canRepeat = v, false);
-		config.add("dependencies", new ConfigList.SimpleList<>(dependencies,
-				new ConfigQuestObject(chapter.file, null, DEP_TYPES),
-				dep -> new ConfigQuestObject(chapter.file, dep.object, DEP_TYPES),
-				object -> {
-					Dependency dependency = new Dependency();
-					dependency.object = (QuestObject) object.getObject();
-					return dependency;
-				}), new ConfigList<>(new ConfigQuestObject(chapter.file, null, DEP_TYPES))).setDisplayName(new TextComponentTranslation("ftbquests.dependencies"));
-
+		config.addList("dependencies", dependencies, new ConfigQuestObject(chapter.file, null, DEP_TYPES), questObject -> new ConfigQuestObject(chapter.file, questObject, DEP_TYPES), configQuestObject -> (QuestObject) configQuestObject.getObject()).setDisplayName(new TextComponentTranslation("ftbquests.dependencies"));
 		config.addBool("tasks_ignore_dependencies", () -> tasksIgnoreDependencies, v -> tasksIgnoreDependencies = v, false);
 		config.addString("guide_page", () -> guidePage, v -> guidePage = v, "");
 		config.addString("custom_click", () -> customClick, v -> customClick = v, "");
@@ -736,9 +681,9 @@ public final class Quest extends QuestObject
 			return false;
 		}
 
-		for (Dependency dependency : dependencies)
+		for (QuestObject dependency : dependencies)
 		{
-			if (dependency.object == object && !dependency.isInvalid())
+			if (dependency == object)
 			{
 				return true;
 			}
@@ -749,7 +694,7 @@ public final class Quest extends QuestObject
 
 	public boolean verifyDependencies(boolean autofix)
 	{
-		dependencies.removeIf(Dependency.PREDICATE_INVALID);
+		dependencies.removeIf(QuestObject.PREDICATE_INVALID);
 
 		if (dependencies.isEmpty())
 		{
@@ -791,9 +736,9 @@ public final class Quest extends QuestObject
 			return false;
 		}
 
-		for (Dependency dependency : dependencies)
+		for (QuestObject dependency : dependencies)
 		{
-			if (dependency.object instanceof Quest && !((Quest) dependency.object).verifyDependenciesInternal(original, false))
+			if (dependency instanceof Quest && !((Quest) dependency).verifyDependenciesInternal(original, false))
 			{
 				return false;
 			}

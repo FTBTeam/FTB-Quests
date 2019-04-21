@@ -10,9 +10,9 @@ import com.feed_the_beast.ftblib.lib.gui.WidgetType;
 import com.feed_the_beast.ftblib.lib.gui.WidgetVerticalSpace;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
-import com.feed_the_beast.ftbquests.quest.Dependency;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
+import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.task.QuestTask;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
@@ -66,9 +66,9 @@ public class PanelQuestLeft extends Panel
 
 			boolean addedText = false;
 
-			for (Dependency dependency : selectedQuest.dependencies)
+			for (QuestObject dependency : selectedQuest.dependencies)
 			{
-				if (!dependency.isInvalid())
+				if (!dependency.invalid)
 				{
 					if (!addedText)
 					{
@@ -77,9 +77,9 @@ public class PanelQuestLeft extends Panel
 						add(new TextField(this).setText(TextFormatting.AQUA + I18n.format("ftbquests.gui.requires") + ":"));
 					}
 
-					ITextComponent component = dependency.object.getDisplayName().createCopy();
+					ITextComponent component = dependency.getDisplayName().createCopy();
 					component.getStyle().setColor(TextFormatting.GRAY);
-					component.getStyle().setClickEvent(new ClickEvent(ClickEvent.Action.CHANGE_PAGE, dependency.object.toString()));
+					component.getStyle().setClickEvent(new ClickEvent(ClickEvent.Action.CHANGE_PAGE, dependency.toString()));
 					component.getStyle().setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponentTranslation("gui.open")));
 					add(new TextField(this).setText(component));
 				}
