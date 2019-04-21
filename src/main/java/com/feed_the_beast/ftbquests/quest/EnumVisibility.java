@@ -7,7 +7,8 @@ public enum EnumVisibility
 {
 	VISIBLE(2),
 	SECRET(1),
-	INVISIBLE(0);
+	INVISIBLE(0),
+	INTERNAL(-1);
 
 	public final int visibility;
 
@@ -18,12 +19,12 @@ public enum EnumVisibility
 
 	public boolean isVisible()
 	{
-		return visibility >= 2;
+		return visibility >= VISIBLE.visibility;
 	}
 
 	public boolean isInvisible()
 	{
-		return visibility <= 0;
+		return visibility <= INVISIBLE.visibility;
 	}
 
 	public EnumVisibility strongest(EnumVisibility other)

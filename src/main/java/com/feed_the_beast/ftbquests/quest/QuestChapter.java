@@ -28,7 +28,6 @@ import java.util.List;
 public final class QuestChapter extends QuestObject
 {
 	public final QuestFile file;
-	public final List<Dependency> dependencies;
 	public final List<Quest> quests;
 	public final List<String> description;
 
@@ -36,7 +35,6 @@ public final class QuestChapter extends QuestObject
 	{
 		file = f;
 		description = new ArrayList<>(0);
-		dependencies = new ArrayList<>(0);
 		quests = new ArrayList<>();
 	}
 

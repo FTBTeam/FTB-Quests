@@ -16,8 +16,6 @@ import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.gui.FTBQuestsTheme;
 import com.feed_the_beast.ftbquests.net.edit.MessageCreateObject;
 import com.feed_the_beast.ftbquests.net.edit.MessageEditObjectDirect;
-import com.feed_the_beast.ftbquests.quest.Dependency;
-import com.feed_the_beast.ftbquests.quest.EnumDependencyType;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
@@ -77,13 +75,13 @@ public class ButtonQuest extends Button
 		{
 			dependencies = new ArrayList<>();
 
-			for (Dependency dependency : quest.dependencies)
+			for (QuestObject dependency : quest.dependencies)
 			{
-				if (!dependency.isInvalid() && dependency.object instanceof Quest && dependency.type != EnumDependencyType.NOT_REQUIRED)
+				if (!dependency.invalid && dependency instanceof Quest)
 				{
 					for (Widget widget : treeGui.quests.widgets)
 					{
-						if (widget instanceof ButtonQuest && dependency.object == ((ButtonQuest) widget).quest)
+						if (widget instanceof ButtonQuest && dependency == ((ButtonQuest) widget).quest)
 						{
 							dependencies.add((ButtonQuest) widget);
 						}
@@ -210,22 +208,19 @@ public class ButtonQuest extends Button
 
 	private void editDependency(Quest quest, QuestObject object, boolean add)
 	{
-		List<Dependency> prevDeps = new ArrayList<>(quest.dependencies);
+		List<QuestObject> prevDeps = new ArrayList<>(quest.dependencies);
 
 		if (add != quest.hasDependency(object))
 		{
 			if (add)
 			{
-				Dependency d = new Dependency();
-				d.object = object;
-				d.type = EnumDependencyType.REQUIRED;
-				quest.dependencies.add(d);
+				quest.dependencies.add(object);
 			}
 			else
 			{
 				for (int i = 0; i < quest.dependencies.size(); i++)
 				{
-					if (quest.dependencies.get(i).object == object)
+					if (quest.dependencies.get(i) == object)
 					{
 						quest.dependencies.remove(i);
 						break;
