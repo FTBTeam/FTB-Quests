@@ -9,6 +9,7 @@ import com.feed_the_beast.ftblib.lib.icon.ImageIcon;
 import com.feed_the_beast.ftblib.lib.math.MathUtils;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.FTBQuests;
+import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import net.minecraft.client.renderer.BufferBuilder;
@@ -48,8 +49,11 @@ public class PanelQuests extends Panel
 
 		for (Quest quest : treeGui.selectedChapter.quests)
 		{
-			widgets.add(new ButtonQuest(this, quest));
-			set.add(getxy(quest.x, quest.y));
+			if (treeGui.file.canEdit() || !quest.getActualVisibility(ClientQuestFile.INSTANCE.self).isInvisible())
+			{
+				widgets.add(new ButtonQuest(this, quest));
+				set.add(getxy(quest.x, quest.y));
+			}
 		}
 
 		for (int y = -Quest.POS_LIMIT; y <= Quest.POS_LIMIT; y++)

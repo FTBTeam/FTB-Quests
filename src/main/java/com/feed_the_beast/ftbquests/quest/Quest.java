@@ -48,6 +48,7 @@ public final class Quest extends QuestObject
 	public final QuestChapter chapter;
 	public String description;
 	public byte x, y;
+	public EnumVisibility visibility;
 	public EnumQuestShape shape;
 	public final List<String> text;
 	public final List<QuestObject> dependencies;
@@ -55,6 +56,7 @@ public final class Quest extends QuestObject
 	public final List<QuestTask> tasks;
 	public final List<QuestReward> rewards;
 	public boolean tasksIgnoreDependencies;
+	public EnumDependencyRequirement dependencyRequirement;
 	public String guidePage;
 	public String customClick;
 	public boolean hideDependencyLines;
@@ -75,6 +77,8 @@ public final class Quest extends QuestObject
 		guidePage = "";
 		customClick = "";
 		hideDependencyLines = false;
+		visibility = EnumVisibility.VISIBLE;
+		dependencyRequirement = EnumDependencyRequirement.ALL_COMPLETED;
 	}
 
 	@Override
@@ -491,7 +495,7 @@ public final class Quest extends QuestObject
 			}
 		}
 
-		return getVisibility(data).isVisible();
+		return getActualVisibility(data).isVisible();
 	}
 
 	@Override
@@ -570,74 +574,79 @@ public final class Quest extends QuestObject
 		super.getConfig(config);
 		config.addInt("x", () -> x, v -> x = (byte) v, 0, -POS_LIMIT, POS_LIMIT);
 		config.addInt("y", () -> y, v -> y = (byte) v, 0, -POS_LIMIT, POS_LIMIT);
+		config.addEnum("visibility", () -> visibility, v -> visibility = v, EnumVisibility.NAME_MAP);
 		config.addEnum("shape", () -> shape, v -> shape = v, EnumQuestShape.NAME_MAP);
 		config.addString("description", () -> description, v -> description = v, "");
 		config.addList("text", text, new ConfigString(""), ConfigString::new, ConfigString::getString);
 		config.addBool("can_repeat", () -> canRepeat, v -> canRepeat = v, false);
 		config.addList("dependencies", dependencies, new ConfigQuestObject(chapter.file, null, DEP_TYPES), questObject -> new ConfigQuestObject(chapter.file, questObject, DEP_TYPES), configQuestObject -> (QuestObject) configQuestObject.getObject()).setDisplayName(new TextComponentTranslation("ftbquests.dependencies"));
 		config.addBool("tasks_ignore_dependencies", () -> tasksIgnoreDependencies, v -> tasksIgnoreDependencies = v, false);
+		config.addEnum("dependency_requirement", () -> dependencyRequirement, v -> dependencyRequirement = v, EnumDependencyRequirement.NAME_MAP);
 		config.addString("guide_page", () -> guidePage, v -> guidePage = v, "");
 		config.addString("custom_click", () -> customClick, v -> customClick = v, "");
 		config.addBool("hide_dependency_lines", () -> hideDependencyLines, v -> hideDependencyLines = v, false);
 	}
 
-	public EnumVisibility getVisibility(@Nullable ITeamData data)
+	public EnumVisibility getVisibility()
 	{
-		EnumVisibility v = EnumVisibility.VISIBLE;
+		if (visibility == EnumVisibility.INTERNAL)
+		{
+			return EnumVisibility.INTERNAL;
+		}
 
-		/*
+		EnumVisibility v = visibility;
+
 		for (QuestObject object : dependencies)
 		{
 			if (object instanceof Quest)
 			{
-				v = v.strongest(((Quest) object).getVisibility(data));
+				v = v.strongest(((Quest) object).getVisibility());
 
-				if (v.isInvisible())
+				if (v == EnumVisibility.INTERNAL)
 				{
-					return EnumVisibility.INVISIBLE;
+					return EnumVisibility.INTERNAL;
 				}
 			}
 		}
 
-		if (data == null && visibilityType != EnumDependencyType.NORMAL)
-		{
-			return visibilityType == EnumDependencyType.SECRET_ONE || visibilityType == EnumDependencyType.SECRET_ALL ? EnumVisibility.SECRET : EnumVisibility.INVISIBLE;
-		}
-		*/
-
-		/*
-		switch (getVisibilityType())
-		{
-			case SECRET_ONE:
-				for (String value : dependencies)
-				{
-					QuestObject object = chapter.file.get(value);
-
-					if (object != null && object.isComplete(data))
-					{
-						return true;
-					}
-				}
-
-				return false;
-			case INVISIBLE:
-				for (String value : dependencies)
-				{
-					QuestObject object = chapter.file.get(value);
-
-					if (object != null && !object.isComplete(data))
-					{
-						return false;
-					}
-				}
-
-				return true;
-			default:
-				return true;
-		}
-		*/
-
 		return v;
+	}
+
+	public EnumVisibility getActualVisibility(@Nullable ITeamData data)
+	{
+		EnumVisibility v = getVisibility();
+
+		if (v == EnumVisibility.INTERNAL)
+		{
+			return EnumVisibility.INVISIBLE;
+		}
+		else if (v == EnumVisibility.VISIBLE || data == null)
+		{
+			return v;
+		}
+
+		if (dependencyRequirement.one)
+		{
+			for (QuestObject object : dependencies)
+			{
+				if (!object.invalid && (dependencyRequirement.completed ? object.isComplete(data) : object.getProgress(data) > 0L))
+				{
+					return EnumVisibility.VISIBLE;
+				}
+			}
+
+			return v;
+		}
+
+		for (QuestObject object : dependencies)
+		{
+			if (!object.invalid && (dependencyRequirement.completed ? !object.isComplete(data) : object.getProgress(data) <= 0L))
+			{
+				return v;
+			}
+		}
+
+		return EnumVisibility.VISIBLE;
 	}
 
 	public QuestTask getTask(int index)
