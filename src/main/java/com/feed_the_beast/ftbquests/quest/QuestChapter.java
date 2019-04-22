@@ -282,7 +282,7 @@ public final class QuestChapter extends QuestObject
 
 		for (Quest quest : quests)
 		{
-			v = v.strongest(quest.getVisibility(data));
+			v = v.strongest(quest.getActualVisibility(data));
 
 			if (v.isInvisible())
 			{

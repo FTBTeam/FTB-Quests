@@ -1,20 +1,36 @@
 package com.feed_the_beast.ftbquests.quest;
 
+import com.feed_the_beast.ftblib.lib.util.IWithID;
+import com.feed_the_beast.ftblib.lib.util.misc.NameMap;
+import net.minecraft.util.text.TextComponentTranslation;
+
 /**
  * @author LatvianModder
  */
-public enum EnumVisibility
+public enum EnumVisibility implements IWithID
 {
-	VISIBLE(2),
-	SECRET(1),
-	INVISIBLE(0),
-	INTERNAL(-1);
+	VISIBLE("visible", 2),
+	SECRET("secret", 1),
+	INVISIBLE("invisible", 0),
+	INTERNAL("internal", -1);
 
+	public static final NameMap<EnumVisibility> NAME_MAP = NameMap.create(VISIBLE, NameMap.ObjectProperties.withName((sender, o) -> new TextComponentTranslation(o.langKey)), values());
+
+	private final String id;
+	private final String langKey;
 	public final int visibility;
 
-	EnumVisibility(int v)
+	EnumVisibility(String s, int v)
 	{
+		id = s;
+		langKey = "ftbquests.quest.visibility." + id;
 		visibility = v;
+	}
+
+	@Override
+	public String getID()
+	{
+		return id;
 	}
 
 	public boolean isVisible()

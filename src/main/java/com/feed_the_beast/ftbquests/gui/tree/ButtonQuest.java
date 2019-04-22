@@ -310,7 +310,7 @@ public class ButtonQuest extends Button
 			return WidgetType.MOUSE_OVER;
 		}
 
-		return treeGui.file.editingMode || quest.getVisibility(treeGui.file.self).isVisible() ? super.getWidgetType() : WidgetType.DISABLED;
+		return treeGui.file.editingMode || quest.getActualVisibility(treeGui.file.self).isVisible() ? super.getWidgetType() : WidgetType.DISABLED;
 	}
 
 	@Override
