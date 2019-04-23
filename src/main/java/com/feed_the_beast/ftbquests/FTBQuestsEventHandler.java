@@ -186,7 +186,7 @@ public class FTBQuestsEventHandler
 			return;
 		}
 
-		if (!ServerQuestFile.INSTANCE.dropLootCrates)
+		if (ServerQuestFile.INSTANCE == null || !ServerQuestFile.INSTANCE.dropLootCrates)
 		{
 			return;
 		}
