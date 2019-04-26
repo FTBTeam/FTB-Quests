@@ -76,7 +76,7 @@ ftbquests.chapter=Chapter
 ftbquests.chapters=Chapters
 ftbquests.chapter.completed=Chapter completed!
 ftbquests.chapter.description=Description
-ftbquests.chapter.visibility=Visibility [WIP!]
+ftbquests.chapter.always_invisible=Always Invisible
 
 ftbquests.quest=Quest
 ftbquests.quests=Quests
