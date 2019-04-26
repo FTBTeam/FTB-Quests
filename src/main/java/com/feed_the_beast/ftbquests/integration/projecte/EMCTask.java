@@ -129,6 +129,7 @@ public class EMCTask extends QuestTask implements ISingleLongValueTask
 		}
 
 		@Override
+		@SuppressWarnings("deprecation")
 		public boolean submitTask(EntityPlayerMP player, Collection<ItemStack> itemsToCheck, boolean simulate)
 		{
 			IKnowledgeProvider knowledge = ProjectEAPI.getTransmutationProxy().getKnowledgeProviderFor(player.getUniqueID());
