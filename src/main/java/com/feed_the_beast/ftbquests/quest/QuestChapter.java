@@ -30,12 +30,14 @@ public final class QuestChapter extends QuestObject
 	public final QuestFile file;
 	public final List<Quest> quests;
 	public final List<String> description;
+	public boolean alwaysInvisible;
 
 	public QuestChapter(QuestFile f)
 	{
 		file = f;
 		description = new ArrayList<>(0);
 		quests = new ArrayList<>();
+		alwaysInvisible = false;
 	}
 
 	@Override
@@ -72,6 +74,11 @@ public final class QuestChapter extends QuestObject
 
 			nbt.setTag("description", list);
 		}
+
+		if (alwaysInvisible)
+		{
+			nbt.setBoolean("always_invisible", true);
+		}
 	}
 
 	@Override
@@ -86,6 +93,8 @@ public final class QuestChapter extends QuestObject
 		{
 			description.add(desc.getStringTagAt(i));
 		}
+
+		alwaysInvisible = nbt.getBoolean("always_invisible");
 	}
 
 	@Override
@@ -93,6 +102,7 @@ public final class QuestChapter extends QuestObject
 	{
 		super.writeNetData(data);
 		data.writeCollection(description, DataOut.STRING);
+		data.writeBoolean(alwaysInvisible);
 	}
 
 	@Override
@@ -100,6 +110,7 @@ public final class QuestChapter extends QuestObject
 	{
 		super.readNetData(data);
 		data.readCollection(description, DataIn.STRING);
+		alwaysInvisible = data.readBoolean();
 	}
 
 	public int getIndex()
@@ -218,7 +229,10 @@ public final class QuestChapter extends QuestObject
 
 		for (Quest quest : quests)
 		{
-			list.add(quest.getIcon());
+			if (!quest.getVisibility().isInvisible())
+			{
+				list.add(quest.getIcon());
+			}
 		}
 
 		return IconAnimation.fromList(list, false);
@@ -274,23 +288,25 @@ public final class QuestChapter extends QuestObject
 	{
 		super.getConfig(config);
 		config.addList("description", description, new ConfigString(""), ConfigString::new, ConfigString::getString);
+		config.addBool("always_invisible", () -> alwaysInvisible, v -> alwaysInvisible = v, false);
 	}
 
-	public EnumVisibility getVisibility(@Nullable ITeamData data)
+	public boolean isVisible(@Nullable ITeamData data)
 	{
-		EnumVisibility v = EnumVisibility.VISIBLE;
+		if (alwaysInvisible || quests.isEmpty())
+		{
+			return false;
+		}
 
 		for (Quest quest : quests)
 		{
-			v = v.strongest(quest.getActualVisibility(data));
-
-			if (v.isInvisible())
+			if (!quest.getActualVisibility(data).isInvisible())
 			{
-				break;
+				return true;
 			}
 		}
 
-		return v;
+		return false;
 	}
 
 	@Override

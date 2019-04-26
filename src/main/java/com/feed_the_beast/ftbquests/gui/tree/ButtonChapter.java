@@ -24,14 +24,12 @@ import java.util.List;
  */
 public class ButtonChapter extends ButtonTab
 {
-	public int index;
 	public QuestChapter chapter;
 	public List<String> description;
 
-	public ButtonChapter(Panel panel, int idx, QuestChapter c)
+	public ButtonChapter(Panel panel, QuestChapter c)
 	{
 		super(panel, StringUtils.addFormatting(c.getDisplayName().getFormattedText()), c.getIcon());
-		index = idx;
 		chapter = c;
 		description = new ArrayList<>();
 

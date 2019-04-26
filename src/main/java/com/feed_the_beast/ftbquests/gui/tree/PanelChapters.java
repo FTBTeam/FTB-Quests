@@ -26,9 +26,9 @@ public class PanelChapters extends Panel
 		{
 			QuestChapter chapter = treeGui.file.chapters.get(i);
 
-			if (canEdit || !chapter.quests.isEmpty())
+			if (canEdit || chapter.isVisible(treeGui.file.self))
 			{
-				add(new ButtonChapter(this, i, chapter));
+				add(new ButtonChapter(this, chapter));
 			}
 		}
 	}

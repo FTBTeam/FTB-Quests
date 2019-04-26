@@ -57,6 +57,9 @@ public class MessageDisplayCompletionToast extends MessageToClient
 			{
 				Minecraft.getMinecraft().getToastGui().add(new ToastQuestObject(object));
 			}
+
+			ClientQuestFile.INSTANCE.questTreeGui.quests.refreshWidgets();
+			ClientQuestFile.INSTANCE.questTreeGui.chapterPanel.refreshWidgets();
 		}
 	}
 }

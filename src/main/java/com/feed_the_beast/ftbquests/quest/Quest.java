@@ -187,6 +187,16 @@ public final class Quest extends QuestObject
 				nbt.setIntArray("dependencies", ai);
 			}
 		}
+
+		if (visibility != EnumVisibility.VISIBLE)
+		{
+			nbt.setString("visibility", visibility.getID());
+
+			if (visibility == EnumVisibility.SECRET || visibility == EnumVisibility.INVISIBLE)
+			{
+				nbt.setString("dependency_requirement", dependencyRequirement.getID());
+			}
+		}
 	}
 
 	@Override
@@ -252,6 +262,9 @@ public final class Quest extends QuestObject
 				dependencies.add(object);
 			}
 		}
+
+		visibility = EnumVisibility.NAME_MAP.get(nbt.getString("visibility"));
+		dependencyRequirement = EnumDependencyRequirement.NAME_MAP.get(nbt.getString("dependency_requirement"));
 	}
 
 	@Override
