@@ -43,7 +43,8 @@ repositories {
 	mavenLocal()
 	maven { url "https://maven.latmod.com/" } //FTB Library, Item Filters, FTB Utilities
 	maven { url "http://dvs1.progwml6.com/files/maven" } //JEI
-	maven { url "https://minecraft.curseforge.com/api/maven/" } //ProjectE, IC2, PackMode, Botania, Baubles, BuildCraft
+	maven { url "https://minecraft.curseforge.com/api/maven/" } //ProjectE, IC2, PackMode, Baubles, BuildCraft
+	maven { url "https://maven.blamejared.com/" } //Botania
 }
 
 dependencies {
@@ -54,7 +55,7 @@ dependencies {
 	deobfProvided "projecte:ProjectE:1.12.2:PE${projecte_version}"
 	deobfProvided "industrial-craft:industrialcraft-2-${ic2_version}:ex112:api"
 	deobfProvided "packmode:packmode:1.12.2:${packmode_version}"
-	deobfProvided "botania:Botania r1.10:${botania_version}"
+	deobfProvided "vazkii.botania:Botania:${botania_version}"
 	deobfProvided "baubles:Baubles:1.12:${baubles_version}"
 	deobfProvided "buildcraft-core:buildcraft:core:${buildcraft_version}"
 }
