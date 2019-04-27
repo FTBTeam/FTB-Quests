@@ -198,7 +198,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 
 			for (ItemStack stack : iconStacks)
 			{
-				Icon icon = ItemIcon.getItemIcon(stack);
+				Icon icon = ItemIcon.getItemIcon(ItemHandlerHelper.copyStackWithSize(stack, 1));
 
 				if (!icon.isEmpty())
 				{
@@ -210,7 +210,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 		{
 			for (ItemStack stack : items)
 			{
-				Icon icon = ItemIcon.getItemIcon(stack);
+				Icon icon = ItemIcon.getItemIcon(ItemHandlerHelper.copyStackWithSize(stack, 1));
 
 				if (!icon.isEmpty())
 				{

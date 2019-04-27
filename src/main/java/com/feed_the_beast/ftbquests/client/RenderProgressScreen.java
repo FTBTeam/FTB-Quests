@@ -6,6 +6,7 @@ import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.tile.TileProgressScreenCore;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
@@ -141,7 +142,9 @@ public class RenderProgressScreen extends TileEntitySpecialRenderer<TileProgress
 
 			GlStateManager.enableTexture2D();
 
-			if (!screen.hideIcons)
+			double d = 3D * (size + 1D);
+
+			if (!screen.hideIcons && Minecraft.getMinecraft().player.getDistanceSq(screen.getPos().getX() + 0.5D, screen.getPos().getY() + 0.5D + screen.height / 2D, screen.getPos().getZ() + 0.5D) <= d * d)
 			{
 				for (Quest quest : chapter.quests)
 				{

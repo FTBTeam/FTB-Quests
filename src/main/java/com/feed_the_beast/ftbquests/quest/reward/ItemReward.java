@@ -136,7 +136,7 @@ public class ItemReward extends QuestReward
 			return super.getAltIcon();
 		}
 
-		return ItemIcon.getItemIcon(stack);
+		return ItemIcon.getItemIcon(ItemHandlerHelper.copyStackWithSize(stack, 1));
 	}
 
 	@Override
