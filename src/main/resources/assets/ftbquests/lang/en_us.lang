@@ -98,6 +98,7 @@ ftbquests.quest.shape.pentagon=Pentagon
 ftbquests.quest.shape.hexagon=Hexagon
 ftbquests.quest.shape.octagon=Octagon
 ftbquests.quest.shape.heart=Heart
+ftbquests.quest.shape.gear=Gear
 ftbquests.quest.text=Text
 ftbquests.quest.can_repeat=Can be repeated
 ftbquests.quest.tasks_ignore_dependencies=Tasks Ignore Dependencies
