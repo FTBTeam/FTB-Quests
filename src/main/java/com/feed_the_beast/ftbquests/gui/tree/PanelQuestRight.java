@@ -73,9 +73,11 @@ public class PanelQuestRight extends Panel
 
 			setWidth(80);
 
-			if (!quest.description.isEmpty())
+			String desc = !quest.description.isEmpty() && quest.description.startsWith("{") && quest.description.endsWith("}") ? I18n.format(quest.description.substring(1, quest.description.length() - 1)) : quest.description;
+
+			if (!desc.isEmpty())
 			{
-				setWidth(Math.max(width, Math.min(180, treeGui.getTheme().getStringWidth(quest.description) + 6)));
+				setWidth(Math.max(width, Math.min(180, treeGui.getTheme().getStringWidth(desc) + 6)));
 			}
 
 			if (!quest.text.isEmpty())
@@ -93,15 +95,23 @@ public class PanelQuestRight extends Panel
 				setWidth(150);
 			}
 
-			if (!quest.description.isEmpty())
+			if (!desc.isEmpty())
 			{
-				add(new TextField(this).setMaxWidth(width - 3).setSpacing(9).setText(TextFormatting.GRAY.toString() + TextFormatting.ITALIC + StringUtils.addFormatting(quest.description)));
+				add(new TextField(this).setMaxWidth(width - 3).setSpacing(9).setText(TextFormatting.GRAY.toString() + TextFormatting.ITALIC + StringUtils.addFormatting(desc)));
 				add(new WidgetVerticalSpace(this, 5));
 			}
 
 			if (!quest.text.isEmpty())
 			{
-				add(new TextField(this).setMaxWidth(width - 3).setSpacing(9).setText(StringUtils.addFormatting(StringJoiner.with('\n').join(quest.text))));
+				String[] text = new String[quest.text.size()];
+
+				for (int i = 0; i < text.length; i++)
+				{
+					String s = quest.text.get(i);
+					text[i] = s.startsWith("{") && s.endsWith("}") ? I18n.format(s.substring(1, s.length() - 1)) : s;
+				}
+
+				add(new TextField(this).setMaxWidth(width - 3).setSpacing(9).setText(StringUtils.addFormatting(StringJoiner.with('\n').joinStrings(text))));
 				add(new WidgetVerticalSpace(this, 10));
 			}
 
