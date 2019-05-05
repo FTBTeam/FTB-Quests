@@ -73,7 +73,7 @@ public class PanelQuestRight extends Panel
 
 			setWidth(80);
 
-			String desc = !quest.description.isEmpty() && quest.description.startsWith("{") && quest.description.endsWith("}") ? I18n.format(quest.description.substring(1, quest.description.length() - 1)) : quest.description;
+			String desc = GuiQuestTree.fixI18n(TextFormatting.GRAY, quest.description);
 
 			if (!desc.isEmpty())
 			{
@@ -97,7 +97,7 @@ public class PanelQuestRight extends Panel
 
 			if (!desc.isEmpty())
 			{
-				add(new TextField(this).setMaxWidth(width - 3).setSpacing(9).setText(TextFormatting.GRAY.toString() + TextFormatting.ITALIC + StringUtils.addFormatting(desc)));
+				add(new TextField(this).setMaxWidth(width - 3).setSpacing(9).setText(TextFormatting.ITALIC + desc));
 				add(new WidgetVerticalSpace(this, 5));
 			}
 
@@ -107,8 +107,7 @@ public class PanelQuestRight extends Panel
 
 				for (int i = 0; i < text.length; i++)
 				{
-					String s = quest.text.get(i);
-					text[i] = s.startsWith("{") && s.endsWith("}") ? I18n.format(s.substring(1, s.length() - 1)) : s;
+					text[i] = GuiQuestTree.fixI18n(null, quest.text.get(i));
 				}
 
 				add(new TextField(this).setMaxWidth(width - 3).setSpacing(9).setText(StringUtils.addFormatting(StringJoiner.with('\n').joinStrings(text))));

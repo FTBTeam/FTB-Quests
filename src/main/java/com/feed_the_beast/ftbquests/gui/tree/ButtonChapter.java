@@ -5,7 +5,6 @@ import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
 import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.gui.Theme;
-import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.gui.FTBQuestsTheme;
 import com.feed_the_beast.ftbquests.net.edit.MessageMoveChapter;
@@ -29,13 +28,13 @@ public class ButtonChapter extends ButtonTab
 
 	public ButtonChapter(Panel panel, QuestChapter c)
 	{
-		super(panel, StringUtils.addFormatting(c.getDisplayName().getFormattedText()), c.getIcon());
+		super(panel, GuiQuestTree.fixI18n(null, c.getDisplayName().getFormattedText()), c.getIcon());
 		chapter = c;
 		description = new ArrayList<>();
 
 		for (String v : chapter.description)
 		{
-			description.add(TextFormatting.GRAY + StringUtils.addFormatting(v));
+			description.add(GuiQuestTree.fixI18n(TextFormatting.GRAY, v));
 		}
 	}
 
