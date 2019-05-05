@@ -10,7 +10,6 @@ import com.feed_the_beast.ftblib.lib.gui.Widget;
 import com.feed_the_beast.ftblib.lib.gui.WidgetType;
 import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
-import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.gui.FTBQuestsTheme;
@@ -41,22 +40,14 @@ public class ButtonQuest extends Button
 
 	public GuiQuestTree treeGui;
 	public Quest quest;
-	public String description;
 	public List<ButtonQuest> dependencies = null;
 
 	public ButtonQuest(Panel panel, Quest q)
 	{
-		super(panel, q.getDisplayName().getFormattedText(), q.getIcon());
+		super(panel, GuiQuestTree.fixI18n(null, q.getDisplayName().getFormattedText()), q.getIcon());
 		treeGui = (GuiQuestTree) panel.getGui();
 		setSize(20, 20);
 		quest = q;
-		String desc = !quest.description.isEmpty() && quest.description.startsWith("{") && quest.description.endsWith("}") ? I18n.format(quest.description.substring(1, quest.description.length() - 1)) : quest.description;
-		description = TextFormatting.GRAY + StringUtils.addFormatting(desc);
-
-		if (StringUtils.unformatted(description).isEmpty())
-		{
-			description = "";
-		}
 	}
 
 	@Override
@@ -266,6 +257,8 @@ public class ButtonQuest extends Button
 		}
 
 		list.add(title);
+
+		String description = GuiQuestTree.fixI18n(TextFormatting.GRAY, quest.description);
 
 		if (!description.isEmpty())
 		{

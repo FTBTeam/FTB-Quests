@@ -15,6 +15,7 @@ import com.feed_the_beast.ftblib.lib.gui.Widget;
 import com.feed_the_beast.ftblib.lib.gui.WidgetType;
 import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.math.MathUtils;
+import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
@@ -157,6 +158,23 @@ public class GuiQuestTree extends GuiBase
 
 		quests.setScrollX((scrollWidth - quests.width) / 2);
 		quests.setScrollY((scrollHeight - quests.height) / 2);
+	}
+
+	public static String fixI18n(@Nullable TextFormatting color, String v)
+	{
+		if (!v.isEmpty() && v.startsWith("{") && v.endsWith("}"))
+		{
+			v = I18n.format(v.substring(1, v.length() - 1));
+		}
+
+		v = color == null ? StringUtils.addFormatting(v) : (color + StringUtils.addFormatting(v));
+
+		if (StringUtils.unformatted(v).isEmpty())
+		{
+			return "";
+		}
+
+		return v;
 	}
 
 	public static void addObjectMenuItems(List<ContextMenuItem> contextMenu, IOpenableGui gui, QuestObjectBase object)
