@@ -11,6 +11,7 @@ import com.feed_the_beast.ftblib.lib.gui.misc.GuiEditConfigValue;
 import com.feed_the_beast.ftblib.lib.gui.misc.GuiSelectFluid;
 import com.feed_the_beast.ftblib.lib.gui.misc.GuiSelectItemStack;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
+import com.feed_the_beast.ftblib.lib.util.ServerUtils;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.FTBQuestsCommon;
@@ -93,7 +94,7 @@ public class FTBQuestsClient extends FTBQuestsCommon
 				{
 					for (DimensionType type : DimensionType.values())
 					{
-						panel.add(new SimpleTextButton(panel, DimensionTask.getName(type.getId()).getFormattedText(), Icon.EMPTY)
+						panel.add(new SimpleTextButton(panel, ServerUtils.getDimensionName(type.getId()).getFormattedText(), Icon.EMPTY)
 						{
 							@Override
 							public void onClicked(MouseButton button)
