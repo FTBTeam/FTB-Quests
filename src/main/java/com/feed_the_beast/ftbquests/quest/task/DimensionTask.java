@@ -3,22 +3,18 @@ package com.feed_the_beast.ftbquests.quest.task;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
-import com.feed_the_beast.ftblib.lib.util.misc.NameMap;
+import com.feed_the_beast.ftblib.lib.util.ServerUtils;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.DimensionType;
-import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.util.Constants;
 
-import java.util.Arrays;
 import java.util.Collection;
 
 /**
@@ -40,18 +36,6 @@ public class DimensionTask extends QuestTask
 	}
 
 	@Override
-	public long getMaxProgress()
-	{
-		return 1;
-	}
-
-	@Override
-	public boolean hideProgressNumbers()
-	{
-		return true;
-	}
-
-	@Override
 	public void writeData(NBTTagCompound nbt)
 	{
 		super.writeData(nbt);
@@ -62,19 +46,18 @@ public class DimensionTask extends QuestTask
 	public void readData(NBTTagCompound nbt)
 	{
 		super.readData(nbt);
+		dimension = nbt.getInteger("dim");
 
-		try
+		if (dimension == 0 && nbt.hasKey("dim", Constants.NBT.TAG_STRING))
 		{
-			dimension = nbt.getInteger("dim");
-
-			if (dimension == 0 && nbt.hasKey("dim", Constants.NBT.TAG_STRING))
+			try
 			{
 				dimension = DimensionType.byName(nbt.getString("dim")).getId();
 			}
-		}
-		catch (Exception ex)
-		{
-			dimension = -1;
+			catch (Exception ex)
+			{
+				dimension = -1;
+			}
 		}
 	}
 
@@ -96,52 +79,15 @@ public class DimensionTask extends QuestTask
 	public void getConfig(ConfigGroup config)
 	{
 		super.getConfig(config);
-		IntOpenHashSet dims = new IntOpenHashSet();
-
-		for (DimensionType types : DimensionType.values())
-		{
-			if (types != null)
-			{
-				dims.add(types.getId());
-			}
-		}
-
-		if (!quest.chapter.file.isClient())
-		{
-			dims.addAll(Arrays.asList(DimensionManager.getIDs()));
-		}
-
-		config.addEnum("dim", () -> dimension, v -> dimension = v, NameMap.create(-1, NameMap.ObjectProperties.withName((sender, dim) -> getName(dim)), dims.toArray(new Integer[0]))).setDisplayName(new TextComponentTranslation("ftbquests.task.ftbquests.dimension"));
+		config.addInt("dim", () -> dimension, v -> dimension = v, 0, Integer.MIN_VALUE, Integer.MAX_VALUE).setDisplayName(new TextComponentTranslation("ftbquests.task.ftbquests.dimension"));
 	}
 
 	@Override
 	public ITextComponent getAltDisplayName()
 	{
-		ITextComponent text = getName(dimension);
+		ITextComponent text = ServerUtils.getDimensionName(dimension);
 		text.getStyle().setColor(TextFormatting.DARK_GREEN);
 		return new TextComponentTranslation("ftbquests.task.ftbquests.dimension", text).appendText(": ").appendSibling(text);
-	}
-
-	public static ITextComponent getName(int dim)
-	{
-		switch (dim)
-		{
-			case 0:
-				return new TextComponentTranslation("createWorld.customize.preset.overworld");
-			case -1:
-				return new TextComponentTranslation("advancements.nether.root.title");
-			case 1:
-				return new TextComponentTranslation("advancements.end.root.title");
-			default:
-				try
-				{
-					return new TextComponentString(DimensionType.getById(dim).getName());
-				}
-				catch (Exception ex)
-				{
-					return new TextComponentString("dim_" + dim);
-				}
-		}
 	}
 
 	@Override

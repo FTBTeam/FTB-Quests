@@ -38,18 +38,6 @@ public class LocationTask extends QuestTask
 	}
 
 	@Override
-	public long getMaxProgress()
-	{
-		return 1L;
-	}
-
-	@Override
-	public String getMaxProgressString()
-	{
-		return "1";
-	}
-
-	@Override
 	public void writeData(NBTTagCompound nbt)
 	{
 		super.writeData(nbt);

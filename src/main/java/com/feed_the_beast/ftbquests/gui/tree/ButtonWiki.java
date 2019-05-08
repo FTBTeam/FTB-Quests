@@ -1,9 +1,10 @@
 package com.feed_the_beast.ftbquests.gui.tree;
 
 import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
-import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.gui.Panel;
+import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
+import com.feed_the_beast.ftbquests.FTBQuests;
 
 /**
  * @author LatvianModder
@@ -12,7 +13,7 @@ public class ButtonWiki extends ButtonTab
 {
 	public ButtonWiki(Panel panel)
 	{
-		super(panel, "Wiki", GuiIcons.INFO);
+		super(panel, "Wiki", Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/info.png"));
 	}
 
 	@Override

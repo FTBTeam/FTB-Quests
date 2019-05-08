@@ -29,18 +29,6 @@ public class CheckmarkTask extends QuestTask
 	}
 
 	@Override
-	public long getMaxProgress()
-	{
-		return 1;
-	}
-
-	@Override
-	public boolean hideProgressNumbers()
-	{
-		return true;
-	}
-
-	@Override
 	@SideOnly(Side.CLIENT)
 	public void drawGUI(@Nullable QuestTaskData data, int x, int y, int w, int h)
 	{
