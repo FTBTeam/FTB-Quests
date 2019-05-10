@@ -158,6 +158,7 @@ ftbquests.task.ftbquests.item.ignore_damage=Ignore Damage
 ftbquests.task.ftbquests.item.nbt_mode=NBT Mode
 ftbquests.task.ftbquests.item.consume_true=Consumes item
 ftbquests.task.ftbquests.item.consume_false=Doesn't consume item
+ftbquests.task.ftbquests.item.hide_valid_items=Hide Valid Items
 ftbquests.task.ftbquests.item.valid_items=Valid items:
 
 ftbquests.task.ftbquests.fluid=Fluid
