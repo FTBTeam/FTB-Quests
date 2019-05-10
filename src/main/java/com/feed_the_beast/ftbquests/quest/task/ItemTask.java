@@ -53,13 +53,16 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 	public boolean consumeItems;
 	public boolean ignoreDamage;
 	public NBTMatchingMode nbtMode;
+	public boolean hideValidItems;
 
 	public ItemTask(Quest quest)
 	{
 		super(quest);
 		items = new ArrayList<>();
 		consumeItems = quest.chapter.file.defaultConsumeItems;
+		ignoreDamage = false;
 		nbtMode = NBTMatchingMode.MATCH;
+		hideValidItems = false;
 	}
 
 	@Override
@@ -117,6 +120,11 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 		{
 			nbt.setByte("ignore_nbt", (byte) nbtMode.ordinal());
 		}
+
+		if (hideValidItems)
+		{
+			nbt.setBoolean("hide_valid_items", true);
+		}
 	}
 
 	@Override
@@ -158,6 +166,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 		consumeItems = nbt.hasKey("consume_items") ? nbt.getBoolean("consume_items") : quest.chapter.file.defaultConsumeItems;
 		ignoreDamage = nbt.getBoolean("ignore_damage");
 		nbtMode = NBTMatchingMode.VALUES[nbt.getByte("ignore_nbt")];
+		hideValidItems = nbt.getBoolean("hide_valid_items");
 	}
 
 	@Override
@@ -171,6 +180,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 		flags = Bits.setFlag(flags, 2, ignoreDamage);
 		flags = Bits.setFlag(flags, 4, nbtMode != NBTMatchingMode.MATCH);
 		flags = Bits.setFlag(flags, 8, nbtMode == NBTMatchingMode.CONTAIN);
+		flags = Bits.setFlag(flags, 16, hideValidItems);
 		data.writeVarInt(flags);
 	}
 
@@ -184,6 +194,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 		consumeItems = Bits.getFlag(flags, 1);
 		ignoreDamage = Bits.getFlag(flags, 2);
 		nbtMode = Bits.getFlag(flags, 4) ? Bits.getFlag(flags, 8) ? NBTMatchingMode.CONTAIN : NBTMatchingMode.IGNORE : NBTMatchingMode.MATCH;
+		hideValidItems = Bits.getFlag(flags, 16);
 	}
 
 	@Override
@@ -324,6 +335,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 		config.addBool("consume_items", () -> consumeItems, v -> consumeItems = v, quest.chapter.file.defaultConsumeItems).setCanEdit(!quest.canRepeat);
 		config.addBool("ignore_damage", () -> ignoreDamage, v -> ignoreDamage = v, false);
 		config.addEnum("nbt_mode", () -> nbtMode, v -> nbtMode = v, NameMap.create(NBTMatchingMode.MATCH, NBTMatchingMode.VALUES));
+		config.addBool("hide_valid_items", () -> hideValidItems, v -> hideValidItems = v, false);
 	}
 
 	@Override
@@ -351,23 +363,42 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 	{
 		list.add(TextFormatting.GRAY + (canInsertItem() ? I18n.format("ftbquests.task.ftbquests.item.consume_true") : I18n.format("ftbquests.task.ftbquests.item.consume_false")));
 		list.add(TextFormatting.GRAY + (canInsertItem() ? I18n.format("ftbquests.task.click_to_submit") : I18n.format("ftbquests.task.auto_detected")));
-		list.add("");
 
-		if (items.isEmpty())
+		if (hideValidItems)
 		{
 			return;
 		}
-		else if (items.size() > 1)
+
+		List<ItemStack> validItems;
+
+		if (items.size() == 1)
+		{
+			validItems = new ArrayList<>();
+			ItemFiltersAPI.getValidItems(items.get(0), validItems);
+		}
+		else
+		{
+			validItems = items;
+		}
+
+		if (validItems.isEmpty())
+		{
+			return;
+		}
+
+		list.add("");
+
+		if (validItems.size() > 1)
 		{
 			list.add(TextFormatting.GRAY + I18n.format("ftbquests.task.ftbquests.item.valid_items"));
 		}
 
-		GuiHelper.addStackTooltip(items.get(0), list);
+		GuiHelper.addStackTooltip(validItems.get(0), list);
 
-		for (int i = 1; i < items.size(); i++)
+		for (int i = 1; i < validItems.size(); i++)
 		{
 			list.add(" - - -");
-			GuiHelper.addStackTooltip(items.get(i), list);
+			GuiHelper.addStackTooltip(validItems.get(i), list);
 		}
 	}
 
