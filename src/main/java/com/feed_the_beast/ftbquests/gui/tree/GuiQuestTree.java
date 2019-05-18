@@ -12,7 +12,6 @@ import com.feed_the_beast.ftblib.lib.gui.IOpenableGui;
 import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.gui.Theme;
 import com.feed_the_beast.ftblib.lib.gui.Widget;
-import com.feed_the_beast.ftblib.lib.gui.WidgetType;
 import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.math.MathUtils;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
@@ -37,7 +36,6 @@ import com.feed_the_beast.ftbquests.quest.task.QuestTask;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.toasts.SystemToast;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
@@ -56,12 +54,14 @@ public class GuiQuestTree extends GuiBase
 	public int scrollWidth, scrollHeight, prevMouseX, prevMouseY, grabbed;
 	public QuestChapter selectedChapter;
 	public final HashSet<Quest> selectedQuests;
-	public final Panel chapterPanel, quests, questLeft, questRight, otherButtons;
+	public final PanelChapters chapterPanel;
+	public final PanelQuests quests;
+	public final PanelOtherButtons otherButtons;
+	public final PanelViewQuest viewQuestPanel;
 	public final ButtonSubscribe subscribe;
 	public Color4I borderColor, backgroundColor;
 	public boolean movingQuest = false;
 	public int zoom = 16;
-	public double zoomd = 16D;
 	public long lastShiftPress = 0L;
 
 	public GuiQuestTree(ClientQuestFile q)
@@ -77,9 +77,8 @@ public class GuiQuestTree extends GuiBase
 		backgroundColor = Color4I.WHITE.withAlpha(33);
 
 		quests = new PanelQuests(this);
-		questLeft = new PanelQuestLeft(this);
-		questRight = new PanelQuestRight(this);
 		otherButtons = new PanelOtherButtons(this);
+		viewQuestPanel = new PanelViewQuest(this);
 
 		subscribe = new ButtonSubscribe(this);
 
@@ -87,9 +86,9 @@ public class GuiQuestTree extends GuiBase
 	}
 
 	@Nullable
-	public Quest getSelectedQuest()
+	public Quest getViewedQuest()
 	{
-		return selectedQuests.size() == 1 ? selectedQuests.iterator().next() : null;
+		return viewQuestPanel.quest;
 	}
 
 	@Override
@@ -98,8 +97,7 @@ public class GuiQuestTree extends GuiBase
 		add(chapterPanel);
 		add(quests);
 		add(otherButtons);
-		add(questLeft);
-		add(questRight);
+		add(viewQuestPanel);
 		add(subscribe);
 	}
 
@@ -122,7 +120,7 @@ public class GuiQuestTree extends GuiBase
 		if (selectedChapter != chapter)
 		{
 			movingQuest = false;
-			selectQuest(null);
+			closeQuest();
 			selectedChapter = chapter;
 			quests.setScrollX(0);
 			quests.setScrollY(0);
@@ -131,21 +129,70 @@ public class GuiQuestTree extends GuiBase
 		}
 	}
 
-	public void selectQuest(@Nullable Quest quest)
+	public void viewQuest(Quest quest)
 	{
-		Quest prev = getSelectedQuest();
 		selectedQuests.clear();
 
-		if (prev != quest)
+		if (viewQuestPanel.quest != quest)
 		{
-			if (quest != null)
+			viewQuestPanel.quest = quest;
+			viewQuestPanel.refreshWidgets();
+		}
+	}
+
+	@Override
+	public boolean onClosedByKey(int key)
+	{
+		if (super.onClosedByKey(key))
+		{
+			if (getViewedQuest() != null)
 			{
-				selectedQuests.add(quest);
+				closeQuest();
+				return false;
 			}
 
-			quests.refreshWidgets();
-			questLeft.refreshWidgets();
-			questRight.refreshWidgets();
+			return true;
+		}
+
+		return false;
+	}
+
+	@Override
+	public void onBack()
+	{
+		if (getViewedQuest() != null)
+		{
+			closeQuest();
+		}
+		else
+		{
+			super.onBack();
+		}
+	}
+
+	public void closeQuest()
+	{
+		selectedQuests.clear();
+
+		if (viewQuestPanel.quest != null)
+		{
+			viewQuestPanel.quest = null;
+			viewQuestPanel.hidePanel = false;
+			viewQuestPanel.refreshWidgets();
+		}
+	}
+
+	public void toggleSelected(Quest quest)
+	{
+		if (viewQuestPanel.quest != null)
+		{
+			viewQuestPanel.quest = null;
+			viewQuestPanel.refreshWidgets();
+		}
+
+		if (!selectedQuests.add(quest))
+		{
+			selectedQuests.remove(quest);
 		}
 	}
 
@@ -299,12 +346,12 @@ public class GuiQuestTree extends GuiBase
 			{
 				case Keyboard.KEY_A:
 					movingQuest = false;
-					selectQuest(null);
+					closeQuest();
 					selectedQuests.addAll(selectedChapter.quests);
 					break;
 				case Keyboard.KEY_D:
 					movingQuest = false;
-					selectQuest(null);
+					closeQuest();
 					break;
 				case Keyboard.KEY_DOWN:
 					movingQuest = true;
@@ -366,7 +413,8 @@ public class GuiQuestTree extends GuiBase
 						{
 							zoom = 20;
 							selectChapter(((Quest) o).chapter);
-							selectQuest((Quest) o);
+							viewQuestPanel.hidePanel = false;
+							viewQuest((Quest) o);
 						}
 					});
 
@@ -383,35 +431,8 @@ public class GuiQuestTree extends GuiBase
 	}
 
 	@Override
-	public void drawBackground(Theme theme, int x, int y, int w, int h)
+	public void tick()
 	{
-		if (zoomd < zoom)
-		{
-			zoomd += MathHelper.clamp((zoom - zoomd) / 8D, 0.1D, 0.8D);
-
-			if (zoomd > zoom)
-			{
-				zoomd = zoom;
-			}
-
-			grabbed = 0;
-			resetScroll(true);
-			//quests.alignWidgets();
-		}
-		else if (zoomd > zoom)
-		{
-			zoomd -= MathHelper.clamp((zoomd - zoom) / 8D, 0.1D, 0.8D);
-
-			if (zoomd < zoom)
-			{
-				zoomd = zoom;
-			}
-
-			grabbed = 0;
-			resetScroll(true);
-			//quests.alignWidgets();
-		}
-
 		if (selectedChapter != null && selectedChapter.invalid)
 		{
 			selectChapter(null);
@@ -422,6 +443,30 @@ public class GuiQuestTree extends GuiBase
 			selectChapter(file.chapters.get(0));
 		}
 
+		super.tick();
+	}
+
+	public int getZoom()
+	{
+		return zoom;
+	}
+
+	public void addZoom(int up)
+	{
+		int z = zoom;
+		zoom = MathHelper.clamp(zoom + up * 4, 8, 24);
+
+		if (zoom != z)
+		{
+			grabbed = 0;
+			resetScroll(true);
+			//quests.alignWidgets();
+		}
+	}
+
+	@Override
+	public void drawBackground(Theme theme, int x, int y, int w, int h)
+	{
 		super.drawBackground(theme, x, y, w, h);
 
 		if (grabbed != 0)
@@ -468,20 +513,6 @@ public class GuiQuestTree extends GuiBase
 		backgroundColor.draw(start, y + 1, w - start - otherButtons.width - 1, chapterPanel.height - 2);
 		borderColor.draw(start, y + chapterPanel.height - 1, w - start - 1, 1);
 
-		Quest selectedQuest = getSelectedQuest();
-
-		if (selectedQuest != null && !movingQuest)
-		{
-			GlStateManager.pushMatrix();
-			GlStateManager.translate(0F, 0F, 500F);
-			String txt = selectedQuest.getDisplayName().getFormattedText();
-			int txts = theme.getStringWidth(txt);
-			GuiHelper.drawHollowRect(2, chapterPanel.height + 1, txts + 6, 14, borderColor, false);
-			theme.drawGui(3, chapterPanel.height + 2, txts + 4, 12, WidgetType.DISABLED);
-			theme.drawString(txt, 5, chapterPanel.height + 4);
-			GlStateManager.popMatrix();
-		}
-
 		super.drawForeground(theme, x, y, w, h);
 	}
 
@@ -510,13 +541,15 @@ public class GuiQuestTree extends GuiBase
 		}
 		else if (object instanceof Quest)
 		{
+			viewQuestPanel.hidePanel = false;
 			selectChapter(((Quest) object).chapter);
-			selectQuest((Quest) object);
+			viewQuest((Quest) object);
 		}
 		else if (object instanceof QuestTask)
 		{
+			viewQuestPanel.hidePanel = false;
 			selectChapter(((QuestTask) object).quest.chapter);
-			selectQuest(((QuestTask) object).quest);
+			viewQuest(((QuestTask) object).quest);
 		}
 
 		openGui();

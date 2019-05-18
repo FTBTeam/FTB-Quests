@@ -119,39 +119,7 @@ public final class QuestChapter extends QuestObject
 	}
 
 	@Override
-	public long getProgress(ITeamData data)
-	{
-		long progress = 0L;
-
-		for (Quest quest : quests)
-		{
-			if (!quest.canRepeat)
-			{
-				progress += quest.getProgress(data);
-			}
-		}
-
-		return progress;
-	}
-
-	@Override
-	public long getMaxProgress()
-	{
-		long maxProgress = 0L;
-
-		for (Quest quest : quests)
-		{
-			if (!quest.canRepeat)
-			{
-				maxProgress += quest.getMaxProgress();
-			}
-		}
-
-		return maxProgress;
-	}
-
-	@Override
-	public int getRelativeProgress(ITeamData data)
+	public int getRelativeProgressFromChildren(ITeamData data)
 	{
 		int progress = 0;
 
@@ -163,21 +131,7 @@ public final class QuestChapter extends QuestObject
 			}
 		}
 
-		return fixRelativeProgress(progress, quests.size());
-	}
-
-	@Override
-	public boolean isComplete(ITeamData data)
-	{
-		for (Quest quest : quests)
-		{
-			if (!quest.canRepeat && !quest.isComplete(data))
-			{
-				return false;
-			}
-		}
-
-		return true;
+		return getRelativeProgressFromChildren(progress, quests.size());
 	}
 
 	public boolean getOnlyHasRepeatableQuests()

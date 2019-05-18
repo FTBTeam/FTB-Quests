@@ -30,6 +30,7 @@ public class ButtonTask extends SimpleTextButton
 		super(panel, t.getDisplayName().getFormattedText(), GuiIcons.ACCEPT);
 		treeGui = (GuiQuestTree) panel.getGui();
 		task = t;
+		setHeight(24);
 	}
 
 	@Override

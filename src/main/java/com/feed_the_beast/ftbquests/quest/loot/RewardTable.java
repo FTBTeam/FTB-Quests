@@ -258,9 +258,9 @@ public final class RewardTable extends QuestObjectBase
 	{
 		GuiQuestTree gui = ClientUtils.getCurrentGuiAs(GuiQuestTree.class);
 
-		if (gui != null && gui.getSelectedQuest() != null)
+		if (gui != null && gui.getViewedQuest() != null)
 		{
-			gui.questRight.refreshWidgets();
+			gui.viewQuestPanel.refreshWidgets();
 		}
 		else
 		{

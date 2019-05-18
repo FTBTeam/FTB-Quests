@@ -20,15 +20,12 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
 import java.io.File;
-import java.util.function.Predicate;
 
 /**
  * @author LatvianModder
  */
 public abstract class QuestObjectBase
 {
-	public static final Predicate<? super QuestObjectBase> PREDICATE_INVALID = o -> o == null || o.invalid;
-
 	public int id = 0;
 	public boolean invalid = false;
 	public String title = "";

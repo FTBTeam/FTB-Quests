@@ -37,7 +37,7 @@ public class ButtonDummyQuest extends Widget
 	@Override
 	public boolean checkMouseOver(int mouseX, int mouseY)
 	{
-		if (treeGui.questLeft.isMouseOver() || treeGui.questRight.isMouseOver() || treeGui.subscribe.isMouseOver())
+		if (treeGui.viewQuestPanel.isMouseOver() || treeGui.subscribe.isMouseOver())
 		{
 			return false;
 		}
@@ -53,7 +53,15 @@ public class ButtonDummyQuest extends Widget
 			return false;
 		}
 
-		if (button.isRight() && treeGui.file.canEdit())
+		if (treeGui.movingQuest && treeGui.selectedQuests.size() == 1 && treeGui.file.canEdit())
+		{
+			GuiHelper.playClickSound();
+			new MessageMoveQuest(treeGui.selectedQuests.iterator().next().id, x, y).sendToServer();
+			treeGui.movingQuest = false;
+			treeGui.closeQuest();
+			return true;
+		}
+		else if (button.isRight() && treeGui.file.canEdit())
 		{
 			GuiHelper.playClickSound();
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
@@ -69,23 +77,14 @@ public class ButtonDummyQuest extends Widget
 			getGui().openContextMenu(contextMenu);
 			return true;
 		}
-		else if (button.isLeft() && treeGui.movingQuest && treeGui.getSelectedQuest() != null && treeGui.file.canEdit())
-		{
-			GuiHelper.playClickSound();
-			new MessageMoveQuest(treeGui.getSelectedQuest().id, x, y).sendToServer();
-			treeGui.movingQuest = false;
-			treeGui.selectQuest(null);
-			return true;
-		}
 
-		treeGui.selectQuest(null);
 		return false;
 	}
 
 	@Override
 	public void addMouseOverText(List<String> list)
 	{
-		if (treeGui.movingQuest && treeGui.getSelectedQuest() != null)
+		if (treeGui.movingQuest && treeGui.selectedQuests.size() == 1)
 		{
 			list.add(I18n.format("gui.move"));
 		}
@@ -99,11 +98,13 @@ public class ButtonDummyQuest extends Widget
 			return;
 		}
 
-		double s = treeGui.zoomd * 3D / 2D;
+		int z = treeGui.getZoom();
+
+		int s = (int) (z * 3D / 2D);
 		double sx = x + (w - s) / 2D;
 		double sy = y + (h - s) / 2D;
 
-		if (treeGui.getSelectedQuest() != null && treeGui.movingQuest)
+		if (treeGui.selectedQuests.size() == 1 && treeGui.movingQuest)
 		{
 			GlStateManager.pushMatrix();
 			GlStateManager.translate(sx, sy, 0);
@@ -111,7 +112,7 @@ public class ButtonDummyQuest extends Widget
 			GlStateManager.color(1F, 1F, 1F, 1F);
 			GlStateManager.enableBlend();
 			GlStateManager.disableAlpha();
-			treeGui.getSelectedQuest().shape.shape.draw(0, 0, 1, 1, Color4I.WHITE.withAlpha(20));
+			treeGui.selectedQuests.iterator().next().shape.shape.draw(0, 0, 1, 1, Color4I.WHITE.withAlpha(20));
 			GlStateManager.popMatrix();
 		}
 
@@ -126,7 +127,7 @@ public class ButtonDummyQuest extends Widget
 			GlStateManager.disableAlpha();
 			Color4I.WHITE.withAlpha(30).draw(0, 0, 1, 1);
 			GlStateManager.popMatrix();
-			GlStateManager.scale(treeGui.zoomd / 24D, treeGui.zoomd / 24D, 1D);
+			GlStateManager.scale(z / 24D, z / 24D, 1D);
 			theme.drawString("X" + this.x, 2, 2);
 			theme.drawString("Y" + this.y, 2, 12);
 			GlStateManager.popMatrix();

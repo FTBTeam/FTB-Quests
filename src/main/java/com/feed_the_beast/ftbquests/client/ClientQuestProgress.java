@@ -73,6 +73,7 @@ public class ClientQuestProgress implements ITeamData
 	@Override
 	public void syncTask(QuestTaskData data)
 	{
+		getFile().clearCachedProgress(getTeamUID());
 	}
 
 	@Override

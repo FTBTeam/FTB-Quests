@@ -41,7 +41,7 @@ public class ButtonQuickComplete extends SimpleTextButton
 			return;
 		}
 
-		Quest selectedQuest = ClientQuestFile.INSTANCE.questTreeGui.getSelectedQuest();
+		Quest selectedQuest = ClientQuestFile.INSTANCE.questTreeGui.getViewedQuest();
 
 		if (selectedQuest == null)
 		{

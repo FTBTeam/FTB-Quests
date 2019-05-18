@@ -121,7 +121,7 @@ public class RenderTaskScreen extends TileEntitySpecialRenderer<TileTaskScreenCo
 			bottomText = data.task.hideProgressNumbers() ? "" : (data.getProgressString() + " / " + data.task.getMaxProgressString());
 		}
 
-		if (data != null && !bottomText.isEmpty() && data.getProgress() >= data.task.getMaxProgress())
+		if (data != null && !bottomText.isEmpty() && data.task.isComplete(data.teamData))
 		{
 			drawString(font, TextFormatting.GREEN + bottomText, 0.83D, 0.15D);
 		}

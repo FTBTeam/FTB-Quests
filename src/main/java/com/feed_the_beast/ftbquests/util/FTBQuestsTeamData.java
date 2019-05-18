@@ -312,6 +312,7 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 	public void syncTask(QuestTaskData data)
 	{
 		team.markDirty();
+		getFile().clearCachedProgress(getTeamUID());
 
 		if (EnumChangeProgress.sendUpdates)
 		{

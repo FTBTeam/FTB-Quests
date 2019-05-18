@@ -96,18 +96,6 @@ public final class QuestVariable extends QuestObject
 	}
 
 	@Override
-	public long getProgress(ITeamData data)
-	{
-		return data.getVariable(id);
-	}
-
-	@Override
-	public long getMaxProgress()
-	{
-		return maxValue;
-	}
-
-	@Override
 	public void changeProgress(ITeamData data, EnumChangeProgress type)
 	{
 		if (type.reset)
@@ -121,11 +109,11 @@ public final class QuestVariable extends QuestObject
 	}
 
 	@Override
-	public int getRelativeProgress(ITeamData data)
+	public int getRelativeProgressFromChildren(ITeamData data)
 	{
 		if (maxValue <= 0L)
 		{
-			return 100;
+			return 0;
 		}
 
 		long value = data.getVariable(id);
@@ -139,13 +127,7 @@ public final class QuestVariable extends QuestObject
 			return 100;
 		}
 
-		return (int) (value * 100L / maxValue);
-	}
-
-	@Override
-	public boolean isComplete(ITeamData data)
-	{
-		return data.getVariable(id) >= maxValue;
+		return (int) Math.min(1L, value * 100L / maxValue);
 	}
 
 	@Override

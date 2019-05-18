@@ -176,9 +176,9 @@ public abstract class QuestReward extends QuestObjectBase
 	{
 		GuiQuestTree gui = ClientUtils.getCurrentGuiAs(GuiQuestTree.class);
 
-		if (gui != null && gui.getSelectedQuest() != null)
+		if (gui != null && gui.getViewedQuest() != null)
 		{
-			gui.questRight.refreshWidgets();
+			gui.viewQuestPanel.refreshWidgets();
 		}
 
 		if (gui != null)

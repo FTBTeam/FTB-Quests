@@ -1,5 +1,6 @@
 package com.feed_the_beast.ftbquests.quest;
 
+import it.unimi.dsi.fastutil.shorts.Short2IntOpenHashMap;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.text.ITextComponent;
 
@@ -10,29 +11,54 @@ import java.util.List;
  */
 public abstract class QuestObject extends QuestObjectBase
 {
-	public abstract long getProgress(ITeamData data);
+	private Short2IntOpenHashMap cachedRelativeProgress;
 
-	public abstract long getMaxProgress();
+	public QuestObject()
+	{
+		cachedRelativeProgress = new Short2IntOpenHashMap();
+		cachedRelativeProgress.defaultReturnValue(-1);
+	}
 
 	public abstract void changeProgress(ITeamData data, EnumChangeProgress type);
 
-	public abstract int getRelativeProgress(ITeamData data);
+	public abstract int getRelativeProgressFromChildren(ITeamData data);
 
-	public static int fixRelativeProgress(int progress, int max)
+	public final int getRelativeProgress(ITeamData data)
 	{
-		if (max <= 0 || progress >= max * 100)
+		int i = cachedRelativeProgress.get(data.getTeamUID());
+
+		if (i == -1)
 		{
-			return 100;
+			i = getRelativeProgressFromChildren(data);
+			cachedRelativeProgress.put(data.getTeamUID(), i);
 		}
-		else if (progress <= 0)
+
+		return i;
+	}
+
+	public static int getRelativeProgressFromChildren(int progressSum, int count)
+	{
+		if (count <= 0 || progressSum <= 0)
 		{
 			return 0;
 		}
+		else if (progressSum >= count * 100)
+		{
+			return 100;
+		}
 
-		return Math.max(1, (int) (progress / (double) max));
+		return Math.max(1, (int) (progressSum / (double) count));
 	}
 
-	public abstract boolean isComplete(ITeamData data);
+	public final boolean isStarted(ITeamData data)
+	{
+		return getRelativeProgress(data) > 0;
+	}
+
+	public final boolean isComplete(ITeamData data)
+	{
+		return getRelativeProgress(data) >= 100;
+	}
 
 	public void onCompleted(ITeamData data, List<EntityPlayerMP> onlineMembers)
 	{
@@ -40,4 +66,23 @@ public abstract class QuestObject extends QuestObjectBase
 
 	@Override
 	public abstract ITextComponent getAltDisplayName();
+
+	@Override
+	public void clearCachedData()
+	{
+		super.clearCachedData();
+		clearCachedProgress((short) 0);
+	}
+
+	public void clearCachedProgress(short id)
+	{
+		if (id == 0)
+		{
+			cachedRelativeProgress.clear();
+		}
+		else
+		{
+			cachedRelativeProgress.remove(id);
+		}
+	}
 }

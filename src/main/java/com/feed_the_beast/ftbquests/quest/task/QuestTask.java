@@ -70,22 +70,9 @@ public abstract class QuestTask extends QuestObject
 	public abstract QuestTaskData createData(ITeamData data);
 
 	@Override
-	public final long getProgress(ITeamData data)
-	{
-		return data.getQuestTaskData(this).getProgress();
-	}
-
-	@Override
-	public final int getRelativeProgress(ITeamData data)
+	public final int getRelativeProgressFromChildren(ITeamData data)
 	{
 		return data.getQuestTaskData(this).getRelativeProgress();
-	}
-
-	@Override
-	public final boolean isComplete(ITeamData data)
-	{
-		long max = getMaxProgress();
-		return max > 0L && getProgress(data) >= max;
 	}
 
 	@Override
@@ -109,10 +96,9 @@ public abstract class QuestTask extends QuestObject
 		}
 	}
 
-	@Override
 	public long getMaxProgress()
 	{
-		return 1;
+		return 1L;
 	}
 
 	public String getMaxProgressString()
@@ -165,9 +151,9 @@ public abstract class QuestTask extends QuestObject
 	{
 		GuiQuestTree gui = ClientUtils.getCurrentGuiAs(GuiQuestTree.class);
 
-		if (gui != null && gui.getSelectedQuest() != null)
+		if (gui != null && gui.getViewedQuest() != null)
 		{
-			gui.questLeft.refreshWidgets();
+			gui.viewQuestPanel.refreshWidgets();
 		}
 
 		if (gui != null)
@@ -245,7 +231,7 @@ public abstract class QuestTask extends QuestObject
 
 	public boolean hideProgressNumbers()
 	{
-		return false;
+		return getMaxProgress() <= 1L;
 	}
 
 	@SideOnly(Side.CLIENT)

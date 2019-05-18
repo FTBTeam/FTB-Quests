@@ -114,7 +114,6 @@ public class ClientQuestFile extends QuestFile
 		boolean hasPrev = false;
 		boolean guiOpen = false;
 		int zoom = 0;
-		double zoomd = 0D;
 		int scrollX = 0, scrollY = 0;
 		int selectedChapter = 0;
 		int[] selectedQuests = new int[0];
@@ -123,7 +122,6 @@ public class ClientQuestFile extends QuestFile
 		{
 			hasPrev = true;
 			zoom = questTreeGui.zoom;
-			zoomd = questTreeGui.zoomd;
 			scrollX = questTreeGui.quests.getScrollX();
 			scrollY = questTreeGui.quests.getScrollY();
 			selectedChapter = questTreeGui.selectedChapter == null ? 0 : questTreeGui.selectedChapter.id;
@@ -148,7 +146,6 @@ public class ClientQuestFile extends QuestFile
 		if (hasPrev)
 		{
 			questTreeGui.zoom = zoom;
-			questTreeGui.zoomd = zoomd;
 			questTreeGui.selectChapter(getChapter(selectedChapter));
 
 			for (int i : selectedQuests)

@@ -45,7 +45,7 @@ public class FTBUtilitiesIntegration
 				}),
 				player -> {
 					ITeamData data = ServerQuestFile.INSTANCE.getData(player.team.getUID());
-					return data != null && ServerQuestFile.INSTANCE.getRelativeProgress(data) > 0L;
+					return data != null && ServerQuestFile.INSTANCE.isStarted(data);
 				})
 		);
 	}
