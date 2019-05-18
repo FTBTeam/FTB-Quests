@@ -30,6 +30,7 @@ public class ButtonReward extends SimpleTextButton
 	{
 		super(panel, r.getDisplayName().getFormattedText(), r.getIcon());
 		reward = r;
+		setHeight(24);
 	}
 
 	@Override

@@ -51,4 +51,10 @@ public class PanelChapters extends Panel
 			align(new WidgetLayout.Horizontal(0, 1, 0));
 		}
 	}
+
+	@Override
+	public boolean isDefaultScrollVertical()
+	{
+		return false;
+	}
 }

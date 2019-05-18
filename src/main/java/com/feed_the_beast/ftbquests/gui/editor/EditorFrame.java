@@ -109,6 +109,11 @@ public final class EditorFrame extends JFrame
 		menuSettings.add(menuItem(I18n.format("ftbquests.gui.complete_instantly"), GuiIcons.ACCEPT.getWrappedIcon(), () -> System.out.println("Hi")));
 		menuSettings.add(menuItem(I18n.format("ftbquests.gui.save_as_file"), GuiIcons.DOWN.getWrappedIcon(), () -> System.out.println("Hi")));
 		menuBar.add(menuSettings);
+		JMenu menuHelp = new JMenu("Help");
+		menuHelp.add(menuItem("Chapters", GuiIcons.INFO.getWrappedIcon(), () -> System.out.println("Hi")));
+		menuHelp.add(menuItem("Quests", GuiIcons.ACCEPT.getWrappedIcon(), () -> System.out.println("Hi")));
+		menuHelp.add(menuItem("Task Types", GuiIcons.DOWN.getWrappedIcon(), () -> System.out.println("Hi")));
+		menuBar.add(menuHelp);
 		setJMenuBar(menuBar);
 
 		JTabbedPane tabs = new JTabbedPane();

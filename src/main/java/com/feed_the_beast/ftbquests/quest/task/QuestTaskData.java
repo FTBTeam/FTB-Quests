@@ -37,7 +37,7 @@ public abstract class QuestTaskData<T extends QuestTask> implements ICapabilityP
 
 	public abstract void changeProgress(EnumChangeProgress type);
 
-	public int getRelativeProgress()
+	public final int getRelativeProgress()
 	{
 		long max = task.getMaxProgress();
 
@@ -57,7 +57,7 @@ public abstract class QuestTaskData<T extends QuestTask> implements ICapabilityP
 			return 100;
 		}
 
-		return Math.max(1, (int) (progress * 100D / (double) max));
+		return (int) Math.max(1L, (progress * 100D / (double) max));
 	}
 
 	public String getProgressString()

@@ -60,6 +60,7 @@ public final class Quest extends QuestObject
 	public String guidePage;
 	public String customClick;
 	public boolean hideDependencyLines;
+	public int minRequiredDependencies;
 
 	public Quest(QuestChapter c)
 	{
@@ -79,6 +80,7 @@ public final class Quest extends QuestObject
 		hideDependencyLines = false;
 		visibility = EnumVisibility.VISIBLE;
 		dependencyRequirement = EnumDependencyRequirement.ALL_COMPLETED;
+		minRequiredDependencies = 0;
 	}
 
 	@Override
@@ -167,7 +169,12 @@ public final class Quest extends QuestObject
 			nbt.setBoolean("hide_dependency_lines", true);
 		}
 
-		dependencies.removeIf(QuestObject.PREDICATE_INVALID);
+		if (minRequiredDependencies > 0)
+		{
+			nbt.setInteger("min_required_dependencies", (byte) minRequiredDependencies);
+		}
+
+		removeInvalidDependencies();
 
 		if (!dependencies.isEmpty())
 		{
@@ -221,6 +228,7 @@ public final class Quest extends QuestObject
 		guidePage = nbt.getString("guide_page");
 		customClick = nbt.getString("custom_click");
 		hideDependencyLines = nbt.getBoolean("hide_dependency_lines");
+		minRequiredDependencies = nbt.getInteger("min_required_dependencies");
 
 		dependencies.clear();
 
@@ -305,6 +313,7 @@ public final class Quest extends QuestObject
 			data.writeString(customClick);
 		}
 
+		data.writeVarInt(minRequiredDependencies);
 		data.writeVarInt(dependencies.size());
 
 		for (QuestObject d : dependencies)
@@ -345,6 +354,8 @@ public final class Quest extends QuestObject
 		customClick = Bits.getFlag(flags, 32) ? data.readString() : "";
 		hideDependencyLines = Bits.getFlag(flags, 64);
 
+		minRequiredDependencies = data.readVarInt();
+
 		dependencies.clear();
 		int d = data.readVarInt();
 
@@ -360,44 +371,7 @@ public final class Quest extends QuestObject
 	}
 
 	@Override
-	public long getProgress(ITeamData data)
-	{
-		/*if (data.getTimesCompleted(this) > 0)
-		{
-			return getMaxProgress();
-		}*/
-
-		long progress = 0L;
-
-		for (QuestTask task : tasks)
-		{
-			if (!task.invalid)
-			{
-				progress += task.getProgress(data);
-			}
-		}
-
-		return progress;
-	}
-
-	@Override
-	public long getMaxProgress()
-	{
-		long maxProgress = 0L;
-
-		for (QuestTask task : tasks)
-		{
-			if (!task.invalid)
-			{
-				maxProgress += task.getMaxProgress();
-			}
-		}
-
-		return maxProgress;
-	}
-
-	@Override
-	public int getRelativeProgress(ITeamData data)
+	public int getRelativeProgressFromChildren(ITeamData data)
 	{
 		/*if (data.getTimesCompleted(this) > 0)
 		{
@@ -406,34 +380,43 @@ public final class Quest extends QuestObject
 
 		int progress = 0;
 
-		int s = 0;
-
 		for (QuestTask task : tasks)
 		{
-			if (!task.invalid)
-			{
-				progress += task.getRelativeProgress(data);
-				s++;
-			}
+			progress += task.getRelativeProgress(data);
 		}
 
-		return fixRelativeProgress(progress, s);
+		if (progress > 0 && !areDependenciesComplete(data))
+		{
+			return 0;
+		}
+
+		return getRelativeProgressFromChildren(progress, tasks.size());
 	}
 
-	@Override
-	public boolean isComplete(ITeamData data)
+	public boolean areDependenciesComplete(ITeamData data)
 	{
-		/*if (data.getTimesCompleted(this) > 0)
+		if (dependencies.isEmpty())
 		{
 			return true;
-		}*/
-
-		for (QuestTask task : tasks)
+		}
+		else if (minRequiredDependencies > 0)
 		{
-			if (!task.invalid && !task.isComplete(data))
+			int complete = 0;
+
+			for (QuestObject dependency : dependencies)
 			{
-				return false;
+				if (!dependency.invalid && dependency.isComplete(data))
+				{
+					complete++;
+
+					if (complete >= minRequiredDependencies)
+					{
+						return true;
+					}
+				}
 			}
+
+			return false;
 		}
 
 		for (QuestObject dependency : dependencies)
@@ -445,6 +428,11 @@ public final class Quest extends QuestObject
 		}
 
 		return true;
+	}
+
+	public boolean canStartTasks(ITeamData data)
+	{
+		return (tasksIgnoreDependencies || areDependenciesComplete(data)) && getActualVisibility(data).isVisible();
 	}
 
 	@Override
@@ -493,22 +481,6 @@ public final class Quest extends QuestObject
 		{
 			data.unclaimRewards(rewards);
 		}
-	}
-
-	public boolean canStartTasks(ITeamData data)
-	{
-		if (!tasksIgnoreDependencies)
-		{
-			for (QuestObject dependency : dependencies)
-			{
-				if (!dependency.isComplete(data))
-				{
-					return false;
-				}
-			}
-		}
-
-		return getActualVisibility(data).isVisible();
 	}
 
 	@Override
@@ -595,9 +567,10 @@ public final class Quest extends QuestObject
 		config.addList("dependencies", dependencies, new ConfigQuestObject(chapter.file, null, DEP_TYPES), questObject -> new ConfigQuestObject(chapter.file, questObject, DEP_TYPES), configQuestObject -> (QuestObject) configQuestObject.getObject()).setDisplayName(new TextComponentTranslation("ftbquests.dependencies"));
 		config.addBool("tasks_ignore_dependencies", () -> tasksIgnoreDependencies, v -> tasksIgnoreDependencies = v, false);
 		config.addEnum("dependency_requirement", () -> dependencyRequirement, v -> dependencyRequirement = v, EnumDependencyRequirement.NAME_MAP);
+		config.addInt("min_required_dependencies", () -> minRequiredDependencies, v -> minRequiredDependencies = v, 0, 0, Integer.MAX_VALUE);
+		config.addBool("hide_dependency_lines", () -> hideDependencyLines, v -> hideDependencyLines = v, false);
 		config.addString("guide_page", () -> guidePage, v -> guidePage = v, "");
 		config.addString("custom_click", () -> customClick, v -> customClick = v, "");
-		config.addBool("hide_dependency_lines", () -> hideDependencyLines, v -> hideDependencyLines = v, false);
 	}
 
 	public EnumVisibility getVisibility()
@@ -611,7 +584,7 @@ public final class Quest extends QuestObject
 
 		for (QuestObject object : dependencies)
 		{
-			if (object instanceof Quest)
+			if (!object.invalid && object instanceof Quest)
 			{
 				v = v.strongest(((Quest) object).getVisibility());
 
@@ -642,7 +615,7 @@ public final class Quest extends QuestObject
 		{
 			for (QuestObject object : dependencies)
 			{
-				if (!object.invalid && (dependencyRequirement.completed ? object.isComplete(data) : object.getProgress(data) > 0L))
+				if (!object.invalid && (dependencyRequirement.completed ? object.isComplete(data) : object.isStarted(data)))
 				{
 					return EnumVisibility.VISIBLE;
 				}
@@ -653,7 +626,7 @@ public final class Quest extends QuestObject
 
 		for (QuestObject object : dependencies)
 		{
-			if (!object.invalid && (dependencyRequirement.completed ? !object.isComplete(data) : object.getProgress(data) <= 0L))
+			if (!object.invalid && (dependencyRequirement.completed ? !object.isComplete(data) : !object.isStarted(data)))
 			{
 				return v;
 			}
@@ -714,15 +687,16 @@ public final class Quest extends QuestObject
 		return false;
 	}
 
+	private void removeInvalidDependencies()
+	{
+		if (!dependencies.isEmpty())
+		{
+			dependencies.removeIf(o -> o == null || o.invalid || o == this);
+		}
+	}
+
 	public boolean verifyDependencies(boolean autofix)
 	{
-		dependencies.removeIf(QuestObject.PREDICATE_INVALID);
-
-		if (dependencies.isEmpty())
-		{
-			return true;
-		}
-
 		try
 		{
 			if (verifyDependenciesInternal(this, true))
@@ -734,7 +708,11 @@ public final class Quest extends QuestObject
 		{
 			if (autofix)
 			{
-				FTBQuests.LOGGER.error("Looping dependencies found! Deleting all dependencies for quest " + this);
+				FTBQuests.LOGGER.error("Looping dependencies found in " + this + "! Deleting all dependencies...");
+			}
+			else
+			{
+				FTBQuests.LOGGER.error("Looping dependencies found in " + this + "!");
 			}
 		}
 
@@ -756,6 +734,13 @@ public final class Quest extends QuestObject
 		if (this == original && !firstLoop)
 		{
 			return false;
+		}
+
+		removeInvalidDependencies();
+
+		if (dependencies.isEmpty())
+		{
+			return true;
 		}
 
 		for (QuestObject dependency : dependencies)
@@ -796,8 +781,7 @@ public final class Quest extends QuestObject
 		if (gui != null)
 		{
 			gui.quests.refreshWidgets();
-			gui.questLeft.refreshWidgets();
-			gui.questRight.refreshWidgets();
+			gui.viewQuestPanel.refreshWidgets();
 		}
 
 		if (chapter.quests.size() == 1) //Edge case, need to figure out better way

@@ -107,7 +107,7 @@ public class GuiQuestChest extends GuiBase implements IContainerListener
 		scrollBar = new PanelScrollBar(this, ScrollBar.Plane.VERTICAL, tasks)
 		{
 			@Override
-			public int getSliderSize()
+			public int getScrollBarSize()
 			{
 				return getMaxValue() <= 0 ? 0 : 9;
 			}

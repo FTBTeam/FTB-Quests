@@ -67,6 +67,7 @@ public class MessageUpdateTaskProgress extends MessageToClient
 
 			if (data != null)
 			{
+				ClientQuestFile.INSTANCE.clearCachedProgress(team);
 				data.getQuestTaskData(qtask).fromNBT(nbt);
 			}
 		}

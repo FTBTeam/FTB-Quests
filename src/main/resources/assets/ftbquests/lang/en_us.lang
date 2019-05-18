@@ -112,6 +112,8 @@ ftbquests.quest.dependency_requirement.one_started=One Started
 ftbquests.quest.guide_page=Guide Page
 ftbquests.quest.custom_click=Custom Click
 ftbquests.quest.hide_dependency_lines=Hide Dependency Lines
+ftbquests.quest.min_required_dependencies=Min Required Dependencies
+ftbquests.quest.min_required_dependencies.tooltip=If you set this to anything more than 0, it becomes an OR quest, where only certain amount of dependencies is required for it to unlock
 
 ftbquests.gui.edit_file=Edit File
 ftbquests.gui.save_as_file=Save as File

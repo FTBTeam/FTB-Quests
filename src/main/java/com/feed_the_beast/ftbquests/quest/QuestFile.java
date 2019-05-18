@@ -117,33 +117,7 @@ public abstract class QuestFile extends QuestObject
 	}
 
 	@Override
-	public long getProgress(ITeamData data)
-	{
-		long progress = 0L;
-
-		for (QuestChapter chapter : chapters)
-		{
-			progress += chapter.getProgress(data);
-		}
-
-		return progress;
-	}
-
-	@Override
-	public long getMaxProgress()
-	{
-		long maxProgress = 0L;
-
-		for (QuestChapter chapter : chapters)
-		{
-			maxProgress += chapter.getMaxProgress();
-		}
-
-		return maxProgress;
-	}
-
-	@Override
-	public int getRelativeProgress(ITeamData data)
+	public int getRelativeProgressFromChildren(ITeamData data)
 	{
 		int progress = 0;
 
@@ -152,21 +126,7 @@ public abstract class QuestFile extends QuestObject
 			progress += chapter.getRelativeProgress(data);
 		}
 
-		return fixRelativeProgress(progress, chapters.size());
-	}
-
-	@Override
-	public boolean isComplete(ITeamData data)
-	{
-		for (QuestChapter chapter : chapters)
-		{
-			if (!chapter.isComplete(data))
-			{
-				return false;
-			}
-		}
-
-		return true;
+		return getRelativeProgressFromChildren(progress, chapters.size());
 	}
 
 	@Override
@@ -1334,5 +1294,31 @@ public abstract class QuestFile extends QuestObject
 	public final int refreshJEI()
 	{
 		return 255;
+	}
+
+	@Override
+	public void clearCachedProgress(short id)
+	{
+		super.clearCachedProgress(id);
+
+		for (QuestChapter chapter : chapters)
+		{
+			chapter.clearCachedProgress(id);
+
+			for (Quest quest : chapter.quests)
+			{
+				quest.clearCachedProgress(id);
+
+				for (QuestTask task : quest.tasks)
+				{
+					task.clearCachedProgress(id);
+				}
+			}
+		}
+
+		for (QuestVariable variable : variables)
+		{
+			variable.clearCachedProgress(id);
+		}
 	}
 }

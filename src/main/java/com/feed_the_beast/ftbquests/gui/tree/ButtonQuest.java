@@ -53,7 +53,7 @@ public class ButtonQuest extends Button
 	@Override
 	public boolean checkMouseOver(int mouseX, int mouseY)
 	{
-		if (treeGui.questLeft.isMouseOver() || treeGui.questRight.isMouseOver() || treeGui.subscribe.isMouseOver())
+		if (treeGui.viewQuestPanel.isMouseOver() || treeGui.subscribe.isMouseOver())
 		{
 			return false;
 		}
@@ -91,7 +91,7 @@ public class ButtonQuest extends Button
 	public void onClicked(MouseButton button)
 	{
 		GuiHelper.playClickSound();
-		Quest selectedQuest = treeGui.getSelectedQuest();
+		Quest selectedQuest = treeGui.getViewedQuest();
 
 		if (treeGui.file.canEdit() && button.isRight())
 		{
@@ -126,14 +126,15 @@ public class ButtonQuest extends Button
 
 				contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), GuiIcons.REMOVE, () -> {
 					treeGui.selectedQuests.forEach(q -> ClientQuestFile.INSTANCE.deleteObject(q.id));
-					treeGui.selectQuest(null);
+					treeGui.closeQuest();
 				}).setYesNo(I18n.format("delete_item", I18n.format("ftbquests.quests") + " [" + treeGui.selectedQuests.size() + "]")));
 			}
 			else
 			{
 				contextMenu.add(new ContextMenuItem(I18n.format("gui.move"), GuiIcons.UP, () -> {
 					treeGui.movingQuest = true;
-					treeGui.selectQuest(quest);
+					treeGui.selectedQuests.clear();
+					treeGui.toggleSelected(quest);
 
 				}));
 
@@ -164,22 +165,19 @@ public class ButtonQuest extends Button
 			if (treeGui.movingQuest && selectedQuest == quest)
 			{
 				treeGui.movingQuest = false;
-				treeGui.selectQuest(null);
-				treeGui.selectQuest(quest);
+				treeGui.viewQuestPanel.hidePanel = false;
+				treeGui.viewQuest(quest);
 			}
 			else
 			{
 				if (isCtrlKeyDown() && treeGui.file.canEdit())
 				{
-					Quest q = treeGui.getSelectedQuest();
-
-					if (q != null)
+					if (treeGui.getViewedQuest() != null)
 					{
-						treeGui.selectQuest(null);
-						treeGui.selectedQuests.add(q);
+						treeGui.closeQuest();
 					}
 
-					treeGui.selectedQuests.add(quest);
+					treeGui.toggleSelected(quest);
 				}
 				else if (!quest.guidePage.isEmpty() && quest.tasks.isEmpty() && quest.rewards.isEmpty() && quest.text.isEmpty())
 				{
@@ -194,7 +192,22 @@ public class ButtonQuest extends Button
 		else if (treeGui.file.canEdit() && button.isMiddle())
 		{
 			treeGui.movingQuest = true;
-			treeGui.selectQuest(quest);
+			treeGui.closeQuest();
+			treeGui.toggleSelected(quest);
+		}
+		else if (button.isRight())
+		{
+			treeGui.movingQuest = false;
+
+			if (treeGui.getViewedQuest() != quest)
+			{
+				treeGui.viewQuestPanel.hidePanel = true;
+				treeGui.viewQuest(quest);
+			}
+			else
+			{
+				treeGui.closeQuest();
+			}
 		}
 	}
 
@@ -299,7 +312,7 @@ public class ButtonQuest extends Button
 	@Override
 	public WidgetType getWidgetType()
 	{
-		if (treeGui.getSelectedQuest() == quest)
+		if (treeGui.getViewedQuest() == quest)
 		{
 			return WidgetType.MOUSE_OVER;
 		}
@@ -353,15 +366,17 @@ public class ButtonQuest extends Button
 			outlineColor = Color4I.GRAY;
 		}
 
-		double s = treeGui.zoomd * 3D / 2D;
-		double sx = x + (w - s) / 2D;
-		double sy = y + (h - s) / 2D;
+		int z = treeGui.getZoom();
+
+		int s = z * 3 / 2;
+		int sx = x + (w - s) / 2;
+		int sy = y + (h - s) / 2;
 
 		if (treeGui.selectedQuests.contains(quest))
 		{
-			double s1 = s + treeGui.zoomd / 5D;
-			double sx1 = x + (w - s1) / 2D;
-			double sy1 = y + (h - s1) / 2D;
+			int s1 = s + z / 5;
+			int sx1 = x + (w - s1) / 2;
+			int sy1 = y + (h - s1) / 2;
 			GlStateManager.pushMatrix();
 			GlStateManager.translate(sx1, sy1, 0D);
 			GlStateManager.scale(s1, s1, 1D);
@@ -380,8 +395,8 @@ public class ButtonQuest extends Button
 		if (!icon.isEmpty())
 		{
 			GlStateManager.pushMatrix();
-			GlStateManager.translate(x + (w - treeGui.zoomd) / 2D, y + (h - treeGui.zoomd) / 2D, 0D);
-			GlStateManager.scale(treeGui.zoomd, treeGui.zoomd, 1D);
+			GlStateManager.translate(x + (w - z) / 2, y + (h - z) / 2, 0D);
+			GlStateManager.scale(z, z, 1D);
 			icon.draw(0, 0, 1, 1);
 			GlStateManager.popMatrix();
 		}
@@ -406,8 +421,8 @@ public class ButtonQuest extends Button
 
 		if (!qicon.isEmpty())
 		{
-			double s1 = treeGui.zoomd / 2D;
-			double os1 = s1 / 4D;
+			int s1 = z / 2;
+			int os1 = s1 / 4;
 			GlStateManager.pushMatrix();
 			GlStateManager.translate(x + w - s1 - os1, y + os1, 500);
 			GlStateManager.scale(s1, s1, 1D);
