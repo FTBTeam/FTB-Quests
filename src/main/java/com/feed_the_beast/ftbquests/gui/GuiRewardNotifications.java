@@ -71,7 +71,7 @@ public class GuiRewardNotifications extends GuiBase implements IRewardListenerGu
 
 		@Override
 		@Nullable
-		public Object getJEIFocus()
+		public Object getIngredientUnderMouse()
 		{
 			return key.icon.getJEIFocus();
 		}

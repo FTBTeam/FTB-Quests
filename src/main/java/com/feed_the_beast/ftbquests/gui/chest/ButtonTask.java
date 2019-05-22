@@ -61,7 +61,7 @@ public class ButtonTask extends Button
 
 	@Override
 	@Nullable
-	public Object getJEIFocus()
+	public Object getIngredientUnderMouse()
 	{
 		return taskData.task.getJEIFocus();
 	}

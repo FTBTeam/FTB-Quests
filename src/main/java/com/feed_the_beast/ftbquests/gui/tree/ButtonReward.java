@@ -109,7 +109,7 @@ public class ButtonReward extends SimpleTextButton
 
 	@Override
 	@Nullable
-	public Object getJEIFocus()
+	public Object getIngredientUnderMouse()
 	{
 		return reward.getJEIFocus();
 	}
