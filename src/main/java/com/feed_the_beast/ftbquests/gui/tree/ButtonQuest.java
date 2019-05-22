@@ -249,7 +249,7 @@ public class ButtonQuest extends Button
 
 	@Override
 	@Nullable
-	public Object getJEIFocus()
+	public Object getIngredientUnderMouse()
 	{
 		return quest.tasks.size() == 1 ? quest.tasks.get(0).getJEIFocus() : null;
 	}

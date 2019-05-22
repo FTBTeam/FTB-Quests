@@ -71,7 +71,7 @@ public class ButtonReward extends Button
 
 	@Override
 	@Nullable
-	public Object getJEIFocus()
+	public Object getIngredientUnderMouse()
 	{
 		return reward == null ? null : reward.getJEIFocus();
 	}
