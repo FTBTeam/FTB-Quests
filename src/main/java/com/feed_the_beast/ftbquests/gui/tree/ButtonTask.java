@@ -92,16 +92,20 @@ public class ButtonTask extends SimpleTextButton
 		if (treeGui.file.self != null && task.quest.canStartTasks(treeGui.file.self))
 		{
 			data = treeGui.file.self.getQuestTaskData(task);
+			long maxp = task.getMaxProgress();
 
-			if (task.hideProgressNumbers())
+			if (maxp > 1L)
 			{
-				list.add(TextFormatting.DARK_GREEN + "[" + data.getRelativeProgress() + "%]");
-			}
-			else
-			{
-				String max = isShiftKeyDown() ? Long.toUnsignedString(task.getMaxProgress()) : task.getMaxProgressString();
-				String prog = isShiftKeyDown() ? Long.toUnsignedString(data.getProgress()) : data.getProgressString();
-				list.add(TextFormatting.DARK_GREEN + (data.getProgress() > task.getMaxProgress() ? max : prog) + " / " + max + " [" + data.getRelativeProgress() + "%]");
+				if (task.hideProgressNumbers())
+				{
+					list.add(TextFormatting.DARK_GREEN + "[" + data.getRelativeProgress() + "%]");
+				}
+				else
+				{
+					String max = isShiftKeyDown() ? Long.toUnsignedString(maxp) : task.getMaxProgressString();
+					String prog = isShiftKeyDown() ? Long.toUnsignedString(data.getProgress()) : data.getProgressString();
+					list.add(TextFormatting.DARK_GREEN + (data.getProgress() > maxp ? max : prog) + " / " + max + " [" + data.getRelativeProgress() + "%]");
+				}
 			}
 		}
 		else

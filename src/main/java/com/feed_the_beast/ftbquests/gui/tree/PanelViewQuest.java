@@ -65,10 +65,10 @@ public class PanelViewQuest extends Panel
 
 		int w = Math.max(parent.width / 5 * 2, gui.getTheme().getStringWidth(title) + 30);
 
-		add(panelContent = new BlankPanel(this));
-		panelContent.add(panelTasks = new BlankPanel(panelContent));
-		panelContent.add(panelRewards = new BlankPanel(panelContent));
-		panelContent.add(panelText = new BlankPanel(panelContent));
+		add(panelContent = new BlankPanel(this, "ContentPanel"));
+		panelContent.add(panelTasks = new BlankPanel(panelContent, "TasksPanel"));
+		panelContent.add(panelRewards = new BlankPanel(panelContent, "RewardsPanel"));
+		panelContent.add(panelText = new BlankPanel(panelContent, "TextPanel"));
 
 		if (!quest.tasks.isEmpty())
 		{
@@ -188,11 +188,15 @@ public class PanelViewQuest extends Panel
 		if (!desc.isEmpty())
 		{
 			panelText.add(new TextField(panelText).addFlags(Theme.CENTERED).setMaxWidth(panelText.width).setSpacing(9).setText(TextFormatting.ITALIC + desc));
-			panelText.add(new WidgetVerticalSpace(panelText, 7));
 		}
 
 		if (!quest.text.isEmpty())
 		{
+			if (!desc.isEmpty())
+			{
+				panelText.add(new WidgetVerticalSpace(panelText, 7));
+			}
+
 			String[] text = new String[quest.text.size()];
 
 			for (int i = 0; i < text.length; i++)
@@ -201,17 +205,28 @@ public class PanelViewQuest extends Panel
 			}
 
 			panelText.add(new TextField(panelText).setMaxWidth(panelText.width).setSpacing(9).setText(StringUtils.addFormatting(StringJoiner.with('\n').joinStrings(text))));
-			//panelText.add(new WidgetVerticalSpace(panelText, 4));
 		}
 
-		panelText.setHeight(panelText.align(WidgetLayout.VERTICAL));
+		if (panelText.widgets.isEmpty())
+		{
+			panelText.setHeight(0);
+			setHeight(Math.min(panelContent.getContentHeight() + 19, parent.height - 10));
+		}
+		else
+		{
+			panelText.setHeight(panelText.align(new WidgetLayout.Vertical(4, 0, 1)));
+			setHeight(Math.min(panelContent.getContentHeight() + 20, parent.height - 10));
+		}
 
-		setHeight(Math.min(panelContent.getContentHeight() + 20, parent.height - 10));
 		setPos((parent.width - width) / 2, (parent.height - height) / 2);
 		panelContent.setHeight(height - 17);
 
-		panelContent.add(new ColorWidget(panelContent, Color4I.WHITE.withAlpha(50), null).setPosAndSize(w2, 0, 1, panelContent.height - panelText.height - 1));
-		panelContent.add(new ColorWidget(panelContent, Color4I.WHITE.withAlpha(50), null).setPosAndSize(-3, panelContent.height - panelText.height - 1, w + 6, 1));
+		panelContent.add(new ColorWidget(panelContent, Color4I.WHITE.withAlpha(50), null).setPosAndSize(w2, 0, 1, panelContent.height - panelText.height - (panelText.widgets.isEmpty() ? 0 : 1)));
+
+		if (!panelText.widgets.isEmpty())
+		{
+			panelContent.add(new ColorWidget(panelContent, Color4I.WHITE.withAlpha(50), null).setPosAndSize(0, panelContent.height - panelText.height - 1, w, 1));
+		}
 
 		/* Put this somewhere
 		if (!selectedQuest.isComplete(ClientQuestFile.INSTANCE.self))
