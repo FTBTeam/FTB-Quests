@@ -15,6 +15,8 @@ import com.feed_the_beast.ftbquests.block.BlockTaskScreenPart;
 import com.feed_the_beast.ftbquests.block.FTBQuestsBlocks;
 import com.feed_the_beast.ftbquests.block.ItemBlockProgressScreen;
 import com.feed_the_beast.ftbquests.block.ItemBlockScreen;
+import com.feed_the_beast.ftbquests.events.ClearFileCacheEvent;
+import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.item.ItemLootCrate;
 import com.feed_the_beast.ftbquests.item.ItemQuestBook;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
@@ -279,6 +281,60 @@ public class FTBQuestsEventHandler
 		if (event.player instanceof EntityPlayerMP && !event.smelting.isEmpty())
 		{
 			FTBQuestsInventoryListener.detect((EntityPlayerMP) event.player, Collections.singleton(event.smelting));
+		}
+	}
+
+	/**
+	 * Modified version of CoFH Soulbound enchantment code
+	 */
+	@SubscribeEvent(priority = EventPriority.HIGH)
+	public static void onPlayerClone(net.minecraftforge.event.entity.player.PlayerEvent.Clone event)
+	{
+		if (!event.isWasDeath())
+		{
+			return;
+		}
+
+		EntityPlayer player = event.getEntityPlayer();
+		EntityPlayer oldPlayer = event.getOriginal();
+
+		if (player instanceof FakePlayer || player.world.getGameRules().getBoolean("keepInventory"))
+		{
+			return;
+		}
+
+		for (int i = 0; i < oldPlayer.inventory.mainInventory.size(); i++)
+		{
+			ItemStack stack = oldPlayer.inventory.mainInventory.get(i);
+
+			if (stack.getItem() == FTBQuestsItems.BOOK && player.addItemStackToInventory(stack))
+			{
+				oldPlayer.inventory.mainInventory.set(i, ItemStack.EMPTY);
+			}
+		}
+	}
+
+	@SubscribeEvent(priority = EventPriority.HIGH)
+	public static void onPlayerDropsEvent(PlayerDropsEvent event)
+	{
+		EntityPlayer player = event.getEntityPlayer();
+
+		if (player instanceof FakePlayer || player.world.getGameRules().getBoolean("keepInventory"))
+		{
+			return;
+		}
+
+		Iterator<EntityItem> iterator = event.getDrops().listIterator();
+
+		while (iterator.hasNext())
+		{
+			EntityItem drop = iterator.next();
+			ItemStack stack = drop.getItem();
+
+			if (stack.getItem() == FTBQuestsItems.BOOK && player.addItemStackToInventory(stack))
+			{
+				iterator.remove();
+			}
 		}
 	}
 }
