@@ -10,7 +10,6 @@ import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.util.ListUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
-import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.events.ObjectCompletedEvent;
 import com.feed_the_beast.ftbquests.gui.tree.GuiQuestTree;
 import com.feed_the_beast.ftbquests.net.MessageDisplayCompletionToast;
@@ -198,11 +197,11 @@ public final class Quest extends QuestObject
 		if (visibility != EnumVisibility.VISIBLE)
 		{
 			nbt.setString("visibility", visibility.getID());
+		}
 
-			if (visibility == EnumVisibility.SECRET || visibility == EnumVisibility.INVISIBLE)
-			{
-				nbt.setString("dependency_requirement", dependencyRequirement.getID());
-			}
+		if (dependencyRequirement != EnumDependencyRequirement.ALL_COMPLETED)
+		{
+			nbt.setString("dependency_requirement", dependencyRequirement.getID());
 		}
 	}
 
@@ -314,6 +313,7 @@ public final class Quest extends QuestObject
 		}
 
 		data.writeVarInt(minRequiredDependencies);
+		EnumDependencyRequirement.NAME_MAP.write(data, dependencyRequirement);
 		data.writeVarInt(dependencies.size());
 
 		for (QuestObject d : dependencies)
@@ -355,7 +355,7 @@ public final class Quest extends QuestObject
 		hideDependencyLines = Bits.getFlag(flags, 64);
 
 		minRequiredDependencies = data.readVarInt();
-
+		dependencyRequirement = EnumDependencyRequirement.NAME_MAP.read(data);
 		dependencies.clear();
 		int d = data.readVarInt();
 
@@ -419,9 +419,22 @@ public final class Quest extends QuestObject
 			return false;
 		}
 
-		for (QuestObject dependency : dependencies)
+		if (dependencyRequirement.one)
 		{
-			if (!dependency.invalid && !dependency.isComplete(data))
+			for (QuestObject object : dependencies)
+			{
+				if (!object.invalid && (dependencyRequirement.completed ? object.isComplete(data) : object.isStarted(data)))
+				{
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		for (QuestObject object : dependencies)
+		{
+			if (!object.invalid && (dependencyRequirement.completed ? !object.isComplete(data) : !object.isStarted(data)))
 			{
 				return false;
 			}
@@ -575,9 +588,9 @@ public final class Quest extends QuestObject
 
 	public EnumVisibility getVisibility()
 	{
-		if (visibility == EnumVisibility.INTERNAL)
+		if (visibility == EnumVisibility.INTERNAL || dependencies.isEmpty())
 		{
-			return EnumVisibility.INTERNAL;
+			return visibility;
 		}
 
 		EnumVisibility v = visibility;
@@ -606,8 +619,28 @@ public final class Quest extends QuestObject
 		{
 			return EnumVisibility.INVISIBLE;
 		}
-		else if (v == EnumVisibility.VISIBLE || data == null)
+		else if (v == EnumVisibility.VISIBLE || data == null || dependencies.isEmpty())
 		{
+			return v;
+		}
+
+		if (minRequiredDependencies > 0)
+		{
+			int complete = 0;
+
+			for (QuestObject dependency : dependencies)
+			{
+				if (!dependency.invalid && dependency.isComplete(data))
+				{
+					complete++;
+
+					if (complete >= minRequiredDependencies)
+					{
+						return EnumVisibility.VISIBLE;
+					}
+				}
+			}
+
 			return v;
 		}
 
@@ -782,11 +815,6 @@ public final class Quest extends QuestObject
 		{
 			gui.quests.refreshWidgets();
 			gui.viewQuestPanel.refreshWidgets();
-		}
-
-		if (chapter.quests.size() == 1) //Edge case, need to figure out better way
-		{
-			ClientQuestFile.INSTANCE.questTreeGui.resetScroll(true);
 		}
 	}
 }

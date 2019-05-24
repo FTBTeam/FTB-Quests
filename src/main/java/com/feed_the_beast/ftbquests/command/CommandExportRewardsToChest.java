@@ -96,7 +96,7 @@ public class CommandExportRewardsToChest extends CommandFTBQuestsBase
 
 					for (WeightedReward reward : table.rewards)
 					{
-						Object object = reward.reward.getJEIFocus();
+						Object object = reward.reward.getIngredient();
 
 						if (object instanceof ItemStack && !((ItemStack) object).isEmpty())
 						{

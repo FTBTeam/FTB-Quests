@@ -16,14 +16,14 @@ public abstract class ButtonTab extends Button
 	{
 		super(panel, title, icon);
 		treeGui = (GuiQuestTree) panel.getGui();
-		setSize(20, treeGui.chapterPanel.height);
+		setSize(18, 18);
 	}
 
 	@Override
 	public void draw(Theme theme, int x, int y, int w, int h)
 	{
-		treeGui.borderColor.draw(x - 1, y + 1, 1, h - 2);
-		treeGui.backgroundColor.draw(x, y + 1, w, h - 2);
+		//treeGui.borderColor.draw(x - 1, y + 1, 1, h - 2);
+		//treeGui.backgroundColor.draw(x, y + 1, w, h - 2);
 		icon.draw(x + (w - 16) / 2, y + (h - 16) / 2, 16, 16);
 
 		if (isMouseOver())

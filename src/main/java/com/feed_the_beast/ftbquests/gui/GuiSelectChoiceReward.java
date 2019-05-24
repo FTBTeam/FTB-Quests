@@ -48,7 +48,7 @@ public class GuiSelectChoiceReward extends GuiButtonListBase
 		@Nullable
 		public Object getIngredientUnderMouse()
 		{
-			return weightedReward.reward.getJEIFocus();
+			return weightedReward.reward.getIngredient();
 		}
 	}
 

@@ -2,6 +2,7 @@ package com.feed_the_beast.ftbquests.gui.tree;
 
 import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.gui.SimpleTextButton;
+import com.feed_the_beast.ftblib.lib.gui.Theme;
 import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.quest.Quest;
@@ -18,6 +19,8 @@ public class ButtonOpenInGuide extends SimpleTextButton
 	public ButtonOpenInGuide(Panel panel, Quest q)
 	{
 		super(panel, I18n.format("ftbquests.gui.open_in_guide"), ItemIcon.getItemIcon(Items.BOOK));
+		setHeight(13);
+		setX((panel.width - width) / 2);
 		quest = q;
 	}
 
@@ -25,5 +28,10 @@ public class ButtonOpenInGuide extends SimpleTextButton
 	public void onClicked(MouseButton button)
 	{
 		handleClick("guide", quest.guidePage);
+	}
+
+	@Override
+	public void drawBackground(Theme theme, int x, int y, int w, int h)
+	{
 	}
 }

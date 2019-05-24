@@ -9,6 +9,7 @@ import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.util.ListUtils;
 import com.feed_the_beast.ftbquests.events.ObjectCompletedEvent;
 import com.feed_the_beast.ftbquests.net.MessageDisplayCompletionToast;
+import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -31,6 +32,7 @@ public final class QuestChapter extends QuestObject
 	public final List<Quest> quests;
 	public final List<String> description;
 	public boolean alwaysInvisible;
+	public QuestChapter group;
 
 	public QuestChapter(QuestFile f)
 	{
@@ -38,6 +40,7 @@ public final class QuestChapter extends QuestObject
 		description = new ArrayList<>(0);
 		quests = new ArrayList<>();
 		alwaysInvisible = false;
+		group = null;
 	}
 
 	@Override
@@ -79,6 +82,11 @@ public final class QuestChapter extends QuestObject
 		{
 			nbt.setBoolean("always_invisible", true);
 		}
+
+		if (group != null && !group.invalid)
+		{
+			nbt.setInteger("group", group.id);
+		}
 	}
 
 	@Override
@@ -95,6 +103,7 @@ public final class QuestChapter extends QuestObject
 		}
 
 		alwaysInvisible = nbt.getBoolean("always_invisible");
+		group = file.getChapter(nbt.getInteger("group"));
 	}
 
 	@Override
@@ -103,6 +112,7 @@ public final class QuestChapter extends QuestObject
 		super.writeNetData(data);
 		data.writeCollection(description, DataOut.STRING);
 		data.writeBoolean(alwaysInvisible);
+		data.writeInt(group == null || group.invalid ? 0 : group.id);
 	}
 
 	@Override
@@ -111,6 +121,7 @@ public final class QuestChapter extends QuestObject
 		super.readNetData(data);
 		data.readCollection(description, DataIn.STRING);
 		alwaysInvisible = data.readBoolean();
+		group = file.getChapter(data.readInt());
 	}
 
 	public int getIndex()
@@ -243,6 +254,21 @@ public final class QuestChapter extends QuestObject
 		super.getConfig(config);
 		config.addList("description", description, new ConfigString(""), ConfigString::new, ConfigString::getString);
 		config.addBool("always_invisible", () -> alwaysInvisible, v -> alwaysInvisible = v, false);
+		config.add("group", new ConfigQuestObject(file, group, QuestObjectType.CHAPTER, QuestObjectType.NULL)
+		{
+			@Nullable
+			@Override
+			public QuestObjectBase getObject()
+			{
+				return group;
+			}
+
+			@Override
+			public void setObject(@Nullable QuestObjectBase v)
+			{
+				group = (QuestChapter) v;
+			}
+		}, new ConfigQuestObject(file, null, QuestObjectType.CHAPTER, QuestObjectType.NULL));
 	}
 
 	public boolean isVisible(@Nullable ITeamData data)

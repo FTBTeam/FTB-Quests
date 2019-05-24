@@ -91,7 +91,7 @@ public class ButtonQuest extends Button
 	public void onClicked(MouseButton button)
 	{
 		GuiHelper.playClickSound();
-		Quest selectedQuest = treeGui.getViewedQuest();
+		Quest selectedQuest = treeGui.selectedQuests.size() == 1 ? treeGui.selectedQuests.iterator().next() : null;
 
 		if (treeGui.file.canEdit() && button.isRight())
 		{
@@ -251,7 +251,7 @@ public class ButtonQuest extends Button
 	@Nullable
 	public Object getIngredientUnderMouse()
 	{
-		return quest.tasks.size() == 1 ? quest.tasks.get(0).getJEIFocus() : null;
+		return quest.tasks.size() == 1 ? quest.tasks.get(0).getIngredient() : null;
 	}
 
 	@Override

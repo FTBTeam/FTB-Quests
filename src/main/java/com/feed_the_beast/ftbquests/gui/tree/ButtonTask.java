@@ -76,7 +76,7 @@ public class ButtonTask extends SimpleTextButton
 	@Nullable
 	public Object getIngredientUnderMouse()
 	{
-		return task.getJEIFocus();
+		return task.getIngredient();
 	}
 
 	@Override

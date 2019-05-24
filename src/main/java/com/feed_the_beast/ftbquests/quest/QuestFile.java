@@ -12,6 +12,7 @@ import com.feed_the_beast.ftblib.lib.math.MathUtils;
 import com.feed_the_beast.ftblib.lib.math.Ticks;
 import com.feed_the_beast.ftblib.lib.util.NBTUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
+import com.feed_the_beast.ftbquests.events.ClearFileCacheEvent;
 import com.feed_the_beast.ftbquests.events.ObjectCompletedEvent;
 import com.feed_the_beast.ftbquests.net.MessageDisplayCompletionToast;
 import com.feed_the_beast.ftbquests.quest.loot.EntityWeight;
@@ -1217,6 +1218,8 @@ public abstract class QuestFile extends QuestObject
 		{
 			chapter.clearCachedData();
 		}
+
+		new ClearFileCacheEvent(this).post();
 	}
 
 	public int readID(int id)

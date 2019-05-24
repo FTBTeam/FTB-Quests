@@ -46,7 +46,7 @@ public class LootCrateWrapper implements IRecipeWrapper, ITooltipCallback<ItemSt
 
 		for (WeightedReward reward : rewards)
 		{
-			Object object = reward.reward.getJEIFocus();
+			Object object = reward.reward.getIngredient();
 			ItemStack stack = object instanceof ItemStack ? (ItemStack) object : ItemStack.EMPTY;
 
 			if (!stack.isEmpty())

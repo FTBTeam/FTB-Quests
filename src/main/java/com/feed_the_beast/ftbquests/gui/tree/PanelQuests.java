@@ -46,7 +46,7 @@ public class PanelQuests extends Panel
 		}
 
 		boolean canEdit = treeGui.file.canEdit();
-
+		int minX = Quest.POS_LIMIT + 1, minY = Quest.POS_LIMIT + 1, maxX = -(Quest.POS_LIMIT + 1), maxY = -(Quest.POS_LIMIT + 1);
 		IntOpenHashSet set = new IntOpenHashSet();
 
 		for (Quest quest : treeGui.selectedChapter.quests)
@@ -57,6 +57,10 @@ public class PanelQuests extends Panel
 
 				if (canEdit)
 				{
+					minX = Math.min(minX, quest.x);
+					minY = Math.min(minY, quest.y);
+					maxX = Math.max(maxX, quest.x);
+					maxY = Math.max(maxY, quest.y);
 					set.add(getxy(quest.x, quest.y));
 				}
 			}
@@ -64,9 +68,19 @@ public class PanelQuests extends Panel
 
 		if (canEdit)
 		{
-			for (int y = -Quest.POS_LIMIT; y <= Quest.POS_LIMIT; y++)
+			if (minX == Quest.POS_LIMIT + 1)
 			{
-				for (int x = -Quest.POS_LIMIT; x <= Quest.POS_LIMIT; x++)
+				minX = minY = maxX = maxY = 0;
+			}
+
+			minX -= 20;
+			minY -= 10;
+			maxX += 20;
+			maxY += 10;
+
+			for (int y = minY; y <= maxY; y++)
+			{
+				for (int x = minX; x <= maxX; x++)
 				{
 					if (!set.contains(getxy(x, y)))
 					{
@@ -99,10 +113,15 @@ public class PanelQuests extends Panel
 			}
 		}
 
-		minX -= 6;
-		minY -= 6;
-		maxX += 6;
-		maxY += 6;
+		if (minX == Quest.POS_LIMIT + 1)
+		{
+			minX = minY = maxX = maxY = 0;
+		}
+
+		minX -= 20;
+		minY -= 10;
+		maxX += 20;
+		maxY += 10;
 
 		int bsize = treeGui.getZoom() * 2 - 2;
 
@@ -129,7 +148,7 @@ public class PanelQuests extends Panel
 			widget.setPosAndSize((x - minX) * bsize, (y - minY) * bsize, bsize, bsize);
 		}
 
-		setPosAndSize(0, treeGui.chapterPanel.height, treeGui.width, treeGui.height - treeGui.chapterPanel.height);
+		setPosAndSize(18, 1, treeGui.width - 36, treeGui.height - 2);
 	}
 
 	@Override

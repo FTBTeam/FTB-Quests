@@ -1,6 +1,7 @@
 package com.feed_the_beast.ftbquests.gui.tree;
 
 import com.feed_the_beast.ftblib.lib.gui.Panel;
+import com.feed_the_beast.ftblib.lib.gui.Theme;
 import com.feed_the_beast.ftblib.lib.gui.WidgetLayout;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
@@ -81,7 +82,14 @@ public class PanelOtherButtons extends Panel
 	@Override
 	public void alignWidgets()
 	{
-		setSize(align(new WidgetLayout.Horizontal(1, 1, 0)), treeGui.chapterPanel.height);
-		setX(getGui().width - width - 1);
+		setPosAndSize(treeGui.width - 18, 1, 18, treeGui.height - 2);
+		align(WidgetLayout.VERTICAL);
+	}
+
+	@Override
+	public void drawBackground(Theme theme, int x, int y, int w, int h)
+	{
+		treeGui.borderColor.draw(x, y, 1, h);
+		treeGui.backgroundColor.draw(x + 1, y, w - 2, h);
 	}
 }
