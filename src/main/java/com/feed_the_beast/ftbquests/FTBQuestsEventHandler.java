@@ -20,6 +20,8 @@ import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.item.ItemLootCrate;
 import com.feed_the_beast.ftbquests.item.ItemQuestBook;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
+import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.loot.LootCrate;
 import com.feed_the_beast.ftbquests.quest.reward.ChoiceReward;
@@ -39,6 +41,7 @@ import com.feed_the_beast.ftbquests.quest.task.ForgeEnergyTask;
 import com.feed_the_beast.ftbquests.quest.task.ItemTask;
 import com.feed_the_beast.ftbquests.quest.task.KillTask;
 import com.feed_the_beast.ftbquests.quest.task.LocationTask;
+import com.feed_the_beast.ftbquests.quest.task.QuestTask;
 import com.feed_the_beast.ftbquests.quest.task.QuestTaskData;
 import com.feed_the_beast.ftbquests.quest.task.QuestTaskType;
 import com.feed_the_beast.ftbquests.quest.task.StatTask;
@@ -60,20 +63,26 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
+import net.minecraftforge.event.entity.player.PlayerDropsEvent;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -97,6 +106,8 @@ public class FTBQuestsEventHandler
 		item.setTranslationKey(FTBQuests.MOD_ID + "." + name);
 		return item;
 	}
+
+	// Registry Events //
 
 	@SubscribeEvent
 	public static void registerBlocks(RegistryEvent.Register<Block> event)
@@ -139,12 +150,6 @@ public class FTBQuestsEventHandler
 	}
 
 	@SubscribeEvent
-	public static void registerFTBLib(FTBLibPreInitRegistryEvent event)
-	{
-		event.getRegistry().registerConfigValueProvider(ConfigQuestObject.ID, () -> new ConfigQuestObject(null, null));
-	}
-
-	@SubscribeEvent
 	public static void registerTasks(RegistryEvent.Register<QuestTaskType> event)
 	{
 		event.getRegistry().registerAll(
@@ -178,6 +183,26 @@ public class FTBQuestsEventHandler
 		FTBQuests.PROXY.setRewardGuiProviders();
 	}
 
+	// FTB Library Events //
+
+	@SubscribeEvent
+	public static void registerFTBLib(FTBLibPreInitRegistryEvent event)
+	{
+		event.getRegistry().registerConfigValueProvider(ConfigQuestObject.ID, () -> new ConfigQuestObject(null, null));
+	}
+
+	// Game Events //
+
+	private static List<KillTask> killTasks = null;
+	private static List<LocationTask> locationTasks = null;
+
+	@SubscribeEvent
+	public static void onFileCacheClear(ClearFileCacheEvent event)
+	{
+		killTasks = null;
+		locationTasks = null;
+	}
+
 	@SubscribeEvent
 	public static void onLivingDrops(LivingDropsEvent event)
 	{
@@ -204,11 +229,28 @@ public class FTBQuestsEventHandler
 	}
 
 	@SubscribeEvent
-	public static void onPlayerKillEvent(LivingDeathEvent event)
+	public static void onPlayerKill(LivingDeathEvent event)
 	{
 		if (event.getSource().getTrueSource() instanceof EntityPlayerMP)
 		{
-			List<KillTask> killTasks = ServerQuestFile.INSTANCE.getKillTasks();
+			if (killTasks == null)
+			{
+				killTasks = new ArrayList<>();
+
+				for (QuestChapter chapter : ServerQuestFile.INSTANCE.chapters)
+				{
+					for (Quest quest : chapter.quests)
+					{
+						for (QuestTask task : quest.tasks)
+						{
+							if (task instanceof KillTask)
+							{
+								killTasks.add((KillTask) task);
+							}
+						}
+					}
+				}
+			}
 
 			if (killTasks.isEmpty())
 			{
@@ -216,6 +258,7 @@ public class FTBQuestsEventHandler
 			}
 
 			EntityPlayerMP player = (EntityPlayerMP) event.getSource().getTrueSource();
+
 			ITeamData data = ServerQuestFile.INSTANCE.getData(FTBLibAPI.getTeamID(player.getUniqueID()));
 
 			if (data == null)
@@ -240,7 +283,24 @@ public class FTBQuestsEventHandler
 	{
 		if (event.phase == TickEvent.Phase.END && !event.player.world.isRemote)
 		{
-			List<LocationTask> locationTasks = ServerQuestFile.INSTANCE.getLocationTasks();
+			if (locationTasks == null)
+			{
+				locationTasks = new ArrayList<>();
+
+				for (QuestChapter chapter : ServerQuestFile.INSTANCE.chapters)
+				{
+					for (Quest quest : chapter.quests)
+					{
+						for (QuestTask task : quest.tasks)
+						{
+							if (task instanceof LocationTask)
+							{
+								locationTasks.add((LocationTask) task);
+							}
+						}
+					}
+				}
+			}
 
 			if (locationTasks.isEmpty())
 			{
@@ -267,7 +327,7 @@ public class FTBQuestsEventHandler
 	}
 
 	@SubscribeEvent
-	public static void onItemCraftedEvent(PlayerEvent.ItemCraftedEvent event)
+	public static void onItemCrafted(PlayerEvent.ItemCraftedEvent event)
 	{
 		if (event.player instanceof EntityPlayerMP && !event.crafting.isEmpty())
 		{
@@ -276,7 +336,7 @@ public class FTBQuestsEventHandler
 	}
 
 	@SubscribeEvent
-	public static void onItemSmeltEvent(PlayerEvent.ItemSmeltedEvent event)
+	public static void onItemSmelt(PlayerEvent.ItemSmeltedEvent event)
 	{
 		if (event.player instanceof EntityPlayerMP && !event.smelting.isEmpty())
 		{

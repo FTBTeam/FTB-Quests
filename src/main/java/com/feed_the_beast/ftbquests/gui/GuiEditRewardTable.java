@@ -155,7 +155,7 @@ public class GuiEditRewardTable extends GuiButtonListBase
 		@Nullable
 		public Object getIngredientUnderMouse()
 		{
-			return reward.reward.getJEIFocus();
+			return reward.reward.getIngredient();
 		}
 	}
 

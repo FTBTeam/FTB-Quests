@@ -73,6 +73,6 @@ public class ButtonReward extends Button
 	@Nullable
 	public Object getIngredientUnderMouse()
 	{
-		return reward == null ? null : reward.getJEIFocus();
+		return reward == null ? null : reward.getIngredient();
 	}
 }

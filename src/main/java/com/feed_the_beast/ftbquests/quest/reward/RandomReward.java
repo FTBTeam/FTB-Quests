@@ -181,7 +181,7 @@ public class RandomReward extends QuestReward
 	@Override
 	@Nullable
 	@SideOnly(Side.CLIENT)
-	public Object getJEIFocus()
+	public Object getIngredient()
 	{
 		return getTable().lootCrate != null ? getTable().lootCrate.createStack() : null;
 	}

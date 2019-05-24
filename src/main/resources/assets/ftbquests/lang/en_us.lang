@@ -104,7 +104,7 @@ ftbquests.quest.can_repeat=Can be repeated
 ftbquests.quest.tasks_ignore_dependencies=Tasks Ignore Dependencies
 ftbquests.quest.tasks_ignore_dependencies.tooltip=Allow to start tasks without completing dependencies
 ftbquests.quest.dependency_requirement=Dependency Requirement
-ftbquests.quest.dependency_requirement.tooltip=Only required when Visibility is set to Secret or Invisible
+ftbquests.quest.dependency_requirement.tooltip=Ignored if Min Required Dependencies > 0
 ftbquests.quest.dependency_requirement.all_completed=All Completed
 ftbquests.quest.dependency_requirement.one_completed=One Completed
 ftbquests.quest.dependency_requirement.all_started=All Started
@@ -142,7 +142,7 @@ ftbquests.gui.quick_complete.info_1=Submit all items
 ftbquests.gui.quick_complete.info_2=Claim all rewards
 ftbquests.gui.subscribe=Like this mod? Consider supporting me on twitch.tv!
 ftbquests.gui.looping_dependencies=Looping dependencies!
-ftbquests.gui.open_in_guide=Open in Guide
+ftbquests.gui.open_in_guide=Click here to read more...
 
 ftbquests.task=Task
 ftbquests.tasks=Tasks

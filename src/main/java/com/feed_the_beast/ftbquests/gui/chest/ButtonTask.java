@@ -63,6 +63,6 @@ public class ButtonTask extends Button
 	@Nullable
 	public Object getIngredientUnderMouse()
 	{
-		return taskData.task.getJEIFocus();
+		return taskData.task.getIngredient();
 	}
 }

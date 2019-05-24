@@ -256,9 +256,9 @@ public abstract class QuestTask extends QuestObject
 
 	@Nullable
 	@SideOnly(Side.CLIENT)
-	public Object getJEIFocus()
+	public Object getIngredient()
 	{
-		return getIcon().getJEIFocus();
+		return getIcon().getIngredient();
 	}
 
 	@Override

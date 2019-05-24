@@ -207,6 +207,16 @@ public class PanelViewQuest extends Panel
 			panelText.add(new TextField(panelText).setMaxWidth(panelText.width).setSpacing(9).setText(StringUtils.addFormatting(StringJoiner.with('\n').joinStrings(text))));
 		}
 
+		if (!quest.guidePage.isEmpty())
+		{
+			if (!desc.isEmpty())
+			{
+				panelText.add(new WidgetVerticalSpace(panelText, 7));
+			}
+
+			panelText.add(new ButtonOpenInGuide(panelText, quest));
+		}
+
 		if (panelText.widgets.isEmpty())
 		{
 			panelText.setHeight(0);

@@ -47,8 +47,8 @@ public class ButtonChapter extends ButtonTab
 		if (treeGui.file.canEdit() && button.isRight())
 		{
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
-			contextMenu.add(new ContextMenuItem(I18n.format("gui.move"), GuiIcons.LEFT, () -> new MessageMoveChapter(chapter.id, true).sendToServer()).setEnabled(() -> chapter.getIndex() > 0).setCloseMenu(false));
-			contextMenu.add(new ContextMenuItem(I18n.format("gui.move"), GuiIcons.RIGHT, () -> new MessageMoveChapter(chapter.id, false).sendToServer()).setEnabled(() -> chapter.getIndex() < treeGui.file.chapters.size() - 1).setCloseMenu(false));
+			contextMenu.add(new ContextMenuItem(I18n.format("gui.move"), GuiIcons.UP, () -> new MessageMoveChapter(chapter.id, true).sendToServer()).setEnabled(() -> chapter.getIndex() > 0).setCloseMenu(false));
+			contextMenu.add(new ContextMenuItem(I18n.format("gui.move"), GuiIcons.DOWN, () -> new MessageMoveChapter(chapter.id, false).sendToServer()).setEnabled(() -> chapter.getIndex() < treeGui.file.chapters.size() - 1).setCloseMenu(false));
 			contextMenu.add(ContextMenuItem.SEPARATOR);
 			GuiQuestTree.addObjectMenuItems(contextMenu, getGui(), chapter);
 			getGui().openContextMenu(contextMenu);
@@ -104,24 +104,12 @@ public class ButtonChapter extends ButtonTab
 	@Override
 	public void draw(Theme theme, int x, int y, int w, int h)
 	{
-		if (treeGui.selectedChapter != chapter)
-		{
-			treeGui.borderColor.draw(x, y + h - 1, w + 1, 1);
-			treeGui.backgroundColor.draw(x, y + 1, w, h - 2);
-		}
-		else
-		{
-			treeGui.borderColor.draw(x + w, y + h - 1, 1, 1);
-		}
-
-		treeGui.borderColor.draw(x + w, y + 1, 1, h - 2);
-
 		int is = width < 18 ? 8 : 16;
 		icon.draw(x + (w - is) / 2, y + (h - is) / 2, is, is);
 
 		if (isMouseOver())
 		{
-			treeGui.backgroundColor.draw(x, y + 1, w, h - (treeGui.selectedChapter == chapter ? 1 : 2));
+			treeGui.backgroundColor.draw(x, y, w, h);
 		}
 
 		if (chapter.quests.isEmpty())

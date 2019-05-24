@@ -11,7 +11,6 @@ import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.gui.IOpenableGui;
 import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.gui.Theme;
-import com.feed_the_beast.ftblib.lib.gui.Widget;
 import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.math.MathUtils;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
@@ -70,8 +69,6 @@ public class GuiQuestTree extends GuiBase
 		selectedQuests = new HashSet<>();
 
 		chapterPanel = new PanelChapters(this);
-		chapterPanel.setHeight(20);
-
 		selectedChapter = file.chapters.isEmpty() ? null : file.chapters.get(0);
 		borderColor = Color4I.WHITE.withAlpha(88);
 		backgroundColor = Color4I.WHITE.withAlpha(33);
@@ -122,10 +119,8 @@ public class GuiQuestTree extends GuiBase
 			movingQuest = false;
 			closeQuest();
 			selectedChapter = chapter;
-			quests.setScrollX(0);
-			quests.setScrollY(0);
 			quests.refreshWidgets();
-			resetScroll(true);
+			resetScroll();
 		}
 	}
 
@@ -196,13 +191,9 @@ public class GuiQuestTree extends GuiBase
 		}
 	}
 
-	public void resetScroll(boolean realign)
+	public void resetScroll()
 	{
-		if (realign)
-		{
-			quests.alignWidgets();
-		}
-
+		quests.alignWidgets();
 		quests.setScrollX((scrollWidth - quests.width) / 2);
 		quests.setScrollY((scrollHeight - quests.height) / 2);
 	}
@@ -459,7 +450,7 @@ public class GuiQuestTree extends GuiBase
 		if (zoom != z)
 		{
 			grabbed = 0;
-			resetScroll(true);
+			resetScroll();
 			//quests.alignWidgets();
 		}
 	}
@@ -502,16 +493,27 @@ public class GuiQuestTree extends GuiBase
 	{
 		GuiHelper.drawHollowRect(x, y, w, h, borderColor, false);
 
-		int start = 1;
+		//backgroundColor.draw(start, y + 1, w - start - otherButtons.width - 1, chapterPanel.height - 2);
+		//borderColor.draw(start, y + chapterPanel.height - 1, w - start - 1, 1);
 
-		if (!chapterPanel.widgets.isEmpty())
+		/*
+		if (file.canEdit())
 		{
-			Widget last = chapterPanel.widgets.get(chapterPanel.widgets.size() - 1);
-			start = last.getX() + last.width + 1;
-		}
+			Widget widget = quests.getWidget(0);
 
-		backgroundColor.draw(start, y + 1, w - start - otherButtons.width - 1, chapterPanel.height - 2);
-		borderColor.draw(start, y + chapterPanel.height - 1, w - start - 1, 1);
+			if (widget instanceof ButtonQuest || widget instanceof ButtonDummyQuest)
+			{
+				double bsize = getZoom() * 2D - 2D;
+				double mx = getMouseX() - quests.getX();//quests.width / 2D;
+				double my = getMouseY() - quests.getY();//quests.height / 2D;
+				double cx = (quests.getScrollX() + mx) / bsize - Quest.POS_LIMIT;
+				double cy = (quests.getScrollY() + my) / bsize - Quest.POS_LIMIT;
+
+				theme.drawString("X: " + StringUtils.formatDouble(cx), 4, 23);
+				theme.drawString("Y: " + StringUtils.formatDouble(cy), 4, 32);
+			}
+		}
+		*/
 
 		super.drawForeground(theme, x, y, w, h);
 	}

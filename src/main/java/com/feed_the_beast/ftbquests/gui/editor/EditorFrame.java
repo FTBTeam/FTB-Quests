@@ -65,8 +65,7 @@ public final class EditorFrame extends JFrame
 
 				try
 				{
-					//UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-					UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
+					UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 					editor = new EditorFrame(ClientQuestFile.INSTANCE);
 					editor.setLocationRelativeTo(null);
 					editor.setVisible(true);

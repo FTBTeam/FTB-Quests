@@ -339,7 +339,7 @@ public class FluidTask extends QuestTask
 	@Override
 	@Nullable
 	@SideOnly(Side.CLIENT)
-	public Object getJEIFocus()
+	public Object getIngredient()
 	{
 		return createFluidStack(Fluid.BUCKET_VOLUME);
 	}

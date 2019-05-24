@@ -63,7 +63,7 @@ public class QuestWrapper implements IRecipeWrapper
 				continue;
 			}
 
-			Object object = task.getJEIFocus();
+			Object object = task.getIngredient();
 			ItemStack stack = object instanceof ItemStack ? (ItemStack) object : ItemStack.EMPTY;
 
 			if (!stack.isEmpty())
@@ -97,7 +97,7 @@ public class QuestWrapper implements IRecipeWrapper
 
 		for (QuestReward reward : quest.rewards)
 		{
-			Object object = reward.getJEIFocus();
+			Object object = reward.getIngredient();
 			ItemStack stack = object instanceof ItemStack ? (ItemStack) object : ItemStack.EMPTY;
 
 			if (!stack.isEmpty())
@@ -119,7 +119,7 @@ public class QuestWrapper implements IRecipeWrapper
 				{
 					for (WeightedReward reward1 : table.rewards)
 					{
-						Object object1 = reward1.reward.getJEIFocus();
+						Object object1 = reward1.reward.getIngredient();
 
 						if (object1 instanceof ItemStack)
 						{
@@ -157,7 +157,11 @@ public class QuestWrapper implements IRecipeWrapper
 	public void drawInfo(Minecraft mc, int recipeWidth, int recipeHeight, int mouseX, int mouseY)
 	{
 		String s = TextFormatting.UNDERLINE + quest.getDisplayName().getUnformattedText();
-		mc.fontRenderer.drawString(s, (recipeWidth - mc.fontRenderer.getStringWidth(s)) / 2, 3, 0xFF222222);
+		int w = mc.fontRenderer.getStringWidth(s);
+		int h = 9;
+		int x = (recipeWidth - w) / 2;
+		int y = 3;
+		mc.fontRenderer.drawString(s, x, y, (mouseX >= x && mouseY >= y && mouseX < x + w && mouseY < y + h) ? 0xFFA87A5E : 0xFF3F2E23);
 	}
 
 	@Override
