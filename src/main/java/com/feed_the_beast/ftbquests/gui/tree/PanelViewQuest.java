@@ -308,12 +308,6 @@ public class PanelViewQuest extends Panel
 		panelContent.setHeight(height - 17);
 
 		/* Put this somewhere
-		if (!selectedQuest.isComplete(ClientQuestFile.INSTANCE.self))
-		{
-			add(new WidgetVerticalSpace(this, 2));
-			add(new ButtonQuickComplete(this));
-		}
-
 		boolean addedText = false;
 
 		for (QuestObject dependency : selectedQuest.dependencies)
