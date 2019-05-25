@@ -20,6 +20,9 @@ public class TextFieldDisabledButton extends TextField
 	@Override
 	public void drawBackground(Theme theme, int x, int y, int w, int h)
 	{
-		theme.drawButton(x, y, w, h, WidgetType.DISABLED);
+		if (isMouseOver())
+		{
+			theme.drawButton(x, y, w, h, WidgetType.DISABLED);
+		}
 	}
 }

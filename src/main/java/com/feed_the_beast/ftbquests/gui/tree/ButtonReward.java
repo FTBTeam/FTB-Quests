@@ -12,6 +12,7 @@ import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.gui.FTBQuestsTheme;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.TextFormatting;
 
@@ -30,7 +31,7 @@ public class ButtonReward extends SimpleTextButton
 	{
 		super(panel, r.getDisplayName().getFormattedText(), r.getIcon());
 		reward = r;
-		setHeight(24);
+		setSize(18, 18);
 	}
 
 	@Override
@@ -115,9 +116,20 @@ public class ButtonReward extends SimpleTextButton
 	}
 
 	@Override
+	public void drawBackground(Theme theme, int x, int y, int w, int h)
+	{
+		if (isMouseOver())
+		{
+			super.drawBackground(theme, x, y, w, h);
+		}
+	}
+
+	@Override
 	public void draw(Theme theme, int x, int y, int w, int h)
 	{
 		super.draw(theme, x, y, w, h);
+		GlStateManager.pushMatrix();
+		GlStateManager.translate(0F, 0F, 500F);
 
 		if (!ClientQuestFile.existsWithTeam())
 		{
@@ -131,5 +143,7 @@ public class ButtonReward extends SimpleTextButton
 		{
 			FTBQuestsTheme.ALERT.draw(x + w - 9, y + 1, 8, 8);
 		}
+
+		GlStateManager.popMatrix();
 	}
 }

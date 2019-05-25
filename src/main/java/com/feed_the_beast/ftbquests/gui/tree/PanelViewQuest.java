@@ -27,6 +27,73 @@ import net.minecraft.util.text.TextFormatting;
  */
 public class PanelViewQuest extends Panel
 {
+	public static class TaskRewardLayout implements WidgetLayout
+	{
+		public static final int[][] LAYOUTS = {
+				{1},
+				{2},
+				{3},
+				{4},
+				{3, 2},
+				{3, 3},
+				{4, 3},
+				{4, 4},
+				{3, 3, 3},
+				{3, 4, 3},
+				{4, 3, 4},
+				{4, 4, 4},
+				{4, 3, 3, 3},
+				{3, 4, 4, 3},
+				{4, 4, 4, 3},
+				{4, 4, 4, 4}
+		};
+
+		@Override
+		public int align(Panel panel)
+		{
+			int s = panel.widgets.size();
+
+			if (s <= 0)
+			{
+				return 0;
+			}
+			else if (s > LAYOUTS.length)
+			{
+				for (int i = 0; i < s; i++)
+				{
+					panel.widgets.get(i).setPos((i % 4) * 18, (i / 4) * 18);
+				}
+
+				return (s / 4) * 18;
+			}
+
+			int[] layout = LAYOUTS[s - 1];
+
+			int m = 0;
+
+			for (int v : layout)
+			{
+				m = Math.max(m, v);
+			}
+
+			int off = 0;
+
+			for (int l = 0; l < layout.length; l++)
+			{
+				int o = ((layout[l] % 2) == (m % 2)) ? 0 : 9;
+
+				for (int i = 0; i < layout[l]; i++)
+				{
+					panel.widgets.get(off + i).setPos(o + i * 18, l * 18);
+				}
+
+				off += layout[l];
+			}
+
+			return layout.length * 18;
+		}
+	}
+
 	public final GuiQuestTree gui;
 	public Quest quest = null;
 	public boolean hidePanel = false;
@@ -34,6 +101,7 @@ public class PanelViewQuest extends Panel
 	private Icon icon = Icon.EMPTY;
 	public Button buttonClose;
 	public BlankPanel panelContent;
+	public BlankPanel panelTasksAndRewards;
 	public BlankPanel panelTasks;
 	public BlankPanel panelRewards;
 	public BlankPanel panelText;
@@ -66,8 +134,9 @@ public class PanelViewQuest extends Panel
 		int w = Math.max(parent.width / 5 * 2, gui.getTheme().getStringWidth(title) + 30);
 
 		add(panelContent = new BlankPanel(this, "ContentPanel"));
-		panelContent.add(panelTasks = new BlankPanel(panelContent, "TasksPanel"));
-		panelContent.add(panelRewards = new BlankPanel(panelContent, "RewardsPanel"));
+		panelContent.add(panelTasksAndRewards = new BlankPanel(panelContent, "TasksAndRewardsPanel"));
+		panelTasksAndRewards.add(panelTasks = new BlankPanel(panelTasksAndRewards, "TasksPanel"));
+		panelTasksAndRewards.add(panelRewards = new BlankPanel(panelTasksAndRewards, "RewardsPanel"));
 		panelContent.add(panelText = new BlankPanel(panelContent, "TextPanel"));
 
 		if (!quest.tasks.isEmpty())
@@ -80,7 +149,7 @@ public class PanelViewQuest extends Panel
 		else
 		{
 			TextFieldDisabledButton noTasks = new TextFieldDisabledButton(panelTasks, TextFormatting.GRAY + I18n.format("ftbquests.gui.no_tasks"));
-			noTasks.setHeight(24);
+			noTasks.setSize(noTasks.width + 8, 18);
 			panelTasks.add(noTasks);
 		}
 
@@ -94,7 +163,7 @@ public class PanelViewQuest extends Panel
 		else
 		{
 			TextFieldDisabledButton noRewards = new TextFieldDisabledButton(panelRewards, TextFormatting.GRAY + I18n.format("ftbquests.gui.no_rewards"));
-			noRewards.setHeight(24);
+			noRewards.setSize(noRewards.width + 8, 18);
 			panelRewards.add(noRewards);
 		}
 
@@ -125,7 +194,7 @@ public class PanelViewQuest extends Panel
 		}
 
 		setWidth(w);
-		panelContent.setPosAndSize(3, 16, w - 6, 0);
+		panelContent.setPosAndSize(0, 16, w, 0);
 		int w2 = panelContent.width / 2;
 
 		add(buttonClose = new ButtonCloseViewQuest(this));
@@ -159,29 +228,35 @@ public class PanelViewQuest extends Panel
 		textFieldRewards.setText(TextFormatting.GOLD + I18n.format("ftbquests.rewards"));
 		panelContent.add(textFieldRewards);
 
-		panelTasks.setPosAndSize(0, 16, w2 - 2, 0);
-		panelRewards.setPosAndSize(w2 + 3, 16, w2 - 2, 0);
+		panelTasks.setPosAndSize(0, 0, w2 - 2, 0);
+		panelRewards.setPosAndSize(w2 + 3, 0, w2 - 2, 0);
 
-		int h = Math.max(panelTasks.align(new WidgetLayout.Vertical(0, 3, 0)), panelRewards.align(new WidgetLayout.Vertical(0, 3, 0)));
+		int at = panelTasks.align(new TaskRewardLayout());
+		int ar = panelRewards.align(new TaskRewardLayout());
+
+		int h = Math.max(at, ar);
 		panelTasks.setHeight(h);
 		panelRewards.setHeight(h);
 
-		int to = (h - panelTasks.getContentHeight()) / 2;
-		int ro = (h - panelRewards.getContentHeight()) / 2;
+		int tox = (panelTasks.width - panelTasks.getContentWidth()) / 2;
+		int rox = (panelRewards.width - panelRewards.getContentWidth()) / 2;
+		int toy = (panelTasks.height - panelTasks.getContentHeight()) / 2;
+		int roy = (panelRewards.height - panelRewards.getContentHeight()) / 2;
 
 		for (Widget widget : panelTasks.widgets)
 		{
-			widget.setWidth(panelTasks.width);
-			widget.setY(widget.posY + to);
+			widget.setX(widget.posX + tox);
+			widget.setY(widget.posY + toy);
 		}
 
 		for (Widget widget : panelRewards.widgets)
 		{
-			widget.setWidth(panelRewards.width);
-			widget.setY(widget.posY + ro);
+			widget.setX(widget.posX + rox);
+			widget.setY(widget.posY + roy);
 		}
 
-		panelText.setPosAndSize(0, h + 18, w, 0);
+		panelTasksAndRewards.setPosAndSize(0, 16, panelTasksAndRewards.getContentWidth(), panelTasksAndRewards.getContentHeight());
+		panelText.setPosAndSize(3, panelTasksAndRewards.posY + panelTasksAndRewards.height + 12, panelContent.width - 6, 0);
 
 		String desc = GuiQuestTree.fixI18n(TextFormatting.GRAY, quest.description);
 
@@ -220,23 +295,17 @@ public class PanelViewQuest extends Panel
 		if (panelText.widgets.isEmpty())
 		{
 			panelText.setHeight(0);
-			setHeight(Math.min(panelContent.getContentHeight() + 19, parent.height - 10));
+			setHeight(Math.min(panelContent.getContentHeight() + 25, parent.height - 10));
 		}
 		else
 		{
-			panelText.setHeight(panelText.align(new WidgetLayout.Vertical(4, 0, 1)));
+			panelContent.add(new ColorWidget(panelContent, gui.borderColor, null).setPosAndSize(1, panelTasksAndRewards.posY + panelTasksAndRewards.height + 6, panelContent.width - 2, 1));
+			panelText.setHeight(panelText.align(new WidgetLayout.Vertical(0, 0, 1)));
 			setHeight(Math.min(panelContent.getContentHeight() + 20, parent.height - 10));
 		}
 
 		setPos((parent.width - width) / 2, (parent.height - height) / 2);
 		panelContent.setHeight(height - 17);
-
-		panelContent.add(new ColorWidget(panelContent, Color4I.WHITE.withAlpha(50), null).setPosAndSize(w2, 0, 1, panelContent.height - panelText.height - (panelText.widgets.isEmpty() ? 0 : 1)));
-
-		if (!panelText.widgets.isEmpty())
-		{
-			panelContent.add(new ColorWidget(panelContent, Color4I.WHITE.withAlpha(50), null).setPosAndSize(0, panelContent.height - panelText.height - 1, w, 1));
-		}
 
 		/* Put this somewhere
 		if (!selectedQuest.isComplete(ClientQuestFile.INSTANCE.self))
@@ -295,7 +364,6 @@ public class PanelViewQuest extends Panel
 	@Override
 	public void alignWidgets()
 	{
-
 	}
 
 	@Override

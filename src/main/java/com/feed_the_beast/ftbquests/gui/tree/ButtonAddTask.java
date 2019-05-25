@@ -1,9 +1,10 @@
 package com.feed_the_beast.ftbquests.gui.tree;
 
+import com.feed_the_beast.ftblib.lib.gui.Button;
 import com.feed_the_beast.ftblib.lib.gui.ContextMenuItem;
 import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
 import com.feed_the_beast.ftblib.lib.gui.Panel;
-import com.feed_the_beast.ftblib.lib.gui.SimpleTextButton;
+import com.feed_the_beast.ftblib.lib.gui.Theme;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.gui.FTBQuestsTheme;
 import com.feed_the_beast.ftbquests.net.edit.MessageCreateObject;
@@ -18,7 +19,7 @@ import java.util.List;
 /**
  * @author LatvianModder
  */
-public class ButtonAddTask extends SimpleTextButton
+public class ButtonAddTask extends Button
 {
 	public final Quest quest;
 
@@ -26,6 +27,7 @@ public class ButtonAddTask extends SimpleTextButton
 	{
 		super(panel, I18n.format("gui.add"), FTBQuestsTheme.ADD);
 		quest = q;
+		setSize(18, 18);
 	}
 
 	@Override
@@ -47,5 +49,14 @@ public class ButtonAddTask extends SimpleTextButton
 		}
 
 		getGui().openContextMenu(contextMenu);
+	}
+
+	@Override
+	public void drawBackground(Theme theme, int x, int y, int w, int h)
+	{
+		if (isMouseOver())
+		{
+			super.drawBackground(theme, x, y, w, h);
+		}
 	}
 }
