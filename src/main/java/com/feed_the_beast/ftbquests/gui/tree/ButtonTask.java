@@ -11,6 +11,7 @@ import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.gui.FTBQuestsTheme;
 import com.feed_the_beast.ftbquests.quest.task.QuestTask;
 import com.feed_the_beast.ftbquests.quest.task.QuestTaskData;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.text.TextFormatting;
 
 import javax.annotation.Nullable;
@@ -27,10 +28,10 @@ public class ButtonTask extends SimpleTextButton
 
 	public ButtonTask(Panel panel, QuestTask t)
 	{
-		super(panel, t.getDisplayName().getFormattedText(), GuiIcons.ACCEPT);
+		super(panel, "", GuiIcons.ACCEPT);
 		treeGui = (GuiQuestTree) panel.getGui();
 		task = t;
-		setHeight(24);
+		setSize(18, 18);
 	}
 
 	@Override
@@ -129,6 +130,15 @@ public class ButtonTask extends SimpleTextButton
 	}
 
 	@Override
+	public void drawBackground(Theme theme, int x, int y, int w, int h)
+	{
+		if (isMouseOver())
+		{
+			super.drawBackground(theme, x, y, w, h);
+		}
+	}
+
+	@Override
 	public void drawIcon(Theme theme, int x, int y, int w, int h)
 	{
 		task.drawGUI(treeGui.file.self == null ? null : treeGui.file.self.getQuestTaskData(task), x, y, w, h);
@@ -141,7 +151,10 @@ public class ButtonTask extends SimpleTextButton
 
 		if (treeGui.file.self != null && task.isComplete(treeGui.file.self))
 		{
+			GlStateManager.pushMatrix();
+			GlStateManager.translate(0F, 0F, 500F);
 			FTBQuestsTheme.COMPLETED.draw(x + w - 9, y + 1, 8, 8);
+			GlStateManager.popMatrix();
 		}
 	}
 }

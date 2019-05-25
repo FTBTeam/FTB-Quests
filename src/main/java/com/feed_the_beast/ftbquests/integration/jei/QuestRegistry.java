@@ -34,7 +34,7 @@ public enum QuestRegistry
 			{
 				for (Quest quest : chapter.quests)
 				{
-					if (!quest.tasks.isEmpty() || !quest.rewards.isEmpty())
+					if (!quest.rewards.isEmpty())
 					{
 						QuestWrapper wrapper = new QuestWrapper(quest);
 						list.add(wrapper);
