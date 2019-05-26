@@ -115,7 +115,7 @@ public class KillTask extends QuestTask
 		}
 
 		config.addEnum("entity", () -> entity, v -> entity = v, NameMap.create(ZOMBIE, NameMap.ObjectProperties.withName((sender, s) -> new TextComponentTranslation("entity." + EntityList.getTranslationName(s) + ".name")), ids.toArray(new ResourceLocation[0])));
-		config.addLong("value", () -> value, v -> value = v, 1L, 1L, Long.MAX_VALUE);
+		config.addLong("value", () -> value, v -> value = v, 100L, 1L, Long.MAX_VALUE);
 	}
 
 	@Override
