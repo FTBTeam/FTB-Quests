@@ -55,7 +55,7 @@ public final class RewardTable extends QuestObjectBase
 		file = f;
 		rewards = new ArrayList<>();
 		fakeQuest = new Quest(new QuestChapter(file));
-		emptyWeight = 9;
+		emptyWeight = 0;
 		lootSize = 27;
 		hideTooltip = false;
 		useTitle = false;
