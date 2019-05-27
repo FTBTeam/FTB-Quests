@@ -33,6 +33,7 @@ import com.feed_the_beast.ftbquests.quest.reward.QuestRewardType;
 import com.feed_the_beast.ftbquests.quest.reward.RandomReward;
 import com.feed_the_beast.ftbquests.quest.reward.XPLevelsReward;
 import com.feed_the_beast.ftbquests.quest.reward.XPReward;
+import com.feed_the_beast.ftbquests.quest.task.AdvancementTask;
 import com.feed_the_beast.ftbquests.quest.task.CheckmarkTask;
 import com.feed_the_beast.ftbquests.quest.task.DimensionTask;
 import com.feed_the_beast.ftbquests.quest.task.FTBQuestsTasks;
@@ -161,7 +162,8 @@ public class FTBQuestsEventHandler
 				FTBQuestsTasks.STAT = new QuestTaskType(StatTask::new).setRegistryName("stat").setIcon(Icon.getIcon("minecraft:items/iron_sword")),
 				FTBQuestsTasks.KILL = new QuestTaskType(KillTask::new).setRegistryName("kill").setIcon(Icon.getIcon("minecraft:items/diamond_sword")),
 				FTBQuestsTasks.LOCATION = new QuestTaskType(LocationTask::new).setRegistryName("location").setIcon(Icon.getIcon("minecraft:items/compass_00")),
-				FTBQuestsTasks.CHECKMARK = new QuestTaskType(CheckmarkTask::new).setRegistryName("checkmark").setIcon(GuiIcons.ACCEPT_GRAY)
+				FTBQuestsTasks.CHECKMARK = new QuestTaskType(CheckmarkTask::new).setRegistryName("checkmark").setIcon(GuiIcons.ACCEPT_GRAY),
+				FTBQuestsTasks.ADVANCEMENT = new QuestTaskType(AdvancementTask::new).setRegistryName("advancement").setIcon(Icon.getIcon("minecraft:items/wheat"))
 		);
 
 		FTBQuests.PROXY.setTaskGuiProviders();

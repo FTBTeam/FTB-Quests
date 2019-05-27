@@ -2,6 +2,9 @@ package com.feed_the_beast.ftbquests;
 
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
+import net.minecraft.advancements.Advancement;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 
@@ -29,5 +32,21 @@ public class FTBQuestsCommon
 
 	public void setRewardGuiProviders()
 	{
+	}
+
+	@Nullable
+	public Advancement getAdvancement(@Nullable MinecraftServer server, String id)
+	{
+		if (id.isEmpty())
+		{
+			return null;
+		}
+
+		if (server != null)
+		{
+			return server.getAdvancementManager().getAdvancement(new ResourceLocation(id));
+		}
+
+		return null;
 	}
 }

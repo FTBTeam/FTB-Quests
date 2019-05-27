@@ -146,7 +146,7 @@ ftbquests.gui.open_in_guide=Click here to read more...
 ftbquests.task=Task
 ftbquests.tasks=Tasks
 ftbquests.task.completed=Task completed!
-ftbquests.task.click_to_submit=Click to submit items
+ftbquests.task.click_to_submit=Click to submit
 ftbquests.task.auto_detected=Items will be auto-detected
 ftbquests.task.click_to_submit_all=Click to submit all items
 ftbquests.task.max_input=Max Input
@@ -198,6 +198,9 @@ ftbquests.task.ftbquests.location.h=H
 ftbquests.task.ftbquests.location.d=D
 
 ftbquests.task.ftbquests.checkmark=Checkmark
+
+ftbquests.task.ftbquests.advancement=Advancement
+ftbquests.task.ftbquests.advancement.title=Advancement '%s'
 
 ftbquests.task.ftbquests.buildcraft_mj=BuildCraft Energy
 ftbquests.task.ftbquests.buildcraft_mj.value=mJ
