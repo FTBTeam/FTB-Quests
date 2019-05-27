@@ -1,10 +1,10 @@
 package com.feed_the_beast.ftbquests.gui.tree;
 
+import com.feed_the_beast.ftblib.lib.gui.Button;
 import com.feed_the_beast.ftblib.lib.gui.ContextMenuItem;
 import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
 import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.gui.Panel;
-import com.feed_the_beast.ftblib.lib.gui.SimpleTextButton;
 import com.feed_the_beast.ftblib.lib.gui.Theme;
 import com.feed_the_beast.ftblib.lib.gui.WidgetType;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
@@ -21,23 +21,17 @@ import java.util.List;
 /**
  * @author LatvianModder
  */
-public class ButtonTask extends SimpleTextButton
+public class ButtonTask extends Button
 {
 	public final GuiQuestTree treeGui;
 	public QuestTask task;
 
 	public ButtonTask(Panel panel, QuestTask t)
 	{
-		super(panel, "", GuiIcons.ACCEPT);
+		super(panel, t.getDisplayName().getFormattedText(), GuiIcons.ACCEPT);
 		treeGui = (GuiQuestTree) panel.getGui();
 		task = t;
 		setSize(18, 18);
-	}
-
-	@Override
-	public boolean hasIcon()
-	{
-		return true;
 	}
 
 	@Override
@@ -62,7 +56,7 @@ public class ButtonTask extends SimpleTextButton
 		if (button.isLeft())
 		{
 			GuiHelper.playClickSound();
-			task.onButtonClicked();
+			task.onButtonClicked(!(task.invalid || treeGui.file.self == null || !task.quest.canStartTasks(treeGui.file.self) || task.isComplete(treeGui.file.self)));
 		}
 		else if (button.isRight() && treeGui.file.canEdit())
 		{
@@ -88,6 +82,11 @@ public class ButtonTask extends SimpleTextButton
 			list.add(TextFormatting.DARK_GRAY + task.toString());
 		}
 
+		if (task.addTitleInMouseOverText())
+		{
+			list.add(getTitle());
+		}
+
 		QuestTaskData data;
 
 		if (treeGui.file.self != null && task.quest.canStartTasks(treeGui.file.self))
@@ -105,28 +104,26 @@ public class ButtonTask extends SimpleTextButton
 				{
 					String max = isShiftKeyDown() ? Long.toUnsignedString(maxp) : task.getMaxProgressString();
 					String prog = isShiftKeyDown() ? Long.toUnsignedString(data.getProgress()) : data.getProgressString();
-					list.add(TextFormatting.DARK_GREEN + (data.getProgress() > maxp ? max : prog) + " / " + max + " [" + data.getRelativeProgress() + "%]");
+
+					if (maxp < 100L)
+					{
+						list.add(TextFormatting.DARK_GREEN + (data.getProgress() > maxp ? max : prog) + " / " + max);
+					}
+					else
+					{
+						list.add(TextFormatting.DARK_GREEN + (data.getProgress() > maxp ? max : prog) + " / " + max + " [" + data.getRelativeProgress() + "%]");
+					}
+
 				}
 			}
 		}
 		else
 		{
 			data = null;
-			list.add(TextFormatting.DARK_GRAY + "[0%]");
+			//list.add(TextFormatting.DARK_GRAY + "[0%]");
 		}
 
 		task.addMouseOverText(list, data);
-	}
-
-	@Override
-	public WidgetType getWidgetType()
-	{
-		if (task.invalid || treeGui.file.self == null || !task.quest.canStartTasks(treeGui.file.self) || task.isComplete(treeGui.file.self))
-		{
-			return WidgetType.DISABLED;
-		}
-
-		return super.getWidgetType();
 	}
 
 	@Override

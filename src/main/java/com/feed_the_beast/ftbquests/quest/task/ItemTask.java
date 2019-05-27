@@ -1,8 +1,8 @@
 package com.feed_the_beast.ftbquests.quest.task;
 
+import com.feed_the_beast.ftblib.integration.FTBLibJEIIntegration;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigItemStack;
-import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.IconAnimation;
 import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
@@ -11,7 +11,7 @@ import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.util.StringJoiner;
 import com.feed_the_beast.ftblib.lib.util.misc.NameMap;
-import com.feed_the_beast.ftbquests.net.MessageSubmitTask;
+import com.feed_the_beast.ftbquests.gui.tree.GuiValidItems;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.latmod.mods.itemfilters.api.ItemFiltersAPI;
@@ -31,6 +31,7 @@ import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.CapabilityItemHandler;
@@ -53,7 +54,6 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 	public boolean consumeItems;
 	public boolean ignoreDamage;
 	public NBTMatchingMode nbtMode;
-	public boolean hideValidItems;
 
 	public ItemTask(Quest quest)
 	{
@@ -62,7 +62,6 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 		consumeItems = quest.chapter.file.defaultConsumeItems;
 		ignoreDamage = false;
 		nbtMode = NBTMatchingMode.MATCH;
-		hideValidItems = false;
 	}
 
 	@Override
@@ -120,11 +119,6 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 		{
 			nbt.setByte("ignore_nbt", (byte) nbtMode.ordinal());
 		}
-
-		if (hideValidItems)
-		{
-			nbt.setBoolean("hide_valid_items", true);
-		}
 	}
 
 	@Override
@@ -166,7 +160,6 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 		consumeItems = nbt.hasKey("consume_items") ? nbt.getBoolean("consume_items") : quest.chapter.file.defaultConsumeItems;
 		ignoreDamage = nbt.getBoolean("ignore_damage");
 		nbtMode = NBTMatchingMode.VALUES[nbt.getByte("ignore_nbt")];
-		hideValidItems = nbt.getBoolean("hide_valid_items");
 	}
 
 	@Override
@@ -180,7 +173,6 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 		flags = Bits.setFlag(flags, 2, ignoreDamage);
 		flags = Bits.setFlag(flags, 4, nbtMode != NBTMatchingMode.MATCH);
 		flags = Bits.setFlag(flags, 8, nbtMode == NBTMatchingMode.CONTAIN);
-		flags = Bits.setFlag(flags, 16, hideValidItems);
 		data.writeVarInt(flags);
 	}
 
@@ -194,7 +186,18 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 		consumeItems = Bits.getFlag(flags, 1);
 		ignoreDamage = Bits.getFlag(flags, 2);
 		nbtMode = Bits.getFlag(flags, 4) ? Bits.getFlag(flags, 8) ? NBTMatchingMode.CONTAIN : NBTMatchingMode.IGNORE : NBTMatchingMode.MATCH;
-		hideValidItems = Bits.getFlag(flags, 16);
+	}
+
+	public List<ItemStack> getValidItems()
+	{
+		if (items.size() == 1 && ItemFiltersAPI.isFilter(items.get(0)))
+		{
+			List<ItemStack> validItems = new ArrayList<>();
+			ItemFiltersAPI.getValidItems(items.get(0), validItems);
+			return validItems;
+		}
+
+		return items;
 	}
 
 	@Override
@@ -202,31 +205,13 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 	{
 		List<Icon> icons = new ArrayList<>();
 
-		if (items.size() == 1 && ItemFiltersAPI.isFilter(items.get(0)))
+		for (ItemStack stack : getValidItems())
 		{
-			List<ItemStack> iconStacks = new ArrayList<>();
-			ItemFiltersAPI.getValidItems(items.get(0), iconStacks);
+			Icon icon = ItemIcon.getItemIcon(ItemHandlerHelper.copyStackWithSize(stack, 1));
 
-			for (ItemStack stack : iconStacks)
+			if (!icon.isEmpty())
 			{
-				Icon icon = ItemIcon.getItemIcon(ItemHandlerHelper.copyStackWithSize(stack, 1));
-
-				if (!icon.isEmpty())
-				{
-					icons.add(icon);
-				}
-			}
-		}
-		else
-		{
-			for (ItemStack stack : items)
-			{
-				Icon icon = ItemIcon.getItemIcon(ItemHandlerHelper.copyStackWithSize(stack, 1));
-
-				if (!icon.isEmpty())
-				{
-					icons.add(icon);
-				}
+				icons.add(icon);
 			}
 		}
 
@@ -335,7 +320,6 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 		config.addBool("consume_items", () -> consumeItems, v -> consumeItems = v, quest.chapter.file.defaultConsumeItems).setCanEdit(!quest.canRepeat);
 		config.addBool("ignore_damage", () -> ignoreDamage, v -> ignoreDamage = v, false);
 		config.addEnum("nbt_mode", () -> nbtMode, v -> nbtMode = v, NameMap.create(NBTMatchingMode.MATCH, NBTMatchingMode.VALUES));
-		config.addBool("hide_valid_items", () -> hideValidItems, v -> hideValidItems = v, false);
 	}
 
 	@Override
@@ -352,53 +336,33 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void onButtonClicked()
+	public void onButtonClicked(boolean canClick)
 	{
-		new MessageSubmitTask(id).sendToServer();
+		List<ItemStack> validItems = getValidItems();
+
+		if (!consumesResources() && validItems.size() == 1 && Loader.isModLoaded("jei"))
+		{
+			showJEIRecipe(validItems.get(0));
+		}
+		else
+		{
+			new GuiValidItems(this, validItems, canClick).openGui();
+		}
+	}
+
+	private void showJEIRecipe(ItemStack stack)
+	{
+		FTBLibJEIIntegration.showRecipe(stack);
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void addMouseOverText(List<String> list, @Nullable QuestTaskData data)
 	{
-		list.add(TextFormatting.GRAY + (canInsertItem() ? I18n.format("ftbquests.task.ftbquests.item.consume_true") : I18n.format("ftbquests.task.ftbquests.item.consume_false")));
-		list.add(TextFormatting.GRAY + (canInsertItem() ? I18n.format("ftbquests.task.click_to_submit") : I18n.format("ftbquests.task.auto_detected")));
-
-		if (hideValidItems)
+		if (consumesResources() || Loader.isModLoaded("jei") || getValidItems().size() > 1)
 		{
-			return;
-		}
-
-		List<ItemStack> validItems;
-
-		if (items.size() == 1)
-		{
-			validItems = new ArrayList<>();
-			ItemFiltersAPI.getValidItems(items.get(0), validItems);
-		}
-		else
-		{
-			validItems = items;
-		}
-
-		if (validItems.isEmpty())
-		{
-			return;
-		}
-
-		list.add("");
-
-		if (validItems.size() > 1)
-		{
-			list.add(TextFormatting.GRAY + I18n.format("ftbquests.task.ftbquests.item.valid_items"));
-		}
-
-		GuiHelper.addStackTooltip(validItems.get(0), list);
-
-		for (int i = 1; i < validItems.size(); i++)
-		{
-			list.add(" - - -");
-			GuiHelper.addStackTooltip(validItems.get(i), list);
+			list.add("");
+			list.add(TextFormatting.YELLOW.toString() + TextFormatting.UNDERLINE + I18n.format(consumesResources() ? "ftbquests.task.click_to_submit" : "ftbquests.task.ftbquests.item.view_items"));
 		}
 	}
 

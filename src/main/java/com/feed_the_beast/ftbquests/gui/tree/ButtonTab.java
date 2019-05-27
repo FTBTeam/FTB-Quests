@@ -16,7 +16,7 @@ public abstract class ButtonTab extends Button
 	{
 		super(panel, title, icon);
 		treeGui = (GuiQuestTree) panel.getGui();
-		setSize(18, 18);
+		setSize(20, 18);
 	}
 
 	@Override
@@ -28,7 +28,7 @@ public abstract class ButtonTab extends Button
 
 		if (isMouseOver())
 		{
-			treeGui.backgroundColor.draw(x, y + 1, w, h - 2);
+			treeGui.backgroundColor.draw(x + 1, y, w - 2, h);
 		}
 	}
 }

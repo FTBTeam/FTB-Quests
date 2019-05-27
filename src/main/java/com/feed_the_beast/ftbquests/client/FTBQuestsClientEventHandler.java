@@ -5,10 +5,7 @@ import com.feed_the_beast.ftblib.events.client.CustomClickEvent;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.item.ItemLootCrate;
-import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.loot.LootCrate;
-import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
 import com.feed_the_beast.ftbquests.tile.TileProgressScreenCore;
 import com.feed_the_beast.ftbquests.tile.TileTaskScreenCore;
 import net.minecraft.client.Minecraft;
@@ -83,24 +80,7 @@ public class FTBQuestsClientEventHandler
 						return "[!]";
 					}
 
-					int r = 0;
-
-					for (QuestChapter chapter : ClientQuestFile.INSTANCE.chapters)
-					{
-						for (Quest quest : chapter.quests)
-						{
-							if (quest.isComplete(ClientQuestFile.INSTANCE.self))
-							{
-								for (QuestReward reward : quest.rewards)
-								{
-									if (!ClientQuestFile.INSTANCE.isRewardClaimed(reward))
-									{
-										r++;
-									}
-								}
-							}
-						}
-					}
+					int r = ClientQuestFile.INSTANCE.getUnclaimedRewards(Minecraft.getMinecraft().player.getUniqueID(), ClientQuestFile.INSTANCE.self);
 
 					if (r > 0)
 					{

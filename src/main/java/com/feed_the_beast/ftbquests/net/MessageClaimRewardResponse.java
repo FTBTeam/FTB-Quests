@@ -68,8 +68,7 @@ public class MessageClaimRewardResponse extends MessageToClient
 			if (treeGui != null)
 			{
 				treeGui.viewQuestPanel.refreshWidgets();
-				treeGui.otherButtons.refreshWidgets();
-				treeGui.otherButtons.alignWidgets();
+				treeGui.otherButtonsTopPanel.refreshWidgets();
 			}
 			else
 			{

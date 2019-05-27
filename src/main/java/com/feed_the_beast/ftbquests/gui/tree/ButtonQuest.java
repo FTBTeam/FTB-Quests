@@ -19,6 +19,7 @@ import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
 import com.feed_the_beast.ftbquests.quest.reward.QuestRewardType;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.nbt.NBTTagCompound;
@@ -53,7 +54,7 @@ public class ButtonQuest extends Button
 	@Override
 	public boolean checkMouseOver(int mouseX, int mouseY)
 	{
-		if (treeGui.viewQuestPanel.isMouseOver() || treeGui.subscribe.isMouseOver())
+		if (treeGui.viewQuestPanel.isMouseOver() || treeGui.chapterHoverPanel.isMouseOverAnyWidget())
 		{
 			return false;
 		}
@@ -71,7 +72,7 @@ public class ButtonQuest extends Button
 			{
 				if (!dependency.invalid && dependency instanceof Quest)
 				{
-					for (Widget widget : treeGui.quests.widgets)
+					for (Widget widget : treeGui.questPanel.widgets)
 					{
 						if (widget instanceof ButtonQuest && dependency == ((ButtonQuest) widget).quest)
 						{
@@ -237,7 +238,7 @@ public class ButtonQuest extends Button
 		if (quest.verifyDependencies(false))
 		{
 			new MessageEditObjectDirect(quest).sendToServer();
-			treeGui.quests.refreshWidgets();
+			treeGui.questPanel.refreshWidgets();
 		}
 		else
 		{
@@ -278,26 +279,18 @@ public class ButtonQuest extends Button
 			list.add(description);
 		}
 
-		if (treeGui.file.self != null && quest.isComplete(treeGui.file.self))
+		if (treeGui.file.self != null)
 		{
-			int r = 0;
+			int r = quest.getUnclaimedRewards(Minecraft.getMinecraft().player.getUniqueID(), treeGui.file.self);
 
-			for (QuestReward reward : quest.rewards)
-			{
-				if (!treeGui.file.isRewardClaimed(reward))
-				{
-					r++;
-				}
-			}
-
-			if (r > 0 || quest.canRepeat)
+			if (r > 0)// || quest.canRepeat)
 			{
 				list.add("");
 			}
 
 			if (r > 0)
 			{
-				list.add(I18n.format("ftbquests.gui.unclaimed_rewards") + ": " + TextFormatting.GOLD + r);
+				list.add(I18n.format("ftbquests.gui.collect_rewards", TextFormatting.GOLD.toString() + r));
 			}
 
 			/*

@@ -183,7 +183,7 @@ public abstract class QuestReward extends QuestObjectBase
 
 		if (gui != null)
 		{
-			gui.quests.refreshWidgets();
+			gui.questPanel.refreshWidgets();
 		}
 	}
 
@@ -230,6 +230,11 @@ public abstract class QuestReward extends QuestObjectBase
 	{
 	}
 
+	public boolean addTitleInMouseOverText()
+	{
+		return true;
+	}
+
 	@SideOnly(Side.CLIENT)
 	public void onButtonClicked()
 	{
@@ -242,7 +247,6 @@ public abstract class QuestReward extends QuestObjectBase
 	}
 
 	@Nullable
-	@SideOnly(Side.CLIENT)
 	public Object getIngredient()
 	{
 		return getIcon().getIngredient();

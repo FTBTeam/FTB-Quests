@@ -21,7 +21,9 @@ import net.minecraftforge.common.util.Constants;
 import javax.annotation.Nullable;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * @author LatvianModder
@@ -273,8 +275,21 @@ public final class QuestChapter extends QuestObject
 
 	public boolean isVisible(@Nullable ITeamData data)
 	{
-		if (alwaysInvisible || quests.isEmpty())
+		if (alwaysInvisible || quests.isEmpty() && !hasChildren())
 		{
+			return false;
+		}
+
+		if (quests.isEmpty())
+		{
+			for (QuestChapter child : getChildren())
+			{
+				if (child.isVisible(data))
+				{
+					return true;
+				}
+			}
+
 			return false;
 		}
 
@@ -298,5 +313,76 @@ public final class QuestChapter extends QuestObject
 		{
 			quest.clearCachedData();
 		}
+	}
+
+	public boolean hasChildren()
+	{
+		for (QuestChapter chapter : file.chapters)
+		{
+			if (chapter.group == this)
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	public List<QuestChapter> getChildren()
+	{
+		List<QuestChapter> list = Collections.emptyList();
+
+		for (QuestChapter chapter : file.chapters)
+		{
+			if (chapter.group == this)
+			{
+				if (list.isEmpty())
+				{
+					list = new ArrayList<>(3);
+				}
+
+				list.add(chapter);
+			}
+		}
+
+		return list;
+	}
+
+	public boolean hasUnclaimedRewards(UUID player, ITeamData data)
+	{
+		for (Quest quest : quests)
+		{
+			if (quest.hasUnclaimedRewards(player, data))
+			{
+				return true;
+			}
+		}
+
+		for (QuestChapter chapter : getChildren())
+		{
+			if (chapter.hasUnclaimedRewards(player, data))
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	public int getUnclaimedRewards(UUID player, ITeamData data)
+	{
+		int r = 0;
+
+		for (Quest quest : quests)
+		{
+			r += quest.getUnclaimedRewards(player, data);
+		}
+
+		for (QuestChapter chapter : getChildren())
+		{
+			r += chapter.getUnclaimedRewards(player, data);
+		}
+
+		return r;
 	}
 }

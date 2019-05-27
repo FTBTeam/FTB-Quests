@@ -148,7 +148,7 @@ public class PanelQuests extends Panel
 			widget.setPosAndSize((x - minX) * bsize, (y - minY) * bsize, bsize, bsize);
 		}
 
-		setPosAndSize(18, 1, treeGui.width - 36, treeGui.height - 2);
+		setPosAndSize(20, 1, treeGui.width - 40, treeGui.height - 2);
 	}
 
 	@Override
