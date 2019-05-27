@@ -365,50 +365,38 @@ public class ButtonQuest extends Button
 		int sx = x + (w - s) / 2;
 		int sy = y + (h - s) / 2;
 
-		if (treeGui.selectedQuests.contains(quest))
-		{
-			int s1 = s + z / 5;
-			int sx1 = x + (w - s1) / 2;
-			int sy1 = y + (h - s1) / 2;
-			GlStateManager.pushMatrix();
-			GlStateManager.translate(sx1, sy1, 0D);
-			GlStateManager.scale(s1, s1, 1D);
-			quest.shape.outline.draw(0, 0, 1, 1, Color4I.WHITE.withAlpha(150 + (int) (Math.sin(System.currentTimeMillis() * 0.003D) * 80)));
-			GlStateManager.popMatrix();
-		}
-
-		GlStateManager.pushMatrix();
-		GlStateManager.translate(sx, sy, 0D);
-		GlStateManager.scale(s, s, 1D);
-		quest.shape.shape.draw(0, 0, 1, 1, Color4I.DARK_GRAY);
-		quest.shape.background.draw(0, 0, 1, 1, Color4I.WHITE.withAlpha(150));
-		quest.shape.outline.draw(0, 0, 1, 1, outlineColor);
-		GlStateManager.popMatrix();
+		quest.shape.shape.draw(sx, sy, s, s, Color4I.DARK_GRAY);
+		quest.shape.background.draw(sx, sy, s, s, Color4I.WHITE.withAlpha(150));
+		quest.shape.outline.draw(sx, sy, s, s, outlineColor);
 
 		if (!icon.isEmpty())
 		{
+			icon.draw(x + (w - z) / 2, y + (h - z) / 2, z, z);
+		}
+
+		if (quest == treeGui.viewQuestPanel.quest || treeGui.selectedQuests.contains(quest))
+		{
 			GlStateManager.pushMatrix();
-			GlStateManager.translate(x + (w - z) / 2, y + (h - z) / 2, 0D);
-			GlStateManager.scale(z, z, 1D);
-			icon.draw(0, 0, 1, 1);
+			GlStateManager.translate(0F, 0F, 500F);
+			Color4I col = Color4I.WHITE.withAlpha(190 + (int) (Math.sin(System.currentTimeMillis() * 0.003D) * 50));
+			quest.shape.outline.draw(sx, sy, s, s, col);
+			quest.shape.background.draw(sx, sy, s, s, col);
 			GlStateManager.popMatrix();
 		}
 
 		if (cantStart)
 		{
 			GlStateManager.pushMatrix();
-			GlStateManager.translate(sx, sy, 500);
-			GlStateManager.scale(s, s, 1D);
-			quest.shape.shape.draw(0, 0, 1, 1, Color4I.BLACK.withAlpha(100));
+			GlStateManager.translate(0F, 0F, 500F);
+			quest.shape.shape.draw(sx, sy, s, s, Color4I.BLACK.withAlpha(100));
 			GlStateManager.popMatrix();
 		}
 
 		if (isMouseOver())
 		{
 			GlStateManager.pushMatrix();
-			GlStateManager.translate(sx, sy, 500);
-			GlStateManager.scale(s, s, 1D);
-			quest.shape.shape.draw(0, 0, 1, 1, Color4I.WHITE.withAlpha(50));
+			GlStateManager.translate(0F, 0F, 500F);
+			quest.shape.shape.draw(sx, sy, s, s, Color4I.WHITE.withAlpha(50));
 			GlStateManager.popMatrix();
 		}
 
@@ -417,9 +405,8 @@ public class ButtonQuest extends Button
 			int s1 = z / 2;
 			int os1 = s1 / 4;
 			GlStateManager.pushMatrix();
-			GlStateManager.translate(x + w - s1 - os1, y + os1, 500);
-			GlStateManager.scale(s1, s1, 1D);
-			qicon.draw(0, 0, 1, 1);
+			GlStateManager.translate(0F, 0F, 500F);
+			qicon.draw(x + w - s1 - os1, y + os1, s1, s1);
 			GlStateManager.popMatrix();
 		}
 	}
