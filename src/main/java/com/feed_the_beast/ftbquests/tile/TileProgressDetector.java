@@ -154,11 +154,6 @@ public class TileProgressDetector extends TileWithTeam implements ITickable, ICo
 
 	public void editConfig(EntityPlayerMP player)
 	{
-		if (!player.isSneaking())
-		{
-			return;
-		}
-
 		boolean editor = FTBQuests.canEdit(player);
 
 		if (!editor && !isOwner(player))
@@ -172,7 +167,10 @@ public class TileProgressDetector extends TileWithTeam implements ITickable, ICo
 		group0.setDisplayName(new TextComponentTranslation("tile.ftbquests.progress_detector.name"));
 		ConfigGroup config = group0.getGroup("ftbquests.progress_detector");
 
-		config.add("team", createTeamConfig(), ConfigNull.INSTANCE).setDisplayName(new TextComponentTranslation("ftbquests.team")).setCanEdit(editor);
+		if (editor)
+		{
+			config.add("team", createTeamConfig(), ConfigNull.INSTANCE).setDisplayName(new TextComponentTranslation("ftbquests.team"));
+		}
 
 		config.add("object", new ConfigQuestObject(ServerQuestFile.INSTANCE, cObject, QuestObjectType.ALL_PROGRESSING)
 		{
