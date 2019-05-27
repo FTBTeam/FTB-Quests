@@ -111,7 +111,7 @@ public class ButtonTask extends Button
 					}
 					else
 					{
-						list.add(TextFormatting.DARK_GREEN + (data.getProgress() > maxp ? max : prog) + " / " + max + " [" + data.getRelativeProgress() + "%]");
+						list.add(TextFormatting.DARK_GREEN + (data.getProgress() > maxp ? max : prog) + " / " + max + TextFormatting.DARK_GRAY + " [" + data.getRelativeProgress() + "%]");
 					}
 
 				}

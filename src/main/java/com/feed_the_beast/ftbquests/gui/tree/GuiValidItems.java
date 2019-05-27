@@ -147,6 +147,7 @@ public class GuiValidItems extends GuiBase
 			{
 				GuiHelper.playClickSound();
 				new MessageSubmitTask(task.id).sendToServer();
+				onBack();
 			}
 
 			@Override

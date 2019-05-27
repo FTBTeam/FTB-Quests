@@ -14,6 +14,7 @@ public class FTBQuestsTasks
 	public static QuestTaskType KILL;
 	public static QuestTaskType LOCATION;
 	public static QuestTaskType CHECKMARK;
+	public static QuestTaskType ADVANCEMENT;
 
 	public static QuestTaskType IC2_ENERGY;
 	public static QuestTaskType BUILDCRAFT_MJ;

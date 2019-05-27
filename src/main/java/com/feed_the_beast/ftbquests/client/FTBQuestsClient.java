@@ -27,10 +27,13 @@ import com.feed_the_beast.ftbquests.quest.task.FluidTask;
 import com.feed_the_beast.ftbquests.quest.task.ItemTask;
 import com.feed_the_beast.ftbquests.quest.task.LocationTask;
 import com.latmod.mods.itemfilters.filters.NBTMatchingMode;
+import net.minecraft.advancements.Advancement;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityStructure;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.DimensionType;
@@ -40,6 +43,8 @@ import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.items.ItemHandlerHelper;
 import org.lwjgl.input.Keyboard;
+
+import javax.annotation.Nullable;
 
 public class FTBQuestsClient extends FTBQuestsCommon
 {
@@ -174,5 +179,17 @@ public class FTBQuestsClient extends FTBQuestsCommon
 				callback.accept(reward);
 			}
 		}).openGui());
+	}
+
+	@Override
+	@Nullable
+	public Advancement getAdvancement(@Nullable MinecraftServer server, String id)
+	{
+		if (server == null && !id.isEmpty() && Minecraft.getMinecraft().player != null)
+		{
+			return Minecraft.getMinecraft().player.connection.getAdvancementManager().getAdvancementList().getAdvancement(new ResourceLocation(id));
+		}
+
+		return super.getAdvancement(server, id);
 	}
 }
