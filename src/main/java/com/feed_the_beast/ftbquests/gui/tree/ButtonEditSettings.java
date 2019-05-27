@@ -4,8 +4,10 @@ import com.feed_the_beast.ftblib.lib.gui.ContextMenuItem;
 import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
 import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.gui.Panel;
+import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.util.FileUtils;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
+import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.gui.FTBQuestsTheme;
 import com.feed_the_beast.ftbquests.gui.GuiRewardTables;
@@ -31,7 +33,7 @@ public class ButtonEditSettings extends ButtonTab
 {
 	public ButtonEditSettings(Panel panel)
 	{
-		super(panel, I18n.format("gui.settings"), GuiIcons.SETTINGS);
+		super(panel, I18n.format("gui.settings"), Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/settings.png"));
 	}
 
 	@Override
@@ -141,8 +143,7 @@ public class ButtonEditSettings extends ButtonTab
 			}
 		}));
 
-		Panel panel = treeGui.openContextMenu(contextMenu);
-		panel.setPos(treeGui.width - panel.width - 2, height + 1);
+		treeGui.openContextMenu(contextMenu);
 	}
 
 	private void appendNum(StringBuilder sb, int num, char c)

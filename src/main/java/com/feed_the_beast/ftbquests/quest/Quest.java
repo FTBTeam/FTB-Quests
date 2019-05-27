@@ -813,8 +813,42 @@ public final class Quest extends QuestObject
 
 		if (gui != null)
 		{
-			gui.quests.refreshWidgets();
+			gui.questPanel.refreshWidgets();
 			gui.viewQuestPanel.refreshWidgets();
 		}
+	}
+
+	public boolean hasUnclaimedRewards(UUID player, ITeamData data)
+	{
+		if (isComplete(data))
+		{
+			for (QuestReward reward : rewards)
+			{
+				if (!data.isRewardClaimed(player, reward))
+				{
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
+	public int getUnclaimedRewards(UUID player, ITeamData data)
+	{
+		int r = 0;
+
+		if (isComplete(data))
+		{
+			for (QuestReward reward : rewards)
+			{
+				if (!data.isRewardClaimed(player, reward))
+				{
+					r++;
+				}
+			}
+		}
+
+		return r;
 	}
 }

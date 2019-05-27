@@ -2,6 +2,7 @@ package com.feed_the_beast.ftbquests.client;
 
 import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftblib.lib.gui.GuiBase;
+import com.feed_the_beast.ftblib.net.MessageMyTeamGui;
 import com.feed_the_beast.ftbquests.gui.GuiVariables;
 import com.feed_the_beast.ftbquests.gui.tree.GuiQuestTree;
 import com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIHelper;
@@ -122,8 +123,8 @@ public class ClientQuestFile extends QuestFile
 		{
 			hasPrev = true;
 			zoom = questTreeGui.zoom;
-			scrollX = questTreeGui.quests.getScrollX();
-			scrollY = questTreeGui.quests.getScrollY();
+			scrollX = questTreeGui.questPanel.getScrollX();
+			scrollY = questTreeGui.questPanel.getScrollY();
 			selectedChapter = questTreeGui.selectedChapter == null ? 0 : questTreeGui.selectedChapter.id;
 			selectedQuests = new int[questTreeGui.selectedQuests.size()];
 			int i = 0;
@@ -170,8 +171,8 @@ public class ClientQuestFile extends QuestFile
 
 		if (hasPrev)
 		{
-			questTreeGui.quests.setScrollX(scrollX);
-			questTreeGui.quests.setScrollY(scrollY);
+			questTreeGui.questPanel.setScrollX(scrollX);
+			questTreeGui.questPanel.setScrollY(scrollY);
 		}
 	}
 
@@ -187,7 +188,8 @@ public class ClientQuestFile extends QuestFile
 		}
 		else
 		{
-			player.sendStatusMessage(new TextComponentTranslation("ftblib.lang.team.error.no_team"), true);
+			new MessageMyTeamGui().sendToServer();
+			//player.sendStatusMessage(new TextComponentTranslation("ftblib.lang.team.error.no_team"), true);
 		}
 	}
 

@@ -2,6 +2,7 @@ package com.feed_the_beast.ftbquests.quest.task;
 
 import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
+import com.feed_the_beast.ftblib.lib.gui.WrappedIngredient;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.events.ObjectCompletedEvent;
@@ -158,7 +159,7 @@ public abstract class QuestTask extends QuestObject
 
 		if (gui != null)
 		{
-			gui.quests.refreshWidgets();
+			gui.questPanel.refreshWidgets();
 		}
 	}
 
@@ -229,6 +230,11 @@ public abstract class QuestTask extends QuestObject
 		return false;
 	}
 
+	public boolean consumesResources()
+	{
+		return canInsertItem();
+	}
+
 	public boolean hideProgressNumbers()
 	{
 		return getMaxProgress() <= 1L;
@@ -237,16 +243,24 @@ public abstract class QuestTask extends QuestObject
 	@SideOnly(Side.CLIENT)
 	public void addMouseOverText(List<String> list, @Nullable QuestTaskData data)
 	{
-		if (data != null && canInsertItem())
+		if (data != null && consumesResources())
 		{
 			list.add(TextFormatting.GRAY + I18n.format("ftbquests.task.click_to_submit"));
 		}
 	}
 
-	@SideOnly(Side.CLIENT)
-	public void onButtonClicked()
+	public boolean addTitleInMouseOverText()
 	{
-		new MessageSubmitTask(id).sendToServer();
+		return true;
+	}
+
+	@SideOnly(Side.CLIENT)
+	public void onButtonClicked(boolean canClick)
+	{
+		if (canClick)
+		{
+			new MessageSubmitTask(id).sendToServer();
+		}
 	}
 
 	public boolean submitItemsOnInventoryChange()
@@ -258,7 +272,12 @@ public abstract class QuestTask extends QuestObject
 	@SideOnly(Side.CLIENT)
 	public Object getIngredient()
 	{
-		return getIcon().getIngredient();
+		if (addTitleInMouseOverText())
+		{
+			return getIcon().getIngredient();
+		}
+
+		return new WrappedIngredient(getIcon().getIngredient()).tooltip();
 	}
 
 	@Override

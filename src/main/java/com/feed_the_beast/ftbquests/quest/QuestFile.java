@@ -42,6 +42,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Random;
+import java.util.UUID;
 
 /**
  * @author LatvianModder
@@ -1323,5 +1324,36 @@ public abstract class QuestFile extends QuestObject
 		{
 			variable.clearCachedProgress(id);
 		}
+	}
+
+	public boolean hasUnclaimedRewards(UUID player, ITeamData data)
+	{
+		for (QuestChapter chapter : chapters)
+		{
+			for (Quest quest : chapter.quests)
+			{
+				if (quest.hasUnclaimedRewards(player, data))
+				{
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
+	public int getUnclaimedRewards(UUID player, ITeamData data)
+	{
+		int r = 0;
+
+		for (QuestChapter chapter : chapters)
+		{
+			for (Quest quest : chapter.quests)
+			{
+				r += quest.getUnclaimedRewards(player, data);
+			}
+		}
+
+		return r;
 	}
 }

@@ -42,7 +42,7 @@ public class ButtonTask extends Button
 	public void onClicked(MouseButton button)
 	{
 		GuiHelper.playClickSound();
-		taskData.task.onButtonClicked();
+		taskData.task.onButtonClicked(true);
 	}
 
 	@Override

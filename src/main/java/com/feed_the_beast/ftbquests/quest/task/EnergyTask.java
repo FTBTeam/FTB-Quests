@@ -91,6 +91,12 @@ public abstract class EnergyTask extends QuestTask implements ISingleLongValueTa
 	}
 
 	@Override
+	public boolean consumesResources()
+	{
+		return true;
+	}
+
+	@Override
 	public void getConfig(ConfigGroup config)
 	{
 		super.getConfig(config);

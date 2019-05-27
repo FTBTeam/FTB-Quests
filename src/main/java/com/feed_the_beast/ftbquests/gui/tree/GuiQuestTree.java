@@ -11,6 +11,7 @@ import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.gui.IOpenableGui;
 import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.gui.Theme;
+import com.feed_the_beast.ftblib.lib.gui.Widget;
 import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.math.MathUtils;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
@@ -54,10 +55,11 @@ public class GuiQuestTree extends GuiBase
 	public QuestChapter selectedChapter;
 	public final HashSet<Quest> selectedQuests;
 	public final PanelChapters chapterPanel;
-	public final PanelQuests quests;
-	public final PanelOtherButtons otherButtons;
+	public final PanelQuests questPanel;
+	public final PanelOtherButtonsBottom otherButtonsBottomPanel;
+	public final PanelOtherButtonsTop otherButtonsTopPanel;
+	public final PanelChapterHover chapterHoverPanel;
 	public final PanelViewQuest viewQuestPanel;
-	public final ButtonSubscribe subscribe;
 	public Color4I borderColor, backgroundColor;
 	public boolean movingQuest = false;
 	public int zoom = 16;
@@ -73,11 +75,11 @@ public class GuiQuestTree extends GuiBase
 		borderColor = Color4I.WHITE.withAlpha(88);
 		backgroundColor = Color4I.WHITE.withAlpha(33);
 
-		quests = new PanelQuests(this);
-		otherButtons = new PanelOtherButtons(this);
+		questPanel = new PanelQuests(this);
+		otherButtonsBottomPanel = new PanelOtherButtonsBottom(this);
+		otherButtonsTopPanel = new PanelOtherButtonsTop(this);
+		chapterHoverPanel = new PanelChapterHover(this);
 		viewQuestPanel = new PanelViewQuest(this);
-
-		subscribe = new ButtonSubscribe(this);
 
 		selectChapter(null);
 	}
@@ -92,18 +94,19 @@ public class GuiQuestTree extends GuiBase
 	public void addWidgets()
 	{
 		add(chapterPanel);
-		add(quests);
-		add(otherButtons);
+		add(questPanel);
+		add(otherButtonsBottomPanel);
+		add(otherButtonsTopPanel);
+		add(chapterHoverPanel);
 		add(viewQuestPanel);
-		add(subscribe);
 	}
 
 	@Override
 	public void alignWidgets()
 	{
-		otherButtons.alignWidgets();
+		otherButtonsBottomPanel.alignWidgets();
+		otherButtonsTopPanel.alignWidgets();
 		chapterPanel.alignWidgets();
-		subscribe.setPos(width - 13, height - 13);
 	}
 
 	@Override
@@ -119,7 +122,7 @@ public class GuiQuestTree extends GuiBase
 			movingQuest = false;
 			closeQuest();
 			selectedChapter = chapter;
-			quests.refreshWidgets();
+			questPanel.refreshWidgets();
 			resetScroll();
 		}
 	}
@@ -193,9 +196,9 @@ public class GuiQuestTree extends GuiBase
 
 	public void resetScroll()
 	{
-		quests.alignWidgets();
-		quests.setScrollX((scrollWidth - quests.width) / 2);
-		quests.setScrollY((scrollHeight - quests.height) / 2);
+		questPanel.alignWidgets();
+		questPanel.setScrollX((scrollWidth - questPanel.width) / 2);
+		questPanel.setScrollY((scrollHeight - questPanel.height) / 2);
 	}
 
 	public static String fixI18n(@Nullable TextFormatting color, String v)
@@ -460,27 +463,35 @@ public class GuiQuestTree extends GuiBase
 	{
 		super.drawBackground(theme, x, y, w, h);
 
+		int pw = 20;
+
+		borderColor.draw(x + pw - 1, y + 1, 1, h - 2);
+		backgroundColor.draw(x + 1, y + 1, pw - 2, h - 2);
+
+		borderColor.draw(x + w - pw, y + 1, 1, h - 2);
+		backgroundColor.draw(x + w - pw + 1, y + 1, pw - 2, h - 2);
+
 		if (grabbed != 0)
 		{
 			int mx = getMouseX();
 			int my = getMouseY();
 
-			if (scrollWidth > quests.width)
+			if (scrollWidth > questPanel.width)
 			{
-				quests.setScrollX(Math.max(Math.min(quests.getScrollX() + (prevMouseX - mx), scrollWidth - quests.width), 0));
+				questPanel.setScrollX(Math.max(Math.min(questPanel.getScrollX() + (prevMouseX - mx), scrollWidth - questPanel.width), 0));
 			}
 			else
 			{
-				quests.setScrollX((scrollWidth - quests.width) / 2);
+				questPanel.setScrollX((scrollWidth - questPanel.width) / 2);
 			}
 
-			if (scrollHeight > quests.height)
+			if (scrollHeight > questPanel.height)
 			{
-				quests.setScrollY(Math.max(Math.min(quests.getScrollY() + (prevMouseY - my), scrollHeight - quests.height), 0));
+				questPanel.setScrollY(Math.max(Math.min(questPanel.getScrollY() + (prevMouseY - my), scrollHeight - questPanel.height), 0));
 			}
 			else
 			{
-				quests.setScrollY((scrollHeight - quests.height) / 2);
+				questPanel.setScrollY((scrollHeight - questPanel.height) / 2);
 			}
 
 			prevMouseX = mx;
@@ -492,6 +503,29 @@ public class GuiQuestTree extends GuiBase
 	public void drawForeground(Theme theme, int x, int y, int w, int h)
 	{
 		GuiHelper.drawHollowRect(x, y, w, h, borderColor, false);
+
+		for (Widget widget : questPanel.widgets)
+		{
+			if (widget.isMouseOver())
+			{
+				if (widget instanceof ButtonQuest)
+				{
+					theme.pushFontUnicode(true);
+					theme.drawString("X: " + ((ButtonQuest) widget).quest.x, x + 22, y + h - 18);
+					theme.drawString("Y: " + ((ButtonQuest) widget).quest.y, x + 22, y + h - 10);
+					theme.popFontUnicode();
+					break;
+				}
+				else if (widget instanceof ButtonDummyQuest)
+				{
+					theme.pushFontUnicode(true);
+					theme.drawString("X: " + ((ButtonDummyQuest) widget).x, x + 22, y + h - 18);
+					theme.drawString("Y: " + ((ButtonDummyQuest) widget).y, x + 22, y + h - 10);
+					theme.popFontUnicode();
+					break;
+				}
+			}
+		}
 
 		//backgroundColor.draw(start, y + 1, w - start - otherButtons.width - 1, chapterPanel.height - 2);
 		//borderColor.draw(start, y + chapterPanel.height - 1, w - start - 1, 1);

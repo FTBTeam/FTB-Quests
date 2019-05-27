@@ -1,9 +1,10 @@
 package com.feed_the_beast.ftbquests.gui.tree;
 
+import com.feed_the_beast.ftblib.lib.gui.ColorWidget;
 import com.feed_the_beast.ftblib.lib.gui.Panel;
-import com.feed_the_beast.ftblib.lib.gui.Theme;
 import com.feed_the_beast.ftblib.lib.gui.WidgetLayout;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
+import net.minecraftforge.fml.common.Loader;
 
 /**
  * @author LatvianModder
@@ -16,35 +17,38 @@ public class PanelChapters extends Panel
 	{
 		super(panel);
 		treeGui = (GuiQuestTree) panel.getGui();
+		setPosAndSize(0, 1, 20, 0);
 	}
 
 	@Override
 	public void addWidgets()
 	{
+		if (Loader.isModLoaded("ftbmoney"))
+		{
+			add(new ButtonOpenShop(this));
+			add(new ColorWidget(this, treeGui.borderColor, null).setPosAndSize(1, 0, width - 2, 1));
+		}
+
 		boolean canEdit = treeGui.file.canEdit();
 
-		for (int i = 0; i < treeGui.file.chapters.size(); i++)
+		for (QuestChapter chapter : treeGui.file.chapters)
 		{
-			QuestChapter chapter = treeGui.file.chapters.get(i);
-
-			if (canEdit || chapter.isVisible(treeGui.file.self))
+			if ((canEdit || chapter.isVisible(treeGui.file.self)) && (chapter.group == null || chapter.group.invalid))
 			{
 				add(new ButtonChapter(this, chapter));
 			}
+		}
+
+		if (canEdit)
+		{
+			add(new ButtonAddChapter(this));
 		}
 	}
 
 	@Override
 	public void alignWidgets()
 	{
-		setPosAndSize(0, 1, 18, treeGui.height - 2);
+		setHeight(treeGui.height - 2);
 		align(WidgetLayout.VERTICAL);
-	}
-
-	@Override
-	public void drawBackground(Theme theme, int x, int y, int w, int h)
-	{
-		treeGui.borderColor.draw(x + w - 1, y, 1, h);
-		treeGui.backgroundColor.draw(x + 1, y, w - 2, h);
 	}
 }

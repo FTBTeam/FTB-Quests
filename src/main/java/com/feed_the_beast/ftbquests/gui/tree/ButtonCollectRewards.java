@@ -2,8 +2,9 @@ package com.feed_the_beast.ftbquests.gui.tree;
 
 import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
 import com.feed_the_beast.ftblib.lib.gui.Panel;
-import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
+import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
+import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.gui.GuiRewardNotifications;
 import com.feed_the_beast.ftbquests.net.MessageClaimAllRewards;
@@ -11,23 +12,14 @@ import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.init.Items;
 import net.minecraft.util.text.TextFormatting;
-
-import java.util.List;
 
 /**
  * @author LatvianModder
  */
-public class ButtonClaimAllRewards extends ButtonTab
+public class ButtonCollectRewards extends ButtonTab
 {
-	public ButtonClaimAllRewards(Panel panel)
-	{
-		super(panel, I18n.format("ftbquests.reward.claim_all"), ItemIcon.getItemIcon(Items.GOLDEN_APPLE));
-	}
-
-	@Override
-	public void addMouseOverText(List<String> list)
+	private static String createTitle(GuiQuestTree treeGui)
 	{
 		int r = 0;
 
@@ -48,7 +40,12 @@ public class ButtonClaimAllRewards extends ButtonTab
 			}
 		}
 
-		list.add(I18n.format("ftbquests.gui.unclaimed_rewards") + ": " + TextFormatting.GOLD + r);
+		return I18n.format("ftbquests.gui.collect_rewards", TextFormatting.GOLD.toString() + r);
+	}
+
+	public ButtonCollectRewards(Panel panel)
+	{
+		super(panel, createTitle((GuiQuestTree) panel.getGui()), Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/collect_rewards.png"));
 	}
 
 	@Override

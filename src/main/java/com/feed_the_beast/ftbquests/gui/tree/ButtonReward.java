@@ -1,10 +1,10 @@
 package com.feed_the_beast.ftbquests.gui.tree;
 
+import com.feed_the_beast.ftblib.lib.gui.Button;
 import com.feed_the_beast.ftblib.lib.gui.ContextMenuItem;
 import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
 import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.gui.Panel;
-import com.feed_the_beast.ftblib.lib.gui.SimpleTextButton;
 import com.feed_the_beast.ftblib.lib.gui.Theme;
 import com.feed_the_beast.ftblib.lib.gui.WidgetType;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
@@ -23,7 +23,7 @@ import java.util.List;
 /**
  * @author LatvianModder
  */
-public class ButtonReward extends SimpleTextButton
+public class ButtonReward extends Button
 {
 	public final QuestReward reward;
 
@@ -51,6 +51,11 @@ public class ButtonReward extends SimpleTextButton
 		if (isShiftKeyDown() && isCtrlKeyDown())
 		{
 			list.add(TextFormatting.DARK_GRAY + reward.toString());
+		}
+
+		if (reward.addTitleInMouseOverText())
+		{
+			list.add(getTitle());
 		}
 
 		if (reward.isTeamReward())

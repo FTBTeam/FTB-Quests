@@ -37,7 +37,7 @@ public class ButtonDummyQuest extends Widget
 	@Override
 	public boolean checkMouseOver(int mouseX, int mouseY)
 	{
-		if (treeGui.viewQuestPanel.isMouseOver() || treeGui.subscribe.isMouseOver())
+		if (treeGui.viewQuestPanel.isMouseOver() || treeGui.chapterHoverPanel.isMouseOverAnyWidget())
 		{
 			return false;
 		}
@@ -99,7 +99,6 @@ public class ButtonDummyQuest extends Widget
 		}
 
 		int z = treeGui.getZoom();
-
 		int s = (int) (z * 3D / 2D);
 		double sx = x + (w - s) / 2D;
 		double sy = y + (h - s) / 2D;
@@ -118,19 +117,7 @@ public class ButtonDummyQuest extends Widget
 
 		if (isMouseOver())
 		{
-			GlStateManager.pushMatrix();
-			GlStateManager.translate(sx, sy, 0);
-			GlStateManager.pushMatrix();
-			GlStateManager.scale(s, s, 1D);
-			GlStateManager.color(1F, 1F, 1F, 1F);
-			GlStateManager.enableBlend();
-			GlStateManager.disableAlpha();
-			Color4I.WHITE.withAlpha(30).draw(0, 0, 1, 1);
-			GlStateManager.popMatrix();
-			GlStateManager.scale(z / 24D, z / 24D, 1D);
-			theme.drawString("X" + this.x, 2, 2);
-			theme.drawString("Y" + this.y, 2, 12);
-			GlStateManager.popMatrix();
+			Color4I.WHITE.withAlpha(30).draw(x + (w - s) / 2, y + (h - s) / 2, s, s);
 		}
 	}
 }

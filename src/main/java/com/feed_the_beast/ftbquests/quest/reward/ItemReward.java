@@ -2,7 +2,7 @@ package com.feed_the_beast.ftbquests.quest.reward;
 
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigItemStack;
-import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
+import com.feed_the_beast.ftblib.lib.gui.WrappedIngredient;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
@@ -136,7 +136,7 @@ public class ItemReward extends QuestReward
 			return super.getAltIcon();
 		}
 
-		return ItemIcon.getItemIcon(ItemHandlerHelper.copyStackWithSize(stack, 1));
+		return ItemIcon.getItemIcon(stack);
 	}
 
 	@Override
@@ -149,14 +149,18 @@ public class ItemReward extends QuestReward
 	@SideOnly(Side.CLIENT)
 	public void addMouseOverText(List<String> list)
 	{
-		GuiHelper.addStackTooltip(stack, list, stack.getCount() > 1 ? (randomBonus > 0 ? (stack.getCount() + "-" + (stack.getCount() + randomBonus) + "x ") : (stack.getCount() + "x ")) : "");
 	}
 
 	@Override
+	public boolean addTitleInMouseOverText()
+	{
+		return false;
+	}
+
 	@Nullable
-	@SideOnly(Side.CLIENT)
+	@Override
 	public Object getIngredient()
 	{
-		return stack;
+		return new WrappedIngredient(stack).tooltip();
 	}
 }

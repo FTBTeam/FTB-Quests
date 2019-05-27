@@ -9,6 +9,7 @@ import com.feed_the_beast.ftblib.lib.gui.Theme;
 import com.feed_the_beast.ftblib.lib.gui.Widget;
 import com.feed_the_beast.ftblib.lib.gui.WidgetLayout;
 import com.feed_the_beast.ftblib.lib.gui.WidgetVerticalSpace;
+import com.feed_the_beast.ftblib.lib.gui.misc.CompactGridLayout;
 import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.util.StringJoiner;
@@ -27,73 +28,6 @@ import net.minecraft.util.text.TextFormatting;
  */
 public class PanelViewQuest extends Panel
 {
-	public static class TaskRewardLayout implements WidgetLayout
-	{
-		public static final int[][] LAYOUTS = {
-				{1},
-				{2},
-				{3},
-				{4},
-				{3, 2},
-				{3, 3},
-				{4, 3},
-				{4, 4},
-				{3, 3, 3},
-				{3, 4, 3},
-				{4, 3, 4},
-				{4, 4, 4},
-				{4, 3, 3, 3},
-				{3, 4, 4, 3},
-				{4, 4, 4, 3},
-				{4, 4, 4, 4}
-		};
-
-		@Override
-		public int align(Panel panel)
-		{
-			int s = panel.widgets.size();
-
-			if (s <= 0)
-			{
-				return 0;
-			}
-			else if (s > LAYOUTS.length)
-			{
-				for (int i = 0; i < s; i++)
-				{
-					panel.widgets.get(i).setPos((i % 4) * 18, (i / 4) * 18);
-				}
-
-				return (s / 4) * 18;
-			}
-
-			int[] layout = LAYOUTS[s - 1];
-
-			int m = 0;
-
-			for (int v : layout)
-			{
-				m = Math.max(m, v);
-			}
-
-			int off = 0;
-
-			for (int l = 0; l < layout.length; l++)
-			{
-				int o = ((layout[l] % 2) == (m % 2)) ? 0 : 9;
-
-				for (int i = 0; i < layout[l]; i++)
-				{
-					panel.widgets.get(off + i).setPos(o + i * 18, l * 18);
-				}
-
-				off += layout[l];
-			}
-
-			return layout.length * 18;
-		}
-	}
-
 	public final GuiQuestTree gui;
 	public Quest quest = null;
 	public boolean hidePanel = false;
@@ -101,7 +35,6 @@ public class PanelViewQuest extends Panel
 	private Icon icon = Icon.EMPTY;
 	public Button buttonClose;
 	public BlankPanel panelContent;
-	public BlankPanel panelTasksAndRewards;
 	public BlankPanel panelTasks;
 	public BlankPanel panelRewards;
 	public BlankPanel panelText;
@@ -110,7 +43,7 @@ public class PanelViewQuest extends Panel
 	{
 		super(g);
 		gui = g;
-		setPosAndSize(-1, -1, 1, 1);
+		setPosAndSize(-1, -1, 0, 0);
 		setOnlyRenderWidgetsInside(true);
 		setOnlyInteractWithWidgetsInside(true);
 	}
@@ -134,9 +67,8 @@ public class PanelViewQuest extends Panel
 		int w = Math.max(parent.width / 5 * 2, gui.getTheme().getStringWidth(title) + 30);
 
 		add(panelContent = new BlankPanel(this, "ContentPanel"));
-		panelContent.add(panelTasksAndRewards = new BlankPanel(panelContent, "TasksAndRewardsPanel"));
-		panelTasksAndRewards.add(panelTasks = new BlankPanel(panelTasksAndRewards, "TasksPanel"));
-		panelTasksAndRewards.add(panelRewards = new BlankPanel(panelTasksAndRewards, "RewardsPanel"));
+		panelContent.add(panelTasks = new BlankPanel(panelContent, "TasksPanel"));
+		panelContent.add(panelRewards = new BlankPanel(panelContent, "RewardsPanel"));
 		panelContent.add(panelText = new BlankPanel(panelContent, "TextPanel"));
 
 		if (!quest.tasks.isEmpty())
@@ -146,7 +78,7 @@ public class PanelViewQuest extends Panel
 				panelTasks.add(new ButtonTask(panelTasks, task));
 			}
 		}
-		else
+		else if (!gui.file.canEdit())
 		{
 			TextFieldDisabledButton noTasks = new TextFieldDisabledButton(panelTasks, TextFormatting.GRAY + I18n.format("ftbquests.gui.no_tasks"));
 			noTasks.setSize(noTasks.width + 8, 18);
@@ -160,7 +92,7 @@ public class PanelViewQuest extends Panel
 				panelRewards.add(new ButtonReward(panelRewards, reward));
 			}
 		}
-		else
+		else if (!gui.file.canEdit())
 		{
 			TextFieldDisabledButton noRewards = new TextFieldDisabledButton(panelRewards, TextFormatting.GRAY + I18n.format("ftbquests.gui.no_rewards"));
 			noRewards.setSize(noRewards.width + 8, 18);
@@ -209,7 +141,7 @@ public class PanelViewQuest extends Panel
 			}
 		};
 
-		textFieldTasks.setPosAndSize(0, 2, w2 - 2, 13);
+		textFieldTasks.setPosAndSize(2, 2, w2 - 3, 13);
 		textFieldTasks.addFlags(Theme.CENTERED | Theme.CENTERED_V);
 		textFieldTasks.setText(TextFormatting.BLUE + I18n.format("ftbquests.tasks"));
 		panelContent.add(textFieldTasks);
@@ -223,16 +155,16 @@ public class PanelViewQuest extends Panel
 			}
 		};
 
-		textFieldRewards.setPosAndSize(w2 + 3, 2, w2 - 2, 13);
+		textFieldRewards.setPosAndSize(w2 + 2, 2, w2 - 3, 13);
 		textFieldRewards.addFlags(Theme.CENTERED | Theme.CENTERED_V);
 		textFieldRewards.setText(TextFormatting.GOLD + I18n.format("ftbquests.rewards"));
 		panelContent.add(textFieldRewards);
 
-		panelTasks.setPosAndSize(0, 0, w2 - 2, 0);
-		panelRewards.setPosAndSize(w2 + 3, 0, w2 - 2, 0);
+		panelTasks.setPosAndSize(2, 16, w2 - 3, 0);
+		panelRewards.setPosAndSize(w2 + 2, 16, w2 - 3, 0);
 
-		int at = panelTasks.align(new TaskRewardLayout());
-		int ar = panelRewards.align(new TaskRewardLayout());
+		int at = panelTasks.align(new CompactGridLayout(20));
+		int ar = panelRewards.align(new CompactGridLayout(20));
 
 		int h = Math.max(at, ar);
 		panelTasks.setHeight(h);
@@ -255,8 +187,7 @@ public class PanelViewQuest extends Panel
 			widget.setY(widget.posY + roy);
 		}
 
-		panelTasksAndRewards.setPosAndSize(0, 16, panelTasksAndRewards.getContentWidth(), panelTasksAndRewards.getContentHeight());
-		panelText.setPosAndSize(3, panelTasksAndRewards.posY + panelTasksAndRewards.height + 12, panelContent.width - 6, 0);
+		panelText.setPosAndSize(3, 16 + h + 12, panelContent.width - 6, 0);
 
 		String desc = GuiQuestTree.fixI18n(TextFormatting.GRAY, quest.description);
 
@@ -294,12 +225,14 @@ public class PanelViewQuest extends Panel
 
 		if (panelText.widgets.isEmpty())
 		{
+			panelContent.add(new ColorWidget(panelContent, gui.borderColor, null).setPosAndSize(w2, 0, 1, h + 40));
 			panelText.setHeight(0);
-			setHeight(Math.min(panelContent.getContentHeight() + 25, parent.height - 10));
+			setHeight(Math.min(panelContent.getContentHeight(), parent.height - 10));
 		}
 		else
 		{
-			panelContent.add(new ColorWidget(panelContent, gui.borderColor, null).setPosAndSize(1, panelTasksAndRewards.posY + panelTasksAndRewards.height + 6, panelContent.width - 2, 1));
+			panelContent.add(new ColorWidget(panelContent, gui.borderColor, null).setPosAndSize(w2, 0, 1, 16 + h + 6));
+			panelContent.add(new ColorWidget(panelContent, gui.borderColor, null).setPosAndSize(1, 16 + h + 6, panelContent.width - 2, 1));
 			panelText.setHeight(panelText.align(new WidgetLayout.Vertical(0, 0, 1)));
 			setHeight(Math.min(panelContent.getContentHeight() + 20, parent.height - 10));
 		}
