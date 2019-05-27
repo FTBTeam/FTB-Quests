@@ -29,7 +29,7 @@ public class TileWithTeam extends TileBase
 	@Override
 	protected void writeData(NBTTagCompound nbt, EnumSaveType type)
 	{
-		if (!team.isEmpty())
+		if (!team.isEmpty() && !type.item)
 		{
 			nbt.setString("Team", team);
 		}

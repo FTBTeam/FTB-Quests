@@ -3,7 +3,6 @@ package com.feed_the_beast.ftbquests.block;
 import com.feed_the_beast.ftblib.lib.util.BlockUtils;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
-import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.tile.IProgressScreen;
@@ -378,18 +377,6 @@ public class BlockProgressScreen extends BlockWithHorizontalFacing
 		if (!ClientQuestFile.exists())
 		{
 			return;
-		}
-
-		ITeamData team = nbt == null ? null : ClientQuestFile.INSTANCE.getData(nbt.getShort("Team"));
-
-		if (team == null)
-		{
-			team = ClientQuestFile.INSTANCE.self;
-		}
-
-		if (team != null)
-		{
-			tooltip.add(I18n.format("ftbquests.team") + ": " + team.getDisplayName().getFormattedText());
 		}
 
 		QuestObject object = nbt == null ? null : ClientQuestFile.INSTANCE.get(nbt.getInteger("Object"));

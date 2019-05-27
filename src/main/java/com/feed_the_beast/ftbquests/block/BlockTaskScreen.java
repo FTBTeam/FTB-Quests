@@ -3,7 +3,6 @@ package com.feed_the_beast.ftbquests.block;
 import com.feed_the_beast.ftblib.lib.util.BlockUtils;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
-import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.task.QuestTask;
 import com.feed_the_beast.ftbquests.quest.task.QuestTaskData;
@@ -20,6 +19,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagByte;
@@ -265,6 +265,13 @@ public class BlockTaskScreen extends BlockWithHorizontalFacing
 
 				BREAKING_SCREEN = false;
 			}
+
+			if (!screen.indestructible)
+			{
+				ItemStack stack = new ItemStack(this);
+				screen.writeToPickBlock(stack);
+				InventoryHelper.spawnItemStack(world, pos.getX(), pos.getY(), pos.getZ(), stack);
+			}
 		}
 
 		super.breakBlock(world, pos, state);
@@ -377,18 +384,6 @@ public class BlockTaskScreen extends BlockWithHorizontalFacing
 			return;
 		}
 
-		ITeamData team = nbt == null ? null : ClientQuestFile.INSTANCE.getData(nbt.getShort("Team"));
-
-		if (team == null)
-		{
-			team = ClientQuestFile.INSTANCE.self;
-		}
-
-		if (team != null)
-		{
-			tooltip.add(I18n.format("ftbquests.team") + ": " + team.getDisplayName().getFormattedText());
-		}
-
 		Quest quest = nbt == null ? null : ClientQuestFile.INSTANCE.getQuest(nbt.getInteger("Quest"));
 
 		if (quest == null || quest.tasks.isEmpty())
@@ -399,13 +394,13 @@ public class BlockTaskScreen extends BlockWithHorizontalFacing
 		tooltip.add(I18n.format("ftbquests.chapter") + ": " + quest.chapter.getYellowDisplayName().getFormattedText());
 		tooltip.add(I18n.format("ftbquests.quest") + ": " + quest.getYellowDisplayName().getFormattedText());
 
-		QuestTask task = quest.getTask(nbt == null ? 0 : nbt.getByte("TaskIndex") & 0xFF);
+		QuestTask task = quest.getTask(nbt.getByte("TaskIndex") & 0xFF);
 
 		tooltip.add(I18n.format("ftbquests.task") + ": " + task.getYellowDisplayName().getFormattedText());
 
-		if (team != null)
+		if (ClientQuestFile.INSTANCE.self != null)
 		{
-			QuestTaskData taskData = team.getQuestTaskData(task);
+			QuestTaskData taskData = ClientQuestFile.INSTANCE.self.getQuestTaskData(task);
 			tooltip.add(I18n.format("ftbquests.progress") + ": " + TextFormatting.BLUE + String.format("%s / %s [%d%%]", taskData.getProgressString(), task.getMaxProgressString(), taskData.getRelativeProgress()));
 		}
 	}

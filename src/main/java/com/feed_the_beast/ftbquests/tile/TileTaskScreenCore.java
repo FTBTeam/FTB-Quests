@@ -328,7 +328,7 @@ public class TileTaskScreenCore extends TileWithTeam implements IConfigCallback,
 	{
 		boolean editor = FTBQuests.canEdit(player);
 
-		if (player.isSneaking())
+		if (player.isSneaking() || task == 0)
 		{
 			if (editor || isOwner(player))
 			{
@@ -352,7 +352,10 @@ public class TileTaskScreenCore extends TileWithTeam implements IConfigCallback,
 				group0.setDisplayName(new TextComponentTranslation("tile.ftbquests.screen.name"));
 				ConfigGroup config = group0.getGroup("ftbquests.screen");
 
-				config.add("team", createTeamConfig(), ConfigNull.INSTANCE).setDisplayName(new TextComponentTranslation("ftbquests.team")).setCanEdit(editor);
+				if (editor)
+				{
+					config.add("team", createTeamConfig(), ConfigNull.INSTANCE).setDisplayName(new TextComponentTranslation("ftbquests.team"));
+				}
 
 				config.add("task", new ConfigQuestObject(ServerQuestFile.INSTANCE, getTask(), QuestObjectType.TASK)
 				{

@@ -1,13 +1,11 @@
 package com.feed_the_beast.ftbquests.block;
 
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
-import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.tile.TileProgressDetector;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -19,7 +17,6 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
@@ -131,18 +128,6 @@ public class BlockProgressDetector extends Block
 		}
 
 		NBTTagCompound nbt = stack.getTagCompound();
-		ITeamData team = nbt == null ? null : ClientQuestFile.INSTANCE.getData(nbt.getShort("Team"));
-
-		if (team == null)
-		{
-			team = ClientQuestFile.INSTANCE.self;
-		}
-
-		if (team != null)
-		{
-			tooltip.add(I18n.format("ftbquests.team") + ": " + TextFormatting.DARK_GREEN + team.getDisplayName().getFormattedText());
-		}
-
 		QuestObject object = nbt == null ? null : ClientQuestFile.INSTANCE.get(nbt.getInteger("Object"));
 
 		if (object != null)
