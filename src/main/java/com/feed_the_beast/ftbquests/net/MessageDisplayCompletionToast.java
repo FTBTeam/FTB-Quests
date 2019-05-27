@@ -60,6 +60,7 @@ public class MessageDisplayCompletionToast extends MessageToClient
 
 			ClientQuestFile.INSTANCE.questTreeGui.questPanel.refreshWidgets();
 			ClientQuestFile.INSTANCE.questTreeGui.chapterPanel.refreshWidgets();
+			ClientQuestFile.INSTANCE.questTreeGui.viewQuestPanel.refreshWidgets();
 		}
 	}
 }

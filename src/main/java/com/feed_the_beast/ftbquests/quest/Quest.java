@@ -60,6 +60,7 @@ public final class Quest extends QuestObject
 	public String customClick;
 	public boolean hideDependencyLines;
 	public int minRequiredDependencies;
+	public boolean hideTextUntilComplete;
 
 	public Quest(QuestChapter c)
 	{
@@ -80,6 +81,7 @@ public final class Quest extends QuestObject
 		visibility = EnumVisibility.VISIBLE;
 		dependencyRequirement = EnumDependencyRequirement.ALL_COMPLETED;
 		minRequiredDependencies = 0;
+		hideTextUntilComplete = false;
 	}
 
 	@Override
@@ -203,6 +205,11 @@ public final class Quest extends QuestObject
 		{
 			nbt.setString("dependency_requirement", dependencyRequirement.getID());
 		}
+
+		if (hideTextUntilComplete)
+		{
+			nbt.setBoolean("hide_text_until_complete", true);
+		}
 	}
 
 	@Override
@@ -272,6 +279,7 @@ public final class Quest extends QuestObject
 
 		visibility = EnumVisibility.NAME_MAP.get(nbt.getString("visibility"));
 		dependencyRequirement = EnumDependencyRequirement.NAME_MAP.get(nbt.getString("dependency_requirement"));
+		hideTextUntilComplete = nbt.getBoolean("hide_text_until_complete");
 	}
 
 	@Override
@@ -286,6 +294,7 @@ public final class Quest extends QuestObject
 		flags = Bits.setFlag(flags, 16, !text.isEmpty());
 		flags = Bits.setFlag(flags, 32, !customClick.isEmpty());
 		flags = Bits.setFlag(flags, 64, hideDependencyLines);
+		flags = Bits.setFlag(flags, 128, hideTextUntilComplete);
 		data.writeVarInt(flags);
 
 		if (!description.isEmpty())
@@ -353,6 +362,7 @@ public final class Quest extends QuestObject
 		guidePage = Bits.getFlag(flags, 4) ? data.readString() : "";
 		customClick = Bits.getFlag(flags, 32) ? data.readString() : "";
 		hideDependencyLines = Bits.getFlag(flags, 64);
+		hideTextUntilComplete = Bits.getFlag(flags, 128);
 
 		minRequiredDependencies = data.readVarInt();
 		dependencyRequirement = EnumDependencyRequirement.NAME_MAP.read(data);
@@ -584,6 +594,7 @@ public final class Quest extends QuestObject
 		config.addBool("hide_dependency_lines", () -> hideDependencyLines, v -> hideDependencyLines = v, false);
 		config.addString("guide_page", () -> guidePage, v -> guidePage = v, "");
 		config.addString("custom_click", () -> customClick, v -> customClick = v, "");
+		config.addBool("hide_text_until_complete", () -> hideTextUntilComplete, v -> hideTextUntilComplete = v, false);
 	}
 
 	public EnumVisibility getVisibility()

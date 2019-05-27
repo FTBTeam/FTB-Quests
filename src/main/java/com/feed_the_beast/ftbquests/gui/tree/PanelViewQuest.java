@@ -196,7 +196,9 @@ public class PanelViewQuest extends Panel
 			panelText.add(new TextField(panelText).addFlags(Theme.CENTERED).setMaxWidth(panelText.width).setSpacing(9).setText(TextFormatting.ITALIC + desc));
 		}
 
-		if (!quest.text.isEmpty())
+		boolean showText = !quest.hideTextUntilComplete || gui.file.self != null && quest.isComplete(gui.file.self);
+
+		if (showText && !quest.text.isEmpty())
 		{
 			if (!desc.isEmpty())
 			{
@@ -213,7 +215,7 @@ public class PanelViewQuest extends Panel
 			panelText.add(new TextField(panelText).setMaxWidth(panelText.width).setSpacing(9).setText(StringUtils.addFormatting(StringJoiner.with('\n').joinStrings(text))));
 		}
 
-		if (!quest.guidePage.isEmpty())
+		if (showText && !quest.guidePage.isEmpty())
 		{
 			if (!desc.isEmpty())
 			{
