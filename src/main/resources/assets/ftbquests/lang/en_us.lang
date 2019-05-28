@@ -218,6 +218,8 @@ ftbquests.task.ftbquests.botania_mana.text=%d Mana
 
 ftbquests.task.ftbquests.emc=EMC
 
+ftbquests.task.ftbquests.gamestage=Game Stage
+
 ftbquests.reward=Reward
 ftbquests.rewards=Rewards
 ftbquests.reward.team_reward=Team Reward
@@ -235,6 +237,9 @@ ftbquests.reward.ftbquests.loot=Loot Reward
 ftbquests.reward.ftbquests.xp=XP
 ftbquests.reward.ftbquests.xp_levels=XP Levels
 ftbquests.reward.ftbquests.command=Command
+
+ftbquests.reward.ftbquests.gamestage=Game Stage
+ftbquests.reward.ftbquests.gamestage.silent=Silent
 
 ftbquests.variable=Variable
 ftbquests.variable.max_value=Max Value
