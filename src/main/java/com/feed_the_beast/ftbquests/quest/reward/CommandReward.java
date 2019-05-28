@@ -23,7 +23,7 @@ import java.util.Map;
  */
 public class CommandReward extends QuestReward
 {
-	private String command;
+	public String command;
 
 	public CommandReward(QuestObjectBase parent)
 	{

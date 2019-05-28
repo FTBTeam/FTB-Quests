@@ -1,4 +1,4 @@
-package com.feed_the_beast.ftbquests.quest.task;
+package com.feed_the_beast.ftbquests.quest.reward;
 
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
@@ -6,34 +6,33 @@ import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftbquests.FTBQuests;
-import com.feed_the_beast.ftbquests.quest.ITeamData;
-import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 
-import java.util.Collection;
-
 /**
  * @author LatvianModder
  */
-public class AdvancementTask extends QuestTask
+public class AdvancementReward extends QuestReward
 {
-	public String advancement = "";
+	public String advancement;
+	public String criterion;
 
-	public AdvancementTask(Quest quest)
+	public AdvancementReward(QuestObjectBase parent)
 	{
-		super(quest);
+		super(parent);
+		advancement = "";
+		criterion = "";
 	}
 
 	@Override
-	public QuestTaskType getType()
+	public QuestRewardType getType()
 	{
-		return FTBQuestsTasks.ADVANCEMENT;
+		return FTBQuestsRewards.ADVANCEMENT;
 	}
 
 	@Override
@@ -41,6 +40,7 @@ public class AdvancementTask extends QuestTask
 	{
 		super.writeData(nbt);
 		nbt.setString("advancement", advancement);
+		nbt.setString("criterion", criterion);
 	}
 
 	@Override
@@ -48,6 +48,7 @@ public class AdvancementTask extends QuestTask
 	{
 		super.readData(nbt);
 		advancement = nbt.getString("advancement");
+		criterion = nbt.getString("criterion");
 	}
 
 	@Override
@@ -55,6 +56,7 @@ public class AdvancementTask extends QuestTask
 	{
 		super.writeNetData(data);
 		data.writeString(advancement);
+		data.writeString(criterion);
 	}
 
 	@Override
@@ -62,13 +64,36 @@ public class AdvancementTask extends QuestTask
 	{
 		super.readNetData(data);
 		advancement = data.readString();
+		criterion = data.readString();
 	}
 
 	@Override
 	public void getConfig(ConfigGroup config)
 	{
 		super.getConfig(config);
-		config.addString("advancement", () -> advancement, v -> advancement = v, "").setDisplayName(new TextComponentTranslation("ftbquests.task.ftbquests.advancement"));
+		config.addString("advancement", () -> advancement, v -> advancement = v, "").setDisplayName(new TextComponentTranslation("ftbquests.reward.ftbquests.advancement"));
+		config.addString("criterion", () -> criterion, v -> criterion = v, "");
+	}
+
+	@Override
+	public void claim(EntityPlayerMP player)
+	{
+		Advancement a = FTBQuests.PROXY.getAdvancement(player.server, advancement);
+
+		if (a != null)
+		{
+			if (criterion.isEmpty())
+			{
+				for (String s : a.getCriteria().keySet())
+				{
+					player.getAdvancements().grantCriterion(a, s);
+				}
+			}
+			else
+			{
+				player.getAdvancements().grantCriterion(a, criterion);
+			}
+		}
 	}
 
 	@Override
@@ -80,7 +105,7 @@ public class AdvancementTask extends QuestTask
 		{
 			ITextComponent text = a.getDisplay().getTitle().createCopy();
 			text.getStyle().setColor(TextFormatting.YELLOW);
-			return new TextComponentTranslation("ftbquests.task.ftbquests.advancement").appendText(": ").appendSibling(text);
+			return new TextComponentTranslation("ftbquests.reward.ftbquests.advancement").appendText(": ").appendSibling(text);
 		}
 
 		return super.getAltDisplayName();
@@ -90,50 +115,12 @@ public class AdvancementTask extends QuestTask
 	public Icon getAltIcon()
 	{
 		Advancement a = FTBQuests.PROXY.getAdvancement(null, advancement);
-		return a == null || a.getDisplay() == null ? super.getAltIcon() : ItemIcon.getItemIcon(a.getDisplay().getIcon());
-	}
 
-	@Override
-	public boolean consumesResources()
-	{
-		return true;
-	}
-
-	@Override
-	public QuestTaskData createData(ITeamData data)
-	{
-		return new Data(this, data);
-	}
-
-	public static class Data extends SimpleQuestTaskData<AdvancementTask>
-	{
-		private Data(AdvancementTask task, ITeamData data)
+		if (a != null && a.getDisplay() != null)
 		{
-			super(task, data);
+			return ItemIcon.getItemIcon(a.getDisplay().getIcon());
 		}
 
-		@Override
-		public boolean submitTask(EntityPlayerMP player, Collection<ItemStack> itemsToCheck, boolean simulate)
-		{
-			if (progress >= 1L || task.advancement.isEmpty())
-			{
-				return false;
-			}
-
-			Advancement a = FTBQuests.PROXY.getAdvancement(player.server, task.advancement);
-
-			if (a != null && player.getAdvancements().getProgress(a).isDone())
-			{
-				if (!simulate)
-				{
-					progress = 1L;
-					sync();
-				}
-
-				return true;
-			}
-
-			return false;
-		}
+		return super.getAltIcon();
 	}
 }

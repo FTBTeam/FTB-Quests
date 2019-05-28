@@ -24,6 +24,7 @@ import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.loot.LootCrate;
+import com.feed_the_beast.ftbquests.quest.reward.AdvancementReward;
 import com.feed_the_beast.ftbquests.quest.reward.ChoiceReward;
 import com.feed_the_beast.ftbquests.quest.reward.CommandReward;
 import com.feed_the_beast.ftbquests.quest.reward.FTBQuestsRewards;
@@ -179,7 +180,8 @@ public class FTBQuestsEventHandler
 				FTBQuestsRewards.LOOT = new QuestRewardType(LootReward::new).setRegistryName("loot").setIcon(GuiIcons.MONEY_BAG).setExcludeFromListRewards(true),
 				FTBQuestsRewards.XP = new QuestRewardType(XPReward::new).setRegistryName("xp").setIcon(Icon.getIcon("minecraft:items/experience_bottle")),
 				FTBQuestsRewards.XP_LEVELS = new QuestRewardType(XPLevelsReward::new).setRegistryName("xp_levels").setIcon(Icon.getIcon("minecraft:items/experience_bottle")),
-				FTBQuestsRewards.COMMAND = new QuestRewardType(CommandReward::new).setRegistryName("command").setIcon(Icon.getIcon("minecraft:blocks/command_block_back"))
+				FTBQuestsRewards.COMMAND = new QuestRewardType(CommandReward::new).setRegistryName("command").setIcon(Icon.getIcon("minecraft:blocks/command_block_back")),
+				FTBQuestsRewards.ADVANCEMENT = new QuestRewardType(AdvancementReward::new).setRegistryName("advancement").setIcon(Icon.getIcon("minecraft:items/wheat"))
 		);
 
 		FTBQuests.PROXY.setRewardGuiProviders();
