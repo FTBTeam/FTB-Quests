@@ -199,9 +199,7 @@ ftbquests.task.ftbquests.location.h=H
 ftbquests.task.ftbquests.location.d=D
 
 ftbquests.task.ftbquests.checkmark=Checkmark
-
 ftbquests.task.ftbquests.advancement=Advancement
-ftbquests.task.ftbquests.advancement.title=Advancement '%s'
 
 ftbquests.task.ftbquests.buildcraft_mj=BuildCraft Energy
 ftbquests.task.ftbquests.buildcraft_mj.value=mJ
@@ -231,12 +229,19 @@ ftbquests.reward.random_bonus=Random Bonus
 ftbquests.reward.ftbquests.item=Item
 ftbquests.reward.ftbquests.item.only_one=Only One
 ftbquests.reward.ftbquests.item.only_one.tooltip=If inventory has that item, doesn't give it. Ignores NBT.
+
 ftbquests.reward.ftbquests.choice=Choice Reward
 ftbquests.reward.ftbquests.random=Random Reward
 ftbquests.reward.ftbquests.loot=Loot Reward
+
 ftbquests.reward.ftbquests.xp=XP
 ftbquests.reward.ftbquests.xp_levels=XP Levels
+
 ftbquests.reward.ftbquests.command=Command
+
+ftbquests.reward.ftbquests.advancement=Advancement
+ftbquests.reward.ftbquests.advancement.criterion=Criterion
+ftbquests.reward.ftbquests.advancement.criterion.tooltip=Optional, set if you want only one criterion to be granted
 
 ftbquests.reward.ftbquests.gamestage=Game Stage
 ftbquests.reward.ftbquests.gamestage.silent=Silent

@@ -17,11 +17,12 @@ import net.minecraft.util.text.TextFormatting;
  */
 public class XPLevelsReward extends QuestReward
 {
-	public int xpLevels = 1;
+	public int xpLevels;
 
 	public XPLevelsReward(QuestObjectBase parent)
 	{
 		super(parent);
+		xpLevels = 1;
 	}
 
 	@Override
