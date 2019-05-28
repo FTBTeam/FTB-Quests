@@ -36,12 +36,6 @@ public class AdvancementTask extends QuestTask
 	}
 
 	@Override
-	public long getMaxProgress()
-	{
-		return 1L;
-	}
-
-	@Override
 	public void writeData(NBTTagCompound nbt)
 	{
 		super.writeData(nbt);

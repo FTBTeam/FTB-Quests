@@ -20,4 +20,5 @@ public class FTBQuestsTasks
 	public static QuestTaskType BUILDCRAFT_MJ;
 	public static QuestTaskType BOTANIA_MANA;
 	public static QuestTaskType EMC;
+	public static QuestTaskType GAMESTAGE;
 }
