@@ -64,7 +64,7 @@ public class PanelViewQuest extends Panel
 		title = GuiQuestTree.fixI18n(TextFormatting.GRAY, quest.getDisplayName().getFormattedText());
 		icon = quest.getIcon();
 
-		int w = Math.max(parent.width / 5 * 2, gui.getTheme().getStringWidth(title) + 30);
+		int w = Math.max(200, gui.getTheme().getStringWidth(title) + 30);
 
 		add(panelContent = new BlankPanel(this, "ContentPanel"));
 		panelContent.add(panelTasks = new BlankPanel(panelContent, "TasksPanel"));
