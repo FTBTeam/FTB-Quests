@@ -60,7 +60,7 @@ public abstract class QuestObject extends QuestObjectBase
 		return getRelativeProgress(data) >= 100;
 	}
 
-	public void onCompleted(ITeamData data, List<EntityPlayerMP> onlineMembers)
+	public void onCompleted(ITeamData data, List<EntityPlayerMP> notifyPlayers)
 	{
 	}
 

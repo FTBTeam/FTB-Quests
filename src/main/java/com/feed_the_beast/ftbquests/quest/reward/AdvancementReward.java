@@ -6,7 +6,7 @@ import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftbquests.FTBQuests;
-import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
+import com.feed_the_beast.ftbquests.quest.Quest;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
@@ -22,9 +22,9 @@ public class AdvancementReward extends QuestReward
 	public String advancement;
 	public String criterion;
 
-	public AdvancementReward(QuestObjectBase parent)
+	public AdvancementReward(Quest quest)
 	{
-		super(parent);
+		super(quest);
 		advancement = "";
 		criterion = "";
 	}

@@ -4,6 +4,7 @@ import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
+import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.quest.loot.RewardTable;
@@ -30,7 +31,7 @@ public class RandomReward extends QuestReward
 {
 	public RewardTable table;
 
-	public RandomReward(QuestObjectBase parent)
+	public RandomReward(Quest parent)
 	{
 		super(parent);
 		table = parent.getQuestFile().dummyTable;

@@ -1,4 +1,4 @@
-package com.feed_the_beast.ftbquests.quest;
+package com.feed_the_beast.ftbquests.gui.editor;
 
 import com.feed_the_beast.ftblib.lib.util.misc.BooleanConsumer;
 

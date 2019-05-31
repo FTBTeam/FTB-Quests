@@ -2,8 +2,8 @@ package com.feed_the_beast.ftbquests.quest.reward;
 
 import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
+import com.feed_the_beast.ftblib.lib.config.EnumTristate;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
-import com.feed_the_beast.ftblib.lib.io.Bits;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftbquests.gui.tree.GuiQuestTree;
@@ -35,16 +35,16 @@ import java.util.List;
  */
 public abstract class QuestReward extends QuestObjectBase
 {
-	public QuestObjectBase parent;
+	public Quest quest;
 
-	public boolean team;
-	private boolean emergency;
+	public EnumTristate team;
+	public EnumTristate autoclaim;
 
-	public QuestReward(QuestObjectBase q)
+	public QuestReward(Quest q)
 	{
-		parent = q;
-		team = parent.getQuestFile().defaultRewardTeam;
-		emergency = false;
+		quest = q;
+		team = EnumTristate.DEFAULT;
+		autoclaim = EnumTristate.DEFAULT;
 	}
 
 	@Override
@@ -56,20 +56,20 @@ public abstract class QuestReward extends QuestObjectBase
 	@Override
 	public final QuestFile getQuestFile()
 	{
-		return parent.getQuestFile();
+		return quest.chapter.file;
 	}
 
 	@Override
 	@Nullable
 	public final QuestChapter getQuestChapter()
 	{
-		return parent.getQuestChapter();
+		return quest.chapter;
 	}
 
 	@Override
 	public final int getParentID()
 	{
-		return parent.id;
+		return quest.id;
 	}
 
 	public abstract QuestRewardType getType();
@@ -78,51 +78,40 @@ public abstract class QuestReward extends QuestObjectBase
 	public void writeData(NBTTagCompound nbt)
 	{
 		super.writeData(nbt);
-
-		if (team != getQuestFile().defaultRewardTeam)
-		{
-			nbt.setBoolean("team_reward", team);
-		}
-
-		if (emergency)
-		{
-			nbt.setBoolean("emergency", true);
-		}
+		team.write(nbt, "team_reward");
+		autoclaim.write(nbt, "autoclaim");
 	}
 
 	@Override
 	public void readData(NBTTagCompound nbt)
 	{
 		super.readData(nbt);
-		team = nbt.hasKey("team_reward") ? nbt.getBoolean("team_reward") : getQuestFile().defaultRewardTeam;
-		emergency = nbt.getBoolean("emergency");
+		team = EnumTristate.read(nbt, "team_reward");
+		autoclaim = EnumTristate.read(nbt, "autoclaim");
 	}
 
 	@Override
 	public void writeNetData(DataOut data)
 	{
 		super.writeNetData(data);
-		int flags = 0;
-		flags = Bits.setFlag(flags, 1, team);
-		flags = Bits.setFlag(flags, 2, emergency);
-		data.writeVarInt(flags);
+		EnumTristate.NAME_MAP.write(data, team);
+		EnumTristate.NAME_MAP.write(data, autoclaim);
 	}
 
 	@Override
 	public void readNetData(DataIn data)
 	{
 		super.readNetData(data);
-		int flags = data.readVarInt();
-		team = Bits.getFlag(flags, 1);
-		emergency = Bits.getFlag(flags, 2);
+		team = EnumTristate.NAME_MAP.read(data);
+		autoclaim = EnumTristate.NAME_MAP.read(data);
 	}
 
 	@Override
 	public void getConfig(ConfigGroup config)
 	{
 		super.getConfig(config);
-		config.addBool("team", this::isTeamReward, v -> team = v, false).setDisplayName(new TextComponentTranslation("ftbquests.reward.team_reward")).setCanEdit(!(parent instanceof Quest) || !((Quest) parent).canRepeat);
-		//config.addBool("emergency", () -> emergency, v -> emergency = v, false).setDisplayName(new TextComponentTranslation("ftbquests.reward.emergency"));
+		config.addEnum("team", () -> team, v -> team = v, EnumTristate.NAME_MAP).setDisplayName(new TextComponentTranslation("ftbquests.reward.team_reward")).setCanEdit(!(quest instanceof Quest) || !quest.canRepeat);
+		config.addEnum("autoclaim", () -> autoclaim, v -> autoclaim = v, EnumTristate.NAME_MAP).setDisplayName(new TextComponentTranslation("ftbquests.reward.autoclaim"));
 	}
 
 	public abstract void claim(EntityPlayerMP player);
@@ -142,10 +131,7 @@ public abstract class QuestReward extends QuestObjectBase
 	@Override
 	public final void deleteSelf()
 	{
-		if (parent instanceof Quest)
-		{
-			((Quest) parent).rewards.remove(this);
-		}
+		quest.rewards.remove(this);
 
 		Collection<QuestReward> c = Collections.singleton(this);
 
@@ -190,20 +176,17 @@ public abstract class QuestReward extends QuestObjectBase
 	@Override
 	public void onCreated()
 	{
-		if (parent instanceof Quest)
-		{
-			((Quest) parent).rewards.add(this);
-		}
+		quest.rewards.add(this);
 	}
 
 	public final boolean isTeamReward()
 	{
-		return team || parent instanceof Quest && ((Quest) parent).canRepeat;
+		return quest.canRepeat || team.get(quest.chapter.file.defaultRewardTeam);
 	}
 
-	public final boolean addToEmergencyItems()
+	public final boolean shouldAutoClaimReward()
 	{
-		return emergency;
+		return autoclaim.get(quest.chapter.alwaysInvisible || quest.chapter.file.defaultRewardAutoclaim);
 	}
 
 	@Override

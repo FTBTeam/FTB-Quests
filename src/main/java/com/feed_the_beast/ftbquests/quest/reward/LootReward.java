@@ -1,7 +1,7 @@
 package com.feed_the_beast.ftbquests.quest.reward;
 
 import com.feed_the_beast.ftbquests.gui.GuiRewardNotifications;
-import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
+import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.loot.WeightedReward;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraftforge.fml.relauncher.Side;
@@ -14,9 +14,9 @@ import java.util.List;
  */
 public class LootReward extends RandomReward
 {
-	public LootReward(QuestObjectBase parent)
+	public LootReward(Quest quest)
 	{
-		super(parent);
+		super(quest);
 	}
 
 	@Override

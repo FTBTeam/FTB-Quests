@@ -142,8 +142,10 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 	@SubscribeEvent
 	public static void onPlayerLoggedIn(ForgePlayerLoggedInEvent event)
 	{
+		FTBQuestsTeamData teamData = FTBQuestsTeamData.get(event.getTeam());
+
 		EntityPlayerMP player = event.getPlayer().getPlayer();
-		Collection<MessageSyncQuests.TeamInst> teamData = new ArrayList<>();
+		Collection<MessageSyncQuests.TeamInst> teamDataList = new ArrayList<>();
 
 		for (ForgeTeam team : event.getUniverse().getTeams())
 		{
@@ -205,24 +207,31 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 				}
 			}
 
-			teamData.add(t);
+			teamDataList.add(t);
 		}
 
-		FTBQuestsTeamData team = FTBQuestsTeamData.get(event.getTeam());
-		IntOpenHashSet rewards = team.claimedPlayerRewards.get(event.getPlayer().getId());
+		IntOpenHashSet rewards = teamData.claimedPlayerRewards.get(event.getPlayer().getId());
 
 		if (rewards == null)
 		{
-			rewards = team.claimedTeamRewards;
+			rewards = teamData.claimedTeamRewards;
 		}
 		else
 		{
 			rewards = new IntOpenHashSet(rewards);
-			rewards.addAll(team.claimedTeamRewards);
+			rewards.addAll(teamData.claimedTeamRewards);
 		}
 
-		new MessageSyncQuests(ServerQuestFile.INSTANCE, event.getPlayer().team.getUID(), teamData, FTBQuests.canEdit(player), rewards).sendTo(player);
+		new MessageSyncQuests(ServerQuestFile.INSTANCE, teamData.getTeamUID(), teamDataList, FTBQuests.canEdit(player), rewards).sendTo(player);
 		event.getPlayer().getPlayer().inventoryContainer.addListener(new FTBQuestsInventoryListener(event.getPlayer().getPlayer()));
+
+		for (QuestChapter chapter : ServerQuestFile.INSTANCE.chapters)
+		{
+			for (Quest quest : chapter.quests)
+			{
+				teamData.checkAutoCompletion(quest);
+			}
+		}
 	}
 
 	@SubscribeEvent
@@ -322,17 +331,20 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 		if (!data.isComplete && data.task.isComplete(this))
 		{
 			data.isComplete = true;
-			List<EntityPlayerMP> onlinePlayers = new ArrayList<>();
+			List<EntityPlayerMP> notifyPlayers = new ArrayList<>();
 
-			for (ForgePlayer player : team.getMembers())
+			if (!data.task.quest.chapter.alwaysInvisible && !data.task.quest.canRepeat)
 			{
-				if (player.isOnline())
+				for (ForgePlayer player : team.getMembers())
 				{
-					onlinePlayers.add(player.getPlayer());
+					if (player.isOnline())
+					{
+						notifyPlayers.add(player.getPlayer());
+					}
 				}
 			}
 
-			data.task.onCompleted(this, onlinePlayers);
+			data.task.onCompleted(this, notifyPlayers);
 		}
 	}
 
@@ -390,9 +402,9 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 			}
 		}
 
-		if (reward.parent instanceof Quest)
+		if (reward.quest instanceof Quest)
 		{
-			((Quest) reward.parent).checkRepeatableQuests(FTBQuestsTeamData.get(team), player.getUniqueID());
+			reward.quest.checkRepeatableQuests(FTBQuestsTeamData.get(team), player.getUniqueID());
 		}
 	}
 
@@ -675,5 +687,45 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 		}
 
 		return data;
+	}
+
+	@Override
+	public void checkAutoCompletion(Quest quest)
+	{
+		if (!quest.isComplete(this))
+		{
+			return;
+		}
+
+		List<EntityPlayerMP> online = null;
+
+		for (QuestReward reward : quest.rewards)
+		{
+			if (reward.shouldAutoClaimReward())
+			{
+				if (online == null)
+				{
+					online = new ArrayList<>();
+
+					for (ForgePlayer player : team.getMembers())
+					{
+						if (player.isOnline())
+						{
+							online.add(player.getPlayer());
+						}
+					}
+
+					if (online.isEmpty())
+					{
+						return;
+					}
+				}
+
+				for (EntityPlayerMP player : online)
+				{
+					claimReward(player, reward);
+				}
+			}
+		}
 	}
 }
