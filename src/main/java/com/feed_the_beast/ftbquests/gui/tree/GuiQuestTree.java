@@ -579,6 +579,8 @@ public class GuiQuestTree extends GuiBase
 
 	public void open(@Nullable QuestObject object)
 	{
+		QuestChapter c = chapterHoverPanel.chapter == null ? null : chapterHoverPanel.chapter.chapter;
+
 		if (object instanceof QuestVariable)
 		{
 			new GuiVariables().openGui();
@@ -602,6 +604,20 @@ public class GuiQuestTree extends GuiBase
 		}
 
 		openGui();
+
+		if (c != null)
+		{
+			for (Widget widget : chapterPanel.widgets)
+			{
+				if (widget instanceof ButtonChapter && c == ((ButtonChapter) widget).chapter)
+				{
+					chapterHoverPanel.chapter = (ButtonChapter) widget;
+					chapterHoverPanel.refreshWidgets();
+					chapterHoverPanel.updateMouseOver(getMouseX(), getMouseY());
+					break;
+				}
+			}
+		}
 	}
 
 	@Override
