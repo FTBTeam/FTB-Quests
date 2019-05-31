@@ -85,7 +85,7 @@ public class ButtonReward extends Button
 	@Override
 	public WidgetType getWidgetType()
 	{
-		if (!ClientQuestFile.existsWithTeam() || !(reward.parent instanceof QuestObject) || !((QuestObject) reward.parent).isComplete(ClientQuestFile.INSTANCE.self))
+		if (!ClientQuestFile.existsWithTeam() || !(reward.quest instanceof QuestObject) || !reward.quest.isComplete(ClientQuestFile.INSTANCE.self))
 		{
 			return WidgetType.DISABLED;
 		}
@@ -98,7 +98,7 @@ public class ButtonReward extends Button
 	{
 		if (button.isLeft())
 		{
-			if (ClientQuestFile.existsWithTeam() && reward.parent instanceof QuestObject && ((QuestObject) reward.parent).isComplete(ClientQuestFile.INSTANCE.self) && !ClientQuestFile.INSTANCE.isRewardClaimed(reward))
+			if (ClientQuestFile.existsWithTeam() && reward.quest instanceof QuestObject && reward.quest.isComplete(ClientQuestFile.INSTANCE.self) && !ClientQuestFile.INSTANCE.isRewardClaimed(reward))
 			{
 				GuiHelper.playClickSound();
 				reward.onButtonClicked();
@@ -144,7 +144,7 @@ public class ButtonReward extends Button
 		{
 			FTBQuestsTheme.COMPLETED.draw(x + w - 9, y + 1, 8, 8);
 		}
-		else if (reward.parent instanceof QuestObject && ((QuestObject) reward.parent).isComplete(ClientQuestFile.INSTANCE.self))
+		else if (reward.quest instanceof QuestObject && reward.quest.isComplete(ClientQuestFile.INSTANCE.self))
 		{
 			FTBQuestsTheme.ALERT.draw(x + w - 9, y + 1, 8, 8);
 		}

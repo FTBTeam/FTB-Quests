@@ -36,4 +36,6 @@ public interface ITeamData
 	void setVariable(int variable, long value);
 
 	boolean isRewardClaimed(UUID player, QuestReward reward);
+
+	void checkAutoCompletion(Quest quest);
 }

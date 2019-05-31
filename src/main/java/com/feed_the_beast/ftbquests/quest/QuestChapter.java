@@ -147,36 +147,20 @@ public final class QuestChapter extends QuestObject
 		return getRelativeProgressFromChildren(progress, quests.size());
 	}
 
-	public boolean getOnlyHasRepeatableQuests()
-	{
-		for (Quest quest : quests)
-		{
-			if (!quest.canRepeat)
-			{
-				return false;
-			}
-		}
-
-		return true;
-	}
-
 	@Override
-	public void onCompleted(ITeamData data, List<EntityPlayerMP> onlineMembers)
+	public void onCompleted(ITeamData data, List<EntityPlayerMP> notifyPlayers)
 	{
-		super.onCompleted(data, onlineMembers);
+		super.onCompleted(data, notifyPlayers);
 		new ObjectCompletedEvent.ChapterEvent(data, this).post();
 
-		if (!getOnlyHasRepeatableQuests())
+		for (EntityPlayerMP player : notifyPlayers)
 		{
-			for (EntityPlayerMP player : onlineMembers)
-			{
-				new MessageDisplayCompletionToast(id).sendTo(player);
-			}
+			new MessageDisplayCompletionToast(id).sendTo(player);
 		}
 
 		if (file.isComplete(data))
 		{
-			file.onCompleted(data, onlineMembers);
+			file.onCompleted(data, notifyPlayers);
 		}
 	}
 

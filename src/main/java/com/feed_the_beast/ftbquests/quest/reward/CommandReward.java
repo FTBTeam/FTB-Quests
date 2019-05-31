@@ -6,7 +6,6 @@ import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
-import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
@@ -25,9 +24,9 @@ public class CommandReward extends QuestReward
 {
 	public String command;
 
-	public CommandReward(QuestObjectBase parent)
+	public CommandReward(Quest quest)
 	{
-		super(parent);
+		super(quest);
 		command = "/say Hi, @team!";
 	}
 
@@ -90,9 +89,9 @@ public class CommandReward extends QuestReward
 			overrides.put("chapter", chapter);
 		}
 
-		if (parent instanceof Quest)
+		if (quest instanceof Quest)
 		{
-			overrides.put("quest", parent);
+			overrides.put("quest", quest);
 		}
 
 		overrides.put("team", FTBLibAPI.getTeam(player.getUniqueID()));

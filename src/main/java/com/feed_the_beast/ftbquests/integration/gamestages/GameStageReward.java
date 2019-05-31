@@ -3,7 +3,7 @@ package com.feed_the_beast.ftbquests.integration.gamestages;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
-import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
+import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.reward.FTBQuestsRewards;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
 import com.feed_the_beast.ftbquests.quest.reward.QuestRewardType;
@@ -23,9 +23,9 @@ public class GameStageReward extends QuestReward
 	public String stage = "";
 	public boolean silent = false;
 
-	public GameStageReward(QuestObjectBase parent)
+	public GameStageReward(Quest quest)
 	{
-		super(parent);
+		super(quest);
 	}
 
 	@Override

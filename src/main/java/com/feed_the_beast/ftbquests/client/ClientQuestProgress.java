@@ -1,6 +1,7 @@
 package com.feed_the_beast.ftbquests.client;
 
 import com.feed_the_beast.ftbquests.quest.ITeamData;
+import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
 import com.feed_the_beast.ftbquests.quest.task.QuestTask;
@@ -123,5 +124,10 @@ public class ClientQuestProgress implements ITeamData
 	public boolean isRewardClaimed(UUID player, QuestReward reward)
 	{
 		return ClientQuestFile.INSTANCE.self != null && teamUID == ClientQuestFile.INSTANCE.self.teamUID && ClientQuestFile.INSTANCE.rewards.contains(reward.id);
+	}
+
+	@Override
+	public void checkAutoCompletion(Quest quest)
+	{
 	}
 }

@@ -58,9 +58,9 @@ public class MessageClaimRewardResponse extends MessageToClient
 
 			QuestReward reward = ClientQuestFile.INSTANCE.getReward(id);
 
-			if (reward != null && reward.parent instanceof Quest)
+			if (reward != null && reward.quest instanceof Quest)
 			{
-				((Quest) reward.parent).checkRepeatableQuests(ClientQuestFile.INSTANCE.self, Minecraft.getMinecraft().player.getUniqueID());
+				reward.quest.checkRepeatableQuests(ClientQuestFile.INSTANCE.self, Minecraft.getMinecraft().player.getUniqueID());
 			}
 
 			GuiQuestTree treeGui = ClientUtils.getCurrentGuiAs(GuiQuestTree.class);

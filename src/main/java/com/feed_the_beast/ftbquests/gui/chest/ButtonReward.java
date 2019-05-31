@@ -31,7 +31,7 @@ public class ButtonReward extends Button
 	@Override
 	public void onClicked(MouseButton button)
 	{
-		if (reward != null && reward.parent instanceof QuestObject && ((QuestObject) reward.parent).isComplete(ClientQuestFile.INSTANCE.self) && !ClientQuestFile.INSTANCE.isRewardClaimed(reward))
+		if (reward != null && reward.quest instanceof QuestObject && reward.quest.isComplete(ClientQuestFile.INSTANCE.self) && !ClientQuestFile.INSTANCE.isRewardClaimed(reward))
 		{
 			GuiHelper.playClickSound();
 			reward.onButtonClicked();

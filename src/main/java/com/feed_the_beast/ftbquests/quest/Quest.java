@@ -78,7 +78,7 @@ public final class Quest extends QuestObject
 		guidePage = "";
 		customClick = "";
 		hideDependencyLines = false;
-		visibility = EnumVisibility.VISIBLE;
+		visibility = EnumVisibility.DEFAULT;
 		dependencyRequirement = EnumDependencyRequirement.ALL_COMPLETED;
 		minRequiredDependencies = 0;
 		hideTextUntilComplete = false;
@@ -196,7 +196,7 @@ public final class Quest extends QuestObject
 			}
 		}
 
-		if (visibility != EnumVisibility.VISIBLE)
+		if (visibility != EnumVisibility.DEFAULT)
 		{
 			nbt.setString("visibility", visibility.getID());
 		}
@@ -459,23 +459,22 @@ public final class Quest extends QuestObject
 	}
 
 	@Override
-	public void onCompleted(ITeamData data, List<EntityPlayerMP> onlineMembers)
+	public void onCompleted(ITeamData data, List<EntityPlayerMP> notifyPlayers)
 	{
 		//data.setTimesCompleted(this, data.getTimesCompleted(this) + 1);
-		super.onCompleted(data, onlineMembers);
-		new ObjectCompletedEvent.QuestEvent(data, this).post();
+		super.onCompleted(data, notifyPlayers);
 
-		if (!canRepeat)
+		for (EntityPlayerMP player : notifyPlayers)
 		{
-			for (EntityPlayerMP player : onlineMembers)
-			{
-				new MessageDisplayCompletionToast(id).sendTo(player);
-			}
+			new MessageDisplayCompletionToast(id).sendTo(player);
 		}
+
+		data.checkAutoCompletion(this);
+		new ObjectCompletedEvent.QuestEvent(data, this).post();
 
 		if (chapter.isComplete(data))
 		{
-			chapter.onCompleted(data, onlineMembers);
+			chapter.onCompleted(data, notifyPlayers);
 		}
 	}
 
@@ -599,7 +598,7 @@ public final class Quest extends QuestObject
 
 	public EnumVisibility getVisibility()
 	{
-		if (visibility == EnumVisibility.INTERNAL || dependencies.isEmpty())
+		if (visibility != EnumVisibility.DEFAULT || dependencies.isEmpty())
 		{
 			return visibility;
 		}

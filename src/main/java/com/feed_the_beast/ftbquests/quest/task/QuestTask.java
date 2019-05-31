@@ -77,15 +77,15 @@ public abstract class QuestTask extends QuestObject
 	}
 
 	@Override
-	public final void onCompleted(ITeamData data, List<EntityPlayerMP> onlineMembers)
+	public final void onCompleted(ITeamData data, List<EntityPlayerMP> notifyPlayers)
 	{
-		super.onCompleted(data, onlineMembers);
+		super.onCompleted(data, notifyPlayers);
 		new ObjectCompletedEvent.TaskEvent(data, this).post();
 		boolean questComplete = quest.isComplete(data);
 
 		if (quest.tasks.size() > 1 && !questComplete)
 		{
-			for (EntityPlayerMP player : onlineMembers)
+			for (EntityPlayerMP player : notifyPlayers)
 			{
 				new MessageDisplayCompletionToast(id).sendTo(player);
 			}
@@ -93,7 +93,7 @@ public abstract class QuestTask extends QuestObject
 
 		if (questComplete)
 		{
-			quest.onCompleted(data, onlineMembers);
+			quest.onCompleted(data, notifyPlayers);
 		}
 	}
 

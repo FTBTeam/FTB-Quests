@@ -318,7 +318,20 @@ public class GuiQuestTree extends GuiBase
 		{
 			if (selectedChapter != null && file.chapters.size() > 1)
 			{
-				selectChapter(file.chapters.get(MathUtils.mod(selectedChapter.getIndex() + (isShiftKeyDown() ? -1 : 1), file.chapters.size())));
+				List<QuestChapter> visibleChapters = new ArrayList<>();
+
+				for (QuestChapter chapter : file.chapters)
+				{
+					if (file.canEdit() || (!chapter.quests.isEmpty() && chapter.isVisible(file.self)))
+					{
+						visibleChapters.add(chapter);
+					}
+				}
+
+				if (!visibleChapters.isEmpty())
+				{
+					selectChapter(visibleChapters.get(MathUtils.mod(visibleChapters.indexOf(selectedChapter) + (isShiftKeyDown() ? -1 : 1), visibleChapters.size())));
+				}
 			}
 
 			return true;

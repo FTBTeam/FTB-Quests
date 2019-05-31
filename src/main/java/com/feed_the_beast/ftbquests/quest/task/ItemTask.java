@@ -3,6 +3,7 @@ package com.feed_the_beast.ftbquests.quest.task;
 import com.feed_the_beast.ftblib.integration.FTBLibJEIIntegration;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigItemStack;
+import com.feed_the_beast.ftblib.lib.config.EnumTristate;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.IconAnimation;
 import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
@@ -51,7 +52,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 {
 	public final List<ItemStack> items;
 	public long count;
-	public boolean consumeItems;
+	public EnumTristate consumeItems;
 	public boolean ignoreDamage;
 	public NBTMatchingMode nbtMode;
 
@@ -59,7 +60,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 	{
 		super(quest);
 		items = new ArrayList<>();
-		consumeItems = quest.chapter.file.defaultConsumeItems;
+		consumeItems = EnumTristate.DEFAULT;
 		ignoreDamage = false;
 		nbtMode = NBTMatchingMode.MATCH;
 	}
@@ -105,10 +106,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 			nbt.setLong("count", count);
 		}
 
-		if (consumeItems != quest.chapter.file.defaultConsumeItems)
-		{
-			nbt.setBoolean("consume_items", consumeItems);
-		}
+		consumeItems.write(nbt, "consume_items");
 
 		if (ignoreDamage)
 		{
@@ -157,7 +155,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 			count = 1;
 		}
 
-		consumeItems = nbt.hasKey("consume_items") ? nbt.getBoolean("consume_items") : quest.chapter.file.defaultConsumeItems;
+		consumeItems = EnumTristate.read(nbt, "consume_items");
 		ignoreDamage = nbt.getBoolean("ignore_damage");
 		nbtMode = NBTMatchingMode.VALUES[nbt.getByte("ignore_nbt")];
 	}
@@ -169,11 +167,12 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 		data.writeCollection(items, DataOut.ITEM_STACK);
 		data.writeVarLong(count);
 		int flags = 0;
-		flags = Bits.setFlag(flags, 1, consumeItems);
+		//flags = Bits.setFlag(flags, 1, consumeItems);
 		flags = Bits.setFlag(flags, 2, ignoreDamage);
 		flags = Bits.setFlag(flags, 4, nbtMode != NBTMatchingMode.MATCH);
 		flags = Bits.setFlag(flags, 8, nbtMode == NBTMatchingMode.CONTAIN);
 		data.writeVarInt(flags);
+		EnumTristate.NAME_MAP.write(data, consumeItems);
 	}
 
 	@Override
@@ -183,9 +182,10 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 		data.readCollection(items, DataIn.ITEM_STACK);
 		count = data.readVarLong();
 		int flags = data.readVarInt();
-		consumeItems = Bits.getFlag(flags, 1);
+		//consumeItems = Bits.getFlag(flags, 1);
 		ignoreDamage = Bits.getFlag(flags, 2);
 		nbtMode = Bits.getFlag(flags, 4) ? Bits.getFlag(flags, 8) ? NBTMatchingMode.CONTAIN : NBTMatchingMode.IGNORE : NBTMatchingMode.MATCH;
+		consumeItems = EnumTristate.NAME_MAP.read(data);
 	}
 
 	public List<ItemStack> getValidItems()
@@ -317,7 +317,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 		super.getConfig(config);
 		config.addList("items", items, new ConfigItemStack(ItemStack.EMPTY, true), v -> new ConfigItemStack(v, true), ConfigItemStack::getStack);
 		config.addLong("count", () -> count, v -> count = v, 1, 1, Long.MAX_VALUE);
-		config.addBool("consume_items", () -> consumeItems, v -> consumeItems = v, quest.chapter.file.defaultConsumeItems).setCanEdit(!quest.canRepeat);
+		config.addEnum("consume_items", () -> consumeItems, v -> consumeItems = v, EnumTristate.NAME_MAP).setCanEdit(!quest.canRepeat);
 		config.addBool("ignore_damage", () -> ignoreDamage, v -> ignoreDamage = v, false);
 		config.addEnum("nbt_mode", () -> nbtMode, v -> nbtMode = v, NameMap.create(NBTMatchingMode.MATCH, NBTMatchingMode.VALUES));
 	}
@@ -325,7 +325,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 	@Override
 	public boolean canInsertItem()
 	{
-		return quest.canRepeat || consumeItems;
+		return quest.canRepeat || consumeItems.get(quest.chapter.file.defaultTeamConsumeItems);
 	}
 
 	@Override
@@ -359,10 +359,20 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 	@SideOnly(Side.CLIENT)
 	public void addMouseOverText(List<String> list, @Nullable QuestTaskData data)
 	{
-		if (consumesResources() || Loader.isModLoaded("jei") || getValidItems().size() > 1)
+		if (consumesResources())
 		{
 			list.add("");
-			list.add(TextFormatting.YELLOW.toString() + TextFormatting.UNDERLINE + I18n.format(consumesResources() ? "ftbquests.task.click_to_submit" : "ftbquests.task.ftbquests.item.view_items"));
+			list.add(TextFormatting.YELLOW.toString() + TextFormatting.UNDERLINE + I18n.format("ftbquests.task.click_to_submit"));
+		}
+		else if (getValidItems().size() > 1)
+		{
+			list.add("");
+			list.add(TextFormatting.YELLOW.toString() + TextFormatting.UNDERLINE + I18n.format("ftbquests.task.ftbquests.item.view_items"));
+		}
+		else if (Loader.isModLoaded("jei"))
+		{
+			list.add("");
+			list.add(TextFormatting.YELLOW.toString() + TextFormatting.UNDERLINE + I18n.format("ftbquests.task.ftbquests.item.click_recipe"));
 		}
 	}
 

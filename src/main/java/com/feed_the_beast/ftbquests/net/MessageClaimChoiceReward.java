@@ -59,7 +59,7 @@ public class MessageClaimChoiceReward extends MessageToServer
 		{
 			FTBQuestsTeamData teamData = FTBQuestsTeamData.get(Universe.get().getPlayer(player).team);
 
-			if (reward.parent instanceof QuestObject && ((QuestObject) reward.parent).isComplete(teamData))
+			if (reward.quest instanceof QuestObject && reward.quest.isComplete(teamData))
 			{
 				ChoiceReward r = (ChoiceReward) reward;
 

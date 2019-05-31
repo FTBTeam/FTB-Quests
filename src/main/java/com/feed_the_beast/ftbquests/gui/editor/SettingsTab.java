@@ -6,7 +6,6 @@ import com.feed_the_beast.ftblib.lib.config.ConfigValueInstance;
 import com.feed_the_beast.ftblib.lib.util.misc.BooleanConsumer;
 import com.feed_the_beast.ftblib.lib.util.misc.NameMap;
 import com.feed_the_beast.ftbquests.FTBQuests;
-import com.feed_the_beast.ftbquests.quest.CallbackCheckBox;
 
 import javax.swing.*;
 import java.awt.*;

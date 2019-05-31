@@ -62,7 +62,8 @@ public abstract class QuestFile extends QuestObject
 	public Ticks emergencyItemsCooldown;
 	public int fileVersion;
 	public boolean defaultRewardTeam;
-	public boolean defaultConsumeItems;
+	public boolean defaultTeamConsumeItems;
+	public boolean defaultRewardAutoclaim;
 	public EnumQuestShape defaultShape;
 	public boolean dropLootCrates;
 	public final EntityWeight lootCrateNoDrop;
@@ -84,7 +85,8 @@ public abstract class QuestFile extends QuestObject
 		emergencyItemsCooldown = Ticks.MINUTE.x(5);
 
 		defaultRewardTeam = false;
-		defaultConsumeItems = false;
+		defaultTeamConsumeItems = false;
+		defaultRewardAutoclaim = false;
 		defaultShape = EnumQuestShape.CIRCLE;
 		dropLootCrates = false;
 		lootCrateNoDrop = new EntityWeight();
@@ -132,12 +134,12 @@ public abstract class QuestFile extends QuestObject
 	}
 
 	@Override
-	public void onCompleted(ITeamData data, List<EntityPlayerMP> onlineMembers)
+	public void onCompleted(ITeamData data, List<EntityPlayerMP> notifyPlayers)
 	{
-		super.onCompleted(data, onlineMembers);
+		super.onCompleted(data, notifyPlayers);
 		new ObjectCompletedEvent.FileEvent(data, this).post();
 
-		for (EntityPlayerMP player : onlineMembers)
+		for (EntityPlayerMP player : notifyPlayers)
 		{
 			new MessageDisplayCompletionToast(id).sendTo(player);
 		}
@@ -408,7 +410,8 @@ public abstract class QuestFile extends QuestObject
 		super.writeData(nbt);
 		nbt.setInteger("version", VERSION);
 		nbt.setBoolean("default_reward_team", defaultRewardTeam);
-		nbt.setBoolean("default_consume_items", defaultConsumeItems);
+		nbt.setBoolean("default_consume_items", defaultTeamConsumeItems);
+		nbt.setBoolean("default_autoclaim_rewards", defaultRewardAutoclaim);
 		nbt.setString("default_quest_shape", defaultShape.getID());
 
 		if (!emergencyItems.isEmpty())
@@ -437,7 +440,8 @@ public abstract class QuestFile extends QuestObject
 	{
 		super.readData(nbt);
 		defaultRewardTeam = nbt.getBoolean("default_reward_team");
-		defaultConsumeItems = nbt.getBoolean("default_consume_items");
+		defaultTeamConsumeItems = nbt.getBoolean("default_consume_items");
+		defaultRewardAutoclaim = nbt.getBoolean("default_autoclaim_rewards");
 		defaultShape = EnumQuestShape.NAME_MAP.get(nbt.getString("default_quest_shape"));
 		emergencyItems.clear();
 
@@ -932,7 +936,8 @@ public abstract class QuestFile extends QuestObject
 		data.writeCollection(emergencyItems, DataOut.ITEM_STACK);
 		data.writeVarLong(emergencyItemsCooldown.ticks());
 		data.writeBoolean(defaultRewardTeam);
-		data.writeBoolean(defaultConsumeItems);
+		data.writeBoolean(defaultTeamConsumeItems);
+		data.writeBoolean(defaultRewardAutoclaim);
 		data.write(defaultShape, EnumQuestShape.NAME_MAP);
 
 		data.writeBoolean(dropLootCrates);
@@ -947,7 +952,8 @@ public abstract class QuestFile extends QuestObject
 		data.readCollection(emergencyItems, DataIn.ITEM_STACK);
 		emergencyItemsCooldown = Ticks.get(data.readVarLong());
 		defaultRewardTeam = data.readBoolean();
-		defaultConsumeItems = data.readBoolean();
+		defaultTeamConsumeItems = data.readBoolean();
+		defaultRewardAutoclaim = data.readBoolean();
 		defaultShape = data.read(EnumQuestShape.NAME_MAP);
 		dropLootCrates = data.readBoolean();
 		lootCrateNoDrop.readNetData(data);
@@ -1201,8 +1207,9 @@ public abstract class QuestFile extends QuestObject
 
 		ConfigGroup defaultsGroup = config.getGroup("defaults");
 		defaultsGroup.addBool("reward_team", () -> defaultRewardTeam, v -> defaultRewardTeam = v, false);
-		defaultsGroup.addBool("consume_items", () -> defaultConsumeItems, v -> defaultConsumeItems = v, false);
-		defaultsGroup.addEnum("quest_shape", () -> defaultShape, v -> defaultShape = v, EnumQuestShape.NAME_MAP);
+		defaultsGroup.addBool("consume_items", () -> defaultTeamConsumeItems, v -> defaultTeamConsumeItems = v, false);
+		defaultsGroup.addBool("autoclaim_rewards", () -> defaultRewardAutoclaim, v -> defaultRewardAutoclaim = v, false);
+		defaultsGroup.addEnum("quest_shape", () -> defaultShape, v -> defaultShape = v, EnumQuestShape.NAME_MAP.withDefault(EnumQuestShape.CIRCLE));
 
 		ConfigGroup d = config.getGroup("loot_crate_no_drop");
 		d.addInt("passive", () -> lootCrateNoDrop.passive, v -> lootCrateNoDrop.passive = v, 0, 0, Integer.MAX_VALUE).setDisplayName(new TextComponentTranslation("ftbquests.loot.entitytype.passive"));

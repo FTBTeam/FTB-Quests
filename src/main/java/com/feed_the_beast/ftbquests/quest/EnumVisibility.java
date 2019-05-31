@@ -9,12 +9,13 @@ import net.minecraft.util.text.TextComponentTranslation;
  */
 public enum EnumVisibility implements IWithID
 {
+	DEFAULT("default", 2),
 	VISIBLE("visible", 2),
 	SECRET("secret", 1),
 	INVISIBLE("invisible", 0),
 	INTERNAL("internal", -1);
 
-	public static final NameMap<EnumVisibility> NAME_MAP = NameMap.create(VISIBLE, NameMap.ObjectProperties.withName((sender, o) -> new TextComponentTranslation(o.langKey)), values());
+	public static final NameMap<EnumVisibility> NAME_MAP = NameMap.create(DEFAULT, NameMap.ObjectProperties.withName((sender, o) -> new TextComponentTranslation(o.langKey)), values());
 
 	private final String id;
 	private final String langKey;
