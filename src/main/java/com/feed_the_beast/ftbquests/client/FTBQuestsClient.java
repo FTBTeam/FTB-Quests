@@ -3,16 +3,10 @@ package com.feed_the_beast.ftbquests.client;
 import com.feed_the_beast.ftblib.FTBLib;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigInt;
-import com.feed_the_beast.ftblib.lib.gui.Panel;
-import com.feed_the_beast.ftblib.lib.gui.SimpleTextButton;
-import com.feed_the_beast.ftblib.lib.gui.misc.GuiButtonListBase;
 import com.feed_the_beast.ftblib.lib.gui.misc.GuiEditConfig;
 import com.feed_the_beast.ftblib.lib.gui.misc.GuiEditConfigValue;
 import com.feed_the_beast.ftblib.lib.gui.misc.GuiSelectFluid;
 import com.feed_the_beast.ftblib.lib.gui.misc.GuiSelectItemStack;
-import com.feed_the_beast.ftblib.lib.icon.Icon;
-import com.feed_the_beast.ftblib.lib.util.ServerUtils;
-import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.FTBQuestsCommon;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
@@ -36,7 +30,6 @@ import net.minecraft.tileentity.TileEntityStructure;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.world.DimensionType;
 import net.minecraftforge.client.settings.KeyConflictContext;
 import net.minecraftforge.client.settings.KeyModifier;
 import net.minecraftforge.fluids.FluidRegistry;
@@ -92,30 +85,9 @@ public class FTBQuestsClient extends FTBQuestsCommon
 		}).openGui());
 
 		FTBQuestsTasks.DIMENSION.setGuiProvider((gui, quest, callback) -> {
-			GuiButtonListBase g = new GuiButtonListBase()
-			{
-				@Override
-				public void addButtons(Panel panel)
-				{
-					for (DimensionType type : DimensionType.values())
-					{
-						panel.add(new SimpleTextButton(panel, ServerUtils.getDimensionName(type.getId()).getFormattedText(), Icon.EMPTY)
-						{
-							@Override
-							public void onClicked(MouseButton button)
-							{
-								gui.openGui();
-								DimensionTask task = new DimensionTask(quest);
-								task.dimension = type.getId();
-								callback.accept(task);
-							}
-						});
-					}
-				}
-			};
-
-			g.focus();
-			g.openGui();
+			DimensionTask task = new DimensionTask(quest);
+			task.dimension = Minecraft.getMinecraft().world.provider.getDimension();
+			callback.accept(task);
 		});
 
 		FTBQuestsTasks.LOCATION.setGuiProvider((gui, quest, callback) -> {
