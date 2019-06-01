@@ -38,18 +38,18 @@ public class ButtonChapter extends ButtonTab
 	@Override
 	public void draw(Theme theme, int x, int y, int w, int h)
 	{
-		int is = width < 18 ? 8 : 16;
-		icon.draw(x + (w - is) / 2, y + (h - is) / 2, is, is);
-
 		if (chapter == treeGui.selectedChapter || treeGui.selectedChapter != null && chapter == treeGui.selectedChapter.group)
 		{
 			treeGui.backgroundColor.draw(x + 1, y, w - 2, h);
 		}
 
-		if (isMouseOver())
+		if (treeGui.chapterHoverPanel.chapter == this)
 		{
-			treeGui.backgroundColor.draw(x + 1, y, w - 2, h);
+			return;
 		}
+
+		int is = width < 18 ? 8 : 16;
+		icon.draw(x + (w - is) / 2, y + (h - is) / 2, is, is);
 
 		if (chapter.quests.isEmpty() && !chapter.hasChildren())
 		{

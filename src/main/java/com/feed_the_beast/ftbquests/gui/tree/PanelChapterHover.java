@@ -59,7 +59,7 @@ public class PanelChapterHover extends Panel
 				widget.setWidth(width - widget.posX);
 			}
 
-			setPos(chapter.getX(), chapter.getY() - 1);
+			setPos(chapter.getX(), Math.min(chapter.getY() - 1, treeGui.height - height - 1));
 		}
 		else
 		{
