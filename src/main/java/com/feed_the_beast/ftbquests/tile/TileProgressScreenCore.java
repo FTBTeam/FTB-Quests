@@ -29,6 +29,7 @@ import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.common.capabilities.Capability;
 
 import javax.annotation.Nullable;
+import java.util.List;
 
 /**
  * @author LatvianModder
@@ -264,10 +265,12 @@ public class TileProgressScreenCore extends TileWithTeam implements IConfigCallb
 		else if (!indestructible)
 		{
 			cChapter = getChapter();
+			cTeam = getTeam();
 
-			if (cChapter != null)
+			if (cChapter != null && cTeam != null)
 			{
-				chapter = cChapter.file.chapters.get((cChapter.file.chapters.indexOf(cChapter) + 1) % cChapter.file.chapters.size()).id;
+				List<QuestChapter> chapters = cChapter.file.getVisibleChapters(cTeam, true);
+				chapter = chapters.get((chapters.indexOf(cChapter) + 1) % chapters.size()).id;
 				updateContainingBlockInfo();
 				markDirty();
 				BlockUtils.notifyBlockUpdate(world, pos, getBlockState());

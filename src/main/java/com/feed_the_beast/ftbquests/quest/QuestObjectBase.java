@@ -58,6 +58,10 @@ public abstract class QuestObjectBase
 
 	public abstract QuestFile getQuestFile();
 
+	public void changeProgress(ITeamData data, EnumChangeProgress type)
+	{
+	}
+
 	@Nullable
 	public QuestChapter getQuestChapter()
 	{

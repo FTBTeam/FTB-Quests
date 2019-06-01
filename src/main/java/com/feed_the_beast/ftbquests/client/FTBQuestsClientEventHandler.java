@@ -80,7 +80,7 @@ public class FTBQuestsClientEventHandler
 						return "[!]";
 					}
 
-					int r = ClientQuestFile.INSTANCE.getUnclaimedRewards(Minecraft.getMinecraft().player.getUniqueID(), ClientQuestFile.INSTANCE.self);
+					int r = ClientQuestFile.INSTANCE.getUnclaimedRewards(Minecraft.getMinecraft().player.getUniqueID(), ClientQuestFile.INSTANCE.self, true);
 
 					if (r > 0)
 					{

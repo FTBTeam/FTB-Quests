@@ -1333,23 +1333,7 @@ public abstract class QuestFile extends QuestObject
 		}
 	}
 
-	public boolean hasUnclaimedRewards(UUID player, ITeamData data)
-	{
-		for (QuestChapter chapter : chapters)
-		{
-			for (Quest quest : chapter.quests)
-			{
-				if (quest.hasUnclaimedRewards(player, data))
-				{
-					return true;
-				}
-			}
-		}
-
-		return false;
-	}
-
-	public int getUnclaimedRewards(UUID player, ITeamData data)
+	public int getUnclaimedRewards(UUID player, ITeamData data, boolean showExcluded)
 	{
 		int r = 0;
 
@@ -1357,7 +1341,7 @@ public abstract class QuestFile extends QuestObject
 		{
 			for (Quest quest : chapter.quests)
 			{
-				r += quest.getUnclaimedRewards(player, data);
+				r += quest.getUnclaimedRewards(player, data, showExcluded);
 			}
 		}
 
@@ -1376,5 +1360,20 @@ public abstract class QuestFile extends QuestObject
 		}
 
 		return false;
+	}
+
+	public List<QuestChapter> getVisibleChapters(ITeamData data, boolean excludeEmpty)
+	{
+		List<QuestChapter> list = new ArrayList<>();
+
+		for (QuestChapter chapter : chapters)
+		{
+			if ((!excludeEmpty || !chapter.quests.isEmpty()) && chapter.isVisible(data))
+			{
+				list.add(chapter);
+			}
+		}
+
+		return list;
 	}
 }

@@ -318,15 +318,7 @@ public class GuiQuestTree extends GuiBase
 		{
 			if (selectedChapter != null && file.chapters.size() > 1)
 			{
-				List<QuestChapter> visibleChapters = new ArrayList<>();
-
-				for (QuestChapter chapter : file.chapters)
-				{
-					if (file.canEdit() || (!chapter.quests.isEmpty() && chapter.isVisible(file.self)))
-					{
-						visibleChapters.add(chapter);
-					}
-				}
+				List<QuestChapter> visibleChapters = file.canEdit() ? file.chapters : file.getVisibleChapters(file.self, true);
 
 				if (!visibleChapters.isEmpty())
 				{

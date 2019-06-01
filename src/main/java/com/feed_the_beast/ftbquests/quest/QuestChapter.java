@@ -330,11 +330,11 @@ public final class QuestChapter extends QuestObject
 		return list;
 	}
 
-	public boolean hasUnclaimedRewards(UUID player, ITeamData data)
+	public boolean hasUnclaimedRewards(UUID player, ITeamData data, boolean showExcluded)
 	{
 		for (Quest quest : quests)
 		{
-			if (quest.hasUnclaimedRewards(player, data))
+			if (quest.hasUnclaimedRewards(player, data, showExcluded))
 			{
 				return true;
 			}
@@ -342,7 +342,7 @@ public final class QuestChapter extends QuestObject
 
 		for (QuestChapter chapter : getChildren())
 		{
-			if (chapter.hasUnclaimedRewards(player, data))
+			if (chapter.hasUnclaimedRewards(player, data, showExcluded))
 			{
 				return true;
 			}
@@ -351,18 +351,18 @@ public final class QuestChapter extends QuestObject
 		return false;
 	}
 
-	public int getUnclaimedRewards(UUID player, ITeamData data)
+	public int getUnclaimedRewards(UUID player, ITeamData data, boolean showExcluded)
 	{
 		int r = 0;
 
 		for (Quest quest : quests)
 		{
-			r += quest.getUnclaimedRewards(player, data);
+			r += quest.getUnclaimedRewards(player, data, showExcluded);
 		}
 
 		for (QuestChapter chapter : getChildren())
 		{
-			r += chapter.getUnclaimedRewards(player, data);
+			r += chapter.getUnclaimedRewards(player, data, showExcluded);
 		}
 
 		return r;

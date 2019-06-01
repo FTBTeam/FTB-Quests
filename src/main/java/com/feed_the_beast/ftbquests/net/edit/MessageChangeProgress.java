@@ -7,7 +7,7 @@ import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.EnumChangeProgress;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
-import com.feed_the_beast.ftbquests.quest.QuestObject;
+import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import net.minecraft.entity.player.EntityPlayerMP;
 
@@ -58,7 +58,7 @@ public class MessageChangeProgress extends MessageToServer
 	{
 		if (FTBQuests.canEdit(player))
 		{
-			QuestObject object = ServerQuestFile.INSTANCE.get(id);
+			QuestObjectBase object = ServerQuestFile.INSTANCE.getBase(id);
 
 			if (object != null)
 			{

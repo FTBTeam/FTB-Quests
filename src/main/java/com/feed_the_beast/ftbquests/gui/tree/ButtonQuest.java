@@ -280,24 +280,13 @@ public class ButtonQuest extends Button
 
 		if (treeGui.file.self != null)
 		{
-			int r = quest.getUnclaimedRewards(Minecraft.getMinecraft().player.getUniqueID(), treeGui.file.self);
-
-			if (r > 0)// || quest.canRepeat)
-			{
-				list.add("");
-			}
+			int r = quest.getUnclaimedRewards(Minecraft.getMinecraft().player.getUniqueID(), treeGui.file.self, true);
 
 			if (r > 0)
 			{
+				list.add("");
 				list.add(I18n.format("ftbquests.gui.collect_rewards", TextFormatting.GOLD.toString() + r));
 			}
-
-			/*
-			if (quest.canRepeat)
-			{
-				list.add(I18n.format("ftbquests.gui.times_completed") + ": " + TextFormatting.GOLD + treeGui.questFile.self.getTimesCompleted(quest));
-			}
-			*/
 		}
 	}
 

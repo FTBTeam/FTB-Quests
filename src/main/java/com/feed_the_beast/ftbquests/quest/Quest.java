@@ -760,13 +760,13 @@ public final class Quest extends QuestObject
 		}
 	}
 
-	public boolean hasUnclaimedRewards(UUID player, ITeamData data)
+	public boolean hasUnclaimedRewards(UUID player, ITeamData data, boolean showExcluded)
 	{
 		if (isComplete(data))
 		{
 			for (QuestReward reward : rewards)
 			{
-				if (!data.isRewardClaimed(player, reward))
+				if ((showExcluded || reward.getExcludeFromClaimAll()) && !data.isRewardClaimed(player, reward))
 				{
 					return true;
 				}
@@ -776,7 +776,7 @@ public final class Quest extends QuestObject
 		return false;
 	}
 
-	public int getUnclaimedRewards(UUID player, ITeamData data)
+	public int getUnclaimedRewards(UUID player, ITeamData data, boolean showExcluded)
 	{
 		int r = 0;
 
@@ -784,7 +784,7 @@ public final class Quest extends QuestObject
 		{
 			for (QuestReward reward : rewards)
 			{
-				if (!data.isRewardClaimed(player, reward))
+				if ((showExcluded || !reward.getExcludeFromClaimAll()) && !data.isRewardClaimed(player, reward))
 				{
 					r++;
 				}
