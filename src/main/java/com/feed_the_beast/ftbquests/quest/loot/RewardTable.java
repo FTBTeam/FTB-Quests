@@ -246,6 +246,17 @@ public final class RewardTable extends QuestObjectBase
 	}
 
 	@Override
+	public void clearCachedData()
+	{
+		super.clearCachedData();
+
+		for (WeightedReward reward : rewards)
+		{
+			reward.reward.clearCachedData();
+		}
+	}
+
+	@Override
 	public void deleteSelf()
 	{
 		file.rewardTables.remove(this);
