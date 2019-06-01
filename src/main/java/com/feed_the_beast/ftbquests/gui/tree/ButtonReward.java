@@ -10,7 +10,6 @@ import com.feed_the_beast.ftblib.lib.gui.WidgetType;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.gui.FTBQuestsTheme;
-import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
@@ -25,11 +24,13 @@ import java.util.List;
  */
 public class ButtonReward extends Button
 {
+	public final GuiQuestTree treeGui;
 	public final QuestReward reward;
 
 	public ButtonReward(Panel panel, QuestReward r)
 	{
 		super(panel, r.getDisplayName().getFormattedText(), r.getIcon());
+		treeGui = (GuiQuestTree) panel.getGui();
 		reward = r;
 		setSize(18, 18);
 	}
@@ -85,7 +86,7 @@ public class ButtonReward extends Button
 	@Override
 	public WidgetType getWidgetType()
 	{
-		if (!ClientQuestFile.existsWithTeam() || !(reward.quest instanceof QuestObject) || !reward.quest.isComplete(ClientQuestFile.INSTANCE.self))
+		if (!ClientQuestFile.existsWithTeam() || !reward.quest.isComplete(ClientQuestFile.INSTANCE.self))
 		{
 			return WidgetType.DISABLED;
 		}
@@ -98,7 +99,7 @@ public class ButtonReward extends Button
 	{
 		if (button.isLeft())
 		{
-			if (ClientQuestFile.existsWithTeam() && reward.quest instanceof QuestObject && reward.quest.isComplete(ClientQuestFile.INSTANCE.self) && !ClientQuestFile.INSTANCE.isRewardClaimed(reward))
+			if (ClientQuestFile.existsWithTeam() && reward.quest.isComplete(ClientQuestFile.INSTANCE.self) && !ClientQuestFile.INSTANCE.isRewardClaimed(reward))
 			{
 				GuiHelper.playClickSound();
 				reward.onButtonClicked();
@@ -144,7 +145,7 @@ public class ButtonReward extends Button
 		{
 			FTBQuestsTheme.COMPLETED.draw(x + w - 9, y + 1, 8, 8);
 		}
-		else if (reward.quest instanceof QuestObject && reward.quest.isComplete(ClientQuestFile.INSTANCE.self))
+		else if (reward.quest.isComplete(ClientQuestFile.INSTANCE.self))
 		{
 			FTBQuestsTheme.ALERT.draw(x + w - 9, y + 1, 8, 8);
 		}

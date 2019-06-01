@@ -7,7 +7,7 @@ import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.quest.EnumChangeProgress;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
-import com.feed_the_beast.ftbquests.quest.QuestObject;
+import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -57,7 +57,7 @@ public class MessageChangeProgressResponse extends MessageToClient
 	@SideOnly(Side.CLIENT)
 	public void onMessage()
 	{
-		QuestObject object = ClientQuestFile.INSTANCE.get(id);
+		QuestObjectBase object = ClientQuestFile.INSTANCE.getBase(id);
 
 		if (object != null)
 		{

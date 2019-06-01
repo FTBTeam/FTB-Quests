@@ -33,7 +33,7 @@ public class PanelChapters extends Panel
 
 		for (QuestChapter chapter : treeGui.file.chapters)
 		{
-			if ((canEdit || chapter.isVisible(treeGui.file.self)) && (chapter.group == null || chapter.group.invalid))
+			if ((chapter.group == null || chapter.group.invalid) && (canEdit || chapter.isVisible(treeGui.file.self)))
 			{
 				add(new ButtonChapter(this, chapter));
 			}

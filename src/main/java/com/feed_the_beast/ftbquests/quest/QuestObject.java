@@ -19,6 +19,7 @@ public abstract class QuestObject extends QuestObjectBase
 		cachedRelativeProgress.defaultReturnValue(-1);
 	}
 
+	@Override
 	public abstract void changeProgress(ITeamData data, EnumChangeProgress type);
 
 	public abstract int getRelativeProgressFromChildren(ITeamData data);

@@ -10,6 +10,7 @@ import com.feed_the_beast.ftbquests.gui.tree.GuiQuestTree;
 import com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIHelper;
 import com.feed_the_beast.ftbquests.net.MessageClaimReward;
 import com.feed_the_beast.ftbquests.net.MessageDisplayRewardToast;
+import com.feed_the_beast.ftbquests.quest.EnumChangeProgress;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
@@ -187,6 +188,15 @@ public abstract class QuestReward extends QuestObjectBase
 	public final boolean shouldAutoClaimReward()
 	{
 		return autoclaim.get(quest.chapter.alwaysInvisible || quest.chapter.file.defaultRewardAutoclaim);
+	}
+
+	@Override
+	public final void changeProgress(ITeamData data, EnumChangeProgress type)
+	{
+		if (type == EnumChangeProgress.RESET || type == EnumChangeProgress.RESET_DEPS)
+		{
+			data.unclaimRewards(Collections.singleton(this));
+		}
 	}
 
 	@Override
