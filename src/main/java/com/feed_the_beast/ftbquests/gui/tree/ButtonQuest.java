@@ -7,7 +7,6 @@ import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.gui.Theme;
 import com.feed_the_beast.ftblib.lib.gui.Widget;
-import com.feed_the_beast.ftblib.lib.gui.WidgetType;
 import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
@@ -300,17 +299,6 @@ public class ButtonQuest extends Button
 			}
 			*/
 		}
-	}
-
-	@Override
-	public WidgetType getWidgetType()
-	{
-		if (treeGui.getViewedQuest() == quest)
-		{
-			return WidgetType.MOUSE_OVER;
-		}
-
-		return treeGui.file.editingMode || quest.getActualVisibility(treeGui.file.self).isVisible() ? super.getWidgetType() : WidgetType.DISABLED;
 	}
 
 	@Override

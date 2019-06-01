@@ -180,10 +180,12 @@ public final class QuestChapter extends QuestObject
 
 		for (Quest quest : quests)
 		{
-			if (!quest.getVisibility().isInvisible())
-			{
-				list.add(quest.getIcon());
-			}
+			list.add(quest.getIcon());
+		}
+
+		for (QuestChapter child : getChildren())
+		{
+			list.add(child.getIcon());
 		}
 
 		return IconAnimation.fromList(list, false);
@@ -257,29 +259,25 @@ public final class QuestChapter extends QuestObject
 		}, new ConfigQuestObject(file, null, QuestObjectType.CHAPTER, QuestObjectType.NULL));
 	}
 
-	public boolean isVisible(@Nullable ITeamData data)
+	@Override
+	public boolean isVisible(ITeamData data)
 	{
-		if (alwaysInvisible || quests.isEmpty() && !hasChildren())
+		if (alwaysInvisible)
 		{
-			return false;
-		}
-
-		if (quests.isEmpty())
-		{
-			for (QuestChapter child : getChildren())
-			{
-				if (child.isVisible(data))
-				{
-					return true;
-				}
-			}
-
 			return false;
 		}
 
 		for (Quest quest : quests)
 		{
-			if (!quest.getActualVisibility(data).isInvisible())
+			if (quest.isVisible(data))
+			{
+				return true;
+			}
+		}
+
+		for (QuestChapter child : getChildren())
+		{
+			if (child.isVisible(data))
 			{
 				return true;
 			}

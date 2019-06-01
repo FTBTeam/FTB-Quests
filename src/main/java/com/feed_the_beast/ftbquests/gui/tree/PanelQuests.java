@@ -51,7 +51,7 @@ public class PanelQuests extends Panel
 
 		for (Quest quest : treeGui.selectedChapter.quests)
 		{
-			if (treeGui.file.canEdit() || !quest.getActualVisibility(ClientQuestFile.INSTANCE.self).isInvisible())
+			if (treeGui.file.canEdit() || quest.isVisible(ClientQuestFile.INSTANCE.self))
 			{
 				add(new ButtonQuest(this, quest));
 

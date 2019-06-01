@@ -1363,4 +1363,18 @@ public abstract class QuestFile extends QuestObject
 
 		return r;
 	}
+
+	@Override
+	public boolean isVisible(ITeamData data)
+	{
+		for (QuestChapter chapter : chapters)
+		{
+			if (chapter.isVisible(data))
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
 }

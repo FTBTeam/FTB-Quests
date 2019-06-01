@@ -60,6 +60,11 @@ public abstract class QuestObject extends QuestObjectBase
 		return getRelativeProgress(data) >= 100;
 	}
 
+	public boolean isVisible(ITeamData data)
+	{
+		return true;
+	}
+
 	public void onCompleted(ITeamData data, List<EntityPlayerMP> notifyPlayers)
 	{
 	}
