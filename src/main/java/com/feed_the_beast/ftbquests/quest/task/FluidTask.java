@@ -3,6 +3,7 @@ package com.feed_the_beast.ftbquests.quest.task;
 import com.feed_the_beast.ftblib.lib.config.ConfigFluid;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigNBT;
+import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
@@ -176,7 +177,8 @@ public class FluidTask extends QuestTask
 	@Override
 	public Icon getAltIcon()
 	{
-		return Icon.getIcon(fluid.getStill(createFluidStack(Fluid.BUCKET_VOLUME)).toString()).combineWith(Icon.getIcon(FluidTask.TANK_TEXTURE.toString()));
+		FluidStack fluidStack = createFluidStack(Fluid.BUCKET_VOLUME);
+		return Icon.getIcon(fluidStack.getFluid().getStill(fluidStack).toString()).withTint(Color4I.rgb(fluidStack.getFluid().getColor(fluidStack))).combineWith(Icon.getIcon(FluidTask.TANK_TEXTURE.toString()));
 	}
 
 	@Override
