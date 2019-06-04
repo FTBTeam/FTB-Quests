@@ -60,11 +60,6 @@ public class ButtonChapter extends ButtonTab
 			return;
 		}
 
-		if (treeGui.file.self == null)
-		{
-			return;
-		}
-
 		if (chapter.hasUnclaimedRewards(Minecraft.getMinecraft().player.getUniqueID(), treeGui.file.self, true))
 		{
 			GlStateManager.pushMatrix();

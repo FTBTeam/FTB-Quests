@@ -52,20 +52,34 @@ public class PanelChapterHover extends Panel
 			}
 
 			setHeight(align(WidgetLayout.VERTICAL));
-			setWidth(getContentWidth());
+			setWidth(Math.max(20, getContentWidth()));
 
 			for (Widget widget : widgets)
 			{
 				widget.setWidth(width - widget.posX);
 			}
 
-			setPos(chapter.getX(), Math.min(chapter.getY() - 1, treeGui.height - height - 1));
+			setX(chapter.getX());
 		}
 		else
 		{
 			type = -1;
 			setPosAndSize(-1, -1, 0, 0);
 		}
+	}
+
+	@Override
+	public int getY()
+	{
+		if (chapter != null)
+		{
+			treeGui.chapterPanel.setOffset(true);
+			int y = Math.min(chapter.getY() - 1, treeGui.height - height - 1);
+			treeGui.chapterPanel.setOffset(false);
+			return y;
+		}
+
+		return -1;
 	}
 
 	@Override

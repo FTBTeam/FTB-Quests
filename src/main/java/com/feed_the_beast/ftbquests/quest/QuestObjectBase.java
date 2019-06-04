@@ -9,6 +9,7 @@ import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.net.edit.MessageEditObject;
 import com.latmod.mods.itemfilters.item.ItemMissing;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.ITextComponent;
@@ -157,6 +158,23 @@ public abstract class QuestObjectBase
 		return component;
 	}
 
+	public String getI18NKey()
+	{
+		return String.format("%s.%08x.title", getObjectType().getID(), id);
+	}
+
+	@SideOnly(Side.CLIENT)
+	public final String getDisplayNameString(boolean formatted)
+	{
+		String key = getI18NKey();
+
+		if (I18n.hasKey(key))
+		{
+		}
+
+		return formatted ? getDisplayName().getFormattedText() : getDisplayName().getUnformattedText();
+	}
+
 	public void deleteSelf()
 	{
 		getQuestFile().remove(id);
@@ -190,7 +208,7 @@ public abstract class QuestObjectBase
 
 	public ConfigGroup createSubGroup(ConfigGroup group)
 	{
-		return group.getGroup(getObjectType().getName());
+		return group.getGroup(getObjectType().getID());
 	}
 
 	@SideOnly(Side.CLIENT)

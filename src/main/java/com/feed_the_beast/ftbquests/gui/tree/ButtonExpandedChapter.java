@@ -116,11 +116,6 @@ public class ButtonExpandedChapter extends SimpleTextButton
 	{
 		super.draw(theme, x, y, w, h);
 
-		if (treeGui.file.self == null)
-		{
-			return;
-		}
-
 		int w2 = 20;
 
 		if (chapter.hasUnclaimedRewards(Minecraft.getMinecraft().player.getUniqueID(), treeGui.file.self, true))

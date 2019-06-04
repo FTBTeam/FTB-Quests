@@ -190,7 +190,7 @@ public abstract class QuestTask extends QuestObject
 	public final ConfigGroup createSubGroup(ConfigGroup group)
 	{
 		QuestTaskType type = getType();
-		return group.getGroup(getObjectType().getName()).getGroup(type.getRegistryName().getNamespace()).getGroup(type.getRegistryName().getPath());
+		return group.getGroup(getObjectType().getID()).getGroup(type.getRegistryName().getNamespace()).getGroup(type.getRegistryName().getPath());
 	}
 
 	public Class<? extends TileTaskScreenCore> getScreenCoreClass()
