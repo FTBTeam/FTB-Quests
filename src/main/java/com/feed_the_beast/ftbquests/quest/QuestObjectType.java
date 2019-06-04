@@ -1,7 +1,7 @@
 package com.feed_the_beast.ftbquests.quest;
 
+import com.feed_the_beast.ftblib.lib.util.IWithID;
 import com.feed_the_beast.ftblib.lib.util.misc.NameMap;
-import net.minecraft.util.IStringSerializable;
 import net.minecraft.util.text.TextFormatting;
 
 import java.util.Arrays;
@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * @author LatvianModder
  */
-public enum QuestObjectType implements IStringSerializable
+public enum QuestObjectType implements IWithID
 {
 	NULL("null", 1, TextFormatting.BLACK),
 	FILE("file", 2, TextFormatting.RED),
@@ -25,23 +25,23 @@ public enum QuestObjectType implements IStringSerializable
 	public static final List<QuestObjectType> ALL_PROGRESSING = Arrays.asList(FILE, CHAPTER, FILE, TASK, VARIABLE);
 	public static final List<QuestObjectType> ALL_PROGRESSING_OR_NULL = Arrays.asList(NULL, FILE, CHAPTER, FILE, TASK, VARIABLE);
 
-	private final String name;
+	private final String id;
 	private final String translationKey;
 	private final int flag;
 	private final TextFormatting color;
 
-	QuestObjectType(String n, int f, TextFormatting c)
+	QuestObjectType(String i, int f, TextFormatting c)
 	{
-		name = n;
-		translationKey = "ftbquests." + name;
+		id = i;
+		translationKey = "ftbquests." + id;
 		flag = f;
 		color = c;
 	}
 
 	@Override
-	public String getName()
+	public String getID()
 	{
-		return name;
+		return id;
 	}
 
 	public String getTranslationKey()

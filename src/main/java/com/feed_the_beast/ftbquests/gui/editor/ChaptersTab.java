@@ -22,7 +22,16 @@ public class ChaptersTab extends ObjectListTab<QuestChapter>
 	{
 		for (QuestChapter chapter : editor.file.chapters)
 		{
-			root.add(new DefaultMutableTreeNode(chapter));
+			if (chapter.group == null || chapter.group.invalid)
+			{
+				DefaultMutableTreeNode node = new DefaultMutableTreeNode(chapter);
+				root.add(node);
+
+				for (QuestChapter child : chapter.getChildren())
+				{
+					node.add(new DefaultMutableTreeNode(child));
+				}
+			}
 		}
 	}
 
