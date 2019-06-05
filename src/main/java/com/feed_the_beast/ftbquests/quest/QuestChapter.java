@@ -367,4 +367,23 @@ public final class QuestChapter extends QuestObject
 
 		return r;
 	}
+
+	@Override
+	public boolean verifyDependenciesInternal(QuestObject original, boolean firstLoop)
+	{
+		if (this == original && !firstLoop)
+		{
+			return false;
+		}
+
+		for (Quest quest : quests)
+		{
+			if (!quest.verifyDependenciesInternal(original, false))
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
 }

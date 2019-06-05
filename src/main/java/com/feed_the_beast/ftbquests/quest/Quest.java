@@ -681,18 +681,11 @@ public final class Quest extends QuestObject
 		}
 		catch (StackOverflowError error)
 		{
-			if (autofix)
-			{
-				FTBQuests.LOGGER.error("Looping dependencies found in " + this + "! Deleting all dependencies...");
-			}
-			else
-			{
-				FTBQuests.LOGGER.error("Looping dependencies found in " + this + "!");
-			}
 		}
 
 		if (autofix)
 		{
+			FTBQuests.LOGGER.error("Looping dependencies found in " + this + "! Deleting all dependencies...");
 			dependencies.clear();
 
 			if (!chapter.file.isClient())
@@ -700,11 +693,16 @@ public final class Quest extends QuestObject
 				ServerQuestFile.INSTANCE.save();
 			}
 		}
+		else
+		{
+			FTBQuests.LOGGER.error("Looping dependencies found in " + this + "!");
+		}
 
 		return false;
 	}
 
-	private boolean verifyDependenciesInternal(Quest original, boolean firstLoop)
+	@Override
+	public boolean verifyDependenciesInternal(QuestObject original, boolean firstLoop)
 	{
 		if (this == original && !firstLoop)
 		{
@@ -713,14 +711,9 @@ public final class Quest extends QuestObject
 
 		removeInvalidDependencies();
 
-		if (dependencies.isEmpty())
-		{
-			return true;
-		}
-
 		for (QuestObject dependency : dependencies)
 		{
-			if (dependency instanceof Quest && !((Quest) dependency).verifyDependenciesInternal(original, false))
+			if (!dependency.verifyDependenciesInternal(original, false))
 			{
 				return false;
 			}
