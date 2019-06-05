@@ -7,6 +7,7 @@ import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.gui.Theme;
 import com.feed_the_beast.ftblib.lib.gui.WidgetType;
+import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.gui.FTBQuestsTheme;
@@ -136,6 +137,7 @@ public class ButtonReward extends Button
 		super.draw(theme, x, y, w, h);
 		GlStateManager.pushMatrix();
 		GlStateManager.translate(0F, 0F, 500F);
+		boolean completed = false;
 
 		if (!ClientQuestFile.existsWithTeam())
 		{
@@ -144,6 +146,7 @@ public class ButtonReward extends Button
 		else if (ClientQuestFile.INSTANCE.isRewardClaimed(reward))
 		{
 			FTBQuestsTheme.COMPLETED.draw(x + w - 9, y + 1, 8, 8);
+			completed = true;
 		}
 		else if (reward.quest.isComplete(ClientQuestFile.INSTANCE.self))
 		{
@@ -151,5 +154,19 @@ public class ButtonReward extends Button
 		}
 
 		GlStateManager.popMatrix();
+
+		if (!completed)
+		{
+			String s = reward.getButtonText();
+
+			if (!s.isEmpty())
+			{
+				GlStateManager.pushMatrix();
+				GlStateManager.translate(x + 19F - theme.getStringWidth(s) / 2F, y + 15F, 500F);
+				GlStateManager.scale(0.5F, 0.5F, 1F);
+				theme.drawString(s, 0, 0, Color4I.WHITE, Theme.SHADOW);
+				GlStateManager.popMatrix();
+			}
+		}
 	}
 }

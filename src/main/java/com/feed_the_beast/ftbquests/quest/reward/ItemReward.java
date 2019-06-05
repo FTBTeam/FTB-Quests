@@ -136,7 +136,7 @@ public class ItemReward extends QuestReward
 			return super.getAltIcon();
 		}
 
-		return ItemIcon.getItemIcon(stack);
+		return ItemIcon.getItemIcon(ItemHandlerHelper.copyStackWithSize(stack, 1));
 	}
 
 	@Override
@@ -162,5 +162,16 @@ public class ItemReward extends QuestReward
 	public Object getIngredient()
 	{
 		return new WrappedIngredient(stack).tooltip();
+	}
+
+	@Override
+	public String getButtonText()
+	{
+		if (randomBonus > 0)
+		{
+			return randomBonus + "-" + (stack.getCount() + randomBonus);
+		}
+
+		return Integer.toString(stack.getCount());
 	}
 }

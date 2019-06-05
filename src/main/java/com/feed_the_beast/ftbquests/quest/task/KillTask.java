@@ -1,6 +1,8 @@
 package com.feed_the_beast.ftbquests.quest.task;
 
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
+import com.feed_the_beast.ftblib.lib.icon.Icon;
+import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.util.misc.NameMap;
@@ -9,6 +11,7 @@ import com.feed_the_beast.ftbquests.quest.Quest;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.stats.StatBase;
@@ -121,7 +124,25 @@ public class KillTask extends QuestTask
 	@Override
 	public ITextComponent getAltDisplayName()
 	{
-		return new TextComponentTranslation("entity." + EntityList.getTranslationName(entity) + ".name");
+		ITextComponent textComponent = getType().getDisplayName().createCopy();
+		textComponent.appendText(": " + Long.toUnsignedString(value) + "x ");
+		textComponent.appendSibling(new TextComponentTranslation("entity." + EntityList.getTranslationName(entity) + ".name"));
+		return textComponent;
+	}
+
+	@Override
+	public Icon getAltIcon()
+	{
+		if (EntityList.ENTITY_EGGS.containsKey(entity))
+		{
+			ItemStack stack = new ItemStack(Items.SPAWN_EGG);
+			NBTTagCompound nbt = new NBTTagCompound();
+			nbt.setString("id", entity.toString());
+			stack.setTagInfo("EntityTag", nbt);
+			return ItemIcon.getItemIcon(stack);
+		}
+
+		return super.getAltIcon();
 	}
 
 	@Override

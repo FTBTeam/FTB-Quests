@@ -286,4 +286,9 @@ public abstract class QuestTask extends QuestObject
 	{
 		return FTBQuestsJEIHelper.QUESTS;
 	}
+
+	public String getButtonText()
+	{
+		return getMaxProgress() <= 1L ? "" : getMaxProgressString();
+	}
 }
