@@ -84,4 +84,10 @@ public class XPReward extends QuestReward
 		text.getStyle().setColor(TextFormatting.GREEN);
 		return new TextComponentTranslation("ftbquests.reward.ftbquests.xp").appendText(": ").appendSibling(text);
 	}
+
+	@Override
+	public String getButtonText()
+	{
+		return "+" + xp;
+	}
 }

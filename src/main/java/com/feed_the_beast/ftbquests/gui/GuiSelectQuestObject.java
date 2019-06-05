@@ -135,6 +135,7 @@ public class GuiSelectQuestObject extends GuiButtonListBase
 		builder.append(']');
 		setTitle(builder.toString());
 		setHasSearchBox(true);
+		focus();
 		setBorder(1, 1, 1);
 		config = c;
 		callbackGui = g;

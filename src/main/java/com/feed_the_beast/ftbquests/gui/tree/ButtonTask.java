@@ -7,6 +7,7 @@ import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.gui.Theme;
 import com.feed_the_beast.ftblib.lib.gui.WidgetType;
+import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.gui.FTBQuestsTheme;
 import com.feed_the_beast.ftbquests.quest.task.QuestTask;
@@ -152,6 +153,19 @@ public class ButtonTask extends Button
 			GlStateManager.translate(0F, 0F, 500F);
 			FTBQuestsTheme.COMPLETED.draw(x + w - 9, y + 1, 8, 8);
 			GlStateManager.popMatrix();
+		}
+		else
+		{
+			String s = task.getButtonText();
+
+			if (!s.isEmpty())
+			{
+				GlStateManager.pushMatrix();
+				GlStateManager.translate(x + 19F - theme.getStringWidth(s) / 2F, y + 15F, 500F);
+				GlStateManager.scale(0.5F, 0.5F, 1F);
+				theme.drawString(s, 0, 0, Color4I.WHITE, Theme.SHADOW);
+				GlStateManager.popMatrix();
+			}
 		}
 	}
 }

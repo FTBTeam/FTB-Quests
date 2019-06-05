@@ -250,4 +250,9 @@ public abstract class QuestReward extends QuestObjectBase
 	{
 		return FTBQuestsJEIHelper.QUESTS;
 	}
+
+	public String getButtonText()
+	{
+		return "";
+	}
 }

@@ -170,6 +170,7 @@ public abstract class QuestObjectBase
 
 		if (I18n.hasKey(key))
 		{
+			return formatted ? I18n.format(key) : TextFormatting.getTextWithoutFormattingCodes(I18n.format(key));
 		}
 
 		return formatted ? getDisplayName().getFormattedText() : getDisplayName().getUnformattedText();

@@ -84,4 +84,10 @@ public class XPLevelsReward extends QuestReward
 		text.getStyle().setColor(TextFormatting.GREEN);
 		return new TextComponentTranslation("ftbquests.reward.ftbquests.xp_levels").appendText(": ").appendSibling(text);
 	}
+
+	@Override
+	public String getButtonText()
+	{
+		return "+" + xpLevels;
+	}
 }
