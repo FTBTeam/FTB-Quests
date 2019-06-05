@@ -91,4 +91,9 @@ public abstract class QuestObject extends QuestObjectBase
 			cachedRelativeProgress.remove(id);
 		}
 	}
+
+	protected boolean verifyDependenciesInternal(QuestObject original, boolean firstLoop)
+	{
+		return true;
+	}
 }

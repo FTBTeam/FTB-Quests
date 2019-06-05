@@ -31,8 +31,14 @@ public class BlockQuestChest extends BlockWithHorizontalFacing
 
 	public BlockQuestChest()
 	{
-		super(Material.IRON, MapColor.GRAY);
+		super(Material.WOOD, MapColor.GRAY);
 		setHardness(1F);
+	}
+
+	@Override
+	public boolean isToolEffective(String type, IBlockState state)
+	{
+		return "axe".equals(type) || "pickaxe".equals(type);
 	}
 
 	@Override

@@ -32,7 +32,7 @@ public class PanelChapterHover extends Panel
 
 			for (QuestChapter c : treeGui.file.chapters)
 			{
-				if (c.group == chapter.chapter)
+				if (c.group == chapter.chapter && c.isVisible(treeGui.file.self))
 				{
 					if (widgets.isEmpty())
 					{
