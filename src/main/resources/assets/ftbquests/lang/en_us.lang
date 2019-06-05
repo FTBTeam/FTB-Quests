@@ -184,6 +184,7 @@ ftbquests.task.ftbquests.stat.value=Value
 ftbquests.task.ftbquests.kill=Kill Entity
 ftbquests.task.ftbquests.kill.entity=Entity Name
 ftbquests.task.ftbquests.kill.value=Count
+ftbquests.task.ftbquests.kill.title=Kill: %sx %s
 
 ftbquests.task.ftbquests.location=Location
 ftbquests.task.ftbquests.location.dim=Dimension
