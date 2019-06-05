@@ -21,6 +21,6 @@ public class ButtonSupport extends ButtonTab
 	public void onClicked(MouseButton button)
 	{
 		GuiHelper.playClickSound();
-		handleClick("https://www.twitch.tv/latvianmodder/subscribe");
+		handleClick("https://www.twitch.tv/latvianmodder");
 	}
 }
