@@ -377,12 +377,6 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 	}
 
 	@Override
-	public String getButtonText()
-	{
-		return count > 1 || consumesResources() ? Long.toUnsignedString(count) : "";
-	}
-
-	@Override
 	public QuestTaskData createData(ITeamData data)
 	{
 		return new Data(this, data);

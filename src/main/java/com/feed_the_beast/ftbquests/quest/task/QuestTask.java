@@ -289,6 +289,6 @@ public abstract class QuestTask extends QuestObject
 
 	public String getButtonText()
 	{
-		return getMaxProgress() <= 1L ? "" : getMaxProgressString();
+		return getMaxProgress() > 1L || consumesResources() ? getMaxProgressString() : "";
 	}
 }
