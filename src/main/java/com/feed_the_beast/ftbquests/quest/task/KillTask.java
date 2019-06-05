@@ -66,12 +66,6 @@ public class KillTask extends QuestTask
 	}
 
 	@Override
-	public String getMaxProgressString()
-	{
-		return Long.toUnsignedString(value);
-	}
-
-	@Override
 	public void writeData(NBTTagCompound nbt)
 	{
 		super.writeData(nbt);
@@ -124,10 +118,7 @@ public class KillTask extends QuestTask
 	@Override
 	public ITextComponent getAltDisplayName()
 	{
-		ITextComponent textComponent = getType().getDisplayName().createCopy();
-		textComponent.appendText(": " + Long.toUnsignedString(value) + "x ");
-		textComponent.appendSibling(new TextComponentTranslation("entity." + EntityList.getTranslationName(entity) + ".name"));
-		return textComponent;
+		return new TextComponentTranslation("ftbquests.task.ftbquests.kill.title", getMaxProgressString(), new TextComponentTranslation("entity." + EntityList.getTranslationName(entity) + ".name"));
 	}
 
 	@Override
@@ -156,12 +147,6 @@ public class KillTask extends QuestTask
 		private Data(KillTask task, ITeamData data)
 		{
 			super(task, data);
-		}
-
-		@Override
-		public String getProgressString()
-		{
-			return Long.toUnsignedString(progress);
 		}
 
 		public void kill(EntityLivingBase entity)
