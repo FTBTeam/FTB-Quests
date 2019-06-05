@@ -59,34 +59,18 @@ public class GuiQuestChest extends GuiBase implements IContainerListener
 					{
 						for (Quest quest : chapter.quests)
 						{
-							for (QuestTask task : quest.tasks)
+							if (quest.canStartTasks(ClientQuestFile.INSTANCE.self))
 							{
-								if (task.canInsertItem())
+								for (QuestTask task : quest.tasks)
 								{
-									QuestTaskData data = ClientQuestFile.INSTANCE.self.getQuestTaskData(task);
-
-									if (data.getRelativeProgress() == 0L && data.task.quest.canStartTasks(ClientQuestFile.INSTANCE.self))
+									if (task.canInsertItem())
 									{
-										add(new ButtonTask(this, data));
-									}
-								}
-							}
-						}
-					}
+										QuestTaskData data = ClientQuestFile.INSTANCE.self.getQuestTaskData(task);
 
-					for (QuestChapter chapter : ClientQuestFile.INSTANCE.chapters)
-					{
-						for (Quest quest : chapter.quests)
-						{
-							for (QuestTask task : quest.tasks)
-							{
-								if (task.canInsertItem())
-								{
-									QuestTaskData data = ClientQuestFile.INSTANCE.self.getQuestTaskData(task);
-
-									if (data.getRelativeProgress() == 100L)
-									{
-										add(new ButtonTask(this, data));
+										if (data.getRelativeProgress() < 100)
+										{
+											add(new ButtonTask(this, data));
+										}
 									}
 								}
 							}
