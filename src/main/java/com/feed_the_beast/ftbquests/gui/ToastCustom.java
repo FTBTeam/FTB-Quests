@@ -1,33 +1,34 @@
-package com.feed_the_beast.ftbquests.gui.tree;
+package com.feed_the_beast.ftbquests.gui;
 
 import com.feed_the_beast.ftblib.lib.gui.misc.SimpleToast;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
-import net.minecraft.client.resources.I18n;
 
 /**
  * @author LatvianModder
  */
-public class ToastReward extends SimpleToast
+public class ToastCustom extends SimpleToast
 {
-	private String text;
+	private String title;
 	private Icon icon;
+	private String description;
 
-	public ToastReward(String t, Icon i)
+	public ToastCustom(String t, Icon i, String d)
 	{
-		text = t;
+		title = t;
 		icon = i;
+		description = d;
 	}
 
 	@Override
 	public String getTitle()
 	{
-		return I18n.format("ftbquests.reward.collected");
+		return title;
 	}
 
 	@Override
 	public String getSubtitle()
 	{
-		return text;
+		return description;
 	}
 
 	@Override
