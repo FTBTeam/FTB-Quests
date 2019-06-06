@@ -5,9 +5,8 @@ import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToClient;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
-import com.feed_the_beast.ftbquests.gui.IRewardListenerGui;
-import com.feed_the_beast.ftbquests.gui.RewardKey;
-import com.feed_the_beast.ftbquests.gui.ToastReward;
+import com.feed_the_beast.ftbquests.gui.ToastCustom;
+import com.feed_the_beast.ftbquests.gui.tree.GuiQuestTree;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.fml.relauncher.Side;
@@ -16,21 +15,21 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 /**
  * @author LatvianModder
  */
-public class MessageDisplayRewardToast extends MessageToClient
+public class MessageDisplayCustomToast extends MessageToClient
 {
-	public static boolean ENABLED = true;
-
 	private ITextComponent text;
 	private Icon icon;
+	private String description;
 
-	public MessageDisplayRewardToast()
+	public MessageDisplayCustomToast()
 	{
 	}
 
-	public MessageDisplayRewardToast(ITextComponent t, Icon i)
+	public MessageDisplayCustomToast(ITextComponent t, Icon i, String d)
 	{
 		text = t;
 		icon = i;
+		description = d;
 	}
 
 	@Override
@@ -44,6 +43,7 @@ public class MessageDisplayRewardToast extends MessageToClient
 	{
 		data.writeTextComponent(text);
 		data.writeIcon(icon);
+		data.writeString(description);
 	}
 
 	@Override
@@ -51,15 +51,13 @@ public class MessageDisplayRewardToast extends MessageToClient
 	{
 		text = data.readTextComponent();
 		icon = data.readIcon();
+		description = data.readString();
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void onMessage()
 	{
-		if (!IRewardListenerGui.add(new RewardKey(text.getUnformattedText(), icon), 1))
-		{
-			Minecraft.getMinecraft().getToastGui().add(new ToastReward(text.getFormattedText(), icon));
-		}
+		Minecraft.getMinecraft().getToastGui().add(new ToastCustom(text.getFormattedText(), icon, GuiQuestTree.fixI18n(null, description)));
 	}
 }

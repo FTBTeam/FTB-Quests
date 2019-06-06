@@ -8,7 +8,7 @@ import com.feed_the_beast.ftblib.lib.net.MessageToClient;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.gui.IRewardListenerGui;
 import com.feed_the_beast.ftbquests.gui.RewardKey;
-import com.feed_the_beast.ftbquests.gui.tree.ToastReward;
+import com.feed_the_beast.ftbquests.gui.ToastReward;
 import net.minecraft.client.Minecraft;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.relauncher.Side;

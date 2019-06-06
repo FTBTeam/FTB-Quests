@@ -242,6 +242,9 @@ ftbquests.reward.ftbquests.advancement=Advancement
 ftbquests.reward.ftbquests.advancement.criterion=Criterion
 ftbquests.reward.ftbquests.advancement.criterion.tooltip=Optional, set if you want only one criterion to be granted
 
+ftbquests.reward.ftbquests.toast=Toast
+ftbquests.reward.ftbquests.toast.description=Description
+
 ftbquests.reward.ftbquests.gamestage=Game Stage
 ftbquests.reward.ftbquests.gamestage.silent=Silent
 
