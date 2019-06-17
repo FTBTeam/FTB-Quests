@@ -9,13 +9,17 @@ import com.feed_the_beast.ftblib.lib.io.Bits;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.util.ListUtils;
+import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
+import com.feed_the_beast.ftbquests.client.FTBQuestsClient;
 import com.feed_the_beast.ftbquests.events.ObjectCompletedEvent;
 import com.feed_the_beast.ftbquests.gui.tree.GuiQuestTree;
 import com.feed_the_beast.ftbquests.net.MessageDisplayCompletionToast;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
 import com.feed_the_beast.ftbquests.quest.task.QuestTask;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
@@ -23,17 +27,14 @@ import net.minecraft.nbt.NBTTagIntArray;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.common.util.Constants;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 /**
  * @author LatvianModder
@@ -41,7 +42,6 @@ import java.util.UUID;
 public final class Quest extends QuestObject
 {
 	public static final int POS_LIMIT = 25;
-	private static final List<QuestObjectType> DEP_TYPES = Arrays.asList(QuestObjectType.QUEST, QuestObjectType.CHAPTER, QuestObjectType.VARIABLE);
 
 	public final QuestChapter chapter;
 	public String description;
@@ -59,6 +59,9 @@ public final class Quest extends QuestObject
 	public boolean hideDependencyLines;
 	public int minRequiredDependencies;
 	public boolean hideTextUntilComplete;
+
+	private String cachedDescription = null;
+	private String[] cachedText = null;
 
 	public Quest(QuestChapter c)
 	{
@@ -510,14 +513,14 @@ public final class Quest extends QuestObject
 	}
 
 	@Override
-	public ITextComponent getAltDisplayName()
+	public String getAltTitle()
 	{
 		if (!tasks.isEmpty())
 		{
-			return tasks.get(0).getDisplayName().createCopy();
+			return tasks.get(0).getTitle();
 		}
 
-		return new TextComponentTranslation("ftbquests.unnamed");
+		return I18n.format("ftbquests.unnamed");
 	}
 
 	@Override
@@ -567,9 +570,9 @@ public final class Quest extends QuestObject
 	}
 
 	@Override
-	public void getConfig(ConfigGroup config)
+	public void getConfig(EntityPlayer player, ConfigGroup config)
 	{
-		super.getConfig(config);
+		super.getConfig(player, config);
 		config.addInt("x", () -> x, v -> x = (byte) v, 0, -POS_LIMIT, POS_LIMIT);
 		config.addInt("y", () -> y, v -> y = (byte) v, 0, -POS_LIMIT, POS_LIMIT);
 		config.addBool("hide", () -> hide, v -> hide = v, false);
@@ -577,7 +580,10 @@ public final class Quest extends QuestObject
 		config.addString("description", () -> description, v -> description = v, "");
 		config.addList("text", text, new ConfigString(""), ConfigString::new, ConfigString::getString);
 		config.addBool("can_repeat", () -> canRepeat, v -> canRepeat = v, false);
-		config.addList("dependencies", dependencies, new ConfigQuestObject(chapter.file, null, DEP_TYPES), questObject -> new ConfigQuestObject(chapter.file, questObject, DEP_TYPES), configQuestObject -> (QuestObject) configQuestObject.getObject()).setDisplayName(new TextComponentTranslation("ftbquests.dependencies"));
+
+		Predicate<QuestObjectBase> depTypes = object -> object != chapter.file && object != chapter && object instanceof QuestObject && !(object instanceof QuestTask);
+
+		config.addList("dependencies", dependencies, new ConfigQuestObject(chapter.file, null, depTypes), questObject -> new ConfigQuestObject(chapter.file, questObject, depTypes), configQuestObject -> (QuestObject) configQuestObject.getObject()).setDisplayName(new TextComponentTranslation("ftbquests.dependencies"));
 		config.addEnum("dependency_requirement", () -> dependencyRequirement, v -> dependencyRequirement = v, EnumDependencyRequirement.NAME_MAP);
 		config.addInt("min_required_dependencies", () -> minRequiredDependencies, v -> minRequiredDependencies = v, 0, 0, Integer.MAX_VALUE);
 		config.addBool("hide_dependency_lines", () -> hideDependencyLines, v -> hideDependencyLines = v, false);
@@ -632,6 +638,8 @@ public final class Quest extends QuestObject
 	public void clearCachedData()
 	{
 		super.clearCachedData();
+		cachedDescription = null;
+		cachedText = null;
 
 		for (QuestTask task : tasks)
 		{
@@ -642,6 +650,49 @@ public final class Quest extends QuestObject
 		{
 			reward.clearCachedData();
 		}
+	}
+
+	public String getDescription()
+	{
+		if (cachedDescription != null)
+		{
+			return cachedDescription;
+		}
+
+		String key = String.format("quests.%08x.description", id);
+		String t = FTBQuestsClient.addI18nAndColors(I18n.format(key));
+
+		if (t.isEmpty() || key.equals(t))
+		{
+			cachedDescription = FTBQuestsClient.addI18nAndColors(description);
+		}
+		else
+		{
+			cachedDescription = t;
+		}
+
+		return cachedDescription;
+	}
+
+	public String[] getText()
+	{
+		if (cachedText != null)
+		{
+			return cachedText;
+		}
+		else if (text.isEmpty())
+		{
+			return StringUtils.EMPTY_ARRAY;
+		}
+
+		cachedText = new String[text.size()];
+
+		for (int i = 0; i < cachedText.length; i++)
+		{
+			cachedText[i] = FTBQuestsClient.addI18nAndColors(text.get(i));
+		}
+
+		return cachedText;
 	}
 
 	public boolean hasDependency(QuestObject object)
@@ -741,7 +792,6 @@ public final class Quest extends QuestObject
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
 	public void editedFromGUI()
 	{
 		GuiQuestTree gui = ClientUtils.getCurrentGuiAs(GuiQuestTree.class);

@@ -2,15 +2,17 @@ package com.feed_the_beast.ftbquests.quest;
 
 import com.feed_the_beast.ftblib.lib.util.IWithID;
 import com.feed_the_beast.ftblib.lib.util.misc.NameMap;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.function.Predicate;
 
 /**
  * @author LatvianModder
  */
-public enum QuestObjectType implements IWithID
+public enum QuestObjectType implements IWithID, Predicate<QuestObjectBase>
 {
 	NULL("null", 1, TextFormatting.BLACK),
 	FILE("file", 2, TextFormatting.RED),
@@ -22,8 +24,8 @@ public enum QuestObjectType implements IWithID
 	REWARD_TABLE("reward_table", 128, TextFormatting.YELLOW);
 
 	public static final NameMap<QuestObjectType> NAME_MAP = NameMap.create(NULL, values());
-	public static final List<QuestObjectType> ALL_PROGRESSING = Arrays.asList(FILE, CHAPTER, FILE, TASK, VARIABLE);
-	public static final List<QuestObjectType> ALL_PROGRESSING_OR_NULL = Arrays.asList(NULL, FILE, CHAPTER, FILE, TASK, VARIABLE);
+	public static final Predicate<QuestObjectBase> ALL_PROGRESSING = object -> object instanceof QuestObject;
+	public static final Predicate<QuestObjectBase> ALL_PROGRESSING_OR_NULL = object -> object == null || object instanceof QuestObject;
 
 	private final String id;
 	private final String translationKey;
@@ -57,5 +59,17 @@ public enum QuestObjectType implements IWithID
 	public TextFormatting getColor()
 	{
 		return color;
+	}
+
+	@SideOnly(Side.CLIENT)
+	public String getDisplayName()
+	{
+		return I18n.format(translationKey);
+	}
+
+	@Override
+	public boolean test(QuestObjectBase object)
+	{
+		return (object == null ? NULL : object.getObjectType()) == this;
 	}
 }

@@ -4,6 +4,7 @@ import com.feed_the_beast.ftblib.FTBLibConfig;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigItemStack;
 import com.feed_the_beast.ftblib.lib.config.ConfigTimer;
+import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.IconAnimation;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
@@ -24,14 +25,15 @@ import com.feed_the_beast.ftbquests.quest.task.QuestTask;
 import com.feed_the_beast.ftbquests.quest.task.QuestTaskType;
 import com.latmod.mods.itemfilters.item.ItemMissing;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.registries.ForgeRegistry;
@@ -1158,6 +1160,12 @@ public abstract class QuestFile extends QuestObject
 	@Nullable
 	public abstract ITeamData getData(String team);
 
+	@Nullable
+	public final ITeamData getData(EntityPlayer player)
+	{
+		return getData(FTBLibAPI.getTeamID(player.getUniqueID()));
+	}
+
 	public abstract Collection<? extends ITeamData> getAllData();
 
 	public abstract void deleteObject(int id);
@@ -1176,15 +1184,15 @@ public abstract class QuestFile extends QuestObject
 	}
 
 	@Override
-	public ITextComponent getAltDisplayName()
+	public String getAltTitle()
 	{
-		return new TextComponentTranslation("ftbquests.file");
+		return I18n.format("ftbquests.file");
 	}
 
 	@Override
-	public void getConfig(ConfigGroup config)
+	public void getConfig(EntityPlayer player, ConfigGroup config)
 	{
-		super.getConfig(config);
+		super.getConfig(player, config);
 		config.addList("emergency_items", emergencyItems, new ConfigItemStack(ItemStack.EMPTY), ConfigItemStack::new, ConfigItemStack::getStack);
 
 		config.add("emergency_items_cooldown", new ConfigTimer(Ticks.NO_TICKS)
@@ -1240,7 +1248,7 @@ public abstract class QuestFile extends QuestObject
 		return id;
 	}
 
-	public int getID(String id)
+	public static int getID(String id)
 	{
 		if (id.isEmpty())
 		{
@@ -1305,6 +1313,11 @@ public abstract class QuestFile extends QuestObject
 	public final int refreshJEI()
 	{
 		return 255;
+	}
+
+	public final Collection<QuestObjectBase> getAllObjects()
+	{
+		return map.values();
 	}
 
 	@Override

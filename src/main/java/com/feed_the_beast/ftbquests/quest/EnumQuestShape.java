@@ -60,4 +60,14 @@ public final class EnumQuestShape extends Icon implements IWithID
 		background.draw(x, y, w, h, col);
 		outline.draw(x, y, w, h, col);
 	}
+
+	public int hashCode()
+	{
+		return id.hashCode();
+	}
+
+	public boolean equals(Object o)
+	{
+		return o == this;
+	}
 }

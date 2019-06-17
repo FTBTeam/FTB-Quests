@@ -123,7 +123,7 @@ public class CommandImportRewardsFromChest extends CommandFTBQuestsBase
 					ServerQuestFile.INSTANCE.clearCachedData();
 					new MessageEditObjectResponse(table).sendToAll();
 					ServerQuestFile.INSTANCE.save();
-					sender.sendMessage(new TextComponentTranslation("commands.ftbquests.import_rewards_from_chest.text", r, table.getDisplayName()));
+					sender.sendMessage(new TextComponentTranslation("commands.ftbquests.import_rewards_from_chest.text", r, table.getTitle()));
 				}
 			}
 		}

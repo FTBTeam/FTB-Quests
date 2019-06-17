@@ -4,8 +4,6 @@ import com.feed_the_beast.ftbquests.gui.GuiRewardNotifications;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.loot.WeightedReward;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.List;
 
@@ -57,14 +55,12 @@ public class LootReward extends RandomReward
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
 	public void addMouseOverText(List<String> list)
 	{
 		getTable().addMouseOverText(list, true, true);
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
 	public void onButtonClicked()
 	{
 		new GuiRewardNotifications().openGui();

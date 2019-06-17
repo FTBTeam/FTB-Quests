@@ -20,6 +20,7 @@ import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.loot.RewardTable;
 import com.feed_the_beast.ftbquests.quest.loot.WeightedReward;
 import com.feed_the_beast.ftbquests.quest.reward.QuestRewardType;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.TextFormatting;
@@ -46,7 +47,7 @@ public class GuiEditRewardTable extends GuiButtonListBase
 		{
 			GuiHelper.playClickSound();
 			ConfigGroup group = ConfigGroup.newGroup(FTBQuests.MOD_ID);
-			rewardTable.getConfig(rewardTable.createSubGroup(group));
+			rewardTable.getConfig(Minecraft.getMinecraft().player, rewardTable.createSubGroup(group));
 			new GuiEditConfig(group, IConfigCallback.DEFAULT).openGui();
 		}
 	}
@@ -89,7 +90,7 @@ public class GuiEditRewardTable extends GuiButtonListBase
 			{
 				if (!type.getExcludeFromListRewards())
 				{
-					contextMenu.add(new ContextMenuItem(type.getDisplayName().getFormattedText(), type.getIcon(), () -> {
+					contextMenu.add(new ContextMenuItem(type.getDisplayName(), type.getIcon(), () -> {
 						GuiHelper.playClickSound();
 						type.getGuiProvider().openCreationGui(this, rewardTable.fakeQuest, reward -> {
 							rewardTable.rewards.add(new WeightedReward(reward, 1));
@@ -109,7 +110,7 @@ public class GuiEditRewardTable extends GuiButtonListBase
 
 		private ButtonWeightedReward(Panel panel, WeightedReward r)
 		{
-			super(panel, r.reward.getDisplayName().getFormattedText(), r.reward.getIcon());
+			super(panel, r.reward.getTitle(), r.reward.getIcon());
 			reward = r;
 		}
 
@@ -128,7 +129,7 @@ public class GuiEditRewardTable extends GuiButtonListBase
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
 			contextMenu.add(new ContextMenuItem(I18n.format("selectServer.edit"), GuiIcons.SETTINGS, () -> {
 				ConfigGroup group = ConfigGroup.newGroup(FTBQuests.MOD_ID);
-				reward.reward.getConfig(reward.reward.createSubGroup(group));
+				reward.reward.getConfig(Minecraft.getMinecraft().player, reward.reward.createSubGroup(group));
 				new GuiEditConfig(group, IConfigCallback.DEFAULT).openGui();
 			}));
 
@@ -136,7 +137,7 @@ public class GuiEditRewardTable extends GuiButtonListBase
 			contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), GuiIcons.REMOVE, () -> {
 				rewardTable.rewards.remove(reward);
 				GuiEditRewardTable.this.refreshWidgets();
-			}).setYesNo(I18n.format("delete_item", reward.reward.getDisplayName().getFormattedText())));
+			}).setYesNo(I18n.format("delete_item", reward.reward.getTitle())));
 			GuiEditRewardTable.this.openContextMenu(contextMenu);
 		}
 

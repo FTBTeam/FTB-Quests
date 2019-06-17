@@ -7,7 +7,7 @@ import com.feed_the_beast.ftblib.lib.net.MessageToClient;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.gui.IRewardListenerGui;
 import com.feed_the_beast.ftbquests.gui.RewardKey;
-import com.feed_the_beast.ftbquests.gui.ToastReward;
+import com.feed_the_beast.ftbquests.gui.RewardToast;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.fml.relauncher.Side;
@@ -59,7 +59,7 @@ public class MessageDisplayRewardToast extends MessageToClient
 	{
 		if (!IRewardListenerGui.add(new RewardKey(text.getUnformattedText(), icon), 1))
 		{
-			Minecraft.getMinecraft().getToastGui().add(new ToastReward(text.getFormattedText(), icon));
+			Minecraft.getMinecraft().getToastGui().add(new RewardToast(text.getFormattedText(), icon));
 		}
 	}
 }

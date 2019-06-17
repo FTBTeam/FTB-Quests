@@ -10,12 +10,12 @@ import com.feed_the_beast.ftblib.lib.util.ListUtils;
 import com.feed_the_beast.ftbquests.events.ObjectCompletedEvent;
 import com.feed_the_beast.ftbquests.net.MessageDisplayCompletionToast;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.common.util.Constants;
 
 import javax.annotation.Nullable;
@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 /**
  * @author LatvianModder
@@ -192,9 +193,9 @@ public final class QuestChapter extends QuestObject
 	}
 
 	@Override
-	public ITextComponent getAltDisplayName()
+	public String getAltTitle()
 	{
-		return new TextComponentTranslation("ftbquests.unnamed");
+		return I18n.format("ftbquests.unnamed");
 	}
 
 	@Override
@@ -237,12 +238,15 @@ public final class QuestChapter extends QuestObject
 	}
 
 	@Override
-	public void getConfig(ConfigGroup config)
+	public void getConfig(EntityPlayer player, ConfigGroup config)
 	{
-		super.getConfig(config);
+		super.getConfig(player, config);
 		config.addList("description", description, new ConfigString(""), ConfigString::new, ConfigString::getString);
 		config.addBool("always_invisible", () -> alwaysInvisible, v -> alwaysInvisible = v, false);
-		config.add("group", new ConfigQuestObject(file, group, QuestObjectType.CHAPTER, QuestObjectType.NULL)
+
+		Predicate<QuestObjectBase> predicate = object -> object == null || (object instanceof QuestChapter && object != this && ((QuestChapter) object).group == null);
+
+		config.add("group", new ConfigQuestObject(file, group, predicate)
 		{
 			@Nullable
 			@Override
@@ -256,7 +260,7 @@ public final class QuestChapter extends QuestObject
 			{
 				group = (QuestChapter) v;
 			}
-		}, new ConfigQuestObject(file, null, QuestObjectType.CHAPTER, QuestObjectType.NULL));
+		}, new ConfigQuestObject(file, null, predicate));
 	}
 
 	@Override
@@ -385,5 +389,10 @@ public final class QuestChapter extends QuestObject
 		}
 
 		return true;
+	}
+
+	public boolean hasGroup()
+	{
+		return group != null && !group.invalid;
 	}
 }

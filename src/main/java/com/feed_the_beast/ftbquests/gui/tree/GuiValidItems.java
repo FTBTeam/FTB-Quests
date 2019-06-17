@@ -176,7 +176,7 @@ public class GuiValidItems extends GuiBase
 	@Override
 	public void addWidgets()
 	{
-		title = I18n.format("ftbquests.task.ftbquests.item.valid_for", task.getDisplayName().getFormattedText());
+		title = I18n.format("ftbquests.task.ftbquests.item.valid_for", task.getTitle());
 		setWidth(Math.max(156, getTheme().getStringWidth(title) + 12));
 		add(itemPanel);
 		add(backButton);

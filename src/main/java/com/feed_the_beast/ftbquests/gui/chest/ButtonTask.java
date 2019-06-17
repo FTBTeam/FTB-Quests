@@ -31,10 +31,10 @@ public class ButtonTask extends Button
 	{
 		if (taskData.task.quest.chapter.file.chapters.size() > 1)
 		{
-			list.add(TextFormatting.GRAY + I18n.format("ftbquests.chapter") + ": " + taskData.task.quest.chapter.getYellowDisplayName().getFormattedText());
+			list.add(TextFormatting.GRAY + I18n.format("ftbquests.chapter") + ": " + taskData.task.quest.chapter.getYellowDisplayName());
 		}
 
-		list.add(TextFormatting.GRAY + I18n.format("ftbquests.quest") + ": " + taskData.task.quest.getYellowDisplayName().getFormattedText());
+		list.add(TextFormatting.GRAY + I18n.format("ftbquests.quest") + ": " + taskData.task.quest.getYellowDisplayName());
 		list.add(TextFormatting.GRAY + I18n.format("ftbquests.progress") + ": " + TextFormatting.BLUE + taskData.getProgressString() + " / " + taskData.task.getMaxProgressString());
 	}
 
@@ -56,7 +56,7 @@ public class ButtonTask extends Button
 		}
 
 		taskData.task.getIcon().draw(x + 1, y, 8, 8);
-		theme.drawString(taskData.task.getDisplayName().getFormattedText(), x + 11, y, theme.getContentColor(getWidgetType()), Theme.SHADOW);
+		theme.drawString(taskData.task.getTitle(), x + 11, y, theme.getContentColor(getWidgetType()), Theme.SHADOW);
 	}
 
 	@Override

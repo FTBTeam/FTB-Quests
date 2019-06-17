@@ -6,14 +6,17 @@ import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
+import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
+import com.feed_the_beast.ftbquests.client.FTBQuestsClient;
+import com.feed_the_beast.ftbquests.gui.editor.ConfigPane;
 import com.feed_the_beast.ftbquests.net.edit.MessageEditObject;
 import com.latmod.mods.itemfilters.item.ItemMissing;
+import javafx.scene.Node;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.fml.relauncher.Side;
@@ -33,7 +36,7 @@ public abstract class QuestObjectBase
 	public ItemStack icon = ItemStack.EMPTY;
 
 	private Icon cachedIcon = null;
-	private ITextComponent cachedDisplayName = null;
+	private String cachedTitle = null;
 
 	public final String toString()
 	{
@@ -105,7 +108,7 @@ public abstract class QuestObjectBase
 		icon = data.readItemStack();
 	}
 
-	public void getConfig(ConfigGroup config)
+	public void getConfig(EntityPlayer player, ConfigGroup config)
 	{
 		config.addString("title", () -> title, v -> title = v, "").setDisplayName(new TextComponentTranslation("ftbquests.title")).setOrder(-127);
 		config.add("icon", new ConfigItemStack.SimpleStack(() -> icon, v -> icon = v), new ConfigItemStack(ItemStack.EMPTY)).setDisplayName(new TextComponentTranslation("ftbquests.icon")).setOrder(-126);
@@ -113,67 +116,64 @@ public abstract class QuestObjectBase
 
 	public abstract Icon getAltIcon();
 
-	public abstract ITextComponent getAltDisplayName();
+	public abstract String getAltTitle();
 
 	public final Icon getIcon()
 	{
-		if (cachedIcon == null)
+		if (cachedIcon != null)
 		{
-			if (!icon.isEmpty())
-			{
-				cachedIcon = ItemIcon.getItemIcon(icon);
-			}
-			else
-			{
-				cachedIcon = getAltIcon();
-			}
+			return cachedIcon;
+		}
+
+		if (!icon.isEmpty())
+		{
+			cachedIcon = ItemIcon.getItemIcon(icon);
+		}
+		else
+		{
+			cachedIcon = getAltIcon();
 		}
 
 		return cachedIcon;
 	}
 
-	public final ITextComponent getDisplayName()
+	public final String getTitle()
 	{
-		if (cachedDisplayName != null)
+		if (cachedTitle != null)
 		{
-			return cachedDisplayName;
+			return cachedTitle;
 		}
 
-		if (!title.isEmpty())
+		String key = String.format("quests.%08x.title", id);
+		String t = FTBQuestsClient.addI18nAndColors(I18n.format(key));
+
+		if (t.isEmpty() || key.equals(t))
 		{
-			cachedDisplayName = title.startsWith("{") && title.endsWith("}") ? new TextComponentTranslation(title.substring(1, title.length() - 1)) : new TextComponentString(title);
+			if (!title.isEmpty())
+			{
+				cachedTitle = FTBQuestsClient.addI18nAndColors(title);
+			}
+			else
+			{
+				cachedTitle = getAltTitle().trim();
+			}
 		}
 		else
 		{
-			cachedDisplayName = getAltDisplayName();
+			cachedTitle = t;
 		}
 
-		return cachedDisplayName;
+		return cachedTitle;
 	}
 
-	public final ITextComponent getYellowDisplayName()
+	public final String getUnformattedTitle()
 	{
-		ITextComponent component = getDisplayName().createCopy();
-		component.getStyle().setColor(TextFormatting.YELLOW);
-		return component;
+		return StringUtils.unformatted(getTitle());
 	}
 
-	public String getI18NKey()
+	public final String getYellowDisplayName()
 	{
-		return String.format("%s.%08x.title", getObjectType().getID(), id);
-	}
-
-	@SideOnly(Side.CLIENT)
-	public final String getDisplayNameString(boolean formatted)
-	{
-		String key = getI18NKey();
-
-		if (I18n.hasKey(key))
-		{
-			return formatted ? I18n.format(key) : TextFormatting.getTextWithoutFormattingCodes(I18n.format(key));
-		}
-
-		return formatted ? getDisplayName().getFormattedText() : getDisplayName().getUnformattedText();
+		return TextFormatting.YELLOW + getTitle();
 	}
 
 	public void deleteSelf()
@@ -185,7 +185,6 @@ public abstract class QuestObjectBase
 	{
 	}
 
-	@SideOnly(Side.CLIENT)
 	public void editedFromGUI()
 	{
 		ClientQuestFile.INSTANCE.refreshGui();
@@ -204,7 +203,7 @@ public abstract class QuestObjectBase
 	public void clearCachedData()
 	{
 		cachedIcon = null;
-		cachedDisplayName = null;
+		cachedTitle = null;
 	}
 
 	public ConfigGroup createSubGroup(ConfigGroup group)
@@ -212,7 +211,6 @@ public abstract class QuestObjectBase
 		return group.getGroup(getObjectType().getID());
 	}
 
-	@SideOnly(Side.CLIENT)
 	public void onEditButtonClicked()
 	{
 		new MessageEditObject(id).sendToServer();
@@ -221,5 +219,11 @@ public abstract class QuestObjectBase
 	public int refreshJEI()
 	{
 		return 0;
+	}
+
+	@SideOnly(Side.CLIENT)
+	public Node createTabContent()
+	{
+		return new ConfigPane(this);
 	}
 }

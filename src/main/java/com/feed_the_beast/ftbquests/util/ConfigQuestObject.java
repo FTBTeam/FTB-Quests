@@ -3,16 +3,15 @@ package com.feed_the_beast.ftbquests.util;
 import com.feed_the_beast.ftblib.lib.config.ConfigValue;
 import com.feed_the_beast.ftblib.lib.config.ConfigValueInstance;
 import com.feed_the_beast.ftblib.lib.gui.IOpenableGui;
-import com.feed_the_beast.ftblib.lib.io.Bits;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
-import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.gui.GuiSelectQuestObject;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
-import com.feed_the_beast.ftbquests.quest.QuestObjectType;
-import net.minecraft.client.resources.I18n;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
+import it.unimi.dsi.fastutil.ints.IntSets;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.ITextComponent;
@@ -20,10 +19,8 @@ import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
 
 import javax.annotation.Nullable;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
+import java.util.function.Predicate;
 
 /**
  * @author LatvianModder
@@ -32,35 +29,43 @@ public class ConfigQuestObject extends ConfigValue
 {
 	public static final String ID = "ftbquests_object";
 
-	private final QuestFile file;
-	private final HashSet<QuestObjectType> types;
+	public final QuestFile file;
+	private final IntSet validObjects;
 	private QuestObjectBase object;
 
-	public ConfigQuestObject(@Nullable QuestFile f, @Nullable QuestObjectBase o, Collection<QuestObjectType> t)
+	public ConfigQuestObject(QuestFile f, @Nullable QuestObjectBase o, IntSet t)
 	{
-		file = f == null ? FTBQuests.PROXY.getQuestFile(null) : f;
+		file = f;
 		object = o;
-		types = new HashSet<>(t);
+		validObjects = new IntOpenHashSet(t);
 	}
 
-	public ConfigQuestObject(@Nullable QuestFile f, @Nullable QuestObjectBase o, QuestObjectType... t)
+	public ConfigQuestObject(QuestFile f, @Nullable QuestObjectBase o, Predicate<QuestObjectBase> t)
 	{
-		this(f, o, Arrays.asList(t));
+		this(f, o, IntSets.EMPTY_SET);
+
+		if (t.test(null))
+		{
+			validObjects.add(0);
+		}
+
+		for (QuestObjectBase objectBase : f.getAllObjects())
+		{
+			if (t.test(objectBase))
+			{
+				validObjects.add(objectBase.id);
+			}
+		}
 	}
 
-	public boolean isValid(QuestObjectType type)
+	public boolean isValid(int id)
 	{
-		return types.contains(type);
+		return validObjects.contains(id);
 	}
 
 	public boolean isValid(@Nullable QuestObjectBase object)
 	{
-		return isValid(object == null ? QuestObjectType.NULL : object.getObjectType());
-	}
-
-	public HashSet<QuestObjectType> getTypes()
-	{
-		return new HashSet<>(types);
+		return isValid(object == null ? 0 : object.id);
 	}
 
 	@Override
@@ -103,7 +108,7 @@ public class ConfigQuestObject extends ConfigValue
 	@Override
 	public ConfigQuestObject copy()
 	{
-		return new ConfigQuestObject(file, object, types);
+		return new ConfigQuestObject(file, object, validObjects);
 	}
 
 	@Override
@@ -116,7 +121,7 @@ public class ConfigQuestObject extends ConfigValue
 			return new TextComponentString("");
 		}
 
-		return object.getDisplayName().createCopy();
+		return new TextComponentString(object.getUnformattedTitle());
 	}
 
 	@Override
@@ -131,50 +136,34 @@ public class ConfigQuestObject extends ConfigValue
 	@Override
 	public void writeData(DataOut data)
 	{
-		int i = 0;
-
-		for (QuestObjectType type : types)
-		{
-			i |= type.getFlag();
-		}
-
-		data.writeVarInt(i);
+		data.writeIntList(validObjects);
 		data.writeInt(getInt());
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
-		types.clear();
+		validObjects.clear();
+		validObjects.addAll(data.readIntList());
 
-		int i = data.readVarInt();
+		QuestObjectBase o = file.getBase(data.readInt());
 
-		for (QuestObjectType type : QuestObjectType.NAME_MAP)
+		if (isValid(o))
 		{
-			if (Bits.getFlag(i, type.getFlag()))
-			{
-				types.add(type);
-			}
-		}
-
-		object = file.getBase(data.readInt());
-
-		if (isValid(object))
-		{
-			setObject(object);
+			setObject(o);
 		}
 	}
 
 	@Override
 	public boolean setValueFromString(@Nullable ICommandSender sender, String string, boolean simulate)
 	{
-		object = file.getBase(file.getID(string));
+		QuestObjectBase o = file.getBase(QuestFile.getID(string));
 
-		if (isValid(object))
+		if (isValid(o))
 		{
 			if (!simulate)
 			{
-				setObject(object);
+				setObject(o);
 			}
 
 			return true;
@@ -195,23 +184,6 @@ public class ConfigQuestObject extends ConfigValue
 		{
 			list.add(TextFormatting.AQUA + "ID: " + TextFormatting.RESET + object);
 		}
-
-		if (types.size() == 1)
-		{
-			list.add(TextFormatting.AQUA + "Type: " + TextFormatting.RESET + I18n.format(types.iterator().next().getTranslationKey()));
-		}
-		else
-		{
-			list.add(TextFormatting.AQUA + "Types:");
-
-			for (QuestObjectType type : QuestObjectType.NAME_MAP)
-			{
-				if (isValid(type))
-				{
-					list.add("> " + I18n.format(type.getTranslationKey()));
-				}
-			}
-		}
 	}
 
 	@Override
@@ -219,15 +191,15 @@ public class ConfigQuestObject extends ConfigValue
 	{
 		if (value instanceof ConfigQuestObject)
 		{
-			types.clear();
-			types.addAll(((ConfigQuestObject) value).types);
+			validObjects.clear();
+			validObjects.addAll(((ConfigQuestObject) value).validObjects);
 		}
 
-		object = file.getBase(value.getInt());
+		QuestObjectBase o = file.getBase(value.getInt());
 
-		if (isValid(object))
+		if (isValid(o))
 		{
-			setObject(object);
+			setObject(o);
 		}
 	}
 
@@ -245,11 +217,11 @@ public class ConfigQuestObject extends ConfigValue
 	@Override
 	public void readFromNBT(NBTTagCompound nbt, String key)
 	{
-		object = file.getBase(nbt.getInteger(key));
+		QuestObjectBase o = file.getBase(nbt.getInteger(key));
 
-		if (isValid(object))
+		if (isValid(o))
 		{
-			setObject(object);
+			setObject(o);
 		}
 	}
 }

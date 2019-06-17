@@ -21,8 +21,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentString;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidActionResult;
@@ -34,8 +32,6 @@ import net.minecraftforge.fluids.capability.FluidTankProperties;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandlerItem;
 import net.minecraftforge.fluids.capability.IFluidTankProperties;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import org.lwjgl.opengl.GL11;
@@ -182,15 +178,15 @@ public class FluidTask extends QuestTask
 	}
 
 	@Override
-	public ITextComponent getAltDisplayName()
+	public String getAltTitle()
 	{
-		return new TextComponentString(getVolumeString(amount)).appendText(" of ").appendText(createFluidStack(Fluid.BUCKET_VOLUME).getLocalizedName());
+		return getVolumeString(amount) + " of " + createFluidStack(Fluid.BUCKET_VOLUME).getLocalizedName();
 	}
 
 	@Override
-	public void getConfig(ConfigGroup config)
+	public void getConfig(EntityPlayer player, ConfigGroup config)
 	{
-		super.getConfig(config);
+		super.getConfig(player, config);
 
 		config.add("fluid", new ConfigFluid(FluidRegistry.WATER, FluidRegistry.WATER)
 		{
@@ -233,54 +229,6 @@ public class FluidTask extends QuestTask
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
-	public void drawGUI(@Nullable QuestTaskData data, int x, int y, int w, int h)
-	{
-		Tessellator tessellator = Tessellator.getInstance();
-		BufferBuilder buffer = tessellator.getBuffer();
-		Minecraft mc = Minecraft.getMinecraft();
-
-		double r = data == null ? 0D : data.getProgress() / (double) data.task.getMaxProgress();
-
-		if (r > 0D)
-		{
-			double h1 = (r * 30D / 32D) * h;
-			double y1 = y + (1D / 32D + (1D - r) * 30D / 32D) * h;
-
-			FluidStack stack = createFluidStack(Fluid.BUCKET_VOLUME);
-			TextureAtlasSprite sprite = mc.getTextureMapBlocks().getAtlasSprite(stack.getFluid().getStill(stack).toString());
-			int color = stack.getFluid().getColor(stack);
-			int alpha = (color >> 24) & 0xFF;
-			int red = (color >> 16) & 0xFF;
-			int green = (color >> 8) & 0xFF;
-			int blue = color & 0xFF;
-			double u0 = sprite.getMinU();
-			double v0 = sprite.getMinV() + (sprite.getMaxV() - sprite.getMinV()) * (1D - r);
-			double u1 = sprite.getMaxU();
-			double v1 = sprite.getMaxV();
-
-			mc.getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
-			mc.getTextureManager().getTexture(TextureMap.LOCATION_BLOCKS_TEXTURE).setBlurMipmap(false, false);
-			buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
-			buffer.pos(x, y1 + h1, 0).tex(u0, v1).color(red, green, blue, alpha).endVertex();
-			buffer.pos(x + w, y1 + h1, 0).tex(u1, v1).color(red, green, blue, alpha).endVertex();
-			buffer.pos(x + w, y1, 0).tex(u1, v0).color(red, green, blue, alpha).endVertex();
-			buffer.pos(x, y1, 0).tex(u0, v0).color(red, green, blue, alpha).endVertex();
-			tessellator.draw();
-			mc.getTextureManager().getTexture(TextureMap.LOCATION_BLOCKS_TEXTURE).restoreLastBlurMipmap();
-		}
-
-		mc.getTextureManager().bindTexture(TANK_TEXTURE);
-		buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
-		buffer.pos(x, y + h, 0).tex(0, 1).endVertex();
-		buffer.pos(x + w, y + h, 0).tex(1, 1).endVertex();
-		buffer.pos(x + w, y, 0).tex(1, 0).endVertex();
-		buffer.pos(x, y, 0).tex(0, 0).endVertex();
-		tessellator.draw();
-	}
-
-	@Override
-	@SideOnly(Side.CLIENT)
 	public void drawScreen(@Nullable QuestTaskData data)
 	{
 		Tessellator tessellator = Tessellator.getInstance();
@@ -340,7 +288,6 @@ public class FluidTask extends QuestTask
 
 	@Override
 	@Nullable
-	@SideOnly(Side.CLIENT)
 	public Object getIngredient()
 	{
 		return createFluidStack(Fluid.BUCKET_VOLUME);

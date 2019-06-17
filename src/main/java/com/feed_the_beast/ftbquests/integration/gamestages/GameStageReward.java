@@ -8,10 +8,10 @@ import com.feed_the_beast.ftbquests.quest.reward.FTBQuestsRewards;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
 import com.feed_the_beast.ftbquests.quest.reward.QuestRewardType;
 import net.darkhax.gamestages.GameStageHelper;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 
@@ -71,9 +71,9 @@ public class GameStageReward extends QuestReward
 	}
 
 	@Override
-	public void getConfig(ConfigGroup config)
+	public void getConfig(EntityPlayer player, ConfigGroup config)
 	{
-		super.getConfig(config);
+		super.getConfig(player, config);
 		config.addString("stage", () -> stage, v -> stage = v, "").setDisplayName(new TextComponentTranslation("ftbquests.reward.ftbquests.gamestage"));
 		config.addBool("silent", () -> silent, v -> silent = v, false);
 	}
@@ -90,10 +90,8 @@ public class GameStageReward extends QuestReward
 	}
 
 	@Override
-	public ITextComponent getAltDisplayName()
+	public String getAltTitle()
 	{
-		ITextComponent text = new TextComponentString(stage);
-		text.getStyle().setColor(TextFormatting.YELLOW);
-		return new TextComponentTranslation("ftbquests.reward.ftbquests.gamestage").appendText(": ").appendSibling(text);
+		return I18n.format("ftbquests.reward.ftbquests.gamestage") + ": " + TextFormatting.YELLOW + stage;
 	}
 }

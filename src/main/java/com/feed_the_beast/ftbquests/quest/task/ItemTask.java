@@ -27,14 +27,10 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.common.Loader;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemHandlerHelper;
 
@@ -224,7 +220,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 	}
 
 	@Override
-	public ITextComponent getAltDisplayName()
+	public String getAltTitle()
 	{
 		String name;
 
@@ -249,7 +245,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 			name = count + "x " + name;
 		}
 
-		return new TextComponentString(name);
+		return name;
 	}
 
 	@Override
@@ -312,9 +308,9 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 	}
 
 	@Override
-	public void getConfig(ConfigGroup config)
+	public void getConfig(EntityPlayer player, ConfigGroup config)
 	{
-		super.getConfig(config);
+		super.getConfig(player, config);
 		config.addList("items", items, new ConfigItemStack(ItemStack.EMPTY, true), v -> new ConfigItemStack(v, true), ConfigItemStack::getStack);
 		config.addLong("count", () -> count, v -> count = v, 1, 1, Long.MAX_VALUE);
 		config.addEnum("consume_items", () -> consumeItems, v -> consumeItems = v, EnumTristate.NAME_MAP).setCanEdit(!quest.canRepeat);
@@ -335,7 +331,6 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
 	public void onButtonClicked(boolean canClick)
 	{
 		List<ItemStack> validItems = getValidItems();
@@ -356,7 +351,6 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
 	public void addMouseOverText(List<String> list, @Nullable QuestTaskData data)
 	{
 		if (consumesResources())

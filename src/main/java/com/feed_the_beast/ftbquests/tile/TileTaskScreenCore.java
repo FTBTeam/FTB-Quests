@@ -441,8 +441,8 @@ public class TileTaskScreenCore extends TileWithTeam implements IConfigCallback,
 			return;
 		}
 
-		String top1 = cTask.quest.getDisplayName().getUnformattedText();
-		String top2 = cTask.getDisplayName().getUnformattedText();
+		String top1 = cTask.quest.getUnformattedTitle();
+		String top2 = cTask.getUnformattedTitle();
 		double iconY = 0.5D;
 
 		if (!top1.isEmpty() && !top1.equalsIgnoreCase(top2))

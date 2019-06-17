@@ -81,8 +81,8 @@ public class RenderTaskScreen extends TileEntitySpecialRenderer<TileTaskScreenCo
 		GlStateManager.translate(-screen.size, -screen.size * 2F, -0.01F);
 		GlStateManager.scale(screen.size * 2D + 1D, screen.size * 2D + 1D, 1D);
 
-		String top1 = screen.inputOnly ? "" : task.quest.getDisplayName().getUnformattedText();
-		String top2 = screen.inputOnly ? "" : task.getDisplayName().getUnformattedText();
+		String top1 = screen.inputOnly ? "" : task.quest.getUnformattedTitle();
+		String top2 = screen.inputOnly ? "" : task.getUnformattedTitle();
 
 		if (top1.isEmpty() || top1.equals(top2))
 		{

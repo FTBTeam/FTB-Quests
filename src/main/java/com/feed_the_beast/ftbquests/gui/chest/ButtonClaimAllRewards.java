@@ -14,9 +14,6 @@ import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 
 import java.util.List;
@@ -56,22 +53,14 @@ public class ButtonClaimAllRewards extends Button
 						{
 							if (!ClientQuestFile.INSTANCE.isRewardClaimed(reward))
 							{
-								ITextComponent component = new TextComponentString("");
-								component.getStyle().setColor(TextFormatting.GRAY);
-								component.appendText("- ");
-								component.appendSibling(reward.getDisplayName());
+								String s = TextFormatting.GRAY + "- " + reward.getTitle();
 
 								if (reward.isTeamReward())
 								{
-									ITextComponent component1 = new TextComponentString("");
-									component1.getStyle().setColor(TextFormatting.BLUE);
-									component1.appendText(" [");
-									component1.appendSibling(new TextComponentTranslation("ftbquests.reward.team_reward"));
-									component1.appendText("]");
-									component.appendSibling(component1);
+									s += TextFormatting.BLUE + " [" + I18n.format("ftbquests.reward.team_reward") + "]";
 								}
 
-								list.add(component.getFormattedText());
+								list.add(s);
 							}
 						}
 					}

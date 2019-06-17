@@ -165,7 +165,7 @@ public class ItemLootCrate extends Item
 		{
 			if (crate.itemName.isEmpty())
 			{
-				tooltip.add(crate.table.getDisplayName().getFormattedText());
+				tooltip.add(crate.table.getTitle());
 			}
 		}
 		else if (stack.hasTagCompound() && stack.getTagCompound().hasKey("type"))

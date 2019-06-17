@@ -139,6 +139,12 @@ ftbquests.gui.times_completed=Times completed
 ftbquests.gui.subscribe=Like this mod? Consider supporting me on twitch.tv!
 ftbquests.gui.looping_dependencies=Looping dependencies!
 ftbquests.gui.open_in_guide=Click here to read more...
+ftbquests.gui.wiki=Open Wiki
+ftbquests.gui.change_progress=Change Progress
+ftbquests.gui.change_progress.reset=Reset
+ftbquests.gui.change_progress.reset_deps=Reset (+Dependencies)
+ftbquests.gui.change_progress.complete=Complete
+ftbquests.gui.change_progress.complete_deps=Complete (+Dependencies)
 
 ftbquests.task=Task
 ftbquests.tasks=Tasks

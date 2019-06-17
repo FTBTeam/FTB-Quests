@@ -11,9 +11,9 @@ import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.quest.loot.RewardTable;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.relauncher.Side;
@@ -87,7 +87,7 @@ public final class QuestRewardType extends IForgeRegistryEntry.Impl<QuestRewardT
 	}
 
 	public final Provider provider;
-	private ITextComponent displayName;
+	private String displayName;
 	private Icon icon;
 	private GuiProvider guiProvider;
 	private boolean excludeFromListRewards;
@@ -116,7 +116,7 @@ public final class QuestRewardType extends IForgeRegistryEntry.Impl<QuestRewardT
 				}
 
 				ConfigGroup group = ConfigGroup.newGroup(FTBQuests.MOD_ID);
-				reward.getConfig(reward.createSubGroup(group));
+				reward.getConfig(Minecraft.getMinecraft().player, reward.createSubGroup(group));
 				new GuiEditConfig(group, (g1, sender) -> callback.accept(reward)).openGui();
 			}
 		};
@@ -127,21 +127,21 @@ public final class QuestRewardType extends IForgeRegistryEntry.Impl<QuestRewardT
 		return getRegistryName().getNamespace().equals(FTBQuests.MOD_ID) ? getRegistryName().getPath() : getRegistryName().toString();
 	}
 
-	public QuestRewardType setDisplayName(ITextComponent name)
+	public QuestRewardType setDisplayName(String name)
 	{
 		displayName = name;
 		return this;
 	}
 
-	public ITextComponent getDisplayName()
+	public String getDisplayName()
 	{
 		if (displayName != null)
 		{
-			return displayName.createCopy();
+			return displayName;
 		}
 
 		ResourceLocation id = getRegistryName();
-		return new TextComponentTranslation("ftbquests.reward." + id.getNamespace() + '.' + id.getPath());
+		return id == null ? "error" : I18n.format("ftbquests.reward." + id.getNamespace() + '.' + id.getPath());
 	}
 
 	public QuestRewardType setIcon(Icon i)

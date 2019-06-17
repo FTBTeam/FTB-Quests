@@ -5,6 +5,8 @@ import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftbquests.net.MessageDisplayRewardToast;
 import com.feed_the_beast.ftbquests.quest.Quest;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.ITextComponent;
@@ -60,9 +62,9 @@ public class XPReward extends QuestReward
 	}
 
 	@Override
-	public void getConfig(ConfigGroup config)
+	public void getConfig(EntityPlayer player, ConfigGroup config)
 	{
-		super.getConfig(config);
+		super.getConfig(player, config);
 		config.addInt("xp", () -> xp, v -> xp = v, 100, 1, Integer.MAX_VALUE).setDisplayName(new TextComponentTranslation("ftbquests.reward.ftbquests.xp"));
 	}
 
@@ -73,16 +75,16 @@ public class XPReward extends QuestReward
 
 		if (MessageDisplayRewardToast.ENABLED)
 		{
-			new MessageDisplayRewardToast(getAltDisplayName(), getIcon()).sendTo(player);
+			ITextComponent text = new TextComponentString("+" + xp);
+			text.getStyle().setColor(TextFormatting.GREEN);
+			new MessageDisplayRewardToast(new TextComponentTranslation("ftbquests.reward.ftbquests.xp").appendText(": ").appendSibling(text), getIcon()).sendTo(player);
 		}
 	}
 
 	@Override
-	public ITextComponent getAltDisplayName()
+	public String getAltTitle()
 	{
-		ITextComponent text = new TextComponentString("+" + xp);
-		text.getStyle().setColor(TextFormatting.GREEN);
-		return new TextComponentTranslation("ftbquests.reward.ftbquests.xp").appendText(": ").appendSibling(text);
+		return I18n.format("ftbquests.reward.ftbquests.xp") + ": " + TextFormatting.GREEN + "+" + xp;
 	}
 
 	@Override

@@ -44,7 +44,7 @@ public class ButtonQuest extends Button
 
 	public ButtonQuest(Panel panel, Quest q)
 	{
-		super(panel, GuiQuestTree.fixI18n(null, q.getDisplayName().getFormattedText()), q.getIcon());
+		super(panel, q.getTitle(), q.getIcon());
 		treeGui = (GuiQuestTree) panel.getGui();
 		setSize(20, 20);
 		quest = q;
@@ -104,7 +104,7 @@ public class ButtonQuest extends Button
 
 					for (QuestRewardType type : QuestRewardType.getRegistry())
 					{
-						contextMenu2.add(new ContextMenuItem(type.getDisplayName().getFormattedText(), type.getIcon(), () -> {
+						contextMenu2.add(new ContextMenuItem(type.getDisplayName(), type.getIcon(), () -> {
 							GuiHelper.playClickSound();
 							type.getGuiProvider().openCreationGui(this, quest, reward -> {
 								for (Quest quest1 : treeGui.selectedQuests)
@@ -179,7 +179,7 @@ public class ButtonQuest extends Button
 
 					treeGui.toggleSelected(quest);
 				}
-				else if (!quest.guidePage.isEmpty() && quest.tasks.isEmpty() && quest.rewards.isEmpty() && quest.text.isEmpty())
+				else if (!quest.guidePage.isEmpty() && quest.tasks.isEmpty() && quest.rewards.isEmpty() && quest.getText().length == 0)
 				{
 					handleClick("guide", quest.guidePage);
 				}
@@ -271,11 +271,11 @@ public class ButtonQuest extends Button
 
 		list.add(title);
 
-		String description = GuiQuestTree.fixI18n(TextFormatting.GRAY, quest.description);
+		String description = quest.getDescription();
 
 		if (!description.isEmpty())
 		{
-			list.add(description);
+			list.add(TextFormatting.GRAY + description);
 		}
 
 		if (treeGui.file.self != null)

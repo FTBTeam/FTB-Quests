@@ -30,7 +30,7 @@ public class ToastQuestObject extends SimpleToast
 	@Override
 	public String getSubtitle()
 	{
-		return object.getDisplayName().getFormattedText();
+		return object.getTitle();
 	}
 
 	@Override

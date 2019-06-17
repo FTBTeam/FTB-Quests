@@ -8,9 +8,9 @@ import com.feed_the_beast.ftblib.lib.gui.misc.GuiEditConfigValue;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.Quest;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.relauncher.Side;
@@ -84,7 +84,7 @@ public final class QuestTaskType extends IForgeRegistryEntry.Impl<QuestTaskType>
 	}
 
 	public final Provider provider;
-	private ITextComponent displayName;
+	private String displayName;
 	private Icon icon;
 	private GuiProvider guiProvider;
 
@@ -115,7 +115,7 @@ public final class QuestTaskType extends IForgeRegistryEntry.Impl<QuestTaskType>
 				}
 
 				ConfigGroup group = ConfigGroup.newGroup(FTBQuests.MOD_ID);
-				task.getConfig(task.createSubGroup(group));
+				task.getConfig(Minecraft.getMinecraft().player, task.createSubGroup(group));
 				new GuiEditConfig(group, (g1, sender) -> callback.accept(task)).openGui();
 			}
 		};
@@ -126,21 +126,21 @@ public final class QuestTaskType extends IForgeRegistryEntry.Impl<QuestTaskType>
 		return getRegistryName().getNamespace().equals(FTBQuests.MOD_ID) ? getRegistryName().getPath() : getRegistryName().toString();
 	}
 
-	public QuestTaskType setDisplayName(ITextComponent name)
+	public QuestTaskType setDisplayName(String name)
 	{
 		displayName = name;
 		return this;
 	}
 
-	public ITextComponent getDisplayName()
+	public String getDisplayName()
 	{
 		if (displayName != null)
 		{
-			return displayName.createCopy();
+			return displayName;
 		}
 
 		ResourceLocation id = getRegistryName();
-		return new TextComponentTranslation("ftbquests.task." + id.getNamespace() + '.' + id.getPath());
+		return id == null ? "error" : I18n.format("ftbquests.task." + id.getNamespace() + '.' + id.getPath());
 	}
 
 	public QuestTaskType setIcon(Icon i)

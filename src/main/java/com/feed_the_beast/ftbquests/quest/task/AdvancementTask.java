@@ -5,14 +5,16 @@ import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
-import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import net.minecraft.advancements.Advancement;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 
@@ -65,31 +67,29 @@ public class AdvancementTask extends QuestTask
 	}
 
 	@Override
-	public void getConfig(ConfigGroup config)
+	public void getConfig(EntityPlayer player, ConfigGroup config)
 	{
-		super.getConfig(config);
+		super.getConfig(player, config);
 		config.addString("advancement", () -> advancement, v -> advancement = v, "").setDisplayName(new TextComponentTranslation("ftbquests.task.ftbquests.advancement"));
 	}
 
 	@Override
-	public ITextComponent getAltDisplayName()
+	public String getAltTitle()
 	{
-		Advancement a = FTBQuests.PROXY.getAdvancement(null, advancement);
+		Advancement a = Minecraft.getMinecraft().player.connection.getAdvancementManager().getAdvancementList().getAdvancement(new ResourceLocation(advancement));
 
 		if (a != null && a.getDisplay() != null)
 		{
-			ITextComponent text = a.getDisplay().getTitle().createCopy();
-			text.getStyle().setColor(TextFormatting.YELLOW);
-			return new TextComponentTranslation("ftbquests.task.ftbquests.advancement").appendText(": ").appendSibling(text);
+			return I18n.format("ftbquests.task.ftbquests.advancement") + ": " + TextFormatting.YELLOW + a.getDisplay().getTitle().getFormattedText();
 		}
 
-		return super.getAltDisplayName();
+		return super.getAltTitle();
 	}
 
 	@Override
 	public Icon getAltIcon()
 	{
-		Advancement a = FTBQuests.PROXY.getAdvancement(null, advancement);
+		Advancement a = Minecraft.getMinecraft().player.connection.getAdvancementManager().getAdvancementList().getAdvancement(new ResourceLocation(advancement));
 		return a == null || a.getDisplay() == null ? super.getAltIcon() : ItemIcon.getItemIcon(a.getDisplay().getIcon());
 	}
 
@@ -120,7 +120,7 @@ public class AdvancementTask extends QuestTask
 				return false;
 			}
 
-			Advancement a = FTBQuests.PROXY.getAdvancement(player.server, task.advancement);
+			Advancement a = player.server.getAdvancementManager().getAdvancement(new ResourceLocation(task.advancement));
 
 			if (a != null && player.getAdvancements().getProgress(a).isDone())
 			{

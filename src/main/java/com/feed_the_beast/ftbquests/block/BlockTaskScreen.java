@@ -391,12 +391,12 @@ public class BlockTaskScreen extends BlockWithHorizontalFacing
 			return;
 		}
 
-		tooltip.add(I18n.format("ftbquests.chapter") + ": " + quest.chapter.getYellowDisplayName().getFormattedText());
-		tooltip.add(I18n.format("ftbquests.quest") + ": " + quest.getYellowDisplayName().getFormattedText());
+		tooltip.add(I18n.format("ftbquests.chapter") + ": " + quest.chapter.getYellowDisplayName());
+		tooltip.add(I18n.format("ftbquests.quest") + ": " + quest.getYellowDisplayName());
 
 		QuestTask task = quest.getTask(nbt.getByte("TaskIndex") & 0xFF);
 
-		tooltip.add(I18n.format("ftbquests.task") + ": " + task.getYellowDisplayName().getFormattedText());
+		tooltip.add(I18n.format("ftbquests.task") + ": " + task.getYellowDisplayName());
 
 		if (ClientQuestFile.INSTANCE.self != null)
 		{

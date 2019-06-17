@@ -110,7 +110,7 @@ public class CommandExportRewardsToChest extends CommandFTBQuestsBase
 						}
 					}
 
-					sender.sendMessage(new TextComponentTranslation("commands.ftbquests.export_rewards_to_chest.text", Integer.toString(r), Integer.toString(table.rewards.size()), table.getDisplayName()));
+					sender.sendMessage(new TextComponentTranslation("commands.ftbquests.export_rewards_to_chest.text", Integer.toString(r), Integer.toString(table.rewards.size()), table.getTitle()));
 				}
 			}
 		}

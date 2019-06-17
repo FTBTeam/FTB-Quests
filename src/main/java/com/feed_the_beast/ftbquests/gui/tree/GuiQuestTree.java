@@ -14,7 +14,6 @@ import com.feed_the_beast.ftblib.lib.gui.Theme;
 import com.feed_the_beast.ftblib.lib.gui.Widget;
 import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.math.MathUtils;
-import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
@@ -27,6 +26,7 @@ import com.feed_the_beast.ftbquests.net.edit.MessageMoveQuest;
 import com.feed_the_beast.ftbquests.quest.EnumChangeProgress;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
+import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
@@ -201,28 +201,11 @@ public class GuiQuestTree extends GuiBase
 		questPanel.setScrollY((scrollHeight - questPanel.height) / 2);
 	}
 
-	public static String fixI18n(@Nullable TextFormatting color, String v)
-	{
-		if (!v.isEmpty() && v.startsWith("{") && v.endsWith("}"))
-		{
-			v = I18n.format(v.substring(1, v.length() - 1));
-		}
-
-		v = color == null ? StringUtils.addFormatting(v) : (color + StringUtils.addFormatting(v));
-
-		if (StringUtils.unformatted(v).isEmpty())
-		{
-			return "";
-		}
-
-		return v;
-	}
-
 	public static void addObjectMenuItems(List<ContextMenuItem> contextMenu, IOpenableGui gui, QuestObjectBase object)
 	{
 		ConfigGroup group = ConfigGroup.newGroup(FTBQuests.MOD_ID);
 		ConfigGroup g = object.createSubGroup(group);
-		object.getConfig(g);
+		object.getConfig(Minecraft.getMinecraft().player, g);
 
 		if (!g.getValues().isEmpty())
 		{
@@ -284,7 +267,7 @@ public class GuiQuestTree extends GuiBase
 			contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.reward_table.edit"), GuiIcons.SETTINGS, () -> ((RandomReward) object).getTable().onEditButtonClicked()));
 		}
 
-		contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), GuiIcons.REMOVE, () -> ClientQuestFile.INSTANCE.deleteObject(object.id)).setYesNo(I18n.format("delete_item", object.getDisplayName().getFormattedText())));
+		contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), GuiIcons.REMOVE, () -> ClientQuestFile.INSTANCE.deleteObject(object.id)).setYesNo(I18n.format("delete_item", object.getTitle())));
 		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.reset_progress"), GuiIcons.REFRESH, () -> new MessageChangeProgress(ClientQuestFile.INSTANCE.self.getTeamUID(), object.id, EnumChangeProgress.RESET).sendToServer()).setYesNo(I18n.format("ftbquests.gui.reset_progress_q")));
 
 		if (object instanceof QuestObject)
@@ -400,7 +383,7 @@ public class GuiQuestTree extends GuiBase
 			{
 				if (now - lastShiftPress <= 400L)
 				{
-					ConfigQuestObject c = new ConfigQuestObject(file, null, QuestObjectType.CHAPTER, QuestObjectType.QUEST);
+					ConfigQuestObject c = new ConfigQuestObject(file, null, QuestObjectType.CHAPTER.or(QuestObjectType.QUEST));
 					GuiSelectQuestObject gui = new GuiSelectQuestObject(c, this, () -> {
 						QuestObjectBase o = c.getObject();
 
@@ -617,7 +600,7 @@ public class GuiQuestTree extends GuiBase
 	{
 		if (scheme.isEmpty() && path.startsWith("#"))
 		{
-			open(file.get(file.getID(path)));
+			open(file.get(QuestFile.getID(path)));
 			return true;
 		}
 

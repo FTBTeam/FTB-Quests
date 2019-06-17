@@ -12,6 +12,7 @@ import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import net.minecraft.command.ICommandSender;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
@@ -75,7 +76,7 @@ public class MessageEditObject extends MessageToServer implements IConfigCallbac
 					group.setDisplayName(new TextComponentTranslation(object.getObjectType().getTranslationKey()));
 				}
 
-				object.getConfig(object.createSubGroup(group));
+				object.getConfig(player, object.createSubGroup(group));
 				FTBLibAPI.editServerConfig(player, group, this);
 			}
 		}
@@ -86,11 +87,11 @@ public class MessageEditObject extends MessageToServer implements IConfigCallbac
 	{
 		QuestObjectBase object = ServerQuestFile.INSTANCE.getBase(id);
 
-		if (object != null)
+		if (object != null && sender instanceof EntityPlayer)
 		{
 			ServerQuestFile.INSTANCE.clearCachedData();
 			ConfigGroup group = ConfigGroup.newGroup("object");
-			object.getConfig(group);
+			object.getConfig((EntityPlayer) sender, group);
 			new MessageEditObjectResponse(object).sendToAll();
 			ServerQuestFile.INSTANCE.save();
 		}

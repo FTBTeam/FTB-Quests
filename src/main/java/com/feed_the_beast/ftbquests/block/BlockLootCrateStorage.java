@@ -70,8 +70,10 @@ public class BlockLootCrateStorage extends BlockSpecialDrop
 				{
 					if (table.lootCrate != null && !table.lootCrate.stringID.isEmpty())
 					{
+						//FIXME: Send message to client with table contents
 						ITextComponent component = new TextComponentString("");
-						component.appendSibling(table.getDisplayName().createCopy());
+						//component.appendSibling(table.getTitle().createCopy());
+						component.appendSibling(new TextComponentString(table.lootCrate.stringID));
 						component.appendText(": ");
 						component.appendSibling(StringUtils.color(new TextComponentString(Integer.toString(tile.crates.getInt(table.lootCrate.stringID))), TextFormatting.GOLD));
 						player.sendMessage(component);

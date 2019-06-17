@@ -5,9 +5,9 @@ import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentTranslation;
 
 import java.io.File;
 
@@ -82,9 +82,9 @@ public final class QuestVariable extends QuestObject
 	}
 
 	@Override
-	public void getConfig(ConfigGroup config)
+	public void getConfig(EntityPlayer player, ConfigGroup config)
 	{
-		super.getConfig(config);
+		super.getConfig(player, config);
 		config.addLong("max_value", () -> maxValue, v -> maxValue = v, 1L, 1L, Long.MAX_VALUE);
 		config.addBool("team", () -> team, v -> team = v, false);
 	}
@@ -131,9 +131,9 @@ public final class QuestVariable extends QuestObject
 	}
 
 	@Override
-	public ITextComponent getAltDisplayName()
+	public String getAltTitle()
 	{
-		return new TextComponentTranslation("ftbquests.variable");
+		return I18n.format("ftbquests.variable");
 	}
 
 	@Override

@@ -37,7 +37,7 @@ public class LootCrateWrapper implements IRecipeWrapper, ITooltipCallback<ItemSt
 	public LootCrateWrapper(LootCrate c)
 	{
 		crate = c;
-		name = crate.table.getDisplayName().getFormattedText();
+		name = crate.table.getTitle();
 		itemStack = crate.createStack();
 		items = new ArrayList<>(c.table.rewards.size());
 
@@ -56,13 +56,13 @@ public class LootCrateWrapper implements IRecipeWrapper, ITooltipCallback<ItemSt
 			else if (reward.reward.getIcon() instanceof ItemIcon)
 			{
 				stack = ((ItemIcon) reward.reward.getIcon()).getStack().copy();
-				stack.setStackDisplayName(reward.reward.getDisplayName().getFormattedText());
+				stack.setStackDisplayName(reward.reward.getTitle());
 				items.add(stack);
 			}
 			else
 			{
 				stack = new ItemStack(Items.PAINTING);
-				stack.setStackDisplayName(reward.reward.getDisplayName().getFormattedText());
+				stack.setStackDisplayName(reward.reward.getTitle());
 				stack.setTagInfo("icon", new NBTTagString(reward.reward.getIcon().toString()));
 				items.add(stack);
 			}
@@ -116,7 +116,7 @@ public class LootCrateWrapper implements IRecipeWrapper, ITooltipCallback<ItemSt
 	public void drawInfo(Minecraft mc, int recipeWidth, int recipeHeight, int mouseX, int mouseY)
 	{
 		GuiHelper.drawItem(itemStack, 0, 0, 2, 2, true);
-		mc.fontRenderer.drawString(TextFormatting.UNDERLINE + crate.table.getDisplayName().getUnformattedText(), 36, 0, 0xFF222222);
+		mc.fontRenderer.drawString(TextFormatting.UNDERLINE + crate.table.getUnformattedTitle(), 36, 0, 0xFF222222);
 
 		int total = ClientQuestFile.INSTANCE.lootCrateNoDrop.passive;
 

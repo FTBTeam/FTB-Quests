@@ -3,13 +3,13 @@ package com.feed_the_beast.ftbquests.quest.task;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
-import com.feed_the_beast.ftblib.lib.util.ServerUtils;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.DimensionType;
@@ -76,18 +76,39 @@ public class DimensionTask extends QuestTask
 	}
 
 	@Override
-	public void getConfig(ConfigGroup config)
+	public void getConfig(EntityPlayer player, ConfigGroup config)
 	{
-		super.getConfig(config);
+		super.getConfig(player, config);
 		config.addInt("dim", () -> dimension, v -> dimension = v, 0, Integer.MIN_VALUE, Integer.MAX_VALUE).setDisplayName(new TextComponentTranslation("ftbquests.task.ftbquests.dimension"));
 	}
 
-	@Override
-	public ITextComponent getAltDisplayName()
+	public static String getDimensionName(int dim)
 	{
-		ITextComponent text = ServerUtils.getDimensionName(dimension);
-		text.getStyle().setColor(TextFormatting.DARK_GREEN);
-		return new TextComponentTranslation("ftbquests.task.ftbquests.dimension", text).appendText(": ").appendSibling(text);
+		switch (dim)
+		{
+			case 0:
+				return I18n.format("createWorld.customize.preset.overworld");
+			case -1:
+				return I18n.format("advancements.nether.root.title");
+			case 1:
+				return I18n.format("advancements.end.root.title");
+			default:
+				for (DimensionType type : DimensionType.values())
+				{
+					if (type.getId() == dim)
+					{
+						return type.getName();
+					}
+				}
+
+				return "dim_" + dim;
+		}
+	}
+
+	@Override
+	public String getAltTitle()
+	{
+		return I18n.format("ftbquests.task.ftbquests.dimension") + ": " + TextFormatting.DARK_GREEN + getDimensionName(dimension);
 	}
 
 	@Override

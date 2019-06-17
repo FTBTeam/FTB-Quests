@@ -3,8 +3,8 @@ package com.feed_the_beast.ftbquests.quest.reward;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
-import com.feed_the_beast.ftbquests.net.MessageDisplayCustomToast;
 import com.feed_the_beast.ftbquests.quest.Quest;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 
@@ -60,15 +60,14 @@ public class ToastReward extends QuestReward
 	}
 
 	@Override
-	public void getConfig(ConfigGroup config)
+	public void getConfig(EntityPlayer player, ConfigGroup config)
 	{
-		super.getConfig(config);
+		super.getConfig(player, config);
 		config.addString("description", () -> description, v -> description = v, "");
 	}
 
 	@Override
 	public void claim(EntityPlayerMP player)
 	{
-		new MessageDisplayCustomToast(getDisplayName(), getIcon(), description).sendTo(player);
 	}
 }

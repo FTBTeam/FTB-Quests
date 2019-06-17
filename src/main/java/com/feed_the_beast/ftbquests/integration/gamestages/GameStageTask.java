@@ -11,11 +11,11 @@ import com.feed_the_beast.ftbquests.quest.task.QuestTaskData;
 import com.feed_the_beast.ftbquests.quest.task.QuestTaskType;
 import com.feed_the_beast.ftbquests.quest.task.SimpleQuestTaskData;
 import net.darkhax.gamestages.GameStageHelper;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 
@@ -68,18 +68,16 @@ public class GameStageTask extends QuestTask
 	}
 
 	@Override
-	public void getConfig(ConfigGroup config)
+	public void getConfig(EntityPlayer player, ConfigGroup config)
 	{
-		super.getConfig(config);
+		super.getConfig(player, config);
 		config.addString("stage", () -> stage, v -> stage = v, "").setDisplayName(new TextComponentTranslation("ftbquests.task.ftbquests.gamestage"));
 	}
 
 	@Override
-	public ITextComponent getAltDisplayName()
+	public String getAltTitle()
 	{
-		ITextComponent text = new TextComponentString(stage);
-		text.getStyle().setColor(TextFormatting.YELLOW);
-		return new TextComponentTranslation("ftbquests.task.ftbquests.gamestage").appendText(": ").appendSibling(text);
+		return I18n.format("ftbquests.task.ftbquests.gamestage") + ": " + TextFormatting.YELLOW + stage;
 	}
 
 	@Override

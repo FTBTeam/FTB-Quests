@@ -12,7 +12,7 @@ import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.gui.FTBQuestsTheme;
 import com.feed_the_beast.ftbquests.gui.GuiRewardTables;
 import com.feed_the_beast.ftbquests.gui.GuiVariables;
-import com.feed_the_beast.ftbquests.gui.editor.EditorFrame;
+import com.feed_the_beast.ftbquests.gui.editor.Editor;
 import com.feed_the_beast.ftbquests.net.edit.MessageChangeProgress;
 import com.feed_the_beast.ftbquests.quest.EnumChangeProgress;
 import com.feed_the_beast.ftbquests.quest.Quest;
@@ -43,7 +43,7 @@ public class ButtonEditSettings extends ButtonTab
 
 		if (isAltKeyDown())
 		{
-			EditorFrame.open(isCtrlKeyDown());
+			Editor.open(isCtrlKeyDown());
 			return;
 		}
 
@@ -94,12 +94,12 @@ public class ButtonEditSettings extends ButtonTab
 				for (int x = 0; x < ClientQuestFile.INSTANCE.chapters.size(); x++)
 				{
 					QuestChapter c = ClientQuestFile.INSTANCE.chapters.get(x);
-					cells[x * 2][0] = c.getDisplayName().getUnformattedText();
+					cells[x * 2][0] = c.getUnformattedTitle();
 
 					for (int y = 0; y < c.quests.size(); y++)
 					{
 						Quest q = c.quests.get(y);
-						cells[x * 2][y + 1] = q.getDisplayName().getUnformattedText();
+						cells[x * 2][y + 1] = q.getUnformattedTitle();
 					}
 				}
 

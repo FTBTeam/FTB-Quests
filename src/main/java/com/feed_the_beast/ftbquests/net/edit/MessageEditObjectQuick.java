@@ -68,7 +68,7 @@ public class MessageEditObjectQuick extends MessageToServer
 			{
 				ConfigGroup group = ConfigGroup.newGroup(FTBQuests.MOD_ID);
 				ConfigGroup g = object.createSubGroup(group);
-				object.getConfig(g);
+				object.getConfig(player, g);
 
 				ConfigValueInstance inst = g.getValueInstance(configId);
 
