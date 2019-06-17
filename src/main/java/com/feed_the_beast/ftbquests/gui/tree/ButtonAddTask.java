@@ -38,7 +38,7 @@ public class ButtonAddTask extends Button
 
 		for (QuestTaskType type : QuestTaskType.getRegistry())
 		{
-			contextMenu.add(new ContextMenuItem(type.getDisplayName().getFormattedText(), type.getIcon(), () -> {
+			contextMenu.add(new ContextMenuItem(type.getDisplayName(), type.getIcon(), () -> {
 				GuiHelper.playClickSound();
 				type.getGuiProvider().openCreationGui(this, quest, task -> {
 					NBTTagCompound extra = new NBTTagCompound();

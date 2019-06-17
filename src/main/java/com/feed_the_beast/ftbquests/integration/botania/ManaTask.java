@@ -18,13 +18,11 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.opengl.GL11;
 import vazkii.botania.api.mana.IManaReceiver;
 
@@ -83,9 +81,9 @@ public class ManaTask extends EnergyTask
 	}
 
 	@Override
-	public ITextComponent getAltDisplayName()
+	public String getAltTitle()
 	{
-		return showNumbers ? new TextComponentTranslation("ftbquests.task.ftbquests.botania_mana.text", StringUtils.formatDouble(value, true)) : new TextComponentTranslation("ftbquests.task.ftbquests.botania_mana.value");
+		return showNumbers ? I18n.format("ftbquests.task.ftbquests.botania_mana.text", StringUtils.formatDouble(value, true)) : I18n.format("ftbquests.task.ftbquests.botania_mana.value");
 	}
 
 	@Override
@@ -113,50 +111,13 @@ public class ManaTask extends EnergyTask
 	}
 
 	@Override
-	public void getConfig(ConfigGroup config)
+	public void getConfig(EntityPlayer player, ConfigGroup config)
 	{
-		super.getConfig(config);
+		super.getConfig(player, config);
 		config.addBool("show_numbers", () -> showNumbers, v -> showNumbers = v, false);
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
-	public void drawGUI(@Nullable QuestTaskData data, int x, int y, int w, int h)
-	{
-		Tessellator tessellator = Tessellator.getInstance();
-		BufferBuilder buffer = tessellator.getBuffer();
-		Minecraft mc = Minecraft.getMinecraft();
-
-		double r = data == null ? 0D : data.getProgress() / (double) data.task.getMaxProgress();
-
-		if (r > 0D)
-		{
-			double y1 = y + (3D / 32D + (1D - r) * 26D / 32D) * h;
-			double h1 = (r * 26D / 32D) * h;
-
-			double v0 = 3D / 32D + (26D / 32D) * (1D - r);
-			double v1 = 29D / 32D;
-
-			mc.getTextureManager().bindTexture(FULL_TEXTURE);
-			buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
-			buffer.pos(x, y1 + h1, 0).tex(0, v1).endVertex();
-			buffer.pos(x + w, y1 + h1, 0).tex(1, v1).endVertex();
-			buffer.pos(x + w, y1, 0).tex(1, v0).endVertex();
-			buffer.pos(x, y1, 0).tex(0, v0).endVertex();
-			tessellator.draw();
-		}
-
-		mc.getTextureManager().bindTexture(EMPTY_TEXTURE);
-		buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
-		buffer.pos(x, y + h, 0).tex(0, 1).endVertex();
-		buffer.pos(x + w, y + h, 0).tex(1, 1).endVertex();
-		buffer.pos(x + w, y, 0).tex(1, 0).endVertex();
-		buffer.pos(x, y, 0).tex(0, 0).endVertex();
-		tessellator.draw();
-	}
-
-	@Override
-	@SideOnly(Side.CLIENT)
 	public void drawScreen(@Nullable QuestTaskData data)
 	{
 		Tessellator tessellator = Tessellator.getInstance();

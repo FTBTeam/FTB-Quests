@@ -73,6 +73,6 @@ public class CommandWeighFromEMC extends CommandFTBQuestsBase
 		ServerQuestFile.INSTANCE.clearCachedData();
 		new MessageEditObjectResponse(table).sendToAll();
 		ServerQuestFile.INSTANCE.save();
-		sender.sendMessage(new TextComponentTranslation("commands.ftbquests.weigh_from_emc.text", table.getDisplayName()));
+		sender.sendMessage(new TextComponentTranslation("commands.ftbquests.weigh_from_emc.text", table.getTitle()));
 	}
 }

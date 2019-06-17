@@ -67,6 +67,16 @@ public class FTBQuestsTheme extends Theme
 			tessellator.draw();
 			GlStateManager.enableTexture2D();
 		}
+
+		public int hashCode()
+		{
+			return 1;
+		}
+
+		public boolean equals(Object o)
+		{
+			return o == this;
+		}
 	};
 
 	public static final Icon COMPLETED = new Icon()
@@ -114,6 +124,16 @@ public class FTBQuestsTheme extends Theme
 
 			tessellator.draw();
 			GlStateManager.enableTexture2D();
+		}
+
+		public int hashCode()
+		{
+			return 1;
+		}
+
+		public boolean equals(Object o)
+		{
+			return o == this;
 		}
 	};
 

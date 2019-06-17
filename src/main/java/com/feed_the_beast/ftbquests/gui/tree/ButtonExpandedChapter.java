@@ -8,6 +8,7 @@ import com.feed_the_beast.ftblib.lib.gui.SimpleTextButton;
 import com.feed_the_beast.ftblib.lib.gui.Theme;
 import com.feed_the_beast.ftblib.lib.gui.WidgetType;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
+import com.feed_the_beast.ftbquests.client.FTBQuestsClient;
 import com.feed_the_beast.ftbquests.gui.FTBQuestsTheme;
 import com.feed_the_beast.ftbquests.net.edit.MessageMoveChapter;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
@@ -31,7 +32,7 @@ public class ButtonExpandedChapter extends SimpleTextButton
 
 	public ButtonExpandedChapter(Panel panel, QuestChapter c)
 	{
-		super(panel, c.getDisplayName().getFormattedText(), c.getIcon());
+		super(panel, c.getTitle(), c.getIcon());
 		treeGui = (GuiQuestTree) getGui();
 		chapter = c;
 
@@ -49,7 +50,7 @@ public class ButtonExpandedChapter extends SimpleTextButton
 
 		for (String v : chapter.description)
 		{
-			description.add(GuiQuestTree.fixI18n(TextFormatting.GRAY, v));
+			description.add(TextFormatting.GRAY + FTBQuestsClient.addI18nAndColors(v));
 		}
 	}
 

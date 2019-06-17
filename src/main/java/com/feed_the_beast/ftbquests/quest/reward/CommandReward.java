@@ -6,11 +6,11 @@ import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 
@@ -65,9 +65,9 @@ public class CommandReward extends QuestReward
 	}
 
 	@Override
-	public void getConfig(ConfigGroup config)
+	public void getConfig(EntityPlayer player, ConfigGroup config)
 	{
-		super.getConfig(config);
+		super.getConfig(player, config);
 		config.addString("command", () -> command, v -> command = v, "/say Hi, @team!").setDisplayName(new TextComponentTranslation("ftbquests.reward.ftbquests.command"));
 	}
 
@@ -89,11 +89,7 @@ public class CommandReward extends QuestReward
 			overrides.put("chapter", chapter);
 		}
 
-		if (quest instanceof Quest)
-		{
-			overrides.put("quest", quest);
-		}
-
+		overrides.put("quest", quest);
 		overrides.put("team", FTBLibAPI.getTeam(player.getUniqueID()));
 
 		String s = command;
@@ -110,10 +106,8 @@ public class CommandReward extends QuestReward
 	}
 
 	@Override
-	public ITextComponent getAltDisplayName()
+	public String getAltTitle()
 	{
-		ITextComponent text = new TextComponentString(command);
-		text.getStyle().setColor(TextFormatting.RED);
-		return new TextComponentTranslation("ftbquests.reward.ftbquests.command").appendText(": ").appendSibling(text);
+		return I18n.format("ftbquests.reward.ftbquests.command") + ": " + TextFormatting.RED + command;
 	}
 }

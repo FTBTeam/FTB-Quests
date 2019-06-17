@@ -10,18 +10,14 @@ import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.quest.loot.RewardTable;
 import com.feed_the_beast.ftbquests.quest.loot.WeightedReward;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.common.util.Constants;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -82,7 +78,7 @@ public class RandomReward extends QuestReward
 			}
 
 			table.id = getQuestFile().readID(0);
-			table.title = getDisplayName().getUnformattedText() + " " + toString();
+			table.title = getUnformattedTitle() + " " + toString();
 			getQuestFile().rewardTables.add(table);
 		}
 	}
@@ -112,11 +108,10 @@ public class RandomReward extends QuestReward
 	}
 
 	@Override
-	public void getConfig(ConfigGroup config)
+	public void getConfig(EntityPlayer player, ConfigGroup config)
 	{
-		super.getConfig(config);
-		Collection<QuestObjectType> set = Collections.singleton(QuestObjectType.REWARD_TABLE);
-		config.add("table", new ConfigQuestObject(getQuestFile(), getTable(), set)
+		super.getConfig(player, config);
+		config.add("table", new ConfigQuestObject(getQuestFile(), getTable(), QuestObjectType.REWARD_TABLE)
 		{
 			@Override
 			public void setObject(@Nullable QuestObjectBase object)
@@ -126,7 +121,7 @@ public class RandomReward extends QuestReward
 					table = (RewardTable) object;
 				}
 			}
-		}, new ConfigQuestObject(getQuestFile(), getQuestFile().dummyTable, set)).setDisplayName(new TextComponentTranslation("ftbquests.reward_table"));
+		}, new ConfigQuestObject(getQuestFile(), getQuestFile().dummyTable, QuestObjectType.REWARD_TABLE)).setDisplayName(new TextComponentTranslation("ftbquests.reward_table"));
 	}
 
 	@Override
@@ -161,13 +156,12 @@ public class RandomReward extends QuestReward
 	}
 
 	@Override
-	public ITextComponent getAltDisplayName()
+	public String getAltTitle()
 	{
-		return getTable().useTitle ? getTable().getDisplayName() : super.getAltDisplayName();
+		return getTable().useTitle ? getTable().getTitle() : super.getAltTitle();
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
 	public void addMouseOverText(List<String> list)
 	{
 		getTable().addMouseOverText(list, true, false);

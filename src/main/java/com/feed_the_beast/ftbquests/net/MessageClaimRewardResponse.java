@@ -8,7 +8,6 @@ import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.gui.chest.GuiQuestChest;
 import com.feed_the_beast.ftbquests.gui.tree.GuiQuestTree;
-import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.fml.relauncher.Side;
@@ -58,7 +57,7 @@ public class MessageClaimRewardResponse extends MessageToClient
 
 			QuestReward reward = ClientQuestFile.INSTANCE.getReward(id);
 
-			if (reward != null && reward.quest instanceof Quest)
+			if (reward != null)
 			{
 				reward.quest.checkRepeatableQuests(ClientQuestFile.INSTANCE.self, Minecraft.getMinecraft().player.getUniqueID());
 			}

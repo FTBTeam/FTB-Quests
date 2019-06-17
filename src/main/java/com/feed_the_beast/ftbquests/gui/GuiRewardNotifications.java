@@ -7,6 +7,7 @@ import com.feed_the_beast.ftblib.lib.gui.SimpleTextButton;
 import com.feed_the_beast.ftblib.lib.gui.Theme;
 import com.feed_the_beast.ftblib.lib.gui.Widget;
 import com.feed_the_beast.ftblib.lib.gui.WidgetLayout;
+import com.feed_the_beast.ftblib.lib.gui.WrappedIngredient;
 import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
@@ -41,13 +42,9 @@ public class GuiRewardNotifications extends GuiBase implements IRewardListenerGu
 		@Override
 		public void addMouseOverText(List<String> list)
 		{
-			if (key.stack.isEmpty())
+			if (!key.title.isEmpty())
 			{
 				list.add(key.title);
-			}
-			else
-			{
-				GuiHelper.addStackTooltip(key.stack, list);
 			}
 		}
 
@@ -73,7 +70,7 @@ public class GuiRewardNotifications extends GuiBase implements IRewardListenerGu
 		@Nullable
 		public Object getIngredientUnderMouse()
 		{
-			return key.icon.getIngredient();
+			return new WrappedIngredient(key.icon.getIngredient()).tooltip();
 		}
 	}
 

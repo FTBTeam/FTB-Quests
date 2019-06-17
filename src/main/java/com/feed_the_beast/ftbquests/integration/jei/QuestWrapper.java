@@ -38,7 +38,7 @@ public class QuestWrapper implements IRecipeWrapper
 	public QuestWrapper(Quest q)
 	{
 		quest = q;
-		name = quest.getDisplayName().getFormattedText();
+		name = quest.getTitle();
 
 		input = new ArrayList<>(5);
 		output = new ArrayList<>(5);
@@ -75,13 +75,13 @@ public class QuestWrapper implements IRecipeWrapper
 			else if (task.getIcon() instanceof ItemIcon)
 			{
 				stack = ((ItemIcon) task.getIcon()).getStack().copy();
-				stack.setStackDisplayName(task.getDisplayName().getFormattedText());
+				stack.setStackDisplayName(task.getTitle());
 				input.add(Collections.singletonList(stack));
 			}
 			else
 			{
 				stack = new ItemStack(Items.PAINTING);
-				stack.setStackDisplayName(task.getDisplayName().getFormattedText());
+				stack.setStackDisplayName(task.getTitle());
 				stack.setTagInfo("icon", new NBTTagString(task.getIcon().toString()));
 				input.add(Collections.singletonList(stack));
 			}
@@ -133,13 +133,13 @@ public class QuestWrapper implements IRecipeWrapper
 			else if (reward.getIcon() instanceof ItemIcon)
 			{
 				stack = ((ItemIcon) reward.getIcon()).getStack().copy();
-				stack.setStackDisplayName(reward.getDisplayName().getFormattedText());
+				stack.setStackDisplayName(reward.getTitle());
 				output.add(Collections.singletonList(stack));
 			}
 			else
 			{
 				stack = new ItemStack(Items.PAINTING);
-				stack.setStackDisplayName(reward.getDisplayName().getFormattedText());
+				stack.setStackDisplayName(reward.getTitle());
 				stack.setTagInfo("icon", new NBTTagString(reward.getIcon().toString()));
 				output.add(Collections.singletonList(stack));
 			}
@@ -156,7 +156,7 @@ public class QuestWrapper implements IRecipeWrapper
 	@Override
 	public void drawInfo(Minecraft mc, int recipeWidth, int recipeHeight, int mouseX, int mouseY)
 	{
-		String s = TextFormatting.UNDERLINE + quest.getDisplayName().getUnformattedText();
+		String s = TextFormatting.UNDERLINE + quest.getTitle();
 		int w = mc.fontRenderer.getStringWidth(s);
 		int h = 9;
 		int x = (recipeWidth - w) / 2;

@@ -5,6 +5,7 @@ import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -99,9 +100,9 @@ public class LocationTask extends QuestTask
 	}
 
 	@Override
-	public void getConfig(ConfigGroup config)
+	public void getConfig(EntityPlayer player, ConfigGroup config)
 	{
-		super.getConfig(config);
+		super.getConfig(player, config);
 		config.addInt("dim", () -> dimension, v -> dimension = v, 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
 		config.addBool("ignore_dim", () -> ignoreDimension, v -> ignoreDimension = v, false);
 		config.addInt("x", () -> x, v -> x = v, 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
@@ -110,6 +111,12 @@ public class LocationTask extends QuestTask
 		config.addInt("w", () -> w, v -> w = v, 1, 1, Integer.MAX_VALUE);
 		config.addInt("h", () -> h, v -> h = v, 1, 1, Integer.MAX_VALUE);
 		config.addInt("d", () -> d, v -> d = v, 1, 1, Integer.MAX_VALUE);
+	}
+
+	@Override
+	public boolean autoSubmitOnPlayerTick()
+	{
+		return true;
 	}
 
 	@Override

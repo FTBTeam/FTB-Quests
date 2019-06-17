@@ -25,7 +25,7 @@ public class GuiSelectChoiceReward extends GuiButtonListBase
 
 		private ButtonChoiceReward(Panel panel, WeightedReward r)
 		{
-			super(panel, r.reward.getDisplayName().getFormattedText(), r.reward.getIcon());
+			super(panel, r.reward.getTitle(), r.reward.getIcon());
 			weightedReward = r;
 		}
 

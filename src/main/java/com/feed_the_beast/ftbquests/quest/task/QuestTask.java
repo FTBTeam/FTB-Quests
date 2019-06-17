@@ -21,11 +21,8 @@ import com.feed_the_beast.ftbquests.tile.TileTaskScreenCore;
 import com.feed_the_beast.ftbquests.tile.TileTaskScreenPart;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -147,19 +144,14 @@ public abstract class QuestTask extends QuestObject
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
 	public void editedFromGUI()
 	{
 		GuiQuestTree gui = ClientUtils.getCurrentGuiAs(GuiQuestTree.class);
 
-		if (gui != null && gui.getViewedQuest() != null)
-		{
-			gui.viewQuestPanel.refreshWidgets();
-		}
-
 		if (gui != null)
 		{
 			gui.questPanel.refreshWidgets();
+			gui.viewQuestPanel.refreshWidgets();
 		}
 	}
 
@@ -181,7 +173,7 @@ public abstract class QuestTask extends QuestObject
 	}
 
 	@Override
-	public ITextComponent getAltDisplayName()
+	public String getAltTitle()
 	{
 		return getType().getDisplayName();
 	}
@@ -213,13 +205,11 @@ public abstract class QuestTask extends QuestObject
 		return new TileTaskScreenPart();
 	}
 
-	@SideOnly(Side.CLIENT)
 	public void drawGUI(@Nullable QuestTaskData data, int x, int y, int w, int h)
 	{
 		getIcon().draw(x, y, w, h);
 	}
 
-	@SideOnly(Side.CLIENT)
 	public void drawScreen(@Nullable QuestTaskData data)
 	{
 		getIcon().draw3D(Icon.EMPTY);
@@ -240,7 +230,6 @@ public abstract class QuestTask extends QuestObject
 		return getMaxProgress() <= 1L;
 	}
 
-	@SideOnly(Side.CLIENT)
 	public void addMouseOverText(List<String> list, @Nullable QuestTaskData data)
 	{
 		if (consumesResources())
@@ -255,7 +244,6 @@ public abstract class QuestTask extends QuestObject
 		return true;
 	}
 
-	@SideOnly(Side.CLIENT)
 	public void onButtonClicked(boolean canClick)
 	{
 		if (canClick)
@@ -270,7 +258,6 @@ public abstract class QuestTask extends QuestObject
 	}
 
 	@Nullable
-	@SideOnly(Side.CLIENT)
 	public Object getIngredient()
 	{
 		if (addTitleInMouseOverText())
@@ -290,5 +277,10 @@ public abstract class QuestTask extends QuestObject
 	public String getButtonText()
 	{
 		return getMaxProgress() > 1L || consumesResources() ? getMaxProgressString() : "";
+	}
+
+	public boolean autoSubmitOnPlayerTick()
+	{
+		return false;
 	}
 }

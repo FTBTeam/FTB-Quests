@@ -6,13 +6,13 @@ import com.feed_the_beast.ftblib.lib.icon.Icon;
 /**
  * @author LatvianModder
  */
-public class ToastCustom extends SimpleToast
+public class CustomToast extends SimpleToast
 {
 	private String title;
 	private Icon icon;
 	private String description;
 
-	public ToastCustom(String t, Icon i, String d)
+	public CustomToast(String t, Icon i, String d)
 	{
 		title = t;
 		icon = i;

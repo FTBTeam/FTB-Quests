@@ -5,6 +5,7 @@ import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.FTBQuests;
+import net.minecraft.client.resources.I18n;
 
 /**
  * @author LatvianModder
@@ -13,7 +14,7 @@ public class ButtonWiki extends ButtonTab
 {
 	public ButtonWiki(Panel panel)
 	{
-		super(panel, "Wiki", Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/info.png"));
+		super(panel, I18n.format("ftbquests.gui.wiki"), Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/info.png"));
 	}
 
 	@Override

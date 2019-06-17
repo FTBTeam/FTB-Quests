@@ -68,7 +68,7 @@ public class ButtonDummyQuest extends Widget
 
 			for (QuestTaskType type : QuestTaskType.getRegistry())
 			{
-				contextMenu.add(new ContextMenuItem(type.getDisplayName().getFormattedText(), type.getIcon(), () -> {
+				contextMenu.add(new ContextMenuItem(type.getDisplayName(), type.getIcon(), () -> {
 					GuiHelper.playClickSound();
 					type.getGuiProvider().openCreationGui(this, new Quest(treeGui.selectedChapter), task -> new MessageCreateTaskAt(treeGui.selectedChapter, x, y, task).sendToServer());
 				}));

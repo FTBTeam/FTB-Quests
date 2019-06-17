@@ -23,14 +23,12 @@ import com.feed_the_beast.ftbquests.quest.reward.FTBQuestsRewards;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
 import com.feed_the_beast.ftbquests.quest.reward.QuestRewardType;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.common.util.Constants;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -229,9 +227,9 @@ public final class RewardTable extends QuestObjectBase
 	}
 
 	@Override
-	public void getConfig(ConfigGroup config)
+	public void getConfig(EntityPlayer player, ConfigGroup config)
 	{
-		super.getConfig(config);
+		super.getConfig(player, config);
 		config.addInt("empty_weight", () -> emptyWeight, v -> emptyWeight = v, 0, 0, Integer.MAX_VALUE);
 		config.addInt("loot_size", () -> lootSize, v -> lootSize = v, 27, 1, Integer.MAX_VALUE);
 		config.addBool("hide_tooltip", () -> hideTooltip, v -> hideTooltip = v, false);
@@ -264,7 +262,6 @@ public final class RewardTable extends QuestObjectBase
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
 	public void editedFromGUI()
 	{
 		GuiQuestTree gui = ClientUtils.getCurrentGuiAs(GuiQuestTree.class);
@@ -320,24 +317,22 @@ public final class RewardTable extends QuestObjectBase
 	}
 
 	@Override
-	public ITextComponent getAltDisplayName()
+	public String getAltTitle()
 	{
 		if (rewards.size() == 1)
 		{
-			return rewards.get(0).reward.getDisplayName();
+			return rewards.get(0).reward.getTitle();
 		}
 
-		return new TextComponentTranslation("ftbquests.reward_table");
+		return I18n.format("ftbquests.reward_table");
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
 	public void onEditButtonClicked()
 	{
 		new GuiEditRewardTable(this, () -> new MessageEditObjectDirect(this).sendToServer()).openGui();
 	}
 
-	@SideOnly(Side.CLIENT)
 	public void addMouseOverText(List<String> list, boolean includeWeight, boolean includeEmpty)
 	{
 		if (hideTooltip)
@@ -376,11 +371,11 @@ public final class RewardTable extends QuestObjectBase
 
 			if (includeWeight)
 			{
-				list.add(TextFormatting.GRAY + "- " + r.reward.getDisplayName().getFormattedText() + TextFormatting.DARK_GRAY + " [" + WeightedReward.chanceString(r.weight, totalWeight) + "]");
+				list.add(TextFormatting.GRAY + "- " + r.reward.getTitle() + TextFormatting.DARK_GRAY + " [" + WeightedReward.chanceString(r.weight, totalWeight) + "]");
 			}
 			else
 			{
-				list.add(TextFormatting.GRAY + "- " + r.reward.getDisplayName().getFormattedText());
+				list.add(TextFormatting.GRAY + "- " + r.reward.getTitle());
 			}
 		}
 	}

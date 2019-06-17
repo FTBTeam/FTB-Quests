@@ -383,7 +383,7 @@ public class BlockProgressScreen extends BlockWithHorizontalFacing
 
 		if (object != null)
 		{
-			tooltip.add(object.getYellowDisplayName().getFormattedText());
+			tooltip.add(object.getYellowDisplayName());
 		}
 	}
 }

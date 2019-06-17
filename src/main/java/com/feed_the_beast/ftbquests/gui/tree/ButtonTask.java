@@ -29,7 +29,7 @@ public class ButtonTask extends Button
 
 	public ButtonTask(Panel panel, QuestTask t)
 	{
-		super(panel, t.getDisplayName().getFormattedText(), GuiIcons.ACCEPT);
+		super(panel, t.getTitle(), GuiIcons.ACCEPT);
 		treeGui = (GuiQuestTree) panel.getGui();
 		task = t;
 		setSize(18, 18);

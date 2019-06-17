@@ -40,7 +40,7 @@ public class GuiRewardTables extends GuiButtonListBase
 
 		public ButtonRewardTable(Panel panel, RewardTable t)
 		{
-			super(panel, t.getDisplayName().getFormattedText(), t.getIcon());
+			super(panel, t.getTitle(), t.getIcon());
 			table = t;
 			setHeight(14);
 
@@ -60,7 +60,7 @@ public class GuiRewardTables extends GuiButtonListBase
 				if (table.lootCrate == null)
 				{
 					table.lootCrate = new LootCrate(table);
-					Matcher matcher = Pattern.compile("[^a-z0-9_]").matcher(table.getDisplayName().getUnformattedText().trim().toLowerCase());
+					Matcher matcher = Pattern.compile("[^a-z0-9_]").matcher(table.getUnformattedTitle().toLowerCase());
 					Matcher matcher1 = Pattern.compile("_{2,}").matcher(matcher.replaceAll("_"));
 					table.lootCrate.stringID = matcher1.replaceAll("_");
 
@@ -99,12 +99,12 @@ public class GuiRewardTables extends GuiButtonListBase
 							break;
 					}
 
-					title = TextFormatting.YELLOW + table.getDisplayName().getFormattedText();
+					title = TextFormatting.YELLOW + table.getTitle();
 				}
 				else
 				{
 					table.lootCrate = null;
-					title = table.getDisplayName().getFormattedText();
+					title = table.getTitle();
 				}
 
 				new MessageEditObjectDirect(table).sendToServer();

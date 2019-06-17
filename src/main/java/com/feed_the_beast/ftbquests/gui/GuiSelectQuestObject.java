@@ -10,10 +10,8 @@ import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
-import com.feed_the_beast.ftbquests.quest.QuestVariable;
 import com.feed_the_beast.ftbquests.quest.loot.RewardTable;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
 import com.feed_the_beast.ftbquests.quest.task.QuestTask;
@@ -22,6 +20,7 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.TextFormatting;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -35,9 +34,14 @@ public class GuiSelectQuestObject extends GuiButtonListBase
 
 		public ButtonQuestObject(Panel panel, @Nullable QuestObjectBase o)
 		{
-			super(panel, o == null ? I18n.format("ftbquests.null") : o.getObjectType().getColor() + o.getDisplayName().getUnformattedText(), o == null ? Icon.EMPTY : o.getIcon());
+			super(panel, o == null ? I18n.format("ftbquests.null") : o.getObjectType().getColor() + o.getUnformattedTitle(), o == null ? Icon.EMPTY : o.getIcon());
 			object = o;
 			setSize(200, 14);
+		}
+
+		private void addObject(List<String> list, QuestObjectBase o)
+		{
+			list.add(TextFormatting.GRAY + o.getObjectType().getDisplayName() + ": " + o.getObjectType().getColor() + o.getUnformattedTitle());
 		}
 
 		@Override
@@ -48,18 +52,18 @@ public class GuiSelectQuestObject extends GuiButtonListBase
 				return;
 			}
 
-			list.add(object.getDisplayName().getFormattedText());
+			list.add(object.getTitle());
 			list.add(TextFormatting.GRAY + "ID: " + TextFormatting.DARK_GRAY + object);
 			list.add(TextFormatting.GRAY + "Type: " + object.getObjectType().getColor() + I18n.format(object.getObjectType().getTranslationKey()));
 
 			if (object instanceof Quest)
 			{
 				Quest quest = (Quest) object;
-				list.add(TextFormatting.GRAY + I18n.format("ftbquests.chapter") + ": " + QuestObjectType.CHAPTER.getColor() + quest.chapter.getDisplayName().getUnformattedText());
+				addObject(list, quest.chapter);
 
 				if (quest.rewards.size() == 1)
 				{
-					list.add(TextFormatting.GRAY + I18n.format("ftbquests.reward") + ": " + QuestObjectType.REWARD.getColor() + quest.rewards.get(0).getDisplayName().getUnformattedText());
+					addObject(list, quest.rewards.get(0));
 				}
 				else if (!quest.rewards.isEmpty())
 				{
@@ -67,19 +71,19 @@ public class GuiSelectQuestObject extends GuiButtonListBase
 
 					for (QuestReward reward : quest.rewards)
 					{
-						list.add("  " + QuestObjectType.REWARD.getColor() + reward.getDisplayName().getUnformattedText());
+						list.add("  " + QuestObjectType.REWARD.getColor() + reward.getUnformattedTitle());
 					}
 				}
 			}
 			else if (object instanceof QuestTask)
 			{
 				Quest quest = ((QuestTask) object).quest;
-				list.add(TextFormatting.GRAY + I18n.format("ftbquests.chapter") + ": " + QuestObjectType.CHAPTER.getColor() + quest.chapter.getDisplayName().getUnformattedText());
-				list.add(TextFormatting.GRAY + I18n.format("ftbquests.quest") + ": " + QuestObjectType.QUEST.getColor() + quest.getDisplayName().getUnformattedText());
+				addObject(list, quest.chapter);
+				addObject(list, quest);
 
 				if (quest.rewards.size() == 1)
 				{
-					list.add(TextFormatting.GRAY + I18n.format("ftbquests.reward") + ": " + QuestObjectType.REWARD.getColor() + quest.rewards.get(0).getDisplayName().getUnformattedText());
+					addObject(list, quest.rewards.get(0));
 				}
 				else if (!quest.rewards.isEmpty())
 				{
@@ -87,7 +91,7 @@ public class GuiSelectQuestObject extends GuiButtonListBase
 
 					for (QuestReward reward : quest.rewards)
 					{
-						list.add("  " + QuestObjectType.REWARD.getColor() + reward.getDisplayName().getUnformattedText());
+						list.add("  " + QuestObjectType.REWARD.getColor() + reward.getUnformattedTitle());
 					}
 				}
 			}
@@ -113,27 +117,7 @@ public class GuiSelectQuestObject extends GuiButtonListBase
 
 	public GuiSelectQuestObject(ConfigQuestObject c, IOpenableGui g, Runnable cb)
 	{
-		StringBuilder builder = new StringBuilder(I18n.format("ftbquests.gui.select_quest_object"));
-		builder.append(" [");
-
-		boolean first = true;
-
-		for (QuestObjectType type : c.getTypes())
-		{
-			if (first)
-			{
-				first = false;
-			}
-			else
-			{
-				builder.append(", ");
-			}
-
-			builder.append(I18n.format(type.getTranslationKey()));
-		}
-
-		builder.append(']');
-		setTitle(builder.toString());
+		setTitle(I18n.format("ftbquests.gui.select_quest_object"));
 		setHasSearchBox(true);
 		focus();
 		setBorder(1, 1, 1);
@@ -145,67 +129,29 @@ public class GuiSelectQuestObject extends GuiButtonListBase
 	@Override
 	public void addButtons(Panel panel)
 	{
-		if (config.isValid(QuestObjectType.NULL))
+		List<QuestObjectBase> list = new ArrayList<>();
+
+		for (QuestObjectBase objectBase : ClientQuestFile.INSTANCE.getAllObjects())
+		{
+			if (config.isValid(objectBase))
+			{
+				list.add(objectBase);
+			}
+		}
+
+		list.sort((o1, o2) -> {
+			int i = Integer.compare(o1.getObjectType().ordinal(), o2.getObjectType().ordinal());
+			return i == 0 ? o1.getUnformattedTitle().compareToIgnoreCase(o2.getUnformattedTitle()) : i;
+		});
+
+		if (config.isValid(0))
 		{
 			panel.add(new ButtonQuestObject(panel, null));
 		}
 
-		if (config.isValid(QuestObjectType.FILE))
+		for (QuestObjectBase objectBase : list)
 		{
-			panel.add(new ButtonQuestObject(panel, ClientQuestFile.INSTANCE));
-		}
-
-		if (config.isValid(QuestObjectType.VARIABLE))
-		{
-			for (QuestVariable variable : ClientQuestFile.INSTANCE.variables)
-			{
-				panel.add(new ButtonQuestObject(panel, variable));
-			}
-		}
-
-		if (config.isValid(QuestObjectType.REWARD_TABLE))
-		{
-			for (RewardTable table : ClientQuestFile.INSTANCE.rewardTables)
-			{
-				panel.add(new ButtonQuestObject(panel, table));
-			}
-		}
-
-		boolean addChapters = config.isValid(QuestObjectType.CHAPTER);
-		boolean addQuests = config.isValid(QuestObjectType.QUEST);
-		boolean addTasks = config.isValid(QuestObjectType.TASK);
-		boolean addRewards = config.isValid(QuestObjectType.REWARD);
-
-		for (QuestChapter chapter : ClientQuestFile.INSTANCE.chapters)
-		{
-			if (addChapters)
-			{
-				panel.add(new ButtonQuestObject(panel, chapter));
-			}
-
-			for (Quest quest : chapter.quests)
-			{
-				if (addQuests)
-				{
-					panel.add(new ButtonQuestObject(panel, quest));
-				}
-
-				if (addTasks)
-				{
-					for (QuestTask task : quest.tasks)
-					{
-						panel.add(new ButtonQuestObject(panel, task));
-					}
-				}
-
-				if (addRewards)
-				{
-					for (QuestReward reward : quest.rewards)
-					{
-						panel.add(new ButtonQuestObject(panel, reward));
-					}
-				}
-			}
+			panel.add(new ButtonQuestObject(panel, objectBase));
 		}
 	}
 

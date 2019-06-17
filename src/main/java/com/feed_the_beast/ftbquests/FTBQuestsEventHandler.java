@@ -15,6 +15,7 @@ import com.feed_the_beast.ftbquests.block.BlockTaskScreenPart;
 import com.feed_the_beast.ftbquests.block.FTBQuestsBlocks;
 import com.feed_the_beast.ftbquests.block.ItemBlockProgressScreen;
 import com.feed_the_beast.ftbquests.block.ItemBlockScreen;
+import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.events.ClearFileCacheEvent;
 import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.item.ItemLootCrate;
@@ -59,6 +60,7 @@ import com.feed_the_beast.ftbquests.tile.TileTaskScreenCore;
 import com.feed_the_beast.ftbquests.tile.TileTaskScreenPart;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
 import com.feed_the_beast.ftbquests.util.FTBQuestsInventoryListener;
+import it.unimi.dsi.fastutil.ints.IntSets;
 import net.minecraft.block.Block;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
@@ -194,19 +196,19 @@ public class FTBQuestsEventHandler
 	@SubscribeEvent
 	public static void registerFTBLib(FTBLibPreInitRegistryEvent event)
 	{
-		event.getRegistry().registerConfigValueProvider(ConfigQuestObject.ID, () -> new ConfigQuestObject(null, null));
+		event.getRegistry().registerConfigValueProvider(ConfigQuestObject.ID, () -> new ConfigQuestObject(ClientQuestFile.INSTANCE, null, IntSets.EMPTY_SET));
 	}
 
 	// Game Events //
 
 	private static List<KillTask> killTasks = null;
-	private static List<LocationTask> locationTasks = null;
+	private static List<QuestTask> autoSubmitTasks = null;
 
 	@SubscribeEvent
 	public static void onFileCacheClear(ClearFileCacheEvent event)
 	{
 		killTasks = null;
-		locationTasks = null;
+		autoSubmitTasks = null;
 	}
 
 	@SubscribeEvent
@@ -287,11 +289,11 @@ public class FTBQuestsEventHandler
 	@SubscribeEvent
 	public static void onPlayerTick(TickEvent.PlayerTickEvent event)
 	{
-		if (event.phase == TickEvent.Phase.END && !event.player.world.isRemote)
+		if (event.phase == TickEvent.Phase.END && !event.player.world.isRemote && ServerQuestFile.INSTANCE != null)
 		{
-			if (locationTasks == null)
+			if (autoSubmitTasks == null)
 			{
-				locationTasks = new ArrayList<>();
+				autoSubmitTasks = new ArrayList<>();
 
 				for (QuestChapter chapter : ServerQuestFile.INSTANCE.chapters)
 				{
@@ -299,16 +301,16 @@ public class FTBQuestsEventHandler
 					{
 						for (QuestTask task : quest.tasks)
 						{
-							if (task instanceof LocationTask)
+							if (task.autoSubmitOnPlayerTick())
 							{
-								locationTasks.add((LocationTask) task);
+								autoSubmitTasks.add(task);
 							}
 						}
 					}
 				}
 			}
 
-			if (locationTasks.isEmpty())
+			if (autoSubmitTasks.isEmpty())
 			{
 				return;
 			}
@@ -320,11 +322,11 @@ public class FTBQuestsEventHandler
 				return;
 			}
 
-			for (LocationTask task : locationTasks)
+			for (QuestTask task : autoSubmitTasks)
 			{
 				QuestTaskData taskData = data.getQuestTaskData(task);
 
-				if (taskData.getProgress() == 0L && task.quest.canStartTasks(data))
+				if (taskData.getRelativeProgress() < 100 && task.quest.canStartTasks(data))
 				{
 					taskData.submitTask((EntityPlayerMP) event.player, Collections.emptyList(), false);
 				}

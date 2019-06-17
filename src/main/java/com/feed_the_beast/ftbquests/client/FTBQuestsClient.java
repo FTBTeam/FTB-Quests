@@ -7,6 +7,7 @@ import com.feed_the_beast.ftblib.lib.gui.misc.GuiEditConfig;
 import com.feed_the_beast.ftblib.lib.gui.misc.GuiEditConfigValue;
 import com.feed_the_beast.ftblib.lib.gui.misc.GuiSelectFluid;
 import com.feed_the_beast.ftblib.lib.gui.misc.GuiSelectItemStack;
+import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.FTBQuestsCommon;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
@@ -21,13 +22,11 @@ import com.feed_the_beast.ftbquests.quest.task.FluidTask;
 import com.feed_the_beast.ftbquests.quest.task.ItemTask;
 import com.feed_the_beast.ftbquests.quest.task.LocationTask;
 import com.latmod.mods.itemfilters.filters.NBTMatchingMode;
-import net.minecraft.advancements.Advancement;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.client.settings.KeyBinding;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityStructure;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraftforge.client.settings.KeyConflictContext;
@@ -37,11 +36,48 @@ import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.items.ItemHandlerHelper;
 import org.lwjgl.input.Keyboard;
 
-import javax.annotation.Nullable;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class FTBQuestsClient extends FTBQuestsCommon
 {
+	private static final Pattern I18N_PATTERN = Pattern.compile("\\{([a-zA-Z0-9\\._\\-]*?)\\}", Pattern.MULTILINE);
 	public static KeyBinding KEY_QUESTS;
+
+	public static String addI18nAndColors(String text)
+	{
+		if (text.isEmpty())
+		{
+			return text;
+		}
+
+		Matcher i18nMatcher = I18N_PATTERN.matcher(text);
+
+		while (i18nMatcher.find())
+		{
+			i18nMatcher.reset();
+
+			StringBuffer sb = new StringBuffer(text.length());
+
+			while (i18nMatcher.find())
+			{
+				i18nMatcher.appendReplacement(sb, I18n.format(i18nMatcher.group(1)));
+			}
+
+			i18nMatcher.appendTail(sb);
+			text = sb.toString();
+			i18nMatcher = I18N_PATTERN.matcher(text);
+		}
+
+		text = StringUtils.addFormatting(text.trim());
+
+		if (StringUtils.unformatted(text).isEmpty())
+		{
+			return "";
+		}
+
+		return text;
+	}
 
 	@Override
 	public void preInit()
@@ -115,7 +151,7 @@ public class FTBQuestsClient extends FTBQuestsCommon
 			}
 
 			ConfigGroup group = ConfigGroup.newGroup(FTBQuests.MOD_ID);
-			task.getConfig(task.createSubGroup(group));
+			task.getConfig(mc.player, task.createSubGroup(group));
 			new GuiEditConfig(group, (g1, sender) -> callback.accept(task)).openGui();
 		});
 	}
@@ -151,17 +187,5 @@ public class FTBQuestsClient extends FTBQuestsCommon
 				callback.accept(reward);
 			}
 		}).openGui());
-	}
-
-	@Override
-	@Nullable
-	public Advancement getAdvancement(@Nullable MinecraftServer server, String id)
-	{
-		if (server == null && !id.isEmpty() && Minecraft.getMinecraft().player != null)
-		{
-			return Minecraft.getMinecraft().player.connection.getAdvancementManager().getAdvancementList().getAdvancement(new ResourceLocation(id));
-		}
-
-		return super.getAdvancement(server, id);
 	}
 }

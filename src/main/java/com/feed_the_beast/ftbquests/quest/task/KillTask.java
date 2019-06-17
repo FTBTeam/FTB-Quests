@@ -8,8 +8,10 @@ import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.util.misc.NameMap;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
@@ -17,7 +19,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.stats.StatBase;
 import net.minecraft.stats.StatList;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.fml.common.registry.EntityEntry;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
@@ -98,9 +99,9 @@ public class KillTask extends QuestTask
 	}
 
 	@Override
-	public void getConfig(ConfigGroup config)
+	public void getConfig(EntityPlayer player, ConfigGroup config)
 	{
-		super.getConfig(config);
+		super.getConfig(player, config);
 		List<ResourceLocation> ids = new ArrayList<>();
 
 		for (EntityEntry entry : ForgeRegistries.ENTITIES)
@@ -116,9 +117,9 @@ public class KillTask extends QuestTask
 	}
 
 	@Override
-	public ITextComponent getAltDisplayName()
+	public String getAltTitle()
 	{
-		return new TextComponentTranslation("ftbquests.task.ftbquests.kill.title", getMaxProgressString(), new TextComponentTranslation("entity." + EntityList.getTranslationName(entity) + ".name"));
+		return I18n.format("ftbquests.task.ftbquests.kill.title", getMaxProgressString(), I18n.format("entity." + EntityList.getTranslationName(entity) + ".name"));
 	}
 
 	@Override

@@ -38,7 +38,7 @@ public class ButtonAddReward extends Button
 
 		for (QuestRewardType type : QuestRewardType.getRegistry())
 		{
-			contextMenu.add(new ContextMenuItem(type.getDisplayName().getFormattedText(), type.getIcon(), () -> {
+			contextMenu.add(new ContextMenuItem(type.getDisplayName(), type.getIcon(), () -> {
 				GuiHelper.playClickSound();
 				type.getGuiProvider().openCreationGui(this, quest, reward -> {
 					NBTTagCompound extra = new NBTTagCompound();

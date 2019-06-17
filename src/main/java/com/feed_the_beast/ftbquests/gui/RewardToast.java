@@ -7,12 +7,12 @@ import net.minecraft.client.resources.I18n;
 /**
  * @author LatvianModder
  */
-public class ToastReward extends SimpleToast
+public class RewardToast extends SimpleToast
 {
 	private String text;
 	private Icon icon;
 
-	public ToastReward(String t, Icon i)
+	public RewardToast(String t, Icon i)
 	{
 		text = t;
 		icon = i;

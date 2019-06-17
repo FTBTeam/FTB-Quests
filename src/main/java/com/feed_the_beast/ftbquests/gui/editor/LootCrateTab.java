@@ -1,21 +1,13 @@
 package com.feed_the_beast.ftbquests.gui.editor;
 
-import com.feed_the_beast.ftbquests.net.edit.MessageEditObjectDirect;
-import com.feed_the_beast.ftbquests.quest.loot.RewardTable;
-
-import javax.swing.*;
-import java.awt.*;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
-
 /**
  * @author LatvianModder
  */
-public class LootCrateTab extends Tab
+public class LootCrateTab
 {
-	public LootCrateTab(EditorFrame e)
+	/*
+	public LootCrateTab(Editor e)
 	{
-		super(e);
 		JPanel mainPanel = new JPanel();
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 
@@ -48,24 +40,24 @@ public class LootCrateTab extends Tab
 		{
 			if (table.lootCrate != null)
 			{
-				JButton button = new JButton(table.getDisplayName().getUnformattedText());
+				JButton button = new JButton(table.getUnformattedTitle());
 				button.setToolTipText(table.lootCrate.stringID + " | " + table.getCodeString());
 				button.addActionListener(e1 -> new LootCrateDialog(editor, table.lootCrate).setVisible(true));
 				dropPanel.add(button);
 
 				dropPanel.add(textField(table.lootCrate.drops.passive, IntVerifier.NON_NEGATIVE, s -> {
 					table.lootCrate.drops.passive = Integer.parseInt(s);
-					EditorFrame.scheduleObjectEdit(table);
+					Editor.scheduleObjectEdit(table);
 				}));
 
 				dropPanel.add(textField(table.lootCrate.drops.monster, IntVerifier.NON_NEGATIVE, s -> {
 					table.lootCrate.drops.monster = Integer.parseInt(s);
-					EditorFrame.scheduleObjectEdit(table);
+					Editor.scheduleObjectEdit(table);
 				}));
 
 				dropPanel.add(textField(table.lootCrate.drops.boss, IntVerifier.NON_NEGATIVE, s -> {
 					table.lootCrate.drops.boss = Integer.parseInt(s);
-					EditorFrame.scheduleObjectEdit(table);
+					Editor.scheduleObjectEdit(table);
 				}));
 			}
 		}
@@ -97,7 +89,7 @@ public class LootCrateTab extends Tab
 			}
 		});
 
-		EditorFrame.addChangeListener(textField, event -> {
+		Editor.addChangeListener(textField, event -> {
 			String txt = textField.getText();
 
 			if (verifier.test(txt))
@@ -108,4 +100,5 @@ public class LootCrateTab extends Tab
 
 		return textField;
 	}
+	*/
 }

@@ -402,10 +402,7 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 			}
 		}
 
-		if (reward.quest instanceof Quest)
-		{
-			reward.quest.checkRepeatableQuests(FTBQuestsTeamData.get(team), player.getUniqueID());
-		}
+		reward.quest.checkRepeatableQuests(FTBQuestsTeamData.get(team), player.getUniqueID());
 	}
 
 	@Override
@@ -444,17 +441,6 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 							iterator.remove();
 						}
 					}
-				}
-			}
-		}
-
-		for (ForgePlayer player : team.getMembers())
-		{
-			if (player.isOnline())
-			{
-				for (QuestReward reward : rewards)
-				{
-					//FIXME: new MessageResetProgress(reward.uid).sendTo(player.getPlayer());
 				}
 			}
 		}
@@ -565,7 +551,7 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 		{
 			for (String s : nbt1.getKeySet())
 			{
-				QuestTask task = ServerQuestFile.INSTANCE.getTask(ServerQuestFile.INSTANCE.getID(s));
+				QuestTask task = ServerQuestFile.INSTANCE.getTask(QuestFile.getID(s));
 
 				if (task != null)
 				{
@@ -593,7 +579,7 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 
 					for (String t : nbt3.getKeySet())
 					{
-						QuestTaskData data = taskData.get(ServerQuestFile.INSTANCE.getID(c + ':' + q + ':' + t));
+						QuestTaskData data = taskData.get(QuestFile.getID(c + ':' + q + ':' + t));
 
 						if (data != null)
 						{
@@ -643,7 +629,7 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 
 		for (String s : nbt1.getKeySet())
 		{
-			QuestVariable variable = ServerQuestFile.INSTANCE.getVariable(ServerQuestFile.INSTANCE.getID(s));
+			QuestVariable variable = ServerQuestFile.INSTANCE.getVariable(QuestFile.getID(s));
 
 			if (variable != null)
 			{

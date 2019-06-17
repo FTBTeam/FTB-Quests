@@ -61,7 +61,7 @@ public class PanelViewQuest extends Panel
 		setScrollX(0);
 		setScrollY(0);
 
-		title = GuiQuestTree.fixI18n(TextFormatting.GRAY, quest.getDisplayName().getFormattedText());
+		title = TextFormatting.GRAY + quest.getTitle();
 		icon = quest.getIcon();
 
 		int w = Math.max(200, gui.getTheme().getStringWidth(title) + 30);
@@ -189,30 +189,23 @@ public class PanelViewQuest extends Panel
 
 		panelText.setPosAndSize(3, 16 + h + 12, panelContent.width - 6, 0);
 
-		String desc = GuiQuestTree.fixI18n(TextFormatting.GRAY, quest.description);
+		String desc = quest.getDescription();
 
 		if (!desc.isEmpty())
 		{
-			panelText.add(new TextField(panelText).addFlags(Theme.CENTERED).setMaxWidth(panelText.width).setSpacing(9).setText(TextFormatting.ITALIC + desc));
+			panelText.add(new TextField(panelText).addFlags(Theme.CENTERED).setMaxWidth(panelText.width).setSpacing(9).setText(TextFormatting.ITALIC + TextFormatting.GRAY.toString() + desc));
 		}
 
 		boolean showText = !quest.hideTextUntilComplete || gui.file.self != null && quest.isComplete(gui.file.self);
 
-		if (showText && !quest.text.isEmpty())
+		if (showText && quest.getText().length > 0)
 		{
 			if (!desc.isEmpty())
 			{
 				panelText.add(new WidgetVerticalSpace(panelText, 7));
 			}
 
-			String[] text = new String[quest.text.size()];
-
-			for (int i = 0; i < text.length; i++)
-			{
-				text[i] = GuiQuestTree.fixI18n(null, quest.text.get(i));
-			}
-
-			panelText.add(new TextField(panelText).setMaxWidth(panelText.width).setSpacing(9).setText(StringUtils.addFormatting(StringJoiner.with('\n').joinStrings(text))));
+			panelText.add(new TextField(panelText).setMaxWidth(panelText.width).setSpacing(9).setText(StringUtils.addFormatting(StringJoiner.with('\n').joinStrings(quest.getText()))));
 		}
 
 		if (showText && !quest.guidePage.isEmpty())

@@ -6,13 +6,11 @@ import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 
 import java.util.Collection;
@@ -93,19 +91,17 @@ public class XPTask extends QuestTask implements ISingleLongValueTask
 	}
 
 	@Override
-	public void getConfig(ConfigGroup config)
+	public void getConfig(EntityPlayer player, ConfigGroup config)
 	{
-		super.getConfig(config);
+		super.getConfig(player, config);
 		config.addLong("value", () -> value, v -> value = v, 1L, 1L, Long.MAX_VALUE);
 		config.addBool("points", () -> points, v -> points = v, false);
 	}
 
 	@Override
-	public ITextComponent getAltDisplayName()
+	public String getAltTitle()
 	{
-		ITextComponent text = new TextComponentString(getMaxProgressString());
-		text.getStyle().setColor(TextFormatting.RED);
-		return new TextComponentTranslation("ftbquests.reward.ftbquests.xp_levels").appendText(": ").appendSibling(text);
+		return I18n.format("ftbquests.reward.ftbquests.xp_levels") + ": " + TextFormatting.RED + getMaxProgressString();
 	}
 
 	@Override

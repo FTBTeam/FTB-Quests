@@ -3,16 +3,15 @@ package com.feed_the_beast.ftbquests.quest.task;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
-import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftblib.lib.util.misc.NameMap;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.stats.StatBase;
 import net.minecraft.stats.StatList;
-import net.minecraft.util.text.ITextComponent;
 
 import java.util.Collection;
 
@@ -93,17 +92,17 @@ public class StatTask extends QuestTask
 	}
 
 	@Override
-	public void getConfig(ConfigGroup config)
+	public void getConfig(EntityPlayer player, ConfigGroup config)
 	{
-		super.getConfig(config);
+		super.getConfig(player, config);
 		config.addEnum("stat", () -> stat, v -> stat = v, NameMap.create(StatList.MOB_KILLS, NameMap.ObjectProperties.withName((sender, s) -> s.getStatName()), StatList.BASIC_STATS.toArray(new StatBase[0])));
 		config.addInt("value", () -> value, v -> value = v, 1, 1, Integer.MAX_VALUE);
 	}
 
 	@Override
-	public ITextComponent getAltDisplayName()
+	public String getAltTitle()
 	{
-		return StringUtils.color(stat.getStatName(), null);
+		return stat.getStatName().getUnformattedText();
 	}
 
 	@Override

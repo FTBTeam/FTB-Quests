@@ -2,7 +2,6 @@ package com.feed_the_beast.ftbquests.quest;
 
 import it.unimi.dsi.fastutil.shorts.Short2IntOpenHashMap;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.util.text.ITextComponent;
 
 import java.util.List;
 
@@ -71,7 +70,7 @@ public abstract class QuestObject extends QuestObjectBase
 	}
 
 	@Override
-	public abstract ITextComponent getAltDisplayName();
+	public abstract String getAltTitle();
 
 	@Override
 	public void clearCachedData()

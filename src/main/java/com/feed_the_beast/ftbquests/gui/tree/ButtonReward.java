@@ -30,7 +30,7 @@ public class ButtonReward extends Button
 
 	public ButtonReward(Panel panel, QuestReward r)
 	{
-		super(panel, r.getDisplayName().getFormattedText(), r.getIcon());
+		super(panel, r.getTitle(), r.getIcon());
 		treeGui = (GuiQuestTree) panel.getGui();
 		reward = r;
 		setSize(18, 18);

@@ -21,7 +21,7 @@ public class ButtonChapter extends ButtonTab
 
 	public ButtonChapter(Panel panel, QuestChapter c)
 	{
-		super(panel, GuiQuestTree.fixI18n(null, c.getDisplayName().getFormattedText()), c.getIcon());
+		super(panel, c.getTitle(), c.getIcon());
 		chapter = c;
 	}
 

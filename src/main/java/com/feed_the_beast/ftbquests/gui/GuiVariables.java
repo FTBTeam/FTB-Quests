@@ -59,7 +59,7 @@ public class GuiVariables extends GuiButtonListBase
 
 		for (QuestVariable variable : ClientQuestFile.INSTANCE.variables)
 		{
-			button = new SimpleTextButton(panel, variable.getDisplayName().getFormattedText(), variable.getIcon())
+			button = new SimpleTextButton(panel, variable.getTitle(), variable.getIcon())
 			{
 				@Override
 				public void onClicked(MouseButton button)

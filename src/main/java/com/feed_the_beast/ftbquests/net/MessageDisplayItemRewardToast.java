@@ -8,7 +8,7 @@ import com.feed_the_beast.ftblib.lib.net.MessageToClient;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.gui.IRewardListenerGui;
 import com.feed_the_beast.ftbquests.gui.RewardKey;
-import com.feed_the_beast.ftbquests.gui.ToastReward;
+import com.feed_the_beast.ftbquests.gui.RewardToast;
 import net.minecraft.client.Minecraft;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.relauncher.Side;
@@ -65,7 +65,7 @@ public class MessageDisplayItemRewardToast extends MessageToClient
 				s = stack.getCount() + "x " + s;
 			}
 
-			Minecraft.getMinecraft().getToastGui().add(new ToastReward(stack.getRarity().color + s, icon));
+			Minecraft.getMinecraft().getToastGui().add(new RewardToast(stack.getRarity().color + s, icon));
 		}
 	}
 }
