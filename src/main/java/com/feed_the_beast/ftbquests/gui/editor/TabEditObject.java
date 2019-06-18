@@ -17,7 +17,7 @@ public class TabEditObject extends Tab
 		object = o;
 		setText(object.getUnformattedTitle());
 		setTooltip(new Tooltip(object.toString()));
-		setContent(new ScrollPane(object.createTabContent()));
+		setContent(new ScrollPane(object.createTabContent().get()));
 		Editor.loadIcon(this, object.getIcon());
 	}
 }

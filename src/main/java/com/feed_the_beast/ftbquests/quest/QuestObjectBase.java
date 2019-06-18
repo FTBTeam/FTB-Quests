@@ -19,11 +19,10 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
 import java.io.File;
+import java.util.Optional;
 
 /**
  * @author LatvianModder
@@ -221,9 +220,8 @@ public abstract class QuestObjectBase
 		return 0;
 	}
 
-	@SideOnly(Side.CLIENT)
-	public Node createTabContent()
+	public Optional<Node> createTabContent()
 	{
-		return new ConfigPane(this);
+		return Optional.of(new ConfigPane(this));
 	}
 }
