@@ -201,8 +201,8 @@ public class FTBQuestsEventHandler
 
 	// Game Events //
 
-	private static List<KillTask> killTasks = null;
-	private static List<QuestTask> autoSubmitTasks = null;
+	private static KillTask[] killTasks = null;
+	private static QuestTask[] autoSubmitTasks = null;
 
 	@SubscribeEvent
 	public static void onFileCacheClear(ClearFileCacheEvent event)
@@ -243,7 +243,7 @@ public class FTBQuestsEventHandler
 		{
 			if (killTasks == null)
 			{
-				killTasks = new ArrayList<>();
+				List<KillTask> tasks = new ArrayList<>();
 
 				for (QuestChapter chapter : ServerQuestFile.INSTANCE.chapters)
 				{
@@ -253,14 +253,16 @@ public class FTBQuestsEventHandler
 						{
 							if (task instanceof KillTask)
 							{
-								killTasks.add((KillTask) task);
+								tasks.add((KillTask) task);
 							}
 						}
 					}
 				}
+
+				killTasks = tasks.toArray(new KillTask[0]);
 			}
 
-			if (killTasks.isEmpty())
+			if (killTasks.length == 0)
 			{
 				return;
 			}
@@ -293,7 +295,7 @@ public class FTBQuestsEventHandler
 		{
 			if (autoSubmitTasks == null)
 			{
-				autoSubmitTasks = new ArrayList<>();
+				List<QuestTask> tasks = new ArrayList<>();
 
 				for (QuestChapter chapter : ServerQuestFile.INSTANCE.chapters)
 				{
@@ -303,14 +305,16 @@ public class FTBQuestsEventHandler
 						{
 							if (task.autoSubmitOnPlayerTick())
 							{
-								autoSubmitTasks.add(task);
+								tasks.add(task);
 							}
 						}
 					}
 				}
+
+				autoSubmitTasks = tasks.toArray(new QuestTask[0]);
 			}
 
-			if (autoSubmitTasks.isEmpty())
+			if (autoSubmitTasks.length == 0)
 			{
 				return;
 			}

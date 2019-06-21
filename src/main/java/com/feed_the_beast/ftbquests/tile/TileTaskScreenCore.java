@@ -11,7 +11,6 @@ import com.feed_the_beast.ftblib.lib.util.BlockUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.block.BlockTaskScreen;
 import com.feed_the_beast.ftbquests.block.FTBQuestsBlocks;
-import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
@@ -43,7 +42,6 @@ import java.util.Collections;
 public class TileTaskScreenCore extends TileWithTeam implements IConfigCallback, ITaskScreen
 {
 	public EnumFacing facing;
-	public int quest = 0;
 	public int task = 0;
 	public int size = 0;
 	public IBlockState skin = BlockUtils.AIR_STATE;
@@ -69,13 +67,7 @@ public class TileTaskScreenCore extends TileWithTeam implements IConfigCallback,
 
 		if (cTask != null)
 		{
-			quest = cTask.quest.id;
 			task = cTask.id;
-		}
-
-		if (quest != 0)
-		{
-			nbt.setInteger("Quest", quest);
 		}
 
 		if (task != 0)
@@ -114,7 +106,6 @@ public class TileTaskScreenCore extends TileWithTeam implements IConfigCallback,
 			facing = EnumFacing.byName(nbt.getString("Facing"));
 		}
 
-		quest = nbt.getInteger("Quest");
 		task = nbt.getInteger("Task");
 		size = nbt.getByte("Size");
 		skin = BlockUtils.getStateFromName(nbt.getString("Skin"));
@@ -251,32 +242,14 @@ public class TileTaskScreenCore extends TileWithTeam implements IConfigCallback,
 	@Nullable
 	public QuestTask getTask()
 	{
-		if (quest == 0)
+		if (task == 0)
 		{
 			return null;
 		}
 		else if (cTask == null || cTask.invalid)
 		{
 			QuestFile file = FTBQuests.PROXY.getQuestFile(world);
-			Quest q = file.getQuest(quest);
-
-			if (q == null || q.tasks.isEmpty())
-			{
-				cTask = null;
-			}
-			else if (task == 0)
-			{
-				cTask = q.tasks.get(0);
-			}
-			else
-			{
-				cTask = file.getTask(task);
-
-				if (cTask != null)
-				{
-					quest = cTask.quest.id;
-				}
-			}
+			cTask = file == null ? null : file.getTask(task);
 		}
 
 		return cTask;
@@ -285,7 +258,7 @@ public class TileTaskScreenCore extends TileWithTeam implements IConfigCallback,
 	@Nullable
 	public QuestTaskData getTaskData()
 	{
-		if (quest == 0 || team.isEmpty())
+		if (task == 0 || team.isEmpty())
 		{
 			return null;
 		}
@@ -336,7 +309,6 @@ public class TileTaskScreenCore extends TileWithTeam implements IConfigCallback,
 
 				if (cTask != null)
 				{
-					quest = cTask.quest.id;
 					task = cTask.id;
 					currentCoreClass = cTask.getScreenCoreClass();
 					currentPartClass = cTask.getScreenPartClass();
@@ -365,7 +337,6 @@ public class TileTaskScreenCore extends TileWithTeam implements IConfigCallback,
 						if (v instanceof QuestTask)
 						{
 							cTask = (QuestTask) v;
-							quest = cTask.quest.id;
 							task = cTask.id;
 						}
 					}
