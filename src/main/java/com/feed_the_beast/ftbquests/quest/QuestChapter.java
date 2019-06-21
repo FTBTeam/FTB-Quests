@@ -172,6 +172,11 @@ public final class QuestChapter extends QuestObject
 		{
 			quest.changeProgress(data, type);
 		}
+
+		for (QuestChapter chapter : getChildren())
+		{
+			chapter.changeProgress(data, type);
+		}
 	}
 
 	@Override
@@ -299,10 +304,20 @@ public final class QuestChapter extends QuestObject
 		{
 			quest.clearCachedData();
 		}
+
+		for (QuestChapter chapter : getChildren())
+		{
+			chapter.clearCachedData();
+		}
 	}
 
 	public boolean hasChildren()
 	{
+		if (group != null)
+		{
+			return false;
+		}
+
 		for (QuestChapter chapter : file.chapters)
 		{
 			if (chapter.group == this)
@@ -317,6 +332,11 @@ public final class QuestChapter extends QuestObject
 	public List<QuestChapter> getChildren()
 	{
 		List<QuestChapter> list = Collections.emptyList();
+
+		if (group != null)
+		{
+			return list;
+		}
 
 		for (QuestChapter chapter : file.chapters)
 		{

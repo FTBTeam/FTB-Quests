@@ -112,6 +112,12 @@ public class DimensionTask extends QuestTask
 	}
 
 	@Override
+	public boolean autoSubmitOnPlayerTick()
+	{
+		return true;
+	}
+
+	@Override
 	public QuestTaskData createData(ITeamData data)
 	{
 		return new Data(this, data);
