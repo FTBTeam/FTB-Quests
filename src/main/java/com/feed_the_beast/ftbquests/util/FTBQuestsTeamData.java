@@ -364,11 +364,20 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 
 	public void claimReward(EntityPlayerMP player, QuestReward reward)
 	{
+		claimReward(player, reward, true);
+	}
+
+	public void claimReward(EntityPlayerMP player, QuestReward reward, boolean giveReward)
+	{
 		if (reward.isTeamReward())
 		{
 			if (claimedTeamRewards.add(reward.id))
 			{
-				reward.claim(player);
+				if (giveReward)
+				{
+					reward.claim(player);
+				}
+
 				team.markDirty();
 
 				for (ForgePlayer player1 : team.getMembers())
@@ -396,7 +405,11 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 					claimedPlayerRewards.put(player.getUniqueID(), set);
 				}
 
-				reward.claim(player);
+				if (giveReward)
+				{
+					reward.claim(player);
+				}
+
 				team.markDirty();
 				new MessageClaimRewardResponse(reward.id).sendTo(player);
 			}

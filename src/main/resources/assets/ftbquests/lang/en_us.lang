@@ -136,7 +136,6 @@ ftbquests.gui.requires=Requires
 ftbquests.gui.required_by=Required by
 ftbquests.gui.collect_rewards=Collect rewards: %s
 ftbquests.gui.times_completed=Times completed
-ftbquests.gui.subscribe=Like this mod? Consider supporting me on twitch.tv!
 ftbquests.gui.looping_dependencies=Looping dependencies!
 ftbquests.gui.open_in_guide=Click here to read more...
 ftbquests.gui.wiki=Open Wiki
