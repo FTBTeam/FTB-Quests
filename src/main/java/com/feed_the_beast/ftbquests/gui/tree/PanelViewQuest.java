@@ -71,28 +71,29 @@ public class PanelViewQuest extends Panel
 		panelContent.add(panelRewards = new BlankPanel(panelContent, "RewardsPanel"));
 		panelContent.add(panelText = new BlankPanel(panelContent, "TextPanel"));
 
-		if (!quest.tasks.isEmpty())
+		boolean canEdit = gui.file.canEdit();
+
+		for (QuestTask task : quest.tasks)
 		{
-			for (QuestTask task : quest.tasks)
-			{
-				panelTasks.add(new ButtonTask(panelTasks, task));
-			}
+			panelTasks.add(new ButtonTask(panelTasks, task));
 		}
-		else if (!gui.file.canEdit())
+
+		if (!canEdit && panelTasks.widgets.isEmpty())
 		{
 			TextFieldDisabledButton noTasks = new TextFieldDisabledButton(panelTasks, TextFormatting.GRAY + I18n.format("ftbquests.gui.no_tasks"));
 			noTasks.setSize(noTasks.width + 8, 18);
 			panelTasks.add(noTasks);
 		}
 
-		if (!quest.rewards.isEmpty())
+		for (QuestReward reward : quest.rewards)
 		{
-			for (QuestReward reward : quest.rewards)
+			if (!reward.invisible || canEdit)
 			{
 				panelRewards.add(new ButtonReward(panelRewards, reward));
 			}
 		}
-		else if (!gui.file.canEdit())
+
+		if (!canEdit && panelRewards.widgets.isEmpty())
 		{
 			TextFieldDisabledButton noRewards = new TextFieldDisabledButton(panelRewards, TextFormatting.GRAY + I18n.format("ftbquests.gui.no_rewards"));
 			noRewards.setSize(noRewards.width + 8, 18);

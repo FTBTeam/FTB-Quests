@@ -38,12 +38,14 @@ public abstract class QuestReward extends QuestObjectBase
 
 	public EnumTristate team;
 	public EnumTristate autoclaim;
+	public boolean invisible;
 
 	public QuestReward(Quest q)
 	{
 		quest = q;
 		team = EnumTristate.DEFAULT;
 		autoclaim = EnumTristate.DEFAULT;
+		invisible = false;
 	}
 
 	@Override
@@ -79,6 +81,11 @@ public abstract class QuestReward extends QuestObjectBase
 		super.writeData(nbt);
 		team.write(nbt, "team_reward");
 		autoclaim.write(nbt, "autoclaim");
+
+		if (invisible)
+		{
+			nbt.setBoolean("invisible", true);
+		}
 	}
 
 	@Override
@@ -87,6 +94,7 @@ public abstract class QuestReward extends QuestObjectBase
 		super.readData(nbt);
 		team = EnumTristate.read(nbt, "team_reward");
 		autoclaim = EnumTristate.read(nbt, "autoclaim");
+		invisible = nbt.getBoolean("invisible");
 	}
 
 	@Override
@@ -95,6 +103,7 @@ public abstract class QuestReward extends QuestObjectBase
 		super.writeNetData(data);
 		EnumTristate.NAME_MAP.write(data, team);
 		EnumTristate.NAME_MAP.write(data, autoclaim);
+		data.writeBoolean(invisible);
 	}
 
 	@Override
@@ -103,6 +112,7 @@ public abstract class QuestReward extends QuestObjectBase
 		super.readNetData(data);
 		team = EnumTristate.NAME_MAP.read(data);
 		autoclaim = EnumTristate.NAME_MAP.read(data);
+		invisible = data.readBoolean();
 	}
 
 	@Override
@@ -110,7 +120,8 @@ public abstract class QuestReward extends QuestObjectBase
 	{
 		super.getConfig(player, config);
 		config.addEnum("team", () -> team, v -> team = v, EnumTristate.NAME_MAP).setDisplayName(new TextComponentTranslation("ftbquests.reward.team_reward")).setCanEdit(!(quest instanceof Quest) || !quest.canRepeat);
-		config.addEnum("autoclaim", () -> autoclaim, v -> autoclaim = v, EnumTristate.NAME_MAP).setDisplayName(new TextComponentTranslation("ftbquests.reward.autoclaim"));
+		config.addEnum("autoclaim", () -> autoclaim, v -> autoclaim = v, EnumTristate.NAME_MAP).setDisplayName(new TextComponentTranslation("ftbquests.reward.autoclaim")).setCanEdit(!invisible);
+		config.addBool("invisible", () -> invisible, v -> invisible = v, false).setDisplayName(new TextComponentTranslation("ftbquests.reward.invisible"));
 	}
 
 	public abstract void claim(EntityPlayerMP player);
@@ -184,7 +195,7 @@ public abstract class QuestReward extends QuestObjectBase
 
 	public final boolean shouldAutoClaimReward()
 	{
-		return autoclaim.get(quest.chapter.alwaysInvisible || quest.chapter.file.defaultRewardAutoclaim);
+		return invisible || autoclaim.get(quest.chapter.alwaysInvisible || quest.chapter.file.defaultRewardAutoclaim);
 	}
 
 	@Override
