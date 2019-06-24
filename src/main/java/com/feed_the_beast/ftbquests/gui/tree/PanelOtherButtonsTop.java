@@ -3,6 +3,7 @@ package com.feed_the_beast.ftbquests.gui.tree;
 import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.gui.WidgetLayout;
 import net.minecraft.client.Minecraft;
+import net.minecraftforge.fml.common.Loader;
 
 /**
  * @author LatvianModder
@@ -22,6 +23,11 @@ public class PanelOtherButtonsTop extends PanelOtherButtons
 		if (r > 0)
 		{
 			add(new ButtonCollectRewards(this, r));
+		}
+
+		if (Loader.isModLoaded("ftbguides"))
+		{
+			add(new ButtonOpenGuides(this));
 		}
 
 		add(new ButtonWiki(this));
