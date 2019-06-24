@@ -8,6 +8,7 @@ public class FTBQuestsTasks
 	public static QuestTaskType ITEM;
 	public static QuestTaskType FLUID;
 	public static QuestTaskType FORGE_ENERGY;
+	public static QuestTaskType CUSTOM;
 	public static QuestTaskType XP;
 	public static QuestTaskType DIMENSION;
 	public static QuestTaskType STAT;

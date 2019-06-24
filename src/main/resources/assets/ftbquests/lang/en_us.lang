@@ -176,6 +176,8 @@ ftbquests.task.ftbquests.forge_energy=Forge Energy
 ftbquests.task.ftbquests.forge_energy.value=FE / RF
 ftbquests.task.ftbquests.forge_energy.text=%d FE
 
+ftbquests.task.ftbquests.custom=Custom
+
 ftbquests.task.ftbquests.xp=XP Levels
 ftbquests.task.ftbquests.xp.value=XP
 ftbquests.task.ftbquests.xp.points=Points
@@ -226,6 +228,7 @@ ftbquests.rewards=Rewards
 ftbquests.reward.team_reward=Team Reward
 ftbquests.reward.emergency=Emergency Item
 ftbquests.reward.autoclaim=Auto-claim
+ftbquests.reward.hidden=Hidden
 ftbquests.reward.claim_all=Claim All Rewards
 ftbquests.reward.collected=Reward Collected!
 ftbquests.reward.random_bonus=Random Bonus

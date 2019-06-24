@@ -492,25 +492,28 @@ public class GuiQuestTree extends GuiBase
 	{
 		GuiHelper.drawHollowRect(x, y, w, h, borderColor, false);
 
-		for (Widget widget : questPanel.widgets)
+		if (file.canEdit())
 		{
-			if (widget.isMouseOver())
+			for (Widget widget : questPanel.widgets)
 			{
-				if (widget instanceof ButtonQuest)
+				if (widget.isMouseOver())
 				{
-					theme.pushFontUnicode(true);
-					theme.drawString("X: " + ((ButtonQuest) widget).quest.x, x + 22, y + h - 18);
-					theme.drawString("Y: " + ((ButtonQuest) widget).quest.y, x + 22, y + h - 10);
-					theme.popFontUnicode();
-					break;
-				}
-				else if (widget instanceof ButtonDummyQuest)
-				{
-					theme.pushFontUnicode(true);
-					theme.drawString("X: " + ((ButtonDummyQuest) widget).x, x + 22, y + h - 18);
-					theme.drawString("Y: " + ((ButtonDummyQuest) widget).y, x + 22, y + h - 10);
-					theme.popFontUnicode();
-					break;
+					if (widget instanceof ButtonQuest)
+					{
+						theme.pushFontUnicode(true);
+						theme.drawString("X: " + ((ButtonQuest) widget).quest.x, x + 22, y + h - 18);
+						theme.drawString("Y: " + ((ButtonQuest) widget).quest.y, x + 22, y + h - 10);
+						theme.popFontUnicode();
+						break;
+					}
+					else if (widget instanceof ButtonDummyQuest)
+					{
+						theme.pushFontUnicode(true);
+						theme.drawString("X: " + ((ButtonDummyQuest) widget).x, x + 22, y + h - 18);
+						theme.drawString("Y: " + ((ButtonDummyQuest) widget).y, x + 22, y + h - 10);
+						theme.popFontUnicode();
+						break;
+					}
 				}
 			}
 		}
