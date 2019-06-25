@@ -47,7 +47,6 @@ public class FTBQuestsWorldData implements IConfigCallback
 		ServerQuestFile.INSTANCE.load();
 
 		int c = ServerQuestFile.INSTANCE.chapters.size();
-		int v = ServerQuestFile.INSTANCE.variables.size();
 		int q = 0;
 		int t = 0;
 		int r = 0;
@@ -63,7 +62,7 @@ public class FTBQuestsWorldData implements IConfigCallback
 			}
 		}
 
-		FTBQuests.LOGGER.info(String.format("Loaded %d chapters, %d quests, %d tasks, %d rewards and %d variables. In total, %d objects", c, q, t, r, v, c + q + t + r + v));
+		FTBQuests.LOGGER.info(String.format("Loaded %d chapters, %d quests, %d tasks and %d rewards. In total, %d objects", c, q, t, r, ServerQuestFile.INSTANCE.getAllObjects().size()));
 
 		NBTTagCompound nbt = event.getData(FTBQuests.MOD_ID);
 		INSTANCE.extraFiles.clear();

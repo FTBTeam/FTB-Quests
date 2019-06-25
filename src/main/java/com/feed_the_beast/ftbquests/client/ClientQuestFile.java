@@ -3,7 +3,6 @@ package com.feed_the_beast.ftbquests.client;
 import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftblib.lib.gui.GuiBase;
 import com.feed_the_beast.ftblib.net.MessageMyTeamGui;
-import com.feed_the_beast.ftbquests.gui.GuiVariables;
 import com.feed_the_beast.ftbquests.gui.tree.GuiQuestTree;
 import com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIHelper;
 import com.feed_the_beast.ftbquests.net.MessageSyncQuests;
@@ -87,11 +86,6 @@ public class ClientQuestFile extends QuestFile
 				}
 			}
 
-			for (int i = 0; i < team.variableKeys.length; i++)
-			{
-				data.variables.put(team.variableKeys[i], team.variableValues[i]);
-			}
-
 			teamData.put(data.getTeamUID(), data);
 		}
 
@@ -161,13 +155,6 @@ public class ClientQuestFile extends QuestFile
 		}
 
 		questTreeGui.refreshWidgets();
-
-		GuiVariables guiVariables = ClientUtils.getCurrentGuiAs(GuiVariables.class);
-
-		if (guiVariables != null)
-		{
-			guiVariables.refreshWidgets();
-		}
 
 		if (hasPrev)
 		{

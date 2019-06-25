@@ -54,7 +54,6 @@ public abstract class QuestFile extends QuestObject
 	public static final int VERSION = 5;
 
 	public final List<QuestChapter> chapters;
-	public final List<QuestVariable> variables;
 	public final List<RewardTable> rewardTables;
 
 	private final Int2ObjectOpenHashMap<QuestObjectBase> map;
@@ -76,7 +75,6 @@ public abstract class QuestFile extends QuestObject
 		id = 1;
 		fileVersion = 0;
 		chapters = new ArrayList<>();
-		variables = new ArrayList<>();
 		rewardTables = new ArrayList<>();
 
 		map = new Int2ObjectOpenHashMap<>();
@@ -173,14 +171,6 @@ public abstract class QuestFile extends QuestObject
 
 		chapters.clear();
 
-		for (QuestVariable variable : variables)
-		{
-			variable.deleteChildren();
-			variable.invalid = true;
-		}
-
-		variables.clear();
-
 		for (RewardTable table : rewardTables)
 		{
 			table.deleteChildren();
@@ -263,13 +253,6 @@ public abstract class QuestFile extends QuestObject
 	}
 
 	@Nullable
-	public QuestVariable getVariable(int id)
-	{
-		QuestObjectBase object = getBase(id);
-		return object instanceof QuestVariable ? (QuestVariable) object : null;
-	}
-
-	@Nullable
 	public QuestReward getReward(int id)
 	{
 		QuestObjectBase object = getBase(id);
@@ -338,11 +321,6 @@ public abstract class QuestFile extends QuestObject
 			}
 		}
 
-		for (QuestVariable variable : variables)
-		{
-			map.put(variable.id, variable);
-		}
-
 		clearCachedData();
 	}
 
@@ -381,8 +359,6 @@ public abstract class QuestFile extends QuestObject
 
 				throw new IllegalArgumentException("Parent quest not found!");
 			}
-			case VARIABLE:
-				return new QuestVariable(this);
 			case REWARD:
 				Quest quest = getQuest(parent);
 
@@ -498,7 +474,6 @@ public abstract class QuestFile extends QuestObject
 		NBTUtils.writeNBTSafe(new File(folder, "file.nbt"), out);
 
 		NBTUtils.writeNBTSafe(new File(folder, "chapters/index.nbt"), createIndex(chapters));
-		NBTUtils.writeNBTSafe(new File(folder, "variables/index.nbt"), createIndex(variables));
 		NBTUtils.writeNBTSafe(new File(folder, "reward_tables/index.nbt"), createIndex(rewardTables));
 
 		for (QuestChapter chapter : chapters)
@@ -565,13 +540,6 @@ public abstract class QuestFile extends QuestObject
 			}
 		}
 
-		for (QuestVariable variable : variables)
-		{
-			out = new NBTTagCompound();
-			variable.writeData(out);
-			NBTUtils.writeNBTSafe(new File(folder, "variables/" + variable.getCodeString() + ".nbt"), out);
-		}
-
 		for (RewardTable table : rewardTables)
 		{
 			out = new NBTTagCompound();
@@ -586,7 +554,6 @@ public abstract class QuestFile extends QuestObject
 		readData(nbt);
 
 		chapters.clear();
-		variables.clear();
 		rewardTables.clear();
 
 		Int2ObjectOpenHashMap<NBTTagCompound> objectDataCache = new Int2ObjectOpenHashMap<>();
@@ -674,17 +641,6 @@ public abstract class QuestFile extends QuestObject
 			}
 		}
 
-		NBTTagList v = nbt.getTagList("variables", Constants.NBT.TAG_COMPOUND);
-
-		for (int i = 0; i < v.tagCount(); i++)
-		{
-			QuestVariable variable = new QuestVariable(this);
-			NBTTagCompound nbt1 = v.getCompoundTagAt(i);
-			variable.id = nbt1.getInteger("uid");
-			objectDataCache.put(variable.id, nbt1);
-			variables.add(variable);
-		}
-
 		refreshIDMap();
 
 		NBTTagCompound nbt1;
@@ -729,16 +685,6 @@ public abstract class QuestFile extends QuestObject
 			}
 		}
 
-		for (QuestVariable variable : variables)
-		{
-			nbt1 = objectDataCache.get(variable.id);
-
-			if (nbt1 != null)
-			{
-				variable.readData(nbt1);
-			}
-		}
-
 		for (RewardTable table : rewardTables)
 		{
 			nbt1 = objectDataCache.get(table.id);
@@ -769,7 +715,6 @@ public abstract class QuestFile extends QuestObject
 		}
 
 		chapters.clear();
-		variables.clear();
 		rewardTables.clear();
 
 		Int2ObjectOpenHashMap<NBTTagCompound> questFileCache = new Int2ObjectOpenHashMap<>();
@@ -838,13 +783,6 @@ public abstract class QuestFile extends QuestObject
 			}
 		}
 
-		for (int i : readIndex(new File(folder, "variables/index.nbt")))
-		{
-			QuestVariable variable = new QuestVariable(this);
-			variable.id = i;
-			variables.add(variable);
-		}
-
 		for (int i : readIndex(new File(folder, "reward_tables/index.nbt")))
 		{
 			RewardTable table = new RewardTable(this);
@@ -899,16 +837,6 @@ public abstract class QuestFile extends QuestObject
 						reward.readData(rt);
 					}
 				}
-			}
-		}
-
-		for (QuestVariable variable : variables)
-		{
-			nbt = NBTUtils.readNBT(new File(folder, "variables/" + variable.getCodeString() + ".nbt"));
-
-			if (nbt != null)
-			{
-				variable.readData(nbt);
 			}
 		}
 
@@ -1005,13 +933,6 @@ public abstract class QuestFile extends QuestObject
 			}
 		}
 
-		data.writeVarInt(variables.size());
-
-		for (QuestVariable variable : variables)
-		{
-			data.writeInt(variable.id);
-		}
-
 		for (RewardTable table : rewardTables)
 		{
 			table.writeNetData(data);
@@ -1037,11 +958,6 @@ public abstract class QuestFile extends QuestObject
 			}
 		}
 
-		for (QuestVariable variable : variables)
-		{
-			variable.writeNetData(data);
-		}
-
 		if (FTBLibConfig.debugging.print_more_info)
 		{
 			FTBQuests.LOGGER.info("Wrote " + (data.getPosition() - pos) + " bytes");
@@ -1054,7 +970,6 @@ public abstract class QuestFile extends QuestObject
 		readNetData(data);
 
 		chapters.clear();
-		variables.clear();
 		rewardTables.clear();
 
 		int rtl = data.readVarInt();
@@ -1107,15 +1022,6 @@ public abstract class QuestFile extends QuestObject
 			}
 		}
 
-		int v = data.readVarInt();
-
-		for (int i = 0; i < v; i++)
-		{
-			QuestVariable variable = new QuestVariable(this);
-			variable.id = data.readInt();
-			variables.add(variable);
-		}
-
 		refreshIDMap();
 
 		for (RewardTable table : rewardTables)
@@ -1141,11 +1047,6 @@ public abstract class QuestFile extends QuestObject
 					reward.readNetData(data);
 				}
 			}
-		}
-
-		for (QuestVariable variable : variables)
-		{
-			variable.readNetData(data);
 		}
 
 		if (FTBLibConfig.debugging.print_more_info)
@@ -1338,11 +1239,6 @@ public abstract class QuestFile extends QuestObject
 					task.clearCachedProgress(id);
 				}
 			}
-		}
-
-		for (QuestVariable variable : variables)
-		{
-			variable.clearCachedProgress(id);
 		}
 	}
 

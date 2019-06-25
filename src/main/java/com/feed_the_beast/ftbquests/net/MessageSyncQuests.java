@@ -32,14 +32,6 @@ public class MessageSyncQuests extends MessageToClient
 				data.writeInt(t.taskKeys[i]);
 				data.writeNBTBase(t.taskValues[i]);
 			}
-
-			data.writeVarInt(t.variableKeys.length);
-
-			for (int i = 0; i < t.variableKeys.length; i++)
-			{
-				data.writeInt(t.variableKeys[i]);
-				data.writeVarLong(t.variableValues[i]);
-			}
 		};
 
 		public static final DataIn.Deserializer<TeamInst> DESERIALIZER = data -> {
@@ -56,15 +48,6 @@ public class MessageSyncQuests extends MessageToClient
 				t.taskValues[i] = data.readNBTBase();
 			}
 
-			t.variableKeys = new int[data.readVarInt()];
-			t.variableValues = new long[t.variableKeys.length];
-
-			for (int i = 0; i < t.variableKeys.length; i++)
-			{
-				t.variableKeys[i] = data.readInt();
-				t.variableValues[i] = data.readVarLong();
-			}
-
 			return t;
 		};
 
@@ -73,8 +56,6 @@ public class MessageSyncQuests extends MessageToClient
 		public ITextComponent name;
 		public int[] taskKeys;
 		public NBTBase[] taskValues;
-		public int[] variableKeys;
-		public long[] variableValues;
 	}
 
 	public QuestFile file;
