@@ -5,8 +5,8 @@ import com.feed_the_beast.ftblib.lib.data.ForgeTeam;
 import com.feed_the_beast.ftblib.lib.data.Universe;
 import com.feed_the_beast.ftblib.lib.util.SidedUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
-import com.feed_the_beast.ftbquests.net.edit.MessageChangeProgressResponse;
 import com.feed_the_beast.ftbquests.quest.EnumChangeProgress;
+import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.util.FTBQuestsTeamData;
@@ -80,7 +80,7 @@ public class CommandChangeProgress extends CommandFTBQuestsBase
 			teams = Collections.singleton(team);
 		}
 
-		QuestObject object = args.length == 2 ? ServerQuestFile.INSTANCE : ServerQuestFile.INSTANCE.get(ServerQuestFile.INSTANCE.getID(args[2]));
+		QuestObject object = args.length == 2 ? ServerQuestFile.INSTANCE : ServerQuestFile.INSTANCE.get(QuestFile.getID(args[2]));
 
 		if (object == null)
 		{
@@ -89,10 +89,7 @@ public class CommandChangeProgress extends CommandFTBQuestsBase
 
 		for (ForgeTeam team : teams)
 		{
-			EnumChangeProgress.sendUpdates = false;
-			object.changeProgress(FTBQuestsTeamData.get(team), type);
-			EnumChangeProgress.sendUpdates = true;
-			new MessageChangeProgressResponse(team.getUID(), object.id, type).sendToAll();
+			object.forceProgress(FTBQuestsTeamData.get(team), type, true);
 		}
 
 		sender.sendMessage(new TextComponentTranslation("commands.ftbquests.change_progress.text"));

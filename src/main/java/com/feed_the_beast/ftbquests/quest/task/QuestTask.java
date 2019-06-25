@@ -82,10 +82,7 @@ public abstract class QuestTask extends QuestObject
 
 		if (quest.tasks.size() > 1 && !questComplete)
 		{
-			for (EntityPlayerMP player : notifyPlayers)
-			{
-				new MessageDisplayCompletionToast(id).sendTo(player);
-			}
+			new MessageDisplayCompletionToast(id).sendTo(notifyPlayers);
 		}
 
 		if (questComplete)

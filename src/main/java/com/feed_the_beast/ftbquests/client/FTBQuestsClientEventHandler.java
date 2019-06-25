@@ -45,6 +45,7 @@ public class FTBQuestsClientEventHandler
 	{
 		addModel(FTBQuestsItems.SCREEN, "facing=north");
 		addModel(FTBQuestsItems.PROGRESS_DETECTOR, "normal");
+		addModel(FTBQuestsItems.CUSTOM_TRIGGER, "normal");
 		addModel(FTBQuestsItems.PROGRESS_SCREEN, "facing=north");
 		addModel(FTBQuestsItems.CHEST, "facing=north");
 		addModel(FTBQuestsItems.LOOT_CRATE_STORAGE, "normal");

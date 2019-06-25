@@ -19,16 +19,18 @@ public class MessageChangeProgressResponse extends MessageToClient
 	private short team;
 	private int id;
 	private EnumChangeProgress type;
+	private boolean notifications;
 
 	public MessageChangeProgressResponse()
 	{
 	}
 
-	public MessageChangeProgressResponse(short t, int i, EnumChangeProgress ty)
+	public MessageChangeProgressResponse(short t, int i, EnumChangeProgress ty, boolean n)
 	{
 		team = t;
 		id = i;
 		type = ty;
+		notifications = n;
 	}
 
 	@Override
@@ -43,6 +45,7 @@ public class MessageChangeProgressResponse extends MessageToClient
 		data.writeShort(team);
 		data.writeInt(id);
 		data.write(type, EnumChangeProgress.NAME_MAP);
+		data.writeBoolean(notifications);
 	}
 
 	@Override
@@ -51,6 +54,7 @@ public class MessageChangeProgressResponse extends MessageToClient
 		team = data.readShort();
 		id = data.readInt();
 		type = EnumChangeProgress.NAME_MAP.read(data);
+		notifications = data.readBoolean();
 	}
 
 	@Override
@@ -65,9 +69,7 @@ public class MessageChangeProgressResponse extends MessageToClient
 
 			if (t != null)
 			{
-				EnumChangeProgress.sendUpdates = false;
-				object.changeProgress(t, type);
-				EnumChangeProgress.sendUpdates = true;
+				object.forceProgress(t, type, notifications);
 			}
 		}
 	}

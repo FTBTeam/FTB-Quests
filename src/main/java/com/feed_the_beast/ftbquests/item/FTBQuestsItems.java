@@ -13,6 +13,7 @@ public class FTBQuestsItems
 {
 	public static final Item SCREEN = Items.AIR;
 	public static final Item PROGRESS_DETECTOR = Items.AIR;
+	public static final Item CUSTOM_TRIGGER = Items.AIR;
 	public static final Item PROGRESS_SCREEN = Items.AIR;
 	public static final Item CHEST = Items.AIR;
 	public static final Item LOOT_CRATE_STORAGE = Items.AIR;
