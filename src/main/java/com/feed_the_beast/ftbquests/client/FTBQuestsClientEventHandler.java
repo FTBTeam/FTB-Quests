@@ -3,11 +3,15 @@ package com.feed_the_beast.ftbquests.client;
 import com.feed_the_beast.ftblib.events.SidebarButtonCreatedEvent;
 import com.feed_the_beast.ftblib.events.client.CustomClickEvent;
 import com.feed_the_beast.ftbquests.FTBQuests;
+import com.feed_the_beast.ftbquests.events.ClearFileCacheEvent;
 import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.item.ItemLootCrate;
+import com.feed_the_beast.ftbquests.net.MessageSubmitTask;
 import com.feed_the_beast.ftbquests.quest.loot.LootCrate;
+import com.feed_the_beast.ftbquests.quest.task.ObservationTask;
 import com.feed_the_beast.ftbquests.tile.TileProgressScreenCore;
 import com.feed_the_beast.ftbquests.tile.TileTaskScreenCore;
+import com.feed_the_beast.ftbquests.util.BlockMatcher;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -23,7 +27,10 @@ import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.relauncher.Side;
+
+import java.util.List;
 
 /**
  * @author LatvianModder
@@ -34,6 +41,7 @@ public class FTBQuestsClientEventHandler
 	private static final ResourceLocation QUESTS_BUTTON = new ResourceLocation(FTBQuests.MOD_ID, "quests");
 
 	public static TextureAtlasSprite inputBlockSprite;
+	private static List<ObservationTask> observationTasks = null;
 
 	private static void addModel(Item item, String variant)
 	{
@@ -102,6 +110,12 @@ public class FTBQuestsClientEventHandler
 	}
 
 	@SubscribeEvent
+	public static void onFileCacheClear(ClearFileCacheEvent event)
+	{
+		observationTasks = null;
+	}
+
+	@SubscribeEvent
 	public static void onKeyEvent(InputEvent.KeyInputEvent event)
 	{
 		if (FTBQuestsClient.KEY_QUESTS.isPressed())
@@ -130,5 +144,34 @@ public class FTBQuestsClientEventHandler
 	public static void onTextureStitchPre(TextureStitchEvent.Pre event)
 	{
 		inputBlockSprite = event.getMap().registerSprite(new ResourceLocation(FTBQuests.MOD_ID, "blocks/screen_front_input"));
+	}
+
+	@SubscribeEvent
+	public static void onClientTick(TickEvent.ClientTickEvent event)
+	{
+		Minecraft mc = Minecraft.getMinecraft();
+
+		if (event.phase == TickEvent.Phase.START && mc.world != null && ClientQuestFile.existsWithTeam())
+		{
+			if (observationTasks == null)
+			{
+				observationTasks = ClientQuestFile.INSTANCE.collect(ObservationTask.class);
+			}
+
+			if (observationTasks.isEmpty())
+			{
+				return;
+			}
+
+			BlockMatcher.Data data = new BlockMatcher.Data(mc.world, mc.objectMouseOver);
+
+			for (ObservationTask task : observationTasks)
+			{
+				if (!task.isComplete(ClientQuestFile.INSTANCE.self) && task.matcher.matches(data))
+				{
+					new MessageSubmitTask(task.id).sendToServer();
+				}
+			}
+		}
 	}
 }
