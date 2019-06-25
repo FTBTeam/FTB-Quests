@@ -2,8 +2,8 @@ package com.feed_the_beast.ftbquests.quest.task;
 
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
-import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.quest.QuestData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
@@ -93,14 +93,14 @@ public class ForgeEnergyTask extends EnergyTask
 	}
 
 	@Override
-	public QuestTaskData createData(ITeamData data)
+	public QuestTaskData createData(QuestData data)
 	{
 		return new Data(this, data);
 	}
 
 	public static class Data extends SimpleQuestTaskData<ForgeEnergyTask> implements IEnergyStorage
 	{
-		private Data(ForgeEnergyTask task, ITeamData data)
+		private Data(ForgeEnergyTask task, QuestData data)
 		{
 			super(task, data);
 		}

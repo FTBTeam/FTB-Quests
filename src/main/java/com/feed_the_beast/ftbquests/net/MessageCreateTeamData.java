@@ -5,8 +5,8 @@ import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToClient;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
+import com.feed_the_beast.ftbquests.client.ClientQuestData;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
-import com.feed_the_beast.ftbquests.client.ClientQuestProgress;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.task.QuestTask;
@@ -62,7 +62,7 @@ public class MessageCreateTeamData extends MessageToClient
 	{
 		if (ClientQuestFile.exists())
 		{
-			ClientQuestProgress data = new ClientQuestProgress(uid, id, name);
+			ClientQuestData data = new ClientQuestData(uid, id, name);
 
 			for (QuestChapter chapter : ClientQuestFile.INSTANCE.chapters)
 			{

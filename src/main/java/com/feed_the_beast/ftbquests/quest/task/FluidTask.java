@@ -8,8 +8,8 @@ import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftbquests.FTBQuests;
-import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.quest.QuestData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
@@ -294,7 +294,7 @@ public class FluidTask extends QuestTask
 	}
 
 	@Override
-	public QuestTaskData createData(ITeamData data)
+	public QuestTaskData createData(QuestData data)
 	{
 		return new Data(this, data);
 	}
@@ -336,7 +336,7 @@ public class FluidTask extends QuestTask
 
 	public static class Data extends SimpleQuestTaskData<FluidTask> implements IFluidHandler
 	{
-		private Data(FluidTask t, ITeamData data)
+		private Data(FluidTask t, QuestData data)
 		{
 			super(t, data);
 		}

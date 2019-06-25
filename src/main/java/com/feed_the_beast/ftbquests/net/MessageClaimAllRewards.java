@@ -9,7 +9,7 @@ import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
-import com.feed_the_beast.ftbquests.util.FTBQuestsTeamData;
+import com.feed_the_beast.ftbquests.util.ServerQuestData;
 import net.minecraft.entity.player.EntityPlayerMP;
 
 /**
@@ -36,7 +36,7 @@ public class MessageClaimAllRewards extends MessageToServer
 	@Override
 	public void onMessage(EntityPlayerMP player)
 	{
-		FTBQuestsTeamData teamData = FTBQuestsTeamData.get(Universe.get().getPlayer(player).team);
+		ServerQuestData teamData = ServerQuestData.get(Universe.get().getPlayer(player).team);
 
 		for (QuestChapter chapter : ServerQuestFile.INSTANCE.chapters)
 		{

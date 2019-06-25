@@ -1,7 +1,7 @@
 package com.feed_the_beast.ftbquests.quest.task;
 
 import com.feed_the_beast.ftbquests.quest.EnumChangeProgress;
-import com.feed_the_beast.ftbquests.quest.ITeamData;
+import com.feed_the_beast.ftbquests.quest.QuestData;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTPrimitive;
 import net.minecraft.nbt.NBTTagByte;
@@ -43,7 +43,7 @@ public abstract class SimpleQuestTaskData<T extends QuestTask> extends QuestTask
 
 	public long progress = 0L;
 
-	public SimpleQuestTaskData(T q, ITeamData d)
+	public SimpleQuestTaskData(T q, QuestData d)
 	{
 		super(q, d);
 	}

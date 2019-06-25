@@ -2,7 +2,7 @@ package com.feed_the_beast.ftbquests.quest.task;
 
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.quest.EnumChangeProgress;
-import com.feed_the_beast.ftbquests.quest.ITeamData;
+import com.feed_the_beast.ftbquests.quest.QuestData;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
@@ -19,10 +19,10 @@ import java.util.Collection;
 public abstract class QuestTaskData<T extends QuestTask> implements ICapabilityProvider, IItemHandler
 {
 	public final T task;
-	public final ITeamData teamData;
+	public final QuestData teamData;
 	public boolean isComplete = false;
 
-	public QuestTaskData(T q, ITeamData d)
+	public QuestTaskData(T q, QuestData d)
 	{
 		task = q;
 		teamData = d;

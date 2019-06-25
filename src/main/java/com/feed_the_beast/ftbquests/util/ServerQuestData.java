@@ -11,7 +11,7 @@ import com.feed_the_beast.ftblib.events.team.ForgeTeamSavedEvent;
 import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
 import com.feed_the_beast.ftblib.lib.data.ForgePlayer;
 import com.feed_the_beast.ftblib.lib.data.ForgeTeam;
-import com.feed_the_beast.ftblib.lib.data.TeamData;
+import com.feed_the_beast.ftblib.lib.data.NBTDataStorage;
 import com.feed_the_beast.ftblib.lib.util.FileUtils;
 import com.feed_the_beast.ftblib.lib.util.NBTUtils;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
@@ -23,16 +23,15 @@ import com.feed_the_beast.ftbquests.net.MessageDeleteTeamData;
 import com.feed_the_beast.ftbquests.net.MessageSyncQuests;
 import com.feed_the_beast.ftbquests.net.MessageUpdateTaskProgress;
 import com.feed_the_beast.ftbquests.quest.EnumChangeProgress;
-import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
+import com.feed_the_beast.ftbquests.quest.QuestData;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
 import com.feed_the_beast.ftbquests.quest.task.DimensionTask;
 import com.feed_the_beast.ftbquests.quest.task.QuestTask;
 import com.feed_the_beast.ftbquests.quest.task.QuestTaskData;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.ContainerPlayer;
@@ -48,8 +47,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -58,9 +55,9 @@ import java.util.UUID;
  * @author LatvianModder
  */
 @Mod.EventBusSubscriber(modid = FTBQuests.MOD_ID)
-public class FTBQuestsTeamData extends TeamData implements ITeamData
+public class ServerQuestData extends QuestData implements NBTDataStorage.Data
 {
-	public static FTBQuestsTeamData get(ForgeTeam team)
+	public static ServerQuestData get(ForgeTeam team)
 	{
 		return team.getData().get(FTBQuests.MOD_ID);
 	}
@@ -68,14 +65,14 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 	@SubscribeEvent
 	public static void registerTeamData(ForgeTeamDataEvent event)
 	{
-		event.register(new FTBQuestsTeamData(event.getTeam()));
+		event.register(new ServerQuestData(event.getTeam()));
 	}
 
 	@SubscribeEvent
 	public static void onTeamSaved(ForgeTeamSavedEvent event)
 	{
 		NBTTagCompound nbt = new NBTTagCompound();
-		FTBQuestsTeamData data = get(event.getTeam());
+		ServerQuestData data = get(event.getTeam());
 		data.writeData(nbt);
 
 		File file = event.getTeam().getDataFile("ftbquests");
@@ -93,7 +90,7 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 	@SubscribeEvent
 	public static void onTeamLoaded(ForgeTeamLoadedEvent event)
 	{
-		FTBQuestsTeamData data = get(event.getTeam());
+		ServerQuestData data = get(event.getTeam());
 
 		for (QuestChapter chapter : ServerQuestFile.INSTANCE.chapters)
 		{
@@ -113,7 +110,7 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 	@SubscribeEvent
 	public static void onTeamCreated(ForgeTeamCreatedEvent event)
 	{
-		FTBQuestsTeamData data = get(event.getTeam());
+		ServerQuestData data = get(event.getTeam());
 
 		for (QuestChapter chapter : ServerQuestFile.INSTANCE.chapters)
 		{
@@ -139,14 +136,14 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 	@SubscribeEvent
 	public static void onPlayerLoggedIn(ForgePlayerLoggedInEvent event)
 	{
-		FTBQuestsTeamData teamData = FTBQuestsTeamData.get(event.getTeam());
+		ServerQuestData teamData = ServerQuestData.get(event.getTeam());
 
 		EntityPlayerMP player = event.getPlayer().getPlayer();
 		Collection<MessageSyncQuests.TeamInst> teamDataList = new ArrayList<>();
 
 		for (ForgeTeam team : event.getUniverse().getTeams())
 		{
-			FTBQuestsTeamData data = get(team);
+			ServerQuestData data = get(team);
 			MessageSyncQuests.TeamInst t = new MessageSyncQuests.TeamInst();
 			t.uid = team.getUID();
 			t.id = team.getID();
@@ -178,22 +175,36 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 				}
 			}
 
+			size = 0;
+
+			for (Map.Entry<UUID, IntOpenHashSet> entry : data.claimedPlayerRewards.entrySet())
+			{
+				if (!entry.getValue().isEmpty())
+				{
+					size++;
+				}
+			}
+
+			t.playerRewardUUIDs = new UUID[size];
+			t.playerRewardIDs = new int[size][];
+			i = 0;
+
+			for (Map.Entry<UUID, IntOpenHashSet> entry : data.claimedPlayerRewards.entrySet())
+			{
+				if (!entry.getValue().isEmpty())
+				{
+					t.playerRewardUUIDs[i] = entry.getKey();
+					t.playerRewardIDs[i] = entry.getValue().toIntArray();
+					i++;
+				}
+			}
+
+			t.teamRewards = data.claimedTeamRewards.toIntArray();
+
 			teamDataList.add(t);
 		}
 
-		IntOpenHashSet rewards = teamData.claimedPlayerRewards.get(event.getPlayer().getId());
-
-		if (rewards == null)
-		{
-			rewards = teamData.claimedTeamRewards;
-		}
-		else
-		{
-			rewards = new IntOpenHashSet(rewards);
-			rewards.addAll(teamData.claimedTeamRewards);
-		}
-
-		new MessageSyncQuests(ServerQuestFile.INSTANCE, teamData.getTeamUID(), teamDataList, FTBQuests.canEdit(player), rewards).sendTo(player);
+		new MessageSyncQuests(ServerQuestFile.INSTANCE, teamData.getTeamUID(), teamDataList, FTBQuests.canEdit(player)).sendTo(player);
 		event.getPlayer().getPlayer().inventoryContainer.addListener(new FTBQuestsInventoryListener(event.getPlayer().getPlayer()));
 
 		for (QuestChapter chapter : ServerQuestFile.INSTANCE.chapters)
@@ -219,7 +230,7 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 	{
 		if (event.player instanceof EntityPlayerMP)
 		{
-			ITeamData data = ServerQuestFile.INSTANCE.getData(FTBLibAPI.getTeamID(event.player.getUniqueID()));
+			QuestData data = ServerQuestFile.INSTANCE.getData(FTBLibAPI.getTeamID(event.player.getUniqueID()));
 
 			if (data != null)
 			{
@@ -267,16 +278,11 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 		}
 	}
 
-	private final Int2ObjectOpenHashMap<QuestTaskData> taskData;
-	private final Map<UUID, IntOpenHashSet> claimedPlayerRewards;
-	private final IntOpenHashSet claimedTeamRewards;
+	public final ForgeTeam team;
 
-	private FTBQuestsTeamData(ForgeTeam team)
+	private ServerQuestData(ForgeTeam t)
 	{
-		super(team);
-		taskData = new Int2ObjectOpenHashMap<>();
-		claimedPlayerRewards = new HashMap<>();
-		claimedTeamRewards = new IntOpenHashSet();
+		team = t;
 	}
 
 	@Override
@@ -286,10 +292,34 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 	}
 
 	@Override
+	public short getTeamUID()
+	{
+		return team.getUID();
+	}
+
+	@Override
+	public String getTeamID()
+	{
+		return team.getID();
+	}
+
+	@Override
+	public ITextComponent getDisplayName()
+	{
+		return team.getTitle();
+	}
+
+	@Override
+	public QuestFile getFile()
+	{
+		return ServerQuestFile.INSTANCE;
+	}
+
+	@Override
 	public void syncTask(QuestTaskData data)
 	{
 		team.markDirty();
-		getFile().clearCachedProgress(getTeamUID());
+		super.syncTask(data);
 
 		if (EnumChangeProgress.sendUpdates)
 		{
@@ -317,116 +347,31 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 	}
 
 	@Override
-	public void removeTask(QuestTask task)
+	public void unclaimRewards(Collection<QuestReward> rewards)
 	{
-		taskData.remove(task.id);
+		super.unclaimRewards(rewards);
+		team.markDirty();
 	}
 
 	@Override
-	public void createTaskData(QuestTask task)
+	public boolean setRewardClaimed(UUID player, QuestReward reward)
 	{
-		QuestTaskData data = task.createData(this);
-		taskData.put(task.id, data);
-		data.isComplete = data.getProgress() >= data.task.getMaxProgress();
+		if (super.setRewardClaimed(player, reward))
+		{
+			team.markDirty();
+			new MessageClaimRewardResponse(getTeamUID(), player, reward.id).sendToAll();
+			return true;
+		}
+
+		return false;
 	}
 
 	public void claimReward(EntityPlayerMP player, QuestReward reward)
 	{
-		claimReward(player, reward, true);
-	}
-
-	public void claimReward(EntityPlayerMP player, QuestReward reward, boolean giveReward)
-	{
-		if (reward.isTeamReward())
+		if (setRewardClaimed(player.getUniqueID(), reward))
 		{
-			if (claimedTeamRewards.add(reward.id))
-			{
-				if (giveReward)
-				{
-					reward.claim(player);
-				}
-
-				team.markDirty();
-
-				for (ForgePlayer player1 : team.getMembers())
-				{
-					if (player1.isOnline())
-					{
-						new MessageClaimRewardResponse(reward.id).sendTo(player1.getPlayer());
-					}
-				}
-			}
+			reward.claim(player);
 		}
-		else
-		{
-			IntOpenHashSet set = claimedPlayerRewards.get(player.getUniqueID());
-
-			if (set == null)
-			{
-				set = new IntOpenHashSet();
-			}
-
-			if (set.add(reward.id))
-			{
-				if (set.size() == 1)
-				{
-					claimedPlayerRewards.put(player.getUniqueID(), set);
-				}
-
-				if (giveReward)
-				{
-					reward.claim(player);
-				}
-
-				team.markDirty();
-				new MessageClaimRewardResponse(reward.id).sendTo(player);
-			}
-		}
-
-		reward.quest.checkRepeatableQuests(FTBQuestsTeamData.get(team), player.getUniqueID());
-	}
-
-	@Override
-	public boolean isRewardClaimed(UUID player, QuestReward reward)
-	{
-		if (reward.isTeamReward())
-		{
-			return claimedTeamRewards.contains(reward.id);
-		}
-
-		IntOpenHashSet rewards = claimedPlayerRewards.get(player);
-		return rewards != null && rewards.contains(reward.id);
-	}
-
-	@Override
-	public void unclaimRewards(Collection<QuestReward> rewards)
-	{
-		for (QuestReward reward : rewards)
-		{
-			if (reward.isTeamReward())
-			{
-				claimedTeamRewards.rem(reward.id);
-			}
-			else
-			{
-				Iterator<IntOpenHashSet> iterator = claimedPlayerRewards.values().iterator();
-
-				while (iterator.hasNext())
-				{
-					IntOpenHashSet set = iterator.next();
-
-					if (set != null && set.rem(reward.id))
-					{
-						if (set.isEmpty())
-						{
-							iterator.remove();
-						}
-					}
-				}
-			}
-		}
-
-		team.markDirty();
 	}
 
 	private void writeData(NBTTagCompound nbt)
@@ -548,43 +493,6 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 				}
 			}
 		}
-	}
-
-	@Override
-	public short getTeamUID()
-	{
-		return team.getUID();
-	}
-
-	@Override
-	public String getTeamID()
-	{
-		return team.getID();
-	}
-
-	@Override
-	public ITextComponent getDisplayName()
-	{
-		return team.getTitle();
-	}
-
-	@Override
-	public QuestFile getFile()
-	{
-		return ServerQuestFile.INSTANCE;
-	}
-
-	@Override
-	public QuestTaskData getQuestTaskData(QuestTask task)
-	{
-		QuestTaskData data = taskData.get(task.id);
-
-		if (data == null)
-		{
-			return task.createData(this);
-		}
-
-		return data;
 	}
 
 	@Override

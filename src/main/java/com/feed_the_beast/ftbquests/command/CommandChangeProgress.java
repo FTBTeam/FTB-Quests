@@ -9,7 +9,7 @@ import com.feed_the_beast.ftbquests.quest.EnumChangeProgress;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
-import com.feed_the_beast.ftbquests.util.FTBQuestsTeamData;
+import com.feed_the_beast.ftbquests.util.ServerQuestData;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
@@ -89,7 +89,7 @@ public class CommandChangeProgress extends CommandFTBQuestsBase
 
 		for (ForgeTeam team : teams)
 		{
-			object.forceProgress(FTBQuestsTeamData.get(team), type, true);
+			object.forceProgress(ServerQuestData.get(team), type, true);
 		}
 
 		sender.sendMessage(new TextComponentTranslation("commands.ftbquests.change_progress.text"));

@@ -166,7 +166,7 @@ public class GuiQuestChest extends GuiBase implements IContainerListener
 					{
 						for (QuestReward reward : quest.rewards)
 						{
-							if (!ClientQuestFile.INSTANCE.isRewardClaimed(reward))
+							if (!ClientQuestFile.INSTANCE.self.isRewardClaimedSelf(reward))
 							{
 								outputSlots[index].reward = reward;
 								index++;

@@ -278,15 +278,12 @@ public class ButtonQuest extends Button
 			list.add(TextFormatting.GRAY + description);
 		}
 
-		if (treeGui.file.self != null)
-		{
-			int r = quest.getUnclaimedRewards(Minecraft.getMinecraft().player.getUniqueID(), treeGui.file.self, true);
+		int r = quest.getUnclaimedRewards(Minecraft.getMinecraft().player.getUniqueID(), treeGui.file.self, true);
 
-			if (r > 0)
-			{
-				list.add("");
-				list.add(I18n.format("ftbquests.gui.collect_rewards", TextFormatting.GOLD.toString() + r));
-			}
+		if (r > 0)
+		{
+			list.add("");
+			list.add(I18n.format("ftbquests.gui.collect_rewards", TextFormatting.GOLD.toString() + r));
 		}
 	}
 
@@ -296,7 +293,7 @@ public class ButtonQuest extends Button
 		Color4I outlineColor = Color4I.WHITE.withAlpha(150);
 		Icon qicon = Icon.EMPTY;
 
-		boolean cantStart = treeGui.file.self == null || !quest.canStartTasks(treeGui.file.self);
+		boolean cantStart = !quest.canStartTasks(treeGui.file.self);
 
 		if (!cantStart)
 		{
@@ -308,7 +305,7 @@ public class ButtonQuest extends Button
 
 				for (QuestReward reward : quest.rewards)
 				{
-					if (!treeGui.file.isRewardClaimed(reward))
+					if (!treeGui.file.self.isRewardClaimedSelf(reward))
 					{
 						hasRewards = true;
 						break;

@@ -51,7 +51,7 @@ public class ButtonClaimAllRewards extends Button
 					{
 						for (QuestReward reward : quest.rewards)
 						{
-							if (!ClientQuestFile.INSTANCE.isRewardClaimed(reward))
+							if (!ClientQuestFile.INSTANCE.self.isRewardClaimedSelf(reward))
 							{
 								String s = TextFormatting.GRAY + "- " + reward.getTitle();
 

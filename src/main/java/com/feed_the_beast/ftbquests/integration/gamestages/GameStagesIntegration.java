@@ -2,9 +2,9 @@ package com.feed_the_beast.ftbquests.integration.gamestages;
 
 import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
 import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
-import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
+import com.feed_the_beast.ftbquests.quest.QuestData;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.reward.FTBQuestsRewards;
 import com.feed_the_beast.ftbquests.quest.reward.QuestRewardType;
@@ -72,7 +72,7 @@ public class GameStagesIntegration
 
 	private static void checkStages(EntityPlayerMP player)
 	{
-		ITeamData data = ServerQuestFile.INSTANCE == null ? null : ServerQuestFile.INSTANCE.getData(FTBLibAPI.getTeam(player.getUniqueID()));
+		QuestData data = ServerQuestFile.INSTANCE == null ? null : ServerQuestFile.INSTANCE.getData(FTBLibAPI.getTeam(player.getUniqueID()));
 
 		if (data != null)
 		{

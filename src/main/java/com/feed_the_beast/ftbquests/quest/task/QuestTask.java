@@ -11,9 +11,9 @@ import com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIHelper;
 import com.feed_the_beast.ftbquests.net.MessageDisplayCompletionToast;
 import com.feed_the_beast.ftbquests.net.MessageSubmitTask;
 import com.feed_the_beast.ftbquests.quest.EnumChangeProgress;
-import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
+import com.feed_the_beast.ftbquests.quest.QuestData;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
@@ -65,16 +65,16 @@ public abstract class QuestTask extends QuestObject
 
 	public abstract QuestTaskType getType();
 
-	public abstract QuestTaskData createData(ITeamData data);
+	public abstract QuestTaskData createData(QuestData data);
 
 	@Override
-	public final int getRelativeProgressFromChildren(ITeamData data)
+	public final int getRelativeProgressFromChildren(QuestData data)
 	{
 		return data.getQuestTaskData(this).getRelativeProgress();
 	}
 
 	@Override
-	public final void onCompleted(ITeamData data, List<EntityPlayerMP> notifyPlayers)
+	public final void onCompleted(QuestData data, List<EntityPlayerMP> notifyPlayers)
 	{
 		super.onCompleted(data, notifyPlayers);
 		new ObjectCompletedEvent.TaskEvent(data, this).post();
@@ -102,7 +102,7 @@ public abstract class QuestTask extends QuestObject
 	}
 
 	@Override
-	public final void changeProgress(ITeamData data, EnumChangeProgress type)
+	public final void changeProgress(QuestData data, EnumChangeProgress type)
 	{
 		QuestTaskData taskData = data.getQuestTaskData(this);
 
@@ -121,7 +121,7 @@ public abstract class QuestTask extends QuestObject
 	{
 		quest.tasks.remove(this);
 
-		for (ITeamData data : quest.chapter.file.getAllData())
+		for (QuestData data : quest.chapter.file.getAllData())
 		{
 			data.removeTask(this);
 		}
@@ -132,7 +132,7 @@ public abstract class QuestTask extends QuestObject
 	@Override
 	public final void deleteChildren()
 	{
-		for (ITeamData data : quest.chapter.file.getAllData())
+		for (QuestData data : quest.chapter.file.getAllData())
 		{
 			data.removeTask(this);
 		}
@@ -157,7 +157,7 @@ public abstract class QuestTask extends QuestObject
 	{
 		quest.tasks.add(this);
 
-		for (ITeamData data : quest.chapter.file.getAllData())
+		for (QuestData data : quest.chapter.file.getAllData())
 		{
 			data.createTaskData(this);
 		}

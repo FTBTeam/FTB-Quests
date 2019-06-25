@@ -11,9 +11,9 @@ import com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIHelper;
 import com.feed_the_beast.ftbquests.net.MessageClaimReward;
 import com.feed_the_beast.ftbquests.net.MessageDisplayRewardToast;
 import com.feed_the_beast.ftbquests.quest.EnumChangeProgress;
-import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
+import com.feed_the_beast.ftbquests.quest.QuestData;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
@@ -145,7 +145,7 @@ public abstract class QuestReward extends QuestObjectBase
 
 		Collection<QuestReward> c = Collections.singleton(this);
 
-		for (ITeamData data : getQuestFile().getAllData())
+		for (QuestData data : getQuestFile().getAllData())
 		{
 			data.unclaimRewards(c);
 		}
@@ -158,7 +158,7 @@ public abstract class QuestReward extends QuestObjectBase
 	{
 		Collection<QuestReward> c = Collections.singleton(this);
 
-		for (ITeamData data : getQuestFile().getAllData())
+		for (QuestData data : getQuestFile().getAllData())
 		{
 			data.unclaimRewards(c);
 		}
@@ -199,7 +199,7 @@ public abstract class QuestReward extends QuestObjectBase
 	}
 
 	@Override
-	public final void changeProgress(ITeamData data, EnumChangeProgress type)
+	public final void changeProgress(QuestData data, EnumChangeProgress type)
 	{
 		if (type == EnumChangeProgress.RESET || type == EnumChangeProgress.RESET_DEPS)
 		{

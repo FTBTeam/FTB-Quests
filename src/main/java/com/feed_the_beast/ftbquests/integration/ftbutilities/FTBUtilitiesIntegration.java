@@ -1,7 +1,7 @@
 package com.feed_the_beast.ftbquests.integration.ftbutilities;
 
 import com.feed_the_beast.ftbquests.FTBQuests;
-import com.feed_the_beast.ftbquests.quest.ITeamData;
+import com.feed_the_beast.ftbquests.quest.QuestData;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbutilities.data.Leaderboard;
 import com.feed_the_beast.ftbutilities.events.LeaderboardRegistryEvent;
@@ -30,7 +30,7 @@ public class FTBUtilitiesIntegration
 				new ResourceLocation(FTBQuests.MOD_ID, "progress"),
 				new TextComponentTranslation("ftbquests.leaderboard_progress"),
 				player -> {
-					ITeamData data = ServerQuestFile.INSTANCE.getData(player.team.getUID());
+					QuestData data = ServerQuestFile.INSTANCE.getData(player.team.getUID());
 
 					if (data == null)
 					{
@@ -40,11 +40,11 @@ public class FTBUtilitiesIntegration
 					return new TextComponentString(ServerQuestFile.INSTANCE.getRelativeProgress(data) + "%");
 				},
 				Comparator.comparingLong(player -> {
-					ITeamData data = ServerQuestFile.INSTANCE.getData(player.team.getUID());
+					QuestData data = ServerQuestFile.INSTANCE.getData(player.team.getUID());
 					return data == null ? 0L : -ServerQuestFile.INSTANCE.getRelativeProgress(data);
 				}),
 				player -> {
-					ITeamData data = ServerQuestFile.INSTANCE.getData(player.team.getUID());
+					QuestData data = ServerQuestFile.INSTANCE.getData(player.team.getUID());
 					return data != null && ServerQuestFile.INSTANCE.isStarted(data);
 				})
 		);

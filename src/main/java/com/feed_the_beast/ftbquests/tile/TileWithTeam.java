@@ -6,7 +6,7 @@ import com.feed_the_beast.ftblib.lib.data.Universe;
 import com.feed_the_beast.ftblib.lib.tile.EnumSaveType;
 import com.feed_the_beast.ftblib.lib.tile.TileBase;
 import com.feed_the_beast.ftbquests.FTBQuests;
-import com.feed_the_beast.ftbquests.quest.ITeamData;
+import com.feed_the_beast.ftbquests.quest.QuestData;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -24,7 +24,7 @@ public class TileWithTeam extends TileBase
 	public String team = "";
 	public boolean indestructible = false;
 
-	protected ITeamData cTeam;
+	protected QuestData cTeam;
 
 	@Override
 	protected void writeData(NBTTagCompound nbt, EnumSaveType type)
@@ -75,7 +75,7 @@ public class TileWithTeam extends TileBase
 	}
 
 	@Nullable
-	public final ITeamData getTeam()
+	public final QuestData getTeam()
 	{
 		if (team.isEmpty())
 		{

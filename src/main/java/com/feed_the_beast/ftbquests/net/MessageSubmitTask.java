@@ -7,7 +7,7 @@ import com.feed_the_beast.ftblib.lib.net.MessageToServer;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.task.QuestTask;
-import com.feed_the_beast.ftbquests.util.FTBQuestsTeamData;
+import com.feed_the_beast.ftbquests.util.ServerQuestData;
 import net.minecraft.entity.player.EntityPlayerMP;
 
 import java.util.Collections;
@@ -49,7 +49,7 @@ public class MessageSubmitTask extends MessageToServer
 	@Override
 	public void onMessage(EntityPlayerMP player)
 	{
-		FTBQuestsTeamData teamData = FTBQuestsTeamData.get(Universe.get().getPlayer(player).team);
+		ServerQuestData teamData = ServerQuestData.get(Universe.get().getPlayer(player).team);
 		QuestTask t = ServerQuestFile.INSTANCE.getTask(task);
 
 		if (t != null && t.quest.canStartTasks(teamData))

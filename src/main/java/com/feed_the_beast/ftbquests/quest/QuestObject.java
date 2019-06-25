@@ -19,11 +19,11 @@ public abstract class QuestObject extends QuestObjectBase
 	}
 
 	@Override
-	public abstract void changeProgress(ITeamData data, EnumChangeProgress type);
+	public abstract void changeProgress(QuestData data, EnumChangeProgress type);
 
-	public abstract int getRelativeProgressFromChildren(ITeamData data);
+	public abstract int getRelativeProgressFromChildren(QuestData data);
 
-	public final int getRelativeProgress(ITeamData data)
+	public final int getRelativeProgress(QuestData data)
 	{
 		int i = cachedRelativeProgress.get(data.getTeamUID());
 
@@ -50,22 +50,22 @@ public abstract class QuestObject extends QuestObjectBase
 		return Math.max(1, (int) (progressSum / (double) count));
 	}
 
-	public final boolean isStarted(ITeamData data)
+	public final boolean isStarted(QuestData data)
 	{
 		return getRelativeProgress(data) > 0;
 	}
 
-	public final boolean isComplete(ITeamData data)
+	public final boolean isComplete(QuestData data)
 	{
 		return getRelativeProgress(data) >= 100;
 	}
 
-	public boolean isVisible(ITeamData data)
+	public boolean isVisible(QuestData data)
 	{
 		return true;
 	}
 
-	public void onCompleted(ITeamData data, List<EntityPlayerMP> notifyPlayers)
+	public void onCompleted(QuestData data, List<EntityPlayerMP> notifyPlayers)
 	{
 	}
 
