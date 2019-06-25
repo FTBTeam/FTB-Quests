@@ -19,7 +19,6 @@ import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.gui.FTBQuestsTheme;
 import com.feed_the_beast.ftbquests.gui.GuiSelectQuestObject;
-import com.feed_the_beast.ftbquests.gui.GuiVariables;
 import com.feed_the_beast.ftbquests.net.edit.MessageChangeProgress;
 import com.feed_the_beast.ftbquests.net.edit.MessageEditObjectQuick;
 import com.feed_the_beast.ftbquests.net.edit.MessageMoveQuest;
@@ -30,7 +29,6 @@ import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
-import com.feed_the_beast.ftbquests.quest.QuestVariable;
 import com.feed_the_beast.ftbquests.quest.reward.RandomReward;
 import com.feed_the_beast.ftbquests.quest.task.QuestTask;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
@@ -559,12 +557,7 @@ public class GuiQuestTree extends GuiBase
 	{
 		QuestChapter c = chapterHoverPanel.chapter == null ? null : chapterHoverPanel.chapter.chapter;
 
-		if (object instanceof QuestVariable)
-		{
-			new GuiVariables().openGui();
-			return;
-		}
-		else if (object instanceof QuestChapter)
+		if (object instanceof QuestChapter)
 		{
 			selectChapter((QuestChapter) object);
 		}

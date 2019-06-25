@@ -31,10 +31,6 @@ public interface ITeamData
 
 	void unclaimRewards(Collection<QuestReward> rewards);
 
-	long getVariable(int variable);
-
-	void setVariable(int variable, long value);
-
 	boolean isRewardClaimed(UUID player, QuestReward reward);
 
 	void checkAutoCompletion(Quest quest);

@@ -22,19 +22,16 @@ import com.feed_the_beast.ftbquests.net.MessageCreateTeamData;
 import com.feed_the_beast.ftbquests.net.MessageDeleteTeamData;
 import com.feed_the_beast.ftbquests.net.MessageSyncQuests;
 import com.feed_the_beast.ftbquests.net.MessageUpdateTaskProgress;
-import com.feed_the_beast.ftbquests.net.MessageUpdateVariable;
 import com.feed_the_beast.ftbquests.quest.EnumChangeProgress;
 import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
-import com.feed_the_beast.ftbquests.quest.QuestVariable;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
 import com.feed_the_beast.ftbquests.quest.task.DimensionTask;
 import com.feed_the_beast.ftbquests.quest.task.QuestTask;
 import com.feed_the_beast.ftbquests.quest.task.QuestTaskData;
-import it.unimi.dsi.fastutil.ints.Int2LongOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -181,32 +178,6 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 				}
 			}
 
-			size = 0;
-
-			for (Int2LongOpenHashMap.Entry entry : data.variables.int2LongEntrySet())
-			{
-				if (entry.getLongValue() > 0L)
-				{
-					size++;
-				}
-			}
-
-			t.variableKeys = new int[size];
-			t.variableValues = new long[size];
-			i = 0;
-
-			for (Int2LongOpenHashMap.Entry entry : data.variables.int2LongEntrySet())
-			{
-				long value = entry.getLongValue();
-
-				if (value > 0L)
-				{
-					t.variableKeys[i] = entry.getIntKey();
-					t.variableValues[i] = value;
-					i++;
-				}
-			}
-
 			teamDataList.add(t);
 		}
 
@@ -299,7 +270,6 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 	private final Int2ObjectOpenHashMap<QuestTaskData> taskData;
 	private final Map<UUID, IntOpenHashSet> claimedPlayerRewards;
 	private final IntOpenHashSet claimedTeamRewards;
-	private final Int2LongOpenHashMap variables;
 
 	private FTBQuestsTeamData(ForgeTeam team)
 	{
@@ -307,8 +277,6 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 		taskData = new Int2ObjectOpenHashMap<>();
 		claimedPlayerRewards = new HashMap<>();
 		claimedTeamRewards = new IntOpenHashSet();
-		variables = new Int2LongOpenHashMap();
-		variables.defaultReturnValue(0L);
 	}
 
 	@Override
@@ -461,44 +429,6 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 		team.markDirty();
 	}
 
-	@Override
-	public long getVariable(int variable)
-	{
-		return variables.get(variable);
-	}
-
-	@Override
-	public void setVariable(int variable, long value)
-	{
-		long prevValue = getVariable(variable);
-
-		if (value <= 0L)
-		{
-			variables.remove(variable);
-		}
-		else
-		{
-			QuestVariable v = ServerQuestFile.INSTANCE.getVariable(variable);
-
-			if (v != null)
-			{
-				value = Math.min(value, v.maxValue);
-			}
-
-			variables.put(variable, value);
-		}
-
-		if (prevValue != value)
-		{
-			team.markDirty();
-
-			if (EnumChangeProgress.sendUpdates)
-			{
-				new MessageUpdateVariable(team.getUID(), variable, value).sendToAll();
-			}
-		}
-	}
-
 	private void writeData(NBTTagCompound nbt)
 	{
 		NBTTagCompound nbt1 = new NBTTagCompound();
@@ -536,23 +466,6 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 			{
 				nbt.setTag("ClaimedPlayerRewards", nbt1);
 			}
-		}
-
-		if (!variables.isEmpty())
-		{
-			nbt1 = new NBTTagCompound();
-
-			for (Int2LongOpenHashMap.Entry entry : variables.int2LongEntrySet())
-			{
-				QuestVariable variable = ServerQuestFile.INSTANCE.getVariable(entry.getIntKey());
-
-				if (variable != null)
-				{
-					nbt1.setLong(variable.getCodeString(), entry.getLongValue());
-				}
-			}
-
-			nbt.setTag("Variables", nbt1);
 		}
 	}
 
@@ -633,20 +546,6 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 
 					claimedPlayerRewards.put(id, set);
 				}
-			}
-		}
-
-		variables.clear();
-
-		nbt1 = nbt.getCompoundTag("Variables");
-
-		for (String s : nbt1.getKeySet())
-		{
-			QuestVariable variable = ServerQuestFile.INSTANCE.getVariable(QuestFile.getID(s));
-
-			if (variable != null)
-			{
-				variables.put(variable.id, nbt1.getLong(s));
 			}
 		}
 	}

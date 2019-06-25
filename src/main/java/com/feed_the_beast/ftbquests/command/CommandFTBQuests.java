@@ -13,7 +13,6 @@ public class CommandFTBQuests extends CommandTreeBase
 	{
 		addSubcommand(new CommandEditingMode());
 		addSubcommand(new CommandChangeProgress());
-		addSubcommand(new CommandSetVariable());
 		addSubcommand(new CommandImportRewardsFromChest());
 		addSubcommand(new CommandExportRewardsToChest());
 

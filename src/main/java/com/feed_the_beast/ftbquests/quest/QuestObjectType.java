@@ -19,7 +19,7 @@ public enum QuestObjectType implements IWithID, Predicate<QuestObjectBase>
 	CHAPTER("chapter", 4, TextFormatting.GOLD),
 	QUEST("quest", 8, TextFormatting.GREEN),
 	TASK("task", 16, TextFormatting.BLUE),
-	VARIABLE("variable", 32, TextFormatting.DARK_PURPLE),
+	//32
 	REWARD("reward", 64, TextFormatting.LIGHT_PURPLE),
 	REWARD_TABLE("reward_table", 128, TextFormatting.YELLOW);
 

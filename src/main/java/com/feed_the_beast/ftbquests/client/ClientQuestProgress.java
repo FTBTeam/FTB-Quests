@@ -6,7 +6,6 @@ import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
 import com.feed_the_beast.ftbquests.quest.task.QuestTask;
 import com.feed_the_beast.ftbquests.quest.task.QuestTaskData;
-import it.unimi.dsi.fastutil.ints.Int2LongOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.util.text.ITextComponent;
 
@@ -22,7 +21,6 @@ public class ClientQuestProgress implements ITeamData
 	private final String teamID;
 	private final ITextComponent displayName;
 	public final Int2ObjectOpenHashMap<QuestTaskData> taskData;
-	public final Int2LongOpenHashMap variables;
 
 	public ClientQuestProgress(short uid, String id, ITextComponent n)
 	{
@@ -30,8 +28,6 @@ public class ClientQuestProgress implements ITeamData
 		teamID = id;
 		displayName = n;
 		taskData = new Int2ObjectOpenHashMap<>();
-		variables = new Int2LongOpenHashMap();
-		variables.defaultReturnValue(0L);
 	}
 
 	@Override
@@ -98,25 +94,6 @@ public class ClientQuestProgress implements ITeamData
 			{
 				ClientQuestFile.INSTANCE.rewards.rem(reward.id);
 			}
-		}
-	}
-
-	@Override
-	public long getVariable(int variable)
-	{
-		return variables.get(variable);
-	}
-
-	@Override
-	public void setVariable(int variable, long value)
-	{
-		if (value <= 0L)
-		{
-			variables.remove(variable);
-		}
-		else
-		{
-			variables.put(variable, value);
 		}
 	}
 
