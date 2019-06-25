@@ -21,9 +21,9 @@ import com.feed_the_beast.ftbquests.events.ClearFileCacheEvent;
 import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.item.ItemLootCrate;
 import com.feed_the_beast.ftbquests.item.ItemQuestBook;
-import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
+import com.feed_the_beast.ftbquests.quest.QuestData;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.loot.LootCrate;
 import com.feed_the_beast.ftbquests.quest.reward.AdvancementReward;
@@ -276,7 +276,7 @@ public class FTBQuestsEventHandler
 
 			EntityPlayerMP player = (EntityPlayerMP) event.getSource().getTrueSource();
 
-			ITeamData data = ServerQuestFile.INSTANCE.getData(FTBLibAPI.getTeamID(player.getUniqueID()));
+			QuestData data = ServerQuestFile.INSTANCE.getData(FTBLibAPI.getTeamID(player.getUniqueID()));
 
 			if (data == null)
 			{
@@ -326,7 +326,7 @@ public class FTBQuestsEventHandler
 				return;
 			}
 
-			ITeamData data = ServerQuestFile.INSTANCE.getData(FTBLibAPI.getTeamID(event.player.getUniqueID()));
+			QuestData data = ServerQuestFile.INSTANCE.getData(FTBLibAPI.getTeamID(event.player.getUniqueID()));
 
 			if (data == null)
 			{

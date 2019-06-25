@@ -6,7 +6,7 @@ import com.feed_the_beast.ftblib.lib.util.FileUtils;
 import com.feed_the_beast.ftblib.lib.util.NBTUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.net.edit.MessageDeleteObjectResponse;
-import com.feed_the_beast.ftbquests.util.FTBQuestsTeamData;
+import com.feed_the_beast.ftbquests.util.ServerQuestData;
 import io.sommers.packmode.api.PackModeAPI;
 import net.minecraft.launchwrapper.Launch;
 import net.minecraft.nbt.NBTTagCompound;
@@ -109,7 +109,7 @@ public class ServerQuestFile extends QuestFile
 
 	@Nullable
 	@Override
-	public ITeamData getData(short team)
+	public QuestData getData(short team)
 	{
 		if (team == 0)
 		{
@@ -117,12 +117,12 @@ public class ServerQuestFile extends QuestFile
 		}
 
 		ForgeTeam t = universe.getTeam(team);
-		return t.isValid() ? FTBQuestsTeamData.get(t) : null;
+		return t.isValid() ? ServerQuestData.get(t) : null;
 	}
 
 	@Nullable
 	@Override
-	public ITeamData getData(String team)
+	public QuestData getData(String team)
 	{
 		if (team.isEmpty())
 		{
@@ -130,20 +130,20 @@ public class ServerQuestFile extends QuestFile
 		}
 
 		ForgeTeam t = universe.getTeam(team);
-		return t.isValid() ? FTBQuestsTeamData.get(t) : null;
+		return t.isValid() ? ServerQuestData.get(t) : null;
 	}
 
 	@Override
-	public Collection<FTBQuestsTeamData> getAllData()
+	public Collection<ServerQuestData> getAllData()
 	{
 		Collection<ForgeTeam> teams = universe.getTeams();
-		List<FTBQuestsTeamData> list = new ArrayList<>(teams.size());
+		List<ServerQuestData> list = new ArrayList<>(teams.size());
 
 		for (ForgeTeam team : teams)
 		{
 			if (team.isValid())
 			{
-				list.add(FTBQuestsTeamData.get(team));
+				list.add(ServerQuestData.get(team));
 			}
 		}
 

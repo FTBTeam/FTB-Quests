@@ -5,8 +5,8 @@ import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
-import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.quest.QuestData;
 import com.feed_the_beast.ftbquests.quest.task.EnergyTask;
 import com.feed_the_beast.ftbquests.quest.task.FTBQuestsTasks;
 import com.feed_the_beast.ftbquests.quest.task.QuestTaskData;
@@ -173,14 +173,14 @@ public class ManaTask extends EnergyTask
 	}
 
 	@Override
-	public QuestTaskData createData(ITeamData data)
+	public QuestTaskData createData(QuestData data)
 	{
 		return new Data(this, data);
 	}
 
 	public static class Data extends SimpleQuestTaskData<ManaTask> implements IManaReceiver
 	{
-		private Data(ManaTask task, ITeamData data)
+		private Data(ManaTask task, QuestData data)
 		{
 			super(task, data);
 		}

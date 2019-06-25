@@ -133,7 +133,7 @@ public final class QuestChapter extends QuestObject
 	}
 
 	@Override
-	public int getRelativeProgressFromChildren(ITeamData data)
+	public int getRelativeProgressFromChildren(QuestData data)
 	{
 		int progress = 0;
 
@@ -149,7 +149,7 @@ public final class QuestChapter extends QuestObject
 	}
 
 	@Override
-	public void onCompleted(ITeamData data, List<EntityPlayerMP> notifyPlayers)
+	public void onCompleted(QuestData data, List<EntityPlayerMP> notifyPlayers)
 	{
 		super.onCompleted(data, notifyPlayers);
 		new ObjectCompletedEvent.ChapterEvent(data, this).post();
@@ -166,7 +166,7 @@ public final class QuestChapter extends QuestObject
 	}
 
 	@Override
-	public void changeProgress(ITeamData data, EnumChangeProgress type)
+	public void changeProgress(QuestData data, EnumChangeProgress type)
 	{
 		for (Quest quest : quests)
 		{
@@ -269,7 +269,7 @@ public final class QuestChapter extends QuestObject
 	}
 
 	@Override
-	public boolean isVisible(ITeamData data)
+	public boolean isVisible(QuestData data)
 	{
 		if (alwaysInvisible)
 		{
@@ -354,7 +354,7 @@ public final class QuestChapter extends QuestObject
 		return list;
 	}
 
-	public boolean hasUnclaimedRewards(UUID player, ITeamData data, boolean showExcluded)
+	public boolean hasUnclaimedRewards(UUID player, QuestData data, boolean showExcluded)
 	{
 		for (Quest quest : quests)
 		{
@@ -375,7 +375,7 @@ public final class QuestChapter extends QuestObject
 		return false;
 	}
 
-	public int getUnclaimedRewards(UUID player, ITeamData data, boolean showExcluded)
+	public int getUnclaimedRewards(UUID player, QuestData data, boolean showExcluded)
 	{
 		int r = 0;
 

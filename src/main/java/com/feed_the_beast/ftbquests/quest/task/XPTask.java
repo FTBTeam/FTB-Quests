@@ -4,8 +4,8 @@ import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigLong;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
-import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.quest.QuestData;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -111,7 +111,7 @@ public class XPTask extends QuestTask implements ISingleLongValueTask
 	}
 
 	@Override
-	public QuestTaskData createData(ITeamData data)
+	public QuestTaskData createData(QuestData data)
 	{
 		return new Data(this, data);
 	}
@@ -190,7 +190,7 @@ public class XPTask extends QuestTask implements ISingleLongValueTask
 
 	public static class Data extends SimpleQuestTaskData<XPTask>
 	{
-		private Data(XPTask task, ITeamData data)
+		private Data(XPTask task, QuestData data)
 		{
 			super(task, data);
 		}

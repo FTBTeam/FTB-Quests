@@ -8,24 +8,30 @@ import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.gui.chest.GuiQuestChest;
 import com.feed_the_beast.ftbquests.gui.tree.GuiQuestTree;
+import com.feed_the_beast.ftbquests.quest.QuestData;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
-import net.minecraft.client.Minecraft;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+
+import java.util.UUID;
 
 /**
  * @author LatvianModder
  */
 public class MessageClaimRewardResponse extends MessageToClient
 {
+	private short team;
+	private UUID player;
 	private int id;
 
 	public MessageClaimRewardResponse()
 	{
 	}
 
-	public MessageClaimRewardResponse(int i)
+	public MessageClaimRewardResponse(short t, UUID p, int i)
 	{
+		team = t;
+		player = p;
 		id = i;
 	}
 
@@ -38,12 +44,16 @@ public class MessageClaimRewardResponse extends MessageToClient
 	@Override
 	public void writeData(DataOut data)
 	{
+		data.writeShort(team);
+		data.writeUUID(player);
 		data.writeInt(id);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
+		team = data.readShort();
+		player = data.readUUID();
 		id = data.readInt();
 	}
 
@@ -51,31 +61,42 @@ public class MessageClaimRewardResponse extends MessageToClient
 	@SideOnly(Side.CLIENT)
 	public void onMessage()
 	{
-		if (ClientQuestFile.existsWithTeam())
+		if (ClientQuestFile.exists())
 		{
-			ClientQuestFile.INSTANCE.rewards.add(id);
-
 			QuestReward reward = ClientQuestFile.INSTANCE.getReward(id);
 
-			if (reward != null)
+			if (reward == null)
 			{
-				reward.quest.checkRepeatableQuests(ClientQuestFile.INSTANCE.self, Minecraft.getMinecraft().player.getUniqueID());
+				return;
 			}
 
-			GuiQuestTree treeGui = ClientUtils.getCurrentGuiAs(GuiQuestTree.class);
+			QuestData data = ClientQuestFile.INSTANCE.getData(team);
 
-			if (treeGui != null)
+			if (data == null)
 			{
-				treeGui.viewQuestPanel.refreshWidgets();
-				treeGui.otherButtonsTopPanel.refreshWidgets();
+				return;
 			}
-			else
-			{
-				GuiQuestChest guiChest = ClientUtils.getCurrentGuiAs(GuiQuestChest.class);
 
-				if (guiChest != null)
+			data.setRewardClaimed(player, reward);
+			reward.quest.checkRepeatableQuests(data, player);
+
+			if (data == ClientQuestFile.INSTANCE.self)
+			{
+				GuiQuestTree treeGui = ClientUtils.getCurrentGuiAs(GuiQuestTree.class);
+
+				if (treeGui != null)
 				{
-					guiChest.updateRewards();
+					treeGui.viewQuestPanel.refreshWidgets();
+					treeGui.otherButtonsTopPanel.refreshWidgets();
+				}
+				else
+				{
+					GuiQuestChest guiChest = ClientUtils.getCurrentGuiAs(GuiQuestChest.class);
+
+					if (guiChest != null)
+					{
+						guiChest.updateRewards();
+					}
 				}
 			}
 		}

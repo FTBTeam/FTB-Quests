@@ -7,7 +7,6 @@ import com.feed_the_beast.ftblib.lib.gui.Theme;
 import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
-import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
@@ -31,7 +30,7 @@ public class ButtonReward extends Button
 	@Override
 	public void onClicked(MouseButton button)
 	{
-		if (reward != null && reward.quest instanceof QuestObject && reward.quest.isComplete(ClientQuestFile.INSTANCE.self) && !ClientQuestFile.INSTANCE.isRewardClaimed(reward))
+		if (reward != null && reward.quest.isComplete(ClientQuestFile.INSTANCE.self) && !ClientQuestFile.INSTANCE.self.isRewardClaimedSelf(reward))
 		{
 			GuiHelper.playClickSound();
 			reward.onButtonClicked();

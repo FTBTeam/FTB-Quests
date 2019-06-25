@@ -3,8 +3,8 @@ package com.feed_the_beast.ftbquests.quest.task;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
-import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.quest.QuestData;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -118,14 +118,14 @@ public class DimensionTask extends QuestTask
 	}
 
 	@Override
-	public QuestTaskData createData(ITeamData data)
+	public QuestTaskData createData(QuestData data)
 	{
 		return new Data(this, data);
 	}
 
 	public static class Data extends SimpleQuestTaskData<DimensionTask>
 	{
-		private Data(DimensionTask task, ITeamData data)
+		private Data(DimensionTask task, QuestData data)
 		{
 			super(task, data);
 		}

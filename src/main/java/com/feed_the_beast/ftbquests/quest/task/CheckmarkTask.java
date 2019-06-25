@@ -2,8 +2,8 @@ package com.feed_the_beast.ftbquests.quest.task;
 
 import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
-import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.quest.QuestData;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 
@@ -39,14 +39,14 @@ public class CheckmarkTask extends QuestTask
 	}
 
 	@Override
-	public QuestTaskData createData(ITeamData data)
+	public QuestTaskData createData(QuestData data)
 	{
 		return new Data(this, data);
 	}
 
 	public static class Data extends SimpleQuestTaskData<CheckmarkTask>
 	{
-		private Data(CheckmarkTask task, ITeamData data)
+		private Data(CheckmarkTask task, QuestData data)
 		{
 			super(task, data);
 		}

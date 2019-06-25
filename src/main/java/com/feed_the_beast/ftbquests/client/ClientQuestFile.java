@@ -10,9 +10,7 @@ import com.feed_the_beast.ftbquests.net.edit.MessageDeleteObject;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
-import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
 import com.feed_the_beast.ftbquests.quest.task.QuestTask;
-import it.unimi.dsi.fastutil.ints.IntCollection;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
 import net.minecraft.entity.player.EntityPlayer;
@@ -38,17 +36,15 @@ public class ClientQuestFile extends QuestFile
 		return exists() && INSTANCE.self != null;
 	}
 
-	private final Short2ObjectOpenHashMap<ClientQuestProgress> teamData;
-	public ClientQuestProgress self;
+	private final Short2ObjectOpenHashMap<ClientQuestData> teamData;
+	public ClientQuestData self;
 	public GuiQuestTree questTreeGui;
 	public GuiBase questGui;
 	public boolean editingMode;
-	public final IntCollection rewards;
 
 	public ClientQuestFile()
 	{
 		teamData = new Short2ObjectOpenHashMap<>();
-		rewards = new IntOpenHashSet();
 	}
 
 	public void load(MessageSyncQuests message)
@@ -63,7 +59,7 @@ public class ClientQuestFile extends QuestFile
 
 		for (MessageSyncQuests.TeamInst team : message.teamData)
 		{
-			ClientQuestProgress data = new ClientQuestProgress(team.uid, team.id, team.name);
+			ClientQuestData data = new ClientQuestData(team.uid, team.id, team.name);
 
 			for (QuestChapter chapter : chapters)
 			{
@@ -86,14 +82,32 @@ public class ClientQuestFile extends QuestFile
 				}
 			}
 
+			for (int i = 0; i < team.playerRewardUUIDs.length; i++)
+			{
+				data.claimedPlayerRewards.put(team.playerRewardUUIDs[i], fromArray(team.playerRewardIDs[i]));
+			}
+
+			data.claimedTeamRewards.addAll(fromArray(team.teamRewards));
 			teamData.put(data.getTeamUID(), data);
 		}
 
 		self = message.team == 0 ? null : teamData.get(message.team);
 		editingMode = message.editingMode;
-		rewards.addAll(message.rewards);
+		//FIXME: rewards.addAll(message.rewards);
 		refreshGui();
 		FTBQuestsJEIHelper.refresh(this);
+	}
+
+	private IntOpenHashSet fromArray(int[] array)
+	{
+		IntOpenHashSet set = new IntOpenHashSet(array.length);
+
+		for (int i : array)
+		{
+			set.add(i);
+		}
+
+		return set;
 	}
 
 	@Override
@@ -188,31 +202,31 @@ public class ClientQuestFile extends QuestFile
 
 	@Nullable
 	@Override
-	public ClientQuestProgress getData(short team)
+	public ClientQuestData getData(short team)
 	{
 		return team == 0 ? null : teamData.get(team);
 	}
 
-	public ClientQuestProgress removeData(short team)
+	public ClientQuestData removeData(short team)
 	{
 		return teamData.remove(team);
 	}
 
-	public void addData(ClientQuestProgress data)
+	public void addData(ClientQuestData data)
 	{
 		teamData.put(data.getTeamUID(), data);
 	}
 
 	@Nullable
 	@Override
-	public ClientQuestProgress getData(String team)
+	public ClientQuestData getData(String team)
 	{
 		if (team.isEmpty())
 		{
 			return null;
 		}
 
-		for (ClientQuestProgress data : teamData.values())
+		for (ClientQuestData data : teamData.values())
 		{
 			if (team.equals(data.getTeamID()))
 			{
@@ -224,7 +238,7 @@ public class ClientQuestFile extends QuestFile
 	}
 
 	@Override
-	public Collection<ClientQuestProgress> getAllData()
+	public Collection<ClientQuestData> getAllData()
 	{
 		return teamData.values();
 	}
@@ -233,10 +247,5 @@ public class ClientQuestFile extends QuestFile
 	public void deleteObject(int id)
 	{
 		new MessageDeleteObject(id).sendToServer();
-	}
-
-	public boolean isRewardClaimed(QuestReward reward)
-	{
-		return rewards.contains(reward.id);
 	}
 }

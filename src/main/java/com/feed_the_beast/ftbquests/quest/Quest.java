@@ -375,7 +375,7 @@ public final class Quest extends QuestObject
 	}
 
 	@Override
-	public int getRelativeProgressFromChildren(ITeamData data)
+	public int getRelativeProgressFromChildren(QuestData data)
 	{
 		/*if (data.getTimesCompleted(this) > 0)
 		{
@@ -397,7 +397,7 @@ public final class Quest extends QuestObject
 		return getRelativeProgressFromChildren(progress, tasks.size());
 	}
 
-	public boolean areDependenciesComplete(ITeamData data)
+	public boolean areDependenciesComplete(QuestData data)
 	{
 		if (dependencies.isEmpty())
 		{
@@ -447,13 +447,13 @@ public final class Quest extends QuestObject
 		return true;
 	}
 
-	public boolean canStartTasks(ITeamData data)
+	public boolean canStartTasks(QuestData data)
 	{
 		return areDependenciesComplete(data);
 	}
 
 	@Override
-	public void onCompleted(ITeamData data, List<EntityPlayerMP> notifyPlayers)
+	public void onCompleted(QuestData data, List<EntityPlayerMP> notifyPlayers)
 	{
 		//data.setTimesCompleted(this, data.getTimesCompleted(this) + 1);
 		super.onCompleted(data, notifyPlayers);
@@ -473,7 +473,7 @@ public final class Quest extends QuestObject
 	}
 
 	@Override
-	public void changeProgress(ITeamData data, EnumChangeProgress type)
+	public void changeProgress(QuestData data, EnumChangeProgress type)
 	{
 		//FIXME: data.setTimesCompleted(this, -1);
 
@@ -493,7 +493,7 @@ public final class Quest extends QuestObject
 			task.changeProgress(data, type);
 		}
 
-		if (type == EnumChangeProgress.RESET || type == EnumChangeProgress.RESET_DEPS)
+		if (type.reset)
 		{
 			data.unclaimRewards(rewards);
 		}
@@ -593,7 +593,7 @@ public final class Quest extends QuestObject
 	}
 
 	@Override
-	public boolean isVisible(ITeamData data)
+	public boolean isVisible(QuestData data)
 	{
 		if (dependencies.isEmpty())
 		{
@@ -773,7 +773,7 @@ public final class Quest extends QuestObject
 		return true;
 	}
 
-	public void checkRepeatableQuests(ITeamData data, UUID player)
+	public void checkRepeatableQuests(QuestData data, UUID player)
 	{
 		if (!canRepeat)
 		{
@@ -803,7 +803,7 @@ public final class Quest extends QuestObject
 		}
 	}
 
-	public boolean hasUnclaimedRewards(UUID player, ITeamData data, boolean showExcluded)
+	public boolean hasUnclaimedRewards(UUID player, QuestData data, boolean showExcluded)
 	{
 		if (isComplete(data))
 		{
@@ -819,7 +819,7 @@ public final class Quest extends QuestObject
 		return false;
 	}
 
-	public int getUnclaimedRewards(UUID player, ITeamData data, boolean showExcluded)
+	public int getUnclaimedRewards(UUID player, QuestData data, boolean showExcluded)
 	{
 		int r = 0;
 

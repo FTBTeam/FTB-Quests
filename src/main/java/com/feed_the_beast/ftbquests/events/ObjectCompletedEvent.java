@@ -1,8 +1,8 @@
 package com.feed_the_beast.ftbquests.events;
 
-import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
+import com.feed_the_beast.ftbquests.quest.QuestData;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.task.QuestTask;
@@ -12,23 +12,23 @@ import com.feed_the_beast.ftbquests.quest.task.QuestTask;
  */
 public class ObjectCompletedEvent<T extends QuestObject> extends FTBQuestsEvent
 {
-	private final ITeamData team;
+	private final QuestData team;
 	protected final T object;
 
-	private ObjectCompletedEvent(ITeamData t, T o)
+	private ObjectCompletedEvent(QuestData t, T o)
 	{
 		team = t;
 		object = o;
 	}
 
-	public ITeamData getTeam()
+	public QuestData getTeam()
 	{
 		return team;
 	}
 
 	public static class FileEvent extends ObjectCompletedEvent<QuestFile>
 	{
-		public FileEvent(ITeamData t, QuestFile o)
+		public FileEvent(QuestData t, QuestFile o)
 		{
 			super(t, o);
 		}
@@ -41,7 +41,7 @@ public class ObjectCompletedEvent<T extends QuestObject> extends FTBQuestsEvent
 
 	public static class ChapterEvent extends ObjectCompletedEvent<QuestChapter>
 	{
-		public ChapterEvent(ITeamData t, QuestChapter o)
+		public ChapterEvent(QuestData t, QuestChapter o)
 		{
 			super(t, o);
 		}
@@ -54,7 +54,7 @@ public class ObjectCompletedEvent<T extends QuestObject> extends FTBQuestsEvent
 
 	public static class QuestEvent extends ObjectCompletedEvent<Quest>
 	{
-		public QuestEvent(ITeamData t, Quest o)
+		public QuestEvent(QuestData t, Quest o)
 		{
 			super(t, o);
 		}
@@ -67,7 +67,7 @@ public class ObjectCompletedEvent<T extends QuestObject> extends FTBQuestsEvent
 
 	public static class TaskEvent extends ObjectCompletedEvent<QuestTask>
 	{
-		public TaskEvent(ITeamData t, QuestTask o)
+		public TaskEvent(QuestData t, QuestTask o)
 		{
 			super(t, o);
 		}

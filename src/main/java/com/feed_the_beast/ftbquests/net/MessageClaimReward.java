@@ -8,7 +8,7 @@ import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
-import com.feed_the_beast.ftbquests.util.FTBQuestsTeamData;
+import com.feed_the_beast.ftbquests.util.ServerQuestData;
 import net.minecraft.entity.player.EntityPlayerMP;
 
 /**
@@ -52,7 +52,7 @@ public class MessageClaimReward extends MessageToServer
 
 		if (reward != null)
 		{
-			FTBQuestsTeamData teamData = FTBQuestsTeamData.get(Universe.get().getPlayer(player).team);
+			ServerQuestData teamData = ServerQuestData.get(Universe.get().getPlayer(player).team);
 
 			if (reward.quest instanceof QuestObject && reward.quest.isComplete(teamData))
 			{

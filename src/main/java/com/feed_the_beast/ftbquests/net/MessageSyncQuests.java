@@ -6,13 +6,13 @@ import com.feed_the_beast.ftblib.lib.net.MessageToClient;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
-import it.unimi.dsi.fastutil.ints.IntCollection;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.Collection;
+import java.util.UUID;
 
 /**
  * @author LatvianModder
@@ -32,6 +32,26 @@ public class MessageSyncQuests extends MessageToClient
 				data.writeInt(t.taskKeys[i]);
 				data.writeNBTBase(t.taskValues[i]);
 			}
+
+			data.writeVarInt(t.playerRewardUUIDs.length);
+
+			for (int i = 0; i < t.playerRewardUUIDs.length; i++)
+			{
+				data.writeUUID(t.playerRewardUUIDs[i]);
+				data.writeVarInt(t.playerRewardIDs[i].length);
+
+				for (int j : t.playerRewardIDs[i])
+				{
+					data.writeInt(j);
+				}
+			}
+
+			data.writeVarInt(t.teamRewards.length);
+
+			for (int i : t.teamRewards)
+			{
+				data.writeInt(i);
+			}
 		};
 
 		public static final DataIn.Deserializer<TeamInst> DESERIALIZER = data -> {
@@ -48,6 +68,27 @@ public class MessageSyncQuests extends MessageToClient
 				t.taskValues[i] = data.readNBTBase();
 			}
 
+			t.playerRewardUUIDs = new UUID[data.readVarInt()];
+			t.playerRewardIDs = new int[t.playerRewardUUIDs.length][];
+
+			for (int i = 0; i < t.playerRewardUUIDs.length; i++)
+			{
+				t.playerRewardUUIDs[i] = data.readUUID();
+				t.playerRewardIDs[i] = new int[data.readVarInt()];
+
+				for (int j = 0; j < t.playerRewardIDs[i].length; j++)
+				{
+					t.playerRewardIDs[i][j] = data.readInt();
+				}
+			}
+
+			t.teamRewards = new int[data.readVarInt()];
+
+			for (int i = 0; i < t.teamRewards.length; i++)
+			{
+				t.teamRewards[i] = data.readInt();
+			}
+
 			return t;
 		};
 
@@ -56,25 +97,26 @@ public class MessageSyncQuests extends MessageToClient
 		public ITextComponent name;
 		public int[] taskKeys;
 		public NBTBase[] taskValues;
+		public UUID[] playerRewardUUIDs;
+		public int[][] playerRewardIDs;
+		public int[] teamRewards;
 	}
 
 	public QuestFile file;
 	public short team;
 	public Collection<TeamInst> teamData;
 	public boolean editingMode;
-	public IntCollection rewards;
 
 	public MessageSyncQuests()
 	{
 	}
 
-	public MessageSyncQuests(QuestFile f, short t, Collection<TeamInst> td, boolean e, IntCollection r)
+	public MessageSyncQuests(QuestFile f, short t, Collection<TeamInst> td, boolean e)
 	{
 		file = f;
 		team = t;
 		teamData = td;
 		editingMode = e;
-		rewards = r;
 	}
 
 	@Override
@@ -90,7 +132,6 @@ public class MessageSyncQuests extends MessageToClient
 		data.writeShort(team);
 		data.writeCollection(teamData, TeamInst.SERIALIZER);
 		data.writeBoolean(editingMode);
-		data.writeIntList(rewards);
 	}
 
 	@Override
@@ -101,7 +142,6 @@ public class MessageSyncQuests extends MessageToClient
 		team = data.readShort();
 		teamData = data.readCollection(TeamInst.DESERIALIZER);
 		editingMode = data.readBoolean();
-		rewards = data.readIntList();
 	}
 
 	@Override

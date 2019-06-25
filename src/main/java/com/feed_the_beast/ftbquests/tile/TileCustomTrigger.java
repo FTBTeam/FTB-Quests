@@ -7,7 +7,7 @@ import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
 import com.feed_the_beast.ftblib.lib.tile.EnumSaveType;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.EnumChangeProgress;
-import com.feed_the_beast.ftbquests.quest.ITeamData;
+import com.feed_the_beast.ftbquests.quest.QuestData;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
@@ -71,7 +71,7 @@ public class TileCustomTrigger extends TileWithTeam implements IConfigCallback
 
 			if (o != null)
 			{
-				ITeamData data = getTeam();
+				QuestData data = getTeam();
 
 				if (data != null)
 				{

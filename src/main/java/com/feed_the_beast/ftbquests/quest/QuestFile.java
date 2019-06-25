@@ -121,7 +121,7 @@ public abstract class QuestFile extends QuestObject
 	}
 
 	@Override
-	public int getRelativeProgressFromChildren(ITeamData data)
+	public int getRelativeProgressFromChildren(QuestData data)
 	{
 		int progress = 0;
 
@@ -134,7 +134,7 @@ public abstract class QuestFile extends QuestObject
 	}
 
 	@Override
-	public void onCompleted(ITeamData data, List<EntityPlayerMP> notifyPlayers)
+	public void onCompleted(QuestData data, List<EntityPlayerMP> notifyPlayers)
 	{
 		super.onCompleted(data, notifyPlayers);
 		new ObjectCompletedEvent.FileEvent(data, this).post();
@@ -146,7 +146,7 @@ public abstract class QuestFile extends QuestObject
 	}
 
 	@Override
-	public void changeProgress(ITeamData data, EnumChangeProgress type)
+	public void changeProgress(QuestData data, EnumChangeProgress type)
 	{
 		for (QuestChapter chapter : chapters)
 		{
@@ -1056,18 +1056,18 @@ public abstract class QuestFile extends QuestObject
 	}
 
 	@Nullable
-	public abstract ITeamData getData(short team);
+	public abstract QuestData getData(short team);
 
 	@Nullable
-	public abstract ITeamData getData(String team);
+	public abstract QuestData getData(String team);
 
 	@Nullable
-	public final ITeamData getData(EntityPlayer player)
+	public final QuestData getData(EntityPlayer player)
 	{
 		return getData(FTBLibAPI.getTeamID(player.getUniqueID()));
 	}
 
-	public abstract Collection<? extends ITeamData> getAllData();
+	public abstract Collection<? extends QuestData> getAllData();
 
 	public abstract void deleteObject(int id);
 
@@ -1242,7 +1242,7 @@ public abstract class QuestFile extends QuestObject
 		}
 	}
 
-	public int getUnclaimedRewards(UUID player, ITeamData data, boolean showExcluded)
+	public int getUnclaimedRewards(UUID player, QuestData data, boolean showExcluded)
 	{
 		int r = 0;
 
@@ -1258,7 +1258,7 @@ public abstract class QuestFile extends QuestObject
 	}
 
 	@Override
-	public boolean isVisible(ITeamData data)
+	public boolean isVisible(QuestData data)
 	{
 		for (QuestChapter chapter : chapters)
 		{
@@ -1271,7 +1271,7 @@ public abstract class QuestFile extends QuestObject
 		return false;
 	}
 
-	public List<QuestChapter> getVisibleChapters(ITeamData data, boolean excludeEmpty)
+	public List<QuestChapter> getVisibleChapters(QuestData data, boolean excludeEmpty)
 	{
 		List<QuestChapter> list = new ArrayList<>();
 

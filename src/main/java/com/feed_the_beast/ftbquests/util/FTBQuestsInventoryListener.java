@@ -1,9 +1,9 @@
 package com.feed_the_beast.ftbquests.util;
 
 import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
-import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
+import com.feed_the_beast.ftbquests.quest.QuestData;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.task.QuestTask;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -45,7 +45,7 @@ public class FTBQuestsInventoryListener implements IContainerListener
 
 		//FTBQuests.LOGGER.info("Running auto-completion with list: " + itemsToCheck);
 
-		ITeamData data = ServerQuestFile.INSTANCE.getData(FTBLibAPI.getTeamID(player.getUniqueID()));
+		QuestData data = ServerQuestFile.INSTANCE.getData(FTBLibAPI.getTeamID(player.getUniqueID()));
 
 		if (data == null)
 		{

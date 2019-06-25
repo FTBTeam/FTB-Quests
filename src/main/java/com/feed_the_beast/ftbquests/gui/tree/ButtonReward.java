@@ -100,7 +100,7 @@ public class ButtonReward extends Button
 	{
 		if (button.isLeft())
 		{
-			if (ClientQuestFile.existsWithTeam() && reward.quest.isComplete(ClientQuestFile.INSTANCE.self) && !ClientQuestFile.INSTANCE.isRewardClaimed(reward))
+			if (ClientQuestFile.existsWithTeam() && reward.quest.isComplete(ClientQuestFile.INSTANCE.self) && !ClientQuestFile.INSTANCE.self.isRewardClaimedSelf(reward))
 			{
 				GuiHelper.playClickSound();
 				reward.onButtonClicked();
@@ -143,7 +143,7 @@ public class ButtonReward extends Button
 		{
 			GuiIcons.CLOSE.draw(x + w - 9, y + 1, 8, 8);
 		}
-		else if (ClientQuestFile.INSTANCE.isRewardClaimed(reward))
+		else if (ClientQuestFile.INSTANCE.self.isRewardClaimedSelf(reward))
 		{
 			FTBQuestsTheme.COMPLETED.draw(x + w - 9, y + 1, 8, 8);
 			completed = true;

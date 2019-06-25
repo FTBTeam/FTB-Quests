@@ -1,7 +1,7 @@
 package com.feed_the_beast.ftbquests.quest.task;
 
-import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.quest.QuestData;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 
@@ -29,14 +29,14 @@ public class CustomTask extends QuestTask
 	}
 
 	@Override
-	public QuestTaskData createData(ITeamData data)
+	public QuestTaskData createData(QuestData data)
 	{
 		return new Data(this, data);
 	}
 
 	public static class Data extends SimpleQuestTaskData<CustomTask>
 	{
-		private Data(CustomTask task, ITeamData data)
+		private Data(CustomTask task, QuestData data)
 		{
 			super(task, data);
 		}

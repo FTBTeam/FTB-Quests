@@ -63,11 +63,11 @@ public abstract class QuestObjectBase
 
 	public abstract QuestFile getQuestFile();
 
-	public void changeProgress(ITeamData data, EnumChangeProgress type)
+	public void changeProgress(QuestData data, EnumChangeProgress type)
 	{
 	}
 
-	public void forceProgress(ITeamData data, EnumChangeProgress type, boolean notifications)
+	public void forceProgress(QuestData data, EnumChangeProgress type, boolean notifications)
 	{
 		EnumChangeProgress.sendUpdates = false;
 		EnumChangeProgress.sendNotifications = notifications ? EnumTristate.TRUE : EnumTristate.FALSE;

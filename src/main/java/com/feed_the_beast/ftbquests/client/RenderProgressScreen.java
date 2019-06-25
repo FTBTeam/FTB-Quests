@@ -2,9 +2,9 @@ package com.feed_the_beast.ftbquests.client;
 
 import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
-import com.feed_the_beast.ftbquests.quest.ITeamData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
+import com.feed_the_beast.ftbquests.quest.QuestData;
 import com.feed_the_beast.ftbquests.tile.TileProgressScreenCore;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
@@ -40,7 +40,7 @@ public class RenderProgressScreen extends TileEntitySpecialRenderer<TileProgress
 			return;
 		}
 
-		ITeamData team = screen.getTeam();
+		QuestData team = screen.getTeam();
 
 		if (team == null)
 		{
