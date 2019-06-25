@@ -42,9 +42,11 @@ import javax.annotation.Nullable;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 /**
  * @author LatvianModder
@@ -1284,5 +1286,34 @@ public abstract class QuestFile extends QuestObject
 		}
 
 		return list;
+	}
+
+	public <T extends QuestObjectBase> List<T> collect(Class<T> clazz, Predicate<QuestObjectBase> filter)
+	{
+		List<T> list = new ArrayList<>();
+
+		for (QuestObjectBase base : getAllObjects())
+		{
+			if (filter.test(base))
+			{
+				list.add((T) base);
+			}
+		}
+
+		if (list.isEmpty())
+		{
+			return Collections.emptyList();
+		}
+		else if (list.size() == 1)
+		{
+			return Collections.singletonList(list.get(0));
+		}
+
+		return list;
+	}
+
+	public <T extends QuestObjectBase> List<T> collect(Class<T> clazz)
+	{
+		return collect(clazz, o -> clazz.isAssignableFrom(o.getClass()));
 	}
 }

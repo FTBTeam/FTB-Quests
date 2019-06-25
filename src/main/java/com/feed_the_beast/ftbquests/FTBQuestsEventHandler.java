@@ -21,8 +21,6 @@ import com.feed_the_beast.ftbquests.events.ClearFileCacheEvent;
 import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.item.ItemLootCrate;
 import com.feed_the_beast.ftbquests.item.ItemQuestBook;
-import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.QuestData;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.loot.LootCrate;
@@ -44,9 +42,11 @@ import com.feed_the_beast.ftbquests.quest.task.DimensionTask;
 import com.feed_the_beast.ftbquests.quest.task.FTBQuestsTasks;
 import com.feed_the_beast.ftbquests.quest.task.FluidTask;
 import com.feed_the_beast.ftbquests.quest.task.ForgeEnergyTask;
+import com.feed_the_beast.ftbquests.quest.task.InteractionTask;
 import com.feed_the_beast.ftbquests.quest.task.ItemTask;
 import com.feed_the_beast.ftbquests.quest.task.KillTask;
 import com.feed_the_beast.ftbquests.quest.task.LocationTask;
+import com.feed_the_beast.ftbquests.quest.task.ObservationTask;
 import com.feed_the_beast.ftbquests.quest.task.QuestTask;
 import com.feed_the_beast.ftbquests.quest.task.QuestTaskData;
 import com.feed_the_beast.ftbquests.quest.task.QuestTaskType;
@@ -61,6 +61,7 @@ import com.feed_the_beast.ftbquests.tile.TileProgressScreenPart;
 import com.feed_the_beast.ftbquests.tile.TileQuestChest;
 import com.feed_the_beast.ftbquests.tile.TileTaskScreenCore;
 import com.feed_the_beast.ftbquests.tile.TileTaskScreenPart;
+import com.feed_the_beast.ftbquests.util.BlockMatcher;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
 import com.feed_the_beast.ftbquests.util.FTBQuestsInventoryListener;
 import it.unimi.dsi.fastutil.ints.IntSets;
@@ -78,6 +79,7 @@ import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.player.PlayerDropsEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
@@ -88,7 +90,6 @@ import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -174,7 +175,9 @@ public class FTBQuestsEventHandler
 				FTBQuestsTasks.KILL = new QuestTaskType(KillTask::new).setRegistryName("kill").setIcon(Icon.getIcon("minecraft:items/diamond_sword")),
 				FTBQuestsTasks.LOCATION = new QuestTaskType(LocationTask::new).setRegistryName("location").setIcon(Icon.getIcon("minecraft:items/compass_00")),
 				FTBQuestsTasks.CHECKMARK = new QuestTaskType(CheckmarkTask::new).setRegistryName("checkmark").setIcon(GuiIcons.ACCEPT_GRAY),
-				FTBQuestsTasks.ADVANCEMENT = new QuestTaskType(AdvancementTask::new).setRegistryName("advancement").setIcon(Icon.getIcon("minecraft:items/wheat"))
+				FTBQuestsTasks.ADVANCEMENT = new QuestTaskType(AdvancementTask::new).setRegistryName("advancement").setIcon(Icon.getIcon("minecraft:items/wheat")),
+				FTBQuestsTasks.OBSERVATION = new QuestTaskType(ObservationTask::new).setRegistryName("observation").setIcon(GuiIcons.ART),
+				FTBQuestsTasks.INTERACTION = new QuestTaskType(InteractionTask::new).setRegistryName("interaction").setIcon(GuiIcons.BELL)
 		);
 
 		FTBQuests.PROXY.setTaskGuiProviders();
@@ -208,14 +211,16 @@ public class FTBQuestsEventHandler
 
 	// Game Events //
 
-	private static KillTask[] killTasks = null;
-	private static QuestTask[] autoSubmitTasks = null;
+	private static List<KillTask> killTasks = null;
+	private static List<QuestTask> autoSubmitTasks = null;
+	private static List<InteractionTask> interactionTasks = null;
 
 	@SubscribeEvent
 	public static void onFileCacheClear(ClearFileCacheEvent event)
 	{
 		killTasks = null;
 		autoSubmitTasks = null;
+		interactionTasks = null;
 	}
 
 	@SubscribeEvent
@@ -250,26 +255,10 @@ public class FTBQuestsEventHandler
 		{
 			if (killTasks == null)
 			{
-				List<KillTask> tasks = new ArrayList<>();
-
-				for (QuestChapter chapter : ServerQuestFile.INSTANCE.chapters)
-				{
-					for (Quest quest : chapter.quests)
-					{
-						for (QuestTask task : quest.tasks)
-						{
-							if (task instanceof KillTask)
-							{
-								tasks.add((KillTask) task);
-							}
-						}
-					}
-				}
-
-				killTasks = tasks.toArray(new KillTask[0]);
+				killTasks = ServerQuestFile.INSTANCE.collect(KillTask.class);
 			}
 
-			if (killTasks.length == 0)
+			if (killTasks.isEmpty())
 			{
 				return;
 			}
@@ -302,26 +291,10 @@ public class FTBQuestsEventHandler
 		{
 			if (autoSubmitTasks == null)
 			{
-				List<QuestTask> tasks = new ArrayList<>();
-
-				for (QuestChapter chapter : ServerQuestFile.INSTANCE.chapters)
-				{
-					for (Quest quest : chapter.quests)
-					{
-						for (QuestTask task : quest.tasks)
-						{
-							if (task.autoSubmitOnPlayerTick())
-							{
-								tasks.add(task);
-							}
-						}
-					}
-				}
-
-				autoSubmitTasks = tasks.toArray(new QuestTask[0]);
+				autoSubmitTasks = ServerQuestFile.INSTANCE.collect(QuestTask.class, o -> o instanceof QuestTask && ((QuestTask) o).autoSubmitOnPlayerTick());
 			}
 
-			if (autoSubmitTasks.length == 0)
+			if (autoSubmitTasks.isEmpty())
 			{
 				return;
 			}
@@ -413,6 +386,42 @@ public class FTBQuestsEventHandler
 			if (stack.getItem() == FTBQuestsItems.BOOK && player.addItemStackToInventory(stack))
 			{
 				iterator.remove();
+			}
+		}
+	}
+
+	@SubscribeEvent(priority = EventPriority.LOW)
+	public static void onBlockRightClick(PlayerInteractEvent.RightClickBlock event)
+	{
+		if (event.getWorld().isRemote)
+		{
+			return;
+		}
+
+		if (interactionTasks == null)
+		{
+			interactionTasks = ServerQuestFile.INSTANCE.collect(InteractionTask.class);
+		}
+
+		if (interactionTasks.isEmpty())
+		{
+			return;
+		}
+
+		QuestData data = ServerQuestFile.INSTANCE.getData(event.getEntityPlayer());
+
+		if (data == null)
+		{
+			return;
+		}
+
+		BlockMatcher.Data matcherData = new BlockMatcher.Data(event.getWorld().getBlockState(event.getPos()), event.getWorld().getTileEntity(event.getPos()));
+
+		for (InteractionTask task : interactionTasks)
+		{
+			if (!task.isComplete(data) && task.matcher.matches(matcherData))
+			{
+				data.getQuestTaskData(task).submitTask((EntityPlayerMP) event.getEntityPlayer(), Collections.emptyList(), false);
 			}
 		}
 	}
