@@ -66,10 +66,7 @@ public class MessageChangeProgress extends MessageToServer
 
 				if (t != null)
 				{
-					EnumChangeProgress.sendUpdates = false;
-					object.changeProgress(t, type);
-					EnumChangeProgress.sendUpdates = true;
-					new MessageChangeProgressResponse(team, id, type).sendToAll();
+					object.forceProgress(t, type, false);
 				}
 			}
 		}

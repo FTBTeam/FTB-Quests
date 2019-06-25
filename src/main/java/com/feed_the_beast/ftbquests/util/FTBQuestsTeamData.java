@@ -333,7 +333,7 @@ public class FTBQuestsTeamData extends TeamData implements ITeamData
 			data.isComplete = true;
 			List<EntityPlayerMP> notifyPlayers = new ArrayList<>();
 
-			if (!data.task.quest.chapter.alwaysInvisible && !data.task.quest.canRepeat && EnumChangeProgress.sendUpdates)
+			if (!data.task.quest.chapter.alwaysInvisible && !data.task.quest.canRepeat && EnumChangeProgress.sendNotifications.get(EnumChangeProgress.sendUpdates))
 			{
 				for (ForgePlayer player : team.getMembers())
 				{

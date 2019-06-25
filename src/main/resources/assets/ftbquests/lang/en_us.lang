@@ -14,6 +14,12 @@ tile.ftbquests.screen.hide_icons=Hide Icons
 tile.ftbquests.progress_detector.name=Quest Progress Detector
 tile.ftbquests.progress_detector.object=Object ID
 tile.ftbquests.progress_detector.level=Output Level
+
+tile.ftbquests.custom_trigger.name=Custom Trigger Block
+tile.ftbquests.custom_trigger.object=Object ID
+tile.ftbquests.custom_trigger.required_redstone=Required Redstone Level
+tile.ftbquests.custom_trigger.notifications=Notifications
+
 tile.ftbquests.progress_screen.name=Progress Screen
 
 tile.ftbquests.chest.name=Quest Chest

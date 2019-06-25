@@ -1,5 +1,6 @@
 package com.feed_the_beast.ftbquests.quest;
 
+import com.feed_the_beast.ftblib.lib.config.EnumTristate;
 import com.feed_the_beast.ftblib.lib.util.IWithID;
 import com.feed_the_beast.ftblib.lib.util.misc.NameMap;
 
@@ -15,6 +16,7 @@ public enum EnumChangeProgress implements IWithID
 
 	public static final NameMap<EnumChangeProgress> NAME_MAP = NameMap.create(RESET, values());
 	public static boolean sendUpdates = true;
+	public static EnumTristate sendNotifications = EnumTristate.DEFAULT;
 
 	private final String id;
 	public final boolean reset, complete, dependencies;

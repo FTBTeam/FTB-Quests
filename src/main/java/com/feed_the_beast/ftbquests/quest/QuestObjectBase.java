@@ -2,6 +2,7 @@ package com.feed_the_beast.ftbquests.quest;
 
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigItemStack;
+import com.feed_the_beast.ftblib.lib.config.EnumTristate;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
@@ -10,6 +11,7 @@ import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.client.FTBQuestsClient;
 import com.feed_the_beast.ftbquests.gui.editor.ConfigPane;
+import com.feed_the_beast.ftbquests.net.edit.MessageChangeProgressResponse;
 import com.feed_the_beast.ftbquests.net.edit.MessageEditObject;
 import com.latmod.mods.itemfilters.item.ItemMissing;
 import javafx.scene.Node;
@@ -63,6 +65,20 @@ public abstract class QuestObjectBase
 
 	public void changeProgress(ITeamData data, EnumChangeProgress type)
 	{
+	}
+
+	public void forceProgress(ITeamData data, EnumChangeProgress type, boolean notifications)
+	{
+		EnumChangeProgress.sendUpdates = false;
+		EnumChangeProgress.sendNotifications = notifications ? EnumTristate.TRUE : EnumTristate.FALSE;
+		changeProgress(data, type);
+		EnumChangeProgress.sendUpdates = true;
+		EnumChangeProgress.sendNotifications = EnumTristate.DEFAULT;
+
+		if (!getQuestFile().isClient())
+		{
+			new MessageChangeProgressResponse(data.getTeamUID(), id, type, notifications).sendToAll();
+		}
 	}
 
 	@Nullable
