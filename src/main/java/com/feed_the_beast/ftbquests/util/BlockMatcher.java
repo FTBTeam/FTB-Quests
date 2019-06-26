@@ -47,12 +47,39 @@ public class BlockMatcher
 
 	public static class Data
 	{
+		public static final Data EMPTY = new Data(BlockUtils.AIR_STATE, null);
+
+		public static Data get(IBlockState state, @Nullable TileEntity tileEntity)
+		{
+			if (state == BlockUtils.AIR_STATE && tileEntity == null)
+			{
+				return EMPTY;
+			}
+
+			return new Data(state, tileEntity);
+		}
+
+		public static Data get(World world, @Nullable RayTraceResult ray)
+		{
+			if (ray == null || ray.typeOfHit != RayTraceResult.Type.BLOCK)
+			{
+				return EMPTY;
+			}
+
+			return get(world.getBlockState(ray.getBlockPos()), world.getTileEntity(ray.getBlockPos()));
+		}
+
+		public static Data get(EntityPlayer player)
+		{
+			return get(player.world, MathUtils.rayTrace(player, true));
+		}
+
 		public final String blockId;
 		public final Map<String, String> blockProperties;
 		public final String entityClass;
 		public final String entityId;
 
-		public Data(IBlockState state, @Nullable TileEntity tileEntity)
+		private Data(IBlockState state, @Nullable TileEntity tileEntity)
 		{
 			blockProperties = new HashMap<>();
 			blockId = String.valueOf(state.getBlock().getRegistryName());
@@ -71,16 +98,6 @@ public class BlockMatcher
 				entityClass = tileEntity.getClass().getName();
 				entityId = String.valueOf(TileEntity.getKey(tileEntity.getClass()));
 			}
-		}
-
-		public Data(World world, @Nullable RayTraceResult ray)
-		{
-			this(ray == null ? BlockUtils.AIR_STATE : world.getBlockState(ray.getBlockPos()), ray == null ? null : world.getTileEntity(ray.getBlockPos()));
-		}
-
-		public Data(EntityPlayer player)
-		{
-			this(player.world, MathUtils.rayTrace(player, true));
 		}
 	}
 
@@ -180,7 +197,7 @@ public class BlockMatcher
 
 	public boolean matches(Data data)
 	{
-		return stringMatches(data) && propertiesMatch(data);
+		return data != Data.EMPTY && stringMatches(data) && propertiesMatch(data);
 	}
 
 	public String getPropertyString()

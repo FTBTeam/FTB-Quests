@@ -90,7 +90,7 @@ public class InteractionTask extends QuestTask
 		@Override
 		public boolean submitTask(EntityPlayerMP player, Collection<ItemStack> itemsToCheck, boolean simulate)
 		{
-			if (progress < 1L && task.matcher.matches(new BlockMatcher.Data(player)))
+			if (progress < 1L && task.matcher.matches(BlockMatcher.Data.get(player)))
 			{
 				if (!simulate)
 				{

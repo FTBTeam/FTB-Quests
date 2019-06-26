@@ -127,15 +127,9 @@ public class FTBQuestsClientEventHandler
 	@SubscribeEvent
 	public static void onCustomClick(CustomClickEvent event)
 	{
-		if (event.getID().getNamespace().equals(FTBQuests.MOD_ID))
+		if (event.getID().getNamespace().equals(FTBQuests.MOD_ID) && "open_gui".equals(event.getID().getPath()))
 		{
-			switch (event.getID().getPath())
-			{
-				case "open_gui":
-					ClientQuestFile.INSTANCE.openQuestGui(Minecraft.getMinecraft().player);
-					break;
-			}
-
+			ClientQuestFile.INSTANCE.openQuestGui(Minecraft.getMinecraft().player);
 			event.setCanceled(true);
 		}
 	}
@@ -163,11 +157,11 @@ public class FTBQuestsClientEventHandler
 				return;
 			}
 
-			BlockMatcher.Data data = new BlockMatcher.Data(mc.world, mc.objectMouseOver);
+			BlockMatcher.Data data = BlockMatcher.Data.get(mc.world, mc.objectMouseOver);
 
 			for (ObservationTask task : observationTasks)
 			{
-				if (!task.isComplete(ClientQuestFile.INSTANCE.self) && task.matcher.matches(data))
+				if (task.matcher.matches(data) && !task.isComplete(ClientQuestFile.INSTANCE.self) && task.quest.canStartTasks(ClientQuestFile.INSTANCE.self))
 				{
 					new MessageSubmitTask(task.id).sendToServer();
 				}
