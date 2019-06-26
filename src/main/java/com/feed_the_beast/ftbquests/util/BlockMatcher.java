@@ -75,7 +75,7 @@ public class BlockMatcher
 
 		public Data(World world, @Nullable RayTraceResult ray)
 		{
-			this(ray == null ? BlockUtils.AIR_STATE : world.getBlockState(ray.getBlockPos()), world.getTileEntity(ray.getBlockPos()));
+			this(ray == null ? BlockUtils.AIR_STATE : world.getBlockState(ray.getBlockPos()), ray == null ? null : world.getTileEntity(ray.getBlockPos()));
 		}
 
 		public Data(EntityPlayer player)
@@ -92,27 +92,49 @@ public class BlockMatcher
 	{
 		nbt.setString("type", type.getID());
 		nbt.setString("match", match);
+
+		if (!properties.isEmpty())
+		{
+			NBTTagCompound nbt1 = new NBTTagCompound();
+
+			for (Map.Entry<String, String> entry : properties.entrySet())
+			{
+				nbt1.setString(entry.getKey(), entry.getValue());
+			}
+
+			nbt.setTag("properties", nbt1);
+		}
 	}
 
 	public void readData(NBTTagCompound nbt)
 	{
 		type = Type.NAME_MAP.get(nbt.getString("type"));
 		match = nbt.getString("match");
+		properties.clear();
+
+		NBTTagCompound nbt1 = nbt.getCompoundTag("properties");
+
+		for (String s : nbt1.getKeySet())
+		{
+			properties.put(s, nbt1.getString(s));
+		}
 	}
 
 	public void writeNetData(DataOut data)
 	{
 		Type.NAME_MAP.write(data, type);
 		data.writeString(match);
+		data.writeMap(properties, DataOut.STRING, DataOut.STRING);
 	}
 
 	public void readNetData(DataIn data)
 	{
 		type = Type.NAME_MAP.read(data);
 		match = data.readString();
+		data.readMap(properties, DataIn.STRING, DataIn.STRING);
 	}
 
-	public boolean matches(Data data)
+	public boolean stringMatches(Data data)
 	{
 		if (match.isEmpty())
 		{
@@ -122,22 +144,86 @@ public class BlockMatcher
 		switch (type)
 		{
 			case BLOCK:
-				if (match.equals(data.blockId))
-				{
-					return true;
-				}
+				return match.equals(data.blockId);
 			case ENTITY_ID:
-				if (match.equals(data.entityId))
-				{
-					return true;
-				}
+				return match.equals(data.entityId);
 			case ENTITY_CLASS:
-				if (match.equals(data.entityClass))
-				{
-					return true;
-				}
+				return match.equals(data.entityClass);
 			default:
 				return false;
+		}
+	}
+
+	public boolean propertiesMatch(Data data)
+	{
+		if (properties.isEmpty())
+		{
+			return true;
+		}
+		else if (properties.size() > data.blockProperties.size())
+		{
+			return false;
+		}
+
+		for (Map.Entry<String, String> entry : properties.entrySet())
+		{
+			String s = data.blockProperties.get(entry.getKey());
+
+			if (s == null || !s.equals(entry.getValue()))
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	public boolean matches(Data data)
+	{
+		return stringMatches(data) && propertiesMatch(data);
+	}
+
+	public String getPropertyString()
+	{
+		if (properties.isEmpty())
+		{
+			return "";
+		}
+
+		StringBuilder builder = new StringBuilder();
+		boolean first = true;
+
+		for (Map.Entry<String, String> entry : properties.entrySet())
+		{
+			if (first)
+			{
+				first = false;
+			}
+			else
+			{
+				builder.append(',');
+			}
+
+			builder.append(entry.getKey());
+			builder.append('=');
+			builder.append(entry.getValue());
+		}
+
+		return builder.toString();
+	}
+
+	public void setPropertyString(String s)
+	{
+		properties.clear();
+
+		for (String s1 : s.split(","))
+		{
+			String[] s2 = s1.split("=", 2);
+
+			if (s2.length == 2)
+			{
+				properties.put(s2[0], s2[1]);
+			}
 		}
 	}
 }

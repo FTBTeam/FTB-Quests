@@ -66,6 +66,7 @@ public class InteractionTask extends QuestTask
 		super.getConfig(player, config);
 		config.addEnum("type", () -> matcher.type, v -> matcher.type = v, BlockMatcher.Type.NAME_MAP);
 		config.addString("match", () -> matcher.match, v -> matcher.match = v, "");
+		config.addString("properties", matcher::getPropertyString, matcher::setPropertyString, "");
 	}
 
 	@Override
