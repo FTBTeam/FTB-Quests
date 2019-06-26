@@ -80,11 +80,14 @@ public class GameStagesIntegration
 			{
 				for (Quest quest : chapter.quests)
 				{
-					for (QuestTask task : quest.tasks)
+					if (quest.canStartTasks(data))
 					{
-						if (task instanceof GameStageTask)
+						for (QuestTask task : quest.tasks)
 						{
-							data.getQuestTaskData(task).submitTask(player, Collections.emptyList(), false);
+							if (task instanceof GameStageTask)
+							{
+								data.getQuestTaskData(task).submitTask(player, Collections.emptyList(), false);
+							}
 						}
 					}
 				}

@@ -415,7 +415,7 @@ public class FTBQuestsEventHandler
 			return;
 		}
 
-		BlockMatcher.Data matcherData = new BlockMatcher.Data(event.getWorld().getBlockState(event.getPos()), event.getWorld().getTileEntity(event.getPos()));
+		BlockMatcher.Data matcherData = BlockMatcher.Data.get(event.getWorld().getBlockState(event.getPos()), event.getWorld().getTileEntity(event.getPos()));
 
 		for (InteractionTask task : interactionTasks)
 		{
