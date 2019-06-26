@@ -419,7 +419,7 @@ public class FTBQuestsEventHandler
 
 		for (InteractionTask task : interactionTasks)
 		{
-			if (!task.isComplete(data) && task.matcher.matches(matcherData))
+			if (!task.isComplete(data) && task.matcher.matches(matcherData) && task.quest.canStartTasks(data))
 			{
 				data.getQuestTaskData(task).submitTask((EntityPlayerMP) event.getEntityPlayer(), Collections.emptyList(), false);
 			}
