@@ -418,9 +418,14 @@ public class GuiQuestTree extends GuiBase
 			selectChapter(null);
 		}
 
-		if (selectedChapter == null && !file.chapters.isEmpty())
+		if (selectedChapter == null)
 		{
-			selectChapter(file.chapters.get(0));
+			List<QuestChapter> visible = file.getVisibleChapters(file.self, !file.canEdit());
+
+			if (!visible.isEmpty())
+			{
+				selectChapter(visible.get(0));
+			}
 		}
 
 		super.tick();
