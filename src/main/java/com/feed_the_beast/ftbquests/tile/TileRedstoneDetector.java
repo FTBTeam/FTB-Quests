@@ -59,7 +59,7 @@ public class TileRedstoneDetector extends TileWithTeam implements IHasConfig
 			{
 				QuestData data = getTeam();
 
-				if (data != null && t.quest.canStartTasks(data))
+				if (data != null && !t.isComplete(data) && t.quest.canStartTasks(data))
 				{
 					t.forceProgress(data, EnumChangeProgress.COMPLETE, notifications);
 				}

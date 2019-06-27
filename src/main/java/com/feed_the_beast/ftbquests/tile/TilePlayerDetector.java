@@ -104,7 +104,7 @@ public class TilePlayerDetector extends TileBase implements IHasConfig, ITickabl
 			{
 				QuestData data = ServerQuestFile.INSTANCE.getData(player);
 
-				if (data != null && t.quest.canStartTasks(data))
+				if (data != null && !t.isComplete(data) && t.quest.canStartTasks(data))
 				{
 					t.forceProgress(data, EnumChangeProgress.COMPLETE, notifications);
 				}
