@@ -566,7 +566,7 @@ public final class Quest extends QuestObject
 	@Override
 	public File getFile(File folder)
 	{
-		return new File(folder, "chapters/" + chapter.getCodeString() + "/" + getCodeString() + ".nbt");
+		return new File(folder, "chapters/" + getCodeString(chapter) + "/" + getCodeString(this) + ".nbt");
 	}
 
 	@Override
@@ -583,7 +583,7 @@ public final class Quest extends QuestObject
 
 		Predicate<QuestObjectBase> depTypes = object -> object != chapter.file && object != chapter && object instanceof QuestObject && !(object instanceof QuestTask);
 
-		config.addList("dependencies", dependencies, new ConfigQuestObject(chapter.file, null, depTypes), questObject -> new ConfigQuestObject(chapter.file, questObject, depTypes), configQuestObject -> (QuestObject) configQuestObject.getObject()).setDisplayName(new TextComponentTranslation("ftbquests.dependencies"));
+		config.addList("dependencies", dependencies, new ConfigQuestObject(chapter.file, 0, depTypes), questObject -> new ConfigQuestObject(chapter.file, questObject.id, depTypes), configQuestObject -> chapter.file.get(configQuestObject.getObject())).setDisplayName(new TextComponentTranslation("ftbquests.dependencies"));
 		config.addEnum("dependency_requirement", () -> dependencyRequirement, v -> dependencyRequirement = v, EnumDependencyRequirement.NAME_MAP);
 		config.addInt("min_required_dependencies", () -> minRequiredDependencies, v -> minRequiredDependencies = v, 0, 0, Integer.MAX_VALUE);
 		config.addBool("hide_dependency_lines", () -> hideDependencyLines, v -> hideDependencyLines = v, false);

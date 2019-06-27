@@ -3,6 +3,7 @@ package com.feed_the_beast.ftbquests.command;
 import com.feed_the_beast.ftblib.FTBLib;
 import com.feed_the_beast.ftblib.lib.math.MathUtils;
 import com.feed_the_beast.ftbquests.net.edit.MessageEditObjectResponse;
+import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.loot.RewardTable;
 import com.feed_the_beast.ftbquests.quest.loot.WeightedReward;
@@ -58,7 +59,7 @@ public class CommandImportRewardsFromChest extends CommandFTBQuestsBase
 			{
 				if (table.lootCrate == null)
 				{
-					list.add(table.getCodeString());
+					list.add(QuestObjectBase.getCodeString(table));
 				}
 			}
 

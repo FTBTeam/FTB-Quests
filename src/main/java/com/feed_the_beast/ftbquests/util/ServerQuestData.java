@@ -27,6 +27,7 @@ import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.QuestData;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
+import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
 import com.feed_the_beast.ftbquests.quest.task.DimensionTask;
@@ -384,7 +385,7 @@ public class ServerQuestData extends QuestData implements NBTDataStorage.Data
 
 			if (nbt2 != null)
 			{
-				nbt1.setTag(data.task.getCodeString(), nbt2);
+				nbt1.setTag(QuestObjectBase.getCodeString(data.task), nbt2);
 			}
 		}
 

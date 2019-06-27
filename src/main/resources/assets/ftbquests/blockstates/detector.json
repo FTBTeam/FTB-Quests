@@ -1,0 +1,6 @@
+{
+	"variants": {
+		"variant=redstone": {"model": "ftbquests:redstone_detector"},
+		"variant=player": {"model": "ftbquests:player_detector"}
+	}
+}

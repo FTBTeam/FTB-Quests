@@ -21,13 +21,13 @@ import java.util.Map;
 /**
  * @author LatvianModder
  */
-public class BlockMatcher
+public class RayMatcher
 {
 	public enum Type implements IWithID
 	{
 		BLOCK("block"),
-		ENTITY_ID("entity_id"),
-		ENTITY_CLASS("entity_class");
+		BLOCK_ENTITY_ID("block_entity_id"),
+		BLOCK_ENTITY_CLASS("block_entity_class");
 
 		public static final NameMap<Type> NAME_MAP = NameMap.create(BLOCK, values());
 
@@ -76,8 +76,8 @@ public class BlockMatcher
 
 		public final String blockId;
 		public final Map<String, String> blockProperties;
-		public final String entityClass;
-		public final String entityId;
+		public final String blockEntityClass;
+		public final String blockEntityId;
 
 		private Data(IBlockState state, @Nullable TileEntity tileEntity)
 		{
@@ -91,12 +91,12 @@ public class BlockMatcher
 
 			if (tileEntity == null)
 			{
-				entityClass = entityId = "";
+				blockEntityClass = blockEntityId = "";
 			}
 			else
 			{
-				entityClass = tileEntity.getClass().getName();
-				entityId = String.valueOf(TileEntity.getKey(tileEntity.getClass()));
+				blockEntityClass = tileEntity.getClass().getName();
+				blockEntityId = String.valueOf(TileEntity.getKey(tileEntity.getClass()));
 			}
 		}
 	}
@@ -107,7 +107,7 @@ public class BlockMatcher
 
 	public void writeData(NBTTagCompound nbt)
 	{
-		nbt.setString("type", type.getID());
+		nbt.setString("match_type", type.getID());
 		nbt.setString("match", match);
 
 		if (!properties.isEmpty())
@@ -125,7 +125,7 @@ public class BlockMatcher
 
 	public void readData(NBTTagCompound nbt)
 	{
-		type = Type.NAME_MAP.get(nbt.getString("type"));
+		type = Type.NAME_MAP.get(nbt.getString("match_type"));
 		match = nbt.getString("match");
 		properties.clear();
 
@@ -162,10 +162,10 @@ public class BlockMatcher
 		{
 			case BLOCK:
 				return match.equals(data.blockId);
-			case ENTITY_ID:
-				return match.equals(data.entityId);
-			case ENTITY_CLASS:
-				return match.equals(data.entityClass);
+			case BLOCK_ENTITY_ID:
+				return match.equals(data.blockEntityId);
+			case BLOCK_ENTITY_CLASS:
+				return match.equals(data.blockEntityClass);
 			default:
 				return false;
 		}

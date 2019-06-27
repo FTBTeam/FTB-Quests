@@ -31,6 +31,26 @@ import java.util.Optional;
  */
 public abstract class QuestObjectBase
 {
+	public static boolean isNull(@Nullable QuestObjectBase object)
+	{
+		return object == null || object.invalid;
+	}
+
+	public static int getID(@Nullable QuestObjectBase object)
+	{
+		return isNull(object) ? 0 : object.id;
+	}
+
+	public static String getCodeString(int id)
+	{
+		return String.format("%08x", id);
+	}
+
+	public static String getCodeString(@Nullable QuestObjectBase object)
+	{
+		return String.format("%08x", getID(object));
+	}
+
 	public int id = 0;
 	public boolean invalid = false;
 	public String title = "";
@@ -41,12 +61,7 @@ public abstract class QuestObjectBase
 
 	public final String toString()
 	{
-		return String.format("#%08x", id);
-	}
-
-	public final String getCodeString()
-	{
-		return String.format("%08x", id);
+		return getCodeString(id);
 	}
 
 	public final boolean equals(Object object)

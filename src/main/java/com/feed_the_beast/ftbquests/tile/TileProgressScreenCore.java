@@ -12,7 +12,6 @@ import com.feed_the_beast.ftbquests.block.BlockProgressScreen;
 import com.feed_the_beast.ftbquests.block.FTBQuestsBlocks;
 import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
-import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
@@ -217,8 +216,6 @@ public class TileProgressScreenCore extends TileWithTeam implements IConfigCallb
 		{
 			if (editor || isOwner(player))
 			{
-				cChapter = getChapter();
-
 				boolean editorOrDestructible = editor || !indestructible;
 				ConfigGroup group0 = ConfigGroup.newGroup("tile");
 				group0.setDisplayName(new TextComponentTranslation("tile.ftbquests.progress_screen.name"));
@@ -229,16 +226,13 @@ public class TileProgressScreenCore extends TileWithTeam implements IConfigCallb
 					config.add("team", createTeamConfig(), ConfigNull.INSTANCE).setDisplayName(new TextComponentTranslation("ftbquests.team"));
 				}
 
-				config.add("chapter", new ConfigQuestObject(ServerQuestFile.INSTANCE, cChapter, QuestObjectType.CHAPTER)
+				config.add("chapter", new ConfigQuestObject(ServerQuestFile.INSTANCE, chapter, QuestObjectType.CHAPTER)
 				{
 					@Override
-					public void setObject(@Nullable QuestObjectBase v)
+					public void setObject(int v)
 					{
-						if (v instanceof QuestChapter)
-						{
-							cChapter = (QuestChapter) v;
-							chapter = cChapter.id;
-						}
+						chapter = v;
+						cChapter = file.getChapter(chapter);
 					}
 				}, ConfigNull.INSTANCE).setCanEdit(editorOrDestructible).setDisplayName(new TextComponentTranslation("ftbquests.chapter"));
 

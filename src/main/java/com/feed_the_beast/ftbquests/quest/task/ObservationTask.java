@@ -5,7 +5,7 @@ import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestData;
-import com.feed_the_beast.ftbquests.util.BlockMatcher;
+import com.feed_the_beast.ftbquests.util.RayMatcher;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
@@ -18,12 +18,12 @@ import java.util.Collection;
  */
 public class ObservationTask extends QuestTask
 {
-	public final BlockMatcher matcher;
+	public final RayMatcher matcher;
 
 	public ObservationTask(Quest quest)
 	{
 		super(quest);
-		matcher = new BlockMatcher();
+		matcher = new RayMatcher();
 	}
 
 	@Override
@@ -64,7 +64,7 @@ public class ObservationTask extends QuestTask
 	public void getConfig(EntityPlayer player, ConfigGroup config)
 	{
 		super.getConfig(player, config);
-		config.addEnum("type", () -> matcher.type, v -> matcher.type = v, BlockMatcher.Type.NAME_MAP);
+		config.addEnum("type", () -> matcher.type, v -> matcher.type = v, RayMatcher.Type.NAME_MAP);
 		config.addString("match", () -> matcher.match, v -> matcher.match = v, "");
 		config.addString("properties", matcher::getPropertyString, matcher::setPropertyString, "");
 	}
@@ -90,7 +90,7 @@ public class ObservationTask extends QuestTask
 		@Override
 		public boolean submitTask(EntityPlayerMP player, Collection<ItemStack> itemsToCheck, boolean simulate)
 		{
-			if (progress < 1L && task.matcher.matches(BlockMatcher.Data.get(player)))
+			if (progress < 1L && task.matcher.matches(RayMatcher.Data.get(player)))
 			{
 				if (!simulate)
 				{

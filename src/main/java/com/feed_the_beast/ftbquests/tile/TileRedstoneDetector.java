@@ -2,34 +2,26 @@ package com.feed_the_beast.ftbquests.tile;
 
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigNull;
-import com.feed_the_beast.ftblib.lib.config.IConfigCallback;
 import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
 import com.feed_the_beast.ftblib.lib.tile.EnumSaveType;
-import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.EnumChangeProgress;
 import com.feed_the_beast.ftbquests.quest.QuestData;
-import com.feed_the_beast.ftbquests.quest.QuestObject;
-import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.task.CustomTask;
+import com.feed_the_beast.ftbquests.quest.task.QuestTask;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
 import net.minecraft.command.ICommandSender;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.TextComponentTranslation;
-
-import javax.annotation.Nullable;
-import java.util.function.Predicate;
 
 /**
  * @author LatvianModder
  */
-public class TileCustomTrigger extends TileWithTeam implements IConfigCallback
+public class TileRedstoneDetector extends TileWithTeam implements IHasConfig
 {
-	private static final Predicate<QuestObjectBase> PREDICATE = object -> object instanceof CustomTask;
-
-	public int object = 0;
+	public int task = 0;
 	public int requiredRedstone = 1;
 	public int currentRedstone = 0;
 	public boolean notifications = true;
@@ -38,7 +30,7 @@ public class TileCustomTrigger extends TileWithTeam implements IConfigCallback
 	protected void writeData(NBTTagCompound nbt, EnumSaveType type)
 	{
 		super.writeData(nbt, type);
-		nbt.setInteger("object", object);
+		nbt.setInteger("task", task);
 		nbt.setByte("required_redstone", (byte) requiredRedstone);
 		nbt.setByte("current_redstone", (byte) currentRedstone);
 		nbt.setBoolean("notifications", notifications);
@@ -48,16 +40,10 @@ public class TileCustomTrigger extends TileWithTeam implements IConfigCallback
 	protected void readData(NBTTagCompound nbt, EnumSaveType type)
 	{
 		super.readData(nbt, type);
-		object = nbt.getInteger("object");
-		requiredRedstone = MathHelper.clamp(nbt.getByte("required_redstone"), 1, 15);
+		task = nbt.getInteger("task");
+		requiredRedstone = nbt.getByte("required_redstone");
 		currentRedstone = nbt.getByte("current_redstone");
-		notifications = !nbt.hasKey("notifications") || nbt.getBoolean("notifications");
-	}
-
-	@Override
-	public void onConfigSaved(ConfigGroup group, ICommandSender sender)
-	{
-		markDirty();
+		notifications = nbt.getBoolean("notifications");
 	}
 
 	public void checkRedstone()
@@ -67,47 +53,59 @@ public class TileCustomTrigger extends TileWithTeam implements IConfigCallback
 
 		if (prev != currentRedstone && currentRedstone >= requiredRedstone && !world.isRemote)
 		{
-			QuestObject o = ServerQuestFile.INSTANCE.get(object);
+			QuestTask t = ServerQuestFile.INSTANCE.getTask(task);
 
-			if (o != null)
+			if (t != null)
 			{
 				QuestData data = getTeam();
 
-				if (data != null)
+				if (data != null && t.quest.canStartTasks(data))
 				{
-					o.forceProgress(data, EnumChangeProgress.COMPLETE, notifications);
+					t.forceProgress(data, EnumChangeProgress.COMPLETE, notifications);
 				}
 			}
 		}
 	}
 
-	public void editConfig(EntityPlayerMP player)
+	@Override
+	public void editConfig(EntityPlayerMP player, boolean editor)
 	{
-		if (!FTBQuests.canEdit(player))
+		if (!editor)
 		{
 			return;
 		}
 
-		QuestObject cObject = ServerQuestFile.INSTANCE.get(object);
-
 		ConfigGroup group0 = ConfigGroup.newGroup("tile");
-		group0.setDisplayName(new TextComponentTranslation("tile.ftbquests.progress_detector.name"));
-		ConfigGroup config = group0.getGroup("ftbquests.custom_trigger");
+		group0.setDisplayName(new TextComponentTranslation("tile.ftbquests.detector.redstone.name"));
+		ConfigGroup config = group0.getGroup("ftbquests.detector.redstone");
 
 		config.add("team", createTeamConfig(), ConfigNull.INSTANCE).setDisplayName(new TextComponentTranslation("ftbquests.team"));
 
-		config.add("object", new ConfigQuestObject(ServerQuestFile.INSTANCE, cObject, PREDICATE)
+		config.add("task", new ConfigQuestObject(ServerQuestFile.INSTANCE, task, CustomTask.PREDICATE)
 		{
 			@Override
-			public void setObject(@Nullable QuestObjectBase v)
+			public void setObject(int v)
 			{
-				object = v == null ? 0 : v.id;
+				task = v;
 			}
-		}, new ConfigQuestObject(ServerQuestFile.INSTANCE, ServerQuestFile.INSTANCE, PREDICATE));
+		}, new ConfigQuestObject(ServerQuestFile.INSTANCE, 0, CustomTask.PREDICATE)).setDisplayName(new TextComponentTranslation("tile.ftbquests.detector.task"));
 
 		config.addInt("required_redstone", () -> requiredRedstone, v -> requiredRedstone = v, 1, 1, 15);
-		config.addBool("notifications", () -> notifications, v -> notifications = v, true);
+		config.addBool("notifications", () -> notifications, v -> notifications = v, true).setDisplayName(new TextComponentTranslation("tile.ftbquests.detector.notifications"));
 
 		FTBLibAPI.editServerConfig(player, group0, this);
+	}
+
+	@Override
+	public void onConfigSaved(ConfigGroup group, ICommandSender sender)
+	{
+		markDirty();
+	}
+
+	@Override
+	public void setIDFromPlacer(EntityLivingBase placer)
+	{
+		super.setIDFromPlacer(placer);
+		checkRedstone();
 	}
 }

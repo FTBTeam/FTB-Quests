@@ -18,7 +18,6 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
 import net.minecraftforge.common.util.Constants;
 
-import javax.annotation.Nullable;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -239,7 +238,7 @@ public final class QuestChapter extends QuestObject
 	@Override
 	public File getFile(File folder)
 	{
-		return new File(folder, "chapters/" + getCodeString());
+		return new File(folder, "chapters/" + getCodeString(this));
 	}
 
 	@Override
@@ -251,21 +250,20 @@ public final class QuestChapter extends QuestObject
 
 		Predicate<QuestObjectBase> predicate = object -> object == null || (object instanceof QuestChapter && object != this && ((QuestChapter) object).group == null);
 
-		config.add("group", new ConfigQuestObject(file, group, predicate)
+		config.add("group", new ConfigQuestObject(file, getID(group), predicate)
 		{
-			@Nullable
 			@Override
-			public QuestObjectBase getObject()
+			public int getObject()
 			{
-				return group;
+				return QuestObjectBase.getID(group);
 			}
 
 			@Override
-			public void setObject(@Nullable QuestObjectBase v)
+			public void setObject(int v)
 			{
-				group = (QuestChapter) v;
+				group = file.getChapter(v);
 			}
-		}, new ConfigQuestObject(file, null, predicate));
+		}, new ConfigQuestObject(file, 0, predicate));
 	}
 
 	@Override

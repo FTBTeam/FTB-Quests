@@ -2,16 +2,20 @@ package com.feed_the_beast.ftbquests.quest.task;
 
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestData;
+import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 
 import java.util.Collection;
+import java.util.function.Predicate;
 
 /**
  * @author LatvianModder
  */
 public class CustomTask extends QuestTask
 {
+	public static final Predicate<QuestObjectBase> PREDICATE = object -> object instanceof CustomTask;
+
 	public CustomTask(Quest quest)
 	{
 		super(quest);

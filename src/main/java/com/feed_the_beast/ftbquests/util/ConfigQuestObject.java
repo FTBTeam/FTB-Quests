@@ -31,16 +31,16 @@ public class ConfigQuestObject extends ConfigValue
 
 	public final QuestFile file;
 	private final IntSet validObjects;
-	private QuestObjectBase object;
+	private int object;
 
-	public ConfigQuestObject(QuestFile f, @Nullable QuestObjectBase o, IntSet t)
+	public ConfigQuestObject(QuestFile f, int o, IntSet t)
 	{
 		file = f;
 		object = o;
 		validObjects = new IntOpenHashSet(t);
 	}
 
-	public ConfigQuestObject(QuestFile f, @Nullable QuestObjectBase o, Predicate<QuestObjectBase> t)
+	public ConfigQuestObject(QuestFile f, int o, Predicate<QuestObjectBase> t)
 	{
 		this(f, o, IntSets.EMPTY_SET);
 
@@ -74,13 +74,12 @@ public class ConfigQuestObject extends ConfigValue
 		return ID;
 	}
 
-	public void setObject(@Nullable QuestObjectBase v)
+	public void setObject(int v)
 	{
 		object = v;
 	}
 
-	@Nullable
-	public QuestObjectBase getObject()
+	public int getObject()
 	{
 		return object;
 	}
@@ -88,21 +87,20 @@ public class ConfigQuestObject extends ConfigValue
 	@Override
 	public String getString()
 	{
-		object = getObject();
-		return object == null ? "" : object.toString();
+		QuestObjectBase o = file.getBase(object);
+		return o == null ? "" : o.toString();
 	}
 
 	@Override
 	public boolean getBoolean()
 	{
-		return getObject() != null;
+		return file.getBase(object) != null;
 	}
 
 	@Override
 	public int getInt()
 	{
-		object = getObject();
-		return object == null ? 0 : object.id;
+		return object;
 	}
 
 	@Override
@@ -114,14 +112,14 @@ public class ConfigQuestObject extends ConfigValue
 	@Override
 	public ITextComponent getStringForGUI()
 	{
-		object = getObject();
+		QuestObjectBase o = file.getBase(object);
 
-		if (object == null)
+		if (o == null)
 		{
 			return new TextComponentString("");
 		}
 
-		return new TextComponentString(object.getUnformattedTitle());
+		return new TextComponentString(o.getUnformattedTitle());
 	}
 
 	@Override
@@ -146,7 +144,7 @@ public class ConfigQuestObject extends ConfigValue
 		validObjects.clear();
 		validObjects.addAll(data.readIntList());
 
-		QuestObjectBase o = file.getBase(data.readInt());
+		int o = data.readInt();
 
 		if (isValid(o))
 		{
@@ -157,7 +155,7 @@ public class ConfigQuestObject extends ConfigValue
 	@Override
 	public boolean setValueFromString(@Nullable ICommandSender sender, String string, boolean simulate)
 	{
-		QuestObjectBase o = file.getBase(QuestFile.getID(string));
+		int o = QuestFile.getID(string);
 
 		if (isValid(o))
 		{
@@ -180,9 +178,11 @@ public class ConfigQuestObject extends ConfigValue
 			list.add(TextFormatting.AQUA + "Default: " + TextFormatting.RESET + inst.getDefaultValue().getStringForGUI().getFormattedText());
 		}
 
-		if (object != null)
+		QuestObjectBase o = file.getBase(object);
+
+		if (o != null)
 		{
-			list.add(TextFormatting.AQUA + "ID: " + TextFormatting.RESET + object);
+			list.add(TextFormatting.AQUA + "ID: " + TextFormatting.RESET + o);
 		}
 	}
 
@@ -195,7 +195,7 @@ public class ConfigQuestObject extends ConfigValue
 			validObjects.addAll(((ConfigQuestObject) value).validObjects);
 		}
 
-		QuestObjectBase o = file.getBase(value.getInt());
+		int o = value.getInt();
 
 		if (isValid(o))
 		{
@@ -206,18 +206,13 @@ public class ConfigQuestObject extends ConfigValue
 	@Override
 	public void writeToNBT(NBTTagCompound nbt, String key)
 	{
-		object = getObject();
-
-		if (object != null)
-		{
-			nbt.setInteger(key, object.id);
-		}
+		nbt.setInteger(key, getObject());
 	}
 
 	@Override
 	public void readFromNBT(NBTTagCompound nbt, String key)
 	{
-		QuestObjectBase o = file.getBase(nbt.getInteger(key));
+		int o = nbt.getInteger(key);
 
 		if (isValid(o))
 		{

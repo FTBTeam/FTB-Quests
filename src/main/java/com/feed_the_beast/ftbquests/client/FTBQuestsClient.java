@@ -29,13 +29,16 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityStructure;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.world.World;
 import net.minecraftforge.client.settings.KeyConflictContext;
 import net.minecraftforge.client.settings.KeyModifier;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.items.ItemHandlerHelper;
 import org.lwjgl.input.Keyboard;
 
+import javax.annotation.Nullable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -86,6 +89,14 @@ public class FTBQuestsClient extends FTBQuestsCommon
 	}
 
 	@Override
+	@Nullable
+	public QuestFile getQuestFile(@Nullable World world)
+	{
+		return getQuestFile(world == null ? FMLCommonHandler.instance().getEffectiveSide().isClient() : world.isRemote);
+	}
+
+	@Override
+	@Nullable
 	public QuestFile getQuestFile(boolean clientSide)
 	{
 		return clientSide ? ClientQuestFile.INSTANCE : ServerQuestFile.INSTANCE;

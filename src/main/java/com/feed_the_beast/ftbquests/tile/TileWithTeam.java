@@ -11,7 +11,6 @@ import com.feed_the_beast.ftbquests.quest.QuestFile;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
 import javax.annotation.Nullable;
@@ -46,25 +45,6 @@ public class TileWithTeam extends TileBase
 		team = nbt.getString("Team");
 		indestructible = nbt.getBoolean("Indestructible");
 		updateContainingBlockInfo();
-	}
-
-	@Override
-	public void writeToItem(ItemStack stack)
-	{
-		NBTTagCompound nbt = new NBTTagCompound();
-		writeData(nbt, EnumSaveType.ITEM);
-
-		if (!nbt.isEmpty())
-		{
-			stack.setTagCompound(nbt);
-		}
-	}
-
-	@Override
-	public void readFromItem(ItemStack stack)
-	{
-		NBTTagCompound nbt = stack.getTagCompound();
-		readData(nbt == null ? new NBTTagCompound() : nbt, EnumSaveType.ITEM);
 	}
 
 	@Override

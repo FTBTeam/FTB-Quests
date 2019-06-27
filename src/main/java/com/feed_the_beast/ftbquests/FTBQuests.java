@@ -16,7 +16,7 @@ import com.feed_the_beast.ftbquests.quest.reward.QuestRewardType;
 import com.feed_the_beast.ftbquests.quest.task.QuestTaskType;
 import com.feed_the_beast.ftbutilities.FTBUtilities;
 import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
@@ -108,7 +108,7 @@ public class FTBQuests
 		event.registerServerCommand(new CommandFTBQuests());
 	}
 
-	public static boolean canEdit(EntityPlayerMP player)
+	public static boolean canEdit(EntityPlayer player)
 	{
 		return NBTUtils.getPersistedData(player, false).getBoolean("ftbquests_editing_mode");
 	}

@@ -9,7 +9,6 @@ import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.gui.GuiSelectQuestObject;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
-import com.feed_the_beast.ftbquests.quest.loot.RewardTable;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
@@ -107,9 +106,9 @@ public final class QuestRewardType extends IForgeRegistryEntry.Impl<QuestRewardT
 
 				if (reward instanceof RandomReward)
 				{
-					ConfigQuestObject config = new ConfigQuestObject(quest.getQuestFile(), null, QuestObjectType.REWARD_TABLE);
+					ConfigQuestObject config = new ConfigQuestObject(quest.getQuestFile(), 0, QuestObjectType.REWARD_TABLE);
 					new GuiSelectQuestObject(config, gui, () -> {
-						((RandomReward) reward).table = (RewardTable) config.getObject();
+						((RandomReward) reward).table = config.file.getRewardTable(config.getObject());
 						callback.accept(reward);
 					}).openGui();
 					return;

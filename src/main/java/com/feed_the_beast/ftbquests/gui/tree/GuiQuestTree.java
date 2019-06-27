@@ -260,7 +260,7 @@ public class GuiQuestTree extends GuiBase
 
 		contextMenu.add(new ContextMenuItem(I18n.format("selectServer.edit"), GuiIcons.SETTINGS, object::onEditButtonClicked));
 
-		if (object instanceof RandomReward && ((RandomReward) object).getTable().id != 0)
+		if (object instanceof RandomReward && !QuestObjectBase.isNull(((RandomReward) object).getTable()))
 		{
 			contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.reward_table.edit"), GuiIcons.SETTINGS, () -> ((RandomReward) object).getTable().onEditButtonClicked()));
 		}
@@ -273,12 +273,12 @@ public class GuiQuestTree extends GuiBase
 			contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.complete_instantly"), FTBQuestsTheme.COMPLETED, () -> new MessageChangeProgress(ClientQuestFile.INSTANCE.self.getTeamUID(), object.id, EnumChangeProgress.COMPLETE).sendToServer()).setYesNo(I18n.format("ftbquests.gui.complete_instantly_q")));
 		}
 
-		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.copy_id"), GuiIcons.INFO, () -> setClipboardString(object.getCodeString()))
+		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.copy_id"), GuiIcons.INFO, () -> setClipboardString(QuestObjectBase.getCodeString(object)))
 		{
 			@Override
 			public void addMouseOverText(List<String> list)
 			{
-				list.add(object.getCodeString());
+				list.add(QuestObjectBase.getCodeString(object));
 			}
 		});
 	}
@@ -381,9 +381,9 @@ public class GuiQuestTree extends GuiBase
 			{
 				if (now - lastShiftPress <= 400L)
 				{
-					ConfigQuestObject c = new ConfigQuestObject(file, null, QuestObjectType.CHAPTER.or(QuestObjectType.QUEST));
+					ConfigQuestObject c = new ConfigQuestObject(file, 0, QuestObjectType.CHAPTER.or(QuestObjectType.QUEST));
 					GuiSelectQuestObject gui = new GuiSelectQuestObject(c, this, () -> {
-						QuestObjectBase o = c.getObject();
+						QuestObjectBase o = file.getBase(c.getObject());
 
 						if (o instanceof QuestChapter)
 						{
