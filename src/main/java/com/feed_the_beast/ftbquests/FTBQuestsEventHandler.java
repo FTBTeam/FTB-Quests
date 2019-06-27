@@ -4,7 +4,7 @@ import com.feed_the_beast.ftblib.events.FTBLibPreInitRegistryEvent;
 import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
 import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
-import com.feed_the_beast.ftbquests.block.BlockCustomTrigger;
+import com.feed_the_beast.ftbquests.block.BlockDetector;
 import com.feed_the_beast.ftbquests.block.BlockLootCrateOpener;
 import com.feed_the_beast.ftbquests.block.BlockLootCrateStorage;
 import com.feed_the_beast.ftbquests.block.BlockProgressDetector;
@@ -14,6 +14,7 @@ import com.feed_the_beast.ftbquests.block.BlockQuestChest;
 import com.feed_the_beast.ftbquests.block.BlockTaskScreen;
 import com.feed_the_beast.ftbquests.block.BlockTaskScreenPart;
 import com.feed_the_beast.ftbquests.block.FTBQuestsBlocks;
+import com.feed_the_beast.ftbquests.block.ItemBlockDetector;
 import com.feed_the_beast.ftbquests.block.ItemBlockProgressScreen;
 import com.feed_the_beast.ftbquests.block.ItemBlockScreen;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
@@ -52,7 +53,6 @@ import com.feed_the_beast.ftbquests.quest.task.QuestTaskData;
 import com.feed_the_beast.ftbquests.quest.task.QuestTaskType;
 import com.feed_the_beast.ftbquests.quest.task.StatTask;
 import com.feed_the_beast.ftbquests.quest.task.XPTask;
-import com.feed_the_beast.ftbquests.tile.TileCustomTrigger;
 import com.feed_the_beast.ftbquests.tile.TileLootCrateOpener;
 import com.feed_the_beast.ftbquests.tile.TileLootCrateStorage;
 import com.feed_the_beast.ftbquests.tile.TileProgressDetector;
@@ -61,9 +61,9 @@ import com.feed_the_beast.ftbquests.tile.TileProgressScreenPart;
 import com.feed_the_beast.ftbquests.tile.TileQuestChest;
 import com.feed_the_beast.ftbquests.tile.TileTaskScreenCore;
 import com.feed_the_beast.ftbquests.tile.TileTaskScreenPart;
-import com.feed_the_beast.ftbquests.util.BlockMatcher;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
 import com.feed_the_beast.ftbquests.util.FTBQuestsInventoryListener;
+import com.feed_the_beast.ftbquests.util.RayMatcher;
 import it.unimi.dsi.fastutil.ints.IntSets;
 import net.minecraft.block.Block;
 import net.minecraft.entity.EntityLivingBase;
@@ -125,7 +125,7 @@ public class FTBQuestsEventHandler
 				withName(new BlockTaskScreen(), "screen"),
 				withName(new BlockTaskScreenPart(), "screen_part"),
 				withName(new BlockProgressDetector(), "progress_detector"),
-				withName(new BlockCustomTrigger(), "custom_trigger"),
+				withName(new BlockDetector(), "detector"),
 				withName(new BlockProgressScreen(), "progress_screen"),
 				withName(new BlockProgressScreenPart(), "progress_screen_part"),
 				withName(new BlockQuestChest(), "chest"),
@@ -136,12 +136,16 @@ public class FTBQuestsEventHandler
 		GameRegistry.registerTileEntity(TileTaskScreenCore.class, new ResourceLocation(FTBQuests.MOD_ID, "screen_core"));
 		GameRegistry.registerTileEntity(TileTaskScreenPart.class, new ResourceLocation(FTBQuests.MOD_ID, "screen_part"));
 		GameRegistry.registerTileEntity(TileProgressDetector.class, new ResourceLocation(FTBQuests.MOD_ID, "progress_detector"));
-		GameRegistry.registerTileEntity(TileCustomTrigger.class, new ResourceLocation(FTBQuests.MOD_ID, "custom_trigger"));
 		GameRegistry.registerTileEntity(TileProgressScreenCore.class, new ResourceLocation(FTBQuests.MOD_ID, "progress_screen_core"));
 		GameRegistry.registerTileEntity(TileProgressScreenPart.class, new ResourceLocation(FTBQuests.MOD_ID, "progress_screen_part"));
 		GameRegistry.registerTileEntity(TileQuestChest.class, new ResourceLocation(FTBQuests.MOD_ID, "chest"));
 		GameRegistry.registerTileEntity(TileLootCrateStorage.class, new ResourceLocation(FTBQuests.MOD_ID, "loot_crate_storage"));
 		GameRegistry.registerTileEntity(TileLootCrateOpener.class, new ResourceLocation(FTBQuests.MOD_ID, "loot_crate_opener"));
+
+		for (BlockDetector.Variant variant : BlockDetector.Variant.VALUES)
+		{
+			GameRegistry.registerTileEntity(variant.clazz, new ResourceLocation(FTBQuests.MOD_ID, variant.getName() + "_detector"));
+		}
 	}
 
 	@SubscribeEvent
@@ -150,7 +154,7 @@ public class FTBQuestsEventHandler
 		event.getRegistry().registerAll(
 				new ItemBlockScreen(FTBQuestsBlocks.SCREEN).setRegistryName("screen"),
 				new ItemBlock(FTBQuestsBlocks.PROGRESS_DETECTOR).setRegistryName("progress_detector"),
-				new ItemBlock(FTBQuestsBlocks.CUSTOM_TRIGGER).setRegistryName("custom_trigger"),
+				new ItemBlockDetector(FTBQuestsBlocks.DETECTOR).setRegistryName("detector"),
 				new ItemBlockProgressScreen(FTBQuestsBlocks.PROGRESS_SCREEN).setRegistryName("progress_screen"),
 				new ItemBlock(FTBQuestsBlocks.CHEST).setRegistryName("chest"),
 				new ItemBlock(FTBQuestsBlocks.LOOT_CRATE_STORAGE).setRegistryName("loot_crate_storage"),
@@ -206,7 +210,7 @@ public class FTBQuestsEventHandler
 	@SubscribeEvent
 	public static void registerFTBLib(FTBLibPreInitRegistryEvent event)
 	{
-		event.getRegistry().registerConfigValueProvider(ConfigQuestObject.ID, () -> new ConfigQuestObject(ClientQuestFile.INSTANCE, null, IntSets.EMPTY_SET));
+		event.getRegistry().registerConfigValueProvider(ConfigQuestObject.ID, () -> new ConfigQuestObject(ClientQuestFile.INSTANCE, 0, IntSets.EMPTY_SET));
 	}
 
 	// Game Events //
@@ -415,7 +419,7 @@ public class FTBQuestsEventHandler
 			return;
 		}
 
-		BlockMatcher.Data matcherData = BlockMatcher.Data.get(event.getWorld().getBlockState(event.getPos()), event.getWorld().getTileEntity(event.getPos()));
+		RayMatcher.Data matcherData = RayMatcher.Data.get(event.getWorld().getBlockState(event.getPos()), event.getWorld().getTileEntity(event.getPos()));
 
 		for (InteractionTask task : interactionTasks)
 		{

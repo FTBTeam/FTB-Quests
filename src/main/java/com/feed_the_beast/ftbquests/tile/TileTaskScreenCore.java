@@ -12,7 +12,6 @@ import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.block.BlockTaskScreen;
 import com.feed_the_beast.ftbquests.block.FTBQuestsBlocks;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
-import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.task.QuestTask;
@@ -246,7 +245,7 @@ public class TileTaskScreenCore extends TileWithTeam implements IConfigCallback,
 		{
 			return null;
 		}
-		else if (cTask == null || cTask.invalid)
+		else if (cTask == null || cTask.invalid || cTask.id != task)
 		{
 			QuestFile file = FTBQuests.PROXY.getQuestFile(world);
 			cTask = file == null ? null : file.getTask(task);
@@ -262,7 +261,7 @@ public class TileTaskScreenCore extends TileWithTeam implements IConfigCallback,
 		{
 			return null;
 		}
-		else if (cTaskData == null || cTaskData.task.invalid)
+		else if (cTaskData == null || cTaskData.task.invalid || cTaskData.task != getTask())
 		{
 			cTask = getTask();
 
@@ -329,16 +328,13 @@ public class TileTaskScreenCore extends TileWithTeam implements IConfigCallback,
 					config.add("team", createTeamConfig(), ConfigNull.INSTANCE).setDisplayName(new TextComponentTranslation("ftbquests.team"));
 				}
 
-				config.add("task", new ConfigQuestObject(ServerQuestFile.INSTANCE, getTask(), QuestObjectType.TASK)
+				config.add("task", new ConfigQuestObject(ServerQuestFile.INSTANCE, task, QuestObjectType.TASK)
 				{
 					@Override
-					public void setObject(QuestObjectBase v)
+					public void setObject(int v)
 					{
-						if (v instanceof QuestTask)
-						{
-							cTask = (QuestTask) v;
-							task = cTask.id;
-						}
+						task = v;
+						cTask = file.getTask(task);
 					}
 				}, ConfigNull.INSTANCE).setCanEdit(editorOrDestructible).setDisplayName(new TextComponentTranslation("ftbquests.task"));
 

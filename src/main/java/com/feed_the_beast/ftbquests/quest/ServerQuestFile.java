@@ -157,15 +157,16 @@ public class ServerQuestFile extends QuestFile
 
 		if (object != null)
 		{
+			File file = object.getFile(new File(Loader.instance().getConfigDir(), "ftbquests/" + getFolderName()));
+
 			object.deleteChildren();
 			object.deleteSelf();
 			refreshIDMap();
 			save();
 
-			File file = object.getFile(new File(Loader.instance().getConfigDir(), "ftbquests/" + getFolderName()));
-
 			if (file != null)
 			{
+				FTBQuests.LOGGER.info("Deleting " + QuestObjectBase.getCodeString(id) + " @ " + file.getAbsolutePath());
 				FileUtils.deleteSafe(file);
 			}
 		}

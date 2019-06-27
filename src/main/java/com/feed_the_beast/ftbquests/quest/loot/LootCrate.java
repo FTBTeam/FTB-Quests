@@ -5,6 +5,7 @@ import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
+import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.google.gson.JsonPrimitive;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -99,7 +100,7 @@ public final class LootCrate
 
 	public String getStringID()
 	{
-		return stringID.isEmpty() ? table.getCodeString() : stringID;
+		return stringID.isEmpty() ? QuestObjectBase.getCodeString(table) : stringID;
 	}
 
 	public ItemStack createStack()

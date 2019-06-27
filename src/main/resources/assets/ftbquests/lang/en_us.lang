@@ -15,10 +15,16 @@ tile.ftbquests.progress_detector.name=Quest Progress Detector
 tile.ftbquests.progress_detector.object=Object ID
 tile.ftbquests.progress_detector.level=Output Level
 
-tile.ftbquests.custom_trigger.name=Custom Trigger Block
-tile.ftbquests.custom_trigger.object=Object ID
-tile.ftbquests.custom_trigger.required_redstone=Required Redstone Level
-tile.ftbquests.custom_trigger.notifications=Notifications
+tile.ftbquests.detector.task=Task
+tile.ftbquests.detector.notifications=Notifications
+
+tile.ftbquests.detector.redstone.name=Redstone Detector
+tile.ftbquests.detector.redstone.required_redstone=Required Redstone Level
+
+tile.ftbquests.detector.player.name=Player Detector
+tile.ftbquests.detector.player.radius=Radius
+tile.ftbquests.detector.player.offset_y=Offset Y
+tile.ftbquests.detector.player.height=Height
 
 tile.ftbquests.progress_screen.name=Progress Screen
 

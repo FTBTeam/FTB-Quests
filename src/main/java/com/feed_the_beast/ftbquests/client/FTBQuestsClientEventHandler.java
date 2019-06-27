@@ -3,6 +3,7 @@ package com.feed_the_beast.ftbquests.client;
 import com.feed_the_beast.ftblib.events.SidebarButtonCreatedEvent;
 import com.feed_the_beast.ftblib.events.client.CustomClickEvent;
 import com.feed_the_beast.ftbquests.FTBQuests;
+import com.feed_the_beast.ftbquests.block.BlockDetector;
 import com.feed_the_beast.ftbquests.events.ClearFileCacheEvent;
 import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.item.ItemLootCrate;
@@ -11,7 +12,7 @@ import com.feed_the_beast.ftbquests.quest.loot.LootCrate;
 import com.feed_the_beast.ftbquests.quest.task.ObservationTask;
 import com.feed_the_beast.ftbquests.tile.TileProgressScreenCore;
 import com.feed_the_beast.ftbquests.tile.TileTaskScreenCore;
-import com.feed_the_beast.ftbquests.util.BlockMatcher;
+import com.feed_the_beast.ftbquests.util.RayMatcher;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -53,7 +54,12 @@ public class FTBQuestsClientEventHandler
 	{
 		addModel(FTBQuestsItems.SCREEN, "facing=north");
 		addModel(FTBQuestsItems.PROGRESS_DETECTOR, "normal");
-		addModel(FTBQuestsItems.CUSTOM_TRIGGER, "normal");
+
+		for (BlockDetector.Variant variant : BlockDetector.Variant.VALUES)
+		{
+			ModelLoader.setCustomModelResourceLocation(FTBQuestsItems.DETECTOR, variant.ordinal(), new ModelResourceLocation(FTBQuestsItems.DETECTOR.getRegistryName(), "variant=" + variant.getName()));
+		}
+
 		addModel(FTBQuestsItems.PROGRESS_SCREEN, "facing=north");
 		addModel(FTBQuestsItems.CHEST, "facing=north");
 		addModel(FTBQuestsItems.LOOT_CRATE_STORAGE, "normal");
@@ -157,7 +163,7 @@ public class FTBQuestsClientEventHandler
 				return;
 			}
 
-			BlockMatcher.Data data = BlockMatcher.Data.get(mc.world, mc.objectMouseOver);
+			RayMatcher.Data data = RayMatcher.Data.get(mc.world, mc.objectMouseOver);
 
 			for (ObservationTask task : observationTasks)
 			{

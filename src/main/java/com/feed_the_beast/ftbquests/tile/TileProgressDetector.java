@@ -9,7 +9,6 @@ import com.feed_the_beast.ftblib.lib.util.BlockUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
-import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
@@ -161,8 +160,6 @@ public class TileProgressDetector extends TileWithTeam implements ITickable, ICo
 			return;
 		}
 
-		cObject = getObject();
-
 		ConfigGroup group0 = ConfigGroup.newGroup("tile");
 		group0.setDisplayName(new TextComponentTranslation("tile.ftbquests.progress_detector.name"));
 		ConfigGroup config = group0.getGroup("ftbquests.progress_detector");
@@ -172,15 +169,15 @@ public class TileProgressDetector extends TileWithTeam implements ITickable, ICo
 			config.add("team", createTeamConfig(), ConfigNull.INSTANCE).setDisplayName(new TextComponentTranslation("ftbquests.team"));
 		}
 
-		config.add("object", new ConfigQuestObject(ServerQuestFile.INSTANCE, cObject, QuestObjectType.ALL_PROGRESSING)
+		config.add("object", new ConfigQuestObject(ServerQuestFile.INSTANCE, object, QuestObjectType.ALL_PROGRESSING)
 		{
 			@Override
-			public void setObject(@Nullable QuestObjectBase v)
+			public void setObject(int v)
 			{
-				cObject = (QuestObject) v;
-				object = cObject == null ? 0 : cObject.id;
+				object = v;
+				cObject = file.get(object);
 			}
-		}, new ConfigQuestObject(ServerQuestFile.INSTANCE, ServerQuestFile.INSTANCE, QuestObjectType.ALL_PROGRESSING));
+		}, new ConfigQuestObject(ServerQuestFile.INSTANCE, 1, QuestObjectType.ALL_PROGRESSING));
 
 		config.addBool("level", () -> level, v -> level = v, false);
 

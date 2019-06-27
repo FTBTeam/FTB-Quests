@@ -59,7 +59,6 @@ public abstract class QuestFile extends QuestObject
 	public final List<RewardTable> rewardTables;
 
 	private final Int2ObjectOpenHashMap<QuestObjectBase> map;
-	public final RewardTable dummyTable;
 
 	public final List<ItemStack> emergencyItems;
 	public Ticks emergencyItemsCooldown;
@@ -80,7 +79,6 @@ public abstract class QuestFile extends QuestObject
 		rewardTables = new ArrayList<>();
 
 		map = new Int2ObjectOpenHashMap<>();
-		dummyTable = new RewardTable(this);
 
 		emergencyItems = new ArrayList<>();
 		emergencyItems.add(new ItemStack(Items.APPLE));
@@ -482,7 +480,7 @@ public abstract class QuestFile extends QuestObject
 		{
 			out = new NBTTagCompound();
 			chapter.writeData(out);
-			String chapterPath = "chapters/" + chapter.getCodeString() + "/";
+			String chapterPath = "chapters/" + getCodeString(chapter) + "/";
 			NBTUtils.writeNBTSafe(new File(folder, chapterPath + "chapter.nbt"), out);
 
 			if (!chapter.quests.isEmpty())
@@ -537,7 +535,7 @@ public abstract class QuestFile extends QuestObject
 						}
 					}
 
-					NBTUtils.writeNBTSafe(new File(folder, chapterPath + quest.getCodeString() + ".nbt"), out);
+					NBTUtils.writeNBTSafe(new File(folder, chapterPath + getCodeString(quest) + ".nbt"), out);
 				}
 			}
 		}
@@ -546,7 +544,7 @@ public abstract class QuestFile extends QuestObject
 		{
 			out = new NBTTagCompound();
 			table.writeData(out);
-			NBTUtils.writeNBTSafe(new File(folder, "reward_tables/" + table.getCodeString() + ".nbt"), out);
+			NBTUtils.writeNBTSafe(new File(folder, "reward_tables/" + getCodeString(table) + ".nbt"), out);
 		}
 	}
 
@@ -727,7 +725,7 @@ public abstract class QuestFile extends QuestObject
 			chapter.id = i;
 			chapters.add(chapter);
 
-			File[] files = new File(folder, "chapters/" + chapter.getCodeString()).listFiles();
+			File[] files = new File(folder, "chapters/" + getCodeString(chapter)).listFiles();
 
 			if (files != null && files.length > 0)
 			{
@@ -740,7 +738,7 @@ public abstract class QuestFile extends QuestObject
 							Quest quest = new Quest(chapter);
 							quest.id = Long.decode("#" + f.getName().replace(".nbt", "")).intValue();
 
-							nbt = NBTUtils.readNBT(new File(folder, "chapters/" + chapter.getCodeString() + "/" + quest.getCodeString() + ".nbt"));
+							nbt = NBTUtils.readNBT(quest.getFile(folder));
 
 							if (nbt != null)
 							{
@@ -796,7 +794,7 @@ public abstract class QuestFile extends QuestObject
 
 		for (QuestChapter chapter : chapters)
 		{
-			nbt = NBTUtils.readNBT(new File(folder, "chapters/" + chapter.getCodeString() + "/chapter.nbt"));
+			nbt = NBTUtils.readNBT(new File(folder, "chapters/" + getCodeString(chapter) + "/chapter.nbt"));
 
 			if (nbt != null)
 			{
@@ -844,7 +842,7 @@ public abstract class QuestFile extends QuestObject
 
 		for (RewardTable table : rewardTables)
 		{
-			nbt = NBTUtils.readNBT(new File(folder, "reward_tables/" + table.getCodeString() + ".nbt"));
+			nbt = NBTUtils.readNBT(new File(folder, "reward_tables/" + getCodeString(table) + ".nbt"));
 
 			if (nbt != null)
 			{

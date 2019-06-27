@@ -5,7 +5,7 @@ import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
+import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.quest.loot.RewardTable;
 import com.feed_the_beast.ftbquests.quest.loot.WeightedReward;
@@ -30,7 +30,7 @@ public class RandomReward extends QuestReward
 	public RandomReward(Quest parent)
 	{
 		super(parent);
-		table = parent.getQuestFile().dummyTable;
+		table = null;
 	}
 
 	@Override
@@ -44,7 +44,7 @@ public class RandomReward extends QuestReward
 	{
 		super.writeData(nbt);
 
-		if (getTable().id != 0 && !getTable().invalid)
+		if (getTable() != null)
 		{
 			nbt.setInteger("table", getQuestFile().rewardTables.indexOf(getTable()));
 		}
@@ -56,13 +56,15 @@ public class RandomReward extends QuestReward
 		super.readData(nbt);
 		int index = nbt.hasKey("table") ? nbt.getInteger("table") : -1;
 
-		if (index >= 0 && index < getQuestFile().rewardTables.size())
+		QuestFile file = getQuestFile();
+
+		if (index >= 0 && index < file.rewardTables.size())
 		{
-			table = getQuestFile().rewardTables.get(index);
+			table = file.rewardTables.get(index);
 		}
 		else
 		{
-			table = new RewardTable(getQuestFile());
+			table = new RewardTable(file);
 			NBTTagList list = nbt.getTagList("rewards", Constants.NBT.TAG_COMPOUND);
 
 			for (int i = 0; i < list.tagCount(); i++)
@@ -77,17 +79,18 @@ public class RandomReward extends QuestReward
 				}
 			}
 
-			table.id = getQuestFile().readID(0);
+			table.id = file.readID(0);
 			table.title = getUnformattedTitle() + " " + toString();
-			getQuestFile().rewardTables.add(table);
+			file.rewardTables.add(table);
 		}
 	}
 
+	@Nullable
 	public RewardTable getTable()
 	{
-		if (table == null || table.invalid)
+		if (table != null && table.invalid)
 		{
-			table = getQuestFile().dummyTable;
+			table = null;
 		}
 
 		return table;
@@ -97,7 +100,7 @@ public class RandomReward extends QuestReward
 	public void writeNetData(DataOut data)
 	{
 		super.writeNetData(data);
-		data.writeInt(getTable().id);
+		data.writeInt(getTable() == null ? 0 : getTable().id);
 	}
 
 	@Override
@@ -111,22 +114,24 @@ public class RandomReward extends QuestReward
 	public void getConfig(EntityPlayer player, ConfigGroup config)
 	{
 		super.getConfig(player, config);
-		config.add("table", new ConfigQuestObject(getQuestFile(), getTable(), QuestObjectType.REWARD_TABLE)
+		config.add("table", new ConfigQuestObject(getQuestFile(), getID(getTable()), QuestObjectType.REWARD_TABLE)
 		{
 			@Override
-			public void setObject(@Nullable QuestObjectBase object)
+			public void setObject(int object)
 			{
-				if (object instanceof RewardTable)
-				{
-					table = (RewardTable) object;
-				}
+				table = file.getRewardTable(object);
 			}
-		}, new ConfigQuestObject(getQuestFile(), getQuestFile().dummyTable, QuestObjectType.REWARD_TABLE)).setDisplayName(new TextComponentTranslation("ftbquests.reward_table"));
+		}, new ConfigQuestObject(getQuestFile(), 0, QuestObjectType.REWARD_TABLE)).setDisplayName(new TextComponentTranslation("ftbquests.reward_table"));
 	}
 
 	@Override
 	public void claim(EntityPlayerMP player)
 	{
+		if (getTable() == null)
+		{
+			return;
+		}
+
 		int totalWeight = getTable().getTotalWeight(false);
 
 		if (totalWeight <= 0)
@@ -152,19 +157,22 @@ public class RandomReward extends QuestReward
 	@Override
 	public Icon getAltIcon()
 	{
-		return getTable().getIcon();
+		return getTable() == null ? super.getAltIcon() : getTable().getIcon();
 	}
 
 	@Override
 	public String getAltTitle()
 	{
-		return getTable().useTitle ? getTable().getTitle() : super.getAltTitle();
+		return getTable() == null ? super.getAltTitle() : getTable().useTitle ? getTable().getTitle() : super.getAltTitle();
 	}
 
 	@Override
 	public void addMouseOverText(List<String> list)
 	{
-		getTable().addMouseOverText(list, true, false);
+		if (getTable() != null)
+		{
+			getTable().addMouseOverText(list, true, false);
+		}
 	}
 
 	@Override
@@ -177,6 +185,6 @@ public class RandomReward extends QuestReward
 	@Nullable
 	public Object getIngredient()
 	{
-		return getTable().lootCrate != null ? getTable().lootCrate.createStack() : null;
+		return getTable() != null && getTable().lootCrate != null ? getTable().lootCrate.createStack() : null;
 	}
 }

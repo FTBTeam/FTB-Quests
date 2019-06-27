@@ -106,7 +106,7 @@ public class GuiSelectQuestObject extends GuiButtonListBase
 		{
 			GuiHelper.playClickSound();
 			callbackGui.openGui();
-			config.setObject(object);
+			config.setObject(QuestObjectBase.getID(object));
 			callback.run();
 		}
 	}
