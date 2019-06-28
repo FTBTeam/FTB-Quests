@@ -13,9 +13,9 @@ import com.feed_the_beast.ftbquests.gui.GuiEditRewardTable;
 import com.feed_the_beast.ftbquests.gui.GuiRewardTables;
 import com.feed_the_beast.ftbquests.gui.tree.GuiQuestTree;
 import com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIHelper;
-import com.feed_the_beast.ftbquests.net.edit.MessageEditObjectDirect;
+import com.feed_the_beast.ftbquests.net.edit.MessageEditObject;
+import com.feed_the_beast.ftbquests.quest.Chapter;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
@@ -52,7 +52,7 @@ public final class RewardTable extends QuestObjectBase
 	{
 		file = f;
 		rewards = new ArrayList<>();
-		fakeQuest = new Quest(new QuestChapter(file));
+		fakeQuest = new Quest(new Chapter(file));
 		emptyWeight = 0;
 		lootSize = 27;
 		hideTooltip = false;
@@ -330,7 +330,7 @@ public final class RewardTable extends QuestObjectBase
 	@Override
 	public void onEditButtonClicked()
 	{
-		new GuiEditRewardTable(this, () -> new MessageEditObjectDirect(this).sendToServer()).openGui();
+		new GuiEditRewardTable(this, () -> new MessageEditObject(this).sendToServer()).openGui();
 	}
 
 	public void addMouseOverText(List<String> list, boolean includeWeight, boolean includeEmpty)

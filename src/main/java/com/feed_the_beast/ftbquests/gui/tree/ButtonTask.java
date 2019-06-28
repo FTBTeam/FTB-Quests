@@ -10,8 +10,8 @@ import com.feed_the_beast.ftblib.lib.gui.WidgetType;
 import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.gui.FTBQuestsTheme;
-import com.feed_the_beast.ftbquests.quest.task.QuestTask;
-import com.feed_the_beast.ftbquests.quest.task.QuestTaskData;
+import com.feed_the_beast.ftbquests.quest.task.Task;
+import com.feed_the_beast.ftbquests.quest.task.TaskData;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.text.TextFormatting;
 
@@ -25,9 +25,9 @@ import java.util.List;
 public class ButtonTask extends Button
 {
 	public final GuiQuestTree treeGui;
-	public QuestTask task;
+	public Task task;
 
-	public ButtonTask(Panel panel, QuestTask t)
+	public ButtonTask(Panel panel, Task t)
 	{
 		super(panel, t.getTitle(), GuiIcons.ACCEPT);
 		treeGui = (GuiQuestTree) panel.getGui();
@@ -56,7 +56,6 @@ public class ButtonTask extends Button
 	{
 		if (button.isLeft())
 		{
-			GuiHelper.playClickSound();
 			task.onButtonClicked(!(task.invalid || treeGui.file.self == null || !task.quest.canStartTasks(treeGui.file.self) || task.isComplete(treeGui.file.self)));
 		}
 		else if (button.isRight() && treeGui.file.canEdit())
@@ -88,11 +87,11 @@ public class ButtonTask extends Button
 			list.add(getTitle());
 		}
 
-		QuestTaskData data;
+		TaskData data;
 
 		if (treeGui.file.self != null && task.quest.canStartTasks(treeGui.file.self))
 		{
-			data = treeGui.file.self.getQuestTaskData(task);
+			data = treeGui.file.self.getTaskData(task);
 			long maxp = task.getMaxProgress();
 
 			if (maxp > 1L)
@@ -104,15 +103,15 @@ public class ButtonTask extends Button
 				else
 				{
 					String max = isShiftKeyDown() ? Long.toUnsignedString(maxp) : task.getMaxProgressString();
-					String prog = isShiftKeyDown() ? Long.toUnsignedString(data.getProgress()) : data.getProgressString();
+					String prog = isShiftKeyDown() ? Long.toUnsignedString(data.progress) : data.getProgressString();
 
 					if (maxp < 100L)
 					{
-						list.add(TextFormatting.DARK_GREEN + (data.getProgress() > maxp ? max : prog) + " / " + max);
+						list.add(TextFormatting.DARK_GREEN + (data.progress > maxp ? max : prog) + " / " + max);
 					}
 					else
 					{
-						list.add(TextFormatting.DARK_GREEN + (data.getProgress() > maxp ? max : prog) + " / " + max + TextFormatting.DARK_GRAY + " [" + data.getRelativeProgress() + "%]");
+						list.add(TextFormatting.DARK_GREEN + (data.progress > maxp ? max : prog) + " / " + max + TextFormatting.DARK_GRAY + " [" + data.getRelativeProgress() + "%]");
 					}
 
 				}
@@ -139,7 +138,7 @@ public class ButtonTask extends Button
 	@Override
 	public void drawIcon(Theme theme, int x, int y, int w, int h)
 	{
-		task.drawGUI(treeGui.file.self == null ? null : treeGui.file.self.getQuestTaskData(task), x, y, w, h);
+		task.drawGUI(treeGui.file.self == null ? null : treeGui.file.self.getTaskData(task), x, y, w, h);
 	}
 
 	@Override

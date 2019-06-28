@@ -18,7 +18,7 @@ import java.util.Collection;
 /**
  * @author LatvianModder
  */
-public class StatTask extends QuestTask
+public class StatTask extends Task
 {
 	public StatBase stat = StatList.MOB_KILLS;
 	public int value = 1;
@@ -42,7 +42,7 @@ public class StatTask extends QuestTask
 	}
 
 	@Override
-	public QuestTaskType getType()
+	public TaskType getType()
 	{
 		return FTBQuestsTasks.STAT;
 	}
@@ -118,12 +118,12 @@ public class StatTask extends QuestTask
 	}
 
 	@Override
-	public QuestTaskData createData(QuestData data)
+	public TaskData createData(QuestData data)
 	{
 		return new Data(this, data);
 	}
 
-	public static class Data extends SimpleQuestTaskData<StatTask>
+	public static class Data extends TaskData<StatTask>
 	{
 		private Data(StatTask task, QuestData data)
 		{

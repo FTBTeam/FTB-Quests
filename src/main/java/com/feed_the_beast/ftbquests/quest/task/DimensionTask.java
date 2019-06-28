@@ -8,19 +8,16 @@ import com.feed_the_beast.ftbquests.quest.QuestData;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.DimensionType;
 import net.minecraftforge.common.util.Constants;
 
-import java.util.Collection;
-
 /**
  * @author LatvianModder
  */
-public class DimensionTask extends QuestTask
+public class DimensionTask extends Task
 {
 	public int dimension = -1;
 
@@ -30,7 +27,7 @@ public class DimensionTask extends QuestTask
 	}
 
 	@Override
-	public QuestTaskType getType()
+	public TaskType getType()
 	{
 		return FTBQuestsTasks.DIMENSION;
 	}
@@ -118,12 +115,12 @@ public class DimensionTask extends QuestTask
 	}
 
 	@Override
-	public QuestTaskData createData(QuestData data)
+	public TaskData createData(QuestData data)
 	{
 		return new Data(this, data);
 	}
 
-	public static class Data extends SimpleQuestTaskData<DimensionTask>
+	public static class Data extends BooleanTaskData<DimensionTask>
 	{
 		private Data(DimensionTask task, QuestData data)
 		{
@@ -131,20 +128,9 @@ public class DimensionTask extends QuestTask
 		}
 
 		@Override
-		public boolean submitTask(EntityPlayerMP player, Collection<ItemStack> itemsToCheck, boolean simulate)
+		public boolean canSubmit(EntityPlayerMP player)
 		{
-			if (progress < 1L && player.dimension == task.dimension && !player.isSpectator())
-			{
-				if (!simulate)
-				{
-					progress = 1L;
-					sync();
-				}
-
-				return true;
-			}
-
-			return false;
+			return player.dimension == task.dimension && !player.isSpectator();
 		}
 	}
 }

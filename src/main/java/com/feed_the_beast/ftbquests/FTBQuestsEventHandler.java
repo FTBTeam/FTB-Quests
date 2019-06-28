@@ -1,9 +1,9 @@
 package com.feed_the_beast.ftbquests;
 
 import com.feed_the_beast.ftblib.events.FTBLibPreInitRegistryEvent;
-import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
 import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
+import com.feed_the_beast.ftblib.lib.util.BlockUtils;
 import com.feed_the_beast.ftbquests.block.BlockDetector;
 import com.feed_the_beast.ftbquests.block.BlockLootCrateOpener;
 import com.feed_the_beast.ftbquests.block.BlockLootCrateStorage;
@@ -48,10 +48,10 @@ import com.feed_the_beast.ftbquests.quest.task.ItemTask;
 import com.feed_the_beast.ftbquests.quest.task.KillTask;
 import com.feed_the_beast.ftbquests.quest.task.LocationTask;
 import com.feed_the_beast.ftbquests.quest.task.ObservationTask;
-import com.feed_the_beast.ftbquests.quest.task.QuestTask;
-import com.feed_the_beast.ftbquests.quest.task.QuestTaskData;
-import com.feed_the_beast.ftbquests.quest.task.QuestTaskType;
 import com.feed_the_beast.ftbquests.quest.task.StatTask;
+import com.feed_the_beast.ftbquests.quest.task.Task;
+import com.feed_the_beast.ftbquests.quest.task.TaskData;
+import com.feed_the_beast.ftbquests.quest.task.TaskType;
 import com.feed_the_beast.ftbquests.quest.task.XPTask;
 import com.feed_the_beast.ftbquests.tile.TileLootCrateOpener;
 import com.feed_the_beast.ftbquests.tile.TileLootCrateStorage;
@@ -166,22 +166,22 @@ public class FTBQuestsEventHandler
 	}
 
 	@SubscribeEvent
-	public static void registerTasks(RegistryEvent.Register<QuestTaskType> event)
+	public static void registerTasks(RegistryEvent.Register<TaskType> event)
 	{
 		event.getRegistry().registerAll(
-				FTBQuestsTasks.ITEM = new QuestTaskType(ItemTask::new).setRegistryName("item").setIcon(Icon.getIcon("minecraft:items/diamond")),
-				FTBQuestsTasks.FLUID = new QuestTaskType(FluidTask::new).setRegistryName("fluid").setIcon(Icon.getIcon(FluidRegistry.WATER.getStill(new FluidStack(FluidRegistry.WATER, Fluid.BUCKET_VOLUME)).toString()).combineWith(Icon.getIcon(FluidTask.TANK_TEXTURE.toString()))),
-				FTBQuestsTasks.FORGE_ENERGY = new QuestTaskType(ForgeEnergyTask::new).setRegistryName("forge_energy").setIcon(Icon.getIcon(ForgeEnergyTask.EMPTY_TEXTURE.toString()).combineWith(Icon.getIcon(ForgeEnergyTask.FULL_TEXTURE.toString()))),
-				FTBQuestsTasks.CUSTOM = new QuestTaskType(CustomTask::new).setRegistryName("custom").setIcon(GuiIcons.COLOR_HSB),
-				FTBQuestsTasks.XP = new QuestTaskType(XPTask::new).setRegistryName("xp").setIcon(Icon.getIcon("minecraft:items/experience_bottle")),
-				FTBQuestsTasks.DIMENSION = new QuestTaskType(DimensionTask::new).setRegistryName("dimension").setIcon(Icon.getIcon("minecraft:blocks/portal")),
-				FTBQuestsTasks.STAT = new QuestTaskType(StatTask::new).setRegistryName("stat").setIcon(Icon.getIcon("minecraft:items/iron_sword")),
-				FTBQuestsTasks.KILL = new QuestTaskType(KillTask::new).setRegistryName("kill").setIcon(Icon.getIcon("minecraft:items/diamond_sword")),
-				FTBQuestsTasks.LOCATION = new QuestTaskType(LocationTask::new).setRegistryName("location").setIcon(Icon.getIcon("minecraft:items/compass_00")),
-				FTBQuestsTasks.CHECKMARK = new QuestTaskType(CheckmarkTask::new).setRegistryName("checkmark").setIcon(GuiIcons.ACCEPT_GRAY),
-				FTBQuestsTasks.ADVANCEMENT = new QuestTaskType(AdvancementTask::new).setRegistryName("advancement").setIcon(Icon.getIcon("minecraft:items/wheat")),
-				FTBQuestsTasks.OBSERVATION = new QuestTaskType(ObservationTask::new).setRegistryName("observation").setIcon(GuiIcons.ART),
-				FTBQuestsTasks.INTERACTION = new QuestTaskType(InteractionTask::new).setRegistryName("interaction").setIcon(GuiIcons.BELL)
+				FTBQuestsTasks.ITEM = new TaskType(ItemTask::new).setRegistryName("item").setIcon(Icon.getIcon("minecraft:items/diamond")),
+				FTBQuestsTasks.FLUID = new TaskType(FluidTask::new).setRegistryName("fluid").setIcon(Icon.getIcon(FluidRegistry.WATER.getStill(new FluidStack(FluidRegistry.WATER, Fluid.BUCKET_VOLUME)).toString()).combineWith(Icon.getIcon(FluidTask.TANK_TEXTURE.toString()))),
+				FTBQuestsTasks.FORGE_ENERGY = new TaskType(ForgeEnergyTask::new).setRegistryName("forge_energy").setIcon(Icon.getIcon(ForgeEnergyTask.EMPTY_TEXTURE.toString()).combineWith(Icon.getIcon(ForgeEnergyTask.FULL_TEXTURE.toString()))),
+				FTBQuestsTasks.CUSTOM = new TaskType(CustomTask::new).setRegistryName("custom").setIcon(GuiIcons.COLOR_HSB),
+				FTBQuestsTasks.XP = new TaskType(XPTask::new).setRegistryName("xp").setIcon(Icon.getIcon("minecraft:items/experience_bottle")),
+				FTBQuestsTasks.DIMENSION = new TaskType(DimensionTask::new).setRegistryName("dimension").setIcon(Icon.getIcon("minecraft:blocks/portal")),
+				FTBQuestsTasks.STAT = new TaskType(StatTask::new).setRegistryName("stat").setIcon(Icon.getIcon("minecraft:items/iron_sword")),
+				FTBQuestsTasks.KILL = new TaskType(KillTask::new).setRegistryName("kill").setIcon(Icon.getIcon("minecraft:items/diamond_sword")),
+				FTBQuestsTasks.LOCATION = new TaskType(LocationTask::new).setRegistryName("location").setIcon(Icon.getIcon("minecraft:items/compass_00")),
+				FTBQuestsTasks.CHECKMARK = new TaskType(CheckmarkTask::new).setRegistryName("checkmark").setIcon(GuiIcons.ACCEPT_GRAY),
+				FTBQuestsTasks.ADVANCEMENT = new TaskType(AdvancementTask::new).setRegistryName("advancement").setIcon(Icon.getIcon("minecraft:items/wheat")),
+				FTBQuestsTasks.OBSERVATION = new TaskType(ObservationTask::new).setRegistryName("observation").setIcon(GuiIcons.ART),
+				FTBQuestsTasks.INTERACTION = new TaskType(InteractionTask::new).setRegistryName("interaction").setIcon(GuiIcons.BELL)
 		);
 
 		FTBQuests.PROXY.setTaskGuiProviders();
@@ -216,7 +216,7 @@ public class FTBQuestsEventHandler
 	// Game Events //
 
 	private static List<KillTask> killTasks = null;
-	private static List<QuestTask> autoSubmitTasks = null;
+	private static List<Task> autoSubmitTasks = null;
 	private static List<InteractionTask> interactionTasks = null;
 
 	@SubscribeEvent
@@ -269,7 +269,7 @@ public class FTBQuestsEventHandler
 
 			EntityPlayerMP player = (EntityPlayerMP) event.getSource().getTrueSource();
 
-			QuestData data = ServerQuestFile.INSTANCE.getData(FTBLibAPI.getTeamID(player.getUniqueID()));
+			QuestData data = ServerQuestFile.INSTANCE.getData(player);
 
 			if (data == null)
 			{
@@ -278,9 +278,9 @@ public class FTBQuestsEventHandler
 
 			for (KillTask task : killTasks)
 			{
-				QuestTaskData taskData = data.getQuestTaskData(task);
+				TaskData taskData = data.getTaskData(task);
 
-				if (taskData.getProgress() < task.getMaxProgress() && task.quest.canStartTasks(data))
+				if (taskData.progress < task.getMaxProgress() && task.quest.canStartTasks(data))
 				{
 					((KillTask.Data) taskData).kill(event.getEntityLiving());
 				}
@@ -295,7 +295,7 @@ public class FTBQuestsEventHandler
 		{
 			if (autoSubmitTasks == null)
 			{
-				autoSubmitTasks = ServerQuestFile.INSTANCE.collect(QuestTask.class, o -> o instanceof QuestTask && ((QuestTask) o).autoSubmitOnPlayerTick());
+				autoSubmitTasks = ServerQuestFile.INSTANCE.collect(Task.class, o -> o instanceof Task && ((Task) o).autoSubmitOnPlayerTick());
 			}
 
 			if (autoSubmitTasks.isEmpty())
@@ -303,20 +303,20 @@ public class FTBQuestsEventHandler
 				return;
 			}
 
-			QuestData data = ServerQuestFile.INSTANCE.getData(FTBLibAPI.getTeamID(event.player.getUniqueID()));
+			QuestData data = ServerQuestFile.INSTANCE.getData(event.player);
 
 			if (data == null)
 			{
 				return;
 			}
 
-			for (QuestTask task : autoSubmitTasks)
+			for (Task task : autoSubmitTasks)
 			{
-				QuestTaskData taskData = data.getQuestTaskData(task);
+				TaskData taskData = data.getTaskData(task);
 
-				if (taskData.getRelativeProgress() < 100 && task.quest.canStartTasks(data))
+				if (!taskData.isComplete() && task.quest.canStartTasks(data))
 				{
-					taskData.submitTask((EntityPlayerMP) event.player, Collections.emptyList(), false);
+					taskData.submitTask((EntityPlayerMP) event.player);
 				}
 			}
 		}
@@ -419,13 +419,53 @@ public class FTBQuestsEventHandler
 			return;
 		}
 
-		RayMatcher.Data matcherData = RayMatcher.Data.get(event.getWorld().getBlockState(event.getPos()), event.getWorld().getTileEntity(event.getPos()));
+		RayMatcher.Data matcherData = RayMatcher.Data.get(event.getWorld().getBlockState(event.getPos()), event.getWorld().getTileEntity(event.getPos()), null);
 
 		for (InteractionTask task : interactionTasks)
 		{
-			if (!task.isComplete(data) && task.matcher.matches(matcherData) && task.quest.canStartTasks(data))
+			TaskData taskData = data.getTaskData(task);
+
+			if (!taskData.isComplete() && task.matcher.matches(matcherData) && task.quest.canStartTasks(data))
 			{
-				data.getQuestTaskData(task).submitTask((EntityPlayerMP) event.getEntityPlayer(), Collections.emptyList(), false);
+				taskData.submitTask((EntityPlayerMP) event.getEntityPlayer());
+			}
+		}
+	}
+
+	@SubscribeEvent(priority = EventPriority.LOW)
+	public static void onEntityRightClick(PlayerInteractEvent.EntityInteract event)
+	{
+		if (event.getWorld().isRemote)
+		{
+			return;
+		}
+
+		if (interactionTasks == null)
+		{
+			interactionTasks = ServerQuestFile.INSTANCE.collect(InteractionTask.class);
+		}
+
+		if (interactionTasks.isEmpty())
+		{
+			return;
+		}
+
+		QuestData data = ServerQuestFile.INSTANCE.getData(event.getEntityPlayer());
+
+		if (data == null)
+		{
+			return;
+		}
+
+		RayMatcher.Data matcherData = RayMatcher.Data.get(BlockUtils.AIR_STATE, null, event.getTarget());
+
+		for (InteractionTask task : interactionTasks)
+		{
+			TaskData taskData = data.getTaskData(task);
+
+			if (!taskData.isComplete() && task.matcher.matches(matcherData) && task.quest.canStartTasks(data))
+			{
+				taskData.submitTask((EntityPlayerMP) event.getEntityPlayer());
 			}
 		}
 	}

@@ -1,8 +1,9 @@
 package com.feed_the_beast.ftbquests.quest;
 
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
-import com.feed_the_beast.ftbquests.quest.task.QuestTask;
-import com.feed_the_beast.ftbquests.quest.task.QuestTaskData;
+import com.feed_the_beast.ftbquests.quest.task.Task;
+import com.feed_the_beast.ftbquests.quest.task.TaskData;
+import it.unimi.dsi.fastutil.ints.Int2ByteOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import net.minecraft.util.text.ITextComponent;
@@ -18,15 +19,17 @@ import java.util.UUID;
  */
 public abstract class QuestData
 {
-	public final Int2ObjectOpenHashMap<QuestTaskData> taskData;
+	public final Int2ObjectOpenHashMap<TaskData> taskData;
 	public final Map<UUID, IntOpenHashSet> claimedPlayerRewards;
 	public final IntOpenHashSet claimedTeamRewards;
+	public Int2ByteOpenHashMap progressCache;
 
 	protected QuestData()
 	{
 		taskData = new Int2ObjectOpenHashMap<>();
 		claimedPlayerRewards = new HashMap<>();
 		claimedTeamRewards = new IntOpenHashSet();
+		progressCache = null;
 	}
 
 	public abstract short getTeamUID();
@@ -37,9 +40,9 @@ public abstract class QuestData
 
 	public abstract QuestFile getFile();
 
-	public QuestTaskData getQuestTaskData(QuestTask task)
+	public TaskData getTaskData(Task task)
 	{
-		QuestTaskData data = taskData.get(task.id);
+		TaskData data = taskData.get(task.id);
 
 		if (data == null)
 		{
@@ -49,21 +52,25 @@ public abstract class QuestData
 		return data;
 	}
 
-	public void syncTask(QuestTaskData data)
+	@Override
+	public String toString()
 	{
-		getFile().clearCachedProgress(getTeamUID());
+		return getTeamID();
 	}
 
-	public void removeTask(QuestTask task)
+	public void syncTask(TaskData data)
+	{
+		getFile().clearCachedProgress();
+	}
+
+	public void removeTask(Task task)
 	{
 		taskData.remove(task.id);
 	}
 
-	public void createTaskData(QuestTask task)
+	public void createTaskData(Task task)
 	{
-		QuestTaskData data = task.createData(this);
-		taskData.put(task.id, data);
-		data.isComplete = data.getProgress() >= data.task.getMaxProgress();
+		taskData.put(task.id, task.createData(this));
 	}
 
 	public boolean isRewardClaimed(UUID player, QuestReward reward)

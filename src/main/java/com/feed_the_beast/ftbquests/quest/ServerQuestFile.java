@@ -166,7 +166,6 @@ public class ServerQuestFile extends QuestFile
 
 			if (file != null)
 			{
-				FTBQuests.LOGGER.info("Deleting " + QuestObjectBase.getCodeString(id) + " @ " + file.getAbsolutePath());
 				FileUtils.deleteSafe(file);
 			}
 		}

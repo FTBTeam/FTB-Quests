@@ -3,7 +3,7 @@ package com.feed_the_beast.ftbquests.gui.tree;
 import com.feed_the_beast.ftblib.lib.gui.ColorWidget;
 import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.gui.WidgetLayout;
-import com.feed_the_beast.ftbquests.quest.QuestChapter;
+import com.feed_the_beast.ftbquests.quest.Chapter;
 import net.minecraftforge.fml.common.Loader;
 
 /**
@@ -31,7 +31,7 @@ public class PanelChapters extends Panel
 
 		boolean canEdit = treeGui.file.canEdit();
 
-		for (QuestChapter chapter : treeGui.file.chapters)
+		for (Chapter chapter : treeGui.file.chapters)
 		{
 			if ((chapter.group == null || chapter.group.invalid) && (canEdit || chapter.isVisible(treeGui.file.self)))
 			{

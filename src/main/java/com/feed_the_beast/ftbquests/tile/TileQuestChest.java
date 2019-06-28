@@ -6,10 +6,11 @@ import com.feed_the_beast.ftblib.lib.config.IConfigCallback;
 import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.gui.FTBQuestsGuiHandler;
+import com.feed_the_beast.ftbquests.quest.Chapter;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.QuestChapter;
+import com.feed_the_beast.ftbquests.quest.QuestData;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
-import com.feed_the_beast.ftbquests.quest.task.QuestTask;
+import com.feed_the_beast.ftbquests.quest.task.Task;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -99,20 +100,19 @@ public class TileQuestChest extends TileWithTeam implements IItemHandler, IConfi
 	public ItemStack insert(ItemStack stack, boolean simulate, @Nullable EntityPlayer player)
 	{
 		QuestFile file = FTBQuests.PROXY.getQuestFile(world);
+		QuestData data = file == null ? null : file.getData(team);
 
-		cTeam = getTeam();
-
-		if (cTeam != null)
+		if (data != null)
 		{
-			for (QuestChapter chapter : file.chapters)
+			for (Chapter chapter : file.chapters)
 			{
 				for (Quest quest : chapter.quests)
 				{
-					for (QuestTask task : quest.tasks)
+					for (Task task : quest.tasks)
 					{
-						if (task.canInsertItem() && !task.isComplete(cTeam) && task.quest.canStartTasks(cTeam))
+						if (task.canInsertItem() && !task.isComplete(data) && task.quest.canStartTasks(data))
 						{
-							stack = cTeam.getQuestTaskData(task).insertItem(stack, false, simulate, player);
+							stack = data.getTaskData(task).insertItem(stack, false, simulate, player);
 
 							if (stack.isEmpty())
 							{

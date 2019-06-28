@@ -8,8 +8,8 @@ import com.feed_the_beast.ftblib.lib.config.IConfigCallback;
 import com.feed_the_beast.ftblib.lib.data.Universe;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.net.MessageSyncEditingMode;
+import com.feed_the_beast.ftbquests.quest.Chapter;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import io.sommers.packmode.api.PackModeAPI;
 import net.minecraft.command.ICommandSender;
@@ -51,7 +51,7 @@ public class FTBQuestsWorldData implements IConfigCallback
 		int t = 0;
 		int r = 0;
 
-		for (QuestChapter chapter : ServerQuestFile.INSTANCE.chapters)
+		for (Chapter chapter : ServerQuestFile.INSTANCE.chapters)
 		{
 			q += chapter.quests.size();
 

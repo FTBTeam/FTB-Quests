@@ -13,7 +13,7 @@ import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.net.MessageGetEmergencyItems;
-import com.feed_the_beast.ftbquests.quest.EnumQuestShape;
+import com.feed_the_beast.ftbquests.quest.QuestShape;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
@@ -50,7 +50,7 @@ public class GuiEmergencyItems extends GuiBase
 		@Override
 		public void draw(Theme theme, int x, int y, int w, int h)
 		{
-			EnumQuestShape.RSQUARE.outline.draw(x - 3, y - 3, w + 6, h + 6);
+			QuestShape.RSQUARE.outline.draw(x - 3, y - 3, w + 6, h + 6);
 			GuiHelper.drawItem(stack, x, y, true);
 		}
 

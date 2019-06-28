@@ -25,27 +25,27 @@ import java.util.function.Consumer;
 /**
  * @author LatvianModder
  */
-public final class QuestTaskType extends IForgeRegistryEntry.Impl<QuestTaskType>
+public final class TaskType extends IForgeRegistryEntry.Impl<TaskType>
 {
-	private static ForgeRegistry<QuestTaskType> REGISTRY;
+	private static ForgeRegistry<TaskType> REGISTRY;
 
 	public static void createRegistry()
 	{
 		if (REGISTRY == null)
 		{
 			ResourceLocation registryName = new ResourceLocation(FTBQuests.MOD_ID, "tasks");
-			REGISTRY = (ForgeRegistry<QuestTaskType>) new RegistryBuilder<QuestTaskType>().setType(QuestTaskType.class).setName(registryName).create();
+			REGISTRY = (ForgeRegistry<TaskType>) new RegistryBuilder<TaskType>().setType(TaskType.class).setName(registryName).create();
 			MinecraftForge.EVENT_BUS.post(new RegistryEvent.Register<>(registryName, REGISTRY));
 		}
 	}
 
-	public static ForgeRegistry<QuestTaskType> getRegistry()
+	public static ForgeRegistry<TaskType> getRegistry()
 	{
 		return REGISTRY;
 	}
 
 	@Nullable
-	public static QuestTask createTask(Quest quest, String id)
+	public static Task createTask(Quest quest, String id)
 	{
 		if (id.isEmpty())
 		{
@@ -56,7 +56,7 @@ public final class QuestTaskType extends IForgeRegistryEntry.Impl<QuestTaskType>
 			id = FTBQuests.MOD_ID + ':' + id;
 		}
 
-		QuestTaskType type = REGISTRY.getValue(new ResourceLocation(id));
+		TaskType type = REGISTRY.getValue(new ResourceLocation(id));
 
 		if (type == null)
 		{
@@ -74,13 +74,13 @@ public final class QuestTaskType extends IForgeRegistryEntry.Impl<QuestTaskType>
 	@FunctionalInterface
 	public interface Provider
 	{
-		QuestTask create(Quest quest);
+		Task create(Quest quest);
 	}
 
 	public interface GuiProvider
 	{
 		@SideOnly(Side.CLIENT)
-		void openCreationGui(IOpenableGui gui, Quest quest, Consumer<QuestTask> callback);
+		void openCreationGui(IOpenableGui gui, Quest quest, Consumer<Task> callback);
 	}
 
 	public final Provider provider;
@@ -88,7 +88,7 @@ public final class QuestTaskType extends IForgeRegistryEntry.Impl<QuestTaskType>
 	private Icon icon;
 	private GuiProvider guiProvider;
 
-	public QuestTaskType(Provider p)
+	public TaskType(Provider p)
 	{
 		provider = p;
 		displayName = null;
@@ -97,9 +97,9 @@ public final class QuestTaskType extends IForgeRegistryEntry.Impl<QuestTaskType>
 		{
 			@Override
 			@SideOnly(Side.CLIENT)
-			public void openCreationGui(IOpenableGui gui, Quest quest, Consumer<QuestTask> callback)
+			public void openCreationGui(IOpenableGui gui, Quest quest, Consumer<Task> callback)
 			{
-				QuestTask task = provider.create(quest);
+				Task task = provider.create(quest);
 
 				if (task instanceof ISingleLongValueTask)
 				{
@@ -126,7 +126,7 @@ public final class QuestTaskType extends IForgeRegistryEntry.Impl<QuestTaskType>
 		return getRegistryName().getNamespace().equals(FTBQuests.MOD_ID) ? getRegistryName().getPath() : getRegistryName().toString();
 	}
 
-	public QuestTaskType setDisplayName(String name)
+	public TaskType setDisplayName(String name)
 	{
 		displayName = name;
 		return this;
@@ -143,7 +143,7 @@ public final class QuestTaskType extends IForgeRegistryEntry.Impl<QuestTaskType>
 		return id == null ? "error" : I18n.format("ftbquests.task." + id.getNamespace() + '.' + id.getPath());
 	}
 
-	public QuestTaskType setIcon(Icon i)
+	public TaskType setIcon(Icon i)
 	{
 		icon = i;
 		return this;
@@ -154,7 +154,7 @@ public final class QuestTaskType extends IForgeRegistryEntry.Impl<QuestTaskType>
 		return icon;
 	}
 
-	public QuestTaskType setGuiProvider(GuiProvider p)
+	public TaskType setGuiProvider(GuiProvider p)
 	{
 		guiProvider = p;
 		return this;

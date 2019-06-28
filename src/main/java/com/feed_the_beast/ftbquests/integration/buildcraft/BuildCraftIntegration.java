@@ -2,7 +2,7 @@ package com.feed_the_beast.ftbquests.integration.buildcraft;
 
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftbquests.quest.task.FTBQuestsTasks;
-import com.feed_the_beast.ftbquests.quest.task.QuestTaskType;
+import com.feed_the_beast.ftbquests.quest.task.TaskType;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -18,8 +18,8 @@ public class BuildCraftIntegration
 	}
 
 	@SubscribeEvent
-	public static void registerTasks(RegistryEvent.Register<QuestTaskType> event)
+	public static void registerTasks(RegistryEvent.Register<TaskType> event)
 	{
-		event.getRegistry().register(FTBQuestsTasks.BUILDCRAFT_MJ = new QuestTaskType(MJTask::new).setRegistryName("buildcraft_mj").setIcon(Icon.getIcon(MJTask.EMPTY_TEXTURE.toString()).combineWith(Icon.getIcon(MJTask.FULL_TEXTURE.toString()))));
+		event.getRegistry().register(FTBQuestsTasks.BUILDCRAFT_MJ = new TaskType(MJTask::new).setRegistryName("buildcraft_mj").setIcon(Icon.getIcon(MJTask.EMPTY_TEXTURE.toString()).combineWith(Icon.getIcon(MJTask.FULL_TEXTURE.toString()))));
 	}
 }

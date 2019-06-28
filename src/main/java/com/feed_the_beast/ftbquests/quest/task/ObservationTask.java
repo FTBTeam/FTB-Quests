@@ -7,16 +7,12 @@ import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestData;
 import com.feed_the_beast.ftbquests.util.RayMatcher;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-
-import java.util.Collection;
 
 /**
  * @author LatvianModder
  */
-public class ObservationTask extends QuestTask
+public class ObservationTask extends Task
 {
 	public final RayMatcher matcher;
 
@@ -27,7 +23,7 @@ public class ObservationTask extends QuestTask
 	}
 
 	@Override
-	public QuestTaskType getType()
+	public TaskType getType()
 	{
 		return FTBQuestsTasks.OBSERVATION;
 	}
@@ -75,33 +71,8 @@ public class ObservationTask extends QuestTask
 	}
 
 	@Override
-	public QuestTaskData createData(QuestData data)
+	public TaskData createData(QuestData data)
 	{
-		return new Data(this, data);
-	}
-
-	public static class Data extends SimpleQuestTaskData<ObservationTask>
-	{
-		private Data(ObservationTask task, QuestData data)
-		{
-			super(task, data);
-		}
-
-		@Override
-		public boolean submitTask(EntityPlayerMP player, Collection<ItemStack> itemsToCheck, boolean simulate)
-		{
-			if (progress < 1L && task.matcher.matches(RayMatcher.Data.get(player)))
-			{
-				if (!simulate)
-				{
-					progress = 1L;
-					sync();
-				}
-
-				return true;
-			}
-
-			return false;
-		}
+		return new BooleanTaskData<>(this, data);
 	}
 }

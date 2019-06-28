@@ -2,7 +2,7 @@ package com.feed_the_beast.ftbquests.gui;
 
 import com.feed_the_beast.ftblib.lib.gui.misc.SimpleToast;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
-import com.feed_the_beast.ftbquests.quest.QuestChapter;
+import com.feed_the_beast.ftbquests.quest.Chapter;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.audio.SoundHandler;
@@ -36,7 +36,7 @@ public class ToastQuestObject extends SimpleToast
 	@Override
 	public boolean isImportant()
 	{
-		return object instanceof QuestChapter;
+		return object instanceof Chapter;
 	}
 
 	@Override
@@ -48,7 +48,7 @@ public class ToastQuestObject extends SimpleToast
 	@Override
 	public void playSound(SoundHandler handler)
 	{
-		if (object instanceof QuestChapter)
+		if (object instanceof Chapter)
 		{
 			handler.playSound(PositionedSoundRecord.getRecord(SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, 1F, 1F));
 		}

@@ -7,6 +7,7 @@ import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
 import com.feed_the_beast.ftblib.lib.tile.EnumSaveType;
 import com.feed_the_beast.ftblib.lib.util.BlockUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
+import com.feed_the_beast.ftbquests.quest.QuestData;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
@@ -127,12 +128,19 @@ public class TileProgressDetector extends TileWithTeam implements ITickable, ICo
 		int rout = redstoneOutput;
 		redstoneOutput = 0;
 
-		cTeam = getTeam();
-		cObject = getObject();
+		QuestFile file = FTBQuests.PROXY.getQuestFile(world);
 
-		if (cTeam != null && cObject != null)
+		if (file == null)
 		{
-			int rel = cObject.getRelativeProgress(cTeam);
+			return;
+		}
+
+		QuestData data = file.getData(team);
+		QuestObject o = file.get(object);
+
+		if (data != null && o != null)
+		{
+			int rel = o.getRelativeProgress(data);
 
 			if (rel >= 100)
 			{

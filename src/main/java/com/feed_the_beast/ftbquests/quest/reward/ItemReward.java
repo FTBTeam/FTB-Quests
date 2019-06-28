@@ -159,7 +159,7 @@ public class ItemReward extends QuestReward
 	{
 		if (randomBonus > 0)
 		{
-			return randomBonus + "-" + (stack.getCount() + randomBonus);
+			return stack.getCount() + "-" + (stack.getCount() + randomBonus);
 		}
 
 		return Integer.toString(stack.getCount());

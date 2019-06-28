@@ -14,7 +14,7 @@ import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.quest.loot.RewardTable;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
-import com.feed_the_beast.ftbquests.quest.task.QuestTask;
+import com.feed_the_beast.ftbquests.quest.task.Task;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.TextFormatting;
@@ -75,9 +75,9 @@ public class GuiSelectQuestObject extends GuiButtonListBase
 					}
 				}
 			}
-			else if (object instanceof QuestTask)
+			else if (object instanceof Task)
 			{
-				Quest quest = ((QuestTask) object).quest;
+				Quest quest = ((Task) object).quest;
 				addObject(list, quest.chapter);
 				addObject(list, quest);
 

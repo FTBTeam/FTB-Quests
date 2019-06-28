@@ -4,6 +4,7 @@ import com.feed_the_beast.ftblib.integration.FTBLibJEIIntegration;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigItemStack;
 import com.feed_the_beast.ftblib.lib.config.EnumTristate;
+import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.IconAnimation;
 import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
@@ -44,7 +45,7 @@ import java.util.function.Predicate;
 /**
  * @author LatvianModder
  */
-public class ItemTask extends QuestTask implements Predicate<ItemStack>
+public class ItemTask extends Task implements Predicate<ItemStack>
 {
 	public final List<ItemStack> items;
 	public long count;
@@ -62,7 +63,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 	}
 
 	@Override
-	public QuestTaskType getType()
+	public TaskType getType()
 	{
 		return FTBQuestsTasks.ITEM;
 	}
@@ -333,6 +334,8 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 	@Override
 	public void onButtonClicked(boolean canClick)
 	{
+		GuiHelper.playClickSound();
+
 		List<ItemStack> validItems = getValidItems();
 
 		if (!consumesResources() && validItems.size() == 1 && Loader.isModLoaded("jei"))
@@ -351,7 +354,7 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 	}
 
 	@Override
-	public void addMouseOverText(List<String> list, @Nullable QuestTaskData data)
+	public void addMouseOverText(List<String> list, @Nullable TaskData data)
 	{
 		if (consumesResources())
 		{
@@ -371,12 +374,12 @@ public class ItemTask extends QuestTask implements Predicate<ItemStack>
 	}
 
 	@Override
-	public QuestTaskData createData(QuestData data)
+	public TaskData createData(QuestData data)
 	{
 		return new Data(this, data);
 	}
 
-	public static class Data extends SimpleQuestTaskData<ItemTask>
+	public static class Data extends TaskData<ItemTask>
 	{
 		private Data(ItemTask t, QuestData data)
 		{

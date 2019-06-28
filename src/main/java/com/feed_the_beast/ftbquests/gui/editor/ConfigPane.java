@@ -39,7 +39,7 @@ public class ConfigPane extends GridPane implements ConfigEditedCallback
 		buttonReset.setText("Reset");
 		buttonReset.setDisable(true);
 		buttonReset.setOnAction(event -> {
-			group.deserializeEditedNBT(original.serializeNBT());
+			group.deserializeNBT(original.serializeNBT());
 			refreshConfig();
 		});
 

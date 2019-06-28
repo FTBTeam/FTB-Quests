@@ -12,18 +12,15 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 
-import java.util.Collection;
-
 /**
  * @author LatvianModder
  */
-public class AdvancementTask extends QuestTask
+public class AdvancementTask extends Task
 {
 	public String advancement = "";
 
@@ -33,7 +30,7 @@ public class AdvancementTask extends QuestTask
 	}
 
 	@Override
-	public QuestTaskType getType()
+	public TaskType getType()
 	{
 		return FTBQuestsTasks.ADVANCEMENT;
 	}
@@ -106,12 +103,12 @@ public class AdvancementTask extends QuestTask
 	}
 
 	@Override
-	public QuestTaskData createData(QuestData data)
+	public TaskData createData(QuestData data)
 	{
 		return new Data(this, data);
 	}
 
-	public static class Data extends SimpleQuestTaskData<AdvancementTask>
+	public static class Data extends BooleanTaskData<AdvancementTask>
 	{
 		private Data(AdvancementTask task, QuestData data)
 		{
@@ -119,27 +116,15 @@ public class AdvancementTask extends QuestTask
 		}
 
 		@Override
-		public boolean submitTask(EntityPlayerMP player, Collection<ItemStack> itemsToCheck, boolean simulate)
+		public boolean canSubmit(EntityPlayerMP player)
 		{
-			if (progress >= 1L || task.advancement.isEmpty())
+			if (task.advancement.isEmpty())
 			{
 				return false;
 			}
 
 			Advancement a = player.server.getAdvancementManager().getAdvancement(new ResourceLocation(task.advancement));
-
-			if (a != null && player.getAdvancements().getProgress(a).isDone())
-			{
-				if (!simulate)
-				{
-					progress = 1L;
-					sync();
-				}
-
-				return true;
-			}
-
-			return false;
+			return a != null && player.getAdvancements().getProgress(a).isDone();
 		}
 	}
 }

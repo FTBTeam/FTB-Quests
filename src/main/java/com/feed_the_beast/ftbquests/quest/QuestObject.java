@@ -1,6 +1,6 @@
 package com.feed_the_beast.ftbquests.quest;
 
-import it.unimi.dsi.fastutil.shorts.Short2IntOpenHashMap;
+import it.unimi.dsi.fastutil.ints.Int2ByteOpenHashMap;
 import net.minecraft.entity.player.EntityPlayerMP;
 
 import java.util.List;
@@ -10,30 +10,38 @@ import java.util.List;
  */
 public abstract class QuestObject extends QuestObjectBase
 {
-	private Short2IntOpenHashMap cachedRelativeProgress;
-
-	public QuestObject()
-	{
-		cachedRelativeProgress = new Short2IntOpenHashMap();
-		cachedRelativeProgress.defaultReturnValue(-1);
-	}
-
 	@Override
-	public abstract void changeProgress(QuestData data, EnumChangeProgress type);
+	public abstract void changeProgress(QuestData data, ChangeProgress type);
 
 	public abstract int getRelativeProgressFromChildren(QuestData data);
 
 	public final int getRelativeProgress(QuestData data)
 	{
-		int i = cachedRelativeProgress.get(data.getTeamUID());
+		if (!cacheProgress())
+		{
+			return getRelativeProgressFromChildren(data);
+		}
+
+		if (data.progressCache == null)
+		{
+			data.progressCache = new Int2ByteOpenHashMap();
+			data.progressCache.defaultReturnValue((byte) -1);
+		}
+
+		int i = data.progressCache.get(id);
 
 		if (i == -1)
 		{
 			i = getRelativeProgressFromChildren(data);
-			cachedRelativeProgress.put(data.getTeamUID(), i);
+			data.progressCache.put(id, (byte) i);
 		}
 
 		return i;
+	}
+
+	public boolean cacheProgress()
+	{
+		return true;
 	}
 
 	public static int getRelativeProgressFromChildren(int progressSum, int count)
@@ -71,25 +79,6 @@ public abstract class QuestObject extends QuestObjectBase
 
 	@Override
 	public abstract String getAltTitle();
-
-	@Override
-	public void clearCachedData()
-	{
-		super.clearCachedData();
-		clearCachedProgress((short) 0);
-	}
-
-	public void clearCachedProgress(short id)
-	{
-		if (id == 0)
-		{
-			cachedRelativeProgress.clear();
-		}
-		else
-		{
-			cachedRelativeProgress.remove(id);
-		}
-	}
 
 	protected boolean verifyDependenciesInternal(QuestObject original, boolean firstLoop)
 	{

@@ -2,8 +2,8 @@ package com.feed_the_beast.ftbquests.client;
 
 import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
 import com.feed_the_beast.ftbquests.block.BlockTaskScreen;
-import com.feed_the_beast.ftbquests.quest.task.QuestTask;
-import com.feed_the_beast.ftbquests.quest.task.QuestTaskData;
+import com.feed_the_beast.ftbquests.quest.task.Task;
+import com.feed_the_beast.ftbquests.quest.task.TaskData;
 import com.feed_the_beast.ftbquests.tile.ITaskScreen;
 import com.feed_the_beast.ftbquests.tile.TileTaskScreenCore;
 import net.minecraft.client.Minecraft;
@@ -33,7 +33,7 @@ public class RenderTaskScreen extends TileEntitySpecialRenderer<TileTaskScreenCo
 			return;
 		}
 
-		QuestTask task = screen.getTask();
+		Task task = screen.getTask();
 
 		if (task == null)
 		{
@@ -104,7 +104,7 @@ public class RenderTaskScreen extends TileEntitySpecialRenderer<TileTaskScreenCo
 			iconY = 0.54D;
 		}
 
-		QuestTaskData data = screen.getTaskData();
+		TaskData data = screen.getTaskData();
 
 		String bottomText;
 
@@ -121,7 +121,7 @@ public class RenderTaskScreen extends TileEntitySpecialRenderer<TileTaskScreenCo
 			bottomText = data.task.hideProgressNumbers() ? "" : (data.getProgressString() + " / " + data.task.getMaxProgressString());
 		}
 
-		if (data != null && !bottomText.isEmpty() && data.task.isComplete(data.teamData))
+		if (data != null && !bottomText.isEmpty() && data.task.isComplete(data.data))
 		{
 			drawString(font, TextFormatting.GREEN + bottomText, 0.83D, 0.15D);
 		}

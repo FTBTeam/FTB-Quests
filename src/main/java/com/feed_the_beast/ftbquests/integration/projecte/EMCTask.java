@@ -8,10 +8,9 @@ import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestData;
 import com.feed_the_beast.ftbquests.quest.task.FTBQuestsTasks;
 import com.feed_the_beast.ftbquests.quest.task.ISingleLongValueTask;
-import com.feed_the_beast.ftbquests.quest.task.QuestTask;
-import com.feed_the_beast.ftbquests.quest.task.QuestTaskData;
-import com.feed_the_beast.ftbquests.quest.task.QuestTaskType;
-import com.feed_the_beast.ftbquests.quest.task.SimpleQuestTaskData;
+import com.feed_the_beast.ftbquests.quest.task.Task;
+import com.feed_the_beast.ftbquests.quest.task.TaskData;
+import com.feed_the_beast.ftbquests.quest.task.TaskType;
 import moze_intel.projecte.api.ProjectEAPI;
 import moze_intel.projecte.api.capabilities.IKnowledgeProvider;
 import net.minecraft.client.resources.I18n;
@@ -27,7 +26,7 @@ import java.util.Collection;
 /**
  * @author LatvianModder
  */
-public class EMCTask extends QuestTask implements ISingleLongValueTask
+public class EMCTask extends Task implements ISingleLongValueTask
 {
 	public long value = 8192L;
 
@@ -37,7 +36,7 @@ public class EMCTask extends QuestTask implements ISingleLongValueTask
 	}
 
 	@Override
-	public QuestTaskType getType()
+	public TaskType getType()
 	{
 		return FTBQuestsTasks.EMC;
 	}
@@ -114,12 +113,12 @@ public class EMCTask extends QuestTask implements ISingleLongValueTask
 	}
 
 	@Override
-	public QuestTaskData createData(QuestData data)
+	public TaskData createData(QuestData data)
 	{
 		return new Data(this, data);
 	}
 
-	public static class Data extends SimpleQuestTaskData<EMCTask>
+	public static class Data extends TaskData<EMCTask>
 	{
 		private Data(EMCTask task, QuestData data)
 		{

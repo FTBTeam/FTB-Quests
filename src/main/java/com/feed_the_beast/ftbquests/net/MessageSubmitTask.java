@@ -6,11 +6,9 @@ import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToServer;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
-import com.feed_the_beast.ftbquests.quest.task.QuestTask;
+import com.feed_the_beast.ftbquests.quest.task.Task;
 import com.feed_the_beast.ftbquests.util.ServerQuestData;
 import net.minecraft.entity.player.EntityPlayerMP;
-
-import java.util.Collections;
 
 /**
  * @author LatvianModder
@@ -50,15 +48,12 @@ public class MessageSubmitTask extends MessageToServer
 	public void onMessage(EntityPlayerMP player)
 	{
 		ServerQuestData teamData = ServerQuestData.get(Universe.get().getPlayer(player).team);
-		QuestTask t = ServerQuestFile.INSTANCE.getTask(task);
+		Task t = ServerQuestFile.INSTANCE.getTask(task);
 
-		if (t != null && t.quest.canStartTasks(teamData))
+		if (t != null && t.quest.canStartTasks(teamData) && teamData.getTaskData(t).submitTask(player) && t.canInsertItem())
 		{
-			if (teamData.getQuestTaskData(t).submitTask(player, Collections.emptyList(), false))
-			{
-				player.inventory.markDirty();
-				player.openContainer.detectAndSendChanges();
-			}
+			player.inventory.markDirty();
+			player.openContainer.detectAndSendChanges();
 		}
 	}
 }

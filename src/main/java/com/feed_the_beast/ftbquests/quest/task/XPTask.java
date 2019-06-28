@@ -18,7 +18,7 @@ import java.util.Collection;
 /**
  * @author LatvianModder
  */
-public class XPTask extends QuestTask implements ISingleLongValueTask
+public class XPTask extends Task implements ISingleLongValueTask
 {
 	public long value = 1L;
 	public boolean points = false;
@@ -29,7 +29,7 @@ public class XPTask extends QuestTask implements ISingleLongValueTask
 	}
 
 	@Override
-	public QuestTaskType getType()
+	public TaskType getType()
 	{
 		return FTBQuestsTasks.XP;
 	}
@@ -111,7 +111,7 @@ public class XPTask extends QuestTask implements ISingleLongValueTask
 	}
 
 	@Override
-	public QuestTaskData createData(QuestData data)
+	public TaskData createData(QuestData data)
 	{
 		return new Data(this, data);
 	}
@@ -188,7 +188,7 @@ public class XPTask extends QuestTask implements ISingleLongValueTask
 		}
 	}
 
-	public static class Data extends SimpleQuestTaskData<XPTask>
+	public static class Data extends TaskData<XPTask>
 	{
 		private Data(XPTask task, QuestData data)
 		{

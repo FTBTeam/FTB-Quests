@@ -1,6 +1,6 @@
 package com.feed_the_beast.ftbquests.integration.botania;
 
-import com.feed_the_beast.ftbquests.quest.task.QuestTaskData;
+import com.feed_the_beast.ftbquests.quest.task.TaskData;
 import com.feed_the_beast.ftbquests.tile.TileTaskScreenCore;
 import vazkii.botania.api.mana.IManaReceiver;
 
@@ -12,9 +12,9 @@ public class TileTaskScreenCoreBotania extends TileTaskScreenCore implements IMa
 	@Override
 	public boolean isFull()
 	{
-		QuestTaskData d = getTaskData();
+		TaskData d = getTaskData();
 
-		if (d instanceof IManaReceiver && d.task.quest.canStartTasks(d.teamData))
+		if (d instanceof IManaReceiver && d.task.quest.canStartTasks(d.data))
 		{
 			return ((IManaReceiver) d).isFull();
 		}
@@ -25,9 +25,9 @@ public class TileTaskScreenCoreBotania extends TileTaskScreenCore implements IMa
 	@Override
 	public void recieveMana(int mana)
 	{
-		QuestTaskData d = getTaskData();
+		TaskData d = getTaskData();
 
-		if (d instanceof IManaReceiver && d.task.quest.canStartTasks(d.teamData))
+		if (d instanceof IManaReceiver && d.task.quest.canStartTasks(d.data))
 		{
 			((IManaReceiver) d).recieveMana(mana);
 		}

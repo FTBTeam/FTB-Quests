@@ -14,9 +14,9 @@ import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.gui.tree.GuiQuestTree;
 import com.feed_the_beast.ftbquests.net.edit.MessageCreateObject;
-import com.feed_the_beast.ftbquests.net.edit.MessageEditObjectDirect;
+import com.feed_the_beast.ftbquests.net.edit.MessageEditObject;
+import com.feed_the_beast.ftbquests.quest.Chapter;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.loot.LootCrate;
 import com.feed_the_beast.ftbquests.quest.loot.RewardTable;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
@@ -107,7 +107,7 @@ public class GuiRewardTables extends GuiButtonListBase
 					title = table.getTitle();
 				}
 
-				new MessageEditObjectDirect(table).sendToServer();
+				new MessageEditObject(table).sendToServer();
 			})
 			{
 				@Override
@@ -126,7 +126,7 @@ public class GuiRewardTables extends GuiButtonListBase
 
 			int usedIn = 0;
 
-			for (QuestChapter chapter : table.file.chapters)
+			for (Chapter chapter : table.file.chapters)
 			{
 				for (Quest quest : chapter.quests)
 				{

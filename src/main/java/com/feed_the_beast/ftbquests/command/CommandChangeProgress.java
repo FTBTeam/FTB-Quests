@@ -5,7 +5,7 @@ import com.feed_the_beast.ftblib.lib.data.ForgeTeam;
 import com.feed_the_beast.ftblib.lib.data.Universe;
 import com.feed_the_beast.ftblib.lib.util.SidedUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
-import com.feed_the_beast.ftbquests.quest.EnumChangeProgress;
+import com.feed_the_beast.ftbquests.quest.ChangeProgress;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
@@ -38,7 +38,7 @@ public class CommandChangeProgress extends CommandFTBQuestsBase
 	{
 		if (args.length == 1)
 		{
-			return getListOfStringsMatchingLastWord(args, EnumChangeProgress.NAME_MAP.values);
+			return getListOfStringsMatchingLastWord(args, ChangeProgress.NAME_MAP.values);
 		}
 		else if (args.length == 2)
 		{
@@ -56,7 +56,7 @@ public class CommandChangeProgress extends CommandFTBQuestsBase
 			throw new WrongUsageException(getUsage(sender));
 		}
 
-		EnumChangeProgress type = EnumChangeProgress.NAME_MAP.get(args[0]);
+		ChangeProgress type = ChangeProgress.NAME_MAP.get(args[0]);
 
 		Collection<ForgeTeam> teams;
 

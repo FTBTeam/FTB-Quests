@@ -8,7 +8,6 @@ import com.feed_the_beast.ftblib.events.team.ForgeTeamLoadedEvent;
 import com.feed_the_beast.ftblib.events.team.ForgeTeamPlayerJoinedEvent;
 import com.feed_the_beast.ftblib.events.team.ForgeTeamPlayerLeftEvent;
 import com.feed_the_beast.ftblib.events.team.ForgeTeamSavedEvent;
-import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
 import com.feed_the_beast.ftblib.lib.data.ForgePlayer;
 import com.feed_the_beast.ftblib.lib.data.ForgeTeam;
 import com.feed_the_beast.ftblib.lib.data.NBTDataStorage;
@@ -22,17 +21,17 @@ import com.feed_the_beast.ftbquests.net.MessageCreateTeamData;
 import com.feed_the_beast.ftbquests.net.MessageDeleteTeamData;
 import com.feed_the_beast.ftbquests.net.MessageSyncQuests;
 import com.feed_the_beast.ftbquests.net.MessageUpdateTaskProgress;
-import com.feed_the_beast.ftbquests.quest.EnumChangeProgress;
+import com.feed_the_beast.ftbquests.quest.ChangeProgress;
+import com.feed_the_beast.ftbquests.quest.Chapter;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.QuestData;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
 import com.feed_the_beast.ftbquests.quest.task.DimensionTask;
-import com.feed_the_beast.ftbquests.quest.task.QuestTask;
-import com.feed_the_beast.ftbquests.quest.task.QuestTaskData;
+import com.feed_the_beast.ftbquests.quest.task.Task;
+import com.feed_the_beast.ftbquests.quest.task.TaskData;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.ContainerPlayer;
@@ -47,7 +46,6 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -93,11 +91,11 @@ public class ServerQuestData extends QuestData implements NBTDataStorage.Data
 	{
 		ServerQuestData data = get(event.getTeam());
 
-		for (QuestChapter chapter : ServerQuestFile.INSTANCE.chapters)
+		for (Chapter chapter : ServerQuestFile.INSTANCE.chapters)
 		{
 			for (Quest quest : chapter.quests)
 			{
-				for (QuestTask task : quest.tasks)
+				for (Task task : quest.tasks)
 				{
 					data.createTaskData(task);
 				}
@@ -113,11 +111,11 @@ public class ServerQuestData extends QuestData implements NBTDataStorage.Data
 	{
 		ServerQuestData data = get(event.getTeam());
 
-		for (QuestChapter chapter : ServerQuestFile.INSTANCE.chapters)
+		for (Chapter chapter : ServerQuestFile.INSTANCE.chapters)
 		{
 			for (Quest quest : chapter.quests)
 			{
-				for (QuestTask task : quest.tasks)
+				for (Task task : quest.tasks)
 				{
 					data.createTaskData(task);
 				}
@@ -152,7 +150,7 @@ public class ServerQuestData extends QuestData implements NBTDataStorage.Data
 
 			int size = 0;
 
-			for (QuestTaskData taskData : data.taskData.values())
+			for (TaskData taskData : data.taskData.values())
 			{
 				if (taskData.toNBT() != null)
 				{
@@ -164,7 +162,7 @@ public class ServerQuestData extends QuestData implements NBTDataStorage.Data
 			t.taskValues = new NBTBase[size];
 			int i = 0;
 
-			for (QuestTaskData taskData : data.taskData.values())
+			for (TaskData taskData : data.taskData.values())
 			{
 				NBTBase nbt = taskData.toNBT();
 
@@ -208,7 +206,7 @@ public class ServerQuestData extends QuestData implements NBTDataStorage.Data
 		new MessageSyncQuests(ServerQuestFile.INSTANCE, teamData.getTeamUID(), teamDataList, FTBQuests.canEdit(player)).sendTo(player);
 		event.getPlayer().getPlayer().inventoryContainer.addListener(new FTBQuestsInventoryListener(event.getPlayer().getPlayer()));
 
-		for (QuestChapter chapter : ServerQuestFile.INSTANCE.chapters)
+		for (Chapter chapter : ServerQuestFile.INSTANCE.chapters)
 		{
 			for (Quest quest : chapter.quests)
 			{
@@ -231,19 +229,19 @@ public class ServerQuestData extends QuestData implements NBTDataStorage.Data
 	{
 		if (event.player instanceof EntityPlayerMP)
 		{
-			QuestData data = ServerQuestFile.INSTANCE.getData(FTBLibAPI.getTeamID(event.player.getUniqueID()));
+			QuestData data = ServerQuestFile.INSTANCE.getData(event.player);
 
 			if (data != null)
 			{
-				for (QuestChapter chapter : ServerQuestFile.INSTANCE.chapters)
+				for (Chapter chapter : ServerQuestFile.INSTANCE.chapters)
 				{
 					for (Quest quest : chapter.quests)
 					{
-						for (QuestTask task : quest.tasks)
+						for (Task task : quest.tasks)
 						{
 							if (task instanceof DimensionTask)
 							{
-								data.getQuestTaskData(task).submitTask((EntityPlayerMP) event.player, Collections.emptyList(), false);
+								data.getTaskData(task).submitTask((EntityPlayerMP) event.player);
 							}
 						}
 					}
@@ -317,22 +315,21 @@ public class ServerQuestData extends QuestData implements NBTDataStorage.Data
 	}
 
 	@Override
-	public void syncTask(QuestTaskData data)
+	public void syncTask(TaskData taskData)
 	{
-		team.markDirty();
-		super.syncTask(data);
+		super.syncTask(taskData);
 
-		if (EnumChangeProgress.sendUpdates)
+		if (ChangeProgress.sendUpdates)
 		{
-			new MessageUpdateTaskProgress(team.getUID(), data.task.id, data.toNBT()).sendToAll();
+			new MessageUpdateTaskProgress(team.getUID(), taskData.task.id, taskData.toNBT()).sendToAll();
 		}
 
-		if (!data.isComplete && data.task.isComplete(this))
+		if (!taskData.isComplete && taskData.task.isComplete(this))
 		{
-			data.isComplete = true;
+			taskData.isComplete = true;
 			List<EntityPlayerMP> notifyPlayers = new ArrayList<>();
 
-			if (!data.task.quest.chapter.alwaysInvisible && !data.task.quest.canRepeat && EnumChangeProgress.sendNotifications.get(EnumChangeProgress.sendUpdates))
+			if (!taskData.task.quest.chapter.alwaysInvisible && !taskData.task.quest.canRepeat && ChangeProgress.sendNotifications.get(ChangeProgress.sendUpdates))
 			{
 				for (ForgePlayer player : team.getMembers())
 				{
@@ -343,8 +340,10 @@ public class ServerQuestData extends QuestData implements NBTDataStorage.Data
 				}
 			}
 
-			data.task.onCompleted(this, notifyPlayers);
+			taskData.task.onCompleted(this, notifyPlayers);
 		}
+
+		team.markDirty();
 	}
 
 	@Override
@@ -379,7 +378,7 @@ public class ServerQuestData extends QuestData implements NBTDataStorage.Data
 	{
 		NBTTagCompound nbt1 = new NBTTagCompound();
 
-		for (QuestTaskData data : taskData.values())
+		for (TaskData data : taskData.values())
 		{
 			NBTBase nbt2 = data.toNBT();
 
@@ -423,7 +422,7 @@ public class ServerQuestData extends QuestData implements NBTDataStorage.Data
 		{
 			for (String s : nbt1.getKeySet())
 			{
-				QuestTask task = ServerQuestFile.INSTANCE.getTask(QuestFile.getID(s));
+				Task task = ServerQuestFile.INSTANCE.getTask(QuestFile.getID(s));
 
 				if (task != null)
 				{
@@ -436,7 +435,7 @@ public class ServerQuestData extends QuestData implements NBTDataStorage.Data
 			team.markDirty();
 			nbt1 = nbt.getCompoundTag("TaskData");
 
-			for (QuestTaskData data : taskData.values())
+			for (TaskData data : taskData.values())
 			{
 				data.fromNBT(null);
 			}
@@ -451,7 +450,7 @@ public class ServerQuestData extends QuestData implements NBTDataStorage.Data
 
 					for (String t : nbt3.getKeySet())
 					{
-						QuestTaskData data = taskData.get(QuestFile.getID(c + ':' + q + ':' + t));
+						TaskData data = taskData.get(QuestFile.getID(c + ':' + q + ':' + t));
 
 						if (data != null)
 						{

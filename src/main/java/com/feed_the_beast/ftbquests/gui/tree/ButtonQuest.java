@@ -13,7 +13,7 @@ import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.gui.FTBQuestsTheme;
 import com.feed_the_beast.ftbquests.net.edit.MessageCreateObject;
-import com.feed_the_beast.ftbquests.net.edit.MessageEditObjectDirect;
+import com.feed_the_beast.ftbquests.net.edit.MessageEditObject;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
@@ -236,7 +236,7 @@ public class ButtonQuest extends Button
 
 		if (quest.verifyDependencies(false))
 		{
-			new MessageEditObjectDirect(quest).sendToServer();
+			new MessageEditObject(quest).sendToServer();
 			treeGui.questPanel.refreshWidgets();
 		}
 		else

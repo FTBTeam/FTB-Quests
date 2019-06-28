@@ -5,26 +5,23 @@ import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestData;
+import com.feed_the_beast.ftbquests.quest.task.BooleanTaskData;
 import com.feed_the_beast.ftbquests.quest.task.FTBQuestsTasks;
-import com.feed_the_beast.ftbquests.quest.task.QuestTask;
-import com.feed_the_beast.ftbquests.quest.task.QuestTaskData;
-import com.feed_the_beast.ftbquests.quest.task.QuestTaskType;
-import com.feed_the_beast.ftbquests.quest.task.SimpleQuestTaskData;
+import com.feed_the_beast.ftbquests.quest.task.Task;
+import com.feed_the_beast.ftbquests.quest.task.TaskData;
+import com.feed_the_beast.ftbquests.quest.task.TaskType;
 import net.darkhax.gamestages.GameStageHelper;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 
-import java.util.Collection;
-
 /**
  * @author LatvianModder
  */
-public class GameStageTask extends QuestTask
+public class GameStageTask extends Task
 {
 	public String stage = "";
 
@@ -34,7 +31,7 @@ public class GameStageTask extends QuestTask
 	}
 
 	@Override
-	public QuestTaskType getType()
+	public TaskType getType()
 	{
 		return FTBQuestsTasks.GAMESTAGE;
 	}
@@ -81,12 +78,12 @@ public class GameStageTask extends QuestTask
 	}
 
 	@Override
-	public QuestTaskData createData(QuestData data)
+	public TaskData createData(QuestData data)
 	{
 		return new Data(this, data);
 	}
 
-	public static class Data extends SimpleQuestTaskData<GameStageTask>
+	public static class Data extends BooleanTaskData<GameStageTask>
 	{
 		private Data(GameStageTask task, QuestData data)
 		{
@@ -94,20 +91,9 @@ public class GameStageTask extends QuestTask
 		}
 
 		@Override
-		public boolean submitTask(EntityPlayerMP player, Collection<ItemStack> itemsToCheck, boolean simulate)
+		public boolean canSubmit(EntityPlayerMP player)
 		{
-			if (progress <= 0L && GameStageHelper.hasStage(player, task.stage))
-			{
-				if (!simulate)
-				{
-					progress = 1L;
-					sync();
-				}
-
-				return true;
-			}
-
-			return false;
+			return GameStageHelper.hasStage(player, task.stage);
 		}
 	}
 }

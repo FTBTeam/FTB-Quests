@@ -3,11 +3,13 @@ package com.feed_the_beast.ftbquests.quest;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigItemStack;
 import com.feed_the_beast.ftblib.lib.config.EnumTristate;
+import com.feed_the_beast.ftblib.lib.gui.misc.GuiEditConfig;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
+import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.client.FTBQuestsClient;
 import com.feed_the_beast.ftbquests.gui.editor.ConfigPane;
@@ -15,6 +17,7 @@ import com.feed_the_beast.ftbquests.net.edit.MessageChangeProgressResponse;
 import com.feed_the_beast.ftbquests.net.edit.MessageEditObject;
 import com.latmod.mods.itemfilters.item.ItemMissing;
 import javafx.scene.Node;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -78,17 +81,18 @@ public abstract class QuestObjectBase
 
 	public abstract QuestFile getQuestFile();
 
-	public void changeProgress(QuestData data, EnumChangeProgress type)
+	public void changeProgress(QuestData data, ChangeProgress type)
 	{
 	}
 
-	public void forceProgress(QuestData data, EnumChangeProgress type, boolean notifications)
+	public void forceProgress(QuestData data, ChangeProgress type, boolean notifications)
 	{
-		EnumChangeProgress.sendUpdates = false;
-		EnumChangeProgress.sendNotifications = notifications ? EnumTristate.TRUE : EnumTristate.FALSE;
+		ChangeProgress.sendUpdates = false;
+		ChangeProgress.sendNotifications = notifications ? EnumTristate.TRUE : EnumTristate.FALSE;
 		changeProgress(data, type);
-		EnumChangeProgress.sendUpdates = true;
-		EnumChangeProgress.sendNotifications = EnumTristate.DEFAULT;
+		ChangeProgress.sendUpdates = true;
+		ChangeProgress.sendNotifications = EnumTristate.DEFAULT;
+		getQuestFile().clearCachedProgress();
 
 		if (!getQuestFile().isClient())
 		{
@@ -97,7 +101,7 @@ public abstract class QuestObjectBase
 	}
 
 	@Nullable
-	public QuestChapter getQuestChapter()
+	public Chapter getQuestChapter()
 	{
 		return null;
 	}
@@ -243,7 +247,9 @@ public abstract class QuestObjectBase
 
 	public void onEditButtonClicked()
 	{
-		new MessageEditObject(id).sendToServer();
+		ConfigGroup group = ConfigGroup.newGroup(FTBQuests.MOD_ID);
+		getConfig(Minecraft.getMinecraft().player, createSubGroup(group));
+		new GuiEditConfig(group, (group1, sender) -> new MessageEditObject(this).sendToServer()).openGui();
 	}
 
 	public int refreshJEI()

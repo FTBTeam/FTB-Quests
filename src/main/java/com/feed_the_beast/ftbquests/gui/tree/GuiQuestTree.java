@@ -22,15 +22,15 @@ import com.feed_the_beast.ftbquests.gui.GuiSelectQuestObject;
 import com.feed_the_beast.ftbquests.net.edit.MessageChangeProgress;
 import com.feed_the_beast.ftbquests.net.edit.MessageEditObjectQuick;
 import com.feed_the_beast.ftbquests.net.edit.MessageMoveQuest;
-import com.feed_the_beast.ftbquests.quest.EnumChangeProgress;
+import com.feed_the_beast.ftbquests.quest.ChangeProgress;
+import com.feed_the_beast.ftbquests.quest.Chapter;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.quest.reward.RandomReward;
-import com.feed_the_beast.ftbquests.quest.task.QuestTask;
+import com.feed_the_beast.ftbquests.quest.task.Task;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.toasts.SystemToast;
@@ -50,7 +50,7 @@ public class GuiQuestTree extends GuiBase
 {
 	public final ClientQuestFile file;
 	public int scrollWidth, scrollHeight, prevMouseX, prevMouseY, grabbed;
-	public QuestChapter selectedChapter;
+	public Chapter selectedChapter;
 	public final HashSet<Quest> selectedQuests;
 	public final PanelChapters chapterPanel;
 	public final PanelQuests questPanel;
@@ -113,7 +113,7 @@ public class GuiQuestTree extends GuiBase
 		return setFullscreen();
 	}
 
-	public void selectChapter(@Nullable QuestChapter chapter)
+	public void selectChapter(@Nullable Chapter chapter)
 	{
 		if (selectedChapter != chapter)
 		{
@@ -266,11 +266,11 @@ public class GuiQuestTree extends GuiBase
 		}
 
 		contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), GuiIcons.REMOVE, () -> ClientQuestFile.INSTANCE.deleteObject(object.id)).setYesNo(I18n.format("delete_item", object.getTitle())));
-		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.reset_progress"), GuiIcons.REFRESH, () -> new MessageChangeProgress(ClientQuestFile.INSTANCE.self.getTeamUID(), object.id, EnumChangeProgress.RESET).sendToServer()).setYesNo(I18n.format("ftbquests.gui.reset_progress_q")));
+		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.reset_progress"), GuiIcons.REFRESH, () -> new MessageChangeProgress(ClientQuestFile.INSTANCE.self.getTeamUID(), object.id, ChangeProgress.RESET).sendToServer()).setYesNo(I18n.format("ftbquests.gui.reset_progress_q")));
 
 		if (object instanceof QuestObject)
 		{
-			contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.complete_instantly"), FTBQuestsTheme.COMPLETED, () -> new MessageChangeProgress(ClientQuestFile.INSTANCE.self.getTeamUID(), object.id, EnumChangeProgress.COMPLETE).sendToServer()).setYesNo(I18n.format("ftbquests.gui.complete_instantly_q")));
+			contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.complete_instantly"), FTBQuestsTheme.COMPLETED, () -> new MessageChangeProgress(ClientQuestFile.INSTANCE.self.getTeamUID(), object.id, ChangeProgress.COMPLETE).sendToServer()).setYesNo(I18n.format("ftbquests.gui.complete_instantly_q")));
 		}
 
 		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.copy_id"), GuiIcons.INFO, () -> setClipboardString(QuestObjectBase.getCodeString(object)))
@@ -299,7 +299,7 @@ public class GuiQuestTree extends GuiBase
 		{
 			if (selectedChapter != null && file.chapters.size() > 1)
 			{
-				List<QuestChapter> visibleChapters = file.canEdit() ? file.chapters : file.getVisibleChapters(file.self, true);
+				List<Chapter> visibleChapters = file.canEdit() ? file.chapters : file.getVisibleChapters(file.self, true);
 
 				if (!visibleChapters.isEmpty())
 				{
@@ -385,9 +385,9 @@ public class GuiQuestTree extends GuiBase
 					GuiSelectQuestObject gui = new GuiSelectQuestObject(c, this, () -> {
 						QuestObjectBase o = file.getBase(c.getObject());
 
-						if (o instanceof QuestChapter)
+						if (o instanceof Chapter)
 						{
-							selectChapter((QuestChapter) o);
+							selectChapter((Chapter) o);
 						}
 						else if (o instanceof Quest)
 						{
@@ -420,7 +420,7 @@ public class GuiQuestTree extends GuiBase
 
 		if (selectedChapter == null)
 		{
-			List<QuestChapter> visible = file.getVisibleChapters(file.self, !file.canEdit());
+			List<Chapter> visible = file.getVisibleChapters(file.self, !file.canEdit());
 
 			if (!visible.isEmpty())
 			{
@@ -560,11 +560,11 @@ public class GuiQuestTree extends GuiBase
 
 	public void open(@Nullable QuestObject object)
 	{
-		QuestChapter c = chapterHoverPanel.chapter == null ? null : chapterHoverPanel.chapter.chapter;
+		Chapter c = chapterHoverPanel.chapter == null ? null : chapterHoverPanel.chapter.chapter;
 
-		if (object instanceof QuestChapter)
+		if (object instanceof Chapter)
 		{
-			selectChapter((QuestChapter) object);
+			selectChapter((Chapter) object);
 		}
 		else if (object instanceof Quest)
 		{
@@ -572,11 +572,11 @@ public class GuiQuestTree extends GuiBase
 			selectChapter(((Quest) object).chapter);
 			viewQuest((Quest) object);
 		}
-		else if (object instanceof QuestTask)
+		else if (object instanceof Task)
 		{
 			viewQuestPanel.hidePanel = false;
-			selectChapter(((QuestTask) object).quest.chapter);
-			viewQuest(((QuestTask) object).quest);
+			selectChapter(((Task) object).quest.chapter);
+			viewQuest(((Task) object).quest);
 		}
 
 		openGui();

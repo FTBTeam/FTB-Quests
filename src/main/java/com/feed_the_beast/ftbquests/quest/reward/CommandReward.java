@@ -4,8 +4,8 @@ import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
+import com.feed_the_beast.ftbquests.quest.Chapter;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -82,7 +82,7 @@ public class CommandReward extends QuestReward
 		overrides.put("y", pos.getY());
 		overrides.put("z", pos.getZ());
 
-		QuestChapter chapter = getQuestChapter();
+		Chapter chapter = getQuestChapter();
 
 		if (chapter != null)
 		{

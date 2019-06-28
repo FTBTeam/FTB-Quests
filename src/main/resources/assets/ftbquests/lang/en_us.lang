@@ -49,6 +49,12 @@ ftbquests.rarity.rare=Rare
 ftbquests.rarity.epic=Epic
 ftbquests.rarity.legendary=Legendary
 
+ftbquests.raymatcher.block_id=Block ID
+ftbquests.raymatcher.block_entity_id=Block Entity ID
+ftbquests.raymatcher.block_entity_class=Block Entity Class
+ftbquests.raymatcher.entity_id=Entity ID
+ftbquests.raymatcher.entity_class=Entity Class
+
 itemGroup.ftbquests=FTB Quests
 sidebar_button.ftbquests.quests=Quests
 sidebar_button.ftbquests.quests.no_team=Join a team to complete quests!

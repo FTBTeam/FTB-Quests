@@ -12,7 +12,7 @@ import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
-import com.feed_the_beast.ftbquests.quest.EnumQuestShape;
+import com.feed_the_beast.ftbquests.quest.QuestShape;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
@@ -51,7 +51,7 @@ public class GuiRewardNotifications extends GuiBase implements IRewardListenerGu
 		@Override
 		public void draw(Theme theme, int x, int y, int w, int h)
 		{
-			EnumQuestShape.RSQUARE.outline.draw(x, y, w, h);
+			QuestShape.RSQUARE.outline.draw(x, y, w, h);
 			key.icon.draw(x + 3, y + 3, 16, 16);
 
 			int count = rewards.getInt(key);

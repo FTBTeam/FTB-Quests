@@ -1,8 +1,8 @@
 package com.feed_the_beast.ftbquests.integration.jei;
 
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
+import com.feed_the_beast.ftbquests.quest.Chapter;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.QuestChapter;
 
 import java.util.ArrayList;
 
@@ -30,7 +30,7 @@ public enum QuestRegistry
 
 		if (ClientQuestFile.exists())
 		{
-			for (QuestChapter chapter : ClientQuestFile.INSTANCE.chapters)
+			for (Chapter chapter : ClientQuestFile.INSTANCE.chapters)
 			{
 				for (Quest quest : chapter.quests)
 				{

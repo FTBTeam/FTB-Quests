@@ -4,11 +4,11 @@ import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
 import com.feed_the_beast.ftblib.lib.tile.EnumSaveType;
 import com.feed_the_beast.ftblib.lib.tile.TileBase;
-import com.feed_the_beast.ftbquests.quest.EnumChangeProgress;
+import com.feed_the_beast.ftbquests.quest.ChangeProgress;
 import com.feed_the_beast.ftbquests.quest.QuestData;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.task.CustomTask;
-import com.feed_the_beast.ftbquests.quest.task.QuestTask;
+import com.feed_the_beast.ftbquests.quest.task.Task;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -85,7 +85,7 @@ public class TilePlayerDetector extends TileBase implements IHasConfig, ITickabl
 			return;
 		}
 
-		QuestTask t = ServerQuestFile.INSTANCE.getTask(task);
+		Task t = ServerQuestFile.INSTANCE.getTask(task);
 
 		if (t == null)
 		{
@@ -106,7 +106,7 @@ public class TilePlayerDetector extends TileBase implements IHasConfig, ITickabl
 
 				if (data != null && !t.isComplete(data) && t.quest.canStartTasks(data))
 				{
-					t.forceProgress(data, EnumChangeProgress.COMPLETE, notifications);
+					t.forceProgress(data, ChangeProgress.COMPLETE, notifications);
 				}
 			}
 		}

@@ -5,15 +5,10 @@ import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
 import com.feed_the_beast.ftblib.lib.data.Universe;
 import com.feed_the_beast.ftblib.lib.tile.EnumSaveType;
 import com.feed_the_beast.ftblib.lib.tile.TileBase;
-import com.feed_the_beast.ftbquests.FTBQuests;
-import com.feed_the_beast.ftbquests.quest.QuestData;
-import com.feed_the_beast.ftbquests.quest.QuestFile;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
-
-import javax.annotation.Nullable;
 
 /**
  * @author LatvianModder
@@ -22,8 +17,6 @@ public class TileWithTeam extends TileBase
 {
 	public String team = "";
 	public boolean indestructible = false;
-
-	protected QuestData cTeam;
 
 	@Override
 	protected void writeData(NBTTagCompound nbt, EnumSaveType type)
@@ -47,29 +40,6 @@ public class TileWithTeam extends TileBase
 		updateContainingBlockInfo();
 	}
 
-	@Override
-	public void updateContainingBlockInfo()
-	{
-		super.updateContainingBlockInfo();
-		cTeam = null;
-	}
-
-	@Nullable
-	public final QuestData getTeam()
-	{
-		if (team.isEmpty())
-		{
-			return null;
-		}
-		else if (cTeam == null && world != null)
-		{
-			QuestFile file = FTBQuests.PROXY.getQuestFile(world);
-			cTeam = file == null ? null : file.getData(team);
-		}
-
-		return cTeam;
-	}
-
 	public final boolean isOwner(EntityPlayer player)
 	{
 		return team.isEmpty() || FTBLibAPI.getTeam(player.getUniqueID()).equals(team);
@@ -77,10 +47,7 @@ public class TileWithTeam extends TileBase
 
 	protected ConfigTeam createTeamConfig()
 	{
-		return new ConfigTeam(() -> Universe.get().getTeam(team), v -> {
-			team = v.getID();
-			cTeam = null;
-		});
+		return new ConfigTeam(() -> Universe.get().getTeam(team), v -> team = v.getID());
 	}
 
 	public void setIDFromPlacer(EntityLivingBase placer)

@@ -28,15 +28,15 @@ import java.util.function.Predicate;
 /**
  * @author LatvianModder
  */
-public final class QuestChapter extends QuestObject
+public final class Chapter extends QuestObject
 {
 	public final QuestFile file;
 	public final List<Quest> quests;
 	public final List<String> description;
 	public boolean alwaysInvisible;
-	public QuestChapter group;
+	public Chapter group;
 
-	public QuestChapter(QuestFile f)
+	public Chapter(QuestFile f)
 	{
 		file = f;
 		description = new ArrayList<>(0);
@@ -58,7 +58,7 @@ public final class QuestChapter extends QuestObject
 	}
 
 	@Override
-	public QuestChapter getQuestChapter()
+	public Chapter getQuestChapter()
 	{
 		return this;
 	}
@@ -165,14 +165,14 @@ public final class QuestChapter extends QuestObject
 	}
 
 	@Override
-	public void changeProgress(QuestData data, EnumChangeProgress type)
+	public void changeProgress(QuestData data, ChangeProgress type)
 	{
 		for (Quest quest : quests)
 		{
 			quest.changeProgress(data, type);
 		}
 
-		for (QuestChapter chapter : getChildren())
+		for (Chapter chapter : getChildren())
 		{
 			chapter.changeProgress(data, type);
 		}
@@ -188,7 +188,7 @@ public final class QuestChapter extends QuestObject
 			list.add(quest.getIcon());
 		}
 
-		for (QuestChapter child : getChildren())
+		for (Chapter child : getChildren())
 		{
 			list.add(child.getIcon());
 		}
@@ -248,7 +248,7 @@ public final class QuestChapter extends QuestObject
 		config.addList("description", description, new ConfigString(""), ConfigString::new, ConfigString::getString);
 		config.addBool("always_invisible", () -> alwaysInvisible, v -> alwaysInvisible = v, false);
 
-		Predicate<QuestObjectBase> predicate = object -> object == null || (object instanceof QuestChapter && object != this && ((QuestChapter) object).group == null);
+		Predicate<QuestObjectBase> predicate = object -> object == null || (object instanceof Chapter && object != this && ((Chapter) object).group == null);
 
 		config.add("group", new ConfigQuestObject(file, getID(group), predicate)
 		{
@@ -282,7 +282,7 @@ public final class QuestChapter extends QuestObject
 			}
 		}
 
-		for (QuestChapter child : getChildren())
+		for (Chapter child : getChildren())
 		{
 			if (child.isVisible(data))
 			{
@@ -303,7 +303,7 @@ public final class QuestChapter extends QuestObject
 			quest.clearCachedData();
 		}
 
-		for (QuestChapter chapter : getChildren())
+		for (Chapter chapter : getChildren())
 		{
 			chapter.clearCachedData();
 		}
@@ -316,7 +316,7 @@ public final class QuestChapter extends QuestObject
 			return false;
 		}
 
-		for (QuestChapter chapter : file.chapters)
+		for (Chapter chapter : file.chapters)
 		{
 			if (chapter.group == this)
 			{
@@ -327,16 +327,16 @@ public final class QuestChapter extends QuestObject
 		return false;
 	}
 
-	public List<QuestChapter> getChildren()
+	public List<Chapter> getChildren()
 	{
-		List<QuestChapter> list = Collections.emptyList();
+		List<Chapter> list = Collections.emptyList();
 
 		if (group != null)
 		{
 			return list;
 		}
 
-		for (QuestChapter chapter : file.chapters)
+		for (Chapter chapter : file.chapters)
 		{
 			if (chapter.group == this)
 			{
@@ -362,7 +362,7 @@ public final class QuestChapter extends QuestObject
 			}
 		}
 
-		for (QuestChapter chapter : getChildren())
+		for (Chapter chapter : getChildren())
 		{
 			if (chapter.hasUnclaimedRewards(player, data, showExcluded))
 			{
@@ -382,7 +382,7 @@ public final class QuestChapter extends QuestObject
 			r += quest.getUnclaimedRewards(player, data, showExcluded);
 		}
 
-		for (QuestChapter chapter : getChildren())
+		for (Chapter chapter : getChildren())
 		{
 			r += chapter.getUnclaimedRewards(player, data, showExcluded);
 		}

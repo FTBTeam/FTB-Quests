@@ -13,9 +13,9 @@ import com.feed_the_beast.ftbquests.gui.FTBQuestsTheme;
 import com.feed_the_beast.ftbquests.gui.GuiRewardTables;
 import com.feed_the_beast.ftbquests.gui.editor.Editor;
 import com.feed_the_beast.ftbquests.net.edit.MessageChangeProgress;
-import com.feed_the_beast.ftbquests.quest.EnumChangeProgress;
+import com.feed_the_beast.ftbquests.quest.ChangeProgress;
+import com.feed_the_beast.ftbquests.quest.Chapter;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -54,8 +54,8 @@ public class ButtonEditSettings extends ButtonTab
 
 		List<ContextMenuItem> contextMenu = new ArrayList<>();
 		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.edit_file"), GuiIcons.SETTINGS, treeGui.file::onEditButtonClicked));
-		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.reset_progress"), GuiIcons.REFRESH, () -> new MessageChangeProgress(ClientQuestFile.INSTANCE.self.getTeamUID(), treeGui.file.id, EnumChangeProgress.RESET).sendToServer()).setYesNo(I18n.format("ftbquests.gui.reset_progress_q")));
-		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.complete_instantly"), FTBQuestsTheme.COMPLETED, () -> new MessageChangeProgress(ClientQuestFile.INSTANCE.self.getTeamUID(), treeGui.file.id, EnumChangeProgress.COMPLETE).sendToServer()).setYesNo(I18n.format("ftbquests.gui.complete_instantly_q")));
+		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.reset_progress"), GuiIcons.REFRESH, () -> new MessageChangeProgress(ClientQuestFile.INSTANCE.self.getTeamUID(), treeGui.file.id, ChangeProgress.RESET).sendToServer()).setYesNo(I18n.format("ftbquests.gui.reset_progress_q")));
+		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.complete_instantly"), FTBQuestsTheme.COMPLETED, () -> new MessageChangeProgress(ClientQuestFile.INSTANCE.self.getTeamUID(), treeGui.file.id, ChangeProgress.COMPLETE).sendToServer()).setYesNo(I18n.format("ftbquests.gui.complete_instantly_q")));
 		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.reward_tables"), GuiIcons.MONEY_BAG, () -> new GuiRewardTables().openGui()));
 		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.save_as_file"), GuiIcons.DOWN, () -> {
 			try
@@ -82,7 +82,7 @@ public class ButtonEditSettings extends ButtonTab
 			{
 				int maxQuests = 0;
 
-				for (QuestChapter chapter : ClientQuestFile.INSTANCE.chapters)
+				for (Chapter chapter : ClientQuestFile.INSTANCE.chapters)
 				{
 					maxQuests = Math.max(maxQuests, chapter.quests.size());
 				}
@@ -91,7 +91,7 @@ public class ButtonEditSettings extends ButtonTab
 
 				for (int x = 0; x < ClientQuestFile.INSTANCE.chapters.size(); x++)
 				{
-					QuestChapter c = ClientQuestFile.INSTANCE.chapters.get(x);
+					Chapter c = ClientQuestFile.INSTANCE.chapters.get(x);
 					cells[x * 2][0] = c.getUnformattedTitle();
 
 					for (int y = 0; y < c.quests.size(); y++)

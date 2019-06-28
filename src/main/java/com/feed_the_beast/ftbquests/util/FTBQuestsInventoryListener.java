@@ -1,11 +1,10 @@
 package com.feed_the_beast.ftbquests.util;
 
-import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
+import com.feed_the_beast.ftbquests.quest.Chapter;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.QuestData;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
-import com.feed_the_beast.ftbquests.quest.task.QuestTask;
+import com.feed_the_beast.ftbquests.quest.task.Task;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IContainerListener;
@@ -45,7 +44,7 @@ public class FTBQuestsInventoryListener implements IContainerListener
 
 		//FTBQuests.LOGGER.info("Running auto-completion with list: " + itemsToCheck);
 
-		QuestData data = ServerQuestFile.INSTANCE.getData(FTBLibAPI.getTeamID(player.getUniqueID()));
+		QuestData data = ServerQuestFile.INSTANCE.getData(player);
 
 		if (data == null)
 		{
@@ -54,15 +53,15 @@ public class FTBQuestsInventoryListener implements IContainerListener
 
 		boolean redo = false;
 
-		for (QuestChapter chapter : ServerQuestFile.INSTANCE.chapters)
+		for (Chapter chapter : ServerQuestFile.INSTANCE.chapters)
 		{
 			for (Quest quest : chapter.quests)
 			{
 				if (hasSubmitTasks(quest) && quest.canStartTasks(data))
 				{
-					for (QuestTask task : quest.tasks)
+					for (Task task : quest.tasks)
 					{
-						if (task.submitItemsOnInventoryChange() && data.getQuestTaskData(task).submitTask(player, itemsToCheck, false))
+						if (task.submitItemsOnInventoryChange() && data.getTaskData(task).submitTask(player, itemsToCheck, false))
 						{
 							redo = true;
 						}
@@ -79,7 +78,7 @@ public class FTBQuestsInventoryListener implements IContainerListener
 
 	private static boolean hasSubmitTasks(Quest quest)
 	{
-		for (QuestTask task : quest.tasks)
+		for (Task task : quest.tasks)
 		{
 			if (task.submitItemsOnInventoryChange())
 			{

@@ -10,8 +10,8 @@ import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.gui.GuiRewardNotifications;
 import com.feed_the_beast.ftbquests.net.MessageClaimAllRewards;
+import com.feed_the_beast.ftbquests.quest.Chapter;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.TextFormatting;
@@ -43,7 +43,7 @@ public class ButtonClaimAllRewards extends Button
 
 		if (ClientQuestFile.existsWithTeam())
 		{
-			for (QuestChapter chapter : ClientQuestFile.INSTANCE.chapters)
+			for (Chapter chapter : ClientQuestFile.INSTANCE.chapters)
 			{
 				for (Quest quest : chapter.quests)
 				{
