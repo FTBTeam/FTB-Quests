@@ -107,7 +107,7 @@ public abstract class Task extends QuestObject
 	@Override
 	public final void changeProgress(QuestData data, ChangeProgress type)
 	{
-		data.getTaskData(this).changeProgress(type);
+		data.getTaskData(this).setProgress(type.reset ? 0L : getMaxProgress());
 	}
 
 	@Override
@@ -242,10 +242,9 @@ public abstract class Task extends QuestObject
 	{
 		if (!autoSubmitOnPlayerTick())
 		{
-			GuiHelper.playClickSound();
-
 			if (canClick)
 			{
+				GuiHelper.playClickSound();
 				new MessageSubmitTask(id).sendToServer();
 			}
 		}

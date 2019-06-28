@@ -1,59 +1,34 @@
 package com.feed_the_beast.ftbquests.quest.task;
 
+import com.feed_the_beast.ftblib.lib.data.ForgePlayer;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
+import com.feed_the_beast.ftbquests.net.MessageUpdateTaskProgress;
 import com.feed_the_beast.ftbquests.quest.ChangeProgress;
 import com.feed_the_beast.ftbquests.quest.QuestData;
+import com.feed_the_beast.ftbquests.util.ServerQuestData;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTPrimitive;
-import net.minecraft.nbt.NBTTagByte;
-import net.minecraft.nbt.NBTTagInt;
-import net.minecraft.nbt.NBTTagLong;
-import net.minecraft.nbt.NBTTagShort;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.items.IItemHandler;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 /**
  * @author LatvianModder
  */
 public class TaskData<T extends Task> implements ICapabilityProvider, IItemHandler
 {
-	@Nullable
-	public static NBTBase longToNBT(long value)
-	{
-		if (value <= 0L)
-		{
-			return null;
-		}
-		else if (value <= Byte.MAX_VALUE)
-		{
-			return new NBTTagByte((byte) value);
-		}
-		else if (value <= Short.MAX_VALUE)
-		{
-			return new NBTTagShort((short) value);
-		}
-		else if (value <= Integer.MAX_VALUE)
-		{
-			return new NBTTagInt((int) value);
-		}
-
-		return new NBTTagLong(value);
-	}
-
 	public final T task;
 	public final QuestData data;
-	public boolean isComplete = false;
-
 	public long progress = 0L;
+	public boolean isComplete = false;
 
 	public TaskData(T q, QuestData d)
 	{
@@ -61,31 +36,50 @@ public class TaskData<T extends Task> implements ICapabilityProvider, IItemHandl
 		data = d;
 	}
 
-	@Nullable
-	public NBTBase toNBT()
+	public final void setProgress(long p)
 	{
-		return progress <= 0L ? null : longToNBT(progress);
-	}
+		p = Math.max(0L, Math.min(p, task.getMaxProgress()));
 
-	public void fromNBT(@Nullable NBTBase nbt)
-	{
-		progress = nbt instanceof NBTPrimitive ? ((NBTPrimitive) nbt).getLong() : 0L;
-		isComplete = isComplete();
-	}
-
-	public void changeProgress(ChangeProgress type)
-	{
-		if (type.reset)
+		if (progress != p)
 		{
-			progress = 0L;
+			progress = p;
 			isComplete = false;
-		}
-		else if (type.complete)
-		{
-			progress = task.getMaxProgress();
-		}
+			task.quest.chapter.file.clearCachedProgress();
 
-		sync();
+			if (!task.quest.chapter.file.isClient())
+			{
+				if (ChangeProgress.sendUpdates)
+				{
+					new MessageUpdateTaskProgress(data.getTeamUID(), task.id, progress).sendToAll();
+				}
+
+				if (!isComplete && isComplete())
+				{
+					isComplete = true;
+					List<EntityPlayerMP> notifyPlayers = new ArrayList<>();
+
+					if (!task.quest.chapter.alwaysInvisible && !task.quest.canRepeat && ChangeProgress.sendNotifications.get(ChangeProgress.sendUpdates))
+					{
+						for (ForgePlayer player : ((ServerQuestData) data).team.getMembers())
+						{
+							if (player.isOnline())
+							{
+								notifyPlayers.add(player.getPlayer());
+							}
+						}
+					}
+
+					task.onCompleted(data, notifyPlayers);
+				}
+			}
+
+			data.markDirty();
+		}
+	}
+
+	public final void addProgress(long p)
+	{
+		setProgress(progress + p);
 	}
 
 	@Override
@@ -181,11 +175,6 @@ public class TaskData<T extends Task> implements ICapabilityProvider, IItemHandl
 	public int getSlotLimit(int slot)
 	{
 		return 64;
-	}
-
-	public final void sync()
-	{
-		data.syncTask(this);
 	}
 
 	public boolean submitTask(EntityPlayerMP player, Collection<ItemStack> itemsToCheck, boolean simulate)

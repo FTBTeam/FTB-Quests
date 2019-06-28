@@ -421,8 +421,7 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 
 					if (!simulate)
 					{
-						progress += add;
-						sync();
+						addProgress(add);
 					}
 
 					return ItemHandlerHelper.copyStackWithSize(stack, (int) (stack.getCount() - add));
@@ -464,8 +463,7 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 				{
 					if (!simulate)
 					{
-						progress = count;
-						sync();
+						setProgress(count);
 					}
 
 					return true;

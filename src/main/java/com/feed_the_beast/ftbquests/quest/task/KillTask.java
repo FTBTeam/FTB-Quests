@@ -160,8 +160,7 @@ public class KillTask extends Task
 		{
 			if (progress < task.value && task.entity.equals(EntityList.getKey(entity)))
 			{
-				progress++;
-				sync();
+				addProgress(1L);
 			}
 		}
 	}

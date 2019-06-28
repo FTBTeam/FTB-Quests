@@ -26,13 +26,13 @@ public class CheckmarkTask extends Task
 	@Override
 	public void drawGUI(@Nullable TaskData data, int x, int y, int w, int h)
 	{
-		(data == null || data.progress < 1L ? GuiIcons.ACCEPT_GRAY : GuiIcons.ACCEPT).draw(x, y, w, h);
+		(data == null || !data.isComplete() ? GuiIcons.ACCEPT_GRAY : GuiIcons.ACCEPT).draw(x, y, w, h);
 	}
 
 	@Override
 	public void drawScreen(@Nullable TaskData data)
 	{
-		(data == null || data.progress < 1L ? GuiIcons.ACCEPT_GRAY : GuiIcons.ACCEPT).draw3D(Icon.EMPTY);
+		(data == null || !data.isComplete() ? GuiIcons.ACCEPT_GRAY : GuiIcons.ACCEPT).draw3D(Icon.EMPTY);
 	}
 
 	@Override

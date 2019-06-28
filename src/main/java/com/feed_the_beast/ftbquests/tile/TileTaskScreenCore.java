@@ -127,31 +127,20 @@ public class TileTaskScreenCore extends TileWithTeam implements IConfigCallback,
 			return true;
 		}
 
-		cTask = getTask();
+		TaskData t = getTaskData();
 
-		if (cTask != null && cTask.getMaxProgress() > 0)
+		if (t == null || !t.task.quest.canStartTasks(t.data))
 		{
-			cTaskData = getTaskData();
+			return false;
+		}
 
-			if (cTaskData == null)
-			{
-				return false;
-			}
-
-			if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)
-			{
-				if (cTask.canInsertItem())
-				{
-					return true;
-				}
-			}
-			else
-			{
-				if (cTaskData.hasCapability(capability, facing) && cTaskData.task.quest.canStartTasks(cTaskData.data))
-				{
-					return true;
-				}
-			}
+		if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY && t.task.canInsertItem())
+		{
+			return true;
+		}
+		else if (t.hasCapability(capability, facing))
+		{
+			return true;
 		}
 
 		return super.hasCapability(capability, facing);
@@ -166,32 +155,24 @@ public class TileTaskScreenCore extends TileWithTeam implements IConfigCallback,
 			return (T) this;
 		}
 
-		cTask = getTask();
+		TaskData t = getTaskData();
 
-		if (cTask != null && cTask.getMaxProgress() > 0)
+		if (t == null || !t.task.quest.canStartTasks(t.data))
 		{
-			cTaskData = getTaskData();
+			return null;
+		}
 
-			if (cTaskData == null)
-			{
-				return null;
-			}
+		if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY && t.task.canInsertItem())
+		{
+			return (T) t;
+		}
+		else
+		{
+			Object object = t.getCapability(capability, facing);
 
-			if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)
+			if (object != null)
 			{
-				if (cTask.canInsertItem())
-				{
-					return (T) cTaskData;
-				}
-			}
-			else
-			{
-				Object object = cTaskData.getCapability(capability, facing);
-
-				if (object != null && cTaskData.task.quest.canStartTasks(cTaskData.data))
-				{
-					return (T) object;
-				}
+				return (T) object;
 			}
 		}
 

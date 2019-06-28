@@ -39,6 +39,7 @@ import net.minecraftforge.items.IItemHandler;
 import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nullable;
+import java.util.Objects;
 
 /**
  * @author LatvianModder
@@ -372,18 +373,15 @@ public class FluidTask extends Task
 		@Override
 		public int fill(FluidStack resource, boolean doFill)
 		{
-			FluidStack fluidStack = task.createFluidStack(Fluid.BUCKET_VOLUME);
-
-			if (progress < task.amount && fluidStack.isFluidEqual(resource))
+			if (progress < task.amount && task.fluid == resource.getFluid() && Objects.equals(task.fluidNBT, resource.tag))
 			{
-				int add = (int) Math.min(Integer.MAX_VALUE, Math.min(resource.amount, task.amount - progress));
+				int add = (int) Math.min(resource.amount, task.amount - progress);
 
 				if (add > 0)
 				{
 					if (doFill)
 					{
-						progress += add;
-						sync();
+						addProgress(add);
 					}
 
 					return add;

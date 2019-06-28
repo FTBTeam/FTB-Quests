@@ -206,8 +206,7 @@ public class ManaTask extends EnergyTask
 
 				if (add > 0L)
 				{
-					progress += add;
-					sync();
+					addProgress(add);
 				}
 			}
 		}

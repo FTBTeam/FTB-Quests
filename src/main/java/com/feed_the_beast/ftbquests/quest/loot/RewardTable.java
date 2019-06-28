@@ -330,6 +330,7 @@ public final class RewardTable extends QuestObjectBase
 	}
 
 	@Override
+	@SideOnly(Side.CLIENT)
 	public void onEditButtonClicked()
 	{
 		new GuiEditRewardTable(this, () -> new MessageEditObject(this).sendToServer()).openGui();

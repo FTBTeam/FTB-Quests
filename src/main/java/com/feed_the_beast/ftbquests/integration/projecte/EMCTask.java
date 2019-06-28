@@ -148,8 +148,7 @@ public class EMCTask extends Task implements ISingleLongValueTask
 				{
 					knowledge.setEmc(emc - add);
 					knowledge.sync(player);
-					progress += add;
-					sync();
+					addProgress((long) add);
 				}
 
 				return true;
