@@ -2,6 +2,7 @@ package com.feed_the_beast.ftbquests.quest.task;
 
 import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
+import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
 import com.feed_the_beast.ftblib.lib.gui.WrappedIngredient;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
@@ -10,9 +11,9 @@ import com.feed_the_beast.ftbquests.gui.tree.GuiQuestTree;
 import com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIHelper;
 import com.feed_the_beast.ftbquests.net.MessageDisplayCompletionToast;
 import com.feed_the_beast.ftbquests.net.MessageSubmitTask;
-import com.feed_the_beast.ftbquests.quest.EnumChangeProgress;
+import com.feed_the_beast.ftbquests.quest.ChangeProgress;
+import com.feed_the_beast.ftbquests.quest.Chapter;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.QuestData;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
@@ -30,11 +31,11 @@ import java.util.List;
 /**
  * @author LatvianModder
  */
-public abstract class QuestTask extends QuestObject
+public abstract class Task extends QuestObject
 {
 	public final Quest quest;
 
-	public QuestTask(Quest q)
+	public Task(Quest q)
 	{
 		quest = q;
 	}
@@ -52,7 +53,7 @@ public abstract class QuestTask extends QuestObject
 	}
 
 	@Override
-	public final QuestChapter getQuestChapter()
+	public final Chapter getQuestChapter()
 	{
 		return quest.chapter;
 	}
@@ -63,14 +64,14 @@ public abstract class QuestTask extends QuestObject
 		return quest.id;
 	}
 
-	public abstract QuestTaskType getType();
+	public abstract TaskType getType();
 
-	public abstract QuestTaskData createData(QuestData data);
+	public abstract TaskData createData(QuestData data);
 
 	@Override
 	public final int getRelativeProgressFromChildren(QuestData data)
 	{
-		return data.getQuestTaskData(this).getRelativeProgress();
+		return data.getTaskData(this).getRelativeProgress();
 	}
 
 	@Override
@@ -102,18 +103,9 @@ public abstract class QuestTask extends QuestObject
 	}
 
 	@Override
-	public final void changeProgress(QuestData data, EnumChangeProgress type)
+	public final void changeProgress(QuestData data, ChangeProgress type)
 	{
-		QuestTaskData taskData = data.getQuestTaskData(this);
-
-		taskData.changeProgress(type);
-
-		if (type.reset)
-		{
-			taskData.isComplete = false;
-		}
-
-		taskData.sync();
+		data.getTaskData(this).changeProgress(type);
 	}
 
 	@Override
@@ -178,7 +170,7 @@ public abstract class QuestTask extends QuestObject
 	@Override
 	public final ConfigGroup createSubGroup(ConfigGroup group)
 	{
-		QuestTaskType type = getType();
+		TaskType type = getType();
 		return group.getGroup(getObjectType().getID()).getGroup(type.getRegistryName().getNamespace()).getGroup(type.getRegistryName().getPath());
 	}
 
@@ -202,12 +194,12 @@ public abstract class QuestTask extends QuestObject
 		return new TileTaskScreenPart();
 	}
 
-	public void drawGUI(@Nullable QuestTaskData data, int x, int y, int w, int h)
+	public void drawGUI(@Nullable TaskData data, int x, int y, int w, int h)
 	{
 		getIcon().draw(x, y, w, h);
 	}
 
-	public void drawScreen(@Nullable QuestTaskData data)
+	public void drawScreen(@Nullable TaskData data)
 	{
 		getIcon().draw3D(Icon.EMPTY);
 	}
@@ -227,7 +219,7 @@ public abstract class QuestTask extends QuestObject
 		return getMaxProgress() <= 1L;
 	}
 
-	public void addMouseOverText(List<String> list, @Nullable QuestTaskData data)
+	public void addMouseOverText(List<String> list, @Nullable TaskData data)
 	{
 		if (consumesResources())
 		{
@@ -243,9 +235,14 @@ public abstract class QuestTask extends QuestObject
 
 	public void onButtonClicked(boolean canClick)
 	{
-		if (canClick)
+		if (!autoSubmitOnPlayerTick())
 		{
-			new MessageSubmitTask(id).sendToServer();
+			GuiHelper.playClickSound();
+
+			if (canClick)
+			{
+				new MessageSubmitTask(id).sendToServer();
+			}
 		}
 	}
 
@@ -277,6 +274,12 @@ public abstract class QuestTask extends QuestObject
 	}
 
 	public boolean autoSubmitOnPlayerTick()
+	{
+		return false;
+	}
+
+	@Override
+	public boolean cacheProgress()
 	{
 		return false;
 	}

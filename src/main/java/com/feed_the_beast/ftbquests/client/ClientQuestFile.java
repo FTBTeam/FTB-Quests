@@ -7,10 +7,10 @@ import com.feed_the_beast.ftbquests.gui.tree.GuiQuestTree;
 import com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIHelper;
 import com.feed_the_beast.ftbquests.net.MessageSyncQuests;
 import com.feed_the_beast.ftbquests.net.edit.MessageDeleteObject;
+import com.feed_the_beast.ftbquests.quest.Chapter;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
-import com.feed_the_beast.ftbquests.quest.task.QuestTask;
+import com.feed_the_beast.ftbquests.quest.task.Task;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
 import net.minecraft.entity.player.EntityPlayer;
@@ -61,11 +61,11 @@ public class ClientQuestFile extends QuestFile
 		{
 			ClientQuestData data = new ClientQuestData(team.uid, team.id, team.name);
 
-			for (QuestChapter chapter : chapters)
+			for (Chapter chapter : chapters)
 			{
 				for (Quest quest : chapter.quests)
 				{
-					for (QuestTask task : quest.tasks)
+					for (Task task : quest.tasks)
 					{
 						data.createTaskData(task);
 					}
@@ -74,11 +74,11 @@ public class ClientQuestFile extends QuestFile
 
 			for (int i = 0; i < team.taskKeys.length; i++)
 			{
-				QuestTask task = getTask(team.taskKeys[i]);
+				Task task = getTask(team.taskKeys[i]);
 
 				if (task != null)
 				{
-					data.getQuestTaskData(task).fromNBT(team.taskValues[i]);
+					data.getTaskData(task).fromNBT(team.taskValues[i]);
 				}
 			}
 

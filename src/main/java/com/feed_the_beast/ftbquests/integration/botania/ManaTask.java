@@ -9,9 +9,8 @@ import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestData;
 import com.feed_the_beast.ftbquests.quest.task.EnergyTask;
 import com.feed_the_beast.ftbquests.quest.task.FTBQuestsTasks;
-import com.feed_the_beast.ftbquests.quest.task.QuestTaskData;
-import com.feed_the_beast.ftbquests.quest.task.QuestTaskType;
-import com.feed_the_beast.ftbquests.quest.task.SimpleQuestTaskData;
+import com.feed_the_beast.ftbquests.quest.task.TaskData;
+import com.feed_the_beast.ftbquests.quest.task.TaskType;
 import com.feed_the_beast.ftbquests.tile.TileTaskScreenCore;
 import com.feed_the_beast.ftbquests.tile.TileTaskScreenPart;
 import net.minecraft.client.Minecraft;
@@ -44,7 +43,7 @@ public class ManaTask extends EnergyTask
 	}
 
 	@Override
-	public QuestTaskType getType()
+	public TaskType getType()
 	{
 		return FTBQuestsTasks.BOTANIA_MANA;
 	}
@@ -118,7 +117,7 @@ public class ManaTask extends EnergyTask
 	}
 
 	@Override
-	public void drawScreen(@Nullable QuestTaskData data)
+	public void drawScreen(@Nullable TaskData data)
 	{
 		Tessellator tessellator = Tessellator.getInstance();
 		BufferBuilder buffer = tessellator.getBuffer();
@@ -137,7 +136,7 @@ public class ManaTask extends EnergyTask
 		buffer.pos(x, y, z).tex(0, 0).endVertex();
 		tessellator.draw();
 
-		double r = data == null ? 0D : data.getProgress() / (double) data.task.getMaxProgress();
+		double r = data == null ? 0D : data.progress / (double) data.task.getMaxProgress();
 
 		if (r > 0D)
 		{
@@ -173,12 +172,12 @@ public class ManaTask extends EnergyTask
 	}
 
 	@Override
-	public QuestTaskData createData(QuestData data)
+	public TaskData createData(QuestData data)
 	{
 		return new Data(this, data);
 	}
 
-	public static class Data extends SimpleQuestTaskData<ManaTask> implements IManaReceiver
+	public static class Data extends TaskData<ManaTask> implements IManaReceiver
 	{
 		private Data(ManaTask task, QuestData data)
 		{

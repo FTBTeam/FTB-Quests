@@ -17,7 +17,7 @@ import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
-import com.feed_the_beast.ftbquests.quest.task.QuestTask;
+import com.feed_the_beast.ftbquests.quest.task.Task;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.math.MathHelper;
@@ -73,7 +73,7 @@ public class PanelViewQuest extends Panel
 
 		boolean canEdit = gui.file.canEdit();
 
-		for (QuestTask task : quest.tasks)
+		for (Task task : quest.tasks)
 		{
 			panelTasks.add(new ButtonTask(panelTasks, task));
 		}
@@ -260,7 +260,7 @@ public class PanelViewQuest extends Panel
 
 		addedText = false;
 
-		for (QuestChapter chapter : treeGui.file.chapters)
+		for (Chapter chapter : treeGui.file.chapters)
 		{
 			for (Quest quest : chapter.quests)
 			{

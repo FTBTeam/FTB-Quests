@@ -8,9 +8,9 @@ import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.net.edit.MessageDeleteObject;
-import com.feed_the_beast.ftbquests.net.edit.MessageEditObjectDirect;
+import com.feed_the_beast.ftbquests.net.edit.MessageEditObject;
+import com.feed_the_beast.ftbquests.quest.Chapter;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
@@ -179,7 +179,7 @@ public final class Editor
 
 		QuestObjectBaseTreeItem rootNode = new QuestObjectBaseTreeItem(ClientQuestFile.INSTANCE);
 
-		for (QuestChapter chapter : ClientQuestFile.INSTANCE.chapters)
+		for (Chapter chapter : ClientQuestFile.INSTANCE.chapters)
 		{
 			if (chapter.hasGroup())
 			{
@@ -189,7 +189,7 @@ public final class Editor
 			QuestObjectBaseTreeItem chapterNode = new QuestObjectBaseTreeItem(chapter);
 			rootNode.getChildren().add(chapterNode);
 
-			for (QuestChapter chapter1 : chapter.getChildren())
+			for (Chapter chapter1 : chapter.getChildren())
 			{
 				QuestObjectBaseTreeItem subChapterNode = new QuestObjectBaseTreeItem(chapter1);
 				chapterNode.getChildren().add(subChapterNode);
@@ -340,6 +340,6 @@ public final class Editor
 
 	public static void scheduleObjectEdit(QuestObjectBase object)
 	{
-		scheduleMessage(new MessageEditObjectDirect(object));
+		scheduleMessage(new MessageEditObject(object));
 	}
 }

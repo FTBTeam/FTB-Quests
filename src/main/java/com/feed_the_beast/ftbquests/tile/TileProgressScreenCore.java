@@ -10,7 +10,8 @@ import com.feed_the_beast.ftblib.lib.util.BlockUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.block.BlockProgressScreen;
 import com.feed_the_beast.ftbquests.block.FTBQuestsBlocks;
-import com.feed_the_beast.ftbquests.quest.QuestChapter;
+import com.feed_the_beast.ftbquests.quest.Chapter;
+import com.feed_the_beast.ftbquests.quest.QuestData;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
@@ -42,7 +43,7 @@ public class TileProgressScreenCore extends TileWithTeam implements IConfigCallb
 	public boolean fullscreen = false;
 	public boolean hideIcons = false;
 
-	private QuestChapter cChapter;
+	private Chapter cChapter;
 
 	@Override
 	protected void writeData(NBTTagCompound nbt, EnumSaveType type)
@@ -174,7 +175,7 @@ public class TileProgressScreenCore extends TileWithTeam implements IConfigCallb
 	}
 
 	@Nullable
-	public QuestChapter getChapter()
+	public Chapter getChapter()
 	{
 		if (chapter == 0)
 		{
@@ -258,13 +259,13 @@ public class TileProgressScreenCore extends TileWithTeam implements IConfigCallb
 		}
 		else if (!indestructible)
 		{
-			cChapter = getChapter();
-			cTeam = getTeam();
+			Chapter c = ServerQuestFile.INSTANCE.getChapter(chapter);
+			QuestData data = ServerQuestFile.INSTANCE.getData(team);
 
-			if (cChapter != null && cTeam != null)
+			if (c != null && data != null)
 			{
-				List<QuestChapter> chapters = cChapter.file.getVisibleChapters(cTeam, true);
-				chapter = chapters.get((chapters.indexOf(cChapter) + 1) % chapters.size()).id;
+				List<Chapter> chapters = c.file.getVisibleChapters(data, true);
+				chapter = chapters.get((chapters.indexOf(c) + 1) % chapters.size()).id;
 				updateContainingBlockInfo();
 				markDirty();
 				BlockUtils.notifyBlockUpdate(world, pos, getBlockState());

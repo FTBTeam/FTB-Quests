@@ -5,7 +5,7 @@ import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToClient;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
-import com.feed_the_beast.ftbquests.quest.EnumChangeProgress;
+import com.feed_the_beast.ftbquests.quest.ChangeProgress;
 import com.feed_the_beast.ftbquests.quest.QuestData;
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import net.minecraftforge.fml.relauncher.Side;
@@ -18,14 +18,14 @@ public class MessageChangeProgressResponse extends MessageToClient
 {
 	private short team;
 	private int id;
-	private EnumChangeProgress type;
+	private ChangeProgress type;
 	private boolean notifications;
 
 	public MessageChangeProgressResponse()
 	{
 	}
 
-	public MessageChangeProgressResponse(short t, int i, EnumChangeProgress ty, boolean n)
+	public MessageChangeProgressResponse(short t, int i, ChangeProgress ty, boolean n)
 	{
 		team = t;
 		id = i;
@@ -44,7 +44,7 @@ public class MessageChangeProgressResponse extends MessageToClient
 	{
 		data.writeShort(team);
 		data.writeInt(id);
-		data.write(type, EnumChangeProgress.NAME_MAP);
+		data.write(type, ChangeProgress.NAME_MAP);
 		data.writeBoolean(notifications);
 	}
 
@@ -53,7 +53,7 @@ public class MessageChangeProgressResponse extends MessageToClient
 	{
 		team = data.readShort();
 		id = data.readInt();
-		type = EnumChangeProgress.NAME_MAP.read(data);
+		type = ChangeProgress.NAME_MAP.read(data);
 		notifications = data.readBoolean();
 	}
 

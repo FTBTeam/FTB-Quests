@@ -16,7 +16,7 @@ import com.feed_the_beast.ftbquests.events.ObjectCompletedEvent;
 import com.feed_the_beast.ftbquests.gui.tree.GuiQuestTree;
 import com.feed_the_beast.ftbquests.net.MessageDisplayCompletionToast;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
-import com.feed_the_beast.ftbquests.quest.task.QuestTask;
+import com.feed_the_beast.ftbquests.quest.task.Task;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
@@ -43,17 +43,17 @@ public final class Quest extends QuestObject
 {
 	public static final int POS_LIMIT = 25;
 
-	public final QuestChapter chapter;
+	public final Chapter chapter;
 	public String description;
 	public byte x, y;
 	public boolean hide;
-	public EnumQuestShape shape;
+	public QuestShape shape;
 	public final List<String> text;
 	public final List<QuestObject> dependencies;
 	public boolean canRepeat;
-	public final List<QuestTask> tasks;
+	public final List<Task> tasks;
 	public final List<QuestReward> rewards;
-	public EnumDependencyRequirement dependencyRequirement;
+	public DependencyRequirement dependencyRequirement;
 	public String guidePage;
 	public String customClick;
 	public boolean hideDependencyLines;
@@ -63,7 +63,7 @@ public final class Quest extends QuestObject
 	private String cachedDescription = null;
 	private String[] cachedText = null;
 
-	public Quest(QuestChapter c)
+	public Quest(Chapter c)
 	{
 		chapter = c;
 		description = "";
@@ -79,7 +79,7 @@ public final class Quest extends QuestObject
 		customClick = "";
 		hideDependencyLines = false;
 		hide = false;
-		dependencyRequirement = EnumDependencyRequirement.ALL_COMPLETED;
+		dependencyRequirement = DependencyRequirement.ALL_COMPLETED;
 		minRequiredDependencies = 0;
 		hideTextUntilComplete = false;
 	}
@@ -97,7 +97,7 @@ public final class Quest extends QuestObject
 	}
 
 	@Override
-	public QuestChapter getQuestChapter()
+	public Chapter getQuestChapter()
 	{
 		return chapter;
 	}
@@ -196,7 +196,7 @@ public final class Quest extends QuestObject
 			nbt.setBoolean("hide", true);
 		}
 
-		if (dependencyRequirement != EnumDependencyRequirement.ALL_COMPLETED)
+		if (dependencyRequirement != DependencyRequirement.ALL_COMPLETED)
 		{
 			nbt.setString("dependency_requirement", dependencyRequirement.getID());
 		}
@@ -214,7 +214,7 @@ public final class Quest extends QuestObject
 		description = nbt.getString("description");
 		x = (byte) MathHelper.clamp(nbt.getByte("x"), -POS_LIMIT, POS_LIMIT);
 		y = (byte) MathHelper.clamp(nbt.getByte("y"), -POS_LIMIT, POS_LIMIT);
-		shape = nbt.hasKey("shape") ? EnumQuestShape.NAME_MAP.get(nbt.getString("shape")) : chapter.file.defaultShape;
+		shape = nbt.hasKey("shape") ? QuestShape.NAME_MAP.get(nbt.getString("shape")) : chapter.file.defaultShape;
 		text.clear();
 
 		NBTTagList list = nbt.getTagList("text", Constants.NBT.TAG_STRING);
@@ -272,7 +272,7 @@ public final class Quest extends QuestObject
 		}
 
 		hide = nbt.getBoolean("hide");
-		dependencyRequirement = EnumDependencyRequirement.NAME_MAP.get(nbt.getString("dependency_requirement"));
+		dependencyRequirement = DependencyRequirement.NAME_MAP.get(nbt.getString("dependency_requirement"));
 		hideTextUntilComplete = nbt.getBoolean("hide_text_until_complete");
 	}
 
@@ -298,7 +298,7 @@ public final class Quest extends QuestObject
 
 		data.writeByte(x);
 		data.writeByte(y);
-		data.write(shape, EnumQuestShape.NAME_MAP);
+		data.write(shape, QuestShape.NAME_MAP);
 
 		if (!text.isEmpty())
 		{
@@ -316,7 +316,7 @@ public final class Quest extends QuestObject
 		}
 
 		data.writeVarInt(minRequiredDependencies);
-		EnumDependencyRequirement.NAME_MAP.write(data, dependencyRequirement);
+		DependencyRequirement.NAME_MAP.write(data, dependencyRequirement);
 		data.writeVarInt(dependencies.size());
 
 		for (QuestObject d : dependencies)
@@ -340,7 +340,7 @@ public final class Quest extends QuestObject
 		description = Bits.getFlag(flags, 8) ? data.readString() : "";
 		x = data.readByte();
 		y = data.readByte();
-		shape = data.read(EnumQuestShape.NAME_MAP);
+		shape = data.read(QuestShape.NAME_MAP);
 
 		if (Bits.getFlag(flags, 16))
 		{
@@ -359,7 +359,7 @@ public final class Quest extends QuestObject
 		hideTextUntilComplete = Bits.getFlag(flags, 128);
 
 		minRequiredDependencies = data.readVarInt();
-		dependencyRequirement = EnumDependencyRequirement.NAME_MAP.read(data);
+		dependencyRequirement = DependencyRequirement.NAME_MAP.read(data);
 		dependencies.clear();
 		int d = data.readVarInt();
 
@@ -382,9 +382,14 @@ public final class Quest extends QuestObject
 			return 100;
 		}*/
 
+		if (tasks.isEmpty())
+		{
+			return areDependenciesComplete(data) ? 100 : 0;
+		}
+
 		int progress = 0;
 
-		for (QuestTask task : tasks)
+		for (Task task : tasks)
 		{
 			progress += task.getRelativeProgress(data);
 		}
@@ -473,7 +478,7 @@ public final class Quest extends QuestObject
 	}
 
 	@Override
-	public void changeProgress(QuestData data, EnumChangeProgress type)
+	public void changeProgress(QuestData data, ChangeProgress type)
 	{
 		//FIXME: data.setTimesCompleted(this, -1);
 
@@ -488,7 +493,7 @@ public final class Quest extends QuestObject
 			}
 		}
 
-		for (QuestTask task : tasks)
+		for (Task task : tasks)
 		{
 			task.changeProgress(data, type);
 		}
@@ -504,7 +509,7 @@ public final class Quest extends QuestObject
 	{
 		List<Icon> list = new ArrayList<>();
 
-		for (QuestTask task : tasks)
+		for (Task task : tasks)
 		{
 			list.add(task.getIcon());
 		}
@@ -533,7 +538,7 @@ public final class Quest extends QuestObject
 	@Override
 	public void deleteChildren()
 	{
-		for (QuestTask task : tasks)
+		for (Task task : tasks)
 		{
 			task.deleteChildren();
 			task.invalid = true;
@@ -556,7 +561,7 @@ public final class Quest extends QuestObject
 
 		if (!tasks.isEmpty())
 		{
-			for (QuestTask task : ListUtils.clearAndCopy(tasks))
+			for (Task task : ListUtils.clearAndCopy(tasks))
 			{
 				task.onCreated();
 			}
@@ -576,15 +581,15 @@ public final class Quest extends QuestObject
 		config.addInt("x", () -> x, v -> x = (byte) v, 0, -POS_LIMIT, POS_LIMIT);
 		config.addInt("y", () -> y, v -> y = (byte) v, 0, -POS_LIMIT, POS_LIMIT);
 		config.addBool("hide", () -> hide, v -> hide = v, false);
-		config.addEnum("shape", () -> shape, v -> shape = v, EnumQuestShape.NAME_MAP);
+		config.addEnum("shape", () -> shape, v -> shape = v, QuestShape.NAME_MAP);
 		config.addString("description", () -> description, v -> description = v, "");
 		config.addList("text", text, new ConfigString(""), ConfigString::new, ConfigString::getString);
 		config.addBool("can_repeat", () -> canRepeat, v -> canRepeat = v, false);
 
-		Predicate<QuestObjectBase> depTypes = object -> object != chapter.file && object != chapter && object instanceof QuestObject && !(object instanceof QuestTask);
+		Predicate<QuestObjectBase> depTypes = object -> object != chapter.file && object != chapter && object instanceof QuestObject && !(object instanceof Task);
 
 		config.addList("dependencies", dependencies, new ConfigQuestObject(chapter.file, 0, depTypes), questObject -> new ConfigQuestObject(chapter.file, questObject.id, depTypes), configQuestObject -> chapter.file.get(configQuestObject.getObject())).setDisplayName(new TextComponentTranslation("ftbquests.dependencies"));
-		config.addEnum("dependency_requirement", () -> dependencyRequirement, v -> dependencyRequirement = v, EnumDependencyRequirement.NAME_MAP);
+		config.addEnum("dependency_requirement", () -> dependencyRequirement, v -> dependencyRequirement = v, DependencyRequirement.NAME_MAP);
 		config.addInt("min_required_dependencies", () -> minRequiredDependencies, v -> minRequiredDependencies = v, 0, 0, Integer.MAX_VALUE);
 		config.addBool("hide_dependency_lines", () -> hideDependencyLines, v -> hideDependencyLines = v, false);
 		config.addString("guide_page", () -> guidePage, v -> guidePage = v, "");
@@ -616,7 +621,7 @@ public final class Quest extends QuestObject
 		return false;
 	}
 
-	public QuestTask getTask(int index)
+	public Task getTask(int index)
 	{
 		if (tasks.isEmpty())
 		{
@@ -641,7 +646,7 @@ public final class Quest extends QuestObject
 		cachedDescription = null;
 		cachedText = null;
 
-		for (QuestTask task : tasks)
+		for (Task task : tasks)
 		{
 			task.clearCachedData();
 		}
@@ -788,7 +793,7 @@ public final class Quest extends QuestObject
 			}
 		}
 
-		changeProgress(data, EnumChangeProgress.RESET);
+		changeProgress(data, ChangeProgress.RESET);
 	}
 
 	@Override

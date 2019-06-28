@@ -13,7 +13,7 @@ import net.minecraft.util.text.TextComponentTranslation;
 /**
  * @author LatvianModder
  */
-public abstract class EnergyTask extends QuestTask implements ISingleLongValueTask
+public abstract class EnergyTask extends Task implements ISingleLongValueTask
 {
 	public long value = 1000L;
 	public long maxInput = 0L;

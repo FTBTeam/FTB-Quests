@@ -11,11 +11,12 @@ import com.feed_the_beast.ftblib.lib.util.BlockUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.block.BlockTaskScreen;
 import com.feed_the_beast.ftbquests.block.FTBQuestsBlocks;
+import com.feed_the_beast.ftbquests.quest.QuestData;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
-import com.feed_the_beast.ftbquests.quest.task.QuestTask;
-import com.feed_the_beast.ftbquests.quest.task.QuestTaskData;
+import com.feed_the_beast.ftbquests.quest.task.Task;
+import com.feed_the_beast.ftbquests.quest.task.TaskData;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
 import com.latmod.mods.itemfilters.api.PaintAPI;
 import net.minecraft.block.BlockHorizontal;
@@ -33,7 +34,6 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.items.CapabilityItemHandler;
 
 import javax.annotation.Nullable;
-import java.util.Collections;
 
 /**
  * @author LatvianModder
@@ -47,8 +47,8 @@ public class TileTaskScreenCore extends TileWithTeam implements IConfigCallback,
 	public boolean inputOnly = false;
 	public ItemStack inputModeIcon = ItemStack.EMPTY;
 
-	private QuestTask cTask;
-	private QuestTaskData cTaskData;
+	private Task cTask;
+	private TaskData cTaskData;
 
 	private Class currentCoreClass, currentPartClass;
 
@@ -147,7 +147,7 @@ public class TileTaskScreenCore extends TileWithTeam implements IConfigCallback,
 			}
 			else
 			{
-				if (cTaskData.hasCapability(capability, facing) && cTaskData.task.quest.canStartTasks(cTaskData.teamData))
+				if (cTaskData.hasCapability(capability, facing) && cTaskData.task.quest.canStartTasks(cTaskData.data))
 				{
 					return true;
 				}
@@ -186,11 +186,11 @@ public class TileTaskScreenCore extends TileWithTeam implements IConfigCallback,
 			}
 			else
 			{
-				T object = cTaskData.getCapability(capability, facing);
+				Object object = cTaskData.getCapability(capability, facing);
 
-				if (object != null && cTaskData.task.quest.canStartTasks(cTaskData.teamData))
+				if (object != null && cTaskData.task.quest.canStartTasks(cTaskData.data))
 				{
-					return object;
+					return (T) object;
 				}
 			}
 		}
@@ -239,7 +239,7 @@ public class TileTaskScreenCore extends TileWithTeam implements IConfigCallback,
 	}
 
 	@Nullable
-	public QuestTask getTask()
+	public Task getTask()
 	{
 		if (task == 0)
 		{
@@ -255,7 +255,7 @@ public class TileTaskScreenCore extends TileWithTeam implements IConfigCallback,
 	}
 
 	@Nullable
-	public QuestTaskData getTaskData()
+	public TaskData getTaskData()
 	{
 		if (task == 0 || team.isEmpty())
 		{
@@ -270,14 +270,21 @@ public class TileTaskScreenCore extends TileWithTeam implements IConfigCallback,
 				return null;
 			}
 
-			cTeam = getTeam();
+			QuestFile file = FTBQuests.PROXY.getQuestFile(world);
 
-			if (cTeam == null)
+			if (file == null)
 			{
 				return null;
 			}
 
-			cTaskData = cTeam.getQuestTaskData(cTask);
+			QuestData data = file.getData(team);
+
+			if (data == null)
+			{
+				return null;
+			}
+
+			cTaskData = data.getTaskData(cTask);
 		}
 
 		return cTaskData;
@@ -428,7 +435,7 @@ public class TileTaskScreenCore extends TileWithTeam implements IConfigCallback,
 					return;
 				}
 
-				if (cTaskData.task.canInsertItem() && cTaskData.task.getMaxProgress() > 0L && cTaskData.getProgress() < cTaskData.task.getMaxProgress())
+				if (cTaskData.task.canInsertItem() && cTaskData.task.getMaxProgress() > 0L && cTaskData.progress < cTaskData.task.getMaxProgress())
 				{
 					ItemStack stack = player.getHeldItem(hand);
 
@@ -444,12 +451,12 @@ public class TileTaskScreenCore extends TileWithTeam implements IConfigCallback,
 					}
 				}
 
-				cTaskData.submitTask(player, Collections.emptyList(), false);
+				cTaskData.submitTask(player);
 			}
 		}
 	}
 
-	public void updateTiles(@Nullable QuestTask task)
+	public void updateTiles(@Nullable Task task)
 	{
 		boolean xaxis = getFacing().getAxis() == EnumFacing.Axis.X;
 

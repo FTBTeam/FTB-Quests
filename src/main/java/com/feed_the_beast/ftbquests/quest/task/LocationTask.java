@@ -7,16 +7,13 @@ import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestData;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.MathHelper;
-
-import java.util.Collection;
 
 /**
  * @author LatvianModder
  */
-public class LocationTask extends QuestTask
+public class LocationTask extends Task
 {
 	public int dimension = 0;
 	public boolean ignoreDimension = false;
@@ -33,7 +30,7 @@ public class LocationTask extends QuestTask
 	}
 
 	@Override
-	public QuestTaskType getType()
+	public TaskType getType()
 	{
 		return FTBQuestsTasks.LOCATION;
 	}
@@ -120,12 +117,12 @@ public class LocationTask extends QuestTask
 	}
 
 	@Override
-	public QuestTaskData createData(QuestData data)
+	public TaskData createData(QuestData data)
 	{
 		return new Data(this, data);
 	}
 
-	public static class Data extends SimpleQuestTaskData<LocationTask>
+	public static class Data extends BooleanTaskData<LocationTask>
 	{
 		private Data(LocationTask task, QuestData data)
 		{
@@ -139,9 +136,9 @@ public class LocationTask extends QuestTask
 		}
 
 		@Override
-		public boolean submitTask(EntityPlayerMP player, Collection<ItemStack> itemsToCheck, boolean simulate)
+		public boolean canSubmit(EntityPlayerMP player)
 		{
-			if (progress == 0 && (task.ignoreDimension || task.dimension == player.dimension))
+			if (task.ignoreDimension || task.dimension == player.dimension)
 			{
 				int y = MathHelper.floor(player.posY);
 
@@ -152,17 +149,7 @@ public class LocationTask extends QuestTask
 					if (x >= task.x && x < task.x + task.w)
 					{
 						int z = MathHelper.floor(player.posZ);
-
-						if (z >= task.z && z < task.z + task.d)
-						{
-							if (!simulate)
-							{
-								progress = 1;
-								sync();
-							}
-
-							return true;
-						}
+						return z >= task.z && z < task.z + task.d;
 					}
 				}
 			}

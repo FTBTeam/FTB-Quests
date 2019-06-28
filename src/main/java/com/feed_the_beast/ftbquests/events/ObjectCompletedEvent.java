@@ -1,11 +1,11 @@
 package com.feed_the_beast.ftbquests.events;
 
+import com.feed_the_beast.ftbquests.quest.Chapter;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.QuestData;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
-import com.feed_the_beast.ftbquests.quest.task.QuestTask;
+import com.feed_the_beast.ftbquests.quest.task.Task;
 
 /**
  * @author LatvianModder
@@ -39,14 +39,14 @@ public class ObjectCompletedEvent<T extends QuestObject> extends FTBQuestsEvent
 		}
 	}
 
-	public static class ChapterEvent extends ObjectCompletedEvent<QuestChapter>
+	public static class ChapterEvent extends ObjectCompletedEvent<Chapter>
 	{
-		public ChapterEvent(QuestData t, QuestChapter o)
+		public ChapterEvent(QuestData t, Chapter o)
 		{
 			super(t, o);
 		}
 
-		public QuestChapter getChapter()
+		public Chapter getChapter()
 		{
 			return object;
 		}
@@ -65,14 +65,14 @@ public class ObjectCompletedEvent<T extends QuestObject> extends FTBQuestsEvent
 		}
 	}
 
-	public static class TaskEvent extends ObjectCompletedEvent<QuestTask>
+	public static class TaskEvent extends ObjectCompletedEvent<Task>
 	{
-		public TaskEvent(QuestData t, QuestTask o)
+		public TaskEvent(QuestData t, Task o)
 		{
 			super(t, o);
 		}
 
-		public QuestTask getTask()
+		public Task getTask()
 		{
 			return object;
 		}

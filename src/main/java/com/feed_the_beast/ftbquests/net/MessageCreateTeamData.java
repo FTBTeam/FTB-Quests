@@ -7,9 +7,9 @@ import com.feed_the_beast.ftblib.lib.net.MessageToClient;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.client.ClientQuestData;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
+import com.feed_the_beast.ftbquests.quest.Chapter;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.QuestChapter;
-import com.feed_the_beast.ftbquests.quest.task.QuestTask;
+import com.feed_the_beast.ftbquests.quest.task.Task;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -64,11 +64,11 @@ public class MessageCreateTeamData extends MessageToClient
 		{
 			ClientQuestData data = new ClientQuestData(uid, id, name);
 
-			for (QuestChapter chapter : ClientQuestFile.INSTANCE.chapters)
+			for (Chapter chapter : ClientQuestFile.INSTANCE.chapters)
 			{
 				for (Quest quest : chapter.quests)
 				{
-					for (QuestTask task : quest.tasks)
+					for (Task task : quest.tasks)
 					{
 						data.createTaskData(task);
 					}

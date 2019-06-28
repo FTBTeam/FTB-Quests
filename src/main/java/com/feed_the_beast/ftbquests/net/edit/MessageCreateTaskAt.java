@@ -5,11 +5,11 @@ import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToServer;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.FTBQuests;
+import com.feed_the_beast.ftbquests.quest.Chapter;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
-import com.feed_the_beast.ftbquests.quest.task.QuestTask;
-import com.feed_the_beast.ftbquests.quest.task.QuestTaskType;
+import com.feed_the_beast.ftbquests.quest.task.Task;
+import com.feed_the_beast.ftbquests.quest.task.TaskType;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 
@@ -19,14 +19,14 @@ import net.minecraft.nbt.NBTTagCompound;
 public class MessageCreateTaskAt extends MessageToServer
 {
 	private int chapter, x, y;
-	private QuestTaskType type;
+	private TaskType type;
 	private NBTTagCompound nbt;
 
 	public MessageCreateTaskAt()
 	{
 	}
 
-	public MessageCreateTaskAt(QuestChapter c, int _x, int _y, QuestTask task)
+	public MessageCreateTaskAt(Chapter c, int _x, int _y, Task task)
 	{
 		chapter = c.id;
 		x = _x;
@@ -48,7 +48,7 @@ public class MessageCreateTaskAt extends MessageToServer
 		data.writeInt(chapter);
 		data.writeVarInt(x);
 		data.writeVarInt(y);
-		data.writeVarInt(QuestTaskType.getRegistry().getID(type));
+		data.writeVarInt(TaskType.getRegistry().getID(type));
 		data.writeNBT(nbt);
 	}
 
@@ -58,7 +58,7 @@ public class MessageCreateTaskAt extends MessageToServer
 		chapter = data.readInt();
 		x = data.readVarInt();
 		y = data.readVarInt();
-		type = QuestTaskType.getRegistry().getValue(data.readVarInt());
+		type = TaskType.getRegistry().getValue(data.readVarInt());
 		nbt = data.readNBT();
 	}
 
@@ -67,7 +67,7 @@ public class MessageCreateTaskAt extends MessageToServer
 	{
 		if (FTBQuests.canEdit(player))
 		{
-			QuestChapter c = ServerQuestFile.INSTANCE.getChapter(chapter);
+			Chapter c = ServerQuestFile.INSTANCE.getChapter(chapter);
 
 			if (c != null)
 			{
@@ -78,7 +78,7 @@ public class MessageCreateTaskAt extends MessageToServer
 				quest.onCreated();
 				new MessageCreateObjectResponse(quest, null).sendToAll();
 
-				QuestTask task = type.provider.create(quest);
+				Task task = type.provider.create(quest);
 				task.id = ServerQuestFile.INSTANCE.readID(0);
 				task.readData(nbt);
 				task.onCreated();

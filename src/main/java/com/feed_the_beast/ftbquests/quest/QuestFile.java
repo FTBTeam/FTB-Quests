@@ -21,8 +21,8 @@ import com.feed_the_beast.ftbquests.quest.loot.LootCrate;
 import com.feed_the_beast.ftbquests.quest.loot.RewardTable;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
 import com.feed_the_beast.ftbquests.quest.reward.QuestRewardType;
-import com.feed_the_beast.ftbquests.quest.task.QuestTask;
-import com.feed_the_beast.ftbquests.quest.task.QuestTaskType;
+import com.feed_the_beast.ftbquests.quest.task.Task;
+import com.feed_the_beast.ftbquests.quest.task.TaskType;
 import com.latmod.mods.itemfilters.item.ItemMissing;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.client.resources.I18n;
@@ -55,7 +55,7 @@ public abstract class QuestFile extends QuestObject
 {
 	public static final int VERSION = 5;
 
-	public final List<QuestChapter> chapters;
+	public final List<Chapter> chapters;
 	public final List<RewardTable> rewardTables;
 
 	private final Int2ObjectOpenHashMap<QuestObjectBase> map;
@@ -66,7 +66,7 @@ public abstract class QuestFile extends QuestObject
 	public boolean defaultRewardTeam;
 	public boolean defaultTeamConsumeItems;
 	public boolean defaultRewardAutoclaim;
-	public EnumQuestShape defaultShape;
+	public QuestShape defaultShape;
 	public boolean dropLootCrates;
 	public final EntityWeight lootCrateNoDrop;
 	public boolean disableGui;
@@ -87,7 +87,7 @@ public abstract class QuestFile extends QuestObject
 		defaultRewardTeam = false;
 		defaultTeamConsumeItems = false;
 		defaultRewardAutoclaim = false;
-		defaultShape = EnumQuestShape.CIRCLE;
+		defaultShape = QuestShape.CIRCLE;
 		dropLootCrates = false;
 		lootCrateNoDrop = new EntityWeight();
 		lootCrateNoDrop.passive = 4000;
@@ -125,7 +125,7 @@ public abstract class QuestFile extends QuestObject
 	{
 		int progress = 0;
 
-		for (QuestChapter chapter : chapters)
+		for (Chapter chapter : chapters)
 		{
 			progress += chapter.getRelativeProgress(data);
 		}
@@ -146,9 +146,9 @@ public abstract class QuestFile extends QuestObject
 	}
 
 	@Override
-	public void changeProgress(QuestData data, EnumChangeProgress type)
+	public void changeProgress(QuestData data, ChangeProgress type)
 	{
-		for (QuestChapter chapter : chapters)
+		for (Chapter chapter : chapters)
 		{
 			chapter.changeProgress(data, type);
 		}
@@ -163,7 +163,7 @@ public abstract class QuestFile extends QuestObject
 	@Override
 	public void deleteChildren()
 	{
-		for (QuestChapter chapter : chapters)
+		for (Chapter chapter : chapters)
 		{
 			chapter.deleteChildren();
 			chapter.invalid = true;
@@ -214,7 +214,7 @@ public abstract class QuestFile extends QuestObject
 			{
 				QuestObject o = (QuestObject) object;
 
-				for (QuestChapter chapter : chapters)
+				for (Chapter chapter : chapters)
 				{
 					for (Quest quest : chapter.quests)
 					{
@@ -232,10 +232,10 @@ public abstract class QuestFile extends QuestObject
 	}
 
 	@Nullable
-	public QuestChapter getChapter(int id)
+	public Chapter getChapter(int id)
 	{
 		QuestObjectBase object = getBase(id);
-		return object instanceof QuestChapter ? (QuestChapter) object : null;
+		return object instanceof Chapter ? (Chapter) object : null;
 	}
 
 	@Nullable
@@ -246,10 +246,10 @@ public abstract class QuestFile extends QuestObject
 	}
 
 	@Nullable
-	public QuestTask getTask(int id)
+	public Task getTask(int id)
 	{
 		QuestObjectBase object = getBase(id);
-		return object instanceof QuestTask ? (QuestTask) object : null;
+		return object instanceof Task ? (Task) object : null;
 	}
 
 	@Nullable
@@ -301,7 +301,7 @@ public abstract class QuestFile extends QuestObject
 			map.put(table.id, table);
 		}
 
-		for (QuestChapter chapter : chapters)
+		for (Chapter chapter : chapters)
 		{
 			map.put(chapter.id, chapter);
 
@@ -309,7 +309,7 @@ public abstract class QuestFile extends QuestObject
 			{
 				map.put(quest.id, quest);
 
-				for (QuestTask task : quest.tasks)
+				for (Task task : quest.tasks)
 				{
 					map.put(task.id, task);
 				}
@@ -329,10 +329,10 @@ public abstract class QuestFile extends QuestObject
 		switch (type)
 		{
 			case CHAPTER:
-				return new QuestChapter(this);
+				return new Chapter(this);
 			case QUEST:
 			{
-				QuestChapter chapter = getChapter(parent);
+				Chapter chapter = getChapter(parent);
 
 				if (chapter != null)
 				{
@@ -347,7 +347,7 @@ public abstract class QuestFile extends QuestObject
 
 				if (quest != null)
 				{
-					QuestTask task = QuestTaskType.createTask(quest, extra.getString("type"));
+					Task task = TaskType.createTask(quest, extra.getString("type"));
 
 					if (task != null)
 					{
@@ -420,7 +420,7 @@ public abstract class QuestFile extends QuestObject
 		defaultRewardTeam = nbt.getBoolean("default_reward_team");
 		defaultTeamConsumeItems = nbt.getBoolean("default_consume_items");
 		defaultRewardAutoclaim = nbt.getBoolean("default_autoclaim_rewards");
-		defaultShape = EnumQuestShape.NAME_MAP.get(nbt.getString("default_quest_shape"));
+		defaultShape = QuestShape.NAME_MAP.get(nbt.getString("default_quest_shape"));
 		emergencyItems.clear();
 
 		NBTTagList list = nbt.getTagList("emergency_items", Constants.NBT.TAG_COMPOUND);
@@ -476,7 +476,7 @@ public abstract class QuestFile extends QuestObject
 		NBTUtils.writeNBTSafe(new File(folder, "chapters/index.nbt"), createIndex(chapters));
 		NBTUtils.writeNBTSafe(new File(folder, "reward_tables/index.nbt"), createIndex(rewardTables));
 
-		for (QuestChapter chapter : chapters)
+		for (Chapter chapter : chapters)
 		{
 			out = new NBTTagCompound();
 			chapter.writeData(out);
@@ -499,9 +499,9 @@ public abstract class QuestFile extends QuestObject
 					{
 						NBTTagList t = new NBTTagList();
 
-						for (QuestTask task : quest.tasks)
+						for (Task task : quest.tasks)
 						{
-							QuestTaskType type = task.getType();
+							TaskType type = task.getType();
 							NBTTagCompound nbt3 = new NBTTagCompound();
 							task.writeData(nbt3);
 							nbt3.setInteger("uid", task.id);
@@ -573,7 +573,7 @@ public abstract class QuestFile extends QuestObject
 
 		for (int i = 0; i < c.tagCount(); i++)
 		{
-			QuestChapter chapter = new QuestChapter(this);
+			Chapter chapter = new Chapter(this);
 			NBTTagCompound ct = c.getCompoundTagAt(i);
 			chapter.id = ct.getInteger("uid");
 			chapters.add(chapter);
@@ -604,7 +604,7 @@ public abstract class QuestFile extends QuestObject
 				for (int k = 0; k < t.tagCount(); k++)
 				{
 					NBTTagCompound tt = t.getCompoundTagAt(k);
-					QuestTask task = QuestTaskType.createTask(quest, tt.getString("type"));
+					Task task = TaskType.createTask(quest, tt.getString("type"));
 
 					if (task != null)
 					{
@@ -645,7 +645,7 @@ public abstract class QuestFile extends QuestObject
 
 		NBTTagCompound nbt1;
 
-		for (QuestChapter chapter : chapters)
+		for (Chapter chapter : chapters)
 		{
 			nbt1 = objectDataCache.get(chapter.id);
 
@@ -663,7 +663,7 @@ public abstract class QuestFile extends QuestObject
 					quest.readData(nbt1);
 				}
 
-				for (QuestTask task : quest.tasks)
+				for (Task task : quest.tasks)
 				{
 					nbt1 = objectDataCache.get(task.id);
 
@@ -695,7 +695,7 @@ public abstract class QuestFile extends QuestObject
 			}
 		}
 
-		for (QuestChapter chapter : chapters)
+		for (Chapter chapter : chapters)
 		{
 			for (Quest quest : chapter.quests)
 			{
@@ -721,7 +721,7 @@ public abstract class QuestFile extends QuestObject
 
 		for (int i : readIndex(new File(folder, "chapters/index.nbt")))
 		{
-			QuestChapter chapter = new QuestChapter(this);
+			Chapter chapter = new Chapter(this);
 			chapter.id = i;
 			chapters.add(chapter);
 
@@ -748,7 +748,7 @@ public abstract class QuestFile extends QuestObject
 								for (int k = 0; k < t.tagCount(); k++)
 								{
 									NBTTagCompound tt = t.getCompoundTagAt(k);
-									QuestTask task = QuestTaskType.createTask(quest, tt.getString("type"));
+									Task task = TaskType.createTask(quest, tt.getString("type"));
 
 									if (task != null)
 									{
@@ -792,7 +792,7 @@ public abstract class QuestFile extends QuestObject
 
 		refreshIDMap();
 
-		for (QuestChapter chapter : chapters)
+		for (Chapter chapter : chapters)
 		{
 			nbt = NBTUtils.readNBT(new File(folder, "chapters/" + getCodeString(chapter) + "/chapter.nbt"));
 
@@ -817,7 +817,7 @@ public abstract class QuestFile extends QuestObject
 				for (int k = 0; k < t.tagCount(); k++)
 				{
 					NBTTagCompound tt = t.getCompoundTagAt(k);
-					QuestTask task = getTask(tt.getInteger("uid"));
+					Task task = getTask(tt.getInteger("uid"));
 
 					if (task != null)
 					{
@@ -850,7 +850,7 @@ public abstract class QuestFile extends QuestObject
 			}
 		}
 
-		for (QuestChapter chapter : chapters)
+		for (Chapter chapter : chapters)
 		{
 			for (Quest quest : chapter.quests)
 			{
@@ -868,7 +868,7 @@ public abstract class QuestFile extends QuestObject
 		data.writeBoolean(defaultRewardTeam);
 		data.writeBoolean(defaultTeamConsumeItems);
 		data.writeBoolean(defaultRewardAutoclaim);
-		data.write(defaultShape, EnumQuestShape.NAME_MAP);
+		data.write(defaultShape, QuestShape.NAME_MAP);
 
 		data.writeBoolean(dropLootCrates);
 		lootCrateNoDrop.writeNetData(data);
@@ -884,7 +884,7 @@ public abstract class QuestFile extends QuestObject
 		defaultRewardTeam = data.readBoolean();
 		defaultTeamConsumeItems = data.readBoolean();
 		defaultRewardAutoclaim = data.readBoolean();
-		defaultShape = data.read(EnumQuestShape.NAME_MAP);
+		defaultShape = data.read(QuestShape.NAME_MAP);
 		dropLootCrates = data.readBoolean();
 		lootCrateNoDrop.readNetData(data);
 		disableGui = data.readBoolean();
@@ -904,10 +904,10 @@ public abstract class QuestFile extends QuestObject
 
 		data.writeVarInt(chapters.size());
 
-		ForgeRegistry<QuestTaskType> taskTypes = QuestTaskType.getRegistry();
+		ForgeRegistry<TaskType> taskTypes = TaskType.getRegistry();
 		ForgeRegistry<QuestRewardType> rewardTypes = QuestRewardType.getRegistry();
 
-		for (QuestChapter chapter : chapters)
+		for (Chapter chapter : chapters)
 		{
 			data.writeInt(chapter.id);
 			data.writeVarInt(chapter.quests.size());
@@ -917,7 +917,7 @@ public abstract class QuestFile extends QuestObject
 				data.writeInt(quest.id);
 				data.writeVarInt(quest.tasks.size());
 
-				for (QuestTask task : quest.tasks)
+				for (Task task : quest.tasks)
 				{
 					data.writeVarInt(taskTypes.getID(task.getType()));
 					data.writeInt(task.id);
@@ -938,7 +938,7 @@ public abstract class QuestFile extends QuestObject
 			table.writeNetData(data);
 		}
 
-		for (QuestChapter chapter : chapters)
+		for (Chapter chapter : chapters)
 		{
 			chapter.writeNetData(data);
 
@@ -946,7 +946,7 @@ public abstract class QuestFile extends QuestObject
 			{
 				quest.writeNetData(data);
 
-				for (QuestTask task : quest.tasks)
+				for (Task task : quest.tasks)
 				{
 					task.writeNetData(data);
 				}
@@ -981,14 +981,14 @@ public abstract class QuestFile extends QuestObject
 			rewardTables.add(table);
 		}
 
-		ForgeRegistry<QuestTaskType> taskTypes = QuestTaskType.getRegistry();
+		ForgeRegistry<TaskType> taskTypes = TaskType.getRegistry();
 		ForgeRegistry<QuestRewardType> rewardTypes = QuestRewardType.getRegistry();
 
 		int c = data.readVarInt();
 
 		for (int i = 0; i < c; i++)
 		{
-			QuestChapter chapter = new QuestChapter(this);
+			Chapter chapter = new Chapter(this);
 			chapter.id = data.readInt();
 			chapters.add(chapter);
 
@@ -1004,8 +1004,8 @@ public abstract class QuestFile extends QuestObject
 
 				for (int k = 0; k < t; k++)
 				{
-					QuestTaskType type = taskTypes.getValue(data.readVarInt());
-					QuestTask task = type.provider.create(quest);
+					TaskType type = taskTypes.getValue(data.readVarInt());
+					Task task = type.provider.create(quest);
 					task.id = data.readInt();
 					quest.tasks.add(task);
 				}
@@ -1029,7 +1029,7 @@ public abstract class QuestFile extends QuestObject
 			table.readNetData(data);
 		}
 
-		for (QuestChapter chapter : chapters)
+		for (Chapter chapter : chapters)
 		{
 			chapter.readNetData(data);
 
@@ -1037,7 +1037,7 @@ public abstract class QuestFile extends QuestObject
 			{
 				quest.readNetData(data);
 
-				for (QuestTask task : quest.tasks)
+				for (Task task : quest.tasks)
 				{
 					task.readNetData(data);
 				}
@@ -1076,7 +1076,7 @@ public abstract class QuestFile extends QuestObject
 	{
 		List<Icon> list = new ArrayList<>();
 
-		for (QuestChapter chapter : chapters)
+		for (Chapter chapter : chapters)
 		{
 			list.add(chapter.getIcon());
 		}
@@ -1118,7 +1118,7 @@ public abstract class QuestFile extends QuestObject
 		defaultsGroup.addBool("reward_team", () -> defaultRewardTeam, v -> defaultRewardTeam = v, false);
 		defaultsGroup.addBool("consume_items", () -> defaultTeamConsumeItems, v -> defaultTeamConsumeItems = v, false);
 		defaultsGroup.addBool("autoclaim_rewards", () -> defaultRewardAutoclaim, v -> defaultRewardAutoclaim = v, false);
-		defaultsGroup.addEnum("quest_shape", () -> defaultShape, v -> defaultShape = v, EnumQuestShape.NAME_MAP.withDefault(EnumQuestShape.CIRCLE));
+		defaultsGroup.addEnum("quest_shape", () -> defaultShape, v -> defaultShape = v, QuestShape.NAME_MAP.withDefault(QuestShape.CIRCLE));
 
 		ConfigGroup d = config.getGroup("loot_crate_no_drop");
 		d.addInt("passive", () -> lootCrateNoDrop.passive, v -> lootCrateNoDrop.passive = v, 0, 0, Integer.MAX_VALUE).setDisplayName(new TextComponentTranslation("ftbquests.loot.entitytype.passive"));
@@ -1131,12 +1131,22 @@ public abstract class QuestFile extends QuestObject
 	{
 		super.clearCachedData();
 
-		for (QuestChapter chapter : chapters)
+		for (Chapter chapter : chapters)
 		{
 			chapter.clearCachedData();
 		}
 
+		clearCachedProgress();
+
 		new ClearFileCacheEvent(this).post();
+	}
+
+	public void clearCachedProgress()
+	{
+		for (QuestData data : getAllData())
+		{
+			data.progressCache = null;
+		}
 	}
 
 	public int readID(int id)
@@ -1221,32 +1231,11 @@ public abstract class QuestFile extends QuestObject
 		return map.values();
 	}
 
-	@Override
-	public void clearCachedProgress(short id)
-	{
-		super.clearCachedProgress(id);
-
-		for (QuestChapter chapter : chapters)
-		{
-			chapter.clearCachedProgress(id);
-
-			for (Quest quest : chapter.quests)
-			{
-				quest.clearCachedProgress(id);
-
-				for (QuestTask task : quest.tasks)
-				{
-					task.clearCachedProgress(id);
-				}
-			}
-		}
-	}
-
 	public int getUnclaimedRewards(UUID player, QuestData data, boolean showExcluded)
 	{
 		int r = 0;
 
-		for (QuestChapter chapter : chapters)
+		for (Chapter chapter : chapters)
 		{
 			for (Quest quest : chapter.quests)
 			{
@@ -1260,7 +1249,7 @@ public abstract class QuestFile extends QuestObject
 	@Override
 	public boolean isVisible(QuestData data)
 	{
-		for (QuestChapter chapter : chapters)
+		for (Chapter chapter : chapters)
 		{
 			if (chapter.isVisible(data))
 			{
@@ -1271,11 +1260,11 @@ public abstract class QuestFile extends QuestObject
 		return false;
 	}
 
-	public List<QuestChapter> getVisibleChapters(QuestData data, boolean excludeEmpty)
+	public List<Chapter> getVisibleChapters(QuestData data, boolean excludeEmpty)
 	{
-		List<QuestChapter> list = new ArrayList<>();
+		List<Chapter> list = new ArrayList<>();
 
-		for (QuestChapter chapter : chapters)
+		for (Chapter chapter : chapters)
 		{
 			if ((!excludeEmpty || !chapter.quests.isEmpty()) && chapter.isVisible(data))
 			{

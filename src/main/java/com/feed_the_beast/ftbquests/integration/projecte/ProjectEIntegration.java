@@ -3,7 +3,7 @@ package com.feed_the_beast.ftbquests.integration.projecte;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.quest.task.FTBQuestsTasks;
-import com.feed_the_beast.ftbquests.quest.task.QuestTaskType;
+import com.feed_the_beast.ftbquests.quest.task.TaskType;
 import moze_intel.projecte.PECore;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.MinecraftForge;
@@ -25,8 +25,8 @@ public class ProjectEIntegration
 	}
 
 	@SubscribeEvent
-	public static void registerTasks(RegistryEvent.Register<QuestTaskType> event)
+	public static void registerTasks(RegistryEvent.Register<TaskType> event)
 	{
-		event.getRegistry().register(FTBQuestsTasks.EMC = new QuestTaskType(EMCTask::new).setRegistryName("emc").setIcon(Icon.getIcon("projecte:items/transmute_tablet")));
+		event.getRegistry().register(FTBQuestsTasks.EMC = new TaskType(EMCTask::new).setRegistryName("emc").setIcon(Icon.getIcon("projecte:items/transmute_tablet")));
 	}
 }

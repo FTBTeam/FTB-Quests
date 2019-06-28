@@ -23,17 +23,17 @@ public class LootCrateTab
 
 		dropPanel.add(textField(editor.file.lootCrateNoDrop.passive, IntVerifier.NON_NEGATIVE, s -> {
 			editor.file.lootCrateNoDrop.passive = Integer.parseInt(s);
-			new MessageEditObjectDirect(editor.file).sendToServer();
+			new MessageEditObject(editor.file).sendToServer();
 		}));
 
 		dropPanel.add(textField(editor.file.lootCrateNoDrop.monster, IntVerifier.NON_NEGATIVE, s -> {
 			editor.file.lootCrateNoDrop.monster = Integer.parseInt(s);
-			new MessageEditObjectDirect(editor.file).sendToServer();
+			new MessageEditObject(editor.file).sendToServer();
 		}));
 
 		dropPanel.add(textField(editor.file.lootCrateNoDrop.boss, IntVerifier.NON_NEGATIVE, s -> {
 			editor.file.lootCrateNoDrop.boss = Integer.parseInt(s);
-			new MessageEditObjectDirect(editor.file).sendToServer();
+			new MessageEditObject(editor.file).sendToServer();
 		}));
 
 		for (RewardTable table : editor.file.rewardTables)

@@ -5,7 +5,7 @@ import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToServer;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.FTBQuests;
-import com.feed_the_beast.ftbquests.quest.EnumChangeProgress;
+import com.feed_the_beast.ftbquests.quest.ChangeProgress;
 import com.feed_the_beast.ftbquests.quest.QuestData;
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
@@ -18,13 +18,13 @@ public class MessageChangeProgress extends MessageToServer
 {
 	private short team;
 	private int id;
-	private EnumChangeProgress type;
+	private ChangeProgress type;
 
 	public MessageChangeProgress()
 	{
 	}
 
-	public MessageChangeProgress(short t, int i, EnumChangeProgress ty)
+	public MessageChangeProgress(short t, int i, ChangeProgress ty)
 	{
 		team = t;
 		id = i;
@@ -42,7 +42,7 @@ public class MessageChangeProgress extends MessageToServer
 	{
 		data.writeShort(team);
 		data.writeInt(id);
-		data.write(type, EnumChangeProgress.NAME_MAP);
+		data.write(type, ChangeProgress.NAME_MAP);
 	}
 
 	@Override
@@ -50,7 +50,7 @@ public class MessageChangeProgress extends MessageToServer
 	{
 		team = data.readShort();
 		id = data.readInt();
-		type = EnumChangeProgress.NAME_MAP.read(data);
+		type = ChangeProgress.NAME_MAP.read(data);
 	}
 
 	@Override

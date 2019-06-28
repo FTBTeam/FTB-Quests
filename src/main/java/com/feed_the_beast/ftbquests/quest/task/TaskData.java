@@ -1,41 +1,105 @@
 package com.feed_the_beast.ftbquests.quest.task;
 
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
-import com.feed_the_beast.ftbquests.quest.EnumChangeProgress;
+import com.feed_the_beast.ftbquests.quest.ChangeProgress;
 import com.feed_the_beast.ftbquests.quest.QuestData;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTBase;
+import net.minecraft.nbt.NBTPrimitive;
+import net.minecraft.nbt.NBTTagByte;
+import net.minecraft.nbt.NBTTagInt;
+import net.minecraft.nbt.NBTTagLong;
+import net.minecraft.nbt.NBTTagShort;
+import net.minecraft.util.EnumFacing;
+import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.items.IItemHandler;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
+import java.util.Collections;
 
 /**
  * @author LatvianModder
  */
-public abstract class QuestTaskData<T extends QuestTask> implements ICapabilityProvider, IItemHandler
+public class TaskData<T extends Task> implements ICapabilityProvider, IItemHandler
 {
+	@Nullable
+	public static NBTBase longToNBT(long value)
+	{
+		if (value <= 0L)
+		{
+			return null;
+		}
+		else if (value <= Byte.MAX_VALUE)
+		{
+			return new NBTTagByte((byte) value);
+		}
+		else if (value <= Short.MAX_VALUE)
+		{
+			return new NBTTagShort((short) value);
+		}
+		else if (value <= Integer.MAX_VALUE)
+		{
+			return new NBTTagInt((int) value);
+		}
+
+		return new NBTTagLong(value);
+	}
+
 	public final T task;
-	public final QuestData teamData;
+	public final QuestData data;
 	public boolean isComplete = false;
 
-	public QuestTaskData(T q, QuestData d)
+	public long progress = 0L;
+
+	public TaskData(T q, QuestData d)
 	{
 		task = q;
-		teamData = d;
+		data = d;
 	}
 
 	@Nullable
-	public abstract NBTBase toNBT();
+	public NBTBase toNBT()
+	{
+		return progress <= 0L ? null : longToNBT(progress);
+	}
 
-	public abstract void fromNBT(@Nullable NBTBase nbt);
+	public void fromNBT(@Nullable NBTBase nbt)
+	{
+		progress = nbt instanceof NBTPrimitive ? ((NBTPrimitive) nbt).getLong() : 0L;
+		isComplete = isComplete();
+	}
 
-	public abstract long getProgress();
+	public void changeProgress(ChangeProgress type)
+	{
+		if (type.reset)
+		{
+			progress = 0L;
+			isComplete = false;
+		}
+		else if (type.complete)
+		{
+			progress = task.getMaxProgress();
+		}
 
-	public abstract void changeProgress(EnumChangeProgress type);
+		sync();
+	}
+
+	@Override
+	public boolean hasCapability(Capability<?> capability, @Nullable EnumFacing facing)
+	{
+		return false;
+	}
+
+	@Nullable
+	@Override
+	public <C> C getCapability(Capability<C> capability, @Nullable EnumFacing facing)
+	{
+		return null;
+	}
 
 	public final int getRelativeProgress()
 	{
@@ -45,8 +109,6 @@ public abstract class QuestTaskData<T extends QuestTask> implements ICapabilityP
 		{
 			return 0;
 		}
-
-		long progress = getProgress();
 
 		if (progress <= 0L)
 		{
@@ -60,14 +122,25 @@ public abstract class QuestTaskData<T extends QuestTask> implements ICapabilityP
 		return (int) Math.max(1L, (progress * 100D / (double) max));
 	}
 
+	public final boolean isComplete()
+	{
+		long max = task.getMaxProgress();
+		return max > 0L && progress >= max;
+	}
+
+	public final boolean isStarted()
+	{
+		return progress > 0L && task.getMaxProgress() > 0L;
+	}
+
 	public String getProgressString()
 	{
-		return StringUtils.formatDouble(getProgress(), true);
+		return StringUtils.formatDouble(progress, true);
 	}
 
 	public String toString()
 	{
-		return teamData.toString() + task;
+		return data.toString() + task;
 	}
 
 	public ItemStack insertItem(ItemStack stack, boolean singleItem, boolean simulate, @Nullable EntityPlayer player)
@@ -90,7 +163,7 @@ public abstract class QuestTaskData<T extends QuestTask> implements ICapabilityP
 	@Override
 	public final ItemStack insertItem(int slot, ItemStack stack, boolean simulate)
 	{
-		if (task.canInsertItem() && task.getMaxProgress() > 0L && getProgress() < task.getMaxProgress() && !stack.isEmpty())
+		if (task.canInsertItem() && task.getMaxProgress() > 0L && progress < task.getMaxProgress() && !stack.isEmpty())
 		{
 			return insertItem(stack, false, simulate, null);
 		}
@@ -112,7 +185,7 @@ public abstract class QuestTaskData<T extends QuestTask> implements ICapabilityP
 
 	public final void sync()
 	{
-		teamData.syncTask(this);
+		data.syncTask(this);
 	}
 
 	public boolean submitTask(EntityPlayerMP player, Collection<ItemStack> itemsToCheck, boolean simulate)
@@ -141,5 +214,10 @@ public abstract class QuestTaskData<T extends QuestTask> implements ICapabilityP
 		}
 
 		return changed;
+	}
+
+	public final boolean submitTask(EntityPlayerMP player)
+	{
+		return submitTask(player, Collections.emptyList(), false);
 	}
 }

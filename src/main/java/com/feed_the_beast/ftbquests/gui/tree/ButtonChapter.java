@@ -5,7 +5,7 @@ import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.gui.Theme;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.gui.FTBQuestsTheme;
-import com.feed_the_beast.ftbquests.quest.QuestChapter;
+import com.feed_the_beast.ftbquests.quest.Chapter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 
@@ -17,9 +17,9 @@ import java.util.List;
  */
 public class ButtonChapter extends ButtonTab
 {
-	public QuestChapter chapter;
+	public Chapter chapter;
 
-	public ButtonChapter(Panel panel, QuestChapter c)
+	public ButtonChapter(Panel panel, Chapter c)
 	{
 		super(panel, c.getTitle(), c.getIcon());
 		chapter = c;

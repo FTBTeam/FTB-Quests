@@ -1,38 +1,37 @@
 package com.feed_the_beast.ftbquests.net.edit;
 
-import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
-import com.feed_the_beast.ftblib.lib.config.IConfigCallback;
-import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToServer;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.FTBQuests;
+import com.feed_the_beast.ftbquests.client.ClientQuestFile;
+import com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIHelper;
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
-import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
-import net.minecraft.command.ICommandSender;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraft.util.text.TextComponentTranslation;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.nbt.NBTTagCompound;
 
 /**
  * @author LatvianModder
  */
-public class MessageEditObject extends MessageToServer implements IConfigCallback
+public class MessageEditObject extends MessageToServer
 {
 	private int id;
+	private NBTTagCompound nbt;
 
 	public MessageEditObject()
 	{
 	}
 
-	public MessageEditObject(int i)
+	public MessageEditObject(QuestObjectBase o)
 	{
-		id = i;
+		id = o.id;
+		nbt = new NBTTagCompound();
+		o.writeData(nbt);
+		FTBQuestsJEIHelper.refresh(o);
+		ClientQuestFile.INSTANCE.clearCachedData();
+		o.editedFromGUI();
 	}
 
 	@Override
@@ -45,12 +44,14 @@ public class MessageEditObject extends MessageToServer implements IConfigCallbac
 	public void writeData(DataOut data)
 	{
 		data.writeInt(id);
+		data.writeNBT(nbt);
 	}
 
 	@Override
 	public void readData(DataIn data)
 	{
 		id = data.readInt();
+		nbt = data.readNBT();
 	}
 
 	@Override
@@ -62,38 +63,11 @@ public class MessageEditObject extends MessageToServer implements IConfigCallbac
 
 			if (object != null)
 			{
-				ConfigGroup group = ConfigGroup.newGroup(FTBQuests.MOD_ID);
-
-				if (object.getObjectType() != QuestObjectType.FILE)
-				{
-					ITextComponent idc = new TextComponentString(" " + object);
-					idc.getStyle().setColor(TextFormatting.DARK_GRAY);
-					idc.getStyle().setBold(false);
-					group.setDisplayName(new TextComponentTranslation(object.getObjectType().getTranslationKey()).appendSibling(idc));
-				}
-				else
-				{
-					group.setDisplayName(new TextComponentTranslation(object.getObjectType().getTranslationKey()));
-				}
-
-				object.getConfig(player, object.createSubGroup(group));
-				FTBLibAPI.editServerConfig(player, group, this);
+				object.readData(nbt);
+				ServerQuestFile.INSTANCE.clearCachedData();
+				ServerQuestFile.INSTANCE.save();
+				new MessageEditObjectResponse(object).sendToAll();
 			}
-		}
-	}
-
-	@Override
-	public void onConfigSaved(ConfigGroup g, ICommandSender sender)
-	{
-		QuestObjectBase object = ServerQuestFile.INSTANCE.getBase(id);
-
-		if (object != null && sender instanceof EntityPlayer)
-		{
-			ServerQuestFile.INSTANCE.clearCachedData();
-			ConfigGroup group = ConfigGroup.newGroup("object");
-			object.getConfig((EntityPlayer) sender, group);
-			new MessageEditObjectResponse(object).sendToAll();
-			ServerQuestFile.INSTANCE.save();
 		}
 	}
 }

@@ -12,11 +12,11 @@ import com.feed_the_beast.ftblib.lib.icon.ImageIcon;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.gui.FTBQuestsTheme;
+import com.feed_the_beast.ftbquests.quest.Chapter;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
-import com.feed_the_beast.ftbquests.quest.task.QuestTask;
-import com.feed_the_beast.ftbquests.quest.task.QuestTaskData;
+import com.feed_the_beast.ftbquests.quest.task.Task;
+import com.feed_the_beast.ftbquests.quest.task.TaskData;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.inventory.Container;
@@ -55,19 +55,19 @@ public class GuiQuestChest extends GuiBase implements IContainerListener
 			{
 				if (ClientQuestFile.existsWithTeam())
 				{
-					for (QuestChapter chapter : ClientQuestFile.INSTANCE.chapters)
+					for (Chapter chapter : ClientQuestFile.INSTANCE.chapters)
 					{
 						for (Quest quest : chapter.quests)
 						{
 							if (quest.canStartTasks(ClientQuestFile.INSTANCE.self))
 							{
-								for (QuestTask task : quest.tasks)
+								for (Task task : quest.tasks)
 								{
 									if (task.canInsertItem())
 									{
-										QuestTaskData data = ClientQuestFile.INSTANCE.self.getQuestTaskData(task);
+										TaskData data = ClientQuestFile.INSTANCE.self.getTaskData(task);
 
-										if (data.getRelativeProgress() < 100)
+										if (!data.isComplete())
 										{
 											add(new ButtonTask(this, data));
 										}
@@ -158,7 +158,7 @@ public class GuiQuestChest extends GuiBase implements IContainerListener
 		{
 			int index = 0;
 
-			for (QuestChapter chapter : ClientQuestFile.INSTANCE.chapters)
+			for (Chapter chapter : ClientQuestFile.INSTANCE.chapters)
 			{
 				for (Quest quest : chapter.quests)
 				{

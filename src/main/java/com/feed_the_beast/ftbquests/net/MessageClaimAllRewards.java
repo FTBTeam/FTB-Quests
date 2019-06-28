@@ -5,8 +5,8 @@ import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToServer;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
+import com.feed_the_beast.ftbquests.quest.Chapter;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
 import com.feed_the_beast.ftbquests.util.ServerQuestData;
@@ -38,7 +38,7 @@ public class MessageClaimAllRewards extends MessageToServer
 	{
 		ServerQuestData teamData = ServerQuestData.get(Universe.get().getPlayer(player).team);
 
-		for (QuestChapter chapter : ServerQuestFile.INSTANCE.chapters)
+		for (Chapter chapter : ServerQuestFile.INSTANCE.chapters)
 		{
 			for (Quest quest : chapter.quests)
 			{

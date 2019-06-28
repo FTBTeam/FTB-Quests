@@ -1,6 +1,6 @@
 package com.feed_the_beast.ftbquests.integration.ic2;
 
-import com.feed_the_beast.ftbquests.quest.task.QuestTaskData;
+import com.feed_the_beast.ftbquests.quest.task.TaskData;
 import com.feed_the_beast.ftbquests.tile.TileTaskScreenCore;
 import ic2.api.energy.EnergyNet;
 import ic2.api.energy.tile.IEnergyEmitter;
@@ -41,9 +41,9 @@ public class TileTaskScreenCoreIC2 extends TileTaskScreenCore implements IEnergy
 	@Override
 	public double getDemandedEnergy()
 	{
-		QuestTaskData d = getTaskData();
+		TaskData d = getTaskData();
 
-		if (d instanceof IC2EnergyTask.Data && d.task.quest.canStartTasks(d.teamData))
+		if (d instanceof IC2EnergyTask.Data && d.task.quest.canStartTasks(d.data))
 		{
 			IC2EnergyTask.Data data = (IC2EnergyTask.Data) d;
 			long e = data.task.value - data.progress;
@@ -68,9 +68,9 @@ public class TileTaskScreenCoreIC2 extends TileTaskScreenCore implements IEnergy
 	@Override
 	public double injectEnergy(EnumFacing facing, double amount, double voltage)
 	{
-		QuestTaskData d = getTaskData();
+		TaskData d = getTaskData();
 
-		if (d instanceof IC2EnergyTask.Data && d.task.quest.canStartTasks(d.teamData))
+		if (d instanceof IC2EnergyTask.Data && d.task.quest.canStartTasks(d.data))
 		{
 			return ((IC2EnergyTask.Data) d).injectEnergy(amount);
 		}

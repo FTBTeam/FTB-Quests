@@ -5,7 +5,7 @@ import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToServer;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.FTBQuests;
-import com.feed_the_beast.ftbquests.quest.QuestChapter;
+import com.feed_the_beast.ftbquests.quest.Chapter;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import net.minecraft.entity.player.EntityPlayerMP;
 
@@ -52,7 +52,7 @@ public class MessageMoveChapter extends MessageToServer
 	{
 		if (FTBQuests.canEdit(player))
 		{
-			QuestChapter chapter = ServerQuestFile.INSTANCE.getChapter(id);
+			Chapter chapter = ServerQuestFile.INSTANCE.getChapter(id);
 
 			if (chapter != null)
 			{

@@ -14,25 +14,25 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 /**
  * @author LatvianModder
  */
-public final class EnumQuestShape extends Icon implements IWithID
+public final class QuestShape extends Icon implements IWithID
 {
-	public static final EnumQuestShape CIRCLE = new EnumQuestShape("circle");
-	public static final EnumQuestShape SQUARE = new EnumQuestShape("square");
-	public static final EnumQuestShape DIAMOND = new EnumQuestShape("diamond");
-	public static final EnumQuestShape RSQUARE = new EnumQuestShape("rsquare");
-	public static final EnumQuestShape PENTAGON = new EnumQuestShape("pentagon");
-	public static final EnumQuestShape HEXAGON = new EnumQuestShape("hexagon");
-	public static final EnumQuestShape OCTAGON = new EnumQuestShape("octagon");
-	public static final EnumQuestShape HEART = new EnumQuestShape("heart");
-	public static final EnumQuestShape GEAR = new EnumQuestShape("gear");
+	public static final QuestShape CIRCLE = new QuestShape("circle");
+	public static final QuestShape SQUARE = new QuestShape("square");
+	public static final QuestShape DIAMOND = new QuestShape("diamond");
+	public static final QuestShape RSQUARE = new QuestShape("rsquare");
+	public static final QuestShape PENTAGON = new QuestShape("pentagon");
+	public static final QuestShape HEXAGON = new QuestShape("hexagon");
+	public static final QuestShape OCTAGON = new QuestShape("octagon");
+	public static final QuestShape HEART = new QuestShape("heart");
+	public static final QuestShape GEAR = new QuestShape("gear");
 
-	public static final NameMap<EnumQuestShape> NAME_MAP = NameMap.create(CIRCLE, NameMap.ObjectProperties.withName((sender, o) -> new TextComponentTranslation(o.langKey)), CIRCLE, SQUARE, DIAMOND, RSQUARE, PENTAGON, HEXAGON, OCTAGON, HEART, GEAR);
+	public static final NameMap<QuestShape> NAME_MAP = NameMap.create(CIRCLE, NameMap.ObjectProperties.withName((sender, o) -> new TextComponentTranslation(o.langKey)), CIRCLE, SQUARE, DIAMOND, RSQUARE, PENTAGON, HEXAGON, OCTAGON, HEART, GEAR);
 
 	public final String id;
 	public final String langKey;
 	public final ImageIcon background, outline, shape;
 
-	public EnumQuestShape(String i)
+	public QuestShape(String i)
 	{
 		id = i;
 		langKey = "ftbquests.quest.shape." + id;

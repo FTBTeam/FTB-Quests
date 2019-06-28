@@ -10,9 +10,9 @@ import com.feed_the_beast.ftbquests.gui.tree.GuiQuestTree;
 import com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIHelper;
 import com.feed_the_beast.ftbquests.net.MessageClaimReward;
 import com.feed_the_beast.ftbquests.net.MessageDisplayRewardToast;
-import com.feed_the_beast.ftbquests.quest.EnumChangeProgress;
+import com.feed_the_beast.ftbquests.quest.ChangeProgress;
+import com.feed_the_beast.ftbquests.quest.Chapter;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.QuestChapter;
 import com.feed_the_beast.ftbquests.quest.QuestData;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
@@ -62,7 +62,7 @@ public abstract class QuestReward extends QuestObjectBase
 
 	@Override
 	@Nullable
-	public final QuestChapter getQuestChapter()
+	public final Chapter getQuestChapter()
 	{
 		return quest.chapter;
 	}
@@ -199,9 +199,9 @@ public abstract class QuestReward extends QuestObjectBase
 	}
 
 	@Override
-	public final void changeProgress(QuestData data, EnumChangeProgress type)
+	public final void changeProgress(QuestData data, ChangeProgress type)
 	{
-		if (type == EnumChangeProgress.RESET || type == EnumChangeProgress.RESET_DEPS)
+		if (type == ChangeProgress.RESET || type == ChangeProgress.RESET_DEPS)
 		{
 			data.unclaimRewards(Collections.singleton(this));
 		}

@@ -7,7 +7,7 @@ import com.feed_the_beast.ftblib.lib.gui.misc.GuiEditConfigValue;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.gui.FTBQuestsTheme;
 import com.feed_the_beast.ftbquests.net.edit.MessageCreateObject;
-import com.feed_the_beast.ftbquests.quest.QuestChapter;
+import com.feed_the_beast.ftbquests.quest.Chapter;
 import net.minecraft.client.resources.I18n;
 
 import java.util.regex.Pattern;
@@ -33,7 +33,7 @@ public class ButtonAddChapter extends ButtonTab
 
 			if (set)
 			{
-				QuestChapter chapter = new QuestChapter(treeGui.file);
+				Chapter chapter = new Chapter(treeGui.file);
 				chapter.title = value.getString();
 				new MessageCreateObject(chapter, null).sendToServer();
 			}

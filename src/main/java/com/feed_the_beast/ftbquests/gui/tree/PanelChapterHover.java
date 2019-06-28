@@ -4,7 +4,7 @@ import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.gui.Theme;
 import com.feed_the_beast.ftblib.lib.gui.Widget;
 import com.feed_the_beast.ftblib.lib.gui.WidgetLayout;
-import com.feed_the_beast.ftbquests.quest.QuestChapter;
+import com.feed_the_beast.ftbquests.quest.Chapter;
 import net.minecraft.client.renderer.GlStateManager;
 
 /**
@@ -30,7 +30,7 @@ public class PanelChapterHover extends Panel
 		{
 			type = 0;
 
-			for (QuestChapter c : treeGui.file.chapters)
+			for (Chapter c : treeGui.file.chapters)
 			{
 				if (c.group == chapter.chapter && (treeGui.file.canEdit() || c.isVisible(treeGui.file.self)))
 				{

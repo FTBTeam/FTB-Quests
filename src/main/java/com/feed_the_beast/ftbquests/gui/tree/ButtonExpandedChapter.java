@@ -11,7 +11,7 @@ import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.client.FTBQuestsClient;
 import com.feed_the_beast.ftbquests.gui.FTBQuestsTheme;
 import com.feed_the_beast.ftbquests.net.edit.MessageMoveChapter;
-import com.feed_the_beast.ftbquests.quest.QuestChapter;
+import com.feed_the_beast.ftbquests.quest.Chapter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
@@ -27,10 +27,10 @@ import java.util.List;
 public class ButtonExpandedChapter extends SimpleTextButton
 {
 	public final GuiQuestTree treeGui;
-	public final QuestChapter chapter;
+	public final Chapter chapter;
 	public List<String> description;
 
-	public ButtonExpandedChapter(Panel panel, QuestChapter c)
+	public ButtonExpandedChapter(Panel panel, Chapter c)
 	{
 		super(panel, c.getTitle(), c.getIcon());
 		treeGui = (GuiQuestTree) getGui();

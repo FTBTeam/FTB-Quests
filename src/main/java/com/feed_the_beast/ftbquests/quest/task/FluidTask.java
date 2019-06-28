@@ -41,7 +41,7 @@ import javax.annotation.Nullable;
 /**
  * @author LatvianModder
  */
-public class FluidTask extends QuestTask
+public class FluidTask extends Task
 {
 	public static final ResourceLocation TANK_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "textures/tasks/tank.png");
 
@@ -55,7 +55,7 @@ public class FluidTask extends QuestTask
 	}
 
 	@Override
-	public QuestTaskType getType()
+	public TaskType getType()
 	{
 		return FTBQuestsTasks.FLUID;
 	}
@@ -229,7 +229,7 @@ public class FluidTask extends QuestTask
 	}
 
 	@Override
-	public void drawScreen(@Nullable QuestTaskData data)
+	public void drawScreen(@Nullable TaskData data)
 	{
 		Tessellator tessellator = Tessellator.getInstance();
 		BufferBuilder buffer = tessellator.getBuffer();
@@ -248,7 +248,7 @@ public class FluidTask extends QuestTask
 		buffer.pos(x, y, z).tex(0, 0).endVertex();
 		tessellator.draw();
 
-		double r = data == null ? 0D : data.getProgress() / (double) data.task.getMaxProgress();
+		double r = data == null ? 0D : data.progress / (double) data.task.getMaxProgress();
 
 		if (r > 0D)
 		{
@@ -294,7 +294,7 @@ public class FluidTask extends QuestTask
 	}
 
 	@Override
-	public QuestTaskData createData(QuestData data)
+	public TaskData createData(QuestData data)
 	{
 		return new Data(this, data);
 	}
@@ -334,7 +334,7 @@ public class FluidTask extends QuestTask
 		}
 	}
 
-	public static class Data extends SimpleQuestTaskData<FluidTask> implements IFluidHandler
+	public static class Data extends TaskData<FluidTask> implements IFluidHandler
 	{
 		private Data(FluidTask t, QuestData data)
 		{

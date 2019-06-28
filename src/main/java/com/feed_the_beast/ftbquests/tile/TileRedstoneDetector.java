@@ -4,11 +4,13 @@ import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigNull;
 import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
 import com.feed_the_beast.ftblib.lib.tile.EnumSaveType;
-import com.feed_the_beast.ftbquests.quest.EnumChangeProgress;
+import com.feed_the_beast.ftbquests.FTBQuests;
+import com.feed_the_beast.ftbquests.quest.ChangeProgress;
 import com.feed_the_beast.ftbquests.quest.QuestData;
+import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.task.CustomTask;
-import com.feed_the_beast.ftbquests.quest.task.QuestTask;
+import com.feed_the_beast.ftbquests.quest.task.Task;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.EntityLivingBase;
@@ -53,15 +55,16 @@ public class TileRedstoneDetector extends TileWithTeam implements IHasConfig
 
 		if (prev != currentRedstone && currentRedstone >= requiredRedstone && !world.isRemote)
 		{
-			QuestTask t = ServerQuestFile.INSTANCE.getTask(task);
+			Task t = ServerQuestFile.INSTANCE.getTask(task);
 
 			if (t != null)
 			{
-				QuestData data = getTeam();
+				QuestFile file = FTBQuests.PROXY.getQuestFile(world);
+				QuestData data = file == null ? null : file.getData(team);
 
 				if (data != null && !t.isComplete(data) && t.quest.canStartTasks(data))
 				{
-					t.forceProgress(data, EnumChangeProgress.COMPLETE, notifications);
+					t.forceProgress(data, ChangeProgress.COMPLETE, notifications);
 				}
 			}
 		}

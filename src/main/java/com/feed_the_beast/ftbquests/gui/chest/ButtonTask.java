@@ -1,11 +1,10 @@
 package com.feed_the_beast.ftbquests.gui.chest;
 
 import com.feed_the_beast.ftblib.lib.gui.Button;
-import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
 import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.gui.Theme;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
-import com.feed_the_beast.ftbquests.quest.task.QuestTaskData;
+import com.feed_the_beast.ftbquests.quest.task.TaskData;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.TextFormatting;
 
@@ -17,9 +16,9 @@ import java.util.List;
  */
 public class ButtonTask extends Button
 {
-	private final QuestTaskData taskData;
+	private final TaskData taskData;
 
-	public ButtonTask(Panel panel, QuestTaskData d)
+	public ButtonTask(Panel panel, TaskData d)
 	{
 		super(panel);
 		taskData = d;
@@ -41,7 +40,6 @@ public class ButtonTask extends Button
 	@Override
 	public void onClicked(MouseButton button)
 	{
-		GuiHelper.playClickSound();
 		taskData.task.onButtonClicked(true);
 	}
 

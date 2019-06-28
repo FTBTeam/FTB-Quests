@@ -8,13 +8,18 @@ import com.feed_the_beast.ftblib.lib.util.IWithID;
 import com.feed_the_beast.ftblib.lib.util.misc.NameMap;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.registry.EntityEntry;
+import net.minecraftforge.fml.common.registry.EntityRegistry;
 
 import javax.annotation.Nullable;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,17 +30,21 @@ public class RayMatcher
 {
 	public enum Type implements IWithID
 	{
-		BLOCK("block"),
-		BLOCK_ENTITY_ID("block_entity_id"),
-		BLOCK_ENTITY_CLASS("block_entity_class");
+		BLOCK_ID("block_id", true),
+		BLOCK_ENTITY_ID("block_entity_id", true),
+		BLOCK_ENTITY_CLASS("block_entity_class", true),
+		ENTITY_ID("entity_id", false),
+		ENTITY_CLASS("entity_class", false);
 
-		public static final NameMap<Type> NAME_MAP = NameMap.create(BLOCK, values());
+		public static final NameMap<Type> NAME_MAP = NameMap.create(BLOCK_ID, NameMap.ObjectProperties.withName((sender, value) -> new TextComponentTranslation("ftbquests.raymatcher." + value.getID())), values());
 
 		private final String name;
+		public final boolean block;
 
-		Type(String n)
+		Type(String n, boolean b)
 		{
 			name = n;
+			block = b;
 		}
 
 		@Override
@@ -47,26 +56,34 @@ public class RayMatcher
 
 	public static class Data
 	{
-		public static final Data EMPTY = new Data(BlockUtils.AIR_STATE, null);
+		public static final Data EMPTY = new Data();
 
-		public static Data get(IBlockState state, @Nullable TileEntity tileEntity)
+		public static Data get(IBlockState state, @Nullable TileEntity tileEntity, @Nullable Entity entity)
 		{
-			if (state == BlockUtils.AIR_STATE && tileEntity == null)
+			if (state == BlockUtils.AIR_STATE && tileEntity == null && entity == null)
 			{
 				return EMPTY;
 			}
 
-			return new Data(state, tileEntity);
+			return new Data(state, tileEntity, entity);
 		}
 
 		public static Data get(World world, @Nullable RayTraceResult ray)
 		{
-			if (ray == null || ray.typeOfHit != RayTraceResult.Type.BLOCK)
+			if (ray == null || ray.typeOfHit == RayTraceResult.Type.MISS)
 			{
 				return EMPTY;
 			}
+			else if (ray.typeOfHit == RayTraceResult.Type.BLOCK)
+			{
+				return get(world.getBlockState(ray.getBlockPos()), world.getTileEntity(ray.getBlockPos()), ray.entityHit);
+			}
+			else if (ray.entityHit != null)
+			{
+				return get(BlockUtils.AIR_STATE, null, ray.entityHit);
+			}
 
-			return get(world.getBlockState(ray.getBlockPos()), world.getTileEntity(ray.getBlockPos()));
+			return EMPTY;
 		}
 
 		public static Data get(EntityPlayer player)
@@ -78,8 +95,20 @@ public class RayMatcher
 		public final Map<String, String> blockProperties;
 		public final String blockEntityClass;
 		public final String blockEntityId;
+		public final String entityClass;
+		public final String entityId;
 
-		private Data(IBlockState state, @Nullable TileEntity tileEntity)
+		private Data()
+		{
+			blockId = "";
+			blockProperties = Collections.emptyMap();
+			blockEntityClass = "null";
+			blockEntityId = "null";
+			entityClass = "null";
+			entityId = "null";
+		}
+
+		private Data(IBlockState state, @Nullable TileEntity tileEntity, @Nullable Entity entity)
 		{
 			blockProperties = new HashMap<>();
 			blockId = String.valueOf(state.getBlock().getRegistryName());
@@ -91,17 +120,28 @@ public class RayMatcher
 
 			if (tileEntity == null)
 			{
-				blockEntityClass = blockEntityId = "";
+				blockEntityClass = blockEntityId = "null";
 			}
 			else
 			{
 				blockEntityClass = tileEntity.getClass().getName();
 				blockEntityId = String.valueOf(TileEntity.getKey(tileEntity.getClass()));
 			}
+
+			if (entity == null)
+			{
+				entityClass = entityId = "";
+			}
+			else
+			{
+				entityClass = entity.getClass().getName();
+				EntityEntry entityEntry = EntityRegistry.getEntry(entity.getClass());
+				entityId = entityEntry == null ? "null" : String.valueOf(entityEntry.getRegistryName());
+			}
 		}
 	}
 
-	public Type type = Type.BLOCK;
+	public Type type = Type.BLOCK_ID;
 	public String match = "";
 	public final Map<String, String> properties = new HashMap<>();
 
@@ -160,12 +200,16 @@ public class RayMatcher
 
 		switch (type)
 		{
-			case BLOCK:
+			case BLOCK_ID:
 				return match.equals(data.blockId);
 			case BLOCK_ENTITY_ID:
 				return match.equals(data.blockEntityId);
 			case BLOCK_ENTITY_CLASS:
 				return match.equals(data.blockEntityClass);
+			case ENTITY_ID:
+				return match.equals(data.entityId);
+			case ENTITY_CLASS:
+				return match.equals(data.entityClass);
 			default:
 				return false;
 		}
@@ -173,7 +217,7 @@ public class RayMatcher
 
 	public boolean propertiesMatch(Data data)
 	{
-		if (properties.isEmpty())
+		if (properties.isEmpty() || !type.block)
 		{
 			return true;
 		}

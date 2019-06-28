@@ -12,7 +12,6 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -24,13 +23,12 @@ import net.minecraftforge.fml.common.registry.EntityEntry;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 /**
  * @author LatvianModder
  */
-public class KillTask extends QuestTask
+public class KillTask extends Task
 {
 	public static final ResourceLocation ZOMBIE = new ResourceLocation("minecraft:zombie");
 	public ResourceLocation entity = ZOMBIE;
@@ -55,7 +53,7 @@ public class KillTask extends QuestTask
 	}
 
 	@Override
-	public QuestTaskType getType()
+	public TaskType getType()
 	{
 		return FTBQuestsTasks.KILL;
 	}
@@ -138,12 +136,17 @@ public class KillTask extends QuestTask
 	}
 
 	@Override
-	public QuestTaskData createData(QuestData data)
+	public TaskData createData(QuestData data)
 	{
 		return new Data(this, data);
 	}
 
-	public static class Data extends SimpleQuestTaskData<KillTask>
+	@Override
+	public void onButtonClicked(boolean canClick)
+	{
+	}
+
+	public static class Data extends TaskData<KillTask>
 	{
 		private Data(KillTask task, QuestData data)
 		{
@@ -157,12 +160,6 @@ public class KillTask extends QuestTask
 				progress++;
 				sync();
 			}
-		}
-
-		@Override
-		public boolean submitTask(EntityPlayerMP player, Collection<ItemStack> itemsToCheck, boolean simulate)
-		{
-			return false;
 		}
 	}
 }

@@ -4,8 +4,8 @@ import com.feed_the_beast.ftblib.lib.util.BlockUtils;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.task.QuestTask;
-import com.feed_the_beast.ftbquests.quest.task.QuestTaskData;
+import com.feed_the_beast.ftbquests.quest.task.Task;
+import com.feed_the_beast.ftbquests.quest.task.TaskData;
 import com.feed_the_beast.ftbquests.tile.ITaskScreen;
 import com.feed_the_beast.ftbquests.tile.TileTaskScreenCore;
 import com.feed_the_beast.ftbquests.tile.TileTaskScreenPart;
@@ -48,7 +48,7 @@ import java.util.Random;
 public class BlockTaskScreen extends BlockWithHorizontalFacing
 {
 	public static boolean BREAKING_SCREEN = false;
-	public static QuestTask currentTask = null;
+	public static Task currentTask = null;
 
 	public static double getClickX(EnumFacing facing, int offX, int offY, double hitX, double hitZ, int size)
 	{
@@ -394,13 +394,13 @@ public class BlockTaskScreen extends BlockWithHorizontalFacing
 		tooltip.add(I18n.format("ftbquests.chapter") + ": " + quest.chapter.getYellowDisplayName());
 		tooltip.add(I18n.format("ftbquests.quest") + ": " + quest.getYellowDisplayName());
 
-		QuestTask task = quest.getTask(nbt.getByte("TaskIndex") & 0xFF);
+		Task task = quest.getTask(nbt.getByte("TaskIndex") & 0xFF);
 
 		tooltip.add(I18n.format("ftbquests.task") + ": " + task.getYellowDisplayName());
 
 		if (ClientQuestFile.INSTANCE.self != null)
 		{
-			QuestTaskData taskData = ClientQuestFile.INSTANCE.self.getQuestTaskData(task);
+			TaskData taskData = ClientQuestFile.INSTANCE.self.getTaskData(task);
 			tooltip.add(I18n.format("ftbquests.progress") + ": " + TextFormatting.BLUE + String.format("%s / %s [%d%%]", taskData.getProgressString(), task.getMaxProgressString(), taskData.getRelativeProgress()));
 		}
 	}
