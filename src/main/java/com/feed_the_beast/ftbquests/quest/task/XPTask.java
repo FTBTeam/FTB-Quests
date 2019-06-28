@@ -223,8 +223,7 @@ public class XPTask extends Task implements ISingleLongValueTask
 						player.addExperienceLevel(-add);
 					}
 
-					progress += add;
-					sync();
+					addProgress(add);
 				}
 
 				return true;

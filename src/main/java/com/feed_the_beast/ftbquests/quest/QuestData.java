@@ -40,6 +40,10 @@ public abstract class QuestData
 
 	public abstract QuestFile getFile();
 
+	public void markDirty()
+	{
+	}
+
 	public TaskData getTaskData(Task task)
 	{
 		TaskData data = taskData.get(task.id);
@@ -56,11 +60,6 @@ public abstract class QuestData
 	public String toString()
 	{
 		return getTeamID();
-	}
-
-	public void syncTask(TaskData data)
-	{
-		getFile().clearCachedProgress();
 	}
 
 	public void removeTask(Task task)
@@ -110,6 +109,8 @@ public abstract class QuestData
 				}
 			}
 		}
+
+		markDirty();
 	}
 
 	public boolean setRewardClaimed(UUID player, Reward reward)

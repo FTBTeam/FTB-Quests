@@ -7,11 +7,8 @@ import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.client.ClientQuestData;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.quest.task.Task;
-import net.minecraft.nbt.NBTBase;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import javax.annotation.Nullable;
 
 /**
  * @author LatvianModder
@@ -20,17 +17,17 @@ public class MessageUpdateTaskProgress extends MessageToClient
 {
 	private short team;
 	private int task;
-	private NBTBase nbt;
+	private long progress;
 
 	public MessageUpdateTaskProgress()
 	{
 	}
 
-	public MessageUpdateTaskProgress(short t, int k, @Nullable NBTBase d)
+	public MessageUpdateTaskProgress(short t, int k, long p)
 	{
 		team = t;
 		task = k;
-		nbt = d;
+		progress = p;
 	}
 
 	@Override
@@ -44,7 +41,7 @@ public class MessageUpdateTaskProgress extends MessageToClient
 	{
 		data.writeShort(team);
 		data.writeInt(task);
-		data.writeNBTBase(nbt);
+		data.writeVarLong(progress);
 	}
 
 	@Override
@@ -52,7 +49,7 @@ public class MessageUpdateTaskProgress extends MessageToClient
 	{
 		team = data.readShort();
 		task = data.readInt();
-		nbt = data.readNBTBase();
+		progress = data.readVarLong();
 	}
 
 	@Override
@@ -68,7 +65,7 @@ public class MessageUpdateTaskProgress extends MessageToClient
 			if (data != null)
 			{
 				ClientQuestFile.INSTANCE.clearCachedProgress();
-				data.getTaskData(qtask).fromNBT(nbt);
+				data.getTaskData(qtask).setProgress(progress);
 			}
 		}
 	}

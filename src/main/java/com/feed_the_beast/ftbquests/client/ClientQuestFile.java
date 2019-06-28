@@ -11,6 +11,7 @@ import com.feed_the_beast.ftbquests.quest.Chapter;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.task.Task;
+import com.feed_the_beast.ftbquests.quest.task.TaskData;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
 import net.minecraft.entity.player.EntityPlayer;
@@ -78,7 +79,9 @@ public class ClientQuestFile extends QuestFile
 
 				if (task != null)
 				{
-					data.getTaskData(task).fromNBT(team.taskValues[i]);
+					TaskData taskData = data.getTaskData(task);
+					taskData.progress = team.taskValues[i];
+					taskData.isComplete = taskData.isComplete();
 				}
 			}
 

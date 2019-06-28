@@ -152,8 +152,7 @@ public class StatTask extends Task
 			{
 				if (!simulate)
 				{
-					progress = set;
-					sync();
+					setProgress(set);
 				}
 
 				return true;

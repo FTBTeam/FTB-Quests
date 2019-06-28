@@ -161,8 +161,7 @@ public class MJTask extends EnergyTask
 				{
 					if (!simulate)
 					{
-						progress += add;
-						sync();
+						addProgress(add);
 					}
 
 					return microJoules - add;

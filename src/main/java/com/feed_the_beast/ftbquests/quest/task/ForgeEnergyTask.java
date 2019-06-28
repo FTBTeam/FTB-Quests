@@ -134,8 +134,7 @@ public class ForgeEnergyTask extends EnergyTask
 				{
 					if (!simulate)
 					{
-						progress += add;
-						sync();
+						addProgress(add);
 					}
 
 					return (int) add;

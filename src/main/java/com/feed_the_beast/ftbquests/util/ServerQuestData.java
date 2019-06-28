@@ -20,8 +20,6 @@ import com.feed_the_beast.ftbquests.net.MessageClaimRewardResponse;
 import com.feed_the_beast.ftbquests.net.MessageCreateTeamData;
 import com.feed_the_beast.ftbquests.net.MessageDeleteTeamData;
 import com.feed_the_beast.ftbquests.net.MessageSyncQuests;
-import com.feed_the_beast.ftbquests.net.MessageUpdateTaskProgress;
-import com.feed_the_beast.ftbquests.quest.ChangeProgress;
 import com.feed_the_beast.ftbquests.quest.Chapter;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestData;
@@ -36,6 +34,7 @@ import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.ContainerPlayer;
 import net.minecraft.nbt.NBTBase;
+import net.minecraft.nbt.NBTPrimitive;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.event.entity.player.PlayerContainerEvent;
@@ -152,24 +151,22 @@ public class ServerQuestData extends QuestData implements NBTDataStorage.Data
 
 			for (TaskData taskData : data.taskData.values())
 			{
-				if (taskData.toNBT() != null)
+				if (taskData.isStarted())
 				{
 					size++;
 				}
 			}
 
 			t.taskKeys = new int[size];
-			t.taskValues = new NBTBase[size];
+			t.taskValues = new long[size];
 			int i = 0;
 
 			for (TaskData taskData : data.taskData.values())
 			{
-				NBTBase nbt = taskData.toNBT();
-
-				if (nbt != null)
+				if (taskData.isStarted())
 				{
 					t.taskKeys[i] = taskData.task.id;
-					t.taskValues[i] = nbt;
+					t.taskValues[i] = taskData.progress;
 					i++;
 				}
 			}
@@ -315,41 +312,8 @@ public class ServerQuestData extends QuestData implements NBTDataStorage.Data
 	}
 
 	@Override
-	public void syncTask(TaskData taskData)
+	public void markDirty()
 	{
-		super.syncTask(taskData);
-
-		if (ChangeProgress.sendUpdates)
-		{
-			new MessageUpdateTaskProgress(team.getUID(), taskData.task.id, taskData.toNBT()).sendToAll();
-		}
-
-		if (!taskData.isComplete && taskData.task.isComplete(this))
-		{
-			taskData.isComplete = true;
-			List<EntityPlayerMP> notifyPlayers = new ArrayList<>();
-
-			if (!taskData.task.quest.chapter.alwaysInvisible && !taskData.task.quest.canRepeat && ChangeProgress.sendNotifications.get(ChangeProgress.sendUpdates))
-			{
-				for (ForgePlayer player : team.getMembers())
-				{
-					if (player.isOnline())
-					{
-						notifyPlayers.add(player.getPlayer());
-					}
-				}
-			}
-
-			taskData.task.onCompleted(this, notifyPlayers);
-		}
-
-		team.markDirty();
-	}
-
-	@Override
-	public void unclaimRewards(Collection<Reward> rewards)
-	{
-		super.unclaimRewards(rewards);
 		team.markDirty();
 	}
 
@@ -358,7 +322,7 @@ public class ServerQuestData extends QuestData implements NBTDataStorage.Data
 	{
 		if (super.setRewardClaimed(player, reward))
 		{
-			team.markDirty();
+			markDirty();
 			new MessageClaimRewardResponse(getTeamUID(), player, reward.id).sendToAll();
 			return true;
 		}
@@ -380,11 +344,26 @@ public class ServerQuestData extends QuestData implements NBTDataStorage.Data
 
 		for (TaskData data : taskData.values())
 		{
-			NBTBase nbt2 = data.toNBT();
-
-			if (nbt2 != null)
+			if (data.isStarted())
 			{
-				nbt1.setTag(QuestObjectBase.getCodeString(data.task), nbt2);
+				String key = QuestObjectBase.getCodeString(data.task);
+
+				if (data.progress <= Byte.MAX_VALUE)
+				{
+					nbt1.setByte(key, (byte) data.progress);
+				}
+				else if (data.progress <= Short.MAX_VALUE)
+				{
+					nbt1.setShort(key, (short) data.progress);
+				}
+				else if (data.progress <= Integer.MAX_VALUE)
+				{
+					nbt1.setInteger(key, (int) data.progress);
+				}
+				else
+				{
+					nbt1.setLong(key, data.progress);
+				}
 			}
 		}
 
@@ -418,46 +397,16 @@ public class ServerQuestData extends QuestData implements NBTDataStorage.Data
 	{
 		NBTTagCompound nbt1 = nbt.getCompoundTag("Tasks");
 
-		if (!nbt1.isEmpty())
+		for (String s : nbt1.getKeySet())
 		{
-			for (String s : nbt1.getKeySet())
+			Task task = ServerQuestFile.INSTANCE.getTask(QuestFile.getID(s));
+
+			if (task != null)
 			{
-				Task task = ServerQuestFile.INSTANCE.getTask(QuestFile.getID(s));
-
-				if (task != null)
-				{
-					taskData.get(task.id).fromNBT(nbt1.getTag(s));
-				}
-			}
-		}
-		else
-		{
-			team.markDirty();
-			nbt1 = nbt.getCompoundTag("TaskData");
-
-			for (TaskData data : taskData.values())
-			{
-				data.fromNBT(null);
-			}
-
-			for (String c : nbt1.getKeySet())
-			{
-				NBTTagCompound nbt2 = nbt1.getCompoundTag(c);
-
-				for (String q : nbt2.getKeySet())
-				{
-					NBTTagCompound nbt3 = nbt2.getCompoundTag(q);
-
-					for (String t : nbt3.getKeySet())
-					{
-						TaskData data = taskData.get(QuestFile.getID(c + ':' + q + ':' + t));
-
-						if (data != null)
-						{
-							data.fromNBT(nbt3.getTag(t));
-						}
-					}
-				}
+				TaskData data = taskData.get(task.id);
+				NBTBase value = nbt1.getTag(s);
+				data.setProgress(value instanceof NBTPrimitive ? ((NBTPrimitive) value).getLong() : 0L);
+				data.isComplete = data.isComplete();
 			}
 		}
 

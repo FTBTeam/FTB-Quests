@@ -24,12 +24,11 @@ public class BooleanTaskData<T extends Task> extends TaskData<T>
 	@Override
 	public boolean submitTask(EntityPlayerMP player, Collection<ItemStack> itemsToCheck, boolean simulate)
 	{
-		if (progress <= 0L && canSubmit(player))
+		if (!isStarted() && canSubmit(player))
 		{
 			if (!simulate)
 			{
-				progress = 1L;
-				sync();
+				setProgress(1L);
 			}
 
 			return true;

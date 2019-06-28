@@ -246,6 +246,7 @@ public abstract class QuestObjectBase
 		return group.getGroup(getObjectType().getID());
 	}
 
+	@SideOnly(Side.CLIENT)
 	public void onEditButtonClicked()
 	{
 		ConfigGroup group = ConfigGroup.newGroup(FTBQuests.MOD_ID);

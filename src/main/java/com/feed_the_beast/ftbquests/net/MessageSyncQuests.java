@@ -6,7 +6,6 @@ import com.feed_the_beast.ftblib.lib.net.MessageToClient;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
-import net.minecraft.nbt.NBTBase;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -30,7 +29,7 @@ public class MessageSyncQuests extends MessageToClient
 			for (int i = 0; i < t.taskKeys.length; i++)
 			{
 				data.writeInt(t.taskKeys[i]);
-				data.writeNBTBase(t.taskValues[i]);
+				data.writeVarLong(t.taskValues[i]);
 			}
 
 			data.writeVarInt(t.playerRewardUUIDs.length);
@@ -60,12 +59,12 @@ public class MessageSyncQuests extends MessageToClient
 			t.id = data.readString();
 			t.name = data.readTextComponent();
 			t.taskKeys = new int[data.readVarInt()];
-			t.taskValues = new NBTBase[t.taskKeys.length];
+			t.taskValues = new long[t.taskKeys.length];
 
 			for (int i = 0; i < t.taskKeys.length; i++)
 			{
 				t.taskKeys[i] = data.readInt();
-				t.taskValues[i] = data.readNBTBase();
+				t.taskValues[i] = data.readVarLong();
 			}
 
 			t.playerRewardUUIDs = new UUID[data.readVarInt()];
@@ -96,7 +95,7 @@ public class MessageSyncQuests extends MessageToClient
 		public String id;
 		public ITextComponent name;
 		public int[] taskKeys;
-		public NBTBase[] taskValues;
+		public long[] taskValues;
 		public UUID[] playerRewardUUIDs;
 		public int[][] playerRewardIDs;
 		public int[] teamRewards;

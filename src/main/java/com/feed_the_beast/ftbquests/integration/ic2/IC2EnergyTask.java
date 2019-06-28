@@ -134,7 +134,7 @@ public class IC2EnergyTask extends EnergyTask
 
 		public double injectEnergy(double amount)
 		{
-			if (amount > 0 && progress < task.value)
+			if (amount > 0 && !isComplete())
 			{
 				double add = Math.min(amount, task.value - progress);
 
@@ -145,8 +145,7 @@ public class IC2EnergyTask extends EnergyTask
 
 				if (add > 0D)
 				{
-					progress += add;
-					sync();
+					addProgress((long) add);
 					return amount - add;
 				}
 			}
