@@ -19,8 +19,8 @@ import com.feed_the_beast.ftbquests.net.MessageDisplayCompletionToast;
 import com.feed_the_beast.ftbquests.quest.loot.EntityWeight;
 import com.feed_the_beast.ftbquests.quest.loot.LootCrate;
 import com.feed_the_beast.ftbquests.quest.loot.RewardTable;
-import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
-import com.feed_the_beast.ftbquests.quest.reward.QuestRewardType;
+import com.feed_the_beast.ftbquests.quest.reward.Reward;
+import com.feed_the_beast.ftbquests.quest.reward.RewardType;
 import com.feed_the_beast.ftbquests.quest.task.Task;
 import com.feed_the_beast.ftbquests.quest.task.TaskType;
 import com.latmod.mods.itemfilters.item.ItemMissing;
@@ -31,11 +31,12 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.registries.ForgeRegistry;
 
 import javax.annotation.Nullable;
@@ -118,6 +119,11 @@ public abstract class QuestFile extends QuestObject
 	public boolean canEdit()
 	{
 		return false;
+	}
+
+	public File getFolder()
+	{
+		throw new IllegalStateException("This quest file doesn't have a folder!");
 	}
 
 	@Override
@@ -253,10 +259,10 @@ public abstract class QuestFile extends QuestObject
 	}
 
 	@Nullable
-	public QuestReward getReward(int id)
+	public Reward getReward(int id)
 	{
 		QuestObjectBase object = getBase(id);
-		return object instanceof QuestReward ? (QuestReward) object : null;
+		return object instanceof Reward ? (Reward) object : null;
 	}
 
 	@Nullable
@@ -314,7 +320,7 @@ public abstract class QuestFile extends QuestObject
 					map.put(task.id, task);
 				}
 
-				for (QuestReward reward : quest.rewards)
+				for (Reward reward : quest.rewards)
 				{
 					map.put(reward.id, reward);
 				}
@@ -364,7 +370,7 @@ public abstract class QuestFile extends QuestObject
 
 				if (quest != null)
 				{
-					QuestReward reward = QuestRewardType.createReward(quest, extra.getString("type"));
+					Reward reward = RewardType.createReward(quest, extra.getString("type"));
 
 					if (reward != null)
 					{
@@ -519,9 +525,9 @@ public abstract class QuestFile extends QuestObject
 					{
 						NBTTagList r = new NBTTagList();
 
-						for (QuestReward reward : quest.rewards)
+						for (Reward reward : quest.rewards)
 						{
-							QuestRewardType type = reward.getType();
+							RewardType type = reward.getType();
 							NBTTagCompound nbt3 = new NBTTagCompound();
 							reward.writeData(nbt3);
 							nbt3.setInteger("uid", reward.id);
@@ -545,162 +551,6 @@ public abstract class QuestFile extends QuestObject
 			out = new NBTTagCompound();
 			table.writeData(out);
 			NBTUtils.writeNBTSafe(new File(folder, "reward_tables/" + getCodeString(table) + ".nbt"), out);
-		}
-	}
-
-	public final void readDataOld(NBTTagCompound nbt)
-	{
-		fileVersion = nbt.getInteger("version");
-		readData(nbt);
-
-		chapters.clear();
-		rewardTables.clear();
-
-		Int2ObjectOpenHashMap<NBTTagCompound> objectDataCache = new Int2ObjectOpenHashMap<>();
-
-		NBTTagList rtl = nbt.getTagList("reward_tables", Constants.NBT.TAG_COMPOUND);
-
-		for (int i = 0; i < rtl.tagCount(); i++)
-		{
-			RewardTable table = new RewardTable(this);
-			NBTTagCompound nbt1 = rtl.getCompoundTagAt(i);
-			table.id = nbt1.getInteger("uid");
-			rewardTables.add(table);
-			objectDataCache.put(table.id, nbt1);
-		}
-
-		NBTTagList c = nbt.getTagList("chapters", Constants.NBT.TAG_COMPOUND);
-
-		for (int i = 0; i < c.tagCount(); i++)
-		{
-			Chapter chapter = new Chapter(this);
-			NBTTagCompound ct = c.getCompoundTagAt(i);
-			chapter.id = ct.getInteger("uid");
-			chapters.add(chapter);
-			objectDataCache.put(chapter.id, ct);
-
-			NBTTagList q = ct.getTagList("quests", Constants.NBT.TAG_COMPOUND);
-
-			for (int j = 0; j < q.tagCount(); j++)
-			{
-				Quest quest = new Quest(chapter);
-				NBTTagCompound qt = q.getCompoundTagAt(j);
-				quest.id = qt.getInteger("uid");
-				chapter.quests.add(quest);
-				objectDataCache.put(quest.id, qt);
-
-				NBTTagList t = qt.getTagList("tasks", Constants.NBT.TAG_COMPOUND);
-
-				if (t.isEmpty())
-				{
-					NBTBase tt = qt.getTag("task");
-
-					if (tt != null)
-					{
-						t.appendTag(tt);
-					}
-				}
-
-				for (int k = 0; k < t.tagCount(); k++)
-				{
-					NBTTagCompound tt = t.getCompoundTagAt(k);
-					Task task = TaskType.createTask(quest, tt.getString("type"));
-
-					if (task != null)
-					{
-						task.id = tt.getInteger("uid");
-						objectDataCache.put(task.id, tt);
-						quest.tasks.add(task);
-					}
-				}
-
-				NBTTagList r = qt.getTagList("rewards", Constants.NBT.TAG_COMPOUND);
-
-				if (r.isEmpty())
-				{
-					NBTBase rt = qt.getTag("reward");
-
-					if (rt != null)
-					{
-						r.appendTag(rt);
-					}
-				}
-
-				for (int k = 0; k < r.tagCount(); k++)
-				{
-					NBTTagCompound rt = r.getCompoundTagAt(k);
-					QuestReward reward = QuestRewardType.createReward(quest, rt.getString("type"));
-
-					if (reward != null)
-					{
-						reward.id = rt.getInteger("uid");
-						objectDataCache.put(reward.id, rt);
-						quest.rewards.add(reward);
-					}
-				}
-			}
-		}
-
-		refreshIDMap();
-
-		NBTTagCompound nbt1;
-
-		for (Chapter chapter : chapters)
-		{
-			nbt1 = objectDataCache.get(chapter.id);
-
-			if (nbt1 != null)
-			{
-				chapter.readData(nbt1);
-			}
-
-			for (Quest quest : chapter.quests)
-			{
-				nbt1 = objectDataCache.get(quest.id);
-
-				if (nbt1 != null)
-				{
-					quest.readData(nbt1);
-				}
-
-				for (Task task : quest.tasks)
-				{
-					nbt1 = objectDataCache.get(task.id);
-
-					if (nbt1 != null)
-					{
-						task.readData(nbt1);
-					}
-				}
-
-				for (QuestReward reward : quest.rewards)
-				{
-					nbt1 = objectDataCache.get(reward.id);
-
-					if (nbt1 != null)
-					{
-						reward.readData(nbt1);
-					}
-				}
-			}
-		}
-
-		for (RewardTable table : rewardTables)
-		{
-			nbt1 = objectDataCache.get(table.id);
-
-			if (nbt1 != null)
-			{
-				table.readData(nbt1);
-			}
-		}
-
-		for (Chapter chapter : chapters)
-		{
-			for (Quest quest : chapter.quests)
-			{
-				quest.verifyDependencies(true);
-			}
 		}
 	}
 
@@ -738,7 +588,7 @@ public abstract class QuestFile extends QuestObject
 							Quest quest = new Quest(chapter);
 							quest.id = Long.decode("#" + f.getName().replace(".nbt", "")).intValue();
 
-							nbt = NBTUtils.readNBT(quest.getFile(folder));
+							nbt = NBTUtils.readNBT(quest.getFile());
 
 							if (nbt != null)
 							{
@@ -762,7 +612,7 @@ public abstract class QuestFile extends QuestObject
 								for (int k = 0; k < r.tagCount(); k++)
 								{
 									NBTTagCompound rt = r.getCompoundTagAt(k);
-									QuestReward reward = QuestRewardType.createReward(quest, rt.getString("type"));
+									Reward reward = RewardType.createReward(quest, rt.getString("type"));
 
 									if (reward != null)
 									{
@@ -830,7 +680,7 @@ public abstract class QuestFile extends QuestObject
 				for (int k = 0; k < r.tagCount(); k++)
 				{
 					NBTTagCompound rt = r.getCompoundTagAt(k);
-					QuestReward reward = getReward(rt.getInteger("uid"));
+					Reward reward = getReward(rt.getInteger("uid"));
 
 					if (reward != null)
 					{
@@ -905,7 +755,7 @@ public abstract class QuestFile extends QuestObject
 		data.writeVarInt(chapters.size());
 
 		ForgeRegistry<TaskType> taskTypes = TaskType.getRegistry();
-		ForgeRegistry<QuestRewardType> rewardTypes = QuestRewardType.getRegistry();
+		ForgeRegistry<RewardType> rewardTypes = RewardType.getRegistry();
 
 		for (Chapter chapter : chapters)
 		{
@@ -925,7 +775,7 @@ public abstract class QuestFile extends QuestObject
 
 				data.writeVarInt(quest.rewards.size());
 
-				for (QuestReward reward : quest.rewards)
+				for (Reward reward : quest.rewards)
 				{
 					data.writeVarInt(rewardTypes.getID(reward.getType()));
 					data.writeInt(reward.id);
@@ -951,7 +801,7 @@ public abstract class QuestFile extends QuestObject
 					task.writeNetData(data);
 				}
 
-				for (QuestReward reward : quest.rewards)
+				for (Reward reward : quest.rewards)
 				{
 					reward.writeNetData(data);
 				}
@@ -982,7 +832,7 @@ public abstract class QuestFile extends QuestObject
 		}
 
 		ForgeRegistry<TaskType> taskTypes = TaskType.getRegistry();
-		ForgeRegistry<QuestRewardType> rewardTypes = QuestRewardType.getRegistry();
+		ForgeRegistry<RewardType> rewardTypes = RewardType.getRegistry();
 
 		int c = data.readVarInt();
 
@@ -1014,8 +864,8 @@ public abstract class QuestFile extends QuestObject
 
 				for (int k = 0; k < r; k++)
 				{
-					QuestRewardType type = rewardTypes.getValue(data.readVarInt());
-					QuestReward reward = type.provider.create(quest);
+					RewardType type = rewardTypes.getValue(data.readVarInt());
+					Reward reward = type.provider.create(quest);
 					reward.id = data.readInt();
 					quest.rewards.add(reward);
 				}
@@ -1042,7 +892,7 @@ public abstract class QuestFile extends QuestObject
 					task.readNetData(data);
 				}
 
-				for (QuestReward reward : quest.rewards)
+				for (Reward reward : quest.rewards)
 				{
 					reward.readNetData(data);
 				}
@@ -1091,9 +941,10 @@ public abstract class QuestFile extends QuestObject
 	}
 
 	@Override
-	public void getConfig(EntityPlayer player, ConfigGroup config)
+	@SideOnly(Side.CLIENT)
+	public void getConfig(ConfigGroup config)
 	{
-		super.getConfig(player, config);
+		super.getConfig(config);
 		config.addList("emergency_items", emergencyItems, new ConfigItemStack(ItemStack.EMPTY), ConfigItemStack::new, ConfigItemStack::getStack);
 
 		config.add("emergency_items_cooldown", new ConfigTimer(Ticks.NO_TICKS)

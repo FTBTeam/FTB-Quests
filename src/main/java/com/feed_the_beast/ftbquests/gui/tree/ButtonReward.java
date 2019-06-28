@@ -11,7 +11,7 @@ import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.gui.FTBQuestsTheme;
-import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
+import com.feed_the_beast.ftbquests.quest.reward.Reward;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.TextFormatting;
@@ -26,9 +26,9 @@ import java.util.List;
 public class ButtonReward extends Button
 {
 	public final GuiQuestTree treeGui;
-	public final QuestReward reward;
+	public final Reward reward;
 
-	public ButtonReward(Panel panel, QuestReward r)
+	public ButtonReward(Panel panel, Reward r)
 	{
 		super(panel, r.getTitle(), r.getIcon());
 		treeGui = (GuiQuestTree) panel.getGui();

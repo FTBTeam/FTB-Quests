@@ -11,7 +11,6 @@ import com.feed_the_beast.ftbquests.quest.QuestData;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -21,6 +20,8 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.fml.common.registry.EntityEntry;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -97,9 +98,10 @@ public class KillTask extends Task
 	}
 
 	@Override
-	public void getConfig(EntityPlayer player, ConfigGroup config)
+	@SideOnly(Side.CLIENT)
+	public void getConfig(ConfigGroup config)
 	{
-		super.getConfig(player, config);
+		super.getConfig(config);
 		List<ResourceLocation> ids = new ArrayList<>();
 
 		for (EntityEntry entry : ForgeRegistries.ENTITIES)
@@ -142,6 +144,7 @@ public class KillTask extends Task
 	}
 
 	@Override
+	@SideOnly(Side.CLIENT)
 	public void onButtonClicked(boolean canClick)
 	{
 	}

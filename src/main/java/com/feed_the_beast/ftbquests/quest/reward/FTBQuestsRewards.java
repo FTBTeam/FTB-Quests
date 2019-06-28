@@ -5,15 +5,15 @@ package com.feed_the_beast.ftbquests.quest.reward;
  */
 public class FTBQuestsRewards
 {
-	public static QuestRewardType ITEM;
-	public static QuestRewardType CHOICE;
-	public static QuestRewardType RANDOM;
-	public static QuestRewardType LOOT;
-	public static QuestRewardType XP;
-	public static QuestRewardType XP_LEVELS;
-	public static QuestRewardType COMMAND;
-	public static QuestRewardType ADVANCEMENT;
-	public static QuestRewardType TOAST;
+	public static RewardType ITEM;
+	public static RewardType CHOICE;
+	public static RewardType RANDOM;
+	public static RewardType LOOT;
+	public static RewardType XP;
+	public static RewardType XP_LEVELS;
+	public static RewardType COMMAND;
+	public static RewardType ADVANCEMENT;
+	public static RewardType TOAST;
 
-	public static QuestRewardType GAMESTAGE;
+	public static RewardType GAMESTAGE;
 }

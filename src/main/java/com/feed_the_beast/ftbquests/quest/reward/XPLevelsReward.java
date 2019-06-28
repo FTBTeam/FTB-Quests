@@ -6,18 +6,19 @@ import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftbquests.net.MessageDisplayRewardToast;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * @author LatvianModder
  */
-public class XPLevelsReward extends QuestReward
+public class XPLevelsReward extends Reward
 {
 	public int xpLevels;
 
@@ -28,7 +29,7 @@ public class XPLevelsReward extends QuestReward
 	}
 
 	@Override
-	public QuestRewardType getType()
+	public RewardType getType()
 	{
 		return FTBQuestsRewards.XP_LEVELS;
 	}
@@ -62,9 +63,10 @@ public class XPLevelsReward extends QuestReward
 	}
 
 	@Override
-	public void getConfig(EntityPlayer player, ConfigGroup config)
+	@SideOnly(Side.CLIENT)
+	public void getConfig(ConfigGroup config)
 	{
-		super.getConfig(player, config);
+		super.getConfig(config);
 		config.addInt("xp_levels", () -> xpLevels, v -> xpLevels = v, 1, 1, Integer.MAX_VALUE).setDisplayName(new TextComponentTranslation("ftbquests.reward.ftbquests.xp_levels"));
 	}
 

@@ -6,7 +6,7 @@ import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestData;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.reward.FTBQuestsRewards;
-import com.feed_the_beast.ftbquests.quest.reward.QuestRewardType;
+import com.feed_the_beast.ftbquests.quest.reward.RewardType;
 import com.feed_the_beast.ftbquests.quest.task.FTBQuestsTasks;
 import com.feed_the_beast.ftbquests.quest.task.Task;
 import com.feed_the_beast.ftbquests.quest.task.TaskType;
@@ -35,9 +35,9 @@ public class GameStagesIntegration
 	}
 
 	@SubscribeEvent
-	public static void registerRewards(RegistryEvent.Register<QuestRewardType> event)
+	public static void registerRewards(RegistryEvent.Register<RewardType> event)
 	{
-		event.getRegistry().register(FTBQuestsRewards.GAMESTAGE = new QuestRewardType(GameStageReward::new).setRegistryName("gamestage").setIcon(GuiIcons.CONTROLLER));
+		event.getRegistry().register(FTBQuestsRewards.GAMESTAGE = new RewardType(GameStageReward::new).setRegistryName("gamestage").setIcon(GuiIcons.CONTROLLER));
 	}
 
 	@SubscribeEvent(priority = EventPriority.LOW)

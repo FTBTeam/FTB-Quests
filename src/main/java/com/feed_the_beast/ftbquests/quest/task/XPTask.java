@@ -12,6 +12,8 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.Collection;
 
@@ -91,9 +93,10 @@ public class XPTask extends Task implements ISingleLongValueTask
 	}
 
 	@Override
-	public void getConfig(EntityPlayer player, ConfigGroup config)
+	@SideOnly(Side.CLIENT)
+	public void getConfig(ConfigGroup config)
 	{
-		super.getConfig(player, config);
+		super.getConfig(config);
 		config.addLong("value", () -> value, v -> value = v, 1L, 1L, Long.MAX_VALUE);
 		config.addBool("points", () -> points, v -> points = v, false);
 	}

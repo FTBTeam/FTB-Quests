@@ -7,7 +7,7 @@ import com.feed_the_beast.ftblib.lib.gui.Theme;
 import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
-import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
+import com.feed_the_beast.ftbquests.quest.reward.Reward;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.TextFormatting;
@@ -20,7 +20,7 @@ import java.util.List;
  */
 public class ButtonReward extends Button
 {
-	public QuestReward reward = null;
+	public Reward reward = null;
 
 	public ButtonReward(Panel panel)
 	{

@@ -11,12 +11,13 @@ import com.feed_the_beast.ftbquests.events.ObjectCompletedEvent;
 import com.feed_the_beast.ftbquests.net.MessageDisplayCompletionToast;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
 import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -236,15 +237,16 @@ public final class Chapter extends QuestObject
 	}
 
 	@Override
-	public File getFile(File folder)
+	public File getFile()
 	{
-		return new File(folder, "chapters/" + getCodeString(this));
+		return new File(file.getFolder(), "chapters/" + getCodeString(this));
 	}
 
 	@Override
-	public void getConfig(EntityPlayer player, ConfigGroup config)
+	@SideOnly(Side.CLIENT)
+	public void getConfig(ConfigGroup config)
 	{
-		super.getConfig(player, config);
+		super.getConfig(config);
 		config.addList("description", description, new ConfigString(""), ConfigString::new, ConfigString::getString);
 		config.addBool("always_invisible", () -> alwaysInvisible, v -> alwaysInvisible = v, false);
 

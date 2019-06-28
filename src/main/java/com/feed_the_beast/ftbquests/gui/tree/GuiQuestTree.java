@@ -20,7 +20,7 @@ import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.gui.FTBQuestsTheme;
 import com.feed_the_beast.ftbquests.gui.GuiSelectQuestObject;
 import com.feed_the_beast.ftbquests.net.edit.MessageChangeProgress;
-import com.feed_the_beast.ftbquests.net.edit.MessageEditObjectQuick;
+import com.feed_the_beast.ftbquests.net.edit.MessageEditObject;
 import com.feed_the_beast.ftbquests.net.edit.MessageMoveQuest;
 import com.feed_the_beast.ftbquests.quest.ChangeProgress;
 import com.feed_the_beast.ftbquests.quest.Chapter;
@@ -203,7 +203,7 @@ public class GuiQuestTree extends GuiBase
 	{
 		ConfigGroup group = ConfigGroup.newGroup(FTBQuests.MOD_ID);
 		ConfigGroup g = object.createSubGroup(group);
-		object.getConfig(Minecraft.getMinecraft().player, g);
+		object.getConfig(g);
 
 		if (!g.getValues().isEmpty())
 		{
@@ -231,7 +231,7 @@ public class GuiQuestTree extends GuiBase
 						@Override
 						public void onClicked(Panel panel, MouseButton button)
 						{
-							inst.getValue().onClicked(gui, inst, button, () -> new MessageEditObjectQuick(object.id, inst.getID(), inst.getValue()).sendToServer());
+							inst.getValue().onClicked(gui, inst, button, () -> new MessageEditObject(object).sendToServer());
 						}
 
 						@Override
@@ -266,11 +266,11 @@ public class GuiQuestTree extends GuiBase
 		}
 
 		contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), GuiIcons.REMOVE, () -> ClientQuestFile.INSTANCE.deleteObject(object.id)).setYesNo(I18n.format("delete_item", object.getTitle())));
-		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.reset_progress"), GuiIcons.REFRESH, () -> new MessageChangeProgress(ClientQuestFile.INSTANCE.self.getTeamUID(), object.id, ChangeProgress.RESET).sendToServer()).setYesNo(I18n.format("ftbquests.gui.reset_progress_q")));
+		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.reset_progress"), GuiIcons.REFRESH, () -> new MessageChangeProgress(ClientQuestFile.INSTANCE.self.getTeamUID(), object.id, isShiftKeyDown() ? ChangeProgress.RESET_DEPS : ChangeProgress.RESET).sendToServer()).setYesNo(I18n.format("ftbquests.gui.reset_progress_q")));
 
 		if (object instanceof QuestObject)
 		{
-			contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.complete_instantly"), FTBQuestsTheme.COMPLETED, () -> new MessageChangeProgress(ClientQuestFile.INSTANCE.self.getTeamUID(), object.id, ChangeProgress.COMPLETE).sendToServer()).setYesNo(I18n.format("ftbquests.gui.complete_instantly_q")));
+			contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.complete_instantly"), FTBQuestsTheme.COMPLETED, () -> new MessageChangeProgress(ClientQuestFile.INSTANCE.self.getTeamUID(), object.id, isShiftKeyDown() ? ChangeProgress.COMPLETE_DEPS : ChangeProgress.COMPLETE).sendToServer()).setYesNo(I18n.format("ftbquests.gui.complete_instantly_q")));
 		}
 
 		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.copy_id"), GuiIcons.INFO, () -> setClipboardString(QuestObjectBase.getCodeString(object)))

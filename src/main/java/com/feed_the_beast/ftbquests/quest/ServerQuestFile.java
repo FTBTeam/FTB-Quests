@@ -3,13 +3,10 @@ package com.feed_the_beast.ftbquests.quest;
 import com.feed_the_beast.ftblib.lib.data.ForgeTeam;
 import com.feed_the_beast.ftblib.lib.data.Universe;
 import com.feed_the_beast.ftblib.lib.util.FileUtils;
-import com.feed_the_beast.ftblib.lib.util.NBTUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.net.edit.MessageDeleteObjectResponse;
 import com.feed_the_beast.ftbquests.util.ServerQuestData;
 import io.sommers.packmode.api.PackModeAPI;
-import net.minecraft.launchwrapper.Launch;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.fml.common.Loader;
 
 import javax.annotation.Nullable;
@@ -28,6 +25,7 @@ public class ServerQuestFile extends QuestFile
 	public final Universe universe;
 	public boolean shouldSave = false;
 	private boolean isLoading = false;
+	private File folder;
 
 	public ServerQuestFile(Universe u)
 	{
@@ -56,7 +54,7 @@ public class ServerQuestFile extends QuestFile
 
 	public void load()
 	{
-		File folder = new File(Loader.instance().getConfigDir(), "ftbquests/" + getFolderName());
+		folder = new File(Loader.instance().getConfigDir(), "ftbquests/" + getFolderName());
 
 		if (folder.exists())
 		{
@@ -64,34 +62,6 @@ public class ServerQuestFile extends QuestFile
 			isLoading = true;
 			readDataFull(folder);
 			isLoading = false;
-		}
-		else
-		{
-			File old = new File(universe.server.getDataDirectory(), "questpacks/" + getFolderName() + ".nbt");
-
-			if (old.exists())
-			{
-				NBTTagCompound nbt = NBTUtils.readNBT(old);
-
-				if (nbt != null)
-				{
-					FTBQuests.LOGGER.info("Loading old quests file from " + old.getAbsolutePath());
-					isLoading = true;
-					readDataOld(nbt);
-					isLoading = false;
-					FileUtils.deleteSafe(old);
-
-					if (!(Boolean) Launch.blackboard.get("fml.deobfuscatedEnvironment"))
-					{
-						File[] p = old.getParentFile().listFiles();
-
-						if (p == null || p.length == 0)
-						{
-							FileUtils.deleteSafe(old.getParentFile());
-						}
-					}
-				}
-			}
 		}
 	}
 
@@ -105,6 +75,12 @@ public class ServerQuestFile extends QuestFile
 	public boolean isLoading()
 	{
 		return isLoading;
+	}
+
+	@Override
+	public File getFolder()
+	{
+		return folder;
 	}
 
 	@Nullable
@@ -157,7 +133,7 @@ public class ServerQuestFile extends QuestFile
 
 		if (object != null)
 		{
-			File file = object.getFile(new File(Loader.instance().getConfigDir(), "ftbquests/" + getFolderName()));
+			File file = object.getFile();
 
 			object.deleteChildren();
 			object.deleteSelf();
@@ -181,7 +157,7 @@ public class ServerQuestFile extends QuestFile
 
 	public void saveNow()
 	{
-		writeDataFull(new File(Loader.instance().getConfigDir(), "ftbquests/" + getFolderName()));
+		writeDataFull(getFolder());
 	}
 
 	public void unload()

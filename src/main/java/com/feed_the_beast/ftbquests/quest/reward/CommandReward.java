@@ -7,12 +7,13 @@ import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftbquests.quest.Chapter;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,7 +21,7 @@ import java.util.Map;
 /**
  * @author LatvianModder
  */
-public class CommandReward extends QuestReward
+public class CommandReward extends Reward
 {
 	public String command;
 
@@ -31,7 +32,7 @@ public class CommandReward extends QuestReward
 	}
 
 	@Override
-	public QuestRewardType getType()
+	public RewardType getType()
 	{
 		return FTBQuestsRewards.COMMAND;
 	}
@@ -65,9 +66,10 @@ public class CommandReward extends QuestReward
 	}
 
 	@Override
-	public void getConfig(EntityPlayer player, ConfigGroup config)
+	@SideOnly(Side.CLIENT)
+	public void getConfig(ConfigGroup config)
 	{
-		super.getConfig(player, config);
+		super.getConfig(config);
 		config.addString("command", () -> command, v -> command = v, "/say Hi, @team!").setDisplayName(new TextComponentTranslation("ftbquests.reward.ftbquests.command"));
 	}
 

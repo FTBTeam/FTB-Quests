@@ -19,8 +19,7 @@ import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.loot.RewardTable;
 import com.feed_the_beast.ftbquests.quest.loot.WeightedReward;
-import com.feed_the_beast.ftbquests.quest.reward.QuestRewardType;
-import net.minecraft.client.Minecraft;
+import com.feed_the_beast.ftbquests.quest.reward.RewardType;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.TextFormatting;
@@ -47,7 +46,7 @@ public class GuiEditRewardTable extends GuiButtonListBase
 		{
 			GuiHelper.playClickSound();
 			ConfigGroup group = ConfigGroup.newGroup(FTBQuests.MOD_ID);
-			rewardTable.getConfig(Minecraft.getMinecraft().player, rewardTable.createSubGroup(group));
+			rewardTable.getConfig(rewardTable.createSubGroup(group));
 			new GuiEditConfig(group, IConfigCallback.DEFAULT).openGui();
 		}
 	}
@@ -86,7 +85,7 @@ public class GuiEditRewardTable extends GuiButtonListBase
 			GuiHelper.playClickSound();
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
 
-			for (QuestRewardType type : QuestRewardType.getRegistry())
+			for (RewardType type : RewardType.getRegistry())
 			{
 				if (!type.getExcludeFromListRewards())
 				{
@@ -129,7 +128,7 @@ public class GuiEditRewardTable extends GuiButtonListBase
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
 			contextMenu.add(new ContextMenuItem(I18n.format("selectServer.edit"), GuiIcons.SETTINGS, () -> {
 				ConfigGroup group = ConfigGroup.newGroup(FTBQuests.MOD_ID);
-				reward.reward.getConfig(Minecraft.getMinecraft().player, reward.reward.createSubGroup(group));
+				reward.reward.getConfig(reward.reward.createSubGroup(group));
 				new GuiEditConfig(group, IConfigCallback.DEFAULT).openGui();
 			}));
 

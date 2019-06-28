@@ -5,8 +5,8 @@ import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.loot.RewardTable;
 import com.feed_the_beast.ftbquests.quest.loot.WeightedReward;
-import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
 import com.feed_the_beast.ftbquests.quest.reward.RandomReward;
+import com.feed_the_beast.ftbquests.quest.reward.Reward;
 import com.feed_the_beast.ftbquests.quest.task.ItemTask;
 import com.feed_the_beast.ftbquests.quest.task.Task;
 import com.latmod.mods.itemfilters.api.ItemFiltersAPI;
@@ -95,7 +95,7 @@ public class QuestWrapper implements IRecipeWrapper
 			output.add(Collections.emptyList());
 		}
 
-		for (QuestReward reward : quest.rewards)
+		for (Reward reward : quest.rewards)
 		{
 			Object object = reward.getIngredient();
 			ItemStack stack = object instanceof ItemStack ? (ItemStack) object : ItemStack.EMPTY;

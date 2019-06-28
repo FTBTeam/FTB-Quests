@@ -32,6 +32,8 @@ import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemHandlerHelper;
 
@@ -309,9 +311,10 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 	}
 
 	@Override
-	public void getConfig(EntityPlayer player, ConfigGroup config)
+	@SideOnly(Side.CLIENT)
+	public void getConfig(ConfigGroup config)
 	{
-		super.getConfig(player, config);
+		super.getConfig(config);
 		config.addList("items", items, new ConfigItemStack(ItemStack.EMPTY, true), v -> new ConfigItemStack(v, true), ConfigItemStack::getStack);
 		config.addLong("count", () -> count, v -> count = v, 1, 1, Long.MAX_VALUE);
 		config.addEnum("consume_items", () -> consumeItems, v -> consumeItems = v, EnumTristate.NAME_MAP).setCanEdit(!quest.canRepeat);
@@ -332,6 +335,7 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 	}
 
 	@Override
+	@SideOnly(Side.CLIENT)
 	public void onButtonClicked(boolean canClick)
 	{
 		GuiHelper.playClickSound();
@@ -348,12 +352,14 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 		}
 	}
 
+	@SideOnly(Side.CLIENT)
 	private void showJEIRecipe(ItemStack stack)
 	{
 		FTBLibJEIIntegration.showRecipe(stack);
 	}
 
 	@Override
+	@SideOnly(Side.CLIENT)
 	public void addMouseOverText(List<String> list, @Nullable TaskData data)
 	{
 		if (consumesResources())

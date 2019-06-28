@@ -13,7 +13,7 @@ import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.quest.loot.RewardTable;
-import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
+import com.feed_the_beast.ftbquests.quest.reward.Reward;
 import com.feed_the_beast.ftbquests.quest.task.Task;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
 import net.minecraft.client.resources.I18n;
@@ -69,7 +69,7 @@ public class GuiSelectQuestObject extends GuiButtonListBase
 				{
 					list.add(TextFormatting.GRAY + I18n.format("ftbquests.rewards"));
 
-					for (QuestReward reward : quest.rewards)
+					for (Reward reward : quest.rewards)
 					{
 						list.add("  " + QuestObjectType.REWARD.getColor() + reward.getUnformattedTitle());
 					}
@@ -89,7 +89,7 @@ public class GuiSelectQuestObject extends GuiButtonListBase
 				{
 					list.add(TextFormatting.GRAY + I18n.format("ftbquests.rewards"));
 
-					for (QuestReward reward : quest.rewards)
+					for (Reward reward : quest.rewards)
 					{
 						list.add("  " + QuestObjectType.REWARD.getColor() + reward.getUnformattedTitle());
 					}

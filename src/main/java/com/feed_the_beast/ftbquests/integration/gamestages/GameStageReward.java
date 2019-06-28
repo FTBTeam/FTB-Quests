@@ -5,20 +5,21 @@ import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.reward.FTBQuestsRewards;
-import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
-import com.feed_the_beast.ftbquests.quest.reward.QuestRewardType;
+import com.feed_the_beast.ftbquests.quest.reward.Reward;
+import com.feed_the_beast.ftbquests.quest.reward.RewardType;
 import net.darkhax.gamestages.GameStageHelper;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * @author LatvianModder
  */
-public class GameStageReward extends QuestReward
+public class GameStageReward extends Reward
 {
 	public String stage = "";
 	public boolean silent = false;
@@ -29,7 +30,7 @@ public class GameStageReward extends QuestReward
 	}
 
 	@Override
-	public QuestRewardType getType()
+	public RewardType getType()
 	{
 		return FTBQuestsRewards.GAMESTAGE;
 	}
@@ -71,9 +72,10 @@ public class GameStageReward extends QuestReward
 	}
 
 	@Override
-	public void getConfig(EntityPlayer player, ConfigGroup config)
+	@SideOnly(Side.CLIENT)
+	public void getConfig(ConfigGroup config)
 	{
-		super.getConfig(player, config);
+		super.getConfig(config);
 		config.addString("stage", () -> stage, v -> stage = v, "").setDisplayName(new TextComponentTranslation("ftbquests.reward.ftbquests.gamestage"));
 		config.addBool("silent", () -> silent, v -> silent = v, false);
 	}

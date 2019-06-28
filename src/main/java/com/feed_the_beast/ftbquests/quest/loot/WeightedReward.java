@@ -1,16 +1,16 @@
 package com.feed_the_beast.ftbquests.quest.loot;
 
-import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
+import com.feed_the_beast.ftbquests.quest.reward.Reward;
 
 /**
  * @author LatvianModder
  */
 public class WeightedReward implements Comparable<WeightedReward>
 {
-	public final QuestReward reward;
+	public final Reward reward;
 	public int weight;
 
-	public WeightedReward(QuestReward r, int w)
+	public WeightedReward(Reward r, int w)
 	{
 		reward = r;
 		weight = Math.max(w, 1);

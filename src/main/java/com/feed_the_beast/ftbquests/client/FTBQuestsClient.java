@@ -162,7 +162,7 @@ public class FTBQuestsClient extends FTBQuestsCommon
 			}
 
 			ConfigGroup group = ConfigGroup.newGroup(FTBQuests.MOD_ID);
-			task.getConfig(mc.player, task.createSubGroup(group));
+			task.getConfig(task.createSubGroup(group));
 			new GuiEditConfig(group, (g1, sender) -> callback.accept(task)).openGui();
 		});
 	}

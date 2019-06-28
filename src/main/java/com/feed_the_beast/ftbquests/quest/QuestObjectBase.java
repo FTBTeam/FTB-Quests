@@ -17,13 +17,13 @@ import com.feed_the_beast.ftbquests.net.edit.MessageChangeProgressResponse;
 import com.feed_the_beast.ftbquests.net.edit.MessageEditObject;
 import com.latmod.mods.itemfilters.item.ItemMissing;
 import javafx.scene.Node;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
 import java.io.File;
@@ -142,7 +142,8 @@ public abstract class QuestObjectBase
 		icon = data.readItemStack();
 	}
 
-	public void getConfig(EntityPlayer player, ConfigGroup config)
+	@SideOnly(Side.CLIENT)
+	public void getConfig(ConfigGroup config)
 	{
 		config.addString("title", () -> title, v -> title = v, "").setDisplayName(new TextComponentTranslation("ftbquests.title")).setOrder(-127);
 		config.add("icon", new ConfigItemStack.SimpleStack(() -> icon, v -> icon = v), new ConfigItemStack(ItemStack.EMPTY)).setDisplayName(new TextComponentTranslation("ftbquests.icon")).setOrder(-126);
@@ -229,7 +230,7 @@ public abstract class QuestObjectBase
 	}
 
 	@Nullable
-	public File getFile(File folder)
+	public File getFile()
 	{
 		return null;
 	}
@@ -248,7 +249,7 @@ public abstract class QuestObjectBase
 	public void onEditButtonClicked()
 	{
 		ConfigGroup group = ConfigGroup.newGroup(FTBQuests.MOD_ID);
-		getConfig(Minecraft.getMinecraft().player, createSubGroup(group));
+		getConfig(createSubGroup(group));
 		new GuiEditConfig(group, (group1, sender) -> new MessageEditObject(this).sendToServer()).openGui();
 	}
 

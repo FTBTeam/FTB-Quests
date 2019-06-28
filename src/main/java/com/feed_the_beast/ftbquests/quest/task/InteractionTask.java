@@ -6,8 +6,9 @@ import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestData;
 import com.feed_the_beast.ftbquests.util.RayMatcher;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * @author LatvianModder
@@ -57,15 +58,17 @@ public class InteractionTask extends Task
 	}
 
 	@Override
-	public void getConfig(EntityPlayer player, ConfigGroup config)
+	@SideOnly(Side.CLIENT)
+	public void getConfig(ConfigGroup config)
 	{
-		super.getConfig(player, config);
+		super.getConfig(config);
 		config.addEnum("type", () -> matcher.type, v -> matcher.type = v, RayMatcher.Type.NAME_MAP);
 		config.addString("match", () -> matcher.match, v -> matcher.match = v, "");
 		config.addString("properties", matcher::getPropertyString, matcher::setPropertyString, "");
 	}
 
 	@Override
+	@SideOnly(Side.CLIENT)
 	public void onButtonClicked(boolean canClick)
 	{
 	}

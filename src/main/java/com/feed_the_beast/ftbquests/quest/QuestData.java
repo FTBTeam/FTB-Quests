@@ -1,6 +1,6 @@
 package com.feed_the_beast.ftbquests.quest;
 
-import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
+import com.feed_the_beast.ftbquests.quest.reward.Reward;
 import com.feed_the_beast.ftbquests.quest.task.Task;
 import com.feed_the_beast.ftbquests.quest.task.TaskData;
 import it.unimi.dsi.fastutil.ints.Int2ByteOpenHashMap;
@@ -73,7 +73,7 @@ public abstract class QuestData
 		taskData.put(task.id, task.createData(this));
 	}
 
-	public boolean isRewardClaimed(UUID player, QuestReward reward)
+	public boolean isRewardClaimed(UUID player, Reward reward)
 	{
 		if (reward.isTeamReward())
 		{
@@ -84,9 +84,9 @@ public abstract class QuestData
 		return rewards != null && rewards.contains(reward.id);
 	}
 
-	public void unclaimRewards(Collection<QuestReward> rewards)
+	public void unclaimRewards(Collection<Reward> rewards)
 	{
-		for (QuestReward reward : rewards)
+		for (Reward reward : rewards)
 		{
 			if (reward.isTeamReward())
 			{
@@ -112,7 +112,7 @@ public abstract class QuestData
 		}
 	}
 
-	public boolean setRewardClaimed(UUID player, QuestReward reward)
+	public boolean setRewardClaimed(UUID player, Reward reward)
 	{
 		if (reward.isTeamReward())
 		{

@@ -10,12 +10,13 @@ import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.quest.loot.RewardTable;
 import com.feed_the_beast.ftbquests.quest.loot.WeightedReward;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -23,7 +24,7 @@ import java.util.List;
 /**
  * @author LatvianModder
  */
-public class RandomReward extends QuestReward
+public class RandomReward extends Reward
 {
 	public RewardTable table;
 
@@ -34,7 +35,7 @@ public class RandomReward extends QuestReward
 	}
 
 	@Override
-	public QuestRewardType getType()
+	public RewardType getType()
 	{
 		return FTBQuestsRewards.RANDOM;
 	}
@@ -70,7 +71,7 @@ public class RandomReward extends QuestReward
 			for (int i = 0; i < list.tagCount(); i++)
 			{
 				NBTTagCompound nbt1 = list.getCompoundTagAt(i);
-				QuestReward reward = QuestRewardType.createReward(table.fakeQuest, nbt1.getString("type"));
+				Reward reward = RewardType.createReward(table.fakeQuest, nbt1.getString("type"));
 
 				if (reward != null)
 				{
@@ -111,9 +112,10 @@ public class RandomReward extends QuestReward
 	}
 
 	@Override
-	public void getConfig(EntityPlayer player, ConfigGroup config)
+	@SideOnly(Side.CLIENT)
+	public void getConfig(ConfigGroup config)
 	{
-		super.getConfig(player, config);
+		super.getConfig(config);
 		config.add("table", new ConfigQuestObject(getQuestFile(), getID(getTable()), QuestObjectType.REWARD_TABLE)
 		{
 			@Override
@@ -167,6 +169,7 @@ public class RandomReward extends QuestReward
 	}
 
 	@Override
+	@SideOnly(Side.CLIENT)
 	public void addMouseOverText(List<String> list)
 	{
 		if (getTable() != null)

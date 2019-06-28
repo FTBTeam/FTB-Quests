@@ -28,7 +28,7 @@ import com.feed_the_beast.ftbquests.quest.QuestData;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
-import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
+import com.feed_the_beast.ftbquests.quest.reward.Reward;
 import com.feed_the_beast.ftbquests.quest.task.DimensionTask;
 import com.feed_the_beast.ftbquests.quest.task.Task;
 import com.feed_the_beast.ftbquests.quest.task.TaskData;
@@ -347,14 +347,14 @@ public class ServerQuestData extends QuestData implements NBTDataStorage.Data
 	}
 
 	@Override
-	public void unclaimRewards(Collection<QuestReward> rewards)
+	public void unclaimRewards(Collection<Reward> rewards)
 	{
 		super.unclaimRewards(rewards);
 		team.markDirty();
 	}
 
 	@Override
-	public boolean setRewardClaimed(UUID player, QuestReward reward)
+	public boolean setRewardClaimed(UUID player, Reward reward)
 	{
 		if (super.setRewardClaimed(player, reward))
 		{
@@ -366,7 +366,7 @@ public class ServerQuestData extends QuestData implements NBTDataStorage.Data
 		return false;
 	}
 
-	public void claimReward(EntityPlayerMP player, QuestReward reward)
+	public void claimReward(EntityPlayerMP player, Reward reward)
 	{
 		if (setRewardClaimed(player.getUniqueID(), reward))
 		{
@@ -505,7 +505,7 @@ public class ServerQuestData extends QuestData implements NBTDataStorage.Data
 
 		List<EntityPlayerMP> online = null;
 
-		for (QuestReward reward : quest.rewards)
+		for (Reward reward : quest.rewards)
 		{
 			if (reward.shouldAutoClaimReward())
 			{

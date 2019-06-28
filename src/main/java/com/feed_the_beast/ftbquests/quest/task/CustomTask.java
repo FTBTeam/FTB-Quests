@@ -3,6 +3,8 @@ package com.feed_the_beast.ftbquests.quest.task;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestData;
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.function.Predicate;
 
@@ -25,6 +27,7 @@ public class CustomTask extends Task
 	}
 
 	@Override
+	@SideOnly(Side.CLIENT)
 	public void onButtonClicked(boolean canClick)
 	{
 	}

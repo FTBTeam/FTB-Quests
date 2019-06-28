@@ -8,7 +8,6 @@ import com.feed_the_beast.ftblib.lib.gui.misc.GuiEditConfigValue;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
@@ -115,7 +114,7 @@ public final class TaskType extends IForgeRegistryEntry.Impl<TaskType>
 				}
 
 				ConfigGroup group = ConfigGroup.newGroup(FTBQuests.MOD_ID);
-				task.getConfig(Minecraft.getMinecraft().player, task.createSubGroup(group));
+				task.getConfig(task.createSubGroup(group));
 				new GuiEditConfig(group, (g1, sender) -> callback.accept(task)).openGui();
 			}
 		};

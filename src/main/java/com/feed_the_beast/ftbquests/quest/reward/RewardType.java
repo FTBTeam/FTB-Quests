@@ -10,7 +10,6 @@ import com.feed_the_beast.ftbquests.gui.GuiSelectQuestObject;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
@@ -27,27 +26,27 @@ import java.util.function.Consumer;
 /**
  * @author LatvianModder
  */
-public final class QuestRewardType extends IForgeRegistryEntry.Impl<QuestRewardType>
+public final class RewardType extends IForgeRegistryEntry.Impl<RewardType>
 {
-	private static ForgeRegistry<QuestRewardType> REGISTRY;
+	private static ForgeRegistry<RewardType> REGISTRY;
 
 	public static void createRegistry()
 	{
 		if (REGISTRY == null)
 		{
 			ResourceLocation registryName = new ResourceLocation(FTBQuests.MOD_ID, "rewards");
-			REGISTRY = (ForgeRegistry<QuestRewardType>) new RegistryBuilder<QuestRewardType>().setType(QuestRewardType.class).setName(registryName).create();
+			REGISTRY = (ForgeRegistry<RewardType>) new RegistryBuilder<RewardType>().setType(RewardType.class).setName(registryName).create();
 			MinecraftForge.EVENT_BUS.post(new RegistryEvent.Register<>(registryName, REGISTRY));
 		}
 	}
 
-	public static ForgeRegistry<QuestRewardType> getRegistry()
+	public static ForgeRegistry<RewardType> getRegistry()
 	{
 		return REGISTRY;
 	}
 
 	@Nullable
-	public static QuestReward createReward(Quest quest, String id)
+	public static Reward createReward(Quest quest, String id)
 	{
 		if (id.isEmpty())
 		{
@@ -58,7 +57,7 @@ public final class QuestRewardType extends IForgeRegistryEntry.Impl<QuestRewardT
 			id = FTBQuests.MOD_ID + ':' + id;
 		}
 
-		QuestRewardType type = REGISTRY.getValue(new ResourceLocation(id));
+		RewardType type = REGISTRY.getValue(new ResourceLocation(id));
 
 		if (type == null)
 		{
@@ -76,13 +75,13 @@ public final class QuestRewardType extends IForgeRegistryEntry.Impl<QuestRewardT
 	@FunctionalInterface
 	public interface Provider
 	{
-		QuestReward create(Quest quest);
+		Reward create(Quest quest);
 	}
 
 	public interface GuiProvider
 	{
 		@SideOnly(Side.CLIENT)
-		void openCreationGui(IOpenableGui gui, Quest quest, Consumer<QuestReward> callback);
+		void openCreationGui(IOpenableGui gui, Quest quest, Consumer<Reward> callback);
 	}
 
 	public final Provider provider;
@@ -91,7 +90,7 @@ public final class QuestRewardType extends IForgeRegistryEntry.Impl<QuestRewardT
 	private GuiProvider guiProvider;
 	private boolean excludeFromListRewards;
 
-	public QuestRewardType(Provider p)
+	public RewardType(Provider p)
 	{
 		provider = p;
 		displayName = null;
@@ -100,9 +99,9 @@ public final class QuestRewardType extends IForgeRegistryEntry.Impl<QuestRewardT
 		{
 			@Override
 			@SideOnly(Side.CLIENT)
-			public void openCreationGui(IOpenableGui gui, Quest quest, Consumer<QuestReward> callback)
+			public void openCreationGui(IOpenableGui gui, Quest quest, Consumer<Reward> callback)
 			{
-				QuestReward reward = provider.create(quest);
+				Reward reward = provider.create(quest);
 
 				if (reward instanceof RandomReward)
 				{
@@ -115,7 +114,7 @@ public final class QuestRewardType extends IForgeRegistryEntry.Impl<QuestRewardT
 				}
 
 				ConfigGroup group = ConfigGroup.newGroup(FTBQuests.MOD_ID);
-				reward.getConfig(Minecraft.getMinecraft().player, reward.createSubGroup(group));
+				reward.getConfig(reward.createSubGroup(group));
 				new GuiEditConfig(group, (g1, sender) -> callback.accept(reward)).openGui();
 			}
 		};
@@ -126,7 +125,7 @@ public final class QuestRewardType extends IForgeRegistryEntry.Impl<QuestRewardT
 		return getRegistryName().getNamespace().equals(FTBQuests.MOD_ID) ? getRegistryName().getPath() : getRegistryName().toString();
 	}
 
-	public QuestRewardType setDisplayName(String name)
+	public RewardType setDisplayName(String name)
 	{
 		displayName = name;
 		return this;
@@ -143,7 +142,7 @@ public final class QuestRewardType extends IForgeRegistryEntry.Impl<QuestRewardT
 		return id == null ? "error" : I18n.format("ftbquests.reward." + id.getNamespace() + '.' + id.getPath());
 	}
 
-	public QuestRewardType setIcon(Icon i)
+	public RewardType setIcon(Icon i)
 	{
 		icon = i;
 		return this;
@@ -154,7 +153,7 @@ public final class QuestRewardType extends IForgeRegistryEntry.Impl<QuestRewardT
 		return icon;
 	}
 
-	public QuestRewardType setGuiProvider(GuiProvider p)
+	public RewardType setGuiProvider(GuiProvider p)
 	{
 		guiProvider = p;
 		return this;
@@ -165,7 +164,7 @@ public final class QuestRewardType extends IForgeRegistryEntry.Impl<QuestRewardT
 		return guiProvider;
 	}
 
-	public QuestRewardType setExcludeFromListRewards(boolean v)
+	public RewardType setExcludeFromListRewards(boolean v)
 	{
 		excludeFromListRewards = v;
 		return this;
