@@ -4,14 +4,15 @@ import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * @author LatvianModder
  */
-public class ToastReward extends QuestReward
+public class ToastReward extends Reward
 {
 	public String description;
 
@@ -22,7 +23,7 @@ public class ToastReward extends QuestReward
 	}
 
 	@Override
-	public QuestRewardType getType()
+	public RewardType getType()
 	{
 		return FTBQuestsRewards.TOAST;
 	}
@@ -60,9 +61,10 @@ public class ToastReward extends QuestReward
 	}
 
 	@Override
-	public void getConfig(EntityPlayer player, ConfigGroup config)
+	@SideOnly(Side.CLIENT)
+	public void getConfig(ConfigGroup config)
 	{
-		super.getConfig(player, config);
+		super.getConfig(config);
 		config.addString("description", () -> description, v -> description = v, "");
 	}
 

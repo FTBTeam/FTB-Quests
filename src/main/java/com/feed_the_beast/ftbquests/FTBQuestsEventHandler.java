@@ -31,8 +31,8 @@ import com.feed_the_beast.ftbquests.quest.reward.CommandReward;
 import com.feed_the_beast.ftbquests.quest.reward.FTBQuestsRewards;
 import com.feed_the_beast.ftbquests.quest.reward.ItemReward;
 import com.feed_the_beast.ftbquests.quest.reward.LootReward;
-import com.feed_the_beast.ftbquests.quest.reward.QuestRewardType;
 import com.feed_the_beast.ftbquests.quest.reward.RandomReward;
+import com.feed_the_beast.ftbquests.quest.reward.RewardType;
 import com.feed_the_beast.ftbquests.quest.reward.ToastReward;
 import com.feed_the_beast.ftbquests.quest.reward.XPLevelsReward;
 import com.feed_the_beast.ftbquests.quest.reward.XPReward;
@@ -188,18 +188,18 @@ public class FTBQuestsEventHandler
 	}
 
 	@SubscribeEvent
-	public static void registerRewards(RegistryEvent.Register<QuestRewardType> event)
+	public static void registerRewards(RegistryEvent.Register<RewardType> event)
 	{
 		event.getRegistry().registerAll(
-				FTBQuestsRewards.ITEM = new QuestRewardType(ItemReward::new).setRegistryName("item").setIcon(Icon.getIcon("minecraft:items/diamond")),
-				FTBQuestsRewards.CHOICE = new QuestRewardType(ChoiceReward::new).setRegistryName("choice").setIcon(GuiIcons.COLOR_RGB).setExcludeFromListRewards(true),
-				FTBQuestsRewards.RANDOM = new QuestRewardType(RandomReward::new).setRegistryName("random").setIcon(GuiIcons.DICE).setExcludeFromListRewards(true),
-				FTBQuestsRewards.LOOT = new QuestRewardType(LootReward::new).setRegistryName("loot").setIcon(GuiIcons.MONEY_BAG).setExcludeFromListRewards(true),
-				FTBQuestsRewards.XP = new QuestRewardType(XPReward::new).setRegistryName("xp").setIcon(Icon.getIcon("minecraft:items/experience_bottle")),
-				FTBQuestsRewards.XP_LEVELS = new QuestRewardType(XPLevelsReward::new).setRegistryName("xp_levels").setIcon(Icon.getIcon("minecraft:items/experience_bottle")),
-				FTBQuestsRewards.COMMAND = new QuestRewardType(CommandReward::new).setRegistryName("command").setIcon(Icon.getIcon("minecraft:blocks/command_block_back")),
-				FTBQuestsRewards.ADVANCEMENT = new QuestRewardType(AdvancementReward::new).setRegistryName("advancement").setIcon(Icon.getIcon("minecraft:items/wheat")),
-				FTBQuestsRewards.TOAST = new QuestRewardType(ToastReward::new).setRegistryName("toast").setIcon(Icon.getIcon("minecraft:items/sign"))
+				FTBQuestsRewards.ITEM = new RewardType(ItemReward::new).setRegistryName("item").setIcon(Icon.getIcon("minecraft:items/diamond")),
+				FTBQuestsRewards.CHOICE = new RewardType(ChoiceReward::new).setRegistryName("choice").setIcon(GuiIcons.COLOR_RGB).setExcludeFromListRewards(true),
+				FTBQuestsRewards.RANDOM = new RewardType(RandomReward::new).setRegistryName("random").setIcon(GuiIcons.DICE).setExcludeFromListRewards(true),
+				FTBQuestsRewards.LOOT = new RewardType(LootReward::new).setRegistryName("loot").setIcon(GuiIcons.MONEY_BAG).setExcludeFromListRewards(true),
+				FTBQuestsRewards.XP = new RewardType(XPReward::new).setRegistryName("xp").setIcon(Icon.getIcon("minecraft:items/experience_bottle")),
+				FTBQuestsRewards.XP_LEVELS = new RewardType(XPLevelsReward::new).setRegistryName("xp_levels").setIcon(Icon.getIcon("minecraft:items/experience_bottle")),
+				FTBQuestsRewards.COMMAND = new RewardType(CommandReward::new).setRegistryName("command").setIcon(Icon.getIcon("minecraft:blocks/command_block_back")),
+				FTBQuestsRewards.ADVANCEMENT = new RewardType(AdvancementReward::new).setRegistryName("advancement").setIcon(Icon.getIcon("minecraft:items/wheat")),
+				FTBQuestsRewards.TOAST = new RewardType(ToastReward::new).setRegistryName("toast").setIcon(Icon.getIcon("minecraft:items/sign"))
 		);
 
 		FTBQuests.PROXY.setRewardGuiProviders();

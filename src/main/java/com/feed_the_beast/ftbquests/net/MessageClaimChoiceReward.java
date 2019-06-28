@@ -7,7 +7,7 @@ import com.feed_the_beast.ftblib.lib.net.MessageToServer;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.reward.ChoiceReward;
-import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
+import com.feed_the_beast.ftbquests.quest.reward.Reward;
 import com.feed_the_beast.ftbquests.util.ServerQuestData;
 import net.minecraft.entity.player.EntityPlayerMP;
 
@@ -52,7 +52,7 @@ public class MessageClaimChoiceReward extends MessageToServer
 	@Override
 	public void onMessage(EntityPlayerMP player)
 	{
-		QuestReward reward = ServerQuestFile.INSTANCE.getReward(id);
+		Reward reward = ServerQuestFile.INSTANCE.getReward(id);
 
 		if (reward instanceof ChoiceReward)
 		{

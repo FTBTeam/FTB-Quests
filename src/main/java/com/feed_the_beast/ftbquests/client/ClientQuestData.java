@@ -2,7 +2,7 @@ package com.feed_the_beast.ftbquests.client;
 
 import com.feed_the_beast.ftbquests.quest.QuestData;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
-import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
+import com.feed_the_beast.ftbquests.quest.reward.Reward;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.text.ITextComponent;
 
@@ -46,7 +46,7 @@ public class ClientQuestData extends QuestData
 		return ClientQuestFile.INSTANCE;
 	}
 
-	public boolean isRewardClaimedSelf(QuestReward reward)
+	public boolean isRewardClaimedSelf(Reward reward)
 	{
 		return isRewardClaimed(Minecraft.getMinecraft().player.getUniqueID(), reward);
 	}

@@ -53,7 +53,7 @@ public class ConfigPane extends GridPane implements ConfigEditedCallback
 		});
 
 		original = ConfigGroup.newGroup(FTBQuests.MOD_ID);
-		object.getConfig(Minecraft.getMinecraft().player, object.createSubGroup(original));
+		object.getConfig(object.createSubGroup(original));
 
 		group = original.copy();
 		refreshConfig();

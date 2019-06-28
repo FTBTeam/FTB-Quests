@@ -19,8 +19,8 @@ import com.feed_the_beast.ftbquests.quest.Chapter;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.loot.LootCrate;
 import com.feed_the_beast.ftbquests.quest.loot.RewardTable;
-import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
 import com.feed_the_beast.ftbquests.quest.reward.RandomReward;
+import com.feed_the_beast.ftbquests.quest.reward.Reward;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.TextFormatting;
 
@@ -130,7 +130,7 @@ public class GuiRewardTables extends GuiButtonListBase
 			{
 				for (Quest quest : chapter.quests)
 				{
-					for (QuestReward reward : quest.rewards)
+					for (Reward reward : quest.rewards)
 					{
 						if (reward instanceof RandomReward && ((RandomReward) reward).table == table)
 						{

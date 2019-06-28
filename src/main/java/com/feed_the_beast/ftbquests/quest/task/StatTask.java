@@ -6,12 +6,13 @@ import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.util.misc.NameMap;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestData;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.stats.StatBase;
 import net.minecraft.stats.StatList;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.Collection;
 
@@ -92,9 +93,10 @@ public class StatTask extends Task
 	}
 
 	@Override
-	public void getConfig(EntityPlayer player, ConfigGroup config)
+	@SideOnly(Side.CLIENT)
+	public void getConfig(ConfigGroup config)
 	{
-		super.getConfig(player, config);
+		super.getConfig(config);
 		config.addEnum("stat", () -> stat, v -> stat = v, NameMap.create(StatList.MOB_KILLS, NameMap.ObjectProperties.withName((sender, s) -> s.getStatName()), StatList.BASIC_STATS.toArray(new StatBase[0])));
 		config.addInt("value", () -> value, v -> value = v, 1, 1, Integer.MAX_VALUE);
 	}

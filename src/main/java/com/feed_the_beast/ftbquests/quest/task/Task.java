@@ -24,6 +24,8 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -219,6 +221,7 @@ public abstract class Task extends QuestObject
 		return getMaxProgress() <= 1L;
 	}
 
+	@SideOnly(Side.CLIENT)
 	public void addMouseOverText(List<String> list, @Nullable TaskData data)
 	{
 		if (consumesResources())
@@ -228,11 +231,13 @@ public abstract class Task extends QuestObject
 		}
 	}
 
+	@SideOnly(Side.CLIENT)
 	public boolean addTitleInMouseOverText()
 	{
 		return true;
 	}
 
+	@SideOnly(Side.CLIENT)
 	public void onButtonClicked(boolean canClick)
 	{
 		if (!autoSubmitOnPlayerTick())
@@ -268,6 +273,7 @@ public abstract class Task extends QuestObject
 		return FTBQuestsJEIHelper.QUESTS;
 	}
 
+	@SideOnly(Side.CLIENT)
 	public String getButtonText()
 	{
 		return getMaxProgress() > 1L || consumesResources() ? getMaxProgressString() : "";

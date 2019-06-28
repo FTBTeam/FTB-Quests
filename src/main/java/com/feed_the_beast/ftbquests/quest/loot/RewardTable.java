@@ -20,15 +20,16 @@ import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.quest.reward.FTBQuestsRewards;
-import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
-import com.feed_the_beast.ftbquests.quest.reward.QuestRewardType;
+import com.feed_the_beast.ftbquests.quest.reward.Reward;
+import com.feed_the_beast.ftbquests.quest.reward.RewardType;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -151,7 +152,7 @@ public final class RewardTable extends QuestObjectBase
 		for (int i = 0; i < list.tagCount(); i++)
 		{
 			NBTTagCompound nbt1 = list.getCompoundTagAt(i);
-			QuestReward reward = QuestRewardType.createReward(fakeQuest, nbt1.getString("type"));
+			Reward reward = RewardType.createReward(fakeQuest, nbt1.getString("type"));
 
 			if (reward != null)
 			{
@@ -184,7 +185,7 @@ public final class RewardTable extends QuestObjectBase
 
 		for (WeightedReward reward : rewards)
 		{
-			data.writeVarInt(QuestRewardType.getRegistry().getID(reward.reward.getType()));
+			data.writeVarInt(RewardType.getRegistry().getID(reward.reward.getType()));
 			reward.reward.writeNetData(data);
 			data.writeVarInt(reward.weight);
 		}
@@ -210,8 +211,8 @@ public final class RewardTable extends QuestObjectBase
 
 		for (int i = 0; i < s; i++)
 		{
-			QuestRewardType type = QuestRewardType.getRegistry().getValue(data.readVarInt());
-			QuestReward reward = type.provider.create(fakeQuest);
+			RewardType type = RewardType.getRegistry().getValue(data.readVarInt());
+			Reward reward = type.provider.create(fakeQuest);
 			reward.readNetData(data);
 			int w = data.readVarInt();
 			rewards.add(new WeightedReward(reward, w));
@@ -227,9 +228,10 @@ public final class RewardTable extends QuestObjectBase
 	}
 
 	@Override
-	public void getConfig(EntityPlayer player, ConfigGroup config)
+	@SideOnly(Side.CLIENT)
+	public void getConfig(ConfigGroup config)
 	{
-		super.getConfig(player, config);
+		super.getConfig(config);
 		config.addInt("empty_weight", () -> emptyWeight, v -> emptyWeight = v, 0, 0, Integer.MAX_VALUE);
 		config.addInt("loot_size", () -> lootSize, v -> lootSize = v, 27, 1, Integer.MAX_VALUE);
 		config.addBool("hide_tooltip", () -> hideTooltip, v -> hideTooltip = v, false);
@@ -288,9 +290,9 @@ public final class RewardTable extends QuestObjectBase
 	}
 
 	@Override
-	public File getFile(File folder)
+	public File getFile()
 	{
-		return new File(folder, "reward_tables/" + getCodeString(this) + ".nbt");
+		return new File(file.getFolder(), "reward_tables/" + getCodeString(this) + ".nbt");
 	}
 
 	@Override

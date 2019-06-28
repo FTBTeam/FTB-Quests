@@ -8,7 +8,7 @@ import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.quest.Chapter;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
-import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
+import com.feed_the_beast.ftbquests.quest.reward.Reward;
 import com.feed_the_beast.ftbquests.util.ServerQuestData;
 import net.minecraft.entity.player.EntityPlayerMP;
 
@@ -44,7 +44,7 @@ public class MessageClaimAllRewards extends MessageToServer
 			{
 				if (quest.isComplete(teamData))
 				{
-					for (QuestReward reward : quest.rewards)
+					for (Reward reward : quest.rewards)
 					{
 						if (!reward.getExcludeFromClaimAll())
 						{

@@ -9,7 +9,7 @@ import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.gui.chest.GuiQuestChest;
 import com.feed_the_beast.ftbquests.gui.tree.GuiQuestTree;
 import com.feed_the_beast.ftbquests.quest.QuestData;
-import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
+import com.feed_the_beast.ftbquests.quest.reward.Reward;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -63,7 +63,7 @@ public class MessageClaimRewardResponse extends MessageToClient
 	{
 		if (ClientQuestFile.exists())
 		{
-			QuestReward reward = ClientQuestFile.INSTANCE.getReward(id);
+			Reward reward = ClientQuestFile.INSTANCE.getReward(id);
 
 			if (reward == null)
 			{

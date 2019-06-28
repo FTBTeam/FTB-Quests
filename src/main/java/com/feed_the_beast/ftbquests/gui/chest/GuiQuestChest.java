@@ -14,7 +14,7 @@ import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.gui.FTBQuestsTheme;
 import com.feed_the_beast.ftbquests.quest.Chapter;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
+import com.feed_the_beast.ftbquests.quest.reward.Reward;
 import com.feed_the_beast.ftbquests.quest.task.Task;
 import com.feed_the_beast.ftbquests.quest.task.TaskData;
 import net.minecraft.client.gui.GuiScreen;
@@ -164,7 +164,7 @@ public class GuiQuestChest extends GuiBase implements IContainerListener
 				{
 					if (quest.isComplete(ClientQuestFile.INSTANCE.self))
 					{
-						for (QuestReward reward : quest.rewards)
+						for (Reward reward : quest.rewards)
 						{
 							if (!ClientQuestFile.INSTANCE.self.isRewardClaimedSelf(reward))
 							{

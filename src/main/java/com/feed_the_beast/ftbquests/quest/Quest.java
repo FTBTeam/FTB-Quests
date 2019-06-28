@@ -15,11 +15,10 @@ import com.feed_the_beast.ftbquests.client.FTBQuestsClient;
 import com.feed_the_beast.ftbquests.events.ObjectCompletedEvent;
 import com.feed_the_beast.ftbquests.gui.tree.GuiQuestTree;
 import com.feed_the_beast.ftbquests.net.MessageDisplayCompletionToast;
-import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
+import com.feed_the_beast.ftbquests.quest.reward.Reward;
 import com.feed_the_beast.ftbquests.quest.task.Task;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
@@ -29,6 +28,8 @@ import net.minecraft.nbt.NBTTagString;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -52,7 +53,7 @@ public final class Quest extends QuestObject
 	public final List<QuestObject> dependencies;
 	public boolean canRepeat;
 	public final List<Task> tasks;
-	public final List<QuestReward> rewards;
+	public final List<Reward> rewards;
 	public DependencyRequirement dependencyRequirement;
 	public String guidePage;
 	public String customClick;
@@ -544,7 +545,7 @@ public final class Quest extends QuestObject
 			task.invalid = true;
 		}
 
-		for (QuestReward reward : rewards)
+		for (Reward reward : rewards)
 		{
 			reward.deleteChildren();
 			reward.invalid = true;
@@ -569,15 +570,16 @@ public final class Quest extends QuestObject
 	}
 
 	@Override
-	public File getFile(File folder)
+	public File getFile()
 	{
-		return new File(folder, "chapters/" + getCodeString(chapter) + "/" + getCodeString(this) + ".nbt");
+		return new File(chapter.file.getFolder(), "chapters/" + getCodeString(chapter) + "/" + getCodeString(this) + ".nbt");
 	}
 
 	@Override
-	public void getConfig(EntityPlayer player, ConfigGroup config)
+	@SideOnly(Side.CLIENT)
+	public void getConfig(ConfigGroup config)
 	{
-		super.getConfig(player, config);
+		super.getConfig(config);
 		config.addInt("x", () -> x, v -> x = (byte) v, 0, -POS_LIMIT, POS_LIMIT);
 		config.addInt("y", () -> y, v -> y = (byte) v, 0, -POS_LIMIT, POS_LIMIT);
 		config.addBool("hide", () -> hide, v -> hide = v, false);
@@ -651,7 +653,7 @@ public final class Quest extends QuestObject
 			task.clearCachedData();
 		}
 
-		for (QuestReward reward : rewards)
+		for (Reward reward : rewards)
 		{
 			reward.clearCachedData();
 		}
@@ -785,7 +787,7 @@ public final class Quest extends QuestObject
 			return;
 		}
 
-		for (QuestReward reward1 : rewards)
+		for (Reward reward1 : rewards)
 		{
 			if (!data.isRewardClaimed(player, reward1))
 			{
@@ -812,7 +814,7 @@ public final class Quest extends QuestObject
 	{
 		if (isComplete(data))
 		{
-			for (QuestReward reward : rewards)
+			for (Reward reward : rewards)
 			{
 				if ((showExcluded || reward.getExcludeFromClaimAll()) && !data.isRewardClaimed(player, reward))
 				{
@@ -830,7 +832,7 @@ public final class Quest extends QuestObject
 
 		if (isComplete(data))
 		{
-			for (QuestReward reward : rewards)
+			for (Reward reward : rewards)
 			{
 				if ((showExcluded || !reward.getExcludeFromClaimAll()) && !data.isRewardClaimed(player, reward))
 				{

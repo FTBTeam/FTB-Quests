@@ -17,12 +17,13 @@ import com.feed_the_beast.ftbquests.quest.QuestData;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -32,7 +33,7 @@ import java.util.List;
 /**
  * @author LatvianModder
  */
-public abstract class QuestReward extends QuestObjectBase
+public abstract class Reward extends QuestObjectBase
 {
 	public Quest quest;
 
@@ -40,7 +41,7 @@ public abstract class QuestReward extends QuestObjectBase
 	public EnumTristate autoclaim;
 	public boolean invisible;
 
-	public QuestReward(Quest q)
+	public Reward(Quest q)
 	{
 		quest = q;
 		team = EnumTristate.DEFAULT;
@@ -73,7 +74,7 @@ public abstract class QuestReward extends QuestObjectBase
 		return quest.id;
 	}
 
-	public abstract QuestRewardType getType();
+	public abstract RewardType getType();
 
 	@Override
 	public void writeData(NBTTagCompound nbt)
@@ -116,9 +117,10 @@ public abstract class QuestReward extends QuestObjectBase
 	}
 
 	@Override
-	public void getConfig(EntityPlayer player, ConfigGroup config)
+	@SideOnly(Side.CLIENT)
+	public void getConfig(ConfigGroup config)
 	{
-		super.getConfig(player, config);
+		super.getConfig(config);
 		config.addEnum("team", () -> team, v -> team = v, EnumTristate.NAME_MAP).setDisplayName(new TextComponentTranslation("ftbquests.reward.team_reward")).setCanEdit(!(quest instanceof Quest) || !quest.canRepeat);
 		config.addEnum("autoclaim", () -> autoclaim, v -> autoclaim = v, EnumTristate.NAME_MAP).setDisplayName(new TextComponentTranslation("ftbquests.reward.autoclaim")).setCanEdit(!invisible);
 		config.addBool("invisible", () -> invisible, v -> invisible = v, false).setDisplayName(new TextComponentTranslation("ftbquests.reward.invisible"));
@@ -143,7 +145,7 @@ public abstract class QuestReward extends QuestObjectBase
 	{
 		quest.rewards.remove(this);
 
-		Collection<QuestReward> c = Collections.singleton(this);
+		Collection<Reward> c = Collections.singleton(this);
 
 		for (QuestData data : getQuestFile().getAllData())
 		{
@@ -156,7 +158,7 @@ public abstract class QuestReward extends QuestObjectBase
 	@Override
 	public final void deleteChildren()
 	{
-		Collection<QuestReward> c = Collections.singleton(this);
+		Collection<Reward> c = Collections.singleton(this);
 
 		for (QuestData data : getQuestFile().getAllData())
 		{
@@ -222,7 +224,7 @@ public abstract class QuestReward extends QuestObjectBase
 	@Override
 	public final ConfigGroup createSubGroup(ConfigGroup group)
 	{
-		QuestRewardType type = getType();
+		RewardType type = getType();
 		return group.getGroup(getObjectType().getID()).getGroup(type.getRegistryName().getNamespace()).getGroup(type.getRegistryName().getPath());
 	}
 
@@ -235,6 +237,7 @@ public abstract class QuestReward extends QuestObjectBase
 		return true;
 	}
 
+	@SideOnly(Side.CLIENT)
 	public void onButtonClicked()
 	{
 		new MessageClaimReward(id).sendToServer();

@@ -12,7 +12,7 @@ import com.feed_the_beast.ftbquests.gui.GuiRewardNotifications;
 import com.feed_the_beast.ftbquests.net.MessageClaimAllRewards;
 import com.feed_the_beast.ftbquests.quest.Chapter;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
+import com.feed_the_beast.ftbquests.quest.reward.Reward;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.TextFormatting;
 
@@ -49,7 +49,7 @@ public class ButtonClaimAllRewards extends Button
 				{
 					if (quest.isComplete(ClientQuestFile.INSTANCE.self))
 					{
-						for (QuestReward reward : quest.rewards)
+						for (Reward reward : quest.rewards)
 						{
 							if (!ClientQuestFile.INSTANCE.self.isRewardClaimedSelf(reward))
 							{

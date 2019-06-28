@@ -6,9 +6,10 @@ import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * @author LatvianModder
@@ -96,9 +97,10 @@ public abstract class EnergyTask extends Task implements ISingleLongValueTask
 	}
 
 	@Override
-	public void getConfig(EntityPlayer player, ConfigGroup config)
+	@SideOnly(Side.CLIENT)
+	public void getConfig(ConfigGroup config)
 	{
-		super.getConfig(player, config);
+		super.getConfig(config);
 		config.addLong("value", () -> value, v -> value = v, 1000L, 1L, Long.MAX_VALUE);
 		config.addLong("max_input", () -> maxInput, v -> maxInput = v, 0L, 0L, Integer.MAX_VALUE).setDisplayName(new TextComponentTranslation("ftbquests.task.max_input"));
 	}

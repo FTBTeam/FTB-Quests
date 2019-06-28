@@ -16,8 +16,8 @@ import com.feed_the_beast.ftbquests.net.edit.MessageCreateObject;
 import com.feed_the_beast.ftbquests.net.edit.MessageEditObject;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
-import com.feed_the_beast.ftbquests.quest.reward.QuestReward;
-import com.feed_the_beast.ftbquests.quest.reward.QuestRewardType;
+import com.feed_the_beast.ftbquests.quest.reward.Reward;
+import com.feed_the_beast.ftbquests.quest.reward.RewardType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
@@ -102,14 +102,14 @@ public class ButtonQuest extends Button
 				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.add_reward_all"), FTBQuestsTheme.ADD, () -> {
 					List<ContextMenuItem> contextMenu2 = new ArrayList<>();
 
-					for (QuestRewardType type : QuestRewardType.getRegistry())
+					for (RewardType type : RewardType.getRegistry())
 					{
 						contextMenu2.add(new ContextMenuItem(type.getDisplayName(), type.getIcon(), () -> {
 							GuiHelper.playClickSound();
 							type.getGuiProvider().openCreationGui(this, quest, reward -> {
 								for (Quest quest1 : treeGui.selectedQuests)
 								{
-									QuestReward r = type.provider.create(quest1);
+									Reward r = type.provider.create(quest1);
 									NBTTagCompound nbt1 = new NBTTagCompound();
 									reward.writeData(nbt1);
 									r.readData(nbt1);
@@ -303,7 +303,7 @@ public class ButtonQuest extends Button
 			{
 				boolean hasRewards = false;
 
-				for (QuestReward reward : quest.rewards)
+				for (Reward reward : quest.rewards)
 				{
 					if (!treeGui.file.self.isRewardClaimedSelf(reward))
 					{

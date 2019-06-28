@@ -9,7 +9,7 @@ import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.gui.FTBQuestsTheme;
 import com.feed_the_beast.ftbquests.net.edit.MessageCreateObject;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.reward.QuestRewardType;
+import com.feed_the_beast.ftbquests.quest.reward.RewardType;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.nbt.NBTTagCompound;
 
@@ -36,7 +36,7 @@ public class ButtonAddReward extends Button
 		GuiHelper.playClickSound();
 		List<ContextMenuItem> contextMenu = new ArrayList<>();
 
-		for (QuestRewardType type : QuestRewardType.getRegistry())
+		for (RewardType type : RewardType.getRegistry())
 		{
 			contextMenu.add(new ContextMenuItem(type.getDisplayName(), type.getIcon(), () -> {
 				GuiHelper.playClickSound();
