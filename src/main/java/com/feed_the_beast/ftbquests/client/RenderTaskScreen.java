@@ -2,7 +2,6 @@ package com.feed_the_beast.ftbquests.client;
 
 import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
 import com.feed_the_beast.ftbquests.block.BlockTaskScreen;
-import com.feed_the_beast.ftbquests.quest.task.Task;
 import com.feed_the_beast.ftbquests.quest.task.TaskData;
 import com.feed_the_beast.ftbquests.tile.ITaskScreen;
 import com.feed_the_beast.ftbquests.tile.TileTaskScreenCore;
@@ -33,9 +32,9 @@ public class RenderTaskScreen extends TileEntitySpecialRenderer<TileTaskScreenCo
 			return;
 		}
 
-		Task task = screen.getTask();
+		TaskData taskData = screen.getTaskData();
 
-		if (task == null)
+		if (taskData == null)
 		{
 			return;
 		}
@@ -81,8 +80,8 @@ public class RenderTaskScreen extends TileEntitySpecialRenderer<TileTaskScreenCo
 		GlStateManager.translate(-screen.size, -screen.size * 2F, -0.01F);
 		GlStateManager.scale(screen.size * 2D + 1D, screen.size * 2D + 1D, 1D);
 
-		String top1 = screen.inputOnly ? "" : task.quest.getUnformattedTitle();
-		String top2 = screen.inputOnly ? "" : task.getUnformattedTitle();
+		String top1 = screen.inputOnly ? "" : taskData.task.quest.getUnformattedTitle();
+		String top2 = screen.inputOnly ? "" : taskData.task.getUnformattedTitle();
 
 		if (top1.isEmpty() || top1.equals(top2))
 		{
@@ -90,7 +89,7 @@ public class RenderTaskScreen extends TileEntitySpecialRenderer<TileTaskScreenCo
 			top2 = "";
 		}
 
-		if (my >= 0D && my <= 0.17D && !screen.indestructible && task.quest.tasks.size() > 1)
+		if (my >= 0D && my <= 0.17D && !screen.indestructible && taskData.task.quest.tasks.size() > 1)
 		{
 			top1 = TextFormatting.GOLD + top1;
 		}
@@ -104,30 +103,9 @@ public class RenderTaskScreen extends TileEntitySpecialRenderer<TileTaskScreenCo
 			iconY = 0.54D;
 		}
 
-		TaskData data = screen.getTaskData();
-
-		String bottomText;
-
-		if (screen.inputOnly)
+		if (!screen.inputOnly && !taskData.task.hideProgressNumbers() && taskData.task.isComplete(taskData.data))
 		{
-			bottomText = "";
-		}
-		else if (data == null)
-		{
-			bottomText = "???";
-		}
-		else
-		{
-			bottomText = data.task.hideProgressNumbers() ? "" : (data.getProgressString() + " / " + data.task.getMaxProgressString());
-		}
-
-		if (data != null && !bottomText.isEmpty() && data.task.isComplete(data.data))
-		{
-			drawString(font, TextFormatting.GREEN + bottomText, 0.83D, 0.15D);
-		}
-		else
-		{
-			drawString(font, bottomText, 0.83D, 0.15D);
+			drawString(font, TextFormatting.GREEN + taskData.getProgressString() + " / " + taskData.task.getMaxProgressString(), 0.83D, 0.15D);
 		}
 
 		GlStateManager.color(1F, 1F, 1F, 1F);
@@ -161,7 +139,7 @@ public class RenderTaskScreen extends TileEntitySpecialRenderer<TileTaskScreenCo
 		}
 		else
 		{
-			task.drawScreen(data);
+			taskData.task.drawScreen(taskData);
 		}
 
 		GlStateManager.disableRescaleNormal();

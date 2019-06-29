@@ -47,9 +47,6 @@ public class TileTaskScreenCore extends TileWithTeam implements IConfigCallback,
 	public boolean inputOnly = false;
 	public ItemStack inputModeIcon = ItemStack.EMPTY;
 
-	private Task cTask;
-	private TaskData cTaskData;
-
 	private Class currentCoreClass, currentPartClass;
 
 	@Override
@@ -60,13 +57,6 @@ public class TileTaskScreenCore extends TileWithTeam implements IConfigCallback,
 		if (!type.item)
 		{
 			nbt.setString("Facing", getFacing().getName());
-		}
-
-		cTask = getTask();
-
-		if (cTask != null)
-		{
-			task = cTask.id;
 		}
 
 		if (task != 0)
@@ -127,20 +117,23 @@ public class TileTaskScreenCore extends TileWithTeam implements IConfigCallback,
 			return true;
 		}
 
-		TaskData t = getTaskData();
+		if (world != null && !world.isRemote)
+		{
+			TaskData t = getTaskData();
 
-		if (t == null || !t.task.quest.canStartTasks(t.data))
-		{
-			return false;
-		}
+			if (t == null || !t.task.quest.canStartTasks(t.data))
+			{
+				return false;
+			}
 
-		if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY && t.task.canInsertItem())
-		{
-			return true;
-		}
-		else if (t.hasCapability(capability, facing))
-		{
-			return true;
+			if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY && t.task.canInsertItem())
+			{
+				return true;
+			}
+			else if (t.hasCapability(capability, facing))
+			{
+				return true;
+			}
 		}
 
 		return super.hasCapability(capability, facing);
@@ -155,24 +148,27 @@ public class TileTaskScreenCore extends TileWithTeam implements IConfigCallback,
 			return (T) this;
 		}
 
-		TaskData t = getTaskData();
-
-		if (t == null || !t.task.quest.canStartTasks(t.data))
+		if (world != null && !world.isRemote)
 		{
-			return null;
-		}
+			TaskData t = getTaskData();
 
-		if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY && t.task.canInsertItem())
-		{
-			return (T) t;
-		}
-		else
-		{
-			Object object = t.getCapability(capability, facing);
-
-			if (object != null)
+			if (t == null || !t.task.quest.canStartTasks(t.data))
 			{
-				return (T) object;
+				return null;
+			}
+
+			if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY && t.task.canInsertItem())
+			{
+				return (T) t;
+			}
+			else
+			{
+				Object object = t.getCapability(capability, facing);
+
+				if (object != null)
+				{
+					return (T) object;
+				}
 			}
 		}
 
@@ -209,8 +205,6 @@ public class TileTaskScreenCore extends TileWithTeam implements IConfigCallback,
 	{
 		super.updateContainingBlockInfo();
 		facing = null;
-		cTask = null;
-		cTaskData = null;
 	}
 
 	@Override
@@ -220,55 +214,35 @@ public class TileTaskScreenCore extends TileWithTeam implements IConfigCallback,
 	}
 
 	@Nullable
-	public Task getTask()
-	{
-		if (task == 0)
-		{
-			return null;
-		}
-		else if (cTask == null || cTask.invalid || cTask.id != task)
-		{
-			QuestFile file = FTBQuests.PROXY.getQuestFile(world);
-			cTask = file == null ? null : file.getTask(task);
-		}
-
-		return cTask;
-	}
-
-	@Nullable
 	public TaskData getTaskData()
 	{
 		if (task == 0 || team.isEmpty())
 		{
 			return null;
 		}
-		else if (cTaskData == null || cTaskData.task.invalid || cTaskData.task != getTask())
+
+		QuestFile file = FTBQuests.PROXY.getQuestFile(world);
+
+		if (file == null)
 		{
-			cTask = getTask();
-
-			if (cTask == null)
-			{
-				return null;
-			}
-
-			QuestFile file = FTBQuests.PROXY.getQuestFile(world);
-
-			if (file == null)
-			{
-				return null;
-			}
-
-			QuestData data = file.getData(team);
-
-			if (data == null)
-			{
-				return null;
-			}
-
-			cTaskData = data.getTaskData(cTask);
+			return null;
 		}
 
-		return cTaskData;
+		Task t = file.getTask(task);
+
+		if (t == null)
+		{
+			return null;
+		}
+
+		QuestData data = file.getData(team);
+
+		if (data == null)
+		{
+			return null;
+		}
+
+		return data.getTaskData(t);
 	}
 
 	@Override
@@ -292,13 +266,13 @@ public class TileTaskScreenCore extends TileWithTeam implements IConfigCallback,
 		{
 			if (editor || isOwner(player))
 			{
-				cTask = getTask();
+				TaskData taskData = getTaskData();
 
-				if (cTask != null)
+				if (taskData != null)
 				{
-					task = cTask.id;
-					currentCoreClass = cTask.getScreenCoreClass();
-					currentPartClass = cTask.getScreenPartClass();
+					task = taskData.task.id;
+					currentCoreClass = taskData.task.getScreenCoreClass();
+					currentPartClass = taskData.task.getScreenPartClass();
 				}
 				else
 				{
@@ -322,7 +296,6 @@ public class TileTaskScreenCore extends TileWithTeam implements IConfigCallback,
 					public void setObject(int v)
 					{
 						task = v;
-						cTask = file.getTask(task);
 					}
 				}, ConfigNull.INSTANCE).setCanEdit(editorOrDestructible).setDisplayName(new TextComponentTranslation("ftbquests.task"));
 
@@ -355,31 +328,30 @@ public class TileTaskScreenCore extends TileWithTeam implements IConfigCallback,
 			return;
 		}
 
-		cTask = getTask();
+		TaskData taskData = getTaskData();
 
-		if (cTask == null)
+		if (taskData == null)
 		{
 			return;
 		}
 
-		if (y >= 0D && y <= 0.17D && !indestructible && cTask.quest.tasks.size() > 1)
+		if (y >= 0D && y <= 0.17D && !indestructible && taskData.task.quest.tasks.size() > 1)
 		{
 			if (!editor && !isOwner(player))
 			{
 				return;
 			}
 
-			currentCoreClass = cTask.getScreenCoreClass();
-			currentPartClass = cTask.getScreenPartClass();
-			cTask = cTask.quest.tasks.get((cTask.quest.tasks.indexOf(cTask) + 1) % cTask.quest.tasks.size());
-			task = cTask.id;
+			currentCoreClass = taskData.task.getScreenCoreClass();
+			currentPartClass = taskData.task.getScreenPartClass();
+			task = taskData.task.quest.tasks.get((taskData.task.quest.tasks.indexOf(taskData.task) + 1) % taskData.task.quest.tasks.size()).id;
 
 			updateContainingBlockInfo();
-			cTask = getTask();
+			taskData = getTaskData();
 
-			if (cTask != null && (currentCoreClass != cTask.getScreenCoreClass() || currentPartClass != cTask.getScreenPartClass()))
+			if (taskData != null && (currentCoreClass != taskData.task.getScreenCoreClass() || currentPartClass != taskData.task.getScreenPartClass()))
 			{
-				updateTiles(cTask);
+				updateTiles(taskData.task);
 			}
 
 			markDirty();
@@ -396,8 +368,15 @@ public class TileTaskScreenCore extends TileWithTeam implements IConfigCallback,
 			return;
 		}
 
-		String top1 = cTask.quest.getUnformattedTitle();
-		String top2 = cTask.getUnformattedTitle();
+		TaskData taskData = getTaskData();
+
+		if (taskData == null)
+		{
+			return;
+		}
+
+		String top1 = taskData.task.quest.getUnformattedTitle();
+		String top2 = taskData.task.getUnformattedTitle();
 		double iconY = 0.5D;
 
 		if (!top1.isEmpty() && !top1.equalsIgnoreCase(top2))
@@ -409,20 +388,13 @@ public class TileTaskScreenCore extends TileWithTeam implements IConfigCallback,
 		{
 			if (!world.isRemote)
 			{
-				cTaskData = getTaskData();
-
-				if (cTaskData == null)
-				{
-					return;
-				}
-
-				if (cTaskData.task.canInsertItem() && cTaskData.task.getMaxProgress() > 0L && cTaskData.progress < cTaskData.task.getMaxProgress())
+				if (taskData.task.canInsertItem() && taskData.task.getMaxProgress() > 0L && taskData.progress < taskData.task.getMaxProgress())
 				{
 					ItemStack stack = player.getHeldItem(hand);
 
 					if (!stack.isEmpty())
 					{
-						ItemStack stack1 = cTaskData.insertItem(stack, false, false, player);
+						ItemStack stack1 = taskData.insertItem(stack, false, false, player);
 
 						if (stack != stack1)
 						{
@@ -432,7 +404,7 @@ public class TileTaskScreenCore extends TileWithTeam implements IConfigCallback,
 					}
 				}
 
-				cTaskData.submitTask(player);
+				taskData.submitTask(player);
 			}
 		}
 	}
@@ -481,11 +453,11 @@ public class TileTaskScreenCore extends TileWithTeam implements IConfigCallback,
 		markDirty();
 		BlockUtils.notifyBlockUpdate(world, pos, getBlockState());
 
-		cTask = getTask();
+		TaskData taskData = getTaskData();
 
-		if (cTask != null && (currentCoreClass != cTask.getScreenCoreClass() || currentPartClass != cTask.getScreenPartClass()))
+		if (taskData != null && (currentCoreClass != taskData.task.getScreenCoreClass() || currentPartClass != taskData.task.getScreenPartClass()))
 		{
-			updateTiles(cTask);
+			updateTiles(taskData.task);
 		}
 	}
 

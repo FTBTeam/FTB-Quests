@@ -65,10 +65,14 @@ public class LootReward extends RandomReward
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void onButtonClicked()
+	public void onButtonClicked(boolean canClick)
 	{
-		new GuiRewardNotifications().openGui();
-		super.onButtonClicked();
+		if (canClick)
+		{
+			new GuiRewardNotifications().openGui();
+		}
+
+		super.onButtonClicked(canClick);
 	}
 
 	@Override

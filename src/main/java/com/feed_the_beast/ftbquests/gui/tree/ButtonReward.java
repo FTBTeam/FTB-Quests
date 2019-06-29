@@ -100,10 +100,9 @@ public class ButtonReward extends Button
 	{
 		if (button.isLeft())
 		{
-			if (ClientQuestFile.existsWithTeam() && reward.quest.isComplete(ClientQuestFile.INSTANCE.self) && !ClientQuestFile.INSTANCE.self.isRewardClaimedSelf(reward))
+			if (ClientQuestFile.existsWithTeam())
 			{
-				GuiHelper.playClickSound();
-				reward.onButtonClicked();
+				reward.onButtonClicked(reward.quest.isComplete(ClientQuestFile.INSTANCE.self) && !ClientQuestFile.INSTANCE.self.isRewardClaimedSelf(reward));
 			}
 		}
 		else if (button.isRight() && ClientQuestFile.exists() && ClientQuestFile.INSTANCE.canEdit())

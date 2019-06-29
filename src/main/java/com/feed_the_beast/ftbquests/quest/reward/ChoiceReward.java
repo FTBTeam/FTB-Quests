@@ -1,5 +1,6 @@
 package com.feed_the_beast.ftbquests.quest.reward;
 
+import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
 import com.feed_the_beast.ftbquests.gui.GuiSelectChoiceReward;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -38,9 +39,13 @@ public class ChoiceReward extends RandomReward
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void onButtonClicked()
+	public void onButtonClicked(boolean canClick)
 	{
-		new GuiSelectChoiceReward(this).openGui();
+		if (canClick)
+		{
+			GuiHelper.playClickSound();
+			new GuiSelectChoiceReward(this).openGui();
+		}
 	}
 
 	@Override

@@ -3,6 +3,7 @@ package com.feed_the_beast.ftbquests.quest.reward;
 import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.EnumTristate;
+import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
@@ -169,6 +170,7 @@ public abstract class Reward extends QuestObjectBase
 	}
 
 	@Override
+	@SideOnly(Side.CLIENT)
 	public void editedFromGUI()
 	{
 		GuiQuestTree gui = ClientUtils.getCurrentGuiAs(GuiQuestTree.class);
@@ -238,9 +240,13 @@ public abstract class Reward extends QuestObjectBase
 	}
 
 	@SideOnly(Side.CLIENT)
-	public void onButtonClicked()
+	public void onButtonClicked(boolean canClick)
 	{
-		new MessageClaimReward(id).sendToServer();
+		if (canClick)
+		{
+			GuiHelper.playClickSound();
+			new MessageClaimReward(id).sendToServer();
+		}
 	}
 
 	public boolean getExcludeFromClaimAll()
