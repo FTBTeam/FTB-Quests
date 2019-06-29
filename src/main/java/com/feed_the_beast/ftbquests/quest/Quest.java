@@ -799,6 +799,7 @@ public final class Quest extends QuestObject
 	}
 
 	@Override
+	@SideOnly(Side.CLIENT)
 	public void editedFromGUI()
 	{
 		GuiQuestTree gui = ClientUtils.getCurrentGuiAs(GuiQuestTree.class);

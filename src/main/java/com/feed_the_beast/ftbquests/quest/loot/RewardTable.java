@@ -264,6 +264,7 @@ public final class RewardTable extends QuestObjectBase
 	}
 
 	@Override
+	@SideOnly(Side.CLIENT)
 	public void editedFromGUI()
 	{
 		GuiQuestTree gui = ClientUtils.getCurrentGuiAs(GuiQuestTree.class);

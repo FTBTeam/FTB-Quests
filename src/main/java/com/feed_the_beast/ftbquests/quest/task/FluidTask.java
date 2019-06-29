@@ -380,7 +380,7 @@ public class FluidTask extends Task
 		@Override
 		public int fill(FluidStack resource, boolean doFill)
 		{
-			if (resource.amount > 0 && !isComplete() && task.fluid == resource.getFluid() && Objects.equals(task.fluidNBT, resource.tag))
+			if (resource.amount > 0 && !isComplete() && task.fluid == resource.getFluid() && Objects.equals(task.fluidNBT, resource.tag) && task.quest.canStartTasks(data))
 			{
 				int add = (int) Math.min(resource.amount, task.amount - progress);
 
@@ -415,6 +415,11 @@ public class FluidTask extends Task
 		@Override
 		public ItemStack insertItem(ItemStack stack, boolean singleItem, boolean simulate, @Nullable EntityPlayer player)
 		{
+			if (isComplete())
+			{
+				return stack;
+			}
+
 			IFluidHandlerItem handlerItem = stack.getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY, null);
 
 			if (handlerItem == null)

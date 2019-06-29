@@ -220,6 +220,7 @@ public abstract class QuestObjectBase
 	{
 	}
 
+	@SideOnly(Side.CLIENT)
 	public void editedFromGUI()
 	{
 		ClientQuestFile.INSTANCE.refreshGui();
