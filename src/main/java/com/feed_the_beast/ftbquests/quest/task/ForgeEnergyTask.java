@@ -121,7 +121,7 @@ public class ForgeEnergyTask extends EnergyTask
 		@Override
 		public int receiveEnergy(int maxReceive, boolean simulate)
 		{
-			if (maxReceive > 0 && progress < task.value)
+			if (maxReceive > 0 && !isComplete())
 			{
 				long add = Math.min(maxReceive, task.value - progress);
 

@@ -33,8 +33,6 @@ import com.feed_the_beast.ftbquests.quest.task.TaskData;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.ContainerPlayer;
-import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTPrimitive;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.event.entity.player.PlayerContainerEvent;
@@ -403,10 +401,7 @@ public class ServerQuestData extends QuestData implements NBTDataStorage.Data
 
 			if (task != null)
 			{
-				TaskData data = taskData.get(task.id);
-				NBTBase value = nbt1.getTag(s);
-				data.setProgress(value instanceof NBTPrimitive ? ((NBTPrimitive) value).getLong() : 0L);
-				data.isComplete = data.isComplete();
+				taskData.get(task.id).readProgress(nbt1.getLong(s));
 			}
 		}
 

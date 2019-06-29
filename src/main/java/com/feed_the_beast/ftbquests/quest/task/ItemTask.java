@@ -408,7 +408,7 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 		@Override
 		public ItemStack insertItem(ItemStack stack, boolean singleItem, boolean simulate, @Nullable EntityPlayer player)
 		{
-			if (task.test(stack))
+			if (!isComplete() && task.test(stack))
 			{
 				long add = Math.min(stack.getCount(), task.count - progress);
 
@@ -419,7 +419,7 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 						add = 1L;
 					}
 
-					if (!simulate)
+					if (!simulate && !data.getFile().isClient())
 					{
 						addProgress(add);
 					}
@@ -440,6 +440,11 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 		@Override
 		public boolean submitTask(EntityPlayerMP player, Collection<ItemStack> itemsToCheck, boolean simulate)
 		{
+			if (isComplete())
+			{
+				return false;
+			}
+
 			if (!task.canInsertItem())
 			{
 				long count = 0;
