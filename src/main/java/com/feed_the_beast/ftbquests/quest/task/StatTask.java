@@ -141,7 +141,7 @@ public class StatTask extends Task
 		@Override
 		public boolean submitTask(EntityPlayerMP player, Collection<ItemStack> itemsToCheck, boolean simulate)
 		{
-			if (progress >= task.value)
+			if (isComplete())
 			{
 				return false;
 			}

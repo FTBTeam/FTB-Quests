@@ -28,7 +28,6 @@ import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
-import net.minecraftforge.fluids.capability.FluidTankProperties;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandlerItem;
 import net.minecraftforge.fluids.capability.IFluidTankProperties;
@@ -50,7 +49,7 @@ public class FluidTask extends Task
 
 	public Fluid fluid = FluidRegistry.WATER;
 	public NBTTagCompound fluidNBT = null;
-	public long amount = Fluid.BUCKET_VOLUME;
+	public int amount = Fluid.BUCKET_VOLUME;
 
 	public FluidTask(Quest quest)
 	{
@@ -83,7 +82,7 @@ public class FluidTask extends Task
 
 		if (amount != Fluid.BUCKET_VOLUME)
 		{
-			nbt.setLong("amount", amount);
+			nbt.setInteger("amount", amount);
 		}
 
 		if (fluidNBT != null)
@@ -105,7 +104,7 @@ public class FluidTask extends Task
 		}
 
 		fluidNBT = (NBTTagCompound) nbt.getTag("nbt");
-		amount = nbt.hasKey("amount") ? nbt.getLong("amount") : Fluid.BUCKET_VOLUME;
+		amount = nbt.hasKey("amount") ? (int) Math.min(Integer.MAX_VALUE, nbt.getLong("amount")) : Fluid.BUCKET_VOLUME;
 
 		if (amount < 1)
 		{
@@ -119,7 +118,7 @@ public class FluidTask extends Task
 		super.writeNetData(data);
 		data.writeString(fluid.getName());
 		data.writeNBT(fluidNBT);
-		data.writeVarLong(amount);
+		data.writeVarInt(amount);
 	}
 
 	@Override
@@ -134,7 +133,7 @@ public class FluidTask extends Task
 		}
 
 		fluidNBT = data.readNBT();
-		amount = data.readVarLong();
+		amount = data.readVarInt();
 	}
 
 	public FluidStack createFluidStack(int amount)
@@ -142,7 +141,7 @@ public class FluidTask extends Task
 		return new FluidStack(fluid, amount, fluidNBT);
 	}
 
-	public static String getVolumeString(long a)
+	public static String getVolumeString(int a)
 	{
 		StringBuilder builder = new StringBuilder();
 
@@ -223,7 +222,7 @@ public class FluidTask extends Task
 			}
 		}, new ConfigNBT(null));
 
-		config.addLong("amount", () -> amount, v -> amount = v, Fluid.BUCKET_VOLUME, 1, Long.MAX_VALUE);
+		config.addInt("amount", () -> amount, v -> amount = v, Fluid.BUCKET_VOLUME, 1, Integer.MAX_VALUE);
 	}
 
 	@Override
@@ -338,8 +337,10 @@ public class FluidTask extends Task
 		}
 	}
 
-	public static class Data extends TaskData<FluidTask> implements IFluidHandler
+	public static class Data extends TaskData<FluidTask> implements IFluidHandler, IFluidTankProperties
 	{
+		private IFluidTankProperties[] properties;
+
 		private Data(FluidTask t, QuestData data)
 		{
 			super(t, data);
@@ -361,25 +362,31 @@ public class FluidTask extends Task
 		@Override
 		public String getProgressString()
 		{
-			return getVolumeString(progress);
+			return getVolumeString((int) progress);
 		}
 
 		@Override
 		public IFluidTankProperties[] getTankProperties()
 		{
-			return new FluidTankProperties[] {new FluidTankProperties(task.createFluidStack((int) (progress * (long) Fluid.BUCKET_VOLUME / task.amount)), Fluid.BUCKET_VOLUME, true, false)};
+			if (properties == null)
+			{
+				properties = new IFluidTankProperties[1];
+				properties[0] = this;
+			}
+
+			return properties;
 		}
 
 		@Override
 		public int fill(FluidStack resource, boolean doFill)
 		{
-			if (progress < task.amount && task.fluid == resource.getFluid() && Objects.equals(task.fluidNBT, resource.tag))
+			if (resource.amount > 0 && !isComplete() && task.fluid == resource.getFluid() && Objects.equals(task.fluidNBT, resource.tag))
 			{
 				int add = (int) Math.min(resource.amount, task.amount - progress);
 
 				if (add > 0)
 				{
-					if (doFill)
+					if (doFill && !data.getFile().isClient())
 					{
 						addProgress(add);
 					}
@@ -450,6 +457,43 @@ public class FluidTask extends Task
 		public int getSlotLimit(int slot)
 		{
 			return 1;
+		}
+
+		@Nullable
+		@Override
+		public FluidStack getContents()
+		{
+			return task.createFluidStack((int) progress);
+		}
+
+		@Override
+		public int getCapacity()
+		{
+			return task.amount;
+		}
+
+		@Override
+		public boolean canFill()
+		{
+			return true;
+		}
+
+		@Override
+		public boolean canDrain()
+		{
+			return false;
+		}
+
+		@Override
+		public boolean canFillFluidType(FluidStack fluidStack)
+		{
+			return task.fluid == fluidStack.getFluid() && Objects.equals(task.fluidNBT, fluidStack.tag);
+		}
+
+		@Override
+		public boolean canDrainFluidType(FluidStack fluidStack)
+		{
+			return false;
 		}
 	}
 }

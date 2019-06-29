@@ -24,7 +24,7 @@ public class BooleanTaskData<T extends Task> extends TaskData<T>
 	@Override
 	public boolean submitTask(EntityPlayerMP player, Collection<ItemStack> itemsToCheck, boolean simulate)
 	{
-		if (!isStarted() && canSubmit(player))
+		if (!isComplete() && canSubmit(player))
 		{
 			if (!simulate)
 			{

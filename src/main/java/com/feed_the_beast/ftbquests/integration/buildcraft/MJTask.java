@@ -153,7 +153,7 @@ public class MJTask extends EnergyTask
 		@Override
 		public long receivePower(long microJoules, boolean simulate)
 		{
-			if (microJoules > 0L && progress < task.value)
+			if (microJoules > 0L && !isComplete())
 			{
 				long add = Math.min(microJoules, getPowerRequested());
 

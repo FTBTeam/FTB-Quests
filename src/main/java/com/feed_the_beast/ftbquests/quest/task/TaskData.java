@@ -28,12 +28,18 @@ public class TaskData<T extends Task> implements ICapabilityProvider, IItemHandl
 	public final T task;
 	public final QuestData data;
 	public long progress = 0L;
-	public boolean isComplete = false;
+	private boolean taskCompleted = false;
 
 	public TaskData(T q, QuestData d)
 	{
 		task = q;
 		data = d;
+	}
+
+	public final void readProgress(long p)
+	{
+		progress = Math.max(0L, Math.min(p, task.getMaxProgress()));
+		taskCompleted = isComplete();
 	}
 
 	public final void setProgress(long p)
@@ -43,7 +49,7 @@ public class TaskData<T extends Task> implements ICapabilityProvider, IItemHandl
 		if (progress != p)
 		{
 			progress = p;
-			isComplete = false;
+			taskCompleted = false;
 			task.quest.chapter.file.clearCachedProgress();
 
 			if (!task.quest.chapter.file.isClient())
@@ -53,9 +59,9 @@ public class TaskData<T extends Task> implements ICapabilityProvider, IItemHandl
 					new MessageUpdateTaskProgress(data.getTeamUID(), task.id, progress).sendToAll();
 				}
 
-				if (!isComplete && isComplete())
+				if (!taskCompleted && isComplete())
 				{
-					isComplete = true;
+					taskCompleted = true;
 					List<EntityPlayerMP> notifyPlayers = new ArrayList<>();
 
 					if (!task.quest.chapter.alwaysInvisible && !task.quest.canRepeat && ChangeProgress.sendNotifications.get(ChangeProgress.sendUpdates))
@@ -134,7 +140,7 @@ public class TaskData<T extends Task> implements ICapabilityProvider, IItemHandl
 
 	public String toString()
 	{
-		return data.toString() + task;
+		return data.toString() + "#" + task;
 	}
 
 	public ItemStack insertItem(ItemStack stack, boolean singleItem, boolean simulate, @Nullable EntityPlayer player)

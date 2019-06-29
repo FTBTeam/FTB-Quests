@@ -158,7 +158,7 @@ public class KillTask extends Task
 
 		public void kill(EntityLivingBase entity)
 		{
-			if (progress < task.value && task.entity.equals(EntityList.getKey(entity)))
+			if (!isComplete() && task.entity.equals(EntityList.getKey(entity)))
 			{
 				addProgress(1L);
 			}
