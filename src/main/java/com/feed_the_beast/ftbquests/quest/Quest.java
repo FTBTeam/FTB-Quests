@@ -666,6 +666,14 @@ public final class Quest extends QuestObject
 			return cachedDescription;
 		}
 
+		String textDesc = loadText().getString("description");
+
+		if (!textDesc.isEmpty())
+		{
+			cachedDescription = textDesc;
+			return cachedDescription;
+		}
+
 		String key = String.format("quests.%08x.description", id);
 		String t = FTBQuestsClient.addI18nAndColors(I18n.format(key));
 
@@ -687,7 +695,15 @@ public final class Quest extends QuestObject
 		{
 			return cachedText;
 		}
-		else if (text.isEmpty())
+
+		cachedText = loadText().getStringArray("text");
+
+		if (cachedText.length > 0)
+		{
+			return cachedText;
+		}
+
+		if (text.isEmpty())
 		{
 			return StringUtils.EMPTY_ARRAY;
 		}

@@ -71,6 +71,7 @@ public abstract class QuestFile extends QuestObject
 	public boolean dropLootCrates;
 	public final EntityWeight lootCrateNoDrop;
 	public boolean disableGui;
+	public String folderName;
 
 	public QuestFile()
 	{
@@ -95,6 +96,7 @@ public abstract class QuestFile extends QuestObject
 		lootCrateNoDrop.monster = 600;
 		lootCrateNoDrop.boss = 0;
 		disableGui = false;
+		folderName = "";
 	}
 
 	public abstract boolean isClient();
@@ -723,6 +725,7 @@ public abstract class QuestFile extends QuestObject
 		data.writeBoolean(dropLootCrates);
 		lootCrateNoDrop.writeNetData(data);
 		data.writeBoolean(disableGui);
+		data.writeString(folderName);
 	}
 
 	@Override
@@ -738,6 +741,7 @@ public abstract class QuestFile extends QuestObject
 		dropLootCrates = data.readBoolean();
 		lootCrateNoDrop.readNetData(data);
 		disableGui = data.readBoolean();
+		folderName = data.readString();
 	}
 
 	public final void writeNetDataFull(DataOut data)
