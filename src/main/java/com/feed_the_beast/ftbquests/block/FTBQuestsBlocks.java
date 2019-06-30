@@ -20,4 +20,5 @@ public class FTBQuestsBlocks
 	public static final Block CHEST = Blocks.AIR;
 	public static final Block LOOT_CRATE_STORAGE = Blocks.AIR;
 	public static final Block LOOT_CRATE_OPENER = Blocks.AIR;
+	public static final Block BARRIER = Blocks.AIR;
 }

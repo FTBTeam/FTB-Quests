@@ -15,6 +15,9 @@ tile.ftbquests.progress_detector.name=Quest Progress Detector
 tile.ftbquests.progress_detector.object=Object ID
 tile.ftbquests.progress_detector.level=Output Level
 
+tile.ftbquests.barrier.name=Quest Barrier
+tile.ftbquests.barrier.object=Object ID
+
 tile.ftbquests.detector.task=Task
 tile.ftbquests.detector.notifications=Notifications
 
