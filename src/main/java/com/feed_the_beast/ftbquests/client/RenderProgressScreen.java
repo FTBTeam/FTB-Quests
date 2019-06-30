@@ -33,7 +33,7 @@ public class RenderProgressScreen extends TileEntitySpecialRenderer<TileProgress
 			return;
 		}
 
-		Chapter chapter = screen.getChapter();
+		Chapter chapter = ClientQuestFile.INSTANCE.getChapter(screen.chapter);
 
 		if (chapter == null)
 		{
