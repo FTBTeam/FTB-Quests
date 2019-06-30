@@ -15,6 +15,7 @@ import com.feed_the_beast.ftbquests.block.BlockQuestChest;
 import com.feed_the_beast.ftbquests.block.BlockTaskScreen;
 import com.feed_the_beast.ftbquests.block.BlockTaskScreenPart;
 import com.feed_the_beast.ftbquests.block.FTBQuestsBlocks;
+import com.feed_the_beast.ftbquests.block.ItemBlockBarrier;
 import com.feed_the_beast.ftbquests.block.ItemBlockDetector;
 import com.feed_the_beast.ftbquests.block.ItemBlockProgressScreen;
 import com.feed_the_beast.ftbquests.block.ItemBlockScreen;
@@ -163,7 +164,7 @@ public class FTBQuestsEventHandler
 				new ItemBlock(FTBQuestsBlocks.CHEST).setRegistryName("chest"),
 				new ItemBlock(FTBQuestsBlocks.LOOT_CRATE_STORAGE).setRegistryName("loot_crate_storage"),
 				new ItemBlock(FTBQuestsBlocks.LOOT_CRATE_OPENER).setRegistryName("loot_crate_opener"),
-				new ItemBlock(FTBQuestsBlocks.BARRIER).setRegistryName("barrier"),
+				new ItemBlockBarrier(FTBQuestsBlocks.BARRIER).setRegistryName("barrier"),
 
 				withName(new ItemQuestBook(), "book"),
 				withName(new ItemLootCrate(), "lootcrate")

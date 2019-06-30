@@ -2,6 +2,7 @@ package com.feed_the_beast.ftbquests.block;
 
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
+import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.quest.QuestData;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
@@ -179,6 +180,11 @@ public class BlockQuestBarrier extends Block
 	@Override
 	public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ)
 	{
+		if (player.getHeldItem(hand).getItem() == FTBQuestsItems.BARRIER)
+		{
+			return false;
+		}
+
 		if (!world.isRemote && FTBQuests.canEdit(player))
 		{
 			TileEntity tileEntity = world.getTileEntity(pos);
