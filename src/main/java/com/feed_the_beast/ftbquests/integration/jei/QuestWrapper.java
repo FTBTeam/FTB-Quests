@@ -35,7 +35,7 @@ public class QuestWrapper implements IRecipeWrapper
 	public final List<List<ItemStack>> input;
 	public final List<List<ItemStack>> output;
 
-	public QuestWrapper(Quest q)
+	public QuestWrapper(Quest q, List<Reward> rewards)
 	{
 		quest = q;
 		name = quest.getTitle();
@@ -87,7 +87,7 @@ public class QuestWrapper implements IRecipeWrapper
 			}
 		}
 
-		if (quest.rewards.size() == 1)
+		if (rewards.size() == 1)
 		{
 			output.add(Collections.emptyList());
 			output.add(Collections.emptyList());
@@ -95,7 +95,7 @@ public class QuestWrapper implements IRecipeWrapper
 			output.add(Collections.emptyList());
 		}
 
-		for (Reward reward : quest.rewards)
+		for (Reward reward : rewards)
 		{
 			Object object = reward.getIngredient();
 			ItemStack stack = object instanceof ItemStack ? (ItemStack) object : ItemStack.EMPTY;
