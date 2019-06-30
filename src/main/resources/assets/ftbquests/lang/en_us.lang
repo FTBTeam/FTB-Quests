@@ -283,6 +283,7 @@ ftbquests.reward.ftbquests.toast.description=Description
 
 ftbquests.reward.ftbquests.gamestage=Game Stage
 ftbquests.reward.ftbquests.gamestage.silent=Silent
+ftbquests.reward.ftbquests.gamestage.remove=Remove
 
 ftbquests.reward_table=Reward Table
 ftbquests.reward_table.hide_tooltip=Hide Tooltip
