@@ -12,7 +12,6 @@ import com.feed_the_beast.ftbquests.block.BlockProgressScreen;
 import com.feed_the_beast.ftbquests.block.FTBQuestsBlocks;
 import com.feed_the_beast.ftbquests.quest.Chapter;
 import com.feed_the_beast.ftbquests.quest.QuestData;
-import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
@@ -43,8 +42,6 @@ public class TileProgressScreenCore extends TileWithTeam implements IConfigCallb
 	public boolean fullscreen = false;
 	public boolean hideIcons = false;
 
-	private Chapter cChapter;
-
 	@Override
 	protected void writeData(NBTTagCompound nbt, EnumSaveType type)
 	{
@@ -53,13 +50,6 @@ public class TileProgressScreenCore extends TileWithTeam implements IConfigCallb
 		if (!type.item)
 		{
 			nbt.setString("Facing", getFacing().getName());
-		}
-
-		cChapter = getChapter();
-
-		if (cChapter != null)
-		{
-			chapter = cChapter.id;
 		}
 
 		if (chapter != 0)
@@ -165,35 +155,12 @@ public class TileProgressScreenCore extends TileWithTeam implements IConfigCallb
 	{
 		super.updateContainingBlockInfo();
 		facing = null;
-		cChapter = null;
 	}
 
 	@Override
 	protected boolean notifyBlock()
 	{
 		return !world.isRemote;
-	}
-
-	@Nullable
-	public Chapter getChapter()
-	{
-		if (chapter == 0)
-		{
-			return null;
-		}
-		else if (cChapter == null || cChapter.invalid)
-		{
-			QuestFile file = FTBQuests.PROXY.getQuestFile(world);
-
-			if (file == null)
-			{
-				return null;
-			}
-
-			cChapter = file.getChapter(chapter);
-		}
-
-		return cChapter;
 	}
 
 	@Override
@@ -233,7 +200,6 @@ public class TileProgressScreenCore extends TileWithTeam implements IConfigCallb
 					public void setObject(int v)
 					{
 						chapter = v;
-						cChapter = file.getChapter(chapter);
 					}
 				}, ConfigNull.INSTANCE).setCanEdit(editorOrDestructible).setDisplayName(new TextComponentTranslation("ftbquests.chapter"));
 
