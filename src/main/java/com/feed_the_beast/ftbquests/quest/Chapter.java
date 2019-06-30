@@ -40,8 +40,8 @@ public final class Chapter extends QuestObject
 	public Chapter(QuestFile f)
 	{
 		file = f;
-		description = new ArrayList<>(0);
 		quests = new ArrayList<>();
+		description = new ArrayList<>(0);
 		alwaysInvisible = false;
 		group = null;
 	}

@@ -8,6 +8,7 @@ import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
+import com.feed_the_beast.ftblib.lib.io.DataReader;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
@@ -15,18 +16,26 @@ import com.feed_the_beast.ftbquests.client.FTBQuestsClient;
 import com.feed_the_beast.ftbquests.gui.editor.ConfigPane;
 import com.feed_the_beast.ftbquests.net.edit.MessageChangeProgressResponse;
 import com.feed_the_beast.ftbquests.net.edit.MessageEditObject;
+import com.feed_the_beast.ftbquests.util.QuestObjectText;
 import com.latmod.mods.itemfilters.item.ItemMissing;
 import javafx.scene.Node;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -61,6 +70,7 @@ public abstract class QuestObjectBase
 
 	private Icon cachedIcon = null;
 	private String cachedTitle = null;
+	private QuestObjectText cachedTextFile = null;
 
 	public final String toString()
 	{
@@ -149,6 +159,92 @@ public abstract class QuestObjectBase
 		config.add("icon", new ConfigItemStack.SimpleStack(() -> icon, v -> icon = v), new ConfigItemStack(ItemStack.EMPTY)).setDisplayName(new TextComponentTranslation("ftbquests.icon")).setOrder(-126);
 	}
 
+	public QuestObjectText loadText()
+	{
+		if (invalid || id == 0)
+		{
+			return QuestObjectText.NONE;
+		}
+		else if (cachedTextFile == null)
+		{
+			cachedTextFile = QuestObjectText.NONE;
+			File file = new File(Loader.instance().getConfigDir(), "ftbquests/" + getQuestFile().folderName + "/text/en_us/" + getCodeString(this) + ".txt");
+			Map<String, String[]> text = new HashMap<>();
+
+			if (file.exists())
+			{
+				String currentKey = "";
+				List<String> currentText = new ArrayList<>();
+
+				for (String s : DataReader.get(file).safeStringList())
+				{
+					if (s.indexOf('[') == 0 && s.indexOf(']') == s.length() - 1)
+					{
+						loadTextAdd(text, currentKey, currentText);
+						currentKey = s.substring(1, s.length() - 1);
+					}
+					else
+					{
+						currentText.add(s);
+					}
+				}
+
+				loadTextAdd(text, currentKey, currentText);
+			}
+
+			String langCode = Minecraft.getMinecraft().getLanguageManager().getCurrentLanguage().getLanguageCode();
+
+			if (!langCode.equals("en_us"))
+			{
+				File fileLang = new File(Loader.instance().getConfigDir(), "ftbquests/" + getQuestFile().folderName + "/text/" + langCode + "/" + getCodeString(this) + ".txt");
+
+				if (fileLang.exists())
+				{
+					String currentKey = "";
+					List<String> currentText = new ArrayList<>();
+
+					for (String s : DataReader.get(fileLang).safeStringList())
+					{
+						if (s.indexOf('[') == 0 && s.indexOf(']') == s.length() - 1)
+						{
+							loadTextAdd(text, currentKey, currentText);
+							currentKey = s.substring(1, s.length() - 1);
+						}
+						else
+						{
+							currentText.add(s);
+						}
+					}
+
+					loadTextAdd(text, currentKey, currentText);
+				}
+			}
+
+			cachedTextFile = text.isEmpty() ? QuestObjectText.NONE : new QuestObjectText(text);
+		}
+
+		return cachedTextFile;
+	}
+
+	private void loadTextAdd(Map<String, String[]> text, String currentKey, List<String> currentText)
+	{
+		while (!currentText.isEmpty() && currentText.get(0).isEmpty())
+		{
+			currentText.remove(0);
+		}
+
+		while (!currentText.isEmpty() && currentText.get(currentText.size() - 1).isEmpty())
+		{
+			currentText.remove(currentText.size() - 1);
+		}
+
+		if (!currentText.isEmpty())
+		{
+			text.put(currentKey, currentText.toArray(new String[0]));
+			currentText.clear();
+		}
+	}
+
 	public abstract Icon getAltIcon();
 
 	public abstract String getAltTitle();
@@ -158,6 +254,32 @@ public abstract class QuestObjectBase
 		if (cachedIcon != null)
 		{
 			return cachedIcon;
+		}
+
+		String textIcon = loadText().getString("icon");
+
+		if (!textIcon.isEmpty())
+		{
+			try
+			{
+				NBTTagCompound nbt = JsonToNBT.getTagFromJson(textIcon);
+
+				if (!nbt.hasKey("Count"))
+				{
+					nbt.setByte("Count", (byte) 1);
+				}
+
+				ItemStack stack = new ItemStack(nbt);
+
+				if (!stack.isEmpty())
+				{
+					cachedIcon = ItemIcon.getItemIcon(stack);
+					return cachedIcon;
+				}
+			}
+			catch (Exception ex)
+			{
+			}
 		}
 
 		if (!icon.isEmpty())
@@ -176,6 +298,14 @@ public abstract class QuestObjectBase
 	{
 		if (cachedTitle != null)
 		{
+			return cachedTitle;
+		}
+
+		String textTitle = loadText().getString("title");
+
+		if (!textTitle.isEmpty())
+		{
+			cachedTitle = textTitle;
 			return cachedTitle;
 		}
 
@@ -240,6 +370,7 @@ public abstract class QuestObjectBase
 	{
 		cachedIcon = null;
 		cachedTitle = null;
+		cachedTextFile = null;
 	}
 
 	public ConfigGroup createSubGroup(ConfigGroup group)

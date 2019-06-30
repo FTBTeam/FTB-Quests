@@ -54,7 +54,8 @@ public class ServerQuestFile extends QuestFile
 
 	public void load()
 	{
-		folder = new File(Loader.instance().getConfigDir(), "ftbquests/" + getFolderName());
+		folderName = getFolderName();
+		folder = new File(Loader.instance().getConfigDir(), "ftbquests/" + folderName);
 
 		if (folder.exists())
 		{
