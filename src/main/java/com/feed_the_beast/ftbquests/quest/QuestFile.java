@@ -14,6 +14,7 @@ import com.feed_the_beast.ftblib.lib.util.NBTUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.events.ClearFileCacheEvent;
 import com.feed_the_beast.ftbquests.events.ObjectCompletedEvent;
+import com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIHelper;
 import com.feed_the_beast.ftbquests.net.MessageDisplayCompletionToast;
 import com.feed_the_beast.ftbquests.quest.loot.EntityWeight;
 import com.feed_the_beast.ftbquests.quest.loot.LootCrate;
@@ -67,6 +68,7 @@ public abstract class QuestFile extends QuestObject
 	public boolean defaultTeamConsumeItems;
 	public RewardAutoClaim defaultRewardAutoclaim;
 	public QuestShape defaultShape;
+	public boolean defaultQuestDisableJEI;
 	public boolean dropLootCrates;
 	public final EntityWeight lootCrateNoDrop;
 	public boolean disableGui;
@@ -89,6 +91,7 @@ public abstract class QuestFile extends QuestObject
 		defaultTeamConsumeItems = false;
 		defaultRewardAutoclaim = RewardAutoClaim.DISABLED;
 		defaultShape = QuestShape.CIRCLE;
+		defaultQuestDisableJEI = false;
 		dropLootCrates = false;
 		lootCrateNoDrop = new EntityWeight();
 		lootCrateNoDrop.passive = 4000;
@@ -398,6 +401,7 @@ public abstract class QuestFile extends QuestObject
 		nbt.setBoolean("default_consume_items", defaultTeamConsumeItems);
 		nbt.setString("default_autoclaim_rewards", defaultRewardAutoclaim.getID());
 		nbt.setString("default_quest_shape", defaultShape.getID());
+		nbt.setBoolean("default_quest_disable_jei", defaultQuestDisableJEI);
 
 		if (!emergencyItems.isEmpty())
 		{
@@ -428,6 +432,7 @@ public abstract class QuestFile extends QuestObject
 		defaultTeamConsumeItems = nbt.getBoolean("default_consume_items");
 		defaultRewardAutoclaim = RewardAutoClaim.NAME_MAP_NO_DEFAULT.get(nbt.getString("default_autoclaim_rewards"));
 		defaultShape = QuestShape.NAME_MAP.get(nbt.getString("default_quest_shape"));
+		defaultQuestDisableJEI = nbt.getBoolean("default_quest_disable_jei");
 		emergencyItems.clear();
 
 		NBTTagList list = nbt.getTagList("emergency_items", Constants.NBT.TAG_COMPOUND);
@@ -720,6 +725,7 @@ public abstract class QuestFile extends QuestObject
 		data.writeBoolean(defaultTeamConsumeItems);
 		RewardAutoClaim.NAME_MAP_NO_DEFAULT.write(data, defaultRewardAutoclaim);
 		QuestShape.NAME_MAP.write(data, defaultShape);
+		data.writeBoolean(defaultQuestDisableJEI);
 
 		data.writeBoolean(dropLootCrates);
 		lootCrateNoDrop.writeNetData(data);
@@ -737,6 +743,7 @@ public abstract class QuestFile extends QuestObject
 		defaultTeamConsumeItems = data.readBoolean();
 		defaultRewardAutoclaim = RewardAutoClaim.NAME_MAP_NO_DEFAULT.read(data);
 		defaultShape = QuestShape.NAME_MAP.read(data);
+		defaultQuestDisableJEI = data.readBoolean();
 		dropLootCrates = data.readBoolean();
 		lootCrateNoDrop.readNetData(data);
 		disableGui = data.readBoolean();
@@ -970,6 +977,7 @@ public abstract class QuestFile extends QuestObject
 		defaultsGroup.addBool("consume_items", () -> defaultTeamConsumeItems, v -> defaultTeamConsumeItems = v, false);
 		defaultsGroup.addEnum("autoclaim_rewards", () -> defaultRewardAutoclaim, v -> defaultRewardAutoclaim = v, RewardAutoClaim.NAME_MAP_NO_DEFAULT);
 		defaultsGroup.addEnum("quest_shape", () -> defaultShape, v -> defaultShape = v, QuestShape.NAME_MAP.withDefault(QuestShape.CIRCLE));
+		defaultsGroup.addBool("quest_disable_jei", () -> defaultQuestDisableJEI, v -> defaultQuestDisableJEI = v, false);
 
 		ConfigGroup d = config.getGroup("loot_crate_no_drop");
 		d.addInt("passive", () -> lootCrateNoDrop.passive, v -> lootCrateNoDrop.passive = v, 0, 0, Integer.MAX_VALUE).setDisplayName(new TextComponentTranslation("ftbquests.loot.entitytype.passive"));
@@ -1074,7 +1082,7 @@ public abstract class QuestFile extends QuestObject
 	@Override
 	public final int refreshJEI()
 	{
-		return 255;
+		return FTBQuestsJEIHelper.QUESTS | FTBQuestsJEIHelper.LOOTCRATES;
 	}
 
 	public final Collection<QuestObjectBase> getAllObjects()
