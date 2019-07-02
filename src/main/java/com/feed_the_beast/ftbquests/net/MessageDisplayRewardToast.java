@@ -18,8 +18,6 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  */
 public class MessageDisplayRewardToast extends MessageToClient
 {
-	public static boolean ENABLED = true;
-
 	private ITextComponent text;
 	private Icon icon;
 

@@ -51,7 +51,7 @@ public class TileQuestBarrier extends TileBase implements IHasConfig
 			{
 				object = v;
 			}
-		}, new ConfigQuestObject(ServerQuestFile.INSTANCE, 1, QuestObjectType.ALL_PROGRESSING)).setDisplayName(new TextComponentTranslation("tile.ftbquests.detector.task"));
+		}, new ConfigQuestObject(ServerQuestFile.INSTANCE, 1, QuestObjectType.ALL_PROGRESSING));
 
 		FTBLibAPI.editServerConfig(player, group0, this);
 	}

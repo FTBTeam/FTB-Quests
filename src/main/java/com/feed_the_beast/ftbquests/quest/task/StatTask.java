@@ -97,7 +97,7 @@ public class StatTask extends Task
 	public void getConfig(ConfigGroup config)
 	{
 		super.getConfig(config);
-		config.addEnum("stat", () -> stat, v -> stat = v, NameMap.create(StatList.MOB_KILLS, NameMap.ObjectProperties.withName((sender, s) -> s.getStatName()), StatList.BASIC_STATS.toArray(new StatBase[0])));
+		config.addEnum("stat", () -> stat, v -> stat = v, NameMap.createWithName(StatList.MOB_KILLS, (sender, s) -> s.getStatName(), StatList.BASIC_STATS.toArray(new StatBase[0])));
 		config.addInt("value", () -> value, v -> value = v, 1, 1, Integer.MAX_VALUE);
 	}
 

@@ -71,11 +71,11 @@ public class XPLevelsReward extends Reward
 	}
 
 	@Override
-	public void claim(EntityPlayerMP player)
+	public void claim(EntityPlayerMP player, boolean notify)
 	{
 		player.addExperienceLevel(xpLevels);
 
-		if (MessageDisplayRewardToast.ENABLED)
+		if (notify)
 		{
 			ITextComponent text = new TextComponentString("+" + xpLevels);
 			text.getStyle().setColor(TextFormatting.GREEN);

@@ -4,7 +4,6 @@ import com.feed_the_beast.ftblib.FTBLibConfig;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigItemStack;
 import com.feed_the_beast.ftblib.lib.config.ConfigTimer;
-import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.IconAnimation;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
@@ -20,6 +19,7 @@ import com.feed_the_beast.ftbquests.quest.loot.EntityWeight;
 import com.feed_the_beast.ftbquests.quest.loot.LootCrate;
 import com.feed_the_beast.ftbquests.quest.loot.RewardTable;
 import com.feed_the_beast.ftbquests.quest.reward.Reward;
+import com.feed_the_beast.ftbquests.quest.reward.RewardAutoClaim;
 import com.feed_the_beast.ftbquests.quest.reward.RewardType;
 import com.feed_the_beast.ftbquests.quest.task.Task;
 import com.feed_the_beast.ftbquests.quest.task.TaskType;
@@ -27,7 +27,6 @@ import com.latmod.mods.itemfilters.item.ItemMissing;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
@@ -66,7 +65,7 @@ public abstract class QuestFile extends QuestObject
 	public int fileVersion;
 	public boolean defaultRewardTeam;
 	public boolean defaultTeamConsumeItems;
-	public boolean defaultRewardAutoclaim;
+	public RewardAutoClaim defaultRewardAutoclaim;
 	public QuestShape defaultShape;
 	public boolean dropLootCrates;
 	public final EntityWeight lootCrateNoDrop;
@@ -88,7 +87,7 @@ public abstract class QuestFile extends QuestObject
 
 		defaultRewardTeam = false;
 		defaultTeamConsumeItems = false;
-		defaultRewardAutoclaim = false;
+		defaultRewardAutoclaim = RewardAutoClaim.DISABLED;
 		defaultShape = QuestShape.CIRCLE;
 		dropLootCrates = false;
 		lootCrateNoDrop = new EntityWeight();
@@ -397,7 +396,7 @@ public abstract class QuestFile extends QuestObject
 		nbt.setInteger("version", VERSION);
 		nbt.setBoolean("default_reward_team", defaultRewardTeam);
 		nbt.setBoolean("default_consume_items", defaultTeamConsumeItems);
-		nbt.setBoolean("default_autoclaim_rewards", defaultRewardAutoclaim);
+		nbt.setString("default_autoclaim_rewards", defaultRewardAutoclaim.getID());
 		nbt.setString("default_quest_shape", defaultShape.getID());
 
 		if (!emergencyItems.isEmpty())
@@ -427,7 +426,7 @@ public abstract class QuestFile extends QuestObject
 		super.readData(nbt);
 		defaultRewardTeam = nbt.getBoolean("default_reward_team");
 		defaultTeamConsumeItems = nbt.getBoolean("default_consume_items");
-		defaultRewardAutoclaim = nbt.getBoolean("default_autoclaim_rewards");
+		defaultRewardAutoclaim = RewardAutoClaim.NAME_MAP_NO_DEFAULT.get(nbt.getString("default_autoclaim_rewards"));
 		defaultShape = QuestShape.NAME_MAP.get(nbt.getString("default_quest_shape"));
 		emergencyItems.clear();
 
@@ -719,8 +718,8 @@ public abstract class QuestFile extends QuestObject
 		data.writeVarLong(emergencyItemsCooldown.ticks());
 		data.writeBoolean(defaultRewardTeam);
 		data.writeBoolean(defaultTeamConsumeItems);
-		data.writeBoolean(defaultRewardAutoclaim);
-		data.write(defaultShape, QuestShape.NAME_MAP);
+		RewardAutoClaim.NAME_MAP_NO_DEFAULT.write(data, defaultRewardAutoclaim);
+		QuestShape.NAME_MAP.write(data, defaultShape);
 
 		data.writeBoolean(dropLootCrates);
 		lootCrateNoDrop.writeNetData(data);
@@ -736,8 +735,8 @@ public abstract class QuestFile extends QuestObject
 		emergencyItemsCooldown = Ticks.get(data.readVarLong());
 		defaultRewardTeam = data.readBoolean();
 		defaultTeamConsumeItems = data.readBoolean();
-		defaultRewardAutoclaim = data.readBoolean();
-		defaultShape = data.read(QuestShape.NAME_MAP);
+		defaultRewardAutoclaim = RewardAutoClaim.NAME_MAP_NO_DEFAULT.read(data);
+		defaultShape = QuestShape.NAME_MAP.read(data);
 		dropLootCrates = data.readBoolean();
 		lootCrateNoDrop.readNetData(data);
 		disableGui = data.readBoolean();
@@ -916,10 +915,7 @@ public abstract class QuestFile extends QuestObject
 	public abstract QuestData getData(String team);
 
 	@Nullable
-	public final QuestData getData(EntityPlayer player)
-	{
-		return getData(FTBLibAPI.getTeamID(player.getUniqueID()));
-	}
+	public abstract QuestData getData(Entity player);
 
 	public abstract Collection<? extends QuestData> getAllData();
 
@@ -972,7 +968,7 @@ public abstract class QuestFile extends QuestObject
 		ConfigGroup defaultsGroup = config.getGroup("defaults");
 		defaultsGroup.addBool("reward_team", () -> defaultRewardTeam, v -> defaultRewardTeam = v, false);
 		defaultsGroup.addBool("consume_items", () -> defaultTeamConsumeItems, v -> defaultTeamConsumeItems = v, false);
-		defaultsGroup.addBool("autoclaim_rewards", () -> defaultRewardAutoclaim, v -> defaultRewardAutoclaim = v, false);
+		defaultsGroup.addEnum("autoclaim_rewards", () -> defaultRewardAutoclaim, v -> defaultRewardAutoclaim = v, RewardAutoClaim.NAME_MAP_NO_DEFAULT);
 		defaultsGroup.addEnum("quest_shape", () -> defaultShape, v -> defaultShape = v, QuestShape.NAME_MAP.withDefault(QuestShape.CIRCLE));
 
 		ConfigGroup d = config.getGroup("loot_crate_no_drop");

@@ -27,6 +27,7 @@ import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.reward.Reward;
+import com.feed_the_beast.ftbquests.quest.reward.RewardAutoClaim;
 import com.feed_the_beast.ftbquests.quest.task.DimensionTask;
 import com.feed_the_beast.ftbquests.quest.task.Task;
 import com.feed_the_beast.ftbquests.quest.task.TaskData;
@@ -42,7 +43,6 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -130,12 +130,33 @@ public class ServerQuestData extends QuestData implements NBTDataStorage.Data
 	}
 
 	@SubscribeEvent
+	public static void onPlayerLeftTeam(ForgeTeamPlayerLeftEvent event)
+	{
+		if (event.getPlayer().isOnline())
+		{
+			new MessageChangedTeam(event.getPlayer().getId(), (short) 0).sendTo(event.getPlayer().getPlayer());
+		}
+	}
+
+	@SubscribeEvent
+	public static void onPlayerJoinedTeam(ForgeTeamPlayerJoinedEvent event)
+	{
+		if (event.getPlayer().isOnline())
+		{
+			new MessageChangedTeam(event.getPlayer().getId(), event.getTeam().getUID()).sendTo(event.getPlayer().getPlayer());
+		}
+	}
+
+	@SubscribeEvent
 	public static void onPlayerLoggedIn(ForgePlayerLoggedInEvent event)
 	{
 		ServerQuestData teamData = ServerQuestData.get(event.getTeam());
-
 		EntityPlayerMP player = event.getPlayer().getPlayer();
-		Collection<MessageSyncQuests.TeamInst> teamDataList = new ArrayList<>();
+
+		MessageSyncQuests m = new MessageSyncQuests();
+		m.file = ServerQuestFile.INSTANCE;
+		m.team = teamData.getTeamUID();
+		m.teamData = new ArrayList<>();
 
 		for (ForgeTeam team : event.getUniverse().getTeams())
 		{
@@ -194,11 +215,23 @@ public class ServerQuestData extends QuestData implements NBTDataStorage.Data
 			}
 
 			t.teamRewards = data.claimedTeamRewards.toIntArray();
-
-			teamDataList.add(t);
+			m.teamData.add(t);
 		}
 
-		new MessageSyncQuests(ServerQuestFile.INSTANCE, teamData.getTeamUID(), teamDataList, FTBQuests.canEdit(player)).sendTo(player);
+		m.editingMode = FTBQuests.canEdit(player);
+		m.playerIDs = new UUID[event.getUniverse().getPlayers().size()];
+		m.playerTeams = new short[m.playerIDs.length];
+
+		int i = 0;
+
+		for (ForgePlayer p : event.getUniverse().getPlayers())
+		{
+			m.playerIDs[i] = p.getId();
+			m.playerTeams[i] = p.team.getUID();
+			i++;
+		}
+
+		m.sendTo(player);
 		event.getPlayer().getPlayer().inventoryContainer.addListener(new FTBQuestsInventoryListener(event.getPlayer().getPlayer()));
 
 		for (Chapter chapter : ServerQuestFile.INSTANCE.chapters)
@@ -251,24 +284,6 @@ public class ServerQuestData extends QuestData implements NBTDataStorage.Data
 		if (event.getEntityPlayer() instanceof EntityPlayerMP && !(event.getContainer() instanceof ContainerPlayer))
 		{
 			event.getContainer().addListener(new FTBQuestsInventoryListener((EntityPlayerMP) event.getEntityPlayer()));
-		}
-	}
-
-	@SubscribeEvent
-	public static void onPlayerLeftTeam(ForgeTeamPlayerLeftEvent event)
-	{
-		if (event.getPlayer().isOnline())
-		{
-			new MessageChangedTeam((short) 0).sendTo(event.getPlayer().getPlayer());
-		}
-	}
-
-	@SubscribeEvent
-	public static void onPlayerJoinedTeam(ForgeTeamPlayerJoinedEvent event)
-	{
-		if (event.getPlayer().isOnline())
-		{
-			new MessageChangedTeam(event.getTeam().getUID()).sendTo(event.getPlayer().getPlayer());
 		}
 	}
 
@@ -328,11 +343,11 @@ public class ServerQuestData extends QuestData implements NBTDataStorage.Data
 		return false;
 	}
 
-	public void claimReward(EntityPlayerMP player, Reward reward)
+	public void claimReward(EntityPlayerMP player, Reward reward, boolean notify)
 	{
 		if (setRewardClaimed(player.getUniqueID(), reward))
 		{
-			reward.claim(player);
+			reward.claim(player, notify);
 		}
 	}
 
@@ -451,7 +466,9 @@ public class ServerQuestData extends QuestData implements NBTDataStorage.Data
 
 		for (Reward reward : quest.rewards)
 		{
-			if (reward.shouldAutoClaimReward())
+			RewardAutoClaim auto = reward.getAutoClaimType();
+
+			if (auto != RewardAutoClaim.DISABLED)
 			{
 				if (online == null)
 				{
@@ -473,7 +490,7 @@ public class ServerQuestData extends QuestData implements NBTDataStorage.Data
 
 				for (EntityPlayerMP player : online)
 				{
-					claimReward(player, reward);
+					claimReward(player, reward, auto == RewardAutoClaim.ENABLED);
 				}
 			}
 		}

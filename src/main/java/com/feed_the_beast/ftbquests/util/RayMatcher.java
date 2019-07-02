@@ -13,7 +13,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.registry.EntityEntry;
 import net.minecraftforge.fml.common.registry.EntityRegistry;
@@ -36,7 +35,7 @@ public class RayMatcher
 		ENTITY_ID("entity_id", false),
 		ENTITY_CLASS("entity_class", false);
 
-		public static final NameMap<Type> NAME_MAP = NameMap.create(BLOCK_ID, NameMap.ObjectProperties.withName((sender, value) -> new TextComponentTranslation("ftbquests.raymatcher." + value.getID())), values());
+		public static final NameMap<Type> NAME_MAP = NameMap.createWithBaseTranslationKey(BLOCK_ID, "ftbquests.raymatcher", values());
 
 		private final String name;
 		public final boolean block;

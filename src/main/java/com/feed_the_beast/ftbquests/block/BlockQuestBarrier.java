@@ -128,7 +128,7 @@ public class BlockQuestBarrier extends Block
 			}
 		}
 
-		for (int i = 0; i < 10; i++)
+		for (int i = 0; i < 15; i++)
 		{
 			world.spawnParticle(EnumParticleTypes.TOWN_AURA, pos.getX() + rand.nextFloat(), pos.getY() + rand.nextFloat(), pos.getZ() + rand.nextFloat(), 0D, 0D, 0D);
 		}
@@ -149,7 +149,7 @@ public class BlockQuestBarrier extends Block
 				if (file != null)
 				{
 					QuestObject object = file.get(((TileQuestBarrier) tileEntity).object);
-					QuestData data = file.getData((EntityPlayer) entity);
+					QuestData data = file.getData(entity);
 
 					if (object != null && data != null && object.isComplete(data))
 					{

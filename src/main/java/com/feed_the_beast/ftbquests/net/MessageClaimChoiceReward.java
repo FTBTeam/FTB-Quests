@@ -56,16 +56,15 @@ public class MessageClaimChoiceReward extends MessageToServer
 
 		if (reward instanceof ChoiceReward)
 		{
+			ChoiceReward r = (ChoiceReward) reward;
 			ServerQuestData teamData = ServerQuestData.get(Universe.get().getPlayer(player).team);
 
-			if (reward.quest.isComplete(teamData))
+			if (r.getTable() != null && reward.quest.isComplete(teamData))
 			{
-				ChoiceReward r = (ChoiceReward) reward;
-
 				if (index >= 0 && index < r.getTable().rewards.size())
 				{
-					r.getTable().rewards.get(index).reward.claim(player);
-					teamData.claimReward(player, reward);
+					r.getTable().rewards.get(index).reward.claim(player, true);
+					teamData.claimReward(player, reward, true);
 				}
 			}
 		}

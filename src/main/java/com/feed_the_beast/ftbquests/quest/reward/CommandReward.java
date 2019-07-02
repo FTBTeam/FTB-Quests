@@ -74,7 +74,7 @@ public class CommandReward extends Reward
 	}
 
 	@Override
-	public void claim(EntityPlayerMP player)
+	public void claim(EntityPlayerMP player, boolean notify)
 	{
 		Map<String, Object> overrides = new HashMap<>();
 		overrides.put("p", player.getName());

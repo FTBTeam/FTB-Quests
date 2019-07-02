@@ -46,7 +46,7 @@ public class MessageCreateObject extends MessageToServer
 	public void writeData(DataOut data)
 	{
 		data.writeInt(parent);
-		data.write(type, QuestObjectType.NAME_MAP);
+		QuestObjectType.NAME_MAP.write(data, type);
 		data.writeNBT(nbt);
 		data.writeNBT(extra);
 	}

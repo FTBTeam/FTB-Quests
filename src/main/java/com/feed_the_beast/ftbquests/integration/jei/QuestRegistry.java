@@ -4,6 +4,7 @@ import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.quest.Chapter;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.reward.Reward;
+import com.feed_the_beast.ftbquests.quest.reward.RewardAutoClaim;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +41,7 @@ public enum QuestRegistry
 
 					for (Reward reward : quest.rewards)
 					{
-						if (!reward.invisible && reward.getIngredient() != null)
+						if (reward.getAutoClaimType() != RewardAutoClaim.INVISIBLE && reward.getIngredient() != null)
 						{
 							rewards.add(reward);
 						}

@@ -42,7 +42,7 @@ public class MessageChangeProgress extends MessageToServer
 	{
 		data.writeShort(team);
 		data.writeInt(id);
-		data.write(type, ChangeProgress.NAME_MAP);
+		ChangeProgress.NAME_MAP.write(data, type);
 	}
 
 	@Override

@@ -23,7 +23,6 @@ public class GameStageReward extends Reward
 {
 	public String stage = "";
 	public boolean remove = false;
-	public boolean silent = false;
 
 	public GameStageReward(Quest quest)
 	{
@@ -42,11 +41,6 @@ public class GameStageReward extends Reward
 		super.writeData(nbt);
 		nbt.setString("stage", stage);
 
-		if (silent)
-		{
-			nbt.setBoolean("silent", true);
-		}
-
 		if (remove)
 		{
 			nbt.setBoolean("remove", true);
@@ -58,7 +52,6 @@ public class GameStageReward extends Reward
 	{
 		super.readData(nbt);
 		stage = nbt.getString("stage");
-		silent = nbt.getBoolean("silent");
 		remove = nbt.getBoolean("remove");
 	}
 
@@ -67,7 +60,6 @@ public class GameStageReward extends Reward
 	{
 		super.writeNetData(data);
 		data.writeString(stage);
-		data.writeBoolean(silent);
 		data.writeBoolean(remove);
 	}
 
@@ -76,7 +68,6 @@ public class GameStageReward extends Reward
 	{
 		super.readNetData(data);
 		stage = data.readString();
-		silent = data.readBoolean();
 		remove = data.readBoolean();
 	}
 
@@ -86,12 +77,11 @@ public class GameStageReward extends Reward
 	{
 		super.getConfig(config);
 		config.addString("stage", () -> stage, v -> stage = v, "").setDisplayName(new TextComponentTranslation("ftbquests.reward.ftbquests.gamestage"));
-		config.addBool("silent", () -> silent, v -> silent = v, false);
 		config.addBool("remove", () -> remove, v -> remove = v, false);
 	}
 
 	@Override
-	public void claim(EntityPlayerMP player)
+	public void claim(EntityPlayerMP player, boolean notify)
 	{
 		if (remove)
 		{
@@ -104,7 +94,7 @@ public class GameStageReward extends Reward
 
 		GameStageHelper.syncPlayer(player);
 
-		if (!silent)
+		if (notify)
 		{
 			if (remove)
 			{

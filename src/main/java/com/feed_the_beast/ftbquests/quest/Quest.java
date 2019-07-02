@@ -299,7 +299,7 @@ public final class Quest extends QuestObject
 
 		data.writeByte(x);
 		data.writeByte(y);
-		data.write(shape, QuestShape.NAME_MAP);
+		QuestShape.NAME_MAP.write(data, shape);
 
 		if (!text.isEmpty())
 		{
@@ -341,7 +341,7 @@ public final class Quest extends QuestObject
 		description = Bits.getFlag(flags, 8) ? data.readString() : "";
 		x = data.readByte();
 		y = data.readByte();
-		shape = data.read(QuestShape.NAME_MAP);
+		shape = QuestShape.NAME_MAP.read(data);
 
 		if (Bits.getFlag(flags, 16))
 		{

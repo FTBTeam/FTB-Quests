@@ -26,7 +26,7 @@ public class ChoiceReward extends RandomReward
 	}
 
 	@Override
-	public void claim(EntityPlayerMP player)
+	public void claim(EntityPlayerMP player, boolean notify)
 	{
 	}
 
@@ -34,7 +34,10 @@ public class ChoiceReward extends RandomReward
 	@SideOnly(Side.CLIENT)
 	public void addMouseOverText(List<String> list)
 	{
-		getTable().addMouseOverText(list, false, false);
+		if (getTable() != null)
+		{
+			getTable().addMouseOverText(list, false, false);
+		}
 	}
 
 	@Override

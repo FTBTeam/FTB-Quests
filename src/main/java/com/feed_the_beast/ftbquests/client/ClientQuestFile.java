@@ -9,15 +9,19 @@ import com.feed_the_beast.ftbquests.net.MessageSyncQuests;
 import com.feed_the_beast.ftbquests.net.edit.MessageDeleteObject;
 import com.feed_the_beast.ftbquests.quest.Chapter;
 import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.quest.QuestData;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.task.Task;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import it.unimi.dsi.fastutil.objects.Object2ShortOpenHashMap;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.text.TextComponentTranslation;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
+import java.util.UUID;
 
 /**
  * @author LatvianModder
@@ -41,10 +45,13 @@ public class ClientQuestFile extends QuestFile
 	public GuiQuestTree questTreeGui;
 	public GuiBase questGui;
 	public boolean editingMode;
+	public final Object2ShortOpenHashMap<UUID> playerTeams;
 
 	public ClientQuestFile()
 	{
 		teamData = new Short2ObjectOpenHashMap<>();
+		playerTeams = new Object2ShortOpenHashMap<>();
+		playerTeams.defaultReturnValue((short) 0);
 	}
 
 	public void load(MessageSyncQuests message)
@@ -93,7 +100,14 @@ public class ClientQuestFile extends QuestFile
 
 		self = message.team == 0 ? null : teamData.get(message.team);
 		editingMode = message.editingMode;
-		//FIXME: rewards.addAll(message.rewards);
+
+		playerTeams.clear();
+
+		for (int i = 0; i < message.playerIDs.length; i++)
+		{
+			playerTeams.put(message.playerIDs[i], message.playerTeams[i]);
+		}
+
 		refreshGui();
 		FTBQuestsJEIHelper.refresh(this);
 	}
@@ -205,6 +219,13 @@ public class ClientQuestFile extends QuestFile
 	public ClientQuestData getData(short team)
 	{
 		return team == 0 ? null : teamData.get(team);
+	}
+
+	@Override
+	@Nullable
+	public QuestData getData(Entity player)
+	{
+		return getData(playerTeams.getShort(player.getUniqueID()));
 	}
 
 	public ClientQuestData removeData(short team)
