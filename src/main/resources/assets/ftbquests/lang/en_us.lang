@@ -233,6 +233,7 @@ ftbquests.task.ftbquests.observation=Observation
 ftbquests.task.ftbquests.observation.type=Type
 ftbquests.task.ftbquests.observation.match=Match
 ftbquests.task.ftbquests.observation.properties=Properties
+ftbquests.task.ftbquests.observation.timer=Timer
 
 ftbquests.task.ftbquests.interaction=Interaction
 ftbquests.task.ftbquests.interaction.type=Type
