@@ -26,8 +26,13 @@ public class LootReward extends RandomReward
 	}
 
 	@Override
-	public void claim(EntityPlayerMP player)
+	public void claim(EntityPlayerMP player, boolean notify)
 	{
+		if (getTable() == null)
+		{
+			return;
+		}
+
 		int totalWeight = getTable().getTotalWeight(true);
 
 		if (totalWeight <= 0)
@@ -48,7 +53,7 @@ public class LootReward extends RandomReward
 
 					if (currentWeight >= number)
 					{
-						reward.reward.claim(player);
+						reward.reward.claim(player, notify);
 						break;
 					}
 				}
@@ -60,7 +65,10 @@ public class LootReward extends RandomReward
 	@SideOnly(Side.CLIENT)
 	public void addMouseOverText(List<String> list)
 	{
-		getTable().addMouseOverText(list, true, true);
+		if (getTable() != null)
+		{
+			getTable().addMouseOverText(list, true, true);
+		}
 	}
 
 	@Override

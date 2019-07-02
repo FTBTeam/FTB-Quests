@@ -2,7 +2,6 @@ package com.feed_the_beast.ftbquests.quest;
 
 import com.feed_the_beast.ftblib.lib.util.IWithID;
 import com.feed_the_beast.ftblib.lib.util.misc.NameMap;
-import net.minecraft.util.text.TextComponentTranslation;
 
 /**
  * @author LatvianModder
@@ -14,17 +13,15 @@ public enum DependencyRequirement implements IWithID
 	ALL_STARTED("all_started", false, false),
 	ONE_STARTED("one_started", true, false);
 
-	public static final NameMap<DependencyRequirement> NAME_MAP = NameMap.create(ALL_COMPLETED, NameMap.ObjectProperties.withName((sender, o) -> new TextComponentTranslation(o.langKey)), values());
+	public static final NameMap<DependencyRequirement> NAME_MAP = NameMap.createWithBaseTranslationKey(ALL_COMPLETED, "ftbquests.quest.dependency_requirement", values());
 
 	private final String id;
-	private final String langKey;
 	public final boolean one;
 	public final boolean completed;
 
 	DependencyRequirement(String s, boolean o, boolean c)
 	{
 		id = s;
-		langKey = "ftbquests.quest.dependency_requirement." + id;
 		one = o;
 		completed = c;
 	}

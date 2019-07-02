@@ -105,18 +105,8 @@ public class MessageSyncQuests extends MessageToClient
 	public short team;
 	public Collection<TeamInst> teamData;
 	public boolean editingMode;
-
-	public MessageSyncQuests()
-	{
-	}
-
-	public MessageSyncQuests(QuestFile f, short t, Collection<TeamInst> td, boolean e)
-	{
-		file = f;
-		team = t;
-		teamData = td;
-		editingMode = e;
-	}
+	public UUID[] playerIDs;
+	public short[] playerTeams;
 
 	@Override
 	public NetworkWrapper getWrapper()
@@ -131,6 +121,13 @@ public class MessageSyncQuests extends MessageToClient
 		data.writeShort(team);
 		data.writeCollection(teamData, TeamInst.SERIALIZER);
 		data.writeBoolean(editingMode);
+		data.writeVarInt(playerIDs.length);
+
+		for (int i = 0; i < playerIDs.length; i++)
+		{
+			data.writeUUID(playerIDs[i]);
+			data.writeShort(playerTeams[i]);
+		}
 	}
 
 	@Override
@@ -141,6 +138,15 @@ public class MessageSyncQuests extends MessageToClient
 		team = data.readShort();
 		teamData = data.readCollection(TeamInst.DESERIALIZER);
 		editingMode = data.readBoolean();
+
+		playerIDs = new UUID[data.readVarInt()];
+		playerTeams = new short[playerIDs.length];
+
+		for (int i = 0; i < playerIDs.length; i++)
+		{
+			playerIDs[i] = data.readUUID();
+			playerTeams[i] = data.readShort();
+		}
 	}
 
 	@Override

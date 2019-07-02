@@ -7,7 +7,6 @@ import com.feed_the_beast.ftblib.lib.util.IWithID;
 import com.feed_the_beast.ftblib.lib.util.misc.NameMap;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -26,16 +25,14 @@ public final class QuestShape extends Icon implements IWithID
 	public static final QuestShape HEART = new QuestShape("heart");
 	public static final QuestShape GEAR = new QuestShape("gear");
 
-	public static final NameMap<QuestShape> NAME_MAP = NameMap.create(CIRCLE, NameMap.ObjectProperties.withName((sender, o) -> new TextComponentTranslation(o.langKey)), CIRCLE, SQUARE, DIAMOND, RSQUARE, PENTAGON, HEXAGON, OCTAGON, HEART, GEAR);
+	public static final NameMap<QuestShape> NAME_MAP = NameMap.createWithBaseTranslationKey(CIRCLE, "ftbquests.quest.shape", CIRCLE, SQUARE, DIAMOND, RSQUARE, PENTAGON, HEXAGON, OCTAGON, HEART, GEAR);
 
 	public final String id;
-	public final String langKey;
 	public final ImageIcon background, outline, shape;
 
 	public QuestShape(String i)
 	{
 		id = i;
-		langKey = "ftbquests.quest.shape." + id;
 		background = new ImageIcon(new ResourceLocation(FTBQuests.MOD_ID, "textures/shapes/" + id + "/background.png"));
 		outline = new ImageIcon(new ResourceLocation(FTBQuests.MOD_ID, "textures/shapes/" + id + "/outline.png"));
 		shape = new ImageIcon(new ResourceLocation(FTBQuests.MOD_ID, "textures/shapes/" + id + "/shape.png"));

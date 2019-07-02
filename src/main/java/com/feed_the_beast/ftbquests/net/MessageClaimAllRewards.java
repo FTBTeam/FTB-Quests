@@ -48,7 +48,7 @@ public class MessageClaimAllRewards extends MessageToServer
 					{
 						if (!reward.getExcludeFromClaimAll())
 						{
-							teamData.claimReward(player, reward);
+							teamData.claimReward(player, reward, true);
 						}
 					}
 				}

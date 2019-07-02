@@ -17,7 +17,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.stats.StatBase;
 import net.minecraft.stats.StatList;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.fml.common.registry.EntityEntry;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import net.minecraftforge.fml.relauncher.Side;
@@ -112,7 +111,7 @@ public class KillTask extends Task
 			}
 		}
 
-		config.addEnum("entity", () -> entity, v -> entity = v, NameMap.create(ZOMBIE, NameMap.ObjectProperties.withName((sender, s) -> new TextComponentTranslation("entity." + EntityList.getTranslationName(s) + ".name")), ids.toArray(new ResourceLocation[0])));
+		config.addEnum("entity", () -> entity, v -> entity = v, NameMap.createWithTranslation(ZOMBIE, (sender, s) -> "entity." + EntityList.getTranslationName(s) + ".name", ids.toArray(new ResourceLocation[0])));
 		config.addLong("value", () -> value, v -> value = v, 100L, 1L, Long.MAX_VALUE);
 	}
 

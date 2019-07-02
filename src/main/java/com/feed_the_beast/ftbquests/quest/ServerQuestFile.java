@@ -1,5 +1,6 @@
 package com.feed_the_beast.ftbquests.quest;
 
+import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
 import com.feed_the_beast.ftblib.lib.data.ForgeTeam;
 import com.feed_the_beast.ftblib.lib.data.Universe;
 import com.feed_the_beast.ftblib.lib.util.FileUtils;
@@ -7,6 +8,7 @@ import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.net.edit.MessageDeleteObjectResponse;
 import com.feed_the_beast.ftbquests.util.ServerQuestData;
 import io.sommers.packmode.api.PackModeAPI;
+import net.minecraft.entity.Entity;
 import net.minecraftforge.fml.common.Loader;
 
 import javax.annotation.Nullable;
@@ -84,8 +86,8 @@ public class ServerQuestFile extends QuestFile
 		return folder;
 	}
 
-	@Nullable
 	@Override
+	@Nullable
 	public QuestData getData(short team)
 	{
 		if (team == 0)
@@ -97,8 +99,8 @@ public class ServerQuestFile extends QuestFile
 		return t.isValid() ? ServerQuestData.get(t) : null;
 	}
 
-	@Nullable
 	@Override
+	@Nullable
 	public QuestData getData(String team)
 	{
 		if (team.isEmpty())
@@ -108,6 +110,13 @@ public class ServerQuestFile extends QuestFile
 
 		ForgeTeam t = universe.getTeam(team);
 		return t.isValid() ? ServerQuestData.get(t) : null;
+	}
+
+	@Override
+	@Nullable
+	public QuestData getData(Entity player)
+	{
+		return getData(FTBLibAPI.getTeamID(player.getUniqueID()));
 	}
 
 	@Override

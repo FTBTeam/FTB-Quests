@@ -69,7 +69,7 @@ public class ToastReward extends Reward
 	}
 
 	@Override
-	public void claim(EntityPlayerMP player)
+	public void claim(EntityPlayerMP player, boolean notify)
 	{
 	}
 }

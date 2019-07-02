@@ -50,7 +50,7 @@ public class MessageCreateObjectResponse extends MessageToClient
 	{
 		data.writeInt(id);
 		data.writeInt(parent);
-		data.write(type, QuestObjectType.NAME_MAP);
+		QuestObjectType.NAME_MAP.write(data, type);
 		data.writeNBT(nbt);
 		data.writeNBT(extra);
 	}

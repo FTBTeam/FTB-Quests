@@ -127,7 +127,7 @@ public class RandomReward extends Reward
 	}
 
 	@Override
-	public void claim(EntityPlayerMP player)
+	public void claim(EntityPlayerMP player, boolean notify)
 	{
 		if (getTable() == null)
 		{
@@ -150,7 +150,7 @@ public class RandomReward extends Reward
 
 			if (currentWeight >= number)
 			{
-				reward.reward.claim(player);
+				reward.reward.claim(player, notify);
 				return;
 			}
 		}

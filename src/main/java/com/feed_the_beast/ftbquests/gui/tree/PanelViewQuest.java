@@ -17,6 +17,7 @@ import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.reward.Reward;
+import com.feed_the_beast.ftbquests.quest.reward.RewardAutoClaim;
 import com.feed_the_beast.ftbquests.quest.task.Task;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
@@ -87,7 +88,7 @@ public class PanelViewQuest extends Panel
 
 		for (Reward reward : quest.rewards)
 		{
-			if (!reward.invisible || canEdit)
+			if (canEdit || reward.getAutoClaimType() != RewardAutoClaim.INVISIBLE)
 			{
 				panelRewards.add(new ButtonReward(panelRewards, reward));
 			}

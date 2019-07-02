@@ -78,7 +78,7 @@ public class ItemLootCrate extends Item
 
 							if (currentWeight >= number)
 							{
-								reward.reward.claim((EntityPlayerMP) player);
+								reward.reward.claim((EntityPlayerMP) player, true);
 								break;
 							}
 						}

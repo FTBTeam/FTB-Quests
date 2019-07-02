@@ -10,7 +10,6 @@ import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftbquests.gui.tree.GuiQuestTree;
 import com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIHelper;
 import com.feed_the_beast.ftbquests.net.MessageClaimReward;
-import com.feed_the_beast.ftbquests.net.MessageDisplayRewardToast;
 import com.feed_the_beast.ftbquests.quest.ChangeProgress;
 import com.feed_the_beast.ftbquests.quest.Chapter;
 import com.feed_the_beast.ftbquests.quest.Quest;
@@ -39,15 +38,13 @@ public abstract class Reward extends QuestObjectBase
 	public Quest quest;
 
 	public EnumTristate team;
-	public EnumTristate autoclaim;
-	public boolean invisible;
+	private RewardAutoClaim autoclaim;
 
 	public Reward(Quest q)
 	{
 		quest = q;
 		team = EnumTristate.DEFAULT;
-		autoclaim = EnumTristate.DEFAULT;
-		invisible = false;
+		autoclaim = RewardAutoClaim.DEFAULT;
 	}
 
 	@Override
@@ -82,11 +79,10 @@ public abstract class Reward extends QuestObjectBase
 	{
 		super.writeData(nbt);
 		team.write(nbt, "team_reward");
-		autoclaim.write(nbt, "autoclaim");
 
-		if (invisible)
+		if (autoclaim != RewardAutoClaim.DEFAULT)
 		{
-			nbt.setBoolean("invisible", true);
+			nbt.setString("auto", autoclaim.getID());
 		}
 	}
 
@@ -95,8 +91,19 @@ public abstract class Reward extends QuestObjectBase
 	{
 		super.readData(nbt);
 		team = EnumTristate.read(nbt, "team_reward");
-		autoclaim = EnumTristate.read(nbt, "autoclaim");
-		invisible = nbt.getBoolean("invisible");
+		autoclaim = RewardAutoClaim.NAME_MAP.get(nbt.getString("auto"));
+
+		if (nbt.hasKey("autoclaim") || nbt.hasKey("invisible"))
+		{
+			if (nbt.getBoolean("invisible"))
+			{
+				autoclaim = RewardAutoClaim.INVISIBLE;
+			}
+			else if (nbt.hasKey("autoclaim"))
+			{
+				autoclaim = nbt.getBoolean("autoclaim") ? RewardAutoClaim.ENABLED : RewardAutoClaim.DISABLED;
+			}
+		}
 	}
 
 	@Override
@@ -104,8 +111,7 @@ public abstract class Reward extends QuestObjectBase
 	{
 		super.writeNetData(data);
 		EnumTristate.NAME_MAP.write(data, team);
-		EnumTristate.NAME_MAP.write(data, autoclaim);
-		data.writeBoolean(invisible);
+		RewardAutoClaim.NAME_MAP.write(data, autoclaim);
 	}
 
 	@Override
@@ -113,8 +119,7 @@ public abstract class Reward extends QuestObjectBase
 	{
 		super.readNetData(data);
 		team = EnumTristate.NAME_MAP.read(data);
-		autoclaim = EnumTristate.NAME_MAP.read(data);
-		invisible = data.readBoolean();
+		autoclaim = RewardAutoClaim.NAME_MAP.read(data);
 	}
 
 	@Override
@@ -122,20 +127,17 @@ public abstract class Reward extends QuestObjectBase
 	public void getConfig(ConfigGroup config)
 	{
 		super.getConfig(config);
-		config.addEnum("team", () -> team, v -> team = v, EnumTristate.NAME_MAP).setDisplayName(new TextComponentTranslation("ftbquests.reward.team_reward")).setCanEdit(!(quest instanceof Quest) || !quest.canRepeat);
-		config.addEnum("autoclaim", () -> autoclaim, v -> autoclaim = v, EnumTristate.NAME_MAP).setDisplayName(new TextComponentTranslation("ftbquests.reward.autoclaim")).setCanEdit(!invisible);
-		config.addBool("invisible", () -> invisible, v -> invisible = v, false).setDisplayName(new TextComponentTranslation("ftbquests.reward.invisible"));
+		config.addEnum("team", () -> team, v -> team = v, EnumTristate.NAME_MAP).setDisplayName(new TextComponentTranslation("ftbquests.reward.team_reward")).setCanEdit(!quest.canRepeat);
+		config.addEnum("autoclaim", () -> autoclaim, v -> autoclaim = v, RewardAutoClaim.NAME_MAP).setDisplayName(new TextComponentTranslation("ftbquests.reward.autoclaim"));
 	}
 
-	public abstract void claim(EntityPlayerMP player);
+	public abstract void claim(EntityPlayerMP player, boolean notify);
 
 	public ItemStack claimAutomated(TileEntity tileEntity, @Nullable EntityPlayerMP player)
 	{
 		if (player != null)
 		{
-			MessageDisplayRewardToast.ENABLED = false;
-			claim(player);
-			MessageDisplayRewardToast.ENABLED = true;
+			claim(player, false);
 		}
 
 		return ItemStack.EMPTY;
@@ -197,9 +199,19 @@ public abstract class Reward extends QuestObjectBase
 		return quest.canRepeat || team.get(quest.chapter.file.defaultRewardTeam);
 	}
 
-	public final boolean shouldAutoClaimReward()
+	public final RewardAutoClaim getAutoClaimType()
 	{
-		return invisible || autoclaim.get(quest.chapter.alwaysInvisible || quest.chapter.file.defaultRewardAutoclaim);
+		if (quest.chapter.alwaysInvisible)
+		{
+			return RewardAutoClaim.ENABLED;
+		}
+
+		if (autoclaim == RewardAutoClaim.DEFAULT)
+		{
+			return quest.chapter.file.defaultRewardAutoclaim;
+		}
+
+		return autoclaim;
 	}
 
 	@Override
@@ -245,7 +257,7 @@ public abstract class Reward extends QuestObjectBase
 		if (canClick)
 		{
 			GuiHelper.playClickSound();
-			new MessageClaimReward(id).sendToServer();
+			new MessageClaimReward(id, true).sendToServer();
 		}
 	}
 

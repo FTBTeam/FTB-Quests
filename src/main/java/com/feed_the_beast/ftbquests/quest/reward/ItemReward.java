@@ -8,7 +8,6 @@ import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftbquests.net.MessageDisplayItemRewardToast;
-import com.feed_the_beast.ftbquests.net.MessageDisplayRewardToast;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.latmod.mods.itemfilters.item.ItemMissing;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -101,7 +100,7 @@ public class ItemReward extends Reward
 	}
 
 	@Override
-	public void claim(EntityPlayerMP player)
+	public void claim(EntityPlayerMP player, boolean notify)
 	{
 		if (onlyOne && player.inventory.hasItemStack(stack))
 		{
@@ -112,7 +111,7 @@ public class ItemReward extends Reward
 		stack1.grow(player.world.rand.nextInt(randomBonus + 1));
 		ItemHandlerHelper.giveItemToPlayer(player, stack1);
 
-		if (MessageDisplayRewardToast.ENABLED)
+		if (notify)
 		{
 			new MessageDisplayItemRewardToast(stack1).sendTo(player);
 		}

@@ -80,7 +80,7 @@ public class AdvancementReward extends Reward
 	}
 
 	@Override
-	public void claim(EntityPlayerMP player)
+	public void claim(EntityPlayerMP player, boolean notify)
 	{
 		Advancement a = player.server.getAdvancementManager().getAdvancement(new ResourceLocation(advancement));
 
