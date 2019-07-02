@@ -22,6 +22,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.client.event.ColorHandlerEvent;
 import net.minecraftforge.client.event.ModelRegistryEvent;
+import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
@@ -43,6 +44,10 @@ public class FTBQuestsClientEventHandler
 
 	public static TextureAtlasSprite inputBlockSprite;
 	private static List<ObservationTask> observationTasks = null;
+
+	private static ObservationTask currentlyObserving = null;
+	private static int currentlyObservingTime = 0;
+	private static int lastCurrentlyObservingTime = 0;
 
 	private static void addModel(Item item, String variant)
 	{
@@ -164,15 +169,46 @@ public class FTBQuestsClientEventHandler
 				return;
 			}
 
+			currentlyObserving = null;
+
 			RayMatcher.Data data = RayMatcher.Data.get(mc.world, mc.objectMouseOver);
 
 			for (ObservationTask task : observationTasks)
 			{
 				if (task.matcher.matches(data) && !task.isComplete(ClientQuestFile.INSTANCE.self) && task.quest.canStartTasks(ClientQuestFile.INSTANCE.self))
 				{
-					new MessageSubmitTask(task.id).sendToServer();
+					currentlyObserving = task;
+					break;
 				}
 			}
+
+			if (currentlyObserving != null)
+			{
+				currentlyObservingTime++;
+
+				if (currentlyObservingTime > currentlyObserving.timer.ticks())
+				{
+					new MessageSubmitTask(currentlyObserving.id).sendToServer();
+					ClientQuestFile.INSTANCE.self.getTaskData(currentlyObserving).addProgress(1L);
+					currentlyObserving = null;
+					currentlyObservingTime = 0;
+					lastCurrentlyObservingTime = 0;
+				}
+			}
+			else
+			{
+				currentlyObservingTime = 0;
+				lastCurrentlyObservingTime = 0;
+			}
+		}
+	}
+
+	@SubscribeEvent
+	public static void onDebugInfo(RenderGameOverlayEvent.Text event)
+	{
+		if (currentlyObserving != null)
+		{
+			event.getLeft().add(TextFormatting.UNDERLINE.toString() + TextFormatting.YELLOW + currentlyObserving.getTitle() + " " + TextFormatting.GREEN + (currentlyObservingTime * 100L / currentlyObserving.timer.ticks()) + "%");
 		}
 	}
 }
