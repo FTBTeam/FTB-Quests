@@ -37,6 +37,11 @@ public enum QuestRegistry
 			{
 				for (Quest quest : chapter.quests)
 				{
+					if (quest.rewards.isEmpty() || quest.disableJEI.get(ClientQuestFile.INSTANCE.defaultQuestDisableJEI))
+					{
+						continue;
+					}
+
 					List<Reward> rewards = new ArrayList<>();
 
 					for (Reward reward : quest.rewards)

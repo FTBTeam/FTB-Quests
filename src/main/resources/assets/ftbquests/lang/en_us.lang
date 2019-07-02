@@ -85,6 +85,7 @@ ftbquests.file.defaults.reward_team=Reward 'Team Reward'
 ftbquests.file.defaults.consume_items=Task 'Consume Items'
 ftbquests.file.defaults.autoclaim_rewards=Reward 'Auto-claim'
 ftbquests.file.defaults.quest_shape=Quest Shape
+ftbquests.file.defaults.quest_disable_jei=Quest 'Disable JEI Recipe'
 ftbquests.file.drop_loot_crates=Entities Drop Loot Crates
 ftbquests.file.loot_crate_no_drop=Entity Loot Crate Drop Empty Weight
 ftbquests.file.disable_gui=Disable GUI
@@ -134,6 +135,7 @@ ftbquests.quest.hide_dependency_lines=Hide Dependency Lines
 ftbquests.quest.min_required_dependencies=Min Required Dependencies
 ftbquests.quest.min_required_dependencies.tooltip=If you set this to anything more than 0, it becomes an OR quest, where only certain amount of dependencies is required for it to unlock
 ftbquests.quest.hide_text_until_complete=Hide Text Until Quest is Completed
+ftbquests.quest.disable_jei=Disable JEI Recipe
 
 ftbquests.gui.edit_file=Edit File
 ftbquests.gui.save_as_file=Save as File

@@ -3,6 +3,7 @@ package com.feed_the_beast.ftbquests.quest;
 import com.feed_the_beast.ftblib.lib.client.ClientUtils;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigString;
+import com.feed_the_beast.ftblib.lib.config.EnumTristate;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.IconAnimation;
 import com.feed_the_beast.ftblib.lib.io.Bits;
@@ -14,6 +15,7 @@ import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.client.FTBQuestsClient;
 import com.feed_the_beast.ftbquests.events.ObjectCompletedEvent;
 import com.feed_the_beast.ftbquests.gui.tree.GuiQuestTree;
+import com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIHelper;
 import com.feed_the_beast.ftbquests.net.MessageDisplayCompletionToast;
 import com.feed_the_beast.ftbquests.quest.reward.Reward;
 import com.feed_the_beast.ftbquests.quest.task.Task;
@@ -60,6 +62,7 @@ public final class Quest extends QuestObject
 	public boolean hideDependencyLines;
 	public int minRequiredDependencies;
 	public boolean hideTextUntilComplete;
+	public EnumTristate disableJEI;
 
 	private String cachedDescription = null;
 	private String[] cachedText = null;
@@ -83,6 +86,7 @@ public final class Quest extends QuestObject
 		dependencyRequirement = DependencyRequirement.ALL_COMPLETED;
 		minRequiredDependencies = 0;
 		hideTextUntilComplete = false;
+		disableJEI = EnumTristate.DEFAULT;
 	}
 
 	@Override
@@ -597,6 +601,7 @@ public final class Quest extends QuestObject
 		config.addString("guide_page", () -> guidePage, v -> guidePage = v, "");
 		config.addString("custom_click", () -> customClick, v -> customClick = v, "");
 		config.addBool("hide_text_until_complete", () -> hideTextUntilComplete, v -> hideTextUntilComplete = v, false);
+		config.addEnum("disable_jei", () -> disableJEI, v -> disableJEI = v, EnumTristate.NAME_MAP);
 	}
 
 	@Override
@@ -812,6 +817,12 @@ public final class Quest extends QuestObject
 		}
 
 		changeProgress(data, ChangeProgress.RESET);
+	}
+
+	@Override
+	public int refreshJEI()
+	{
+		return FTBQuestsJEIHelper.QUESTS;
 	}
 
 	@Override
