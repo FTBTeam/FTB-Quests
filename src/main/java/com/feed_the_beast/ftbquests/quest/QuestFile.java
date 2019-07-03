@@ -1005,6 +1005,7 @@ public abstract class QuestFile extends QuestObject
 		for (QuestData data : getAllData())
 		{
 			data.progressCache = null;
+			data.areDependenciesCompleteCache = null;
 		}
 	}
 
