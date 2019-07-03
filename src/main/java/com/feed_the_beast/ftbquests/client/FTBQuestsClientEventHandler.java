@@ -2,6 +2,8 @@ package com.feed_the_beast.ftbquests.client;
 
 import com.feed_the_beast.ftblib.events.SidebarButtonCreatedEvent;
 import com.feed_the_beast.ftblib.events.client.CustomClickEvent;
+import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
+import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.block.BlockDetector;
 import com.feed_the_beast.ftbquests.events.ClearFileCacheEvent;
@@ -14,6 +16,7 @@ import com.feed_the_beast.ftbquests.tile.TileProgressScreenCore;
 import com.feed_the_beast.ftbquests.tile.TileTaskScreenCore;
 import com.feed_the_beast.ftbquests.util.RayMatcher;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.I18n;
@@ -47,7 +50,6 @@ public class FTBQuestsClientEventHandler
 
 	private static ObservationTask currentlyObserving = null;
 	private static int currentlyObservingTime = 0;
-	private static int lastCurrentlyObservingTime = 0;
 
 	private static void addModel(Item item, String variant)
 	{
@@ -175,7 +177,7 @@ public class FTBQuestsClientEventHandler
 
 			for (ObservationTask task : observationTasks)
 			{
-				if (task.matcher.matches(data) && !task.isComplete(ClientQuestFile.INSTANCE.self) && task.quest.canStartTasks(ClientQuestFile.INSTANCE.self))
+				if (!task.isComplete(ClientQuestFile.INSTANCE.self) && task.matcher.matches(data) && task.quest.canStartTasks(ClientQuestFile.INSTANCE.self))
 				{
 					currentlyObserving = task;
 					break;
@@ -184,31 +186,49 @@ public class FTBQuestsClientEventHandler
 
 			if (currentlyObserving != null)
 			{
-				currentlyObservingTime++;
+				if (!mc.isGamePaused())
+				{
+					currentlyObservingTime++;
+				}
 
-				if (currentlyObservingTime > currentlyObserving.timer.ticks())
+				if (currentlyObservingTime >= currentlyObserving.timer.ticks())
 				{
 					new MessageSubmitTask(currentlyObserving.id).sendToServer();
 					ClientQuestFile.INSTANCE.self.getTaskData(currentlyObserving).addProgress(1L);
 					currentlyObserving = null;
 					currentlyObservingTime = 0;
-					lastCurrentlyObservingTime = 0;
 				}
 			}
 			else
 			{
 				currentlyObservingTime = 0;
-				lastCurrentlyObservingTime = 0;
 			}
 		}
 	}
 
 	@SubscribeEvent
-	public static void onDebugInfo(RenderGameOverlayEvent.Text event)
+	public static void onScreenRender(RenderGameOverlayEvent.Post event)
 	{
-		if (currentlyObserving != null)
+		if (currentlyObserving != null && event.getType() == RenderGameOverlayEvent.ElementType.ALL)
 		{
-			event.getLeft().add(TextFormatting.UNDERLINE.toString() + TextFormatting.YELLOW + currentlyObserving.getTitle() + " " + TextFormatting.GREEN + (currentlyObservingTime * 100L / currentlyObserving.timer.ticks()) + "%");
+			GlStateManager.enableBlend();
+			Minecraft mc = Minecraft.getMinecraft();
+			int cx = event.getResolution().getScaledWidth() / 2;
+			int cy = event.getResolution().getScaledHeight() / 2;
+			String s = TextFormatting.UNDERLINE.toString() + TextFormatting.YELLOW + currentlyObserving.getTitle();
+			int sw = mc.fontRenderer.getStringWidth(s);
+			int bw = Math.max(sw, 100);
+			Color4I.DARK_GRAY.withAlpha(130).draw(cx - bw / 2 - 3, cy - 63, bw + 6, 29);
+			GuiHelper.drawHollowRect(cx - bw / 2 - 3, cy - 63, bw + 6, 29, Color4I.DARK_GRAY, false);
+
+			mc.fontRenderer.drawStringWithShadow(s, cx - sw / 2, cy - 60, 0xFFFFFF);
+			double completed = (currentlyObservingTime + event.getPartialTicks()) / (double) currentlyObserving.timer.ticks();
+
+			GuiHelper.drawHollowRect(cx - bw / 2, cy - 49, bw, 12, Color4I.DARK_GRAY, false);
+			Color4I.LIGHT_BLUE.withAlpha(130).draw(cx - bw / 2 + 1, cy - 48, (int) ((bw - 2D) * completed), 10);
+
+			String s1 = (currentlyObservingTime * 100L / currentlyObserving.timer.ticks()) + "%";
+			mc.fontRenderer.drawStringWithShadow(s1, cx - mc.fontRenderer.getStringWidth(s1) / 2, cy - 47, 0xFFFFFF);
 		}
 	}
 }
