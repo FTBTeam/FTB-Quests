@@ -20,6 +20,7 @@ import com.feed_the_beast.ftbquests.net.MessageDisplayCompletionToast;
 import com.feed_the_beast.ftbquests.quest.reward.Reward;
 import com.feed_the_beast.ftbquests.quest.task.Task;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
+import it.unimi.dsi.fastutil.ints.Int2ByteOpenHashMap;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTBase;
@@ -413,7 +414,27 @@ public final class Quest extends QuestObject
 		{
 			return true;
 		}
-		else if (minRequiredDependencies > 0)
+
+		if (data.areDependenciesCompleteCache == null)
+		{
+			data.areDependenciesCompleteCache = new Int2ByteOpenHashMap();
+			data.areDependenciesCompleteCache.defaultReturnValue((byte) -1);
+		}
+
+		byte b = data.areDependenciesCompleteCache.get(id);
+
+		if (b == -1)
+		{
+			b = areDependenciesComplete0(data) ? (byte) 1 : (byte) 0;
+			data.areDependenciesCompleteCache.put(id, b);
+		}
+
+		return b == 1;
+	}
+
+	private boolean areDependenciesComplete0(QuestData data)
+	{
+		if (minRequiredDependencies > 0)
 		{
 			int complete = 0;
 

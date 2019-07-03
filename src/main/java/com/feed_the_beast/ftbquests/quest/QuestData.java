@@ -23,6 +23,7 @@ public abstract class QuestData
 	public final Map<UUID, IntOpenHashSet> claimedPlayerRewards;
 	public final IntOpenHashSet claimedTeamRewards;
 	public Int2ByteOpenHashMap progressCache;
+	public Int2ByteOpenHashMap areDependenciesCompleteCache;
 
 	protected QuestData()
 	{
@@ -30,6 +31,7 @@ public abstract class QuestData
 		claimedPlayerRewards = new HashMap<>();
 		claimedTeamRewards = new IntOpenHashSet();
 		progressCache = null;
+		areDependenciesCompleteCache = null;
 	}
 
 	public abstract short getTeamUID();
