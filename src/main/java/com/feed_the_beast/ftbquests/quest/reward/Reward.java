@@ -201,7 +201,7 @@ public abstract class Reward extends QuestObjectBase
 
 	public final RewardAutoClaim getAutoClaimType()
 	{
-		if (quest.chapter.alwaysInvisible)
+		if (quest.chapter.alwaysInvisible && (autoclaim == RewardAutoClaim.DEFAULT || autoclaim == RewardAutoClaim.DISABLED))
 		{
 			return RewardAutoClaim.ENABLED;
 		}
