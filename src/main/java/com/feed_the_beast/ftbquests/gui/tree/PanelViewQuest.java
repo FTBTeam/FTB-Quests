@@ -35,6 +35,7 @@ public class PanelViewQuest extends Panel
 	private String title = "";
 	private Icon icon = Icon.EMPTY;
 	public Button buttonClose;
+	public Button buttonOnScreen;
 	public BlankPanel panelContent;
 	public BlankPanel panelTasks;
 	public BlankPanel panelRewards;
@@ -133,6 +134,9 @@ public class PanelViewQuest extends Panel
 
 		add(buttonClose = new ButtonCloseViewQuest(this));
 		buttonClose.setPosAndSize(w - 14, 2, 12, 12);
+
+		add(buttonOnScreen = new ButtonFavoriteViewQuest(this));
+		buttonOnScreen.setPosAndSize(w - 26, 2, 12, 12);
 
 		TextField textFieldTasks = new TextField(panelContent)
 		{

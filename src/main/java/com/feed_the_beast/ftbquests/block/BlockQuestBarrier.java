@@ -27,6 +27,7 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -110,6 +111,12 @@ public class BlockQuestBarrier extends Block
 	}
 
 	@Override
+	public boolean canEntityDestroy(IBlockState state, IBlockAccess world, BlockPos pos, Entity entity)
+	{
+		return false;
+	}
+
+	@Override
 	@SideOnly(Side.CLIENT)
 	public void randomDisplayTick(IBlockState state, World world, BlockPos pos, Random rand)
 	{
@@ -140,6 +147,11 @@ public class BlockQuestBarrier extends Block
 	{
 		if (entity instanceof EntityPlayer)
 		{
+			if (((EntityPlayer) entity).capabilities.isCreativeMode)
+			{
+				return;
+			}
+
 			TileEntity tileEntity = world.getTileEntity(pos);
 
 			if (tileEntity instanceof TileQuestBarrier)

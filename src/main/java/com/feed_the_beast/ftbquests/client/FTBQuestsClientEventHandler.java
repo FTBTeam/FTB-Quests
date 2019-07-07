@@ -10,8 +10,11 @@ import com.feed_the_beast.ftbquests.events.ClearFileCacheEvent;
 import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.item.ItemLootCrate;
 import com.feed_the_beast.ftbquests.net.MessageSubmitTask;
+import com.feed_the_beast.ftbquests.quest.Chapter;
+import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.loot.LootCrate;
 import com.feed_the_beast.ftbquests.quest.task.ObservationTask;
+import com.feed_the_beast.ftbquests.quest.task.Task;
 import com.feed_the_beast.ftbquests.tile.TileProgressScreenCore;
 import com.feed_the_beast.ftbquests.tile.TileTaskScreenCore;
 import com.feed_the_beast.ftbquests.util.RayMatcher;
@@ -35,6 +38,7 @@ import net.minecraftforge.fml.common.gameevent.InputEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.relauncher.Side;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -209,26 +213,130 @@ public class FTBQuestsClientEventHandler
 	@SubscribeEvent
 	public static void onScreenRender(RenderGameOverlayEvent.Post event)
 	{
-		if (currentlyObserving != null && event.getType() == RenderGameOverlayEvent.ElementType.ALL)
+		if (event.getType() != RenderGameOverlayEvent.ElementType.ALL || !ClientQuestFile.existsWithTeam())
 		{
-			GlStateManager.enableBlend();
-			Minecraft mc = Minecraft.getMinecraft();
+			return;
+		}
+
+		GlStateManager.enableBlend();
+		Minecraft mc = Minecraft.getMinecraft();
+		int cy = event.getResolution().getScaledHeight() / 2;
+
+		if (currentlyObserving != null)
+		{
 			int cx = event.getResolution().getScaledWidth() / 2;
-			int cy = event.getResolution().getScaledHeight() / 2;
-			String s = TextFormatting.UNDERLINE.toString() + TextFormatting.YELLOW + currentlyObserving.getTitle();
-			int sw = mc.fontRenderer.getStringWidth(s);
+			String cot = TextFormatting.UNDERLINE.toString() + TextFormatting.YELLOW + currentlyObserving.getTitle();
+			int sw = mc.fontRenderer.getStringWidth(cot);
 			int bw = Math.max(sw, 100);
 			Color4I.DARK_GRAY.withAlpha(130).draw(cx - bw / 2 - 3, cy - 63, bw + 6, 29);
 			GuiHelper.drawHollowRect(cx - bw / 2 - 3, cy - 63, bw + 6, 29, Color4I.DARK_GRAY, false);
 
-			mc.fontRenderer.drawStringWithShadow(s, cx - sw / 2, cy - 60, 0xFFFFFF);
+			mc.fontRenderer.drawStringWithShadow(cot, cx - sw / 2, cy - 60, 0xFFFFFF);
 			double completed = (currentlyObservingTime + event.getPartialTicks()) / (double) currentlyObserving.timer.ticks();
 
 			GuiHelper.drawHollowRect(cx - bw / 2, cy - 49, bw, 12, Color4I.DARK_GRAY, false);
 			Color4I.LIGHT_BLUE.withAlpha(130).draw(cx - bw / 2 + 1, cy - 48, (int) ((bw - 2D) * completed), 10);
 
-			String s1 = (currentlyObservingTime * 100L / currentlyObserving.timer.ticks()) + "%";
-			mc.fontRenderer.drawStringWithShadow(s1, cx - mc.fontRenderer.getStringWidth(s1) / 2, cy - 47, 0xFFFFFF);
+			String cop = (currentlyObservingTime * 100L / currentlyObserving.timer.ticks()) + "%";
+			mc.fontRenderer.drawStringWithShadow(cop, cx - mc.fontRenderer.getStringWidth(cop) / 2, cy - 47, 0xFFFFFF);
+		}
+
+		if (!ClientQuestFile.INSTANCE.favoriteQuests.isEmpty())
+		{
+			List<String> list = new ArrayList<>();
+			boolean first = true;
+
+			if (ClientQuestFile.INSTANCE.favoriteQuests.contains(1))
+			{
+				for (Chapter chapter : ClientQuestFile.INSTANCE.chapters)
+				{
+					for (Quest quest : chapter.quests)
+					{
+						if (!quest.isComplete(ClientQuestFile.INSTANCE.self) && quest.canStartTasks(ClientQuestFile.INSTANCE.self))
+						{
+							if (first)
+							{
+								first = false;
+							}
+							else
+							{
+								list.add("");
+							}
+
+							list.add(TextFormatting.BOLD + mc.fontRenderer.trimStringToWidth(quest.getTitle(), 160) + " " + TextFormatting.DARK_AQUA + quest.getRelativeProgress(ClientQuestFile.INSTANCE.self) + "%");
+
+							for (Task task : quest.tasks)
+							{
+								if (!task.isComplete(ClientQuestFile.INSTANCE.self))
+								{
+									list.add(TextFormatting.GRAY + mc.fontRenderer.trimStringToWidth(task.getTitle(), 160) + " " + TextFormatting.GREEN + ClientQuestFile.INSTANCE.self.getTaskData(task).getProgressString() + "/" + task.getMaxProgressString());
+								}
+							}
+						}
+					}
+				}
+			}
+			else
+			{
+				for (int q : ClientQuestFile.INSTANCE.favoriteQuests)
+				{
+					Quest quest = ClientQuestFile.INSTANCE.getQuest(q);
+
+					if (quest != null)
+					{
+						if (first)
+						{
+							first = false;
+						}
+						else
+						{
+							list.add("");
+						}
+
+						if (quest.isComplete(ClientQuestFile.INSTANCE.self))
+						{
+							list.add(TextFormatting.BOLD.toString() + TextFormatting.GREEN + mc.fontRenderer.trimStringToWidth(quest.getTitle(), 160) + TextFormatting.DARK_GREEN + " 100%");
+						}
+						else
+						{
+							list.add(TextFormatting.BOLD + mc.fontRenderer.trimStringToWidth(quest.getTitle(), 160) + " " + TextFormatting.DARK_AQUA + quest.getRelativeProgress(ClientQuestFile.INSTANCE.self) + "%");
+
+							for (Task task : quest.tasks)
+							{
+								if (!task.isComplete(ClientQuestFile.INSTANCE.self))
+								{
+									list.add(TextFormatting.GRAY + mc.fontRenderer.trimStringToWidth(task.getTitle(), 160) + " " + TextFormatting.GREEN + ClientQuestFile.INSTANCE.self.getTaskData(task).getProgressString() + "/" + task.getMaxProgressString());
+								}
+							}
+						}
+					}
+				}
+			}
+
+			if (!list.isEmpty())
+			{
+				int mw = 0;
+
+				for (String s : list)
+				{
+					mw = Math.max(mw, mc.fontRenderer.getStringWidth(s));
+				}
+
+				double scale = 0.5D; //Make this a config
+
+				GlStateManager.pushMatrix();
+				GlStateManager.translate(event.getResolution().getScaledWidth() - mw * scale - 8D, cy - list.size() * 4.5D * scale, 100D);
+				GlStateManager.scale(scale, scale, 1D);
+
+				Color4I.BLACK.withAlpha(100).draw(0, 0, mw + 8, list.size() * 9 + 8);
+
+				for (int i = 0; i < list.size(); i++)
+				{
+					mc.fontRenderer.drawStringWithShadow(list.get(i), 4, i * 9 + 4, 0xFFFFFFFF);
+				}
+
+				GlStateManager.popMatrix();
+			}
 		}
 	}
 }
