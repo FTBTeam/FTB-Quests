@@ -241,12 +241,12 @@ public class FTBQuestsClientEventHandler
 			mc.fontRenderer.drawStringWithShadow(cop, cx - mc.fontRenderer.getStringWidth(cop) / 2, cy - 47, 0xFFFFFF);
 		}
 
-		if (!ClientQuestFile.INSTANCE.favoriteQuests.isEmpty())
+		if (!ClientQuestFile.INSTANCE.pinnedQuests.isEmpty())
 		{
 			List<String> list = new ArrayList<>();
 			boolean first = true;
 
-			if (ClientQuestFile.INSTANCE.favoriteQuests.contains(1))
+			if (ClientQuestFile.INSTANCE.pinnedQuests.contains(1))
 			{
 				for (Chapter chapter : ClientQuestFile.INSTANCE.chapters)
 				{
@@ -278,7 +278,7 @@ public class FTBQuestsClientEventHandler
 			}
 			else
 			{
-				for (int q : ClientQuestFile.INSTANCE.favoriteQuests)
+				for (int q : ClientQuestFile.INSTANCE.pinnedQuests)
 				{
 					Quest quest = ClientQuestFile.INSTANCE.getQuest(q);
 

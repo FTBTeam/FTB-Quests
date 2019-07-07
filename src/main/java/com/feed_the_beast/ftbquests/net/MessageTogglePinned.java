@@ -11,15 +11,15 @@ import net.minecraft.entity.player.EntityPlayerMP;
 /**
  * @author LatvianModder
  */
-public class MessageToggleFavorite extends MessageToServer
+public class MessageTogglePinned extends MessageToServer
 {
 	private int id;
 
-	public MessageToggleFavorite()
+	public MessageTogglePinned()
 	{
 	}
 
-	public MessageToggleFavorite(int i)
+	public MessageTogglePinned(int i)
 	{
 		id = i;
 	}
@@ -45,7 +45,7 @@ public class MessageToggleFavorite extends MessageToServer
 	@Override
 	public void onMessage(EntityPlayerMP player)
 	{
-		int[] fav = NBTUtils.getPersistedData(player, false).getIntArray("ftbquests_fav");
+		int[] fav = NBTUtils.getPersistedData(player, false).getIntArray("ftbquests_pinned");
 
 		IntOpenHashSet set = new IntOpenHashSet(fav.length);
 
@@ -63,7 +63,7 @@ public class MessageToggleFavorite extends MessageToServer
 			set.add(id);
 		}
 
-		NBTUtils.getPersistedData(player, true).setIntArray("ftbquests_fav", set.toIntArray());
-		new MessageToggleFavoriteResponse(id).sendTo(player);
+		NBTUtils.getPersistedData(player, true).setIntArray("ftbquests_pinned", set.toIntArray());
+		new MessageTogglePinnedResponse(id).sendTo(player);
 	}
 }

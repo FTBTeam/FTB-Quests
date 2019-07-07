@@ -46,14 +46,14 @@ public class ClientQuestFile extends QuestFile
 	public GuiBase questGui;
 	public boolean editingMode;
 	public final Object2ShortOpenHashMap<UUID> playerTeams;
-	public final IntOpenHashSet favoriteQuests;
+	public final IntOpenHashSet pinnedQuests;
 
 	public ClientQuestFile()
 	{
 		teamData = new Short2ObjectOpenHashMap<>();
 		playerTeams = new Object2ShortOpenHashMap<>();
 		playerTeams.defaultReturnValue((short) 0);
-		favoriteQuests = new IntOpenHashSet();
+		pinnedQuests = new IntOpenHashSet();
 	}
 
 	public void load(MessageSyncQuests message)
@@ -110,11 +110,11 @@ public class ClientQuestFile extends QuestFile
 			playerTeams.put(message.playerIDs[i], message.playerTeams[i]);
 		}
 
-		favoriteQuests.clear();
+		pinnedQuests.clear();
 
 		for (int i : message.favorites)
 		{
-			favoriteQuests.add(i);
+			pinnedQuests.add(i);
 		}
 
 		refreshGui();
