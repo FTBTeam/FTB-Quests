@@ -24,6 +24,7 @@ import java.util.Map;
 public class CommandReward extends Reward
 {
 	public String command;
+	public boolean playerCommand;
 
 	public CommandReward(Quest quest)
 	{
@@ -42,6 +43,11 @@ public class CommandReward extends Reward
 	{
 		super.writeData(nbt);
 		nbt.setString("command", command);
+
+		if (playerCommand)
+		{
+			nbt.setBoolean("player_command", true);
+		}
 	}
 
 	@Override
@@ -49,6 +55,7 @@ public class CommandReward extends Reward
 	{
 		super.readData(nbt);
 		command = nbt.getString("command");
+		playerCommand = nbt.getBoolean("player_command");
 	}
 
 	@Override
@@ -56,6 +63,7 @@ public class CommandReward extends Reward
 	{
 		super.writeNetData(data);
 		data.writeString(command);
+		data.writeBoolean(playerCommand);
 	}
 
 	@Override
@@ -63,6 +71,7 @@ public class CommandReward extends Reward
 	{
 		super.readNetData(data);
 		command = data.readString();
+		playerCommand = data.readBoolean();
 	}
 
 	@Override
@@ -71,6 +80,7 @@ public class CommandReward extends Reward
 	{
 		super.getConfig(config);
 		config.addString("command", () -> command, v -> command = v, "/say Hi, @team!").setDisplayName(new TextComponentTranslation("ftbquests.reward.ftbquests.command"));
+		config.addBool("player", () -> playerCommand, v -> playerCommand = v, false);
 	}
 
 	@Override
@@ -104,7 +114,7 @@ public class CommandReward extends Reward
 			}
 		}
 
-		player.server.getCommandManager().executeCommand(player.server, s);
+		player.server.getCommandManager().executeCommand(playerCommand ? player : player.server, s);
 	}
 
 	@Override

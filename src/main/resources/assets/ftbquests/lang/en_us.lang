@@ -283,6 +283,7 @@ ftbquests.reward.ftbquests.xp=XP
 ftbquests.reward.ftbquests.xp_levels=XP Levels
 
 ftbquests.reward.ftbquests.command=Command
+ftbquests.reward.ftbquests.command.player=Run as Player
 
 ftbquests.reward.ftbquests.advancement=Advancement
 ftbquests.reward.ftbquests.advancement.criterion=Criterion
