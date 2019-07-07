@@ -99,6 +99,7 @@ public class MessageSyncQuests extends MessageToClient
 		public UUID[] playerRewardUUIDs;
 		public int[][] playerRewardIDs;
 		public int[] teamRewards;
+
 	}
 
 	public QuestFile file;
@@ -107,6 +108,7 @@ public class MessageSyncQuests extends MessageToClient
 	public boolean editingMode;
 	public UUID[] playerIDs;
 	public short[] playerTeams;
+	public int[] favorites;
 
 	@Override
 	public NetworkWrapper getWrapper()
@@ -128,6 +130,13 @@ public class MessageSyncQuests extends MessageToClient
 			data.writeUUID(playerIDs[i]);
 			data.writeShort(playerTeams[i]);
 		}
+
+		data.writeVarInt(favorites.length);
+
+		for (int i : favorites)
+		{
+			data.writeInt(i);
+		}
 	}
 
 	@Override
@@ -146,6 +155,13 @@ public class MessageSyncQuests extends MessageToClient
 		{
 			playerIDs[i] = data.readUUID();
 			playerTeams[i] = data.readShort();
+		}
+
+		favorites = new int[data.readVarInt()];
+
+		for (int i = 0; i < favorites.length; i++)
+		{
+			favorites[i] = data.readInt();
 		}
 	}
 
