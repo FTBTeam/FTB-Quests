@@ -15,12 +15,6 @@ public class CommandFTBQuests extends CommandTreeBase
 		addSubcommand(new CommandChangeProgress());
 		addSubcommand(new CommandImportRewardsFromChest());
 		addSubcommand(new CommandExportRewardsToChest());
-		addSubcommand(new CommandAutoFavorite());
-
-		/*if (Loader.isModLoaded("projecte"))
-		{
-			addSubcommand(new CommandWeighFromEMC());
-		}*/
 	}
 
 	@Override

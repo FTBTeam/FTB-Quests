@@ -167,7 +167,10 @@ ftbquests.gui.change_progress.reset=Reset
 ftbquests.gui.change_progress.reset_deps=Reset (+Dependencies)
 ftbquests.gui.change_progress.complete=Complete
 ftbquests.gui.change_progress.complete_deps=Complete (+Dependencies)
-ftbquests.gui.favorite=Favorite
+ftbquests.gui.pin=Pin
+ftbquests.gui.unpin=Unpin
+ftbquests.gui.autopin.on=Auto-pin: Enabled
+ftbquests.gui.autopin.off=Auto-pin: Disabled
 
 ftbquests.task=Task
 ftbquests.tasks=Tasks
@@ -344,4 +347,4 @@ commands.ftbquests.weigh_from_emc.invalid_id=Invalid Reward Table ID!
 commands.ftbquests.weigh_from_emc.text=Changed item reward weight based on EMC in %s
 commands.ftbquests.export_rewards_to_chest.usage=/ftbquests export_rewards_to_chest <reward_table>
 commands.ftbquests.export_rewards_to_chest.text=Exported %s / %s items from '%s'
-commands.ftbquests.auto_favorite.usage=/ftbquests auto_favorite
+commands.ftbquests.auto_pin.usage=/ftbquests auto_pin

@@ -231,7 +231,7 @@ public class ServerQuestData extends QuestData implements NBTDataStorage.Data
 			i++;
 		}
 
-		m.favorites = NBTUtils.getPersistedData(player, false).getIntArray("ftbquests_fav");
+		m.favorites = NBTUtils.getPersistedData(player, false).getIntArray("ftbquests_pinned");
 
 		m.sendTo(player);
 		event.getPlayer().getPlayer().inventoryContainer.addListener(new FTBQuestsInventoryListener(event.getPlayer().getPlayer()));

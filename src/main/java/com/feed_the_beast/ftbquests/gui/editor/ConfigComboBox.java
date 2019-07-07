@@ -6,6 +6,8 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
+import javafx.util.Callback;
 import net.minecraft.client.Minecraft;
 
 /**
@@ -24,7 +26,7 @@ public class ConfigComboBox<T> extends ComboBox<T> implements EventHandler<Actio
 		NameMap<T> nameMap = config.getNameMap();
 		getItems().addAll(nameMap.values);
 		setOnAction(this);
-		setCellFactory(callback -> new ListCell<T>()
+		Callback<ListView<T>, ListCell<T>> cellFactory = callback -> new ListCell<T>()
 		{
 			@Override
 			public void updateItem(T object, boolean empty)
@@ -40,7 +42,10 @@ public class ConfigComboBox<T> extends ComboBox<T> implements EventHandler<Actio
 					setText(config.getNameMap().getDisplayName(Minecraft.getMinecraft().player, object).getUnformattedText());
 				}
 			}
-		});
+		};
+
+		setCellFactory(cellFactory);
+		setButtonCell(cellFactory.call(null));
 
 		getSelectionModel().select(config.getValue());
 	}

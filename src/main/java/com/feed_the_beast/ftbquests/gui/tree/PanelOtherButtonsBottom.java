@@ -16,6 +16,7 @@ public class PanelOtherButtonsBottom extends PanelOtherButtons
 	@Override
 	public void addWidgets()
 	{
+		add(new ButtonAutopin(this));
 		add(new ButtonSupport(this));
 
 		if (treeGui.file.canEdit())

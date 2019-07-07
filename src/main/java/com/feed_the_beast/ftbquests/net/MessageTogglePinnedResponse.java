@@ -11,15 +11,15 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 /**
  * @author LatvianModder
  */
-public class MessageToggleFavoriteResponse extends MessageToClient
+public class MessageTogglePinnedResponse extends MessageToClient
 {
 	private int id;
 
-	public MessageToggleFavoriteResponse()
+	public MessageTogglePinnedResponse()
 	{
 	}
 
-	public MessageToggleFavoriteResponse(int i)
+	public MessageTogglePinnedResponse(int i)
 	{
 		id = i;
 	}
@@ -48,14 +48,16 @@ public class MessageToggleFavoriteResponse extends MessageToClient
 	{
 		if (ClientQuestFile.exists())
 		{
-			if (ClientQuestFile.INSTANCE.favoriteQuests.contains(id))
+			if (ClientQuestFile.INSTANCE.pinnedQuests.contains(id))
 			{
-				ClientQuestFile.INSTANCE.favoriteQuests.rem(id);
+				ClientQuestFile.INSTANCE.pinnedQuests.rem(id);
 			}
 			else
 			{
-				ClientQuestFile.INSTANCE.favoriteQuests.add(id);
+				ClientQuestFile.INSTANCE.pinnedQuests.add(id);
 			}
+
+			ClientQuestFile.INSTANCE.questTreeGui.otherButtonsBottomPanel.refreshWidgets();
 
 			if (ClientQuestFile.INSTANCE.questTreeGui.viewQuestPanel != null)
 			{

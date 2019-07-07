@@ -135,7 +135,7 @@ public class PanelViewQuest extends Panel
 		add(buttonClose = new ButtonCloseViewQuest(this));
 		buttonClose.setPosAndSize(w - 14, 2, 12, 12);
 
-		add(buttonOnScreen = new ButtonFavoriteViewQuest(this));
+		add(buttonOnScreen = new ButtonPinViewQuest(this));
 		buttonOnScreen.setPosAndSize(w - 26, 2, 12, 12);
 
 		TextField textFieldTasks = new TextField(panelContent)
