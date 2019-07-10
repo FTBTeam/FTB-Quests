@@ -387,6 +387,9 @@ public class BlockProgressScreen extends BlockWithHorizontalFacing
 	public void addInformation(ItemStack stack, @Nullable World world, List<String> tooltip, ITooltipFlag flag)
 	{
 		TileProgressScreenCore t = getStatic();
+		t.resetData();
+		t.readFromItem(stack);
+
 		tooltip.add(I18n.format("tile.ftbquests.screen.size") + ": " + TextFormatting.GOLD + (1 + t.width * 2) + " x " + (1 + t.height));
 
 		if (!ClientQuestFile.exists())
