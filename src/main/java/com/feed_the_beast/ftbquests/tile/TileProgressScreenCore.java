@@ -102,6 +102,20 @@ public class TileProgressScreenCore extends TileWithTeam implements IConfigCallb
 		updateContainingBlockInfo();
 	}
 
+	public final void resetData()
+	{
+		team = "";
+		indestructible = false;
+		facing = null;
+		chapter = 0;
+		width = 0;
+		height = 0;
+		skin = BlockUtils.AIR_STATE;
+		fullscreen = false;
+		hideIcons = false;
+		updateContainingBlockInfo();
+	}
+
 	@Override
 	public boolean hasCapability(Capability<?> capability, @Nullable EnumFacing facing)
 	{

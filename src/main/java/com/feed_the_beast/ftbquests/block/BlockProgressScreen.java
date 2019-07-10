@@ -3,7 +3,8 @@ package com.feed_the_beast.ftbquests.block;
 import com.feed_the_beast.ftblib.lib.util.BlockUtils;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
-import com.feed_the_beast.ftbquests.quest.QuestObject;
+import com.feed_the_beast.ftbquests.quest.Chapter;
+import com.feed_the_beast.ftbquests.quest.QuestData;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.tile.IProgressScreen;
 import com.feed_the_beast.ftbquests.tile.TileProgressScreenCore;
@@ -20,8 +21,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagByte;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
@@ -45,6 +44,18 @@ import java.util.Random;
  */
 public class BlockProgressScreen extends BlockWithHorizontalFacing
 {
+	private static TileProgressScreenCore staticTile;
+
+	public static TileProgressScreenCore getStatic()
+	{
+		if (staticTile == null)
+		{
+			staticTile = new TileProgressScreenCore();
+		}
+
+		return staticTile;
+	}
+
 	public BlockProgressScreen()
 	{
 		super(Material.IRON, MapColor.BLACK);
@@ -69,17 +80,23 @@ public class BlockProgressScreen extends BlockWithHorizontalFacing
 	{
 		items.add(new ItemStack(this));
 
+		TileProgressScreenCore t = getStatic();
+
 		for (int i = 1; i <= 4; i++)
 		{
+			t.resetData();
+			t.width = i;
+			t.height = i * 2;
 			ItemStack stack = new ItemStack(this);
-			stack.setTagInfo("Width", new NBTTagByte((byte) i));
-			stack.setTagInfo("Height", new NBTTagByte((byte) (i * 2)));
+			t.writeToItem(stack);
 			items.add(stack);
 		}
 
+		t.resetData();
+		t.width = 2;
+		t.height = 3;
 		ItemStack stack = new ItemStack(this);
-		stack.setTagInfo("Width", new NBTTagByte((byte) 2));
-		stack.setTagInfo("Height", new NBTTagByte((byte) 3));
+		t.writeToItem(stack);
 		items.add(stack);
 	}
 
@@ -369,21 +386,31 @@ public class BlockProgressScreen extends BlockWithHorizontalFacing
 	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack stack, @Nullable World world, List<String> tooltip, ITooltipFlag flag)
 	{
-		NBTTagCompound nbt = stack.getTagCompound();
-		int width = nbt == null ? 0 : nbt.getByte("Width");
-		int height = nbt == null ? 0 : nbt.getByte("Height");
-		tooltip.add(I18n.format("tile.ftbquests.screen.size") + ": " + TextFormatting.GOLD + (1 + width * 2) + " x " + (1 + height));
+		TileProgressScreenCore t = getStatic();
+		tooltip.add(I18n.format("tile.ftbquests.screen.size") + ": " + TextFormatting.GOLD + (1 + t.width * 2) + " x " + (1 + t.height));
 
 		if (!ClientQuestFile.exists())
 		{
 			return;
 		}
 
-		QuestObject object = nbt == null ? null : ClientQuestFile.INSTANCE.get(nbt.getInteger("Object"));
+		Chapter chapter = ClientQuestFile.INSTANCE.getChapter(t.chapter);
 
-		if (object != null)
+		if (chapter == null)
 		{
-			tooltip.add(object.getYellowDisplayName());
+			return;
+		}
+
+		tooltip.add(chapter.getYellowDisplayName());
+
+		if (!t.team.isEmpty())
+		{
+			QuestData data = ClientQuestFile.INSTANCE.getData(t.team);
+
+			if (data != null)
+			{
+				tooltip.add(I18n.format("ftbquests.progress") + ": " + TextFormatting.BLUE + chapter.getRelativeProgress(data) + "%");
+			}
 		}
 	}
 }
