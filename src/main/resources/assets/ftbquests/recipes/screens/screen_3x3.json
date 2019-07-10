@@ -1,7 +1,7 @@
 {
 	"type": "minecraft:crafting_shaped",
 	"group": "ftbquests:screen",
-	"result": {"item": "screen", "nbt": {"Size": 1}},
+	"result": {"item": "screen", "nbt": "{BlockEntityTag:{Size:1b,id:\"ftbquests:screen_core\"},display:{Lore:[\"(+NBT)\"]}}"},
 	"pattern": [
 		"SSS",
 		"SSS",
