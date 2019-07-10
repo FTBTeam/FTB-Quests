@@ -18,7 +18,7 @@ import com.feed_the_beast.ftbquests.block.FTBQuestsBlocks;
 import com.feed_the_beast.ftbquests.block.ItemBlockBarrier;
 import com.feed_the_beast.ftbquests.block.ItemBlockDetector;
 import com.feed_the_beast.ftbquests.block.ItemBlockProgressScreen;
-import com.feed_the_beast.ftbquests.block.ItemBlockScreen;
+import com.feed_the_beast.ftbquests.block.ItemBlockTaskScreen;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.events.ClearFileCacheEvent;
 import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
@@ -157,7 +157,7 @@ public class FTBQuestsEventHandler
 	public static void registerItems(RegistryEvent.Register<Item> event)
 	{
 		event.getRegistry().registerAll(
-				new ItemBlockScreen(FTBQuestsBlocks.SCREEN).setRegistryName("screen"),
+				new ItemBlockTaskScreen(FTBQuestsBlocks.SCREEN).setRegistryName("screen"),
 				new ItemBlock(FTBQuestsBlocks.PROGRESS_DETECTOR).setRegistryName("progress_detector"),
 				new ItemBlockDetector(FTBQuestsBlocks.DETECTOR).setRegistryName("detector"),
 				new ItemBlockProgressScreen(FTBQuestsBlocks.PROGRESS_SCREEN).setRegistryName("progress_screen"),

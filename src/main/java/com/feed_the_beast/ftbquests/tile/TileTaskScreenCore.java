@@ -109,6 +109,19 @@ public class TileTaskScreenCore extends TileWithTeam implements IConfigCallback,
 		updateContainingBlockInfo();
 	}
 
+	public final void resetData()
+	{
+		team = "";
+		indestructible = false;
+		facing = null;
+		task = 0;
+		size = 0;
+		skin = BlockUtils.AIR_STATE;
+		inputOnly = false;
+		inputModeIcon = ItemStack.EMPTY;
+		updateContainingBlockInfo();
+	}
+
 	@Override
 	public boolean hasCapability(Capability<?> capability, @Nullable EnumFacing facing)
 	{
