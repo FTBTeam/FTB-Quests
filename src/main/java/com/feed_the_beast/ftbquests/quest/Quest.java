@@ -489,9 +489,12 @@ public final class Quest extends QuestObject
 		//data.setTimesCompleted(this, data.getTimesCompleted(this) + 1);
 		super.onCompleted(data, notifyPlayers);
 
-		for (EntityPlayerMP player : notifyPlayers)
+		if (!disableToast)
 		{
-			new MessageDisplayCompletionToast(id).sendTo(player);
+			for (EntityPlayerMP player : notifyPlayers)
+			{
+				new MessageDisplayCompletionToast(id).sendTo(player);
+			}
 		}
 
 		data.checkAutoCompletion(this);

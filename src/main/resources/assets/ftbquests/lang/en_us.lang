@@ -73,6 +73,7 @@ ftbquests.dependencies=Dependencies
 ftbquests.dependency=Dependency
 
 ftbquests.null=None
+ftbquests.disable_completion_toast=Disable Completion Toast
 ftbquests.file=File
 ftbquests.file.completed=All chapters completed!
 ftbquests.file.allow_take_quest_blocks=Allow to Take Quest Blocks

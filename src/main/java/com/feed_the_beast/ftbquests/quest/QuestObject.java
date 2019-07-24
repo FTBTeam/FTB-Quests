@@ -1,7 +1,14 @@
 package com.feed_the_beast.ftbquests.quest;
 
+import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
+import com.feed_the_beast.ftblib.lib.io.DataIn;
+import com.feed_the_beast.ftblib.lib.io.DataOut;
 import it.unimi.dsi.fastutil.ints.Int2ByteOpenHashMap;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.List;
 
@@ -10,6 +17,48 @@ import java.util.List;
  */
 public abstract class QuestObject extends QuestObjectBase
 {
+	public boolean disableToast = false;
+
+	@Override
+	public void writeData(NBTTagCompound nbt)
+	{
+		super.writeData(nbt);
+
+		if (disableToast)
+		{
+			nbt.setBoolean("disable_toast", true);
+		}
+	}
+
+	@Override
+	public void readData(NBTTagCompound nbt)
+	{
+		super.readData(nbt);
+		disableToast = nbt.getBoolean("disable_toast");
+	}
+
+	@Override
+	public void writeNetData(DataOut data)
+	{
+		super.writeNetData(data);
+		data.writeBoolean(disableToast);
+	}
+
+	@Override
+	public void readNetData(DataIn data)
+	{
+		super.readNetData(data);
+		disableToast = data.readBoolean();
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public void getConfig(ConfigGroup config)
+	{
+		super.getConfig(config);
+		config.addBool("disable_toast", () -> disableToast, v -> disableToast = v, false).setDisplayName(new TextComponentTranslation("ftbquests.disable_completion_toast")).setCanEdit(getQuestChapter() == null || !getQuestChapter().alwaysInvisible);
+	}
+
 	@Override
 	public abstract void changeProgress(QuestData data, ChangeProgress type);
 
