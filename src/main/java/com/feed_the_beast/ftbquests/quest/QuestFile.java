@@ -149,9 +149,12 @@ public abstract class QuestFile extends QuestObject
 		super.onCompleted(data, notifyPlayers);
 		new ObjectCompletedEvent.FileEvent(data, this).post();
 
-		for (EntityPlayerMP player : notifyPlayers)
+		if (!disableToast)
 		{
-			new MessageDisplayCompletionToast(id).sendTo(player);
+			for (EntityPlayerMP player : notifyPlayers)
+			{
+				new MessageDisplayCompletionToast(id).sendTo(player);
+			}
 		}
 	}
 

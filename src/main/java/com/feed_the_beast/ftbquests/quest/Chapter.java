@@ -154,9 +154,12 @@ public final class Chapter extends QuestObject
 		super.onCompleted(data, notifyPlayers);
 		new ObjectCompletedEvent.ChapterEvent(data, this).post();
 
-		for (EntityPlayerMP player : notifyPlayers)
+		if (!disableToast)
 		{
-			new MessageDisplayCompletionToast(id).sendTo(player);
+			for (EntityPlayerMP player : notifyPlayers)
+			{
+				new MessageDisplayCompletionToast(id).sendTo(player);
+			}
 		}
 
 		if (file.isComplete(data))

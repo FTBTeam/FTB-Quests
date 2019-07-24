@@ -83,7 +83,7 @@ public abstract class Task extends QuestObject
 		new ObjectCompletedEvent.TaskEvent(data, this).post();
 		boolean questComplete = quest.isComplete(data);
 
-		if (quest.tasks.size() > 1 && !questComplete)
+		if (quest.tasks.size() > 1 && !questComplete && !disableToast)
 		{
 			new MessageDisplayCompletionToast(id).sendTo(notifyPlayers);
 		}
