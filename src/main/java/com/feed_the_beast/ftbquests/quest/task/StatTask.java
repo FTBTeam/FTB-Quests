@@ -26,15 +26,8 @@ public class StatTask extends Task
 
 	public static StatBase get(String id)
 	{
-		for (StatBase base : StatList.BASIC_STATS)
-		{
-			if (base.statId.equals(id))
-			{
-				return base;
-			}
-		}
-
-		return StatList.MOB_KILLS;
+		StatBase stat = StatList.getOneShotStat(id);
+		return stat == null ? StatList.MOB_KILLS : stat;
 	}
 
 	public StatTask(Quest quest)

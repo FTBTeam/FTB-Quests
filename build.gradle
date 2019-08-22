@@ -41,7 +41,7 @@ configurations.all {
 
 repositories {
 	mavenLocal()
-	maven { url "https://maven.latmod.com/" } //FTB Library, Item Filters, FTB Utilities
+	maven { url "https://maven.latmod.com/" } //FTB Library, KubeJS, Item Filters, FTB Utilities
 	maven { url "http://dvs1.progwml6.com/files/maven" } //JEI
 	maven { url "https://minecraft.curseforge.com/api/maven/" } //ProjectE, IC2, PackMode, Baubles, BuildCraft, GameStages
 	maven { url "https://maven.blamejared.com/" } //Botania
@@ -50,6 +50,7 @@ repositories {
 dependencies {
 	deobfCompile "com.feed_the_beast.mods:FTBLib:${ftblib_version}"
 	deobfCompile "com.latmod.mods:ItemFilters:${itemfilters_version}"
+	deobfProvided "dev.latvian.kubejs:KubeJS:forge-1.12.2-${kubejs_version}"
 	deobfProvided "com.feed_the_beast.mods:FTBUtilities:${ftbutilities_version}"
 	compile "mezz.jei:jei_${mc_version}:${jei_version}:api"
 	deobfProvided "projecte:ProjectE:${mc_version}:PE${projecte_version}"

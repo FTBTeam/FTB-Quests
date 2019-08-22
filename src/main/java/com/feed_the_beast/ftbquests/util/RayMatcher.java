@@ -21,12 +21,15 @@ import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * @author LatvianModder
  */
 public class RayMatcher
 {
+	private static final Pattern PROPERTY_PATTERN = Pattern.compile("(\\w+)(\\=|\\=\\=|\\>\\=|\\<\\=|\\>|\\<|\\!\\=)(\\w+)");
+
 	public enum Type implements IWithID
 	{
 		BLOCK_ID("block_id", true),
