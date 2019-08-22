@@ -283,6 +283,7 @@ ftbquests.reward.ftbquests.item.only_one.tooltip=If inventory has that item, doe
 ftbquests.reward.ftbquests.choice=Choice Reward
 ftbquests.reward.ftbquests.random=Random Reward
 ftbquests.reward.ftbquests.loot=Loot Reward
+ftbquests.reward.ftbquests.custom=Custom
 
 ftbquests.reward.ftbquests.xp=XP
 ftbquests.reward.ftbquests.xp_levels=XP Levels

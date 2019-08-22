@@ -30,6 +30,7 @@ import com.feed_the_beast.ftbquests.quest.loot.LootCrate;
 import com.feed_the_beast.ftbquests.quest.reward.AdvancementReward;
 import com.feed_the_beast.ftbquests.quest.reward.ChoiceReward;
 import com.feed_the_beast.ftbquests.quest.reward.CommandReward;
+import com.feed_the_beast.ftbquests.quest.reward.CustomReward;
 import com.feed_the_beast.ftbquests.quest.reward.FTBQuestsRewards;
 import com.feed_the_beast.ftbquests.quest.reward.ItemReward;
 import com.feed_the_beast.ftbquests.quest.reward.LootReward;
@@ -201,9 +202,10 @@ public class FTBQuestsEventHandler
 				FTBQuestsRewards.CHOICE = new RewardType(ChoiceReward::new).setRegistryName("choice").setIcon(GuiIcons.COLOR_RGB).setExcludeFromListRewards(true),
 				FTBQuestsRewards.RANDOM = new RewardType(RandomReward::new).setRegistryName("random").setIcon(GuiIcons.DICE).setExcludeFromListRewards(true),
 				FTBQuestsRewards.LOOT = new RewardType(LootReward::new).setRegistryName("loot").setIcon(GuiIcons.MONEY_BAG).setExcludeFromListRewards(true),
+				FTBQuestsRewards.COMMAND = new RewardType(CommandReward::new).setRegistryName("command").setIcon(Icon.getIcon("minecraft:blocks/command_block_back")),
+				FTBQuestsRewards.CUSTOM = new RewardType(CustomReward::new).setRegistryName("custom").setIcon(GuiIcons.COLOR_HSB),
 				FTBQuestsRewards.XP = new RewardType(XPReward::new).setRegistryName("xp").setIcon(Icon.getIcon("minecraft:items/experience_bottle")),
 				FTBQuestsRewards.XP_LEVELS = new RewardType(XPLevelsReward::new).setRegistryName("xp_levels").setIcon(Icon.getIcon("minecraft:items/experience_bottle")),
-				FTBQuestsRewards.COMMAND = new RewardType(CommandReward::new).setRegistryName("command").setIcon(Icon.getIcon("minecraft:blocks/command_block_back")),
 				FTBQuestsRewards.ADVANCEMENT = new RewardType(AdvancementReward::new).setRegistryName("advancement").setIcon(Icon.getIcon("minecraft:items/wheat")),
 				FTBQuestsRewards.TOAST = new RewardType(ToastReward::new).setRegistryName("toast").setIcon(Icon.getIcon("minecraft:items/sign"))
 		);

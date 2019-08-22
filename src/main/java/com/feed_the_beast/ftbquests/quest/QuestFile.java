@@ -13,6 +13,7 @@ import com.feed_the_beast.ftblib.lib.math.Ticks;
 import com.feed_the_beast.ftblib.lib.util.NBTUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.events.ClearFileCacheEvent;
+import com.feed_the_beast.ftbquests.events.CustomTaskEvent;
 import com.feed_the_beast.ftbquests.events.ObjectCompletedEvent;
 import com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIHelper;
 import com.feed_the_beast.ftbquests.net.MessageDisplayCompletionToast;
@@ -22,6 +23,7 @@ import com.feed_the_beast.ftbquests.quest.loot.RewardTable;
 import com.feed_the_beast.ftbquests.quest.reward.Reward;
 import com.feed_the_beast.ftbquests.quest.reward.RewardAutoClaim;
 import com.feed_the_beast.ftbquests.quest.reward.RewardType;
+import com.feed_the_beast.ftbquests.quest.task.CustomTask;
 import com.feed_the_beast.ftbquests.quest.task.Task;
 import com.feed_the_beast.ftbquests.quest.task.TaskType;
 import com.latmod.mods.itemfilters.item.ItemMissing;
@@ -716,6 +718,14 @@ public abstract class QuestFile extends QuestObject
 				quest.verifyDependencies(true);
 			}
 		}
+
+		for (QuestObjectBase object : getAllObjects())
+		{
+			if (object instanceof CustomTask)
+			{
+				new CustomTaskEvent((CustomTask) object).post();
+			}
+		}
 	}
 
 	@Override
@@ -729,7 +739,6 @@ public abstract class QuestFile extends QuestObject
 		RewardAutoClaim.NAME_MAP_NO_DEFAULT.write(data, defaultRewardAutoclaim);
 		QuestShape.NAME_MAP.write(data, defaultShape);
 		data.writeBoolean(defaultQuestDisableJEI);
-
 		data.writeBoolean(dropLootCrates);
 		lootCrateNoDrop.writeNetData(data);
 		data.writeBoolean(disableGui);
@@ -909,6 +918,14 @@ public abstract class QuestFile extends QuestObject
 				{
 					reward.readNetData(data);
 				}
+			}
+		}
+
+		for (QuestObjectBase object : getAllObjects())
+		{
+			if (object instanceof CustomTask)
+			{
+				new CustomTaskEvent((CustomTask) object).post();
 			}
 		}
 

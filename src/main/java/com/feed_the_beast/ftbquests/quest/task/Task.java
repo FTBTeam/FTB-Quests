@@ -6,6 +6,7 @@ import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
 import com.feed_the_beast.ftblib.lib.gui.WrappedIngredient;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
+import com.feed_the_beast.ftbquests.events.CustomTaskEvent;
 import com.feed_the_beast.ftbquests.events.ObjectCompletedEvent;
 import com.feed_the_beast.ftbquests.gui.tree.GuiQuestTree;
 import com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIHelper;
@@ -155,6 +156,11 @@ public abstract class Task extends QuestObject
 		for (QuestData data : quest.chapter.file.getAllData())
 		{
 			data.createTaskData(this);
+		}
+
+		if (this instanceof CustomTask)
+		{
+			new CustomTaskEvent((CustomTask) this).post();
 		}
 	}
 

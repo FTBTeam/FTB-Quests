@@ -9,9 +9,10 @@ public class FTBQuestsRewards
 	public static RewardType CHOICE;
 	public static RewardType RANDOM;
 	public static RewardType LOOT;
+	public static RewardType COMMAND;
+	public static RewardType CUSTOM;
 	public static RewardType XP;
 	public static RewardType XP_LEVELS;
-	public static RewardType COMMAND;
 	public static RewardType ADVANCEMENT;
 	public static RewardType TOAST;
 
