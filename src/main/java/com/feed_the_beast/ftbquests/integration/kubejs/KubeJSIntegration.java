@@ -4,7 +4,7 @@ import com.feed_the_beast.ftbquests.events.CustomRewardEvent;
 import com.feed_the_beast.ftbquests.events.CustomTaskEvent;
 import dev.latvian.kubejs.KubeJSBindingsEvent;
 import dev.latvian.kubejs.KubeJSEventRegistryEvent;
-import dev.latvian.kubejs.events.EventsJS;
+import dev.latvian.kubejs.event.EventsJS;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 

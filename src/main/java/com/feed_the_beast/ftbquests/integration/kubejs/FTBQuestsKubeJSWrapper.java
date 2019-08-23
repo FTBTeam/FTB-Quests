@@ -1,6 +1,5 @@
 package com.feed_the_beast.ftbquests.integration.kubejs;
 
-import com.feed_the_beast.ftblib.lib.util.misc.NameMap;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.ChangeProgress;
 import com.feed_the_beast.ftbquests.quest.QuestData;
@@ -12,15 +11,16 @@ import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import dev.latvian.kubejs.player.PlayerJS;
 
 import javax.annotation.Nullable;
+import java.util.Map;
 
 /**
  * @author LatvianModder
  */
 public class FTBQuestsKubeJSWrapper
 {
-	public final NameMap<QuestShape> questShapes = QuestShape.NAME_MAP;
-	public final NameMap<QuestObjectType> questObjectTypes = QuestObjectType.NAME_MAP;
-	public final NameMap<ChangeProgress> changeProgressTypes = ChangeProgress.NAME_MAP;
+	public final Map<String, QuestShape> questShapes = QuestShape.NAME_MAP.map;
+	public final Map<String, QuestObjectType> questObjectTypes = QuestObjectType.NAME_MAP.map;
+	public final Map<String, ChangeProgress> changeProgressTypes = ChangeProgress.NAME_MAP.map;
 
 	@Nullable
 	public ServerQuestFile file()

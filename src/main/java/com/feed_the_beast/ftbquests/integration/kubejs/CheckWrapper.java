@@ -1,7 +1,7 @@
 package com.feed_the_beast.ftbquests.integration.kubejs;
 
 import com.feed_the_beast.ftbquests.quest.task.CustomTask;
-import dev.latvian.kubejs.util.ServerJS;
+import dev.latvian.kubejs.server.ServerJS;
 import net.minecraft.entity.player.EntityPlayerMP;
 
 /**

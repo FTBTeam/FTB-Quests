@@ -31,4 +31,9 @@ public class FTBQuestsCommon
 	public void setRewardGuiProviders()
 	{
 	}
+
+	public String getLanguageCode()
+	{
+		return "en_us";
+	}
 }

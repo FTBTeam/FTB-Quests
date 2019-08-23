@@ -19,7 +19,6 @@ import com.feed_the_beast.ftbquests.net.edit.MessageEditObject;
 import com.feed_the_beast.ftbquests.util.QuestObjectText;
 import com.latmod.mods.itemfilters.item.ItemMissing;
 import javafx.scene.Node;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.JsonToNBT;
@@ -192,7 +191,7 @@ public abstract class QuestObjectBase
 				loadTextAdd(text, currentKey, currentText);
 			}
 
-			String langCode = Minecraft.getMinecraft().getLanguageManager().getCurrentLanguage().getLanguageCode();
+			String langCode = FTBQuests.PROXY.getLanguageCode();
 
 			if (!langCode.equals("en_us"))
 			{
