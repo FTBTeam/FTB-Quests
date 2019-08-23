@@ -208,4 +208,10 @@ public class FTBQuestsClient extends FTBQuestsCommon
 			}
 		}).openGui());
 	}
+
+	@Override
+	public String getLanguageCode()
+	{
+		return Minecraft.getMinecraft().getLanguageManager().getCurrentLanguage().getLanguageCode();
+	}
 }

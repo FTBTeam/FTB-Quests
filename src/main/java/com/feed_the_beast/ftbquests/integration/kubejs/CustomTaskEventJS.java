@@ -1,6 +1,6 @@
 package com.feed_the_beast.ftbquests.integration.kubejs;
 
-import dev.latvian.kubejs.events.EventJS;
+import dev.latvian.kubejs.event.EventJS;
 
 /**
  * @author LatvianModder

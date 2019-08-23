@@ -1,6 +1,7 @@
 package com.feed_the_beast.ftbquests.quest.reward;
 
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
+import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftbquests.net.MessageDisplayRewardToast;
@@ -79,7 +80,7 @@ public class XPLevelsReward extends Reward
 		{
 			ITextComponent text = new TextComponentString("+" + xpLevels);
 			text.getStyle().setColor(TextFormatting.GREEN);
-			new MessageDisplayRewardToast(new TextComponentTranslation("ftbquests.reward.ftbquests.xp_levels").appendText(": ").appendSibling(text), getIcon()).sendTo(player);
+			new MessageDisplayRewardToast(id, new TextComponentTranslation("ftbquests.reward.ftbquests.xp_levels").appendText(": ").appendSibling(text), Icon.EMPTY).sendTo(player);
 		}
 	}
 

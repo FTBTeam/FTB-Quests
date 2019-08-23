@@ -5,6 +5,7 @@ import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToClient;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
+import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.gui.IRewardListenerGui;
 import com.feed_the_beast.ftbquests.gui.RewardKey;
 import com.feed_the_beast.ftbquests.gui.RewardToast;
@@ -18,6 +19,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  */
 public class MessageDisplayRewardToast extends MessageToClient
 {
+	private int id;
 	private ITextComponent text;
 	private Icon icon;
 
@@ -25,8 +27,9 @@ public class MessageDisplayRewardToast extends MessageToClient
 	{
 	}
 
-	public MessageDisplayRewardToast(ITextComponent t, Icon i)
+	public MessageDisplayRewardToast(int _id, ITextComponent t, Icon i)
 	{
+		id = _id;
 		text = t;
 		icon = i;
 	}
@@ -40,6 +43,7 @@ public class MessageDisplayRewardToast extends MessageToClient
 	@Override
 	public void writeData(DataOut data)
 	{
+		data.writeInt(id);
 		data.writeTextComponent(text);
 		data.writeIcon(icon);
 	}
@@ -47,6 +51,7 @@ public class MessageDisplayRewardToast extends MessageToClient
 	@Override
 	public void readData(DataIn data)
 	{
+		id = data.readInt();
 		text = data.readTextComponent();
 		icon = data.readIcon();
 	}
@@ -55,9 +60,11 @@ public class MessageDisplayRewardToast extends MessageToClient
 	@SideOnly(Side.CLIENT)
 	public void onMessage()
 	{
-		if (!IRewardListenerGui.add(new RewardKey(text.getUnformattedText(), icon), 1))
+		Icon i = icon.isEmpty() ? ClientQuestFile.INSTANCE.getBase(id).getIcon() : icon;
+
+		if (!IRewardListenerGui.add(new RewardKey(text.getUnformattedText(), i), 1))
 		{
-			Minecraft.getMinecraft().getToastGui().add(new RewardToast(text.getFormattedText(), icon));
+			Minecraft.getMinecraft().getToastGui().add(new RewardToast(text.getFormattedText(), i));
 		}
 	}
 }
