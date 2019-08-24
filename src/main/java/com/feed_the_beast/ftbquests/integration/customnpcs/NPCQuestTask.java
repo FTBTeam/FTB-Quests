@@ -20,7 +20,7 @@ import noppes.npcs.controllers.PlayerQuestController;
  */
 public class NPCQuestTask extends Task
 {
-	public int npcQuestID = 0;
+	public int npcQuest = 0;
 
 	public NPCQuestTask(Quest quest)
 	{
@@ -37,28 +37,28 @@ public class NPCQuestTask extends Task
 	public void writeData(NBTTagCompound nbt)
 	{
 		super.writeData(nbt);
-		nbt.setInteger("npc_quest", npcQuestID);
+		nbt.setInteger("npc_quest", npcQuest);
 	}
 
 	@Override
 	public void readData(NBTTagCompound nbt)
 	{
 		super.readData(nbt);
-		npcQuestID = nbt.getInteger("npc_quest");
+		npcQuest = nbt.getInteger("npc_quest");
 	}
 
 	@Override
 	public void writeNetData(DataOut data)
 	{
 		super.writeNetData(data);
-		data.writeVarInt(npcQuestID);
+		data.writeVarInt(npcQuest);
 	}
 
 	@Override
 	public void readNetData(DataIn data)
 	{
 		super.readNetData(data);
-		npcQuestID = data.readVarInt();
+		npcQuest = data.readVarInt();
 	}
 
 	@Override
@@ -66,13 +66,7 @@ public class NPCQuestTask extends Task
 	public void getConfig(ConfigGroup config)
 	{
 		super.getConfig(config);
-		config.addInt("id", () -> npcQuestID, v -> npcQuestID = v, 0, 0, Integer.MAX_VALUE);
-	}
-
-	@Override
-	public int autoSubmitOnPlayerTick()
-	{
-		return 20;
+		config.addInt("id", () -> npcQuest, v -> npcQuest = v, 0, 0, Integer.MAX_VALUE);
 	}
 
 	@Override
@@ -91,7 +85,7 @@ public class NPCQuestTask extends Task
 		@Override
 		public boolean canSubmit(EntityPlayerMP player)
 		{
-			return task.npcQuestID > 0 && PlayerQuestController.isQuestActive(player, task.npcQuestID);
+			return task.npcQuest > 0 && PlayerQuestController.isQuestActive(player, task.npcQuest);
 		}
 	}
 }

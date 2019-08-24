@@ -262,12 +262,12 @@ ftbquests.task.ftbquests.emc=EMC
 
 ftbquests.task.ftbquests.gamestage=Game Stage
 
-ftbquests.task.ftbquests.npc_quest=NPC Quest
-ftbquests.task.ftbquests.npc_quest.id=CustomNPCs Quest ID
-ftbquests.task.ftbquests.npc_dialog=NPC Dialog
-ftbquests.task.ftbquests.npc_dialog.id=CustomNPCs Dialog ID
-ftbquests.task.ftbquests.npc_faction=NPC Faction
-ftbquests.task.ftbquests.npc_faction.id=CustomNPCs Faction ID
+ftbquests.task.ftbquests.npc_quest=CustomNPCs Quest
+ftbquests.task.ftbquests.npc_quest.id=Quest ID
+ftbquests.task.ftbquests.npc_dialog=CustomNPCs Dialog
+ftbquests.task.ftbquests.npc_dialog.id=Dialog ID
+ftbquests.task.ftbquests.npc_faction=CustomNPCs Faction
+ftbquests.task.ftbquests.npc_faction.id=Faction ID
 ftbquests.task.ftbquests.npc_faction.required_points=Required Points
 ftbquests.task.ftbquests.npc_faction.mode=Point mode
 
@@ -310,6 +310,22 @@ ftbquests.reward.ftbquests.toast.description=Description
 ftbquests.reward.ftbquests.gamestage=Game Stage
 ftbquests.reward.ftbquests.gamestage.silent=Silent
 ftbquests.reward.ftbquests.gamestage.remove=Remove
+
+ftbquests.reward.ftbquests.npc_faction=CustomNPCs Faction
+ftbquests.reward.ftbquests.npc_faction.id=CustomNPCs Faction ID
+ftbquests.reward.ftbquests.npc_faction.points=Points
+ftbquests.reward.ftbquests.npc_faction.add=Add
+
+ftbquests.reward.ftbquests.npc_mail=CustomNPCs Mail
+ftbquests.reward.ftbquests.npc_mail.subject=Subject
+ftbquests.reward.ftbquests.npc_mail.sender=Sender
+ftbquests.reward.ftbquests.npc_mail.message=Message
+ftbquests.reward.ftbquests.npc_mail.time=Time
+ftbquests.reward.ftbquests.npc_mail.been_read=Been Read
+ftbquests.reward.ftbquests.npc_mail.quest_id=CustomNPCs Quest ID
+ftbquests.reward.ftbquests.npc_mail.quest_title=CustomNPCs Quest Title
+ftbquests.reward.ftbquests.npc_mail.items=Items
+ftbquests.reward.ftbquests.npc_mail.time_past=Time Past
 
 ftbquests.reward_table=Reward Table
 ftbquests.reward_table.hide_tooltip=Hide Tooltip
