@@ -4,7 +4,6 @@ import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.reward.FTBQuestsRewards;
 import com.feed_the_beast.ftbquests.quest.reward.Reward;
 import com.feed_the_beast.ftbquests.quest.reward.RewardType;
 import net.darkhax.gamestages.GameStageHelper;
@@ -32,7 +31,7 @@ public class GameStageReward extends Reward
 	@Override
 	public RewardType getType()
 	{
-		return FTBQuestsRewards.GAMESTAGE;
+		return GameStagesIntegration.GAMESTAGE_REWARD;
 	}
 
 	@Override

@@ -8,7 +8,6 @@ import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestData;
 import com.feed_the_beast.ftbquests.quest.task.EnergyTask;
-import com.feed_the_beast.ftbquests.quest.task.FTBQuestsTasks;
 import com.feed_the_beast.ftbquests.quest.task.TaskData;
 import com.feed_the_beast.ftbquests.quest.task.TaskType;
 import net.minecraft.client.Minecraft;
@@ -41,7 +40,7 @@ public class MJTask extends EnergyTask
 	@Override
 	public TaskType getType()
 	{
-		return FTBQuestsTasks.BUILDCRAFT_MJ;
+		return BuildCraftIntegration.MJ_TASK;
 	}
 
 	@Override

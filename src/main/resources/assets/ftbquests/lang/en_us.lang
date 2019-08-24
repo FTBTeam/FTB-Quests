@@ -262,6 +262,15 @@ ftbquests.task.ftbquests.emc=EMC
 
 ftbquests.task.ftbquests.gamestage=Game Stage
 
+ftbquests.task.ftbquests.npc_quest=NPC Quest
+ftbquests.task.ftbquests.npc_quest.id=CustomNPCs Quest ID
+ftbquests.task.ftbquests.npc_dialog=NPC Dialog
+ftbquests.task.ftbquests.npc_dialog.id=CustomNPCs Dialog ID
+ftbquests.task.ftbquests.npc_faction=NPC Faction
+ftbquests.task.ftbquests.npc_faction.id=CustomNPCs Faction ID
+ftbquests.task.ftbquests.npc_faction.required_points=Required Points
+ftbquests.task.ftbquests.npc_faction.mode=Point mode
+
 ftbquests.reward=Reward
 ftbquests.rewards=Rewards
 ftbquests.reward.team_reward=Team Reward

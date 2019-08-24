@@ -15,6 +15,4 @@ public class FTBQuestsRewards
 	public static RewardType XP_LEVELS;
 	public static RewardType ADVANCEMENT;
 	public static RewardType TOAST;
-
-	public static RewardType GAMESTAGE;
 }

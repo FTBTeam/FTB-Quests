@@ -111,9 +111,9 @@ public class DimensionTask extends Task
 	}
 
 	@Override
-	public boolean autoSubmitOnPlayerTick()
+	public int autoSubmitOnPlayerTick()
 	{
-		return true;
+		return 20;
 	}
 
 	@Override

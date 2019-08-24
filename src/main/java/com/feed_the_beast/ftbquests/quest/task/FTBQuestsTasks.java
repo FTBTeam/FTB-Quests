@@ -18,10 +18,4 @@ public class FTBQuestsTasks
 	public static TaskType ADVANCEMENT;
 	public static TaskType OBSERVATION;
 	public static TaskType INTERACTION;
-
-	public static TaskType IC2_ENERGY;
-	public static TaskType BUILDCRAFT_MJ;
-	public static TaskType BOTANIA_MANA;
-	public static TaskType EMC;
-	public static TaskType GAMESTAGE;
 }

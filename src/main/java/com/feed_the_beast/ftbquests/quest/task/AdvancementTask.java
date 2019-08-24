@@ -99,9 +99,9 @@ public class AdvancementTask extends Task
 	}
 
 	@Override
-	public boolean autoSubmitOnPlayerTick()
+	public int autoSubmitOnPlayerTick()
 	{
-		return true;
+		return 5;
 	}
 
 	@Override

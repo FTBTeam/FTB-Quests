@@ -6,7 +6,6 @@ import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestData;
-import com.feed_the_beast.ftbquests.quest.task.FTBQuestsTasks;
 import com.feed_the_beast.ftbquests.quest.task.ISingleLongValueTask;
 import com.feed_the_beast.ftbquests.quest.task.Task;
 import com.feed_the_beast.ftbquests.quest.task.TaskData;
@@ -39,7 +38,7 @@ public class EMCTask extends Task implements ISingleLongValueTask
 	@Override
 	public TaskType getType()
 	{
-		return FTBQuestsTasks.EMC;
+		return ProjectEIntegration.EMC_TASK;
 	}
 
 	@Override
