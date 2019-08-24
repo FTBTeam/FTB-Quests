@@ -21,6 +21,6 @@ public class ButtonWiki extends ButtonTab
 	public void onClicked(MouseButton button)
 	{
 		GuiHelper.playClickSound();
-		handleClick("https://minecraft.curseforge.com/projects/ftb-quests/pages");
+		handleClick("https://www.curseforge.com/minecraft/mc-mods/ftb-quests/pages/about");
 	}
 }
