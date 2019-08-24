@@ -83,12 +83,6 @@ public class NPCFactionTask extends Task
 	}
 
 	@Override
-	public int autoSubmitOnPlayerTick()
-	{
-		return 20;
-	}
-
-	@Override
 	public TaskData createData(QuestData data)
 	{
 		return new Data(this, data);
