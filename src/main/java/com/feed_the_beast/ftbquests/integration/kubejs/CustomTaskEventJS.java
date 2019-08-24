@@ -8,6 +8,7 @@ import dev.latvian.kubejs.event.EventJS;
 public class CustomTaskEventJS extends EventJS
 {
 	public CustomTaskCheckerJS check;
+	public int checkTimer = 1;
 
 	@Override
 	public boolean canCancel()

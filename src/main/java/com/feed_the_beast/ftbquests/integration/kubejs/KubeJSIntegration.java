@@ -42,6 +42,7 @@ public class KubeJSIntegration
 			if (e.check != null)
 			{
 				event.getTask().check = new CheckWrapper(e.check);
+				event.getTask().checkTimer = e.checkTimer;
 			}
 		}
 	}
