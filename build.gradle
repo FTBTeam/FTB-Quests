@@ -7,12 +7,14 @@ buildscript {
 	dependencies {
 		classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
 		classpath 'gradle.plugin.com.matthewprenger:CurseGradle:1.1.0'
+		classpath 'com.wynprice.cursemaven:CurseMaven:1.2.2'
 	}
 }
 
 apply plugin: 'net.minecraftforge.gradle.forge'
 apply plugin: 'com.matthewprenger.cursegradle'
 apply plugin: 'maven'
+apply plugin: 'com.wynprice.cursemaven'
 
 apply from: 'https://raw.githubusercontent.com/MinecraftModDevelopment/Gradle-Collection/master/generic/markdown-git-changelog.gradle'
 
@@ -29,10 +31,10 @@ compileJava {
 minecraft {
 	version = "${mc_version}-${forge_version}"
 	runDir = "run"
-	mappings = "${mappings_version}"
+	mappings = project.mappings_version
 
 	replace "0.0.0.ftbquests", project.version
-	replaceIn "${mod_reference}"
+	replaceIn project.mod_reference
 }
 
 configurations.all {
@@ -42,9 +44,6 @@ configurations.all {
 repositories {
 	mavenLocal()
 	maven { url "https://maven.latmod.com/" } //FTB Library, KubeJS, Item Filters, FTB Utilities
-	maven { url "http://dvs1.progwml6.com/files/maven" } //JEI
-	maven { url "https://minecraft.curseforge.com/api/maven/" } //ProjectE, IC2, PackMode, Baubles, BuildCraft, GameStages
-	maven { url "https://maven.blamejared.com/" } //Botania
 }
 
 dependencies {
@@ -52,14 +51,15 @@ dependencies {
 	deobfCompile "com.latmod.mods:ItemFilters:${itemfilters_version}"
 	deobfProvided "dev.latvian.kubejs:KubeJS:forge-1.12.2-${kubejs_version}"
 	deobfProvided "com.feed_the_beast.mods:FTBUtilities:${ftbutilities_version}"
-	compile "mezz.jei:jei_${mc_version}:${jei_version}:api"
-	deobfProvided "projecte:ProjectE:${mc_version}:PE${projecte_version}"
-	deobfProvided "industrial-craft:industrialcraft-2-${ic2_version}:ex112:api"
-	deobfProvided "packmode:packmode:${mc_version}:${packmode_version}"
-	deobfProvided "vazkii.botania:Botania:${botania_version}"
-	deobfProvided "baubles:Baubles:1.12:${baubles_version}"
-	deobfProvided "buildcraft-core:buildcraft:core:${buildcraft_version}"
-	deobfProvided "game-stages:GameStages:${mc_version}:${gamestages_version}"
+	deobfProvided curse.resolve('jei', project.jei_file)
+	deobfProvided curse.resolve('industrial-craft', project.industrialcraft_file)
+	deobfProvided curse.resolve('packmode', project.packmode_file)
+	deobfProvided curse.resolve('botania', project.botania_file)
+	deobfProvided curse.resolve('baubles', project.baubles_file)
+	deobfProvided curse.resolve('buildcraft-core', project.buildcraftcore_file)
+	deobfProvided curse.resolve('projecte', project.projecte_file)
+	deobfProvided curse.resolve('game-stages', project.gamestages_file)
+	deobfProvided curse.resolve('custom-npcs', project.customnpcs_file)
 }
 
 processResources {
@@ -94,9 +94,9 @@ if (ENV.CURSEFORGE_KEY) {
 	curseforge {
 		apiKey = ENV.CURSEFORGE_KEY
 		project {
-			id = "${curseforge_id}"
+			id = project.curseforge_id
 			releaseType = "release"
-			addGameVersion "${mc_version}"
+			addGameVersion project.mc_version
 			relations {
 				requiredDependency 'ftblib'
 				requiredDependency 'item-filters'
