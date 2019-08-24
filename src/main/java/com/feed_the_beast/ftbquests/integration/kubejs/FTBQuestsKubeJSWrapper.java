@@ -1,6 +1,5 @@
 package com.feed_the_beast.ftbquests.integration.kubejs;
 
-import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.ChangeProgress;
 import com.feed_the_beast.ftbquests.quest.QuestData;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
@@ -26,11 +25,6 @@ public class FTBQuestsKubeJSWrapper
 	public ServerQuestFile file()
 	{
 		return ServerQuestFile.INSTANCE;
-	}
-
-	public boolean canEdit(PlayerJS player)
-	{
-		return FTBQuests.canEdit(player.player);
 	}
 
 	@Nullable
