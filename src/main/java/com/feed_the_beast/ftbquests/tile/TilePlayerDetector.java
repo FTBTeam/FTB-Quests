@@ -135,4 +135,10 @@ public class TilePlayerDetector extends TileBase implements IHasConfig, ITickabl
 
 		return cachedAABB;
 	}
+
+	@Override
+	public AxisAlignedBB getRenderBoundingBox()
+	{
+		return getAABB();
+	}
 }
