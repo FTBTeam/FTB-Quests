@@ -15,6 +15,7 @@ import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.loot.LootCrate;
 import com.feed_the_beast.ftbquests.quest.task.ObservationTask;
 import com.feed_the_beast.ftbquests.quest.task.Task;
+import com.feed_the_beast.ftbquests.tile.TilePlayerDetector;
 import com.feed_the_beast.ftbquests.tile.TileProgressScreenCore;
 import com.feed_the_beast.ftbquests.tile.TileTaskScreenCore;
 import com.feed_the_beast.ftbquests.util.RayMatcher;
@@ -82,6 +83,7 @@ public class FTBQuestsClientEventHandler
 
 		ClientRegistry.bindTileEntitySpecialRenderer(TileTaskScreenCore.class, new RenderTaskScreen());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileProgressScreenCore.class, new RenderProgressScreen());
+		ClientRegistry.bindTileEntitySpecialRenderer(TilePlayerDetector.class, new RenderPlayerDetector());
 	}
 
 	@SubscribeEvent
