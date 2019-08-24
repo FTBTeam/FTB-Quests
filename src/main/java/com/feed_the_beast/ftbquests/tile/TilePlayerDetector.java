@@ -25,8 +25,9 @@ public class TilePlayerDetector extends TileBase implements IHasConfig, ITickabl
 	public int task = 0;
 	public boolean notifications = true;
 	public double radius = 1.49D;
-	public double offsetY = 0.01D;
+	public double offsetY = 1.01D;
 	public double height = 2.98D;
+	private AxisAlignedBB cachedAABB;
 
 	@Override
 	protected void writeData(NBTTagCompound nbt, EnumSaveType type)
@@ -92,11 +93,7 @@ public class TilePlayerDetector extends TileBase implements IHasConfig, ITickabl
 			return;
 		}
 
-		double x = pos.getX() + 0.5D;
-		double y = pos.getY() + offsetY;
-		double z = pos.getZ() + 0.5D;
-
-		AxisAlignedBB aabb = new AxisAlignedBB(x - radius, y, z - radius, x + radius, y + height, z + radius);
+		AxisAlignedBB aabb = getAABB();
 
 		for (EntityPlayerMP player : world.getEntitiesWithinAABB(EntityPlayerMP.class, aabb))
 		{
@@ -116,5 +113,26 @@ public class TilePlayerDetector extends TileBase implements IHasConfig, ITickabl
 	public void onConfigSaved(ConfigGroup group, ICommandSender sender)
 	{
 		markDirty();
+		updateContainingBlockInfo();
+	}
+
+	@Override
+	public void updateContainingBlockInfo()
+	{
+		super.updateContainingBlockInfo();
+		cachedAABB = null;
+	}
+
+	public AxisAlignedBB getAABB()
+	{
+		if (cachedAABB == null)
+		{
+			double x = pos.getX() + 0.5D;
+			double y = pos.getY() + offsetY;
+			double z = pos.getZ() + 0.5D;
+			cachedAABB = new AxisAlignedBB(x - radius, y, z - radius, x + radius, y + height, z + radius);
+		}
+
+		return cachedAABB;
 	}
 }
