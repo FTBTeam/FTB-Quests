@@ -6,6 +6,7 @@ import com.feed_the_beast.ftbquests.command.CommandFTBQuests;
 import com.feed_the_beast.ftbquests.gui.FTBQuestsGuiHandler;
 import com.feed_the_beast.ftbquests.integration.botania.BotaniaIntegration;
 import com.feed_the_beast.ftbquests.integration.buildcraft.BuildCraftIntegration;
+import com.feed_the_beast.ftbquests.integration.customnpcs.CustomNPCsIntegration;
 import com.feed_the_beast.ftbquests.integration.ftbutilities.FTBUtilitiesIntegration;
 import com.feed_the_beast.ftbquests.integration.gamestages.GameStagesIntegration;
 import com.feed_the_beast.ftbquests.integration.ic2.IC2Integration;
@@ -32,7 +33,7 @@ import org.apache.logging.log4j.Logger;
 		modid = FTBQuests.MOD_ID,
 		name = FTBQuests.MOD_NAME,
 		version = FTBQuests.VERSION,
-		dependencies = FTBLib.THIS_DEP + ";required-after:itemfilters;before:kubejs;after:gamestages;after:ic2;after:ftbutilities;after:botania;after:buildcraftcore;after:projecte"
+		dependencies = FTBLib.THIS_DEP + ";required-after:itemfilters;before:kubejs;after:gamestages;after:ic2;after:ftbutilities;after:botania;after:buildcraftcore;after:projecte;after:customnpcs"
 )
 public class FTBQuests
 {
@@ -94,6 +95,11 @@ public class FTBQuests
 		if (Loader.isModLoaded("gamestages"))
 		{
 			GameStagesIntegration.preInit();
+		}
+
+		if (Loader.isModLoaded("customnpcs"))
+		{
+			CustomNPCsIntegration.preInit();
 		}
 
 		NetworkRegistry.INSTANCE.registerGuiHandler(this, new FTBQuestsGuiHandler());

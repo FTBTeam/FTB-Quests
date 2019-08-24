@@ -303,7 +303,7 @@ public class FTBQuestsEventHandler
 		{
 			if (autoSubmitTasks == null)
 			{
-				autoSubmitTasks = ServerQuestFile.INSTANCE.collect(Task.class, o -> o instanceof Task && ((Task) o).autoSubmitOnPlayerTick());
+				autoSubmitTasks = ServerQuestFile.INSTANCE.collect(Task.class, o -> o instanceof Task && ((Task) o).autoSubmitOnPlayerTick() > 0);
 			}
 
 			if (autoSubmitTasks.isEmpty())
@@ -318,13 +318,20 @@ public class FTBQuestsEventHandler
 				return;
 			}
 
+			long t = event.player.world.getTotalWorldTime();
+
 			for (Task task : autoSubmitTasks)
 			{
-				TaskData taskData = data.getTaskData(task);
+				long d = task.autoSubmitOnPlayerTick();
 
-				if (!taskData.isComplete() && task.quest.canStartTasks(data))
+				if (d > 0L && t % d == 0L)
 				{
-					taskData.submitTask((EntityPlayerMP) event.player);
+					TaskData taskData = data.getTaskData(task);
+
+					if (!taskData.isComplete() && task.quest.canStartTasks(data))
+					{
+						taskData.submitTask((EntityPlayerMP) event.player);
+					}
 				}
 			}
 		}

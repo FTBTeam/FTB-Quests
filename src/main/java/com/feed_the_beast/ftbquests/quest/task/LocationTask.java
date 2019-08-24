@@ -113,9 +113,9 @@ public class LocationTask extends Task
 	}
 
 	@Override
-	public boolean autoSubmitOnPlayerTick()
+	public int autoSubmitOnPlayerTick()
 	{
-		return true;
+		return 3;
 	}
 
 	@Override

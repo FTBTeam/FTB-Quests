@@ -5,9 +5,7 @@ import com.feed_the_beast.ftbquests.quest.Chapter;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestData;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
-import com.feed_the_beast.ftbquests.quest.reward.FTBQuestsRewards;
 import com.feed_the_beast.ftbquests.quest.reward.RewardType;
-import com.feed_the_beast.ftbquests.quest.task.FTBQuestsTasks;
 import com.feed_the_beast.ftbquests.quest.task.Task;
 import com.feed_the_beast.ftbquests.quest.task.TaskType;
 import net.darkhax.gamestages.event.GameStageEvent;
@@ -23,6 +21,9 @@ import net.minecraftforge.fml.common.gameevent.PlayerEvent;
  */
 public class GameStagesIntegration
 {
+	public static TaskType GAMESTAGE_TASK;
+	public static RewardType GAMESTAGE_REWARD;
+
 	public static void preInit()
 	{
 		MinecraftForge.EVENT_BUS.register(GameStagesIntegration.class);
@@ -31,13 +32,13 @@ public class GameStagesIntegration
 	@SubscribeEvent
 	public static void registerTasks(RegistryEvent.Register<TaskType> event)
 	{
-		event.getRegistry().register(FTBQuestsTasks.GAMESTAGE = new TaskType(GameStageTask::new).setRegistryName("gamestage").setIcon(GuiIcons.CONTROLLER));
+		event.getRegistry().register(GAMESTAGE_TASK = new TaskType(GameStageTask::new).setRegistryName("gamestage").setIcon(GuiIcons.CONTROLLER));
 	}
 
 	@SubscribeEvent
 	public static void registerRewards(RegistryEvent.Register<RewardType> event)
 	{
-		event.getRegistry().register(FTBQuestsRewards.GAMESTAGE = new RewardType(GameStageReward::new).setRegistryName("gamestage").setIcon(GuiIcons.CONTROLLER));
+		event.getRegistry().register(GAMESTAGE_REWARD = new RewardType(GameStageReward::new).setRegistryName("gamestage").setIcon(GuiIcons.CONTROLLER));
 	}
 
 	@SubscribeEvent(priority = EventPriority.LOW)

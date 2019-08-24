@@ -23,11 +23,13 @@ public class CustomTask extends Task
 	}
 
 	public Check check;
+	public int checkTimer;
 
 	public CustomTask(Quest quest)
 	{
 		super(quest);
 		check = null;
+		checkTimer = 1;
 	}
 
 	@Override
@@ -43,9 +45,9 @@ public class CustomTask extends Task
 	}
 
 	@Override
-	public boolean autoSubmitOnPlayerTick()
+	public int autoSubmitOnPlayerTick()
 	{
-		return check != null;
+		return check == null ? 0 : checkTimer;
 	}
 
 	@Override

@@ -1,4 +1,4 @@
-package com.feed_the_beast.ftbquests.integration.gamestages;
+package com.feed_the_beast.ftbquests.integration.customnpcs;
 
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
@@ -9,23 +9,20 @@ import com.feed_the_beast.ftbquests.quest.task.BooleanTaskData;
 import com.feed_the_beast.ftbquests.quest.task.Task;
 import com.feed_the_beast.ftbquests.quest.task.TaskData;
 import com.feed_the_beast.ftbquests.quest.task.TaskType;
-import net.darkhax.gamestages.GameStageHelper;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.text.TextComponentTranslation;
-import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import noppes.npcs.controllers.data.PlayerData;
 
 /**
  * @author LatvianModder
  */
-public class GameStageTask extends Task
+public class NPCDialogTask extends Task
 {
-	public String stage = "";
+	public int npcDialog = 0;
 
-	public GameStageTask(Quest quest)
+	public NPCDialogTask(Quest quest)
 	{
 		super(quest);
 	}
@@ -33,35 +30,35 @@ public class GameStageTask extends Task
 	@Override
 	public TaskType getType()
 	{
-		return GameStagesIntegration.GAMESTAGE_TASK;
+		return CustomNPCsIntegration.DIALOG_TASK;
 	}
 
 	@Override
 	public void writeData(NBTTagCompound nbt)
 	{
 		super.writeData(nbt);
-		nbt.setString("stage", stage);
+		nbt.setInteger("npc_dialog", npcDialog);
 	}
 
 	@Override
 	public void readData(NBTTagCompound nbt)
 	{
 		super.readData(nbt);
-		stage = nbt.getString("stage");
+		npcDialog = nbt.getInteger("npc_dialog");
 	}
 
 	@Override
 	public void writeNetData(DataOut data)
 	{
 		super.writeNetData(data);
-		data.writeString(stage);
+		data.writeVarInt(npcDialog);
 	}
 
 	@Override
 	public void readNetData(DataIn data)
 	{
 		super.readNetData(data);
-		stage = data.readString();
+		npcDialog = data.readVarInt();
 	}
 
 	@Override
@@ -69,13 +66,13 @@ public class GameStageTask extends Task
 	public void getConfig(ConfigGroup config)
 	{
 		super.getConfig(config);
-		config.addString("stage", () -> stage, v -> stage = v, "").setDisplayName(new TextComponentTranslation("ftbquests.task.ftbquests.gamestage"));
+		config.addInt("id", () -> npcDialog, v -> npcDialog = v, 0, 0, Integer.MAX_VALUE);
 	}
 
 	@Override
-	public String getAltTitle()
+	public int autoSubmitOnPlayerTick()
 	{
-		return I18n.format("ftbquests.task.ftbquests.gamestage") + ": " + TextFormatting.YELLOW + stage;
+		return 20;
 	}
 
 	@Override
@@ -84,9 +81,9 @@ public class GameStageTask extends Task
 		return new Data(this, data);
 	}
 
-	public static class Data extends BooleanTaskData<GameStageTask>
+	public static class Data extends BooleanTaskData<NPCDialogTask>
 	{
-		private Data(GameStageTask task, QuestData data)
+		private Data(NPCDialogTask task, QuestData data)
 		{
 			super(task, data);
 		}
@@ -94,7 +91,8 @@ public class GameStageTask extends Task
 		@Override
 		public boolean canSubmit(EntityPlayerMP player)
 		{
-			return GameStageHelper.hasStage(player, task.stage);
+			PlayerData data = task.npcDialog > 0 ? PlayerData.get(player) : null;
+			return data != null && data.dialogData.dialogsRead.contains(task.npcDialog);
 		}
 	}
 }

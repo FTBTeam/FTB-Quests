@@ -247,7 +247,7 @@ public abstract class Task extends QuestObject
 	@SideOnly(Side.CLIENT)
 	public void onButtonClicked(boolean canClick)
 	{
-		if (!autoSubmitOnPlayerTick())
+		if (autoSubmitOnPlayerTick() <= 0)
 		{
 			if (canClick)
 			{
@@ -285,9 +285,9 @@ public abstract class Task extends QuestObject
 		return getMaxProgress() > 1L || consumesResources() ? getMaxProgressString() : "";
 	}
 
-	public boolean autoSubmitOnPlayerTick()
+	public int autoSubmitOnPlayerTick()
 	{
-		return false;
+		return 0;
 	}
 
 	@Override

@@ -5,7 +5,6 @@ import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestData;
 import com.feed_the_beast.ftbquests.quest.task.EnergyTask;
-import com.feed_the_beast.ftbquests.quest.task.FTBQuestsTasks;
 import com.feed_the_beast.ftbquests.quest.task.TaskData;
 import com.feed_the_beast.ftbquests.quest.task.TaskType;
 import com.feed_the_beast.ftbquests.tile.TileTaskScreenCore;
@@ -37,7 +36,7 @@ public class IC2EnergyTask extends EnergyTask
 	@Override
 	public TaskType getType()
 	{
-		return FTBQuestsTasks.IC2_ENERGY;
+		return IC2Integration.EU_TASK;
 	}
 
 	@Override
