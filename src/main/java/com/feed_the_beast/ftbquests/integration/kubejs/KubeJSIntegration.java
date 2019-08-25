@@ -59,7 +59,7 @@ public class KubeJSIntegration
 	{
 		if (!event.getReward().getQuestFile().isClient())
 		{
-			EventsJS.INSTANCE.post("ftbquests.custom_reward." + event.getReward(), new CustomRewardEventJS(event.getPlayer()));
+			EventsJS.INSTANCE.post("ftbquests.custom_reward." + event.getReward(), new CustomRewardEventJS(event.getPlayer(), event.getNotify()));
 		}
 	}
 }
