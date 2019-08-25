@@ -23,6 +23,6 @@ public class CustomReward extends Reward
 	@Override
 	public void claim(EntityPlayerMP player, boolean notify)
 	{
-		new CustomRewardEvent(this, player).post();
+		new CustomRewardEvent(this, player, notify).post();
 	}
 }

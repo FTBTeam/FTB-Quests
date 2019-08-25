@@ -8,9 +8,12 @@ import net.minecraft.entity.Entity;
  */
 public class CustomRewardEventJS extends PlayerEventJS
 {
-	public CustomRewardEventJS(Entity p)
+	public final boolean notify;
+
+	public CustomRewardEventJS(Entity p, boolean n)
 	{
 		super(p);
+		notify = n;
 	}
 
 	@Override

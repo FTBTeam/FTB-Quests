@@ -12,11 +12,13 @@ public class CustomRewardEvent extends FTBQuestsEvent
 {
 	private final CustomReward reward;
 	private final EntityPlayerMP player;
+	private final boolean notify;
 
-	public CustomRewardEvent(CustomReward r, EntityPlayerMP p)
+	public CustomRewardEvent(CustomReward r, EntityPlayerMP p, boolean n)
 	{
 		reward = r;
 		player = p;
+		notify = n;
 	}
 
 	public CustomReward getReward()
@@ -27,5 +29,10 @@ public class CustomRewardEvent extends FTBQuestsEvent
 	public EntityPlayerMP getPlayer()
 	{
 		return player;
+	}
+
+	public boolean getNotify()
+	{
+		return notify;
 	}
 }
