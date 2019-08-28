@@ -3,7 +3,7 @@ package com.feed_the_beast.ftbquests.integration.kubejs;
 import com.feed_the_beast.ftbquests.events.CustomRewardEvent;
 import com.feed_the_beast.ftbquests.events.CustomTaskEvent;
 import dev.latvian.kubejs.KubeJSBindingsEvent;
-import dev.latvian.kubejs.KubeJSEventRegistryEvent;
+import dev.latvian.kubejs.documentation.DocumentationEvent;
 import dev.latvian.kubejs.event.EventsJS;
 import dev.latvian.kubejs.player.PlayerDataCreatedEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -20,10 +20,12 @@ public class KubeJSIntegration
 	}
 
 	@SubscribeEvent
-	public static void registerEvents(KubeJSEventRegistryEvent event)
+	public static void registerDocumentation(DocumentationEvent event)
 	{
-		event.register("ftbquests.custom_task.<id>", CustomTaskEventJS.class);
-		event.register("ftbquests.custom_reward.<id>", CustomRewardEventJS.class);
+		event.registerPackage(KubeJSIntegration.class.getPackage());
+
+		event.registerEvent("ftbquests.custom_task.<id>", CustomTaskEventJS.class);
+		event.registerEvent("ftbquests.custom_reward.<id>", CustomRewardEventJS.class);
 	}
 
 	@SubscribeEvent
