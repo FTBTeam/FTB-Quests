@@ -100,6 +100,17 @@ if (ENV.CURSEFORGE_KEY) {
 			relations {
 				requiredDependency 'ftblib'
 				requiredDependency 'item-filters'
+				optionalDependency 'kubejs'
+				optionalDependency 'ftb-utilities'
+				optionalDependency 'jei'
+				optionalDependency 'industrial-craft'
+				optionalDependency 'packmode'
+				optionalDependency 'botania'
+				optionalDependency 'baubles'
+				optionalDependency 'buildcraft-core'
+				optionalDependency 'projecte'
+				optionalDependency 'game-stages'
+				optionalDependency 'custom-npcs'
 			}
 			changelog = getGitChangelog
 			changelogType = 'markdown'
