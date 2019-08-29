@@ -22,13 +22,13 @@ import java.util.Map;
 @DocClass(displayName = "FTB Quests Integration")
 public class FTBQuestsKubeJSWrapper
 {
-	@DocField("Map of quest shapes")
+	@DocField
 	public final Map<String, QuestShape> questShapes = QuestShape.NAME_MAP.map;
 
-	@DocField("Map of quest object types")
+	@DocField
 	public final Map<String, QuestObjectType> questObjectTypes = QuestObjectType.NAME_MAP.map;
 
-	@DocField("Map of quest progress types")
+	@DocField
 	public final Map<String, ChangeProgress> changeProgressTypes = ChangeProgress.NAME_MAP.map;
 
 	@Nullable

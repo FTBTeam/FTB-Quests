@@ -122,7 +122,7 @@ public abstract class QuestObject extends QuestObjectBase
 		return true;
 	}
 
-	public void onCompleted(QuestData data, List<EntityPlayerMP> notifyPlayers)
+	public void onCompleted(QuestData data, List<EntityPlayerMP> notifiedPlayers)
 	{
 	}
 

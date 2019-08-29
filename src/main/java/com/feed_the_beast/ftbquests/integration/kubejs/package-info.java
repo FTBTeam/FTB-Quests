@@ -2,7 +2,7 @@
 @mcp.MethodsReturnNonnullByDefault
 @DocPackage({
 		FTBQuestsKubeJSWrapper.class,
-		FTBQuestsKubeJSPlayerData.class,
+		FTBQuestsKubeJSPlayerData.class
 })
 package com.feed_the_beast.ftbquests.integration.kubejs;
 

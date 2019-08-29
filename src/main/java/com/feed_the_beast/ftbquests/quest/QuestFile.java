@@ -146,14 +146,14 @@ public abstract class QuestFile extends QuestObject
 	}
 
 	@Override
-	public void onCompleted(QuestData data, List<EntityPlayerMP> notifyPlayers)
+	public void onCompleted(QuestData data, List<EntityPlayerMP> notifiedPlayers)
 	{
-		super.onCompleted(data, notifyPlayers);
-		new ObjectCompletedEvent.FileEvent(data, this).post();
+		super.onCompleted(data, notifiedPlayers);
+		new ObjectCompletedEvent.FileEvent(data, this, notifiedPlayers).post();
 
 		if (!disableToast)
 		{
-			for (EntityPlayerMP player : notifyPlayers)
+			for (EntityPlayerMP player : notifiedPlayers)
 			{
 				new MessageDisplayCompletionToast(id).sendTo(player);
 			}

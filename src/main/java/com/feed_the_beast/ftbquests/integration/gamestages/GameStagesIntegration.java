@@ -42,7 +42,7 @@ public class GameStagesIntegration
 	}
 
 	@SubscribeEvent(priority = EventPriority.LOW)
-	public static void onGameStageAdded(PlayerEvent.PlayerLoggedInEvent event)
+	public static void onLoggedIn(PlayerEvent.PlayerLoggedInEvent event)
 	{
 		if (event.player instanceof EntityPlayerMP)
 		{
