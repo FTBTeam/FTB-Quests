@@ -2,6 +2,8 @@ package com.feed_the_beast.ftbquests.integration.kubejs;
 
 import com.feed_the_beast.ftbquests.events.CustomRewardEvent;
 import com.feed_the_beast.ftbquests.events.CustomTaskEvent;
+import com.feed_the_beast.ftbquests.events.ObjectCompletedEvent;
+import com.feed_the_beast.ftbquests.quest.task.CustomTask;
 import dev.latvian.kubejs.KubeJSBindingsEvent;
 import dev.latvian.kubejs.documentation.DocumentationEvent;
 import dev.latvian.kubejs.event.EventsJS;
@@ -24,8 +26,9 @@ public class KubeJSIntegration
 	{
 		event.registerPackage(KubeJSIntegration.class.getPackage());
 
-		event.registerEvent("ftbquests.custom_task.<id>", CustomTaskEventJS.class);
-		event.registerEvent("ftbquests.custom_reward.<id>", CustomRewardEventJS.class);
+		event.registerDoubleEvent("ftbquests.custom_task", "id", CustomTaskEventJS.class);
+		event.registerDoubleEvent("ftbquests.custom_reward", "id", CustomRewardEventJS.class);
+		event.registerDoubleEvent("ftbquests.completed", "id", QuestObjectCompletedEventJS.class);
 	}
 
 	@SubscribeEvent
@@ -43,25 +46,37 @@ public class KubeJSIntegration
 	@SubscribeEvent
 	public static void onCustomTask(CustomTaskEvent event)
 	{
-		if (!event.getTask().getQuestFile().isClient())
-		{
-			CustomTaskEventJS e = new CustomTaskEventJS();
-			EventsJS.INSTANCE.post("ftbquests.custom_task." + event.getTask(), e);
+		CustomTask c = event.getTask();
 
-			if (e.check != null)
+		if (!c.getQuestFile().isClient())
+		{
+			CustomTaskEventJS e = new CustomTaskEventJS(event.getTask());
+
+			if (EventsJS.postDouble("ftbquests.custom_task", e.task.toString(), e) && e.check != null)
 			{
-				event.getTask().check = new CheckWrapper(e.check);
-				event.getTask().checkTimer = e.checkTimer;
+				c.check = new CheckWrapper(e.check);
+				c.checkTimer = e.checkTimer;
+				c.enableButton = e.enableButton;
+				c.maxProgress = e.maxProgress;
 			}
 		}
 	}
 
 	@SubscribeEvent
-	public static void onCustomReward(CustomRewardEvent event)
+	public static void onCustomReward(CustomRewardEvent e)
 	{
-		if (!event.getReward().getQuestFile().isClient())
+		if (!e.getReward().getQuestFile().isClient())
 		{
-			EventsJS.INSTANCE.post("ftbquests.custom_reward." + event.getReward(), new CustomRewardEventJS(event.getPlayer(), event.getNotify()));
+			EventsJS.postDouble("ftbquests.custom_reward", e.getReward().toString(), new CustomRewardEventJS(e.getPlayer(), e.getReward(), e.getNotify()));
+		}
+	}
+
+	@SubscribeEvent
+	public static void onCompleted(ObjectCompletedEvent e)
+	{
+		if (!e.getObject().getQuestFile().isClient())
+		{
+			EventsJS.postDouble("ftbquests.completed", e.getObject().toString(), new QuestObjectCompletedEventJS(e.getData(), e.getObject(), e.getNotifiedPlayers()));
 		}
 	}
 }

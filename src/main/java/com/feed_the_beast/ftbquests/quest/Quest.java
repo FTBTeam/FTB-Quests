@@ -484,25 +484,25 @@ public final class Quest extends QuestObject
 	}
 
 	@Override
-	public void onCompleted(QuestData data, List<EntityPlayerMP> notifyPlayers)
+	public void onCompleted(QuestData data, List<EntityPlayerMP> notifiedPlayers)
 	{
 		//data.setTimesCompleted(this, data.getTimesCompleted(this) + 1);
-		super.onCompleted(data, notifyPlayers);
+		super.onCompleted(data, notifiedPlayers);
 
 		if (!disableToast)
 		{
-			for (EntityPlayerMP player : notifyPlayers)
+			for (EntityPlayerMP player : notifiedPlayers)
 			{
 				new MessageDisplayCompletionToast(id).sendTo(player);
 			}
 		}
 
 		data.checkAutoCompletion(this);
-		new ObjectCompletedEvent.QuestEvent(data, this).post();
+		new ObjectCompletedEvent.QuestEvent(data, this, notifiedPlayers).post();
 
 		if (chapter.isComplete(data))
 		{
-			chapter.onCompleted(data, notifyPlayers);
+			chapter.onCompleted(data, notifiedPlayers);
 		}
 	}
 

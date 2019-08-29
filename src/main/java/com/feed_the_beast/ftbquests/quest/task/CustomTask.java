@@ -1,12 +1,16 @@
 package com.feed_the_beast.ftbquests.quest.task;
 
+import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
+import com.feed_the_beast.ftbquests.net.MessageSubmitTask;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestData;
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import java.util.Collection;
 import java.util.function.Predicate;
 
 /**
@@ -19,17 +23,21 @@ public class CustomTask extends Task
 	@FunctionalInterface
 	public interface Check
 	{
-		boolean check(EntityPlayerMP player);
+		void check(CustomTask.Data taskData, EntityPlayerMP player);
 	}
 
 	public Check check;
 	public int checkTimer;
+	public long maxProgress;
+	public boolean enableButton;
 
 	public CustomTask(Quest quest)
 	{
 		super(quest);
 		check = null;
 		checkTimer = 1;
+		maxProgress = 1L;
+		enableButton = false;
 	}
 
 	@Override
@@ -39,9 +47,20 @@ public class CustomTask extends Task
 	}
 
 	@Override
+	public long getMaxProgress()
+	{
+		return maxProgress;
+	}
+
+	@Override
 	@SideOnly(Side.CLIENT)
 	public void onButtonClicked(boolean canClick)
 	{
+		if (enableButton && canClick)
+		{
+			GuiHelper.playClickSound();
+			new MessageSubmitTask(id).sendToServer();
+		}
 	}
 
 	@Override
@@ -56,7 +75,7 @@ public class CustomTask extends Task
 		return new Data(this, data);
 	}
 
-	public static class Data extends BooleanTaskData<CustomTask>
+	public static class Data extends TaskData<CustomTask>
 	{
 		private Data(CustomTask task, QuestData data)
 		{
@@ -64,9 +83,14 @@ public class CustomTask extends Task
 		}
 
 		@Override
-		public boolean canSubmit(EntityPlayerMP player)
+		public boolean submitTask(EntityPlayerMP player, Collection<ItemStack> itemsToCheck, boolean simulate)
 		{
-			return task.check == null || task.check.check(player);
+			if (task.check != null && !simulate && !isComplete())
+			{
+				task.check.check(this, player);
+			}
+
+			return false;
 		}
 	}
 }

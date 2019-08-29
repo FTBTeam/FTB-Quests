@@ -6,75 +6,96 @@ import com.feed_the_beast.ftbquests.quest.QuestData;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.task.Task;
+import net.minecraft.entity.player.EntityPlayerMP;
+
+import java.util.List;
 
 /**
  * @author LatvianModder
  */
 public class ObjectCompletedEvent<T extends QuestObject> extends FTBQuestsEvent
 {
-	private final QuestData team;
-	protected final T object;
+	private final QuestData data;
+	private final T object;
+	private final List<EntityPlayerMP> notifiedPlayers;
 
-	private ObjectCompletedEvent(QuestData t, T o)
+	private ObjectCompletedEvent(QuestData t, T o, List<EntityPlayerMP> n)
 	{
-		team = t;
+		data = t;
 		object = o;
+		notifiedPlayers = n;
 	}
 
+	public QuestData getData()
+	{
+		return data;
+	}
+
+	public T getObject()
+	{
+		return object;
+	}
+
+	public List<EntityPlayerMP> getNotifiedPlayers()
+	{
+		return notifiedPlayers;
+	}
+
+	@Deprecated
 	public QuestData getTeam()
 	{
-		return team;
+		return getData();
 	}
 
 	public static class FileEvent extends ObjectCompletedEvent<QuestFile>
 	{
-		public FileEvent(QuestData t, QuestFile o)
+		public FileEvent(QuestData t, QuestFile o, List<EntityPlayerMP> n)
 		{
-			super(t, o);
+			super(t, o, n);
 		}
 
 		public QuestFile getFile()
 		{
-			return object;
+			return getObject();
 		}
 	}
 
 	public static class ChapterEvent extends ObjectCompletedEvent<Chapter>
 	{
-		public ChapterEvent(QuestData t, Chapter o)
+		public ChapterEvent(QuestData t, Chapter o, List<EntityPlayerMP> n)
 		{
-			super(t, o);
+			super(t, o, n);
 		}
 
 		public Chapter getChapter()
 		{
-			return object;
+			return getObject();
 		}
 	}
 
 	public static class QuestEvent extends ObjectCompletedEvent<Quest>
 	{
-		public QuestEvent(QuestData t, Quest o)
+		public QuestEvent(QuestData t, Quest o, List<EntityPlayerMP> n)
 		{
-			super(t, o);
+			super(t, o, n);
 		}
 
 		public Quest getQuest()
 		{
-			return object;
+			return getObject();
 		}
 	}
 
 	public static class TaskEvent extends ObjectCompletedEvent<Task>
 	{
-		public TaskEvent(QuestData t, Task o)
+		public TaskEvent(QuestData t, Task o, List<EntityPlayerMP> n)
 		{
-			super(t, o);
+			super(t, o, n);
 		}
 
 		public Task getTask()
 		{
-			return object;
+			return getObject();
 		}
 	}
 }
