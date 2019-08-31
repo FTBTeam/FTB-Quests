@@ -80,6 +80,7 @@ public class FTBQuestsClientEventHandler
 
 		addModel(FTBQuestsItems.BOOK, "inventory");
 		addModel(FTBQuestsItems.LOOTCRATE, "inventory");
+		addModel(FTBQuestsItems.CUSTOM_ICON, "inventory");
 
 		ClientRegistry.bindTileEntitySpecialRenderer(TileTaskScreenCore.class, new RenderTaskScreen());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileProgressScreenCore.class, new RenderProgressScreen());

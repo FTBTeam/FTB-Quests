@@ -22,6 +22,7 @@ import com.feed_the_beast.ftbquests.block.ItemBlockTaskScreen;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.events.ClearFileCacheEvent;
 import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
+import com.feed_the_beast.ftbquests.item.ItemCustomIcon;
 import com.feed_the_beast.ftbquests.item.ItemLootCrate;
 import com.feed_the_beast.ftbquests.item.ItemQuestBook;
 import com.feed_the_beast.ftbquests.quest.QuestData;
@@ -168,7 +169,8 @@ public class FTBQuestsEventHandler
 				new ItemBlockBarrier(FTBQuestsBlocks.BARRIER).setRegistryName("barrier"),
 
 				withName(new ItemQuestBook(), "book"),
-				withName(new ItemLootCrate(), "lootcrate")
+				withName(new ItemLootCrate(), "lootcrate"),
+				withName(new ItemCustomIcon(), "custom_icon")
 		);
 	}
 

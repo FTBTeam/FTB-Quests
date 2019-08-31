@@ -79,6 +79,7 @@ public abstract class QuestFile extends QuestObject
 	public QuestFile()
 	{
 		id = 1;
+		eventID = "file";
 		fileVersion = 0;
 		chapters = new ArrayList<>();
 		rewardTables = new ArrayList<>();

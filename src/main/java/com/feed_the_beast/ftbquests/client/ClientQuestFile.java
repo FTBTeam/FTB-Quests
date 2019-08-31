@@ -17,6 +17,8 @@ import it.unimi.dsi.fastutil.objects.Object2ShortOpenHashMap;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 
 import javax.annotation.Nullable;
@@ -215,6 +217,11 @@ public class ClientQuestFile extends QuestFile
 			new MessageMyTeamGui().sendToServer();
 			//player.sendStatusMessage(new TextComponentTranslation("ftblib.lang.team.error.no_team"), true);
 		}
+	}
+
+	public void openCustomIconGui(EntityPlayer player, EnumHand hand)
+	{
+		player.sendStatusMessage(new TextComponentString("Set NBT to {icon:\"ftblib:textures/icons/support.png\"} or something"), true);
 	}
 
 	@Override

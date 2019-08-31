@@ -9,7 +9,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumHand;
-import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -20,9 +19,9 @@ import java.util.List;
 /**
  * @author LatvianModder
  */
-public class ItemQuestBook extends Item
+public class ItemCustomIcon extends Item
 {
-	public ItemQuestBook()
+	public ItemCustomIcon()
 	{
 		setMaxStackSize(1);
 	}
@@ -32,40 +31,21 @@ public class ItemQuestBook extends Item
 	{
 		if (world.isRemote)
 		{
-			openGui(player);
+			openGui(player, hand);
 		}
 
 		return new ActionResult<>(EnumActionResult.SUCCESS, player.getHeldItem(hand));
 	}
 
-	private void openGui(EntityPlayer player)
+	private void openGui(EntityPlayer player, EnumHand hand)
 	{
-		ClientQuestFile.INSTANCE.openQuestGui(player);
-	}
-
-	@Override
-	public ItemStack getContainerItem(ItemStack stack)
-	{
-		return stack.copy();
-	}
-
-	@Override
-	public boolean hasContainerItem(ItemStack stack)
-	{
-		return true;
+		ClientQuestFile.INSTANCE.openCustomIconGui(player, hand);
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn)
 	{
-		if (ClientQuestFile.exists() && ClientQuestFile.INSTANCE.disableGui && !ClientQuestFile.INSTANCE.editingMode)
-		{
-			tooltip.add(TextFormatting.RED + I18n.format("item.ftbquests.book.disabled"));
-		}
-		else
-		{
-			tooltip.add(I18n.format("item.ftbquests.book.tooltip"));
-		}
+		tooltip.add(I18n.format("item.ftbquests.custom_icon.tooltip"));
 	}
 }

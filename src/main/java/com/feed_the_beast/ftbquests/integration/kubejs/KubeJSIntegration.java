@@ -4,11 +4,11 @@ import com.feed_the_beast.ftbquests.events.CustomRewardEvent;
 import com.feed_the_beast.ftbquests.events.CustomTaskEvent;
 import com.feed_the_beast.ftbquests.events.ObjectCompletedEvent;
 import com.feed_the_beast.ftbquests.quest.task.CustomTask;
-import dev.latvian.kubejs.documentation.AttachedDataType;
 import dev.latvian.kubejs.documentation.DocumentationEvent;
 import dev.latvian.kubejs.event.EventsJS;
-import dev.latvian.kubejs.player.PlayerDataCreatedEvent;
+import dev.latvian.kubejs.player.AttachPlayerDataEvent;
 import dev.latvian.kubejs.script.BindingsEvent;
+import dev.latvian.kubejs.script.DataType;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
@@ -25,7 +25,7 @@ public class KubeJSIntegration
 	@SubscribeEvent
 	public static void registerDocumentation(DocumentationEvent event)
 	{
-		event.registerAttachedData(AttachedDataType.PLAYER, "ftbquests", FTBQuestsKubeJSPlayerData.class);
+		event.registerAttachedData(DataType.PLAYER, "ftbquests", FTBQuestsKubeJSPlayerData.class);
 
 		event.registerDoubleEvent("ftbquests.custom_task", "id", CustomTaskEventJS.class);
 		event.registerDoubleEvent("ftbquests.custom_reward", "id", CustomRewardEventJS.class);
@@ -39,9 +39,9 @@ public class KubeJSIntegration
 	}
 
 	@SubscribeEvent
-	public static void onPlayerDataCreated(PlayerDataCreatedEvent event)
+	public static void attachPlayerData(AttachPlayerDataEvent event)
 	{
-		event.setData("ftbquests", new FTBQuestsKubeJSPlayerData(event.getPlayerData()));
+		event.add("ftbquests", new FTBQuestsKubeJSPlayerData(event.getParent()));
 	}
 
 	@SubscribeEvent
@@ -53,7 +53,7 @@ public class KubeJSIntegration
 		{
 			CustomTaskEventJS e = new CustomTaskEventJS(event.getTask());
 
-			if (EventsJS.postDouble("ftbquests.custom_task", e.task.toString(), e) && e.check != null)
+			if (EventsJS.postDouble("ftbquests.custom_task", e.task.getEventID(), e) && e.check != null)
 			{
 				c.check = new CheckWrapper(e.check);
 				c.checkTimer = e.checkTimer;
@@ -68,7 +68,7 @@ public class KubeJSIntegration
 	{
 		if (!e.getReward().getQuestFile().isClient())
 		{
-			EventsJS.postDouble("ftbquests.custom_reward", e.getReward().toString(), new CustomRewardEventJS(e.getPlayer(), e.getReward(), e.getNotify()));
+			EventsJS.postDouble("ftbquests.custom_reward", e.getReward().getEventID(), new CustomRewardEventJS(e.getPlayer(), e.getReward(), e.getNotify()));
 		}
 	}
 
@@ -77,7 +77,7 @@ public class KubeJSIntegration
 	{
 		if (!e.getObject().getQuestFile().isClient())
 		{
-			EventsJS.postDouble("ftbquests.completed", e.getObject().toString(), new QuestObjectCompletedEventJS(e.getData(), e.getObject(), e.getNotifiedPlayers()));
+			EventsJS.postDouble("ftbquests.completed", e.getObject().getEventID(), new QuestObjectCompletedEventJS(e.getData(), e.getObject(), e.getNotifiedPlayers()));
 		}
 	}
 }

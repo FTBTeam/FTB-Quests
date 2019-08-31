@@ -1,7 +1,7 @@
 {
 	"quests": {
 		"group": "ftblib:info",
-		"icon": "minecraft:items/book_enchanted",
+		"icon": "ftbquests:items/book",
 		"x": 610,
 		"click": "ftbquests:open_gui",
 		"required_server_mods": ["ftbquests"],

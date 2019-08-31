@@ -7,6 +7,7 @@ import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.loot.LootCrate;
 import com.feed_the_beast.ftbquests.quest.loot.RewardTable;
 import com.feed_the_beast.ftbquests.quest.loot.WeightedReward;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
@@ -154,6 +155,9 @@ public class ItemLootCrate extends Item
 	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack stack, @Nullable World world, List<String> tooltip, ITooltipFlag flag)
 	{
+		tooltip.add(I18n.format("item.ftbquests.lootcrate.tooltip_1"));
+		tooltip.add(I18n.format("item.ftbquests.lootcrate.tooltip_2"));
+
 		if (world == null || !ClientQuestFile.exists())
 		{
 			return;
@@ -165,11 +169,13 @@ public class ItemLootCrate extends Item
 		{
 			if (crate.itemName.isEmpty())
 			{
+				tooltip.add("");
 				tooltip.add(crate.table.getTitle());
 			}
 		}
 		else if (stack.hasTagCompound() && stack.getTagCompound().hasKey("type"))
 		{
+			tooltip.add("");
 			tooltip.add(stack.getTagCompound().getString("type"));
 		}
 	}

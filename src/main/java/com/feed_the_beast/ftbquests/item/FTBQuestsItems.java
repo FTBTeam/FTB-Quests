@@ -22,4 +22,5 @@ public class FTBQuestsItems
 
 	public static final Item BOOK = Items.AIR;
 	public static final Item LOOTCRATE = Items.AIR;
+	public static final Item CUSTOM_ICON = Items.AIR;
 }
