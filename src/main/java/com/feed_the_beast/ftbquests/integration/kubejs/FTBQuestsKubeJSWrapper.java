@@ -31,32 +31,36 @@ public class FTBQuestsKubeJSWrapper
 	@DocField
 	public final Map<String, ChangeProgress> changeProgressTypes = ChangeProgress.NAME_MAP.map;
 
-	@Nullable
 	@DocMethod("Currently loaded quest file. Can be null")
 	public ServerQuestFile file()
 	{
+		if (ServerQuestFile.INSTANCE == null)
+		{
+			throw new NullPointerException("Server quest file isn't loaded!");
+		}
+
 		return ServerQuestFile.INSTANCE;
 	}
 
 	@Nullable
-	@DocMethod(value = "Quest data from team UID", params = @Param("team"))
-	public QuestData data(int team)
+	@DocMethod(value = "Quest data from team UID", params = @Param(value = "team", type = short.class))
+	public QuestData data(Number team)
 	{
-		return ServerQuestFile.INSTANCE.getData((short) team);
+		return file().getData(team.shortValue());
 	}
 
 	@Nullable
 	@DocMethod(value = "Quest data from team ID", params = @Param("team"))
 	public QuestData data(String team)
 	{
-		return ServerQuestFile.INSTANCE.getData(team);
+		return file().getData(team);
 	}
 
 	@Nullable
 	@DocMethod(value = "Quest data from player")
 	public QuestData data(PlayerJS player)
 	{
-		return ServerQuestFile.INSTANCE.getData(player.player);
+		return file().getData(player.player);
 	}
 
 	@Nullable
@@ -65,7 +69,7 @@ public class FTBQuestsKubeJSWrapper
 	{
 		if (id instanceof Number)
 		{
-			return ServerQuestFile.INSTANCE.getBase(((Number) id).intValue());
+			return file().getBase(((Number) id).intValue());
 		}
 
 		return object(QuestFile.getID(id.toString()));

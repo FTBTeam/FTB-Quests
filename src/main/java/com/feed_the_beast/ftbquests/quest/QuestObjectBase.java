@@ -6,6 +6,7 @@ import com.feed_the_beast.ftblib.lib.config.EnumTristate;
 import com.feed_the_beast.ftblib.lib.gui.misc.GuiEditConfig;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
+import com.feed_the_beast.ftblib.lib.io.Bits;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.io.DataReader;
@@ -14,6 +15,7 @@ import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.client.FTBQuestsClient;
 import com.feed_the_beast.ftbquests.gui.editor.ConfigPane;
+import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.net.edit.MessageChangeProgressResponse;
 import com.feed_the_beast.ftbquests.net.edit.MessageEditObject;
 import com.feed_the_beast.ftbquests.util.QuestObjectText;
@@ -36,6 +38,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 /**
  * @author LatvianModder
@@ -66,6 +69,7 @@ public abstract class QuestObjectBase
 	public boolean invalid = false;
 	public String title = "";
 	public ItemStack icon = ItemStack.EMPTY;
+	public String eventID = "";
 
 	private Icon cachedIcon = null;
 	private String cachedTitle = null;
@@ -74,6 +78,11 @@ public abstract class QuestObjectBase
 	public final String toString()
 	{
 		return getCodeString(id);
+	}
+
+	public final String getEventID()
+	{
+		return eventID.isEmpty() ? getCodeString(id) : eventID;
 	}
 
 	public final boolean equals(Object object)
@@ -131,24 +140,51 @@ public abstract class QuestObjectBase
 		{
 			nbt.setTag("icon", ItemMissing.write(icon, false));
 		}
+
+		if (!eventID.isEmpty())
+		{
+			nbt.setString("event_id", eventID);
+		}
 	}
 
 	public void readData(NBTTagCompound nbt)
 	{
 		title = nbt.getString("title");
 		icon = ItemMissing.read(nbt.getTag("icon"));
+		eventID = nbt.getString("event_id");
 	}
 
 	public void writeNetData(DataOut data)
 	{
-		data.writeString(title);
-		data.writeItemStack(icon);
+		int flags = 0;
+		flags = Bits.setFlag(flags, 1, !title.isEmpty());
+		flags = Bits.setFlag(flags, 2, !icon.isEmpty());
+		flags = Bits.setFlag(flags, 4, !eventID.isEmpty());
+
+		data.writeVarInt(flags);
+
+		if (!title.isEmpty())
+		{
+			data.writeString(title);
+		}
+
+		if (!icon.isEmpty())
+		{
+			data.writeItemStack(icon);
+		}
+
+		if (!eventID.isEmpty())
+		{
+			data.writeString(eventID);
+		}
 	}
 
 	public void readNetData(DataIn data)
 	{
-		title = data.readString();
-		icon = data.readItemStack();
+		int flags = data.readVarInt();
+		title = Bits.getFlag(flags, 1) ? data.readString() : "";
+		icon = Bits.getFlag(flags, 2) ? data.readItemStack() : ItemStack.EMPTY;
+		eventID = Bits.getFlag(flags, 4) ? data.readString() : "";
 	}
 
 	@SideOnly(Side.CLIENT)
@@ -156,6 +192,7 @@ public abstract class QuestObjectBase
 	{
 		config.addString("title", () -> title, v -> title = v, "").setDisplayName(new TextComponentTranslation("ftbquests.title")).setOrder(-127);
 		config.add("icon", new ConfigItemStack.SimpleStack(() -> icon, v -> icon = v), new ConfigItemStack(ItemStack.EMPTY)).setDisplayName(new TextComponentTranslation("ftbquests.icon")).setOrder(-126);
+		config.addString("event_id", () -> eventID, v -> eventID = v, "", Pattern.compile("^[a-z0-9_]*$")).setDisplayName(new TextComponentTranslation("ftbquests.event_id")).setOrder(-125);
 	}
 
 	public QuestObjectText loadText()
@@ -283,9 +320,17 @@ public abstract class QuestObjectBase
 
 		if (!icon.isEmpty())
 		{
-			cachedIcon = ItemIcon.getItemIcon(icon);
+			if (icon.getItem() == FTBQuestsItems.CUSTOM_ICON && icon.hasTagCompound())
+			{
+				cachedIcon = Icon.getIcon(icon.getTagCompound().getString("icon"));
+			}
+			else
+			{
+				cachedIcon = ItemIcon.getItemIcon(icon);
+			}
 		}
-		else
+
+		if (cachedIcon == null || cachedIcon.isEmpty())
 		{
 			cachedIcon = getAltIcon();
 		}

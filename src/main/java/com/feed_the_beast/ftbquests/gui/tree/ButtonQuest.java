@@ -12,12 +12,15 @@ import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.gui.FTBQuestsTheme;
+import com.feed_the_beast.ftbquests.gui.GuiSelectQuestObject;
 import com.feed_the_beast.ftbquests.net.edit.MessageCreateObject;
 import com.feed_the_beast.ftbquests.net.edit.MessageEditObject;
+import com.feed_the_beast.ftbquests.quest.Chapter;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.reward.Reward;
 import com.feed_the_beast.ftbquests.quest.reward.RewardType;
+import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
@@ -135,8 +138,21 @@ public class ButtonQuest extends Button
 					treeGui.movingQuest = true;
 					treeGui.selectedQuests.clear();
 					treeGui.toggleSelected(quest);
-
 				}));
+
+				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.move_to_chapter"), GuiIcons.RIGHT, () -> {
+					ConfigQuestObject object = new ConfigQuestObject(treeGui.file, 0, o -> o instanceof Chapter && o != quest.chapter && !quest.hasDependency((Chapter) o));
+					new GuiSelectQuestObject(object, this, () -> {
+						treeGui.open(treeGui.file.get(object.getObject()));
+					}).openGui();
+				})
+				{
+					@Override
+					public void addMouseOverText(List<String> list)
+					{
+						list.add(TextFormatting.DARK_GRAY + I18n.format("ftbquests.gui.move_tooltip"));
+					}
+				});
 
 				if (selectedQuest != null && selectedQuest != quest)
 				{

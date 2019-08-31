@@ -43,8 +43,13 @@ tile.ftbquests.loot_crate_opener.name=Loot Crate Opener
 tile.ftbquests.loot_crate_opener.rightclick=Stored items: %d
 
 item.ftbquests.book.name=Quest Book
+item.ftbquests.book.tooltip=Right-click to open quest window
 item.ftbquests.book.disabled=Quest Book GUI is disabled!
 item.ftbquests.lootcrate.name=Loot Crate
+item.ftbquests.lootcrate.tooltip_1=Right-click to open
+item.ftbquests.lootcrate.tooltip_2=Sneak-right-click to open all in hand
+item.ftbquests.custom_icon.name=Custom Icon
+item.ftbquests.custom_icon.tooltip=Right-click to set icon and use this item from inventory as Icon in quests
 
 ftbquests.rarity.common=Common
 ftbquests.rarity.uncommon=Uncommon
@@ -67,7 +72,11 @@ ftbquests.unnamed=Unnamed
 ftbquests.team=Team
 ftbquests.progress=Progress
 ftbquests.title=Title
+ftbquests.title.tooltip=Custom title
 ftbquests.icon=Icon
+ftbquests.icon.tooltip=Custom icon
+ftbquests.event_id=Event ID
+ftbquests.event_id.tooltip=Used for KubeJS events
 ftbquests.completion_command=Completion Command
 ftbquests.dependencies=Dependencies
 ftbquests.dependency=Dependency
@@ -172,6 +181,8 @@ ftbquests.gui.pin=Pin
 ftbquests.gui.unpin=Unpin
 ftbquests.gui.autopin.on=Auto-pin: Enabled
 ftbquests.gui.autopin.off=Auto-pin: Disabled
+ftbquests.gui.move_to_chapter=Move to another chapter
+ftbquests.gui.move_tooltip=Shortcut: Middle mouse button click
 
 ftbquests.task=Task
 ftbquests.tasks=Tasks

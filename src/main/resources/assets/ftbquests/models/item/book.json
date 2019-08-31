@@ -1,3 +1,6 @@
 {
-	"parent": "item/enchanted_book"
+	"parent": "item/generated",
+	"textures": {
+		"layer0": "ftbquests:items/book"
+	}
 }
