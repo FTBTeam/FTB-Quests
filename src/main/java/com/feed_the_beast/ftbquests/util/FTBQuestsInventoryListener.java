@@ -32,7 +32,11 @@ public class FTBQuestsInventoryListener implements IContainerListener
 	public static void detect(EntityPlayerMP player, Collection<ItemStack> itemsToCheck)
 	{
 		detectCounter = 0;
-		detect0(player, itemsToCheck);
+
+		if (ServerQuestFile.INSTANCE != null)
+		{
+			detect0(player, itemsToCheck);
+		}
 	}
 
 	private static void detect0(EntityPlayerMP player, Collection<ItemStack> itemsToCheck)
