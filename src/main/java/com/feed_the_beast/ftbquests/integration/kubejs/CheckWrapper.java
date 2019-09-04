@@ -21,7 +21,7 @@ public class CheckWrapper implements CustomTask.Check
 	{
 		CustomTaskDataWrapper wrapper = new CustomTaskDataWrapper(taskData);
 		long prev = wrapper.progress;
-		checkerJS.check(wrapper, ServerJS.instance.player(player.getUniqueID()));
+		checkerJS.check(wrapper, ServerJS.instance.getPlayer(player.getUniqueID()));
 
 		if (prev != wrapper.progress)
 		{
