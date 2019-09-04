@@ -7,6 +7,7 @@ import dev.latvian.kubejs.documentation.DocClass;
 import dev.latvian.kubejs.documentation.DocMethod;
 import dev.latvian.kubejs.documentation.Param;
 import dev.latvian.kubejs.player.PlayerDataJS;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 
 /**
@@ -25,19 +26,23 @@ public class FTBQuestsKubeJSPlayerData
 	@DocMethod("Returns true if player is in editing mode")
 	public boolean canEdit()
 	{
-		EntityPlayerMP p = playerData.getPlayerEntity();
+		EntityPlayer p = playerData.getPlayerEntity();
 		return p != null && FTBQuests.canEdit(p);
 	}
 
 	@DocMethod(value = "Sets editing mode for player", params = @Param("canEdit"))
 	public void setCanEdit(boolean canEdit)
 	{
-		EntityPlayerMP p = playerData.getPlayerEntity();
+		EntityPlayer p = playerData.getPlayerEntity();
 
 		if (p != null)
 		{
 			NBTUtils.getPersistedData(p, canEdit).setBoolean("ftbquests_editing_mode", canEdit);
-			new MessageSyncEditingMode(canEdit).sendTo(p);
+
+			if (p instanceof EntityPlayerMP)
+			{
+				new MessageSyncEditingMode(canEdit).sendTo((EntityPlayerMP) p);
+			}
 		}
 	}
 }
