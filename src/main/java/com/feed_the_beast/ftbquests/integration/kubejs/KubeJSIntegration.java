@@ -3,7 +3,6 @@ package com.feed_the_beast.ftbquests.integration.kubejs;
 import com.feed_the_beast.ftbquests.events.CustomRewardEvent;
 import com.feed_the_beast.ftbquests.events.CustomTaskEvent;
 import com.feed_the_beast.ftbquests.events.ObjectCompletedEvent;
-import com.feed_the_beast.ftbquests.quest.task.CustomTask;
 import dev.latvian.kubejs.documentation.DocumentationEvent;
 import dev.latvian.kubejs.event.EventsJS;
 import dev.latvian.kubejs.player.AttachPlayerDataEvent;
@@ -47,37 +46,24 @@ public class KubeJSIntegration
 	@SubscribeEvent
 	public static void onCustomTask(CustomTaskEvent event)
 	{
-		CustomTask c = event.getTask();
-
-		if (!c.getQuestFile().isClient())
+		if (EventsJS.postDouble("ftbquests.custom_task", event.getTask().getEventID(), new CustomTaskEventJS(event)))
 		{
-			CustomTaskEventJS e = new CustomTaskEventJS(event.getTask());
-
-			if (EventsJS.postDouble("ftbquests.custom_task", e.task.getEventID(), e) && e.check != null)
-			{
-				c.check = new CheckWrapper(e.check);
-				c.checkTimer = e.checkTimer;
-				c.enableButton = e.enableButton;
-				c.maxProgress = e.maxProgress;
-			}
+			event.setCanceled(true);
 		}
 	}
 
 	@SubscribeEvent
-	public static void onCustomReward(CustomRewardEvent e)
+	public static void onCustomReward(CustomRewardEvent event)
 	{
-		if (!e.getReward().getQuestFile().isClient())
+		if (EventsJS.postDouble("ftbquests.custom_reward", event.getReward().getEventID(), new CustomRewardEventJS(event)))
 		{
-			EventsJS.postDouble("ftbquests.custom_reward", e.getReward().getEventID(), new CustomRewardEventJS(e.getPlayer(), e.getReward(), e.getNotify()));
+			event.setCanceled(true);
 		}
 	}
 
 	@SubscribeEvent
-	public static void onCompleted(ObjectCompletedEvent e)
+	public static void onCompleted(ObjectCompletedEvent event)
 	{
-		if (!e.getObject().getQuestFile().isClient())
-		{
-			EventsJS.postDouble("ftbquests.completed", e.getObject().getEventID(), new QuestObjectCompletedEventJS(e.getData(), e.getObject(), e.getNotifiedPlayers()));
-		}
+		EventsJS.postDouble("ftbquests.completed", event.getObject().getEventID(), new QuestObjectCompletedEventJS(event));
 	}
 }
