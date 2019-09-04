@@ -1,17 +1,18 @@
 package com.feed_the_beast.ftbquests.integration.kubejs;
 
+import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.ChangeProgress;
 import com.feed_the_beast.ftbquests.quest.QuestData;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.quest.QuestShape;
-import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import dev.latvian.kubejs.documentation.DocClass;
 import dev.latvian.kubejs.documentation.DocField;
 import dev.latvian.kubejs.documentation.DocMethod;
 import dev.latvian.kubejs.documentation.Param;
 import dev.latvian.kubejs.player.PlayerJS;
+import dev.latvian.kubejs.world.WorldJS;
 
 import javax.annotation.Nullable;
 import java.util.Map;
@@ -31,47 +32,49 @@ public class FTBQuestsKubeJSWrapper
 	@DocField
 	public final Map<String, ChangeProgress> changeProgressTypes = ChangeProgress.NAME_MAP.map;
 
-	@DocMethod("Currently loaded quest file. Can be null")
-	public ServerQuestFile file()
+	@DocMethod(value = "Currently loaded quest file. Can be null", params = @Param("world"))
+	public QuestFile file(WorldJS world)
 	{
-		if (ServerQuestFile.INSTANCE == null)
+		QuestFile f = FTBQuests.PROXY.getQuestFile(world.world);
+
+		if (f == null)
 		{
-			throw new NullPointerException("Server quest file isn't loaded!");
+			throw new NullPointerException("Quest file isn't loaded!");
 		}
 
-		return ServerQuestFile.INSTANCE;
+		return f;
 	}
 
 	@Nullable
-	@DocMethod(value = "Quest data from team UID", params = @Param(value = "team", type = short.class))
-	public QuestData data(Number team)
+	@DocMethod(value = "Quest data from team UID", params = {@Param("world"), @Param(value = "team", type = short.class)})
+	public QuestData data(WorldJS world, Number team)
 	{
-		return file().getData(team.shortValue());
+		return file(world).getData(team.shortValue());
 	}
 
 	@Nullable
-	@DocMethod(value = "Quest data from team ID", params = @Param("team"))
-	public QuestData data(String team)
+	@DocMethod(value = "Quest data from team ID", params = {@Param("world"), @Param("team")})
+	public QuestData data(WorldJS world, String team)
 	{
-		return file().getData(team);
+		return file(world).getData(team);
 	}
 
 	@Nullable
-	@DocMethod(value = "Quest data from player")
+	@DocMethod(value = "Quest data from player", params = @Param("player"))
 	public QuestData data(PlayerJS player)
 	{
-		return file().getData(player.player);
+		return file(player.world).getData(player.player);
 	}
 
 	@Nullable
-	@DocMethod(value = "Quest object from object UID", params = @Param("id"))
-	public QuestObjectBase object(Object id)
+	@DocMethod(value = "Quest object from object UID", params = {@Param("world"), @Param("id")})
+	public QuestObjectBase object(WorldJS world, Object id)
 	{
 		if (id instanceof Number)
 		{
-			return file().getBase(((Number) id).intValue());
+			return file(world).getBase(((Number) id).intValue());
 		}
 
-		return object(QuestFile.getID(id.toString()));
+		return object(world, QuestFile.getID(id.toString()));
 	}
 }
