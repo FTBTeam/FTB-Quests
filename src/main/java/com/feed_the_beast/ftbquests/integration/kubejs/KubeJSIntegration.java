@@ -26,8 +26,8 @@ public class KubeJSIntegration
 	{
 		event.registerAttachedData(DataType.PLAYER, "ftbquests", FTBQuestsKubeJSPlayerData.class);
 
-		event.registerDoubleEvent("ftbquests.custom_task", "id", CustomTaskEventJS.class);
-		event.registerDoubleEvent("ftbquests.custom_reward", "id", CustomRewardEventJS.class);
+		event.registerDoubleEvent("ftbquests.custom_task", "id", CustomTaskEventJS.class, true);
+		event.registerDoubleEvent("ftbquests.custom_reward", "id", CustomRewardEventJS.class, true);
 		event.registerDoubleEvent("ftbquests.completed", "id", QuestObjectCompletedEventJS.class);
 	}
 
