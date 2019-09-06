@@ -3,6 +3,8 @@ package com.feed_the_beast.ftbquests.integration.kubejs;
 import com.feed_the_beast.ftblib.lib.util.NBTUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.net.MessageSyncEditingMode;
+import com.feed_the_beast.ftbquests.quest.QuestData;
+import com.feed_the_beast.ftbquests.quest.QuestFile;
 import dev.latvian.kubejs.documentation.DocClass;
 import dev.latvian.kubejs.documentation.DocMethod;
 import dev.latvian.kubejs.documentation.Param;
@@ -24,7 +26,7 @@ public class FTBQuestsKubeJSPlayerData
 	}
 
 	@DocMethod("Returns true if player is in editing mode")
-	public boolean canEdit()
+	public boolean getCanEdit()
 	{
 		EntityPlayer p = playerData.getPlayerEntity();
 		return p != null && FTBQuests.canEdit(p);
@@ -44,5 +46,15 @@ public class FTBQuestsKubeJSPlayerData
 				new MessageSyncEditingMode(canEdit).sendTo((EntityPlayerMP) p);
 			}
 		}
+	}
+
+	public QuestFile getFile()
+	{
+		return FTBQuests.PROXY.getQuestFile(playerData.getOverworld().world);
+	}
+
+	public QuestData getData()
+	{
+		return getFile().getData(playerData.getPlayerEntity());
 	}
 }
