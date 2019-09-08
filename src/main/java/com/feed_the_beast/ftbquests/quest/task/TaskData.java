@@ -2,6 +2,7 @@ package com.feed_the_beast.ftbquests.quest.task;
 
 import com.feed_the_beast.ftblib.lib.data.ForgePlayer;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
+import com.feed_the_beast.ftbquests.events.TaskStartedEvent;
 import com.feed_the_beast.ftbquests.net.MessageUpdateTaskProgress;
 import com.feed_the_beast.ftbquests.quest.ChangeProgress;
 import com.feed_the_beast.ftbquests.quest.QuestData;
@@ -10,6 +11,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.items.IItemHandler;
@@ -57,6 +59,11 @@ public class TaskData<T extends Task> implements ICapabilityProvider, IItemHandl
 				if (ChangeProgress.sendUpdates)
 				{
 					new MessageUpdateTaskProgress(data.getTeamUID(), task.id, progress).sendToAll();
+				}
+
+				if (p == 0)
+				{
+					MinecraftForge.EVENT_BUS.post(new TaskStartedEvent(this));
 				}
 
 				if (!taskCompleted && isComplete())

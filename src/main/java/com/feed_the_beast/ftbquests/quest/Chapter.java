@@ -135,6 +135,11 @@ public final class Chapter extends QuestObject
 	@Override
 	public int getRelativeProgressFromChildren(QuestData data)
 	{
+		if (alwaysInvisible)
+		{
+			return 100;
+		}
+
 		int progress = 0;
 
 		for (Quest quest : quests)

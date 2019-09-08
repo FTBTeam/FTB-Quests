@@ -63,7 +63,7 @@ public class FTBQuestsKubeJSWrapper
 	@DocMethod(value = "Quest data from player", params = @Param("player"))
 	public QuestData data(PlayerJS player)
 	{
-		return file(player.world).getData(player.player);
+		return file(player.world).getData(player.entityPlayer);
 	}
 
 	@Nullable
