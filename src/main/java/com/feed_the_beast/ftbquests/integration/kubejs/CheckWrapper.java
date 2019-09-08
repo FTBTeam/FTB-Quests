@@ -19,13 +19,6 @@ public class CheckWrapper implements CustomTask.Check
 	@Override
 	public void check(CustomTask.Data taskData, EntityPlayerMP player)
 	{
-		CustomTaskDataWrapper wrapper = new CustomTaskDataWrapper(taskData);
-		long prev = wrapper.progress;
-		checkerJS.check(wrapper, ServerJS.instance.getPlayer(player.getUniqueID()));
-
-		if (prev != wrapper.progress)
-		{
-			taskData.setProgress(wrapper.progress);
-		}
+		checkerJS.check(taskData, ServerJS.instance.getPlayer(player));
 	}
 }

@@ -3,7 +3,7 @@ package com.feed_the_beast.ftbquests.integration.kubejs;
 import com.feed_the_beast.ftbquests.quest.QuestData;
 import com.feed_the_beast.ftbquests.quest.task.CustomTask;
 import dev.latvian.kubejs.documentation.DocClass;
-import dev.latvian.kubejs.documentation.DocField;
+import dev.latvian.kubejs.documentation.DocMethod;
 
 /**
  * @author LatvianModder
@@ -11,18 +11,34 @@ import dev.latvian.kubejs.documentation.DocField;
 @DocClass(displayName = "Custom Task Data")
 public class CustomTaskDataWrapper
 {
-	@DocField
-	public final CustomTask task;
-
-	@DocField
-	public final QuestData data;
-
-	public long progress;
+	private final CustomTask.Data taskData;
 
 	CustomTaskDataWrapper(CustomTask.Data d)
 	{
-		task = d.task;
-		data = d.data;
-		progress = d.progress;
+		taskData = d;
+	}
+
+	@DocMethod
+	public CustomTask getTask()
+	{
+		return taskData.task;
+	}
+
+	@DocMethod
+	public QuestData getData()
+	{
+		return taskData.data;
+	}
+
+	@DocMethod
+	public long getProgress()
+	{
+		return taskData.progress;
+	}
+
+	@DocMethod
+	public void setProgress(long progress)
+	{
+		taskData.setProgress(progress);
 	}
 }

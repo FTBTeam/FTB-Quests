@@ -1,5 +1,6 @@
 package com.feed_the_beast.ftbquests.integration.kubejs;
 
+import com.feed_the_beast.ftbquests.quest.task.CustomTask;
 import dev.latvian.kubejs.player.PlayerJS;
 
 /**
@@ -8,5 +9,5 @@ import dev.latvian.kubejs.player.PlayerJS;
 @FunctionalInterface
 public interface CustomTaskCheckerJS
 {
-	void check(CustomTaskDataWrapper task, PlayerJS player);
+	void check(CustomTask.Data taskData, PlayerJS player);
 }
