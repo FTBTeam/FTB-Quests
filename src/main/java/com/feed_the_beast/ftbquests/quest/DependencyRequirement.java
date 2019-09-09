@@ -27,7 +27,7 @@ public enum DependencyRequirement implements IWithID
 	}
 
 	@Override
-	public String getID()
+	public String getId()
 	{
 		return id;
 	}

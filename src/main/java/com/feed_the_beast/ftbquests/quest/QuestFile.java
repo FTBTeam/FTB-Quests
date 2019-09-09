@@ -405,8 +405,8 @@ public abstract class QuestFile extends QuestObject
 		nbt.setInteger("version", VERSION);
 		nbt.setBoolean("default_reward_team", defaultRewardTeam);
 		nbt.setBoolean("default_consume_items", defaultTeamConsumeItems);
-		nbt.setString("default_autoclaim_rewards", defaultRewardAutoclaim.getID());
-		nbt.setString("default_quest_shape", defaultShape.getID());
+		nbt.setString("default_autoclaim_rewards", defaultRewardAutoclaim.getId());
+		nbt.setString("default_quest_shape", defaultShape.getId());
 		nbt.setBoolean("default_quest_disable_jei", defaultQuestDisableJEI);
 
 		if (!emergencyItems.isEmpty())

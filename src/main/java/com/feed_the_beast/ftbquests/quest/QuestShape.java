@@ -39,7 +39,7 @@ public final class QuestShape extends Icon implements IWithID
 	}
 
 	@Override
-	public String getID()
+	public String getId()
 	{
 		return id;
 	}

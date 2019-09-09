@@ -131,7 +131,7 @@ public final class Quest extends QuestObject
 
 		if (shape != chapter.file.defaultShape)
 		{
-			nbt.setString("shape", shape.getID());
+			nbt.setString("shape", shape.getId());
 		}
 
 		if (!description.isEmpty())
@@ -204,7 +204,7 @@ public final class Quest extends QuestObject
 
 		if (dependencyRequirement != DependencyRequirement.ALL_COMPLETED)
 		{
-			nbt.setString("dependency_requirement", dependencyRequirement.getID());
+			nbt.setString("dependency_requirement", dependencyRequirement.getId());
 		}
 
 		if (hideTextUntilComplete)

@@ -25,7 +25,7 @@ public enum NumberMode implements IWithID
 	}
 
 	@Override
-	public String getID()
+	public String getId()
 	{
 		return name;
 	}

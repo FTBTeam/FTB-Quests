@@ -69,7 +69,7 @@ public class ConfigQuestObject extends ConfigValue
 	}
 
 	@Override
-	public String getID()
+	public String getId()
 	{
 		return ID;
 	}
