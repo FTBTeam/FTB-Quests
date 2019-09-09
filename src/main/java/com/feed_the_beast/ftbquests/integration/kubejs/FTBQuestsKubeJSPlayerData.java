@@ -5,6 +5,7 @@ import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.net.MessageSyncEditingMode;
 import com.feed_the_beast.ftbquests.quest.QuestData;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
+import com.feed_the_beast.ftbquests.quest.task.Task;
 import dev.latvian.kubejs.documentation.DocClass;
 import dev.latvian.kubejs.documentation.DocMethod;
 import dev.latvian.kubejs.documentation.Param;
@@ -48,13 +49,27 @@ public class FTBQuestsKubeJSPlayerData
 		}
 	}
 
+	@DocMethod
 	public QuestFile getFile()
 	{
 		return FTBQuests.PROXY.getQuestFile(playerData.getOverworld().world);
 	}
 
+	@DocMethod
 	public QuestData getData()
 	{
 		return getFile().getData(playerData.getPlayerEntity());
+	}
+
+	@DocMethod(params = {@Param("id"), @Param("progress")})
+	public void addProgress(Object id, long progress)
+	{
+		QuestFile file = getFile();
+		Task task = file.getTask(file.getID(String.valueOf(id)));
+
+		if (task != null)
+		{
+			file.getData(playerData.getPlayerEntity()).getTaskData(task).addProgress(progress);
+		}
 	}
 }

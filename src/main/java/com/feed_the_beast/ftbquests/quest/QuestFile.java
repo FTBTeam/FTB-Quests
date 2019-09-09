@@ -1040,8 +1040,19 @@ public abstract class QuestFile extends QuestObject
 		return id;
 	}
 
-	public static int getID(String id)
+	public int getID(@Nullable Object o)
 	{
+		if (o == null)
+		{
+			return 0;
+		}
+		else if (o instanceof Number)
+		{
+			return ((Number) o).intValue();
+		}
+
+		String id = o.toString();
+
 		if (id.isEmpty())
 		{
 			return 0;
@@ -1057,6 +1068,14 @@ public abstract class QuestFile extends QuestObject
 		}
 		catch (Exception ex)
 		{
+			for (QuestObjectBase b : map.values())
+			{
+				if (b.eventID.equals(id))
+				{
+					return b.id;
+				}
+			}
+
 			return 0;
 		}
 	}
