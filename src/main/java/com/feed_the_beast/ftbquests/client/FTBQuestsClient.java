@@ -3,6 +3,7 @@ package com.feed_the_beast.ftbquests.client;
 import com.feed_the_beast.ftblib.FTBLib;
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigInt;
+import com.feed_the_beast.ftblib.lib.config.ConfigString;
 import com.feed_the_beast.ftblib.lib.gui.misc.GuiEditConfig;
 import com.feed_the_beast.ftblib.lib.gui.misc.GuiEditConfigValue;
 import com.feed_the_beast.ftblib.lib.gui.misc.GuiSelectFluid;
@@ -10,6 +11,7 @@ import com.feed_the_beast.ftblib.lib.gui.misc.GuiSelectItemStack;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.FTBQuestsCommon;
+import com.feed_the_beast.ftbquests.net.MessageSetCustomIcon;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.reward.FTBQuestsRewards;
@@ -26,6 +28,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.resources.IReloadableResourceManager;
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagString;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityStructure;
 import net.minecraft.util.math.BlockPos;
@@ -213,5 +217,18 @@ public class FTBQuestsClient extends FTBQuestsCommon
 	public String getLanguageCode()
 	{
 		return Minecraft.getMinecraft().getLanguageManager().getCurrentLanguage().getLanguageCode();
+	}
+
+	@Override
+	public void openCustomIconGui(ItemStack stack)
+	{
+		new GuiEditConfigValue("icon", new ConfigString(stack.hasTagCompound() ? stack.getTagCompound().getString("icon") : ""), (value, set) -> {
+			if (set)
+			{
+				stack.setTagInfo("icon", new NBTTagString(value.getString()));
+				new MessageSetCustomIcon(value.getString()).sendToServer();
+			}
+			Minecraft.getMinecraft().player.closeScreen();
+		}).openGui();
 	}
 }

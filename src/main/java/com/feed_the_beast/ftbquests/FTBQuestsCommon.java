@@ -2,6 +2,7 @@ package com.feed_the_beast.ftbquests;
 
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
+import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
@@ -35,5 +36,9 @@ public class FTBQuestsCommon
 	public String getLanguageCode()
 	{
 		return "en_us";
+	}
+
+	public void openCustomIconGui(ItemStack stack)
+	{
 	}
 }

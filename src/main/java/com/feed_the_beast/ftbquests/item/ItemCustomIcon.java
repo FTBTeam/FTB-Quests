@@ -1,6 +1,6 @@
 package com.feed_the_beast.ftbquests.item;
 
-import com.feed_the_beast.ftbquests.client.ClientQuestFile;
+import com.feed_the_beast.ftbquests.FTBQuests;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.creativetab.CreativeTabs;
@@ -37,7 +37,7 @@ public class ItemCustomIcon extends Item
 
 		if (world.isRemote)
 		{
-			openGui(stack);
+			FTBQuests.PROXY.openCustomIconGui(stack);
 		}
 
 		return new ActionResult<>(EnumActionResult.SUCCESS, stack);
@@ -52,11 +52,6 @@ public class ItemCustomIcon extends Item
 			stack.setTagInfo("icon", new NBTTagString("ftblib:textures/icons/support.png"));
 			items.add(stack);
 		}
-	}
-
-	private void openGui(ItemStack stack)
-	{
-		ClientQuestFile.INSTANCE.openCustomIconGui(stack);
 	}
 
 	@Override
