@@ -33,7 +33,8 @@ import org.apache.logging.log4j.Logger;
 		modid = FTBQuests.MOD_ID,
 		name = FTBQuests.MOD_NAME,
 		version = FTBQuests.VERSION,
-		dependencies = FTBLib.THIS_DEP + ";required-after:itemfilters;before:kubejs;after:gamestages;after:ic2;after:ftbutilities;after:botania;after:buildcraftcore;after:projecte;after:customnpcs"
+		dependencies = FTBLib.THIS_DEP + ";required-after:itemfilters;before:kubejs;after:gamestages;after:ic2;after:ftbutilities;after:botania;after:buildcraftcore;after:projecte;after:customnpcs",
+		acceptableRemoteVersions = "*"
 )
 public class FTBQuests
 {
