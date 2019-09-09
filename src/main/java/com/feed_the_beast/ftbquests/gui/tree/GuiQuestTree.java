@@ -25,7 +25,6 @@ import com.feed_the_beast.ftbquests.net.edit.MessageMoveQuest;
 import com.feed_the_beast.ftbquests.quest.ChangeProgress;
 import com.feed_the_beast.ftbquests.quest.Chapter;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
@@ -601,7 +600,7 @@ public class GuiQuestTree extends GuiBase
 	{
 		if (scheme.isEmpty() && path.startsWith("#"))
 		{
-			open(file.get(QuestFile.getID(path)));
+			open(file.get(file.getID(path)));
 			return true;
 		}
 

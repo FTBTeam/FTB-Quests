@@ -33,7 +33,7 @@ public class FTBQuestsKubeJSWrapper
 	public final Map<String, ChangeProgress> changeProgressTypes = ChangeProgress.NAME_MAP.map;
 
 	@DocMethod(value = "Currently loaded quest file. Can be null", params = @Param("world"))
-	public QuestFile file(WorldJS world)
+	public QuestFile getFile(WorldJS world)
 	{
 		QuestFile f = FTBQuests.PROXY.getQuestFile(world.world);
 
@@ -47,34 +47,30 @@ public class FTBQuestsKubeJSWrapper
 
 	@Nullable
 	@DocMethod(value = "Quest data from team UID", params = {@Param("world"), @Param(value = "team", type = short.class)})
-	public QuestData data(WorldJS world, Number team)
+	public QuestData getData(WorldJS world, Number team)
 	{
-		return file(world).getData(team.shortValue());
+		return getFile(world).getData(team.shortValue());
 	}
 
 	@Nullable
 	@DocMethod(value = "Quest data from team ID", params = {@Param("world"), @Param("team")})
-	public QuestData data(WorldJS world, String team)
+	public QuestData getData(WorldJS world, String team)
 	{
-		return file(world).getData(team);
+		return getFile(world).getData(team);
 	}
 
 	@Nullable
 	@DocMethod(value = "Quest data from player", params = @Param("player"))
-	public QuestData data(PlayerJS player)
+	public QuestData getData(PlayerJS player)
 	{
-		return file(player.world).getData(player.entityPlayer);
+		return getFile(player.world).getData(player.playerEntity);
 	}
 
 	@Nullable
 	@DocMethod(value = "Quest object from object UID", params = {@Param("world"), @Param("id")})
-	public QuestObjectBase object(WorldJS world, Object id)
+	public QuestObjectBase getObject(WorldJS world, Object id)
 	{
-		if (id instanceof Number)
-		{
-			return file(world).getBase(((Number) id).intValue());
-		}
-
-		return object(world, QuestFile.getID(id.toString()));
+		QuestFile file = getFile(world);
+		return file.getBase(file.getID(id));
 	}
 }

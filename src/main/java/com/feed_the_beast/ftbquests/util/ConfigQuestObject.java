@@ -155,7 +155,7 @@ public class ConfigQuestObject extends ConfigValue
 	@Override
 	public boolean setValueFromString(@Nullable ICommandSender sender, String string, boolean simulate)
 	{
-		int o = QuestFile.getID(string);
+		int o = file.getID(string);
 
 		if (isValid(o))
 		{

@@ -414,7 +414,7 @@ public class ServerQuestData extends QuestData implements NBTDataStorage.Data
 
 		for (String s : nbt1.getKeySet())
 		{
-			Task task = ServerQuestFile.INSTANCE.getTask(QuestFile.getID(s));
+			Task task = ServerQuestFile.INSTANCE.getTask(ServerQuestFile.INSTANCE.getID(s));
 
 			if (task != null)
 			{
