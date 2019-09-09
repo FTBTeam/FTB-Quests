@@ -48,7 +48,7 @@ public class KubeJSIntegration
 	@SubscribeEvent
 	public static void onCustomTask(CustomTaskEvent event)
 	{
-		if (EventsJS.postDouble("ftbquests.custom_task", event.getTask().getEventID(), new CustomTaskEventJS(event)))
+		if (EventsJS.postDouble("ftbquests.custom_task", event.getTask().getCustomID(), new CustomTaskEventJS(event)))
 		{
 			event.setCanceled(true);
 		}
@@ -57,7 +57,7 @@ public class KubeJSIntegration
 	@SubscribeEvent
 	public static void onCustomReward(CustomRewardEvent event)
 	{
-		if (EventsJS.postDouble("ftbquests.custom_reward", event.getReward().getEventID(), new CustomRewardEventJS(event)))
+		if (EventsJS.postDouble("ftbquests.custom_reward", event.getReward().getCustomID(), new CustomRewardEventJS(event)))
 		{
 			event.setCanceled(true);
 		}
@@ -66,12 +66,12 @@ public class KubeJSIntegration
 	@SubscribeEvent
 	public static void onCompleted(ObjectCompletedEvent event)
 	{
-		EventsJS.postDouble("ftbquests.completed", event.getObject().getEventID(), new QuestObjectCompletedEventJS(event));
+		EventsJS.postDouble("ftbquests.completed", event.getObject().getCustomID(), new QuestObjectCompletedEventJS(event));
 	}
 
 	@SubscribeEvent
 	public static void onTaskStarted(TaskStartedEvent event)
 	{
-		EventsJS.postDouble("ftbquests.started", event.getTaskData().task.getEventID(), new TaskStartedEventJS(event));
+		EventsJS.postDouble("ftbquests.started", event.getTaskData().task.getCustomID(), new TaskStartedEventJS(event));
 	}
 }

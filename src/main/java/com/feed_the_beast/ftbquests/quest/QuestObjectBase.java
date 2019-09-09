@@ -69,7 +69,7 @@ public abstract class QuestObjectBase
 	public boolean invalid = false;
 	public String title = "";
 	public ItemStack icon = ItemStack.EMPTY;
-	public String eventID = "";
+	public String customID = "";
 
 	private Icon cachedIcon = null;
 	private String cachedTitle = null;
@@ -80,9 +80,9 @@ public abstract class QuestObjectBase
 		return getCodeString(id);
 	}
 
-	public final String getEventID()
+	public final String getCustomID()
 	{
-		return eventID.isEmpty() ? getCodeString(id) : eventID;
+		return customID.isEmpty() ? getCodeString(id) : customID;
 	}
 
 	public final boolean equals(Object object)
@@ -141,9 +141,9 @@ public abstract class QuestObjectBase
 			nbt.setTag("icon", ItemMissing.write(icon, false));
 		}
 
-		if (!eventID.isEmpty())
+		if (!customID.isEmpty())
 		{
-			nbt.setString("event_id", eventID);
+			nbt.setString("custom_id", customID);
 		}
 	}
 
@@ -151,7 +151,7 @@ public abstract class QuestObjectBase
 	{
 		title = nbt.getString("title");
 		icon = ItemMissing.read(nbt.getTag("icon"));
-		eventID = nbt.getString("event_id");
+		customID = nbt.getString("custom_id");
 	}
 
 	public void writeNetData(DataOut data)
@@ -159,7 +159,7 @@ public abstract class QuestObjectBase
 		int flags = 0;
 		flags = Bits.setFlag(flags, 1, !title.isEmpty());
 		flags = Bits.setFlag(flags, 2, !icon.isEmpty());
-		flags = Bits.setFlag(flags, 4, !eventID.isEmpty());
+		flags = Bits.setFlag(flags, 4, !customID.isEmpty());
 
 		data.writeVarInt(flags);
 
@@ -173,9 +173,9 @@ public abstract class QuestObjectBase
 			data.writeItemStack(icon);
 		}
 
-		if (!eventID.isEmpty())
+		if (!customID.isEmpty())
 		{
-			data.writeString(eventID);
+			data.writeString(customID);
 		}
 	}
 
@@ -184,7 +184,7 @@ public abstract class QuestObjectBase
 		int flags = data.readVarInt();
 		title = Bits.getFlag(flags, 1) ? data.readString() : "";
 		icon = Bits.getFlag(flags, 2) ? data.readItemStack() : ItemStack.EMPTY;
-		eventID = Bits.getFlag(flags, 4) ? data.readString() : "";
+		customID = Bits.getFlag(flags, 4) ? data.readString() : "";
 	}
 
 	@SideOnly(Side.CLIENT)
@@ -192,7 +192,7 @@ public abstract class QuestObjectBase
 	{
 		config.addString("title", () -> title, v -> title = v, "").setDisplayName(new TextComponentTranslation("ftbquests.title")).setOrder(-127);
 		config.add("icon", new ConfigItemStack.SimpleStack(() -> icon, v -> icon = v), new ConfigItemStack(ItemStack.EMPTY)).setDisplayName(new TextComponentTranslation("ftbquests.icon")).setOrder(-126);
-		config.addString("event_id", () -> eventID, v -> eventID = v, "", Pattern.compile("^[a-z0-9_]*$")).setDisplayName(new TextComponentTranslation("ftbquests.event_id")).setOrder(-125);
+		config.addString("custom_id", () -> customID, v -> customID = v, "", Pattern.compile("^[a-z0-9_]*$")).setDisplayName(new TextComponentTranslation("ftbquests.custom_id")).setOrder(-125);
 	}
 
 	public QuestObjectText loadText()
