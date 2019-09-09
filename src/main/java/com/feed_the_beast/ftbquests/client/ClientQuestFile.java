@@ -1,10 +1,13 @@
 package com.feed_the_beast.ftbquests.client;
 
 import com.feed_the_beast.ftblib.lib.client.ClientUtils;
+import com.feed_the_beast.ftblib.lib.config.ConfigString;
 import com.feed_the_beast.ftblib.lib.gui.GuiBase;
+import com.feed_the_beast.ftblib.lib.gui.misc.GuiEditConfigValue;
 import com.feed_the_beast.ftblib.net.MessageMyTeamGui;
 import com.feed_the_beast.ftbquests.gui.tree.GuiQuestTree;
 import com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIHelper;
+import com.feed_the_beast.ftbquests.net.MessageSetCustomIcon;
 import com.feed_the_beast.ftbquests.net.MessageSyncQuests;
 import com.feed_the_beast.ftbquests.net.edit.MessageDeleteObject;
 import com.feed_the_beast.ftbquests.quest.Chapter;
@@ -15,10 +18,11 @@ import com.feed_the_beast.ftbquests.quest.task.Task;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.objects.Object2ShortOpenHashMap;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.EnumHand;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagString;
 import net.minecraft.util.text.TextComponentTranslation;
 
 import javax.annotation.Nullable;
@@ -219,9 +223,16 @@ public class ClientQuestFile extends QuestFile
 		}
 	}
 
-	public void openCustomIconGui(EntityPlayer player, EnumHand hand)
+	public void openCustomIconGui(ItemStack stack)
 	{
-		player.sendStatusMessage(new TextComponentString("Set NBT to {icon:\"ftblib:textures/icons/support.png\"} or something"), true);
+		new GuiEditConfigValue("icon", new ConfigString(stack.hasTagCompound() ? stack.getTagCompound().getString("icon") : ""), (value, set) -> {
+			if (set)
+			{
+				stack.setTagInfo("icon", new NBTTagString(value.getString()));
+				new MessageSetCustomIcon(value.getString()).sendToServer();
+			}
+			Minecraft.getMinecraft().player.closeScreen();
+		}).openGui();
 	}
 
 	@Override

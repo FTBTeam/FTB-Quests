@@ -27,6 +27,7 @@ public class FTBQuestsNetHandler
 		GENERAL.register(new MessageDisplayItemRewardToast());
 		GENERAL.register(new MessageTogglePinned());
 		GENERAL.register(new MessageTogglePinnedResponse());
+		GENERAL.register(new MessageSetCustomIcon());
 
 		FTBQuestsEditNetHandler.init();
 	}

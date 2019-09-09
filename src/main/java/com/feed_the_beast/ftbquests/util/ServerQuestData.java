@@ -1,6 +1,7 @@
 package com.feed_the_beast.ftbquests.util;
 
 import com.feed_the_beast.ftblib.events.player.ForgePlayerLoggedInEvent;
+import com.feed_the_beast.ftblib.events.team.ForgeTeamChangedEvent;
 import com.feed_the_beast.ftblib.events.team.ForgeTeamCreatedEvent;
 import com.feed_the_beast.ftblib.events.team.ForgeTeamDataEvent;
 import com.feed_the_beast.ftblib.events.team.ForgeTeamDeletedEvent;
@@ -286,6 +287,21 @@ public class ServerQuestData extends QuestData implements NBTDataStorage.Data
 		if (event.getEntityPlayer() instanceof EntityPlayerMP && !(event.getContainer() instanceof ContainerPlayer))
 		{
 			event.getContainer().addListener(new FTBQuestsInventoryListener((EntityPlayerMP) event.getEntityPlayer()));
+		}
+	}
+
+	@SubscribeEvent
+	public static void onTeamChanged(ForgeTeamChangedEvent event)
+	{
+		ServerQuestData oldData = get(event.getOldTeam());
+		ServerQuestData newData = get(event.getTeam());
+		newData.progressCache = null;
+		newData.areDependenciesCompleteCache = null;
+
+		for (TaskData oldTaskData : oldData.taskData.values())
+		{
+			TaskData newTaskData = newData.getTaskData(oldTaskData.task);
+			newTaskData.setProgress(Math.max(oldTaskData.progress, newTaskData.progress));
 		}
 	}
 
