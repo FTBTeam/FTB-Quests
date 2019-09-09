@@ -164,7 +164,7 @@ public class ServerQuestData extends QuestData implements NBTDataStorage.Data
 			ServerQuestData data = get(team);
 			MessageSyncQuests.TeamInst t = new MessageSyncQuests.TeamInst();
 			t.uid = team.getUID();
-			t.id = team.getID();
+			t.id = team.getId();
 			t.name = team.getTitle();
 
 			int size = 0;
@@ -313,7 +313,7 @@ public class ServerQuestData extends QuestData implements NBTDataStorage.Data
 	}
 
 	@Override
-	public String getID()
+	public String getId()
 	{
 		return FTBQuests.MOD_ID;
 	}
@@ -327,7 +327,7 @@ public class ServerQuestData extends QuestData implements NBTDataStorage.Data
 	@Override
 	public String getTeamID()
 	{
-		return team.getID();
+		return team.getId();
 	}
 
 	@Override

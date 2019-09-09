@@ -42,7 +42,7 @@ public class NPCFactionTask extends Task
 		super.writeData(nbt);
 		nbt.setInteger("npc_faction", npcFaction);
 		nbt.setInteger("required_points", requiredPoints);
-		nbt.setString("point_mode", mode.getID());
+		nbt.setString("point_mode", mode.getId());
 	}
 
 	@Override

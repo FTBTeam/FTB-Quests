@@ -47,7 +47,7 @@ public class TileWithTeam extends TileBase
 
 	protected ConfigTeam createTeamConfig()
 	{
-		return new ConfigTeam(() -> Universe.get().getTeam(team), v -> team = v.getID());
+		return new ConfigTeam(() -> Universe.get().getTeam(team), v -> team = v.getId());
 	}
 
 	public void setIDFromPlacer(EntityLivingBase placer)

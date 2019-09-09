@@ -50,7 +50,7 @@ public class RayMatcher
 		}
 
 		@Override
-		public String getID()
+		public String getId()
 		{
 			return name;
 		}
@@ -149,7 +149,7 @@ public class RayMatcher
 
 	public void writeData(NBTTagCompound nbt)
 	{
-		nbt.setString("match_type", type.getID());
+		nbt.setString("match_type", type.getId());
 		nbt.setString("match", match);
 
 		if (!properties.isEmpty())

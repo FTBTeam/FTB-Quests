@@ -82,7 +82,7 @@ public abstract class Reward extends QuestObjectBase
 
 		if (autoclaim != RewardAutoClaim.DEFAULT)
 		{
-			nbt.setString("auto", autoclaim.getID());
+			nbt.setString("auto", autoclaim.getId());
 		}
 	}
 
@@ -239,7 +239,7 @@ public abstract class Reward extends QuestObjectBase
 	public final ConfigGroup createSubGroup(ConfigGroup group)
 	{
 		RewardType type = getType();
-		return group.getGroup(getObjectType().getID()).getGroup(type.getRegistryName().getNamespace()).getGroup(type.getRegistryName().getPath());
+		return group.getGroup(getObjectType().getId()).getGroup(type.getRegistryName().getNamespace()).getGroup(type.getRegistryName().getPath());
 	}
 
 	public void addMouseOverText(List<String> list)

@@ -30,7 +30,7 @@ public enum ChangeProgress implements IWithID
 	}
 
 	@Override
-	public String getID()
+	public String getId()
 	{
 		return id;
 	}

@@ -419,7 +419,7 @@ public abstract class QuestObjectBase
 
 	public ConfigGroup createSubGroup(ConfigGroup group)
 	{
-		return group.getGroup(getObjectType().getID());
+		return group.getGroup(getObjectType().getId());
 	}
 
 	@SideOnly(Side.CLIENT)

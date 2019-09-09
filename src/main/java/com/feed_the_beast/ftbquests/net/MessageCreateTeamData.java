@@ -30,7 +30,7 @@ public class MessageCreateTeamData extends MessageToClient
 	public MessageCreateTeamData(ForgeTeam team)
 	{
 		uid = team.getUID();
-		id = team.getID();
+		id = team.getId();
 		name = team.getTitle();
 	}
 
