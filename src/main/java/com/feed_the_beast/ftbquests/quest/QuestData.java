@@ -6,11 +6,13 @@ import com.feed_the_beast.ftbquests.quest.task.TaskData;
 import it.unimi.dsi.fastutil.ints.Int2ByteOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.text.ITextComponent;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -41,6 +43,8 @@ public abstract class QuestData
 	public abstract ITextComponent getDisplayName();
 
 	public abstract QuestFile getFile();
+
+	public abstract List<? extends EntityPlayer> getOnlineMembers();
 
 	public void markDirty()
 	{

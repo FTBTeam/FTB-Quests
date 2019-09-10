@@ -343,6 +343,12 @@ public class ServerQuestData extends QuestData implements NBTDataStorage.Data
 	}
 
 	@Override
+	public List<EntityPlayerMP> getOnlineMembers()
+	{
+		return team.getOnlineMembers();
+	}
+
+	@Override
 	public void markDirty()
 	{
 		team.markDirty();
