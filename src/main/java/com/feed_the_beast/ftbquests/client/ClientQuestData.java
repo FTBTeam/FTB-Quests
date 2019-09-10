@@ -4,7 +4,11 @@ import com.feed_the_beast.ftbquests.quest.QuestData;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.reward.Reward;
 import net.minecraft.client.Minecraft;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.text.ITextComponent;
+
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author LatvianModder
@@ -44,6 +48,17 @@ public class ClientQuestData extends QuestData
 	public QuestFile getFile()
 	{
 		return ClientQuestFile.INSTANCE;
+	}
+
+	@Override
+	public List<EntityPlayer> getOnlineMembers()
+	{
+		if (this == ClientQuestFile.INSTANCE.self)
+		{
+			return Collections.singletonList(Minecraft.getMinecraft().player);
+		}
+
+		return Collections.emptyList();
 	}
 
 	public boolean isRewardClaimedSelf(Reward reward)

@@ -39,4 +39,10 @@ public class QuestObjectCompletedEventJS extends EventJS
 	{
 		return ServerJS.instance.overworld.createEntityList(event.getNotifiedPlayers());
 	}
+
+	@DocMethod("List of all online team members")
+	public EntityArrayList getOnlineMembers()
+	{
+		return ServerJS.instance.overworld.createEntityList(getData().getOnlineMembers());
+	}
 }
