@@ -76,7 +76,7 @@ public class FTBQuestsClientEventHandler
 		addModel(FTBQuestsItems.CHEST, "facing=north");
 		addModel(FTBQuestsItems.LOOT_CRATE_STORAGE, "normal");
 		addModel(FTBQuestsItems.LOOT_CRATE_OPENER, "normal");
-		addModel(FTBQuestsItems.BARRIER, "normal");
+		addModel(FTBQuestsItems.BARRIER, "completed=false");
 
 		addModel(FTBQuestsItems.BOOK, "inventory");
 		addModel(FTBQuestsItems.LOOTCRATE, "inventory");
