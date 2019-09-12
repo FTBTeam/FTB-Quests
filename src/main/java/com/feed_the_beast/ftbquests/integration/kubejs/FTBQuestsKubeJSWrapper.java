@@ -8,7 +8,6 @@ import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.quest.QuestShape;
 import dev.latvian.kubejs.documentation.DocClass;
-import dev.latvian.kubejs.documentation.DocField;
 import dev.latvian.kubejs.documentation.DocMethod;
 import dev.latvian.kubejs.documentation.Param;
 import dev.latvian.kubejs.player.PlayerJS;
@@ -23,14 +22,23 @@ import java.util.Map;
 @DocClass(displayName = "FTB Quests Integration")
 public class FTBQuestsKubeJSWrapper
 {
-	@DocField
-	public final Map<String, QuestShape> questShapes = QuestShape.NAME_MAP.map;
+	@DocMethod
+	public Map<String, QuestShape> getQuestShapes()
+	{
+		return QuestShape.NAME_MAP.map;
+	}
 
-	@DocField
-	public final Map<String, QuestObjectType> questObjectTypes = QuestObjectType.NAME_MAP.map;
+	@DocMethod
+	public Map<String, QuestObjectType> getQuestObjectTypes()
+	{
+		return QuestObjectType.NAME_MAP.map;
+	}
 
-	@DocField
-	public final Map<String, ChangeProgress> changeProgressTypes = ChangeProgress.NAME_MAP.map;
+	@DocMethod
+	public Map<String, ChangeProgress> getChangeProgressTypes()
+	{
+		return ChangeProgress.NAME_MAP.map;
+	}
 
 	@DocMethod(value = "Currently loaded quest file. Can be null", params = @Param("world"))
 	public QuestFile getFile(WorldJS world)
@@ -63,7 +71,7 @@ public class FTBQuestsKubeJSWrapper
 	@DocMethod(value = "Quest data from player", params = @Param("player"))
 	public QuestData getData(PlayerJS player)
 	{
-		return getFile(player.world).getData(player.playerEntity);
+		return getFile(player.getWorld()).getData(player.getPlayerEntity());
 	}
 
 	@Nullable

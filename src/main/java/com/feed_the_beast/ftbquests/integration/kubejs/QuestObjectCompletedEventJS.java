@@ -37,12 +37,12 @@ public class QuestObjectCompletedEventJS extends EventJS
 	@DocMethod("List of notified players. It isn't always the list of online members of that team, for example, this list is empty when invisible quest was completed")
 	public EntityArrayList getNotifiedPlayers()
 	{
-		return ServerJS.instance.overworld.createEntityList(event.getNotifiedPlayers());
+		return ServerJS.instance.getOverworld().createEntityList(event.getNotifiedPlayers());
 	}
 
 	@DocMethod("List of all online team members")
 	public EntityArrayList getOnlineMembers()
 	{
-		return ServerJS.instance.overworld.createEntityList(getData().getOnlineMembers());
+		return ServerJS.instance.getOverworld().createEntityList(getData().getOnlineMembers());
 	}
 }
