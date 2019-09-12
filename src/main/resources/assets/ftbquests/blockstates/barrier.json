@@ -1,5 +1,6 @@
 {
 	"variants": {
-		"normal": [{"model": "ftbquests:barrier"}]
+		"completed=false": [{"model": "ftbquests:barrier"}],
+		"completed=true": [{"model": "ftbquests:barrier_completed"}]
 	}
 }

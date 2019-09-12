@@ -11,6 +11,8 @@ import com.google.common.base.Predicate;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.properties.PropertyBool;
+import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -19,28 +21,27 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockRenderLayer;
-import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
-import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
 import java.util.List;
-import java.util.Random;
 
 /**
  * @author LatvianModder
  */
 public class BlockQuestBarrier extends Block
 {
+	public static final PropertyBool COMPLETED = PropertyBool.create("completed");
 	private static final Predicate<Entity> PREDICATE = entity -> entity instanceof EntityPlayer && ((EntityPlayer) entity).capabilities.isCreativeMode;
 
 	public BlockQuestBarrier()
@@ -49,6 +50,25 @@ public class BlockQuestBarrier extends Block
 		translucent = true;
 		setBlockUnbreakable();
 		setResistance(6000000F);
+	}
+
+	@Override
+	protected BlockStateContainer createBlockState()
+	{
+		return new BlockStateContainer(this, COMPLETED);
+	}
+
+	@Override
+	public int getMetaFromState(IBlockState state)
+	{
+		return state.getValue(COMPLETED) ? 1 : 0;
+	}
+
+	@Override
+	@Deprecated
+	public IBlockState getStateFromMeta(int meta)
+	{
+		return getDefaultState().withProperty(COMPLETED, meta == 1);
 	}
 
 	@Override
@@ -86,16 +106,9 @@ public class BlockQuestBarrier extends Block
 	}
 
 	@Override
-	@Deprecated
-	public EnumBlockRenderType getRenderType(IBlockState state)
-	{
-		return EnumBlockRenderType.INVISIBLE;
-	}
-
-	@Override
 	public BlockRenderLayer getRenderLayer()
 	{
-		return BlockRenderLayer.CUTOUT;
+		return BlockRenderLayer.TRANSLUCENT;
 	}
 
 	@Override
@@ -117,31 +130,6 @@ public class BlockQuestBarrier extends Block
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
-	public void randomDisplayTick(IBlockState state, World world, BlockPos pos, Random rand)
-	{
-		if (ClientQuestFile.existsWithTeam())
-		{
-			TileEntity tileEntity = world.getTileEntity(pos);
-
-			if (tileEntity instanceof TileQuestBarrier)
-			{
-				QuestObject object = ClientQuestFile.INSTANCE.get(((TileQuestBarrier) tileEntity).object);
-
-				if (object != null && object.isComplete(ClientQuestFile.INSTANCE.self))
-				{
-					return;
-				}
-			}
-		}
-
-		for (int i = 0; i < 15; i++)
-		{
-			world.spawnParticle(EnumParticleTypes.TOWN_AURA, pos.getX() + rand.nextFloat(), pos.getY() + rand.nextFloat(), pos.getZ() + rand.nextFloat(), 0D, 0D, 0D);
-		}
-	}
-
-	@Override
 	@Deprecated
 	public void addCollisionBoxToList(IBlockState state, World world, BlockPos pos, AxisAlignedBB entityBox, List<AxisAlignedBB> collidingBoxes, @Nullable Entity entity, boolean isActualState)
 	{
@@ -160,7 +148,7 @@ public class BlockQuestBarrier extends Block
 
 				if (file != null)
 				{
-					QuestObject object = file.get(((TileQuestBarrier) tileEntity).object);
+					QuestObject object = ((TileQuestBarrier) tileEntity).getObject(file);
 					QuestData data = file.getData(entity);
 
 					if (object != null && data != null && object.isComplete(data))
@@ -219,5 +207,35 @@ public class BlockQuestBarrier extends Block
 		{
 			((TileQuestBarrier) tileEntity).readFromItem(stack);
 		}
+	}
+
+	@Override
+	@Deprecated
+	public IBlockState getActualState(IBlockState state, IBlockAccess world, BlockPos pos)
+	{
+		if (world instanceof World && ((World) world).isRemote || FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT)
+		{
+			TileEntity tileEntity = world.getTileEntity(pos);
+
+			if (tileEntity instanceof TileQuestBarrier && ClientQuestFile.existsWithTeam())
+			{
+				QuestObject object = ((TileQuestBarrier) tileEntity).getObject(ClientQuestFile.INSTANCE);
+
+				if (object != null && object.isComplete(ClientQuestFile.INSTANCE.self))
+				{
+					return state.withProperty(COMPLETED, true);
+				}
+			}
+		}
+
+		return state;
+	}
+
+	@Override
+	@Deprecated
+	@SideOnly(Side.CLIENT)
+	public boolean shouldSideBeRendered(IBlockState state, IBlockAccess world, BlockPos pos, EnumFacing facing)
+	{
+		return world.getBlockState(pos.offset(facing)).getBlock() != this && super.shouldSideBeRendered(state, world, pos, facing);
 	}
 }
