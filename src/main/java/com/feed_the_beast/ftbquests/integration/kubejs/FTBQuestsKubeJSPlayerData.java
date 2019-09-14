@@ -8,9 +8,9 @@ import com.feed_the_beast.ftbquests.quest.QuestData;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.task.Task;
-import dev.latvian.kubejs.documentation.DocClass;
-import dev.latvian.kubejs.documentation.DocMethod;
-import dev.latvian.kubejs.documentation.Param;
+import dev.latvian.kubejs.documentation.DisplayName;
+import dev.latvian.kubejs.documentation.Info;
+import dev.latvian.kubejs.documentation.P;
 import dev.latvian.kubejs.player.PlayerDataJS;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -20,7 +20,7 @@ import javax.annotation.Nullable;
 /**
  * @author LatvianModder
  */
-@DocClass(displayName = "FTB Quests Player Data")
+@DisplayName("FTB Quests Player Data")
 public class FTBQuestsKubeJSPlayerData
 {
 	private final PlayerDataJS playerData;
@@ -30,15 +30,15 @@ public class FTBQuestsKubeJSPlayerData
 		playerData = p;
 	}
 
-	@DocMethod("Returns true if player is in editing mode")
+	@Info("Returns true if player is in editing mode")
 	public boolean getCanEdit()
 	{
 		EntityPlayer p = playerData.getPlayerEntity();
 		return p != null && FTBQuests.canEdit(p);
 	}
 
-	@DocMethod(value = "Sets editing mode for player", params = @Param("canEdit"))
-	public void setCanEdit(boolean canEdit)
+	@Info("Sets editing mode for player")
+	public void setCanEdit(@P("canEdit") boolean canEdit)
 	{
 		EntityPlayer p = playerData.getPlayerEntity();
 
@@ -53,14 +53,12 @@ public class FTBQuestsKubeJSPlayerData
 		}
 	}
 
-	@DocMethod
 	@Nullable
 	public QuestFile getFile()
 	{
 		return FTBQuests.PROXY.getQuestFile(playerData.getOverworld().world);
 	}
 
-	@DocMethod
 	@Nullable
 	public QuestData getData()
 	{
@@ -69,8 +67,7 @@ public class FTBQuestsKubeJSPlayerData
 		return file == null || player == null ? null : file.getData(player);
 	}
 
-	@DocMethod(params = {@Param("id"), @Param("progress")})
-	public void addProgress(Object id, long progress)
+	public void addProgress(@P("id") Object id, @P("progress") long progress)
 	{
 		QuestData data = getData();
 
@@ -87,8 +84,7 @@ public class FTBQuestsKubeJSPlayerData
 		}
 	}
 
-	@DocMethod(params = @Param("id"))
-	public boolean isCompleted(Object id)
+	public boolean isCompleted(@P("id") Object id)
 	{
 		QuestData data = getData();
 
@@ -101,8 +97,7 @@ public class FTBQuestsKubeJSPlayerData
 		return object != null && object.isComplete(data);
 	}
 
-	@DocMethod(params = @Param("id"))
-	public boolean isStarted(Object id)
+	public boolean isStarted(@P("id") Object id)
 	{
 		QuestData data = getData();
 
@@ -115,8 +110,7 @@ public class FTBQuestsKubeJSPlayerData
 		return object != null && object.isStarted(data);
 	}
 
-	@DocMethod(params = @Param("id"))
-	public boolean canStartQuest(Object id)
+	public boolean canStartQuest(@P("id") Object id)
 	{
 		QuestData data = getData();
 
@@ -129,8 +123,7 @@ public class FTBQuestsKubeJSPlayerData
 		return quest != null && quest.canStartTasks(data);
 	}
 
-	@DocMethod(params = @Param("id"))
-	public int getProgress(Object id)
+	public int getProgress(@P("id") Object id)
 	{
 		QuestData data = getData();
 
