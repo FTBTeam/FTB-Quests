@@ -3,6 +3,7 @@ package com.feed_the_beast.ftbquests.integration.kubejs;
 import com.feed_the_beast.ftblib.lib.util.NBTUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.net.MessageSyncEditingMode;
+import com.feed_the_beast.ftbquests.quest.ChangeProgress;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestData;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
@@ -76,11 +77,45 @@ public class FTBQuestsKubeJSPlayerData
 			return;
 		}
 
-		Task task = data.getFile().getTask(data.getFile().getID(String.valueOf(id)));
+		Task task = data.getFile().getTask(data.getFile().getID(id));
 
 		if (task != null)
 		{
 			data.getTaskData(task).addProgress(progress);
+		}
+	}
+
+	public void complete(@P("id") Object id)
+	{
+		QuestData data = getData();
+
+		if (data == null)
+		{
+			return;
+		}
+
+		QuestObject object = data.getFile().get(data.getFile().getID(id));
+
+		if (object != null)
+		{
+			object.forceProgress(data, ChangeProgress.COMPLETE, false);
+		}
+	}
+
+	public void reset(@P("id") Object id)
+	{
+		QuestData data = getData();
+
+		if (data == null)
+		{
+			return;
+		}
+
+		QuestObject object = data.getFile().get(data.getFile().getID(id));
+
+		if (object != null)
+		{
+			object.forceProgress(data, ChangeProgress.RESET, false);
 		}
 	}
 
