@@ -27,6 +27,7 @@ public class TileQuestBarrier extends TileBase implements IHasConfig, ITickable
 {
 	public String object = "";
 	private Boolean prevCompleted = null;
+	public boolean completed = false;
 
 	@Override
 	protected void writeData(NBTTagCompound nbt, EnumSaveType type)
@@ -78,7 +79,6 @@ public class TileQuestBarrier extends TileBase implements IHasConfig, ITickable
 	{
 		updateContainingBlockInfo();
 		markDirty();
-		BlockUtils.notifyBlockUpdate(world, pos, getBlockState());
 	}
 
 	@Override
@@ -87,13 +87,25 @@ public class TileQuestBarrier extends TileBase implements IHasConfig, ITickable
 		if (world.isRemote && world.getTotalWorldTime() % 7L == 0L)
 		{
 			QuestObject o = getObject(ClientQuestFile.INSTANCE);
-			boolean c = o != null && ClientQuestFile.existsWithTeam() && o.isComplete(ClientQuestFile.INSTANCE.self);
+			completed = o != null && ClientQuestFile.existsWithTeam() && o.isComplete(ClientQuestFile.INSTANCE.self);
 
-			if (prevCompleted == null || prevCompleted != c)
+			if (prevCompleted == null || prevCompleted != completed)
 			{
-				prevCompleted = c;
-				BlockUtils.notifyBlockUpdate(world, pos, getBlockState());
+				prevCompleted = completed;
+				markDirty();
 			}
+		}
+
+		checkIfDirty();
+	}
+
+	@Override
+	protected void sendDirtyUpdate()
+	{
+		if (world != null)
+		{
+			world.markChunkDirty(pos, this);
+			BlockUtils.notifyBlockUpdate(world, pos, getBlockState());
 		}
 	}
 

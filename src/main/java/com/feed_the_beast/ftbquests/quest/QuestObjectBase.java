@@ -116,6 +116,8 @@ public abstract class QuestObjectBase
 		{
 			new MessageChangeProgressResponse(data.getTeamUID(), id, type, notifications).sendToAll();
 		}
+
+		data.markDirty();
 	}
 
 	@Nullable
