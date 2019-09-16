@@ -45,6 +45,7 @@ public class BlockQuestBarrier extends Block
 	public BlockQuestBarrier()
 	{
 		super(Material.BARRIER, MapColor.LIGHT_BLUE);
+		setDefaultState(blockState.getBaseState().withProperty(COMPLETED, false));
 		translucent = true;
 		setBlockUnbreakable();
 		setResistance(6000000F);
@@ -59,14 +60,14 @@ public class BlockQuestBarrier extends Block
 	@Override
 	public int getMetaFromState(IBlockState state)
 	{
-		return state.getValue(COMPLETED) ? 1 : 0;
+		return 0;
 	}
 
 	@Override
 	@Deprecated
 	public IBlockState getStateFromMeta(int meta)
 	{
-		return getDefaultState().withProperty(COMPLETED, meta == 1);
+		return getDefaultState();
 	}
 
 	@Override
