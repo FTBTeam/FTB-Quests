@@ -79,7 +79,6 @@ public abstract class QuestFile extends QuestObject
 	public QuestFile()
 	{
 		id = 1;
-		customID = "file";
 		fileVersion = 0;
 		chapters = new ArrayList<>();
 		rewardTables = new ArrayList<>();
@@ -1070,7 +1069,7 @@ public abstract class QuestFile extends QuestObject
 		{
 			for (QuestObjectBase b : map.values())
 			{
-				if (b.customID.equals(id))
+				if (b.hasTag(id))
 				{
 					return b.id;
 				}
