@@ -1,7 +1,6 @@
 package com.feed_the_beast.ftbquests.block;
 
 import com.feed_the_beast.ftbquests.FTBQuests;
-import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.quest.QuestData;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
@@ -29,7 +28,6 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -213,19 +211,11 @@ public class BlockQuestBarrier extends Block
 	@Deprecated
 	public IBlockState getActualState(IBlockState state, IBlockAccess world, BlockPos pos)
 	{
-		if (world instanceof World && ((World) world).isRemote || FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT)
+		TileEntity tileEntity = world.getTileEntity(pos);
+
+		if (tileEntity instanceof TileQuestBarrier && ((TileQuestBarrier) tileEntity).completed)
 		{
-			TileEntity tileEntity = world.getTileEntity(pos);
-
-			if (tileEntity instanceof TileQuestBarrier && ClientQuestFile.existsWithTeam())
-			{
-				QuestObject object = ((TileQuestBarrier) tileEntity).getObject(ClientQuestFile.INSTANCE);
-
-				if (object != null && object.isComplete(ClientQuestFile.INSTANCE.self))
-				{
-					return state.withProperty(COMPLETED, true);
-				}
-			}
+			return state.withProperty(COMPLETED, true);
 		}
 
 		return state;
