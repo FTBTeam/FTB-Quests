@@ -8,7 +8,6 @@ import com.feed_the_beast.ftblib.lib.util.BlockUtils;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
-import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
@@ -25,24 +24,31 @@ import javax.annotation.Nullable;
  */
 public class TileQuestBarrier extends TileBase implements IHasConfig, ITickable
 {
-	public String object = "";
+	public int object = 0;
 	private Boolean prevCompleted = null;
 	public boolean completed = false;
 
 	@Override
 	protected void writeData(NBTTagCompound nbt, EnumSaveType type)
 	{
-		nbt.setString("object", object);
+		nbt.setInteger("object", object);
 	}
 
 	@Override
 	protected void readData(NBTTagCompound nbt, EnumSaveType type)
 	{
-		object = nbt.getString("object");
+		object = nbt.getInteger("object");
 
-		if (object.isEmpty())
+		if (object == 0)
 		{
-			object = QuestObjectBase.getCodeString(nbt.getInteger("object"));
+			try
+			{
+				object = Long.valueOf(nbt.getString("object"), 16).intValue();
+			}
+			catch (Exception ex)
+			{
+				object = 0;
+			}
 		}
 
 		prevCompleted = null;
@@ -66,8 +72,7 @@ public class TileQuestBarrier extends TileBase implements IHasConfig, ITickable
 			@Override
 			public void setObject(int v)
 			{
-				QuestObjectBase o = file.getBase(v);
-				object = o == null ? "" : o.getCustomID();
+				object = v;
 			}
 		}, new ConfigQuestObject(ServerQuestFile.INSTANCE, 1, QuestObjectType.ALL_PROGRESSING));
 

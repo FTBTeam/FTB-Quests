@@ -2,6 +2,7 @@ package com.feed_the_beast.ftbquests.quest;
 
 import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.config.ConfigItemStack;
+import com.feed_the_beast.ftblib.lib.config.ConfigString;
 import com.feed_the_beast.ftblib.lib.config.EnumTristate;
 import com.feed_the_beast.ftblib.lib.gui.misc.GuiEditConfig;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
@@ -25,8 +26,11 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.NBTTagString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -35,9 +39,11 @@ import javax.annotation.Nullable;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
@@ -45,6 +51,8 @@ import java.util.regex.Pattern;
  */
 public abstract class QuestObjectBase
 {
+	private static final Pattern TAG_PATTERN = Pattern.compile("^[a-z0-9_]*$");
+
 	public static boolean isNull(@Nullable QuestObjectBase object)
 	{
 		return object == null || object.invalid;
@@ -69,20 +77,20 @@ public abstract class QuestObjectBase
 	public boolean invalid = false;
 	public String title = "";
 	public ItemStack icon = ItemStack.EMPTY;
-	public String customID = "";
+	private Set<String> tags = new LinkedHashSet<>(0);
 
 	private Icon cachedIcon = null;
 	private String cachedTitle = null;
 	private QuestObjectText cachedTextFile = null;
 
-	public final String toString()
+	public final String getCodeString()
 	{
 		return getCodeString(id);
 	}
 
-	public final String getCustomID()
+	public final String toString()
 	{
-		return customID.isEmpty() ? getCodeString(id) : customID;
+		return getCodeString();
 	}
 
 	public final boolean equals(Object object)
@@ -98,6 +106,16 @@ public abstract class QuestObjectBase
 	public abstract QuestObjectType getObjectType();
 
 	public abstract QuestFile getQuestFile();
+
+	public Set<String> getTags()
+	{
+		return tags;
+	}
+
+	public boolean hasTag(String tag)
+	{
+		return !tags.isEmpty() && tags.contains(tag);
+	}
 
 	public void changeProgress(QuestData data, ChangeProgress type)
 	{
@@ -143,9 +161,16 @@ public abstract class QuestObjectBase
 			nbt.setTag("icon", ItemMissing.write(icon, false));
 		}
 
-		if (!customID.isEmpty())
+		if (!tags.isEmpty())
 		{
-			nbt.setString("custom_id", customID);
+			NBTTagList tagList = new NBTTagList();
+
+			for (String s : tags)
+			{
+				tagList.appendTag(new NBTTagString(s));
+			}
+
+			nbt.setTag("tags", tagList);
 		}
 	}
 
@@ -153,7 +178,20 @@ public abstract class QuestObjectBase
 	{
 		title = nbt.getString("title");
 		icon = ItemMissing.read(nbt.getTag("icon"));
-		customID = nbt.getString("custom_id");
+
+		NBTTagList tagsList = nbt.getTagList("tags", Constants.NBT.TAG_STRING);
+
+		tags = new LinkedHashSet<>(tagsList.tagCount());
+
+		for (int i = 0; i < tagsList.tagCount(); i++)
+		{
+			tags.add(tagsList.getStringTagAt(i));
+		}
+
+		if (nbt.hasKey("custom_id"))
+		{
+			tags.add(nbt.getString("custom_id"));
+		}
 	}
 
 	public void writeNetData(DataOut data)
@@ -161,7 +199,7 @@ public abstract class QuestObjectBase
 		int flags = 0;
 		flags = Bits.setFlag(flags, 1, !title.isEmpty());
 		flags = Bits.setFlag(flags, 2, !icon.isEmpty());
-		flags = Bits.setFlag(flags, 4, !customID.isEmpty());
+		flags = Bits.setFlag(flags, 4, !tags.isEmpty());
 
 		data.writeVarInt(flags);
 
@@ -175,9 +213,9 @@ public abstract class QuestObjectBase
 			data.writeItemStack(icon);
 		}
 
-		if (!customID.isEmpty())
+		if (!tags.isEmpty())
 		{
-			data.writeString(customID);
+			data.writeCollection(tags, DataOut.STRING);
 		}
 	}
 
@@ -186,7 +224,12 @@ public abstract class QuestObjectBase
 		int flags = data.readVarInt();
 		title = Bits.getFlag(flags, 1) ? data.readString() : "";
 		icon = Bits.getFlag(flags, 2) ? data.readItemStack() : ItemStack.EMPTY;
-		customID = Bits.getFlag(flags, 4) ? data.readString() : "";
+		tags = new LinkedHashSet<>(0);
+
+		if (Bits.getFlag(flags, 4))
+		{
+			data.readCollection(tags, DataIn.STRING);
+		}
 	}
 
 	@SideOnly(Side.CLIENT)
@@ -194,7 +237,7 @@ public abstract class QuestObjectBase
 	{
 		config.addString("title", () -> title, v -> title = v, "").setDisplayName(new TextComponentTranslation("ftbquests.title")).setOrder(-127);
 		config.add("icon", new ConfigItemStack.SimpleStack(() -> icon, v -> icon = v), new ConfigItemStack(ItemStack.EMPTY)).setDisplayName(new TextComponentTranslation("ftbquests.icon")).setOrder(-126);
-		config.addString("custom_id", () -> customID, v -> customID = v, "", Pattern.compile("^[a-z0-9_]*$")).setDisplayName(new TextComponentTranslation("ftbquests.custom_id")).setOrder(-125);
+		config.addList("tags", tags, new ConfigString("", TAG_PATTERN), value -> new ConfigString(value, TAG_PATTERN), ConfigString::getString).setDisplayName(new TextComponentTranslation("ftbquests.tags")).setOrder(-125);
 	}
 
 	public QuestObjectText loadText()

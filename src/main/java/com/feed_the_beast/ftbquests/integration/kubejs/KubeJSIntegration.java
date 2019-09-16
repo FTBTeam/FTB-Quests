@@ -29,8 +29,8 @@ public class KubeJSIntegration
 
 		event.registerEvent("ftbquests.custom_task", CustomTaskEventJS.class).doubleParam("id").canCancel();
 		event.registerEvent("ftbquests.custom_reward", CustomRewardEventJS.class).doubleParam("id").canCancel();
-		event.registerEvent("ftbquests.completed", QuestObjectCompletedEventJS.class).doubleParam("id");
-		event.registerEvent("ftbquests.started", TaskStartedEventJS.class).doubleParam("id");
+		event.registerEvent("ftbquests.completed", QuestObjectCompletedEventJS.class).doubleParam("id|tag");
+		event.registerEvent("ftbquests.started", TaskStartedEventJS.class).doubleParam("id|tag");
 	}
 
 	@SubscribeEvent
@@ -48,7 +48,7 @@ public class KubeJSIntegration
 	@SubscribeEvent
 	public static void onCustomTask(CustomTaskEvent event)
 	{
-		if (EventsJS.postDouble("ftbquests.custom_task", event.getTask().getCustomID(), new CustomTaskEventJS(event)))
+		if (EventsJS.postDouble("ftbquests.custom_task", event.getTask().toString(), new CustomTaskEventJS(event)))
 		{
 			event.setCanceled(true);
 		}
@@ -57,7 +57,7 @@ public class KubeJSIntegration
 	@SubscribeEvent
 	public static void onCustomReward(CustomRewardEvent event)
 	{
-		if (EventsJS.postDouble("ftbquests.custom_reward", event.getReward().getCustomID(), new CustomRewardEventJS(event)))
+		if (EventsJS.postDouble("ftbquests.custom_reward", event.getReward().toString(), new CustomRewardEventJS(event)))
 		{
 			event.setCanceled(true);
 		}
@@ -66,12 +66,24 @@ public class KubeJSIntegration
 	@SubscribeEvent
 	public static void onCompleted(ObjectCompletedEvent event)
 	{
-		EventsJS.postDouble("ftbquests.completed", event.getObject().getCustomID(), new QuestObjectCompletedEventJS(event));
+		QuestObjectCompletedEventJS e = new QuestObjectCompletedEventJS(event);
+		EventsJS.postDouble("ftbquests.completed", event.getObject().toString(), e);
+
+		for (String tag : event.getObject().getTags())
+		{
+			EventsJS.post("ftbquests.completed." + tag, e);
+		}
 	}
 
 	@SubscribeEvent
 	public static void onTaskStarted(TaskStartedEvent event)
 	{
-		EventsJS.postDouble("ftbquests.started", event.getTaskData().task.getCustomID(), new TaskStartedEventJS(event));
+		TaskStartedEventJS e = new TaskStartedEventJS(event);
+		EventsJS.postDouble("ftbquests.started", event.getTaskData().task.toString(), e);
+
+		for (String tag : event.getTaskData().task.getTags())
+		{
+			EventsJS.post("ftbquests.started." + tag, e);
+		}
 	}
 }
