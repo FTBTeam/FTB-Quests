@@ -74,16 +74,19 @@ public class PanelViewQuest extends Panel
 		panelContent.add(panelText = new BlankPanel(panelContent, "TextPanel"));
 
 		boolean canEdit = gui.file.canEdit();
+		int bsize = 18;
 
 		for (Task task : quest.tasks)
 		{
-			panelTasks.add(new ButtonTask(panelTasks, task));
+			ButtonTask b = new ButtonTask(panelTasks, task);
+			panelTasks.add(b);
+			b.setSize(bsize, bsize);
 		}
 
 		if (!canEdit && panelTasks.widgets.isEmpty())
 		{
 			TextFieldDisabledButton noTasks = new TextFieldDisabledButton(panelTasks, TextFormatting.GRAY + I18n.format("ftbquests.gui.no_tasks"));
-			noTasks.setSize(noTasks.width + 8, 18);
+			noTasks.setSize(noTasks.width + 8, bsize);
 			panelTasks.add(noTasks);
 		}
 
@@ -91,14 +94,16 @@ public class PanelViewQuest extends Panel
 		{
 			if (canEdit || reward.getAutoClaimType() != RewardAutoClaim.INVISIBLE)
 			{
-				panelRewards.add(new ButtonReward(panelRewards, reward));
+				ButtonReward b = new ButtonReward(panelRewards, reward);
+				panelRewards.add(b);
+				b.setSize(bsize, bsize);
 			}
 		}
 
 		if (!canEdit && panelRewards.widgets.isEmpty())
 		{
 			TextFieldDisabledButton noRewards = new TextFieldDisabledButton(panelRewards, TextFormatting.GRAY + I18n.format("ftbquests.gui.no_rewards"));
-			noRewards.setSize(noRewards.width + 8, 18);
+			noRewards.setSize(noRewards.width + 8, bsize);
 			panelRewards.add(noRewards);
 		}
 
@@ -122,6 +127,11 @@ public class PanelViewQuest extends Panel
 
 		ww = MathHelper.clamp(ww, 70, 140);
 		w = Math.max(w, ww * 2 + 10);
+
+		if (gui.file.fullScreenQuestView)
+		{
+			w = gui.width - 1;
+		}
 
 		if (w % 2 == 0)
 		{
@@ -169,8 +179,8 @@ public class PanelViewQuest extends Panel
 		panelTasks.setPosAndSize(2, 16, w2 - 3, 0);
 		panelRewards.setPosAndSize(w2 + 2, 16, w2 - 3, 0);
 
-		int at = panelTasks.align(new CompactGridLayout(20));
-		int ar = panelRewards.align(new CompactGridLayout(20));
+		int at = panelTasks.align(new CompactGridLayout(bsize + 2));
+		int ar = panelRewards.align(new CompactGridLayout(bsize + 2));
 
 		int h = Math.max(at, ar);
 		panelTasks.setHeight(h);
@@ -236,6 +246,11 @@ public class PanelViewQuest extends Panel
 			panelContent.add(new ColorWidget(panelContent, gui.borderColor, null).setPosAndSize(1, 16 + h + 6, panelContent.width - 2, 1));
 			panelText.setHeight(panelText.align(new WidgetLayout.Vertical(0, 0, 1)));
 			setHeight(Math.min(panelContent.getContentHeight() + 20, parent.height - 10));
+		}
+
+		if (gui.file.fullScreenQuestView)
+		{
+			height = gui.height;
 		}
 
 		setPos((parent.width - width) / 2, (parent.height - height) / 2);

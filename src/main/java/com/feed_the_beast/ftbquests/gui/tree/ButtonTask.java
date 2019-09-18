@@ -32,7 +32,6 @@ public class ButtonTask extends Button
 		super(panel, t.getTitle(), GuiIcons.ACCEPT);
 		treeGui = (GuiQuestTree) panel.getGui();
 		task = t;
-		setSize(18, 18);
 	}
 
 	@Override
@@ -144,7 +143,9 @@ public class ButtonTask extends Button
 	@Override
 	public void draw(Theme theme, int x, int y, int w, int h)
 	{
-		super.draw(theme, x, y, w, h);
+		int bs = h >= 32 ? 32 : 16;
+		drawBackground(theme, x, y, w, h);
+		drawIcon(theme, x + (w - bs) / 2, y + (h - bs) / 2, bs, bs);
 
 		if (treeGui.file.self != null && task.isComplete(treeGui.file.self))
 		{

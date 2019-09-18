@@ -99,6 +99,7 @@ ftbquests.file.defaults.quest_disable_jei=Quest 'Disable JEI Recipe'
 ftbquests.file.drop_loot_crates=Entities Drop Loot Crates
 ftbquests.file.loot_crate_no_drop=Entity Loot Crate Drop Empty Weight
 ftbquests.file.disable_gui=Disable GUI
+ftbquests.file.full_screen_quest_view=Full Screen Quest View
 
 ftbquests.loot.entitydrops=Entity Drops
 ftbquests.loot.entitytype.passive=Passive

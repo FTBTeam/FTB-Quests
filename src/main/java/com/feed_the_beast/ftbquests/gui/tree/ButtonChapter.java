@@ -36,6 +36,17 @@ public class ButtonChapter extends ButtonTab
 	}
 
 	@Override
+	public boolean checkMouseOver(int mouseX, int mouseY)
+	{
+		if (treeGui.viewQuestPanel.isMouseOver())
+		{
+			return false;
+		}
+
+		return super.checkMouseOver(mouseX, mouseY);
+	}
+
+	@Override
 	public void draw(Theme theme, int x, int y, int w, int h)
 	{
 		if (chapter == treeGui.selectedChapter || treeGui.selectedChapter != null && chapter == treeGui.selectedChapter.group)

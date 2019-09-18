@@ -133,7 +133,10 @@ public class ButtonReward extends Button
 	@Override
 	public void draw(Theme theme, int x, int y, int w, int h)
 	{
-		super.draw(theme, x, y, w, h);
+		int bs = h >= 32 ? 32 : 16;
+		drawBackground(theme, x, y, w, h);
+		drawIcon(theme, x + (w - bs) / 2, y + (h - bs) / 2, bs, bs);
+
 		GlStateManager.pushMatrix();
 		GlStateManager.translate(0F, 0F, 500F);
 		boolean completed = false;
