@@ -55,6 +55,17 @@ public class ButtonExpandedChapter extends SimpleTextButton
 	}
 
 	@Override
+	public boolean checkMouseOver(int mouseX, int mouseY)
+	{
+		if (treeGui.viewQuestPanel.isMouseOver())
+		{
+			return false;
+		}
+
+		return super.checkMouseOver(mouseX, mouseY);
+	}
+
+	@Override
 	public void onClicked(MouseButton button)
 	{
 		if (treeGui.file.canEdit() || !chapter.quests.isEmpty())

@@ -75,6 +75,7 @@ public abstract class QuestFile extends QuestObject
 	public final EntityWeight lootCrateNoDrop;
 	public boolean disableGui;
 	public String folderName;
+	public boolean fullScreenQuestView;
 
 	public QuestFile()
 	{
@@ -101,6 +102,7 @@ public abstract class QuestFile extends QuestObject
 		lootCrateNoDrop.boss = 0;
 		disableGui = false;
 		folderName = "";
+		fullScreenQuestView = false;
 	}
 
 	public abstract boolean isClient();
@@ -427,6 +429,7 @@ public abstract class QuestFile extends QuestObject
 		lootCrateNoDrop.writeData(nbt1);
 		nbt.setTag("loot_crate_no_drop", nbt1);
 		nbt.setBoolean("disable_gui", disableGui);
+		nbt.setBoolean("full_screen_quest_view", fullScreenQuestView);
 	}
 
 	@Override
@@ -462,6 +465,7 @@ public abstract class QuestFile extends QuestObject
 		}
 
 		disableGui = nbt.getBoolean("disable_gui");
+		fullScreenQuestView = nbt.getBoolean("full_screen_quest_view");
 	}
 
 	private NBTTagCompound createIndex(List<? extends QuestObjectBase> list)
@@ -743,6 +747,7 @@ public abstract class QuestFile extends QuestObject
 		lootCrateNoDrop.writeNetData(data);
 		data.writeBoolean(disableGui);
 		data.writeString(folderName);
+		data.writeBoolean(fullScreenQuestView);
 	}
 
 	@Override
@@ -760,6 +765,7 @@ public abstract class QuestFile extends QuestObject
 		lootCrateNoDrop.readNetData(data);
 		disableGui = data.readBoolean();
 		folderName = data.readString();
+		fullScreenQuestView = data.readBoolean();
 	}
 
 	public final void writeNetDataFull(DataOut data)
@@ -991,6 +997,7 @@ public abstract class QuestFile extends QuestObject
 
 		config.addBool("drop_loot_crates", () -> dropLootCrates, v -> dropLootCrates = v, false);
 		config.addBool("disable_gui", () -> disableGui, v -> disableGui = v, false);
+		config.addBool("full_screen_quest_view", () -> fullScreenQuestView, v -> fullScreenQuestView = v, false);
 
 		ConfigGroup defaultsGroup = config.getGroup("defaults");
 		defaultsGroup.addBool("reward_team", () -> defaultRewardTeam, v -> defaultRewardTeam = v, false);
