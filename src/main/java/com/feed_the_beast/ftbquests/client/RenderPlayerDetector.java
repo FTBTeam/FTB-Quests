@@ -10,6 +10,8 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import org.lwjgl.opengl.GL11;
 
+import java.awt.*;
+
 /**
  * @author LatvianModder
  */
@@ -31,8 +33,11 @@ public class RenderPlayerDetector extends TileEntitySpecialRenderer<TilePlayerDe
 		double maxX = x + aabb.maxX - pos.getX();
 		double maxY = y + aabb.maxY - pos.getY();
 		double maxZ = z + aabb.maxZ - pos.getZ();
-		int w = 223;
-		int a = 180;
+		int col = Color.getHSBColor((detector.hashCode() & 31) / 31F, 0.5F, 1F).getRGB();
+		int r = (col >> 16) & 0xFF;
+		int g = (col >> 8) & 0xFF;
+		int b = col & 0xFF;
+		int a = 33;
 
 		Tessellator tessellator = Tessellator.getInstance();
 		BufferBuilder bufferbuilder = tessellator.getBuffer();
@@ -42,27 +47,53 @@ public class RenderPlayerDetector extends TileEntitySpecialRenderer<TilePlayerDe
 		GlStateManager.enableBlend();
 		GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
 		setLightmapDisabled(true);
-		GlStateManager.glLineWidth(2.0F);
+		GlStateManager.glLineWidth(2F);
+		GlStateManager.disableDepth();
+
 		bufferbuilder.begin(GL11.GL_LINE_STRIP, DefaultVertexFormats.POSITION_COLOR);
-		bufferbuilder.pos(minX, minY, minZ).color(w, w, w, a).endVertex();
-		bufferbuilder.pos(minX, minY, minZ).color(w, w, w, a).endVertex();
-		bufferbuilder.pos(maxX, minY, minZ).color(w, w, w, a).endVertex();
-		bufferbuilder.pos(maxX, minY, maxZ).color(w, w, w, a).endVertex();
-		bufferbuilder.pos(minX, minY, maxZ).color(w, w, w, a).endVertex();
-		bufferbuilder.pos(minX, minY, minZ).color(w, w, w, a).endVertex();
-		bufferbuilder.pos(minX, maxY, minZ).color(w, w, w, a).endVertex();
-		bufferbuilder.pos(maxX, maxY, minZ).color(w, w, w, a).endVertex();
-		bufferbuilder.pos(maxX, maxY, maxZ).color(w, w, w, a).endVertex();
-		bufferbuilder.pos(minX, maxY, maxZ).color(w, w, w, a).endVertex();
-		bufferbuilder.pos(minX, maxY, minZ).color(w, w, w, a).endVertex();
-		bufferbuilder.pos(minX, maxY, maxZ).color(w, w, w, a).endVertex();
-		bufferbuilder.pos(minX, minY, maxZ).color(w, w, w, a).endVertex();
-		bufferbuilder.pos(maxX, minY, maxZ).color(w, w, w, a).endVertex();
-		bufferbuilder.pos(maxX, maxY, maxZ).color(w, w, w, a).endVertex();
-		bufferbuilder.pos(maxX, maxY, minZ).color(w, w, w, a).endVertex();
-		bufferbuilder.pos(maxX, minY, minZ).color(w, w, w, a).endVertex();
-		bufferbuilder.pos(maxX, minY, minZ).color(w, w, w, a).endVertex();
+		bufferbuilder.pos(minX, minY, minZ).color(r, g, b, a).endVertex();
+		bufferbuilder.pos(minX, minY, minZ).color(r, g, b, a).endVertex();
+		bufferbuilder.pos(maxX, minY, minZ).color(r, g, b, a).endVertex();
+		bufferbuilder.pos(maxX, minY, maxZ).color(r, g, b, a).endVertex();
+		bufferbuilder.pos(minX, minY, maxZ).color(r, g, b, a).endVertex();
+		bufferbuilder.pos(minX, minY, minZ).color(r, g, b, a).endVertex();
+		bufferbuilder.pos(minX, maxY, minZ).color(r, g, b, a).endVertex();
+		bufferbuilder.pos(maxX, maxY, minZ).color(r, g, b, a).endVertex();
+		bufferbuilder.pos(maxX, maxY, maxZ).color(r, g, b, a).endVertex();
+		bufferbuilder.pos(minX, maxY, maxZ).color(r, g, b, a).endVertex();
+		bufferbuilder.pos(minX, maxY, minZ).color(r, g, b, a).endVertex();
+		bufferbuilder.pos(minX, maxY, maxZ).color(r, g, b, a).endVertex();
+		bufferbuilder.pos(minX, minY, maxZ).color(r, g, b, a).endVertex();
+		bufferbuilder.pos(maxX, minY, maxZ).color(r, g, b, a).endVertex();
+		bufferbuilder.pos(maxX, maxY, maxZ).color(r, g, b, a).endVertex();
+		bufferbuilder.pos(maxX, maxY, minZ).color(r, g, b, a).endVertex();
+		bufferbuilder.pos(maxX, minY, minZ).color(r, g, b, a).endVertex();
+		bufferbuilder.pos(maxX, minY, minZ).color(r, g, b, a).endVertex();
 		tessellator.draw();
+		GlStateManager.enableDepth();
+
+		a = 180;
+		bufferbuilder.begin(GL11.GL_LINE_STRIP, DefaultVertexFormats.POSITION_COLOR);
+		bufferbuilder.pos(minX, minY, minZ).color(r, g, b, a).endVertex();
+		bufferbuilder.pos(minX, minY, minZ).color(r, g, b, a).endVertex();
+		bufferbuilder.pos(maxX, minY, minZ).color(r, g, b, a).endVertex();
+		bufferbuilder.pos(maxX, minY, maxZ).color(r, g, b, a).endVertex();
+		bufferbuilder.pos(minX, minY, maxZ).color(r, g, b, a).endVertex();
+		bufferbuilder.pos(minX, minY, minZ).color(r, g, b, a).endVertex();
+		bufferbuilder.pos(minX, maxY, minZ).color(r, g, b, a).endVertex();
+		bufferbuilder.pos(maxX, maxY, minZ).color(r, g, b, a).endVertex();
+		bufferbuilder.pos(maxX, maxY, maxZ).color(r, g, b, a).endVertex();
+		bufferbuilder.pos(minX, maxY, maxZ).color(r, g, b, a).endVertex();
+		bufferbuilder.pos(minX, maxY, minZ).color(r, g, b, a).endVertex();
+		bufferbuilder.pos(minX, maxY, maxZ).color(r, g, b, a).endVertex();
+		bufferbuilder.pos(minX, minY, maxZ).color(r, g, b, a).endVertex();
+		bufferbuilder.pos(maxX, minY, maxZ).color(r, g, b, a).endVertex();
+		bufferbuilder.pos(maxX, maxY, maxZ).color(r, g, b, a).endVertex();
+		bufferbuilder.pos(maxX, maxY, minZ).color(r, g, b, a).endVertex();
+		bufferbuilder.pos(maxX, minY, minZ).color(r, g, b, a).endVertex();
+		bufferbuilder.pos(maxX, minY, minZ).color(r, g, b, a).endVertex();
+		tessellator.draw();
+
 		GlStateManager.glLineWidth(1.0F);
 		setLightmapDisabled(false);
 		GlStateManager.glLineWidth(1.0F);
