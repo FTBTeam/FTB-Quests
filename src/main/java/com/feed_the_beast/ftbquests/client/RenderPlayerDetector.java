@@ -1,6 +1,7 @@
 package com.feed_the_beast.ftbquests.client;
 
 import com.feed_the_beast.ftbquests.tile.TilePlayerDetector;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
@@ -20,7 +21,7 @@ public class RenderPlayerDetector extends TileEntitySpecialRenderer<TilePlayerDe
 	@Override
 	public void render(TilePlayerDetector detector, double x, double y, double z, float partialTicks, int destroyStage, float alpha)
 	{
-		if (!ClientQuestFile.exists() || !ClientQuestFile.INSTANCE.canEdit())
+		if (!ClientQuestFile.exists() || !Minecraft.getMinecraft().player.capabilities.isCreativeMode)
 		{
 			return;
 		}
@@ -37,7 +38,6 @@ public class RenderPlayerDetector extends TileEntitySpecialRenderer<TilePlayerDe
 		int r = (col >> 16) & 0xFF;
 		int g = (col >> 8) & 0xFF;
 		int b = col & 0xFF;
-		int a = 33;
 
 		Tessellator tessellator = Tessellator.getInstance();
 		BufferBuilder bufferbuilder = tessellator.getBuffer();
@@ -48,31 +48,36 @@ public class RenderPlayerDetector extends TileEntitySpecialRenderer<TilePlayerDe
 		GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
 		setLightmapDisabled(true);
 		GlStateManager.glLineWidth(2F);
-		GlStateManager.disableDepth();
 
-		bufferbuilder.begin(GL11.GL_LINE_STRIP, DefaultVertexFormats.POSITION_COLOR);
-		bufferbuilder.pos(minX, minY, minZ).color(r, g, b, a).endVertex();
-		bufferbuilder.pos(minX, minY, minZ).color(r, g, b, a).endVertex();
-		bufferbuilder.pos(maxX, minY, minZ).color(r, g, b, a).endVertex();
-		bufferbuilder.pos(maxX, minY, maxZ).color(r, g, b, a).endVertex();
-		bufferbuilder.pos(minX, minY, maxZ).color(r, g, b, a).endVertex();
-		bufferbuilder.pos(minX, minY, minZ).color(r, g, b, a).endVertex();
-		bufferbuilder.pos(minX, maxY, minZ).color(r, g, b, a).endVertex();
-		bufferbuilder.pos(maxX, maxY, minZ).color(r, g, b, a).endVertex();
-		bufferbuilder.pos(maxX, maxY, maxZ).color(r, g, b, a).endVertex();
-		bufferbuilder.pos(minX, maxY, maxZ).color(r, g, b, a).endVertex();
-		bufferbuilder.pos(minX, maxY, minZ).color(r, g, b, a).endVertex();
-		bufferbuilder.pos(minX, maxY, maxZ).color(r, g, b, a).endVertex();
-		bufferbuilder.pos(minX, minY, maxZ).color(r, g, b, a).endVertex();
-		bufferbuilder.pos(maxX, minY, maxZ).color(r, g, b, a).endVertex();
-		bufferbuilder.pos(maxX, maxY, maxZ).color(r, g, b, a).endVertex();
-		bufferbuilder.pos(maxX, maxY, minZ).color(r, g, b, a).endVertex();
-		bufferbuilder.pos(maxX, minY, minZ).color(r, g, b, a).endVertex();
-		bufferbuilder.pos(maxX, minY, minZ).color(r, g, b, a).endVertex();
-		tessellator.draw();
+		if (Minecraft.getMinecraft().player.isSneaking())
+		{
+			final int a = 33;
+			GlStateManager.disableDepth();
+			bufferbuilder.begin(GL11.GL_LINE_STRIP, DefaultVertexFormats.POSITION_COLOR);
+			bufferbuilder.pos(minX, minY, minZ).color(r, g, b, a).endVertex();
+			bufferbuilder.pos(minX, minY, minZ).color(r, g, b, a).endVertex();
+			bufferbuilder.pos(maxX, minY, minZ).color(r, g, b, a).endVertex();
+			bufferbuilder.pos(maxX, minY, maxZ).color(r, g, b, a).endVertex();
+			bufferbuilder.pos(minX, minY, maxZ).color(r, g, b, a).endVertex();
+			bufferbuilder.pos(minX, minY, minZ).color(r, g, b, a).endVertex();
+			bufferbuilder.pos(minX, maxY, minZ).color(r, g, b, a).endVertex();
+			bufferbuilder.pos(maxX, maxY, minZ).color(r, g, b, a).endVertex();
+			bufferbuilder.pos(maxX, maxY, maxZ).color(r, g, b, a).endVertex();
+			bufferbuilder.pos(minX, maxY, maxZ).color(r, g, b, a).endVertex();
+			bufferbuilder.pos(minX, maxY, minZ).color(r, g, b, a).endVertex();
+			bufferbuilder.pos(minX, maxY, maxZ).color(r, g, b, a).endVertex();
+			bufferbuilder.pos(minX, minY, maxZ).color(r, g, b, a).endVertex();
+			bufferbuilder.pos(maxX, minY, maxZ).color(r, g, b, a).endVertex();
+			bufferbuilder.pos(maxX, maxY, maxZ).color(r, g, b, a).endVertex();
+			bufferbuilder.pos(maxX, maxY, minZ).color(r, g, b, a).endVertex();
+			bufferbuilder.pos(maxX, minY, minZ).color(r, g, b, a).endVertex();
+			bufferbuilder.pos(maxX, minY, minZ).color(r, g, b, a).endVertex();
+			tessellator.draw();
+		}
+
 		GlStateManager.enableDepth();
 
-		a = 180;
+		final int a = 180;
 		bufferbuilder.begin(GL11.GL_LINE_STRIP, DefaultVertexFormats.POSITION_COLOR);
 		bufferbuilder.pos(minX, minY, minZ).color(r, g, b, a).endVertex();
 		bufferbuilder.pos(minX, minY, minZ).color(r, g, b, a).endVertex();
