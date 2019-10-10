@@ -20,6 +20,6 @@ public class ButtonSupport extends ButtonTab
 	public void onClicked(MouseButton button)
 	{
 		GuiHelper.playClickSound();
-		handleClick("https://latmod.com/supporting/");
+		handleClick("https://latvian.dev/supporting/");
 	}
 }
