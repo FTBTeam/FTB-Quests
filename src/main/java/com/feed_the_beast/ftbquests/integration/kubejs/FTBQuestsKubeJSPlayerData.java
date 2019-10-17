@@ -57,7 +57,7 @@ public class FTBQuestsKubeJSPlayerData
 	@Nullable
 	public QuestFile getFile()
 	{
-		return FTBQuests.PROXY.getQuestFile(playerData.getOverworld().world);
+		return FTBQuests.PROXY.getQuestFile(playerData.getOverworld().minecraftWorld);
 	}
 
 	@Nullable
