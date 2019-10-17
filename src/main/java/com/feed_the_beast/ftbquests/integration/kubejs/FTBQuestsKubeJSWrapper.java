@@ -41,7 +41,7 @@ public class FTBQuestsKubeJSWrapper
 	@Info("Currently loaded quest file. Can be null")
 	public QuestFile getFile(@P("world") WorldJS world)
 	{
-		QuestFile f = FTBQuests.PROXY.getQuestFile(world.world);
+		QuestFile f = FTBQuests.PROXY.getQuestFile(world.minecraftWorld);
 
 		if (f == null)
 		{
@@ -69,7 +69,7 @@ public class FTBQuestsKubeJSWrapper
 	@Info("Quest data from player")
 	public QuestData getData(@P("player") PlayerJS player)
 	{
-		return getFile(player.getWorld()).getData(player.getPlayerEntity());
+		return getFile(player.getWorld()).getData(player.minecraftPlayer);
 	}
 
 	@Nullable
