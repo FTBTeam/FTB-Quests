@@ -5,18 +5,24 @@ import com.feed_the_beast.ftbquests.quest.QuestData;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import dev.latvian.kubejs.documentation.Ignore;
 import dev.latvian.kubejs.documentation.Info;
-import dev.latvian.kubejs.event.EventJS;
 import dev.latvian.kubejs.player.EntityArrayList;
+import dev.latvian.kubejs.server.ServerEventJS;
 import dev.latvian.kubejs.server.ServerJS;
 
 /**
  * @author LatvianModder
  */
 @Info("Event that gets fired when an object is completed. It can be a file, quest, chapter, task")
-public class QuestObjectCompletedEventJS extends EventJS
+public class QuestObjectCompletedEventJS extends ServerEventJS
 {
 	@Ignore
 	public final ObjectCompletedEvent event;
+
+	@Override
+	public ServerJS getServer()
+	{
+		return ServerJS.instance;
+	}
 
 	public QuestObjectCompletedEventJS(ObjectCompletedEvent e)
 	{
