@@ -8,6 +8,8 @@ import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestData;
 import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementProgress;
+import net.minecraft.advancements.CriterionProgress;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -24,6 +26,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class AdvancementTask extends Task
 {
 	public String advancement = "";
+	public String criterion = "";
 
 	public AdvancementTask(Quest quest)
 	{
@@ -41,6 +44,7 @@ public class AdvancementTask extends Task
 	{
 		super.writeData(nbt);
 		nbt.setString("advancement", advancement);
+		nbt.setString("criterion", criterion);
 	}
 
 	@Override
@@ -48,6 +52,7 @@ public class AdvancementTask extends Task
 	{
 		super.readData(nbt);
 		advancement = nbt.getString("advancement");
+		criterion = nbt.getString("criterion");
 	}
 
 	@Override
@@ -55,6 +60,7 @@ public class AdvancementTask extends Task
 	{
 		super.writeNetData(data);
 		data.writeString(advancement);
+		data.writeString(criterion);
 	}
 
 	@Override
@@ -62,6 +68,7 @@ public class AdvancementTask extends Task
 	{
 		super.readNetData(data);
 		advancement = data.readString();
+		criterion = data.readString();
 	}
 
 	@Override
@@ -70,6 +77,7 @@ public class AdvancementTask extends Task
 	{
 		super.getConfig(config);
 		config.addString("advancement", () -> advancement, v -> advancement = v, "").setDisplayName(new TextComponentTranslation("ftbquests.task.ftbquests.advancement"));
+		config.addString("criterion", () -> criterion, v -> criterion = v, "");
 	}
 
 	@Override
@@ -126,7 +134,23 @@ public class AdvancementTask extends Task
 			}
 
 			Advancement a = player.server.getAdvancementManager().getAdvancement(new ResourceLocation(task.advancement));
-			return a != null && player.getAdvancements().getProgress(a).isDone();
+
+			if (a == null)
+			{
+				return false;
+			}
+
+			AdvancementProgress progress = player.getAdvancements().getProgress(a);
+
+			if (task.criterion.isEmpty())
+			{
+				return progress.isDone();
+			}
+			else
+			{
+				CriterionProgress criterionProgress = progress.getCriterionProgress(task.criterion);
+				return criterionProgress != null && criterionProgress.isObtained();
+			}
 		}
 	}
 }
