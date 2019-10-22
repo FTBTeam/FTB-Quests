@@ -2,10 +2,9 @@ package com.feed_the_beast.ftbquests.gui.tree;
 
 import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
 import com.feed_the_beast.ftblib.lib.gui.Panel;
-import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.util.NBTUtils;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
-import com.feed_the_beast.ftbquests.FTBQuests;
+import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.TextFormatting;
@@ -19,7 +18,7 @@ public class ButtonOpenShop extends ButtonTab
 {
 	public ButtonOpenShop(Panel panel)
 	{
-		super(panel, I18n.format("sidebar_button.ftbmoney.shop"), Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/shop.png"));
+		super(panel, I18n.format("sidebar_button.ftbmoney.shop"), ThemeProperties.SHOP_ICON.get());
 	}
 
 	@Override

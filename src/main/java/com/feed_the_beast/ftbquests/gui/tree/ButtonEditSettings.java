@@ -2,20 +2,18 @@ package com.feed_the_beast.ftbquests.gui.tree;
 
 import com.feed_the_beast.ftblib.lib.gui.ContextMenuItem;
 import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
-import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.gui.Panel;
-import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.util.FileUtils;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
-import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
-import com.feed_the_beast.ftbquests.gui.FTBQuestsTheme;
 import com.feed_the_beast.ftbquests.gui.GuiRewardTables;
 import com.feed_the_beast.ftbquests.gui.editor.Editor;
 import com.feed_the_beast.ftbquests.net.edit.MessageChangeProgress;
 import com.feed_the_beast.ftbquests.quest.ChangeProgress;
 import com.feed_the_beast.ftbquests.quest.Chapter;
 import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.quest.theme.ThemeLoader;
+import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -32,7 +30,7 @@ public class ButtonEditSettings extends ButtonTab
 {
 	public ButtonEditSettings(Panel panel)
 	{
-		super(panel, I18n.format("gui.settings"), Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/settings.png"));
+		super(panel, I18n.format("gui.settings"), ThemeProperties.SETTINGS_ICON.get());
 	}
 
 	@Override
@@ -53,11 +51,11 @@ public class ButtonEditSettings extends ButtonTab
 		}
 
 		List<ContextMenuItem> contextMenu = new ArrayList<>();
-		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.edit_file"), GuiIcons.SETTINGS, treeGui.file::onEditButtonClicked));
-		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.reset_progress"), GuiIcons.REFRESH, () -> new MessageChangeProgress(ClientQuestFile.INSTANCE.self.getTeamUID(), treeGui.file.id, ChangeProgress.RESET).sendToServer()).setYesNo(I18n.format("ftbquests.gui.reset_progress_q")));
-		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.complete_instantly"), FTBQuestsTheme.COMPLETED, () -> new MessageChangeProgress(ClientQuestFile.INSTANCE.self.getTeamUID(), treeGui.file.id, ChangeProgress.COMPLETE).sendToServer()).setYesNo(I18n.format("ftbquests.gui.complete_instantly_q")));
-		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.reward_tables"), GuiIcons.MONEY_BAG, () -> new GuiRewardTables().openGui()));
-		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.save_as_file"), GuiIcons.DOWN, () -> {
+		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.edit_file"), ThemeProperties.SETTINGS_ICON.get(), treeGui.file::onEditButtonClicked));
+		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.reset_progress"), ThemeProperties.RELOAD_ICON.get(), () -> new MessageChangeProgress(ClientQuestFile.INSTANCE.self.getTeamUID(), treeGui.file.id, ChangeProgress.RESET).sendToServer()).setYesNo(I18n.format("ftbquests.gui.reset_progress_q")));
+		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.complete_instantly"), ThemeProperties.CHECK_ICON.get(), () -> new MessageChangeProgress(ClientQuestFile.INSTANCE.self.getTeamUID(), treeGui.file.id, ChangeProgress.COMPLETE).sendToServer()).setYesNo(I18n.format("ftbquests.gui.complete_instantly_q")));
+		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.reward_tables"), ThemeProperties.REWARD_TABLE_ICON.get(), () -> new GuiRewardTables().openGui()));
+		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.save_as_file"), ThemeProperties.DOWNLOAD_ICON.get(), () -> {
 			try
 			{
 				Calendar time = Calendar.getInstance();
@@ -77,7 +75,7 @@ public class ButtonEditSettings extends ButtonTab
 			}
 		}));
 
-		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.export_spreadsheet"), GuiIcons.DOWN, () -> {
+		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.export_spreadsheet"), ThemeProperties.DOWNLOAD_ICON.get(), () -> {
 			try
 			{
 				int maxQuests = 0;
@@ -139,6 +137,13 @@ public class ButtonEditSettings extends ButtonTab
 			{
 				ex.printStackTrace();
 			}
+		}));
+
+		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.reload_theme"), ThemeProperties.RELOAD_ICON.get(), () -> {
+			Minecraft mc = Minecraft.getMinecraft();
+			mc.getTextureManager().onResourceManagerReload(mc.getResourceManager());
+			ThemeLoader.loadTheme(mc.getResourceManager());
+			ClientQuestFile.INSTANCE.refreshGui();
 		}));
 
 		treeGui.openContextMenu(contextMenu);

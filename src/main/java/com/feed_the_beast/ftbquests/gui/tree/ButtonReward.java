@@ -10,8 +10,8 @@ import com.feed_the_beast.ftblib.lib.gui.WidgetType;
 import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
-import com.feed_the_beast.ftbquests.gui.FTBQuestsTheme;
 import com.feed_the_beast.ftbquests.quest.reward.Reward;
+import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.TextFormatting;
@@ -147,12 +147,12 @@ public class ButtonReward extends Button
 		}
 		else if (ClientQuestFile.INSTANCE.self.isRewardClaimedSelf(reward))
 		{
-			FTBQuestsTheme.COMPLETED.draw(x + w - 9, y + 1, 8, 8);
+			ThemeProperties.CHECK_ICON.get().draw(x + w - 9, y + 1, 8, 8);
 			completed = true;
 		}
 		else if (reward.quest.isComplete(ClientQuestFile.INSTANCE.self))
 		{
-			FTBQuestsTheme.ALERT.draw(x + w - 9, y + 1, 8, 8);
+			ThemeProperties.ALERT_ICON.get().draw(x + w - 9, y + 1, 8, 8);
 		}
 
 		GlStateManager.popMatrix();

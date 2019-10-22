@@ -12,6 +12,7 @@ import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestData;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.task.Task;
+import com.feed_the_beast.ftbquests.quest.theme.QuestTheme;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.objects.Object2ShortOpenHashMap;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
@@ -277,5 +278,12 @@ public class ClientQuestFile extends QuestFile
 	public void deleteObject(int id)
 	{
 		new MessageDeleteObject(id).sendToServer();
+	}
+
+	@Override
+	public void clearCachedData()
+	{
+		super.clearCachedData();
+		QuestTheme.instance.clearCache();
 	}
 }

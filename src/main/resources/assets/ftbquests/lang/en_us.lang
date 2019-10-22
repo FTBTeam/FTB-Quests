@@ -184,6 +184,7 @@ ftbquests.gui.autopin.on=Auto-pin: Enabled
 ftbquests.gui.autopin.off=Auto-pin: Disabled
 ftbquests.gui.move_to_chapter=Move to another chapter
 ftbquests.gui.move_tooltip=Shortcut: Middle mouse button click
+ftbquests.gui.reload_theme=Reload Theme
 
 ftbquests.task=Task
 ftbquests.tasks=Tasks

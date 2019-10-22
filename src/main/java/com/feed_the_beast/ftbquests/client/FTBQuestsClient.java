@@ -23,6 +23,7 @@ import com.feed_the_beast.ftbquests.quest.task.FTBQuestsTasks;
 import com.feed_the_beast.ftbquests.quest.task.FluidTask;
 import com.feed_the_beast.ftbquests.quest.task.ItemTask;
 import com.feed_the_beast.ftbquests.quest.task.LocationTask;
+import com.feed_the_beast.ftbquests.quest.theme.ThemeLoader;
 import com.latmod.mods.itemfilters.filters.NBTMatchingMode;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
@@ -35,7 +36,6 @@ import net.minecraft.tileentity.TileEntityStructure;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
-import net.minecraftforge.client.resource.ISelectiveResourceReloadListener;
 import net.minecraftforge.client.settings.KeyConflictContext;
 import net.minecraftforge.client.settings.KeyModifier;
 import net.minecraftforge.fluids.FluidRegistry;
@@ -92,13 +92,8 @@ public class FTBQuestsClient extends FTBQuestsCommon
 	public void preInit()
 	{
 		ClientRegistry.registerKeyBinding(KEY_QUESTS = new KeyBinding("key.ftbquests.quests", KeyConflictContext.IN_GAME, KeyModifier.NONE, Keyboard.KEY_NONE, FTBLib.KEY_CATEGORY));
-
-		((IReloadableResourceManager) Minecraft.getMinecraft().getResourceManager()).registerReloadListener((ISelectiveResourceReloadListener) (manager, predicate) -> {
-			if (ClientQuestFile.exists())
-			{
-				ClientQuestFile.INSTANCE.clearCachedData();
-			}
-		});
+		((IReloadableResourceManager) Minecraft.getMinecraft().getResourceManager()).registerReloadListener(new QuestFileCacheReloader());
+		((IReloadableResourceManager) Minecraft.getMinecraft().getResourceManager()).registerReloadListener(new ThemeLoader());
 	}
 
 	@Override

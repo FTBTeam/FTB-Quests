@@ -111,7 +111,7 @@ public class ButtonDummyQuest extends Widget
 			GlStateManager.color(1F, 1F, 1F, 1F);
 			GlStateManager.enableBlend();
 			GlStateManager.disableAlpha();
-			treeGui.selectedQuests.iterator().next().shape.shape.draw(0, 0, 1, 1, Color4I.WHITE.withAlpha(20));
+			treeGui.selectedQuests.iterator().next().shape.shape.withColor(Color4I.WHITE.withAlpha(20)).draw(0, 0, 1, 1);
 			GlStateManager.popMatrix();
 		}
 

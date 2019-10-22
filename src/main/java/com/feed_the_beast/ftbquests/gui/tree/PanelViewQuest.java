@@ -16,9 +16,12 @@ import com.feed_the_beast.ftblib.lib.util.StringJoiner;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.quest.reward.Reward;
 import com.feed_the_beast.ftbquests.quest.reward.RewardAutoClaim;
 import com.feed_the_beast.ftbquests.quest.task.Task;
+import com.feed_the_beast.ftbquests.quest.theme.QuestTheme;
+import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.math.MathHelper;
@@ -60,10 +63,13 @@ public class PanelViewQuest extends Panel
 			return;
 		}
 
+		QuestObjectBase prev = QuestTheme.currentObject;
+		QuestTheme.currentObject = quest;
+
 		setScrollX(0);
 		setScrollY(0);
 
-		title = TextFormatting.GRAY + quest.getTitle();
+		title = quest.getTitle();
 		icon = quest.getIcon();
 
 		int w = Math.max(200, gui.getTheme().getStringWidth(title) + 30);
@@ -85,8 +91,9 @@ public class PanelViewQuest extends Panel
 
 		if (!canEdit && panelTasks.widgets.isEmpty())
 		{
-			TextFieldDisabledButton noTasks = new TextFieldDisabledButton(panelTasks, TextFormatting.GRAY + I18n.format("ftbquests.gui.no_tasks"));
+			TextFieldDisabledButton noTasks = new TextFieldDisabledButton(panelTasks, I18n.format("ftbquests.gui.no_tasks"));
 			noTasks.setSize(noTasks.width + 8, bsize);
+			noTasks.setColor(ThemeProperties.DISABLED_TEXT_COLOR.get(quest));
 			panelTasks.add(noTasks);
 		}
 
@@ -102,8 +109,9 @@ public class PanelViewQuest extends Panel
 
 		if (!canEdit && panelRewards.widgets.isEmpty())
 		{
-			TextFieldDisabledButton noRewards = new TextFieldDisabledButton(panelRewards, TextFormatting.GRAY + I18n.format("ftbquests.gui.no_rewards"));
+			TextFieldDisabledButton noRewards = new TextFieldDisabledButton(panelRewards, I18n.format("ftbquests.gui.no_rewards"));
 			noRewards.setSize(noRewards.width + 8, bsize);
+			noRewards.setColor(ThemeProperties.DISABLED_TEXT_COLOR.get(quest));
 			panelRewards.add(noRewards);
 		}
 
@@ -128,7 +136,7 @@ public class PanelViewQuest extends Panel
 		ww = MathHelper.clamp(ww, 70, 140);
 		w = Math.max(w, ww * 2 + 10);
 
-		if (gui.file.fullScreenQuestView)
+		if (ThemeProperties.FULL_SCREEN_QUEST.get(quest) == 1)
 		{
 			w = gui.width - 1;
 		}
@@ -159,7 +167,8 @@ public class PanelViewQuest extends Panel
 
 		textFieldTasks.setPosAndSize(2, 2, w2 - 3, 13);
 		textFieldTasks.addFlags(Theme.CENTERED | Theme.CENTERED_V);
-		textFieldTasks.setText(TextFormatting.BLUE + I18n.format("ftbquests.tasks"));
+		textFieldTasks.setText(I18n.format("ftbquests.tasks"));
+		textFieldTasks.setColor(ThemeProperties.TASKS_TEXT_COLOR.get(quest));
 		panelContent.add(textFieldTasks);
 
 		TextField textFieldRewards = new TextField(panelContent)
@@ -173,7 +182,8 @@ public class PanelViewQuest extends Panel
 
 		textFieldRewards.setPosAndSize(w2 + 2, 2, w2 - 3, 13);
 		textFieldRewards.addFlags(Theme.CENTERED | Theme.CENTERED_V);
-		textFieldRewards.setText(TextFormatting.GOLD + I18n.format("ftbquests.rewards"));
+		textFieldRewards.setText(I18n.format("ftbquests.rewards"));
+		textFieldRewards.setColor(ThemeProperties.REWARDS_TEXT_COLOR.get(quest));
 		panelContent.add(textFieldRewards);
 
 		panelTasks.setPosAndSize(2, 16, w2 - 3, 0);
@@ -234,21 +244,23 @@ public class PanelViewQuest extends Panel
 			panelText.add(new ButtonOpenInGuide(panelText, quest));
 		}
 
+		Color4I borderColor = ThemeProperties.WIDGET_BORDER.get(gui.selectedChapter);
+
 		if (panelText.widgets.isEmpty())
 		{
-			panelContent.add(new ColorWidget(panelContent, gui.borderColor, null).setPosAndSize(w2, 0, 1, h + 40));
+			panelContent.add(new ColorWidget(panelContent, borderColor, null).setPosAndSize(w2, 0, 1, h + 40));
 			panelText.setHeight(0);
 			setHeight(Math.min(panelContent.getContentHeight(), parent.height - 10));
 		}
 		else
 		{
-			panelContent.add(new ColorWidget(panelContent, gui.borderColor, null).setPosAndSize(w2, 0, 1, 16 + h + 6));
-			panelContent.add(new ColorWidget(panelContent, gui.borderColor, null).setPosAndSize(1, 16 + h + 6, panelContent.width - 2, 1));
+			panelContent.add(new ColorWidget(panelContent, borderColor, null).setPosAndSize(w2, 0, 1, 16 + h + 6));
+			panelContent.add(new ColorWidget(panelContent, borderColor, null).setPosAndSize(1, 16 + h + 6, panelContent.width - 2, 1));
 			panelText.setHeight(panelText.align(new WidgetLayout.Vertical(0, 0, 1)));
 			setHeight(Math.min(panelContent.getContentHeight() + 20, parent.height - 10));
 		}
 
-		if (gui.file.fullScreenQuestView)
+		if (ThemeProperties.FULL_SCREEN_QUEST.get(quest) == 1)
 		{
 			height = gui.height;
 		}
@@ -302,6 +314,8 @@ public class PanelViewQuest extends Panel
 			}
 		}
 		*/
+
+		QuestTheme.currentObject = prev;
 	}
 
 	@Override
@@ -314,21 +328,25 @@ public class PanelViewQuest extends Panel
 	{
 		if (quest != null && !hidePanel)
 		{
+			QuestObjectBase prev = QuestTheme.currentObject;
+			QuestTheme.currentObject = quest;
 			GlStateManager.pushMatrix();
 			GlStateManager.translate(0F, 0F, 500F);
 			super.draw(theme, x, y, w, h);
 			GlStateManager.popMatrix();
+			QuestTheme.currentObject = prev;
 		}
 	}
 
 	@Override
 	public void drawBackground(Theme theme, int x, int y, int w, int h)
 	{
+		Color4I borderColor = ThemeProperties.WIDGET_BORDER.get(gui.selectedChapter);
 		Color4I.DARK_GRAY.withAlpha(120).draw(gui.getX(), gui.getY(), gui.width, gui.height);
 		theme.drawContextMenuBackground(x, y, w, h);
-		theme.drawString(title, x + w / 2, y + 4, Color4I.WHITE, Theme.CENTERED);
+		theme.drawString(title, x + w / 2, y + 4, ThemeProperties.TITLE_TEXT_COLOR.get(quest), Theme.CENTERED);
 		icon.draw(x + 2, y + 2, 12, 12);
-		((GuiQuestTree) getGui()).borderColor.draw(x + 1, y + 15, w - 2, 1);
+		borderColor.draw(x + 1, y + 15, w - 2, 1);
 	}
 
 	@Override

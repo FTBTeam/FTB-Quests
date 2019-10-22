@@ -3,7 +3,6 @@ package com.feed_the_beast.ftbquests.gui.tree;
 import com.feed_the_beast.ftblib.lib.gui.Button;
 import com.feed_the_beast.ftblib.lib.gui.ContextMenuItem;
 import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
-import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.gui.Theme;
 import com.feed_the_beast.ftblib.lib.gui.Widget;
@@ -11,13 +10,13 @@ import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
-import com.feed_the_beast.ftbquests.gui.FTBQuestsTheme;
 import com.feed_the_beast.ftbquests.net.edit.MessageCreateObject;
 import com.feed_the_beast.ftbquests.net.edit.MessageEditObject;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.reward.Reward;
 import com.feed_the_beast.ftbquests.quest.reward.RewardType;
+import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
@@ -99,7 +98,7 @@ public class ButtonQuest extends Button
 
 			if (treeGui.selectedQuests.size() > 1)
 			{
-				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.add_reward_all"), FTBQuestsTheme.ADD, () -> {
+				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.add_reward_all"), ThemeProperties.ADD_ICON.get(), () -> {
 					List<ContextMenuItem> contextMenu2 = new ArrayList<>();
 
 					for (RewardType type : RewardType.getRegistry())
@@ -124,14 +123,14 @@ public class ButtonQuest extends Button
 					getGui().openContextMenu(contextMenu2);
 				}));
 
-				contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), GuiIcons.REMOVE, () -> {
+				contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), ThemeProperties.DELETE_ICON.get(), () -> {
 					treeGui.selectedQuests.forEach(q -> ClientQuestFile.INSTANCE.deleteObject(q.id));
 					treeGui.closeQuest();
 				}).setYesNo(I18n.format("delete_item", I18n.format("ftbquests.quests") + " [" + treeGui.selectedQuests.size() + "]")));
 			}
 			else
 			{
-				contextMenu.add(new ContextMenuItem(I18n.format("gui.move"), GuiIcons.UP, () -> {
+				contextMenu.add(new ContextMenuItem(I18n.format("gui.move"), ThemeProperties.MOVE_UP_ICON.get(), () -> {
 					treeGui.movingQuest = true;
 					treeGui.selectedQuests.clear();
 					treeGui.toggleSelected(quest);
@@ -157,15 +156,15 @@ public class ButtonQuest extends Button
 				{
 					if (selectedQuest.hasDependency(quest))
 					{
-						contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.rem_dep"), GuiIcons.REMOVE, () -> editDependency(selectedQuest, quest, false)));
+						contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.rem_dep"), ThemeProperties.DELETE_ICON.get(), () -> editDependency(selectedQuest, quest, false)));
 					}
 					else if (quest.hasDependency(selectedQuest))
 					{
-						contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.rem_dep"), GuiIcons.REMOVE, () -> editDependency(quest, selectedQuest, false)));
+						contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.rem_dep"), ThemeProperties.DELETE_ICON.get(), () -> editDependency(quest, selectedQuest, false)));
 					}
 					else
 					{
-						contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.set_dep"), FTBQuestsTheme.ADD, () -> editDependency(quest, selectedQuest, true)).setEnabled(selectedQuest != null && selectedQuest != quest && !selectedQuest.canRepeat));
+						contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.set_dep"), ThemeProperties.ADD_ICON.get(), () -> editDependency(quest, selectedQuest, true)).setEnabled(selectedQuest != null && selectedQuest != quest && !selectedQuest.canRepeat));
 					}
 				}
 
@@ -329,11 +328,11 @@ public class ButtonQuest extends Button
 
 				if (hasRewards)
 				{
-					qicon = FTBQuestsTheme.ALERT;
+					qicon = ThemeProperties.ALERT_ICON.get();
 				}
 				else
 				{
-					qicon = FTBQuestsTheme.COMPLETED;
+					qicon = ThemeProperties.CHECK_ICON.get();
 				}
 
 				outlineColor = COL_COMPLETED.withAlpha(200);
@@ -354,9 +353,9 @@ public class ButtonQuest extends Button
 		int sx = x + (w - s) / 2;
 		int sy = y + (h - s) / 2;
 
-		quest.shape.shape.draw(sx, sy, s, s, Color4I.DARK_GRAY);
-		quest.shape.background.draw(sx, sy, s, s, Color4I.WHITE.withAlpha(150));
-		quest.shape.outline.draw(sx, sy, s, s, outlineColor);
+		quest.shape.shape.withColor(Color4I.DARK_GRAY).draw(sx, sy, s, s);
+		quest.shape.background.withColor(Color4I.WHITE.withAlpha(150)).draw(sx, sy, s, s);
+		quest.shape.outline.withColor(outlineColor).draw(sx, sy, s, s);
 
 		if (!icon.isEmpty())
 		{
@@ -368,8 +367,8 @@ public class ButtonQuest extends Button
 			GlStateManager.pushMatrix();
 			GlStateManager.translate(0F, 0F, 500F);
 			Color4I col = Color4I.WHITE.withAlpha(190 + (int) (Math.sin(System.currentTimeMillis() * 0.003D) * 50));
-			quest.shape.outline.draw(sx, sy, s, s, col);
-			quest.shape.background.draw(sx, sy, s, s, col);
+			quest.shape.outline.withColor(col).draw(sx, sy, s, s);
+			quest.shape.background.withColor(col).draw(sx, sy, s, s);
 			GlStateManager.popMatrix();
 		}
 
@@ -377,7 +376,7 @@ public class ButtonQuest extends Button
 		{
 			GlStateManager.pushMatrix();
 			GlStateManager.translate(0F, 0F, 500F);
-			quest.shape.shape.draw(sx, sy, s, s, Color4I.BLACK.withAlpha(100));
+			quest.shape.shape.withColor(Color4I.BLACK.withAlpha(100)).draw(sx, sy, s, s);
 			GlStateManager.popMatrix();
 		}
 
@@ -385,7 +384,7 @@ public class ButtonQuest extends Button
 		{
 			GlStateManager.pushMatrix();
 			GlStateManager.translate(0F, 0F, 500F);
-			quest.shape.shape.draw(sx, sy, s, s, Color4I.WHITE.withAlpha(50));
+			quest.shape.shape.withColor(Color4I.WHITE.withAlpha(50)).draw(sx, sy, s, s);
 			GlStateManager.popMatrix();
 		}
 

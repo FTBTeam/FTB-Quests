@@ -30,6 +30,8 @@ import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.quest.reward.RandomReward;
 import com.feed_the_beast.ftbquests.quest.task.Task;
+import com.feed_the_beast.ftbquests.quest.theme.QuestTheme;
+import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.toasts.SystemToast;
@@ -57,7 +59,6 @@ public class GuiQuestTree extends GuiBase
 	public final PanelOtherButtonsTop otherButtonsTopPanel;
 	public final PanelChapterHover chapterHoverPanel;
 	public final PanelViewQuest viewQuestPanel;
-	public Color4I borderColor, backgroundColor;
 	public boolean movingQuest = false;
 	public int zoom = 16;
 	public long lastShiftPress = 0L;
@@ -69,8 +70,6 @@ public class GuiQuestTree extends GuiBase
 
 		chapterPanel = new PanelChapters(this);
 		selectedChapter = file.chapters.isEmpty() ? null : file.chapters.get(0);
-		borderColor = Color4I.WHITE.withAlpha(88);
-		backgroundColor = Color4I.WHITE.withAlpha(33);
 
 		questPanel = new PanelQuests(this);
 		otherButtonsBottomPanel = new PanelOtherButtonsBottom(this);
@@ -90,6 +89,7 @@ public class GuiQuestTree extends GuiBase
 	@Override
 	public void addWidgets()
 	{
+		QuestTheme.currentObject = selectedChapter;
 		add(chapterPanel);
 		add(questPanel);
 		add(otherButtonsBottomPanel);
@@ -101,6 +101,7 @@ public class GuiQuestTree extends GuiBase
 	@Override
 	public void alignWidgets()
 	{
+		QuestTheme.currentObject = selectedChapter;
 		otherButtonsBottomPanel.alignWidgets();
 		otherButtonsTopPanel.alignWidgets();
 		chapterPanel.alignWidgets();
@@ -257,22 +258,22 @@ public class GuiQuestTree extends GuiBase
 			}
 		}
 
-		contextMenu.add(new ContextMenuItem(I18n.format("selectServer.edit"), GuiIcons.SETTINGS, object::onEditButtonClicked));
+		contextMenu.add(new ContextMenuItem(I18n.format("selectServer.edit"), ThemeProperties.SETTINGS_ICON.get(), object::onEditButtonClicked));
 
 		if (object instanceof RandomReward && !QuestObjectBase.isNull(((RandomReward) object).getTable()))
 		{
-			contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.reward_table.edit"), GuiIcons.SETTINGS, () -> ((RandomReward) object).getTable().onEditButtonClicked()));
+			contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.reward_table.edit"), ThemeProperties.SETTINGS_ICON.get(), () -> ((RandomReward) object).getTable().onEditButtonClicked()));
 		}
 
-		contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), GuiIcons.REMOVE, () -> ClientQuestFile.INSTANCE.deleteObject(object.id)).setYesNo(I18n.format("delete_item", object.getTitle())));
-		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.reset_progress"), GuiIcons.REFRESH, () -> new MessageChangeProgress(ClientQuestFile.INSTANCE.self.getTeamUID(), object.id, isShiftKeyDown() ? ChangeProgress.RESET_DEPS : ChangeProgress.RESET).sendToServer()).setYesNo(I18n.format("ftbquests.gui.reset_progress_q")));
+		contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), ThemeProperties.DELETE_ICON.get(), () -> ClientQuestFile.INSTANCE.deleteObject(object.id)).setYesNo(I18n.format("delete_item", object.getTitle())));
+		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.reset_progress"), ThemeProperties.RELOAD_ICON.get(), () -> new MessageChangeProgress(ClientQuestFile.INSTANCE.self.getTeamUID(), object.id, isShiftKeyDown() ? ChangeProgress.RESET_DEPS : ChangeProgress.RESET).sendToServer()).setYesNo(I18n.format("ftbquests.gui.reset_progress_q")));
 
 		if (object instanceof QuestObject)
 		{
-			contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.complete_instantly"), FTBQuestsTheme.COMPLETED, () -> new MessageChangeProgress(ClientQuestFile.INSTANCE.self.getTeamUID(), object.id, isShiftKeyDown() ? ChangeProgress.COMPLETE_DEPS : ChangeProgress.COMPLETE).sendToServer()).setYesNo(I18n.format("ftbquests.gui.complete_instantly_q")));
+			contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.complete_instantly"), ThemeProperties.CHECK_ICON.get(), () -> new MessageChangeProgress(ClientQuestFile.INSTANCE.self.getTeamUID(), object.id, isShiftKeyDown() ? ChangeProgress.COMPLETE_DEPS : ChangeProgress.COMPLETE).sendToServer()).setYesNo(I18n.format("ftbquests.gui.complete_instantly_q")));
 		}
 
-		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.copy_id"), GuiIcons.INFO, () -> setClipboardString(QuestObjectBase.getCodeString(object)))
+		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.copy_id"), ThemeProperties.WIKI_ICON.get(), () -> setClipboardString(QuestObjectBase.getCodeString(object)))
 		{
 			@Override
 			public void addMouseOverText(List<String> list)
@@ -451,9 +452,13 @@ public class GuiQuestTree extends GuiBase
 	@Override
 	public void drawBackground(Theme theme, int x, int y, int w, int h)
 	{
+		QuestTheme.currentObject = selectedChapter;
 		super.drawBackground(theme, x, y, w, h);
 
 		int pw = 20;
+
+		Color4I borderColor = ThemeProperties.WIDGET_BORDER.get(selectedChapter);
+		Color4I backgroundColor = ThemeProperties.WIDGET_BACKGROUND.get(selectedChapter);
 
 		borderColor.draw(x + pw - 1, y + 1, 1, h - 2);
 		backgroundColor.draw(x + 1, y + 1, pw - 2, h - 2);
@@ -492,6 +497,8 @@ public class GuiQuestTree extends GuiBase
 	@Override
 	public void drawForeground(Theme theme, int x, int y, int w, int h)
 	{
+		Color4I borderColor = ThemeProperties.WIDGET_BORDER.get(selectedChapter);
+
 		GuiHelper.drawHollowRect(x, y, w, h, borderColor, false);
 
 		if (file.canEdit())

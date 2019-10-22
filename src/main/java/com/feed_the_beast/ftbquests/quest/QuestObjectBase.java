@@ -19,12 +19,12 @@ import com.feed_the_beast.ftbquests.gui.editor.ConfigPane;
 import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.net.edit.MessageChangeProgressResponse;
 import com.feed_the_beast.ftbquests.net.edit.MessageEditObject;
+import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
 import com.feed_the_beast.ftbquests.util.QuestObjectText;
 import com.latmod.mods.itemfilters.item.ItemMissing;
 import javafx.scene.Node;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
@@ -146,7 +146,7 @@ public abstract class QuestObjectBase
 
 	public int getParentID()
 	{
-		return 0;
+		return 1;
 	}
 
 	public void writeData(NBTTagCompound nbt)
@@ -337,32 +337,6 @@ public abstract class QuestObjectBase
 			return cachedIcon;
 		}
 
-		String textIcon = loadText().getString("icon");
-
-		if (!textIcon.isEmpty())
-		{
-			try
-			{
-				NBTTagCompound nbt = JsonToNBT.getTagFromJson(textIcon);
-
-				if (!nbt.hasKey("Count"))
-				{
-					nbt.setByte("Count", (byte) 1);
-				}
-
-				ItemStack stack = new ItemStack(nbt);
-
-				if (!stack.isEmpty())
-				{
-					cachedIcon = ItemIcon.getItemIcon(stack);
-					return cachedIcon;
-				}
-			}
-			catch (Exception ex)
-			{
-			}
-		}
-
 		if (!icon.isEmpty())
 		{
 			if (icon.getItem() == FTBQuestsItems.CUSTOM_ICON && icon.hasTagCompound())
@@ -376,6 +350,11 @@ public abstract class QuestObjectBase
 		}
 
 		if (cachedIcon == null || cachedIcon.isEmpty())
+		{
+			cachedIcon = ThemeProperties.ICON.get(this);
+		}
+
+		if (cachedIcon.isEmpty())
 		{
 			cachedIcon = getAltIcon();
 		}

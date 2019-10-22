@@ -3,7 +3,9 @@ package com.feed_the_beast.ftbquests.gui.tree;
 import com.feed_the_beast.ftblib.lib.gui.ColorWidget;
 import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.gui.WidgetLayout;
+import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftbquests.quest.Chapter;
+import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraftforge.fml.common.Loader;
 
 /**
@@ -26,7 +28,8 @@ public class PanelChapters extends Panel
 		if (Loader.isModLoaded("ftbmoney"))
 		{
 			add(new ButtonOpenShop(this));
-			add(new ColorWidget(this, treeGui.borderColor, null).setPosAndSize(1, 0, width - 2, 1));
+			Color4I borderColor = ThemeProperties.WIDGET_BORDER.get(treeGui.selectedChapter);
+			add(new ColorWidget(this, borderColor, null).setPosAndSize(1, 0, width - 2, 1));
 		}
 
 		boolean canEdit = treeGui.file.canEdit();
