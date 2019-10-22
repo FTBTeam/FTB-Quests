@@ -210,7 +210,7 @@ public abstract class Task extends QuestObject
 
 	public void drawScreen(@Nullable TaskData data)
 	{
-		getIcon().draw3D(Icon.EMPTY);
+		getIcon().draw3D();
 	}
 
 	public boolean canInsertItem()

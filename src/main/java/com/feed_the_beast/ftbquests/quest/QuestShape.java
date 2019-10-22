@@ -1,6 +1,5 @@
 package com.feed_the_beast.ftbquests.quest;
 
-import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.ImageIcon;
 import com.feed_the_beast.ftblib.lib.util.IWithID;
@@ -51,11 +50,10 @@ public final class QuestShape extends Icon implements IWithID
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void draw(int x, int y, int w, int h, Color4I col)
+	public void draw(int x, int y, int w, int h)
 	{
-		col = col.whiteIfEmpty();
-		background.draw(x, y, w, h, col);
-		outline.draw(x, y, w, h, col);
+		background.draw(x, y, w, h);
+		outline.draw(x, y, w, h);
 	}
 
 	public int hashCode()

@@ -1,7 +1,6 @@
 package com.feed_the_beast.ftbquests.quest.task;
 
 import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
-import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestData;
 
@@ -32,7 +31,7 @@ public class CheckmarkTask extends Task
 	@Override
 	public void drawScreen(@Nullable TaskData data)
 	{
-		(data == null || !data.isComplete() ? GuiIcons.ACCEPT_GRAY : GuiIcons.ACCEPT).draw3D(Icon.EMPTY);
+		(data == null || !data.isComplete() ? GuiIcons.ACCEPT_GRAY : GuiIcons.ACCEPT).draw3D();
 	}
 
 	@Override

@@ -1,7 +1,6 @@
 package com.feed_the_beast.ftbquests.client;
 
 import com.feed_the_beast.ftblib.lib.icon.Color4I;
-import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftbquests.quest.Chapter;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestData;
@@ -157,7 +156,7 @@ public class RenderProgressScreen extends TileEntitySpecialRenderer<TileProgress
 					GlStateManager.pushMatrix();
 					GlStateManager.translate(rx, ry, -0.009F);
 					GlStateManager.scale(rw, rh, 1F);
-					quest.getIcon().draw3D(Icon.EMPTY);
+					quest.getIcon().draw3D();
 					GlStateManager.popMatrix();
 				}
 			}

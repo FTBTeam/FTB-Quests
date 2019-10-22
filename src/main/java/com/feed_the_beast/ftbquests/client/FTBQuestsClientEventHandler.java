@@ -7,6 +7,7 @@ import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.block.BlockDetector;
 import com.feed_the_beast.ftbquests.events.ClearFileCacheEvent;
+import com.feed_the_beast.ftbquests.events.ThemePropertyEvent;
 import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.item.ItemLootCrate;
 import com.feed_the_beast.ftbquests.net.MessageSubmitTask;
@@ -15,6 +16,7 @@ import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.loot.LootCrate;
 import com.feed_the_beast.ftbquests.quest.task.ObservationTask;
 import com.feed_the_beast.ftbquests.quest.task.Task;
+import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
 import com.feed_the_beast.ftbquests.tile.TilePlayerDetector;
 import com.feed_the_beast.ftbquests.tile.TileProgressScreenCore;
 import com.feed_the_beast.ftbquests.tile.TileTaskScreenCore;
@@ -85,6 +87,12 @@ public class FTBQuestsClientEventHandler
 		ClientRegistry.bindTileEntitySpecialRenderer(TileTaskScreenCore.class, new RenderTaskScreen());
 		ClientRegistry.bindTileEntitySpecialRenderer(TileProgressScreenCore.class, new RenderProgressScreen());
 		ClientRegistry.bindTileEntitySpecialRenderer(TilePlayerDetector.class, new RenderPlayerDetector());
+	}
+
+	@SubscribeEvent
+	public static void registerProperties(ThemePropertyEvent event)
+	{
+		ThemeProperties.register(event);
 	}
 
 	@SubscribeEvent

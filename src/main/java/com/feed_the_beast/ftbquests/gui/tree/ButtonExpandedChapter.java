@@ -2,16 +2,16 @@ package com.feed_the_beast.ftbquests.gui.tree;
 
 import com.feed_the_beast.ftblib.lib.gui.ContextMenuItem;
 import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
-import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.gui.SimpleTextButton;
 import com.feed_the_beast.ftblib.lib.gui.Theme;
 import com.feed_the_beast.ftblib.lib.gui.WidgetType;
+import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.client.FTBQuestsClient;
-import com.feed_the_beast.ftbquests.gui.FTBQuestsTheme;
 import com.feed_the_beast.ftbquests.net.edit.MessageMoveChapter;
 import com.feed_the_beast.ftbquests.quest.Chapter;
+import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
@@ -81,11 +81,11 @@ public class ButtonExpandedChapter extends SimpleTextButton
 		if (treeGui.file.canEdit() && button.isRight())
 		{
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
-			contextMenu.add(new ContextMenuItem(I18n.format("gui.move"), GuiIcons.UP, () -> new MessageMoveChapter(chapter.id, true).sendToServer()).setEnabled(() -> chapter.getIndex() > 0).setCloseMenu(false));
-			contextMenu.add(new ContextMenuItem(I18n.format("gui.move"), GuiIcons.DOWN, () -> new MessageMoveChapter(chapter.id, false).sendToServer()).setEnabled(() -> chapter.getIndex() < treeGui.file.chapters.size() - 1).setCloseMenu(false));
+			contextMenu.add(new ContextMenuItem(I18n.format("gui.move"), ThemeProperties.MOVE_UP_ICON.get(), () -> new MessageMoveChapter(chapter.id, true).sendToServer()).setEnabled(() -> chapter.getIndex() > 0).setCloseMenu(false));
+			contextMenu.add(new ContextMenuItem(I18n.format("gui.move"), ThemeProperties.MOVE_DOWN_ICON.get(), () -> new MessageMoveChapter(chapter.id, false).sendToServer()).setEnabled(() -> chapter.getIndex() < treeGui.file.chapters.size() - 1).setCloseMenu(false));
 			contextMenu.add(ContextMenuItem.SEPARATOR);
-			GuiQuestTree.addObjectMenuItems(contextMenu, getGui(), chapter);
-			getGui().openContextMenu(contextMenu);
+			GuiQuestTree.addObjectMenuItems(contextMenu, treeGui, chapter);
+			treeGui.openContextMenu(contextMenu);
 		}
 	}
 
@@ -112,12 +112,13 @@ public class ButtonExpandedChapter extends SimpleTextButton
 			}
 			else
 			{
+				Color4I borderColor = ThemeProperties.WIDGET_BORDER.get(treeGui.selectedChapter);
 				//treeGui.borderColor.draw(x, y, 1, h);
-				treeGui.borderColor.draw(x + w - 1, y, 1, h);
+				borderColor.draw(x + w - 1, y, 1, h);
 
 				if (parent.widgets.get(parent.widgets.size() - 1) == this)
 				{
-					treeGui.borderColor.draw(x, y + h - 1, w - 1, h);
+					borderColor.draw(x, y + h - 1, w - 1, h);
 				}
 			}
 		}
@@ -134,14 +135,14 @@ public class ButtonExpandedChapter extends SimpleTextButton
 		{
 			GlStateManager.pushMatrix();
 			GlStateManager.translate(0F, 0F, 450F);
-			FTBQuestsTheme.ALERT.draw(x + w2 - 7, y + 3, 6, 6);
+			ThemeProperties.ALERT_ICON.get().draw(x + w2 - 7, y + 3, 6, 6);
 			GlStateManager.popMatrix();
 		}
 		else if (chapter.isComplete(treeGui.file.self))
 		{
 			GlStateManager.pushMatrix();
 			GlStateManager.translate(0F, 0F, 450F);
-			FTBQuestsTheme.COMPLETED.draw(x + w2 - 8, y + 2, 8, 8);
+			ThemeProperties.CHECK_ICON.get().draw(x + w2 - 8, y + 2, 8, 8);
 			GlStateManager.popMatrix();
 		}
 	}

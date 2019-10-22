@@ -6,7 +6,6 @@ import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
-import com.google.gson.JsonPrimitive;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagString;
@@ -88,7 +87,7 @@ public final class LootCrate
 	{
 		config.addString("id", () -> stringID, v -> stringID = v, "", Pattern.compile("[a-z0-9_]+"));
 		config.addString("item_name", () -> itemName, v -> itemName = v, "");
-		config.addString("color", () -> color.toString(), v -> color = Color4I.fromJson(new JsonPrimitive(v)), "#FFFFFF", Pattern.compile("^#[a-fA-F0-9]{6}$"));
+		config.addString("color", () -> color.toString(), v -> color = Color4I.fromString(v), "#FFFFFF", Pattern.compile("^#[a-fA-F0-9]{6}$"));
 		config.addBool("glow", () -> glow, v -> glow = v, true);
 
 		ConfigGroup d = config.getGroup("drops");

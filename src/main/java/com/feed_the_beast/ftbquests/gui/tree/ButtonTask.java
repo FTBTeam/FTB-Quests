@@ -9,9 +9,9 @@ import com.feed_the_beast.ftblib.lib.gui.Theme;
 import com.feed_the_beast.ftblib.lib.gui.WidgetType;
 import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
-import com.feed_the_beast.ftbquests.gui.FTBQuestsTheme;
 import com.feed_the_beast.ftbquests.quest.task.Task;
 import com.feed_the_beast.ftbquests.quest.task.TaskData;
+import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.text.TextFormatting;
 
@@ -151,7 +151,7 @@ public class ButtonTask extends Button
 		{
 			GlStateManager.pushMatrix();
 			GlStateManager.translate(0F, 0F, 500F);
-			FTBQuestsTheme.COMPLETED.draw(x + w - 9, y + 1, 8, 8);
+			ThemeProperties.CHECK_ICON.get().draw(x + w - 9, y + 1, 8, 8);
 			GlStateManager.popMatrix();
 		}
 		else

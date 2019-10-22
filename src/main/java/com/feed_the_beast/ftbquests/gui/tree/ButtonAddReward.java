@@ -6,10 +6,10 @@ import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
 import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.gui.Theme;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
-import com.feed_the_beast.ftbquests.gui.FTBQuestsTheme;
 import com.feed_the_beast.ftbquests.net.edit.MessageCreateObject;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.reward.RewardType;
+import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.nbt.NBTTagCompound;
 
@@ -25,7 +25,7 @@ public class ButtonAddReward extends Button
 
 	public ButtonAddReward(Panel panel, Quest q)
 	{
-		super(panel, I18n.format("gui.add"), FTBQuestsTheme.ADD);
+		super(panel, I18n.format("gui.add"), ThemeProperties.ADD_ICON.get());
 		quest = q;
 		setSize(18, 18);
 	}

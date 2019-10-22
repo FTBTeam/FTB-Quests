@@ -3,7 +3,9 @@ package com.feed_the_beast.ftbquests.gui.tree;
 import com.feed_the_beast.ftblib.lib.gui.Button;
 import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.gui.Theme;
+import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
+import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
 
 /**
  * @author LatvianModder
@@ -28,7 +30,8 @@ public abstract class ButtonTab extends Button
 
 		if (isMouseOver())
 		{
-			treeGui.backgroundColor.draw(x + 1, y, w - 2, h);
+			Color4I backgroundColor = ThemeProperties.WIDGET_BACKGROUND.get(treeGui.selectedChapter);
+			backgroundColor.draw(x + 1, y, w - 2, h);
 		}
 	}
 }

@@ -1,0 +1,48 @@
+[*]
+background:          ftblib:textures/gui/background_squares.png; color=#DCFFFFFF; tile_size=64
+disabled_background: {{background}}; color=#F0B4B4B4
+
+text_color:          #FFFFFF
+hover_text_color:    #FFFFA0
+disabled_text_color: #555555
+title_text_color:    #AAAAAA
+
+widget_border:     #58FFFFFF
+widget_background: #21FFFFFF
+symbol_in:         #9BC600
+symbol_out:        #408300
+
+button:                hollow_rectangle:{{widget_border}}
+disabled_button:       hollow_rectangle:{{disabled_text_color}}
+hover_button:          {{button}} + {{widget_background}}; padding=1
+context_menu:          hollow_rectangle:{{widget_border}}; round_edges=1 + {{disabled_background}}; padding=1
+scroll_bar_background: #46000000
+scroll_bar:            #64FFFFFF; border=#64999999
+container_slot:        hollow_rectangle:#96FFFFFF; padding=-1
+
+check_icon:           builtin
+add_icon:             builtin
+alert_icon:           ftbquests:textures/gui/alert.png
+support_icon:         ftblib:textures/icons/support.png
+wiki_icon:            ftbquests:textures/gui/info.png
+wiki_url:             https://latvian.dev/mods/ftbquests/wiki/
+pin_icon_on:          ftbquests:textures/gui/pin.png; color=#F8BD1C
+pin_icon_off:         ftbquests:textures/gui/pin.png; color=#DBDBDB
+settings_icon:        ftbquests:textures/gui/settings.png
+close_icon:           ftbquests:textures/gui/close.png
+emergency_items_icon: ftbquests:textures/gui/emergency_items.png; color=#F3D9FF
+guide_icon:           ftbquests:textures/gui/guide.png; color=#EF9E1A
+collect_rewards_icon: ftbquests:textures/gui/collect_rewards.png; color=#F8E71C
+reward_table_icon:    ftblib:icons/money_bag
+shop_icon:            ftbquests:textures/gui/shop.png; color=#EF9E1A
+delete_icon:          ftblib:icons/remove
+reload_icon:          ftblib:icons/refresh
+download_icon:        ftblib:icons/down
+edit_icon:            ftblib:icons/settings
+move_up_icon:         ftblib:icons/up
+move_down_icon:       ftblib:icons/down
+
+icon:               none
+full_screen_quest:  0
+tasks_text_color:   #5555FF
+rewards_text_color: #FFAA00

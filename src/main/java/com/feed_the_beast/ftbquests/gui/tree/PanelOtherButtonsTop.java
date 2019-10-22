@@ -30,12 +30,12 @@ public class PanelOtherButtonsTop extends PanelOtherButtons
 			add(new ButtonOpenGuides(this));
 		}
 
-		add(new ButtonWiki(this));
-
 		if (!treeGui.file.emergencyItems.isEmpty() && (treeGui.file.self != null || treeGui.file.canEdit()))
 		{
 			add(new ButtonEmergencyItems(this));
 		}
+
+		add(new ButtonWiki(this));
 	}
 
 	@Override
