@@ -1,10 +1,8 @@
 package com.feed_the_beast.ftbquests.gui;
 
-import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
 import com.feed_the_beast.ftblib.lib.gui.Theme;
 import com.feed_the_beast.ftblib.lib.gui.WidgetType;
 import com.feed_the_beast.ftblib.lib.icon.Color4I;
-import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
 
 /**
@@ -32,8 +30,7 @@ public class FTBQuestsTheme extends Theme
 	@Override
 	public void drawGui(int x, int y, int w, int h, WidgetType type)
 	{
-		Icon icon = (type == WidgetType.DISABLED ? ThemeProperties.DISABLED_BACKGROUND : ThemeProperties.BACKGROUND).get();
-		icon.draw(x, y, w, h);
+		ThemeProperties.BACKGROUND.get().draw(x, y, w, h);
 	}
 
 	@Override
@@ -60,12 +57,15 @@ public class FTBQuestsTheme extends Theme
 	}
 
 	@Override
+	public void drawPanelBackground(int x, int y, int w, int h)
+	{
+		ThemeProperties.PANEL.get().draw(x, y, w, h);
+	}
+
+	@Override
 	public void drawContextMenuBackground(int x, int y, int w, int h)
 	{
-		Color4I borderColor = ThemeProperties.WIDGET_BORDER.get();
-		GuiHelper.drawHollowRect(x, y, w, h, borderColor, true);
-		drawGui(x + 1, y + 1, w - 2, h - 2, WidgetType.DISABLED);
-		//ThemeProperties.DISABLED_BACKGROUND.get().withPadding(1).withBorder(ThemeProperties.WIDGET_BORDER.get(), true).draw(x, y, w, h);
+		ThemeProperties.CONTEXT_MENU.get().draw(x, y, w, h);
 	}
 
 	@Override

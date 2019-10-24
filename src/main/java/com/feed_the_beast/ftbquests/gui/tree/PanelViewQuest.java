@@ -341,10 +341,11 @@ public class PanelViewQuest extends Panel
 	@Override
 	public void drawBackground(Theme theme, int x, int y, int w, int h)
 	{
-		Color4I borderColor = ThemeProperties.WIDGET_BORDER.get(gui.selectedChapter);
+		Color4I borderColor = ThemeProperties.QUEST_VIEW_BORDER.get();
 		Color4I.DARK_GRAY.withAlpha(120).draw(gui.getX(), gui.getY(), gui.width, gui.height);
-		theme.drawContextMenuBackground(x, y, w, h);
-		theme.drawString(title, x + w / 2, y + 4, ThemeProperties.TITLE_TEXT_COLOR.get(quest), Theme.CENTERED);
+		Icon background = ThemeProperties.QUEST_VIEW_BACKGROUND.get();
+		background.draw(x, y, w, h);
+		theme.drawString(title, x + w / 2, y + 4, ThemeProperties.QUEST_VIEW_TITLE.get(), Theme.CENTERED);
 		icon.draw(x + 2, y + 2, 12, 12);
 		borderColor.draw(x + 1, y + 15, w - 2, 1);
 	}

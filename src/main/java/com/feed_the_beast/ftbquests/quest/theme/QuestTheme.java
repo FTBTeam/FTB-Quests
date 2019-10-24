@@ -96,6 +96,11 @@ public class QuestTheme
 	{
 		if (object == null)
 		{
+			object = currentObject;
+		}
+
+		if (object == null)
+		{
 			return get(property);
 		}
 

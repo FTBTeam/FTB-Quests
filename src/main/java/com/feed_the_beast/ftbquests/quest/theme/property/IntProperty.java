@@ -1,5 +1,7 @@
 package com.feed_the_beast.ftbquests.quest.theme.property;
 
+import net.minecraft.util.math.MathHelper;
+
 /**
  * @author LatvianModder
  */
@@ -26,11 +28,7 @@ public class IntProperty extends ThemeProperty<Integer>
 		try
 		{
 			int i = Integer.parseInt(string);
-
-			if (i >= min && i <= max)
-			{
-				return i;
-			}
+			return MathHelper.clamp(i, min, max);
 		}
 		catch (Exception ignored)
 		{

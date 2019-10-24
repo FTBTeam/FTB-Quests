@@ -45,6 +45,6 @@ public abstract class ThemeProperty<T>
 
 	public T get()
 	{
-		return get(QuestTheme.currentObject);
+		return get(null);
 	}
 }
