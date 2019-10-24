@@ -49,7 +49,7 @@ public class ButtonQuest extends Button
 	@Override
 	public boolean checkMouseOver(int mouseX, int mouseY)
 	{
-		if (treeGui.viewQuestPanel.isMouseOver() || treeGui.chapterHoverPanel.isMouseOverAnyWidget())
+		if (treeGui.movingQuest || treeGui.viewQuestPanel.isMouseOver() || treeGui.chapterHoverPanel.isMouseOverAnyWidget())
 		{
 			return false;
 		}
@@ -69,7 +69,7 @@ public class ButtonQuest extends Button
 				{
 					for (Widget widget : treeGui.questPanel.widgets)
 					{
-						if (widget instanceof ButtonQuest && dependency == ((ButtonQuest) widget).quest)
+						if (dependency == ((ButtonQuest) widget).quest)
 						{
 							dependencies.add((ButtonQuest) widget);
 						}

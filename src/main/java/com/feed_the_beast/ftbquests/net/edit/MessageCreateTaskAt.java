@@ -18,7 +18,8 @@ import net.minecraft.nbt.NBTTagCompound;
  */
 public class MessageCreateTaskAt extends MessageToServer
 {
-	private int chapter, x, y;
+	private int chapter;
+	private double x, y;
 	private TaskType type;
 	private NBTTagCompound nbt;
 
@@ -26,7 +27,7 @@ public class MessageCreateTaskAt extends MessageToServer
 	{
 	}
 
-	public MessageCreateTaskAt(Chapter c, int _x, int _y, Task task)
+	public MessageCreateTaskAt(Chapter c, double _x, double _y, Task task)
 	{
 		chapter = c.id;
 		x = _x;
@@ -46,8 +47,8 @@ public class MessageCreateTaskAt extends MessageToServer
 	public void writeData(DataOut data)
 	{
 		data.writeInt(chapter);
-		data.writeVarInt(x);
-		data.writeVarInt(y);
+		data.writeDouble(x);
+		data.writeDouble(y);
 		data.writeVarInt(TaskType.getRegistry().getID(type));
 		data.writeNBT(nbt);
 	}
@@ -56,8 +57,8 @@ public class MessageCreateTaskAt extends MessageToServer
 	public void readData(DataIn data)
 	{
 		chapter = data.readInt();
-		x = data.readVarInt();
-		y = data.readVarInt();
+		x = data.readDouble();
+		y = data.readDouble();
 		type = TaskType.getRegistry().getValue(data.readVarInt());
 		nbt = data.readNBT();
 	}
@@ -72,8 +73,8 @@ public class MessageCreateTaskAt extends MessageToServer
 			if (c != null)
 			{
 				Quest quest = new Quest(c);
-				quest.x = (byte) x;
-				quest.y = (byte) y;
+				quest.x = x;
+				quest.y = y;
 				quest.id = ServerQuestFile.INSTANCE.readID(0);
 				quest.onCreated();
 				new MessageCreateObjectResponse(quest, null).sendToAll();

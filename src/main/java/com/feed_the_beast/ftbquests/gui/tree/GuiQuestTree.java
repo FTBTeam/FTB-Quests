@@ -498,57 +498,7 @@ public class GuiQuestTree extends GuiBase
 	public void drawForeground(Theme theme, int x, int y, int w, int h)
 	{
 		Color4I borderColor = ThemeProperties.WIDGET_BORDER.get(selectedChapter);
-
 		GuiHelper.drawHollowRect(x, y, w, h, borderColor, false);
-
-		if (file.canEdit())
-		{
-			for (Widget widget : questPanel.widgets)
-			{
-				if (widget.isMouseOver())
-				{
-					if (widget instanceof ButtonQuest)
-					{
-						theme.pushFontUnicode(true);
-						theme.drawString("X: " + ((ButtonQuest) widget).quest.x, x + 22, y + h - 18);
-						theme.drawString("Y: " + ((ButtonQuest) widget).quest.y, x + 22, y + h - 10);
-						theme.popFontUnicode();
-						break;
-					}
-					else if (widget instanceof ButtonDummyQuest)
-					{
-						theme.pushFontUnicode(true);
-						theme.drawString("X: " + ((ButtonDummyQuest) widget).x, x + 22, y + h - 18);
-						theme.drawString("Y: " + ((ButtonDummyQuest) widget).y, x + 22, y + h - 10);
-						theme.popFontUnicode();
-						break;
-					}
-				}
-			}
-		}
-
-		//backgroundColor.draw(start, y + 1, w - start - otherButtons.width - 1, chapterPanel.height - 2);
-		//borderColor.draw(start, y + chapterPanel.height - 1, w - start - 1, 1);
-
-		/*
-		if (file.canEdit())
-		{
-			Widget widget = quests.getWidget(0);
-
-			if (widget instanceof ButtonQuest || widget instanceof ButtonDummyQuest)
-			{
-				double bsize = getZoom() * 2D - 2D;
-				double mx = getMouseX() - quests.getX();//quests.width / 2D;
-				double my = getMouseY() - quests.getY();//quests.height / 2D;
-				double cx = (quests.getScrollX() + mx) / bsize - Quest.POS_LIMIT;
-				double cy = (quests.getScrollY() + my) / bsize - Quest.POS_LIMIT;
-
-				theme.drawString("X: " + StringUtils.formatDouble(cx), 4, 23);
-				theme.drawString("Y: " + StringUtils.formatDouble(cy), 4, 32);
-			}
-		}
-		*/
-
 		super.drawForeground(theme, x, y, w, h);
 	}
 
