@@ -39,6 +39,7 @@ public interface ThemeProperties
 	IconProperty SCROLL_BAR_BACKGROUND = new IconProperty("scroll_bar_background");
 	IconProperty SCROLL_BAR = new IconProperty("scroll_bar");
 	IconProperty CONTAINER_SLOT = new IconProperty("container_slot");
+	IconProperty TEXT_BOX = new IconProperty("text_box");
 
 	//Icons
 	IconProperty CHECK_ICON = new IconProperty("check_icon", new Icon()
