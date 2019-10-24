@@ -1,5 +1,7 @@
 package com.feed_the_beast.ftbquests.gui.tree;
 
+import com.feed_the_beast.ftblib.lib.gui.ContextMenuItem;
+import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
 import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.gui.Theme;
 import com.feed_the_beast.ftblib.lib.gui.Widget;
@@ -7,17 +9,24 @@ import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.ImageIcon;
 import com.feed_the_beast.ftblib.lib.math.MathUtils;
+import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
+import com.feed_the_beast.ftbquests.net.edit.MessageCreateTaskAt;
+import com.feed_the_beast.ftbquests.net.edit.MessageMoveQuest;
 import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.quest.task.TaskType;
 import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
-import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.util.math.MathHelper;
 import org.lwjgl.opengl.GL11;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author LatvianModder
@@ -26,16 +35,13 @@ public class PanelQuests extends Panel
 {
 	private static final ImageIcon DEFAULT_DEPENDENCY_LINE_TEXTURE = (ImageIcon) Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/dependency.png");
 	public final GuiQuestTree treeGui;
+	public double questX = 0;
+	public double questY = 0;
 
 	public PanelQuests(Panel panel)
 	{
 		super(panel);
 		treeGui = (GuiQuestTree) panel.getGui();
-	}
-
-	private int getxy(int x, int y)
-	{
-		return ((x + Quest.POS_LIMIT) << 16) | (y + Quest.POS_LIMIT);
 	}
 
 	@Override
@@ -46,48 +52,11 @@ public class PanelQuests extends Panel
 			return;
 		}
 
-		boolean canEdit = treeGui.file.canEdit();
-		int minX = Quest.POS_LIMIT + 1, minY = Quest.POS_LIMIT + 1, maxX = -(Quest.POS_LIMIT + 1), maxY = -(Quest.POS_LIMIT + 1);
-		IntOpenHashSet set = new IntOpenHashSet();
-
 		for (Quest quest : treeGui.selectedChapter.quests)
 		{
 			if (treeGui.file.canEdit() || quest.isVisible(ClientQuestFile.INSTANCE.self))
 			{
 				add(new ButtonQuest(this, quest));
-
-				if (canEdit)
-				{
-					minX = Math.min(minX, quest.x);
-					minY = Math.min(minY, quest.y);
-					maxX = Math.max(maxX, quest.x);
-					maxY = Math.max(maxY, quest.y);
-					set.add(getxy(quest.x, quest.y));
-				}
-			}
-		}
-
-		if (canEdit)
-		{
-			if (minX == Quest.POS_LIMIT + 1)
-			{
-				minX = minY = maxX = maxY = 0;
-			}
-
-			minX -= 20;
-			minY -= 10;
-			maxX += 20;
-			maxY += 10;
-
-			for (int y = minY; y <= maxY; y++)
-			{
-				for (int x = minX; x <= maxX; x++)
-				{
-					if (!set.contains(getxy(x, y)))
-					{
-						add(new ButtonDummyQuest(this, (byte) x, (byte) y));
-					}
-				}
 			}
 		}
 
@@ -100,21 +69,18 @@ public class PanelQuests extends Panel
 		treeGui.scrollWidth = 0;
 		treeGui.scrollHeight = 0;
 
-		int minX = Quest.POS_LIMIT + 1, minY = Quest.POS_LIMIT + 1, maxX = -(Quest.POS_LIMIT + 1), maxY = -(Quest.POS_LIMIT + 1);
+		double minX = Double.POSITIVE_INFINITY, minY = Double.POSITIVE_INFINITY, maxX = Double.NEGATIVE_INFINITY, maxY = Double.NEGATIVE_INFINITY;
 
 		for (Widget widget : widgets)
 		{
-			if (widget instanceof ButtonQuest)
-			{
-				Quest quest = ((ButtonQuest) widget).quest;
-				minX = Math.min(minX, quest.x);
-				minY = Math.min(minY, quest.y);
-				maxX = Math.max(maxX, quest.x);
-				maxY = Math.max(maxY, quest.y);
-			}
+			Quest quest = ((ButtonQuest) widget).quest;
+			minX = Math.min(minX, quest.x);
+			minY = Math.min(minY, quest.y);
+			maxX = Math.max(maxX, quest.x);
+			maxY = Math.max(maxY, quest.y);
 		}
 
-		if (minX == Quest.POS_LIMIT + 1)
+		if (minX == Double.POSITIVE_INFINITY)
 		{
 			minX = minY = maxX = maxY = 0;
 		}
@@ -124,29 +90,15 @@ public class PanelQuests extends Panel
 		maxX += 20;
 		maxY += 10;
 
-		int bsize = treeGui.getZoom() * 2 - 2;
+		double bsize = treeGui.getZoom() * 2 - 2;
 
-		treeGui.scrollWidth = (maxX - minX + 1) * bsize;
-		treeGui.scrollHeight = (maxY - minY + 1) * bsize;
+		treeGui.scrollWidth = (int) ((maxX - minX + 1) * bsize);
+		treeGui.scrollHeight = (int) ((maxY - minY + 1) * bsize);
 
 		for (Widget widget : widgets)
 		{
-			int x, y;
-
-			if (widget instanceof ButtonQuest)
-			{
-				Quest quest = ((ButtonQuest) widget).quest;
-				x = quest.x;
-				y = quest.y;
-			}
-			else
-			{
-				ButtonDummyQuest button = (ButtonDummyQuest) widget;
-				x = button.x;
-				y = button.y;
-			}
-
-			widget.setPosAndSize((x - minX) * bsize, (y - minY) * bsize, bsize, bsize);
+			Quest quest = ((ButtonQuest) widget).quest;
+			widget.setPosAndSize((int) ((quest.x - minX) * bsize), (int) ((quest.y - minY) * bsize), (int) bsize, (int) bsize);
 		}
 
 		setPosAndSize(20, 1, treeGui.width - 40, treeGui.height - 2);
@@ -179,117 +131,111 @@ public class PanelQuests extends Panel
 
 		for (Widget widget : widgets)
 		{
-			if (widget instanceof ButtonQuest)
-			{
-				Quest wquest = ((ButtonQuest) widget).quest;
+			Quest wquest = ((ButtonQuest) widget).quest;
 
-				if (wquest.hideDependencyLines)
+			if (wquest.hideDependencyLines)
+			{
+				continue;
+			}
+
+			boolean unavailable = treeGui.file.self == null || !wquest.canStartTasks(treeGui.file.self);
+			boolean complete = !unavailable && treeGui.file.self != null && wquest.isComplete(treeGui.file.self);
+
+			for (ButtonQuest button : ((ButtonQuest) widget).getDependencies())
+			{
+				if (button.quest == selectedQuest || wquest == selectedQuest)
 				{
 					continue;
 				}
 
-				boolean unavailable = treeGui.file.self == null || !wquest.canStartTasks(treeGui.file.self);
-				boolean complete = !unavailable && treeGui.file.self != null && wquest.isComplete(treeGui.file.self);
+				int r, g, b, a;
 
-				for (ButtonQuest button : ((ButtonQuest) widget).getDependencies())
+				if (complete)
 				{
-					if (button.quest == selectedQuest || wquest == selectedQuest)
-					{
-						continue;
-					}
-
-					int r, g, b, a;
-
-					if (complete)
-					{
-						Color4I c = ThemeProperties.DEPENDENCY_LINE_COMPLETED_COLOR.get(treeGui.selectedChapter);
-						r = c.redi();
-						g = c.greeni();
-						b = c.bluei();
-						a = c.alphai();
-					}
-					else
-					{
-						Color4I c = Color4I.hsb(button.quest.id / 1000F, 0.2F, unavailable ? 0.3F : 0.8F);
-						r = c.redi();
-						g = c.greeni();
-						b = c.bluei();
-						a = 180;
-					}
-
-					double sx = widget.getX() + widget.width / 2D;
-					double sy = widget.getY() + widget.height / 2D;
-					double ex = button.getX() + button.width / 2D;
-					double ey = button.getY() + button.height / 2D;
-					double len = MathUtils.dist(sx, sy, ex, ey);
-
-					GlStateManager.pushMatrix();
-					GlStateManager.translate(sx, sy, 0);
-					GlStateManager.rotate((float) (Math.atan2(ey - sy, ex - sx) * 180D / Math.PI), 0F, 0F, 1F);
-					buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
-					buffer.pos(0, -s, 0).tex(len / s / 2D + mu, 0).color(r, g, b, a).endVertex();
-					buffer.pos(0, s, 0).tex(len / s / 2D + mu, 1).color(r, g, b, a).endVertex();
-					buffer.pos(len, s, 0).tex(mu, 1).color(r * 3 / 4, g * 3 / 4, b * 3 / 4, a).endVertex();
-					buffer.pos(len, -s, 0).tex(mu, 0).color(r * 3 / 4, g * 3 / 4, b * 3 / 4, a).endVertex();
-					tessellator.draw();
-					GlStateManager.popMatrix();
+					Color4I c = ThemeProperties.DEPENDENCY_LINE_COMPLETED_COLOR.get(treeGui.selectedChapter);
+					r = c.redi();
+					g = c.greeni();
+					b = c.bluei();
+					a = c.alphai();
 				}
+				else
+				{
+					Color4I c = Color4I.hsb(button.quest.id / 1000F, 0.2F, unavailable ? 0.3F : 0.8F);
+					r = c.redi();
+					g = c.greeni();
+					b = c.bluei();
+					a = 180;
+				}
+
+				double sx = widget.getX() + widget.width / 2D;
+				double sy = widget.getY() + widget.height / 2D;
+				double ex = button.getX() + button.width / 2D;
+				double ey = button.getY() + button.height / 2D;
+				double len = MathUtils.dist(sx, sy, ex, ey);
+
+				GlStateManager.pushMatrix();
+				GlStateManager.translate(sx, sy, 0);
+				GlStateManager.rotate((float) (Math.atan2(ey - sy, ex - sx) * 180D / Math.PI), 0F, 0F, 1F);
+				buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
+				buffer.pos(0, -s, 0).tex(len / s / 2D + mu, 0).color(r, g, b, a).endVertex();
+				buffer.pos(0, s, 0).tex(len / s / 2D + mu, 1).color(r, g, b, a).endVertex();
+				buffer.pos(len, s, 0).tex(mu, 1).color(r * 3 / 4, g * 3 / 4, b * 3 / 4, a).endVertex();
+				buffer.pos(len, -s, 0).tex(mu, 0).color(r * 3 / 4, g * 3 / 4, b * 3 / 4, a).endVertex();
+				tessellator.draw();
+				GlStateManager.popMatrix();
 			}
 		}
 
 		for (Widget widget : widgets)
 		{
-			if (widget instanceof ButtonQuest)
-			{
-				Quest wquest = ((ButtonQuest) widget).quest;
+			Quest wquest = ((ButtonQuest) widget).quest;
 
-				if (wquest.hideDependencyLines)
+			if (wquest.hideDependencyLines)
+			{
+				continue;
+			}
+
+			for (ButtonQuest button : ((ButtonQuest) widget).getDependencies())
+			{
+				int r, g, b, a;
+
+				if (button.quest == selectedQuest)
+				{
+					Color4I c = ThemeProperties.DEPENDENCY_LINE_REQUIRED_FOR_COLOR.get(treeGui.selectedChapter);
+					r = c.redi();
+					g = c.greeni();
+					b = c.bluei();
+					a = c.alphai();
+				}
+				else if (wquest == selectedQuest)
+				{
+					Color4I c = ThemeProperties.DEPENDENCY_LINE_REQUIRES_COLOR.get(treeGui.selectedChapter);
+					r = c.redi();
+					g = c.greeni();
+					b = c.bluei();
+					a = c.alphai();
+				}
+				else
 				{
 					continue;
 				}
 
-				for (ButtonQuest button : ((ButtonQuest) widget).getDependencies())
-				{
-					int r, g, b, a;
+				double sx = widget.getX() + widget.width / 2D;
+				double sy = widget.getY() + widget.height / 2D;
+				double ex = button.getX() + button.width / 2D;
+				double ey = button.getY() + button.height / 2D;
+				double len = MathUtils.dist(sx, sy, ex, ey);
 
-					if (button.quest == selectedQuest)
-					{
-						Color4I c = ThemeProperties.DEPENDENCY_LINE_REQUIRED_FOR_COLOR.get(treeGui.selectedChapter);
-						r = c.redi();
-						g = c.greeni();
-						b = c.bluei();
-						a = c.alphai();
-					}
-					else if (wquest == selectedQuest)
-					{
-						Color4I c = ThemeProperties.DEPENDENCY_LINE_REQUIRES_COLOR.get(treeGui.selectedChapter);
-						r = c.redi();
-						g = c.greeni();
-						b = c.bluei();
-						a = c.alphai();
-					}
-					else
-					{
-						continue;
-					}
-
-					double sx = widget.getX() + widget.width / 2D;
-					double sy = widget.getY() + widget.height / 2D;
-					double ex = button.getX() + button.width / 2D;
-					double ey = button.getY() + button.height / 2D;
-					double len = MathUtils.dist(sx, sy, ex, ey);
-
-					GlStateManager.pushMatrix();
-					GlStateManager.translate(sx, sy, 0);
-					GlStateManager.rotate((float) (Math.atan2(ey - sy, ex - sx) * 180D / Math.PI), 0F, 0F, 1F);
-					buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
-					buffer.pos(0, -s, 0).tex(len / s / 2D + ms, 0).color(r, g, b, a).endVertex();
-					buffer.pos(0, s, 0).tex(len / s / 2D + ms, 1).color(r, g, b, a).endVertex();
-					buffer.pos(len, s, 0).tex(ms, 1).color(r * 3 / 4, g * 3 / 4, b * 3 / 4, a).endVertex();
-					buffer.pos(len, -s, 0).tex(ms, 0).color(r * 3 / 4, g * 3 / 4, b * 3 / 4, a).endVertex();
-					tessellator.draw();
-					GlStateManager.popMatrix();
-				}
+				GlStateManager.pushMatrix();
+				GlStateManager.translate(sx, sy, 0);
+				GlStateManager.rotate((float) (Math.atan2(ey - sy, ex - sx) * 180D / Math.PI), 0F, 0F, 1F);
+				buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
+				buffer.pos(0, -s, 0).tex(len / s / 2D + ms, 0).color(r, g, b, a).endVertex();
+				buffer.pos(0, s, 0).tex(len / s / 2D + ms, 1).color(r, g, b, a).endVertex();
+				buffer.pos(len, s, 0).tex(ms, 1).color(r * 3 / 4, g * 3 / 4, b * 3 / 4, a).endVertex();
+				buffer.pos(len, -s, 0).tex(ms, 0).color(r * 3 / 4, g * 3 / 4, b * 3 / 4, a).endVertex();
+				tessellator.draw();
+				GlStateManager.popMatrix();
 			}
 		}
 
@@ -298,24 +244,137 @@ public class PanelQuests extends Panel
 	}
 
 	@Override
+	public void draw(Theme theme, int x, int y, int w, int h)
+	{
+		super.draw(theme, x, y, w, h);
+
+		if (isMouseOver())
+		{
+			double minX = Double.POSITIVE_INFINITY, minY = Double.POSITIVE_INFINITY, maxX = Double.NEGATIVE_INFINITY, maxY = Double.NEGATIVE_INFINITY;
+
+			for (Widget widget : widgets)
+			{
+				Quest quest = ((ButtonQuest) widget).quest;
+				minX = Math.min(minX, quest.x);
+				minY = Math.min(minY, quest.y);
+				maxX = Math.max(maxX, quest.x);
+				maxY = Math.max(maxY, quest.y);
+			}
+
+			if (minX == Double.POSITIVE_INFINITY)
+			{
+				minX = minY = maxX = maxY = 0;
+			}
+
+			minX -= 20;
+			minY -= 10;
+			maxX += 20;
+			maxY += 10;
+
+			double dx = (maxX - minX + 1);
+			double dy = (maxY - minY + 1);
+
+			setOffset(true);
+			double qx = (treeGui.getMouseX() - getX()) / (double) treeGui.scrollWidth * dx + minX;
+			double qy = (treeGui.getMouseY() - getY()) / (double) treeGui.scrollHeight * dy + minY;
+			setOffset(false);
+
+			if (isCtrlKeyDown())
+			{
+				questX = qx - 0.5D;
+				questY = qy - 0.5D;
+			}
+			else if (isShiftKeyDown())
+			{
+				questX = MathHelper.floor(qx);
+				questY = MathHelper.floor(qy);
+			}
+			else
+			{
+				questX = MathHelper.floor(qx * 2D - 0.5D) / 2D;
+				questY = MathHelper.floor(qy * 2D - 0.5D) / 2D;
+			}
+
+			if (treeGui.file.canEdit())
+			{
+				theme.pushFontUnicode(true);
+				theme.drawString("X: " + StringUtils.formatDouble(questX), x + 3, y + h - 18, Theme.SHADOW);
+				theme.drawString("Y: " + StringUtils.formatDouble(questY), x + 3, y + h - 10, Theme.SHADOW);
+				theme.popFontUnicode();
+
+				if (treeGui.movingQuest && treeGui.selectedQuests.size() == 1)
+				{
+					int z = treeGui.getZoom();
+					double s = z * 3D / 2D;
+					double off = (z * 2 - 2 - s) / 2D;
+					setOffset(true);
+					double sx = (questX - minX) / dx * treeGui.scrollWidth + getX() + off;
+					double sy = (questY - minY) / dy * treeGui.scrollHeight + getY() + off;
+					setOffset(false);
+					FTBQuests.LOGGER.info(sx + " : " + sy);
+					GlStateManager.pushMatrix();
+					GlStateManager.translate(sx, sy, 0);
+					GlStateManager.scale(s, s, 1D);
+					GlStateManager.color(1F, 1F, 1F, 1F);
+					GlStateManager.enableBlend();
+					GlStateManager.disableAlpha();
+					GuiHelper.setupDrawing();
+					treeGui.selectedQuests.iterator().next().shape.shape.withColor(Color4I.WHITE.withAlpha(20)).draw(0, 0, 1, 1);
+					GlStateManager.popMatrix();
+				}
+			}
+		}
+	}
+
+	@Override
 	public boolean mousePressed(MouseButton button)
 	{
-		boolean b = super.mousePressed(button);
-
-		if (!b && !treeGui.viewQuestPanel.hidePanel && treeGui.getViewedQuest() != null)
+		if (treeGui.movingQuest && treeGui.selectedQuests.size() == 1 && treeGui.file.canEdit())
 		{
+			GuiHelper.playClickSound();
+			new MessageMoveQuest(treeGui.selectedQuests.iterator().next().id, questX, questY).sendToServer();
+			treeGui.movingQuest = false;
 			treeGui.closeQuest();
+			return true;
 		}
 
-		if (!b && button.isLeft() && isMouseOver() && (treeGui.viewQuestPanel.hidePanel || treeGui.getViewedQuest() == null))
+		if (super.mousePressed(button))
+		{
+			return true;
+		}
+
+		if (!treeGui.viewQuestPanel.hidePanel && treeGui.getViewedQuest() != null)
+		{
+			treeGui.closeQuest();
+			return true;
+		}
+
+		if (button.isLeft() && isMouseOver() && (treeGui.viewQuestPanel.hidePanel || treeGui.getViewedQuest() == null))
 		{
 			treeGui.prevMouseX = getMouseX();
 			treeGui.prevMouseY = getMouseY();
 			treeGui.grabbed = 1;
-			b = true;
+			return true;
 		}
 
-		return b;
+		if (button.isRight() && treeGui.file.canEdit())
+		{
+			GuiHelper.playClickSound();
+			List<ContextMenuItem> contextMenu = new ArrayList<>();
+
+			for (TaskType type : TaskType.getRegistry())
+			{
+				contextMenu.add(new ContextMenuItem(type.getDisplayName(), type.getIcon(), () -> {
+					GuiHelper.playClickSound();
+					type.getGuiProvider().openCreationGui(this, new Quest(treeGui.selectedChapter), task -> new MessageCreateTaskAt(treeGui.selectedChapter, questX, questY, task).sendToServer());
+				}));
+			}
+
+			getGui().openContextMenu(contextMenu);
+			return true;
+		}
+
+		return false;
 	}
 
 	@Override

@@ -28,7 +28,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagIntArray;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.relauncher.Side;
@@ -45,11 +44,9 @@ import java.util.function.Predicate;
  */
 public final class Quest extends QuestObject
 {
-	public static final int POS_LIMIT = 25;
-
 	public final Chapter chapter;
 	public String description;
-	public byte x, y;
+	public double x, y;
 	public boolean hide;
 	public QuestShape shape;
 	public final List<String> text;
@@ -118,16 +115,8 @@ public final class Quest extends QuestObject
 	public void writeData(NBTTagCompound nbt)
 	{
 		super.writeData(nbt);
-
-		if (x != 0)
-		{
-			nbt.setByte("x", x);
-		}
-
-		if (y != 0)
-		{
-			nbt.setByte("y", y);
-		}
+		nbt.setDouble("x", x);
+		nbt.setDouble("y", y);
 
 		if (shape != chapter.file.defaultShape)
 		{
@@ -218,8 +207,8 @@ public final class Quest extends QuestObject
 	{
 		super.readData(nbt);
 		description = nbt.getString("description");
-		x = (byte) MathHelper.clamp(nbt.getByte("x"), -POS_LIMIT, POS_LIMIT);
-		y = (byte) MathHelper.clamp(nbt.getByte("y"), -POS_LIMIT, POS_LIMIT);
+		x = nbt.getDouble("x");
+		y = nbt.getDouble("y");
 		shape = nbt.hasKey("shape") ? QuestShape.NAME_MAP.get(nbt.getString("shape")) : chapter.file.defaultShape;
 		text.clear();
 
@@ -302,8 +291,8 @@ public final class Quest extends QuestObject
 			data.writeString(description);
 		}
 
-		data.writeByte(x);
-		data.writeByte(y);
+		data.writeDouble(x);
+		data.writeDouble(y);
 		QuestShape.NAME_MAP.write(data, shape);
 
 		if (!text.isEmpty())
@@ -344,8 +333,8 @@ public final class Quest extends QuestObject
 		super.readNetData(data);
 		int flags = data.readVarInt();
 		description = Bits.getFlag(flags, 8) ? data.readString() : "";
-		x = data.readByte();
-		y = data.readByte();
+		x = data.readDouble();
+		y = data.readDouble();
 		shape = QuestShape.NAME_MAP.read(data);
 
 		if (Bits.getFlag(flags, 16))
@@ -608,8 +597,8 @@ public final class Quest extends QuestObject
 	public void getConfig(ConfigGroup config)
 	{
 		super.getConfig(config);
-		config.addInt("x", () -> x, v -> x = (byte) v, 0, -POS_LIMIT, POS_LIMIT);
-		config.addInt("y", () -> y, v -> y = (byte) v, 0, -POS_LIMIT, POS_LIMIT);
+		config.addDouble("x", () -> x, v -> x = v, 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+		config.addDouble("y", () -> y, v -> y = v, 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
 		config.addBool("hide", () -> hide, v -> hide = v, false);
 		config.addEnum("shape", () -> shape, v -> shape = v, QuestShape.NAME_MAP);
 		config.addString("description", () -> description, v -> description = v, "");

@@ -76,7 +76,7 @@ public class RenderProgressScreen extends TileEntitySpecialRenderer<TileProgress
 
 		if (!chapter.quests.isEmpty())
 		{
-			int minX = Quest.POS_LIMIT + 1, minY = Quest.POS_LIMIT + 1, maxX = -(Quest.POS_LIMIT + 1), maxY = -(Quest.POS_LIMIT + 1);
+			double minX = Double.POSITIVE_INFINITY, minY = Double.POSITIVE_INFINITY, maxX = Double.NEGATIVE_INFINITY, maxY = Double.NEGATIVE_INFINITY;
 
 			for (Quest quest : chapter.quests)
 			{
@@ -86,8 +86,8 @@ public class RenderProgressScreen extends TileEntitySpecialRenderer<TileProgress
 				maxY = Math.max(maxY, quest.y);
 			}
 
-			int sizeX = maxX - minX + 1;
-			int sizeY = maxY - minY + 1;
+			double sizeX = maxX - minX + 1D;
+			double sizeY = maxY - minY + 1D;
 
 			if (!screen.fullscreen)
 			{
@@ -126,10 +126,10 @@ public class RenderProgressScreen extends TileEntitySpecialRenderer<TileProgress
 					b = COLOR_IN_PROGRESS.bluei();
 				}
 
-				double rx = (quest.x - minX) / (double) sizeX + 0.0025D;
-				double ry = (quest.y - minY) / (double) sizeY + 0.0025D;
-				double rw = 1D / (double) sizeX - 0.005D;
-				double rh = 1D / (double) sizeY - 0.005D;
+				double rx = (quest.x - minX) / sizeX + 0.0025D;
+				double ry = (quest.y - minY) / sizeY + 0.0025D;
+				double rw = 1D / sizeX - 0.005D;
+				double rh = 1D / sizeY - 0.005D;
 
 				buffer.pos(rx, ry, 0).color(r, g, b, a).endVertex();
 				buffer.pos(rx, ry + rh, 0).color(r, g, b, a).endVertex();
@@ -147,11 +147,11 @@ public class RenderProgressScreen extends TileEntitySpecialRenderer<TileProgress
 			{
 				for (Quest quest : chapter.quests)
 				{
-					double rx = (quest.x - minX + 0.5D) / (double) sizeX;
-					double ry = (quest.y - minY + 0.5D) / (double) sizeY;
-					int s = Math.max(sizeX, sizeY);
-					double rw = 0.75D / (double) s;
-					double rh = 0.75D / (double) s;
+					double rx = (quest.x - minX + 0.5D) / sizeX;
+					double ry = (quest.y - minY + 0.5D) / sizeY;
+					double s = Math.max(sizeX, sizeY);
+					double rw = 0.75D / s;
+					double rh = 0.75D / s;
 
 					GlStateManager.pushMatrix();
 					GlStateManager.translate(rx, ry, -0.009F);
