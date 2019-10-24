@@ -19,13 +19,11 @@ public interface ThemeProperties
 {
 	//Main GUI
 	IconProperty BACKGROUND = new IconProperty("background");
-	IconProperty DISABLED_BACKGROUND = new IconProperty("disabled_background");
 
 	//Text Color
 	ColorProperty TEXT_COLOR = new ColorProperty("text_color");
 	ColorProperty HOVER_TEXT_COLOR = new ColorProperty("hover_text_color");
 	ColorProperty DISABLED_TEXT_COLOR = new ColorProperty("disabled_text_color");
-	ColorProperty TITLE_TEXT_COLOR = new ColorProperty("title_text_color");
 
 	//Widgets
 	ColorProperty WIDGET_BORDER = new ColorProperty("widget_border");
@@ -34,6 +32,7 @@ public interface ThemeProperties
 	ColorProperty SYMBOL_OUT = new ColorProperty("symbol_out");
 
 	IconProperty BUTTON = new IconProperty("button");
+	IconProperty PANEL = new IconProperty("panel");
 	IconProperty DISABLED_BUTTON = new IconProperty("disabled_button");
 	IconProperty HOVER_BUTTON = new IconProperty("hover_button");
 	IconProperty CONTEXT_MENU = new IconProperty("context_menu");
@@ -187,6 +186,18 @@ public interface ThemeProperties
 	IntProperty FULL_SCREEN_QUEST = new IntProperty("full_screen_quest", 0, 1);
 	ColorProperty TASKS_TEXT_COLOR = new ColorProperty("tasks_text_color");
 	ColorProperty REWARDS_TEXT_COLOR = new ColorProperty("rewards_text_color");
+	IconProperty QUEST_VIEW_BACKGROUND = new IconProperty("quest_view_background");
+	ColorProperty QUEST_VIEW_BORDER = new ColorProperty("quest_view_border");
+	ColorProperty QUEST_VIEW_TITLE = new ColorProperty("quest_view_title");
+	ColorProperty QUEST_COMPLETED_COLOR = new ColorProperty("quest_completed_color");
+	ColorProperty QUEST_STARTED_COLOR = new ColorProperty("quest_started_color");
+	IconProperty DEPENDENCY_LINE_TEXTURE = new IconProperty("dependency_line_texture");
+	ColorProperty DEPENDENCY_LINE_COMPLETED_COLOR = new ColorProperty("dependency_line_completed_color");
+	ColorProperty DEPENDENCY_LINE_REQUIRES_COLOR = new ColorProperty("dependency_line_requires_color");
+	ColorProperty DEPENDENCY_LINE_REQUIRED_FOR_COLOR = new ColorProperty("dependency_line_required_for_color");
+	DoubleProperty DEPENDENCY_LINE_SELECTED_SPEED = new DoubleProperty("dependency_line_selected_speed", 0D, 1000D);
+	DoubleProperty DEPENDENCY_LINE_UNSELECTED_SPEED = new DoubleProperty("dependency_line_unselected_speed", 0D, 1000D);
+	DoubleProperty DEPENDENCY_LINE_THICKNESS = new DoubleProperty("dependency_line_thickness", 0D, 3D);
 
 	static void register(ThemePropertyEvent event)
 	{

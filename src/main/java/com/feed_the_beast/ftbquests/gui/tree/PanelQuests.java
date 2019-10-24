@@ -11,6 +11,7 @@ import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
@@ -23,7 +24,7 @@ import org.lwjgl.opengl.GL11;
  */
 public class PanelQuests extends Panel
 {
-	public static final ImageIcon DEPENDENCY = (ImageIcon) Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/dependency.png");
+	private static final ImageIcon DEFAULT_DEPENDENCY_LINE_TEXTURE = (ImageIcon) Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/dependency.png");
 	public final GuiQuestTree treeGui;
 
 	public PanelQuests(Panel panel)
@@ -158,11 +159,23 @@ public class PanelQuests extends Panel
 		Tessellator tessellator = Tessellator.getInstance();
 		BufferBuilder buffer = tessellator.getBuffer();
 
-		DEPENDENCY.bindTexture();
-		GlStateManager.shadeModel(GL11.GL_SMOOTH);
-		double moving = -(System.currentTimeMillis() * 0.001D) % 1D;
-		double s = treeGui.getZoom() / 8D;
+		Icon icon = ThemeProperties.DEPENDENCY_LINE_TEXTURE.get(treeGui.selectedChapter);
+
+		if (icon instanceof ImageIcon)
+		{
+			icon.bindTexture();
+		}
+		else
+		{
+			DEFAULT_DEPENDENCY_LINE_TEXTURE.bindTexture();
+		}
+
 		Quest selectedQuest = treeGui.getViewedQuest();
+		GlStateManager.shadeModel(GL11.GL_SMOOTH);
+		double mt = -(System.currentTimeMillis() * 0.001D);
+		double mu = (mt * ThemeProperties.DEPENDENCY_LINE_UNSELECTED_SPEED.get(treeGui.selectedChapter)) % 1D;
+		double ms = (mt * ThemeProperties.DEPENDENCY_LINE_SELECTED_SPEED.get(treeGui.selectedChapter)) % 1D;
+		double s = treeGui.getZoom() * ThemeProperties.DEPENDENCY_LINE_THICKNESS.get(treeGui.selectedChapter);
 
 		for (Widget widget : widgets)
 		{
@@ -189,10 +202,11 @@ public class PanelQuests extends Panel
 
 					if (complete)
 					{
-						r = 100;
-						g = 220;
-						b = 100;
-						a = 255;
+						Color4I c = ThemeProperties.DEPENDENCY_LINE_COMPLETED_COLOR.get(treeGui.selectedChapter);
+						r = c.redi();
+						g = c.greeni();
+						b = c.bluei();
+						a = c.alphai();
 					}
 					else
 					{
@@ -213,10 +227,10 @@ public class PanelQuests extends Panel
 					GlStateManager.translate(sx, sy, 0);
 					GlStateManager.rotate((float) (Math.atan2(ey - sy, ex - sx) * 180D / Math.PI), 0F, 0F, 1F);
 					buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
-					buffer.pos(0, -s, 0).tex(len / s / 2D, 0).color(r, g, b, a).endVertex();
-					buffer.pos(0, s, 0).tex(len / s / 2D, 1).color(r, g, b, a).endVertex();
-					buffer.pos(len, s, 0).tex(0D, 1).color(r * 3 / 4, g * 3 / 4, b * 3 / 4, a).endVertex();
-					buffer.pos(len, -s, 0).tex(0D, 0).color(r * 3 / 4, g * 3 / 4, b * 3 / 4, a).endVertex();
+					buffer.pos(0, -s, 0).tex(len / s / 2D + mu, 0).color(r, g, b, a).endVertex();
+					buffer.pos(0, s, 0).tex(len / s / 2D + mu, 1).color(r, g, b, a).endVertex();
+					buffer.pos(len, s, 0).tex(mu, 1).color(r * 3 / 4, g * 3 / 4, b * 3 / 4, a).endVertex();
+					buffer.pos(len, -s, 0).tex(mu, 0).color(r * 3 / 4, g * 3 / 4, b * 3 / 4, a).endVertex();
 					tessellator.draw();
 					GlStateManager.popMatrix();
 				}
@@ -236,19 +250,23 @@ public class PanelQuests extends Panel
 
 				for (ButtonQuest button : ((ButtonQuest) widget).getDependencies())
 				{
-					int r, g, b;
+					int r, g, b, a;
 
 					if (button.quest == selectedQuest)
 					{
-						r = 200;
-						g = 200;
-						b = 0;
+						Color4I c = ThemeProperties.DEPENDENCY_LINE_REQUIRED_FOR_COLOR.get(treeGui.selectedChapter);
+						r = c.redi();
+						g = c.greeni();
+						b = c.bluei();
+						a = c.alphai();
 					}
 					else if (wquest == selectedQuest)
 					{
-						r = 0;
-						g = 200;
-						b = 200;
+						Color4I c = ThemeProperties.DEPENDENCY_LINE_REQUIRES_COLOR.get(treeGui.selectedChapter);
+						r = c.redi();
+						g = c.greeni();
+						b = c.bluei();
+						a = c.alphai();
 					}
 					else
 					{
@@ -265,10 +283,10 @@ public class PanelQuests extends Panel
 					GlStateManager.translate(sx, sy, 0);
 					GlStateManager.rotate((float) (Math.atan2(ey - sy, ex - sx) * 180D / Math.PI), 0F, 0F, 1F);
 					buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
-					buffer.pos(0, -s, 0).tex(len / s / 2D + moving, 0).color(r, g, b, 255).endVertex();
-					buffer.pos(0, s, 0).tex(len / s / 2D + moving, 1).color(r, g, b, 255).endVertex();
-					buffer.pos(len, s, 0).tex(moving, 1).color(r * 3 / 4, g * 3 / 4, b * 3 / 4, 255).endVertex();
-					buffer.pos(len, -s, 0).tex(moving, 0).color(r * 3 / 4, g * 3 / 4, b * 3 / 4, 255).endVertex();
+					buffer.pos(0, -s, 0).tex(len / s / 2D + ms, 0).color(r, g, b, a).endVertex();
+					buffer.pos(0, s, 0).tex(len / s / 2D + ms, 1).color(r, g, b, a).endVertex();
+					buffer.pos(len, s, 0).tex(ms, 1).color(r * 3 / 4, g * 3 / 4, b * 3 / 4, a).endVertex();
+					buffer.pos(len, -s, 0).tex(ms, 0).color(r * 3 / 4, g * 3 / 4, b * 3 / 4, a).endVertex();
 					tessellator.draw();
 					GlStateManager.popMatrix();
 				}

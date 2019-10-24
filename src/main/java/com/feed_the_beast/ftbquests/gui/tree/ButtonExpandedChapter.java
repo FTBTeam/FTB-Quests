@@ -102,9 +102,10 @@ public class ButtonExpandedChapter extends SimpleTextButton
 
 		if (isMouseOver())
 		{
-			theme.drawButton(x, y, w, h, WidgetType.MOUSE_OVER);
+			ThemeProperties.WIDGET_BACKGROUND.get().draw(x, y, w - 1, h);
 		}
-		else if (parent.widgets.size() > 1)
+
+		if (parent.widgets.size() > 1)
 		{
 			if (parent.widgets.get(0) == this)
 			{
@@ -121,6 +122,10 @@ public class ButtonExpandedChapter extends SimpleTextButton
 					borderColor.draw(x, y + h - 1, w - 1, h);
 				}
 			}
+		}
+		else
+		{
+			GuiHelper.drawHollowRect(x, y, w, h, ThemeProperties.WIDGET_BORDER.get(), false);
 		}
 	}
 

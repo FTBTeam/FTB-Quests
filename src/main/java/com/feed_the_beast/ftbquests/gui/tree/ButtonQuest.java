@@ -34,9 +34,6 @@ import java.util.List;
  */
 public class ButtonQuest extends Button
 {
-	public static final Color4I COL_COMPLETED = Color4I.rgb(0x56FF56);
-	public static final Color4I COL_STARTED = Color4I.rgb(0x00FFFF);
-
 	public GuiQuestTree treeGui;
 	public Quest quest;
 	public List<ButtonQuest> dependencies = null;
@@ -335,11 +332,11 @@ public class ButtonQuest extends Button
 					qicon = ThemeProperties.CHECK_ICON.get();
 				}
 
-				outlineColor = COL_COMPLETED.withAlpha(200);
+				outlineColor = ThemeProperties.QUEST_COMPLETED_COLOR.get();
 			}
 			else if (progress > 0)
 			{
-				outlineColor = COL_STARTED.withAlpha(200);
+				outlineColor = ThemeProperties.QUEST_STARTED_COLOR.get();
 			}
 		}
 		else

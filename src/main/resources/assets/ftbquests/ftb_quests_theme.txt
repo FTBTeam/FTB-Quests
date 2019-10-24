@@ -1,25 +1,25 @@
 [*]
 background:          ftblib:textures/gui/background_squares.png; color=#DCFFFFFF; tile_size=64
-disabled_background: {{background}}; color=#F0B4B4B4
 
 text_color:          #FFFFFF
 hover_text_color:    #FFFFA0
-disabled_text_color: #555555
-title_text_color:    #AAAAAA
+disabled_text_color: #999999
 
-widget_border:     #58FFFFFF
-widget_background: #21FFFFFF
+widget_border:     #1B1D1E
+widget_background: #44000000
 symbol_in:         #9BC600
 symbol_out:        #408300
 
 button:                hollow_rectangle:{{widget_border}}
-disabled_button:       hollow_rectangle:{{disabled_text_color}}
+panel:                 {{container_slot}}
+disabled_button:       hollow_rectangle:{{widget_border}}
 hover_button:          {{button}} + {{widget_background}}; padding=1
-context_menu:          hollow_rectangle:{{widget_border}}; round_edges=1 + {{disabled_background}}; padding=1
-scroll_bar_background: #46000000
-scroll_bar:            #64FFFFFF; border=#64999999
-container_slot:        hollow_rectangle:#96FFFFFF; padding=-1
+context_menu:          hollow_rectangle:{{widget_border}}; round_edges + {{background}}; color=#B4B4B4; padding=1
+scroll_bar_background: {{widget_background}}
+scroll_bar:            {{button}} + {{widget_background}}; padding=1
+container_slot:        {{button}}; padding=-1
 
+icon:                 none
 check_icon:           builtin
 add_icon:             builtin
 alert_icon:           ftbquests:textures/gui/alert.png
@@ -42,7 +42,18 @@ edit_icon:            ftblib:icons/settings
 move_up_icon:         ftblib:icons/up
 move_down_icon:       ftblib:icons/down
 
-icon:               none
-full_screen_quest:  0
-tasks_text_color:   #5555FF
-rewards_text_color: #FFAA00
+full_screen_quest:                  0
+tasks_text_color:                   #5555FF
+rewards_text_color:                 #FFAA00
+quest_view_background:              {{context_menu}}
+quest_view_border:                  {{widget_border}}
+quest_view_title:                   #AAAAAA
+quest_completed_color:              #C856FF56
+quest_started_color:                #C800FFFF
+dependency_line_texture:            ftbquests:textures/gui/dependency.png
+dependency_line_completed_color:    #64DC64
+dependency_line_requires_color:     #00C8C8
+dependency_line_required_for_color: #C8C800
+dependency_line_selected_speed:     1.0
+dependency_line_unselected_speed:   0.0
+dependency_line_thickness:          0.125
