@@ -18,6 +18,7 @@ context_menu:          hollow_rectangle:{{widget_border}}; round_edges + {{backg
 scroll_bar_background: {{widget_background}}
 scroll_bar:            {{button}} + {{widget_background}}; padding=1
 container_slot:        {{button}}; padding=-1
+text_box:              part:minecraft:textures/gui/container/enchanting_table.png; pos=0,185,108,19; corner=6
 
 icon:                 none
 check_icon:           builtin

@@ -8,7 +8,7 @@ import com.feed_the_beast.ftblib.lib.gui.PanelScrollBar;
 import com.feed_the_beast.ftblib.lib.gui.ScrollBar;
 import com.feed_the_beast.ftblib.lib.gui.Theme;
 import com.feed_the_beast.ftblib.lib.gui.WidgetLayout;
-import com.feed_the_beast.ftblib.lib.icon.ImageIcon;
+import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.gui.FTBQuestsTheme;
@@ -24,16 +24,15 @@ import net.minecraft.inventory.IContainerListener;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
-import net.minecraft.util.ResourceLocation;
 
 /**
  * @author LatvianModder
  */
 public class GuiQuestChest extends GuiBase implements IContainerListener
 {
-	public static final ImageIcon TEXTURE = new ImageIcon(new ResourceLocation(FTBQuests.MOD_ID, "textures/gui/chest.png"));
-	private static final ImageIcon BACKGROUND = TEXTURE.withUVfromCoords(0, 0, 176, 189, 256, 256);
-	private static final ImageIcon SCROLL_BAR = TEXTURE.withUVfromCoords(177, 0, 8, 9, 256, 256);
+	public static final Icon TEXTURE = Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/chest.png");
+	private static final Icon BACKGROUND = TEXTURE.withUV(0, 0, 176, 189, 256, 256);
+	private static final Icon SCROLL_BAR = TEXTURE.withUV(177, 0, 8, 9, 256, 256);
 
 	public final ContainerQuestChest container;
 	private final Panel tasks;

@@ -79,4 +79,10 @@ public class FTBQuestsTheme extends Theme
 	{
 		ThemeProperties.SCROLL_BAR.get().draw(x, y, w, h);
 	}
+
+	@Override
+	public void drawTextBox(int x, int y, int w, int h)
+	{
+		ThemeProperties.TEXT_BOX.get().draw(x, y, w, h);
+	}
 }

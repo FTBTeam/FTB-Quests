@@ -50,7 +50,7 @@ public class ButtonTask extends Button
 
 		if (r > 0L)
 		{
-			GuiQuestChest.TEXTURE.withUVfromCoords(0, r >= width ? 199 : 190, r, 8, 256, 256).draw(x, y, r, 8);
+			GuiQuestChest.TEXTURE.withUV(0, r >= width ? 199 : 190, r, 8, 256, 256).draw(x, y, r, 8);
 		}
 
 		taskData.task.getIcon().draw(x + 1, y, 8, 8);
