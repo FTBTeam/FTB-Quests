@@ -45,6 +45,7 @@ import org.lwjgl.input.Keyboard;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 public class GuiQuestTree extends GuiBase
@@ -59,14 +60,14 @@ public class GuiQuestTree extends GuiBase
 	public final PanelOtherButtonsTop otherButtonsTopPanel;
 	public final PanelChapterHover chapterHoverPanel;
 	public final PanelViewQuest viewQuestPanel;
-	public boolean movingQuest = false;
+	public boolean movingQuests = false;
 	public int zoom = 16;
 	public long lastShiftPress = 0L;
 
 	public GuiQuestTree(ClientQuestFile q)
 	{
 		file = q;
-		selectedQuests = new HashSet<>();
+		selectedQuests = new LinkedHashSet<>();
 
 		chapterPanel = new PanelChapters(this);
 		selectedChapter = file.chapters.isEmpty() ? null : file.chapters.get(0);
@@ -110,24 +111,32 @@ public class GuiQuestTree extends GuiBase
 	@Override
 	public boolean onInit()
 	{
+		//Keyboard.enableRepeatEvents(true);
 		return setFullscreen();
+	}
+
+	@Override
+	public void onClosed()
+	{
+		super.onClosed();
+		//Keyboard.enableRepeatEvents(false);
 	}
 
 	public void selectChapter(@Nullable Chapter chapter)
 	{
 		if (selectedChapter != chapter)
 		{
-			movingQuest = false;
+			//movingQuests = false;
 			closeQuest();
 			selectedChapter = chapter;
 			questPanel.refreshWidgets();
-			resetScroll();
+			questPanel.resetScroll();
 		}
 	}
 
 	public void viewQuest(Quest quest)
 	{
-		selectedQuests.clear();
+		//selectedQuests.clear();
 
 		if (viewQuestPanel.quest != quest)
 		{
@@ -168,7 +177,7 @@ public class GuiQuestTree extends GuiBase
 
 	public void closeQuest()
 	{
-		selectedQuests.clear();
+		//selectedQuests.clear();
 
 		if (viewQuestPanel.quest != null)
 		{
@@ -190,13 +199,6 @@ public class GuiQuestTree extends GuiBase
 		{
 			selectedQuests.remove(quest);
 		}
-	}
-
-	public void resetScroll()
-	{
-		questPanel.alignWidgets();
-		questPanel.setScrollX((scrollWidth - questPanel.width) / 2);
-		questPanel.setScrollY((scrollHeight - questPanel.height) / 2);
 	}
 
 	public static void addObjectMenuItems(List<ContextMenuItem> contextMenu, IOpenableGui gui, QuestObjectBase object)
@@ -295,7 +297,8 @@ public class GuiQuestTree extends GuiBase
 		{
 			return true;
 		}
-		else if (key == Keyboard.KEY_TAB)
+
+		if (key == Keyboard.KEY_TAB)
 		{
 			if (selectedChapter != null && file.chapters.size() > 1)
 			{
@@ -309,7 +312,8 @@ public class GuiQuestTree extends GuiBase
 
 			return true;
 		}
-		else if (keyChar >= '1' && keyChar <= '9')
+
+		if (keyChar >= '1' && keyChar <= '9')
 		{
 			int i = keyChar - '1';
 
@@ -320,56 +324,48 @@ public class GuiQuestTree extends GuiBase
 
 			return true;
 		}
-		else if (selectedChapter != null && file.canEdit() && isCtrlKeyDown() && !isShiftKeyDown() && !isAltKeyDown())
+
+		if (selectedChapter != null && file.canEdit())
 		{
+			double step;
+
+			if (isCtrlKeyDown())
+			{
+				step = 0.1D;
+			}
+			else if (isShiftKeyDown())
+			{
+				step = 1D;
+			}
+			else
+			{
+				step = 0.5D;
+			}
+
 			switch (key)
 			{
 				case Keyboard.KEY_A:
-					movingQuest = false;
-					closeQuest();
 					selectedQuests.addAll(selectedChapter.quests);
-					break;
+					return true;
 				case Keyboard.KEY_D:
-					movingQuest = false;
-					closeQuest();
-					break;
+					selectedQuests.removeAll(selectedChapter.quests);
+					return true;
 				case Keyboard.KEY_DOWN:
-					movingQuest = true;
-					for (Quest quest : selectedQuests)
-					{
-						new MessageMoveQuest(quest.id, quest.x, (byte) (quest.y + 1)).sendToServer();
-					}
-					movingQuest = false;
-					break;
+					selectedQuests.forEach(quest -> new MessageMoveQuest(quest.id, selectedChapter.id, quest.x, quest.y + step).sendToServer());
+					return true;
 				case Keyboard.KEY_UP:
-					movingQuest = true;
-					for (Quest quest : selectedQuests)
-					{
-						new MessageMoveQuest(quest.id, quest.x, (byte) (quest.y - 1)).sendToServer();
-					}
-					movingQuest = false;
-					break;
+					selectedQuests.forEach(quest -> new MessageMoveQuest(quest.id, selectedChapter.id, quest.x, quest.y - step).sendToServer());
+					return true;
 				case Keyboard.KEY_LEFT:
-					movingQuest = true;
-					for (Quest quest : selectedQuests)
-					{
-						new MessageMoveQuest(quest.id, (byte) (quest.x - 1), quest.y).sendToServer();
-					}
-					movingQuest = false;
-					break;
+					selectedQuests.forEach(quest -> new MessageMoveQuest(quest.id, selectedChapter.id, quest.x - step, quest.y).sendToServer());
+					return true;
 				case Keyboard.KEY_RIGHT:
-					movingQuest = true;
-					for (Quest quest : selectedQuests)
-					{
-						new MessageMoveQuest(quest.id, (byte) (quest.x + 1), quest.y).sendToServer();
-					}
-					movingQuest = false;
-					break;
+					selectedQuests.forEach(quest -> new MessageMoveQuest(quest.id, selectedChapter.id, quest.x + step, quest.y).sendToServer());
+					return true;
 			}
-
-			return true;
 		}
-		else if (key == Keyboard.KEY_LSHIFT)
+
+		if (key == Keyboard.KEY_LSHIFT)
 		{
 			long now = System.currentTimeMillis();
 
@@ -444,8 +440,10 @@ public class GuiQuestTree extends GuiBase
 		if (zoom != z)
 		{
 			grabbed = 0;
-			resetScroll();
-			//quests.alignWidgets();
+			double sx = questPanel.centerQuestX;
+			double sy = questPanel.centerQuestY;
+			questPanel.resetScroll();
+			questPanel.scrollTo(sx, sy);
 		}
 	}
 

@@ -37,11 +37,24 @@ public class PanelQuests extends Panel
 	public final GuiQuestTree treeGui;
 	public double questX = 0;
 	public double questY = 0;
+	public double centerQuestX = 0;
+	public double centerQuestY = 0;
 
 	public PanelQuests(Panel panel)
 	{
 		super(panel);
 		treeGui = (GuiQuestTree) panel.getGui();
+	}
+
+	public void scrollTo(double x, double y)
+	{
+	}
+
+	public void resetScroll()
+	{
+		alignWidgets();
+		setScrollX((treeGui.scrollWidth - width) / 2);
+		setScrollY((treeGui.scrollHeight - height) / 2);
 	}
 
 	@Override
@@ -277,6 +290,8 @@ public class PanelQuests extends Panel
 			setOffset(true);
 			double qx = (treeGui.getMouseX() - getX()) / (double) treeGui.scrollWidth * dx + minX;
 			double qy = (treeGui.getMouseY() - getY()) / (double) treeGui.scrollHeight * dy + minY;
+			centerQuestX = (treeGui.width / 2D - getX()) / (double) treeGui.scrollWidth * dx + minX;
+			centerQuestY = (treeGui.height / 2D - getY()) / (double) treeGui.scrollHeight * dy + minY;
 			setOffset(false);
 
 			if (isCtrlKeyDown())
@@ -298,11 +313,43 @@ public class PanelQuests extends Panel
 			if (treeGui.file.canEdit())
 			{
 				theme.pushFontUnicode(true);
-				theme.drawString("X: " + StringUtils.formatDouble(questX), x + 3, y + h - 18, Theme.SHADOW);
-				theme.drawString("Y: " + StringUtils.formatDouble(questY), x + 3, y + h - 10, Theme.SHADOW);
+				theme.drawString("X:" + (questX < 0 ? "" : " ") + StringUtils.DOUBLE_FORMATTER_00.format(questX), x + 3, y + h - 18, Theme.SHADOW);
+				theme.drawString("Y:" + (questY < 0 ? "" : " ") + StringUtils.DOUBLE_FORMATTER_00.format(questY), x + 3, y + h - 10, Theme.SHADOW);
+				theme.drawString("CX:" + (centerQuestX < 0 ? "" : " ") + StringUtils.DOUBLE_FORMATTER_00.format(centerQuestX), x + w - 30, y + h - 18, Theme.SHADOW);
+				theme.drawString("CY:" + (centerQuestY < 0 ? "" : " ") + StringUtils.DOUBLE_FORMATTER_00.format(centerQuestY), x + w - 30, y + h - 10, Theme.SHADOW);
 				theme.popFontUnicode();
 
-				if (treeGui.movingQuest && treeGui.selectedQuests.size() == 1)
+				if (treeGui.movingQuests && !treeGui.selectedQuests.isEmpty())
+				{
+					int z = treeGui.getZoom();
+					double s = z * 3D / 2D;
+					double off = (z * 2 - 2 - s) / 2D;
+
+					double ominX = Double.POSITIVE_INFINITY, ominY = Double.POSITIVE_INFINITY;
+
+					for (Quest q : treeGui.selectedQuests)
+					{
+						ominX = Math.min(ominX, q.x);
+						ominY = Math.min(ominY, q.y);
+					}
+
+					for (Quest q : treeGui.selectedQuests)
+					{
+						setOffset(true);
+						double ox = (q.x - ominX);
+						double oy = (q.y - ominY);
+						double sx = (questX + ox - minX) / dx * treeGui.scrollWidth + getX() + off;
+						double sy = (questY + oy - minY) / dy * treeGui.scrollHeight + getY() + off;
+						setOffset(false);
+						GlStateManager.pushMatrix();
+						GlStateManager.translate(sx, sy, 0);
+						GlStateManager.scale(s, s, 1D);
+						GuiHelper.setupDrawing();
+						q.getShape().shape.withColor(Color4I.WHITE.withAlpha(30)).draw(0, 0, 1, 1);
+						GlStateManager.popMatrix();
+					}
+				}
+				else
 				{
 					int z = treeGui.getZoom();
 					double s = z * 3D / 2D;
@@ -311,15 +358,11 @@ public class PanelQuests extends Panel
 					double sx = (questX - minX) / dx * treeGui.scrollWidth + getX() + off;
 					double sy = (questY - minY) / dy * treeGui.scrollHeight + getY() + off;
 					setOffset(false);
-					FTBQuests.LOGGER.info(sx + " : " + sy);
 					GlStateManager.pushMatrix();
 					GlStateManager.translate(sx, sy, 0);
 					GlStateManager.scale(s, s, 1D);
-					GlStateManager.color(1F, 1F, 1F, 1F);
-					GlStateManager.enableBlend();
-					GlStateManager.disableAlpha();
 					GuiHelper.setupDrawing();
-					treeGui.selectedQuests.iterator().next().shape.shape.withColor(Color4I.WHITE.withAlpha(20)).draw(0, 0, 1, 1);
+					treeGui.selectedChapter.getDefaultShape().shape.withColor(Color4I.WHITE.withAlpha(10)).draw(0, 0, 1, 1);
 					GlStateManager.popMatrix();
 				}
 			}
@@ -329,12 +372,29 @@ public class PanelQuests extends Panel
 	@Override
 	public boolean mousePressed(MouseButton button)
 	{
-		if (treeGui.movingQuest && treeGui.selectedQuests.size() == 1 && treeGui.file.canEdit())
+		if (treeGui.movingQuests && treeGui.file.canEdit())
 		{
-			GuiHelper.playClickSound();
-			new MessageMoveQuest(treeGui.selectedQuests.iterator().next().id, questX, questY).sendToServer();
-			treeGui.movingQuest = false;
-			treeGui.closeQuest();
+			if (!button.isRight() && !treeGui.selectedQuests.isEmpty())
+			{
+				GuiHelper.playClickSound();
+
+				double minX = Double.POSITIVE_INFINITY;
+				double minY = Double.POSITIVE_INFINITY;
+
+				for (Quest q : treeGui.selectedQuests)
+				{
+					minX = Math.min(minX, q.x);
+					minY = Math.min(minY, q.y);
+				}
+
+				for (Quest q : treeGui.selectedQuests)
+				{
+					new MessageMoveQuest(q.id, treeGui.selectedChapter.id, questX + (q.x - minX), questY + (q.y - minY)).sendToServer();
+				}
+			}
+
+			treeGui.movingQuests = false;
+			treeGui.selectedQuests.clear();
 			return true;
 		}
 
@@ -361,16 +421,18 @@ public class PanelQuests extends Panel
 		{
 			GuiHelper.playClickSound();
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
+			double qx = questX;
+			double qy = questY;
 
 			for (TaskType type : TaskType.getRegistry())
 			{
 				contextMenu.add(new ContextMenuItem(type.getDisplayName(), type.getIcon(), () -> {
 					GuiHelper.playClickSound();
-					type.getGuiProvider().openCreationGui(this, new Quest(treeGui.selectedChapter), task -> new MessageCreateTaskAt(treeGui.selectedChapter, questX, questY, task).sendToServer());
+					type.getGuiProvider().openCreationGui(this, new Quest(treeGui.selectedChapter), task -> new MessageCreateTaskAt(treeGui.selectedChapter, qx, qy, task).sendToServer());
 				}));
 			}
 
-			getGui().openContextMenu(contextMenu);
+			treeGui.openContextMenu(contextMenu);
 			return true;
 		}
 

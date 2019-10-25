@@ -44,7 +44,7 @@ import java.util.function.Predicate;
  */
 public final class Quest extends QuestObject
 {
-	public final Chapter chapter;
+	public Chapter chapter;
 	public String description;
 	public double x, y;
 	public boolean hide;
@@ -71,7 +71,7 @@ public final class Quest extends QuestObject
 		description = "";
 		x = 0;
 		y = 0;
-		shape = chapter.file.defaultShape;
+		shape = QuestShape.DEFAULT;
 		text = new ArrayList<>();
 		canRepeat = false;
 		dependencies = new ArrayList<>(0);
@@ -118,7 +118,7 @@ public final class Quest extends QuestObject
 		nbt.setDouble("x", x);
 		nbt.setDouble("y", y);
 
-		if (shape != chapter.file.defaultShape)
+		if (shape != QuestShape.DEFAULT)
 		{
 			nbt.setString("shape", shape.getId());
 		}
@@ -209,7 +209,7 @@ public final class Quest extends QuestObject
 		description = nbt.getString("description");
 		x = nbt.getDouble("x");
 		y = nbt.getDouble("y");
-		shape = nbt.hasKey("shape") ? QuestShape.NAME_MAP.get(nbt.getString("shape")) : chapter.file.defaultShape;
+		shape = nbt.hasKey("shape") ? QuestShape.NAME_MAP.get(nbt.getString("shape")) : QuestShape.DEFAULT;
 		text.clear();
 
 		NBTTagList list = nbt.getTagList("text", Constants.NBT.TAG_STRING);
@@ -617,6 +617,11 @@ public final class Quest extends QuestObject
 		config.addEnum("disable_jei", () -> disableJEI, v -> disableJEI = v, EnumTristate.NAME_MAP);
 	}
 
+	public QuestShape getShape()
+	{
+		return shape == QuestShape.DEFAULT ? chapter.getDefaultShape() : shape;
+	}
+
 	@Override
 	public boolean isVisible(QuestData data)
 	{
@@ -883,5 +888,31 @@ public final class Quest extends QuestObject
 		}
 
 		return r;
+	}
+
+	public void move(double nx, double ny, int nc)
+	{
+		x = nx;
+		y = ny;
+
+		if (nc != chapter.id)
+		{
+			QuestFile f = getQuestFile();
+			Chapter c = f.getChapter(nc);
+
+			if (c != null)
+			{
+				File oldFile = f.isClient() ? null : getFile();
+				chapter.quests.remove(this);
+				c.quests.add(this);
+				chapter = c;
+				File newFile = f.isClient() ? null : getFile();
+
+				if (oldFile != null && newFile != null && !oldFile.renameTo(newFile))
+				{
+					FTBQuests.LOGGER.error("Couldn't rename " + oldFile.getPath() + " to " + newFile.getPath());
+				}
+			}
+		}
 	}
 }

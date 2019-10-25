@@ -423,4 +423,9 @@ public final class Chapter extends QuestObject
 	{
 		return group != null && !group.invalid;
 	}
+
+	public QuestShape getDefaultShape()
+	{
+		return file.getDefaultShape();
+	}
 }
