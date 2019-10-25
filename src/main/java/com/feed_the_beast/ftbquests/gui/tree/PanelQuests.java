@@ -48,13 +48,41 @@ public class PanelQuests extends Panel
 
 	public void scrollTo(double x, double y)
 	{
+		double minX = Double.POSITIVE_INFINITY, minY = Double.POSITIVE_INFINITY, maxX = Double.NEGATIVE_INFINITY, maxY = Double.NEGATIVE_INFINITY;
+
+		for (Widget widget : widgets)
+		{
+			Quest quest = ((ButtonQuest) widget).quest;
+			minX = Math.min(minX, quest.x);
+			minY = Math.min(minY, quest.y);
+			maxX = Math.max(maxX, quest.x);
+			maxY = Math.max(maxY, quest.y);
+		}
+
+		if (minX == Double.POSITIVE_INFINITY)
+		{
+			minX = minY = maxX = maxY = 0;
+		}
+
+		minX -= 20;
+		minY -= 10;
+		maxX += 20;
+		maxY += 10;
+
+		double dx = (maxX - minX + 1);
+		double dy = (maxY - minY + 1);
+
+		setOffset(true);
+		setScrollX((x - minX) / dx * treeGui.scrollWidth - width / 2D);
+		setScrollY((y - minY) / dy * treeGui.scrollHeight - height / 2D);
+		setOffset(false);
 	}
 
 	public void resetScroll()
 	{
 		alignWidgets();
-		setScrollX((treeGui.scrollWidth - width) / 2);
-		setScrollY((treeGui.scrollHeight - height) / 2);
+		setScrollX((treeGui.scrollWidth - width) / 2D);
+		setScrollY((treeGui.scrollHeight - height) / 2D);
 	}
 
 	@Override
@@ -105,8 +133,8 @@ public class PanelQuests extends Panel
 
 		double bsize = treeGui.getZoom() * 2 - 2;
 
-		treeGui.scrollWidth = (int) ((maxX - minX + 1) * bsize);
-		treeGui.scrollHeight = (int) ((maxY - minY + 1) * bsize);
+		treeGui.scrollWidth = (maxX - minX + 1) * bsize;
+		treeGui.scrollHeight = (maxY - minY + 1) * bsize;
 
 		for (Widget widget : widgets)
 		{
@@ -288,10 +316,10 @@ public class PanelQuests extends Panel
 			double dy = (maxY - minY + 1);
 
 			setOffset(true);
-			double qx = (treeGui.getMouseX() - getX()) / (double) treeGui.scrollWidth * dx + minX;
-			double qy = (treeGui.getMouseY() - getY()) / (double) treeGui.scrollHeight * dy + minY;
-			centerQuestX = (treeGui.width / 2D - getX()) / (double) treeGui.scrollWidth * dx + minX;
-			centerQuestY = (treeGui.height / 2D - getY()) / (double) treeGui.scrollHeight * dy + minY;
+			double qx = (treeGui.getMouseX() - getX()) / treeGui.scrollWidth * dx + minX;
+			double qy = (treeGui.getMouseY() - getY()) / treeGui.scrollHeight * dy + minY;
+			centerQuestX = (treeGui.width / 2D - getX()) / treeGui.scrollWidth * dx + minX;
+			centerQuestY = (treeGui.height / 2D - getY()) / treeGui.scrollHeight * dy + minY;
 			setOffset(false);
 
 			if (isCtrlKeyDown())
