@@ -33,17 +33,19 @@ public final class Chapter extends QuestObject
 {
 	public final QuestFile file;
 	public final List<Quest> quests;
-	public final List<String> description;
+	public final List<String> subtitle;
 	public boolean alwaysInvisible;
 	public Chapter group;
+	public QuestShape defaultQuestShape;
 
 	public Chapter(QuestFile f)
 	{
 		file = f;
 		quests = new ArrayList<>();
-		description = new ArrayList<>(0);
+		subtitle = new ArrayList<>(0);
 		alwaysInvisible = false;
 		group = null;
+		defaultQuestShape = QuestShape.DEFAULT;
 	}
 
 	@Override
@@ -69,11 +71,11 @@ public final class Chapter extends QuestObject
 	{
 		super.writeData(nbt);
 
-		if (!description.isEmpty())
+		if (!subtitle.isEmpty())
 		{
 			NBTTagList list = new NBTTagList();
 
-			for (String v : description)
+			for (String v : subtitle)
 			{
 				list.appendTag(new NBTTagString(v));
 			}
@@ -81,50 +83,47 @@ public final class Chapter extends QuestObject
 			nbt.setTag("description", list);
 		}
 
-		if (alwaysInvisible)
-		{
-			nbt.setBoolean("always_invisible", true);
-		}
-
-		if (group != null && !group.invalid)
-		{
-			nbt.setInteger("group", group.id);
-		}
+		nbt.setBoolean("always_invisible", alwaysInvisible);
+		nbt.setInteger("group", group != null && !group.invalid ? group.id : 0);
+		nbt.setString("default_quest_shape", defaultQuestShape.getId());
 	}
 
 	@Override
 	public void readData(NBTTagCompound nbt)
 	{
 		super.readData(nbt);
-		description.clear();
+		subtitle.clear();
 
 		NBTTagList desc = nbt.getTagList("description", Constants.NBT.TAG_STRING);
 
 		for (int i = 0; i < desc.tagCount(); i++)
 		{
-			description.add(desc.getStringTagAt(i));
+			subtitle.add(desc.getStringTagAt(i));
 		}
 
 		alwaysInvisible = nbt.getBoolean("always_invisible");
 		group = file.getChapter(nbt.getInteger("group"));
+		defaultQuestShape = QuestShape.NAME_MAP.get(nbt.getString("default_quest_shape"));
 	}
 
 	@Override
 	public void writeNetData(DataOut data)
 	{
 		super.writeNetData(data);
-		data.writeCollection(description, DataOut.STRING);
+		data.writeCollection(subtitle, DataOut.STRING);
 		data.writeBoolean(alwaysInvisible);
 		data.writeInt(group == null || group.invalid ? 0 : group.id);
+		QuestShape.NAME_MAP.write(data, defaultQuestShape);
 	}
 
 	@Override
 	public void readNetData(DataIn data)
 	{
 		super.readNetData(data);
-		data.readCollection(description, DataIn.STRING);
+		data.readCollection(subtitle, DataIn.STRING);
 		alwaysInvisible = data.readBoolean();
 		group = file.getChapter(data.readInt());
+		defaultQuestShape = QuestShape.NAME_MAP.read(data);
 	}
 
 	public int getIndex()
@@ -255,7 +254,7 @@ public final class Chapter extends QuestObject
 	public void getConfig(ConfigGroup config)
 	{
 		super.getConfig(config);
-		config.addList("description", description, new ConfigString(""), ConfigString::new, ConfigString::getString);
+		config.addList("subtitle", subtitle, new ConfigString(""), ConfigString::new, ConfigString::getString);
 		config.addBool("always_invisible", () -> alwaysInvisible, v -> alwaysInvisible = v, false);
 
 		Predicate<QuestObjectBase> predicate = object -> object == null || (object instanceof Chapter && object != this && ((Chapter) object).group == null);
@@ -274,6 +273,8 @@ public final class Chapter extends QuestObject
 				group = file.getChapter(v);
 			}
 		}, new ConfigQuestObject(file, 0, predicate));
+
+		config.addEnum("default_quest_shape", () -> defaultQuestShape, v -> defaultQuestShape = v, QuestShape.NAME_MAP);
 	}
 
 	@Override
@@ -424,8 +425,8 @@ public final class Chapter extends QuestObject
 		return group != null && !group.invalid;
 	}
 
-	public QuestShape getDefaultShape()
+	public QuestShape getDefaultQuestShape()
 	{
-		return file.getDefaultShape();
+		return defaultQuestShape == QuestShape.DEFAULT ? file.getDefaultQuestShape() : defaultQuestShape;
 	}
 }

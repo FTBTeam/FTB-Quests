@@ -48,7 +48,7 @@ public class ButtonExpandedChapter extends SimpleTextButton
 
 		description = new ArrayList<>();
 
-		for (String v : chapter.description)
+		for (String v : chapter.subtitle)
 		{
 			description.add(TextFormatting.GRAY + FTBQuestsClient.addI18nAndColors(v));
 		}

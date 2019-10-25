@@ -69,7 +69,7 @@ public abstract class QuestFile extends QuestObject
 	public boolean defaultRewardTeam;
 	public boolean defaultTeamConsumeItems;
 	public RewardAutoClaim defaultRewardAutoClaim;
-	public QuestShape defaultShape;
+	public QuestShape defaultQuestShape;
 	public boolean defaultQuestDisableJEI;
 	public boolean dropLootCrates;
 	public final EntityWeight lootCrateNoDrop;
@@ -92,7 +92,7 @@ public abstract class QuestFile extends QuestObject
 		defaultRewardTeam = false;
 		defaultTeamConsumeItems = false;
 		defaultRewardAutoClaim = RewardAutoClaim.DISABLED;
-		defaultShape = QuestShape.CIRCLE;
+		defaultQuestShape = QuestShape.CIRCLE;
 		defaultQuestDisableJEI = false;
 		dropLootCrates = false;
 		lootCrateNoDrop = new EntityWeight();
@@ -405,7 +405,7 @@ public abstract class QuestFile extends QuestObject
 		nbt.setBoolean("default_reward_team", defaultRewardTeam);
 		nbt.setBoolean("default_consume_items", defaultTeamConsumeItems);
 		nbt.setString("default_autoclaim_rewards", defaultRewardAutoClaim.getId());
-		nbt.setString("default_quest_shape", defaultShape.getId());
+		nbt.setString("default_quest_shape", defaultQuestShape.getId());
 		nbt.setBoolean("default_quest_disable_jei", defaultQuestDisableJEI);
 
 		if (!emergencyItems.isEmpty())
@@ -436,7 +436,7 @@ public abstract class QuestFile extends QuestObject
 		defaultRewardTeam = nbt.getBoolean("default_reward_team");
 		defaultTeamConsumeItems = nbt.getBoolean("default_consume_items");
 		defaultRewardAutoClaim = RewardAutoClaim.NAME_MAP_NO_DEFAULT.get(nbt.getString("default_autoclaim_rewards"));
-		defaultShape = QuestShape.NAME_MAP.get(nbt.getString("default_quest_shape"));
+		defaultQuestShape = QuestShape.NAME_MAP.get(nbt.getString("default_quest_shape"));
 		defaultQuestDisableJEI = nbt.getBoolean("default_quest_disable_jei");
 		emergencyItems.clear();
 
@@ -737,7 +737,7 @@ public abstract class QuestFile extends QuestObject
 		data.writeBoolean(defaultRewardTeam);
 		data.writeBoolean(defaultTeamConsumeItems);
 		RewardAutoClaim.NAME_MAP_NO_DEFAULT.write(data, defaultRewardAutoClaim);
-		QuestShape.NAME_MAP.write(data, defaultShape);
+		QuestShape.NAME_MAP.write(data, defaultQuestShape);
 		data.writeBoolean(defaultQuestDisableJEI);
 		data.writeBoolean(dropLootCrates);
 		lootCrateNoDrop.writeNetData(data);
@@ -754,7 +754,7 @@ public abstract class QuestFile extends QuestObject
 		defaultRewardTeam = data.readBoolean();
 		defaultTeamConsumeItems = data.readBoolean();
 		defaultRewardAutoClaim = RewardAutoClaim.NAME_MAP_NO_DEFAULT.read(data);
-		defaultShape = QuestShape.NAME_MAP.read(data);
+		defaultQuestShape = QuestShape.NAME_MAP.read(data);
 		defaultQuestDisableJEI = data.readBoolean();
 		dropLootCrates = data.readBoolean();
 		lootCrateNoDrop.readNetData(data);
@@ -1002,7 +1002,7 @@ public abstract class QuestFile extends QuestObject
 		defaultsGroup.addBool("reward_team", () -> defaultRewardTeam, v -> defaultRewardTeam = v, false);
 		defaultsGroup.addBool("consume_items", () -> defaultTeamConsumeItems, v -> defaultTeamConsumeItems = v, false);
 		defaultsGroup.addEnum("autoclaim_rewards", () -> defaultRewardAutoClaim, v -> defaultRewardAutoClaim = v, RewardAutoClaim.NAME_MAP_NO_DEFAULT);
-		defaultsGroup.addEnum("quest_shape", () -> defaultShape, v -> defaultShape = v, QuestShape.NAME_MAP.withDefault(QuestShape.CIRCLE));
+		defaultsGroup.addEnum("quest_shape", () -> defaultQuestShape, v -> defaultQuestShape = v, QuestShape.NAME_MAP.withDefault(QuestShape.CIRCLE));
 		defaultsGroup.addBool("quest_disable_jei", () -> defaultQuestDisableJEI, v -> defaultQuestDisableJEI = v, false);
 
 		ConfigGroup d = config.getGroup("loot_crate_no_drop");
@@ -1209,8 +1209,8 @@ public abstract class QuestFile extends QuestObject
 		return collect(clazz, o -> clazz.isAssignableFrom(o.getClass()));
 	}
 
-	public QuestShape getDefaultShape()
+	public QuestShape getDefaultQuestShape()
 	{
-		return defaultShape == QuestShape.DEFAULT ? QuestShape.CIRCLE : defaultShape;
+		return defaultQuestShape == QuestShape.DEFAULT ? QuestShape.CIRCLE : defaultQuestShape;
 	}
 }

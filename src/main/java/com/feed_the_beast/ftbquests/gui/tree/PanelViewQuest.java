@@ -215,7 +215,7 @@ public class PanelViewQuest extends Panel
 
 		panelText.setPosAndSize(3, 16 + h + 12, panelContent.width - 6, 0);
 
-		String desc = quest.getDescription();
+		String desc = quest.getSubtitle();
 
 		if (!desc.isEmpty())
 		{
@@ -224,14 +224,14 @@ public class PanelViewQuest extends Panel
 
 		boolean showText = !quest.hideTextUntilComplete || gui.file.self != null && quest.isComplete(gui.file.self);
 
-		if (showText && quest.getText().length > 0)
+		if (showText && quest.getDescription().length > 0)
 		{
 			if (!desc.isEmpty())
 			{
 				panelText.add(new WidgetVerticalSpace(panelText, 7));
 			}
 
-			panelText.add(new TextField(panelText).setMaxWidth(panelText.width).setSpacing(9).setText(StringUtils.addFormatting(StringJoiner.with('\n').joinStrings(quest.getText()))));
+			panelText.add(new TextField(panelText).setMaxWidth(panelText.width).setSpacing(9).setText(StringUtils.addFormatting(StringJoiner.with('\n').joinStrings(quest.getDescription()))));
 		}
 
 		if (showText && !quest.guidePage.isEmpty())

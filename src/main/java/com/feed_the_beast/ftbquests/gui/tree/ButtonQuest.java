@@ -183,7 +183,7 @@ public class ButtonQuest extends Button
 
 				treeGui.toggleSelected(quest);
 			}
-			else if (!quest.guidePage.isEmpty() && quest.tasks.isEmpty() && quest.rewards.isEmpty() && quest.getText().length == 0)
+			else if (!quest.guidePage.isEmpty() && quest.tasks.isEmpty() && quest.rewards.isEmpty() && quest.getDescription().length == 0)
 			{
 				handleClick("guide", quest.guidePage);
 			}
@@ -277,7 +277,7 @@ public class ButtonQuest extends Button
 
 		list.add(title);
 
-		String description = quest.getDescription();
+		String description = quest.getSubtitle();
 
 		if (!description.isEmpty())
 		{
