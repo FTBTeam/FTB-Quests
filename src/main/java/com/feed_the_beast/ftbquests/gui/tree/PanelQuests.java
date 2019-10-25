@@ -362,7 +362,7 @@ public class PanelQuests extends Panel
 					GlStateManager.translate(sx, sy, 0);
 					GlStateManager.scale(s, s, 1D);
 					GuiHelper.setupDrawing();
-					treeGui.selectedChapter.getDefaultShape().shape.withColor(Color4I.WHITE.withAlpha(10)).draw(0, 0, 1, 1);
+					treeGui.selectedChapter.getDefaultQuestShape().shape.withColor(Color4I.WHITE.withAlpha(10)).draw(0, 0, 1, 1);
 					GlStateManager.popMatrix();
 				}
 			}

@@ -45,11 +45,11 @@ import java.util.function.Predicate;
 public final class Quest extends QuestObject
 {
 	public Chapter chapter;
-	public String description;
+	public String subtitle;
 	public double x, y;
 	public boolean hide;
 	public QuestShape shape;
-	public final List<String> text;
+	public final List<String> description;
 	public final List<QuestObject> dependencies;
 	public boolean canRepeat;
 	public final List<Task> tasks;
@@ -68,11 +68,11 @@ public final class Quest extends QuestObject
 	public Quest(Chapter c)
 	{
 		chapter = c;
-		description = "";
+		subtitle = "";
 		x = 0;
 		y = 0;
 		shape = QuestShape.DEFAULT;
-		text = new ArrayList<>();
+		description = new ArrayList<>();
 		canRepeat = false;
 		dependencies = new ArrayList<>(0);
 		tasks = new ArrayList<>(1);
@@ -123,16 +123,16 @@ public final class Quest extends QuestObject
 			nbt.setString("shape", shape.getId());
 		}
 
-		if (!description.isEmpty())
+		if (!subtitle.isEmpty())
 		{
-			nbt.setString("description", description);
+			nbt.setString("description", subtitle);
 		}
 
-		if (!text.isEmpty())
+		if (!description.isEmpty())
 		{
 			NBTTagList array = new NBTTagList();
 
-			for (String value : text)
+			for (String value : description)
 			{
 				array.appendTag(new NBTTagString(value));
 			}
@@ -206,17 +206,17 @@ public final class Quest extends QuestObject
 	public void readData(NBTTagCompound nbt)
 	{
 		super.readData(nbt);
-		description = nbt.getString("description");
+		subtitle = nbt.getString("description");
 		x = nbt.getDouble("x");
 		y = nbt.getDouble("y");
 		shape = nbt.hasKey("shape") ? QuestShape.NAME_MAP.get(nbt.getString("shape")) : QuestShape.DEFAULT;
-		text.clear();
+		description.clear();
 
 		NBTTagList list = nbt.getTagList("text", Constants.NBT.TAG_STRING);
 
 		for (int k = 0; k < list.tagCount(); k++)
 		{
-			text.add(list.getStringTagAt(k));
+			description.add(list.getStringTagAt(k));
 		}
 
 		canRepeat = nbt.getBoolean("can_repeat");
@@ -279,25 +279,25 @@ public final class Quest extends QuestObject
 		flags = Bits.setFlag(flags, 1, canRepeat);
 		flags = Bits.setFlag(flags, 2, hide);
 		flags = Bits.setFlag(flags, 4, !guidePage.isEmpty());
-		flags = Bits.setFlag(flags, 8, !description.isEmpty());
-		flags = Bits.setFlag(flags, 16, !text.isEmpty());
+		flags = Bits.setFlag(flags, 8, !subtitle.isEmpty());
+		flags = Bits.setFlag(flags, 16, !description.isEmpty());
 		flags = Bits.setFlag(flags, 32, !customClick.isEmpty());
 		flags = Bits.setFlag(flags, 64, hideDependencyLines);
 		flags = Bits.setFlag(flags, 128, hideTextUntilComplete);
 		data.writeVarInt(flags);
 
-		if (!description.isEmpty())
+		if (!subtitle.isEmpty())
 		{
-			data.writeString(description);
+			data.writeString(subtitle);
 		}
 
 		data.writeDouble(x);
 		data.writeDouble(y);
 		QuestShape.NAME_MAP.write(data, shape);
 
-		if (!text.isEmpty())
+		if (!description.isEmpty())
 		{
-			data.writeCollection(text, DataOut.STRING);
+			data.writeCollection(description, DataOut.STRING);
 		}
 
 		if (!guidePage.isEmpty())
@@ -332,18 +332,18 @@ public final class Quest extends QuestObject
 	{
 		super.readNetData(data);
 		int flags = data.readVarInt();
-		description = Bits.getFlag(flags, 8) ? data.readString() : "";
+		subtitle = Bits.getFlag(flags, 8) ? data.readString() : "";
 		x = data.readDouble();
 		y = data.readDouble();
 		shape = QuestShape.NAME_MAP.read(data);
 
 		if (Bits.getFlag(flags, 16))
 		{
-			data.readCollection(text, DataIn.STRING);
+			data.readCollection(description, DataIn.STRING);
 		}
 		else
 		{
-			text.clear();
+			description.clear();
 		}
 
 		canRepeat = Bits.getFlag(flags, 1);
@@ -597,13 +597,13 @@ public final class Quest extends QuestObject
 	public void getConfig(ConfigGroup config)
 	{
 		super.getConfig(config);
+		config.addString("subtitle", () -> subtitle, v -> subtitle = v, "");
+		config.addList("description", description, new ConfigString(""), ConfigString::new, ConfigString::getString);
+		config.addEnum("shape", () -> shape, v -> shape = v, QuestShape.NAME_MAP);
+		config.addBool("hide", () -> hide, v -> hide = v, false);
+		config.addBool("can_repeat", () -> canRepeat, v -> canRepeat = v, false);
 		config.addDouble("x", () -> x, v -> x = v, 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
 		config.addDouble("y", () -> y, v -> y = v, 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
-		config.addBool("hide", () -> hide, v -> hide = v, false);
-		config.addEnum("shape", () -> shape, v -> shape = v, QuestShape.NAME_MAP);
-		config.addString("description", () -> description, v -> description = v, "");
-		config.addList("text", text, new ConfigString(""), ConfigString::new, ConfigString::getString);
-		config.addBool("can_repeat", () -> canRepeat, v -> canRepeat = v, false);
 
 		Predicate<QuestObjectBase> depTypes = object -> object != chapter.file && object != chapter && object instanceof QuestObject;// && !(object instanceof Task);
 
@@ -619,7 +619,7 @@ public final class Quest extends QuestObject
 
 	public QuestShape getShape()
 	{
-		return shape == QuestShape.DEFAULT ? chapter.getDefaultShape() : shape;
+		return shape == QuestShape.DEFAULT ? chapter.getDefaultQuestShape() : shape;
 	}
 
 	@Override
@@ -682,7 +682,7 @@ public final class Quest extends QuestObject
 		}
 	}
 
-	public String getDescription()
+	public String getSubtitle()
 	{
 		if (cachedDescription != null)
 		{
@@ -702,7 +702,7 @@ public final class Quest extends QuestObject
 
 		if (t.isEmpty() || key.equals(t))
 		{
-			cachedDescription = FTBQuestsClient.addI18nAndColors(description);
+			cachedDescription = FTBQuestsClient.addI18nAndColors(subtitle);
 		}
 		else
 		{
@@ -712,7 +712,7 @@ public final class Quest extends QuestObject
 		return cachedDescription;
 	}
 
-	public String[] getText()
+	public String[] getDescription()
 	{
 		if (cachedText != null)
 		{
@@ -726,16 +726,16 @@ public final class Quest extends QuestObject
 			return cachedText;
 		}
 
-		if (text.isEmpty())
+		if (description.isEmpty())
 		{
 			return StringUtils.EMPTY_ARRAY;
 		}
 
-		cachedText = new String[text.size()];
+		cachedText = new String[description.size()];
 
 		for (int i = 0; i < cachedText.length; i++)
 		{
-			cachedText[i] = FTBQuestsClient.addI18nAndColors(text.get(i));
+			cachedText[i] = FTBQuestsClient.addI18nAndColors(description.get(i));
 		}
 
 		return cachedText;
