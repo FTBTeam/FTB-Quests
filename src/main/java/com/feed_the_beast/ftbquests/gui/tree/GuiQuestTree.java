@@ -51,7 +51,8 @@ import java.util.List;
 public class GuiQuestTree extends GuiBase
 {
 	public final ClientQuestFile file;
-	public int scrollWidth, scrollHeight, prevMouseX, prevMouseY, grabbed;
+	public double scrollWidth, scrollHeight;
+	public int prevMouseX, prevMouseY, grabbed;
 	public Chapter selectedChapter;
 	public final HashSet<Quest> selectedQuests;
 	public final PanelChapters chapterPanel;
@@ -313,6 +314,12 @@ public class GuiQuestTree extends GuiBase
 			return true;
 		}
 
+		if (key == Keyboard.KEY_SPACE)
+		{
+			questPanel.resetScroll();
+			return true;
+		}
+
 		if (keyChar >= '1' && keyChar <= '9')
 		{
 			int i = keyChar - '1';
@@ -523,8 +530,10 @@ public class GuiQuestTree extends GuiBase
 		else if (object instanceof Quest)
 		{
 			viewQuestPanel.hidePanel = false;
-			selectChapter(((Quest) object).chapter);
-			viewQuest((Quest) object);
+			Quest q = (Quest) object;
+			selectChapter(q.chapter);
+			viewQuest(q);
+			questPanel.scrollTo(q.x + 0.5D, q.y + 0.5D);
 		}
 		else if (object instanceof Task)
 		{
