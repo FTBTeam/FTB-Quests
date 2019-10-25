@@ -121,6 +121,7 @@ ftbquests.quest.subtitle=Subtitle
 ftbquests.quest.description=Description
 ftbquests.quest.x=X
 ftbquests.quest.y=Y
+ftbquests.quest.size=Size
 ftbquests.quest.hide=Hide Quest Until Dependencies are Visible
 ftbquests.quest.shape=Shape
 ftbquests.quest.shape.default=Default

@@ -341,7 +341,7 @@ public class ButtonQuest extends Button
 
 		int z = treeGui.getZoom();
 
-		int s = z * 3 / 2;
+		int s = (int) (z * 3 / 2 * quest.size);
 		int sx = x + (w - s) / 2;
 		int sy = y + (h - s) / 2;
 
@@ -353,7 +353,8 @@ public class ButtonQuest extends Button
 
 		if (!icon.isEmpty())
 		{
-			icon.draw(x + (w - z) / 2, y + (h - z) / 2, z, z);
+			int is = (int) (z * quest.size);
+			icon.draw(x + (w - is) / 2, y + (h - is) / 2, is, is);
 		}
 
 		if (quest == treeGui.viewQuestPanel.quest || treeGui.selectedQuests.contains(quest))
@@ -384,11 +385,10 @@ public class ButtonQuest extends Button
 
 		if (!qicon.isEmpty())
 		{
-			int s1 = z / 2;
-			int os1 = s1 / 4;
+			int s1 = (int) (z / 2 * quest.size);
 			GlStateManager.pushMatrix();
 			GlStateManager.translate(0F, 0F, 500F);
-			qicon.draw(x + w - s1 - os1, y + os1, s1, s1);
+			qicon.draw(sx + s - s1, sy, s1, s1);
 			GlStateManager.popMatrix();
 		}
 	}

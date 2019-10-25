@@ -442,7 +442,7 @@ public class GuiQuestTree extends GuiBase
 	public void addZoom(int up)
 	{
 		int z = zoom;
-		zoom = MathHelper.clamp(zoom + up * 4, 8, 24);
+		zoom = MathHelper.clamp(zoom + up * 4, 4, 28);
 
 		if (zoom != z)
 		{
