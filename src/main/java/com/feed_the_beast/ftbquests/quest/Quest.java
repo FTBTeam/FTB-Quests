@@ -61,6 +61,7 @@ public final class Quest extends QuestObject
 	public int minRequiredDependencies;
 	public boolean hideTextUntilComplete;
 	public EnumTristate disableJEI;
+	public double size;
 
 	private String cachedDescription = null;
 	private String[] cachedText = null;
@@ -85,6 +86,7 @@ public final class Quest extends QuestObject
 		minRequiredDependencies = 0;
 		hideTextUntilComplete = false;
 		disableJEI = EnumTristate.DEFAULT;
+		size = 1D;
 	}
 
 	@Override
@@ -200,6 +202,11 @@ public final class Quest extends QuestObject
 		{
 			nbt.setBoolean("hide_text_until_complete", true);
 		}
+
+		if (size != 1D)
+		{
+			nbt.setDouble("size", size);
+		}
 	}
 
 	@Override
@@ -269,6 +276,7 @@ public final class Quest extends QuestObject
 		hide = nbt.getBoolean("hide");
 		dependencyRequirement = DependencyRequirement.NAME_MAP.get(nbt.getString("dependency_requirement"));
 		hideTextUntilComplete = nbt.getBoolean("hide_text_until_complete");
+		size = nbt.hasKey("size") ? nbt.getDouble("size") : 1D;
 	}
 
 	@Override
@@ -325,6 +333,8 @@ public final class Quest extends QuestObject
 				data.writeInt(d.id);
 			}
 		}
+
+		data.writeDouble(size);
 	}
 
 	@Override
@@ -367,6 +377,8 @@ public final class Quest extends QuestObject
 				dependencies.add(object);
 			}
 		}
+
+		size = data.readDouble();
 	}
 
 	@Override
@@ -602,6 +614,7 @@ public final class Quest extends QuestObject
 		config.addEnum("shape", () -> shape, v -> shape = v, QuestShape.NAME_MAP);
 		config.addBool("hide", () -> hide, v -> hide = v, false);
 		config.addBool("can_repeat", () -> canRepeat, v -> canRepeat = v, false);
+		config.addDouble("size", () -> size, v -> size = v, 1, 0.5D, 4D);
 		config.addDouble("x", () -> x, v -> x = v, 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
 		config.addDouble("y", () -> y, v -> y = v, 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
 

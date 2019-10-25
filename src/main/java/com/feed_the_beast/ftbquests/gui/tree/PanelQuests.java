@@ -64,10 +64,10 @@ public class PanelQuests extends Panel
 			minX = minY = maxX = maxY = 0;
 		}
 
-		minX -= 20;
-		minY -= 10;
-		maxX += 20;
-		maxY += 10;
+		minX -= 40;
+		minY -= 30;
+		maxX += 40;
+		maxY += 30;
 
 		double dx = (maxX - minX + 1);
 		double dy = (maxY - minY + 1);
@@ -126,10 +126,10 @@ public class PanelQuests extends Panel
 			minX = minY = maxX = maxY = 0;
 		}
 
-		minX -= 20;
-		minY -= 10;
-		maxX += 20;
-		maxY += 10;
+		minX -= 40;
+		minY -= 30;
+		maxX += 40;
+		maxY += 30;
 
 		double bsize = treeGui.getZoom() * 2 - 2;
 
@@ -139,7 +139,8 @@ public class PanelQuests extends Panel
 		for (Widget widget : widgets)
 		{
 			Quest quest = ((ButtonQuest) widget).quest;
-			widget.setPosAndSize((int) ((quest.x - minX) * bsize), (int) ((quest.y - minY) * bsize), (int) bsize, (int) bsize);
+			double bsize1 = bsize * quest.size;
+			widget.setPosAndSize((int) ((quest.x - minX) * bsize - (bsize1 - bsize) / 2D), (int) ((quest.y - minY) * bsize - (bsize1 - bsize) / 2D), (int) bsize1, (int) bsize1);
 		}
 
 		setPosAndSize(20, 1, treeGui.width - 40, treeGui.height - 2);
@@ -307,10 +308,10 @@ public class PanelQuests extends Panel
 				minX = minY = maxX = maxY = 0;
 			}
 
-			minX -= 20;
-			minY -= 10;
-			maxX += 20;
-			maxY += 10;
+			minX -= 40;
+			minY -= 30;
+			maxX += 40;
+			maxY += 30;
 
 			double dx = (maxX - minX + 1);
 			double dy = (maxY - minY + 1);
@@ -350,8 +351,6 @@ public class PanelQuests extends Panel
 				if (treeGui.movingQuests && !treeGui.selectedQuests.isEmpty())
 				{
 					int z = treeGui.getZoom();
-					double s = z * 3D / 2D;
-					double off = (z * 2 - 2 - s) / 2D;
 
 					double ominX = Double.POSITIVE_INFINITY, ominY = Double.POSITIVE_INFINITY;
 
@@ -363,6 +362,8 @@ public class PanelQuests extends Panel
 
 					for (Quest q : treeGui.selectedQuests)
 					{
+						double s = (int) (z * 3 / 2 * q.size);
+						double off = (z * 2 - 2 - s) / 2D;
 						setOffset(true);
 						double ox = (q.x - ominX);
 						double oy = (q.y - ominY);
