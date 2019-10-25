@@ -14,6 +14,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  */
 public final class QuestShape extends Icon implements IWithID
 {
+	public static final QuestShape DEFAULT = new QuestShape("default");
 	public static final QuestShape CIRCLE = new QuestShape("circle");
 	public static final QuestShape SQUARE = new QuestShape("square");
 	public static final QuestShape DIAMOND = new QuestShape("diamond");
@@ -24,7 +25,7 @@ public final class QuestShape extends Icon implements IWithID
 	public static final QuestShape HEART = new QuestShape("heart");
 	public static final QuestShape GEAR = new QuestShape("gear");
 
-	public static final NameMap<QuestShape> NAME_MAP = NameMap.createWithBaseTranslationKey(CIRCLE, "ftbquests.quest.shape", CIRCLE, SQUARE, DIAMOND, RSQUARE, PENTAGON, HEXAGON, OCTAGON, HEART, GEAR);
+	public static final NameMap<QuestShape> NAME_MAP = NameMap.createWithBaseTranslationKey(DEFAULT, "ftbquests.quest.shape", DEFAULT, CIRCLE, SQUARE, DIAMOND, RSQUARE, PENTAGON, HEXAGON, OCTAGON, HEART, GEAR);
 
 	public final String id;
 	public final ImageIcon background, outline, shape;

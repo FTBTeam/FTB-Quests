@@ -68,7 +68,7 @@ public abstract class QuestFile extends QuestObject
 	public int fileVersion;
 	public boolean defaultRewardTeam;
 	public boolean defaultTeamConsumeItems;
-	public RewardAutoClaim defaultRewardAutoclaim;
+	public RewardAutoClaim defaultRewardAutoClaim;
 	public QuestShape defaultShape;
 	public boolean defaultQuestDisableJEI;
 	public boolean dropLootCrates;
@@ -91,7 +91,7 @@ public abstract class QuestFile extends QuestObject
 
 		defaultRewardTeam = false;
 		defaultTeamConsumeItems = false;
-		defaultRewardAutoclaim = RewardAutoClaim.DISABLED;
+		defaultRewardAutoClaim = RewardAutoClaim.DISABLED;
 		defaultShape = QuestShape.CIRCLE;
 		defaultQuestDisableJEI = false;
 		dropLootCrates = false;
@@ -404,7 +404,7 @@ public abstract class QuestFile extends QuestObject
 		nbt.setInteger("version", VERSION);
 		nbt.setBoolean("default_reward_team", defaultRewardTeam);
 		nbt.setBoolean("default_consume_items", defaultTeamConsumeItems);
-		nbt.setString("default_autoclaim_rewards", defaultRewardAutoclaim.getId());
+		nbt.setString("default_autoclaim_rewards", defaultRewardAutoClaim.getId());
 		nbt.setString("default_quest_shape", defaultShape.getId());
 		nbt.setBoolean("default_quest_disable_jei", defaultQuestDisableJEI);
 
@@ -435,7 +435,7 @@ public abstract class QuestFile extends QuestObject
 		super.readData(nbt);
 		defaultRewardTeam = nbt.getBoolean("default_reward_team");
 		defaultTeamConsumeItems = nbt.getBoolean("default_consume_items");
-		defaultRewardAutoclaim = RewardAutoClaim.NAME_MAP_NO_DEFAULT.get(nbt.getString("default_autoclaim_rewards"));
+		defaultRewardAutoClaim = RewardAutoClaim.NAME_MAP_NO_DEFAULT.get(nbt.getString("default_autoclaim_rewards"));
 		defaultShape = QuestShape.NAME_MAP.get(nbt.getString("default_quest_shape"));
 		defaultQuestDisableJEI = nbt.getBoolean("default_quest_disable_jei");
 		emergencyItems.clear();
@@ -736,7 +736,7 @@ public abstract class QuestFile extends QuestObject
 		data.writeVarLong(emergencyItemsCooldown.ticks());
 		data.writeBoolean(defaultRewardTeam);
 		data.writeBoolean(defaultTeamConsumeItems);
-		RewardAutoClaim.NAME_MAP_NO_DEFAULT.write(data, defaultRewardAutoclaim);
+		RewardAutoClaim.NAME_MAP_NO_DEFAULT.write(data, defaultRewardAutoClaim);
 		QuestShape.NAME_MAP.write(data, defaultShape);
 		data.writeBoolean(defaultQuestDisableJEI);
 		data.writeBoolean(dropLootCrates);
@@ -753,7 +753,7 @@ public abstract class QuestFile extends QuestObject
 		emergencyItemsCooldown = Ticks.get(data.readVarLong());
 		defaultRewardTeam = data.readBoolean();
 		defaultTeamConsumeItems = data.readBoolean();
-		defaultRewardAutoclaim = RewardAutoClaim.NAME_MAP_NO_DEFAULT.read(data);
+		defaultRewardAutoClaim = RewardAutoClaim.NAME_MAP_NO_DEFAULT.read(data);
 		defaultShape = QuestShape.NAME_MAP.read(data);
 		defaultQuestDisableJEI = data.readBoolean();
 		dropLootCrates = data.readBoolean();
@@ -1001,7 +1001,7 @@ public abstract class QuestFile extends QuestObject
 		ConfigGroup defaultsGroup = config.getGroup("defaults");
 		defaultsGroup.addBool("reward_team", () -> defaultRewardTeam, v -> defaultRewardTeam = v, false);
 		defaultsGroup.addBool("consume_items", () -> defaultTeamConsumeItems, v -> defaultTeamConsumeItems = v, false);
-		defaultsGroup.addEnum("autoclaim_rewards", () -> defaultRewardAutoclaim, v -> defaultRewardAutoclaim = v, RewardAutoClaim.NAME_MAP_NO_DEFAULT);
+		defaultsGroup.addEnum("autoclaim_rewards", () -> defaultRewardAutoClaim, v -> defaultRewardAutoClaim = v, RewardAutoClaim.NAME_MAP_NO_DEFAULT);
 		defaultsGroup.addEnum("quest_shape", () -> defaultShape, v -> defaultShape = v, QuestShape.NAME_MAP.withDefault(QuestShape.CIRCLE));
 		defaultsGroup.addBool("quest_disable_jei", () -> defaultQuestDisableJEI, v -> defaultQuestDisableJEI = v, false);
 
@@ -1207,5 +1207,10 @@ public abstract class QuestFile extends QuestObject
 	public <T extends QuestObjectBase> List<T> collect(Class<T> clazz)
 	{
 		return collect(clazz, o -> clazz.isAssignableFrom(o.getClass()));
+	}
+
+	public QuestShape getDefaultShape()
+	{
+		return defaultShape == QuestShape.DEFAULT ? QuestShape.CIRCLE : defaultShape;
 	}
 }

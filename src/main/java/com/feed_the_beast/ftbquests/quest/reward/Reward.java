@@ -208,7 +208,7 @@ public abstract class Reward extends QuestObjectBase
 
 		if (autoclaim == RewardAutoClaim.DEFAULT)
 		{
-			return quest.chapter.file.defaultRewardAutoclaim;
+			return quest.chapter.file.defaultRewardAutoClaim;
 		}
 
 		return autoclaim;

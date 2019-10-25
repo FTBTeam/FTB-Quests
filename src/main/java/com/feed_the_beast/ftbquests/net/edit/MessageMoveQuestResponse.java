@@ -17,15 +17,17 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class MessageMoveQuestResponse extends MessageToClient
 {
 	private int id;
+	private int chapter;
 	private double x, y;
 
 	public MessageMoveQuestResponse()
 	{
 	}
 
-	public MessageMoveQuestResponse(int i, double _x, double _y)
+	public MessageMoveQuestResponse(int i, int c, double _x, double _y)
 	{
 		id = i;
+		chapter = c;
 		x = _x;
 		y = _y;
 	}
@@ -40,6 +42,7 @@ public class MessageMoveQuestResponse extends MessageToClient
 	public void writeData(DataOut data)
 	{
 		data.writeInt(id);
+		data.writeInt(chapter);
 		data.writeDouble(x);
 		data.writeDouble(y);
 	}
@@ -48,6 +51,7 @@ public class MessageMoveQuestResponse extends MessageToClient
 	public void readData(DataIn data)
 	{
 		id = data.readInt();
+		chapter = data.readInt();
 		x = data.readDouble();
 		y = data.readDouble();
 	}
@@ -62,18 +66,15 @@ public class MessageMoveQuestResponse extends MessageToClient
 
 			if (quest != null)
 			{
-				quest.x = x;
-				quest.y = y;
-
+				quest.move(x, y, chapter);
 				GuiQuestTree gui = ClientUtils.getCurrentGuiAs(GuiQuestTree.class);
 
 				if (gui != null)
 				{
-					int sx = gui.questPanel.getScrollX();
-					int sy = gui.questPanel.getScrollY();
+					double sx = gui.questPanel.centerQuestX;
+					double sy = gui.questPanel.centerQuestY;
 					gui.questPanel.refreshWidgets();
-					gui.questPanel.setScrollX(sx);
-					gui.questPanel.setScrollY(sy);
+					gui.questPanel.scrollTo(sx, sy);
 				}
 			}
 		}

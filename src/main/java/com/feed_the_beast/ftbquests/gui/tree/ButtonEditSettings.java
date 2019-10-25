@@ -16,7 +16,9 @@ import com.feed_the_beast.ftbquests.quest.theme.ThemeLoader;
 import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.event.ClickEvent;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -66,8 +68,11 @@ public class ButtonEditSettings extends ButtonTab
 				appendNum(fileName, time.get(Calendar.HOUR_OF_DAY), '-');
 				appendNum(fileName, time.get(Calendar.MINUTE), '-');
 				appendNum(fileName, time.get(Calendar.SECOND), '\0');
-				ClientQuestFile.INSTANCE.writeDataFull(new File(Minecraft.getMinecraft().gameDir, fileName.toString()));
-				Minecraft.getMinecraft().player.sendMessage(new TextComponentTranslation("ftbquests.gui.saved_as_file", fileName.toString()));
+				File file = new File(Minecraft.getMinecraft().gameDir, fileName.toString()).getCanonicalFile();
+				ClientQuestFile.INSTANCE.writeDataFull(file);
+				ITextComponent component = new TextComponentTranslation("ftbquests.gui.saved_as_file", file.getPath().replace(Minecraft.getMinecraft().gameDir.getCanonicalFile().getAbsolutePath(), ""));
+				component.getStyle().setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, file.getAbsolutePath()));
+				Minecraft.getMinecraft().player.sendMessage(component);
 			}
 			catch (Exception ex)
 			{

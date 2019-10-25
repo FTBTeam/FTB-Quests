@@ -14,15 +14,17 @@ import net.minecraft.entity.player.EntityPlayerMP;
 public class MessageMoveQuest extends MessageToServer
 {
 	private int id;
+	private int chapter;
 	private double x, y;
 
 	public MessageMoveQuest()
 	{
 	}
 
-	public MessageMoveQuest(int i, double _x, double _y)
+	public MessageMoveQuest(int i, int c, double _x, double _y)
 	{
 		id = i;
+		chapter = c;
 		x = _x;
 		y = _y;
 	}
@@ -37,6 +39,7 @@ public class MessageMoveQuest extends MessageToServer
 	public void writeData(DataOut data)
 	{
 		data.writeInt(id);
+		data.writeInt(chapter);
 		data.writeDouble(x);
 		data.writeDouble(y);
 	}
@@ -45,6 +48,7 @@ public class MessageMoveQuest extends MessageToServer
 	public void readData(DataIn data)
 	{
 		id = data.readInt();
+		chapter = data.readInt();
 		x = data.readDouble();
 		y = data.readDouble();
 	}
@@ -56,10 +60,9 @@ public class MessageMoveQuest extends MessageToServer
 
 		if (quest != null)
 		{
-			quest.x = x;
-			quest.y = y;
+			quest.move(x, y, chapter);
 			ServerQuestFile.INSTANCE.save();
-			new MessageMoveQuestResponse(id, x, y).sendToAll();
+			new MessageMoveQuestResponse(id, chapter, x, y).sendToAll();
 		}
 	}
 }

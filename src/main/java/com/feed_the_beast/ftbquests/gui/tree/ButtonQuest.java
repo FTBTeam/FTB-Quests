@@ -14,6 +14,7 @@ import com.feed_the_beast.ftbquests.net.edit.MessageCreateObject;
 import com.feed_the_beast.ftbquests.net.edit.MessageEditObject;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
+import com.feed_the_beast.ftbquests.quest.QuestShape;
 import com.feed_the_beast.ftbquests.quest.reward.Reward;
 import com.feed_the_beast.ftbquests.quest.reward.RewardType;
 import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
@@ -49,7 +50,7 @@ public class ButtonQuest extends Button
 	@Override
 	public boolean checkMouseOver(int mouseX, int mouseY)
 	{
-		if (treeGui.movingQuest || treeGui.viewQuestPanel.isMouseOver() || treeGui.chapterHoverPanel.isMouseOverAnyWidget())
+		if (treeGui.movingQuests || treeGui.viewQuestPanel.isMouseOver() || treeGui.chapterHoverPanel.isMouseOverAnyWidget())
 		{
 			return false;
 		}
@@ -128,7 +129,7 @@ public class ButtonQuest extends Button
 			else
 			{
 				contextMenu.add(new ContextMenuItem(I18n.format("gui.move"), ThemeProperties.MOVE_UP_ICON.get(), () -> {
-					treeGui.movingQuest = true;
+					treeGui.movingQuests = true;
 					treeGui.selectedQuests.clear();
 					treeGui.toggleSelected(quest);
 				})
@@ -173,42 +174,36 @@ public class ButtonQuest extends Button
 		}
 		else if (button.isLeft())
 		{
-			if (treeGui.movingQuest && selectedQuest == quest)
+			if (isCtrlKeyDown() && treeGui.file.canEdit())
 			{
-				treeGui.movingQuest = false;
-				treeGui.viewQuestPanel.hidePanel = false;
-				treeGui.viewQuest(quest);
-			}
-			else
-			{
-				if (isCtrlKeyDown() && treeGui.file.canEdit())
+				if (treeGui.getViewedQuest() != null)
 				{
-					if (treeGui.getViewedQuest() != null)
-					{
-						treeGui.closeQuest();
-					}
+					treeGui.closeQuest();
+				}
 
-					treeGui.toggleSelected(quest);
-				}
-				else if (!quest.guidePage.isEmpty() && quest.tasks.isEmpty() && quest.rewards.isEmpty() && quest.getText().length == 0)
-				{
-					handleClick("guide", quest.guidePage);
-				}
-				else if (quest.customClick.isEmpty() || !handleClick(quest.customClick))
-				{
-					treeGui.open(quest);
-				}
+				treeGui.toggleSelected(quest);
+			}
+			else if (!quest.guidePage.isEmpty() && quest.tasks.isEmpty() && quest.rewards.isEmpty() && quest.getText().length == 0)
+			{
+				handleClick("guide", quest.guidePage);
+			}
+			else if (quest.customClick.isEmpty() || !handleClick(quest.customClick))
+			{
+				treeGui.open(quest);
 			}
 		}
 		else if (treeGui.file.canEdit() && button.isMiddle())
 		{
-			treeGui.movingQuest = true;
-			treeGui.closeQuest();
-			treeGui.toggleSelected(quest);
+			if (!treeGui.selectedQuests.contains(quest))
+			{
+				treeGui.toggleSelected(quest);
+			}
+
+			treeGui.movingQuests = true;
 		}
 		else if (button.isRight())
 		{
-			treeGui.movingQuest = false;
+			treeGui.movingQuests = false;
 
 			if (treeGui.getViewedQuest() != quest)
 			{
@@ -350,9 +345,11 @@ public class ButtonQuest extends Button
 		int sx = x + (w - s) / 2;
 		int sy = y + (h - s) / 2;
 
-		quest.shape.shape.withColor(Color4I.DARK_GRAY).draw(sx, sy, s, s);
-		quest.shape.background.withColor(Color4I.WHITE.withAlpha(150)).draw(sx, sy, s, s);
-		quest.shape.outline.withColor(outlineColor).draw(sx, sy, s, s);
+		QuestShape shape = quest.getShape();
+
+		shape.shape.withColor(Color4I.DARK_GRAY).draw(sx, sy, s, s);
+		shape.background.withColor(Color4I.WHITE.withAlpha(150)).draw(sx, sy, s, s);
+		shape.outline.withColor(outlineColor).draw(sx, sy, s, s);
 
 		if (!icon.isEmpty())
 		{
@@ -364,8 +361,8 @@ public class ButtonQuest extends Button
 			GlStateManager.pushMatrix();
 			GlStateManager.translate(0F, 0F, 500F);
 			Color4I col = Color4I.WHITE.withAlpha(190 + (int) (Math.sin(System.currentTimeMillis() * 0.003D) * 50));
-			quest.shape.outline.withColor(col).draw(sx, sy, s, s);
-			quest.shape.background.withColor(col).draw(sx, sy, s, s);
+			shape.outline.withColor(col).draw(sx, sy, s, s);
+			shape.background.withColor(col).draw(sx, sy, s, s);
 			GlStateManager.popMatrix();
 		}
 
@@ -373,7 +370,7 @@ public class ButtonQuest extends Button
 		{
 			GlStateManager.pushMatrix();
 			GlStateManager.translate(0F, 0F, 500F);
-			quest.shape.shape.withColor(Color4I.BLACK.withAlpha(100)).draw(sx, sy, s, s);
+			shape.shape.withColor(Color4I.BLACK.withAlpha(100)).draw(sx, sy, s, s);
 			GlStateManager.popMatrix();
 		}
 
@@ -381,7 +378,7 @@ public class ButtonQuest extends Button
 		{
 			GlStateManager.pushMatrix();
 			GlStateManager.translate(0F, 0F, 500F);
-			quest.shape.shape.withColor(Color4I.WHITE.withAlpha(50)).draw(sx, sy, s, s);
+			shape.shape.withColor(Color4I.WHITE.withAlpha(50)).draw(sx, sy, s, s);
 			GlStateManager.popMatrix();
 		}
 
