@@ -4,34 +4,32 @@ import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.QuestData;
-import com.feed_the_beast.ftbquests.quest.task.BooleanTaskData;
-import com.feed_the_beast.ftbquests.quest.task.Task;
-import com.feed_the_beast.ftbquests.quest.task.TaskData;
-import com.feed_the_beast.ftbquests.quest.task.TaskType;
+import com.feed_the_beast.ftbquests.quest.reward.Reward;
+import com.feed_the_beast.ftbquests.quest.reward.RewardType;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import noppes.npcs.controllers.PlayerQuestController;
+import noppes.npcs.controllers.data.PlayerData;
+import noppes.npcs.controllers.data.QuestData;
 
 /**
  * @author LatvianModder
  */
-public class NPCQuestTask extends Task
+public class NPCQuestReward extends Reward
 {
 	public int npcQuest = 0;
-	public boolean checkActive = false;
 
-	public NPCQuestTask(Quest quest)
+	public NPCQuestReward(Quest quest)
 	{
 		super(quest);
 	}
 
 	@Override
-	public TaskType getType()
+	public RewardType getType()
 	{
-		return CustomNPCsIntegration.QUEST_TASK;
+		return CustomNPCsIntegration.QUEST_REWARD;
 	}
 
 	@Override
@@ -39,7 +37,6 @@ public class NPCQuestTask extends Task
 	{
 		super.writeData(nbt);
 		nbt.setInteger("npc_quest", npcQuest);
-		nbt.setBoolean("check_active", checkActive);
 	}
 
 	@Override
@@ -47,7 +44,6 @@ public class NPCQuestTask extends Task
 	{
 		super.readData(nbt);
 		npcQuest = nbt.getInteger("npc_quest");
-		checkActive = nbt.getBoolean("check_active");
 	}
 
 	@Override
@@ -55,7 +51,6 @@ public class NPCQuestTask extends Task
 	{
 		super.writeNetData(data);
 		data.writeVarInt(npcQuest);
-		data.writeBoolean(checkActive);
 	}
 
 	@Override
@@ -63,7 +58,6 @@ public class NPCQuestTask extends Task
 	{
 		super.readNetData(data);
 		npcQuest = data.readVarInt();
-		checkActive = data.readBoolean();
 	}
 
 	@Override
@@ -72,26 +66,17 @@ public class NPCQuestTask extends Task
 	{
 		super.getConfig(config);
 		config.addInt("id", () -> npcQuest, v -> npcQuest = v, 0, 0, Integer.MAX_VALUE);
-		config.addBool("check_active", () -> checkActive, v -> checkActive = v, false);
 	}
 
 	@Override
-	public TaskData createData(QuestData data)
+	public void claim(EntityPlayerMP player, boolean notify)
 	{
-		return new Data(this, data);
-	}
+		PlayerData data = PlayerData.get(player);
+		QuestData qd = data == null ? null : data.questData.activeQuests.get(npcQuest);
 
-	public static class Data extends BooleanTaskData<NPCQuestTask>
-	{
-		private Data(NPCQuestTask task, QuestData data)
+		if (qd != null)
 		{
-			super(task, data);
-		}
-
-		@Override
-		public boolean canSubmit(EntityPlayerMP player)
-		{
-			return task.npcQuest > 0 && (task.checkActive ? PlayerQuestController.isQuestActive(player, task.npcQuest) : PlayerQuestController.isQuestFinished(player, task.npcQuest));
+			PlayerQuestController.setQuestFinished(qd.quest, player);
 		}
 	}
 }

@@ -24,6 +24,7 @@ public class CustomNPCsIntegration
 	public static TaskType DIALOG_TASK;
 	public static TaskType FACTION_TASK;
 
+	public static RewardType QUEST_REWARD;
 	public static RewardType MAIL_REWARD;
 	public static RewardType FACTION_REWARD;
 
@@ -43,6 +44,7 @@ public class CustomNPCsIntegration
 	@SubscribeEvent
 	public static void registerRewards(RegistryEvent.Register<RewardType> event)
 	{
+		event.getRegistry().register(QUEST_REWARD = new RewardType(NPCQuestReward::new).setRegistryName("npc_quest").setIcon(GuiIcons.PLAYER));
 		event.getRegistry().register(MAIL_REWARD = new RewardType(NPCMailReward::new).setRegistryName("npc_mail").setIcon(GuiIcons.PLAYER));
 		event.getRegistry().register(FACTION_REWARD = new RewardType(NPCFactionReward::new).setRegistryName("npc_faction").setIcon(GuiIcons.PLAYER));
 	}
