@@ -519,7 +519,7 @@ public class GuiQuestTree extends GuiBase
 		return false;
 	}
 
-	public void open(@Nullable QuestObject object)
+	public void open(@Nullable QuestObject object, boolean focus)
 	{
 		Chapter c = chapterHoverPanel.chapter == null ? null : chapterHoverPanel.chapter.chapter;
 
@@ -533,7 +533,11 @@ public class GuiQuestTree extends GuiBase
 			Quest q = (Quest) object;
 			selectChapter(q.chapter);
 			viewQuest(q);
-			questPanel.scrollTo(q.x + 0.5D, q.y + 0.5D);
+
+			if (focus)
+			{
+				questPanel.scrollTo(q.x + 0.5D, q.y + 0.5D);
+			}
 		}
 		else if (object instanceof Task)
 		{
@@ -564,7 +568,7 @@ public class GuiQuestTree extends GuiBase
 	{
 		if (scheme.isEmpty() && path.startsWith("#"))
 		{
-			open(file.get(file.getID(path)));
+			open(file.get(file.getID(path)), true);
 			return true;
 		}
 

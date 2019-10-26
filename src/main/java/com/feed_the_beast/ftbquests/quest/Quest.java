@@ -485,10 +485,10 @@ public final class Quest extends QuestObject
 	}
 
 	@Override
-	public void onCompleted(QuestData data, List<EntityPlayerMP> notifiedPlayers)
+	public void onCompleted(QuestData data, List<EntityPlayerMP> onlineMembers, List<EntityPlayerMP> notifiedPlayers)
 	{
 		//data.setTimesCompleted(this, data.getTimesCompleted(this) + 1);
-		super.onCompleted(data, notifiedPlayers);
+		super.onCompleted(data, onlineMembers, notifiedPlayers);
 
 		if (!disableToast)
 		{
@@ -499,11 +499,11 @@ public final class Quest extends QuestObject
 		}
 
 		data.checkAutoCompletion(this);
-		new ObjectCompletedEvent.QuestEvent(data, this, notifiedPlayers).post();
+		new ObjectCompletedEvent.QuestEvent(data, this, onlineMembers, notifiedPlayers).post();
 
 		if (chapter.isComplete(data))
 		{
-			chapter.onCompleted(data, notifiedPlayers);
+			chapter.onCompleted(data, onlineMembers, notifiedPlayers);
 		}
 	}
 
@@ -614,7 +614,7 @@ public final class Quest extends QuestObject
 		config.addEnum("shape", () -> shape, v -> shape = v, QuestShape.NAME_MAP);
 		config.addBool("hide", () -> hide, v -> hide = v, false);
 		config.addBool("can_repeat", () -> canRepeat, v -> canRepeat = v, false);
-		config.addDouble("size", () -> size, v -> size = v, 1, 0.5D, 4D);
+		config.addDouble("size", () -> size, v -> size = v, 1, 0.5D, 3D);
 		config.addDouble("x", () -> x, v -> x = v, 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
 		config.addDouble("y", () -> y, v -> y = v, 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
 

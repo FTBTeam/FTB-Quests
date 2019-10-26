@@ -95,7 +95,6 @@ import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -344,7 +343,7 @@ public class FTBQuestsEventHandler
 	{
 		if (event.player instanceof EntityPlayerMP && !event.crafting.isEmpty())
 		{
-			FTBQuestsInventoryListener.detect((EntityPlayerMP) event.player, Collections.singleton(event.crafting));
+			FTBQuestsInventoryListener.detect((EntityPlayerMP) event.player, event.crafting);
 		}
 	}
 
@@ -353,7 +352,7 @@ public class FTBQuestsEventHandler
 	{
 		if (event.player instanceof EntityPlayerMP && !event.smelting.isEmpty())
 		{
-			FTBQuestsInventoryListener.detect((EntityPlayerMP) event.player, Collections.singleton(event.smelting));
+			FTBQuestsInventoryListener.detect((EntityPlayerMP) event.player, event.smelting);
 		}
 	}
 

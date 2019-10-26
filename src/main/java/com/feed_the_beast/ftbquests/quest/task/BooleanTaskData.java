@@ -4,8 +4,6 @@ import com.feed_the_beast.ftbquests.quest.QuestData;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 
-import java.util.Collection;
-
 /**
  * @author LatvianModder
  */
@@ -22,18 +20,11 @@ public class BooleanTaskData<T extends Task> extends TaskData<T>
 	}
 
 	@Override
-	public boolean submitTask(EntityPlayerMP player, Collection<ItemStack> itemsToCheck, boolean simulate)
+	public void submitTask(EntityPlayerMP player, ItemStack item)
 	{
 		if (!isComplete() && canSubmit(player))
 		{
-			if (!simulate)
-			{
-				setProgress(1L);
-			}
-
-			return true;
+			setProgress(1L);
 		}
-
-		return false;
 	}
 }

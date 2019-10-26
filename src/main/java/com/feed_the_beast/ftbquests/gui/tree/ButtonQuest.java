@@ -189,7 +189,7 @@ public class ButtonQuest extends Button
 			}
 			else if (quest.customClick.isEmpty() || !handleClick(quest.customClick))
 			{
-				treeGui.open(quest);
+				treeGui.open(quest, false);
 			}
 		}
 		else if (treeGui.file.canEdit() && button.isMiddle())

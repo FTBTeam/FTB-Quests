@@ -153,10 +153,10 @@ public final class Chapter extends QuestObject
 	}
 
 	@Override
-	public void onCompleted(QuestData data, List<EntityPlayerMP> notifiedPlayers)
+	public void onCompleted(QuestData data, List<EntityPlayerMP> onlineMembers, List<EntityPlayerMP> notifiedPlayers)
 	{
-		super.onCompleted(data, notifiedPlayers);
-		new ObjectCompletedEvent.ChapterEvent(data, this, notifiedPlayers).post();
+		super.onCompleted(data, onlineMembers, notifiedPlayers);
+		new ObjectCompletedEvent.ChapterEvent(data, this, onlineMembers, notifiedPlayers).post();
 
 		if (!disableToast)
 		{
@@ -168,7 +168,7 @@ public final class Chapter extends QuestObject
 
 		if (file.isComplete(data))
 		{
-			file.onCompleted(data, notifiedPlayers);
+			file.onCompleted(data, onlineMembers, notifiedPlayers);
 		}
 	}
 
