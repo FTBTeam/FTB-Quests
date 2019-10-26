@@ -50,7 +50,7 @@ public class MessageSubmitTask extends MessageToServer
 		ServerQuestData teamData = ServerQuestData.get(Universe.get().getPlayer(player).team);
 		Task t = ServerQuestFile.INSTANCE.getTask(task);
 
-		if (t != null && t.canInsertItem() && t.quest.canStartTasks(teamData))
+		if (t != null && t.quest.canStartTasks(teamData))
 		{
 			teamData.getTaskData(t).submitTask(player);
 		}
