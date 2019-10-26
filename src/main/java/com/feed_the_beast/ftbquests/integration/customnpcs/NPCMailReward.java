@@ -108,7 +108,6 @@ public class NPCMailReward extends Reward
 		}, new ConfigList<>(new ConfigString("")));
 
 		config.addInt("quest_id", () -> mail.questId, v -> mail.questId = v, -1, -1, Integer.MAX_VALUE);
-		config.addString("quest_title", () -> mail.questTitle, v -> mail.questTitle = v, "");
 		config.addList("items", mail.items, new ConfigItemStack(ItemStack.EMPTY), ConfigItemStack::new, ConfigItemStack::getStack);
 	}
 
