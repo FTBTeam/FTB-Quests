@@ -74,7 +74,7 @@ public class ButtonExpandedChapter extends SimpleTextButton
 
 			if (treeGui.selectedChapter != chapter)
 			{
-				treeGui.open(chapter);
+				treeGui.open(chapter, false);
 			}
 		}
 

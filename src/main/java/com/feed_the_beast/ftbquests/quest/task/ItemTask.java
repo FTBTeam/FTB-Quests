@@ -39,7 +39,6 @@ import net.minecraftforge.items.ItemHandlerHelper;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
@@ -438,23 +437,18 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 		}
 
 		@Override
-		public boolean submitTask(EntityPlayerMP player, Collection<ItemStack> itemsToCheck, boolean simulate)
+		public void submitTask(EntityPlayerMP player, ItemStack item)
 		{
 			if (isComplete())
 			{
-				return false;
+				return;
 			}
 
 			if (!task.canInsertItem())
 			{
 				long count = 0;
 
-				if (itemsToCheck.isEmpty())
-				{
-					itemsToCheck = player.inventory.mainInventory;
-				}
-
-				for (ItemStack stack : itemsToCheck)
+				for (ItemStack stack : player.inventory.mainInventory)
 				{
 					if (!stack.isEmpty() && task.test(stack))
 					{
@@ -466,15 +460,16 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 
 				if (count > progress)
 				{
-					if (!simulate)
-					{
-						setProgress(count);
-					}
-
-					return true;
+					setProgress(count);
+					return;
 				}
 
-				return false;
+				return;
+			}
+
+			if (!item.isEmpty())
+			{
+				return;
 			}
 
 			boolean changed = false;
@@ -482,20 +477,20 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 			for (int i = 0; i < player.inventory.mainInventory.size(); i++)
 			{
 				ItemStack stack = player.inventory.mainInventory.get(i);
-				ItemStack stack1 = insertItem(stack, false, simulate, player);
+				ItemStack stack1 = insertItem(stack, false, false, player);
 
 				if (!ItemStack.areItemStacksEqual(stack, stack1))
 				{
 					changed = true;
-
-					if (!simulate)
-					{
-						player.inventory.mainInventory.set(i, stack1);
-					}
+					player.inventory.mainInventory.set(i, stack1.isEmpty() ? ItemStack.EMPTY : stack1);
 				}
 			}
 
-			return changed;
+			if (changed)
+			{
+				player.inventory.markDirty();
+				player.openContainer.detectAndSendChanges();
+			}
 		}
 	}
 }

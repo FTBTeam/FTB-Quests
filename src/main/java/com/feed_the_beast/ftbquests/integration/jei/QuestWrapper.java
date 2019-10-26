@@ -169,7 +169,7 @@ public class QuestWrapper implements IRecipeWrapper
 	{
 		if (mouseY >= 0 && mouseY < 20 && !ClientQuestFile.INSTANCE.disableGui)
 		{
-			ClientQuestFile.INSTANCE.questTreeGui.open(quest);
+			ClientQuestFile.INSTANCE.questTreeGui.open(quest, true);
 			return true;
 		}
 

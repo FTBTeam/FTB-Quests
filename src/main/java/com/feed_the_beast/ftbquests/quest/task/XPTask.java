@@ -15,8 +15,6 @@ import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-import java.util.Collection;
-
 /**
  * @author LatvianModder
  */
@@ -205,31 +203,26 @@ public class XPTask extends Task implements ISingleLongValueTask
 		}
 
 		@Override
-		public boolean submitTask(EntityPlayerMP player, Collection<ItemStack> itemsToCheck, boolean simulate)
+		public void submitTask(EntityPlayerMP player, ItemStack item)
 		{
 			int add = (int) Math.min(task.points ? getPlayerXP(player) : player.experienceLevel, Math.min(task.value - progress, Integer.MAX_VALUE));
 
-			if (add > 0)
+			if (add <= 0)
 			{
-				if (!simulate)
-				{
-					if (task.points)
-					{
-						addPlayerXP(player, -add);
-						player.addExperienceLevel(0);
-					}
-					else
-					{
-						player.addExperienceLevel(-add);
-					}
-
-					addProgress(add);
-				}
-
-				return true;
+				return;
 			}
 
-			return false;
+			if (task.points)
+			{
+				addPlayerXP(player, -add);
+				player.addExperienceLevel(0);
+			}
+			else
+			{
+				player.addExperienceLevel(-add);
+			}
+
+			addProgress(add);
 		}
 	}
 }

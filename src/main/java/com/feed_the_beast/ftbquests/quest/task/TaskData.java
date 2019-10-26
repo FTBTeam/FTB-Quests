@@ -1,11 +1,11 @@
 package com.feed_the_beast.ftbquests.quest.task;
 
-import com.feed_the_beast.ftblib.lib.data.ForgePlayer;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.events.TaskStartedEvent;
 import com.feed_the_beast.ftbquests.net.MessageUpdateTaskProgress;
 import com.feed_the_beast.ftbquests.quest.ChangeProgress;
 import com.feed_the_beast.ftbquests.quest.QuestData;
+import com.feed_the_beast.ftbquests.util.FTBQuestsInventoryListener;
 import com.feed_the_beast.ftbquests.util.ServerQuestData;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -17,8 +17,6 @@ import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.items.IItemHandler;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -54,7 +52,7 @@ public class TaskData<T extends Task> implements ICapabilityProvider, IItemHandl
 			taskCompleted = false;
 			task.quest.chapter.file.clearCachedProgress();
 
-			if (!task.quest.chapter.file.isClient())
+			if (data instanceof ServerQuestData)
 			{
 				if (ChangeProgress.sendUpdates)
 				{
@@ -69,20 +67,24 @@ public class TaskData<T extends Task> implements ICapabilityProvider, IItemHandl
 				if (!taskCompleted && isComplete())
 				{
 					taskCompleted = true;
-					List<EntityPlayerMP> notifyPlayers = new ArrayList<>();
+					List<EntityPlayerMP> onlineMembers = ((ServerQuestData) data).team.getOnlineMembers();
+					List<EntityPlayerMP> notifiedPlayers;
 
 					if (!task.quest.chapter.alwaysInvisible && !task.quest.canRepeat && ChangeProgress.sendNotifications.get(ChangeProgress.sendUpdates))
 					{
-						for (ForgePlayer player : ((ServerQuestData) data).team.getMembers())
-						{
-							if (player.isOnline())
-							{
-								notifyPlayers.add(player.getPlayer());
-							}
-						}
+						notifiedPlayers = onlineMembers;
+					}
+					else
+					{
+						notifiedPlayers = Collections.emptyList();
 					}
 
-					task.onCompleted(data, notifyPlayers);
+					task.onCompleted(data, onlineMembers, notifiedPlayers);
+
+					for (EntityPlayerMP player : onlineMembers)
+					{
+						FTBQuestsInventoryListener.detect(player, ItemStack.EMPTY);
+					}
 				}
 			}
 
@@ -190,11 +192,11 @@ public class TaskData<T extends Task> implements ICapabilityProvider, IItemHandl
 		return 64;
 	}
 
-	public boolean submitTask(EntityPlayerMP player, Collection<ItemStack> itemsToCheck, boolean simulate)
+	public void submitTask(EntityPlayerMP player, ItemStack item)
 	{
-		if (!task.canInsertItem())
+		if (!task.canInsertItem() || !item.isEmpty())
 		{
-			return false;
+			return;
 		}
 
 		boolean changed = false;
@@ -202,24 +204,24 @@ public class TaskData<T extends Task> implements ICapabilityProvider, IItemHandl
 		for (int i = 0; i < player.inventory.mainInventory.size(); i++)
 		{
 			ItemStack stack = player.inventory.mainInventory.get(i);
-			ItemStack stack1 = insertItem(stack, false, simulate, player);
+			ItemStack stack1 = insertItem(stack, false, false, player);
 
 			if (!ItemStack.areItemStacksEqual(stack, stack1))
 			{
 				changed = true;
-
-				if (!simulate)
-				{
-					player.inventory.mainInventory.set(i, stack1);
-				}
+				player.inventory.mainInventory.set(i, stack1);
 			}
 		}
 
-		return changed;
+		if (changed)
+		{
+			player.inventory.markDirty();
+			player.openContainer.detectAndSendChanges();
+		}
 	}
 
-	public final boolean submitTask(EntityPlayerMP player)
+	public final void submitTask(EntityPlayerMP player)
 	{
-		return submitTask(player, Collections.emptyList(), false);
+		submitTask(player, ItemStack.EMPTY);
 	}
 }

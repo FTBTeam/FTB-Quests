@@ -14,8 +14,6 @@ import net.minecraft.stats.StatList;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-import java.util.Collection;
-
 /**
  * @author LatvianModder
  */
@@ -132,26 +130,19 @@ public class StatTask extends Task
 		}
 
 		@Override
-		public boolean submitTask(EntityPlayerMP player, Collection<ItemStack> itemsToCheck, boolean simulate)
+		public void submitTask(EntityPlayerMP player, ItemStack item)
 		{
 			if (isComplete())
 			{
-				return false;
+				return;
 			}
 
 			int set = Math.min(task.value, player.getStatFile().readStat(task.stat));
 
 			if (set > progress)
 			{
-				if (!simulate)
-				{
-					setProgress(set);
-				}
-
-				return true;
+				setProgress(set);
 			}
-
-			return false;
 		}
 	}
 }

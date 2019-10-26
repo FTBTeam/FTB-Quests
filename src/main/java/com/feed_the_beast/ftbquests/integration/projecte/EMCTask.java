@@ -21,8 +21,6 @@ import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-import java.util.Collection;
-
 /**
  * @author LatvianModder
  */
@@ -134,11 +132,11 @@ public class EMCTask extends Task implements ISingleLongValueTask
 
 		@Override
 		@SuppressWarnings("deprecation")
-		public boolean submitTask(EntityPlayerMP player, Collection<ItemStack> itemsToCheck, boolean simulate)
+		public void submitTask(EntityPlayerMP player, ItemStack item)
 		{
 			if (isComplete())
 			{
-				return false;
+				return;
 			}
 
 			IKnowledgeProvider knowledge = ProjectEAPI.getTransmutationProxy().getKnowledgeProviderFor(player.getUniqueID());
@@ -148,17 +146,10 @@ public class EMCTask extends Task implements ISingleLongValueTask
 
 			if (add > 0D)
 			{
-				if (!simulate)
-				{
-					knowledge.setEmc(emc - add);
-					knowledge.sync(player);
-					addProgress((long) add);
-				}
-
-				return true;
+				knowledge.setEmc(emc - add);
+				knowledge.sync(player);
+				addProgress((long) add);
 			}
-
-			return false;
 		}
 	}
 }

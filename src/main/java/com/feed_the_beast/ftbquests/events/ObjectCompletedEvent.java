@@ -17,12 +17,14 @@ public class ObjectCompletedEvent<T extends QuestObject> extends FTBQuestsEvent
 {
 	private final QuestData data;
 	private final T object;
+	private final List<EntityPlayerMP> onlineMembers;
 	private final List<EntityPlayerMP> notifiedPlayers;
 
-	private ObjectCompletedEvent(QuestData t, T o, List<EntityPlayerMP> n)
+	private ObjectCompletedEvent(QuestData t, T o, List<EntityPlayerMP> om, List<EntityPlayerMP> n)
 	{
 		data = t;
 		object = o;
+		onlineMembers = om;
 		notifiedPlayers = n;
 	}
 
@@ -34,6 +36,11 @@ public class ObjectCompletedEvent<T extends QuestObject> extends FTBQuestsEvent
 	public T getObject()
 	{
 		return object;
+	}
+
+	public List<EntityPlayerMP> getOnlineMembers()
+	{
+		return onlineMembers;
 	}
 
 	public List<EntityPlayerMP> getNotifiedPlayers()
@@ -49,9 +56,9 @@ public class ObjectCompletedEvent<T extends QuestObject> extends FTBQuestsEvent
 
 	public static class FileEvent extends ObjectCompletedEvent<QuestFile>
 	{
-		public FileEvent(QuestData t, QuestFile o, List<EntityPlayerMP> n)
+		public FileEvent(QuestData t, QuestFile o, List<EntityPlayerMP> om, List<EntityPlayerMP> n)
 		{
-			super(t, o, n);
+			super(t, o, om, n);
 		}
 
 		public QuestFile getFile()
@@ -62,9 +69,9 @@ public class ObjectCompletedEvent<T extends QuestObject> extends FTBQuestsEvent
 
 	public static class ChapterEvent extends ObjectCompletedEvent<Chapter>
 	{
-		public ChapterEvent(QuestData t, Chapter o, List<EntityPlayerMP> n)
+		public ChapterEvent(QuestData t, Chapter o, List<EntityPlayerMP> om, List<EntityPlayerMP> n)
 		{
-			super(t, o, n);
+			super(t, o, om, n);
 		}
 
 		public Chapter getChapter()
@@ -75,9 +82,9 @@ public class ObjectCompletedEvent<T extends QuestObject> extends FTBQuestsEvent
 
 	public static class QuestEvent extends ObjectCompletedEvent<Quest>
 	{
-		public QuestEvent(QuestData t, Quest o, List<EntityPlayerMP> n)
+		public QuestEvent(QuestData t, Quest o, List<EntityPlayerMP> om, List<EntityPlayerMP> n)
 		{
-			super(t, o, n);
+			super(t, o, om, n);
 		}
 
 		public Quest getQuest()
@@ -88,9 +95,9 @@ public class ObjectCompletedEvent<T extends QuestObject> extends FTBQuestsEvent
 
 	public static class TaskEvent extends ObjectCompletedEvent<Task>
 	{
-		public TaskEvent(QuestData t, Task o, List<EntityPlayerMP> n)
+		public TaskEvent(QuestData t, Task o, List<EntityPlayerMP> om, List<EntityPlayerMP> n)
 		{
-			super(t, o, n);
+			super(t, o, om, n);
 		}
 
 		public Task getTask()

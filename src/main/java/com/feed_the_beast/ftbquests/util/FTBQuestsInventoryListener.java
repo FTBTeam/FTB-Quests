@@ -12,16 +12,11 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
 
-import java.util.Collection;
-import java.util.Collections;
-
 /**
  * @author LatvianModder
  */
 public class FTBQuestsInventoryListener implements IContainerListener
 {
-	private static int detectCounter = 0;
-
 	public final EntityPlayerMP player;
 
 	public FTBQuestsInventoryListener(EntityPlayerMP p)
@@ -29,24 +24,12 @@ public class FTBQuestsInventoryListener implements IContainerListener
 		player = p;
 	}
 
-	public static void detect(EntityPlayerMP player, Collection<ItemStack> itemsToCheck)
+	public static void detect(EntityPlayerMP player, ItemStack item)
 	{
-		detectCounter = 0;
-
-		if (ServerQuestFile.INSTANCE != null)
-		{
-			detect0(player, itemsToCheck);
-		}
-	}
-
-	private static void detect0(EntityPlayerMP player, Collection<ItemStack> itemsToCheck)
-	{
-		if (++detectCounter >= 10)
+		if (ServerQuestFile.INSTANCE == null)
 		{
 			return;
 		}
-
-		//FTBQuests.LOGGER.info("Running auto-completion with list: " + itemsToCheck);
 
 		QuestData data = ServerQuestFile.INSTANCE.getData(player);
 
@@ -65,18 +48,13 @@ public class FTBQuestsInventoryListener implements IContainerListener
 				{
 					for (Task task : quest.tasks)
 					{
-						if (task.submitItemsOnInventoryChange() && data.getTaskData(task).submitTask(player, itemsToCheck, false))
+						if (task.submitItemsOnInventoryChange())
 						{
-							redo = true;
+							data.getTaskData(task).submitTask(player, item);
 						}
 					}
 				}
 			}
-		}
-
-		if (redo)
-		{
-			detect(player, Collections.emptyList());
 		}
 	}
 
@@ -96,7 +74,7 @@ public class FTBQuestsInventoryListener implements IContainerListener
 	@Override
 	public void sendAllContents(Container container, NonNullList<ItemStack> itemsList)
 	{
-		detect(player, Collections.emptyList());
+		detect(player, ItemStack.EMPTY);
 	}
 
 	@Override
@@ -104,7 +82,7 @@ public class FTBQuestsInventoryListener implements IContainerListener
 	{
 		if (!stack.isEmpty() && container.getSlot(index).inventory == player.inventory)
 		{
-			detect(player, Collections.singleton(stack));
+			detect(player, ItemStack.EMPTY);
 		}
 	}
 
