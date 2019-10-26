@@ -51,7 +51,7 @@ public class NPCFactionTask extends Task
 		super.readData(nbt);
 		npcFaction = nbt.getInteger("npc_faction");
 		requiredPoints = nbt.getInteger("required_points");
-		mode = NumberMode.NAME_MAP.get(nbt.getString("mode"));
+		mode = NumberMode.NAME_MAP.get(nbt.getString("point_mode"));
 	}
 
 	@Override
