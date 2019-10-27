@@ -14,21 +14,22 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  */
 public final class QuestShape extends Icon implements IWithID
 {
-	public static final QuestShape DEFAULT = new QuestShape("default");
-	public static final QuestShape CIRCLE = new QuestShape("circle");
+	public static final QuestShape DEFAULT = new QuestShape("default").circularCheck();
+	public static final QuestShape CIRCLE = new QuestShape("circle").circularCheck();
 	public static final QuestShape SQUARE = new QuestShape("square");
-	public static final QuestShape DIAMOND = new QuestShape("diamond");
+	public static final QuestShape DIAMOND = new QuestShape("diamond").circularCheck();
 	public static final QuestShape RSQUARE = new QuestShape("rsquare");
-	public static final QuestShape PENTAGON = new QuestShape("pentagon");
-	public static final QuestShape HEXAGON = new QuestShape("hexagon");
-	public static final QuestShape OCTAGON = new QuestShape("octagon");
+	public static final QuestShape PENTAGON = new QuestShape("pentagon").circularCheck();
+	public static final QuestShape HEXAGON = new QuestShape("hexagon").circularCheck();
+	public static final QuestShape OCTAGON = new QuestShape("octagon").circularCheck();
 	public static final QuestShape HEART = new QuestShape("heart");
-	public static final QuestShape GEAR = new QuestShape("gear");
+	public static final QuestShape GEAR = new QuestShape("gear").circularCheck();
 
 	public static final NameMap<QuestShape> NAME_MAP = NameMap.createWithBaseTranslationKey(DEFAULT, "ftbquests.quest.shape", DEFAULT, CIRCLE, SQUARE, DIAMOND, RSQUARE, PENTAGON, HEXAGON, OCTAGON, HEART, GEAR);
 
 	public final String id;
 	public final ImageIcon background, outline, shape;
+	public boolean circularCheck;
 
 	public QuestShape(String i)
 	{
@@ -36,6 +37,13 @@ public final class QuestShape extends Icon implements IWithID
 		background = new ImageIcon(new ResourceLocation(FTBQuests.MOD_ID, "textures/shapes/" + id + "/background.png"));
 		outline = new ImageIcon(new ResourceLocation(FTBQuests.MOD_ID, "textures/shapes/" + id + "/outline.png"));
 		shape = new ImageIcon(new ResourceLocation(FTBQuests.MOD_ID, "textures/shapes/" + id + "/shape.png"));
+		circularCheck = false;
+	}
+
+	public QuestShape circularCheck()
+	{
+		circularCheck = true;
+		return this;
 	}
 
 	@Override
