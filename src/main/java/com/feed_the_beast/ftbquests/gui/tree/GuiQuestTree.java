@@ -120,6 +120,7 @@ public class GuiQuestTree extends GuiBase
 	@Override
 	public void onClosed()
 	{
+		selectedQuests.clear();
 		super.onClosed();
 		//Keyboard.enableRepeatEvents(false);
 	}
