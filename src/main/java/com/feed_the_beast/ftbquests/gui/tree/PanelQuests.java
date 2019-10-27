@@ -107,6 +107,11 @@ public class PanelQuests extends Panel
 	@Override
 	public void alignWidgets()
 	{
+		if (treeGui.selectedChapter == null)
+		{
+			return;
+		}
+
 		treeGui.scrollWidth = 0;
 		treeGui.scrollHeight = 0;
 
@@ -290,7 +295,7 @@ public class PanelQuests extends Panel
 	{
 		super.draw(theme, x, y, w, h);
 
-		if (isMouseOver())
+		if (treeGui.selectedChapter != null && isMouseOver())
 		{
 			double minX = Double.POSITIVE_INFINITY, minY = Double.POSITIVE_INFINITY, maxX = Double.NEGATIVE_INFINITY, maxY = Double.NEGATIVE_INFINITY;
 
@@ -403,7 +408,7 @@ public class PanelQuests extends Panel
 	{
 		if (treeGui.movingQuests && treeGui.file.canEdit())
 		{
-			if (!button.isRight() && !treeGui.selectedQuests.isEmpty())
+			if (treeGui.selectedChapter != null && !button.isRight() && !treeGui.selectedQuests.isEmpty())
 			{
 				GuiHelper.playClickSound();
 
@@ -473,6 +478,17 @@ public class PanelQuests extends Panel
 	{
 		super.mouseReleased(button);
 		treeGui.grabbed = 0;
+	}
+
+	@Override
+	public boolean checkMouseOver(int mouseX, int mouseY)
+	{
+		if (!treeGui.chapterHoverPanel.widgets.isEmpty())
+		{
+			return false;
+		}
+
+		return super.checkMouseOver(mouseX, mouseY);
 	}
 
 	@Override

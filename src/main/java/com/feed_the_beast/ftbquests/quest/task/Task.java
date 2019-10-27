@@ -247,13 +247,10 @@ public abstract class Task extends QuestObject
 	@SideOnly(Side.CLIENT)
 	public void onButtonClicked(boolean canClick)
 	{
-		if (autoSubmitOnPlayerTick() <= 0)
+		if (canClick && autoSubmitOnPlayerTick() <= 0)
 		{
-			if (canClick)
-			{
-				GuiHelper.playClickSound();
-				new MessageSubmitTask(id).sendToServer();
-			}
+			GuiHelper.playClickSound();
+			new MessageSubmitTask(id).sendToServer();
 		}
 	}
 

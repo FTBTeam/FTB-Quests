@@ -281,6 +281,7 @@ ftbquests.task.ftbquests.gamestage=Game Stage
 
 ftbquests.task.ftbquests.npc_quest=CustomNPCs Quest
 ftbquests.task.ftbquests.npc_quest.id=Quest ID
+ftbquests.task.ftbquests.npc_quest.check_active=Check if quest is active
 ftbquests.task.ftbquests.npc_dialog=CustomNPCs Dialog
 ftbquests.task.ftbquests.npc_dialog.id=Dialog ID
 ftbquests.task.ftbquests.npc_faction=CustomNPCs Faction
@@ -328,8 +329,11 @@ ftbquests.reward.ftbquests.gamestage=Game Stage
 ftbquests.reward.ftbquests.gamestage.silent=Silent
 ftbquests.reward.ftbquests.gamestage.remove=Remove
 
+ftbquests.reward.ftbquests.npc_quest=CustomNPCs Quest
+ftbquests.reward.ftbquests.npc_quest.id=Quest ID
+
 ftbquests.reward.ftbquests.npc_faction=CustomNPCs Faction
-ftbquests.reward.ftbquests.npc_faction.id=CustomNPCs Faction ID
+ftbquests.reward.ftbquests.npc_faction.id=Faction ID
 ftbquests.reward.ftbquests.npc_faction.points=Points
 ftbquests.reward.ftbquests.npc_faction.add=Add
 
