@@ -333,20 +333,15 @@ public class PanelQuests extends Panel
 			centerQuestY = (treeGui.height / 2D - getY()) / treeGui.scrollHeight * dy + minY;
 			setOffset(false);
 
-			if (isCtrlKeyDown())
+			if (isShiftKeyDown())
 			{
-				questX = qx - 0.5D;
-				questY = qy - 0.5D;
-			}
-			else if (isShiftKeyDown())
-			{
-				questX = MathHelper.floor(qx);
-				questY = MathHelper.floor(qy);
+				questX = qx;
+				questY = qy;
 			}
 			else
 			{
-				questX = MathHelper.floor(qx * 2D - 0.5D) / 2D;
-				questY = MathHelper.floor(qy * 2D - 0.5D) / 2D;
+				questX = MathHelper.floor(qx * 2D + 0.5D) / 2D;
+				questY = MathHelper.floor(qy * 2D + 0.5D) / 2D;
 			}
 
 			if (treeGui.file.canEdit())
