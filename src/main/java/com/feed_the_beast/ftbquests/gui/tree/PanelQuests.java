@@ -128,7 +128,7 @@ public class PanelQuests extends Panel
 
 		if (minX == Double.POSITIVE_INFINITY)
 		{
-			minX = minY = maxX = maxY = 0;
+			minX = minY = maxX = maxY = 0D;
 		}
 
 		minX -= 40;
@@ -154,6 +154,11 @@ public class PanelQuests extends Panel
 	@Override
 	public void drawOffsetBackground(Theme theme, int x, int y, int w, int h)
 	{
+		if (treeGui.selectedChapter == null)
+		{
+			return;
+		}
+
 		GlStateManager.color(1F, 1F, 1F, 1F);
 		Tessellator tessellator = Tessellator.getInstance();
 		BufferBuilder buffer = tessellator.getBuffer();
@@ -347,10 +352,13 @@ public class PanelQuests extends Panel
 			if (treeGui.file.canEdit())
 			{
 				theme.pushFontUnicode(true);
+				GlStateManager.pushMatrix();
+				GlStateManager.translate(0D, 0D, 1000D);
 				theme.drawString("X:" + (questX < 0 ? "" : " ") + StringUtils.DOUBLE_FORMATTER_00.format(questX), x + 3, y + h - 18, Theme.SHADOW);
 				theme.drawString("Y:" + (questY < 0 ? "" : " ") + StringUtils.DOUBLE_FORMATTER_00.format(questY), x + 3, y + h - 10, Theme.SHADOW);
 				theme.drawString("CX:" + (centerQuestX < 0 ? "" : " ") + StringUtils.DOUBLE_FORMATTER_00.format(centerQuestX), x + w - 30, y + h - 18, Theme.SHADOW);
 				theme.drawString("CY:" + (centerQuestY < 0 ? "" : " ") + StringUtils.DOUBLE_FORMATTER_00.format(centerQuestY), x + w - 30, y + h - 10, Theme.SHADOW);
+				GlStateManager.popMatrix();
 				theme.popFontUnicode();
 
 				if (treeGui.movingQuests && !treeGui.selectedQuests.isEmpty())

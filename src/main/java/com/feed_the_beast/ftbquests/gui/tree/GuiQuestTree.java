@@ -64,6 +64,7 @@ public class GuiQuestTree extends GuiBase
 	public boolean movingQuests = false;
 	public int zoom = 16;
 	public long lastShiftPress = 0L;
+	public static boolean grid = false;
 
 	public GuiQuestTree(ClientQuestFile q)
 	{
@@ -320,6 +321,12 @@ public class GuiQuestTree extends GuiBase
 			return true;
 		}
 
+		if (key == Keyboard.KEY_R)
+		{
+			grid = !grid;
+			return true;
+		}
+
 		if (keyChar >= '1' && keyChar <= '9')
 		{
 			int i = keyChar - '1';
@@ -437,6 +444,11 @@ public class GuiQuestTree extends GuiBase
 	public int getZoom()
 	{
 		return zoom;
+	}
+
+	public double getButtonSize()
+	{
+		return getZoom() * 3D / 2D;
 	}
 
 	public void addZoom(int up)
