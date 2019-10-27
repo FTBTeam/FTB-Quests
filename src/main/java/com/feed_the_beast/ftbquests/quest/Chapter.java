@@ -139,6 +139,13 @@ public final class Chapter extends QuestObject
 			return 100;
 		}
 
+		List<Chapter> children = getChildren();
+
+		if (quests.isEmpty() && children.isEmpty())
+		{
+			return 100;
+		}
+
 		int progress = 0;
 
 		for (Quest quest : quests)
@@ -149,7 +156,15 @@ public final class Chapter extends QuestObject
 			}
 		}
 
-		return getRelativeProgressFromChildren(progress, quests.size());
+		int count = quests.size();
+
+		for (Chapter chapter : getChildren())
+		{
+			progress += chapter.getRelativeProgressFromChildren(data);
+			count++;
+		}
+
+		return getRelativeProgressFromChildren(progress, count);
 	}
 
 	@Override
