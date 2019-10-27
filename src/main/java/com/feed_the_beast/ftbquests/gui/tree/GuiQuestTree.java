@@ -340,17 +340,13 @@ public class GuiQuestTree extends GuiBase
 			return true;
 		}
 
-		if (selectedChapter != null && file.canEdit())
+		if (isCtrlKeyDown() && selectedChapter != null && file.canEdit())
 		{
 			double step;
 
-			if (isCtrlKeyDown())
+			if (isShiftKeyDown())
 			{
 				step = 0.1D;
-			}
-			else if (isShiftKeyDown())
-			{
-				step = 1D;
 			}
 			else
 			{
