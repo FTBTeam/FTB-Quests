@@ -333,7 +333,7 @@ public class FTBQuestsClientEventHandler
 					mw = Math.max(mw, mc.fontRenderer.getStringWidth(s));
 				}
 
-				double scale = 0.5D; //Make this a config
+				double scale = ThemeProperties.PINNED_QUEST_SIZE.get(ClientQuestFile.INSTANCE);
 
 				GlStateManager.pushMatrix();
 				GlStateManager.translate(event.getResolution().getScaledWidth() - mw * scale - 8D, cy - list.size() * 4.5D * scale, 100D);

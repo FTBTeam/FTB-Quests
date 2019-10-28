@@ -59,3 +59,4 @@ dependency_line_selected_speed:     1.0
 dependency_line_unselected_speed:   0.0
 dependency_line_thickness:          0.17
 quest_spacing:                      1.0
+pinned_quest_size:                  0.75
