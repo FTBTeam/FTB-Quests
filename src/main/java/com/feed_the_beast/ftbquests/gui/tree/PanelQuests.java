@@ -136,16 +136,19 @@ public class PanelQuests extends Panel
 		maxX += 40;
 		maxY += 30;
 
-		double bsize = treeGui.getZoom() * 2 - 2;
+		double bs = treeGui.getQuestButtonSize();
+		double bp = treeGui.getQuestButtonSpacing();
 
-		treeGui.scrollWidth = (maxX - minX + 1) * bsize;
-		treeGui.scrollHeight = (maxY - minY + 1) * bsize;
+		treeGui.scrollWidth = (maxX - minX + 1D) * (bs + bp);
+		treeGui.scrollHeight = (maxY - minY + 1D) * (bs + bp);
 
-		for (Widget widget : widgets)
+		for (Widget w : widgets)
 		{
-			Quest quest = ((ButtonQuest) widget).quest;
-			double bsize1 = bsize * quest.size;
-			widget.setPosAndSize((int) ((quest.x - minX) * bsize - (bsize1 - bsize) / 2D), (int) ((quest.y - minY) * bsize - (bsize1 - bsize) / 2D), (int) bsize1, (int) bsize1);
+			Quest q = ((ButtonQuest) w).quest;
+			double s = bs * q.size;
+			double x = (q.x - minX - q.size / 2D) * (bs + bp) + bp / 2D;
+			double y = (q.y - minY - q.size / 2D) * (bs + bp) + bp / 2D;
+			w.setPosAndSize((int) x, (int) y, (int) s, (int) s);
 		}
 
 		setPosAndSize(20, 1, treeGui.width - 40, treeGui.height - 2);
@@ -179,7 +182,7 @@ public class PanelQuests extends Panel
 		double mt = -(System.currentTimeMillis() * 0.001D);
 		double mu = (mt * ThemeProperties.DEPENDENCY_LINE_UNSELECTED_SPEED.get(treeGui.selectedChapter)) % 1D;
 		double ms = (mt * ThemeProperties.DEPENDENCY_LINE_SELECTED_SPEED.get(treeGui.selectedChapter)) % 1D;
-		double s = treeGui.getZoom() * ThemeProperties.DEPENDENCY_LINE_THICKNESS.get(treeGui.selectedChapter);
+		double s = treeGui.getZoom() * ThemeProperties.DEPENDENCY_LINE_THICKNESS.get(treeGui.selectedChapter) / 4D * 3D;
 
 		for (Widget widget : widgets)
 		{
@@ -358,49 +361,75 @@ public class PanelQuests extends Panel
 
 				if (treeGui.movingQuests && !treeGui.selectedQuests.isEmpty())
 				{
-					int z = treeGui.getZoom();
+					double bs = treeGui.getQuestButtonSize();
 
-					double ominX = Double.POSITIVE_INFINITY, ominY = Double.POSITIVE_INFINITY;
+					double ominX = Double.POSITIVE_INFINITY, ominY = Double.POSITIVE_INFINITY, omaxX = Double.NEGATIVE_INFINITY, omaxY = Double.NEGATIVE_INFINITY;
 
 					for (Quest q : treeGui.selectedQuests)
 					{
 						ominX = Math.min(ominX, q.x);
 						ominY = Math.min(ominY, q.y);
+						omaxX = Math.max(omaxX, q.x);
+						omaxY = Math.max(omaxY, q.y);
 					}
+
+					setOffset(true);
+					int panelX = getX();
+					int panelY = getY();
+					setOffset(false);
 
 					for (Quest q : treeGui.selectedQuests)
 					{
-						double s = (int) (z * 3 / 2 * q.size);
-						double off = (z * 2 - 2 - s) / 2D;
-						setOffset(true);
+						double s = bs * q.size;
 						double ox = (q.x - ominX);
 						double oy = (q.y - ominY);
-						double sx = (questX + ox - minX) / dx * treeGui.scrollWidth + getX() + off;
-						double sy = (questY + oy - minY) / dy * treeGui.scrollHeight + getY() + off;
-						setOffset(false);
+						double sx = (questX + ox - minX) / dx * treeGui.scrollWidth + panelX;
+						double sy = (questY + oy - minY) / dy * treeGui.scrollHeight + panelY;
 						GlStateManager.pushMatrix();
-						GlStateManager.translate(sx, sy, 0);
+						GlStateManager.translate(sx - s / 2D, sy - s / 2D, 0D);
 						GlStateManager.scale(s, s, 1D);
 						GuiHelper.setupDrawing();
 						q.getShape().shape.withColor(Color4I.WHITE.withAlpha(30)).draw(0, 0, 1, 1);
+						GlStateManager.popMatrix();
+					}
+
+					if (GuiQuestTree.grid)
+					{
+						double boxX = ominX / dx * treeGui.scrollWidth + panelX;
+						double boxY = ominY / dy * treeGui.scrollHeight + panelY;
+						double boxW = omaxX / dx * treeGui.scrollWidth + panelX - boxX;
+						double boxH = omaxY / dy * treeGui.scrollHeight + panelY - boxY;
+
+						GlStateManager.pushMatrix();
+						GlStateManager.translate(0, 0, 1000);
+						GuiHelper.drawHollowRect((int) boxX, (int) boxY, (int) boxW, (int) boxH, Color4I.WHITE.withAlpha(30), false);
 						GlStateManager.popMatrix();
 					}
 				}
 				else
 				{
 					int z = treeGui.getZoom();
-					double s = z * 3D / 2D;
-					double off = (z * 2 - 2 - s) / 2D;
+					double bs = treeGui.getQuestButtonSize();
 					setOffset(true);
-					double sx = (questX - minX) / dx * treeGui.scrollWidth + getX() + off;
-					double sy = (questY - minY) / dy * treeGui.scrollHeight + getY() + off;
+					double sx = (questX - minX) / dx * treeGui.scrollWidth + getX();
+					double sy = (questY - minY) / dy * treeGui.scrollHeight + getY();
 					setOffset(false);
 					GlStateManager.pushMatrix();
-					GlStateManager.translate(sx, sy, 0);
-					GlStateManager.scale(s, s, 1D);
+					GlStateManager.translate(sx - bs / 2D, sy - bs / 2D, 0D);
+					GlStateManager.scale(bs, bs, 1D);
 					GuiHelper.setupDrawing();
 					treeGui.selectedChapter.getDefaultQuestShape().shape.withColor(Color4I.WHITE.withAlpha(10)).draw(0, 0, 1, 1);
 					GlStateManager.popMatrix();
+
+					if (GuiQuestTree.grid)
+					{
+						GlStateManager.pushMatrix();
+						GlStateManager.translate(0, 0, 1000);
+						Color4I.WHITE.draw((int) sx, (int) sy, 1, 1);
+						Color4I.WHITE.withAlpha(30).draw(0, (int) sy, width, 1);
+						Color4I.WHITE.withAlpha(30).draw((int) sx, 0, 1, height);
+						GlStateManager.popMatrix();
+					}
 				}
 			}
 		}

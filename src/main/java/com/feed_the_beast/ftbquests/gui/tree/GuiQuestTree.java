@@ -293,6 +293,19 @@ public class GuiQuestTree extends GuiBase
 		Minecraft.getMinecraft().getToastGui().add(new SystemToast(SystemToast.Type.TUTORIAL_HINT, new TextComponentTranslation("ftbquests.gui.error"), error));
 	}
 
+	private boolean moveSelectedQuests(double x, double y)
+	{
+		for (Quest quest : selectedQuests)
+		{
+			if (quest.chapter == selectedChapter)
+			{
+				new MessageMoveQuest(quest.id, selectedChapter.id, quest.x + x, quest.y + y).sendToServer();
+			}
+		}
+
+		return true;
+	}
+
 	@Override
 	public boolean keyPressed(int key, char keyChar)
 	{
@@ -359,20 +372,16 @@ public class GuiQuestTree extends GuiBase
 					selectedQuests.addAll(selectedChapter.quests);
 					return true;
 				case Keyboard.KEY_D:
-					selectedQuests.removeAll(selectedChapter.quests);
+					selectedQuests.clear();
 					return true;
 				case Keyboard.KEY_DOWN:
-					selectedQuests.forEach(quest -> new MessageMoveQuest(quest.id, selectedChapter.id, quest.x, quest.y + step).sendToServer());
-					return true;
+					return moveSelectedQuests(0D, step);
 				case Keyboard.KEY_UP:
-					selectedQuests.forEach(quest -> new MessageMoveQuest(quest.id, selectedChapter.id, quest.x, quest.y - step).sendToServer());
-					return true;
+					return moveSelectedQuests(0D, -step);
 				case Keyboard.KEY_LEFT:
-					selectedQuests.forEach(quest -> new MessageMoveQuest(quest.id, selectedChapter.id, quest.x - step, quest.y).sendToServer());
-					return true;
+					return moveSelectedQuests(-step, 0D);
 				case Keyboard.KEY_RIGHT:
-					selectedQuests.forEach(quest -> new MessageMoveQuest(quest.id, selectedChapter.id, quest.x + step, quest.y).sendToServer());
-					return true;
+					return moveSelectedQuests(step, 0D);
 			}
 		}
 
@@ -443,9 +452,14 @@ public class GuiQuestTree extends GuiBase
 		return zoom;
 	}
 
-	public double getButtonSize()
+	public double getQuestButtonSize()
 	{
 		return getZoom() * 3D / 2D;
+	}
+
+	public double getQuestButtonSpacing()
+	{
+		return getZoom() * ThemeProperties.QUEST_SPACING.get(selectedChapter) / 4D;
 	}
 
 	public void addZoom(int up)
