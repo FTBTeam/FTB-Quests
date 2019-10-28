@@ -200,6 +200,7 @@ public interface ThemeProperties
 	DoubleProperty DEPENDENCY_LINE_UNSELECTED_SPEED = new DoubleProperty("dependency_line_unselected_speed", 0D, 1000D);
 	DoubleProperty DEPENDENCY_LINE_THICKNESS = new DoubleProperty("dependency_line_thickness", 0D, 3D);
 	DoubleProperty QUEST_SPACING = new DoubleProperty("quest_spacing", 0D, 8D);
+	DoubleProperty PINNED_QUEST_SIZE = new DoubleProperty("pinned_quest_size", 0D, 3D);
 
 	static void register(ThemePropertyEvent event)
 	{
