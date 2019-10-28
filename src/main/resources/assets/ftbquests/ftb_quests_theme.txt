@@ -57,4 +57,5 @@ dependency_line_requires_color:     #00C8C8
 dependency_line_required_for_color: #C8C800
 dependency_line_selected_speed:     1.0
 dependency_line_unselected_speed:   0.0
-dependency_line_thickness:          0.125
+dependency_line_thickness:          0.17
+quest_spacing:                      1.0

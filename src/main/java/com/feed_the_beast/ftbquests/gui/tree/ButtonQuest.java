@@ -3,6 +3,7 @@ package com.feed_the_beast.ftbquests.gui.tree;
 import com.feed_the_beast.ftblib.lib.gui.Button;
 import com.feed_the_beast.ftblib.lib.gui.ContextMenuItem;
 import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
+import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.gui.Theme;
 import com.feed_the_beast.ftblib.lib.gui.Widget;
@@ -27,7 +28,6 @@ import net.minecraft.util.text.TextFormatting;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -37,7 +37,7 @@ public class ButtonQuest extends Button
 {
 	public GuiQuestTree treeGui;
 	public Quest quest;
-	public List<ButtonQuest> dependencies = null;
+	public ButtonQuest[] dependencies = null;
 
 	public ButtonQuest(Panel panel, Quest q)
 	{
@@ -58,11 +58,11 @@ public class ButtonQuest extends Button
 		return super.checkMouseOver(mouseX, mouseY);
 	}
 
-	public List<ButtonQuest> getDependencies()
+	public ButtonQuest[] getDependencies()
 	{
 		if (dependencies == null)
 		{
-			dependencies = new ArrayList<>();
+			ArrayList<ButtonQuest> list = new ArrayList<>();
 
 			for (QuestObject dependency : quest.dependencies)
 			{
@@ -72,13 +72,13 @@ public class ButtonQuest extends Button
 					{
 						if (dependency == ((ButtonQuest) widget).quest)
 						{
-							dependencies.add((ButtonQuest) widget);
+							list.add((ButtonQuest) widget);
 						}
 					}
 				}
 			}
 
-			dependencies = dependencies.isEmpty() ? Collections.emptyList() : dependencies;
+			dependencies = list.toArray(new ButtonQuest[0]);
 		}
 
 		return dependencies;
@@ -88,47 +88,84 @@ public class ButtonQuest extends Button
 	public void onClicked(MouseButton button)
 	{
 		GuiHelper.playClickSound();
-		Quest selectedQuest = treeGui.selectedQuests.size() == 1 ? treeGui.selectedQuests.iterator().next() : null;
 
 		if (treeGui.file.canEdit() && button.isRight())
 		{
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
 
-			if (treeGui.selectedQuests.size() > 1)
+			if (!treeGui.selectedQuests.isEmpty())
 			{
-				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.add_reward_all"), ThemeProperties.ADD_ICON.get(), () -> {
-					List<ContextMenuItem> contextMenu2 = new ArrayList<>();
+				if (!treeGui.selectedQuests.contains(quest))
+				{
+					contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.add_dependencies"), ThemeProperties.ADD_ICON.get(), () -> {
+						for (Quest q : treeGui.selectedQuests)
+						{
+							editDependency(quest, q, true);
+						}
+					}));
 
-					for (RewardType type : RewardType.getRegistry())
-					{
-						contextMenu2.add(new ContextMenuItem(type.getDisplayName(), type.getIcon(), () -> {
-							GuiHelper.playClickSound();
-							type.getGuiProvider().openCreationGui(this, quest, reward -> {
-								for (Quest quest1 : treeGui.selectedQuests)
-								{
-									Reward r = type.provider.create(quest1);
-									NBTTagCompound nbt1 = new NBTTagCompound();
-									reward.writeData(nbt1);
-									r.readData(nbt1);
-									NBTTagCompound extra = new NBTTagCompound();
-									extra.setString("type", type.getTypeForNBT());
-									new MessageCreateObject(r, extra).sendToServer();
-								}
-							});
-						}));
-					}
+					contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.remove_dependencies"), ThemeProperties.DELETE_ICON.get(), () -> {
+						for (Quest q : treeGui.selectedQuests)
+						{
+							editDependency(quest, q, false);
+						}
+					}));
 
-					getGui().openContextMenu(contextMenu2);
-				}));
+					contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.add_dependencies_self"), ThemeProperties.ADD_ICON.get(), () -> {
+						for (Quest q : treeGui.selectedQuests)
+						{
+							editDependency(q, quest, true);
+						}
+					}));
 
-				contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), ThemeProperties.DELETE_ICON.get(), () -> {
-					treeGui.selectedQuests.forEach(q -> ClientQuestFile.INSTANCE.deleteObject(q.id));
-					treeGui.closeQuest();
-				}).setYesNo(I18n.format("delete_item", I18n.format("ftbquests.quests") + " [" + treeGui.selectedQuests.size() + "]")));
+					contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.remove_dependencies_self"), ThemeProperties.DELETE_ICON.get(), () -> {
+						for (Quest q : treeGui.selectedQuests)
+						{
+							editDependency(q, quest, false);
+						}
+					}));
+				}
+				else
+				{
+					contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.add_reward_all"), ThemeProperties.ADD_ICON.get(quest), () -> {
+						List<ContextMenuItem> contextMenu2 = new ArrayList<>();
+
+						for (RewardType type : RewardType.getRegistry())
+						{
+							contextMenu2.add(new ContextMenuItem(type.getDisplayName(), type.getIcon(), () -> {
+								GuiHelper.playClickSound();
+								type.getGuiProvider().openCreationGui(this, quest, reward -> {
+									for (Quest quest1 : treeGui.selectedQuests)
+									{
+										Reward r = type.provider.create(quest1);
+										NBTTagCompound nbt1 = new NBTTagCompound();
+										reward.writeData(nbt1);
+										r.readData(nbt1);
+										NBTTagCompound extra = new NBTTagCompound();
+										extra.setString("type", type.getTypeForNBT());
+										new MessageCreateObject(r, extra).sendToServer();
+									}
+								});
+							}));
+						}
+
+						getGui().openContextMenu(contextMenu2);
+					}));
+
+					contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), ThemeProperties.DELETE_ICON.get(quest), () -> {
+						treeGui.selectedQuests.forEach(q -> ClientQuestFile.INSTANCE.deleteObject(q.id));
+						treeGui.closeQuest();
+					}).setYesNo(I18n.format("delete_item", I18n.format("ftbquests.quests") + " [" + treeGui.selectedQuests.size() + "]")));
+				}
+
+				contextMenu.add(ContextMenuItem.SEPARATOR);
+				contextMenu.add(new ContextMenuItem(TextFormatting.GRAY + "Ctrl+A to select all quests", GuiIcons.INFO, null));
+				contextMenu.add(new ContextMenuItem(TextFormatting.GRAY + "Ctrl+D to deselect all quests", GuiIcons.INFO, null));
+				contextMenu.add(new ContextMenuItem(TextFormatting.GRAY + "Ctrl+Arrow Key to move selected quests", GuiIcons.INFO, null));
 			}
 			else
 			{
-				contextMenu.add(new ContextMenuItem(I18n.format("gui.move"), ThemeProperties.MOVE_UP_ICON.get(), () -> {
+				contextMenu.add(new ContextMenuItem(I18n.format("gui.move"), ThemeProperties.MOVE_UP_ICON.get(quest), () -> {
 					treeGui.movingQuests = true;
 					treeGui.selectedQuests.clear();
 					treeGui.toggleSelected(quest);
@@ -140,31 +177,6 @@ public class ButtonQuest extends Button
 						list.add(TextFormatting.DARK_GRAY + I18n.format("ftbquests.gui.move_tooltip"));
 					}
 				});
-
-				/*
-				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.move_to_chapter"), GuiIcons.RIGHT, () -> {
-					ConfigQuestObject object = new ConfigQuestObject(treeGui.file, 0, o -> o instanceof Chapter && o != quest.chapter && !quest.hasDependency((Chapter) o));
-					new GuiSelectQuestObject(object, this, () -> {
-						treeGui.open(treeGui.file.get(object.getObject()));
-					}).openGui();
-				}));
-				*/
-
-				if (selectedQuest != null && selectedQuest != quest)
-				{
-					if (selectedQuest.hasDependency(quest))
-					{
-						contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.rem_dep"), ThemeProperties.DELETE_ICON.get(), () -> editDependency(selectedQuest, quest, false)));
-					}
-					else if (quest.hasDependency(selectedQuest))
-					{
-						contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.rem_dep"), ThemeProperties.DELETE_ICON.get(), () -> editDependency(quest, selectedQuest, false)));
-					}
-					else
-					{
-						contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.set_dep"), ThemeProperties.ADD_ICON.get(), () -> editDependency(quest, selectedQuest, true)).setEnabled(selectedQuest != null && selectedQuest != quest && !selectedQuest.canRepeat));
-					}
-				}
 
 				contextMenu.add(ContextMenuItem.SEPARATOR);
 				GuiQuestTree.addObjectMenuItems(contextMenu, getGui(), quest);
@@ -229,14 +241,7 @@ public class ButtonQuest extends Button
 			}
 			else
 			{
-				for (int i = 0; i < quest.dependencies.size(); i++)
-				{
-					if (quest.dependencies.get(i) == object)
-					{
-						quest.dependencies.remove(i);
-						break;
-					}
-				}
+				quest.dependencies.remove(object);
 			}
 		}
 
@@ -320,18 +325,18 @@ public class ButtonQuest extends Button
 
 				if (hasRewards)
 				{
-					qicon = ThemeProperties.ALERT_ICON.get();
+					qicon = ThemeProperties.ALERT_ICON.get(quest);
 				}
 				else
 				{
-					qicon = ThemeProperties.CHECK_ICON.get();
+					qicon = ThemeProperties.CHECK_ICON.get(quest);
 				}
 
-				outlineColor = ThemeProperties.QUEST_COMPLETED_COLOR.get();
+				outlineColor = ThemeProperties.QUEST_COMPLETED_COLOR.get(quest);
 			}
 			else if (progress > 0)
 			{
-				outlineColor = ThemeProperties.QUEST_STARTED_COLOR.get();
+				outlineColor = ThemeProperties.QUEST_STARTED_COLOR.get(quest);
 			}
 		}
 		else
@@ -339,56 +344,55 @@ public class ButtonQuest extends Button
 			outlineColor = Color4I.GRAY;
 		}
 
-		int z = treeGui.getZoom();
-
-		int s = (int) (z * 3 / 2 * quest.size);
-		int sx = x + (w - s) / 2;
-		int sy = y + (h - s) / 2;
-
 		QuestShape shape = quest.getShape();
 
-		shape.shape.withColor(Color4I.DARK_GRAY).draw(sx, sy, s, s);
-		shape.background.withColor(Color4I.WHITE.withAlpha(150)).draw(sx, sy, s, s);
-		shape.outline.withColor(outlineColor).draw(sx, sy, s, s);
+		shape.shape.withColor(Color4I.DARK_GRAY).draw(x, y, w, h);
+		shape.background.withColor(Color4I.WHITE.withAlpha(150)).draw(x, y, w, h);
+		shape.outline.withColor(outlineColor).draw(x, y, w, h);
 
 		if (!icon.isEmpty())
 		{
-			int is = (int) (z * quest.size);
-			icon.draw(x + (w - is) / 2, y + (h - is) / 2, is, is);
+			double s = w * 2D / 3D;
+			GlStateManager.pushMatrix();
+			GlStateManager.translate(x + (w - s) / 2D, y + (h - s) / 2D, 0F);
+			GlStateManager.scale(s, s, 1D);
+			icon.draw(0, 0, 1, 1);
+			GlStateManager.popMatrix();
 		}
 
 		if (quest == treeGui.viewQuestPanel.quest || treeGui.selectedQuests.contains(quest))
 		{
 			GlStateManager.pushMatrix();
-			GlStateManager.translate(0F, 0F, 500F);
-			Color4I col = Color4I.WHITE.withAlpha(190 + (int) (Math.sin(System.currentTimeMillis() * 0.003D) * 50));
-			shape.outline.withColor(col).draw(sx, sy, s, s);
-			shape.background.withColor(col).draw(sx, sy, s, s);
+			GlStateManager.translate(0D, 0D, 500D);
+			Color4I col = Color4I.WHITE.withAlpha((int) (190D + Math.sin(System.currentTimeMillis() * 0.003D) * 50D));
+			shape.outline.withColor(col).draw(x, y, w, h);
+			shape.background.withColor(col).draw(x, y, w, h);
 			GlStateManager.popMatrix();
 		}
 
 		if (cantStart)
 		{
 			GlStateManager.pushMatrix();
-			GlStateManager.translate(0F, 0F, 500F);
-			shape.shape.withColor(Color4I.BLACK.withAlpha(100)).draw(sx, sy, s, s);
+			GlStateManager.translate(0D, 0D, 500D);
+			shape.shape.withColor(Color4I.BLACK.withAlpha(100)).draw(x, y, w, h);
 			GlStateManager.popMatrix();
 		}
 
 		if (isMouseOver())
 		{
 			GlStateManager.pushMatrix();
-			GlStateManager.translate(0F, 0F, 500F);
-			shape.shape.withColor(Color4I.WHITE.withAlpha(50)).draw(sx, sy, s, s);
+			GlStateManager.translate(0D, 0D, 500D);
+			shape.shape.withColor(Color4I.WHITE.withAlpha(50)).draw(x, y, w, h);
 			GlStateManager.popMatrix();
 		}
 
 		if (!qicon.isEmpty())
 		{
-			int s1 = (int) (z / 2 * quest.size);
+			double s = w / 2D;//(int) (treeGui.getZoom() / 2 * quest.size);
 			GlStateManager.pushMatrix();
-			GlStateManager.translate(0F, 0F, 500F);
-			qicon.draw(sx + s - s1, sy, s1, s1);
+			GlStateManager.translate(x + w - s, y, 500D);
+			GlStateManager.scale(s, s, 1D);
+			qicon.draw(0, 0, 1, 1);
 			GlStateManager.popMatrix();
 		}
 	}

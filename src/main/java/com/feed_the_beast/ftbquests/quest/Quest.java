@@ -35,7 +35,9 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
 
@@ -50,7 +52,7 @@ public final class Quest extends QuestObject
 	public boolean hide;
 	public QuestShape shape;
 	public final List<String> description;
-	public final List<QuestObject> dependencies;
+	public final Set<QuestObject> dependencies;
 	public boolean canRepeat;
 	public final List<Task> tasks;
 	public final List<Reward> rewards;
@@ -75,7 +77,7 @@ public final class Quest extends QuestObject
 		shape = QuestShape.DEFAULT;
 		description = new ArrayList<>();
 		canRepeat = false;
-		dependencies = new ArrayList<>(0);
+		dependencies = new HashSet<>(0);
 		tasks = new ArrayList<>(1);
 		rewards = new ArrayList<>(1);
 		guidePage = "";
@@ -172,10 +174,12 @@ public final class Quest extends QuestObject
 		if (!dependencies.isEmpty())
 		{
 			int[] ai = new int[dependencies.size()];
+			int i = 0;
 
-			for (int i = 0; i < dependencies.size(); i++)
+			for (QuestObject dep : dependencies)
 			{
-				ai[i] = dependencies.get(i).id;
+				ai[i] = dep.id;
+				i++;
 			}
 
 			if (ai.length == 1)
