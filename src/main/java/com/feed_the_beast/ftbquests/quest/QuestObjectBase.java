@@ -15,14 +15,12 @@ import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.client.FTBQuestsClient;
-import com.feed_the_beast.ftbquests.gui.editor.ConfigPane;
 import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.net.edit.MessageChangeProgressResponse;
 import com.feed_the_beast.ftbquests.net.edit.MessageEditObject;
 import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
 import com.feed_the_beast.ftbquests.util.QuestObjectText;
 import com.latmod.mods.itemfilters.item.ItemMissing;
-import javafx.scene.Node;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -42,7 +40,6 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -457,10 +454,5 @@ public abstract class QuestObjectBase
 	public int refreshJEI()
 	{
 		return 0;
-	}
-
-	public Optional<Node> createTabContent()
-	{
-		return Optional.of(new ConfigPane(this));
 	}
 }

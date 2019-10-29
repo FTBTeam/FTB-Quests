@@ -7,7 +7,6 @@ import com.feed_the_beast.ftblib.lib.util.FileUtils;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.gui.GuiRewardTables;
-import com.feed_the_beast.ftbquests.gui.editor.Editor;
 import com.feed_the_beast.ftbquests.net.edit.MessageChangeProgress;
 import com.feed_the_beast.ftbquests.quest.ChangeProgress;
 import com.feed_the_beast.ftbquests.quest.Chapter;
@@ -39,12 +38,6 @@ public class ButtonEditSettings extends ButtonTab
 	public void onClicked(MouseButton button)
 	{
 		GuiHelper.playClickSound();
-
-		if (isAltKeyDown())
-		{
-			Editor.open(isCtrlKeyDown());
-			return;
-		}
 
 		if (treeGui.contextMenu != null)
 		{
