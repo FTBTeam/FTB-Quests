@@ -13,7 +13,6 @@ import com.feed_the_beast.ftbquests.block.BlockTaskScreen;
 import com.feed_the_beast.ftbquests.block.FTBQuestsBlocks;
 import com.feed_the_beast.ftbquests.quest.QuestData;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
-import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.task.Task;
 import com.feed_the_beast.ftbquests.quest.task.TaskData;
@@ -275,150 +274,59 @@ public class TileTaskScreenCore extends TileWithTeam implements IConfigCallback,
 	{
 		boolean editor = FTBQuests.canEdit(player);
 
-		if (player.isSneaking() || task == 0)
+		if (editor || isOwner(player))
 		{
-			if (editor || isOwner(player))
+			TaskData taskData = getTaskData();
+
+			if (taskData != null)
 			{
-				TaskData taskData = getTaskData();
-
-				if (taskData != null)
-				{
-					task = taskData.task.id;
-					currentCoreClass = taskData.task.getScreenCoreClass();
-					currentPartClass = taskData.task.getScreenPartClass();
-				}
-				else
-				{
-					currentCoreClass = TileTaskScreenCore.class;
-					currentPartClass = TileTaskScreenPart.class;
-				}
-
-				boolean editorOrDestructible = editor || !indestructible;
-				ConfigGroup group0 = ConfigGroup.newGroup("tile");
-				group0.setDisplayName(new TextComponentTranslation("tile.ftbquests.screen.name"));
-				ConfigGroup config = group0.getGroup("ftbquests.screen");
-
-				if (editor)
-				{
-					config.add("team", createTeamConfig(), ConfigNull.INSTANCE).setDisplayName(new TextComponentTranslation("ftbquests.team"));
-				}
-
-				config.add("task", new ConfigQuestObject(ServerQuestFile.INSTANCE, task, QuestObjectType.TASK)
-				{
-					@Override
-					public void setObject(int v)
-					{
-						task = v;
-					}
-				}, ConfigNull.INSTANCE).setCanEdit(editorOrDestructible).setDisplayName(new TextComponentTranslation("ftbquests.task"));
-
-				config.add("skin", new ConfigBlockState(skin)
-				{
-					@Override
-					public void setBlockState(IBlockState v)
-					{
-						skin = v;
-					}
-				}, new ConfigBlockState(BlockUtils.AIR_STATE)).setCanEdit(editorOrDestructible);
-
-				if (editor)
-				{
-					config.addBool("indestructible", () -> indestructible, v -> indestructible = v, false);
-				}
-
-				config.addBool("input_only", () -> inputOnly, v -> inputOnly = v, false);
-				config.add("input_mode_icon", new ConfigItemStack.SimpleStack(() -> inputModeIcon, v -> inputModeIcon = v), new ConfigItemStack(ItemStack.EMPTY));
-
-				FTBLibAPI.editServerConfig(player, group0, this);
+				task = taskData.task.id;
+				currentCoreClass = taskData.task.getScreenCoreClass();
+				currentPartClass = taskData.task.getScreenPartClass();
+			}
+			else
+			{
+				currentCoreClass = TileTaskScreenCore.class;
+				currentPartClass = TileTaskScreenPart.class;
 			}
 
-			return;
-		}
+			boolean editorOrDestructible = editor || !indestructible;
+			ConfigGroup group0 = ConfigGroup.newGroup("tile");
+			group0.setDisplayName(new TextComponentTranslation("tile.ftbquests.screen.name"));
+			ConfigGroup config = group0.getGroup("ftbquests.screen");
 
-		if (inputOnly)
-		{
-			insertItem(player, hand, x, y);
-			return;
-		}
-
-		TaskData taskData = getTaskData();
-
-		if (taskData == null)
-		{
-			return;
-		}
-
-		if (y >= 0D && y <= 0.17D && !indestructible && taskData.task.quest.tasks.size() > 1)
-		{
-			if (!editor && !isOwner(player))
+			if (editor)
 			{
-				return;
+				config.add("team", createTeamConfig(), ConfigNull.INSTANCE).setDisplayName(new TextComponentTranslation("ftbquests.team"));
 			}
 
-			currentCoreClass = taskData.task.getScreenCoreClass();
-			currentPartClass = taskData.task.getScreenPartClass();
-			task = taskData.task.quest.tasks.get((taskData.task.quest.tasks.indexOf(taskData.task) + 1) % taskData.task.quest.tasks.size()).id;
-
-			updateContainingBlockInfo();
-			taskData = getTaskData();
-
-			if (taskData != null && (currentCoreClass != taskData.task.getScreenCoreClass() || currentPartClass != taskData.task.getScreenPartClass()))
+			config.add("task", new ConfigQuestObject(ServerQuestFile.INSTANCE, task, o -> o instanceof Task && ((Task) o).consumesResources())
 			{
-				updateTiles(taskData.task);
-			}
-
-			markDirty();
-			return;
-		}
-
-		insertItem(player, hand, x, y);
-	}
-
-	private void insertItem(EntityPlayerMP player, EnumHand hand, double x, double y)
-	{
-		if (!isOwner(player))
-		{
-			return;
-		}
-
-		TaskData taskData = getTaskData();
-
-		if (taskData == null)
-		{
-			return;
-		}
-
-		String top1 = taskData.task.quest.getUnformattedTitle();
-		String top2 = taskData.task.getUnformattedTitle();
-		double iconY = 0.5D;
-
-		if (!top1.isEmpty() && !top1.equalsIgnoreCase(top2))
-		{
-			iconY = 0.54D;
-		}
-
-		if (y >= iconY - 0.25D && y <= iconY + 0.25D)
-		{
-			if (!world.isRemote)
-			{
-				if (taskData.task.canInsertItem() && taskData.task.getMaxProgress() > 0L && taskData.progress < taskData.task.getMaxProgress())
+				@Override
+				public void setObject(int v)
 				{
-					ItemStack stack = player.getHeldItem(hand);
-
-					if (!stack.isEmpty())
-					{
-						ItemStack stack1 = taskData.insertItem(stack, false, false, player);
-
-						if (stack != stack1)
-						{
-							player.setHeldItem(hand, stack1);
-							return;
-						}
-					}
+					task = v;
 				}
+			}, ConfigNull.INSTANCE).setCanEdit(editorOrDestructible).setDisplayName(new TextComponentTranslation("ftbquests.task"));
 
-				taskData.submitTask(player);
+			config.add("skin", new ConfigBlockState(skin)
+			{
+				@Override
+				public void setBlockState(IBlockState v)
+				{
+					skin = v;
+				}
+			}, new ConfigBlockState(BlockUtils.AIR_STATE)).setCanEdit(editorOrDestructible);
+
+			if (editor)
+			{
+				config.addBool("indestructible", () -> indestructible, v -> indestructible = v, false);
 			}
+
+			config.addBool("input_only", () -> inputOnly, v -> inputOnly = v, false);
+			config.add("input_mode_icon", new ConfigItemStack.SimpleStack(() -> inputModeIcon, v -> inputModeIcon = v), new ConfigItemStack(ItemStack.EMPTY));
+
+			FTBLibAPI.editServerConfig(player, group0, this);
 		}
 	}
 
