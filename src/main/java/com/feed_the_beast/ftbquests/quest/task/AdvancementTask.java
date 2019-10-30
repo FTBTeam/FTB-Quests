@@ -101,12 +101,6 @@ public class AdvancementTask extends Task
 	}
 
 	@Override
-	public boolean consumesResources()
-	{
-		return true;
-	}
-
-	@Override
 	public int autoSubmitOnPlayerTick()
 	{
 		return 5;
