@@ -146,8 +146,8 @@ public class PanelQuests extends Panel
 		{
 			Quest q = ((ButtonQuest) w).quest;
 			double s = bs * q.size;
-			double x = (q.x - minX - q.size / 2D) * (bs + bp) + bp / 2D;
-			double y = (q.y - minY - q.size / 2D) * (bs + bp) + bp / 2D;
+			double x = (q.x - minX - q.size / 2D) * (bs + bp) + bp / 2D + bp * (q.size - 1D) / 2D;
+			double y = (q.y - minY - q.size / 2D) * (bs + bp) + bp / 2D + bp * (q.size - 1D) / 2D;
 			w.setPosAndSize((int) x, (int) y, (int) s, (int) s);
 		}
 
