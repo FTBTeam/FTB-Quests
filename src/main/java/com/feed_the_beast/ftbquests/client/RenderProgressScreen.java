@@ -80,14 +80,14 @@ public class RenderProgressScreen extends TileEntitySpecialRenderer<TileProgress
 
 			for (Quest quest : chapter.quests)
 			{
-				minX = Math.min(minX, quest.x);
-				minY = Math.min(minY, quest.y);
-				maxX = Math.max(maxX, quest.x);
-				maxY = Math.max(maxY, quest.y);
+				minX = Math.min(minX, quest.x - quest.size / 2D);
+				minY = Math.min(minY, quest.y - quest.size / 2D);
+				maxX = Math.max(maxX, quest.x + quest.size / 2D);
+				maxY = Math.max(maxY, quest.y + quest.size / 2D);
 			}
 
-			double sizeX = maxX - minX + 1D;
-			double sizeY = maxY - minY + 1D;
+			double sizeX = maxX - minX;
+			double sizeY = maxY - minY;
 
 			if (!screen.fullscreen)
 			{
@@ -126,10 +126,10 @@ public class RenderProgressScreen extends TileEntitySpecialRenderer<TileProgress
 					b = COLOR_IN_PROGRESS.bluei();
 				}
 
-				double rx = (quest.x - minX) / sizeX + 0.0025D;
-				double ry = (quest.y - minY) / sizeY + 0.0025D;
-				double rw = 1D / sizeX - 0.005D;
-				double rh = 1D / sizeY - 0.005D;
+				double rw = (1D / sizeX - 0.005D) * quest.size;
+				double rh = (1D / sizeY - 0.005D) * quest.size;
+				double rx = (quest.x - minX) / sizeX + 0.0025D - rw / 2D;
+				double ry = (quest.y - minY) / sizeY + 0.0025D - rh / 2D;
 
 				buffer.pos(rx, ry, 0).color(r, g, b, a).endVertex();
 				buffer.pos(rx, ry + rh, 0).color(r, g, b, a).endVertex();
@@ -147,11 +147,11 @@ public class RenderProgressScreen extends TileEntitySpecialRenderer<TileProgress
 			{
 				for (Quest quest : chapter.quests)
 				{
-					double rx = (quest.x - minX + 0.5D) / sizeX;
-					double ry = (quest.y - minY + 0.5D) / sizeY;
 					double s = Math.max(sizeX, sizeY);
-					double rw = 0.75D / s;
-					double rh = 0.75D / s;
+					double rw = (0.75D / s) * quest.size;
+					double rh = (0.75D / s) * quest.size;
+					double rx = (quest.x - minX) / sizeX;
+					double ry = (quest.y - minY) / sizeY;
 
 					GlStateManager.pushMatrix();
 					GlStateManager.translate(rx, ry, -0.009F);
