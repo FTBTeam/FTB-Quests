@@ -5,14 +5,27 @@ import com.feed_the_beast.ftblib.lib.gui.ContextMenuItem;
 import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
 import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.gui.Panel;
+import com.feed_the_beast.ftblib.lib.gui.SimpleTextButton;
 import com.feed_the_beast.ftblib.lib.gui.Theme;
 import com.feed_the_beast.ftblib.lib.gui.WidgetType;
+import com.feed_the_beast.ftblib.lib.gui.misc.GuiButtonListBase;
 import com.feed_the_beast.ftblib.lib.icon.Color4I;
+import com.feed_the_beast.ftblib.lib.icon.Icon;
+import com.feed_the_beast.ftblib.lib.util.InvUtils;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
+import com.feed_the_beast.ftbquests.net.edit.MessageEditObject;
+import com.feed_the_beast.ftbquests.quest.task.ItemTask;
 import com.feed_the_beast.ftbquests.quest.task.Task;
 import com.feed_the_beast.ftbquests.quest.task.TaskData;
 import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
+import com.latmod.mods.itemfilters.api.IItemFilter;
+import com.latmod.mods.itemfilters.api.ItemFiltersAPI;
+import com.latmod.mods.itemfilters.filters.OreDictionaryFilter;
+import com.latmod.mods.itemfilters.item.ItemFilter;
+import com.latmod.mods.itemfilters.item.ItemFiltersItems;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.TextFormatting;
 
 import javax.annotation.Nullable;
@@ -61,6 +74,79 @@ public class ButtonTask extends Button
 		{
 			GuiHelper.playClickSound();
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
+
+			if (task instanceof ItemTask)
+			{
+				ItemTask i = (ItemTask) task;
+
+				if (i.items.size() == 1 && !(i.items.get(0).getItem() instanceof ItemFilter))
+				{
+					List<String> oreNames = new ArrayList<>(InvUtils.getOreNames(null, i.items.get(0)));
+
+					if (!oreNames.isEmpty())
+					{
+						contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.task.ftbquests.item.convert_oredict"), ThemeProperties.RELOAD_ICON.get(), () -> {
+							ItemStack oreFilter = new ItemStack(ItemFiltersItems.FILTER);
+							IItemFilter filter = ItemFiltersAPI.getFilter(oreFilter);
+
+							if (filter instanceof ItemFilter.ItemFilterData)
+							{
+								((ItemFilter.ItemFilterData) filter).filter = new OreDictionaryFilter();
+
+								if (oreNames.size() == 1)
+								{
+									((OreDictionaryFilter) ((ItemFilter.ItemFilterData) filter).filter).setValue(oreNames.get(0));
+
+									i.items.clear();
+									i.items.add(oreFilter);
+
+									if (i.title.isEmpty())
+									{
+										i.title = "Any " + oreNames.get(0);
+									}
+
+									new MessageEditObject(i).sendToServer();
+								}
+								else
+								{
+									new GuiButtonListBase()
+									{
+										@Override
+										public void addButtons(Panel panel)
+										{
+											for (String s : oreNames)
+											{
+												panel.add(new SimpleTextButton(panel, s, Icon.EMPTY)
+												{
+													@Override
+													public void onClicked(MouseButton button)
+													{
+														treeGui.openGui();
+														((OreDictionaryFilter) ((ItemFilter.ItemFilterData) filter).filter).setValue(s);
+
+														i.items.clear();
+														i.items.add(oreFilter);
+
+														if (i.title.isEmpty())
+														{
+															i.title = "Any " + s;
+														}
+
+														new MessageEditObject(i).sendToServer();
+													}
+												});
+											}
+										}
+									}.openGui();
+								}
+							}
+						}));
+
+						contextMenu.add(ContextMenuItem.SEPARATOR);
+					}
+				}
+			}
+
 			GuiQuestTree.addObjectMenuItems(contextMenu, getGui(), task);
 			getGui().openContextMenu(contextMenu);
 		}
