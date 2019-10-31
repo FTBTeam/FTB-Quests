@@ -39,6 +39,7 @@ public class PanelQuests extends Panel
 	public double questY = 0;
 	public double centerQuestX = 0;
 	public double centerQuestY = 0;
+	public ButtonQuest mouseOverQuest = null;
 
 	public PanelQuests(Panel panel)
 	{
@@ -521,6 +522,22 @@ public class PanelQuests extends Panel
 		}
 
 		return super.checkMouseOver(mouseX, mouseY);
+	}
+
+	@Override
+	public void updateMouseOver(int mouseX, int mouseY)
+	{
+		mouseOverQuest = null;
+		super.updateMouseOver(mouseX, mouseY);
+
+		for (Widget widget : widgets)
+		{
+			if (widget.isMouseOver() && widget instanceof ButtonQuest)
+			{
+				mouseOverQuest = (ButtonQuest) widget;
+				break;
+			}
+		}
 	}
 
 	@Override
