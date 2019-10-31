@@ -147,21 +147,26 @@ public final class Chapter extends QuestObject
 		}
 
 		int progress = 0;
+		int count = 0;
 
 		for (Quest quest : quests)
 		{
 			if (!quest.canRepeat)
 			{
 				progress += quest.getRelativeProgress(data);
+				count++;
 			}
 		}
-
-		int count = quests.size();
 
 		for (Chapter chapter : getChildren())
 		{
 			progress += chapter.getRelativeProgressFromChildren(data);
 			count++;
+		}
+
+		if (count <= 0)
+		{
+			return 100;
 		}
 
 		return getRelativeProgressFromChildren(progress, count);
