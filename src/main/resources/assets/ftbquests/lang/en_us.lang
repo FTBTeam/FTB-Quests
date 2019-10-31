@@ -212,6 +212,7 @@ ftbquests.task.ftbquests.item.valid_items=Valid items:
 ftbquests.task.ftbquests.item.view_items=Click to view valid items
 ftbquests.task.ftbquests.item.valid_for=Valid items for %s
 ftbquests.task.ftbquests.item.click_recipe=Click to view recipe(s)
+ftbquests.task.ftbquests.item.convert_oredict=Convert to Ore Dictionary item
 
 ftbquests.task.ftbquests.fluid=Fluid
 ftbquests.task.ftbquests.fluid.fluid=Fluid
