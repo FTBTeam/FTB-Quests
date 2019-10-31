@@ -25,6 +25,7 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
+import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -56,6 +57,24 @@ public class ButtonQuest extends Button
 		}
 
 		return super.checkMouseOver(mouseX, mouseY);
+	}
+
+	@Override
+	public void updateMouseOver(int mouseX, int mouseY)
+	{
+		super.updateMouseOver(mouseX, mouseY);
+
+		if (treeGui.questPanel.mouseOverQuest == null)
+		{
+			if (isMouseOver)
+			{
+				treeGui.questPanel.mouseOverQuest = this;
+			}
+		}
+		else if (treeGui.questPanel.mouseOverQuest != this)
+		{
+			isMouseOver = false;
+		}
 	}
 
 	public ButtonQuest[] getDependencies()
@@ -360,6 +379,12 @@ public class ButtonQuest extends Button
 			GlStateManager.popMatrix();
 		}
 
+		GlStateManager.enableAlpha();
+		GlStateManager.alphaFunc(GL11.GL_GREATER, 0.1F);
+		GlStateManager.enableBlend();
+		GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+		GlStateManager.color(1F, 1F, 1F, 1F);
+
 		if (quest == treeGui.viewQuestPanel.quest || treeGui.selectedQuests.contains(quest))
 		{
 			GlStateManager.pushMatrix();
@@ -382,7 +407,7 @@ public class ButtonQuest extends Button
 		{
 			GlStateManager.pushMatrix();
 			GlStateManager.translate(0D, 0D, 500D);
-			shape.shape.withColor(Color4I.WHITE.withAlpha(50)).draw(x, y, w, h);
+			shape.shape.withColor(Color4I.WHITE.withAlpha(100)).draw(x, y, w, h);
 			GlStateManager.popMatrix();
 		}
 
