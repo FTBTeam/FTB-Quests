@@ -173,7 +173,7 @@ public class ButtonQuest extends Button
 
 					contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), ThemeProperties.DELETE_ICON.get(quest), () -> {
 						treeGui.selectedQuests.forEach(q -> ClientQuestFile.INSTANCE.deleteObject(q.id));
-						treeGui.closeQuest();
+						treeGui.selectedQuests.clear();
 					}).setYesNo(I18n.format("delete_item", I18n.format("ftbquests.quests") + " [" + treeGui.selectedQuests.size() + "]")));
 				}
 
