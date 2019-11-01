@@ -21,9 +21,9 @@ import com.feed_the_beast.ftbquests.gui.FTBQuestsTheme;
 import com.feed_the_beast.ftbquests.gui.GuiSelectQuestObject;
 import com.feed_the_beast.ftbquests.net.edit.MessageChangeProgress;
 import com.feed_the_beast.ftbquests.net.edit.MessageEditObject;
-import com.feed_the_beast.ftbquests.net.edit.MessageMoveQuest;
 import com.feed_the_beast.ftbquests.quest.ChangeProgress;
 import com.feed_the_beast.ftbquests.quest.Chapter;
+import com.feed_the_beast.ftbquests.quest.Movable;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
@@ -54,14 +54,14 @@ public class GuiQuestTree extends GuiBase
 	public double scrollWidth, scrollHeight;
 	public int prevMouseX, prevMouseY, grabbed;
 	public Chapter selectedChapter;
-	public final HashSet<Quest> selectedQuests;
+	public final HashSet<Movable> selectedObjects;
 	public final PanelChapters chapterPanel;
 	public final PanelQuests questPanel;
 	public final PanelOtherButtonsBottom otherButtonsBottomPanel;
 	public final PanelOtherButtonsTop otherButtonsTopPanel;
 	public final PanelChapterHover chapterHoverPanel;
 	public final PanelViewQuest viewQuestPanel;
-	public boolean movingQuests = false;
+	public boolean movingObjects = false;
 	public int zoom = 16;
 	public long lastShiftPress = 0L;
 	public static boolean grid = false;
@@ -69,7 +69,7 @@ public class GuiQuestTree extends GuiBase
 	public GuiQuestTree(ClientQuestFile q)
 	{
 		file = q;
-		selectedQuests = new LinkedHashSet<>();
+		selectedObjects = new LinkedHashSet<>();
 
 		chapterPanel = new PanelChapters(this);
 		selectedChapter = file.chapters.isEmpty() ? null : file.chapters.get(0);
@@ -120,7 +120,7 @@ public class GuiQuestTree extends GuiBase
 	@Override
 	public void onClosed()
 	{
-		selectedQuests.clear();
+		selectedObjects.clear();
 		super.onClosed();
 		//Keyboard.enableRepeatEvents(false);
 	}
@@ -190,7 +190,7 @@ public class GuiQuestTree extends GuiBase
 		}
 	}
 
-	public void toggleSelected(Quest quest)
+	public void toggleSelected(Movable movable)
 	{
 		if (viewQuestPanel.quest != null)
 		{
@@ -198,9 +198,9 @@ public class GuiQuestTree extends GuiBase
 			viewQuestPanel.refreshWidgets();
 		}
 
-		if (!selectedQuests.add(quest))
+		if (!selectedObjects.add(movable))
 		{
-			selectedQuests.remove(quest);
+			selectedObjects.remove(movable);
 		}
 	}
 
@@ -295,11 +295,11 @@ public class GuiQuestTree extends GuiBase
 
 	private boolean moveSelectedQuests(double x, double y)
 	{
-		for (Quest quest : selectedQuests)
+		for (Movable movable : selectedObjects)
 		{
-			if (quest.chapter == selectedChapter)
+			if (movable.getChapter() == selectedChapter)
 			{
-				new MessageMoveQuest(quest.id, selectedChapter.id, quest.x + x, quest.y + y).sendToServer();
+				movable.move(selectedChapter, movable.getX() + x, movable.getY() + y);
 			}
 		}
 
@@ -369,10 +369,10 @@ public class GuiQuestTree extends GuiBase
 			switch (key)
 			{
 				case Keyboard.KEY_A:
-					selectedQuests.addAll(selectedChapter.quests);
+					selectedObjects.addAll(selectedChapter.quests);
 					return true;
 				case Keyboard.KEY_D:
-					selectedQuests.clear();
+					selectedObjects.clear();
 					return true;
 				case Keyboard.KEY_DOWN:
 					return moveSelectedQuests(0D, step);

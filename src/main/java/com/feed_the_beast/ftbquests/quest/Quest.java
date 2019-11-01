@@ -17,6 +17,7 @@ import com.feed_the_beast.ftbquests.events.ObjectCompletedEvent;
 import com.feed_the_beast.ftbquests.gui.tree.GuiQuestTree;
 import com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIHelper;
 import com.feed_the_beast.ftbquests.net.MessageDisplayCompletionToast;
+import com.feed_the_beast.ftbquests.net.edit.MessageMoveQuest;
 import com.feed_the_beast.ftbquests.quest.reward.Reward;
 import com.feed_the_beast.ftbquests.quest.task.Task;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
@@ -44,7 +45,7 @@ import java.util.function.Predicate;
 /**
  * @author LatvianModder
  */
-public final class Quest extends QuestObject
+public final class Quest extends QuestObject implements Movable
 {
 	public Chapter chapter;
 	public String subtitle;
@@ -634,9 +635,47 @@ public final class Quest extends QuestObject
 		config.addEnum("disable_jei", () -> disableJEI, v -> disableJEI = v, EnumTristate.NAME_MAP);
 	}
 
+	@Override
+	public Chapter getChapter()
+	{
+		return chapter;
+	}
+
+	@Override
+	public double getX()
+	{
+		return x;
+	}
+
+	@Override
+	public double getY()
+	{
+		return y;
+	}
+
+	@Override
+	public double getWidth()
+	{
+		return size;
+	}
+
+	@Override
+	public double getHeight()
+	{
+		return size;
+	}
+
+	@Override
 	public QuestShape getShape()
 	{
 		return shape == QuestShape.DEFAULT ? chapter.getDefaultQuestShape() : shape;
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public void move(Chapter to, double x, double y)
+	{
+		new MessageMoveQuest(id, to.id, x, y).sendToServer();
 	}
 
 	@Override
@@ -907,7 +946,7 @@ public final class Quest extends QuestObject
 		return r;
 	}
 
-	public void move(double nx, double ny, int nc)
+	public void moved(double nx, double ny, int nc)
 	{
 		x = nx;
 		y = ny;

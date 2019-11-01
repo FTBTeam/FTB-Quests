@@ -13,6 +13,8 @@ import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.net.edit.MessageCreateObject;
 import com.feed_the_beast.ftbquests.net.edit.MessageEditObject;
+import com.feed_the_beast.ftbquests.quest.ChapterImage;
+import com.feed_the_beast.ftbquests.quest.Movable;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.QuestShape;
@@ -51,7 +53,7 @@ public class ButtonQuest extends Button
 	@Override
 	public boolean checkMouseOver(int mouseX, int mouseY)
 	{
-		if (treeGui.movingQuests || treeGui.viewQuestPanel.isMouseOver() || treeGui.chapterHoverPanel.isMouseOverAnyWidget())
+		if (treeGui.movingObjects || treeGui.viewQuestPanel.isMouseOver() || treeGui.chapterHoverPanel.isMouseOverAnyWidget())
 		{
 			return false;
 		}
@@ -89,7 +91,7 @@ public class ButtonQuest extends Button
 				{
 					for (Widget widget : treeGui.questPanel.widgets)
 					{
-						if (dependency == ((ButtonQuest) widget).quest)
+						if (widget instanceof ButtonQuest && dependency == ((ButtonQuest) widget).quest)
 						{
 							list.add((ButtonQuest) widget);
 						}
@@ -112,35 +114,47 @@ public class ButtonQuest extends Button
 		{
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
 
-			if (!treeGui.selectedQuests.isEmpty())
+			if (!treeGui.selectedObjects.isEmpty())
 			{
-				if (!treeGui.selectedQuests.contains(quest))
+				if (!treeGui.selectedObjects.contains(quest))
 				{
 					contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.add_dependencies"), ThemeProperties.ADD_ICON.get(), () -> {
-						for (Quest q : treeGui.selectedQuests)
+						for (Movable q : treeGui.selectedObjects)
 						{
-							editDependency(quest, q, true);
+							if (q instanceof Quest)
+							{
+								editDependency(quest, (Quest) q, true);
+							}
 						}
 					}));
 
 					contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.remove_dependencies"), ThemeProperties.DELETE_ICON.get(), () -> {
-						for (Quest q : treeGui.selectedQuests)
+						for (Movable q : treeGui.selectedObjects)
 						{
-							editDependency(quest, q, false);
+							if (q instanceof Quest)
+							{
+								editDependency(quest, (Quest) q, false);
+							}
 						}
 					}));
 
 					contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.add_dependencies_self"), ThemeProperties.ADD_ICON.get(), () -> {
-						for (Quest q : treeGui.selectedQuests)
+						for (Movable q : treeGui.selectedObjects)
 						{
-							editDependency(q, quest, true);
+							if (q instanceof Quest)
+							{
+								editDependency((Quest) q, quest, true);
+							}
 						}
 					}));
 
 					contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.remove_dependencies_self"), ThemeProperties.DELETE_ICON.get(), () -> {
-						for (Quest q : treeGui.selectedQuests)
+						for (Movable q : treeGui.selectedObjects)
 						{
-							editDependency(q, quest, false);
+							if (q instanceof Quest)
+							{
+								editDependency((Quest) q, quest, false);
+							}
 						}
 					}));
 				}
@@ -154,15 +168,18 @@ public class ButtonQuest extends Button
 							contextMenu2.add(new ContextMenuItem(type.getDisplayName(), type.getIcon(), () -> {
 								GuiHelper.playClickSound();
 								type.getGuiProvider().openCreationGui(this, quest, reward -> {
-									for (Quest quest1 : treeGui.selectedQuests)
+									for (Movable movable : treeGui.selectedObjects)
 									{
-										Reward r = type.provider.create(quest1);
-										NBTTagCompound nbt1 = new NBTTagCompound();
-										reward.writeData(nbt1);
-										r.readData(nbt1);
-										NBTTagCompound extra = new NBTTagCompound();
-										extra.setString("type", type.getTypeForNBT());
-										new MessageCreateObject(r, extra).sendToServer();
+										if (movable instanceof Quest)
+										{
+											Reward r = type.provider.create((Quest) movable);
+											NBTTagCompound nbt1 = new NBTTagCompound();
+											reward.writeData(nbt1);
+											r.readData(nbt1);
+											NBTTagCompound extra = new NBTTagCompound();
+											extra.setString("type", type.getTypeForNBT());
+											new MessageCreateObject(r, extra).sendToServer();
+										}
 									}
 								});
 							}));
@@ -172,9 +189,19 @@ public class ButtonQuest extends Button
 					}));
 
 					contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), ThemeProperties.DELETE_ICON.get(quest), () -> {
-						treeGui.selectedQuests.forEach(q -> ClientQuestFile.INSTANCE.deleteObject(q.id));
-						treeGui.selectedQuests.clear();
-					}).setYesNo(I18n.format("delete_item", I18n.format("ftbquests.quests") + " [" + treeGui.selectedQuests.size() + "]")));
+						treeGui.selectedObjects.forEach(q -> {
+							if (q instanceof Quest)
+							{
+								ClientQuestFile.INSTANCE.deleteObject(((Quest) q).id);
+							}
+							else if (q instanceof ChapterImage)
+							{
+								((ChapterImage) q).chapter.images.remove(q);
+								new MessageEditObject(((ChapterImage) q).chapter).sendToServer();
+							}
+						});
+						treeGui.selectedObjects.clear();
+					}).setYesNo(I18n.format("delete_item", I18n.format("ftbquests.quests") + " [" + treeGui.selectedObjects.size() + "]")));
 				}
 
 				contextMenu.add(ContextMenuItem.SEPARATOR);
@@ -185,8 +212,8 @@ public class ButtonQuest extends Button
 			else
 			{
 				contextMenu.add(new ContextMenuItem(I18n.format("gui.move"), ThemeProperties.MOVE_UP_ICON.get(quest), () -> {
-					treeGui.movingQuests = true;
-					treeGui.selectedQuests.clear();
+					treeGui.movingObjects = true;
+					treeGui.selectedObjects.clear();
 					treeGui.toggleSelected(quest);
 				})
 				{
@@ -225,16 +252,16 @@ public class ButtonQuest extends Button
 		}
 		else if (treeGui.file.canEdit() && button.isMiddle())
 		{
-			if (!treeGui.selectedQuests.contains(quest))
+			if (!treeGui.selectedObjects.contains(quest))
 			{
 				treeGui.toggleSelected(quest);
 			}
 
-			treeGui.movingQuests = true;
+			treeGui.movingObjects = true;
 		}
 		else if (button.isRight())
 		{
-			treeGui.movingQuests = false;
+			treeGui.movingObjects = false;
 
 			if (treeGui.getViewedQuest() != quest)
 			{
@@ -385,7 +412,7 @@ public class ButtonQuest extends Button
 		GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
 		GlStateManager.color(1F, 1F, 1F, 1F);
 
-		if (quest == treeGui.viewQuestPanel.quest || treeGui.selectedQuests.contains(quest))
+		if (quest == treeGui.viewQuestPanel.quest || treeGui.selectedObjects.contains(quest))
 		{
 			GlStateManager.pushMatrix();
 			GlStateManager.translate(0D, 0D, 500D);

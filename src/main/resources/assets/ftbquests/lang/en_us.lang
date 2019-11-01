@@ -114,6 +114,16 @@ ftbquests.chapter.always_invisible=Always Invisible
 ftbquests.chapter.group=Group
 ftbquests.chapter.default_quest_shape=Default Quest Shape
 
+ftbquests.chapter.image=Image
+ftbquests.chapter.image.x=X
+ftbquests.chapter.image.y=Y
+ftbquests.chapter.image.width=Width
+ftbquests.chapter.image.height=Height
+ftbquests.chapter.image.rotation=Rotation
+ftbquests.chapter.image.image=Image
+ftbquests.chapter.image.hover=Hover Text
+ftbquests.chapter.image.click=Click
+
 ftbquests.quest=Quest
 ftbquests.quests=Quests
 ftbquests.quest.completed=Quest completed!

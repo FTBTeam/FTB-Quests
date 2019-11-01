@@ -37,6 +37,7 @@ public final class Chapter extends QuestObject
 	public boolean alwaysInvisible;
 	public Chapter group;
 	public QuestShape defaultQuestShape;
+	public final List<ChapterImage> images;
 
 	public Chapter(QuestFile f)
 	{
@@ -46,6 +47,7 @@ public final class Chapter extends QuestObject
 		alwaysInvisible = false;
 		group = null;
 		defaultQuestShape = QuestShape.DEFAULT;
+		images = new ArrayList<>();
 	}
 
 	@Override
@@ -86,6 +88,20 @@ public final class Chapter extends QuestObject
 		nbt.setBoolean("always_invisible", alwaysInvisible);
 		nbt.setInteger("group", group != null && !group.invalid ? group.id : 0);
 		nbt.setString("default_quest_shape", defaultQuestShape.getId());
+
+		if (!images.isEmpty())
+		{
+			NBTTagList list = new NBTTagList();
+
+			for (ChapterImage image : images)
+			{
+				NBTTagCompound nbt1 = new NBTTagCompound();
+				image.writeData(nbt1);
+				list.appendTag(nbt1);
+			}
+
+			nbt.setTag("images", list);
+		}
 	}
 
 	@Override
@@ -104,6 +120,17 @@ public final class Chapter extends QuestObject
 		alwaysInvisible = nbt.getBoolean("always_invisible");
 		group = file.getChapter(nbt.getInteger("group"));
 		defaultQuestShape = QuestShape.NAME_MAP.get(nbt.getString("default_quest_shape"));
+
+		NBTTagList imgs = nbt.getTagList("images", Constants.NBT.TAG_COMPOUND);
+
+		images.clear();
+
+		for (int i = 0; i < imgs.tagCount(); i++)
+		{
+			ChapterImage image = new ChapterImage(this);
+			image.readData(imgs.getCompoundTagAt(i));
+			images.add(image);
+		}
 	}
 
 	@Override
@@ -114,6 +141,7 @@ public final class Chapter extends QuestObject
 		data.writeBoolean(alwaysInvisible);
 		data.writeInt(group == null || group.invalid ? 0 : group.id);
 		QuestShape.NAME_MAP.write(data, defaultQuestShape);
+		data.writeCollection(images, (d, object) -> object.writeNetData(d));
 	}
 
 	@Override
@@ -124,6 +152,11 @@ public final class Chapter extends QuestObject
 		alwaysInvisible = data.readBoolean();
 		group = file.getChapter(data.readInt());
 		defaultQuestShape = QuestShape.NAME_MAP.read(data);
+		data.readCollection(images, d -> {
+			ChapterImage image = new ChapterImage(this);
+			image.readNetData(d);
+			return image;
+		});
 	}
 
 	public int getIndex()

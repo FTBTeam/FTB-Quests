@@ -8,6 +8,7 @@ import com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIHelper;
 import com.feed_the_beast.ftbquests.net.MessageSyncQuests;
 import com.feed_the_beast.ftbquests.net.edit.MessageDeleteObject;
 import com.feed_the_beast.ftbquests.quest.Chapter;
+import com.feed_the_beast.ftbquests.quest.Movable;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestData;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
@@ -158,12 +159,16 @@ public class ClientQuestFile extends QuestFile
 			scrollX = questTreeGui.questPanel.centerQuestX;
 			scrollY = questTreeGui.questPanel.centerQuestY;
 			selectedChapter = questTreeGui.selectedChapter == null ? 0 : questTreeGui.selectedChapter.id;
-			selectedQuests = new int[questTreeGui.selectedQuests.size()];
+			selectedQuests = new int[questTreeGui.selectedObjects.size()];
 			int i = 0;
 
-			for (Quest q : questTreeGui.selectedQuests)
+			for (Movable m : questTreeGui.selectedObjects)
 			{
-				selectedQuests[i] = q.id;
+				if (m instanceof Quest)
+				{
+					selectedQuests[i] = ((Quest) m).id;
+				}
+
 				i++;
 			}
 
@@ -183,7 +188,12 @@ public class ClientQuestFile extends QuestFile
 
 			for (int i : selectedQuests)
 			{
-				questTreeGui.selectedQuests.add(getQuest(i));
+				Quest q = getQuest(i);
+
+				if (q != null)
+				{
+					questTreeGui.selectedObjects.add(q);
+				}
 			}
 
 			if (guiOpen)
