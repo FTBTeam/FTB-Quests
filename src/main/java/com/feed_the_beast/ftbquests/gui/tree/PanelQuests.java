@@ -40,6 +40,7 @@ public class PanelQuests extends Panel
 	public double centerQuestX = 0;
 	public double centerQuestY = 0;
 	public ButtonQuest mouseOverQuest = null;
+	public double questMinX, questMinY, questMaxX, questMaxY;
 
 	public PanelQuests(Panel panel)
 	{
@@ -47,36 +48,42 @@ public class PanelQuests extends Panel
 		treeGui = (GuiQuestTree) panel.getGui();
 	}
 
-	public void scrollTo(double x, double y)
+	public void updateMinMax()
 	{
-		double minX = Double.POSITIVE_INFINITY, minY = Double.POSITIVE_INFINITY, maxX = Double.NEGATIVE_INFINITY, maxY = Double.NEGATIVE_INFINITY;
+		questMinX = Double.POSITIVE_INFINITY;
+		questMinY = Double.POSITIVE_INFINITY;
+		questMaxX = Double.NEGATIVE_INFINITY;
+		questMaxY = Double.NEGATIVE_INFINITY;
 
 		for (Widget widget : widgets)
 		{
 			Quest quest = ((ButtonQuest) widget).quest;
-			minX = Math.min(minX, quest.x);
-			minY = Math.min(minY, quest.y);
-			maxX = Math.max(maxX, quest.x);
-			maxY = Math.max(maxY, quest.y);
+			questMinX = Math.min(questMinX, quest.x - quest.size / 2D);
+			questMinY = Math.min(questMinY, quest.y - quest.size / 2D);
+			questMaxX = Math.max(questMaxX, quest.x + quest.size / 2D);
+			questMaxY = Math.max(questMaxY, quest.y + quest.size / 2D);
 		}
 
-		if (minX == Double.POSITIVE_INFINITY)
+		if (questMinX == Double.POSITIVE_INFINITY)
 		{
-			minX = minY = maxX = maxY = 0;
+			questMinX = questMinY = questMaxX = questMaxY = 0D;
 		}
 
-		minX -= 40;
-		minY -= 30;
-		maxX += 40;
-		maxY += 30;
+		questMinX -= 40D;
+		questMinY -= 30D;
+		questMaxX += 40D;
+		questMaxY += 30D;
+	}
 
-		double dx = (maxX - minX + 1);
-		double dy = (maxY - minY + 1);
+	public void scrollTo(double x, double y)
+	{
+		updateMinMax();
 
-		setOffset(true);
-		setScrollX((x - minX) / dx * treeGui.scrollWidth - width / 2D);
-		setScrollY((y - minY) / dy * treeGui.scrollHeight - height / 2D);
-		setOffset(false);
+		double dx = (questMaxX - questMinX);
+		double dy = (questMaxY - questMinY);
+
+		setScrollX((x - questMinX) / dx * treeGui.scrollWidth - width / 2D);
+		setScrollY((y - questMinY) / dy * treeGui.scrollHeight - height / 2D);
 	}
 
 	public void resetScroll()
@@ -113,42 +120,23 @@ public class PanelQuests extends Panel
 			return;
 		}
 
-		treeGui.scrollWidth = 0;
-		treeGui.scrollHeight = 0;
+		treeGui.scrollWidth = 0D;
+		treeGui.scrollHeight = 0D;
 
-		double minX = Double.POSITIVE_INFINITY, minY = Double.POSITIVE_INFINITY, maxX = Double.NEGATIVE_INFINITY, maxY = Double.NEGATIVE_INFINITY;
-
-		for (Widget widget : widgets)
-		{
-			Quest quest = ((ButtonQuest) widget).quest;
-			minX = Math.min(minX, quest.x);
-			minY = Math.min(minY, quest.y);
-			maxX = Math.max(maxX, quest.x);
-			maxY = Math.max(maxY, quest.y);
-		}
-
-		if (minX == Double.POSITIVE_INFINITY)
-		{
-			minX = minY = maxX = maxY = 0D;
-		}
-
-		minX -= 40;
-		minY -= 30;
-		maxX += 40;
-		maxY += 30;
+		updateMinMax();
 
 		double bs = treeGui.getQuestButtonSize();
 		double bp = treeGui.getQuestButtonSpacing();
 
-		treeGui.scrollWidth = (maxX - minX + 1D) * (bs + bp);
-		treeGui.scrollHeight = (maxY - minY + 1D) * (bs + bp);
+		treeGui.scrollWidth = (questMaxX - questMinX) * (bs + bp);
+		treeGui.scrollHeight = (questMaxY - questMinY) * (bs + bp);
 
 		for (Widget w : widgets)
 		{
 			Quest q = ((ButtonQuest) w).quest;
 			double s = bs * q.size;
-			double x = (q.x - minX - q.size / 2D) * (bs + bp) + bp / 2D + bp * (q.size - 1D) / 2D;
-			double y = (q.y - minY - q.size / 2D) * (bs + bp) + bp / 2D + bp * (q.size - 1D) / 2D;
+			double x = (q.x - questMinX - q.size / 2D) * (bs + bp) + bp / 2D + bp * (q.size - 1D) / 2D;
+			double y = (q.y - questMinY - q.size / 2D) * (bs + bp) + bp / 2D + bp * (q.size - 1D) / 2D;
 			w.setPosAndSize((int) x, (int) y, (int) s, (int) s);
 		}
 
@@ -306,36 +294,18 @@ public class PanelQuests extends Panel
 
 		if (treeGui.selectedChapter != null && isMouseOver())
 		{
-			double minX = Double.POSITIVE_INFINITY, minY = Double.POSITIVE_INFINITY, maxX = Double.NEGATIVE_INFINITY, maxY = Double.NEGATIVE_INFINITY;
+			//updateMinMax();
 
-			for (Widget widget : widgets)
-			{
-				Quest quest = ((ButtonQuest) widget).quest;
-				minX = Math.min(minX, quest.x);
-				minY = Math.min(minY, quest.y);
-				maxX = Math.max(maxX, quest.x);
-				maxY = Math.max(maxY, quest.y);
-			}
+			double dx = (questMaxX - questMinX);
+			double dy = (questMaxY - questMinY);
 
-			if (minX == Double.POSITIVE_INFINITY)
-			{
-				minX = minY = maxX = maxY = 0;
-			}
+			double px = getX() - getScrollX();
+			double py = getY() - getScrollY();
 
-			minX -= 40;
-			minY -= 30;
-			maxX += 40;
-			maxY += 30;
-
-			double dx = (maxX - minX + 1);
-			double dy = (maxY - minY + 1);
-
-			setOffset(true);
-			double qx = (treeGui.getMouseX() - getX()) / treeGui.scrollWidth * dx + minX;
-			double qy = (treeGui.getMouseY() - getY()) / treeGui.scrollHeight * dy + minY;
-			centerQuestX = (treeGui.width / 2D - getX()) / treeGui.scrollWidth * dx + minX;
-			centerQuestY = (treeGui.height / 2D - getY()) / treeGui.scrollHeight * dy + minY;
-			setOffset(false);
+			double qx = (treeGui.getMouseX() - px) / treeGui.scrollWidth * dx + questMinX;
+			double qy = (treeGui.getMouseY() - py) / treeGui.scrollHeight * dy + questMinY;
+			centerQuestX = (treeGui.width / 2D - px) / treeGui.scrollWidth * dx + questMinX;
+			centerQuestY = (treeGui.height / 2D - py) / treeGui.scrollHeight * dy + questMinY;
 
 			if (isShiftKeyDown())
 			{
@@ -374,18 +344,13 @@ public class PanelQuests extends Panel
 						omaxY = Math.max(omaxY, q.y);
 					}
 
-					setOffset(true);
-					int panelX = getX();
-					int panelY = getY();
-					setOffset(false);
-
 					for (Quest q : treeGui.selectedQuests)
 					{
 						double s = bs * q.size;
 						double ox = (q.x - ominX);
 						double oy = (q.y - ominY);
-						double sx = (questX + ox - minX) / dx * treeGui.scrollWidth + panelX;
-						double sy = (questY + oy - minY) / dy * treeGui.scrollHeight + panelY;
+						double sx = (questX + ox - questMinX) / dx * treeGui.scrollWidth + px;
+						double sy = (questY + oy - questMinY) / dy * treeGui.scrollHeight + py;
 						GlStateManager.pushMatrix();
 						GlStateManager.translate(sx - s / 2D, sy - s / 2D, 0D);
 						GlStateManager.scale(s, s, 1D);
@@ -396,10 +361,10 @@ public class PanelQuests extends Panel
 
 					if (GuiQuestTree.grid)
 					{
-						double boxX = ominX / dx * treeGui.scrollWidth + panelX;
-						double boxY = ominY / dy * treeGui.scrollHeight + panelY;
-						double boxW = omaxX / dx * treeGui.scrollWidth + panelX - boxX;
-						double boxH = omaxY / dy * treeGui.scrollHeight + panelY - boxY;
+						double boxX = ominX / dx * treeGui.scrollWidth + px;
+						double boxY = ominY / dy * treeGui.scrollHeight + py;
+						double boxW = omaxX / dx * treeGui.scrollWidth + px - boxX;
+						double boxH = omaxY / dy * treeGui.scrollHeight + py - boxY;
 
 						GlStateManager.pushMatrix();
 						GlStateManager.translate(0, 0, 1000);
@@ -411,10 +376,8 @@ public class PanelQuests extends Panel
 				{
 					int z = treeGui.getZoom();
 					double bs = treeGui.getQuestButtonSize();
-					setOffset(true);
-					double sx = (questX - minX) / dx * treeGui.scrollWidth + getX();
-					double sy = (questY - minY) / dy * treeGui.scrollHeight + getY();
-					setOffset(false);
+					double sx = (questX - questMinX) / dx * treeGui.scrollWidth + px;
+					double sy = (questY - questMinY) / dy * treeGui.scrollHeight + py;
 					GlStateManager.pushMatrix();
 					GlStateManager.translate(sx - bs / 2D, sy - bs / 2D, 0D);
 					GlStateManager.scale(bs, bs, 1D);
