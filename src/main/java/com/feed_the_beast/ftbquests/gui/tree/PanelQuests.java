@@ -2,6 +2,7 @@ package com.feed_the_beast.ftbquests.gui.tree;
 
 import com.feed_the_beast.ftblib.lib.gui.ContextMenuItem;
 import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
+import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.gui.Theme;
 import com.feed_the_beast.ftblib.lib.gui.Widget;
@@ -14,7 +15,9 @@ import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.net.edit.MessageCreateTaskAt;
-import com.feed_the_beast.ftbquests.net.edit.MessageMoveQuest;
+import com.feed_the_beast.ftbquests.net.edit.MessageEditObject;
+import com.feed_the_beast.ftbquests.quest.ChapterImage;
+import com.feed_the_beast.ftbquests.quest.Movable;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.task.TaskType;
 import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
@@ -22,6 +25,7 @@ import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.util.math.MathHelper;
 import org.lwjgl.opengl.GL11;
 
@@ -55,13 +59,35 @@ public class PanelQuests extends Panel
 		questMaxX = Double.NEGATIVE_INFINITY;
 		questMaxY = Double.NEGATIVE_INFINITY;
 
-		for (Widget widget : widgets)
+		for (Widget w : widgets)
 		{
-			Quest quest = ((ButtonQuest) widget).quest;
-			questMinX = Math.min(questMinX, quest.x - quest.size / 2D);
-			questMinY = Math.min(questMinY, quest.y - quest.size / 2D);
-			questMaxX = Math.max(questMaxX, quest.x + quest.size / 2D);
-			questMaxY = Math.max(questMaxY, quest.y + quest.size / 2D);
+			double qx, qy, qw, qh;
+
+			if (w instanceof ButtonQuest)
+			{
+				Quest q = ((ButtonQuest) w).quest;
+				qx = q.x;
+				qy = q.y;
+				qw = q.size;
+				qh = q.size;
+			}
+			else if (w instanceof ButtonChapterImage)
+			{
+				ChapterImage q = ((ButtonChapterImage) w).chapterImage;
+				qx = q.x;
+				qy = q.y;
+				qw = q.width;
+				qh = q.height;
+			}
+			else
+			{
+				continue;
+			}
+
+			questMinX = Math.min(questMinX, qx - qw / 2D);
+			questMinY = Math.min(questMinY, qy - qh / 2D);
+			questMaxX = Math.max(questMaxX, qx + qw / 2D);
+			questMaxY = Math.max(questMaxY, qy + qh / 2D);
 		}
 
 		if (questMinX == Double.POSITIVE_INFINITY)
@@ -109,6 +135,11 @@ public class PanelQuests extends Panel
 			}
 		}
 
+		for (ChapterImage image : treeGui.selectedChapter.images)
+		{
+			add(new ButtonChapterImage(this, image));
+		}
+
 		alignWidgets();
 	}
 
@@ -133,11 +164,32 @@ public class PanelQuests extends Panel
 
 		for (Widget w : widgets)
 		{
-			Quest q = ((ButtonQuest) w).quest;
-			double s = bs * q.size;
-			double x = (q.x - questMinX - q.size / 2D) * (bs + bp) + bp / 2D + bp * (q.size - 1D) / 2D;
-			double y = (q.y - questMinY - q.size / 2D) * (bs + bp) + bp / 2D + bp * (q.size - 1D) / 2D;
-			w.setPosAndSize((int) x, (int) y, (int) s, (int) s);
+			double qx, qy, qw, qh;
+
+			if (w instanceof ButtonQuest)
+			{
+				Quest q = ((ButtonQuest) w).quest;
+				qx = q.x;
+				qy = q.y;
+				qw = q.size;
+				qh = q.size;
+			}
+			else if (w instanceof ButtonChapterImage)
+			{
+				ChapterImage q = ((ButtonChapterImage) w).chapterImage;
+				qx = q.x;
+				qy = q.y;
+				qw = q.width;
+				qh = q.height;
+			}
+			else
+			{
+				continue;
+			}
+
+			double x = (qx - questMinX - qw / 2D) * (bs + bp) + bp / 2D + bp * (qw - 1D) / 2D;
+			double y = (qy - questMinY - qh / 2D) * (bs + bp) + bp / 2D + bp * (qh - 1D) / 2D;
+			w.setPosAndSize((int) x, (int) y, (int) (bs * qw), (int) (bs * qh));
 		}
 
 		setPosAndSize(20, 1, treeGui.width - 40, treeGui.height - 2);
@@ -175,6 +227,11 @@ public class PanelQuests extends Panel
 
 		for (Widget widget : widgets)
 		{
+			if (!(widget instanceof ButtonQuest))
+			{
+				continue;
+			}
+
 			Quest wquest = ((ButtonQuest) widget).quest;
 
 			if (wquest.hideDependencyLines)
@@ -232,6 +289,11 @@ public class PanelQuests extends Panel
 
 		for (Widget widget : widgets)
 		{
+			if (!(widget instanceof ButtonQuest))
+			{
+				continue;
+			}
+
 			Quest wquest = ((ButtonQuest) widget).quest;
 
 			if (wquest.hideDependencyLines)
@@ -330,32 +392,31 @@ public class PanelQuests extends Panel
 				GlStateManager.popMatrix();
 				theme.popFontUnicode();
 
-				if (treeGui.movingQuests && !treeGui.selectedQuests.isEmpty())
+				if (treeGui.movingObjects && !treeGui.selectedObjects.isEmpty())
 				{
 					double bs = treeGui.getQuestButtonSize();
 
 					double ominX = Double.POSITIVE_INFINITY, ominY = Double.POSITIVE_INFINITY, omaxX = Double.NEGATIVE_INFINITY, omaxY = Double.NEGATIVE_INFINITY;
 
-					for (Quest q : treeGui.selectedQuests)
+					for (Movable q : treeGui.selectedObjects)
 					{
-						ominX = Math.min(ominX, q.x);
-						ominY = Math.min(ominY, q.y);
-						omaxX = Math.max(omaxX, q.x);
-						omaxY = Math.max(omaxY, q.y);
+						ominX = Math.min(ominX, q.getX());
+						ominY = Math.min(ominY, q.getY());
+						omaxX = Math.max(omaxX, q.getX());
+						omaxY = Math.max(omaxY, q.getY());
 					}
 
-					for (Quest q : treeGui.selectedQuests)
+					for (Movable m : treeGui.selectedObjects)
 					{
-						double s = bs * q.size;
-						double ox = (q.x - ominX);
-						double oy = (q.y - ominY);
+						double ox = m.getX() - ominX;
+						double oy = m.getY() - ominY;
 						double sx = (questX + ox - questMinX) / dx * treeGui.scrollWidth + px;
 						double sy = (questY + oy - questMinY) / dy * treeGui.scrollHeight + py;
 						GlStateManager.pushMatrix();
-						GlStateManager.translate(sx - s / 2D, sy - s / 2D, 0D);
-						GlStateManager.scale(s, s, 1D);
+						GlStateManager.translate(sx - bs * m.getWidth() / 2D, sy - bs * m.getHeight() / 2D, 0D);
+						GlStateManager.scale(bs * m.getWidth(), bs * m.getHeight(), 1D);
 						GuiHelper.setupDrawing();
-						q.getShape().shape.withColor(Color4I.WHITE.withAlpha(30)).draw(0, 0, 1, 1);
+						m.getShape().shape.withColor(Color4I.WHITE.withAlpha(30)).draw(0, 0, 1, 1);
 						GlStateManager.popMatrix();
 					}
 
@@ -402,29 +463,29 @@ public class PanelQuests extends Panel
 	@Override
 	public boolean mousePressed(MouseButton button)
 	{
-		if (treeGui.movingQuests && treeGui.file.canEdit())
+		if (treeGui.movingObjects && treeGui.file.canEdit())
 		{
-			if (treeGui.selectedChapter != null && !button.isRight() && !treeGui.selectedQuests.isEmpty())
+			if (treeGui.selectedChapter != null && !button.isRight() && !treeGui.selectedObjects.isEmpty())
 			{
 				GuiHelper.playClickSound();
 
 				double minX = Double.POSITIVE_INFINITY;
 				double minY = Double.POSITIVE_INFINITY;
 
-				for (Quest q : treeGui.selectedQuests)
+				for (Movable q : treeGui.selectedObjects)
 				{
-					minX = Math.min(minX, q.x);
-					minY = Math.min(minY, q.y);
+					minX = Math.min(minX, q.getX());
+					minY = Math.min(minY, q.getY());
 				}
 
-				for (Quest q : treeGui.selectedQuests)
+				for (Movable q : treeGui.selectedObjects)
 				{
-					new MessageMoveQuest(q.id, treeGui.selectedChapter.id, questX + (q.x - minX), questY + (q.y - minY)).sendToServer();
+					q.move(treeGui.selectedChapter, questX + (q.getX() - minX), questY + (q.getY() - minY));
 				}
 			}
 
-			treeGui.movingQuests = false;
-			treeGui.selectedQuests.clear();
+			treeGui.movingObjects = false;
+			treeGui.selectedObjects.clear();
 			return true;
 		}
 
@@ -461,6 +522,15 @@ public class PanelQuests extends Panel
 					type.getGuiProvider().openCreationGui(this, new Quest(treeGui.selectedChapter), task -> new MessageCreateTaskAt(treeGui.selectedChapter, qx, qy, task).sendToServer());
 				}));
 			}
+
+			contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.chapter.image"), GuiIcons.ART, () -> {
+				GuiHelper.playClickSound();
+				ChapterImage image = new ChapterImage(treeGui.selectedChapter);
+				image.x = qx;
+				image.y = qy;
+				treeGui.selectedChapter.images.add(image);
+				new MessageEditObject(treeGui.selectedChapter).sendToServer();
+			}));
 
 			treeGui.openContextMenu(contextMenu);
 			return true;

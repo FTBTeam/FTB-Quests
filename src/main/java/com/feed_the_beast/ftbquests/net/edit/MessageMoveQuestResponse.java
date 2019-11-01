@@ -66,7 +66,7 @@ public class MessageMoveQuestResponse extends MessageToClient
 
 			if (quest != null)
 			{
-				quest.move(x, y, chapter);
+				quest.moved(x, y, chapter);
 				GuiQuestTree gui = ClientUtils.getCurrentGuiAs(GuiQuestTree.class);
 
 				if (gui != null)
