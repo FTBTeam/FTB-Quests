@@ -420,7 +420,7 @@ public class PanelQuests extends Panel
 						GlStateManager.popMatrix();
 					}
 
-					if (GuiQuestTree.grid)
+					if (GuiQuestTree.grid && treeGui.viewQuestPanel.quest == null)
 					{
 						double boxX = ominX / dx * treeGui.scrollWidth + px;
 						double boxY = ominY / dy * treeGui.scrollHeight + py;
@@ -446,13 +446,13 @@ public class PanelQuests extends Panel
 					treeGui.selectedChapter.getDefaultQuestShape().shape.withColor(Color4I.WHITE.withAlpha(10)).draw(0, 0, 1, 1);
 					GlStateManager.popMatrix();
 
-					if (GuiQuestTree.grid)
+					if (GuiQuestTree.grid && treeGui.viewQuestPanel.quest == null)
 					{
 						GlStateManager.pushMatrix();
 						GlStateManager.translate(0, 0, 1000);
 						Color4I.WHITE.draw((int) sx, (int) sy, 1, 1);
-						Color4I.WHITE.withAlpha(30).draw(0, (int) sy, width, 1);
-						Color4I.WHITE.withAlpha(30).draw((int) sx, 0, 1, height);
+						Color4I.WHITE.withAlpha(30).draw(getX(), (int) sy, width, 1);
+						Color4I.WHITE.withAlpha(30).draw((int) sx, getY(), 1, height);
 						GlStateManager.popMatrix();
 					}
 				}
