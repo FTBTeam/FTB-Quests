@@ -43,6 +43,11 @@ public class ButtonChapterImage extends Button
 			return false;
 		}
 
+		if (chapterImage.click.isEmpty() && !treeGui.file.canEdit())
+		{
+			return false;
+		}
+
 		return super.checkMouseOver(mouseX, mouseY);
 	}
 
