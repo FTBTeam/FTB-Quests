@@ -21,7 +21,7 @@ import java.util.List;
  */
 public final class ChapterImage implements Movable
 {
-	public final Chapter chapter;
+	public Chapter chapter;
 	public double x, y;
 	public double width, height;
 	public double rotation;
@@ -160,6 +160,16 @@ public final class ChapterImage implements Movable
 	{
 		x = _x;
 		y = _y;
+
+		if (to != chapter)
+		{
+			chapter.images.remove(this);
+			new MessageEditObject(chapter).sendToServer();
+
+			chapter = to;
+			chapter.images.add(this);
+		}
+
 		new MessageEditObject(chapter).sendToServer();
 	}
 }
