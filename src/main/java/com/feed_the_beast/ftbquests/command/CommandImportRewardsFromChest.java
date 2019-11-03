@@ -114,9 +114,7 @@ public class CommandImportRewardsFromChest extends CommandFTBQuestsBase
 
 						if (!stack.isEmpty())
 						{
-							ItemReward itemReward = new ItemReward(table.fakeQuest);
-							itemReward.stack = stack.copy();
-							table.rewards.add(new WeightedReward(itemReward, weight));
+							table.rewards.add(new WeightedReward(new ItemReward(table.fakeQuest, stack.copy()), weight));
 							r++;
 						}
 					}

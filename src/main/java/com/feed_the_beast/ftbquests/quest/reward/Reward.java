@@ -38,7 +38,7 @@ public abstract class Reward extends QuestObjectBase
 	public Quest quest;
 
 	public EnumTristate team;
-	private RewardAutoClaim autoclaim;
+	public RewardAutoClaim autoclaim;
 
 	public Reward(Quest q)
 	{

@@ -55,7 +55,7 @@ public final class RewardTable extends QuestObjectBase
 		rewards = new ArrayList<>();
 		fakeQuest = new Quest(new Chapter(file));
 		emptyWeight = 0;
-		lootSize = 27;
+		lootSize = 1;
 		hideTooltip = false;
 		useTitle = false;
 		lootCrate = null;
@@ -233,7 +233,7 @@ public final class RewardTable extends QuestObjectBase
 	{
 		super.getConfig(config);
 		config.addInt("empty_weight", () -> emptyWeight, v -> emptyWeight = v, 0, 0, Integer.MAX_VALUE);
-		config.addInt("loot_size", () -> lootSize, v -> lootSize = v, 27, 1, Integer.MAX_VALUE);
+		config.addInt("loot_size", () -> lootSize, v -> lootSize = v, 1, 1, Integer.MAX_VALUE);
 		config.addBool("hide_tooltip", () -> hideTooltip, v -> hideTooltip = v, false);
 		config.addBool("use_title", () -> useTitle, v -> useTitle = v, false);
 
