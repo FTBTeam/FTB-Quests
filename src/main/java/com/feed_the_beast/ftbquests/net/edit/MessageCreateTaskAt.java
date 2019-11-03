@@ -75,12 +75,12 @@ public class MessageCreateTaskAt extends MessageToServer
 				Quest quest = new Quest(c);
 				quest.x = x;
 				quest.y = y;
-				quest.id = ServerQuestFile.INSTANCE.readID(0);
+				quest.id = ServerQuestFile.INSTANCE.newID();
 				quest.onCreated();
 				new MessageCreateObjectResponse(quest, null).sendToAll();
 
 				Task task = type.provider.create(quest);
-				task.id = ServerQuestFile.INSTANCE.readID(0);
+				task.id = ServerQuestFile.INSTANCE.newID();
 				task.readData(nbt);
 				task.onCreated();
 				NBTTagCompound extra = new NBTTagCompound();

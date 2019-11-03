@@ -27,16 +27,21 @@ import javax.annotation.Nullable;
  */
 public class ItemReward extends Reward
 {
-	public ItemStack stack;
+	public ItemStack item;
 	public int randomBonus;
 	public boolean onlyOne;
 
-	public ItemReward(Quest quest)
+	public ItemReward(Quest quest, ItemStack is)
 	{
 		super(quest);
-		stack = new ItemStack(Items.APPLE);
+		item = is;
 		randomBonus = 0;
 		onlyOne = false;
+	}
+
+	public ItemReward(Quest quest)
+	{
+		this(quest, new ItemStack(Items.APPLE));
 	}
 
 	@Override
@@ -49,7 +54,7 @@ public class ItemReward extends Reward
 	public void writeData(NBTTagCompound nbt)
 	{
 		super.writeData(nbt);
-		nbt.setTag("item", ItemMissing.write(stack, false));
+		nbt.setTag("item", ItemMissing.write(item, false));
 
 		if (randomBonus > 0)
 		{
@@ -66,7 +71,7 @@ public class ItemReward extends Reward
 	public void readData(NBTTagCompound nbt)
 	{
 		super.readData(nbt);
-		stack = ItemMissing.read(nbt.getTag("item"));
+		item = ItemMissing.read(nbt.getTag("item"));
 		randomBonus = nbt.getInteger("random_bonus");
 		onlyOne = nbt.getBoolean("only_one");
 	}
@@ -75,7 +80,7 @@ public class ItemReward extends Reward
 	public void writeNetData(DataOut data)
 	{
 		super.writeNetData(data);
-		data.writeItemStack(stack);
+		data.writeItemStack(item);
 		data.writeVarInt(randomBonus);
 		data.writeBoolean(onlyOne);
 	}
@@ -84,7 +89,7 @@ public class ItemReward extends Reward
 	public void readNetData(DataIn data)
 	{
 		super.readNetData(data);
-		stack = data.readItemStack();
+		item = data.readItemStack();
 		randomBonus = data.readVarInt();
 		onlyOne = data.readBoolean();
 	}
@@ -94,7 +99,7 @@ public class ItemReward extends Reward
 	public void getConfig(ConfigGroup config)
 	{
 		super.getConfig(config);
-		config.add("item", new ConfigItemStack.SimpleStack(() -> stack, v -> stack = v), new ConfigItemStack(ItemStack.EMPTY)).setDisplayName(new TextComponentTranslation("ftbquests.reward.ftbquests.item"));
+		config.add("item", new ConfigItemStack.SimpleStack(() -> item, v -> item = v), new ConfigItemStack(ItemStack.EMPTY)).setDisplayName(new TextComponentTranslation("ftbquests.reward.ftbquests.item"));
 		config.addInt("random_bonus", () -> randomBonus, v -> randomBonus = v, 0, 0, Integer.MAX_VALUE).setDisplayName(new TextComponentTranslation("ftbquests.reward.random_bonus"));
 		config.addBool("only_one", () -> onlyOne, v -> onlyOne = v, false);
 	}
@@ -102,12 +107,12 @@ public class ItemReward extends Reward
 	@Override
 	public void claim(EntityPlayerMP player, boolean notify)
 	{
-		if (onlyOne && player.inventory.hasItemStack(stack))
+		if (onlyOne && player.inventory.hasItemStack(item))
 		{
 			return;
 		}
 
-		ItemStack stack1 = stack.copy();
+		ItemStack stack1 = item.copy();
 		stack1.grow(player.world.rand.nextInt(randomBonus + 1));
 		ItemHandlerHelper.giveItemToPlayer(player, stack1);
 
@@ -120,7 +125,7 @@ public class ItemReward extends Reward
 	@Override
 	public ItemStack claimAutomated(TileEntity tileEntity, @Nullable EntityPlayerMP player)
 	{
-		ItemStack stack1 = stack.copy();
+		ItemStack stack1 = item.copy();
 		stack1.grow(tileEntity.getWorld().rand.nextInt(randomBonus + 1));
 		return stack1;
 	}
@@ -128,18 +133,18 @@ public class ItemReward extends Reward
 	@Override
 	public Icon getAltIcon()
 	{
-		if (stack.isEmpty())
+		if (item.isEmpty())
 		{
 			return super.getAltIcon();
 		}
 
-		return ItemIcon.getItemIcon(ItemHandlerHelper.copyStackWithSize(stack, 1));
+		return ItemIcon.getItemIcon(ItemHandlerHelper.copyStackWithSize(item, 1));
 	}
 
 	@Override
 	public String getAltTitle()
 	{
-		return (stack.getCount() > 1 ? (randomBonus > 0 ? (stack.getCount() + "-" + (stack.getCount() + randomBonus) + "x ") : (stack.getCount() + "x ")) : "") + stack.getDisplayName();
+		return (item.getCount() > 1 ? (randomBonus > 0 ? (item.getCount() + "-" + (item.getCount() + randomBonus) + "x ") : (item.getCount() + "x ")) : "") + item.getDisplayName();
 	}
 
 	@Override
@@ -152,7 +157,7 @@ public class ItemReward extends Reward
 	@Override
 	public Object getIngredient()
 	{
-		return new WrappedIngredient(stack).tooltip();
+		return new WrappedIngredient(item).tooltip();
 	}
 
 	@Override
@@ -160,9 +165,9 @@ public class ItemReward extends Reward
 	{
 		if (randomBonus > 0)
 		{
-			return stack.getCount() + "-" + (stack.getCount() + randomBonus);
+			return item.getCount() + "-" + (item.getCount() + randomBonus);
 		}
 
-		return Integer.toString(stack.getCount());
+		return Integer.toString(item.getCount());
 	}
 }

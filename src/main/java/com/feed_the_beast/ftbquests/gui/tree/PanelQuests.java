@@ -463,6 +463,11 @@ public class PanelQuests extends Panel
 	@Override
 	public boolean mousePressed(MouseButton button)
 	{
+		if (treeGui.selectedChapter == null)
+		{
+			return false;
+		}
+
 		if (treeGui.movingObjects && treeGui.file.canEdit())
 		{
 			if (treeGui.selectedChapter != null && !button.isRight() && !treeGui.selectedObjects.isEmpty())

@@ -181,9 +181,7 @@ public class FTBQuestsClient extends FTBQuestsCommon
 		FTBQuestsRewards.ITEM.setGuiProvider((gui, quest, callback) -> new GuiSelectItemStack(gui, stack -> {
 			if (!stack.isEmpty())
 			{
-				ItemReward reward = new ItemReward(quest);
-				reward.stack = stack;
-				callback.accept(reward);
+				callback.accept(new ItemReward(quest, stack));
 			}
 		}).openGui());
 

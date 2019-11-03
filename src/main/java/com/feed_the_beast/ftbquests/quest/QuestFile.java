@@ -1035,6 +1035,11 @@ public abstract class QuestFile extends QuestObject
 		}
 	}
 
+	public int newID()
+	{
+		return readID(0);
+	}
+
 	public int readID(int id)
 	{
 		while (id == 0 || id == 1 || map.get(id) != null)

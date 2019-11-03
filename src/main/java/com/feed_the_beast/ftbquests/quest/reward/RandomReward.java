@@ -80,7 +80,7 @@ public class RandomReward extends Reward
 				}
 			}
 
-			table.id = file.readID(0);
+			table.id = file.newID();
 			table.title = getUnformattedTitle() + " " + toString();
 			file.rewardTables.add(table);
 		}
