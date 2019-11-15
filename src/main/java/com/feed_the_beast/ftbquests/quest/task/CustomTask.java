@@ -1,6 +1,8 @@
 package com.feed_the_beast.ftbquests.quest.task;
 
 import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
+import com.feed_the_beast.ftblib.lib.io.DataIn;
+import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftbquests.net.MessageSubmitTask;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestData;
@@ -66,6 +68,24 @@ public class CustomTask extends Task
 	public int autoSubmitOnPlayerTick()
 	{
 		return check == null ? 0 : checkTimer;
+	}
+
+	@Override
+	public void writeNetData(DataOut data)
+	{
+		super.writeNetData(data);
+		data.writeVarInt(checkTimer);
+		data.writeVarLong(maxProgress);
+		data.writeBoolean(enableButton);
+	}
+
+	@Override
+	public void readNetData(DataIn data)
+	{
+		super.readNetData(data);
+		checkTimer = data.readVarInt();
+		maxProgress = data.readVarLong();
+		enableButton = data.readBoolean();
 	}
 
 	@Override
