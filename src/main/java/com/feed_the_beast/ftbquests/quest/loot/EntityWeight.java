@@ -1,10 +1,9 @@
 package com.feed_the_beast.ftbquests.quest.loot;
 
-import com.feed_the_beast.ftblib.lib.io.DataIn;
-import com.feed_the_beast.ftblib.lib.io.DataOut;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.monster.IMob;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.PacketBuffer;
 
 /**
  * @author LatvianModder
@@ -29,45 +28,28 @@ public class EntityWeight
 		return passive;
 	}
 
-	public void writeData(NBTTagCompound nbt)
+	public void writeData(CompoundNBT nbt)
 	{
-		nbt.setInteger("passive", passive);
-		nbt.setInteger("monster", monster);
-		nbt.setInteger("boss", boss);
+		nbt.putInt("passive", passive);
+		nbt.putInt("monster", monster);
+		nbt.putInt("boss", boss);
 	}
 
-	public void readData(NBTTagCompound nbt)
+	public void readData(CompoundNBT nbt)
 	{
-		passive = nbt.getInteger("passive");
-
-		if (passive == 0)
-		{
-			passive = nbt.getInteger("#passive");
-		}
-
-		monster = nbt.getInteger("monster");
-
-		if (monster == 0)
-		{
-			monster = nbt.getInteger("#monster");
-		}
-
-		boss = nbt.getInteger("boss");
-
-		if (boss == 0)
-		{
-			boss = nbt.getInteger("#boss");
-		}
+		passive = nbt.getInt("passive");
+		monster = nbt.getInt("monster");
+		boss = nbt.getInt("boss");
 	}
 
-	public void writeNetData(DataOut data)
+	public void writeNetData(PacketBuffer data)
 	{
 		data.writeVarInt(passive);
 		data.writeVarInt(monster);
 		data.writeVarInt(boss);
 	}
 
-	public void readNetData(DataIn data)
+	public void readNetData(PacketBuffer data)
 	{
 		passive = data.readVarInt();
 		monster = data.readVarInt();

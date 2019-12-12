@@ -1,48 +1,43 @@
 package com.feed_the_beast.ftbquests.client;
 
-import com.feed_the_beast.ftblib.FTBLib;
-import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
-import com.feed_the_beast.ftblib.lib.config.ConfigInt;
-import com.feed_the_beast.ftblib.lib.config.ConfigString;
-import com.feed_the_beast.ftblib.lib.gui.misc.GuiEditConfig;
-import com.feed_the_beast.ftblib.lib.gui.misc.GuiEditConfigValue;
-import com.feed_the_beast.ftblib.lib.gui.misc.GuiSelectFluid;
-import com.feed_the_beast.ftblib.lib.gui.misc.GuiSelectItemStack;
-import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.FTBQuestsCommon;
-import com.feed_the_beast.ftbquests.net.MessageSetCustomIcon;
+import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.reward.FTBQuestsRewards;
 import com.feed_the_beast.ftbquests.quest.reward.ItemReward;
-import com.feed_the_beast.ftbquests.quest.reward.XPLevelsReward;
-import com.feed_the_beast.ftbquests.quest.reward.XPReward;
 import com.feed_the_beast.ftbquests.quest.task.DimensionTask;
 import com.feed_the_beast.ftbquests.quest.task.FTBQuestsTasks;
 import com.feed_the_beast.ftbquests.quest.task.FluidTask;
 import com.feed_the_beast.ftbquests.quest.task.ItemTask;
 import com.feed_the_beast.ftbquests.quest.task.LocationTask;
 import com.feed_the_beast.ftbquests.quest.theme.ThemeLoader;
-import com.latmod.mods.itemfilters.filters.NBTMatchingMode;
+import com.feed_the_beast.mods.ftbguilibrary.config.ConfigFluid;
+import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
+import com.feed_the_beast.mods.ftbguilibrary.config.ConfigItemStack;
+import com.feed_the_beast.mods.ftbguilibrary.config.Tristate;
+import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiEditConfig;
+import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiSelectFluid;
+import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiSelectItemStack;
+import com.feed_the_beast.mods.ftbguilibrary.utils.StringUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.client.resources.IReloadableResourceManager;
 import net.minecraft.client.settings.KeyBinding;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagString;
+import net.minecraft.client.util.InputMappings;
+import net.minecraft.resources.IReloadableResourceManager;
+import net.minecraft.tileentity.StructureBlockTileEntity;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityStructure;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.world.World;
+import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.world.IWorld;
 import net.minecraftforge.client.settings.KeyConflictContext;
 import net.minecraftforge.client.settings.KeyModifier;
-import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
-import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.thread.EffectiveSide;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.items.ItemHandlerHelper;
-import org.lwjgl.input.Keyboard;
 
 import javax.annotation.Nullable;
 import java.util.regex.Matcher;
@@ -89,75 +84,88 @@ public class FTBQuestsClient extends FTBQuestsCommon
 	}
 
 	@Override
-	public void preInit()
+	public void init()
 	{
-		ClientRegistry.registerKeyBinding(KEY_QUESTS = new KeyBinding("key.ftbquests.quests", KeyConflictContext.IN_GAME, KeyModifier.NONE, Keyboard.KEY_NONE, FTBLib.KEY_CATEGORY));
-		((IReloadableResourceManager) Minecraft.getMinecraft().getResourceManager()).registerReloadListener(new QuestFileCacheReloader());
-		((IReloadableResourceManager) Minecraft.getMinecraft().getResourceManager()).registerReloadListener(new ThemeLoader());
+		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
+		new FTBQuestsClientEventHandler().init();
+	}
+
+	private void setup(FMLClientSetupEvent event)
+	{
+		ClientRegistry.registerKeyBinding(KEY_QUESTS = new KeyBinding("key.ftbquests.quests", KeyConflictContext.IN_GAME, KeyModifier.NONE, InputMappings.Type.KEYSYM, -1, "key.categories.ftbquests"));
+		((IReloadableResourceManager) Minecraft.getInstance().getResourceManager()).addReloadListener(new QuestFileCacheReloader());
+		((IReloadableResourceManager) Minecraft.getInstance().getResourceManager()).addReloadListener(new ThemeLoader());
+	}
+
+	@Override
+	public QuestFile getQuestFile(IWorld world)
+	{
+		return world.isRemote() ? ClientQuestFile.INSTANCE : ServerQuestFile.INSTANCE;
 	}
 
 	@Override
 	@Nullable
-	public QuestFile getQuestFile(@Nullable World world)
+	public QuestFile getQuestFile(Tristate clientSide)
 	{
-		return getQuestFile(world == null ? FMLCommonHandler.instance().getEffectiveSide().isClient() : world.isRemote);
-	}
+		if (clientSide.isDefault())
+		{
+			return getQuestFile(EffectiveSide.get().isClient() ? Tristate.TRUE : Tristate.FALSE);
+		}
 
-	@Override
-	@Nullable
-	public QuestFile getQuestFile(boolean clientSide)
-	{
-		return clientSide ? ClientQuestFile.INSTANCE : ServerQuestFile.INSTANCE;
+		return clientSide.isTrue() ? ClientQuestFile.INSTANCE : ServerQuestFile.INSTANCE;
 	}
 
 	@Override
 	public void setTaskGuiProviders()
 	{
-		FTBQuestsTasks.ITEM.setGuiProvider((gui, quest, callback) -> new GuiSelectItemStack(gui, stack -> {
-			if (!stack.isEmpty())
-			{
-				ItemTask itemTask = new ItemTask(quest);
-				itemTask.items.add(ItemHandlerHelper.copyStackWithSize(stack, 1));
-				itemTask.count = stack.getCount();
+		FTBQuestsTasks.ITEM.setGuiProvider((gui, quest, callback) -> {
+			ConfigItemStack c = new ConfigItemStack(false, false);
 
-				if (!stack.isStackable())
+			new GuiSelectItemStack(c, accepted -> {
+				gui.run();
+				if (accepted)
 				{
-					itemTask.nbtMode = NBTMatchingMode.IGNORE;
-					itemTask.ignoreDamage = !stack.getHasSubtypes();
+					ItemTask itemTask = new ItemTask(quest);
+					itemTask.item = ItemHandlerHelper.copyStackWithSize(c.value, 1);
+					itemTask.count = c.value.getCount();
+					callback.accept(itemTask);
 				}
+			}).openGui();
+		});
 
-				callback.accept(itemTask);
-			}
-		}).openGui());
+		FTBQuestsTasks.FLUID.setGuiProvider((gui, quest, callback) -> {
+			ConfigFluid c = new ConfigFluid(false);
 
-		FTBQuestsTasks.FLUID.setGuiProvider((gui, quest, callback) -> new GuiSelectFluid(gui, () -> FluidRegistry.WATER, fluid -> {
-			if (fluid != null)
-			{
-				FluidTask fluidTask = new FluidTask(quest);
-				fluidTask.fluid = fluid;
-				callback.accept(fluidTask);
-			}
-		}).openGui());
+			new GuiSelectFluid(c, accepted -> {
+				gui.run();
+				if (accepted)
+				{
+					FluidTask fluidTask = new FluidTask(quest);
+					fluidTask.fluid = c.value;
+					callback.accept(fluidTask);
+				}
+			}).openGui();
+		});
 
 		FTBQuestsTasks.DIMENSION.setGuiProvider((gui, quest, callback) -> {
 			DimensionTask task = new DimensionTask(quest);
-			task.dimension = Minecraft.getMinecraft().world.provider.getDimension();
+			task.dimension = Minecraft.getInstance().world.getDimension().getType();
 			callback.accept(task);
 		});
 
 		FTBQuestsTasks.LOCATION.setGuiProvider((gui, quest, callback) -> {
 			LocationTask task = new LocationTask(quest);
-			Minecraft mc = Minecraft.getMinecraft();
+			Minecraft mc = Minecraft.getInstance();
 
-			if (mc.objectMouseOver != null && mc.objectMouseOver.typeOfHit == RayTraceResult.Type.BLOCK)
+			if (mc.objectMouseOver instanceof BlockRayTraceResult)
 			{
-				TileEntity tileEntity = mc.world.getTileEntity(mc.objectMouseOver.getBlockPos());
+				TileEntity tileEntity = mc.world.getTileEntity(((BlockRayTraceResult) mc.objectMouseOver).getPos());
 
-				if (tileEntity instanceof TileEntityStructure)
+				if (tileEntity instanceof StructureBlockTileEntity)
 				{
-					BlockPos pos = ((TileEntityStructure) tileEntity).getPosition();
-					BlockPos size = ((TileEntityStructure) tileEntity).getStructureSize();
-					task.dimension = mc.world.provider.getDimension();
+					BlockPos pos = ((StructureBlockTileEntity) tileEntity).getPosition();
+					BlockPos size = ((StructureBlockTileEntity) tileEntity).getStructureSize();
+					task.dimension = mc.world.getDimension().getType();
 					task.x = pos.getX() + tileEntity.getPos().getX();
 					task.y = pos.getY() + tileEntity.getPos().getY();
 					task.z = pos.getZ() + tileEntity.getPos().getZ();
@@ -169,22 +177,37 @@ public class FTBQuestsClient extends FTBQuestsCommon
 				}
 			}
 
-			ConfigGroup group = ConfigGroup.newGroup(FTBQuests.MOD_ID);
+			ConfigGroup group = new ConfigGroup(FTBQuests.MOD_ID);
 			task.getConfig(task.createSubGroup(group));
-			new GuiEditConfig(group, (g1, sender) -> callback.accept(task)).openGui();
+
+			group.savedCallback = accepted -> {
+				gui.run();
+				if (accepted)
+				{
+					callback.accept(task);
+				}
+			};
+
+			new GuiEditConfig(group).openGui();
 		});
 	}
 
 	@Override
 	public void setRewardGuiProviders()
 	{
-		FTBQuestsRewards.ITEM.setGuiProvider((gui, quest, callback) -> new GuiSelectItemStack(gui, stack -> {
-			if (!stack.isEmpty())
-			{
-				callback.accept(new ItemReward(quest, stack));
-			}
-		}).openGui());
+		FTBQuestsRewards.ITEM.setGuiProvider((gui, quest, callback) -> {
+			ConfigItemStack c = new ConfigItemStack(false, false);
 
+			new GuiSelectItemStack(c, accepted -> {
+				if (accepted)
+				{
+					callback.accept(new ItemReward(quest, c.value));
+				}
+				gui.run();
+			});
+		});
+
+		/* FIXME
 		FTBQuestsRewards.XP.setGuiProvider((gui, quest, callback) -> new GuiEditConfigValue("xp", new ConfigInt(100, 1, Integer.MAX_VALUE), (value, set) -> {
 			gui.openGui();
 			if (set)
@@ -204,24 +227,12 @@ public class FTBQuestsClient extends FTBQuestsCommon
 				callback.accept(reward);
 			}
 		}).openGui());
+		*/
 	}
 
 	@Override
-	public String getLanguageCode()
+	public PlayerData getClientPlayerData()
 	{
-		return Minecraft.getMinecraft().getLanguageManager().getCurrentLanguage().getLanguageCode();
-	}
-
-	@Override
-	public void openCustomIconGui(ItemStack stack)
-	{
-		new GuiEditConfigValue("icon", new ConfigString(stack.hasTagCompound() ? stack.getTagCompound().getString("icon") : ""), (value, set) -> {
-			if (set)
-			{
-				stack.setTagInfo("icon", new NBTTagString(value.getString()));
-				new MessageSetCustomIcon(value.getString()).sendToServer();
-			}
-			Minecraft.getMinecraft().player.closeScreen();
-		}).openGui();
+		return ClientQuestFile.INSTANCE.getData(Minecraft.getInstance().player);
 	}
 }

@@ -1,19 +1,19 @@
 package com.feed_the_beast.ftbquests.quest.task;
 
-import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.events.TaskStartedEvent;
 import com.feed_the_beast.ftbquests.net.MessageUpdateTaskProgress;
 import com.feed_the_beast.ftbquests.quest.ChangeProgress;
-import com.feed_the_beast.ftbquests.quest.QuestData;
+import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.util.FTBQuestsInventoryListener;
-import com.feed_the_beast.ftbquests.util.ServerQuestData;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
+import com.feed_the_beast.mods.ftbguilibrary.utils.StringUtils;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
+import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.IItemHandler;
 
 import javax.annotation.Nullable;
@@ -26,11 +26,11 @@ import java.util.List;
 public class TaskData<T extends Task> implements ICapabilityProvider, IItemHandler
 {
 	public final T task;
-	public final QuestData data;
+	public final PlayerData data;
 	public long progress = 0L;
 	private boolean taskCompleted = false;
 
-	public TaskData(T q, QuestData d)
+	public TaskData(T q, PlayerData d)
 	{
 		task = q;
 		data = d;
@@ -38,8 +38,9 @@ public class TaskData<T extends Task> implements ICapabilityProvider, IItemHandl
 
 	public final void readProgress(long p)
 	{
-		progress = Math.max(0L, Math.min(p, task.getMaxProgress()));
-		taskCompleted = isComplete();
+		long max = task.getMaxProgress();
+		progress = Math.max(0L, Math.min(p, max));
+		taskCompleted = progress == max;
 	}
 
 	public final void setProgress(long p)
@@ -52,11 +53,11 @@ public class TaskData<T extends Task> implements ICapabilityProvider, IItemHandl
 			taskCompleted = false;
 			task.quest.chapter.file.clearCachedProgress();
 
-			if (data instanceof ServerQuestData)
+			if (data.file.getSide().isServer())
 			{
 				if (ChangeProgress.sendUpdates)
 				{
-					new MessageUpdateTaskProgress(data.getTeamUID(), task.id, progress).sendToAll();
+					new MessageUpdateTaskProgress(data, task.id, progress).sendToAll();
 				}
 
 				if (p == 0)
@@ -67,8 +68,8 @@ public class TaskData<T extends Task> implements ICapabilityProvider, IItemHandl
 				if (!taskCompleted && isComplete())
 				{
 					taskCompleted = true;
-					List<EntityPlayerMP> onlineMembers = ((ServerQuestData) data).team.getOnlineMembers();
-					List<EntityPlayerMP> notifiedPlayers;
+					List<ServerPlayerEntity> onlineMembers = data.getOnlineMembers();
+					List<ServerPlayerEntity> notifiedPlayers;
 
 					if (!task.quest.chapter.alwaysInvisible && !task.quest.canRepeat && ChangeProgress.sendNotifications.get(ChangeProgress.sendUpdates))
 					{
@@ -81,7 +82,7 @@ public class TaskData<T extends Task> implements ICapabilityProvider, IItemHandl
 
 					task.onCompleted(data, onlineMembers, notifiedPlayers);
 
-					for (EntityPlayerMP player : onlineMembers)
+					for (ServerPlayerEntity player : onlineMembers)
 					{
 						FTBQuestsInventoryListener.detect(player, ItemStack.EMPTY);
 					}
@@ -98,16 +99,9 @@ public class TaskData<T extends Task> implements ICapabilityProvider, IItemHandl
 	}
 
 	@Override
-	public boolean hasCapability(Capability<?> capability, @Nullable EnumFacing facing)
+	public <C> LazyOptional<C> getCapability(Capability<C> capability, @Nullable Direction facing)
 	{
-		return false;
-	}
-
-	@Nullable
-	@Override
-	public <C> C getCapability(Capability<C> capability, @Nullable EnumFacing facing)
-	{
-		return null;
+		return LazyOptional.empty();
 	}
 
 	public final int getRelativeProgress()
@@ -152,9 +146,15 @@ public class TaskData<T extends Task> implements ICapabilityProvider, IItemHandl
 		return data.toString() + "#" + task;
 	}
 
-	public ItemStack insertItem(ItemStack stack, boolean singleItem, boolean simulate, @Nullable EntityPlayer player)
+	public ItemStack insertItem(ItemStack stack, boolean singleItem, boolean simulate, @Nullable PlayerEntity player)
 	{
 		return stack;
+	}
+
+	@Override
+	public boolean isItemValid(int slot, ItemStack stack)
+	{
+		return true;
 	}
 
 	@Override
@@ -192,7 +192,7 @@ public class TaskData<T extends Task> implements ICapabilityProvider, IItemHandl
 		return 64;
 	}
 
-	public void submitTask(EntityPlayerMP player, ItemStack item)
+	public void submitTask(ServerPlayerEntity player, ItemStack item)
 	{
 		if (!task.canInsertItem() || !item.isEmpty())
 		{
@@ -220,7 +220,7 @@ public class TaskData<T extends Task> implements ICapabilityProvider, IItemHandl
 		}
 	}
 
-	public final void submitTask(EntityPlayerMP player)
+	public final void submitTask(ServerPlayerEntity player)
 	{
 		submitTask(player, ItemStack.EMPTY);
 	}

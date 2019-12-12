@@ -1,21 +1,21 @@
 package com.feed_the_beast.ftbquests.quest.task;
 
-import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
-import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
-import com.feed_the_beast.ftblib.lib.gui.IOpenableGui;
-import com.feed_the_beast.ftblib.lib.gui.misc.GuiEditConfig;
-import com.feed_the_beast.ftblib.lib.gui.misc.GuiEditConfigValue;
-import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
+import com.feed_the_beast.mods.ftbguilibrary.config.ConfigLong;
+import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiEditConfig;
+import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiEditConfigFromString;
+import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
+import com.feed_the_beast.mods.ftbguilibrary.widget.GuiIcons;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.registries.ForgeRegistry;
-import net.minecraftforge.registries.IForgeRegistryEntry;
+import net.minecraftforge.registries.ForgeRegistryEntry;
 import net.minecraftforge.registries.RegistryBuilder;
 
 import javax.annotation.Nullable;
@@ -24,7 +24,7 @@ import java.util.function.Consumer;
 /**
  * @author LatvianModder
  */
-public final class TaskType extends IForgeRegistryEntry.Impl<TaskType>
+public final class TaskType extends ForgeRegistryEntry<TaskType>
 {
 	private static ForgeRegistry<TaskType> REGISTRY;
 
@@ -78,8 +78,8 @@ public final class TaskType extends IForgeRegistryEntry.Impl<TaskType>
 
 	public interface GuiProvider
 	{
-		@SideOnly(Side.CLIENT)
-		void openCreationGui(IOpenableGui gui, Quest quest, Consumer<Task> callback);
+		@OnlyIn(Dist.CLIENT)
+		void openCreationGui(Runnable gui, Quest quest, Consumer<Task> callback);
 	}
 
 	public final Provider provider;
@@ -95,27 +95,37 @@ public final class TaskType extends IForgeRegistryEntry.Impl<TaskType>
 		guiProvider = new GuiProvider()
 		{
 			@Override
-			@SideOnly(Side.CLIENT)
-			public void openCreationGui(IOpenableGui gui, Quest quest, Consumer<Task> callback)
+			@OnlyIn(Dist.CLIENT)
+			public void openCreationGui(Runnable gui, Quest quest, Consumer<Task> callback)
 			{
 				Task task = provider.create(quest);
 
 				if (task instanceof ISingleLongValueTask)
 				{
-					new GuiEditConfigValue("value", ((ISingleLongValueTask) task).getDefaultValue(), (value, set) -> {
-						gui.openGui();
-						if (set)
+					ISingleLongValueTask t = (ISingleLongValueTask) task;
+					ConfigLong c = new ConfigLong(0L, t.getMaxConfigValue());
+
+					GuiEditConfigFromString.open(c, t.getDefaultConfigValue(), t.getDefaultConfigValue(), accepted -> {
+						if (accepted)
 						{
-							((ISingleLongValueTask) task).setValue(value.getLong());
+							((ISingleLongValueTask) task).setValue(c.value);
 							callback.accept(task);
 						}
-					}).openGui();
+						gui.run();
+					});
 					return;
 				}
 
-				ConfigGroup group = ConfigGroup.newGroup(FTBQuests.MOD_ID);
+				ConfigGroup group = new ConfigGroup(FTBQuests.MOD_ID);
 				task.getConfig(task.createSubGroup(group));
-				new GuiEditConfig(group, (g1, sender) -> callback.accept(task)).openGui();
+				group.savedCallback = accepted -> {
+					if (accepted)
+					{
+						callback.accept(task);
+					}
+					gui.run();
+				};
+				new GuiEditConfig(group).openGui();
 			}
 		};
 	}

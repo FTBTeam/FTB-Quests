@@ -1,36 +1,35 @@
 package com.feed_the_beast.ftbquests.quest.task;
 
-import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
-import com.feed_the_beast.ftblib.lib.io.DataIn;
-import com.feed_the_beast.ftblib.lib.io.DataOut;
-import com.feed_the_beast.ftblib.lib.util.misc.NameMap;
+import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.QuestData;
-import net.minecraft.entity.player.EntityPlayerMP;
+import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
+import com.feed_the_beast.mods.ftbguilibrary.config.NameMap;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.stats.StatBase;
-import net.minecraft.stats.StatList;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.stats.Stat;
+import net.minecraft.stats.Stats;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author LatvianModder
  */
 public class StatTask extends Task
 {
-	public StatBase stat = StatList.MOB_KILLS;
+	public Stat<ResourceLocation> stat;
 	public int value = 1;
-
-	public static StatBase get(String id)
-	{
-		StatBase stat = StatList.getOneShotStat(id);
-		return stat == null ? StatList.MOB_KILLS : stat;
-	}
 
 	public StatTask(Quest quest)
 	{
 		super(quest);
+		stat = Stats.CUSTOM.get(Stats.MOB_KILLS);
 	}
 
 	@Override
@@ -52,50 +51,53 @@ public class StatTask extends Task
 	}
 
 	@Override
-	public void writeData(NBTTagCompound nbt)
+	public void writeData(CompoundNBT nbt)
 	{
 		super.writeData(nbt);
-		nbt.setString("stat", stat.statId);
-		nbt.setInteger("value", value);
+		nbt.putString("stat", stat.toString());
+		nbt.putInt("value", value);
 	}
 
 	@Override
-	public void readData(NBTTagCompound nbt)
+	public void readData(CompoundNBT nbt)
 	{
 		super.readData(nbt);
-		stat = get(nbt.getString("stat"));
-		value = nbt.getInteger("value");
+		stat = Stats.CUSTOM.get(new ResourceLocation(nbt.getString("stat")));
+		value = nbt.getInt("value");
 	}
 
 	@Override
-	public void writeNetData(DataOut data)
+	public void writeNetData(PacketBuffer buffer)
 	{
-		super.writeNetData(data);
-		data.writeString(stat.statId);
-		data.writeVarInt(value);
+		super.writeNetData(buffer);
+		buffer.writeResourceLocation(stat.getValue());
+		buffer.writeVarInt(value);
 	}
 
 	@Override
-	public void readNetData(DataIn data)
+	public void readNetData(PacketBuffer buffer)
 	{
-		super.readNetData(data);
-		stat = get(data.readString());
-		value = data.readVarInt();
+		super.readNetData(buffer);
+		stat = Stats.CUSTOM.get(buffer.readResourceLocation());
+		value = buffer.readVarInt();
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
+	@OnlyIn(Dist.CLIENT)
 	public void getConfig(ConfigGroup config)
 	{
 		super.getConfig(config);
-		config.addEnum("stat", () -> stat, v -> stat = v, NameMap.createWithName(StatList.MOB_KILLS, (sender, s) -> s.getStatName(), StatList.BASIC_STATS.toArray(new StatBase[0])));
-		config.addInt("value", () -> value, v -> value = v, 1, 1, Integer.MAX_VALUE);
+
+		List<Stat<ResourceLocation>> list = new ArrayList<>();
+		Stats.CUSTOM.iterator().forEachRemaining(list::add);
+		config.addEnum("stat", stat, v -> stat = v, NameMap.of(Stats.CUSTOM.get(Stats.MOB_KILLS), list).name(v -> new TranslationTextComponent("stat." + v.getValue().getNamespace() + "." + v.getValue().getPath())).create());
+		config.addInt("value", value, v -> value = v, 1, 1, Integer.MAX_VALUE);
 	}
 
 	@Override
 	public String getAltTitle()
 	{
-		return stat.getStatName().getUnformattedText();
+		return stat.getName();
 	}
 
 	@Override
@@ -111,14 +113,14 @@ public class StatTask extends Task
 	}
 
 	@Override
-	public TaskData createData(QuestData data)
+	public TaskData createData(PlayerData data)
 	{
 		return new Data(this, data);
 	}
 
 	public static class Data extends TaskData<StatTask>
 	{
-		private Data(StatTask task, QuestData data)
+		private Data(StatTask task, PlayerData data)
 		{
 			super(task, data);
 		}
@@ -130,14 +132,14 @@ public class StatTask extends Task
 		}
 
 		@Override
-		public void submitTask(EntityPlayerMP player, ItemStack item)
+		public void submitTask(ServerPlayerEntity player, ItemStack item)
 		{
 			if (isComplete())
 			{
 				return;
 			}
 
-			int set = Math.min(task.value, player.getStatFile().readStat(task.stat));
+			int set = Math.min(task.value, player.getStats().getValue(task.stat));
 
 			if (set > progress)
 			{

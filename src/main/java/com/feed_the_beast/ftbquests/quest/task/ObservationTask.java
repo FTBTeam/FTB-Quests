@@ -1,30 +1,35 @@
 package com.feed_the_beast.ftbquests.quest.task;
 
-import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
-import com.feed_the_beast.ftblib.lib.config.ConfigTimer;
-import com.feed_the_beast.ftblib.lib.io.DataIn;
-import com.feed_the_beast.ftblib.lib.io.DataOut;
-import com.feed_the_beast.ftblib.lib.math.Ticks;
+import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.QuestData;
-import com.feed_the_beast.ftbquests.util.RayMatcher;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.math.RayTraceResult;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 /**
  * @author LatvianModder
  */
 public class ObservationTask extends Task
 {
-	public final RayMatcher matcher;
-	public Ticks timer;
+	@FunctionalInterface
+	public interface Check
+	{
+		boolean check(PlayerEntity player, RayTraceResult lookingAt);
+	}
+
+	public final Check matcher;
+	public long ticks;
 
 	public ObservationTask(Quest quest)
 	{
 		super(quest);
-		matcher = new RayMatcher();
-		timer = Ticks.NO_TICKS;
+		matcher = (player, ray) -> false;
+		ticks = 0L;
 	}
 
 	@Override
@@ -34,69 +39,49 @@ public class ObservationTask extends Task
 	}
 
 	@Override
-	public void writeData(NBTTagCompound nbt)
+	public void writeData(CompoundNBT nbt)
 	{
 		super.writeData(nbt);
-		matcher.writeData(nbt);
-		nbt.setLong("timer", timer.ticks());
+		nbt.putLong("ticks", ticks);
 	}
 
 	@Override
-	public void readData(NBTTagCompound nbt)
+	public void readData(CompoundNBT nbt)
 	{
 		super.readData(nbt);
-		matcher.readData(nbt);
-		timer = Ticks.get(nbt.getLong("timer"));
+		ticks = nbt.getLong("ticks");
 	}
 
 	@Override
-	public void writeNetData(DataOut data)
+	public void writeNetData(PacketBuffer buffer)
 	{
-		super.writeNetData(data);
-		matcher.writeNetData(data);
-		data.writeVarLong(timer.ticks());
+		super.writeNetData(buffer);
+		buffer.writeVarLong(ticks);
 	}
 
 	@Override
-	public void readNetData(DataIn data)
+	public void readNetData(PacketBuffer buffer)
 	{
-		super.readNetData(data);
-		matcher.readNetData(data);
-		timer = Ticks.get(data.readVarLong());
+		super.readNetData(buffer);
+		ticks = buffer.readVarLong();
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
+	@OnlyIn(Dist.CLIENT)
 	public void getConfig(ConfigGroup config)
 	{
 		super.getConfig(config);
-		config.addEnum("type", () -> matcher.type, v -> matcher.type = v, RayMatcher.Type.NAME_MAP);
-		config.addString("match", () -> matcher.match, v -> matcher.match = v, "");
-		config.addString("properties", matcher::getPropertyString, matcher::setPropertyString, "");
-		config.add("timer", new ConfigTimer(timer)
-		{
-			@Override
-			public Ticks getTimer()
-			{
-				return timer;
-			}
-
-			@Override
-			public void setTimer(Ticks v)
-			{
-				timer = v;
-			}
-		}, new ConfigTimer(Ticks.NO_TICKS));
+		config.addLong("ticks", ticks, v -> ticks = v, 0L, 0L, 1200L);
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
-	public void onButtonClicked(boolean canClick)
+	@OnlyIn(Dist.CLIENT)
+	public void onButtonClicked(Button button, boolean canClick)
 	{
 	}
 
 	@Override
-	public TaskData createData(QuestData data)
+	public TaskData createData(PlayerData data)
 	{
 		return new BooleanTaskData<>(this, data);
 	}

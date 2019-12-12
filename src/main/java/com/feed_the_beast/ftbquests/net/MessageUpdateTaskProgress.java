@@ -1,72 +1,55 @@
 package com.feed_the_beast.ftbquests.net;
 
-import com.feed_the_beast.ftblib.lib.io.DataIn;
-import com.feed_the_beast.ftblib.lib.io.DataOut;
-import com.feed_the_beast.ftblib.lib.net.MessageToClient;
-import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
-import com.feed_the_beast.ftbquests.client.ClientQuestData;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
+import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.quest.task.Task;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import com.feed_the_beast.ftbquests.util.NetUtils;
+import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.fml.network.NetworkEvent;
+
+import java.util.UUID;
 
 /**
  * @author LatvianModder
  */
-public class MessageUpdateTaskProgress extends MessageToClient
+public class MessageUpdateTaskProgress extends MessageBase
 {
-	private short team;
+	private UUID player;
 	private int task;
 	private long progress;
 
-	public MessageUpdateTaskProgress()
+	public MessageUpdateTaskProgress(PacketBuffer buffer)
 	{
+		player = NetUtils.readUUID(buffer);
+		task = buffer.readVarInt();
+		progress = buffer.readVarLong();
 	}
 
-	public MessageUpdateTaskProgress(short t, int k, long p)
+	public MessageUpdateTaskProgress(PlayerData t, int k, long p)
 	{
-		team = t;
+		player = t.uuid;
 		task = k;
 		progress = p;
 	}
 
 	@Override
-	public NetworkWrapper getWrapper()
+	public void write(PacketBuffer buffer)
 	{
-		return FTBQuestsNetHandler.GENERAL;
+		NetUtils.writeUUID(buffer, player);
+		buffer.writeVarInt(task);
+		buffer.writeVarLong(progress);
 	}
 
 	@Override
-	public void writeData(DataOut data)
+	public void handle(NetworkEvent.Context context)
 	{
-		data.writeShort(team);
-		data.writeInt(task);
-		data.writeVarLong(progress);
-	}
+		Task t = ClientQuestFile.INSTANCE.getTask(task);
 
-	@Override
-	public void readData(DataIn data)
-	{
-		team = data.readShort();
-		task = data.readInt();
-		progress = data.readVarLong();
-	}
-
-	@Override
-	@SideOnly(Side.CLIENT)
-	public void onMessage()
-	{
-		Task qtask = ClientQuestFile.INSTANCE.getTask(task);
-
-		if (qtask != null)
+		if (t != null)
 		{
-			ClientQuestData data = ClientQuestFile.INSTANCE.getData(team);
-
-			if (data != null)
-			{
-				ClientQuestFile.INSTANCE.clearCachedProgress();
-				data.getTaskData(qtask).setProgress(progress);
-			}
+			PlayerData data = ClientQuestFile.INSTANCE.getData(player);
+			ClientQuestFile.INSTANCE.clearCachedProgress();
+			data.getTaskData(t).setProgress(progress);
 		}
 	}
 }

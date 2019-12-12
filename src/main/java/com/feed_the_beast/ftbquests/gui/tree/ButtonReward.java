@@ -1,18 +1,17 @@
 package com.feed_the_beast.ftbquests.gui.tree;
 
-import com.feed_the_beast.ftblib.lib.gui.Button;
-import com.feed_the_beast.ftblib.lib.gui.ContextMenuItem;
-import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
-import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
-import com.feed_the_beast.ftblib.lib.gui.Panel;
-import com.feed_the_beast.ftblib.lib.gui.Theme;
-import com.feed_the_beast.ftblib.lib.gui.WidgetType;
-import com.feed_the_beast.ftblib.lib.icon.Color4I;
-import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.quest.reward.Reward;
 import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
-import net.minecraft.client.renderer.GlStateManager;
+import com.feed_the_beast.mods.ftbguilibrary.icon.Color4I;
+import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
+import com.feed_the_beast.mods.ftbguilibrary.widget.ContextMenuItem;
+import com.feed_the_beast.mods.ftbguilibrary.widget.GuiIcons;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
+import com.feed_the_beast.mods.ftbguilibrary.widget.WidgetType;
+import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.TextFormatting;
 
@@ -87,7 +86,7 @@ public class ButtonReward extends Button
 	@Override
 	public WidgetType getWidgetType()
 	{
-		if (!ClientQuestFile.existsWithTeam() || !reward.quest.isComplete(ClientQuestFile.INSTANCE.self))
+		if (!ClientQuestFile.exists() || !ClientQuestFile.INSTANCE.self.isComplete(reward.quest))
 		{
 			return WidgetType.DISABLED;
 		}
@@ -100,14 +99,14 @@ public class ButtonReward extends Button
 	{
 		if (button.isLeft())
 		{
-			if (ClientQuestFile.existsWithTeam())
+			if (ClientQuestFile.exists())
 			{
-				reward.onButtonClicked(reward.quest.isComplete(ClientQuestFile.INSTANCE.self) && !ClientQuestFile.INSTANCE.self.isRewardClaimedSelf(reward));
+				reward.onButtonClicked(this, ClientQuestFile.INSTANCE.self.isComplete(reward.quest) && !ClientQuestFile.INSTANCE.self.isRewardClaimed(reward.id));
 			}
 		}
 		else if (button.isRight() && ClientQuestFile.exists() && ClientQuestFile.INSTANCE.canEdit())
 		{
-			GuiHelper.playClickSound();
+			playClickSound();
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
 			GuiQuestTree.addObjectMenuItems(contextMenu, getGui(), reward);
 			getGui().openContextMenu(contextMenu);
@@ -138,19 +137,19 @@ public class ButtonReward extends Button
 		drawIcon(theme, x + (w - bs) / 2, y + (h - bs) / 2, bs, bs);
 
 		GlStateManager.pushMatrix();
-		GlStateManager.translate(0F, 0F, 500F);
+		GlStateManager.translatef(0F, 0F, 500F);
 		boolean completed = false;
 
-		if (!ClientQuestFile.existsWithTeam())
+		if (!ClientQuestFile.exists())
 		{
 			GuiIcons.CLOSE.draw(x + w - 9, y + 1, 8, 8);
 		}
-		else if (ClientQuestFile.INSTANCE.self.isRewardClaimedSelf(reward))
+		else if (ClientQuestFile.INSTANCE.self.isRewardClaimed(reward.id))
 		{
 			ThemeProperties.CHECK_ICON.get().draw(x + w - 9, y + 1, 8, 8);
 			completed = true;
 		}
-		else if (reward.quest.isComplete(ClientQuestFile.INSTANCE.self))
+		else if (ClientQuestFile.INSTANCE.self.isComplete(reward.quest))
 		{
 			ThemeProperties.ALERT_ICON.get().draw(x + w - 9, y + 1, 8, 8);
 		}
@@ -164,8 +163,8 @@ public class ButtonReward extends Button
 			if (!s.isEmpty())
 			{
 				GlStateManager.pushMatrix();
-				GlStateManager.translate(x + 19F - theme.getStringWidth(s) / 2F, y + 15F, 500F);
-				GlStateManager.scale(0.5F, 0.5F, 1F);
+				GlStateManager.translatef(x + 19F - theme.getStringWidth(s) / 2F, y + 15F, 500F);
+				GlStateManager.scalef(0.5F, 0.5F, 1F);
 				theme.drawString(s, 0, 0, Color4I.WHITE, Theme.SHADOW);
 				GlStateManager.popMatrix();
 			}

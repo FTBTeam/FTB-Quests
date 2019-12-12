@@ -1,21 +1,21 @@
 package com.feed_the_beast.ftbquests.integration.jei;
 
-import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
-import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
-import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.quest.loot.LootCrate;
 import com.feed_the_beast.ftbquests.quest.loot.RewardTable;
 import com.feed_the_beast.ftbquests.quest.loot.WeightedReward;
-import mezz.jei.api.gui.ITooltipCallback;
+import com.feed_the_beast.mods.ftbguilibrary.icon.ItemIcon;
+import com.feed_the_beast.mods.ftbguilibrary.utils.StringUtils;
+import com.feed_the_beast.mods.ftbguilibrary.widget.GuiHelper;
+import mezz.jei.api.constants.VanillaTypes;
+import mezz.jei.api.gui.ingredient.ITooltipCallback;
 import mezz.jei.api.ingredients.IIngredients;
-import mezz.jei.api.ingredients.VanillaTypes;
-import mezz.jei.api.recipe.IRecipeWrapper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagString;
+import net.minecraft.item.Items;
+import net.minecraft.nbt.StringNBT;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 
 import java.util.ArrayList;
@@ -25,7 +25,7 @@ import java.util.List;
 /**
  * @author LatvianModder
  */
-public class LootCrateWrapper implements IRecipeWrapper, ITooltipCallback<ItemStack>
+public class LootCrateWrapper implements /*IRecipeWrapper, */ITooltipCallback<ItemStack>
 {
 	public final LootCrate crate;
 	public final String name;
@@ -56,14 +56,14 @@ public class LootCrateWrapper implements IRecipeWrapper, ITooltipCallback<ItemSt
 			else if (reward.reward.getIcon() instanceof ItemIcon)
 			{
 				stack = ((ItemIcon) reward.reward.getIcon()).getStack().copy();
-				stack.setStackDisplayName(reward.reward.getTitle());
+				stack.setDisplayName(new StringTextComponent(reward.reward.getTitle()));
 				items.add(stack);
 			}
 			else
 			{
 				stack = new ItemStack(Items.PAINTING);
-				stack.setStackDisplayName(reward.reward.getTitle());
-				stack.setTagInfo("icon", new NBTTagString(reward.reward.getIcon().toString()));
+				stack.setDisplayName(new StringTextComponent(reward.reward.getTitle()));
+				stack.setTagInfo("icon", new StringNBT(reward.reward.getIcon().toString()));
 				items.add(stack);
 			}
 		}
@@ -93,7 +93,7 @@ public class LootCrateWrapper implements IRecipeWrapper, ITooltipCallback<ItemSt
 		}
 	}
 
-	@Override
+	//FIXME: @Override
 	public void getIngredients(IIngredients ingredients)
 	{
 		ingredients.setInput(VanillaTypes.ITEM, itemStack);
@@ -112,7 +112,7 @@ public class LootCrateWrapper implements IRecipeWrapper, ITooltipCallback<ItemSt
 		return s;
 	}
 
-	@Override
+	//FIXME: @Override
 	public void drawInfo(Minecraft mc, int recipeWidth, int recipeHeight, int mouseX, int mouseY)
 	{
 		GuiHelper.drawItem(itemStack, 0, 0, 2, 2, true);

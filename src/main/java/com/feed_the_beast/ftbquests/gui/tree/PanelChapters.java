@@ -1,12 +1,12 @@
 package com.feed_the_beast.ftbquests.gui.tree;
 
-import com.feed_the_beast.ftblib.lib.gui.ColorWidget;
-import com.feed_the_beast.ftblib.lib.gui.Panel;
-import com.feed_the_beast.ftblib.lib.gui.WidgetLayout;
-import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftbquests.quest.Chapter;
 import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
-import net.minecraftforge.fml.common.Loader;
+import com.feed_the_beast.mods.ftbguilibrary.icon.Color4I;
+import com.feed_the_beast.mods.ftbguilibrary.widget.ColorWidget;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
+import com.feed_the_beast.mods.ftbguilibrary.widget.WidgetLayout;
+import net.minecraftforge.fml.ModList;
 
 /**
  * @author LatvianModder
@@ -25,7 +25,7 @@ public class PanelChapters extends Panel
 	@Override
 	public void addWidgets()
 	{
-		if (Loader.isModLoaded("ftbmoney"))
+		if (ModList.get().isLoaded("ftbmoney"))
 		{
 			add(new ButtonOpenShop(this));
 			Color4I borderColor = ThemeProperties.WIDGET_BORDER.get(treeGui.selectedChapter);

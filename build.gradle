@@ -1,17 +1,18 @@
 buildscript {
 	repositories {
 		jcenter()
-		maven { url = "http://files.minecraftforge.net/maven" }
+		maven { url = 'https://files.minecraftforge.net/maven' }
 		maven { url "https://plugins.gradle.org/m2/" }
+		mavenCentral()
 	}
 	dependencies {
-		classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
+		classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
 		classpath 'gradle.plugin.com.matthewprenger:CurseGradle:1.1.0'
 		classpath 'com.wynprice.cursemaven:CurseMaven:1.2.+'
 	}
 }
-
-apply plugin: 'net.minecraftforge.gradle.forge'
+apply plugin: 'net.minecraftforge.gradle'
+apply plugin: 'eclipse'
 apply plugin: 'com.matthewprenger.cursegradle'
 apply plugin: 'maven'
 apply plugin: 'com.wynprice.cursemaven'
@@ -20,64 +21,104 @@ apply from: 'https://raw.githubusercontent.com/MinecraftModDevelopment/Gradle-Co
 
 def ENV = System.getenv()
 version = ENV.BUILD_NUMBER ? "${mod_version}.${ENV.BUILD_NUMBER}" : "${mod_version}.custom"
-group = package_group
-archivesBaseName = mod_name
+group = project.mod_package
+archivesBaseName = project.mod_name
 
-sourceCompatibility = targetCompatibility = "1.8"
-compileJava {
-	sourceCompatibility = targetCompatibility = "1.8"
-}
+sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
 
 minecraft {
-	version = "${mc_version}-${forge_version}"
-	runDir = "run"
-	mappings = project.mappings_version
+	mappings channel: 'snapshot', version: project.mapping_version
+	// accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
+	runs {
+		client {
+			workingDirectory project.file('run')
+			property 'forge.logging.console.level', 'debug'
 
-	replace "0.0.0.ftbquests", project.version
-	replaceIn project.mod_reference
+			mods {
+				kubejs {
+					source sourceSets.main
+				}
+			}
+		}
+
+		server {
+			workingDirectory project.file('run')
+			property 'forge.logging.console.level', 'debug'
+
+			mods {
+				kubejs {
+					source sourceSets.main
+				}
+			}
+		}
+
+		data {
+			workingDirectory project.file('run')
+			property 'forge.logging.console.level', 'debug'
+
+			args '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/')
+
+			mods {
+				kubejs {
+					source sourceSets.main
+				}
+			}
+		}
+	}
 }
 
+/*
 configurations.all {
 	transitive = false
 }
+*/
 
 repositories {
 	mavenLocal()
-	maven { url "https://maven.latmod.com/" } //FTB Library, KubeJS, Item Filters, FTB Utilities
+	maven { url "https://maven.latmod.com/" } //Aurora
 }
 
 dependencies {
-	deobfCompile "com.feed_the_beast.mods:FTBLib:${ftblib_version}"
-	deobfCompile "com.latmod.mods:ItemFilters:${itemfilters_version}"
-	deobfProvided "dev.latvian.kubejs:KubeJS:forge-1.12.2-${kubejs_version}"
-	deobfProvided "com.feed_the_beast.mods:FTBUtilities:${ftbutilities_version}"
-	deobfProvided curse.resolve('jei', project.jei_file)
-	deobfProvided curse.resolve('industrial-craft', project.industrialcraft_file)
-	deobfProvided curse.resolve('packmode', project.packmode_file)
-	deobfProvided curse.resolve('botania', project.botania_file)
-	deobfProvided curse.resolve('baubles', project.baubles_file)
-	deobfProvided curse.resolve('buildcraft-core', project.buildcraftcore_file)
-	deobfProvided curse.resolve('projecte', project.projecte_file)
-	deobfProvided curse.resolve('game-stages', project.gamestages_file)
-	deobfProvided curse.resolve('custom-npcs', project.customnpcs_file)
+	minecraft "net.minecraftforge:forge:${forge_version}"
+	compile "com.feed_the_beast.mods:ftb-gui-library:${ftb_gui_library_version}:deobf"
+	compile "dev.latvian.mods:item-filters:${itemfilters_version}:deobf"
+	compile "com.feed_the_beast.mods:ftb-teams:${ftb_teams_version}:deobf"
+	compile "dev.latvian.mods:kubejs-forge-1.14.4:${kubejs_version}:deobf"
+	compile fg.deobf(curse.resolve('jei', project.jei_file))
+	compile fg.deobf(curse.resolve('packmode', project.packmode_file))
+	compile fg.deobf(curse.resolve('bookshelf', project.bookshelf_file))
+	compile fg.deobf(curse.resolve('game-stages', project.gamestages_file))
 }
 
-processResources {
-	inputs.property "version", project.version
-	inputs.property "mcversion", project.minecraft.version
-
-	from(sourceSets.main.resources.srcDirs) {
-		include 'mcmod.info'
-		expand 'version': project.version, 'mcversion': project.minecraft.version
+jar {
+	manifest {
+		attributes([
+				"Specification-Title"     : project.mod_id,
+				"Specification-Vendor"    : project.mod_author,
+				"Specification-Version"   : "1",
+				"Implementation-Title"    : project.name,
+				"Implementation-Version"  : version,
+				"Implementation-Vendor"   : project.mod_author,
+				"Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+		])
 	}
+}
 
-	from(sourceSets.main.resources.srcDirs) {
-		exclude 'mcmod.info'
-	}
+task deobfJar(type: Jar) {
+	from sourceSets.main.output
+	classifier 'deobf'
+}
+
+build.dependsOn deobfJar
+
+def reobfFile = file("$buildDir/reobfJar/output.jar")
+def reobfArtifact = artifacts.add('default', reobfFile) {
+	type 'jar'
+	builtBy 'reobfJar'
 }
 
 artifacts {
-	archives sourceJar
+	archives deobfJar
 }
 
 if (ENV.LOCAL_MAVEN) {
@@ -90,31 +131,24 @@ if (ENV.LOCAL_MAVEN) {
 	}
 }
 
+/*
 if (ENV.CURSEFORGE_KEY) {
 	curseforge {
 		apiKey = ENV.CURSEFORGE_KEY
 		project {
-			id = project.curseforge_id
+			id = "${curseforge_id}"
 			releaseType = "release"
-			addGameVersion project.mc_version
+			addGameVersion "1.14.4"
 			relations {
-				requiredDependency 'ftblib'
-				requiredDependency 'item-filters'
-				optionalDependency 'kubejs'
-				optionalDependency 'ftb-utilities'
+				optionalDependency 'aurora'
 				optionalDependency 'jei'
-				optionalDependency 'industrial-craft'
 				optionalDependency 'packmode'
-				optionalDependency 'botania'
-				optionalDependency 'baubles'
-				optionalDependency 'buildcraft-core'
-				optionalDependency 'projecte'
 				optionalDependency 'game-stages'
-				optionalDependency 'custom-npcs'
 			}
 			changelog = getGitChangelog
 			changelogType = 'markdown'
-			addArtifact(sourceJar)
+			addArtifact(deobfJar)
 		}
 	}
 }
+*/

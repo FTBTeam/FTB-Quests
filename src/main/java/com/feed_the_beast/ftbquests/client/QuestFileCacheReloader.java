@@ -1,8 +1,9 @@
 package com.feed_the_beast.ftbquests.client;
 
-import net.minecraft.client.resources.IResourceManager;
-import net.minecraftforge.client.resource.IResourceType;
-import net.minecraftforge.client.resource.ISelectiveResourceReloadListener;
+
+import net.minecraft.resources.IResourceManager;
+import net.minecraftforge.resource.IResourceType;
+import net.minecraftforge.resource.ISelectiveResourceReloadListener;
 
 import java.util.function.Predicate;
 

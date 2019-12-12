@@ -1,19 +1,18 @@
 package com.feed_the_beast.ftbquests.gui.tree;
 
-import com.feed_the_beast.ftblib.lib.gui.ContextMenuItem;
-import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
-import com.feed_the_beast.ftblib.lib.gui.Panel;
-import com.feed_the_beast.ftblib.lib.gui.SimpleTextButton;
-import com.feed_the_beast.ftblib.lib.gui.Theme;
-import com.feed_the_beast.ftblib.lib.gui.WidgetType;
-import com.feed_the_beast.ftblib.lib.icon.Color4I;
-import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.client.FTBQuestsClient;
-import com.feed_the_beast.ftbquests.net.edit.MessageMoveChapter;
+import com.feed_the_beast.ftbquests.net.MessageMoveChapter;
 import com.feed_the_beast.ftbquests.quest.Chapter;
 import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GlStateManager;
+import com.feed_the_beast.mods.ftbguilibrary.icon.Color4I;
+import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
+import com.feed_the_beast.mods.ftbguilibrary.widget.ContextMenuItem;
+import com.feed_the_beast.mods.ftbguilibrary.widget.GuiHelper;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
+import com.feed_the_beast.mods.ftbguilibrary.widget.SimpleTextButton;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
+import com.feed_the_beast.mods.ftbguilibrary.widget.WidgetType;
+import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.TextFormatting;
 
@@ -38,7 +37,7 @@ public class ButtonExpandedChapter extends SimpleTextButton
 
 		if (treeGui.file.self != null)
 		{
-			int p = c.getRelativeProgress(treeGui.file.self);
+			int p = treeGui.file.self.getRelativeProgress(c);
 
 			if (p > 0 && p < 100)
 			{
@@ -70,7 +69,7 @@ public class ButtonExpandedChapter extends SimpleTextButton
 	{
 		if (treeGui.file.canEdit() || !chapter.quests.isEmpty())
 		{
-			GuiHelper.playClickSound();
+			playClickSound();
 
 			if (treeGui.selectedChapter != chapter)
 			{
@@ -136,17 +135,17 @@ public class ButtonExpandedChapter extends SimpleTextButton
 
 		int w2 = 20;
 
-		if (chapter.hasUnclaimedRewards(Minecraft.getMinecraft().player.getUniqueID(), treeGui.file.self, true))
+		if (treeGui.file.self.hasUnclaimedRewards(chapter, true))
 		{
 			GlStateManager.pushMatrix();
-			GlStateManager.translate(0F, 0F, 450F);
+			GlStateManager.translatef(0, 0, 450);
 			ThemeProperties.ALERT_ICON.get().draw(x + w2 - 7, y + 3, 6, 6);
 			GlStateManager.popMatrix();
 		}
-		else if (chapter.isComplete(treeGui.file.self))
+		else if (treeGui.file.self.isComplete(chapter))
 		{
 			GlStateManager.pushMatrix();
-			GlStateManager.translate(0F, 0F, 450F);
+			GlStateManager.translatef(0, 0, 450);
 			ThemeProperties.CHECK_ICON.get().draw(x + w2 - 8, y + 2, 8, 8);
 			GlStateManager.popMatrix();
 		}

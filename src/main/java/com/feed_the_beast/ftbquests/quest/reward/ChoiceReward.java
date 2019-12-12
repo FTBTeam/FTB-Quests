@@ -1,11 +1,11 @@
 package com.feed_the_beast.ftbquests.quest.reward;
 
-import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
 import com.feed_the_beast.ftbquests.gui.GuiSelectChoiceReward;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.util.List;
 
@@ -26,12 +26,12 @@ public class ChoiceReward extends RandomReward
 	}
 
 	@Override
-	public void claim(EntityPlayerMP player, boolean notify)
+	public void claim(ServerPlayerEntity player, boolean notify)
 	{
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
+	@OnlyIn(Dist.CLIENT)
 	public void addMouseOverText(List<String> list)
 	{
 		if (getTable() != null)
@@ -41,12 +41,12 @@ public class ChoiceReward extends RandomReward
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
-	public void onButtonClicked(boolean canClick)
+	@OnlyIn(Dist.CLIENT)
+	public void onButtonClicked(Button button, boolean canClick)
 	{
 		if (canClick)
 		{
-			GuiHelper.playClickSound();
+			button.playClickSound();
 			new GuiSelectChoiceReward(this).openGui();
 		}
 	}

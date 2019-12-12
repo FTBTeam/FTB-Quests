@@ -1,0 +1,76 @@
+modLoader="javafml"
+loaderVersion="[28,)"
+issueTrackerURL="https://github.com/FTBTeam/FTB-Quests/issues"
+
+[[mods]]
+modId="ftbquests"
+version="${file.jarVersion}"
+displayName="FTB Quests"
+authors="LatvianModder"
+description='''
+Lets you easily create and play with quests
+'''
+# logoFile="logo.png"
+
+[[dependencies.ftbquests]]
+    modId="forge"
+    mandatory=true
+    versionRange="[28,)"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.ftbquests]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[1.14.4]"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.ftbquests]]
+    modId="itemfilters"
+    mandatory=true
+    versionRange="[1.0.0,)"
+    ordering="AFTER"
+    side="BOTH"
+
+[[dependencies.ftbquests]]
+    modId="ftbguilibrary"
+    mandatory=true
+    versionRange="[1.0.0,)"
+    ordering="AFTER"
+    side="BOTH"
+
+[[dependencies.ftbquests]]
+    modId="ftbteams"
+    mandatory=false
+    versionRange="[1.0.0,)"
+    ordering="AFTER"
+    side="BOTH"
+
+[[dependencies.ftbquests]]
+    modId="kubjes"
+    mandatory=false
+    versionRange="[1.0.0,)"
+    ordering="BEFORE"
+    side="BOTH"
+
+[[dependencies.ftbquests]]
+    modId="gamestages"
+    mandatory=false
+    versionRange="[1.0.0,)"
+    ordering="AFTER"
+    side="BOTH"
+
+[[dependencies.ftbquests]]
+    modId="jei"
+    mandatory=false
+    versionRange="[1.0.0,)"
+    ordering="AFTER"
+    side="BOTH"
+
+[[dependencies.ftbquests]]
+    modId="packmode"
+    mandatory=false
+    versionRange="[1.0.0,)"
+    ordering="AFTER"
+    side="BOTH"

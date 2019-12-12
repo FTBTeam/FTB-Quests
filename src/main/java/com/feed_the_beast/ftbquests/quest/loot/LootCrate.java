@@ -1,15 +1,13 @@
 package com.feed_the_beast.ftbquests.quest.loot;
 
-import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
-import com.feed_the_beast.ftblib.lib.icon.Color4I;
-import com.feed_the_beast.ftblib.lib.io.DataIn;
-import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
+import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
+import com.feed_the_beast.mods.ftbguilibrary.icon.Color4I;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagString;
-import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.StringNBT;
+import net.minecraft.network.PacketBuffer;
 
 import java.util.regex.Pattern;
 
@@ -35,37 +33,37 @@ public final class LootCrate
 		drops = new EntityWeight();
 	}
 
-	public void writeData(NBTTagCompound nbt)
+	public void writeData(CompoundNBT nbt)
 	{
-		nbt.setString("string_id", stringID);
+		nbt.putString("string_id", stringID);
 
 		if (!itemName.isEmpty())
 		{
-			nbt.setString("item_name", itemName);
+			nbt.putString("item_name", itemName);
 		}
 
-		nbt.setInteger("color", color.rgb());
+		nbt.putInt("color", color.rgb());
 
 		if (glow)
 		{
-			nbt.setBoolean("glow", true);
+			nbt.putBoolean("glow", true);
 		}
 
-		NBTTagCompound nbt1 = new NBTTagCompound();
+		CompoundNBT nbt1 = new CompoundNBT();
 		drops.writeData(nbt1);
-		nbt.setTag("drops", nbt1);
+		nbt.put("drops", nbt1);
 	}
 
-	public void readData(NBTTagCompound nbt)
+	public void readData(CompoundNBT nbt)
 	{
 		stringID = nbt.getString("string_id");
 		itemName = nbt.getString("item_name");
-		color = Color4I.rgb(nbt.getInteger("color"));
+		color = Color4I.rgb(nbt.getInt("color"));
 		glow = nbt.getBoolean("glow");
-		drops.readData(nbt.getCompoundTag("drops"));
+		drops.readData(nbt.getCompound("drops"));
 	}
 
-	public void writeNetData(DataOut data)
+	public void writeNetData(PacketBuffer data)
 	{
 		data.writeString(stringID);
 		data.writeString(itemName);
@@ -74,7 +72,7 @@ public final class LootCrate
 		drops.writeNetData(data);
 	}
 
-	public void readNetData(DataIn data)
+	public void readNetData(PacketBuffer data)
 	{
 		stringID = data.readString();
 		itemName = data.readString();
@@ -85,16 +83,16 @@ public final class LootCrate
 
 	public void getConfig(ConfigGroup config)
 	{
-		config.addString("id", () -> stringID, v -> stringID = v, "", Pattern.compile("[a-z0-9_]+"));
-		config.addString("item_name", () -> itemName, v -> itemName = v, "");
-		config.addString("color", () -> color.toString(), v -> color = Color4I.fromString(v), "#FFFFFF", Pattern.compile("^#[a-fA-F0-9]{6}$"));
-		config.addBool("glow", () -> glow, v -> glow = v, true);
+		config.addString("id", stringID, v -> stringID = v, "", Pattern.compile("[a-z0-9_]+"));
+		config.addString("item_name", itemName, v -> itemName = v, "");
+		config.addString("color", color.toString(), v -> color = Color4I.fromString(v), "#FFFFFF", Pattern.compile("^#[a-fA-F0-9]{6}$"));
+		config.addBool("glow", glow, v -> glow = v, true);
 
 		ConfigGroup d = config.getGroup("drops");
-		d.setDisplayName(new TextComponentTranslation("ftbquests.loot.entitydrops"));
-		d.addInt("passive", () -> drops.passive, v -> drops.passive = v, 0, 0, Integer.MAX_VALUE).setDisplayName(new TextComponentTranslation("ftbquests.loot.entitytype.passive"));
-		d.addInt("monster", () -> drops.monster, v -> drops.monster = v, 0, 0, Integer.MAX_VALUE).setDisplayName(new TextComponentTranslation("ftbquests.loot.entitytype.monster"));
-		d.addInt("boss", () -> drops.boss, v -> drops.boss = v, 0, 0, Integer.MAX_VALUE).setDisplayName(new TextComponentTranslation("ftbquests.loot.entitytype.boss"));
+		d.setNameKey("ftbquests.loot.entitydrops");
+		d.addInt("passive", drops.passive, v -> drops.passive = v, 0, 0, Integer.MAX_VALUE).setNameKey("ftbquests.loot.entitytype.passive");
+		d.addInt("monster", drops.monster, v -> drops.monster = v, 0, 0, Integer.MAX_VALUE).setNameKey("ftbquests.loot.entitytype.monster");
+		d.addInt("boss", drops.boss, v -> drops.boss = v, 0, 0, Integer.MAX_VALUE).setNameKey("ftbquests.loot.entitytype.boss");
 	}
 
 	public String getStringID()
@@ -105,7 +103,7 @@ public final class LootCrate
 	public ItemStack createStack()
 	{
 		ItemStack stack = new ItemStack(FTBQuestsItems.LOOTCRATE);
-		stack.setTagInfo("type", new NBTTagString(getStringID()));
+		stack.setTagInfo("type", new StringNBT(getStringID()));
 		return stack;
 	}
 }

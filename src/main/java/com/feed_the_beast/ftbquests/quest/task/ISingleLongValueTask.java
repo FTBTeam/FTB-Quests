@@ -1,13 +1,19 @@
 package com.feed_the_beast.ftbquests.quest.task;
 
-import com.feed_the_beast.ftblib.lib.config.ConfigLong;
-
 /**
  * @author LatvianModder
  */
 public interface ISingleLongValueTask
 {
-	ConfigLong getDefaultValue();
+	default long getDefaultConfigValue()
+	{
+		return 1L;
+	}
+
+	default long getMaxConfigValue()
+	{
+		return Long.MAX_VALUE;
+	}
 
 	void setValue(long value);
 }

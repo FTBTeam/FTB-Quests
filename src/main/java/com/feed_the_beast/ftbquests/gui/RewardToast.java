@@ -1,7 +1,7 @@
 package com.feed_the_beast.ftbquests.gui;
 
-import com.feed_the_beast.ftblib.lib.gui.misc.SimpleToast;
-import com.feed_the_beast.ftblib.lib.icon.Icon;
+import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
+import com.feed_the_beast.mods.ftbguilibrary.misc.SimpleToast;
 import net.minecraft.client.resources.I18n;
 
 /**

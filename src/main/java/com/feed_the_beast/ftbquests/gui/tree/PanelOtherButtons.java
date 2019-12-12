@@ -1,6 +1,6 @@
 package com.feed_the_beast.ftbquests.gui.tree;
 
-import com.feed_the_beast.ftblib.lib.gui.Panel;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
 
 /**
  * @author LatvianModder

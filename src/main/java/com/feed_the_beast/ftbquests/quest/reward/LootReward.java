@@ -3,9 +3,10 @@ package com.feed_the_beast.ftbquests.quest.reward;
 import com.feed_the_beast.ftbquests.gui.GuiRewardNotifications;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.loot.WeightedReward;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.util.List;
 
@@ -26,7 +27,7 @@ public class LootReward extends RandomReward
 	}
 
 	@Override
-	public void claim(EntityPlayerMP player, boolean notify)
+	public void claim(ServerPlayerEntity player, boolean notify)
 	{
 		if (getTable() == null)
 		{
@@ -62,7 +63,7 @@ public class LootReward extends RandomReward
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
+	@OnlyIn(Dist.CLIENT)
 	public void addMouseOverText(List<String> list)
 	{
 		if (getTable() != null)
@@ -72,15 +73,15 @@ public class LootReward extends RandomReward
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
-	public void onButtonClicked(boolean canClick)
+	@OnlyIn(Dist.CLIENT)
+	public void onButtonClicked(Button button, boolean canClick)
 	{
 		if (canClick)
 		{
 			new GuiRewardNotifications().openGui();
 		}
 
-		super.onButtonClicked(canClick);
+		super.onButtonClicked(button, canClick);
 	}
 
 	@Override

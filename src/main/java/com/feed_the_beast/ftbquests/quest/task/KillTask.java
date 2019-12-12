@@ -1,26 +1,23 @@
 package com.feed_the_beast.ftbquests.quest.task;
 
-import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
-import com.feed_the_beast.ftblib.lib.icon.Icon;
-import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
-import com.feed_the_beast.ftblib.lib.io.DataIn;
-import com.feed_the_beast.ftblib.lib.io.DataOut;
-import com.feed_the_beast.ftblib.lib.util.misc.NameMap;
+import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.QuestData;
+import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
+import com.feed_the_beast.mods.ftbguilibrary.config.NameMap;
+import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
+import com.feed_the_beast.mods.ftbguilibrary.icon.ItemIcon;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.entity.EntityList;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.init.Items;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.stats.StatBase;
-import net.minecraft.stats.StatList;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.item.Items;
+import net.minecraft.item.SpawnEggItem;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.common.registry.EntityEntry;
-import net.minecraftforge.fml.common.registry.ForgeRegistries;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,19 +30,6 @@ public class KillTask extends Task
 	public static final ResourceLocation ZOMBIE = new ResourceLocation("minecraft:zombie");
 	public ResourceLocation entity = ZOMBIE;
 	public long value = 100L;
-
-	public static StatBase get(String id)
-	{
-		for (StatBase base : StatList.BASIC_STATS)
-		{
-			if (base.statId.equals(id))
-			{
-				return base;
-			}
-		}
-
-		return StatList.MOB_KILLS;
-	}
 
 	public KillTask(Quest quest)
 	{
@@ -65,99 +49,95 @@ public class KillTask extends Task
 	}
 
 	@Override
-	public void writeData(NBTTagCompound nbt)
+	public void writeData(CompoundNBT nbt)
 	{
 		super.writeData(nbt);
-		nbt.setString("entity", entity.toString());
-		nbt.setLong("value", value);
+		nbt.putString("entity", entity.toString());
+		nbt.putLong("value", value);
 	}
 
 	@Override
-	public void readData(NBTTagCompound nbt)
+	public void readData(CompoundNBT nbt)
 	{
 		super.readData(nbt);
 		entity = new ResourceLocation(nbt.getString("entity"));
-		value = nbt.getInteger("value");
+		value = nbt.getLong("value");
 	}
 
 	@Override
-	public void writeNetData(DataOut data)
+	public void writeNetData(PacketBuffer buffer)
 	{
-		super.writeNetData(data);
-		data.writeString(entity.toString());
-		data.writeVarLong(value);
+		super.writeNetData(buffer);
+		buffer.writeString(entity.toString());
+		buffer.writeVarLong(value);
 	}
 
 	@Override
-	public void readNetData(DataIn data)
+	public void readNetData(PacketBuffer buffer)
 	{
-		super.readNetData(data);
-		entity = new ResourceLocation(data.readString());
-		value = data.readVarInt();
+		super.readNetData(buffer);
+		entity = new ResourceLocation(buffer.readString());
+		value = buffer.readVarInt();
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
+	@OnlyIn(Dist.CLIENT)
 	public void getConfig(ConfigGroup config)
 	{
 		super.getConfig(config);
 		List<ResourceLocation> ids = new ArrayList<>();
 
-		for (EntityEntry entry : ForgeRegistries.ENTITIES)
+		for (EntityType type : ForgeRegistries.ENTITIES)
 		{
-			if (EntityLivingBase.class.isAssignableFrom(entry.getEntityClass()))
-			{
-				ids.add(entry.getRegistryName());
-			}
+			ids.add(type.getRegistryName());
 		}
 
-		config.addEnum("entity", () -> entity, v -> entity = v, NameMap.createWithTranslation(ZOMBIE, (sender, s) -> "entity." + EntityList.getTranslationName(s) + ".name", ids.toArray(new ResourceLocation[0])));
-		config.addLong("value", () -> value, v -> value = v, 100L, 1L, Long.MAX_VALUE);
+		config.addEnum("entity", entity, v -> entity = v, NameMap.of(ZOMBIE, ids)
+				.nameKey(v -> "entity." + v.getNamespace() + "." + v.getPath())
+				.icon(v -> {
+					SpawnEggItem item = SpawnEggItem.getEgg(ForgeRegistries.ENTITIES.getValue(v));
+					return ItemIcon.getItemIcon(item != null ? item : Items.SPAWNER);
+				})
+				.create(), ZOMBIE);
+
+		config.addLong("value", value, v -> value = v, 100L, 1L, Long.MAX_VALUE);
 	}
 
 	@Override
 	public String getAltTitle()
 	{
-		return I18n.format("ftbquests.task.ftbquests.kill.title", getMaxProgressString(), I18n.format("entity." + EntityList.getTranslationName(entity) + ".name"));
+		return I18n.format("ftbquests.task.ftbquests.kill.title", getMaxProgressString(), I18n.format("entity." + entity.getNamespace() + "." + entity.getPath()));
 	}
 
 	@Override
 	public Icon getAltIcon()
 	{
-		if (EntityList.ENTITY_EGGS.containsKey(entity))
-		{
-			ItemStack stack = new ItemStack(Items.SPAWN_EGG);
-			NBTTagCompound nbt = new NBTTagCompound();
-			nbt.setString("id", entity.toString());
-			stack.setTagInfo("EntityTag", nbt);
-			return ItemIcon.getItemIcon(stack);
-		}
-
-		return super.getAltIcon();
+		SpawnEggItem item = SpawnEggItem.getEgg(ForgeRegistries.ENTITIES.getValue(entity));
+		return ItemIcon.getItemIcon(item != null ? item : Items.SPAWNER);
 	}
 
 	@Override
-	public TaskData createData(QuestData data)
+	public TaskData createData(PlayerData data)
 	{
 		return new Data(this, data);
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
-	public void onButtonClicked(boolean canClick)
+	@OnlyIn(Dist.CLIENT)
+	public void onButtonClicked(Button button, boolean canClick)
 	{
 	}
 
 	public static class Data extends TaskData<KillTask>
 	{
-		private Data(KillTask task, QuestData data)
+		private Data(KillTask task, PlayerData data)
 		{
 			super(task, data);
 		}
 
-		public void kill(EntityLivingBase entity)
+		public void kill(LivingEntity entity)
 		{
-			if (!isComplete() && task.entity.equals(EntityList.getKey(entity)))
+			if (!isComplete() && task.entity.equals(entity.getType().getRegistryName()))
 			{
 				addProgress(1L);
 			}

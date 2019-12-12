@@ -1,41 +1,40 @@
 package com.feed_the_beast.ftbquests.quest;
 
-import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
-import com.feed_the_beast.ftblib.lib.config.ConfigItemStack;
-import com.feed_the_beast.ftblib.lib.config.ConfigString;
-import com.feed_the_beast.ftblib.lib.config.EnumTristate;
-import com.feed_the_beast.ftblib.lib.gui.misc.GuiEditConfig;
-import com.feed_the_beast.ftblib.lib.icon.Icon;
-import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
-import com.feed_the_beast.ftblib.lib.io.Bits;
-import com.feed_the_beast.ftblib.lib.io.DataIn;
-import com.feed_the_beast.ftblib.lib.io.DataOut;
-import com.feed_the_beast.ftblib.lib.io.DataReader;
-import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.client.FTBQuestsClient;
-import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
-import com.feed_the_beast.ftbquests.net.edit.MessageChangeProgressResponse;
-import com.feed_the_beast.ftbquests.net.edit.MessageEditObject;
+import com.feed_the_beast.ftbquests.net.MessageChangeProgressResponse;
+import com.feed_the_beast.ftbquests.net.MessageEditObject;
 import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
+import com.feed_the_beast.ftbquests.util.FileUtils;
+import com.feed_the_beast.ftbquests.util.NetUtils;
 import com.feed_the_beast.ftbquests.util.QuestObjectText;
-import com.latmod.mods.itemfilters.item.ItemMissing;
+import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
+import com.feed_the_beast.mods.ftbguilibrary.config.ConfigItemStack;
+import com.feed_the_beast.mods.ftbguilibrary.config.ConfigString;
+import com.feed_the_beast.mods.ftbguilibrary.config.Tristate;
+import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiEditConfig;
+import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
+import com.feed_the_beast.mods.ftbguilibrary.icon.ItemIcon;
+import com.feed_the_beast.mods.ftbguilibrary.utils.Bits;
+import com.feed_the_beast.mods.ftbguilibrary.utils.StringUtils;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.nbt.NBTTagString;
-import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
+import net.minecraft.nbt.StringNBT;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.util.Constants;
-import net.minecraftforge.fml.common.Loader;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.fml.loading.FMLPaths;
 
 import javax.annotation.Nullable;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -74,11 +73,12 @@ public abstract class QuestObjectBase
 	public boolean invalid = false;
 	public String title = "";
 	public ItemStack icon = ItemStack.EMPTY;
-	private Set<String> tags = new LinkedHashSet<>(0);
+	private List<String> tags = new ArrayList<>(0);
 
 	private Icon cachedIcon = null;
 	private String cachedTitle = null;
 	private QuestObjectText cachedTextFile = null;
+	private Set<String> cachedTags = null;
 
 	public final String getCodeString()
 	{
@@ -106,30 +106,39 @@ public abstract class QuestObjectBase
 
 	public Set<String> getTags()
 	{
-		return tags;
+		if (tags.isEmpty())
+		{
+			return Collections.emptySet();
+		}
+		else if (cachedTags == null)
+		{
+			cachedTags = new LinkedHashSet<>(tags);
+		}
+
+		return cachedTags;
 	}
 
 	public boolean hasTag(String tag)
 	{
-		return !tags.isEmpty() && tags.contains(tag);
+		return !tags.isEmpty() && getTags().contains(tag);
 	}
 
-	public void changeProgress(QuestData data, ChangeProgress type)
+	public void changeProgress(PlayerData data, ChangeProgress type)
 	{
 	}
 
-	public void forceProgress(QuestData data, ChangeProgress type, boolean notifications)
+	public void forceProgress(PlayerData data, ChangeProgress type, boolean notifications)
 	{
 		ChangeProgress.sendUpdates = false;
-		ChangeProgress.sendNotifications = notifications ? EnumTristate.TRUE : EnumTristate.FALSE;
+		ChangeProgress.sendNotifications = notifications ? Tristate.TRUE : Tristate.FALSE;
 		changeProgress(data, type);
 		ChangeProgress.sendUpdates = true;
-		ChangeProgress.sendNotifications = EnumTristate.DEFAULT;
+		ChangeProgress.sendNotifications = Tristate.DEFAULT;
 		getQuestFile().clearCachedProgress();
 
-		if (!getQuestFile().isClient())
+		if (!getQuestFile().getSide().isClient())
 		{
-			new MessageChangeProgressResponse(data.getTeamUID(), id, type, notifications).sendToAll();
+			new MessageChangeProgressResponse(data.uuid, id, type, notifications).sendToAll();
 		}
 
 		data.markDirty();
@@ -146,97 +155,98 @@ public abstract class QuestObjectBase
 		return 1;
 	}
 
-	public void writeData(NBTTagCompound nbt)
+	public void writeData(CompoundNBT nbt)
 	{
 		if (!title.isEmpty())
 		{
-			nbt.setString("title", title);
+			nbt.putString("title", title);
 		}
 
 		if (!icon.isEmpty())
 		{
-			nbt.setTag("icon", ItemMissing.write(icon, false));
+			nbt.put("icon", icon.serializeNBT());
 		}
 
 		if (!tags.isEmpty())
 		{
-			NBTTagList tagList = new NBTTagList();
+			ListNBT tagList = new ListNBT();
 
 			for (String s : tags)
 			{
-				tagList.appendTag(new NBTTagString(s));
+				tagList.add(new StringNBT(s));
 			}
 
-			nbt.setTag("tags", tagList);
+			nbt.put("tags", tagList);
 		}
 	}
 
-	public void readData(NBTTagCompound nbt)
+	public void readData(CompoundNBT nbt)
 	{
 		title = nbt.getString("title");
-		icon = ItemMissing.read(nbt.getTag("icon"));
+		icon = nbt.contains("icon") ? ItemStack.read(nbt.getCompound("icon")) : ItemStack.EMPTY;
 
-		NBTTagList tagsList = nbt.getTagList("tags", Constants.NBT.TAG_STRING);
+		ListNBT tagsList = nbt.getList("tags", Constants.NBT.TAG_STRING);
 
-		tags = new LinkedHashSet<>(tagsList.tagCount());
+		tags = new ArrayList<>(tagsList.size());
 
-		for (int i = 0; i < tagsList.tagCount(); i++)
+		for (int i = 0; i < tagsList.size(); i++)
 		{
-			tags.add(tagsList.getStringTagAt(i));
+			tags.add(tagsList.getString(i));
 		}
 
-		if (nbt.hasKey("custom_id"))
+		if (nbt.contains("custom_id"))
 		{
 			tags.add(nbt.getString("custom_id"));
 		}
 	}
 
-	public void writeNetData(DataOut data)
+	public void writeNetData(PacketBuffer buffer)
 	{
 		int flags = 0;
 		flags = Bits.setFlag(flags, 1, !title.isEmpty());
 		flags = Bits.setFlag(flags, 2, !icon.isEmpty());
 		flags = Bits.setFlag(flags, 4, !tags.isEmpty());
 
-		data.writeVarInt(flags);
+		buffer.writeVarInt(flags);
 
 		if (!title.isEmpty())
 		{
-			data.writeString(title);
+			buffer.writeString(title);
 		}
 
 		if (!icon.isEmpty())
 		{
-			data.writeItemStack(icon);
+			buffer.writeItemStack(icon);
 		}
 
 		if (!tags.isEmpty())
 		{
-			data.writeCollection(tags, DataOut.STRING);
+			NetUtils.writeStrings(buffer, tags);
 		}
 	}
 
-	public void readNetData(DataIn data)
+	public void readNetData(PacketBuffer buffer)
 	{
-		int flags = data.readVarInt();
-		title = Bits.getFlag(flags, 1) ? data.readString() : "";
-		icon = Bits.getFlag(flags, 2) ? data.readItemStack() : ItemStack.EMPTY;
-		tags = new LinkedHashSet<>(0);
+		int flags = buffer.readVarInt();
+		title = Bits.getFlag(flags, 1) ? buffer.readString() : "";
+		icon = Bits.getFlag(flags, 2) ? buffer.readItemStack() : ItemStack.EMPTY;
+		tags = new ArrayList<>(0);
 
 		if (Bits.getFlag(flags, 4))
 		{
-			data.readCollection(tags, DataIn.STRING);
+			NetUtils.readStrings(buffer, tags);
 		}
 	}
 
-	@SideOnly(Side.CLIENT)
+	@OnlyIn(Dist.CLIENT)
 	public void getConfig(ConfigGroup config)
 	{
-		config.addString("title", () -> title, v -> title = v, "").setDisplayName(new TextComponentTranslation("ftbquests.title")).setOrder(-127);
-		config.add("icon", new ConfigItemStack.SimpleStack(() -> icon, v -> icon = v), new ConfigItemStack(ItemStack.EMPTY)).setDisplayName(new TextComponentTranslation("ftbquests.icon")).setOrder(-126);
-		config.addList("tags", tags, new ConfigString("", TAG_PATTERN), value -> new ConfigString(value, TAG_PATTERN), ConfigString::getString).setDisplayName(new TextComponentTranslation("ftbquests.tags")).setOrder(-125);
+		config.addString("title", title, v -> title = v, "").setNameKey("ftbquests.title").setOrder(-127);
+		config.add("icon", new ConfigItemStack(false, true), icon, v -> icon = v, ItemStack.EMPTY).setNameKey("ftbquests.icon").setOrder(-126);
+		config.addList("tags", tags, new ConfigString(TAG_PATTERN), "").setNameKey("ftbquests.tags").setOrder(-125);
 	}
 
+	@OnlyIn(Dist.CLIENT)
 	public QuestObjectText loadText()
 	{
 		if (invalid || id == 0)
@@ -246,7 +256,7 @@ public abstract class QuestObjectBase
 		else if (cachedTextFile == null)
 		{
 			cachedTextFile = QuestObjectText.NONE;
-			File file = new File(Loader.instance().getConfigDir(), "ftbquests/" + getQuestFile().folderName + "/text/en_us/" + getCodeString(this) + ".txt");
+			File file = FMLPaths.CONFIGDIR.get().resolve("ftbquests/" + getQuestFile().folderName + "/text/en_us/" + getCodeString(this) + ".txt").toFile();
 			Map<String, String[]> text = new HashMap<>();
 
 			if (file.exists())
@@ -254,7 +264,7 @@ public abstract class QuestObjectBase
 				String currentKey = "";
 				List<String> currentText = new ArrayList<>();
 
-				for (String s : DataReader.get(file).safeStringList())
+				for (String s : FileUtils.readFile(file))
 				{
 					if (s.indexOf('[') == 0 && s.indexOf(']') == s.length() - 1)
 					{
@@ -270,18 +280,18 @@ public abstract class QuestObjectBase
 				loadTextAdd(text, currentKey, currentText);
 			}
 
-			String langCode = FTBQuests.PROXY.getLanguageCode();
+			String langCode = Minecraft.getInstance().getLanguageManager().getCurrentLanguage().getCode();
 
 			if (!langCode.equals("en_us"))
 			{
-				File fileLang = new File(Loader.instance().getConfigDir(), "ftbquests/" + getQuestFile().folderName + "/text/" + langCode + "/" + getCodeString(this) + ".txt");
+				File fileLang = FMLPaths.CONFIGDIR.get().resolve("ftbquests/" + getQuestFile().folderName + "/text/" + langCode + "/" + getCodeString(this) + ".txt").toFile();
 
 				if (fileLang.exists())
 				{
 					String currentKey = "";
 					List<String> currentText = new ArrayList<>();
 
-					for (String s : DataReader.get(fileLang).safeStringList())
+					for (String s : FileUtils.readFile(fileLang))
 					{
 						if (s.indexOf('[') == 0 && s.indexOf(']') == s.length() - 1)
 						{
@@ -336,14 +346,7 @@ public abstract class QuestObjectBase
 
 		if (!icon.isEmpty())
 		{
-			if (icon.getItem() == FTBQuestsItems.CUSTOM_ICON && icon.hasTagCompound())
-			{
-				cachedIcon = Icon.getIcon(icon.getTagCompound().getString("icon"));
-			}
-			else
-			{
-				cachedIcon = ItemIcon.getItemIcon(icon);
-			}
+			cachedIcon = ItemIcon.getItemIcon(icon);
 		}
 
 		if (cachedIcon == null || cachedIcon.isEmpty())
@@ -359,6 +362,7 @@ public abstract class QuestObjectBase
 		return cachedIcon;
 	}
 
+	@OnlyIn(Dist.CLIENT)
 	public final String getTitle()
 	{
 		if (cachedTitle != null)
@@ -415,7 +419,7 @@ public abstract class QuestObjectBase
 	{
 	}
 
-	@SideOnly(Side.CLIENT)
+	@OnlyIn(Dist.CLIENT)
 	public void editedFromGUI()
 	{
 		ClientQuestFile.INSTANCE.refreshGui();
@@ -436,19 +440,28 @@ public abstract class QuestObjectBase
 		cachedIcon = null;
 		cachedTitle = null;
 		cachedTextFile = null;
+		cachedTags = null;
 	}
 
 	public ConfigGroup createSubGroup(ConfigGroup group)
 	{
-		return group.getGroup(getObjectType().getId());
+		return group.getGroup(getObjectType().id);
 	}
 
-	@SideOnly(Side.CLIENT)
+	@OnlyIn(Dist.CLIENT)
 	public void onEditButtonClicked()
 	{
-		ConfigGroup group = ConfigGroup.newGroup(FTBQuests.MOD_ID);
+		ConfigGroup group = new ConfigGroup(FTBQuests.MOD_ID);
 		getConfig(createSubGroup(group));
-		new GuiEditConfig(group, (group1, sender) -> new MessageEditObject(this).sendToServer()).openGui();
+
+		group.savedCallback = accepted -> {
+			if (accepted)
+			{
+				new MessageEditObject(this).sendToServer();
+			}
+		};
+
+		new GuiEditConfig(group).openGui();
 	}
 
 	public int refreshJEI()

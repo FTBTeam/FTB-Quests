@@ -41,7 +41,7 @@ public class TypeSelector extends ThemeSelector
 	@Override
 	public String toString()
 	{
-		return type.getId();
+		return type.id;
 	}
 
 	@Override

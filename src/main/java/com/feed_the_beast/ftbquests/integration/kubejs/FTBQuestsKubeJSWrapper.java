@@ -2,7 +2,7 @@ package com.feed_the_beast.ftbquests.integration.kubejs;
 
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.ChangeProgress;
-import com.feed_the_beast.ftbquests.quest.QuestData;
+import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
@@ -10,12 +10,12 @@ import com.feed_the_beast.ftbquests.quest.QuestShape;
 import dev.latvian.kubejs.documentation.DisplayName;
 import dev.latvian.kubejs.documentation.Info;
 import dev.latvian.kubejs.documentation.P;
-import dev.latvian.kubejs.documentation.T;
 import dev.latvian.kubejs.player.PlayerJS;
 import dev.latvian.kubejs.world.WorldJS;
 
 import javax.annotation.Nullable;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * @author LatvianModder
@@ -38,36 +38,22 @@ public class FTBQuestsKubeJSWrapper
 		return ChangeProgress.NAME_MAP.map;
 	}
 
-	@Info("Currently loaded quest file. Can be null")
+	@Info("Currently loaded quest file")
 	public QuestFile getFile(@P("world") WorldJS world)
 	{
-		QuestFile f = FTBQuests.PROXY.getQuestFile(world.minecraftWorld);
-
-		if (f == null)
-		{
-			throw new NullPointerException("Quest file isn't loaded!");
-		}
-
-		return f;
+		return FTBQuests.PROXY.getQuestFile(world.minecraftWorld);
 	}
 
 	@Nullable
-	@Info("Quest data from team UID")
-	public QuestData getData(@P("world") WorldJS world, @P("team") @T(short.class) Number team)
+	@Info("Quest data from UUID")
+	public PlayerData getData(@P("world") WorldJS world, @P("uuid") UUID uuid)
 	{
-		return getFile(world).getData(team.shortValue());
-	}
-
-	@Nullable
-	@Info("Quest data from team ID")
-	public QuestData getData(@P("world") WorldJS world, @P("team") String team)
-	{
-		return getFile(world).getData(team);
+		return getFile(world).getData(uuid);
 	}
 
 	@Nullable
 	@Info("Quest data from player")
-	public QuestData getData(@P("player") PlayerJS player)
+	public PlayerData getData(@P("player") PlayerJS player)
 	{
 		return getFile(player.getWorld()).getData(player.minecraftPlayer);
 	}

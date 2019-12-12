@@ -1,20 +1,5 @@
 package com.feed_the_beast.ftbquests.gui.tree;
 
-import com.feed_the_beast.ftblib.lib.gui.BlankPanel;
-import com.feed_the_beast.ftblib.lib.gui.Button;
-import com.feed_the_beast.ftblib.lib.gui.ColorWidget;
-import com.feed_the_beast.ftblib.lib.gui.Panel;
-import com.feed_the_beast.ftblib.lib.gui.TextField;
-import com.feed_the_beast.ftblib.lib.gui.Theme;
-import com.feed_the_beast.ftblib.lib.gui.Widget;
-import com.feed_the_beast.ftblib.lib.gui.WidgetLayout;
-import com.feed_the_beast.ftblib.lib.gui.WidgetVerticalSpace;
-import com.feed_the_beast.ftblib.lib.gui.misc.CompactGridLayout;
-import com.feed_the_beast.ftblib.lib.icon.Color4I;
-import com.feed_the_beast.ftblib.lib.icon.Icon;
-import com.feed_the_beast.ftblib.lib.util.StringJoiner;
-import com.feed_the_beast.ftblib.lib.util.StringUtils;
-import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.quest.reward.Reward;
@@ -22,7 +7,21 @@ import com.feed_the_beast.ftbquests.quest.reward.RewardAutoClaim;
 import com.feed_the_beast.ftbquests.quest.task.Task;
 import com.feed_the_beast.ftbquests.quest.theme.QuestTheme;
 import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
-import net.minecraft.client.renderer.GlStateManager;
+import com.feed_the_beast.mods.ftbguilibrary.icon.Color4I;
+import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
+import com.feed_the_beast.mods.ftbguilibrary.misc.CompactGridLayout;
+import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
+import com.feed_the_beast.mods.ftbguilibrary.utils.StringUtils;
+import com.feed_the_beast.mods.ftbguilibrary.widget.BlankPanel;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
+import com.feed_the_beast.mods.ftbguilibrary.widget.ColorWidget;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
+import com.feed_the_beast.mods.ftbguilibrary.widget.TextField;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Widget;
+import com.feed_the_beast.mods.ftbguilibrary.widget.WidgetLayout;
+import com.feed_the_beast.mods.ftbguilibrary.widget.WidgetVerticalSpace;
+import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.TextFormatting;
@@ -222,7 +221,7 @@ public class PanelViewQuest extends Panel
 			panelText.add(new TextField(panelText).addFlags(Theme.CENTERED).setMaxWidth(panelText.width).setSpacing(9).setText(TextFormatting.ITALIC + TextFormatting.GRAY.toString() + desc));
 		}
 
-		boolean showText = !quest.hideTextUntilComplete || gui.file.self != null && quest.isComplete(gui.file.self);
+		boolean showText = !quest.hideTextUntilComplete || gui.file.self != null && gui.file.self.isComplete(quest);
 
 		if (showText && quest.getDescription().length > 0)
 		{
@@ -231,7 +230,7 @@ public class PanelViewQuest extends Panel
 				panelText.add(new WidgetVerticalSpace(panelText, 7));
 			}
 
-			panelText.add(new TextField(panelText).setMaxWidth(panelText.width).setSpacing(9).setText(StringUtils.addFormatting(StringJoiner.with('\n').joinStrings(quest.getDescription()))));
+			panelText.add(new TextField(panelText).setMaxWidth(panelText.width).setSpacing(9).setText(StringUtils.addFormatting(String.join("\n", quest.getDescription()))));
 		}
 
 		if (showText && !quest.guidePage.isEmpty())
@@ -331,7 +330,7 @@ public class PanelViewQuest extends Panel
 			QuestObjectBase prev = QuestTheme.currentObject;
 			QuestTheme.currentObject = quest;
 			GlStateManager.pushMatrix();
-			GlStateManager.translate(0F, 0F, 500F);
+			GlStateManager.translatef(0F, 0F, 500F);
 			super.draw(theme, x, y, w, h);
 			GlStateManager.popMatrix();
 			QuestTheme.currentObject = prev;

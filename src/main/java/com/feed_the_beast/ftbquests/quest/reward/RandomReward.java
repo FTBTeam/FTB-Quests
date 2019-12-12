@@ -1,22 +1,20 @@
 package com.feed_the_beast.ftbquests.quest.reward;
 
-import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
-import com.feed_the_beast.ftblib.lib.icon.Icon;
-import com.feed_the_beast.ftblib.lib.io.DataIn;
-import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.quest.loot.RewardTable;
 import com.feed_the_beast.ftbquests.quest.loot.WeightedReward;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.util.text.TextComponentTranslation;
+import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
+import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
+import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.util.Constants;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -41,21 +39,21 @@ public class RandomReward extends Reward
 	}
 
 	@Override
-	public void writeData(NBTTagCompound nbt)
+	public void writeData(CompoundNBT nbt)
 	{
 		super.writeData(nbt);
 
 		if (getTable() != null)
 		{
-			nbt.setInteger("table", getQuestFile().rewardTables.indexOf(getTable()));
+			nbt.putInt("table", getQuestFile().rewardTables.indexOf(getTable()));
 		}
 	}
 
 	@Override
-	public void readData(NBTTagCompound nbt)
+	public void readData(CompoundNBT nbt)
 	{
 		super.readData(nbt);
-		int index = nbt.hasKey("table") ? nbt.getInteger("table") : -1;
+		int index = nbt.contains("table") ? nbt.getInt("table") : -1;
 
 		QuestFile file = getQuestFile();
 
@@ -66,17 +64,17 @@ public class RandomReward extends Reward
 		else
 		{
 			table = new RewardTable(file);
-			NBTTagList list = nbt.getTagList("rewards", Constants.NBT.TAG_COMPOUND);
+			ListNBT list = nbt.getList("rewards", Constants.NBT.TAG_COMPOUND);
 
-			for (int i = 0; i < list.tagCount(); i++)
+			for (int i = 0; i < list.size(); i++)
 			{
-				NBTTagCompound nbt1 = list.getCompoundTagAt(i);
+				CompoundNBT nbt1 = list.getCompound(i);
 				Reward reward = RewardType.createReward(table.fakeQuest, nbt1.getString("type"));
 
 				if (reward != null)
 				{
 					reward.readData(nbt1);
-					table.rewards.add(new WeightedReward(reward, nbt1.getInteger("weight")));
+					table.rewards.add(new WeightedReward(reward, nbt1.getInt("weight")));
 				}
 			}
 
@@ -98,36 +96,29 @@ public class RandomReward extends Reward
 	}
 
 	@Override
-	public void writeNetData(DataOut data)
+	public void writeNetData(PacketBuffer buffer)
 	{
-		super.writeNetData(data);
-		data.writeInt(getTable() == null ? 0 : getTable().id);
+		super.writeNetData(buffer);
+		buffer.writeInt(getTable() == null ? 0 : getTable().id);
 	}
 
 	@Override
-	public void readNetData(DataIn data)
+	public void readNetData(PacketBuffer buffer)
 	{
-		super.readNetData(data);
-		table = getQuestFile().getRewardTable(data.readInt());
+		super.readNetData(buffer);
+		table = getQuestFile().getRewardTable(buffer.readInt());
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
+	@OnlyIn(Dist.CLIENT)
 	public void getConfig(ConfigGroup config)
 	{
 		super.getConfig(config);
-		config.add("table", new ConfigQuestObject(getQuestFile(), getID(getTable()), QuestObjectType.REWARD_TABLE)
-		{
-			@Override
-			public void setObject(int object)
-			{
-				table = file.getRewardTable(object);
-			}
-		}, new ConfigQuestObject(getQuestFile(), 0, QuestObjectType.REWARD_TABLE)).setDisplayName(new TextComponentTranslation("ftbquests.reward_table"));
+		config.add("table", new ConfigQuestObject<>(QuestObjectType.REWARD_TABLE), table, v -> table = v, getTable()).setNameKey("ftbquests.reward_table");
 	}
 
 	@Override
-	public void claim(EntityPlayerMP player, boolean notify)
+	public void claim(ServerPlayerEntity player, boolean notify)
 	{
 		if (getTable() == null)
 		{
@@ -169,7 +160,7 @@ public class RandomReward extends Reward
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
+	@OnlyIn(Dist.CLIENT)
 	public void addMouseOverText(List<String> list)
 	{
 		if (getTable() != null)

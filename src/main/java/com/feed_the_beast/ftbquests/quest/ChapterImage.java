@@ -1,17 +1,17 @@
 package com.feed_the_beast.ftbquests.quest;
 
-import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
-import com.feed_the_beast.ftblib.lib.config.ConfigString;
-import com.feed_the_beast.ftblib.lib.icon.Icon;
-import com.feed_the_beast.ftblib.lib.io.DataIn;
-import com.feed_the_beast.ftblib.lib.io.DataOut;
-import com.feed_the_beast.ftbquests.net.edit.MessageEditObject;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.nbt.NBTTagString;
+import com.feed_the_beast.ftbquests.net.MessageEditObject;
+import com.feed_the_beast.ftbquests.util.NetUtils;
+import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
+import com.feed_the_beast.mods.ftbguilibrary.config.ConfigString;
+import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
+import net.minecraft.nbt.StringNBT;
+import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.util.Constants;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,27 +41,27 @@ public final class ChapterImage implements Movable
 		click = "";
 	}
 
-	public void writeData(NBTTagCompound nbt)
+	public void writeData(CompoundNBT nbt)
 	{
-		nbt.setDouble("x", x);
-		nbt.setDouble("y", y);
-		nbt.setDouble("width", width);
-		nbt.setDouble("height", height);
-		nbt.setDouble("rotation", rotation);
-		nbt.setString("image", image.toString());
+		nbt.putDouble("x", x);
+		nbt.putDouble("y", y);
+		nbt.putDouble("width", width);
+		nbt.putDouble("height", height);
+		nbt.putDouble("rotation", rotation);
+		nbt.putString("image", image.toString());
 
-		NBTTagList hoverTag = new NBTTagList();
+		ListNBT hoverTag = new ListNBT();
 
 		for (String s : hover)
 		{
-			hoverTag.appendTag(new NBTTagString(s));
+			hoverTag.add(new StringNBT(s));
 		}
 
-		nbt.setTag("hover", hoverTag);
-		nbt.setString("click", click);
+		nbt.put("hover", hoverTag);
+		nbt.putString("click", click);
 	}
 
-	public void readData(NBTTagCompound nbt)
+	public void readData(CompoundNBT nbt)
 	{
 		x = nbt.getDouble("x");
 		y = nbt.getDouble("y");
@@ -71,51 +71,51 @@ public final class ChapterImage implements Movable
 		image = Icon.getIcon(nbt.getString("image"));
 
 		hover.clear();
-		NBTTagList hoverTag = nbt.getTagList("hover", Constants.NBT.TAG_STRING);
+		ListNBT hoverTag = nbt.getList("hover", Constants.NBT.TAG_STRING);
 
-		for (int i = 0; i < hoverTag.tagCount(); i++)
+		for (int i = 0; i < hoverTag.size(); i++)
 		{
-			hover.add(hoverTag.getStringTagAt(i));
+			hover.add(hoverTag.getString(i));
 		}
 
 		click = nbt.getString("click");
 	}
 
-	public void writeNetData(DataOut data)
+	public void writeNetData(PacketBuffer buffer)
 	{
-		data.writeDouble(x);
-		data.writeDouble(y);
-		data.writeDouble(width);
-		data.writeDouble(height);
-		data.writeDouble(rotation);
-		data.writeIcon(image);
-		data.writeCollection(hover, DataOut.STRING);
-		data.writeString(click);
+		buffer.writeDouble(x);
+		buffer.writeDouble(y);
+		buffer.writeDouble(width);
+		buffer.writeDouble(height);
+		buffer.writeDouble(rotation);
+		NetUtils.writeIcon(buffer, image);
+		NetUtils.writeStrings(buffer, hover);
+		buffer.writeString(click);
 	}
 
-	public void readNetData(DataIn data)
+	public void readNetData(PacketBuffer buffer)
 	{
-		x = data.readDouble();
-		y = data.readDouble();
-		width = data.readDouble();
-		height = data.readDouble();
-		rotation = data.readDouble();
-		image = data.readIcon();
-		data.readCollection(hover, DataIn.STRING);
-		click = data.readString();
+		x = buffer.readDouble();
+		y = buffer.readDouble();
+		width = buffer.readDouble();
+		height = buffer.readDouble();
+		rotation = buffer.readDouble();
+		image = NetUtils.readIcon(buffer);
+		NetUtils.readStrings(buffer, hover);
+		click = buffer.readString();
 	}
 
-	@SideOnly(Side.CLIENT)
+	@OnlyIn(Dist.CLIENT)
 	public void getConfig(ConfigGroup config)
 	{
-		config.addDouble("x", () -> x, v -> x = v, 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
-		config.addDouble("y", () -> y, v -> y = v, 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
-		config.addDouble("width", () -> width, v -> width = v, 1, 0, Double.POSITIVE_INFINITY);
-		config.addDouble("height", () -> height, v -> height = v, 1, 0, Double.POSITIVE_INFINITY);
-		config.addDouble("rotation", () -> rotation, v -> rotation = v, 0, -180, 180);
-		config.addString("image", () -> image.toString(), v -> image = Icon.getIcon(v), "minecraft:textures/gui/presets/isles.png");
-		config.addList("hover", hover, new ConfigString(""), ConfigString::new, ConfigString::getString);
-		config.addString("click", () -> click, v -> click = v, "");
+		config.addDouble("x", x, v -> x = v, 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+		config.addDouble("y", y, v -> y = v, 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+		config.addDouble("width", width, v -> width = v, 1, 0, Double.POSITIVE_INFINITY);
+		config.addDouble("height", height, v -> height = v, 1, 0, Double.POSITIVE_INFINITY);
+		config.addDouble("rotation", rotation, v -> rotation = v, 0, -180, 180);
+		config.addString("image", image.toString(), v -> image = Icon.getIcon(v), "minecraft:textures/gui/presets/isles.png");
+		config.addList("hover", hover, new ConfigString(), "");
+		config.addString("click", click, v -> click = v, "");
 	}
 
 	@Override
@@ -155,7 +155,7 @@ public final class ChapterImage implements Movable
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
+	@OnlyIn(Dist.CLIENT)
 	public void move(Chapter to, double _x, double _y)
 	{
 		x = _x;

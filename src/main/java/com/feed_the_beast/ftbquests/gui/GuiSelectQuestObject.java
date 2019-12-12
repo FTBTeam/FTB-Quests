@@ -1,13 +1,5 @@
 package com.feed_the_beast.ftbquests.gui;
 
-import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
-import com.feed_the_beast.ftblib.lib.gui.IOpenableGui;
-import com.feed_the_beast.ftblib.lib.gui.Panel;
-import com.feed_the_beast.ftblib.lib.gui.SimpleTextButton;
-import com.feed_the_beast.ftblib.lib.gui.Theme;
-import com.feed_the_beast.ftblib.lib.gui.misc.GuiButtonListBase;
-import com.feed_the_beast.ftblib.lib.icon.Icon;
-import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
@@ -16,6 +8,14 @@ import com.feed_the_beast.ftbquests.quest.loot.RewardTable;
 import com.feed_the_beast.ftbquests.quest.reward.Reward;
 import com.feed_the_beast.ftbquests.quest.task.Task;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
+import com.feed_the_beast.mods.ftbguilibrary.config.ConfigCallback;
+import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
+import com.feed_the_beast.mods.ftbguilibrary.misc.GuiButtonListBase;
+import com.feed_the_beast.mods.ftbguilibrary.utils.Key;
+import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
+import com.feed_the_beast.mods.ftbguilibrary.widget.SimpleTextButton;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.TextFormatting;
 
@@ -26,13 +26,13 @@ import java.util.List;
 /**
  * @author LatvianModder
  */
-public class GuiSelectQuestObject extends GuiButtonListBase
+public class GuiSelectQuestObject<T extends QuestObjectBase> extends GuiButtonListBase
 {
 	public class ButtonQuestObject extends SimpleTextButton
 	{
-		public final QuestObjectBase object;
+		public final T object;
 
-		public ButtonQuestObject(Panel panel, @Nullable QuestObjectBase o)
+		public ButtonQuestObject(Panel panel, @Nullable T o)
 		{
 			super(panel, o == null ? I18n.format("ftbquests.null") : o.getObjectType().getColor() + o.getUnformattedTitle(), o == null ? Icon.EMPTY : o.getIcon());
 			object = o;
@@ -41,7 +41,7 @@ public class GuiSelectQuestObject extends GuiButtonListBase
 
 		private void addObject(List<String> list, QuestObjectBase o)
 		{
-			list.add(TextFormatting.GRAY + o.getObjectType().getDisplayName() + ": " + o.getObjectType().getColor() + o.getUnformattedTitle());
+			list.add(TextFormatting.GRAY + QuestObjectType.NAME_MAP.getDisplayName(o.getObjectType()).getString() + ": " + o.getObjectType().getColor() + o.getUnformattedTitle());
 		}
 
 		@Override
@@ -54,7 +54,7 @@ public class GuiSelectQuestObject extends GuiButtonListBase
 
 			list.add(object.getTitle());
 			list.add(TextFormatting.GRAY + "ID: " + TextFormatting.DARK_GRAY + object);
-			list.add(TextFormatting.GRAY + "Type: " + object.getObjectType().getColor() + I18n.format(object.getObjectType().getTranslationKey()));
+			list.add(TextFormatting.GRAY + "Type: " + object.getObjectType().getColor() + QuestObjectType.NAME_MAP.getDisplayName(object.getObjectType()).getString());
 
 			if (object instanceof Quest)
 			{
@@ -104,38 +104,47 @@ public class GuiSelectQuestObject extends GuiButtonListBase
 		@Override
 		public void onClicked(MouseButton button)
 		{
-			GuiHelper.playClickSound();
-			callbackGui.openGui();
-			config.setObject(QuestObjectBase.getID(object));
-			callback.run();
+			playClickSound();
+			config.setCurrentValue(object);
+			callback.save(true);
 		}
 	}
 
-	private final ConfigQuestObject config;
-	private final IOpenableGui callbackGui;
-	private final Runnable callback;
+	private final ConfigQuestObject<T> config;
+	private final ConfigCallback callback;
 
-	public GuiSelectQuestObject(ConfigQuestObject c, IOpenableGui g, Runnable cb)
+	public GuiSelectQuestObject(ConfigQuestObject<T> c, ConfigCallback cb)
 	{
 		setTitle(I18n.format("ftbquests.gui.select_quest_object"));
 		setHasSearchBox(true);
 		focus();
 		setBorder(1, 1, 1);
 		config = c;
-		callbackGui = g;
 		callback = cb;
+	}
+
+	@Override
+	public boolean onClosedByKey(Key key)
+	{
+		if (super.onClosedByKey(key))
+		{
+			callback.save(false);
+			return false;
+		}
+
+		return false;
 	}
 
 	@Override
 	public void addButtons(Panel panel)
 	{
-		List<QuestObjectBase> list = new ArrayList<>();
+		List<T> list = new ArrayList<>();
 
 		for (QuestObjectBase objectBase : ClientQuestFile.INSTANCE.getAllObjects())
 		{
-			if (config.isValid(objectBase))
+			if (config.predicate.test(objectBase))
 			{
-				list.add(objectBase);
+				list.add((T) objectBase);
 			}
 		}
 
@@ -144,12 +153,12 @@ public class GuiSelectQuestObject extends GuiButtonListBase
 			return i == 0 ? o1.getUnformattedTitle().compareToIgnoreCase(o2.getUnformattedTitle()) : i;
 		});
 
-		if (config.isValid(0))
+		if (config.predicate.test(null))
 		{
 			panel.add(new ButtonQuestObject(panel, null));
 		}
 
-		for (QuestObjectBase objectBase : list)
+		for (T objectBase : list)
 		{
 			panel.add(new ButtonQuestObject(panel, objectBase));
 		}

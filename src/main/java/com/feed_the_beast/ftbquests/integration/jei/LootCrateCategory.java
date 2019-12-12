@@ -1,24 +1,24 @@
 package com.feed_the_beast.ftbquests.integration.jei;
 
-import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
-import mezz.jei.api.IGuiHelper;
-import mezz.jei.api.gui.IDrawable;
-import mezz.jei.api.gui.IGuiItemStackGroup;
+import com.feed_the_beast.mods.ftbguilibrary.widget.GuiHelper;
 import mezz.jei.api.gui.IRecipeLayout;
+import mezz.jei.api.gui.drawable.IDrawable;
+import mezz.jei.api.gui.ingredient.IGuiItemStackGroup;
+import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.ingredients.IIngredients;
-import mezz.jei.api.recipe.IRecipeCategory;
-import net.minecraft.client.Minecraft;
+import mezz.jei.api.recipe.category.IRecipeCategory;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
 
 /**
  * @author LatvianModder
  */
 public class LootCrateCategory implements IRecipeCategory<LootCrateWrapper>
 {
-	public static final String UID = "ftbquests.lootcrates";
+	public static final ResourceLocation UID = new ResourceLocation(FTBQuests.MOD_ID, "lootcrates");
 
 	public static final int ITEMSX = 10;
 	public static final int ITEMSY = 5;
@@ -45,7 +45,7 @@ public class LootCrateCategory implements IRecipeCategory<LootCrateWrapper>
 			}
 
 			@Override
-			public void draw(Minecraft minecraft, int xOffset, int yOffset)
+			public void draw(int xOffset, int yOffset)
 			{
 				if (!LootCrateRegistry.INSTANCE.list.isEmpty())
 				{
@@ -60,21 +60,21 @@ public class LootCrateCategory implements IRecipeCategory<LootCrateWrapper>
 	}
 
 	@Override
-	public String getUid()
+	public ResourceLocation getUid()
 	{
 		return UID;
+	}
+
+	@Override
+	public Class<LootCrateWrapper> getRecipeClass()
+	{
+		return LootCrateWrapper.class;
 	}
 
 	@Override
 	public String getTitle()
 	{
 		return I18n.format("jei.ftbquests.lootcrates");
-	}
-
-	@Override
-	public String getModName()
-	{
-		return FTBQuests.MOD_NAME;
 	}
 
 	@Override
@@ -87,6 +87,12 @@ public class LootCrateCategory implements IRecipeCategory<LootCrateWrapper>
 	public IDrawable getIcon()
 	{
 		return icon;
+	}
+
+	@Override
+	public void setIngredients(LootCrateWrapper wrapper, IIngredients iIngredients)
+	{
+		//FIXME
 	}
 
 	@Override

@@ -1,44 +1,40 @@
 package com.feed_the_beast.ftbquests.quest.task;
 
-import com.feed_the_beast.ftblib.lib.config.ConfigFluid;
-import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
-import com.feed_the_beast.ftblib.lib.config.ConfigNBT;
-import com.feed_the_beast.ftblib.lib.icon.Color4I;
-import com.feed_the_beast.ftblib.lib.icon.Icon;
-import com.feed_the_beast.ftblib.lib.io.DataIn;
-import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftbquests.FTBQuests;
+import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.QuestData;
+import com.feed_the_beast.mods.ftbguilibrary.config.ConfigFluid;
+import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
+import com.feed_the_beast.mods.ftbguilibrary.config.ConfigNBT;
+import com.feed_the_beast.mods.ftbguilibrary.icon.Color4I;
+import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.texture.AtlasTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.fluid.Fluid;
+import net.minecraft.fluid.Fluids;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.fluids.Fluid;
-import net.minecraftforge.fluids.FluidActionResult;
-import net.minecraftforge.fluids.FluidRegistry;
+import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.fluids.FluidAttributes;
 import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.fluids.capability.IFluidHandlerItem;
-import net.minecraftforge.fluids.capability.IFluidTankProperties;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nullable;
-import java.util.Objects;
 
 /**
  * @author LatvianModder
@@ -47,9 +43,11 @@ public class FluidTask extends Task
 {
 	public static final ResourceLocation TANK_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "textures/tasks/tank.png");
 
-	public Fluid fluid = FluidRegistry.WATER;
-	public NBTTagCompound fluidNBT = null;
-	public int amount = Fluid.BUCKET_VOLUME;
+	public Fluid fluid = Fluids.WATER;
+	public CompoundNBT fluidNBT = null;
+	public long amount = FluidAttributes.BUCKET_VOLUME;
+
+	private FluidStack cachedFluidStack = null;
 
 	public FluidTask(Quest quest)
 	{
@@ -75,95 +73,98 @@ public class FluidTask extends Task
 	}
 
 	@Override
-	public void writeData(NBTTagCompound nbt)
+	public void writeData(CompoundNBT nbt)
 	{
 		super.writeData(nbt);
-		nbt.setString("fluid", fluid.getName());
-
-		if (amount != Fluid.BUCKET_VOLUME)
-		{
-			nbt.setInteger("amount", amount);
-		}
+		nbt.putString("fluid", fluid.getRegistryName().toString());
+		nbt.putLong("amount", amount);
 
 		if (fluidNBT != null)
 		{
-			nbt.setTag("nbt", fluidNBT);
+			nbt.put("nbt", fluidNBT);
 		}
 	}
 
 	@Override
-	public void readData(NBTTagCompound nbt)
+	public void readData(CompoundNBT nbt)
 	{
 		super.readData(nbt);
 
-		fluid = FluidRegistry.getFluid(nbt.getString("fluid"));
+		fluid = ForgeRegistries.FLUIDS.getValue(new ResourceLocation(nbt.getString("fluid")));
 
-		if (fluid == null)
+		if (fluid == null || fluid == Fluids.EMPTY)
 		{
-			fluid = FluidRegistry.WATER;
+			fluid = Fluids.WATER;
 		}
 
-		fluidNBT = (NBTTagCompound) nbt.getTag("nbt");
-		amount = nbt.hasKey("amount") ? (int) Math.min(Integer.MAX_VALUE, nbt.getLong("amount")) : Fluid.BUCKET_VOLUME;
-
-		if (amount < 1)
-		{
-			amount = 1;
-		}
+		amount = Math.max(1L, nbt.getLong("amount"));
+		fluidNBT = (CompoundNBT) nbt.get("nbt");
 	}
 
 	@Override
-	public void writeNetData(DataOut data)
+	public void writeNetData(PacketBuffer buffer)
 	{
-		super.writeNetData(data);
-		data.writeString(fluid.getName());
-		data.writeNBT(fluidNBT);
-		data.writeVarInt(amount);
+		super.writeNetData(buffer);
+		buffer.writeResourceLocation(fluid.getRegistryName());
+		buffer.writeCompoundTag(fluidNBT);
+		buffer.writeVarLong(amount);
 	}
 
 	@Override
-	public void readNetData(DataIn data)
+	public void readNetData(PacketBuffer buffer)
 	{
-		super.readNetData(data);
-		fluid = FluidRegistry.getFluid(data.readString());
+		super.readNetData(buffer);
+		fluid = ForgeRegistries.FLUIDS.getValue(buffer.readResourceLocation());
 
-		if (fluid == null)
+		if (fluid == null || fluid == Fluids.EMPTY)
 		{
-			fluid = FluidRegistry.WATER;
+			fluid = Fluids.WATER;
 		}
 
-		fluidNBT = data.readNBT();
-		amount = data.readVarInt();
+		fluidNBT = buffer.readCompoundTag();
+		amount = buffer.readVarLong();
 	}
 
-	public FluidStack createFluidStack(int amount)
+	@Override
+	public void clearCachedData()
 	{
-		return new FluidStack(fluid, amount, fluidNBT);
+		super.clearCachedData();
+		cachedFluidStack = null;
 	}
 
-	public static String getVolumeString(int a)
+	public FluidStack createFluidStack()
+	{
+		if (cachedFluidStack == null)
+		{
+			cachedFluidStack = new FluidStack(fluid, FluidAttributes.BUCKET_VOLUME, fluidNBT);
+		}
+
+		return cachedFluidStack;
+	}
+
+	public static String getVolumeString(long a)
 	{
 		StringBuilder builder = new StringBuilder();
 
-		if (a >= Fluid.BUCKET_VOLUME)
+		if (a >= FluidAttributes.BUCKET_VOLUME)
 		{
-			if (a % Fluid.BUCKET_VOLUME != 0L)
+			if (a % FluidAttributes.BUCKET_VOLUME != 0L)
 			{
-				builder.append(a / (double) Fluid.BUCKET_VOLUME);
+				builder.append(a / (double) FluidAttributes.BUCKET_VOLUME);
 			}
 			else
 			{
-				builder.append(a / Fluid.BUCKET_VOLUME);
+				builder.append(a / FluidAttributes.BUCKET_VOLUME);
 			}
 		}
 		else
 		{
-			builder.append(a % Fluid.BUCKET_VOLUME);
+			builder.append(a % FluidAttributes.BUCKET_VOLUME);
 		}
 
 		builder.append(' ');
 
-		if (a < Fluid.BUCKET_VOLUME)
+		if (a < FluidAttributes.BUCKET_VOLUME)
 		{
 			builder.append('m');
 		}
@@ -175,54 +176,26 @@ public class FluidTask extends Task
 	@Override
 	public Icon getAltIcon()
 	{
-		FluidStack fluidStack = createFluidStack(Fluid.BUCKET_VOLUME);
-		return Icon.getIcon(fluidStack.getFluid().getStill(fluidStack).toString()).withTint(Color4I.rgb(fluidStack.getFluid().getColor(fluidStack))).combineWith(Icon.getIcon(FluidTask.TANK_TEXTURE.toString()));
+		FluidStack stack = createFluidStack();
+		FluidAttributes a = stack.getFluid().getAttributes();
+		return Icon.getIcon(a.getStill(stack).toString()).withTint(Color4I.rgb(a.getColor(stack))).combineWith(Icon.getIcon(FluidTask.TANK_TEXTURE.toString()));
 	}
 
 	@Override
 	public String getAltTitle()
 	{
-		return getVolumeString(amount) + " of " + createFluidStack(Fluid.BUCKET_VOLUME).getLocalizedName();
+		return getVolumeString(amount) + " of " + createFluidStack().getDisplayName().getFormattedText();
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
+	@OnlyIn(Dist.CLIENT)
 	public void getConfig(ConfigGroup config)
 	{
 		super.getConfig(config);
 
-		config.add("fluid", new ConfigFluid(FluidRegistry.WATER, FluidRegistry.WATER)
-		{
-			@Override
-			public Fluid getFluid()
-			{
-				return fluid;
-			}
-
-			@Override
-			public void setFluid(Fluid v)
-			{
-				fluid = v;
-			}
-		}, new ConfigFluid(FluidRegistry.WATER, FluidRegistry.WATER));
-
-		config.add("fluid_nbt", new ConfigNBT(null)
-		{
-			@Override
-			@Nullable
-			public NBTTagCompound getNBT()
-			{
-				return fluidNBT;
-			}
-
-			@Override
-			public void setNBT(@Nullable NBTTagCompound v)
-			{
-				fluidNBT = v;
-			}
-		}, new ConfigNBT(null));
-
-		config.addInt("amount", () -> amount, v -> amount = v, Fluid.BUCKET_VOLUME, 1, Integer.MAX_VALUE);
+		config.add("fluid", new ConfigFluid(false), fluid, v -> fluid = v, Fluids.WATER);
+		config.add("fluid_nbt", new ConfigNBT(), fluidNBT, v -> fluidNBT = v, null);
+		config.addLong("amount", amount, v -> amount = v, FluidAttributes.BUCKET_VOLUME, 1, Long.MAX_VALUE);
 	}
 
 	@Override
@@ -236,7 +209,7 @@ public class FluidTask extends Task
 	{
 		Tessellator tessellator = Tessellator.getInstance();
 		BufferBuilder buffer = tessellator.getBuffer();
-		Minecraft mc = Minecraft.getMinecraft();
+		Minecraft mc = Minecraft.getInstance();
 
 		mc.getTextureManager().bindTexture(TANK_TEXTURE);
 		buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
@@ -265,9 +238,9 @@ public class FluidTask extends Task
 			h += 1D / 64D;
 			z = 0.003D;
 
-			FluidStack stack = createFluidStack(Fluid.BUCKET_VOLUME);
-			TextureAtlasSprite sprite = mc.getTextureMapBlocks().getAtlasSprite(stack.getFluid().getStill(stack).toString());
-			int color = stack.getFluid().getColor(stack);
+			FluidStack stack = createFluidStack();
+			TextureAtlasSprite sprite = mc.getTextureMap().getAtlasSprite(stack.getFluid().getAttributes().getStill(stack).toString());
+			int color = stack.getFluid().getAttributes().getColor(stack);
 			int alpha = (color >> 24) & 0xFF;
 			int red = (color >> 16) & 0xFF;
 			int green = (color >> 8) & 0xFF;
@@ -277,15 +250,15 @@ public class FluidTask extends Task
 			double u1 = sprite.getMaxU();
 			double v1 = sprite.getMaxV();
 
-			mc.getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
-			mc.getTextureManager().getTexture(TextureMap.LOCATION_BLOCKS_TEXTURE).setBlurMipmap(false, false);
+			mc.getTextureManager().bindTexture(AtlasTexture.LOCATION_BLOCKS_TEXTURE);
+			mc.getTextureManager().getTexture(AtlasTexture.LOCATION_BLOCKS_TEXTURE).setBlurMipmap(false, false);
 			buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
 			buffer.pos(x, y + h, z).tex(u0, v1).color(red, green, blue, alpha).endVertex();
 			buffer.pos(x + w, y + h, z).tex(u1, v1).color(red, green, blue, alpha).endVertex();
 			buffer.pos(x + w, y, z).tex(u1, v0).color(red, green, blue, alpha).endVertex();
 			buffer.pos(x, y, z).tex(u0, v0).color(red, green, blue, alpha).endVertex();
 			tessellator.draw();
-			mc.getTextureManager().getTexture(TextureMap.LOCATION_BLOCKS_TEXTURE).restoreLastBlurMipmap();
+			mc.getTextureManager().getTexture(AtlasTexture.LOCATION_BLOCKS_TEXTURE).restoreLastBlurMipmap();
 		}
 	}
 
@@ -293,11 +266,11 @@ public class FluidTask extends Task
 	@Nullable
 	public Object getIngredient()
 	{
-		return createFluidStack(Fluid.BUCKET_VOLUME);
+		return createFluidStack();
 	}
 
 	@Override
-	public TaskData createData(QuestData data)
+	public TaskData createData(PlayerData data)
 	{
 		return new Data(this, data);
 	}
@@ -335,28 +308,39 @@ public class FluidTask extends Task
 		{
 			return 64;
 		}
+
+		@Override
+		public boolean isItemValid(int slot, ItemStack stack)
+		{
+			return true;
+		}
 	}
 
-	public static class Data extends TaskData<FluidTask> implements IFluidHandler, IFluidTankProperties
+	public static class Data extends TaskData<FluidTask> implements IFluidHandler
 	{
-		private IFluidTankProperties[] properties;
+		private final LazyOptional<IFluidHandler> fluidHandlerProvider;
+		private final LazyOptional<IItemHandler> itemHandlerProvider;
 
-		private Data(FluidTask t, QuestData data)
+		private Data(FluidTask t, PlayerData data)
 		{
 			super(t, data);
+			fluidHandlerProvider = LazyOptional.of(() -> this);
+			itemHandlerProvider = LazyOptional.of(() -> this);
 		}
 
 		@Override
-		public boolean hasCapability(Capability<?> capability, @Nullable EnumFacing facing)
+		public <T> LazyOptional<T> getCapability(Capability<T> capability, @Nullable Direction facing)
 		{
-			return capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY || capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY;
-		}
+			if (capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY)
+			{
+				return fluidHandlerProvider.cast();
+			}
+			else if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)
+			{
+				return itemHandlerProvider.cast();
+			}
 
-		@Nullable
-		@Override
-		public <T> T getCapability(Capability<T> capability, @Nullable EnumFacing facing)
-		{
-			return capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY || capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY ? (T) this : null;
+			return LazyOptional.empty();
 		}
 
 		@Override
@@ -366,27 +350,27 @@ public class FluidTask extends Task
 		}
 
 		@Override
-		public IFluidTankProperties[] getTankProperties()
+		public int getTanks()
 		{
-			if (properties == null)
-			{
-				properties = new IFluidTankProperties[1];
-				properties[0] = this;
-			}
-
-			return properties;
+			return 1;
 		}
 
 		@Override
-		public int fill(FluidStack resource, boolean doFill)
+		public boolean isFluidValid(int tank, FluidStack stack)
 		{
-			if (resource.amount > 0 && !isComplete() && task.fluid == resource.getFluid() && Objects.equals(task.fluidNBT, resource.tag) && task.quest.canStartTasks(data))
+			return task.createFluidStack().isFluidEqual(stack);
+		}
+
+		@Override
+		public int fill(FluidStack resource, FluidAction action)
+		{
+			if (resource.getAmount() > 0 && !isComplete() && task.createFluidStack().isFluidEqual(resource) && data.canStartTasks(task.quest))
 			{
-				int add = (int) Math.min(resource.amount, task.amount - progress);
+				int add = (int) Math.min(resource.getAmount(), Math.min(Integer.MAX_VALUE, task.amount - progress));
 
 				if (add > 0)
 				{
-					if (doFill && !data.getFile().isClient())
+					if (action.execute() && data.file.getSide().isServer())
 					{
 						addProgress(add);
 					}
@@ -398,22 +382,21 @@ public class FluidTask extends Task
 			return 0;
 		}
 
-		@Nullable
 		@Override
-		public FluidStack drain(FluidStack resource, boolean doDrain)
+		public FluidStack drain(FluidStack resource, FluidAction action)
 		{
-			return null;
-		}
-
-		@Nullable
-		@Override
-		public FluidStack drain(int maxDrain, boolean doDrain)
-		{
-			return null;
+			return FluidStack.EMPTY;
 		}
 
 		@Override
-		public ItemStack insertItem(ItemStack stack, boolean singleItem, boolean simulate, @Nullable EntityPlayer player)
+		public FluidStack drain(int maxDrain, FluidAction action)
+		{
+			return FluidStack.EMPTY;
+		}
+
+		/*
+		@Override
+		public ItemStack insertItem(ItemStack stack, boolean singleItem, boolean simulate, @Nullable PlayerEntity player)
 		{
 			if (isComplete())
 			{
@@ -463,42 +446,18 @@ public class FluidTask extends Task
 		{
 			return 1;
 		}
+		*/
 
-		@Nullable
 		@Override
-		public FluidStack getContents()
+		public FluidStack getFluidInTank(int tank)
 		{
-			return task.createFluidStack((int) progress);
+			return FluidStack.EMPTY;
 		}
 
 		@Override
-		public int getCapacity()
+		public int getTankCapacity(int tank)
 		{
-			return task.amount;
-		}
-
-		@Override
-		public boolean canFill()
-		{
-			return true;
-		}
-
-		@Override
-		public boolean canDrain()
-		{
-			return false;
-		}
-
-		@Override
-		public boolean canFillFluidType(FluidStack fluidStack)
-		{
-			return task.fluid == fluidStack.getFluid() && Objects.equals(task.fluidNBT, fluidStack.tag);
-		}
-
-		@Override
-		public boolean canDrainFluidType(FluidStack fluidStack)
-		{
-			return false;
+			return (int) Math.min(Integer.MAX_VALUE, task.amount);
 		}
 	}
 }

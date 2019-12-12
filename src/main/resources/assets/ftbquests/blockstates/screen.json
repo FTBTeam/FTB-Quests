@@ -1,8 +1,0 @@
-{
-	"variants": {
-		"facing=north": {"model": "ftbquests:screen"},
-		"facing=south": {"model": "ftbquests:screen", "y": 180},
-		"facing=west": {"model": "ftbquests:screen", "y": 270},
-		"facing=east": {"model": "ftbquests:screen", "y": 90}
-	}
-}

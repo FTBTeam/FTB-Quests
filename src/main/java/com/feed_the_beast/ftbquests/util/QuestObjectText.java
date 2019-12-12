@@ -1,6 +1,6 @@
 package com.feed_the_beast.ftbquests.util;
 
-import com.feed_the_beast.ftblib.lib.util.StringUtils;
+import com.feed_the_beast.mods.ftbguilibrary.utils.StringUtils;
 
 import java.util.Collections;
 import java.util.Map;

@@ -1,20 +1,19 @@
 package com.feed_the_beast.ftbquests.gui;
 
-import com.feed_the_beast.ftblib.lib.gui.GuiBase;
-import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
-import com.feed_the_beast.ftblib.lib.gui.Panel;
-import com.feed_the_beast.ftblib.lib.gui.SimpleTextButton;
-import com.feed_the_beast.ftblib.lib.gui.Theme;
-import com.feed_the_beast.ftblib.lib.gui.Widget;
-import com.feed_the_beast.ftblib.lib.gui.WidgetLayout;
-import com.feed_the_beast.ftblib.lib.gui.WrappedIngredient;
-import com.feed_the_beast.ftblib.lib.icon.Color4I;
-import com.feed_the_beast.ftblib.lib.icon.Icon;
-import com.feed_the_beast.ftblib.lib.util.StringUtils;
-import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.quest.QuestShape;
+import com.feed_the_beast.mods.ftbguilibrary.icon.Color4I;
+import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
+import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
+import com.feed_the_beast.mods.ftbguilibrary.utils.StringUtils;
+import com.feed_the_beast.mods.ftbguilibrary.widget.GuiBase;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
+import com.feed_the_beast.mods.ftbguilibrary.widget.SimpleTextButton;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Widget;
+import com.feed_the_beast.mods.ftbguilibrary.widget.WidgetLayout;
+import com.feed_the_beast.mods.ftbguilibrary.widget.WrappedIngredient;
+import com.mojang.blaze3d.platform.GlStateManager;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.TextFormatting;
@@ -59,7 +58,7 @@ public class GuiRewardNotifications extends GuiBase implements IRewardListenerGu
 			if (count > 1)
 			{
 				GlStateManager.pushMatrix();
-				GlStateManager.translate(0F, 0F, 600F);
+				GlStateManager.translatef(0, 0, 600);
 				String s = StringUtils.formatDouble(count, true);
 				theme.drawString(TextFormatting.YELLOW + s, x + 22 - theme.getStringWidth(s), y + 12, Theme.SHADOW);
 				GlStateManager.popMatrix();
@@ -86,7 +85,7 @@ public class GuiRewardNotifications extends GuiBase implements IRewardListenerGu
 			@Override
 			public void onClicked(MouseButton button)
 			{
-				GuiHelper.playClickSound();
+				playClickSound();
 				getGui().closeGui();
 			}
 		};
@@ -150,10 +149,10 @@ public class GuiRewardNotifications extends GuiBase implements IRewardListenerGu
 	public void drawBackground(Theme theme, int x, int y, int w, int h)
 	{
 		GlStateManager.pushMatrix();
-		GlStateManager.translate((int) (w / 2F), (int) (h / 5F), 0F);
-		GlStateManager.scale(2F, 2F, 1F);
+		GlStateManager.translatef((int) (w / 2F), (int) (h / 5F), 0F);
+		GlStateManager.scalef(2, 2, 1);
 		String s = I18n.format("ftbquests.rewards");
-		theme.drawString(s, -theme.getStringWidth(s) / 2, 0, Color4I.WHITE, 0);
+		theme.drawString(s, -theme.getStringWidth(s) / 2F, 0, Color4I.WHITE, 0);
 		GlStateManager.popMatrix();
 	}
 

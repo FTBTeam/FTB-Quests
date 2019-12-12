@@ -1,33 +1,42 @@
 package com.feed_the_beast.ftbquests.quest.task;
 
-import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
-import com.feed_the_beast.ftblib.lib.io.DataIn;
-import com.feed_the_beast.ftblib.lib.io.DataOut;
+import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.QuestData;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.nbt.NBTTagCompound;
+import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
+import com.feed_the_beast.mods.ftbguilibrary.config.NameMap;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraft.util.registry.Registry;
+import net.minecraft.world.dimension.DimensionType;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+
+import java.util.stream.Collectors;
 
 /**
  * @author LatvianModder
  */
 public class LocationTask extends Task
 {
-	public int dimension = 0;
-	public boolean ignoreDimension = false;
-	public int x = 0;
-	public int y = 0;
-	public int z = 0;
-	public int w = 1;
-	public int h = 1;
-	public int d = 1;
+	public DimensionType dimension;
+	public boolean ignoreDimension;
+	public int x, y, z;
+	public int w, h, d;
 
 	public LocationTask(Quest quest)
 	{
 		super(quest);
+		dimension = DimensionType.OVERWORLD;
+		ignoreDimension = false;
+		x = 0;
+		y = 0;
+		z = 0;
+		w = 1;
+		h = 1;
+		d = 1;
 	}
 
 	@Override
@@ -37,79 +46,88 @@ public class LocationTask extends Task
 	}
 
 	@Override
-	public void writeData(NBTTagCompound nbt)
+	public void writeData(CompoundNBT nbt)
 	{
 		super.writeData(nbt);
-		nbt.setIntArray("location", new int[] {dimension, x, y, z, w, h, d});
-
-		if (ignoreDimension)
-		{
-			nbt.setBoolean("ignore_dim", true);
-		}
+		nbt.putString("dimension", DimensionType.getKey(dimension).toString());
+		nbt.putBoolean("ignore_dimension", ignoreDimension);
+		nbt.putIntArray("position", new int[] {x, y, z});
+		nbt.putIntArray("size", new int[] {w, h, d});
 	}
 
 	@Override
-	public void readData(NBTTagCompound nbt)
+	public void readData(CompoundNBT nbt)
 	{
 		super.readData(nbt);
-		int[] ai = nbt.getIntArray("location");
+		dimension = DimensionType.byName(new ResourceLocation(nbt.getString("dimension")));
 
-		if (ai.length != 7)
+		if (dimension == null)
 		{
-			ai = new int[7];
+			dimension = DimensionType.OVERWORLD;
 		}
 
-		dimension = ai[0];
-		x = ai[1];
-		y = ai[2];
-		z = ai[3];
-		w = ai[4];
-		h = ai[5];
-		d = ai[6];
-		ignoreDimension = nbt.getBoolean("ignore_dim");
+		ignoreDimension = nbt.getBoolean("ignore_dimension");
+
+		int[] pos = nbt.getIntArray("position");
+
+		if (pos.length == 3)
+		{
+			x = pos[0];
+			y = pos[1];
+			z = pos[2];
+		}
+
+		int[] size = nbt.getIntArray("size");
+
+		if (pos.length == 3)
+		{
+			w = size[0];
+			h = size[1];
+			d = size[2];
+		}
 	}
 
 	@Override
-	public void writeNetData(DataOut data)
+	public void writeNetData(PacketBuffer buffer)
 	{
-		super.writeNetData(data);
-		data.writeVarInt(dimension);
-		data.writeBoolean(ignoreDimension);
-		data.writeVarInt(x);
-		data.writeVarInt(y);
-		data.writeVarInt(z);
-		data.writeVarInt(w);
-		data.writeVarInt(h);
-		data.writeVarInt(d);
+		super.writeNetData(buffer);
+		buffer.writeResourceLocation(DimensionType.getKey(dimension));
+		buffer.writeBoolean(ignoreDimension);
+		buffer.writeVarInt(x);
+		buffer.writeVarInt(y);
+		buffer.writeVarInt(z);
+		buffer.writeVarInt(w);
+		buffer.writeVarInt(h);
+		buffer.writeVarInt(d);
 	}
 
 	@Override
-	public void readNetData(DataIn data)
+	public void readNetData(PacketBuffer buffer)
 	{
-		super.readNetData(data);
-		dimension = data.readVarInt();
-		ignoreDimension = data.readBoolean();
-		x = data.readVarInt();
-		y = data.readVarInt();
-		z = data.readVarInt();
-		w = data.readVarInt();
-		h = data.readVarInt();
-		d = data.readVarInt();
+		super.readNetData(buffer);
+		dimension = DimensionType.byName(buffer.readResourceLocation());
+		ignoreDimension = buffer.readBoolean();
+		x = buffer.readVarInt();
+		y = buffer.readVarInt();
+		z = buffer.readVarInt();
+		w = buffer.readVarInt();
+		h = buffer.readVarInt();
+		d = buffer.readVarInt();
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
+	@OnlyIn(Dist.CLIENT)
 	public void getConfig(ConfigGroup config)
 	{
 		super.getConfig(config);
-		config.addInt("dim", () -> dimension, v -> dimension = v, 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
-		config.addBool("ignore_dim", () -> ignoreDimension, v -> ignoreDimension = v, false);
-		config.addInt("x", () -> x, v -> x = v, 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
-		config.addInt("y", () -> y, v -> y = v, 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
-		config.addInt("z", () -> z, v -> z = v, 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
-		config.addInt("w", () -> w, v -> w = v, 1, 1, Integer.MAX_VALUE);
-		config.addInt("h", () -> h, v -> h = v, 1, 1, Integer.MAX_VALUE);
-		config.addInt("d", () -> d, v -> d = v, 1, 1, Integer.MAX_VALUE);
+		config.addEnum("dim", dimension, v -> dimension = v, NameMap.of(DimensionType.OVERWORLD, Registry.DIMENSION_TYPE.stream().collect(Collectors.toList())).create());
+		config.addBool("ignore_dim", ignoreDimension, v -> ignoreDimension = v, false);
+		config.addInt("x", x, v -> x = v, 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
+		config.addInt("y", y, v -> y = v, 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
+		config.addInt("z", z, v -> z = v, 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
+		config.addInt("w", w, v -> w = v, 1, 1, Integer.MAX_VALUE);
+		config.addInt("h", h, v -> h = v, 1, 1, Integer.MAX_VALUE);
+		config.addInt("d", d, v -> d = v, 1, 1, Integer.MAX_VALUE);
 	}
 
 	@Override
@@ -119,14 +137,14 @@ public class LocationTask extends Task
 	}
 
 	@Override
-	public TaskData createData(QuestData data)
+	public TaskData createData(PlayerData data)
 	{
 		return new Data(this, data);
 	}
 
 	public static class Data extends BooleanTaskData<LocationTask>
 	{
-		private Data(LocationTask task, QuestData data)
+		private Data(LocationTask task, PlayerData data)
 		{
 			super(task, data);
 		}
@@ -138,7 +156,7 @@ public class LocationTask extends Task
 		}
 
 		@Override
-		public boolean canSubmit(EntityPlayerMP player)
+		public boolean canSubmit(ServerPlayerEntity player)
 		{
 			if (task.ignoreDimension || task.dimension == player.dimension)
 			{

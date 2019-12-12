@@ -1,24 +1,22 @@
 package com.feed_the_beast.ftbquests.net;
 
-import com.feed_the_beast.ftblib.lib.data.Universe;
-import com.feed_the_beast.ftblib.lib.io.DataIn;
-import com.feed_the_beast.ftblib.lib.io.DataOut;
-import com.feed_the_beast.ftblib.lib.net.MessageToServer;
-import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
+import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.task.Task;
-import com.feed_the_beast.ftbquests.util.ServerQuestData;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.fml.network.NetworkEvent;
 
 /**
  * @author LatvianModder
  */
-public class MessageSubmitTask extends MessageToServer
+public class MessageSubmitTask extends MessageBase
 {
-	private int task;
+	private final int task;
 
-	public MessageSubmitTask()
+	MessageSubmitTask(PacketBuffer buffer)
 	{
+		task = buffer.readInt();
 	}
 
 	public MessageSubmitTask(int t)
@@ -27,32 +25,21 @@ public class MessageSubmitTask extends MessageToServer
 	}
 
 	@Override
-	public NetworkWrapper getWrapper()
+	public void write(PacketBuffer buffer)
 	{
-		return FTBQuestsNetHandler.GENERAL;
+		buffer.writeInt(task);
 	}
 
 	@Override
-	public void writeData(DataOut data)
+	public void handle(NetworkEvent.Context context)
 	{
-		data.writeInt(task);
-	}
-
-	@Override
-	public void readData(DataIn data)
-	{
-		task = data.readInt();
-	}
-
-	@Override
-	public void onMessage(EntityPlayerMP player)
-	{
-		ServerQuestData teamData = ServerQuestData.get(Universe.get().getPlayer(player).team);
+		ServerPlayerEntity player = context.getSender();
+		PlayerData data = PlayerData.get(player);
 		Task t = ServerQuestFile.INSTANCE.getTask(task);
 
-		if (t != null && t.quest.canStartTasks(teamData))
+		if (t != null && data.canStartTasks(t.quest))
 		{
-			teamData.getTaskData(t).submitTask(player);
+			data.getTaskData(t).submitTask(player);
 		}
 	}
 }

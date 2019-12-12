@@ -1,13 +1,13 @@
 package com.feed_the_beast.ftbquests.gui;
 
-import com.feed_the_beast.ftblib.lib.gui.misc.SimpleToast;
-import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftbquests.quest.Chapter;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
-import net.minecraft.client.audio.PositionedSoundRecord;
+import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
+import com.feed_the_beast.mods.ftbguilibrary.misc.SimpleToast;
+import net.minecraft.client.audio.SimpleSound;
 import net.minecraft.client.audio.SoundHandler;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.init.SoundEvents;
+import net.minecraft.util.SoundEvents;
 
 /**
  * @author LatvianModder
@@ -24,7 +24,7 @@ public class ToastQuestObject extends SimpleToast
 	@Override
 	public String getTitle()
 	{
-		return I18n.format(object.getObjectType().getTranslationKey() + ".completed");
+		return I18n.format(object.getObjectType().translationKey + ".completed");
 	}
 
 	@Override
@@ -50,7 +50,7 @@ public class ToastQuestObject extends SimpleToast
 	{
 		if (object instanceof Chapter)
 		{
-			handler.playSound(PositionedSoundRecord.getRecord(SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, 1F, 1F));
+			handler.play(SimpleSound.master(SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, 1F, 1F));
 		}
 	}
 }

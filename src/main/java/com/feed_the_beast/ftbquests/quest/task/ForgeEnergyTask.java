@@ -1,17 +1,18 @@
 package com.feed_the_beast.ftbquests.quest.task;
 
-import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
+import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.QuestData;
+import com.feed_the_beast.mods.ftbguilibrary.utils.StringUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
 import org.lwjgl.opengl.GL11;
@@ -48,7 +49,7 @@ public class ForgeEnergyTask extends EnergyTask
 	{
 		Tessellator tessellator = Tessellator.getInstance();
 		BufferBuilder buffer = tessellator.getBuffer();
-		Minecraft mc = Minecraft.getMinecraft();
+		Minecraft mc = Minecraft.getInstance();
 
 		mc.getTextureManager().bindTexture(EMPTY_TEXTURE);
 		buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
@@ -93,29 +94,25 @@ public class ForgeEnergyTask extends EnergyTask
 	}
 
 	@Override
-	public TaskData createData(QuestData data)
+	public TaskData createData(PlayerData data)
 	{
 		return new Data(this, data);
 	}
 
 	public static class Data extends TaskData<ForgeEnergyTask> implements IEnergyStorage
 	{
-		private Data(ForgeEnergyTask task, QuestData data)
+		private final LazyOptional<IEnergyStorage> energyStorageProvider;
+
+		private Data(ForgeEnergyTask task, PlayerData data)
 		{
 			super(task, data);
+			energyStorageProvider = LazyOptional.of(() -> this);
 		}
 
 		@Override
-		public boolean hasCapability(Capability<?> capability, @Nullable EnumFacing facing)
+		public <T> LazyOptional<T> getCapability(Capability<T> capability, @Nullable Direction facing)
 		{
-			return capability == CapabilityEnergy.ENERGY;
-		}
-
-		@Nullable
-		@Override
-		public <T> T getCapability(Capability<T> capability, @Nullable EnumFacing facing)
-		{
-			return capability == CapabilityEnergy.ENERGY ? (T) this : null;
+			return capability == CapabilityEnergy.ENERGY ? energyStorageProvider.cast() : LazyOptional.empty();
 		}
 
 		@Override

@@ -1,10 +1,9 @@
 package com.feed_the_beast.ftbquests.gui.tree;
 
-import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
-import com.feed_the_beast.ftblib.lib.gui.SimpleTextButton;
-import com.feed_the_beast.ftblib.lib.gui.Theme;
-import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
+import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
+import com.feed_the_beast.mods.ftbguilibrary.widget.SimpleTextButton;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
 import net.minecraft.client.resources.I18n;
 
 /**
@@ -20,7 +19,7 @@ public class ButtonCloseViewQuest extends SimpleTextButton
 	@Override
 	public void onClicked(MouseButton button)
 	{
-		GuiHelper.playClickSound();
+		playClickSound();
 		((GuiQuestTree) getGui()).closeQuest();
 	}
 

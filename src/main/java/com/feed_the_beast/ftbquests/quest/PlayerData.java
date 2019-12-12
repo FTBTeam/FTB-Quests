@@ -1,0 +1,587 @@
+package com.feed_the_beast.ftbquests.quest;
+
+import com.feed_the_beast.ftbquests.FTBQuests;
+import com.feed_the_beast.ftbquests.net.MessageClaimRewardResponse;
+import com.feed_the_beast.ftbquests.net.MessageSyncEditingMode;
+import com.feed_the_beast.ftbquests.quest.reward.Reward;
+import com.feed_the_beast.ftbquests.quest.reward.RewardAutoClaim;
+import com.feed_the_beast.ftbquests.quest.task.Task;
+import com.feed_the_beast.ftbquests.quest.task.TaskData;
+import it.unimi.dsi.fastutil.ints.Int2ByteOpenHashMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.common.util.INBTSerializable;
+
+import javax.annotation.Nullable;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
+
+/**
+ * @author LatvianModder
+ */
+public class PlayerData implements INBTSerializable<CompoundNBT>
+{
+	public static PlayerData get(PlayerEntity player)
+	{
+		return FTBQuests.PROXY.getQuestFile(player.getEntityWorld()).getData(player);
+	}
+
+	public final QuestFile file;
+	public final UUID uuid;
+	public String name;
+
+	private final Int2ObjectOpenHashMap<TaskData> taskData;
+	private final IntOpenHashSet claimedRewards;
+	private boolean canEdit;
+	private long money;
+	private boolean autoPin;
+	public final IntOpenHashSet pinnedQuests;
+
+	private Int2ByteOpenHashMap progressCache;
+	private Int2ByteOpenHashMap areDependenciesCompleteCache;
+
+	public PlayerData(QuestFile f, UUID id, String n)
+	{
+		file = f;
+		uuid = id;
+		name = n;
+		taskData = new Int2ObjectOpenHashMap<>();
+		claimedRewards = new IntOpenHashSet();
+		canEdit = false;
+		money = 0L;
+		autoPin = false;
+		pinnedQuests = new IntOpenHashSet();
+	}
+
+	public void markDirty()
+	{
+	}
+
+	public TaskData getTaskData(Task task)
+	{
+		return Objects.requireNonNull(taskData.get(task.id));
+	}
+
+	public void createTaskData(Task task)
+	{
+		taskData.put(task.id, task.createData(this));
+	}
+
+	public void removeTaskData(Task task)
+	{
+		taskData.remove(task.id);
+	}
+
+	public boolean isRewardClaimed(int id)
+	{
+		return claimedRewards.contains(id);
+	}
+
+	public boolean setRewardClaimed(int id, boolean claimed)
+	{
+		if (claimed ? claimedRewards.add(id) : claimedRewards.remove(id))
+		{
+			markDirty();
+			return true;
+		}
+
+		return false;
+	}
+
+	public boolean getCanEdit()
+	{
+		return canEdit;
+	}
+
+	public boolean setCanEdit(boolean mode)
+	{
+		if (canEdit != mode)
+		{
+			canEdit = mode;
+			markDirty();
+
+			if (file.getSide().isServer())
+			{
+				ServerPlayerEntity player = getPlayer();
+
+				if (player != null)
+				{
+					new MessageSyncEditingMode(canEdit).sendTo(player);
+				}
+			}
+
+			return true;
+		}
+
+		return false;
+	}
+
+	public long getMoney()
+	{
+		return money;
+	}
+
+	public void setMoney(long value)
+	{
+		long m = Math.max(0L, value);
+
+		if (money != m)
+		{
+			money = m;
+			markDirty();
+		}
+	}
+
+	public boolean getAutoPin()
+	{
+		return autoPin;
+	}
+
+	public void setAutoPin(boolean auto)
+	{
+		if (autoPin != auto)
+		{
+			autoPin = auto;
+			markDirty();
+		}
+	}
+
+	public boolean isQuestPinned(int id)
+	{
+		return pinnedQuests.contains(id);
+	}
+
+	public void setQuestPinned(int id, boolean pinned)
+	{
+		if (pinned ? pinnedQuests.add(id) : pinnedQuests.remove(id))
+		{
+			markDirty();
+		}
+	}
+
+	public void clearCache()
+	{
+		progressCache = null;
+		areDependenciesCompleteCache = null;
+	}
+
+	@Override
+	public CompoundNBT serializeNBT()
+	{
+		CompoundNBT nbt = new CompoundNBT();
+		CompoundNBT taskDataNbt = new CompoundNBT();
+
+		for (TaskData data : taskData.values())
+		{
+			if (data.isStarted())
+			{
+				String key = QuestObjectBase.getCodeString(data.task);
+
+				if (data.progress <= Byte.MAX_VALUE)
+				{
+					taskDataNbt.putByte(key, (byte) data.progress);
+				}
+				else if (data.progress <= Short.MAX_VALUE)
+				{
+					taskDataNbt.putShort(key, (short) data.progress);
+				}
+				else if (data.progress <= Integer.MAX_VALUE)
+				{
+					taskDataNbt.putInt(key, (int) data.progress);
+				}
+				else
+				{
+					taskDataNbt.putLong(key, data.progress);
+				}
+			}
+		}
+
+		nbt.put("tasks", taskDataNbt);
+		nbt.putIntArray("claimed_rewards", claimedRewards.toIntArray());
+		nbt.putBoolean("can_edit", canEdit);
+		nbt.putLong("money", money);
+		nbt.putBoolean("auto_pin", autoPin);
+		nbt.putIntArray("pinned_quests", pinnedQuests.toIntArray());
+		return nbt;
+	}
+
+	@Override
+	public void deserializeNBT(CompoundNBT nbt)
+	{
+		CompoundNBT nbt1 = nbt.getCompound("tasks");
+
+		for (String s : nbt1.keySet())
+		{
+			Task task = ServerQuestFile.INSTANCE.getTask(ServerQuestFile.INSTANCE.getID(s));
+
+			if (task != null)
+			{
+				taskData.get(task.id).readProgress(nbt1.getLong(s));
+			}
+		}
+
+		claimedRewards.clear();
+		claimedRewards.addAll(new IntOpenHashSet(nbt.getIntArray("claimed_rewards")));
+		canEdit = nbt.getBoolean("can_edit");
+		money = nbt.getLong("money");
+		autoPin = nbt.getBoolean("auto_pin");
+		pinnedQuests.clear();
+		pinnedQuests.addAll(new IntOpenHashSet(nbt.getIntArray("pinned_quests")));
+	}
+
+	public void write(PacketBuffer buffer, boolean self)
+	{
+		buffer.writeString(name, Short.MAX_VALUE);
+		buffer.writeVarLong(money);
+		int tds = 0;
+
+		for (TaskData t : taskData.values())
+		{
+			if (t.progress > 0L)
+			{
+				tds++;
+			}
+		}
+
+		buffer.writeVarInt(tds);
+
+		for (TaskData t : taskData.values())
+		{
+			if (t.progress > 0L)
+			{
+				buffer.writeVarInt(t.task.id);
+				buffer.writeVarLong(t.progress);
+			}
+		}
+
+		if (self)
+		{
+			buffer.writeVarInt(claimedRewards.size());
+
+			for (Integer reward : claimedRewards)
+			{
+				buffer.writeVarInt(reward);
+			}
+
+			canEdit = buffer.readBoolean();
+			autoPin = buffer.readBoolean();
+
+			buffer.writeVarInt(pinnedQuests.size());
+
+			for (Integer reward : pinnedQuests)
+			{
+				buffer.writeVarInt(reward);
+			}
+		}
+	}
+
+	public void read(PacketBuffer buffer, boolean self)
+	{
+		name = buffer.readString(Short.MAX_VALUE);
+		money = buffer.readVarLong();
+
+		int ts = buffer.readVarInt();
+
+		for (int i = 0; i < ts; i++)
+		{
+			TaskData t = taskData.get(buffer.readVarInt());
+			long progress = buffer.readVarLong();
+
+			if (t != null)
+			{
+				t.progress = progress;
+			}
+		}
+
+		claimedRewards.clear();
+		canEdit = false;
+		autoPin = false;
+		pinnedQuests.clear();
+
+		if (self)
+		{
+			int crs = buffer.readVarInt();
+
+			for (int i = 0; i < crs; i++)
+			{
+				claimedRewards.add(buffer.readVarInt());
+			}
+
+			canEdit = buffer.readBoolean();
+			autoPin = buffer.readBoolean();
+
+			int pqs = buffer.readVarInt();
+
+			for (int i = 0; i < pqs; i++)
+			{
+				pinnedQuests.add(buffer.readVarInt());
+			}
+		}
+	}
+
+	public int getRelativeProgress(QuestObject object)
+	{
+		if (!object.cacheProgress())
+		{
+			return object.getRelativeProgressFromChildren(this);
+		}
+
+		if (progressCache == null)
+		{
+			progressCache = new Int2ByteOpenHashMap();
+			progressCache.defaultReturnValue((byte) -1);
+		}
+
+		int i = progressCache.get(object.id);
+
+		if (i == -1)
+		{
+			i = object.getRelativeProgressFromChildren(this);
+			progressCache.put(object.id, (byte) i);
+		}
+
+		return i;
+	}
+
+	public boolean isStarted(QuestObject object)
+	{
+		return getRelativeProgress(object) > 0;
+	}
+
+	public boolean isComplete(QuestObject object)
+	{
+		return getRelativeProgress(object) >= 100;
+	}
+
+	public boolean areDependenciesComplete(Quest quest)
+	{
+		if (quest.dependencies.isEmpty())
+		{
+			return true;
+		}
+
+		if (areDependenciesCompleteCache == null)
+		{
+			areDependenciesCompleteCache = new Int2ByteOpenHashMap();
+			areDependenciesCompleteCache.defaultReturnValue((byte) -1);
+		}
+
+		byte b = areDependenciesCompleteCache.get(quest.id);
+
+		if (b == -1)
+		{
+			b = areDependenciesComplete0(quest) ? (byte) 1 : (byte) 0;
+			areDependenciesCompleteCache.put(quest.id, b);
+		}
+
+		return b == 1;
+	}
+
+	private boolean areDependenciesComplete0(Quest quest)
+	{
+		if (quest.minRequiredDependencies > 0)
+		{
+			int complete = 0;
+
+			for (QuestObject dependency : quest.dependencies)
+			{
+				if (!dependency.invalid && isComplete(dependency))
+				{
+					complete++;
+
+					if (complete >= quest.minRequiredDependencies)
+					{
+						return true;
+					}
+				}
+			}
+
+			return false;
+		}
+
+		if (quest.dependencyRequirement.one)
+		{
+			for (QuestObject object : quest.dependencies)
+			{
+				if (!object.invalid && (quest.dependencyRequirement.completed ? isComplete(object) : isStarted(object)))
+				{
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		for (QuestObject object : quest.dependencies)
+		{
+			if (!object.invalid && (quest.dependencyRequirement.completed ? !isComplete(object) : !isStarted(object)))
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	public boolean canStartTasks(Quest quest)
+	{
+		return areDependenciesComplete(quest);
+	}
+
+	public int getUnclaimedRewards(boolean showExcluded)
+	{
+		int r = 0;
+
+		for (Chapter chapter : file.chapters)
+		{
+			for (Quest quest : chapter.quests)
+			{
+				r += getUnclaimedRewards(quest, showExcluded);
+			}
+		}
+
+		return r;
+	}
+
+	public boolean hasUnclaimedRewards(Chapter chapter, boolean showExcluded)
+	{
+		for (Quest quest : chapter.quests)
+		{
+			if (hasUnclaimedRewards(quest, showExcluded))
+			{
+				return true;
+			}
+		}
+
+		for (Chapter chapter1 : chapter.getChildren())
+		{
+			if (hasUnclaimedRewards(chapter1, showExcluded))
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	public int getUnclaimedRewards(Chapter chapter, boolean showExcluded)
+	{
+		int r = 0;
+
+		for (Quest quest : chapter.quests)
+		{
+			r += getUnclaimedRewards(quest, showExcluded);
+		}
+
+		for (Chapter chapter1 : chapter.getChildren())
+		{
+			r += getUnclaimedRewards(chapter1, showExcluded);
+		}
+
+		return r;
+	}
+
+	public boolean hasUnclaimedRewards(Quest quest, boolean showExcluded)
+	{
+		if (isComplete(quest))
+		{
+			for (Reward reward : quest.rewards)
+			{
+				if ((showExcluded || reward.getExcludeFromClaimAll()) && !isRewardClaimed(reward.id))
+				{
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
+	public int getUnclaimedRewards(Quest quest, boolean showExcluded)
+	{
+		int r = 0;
+
+		if (isComplete(quest))
+		{
+			for (Reward reward : quest.rewards)
+			{
+				if ((showExcluded || !reward.getExcludeFromClaimAll()) && !isRewardClaimed(reward.id))
+				{
+					r++;
+				}
+			}
+		}
+
+		return r;
+	}
+
+	public void claimReward(ServerPlayerEntity player, Reward reward, boolean notify)
+	{
+		if (setRewardClaimed(reward.id, true))
+		{
+			reward.claim(player, notify);
+
+			if (file.getSide().isServer())
+			{
+				new MessageClaimRewardResponse(uuid, reward.id).sendToAll();
+			}
+		}
+	}
+
+	@Nullable
+	public ServerPlayerEntity getPlayer()
+	{
+		return ((ServerQuestFile) file).server.getPlayerList().getPlayerByUUID(uuid);
+	}
+
+	public List<ServerPlayerEntity> getOnlineMembers()
+	{
+		ServerPlayerEntity playerEntity = getPlayer();
+
+		if (playerEntity != null)
+		{
+			return Collections.singletonList(playerEntity);
+		}
+
+		return Collections.emptyList();
+	}
+
+	public void checkAutoCompletion(Quest quest)
+	{
+		if (!isComplete(quest))
+		{
+			return;
+		}
+
+		List<ServerPlayerEntity> online = null;
+
+		for (Reward reward : quest.rewards)
+		{
+			RewardAutoClaim auto = reward.getAutoClaimType();
+
+			if (auto != RewardAutoClaim.DISABLED)
+			{
+				if (online == null)
+				{
+					online = getOnlineMembers();
+
+					if (online.isEmpty())
+					{
+						return;
+					}
+				}
+
+				for (ServerPlayerEntity player : online)
+				{
+					claimReward(player, reward, auto == RewardAutoClaim.ENABLED);
+				}
+			}
+		}
+	}
+}

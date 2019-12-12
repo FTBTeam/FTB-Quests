@@ -1,18 +1,19 @@
 package com.feed_the_beast.ftbquests.quest;
 
-import com.feed_the_beast.ftblib.lib.icon.Icon;
-import com.feed_the_beast.ftblib.lib.icon.ImageIcon;
-import com.feed_the_beast.ftblib.lib.util.IWithID;
-import com.feed_the_beast.ftblib.lib.util.misc.NameMap;
 import com.feed_the_beast.ftbquests.FTBQuests;
+import com.feed_the_beast.mods.ftbguilibrary.config.NameMap;
+import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
+import com.feed_the_beast.mods.ftbguilibrary.icon.ImageIcon;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+
+import java.util.Arrays;
 
 /**
  * @author LatvianModder
  */
-public final class QuestShape extends Icon implements IWithID
+public final class QuestShape extends Icon
 {
 	public static final QuestShape DEFAULT = new QuestShape("default").circularCheck();
 	public static final QuestShape CIRCLE = new QuestShape("circle").circularCheck();
@@ -25,7 +26,7 @@ public final class QuestShape extends Icon implements IWithID
 	public static final QuestShape HEART = new QuestShape("heart");
 	public static final QuestShape GEAR = new QuestShape("gear").circularCheck();
 
-	public static final NameMap<QuestShape> NAME_MAP = NameMap.createWithBaseTranslationKey(DEFAULT, "ftbquests.quest.shape", DEFAULT, CIRCLE, SQUARE, DIAMOND, RSQUARE, PENTAGON, HEXAGON, OCTAGON, HEART, GEAR);
+	public static final NameMap<QuestShape> NAME_MAP = NameMap.of(DEFAULT, Arrays.asList(DEFAULT, CIRCLE, SQUARE, DIAMOND, RSQUARE, PENTAGON, HEXAGON, OCTAGON, HEART, GEAR)).id(v -> v.id).baseNameKey("ftbquests.quest.shape").create();
 
 	public final String id;
 	public final ImageIcon background, outline, shape;
@@ -46,19 +47,13 @@ public final class QuestShape extends Icon implements IWithID
 		return this;
 	}
 
-	@Override
-	public String getId()
-	{
-		return id;
-	}
-
 	public String toString()
 	{
 		return "quest_shape:" + id;
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
+	@OnlyIn(Dist.CLIENT)
 	public void draw(int x, int y, int w, int h)
 	{
 		background.draw(x, y, w, h);

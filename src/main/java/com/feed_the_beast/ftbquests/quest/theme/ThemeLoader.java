@@ -1,7 +1,5 @@
 package com.feed_the_beast.ftbquests.quest.theme;
 
-import com.feed_the_beast.ftblib.FTBLibConfig;
-import com.feed_the_beast.ftblib.lib.io.DataReader;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.quest.theme.selector.AllSelector;
@@ -11,13 +9,15 @@ import com.feed_the_beast.ftbquests.quest.theme.selector.NotSelector;
 import com.feed_the_beast.ftbquests.quest.theme.selector.TagSelector;
 import com.feed_the_beast.ftbquests.quest.theme.selector.ThemeSelector;
 import com.feed_the_beast.ftbquests.quest.theme.selector.TypeSelector;
-import net.minecraft.client.resources.IResource;
-import net.minecraft.client.resources.IResourceManager;
+import com.feed_the_beast.ftbquests.util.FileUtils;
+import net.minecraft.resources.IResource;
+import net.minecraft.resources.IResourceManager;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.client.resource.IResourceType;
-import net.minecraftforge.client.resource.ISelectiveResourceReloadListener;
+import net.minecraftforge.resource.IResourceType;
+import net.minecraftforge.resource.ISelectiveResourceReloadListener;
 
 import javax.annotation.Nullable;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -53,7 +53,10 @@ public class ThemeLoader implements ISelectiveResourceReloadListener
 		{
 			for (IResource resource : resourceManager.getAllResources(new ResourceLocation(FTBQuests.MOD_ID, "ftb_quests_theme.txt")))
 			{
-				parse(map, DataReader.get(resource).safeStringList());
+				try (InputStream in = resource.getInputStream())
+				{
+					parse(map, FileUtils.read(in));
+				}
 			}
 		}
 		catch (Exception ex)
@@ -72,26 +75,23 @@ public class ThemeLoader implements ISelectiveResourceReloadListener
 		theme.selectors.sort(null);
 		QuestTheme.instance = theme;
 
-		if (FTBLibConfig.debugging.print_more_info)
+		FTBQuests.LOGGER.debug("Theme:");
+		FTBQuests.LOGGER.debug("");
+		FTBQuests.LOGGER.debug("[*]");
+
+		for (Map.Entry<String, String> entry : theme.defaults.properties.entrySet())
 		{
-			FTBQuests.LOGGER.info("Theme:");
-			FTBQuests.LOGGER.info("");
-			FTBQuests.LOGGER.info("[*]");
+			FTBQuests.LOGGER.debug(entry.getKey() + ": " + theme.replaceVariables(entry.getValue(), 0));
+		}
 
-			for (Map.Entry<String, String> entry : theme.defaults.properties.entrySet())
+		for (SelectorProperties selectorProperties : theme.selectors)
+		{
+			FTBQuests.LOGGER.debug("");
+			FTBQuests.LOGGER.debug("[" + selectorProperties.selector + "]");
+
+			for (Map.Entry<String, String> entry : selectorProperties.properties.entrySet())
 			{
-				FTBQuests.LOGGER.info(entry.getKey() + ": " + theme.replaceVariables(entry.getValue(), 0));
-			}
-
-			for (SelectorProperties selectorProperties : theme.selectors)
-			{
-				FTBQuests.LOGGER.info("");
-				FTBQuests.LOGGER.info("[" + selectorProperties.selector + "]");
-
-				for (Map.Entry<String, String> entry : selectorProperties.properties.entrySet())
-				{
-					FTBQuests.LOGGER.info(entry.getKey() + ": " + theme.replaceVariables(entry.getValue(), 0));
-				}
+				FTBQuests.LOGGER.debug(entry.getKey() + ": " + theme.replaceVariables(entry.getValue(), 0));
 			}
 		}
 	}

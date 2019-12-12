@@ -1,18 +1,8 @@
 package com.feed_the_beast.ftbquests.gui.tree;
 
-import com.feed_the_beast.ftblib.lib.gui.Button;
-import com.feed_the_beast.ftblib.lib.gui.ContextMenuItem;
-import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
-import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
-import com.feed_the_beast.ftblib.lib.gui.Panel;
-import com.feed_the_beast.ftblib.lib.gui.Theme;
-import com.feed_the_beast.ftblib.lib.gui.Widget;
-import com.feed_the_beast.ftblib.lib.icon.Color4I;
-import com.feed_the_beast.ftblib.lib.icon.Icon;
-import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
-import com.feed_the_beast.ftbquests.net.edit.MessageCreateObject;
-import com.feed_the_beast.ftbquests.net.edit.MessageEditObject;
+import com.feed_the_beast.ftbquests.net.MessageCreateObject;
+import com.feed_the_beast.ftbquests.net.MessageEditObject;
 import com.feed_the_beast.ftbquests.quest.ChapterImage;
 import com.feed_the_beast.ftbquests.quest.Movable;
 import com.feed_the_beast.ftbquests.quest.Quest;
@@ -21,12 +11,20 @@ import com.feed_the_beast.ftbquests.quest.QuestShape;
 import com.feed_the_beast.ftbquests.quest.reward.Reward;
 import com.feed_the_beast.ftbquests.quest.reward.RewardType;
 import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GlStateManager;
+import com.feed_the_beast.mods.ftbguilibrary.icon.Color4I;
+import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
+import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
+import com.feed_the_beast.mods.ftbguilibrary.widget.ContextMenuItem;
+import com.feed_the_beast.mods.ftbguilibrary.widget.GuiIcons;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Widget;
+import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.TranslationTextComponent;
 import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nullable;
@@ -108,7 +106,7 @@ public class ButtonQuest extends Button
 	@Override
 	public void onClicked(MouseButton button)
 	{
-		GuiHelper.playClickSound();
+		playClickSound();
 
 		if (treeGui.file.canEdit() && button.isRight())
 		{
@@ -166,18 +164,18 @@ public class ButtonQuest extends Button
 						for (RewardType type : RewardType.getRegistry())
 						{
 							contextMenu2.add(new ContextMenuItem(type.getDisplayName(), type.getIcon(), () -> {
-								GuiHelper.playClickSound();
+								playClickSound();
 								type.getGuiProvider().openCreationGui(this, quest, reward -> {
 									for (Movable movable : treeGui.selectedObjects)
 									{
 										if (movable instanceof Quest)
 										{
 											Reward r = type.provider.create((Quest) movable);
-											NBTTagCompound nbt1 = new NBTTagCompound();
+											CompoundNBT nbt1 = new CompoundNBT();
 											reward.writeData(nbt1);
 											r.readData(nbt1);
-											NBTTagCompound extra = new NBTTagCompound();
-											extra.setString("type", type.getTypeForNBT());
+											CompoundNBT extra = new CompoundNBT();
+											extra.putString("type", type.getTypeForNBT());
 											new MessageCreateObject(r, extra).sendToServer();
 										}
 									}
@@ -201,7 +199,7 @@ public class ButtonQuest extends Button
 							}
 						});
 						treeGui.selectedObjects.clear();
-					}).setYesNo(I18n.format("delete_item", I18n.format("ftbquests.quests") + " [" + treeGui.selectedObjects.size() + "]")));
+					}).setYesNo(new TranslationTextComponent("delete_item", I18n.format("ftbquests.quests") + " [" + treeGui.selectedObjects.size() + "]")));
 				}
 
 				contextMenu.add(ContextMenuItem.SEPARATOR);
@@ -300,7 +298,7 @@ public class ButtonQuest extends Button
 		{
 			quest.dependencies.clear();
 			quest.dependencies.addAll(prevDeps);
-			GuiQuestTree.displayError(new TextComponentTranslation("ftbquests.gui.looping_dependencies"));
+			GuiQuestTree.displayError(new TranslationTextComponent("ftbquests.gui.looping_dependencies"));
 		}
 	}
 
@@ -318,7 +316,7 @@ public class ButtonQuest extends Button
 
 		if (treeGui.file.self != null)
 		{
-			int p = quest.getRelativeProgress(treeGui.file.self);
+			int p = treeGui.file.self.getRelativeProgress(quest);
 
 			if (p > 0 && p < 100)
 			{
@@ -335,7 +333,7 @@ public class ButtonQuest extends Button
 			list.add(TextFormatting.GRAY + description);
 		}
 
-		int r = quest.getUnclaimedRewards(Minecraft.getMinecraft().player.getUniqueID(), treeGui.file.self, true);
+		int r = treeGui.file.self.getUnclaimedRewards(quest, true);
 
 		if (r > 0)
 		{
@@ -350,11 +348,11 @@ public class ButtonQuest extends Button
 		Color4I outlineColor = Color4I.WHITE.withAlpha(150);
 		Icon qicon = Icon.EMPTY;
 
-		boolean cantStart = !quest.canStartTasks(treeGui.file.self);
+		boolean cantStart = !treeGui.file.self.canStartTasks(quest);
 
 		if (!cantStart)
 		{
-			int progress = quest.getRelativeProgress(treeGui.file.self);
+			int progress = treeGui.file.self.getRelativeProgress(quest);
 
 			if (progress >= 100)
 			{
@@ -362,7 +360,7 @@ public class ButtonQuest extends Button
 
 				for (Reward reward : quest.rewards)
 				{
-					if (!treeGui.file.self.isRewardClaimedSelf(reward))
+					if (!treeGui.file.self.isRewardClaimed(reward.id))
 					{
 						hasRewards = true;
 						break;
@@ -400,22 +398,22 @@ public class ButtonQuest extends Button
 		{
 			double s = w * 2D / 3D;
 			GlStateManager.pushMatrix();
-			GlStateManager.translate(x + (w - s) / 2D, y + (h - s) / 2D, 0F);
-			GlStateManager.scale(s, s, 1D);
+			GlStateManager.translated(x + (w - s) / 2D, y + (h - s) / 2D, 0F);
+			GlStateManager.scaled(s, s, 1D);
 			icon.draw(0, 0, 1, 1);
 			GlStateManager.popMatrix();
 		}
 
-		GlStateManager.enableAlpha();
+		GlStateManager.enableAlphaTest();
 		GlStateManager.alphaFunc(GL11.GL_GREATER, 0.1F);
 		GlStateManager.enableBlend();
 		GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-		GlStateManager.color(1F, 1F, 1F, 1F);
+		GlStateManager.color4f(1F, 1F, 1F, 1F);
 
 		if (quest == treeGui.viewQuestPanel.quest || treeGui.selectedObjects.contains(quest))
 		{
 			GlStateManager.pushMatrix();
-			GlStateManager.translate(0D, 0D, 500D);
+			GlStateManager.translatef(0, 0, 500);
 			Color4I col = Color4I.WHITE.withAlpha((int) (190D + Math.sin(System.currentTimeMillis() * 0.003D) * 50D));
 			shape.outline.withColor(col).draw(x, y, w, h);
 			shape.background.withColor(col).draw(x, y, w, h);
@@ -425,7 +423,7 @@ public class ButtonQuest extends Button
 		if (cantStart)
 		{
 			GlStateManager.pushMatrix();
-			GlStateManager.translate(0D, 0D, 500D);
+			GlStateManager.translatef(0, 0, 500);
 			shape.shape.withColor(Color4I.BLACK.withAlpha(100)).draw(x, y, w, h);
 			GlStateManager.popMatrix();
 		}
@@ -433,7 +431,7 @@ public class ButtonQuest extends Button
 		if (isMouseOver())
 		{
 			GlStateManager.pushMatrix();
-			GlStateManager.translate(0D, 0D, 500D);
+			GlStateManager.translatef(0, 0, 500);
 			shape.shape.withColor(Color4I.WHITE.withAlpha(100)).draw(x, y, w, h);
 			GlStateManager.popMatrix();
 		}
@@ -442,8 +440,8 @@ public class ButtonQuest extends Button
 		{
 			double s = w / 2D;//(int) (treeGui.getZoom() / 2 * quest.size);
 			GlStateManager.pushMatrix();
-			GlStateManager.translate(x + w - s, y, 500D);
-			GlStateManager.scale(s, s, 1D);
+			GlStateManager.translated(x + w - s, y, 500);
+			GlStateManager.scaled(s, s, 1D);
 			qicon.draw(0, 0, 1, 1);
 			GlStateManager.popMatrix();
 		}
