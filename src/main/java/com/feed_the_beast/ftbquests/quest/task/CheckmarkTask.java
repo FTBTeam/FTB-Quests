@@ -1,8 +1,8 @@
 package com.feed_the_beast.ftbquests.quest.task;
 
-import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
+import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.QuestData;
+import com.feed_the_beast.mods.ftbguilibrary.widget.GuiIcons;
 
 import javax.annotation.Nullable;
 
@@ -35,7 +35,7 @@ public class CheckmarkTask extends Task
 	}
 
 	@Override
-	public TaskData createData(QuestData data)
+	public TaskData createData(PlayerData data)
 	{
 		return new BooleanTaskData<>(this, data);
 	}

@@ -1,22 +1,19 @@
 package com.feed_the_beast.ftbquests.net;
 
-import com.feed_the_beast.ftblib.lib.io.DataIn;
-import com.feed_the_beast.ftblib.lib.io.DataOut;
-import com.feed_the_beast.ftblib.lib.net.MessageToClient;
-import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.fml.network.NetworkEvent;
 
 /**
  * @author LatvianModder
  */
-public class MessageSyncEditingMode extends MessageToClient
+public class MessageSyncEditingMode extends MessageBase
 {
-	public boolean editingMode;
+	private final boolean editingMode;
 
-	public MessageSyncEditingMode()
+	public MessageSyncEditingMode(PacketBuffer buffer)
 	{
+		editingMode = buffer.readBoolean();
 	}
 
 	public MessageSyncEditingMode(boolean e)
@@ -25,30 +22,16 @@ public class MessageSyncEditingMode extends MessageToClient
 	}
 
 	@Override
-	public NetworkWrapper getWrapper()
+	public void write(PacketBuffer buffer)
 	{
-		return FTBQuestsNetHandler.GENERAL;
+		buffer.writeBoolean(editingMode);
 	}
 
 	@Override
-	public void writeData(DataOut data)
+	public void handle(NetworkEvent.Context context)
 	{
-		data.writeBoolean(editingMode);
-	}
-
-	@Override
-	public void readData(DataIn data)
-	{
-		editingMode = data.readBoolean();
-	}
-
-	@Override
-	@SideOnly(Side.CLIENT)
-	public void onMessage()
-	{
-		if (ClientQuestFile.exists() && ClientQuestFile.INSTANCE.editingMode != editingMode)
+		if (ClientQuestFile.exists() && ClientQuestFile.INSTANCE.self.setCanEdit(editingMode))
 		{
-			ClientQuestFile.INSTANCE.editingMode = editingMode;
 			ClientQuestFile.INSTANCE.refreshGui();
 		}
 	}

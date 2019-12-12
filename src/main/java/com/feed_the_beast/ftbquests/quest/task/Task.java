@@ -1,11 +1,5 @@
 package com.feed_the_beast.ftbquests.quest.task;
 
-import com.feed_the_beast.ftblib.lib.client.ClientUtils;
-import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
-import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
-import com.feed_the_beast.ftblib.lib.gui.WrappedIngredient;
-import com.feed_the_beast.ftblib.lib.icon.Icon;
-import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.events.CustomTaskEvent;
 import com.feed_the_beast.ftbquests.events.ObjectCompletedEvent;
 import com.feed_the_beast.ftbquests.gui.tree.GuiQuestTree;
@@ -14,19 +8,23 @@ import com.feed_the_beast.ftbquests.net.MessageDisplayCompletionToast;
 import com.feed_the_beast.ftbquests.net.MessageSubmitTask;
 import com.feed_the_beast.ftbquests.quest.ChangeProgress;
 import com.feed_the_beast.ftbquests.quest.Chapter;
+import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.QuestData;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
-import com.feed_the_beast.ftbquests.tile.TileTaskScreenCore;
-import com.feed_the_beast.ftbquests.tile.TileTaskScreenPart;
+import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
+import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
+import com.feed_the_beast.mods.ftbguilibrary.utils.ClientUtils;
+import com.feed_the_beast.mods.ftbguilibrary.utils.StringUtils;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
+import com.feed_the_beast.mods.ftbguilibrary.widget.WrappedIngredient;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.common.MinecraftForge;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -69,20 +67,20 @@ public abstract class Task extends QuestObject
 
 	public abstract TaskType getType();
 
-	public abstract TaskData createData(QuestData data);
+	public abstract TaskData createData(PlayerData data);
 
 	@Override
-	public final int getRelativeProgressFromChildren(QuestData data)
+	public final int getRelativeProgressFromChildren(PlayerData data)
 	{
 		return data.getTaskData(this).getRelativeProgress();
 	}
 
 	@Override
-	public final void onCompleted(QuestData data, List<EntityPlayerMP> onlineMembers, List<EntityPlayerMP> notifiedPlayers)
+	public final void onCompleted(PlayerData data, List<ServerPlayerEntity> onlineMembers, List<ServerPlayerEntity> notifiedPlayers)
 	{
 		super.onCompleted(data, onlineMembers, notifiedPlayers);
-		new ObjectCompletedEvent.TaskEvent(data, this, onlineMembers, notifiedPlayers).post();
-		boolean questComplete = quest.isComplete(data);
+		MinecraftForge.EVENT_BUS.post(new ObjectCompletedEvent.TaskEvent(data, this, onlineMembers, notifiedPlayers));
+		boolean questComplete = data.isComplete(quest);
 
 		if (quest.tasks.size() > 1 && !questComplete && !disableToast)
 		{
@@ -106,7 +104,7 @@ public abstract class Task extends QuestObject
 	}
 
 	@Override
-	public final void changeProgress(QuestData data, ChangeProgress type)
+	public final void changeProgress(PlayerData data, ChangeProgress type)
 	{
 		data.getTaskData(this).setProgress(type.reset ? 0L : getMaxProgress());
 	}
@@ -116,9 +114,9 @@ public abstract class Task extends QuestObject
 	{
 		quest.tasks.remove(this);
 
-		for (QuestData data : quest.chapter.file.getAllData())
+		for (PlayerData data : quest.chapter.file.getAllData())
 		{
-			data.removeTask(this);
+			data.removeTaskData(this);
 		}
 
 		super.deleteSelf();
@@ -127,16 +125,16 @@ public abstract class Task extends QuestObject
 	@Override
 	public final void deleteChildren()
 	{
-		for (QuestData data : quest.chapter.file.getAllData())
+		for (PlayerData data : quest.chapter.file.getAllData())
 		{
-			data.removeTask(this);
+			data.removeTaskData(this);
 		}
 
 		super.deleteChildren();
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
+	@OnlyIn(Dist.CLIENT)
 	public void editedFromGUI()
 	{
 		GuiQuestTree gui = ClientUtils.getCurrentGuiAs(GuiQuestTree.class);
@@ -153,14 +151,14 @@ public abstract class Task extends QuestObject
 	{
 		quest.tasks.add(this);
 
-		for (QuestData data : quest.chapter.file.getAllData())
+		for (PlayerData data : quest.chapter.file.getAllData())
 		{
 			data.createTaskData(this);
 		}
 
 		if (this instanceof CustomTask)
 		{
-			new CustomTaskEvent((CustomTask) this).post();
+			MinecraftForge.EVENT_BUS.post(new CustomTaskEvent((CustomTask) this));
 		}
 	}
 
@@ -180,12 +178,13 @@ public abstract class Task extends QuestObject
 	public final ConfigGroup createSubGroup(ConfigGroup group)
 	{
 		TaskType type = getType();
-		return group.getGroup(getObjectType().getId()).getGroup(type.getRegistryName().getNamespace()).getGroup(type.getRegistryName().getPath());
+		return group.getGroup(getObjectType().id).getGroup(type.getRegistryName().getNamespace()).getGroup(type.getRegistryName().getPath());
 	}
 
-	public Class<? extends TileTaskScreenCore> getScreenCoreClass()
+	/* FIXME:
+	public Class<? extends BlockEntityTaskScreenCore> getScreenCoreClass()
 	{
-		return TileTaskScreenCore.class;
+		return BlockEntityTaskScreenCore.class;
 	}
 
 	public Class<? extends TileTaskScreenPart> getScreenPartClass()
@@ -193,15 +192,16 @@ public abstract class Task extends QuestObject
 		return TileTaskScreenPart.class;
 	}
 
-	public TileTaskScreenCore createScreenCore(World world)
+	public BlockEntityTaskScreenCore createScreenCore(World world)
 	{
-		return new TileTaskScreenCore();
+		return new BlockEntityTaskScreenCore();
 	}
 
 	public TileTaskScreenPart createScreenPart(World world)
 	{
 		return new TileTaskScreenPart();
 	}
+	*/
 
 	public void drawGUI(@Nullable TaskData data, int x, int y, int w, int h)
 	{
@@ -228,7 +228,7 @@ public abstract class Task extends QuestObject
 		return getMaxProgress() <= 1L;
 	}
 
-	@SideOnly(Side.CLIENT)
+	@OnlyIn(Dist.CLIENT)
 	public void addMouseOverText(List<String> list, @Nullable TaskData data)
 	{
 		if (consumesResources())
@@ -238,18 +238,18 @@ public abstract class Task extends QuestObject
 		}
 	}
 
-	@SideOnly(Side.CLIENT)
+	@OnlyIn(Dist.CLIENT)
 	public boolean addTitleInMouseOverText()
 	{
 		return true;
 	}
 
-	@SideOnly(Side.CLIENT)
-	public void onButtonClicked(boolean canClick)
+	@OnlyIn(Dist.CLIENT)
+	public void onButtonClicked(Button button, boolean canClick)
 	{
 		if (canClick && autoSubmitOnPlayerTick() <= 0)
 		{
-			GuiHelper.playClickSound();
+			button.playClickSound();
 			new MessageSubmitTask(id).sendToServer();
 		}
 	}
@@ -276,7 +276,7 @@ public abstract class Task extends QuestObject
 		return FTBQuestsJEIHelper.QUESTS;
 	}
 
-	@SideOnly(Side.CLIENT)
+	@OnlyIn(Dist.CLIENT)
 	public String getButtonText()
 	{
 		return getMaxProgress() > 1L || consumesResources() ? getMaxProgressString() : "";

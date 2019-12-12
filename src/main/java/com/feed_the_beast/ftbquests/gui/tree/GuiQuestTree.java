@@ -1,26 +1,11 @@
 package com.feed_the_beast.ftbquests.gui.tree;
 
-import com.feed_the_beast.ftblib.lib.config.ConfigBoolean;
-import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
-import com.feed_the_beast.ftblib.lib.config.ConfigValueInstance;
-import com.feed_the_beast.ftblib.lib.config.IIteratingConfig;
-import com.feed_the_beast.ftblib.lib.gui.ContextMenuItem;
-import com.feed_the_beast.ftblib.lib.gui.GuiBase;
-import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
-import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
-import com.feed_the_beast.ftblib.lib.gui.IOpenableGui;
-import com.feed_the_beast.ftblib.lib.gui.Panel;
-import com.feed_the_beast.ftblib.lib.gui.Theme;
-import com.feed_the_beast.ftblib.lib.gui.Widget;
-import com.feed_the_beast.ftblib.lib.icon.Color4I;
-import com.feed_the_beast.ftblib.lib.math.MathUtils;
-import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.gui.FTBQuestsTheme;
 import com.feed_the_beast.ftbquests.gui.GuiSelectQuestObject;
-import com.feed_the_beast.ftbquests.net.edit.MessageChangeProgress;
-import com.feed_the_beast.ftbquests.net.edit.MessageEditObject;
+import com.feed_the_beast.ftbquests.net.MessageChangeProgress;
+import com.feed_the_beast.ftbquests.net.MessageEditObject;
 import com.feed_the_beast.ftbquests.quest.ChangeProgress;
 import com.feed_the_beast.ftbquests.quest.Chapter;
 import com.feed_the_beast.ftbquests.quest.Movable;
@@ -33,14 +18,29 @@ import com.feed_the_beast.ftbquests.quest.task.Task;
 import com.feed_the_beast.ftbquests.quest.theme.QuestTheme;
 import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
+import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
+import com.feed_the_beast.mods.ftbguilibrary.config.ConfigValue;
+import com.feed_the_beast.mods.ftbguilibrary.config.ConfigWithVariants;
+import com.feed_the_beast.mods.ftbguilibrary.icon.Color4I;
+import com.feed_the_beast.mods.ftbguilibrary.utils.Key;
+import com.feed_the_beast.mods.ftbguilibrary.utils.MathUtils;
+import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
+import com.feed_the_beast.mods.ftbguilibrary.widget.ContextMenuItem;
+import com.feed_the_beast.mods.ftbguilibrary.widget.GuiBase;
+import com.feed_the_beast.mods.ftbguilibrary.widget.GuiHelper;
+import com.feed_the_beast.mods.ftbguilibrary.widget.GuiIcons;
+import com.feed_the_beast.mods.ftbguilibrary.widget.IOpenableGui;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Widget;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.toasts.SystemToast;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
-import org.lwjgl.input.Keyboard;
+import net.minecraft.util.text.TranslationTextComponent;
+import org.lwjgl.glfw.GLFW;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -149,23 +149,6 @@ public class GuiQuestTree extends GuiBase
 	}
 
 	@Override
-	public boolean onClosedByKey(int key)
-	{
-		if (super.onClosedByKey(key))
-		{
-			if (getViewedQuest() != null)
-			{
-				closeQuest();
-				return false;
-			}
-
-			return true;
-		}
-
-		return false;
-	}
-
-	@Override
 	public void onBack()
 	{
 		if (getViewedQuest() != null)
@@ -206,7 +189,7 @@ public class GuiQuestTree extends GuiBase
 
 	public static void addObjectMenuItems(List<ContextMenuItem> contextMenu, IOpenableGui gui, QuestObjectBase object)
 	{
-		ConfigGroup group = ConfigGroup.newGroup(FTBQuests.MOD_ID);
+		ConfigGroup group = new ConfigGroup(FTBQuests.MOD_ID);
 		ConfigGroup g = object.createSubGroup(group);
 		object.getConfig(g);
 
@@ -214,42 +197,41 @@ public class GuiQuestTree extends GuiBase
 		{
 			List<ContextMenuItem> list = new ArrayList<>();
 
-			for (ConfigValueInstance inst : g.getValues())
+			for (ConfigValue inst : g.getValues())
 			{
-				if (inst.getValue() instanceof IIteratingConfig)
+				if (inst instanceof ConfigWithVariants)
 				{
-					String name = inst.getDisplayName().getFormattedText();
+					String name = inst.getName();
 
 					if (!inst.getCanEdit())
 					{
 						name = TextFormatting.GRAY + name;
 					}
 
-					list.add(new ContextMenuItem(name, inst.getIcon(), null)
+					list.add(new ContextMenuItem(name, GuiIcons.SETTINGS, null)
 					{
 						@Override
 						public void addMouseOverText(List<String> list)
 						{
-							list.add(inst.getValue().getStringForGUI().getFormattedText());
+							list.add(inst.getStringForGUI(inst.value));
 						}
 
 						@Override
 						public void onClicked(Panel panel, MouseButton button)
 						{
-							inst.getValue().onClicked(gui, inst, button, () -> new MessageEditObject(object).sendToServer());
+							inst.onClicked(button, accepted -> {
+								if (accepted)
+								{
+									new MessageEditObject(object).sendToServer();
+								}
+								gui.run();
+							});
 						}
 
 						@Override
 						public void drawIcon(Theme theme, int x, int y, int w, int h)
 						{
-							if (inst.getValue() instanceof ConfigBoolean)
-							{
-								(inst.getValue().getBoolean() ? GuiIcons.ACCEPT : GuiIcons.ACCEPT_GRAY).draw(x, y, w, h);
-							}
-							else
-							{
-								super.drawIcon(theme, x, y, w, h);
-							}
+							inst.getIcon(inst.value).draw(x, y, w, h);
 						}
 					});
 				}
@@ -274,16 +256,16 @@ public class GuiQuestTree extends GuiBase
 
 		if (!isShiftKeyDown())
 		{
-			delete.setYesNo(I18n.format("delete_item", object.getTitle()));
+			delete.setYesNo(new TranslationTextComponent("delete_item", object.getTitle()));
 		}
 
 		contextMenu.add(delete);
 
-		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.reset_progress"), ThemeProperties.RELOAD_ICON.get(), () -> new MessageChangeProgress(ClientQuestFile.INSTANCE.self.getTeamUID(), object.id, isShiftKeyDown() ? ChangeProgress.RESET_DEPS : ChangeProgress.RESET).sendToServer()).setYesNo(I18n.format("ftbquests.gui.reset_progress_q")));
+		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.reset_progress"), ThemeProperties.RELOAD_ICON.get(), () -> new MessageChangeProgress(ClientQuestFile.INSTANCE.self.uuid, object.id, isShiftKeyDown() ? ChangeProgress.RESET_DEPS : ChangeProgress.RESET).sendToServer()).setYesNo(new TranslationTextComponent("ftbquests.gui.reset_progress_q")));
 
 		if (object instanceof QuestObject)
 		{
-			contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.complete_instantly"), ThemeProperties.CHECK_ICON.get(), () -> new MessageChangeProgress(ClientQuestFile.INSTANCE.self.getTeamUID(), object.id, isShiftKeyDown() ? ChangeProgress.COMPLETE_DEPS : ChangeProgress.COMPLETE).sendToServer()).setYesNo(I18n.format("ftbquests.gui.complete_instantly_q")));
+			contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.complete_instantly"), ThemeProperties.CHECK_ICON.get(), () -> new MessageChangeProgress(ClientQuestFile.INSTANCE.self.uuid, object.id, isShiftKeyDown() ? ChangeProgress.COMPLETE_DEPS : ChangeProgress.COMPLETE).sendToServer()).setYesNo(new TranslationTextComponent("ftbquests.gui.complete_instantly_q")));
 		}
 
 		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.copy_id"), ThemeProperties.WIKI_ICON.get(), () -> setClipboardString(QuestObjectBase.getCodeString(object)))
@@ -298,7 +280,7 @@ public class GuiQuestTree extends GuiBase
 
 	public static void displayError(ITextComponent error)
 	{
-		Minecraft.getMinecraft().getToastGui().add(new SystemToast(SystemToast.Type.TUTORIAL_HINT, new TextComponentTranslation("ftbquests.gui.error"), error));
+		Minecraft.getInstance().getToastGui().add(new SystemToast(SystemToast.Type.TUTORIAL_HINT, new TranslationTextComponent("ftbquests.gui.error"), error));
 	}
 
 	private boolean moveSelectedQuests(double x, double y)
@@ -315,14 +297,14 @@ public class GuiQuestTree extends GuiBase
 	}
 
 	@Override
-	public boolean keyPressed(int key, char keyChar)
+	public boolean keyPressed(Key key)
 	{
-		if (super.keyPressed(key, keyChar))
+		if (super.keyPressed(key))
 		{
 			return true;
 		}
 
-		if (key == Keyboard.KEY_TAB)
+		if (key.is(GLFW.GLFW_KEY_TAB))
 		{
 			if (selectedChapter != null && file.chapters.size() > 1)
 			{
@@ -337,21 +319,21 @@ public class GuiQuestTree extends GuiBase
 			return true;
 		}
 
-		if (key == Keyboard.KEY_SPACE)
+		if (key.is(GLFW.GLFW_KEY_SPACE))
 		{
 			questPanel.resetScroll();
 			return true;
 		}
 
-		if (key == Keyboard.KEY_R)
+		if (key.is(GLFW.GLFW_KEY_R) && key.modifiers.onlyControl())
 		{
 			grid = !grid;
 			return true;
 		}
 
-		if (keyChar >= '1' && keyChar <= '9')
+		if (key.keyCode >= GLFW.GLFW_KEY_1 && key.keyCode <= GLFW.GLFW_KEY_9)
 		{
-			int i = keyChar - '1';
+			int i = key.keyCode - GLFW.GLFW_KEY_1;
 
 			if (i < file.chapters.size())
 			{
@@ -361,11 +343,11 @@ public class GuiQuestTree extends GuiBase
 			return true;
 		}
 
-		if (isCtrlKeyDown() && selectedChapter != null && file.canEdit())
+		if (key.modifiers.control() && selectedChapter != null && file.canEdit())
 		{
 			double step;
 
-			if (isShiftKeyDown())
+			if (key.modifiers.shift())
 			{
 				step = 0.1D;
 			}
@@ -374,26 +356,26 @@ public class GuiQuestTree extends GuiBase
 				step = 0.5D;
 			}
 
-			switch (key)
+			switch (key.keyCode)
 			{
-				case Keyboard.KEY_A:
+				case GLFW.GLFW_KEY_A:
 					selectedObjects.addAll(selectedChapter.quests);
 					return true;
-				case Keyboard.KEY_D:
+				case GLFW.GLFW_KEY_D:
 					selectedObjects.clear();
 					return true;
-				case Keyboard.KEY_DOWN:
+				case GLFW.GLFW_KEY_DOWN:
 					return moveSelectedQuests(0D, step);
-				case Keyboard.KEY_UP:
+				case GLFW.GLFW_KEY_UP:
 					return moveSelectedQuests(0D, -step);
-				case Keyboard.KEY_LEFT:
+				case GLFW.GLFW_KEY_LEFT:
 					return moveSelectedQuests(-step, 0D);
-				case Keyboard.KEY_RIGHT:
+				case GLFW.GLFW_KEY_RIGHT:
 					return moveSelectedQuests(step, 0D);
 			}
 		}
 
-		if (key == Keyboard.KEY_LSHIFT)
+		if (key.keyCode == GLFW.GLFW_KEY_LEFT_SHIFT || key.keyCode == GLFW.GLFW_KEY_RIGHT_SHIFT)
 		{
 			long now = System.currentTimeMillis();
 
@@ -405,21 +387,24 @@ public class GuiQuestTree extends GuiBase
 			{
 				if (now - lastShiftPress <= 400L)
 				{
-					ConfigQuestObject c = new ConfigQuestObject(file, 0, QuestObjectType.CHAPTER.or(QuestObjectType.QUEST));
-					GuiSelectQuestObject gui = new GuiSelectQuestObject(c, this, () -> {
-						QuestObjectBase o = file.getBase(c.getObject());
+					ConfigQuestObject<QuestObject> c = new ConfigQuestObject<>(QuestObjectType.CHAPTER.or(QuestObjectType.QUEST));
+					GuiSelectQuestObject gui = new GuiSelectQuestObject<>(c, accepted -> {
+						if (accepted)
+						{
+							if (c.value instanceof Chapter)
+							{
+								selectChapter((Chapter) c.value);
+							}
+							else if (c.value instanceof Quest)
+							{
+								zoom = 20;
+								selectChapter(((Quest) c.value).chapter);
+								viewQuestPanel.hidePanel = false;
+								viewQuest((Quest) c.value);
+							}
+						}
 
-						if (o instanceof Chapter)
-						{
-							selectChapter((Chapter) o);
-						}
-						else if (o instanceof Quest)
-						{
-							zoom = 20;
-							selectChapter(((Quest) o).chapter);
-							viewQuestPanel.hidePanel = false;
-							viewQuest((Quest) o);
-						}
+						GuiQuestTree.this.openGui();
 					});
 
 					gui.focus();
@@ -470,10 +455,10 @@ public class GuiQuestTree extends GuiBase
 		return getZoom() * ThemeProperties.QUEST_SPACING.get(selectedChapter) / 4D;
 	}
 
-	public void addZoom(int up)
+	public void addZoom(double up)
 	{
 		int z = zoom;
-		zoom = MathHelper.clamp(zoom + up * 4, 4, 28);
+		zoom = (int) MathHelper.clamp(zoom + up * 4, 4, 28);
 
 		if (zoom != z)
 		{

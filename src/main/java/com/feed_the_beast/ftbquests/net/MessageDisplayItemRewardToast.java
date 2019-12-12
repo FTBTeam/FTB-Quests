@@ -1,29 +1,26 @@
 package com.feed_the_beast.ftbquests.net;
 
-import com.feed_the_beast.ftblib.lib.icon.Icon;
-import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
-import com.feed_the_beast.ftblib.lib.io.DataIn;
-import com.feed_the_beast.ftblib.lib.io.DataOut;
-import com.feed_the_beast.ftblib.lib.net.MessageToClient;
-import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.gui.IRewardListenerGui;
 import com.feed_the_beast.ftbquests.gui.RewardKey;
 import com.feed_the_beast.ftbquests.gui.RewardToast;
+import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
+import com.feed_the_beast.mods.ftbguilibrary.icon.ItemIcon;
 import net.minecraft.client.Minecraft;
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.fml.network.NetworkEvent;
 import net.minecraftforge.items.ItemHandlerHelper;
 
 /**
  * @author LatvianModder
  */
-public class MessageDisplayItemRewardToast extends MessageToClient
+public class MessageDisplayItemRewardToast extends MessageBase
 {
-	private ItemStack stack;
+	private final ItemStack stack;
 
-	public MessageDisplayItemRewardToast()
+	MessageDisplayItemRewardToast(PacketBuffer buffer)
 	{
+		stack = buffer.readItemStack();
 	}
 
 	public MessageDisplayItemRewardToast(ItemStack is)
@@ -31,41 +28,27 @@ public class MessageDisplayItemRewardToast extends MessageToClient
 		stack = is;
 	}
 
-	@Override
-	public NetworkWrapper getWrapper()
+	public void write(PacketBuffer buffer)
 	{
-		return FTBQuestsNetHandler.GENERAL;
+		buffer.writeItemStack(stack);
 	}
 
 	@Override
-	public void writeData(DataOut data)
-	{
-		data.writeItemStack(stack);
-	}
-
-	@Override
-	public void readData(DataIn data)
-	{
-		stack = data.readItemStack();
-	}
-
-	@Override
-	@SideOnly(Side.CLIENT)
-	public void onMessage()
+	public void handle(NetworkEvent.Context context)
 	{
 		ItemStack stack1 = ItemHandlerHelper.copyStackWithSize(stack, 1);
 		Icon icon = ItemIcon.getItemIcon(stack1);
 
-		if (!IRewardListenerGui.add(new RewardKey(stack.getDisplayName(), icon).setStack(stack1), stack.getCount()))
+		if (!IRewardListenerGui.add(new RewardKey(stack.getDisplayName().getString(), icon).setStack(stack1), stack.getCount()))
 		{
-			String s = stack.getDisplayName();
+			String s = stack.getDisplayName().getFormattedText();
 
 			if (stack.getCount() > 1)
 			{
 				s = stack.getCount() + "x " + s;
 			}
 
-			Minecraft.getMinecraft().getToastGui().add(new RewardToast(stack.getRarity().color + s, icon));
+			Minecraft.getInstance().getToastGui().add(new RewardToast(stack.getRarity().color + s, icon));
 		}
 	}
 }

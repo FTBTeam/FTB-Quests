@@ -7,25 +7,31 @@ import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.loot.LootCrate;
 import com.feed_the_beast.ftbquests.quest.loot.RewardTable;
 import com.feed_the_beast.ftbquests.quest.loot.WeightedReward;
-import net.minecraft.client.resources.I18n;
+import com.feed_the_beast.mods.ftbguilibrary.config.Tristate;
 import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.init.SoundEvents;
-import net.minecraft.item.EnumRarity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Rarity;
+import net.minecraft.particles.ItemParticleData;
+import net.minecraft.particles.ParticleTypes;
 import net.minecraft.util.ActionResult;
-import net.minecraft.util.EnumActionResult;
-import net.minecraft.util.EnumHand;
-import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.ActionResultType;
+import net.minecraft.util.Hand;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -35,27 +41,32 @@ import java.util.List;
  */
 public class ItemLootCrate extends Item
 {
-	@Nullable
-	public static LootCrate getCrate(@Nullable World world, ItemStack stack)
+	public ItemLootCrate()
 	{
-		if (stack.hasTagCompound() && stack.getItem() instanceof ItemLootCrate)
+		super(new Properties().group(FTBQuests.ITEM_GROUP));
+	}
+
+	@Nullable
+	public static LootCrate getCrate(@Nullable IWorld world, ItemStack stack)
+	{
+		if (stack.hasTag() && stack.getItem() instanceof ItemLootCrate)
 		{
-			QuestFile file = FTBQuests.PROXY.getQuestFile(world);
-			return file == null ? null : file.getLootCrate(stack.getTagCompound().getString("type"));
+			QuestFile file = world == null ? FTBQuests.PROXY.getQuestFile(Tristate.DEFAULT) : FTBQuests.PROXY.getQuestFile(world);
+			return file == null ? null : file.getLootCrate(stack.getTag().getString("type"));
 		}
 
 		return null;
 	}
 
 	@Override
-	public ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer player, EnumHand hand)
+	public ActionResult<ItemStack> onItemRightClick(World world, PlayerEntity player, Hand hand)
 	{
 		ItemStack stack = player.getHeldItem(hand);
 		LootCrate crate = getCrate(world, stack);
 
 		if (crate == null)
 		{
-			return new ActionResult<>(EnumActionResult.SUCCESS, stack);
+			return new ActionResult<>(ActionResultType.SUCCESS, stack);
 		}
 
 		int size = player.isSneaking() ? stack.getCount() : 1;
@@ -79,7 +90,7 @@ public class ItemLootCrate extends Item
 
 							if (currentWeight >= number)
 							{
-								reward.reward.claim((EntityPlayerMP) player, true);
+								reward.reward.claim((ServerPlayerEntity) player, true);
 								break;
 							}
 						}
@@ -103,12 +114,12 @@ public class ItemLootCrate extends Item
 				vec3d1 = vec3d1.rotatePitch(-player.rotationPitch * 0.017453292F);
 				vec3d1 = vec3d1.rotateYaw(-player.rotationYaw * 0.017453292F);
 				vec3d1 = vec3d1.add(player.posX, player.posY + (double) player.getEyeHeight(), player.posZ);
-				world.spawnParticle(EnumParticleTypes.ITEM_CRACK, vec3d1.x, vec3d1.y, vec3d1.z, vec3d.x, vec3d.y + 0.05D, vec3d.z, Item.getIdFromItem(this), 0);
+				world.addParticle(new ItemParticleData(ParticleTypes.ITEM, stack), vec3d1.x, vec3d1.y, vec3d1.z, vec3d.x, vec3d.y + 0.05D, vec3d.z);
 			}
 		}
 
 		stack.shrink(size);
-		return new ActionResult<>(EnumActionResult.SUCCESS, stack);
+		return new ActionResult<>(ActionResultType.SUCCESS, stack);
 	}
 
 	@Override
@@ -119,24 +130,24 @@ public class ItemLootCrate extends Item
 	}
 
 	@Override
-	public String getItemStackDisplayName(ItemStack stack)
+	public ITextComponent getDisplayName(ItemStack stack)
 	{
 		LootCrate crate = getCrate(null, stack);
-		return crate != null && !crate.itemName.isEmpty() ? crate.itemName : super.getItemStackDisplayName(stack);
+		return crate != null && !crate.itemName.isEmpty() ? new StringTextComponent(crate.itemName) : super.getDisplayName(stack);
 	}
 
 	@Override
-	public EnumRarity getRarity(ItemStack stack)
+	public Rarity getRarity(ItemStack stack)
 	{
-		return EnumRarity.UNCOMMON;
+		return Rarity.UNCOMMON;
 	}
 
 	@Override
-	public void getSubItems(CreativeTabs tab, NonNullList<ItemStack> items)
+	public void fillItemGroup(ItemGroup tab, NonNullList<ItemStack> items)
 	{
-		if (isInCreativeTab(tab))
+		if (isInGroup(tab))
 		{
-			QuestFile file = FTBQuests.PROXY.getQuestFile(null);
+			QuestFile file = FTBQuests.PROXY.getQuestFile(Tristate.DEFAULT);
 
 			if (file != null)
 			{
@@ -152,11 +163,11 @@ public class ItemLootCrate extends Item
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
-	public void addInformation(ItemStack stack, @Nullable World world, List<String> tooltip, ITooltipFlag flag)
+	@OnlyIn(Dist.CLIENT)
+	public void addInformation(ItemStack stack, @Nullable World world, List<ITextComponent> tooltip, ITooltipFlag flag)
 	{
-		tooltip.add(I18n.format("item.ftbquests.lootcrate.tooltip_1"));
-		tooltip.add(I18n.format("item.ftbquests.lootcrate.tooltip_2"));
+		tooltip.add(new TranslationTextComponent("item.ftbquests.lootcrate.tooltip_1").applyTextStyle(TextFormatting.GRAY));
+		tooltip.add(new TranslationTextComponent("item.ftbquests.lootcrate.tooltip_2").applyTextStyle(TextFormatting.GRAY));
 
 		if (world == null || !ClientQuestFile.exists())
 		{
@@ -169,14 +180,14 @@ public class ItemLootCrate extends Item
 		{
 			if (crate.itemName.isEmpty())
 			{
-				tooltip.add("");
-				tooltip.add(crate.table.getTitle());
+				tooltip.add(new StringTextComponent(""));
+				tooltip.add(new StringTextComponent(crate.table.getTitle()).applyTextStyle(TextFormatting.GRAY));
 			}
 		}
-		else if (stack.hasTagCompound() && stack.getTagCompound().hasKey("type"))
+		else if (stack.hasTag() && stack.getTag().contains("type"))
 		{
-			tooltip.add("");
-			tooltip.add(stack.getTagCompound().getString("type"));
+			tooltip.add(new StringTextComponent(""));
+			tooltip.add(new StringTextComponent(stack.getTag().getString("type")).applyTextStyle(TextFormatting.GRAY));
 		}
 	}
 }

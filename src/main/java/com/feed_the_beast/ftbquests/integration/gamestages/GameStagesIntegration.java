@@ -1,20 +1,20 @@
 package com.feed_the_beast.ftbquests.integration.gamestages;
 
-import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftbquests.quest.Chapter;
+import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.QuestData;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.reward.RewardType;
 import com.feed_the_beast.ftbquests.quest.task.Task;
 import com.feed_the_beast.ftbquests.quest.task.TaskType;
+import com.feed_the_beast.mods.ftbguilibrary.widget.GuiIcons;
 import net.darkhax.gamestages.event.GameStageEvent;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.fml.common.eventhandler.EventPriority;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.PlayerEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 /**
  * @author LatvianModder
@@ -24,53 +24,52 @@ public class GameStagesIntegration
 	public static TaskType GAMESTAGE_TASK;
 	public static RewardType GAMESTAGE_REWARD;
 
-	public static void preInit()
+	public void init()
 	{
-		MinecraftForge.EVENT_BUS.register(GameStagesIntegration.class);
+		FMLJavaModLoadingContext.get().getModEventBus().addGenericListener(TaskType.class, this::registerTasks);
+		FMLJavaModLoadingContext.get().getModEventBus().addGenericListener(RewardType.class, this::registerRewards);
+		MinecraftForge.EVENT_BUS.addListener(EventPriority.LOW, this::onLoggedIn);
+		MinecraftForge.EVENT_BUS.addListener(this::onGameStageAdded);
+		MinecraftForge.EVENT_BUS.addListener(this::onGameStageRemoved);
 	}
 
-	@SubscribeEvent
-	public static void registerTasks(RegistryEvent.Register<TaskType> event)
+	private void registerTasks(RegistryEvent.Register<TaskType> event)
 	{
 		event.getRegistry().register(GAMESTAGE_TASK = new TaskType(GameStageTask::new).setRegistryName("gamestage").setIcon(GuiIcons.CONTROLLER));
 	}
 
-	@SubscribeEvent
-	public static void registerRewards(RegistryEvent.Register<RewardType> event)
+	private void registerRewards(RegistryEvent.Register<RewardType> event)
 	{
 		event.getRegistry().register(GAMESTAGE_REWARD = new RewardType(GameStageReward::new).setRegistryName("gamestage").setIcon(GuiIcons.CONTROLLER));
 	}
 
-	@SubscribeEvent(priority = EventPriority.LOW)
-	public static void onLoggedIn(PlayerEvent.PlayerLoggedInEvent event)
+	private void onLoggedIn(PlayerEvent.PlayerLoggedInEvent event)
 	{
-		if (event.player instanceof EntityPlayerMP)
+		if (event.getPlayer() instanceof ServerPlayerEntity)
 		{
-			checkStages((EntityPlayerMP) event.player);
+			checkStages((ServerPlayerEntity) event.getPlayer());
 		}
 	}
 
-	@SubscribeEvent
-	public static void onGameStageAdded(GameStageEvent.Added event)
+	private void onGameStageAdded(GameStageEvent.Added event)
 	{
-		if (event.getEntityPlayer() instanceof EntityPlayerMP)
+		if (event.getPlayer() instanceof ServerPlayerEntity)
 		{
-			checkStages((EntityPlayerMP) event.getEntityPlayer());
+			checkStages((ServerPlayerEntity) event.getPlayer());
 		}
 	}
 
-	@SubscribeEvent
-	public static void onGameStageRemoved(GameStageEvent.Removed event)
+	private void onGameStageRemoved(GameStageEvent.Removed event)
 	{
-		if (event.getEntityPlayer() instanceof EntityPlayerMP)
+		if (event.getPlayer() instanceof ServerPlayerEntity)
 		{
-			checkStages((EntityPlayerMP) event.getEntityPlayer());
+			checkStages((ServerPlayerEntity) event.getPlayer());
 		}
 	}
 
-	private static void checkStages(EntityPlayerMP player)
+	private static void checkStages(ServerPlayerEntity player)
 	{
-		QuestData data = ServerQuestFile.INSTANCE == null ? null : ServerQuestFile.INSTANCE.getData(player);
+		PlayerData data = ServerQuestFile.INSTANCE == null ? null : ServerQuestFile.INSTANCE.getData(player);
 
 		if (data != null)
 		{
@@ -78,7 +77,7 @@ public class GameStagesIntegration
 			{
 				for (Quest quest : chapter.quests)
 				{
-					if (quest.canStartTasks(data))
+					if (data.canStartTasks(quest))
 					{
 						for (Task task : quest.tasks)
 						{

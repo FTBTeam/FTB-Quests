@@ -1,23 +1,23 @@
 package com.feed_the_beast.ftbquests.quest.reward;
 
-import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
-import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
-import com.feed_the_beast.ftblib.lib.gui.IOpenableGui;
-import com.feed_the_beast.ftblib.lib.gui.misc.GuiEditConfig;
-import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.gui.GuiSelectQuestObject;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
+import com.feed_the_beast.ftbquests.quest.loot.RewardTable;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
+import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
+import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiEditConfig;
+import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
+import com.feed_the_beast.mods.ftbguilibrary.widget.GuiIcons;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.registries.ForgeRegistry;
-import net.minecraftforge.registries.IForgeRegistryEntry;
+import net.minecraftforge.registries.ForgeRegistryEntry;
 import net.minecraftforge.registries.RegistryBuilder;
 
 import javax.annotation.Nullable;
@@ -26,7 +26,7 @@ import java.util.function.Consumer;
 /**
  * @author LatvianModder
  */
-public final class RewardType extends IForgeRegistryEntry.Impl<RewardType>
+public final class RewardType extends ForgeRegistryEntry<RewardType>
 {
 	private static ForgeRegistry<RewardType> REGISTRY;
 
@@ -80,8 +80,8 @@ public final class RewardType extends IForgeRegistryEntry.Impl<RewardType>
 
 	public interface GuiProvider
 	{
-		@SideOnly(Side.CLIENT)
-		void openCreationGui(IOpenableGui gui, Quest quest, Consumer<Reward> callback);
+		@OnlyIn(Dist.CLIENT)
+		void openCreationGui(Runnable gui, Quest quest, Consumer<Reward> callback);
 	}
 
 	public final Provider provider;
@@ -98,24 +98,35 @@ public final class RewardType extends IForgeRegistryEntry.Impl<RewardType>
 		guiProvider = new GuiProvider()
 		{
 			@Override
-			@SideOnly(Side.CLIENT)
-			public void openCreationGui(IOpenableGui gui, Quest quest, Consumer<Reward> callback)
+			@OnlyIn(Dist.CLIENT)
+			public void openCreationGui(Runnable gui, Quest quest, Consumer<Reward> callback)
 			{
 				Reward reward = provider.create(quest);
 
 				if (reward instanceof RandomReward)
 				{
-					ConfigQuestObject config = new ConfigQuestObject(quest.getQuestFile(), 0, QuestObjectType.REWARD_TABLE);
-					new GuiSelectQuestObject(config, gui, () -> {
-						((RandomReward) reward).table = config.file.getRewardTable(config.getObject());
-						callback.accept(reward);
+					ConfigQuestObject<RewardTable> config = new ConfigQuestObject<>(QuestObjectType.REWARD_TABLE);
+					new GuiSelectQuestObject<>(config, accepted -> {
+						if (accepted)
+						{
+							((RandomReward) reward).table = config.value;
+							callback.accept(reward);
+						}
+						gui.run();
 					}).openGui();
 					return;
 				}
 
-				ConfigGroup group = ConfigGroup.newGroup(FTBQuests.MOD_ID);
+				ConfigGroup group = new ConfigGroup(FTBQuests.MOD_ID);
 				reward.getConfig(reward.createSubGroup(group));
-				new GuiEditConfig(group, (g1, sender) -> callback.accept(reward)).openGui();
+				group.savedCallback = accepted -> {
+					if (accepted)
+					{
+						callback.accept(reward);
+					}
+					gui.run();
+				};
+				new GuiEditConfig(group).openGui();
 			}
 		};
 	}

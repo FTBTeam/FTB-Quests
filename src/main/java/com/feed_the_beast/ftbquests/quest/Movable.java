@@ -1,7 +1,7 @@
 package com.feed_the_beast.ftbquests.quest;
 
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 /**
  * @author LatvianModder
@@ -20,6 +20,6 @@ public interface Movable
 
 	QuestShape getShape();
 
-	@SideOnly(Side.CLIENT)
+	@OnlyIn(Dist.CLIENT)
 	void move(Chapter to, double x, double y);
 }

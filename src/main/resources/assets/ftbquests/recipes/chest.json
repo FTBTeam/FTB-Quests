@@ -1,9 +1,0 @@
-{
-	"type": "minecraft:crafting_shapeless",
-	"group": "ftbquests:chest",
-	"result": {"item": "chest"},
-	"ingredients": [
-		{"item": "book"},
-		{"type": "forge:ore_dict", "ore": "chest"}
-	]
-}

@@ -1,6 +1,5 @@
 package com.feed_the_beast.ftbquests.quest.theme.selector;
 
-import com.feed_the_beast.ftblib.lib.util.StringJoiner;
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 
 import java.util.ArrayList;
@@ -52,7 +51,19 @@ public class AndSelector extends ThemeSelector
 	@Override
 	public String toString()
 	{
-		return StringJoiner.with(" & ").join(selectors);
+		StringBuilder builder = new StringBuilder();
+
+		for (int i = 0; i < selectors.size(); i++)
+		{
+			if (i > 0)
+			{
+				builder.append(" & ");
+			}
+
+			builder.append(selectors.get(i));
+		}
+
+		return builder.toString();
 	}
 
 	@Override

@@ -1,7 +1,7 @@
 package com.feed_the_beast.ftbquests.integration.jei;
 
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
-import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.fml.ModList;
 
 /**
  * @author LatvianModder
@@ -15,7 +15,7 @@ public class FTBQuestsJEIHelper
 	{
 		int i = object.refreshJEI();
 
-		if (i != 0 && Loader.isModLoaded("jei"))
+		if (i != 0 && ModList.get().isLoaded("jei"))
 		{
 			if ((i & QUESTS) != 0)
 			{

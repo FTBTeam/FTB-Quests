@@ -1,6 +1,6 @@
 package com.feed_the_beast.ftbquests.quest.theme.property;
 
-import com.feed_the_beast.ftblib.lib.icon.Icon;
+import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 
 /**
  * @author LatvianModder

@@ -1,25 +1,24 @@
 package com.feed_the_beast.ftbquests.net;
 
-import com.feed_the_beast.ftblib.lib.data.Universe;
-import com.feed_the_beast.ftblib.lib.io.DataIn;
-import com.feed_the_beast.ftblib.lib.io.DataOut;
-import com.feed_the_beast.ftblib.lib.net.MessageToServer;
-import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
+import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.reward.Reward;
-import com.feed_the_beast.ftbquests.util.ServerQuestData;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.fml.network.NetworkEvent;
 
 /**
  * @author LatvianModder
  */
-public class MessageClaimReward extends MessageToServer
+public class MessageClaimReward extends MessageBase
 {
-	private int id;
-	private boolean notify;
+	private final int id;
+	private final boolean notify;
 
-	public MessageClaimReward()
+	MessageClaimReward(PacketBuffer buffer)
 	{
+		id = buffer.readInt();
+		notify = buffer.readBoolean();
 	}
 
 	public MessageClaimReward(int i, boolean n)
@@ -28,36 +27,22 @@ public class MessageClaimReward extends MessageToServer
 		notify = n;
 	}
 
-	@Override
-	public NetworkWrapper getWrapper()
+	public void write(PacketBuffer buffer)
 	{
-		return FTBQuestsNetHandler.GENERAL;
+		buffer.writeInt(id);
+		buffer.writeBoolean(notify);
 	}
 
-	@Override
-	public void writeData(DataOut data)
-	{
-		data.writeInt(id);
-		data.writeBoolean(notify);
-	}
-
-	@Override
-	public void readData(DataIn data)
-	{
-		id = data.readInt();
-		notify = data.readBoolean();
-	}
-
-	@Override
-	public void onMessage(EntityPlayerMP player)
+	public void handle(NetworkEvent.Context context)
 	{
 		Reward reward = ServerQuestFile.INSTANCE.getReward(id);
+		ServerPlayerEntity player = context.getSender();
 
 		if (reward != null)
 		{
-			ServerQuestData teamData = ServerQuestData.get(Universe.get().getPlayer(player).team);
+			PlayerData teamData = ServerQuestFile.INSTANCE.getData(player);
 
-			if (reward.quest.isComplete(teamData))
+			if (teamData.isComplete(reward.quest))
 			{
 				teamData.claimReward(player, reward, notify);
 			}

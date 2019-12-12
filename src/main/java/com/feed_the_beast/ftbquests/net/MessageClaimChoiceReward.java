@@ -1,27 +1,20 @@
 package com.feed_the_beast.ftbquests.net;
 
-import com.feed_the_beast.ftblib.lib.data.Universe;
-import com.feed_the_beast.ftblib.lib.io.DataIn;
-import com.feed_the_beast.ftblib.lib.io.DataOut;
-import com.feed_the_beast.ftblib.lib.net.MessageToServer;
-import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
+import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.reward.ChoiceReward;
 import com.feed_the_beast.ftbquests.quest.reward.Reward;
-import com.feed_the_beast.ftbquests.util.ServerQuestData;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.fml.network.NetworkEvent;
 
 /**
  * @author LatvianModder
  */
-public class MessageClaimChoiceReward extends MessageToServer
+public class MessageClaimChoiceReward extends MessageBase
 {
-	private int id;
-	private int index;
-
-	public MessageClaimChoiceReward()
-	{
-	}
+	private final int id;
+	private final int index;
 
 	public MessageClaimChoiceReward(int i, int idx)
 	{
@@ -29,42 +22,34 @@ public class MessageClaimChoiceReward extends MessageToServer
 		index = idx;
 	}
 
-	@Override
-	public NetworkWrapper getWrapper()
+	MessageClaimChoiceReward(PacketBuffer buffer)
 	{
-		return FTBQuestsNetHandler.GENERAL;
+		id = buffer.readInt();
+		index = buffer.readVarInt();
 	}
 
-	@Override
-	public void writeData(DataOut data)
+	public void write(PacketBuffer buffer)
 	{
-		data.writeInt(id);
-		data.writeVarInt(index);
+		buffer.writeInt(id);
+		buffer.writeVarInt(index);
 	}
 
-	@Override
-	public void readData(DataIn data)
-	{
-		id = data.readInt();
-		index = data.readVarInt();
-	}
-
-	@Override
-	public void onMessage(EntityPlayerMP player)
+	public void handle(NetworkEvent.Context context)
 	{
 		Reward reward = ServerQuestFile.INSTANCE.getReward(id);
 
 		if (reward instanceof ChoiceReward)
 		{
+			ServerPlayerEntity player = context.getSender();
 			ChoiceReward r = (ChoiceReward) reward;
-			ServerQuestData teamData = ServerQuestData.get(Universe.get().getPlayer(player).team);
+			PlayerData data = PlayerData.get(player);
 
-			if (r.getTable() != null && reward.quest.isComplete(teamData))
+			if (r.getTable() != null && data.isComplete(reward.quest))
 			{
 				if (index >= 0 && index < r.getTable().rewards.size())
 				{
 					r.getTable().rewards.get(index).reward.claim(player, true);
-					teamData.claimReward(player, reward, true);
+					data.claimReward(player, reward, true);
 				}
 			}
 		}

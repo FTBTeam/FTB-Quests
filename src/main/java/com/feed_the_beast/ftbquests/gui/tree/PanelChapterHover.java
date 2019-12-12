@@ -1,11 +1,11 @@
 package com.feed_the_beast.ftbquests.gui.tree;
 
-import com.feed_the_beast.ftblib.lib.gui.Panel;
-import com.feed_the_beast.ftblib.lib.gui.Theme;
-import com.feed_the_beast.ftblib.lib.gui.Widget;
-import com.feed_the_beast.ftblib.lib.gui.WidgetLayout;
 import com.feed_the_beast.ftbquests.quest.Chapter;
-import net.minecraft.client.renderer.GlStateManager;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Widget;
+import com.feed_the_beast.mods.ftbguilibrary.widget.WidgetLayout;
+import com.mojang.blaze3d.platform.GlStateManager;
 
 /**
  * @author LatvianModder
@@ -98,7 +98,7 @@ public class PanelChapterHover extends Panel
 		if (type != -1)
 		{
 			GlStateManager.pushMatrix();
-			GlStateManager.translate(0F, 0F, 500F);
+			GlStateManager.translatef(0F, 0F, 500F);
 			super.draw(theme, x, y, w, h);
 			GlStateManager.popMatrix();
 		}

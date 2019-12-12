@@ -1,13 +1,12 @@
 package com.feed_the_beast.ftbquests.quest.reward;
 
-import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
-import com.feed_the_beast.ftblib.lib.io.DataIn;
-import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 /**
  * @author LatvianModder
@@ -29,47 +28,43 @@ public class ToastReward extends Reward
 	}
 
 	@Override
-	public void writeData(NBTTagCompound nbt)
+	public void writeData(CompoundNBT nbt)
 	{
 		super.writeData(nbt);
-
-		if (!description.isEmpty())
-		{
-			nbt.setString("description", description);
-		}
+		nbt.putString("description", description);
 	}
 
 	@Override
-	public void readData(NBTTagCompound nbt)
+	public void readData(CompoundNBT nbt)
 	{
 		super.readData(nbt);
 		description = nbt.getString("description");
 	}
 
 	@Override
-	public void writeNetData(DataOut data)
+	public void writeNetData(PacketBuffer buffer)
 	{
-		super.writeNetData(data);
-		data.writeString(description);
+		super.writeNetData(buffer);
+		buffer.writeString(description);
 	}
 
 	@Override
-	public void readNetData(DataIn data)
+	public void readNetData(PacketBuffer buffer)
 	{
-		super.readNetData(data);
-		description = data.readString();
+		super.readNetData(buffer);
+		description = buffer.readString();
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
+	@OnlyIn(Dist.CLIENT)
 	public void getConfig(ConfigGroup config)
 	{
 		super.getConfig(config);
-		config.addString("description", () -> description, v -> description = v, "");
+		config.addString("description", description, v -> description = v, "");
 	}
 
 	@Override
-	public void claim(EntityPlayerMP player, boolean notify)
+	public void claim(ServerPlayerEntity player, boolean notify)
 	{
 	}
 }

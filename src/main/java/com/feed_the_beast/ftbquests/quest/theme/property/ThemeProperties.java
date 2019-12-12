@@ -1,10 +1,10 @@
 package com.feed_the_beast.ftbquests.quest.theme.property;
 
-import com.feed_the_beast.ftblib.lib.icon.Color4I;
-import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftbquests.events.ThemePropertyEvent;
+import com.feed_the_beast.mods.ftbguilibrary.icon.Color4I;
+import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
+import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import org.lwjgl.opengl.GL11;
@@ -47,7 +47,7 @@ public interface ThemeProperties
 		@Override
 		public void draw(int x, int y, int w, int h)
 		{
-			GlStateManager.disableTexture2D();
+			GlStateManager.disableTexture();
 			Tessellator tessellator = Tessellator.getInstance();
 			BufferBuilder buffer = tessellator.getBuffer();
 			buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
@@ -88,7 +88,7 @@ public interface ThemeProperties
 			buffer.pos(x + dw * 13, y + dh * 1 + dh, 0).color(r, g, b, a).endVertex();
 
 			tessellator.draw();
-			GlStateManager.enableTexture2D();
+			GlStateManager.enableTexture();
 		}
 
 		public int hashCode()
@@ -107,7 +107,7 @@ public interface ThemeProperties
 		@Override
 		public void draw(int x, int y, int w, int h)
 		{
-			GlStateManager.disableTexture2D();
+			GlStateManager.disableTexture();
 			Tessellator tessellator = Tessellator.getInstance();
 			BufferBuilder buffer = tessellator.getBuffer();
 			buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
@@ -148,7 +148,7 @@ public interface ThemeProperties
 			buffer.pos(x + dw * 13, y + dh * 7, 0).color(r, g, b, a).endVertex();
 
 			tessellator.draw();
-			GlStateManager.enableTexture2D();
+			GlStateManager.enableTexture();
 		}
 
 		public int hashCode()

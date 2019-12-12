@@ -1,7 +1,7 @@
 package com.feed_the_beast.ftbquests.quest.task;
 
-import com.feed_the_beast.ftbquests.quest.QuestData;
-import net.minecraft.entity.player.EntityPlayerMP;
+import com.feed_the_beast.ftbquests.quest.PlayerData;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
 
 /**
@@ -9,18 +9,18 @@ import net.minecraft.item.ItemStack;
  */
 public class BooleanTaskData<T extends Task> extends TaskData<T>
 {
-	public BooleanTaskData(T q, QuestData d)
+	public BooleanTaskData(T q, PlayerData d)
 	{
 		super(q, d);
 	}
 
-	public boolean canSubmit(EntityPlayerMP player)
+	public boolean canSubmit(ServerPlayerEntity player)
 	{
 		return true;
 	}
 
 	@Override
-	public void submitTask(EntityPlayerMP player, ItemStack item)
+	public void submitTask(ServerPlayerEntity player, ItemStack item)
 	{
 		if (!isComplete() && canSubmit(player))
 		{

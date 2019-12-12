@@ -1,13 +1,12 @@
 package com.feed_the_beast.ftbquests.gui.tree;
 
-import com.feed_the_beast.ftblib.lib.gui.Panel;
-import com.feed_the_beast.ftblib.lib.gui.Theme;
-import com.feed_the_beast.ftblib.lib.icon.Color4I;
-import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.quest.Chapter;
 import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GlStateManager;
+import com.feed_the_beast.mods.ftbguilibrary.icon.Color4I;
+import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
+import com.mojang.blaze3d.platform.GlStateManager;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -66,23 +65,23 @@ public class ButtonChapter extends ButtonTab
 		if (chapter.quests.isEmpty() && !chapter.hasChildren())
 		{
 			GlStateManager.pushMatrix();
-			GlStateManager.translate(0F, 0F, 450F);
+			GlStateManager.translatef(0, 0, 450);
 			ThemeProperties.CLOSE_ICON.get().draw(x + w - 10, y + 2, 8, 8);
 			GlStateManager.popMatrix();
 			return;
 		}
 
-		if (chapter.hasUnclaimedRewards(Minecraft.getMinecraft().player.getUniqueID(), treeGui.file.self, true))
+		if (treeGui.file.self.hasUnclaimedRewards(chapter, true))
 		{
 			GlStateManager.pushMatrix();
-			GlStateManager.translate(0F, 0F, 450F);
+			GlStateManager.translatef(0, 0, 450);
 			ThemeProperties.ALERT_ICON.get().draw(x + w - 7, y + 2, 6, 6);
 			GlStateManager.popMatrix();
 		}
-		else if (chapter.isComplete(treeGui.file.self))
+		else if (treeGui.file.self.isComplete(chapter))
 		{
 			GlStateManager.pushMatrix();
-			GlStateManager.translate(0F, 0F, 450F);
+			GlStateManager.translatef(0, 0, 450);
 			ThemeProperties.CHECK_ICON.get().draw(x + w - 8, y + 1, 8, 8);
 			GlStateManager.popMatrix();
 		}

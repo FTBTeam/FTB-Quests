@@ -1,13 +1,6 @@
 package com.feed_the_beast.ftbquests.integration.jei;
 
-import com.feed_the_beast.ftbquests.client.ClientQuestFile;
-import com.feed_the_beast.ftbquests.quest.Chapter;
-import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.reward.Reward;
-import com.feed_the_beast.ftbquests.quest.reward.RewardAutoClaim;
-
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author LatvianModder
@@ -18,14 +11,14 @@ public enum QuestRegistry
 
 	public final ArrayList<QuestWrapper> list = new ArrayList<>();
 
-	@SuppressWarnings("deprecation")
 	public void refresh()
 	{
+		/*
 		if (FTBQuestsJEIIntegration.runtime != null && !list.isEmpty())
 		{
 			for (QuestWrapper wrapper : list)
 			{
-				FTBQuestsJEIIntegration.runtime.getRecipeRegistry().removeRecipe(wrapper, QuestCategory.UID);
+				FTBQuestsJEIIntegration.runtime.getRecipeManager().removeRecipe(wrapper, QuestCategory.UID);
 			}
 		}
 
@@ -56,10 +49,11 @@ public enum QuestRegistry
 					{
 						QuestWrapper wrapper = new QuestWrapper(quest, rewards);
 						list.add(wrapper);
-						FTBQuestsJEIIntegration.runtime.getRecipeRegistry().addRecipe(wrapper, QuestCategory.UID);
+						FTBQuestsJEIIntegration.runtime.getRecipeManager().addRecipe(wrapper, QuestCategory.UID);
 					}
 				}
 			}
 		}
+		*/
 	}
 }

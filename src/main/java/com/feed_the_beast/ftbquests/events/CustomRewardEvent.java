@@ -1,8 +1,8 @@
 package com.feed_the_beast.ftbquests.events;
 
 import com.feed_the_beast.ftbquests.quest.reward.CustomReward;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraftforge.fml.common.eventhandler.Cancelable;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraftforge.eventbus.api.Cancelable;
 
 /**
  * @author LatvianModder
@@ -11,10 +11,10 @@ import net.minecraftforge.fml.common.eventhandler.Cancelable;
 public class CustomRewardEvent extends FTBQuestsEvent
 {
 	private final CustomReward reward;
-	private final EntityPlayerMP player;
+	private final ServerPlayerEntity player;
 	private final boolean notify;
 
-	public CustomRewardEvent(CustomReward r, EntityPlayerMP p, boolean n)
+	public CustomRewardEvent(CustomReward r, ServerPlayerEntity p, boolean n)
 	{
 		reward = r;
 		player = p;
@@ -26,7 +26,7 @@ public class CustomRewardEvent extends FTBQuestsEvent
 		return reward;
 	}
 
-	public EntityPlayerMP getPlayer()
+	public ServerPlayerEntity getPlayer()
 	{
 		return player;
 	}

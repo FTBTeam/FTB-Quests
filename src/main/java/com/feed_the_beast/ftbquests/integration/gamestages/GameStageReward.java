@@ -1,19 +1,18 @@
 package com.feed_the_beast.ftbquests.integration.gamestages;
 
-import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
-import com.feed_the_beast.ftblib.lib.io.DataIn;
-import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.reward.Reward;
 import com.feed_the_beast.ftbquests.quest.reward.RewardType;
+import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
 import net.darkhax.gamestages.GameStageHelper;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 /**
  * @author LatvianModder
@@ -35,19 +34,19 @@ public class GameStageReward extends Reward
 	}
 
 	@Override
-	public void writeData(NBTTagCompound nbt)
+	public void writeData(CompoundNBT nbt)
 	{
 		super.writeData(nbt);
-		nbt.setString("stage", stage);
+		nbt.putString("stage", stage);
 
 		if (remove)
 		{
-			nbt.setBoolean("remove", true);
+			nbt.putBoolean("remove", true);
 		}
 	}
 
 	@Override
-	public void readData(NBTTagCompound nbt)
+	public void readData(CompoundNBT nbt)
 	{
 		super.readData(nbt);
 		stage = nbt.getString("stage");
@@ -55,32 +54,32 @@ public class GameStageReward extends Reward
 	}
 
 	@Override
-	public void writeNetData(DataOut data)
+	public void writeNetData(PacketBuffer buffer)
 	{
-		super.writeNetData(data);
-		data.writeString(stage);
-		data.writeBoolean(remove);
+		super.writeNetData(buffer);
+		buffer.writeString(stage);
+		buffer.writeBoolean(remove);
 	}
 
 	@Override
-	public void readNetData(DataIn data)
+	public void readNetData(PacketBuffer buffer)
 	{
-		super.readNetData(data);
-		stage = data.readString();
-		remove = data.readBoolean();
+		super.readNetData(buffer);
+		stage = buffer.readString();
+		remove = buffer.readBoolean();
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
+	@OnlyIn(Dist.CLIENT)
 	public void getConfig(ConfigGroup config)
 	{
 		super.getConfig(config);
-		config.addString("stage", () -> stage, v -> stage = v, "").setDisplayName(new TextComponentTranslation("ftbquests.reward.ftbquests.gamestage"));
-		config.addBool("remove", () -> remove, v -> remove = v, false);
+		config.addString("stage", stage, v -> stage = v, "").setNameKey("ftbquests.reward.ftbquests.gamestage");
+		config.addBool("remove", remove, v -> remove = v, false);
 	}
 
 	@Override
-	public void claim(EntityPlayerMP player, boolean notify)
+	public void claim(ServerPlayerEntity player, boolean notify)
 	{
 		if (remove)
 		{
@@ -97,11 +96,11 @@ public class GameStageReward extends Reward
 		{
 			if (remove)
 			{
-				player.sendMessage(new TextComponentTranslation("commands.gamestage.remove.target", stage));
+				player.sendMessage(new TranslationTextComponent("commands.gamestage.remove.target", stage));
 			}
 			else
 			{
-				player.sendMessage(new TextComponentTranslation("commands.gamestage.add.target", stage));
+				player.sendMessage(new TranslationTextComponent("commands.gamestage.add.target", stage));
 			}
 		}
 	}

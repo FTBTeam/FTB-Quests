@@ -1,7 +1,7 @@
 package com.feed_the_beast.ftbquests.events;
 
 import com.feed_the_beast.ftbquests.quest.task.CustomTask;
-import net.minecraftforge.fml.common.eventhandler.Cancelable;
+import net.minecraftforge.eventbus.api.Cancelable;
 
 /**
  * @author LatvianModder

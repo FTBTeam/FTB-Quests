@@ -1,15 +1,12 @@
 package com.feed_the_beast.ftbquests.quest.task;
 
-import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
-import com.feed_the_beast.ftblib.lib.config.ConfigLong;
-import com.feed_the_beast.ftblib.lib.io.DataIn;
-import com.feed_the_beast.ftblib.lib.io.DataOut;
-import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.text.TextComponentTranslation;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
+import com.feed_the_beast.mods.ftbguilibrary.utils.StringUtils;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 /**
  * @author LatvianModder
@@ -31,19 +28,19 @@ public abstract class EnergyTask extends Task implements ISingleLongValueTask
 	}
 
 	@Override
-	public void writeData(NBTTagCompound nbt)
+	public void writeData(CompoundNBT nbt)
 	{
 		super.writeData(nbt);
-		nbt.setLong("value", value);
+		nbt.putLong("value", value);
 
 		if (maxInput > 0L)
 		{
-			nbt.setLong("max_input", maxInput);
+			nbt.putLong("max_input", maxInput);
 		}
 	}
 
 	@Override
-	public void readData(NBTTagCompound nbt)
+	public void readData(CompoundNBT nbt)
 	{
 		super.readData(nbt);
 		value = nbt.getLong("value");
@@ -57,25 +54,19 @@ public abstract class EnergyTask extends Task implements ISingleLongValueTask
 	}
 
 	@Override
-	public void writeNetData(DataOut data)
+	public void writeNetData(PacketBuffer buffer)
 	{
-		super.writeNetData(data);
-		data.writeVarLong(value);
-		data.writeVarLong(maxInput);
+		super.writeNetData(buffer);
+		buffer.writeVarLong(value);
+		buffer.writeVarLong(maxInput);
 	}
 
 	@Override
-	public void readNetData(DataIn data)
+	public void readNetData(PacketBuffer buffer)
 	{
-		super.readNetData(data);
-		value = data.readVarLong();
-		maxInput = data.readVarLong();
-	}
-
-	@Override
-	public ConfigLong getDefaultValue()
-	{
-		return new ConfigLong(value, 1L, Long.MAX_VALUE);
+		super.readNetData(buffer);
+		value = buffer.readVarLong();
+		maxInput = buffer.readVarLong();
 	}
 
 	@Override
@@ -97,11 +88,11 @@ public abstract class EnergyTask extends Task implements ISingleLongValueTask
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
+	@OnlyIn(Dist.CLIENT)
 	public void getConfig(ConfigGroup config)
 	{
 		super.getConfig(config);
-		config.addLong("value", () -> value, v -> value = v, 1000L, 1L, Long.MAX_VALUE);
-		config.addLong("max_input", () -> maxInput, v -> maxInput = v, 0L, 0L, Integer.MAX_VALUE).setDisplayName(new TextComponentTranslation("ftbquests.task.max_input"));
+		config.addLong("value", value, v -> value = v, 1000L, 1L, Long.MAX_VALUE);
+		config.addLong("max_input", maxInput, v -> maxInput = v, 0L, 0L, Integer.MAX_VALUE).setNameKey("ftbquests.task.max_input");
 	}
 }

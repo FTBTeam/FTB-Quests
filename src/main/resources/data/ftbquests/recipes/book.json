@@ -1,0 +1,9 @@
+{
+	"type": "minecraft:crafting_shapeless",
+	"group": "ftbquests:book",
+	"result": {"item": "ftbquests:book", "count": 1},
+	"ingredients": [
+		{"item": "minecraft:book"},
+		{"tag": "forge:stone"}
+	]
+}

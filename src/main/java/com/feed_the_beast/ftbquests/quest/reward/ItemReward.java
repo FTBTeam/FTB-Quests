@@ -1,23 +1,19 @@
 package com.feed_the_beast.ftbquests.quest.reward;
 
-import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
-import com.feed_the_beast.ftblib.lib.config.ConfigItemStack;
-import com.feed_the_beast.ftblib.lib.gui.WrappedIngredient;
-import com.feed_the_beast.ftblib.lib.icon.Icon;
-import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
-import com.feed_the_beast.ftblib.lib.io.DataIn;
-import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftbquests.net.MessageDisplayItemRewardToast;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import com.latmod.mods.itemfilters.item.ItemMissing;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.init.Items;
+import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
+import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
+import com.feed_the_beast.mods.ftbguilibrary.icon.ItemIcon;
+import com.feed_the_beast.mods.ftbguilibrary.widget.WrappedIngredient;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.item.Items;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.text.TextComponentTranslation;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.items.ItemHandlerHelper;
 
 import javax.annotation.Nullable;
@@ -51,61 +47,53 @@ public class ItemReward extends Reward
 	}
 
 	@Override
-	public void writeData(NBTTagCompound nbt)
+	public void writeData(CompoundNBT nbt)
 	{
 		super.writeData(nbt);
-		nbt.setTag("item", ItemMissing.write(item, false));
-
-		if (randomBonus > 0)
-		{
-			nbt.setInteger("random_bonus", randomBonus);
-		}
-
-		if (onlyOne)
-		{
-			nbt.setBoolean("only_one", true);
-		}
+		nbt.put("item", item.serializeNBT());
+		nbt.putInt("random_bonus", randomBonus);
+		nbt.putBoolean("only_one", true);
 	}
 
 	@Override
-	public void readData(NBTTagCompound nbt)
+	public void readData(CompoundNBT nbt)
 	{
 		super.readData(nbt);
-		item = ItemMissing.read(nbt.getTag("item"));
-		randomBonus = nbt.getInteger("random_bonus");
+		item = ItemStack.read(nbt.getCompound("item"));
+		randomBonus = nbt.getInt("random_bonus");
 		onlyOne = nbt.getBoolean("only_one");
 	}
 
 	@Override
-	public void writeNetData(DataOut data)
+	public void writeNetData(PacketBuffer buffer)
 	{
-		super.writeNetData(data);
-		data.writeItemStack(item);
-		data.writeVarInt(randomBonus);
-		data.writeBoolean(onlyOne);
+		super.writeNetData(buffer);
+		buffer.writeItemStack(item);
+		buffer.writeVarInt(randomBonus);
+		buffer.writeBoolean(onlyOne);
 	}
 
 	@Override
-	public void readNetData(DataIn data)
+	public void readNetData(PacketBuffer buffer)
 	{
-		super.readNetData(data);
-		item = data.readItemStack();
-		randomBonus = data.readVarInt();
-		onlyOne = data.readBoolean();
+		super.readNetData(buffer);
+		item = buffer.readItemStack();
+		randomBonus = buffer.readVarInt();
+		onlyOne = buffer.readBoolean();
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
+	@OnlyIn(Dist.CLIENT)
 	public void getConfig(ConfigGroup config)
 	{
 		super.getConfig(config);
-		config.add("item", new ConfigItemStack.SimpleStack(() -> item, v -> item = v), new ConfigItemStack(ItemStack.EMPTY)).setDisplayName(new TextComponentTranslation("ftbquests.reward.ftbquests.item"));
-		config.addInt("random_bonus", () -> randomBonus, v -> randomBonus = v, 0, 0, Integer.MAX_VALUE).setDisplayName(new TextComponentTranslation("ftbquests.reward.random_bonus"));
-		config.addBool("only_one", () -> onlyOne, v -> onlyOne = v, false);
+		config.addItemStack("item", item, v -> item = v, ItemStack.EMPTY, false, false).setNameKey("ftbquests.reward.ftbquests.item");
+		config.addInt("random_bonus", randomBonus, v -> randomBonus = v, 0, 0, Integer.MAX_VALUE).setNameKey("ftbquests.reward.random_bonus");
+		config.addBool("only_one", onlyOne, v -> onlyOne = v, false);
 	}
 
 	@Override
-	public void claim(EntityPlayerMP player, boolean notify)
+	public void claim(ServerPlayerEntity player, boolean notify)
 	{
 		if (onlyOne && player.inventory.hasItemStack(item))
 		{
@@ -123,7 +111,7 @@ public class ItemReward extends Reward
 	}
 
 	@Override
-	public ItemStack claimAutomated(TileEntity tileEntity, @Nullable EntityPlayerMP player)
+	public ItemStack claimAutomated(TileEntity tileEntity, @Nullable ServerPlayerEntity player)
 	{
 		ItemStack stack1 = item.copy();
 		stack1.grow(tileEntity.getWorld().rand.nextInt(randomBonus + 1));

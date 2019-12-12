@@ -1,26 +1,25 @@
 package com.feed_the_beast.ftbquests.gui;
 
-import com.feed_the_beast.ftblib.lib.config.ConfigString;
-import com.feed_the_beast.ftblib.lib.gui.ContextMenuItem;
-import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
-import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
-import com.feed_the_beast.ftblib.lib.gui.Panel;
-import com.feed_the_beast.ftblib.lib.gui.SimpleTextButton;
-import com.feed_the_beast.ftblib.lib.gui.Theme;
-import com.feed_the_beast.ftblib.lib.gui.misc.GuiButtonListBase;
-import com.feed_the_beast.ftblib.lib.gui.misc.GuiEditConfigValue;
-import com.feed_the_beast.ftblib.lib.icon.Color4I;
-import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.gui.tree.GuiQuestTree;
-import com.feed_the_beast.ftbquests.net.edit.MessageCreateObject;
-import com.feed_the_beast.ftbquests.net.edit.MessageEditObject;
+import com.feed_the_beast.ftbquests.net.MessageCreateObject;
+import com.feed_the_beast.ftbquests.net.MessageEditObject;
 import com.feed_the_beast.ftbquests.quest.Chapter;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.loot.LootCrate;
 import com.feed_the_beast.ftbquests.quest.loot.RewardTable;
 import com.feed_the_beast.ftbquests.quest.reward.RandomReward;
 import com.feed_the_beast.ftbquests.quest.reward.Reward;
+import com.feed_the_beast.mods.ftbguilibrary.config.ConfigString;
+import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiEditConfigFromString;
+import com.feed_the_beast.mods.ftbguilibrary.icon.Color4I;
+import com.feed_the_beast.mods.ftbguilibrary.misc.GuiButtonListBase;
+import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
+import com.feed_the_beast.mods.ftbguilibrary.widget.ContextMenuItem;
+import com.feed_the_beast.mods.ftbguilibrary.widget.GuiIcons;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
+import com.feed_the_beast.mods.ftbguilibrary.widget.SimpleTextButton;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.TextFormatting;
 
@@ -53,7 +52,7 @@ public class GuiRewardTables extends GuiButtonListBase
 		@Override
 		public void onClicked(MouseButton button)
 		{
-			GuiHelper.playClickSound();
+			playClickSound();
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
 			GuiQuestTree.addObjectMenuItems(contextMenu, GuiRewardTables.this, table);
 			contextMenu.add(new ContextMenuItem(I18n.format("item.ftbquests.lootcrate.name"), GuiIcons.ACCEPT, () -> {
@@ -164,18 +163,16 @@ public class GuiRewardTables extends GuiButtonListBase
 			@Override
 			public void onClicked(MouseButton button)
 			{
-				GuiHelper.playClickSound();
-
-				new GuiEditConfigValue("id", new ConfigString(""), (value, set) -> {
-					GuiRewardTables.this.openGui();
-
-					if (set)
+				playClickSound();
+				ConfigString c = new ConfigString();
+				GuiEditConfigFromString.open(c, "", "", accepted -> {
+					if (accepted)
 					{
 						RewardTable table = new RewardTable(ClientQuestFile.INSTANCE);
-						table.title = value.getString();
+						table.title = c.value;
 						new MessageCreateObject(table, null).sendToServer();
 					}
-				}).openGui();
+				});
 			}
 		};
 

@@ -1,20 +1,20 @@
 package com.feed_the_beast.ftbquests.gui.tree;
 
-import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
-import com.feed_the_beast.ftblib.lib.gui.Button;
-import com.feed_the_beast.ftblib.lib.gui.ContextMenuItem;
-import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
-import com.feed_the_beast.ftblib.lib.gui.Panel;
-import com.feed_the_beast.ftblib.lib.gui.Theme;
-import com.feed_the_beast.ftblib.lib.gui.misc.GuiEditConfig;
-import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.FTBQuests;
-import com.feed_the_beast.ftbquests.net.edit.MessageEditObject;
+import com.feed_the_beast.ftbquests.net.MessageEditObject;
 import com.feed_the_beast.ftbquests.quest.ChapterImage;
 import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
-import net.minecraft.client.renderer.GlStateManager;
+import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
+import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiEditConfig;
+import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
+import com.feed_the_beast.mods.ftbguilibrary.widget.ContextMenuItem;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
+import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.TranslationTextComponent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,9 +59,16 @@ public class ButtonChapterImage extends Button
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
 
 			contextMenu.add(new ContextMenuItem(I18n.format("selectServer.edit"), ThemeProperties.EDIT_ICON.get(), () -> {
-				ConfigGroup group = ConfigGroup.newGroup(FTBQuests.MOD_ID);
+				ConfigGroup group = new ConfigGroup(FTBQuests.MOD_ID);
 				chapterImage.getConfig(group.getGroup("chapter").getGroup("image"));
-				new GuiEditConfig(group, (group1, sender) -> new MessageEditObject(chapterImage.chapter).sendToServer()).openGui();
+				group.savedCallback = accepted -> {
+					if (accepted)
+					{
+						new MessageEditObject(chapterImage.chapter).sendToServer();
+					}
+					run();
+				};
+				new GuiEditConfig(group).openGui();
 			}));
 
 			contextMenu.add(new ContextMenuItem(I18n.format("gui.move"), ThemeProperties.MOVE_UP_ICON.get(chapterImage.chapter), () -> {
@@ -80,7 +87,7 @@ public class ButtonChapterImage extends Button
 			contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), ThemeProperties.DELETE_ICON.get(), () -> {
 				chapterImage.chapter.images.remove(chapterImage);
 				new MessageEditObject(chapterImage.chapter).sendToServer();
-			}).setYesNo(I18n.format("delete_item", chapterImage.image.toString())));
+			}).setYesNo(new TranslationTextComponent("delete_item", chapterImage.image.toString())));
 
 			getGui().openContextMenu(contextMenu);
 		}
@@ -88,7 +95,7 @@ public class ButtonChapterImage extends Button
 		{
 			if (!chapterImage.click.isEmpty())
 			{
-				GuiHelper.playClickSound();
+				playClickSound();
 				handleClick(chapterImage.click);
 			}
 		}
@@ -123,9 +130,9 @@ public class ButtonChapterImage extends Button
 	public void draw(Theme theme, int x, int y, int w, int h)
 	{
 		GlStateManager.pushMatrix();
-		GlStateManager.translate((int) (x + w / 2D), (int) (y + h / 2D), 10);
-		GlStateManager.rotate((float) chapterImage.rotation, 0, 0, 1);
-		GlStateManager.scale(w / 2D, h / 2D, 1);
+		GlStateManager.translated((int) (x + w / 2D), (int) (y + h / 2D), 10);
+		GlStateManager.rotated(chapterImage.rotation, 0, 0, 1);
+		GlStateManager.scalef(w / 2F, h / 2F, 1);
 		chapterImage.image.draw(-1, -1, 2, 2);
 		GlStateManager.popMatrix();
 	}

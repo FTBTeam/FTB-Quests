@@ -1,16 +1,15 @@
 package com.feed_the_beast.ftbquests.quest.task;
 
-import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
-import com.feed_the_beast.ftblib.lib.io.DataIn;
-import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftbquests.net.MessageSubmitTask;
+import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.QuestData;
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
-import net.minecraft.entity.player.EntityPlayerMP;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.util.function.Predicate;
 
@@ -24,7 +23,7 @@ public class CustomTask extends Task
 	@FunctionalInterface
 	public interface Check
 	{
-		void check(CustomTask.Data taskData, EntityPlayerMP player);
+		void check(CustomTask.Data taskData, ServerPlayerEntity player);
 	}
 
 	public Check check;
@@ -54,12 +53,12 @@ public class CustomTask extends Task
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
-	public void onButtonClicked(boolean canClick)
+	@OnlyIn(Dist.CLIENT)
+	public void onButtonClicked(Button button, boolean canClick)
 	{
 		if (enableButton && canClick)
 		{
-			GuiHelper.playClickSound();
+			button.playClickSound();
 			new MessageSubmitTask(id).sendToServer();
 		}
 	}
@@ -71,38 +70,38 @@ public class CustomTask extends Task
 	}
 
 	@Override
-	public void writeNetData(DataOut data)
+	public void writeNetData(PacketBuffer buffer)
 	{
-		super.writeNetData(data);
-		data.writeVarInt(checkTimer);
-		data.writeVarLong(maxProgress);
-		data.writeBoolean(enableButton);
+		super.writeNetData(buffer);
+		buffer.writeVarInt(checkTimer);
+		buffer.writeVarLong(maxProgress);
+		buffer.writeBoolean(enableButton);
 	}
 
 	@Override
-	public void readNetData(DataIn data)
+	public void readNetData(PacketBuffer buffer)
 	{
-		super.readNetData(data);
-		checkTimer = data.readVarInt();
-		maxProgress = data.readVarLong();
-		enableButton = data.readBoolean();
+		super.readNetData(buffer);
+		checkTimer = buffer.readVarInt();
+		maxProgress = buffer.readVarLong();
+		enableButton = buffer.readBoolean();
 	}
 
 	@Override
-	public TaskData createData(QuestData data)
+	public TaskData createData(PlayerData data)
 	{
 		return new Data(this, data);
 	}
 
 	public static class Data extends TaskData<CustomTask>
 	{
-		private Data(CustomTask task, QuestData data)
+		private Data(CustomTask task, PlayerData data)
 		{
 			super(task, data);
 		}
 
 		@Override
-		public void submitTask(EntityPlayerMP player, ItemStack item)
+		public void submitTask(ServerPlayerEntity player, ItemStack item)
 		{
 			if (task.check != null && !isComplete())
 			{

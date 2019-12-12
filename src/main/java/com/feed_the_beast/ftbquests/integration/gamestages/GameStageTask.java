@@ -1,22 +1,20 @@
 package com.feed_the_beast.ftbquests.integration.gamestages;
 
-import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
-import com.feed_the_beast.ftblib.lib.io.DataIn;
-import com.feed_the_beast.ftblib.lib.io.DataOut;
+import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.QuestData;
 import com.feed_the_beast.ftbquests.quest.task.BooleanTaskData;
 import com.feed_the_beast.ftbquests.quest.task.Task;
 import com.feed_the_beast.ftbquests.quest.task.TaskData;
 import com.feed_the_beast.ftbquests.quest.task.TaskType;
+import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
 import net.darkhax.gamestages.GameStageHelper;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 /**
  * @author LatvianModder
@@ -37,39 +35,39 @@ public class GameStageTask extends Task
 	}
 
 	@Override
-	public void writeData(NBTTagCompound nbt)
+	public void writeData(CompoundNBT nbt)
 	{
 		super.writeData(nbt);
-		nbt.setString("stage", stage);
+		nbt.putString("stage", stage);
 	}
 
 	@Override
-	public void readData(NBTTagCompound nbt)
+	public void readData(CompoundNBT nbt)
 	{
 		super.readData(nbt);
 		stage = nbt.getString("stage");
 	}
 
 	@Override
-	public void writeNetData(DataOut data)
+	public void writeNetData(PacketBuffer buffer)
 	{
-		super.writeNetData(data);
-		data.writeString(stage);
+		super.writeNetData(buffer);
+		buffer.writeString(stage);
 	}
 
 	@Override
-	public void readNetData(DataIn data)
+	public void readNetData(PacketBuffer buffer)
 	{
-		super.readNetData(data);
-		stage = data.readString();
+		super.readNetData(buffer);
+		stage = buffer.readString();
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
+	@OnlyIn(Dist.CLIENT)
 	public void getConfig(ConfigGroup config)
 	{
 		super.getConfig(config);
-		config.addString("stage", () -> stage, v -> stage = v, "").setDisplayName(new TextComponentTranslation("ftbquests.task.ftbquests.gamestage"));
+		config.addString("stage", stage, v -> stage = v, "").setNameKey("ftbquests.task.ftbquests.gamestage");
 	}
 
 	@Override
@@ -79,20 +77,20 @@ public class GameStageTask extends Task
 	}
 
 	@Override
-	public TaskData createData(QuestData data)
+	public TaskData createData(PlayerData data)
 	{
 		return new Data(this, data);
 	}
 
 	public static class Data extends BooleanTaskData<GameStageTask>
 	{
-		private Data(GameStageTask task, QuestData data)
+		private Data(GameStageTask task, PlayerData data)
 		{
 			super(task, data);
 		}
 
 		@Override
-		public boolean canSubmit(EntityPlayerMP player)
+		public boolean canSubmit(ServerPlayerEntity player)
 		{
 			return GameStageHelper.hasStage(player, task.stage);
 		}

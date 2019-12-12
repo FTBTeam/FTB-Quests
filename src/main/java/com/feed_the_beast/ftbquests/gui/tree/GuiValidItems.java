@@ -1,26 +1,26 @@
 package com.feed_the_beast.ftbquests.gui.tree;
 
-import com.feed_the_beast.ftblib.integration.FTBLibJEIIntegration;
-import com.feed_the_beast.ftblib.lib.gui.Button;
-import com.feed_the_beast.ftblib.lib.gui.GuiBase;
-import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
-import com.feed_the_beast.ftblib.lib.gui.Panel;
-import com.feed_the_beast.ftblib.lib.gui.SimpleTextButton;
-import com.feed_the_beast.ftblib.lib.gui.Theme;
-import com.feed_the_beast.ftblib.lib.gui.Widget;
-import com.feed_the_beast.ftblib.lib.gui.WidgetType;
-import com.feed_the_beast.ftblib.lib.gui.WrappedIngredient;
-import com.feed_the_beast.ftblib.lib.gui.misc.CompactGridLayout;
-import com.feed_the_beast.ftblib.lib.icon.Color4I;
-import com.feed_the_beast.ftblib.lib.icon.Icon;
-import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
-import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.gui.FTBQuestsTheme;
 import com.feed_the_beast.ftbquests.net.MessageSubmitTask;
 import com.feed_the_beast.ftbquests.quest.task.ItemTask;
+import com.feed_the_beast.mods.ftbguilibrary.icon.Color4I;
+import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
+import com.feed_the_beast.mods.ftbguilibrary.icon.ItemIcon;
+import com.feed_the_beast.mods.ftbguilibrary.misc.CompactGridLayout;
+import com.feed_the_beast.mods.ftbguilibrary.utils.Key;
+import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
+import com.feed_the_beast.mods.ftbguilibrary.widget.GuiBase;
+import com.feed_the_beast.mods.ftbguilibrary.widget.GuiHelper;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
+import com.feed_the_beast.mods.ftbguilibrary.widget.SimpleTextButton;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Widget;
+import com.feed_the_beast.mods.ftbguilibrary.widget.WidgetType;
+import com.feed_the_beast.mods.ftbguilibrary.widget.WrappedIngredient;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.fml.ModList;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -43,7 +43,7 @@ public class GuiValidItems extends GuiBase
 		@Override
 		public void onClicked(MouseButton button)
 		{
-			if (Loader.isModLoaded("jei"))
+			if (ModList.get().isLoaded("jei"))
 			{
 				showJEIRecipe();
 			}
@@ -51,7 +51,7 @@ public class GuiValidItems extends GuiBase
 
 		private void showJEIRecipe()
 		{
-			FTBLibJEIIntegration.showRecipe(stack);
+			//FIXME: FTBLibJEIIntegration.showRecipe(stack);
 		}
 
 		@Nullable
@@ -129,7 +129,7 @@ public class GuiValidItems extends GuiBase
 			@Override
 			public void onClicked(MouseButton button)
 			{
-				GuiHelper.playClickSound();
+				playClickSound();
 				onBack();
 			}
 
@@ -145,7 +145,7 @@ public class GuiValidItems extends GuiBase
 			@Override
 			public void onClicked(MouseButton button)
 			{
-				GuiHelper.playClickSound();
+				playClickSound();
 				new MessageSubmitTask(task.id).sendToServer();
 				onBack();
 			}
@@ -193,11 +193,11 @@ public class GuiValidItems extends GuiBase
 	public void drawBackground(Theme theme, int x, int y, int w, int h)
 	{
 		super.drawBackground(theme, x, y, w, h);
-		theme.drawString(title, x + w / 2, y + 6, Color4I.WHITE, Theme.CENTERED);
+		theme.drawString(title, x + w / 2F, y + 6, Color4I.WHITE, Theme.CENTERED);
 	}
 
 	@Override
-	public boolean onClosedByKey(int key)
+	public boolean onClosedByKey(Key key)
 	{
 		if (super.onClosedByKey(key))
 		{

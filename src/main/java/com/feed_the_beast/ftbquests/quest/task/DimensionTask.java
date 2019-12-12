@@ -1,30 +1,33 @@
 package com.feed_the_beast.ftbquests.quest.task;
 
-import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
-import com.feed_the_beast.ftblib.lib.io.DataIn;
-import com.feed_the_beast.ftblib.lib.io.DataOut;
+import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.QuestData;
+import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
+import com.feed_the_beast.mods.ftbguilibrary.config.NameMap;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraft.world.DimensionType;
-import net.minecraftforge.common.util.Constants;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraft.world.dimension.DimensionType;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+
+import java.util.stream.Collectors;
 
 /**
  * @author LatvianModder
  */
 public class DimensionTask extends Task
 {
-	public int dimension = -1;
+	public DimensionType dimension;
 
 	public DimensionTask(Quest quest)
 	{
 		super(quest);
+		dimension = DimensionType.OVERWORLD;
 	}
 
 	@Override
@@ -34,80 +37,50 @@ public class DimensionTask extends Task
 	}
 
 	@Override
-	public void writeData(NBTTagCompound nbt)
+	public void writeData(CompoundNBT nbt)
 	{
 		super.writeData(nbt);
-		nbt.setInteger("dim", dimension);
+		nbt.putString("dimension", DimensionType.getKey(dimension).toString());
 	}
 
 	@Override
-	public void readData(NBTTagCompound nbt)
+	public void readData(CompoundNBT nbt)
 	{
 		super.readData(nbt);
-		dimension = nbt.getInteger("dim");
+		dimension = DimensionType.byName(new ResourceLocation(nbt.getString("dimension")));
 
-		if (dimension == 0 && nbt.hasKey("dim", Constants.NBT.TAG_STRING))
+		if (dimension == null)
 		{
-			try
-			{
-				dimension = DimensionType.byName(nbt.getString("dim")).getId();
-			}
-			catch (Exception ex)
-			{
-				dimension = -1;
-			}
+			dimension = DimensionType.THE_NETHER;
 		}
 	}
 
 	@Override
-	public void writeNetData(DataOut data)
+	public void writeNetData(PacketBuffer buffer)
 	{
-		super.writeNetData(data);
-		data.writeVarInt(dimension);
+		super.writeNetData(buffer);
+		buffer.writeResourceLocation(DimensionType.getKey(dimension));
 	}
 
 	@Override
-	public void readNetData(DataIn data)
+	public void readNetData(PacketBuffer buffer)
 	{
-		super.readNetData(data);
-		dimension = data.readVarInt();
+		super.readNetData(buffer);
+		dimension = DimensionType.byName(buffer.readResourceLocation());
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
+	@OnlyIn(Dist.CLIENT)
 	public void getConfig(ConfigGroup config)
 	{
 		super.getConfig(config);
-		config.addInt("dim", () -> dimension, v -> dimension = v, 0, Integer.MIN_VALUE, Integer.MAX_VALUE).setDisplayName(new TextComponentTranslation("ftbquests.task.ftbquests.dimension"));
-	}
-
-	public static String getDimensionName(int dim)
-	{
-		switch (dim)
-		{
-			case 0:
-				return I18n.format("createWorld.customize.preset.overworld");
-			case -1:
-				return I18n.format("advancements.nether.root.title");
-			case 1:
-				return I18n.format("advancements.end.root.title");
-			default:
-				for (DimensionType type : DimensionType.values())
-				{
-					if (type.getId() == dim)
-					{
-						return type.getName();
-					}
-				}
-
-				return "dim_" + dim;
-		}
+		config.addEnum("dim", dimension, v -> dimension = v, NameMap.of(DimensionType.OVERWORLD, Registry.DIMENSION_TYPE.stream().collect(Collectors.toList())).create());
 	}
 
 	@Override
 	public String getAltTitle()
 	{
-		return I18n.format("ftbquests.task.ftbquests.dimension") + ": " + TextFormatting.DARK_GREEN + getDimensionName(dimension);
+		return I18n.format("ftbquests.task.ftbquests.dimension") + ": " + TextFormatting.DARK_GREEN + dimension.getRegistryName();
 	}
 
 	@Override
@@ -117,20 +90,20 @@ public class DimensionTask extends Task
 	}
 
 	@Override
-	public TaskData createData(QuestData data)
+	public TaskData createData(PlayerData data)
 	{
 		return new Data(this, data);
 	}
 
 	public static class Data extends BooleanTaskData<DimensionTask>
 	{
-		private Data(DimensionTask task, QuestData data)
+		private Data(DimensionTask task, PlayerData data)
 		{
 			super(task, data);
 		}
 
 		@Override
-		public boolean canSubmit(EntityPlayerMP player)
+		public boolean canSubmit(ServerPlayerEntity player)
 		{
 			return player.dimension == task.dimension && !player.isSpectator();
 		}

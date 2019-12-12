@@ -1,28 +1,20 @@
 package com.feed_the_beast.ftbquests.client;
 
-import com.feed_the_beast.ftblib.lib.client.ClientUtils;
-import com.feed_the_beast.ftblib.lib.gui.GuiBase;
-import com.feed_the_beast.ftblib.net.MessageMyTeamGui;
 import com.feed_the_beast.ftbquests.gui.tree.GuiQuestTree;
 import com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIHelper;
-import com.feed_the_beast.ftbquests.net.MessageSyncQuests;
-import com.feed_the_beast.ftbquests.net.edit.MessageDeleteObject;
-import com.feed_the_beast.ftbquests.quest.Chapter;
+import com.feed_the_beast.ftbquests.net.MessageDeleteObject;
 import com.feed_the_beast.ftbquests.quest.Movable;
+import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.QuestData;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
-import com.feed_the_beast.ftbquests.quest.task.Task;
 import com.feed_the_beast.ftbquests.quest.theme.QuestTheme;
-import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
-import it.unimi.dsi.fastutil.objects.Object2ShortOpenHashMap;
-import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.text.TextComponentTranslation;
+import com.feed_the_beast.mods.ftbguilibrary.utils.ClientUtils;
+import com.feed_the_beast.mods.ftbguilibrary.widget.GuiBase;
+import net.minecraft.client.Minecraft;
+import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraftforge.fml.LogicalSide;
 
-import javax.annotation.Nullable;
-import java.util.Collection;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -37,28 +29,11 @@ public class ClientQuestFile extends QuestFile
 		return INSTANCE != null && !INSTANCE.invalid;
 	}
 
-	public static boolean existsWithTeam()
-	{
-		return exists() && INSTANCE.self != null;
-	}
-
-	private final Short2ObjectOpenHashMap<ClientQuestData> teamData;
-	public ClientQuestData self;
+	public PlayerData self;
 	public GuiQuestTree questTreeGui;
 	public GuiBase questGui;
-	public boolean editingMode;
-	public final Object2ShortOpenHashMap<UUID> playerTeams;
-	public final IntOpenHashSet pinnedQuests;
 
-	public ClientQuestFile()
-	{
-		teamData = new Short2ObjectOpenHashMap<>();
-		playerTeams = new Object2ShortOpenHashMap<>();
-		playerTeams.defaultReturnValue((short) 0);
-		pinnedQuests = new IntOpenHashSet();
-	}
-
-	public void load(MessageSyncQuests message)
+	public void load(UUID s)
 	{
 		if (INSTANCE != null)
 		{
@@ -67,78 +42,16 @@ public class ClientQuestFile extends QuestFile
 		}
 
 		INSTANCE = this;
-
-		for (MessageSyncQuests.TeamInst team : message.teamData)
-		{
-			ClientQuestData data = new ClientQuestData(team.uid, team.id, team.name);
-
-			for (Chapter chapter : chapters)
-			{
-				for (Quest quest : chapter.quests)
-				{
-					for (Task task : quest.tasks)
-					{
-						data.createTaskData(task);
-					}
-				}
-			}
-
-			for (int i = 0; i < team.taskKeys.length; i++)
-			{
-				Task task = getTask(team.taskKeys[i]);
-
-				if (task != null)
-				{
-					data.getTaskData(task).readProgress(team.taskValues[i]);
-				}
-			}
-
-			for (int i = 0; i < team.playerRewardUUIDs.length; i++)
-			{
-				data.claimedPlayerRewards.put(team.playerRewardUUIDs[i], fromArray(team.playerRewardIDs[i]));
-			}
-
-			data.claimedTeamRewards.addAll(fromArray(team.teamRewards));
-			teamData.put(data.getTeamUID(), data);
-		}
-
-		self = message.team == 0 ? null : teamData.get(message.team);
-		editingMode = message.editingMode;
-
-		playerTeams.clear();
-
-		for (int i = 0; i < message.playerIDs.length; i++)
-		{
-			playerTeams.put(message.playerIDs[i], message.playerTeams[i]);
-		}
-
-		pinnedQuests.clear();
-
-		for (int i : message.favorites)
-		{
-			pinnedQuests.add(i);
-		}
+		self = Objects.requireNonNull(getData(s));
 
 		refreshGui();
 		FTBQuestsJEIHelper.refresh(this);
 	}
 
-	private IntOpenHashSet fromArray(int[] array)
-	{
-		IntOpenHashSet set = new IntOpenHashSet(array.length);
-
-		for (int i : array)
-		{
-			set.add(i);
-		}
-
-		return set;
-	}
-
 	@Override
 	public boolean canEdit()
 	{
-		return editingMode;
+		return self.getCanEdit();
 	}
 
 	public void refreshGui()
@@ -210,77 +123,27 @@ public class ClientQuestFile extends QuestFile
 		}
 	}
 
-	public void openQuestGui(EntityPlayer player)
+	public void openQuestGui()
 	{
-		if (disableGui && !editingMode)
+		if (disableGui && !self.getCanEdit())
 		{
-			player.sendStatusMessage(new TextComponentTranslation("item.ftbquests.book.disabled"), true);
+			Minecraft.getInstance().player.sendStatusMessage(new TranslationTextComponent("item.ftbquests.book.disabled"), true);
 		}
-		else if (existsWithTeam())
+		else if (exists())
 		{
 			questGui.openGui();
 		}
 		else
 		{
-			new MessageMyTeamGui().sendToServer();
+			//FIXME: new MessageMyTeamGui().sendToServer();
 			//player.sendStatusMessage(new TextComponentTranslation("ftblib.lang.team.error.no_team"), true);
 		}
 	}
 
 	@Override
-	public boolean isClient()
+	public LogicalSide getSide()
 	{
-		return true;
-	}
-
-	@Nullable
-	@Override
-	public ClientQuestData getData(short team)
-	{
-		return team == 0 ? null : teamData.get(team);
-	}
-
-	@Override
-	@Nullable
-	public QuestData getData(Entity player)
-	{
-		return getData(playerTeams.getShort(player.getUniqueID()));
-	}
-
-	public ClientQuestData removeData(short team)
-	{
-		return teamData.remove(team);
-	}
-
-	public void addData(ClientQuestData data)
-	{
-		teamData.put(data.getTeamUID(), data);
-	}
-
-	@Nullable
-	@Override
-	public ClientQuestData getData(String team)
-	{
-		if (team.isEmpty())
-		{
-			return null;
-		}
-
-		for (ClientQuestData data : teamData.values())
-		{
-			if (team.equals(data.getTeamID()))
-			{
-				return data;
-			}
-		}
-
-		return null;
-	}
-
-	@Override
-	public Collection<ClientQuestData> getAllData()
-	{
-		return teamData.values();
+		return LogicalSide.CLIENT;
 	}
 
 	@Override

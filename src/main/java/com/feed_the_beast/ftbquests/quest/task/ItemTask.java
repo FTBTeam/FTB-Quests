@@ -1,46 +1,35 @@
 package com.feed_the_beast.ftbquests.quest.task;
 
-import com.feed_the_beast.ftblib.integration.FTBLibJEIIntegration;
-import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
-import com.feed_the_beast.ftblib.lib.config.ConfigItemStack;
-import com.feed_the_beast.ftblib.lib.config.EnumTristate;
-import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
-import com.feed_the_beast.ftblib.lib.icon.Icon;
-import com.feed_the_beast.ftblib.lib.icon.IconAnimation;
-import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
-import com.feed_the_beast.ftblib.lib.io.Bits;
-import com.feed_the_beast.ftblib.lib.io.DataIn;
-import com.feed_the_beast.ftblib.lib.io.DataOut;
-import com.feed_the_beast.ftblib.lib.util.StringJoiner;
-import com.feed_the_beast.ftblib.lib.util.misc.NameMap;
 import com.feed_the_beast.ftbquests.gui.tree.GuiValidItems;
+import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.QuestData;
-import com.latmod.mods.itemfilters.api.ItemFiltersAPI;
-import com.latmod.mods.itemfilters.filters.NBTMatchingMode;
-import com.latmod.mods.itemfilters.item.ItemFiltersItems;
-import com.latmod.mods.itemfilters.item.ItemMissing;
+import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
+import com.feed_the_beast.mods.ftbguilibrary.config.Tristate;
+import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
+import com.feed_the_beast.mods.ftbguilibrary.icon.IconAnimation;
+import com.feed_the_beast.mods.ftbguilibrary.icon.ItemIcon;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
+import dev.latvian.mods.itemfilters.api.ItemFiltersAPI;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.item.Item;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.Direction;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.util.Constants;
-import net.minecraftforge.fml.common.Loader;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemHandlerHelper;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Predicate;
 
 /**
@@ -48,19 +37,15 @@ import java.util.function.Predicate;
  */
 public class ItemTask extends Task implements Predicate<ItemStack>
 {
-	public final List<ItemStack> items;
+	public ItemStack item;
 	public long count;
-	public EnumTristate consumeItems;
-	public boolean ignoreDamage;
-	public NBTMatchingMode nbtMode;
+	public Tristate consumeItems;
 
 	public ItemTask(Quest quest)
 	{
 		super(quest);
-		items = new ArrayList<>();
-		consumeItems = EnumTristate.DEFAULT;
-		ignoreDamage = false;
-		nbtMode = NBTMatchingMode.MATCH;
+		item = ItemStack.EMPTY;
+		consumeItems = Tristate.DEFAULT;
 	}
 
 	@Override
@@ -76,76 +61,24 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 	}
 
 	@Override
-	public void writeData(NBTTagCompound nbt)
+	public void writeData(CompoundNBT nbt)
 	{
 		super.writeData(nbt);
-
-		if (items.size() == 1)
-		{
-			nbt.setTag("item", ItemMissing.write(items.get(0), false));
-		}
-		else
-		{
-			NBTTagList list = new NBTTagList();
-
-			for (ItemStack stack : items)
-			{
-				if (!stack.isEmpty())
-				{
-					list.appendTag(ItemMissing.write(stack, true));
-				}
-			}
-
-			nbt.setTag("items", list);
-		}
+		nbt.put("item", item.serializeNBT());
 
 		if (count > 1)
 		{
-			nbt.setLong("count", count);
+			nbt.putLong("count", count);
 		}
 
 		consumeItems.write(nbt, "consume_items");
-
-		if (ignoreDamage)
-		{
-			nbt.setBoolean("ignore_damage", true);
-		}
-
-		if (nbtMode != NBTMatchingMode.MATCH)
-		{
-			nbt.setByte("ignore_nbt", (byte) nbtMode.ordinal());
-		}
 	}
 
 	@Override
-	public void readData(NBTTagCompound nbt)
+	public void readData(CompoundNBT nbt)
 	{
 		super.readData(nbt);
-		items.clear();
-		NBTTagList list = nbt.getTagList("items", Constants.NBT.TAG_COMPOUND);
-
-		if (list.isEmpty())
-		{
-			ItemStack stack = ItemMissing.read(nbt.getTag("item"));
-
-			if (!stack.isEmpty())
-			{
-				items.add(stack);
-			}
-		}
-		else
-		{
-			for (int i = 0; i < list.tagCount(); i++)
-			{
-				ItemStack stack = ItemMissing.read(list.getCompoundTagAt(i));
-
-				if (!stack.isEmpty())
-				{
-					items.add(stack);
-				}
-			}
-		}
-
+		item = ItemStack.read(nbt.getCompound("item"));
 		count = nbt.getLong("count");
 
 		if (count < 1)
@@ -153,49 +86,32 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 			count = 1;
 		}
 
-		consumeItems = EnumTristate.read(nbt, "consume_items");
-		ignoreDamage = nbt.getBoolean("ignore_damage");
-		nbtMode = NBTMatchingMode.VALUES[nbt.getByte("ignore_nbt")];
+		consumeItems = Tristate.read(nbt, "consume_items");
 	}
 
 	@Override
-	public void writeNetData(DataOut data)
+	public void writeNetData(PacketBuffer buffer)
 	{
-		super.writeNetData(data);
-		data.writeCollection(items, DataOut.ITEM_STACK);
-		data.writeVarLong(count);
-		int flags = 0;
-		//flags = Bits.setFlag(flags, 1, consumeItems);
-		flags = Bits.setFlag(flags, 2, ignoreDamage);
-		flags = Bits.setFlag(flags, 4, nbtMode != NBTMatchingMode.MATCH);
-		flags = Bits.setFlag(flags, 8, nbtMode == NBTMatchingMode.CONTAIN);
-		data.writeVarInt(flags);
-		EnumTristate.NAME_MAP.write(data, consumeItems);
+		super.writeNetData(buffer);
+		buffer.writeItemStack(item);
+		buffer.writeVarLong(count);
+		Tristate.NAME_MAP.write(buffer, consumeItems);
 	}
 
 	@Override
-	public void readNetData(DataIn data)
+	public void readNetData(PacketBuffer buffer)
 	{
-		super.readNetData(data);
-		data.readCollection(items, DataIn.ITEM_STACK);
-		count = data.readVarLong();
-		int flags = data.readVarInt();
-		//consumeItems = Bits.getFlag(flags, 1);
-		ignoreDamage = Bits.getFlag(flags, 2);
-		nbtMode = Bits.getFlag(flags, 4) ? Bits.getFlag(flags, 8) ? NBTMatchingMode.CONTAIN : NBTMatchingMode.IGNORE : NBTMatchingMode.MATCH;
-		consumeItems = EnumTristate.NAME_MAP.read(data);
+		super.readNetData(buffer);
+		item = buffer.readItemStack();
+		count = buffer.readVarLong();
+		consumeItems = Tristate.NAME_MAP.read(buffer);
 	}
 
 	public List<ItemStack> getValidItems()
 	{
-		if (items.size() == 1 && ItemFiltersAPI.isFilter(items.get(0)))
-		{
-			List<ItemStack> validItems = new ArrayList<>();
-			ItemFiltersAPI.getValidItems(items.get(0), validItems);
-			return validItems;
-		}
-
-		return items;
+		List<ItemStack> list = new ArrayList<>();
+		ItemFiltersAPI.getValidItems(item, list);
+		return list;
 	}
 
 	@Override
@@ -224,101 +140,28 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 	@Override
 	public String getAltTitle()
 	{
-		String name;
-
-		if (items.size() == 1)
-		{
-			name = items.get(0).getDisplayName();
-		}
-		else
-		{
-			String[] s = new String[items.size()];
-
-			for (int i = 0; i < s.length; i++)
-			{
-				s[i] = items.get(i).getDisplayName();
-			}
-
-			name = "[" + StringJoiner.with(", ").joinStrings(s) + "]";
-		}
-
 		if (count > 1)
 		{
-			name = count + "x " + name;
+			return count + "x " + item.getDisplayName().getFormattedText();
 		}
 
-		return name;
+		return item.getDisplayName().getFormattedText();
 	}
 
 	@Override
 	public boolean test(ItemStack stack)
 	{
-		if (stack.isEmpty() || stack.getItem() == ItemFiltersItems.MISSING)
-		{
-			return false;
-		}
-		else if (items.size() == 1 && ItemFiltersAPI.isFilter(items.get(0)))
-		{
-			return ItemFiltersAPI.filter(items.get(0), stack);
-		}
-
-		Item item = stack.getItem();
-		int meta = ignoreDamage ? 0 : stack.getMetadata();
-		NBTTagCompound nbt = nbtMode == NBTMatchingMode.CONTAIN ? stack.getTagCompound() : item.getNBTShareTag(stack);
-
-		for (ItemStack stack1 : items)
-		{
-			if (item == stack1.getItem())
-			{
-				if (ignoreDamage || meta == stack1.getMetadata())
-				{
-					switch (nbtMode)
-					{
-						case MATCH:
-							return Objects.equals(nbt, stack1.getItem().getNBTShareTag(stack1));
-						case IGNORE:
-							return true;
-						case CONTAIN:
-						{
-							NBTTagCompound nbt1 = stack1.getTagCompound();
-
-							if (nbt1 == null || nbt1.isEmpty())
-							{
-								return true;
-							}
-							else if (nbt == null || nbt.isEmpty())
-							{
-								return false;
-							}
-
-							for (String s : nbt1.getKeySet())
-							{
-								if (!Objects.equals(nbt.getTag(s), nbt1.getTag(s)))
-								{
-									return false;
-								}
-							}
-
-							return true;
-						}
-					}
-				}
-			}
-		}
-
-		return false;
+		return ItemFiltersAPI.filter(item, stack);
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
+	@OnlyIn(Dist.CLIENT)
 	public void getConfig(ConfigGroup config)
 	{
 		super.getConfig(config);
-		config.addList("items", items, new ConfigItemStack(ItemStack.EMPTY, true), v -> new ConfigItemStack(v, true), ConfigItemStack::getStack);
-		config.addLong("count", () -> count, v -> count = v, 1, 1, Long.MAX_VALUE);
-		config.addEnum("consume_items", () -> consumeItems, v -> consumeItems = v, EnumTristate.NAME_MAP).setCanEdit(!quest.canRepeat);
-		config.addBool("ignore_damage", () -> ignoreDamage, v -> ignoreDamage = v, false);
-		config.addEnum("nbt_mode", () -> nbtMode, v -> nbtMode = v, NameMap.create(NBTMatchingMode.MATCH, NBTMatchingMode.VALUES));
+		config.addItemStack("items", item, v -> item = v, ItemStack.EMPTY, true, false);
+		config.addLong("count", count, v -> count = v, 1, 1, Long.MAX_VALUE);
+		config.addEnum("consume_items", consumeItems, v -> consumeItems = v, Tristate.NAME_MAP).setCanEdit(!quest.canRepeat);
 	}
 
 	@Override
@@ -334,14 +177,14 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
-	public void onButtonClicked(boolean canClick)
+	@OnlyIn(Dist.CLIENT)
+	public void onButtonClicked(Button button, boolean canClick)
 	{
-		GuiHelper.playClickSound();
+		button.playClickSound();
 
 		List<ItemStack> validItems = getValidItems();
 
-		if (!consumesResources() && validItems.size() == 1 && Loader.isModLoaded("jei"))
+		if (!consumesResources() && validItems.size() == 1 && ModList.get().isLoaded("jei"))
 		{
 			showJEIRecipe(validItems.get(0));
 		}
@@ -351,14 +194,14 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 		}
 	}
 
-	@SideOnly(Side.CLIENT)
+	@OnlyIn(Dist.CLIENT)
 	private void showJEIRecipe(ItemStack stack)
 	{
-		FTBLibJEIIntegration.showRecipe(stack);
+		//FIXME: FTBLibJEIIntegration.showRecipe(stack);
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
+	@OnlyIn(Dist.CLIENT)
 	public void addMouseOverText(List<String> list, @Nullable TaskData data)
 	{
 		if (consumesResources())
@@ -371,7 +214,7 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 			list.add("");
 			list.add(TextFormatting.YELLOW.toString() + TextFormatting.UNDERLINE + I18n.format("ftbquests.task.ftbquests.item.view_items"));
 		}
-		else if (Loader.isModLoaded("jei"))
+		else if (ModList.get().isLoaded("jei"))
 		{
 			list.add("");
 			list.add(TextFormatting.YELLOW.toString() + TextFormatting.UNDERLINE + I18n.format("ftbquests.task.ftbquests.item.click_recipe"));
@@ -379,33 +222,28 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 	}
 
 	@Override
-	public TaskData createData(QuestData data)
+	public TaskData createData(PlayerData data)
 	{
 		return new Data(this, data);
 	}
 
 	public static class Data extends TaskData<ItemTask>
 	{
-		private Data(ItemTask t, QuestData data)
+		private final LazyOptional<IItemHandler> itemHandlerProvider = LazyOptional.of(() -> this);
+
+		private Data(ItemTask t, PlayerData data)
 		{
 			super(t, data);
 		}
 
 		@Override
-		public boolean hasCapability(Capability<?> capability, @Nullable EnumFacing facing)
+		public <T> LazyOptional<T> getCapability(Capability<T> capability, @Nullable Direction facing)
 		{
-			return capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY;
-		}
-
-		@Nullable
-		@Override
-		public <T> T getCapability(Capability<T> capability, @Nullable EnumFacing facing)
-		{
-			return capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY ? (T) this : null;
+			return capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY ? itemHandlerProvider.cast() : LazyOptional.empty();
 		}
 
 		@Override
-		public ItemStack insertItem(ItemStack stack, boolean singleItem, boolean simulate, @Nullable EntityPlayer player)
+		public ItemStack insertItem(ItemStack stack, boolean singleItem, boolean simulate, @Nullable PlayerEntity player)
 		{
 			if (!isComplete() && task.test(stack))
 			{
@@ -418,7 +256,7 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 						add = 1L;
 					}
 
-					if (!simulate && !data.getFile().isClient())
+					if (!simulate && data.file.getSide().isServer())
 					{
 						addProgress(add);
 					}
@@ -437,7 +275,7 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 		}
 
 		@Override
-		public void submitTask(EntityPlayerMP player, ItemStack item)
+		public void submitTask(ServerPlayerEntity player, ItemStack item)
 		{
 			if (isComplete())
 			{

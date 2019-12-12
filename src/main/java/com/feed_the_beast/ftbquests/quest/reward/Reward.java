@@ -1,33 +1,29 @@
 package com.feed_the_beast.ftbquests.quest.reward;
 
-import com.feed_the_beast.ftblib.lib.client.ClientUtils;
-import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
-import com.feed_the_beast.ftblib.lib.config.EnumTristate;
-import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
-import com.feed_the_beast.ftblib.lib.icon.Icon;
-import com.feed_the_beast.ftblib.lib.io.DataIn;
-import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftbquests.gui.tree.GuiQuestTree;
 import com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIHelper;
 import com.feed_the_beast.ftbquests.net.MessageClaimReward;
 import com.feed_the_beast.ftbquests.quest.ChangeProgress;
 import com.feed_the_beast.ftbquests.quest.Chapter;
+import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.QuestData;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
-import net.minecraft.entity.player.EntityPlayerMP;
+import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
+import com.feed_the_beast.mods.ftbguilibrary.config.Tristate;
+import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
+import com.feed_the_beast.mods.ftbguilibrary.utils.ClientUtils;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.text.TextComponentTranslation;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import javax.annotation.Nullable;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -37,13 +33,13 @@ public abstract class Reward extends QuestObjectBase
 {
 	public Quest quest;
 
-	public EnumTristate team;
+	public Tristate team;
 	public RewardAutoClaim autoclaim;
 
 	public Reward(Quest q)
 	{
 		quest = q;
-		team = EnumTristate.DEFAULT;
+		team = Tristate.DEFAULT;
 		autoclaim = RewardAutoClaim.DEFAULT;
 	}
 
@@ -75,65 +71,53 @@ public abstract class Reward extends QuestObjectBase
 	public abstract RewardType getType();
 
 	@Override
-	public void writeData(NBTTagCompound nbt)
+	public void writeData(CompoundNBT nbt)
 	{
 		super.writeData(nbt);
 		team.write(nbt, "team_reward");
 
 		if (autoclaim != RewardAutoClaim.DEFAULT)
 		{
-			nbt.setString("auto", autoclaim.getId());
+			nbt.putString("auto", autoclaim.id);
 		}
 	}
 
 	@Override
-	public void readData(NBTTagCompound nbt)
+	public void readData(CompoundNBT nbt)
 	{
 		super.readData(nbt);
-		team = EnumTristate.read(nbt, "team_reward");
+		team = Tristate.read(nbt, "team_reward");
 		autoclaim = RewardAutoClaim.NAME_MAP.get(nbt.getString("auto"));
-
-		if (nbt.hasKey("autoclaim") || nbt.hasKey("invisible"))
-		{
-			if (nbt.getBoolean("invisible"))
-			{
-				autoclaim = RewardAutoClaim.INVISIBLE;
-			}
-			else if (nbt.hasKey("autoclaim"))
-			{
-				autoclaim = nbt.getBoolean("autoclaim") ? RewardAutoClaim.ENABLED : RewardAutoClaim.DISABLED;
-			}
-		}
 	}
 
 	@Override
-	public void writeNetData(DataOut data)
+	public void writeNetData(PacketBuffer buffer)
 	{
-		super.writeNetData(data);
-		EnumTristate.NAME_MAP.write(data, team);
-		RewardAutoClaim.NAME_MAP.write(data, autoclaim);
+		super.writeNetData(buffer);
+		Tristate.NAME_MAP.write(buffer, team);
+		RewardAutoClaim.NAME_MAP.write(buffer, autoclaim);
 	}
 
 	@Override
-	public void readNetData(DataIn data)
+	public void readNetData(PacketBuffer buffer)
 	{
-		super.readNetData(data);
-		team = EnumTristate.NAME_MAP.read(data);
-		autoclaim = RewardAutoClaim.NAME_MAP.read(data);
+		super.readNetData(buffer);
+		team = Tristate.NAME_MAP.read(buffer);
+		autoclaim = RewardAutoClaim.NAME_MAP.read(buffer);
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
+	@OnlyIn(Dist.CLIENT)
 	public void getConfig(ConfigGroup config)
 	{
 		super.getConfig(config);
-		config.addEnum("team", () -> team, v -> team = v, EnumTristate.NAME_MAP).setDisplayName(new TextComponentTranslation("ftbquests.reward.team_reward")).setCanEdit(!quest.canRepeat);
-		config.addEnum("autoclaim", () -> autoclaim, v -> autoclaim = v, RewardAutoClaim.NAME_MAP).setDisplayName(new TextComponentTranslation("ftbquests.reward.autoclaim"));
+		config.addEnum("team", team, v -> team = v, Tristate.NAME_MAP).setNameKey("ftbquests.reward.team_reward").setCanEdit(!quest.canRepeat);
+		config.addEnum("autoclaim", autoclaim, v -> autoclaim = v, RewardAutoClaim.NAME_MAP).setNameKey("ftbquests.reward.autoclaim");
 	}
 
-	public abstract void claim(EntityPlayerMP player, boolean notify);
+	public abstract void claim(ServerPlayerEntity player, boolean notify);
 
-	public ItemStack claimAutomated(TileEntity tileEntity, @Nullable EntityPlayerMP player)
+	public ItemStack claimAutomated(TileEntity tileEntity, @Nullable ServerPlayerEntity player)
 	{
 		if (player != null)
 		{
@@ -148,11 +132,9 @@ public abstract class Reward extends QuestObjectBase
 	{
 		quest.rewards.remove(this);
 
-		Collection<Reward> c = Collections.singleton(this);
-
-		for (QuestData data : getQuestFile().getAllData())
+		for (PlayerData data : getQuestFile().getAllData())
 		{
-			data.unclaimRewards(c);
+			data.setRewardClaimed(id, false);
 		}
 
 		super.deleteSelf();
@@ -161,18 +143,16 @@ public abstract class Reward extends QuestObjectBase
 	@Override
 	public final void deleteChildren()
 	{
-		Collection<Reward> c = Collections.singleton(this);
-
-		for (QuestData data : getQuestFile().getAllData())
+		for (PlayerData data : getQuestFile().getAllData())
 		{
-			data.unclaimRewards(c);
+			data.setRewardClaimed(id, false);
 		}
 
 		super.deleteChildren();
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
+	@OnlyIn(Dist.CLIENT)
 	public void editedFromGUI()
 	{
 		GuiQuestTree gui = ClientUtils.getCurrentGuiAs(GuiQuestTree.class);
@@ -215,11 +195,11 @@ public abstract class Reward extends QuestObjectBase
 	}
 
 	@Override
-	public final void changeProgress(QuestData data, ChangeProgress type)
+	public final void changeProgress(PlayerData data, ChangeProgress type)
 	{
 		if (type == ChangeProgress.RESET || type == ChangeProgress.RESET_DEPS)
 		{
-			data.unclaimRewards(Collections.singleton(this));
+			data.setRewardClaimed(id, false);
 		}
 	}
 
@@ -239,7 +219,7 @@ public abstract class Reward extends QuestObjectBase
 	public final ConfigGroup createSubGroup(ConfigGroup group)
 	{
 		RewardType type = getType();
-		return group.getGroup(getObjectType().getId()).getGroup(type.getRegistryName().getNamespace()).getGroup(type.getRegistryName().getPath());
+		return group.getGroup(getObjectType().id).getGroup(type.getRegistryName().getNamespace()).getGroup(type.getRegistryName().getPath());
 	}
 
 	public void addMouseOverText(List<String> list)
@@ -251,12 +231,12 @@ public abstract class Reward extends QuestObjectBase
 		return true;
 	}
 
-	@SideOnly(Side.CLIENT)
-	public void onButtonClicked(boolean canClick)
+	@OnlyIn(Dist.CLIENT)
+	public void onButtonClicked(Button button, boolean canClick)
 	{
 		if (canClick)
 		{
-			GuiHelper.playClickSound();
+			button.playClickSound();
 			new MessageClaimReward(id, true).sendToServer();
 		}
 	}

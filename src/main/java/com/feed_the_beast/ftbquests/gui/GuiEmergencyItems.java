@@ -1,24 +1,26 @@
 package com.feed_the_beast.ftbquests.gui;
 
-import com.feed_the_beast.ftblib.lib.gui.GuiBase;
-import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
-import com.feed_the_beast.ftblib.lib.gui.Panel;
-import com.feed_the_beast.ftblib.lib.gui.SimpleTextButton;
-import com.feed_the_beast.ftblib.lib.gui.Theme;
-import com.feed_the_beast.ftblib.lib.gui.Widget;
-import com.feed_the_beast.ftblib.lib.gui.WidgetLayout;
-import com.feed_the_beast.ftblib.lib.icon.Color4I;
-import com.feed_the_beast.ftblib.lib.icon.Icon;
-import com.feed_the_beast.ftblib.lib.util.StringUtils;
-import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.net.MessageGetEmergencyItems;
 import com.feed_the_beast.ftbquests.quest.QuestShape;
-import net.minecraft.client.renderer.GlStateManager;
+import com.feed_the_beast.mods.ftbguilibrary.icon.Color4I;
+import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
+import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
+import com.feed_the_beast.mods.ftbguilibrary.utils.StringUtils;
+import com.feed_the_beast.mods.ftbguilibrary.widget.GuiBase;
+import com.feed_the_beast.mods.ftbguilibrary.widget.GuiHelper;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
+import com.feed_the_beast.mods.ftbguilibrary.widget.SimpleTextButton;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Widget;
+import com.feed_the_beast.mods.ftbguilibrary.widget.WidgetLayout;
+import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.text.ITextComponent;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -26,7 +28,7 @@ import java.util.List;
  */
 public class GuiEmergencyItems extends GuiBase
 {
-	private long endTime = System.currentTimeMillis() + ClientQuestFile.INSTANCE.emergencyItemsCooldown.millis();
+	private long endTime = System.currentTimeMillis() + ClientQuestFile.INSTANCE.emergencyItemsCooldown * 1000L;
 	private boolean done = false;
 
 	private static class EmergencyItem extends Widget
@@ -44,7 +46,13 @@ public class GuiEmergencyItems extends GuiBase
 		@Override
 		public void addMouseOverText(List<String> list)
 		{
-			GuiHelper.addStackTooltip(stack, list);
+			List<ITextComponent> list1 = new ArrayList<>();
+			GuiHelper.addStackTooltip(stack, list1);
+
+			for (ITextComponent t : list1)
+			{
+				list.add(t.getFormattedText());
+			}
 		}
 
 		@Override
@@ -67,7 +75,7 @@ public class GuiEmergencyItems extends GuiBase
 		@Override
 		public void onClicked(MouseButton button)
 		{
-			GuiHelper.playClickSound();
+			playClickSound();
 			getGui().closeGui();
 		}
 	};
@@ -124,15 +132,15 @@ public class GuiEmergencyItems extends GuiBase
 		}
 
 		GlStateManager.pushMatrix();
-		GlStateManager.translate((int) (w / 2F), (int) (h / 5F), 0F);
-		GlStateManager.scale(2F, 2F, 1F);
+		GlStateManager.translatef((int) (w / 2F), (int) (h / 5F), 0F);
+		GlStateManager.scalef(2F, 2F, 1F);
 		String s = I18n.format("ftbquests.file.emergency_items");
 		theme.drawString(s, -theme.getStringWidth(s) / 2, 0, Color4I.WHITE, 0);
 		GlStateManager.popMatrix();
 
 		GlStateManager.pushMatrix();
-		GlStateManager.translate((int) (w / 2F), (int) (h / 2.5F), 0F);
-		GlStateManager.scale(4F, 4F, 1F);
+		GlStateManager.translatef((int) (w / 2F), (int) (h / 2.5F), 0F);
+		GlStateManager.scalef(4F, 4F, 1F);
 		s = left <= 0L ? "00:00" : StringUtils.getTimeString(left / 1000L * 1000L + 1000L);
 		int x1 = -theme.getStringWidth(s) / 2;
 		theme.drawString(s, x1 - 1, 0, Color4I.BLACK, 0);

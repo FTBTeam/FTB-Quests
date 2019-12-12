@@ -1,29 +1,28 @@
 package com.feed_the_beast.ftbquests.quest;
 
-import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
-import com.feed_the_beast.ftblib.lib.config.ConfigString;
-import com.feed_the_beast.ftblib.lib.icon.Icon;
-import com.feed_the_beast.ftblib.lib.icon.IconAnimation;
-import com.feed_the_beast.ftblib.lib.io.DataIn;
-import com.feed_the_beast.ftblib.lib.io.DataOut;
-import com.feed_the_beast.ftblib.lib.util.ListUtils;
 import com.feed_the_beast.ftbquests.events.ObjectCompletedEvent;
 import com.feed_the_beast.ftbquests.net.MessageDisplayCompletionToast;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
+import com.feed_the_beast.ftbquests.util.NetUtils;
+import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
+import com.feed_the_beast.mods.ftbguilibrary.config.ConfigString;
+import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
+import com.feed_the_beast.mods.ftbguilibrary.icon.IconAnimation;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.nbt.NBTTagString;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
+import net.minecraft.nbt.StringNBT;
+import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.Constants;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
 import java.util.function.Predicate;
 
 /**
@@ -69,90 +68,90 @@ public final class Chapter extends QuestObject
 	}
 
 	@Override
-	public void writeData(NBTTagCompound nbt)
+	public void writeData(CompoundNBT nbt)
 	{
 		super.writeData(nbt);
 
 		if (!subtitle.isEmpty())
 		{
-			NBTTagList list = new NBTTagList();
+			ListNBT list = new ListNBT();
 
 			for (String v : subtitle)
 			{
-				list.appendTag(new NBTTagString(v));
+				list.add(new StringNBT(v));
 			}
 
-			nbt.setTag("description", list);
+			nbt.put("description", list);
 		}
 
-		nbt.setBoolean("always_invisible", alwaysInvisible);
-		nbt.setInteger("group", group != null && !group.invalid ? group.id : 0);
-		nbt.setString("default_quest_shape", defaultQuestShape.getId());
+		nbt.putBoolean("always_invisible", alwaysInvisible);
+		nbt.putInt("group", group != null && !group.invalid ? group.id : 0);
+		nbt.putString("default_quest_shape", defaultQuestShape.id);
 
 		if (!images.isEmpty())
 		{
-			NBTTagList list = new NBTTagList();
+			ListNBT list = new ListNBT();
 
 			for (ChapterImage image : images)
 			{
-				NBTTagCompound nbt1 = new NBTTagCompound();
+				CompoundNBT nbt1 = new CompoundNBT();
 				image.writeData(nbt1);
-				list.appendTag(nbt1);
+				list.add(nbt1);
 			}
 
-			nbt.setTag("images", list);
+			nbt.put("images", list);
 		}
 	}
 
 	@Override
-	public void readData(NBTTagCompound nbt)
+	public void readData(CompoundNBT nbt)
 	{
 		super.readData(nbt);
 		subtitle.clear();
 
-		NBTTagList desc = nbt.getTagList("description", Constants.NBT.TAG_STRING);
+		ListNBT desc = nbt.getList("description", Constants.NBT.TAG_STRING);
 
-		for (int i = 0; i < desc.tagCount(); i++)
+		for (int i = 0; i < desc.size(); i++)
 		{
-			subtitle.add(desc.getStringTagAt(i));
+			subtitle.add(desc.getString(i));
 		}
 
 		alwaysInvisible = nbt.getBoolean("always_invisible");
-		group = file.getChapter(nbt.getInteger("group"));
+		group = file.getChapter(nbt.getInt("group"));
 		defaultQuestShape = QuestShape.NAME_MAP.get(nbt.getString("default_quest_shape"));
 
-		NBTTagList imgs = nbt.getTagList("images", Constants.NBT.TAG_COMPOUND);
+		ListNBT imgs = nbt.getList("images", Constants.NBT.TAG_COMPOUND);
 
 		images.clear();
 
-		for (int i = 0; i < imgs.tagCount(); i++)
+		for (int i = 0; i < imgs.size(); i++)
 		{
 			ChapterImage image = new ChapterImage(this);
-			image.readData(imgs.getCompoundTagAt(i));
+			image.readData(imgs.getCompound(i));
 			images.add(image);
 		}
 	}
 
 	@Override
-	public void writeNetData(DataOut data)
+	public void writeNetData(PacketBuffer buffer)
 	{
-		super.writeNetData(data);
-		data.writeCollection(subtitle, DataOut.STRING);
-		data.writeBoolean(alwaysInvisible);
-		data.writeInt(group == null || group.invalid ? 0 : group.id);
-		QuestShape.NAME_MAP.write(data, defaultQuestShape);
-		data.writeCollection(images, (d, object) -> object.writeNetData(d));
+		super.writeNetData(buffer);
+		NetUtils.writeStrings(buffer, subtitle);
+		buffer.writeBoolean(alwaysInvisible);
+		buffer.writeInt(group == null || group.invalid ? 0 : group.id);
+		QuestShape.NAME_MAP.write(buffer, defaultQuestShape);
+		NetUtils.write(buffer, images, (d, img) -> img.writeNetData(d));
 	}
 
 	@Override
-	public void readNetData(DataIn data)
+	public void readNetData(PacketBuffer buffer)
 	{
-		super.readNetData(data);
-		data.readCollection(subtitle, DataIn.STRING);
-		alwaysInvisible = data.readBoolean();
-		group = file.getChapter(data.readInt());
-		defaultQuestShape = QuestShape.NAME_MAP.read(data);
-		data.readCollection(images, d -> {
+		super.readNetData(buffer);
+		NetUtils.readStrings(buffer, subtitle);
+		alwaysInvisible = buffer.readBoolean();
+		group = file.getChapter(buffer.readInt());
+		defaultQuestShape = QuestShape.NAME_MAP.read(buffer);
+		NetUtils.read(buffer, images, d -> {
 			ChapterImage image = new ChapterImage(this);
 			image.readNetData(d);
 			return image;
@@ -165,7 +164,7 @@ public final class Chapter extends QuestObject
 	}
 
 	@Override
-	public int getRelativeProgressFromChildren(QuestData data)
+	public int getRelativeProgressFromChildren(PlayerData data)
 	{
 		if (alwaysInvisible)
 		{
@@ -186,7 +185,7 @@ public final class Chapter extends QuestObject
 		{
 			if (!quest.canRepeat)
 			{
-				progress += quest.getRelativeProgress(data);
+				progress += data.getRelativeProgress(quest);
 				count++;
 			}
 		}
@@ -206,27 +205,27 @@ public final class Chapter extends QuestObject
 	}
 
 	@Override
-	public void onCompleted(QuestData data, List<EntityPlayerMP> onlineMembers, List<EntityPlayerMP> notifiedPlayers)
+	public void onCompleted(PlayerData data, List<ServerPlayerEntity> onlineMembers, List<ServerPlayerEntity> notifiedPlayers)
 	{
 		super.onCompleted(data, onlineMembers, notifiedPlayers);
-		new ObjectCompletedEvent.ChapterEvent(data, this, onlineMembers, notifiedPlayers).post();
+		MinecraftForge.EVENT_BUS.post(new ObjectCompletedEvent.ChapterEvent(data, this, onlineMembers, notifiedPlayers));
 
 		if (!disableToast)
 		{
-			for (EntityPlayerMP player : notifiedPlayers)
+			for (ServerPlayerEntity player : notifiedPlayers)
 			{
 				new MessageDisplayCompletionToast(id).sendTo(player);
 			}
 		}
 
-		if (file.isComplete(data))
+		if (data.isComplete(file))
 		{
 			file.onCompleted(data, onlineMembers, notifiedPlayers);
 		}
 	}
 
 	@Override
-	public void changeProgress(QuestData data, ChangeProgress type)
+	public void changeProgress(PlayerData data, ChangeProgress type)
 	{
 		for (Quest quest : quests)
 		{
@@ -289,7 +288,9 @@ public final class Chapter extends QuestObject
 
 		if (!quests.isEmpty())
 		{
-			for (Quest quest : ListUtils.clearAndCopy(quests))
+			List<Quest> l = new ArrayList<>(quests);
+			quests.clear();
+			for (Quest quest : l)
 			{
 				quest.onCreated();
 			}
@@ -303,35 +304,21 @@ public final class Chapter extends QuestObject
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
+	@OnlyIn(Dist.CLIENT)
 	public void getConfig(ConfigGroup config)
 	{
 		super.getConfig(config);
-		config.addList("subtitle", subtitle, new ConfigString(""), ConfigString::new, ConfigString::getString);
-		config.addBool("always_invisible", () -> alwaysInvisible, v -> alwaysInvisible = v, false);
+		config.addList("subtitle", subtitle, new ConfigString(null), "");
+		config.addBool("always_invisible", alwaysInvisible, v -> alwaysInvisible = v, false);
 
 		Predicate<QuestObjectBase> predicate = object -> object == null || (object instanceof Chapter && object != this && ((Chapter) object).group == null);
+		config.add("group", new ConfigQuestObject<>(predicate), group, v -> group = v, null);
 
-		config.add("group", new ConfigQuestObject(file, getID(group), predicate)
-		{
-			@Override
-			public int getObject()
-			{
-				return QuestObjectBase.getID(group);
-			}
-
-			@Override
-			public void setObject(int v)
-			{
-				group = file.getChapter(v);
-			}
-		}, new ConfigQuestObject(file, 0, predicate));
-
-		config.addEnum("default_quest_shape", () -> defaultQuestShape, v -> defaultQuestShape = v, QuestShape.NAME_MAP);
+		config.addEnum("default_quest_shape", defaultQuestShape, v -> defaultQuestShape = v, QuestShape.NAME_MAP);
 	}
 
 	@Override
-	public boolean isVisible(QuestData data)
+	public boolean isVisible(PlayerData data)
 	{
 		if (alwaysInvisible)
 		{
@@ -414,44 +401,6 @@ public final class Chapter extends QuestObject
 		}
 
 		return list;
-	}
-
-	public boolean hasUnclaimedRewards(UUID player, QuestData data, boolean showExcluded)
-	{
-		for (Quest quest : quests)
-		{
-			if (quest.hasUnclaimedRewards(player, data, showExcluded))
-			{
-				return true;
-			}
-		}
-
-		for (Chapter chapter : getChildren())
-		{
-			if (chapter.hasUnclaimedRewards(player, data, showExcluded))
-			{
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	public int getUnclaimedRewards(UUID player, QuestData data, boolean showExcluded)
-	{
-		int r = 0;
-
-		for (Quest quest : quests)
-		{
-			r += quest.getUnclaimedRewards(player, data, showExcluded);
-		}
-
-		for (Chapter chapter : getChildren())
-		{
-			r += chapter.getUnclaimedRewards(player, data, showExcluded);
-		}
-
-		return r;
 	}
 
 	@Override

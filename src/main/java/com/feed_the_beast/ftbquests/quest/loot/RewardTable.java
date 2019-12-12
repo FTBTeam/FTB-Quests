@@ -1,19 +1,10 @@
 package com.feed_the_beast.ftbquests.quest.loot;
 
-import com.feed_the_beast.ftblib.lib.client.ClientUtils;
-import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
-import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
-import com.feed_the_beast.ftblib.lib.icon.Icon;
-import com.feed_the_beast.ftblib.lib.icon.IconAnimation;
-import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
-import com.feed_the_beast.ftblib.lib.io.Bits;
-import com.feed_the_beast.ftblib.lib.io.DataIn;
-import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftbquests.gui.GuiEditRewardTable;
 import com.feed_the_beast.ftbquests.gui.GuiRewardTables;
 import com.feed_the_beast.ftbquests.gui.tree.GuiQuestTree;
 import com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIHelper;
-import com.feed_the_beast.ftbquests.net.edit.MessageEditObject;
+import com.feed_the_beast.ftbquests.net.MessageEditObject;
 import com.feed_the_beast.ftbquests.quest.Chapter;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
@@ -22,14 +13,21 @@ import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.quest.reward.FTBQuestsRewards;
 import com.feed_the_beast.ftbquests.quest.reward.Reward;
 import com.feed_the_beast.ftbquests.quest.reward.RewardType;
+import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
+import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
+import com.feed_the_beast.mods.ftbguilibrary.icon.IconAnimation;
+import com.feed_the_beast.mods.ftbguilibrary.icon.ItemIcon;
+import com.feed_the_beast.mods.ftbguilibrary.utils.Bits;
+import com.feed_the_beast.mods.ftbguilibrary.utils.ClientUtils;
+import com.feed_the_beast.mods.ftbguilibrary.widget.GuiIcons;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.util.Constants;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -86,135 +84,135 @@ public final class RewardTable extends QuestObjectBase
 	}
 
 	@Override
-	public void writeData(NBTTagCompound nbt)
+	public void writeData(CompoundNBT nbt)
 	{
 		super.writeData(nbt);
 
 		if (emptyWeight > 0)
 		{
-			nbt.setInteger("empty_weight", emptyWeight);
+			nbt.putInt("empty_weight", emptyWeight);
 		}
 
-		nbt.setInteger("loot_size", lootSize);
+		nbt.putInt("loot_size", lootSize);
 
 		if (hideTooltip)
 		{
-			nbt.setBoolean("hide_tooltip", true);
+			nbt.putBoolean("hide_tooltip", true);
 		}
 
 		if (useTitle)
 		{
-			nbt.setBoolean("use_title", true);
+			nbt.putBoolean("use_title", true);
 		}
 
-		NBTTagList list = new NBTTagList();
+		ListNBT list = new ListNBT();
 
 		for (WeightedReward reward : rewards)
 		{
-			NBTTagCompound nbt1 = new NBTTagCompound();
+			CompoundNBT nbt1 = new CompoundNBT();
 			reward.reward.writeData(nbt1);
 
 			if (reward.reward.getType() != FTBQuestsRewards.ITEM)
 			{
-				nbt1.setString("type", reward.reward.getType().getTypeForNBT());
+				nbt1.putString("type", reward.reward.getType().getTypeForNBT());
 			}
 
 			if (reward.weight > 1)
 			{
-				nbt1.setInteger("weight", reward.weight);
+				nbt1.putInt("weight", reward.weight);
 			}
 
-			list.appendTag(nbt1);
+			list.add(nbt1);
 		}
 
-		nbt.setTag("rewards", list);
+		nbt.put("rewards", list);
 
 		if (lootCrate != null)
 		{
-			NBTTagCompound nbt1 = new NBTTagCompound();
+			CompoundNBT nbt1 = new CompoundNBT();
 			lootCrate.writeData(nbt1);
-			nbt.setTag("loot_crate", nbt1);
+			nbt.put("loot_crate", nbt1);
 		}
 	}
 
 	@Override
-	public void readData(NBTTagCompound nbt)
+	public void readData(CompoundNBT nbt)
 	{
 		super.readData(nbt);
-		emptyWeight = nbt.getInteger("empty_weight");
-		lootSize = nbt.getInteger("loot_size");
+		emptyWeight = nbt.getInt("empty_weight");
+		lootSize = nbt.getInt("loot_size");
 		hideTooltip = nbt.getBoolean("hide_tooltip");
 		useTitle = nbt.getBoolean("use_title");
 
 		rewards.clear();
-		NBTTagList list = nbt.getTagList("rewards", Constants.NBT.TAG_COMPOUND);
+		ListNBT list = nbt.getList("rewards", Constants.NBT.TAG_COMPOUND);
 
-		for (int i = 0; i < list.tagCount(); i++)
+		for (int i = 0; i < list.size(); i++)
 		{
-			NBTTagCompound nbt1 = list.getCompoundTagAt(i);
+			CompoundNBT nbt1 = list.getCompound(i);
 			Reward reward = RewardType.createReward(fakeQuest, nbt1.getString("type"));
 
 			if (reward != null)
 			{
 				reward.readData(nbt1);
-				rewards.add(new WeightedReward(reward, nbt1.getInteger("weight")));
+				rewards.add(new WeightedReward(reward, nbt1.getInt("weight")));
 			}
 		}
 
 		lootCrate = null;
 
-		if (nbt.hasKey("loot_crate"))
+		if (nbt.contains("loot_crate"))
 		{
 			lootCrate = new LootCrate(this);
-			lootCrate.readData(nbt.getCompoundTag("loot_crate"));
+			lootCrate.readData(nbt.getCompound("loot_crate"));
 		}
 	}
 
 	@Override
-	public void writeNetData(DataOut data)
+	public void writeNetData(PacketBuffer buffer)
 	{
-		super.writeNetData(data);
-		data.writeVarInt(emptyWeight);
-		data.writeVarInt(lootSize);
+		super.writeNetData(buffer);
+		buffer.writeVarInt(emptyWeight);
+		buffer.writeVarInt(lootSize);
 		int flags = 0;
 		flags = Bits.setFlag(flags, 1, hideTooltip);
 		flags = Bits.setFlag(flags, 2, useTitle);
 		flags = Bits.setFlag(flags, 4, lootCrate != null);
-		data.writeVarInt(flags);
-		data.writeVarInt(rewards.size());
+		buffer.writeVarInt(flags);
+		buffer.writeVarInt(rewards.size());
 
 		for (WeightedReward reward : rewards)
 		{
-			data.writeVarInt(RewardType.getRegistry().getID(reward.reward.getType()));
-			reward.reward.writeNetData(data);
-			data.writeVarInt(reward.weight);
+			buffer.writeVarInt(RewardType.getRegistry().getID(reward.reward.getType()));
+			reward.reward.writeNetData(buffer);
+			buffer.writeVarInt(reward.weight);
 		}
 
 		if (lootCrate != null)
 		{
-			lootCrate.writeNetData(data);
+			lootCrate.writeNetData(buffer);
 		}
 	}
 
 	@Override
-	public void readNetData(DataIn data)
+	public void readNetData(PacketBuffer buffer)
 	{
-		super.readNetData(data);
-		emptyWeight = data.readVarInt();
-		lootSize = data.readVarInt();
-		int flags = data.readVarInt();
+		super.readNetData(buffer);
+		emptyWeight = buffer.readVarInt();
+		lootSize = buffer.readVarInt();
+		int flags = buffer.readVarInt();
 		hideTooltip = Bits.getFlag(flags, 1);
 		useTitle = Bits.getFlag(flags, 2);
 		boolean hasCrate = Bits.getFlag(flags, 4);
 		rewards.clear();
-		int s = data.readVarInt();
+		int s = buffer.readVarInt();
 
 		for (int i = 0; i < s; i++)
 		{
-			RewardType type = RewardType.getRegistry().getValue(data.readVarInt());
+			RewardType type = RewardType.getRegistry().getValue(buffer.readVarInt());
 			Reward reward = type.provider.create(fakeQuest);
-			reward.readNetData(data);
-			int w = data.readVarInt();
+			reward.readNetData(buffer);
+			int w = buffer.readVarInt();
 			rewards.add(new WeightedReward(reward, w));
 		}
 
@@ -223,25 +221,23 @@ public final class RewardTable extends QuestObjectBase
 		if (hasCrate)
 		{
 			lootCrate = new LootCrate(this);
-			lootCrate.readNetData(data);
+			lootCrate.readNetData(buffer);
 		}
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
+	@OnlyIn(Dist.CLIENT)
 	public void getConfig(ConfigGroup config)
 	{
 		super.getConfig(config);
-		config.addInt("empty_weight", () -> emptyWeight, v -> emptyWeight = v, 0, 0, Integer.MAX_VALUE);
-		config.addInt("loot_size", () -> lootSize, v -> lootSize = v, 1, 1, Integer.MAX_VALUE);
-		config.addBool("hide_tooltip", () -> hideTooltip, v -> hideTooltip = v, false);
-		config.addBool("use_title", () -> useTitle, v -> useTitle = v, false);
+		config.addInt("empty_weight", emptyWeight, v -> emptyWeight = v, 0, 0, Integer.MAX_VALUE);
+		config.addInt("loot_size", lootSize, v -> lootSize = v, 1, 1, Integer.MAX_VALUE);
+		config.addBool("hide_tooltip", hideTooltip, v -> hideTooltip = v, false);
+		config.addBool("use_title", useTitle, v -> useTitle = v, false);
 
 		if (lootCrate != null)
 		{
-			ConfigGroup lc = config.getGroup("loot_crate");
-			lc.setDisplayName(new TextComponentTranslation("item.ftbquests.lootcrate.name"));
-			lootCrate.getConfig(lc);
+			lootCrate.getConfig(config.getGroup("loot_crate").setNameKey("item.ftbquests.lootcrate.name"));
 		}
 	}
 
@@ -264,7 +260,7 @@ public final class RewardTable extends QuestObjectBase
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
+	@OnlyIn(Dist.CLIENT)
 	public void editedFromGUI()
 	{
 		GuiQuestTree gui = ClientUtils.getCurrentGuiAs(GuiQuestTree.class);
@@ -331,7 +327,7 @@ public final class RewardTable extends QuestObjectBase
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
+	@OnlyIn(Dist.CLIENT)
 	public void onEditButtonClicked()
 	{
 		new GuiEditRewardTable(this, () -> new MessageEditObject(this).sendToServer()).openGui();

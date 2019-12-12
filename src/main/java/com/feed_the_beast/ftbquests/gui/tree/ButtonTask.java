@@ -1,36 +1,34 @@
 package com.feed_the_beast.ftbquests.gui.tree;
 
-import com.feed_the_beast.ftblib.lib.gui.Button;
-import com.feed_the_beast.ftblib.lib.gui.ContextMenuItem;
-import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
-import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
-import com.feed_the_beast.ftblib.lib.gui.Panel;
-import com.feed_the_beast.ftblib.lib.gui.SimpleTextButton;
-import com.feed_the_beast.ftblib.lib.gui.Theme;
-import com.feed_the_beast.ftblib.lib.gui.WidgetType;
-import com.feed_the_beast.ftblib.lib.gui.misc.GuiButtonListBase;
-import com.feed_the_beast.ftblib.lib.icon.Color4I;
-import com.feed_the_beast.ftblib.lib.icon.Icon;
-import com.feed_the_beast.ftblib.lib.util.InvUtils;
-import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
-import com.feed_the_beast.ftbquests.net.edit.MessageEditObject;
+import com.feed_the_beast.ftbquests.net.MessageEditObject;
 import com.feed_the_beast.ftbquests.quest.task.ItemTask;
 import com.feed_the_beast.ftbquests.quest.task.Task;
 import com.feed_the_beast.ftbquests.quest.task.TaskData;
 import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
-import com.latmod.mods.itemfilters.api.IItemFilter;
-import com.latmod.mods.itemfilters.api.ItemFiltersAPI;
-import com.latmod.mods.itemfilters.filters.OreDictionaryFilter;
-import com.latmod.mods.itemfilters.item.ItemFilter;
-import com.latmod.mods.itemfilters.item.ItemFiltersItems;
-import net.minecraft.client.renderer.GlStateManager;
+import com.feed_the_beast.mods.ftbguilibrary.icon.Color4I;
+import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
+import com.feed_the_beast.mods.ftbguilibrary.misc.GuiButtonListBase;
+import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
+import com.feed_the_beast.mods.ftbguilibrary.widget.ContextMenuItem;
+import com.feed_the_beast.mods.ftbguilibrary.widget.GuiIcons;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
+import com.feed_the_beast.mods.ftbguilibrary.widget.SimpleTextButton;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
+import com.feed_the_beast.mods.ftbguilibrary.widget.WidgetType;
+import com.mojang.blaze3d.platform.GlStateManager;
+import dev.latvian.mods.itemfilters.api.IStringValueFilter;
+import dev.latvian.mods.itemfilters.api.ItemFiltersAPI;
+import dev.latvian.mods.itemfilters.api.ItemFiltersItems;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextFormatting;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author LatvianModder
@@ -68,82 +66,69 @@ public class ButtonTask extends Button
 	{
 		if (button.isLeft())
 		{
-			task.onButtonClicked(!(task.invalid || treeGui.file.self == null || !task.quest.canStartTasks(treeGui.file.self) || task.isComplete(treeGui.file.self)));
+			task.onButtonClicked(this, !(task.invalid || treeGui.file.self == null || !treeGui.file.self.canStartTasks(task.quest) || treeGui.file.self.isComplete(task)));
 		}
 		else if (button.isRight() && treeGui.file.canEdit())
 		{
-			GuiHelper.playClickSound();
+			playClickSound();
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
 
 			if (task instanceof ItemTask)
 			{
 				ItemTask i = (ItemTask) task;
+				Set<ResourceLocation> tags = i.item.getItem().getTags();
 
-				if (i.items.size() == 1 && !(i.items.get(0).getItem() instanceof ItemFilter))
+				if (!tags.isEmpty() && !ItemFiltersAPI.isFilter(i.item))
 				{
-					List<String> oreNames = new ArrayList<>(InvUtils.getOreNames(null, i.items.get(0)));
+					contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.task.ftbquests.item.convert_tag"), ThemeProperties.RELOAD_ICON.get(), () -> {
+						ItemStack tagFilter = new ItemStack(ItemFiltersItems.TAG);
 
-					if (!oreNames.isEmpty())
-					{
-						contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.task.ftbquests.item.convert_oredict"), ThemeProperties.RELOAD_ICON.get(), () -> {
-							ItemStack oreFilter = new ItemStack(ItemFiltersItems.FILTER);
-							IItemFilter filter = ItemFiltersAPI.getFilter(oreFilter);
+						if (tags.size() == 1)
+						{
+							String tag = tags.iterator().next().toString();
+							((IStringValueFilter) tagFilter.getItem()).setValue(tagFilter, tag);
+							i.item = tagFilter;
 
-							if (filter instanceof ItemFilter.ItemFilterData)
+							if (i.title.isEmpty())
 							{
-								((ItemFilter.ItemFilterData) filter).filter = new OreDictionaryFilter();
-
-								if (oreNames.size() == 1)
-								{
-									((OreDictionaryFilter) ((ItemFilter.ItemFilterData) filter).filter).setValue(oreNames.get(0));
-
-									i.items.clear();
-									i.items.add(oreFilter);
-
-									if (i.title.isEmpty())
-									{
-										i.title = "Any " + oreNames.get(0);
-									}
-
-									new MessageEditObject(i).sendToServer();
-								}
-								else
-								{
-									new GuiButtonListBase()
-									{
-										@Override
-										public void addButtons(Panel panel)
-										{
-											for (String s : oreNames)
-											{
-												panel.add(new SimpleTextButton(panel, s, Icon.EMPTY)
-												{
-													@Override
-													public void onClicked(MouseButton button)
-													{
-														treeGui.openGui();
-														((OreDictionaryFilter) ((ItemFilter.ItemFilterData) filter).filter).setValue(s);
-
-														i.items.clear();
-														i.items.add(oreFilter);
-
-														if (i.title.isEmpty())
-														{
-															i.title = "Any " + s;
-														}
-
-														new MessageEditObject(i).sendToServer();
-													}
-												});
-											}
-										}
-									}.openGui();
-								}
+								i.title = "Any " + tag;
 							}
-						}));
 
-						contextMenu.add(ContextMenuItem.SEPARATOR);
-					}
+							new MessageEditObject(i).sendToServer();
+						}
+						else
+						{
+							new GuiButtonListBase()
+							{
+								@Override
+								public void addButtons(Panel panel)
+								{
+									for (ResourceLocation s : tags)
+									{
+										panel.add(new SimpleTextButton(panel, s.toString(), Icon.EMPTY)
+										{
+											@Override
+											public void onClicked(MouseButton button)
+											{
+												treeGui.openGui();
+												((IStringValueFilter) tagFilter.getItem()).setValue(tagFilter, s.toString());
+												i.item = tagFilter;
+
+												if (i.title.isEmpty())
+												{
+													i.title = "Any " + s;
+												}
+
+												new MessageEditObject(i).sendToServer();
+											}
+										});
+									}
+								}
+							}.openGui();
+						}
+					}));
+
+					contextMenu.add(ContextMenuItem.SEPARATOR);
 				}
 			}
 
@@ -174,7 +159,7 @@ public class ButtonTask extends Button
 
 		TaskData data;
 
-		if (treeGui.file.self != null && task.quest.canStartTasks(treeGui.file.self))
+		if (treeGui.file.self != null && treeGui.file.self.canStartTasks(task.quest))
 		{
 			data = treeGui.file.self.getTaskData(task);
 			long maxp = task.getMaxProgress();
@@ -233,10 +218,10 @@ public class ButtonTask extends Button
 		drawBackground(theme, x, y, w, h);
 		drawIcon(theme, x + (w - bs) / 2, y + (h - bs) / 2, bs, bs);
 
-		if (treeGui.file.self != null && task.isComplete(treeGui.file.self))
+		if (treeGui.file.self != null && treeGui.file.self.isComplete(task))
 		{
 			GlStateManager.pushMatrix();
-			GlStateManager.translate(0F, 0F, 500F);
+			GlStateManager.translatef(0F, 0F, 500F);
 			ThemeProperties.CHECK_ICON.get().draw(x + w - 9, y + 1, 8, 8);
 			GlStateManager.popMatrix();
 		}
@@ -247,8 +232,8 @@ public class ButtonTask extends Button
 			if (!s.isEmpty())
 			{
 				GlStateManager.pushMatrix();
-				GlStateManager.translate(x + 19F - theme.getStringWidth(s) / 2F, y + 15F, 500F);
-				GlStateManager.scale(0.5F, 0.5F, 1F);
+				GlStateManager.translatef(x + 19F - theme.getStringWidth(s) / 2F, y + 15F, 500F);
+				GlStateManager.scalef(0.5F, 0.5F, 1F);
 				theme.drawString(s, 0, 0, Color4I.WHITE, Theme.SHADOW);
 				GlStateManager.popMatrix();
 			}

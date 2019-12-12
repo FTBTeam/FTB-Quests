@@ -1,13 +1,12 @@
 package com.feed_the_beast.ftbquests.gui.tree;
 
-import com.feed_the_beast.ftblib.lib.config.ConfigString;
-import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
-import com.feed_the_beast.ftblib.lib.gui.Panel;
-import com.feed_the_beast.ftblib.lib.gui.misc.GuiEditConfigValue;
-import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
-import com.feed_the_beast.ftbquests.net.edit.MessageCreateObject;
+import com.feed_the_beast.ftbquests.net.MessageCreateObject;
 import com.feed_the_beast.ftbquests.quest.Chapter;
 import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
+import com.feed_the_beast.mods.ftbguilibrary.config.ConfigString;
+import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiEditConfigFromString;
+import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
 import net.minecraft.client.resources.I18n;
 
 import java.util.regex.Pattern;
@@ -25,18 +24,18 @@ public class ButtonAddChapter extends ButtonTab
 	@Override
 	public void onClicked(MouseButton button)
 	{
-		GuiHelper.playClickSound();
+		playClickSound();
 
-		new GuiEditConfigValue("title", new ConfigString("", Pattern.compile("^.+$")), (value, set) ->
-		{
+		ConfigString c = new ConfigString(Pattern.compile("^.+$"));
+		GuiEditConfigFromString.open(c, "", "", accepted -> {
 			treeGui.openGui();
 
-			if (set)
+			if (accepted)
 			{
 				Chapter chapter = new Chapter(treeGui.file);
-				chapter.title = value.getString();
+				chapter.title = c.value;
 				new MessageCreateObject(chapter, null).sendToServer();
 			}
-		}).openGui();
+		});
 	}
 }

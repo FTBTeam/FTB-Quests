@@ -1,7 +1,5 @@
 package com.feed_the_beast.ftbquests.integration.jei;
 
-import com.feed_the_beast.ftblib.lib.icon.ItemIcon;
-import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.loot.RewardTable;
 import com.feed_the_beast.ftbquests.quest.loot.WeightedReward;
@@ -9,17 +7,15 @@ import com.feed_the_beast.ftbquests.quest.reward.RandomReward;
 import com.feed_the_beast.ftbquests.quest.reward.Reward;
 import com.feed_the_beast.ftbquests.quest.task.ItemTask;
 import com.feed_the_beast.ftbquests.quest.task.Task;
-import com.latmod.mods.itemfilters.api.ItemFiltersAPI;
-import com.latmod.mods.itemfilters.filters.ORFilter;
-import com.latmod.mods.itemfilters.item.ItemFiltersItems;
-import mezz.jei.api.ingredients.IIngredients;
-import mezz.jei.api.ingredients.VanillaTypes;
-import mezz.jei.api.recipe.IRecipeWrapper;
-import net.minecraft.client.Minecraft;
-import net.minecraft.init.Items;
+import com.feed_the_beast.mods.ftbguilibrary.icon.ItemIcon;
+import dev.latvian.mods.itemfilters.ItemFilters;
+import dev.latvian.mods.itemfilters.api.ItemFiltersAPI;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagString;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.item.Items;
+import net.minecraft.nbt.StringNBT;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,7 +24,7 @@ import java.util.List;
 /**
  * @author LatvianModder
  */
-public class QuestWrapper implements IRecipeWrapper
+public class QuestWrapper //FIXME: implements IRecipeWrapper
 {
 	public final Quest quest;
 	public final String name;
@@ -55,11 +51,9 @@ public class QuestWrapper implements IRecipeWrapper
 		{
 			if (task instanceof ItemTask)
 			{
-				ORFilter filter = new ORFilter();
-				filter.items.addAll(((ItemTask) task).items);
-				List<ItemStack> list = new ArrayList<>();
-				filter.getValidItems(list);
-				input.add(list);
+				ItemStack filter = new ItemStack(ForgeRegistries.ITEMS.getValue(new ResourceLocation(ItemFilters.MOD_ID, "or")));
+				//FIXME: filter.items.addAll(((ItemTask) task).items);
+				input.add(Collections.singletonList(filter));
 				continue;
 			}
 
@@ -75,14 +69,14 @@ public class QuestWrapper implements IRecipeWrapper
 			else if (task.getIcon() instanceof ItemIcon)
 			{
 				stack = ((ItemIcon) task.getIcon()).getStack().copy();
-				stack.setStackDisplayName(task.getTitle());
+				stack.setDisplayName(new StringTextComponent(task.getTitle()));
 				input.add(Collections.singletonList(stack));
 			}
 			else
 			{
 				stack = new ItemStack(Items.PAINTING);
-				stack.setStackDisplayName(task.getTitle());
-				stack.setTagInfo("icon", new NBTTagString(task.getIcon().toString()));
+				stack.setDisplayName(new StringTextComponent(task.getTitle()));
+				stack.setTagInfo("icon", new StringNBT(task.getIcon().toString()));
 				input.add(Collections.singletonList(stack));
 			}
 		}
@@ -111,8 +105,8 @@ public class QuestWrapper implements IRecipeWrapper
 
 				if (table.hideTooltip)
 				{
-					ItemStack unknown = new ItemStack(ItemFiltersItems.MISSING);
-					unknown.setStackDisplayName("Unknown Reward");
+					ItemStack unknown = new ItemStack(Items.BARRIER);
+					unknown.setDisplayName(new StringTextComponent("Unknown Reward"));
 					list.add(unknown);
 				}
 				else
@@ -133,19 +127,20 @@ public class QuestWrapper implements IRecipeWrapper
 			else if (reward.getIcon() instanceof ItemIcon)
 			{
 				stack = ((ItemIcon) reward.getIcon()).getStack().copy();
-				stack.setStackDisplayName(reward.getTitle());
+				stack.setDisplayName(new StringTextComponent(reward.getTitle()));
 				output.add(Collections.singletonList(stack));
 			}
 			else
 			{
 				stack = new ItemStack(Items.PAINTING);
-				stack.setStackDisplayName(reward.getTitle());
-				stack.setTagInfo("icon", new NBTTagString(reward.getIcon().toString()));
+				stack.setDisplayName(new StringTextComponent(reward.getTitle()));
+				stack.setTagInfo("icon", new StringNBT(reward.getIcon().toString()));
 				output.add(Collections.singletonList(stack));
 			}
 		}
 	}
 
+	/*
 	@Override
 	public void getIngredients(IIngredients ingredients)
 	{
@@ -175,4 +170,5 @@ public class QuestWrapper implements IRecipeWrapper
 
 		return false;
 	}
+	 */
 }

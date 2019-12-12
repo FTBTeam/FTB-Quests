@@ -1,13 +1,13 @@
 {
 	"parent": "block/block",
 	"textures": {
-		"side_outline": "ftbquests:items/lootcrate/side_outline",
-		"top_outline": "ftbquests:items/lootcrate/top_outline",
-		"front_outline": "ftbquests:items/lootcrate/front_outline",
-		"side": "ftbquests:items/lootcrate/side",
-		"top": "ftbquests:items/lootcrate/top",
-		"front": "ftbquests:items/lootcrate/front",
-		"particle": "ftbquests:items/lootcrate/front_outline"
+		"side_outline": "ftbquests:item/lootcrate/side_outline",
+		"top_outline": "ftbquests:item/lootcrate/top_outline",
+		"front_outline": "ftbquests:item/lootcrate/front_outline",
+		"side": "ftbquests:item/lootcrate/side",
+		"top": "ftbquests:item/lootcrate/top",
+		"front": "ftbquests:item/lootcrate/front",
+		"particle": "ftbquests:item/lootcrate/front_outline"
 	},
 	"elements": [
 		{

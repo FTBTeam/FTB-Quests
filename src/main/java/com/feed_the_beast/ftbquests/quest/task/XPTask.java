@@ -1,19 +1,17 @@
 package com.feed_the_beast.ftbquests.quest.task;
 
-import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
-import com.feed_the_beast.ftblib.lib.config.ConfigLong;
-import com.feed_the_beast.ftblib.lib.io.DataIn;
-import com.feed_the_beast.ftblib.lib.io.DataOut;
+import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.QuestData;
+import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 /**
  * @author LatvianModder
@@ -47,15 +45,15 @@ public class XPTask extends Task implements ISingleLongValueTask
 	}
 
 	@Override
-	public void writeData(NBTTagCompound nbt)
+	public void writeData(CompoundNBT nbt)
 	{
 		super.writeData(nbt);
-		nbt.setLong("value", value);
-		nbt.setBoolean("points", points);
+		nbt.putLong("value", value);
+		nbt.putBoolean("points", points);
 	}
 
 	@Override
-	public void readData(NBTTagCompound nbt)
+	public void readData(CompoundNBT nbt)
 	{
 		super.readData(nbt);
 		value = nbt.getLong("value");
@@ -63,25 +61,19 @@ public class XPTask extends Task implements ISingleLongValueTask
 	}
 
 	@Override
-	public void writeNetData(DataOut data)
+	public void writeNetData(PacketBuffer buffer)
 	{
-		super.writeNetData(data);
-		data.writeVarLong(value);
-		data.writeBoolean(points);
+		super.writeNetData(buffer);
+		buffer.writeVarLong(value);
+		buffer.writeBoolean(points);
 	}
 
 	@Override
-	public void readNetData(DataIn data)
+	public void readNetData(PacketBuffer buffer)
 	{
-		super.readNetData(data);
-		value = data.readVarLong();
-		points = data.readBoolean();
-	}
-
-	@Override
-	public ConfigLong getDefaultValue()
-	{
-		return new ConfigLong(value, 1L, Long.MAX_VALUE);
+		super.readNetData(buffer);
+		value = buffer.readVarLong();
+		points = buffer.readBoolean();
 	}
 
 	@Override
@@ -91,12 +83,12 @@ public class XPTask extends Task implements ISingleLongValueTask
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
+	@OnlyIn(Dist.CLIENT)
 	public void getConfig(ConfigGroup config)
 	{
 		super.getConfig(config);
-		config.addLong("value", () -> value, v -> value = v, 1L, 1L, Long.MAX_VALUE);
-		config.addBool("points", () -> points, v -> points = v, false);
+		config.addLong("value", value, v -> value = v, 1L, 1L, Long.MAX_VALUE);
+		config.addBool("points", points, v -> points = v, false);
 	}
 
 	@Override
@@ -112,17 +104,17 @@ public class XPTask extends Task implements ISingleLongValueTask
 	}
 
 	@Override
-	public TaskData createData(QuestData data)
+	public TaskData createData(PlayerData data)
 	{
 		return new Data(this, data);
 	}
 
-	public static int getPlayerXP(EntityPlayer player)
+	public static int getPlayerXP(PlayerEntity player)
 	{
 		return (int) (getExperienceForLevel(player.experienceLevel) + (player.experience * player.xpBarCap()));
 	}
 
-	public static void addPlayerXP(EntityPlayer player, int amount)
+	public static void addPlayerXP(PlayerEntity player, int amount)
 	{
 		int experience = getPlayerXP(player) + amount;
 		player.experienceTotal = experience;
@@ -191,7 +183,7 @@ public class XPTask extends Task implements ISingleLongValueTask
 
 	public static class Data extends TaskData<XPTask>
 	{
-		private Data(XPTask task, QuestData data)
+		private Data(XPTask task, PlayerData data)
 		{
 			super(task, data);
 		}
@@ -203,7 +195,7 @@ public class XPTask extends Task implements ISingleLongValueTask
 		}
 
 		@Override
-		public void submitTask(EntityPlayerMP player, ItemStack item)
+		public void submitTask(ServerPlayerEntity player, ItemStack item)
 		{
 			int add = (int) Math.min(task.points ? getPlayerXP(player) : player.experienceLevel, Math.min(task.value - progress, Integer.MAX_VALUE));
 

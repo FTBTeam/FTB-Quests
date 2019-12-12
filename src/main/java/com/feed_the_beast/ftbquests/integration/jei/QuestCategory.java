@@ -2,12 +2,12 @@ package com.feed_the_beast.ftbquests.integration.jei;
 
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
-import mezz.jei.api.IGuiHelper;
-import mezz.jei.api.gui.IDrawable;
-import mezz.jei.api.gui.IGuiItemStackGroup;
 import mezz.jei.api.gui.IRecipeLayout;
+import mezz.jei.api.gui.drawable.IDrawable;
+import mezz.jei.api.gui.ingredient.IGuiItemStackGroup;
+import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.ingredients.IIngredients;
-import mezz.jei.api.recipe.IRecipeCategory;
+import mezz.jei.api.recipe.category.IRecipeCategory;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
@@ -17,34 +17,36 @@ import net.minecraft.util.ResourceLocation;
  */
 public class QuestCategory implements IRecipeCategory<QuestWrapper>
 {
-	public static final String UID = "ftbquests.quests";
+	public static final ResourceLocation UID = new ResourceLocation(FTBQuests.MOD_ID, "quests");
 	public static final ResourceLocation TEXTURE = new ResourceLocation(FTBQuests.MOD_ID + ":textures/gui/jei/quest.png");
+	public static QuestCategory instance;
 
 	private final IDrawable background;
 	private final IDrawable icon;
 
 	public QuestCategory(IGuiHelper guiHelper)
 	{
+		instance = this;
 		background = guiHelper.createDrawable(TEXTURE, 0, 0, 144, 74);
 		icon = guiHelper.createDrawableIngredient(new ItemStack(FTBQuestsItems.BOOK));
 	}
 
 	@Override
-	public String getUid()
+	public ResourceLocation getUid()
 	{
 		return UID;
+	}
+
+	@Override
+	public Class<QuestWrapper> getRecipeClass()
+	{
+		return QuestWrapper.class;
 	}
 
 	@Override
 	public String getTitle()
 	{
 		return I18n.format("ftbquests.quests");
-	}
-
-	@Override
-	public String getModName()
-	{
-		return FTBQuests.MOD_NAME;
 	}
 
 	@Override
@@ -57,6 +59,12 @@ public class QuestCategory implements IRecipeCategory<QuestWrapper>
 	public IDrawable getIcon()
 	{
 		return icon;
+	}
+
+	@Override
+	public void setIngredients(QuestWrapper questWrapper, IIngredients iIngredients)
+	{
+		//FIXME
 	}
 
 	@Override

@@ -1,17 +1,16 @@
 package com.feed_the_beast.ftbquests.gui.tree;
 
-import com.feed_the_beast.ftblib.lib.gui.Button;
-import com.feed_the_beast.ftblib.lib.gui.ContextMenuItem;
-import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
-import com.feed_the_beast.ftblib.lib.gui.Panel;
-import com.feed_the_beast.ftblib.lib.gui.Theme;
-import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
-import com.feed_the_beast.ftbquests.net.edit.MessageCreateObject;
+import com.feed_the_beast.ftbquests.net.MessageCreateObject;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.reward.RewardType;
 import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
+import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
+import com.feed_the_beast.mods.ftbguilibrary.widget.ContextMenuItem;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,16 +32,16 @@ public class ButtonAddReward extends Button
 	@Override
 	public void onClicked(MouseButton button)
 	{
-		GuiHelper.playClickSound();
+		playClickSound();
 		List<ContextMenuItem> contextMenu = new ArrayList<>();
 
 		for (RewardType type : RewardType.getRegistry())
 		{
 			contextMenu.add(new ContextMenuItem(type.getDisplayName(), type.getIcon(), () -> {
-				GuiHelper.playClickSound();
+				playClickSound();
 				type.getGuiProvider().openCreationGui(this, quest, reward -> {
-					NBTTagCompound extra = new NBTTagCompound();
-					extra.setString("type", type.getTypeForNBT());
+					CompoundNBT extra = new CompoundNBT();
+					extra.putString("type", type.getTypeForNBT());
 					new MessageCreateObject(reward, extra).sendToServer();
 				});
 			}));

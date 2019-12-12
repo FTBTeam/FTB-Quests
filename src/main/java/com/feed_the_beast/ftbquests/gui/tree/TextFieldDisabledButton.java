@@ -1,8 +1,8 @@
 package com.feed_the_beast.ftbquests.gui.tree;
 
-import com.feed_the_beast.ftblib.lib.gui.Panel;
-import com.feed_the_beast.ftblib.lib.gui.TextField;
-import com.feed_the_beast.ftblib.lib.gui.Theme;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
+import com.feed_the_beast.mods.ftbguilibrary.widget.TextField;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
 
 /**
  * @author LatvianModder

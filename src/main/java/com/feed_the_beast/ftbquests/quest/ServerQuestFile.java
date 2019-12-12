@@ -1,21 +1,15 @@
 package com.feed_the_beast.ftbquests.quest;
 
-import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
-import com.feed_the_beast.ftblib.lib.data.ForgeTeam;
-import com.feed_the_beast.ftblib.lib.data.Universe;
-import com.feed_the_beast.ftblib.lib.util.FileUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
-import com.feed_the_beast.ftbquests.net.edit.MessageDeleteObjectResponse;
-import com.feed_the_beast.ftbquests.util.ServerQuestData;
-import io.sommers.packmode.api.PackModeAPI;
-import net.minecraft.entity.Entity;
-import net.minecraftforge.fml.common.Loader;
+import com.feed_the_beast.ftbquests.net.MessageDeleteObjectResponse;
+import com.feed_the_beast.ftbquests.util.FileUtils;
+import com.teamacronymcoders.packmode.api.PackModeAPI;
+import net.minecraft.server.MinecraftServer;
+import net.minecraftforge.fml.LogicalSide;
+import net.minecraftforge.fml.ModList;
+import net.minecraftforge.fml.loading.FMLPaths;
 
-import javax.annotation.Nullable;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 
 /**
  * @author LatvianModder
@@ -24,24 +18,19 @@ public class ServerQuestFile extends QuestFile
 {
 	public static ServerQuestFile INSTANCE;
 
-	public final Universe universe;
+	public final MinecraftServer server;
 	public boolean shouldSave = false;
 	private boolean isLoading = false;
 	private File folder;
 
-	public ServerQuestFile(Universe u)
+	public ServerQuestFile(MinecraftServer s)
 	{
-		universe = u;
+		server = s;
 	}
 
 	private String getFolderName()
 	{
-		if (universe.world.getGameRules().hasRule("questfile"))
-		{
-			return universe.world.getGameRules().getString("questfile");
-		}
-
-		if (Loader.isModLoaded("packmode"))
+		if (ModList.get().isLoaded("packmode"))
 		{
 			return getPackmodeFolderName();
 		}
@@ -51,13 +40,13 @@ public class ServerQuestFile extends QuestFile
 
 	private static String getPackmodeFolderName()
 	{
-		return PackModeAPI.getInstance().getCurrentPackMode();
+		return PackModeAPI.getInstance().getPackMode();
 	}
 
 	public void load()
 	{
 		folderName = getFolderName();
-		folder = new File(Loader.instance().getConfigDir(), "ftbquests/" + folderName);
+		folder = FMLPaths.CONFIGDIR.get().resolve("ftbquests/" + folderName).toFile();
 
 		if (folder.exists())
 		{
@@ -66,12 +55,30 @@ public class ServerQuestFile extends QuestFile
 			readDataFull(folder);
 			isLoading = false;
 		}
+
+		int c = chapters.size();
+		int q = 0;
+		int t = 0;
+		int r = 0;
+
+		for (Chapter chapter : chapters)
+		{
+			q += chapter.quests.size();
+
+			for (Quest quest : chapter.quests)
+			{
+				t += quest.tasks.size();
+				r += quest.rewards.size();
+			}
+		}
+
+		FTBQuests.LOGGER.info(String.format("Loaded %d chapters, %d quests, %d tasks and %d rewards. In total, %d objects", c, q, t, r, getAllObjects().size()));
 	}
 
 	@Override
-	public boolean isClient()
+	public LogicalSide getSide()
 	{
-		return false;
+		return LogicalSide.SERVER;
 	}
 
 	@Override
@@ -84,56 +91,6 @@ public class ServerQuestFile extends QuestFile
 	public File getFolder()
 	{
 		return folder;
-	}
-
-	@Override
-	@Nullable
-	public QuestData getData(short team)
-	{
-		if (team == 0)
-		{
-			return null;
-		}
-
-		ForgeTeam t = universe.getTeam(team);
-		return t.isValid() ? ServerQuestData.get(t) : null;
-	}
-
-	@Override
-	@Nullable
-	public QuestData getData(String team)
-	{
-		if (team.isEmpty())
-		{
-			return null;
-		}
-
-		ForgeTeam t = universe.getTeam(team);
-		return t.isValid() ? ServerQuestData.get(t) : null;
-	}
-
-	@Override
-	@Nullable
-	public QuestData getData(Entity player)
-	{
-		return getData(FTBLibAPI.getTeamID(player.getUniqueID()));
-	}
-
-	@Override
-	public Collection<ServerQuestData> getAllData()
-	{
-		Collection<ForgeTeam> teams = universe.getTeams();
-		List<ServerQuestData> list = new ArrayList<>(teams.size());
-
-		for (ForgeTeam team : teams)
-		{
-			if (team.isValid())
-			{
-				list.add(ServerQuestData.get(team));
-			}
-		}
-
-		return list;
 	}
 
 	@Override
@@ -152,7 +109,7 @@ public class ServerQuestFile extends QuestFile
 
 			if (file != null)
 			{
-				FileUtils.deleteSafe(file);
+				FileUtils.delete(file);
 			}
 		}
 
@@ -162,7 +119,7 @@ public class ServerQuestFile extends QuestFile
 	public void save()
 	{
 		shouldSave = true;
-		universe.markDirty();
+		//FIXME: universe.markDirty();
 	}
 
 	public void saveNow()

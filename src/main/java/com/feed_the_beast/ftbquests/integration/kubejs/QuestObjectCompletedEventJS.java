@@ -1,7 +1,7 @@
 package com.feed_the_beast.ftbquests.integration.kubejs;
 
 import com.feed_the_beast.ftbquests.events.ObjectCompletedEvent;
-import com.feed_the_beast.ftbquests.quest.QuestData;
+import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import dev.latvian.kubejs.documentation.Ignore;
 import dev.latvian.kubejs.documentation.Info;
@@ -29,7 +29,7 @@ public class QuestObjectCompletedEventJS extends ServerEventJS
 		event = e;
 	}
 
-	public QuestData getData()
+	public PlayerData getData()
 	{
 		return event.getData();
 	}

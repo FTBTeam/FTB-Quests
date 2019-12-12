@@ -1,19 +1,16 @@
 package com.feed_the_beast.ftbquests.quest.reward;
 
-import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
-import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
-import com.feed_the_beast.ftblib.lib.io.DataIn;
-import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftbquests.quest.Chapter;
 import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -39,19 +36,15 @@ public class CommandReward extends Reward
 	}
 
 	@Override
-	public void writeData(NBTTagCompound nbt)
+	public void writeData(CompoundNBT nbt)
 	{
 		super.writeData(nbt);
-		nbt.setString("command", command);
-
-		if (playerCommand)
-		{
-			nbt.setBoolean("player_command", true);
-		}
+		nbt.putString("command", command);
+		nbt.putBoolean("player_command", true);
 	}
 
 	@Override
-	public void readData(NBTTagCompound nbt)
+	public void readData(CompoundNBT nbt)
 	{
 		super.readData(nbt);
 		command = nbt.getString("command");
@@ -59,32 +52,32 @@ public class CommandReward extends Reward
 	}
 
 	@Override
-	public void writeNetData(DataOut data)
+	public void writeNetData(PacketBuffer buffer)
 	{
-		super.writeNetData(data);
-		data.writeString(command);
-		data.writeBoolean(playerCommand);
+		super.writeNetData(buffer);
+		buffer.writeString(command);
+		buffer.writeBoolean(playerCommand);
 	}
 
 	@Override
-	public void readNetData(DataIn data)
+	public void readNetData(PacketBuffer buffer)
 	{
-		super.readNetData(data);
-		command = data.readString();
-		playerCommand = data.readBoolean();
+		super.readNetData(buffer);
+		command = buffer.readString();
+		playerCommand = buffer.readBoolean();
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
+	@OnlyIn(Dist.CLIENT)
 	public void getConfig(ConfigGroup config)
 	{
 		super.getConfig(config);
-		config.addString("command", () -> command, v -> command = v, "/say Hi, @team!").setDisplayName(new TextComponentTranslation("ftbquests.reward.ftbquests.command"));
-		config.addBool("player", () -> playerCommand, v -> playerCommand = v, false);
+		config.addString("command", command, v -> command = v, "/say Hi, @team!").setNameKey("ftbquests.reward.ftbquests.command");
+		config.addBool("player", playerCommand, v -> playerCommand = v, false);
 	}
 
 	@Override
-	public void claim(EntityPlayerMP player, boolean notify)
+	public void claim(ServerPlayerEntity player, boolean notify)
 	{
 		Map<String, Object> overrides = new HashMap<>();
 		overrides.put("p", player.getName());
@@ -102,7 +95,6 @@ public class CommandReward extends Reward
 		}
 
 		overrides.put("quest", quest);
-		overrides.put("team", FTBLibAPI.getTeam(player.getUniqueID()));
 
 		String s = command;
 
@@ -114,7 +106,7 @@ public class CommandReward extends Reward
 			}
 		}
 
-		player.server.getCommandManager().executeCommand(playerCommand ? player : player.server, s);
+		player.server.getCommandManager().handleCommand(playerCommand ? player.getCommandSource() : player.server.getCommandSource(), s);
 	}
 
 	@Override

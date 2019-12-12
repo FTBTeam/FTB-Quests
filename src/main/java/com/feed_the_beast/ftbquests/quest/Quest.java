@@ -1,45 +1,38 @@
 package com.feed_the_beast.ftbquests.quest;
 
-import com.feed_the_beast.ftblib.lib.client.ClientUtils;
-import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
-import com.feed_the_beast.ftblib.lib.config.ConfigString;
-import com.feed_the_beast.ftblib.lib.config.EnumTristate;
-import com.feed_the_beast.ftblib.lib.icon.Icon;
-import com.feed_the_beast.ftblib.lib.icon.IconAnimation;
-import com.feed_the_beast.ftblib.lib.io.Bits;
-import com.feed_the_beast.ftblib.lib.io.DataIn;
-import com.feed_the_beast.ftblib.lib.io.DataOut;
-import com.feed_the_beast.ftblib.lib.util.ListUtils;
-import com.feed_the_beast.ftblib.lib.util.StringUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.client.FTBQuestsClient;
 import com.feed_the_beast.ftbquests.events.ObjectCompletedEvent;
 import com.feed_the_beast.ftbquests.gui.tree.GuiQuestTree;
 import com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIHelper;
 import com.feed_the_beast.ftbquests.net.MessageDisplayCompletionToast;
-import com.feed_the_beast.ftbquests.net.edit.MessageMoveQuest;
+import com.feed_the_beast.ftbquests.net.MessageMoveQuest;
 import com.feed_the_beast.ftbquests.quest.reward.Reward;
 import com.feed_the_beast.ftbquests.quest.task.Task;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
-import it.unimi.dsi.fastutil.ints.Int2ByteOpenHashMap;
+import com.feed_the_beast.ftbquests.util.NetUtils;
+import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
+import com.feed_the_beast.mods.ftbguilibrary.config.ConfigString;
+import com.feed_the_beast.mods.ftbguilibrary.config.Tristate;
+import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
+import com.feed_the_beast.mods.ftbguilibrary.icon.IconAnimation;
+import com.feed_the_beast.mods.ftbguilibrary.utils.Bits;
+import com.feed_the_beast.mods.ftbguilibrary.utils.ClientUtils;
+import com.feed_the_beast.mods.ftbguilibrary.utils.StringUtils;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagIntArray;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.nbt.NBTTagString;
-import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
+import net.minecraft.nbt.StringNBT;
+import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.Constants;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.UUID;
 import java.util.function.Predicate;
 
 /**
@@ -53,7 +46,7 @@ public final class Quest extends QuestObject implements Movable
 	public boolean hide;
 	public QuestShape shape;
 	public final List<String> description;
-	public final Set<QuestObject> dependencies;
+	public final List<QuestObject> dependencies;
 	public boolean canRepeat;
 	public final List<Task> tasks;
 	public final List<Reward> rewards;
@@ -63,7 +56,7 @@ public final class Quest extends QuestObject implements Movable
 	public boolean hideDependencyLines;
 	public int minRequiredDependencies;
 	public boolean hideTextUntilComplete;
-	public EnumTristate disableJEI;
+	public Tristate disableJEI;
 	public double size;
 
 	private String cachedDescription = null;
@@ -76,9 +69,9 @@ public final class Quest extends QuestObject implements Movable
 		x = 0;
 		y = 0;
 		shape = QuestShape.DEFAULT;
-		description = new ArrayList<>();
+		description = new ArrayList<>(0);
 		canRepeat = false;
-		dependencies = new HashSet<>(0);
+		dependencies = new ArrayList<>(0);
 		tasks = new ArrayList<>(1);
 		rewards = new ArrayList<>(1);
 		guidePage = "";
@@ -88,7 +81,7 @@ public final class Quest extends QuestObject implements Movable
 		dependencyRequirement = DependencyRequirement.ALL_COMPLETED;
 		minRequiredDependencies = 0;
 		hideTextUntilComplete = false;
-		disableJEI = EnumTristate.DEFAULT;
+		disableJEI = Tristate.DEFAULT;
 		size = 1D;
 	}
 
@@ -117,57 +110,53 @@ public final class Quest extends QuestObject implements Movable
 	}
 
 	@Override
-	public void writeData(NBTTagCompound nbt)
+	public void writeData(CompoundNBT nbt)
 	{
 		super.writeData(nbt);
-		nbt.setDouble("x", x);
-		nbt.setDouble("y", y);
-
-		if (shape != QuestShape.DEFAULT)
-		{
-			nbt.setString("shape", shape.getId());
-		}
+		nbt.putDouble("x", x);
+		nbt.putDouble("y", y);
+		nbt.putString("shape", shape.id);
 
 		if (!subtitle.isEmpty())
 		{
-			nbt.setString("description", subtitle);
+			nbt.putString("subtitle", subtitle);
 		}
 
 		if (!description.isEmpty())
 		{
-			NBTTagList array = new NBTTagList();
+			ListNBT array = new ListNBT();
 
 			for (String value : description)
 			{
-				array.appendTag(new NBTTagString(value));
+				array.add(new StringNBT(value));
 			}
 
-			nbt.setTag("text", array);
+			nbt.put("description", array);
 		}
 
 		if (canRepeat)
 		{
-			nbt.setBoolean("can_repeat", true);
+			nbt.putBoolean("can_repeat", true);
 		}
 
 		if (!guidePage.isEmpty())
 		{
-			nbt.setString("guide_page", guidePage);
+			nbt.putString("guide_page", guidePage);
 		}
 
 		if (!customClick.isEmpty())
 		{
-			nbt.setString("custom_click", customClick);
+			nbt.putString("custom_click", customClick);
 		}
 
 		if (hideDependencyLines)
 		{
-			nbt.setBoolean("hide_dependency_lines", true);
+			nbt.putBoolean("hide_dependency_lines", true);
 		}
 
 		if (minRequiredDependencies > 0)
 		{
-			nbt.setInteger("min_required_dependencies", (byte) minRequiredDependencies);
+			nbt.putInt("min_required_dependencies", (byte) minRequiredDependencies);
 		}
 
 		removeInvalidDependencies();
@@ -183,94 +172,58 @@ public final class Quest extends QuestObject implements Movable
 				i++;
 			}
 
-			if (ai.length == 1)
-			{
-				nbt.setInteger("dependency", ai[0]);
-			}
-			else
-			{
-				nbt.setIntArray("dependencies", ai);
-			}
+			nbt.putIntArray("dependencies", ai);
 		}
 
 		if (hide)
 		{
-			nbt.setBoolean("hide", true);
+			nbt.putBoolean("hide", true);
 		}
 
 		if (dependencyRequirement != DependencyRequirement.ALL_COMPLETED)
 		{
-			nbt.setString("dependency_requirement", dependencyRequirement.getId());
+			nbt.putString("dependency_requirement", dependencyRequirement.id);
 		}
 
 		if (hideTextUntilComplete)
 		{
-			nbt.setBoolean("hide_text_until_complete", true);
+			nbt.putBoolean("hide_text_until_complete", true);
 		}
 
 		if (size != 1D)
 		{
-			nbt.setDouble("size", size);
+			nbt.putDouble("size", size);
 		}
 	}
 
 	@Override
-	public void readData(NBTTagCompound nbt)
+	public void readData(CompoundNBT nbt)
 	{
 		super.readData(nbt);
-		subtitle = nbt.getString("description");
+		subtitle = nbt.getString("subtitle");
 		x = nbt.getDouble("x");
 		y = nbt.getDouble("y");
-		shape = nbt.hasKey("shape") ? QuestShape.NAME_MAP.get(nbt.getString("shape")) : QuestShape.DEFAULT;
+		shape = QuestShape.NAME_MAP.get(nbt.getString("shape"));
 		description.clear();
 
-		NBTTagList list = nbt.getTagList("text", Constants.NBT.TAG_STRING);
+		ListNBT list = nbt.getList("description", Constants.NBT.TAG_STRING);
 
-		for (int k = 0; k < list.tagCount(); k++)
+		for (int k = 0; k < list.size(); k++)
 		{
-			description.add(list.getStringTagAt(k));
+			description.add(list.getString(k));
 		}
 
 		canRepeat = nbt.getBoolean("can_repeat");
 		guidePage = nbt.getString("guide_page");
 		customClick = nbt.getString("custom_click");
 		hideDependencyLines = nbt.getBoolean("hide_dependency_lines");
-		minRequiredDependencies = nbt.getInteger("min_required_dependencies");
+		minRequiredDependencies = nbt.getInt("min_required_dependencies");
 
 		dependencies.clear();
 
-		NBTBase depsTag = nbt.getTag("dependencies");
-
-		if (depsTag instanceof NBTTagIntArray)
+		for (int i : nbt.getIntArray("dependencies"))
 		{
-			for (int i : nbt.getIntArray("dependencies"))
-			{
-				QuestObject object = chapter.file.get(i);
-
-				if (object != null)
-				{
-					dependencies.add(object);
-				}
-			}
-		}
-		else if (depsTag instanceof NBTTagList)
-		{
-			list = (NBTTagList) depsTag;
-
-			for (int i = 0; i < list.tagCount(); i++)
-			{
-				NBTTagCompound nbt1 = list.getCompoundTagAt(i);
-				QuestObject object = chapter.file.get(nbt1.getInteger("id"));
-
-				if (object != null)
-				{
-					dependencies.add(object);
-				}
-			}
-		}
-		else
-		{
-			QuestObject object = chapter.file.get(nbt.getInteger("dependency"));
+			QuestObject object = chapter.file.get(i);
 
 			if (object != null)
 			{
@@ -281,13 +234,13 @@ public final class Quest extends QuestObject implements Movable
 		hide = nbt.getBoolean("hide");
 		dependencyRequirement = DependencyRequirement.NAME_MAP.get(nbt.getString("dependency_requirement"));
 		hideTextUntilComplete = nbt.getBoolean("hide_text_until_complete");
-		size = nbt.hasKey("size") ? nbt.getDouble("size") : 1D;
+		size = nbt.contains("size") ? nbt.getDouble("size") : 1D;
 	}
 
 	@Override
-	public void writeNetData(DataOut data)
+	public void writeNetData(PacketBuffer buffer)
 	{
-		super.writeNetData(data);
+		super.writeNetData(buffer);
 		int flags = 0;
 		flags = Bits.setFlag(flags, 1, canRepeat);
 		flags = Bits.setFlag(flags, 2, hide);
@@ -297,64 +250,64 @@ public final class Quest extends QuestObject implements Movable
 		flags = Bits.setFlag(flags, 32, !customClick.isEmpty());
 		flags = Bits.setFlag(flags, 64, hideDependencyLines);
 		flags = Bits.setFlag(flags, 128, hideTextUntilComplete);
-		data.writeVarInt(flags);
+		buffer.writeVarInt(flags);
 
 		if (!subtitle.isEmpty())
 		{
-			data.writeString(subtitle);
+			buffer.writeString(subtitle);
 		}
 
-		data.writeDouble(x);
-		data.writeDouble(y);
-		QuestShape.NAME_MAP.write(data, shape);
+		buffer.writeDouble(x);
+		buffer.writeDouble(y);
+		QuestShape.NAME_MAP.write(buffer, shape);
 
 		if (!description.isEmpty())
 		{
-			data.writeCollection(description, DataOut.STRING);
+			NetUtils.writeStrings(buffer, description);
 		}
 
 		if (!guidePage.isEmpty())
 		{
-			data.writeString(guidePage);
+			buffer.writeString(guidePage);
 		}
 
 		if (!customClick.isEmpty())
 		{
-			data.writeString(customClick);
+			buffer.writeString(customClick);
 		}
 
-		data.writeVarInt(minRequiredDependencies);
-		DependencyRequirement.NAME_MAP.write(data, dependencyRequirement);
-		data.writeVarInt(dependencies.size());
+		buffer.writeVarInt(minRequiredDependencies);
+		DependencyRequirement.NAME_MAP.write(buffer, dependencyRequirement);
+		buffer.writeVarInt(dependencies.size());
 
 		for (QuestObject d : dependencies)
 		{
 			if (d.invalid)
 			{
-				data.writeInt(0);
+				buffer.writeInt(0);
 			}
 			else
 			{
-				data.writeInt(d.id);
+				buffer.writeInt(d.id);
 			}
 		}
 
-		data.writeDouble(size);
+		buffer.writeDouble(size);
 	}
 
 	@Override
-	public void readNetData(DataIn data)
+	public void readNetData(PacketBuffer buffer)
 	{
-		super.readNetData(data);
-		int flags = data.readVarInt();
-		subtitle = Bits.getFlag(flags, 8) ? data.readString() : "";
-		x = data.readDouble();
-		y = data.readDouble();
-		shape = QuestShape.NAME_MAP.read(data);
+		super.readNetData(buffer);
+		int flags = buffer.readVarInt();
+		subtitle = Bits.getFlag(flags, 8) ? buffer.readString() : "";
+		x = buffer.readDouble();
+		y = buffer.readDouble();
+		shape = QuestShape.NAME_MAP.read(buffer);
 
 		if (Bits.getFlag(flags, 16))
 		{
-			data.readCollection(description, DataIn.STRING);
+			NetUtils.readStrings(buffer, description);
 		}
 		else
 		{
@@ -363,19 +316,19 @@ public final class Quest extends QuestObject implements Movable
 
 		canRepeat = Bits.getFlag(flags, 1);
 		hide = Bits.getFlag(flags, 2);
-		guidePage = Bits.getFlag(flags, 4) ? data.readString() : "";
-		customClick = Bits.getFlag(flags, 32) ? data.readString() : "";
+		guidePage = Bits.getFlag(flags, 4) ? buffer.readString() : "";
+		customClick = Bits.getFlag(flags, 32) ? buffer.readString() : "";
 		hideDependencyLines = Bits.getFlag(flags, 64);
 		hideTextUntilComplete = Bits.getFlag(flags, 128);
 
-		minRequiredDependencies = data.readVarInt();
-		dependencyRequirement = DependencyRequirement.NAME_MAP.read(data);
+		minRequiredDependencies = buffer.readVarInt();
+		dependencyRequirement = DependencyRequirement.NAME_MAP.read(buffer);
 		dependencies.clear();
-		int d = data.readVarInt();
+		int d = buffer.readVarInt();
 
 		for (int i = 0; i < d; i++)
 		{
-			QuestObject object = chapter.file.get(data.readInt());
+			QuestObject object = chapter.file.get(buffer.readInt());
 
 			if (object != null)
 			{
@@ -383,11 +336,11 @@ public final class Quest extends QuestObject implements Movable
 			}
 		}
 
-		size = data.readDouble();
+		size = buffer.readDouble();
 	}
 
 	@Override
-	public int getRelativeProgressFromChildren(QuestData data)
+	public int getRelativeProgressFromChildren(PlayerData data)
 	{
 		/*if (data.getTimesCompleted(this) > 0)
 		{
@@ -396,17 +349,17 @@ public final class Quest extends QuestObject implements Movable
 
 		if (tasks.isEmpty())
 		{
-			return areDependenciesComplete(data) ? 100 : 0;
+			return data.areDependenciesComplete(this) ? 100 : 0;
 		}
 
 		int progress = 0;
 
 		for (Task task : tasks)
 		{
-			progress += task.getRelativeProgress(data);
+			progress += data.getRelativeProgress(task);
 		}
 
-		if (progress > 0 && !areDependenciesComplete(data))
+		if (progress > 0 && !data.areDependenciesComplete(this))
 		{
 			return 0;
 		}
@@ -414,106 +367,31 @@ public final class Quest extends QuestObject implements Movable
 		return getRelativeProgressFromChildren(progress, tasks.size());
 	}
 
-	public boolean areDependenciesComplete(QuestData data)
-	{
-		if (dependencies.isEmpty())
-		{
-			return true;
-		}
-
-		if (data.areDependenciesCompleteCache == null)
-		{
-			data.areDependenciesCompleteCache = new Int2ByteOpenHashMap();
-			data.areDependenciesCompleteCache.defaultReturnValue((byte) -1);
-		}
-
-		byte b = data.areDependenciesCompleteCache.get(id);
-
-		if (b == -1)
-		{
-			b = areDependenciesComplete0(data) ? (byte) 1 : (byte) 0;
-			data.areDependenciesCompleteCache.put(id, b);
-		}
-
-		return b == 1;
-	}
-
-	private boolean areDependenciesComplete0(QuestData data)
-	{
-		if (minRequiredDependencies > 0)
-		{
-			int complete = 0;
-
-			for (QuestObject dependency : dependencies)
-			{
-				if (!dependency.invalid && dependency.isComplete(data))
-				{
-					complete++;
-
-					if (complete >= minRequiredDependencies)
-					{
-						return true;
-					}
-				}
-			}
-
-			return false;
-		}
-
-		if (dependencyRequirement.one)
-		{
-			for (QuestObject object : dependencies)
-			{
-				if (!object.invalid && (dependencyRequirement.completed ? object.isComplete(data) : object.isStarted(data)))
-				{
-					return true;
-				}
-			}
-
-			return false;
-		}
-
-		for (QuestObject object : dependencies)
-		{
-			if (!object.invalid && (dependencyRequirement.completed ? !object.isComplete(data) : !object.isStarted(data)))
-			{
-				return false;
-			}
-		}
-
-		return true;
-	}
-
-	public boolean canStartTasks(QuestData data)
-	{
-		return areDependenciesComplete(data);
-	}
-
 	@Override
-	public void onCompleted(QuestData data, List<EntityPlayerMP> onlineMembers, List<EntityPlayerMP> notifiedPlayers)
+	public void onCompleted(PlayerData data, List<ServerPlayerEntity> onlineMembers, List<ServerPlayerEntity> notifiedPlayers)
 	{
 		//data.setTimesCompleted(this, data.getTimesCompleted(this) + 1);
 		super.onCompleted(data, onlineMembers, notifiedPlayers);
 
 		if (!disableToast)
 		{
-			for (EntityPlayerMP player : notifiedPlayers)
+			for (ServerPlayerEntity player : notifiedPlayers)
 			{
 				new MessageDisplayCompletionToast(id).sendTo(player);
 			}
 		}
 
 		data.checkAutoCompletion(this);
-		new ObjectCompletedEvent.QuestEvent(data, this, onlineMembers, notifiedPlayers).post();
+		MinecraftForge.EVENT_BUS.post(new ObjectCompletedEvent.QuestEvent(data, this, onlineMembers, notifiedPlayers));
 
-		if (chapter.isComplete(data))
+		if (data.isComplete(chapter))
 		{
 			chapter.onCompleted(data, onlineMembers, notifiedPlayers);
 		}
 	}
 
 	@Override
-	public void changeProgress(QuestData data, ChangeProgress type)
+	public void changeProgress(PlayerData data, ChangeProgress type)
 	{
 		//FIXME: data.setTimesCompleted(this, -1);
 
@@ -535,7 +413,10 @@ public final class Quest extends QuestObject implements Movable
 
 		if (type.reset)
 		{
-			data.unclaimRewards(rewards);
+			for (Reward r : rewards)
+			{
+				data.setRewardClaimed(r.id, false);
+			}
 		}
 	}
 
@@ -596,7 +477,9 @@ public final class Quest extends QuestObject implements Movable
 
 		if (!tasks.isEmpty())
 		{
-			for (Task task : ListUtils.clearAndCopy(tasks))
+			List<Task> l = new ArrayList<>(tasks);
+			tasks.clear();
+			for (Task task : l)
 			{
 				task.onCreated();
 			}
@@ -610,29 +493,29 @@ public final class Quest extends QuestObject implements Movable
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
+	@OnlyIn(Dist.CLIENT)
 	public void getConfig(ConfigGroup config)
 	{
 		super.getConfig(config);
-		config.addString("subtitle", () -> subtitle, v -> subtitle = v, "");
-		config.addList("description", description, new ConfigString(""), ConfigString::new, ConfigString::getString);
-		config.addEnum("shape", () -> shape, v -> shape = v, QuestShape.NAME_MAP);
-		config.addBool("hide", () -> hide, v -> hide = v, false);
-		config.addBool("can_repeat", () -> canRepeat, v -> canRepeat = v, false);
-		config.addDouble("size", () -> size, v -> size = v, 1, 0.5D, 3D);
-		config.addDouble("x", () -> x, v -> x = v, 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
-		config.addDouble("y", () -> y, v -> y = v, 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+		config.addString("subtitle", subtitle, v -> subtitle = v, "");
+		config.addList("description", description, new ConfigString(), "");
+		config.addEnum("shape", shape, v -> shape = v, QuestShape.NAME_MAP);
+		config.addBool("hide", hide, v -> hide = v, false);
+		config.addBool("can_repeat", canRepeat, v -> canRepeat = v, false);
+		config.addDouble("size", size, v -> size = v, 1, 0.5D, 3D);
+		config.addDouble("x", x, v -> x = v, 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+		config.addDouble("y", y, v -> y = v, 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
 
 		Predicate<QuestObjectBase> depTypes = object -> object != chapter.file && object != chapter && object instanceof QuestObject;// && !(object instanceof Task);
 
-		config.addList("dependencies", dependencies, new ConfigQuestObject(chapter.file, 0, depTypes), questObject -> new ConfigQuestObject(chapter.file, questObject.id, depTypes), configQuestObject -> chapter.file.get(configQuestObject.getObject())).setDisplayName(new TextComponentTranslation("ftbquests.dependencies"));
-		config.addEnum("dependency_requirement", () -> dependencyRequirement, v -> dependencyRequirement = v, DependencyRequirement.NAME_MAP);
-		config.addInt("min_required_dependencies", () -> minRequiredDependencies, v -> minRequiredDependencies = v, 0, 0, Integer.MAX_VALUE);
-		config.addBool("hide_dependency_lines", () -> hideDependencyLines, v -> hideDependencyLines = v, false);
-		config.addString("guide_page", () -> guidePage, v -> guidePage = v, "");
-		config.addString("custom_click", () -> customClick, v -> customClick = v, "");
-		config.addBool("hide_text_until_complete", () -> hideTextUntilComplete, v -> hideTextUntilComplete = v, false);
-		config.addEnum("disable_jei", () -> disableJEI, v -> disableJEI = v, EnumTristate.NAME_MAP);
+		config.addList("dependencies", dependencies, new ConfigQuestObject<>(depTypes), null).setNameKey("ftbquests.dependencies");
+		config.addEnum("dependency_requirement", dependencyRequirement, v -> dependencyRequirement = v, DependencyRequirement.NAME_MAP);
+		config.addInt("min_required_dependencies", minRequiredDependencies, v -> minRequiredDependencies = v, 0, 0, Integer.MAX_VALUE);
+		config.addBool("hide_dependency_lines", hideDependencyLines, v -> hideDependencyLines = v, false);
+		config.addString("guide_page", guidePage, v -> guidePage = v, "");
+		config.addString("custom_click", customClick, v -> customClick = v, "");
+		config.addBool("hide_text_until_complete", hideTextUntilComplete, v -> hideTextUntilComplete = v, false);
+		config.addEnum("disable_jei", disableJEI, v -> disableJEI = v, Tristate.NAME_MAP);
 	}
 
 	@Override
@@ -672,14 +555,14 @@ public final class Quest extends QuestObject implements Movable
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
+	@OnlyIn(Dist.CLIENT)
 	public void move(Chapter to, double x, double y)
 	{
 		new MessageMoveQuest(id, to.id, x, y).sendToServer();
 	}
 
 	@Override
-	public boolean isVisible(QuestData data)
+	public boolean isVisible(PlayerData data)
 	{
 		if (dependencies.isEmpty())
 		{
@@ -688,7 +571,7 @@ public final class Quest extends QuestObject implements Movable
 
 		if (hide)
 		{
-			return areDependenciesComplete(data);
+			return data.areDependenciesComplete(this);
 		}
 
 		for (QuestObject object : dependencies)
@@ -738,6 +621,7 @@ public final class Quest extends QuestObject implements Movable
 		}
 	}
 
+	@OnlyIn(Dist.CLIENT)
 	public String getSubtitle()
 	{
 		if (cachedDescription != null)
@@ -768,6 +652,7 @@ public final class Quest extends QuestObject implements Movable
 		return cachedDescription;
 	}
 
+	@OnlyIn(Dist.CLIENT)
 	public String[] getDescription()
 	{
 		if (cachedText != null)
@@ -841,7 +726,7 @@ public final class Quest extends QuestObject implements Movable
 			FTBQuests.LOGGER.error("Looping dependencies found in " + this + "! Deleting all dependencies...");
 			dependencies.clear();
 
-			if (!chapter.file.isClient())
+			if (chapter.file.getSide().isServer())
 			{
 				ServerQuestFile.INSTANCE.save();
 			}
@@ -875,7 +760,7 @@ public final class Quest extends QuestObject implements Movable
 		return true;
 	}
 
-	public void checkRepeatableQuests(QuestData data, UUID player)
+	public void checkRepeatableQuests(PlayerData data)
 	{
 		if (!canRepeat)
 		{
@@ -884,7 +769,7 @@ public final class Quest extends QuestObject implements Movable
 
 		for (Reward reward1 : rewards)
 		{
-			if (!data.isRewardClaimed(player, reward1))
+			if (!data.isRewardClaimed(reward1.id))
 			{
 				return;
 			}
@@ -900,7 +785,7 @@ public final class Quest extends QuestObject implements Movable
 	}
 
 	@Override
-	@SideOnly(Side.CLIENT)
+	@OnlyIn(Dist.CLIENT)
 	public void editedFromGUI()
 	{
 		GuiQuestTree gui = ClientUtils.getCurrentGuiAs(GuiQuestTree.class);
@@ -910,40 +795,6 @@ public final class Quest extends QuestObject implements Movable
 			gui.questPanel.refreshWidgets();
 			gui.viewQuestPanel.refreshWidgets();
 		}
-	}
-
-	public boolean hasUnclaimedRewards(UUID player, QuestData data, boolean showExcluded)
-	{
-		if (isComplete(data))
-		{
-			for (Reward reward : rewards)
-			{
-				if ((showExcluded || reward.getExcludeFromClaimAll()) && !data.isRewardClaimed(player, reward))
-				{
-					return true;
-				}
-			}
-		}
-
-		return false;
-	}
-
-	public int getUnclaimedRewards(UUID player, QuestData data, boolean showExcluded)
-	{
-		int r = 0;
-
-		if (isComplete(data))
-		{
-			for (Reward reward : rewards)
-			{
-				if ((showExcluded || !reward.getExcludeFromClaimAll()) && !data.isRewardClaimed(player, reward))
-				{
-					r++;
-				}
-			}
-		}
-
-		return r;
 	}
 
 	public void moved(double nx, double ny, int nc)
@@ -958,11 +809,11 @@ public final class Quest extends QuestObject implements Movable
 
 			if (c != null)
 			{
-				File oldFile = f.isClient() ? null : getFile();
+				File oldFile = f.getSide().isClient() ? null : getFile();
 				chapter.quests.remove(this);
 				c.quests.add(this);
 				chapter = c;
-				File newFile = f.isClient() ? null : getFile();
+				File newFile = f.getSide().isClient() ? null : getFile();
 
 				if (oldFile != null && newFile != null && !oldFile.renameTo(newFile))
 				{

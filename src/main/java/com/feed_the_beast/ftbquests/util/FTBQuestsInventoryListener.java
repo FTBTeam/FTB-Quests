@@ -1,14 +1,13 @@
 package com.feed_the_beast.ftbquests.util;
 
 import com.feed_the_beast.ftbquests.quest.Chapter;
+import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.QuestData;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.task.Task;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.IContainerListener;
-import net.minecraft.inventory.IInventory;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.inventory.container.Container;
+import net.minecraft.inventory.container.IContainerListener;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
 
@@ -17,21 +16,21 @@ import net.minecraft.util.NonNullList;
  */
 public class FTBQuestsInventoryListener implements IContainerListener
 {
-	public final EntityPlayerMP player;
+	public final ServerPlayerEntity player;
 
-	public FTBQuestsInventoryListener(EntityPlayerMP p)
+	public FTBQuestsInventoryListener(ServerPlayerEntity p)
 	{
 		player = p;
 	}
 
-	public static void detect(EntityPlayerMP player, ItemStack item)
+	public static void detect(ServerPlayerEntity player, ItemStack item)
 	{
 		if (ServerQuestFile.INSTANCE == null)
 		{
 			return;
 		}
 
-		QuestData data = ServerQuestFile.INSTANCE.getData(player);
+		PlayerData data = ServerQuestFile.INSTANCE.getData(player);
 
 		if (data == null)
 		{
@@ -44,7 +43,7 @@ public class FTBQuestsInventoryListener implements IContainerListener
 		{
 			for (Quest quest : chapter.quests)
 			{
-				if (hasSubmitTasks(quest) && quest.canStartTasks(data))
+				if (hasSubmitTasks(quest) && data.canStartTasks(quest))
 				{
 					for (Task task : quest.tasks)
 					{
@@ -88,11 +87,6 @@ public class FTBQuestsInventoryListener implements IContainerListener
 
 	@Override
 	public void sendWindowProperty(Container container, int id, int value)
-	{
-	}
-
-	@Override
-	public void sendAllWindowProperties(Container container, IInventory inventory)
 	{
 	}
 }

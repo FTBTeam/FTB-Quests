@@ -1,28 +1,28 @@
 package com.feed_the_beast.ftbquests.gui.tree;
 
-import com.feed_the_beast.ftblib.lib.gui.ContextMenuItem;
-import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
-import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
-import com.feed_the_beast.ftblib.lib.gui.Panel;
-import com.feed_the_beast.ftblib.lib.gui.Theme;
-import com.feed_the_beast.ftblib.lib.gui.Widget;
-import com.feed_the_beast.ftblib.lib.icon.Color4I;
-import com.feed_the_beast.ftblib.lib.icon.Icon;
-import com.feed_the_beast.ftblib.lib.icon.ImageIcon;
-import com.feed_the_beast.ftblib.lib.math.MathUtils;
-import com.feed_the_beast.ftblib.lib.util.StringUtils;
-import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
-import com.feed_the_beast.ftbquests.net.edit.MessageCreateTaskAt;
-import com.feed_the_beast.ftbquests.net.edit.MessageEditObject;
+import com.feed_the_beast.ftbquests.net.MessageCreateTaskAt;
+import com.feed_the_beast.ftbquests.net.MessageEditObject;
 import com.feed_the_beast.ftbquests.quest.ChapterImage;
 import com.feed_the_beast.ftbquests.quest.Movable;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.task.TaskType;
 import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
+import com.feed_the_beast.mods.ftbguilibrary.icon.Color4I;
+import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
+import com.feed_the_beast.mods.ftbguilibrary.icon.ImageIcon;
+import com.feed_the_beast.mods.ftbguilibrary.utils.MathUtils;
+import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
+import com.feed_the_beast.mods.ftbguilibrary.utils.StringUtils;
+import com.feed_the_beast.mods.ftbguilibrary.widget.ContextMenuItem;
+import com.feed_the_beast.mods.ftbguilibrary.widget.GuiHelper;
+import com.feed_the_beast.mods.ftbguilibrary.widget.GuiIcons;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Widget;
+import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.I18n;
@@ -203,7 +203,7 @@ public class PanelQuests extends Panel
 			return;
 		}
 
-		GlStateManager.color(1F, 1F, 1F, 1F);
+		GlStateManager.color4f(1F, 1F, 1F, 1F);
 		Tessellator tessellator = Tessellator.getInstance();
 		BufferBuilder buffer = tessellator.getBuffer();
 
@@ -239,8 +239,8 @@ public class PanelQuests extends Panel
 				continue;
 			}
 
-			boolean unavailable = treeGui.file.self == null || !wquest.canStartTasks(treeGui.file.self);
-			boolean complete = !unavailable && treeGui.file.self != null && wquest.isComplete(treeGui.file.self);
+			boolean unavailable = treeGui.file.self == null || !treeGui.file.self.canStartTasks(wquest);
+			boolean complete = !unavailable && treeGui.file.self != null && treeGui.file.self.isComplete(wquest);
 
 			for (ButtonQuest button : ((ButtonQuest) widget).getDependencies())
 			{
@@ -275,8 +275,8 @@ public class PanelQuests extends Panel
 				double len = MathUtils.dist(sx, sy, ex, ey);
 
 				GlStateManager.pushMatrix();
-				GlStateManager.translate(sx, sy, 0);
-				GlStateManager.rotate((float) (Math.atan2(ey - sy, ex - sx) * 180D / Math.PI), 0F, 0F, 1F);
+				GlStateManager.translated(sx, sy, 0);
+				GlStateManager.rotatef((float) (Math.atan2(ey - sy, ex - sx) * 180D / Math.PI), 0F, 0F, 1F);
 				buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
 				buffer.pos(0, -s, 0).tex(len / s / 2D + mu, 0).color(r, g, b, a).endVertex();
 				buffer.pos(0, s, 0).tex(len / s / 2D + mu, 1).color(r, g, b, a).endVertex();
@@ -333,8 +333,8 @@ public class PanelQuests extends Panel
 				double len = MathUtils.dist(sx, sy, ex, ey);
 
 				GlStateManager.pushMatrix();
-				GlStateManager.translate(sx, sy, 0);
-				GlStateManager.rotate((float) (Math.atan2(ey - sy, ex - sx) * 180D / Math.PI), 0F, 0F, 1F);
+				GlStateManager.translated(sx, sy, 0);
+				GlStateManager.rotatef((float) (Math.atan2(ey - sy, ex - sx) * 180D / Math.PI), 0F, 0F, 1F);
 				buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
 				buffer.pos(0, -s, 0).tex(len / s / 2D + ms, 0).color(r, g, b, a).endVertex();
 				buffer.pos(0, s, 0).tex(len / s / 2D + ms, 1).color(r, g, b, a).endVertex();
@@ -346,7 +346,7 @@ public class PanelQuests extends Panel
 		}
 
 		GlStateManager.shadeModel(GL11.GL_FLAT);
-		GlStateManager.color(1F, 1F, 1F, 1F);
+		GlStateManager.color4f(1F, 1F, 1F, 1F);
 	}
 
 	@Override
@@ -384,7 +384,7 @@ public class PanelQuests extends Panel
 			{
 				theme.pushFontUnicode(true);
 				GlStateManager.pushMatrix();
-				GlStateManager.translate(0D, 0D, 1000D);
+				GlStateManager.translatef(0F, 0F, 1000F);
 				theme.drawString("X:" + (questX < 0 ? "" : " ") + StringUtils.DOUBLE_FORMATTER_00.format(questX), x + 3, y + h - 18, Theme.SHADOW);
 				theme.drawString("Y:" + (questY < 0 ? "" : " ") + StringUtils.DOUBLE_FORMATTER_00.format(questY), x + 3, y + h - 10, Theme.SHADOW);
 				theme.drawString("CX:" + (centerQuestX < 0 ? "" : " ") + StringUtils.DOUBLE_FORMATTER_00.format(centerQuestX), x + w - 30, y + h - 18, Theme.SHADOW);
@@ -413,8 +413,8 @@ public class PanelQuests extends Panel
 						double sx = (questX + ox - questMinX) / dx * treeGui.scrollWidth + px;
 						double sy = (questY + oy - questMinY) / dy * treeGui.scrollHeight + py;
 						GlStateManager.pushMatrix();
-						GlStateManager.translate(sx - bs * m.getWidth() / 2D, sy - bs * m.getHeight() / 2D, 0D);
-						GlStateManager.scale(bs * m.getWidth(), bs * m.getHeight(), 1D);
+						GlStateManager.translated(sx - bs * m.getWidth() / 2D, sy - bs * m.getHeight() / 2D, 0D);
+						GlStateManager.scaled(bs * m.getWidth(), bs * m.getHeight(), 1D);
 						GuiHelper.setupDrawing();
 						m.getShape().shape.withColor(Color4I.WHITE.withAlpha(30)).draw(0, 0, 1, 1);
 						GlStateManager.popMatrix();
@@ -428,7 +428,7 @@ public class PanelQuests extends Panel
 						double boxH = omaxY / dy * treeGui.scrollHeight + py - boxY;
 
 						GlStateManager.pushMatrix();
-						GlStateManager.translate(0, 0, 1000);
+						GlStateManager.translatef(0, 0, 1000);
 						GuiHelper.drawHollowRect((int) boxX, (int) boxY, (int) boxW, (int) boxH, Color4I.WHITE.withAlpha(30), false);
 						GlStateManager.popMatrix();
 					}
@@ -440,8 +440,8 @@ public class PanelQuests extends Panel
 					double sx = (questX - questMinX) / dx * treeGui.scrollWidth + px;
 					double sy = (questY - questMinY) / dy * treeGui.scrollHeight + py;
 					GlStateManager.pushMatrix();
-					GlStateManager.translate(sx - bs / 2D, sy - bs / 2D, 0D);
-					GlStateManager.scale(bs, bs, 1D);
+					GlStateManager.translated(sx - bs / 2D, sy - bs / 2D, 0D);
+					GlStateManager.scaled(bs, bs, 1D);
 					GuiHelper.setupDrawing();
 					treeGui.selectedChapter.getDefaultQuestShape().shape.withColor(Color4I.WHITE.withAlpha(10)).draw(0, 0, 1, 1);
 					GlStateManager.popMatrix();
@@ -449,7 +449,7 @@ public class PanelQuests extends Panel
 					if (GuiQuestTree.grid && treeGui.viewQuestPanel.quest == null)
 					{
 						GlStateManager.pushMatrix();
-						GlStateManager.translate(0, 0, 1000);
+						GlStateManager.translatef(0, 0, 1000);
 						Color4I.WHITE.draw((int) sx, (int) sy, 1, 1);
 						Color4I.WHITE.withAlpha(30).draw(getX(), (int) sy, width, 1);
 						Color4I.WHITE.withAlpha(30).draw((int) sx, getY(), 1, height);
@@ -472,7 +472,7 @@ public class PanelQuests extends Panel
 		{
 			if (treeGui.selectedChapter != null && !button.isRight() && !treeGui.selectedObjects.isEmpty())
 			{
-				GuiHelper.playClickSound();
+				playClickSound();
 
 				double minX = Double.POSITIVE_INFINITY;
 				double minY = Double.POSITIVE_INFINITY;
@@ -515,7 +515,7 @@ public class PanelQuests extends Panel
 
 		if (button.isRight() && treeGui.file.canEdit())
 		{
-			GuiHelper.playClickSound();
+			playClickSound();
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
 			double qx = questX;
 			double qy = questY;
@@ -523,13 +523,13 @@ public class PanelQuests extends Panel
 			for (TaskType type : TaskType.getRegistry())
 			{
 				contextMenu.add(new ContextMenuItem(type.getDisplayName(), type.getIcon(), () -> {
-					GuiHelper.playClickSound();
+					playClickSound();
 					type.getGuiProvider().openCreationGui(this, new Quest(treeGui.selectedChapter), task -> new MessageCreateTaskAt(treeGui.selectedChapter, qx, qy, task).sendToServer());
 				}));
 			}
 
 			contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.chapter.image"), GuiIcons.ART, () -> {
-				GuiHelper.playClickSound();
+				playClickSound();
 				ChapterImage image = new ChapterImage(treeGui.selectedChapter);
 				image.x = qx;
 				image.y = qy;
@@ -579,7 +579,7 @@ public class PanelQuests extends Panel
 	}
 
 	@Override
-	public boolean scrollPanel(int scroll)
+	public boolean scrollPanel(double scroll)
 	{
 		if (treeGui.selectedChapter != null && treeGui.getViewedQuest() == null && isMouseOver())
 		{

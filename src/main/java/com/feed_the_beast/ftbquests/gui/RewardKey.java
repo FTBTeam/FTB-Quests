@@ -1,7 +1,9 @@
 package com.feed_the_beast.ftbquests.gui;
 
-import com.feed_the_beast.ftblib.lib.icon.Icon;
+import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import net.minecraft.item.ItemStack;
+
+import java.util.Objects;
 
 /**
  * @author LatvianModder
@@ -42,7 +44,7 @@ public class RewardKey
 
 			if (!stack.isEmpty())
 			{
-				return ItemStack.areItemStacksEqualUsingNBTShareTag(stack, e.stack);
+				return stack.getItem() == e.stack.getItem() && Objects.equals(stack.getTag(), e.stack.getTag());
 			}
 			else
 			{

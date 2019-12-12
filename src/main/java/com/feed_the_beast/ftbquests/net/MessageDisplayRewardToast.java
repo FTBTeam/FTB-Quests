@@ -1,30 +1,30 @@
 package com.feed_the_beast.ftbquests.net;
 
-import com.feed_the_beast.ftblib.lib.icon.Icon;
-import com.feed_the_beast.ftblib.lib.io.DataIn;
-import com.feed_the_beast.ftblib.lib.io.DataOut;
-import com.feed_the_beast.ftblib.lib.net.MessageToClient;
-import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.gui.IRewardListenerGui;
 import com.feed_the_beast.ftbquests.gui.RewardKey;
 import com.feed_the_beast.ftbquests.gui.RewardToast;
+import com.feed_the_beast.ftbquests.util.NetUtils;
+import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import net.minecraft.client.Minecraft;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.fml.network.NetworkEvent;
 
 /**
  * @author LatvianModder
  */
-public class MessageDisplayRewardToast extends MessageToClient
+public class MessageDisplayRewardToast extends MessageBase
 {
-	private int id;
-	private ITextComponent text;
-	private Icon icon;
+	private final int id;
+	private final ITextComponent text;
+	private final Icon icon;
 
-	public MessageDisplayRewardToast()
+	MessageDisplayRewardToast(PacketBuffer buffer)
 	{
+		id = buffer.readInt();
+		text = buffer.readTextComponent();
+		icon = NetUtils.readIcon(buffer);
 	}
 
 	public MessageDisplayRewardToast(int _id, ITextComponent t, Icon i)
@@ -35,36 +35,21 @@ public class MessageDisplayRewardToast extends MessageToClient
 	}
 
 	@Override
-	public NetworkWrapper getWrapper()
+	public void write(PacketBuffer buffer)
 	{
-		return FTBQuestsNetHandler.GENERAL;
+		buffer.writeInt(id);
+		buffer.writeTextComponent(text);
+		NetUtils.writeIcon(buffer, icon);
 	}
 
 	@Override
-	public void writeData(DataOut data)
-	{
-		data.writeInt(id);
-		data.writeTextComponent(text);
-		data.writeIcon(icon);
-	}
-
-	@Override
-	public void readData(DataIn data)
-	{
-		id = data.readInt();
-		text = data.readTextComponent();
-		icon = data.readIcon();
-	}
-
-	@Override
-	@SideOnly(Side.CLIENT)
-	public void onMessage()
+	public void handle(NetworkEvent.Context context)
 	{
 		Icon i = icon.isEmpty() ? ClientQuestFile.INSTANCE.getBase(id).getIcon() : icon;
 
-		if (!IRewardListenerGui.add(new RewardKey(text.getUnformattedText(), i), 1))
+		if (!IRewardListenerGui.add(new RewardKey(text.getString(), i), 1))
 		{
-			Minecraft.getMinecraft().getToastGui().add(new RewardToast(text.getFormattedText(), i));
+			Minecraft.getInstance().getToastGui().add(new RewardToast(text.getFormattedText(), i));
 		}
 	}
 }

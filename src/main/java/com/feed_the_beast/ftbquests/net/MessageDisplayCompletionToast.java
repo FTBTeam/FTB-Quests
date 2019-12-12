@@ -1,25 +1,22 @@
 package com.feed_the_beast.ftbquests.net;
 
-import com.feed_the_beast.ftblib.lib.io.DataIn;
-import com.feed_the_beast.ftblib.lib.io.DataOut;
-import com.feed_the_beast.ftblib.lib.net.MessageToClient;
-import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.gui.ToastQuestObject;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import net.minecraft.client.Minecraft;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.fml.network.NetworkEvent;
 
 /**
  * @author LatvianModder
  */
-public class MessageDisplayCompletionToast extends MessageToClient
+public class MessageDisplayCompletionToast extends MessageBase
 {
-	public int id;
+	private final int id;
 
-	public MessageDisplayCompletionToast()
+	MessageDisplayCompletionToast(PacketBuffer buffer)
 	{
+		id = buffer.readInt();
 	}
 
 	public MessageDisplayCompletionToast(int i)
@@ -27,27 +24,12 @@ public class MessageDisplayCompletionToast extends MessageToClient
 		id = i;
 	}
 
-	@Override
-	public NetworkWrapper getWrapper()
+	public void write(PacketBuffer buffer)
 	{
-		return FTBQuestsNetHandler.GENERAL;
+		buffer.writeInt(id);
 	}
 
-	@Override
-	public void writeData(DataOut data)
-	{
-		data.writeInt(id);
-	}
-
-	@Override
-	public void readData(DataIn data)
-	{
-		id = data.readInt();
-	}
-
-	@Override
-	@SideOnly(Side.CLIENT)
-	public void onMessage()
+	public void handle(NetworkEvent.Context context)
 	{
 		if (ClientQuestFile.exists())
 		{
@@ -55,7 +37,7 @@ public class MessageDisplayCompletionToast extends MessageToClient
 
 			if (object != null)
 			{
-				Minecraft.getMinecraft().getToastGui().add(new ToastQuestObject(object));
+				Minecraft.getInstance().getToastGui().add(new ToastQuestObject(object));
 			}
 
 			ClientQuestFile.INSTANCE.questTreeGui.questPanel.refreshWidgets();

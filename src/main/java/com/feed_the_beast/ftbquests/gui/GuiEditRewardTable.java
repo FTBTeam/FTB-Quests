@@ -1,28 +1,25 @@
 package com.feed_the_beast.ftbquests.gui;
 
-import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
-import com.feed_the_beast.ftblib.lib.config.ConfigInt;
-import com.feed_the_beast.ftblib.lib.config.ConfigValue;
-import com.feed_the_beast.ftblib.lib.config.IConfigCallback;
-import com.feed_the_beast.ftblib.lib.gui.ContextMenuItem;
-import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
-import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
-import com.feed_the_beast.ftblib.lib.gui.Panel;
-import com.feed_the_beast.ftblib.lib.gui.SimpleTextButton;
-import com.feed_the_beast.ftblib.lib.gui.Theme;
-import com.feed_the_beast.ftblib.lib.gui.WidgetVerticalSpace;
-import com.feed_the_beast.ftblib.lib.gui.misc.GuiButtonListBase;
-import com.feed_the_beast.ftblib.lib.gui.misc.GuiEditConfig;
-import com.feed_the_beast.ftblib.lib.gui.misc.GuiEditConfigValue;
-import com.feed_the_beast.ftblib.lib.gui.misc.IConfigValueEditCallback;
-import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.loot.RewardTable;
 import com.feed_the_beast.ftbquests.quest.loot.WeightedReward;
 import com.feed_the_beast.ftbquests.quest.reward.RewardType;
+import com.feed_the_beast.mods.ftbguilibrary.config.ConfigDouble;
+import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
+import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiEditConfig;
+import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiEditConfigFromString;
+import com.feed_the_beast.mods.ftbguilibrary.misc.GuiButtonListBase;
+import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
+import com.feed_the_beast.mods.ftbguilibrary.widget.ContextMenuItem;
+import com.feed_the_beast.mods.ftbguilibrary.widget.GuiIcons;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
+import com.feed_the_beast.mods.ftbguilibrary.widget.SimpleTextButton;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
+import com.feed_the_beast.mods.ftbguilibrary.widget.WidgetVerticalSpace;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.TranslationTextComponent;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -44,10 +41,11 @@ public class GuiEditRewardTable extends GuiButtonListBase
 		@Override
 		public void onClicked(MouseButton button)
 		{
-			GuiHelper.playClickSound();
-			ConfigGroup group = ConfigGroup.newGroup(FTBQuests.MOD_ID);
+			playClickSound();
+			ConfigGroup group = new ConfigGroup(FTBQuests.MOD_ID);
 			rewardTable.getConfig(rewardTable.createSubGroup(group));
-			new GuiEditConfig(group, IConfigCallback.DEFAULT).openGui();
+			group.savedCallback = accepted -> run();
+			new GuiEditConfig(group).openGui();
 		}
 	}
 
@@ -62,9 +60,9 @@ public class GuiEditRewardTable extends GuiButtonListBase
 		@Override
 		public void onClicked(MouseButton button)
 		{
-			GuiHelper.playClickSound();
+			playClickSound();
 			closeGui();
-			NBTTagCompound nbt = new NBTTagCompound();
+			CompoundNBT nbt = new CompoundNBT();
 			rewardTable.writeData(nbt);
 			originalTable.readData(nbt);
 			callback.run();
@@ -82,7 +80,7 @@ public class GuiEditRewardTable extends GuiButtonListBase
 		@Override
 		public void onClicked(MouseButton button)
 		{
-			GuiHelper.playClickSound();
+			playClickSound();
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
 
 			for (RewardType type : RewardType.getRegistry())
@@ -90,7 +88,7 @@ public class GuiEditRewardTable extends GuiButtonListBase
 				if (!type.getExcludeFromListRewards())
 				{
 					contextMenu.add(new ContextMenuItem(type.getDisplayName(), type.getIcon(), () -> {
-						GuiHelper.playClickSound();
+						playClickSound();
 						type.getGuiProvider().openCreationGui(this, rewardTable.fakeQuest, reward -> {
 							rewardTable.rewards.add(new WeightedReward(reward, 1));
 							openGui();
@@ -103,7 +101,7 @@ public class GuiEditRewardTable extends GuiButtonListBase
 		}
 	}
 
-	private class ButtonWeightedReward extends SimpleTextButton implements IConfigValueEditCallback
+	private class ButtonWeightedReward extends SimpleTextButton
 	{
 		private final WeightedReward reward;
 
@@ -124,31 +122,42 @@ public class GuiEditRewardTable extends GuiButtonListBase
 		@Override
 		public void onClicked(MouseButton button)
 		{
-			GuiHelper.playClickSound();
+			playClickSound();
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
 			contextMenu.add(new ContextMenuItem(I18n.format("selectServer.edit"), GuiIcons.SETTINGS, () -> {
-				ConfigGroup group = ConfigGroup.newGroup(FTBQuests.MOD_ID);
+				ConfigGroup group = new ConfigGroup(FTBQuests.MOD_ID);
 				reward.reward.getConfig(reward.reward.createSubGroup(group));
-				new GuiEditConfig(group, IConfigCallback.DEFAULT).openGui();
+				group.savedCallback = accepted -> run();
+				new GuiEditConfig(group).openGui();
 			}));
 
-			contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.reward_table.set_weight"), GuiIcons.SETTINGS, () -> new GuiEditConfigValue("value", new ConfigInt(reward.weight, 1, Integer.MAX_VALUE), this).openGui()));
+			contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.reward_table.set_weight"), GuiIcons.SETTINGS, () -> {
+				ConfigDouble c = new ConfigDouble(0D, Double.POSITIVE_INFINITY);
+				GuiEditConfigFromString.open(c, (double) reward.weight, 1D, accepted -> {
+					if (accepted)
+					{
+						reward.weight = c.value.intValue();
+
+						if (c.value < 1D)
+						{
+							for (WeightedReward reward : rewardTable.rewards)
+							{
+								reward.weight = (int) (reward.weight / c.value);
+							}
+
+							reward.weight = 1;
+						}
+					}
+
+					run();
+				});
+			}));
+
 			contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), GuiIcons.REMOVE, () -> {
 				rewardTable.rewards.remove(reward);
 				GuiEditRewardTable.this.refreshWidgets();
-			}).setYesNo(I18n.format("delete_item", reward.reward.getTitle())));
+			}).setYesNo(new TranslationTextComponent("delete_item", reward.reward.getTitle())));
 			GuiEditRewardTable.this.openContextMenu(contextMenu);
-		}
-
-		@Override
-		public void onCallback(ConfigValue value, boolean set)
-		{
-			openGui();
-
-			if (set)
-			{
-				reward.weight = value.getInt();
-			}
 		}
 
 		@Override
@@ -167,7 +176,7 @@ public class GuiEditRewardTable extends GuiButtonListBase
 	{
 		originalTable = r;
 		rewardTable = new RewardTable(originalTable.file);
-		NBTTagCompound nbt = new NBTTagCompound();
+		CompoundNBT nbt = new CompoundNBT();
 		originalTable.writeData(nbt);
 		rewardTable.readData(nbt);
 		callback = c;
