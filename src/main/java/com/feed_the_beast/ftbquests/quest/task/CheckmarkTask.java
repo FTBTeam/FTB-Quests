@@ -2,7 +2,7 @@ package com.feed_the_beast.ftbquests.quest.task;
 
 import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.mods.ftbguilibrary.widget.GuiIcons;
+import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
 
 import javax.annotation.Nullable;
 
@@ -25,13 +25,7 @@ public class CheckmarkTask extends Task
 	@Override
 	public void drawGUI(@Nullable TaskData data, int x, int y, int w, int h)
 	{
-		(data == null || !data.isComplete() ? GuiIcons.ACCEPT_GRAY : GuiIcons.ACCEPT).draw(x, y, w, h);
-	}
-
-	@Override
-	public void drawScreen(@Nullable TaskData data)
-	{
-		(data == null || !data.isComplete() ? GuiIcons.ACCEPT_GRAY : GuiIcons.ACCEPT).draw3D();
+		(data == null || !data.isComplete() ? ThemeProperties.CHECKMARK_TASK_INACTIVE.get(this) : ThemeProperties.CHECKMARK_TASK_ACTIVE.get(this)).draw(x, y, w, h);
 	}
 
 	@Override

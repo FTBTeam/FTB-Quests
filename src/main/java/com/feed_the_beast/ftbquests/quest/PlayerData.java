@@ -20,7 +20,10 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.common.util.INBTSerializable;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -187,9 +190,12 @@ public class PlayerData implements INBTSerializable<CompoundNBT>
 		nbt.putLong("money", money);
 		nbt.putBoolean("auto_pin", autoPin);
 
-		CompoundNBT taskDataNBT = new CompoundNBT();
+		CompoundNBT taskDataNBT = new OrderedCompoundNBT();
 
-		for (TaskData data : taskData.values())
+		List<TaskData> taskDataList = new ArrayList<>(taskData.values());
+		taskDataList.sort(Comparator.comparingInt(o -> o.task.id));
+
+		for (TaskData data : taskDataList)
 		{
 			if (data.progress > 0L)
 			{
@@ -199,8 +205,14 @@ public class PlayerData implements INBTSerializable<CompoundNBT>
 
 		nbt.put("task_progress", taskDataNBT);
 
-		nbt.putIntArray("claimed_rewards", claimedRewards.toIntArray());
-		nbt.putIntArray("pinned_quests", pinnedQuests.toIntArray());
+		int[] claimedRewardsArray = claimedRewards.toIntArray();
+		Arrays.sort(claimedRewardsArray);
+		nbt.putIntArray("claimed_rewards", claimedRewardsArray);
+
+		int[] pinnedQuestsArray = pinnedQuests.toIntArray();
+		Arrays.sort(pinnedQuestsArray);
+		nbt.putIntArray("pinned_quests", pinnedQuestsArray);
+
 		return nbt;
 	}
 

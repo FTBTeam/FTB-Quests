@@ -17,7 +17,7 @@ public class PanelOtherButtonsTop extends PanelOtherButtons
 	@Override
 	public void addWidgets()
 	{
-		add(new ButtonRewards(this));
+		add(new ButtonModpack(this));
 
 		if (ModList.get().isLoaded("ftbguides"))
 		{

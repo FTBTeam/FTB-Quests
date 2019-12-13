@@ -37,6 +37,9 @@ public class FTBQuestsNetHandler
 		MAIN.registerMessage(++id, MessageDisplayItemRewardToast.class, MessageDisplayItemRewardToast::write, MessageDisplayItemRewardToast::new, MessageDisplayItemRewardToast::handle);
 		MAIN.registerMessage(++id, MessageTogglePinned.class, MessageTogglePinned::write, MessageTogglePinned::new, MessageTogglePinned::handle);
 		MAIN.registerMessage(++id, MessageTogglePinnedResponse.class, MessageTogglePinnedResponse::write, MessageTogglePinnedResponse::new, MessageTogglePinnedResponse::handle);
+		MAIN.registerMessage(++id, MessageUpdatePlayerData.class, MessageUpdatePlayerData::write, MessageUpdatePlayerData::new, MessageUpdatePlayerData::handle);
+
+		id = 100;
 
 		// Editing
 		MAIN.registerMessage(++id, MessageChangeProgress.class, MessageChangeProgress::write, MessageChangeProgress::new, MessageChangeProgress::handle);

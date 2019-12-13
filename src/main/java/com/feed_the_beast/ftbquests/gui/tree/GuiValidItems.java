@@ -1,6 +1,7 @@
 package com.feed_the_beast.ftbquests.gui.tree;
 
 import com.feed_the_beast.ftbquests.gui.FTBQuestsTheme;
+import com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIHelper;
 import com.feed_the_beast.ftbquests.net.MessageSubmitTask;
 import com.feed_the_beast.ftbquests.quest.task.ItemTask;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Color4I;
@@ -51,7 +52,7 @@ public class GuiValidItems extends GuiBase
 
 		private void showJEIRecipe()
 		{
-			//FIXME: FTBLibJEIIntegration.showRecipe(stack);
+			FTBQuestsJEIHelper.showRecipes(stack);
 		}
 
 		@Nullable

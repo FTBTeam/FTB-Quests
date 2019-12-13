@@ -34,6 +34,11 @@ minecraft {
 			workingDirectory project.file('run')
 			property 'forge.logging.console.level', 'debug'
 
+			if (project.hasProperty('mc_dev_uuid')) args '--uuid', project.mc_dev_uuid
+			if (project.hasProperty('mc_dev_username')) args '--username', project.mc_dev_username
+			if (project.hasProperty('mc_dev_width')) args '--width', project.mc_dev_width
+			if (project.hasProperty('mc_dev_height')) args '--height', project.mc_dev_height
+
 			mods {
 				kubejs {
 					source sourceSets.main

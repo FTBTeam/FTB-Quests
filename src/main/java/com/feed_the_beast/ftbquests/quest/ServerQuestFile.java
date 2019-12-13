@@ -155,7 +155,6 @@ public class ServerQuestFile extends QuestFile
 	public void save()
 	{
 		shouldSave = true;
-		//FIXME: universe.markDirty();
 	}
 
 	public void checkSave()
@@ -194,7 +193,14 @@ public class ServerQuestFile extends QuestFile
 		{
 			data.name = player.getGameProfile().getName();
 			data.save();
-			//FIXME: Send update to other players
+
+			for (ServerPlayerEntity player1 : server.getPlayerList().getPlayers())
+			{
+				if (player1 != player)
+				{
+					new MessageCreatePlayerData(data).sendTo(player1);
+				}
+			}
 		}
 		else
 		{

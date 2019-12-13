@@ -33,7 +33,7 @@ settings_icon:        ftbquests:textures/gui/settings.png
 close_icon:           ftbquests:textures/gui/close.png
 emergency_items_icon: ftbquests:textures/gui/emergency_items.png; color=#F3D9FF
 guide_icon:           ftbquests:textures/gui/guide.png; color=#EF9E1A
-collect_rewards_icon: ftbquests:textures/gui/collect_rewards.png; color=#F8E71C
+modpack_icon:         ftbquests:textures/item/book.png
 reward_table_icon:    ftbguilibrary:icons/money_bag
 shop_icon:            ftbquests:textures/gui/shop.png; color=#EF9E1A
 delete_icon:          ftbguilibrary:icons/remove
@@ -60,3 +60,6 @@ dependency_line_unselected_speed:   0.0
 dependency_line_thickness:          0.17
 quest_spacing:                      1.0
 pinned_quest_size:                  0.75
+
+checkmark_task_active   ftbguilibrary:icons/accept
+checkmark_task_inactive ftbguilibrary:icons/accept_gray

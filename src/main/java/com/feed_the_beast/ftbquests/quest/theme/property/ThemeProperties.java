@@ -17,15 +17,15 @@ import java.lang.reflect.Modifier;
  */
 public interface ThemeProperties
 {
-	//Main GUI
+	// Main GUI //
 	IconProperty BACKGROUND = new IconProperty("background");
 
-	//Text Color
+	// Text Color //
 	ColorProperty TEXT_COLOR = new ColorProperty("text_color");
 	ColorProperty HOVER_TEXT_COLOR = new ColorProperty("hover_text_color");
 	ColorProperty DISABLED_TEXT_COLOR = new ColorProperty("disabled_text_color");
 
-	//Widgets
+	// Widgets //
 	ColorProperty WIDGET_BORDER = new ColorProperty("widget_border");
 	ColorProperty WIDGET_BACKGROUND = new ColorProperty("widget_background");
 	ColorProperty SYMBOL_IN = new ColorProperty("symbol_in");
@@ -172,7 +172,7 @@ public interface ThemeProperties
 	IconProperty CLOSE_ICON = new IconProperty("close_icon");
 	IconProperty EMERGENCY_ITEMS_ICON = new IconProperty("emergency_items_icon");
 	IconProperty GUIDE_ICON = new IconProperty("guide_icon");
-	IconProperty COLLECT_REWARDS_ICON = new IconProperty("collect_rewards_icon");
+	IconProperty MODPACK_ICON = new IconProperty("modpack_icon");
 	IconProperty REWARD_TABLE_ICON = new IconProperty("reward_table_icon");
 	IconProperty SHOP_ICON = new IconProperty("shop_icon");
 	IconProperty DELETE_ICON = new IconProperty("delete_icon");
@@ -182,7 +182,7 @@ public interface ThemeProperties
 	IconProperty MOVE_UP_ICON = new IconProperty("move_up_icon");
 	IconProperty MOVE_DOWN_ICON = new IconProperty("move_down_icon");
 
-	//Quest window
+	// Quest window //
 	IconProperty ICON = new IconProperty("icon");
 	IntProperty FULL_SCREEN_QUEST = new IntProperty("full_screen_quest", 0, 1);
 	ColorProperty TASKS_TEXT_COLOR = new ColorProperty("tasks_text_color");
@@ -201,6 +201,10 @@ public interface ThemeProperties
 	DoubleProperty DEPENDENCY_LINE_THICKNESS = new DoubleProperty("dependency_line_thickness", 0D, 3D);
 	DoubleProperty QUEST_SPACING = new DoubleProperty("quest_spacing", 0D, 8D);
 	DoubleProperty PINNED_QUEST_SIZE = new DoubleProperty("pinned_quest_size", 0D, 3D);
+
+	// Task specific //
+	IconProperty CHECKMARK_TASK_ACTIVE = new IconProperty("checkmark_task_active");
+	IconProperty CHECKMARK_TASK_INACTIVE = new IconProperty("checkmark_task_inactive");
 
 	static void register(ThemePropertyEvent event)
 	{

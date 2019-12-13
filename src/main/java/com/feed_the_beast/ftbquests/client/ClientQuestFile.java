@@ -133,11 +133,6 @@ public class ClientQuestFile extends QuestFile
 		{
 			questGui.openGui();
 		}
-		else
-		{
-			//FIXME: new MessageMyTeamGui().sendToServer();
-			//player.sendStatusMessage(new TextComponentTranslation("ftblib.lang.team.error.no_team"), true);
-		}
 	}
 
 	@Override

@@ -1,6 +1,7 @@
 package com.feed_the_beast.ftbquests.integration.jei;
 
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
+import mezz.jei.api.recipe.IFocus;
 import net.minecraftforge.fml.ModList;
 
 /**
@@ -37,5 +38,10 @@ public class FTBQuestsJEIHelper
 	private static void refreshLootcrates()
 	{
 		LootCrateRegistry.INSTANCE.refresh();
+	}
+
+	public static void showRecipes(Object object)
+	{
+		FTBQuestsJEIIntegration.runtime.getRecipesGui().show(FTBQuestsJEIIntegration.runtime.getRecipeManager().createFocus(IFocus.Mode.OUTPUT, object));
 	}
 }

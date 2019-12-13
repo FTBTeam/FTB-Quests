@@ -13,7 +13,7 @@ public class MessageTogglePinnedResponse extends MessageBase
 {
 	private final int id;
 
-	public MessageTogglePinnedResponse(PacketBuffer buffer)
+	MessageTogglePinnedResponse(PacketBuffer buffer)
 	{
 		id = buffer.readVarInt();
 	}

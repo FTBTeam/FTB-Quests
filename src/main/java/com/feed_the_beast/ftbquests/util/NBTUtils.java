@@ -3,13 +3,16 @@ package com.feed_the_beast.ftbquests.util;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.nbt.ByteArrayNBT;
+import net.minecraft.nbt.CollectionNBT;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.DoubleNBT;
 import net.minecraft.nbt.EndNBT;
 import net.minecraft.nbt.FloatNBT;
 import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.IntArrayNBT;
 import net.minecraft.nbt.JsonToNBT;
-import net.minecraft.nbt.ListNBT;
+import net.minecraft.nbt.LongArrayNBT;
 import net.minecraft.nbt.NumberNBT;
 import net.minecraft.nbt.StringNBT;
 import net.minecraft.util.ResourceLocation;
@@ -141,7 +144,6 @@ public class NBTUtils
 			while ((line = reader.readLine()) != null)
 			{
 				s.append(line.trim());
-				s.append(' ');
 			}
 
 			return JsonToNBT.getTagFromJson(s.toString());
@@ -230,43 +232,24 @@ public class NBTUtils
 			builder.pop();
 			builder.print("}");
 		}
-		else if (nbt instanceof ListNBT)
+		else if (nbt instanceof CollectionNBT)
 		{
-			ListNBT list = (ListNBT) nbt;
-
-			if (list.isEmpty())
+			if (nbt instanceof ByteArrayNBT)
 			{
-				builder.print("[]");
-				return;
+				appendCollection(builder, (CollectionNBT<?>) nbt, "B;");
 			}
-			else if (list.size() == 1)
+			else if (nbt instanceof IntArrayNBT)
 			{
-				builder.print("[");
-				append(builder, list.get(0));
-				builder.print("]");
-				return;
+				appendCollection(builder, (CollectionNBT<?>) nbt, "I;");
 			}
-
-			builder.print("[");
-			builder.println();
-			builder.push();
-			int index = 0;
-
-			for (INBT value : list)
+			else if (nbt instanceof LongArrayNBT)
 			{
-				index++;
-				append(builder, value);
-
-				if (index != list.size())
-				{
-					builder.print(",");
-				}
-
-				builder.println();
+				appendCollection(builder, (CollectionNBT<?>) nbt, "L;");
 			}
-
-			builder.pop();
-			builder.print("]");
+			else
+			{
+				appendCollection(builder, (CollectionNBT<?>) nbt, "");
+			}
 		}
 		else if (nbt instanceof NumberNBT)
 		{
@@ -297,6 +280,47 @@ public class NBTUtils
 		{
 			builder.print(nbt.toString());
 		}
+	}
+
+	private static void appendCollection(SNBTBuilder builder, CollectionNBT<? extends INBT> nbt, String opening)
+	{
+		if (nbt.isEmpty())
+		{
+			builder.print("[");
+			builder.print(opening);
+			builder.print("]");
+			return;
+		}
+		else if (nbt.size() == 1)
+		{
+			builder.print("[");
+			builder.print(opening);
+			append(builder, nbt.get(0));
+			builder.print("]");
+			return;
+		}
+
+		builder.print("[");
+		builder.print(opening);
+		builder.println();
+		builder.push();
+		int index = 0;
+
+		for (INBT value : nbt)
+		{
+			index++;
+			append(builder, value);
+
+			if (index != nbt.size())
+			{
+				builder.print(",");
+			}
+
+			builder.println();
+		}
+
+		builder.pop();
+		builder.print("]");
 	}
 
 	public static void putVarLong(CompoundNBT nbt, String key, long value)
