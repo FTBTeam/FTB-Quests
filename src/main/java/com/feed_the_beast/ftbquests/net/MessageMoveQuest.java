@@ -16,8 +16,8 @@ public class MessageMoveQuest extends MessageBase
 
 	MessageMoveQuest(PacketBuffer buffer)
 	{
-		id = buffer.readInt();
-		chapter = buffer.readInt();
+		id = buffer.readVarInt();
+		chapter = buffer.readVarInt();
 		x = buffer.readDouble();
 		y = buffer.readDouble();
 	}
@@ -30,14 +30,16 @@ public class MessageMoveQuest extends MessageBase
 		y = _y;
 	}
 
+	@Override
 	public void write(PacketBuffer buffer)
 	{
-		buffer.writeInt(id);
-		buffer.writeInt(chapter);
+		buffer.writeVarInt(id);
+		buffer.writeVarInt(chapter);
 		buffer.writeDouble(x);
 		buffer.writeDouble(y);
 	}
 
+	@Override
 	public void handle(NetworkEvent.Context context)
 	{
 		Quest quest = ServerQuestFile.INSTANCE.getQuest(id);

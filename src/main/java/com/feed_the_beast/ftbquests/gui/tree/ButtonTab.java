@@ -12,12 +12,12 @@ import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
  */
 public abstract class ButtonTab extends Button
 {
-	public final GuiQuestTree treeGui;
+	public final GuiQuests treeGui;
 
 	public ButtonTab(Panel panel, String title, Icon icon)
 	{
 		super(panel, title, icon);
-		treeGui = (GuiQuestTree) panel.getGui();
+		treeGui = (GuiQuests) panel.getGui();
 		setSize(20, 18);
 	}
 

@@ -17,7 +17,7 @@ public class MessageClaimReward extends MessageBase
 
 	MessageClaimReward(PacketBuffer buffer)
 	{
-		id = buffer.readInt();
+		id = buffer.readVarInt();
 		notify = buffer.readBoolean();
 	}
 
@@ -27,12 +27,14 @@ public class MessageClaimReward extends MessageBase
 		notify = n;
 	}
 
+	@Override
 	public void write(PacketBuffer buffer)
 	{
-		buffer.writeInt(id);
+		buffer.writeVarInt(id);
 		buffer.writeBoolean(notify);
 	}
 
+	@Override
 	public void handle(NetworkEvent.Context context)
 	{
 		Reward reward = ServerQuestFile.INSTANCE.getReward(id);

@@ -22,7 +22,7 @@ public class MessageCreateTaskAt extends MessageBase
 
 	MessageCreateTaskAt(PacketBuffer buffer)
 	{
-		chapter = buffer.readInt();
+		chapter = buffer.readVarInt();
 		x = buffer.readDouble();
 		y = buffer.readDouble();
 		type = TaskType.getRegistry().getValue(buffer.readVarInt());
@@ -39,15 +39,17 @@ public class MessageCreateTaskAt extends MessageBase
 		task.writeData(nbt);
 	}
 
+	@Override
 	public void write(PacketBuffer buffer)
 	{
-		buffer.writeInt(chapter);
+		buffer.writeVarInt(chapter);
 		buffer.writeDouble(x);
 		buffer.writeDouble(y);
 		buffer.writeVarInt(TaskType.getRegistry().getID(type));
 		buffer.writeCompoundTag(nbt);
 	}
 
+	@Override
 	public void handle(NetworkEvent.Context context)
 	{
 		if (NetUtils.canEdit(context))

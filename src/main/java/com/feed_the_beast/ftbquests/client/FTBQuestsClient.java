@@ -25,6 +25,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.client.util.InputMappings;
+import net.minecraft.fluid.Fluids;
+import net.minecraft.item.ItemStack;
 import net.minecraft.resources.IReloadableResourceManager;
 import net.minecraft.tileentity.StructureBlockTileEntity;
 import net.minecraft.tileentity.TileEntity;
@@ -87,14 +89,14 @@ public class FTBQuestsClient extends FTBQuestsCommon
 	public void init()
 	{
 		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
+		((IReloadableResourceManager) Minecraft.getInstance().getResourceManager()).addReloadListener(new QuestFileCacheReloader());
+		((IReloadableResourceManager) Minecraft.getInstance().getResourceManager()).addReloadListener(new ThemeLoader());
 		new FTBQuestsClientEventHandler().init();
 	}
 
 	private void setup(FMLClientSetupEvent event)
 	{
 		ClientRegistry.registerKeyBinding(KEY_QUESTS = new KeyBinding("key.ftbquests.quests", KeyConflictContext.IN_GAME, KeyModifier.NONE, InputMappings.Type.KEYSYM, -1, "key.categories.ftbquests"));
-		((IReloadableResourceManager) Minecraft.getInstance().getResourceManager()).addReloadListener(new QuestFileCacheReloader());
-		((IReloadableResourceManager) Minecraft.getInstance().getResourceManager()).addReloadListener(new ThemeLoader());
 	}
 
 	@Override
@@ -120,6 +122,8 @@ public class FTBQuestsClient extends FTBQuestsCommon
 	{
 		FTBQuestsTasks.ITEM.setGuiProvider((gui, quest, callback) -> {
 			ConfigItemStack c = new ConfigItemStack(false, false);
+			c.defaultValue = ItemStack.EMPTY;
+			c.value = ItemStack.EMPTY;
 
 			new GuiSelectItemStack(c, accepted -> {
 				gui.run();
@@ -135,6 +139,8 @@ public class FTBQuestsClient extends FTBQuestsCommon
 
 		FTBQuestsTasks.FLUID.setGuiProvider((gui, quest, callback) -> {
 			ConfigFluid c = new ConfigFluid(false);
+			c.defaultValue = Fluids.EMPTY;
+			c.value = Fluids.EMPTY;
 
 			new GuiSelectFluid(c, accepted -> {
 				gui.run();
@@ -197,6 +203,8 @@ public class FTBQuestsClient extends FTBQuestsCommon
 	{
 		FTBQuestsRewards.ITEM.setGuiProvider((gui, quest, callback) -> {
 			ConfigItemStack c = new ConfigItemStack(false, false);
+			c.defaultValue = ItemStack.EMPTY;
+			c.value = ItemStack.EMPTY;
 
 			new GuiSelectItemStack(c, accepted -> {
 				if (accepted)
@@ -204,7 +212,7 @@ public class FTBQuestsClient extends FTBQuestsCommon
 					callback.accept(new ItemReward(quest, c.value));
 				}
 				gui.run();
-			});
+			}).openGui();
 		});
 
 		/* FIXME

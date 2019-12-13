@@ -1,7 +1,7 @@
 package com.feed_the_beast.ftbquests.net;
 
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
-import com.feed_the_beast.ftbquests.gui.tree.GuiQuestTree;
+import com.feed_the_beast.ftbquests.gui.tree.GuiQuests;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.mods.ftbguilibrary.utils.ClientUtils;
 import net.minecraft.network.PacketBuffer;
@@ -18,8 +18,8 @@ public class MessageMoveQuestResponse extends MessageBase
 
 	MessageMoveQuestResponse(PacketBuffer buffer)
 	{
-		id = buffer.readInt();
-		chapter = buffer.readInt();
+		id = buffer.readVarInt();
+		chapter = buffer.readVarInt();
 		x = buffer.readDouble();
 		y = buffer.readDouble();
 	}
@@ -35,12 +35,13 @@ public class MessageMoveQuestResponse extends MessageBase
 	@Override
 	public void write(PacketBuffer buffer)
 	{
-		buffer.writeInt(id);
-		buffer.writeInt(chapter);
+		buffer.writeVarInt(id);
+		buffer.writeVarInt(chapter);
 		buffer.writeDouble(x);
 		buffer.writeDouble(y);
 	}
 
+	@Override
 	public void handle(NetworkEvent.Context context)
 	{
 		if (ClientQuestFile.INSTANCE != null)
@@ -50,7 +51,7 @@ public class MessageMoveQuestResponse extends MessageBase
 			if (quest != null)
 			{
 				quest.moved(x, y, chapter);
-				GuiQuestTree gui = ClientUtils.getCurrentGuiAs(GuiQuestTree.class);
+				GuiQuests gui = ClientUtils.getCurrentGuiAs(GuiQuests.class);
 
 				if (gui != null)
 				{

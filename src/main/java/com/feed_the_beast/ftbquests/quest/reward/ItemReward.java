@@ -2,6 +2,7 @@ package com.feed_the_beast.ftbquests.quest.reward;
 
 import com.feed_the_beast.ftbquests.net.MessageDisplayItemRewardToast;
 import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.util.NBTUtils;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.icon.ItemIcon;
@@ -50,16 +51,24 @@ public class ItemReward extends Reward
 	public void writeData(CompoundNBT nbt)
 	{
 		super.writeData(nbt);
-		nbt.put("item", item.serializeNBT());
-		nbt.putInt("random_bonus", randomBonus);
-		nbt.putBoolean("only_one", true);
+		NBTUtils.write(nbt, "item", item);
+
+		if (randomBonus > 0)
+		{
+			nbt.putInt("random_bonus", randomBonus);
+		}
+
+		if (onlyOne)
+		{
+			nbt.putBoolean("only_one", true);
+		}
 	}
 
 	@Override
 	public void readData(CompoundNBT nbt)
 	{
 		super.readData(nbt);
-		item = ItemStack.read(nbt.getCompound("item"));
+		item = NBTUtils.read(nbt, "item");
 		randomBonus = nbt.getInt("random_bonus");
 		onlyOne = nbt.getBoolean("only_one");
 	}

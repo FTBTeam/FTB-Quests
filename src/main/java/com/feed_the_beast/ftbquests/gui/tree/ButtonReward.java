@@ -24,13 +24,13 @@ import java.util.List;
  */
 public class ButtonReward extends Button
 {
-	public final GuiQuestTree treeGui;
+	public final GuiQuests treeGui;
 	public final Reward reward;
 
 	public ButtonReward(Panel panel, Reward r)
 	{
 		super(panel, r.getTitle(), r.getIcon());
-		treeGui = (GuiQuestTree) panel.getGui();
+		treeGui = (GuiQuests) panel.getGui();
 		reward = r;
 		setSize(18, 18);
 	}
@@ -101,14 +101,14 @@ public class ButtonReward extends Button
 		{
 			if (ClientQuestFile.exists())
 			{
-				reward.onButtonClicked(this, ClientQuestFile.INSTANCE.self.isComplete(reward.quest) && !ClientQuestFile.INSTANCE.self.isRewardClaimed(reward.id));
+				reward.onButtonClicked(this, ClientQuestFile.INSTANCE.self.getClaimType(reward).canClaim());
 			}
 		}
 		else if (button.isRight() && ClientQuestFile.exists() && ClientQuestFile.INSTANCE.canEdit())
 		{
 			playClickSound();
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
-			GuiQuestTree.addObjectMenuItems(contextMenu, getGui(), reward);
+			GuiQuests.addObjectMenuItems(contextMenu, getGui(), reward);
 			getGui().openContextMenu(contextMenu);
 		}
 	}
@@ -144,7 +144,7 @@ public class ButtonReward extends Button
 		{
 			GuiIcons.CLOSE.draw(x + w - 9, y + 1, 8, 8);
 		}
-		else if (ClientQuestFile.INSTANCE.self.isRewardClaimed(reward.id))
+		else if (ClientQuestFile.INSTANCE.self.getClaimType(reward).isClaimed())
 		{
 			ThemeProperties.CHECK_ICON.get().draw(x + w - 9, y + 1, 8, 8);
 			completed = true;

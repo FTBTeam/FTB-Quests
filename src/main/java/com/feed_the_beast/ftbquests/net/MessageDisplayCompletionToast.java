@@ -16,7 +16,7 @@ public class MessageDisplayCompletionToast extends MessageBase
 
 	MessageDisplayCompletionToast(PacketBuffer buffer)
 	{
-		id = buffer.readInt();
+		id = buffer.readVarInt();
 	}
 
 	public MessageDisplayCompletionToast(int i)
@@ -24,11 +24,13 @@ public class MessageDisplayCompletionToast extends MessageBase
 		id = i;
 	}
 
+	@Override
 	public void write(PacketBuffer buffer)
 	{
-		buffer.writeInt(id);
+		buffer.writeVarInt(id);
 	}
 
+	@Override
 	public void handle(NetworkEvent.Context context)
 	{
 		if (ClientQuestFile.exists())

@@ -22,7 +22,7 @@ public class MessageDisplayRewardToast extends MessageBase
 
 	MessageDisplayRewardToast(PacketBuffer buffer)
 	{
-		id = buffer.readInt();
+		id = buffer.readVarInt();
 		text = buffer.readTextComponent();
 		icon = NetUtils.readIcon(buffer);
 	}
@@ -37,7 +37,7 @@ public class MessageDisplayRewardToast extends MessageBase
 	@Override
 	public void write(PacketBuffer buffer)
 	{
-		buffer.writeInt(id);
+		buffer.writeVarInt(id);
 		buffer.writeTextComponent(text);
 		NetUtils.writeIcon(buffer, icon);
 	}

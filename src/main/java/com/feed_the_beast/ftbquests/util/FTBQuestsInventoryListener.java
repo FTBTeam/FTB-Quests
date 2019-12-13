@@ -32,13 +32,6 @@ public class FTBQuestsInventoryListener implements IContainerListener
 
 		PlayerData data = ServerQuestFile.INSTANCE.getData(player);
 
-		if (data == null)
-		{
-			return;
-		}
-
-		boolean redo = false;
-
 		for (Chapter chapter : ServerQuestFile.INSTANCE.chapters)
 		{
 			for (Quest quest : chapter.quests)

@@ -1,15 +1,24 @@
 package com.feed_the_beast.ftbquests.quest;
 
 import com.feed_the_beast.ftbquests.FTBQuests;
+import com.feed_the_beast.ftbquests.net.MessageCreatePlayerData;
 import com.feed_the_beast.ftbquests.net.MessageDeleteObjectResponse;
+import com.feed_the_beast.ftbquests.net.MessageSyncQuests;
+import com.feed_the_beast.ftbquests.util.FTBQuestsInventoryListener;
 import com.feed_the_beast.ftbquests.util.FileUtils;
+import com.feed_the_beast.ftbquests.util.NBTUtils;
 import com.teamacronymcoders.packmode.api.PackModeAPI;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.dimension.DimensionType;
 import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.loading.FMLPaths;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.UUID;
 
 /**
  * @author LatvianModder
@@ -19,13 +28,15 @@ public class ServerQuestFile extends QuestFile
 	public static ServerQuestFile INSTANCE;
 
 	public final MinecraftServer server;
-	public boolean shouldSave = false;
-	private boolean isLoading = false;
-	private File folder;
+	private boolean shouldSave;
+	private boolean isLoading;
+	private Path folder;
 
 	public ServerQuestFile(MinecraftServer s)
 	{
 		server = s;
+		shouldSave = false;
+		isLoading = false;
 	}
 
 	private String getFolderName()
@@ -40,17 +51,17 @@ public class ServerQuestFile extends QuestFile
 
 	private static String getPackmodeFolderName()
 	{
-		return PackModeAPI.getInstance().getPackMode();
+		return PackModeAPI.getInstance().getPackMode().toLowerCase();
 	}
 
 	public void load()
 	{
 		folderName = getFolderName();
-		folder = FMLPaths.CONFIGDIR.get().resolve("ftbquests/" + folderName).toFile();
+		folder = FMLPaths.CONFIGDIR.get().resolve("ftbquests/" + folderName);
 
-		if (folder.exists())
+		if (Files.exists(folder))
 		{
-			FTBQuests.LOGGER.info("Loading quests from " + folder.getAbsolutePath());
+			FTBQuests.LOGGER.info("Loading quests from " + folder);
 			isLoading = true;
 			readDataFull(folder);
 			isLoading = false;
@@ -73,6 +84,31 @@ public class ServerQuestFile extends QuestFile
 		}
 
 		FTBQuests.LOGGER.info(String.format("Loaded %d chapters, %d quests, %d tasks and %d rewards. In total, %d objects", c, q, t, r, getAllObjects().size()));
+
+		Path path = server.getWorld(DimensionType.OVERWORLD).getSaveHandler().getPlayerFolder().toPath().resolve("ftbquests");
+
+		try
+		{
+			Files.list(path).forEach(path1 -> {
+				CompoundNBT nbt = NBTUtils.readSNBT(path1);
+
+				try
+				{
+					UUID uuid = UUID.fromString(nbt.getString("uuid"));
+					PlayerData data = new PlayerData(this, uuid);
+					addData(data);
+					data.deserializeNBT(nbt);
+				}
+				catch (Exception ex)
+				{
+					ex.printStackTrace();
+				}
+			});
+		}
+		catch (Exception ex)
+		{
+			ex.printStackTrace();
+		}
 	}
 
 	@Override
@@ -88,7 +124,7 @@ public class ServerQuestFile extends QuestFile
 	}
 
 	@Override
-	public File getFolder()
+	public Path getFolder()
 	{
 		return folder;
 	}
@@ -100,7 +136,7 @@ public class ServerQuestFile extends QuestFile
 
 		if (object != null)
 		{
-			File file = object.getFile();
+			String file = object.getPath();
 
 			object.deleteChildren();
 			object.deleteSelf();
@@ -109,7 +145,7 @@ public class ServerQuestFile extends QuestFile
 
 			if (file != null)
 			{
-				FileUtils.delete(file);
+				FileUtils.delete(getFolder().resolve(file).toFile());
 			}
 		}
 
@@ -122,20 +158,68 @@ public class ServerQuestFile extends QuestFile
 		//FIXME: universe.markDirty();
 	}
 
-	public void saveNow()
+	public void checkSave()
 	{
-		writeDataFull(getFolder());
+		if (shouldSave)
+		{
+			writeDataFull(getFolder());
+			shouldSave = false;
+		}
+
+		Path path = server.getWorld(DimensionType.OVERWORLD).getSaveHandler().getPlayerFolder().toPath().resolve("ftbquests");
+
+		for (PlayerData data : getAllData())
+		{
+			if (data.shouldSave)
+			{
+				NBTUtils.writeSNBT(path, data.uuid.toString(), data.serializeNBT());
+				data.shouldSave = false;
+			}
+		}
 	}
 
 	public void unload()
 	{
-		if (shouldSave)
-		{
-			saveNow();
-			shouldSave = false;
-		}
-
+		checkSave();
 		deleteChildren();
 		deleteSelf();
+	}
+
+	public void onLoggedIn(ServerPlayerEntity player)
+	{
+		UUID id = player.getUniqueID();
+		PlayerData data = playerDataMap.get(id);
+
+		if (data != null)
+		{
+			data.name = player.getGameProfile().getName();
+			data.save();
+			//FIXME: Send update to other players
+		}
+		else
+		{
+			data = new PlayerData(this, id);
+			data.name = player.getGameProfile().getName();
+			addData(data);
+
+			for (ServerPlayerEntity player1 : server.getPlayerList().getPlayers())
+			{
+				if (player1 != player)
+				{
+					new MessageCreatePlayerData(data).sendTo(player1);
+				}
+			}
+		}
+
+		new MessageSyncQuests(id, this).sendTo(player);
+		player.container.addListener(new FTBQuestsInventoryListener(player));
+
+		for (Chapter chapter : ServerQuestFile.INSTANCE.chapters)
+		{
+			for (Quest quest : chapter.quests)
+			{
+				data.checkAutoCompletion(quest);
+			}
+		}
 	}
 }

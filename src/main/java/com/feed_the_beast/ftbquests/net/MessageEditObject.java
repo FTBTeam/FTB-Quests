@@ -19,7 +19,7 @@ public class MessageEditObject extends MessageBase
 
 	MessageEditObject(PacketBuffer buffer)
 	{
-		id = buffer.readInt();
+		id = buffer.readVarInt();
 		nbt = buffer.readCompoundTag();
 	}
 
@@ -33,12 +33,14 @@ public class MessageEditObject extends MessageBase
 		o.editedFromGUI();
 	}
 
+	@Override
 	public void write(PacketBuffer buffer)
 	{
-		buffer.writeInt(id);
+		buffer.writeVarInt(id);
 		buffer.writeCompoundTag(nbt);
 	}
 
+	@Override
 	public void handle(NetworkEvent.Context context)
 	{
 		if (NetUtils.canEdit(context))

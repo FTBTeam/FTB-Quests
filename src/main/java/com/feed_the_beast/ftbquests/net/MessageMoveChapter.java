@@ -16,7 +16,7 @@ public class MessageMoveChapter extends MessageBase
 
 	public MessageMoveChapter(PacketBuffer buffer)
 	{
-		id = buffer.readInt();
+		id = buffer.readVarInt();
 		left = buffer.readBoolean();
 	}
 
@@ -26,12 +26,14 @@ public class MessageMoveChapter extends MessageBase
 		left = l;
 	}
 
+	@Override
 	public void write(PacketBuffer buffer)
 	{
-		buffer.writeInt(id);
+		buffer.writeVarInt(id);
 		buffer.writeBoolean(left);
 	}
 
+	@Override
 	public void handle(NetworkEvent.Context context)
 	{
 		if (NetUtils.canEdit(context))

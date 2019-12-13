@@ -61,11 +61,6 @@ public final class RewardType extends ForgeRegistryEntry<RewardType>
 
 		if (type == null)
 		{
-			if (id.equals("ftbquests:ftb_money"))
-			{
-				return createReward(quest, "ftbmoney:money");
-			}
-
 			return null;
 		}
 

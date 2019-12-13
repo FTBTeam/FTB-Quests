@@ -19,7 +19,6 @@ import com.feed_the_beast.mods.ftbguilibrary.widget.CustomClickEvent;
 import com.feed_the_beast.mods.ftbguilibrary.widget.GuiHelper;
 import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.client.event.ColorHandlerEvent;
@@ -73,29 +72,12 @@ public class FTBQuestsClientEventHandler
 		{
 			event.getButton().setCustomTextHandler(() ->
 			{
-				if (ClientQuestFile.exists())
+				if (ClientQuestFile.exists() && ClientQuestFile.INSTANCE.self.hasUnclaimedRewards())
 				{
-					if (!ClientQuestFile.exists())
-					{
-						return "[!]";
-					}
-
-					int r = ClientQuestFile.INSTANCE.self.getUnclaimedRewards(true);
-
-					if (r > 0)
-					{
-						return Integer.toString(r);
-					}
+					return "[!]";
 				}
 
 				return "";
-			});
-
-			event.getButton().setTooltipHandler(list -> {
-				if (ClientQuestFile.exists() && !ClientQuestFile.exists())
-				{
-					list.add(TextFormatting.GRAY + I18n.format("sidebar_button.ftbquests.quests.no_team"));
-				}
 			});
 		}
 	}

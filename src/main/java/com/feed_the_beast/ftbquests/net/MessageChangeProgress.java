@@ -22,7 +22,7 @@ public class MessageChangeProgress extends MessageBase
 	MessageChangeProgress(PacketBuffer buffer)
 	{
 		team = NetUtils.readUUID(buffer);
-		id = buffer.readInt();
+		id = buffer.readVarInt();
 		type = ChangeProgress.NAME_MAP.read(buffer);
 
 	}
@@ -34,13 +34,15 @@ public class MessageChangeProgress extends MessageBase
 		type = ty;
 	}
 
+	@Override
 	public void write(PacketBuffer buffer)
 	{
 		NetUtils.writeUUID(buffer, team);
-		buffer.writeInt(id);
+		buffer.writeVarInt(id);
 		ChangeProgress.NAME_MAP.write(buffer, type);
 	}
 
+	@Override
 	public void handle(NetworkEvent.Context context)
 	{
 		if (NetUtils.canEdit(context))

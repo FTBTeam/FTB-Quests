@@ -28,6 +28,7 @@ public class MessageDisplayItemRewardToast extends MessageBase
 		stack = is;
 	}
 
+	@Override
 	public void write(PacketBuffer buffer)
 	{
 		buffer.writeItemStack(stack);

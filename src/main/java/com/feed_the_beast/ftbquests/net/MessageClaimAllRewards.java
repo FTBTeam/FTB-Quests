@@ -22,10 +22,12 @@ public class MessageClaimAllRewards extends MessageBase
 	{
 	}
 
+	@Override
 	public void write(PacketBuffer buffer)
 	{
 	}
 
+	@Override
 	public void handle(NetworkEvent.Context context)
 	{
 		ServerPlayerEntity player = context.getSender();

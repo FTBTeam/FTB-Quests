@@ -35,13 +35,13 @@ import java.util.Set;
  */
 public class ButtonTask extends Button
 {
-	public final GuiQuestTree treeGui;
+	public final GuiQuests treeGui;
 	public Task task;
 
 	public ButtonTask(Panel panel, Task t)
 	{
 		super(panel, t.getTitle(), GuiIcons.ACCEPT);
-		treeGui = (GuiQuestTree) panel.getGui();
+		treeGui = (GuiQuests) panel.getGui();
 		task = t;
 	}
 
@@ -66,7 +66,7 @@ public class ButtonTask extends Button
 	{
 		if (button.isLeft())
 		{
-			task.onButtonClicked(this, !(task.invalid || treeGui.file.self == null || !treeGui.file.self.canStartTasks(task.quest) || treeGui.file.self.isComplete(task)));
+			task.onButtonClicked(this, !(task.invalid || !treeGui.file.self.canStartTasks(task.quest) || treeGui.file.self.isComplete(task)));
 		}
 		else if (button.isRight() && treeGui.file.canEdit())
 		{
@@ -132,7 +132,7 @@ public class ButtonTask extends Button
 				}
 			}
 
-			GuiQuestTree.addObjectMenuItems(contextMenu, getGui(), task);
+			GuiQuests.addObjectMenuItems(contextMenu, getGui(), task);
 			getGui().openContextMenu(contextMenu);
 		}
 	}
@@ -159,7 +159,7 @@ public class ButtonTask extends Button
 
 		TaskData data;
 
-		if (treeGui.file.self != null && treeGui.file.self.canStartTasks(task.quest))
+		if (treeGui.file.self.canStartTasks(task.quest))
 		{
 			data = treeGui.file.self.getTaskData(task);
 			long maxp = task.getMaxProgress();
@@ -208,7 +208,7 @@ public class ButtonTask extends Button
 	@Override
 	public void drawIcon(Theme theme, int x, int y, int w, int h)
 	{
-		task.drawGUI(treeGui.file.self == null ? null : treeGui.file.self.getTaskData(task), x, y, w, h);
+		task.drawGUI(treeGui.file.self.getTaskData(task), x, y, w, h);
 	}
 
 	@Override
@@ -218,7 +218,7 @@ public class ButtonTask extends Button
 		drawBackground(theme, x, y, w, h);
 		drawIcon(theme, x + (w - bs) / 2, y + (h - bs) / 2, bs, bs);
 
-		if (treeGui.file.self != null && treeGui.file.self.isComplete(task))
+		if (treeGui.file.self.isComplete(task))
 		{
 			GlStateManager.pushMatrix();
 			GlStateManager.translatef(0F, 0F, 500F);

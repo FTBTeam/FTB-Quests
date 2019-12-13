@@ -1,6 +1,6 @@
 package com.feed_the_beast.ftbquests.quest.reward;
 
-import com.feed_the_beast.ftbquests.gui.tree.GuiQuestTree;
+import com.feed_the_beast.ftbquests.gui.tree.GuiQuests;
 import com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIHelper;
 import com.feed_the_beast.ftbquests.net.MessageClaimReward;
 import com.feed_the_beast.ftbquests.quest.ChangeProgress;
@@ -74,7 +74,11 @@ public abstract class Reward extends QuestObjectBase
 	public void writeData(CompoundNBT nbt)
 	{
 		super.writeData(nbt);
-		team.write(nbt, "team_reward");
+
+		if (team != Tristate.DEFAULT)
+		{
+			team.write(nbt, "team_reward");
+		}
 
 		if (autoclaim != RewardAutoClaim.DEFAULT)
 		{
@@ -111,7 +115,7 @@ public abstract class Reward extends QuestObjectBase
 	public void getConfig(ConfigGroup config)
 	{
 		super.getConfig(config);
-		config.addEnum("team", team, v -> team = v, Tristate.NAME_MAP).setNameKey("ftbquests.reward.team_reward").setCanEdit(!quest.canRepeat);
+		config.addEnum("team", team, v -> team = v, Tristate.NAME_MAP).setNameKey("ftbquests.reward.team_reward");
 		config.addEnum("autoclaim", autoclaim, v -> autoclaim = v, RewardAutoClaim.NAME_MAP).setNameKey("ftbquests.reward.autoclaim");
 	}
 
@@ -155,7 +159,7 @@ public abstract class Reward extends QuestObjectBase
 	@OnlyIn(Dist.CLIENT)
 	public void editedFromGUI()
 	{
-		GuiQuestTree gui = ClientUtils.getCurrentGuiAs(GuiQuestTree.class);
+		GuiQuests gui = ClientUtils.getCurrentGuiAs(GuiQuests.class);
 
 		if (gui != null && gui.getViewedQuest() != null)
 		{
@@ -176,7 +180,7 @@ public abstract class Reward extends QuestObjectBase
 
 	public final boolean isTeamReward()
 	{
-		return quest.canRepeat || team.get(quest.chapter.file.defaultRewardTeam);
+		return team.get(quest.chapter.file.defaultRewardTeam);
 	}
 
 	public final RewardAutoClaim getAutoClaimType()

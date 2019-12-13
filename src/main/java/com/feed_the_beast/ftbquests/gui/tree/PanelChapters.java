@@ -13,12 +13,12 @@ import net.minecraftforge.fml.ModList;
  */
 public class PanelChapters extends Panel
 {
-	public final GuiQuestTree treeGui;
+	public final GuiQuests treeGui;
 
 	public PanelChapters(Panel panel)
 	{
 		super(panel);
-		treeGui = (GuiQuestTree) panel.getGui();
+		treeGui = (GuiQuests) panel.getGui();
 		setPosAndSize(0, 1, 20, 0);
 	}
 

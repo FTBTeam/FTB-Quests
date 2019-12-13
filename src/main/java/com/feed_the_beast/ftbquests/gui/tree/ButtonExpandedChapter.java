@@ -25,14 +25,14 @@ import java.util.List;
  */
 public class ButtonExpandedChapter extends SimpleTextButton
 {
-	public final GuiQuestTree treeGui;
+	public final GuiQuests treeGui;
 	public final Chapter chapter;
 	public List<String> description;
 
 	public ButtonExpandedChapter(Panel panel, Chapter c)
 	{
 		super(panel, c.getTitle(), c.getIcon());
-		treeGui = (GuiQuestTree) getGui();
+		treeGui = (GuiQuests) getGui();
 		chapter = c;
 
 		if (treeGui.file.self != null)
@@ -83,7 +83,7 @@ public class ButtonExpandedChapter extends SimpleTextButton
 			contextMenu.add(new ContextMenuItem(I18n.format("gui.move"), ThemeProperties.MOVE_UP_ICON.get(), () -> new MessageMoveChapter(chapter.id, true).sendToServer()).setEnabled(() -> chapter.getIndex() > 0).setCloseMenu(false));
 			contextMenu.add(new ContextMenuItem(I18n.format("gui.move"), ThemeProperties.MOVE_DOWN_ICON.get(), () -> new MessageMoveChapter(chapter.id, false).sendToServer()).setEnabled(() -> chapter.getIndex() < treeGui.file.chapters.size() - 1).setCloseMenu(false));
 			contextMenu.add(ContextMenuItem.SEPARATOR);
-			GuiQuestTree.addObjectMenuItems(contextMenu, treeGui, chapter);
+			GuiQuests.addObjectMenuItems(contextMenu, treeGui, chapter);
 			treeGui.openContextMenu(contextMenu);
 		}
 	}
@@ -135,7 +135,7 @@ public class ButtonExpandedChapter extends SimpleTextButton
 
 		int w2 = 20;
 
-		if (treeGui.file.self.hasUnclaimedRewards(chapter, true))
+		if (treeGui.file.self.hasUnclaimedRewards(chapter))
 		{
 			GlStateManager.pushMatrix();
 			GlStateManager.translatef(0, 0, 450);

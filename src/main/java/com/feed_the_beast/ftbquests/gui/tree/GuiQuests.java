@@ -29,7 +29,6 @@ import com.feed_the_beast.mods.ftbguilibrary.widget.ContextMenuItem;
 import com.feed_the_beast.mods.ftbguilibrary.widget.GuiBase;
 import com.feed_the_beast.mods.ftbguilibrary.widget.GuiHelper;
 import com.feed_the_beast.mods.ftbguilibrary.widget.GuiIcons;
-import com.feed_the_beast.mods.ftbguilibrary.widget.IOpenableGui;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Widget;
@@ -48,7 +47,7 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 
-public class GuiQuestTree extends GuiBase
+public class GuiQuests extends GuiBase
 {
 	public final ClientQuestFile file;
 	public double scrollWidth, scrollHeight;
@@ -66,7 +65,7 @@ public class GuiQuestTree extends GuiBase
 	public long lastShiftPress = 0L;
 	public static boolean grid = false;
 
-	public GuiQuestTree(ClientQuestFile q)
+	public GuiQuests(ClientQuestFile q)
 	{
 		file = q;
 		selectedObjects = new LinkedHashSet<>();
@@ -187,7 +186,7 @@ public class GuiQuestTree extends GuiBase
 		}
 	}
 
-	public static void addObjectMenuItems(List<ContextMenuItem> contextMenu, IOpenableGui gui, QuestObjectBase object)
+	public static void addObjectMenuItems(List<ContextMenuItem> contextMenu, Runnable gui, QuestObjectBase object)
 	{
 		ConfigGroup group = new ConfigGroup(FTBQuests.MOD_ID);
 		ConfigGroup g = object.createSubGroup(group);
@@ -197,13 +196,13 @@ public class GuiQuestTree extends GuiBase
 		{
 			List<ContextMenuItem> list = new ArrayList<>();
 
-			for (ConfigValue inst : g.getValues())
+			for (ConfigValue c : g.getValues())
 			{
-				if (inst instanceof ConfigWithVariants)
+				if (c instanceof ConfigWithVariants)
 				{
-					String name = inst.getName();
+					String name = c.getName();
 
-					if (!inst.getCanEdit())
+					if (!c.getCanEdit())
 					{
 						name = TextFormatting.GRAY + name;
 					}
@@ -213,25 +212,25 @@ public class GuiQuestTree extends GuiBase
 						@Override
 						public void addMouseOverText(List<String> list)
 						{
-							list.add(inst.getStringForGUI(inst.value));
+							list.add(c.getStringForGUI(c.value));
 						}
 
 						@Override
 						public void onClicked(Panel panel, MouseButton button)
 						{
-							inst.onClicked(button, accepted -> {
+							c.onClicked(button, accepted -> {
 								if (accepted)
 								{
+									c.setter.accept(c.value);
 									new MessageEditObject(object).sendToServer();
 								}
-								gui.run();
 							});
 						}
 
 						@Override
 						public void drawIcon(Theme theme, int x, int y, int w, int h)
 						{
-							inst.getIcon(inst.value).draw(x, y, w, h);
+							c.getIcon(c.value).draw(x, y, w, h);
 						}
 					});
 				}
@@ -245,11 +244,11 @@ public class GuiQuestTree extends GuiBase
 			}
 		}
 
-		contextMenu.add(new ContextMenuItem(I18n.format("selectServer.edit"), ThemeProperties.EDIT_ICON.get(), object::onEditButtonClicked));
+		contextMenu.add(new ContextMenuItem(I18n.format("selectServer.edit"), ThemeProperties.EDIT_ICON.get(), () -> object.onEditButtonClicked(gui)));
 
 		if (object instanceof RandomReward && !QuestObjectBase.isNull(((RandomReward) object).getTable()))
 		{
-			contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.reward_table.edit"), ThemeProperties.EDIT_ICON.get(), () -> ((RandomReward) object).getTable().onEditButtonClicked()));
+			contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.reward_table.edit"), ThemeProperties.EDIT_ICON.get(), () -> ((RandomReward) object).getTable().onEditButtonClicked(gui)));
 		}
 
 		ContextMenuItem delete = new ContextMenuItem(I18n.format("selectServer.delete"), ThemeProperties.DELETE_ICON.get(), () -> ClientQuestFile.INSTANCE.deleteObject(object.id));
@@ -404,7 +403,7 @@ public class GuiQuestTree extends GuiBase
 							}
 						}
 
-						GuiQuestTree.this.openGui();
+						GuiQuests.this.openGui();
 					});
 
 					gui.focus();

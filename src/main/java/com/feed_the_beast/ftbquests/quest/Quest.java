@@ -3,7 +3,7 @@ package com.feed_the_beast.ftbquests.quest;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.client.FTBQuestsClient;
 import com.feed_the_beast.ftbquests.events.ObjectCompletedEvent;
-import com.feed_the_beast.ftbquests.gui.tree.GuiQuestTree;
+import com.feed_the_beast.ftbquests.gui.tree.GuiQuests;
 import com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIHelper;
 import com.feed_the_beast.ftbquests.net.MessageDisplayCompletionToast;
 import com.feed_the_beast.ftbquests.net.MessageMoveQuest;
@@ -30,7 +30,6 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.Constants;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
@@ -43,19 +42,18 @@ public final class Quest extends QuestObject implements Movable
 	public Chapter chapter;
 	public String subtitle;
 	public double x, y;
-	public boolean hide;
+	public Tristate hide;
 	public QuestShape shape;
 	public final List<String> description;
 	public final List<QuestObject> dependencies;
-	public boolean canRepeat;
 	public final List<Task> tasks;
 	public final List<Reward> rewards;
 	public DependencyRequirement dependencyRequirement;
 	public String guidePage;
 	public String customClick;
-	public boolean hideDependencyLines;
+	public Tristate hideDependencyLines;
 	public int minRequiredDependencies;
-	public boolean hideTextUntilComplete;
+	public Tristate hideTextUntilComplete;
 	public Tristate disableJEI;
 	public double size;
 
@@ -70,17 +68,16 @@ public final class Quest extends QuestObject implements Movable
 		y = 0;
 		shape = QuestShape.DEFAULT;
 		description = new ArrayList<>(0);
-		canRepeat = false;
 		dependencies = new ArrayList<>(0);
 		tasks = new ArrayList<>(1);
 		rewards = new ArrayList<>(1);
 		guidePage = "";
 		customClick = "";
-		hideDependencyLines = false;
-		hide = false;
+		hideDependencyLines = Tristate.DEFAULT;
+		hide = Tristate.DEFAULT;
 		dependencyRequirement = DependencyRequirement.ALL_COMPLETED;
 		minRequiredDependencies = 0;
-		hideTextUntilComplete = false;
+		hideTextUntilComplete = Tristate.DEFAULT;
 		disableJEI = Tristate.DEFAULT;
 		size = 1D;
 	}
@@ -115,7 +112,11 @@ public final class Quest extends QuestObject implements Movable
 		super.writeData(nbt);
 		nbt.putDouble("x", x);
 		nbt.putDouble("y", y);
-		nbt.putString("shape", shape.id);
+
+		if (shape != QuestShape.DEFAULT)
+		{
+			nbt.putString("shape", shape.id);
+		}
 
 		if (!subtitle.isEmpty())
 		{
@@ -134,11 +135,6 @@ public final class Quest extends QuestObject implements Movable
 			nbt.put("description", array);
 		}
 
-		if (canRepeat)
-		{
-			nbt.putBoolean("can_repeat", true);
-		}
-
 		if (!guidePage.isEmpty())
 		{
 			nbt.putString("guide_page", guidePage);
@@ -149,9 +145,9 @@ public final class Quest extends QuestObject implements Movable
 			nbt.putString("custom_click", customClick);
 		}
 
-		if (hideDependencyLines)
+		if (hideDependencyLines != Tristate.DEFAULT)
 		{
-			nbt.putBoolean("hide_dependency_lines", true);
+			nbt.putBoolean("hide_dependency_lines", hideDependencyLines.isTrue());
 		}
 
 		if (minRequiredDependencies > 0)
@@ -175,9 +171,9 @@ public final class Quest extends QuestObject implements Movable
 			nbt.putIntArray("dependencies", ai);
 		}
 
-		if (hide)
+		if (hide != Tristate.DEFAULT)
 		{
-			nbt.putBoolean("hide", true);
+			nbt.putBoolean("hide", hide.isTrue());
 		}
 
 		if (dependencyRequirement != DependencyRequirement.ALL_COMPLETED)
@@ -185,9 +181,9 @@ public final class Quest extends QuestObject implements Movable
 			nbt.putString("dependency_requirement", dependencyRequirement.id);
 		}
 
-		if (hideTextUntilComplete)
+		if (hideTextUntilComplete != Tristate.DEFAULT)
 		{
-			nbt.putBoolean("hide_text_until_complete", true);
+			nbt.putBoolean("hide_text_until_complete", hideTextUntilComplete.isTrue());
 		}
 
 		if (size != 1D)
@@ -213,10 +209,9 @@ public final class Quest extends QuestObject implements Movable
 			description.add(list.getString(k));
 		}
 
-		canRepeat = nbt.getBoolean("can_repeat");
 		guidePage = nbt.getString("guide_page");
 		customClick = nbt.getString("custom_click");
-		hideDependencyLines = nbt.getBoolean("hide_dependency_lines");
+		hideDependencyLines = Tristate.read(nbt, "hide_dependency_lines");
 		minRequiredDependencies = nbt.getInt("min_required_dependencies");
 
 		dependencies.clear();
@@ -231,9 +226,9 @@ public final class Quest extends QuestObject implements Movable
 			}
 		}
 
-		hide = nbt.getBoolean("hide");
+		hide = Tristate.read(nbt, "hide");
 		dependencyRequirement = DependencyRequirement.NAME_MAP.get(nbt.getString("dependency_requirement"));
-		hideTextUntilComplete = nbt.getBoolean("hide_text_until_complete");
+		hideTextUntilComplete = Tristate.read(nbt, "hide_text_until_complete");
 		size = nbt.contains("size") ? nbt.getDouble("size") : 1D;
 	}
 
@@ -242,15 +237,15 @@ public final class Quest extends QuestObject implements Movable
 	{
 		super.writeNetData(buffer);
 		int flags = 0;
-		flags = Bits.setFlag(flags, 1, canRepeat);
-		flags = Bits.setFlag(flags, 2, hide);
-		flags = Bits.setFlag(flags, 4, !guidePage.isEmpty());
-		flags = Bits.setFlag(flags, 8, !subtitle.isEmpty());
-		flags = Bits.setFlag(flags, 16, !description.isEmpty());
-		flags = Bits.setFlag(flags, 32, !customClick.isEmpty());
-		flags = Bits.setFlag(flags, 64, hideDependencyLines);
-		flags = Bits.setFlag(flags, 128, hideTextUntilComplete);
+		flags = Bits.setFlag(flags, 1, !subtitle.isEmpty());
+		flags = Bits.setFlag(flags, 2, !description.isEmpty());
+		flags = Bits.setFlag(flags, 4, !customClick.isEmpty());
+		flags = Bits.setFlag(flags, 8, !guidePage.isEmpty());
 		buffer.writeVarInt(flags);
+
+		hide.write(buffer);
+		hideDependencyLines.write(buffer);
+		hideTextUntilComplete.write(buffer);
 
 		if (!subtitle.isEmpty())
 		{
@@ -300,12 +295,16 @@ public final class Quest extends QuestObject implements Movable
 	{
 		super.readNetData(buffer);
 		int flags = buffer.readVarInt();
-		subtitle = Bits.getFlag(flags, 8) ? buffer.readString() : "";
+		hide = Tristate.read(buffer);
+		hideDependencyLines = Tristate.read(buffer);
+		hideTextUntilComplete = Tristate.read(buffer);
+
+		subtitle = Bits.getFlag(flags, 1) ? buffer.readString() : "";
 		x = buffer.readDouble();
 		y = buffer.readDouble();
 		shape = QuestShape.NAME_MAP.read(buffer);
 
-		if (Bits.getFlag(flags, 16))
+		if (Bits.getFlag(flags, 2))
 		{
 			NetUtils.readStrings(buffer, description);
 		}
@@ -314,12 +313,8 @@ public final class Quest extends QuestObject implements Movable
 			description.clear();
 		}
 
-		canRepeat = Bits.getFlag(flags, 1);
-		hide = Bits.getFlag(flags, 2);
-		guidePage = Bits.getFlag(flags, 4) ? buffer.readString() : "";
-		customClick = Bits.getFlag(flags, 32) ? buffer.readString() : "";
-		hideDependencyLines = Bits.getFlag(flags, 64);
-		hideTextUntilComplete = Bits.getFlag(flags, 128);
+		customClick = Bits.getFlag(flags, 4) ? buffer.readString() : "";
+		guidePage = Bits.getFlag(flags, 8) ? buffer.readString() : "";
 
 		minRequiredDependencies = buffer.readVarInt();
 		dependencyRequirement = DependencyRequirement.NAME_MAP.read(buffer);
@@ -487,12 +482,6 @@ public final class Quest extends QuestObject implements Movable
 	}
 
 	@Override
-	public File getFile()
-	{
-		return new File(chapter.file.getFolder(), "chapters/" + getCodeString(chapter) + "/" + getCodeString(this) + ".nbt");
-	}
-
-	@Override
 	@OnlyIn(Dist.CLIENT)
 	public void getConfig(ConfigGroup config)
 	{
@@ -500,8 +489,7 @@ public final class Quest extends QuestObject implements Movable
 		config.addString("subtitle", subtitle, v -> subtitle = v, "");
 		config.addList("description", description, new ConfigString(), "");
 		config.addEnum("shape", shape, v -> shape = v, QuestShape.NAME_MAP);
-		config.addBool("hide", hide, v -> hide = v, false);
-		config.addBool("can_repeat", canRepeat, v -> canRepeat = v, false);
+		config.addTristate("hide", hide, v -> hide = v);
 		config.addDouble("size", size, v -> size = v, 1, 0.5D, 3D);
 		config.addDouble("x", x, v -> x = v, 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
 		config.addDouble("y", y, v -> y = v, 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
@@ -511,10 +499,10 @@ public final class Quest extends QuestObject implements Movable
 		config.addList("dependencies", dependencies, new ConfigQuestObject<>(depTypes), null).setNameKey("ftbquests.dependencies");
 		config.addEnum("dependency_requirement", dependencyRequirement, v -> dependencyRequirement = v, DependencyRequirement.NAME_MAP);
 		config.addInt("min_required_dependencies", minRequiredDependencies, v -> minRequiredDependencies = v, 0, 0, Integer.MAX_VALUE);
-		config.addBool("hide_dependency_lines", hideDependencyLines, v -> hideDependencyLines = v, false);
+		config.addTristate("hide_dependency_lines", hideDependencyLines, v -> hideDependencyLines = v);
 		config.addString("guide_page", guidePage, v -> guidePage = v, "");
 		config.addString("custom_click", customClick, v -> customClick = v, "");
-		config.addBool("hide_text_until_complete", hideTextUntilComplete, v -> hideTextUntilComplete = v, false);
+		config.addTristate("hide_text_until_complete", hideTextUntilComplete, v -> hideTextUntilComplete = v);
 		config.addEnum("disable_jei", disableJEI, v -> disableJEI = v, Tristate.NAME_MAP);
 	}
 
@@ -569,7 +557,7 @@ public final class Quest extends QuestObject implements Movable
 			return true;
 		}
 
-		if (hide)
+		if (hide.get(false))
 		{
 			return data.areDependenciesComplete(this);
 		}
@@ -760,24 +748,6 @@ public final class Quest extends QuestObject implements Movable
 		return true;
 	}
 
-	public void checkRepeatableQuests(PlayerData data)
-	{
-		if (!canRepeat)
-		{
-			return;
-		}
-
-		for (Reward reward1 : rewards)
-		{
-			if (!data.isRewardClaimed(reward1.id))
-			{
-				return;
-			}
-		}
-
-		changeProgress(data, ChangeProgress.RESET);
-	}
-
 	@Override
 	public int refreshJEI()
 	{
@@ -788,7 +758,7 @@ public final class Quest extends QuestObject implements Movable
 	@OnlyIn(Dist.CLIENT)
 	public void editedFromGUI()
 	{
-		GuiQuestTree gui = ClientUtils.getCurrentGuiAs(GuiQuestTree.class);
+		GuiQuests gui = ClientUtils.getCurrentGuiAs(GuiQuests.class);
 
 		if (gui != null)
 		{
@@ -809,16 +779,9 @@ public final class Quest extends QuestObject implements Movable
 
 			if (c != null)
 			{
-				File oldFile = f.getSide().isClient() ? null : getFile();
 				chapter.quests.remove(this);
 				c.quests.add(this);
 				chapter = c;
-				File newFile = f.getSide().isClient() ? null : getFile();
-
-				if (oldFile != null && newFile != null && !oldFile.renameTo(newFile))
-				{
-					FTBQuests.LOGGER.error("Couldn't rename " + oldFile.getPath() + " to " + newFile.getPath());
-				}
 			}
 		}
 	}

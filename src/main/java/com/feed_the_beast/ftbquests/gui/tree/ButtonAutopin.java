@@ -13,7 +13,7 @@ public class ButtonAutopin extends ButtonTab
 {
 	public ButtonAutopin(Panel panel)
 	{
-		super(panel, I18n.format(((GuiQuestTree) panel.getGui()).file.self.getAutoPin() ? "ftbquests.gui.autopin.on" : "ftbquests.gui.autopin.off"), ((GuiQuestTree) panel.getGui()).file.self.getAutoPin() ? ThemeProperties.PIN_ICON_ON.get() : ThemeProperties.PIN_ICON_OFF.get());
+		super(panel, I18n.format(((GuiQuests) panel.getGui()).file.self.getAutoPin() ? "ftbquests.gui.autopin.on" : "ftbquests.gui.autopin.off"), ((GuiQuests) panel.getGui()).file.self.getAutoPin() ? ThemeProperties.PIN_ICON_ON.get() : ThemeProperties.PIN_ICON_OFF.get());
 	}
 
 	@Override

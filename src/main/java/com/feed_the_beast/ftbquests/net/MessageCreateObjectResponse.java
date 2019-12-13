@@ -24,8 +24,8 @@ public class MessageCreateObjectResponse extends MessageBase
 
 	public MessageCreateObjectResponse(PacketBuffer buffer)
 	{
-		id = buffer.readInt();
-		parent = buffer.readInt();
+		id = buffer.readVarInt();
+		parent = buffer.readVarInt();
 		type = QuestObjectType.NAME_MAP.read(buffer);
 		nbt = buffer.readCompoundTag();
 		extra = buffer.readCompoundTag();
@@ -44,13 +44,14 @@ public class MessageCreateObjectResponse extends MessageBase
 	@Override
 	public void write(PacketBuffer buffer)
 	{
-		buffer.writeInt(id);
-		buffer.writeInt(parent);
+		buffer.writeVarInt(id);
+		buffer.writeVarInt(parent);
 		QuestObjectType.NAME_MAP.write(buffer, type);
 		buffer.writeCompoundTag(nbt);
 		buffer.writeCompoundTag(extra);
 	}
 
+	@Override
 	public void handle(NetworkEvent.Context context)
 	{
 		QuestObjectBase object = ClientQuestFile.INSTANCE.create(type, parent, extra == null ? new CompoundNBT() : extra);

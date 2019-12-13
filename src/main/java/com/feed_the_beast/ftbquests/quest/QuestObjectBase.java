@@ -7,6 +7,7 @@ import com.feed_the_beast.ftbquests.net.MessageChangeProgressResponse;
 import com.feed_the_beast.ftbquests.net.MessageEditObject;
 import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
 import com.feed_the_beast.ftbquests.util.FileUtils;
+import com.feed_the_beast.ftbquests.util.NBTUtils;
 import com.feed_the_beast.ftbquests.util.NetUtils;
 import com.feed_the_beast.ftbquests.util.QuestObjectText;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
@@ -61,12 +62,12 @@ public abstract class QuestObjectBase
 
 	public static String getCodeString(int id)
 	{
-		return String.format("%08x", id);
+		return Integer.toUnsignedString(id);
 	}
 
 	public static String getCodeString(@Nullable QuestObjectBase object)
 	{
-		return String.format("%08x", getID(object));
+		return getCodeString(getID(object));
 	}
 
 	public int id = 0;
@@ -141,7 +142,7 @@ public abstract class QuestObjectBase
 			new MessageChangeProgressResponse(data.uuid, id, type, notifications).sendToAll();
 		}
 
-		data.markDirty();
+		data.save();
 	}
 
 	@Nullable
@@ -162,10 +163,7 @@ public abstract class QuestObjectBase
 			nbt.putString("title", title);
 		}
 
-		if (!icon.isEmpty())
-		{
-			nbt.put("icon", icon.serializeNBT());
-		}
+		NBTUtils.write(nbt, "icon", icon);
 
 		if (!tags.isEmpty())
 		{
@@ -183,7 +181,7 @@ public abstract class QuestObjectBase
 	public void readData(CompoundNBT nbt)
 	{
 		title = nbt.getString("title");
-		icon = nbt.contains("icon") ? ItemStack.read(nbt.getCompound("icon")) : ItemStack.EMPTY;
+		icon = NBTUtils.read(nbt, "icon");
 
 		ListNBT tagsList = nbt.getList("tags", Constants.NBT.TAG_STRING);
 
@@ -430,7 +428,7 @@ public abstract class QuestObjectBase
 	}
 
 	@Nullable
-	public File getFile()
+	public String getPath()
 	{
 		return null;
 	}
@@ -449,12 +447,13 @@ public abstract class QuestObjectBase
 	}
 
 	@OnlyIn(Dist.CLIENT)
-	public void onEditButtonClicked()
+	public void onEditButtonClicked(Runnable gui)
 	{
 		ConfigGroup group = new ConfigGroup(FTBQuests.MOD_ID);
 		getConfig(createSubGroup(group));
 
 		group.savedCallback = accepted -> {
+			gui.run();
 			if (accepted)
 			{
 				new MessageEditObject(this).sendToServer();

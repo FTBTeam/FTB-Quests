@@ -16,7 +16,7 @@ public class MessageSubmitTask extends MessageBase
 
 	MessageSubmitTask(PacketBuffer buffer)
 	{
-		task = buffer.readInt();
+		task = buffer.readVarInt();
 	}
 
 	public MessageSubmitTask(int t)
@@ -27,7 +27,7 @@ public class MessageSubmitTask extends MessageBase
 	@Override
 	public void write(PacketBuffer buffer)
 	{
-		buffer.writeInt(task);
+		buffer.writeVarInt(task);
 	}
 
 	@Override

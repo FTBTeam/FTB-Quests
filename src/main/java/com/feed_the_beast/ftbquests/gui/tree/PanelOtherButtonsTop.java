@@ -17,12 +17,7 @@ public class PanelOtherButtonsTop extends PanelOtherButtons
 	@Override
 	public void addWidgets()
 	{
-		int r = treeGui.file.self.getUnclaimedRewards(false);
-
-		if (r > 0)
-		{
-			add(new ButtonCollectRewards(this, r));
-		}
+		add(new ButtonRewards(this));
 
 		if (ModList.get().isLoaded("ftbguides"))
 		{

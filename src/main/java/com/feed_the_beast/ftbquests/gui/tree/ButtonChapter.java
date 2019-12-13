@@ -71,7 +71,7 @@ public class ButtonChapter extends ButtonTab
 			return;
 		}
 
-		if (treeGui.file.self.hasUnclaimedRewards(chapter, true))
+		if (treeGui.file.self.hasUnclaimedRewards(chapter))
 		{
 			GlStateManager.pushMatrix();
 			GlStateManager.translatef(0, 0, 450);

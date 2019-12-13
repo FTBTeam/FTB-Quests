@@ -1,5 +1,5 @@
 [*]
-background:          ftblib:textures/gui/background_squares.png; color=#DCFFFFFF; tile_size=64
+background:          ftbguilibrary:textures/gui/background_squares.png; color=#DCFFFFFF; tile_size=64
 
 text_color:          #FFFFFF
 hover_text_color:    #FFFFA0
@@ -24,7 +24,7 @@ icon:                 none
 check_icon:           builtin
 add_icon:             builtin
 alert_icon:           ftbquests:textures/gui/alert.png
-support_icon:         ftblib:textures/icons/support.png
+support_icon:         ftbguilibrary:textures/icons/support.png
 wiki_icon:            ftbquests:textures/gui/info.png
 wiki_url:             https://github.com/FTBTeam/FTB-Quests/wiki
 pin_icon_on:          ftbquests:textures/gui/pin.png; color=#F8BD1C
@@ -34,14 +34,14 @@ close_icon:           ftbquests:textures/gui/close.png
 emergency_items_icon: ftbquests:textures/gui/emergency_items.png; color=#F3D9FF
 guide_icon:           ftbquests:textures/gui/guide.png; color=#EF9E1A
 collect_rewards_icon: ftbquests:textures/gui/collect_rewards.png; color=#F8E71C
-reward_table_icon:    ftblib:icons/money_bag
+reward_table_icon:    ftbguilibrary:icons/money_bag
 shop_icon:            ftbquests:textures/gui/shop.png; color=#EF9E1A
-delete_icon:          ftblib:icons/remove
-reload_icon:          ftblib:icons/refresh
-download_icon:        ftblib:icons/down
-edit_icon:            ftblib:icons/settings
-move_up_icon:         ftblib:icons/up
-move_down_icon:       ftblib:icons/down
+delete_icon:          ftbguilibrary:icons/remove
+reload_icon:          ftbguilibrary:icons/refresh
+download_icon:        ftbguilibrary:icons/down
+edit_icon:            ftbguilibrary:icons/settings
+move_up_icon:         ftbguilibrary:icons/up
+move_down_icon:       ftbguilibrary:icons/down
 
 full_screen_quest:                  0
 tasks_text_color:                   #5555FF

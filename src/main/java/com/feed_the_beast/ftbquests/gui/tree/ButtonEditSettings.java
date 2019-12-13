@@ -42,7 +42,7 @@ public class ButtonEditSettings extends ButtonTab
 		}
 
 		List<ContextMenuItem> contextMenu = new ArrayList<>();
-		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.edit_file"), ThemeProperties.SETTINGS_ICON.get(), treeGui.file::onEditButtonClicked));
+		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.edit_file"), ThemeProperties.SETTINGS_ICON.get(), () -> treeGui.file.onEditButtonClicked(this)));
 		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.reset_progress"), ThemeProperties.RELOAD_ICON.get(), () -> new MessageChangeProgress(ClientQuestFile.INSTANCE.self.uuid, treeGui.file.id, ChangeProgress.RESET).sendToServer()).setYesNo(new TranslationTextComponent("ftbquests.gui.reset_progress_q")));
 		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.complete_instantly"), ThemeProperties.CHECK_ICON.get(), () -> new MessageChangeProgress(ClientQuestFile.INSTANCE.self.uuid, treeGui.file.id, ChangeProgress.COMPLETE).sendToServer()).setYesNo(new TranslationTextComponent("ftbquests.gui.complete_instantly_q")));
 		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.reward_tables"), ThemeProperties.REWARD_TABLE_ICON.get(), () -> new GuiRewardTables().openGui()));
@@ -58,7 +58,7 @@ public class ButtonEditSettings extends ButtonTab
 				appendNum(fileName, time.get(Calendar.MINUTE), '-');
 				appendNum(fileName, time.get(Calendar.SECOND), '\0');
 				File file = new File(Minecraft.getInstance().gameDir, fileName.toString()).getCanonicalFile();
-				ClientQuestFile.INSTANCE.writeDataFull(file);
+				ClientQuestFile.INSTANCE.writeDataFull(file.toPath());
 				ITextComponent component = new TranslationTextComponent("ftbquests.gui.saved_as_file", file.getPath().replace(Minecraft.getInstance().gameDir.getCanonicalFile().getAbsolutePath(), ""));
 				component.getStyle().setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, file.getAbsolutePath()));
 				Minecraft.getInstance().player.sendMessage(component);

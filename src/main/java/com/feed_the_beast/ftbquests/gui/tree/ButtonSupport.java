@@ -19,6 +19,6 @@ public class ButtonSupport extends ButtonTab
 	public void onClicked(MouseButton button)
 	{
 		playClickSound();
-		handleClick("https://latvian.dev/supporting/");
+		handleClick("https://github.com/sponsors/LatvianModder");
 	}
 }

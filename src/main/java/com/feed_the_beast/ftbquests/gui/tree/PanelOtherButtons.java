@@ -7,12 +7,12 @@ import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
  */
 public abstract class PanelOtherButtons extends Panel
 {
-	public final GuiQuestTree treeGui;
+	public final GuiQuests treeGui;
 
 	public PanelOtherButtons(Panel panel)
 	{
 		super(panel);
-		treeGui = (GuiQuestTree) panel.getGui();
+		treeGui = (GuiQuests) panel.getGui();
 		setWidth(20);
 	}
 }

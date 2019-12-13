@@ -22,7 +22,7 @@ public class MessageChangeProgressResponse extends MessageBase
 	MessageChangeProgressResponse(PacketBuffer buffer)
 	{
 		player = NetUtils.readUUID(buffer);
-		id = buffer.readInt();
+		id = buffer.readVarInt();
 		type = ChangeProgress.NAME_MAP.read(buffer);
 		notifications = buffer.readBoolean();
 	}
@@ -39,11 +39,12 @@ public class MessageChangeProgressResponse extends MessageBase
 	public void write(PacketBuffer buffer)
 	{
 		NetUtils.writeUUID(buffer, player);
-		buffer.writeInt(id);
+		buffer.writeVarInt(id);
 		ChangeProgress.NAME_MAP.write(buffer, type);
 		buffer.writeBoolean(notifications);
 	}
 
+	@Override
 	public void handle(NetworkEvent.Context context)
 	{
 		QuestObjectBase object = ClientQuestFile.INSTANCE.getBase(id);
