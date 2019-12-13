@@ -8,20 +8,15 @@ import com.feed_the_beast.ftbquests.util.FTBQuestsInventoryListener;
 import com.feed_the_beast.mods.ftbguilibrary.utils.StringUtils;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.Direction;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ICapabilityProvider;
-import net.minecraftforge.common.util.LazyOptional;
 
-import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
 
 /**
  * @author LatvianModder
  */
-public class TaskData<T extends Task> implements ICapabilityProvider
+public class TaskData<T extends Task>
 {
 	public final T task;
 	public final PlayerData data;
@@ -94,12 +89,6 @@ public class TaskData<T extends Task> implements ICapabilityProvider
 	public final void addProgress(long p)
 	{
 		setProgress(progress + p);
-	}
-
-	@Override
-	public <C> LazyOptional<C> getCapability(Capability<C> capability, @Nullable Direction facing)
-	{
-		return LazyOptional.empty();
 	}
 
 	public final int getRelativeProgress()

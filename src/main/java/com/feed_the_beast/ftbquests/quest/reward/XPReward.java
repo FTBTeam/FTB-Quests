@@ -22,10 +22,15 @@ public class XPReward extends Reward
 {
 	public int xp;
 
-	public XPReward(Quest quest)
+	public XPReward(Quest quest, int x)
 	{
 		super(quest);
-		xp = 100;
+		xp = x;
+	}
+
+	public XPReward(Quest quest)
+	{
+		this(quest, 100);
 	}
 
 	@Override

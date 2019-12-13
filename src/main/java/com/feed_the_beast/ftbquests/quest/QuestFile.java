@@ -15,13 +15,13 @@ import com.feed_the_beast.ftbquests.quest.reward.RewardType;
 import com.feed_the_beast.ftbquests.quest.task.CustomTask;
 import com.feed_the_beast.ftbquests.quest.task.Task;
 import com.feed_the_beast.ftbquests.quest.task.TaskType;
+import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
 import com.feed_the_beast.ftbquests.util.NBTUtils;
 import com.feed_the_beast.ftbquests.util.NetUtils;
 import com.feed_the_beast.ftbquests.util.OrderedCompoundNBT;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigItemStack;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
-import com.feed_the_beast.mods.ftbguilibrary.icon.IconAnimation;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.Entity;
@@ -476,7 +476,7 @@ public abstract class QuestFile extends QuestObject
 		fileNBT.putInt("version", VERSION);
 		fileNBT.putInt("last_id", lastID);
 		writeData(fileNBT);
-		NBTUtils.writeSNBT(folder, "file", fileNBT);
+		NBTUtils.writeSNBT(folder, "data", fileNBT);
 
 		for (Chapter chapter : chapters)
 		{
@@ -791,10 +791,7 @@ public abstract class QuestFile extends QuestObject
 			data.write(buffer, data == selfPlayerData);
 		}
 
-		//FIXME: if (FTBLibConfig.debugging.print_more_info)
-		{
-			FTBQuests.LOGGER.info("Wrote " + (buffer.writerIndex() - pos) + " bytes");
-		}
+		FTBQuests.LOGGER.debug("Wrote " + (buffer.writerIndex() - pos) + " bytes");
 	}
 
 	public final void readNetDataFull(PacketBuffer buffer, UUID self)
@@ -899,10 +896,7 @@ public abstract class QuestFile extends QuestObject
 			data.read(buffer, data.uuid.equals(self));
 		}
 
-		//FIXME: if (FTBLibConfig.debugging.print_more_info)
-		{
-			FTBQuests.LOGGER.info("Read " + (buffer.readerIndex() - pos) + " bytes");
-		}
+		FTBQuests.LOGGER.debug("Read " + (buffer.readerIndex() - pos) + " bytes");
 	}
 
 	@Override
@@ -931,14 +925,7 @@ public abstract class QuestFile extends QuestObject
 	@Override
 	public Icon getAltIcon()
 	{
-		List<Icon> list = new ArrayList<>();
-
-		for (Chapter chapter : chapters)
-		{
-			list.add(chapter.getIcon());
-		}
-
-		return IconAnimation.fromList(list, false);
+		return ThemeProperties.MODPACK_ICON.get(this);
 	}
 
 	@Override
@@ -1033,7 +1020,7 @@ public abstract class QuestFile extends QuestObject
 
 		try
 		{
-			return Long.valueOf(id.charAt(0) == '#' ? id.substring(1) : id, 16).intValue();
+			return Long.valueOf(id.charAt(0) == '#' ? id.substring(1) : id).intValue();
 		}
 		catch (Exception ex)
 		{

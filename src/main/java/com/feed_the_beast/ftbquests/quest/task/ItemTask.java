@@ -1,6 +1,7 @@
 package com.feed_the_beast.ftbquests.quest.task;
 
 import com.feed_the_beast.ftbquests.gui.tree.GuiValidItems;
+import com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIHelper;
 import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.util.NBTUtils;
@@ -16,15 +17,10 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.Direction;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fml.ModList;
-import net.minecraftforge.items.CapabilityItemHandler;
-import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemHandlerHelper;
 
 import javax.annotation.Nullable;
@@ -207,7 +203,7 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 	@OnlyIn(Dist.CLIENT)
 	private void showJEIRecipe(ItemStack stack)
 	{
-		//FIXME: FTBLibJEIIntegration.showRecipe(stack);
+		FTBQuestsJEIHelper.showRecipes(stack);
 	}
 
 	@Override
@@ -237,40 +233,14 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 		return new Data(this, data);
 	}
 
-	public static class Data extends TaskData<ItemTask> implements IItemHandler
+	public static class Data extends TaskData<ItemTask>
 	{
-		private final LazyOptional<IItemHandler> itemHandlerProvider = LazyOptional.of(() -> this);
-
 		private Data(ItemTask t, PlayerData data)
 		{
 			super(t, data);
 		}
 
-		@Override
-		public <T> LazyOptional<T> getCapability(Capability<T> capability, @Nullable Direction facing)
-		{
-			return capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY ? itemHandlerProvider.cast() : LazyOptional.empty();
-		}
-
-		@Override
-		public boolean isItemValid(int slot, ItemStack stack)
-		{
-			return true;
-		}
-
-		@Override
-		public final int getSlots()
-		{
-			return 1;
-		}
-
-		@Override
-		public final ItemStack getStackInSlot(int slot)
-		{
-			return ItemStack.EMPTY;
-		}
-
-		private ItemStack insert(ItemStack stack, boolean simulate)
+		public ItemStack insert(ItemStack stack, boolean simulate)
 		{
 			if (!isComplete() && task.test(stack))
 			{
@@ -288,29 +258,6 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 			}
 
 			return stack;
-		}
-
-		@Override
-		public final ItemStack insertItem(int slot, ItemStack stack, boolean simulate)
-		{
-			if (task.consumesResources() && task.getMaxProgress() > 0L && progress < task.getMaxProgress() && !stack.isEmpty())
-			{
-				return insert(stack, simulate);
-			}
-
-			return stack;
-		}
-
-		@Override
-		public final ItemStack extractItem(int slot, int amount, boolean simulate)
-		{
-			return ItemStack.EMPTY;
-		}
-
-		@Override
-		public int getSlotLimit(int slot)
-		{
-			return 64;
 		}
 
 		@Override

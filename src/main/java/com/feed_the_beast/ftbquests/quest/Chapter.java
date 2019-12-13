@@ -2,7 +2,6 @@ package com.feed_the_beast.ftbquests.quest;
 
 import com.feed_the_beast.ftbquests.events.ObjectCompletedEvent;
 import com.feed_the_beast.ftbquests.net.MessageDisplayCompletionToast;
-import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
 import com.feed_the_beast.ftbquests.util.NetUtils;
 import com.feed_the_beast.ftbquests.util.OrderedCompoundNBT;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
@@ -23,7 +22,6 @@ import net.minecraftforge.common.util.Constants;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Predicate;
 
 /**
  * @author LatvianModder
@@ -323,8 +321,8 @@ public final class Chapter extends QuestObject
 		config.addList("subtitle", subtitle, new ConfigString(null), "");
 		config.addBool("always_invisible", alwaysInvisible, v -> alwaysInvisible = v, false);
 
-		Predicate<QuestObjectBase> predicate = object -> object == null || (object instanceof Chapter && object != this && ((Chapter) object).group == null);
-		config.add("group", new ConfigQuestObject<>(predicate), group, v -> group = v, null);
+		//Predicate<QuestObjectBase> predicate = object -> object == null || (object instanceof Chapter && object != this && ((Chapter) object).group == null);
+		//config.add("group", new ConfigQuestObject<>(predicate), group, v -> group = v, null);
 
 		config.addEnum("default_quest_shape", defaultQuestShape, v -> defaultQuestShape = v, QuestShape.NAME_MAP);
 	}

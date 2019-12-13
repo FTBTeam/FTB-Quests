@@ -16,13 +16,13 @@ import java.util.List;
 /**
  * @author LatvianModder
  */
-public class ButtonRewards extends ButtonTab
+public class ButtonModpack extends ButtonTab
 {
 	private final boolean unclaimedRewards;
 
-	public ButtonRewards(Panel panel)
+	public ButtonModpack(Panel panel)
 	{
-		super(panel, "", ThemeProperties.COLLECT_REWARDS_ICON.get());
+		super(panel, "", ClientQuestFile.INSTANCE.getIcon());
 		title = treeGui.file.getTitle();
 		unclaimedRewards = treeGui.file.self.hasUnclaimedRewards();
 	}

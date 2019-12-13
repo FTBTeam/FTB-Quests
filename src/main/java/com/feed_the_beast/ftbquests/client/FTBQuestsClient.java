@@ -7,6 +7,8 @@ import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.reward.FTBQuestsRewards;
 import com.feed_the_beast.ftbquests.quest.reward.ItemReward;
+import com.feed_the_beast.ftbquests.quest.reward.XPLevelsReward;
+import com.feed_the_beast.ftbquests.quest.reward.XPReward;
 import com.feed_the_beast.ftbquests.quest.task.DimensionTask;
 import com.feed_the_beast.ftbquests.quest.task.FTBQuestsTasks;
 import com.feed_the_beast.ftbquests.quest.task.FluidTask;
@@ -15,9 +17,11 @@ import com.feed_the_beast.ftbquests.quest.task.LocationTask;
 import com.feed_the_beast.ftbquests.quest.theme.ThemeLoader;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigFluid;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
+import com.feed_the_beast.mods.ftbguilibrary.config.ConfigInt;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigItemStack;
 import com.feed_the_beast.mods.ftbguilibrary.config.Tristate;
 import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiEditConfig;
+import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiEditConfigFromString;
 import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiSelectFluid;
 import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiSelectItemStack;
 import com.feed_the_beast.mods.ftbguilibrary.utils.StringUtils;
@@ -215,27 +219,31 @@ public class FTBQuestsClient extends FTBQuestsCommon
 			}).openGui();
 		});
 
-		/* FIXME
-		FTBQuestsRewards.XP.setGuiProvider((gui, quest, callback) -> new GuiEditConfigValue("xp", new ConfigInt(100, 1, Integer.MAX_VALUE), (value, set) -> {
-			gui.openGui();
-			if (set)
-			{
-				XPReward reward = new XPReward(quest);
-				reward.xp = value.getInt();
-				callback.accept(reward);
-			}
-		}).openGui());
+		FTBQuestsRewards.XP.setGuiProvider((gui, quest, callback) -> {
+			ConfigInt c = new ConfigInt(1, Integer.MAX_VALUE);
 
-		FTBQuestsRewards.XP_LEVELS.setGuiProvider((gui, quest, callback) -> new GuiEditConfigValue("xp_levels", new ConfigInt(1, 1, Integer.MAX_VALUE), (value, set) -> {
-			gui.openGui();
-			if (set)
-			{
-				XPLevelsReward reward = new XPLevelsReward(quest);
-				reward.xpLevels = value.getInt();
-				callback.accept(reward);
-			}
-		}).openGui());
-		*/
+			GuiEditConfigFromString.open(c, 100, 100, accepted -> {
+				if (accepted)
+				{
+					callback.accept(new XPReward(quest, c.value));
+				}
+
+				gui.run();
+			});
+		});
+
+		FTBQuestsRewards.XP_LEVELS.setGuiProvider((gui, quest, callback) -> {
+			ConfigInt c = new ConfigInt(1, Integer.MAX_VALUE);
+
+			GuiEditConfigFromString.open(c, 5, 5, accepted -> {
+				if (accepted)
+				{
+					callback.accept(new XPLevelsReward(quest, c.value));
+				}
+
+				gui.run();
+			});
+		});
 	}
 
 	@Override

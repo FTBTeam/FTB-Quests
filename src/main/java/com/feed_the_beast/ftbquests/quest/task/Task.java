@@ -181,36 +181,9 @@ public abstract class Task extends QuestObject
 		return group.getGroup(getObjectType().id).getGroup(type.getRegistryName().getNamespace()).getGroup(type.getRegistryName().getPath());
 	}
 
-	/* FIXME:
-	public Class<? extends BlockEntityTaskScreenCore> getScreenCoreClass()
-	{
-		return BlockEntityTaskScreenCore.class;
-	}
-
-	public Class<? extends TileTaskScreenPart> getScreenPartClass()
-	{
-		return TileTaskScreenPart.class;
-	}
-
-	public BlockEntityTaskScreenCore createScreenCore(World world)
-	{
-		return new BlockEntityTaskScreenCore();
-	}
-
-	public TileTaskScreenPart createScreenPart(World world)
-	{
-		return new TileTaskScreenPart();
-	}
-	*/
-
 	public void drawGUI(@Nullable TaskData data, int x, int y, int w, int h)
 	{
 		getIcon().draw(x, y, w, h);
-	}
-
-	public void drawScreen(@Nullable TaskData data)
-	{
-		getIcon().draw3D();
 	}
 
 	public boolean canInsertItem()
