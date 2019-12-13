@@ -6,7 +6,6 @@ import com.feed_the_beast.ftbquests.quest.ChangeProgress;
 import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.util.FTBQuestsInventoryListener;
 import com.feed_the_beast.mods.ftbguilibrary.utils.StringUtils;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Direction;
@@ -14,7 +13,6 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.IItemHandler;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
@@ -23,7 +21,7 @@ import java.util.List;
 /**
  * @author LatvianModder
  */
-public class TaskData<T extends Task> implements ICapabilityProvider, IItemHandler
+public class TaskData<T extends Task> implements ICapabilityProvider
 {
 	public final T task;
 	public final PlayerData data;
@@ -71,7 +69,7 @@ public class TaskData<T extends Task> implements ICapabilityProvider, IItemHandl
 					List<ServerPlayerEntity> onlineMembers = data.getOnlineMembers();
 					List<ServerPlayerEntity> notifiedPlayers;
 
-					if (!task.quest.chapter.alwaysInvisible && !task.quest.canRepeat && ChangeProgress.sendNotifications.get(ChangeProgress.sendUpdates))
+					if (!task.quest.chapter.alwaysInvisible && ChangeProgress.sendNotifications.get(ChangeProgress.sendUpdates))
 					{
 						notifiedPlayers = onlineMembers;
 					}
@@ -89,7 +87,7 @@ public class TaskData<T extends Task> implements ICapabilityProvider, IItemHandl
 				}
 			}
 
-			data.markDirty();
+			data.save();
 		}
 	}
 
@@ -146,78 +144,8 @@ public class TaskData<T extends Task> implements ICapabilityProvider, IItemHandl
 		return data.toString() + "#" + task;
 	}
 
-	public ItemStack insertItem(ItemStack stack, boolean singleItem, boolean simulate, @Nullable PlayerEntity player)
-	{
-		return stack;
-	}
-
-	@Override
-	public boolean isItemValid(int slot, ItemStack stack)
-	{
-		return true;
-	}
-
-	@Override
-	public final int getSlots()
-	{
-		return 1;
-	}
-
-	@Override
-	public final ItemStack getStackInSlot(int slot)
-	{
-		return ItemStack.EMPTY;
-	}
-
-	@Override
-	public final ItemStack insertItem(int slot, ItemStack stack, boolean simulate)
-	{
-		if (task.canInsertItem() && task.getMaxProgress() > 0L && progress < task.getMaxProgress() && !stack.isEmpty())
-		{
-			return insertItem(stack, false, simulate, null);
-		}
-
-		return stack;
-	}
-
-	@Override
-	public final ItemStack extractItem(int slot, int amount, boolean simulate)
-	{
-		return ItemStack.EMPTY;
-	}
-
-	@Override
-	public int getSlotLimit(int slot)
-	{
-		return 64;
-	}
-
 	public void submitTask(ServerPlayerEntity player, ItemStack item)
 	{
-		if (!task.canInsertItem() || !item.isEmpty())
-		{
-			return;
-		}
-
-		boolean changed = false;
-
-		for (int i = 0; i < player.inventory.mainInventory.size(); i++)
-		{
-			ItemStack stack = player.inventory.mainInventory.get(i);
-			ItemStack stack1 = insertItem(stack, false, false, player);
-
-			if (!ItemStack.areItemStacksEqual(stack, stack1))
-			{
-				changed = true;
-				player.inventory.mainInventory.set(i, stack1);
-			}
-		}
-
-		if (changed)
-		{
-			player.inventory.markDirty();
-			player.openContainer.detectAndSendChanges();
-		}
 	}
 
 	public final void submitTask(ServerPlayerEntity player)

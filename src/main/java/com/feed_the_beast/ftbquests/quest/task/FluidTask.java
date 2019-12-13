@@ -316,7 +316,7 @@ public class FluidTask extends Task
 		}
 	}
 
-	public static class Data extends TaskData<FluidTask> implements IFluidHandler
+	public static class Data extends TaskData<FluidTask> implements IFluidHandler, IItemHandler
 	{
 		private final LazyOptional<IFluidHandler> fluidHandlerProvider;
 		private final LazyOptional<IItemHandler> itemHandlerProvider;
@@ -393,7 +393,7 @@ public class FluidTask extends Task
 		{
 			return FluidStack.EMPTY;
 		}
-
+		
 		/*
 		@Override
 		public ItemStack insertItem(ItemStack stack, boolean singleItem, boolean simulate, @Nullable PlayerEntity player)
@@ -458,6 +458,49 @@ public class FluidTask extends Task
 		public int getTankCapacity(int tank)
 		{
 			return (int) Math.min(Integer.MAX_VALUE, task.amount);
+		}
+
+		// Items
+
+		@Override
+		public boolean isItemValid(int slot, ItemStack stack)
+		{
+			return true;
+		}
+
+		@Override
+		public final int getSlots()
+		{
+			return 1;
+		}
+
+		@Override
+		public final ItemStack getStackInSlot(int slot)
+		{
+			return ItemStack.EMPTY;
+		}
+
+		@Override
+		public final ItemStack insertItem(int slot, ItemStack stack, boolean simulate)
+		{
+			if (task.canInsertItem() && task.getMaxProgress() > 0L && progress < task.getMaxProgress() && !stack.isEmpty())
+			{
+				//return insertItem(stack, false, simulate, null);
+			}
+
+			return stack;
+		}
+
+		@Override
+		public final ItemStack extractItem(int slot, int amount, boolean simulate)
+		{
+			return ItemStack.EMPTY;
+		}
+
+		@Override
+		public int getSlotLimit(int slot)
+		{
+			return 64;
 		}
 	}
 }

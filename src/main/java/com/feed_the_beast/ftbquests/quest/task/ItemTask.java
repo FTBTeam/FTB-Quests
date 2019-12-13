@@ -3,6 +3,7 @@ package com.feed_the_beast.ftbquests.quest.task;
 import com.feed_the_beast.ftbquests.gui.tree.GuiValidItems;
 import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.util.NBTUtils;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
 import com.feed_the_beast.mods.ftbguilibrary.config.Tristate;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
@@ -11,7 +12,6 @@ import com.feed_the_beast.mods.ftbguilibrary.icon.ItemIcon;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
 import dev.latvian.mods.itemfilters.api.ItemFiltersAPI;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
@@ -45,6 +45,7 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 	{
 		super(quest);
 		item = ItemStack.EMPTY;
+		count = 1;
 		consumeItems = Tristate.DEFAULT;
 	}
 
@@ -64,21 +65,24 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 	public void writeData(CompoundNBT nbt)
 	{
 		super.writeData(nbt);
-		nbt.put("item", item.serializeNBT());
+		NBTUtils.write(nbt, "item", item);
 
 		if (count > 1)
 		{
 			nbt.putLong("count", count);
 		}
 
-		consumeItems.write(nbt, "consume_items");
+		if (consumeItems != Tristate.DEFAULT)
+		{
+			consumeItems.write(nbt, "consume_items");
+		}
 	}
 
 	@Override
 	public void readData(CompoundNBT nbt)
 	{
 		super.readData(nbt);
-		item = ItemStack.read(nbt.getCompound("item"));
+		item = NBTUtils.read(nbt, "item");
 		count = nbt.getLong("count");
 
 		if (count < 1)
@@ -159,21 +163,27 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 	public void getConfig(ConfigGroup config)
 	{
 		super.getConfig(config);
-		config.addItemStack("items", item, v -> item = v, ItemStack.EMPTY, true, false);
+		config.addItemStack("item", item, v -> item = v, ItemStack.EMPTY, true, false).setNameKey("ftbquests.task.ftbquests.item");
 		config.addLong("count", count, v -> count = v, 1, 1, Long.MAX_VALUE);
-		config.addEnum("consume_items", consumeItems, v -> consumeItems = v, Tristate.NAME_MAP).setCanEdit(!quest.canRepeat);
+		config.addEnum("consume_items", consumeItems, v -> consumeItems = v, Tristate.NAME_MAP);
+	}
+
+	@Override
+	public boolean consumesResources()
+	{
+		return consumeItems.get(quest.chapter.file.defaultTeamConsumeItems);
 	}
 
 	@Override
 	public boolean canInsertItem()
 	{
-		return quest.canRepeat || consumeItems.get(quest.chapter.file.defaultTeamConsumeItems);
+		return consumesResources();
 	}
 
 	@Override
 	public boolean submitItemsOnInventoryChange()
 	{
-		return !canInsertItem();
+		return !consumesResources();
 	}
 
 	@Override
@@ -227,7 +237,7 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 		return new Data(this, data);
 	}
 
-	public static class Data extends TaskData<ItemTask>
+	public static class Data extends TaskData<ItemTask> implements IItemHandler
 	{
 		private final LazyOptional<IItemHandler> itemHandlerProvider = LazyOptional.of(() -> this);
 
@@ -243,7 +253,24 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 		}
 
 		@Override
-		public ItemStack insertItem(ItemStack stack, boolean singleItem, boolean simulate, @Nullable PlayerEntity player)
+		public boolean isItemValid(int slot, ItemStack stack)
+		{
+			return true;
+		}
+
+		@Override
+		public final int getSlots()
+		{
+			return 1;
+		}
+
+		@Override
+		public final ItemStack getStackInSlot(int slot)
+		{
+			return ItemStack.EMPTY;
+		}
+
+		private ItemStack insert(ItemStack stack, boolean simulate)
 		{
 			if (!isComplete() && task.test(stack))
 			{
@@ -251,12 +278,7 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 
 				if (add > 0L)
 				{
-					if (singleItem)
-					{
-						add = 1L;
-					}
-
-					if (!simulate && data.file.getSide().isServer())
+					if (!simulate && !data.file.getSide().isClient())
 					{
 						addProgress(add);
 					}
@@ -269,9 +291,26 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 		}
 
 		@Override
+		public final ItemStack insertItem(int slot, ItemStack stack, boolean simulate)
+		{
+			if (task.consumesResources() && task.getMaxProgress() > 0L && progress < task.getMaxProgress() && !stack.isEmpty())
+			{
+				return insert(stack, simulate);
+			}
+
+			return stack;
+		}
+
+		@Override
+		public final ItemStack extractItem(int slot, int amount, boolean simulate)
+		{
+			return ItemStack.EMPTY;
+		}
+
+		@Override
 		public int getSlotLimit(int slot)
 		{
-			return (int) Math.min(64L, task.count - progress);
+			return 64;
 		}
 
 		@Override
@@ -282,7 +321,7 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 				return;
 			}
 
-			if (!task.canInsertItem())
+			if (!task.consumesResources())
 			{
 				long count = 0;
 
@@ -315,9 +354,9 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 			for (int i = 0; i < player.inventory.mainInventory.size(); i++)
 			{
 				ItemStack stack = player.inventory.mainInventory.get(i);
-				ItemStack stack1 = insertItem(stack, false, false, player);
+				ItemStack stack1 = insert(stack, false);
 
-				if (!ItemStack.areItemStacksEqual(stack, stack1))
+				if (stack != stack1)
 				{
 					changed = true;
 					player.inventory.mainInventory.set(i, stack1.isEmpty() ? ItemStack.EMPTY : stack1);

@@ -15,7 +15,7 @@ public class MessageTogglePinnedResponse extends MessageBase
 
 	public MessageTogglePinnedResponse(PacketBuffer buffer)
 	{
-		id = buffer.readInt();
+		id = buffer.readVarInt();
 	}
 
 	public MessageTogglePinnedResponse(int i)
@@ -26,7 +26,7 @@ public class MessageTogglePinnedResponse extends MessageBase
 	@Override
 	public void write(PacketBuffer buffer)
 	{
-		buffer.writeInt(id);
+		buffer.writeVarInt(id);
 	}
 
 	@Override

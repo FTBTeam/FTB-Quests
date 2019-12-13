@@ -38,7 +38,7 @@ import java.util.List;
 public class PanelQuests extends Panel
 {
 	private static final ImageIcon DEFAULT_DEPENDENCY_LINE_TEXTURE = (ImageIcon) Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/dependency.png");
-	public final GuiQuestTree treeGui;
+	public final GuiQuests treeGui;
 	public double questX = 0;
 	public double questY = 0;
 	public double centerQuestX = 0;
@@ -49,7 +49,7 @@ public class PanelQuests extends Panel
 	public PanelQuests(Panel panel)
 	{
 		super(panel);
-		treeGui = (GuiQuestTree) panel.getGui();
+		treeGui = (GuiQuests) panel.getGui();
 	}
 
 	public void updateMinMax()
@@ -234,7 +234,7 @@ public class PanelQuests extends Panel
 
 			Quest wquest = ((ButtonQuest) widget).quest;
 
-			if (wquest.hideDependencyLines)
+			if (wquest.hideDependencyLines.get(false))
 			{
 				continue;
 			}
@@ -296,7 +296,7 @@ public class PanelQuests extends Panel
 
 			Quest wquest = ((ButtonQuest) widget).quest;
 
-			if (wquest.hideDependencyLines)
+			if (wquest.hideDependencyLines.get(false))
 			{
 				continue;
 			}
@@ -387,8 +387,8 @@ public class PanelQuests extends Panel
 				GlStateManager.translatef(0F, 0F, 1000F);
 				theme.drawString("X:" + (questX < 0 ? "" : " ") + StringUtils.DOUBLE_FORMATTER_00.format(questX), x + 3, y + h - 18, Theme.SHADOW);
 				theme.drawString("Y:" + (questY < 0 ? "" : " ") + StringUtils.DOUBLE_FORMATTER_00.format(questY), x + 3, y + h - 10, Theme.SHADOW);
-				theme.drawString("CX:" + (centerQuestX < 0 ? "" : " ") + StringUtils.DOUBLE_FORMATTER_00.format(centerQuestX), x + w - 30, y + h - 18, Theme.SHADOW);
-				theme.drawString("CY:" + (centerQuestY < 0 ? "" : " ") + StringUtils.DOUBLE_FORMATTER_00.format(centerQuestY), x + w - 30, y + h - 10, Theme.SHADOW);
+				theme.drawString("CX:" + (centerQuestX < 0 ? "" : " ") + StringUtils.DOUBLE_FORMATTER_00.format(centerQuestX), x + w - 42, y + h - 18, Theme.SHADOW);
+				theme.drawString("CY:" + (centerQuestY < 0 ? "" : " ") + StringUtils.DOUBLE_FORMATTER_00.format(centerQuestY), x + w - 42, y + h - 10, Theme.SHADOW);
 				GlStateManager.popMatrix();
 				theme.popFontUnicode();
 
@@ -420,7 +420,7 @@ public class PanelQuests extends Panel
 						GlStateManager.popMatrix();
 					}
 
-					if (GuiQuestTree.grid && treeGui.viewQuestPanel.quest == null)
+					if (GuiQuests.grid && treeGui.viewQuestPanel.quest == null)
 					{
 						double boxX = ominX / dx * treeGui.scrollWidth + px;
 						double boxY = ominY / dy * treeGui.scrollHeight + py;
@@ -446,7 +446,7 @@ public class PanelQuests extends Panel
 					treeGui.selectedChapter.getDefaultQuestShape().shape.withColor(Color4I.WHITE.withAlpha(10)).draw(0, 0, 1, 1);
 					GlStateManager.popMatrix();
 
-					if (GuiQuestTree.grid && treeGui.viewQuestPanel.quest == null)
+					if (GuiQuests.grid && treeGui.viewQuestPanel.quest == null)
 					{
 						GlStateManager.pushMatrix();
 						GlStateManager.translatef(0, 0, 1000);

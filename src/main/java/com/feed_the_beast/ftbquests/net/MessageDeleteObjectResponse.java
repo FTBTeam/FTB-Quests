@@ -15,7 +15,7 @@ public class MessageDeleteObjectResponse extends MessageBase
 
 	MessageDeleteObjectResponse(PacketBuffer buffer)
 	{
-		id = buffer.readInt();
+		id = buffer.readVarInt();
 	}
 
 	public MessageDeleteObjectResponse(int i)
@@ -26,9 +26,10 @@ public class MessageDeleteObjectResponse extends MessageBase
 	@Override
 	public void write(PacketBuffer buffer)
 	{
-		buffer.writeInt(id);
+		buffer.writeVarInt(id);
 	}
 
+	@Override
 	public void handle(NetworkEvent.Context context)
 	{
 		if (ClientQuestFile.exists())

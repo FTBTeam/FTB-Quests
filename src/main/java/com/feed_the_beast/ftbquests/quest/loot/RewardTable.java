@@ -2,7 +2,7 @@ package com.feed_the_beast.ftbquests.quest.loot;
 
 import com.feed_the_beast.ftbquests.gui.GuiEditRewardTable;
 import com.feed_the_beast.ftbquests.gui.GuiRewardTables;
-import com.feed_the_beast.ftbquests.gui.tree.GuiQuestTree;
+import com.feed_the_beast.ftbquests.gui.tree.GuiQuests;
 import com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIHelper;
 import com.feed_the_beast.ftbquests.net.MessageEditObject;
 import com.feed_the_beast.ftbquests.quest.Chapter;
@@ -29,7 +29,6 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.util.Constants;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -263,7 +262,7 @@ public final class RewardTable extends QuestObjectBase
 	@OnlyIn(Dist.CLIENT)
 	public void editedFromGUI()
 	{
-		GuiQuestTree gui = ClientUtils.getCurrentGuiAs(GuiQuestTree.class);
+		GuiQuests gui = ClientUtils.getCurrentGuiAs(GuiQuests.class);
 
 		if (gui != null && gui.getViewedQuest() != null)
 		{
@@ -287,9 +286,9 @@ public final class RewardTable extends QuestObjectBase
 	}
 
 	@Override
-	public File getFile()
+	public String getPath()
 	{
-		return new File(file.getFolder(), "reward_tables/" + getCodeString(this) + ".nbt");
+		return "reward_tables/" + getCodeString(this);
 	}
 
 	@Override
@@ -328,7 +327,7 @@ public final class RewardTable extends QuestObjectBase
 
 	@Override
 	@OnlyIn(Dist.CLIENT)
-	public void onEditButtonClicked()
+	public void onEditButtonClicked(Runnable gui)
 	{
 		new GuiEditRewardTable(this, () -> new MessageEditObject(this).sendToServer()).openGui();
 	}

@@ -4,6 +4,7 @@ import com.feed_the_beast.ftbquests.events.ObjectCompletedEvent;
 import com.feed_the_beast.ftbquests.net.MessageDisplayCompletionToast;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
 import com.feed_the_beast.ftbquests.util.NetUtils;
+import com.feed_the_beast.ftbquests.util.OrderedCompoundNBT;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigString;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
@@ -19,7 +20,6 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.Constants;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -31,6 +31,7 @@ import java.util.function.Predicate;
 public final class Chapter extends QuestObject
 {
 	public final QuestFile file;
+	public String filename;
 	public final List<Quest> quests;
 	public final List<String> subtitle;
 	public boolean alwaysInvisible;
@@ -41,6 +42,7 @@ public final class Chapter extends QuestObject
 	public Chapter(QuestFile f)
 	{
 		file = f;
+		filename = "";
 		quests = new ArrayList<>();
 		subtitle = new ArrayList<>(0);
 		alwaysInvisible = false;
@@ -70,6 +72,7 @@ public final class Chapter extends QuestObject
 	@Override
 	public void writeData(CompoundNBT nbt)
 	{
+		nbt.putString("filename", filename);
 		super.writeData(nbt);
 
 		if (!subtitle.isEmpty())
@@ -81,12 +84,23 @@ public final class Chapter extends QuestObject
 				list.add(new StringNBT(v));
 			}
 
-			nbt.put("description", list);
+			nbt.put("subtitle", list);
 		}
 
-		nbt.putBoolean("always_invisible", alwaysInvisible);
-		nbt.putInt("group", group != null && !group.invalid ? group.id : 0);
-		nbt.putString("default_quest_shape", defaultQuestShape.id);
+		if (alwaysInvisible)
+		{
+			nbt.putBoolean("always_invisible", true);
+		}
+
+		if (group != null && !group.invalid)
+		{
+			nbt.putInt("group", group.id);
+		}
+
+		if (defaultQuestShape != QuestShape.DEFAULT)
+		{
+			nbt.putString("default_quest_shape", defaultQuestShape.id);
+		}
 
 		if (!images.isEmpty())
 		{
@@ -94,7 +108,7 @@ public final class Chapter extends QuestObject
 
 			for (ChapterImage image : images)
 			{
-				CompoundNBT nbt1 = new CompoundNBT();
+				CompoundNBT nbt1 = new OrderedCompoundNBT();
 				image.writeData(nbt1);
 				list.add(nbt1);
 			}
@@ -106,14 +120,15 @@ public final class Chapter extends QuestObject
 	@Override
 	public void readData(CompoundNBT nbt)
 	{
+		filename = nbt.getString("filename");
 		super.readData(nbt);
 		subtitle.clear();
 
-		ListNBT desc = nbt.getList("description", Constants.NBT.TAG_STRING);
+		ListNBT subtitleNBT = nbt.getList("subtitle", Constants.NBT.TAG_STRING);
 
-		for (int i = 0; i < desc.size(); i++)
+		for (int i = 0; i < subtitleNBT.size(); i++)
 		{
-			subtitle.add(desc.getString(i));
+			subtitle.add(subtitleNBT.getString(i));
 		}
 
 		alwaysInvisible = nbt.getBoolean("always_invisible");
@@ -183,11 +198,8 @@ public final class Chapter extends QuestObject
 
 		for (Quest quest : quests)
 		{
-			if (!quest.canRepeat)
-			{
-				progress += data.getRelativeProgress(quest);
-				count++;
-			}
+			progress += data.getRelativeProgress(quest);
+			count++;
 		}
 
 		for (Chapter chapter : getChildren())
@@ -298,9 +310,9 @@ public final class Chapter extends QuestObject
 	}
 
 	@Override
-	public File getFile()
+	public String getPath()
 	{
-		return new File(file.getFolder(), "chapters/" + getCodeString(this));
+		return "chapters/" + filename;
 	}
 
 	@Override

@@ -5,8 +5,11 @@ import com.feed_the_beast.ftbquests.net.MessageClaimRewardResponse;
 import com.feed_the_beast.ftbquests.net.MessageSyncEditingMode;
 import com.feed_the_beast.ftbquests.quest.reward.Reward;
 import com.feed_the_beast.ftbquests.quest.reward.RewardAutoClaim;
+import com.feed_the_beast.ftbquests.quest.reward.RewardClaimType;
 import com.feed_the_beast.ftbquests.quest.task.Task;
 import com.feed_the_beast.ftbquests.quest.task.TaskData;
+import com.feed_the_beast.ftbquests.util.NBTUtils;
+import com.feed_the_beast.ftbquests.util.OrderedCompoundNBT;
 import it.unimi.dsi.fastutil.ints.Int2ByteOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
@@ -35,6 +38,7 @@ public class PlayerData implements INBTSerializable<CompoundNBT>
 	public final QuestFile file;
 	public final UUID uuid;
 	public String name;
+	public boolean shouldSave;
 
 	private final Int2ObjectOpenHashMap<TaskData> taskData;
 	private final IntOpenHashSet claimedRewards;
@@ -46,11 +50,12 @@ public class PlayerData implements INBTSerializable<CompoundNBT>
 	private Int2ByteOpenHashMap progressCache;
 	private Int2ByteOpenHashMap areDependenciesCompleteCache;
 
-	public PlayerData(QuestFile f, UUID id, String n)
+	public PlayerData(QuestFile f, UUID id)
 	{
 		file = f;
 		uuid = id;
-		name = n;
+		name = "";
+		shouldSave = false;
 		taskData = new Int2ObjectOpenHashMap<>();
 		claimedRewards = new IntOpenHashSet();
 		canEdit = false;
@@ -59,8 +64,9 @@ public class PlayerData implements INBTSerializable<CompoundNBT>
 		pinnedQuests = new IntOpenHashSet();
 	}
 
-	public void markDirty()
+	public void save()
 	{
+		shouldSave = true;
 	}
 
 	public TaskData getTaskData(Task task)
@@ -87,7 +93,7 @@ public class PlayerData implements INBTSerializable<CompoundNBT>
 	{
 		if (claimed ? claimedRewards.add(id) : claimedRewards.remove(id))
 		{
-			markDirty();
+			save();
 			return true;
 		}
 
@@ -104,7 +110,7 @@ public class PlayerData implements INBTSerializable<CompoundNBT>
 		if (canEdit != mode)
 		{
 			canEdit = mode;
-			markDirty();
+			save();
 
 			if (file.getSide().isServer())
 			{
@@ -134,7 +140,7 @@ public class PlayerData implements INBTSerializable<CompoundNBT>
 		if (money != m)
 		{
 			money = m;
-			markDirty();
+			save();
 		}
 	}
 
@@ -148,7 +154,7 @@ public class PlayerData implements INBTSerializable<CompoundNBT>
 		if (autoPin != auto)
 		{
 			autoPin = auto;
-			markDirty();
+			save();
 		}
 	}
 
@@ -161,7 +167,7 @@ public class PlayerData implements INBTSerializable<CompoundNBT>
 	{
 		if (pinned ? pinnedQuests.add(id) : pinnedQuests.remove(id))
 		{
-			markDirty();
+			save();
 		}
 	}
 
@@ -174,39 +180,26 @@ public class PlayerData implements INBTSerializable<CompoundNBT>
 	@Override
 	public CompoundNBT serializeNBT()
 	{
-		CompoundNBT nbt = new CompoundNBT();
-		CompoundNBT taskDataNbt = new CompoundNBT();
-
-		for (TaskData data : taskData.values())
-		{
-			if (data.isStarted())
-			{
-				String key = QuestObjectBase.getCodeString(data.task);
-
-				if (data.progress <= Byte.MAX_VALUE)
-				{
-					taskDataNbt.putByte(key, (byte) data.progress);
-				}
-				else if (data.progress <= Short.MAX_VALUE)
-				{
-					taskDataNbt.putShort(key, (short) data.progress);
-				}
-				else if (data.progress <= Integer.MAX_VALUE)
-				{
-					taskDataNbt.putInt(key, (int) data.progress);
-				}
-				else
-				{
-					taskDataNbt.putLong(key, data.progress);
-				}
-			}
-		}
-
-		nbt.put("tasks", taskDataNbt);
-		nbt.putIntArray("claimed_rewards", claimedRewards.toIntArray());
+		CompoundNBT nbt = new OrderedCompoundNBT();
+		nbt.putString("uuid", uuid.toString());
+		nbt.putString("name", name);
 		nbt.putBoolean("can_edit", canEdit);
 		nbt.putLong("money", money);
 		nbt.putBoolean("auto_pin", autoPin);
+
+		CompoundNBT taskDataNBT = new CompoundNBT();
+
+		for (TaskData data : taskData.values())
+		{
+			if (data.progress > 0L)
+			{
+				NBTUtils.putVarLong(taskDataNBT, QuestObjectBase.getCodeString(data.task), data.progress);
+			}
+		}
+
+		nbt.put("task_progress", taskDataNBT);
+
+		nbt.putIntArray("claimed_rewards", claimedRewards.toIntArray());
 		nbt.putIntArray("pinned_quests", pinnedQuests.toIntArray());
 		return nbt;
 	}
@@ -214,23 +207,25 @@ public class PlayerData implements INBTSerializable<CompoundNBT>
 	@Override
 	public void deserializeNBT(CompoundNBT nbt)
 	{
-		CompoundNBT nbt1 = nbt.getCompound("tasks");
+		name = nbt.getString("name");
+		canEdit = nbt.getBoolean("can_edit");
+		money = nbt.getLong("money");
+		autoPin = nbt.getBoolean("auto_pin");
 
-		for (String s : nbt1.keySet())
+		CompoundNBT taskDataNBT = nbt.getCompound("task_progress");
+
+		for (String s : taskDataNBT.keySet())
 		{
-			Task task = ServerQuestFile.INSTANCE.getTask(ServerQuestFile.INSTANCE.getID(s));
+			Task task = file.getTask(file.getID(s));
 
 			if (task != null)
 			{
-				taskData.get(task.id).readProgress(nbt1.getLong(s));
+				taskData.get(task.id).readProgress(taskDataNBT.getLong(s));
 			}
 		}
 
 		claimedRewards.clear();
 		claimedRewards.addAll(new IntOpenHashSet(nbt.getIntArray("claimed_rewards")));
-		canEdit = nbt.getBoolean("can_edit");
-		money = nbt.getLong("money");
-		autoPin = nbt.getBoolean("auto_pin");
 		pinnedQuests.clear();
 		pinnedQuests.addAll(new IntOpenHashSet(nbt.getIntArray("pinned_quests")));
 	}
@@ -264,13 +259,13 @@ public class PlayerData implements INBTSerializable<CompoundNBT>
 		{
 			buffer.writeVarInt(claimedRewards.size());
 
-			for (Integer reward : claimedRewards)
+			for (int i : claimedRewards)
 			{
-				buffer.writeVarInt(reward);
+				buffer.writeVarInt(i);
 			}
 
-			canEdit = buffer.readBoolean();
-			autoPin = buffer.readBoolean();
+			buffer.writeBoolean(canEdit);
+			buffer.writeBoolean(autoPin);
 
 			buffer.writeVarInt(pinnedQuests.size());
 
@@ -434,34 +429,11 @@ public class PlayerData implements INBTSerializable<CompoundNBT>
 		return areDependenciesComplete(quest);
 	}
 
-	public int getUnclaimedRewards(boolean showExcluded)
+	public boolean hasUnclaimedRewards()
 	{
-		int r = 0;
-
 		for (Chapter chapter : file.chapters)
 		{
-			for (Quest quest : chapter.quests)
-			{
-				r += getUnclaimedRewards(quest, showExcluded);
-			}
-		}
-
-		return r;
-	}
-
-	public boolean hasUnclaimedRewards(Chapter chapter, boolean showExcluded)
-	{
-		for (Quest quest : chapter.quests)
-		{
-			if (hasUnclaimedRewards(quest, showExcluded))
-			{
-				return true;
-			}
-		}
-
-		for (Chapter chapter1 : chapter.getChildren())
-		{
-			if (hasUnclaimedRewards(chapter1, showExcluded))
+			if (hasUnclaimedRewards(chapter))
 			{
 				return true;
 			}
@@ -470,30 +442,34 @@ public class PlayerData implements INBTSerializable<CompoundNBT>
 		return false;
 	}
 
-	public int getUnclaimedRewards(Chapter chapter, boolean showExcluded)
+	public boolean hasUnclaimedRewards(Chapter chapter)
 	{
-		int r = 0;
-
 		for (Quest quest : chapter.quests)
 		{
-			r += getUnclaimedRewards(quest, showExcluded);
+			if (hasUnclaimedRewards(quest))
+			{
+				return true;
+			}
 		}
 
 		for (Chapter chapter1 : chapter.getChildren())
 		{
-			r += getUnclaimedRewards(chapter1, showExcluded);
+			if (hasUnclaimedRewards(chapter1))
+			{
+				return true;
+			}
 		}
 
-		return r;
+		return false;
 	}
 
-	public boolean hasUnclaimedRewards(Quest quest, boolean showExcluded)
+	public boolean hasUnclaimedRewards(Quest quest)
 	{
 		if (isComplete(quest))
 		{
 			for (Reward reward : quest.rewards)
 			{
-				if ((showExcluded || reward.getExcludeFromClaimAll()) && !isRewardClaimed(reward.id))
+				if (getClaimType(reward) == RewardClaimType.CAN_CLAIM)
 				{
 					return true;
 				}
@@ -501,24 +477,6 @@ public class PlayerData implements INBTSerializable<CompoundNBT>
 		}
 
 		return false;
-	}
-
-	public int getUnclaimedRewards(Quest quest, boolean showExcluded)
-	{
-		int r = 0;
-
-		if (isComplete(quest))
-		{
-			for (Reward reward : quest.rewards)
-			{
-				if ((showExcluded || !reward.getExcludeFromClaimAll()) && !isRewardClaimed(reward.id))
-				{
-					r++;
-				}
-			}
-		}
-
-		return r;
 	}
 
 	public void claimReward(ServerPlayerEntity player, Reward reward, boolean notify)
@@ -529,7 +487,7 @@ public class PlayerData implements INBTSerializable<CompoundNBT>
 
 			if (file.getSide().isServer())
 			{
-				new MessageClaimRewardResponse(uuid, reward.id).sendToAll();
+				new MessageClaimRewardResponse(uuid, reward.id, 1).sendToAll();
 			}
 		}
 	}
@@ -583,5 +541,21 @@ public class PlayerData implements INBTSerializable<CompoundNBT>
 				}
 			}
 		}
+	}
+
+	public RewardClaimType getClaimType(Reward reward)
+	{
+		boolean r = isRewardClaimed(reward.id);
+
+		if (r)
+		{
+			return RewardClaimType.CLAIMED;
+		}
+		else if (isComplete(reward.quest))
+		{
+			return RewardClaimType.CAN_CLAIM;
+		}
+
+		return RewardClaimType.CANT_CLAIM;
 	}
 }

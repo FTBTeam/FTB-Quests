@@ -59,11 +59,6 @@ public final class TaskType extends ForgeRegistryEntry<TaskType>
 
 		if (type == null)
 		{
-			if (id.equals("ftbquests:ftb_money"))
-			{
-				return createTask(quest, "ftbmoney:money");
-			}
-
 			return null;
 		}
 

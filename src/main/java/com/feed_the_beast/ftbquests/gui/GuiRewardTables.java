@@ -1,7 +1,7 @@
 package com.feed_the_beast.ftbquests.gui;
 
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
-import com.feed_the_beast.ftbquests.gui.tree.GuiQuestTree;
+import com.feed_the_beast.ftbquests.gui.tree.GuiQuests;
 import com.feed_the_beast.ftbquests.net.MessageCreateObject;
 import com.feed_the_beast.ftbquests.net.MessageEditObject;
 import com.feed_the_beast.ftbquests.quest.Chapter;
@@ -54,7 +54,7 @@ public class GuiRewardTables extends GuiButtonListBase
 		{
 			playClickSound();
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
-			GuiQuestTree.addObjectMenuItems(contextMenu, GuiRewardTables.this, table);
+			GuiQuests.addObjectMenuItems(contextMenu, GuiRewardTables.this, table);
 			contextMenu.add(new ContextMenuItem(I18n.format("item.ftbquests.lootcrate.name"), GuiIcons.ACCEPT, () -> {
 				if (table.lootCrate == null)
 				{

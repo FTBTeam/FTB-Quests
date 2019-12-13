@@ -20,6 +20,7 @@ public class MessageGetEmergencyItems extends MessageBase
 	{
 	}
 
+	@Override
 	public void write(PacketBuffer buffer)
 	{
 	}

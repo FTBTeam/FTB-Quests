@@ -22,7 +22,7 @@ public class MessageCreateObject extends MessageBase
 
 	MessageCreateObject(PacketBuffer buffer)
 	{
-		parent = buffer.readInt();
+		parent = buffer.readVarInt();
 		type = QuestObjectType.NAME_MAP.read(buffer);
 		nbt = buffer.readCompoundTag();
 		extra = buffer.readCompoundTag();
@@ -37,14 +37,16 @@ public class MessageCreateObject extends MessageBase
 		extra = e;
 	}
 
+	@Override
 	public void write(PacketBuffer buffer)
 	{
-		buffer.writeInt(parent);
+		buffer.writeVarInt(parent);
 		QuestObjectType.NAME_MAP.write(buffer, type);
 		buffer.writeCompoundTag(nbt);
 		buffer.writeCompoundTag(extra);
 	}
 
+	@Override
 	public void handle(NetworkEvent.Context context)
 	{
 		if (NetUtils.canEdit(context))

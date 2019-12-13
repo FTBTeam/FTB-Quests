@@ -14,7 +14,7 @@ public class MessageDeleteObject extends MessageBase
 
 	MessageDeleteObject(PacketBuffer buffer)
 	{
-		id = buffer.readInt();
+		id = buffer.readVarInt();
 	}
 
 	public MessageDeleteObject(int i)
@@ -22,11 +22,13 @@ public class MessageDeleteObject extends MessageBase
 		id = i;
 	}
 
+	@Override
 	public void write(PacketBuffer buffer)
 	{
-		buffer.writeInt(id);
+		buffer.writeVarInt(id);
 	}
 
+	@Override
 	public void handle(NetworkEvent.Context context)
 	{
 		if (NetUtils.canEdit(context))

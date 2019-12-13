@@ -1,6 +1,6 @@
 package com.feed_the_beast.ftbquests.client;
 
-import com.feed_the_beast.ftbquests.gui.tree.GuiQuestTree;
+import com.feed_the_beast.ftbquests.gui.tree.GuiQuests;
 import com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIHelper;
 import com.feed_the_beast.ftbquests.net.MessageDeleteObject;
 import com.feed_the_beast.ftbquests.quest.Movable;
@@ -30,7 +30,7 @@ public class ClientQuestFile extends QuestFile
 	}
 
 	public PlayerData self;
-	public GuiQuestTree questTreeGui;
+	public GuiQuests questTreeGui;
 	public GuiBase questGui;
 
 	public void load(UUID s)
@@ -41,8 +41,8 @@ public class ClientQuestFile extends QuestFile
 			INSTANCE.deleteSelf();
 		}
 
-		INSTANCE = this;
 		self = Objects.requireNonNull(getData(s));
+		INSTANCE = this;
 
 		refreshGui();
 		FTBQuestsJEIHelper.refresh(this);
@@ -85,13 +85,13 @@ public class ClientQuestFile extends QuestFile
 				i++;
 			}
 
-			if (ClientUtils.getCurrentGuiAs(GuiQuestTree.class) != null)
+			if (ClientUtils.getCurrentGuiAs(GuiQuests.class) != null)
 			{
 				guiOpen = true;
 			}
 		}
 
-		questTreeGui = new GuiQuestTree(this);
+		questTreeGui = new GuiQuests(this);
 		questGui = questTreeGui;
 
 		if (hasPrev)

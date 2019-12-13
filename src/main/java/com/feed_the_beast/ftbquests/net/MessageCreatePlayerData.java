@@ -1,10 +1,7 @@
 package com.feed_the_beast.ftbquests.net;
 
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
-import com.feed_the_beast.ftbquests.quest.Chapter;
 import com.feed_the_beast.ftbquests.quest.PlayerData;
-import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.task.Task;
 import com.feed_the_beast.ftbquests.util.NetUtils;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
@@ -31,29 +28,20 @@ public class MessageCreatePlayerData extends MessageBase
 		name = data.name;
 	}
 
+	@Override
 	public void write(PacketBuffer buffer)
 	{
 		NetUtils.writeUUID(buffer, uuid);
 		buffer.writeString(name);
 	}
 
+	@Override
 	public void handle(NetworkEvent.Context context)
 	{
 		if (ClientQuestFile.exists())
 		{
-			PlayerData data = new PlayerData(ClientQuestFile.INSTANCE, uuid, name);
-
-			for (Chapter chapter : ClientQuestFile.INSTANCE.chapters)
-			{
-				for (Quest quest : chapter.quests)
-				{
-					for (Task task : quest.tasks)
-					{
-						data.createTaskData(task);
-					}
-				}
-			}
-
+			PlayerData data = new PlayerData(ClientQuestFile.INSTANCE, uuid);
+			data.name = name;
 			data.file.addData(data);
 		}
 	}

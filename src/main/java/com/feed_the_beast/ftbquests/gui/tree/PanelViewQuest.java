@@ -31,7 +31,7 @@ import net.minecraft.util.text.TextFormatting;
  */
 public class PanelViewQuest extends Panel
 {
-	public final GuiQuestTree gui;
+	public final GuiQuests gui;
 	public Quest quest = null;
 	public boolean hidePanel = false;
 	private String title = "";
@@ -43,7 +43,7 @@ public class PanelViewQuest extends Panel
 	public BlankPanel panelRewards;
 	public BlankPanel panelText;
 
-	public PanelViewQuest(GuiQuestTree g)
+	public PanelViewQuest(GuiQuests g)
 	{
 		super(g);
 		gui = g;
@@ -221,7 +221,7 @@ public class PanelViewQuest extends Panel
 			panelText.add(new TextField(panelText).addFlags(Theme.CENTERED).setMaxWidth(panelText.width).setSpacing(9).setText(TextFormatting.ITALIC + TextFormatting.GRAY.toString() + desc));
 		}
 
-		boolean showText = !quest.hideTextUntilComplete || gui.file.self != null && gui.file.self.isComplete(quest);
+		boolean showText = !quest.hideTextUntilComplete.get(false) || gui.file.self != null && gui.file.self.isComplete(quest);
 
 		if (showText && quest.getDescription().length > 0)
 		{

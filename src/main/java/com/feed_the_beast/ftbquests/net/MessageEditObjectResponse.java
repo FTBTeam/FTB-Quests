@@ -17,7 +17,7 @@ public class MessageEditObjectResponse extends MessageBase
 
 	MessageEditObjectResponse(PacketBuffer buffer)
 	{
-		id = buffer.readInt();
+		id = buffer.readVarInt();
 		nbt = buffer.readCompoundTag();
 	}
 
@@ -31,10 +31,11 @@ public class MessageEditObjectResponse extends MessageBase
 	@Override
 	public void write(PacketBuffer buffer)
 	{
-		buffer.writeInt(id);
+		buffer.writeVarInt(id);
 		buffer.writeCompoundTag(nbt);
 	}
 
+	@Override
 	public void handle(NetworkEvent.Context context)
 	{
 		ClientQuestFile.INSTANCE.clearCachedData();

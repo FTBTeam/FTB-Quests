@@ -24,13 +24,13 @@ import java.util.List;
  */
 public class ButtonChapterImage extends Button
 {
-	public GuiQuestTree treeGui;
+	public GuiQuests treeGui;
 	public ChapterImage chapterImage;
 
 	public ButtonChapterImage(Panel panel, ChapterImage i)
 	{
 		super(panel, "", i.image);
-		treeGui = (GuiQuestTree) panel.getGui();
+		treeGui = (GuiQuests) panel.getGui();
 		setSize(20, 20);
 		chapterImage = i;
 	}

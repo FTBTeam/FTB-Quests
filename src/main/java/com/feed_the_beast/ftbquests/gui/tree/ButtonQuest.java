@@ -36,14 +36,14 @@ import java.util.List;
  */
 public class ButtonQuest extends Button
 {
-	public GuiQuestTree treeGui;
+	public GuiQuests treeGui;
 	public Quest quest;
 	public ButtonQuest[] dependencies = null;
 
 	public ButtonQuest(Panel panel, Quest q)
 	{
 		super(panel, q.getTitle(), q.getIcon());
-		treeGui = (GuiQuestTree) panel.getGui();
+		treeGui = (GuiQuests) panel.getGui();
 		setSize(20, 20);
 		quest = q;
 	}
@@ -223,7 +223,7 @@ public class ButtonQuest extends Button
 				});
 
 				contextMenu.add(ContextMenuItem.SEPARATOR);
-				GuiQuestTree.addObjectMenuItems(contextMenu, getGui(), quest);
+				GuiQuests.addObjectMenuItems(contextMenu, getGui(), quest);
 			}
 
 			getGui().openContextMenu(contextMenu);
@@ -298,7 +298,7 @@ public class ButtonQuest extends Button
 		{
 			quest.dependencies.clear();
 			quest.dependencies.addAll(prevDeps);
-			GuiQuestTree.displayError(new TranslationTextComponent("ftbquests.gui.looping_dependencies"));
+			GuiQuests.displayError(new TranslationTextComponent("ftbquests.gui.looping_dependencies"));
 		}
 	}
 
@@ -332,14 +332,6 @@ public class ButtonQuest extends Button
 		{
 			list.add(TextFormatting.GRAY + description);
 		}
-
-		int r = treeGui.file.self.getUnclaimedRewards(quest, true);
-
-		if (r > 0)
-		{
-			list.add("");
-			list.add(I18n.format("ftbquests.gui.collect_rewards", TextFormatting.GOLD.toString() + r));
-		}
 	}
 
 	@Override
@@ -356,18 +348,7 @@ public class ButtonQuest extends Button
 
 			if (progress >= 100)
 			{
-				boolean hasRewards = false;
-
-				for (Reward reward : quest.rewards)
-				{
-					if (!treeGui.file.self.isRewardClaimed(reward.id))
-					{
-						hasRewards = true;
-						break;
-					}
-				}
-
-				if (hasRewards)
+				if (treeGui.file.self.hasUnclaimedRewards(quest))
 				{
 					qicon = ThemeProperties.ALERT_ICON.get(quest);
 				}

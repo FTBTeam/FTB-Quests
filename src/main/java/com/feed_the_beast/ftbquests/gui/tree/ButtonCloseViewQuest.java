@@ -20,7 +20,7 @@ public class ButtonCloseViewQuest extends SimpleTextButton
 	public void onClicked(MouseButton button)
 	{
 		playClickSound();
-		((GuiQuestTree) getGui()).closeQuest();
+		((GuiQuests) getGui()).closeQuest();
 	}
 
 	@Override

@@ -12,14 +12,14 @@ import com.mojang.blaze3d.platform.GlStateManager;
  */
 public class PanelChapterHover extends Panel
 {
-	public final GuiQuestTree treeGui;
+	public final GuiQuests treeGui;
 	public ButtonChapter chapter = null;
 	public int type = -1;
 
 	public PanelChapterHover(Panel panel)
 	{
 		super(panel);
-		treeGui = (GuiQuestTree) panel.getGui();
+		treeGui = (GuiQuests) panel.getGui();
 		setPosAndSize(-1, -1, 0, 0);
 	}
 

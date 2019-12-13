@@ -24,16 +24,18 @@ public class MessageClaimChoiceReward extends MessageBase
 
 	MessageClaimChoiceReward(PacketBuffer buffer)
 	{
-		id = buffer.readInt();
+		id = buffer.readVarInt();
 		index = buffer.readVarInt();
 	}
 
+	@Override
 	public void write(PacketBuffer buffer)
 	{
-		buffer.writeInt(id);
+		buffer.writeVarInt(id);
 		buffer.writeVarInt(index);
 	}
 
+	@Override
 	public void handle(NetworkEvent.Context context)
 	{
 		Reward reward = ServerQuestFile.INSTANCE.getReward(id);

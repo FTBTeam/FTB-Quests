@@ -34,8 +34,20 @@ public class ButtonAddChapter extends ButtonTab
 			{
 				Chapter chapter = new Chapter(treeGui.file);
 				chapter.title = c.value;
+				chapter.filename = chapter.title.replaceAll("\\W", "").toLowerCase();
+
+				for (Chapter ch : treeGui.file.chapters)
+				{
+					if (ch.filename.equals(chapter.filename))
+					{
+						return;
+					}
+				}
+
 				new MessageCreateObject(chapter, null).sendToServer();
 			}
+
+			run();
 		});
 	}
 }
