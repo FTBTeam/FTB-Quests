@@ -164,7 +164,7 @@ public class FluidTask extends Task
 	{
 		FluidStack stack = createFluidStack();
 		FluidAttributes a = stack.getFluid().getAttributes();
-		return Icon.getIcon(a.getStill(stack).toString()).withTint(Color4I.rgb(a.getColor(stack))).combineWith(Icon.getIcon(FluidTask.TANK_TEXTURE.toString()));
+		return Icon.getIcon(a.getStillTexture(stack).toString()).withTint(Color4I.rgb(a.getColor(stack))).combineWith(Icon.getIcon(FluidTask.TANK_TEXTURE.toString()));
 	}
 
 	@Override

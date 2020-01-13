@@ -54,7 +54,7 @@ public final class ChapterImage implements Movable
 
 		for (String s : hover)
 		{
-			hoverTag.add(new StringNBT(s));
+			hoverTag.add(StringNBT.of(s));
 		}
 
 		nbt.put("hover", hoverTag);

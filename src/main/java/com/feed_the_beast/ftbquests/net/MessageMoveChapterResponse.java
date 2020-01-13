@@ -1,7 +1,7 @@
 package com.feed_the_beast.ftbquests.net;
 
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
-import com.feed_the_beast.ftbquests.gui.tree.GuiQuests;
+import com.feed_the_beast.ftbquests.gui.quests.GuiQuests;
 import com.feed_the_beast.ftbquests.quest.Chapter;
 import com.feed_the_beast.mods.ftbguilibrary.utils.ClientUtils;
 import net.minecraft.network.PacketBuffer;

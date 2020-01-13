@@ -9,6 +9,7 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.DoubleNBT;
 import net.minecraft.nbt.FloatNBT;
 import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.INBTType;
 import net.minecraft.nbt.IntArrayNBT;
 import net.minecraft.nbt.IntNBT;
 import net.minecraft.nbt.ListNBT;
@@ -70,25 +71,25 @@ public class OrderedCompoundNBT extends CompoundNBT
 	@Override
 	public void putByte(String key, byte value)
 	{
-		tagMap.put(key, new ByteNBT(value));
+		tagMap.put(key, ByteNBT.of(value));
 	}
 
 	@Override
 	public void putShort(String key, short value)
 	{
-		tagMap.put(key, new ShortNBT(value));
+		tagMap.put(key, ShortNBT.of(value));
 	}
 
 	@Override
 	public void putInt(String key, int value)
 	{
-		tagMap.put(key, new IntNBT(value));
+		tagMap.put(key, IntNBT.of(value));
 	}
 
 	@Override
 	public void putLong(String key, long value)
 	{
-		tagMap.put(key, new LongNBT(value));
+		tagMap.put(key, LongNBT.of(value));
 	}
 
 	@Override
@@ -113,19 +114,19 @@ public class OrderedCompoundNBT extends CompoundNBT
 	@Override
 	public void putFloat(String key, float value)
 	{
-		tagMap.put(key, new FloatNBT(value));
+		tagMap.put(key, FloatNBT.of(value));
 	}
 
 	@Override
 	public void putDouble(String key, double value)
 	{
-		tagMap.put(key, new DoubleNBT(value));
+		tagMap.put(key, DoubleNBT.of(value));
 	}
 
 	@Override
 	public void putString(String key, String value)
 	{
-		tagMap.put(key, new StringNBT(value));
+		tagMap.put(key, StringNBT.of(value));
 	}
 
 	@Override
@@ -333,7 +334,7 @@ public class OrderedCompoundNBT extends CompoundNBT
 		}
 		catch (ClassCastException classcastexception)
 		{
-			throw new ReportedException(createCrashReport(key, 7, classcastexception));
+			throw new ReportedException(createCrashReport(key, ByteArrayNBT.READER, classcastexception));
 		}
 
 		return new byte[0];
@@ -351,7 +352,7 @@ public class OrderedCompoundNBT extends CompoundNBT
 		}
 		catch (ClassCastException classcastexception)
 		{
-			throw new ReportedException(createCrashReport(key, 11, classcastexception));
+			throw new ReportedException(createCrashReport(key, IntArrayNBT.READER, classcastexception));
 		}
 
 		return new int[0];
@@ -369,7 +370,7 @@ public class OrderedCompoundNBT extends CompoundNBT
 		}
 		catch (ClassCastException classcastexception)
 		{
-			throw new ReportedException(createCrashReport(key, 12, classcastexception));
+			throw new ReportedException(createCrashReport(key, LongArrayNBT.READER, classcastexception));
 		}
 
 		return new long[0];
@@ -387,7 +388,7 @@ public class OrderedCompoundNBT extends CompoundNBT
 		}
 		catch (ClassCastException classcastexception)
 		{
-			throw new ReportedException(createCrashReport(key, 10, classcastexception));
+			throw new ReportedException(createCrashReport(key, READER, classcastexception));
 		}
 
 		return new CompoundNBT();
@@ -411,7 +412,7 @@ public class OrderedCompoundNBT extends CompoundNBT
 		}
 		catch (ClassCastException classcastexception)
 		{
-			throw new ReportedException(createCrashReport(key, 9, classcastexception));
+			throw new ReportedException(createCrashReport(key, ListNBT.READER, classcastexception));
 		}
 
 		return new ListNBT();
@@ -435,12 +436,14 @@ public class OrderedCompoundNBT extends CompoundNBT
 		return tagMap.isEmpty();
 	}
 
-	private CrashReport createCrashReport(String key, int expectedType, ClassCastException ex)
+	private CrashReport createCrashReport(String key, INBTType<?> expectedType, ClassCastException ex)
 	{
 		CrashReport crashreport = CrashReport.makeCrashReport(ex, "Reading NBT data");
 		CrashReportCategory crashreportcategory = crashreport.makeCategoryDepth("Corrupt NBT tag", 1);
-		crashreportcategory.addDetail("Tag type found", () -> NBT_TYPES[tagMap.get(key).getId()]);
-		crashreportcategory.addDetail("Tag type expected", () -> NBT_TYPES[expectedType]);
+		crashreportcategory.addDetail("Tag type found", () -> {
+			return this.tagMap.get(key).getReader().getCrashReportName();
+		});
+		crashreportcategory.addDetail("Tag type expected", expectedType::getCrashReportName);
 		crashreportcategory.addDetail("Tag name", key);
 		return crashreport;
 	}

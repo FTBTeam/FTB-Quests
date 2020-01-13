@@ -63,7 +63,7 @@ public class LootCrateWrapper implements /*IRecipeWrapper, */ITooltipCallback<It
 			{
 				stack = new ItemStack(Items.PAINTING);
 				stack.setDisplayName(new StringTextComponent(reward.reward.getTitle()));
-				stack.setTagInfo("icon", new StringNBT(reward.reward.getIcon().toString()));
+				stack.setTagInfo("icon", StringNBT.of(reward.reward.getIcon().toString()));
 				items.add(stack);
 			}
 		}

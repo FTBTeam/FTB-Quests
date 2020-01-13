@@ -137,7 +137,7 @@ public class FTBQuestsEventHandler
 	{
 		event.getRegistry().registerAll(
 				FTBQuestsTasks.ITEM = new TaskType(ItemTask::new).setRegistryName("item").setIcon(Icon.getIcon("minecraft:item/diamond")),
-				FTBQuestsTasks.FLUID = new TaskType(FluidTask::new).setRegistryName("fluid").setIcon(Icon.getIcon(Fluids.WATER.getAttributes().getStill(new FluidStack(Fluids.WATER, FluidAttributes.BUCKET_VOLUME)).toString()).combineWith(Icon.getIcon(FluidTask.TANK_TEXTURE.toString()))),
+				FTBQuestsTasks.FLUID = new TaskType(FluidTask::new).setRegistryName("fluid").setIcon(Icon.getIcon(Fluids.WATER.getAttributes().getStillTexture(new FluidStack(Fluids.WATER, FluidAttributes.BUCKET_VOLUME)).toString()).combineWith(Icon.getIcon(FluidTask.TANK_TEXTURE.toString()))),
 				FTBQuestsTasks.FORGE_ENERGY = new TaskType(ForgeEnergyTask::new).setRegistryName("forge_energy").setIcon(Icon.getIcon(ForgeEnergyTask.EMPTY_TEXTURE.toString()).combineWith(Icon.getIcon(ForgeEnergyTask.FULL_TEXTURE.toString()))),
 				FTBQuestsTasks.CUSTOM = new TaskType(CustomTask::new).setRegistryName("custom").setIcon(GuiIcons.COLOR_HSB),
 				FTBQuestsTasks.XP = new TaskType(XPTask::new).setRegistryName("xp").setIcon(Icon.getIcon("minecraft:item/experience_bottle")),
@@ -263,7 +263,7 @@ public class FTBQuestsEventHandler
 
 		if (crate != null)
 		{
-			ItemEntity ei = new ItemEntity(e.world, e.posX, e.posY, e.posZ, crate.createStack());
+			ItemEntity ei = new ItemEntity(e.world, e.getX(), e.getY(), e.getZ(), crate.createStack());
 			ei.setPickupDelay(10);
 			event.getDrops().add(ei);
 		}

@@ -12,7 +12,7 @@ import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Widget;
 import com.feed_the_beast.mods.ftbguilibrary.widget.WidgetLayout;
 import com.feed_the_beast.mods.ftbguilibrary.widget.WrappedIngredient;
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.math.MathHelper;
@@ -57,11 +57,11 @@ public class GuiRewardNotifications extends GuiBase implements IRewardListenerGu
 
 			if (count > 1)
 			{
-				GlStateManager.pushMatrix();
-				GlStateManager.translatef(0, 0, 600);
+				RenderSystem.pushMatrix();
+				RenderSystem.translatef(0, 0, 600);
 				String s = StringUtils.formatDouble(count, true);
 				theme.drawString(TextFormatting.YELLOW + s, x + 22 - theme.getStringWidth(s), y + 12, Theme.SHADOW);
-				GlStateManager.popMatrix();
+				RenderSystem.popMatrix();
 			}
 		}
 
@@ -148,12 +148,12 @@ public class GuiRewardNotifications extends GuiBase implements IRewardListenerGu
 	@Override
 	public void drawBackground(Theme theme, int x, int y, int w, int h)
 	{
-		GlStateManager.pushMatrix();
-		GlStateManager.translatef((int) (w / 2F), (int) (h / 5F), 0F);
-		GlStateManager.scalef(2, 2, 1);
+		RenderSystem.pushMatrix();
+		RenderSystem.translatef((int) (w / 2F), (int) (h / 5F), 0F);
+		RenderSystem.scalef(2, 2, 1);
 		String s = I18n.format("ftbquests.rewards");
 		theme.drawString(s, -theme.getStringWidth(s) / 2F, 0, Color4I.WHITE, 0);
-		GlStateManager.popMatrix();
+		RenderSystem.popMatrix();
 	}
 
 	@Override

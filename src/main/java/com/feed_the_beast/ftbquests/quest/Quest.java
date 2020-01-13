@@ -3,7 +3,7 @@ package com.feed_the_beast.ftbquests.quest;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.client.FTBQuestsClient;
 import com.feed_the_beast.ftbquests.events.ObjectCompletedEvent;
-import com.feed_the_beast.ftbquests.gui.tree.GuiQuests;
+import com.feed_the_beast.ftbquests.gui.quests.GuiQuests;
 import com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIHelper;
 import com.feed_the_beast.ftbquests.net.MessageDisplayCompletionToast;
 import com.feed_the_beast.ftbquests.net.MessageMoveQuest;
@@ -129,7 +129,7 @@ public final class Quest extends QuestObject implements Movable
 
 			for (String value : description)
 			{
-				array.add(new StringNBT(value));
+				array.add(StringNBT.of(value));
 			}
 
 			nbt.put("description", array);

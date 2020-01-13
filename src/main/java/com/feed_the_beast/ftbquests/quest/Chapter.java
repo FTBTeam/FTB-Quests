@@ -79,7 +79,7 @@ public final class Chapter extends QuestObject
 
 			for (String v : subtitle)
 			{
-				list.add(new StringNBT(v));
+				list.add(StringNBT.of(v));
 			}
 
 			nbt.put("subtitle", list);

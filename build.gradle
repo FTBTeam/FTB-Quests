@@ -80,15 +80,16 @@ configurations.all {
 
 repositories {
 	mavenLocal()
+	maven { url "https://maven.tterrag.com/" } //Yarn2MCP
 	maven { url "https://maven.latmod.com/" } //Aurora
 }
 
 dependencies {
 	minecraft "net.minecraftforge:forge:${forge_version}"
-	compile "com.feed_the_beast.mods:ftb-gui-library:${ftb_gui_library_version}:deobf"
-	compile "dev.latvian.mods:item-filters:${itemfilters_version}:deobf"
-	compile "com.feed_the_beast.mods:ftb-teams:${ftb_teams_version}:deobf"
-	compile "dev.latvian.mods:kubejs-forge-1.14.4:${kubejs_version}:deobf"
+	compile fg.deobf(project.dependencies.create("com.feed_the_beast.mods:ftb-gui-library:${ftb_gui_library_version}"))
+	compile fg.deobf(project.dependencies.create("dev.latvian.mods:item-filters:${itemfilters_version}"))
+	compile fg.deobf(project.dependencies.create("com.feed_the_beast.mods:ftb-teams:${ftb_teams_version}"))
+	compile fg.deobf(project.dependencies.create("dev.latvian.mods:kubejs-forge-1.14.4:${kubejs_version}"))
 	compile fg.deobf(curse.resolve('jei', project.jei_file))
 	compile fg.deobf(curse.resolve('packmode', project.packmode_file))
 	compile fg.deobf(curse.resolve('bookshelf', project.bookshelf_file))

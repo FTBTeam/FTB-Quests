@@ -1,6 +1,6 @@
 package com.feed_the_beast.ftbquests.client;
 
-import com.feed_the_beast.ftbquests.gui.tree.GuiQuests;
+import com.feed_the_beast.ftbquests.gui.quests.GuiQuests;
 import com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIHelper;
 import com.feed_the_beast.ftbquests.net.MessageDeleteObject;
 import com.feed_the_beast.ftbquests.quest.Movable;
