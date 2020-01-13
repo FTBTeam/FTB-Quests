@@ -2,7 +2,7 @@ package com.feed_the_beast.ftbquests.quest.loot;
 
 import com.feed_the_beast.ftbquests.gui.GuiEditRewardTable;
 import com.feed_the_beast.ftbquests.gui.GuiRewardTables;
-import com.feed_the_beast.ftbquests.gui.tree.GuiQuests;
+import com.feed_the_beast.ftbquests.gui.quests.GuiQuests;
 import com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIHelper;
 import com.feed_the_beast.ftbquests.net.MessageEditObject;
 import com.feed_the_beast.ftbquests.quest.Chapter;

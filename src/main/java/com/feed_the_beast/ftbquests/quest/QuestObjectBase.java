@@ -171,7 +171,7 @@ public abstract class QuestObjectBase
 
 			for (String s : tags)
 			{
-				tagList.add(new StringNBT(s));
+				tagList.add(StringNBT.of(s));
 			}
 
 			nbt.put("tags", tagList);

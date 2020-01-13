@@ -14,7 +14,7 @@ import com.feed_the_beast.mods.ftbguilibrary.widget.SimpleTextButton;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Widget;
 import com.feed_the_beast.mods.ftbguilibrary.widget.WidgetLayout;
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.ITextComponent;
@@ -131,16 +131,16 @@ public class GuiEmergencyItems extends GuiBase
 			left = 0L;
 		}
 
-		GlStateManager.pushMatrix();
-		GlStateManager.translatef((int) (w / 2F), (int) (h / 5F), 0F);
-		GlStateManager.scalef(2F, 2F, 1F);
+		RenderSystem.pushMatrix();
+		RenderSystem.translatef((int) (w / 2F), (int) (h / 5F), 0F);
+		RenderSystem.scalef(2F, 2F, 1F);
 		String s = I18n.format("ftbquests.file.emergency_items");
-		theme.drawString(s, -theme.getStringWidth(s) / 2, 0, Color4I.WHITE, 0);
-		GlStateManager.popMatrix();
+		theme.drawString(s, -theme.getStringWidth(s) / 2F, 0, Color4I.WHITE, 0);
+		RenderSystem.popMatrix();
 
-		GlStateManager.pushMatrix();
-		GlStateManager.translatef((int) (w / 2F), (int) (h / 2.5F), 0F);
-		GlStateManager.scalef(4F, 4F, 1F);
+		RenderSystem.pushMatrix();
+		RenderSystem.translatef((int) (w / 2F), (int) (h / 2.5F), 0F);
+		RenderSystem.scalef(4F, 4F, 1F);
 		s = left <= 0L ? "00:00" : StringUtils.getTimeString(left / 1000L * 1000L + 1000L);
 		int x1 = -theme.getStringWidth(s) / 2;
 		theme.drawString(s, x1 - 1, 0, Color4I.BLACK, 0);
@@ -148,7 +148,7 @@ public class GuiEmergencyItems extends GuiBase
 		theme.drawString(s, x1, 1, Color4I.BLACK, 0);
 		theme.drawString(s, x1, -1, Color4I.BLACK, 0);
 		theme.drawString(s, x1, 0, Color4I.WHITE, 0);
-		GlStateManager.popMatrix();
+		RenderSystem.popMatrix();
 	}
 
 	@Override

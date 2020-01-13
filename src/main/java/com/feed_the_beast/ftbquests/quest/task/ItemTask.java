@@ -1,6 +1,6 @@
 package com.feed_the_beast.ftbquests.quest.task;
 
-import com.feed_the_beast.ftbquests.gui.tree.GuiValidItems;
+import com.feed_the_beast.ftbquests.gui.quests.GuiValidItems;
 import com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIHelper;
 import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.quest.Quest;

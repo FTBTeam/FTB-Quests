@@ -18,6 +18,7 @@ import com.feed_the_beast.mods.ftbguilibrary.sidebar.SidebarButtonCreatedEvent;
 import com.feed_the_beast.mods.ftbguilibrary.widget.CustomClickEvent;
 import com.feed_the_beast.mods.ftbguilibrary.widget.GuiHelper;
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextFormatting;
@@ -269,9 +270,9 @@ public class FTBQuestsClientEventHandler
 
 				double scale = ThemeProperties.PINNED_QUEST_SIZE.get(file);
 
-				GlStateManager.pushMatrix();
-				GlStateManager.translated(event.getWindow().getScaledWidth() - mw * scale - 8D, cy - list.size() * 4.5D * scale, 100D);
-				GlStateManager.scaled(scale, scale, 1D);
+				RenderSystem.pushMatrix();
+				RenderSystem.translated(event.getWindow().getScaledWidth() - mw * scale - 8D, cy - list.size() * 4.5D * scale, 100D);
+				RenderSystem.scaled(scale, scale, 1D);
 
 				Color4I.BLACK.withAlpha(100).draw(0, 0, mw + 8, list.size() * 9 + 8);
 
@@ -280,7 +281,7 @@ public class FTBQuestsClientEventHandler
 					mc.fontRenderer.drawStringWithShadow(list.get(i), 4, i * 9 + 4, 0xFFFFFFFF);
 				}
 
-				GlStateManager.popMatrix();
+				RenderSystem.popMatrix();
 			}
 		}
 	}
