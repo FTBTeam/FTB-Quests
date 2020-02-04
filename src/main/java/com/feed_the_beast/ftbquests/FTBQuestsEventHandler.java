@@ -263,7 +263,7 @@ public class FTBQuestsEventHandler
 
 		if (crate != null)
 		{
-			ItemEntity ei = new ItemEntity(e.world, e.getX(), e.getY(), e.getZ(), crate.createStack());
+			ItemEntity ei = new ItemEntity(e.world, e.getPosX(), e.getPosY(), e.getPosZ(), crate.createStack());
 			ei.setPickupDelay(10);
 			event.getDrops().add(ei);
 		}

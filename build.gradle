@@ -40,7 +40,7 @@ minecraft {
 			if (project.hasProperty('mc_dev_height')) args '--height', project.mc_dev_height
 
 			mods {
-				kubejs {
+				ftbquests {
 					source sourceSets.main
 				}
 			}
@@ -51,7 +51,7 @@ minecraft {
 			property 'forge.logging.console.level', 'debug'
 
 			mods {
-				kubejs {
+				ftbquests {
 					source sourceSets.main
 				}
 			}
@@ -64,7 +64,7 @@ minecraft {
 			args '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/')
 
 			mods {
-				kubejs {
+				ftbquests {
 					source sourceSets.main
 				}
 			}
@@ -72,28 +72,36 @@ minecraft {
 	}
 }
 
-/*
 configurations.all {
-	transitive = false
+	resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
 }
-*/
 
 repositories {
 	mavenLocal()
-	maven { url "https://maven.tterrag.com/" } //Yarn2MCP
-	maven { url "https://maven.latmod.com/" } //Aurora
+	maven { url "https://maven.latmod.com/" } //FTB GUI Library, Item Filters, FTB Teams, KubeJS
 }
 
 dependencies {
 	minecraft "net.minecraftforge:forge:${forge_version}"
-	compile fg.deobf(project.dependencies.create("com.feed_the_beast.mods:ftb-gui-library:${ftb_gui_library_version}"))
-	compile fg.deobf(project.dependencies.create("dev.latvian.mods:item-filters:${itemfilters_version}"))
-	compile fg.deobf(project.dependencies.create("com.feed_the_beast.mods:ftb-teams:${ftb_teams_version}"))
-	compile fg.deobf(project.dependencies.create("dev.latvian.mods:kubejs-forge-1.14.4:${kubejs_version}"))
-	compile fg.deobf(curse.resolve('jei', project.jei_file))
-	compile fg.deobf(curse.resolve('packmode', project.packmode_file))
-	compile fg.deobf(curse.resolve('bookshelf', project.bookshelf_file))
-	compile fg.deobf(curse.resolve('game-stages', project.gamestages_file))
+	compile(fg.deobf(project.dependencies.create("com.feed_the_beast.mods:ftb-gui-library:${ftb_gui_library_version}") {
+		transitive = false
+		changing = true
+	}))
+	compile(fg.deobf(project.dependencies.create("dev.latvian.mods:item-filters:${itemfilters_version}") {
+		transitive = false
+		changing = true
+	}))
+	compile(fg.deobf(project.dependencies.create("com.feed_the_beast.mods:ftb-teams:${ftb_teams_version}") {
+		transitive = false
+		changing = true
+	}))
+	compile(fg.deobf(project.dependencies.create("dev.latvian.mods:kubejs-forge-1.14.4:${kubejs_version}") {
+		transitive = false
+		changing = true
+	}))
+	compileOnly fg.deobf(curse.resolve('jei', project.jei_file))
+	compileOnly fg.deobf(curse.resolve('bookshelf', project.bookshelf_file))
+	compileOnly fg.deobf(curse.resolve('game-stages', project.gamestages_file))
 }
 
 jar {

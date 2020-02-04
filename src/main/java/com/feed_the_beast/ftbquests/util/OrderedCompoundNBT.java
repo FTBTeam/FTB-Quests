@@ -71,25 +71,25 @@ public class OrderedCompoundNBT extends CompoundNBT
 	@Override
 	public void putByte(String key, byte value)
 	{
-		tagMap.put(key, ByteNBT.of(value));
+		tagMap.put(key, ByteNBT.valueOf(value));
 	}
 
 	@Override
 	public void putShort(String key, short value)
 	{
-		tagMap.put(key, ShortNBT.of(value));
+		tagMap.put(key, ShortNBT.valueOf(value));
 	}
 
 	@Override
 	public void putInt(String key, int value)
 	{
-		tagMap.put(key, IntNBT.of(value));
+		tagMap.put(key, IntNBT.valueOf(value));
 	}
 
 	@Override
 	public void putLong(String key, long value)
 	{
-		tagMap.put(key, LongNBT.of(value));
+		tagMap.put(key, LongNBT.valueOf(value));
 	}
 
 	@Override
@@ -114,19 +114,19 @@ public class OrderedCompoundNBT extends CompoundNBT
 	@Override
 	public void putFloat(String key, float value)
 	{
-		tagMap.put(key, FloatNBT.of(value));
+		tagMap.put(key, FloatNBT.valueOf(value));
 	}
 
 	@Override
 	public void putDouble(String key, double value)
 	{
-		tagMap.put(key, DoubleNBT.of(value));
+		tagMap.put(key, DoubleNBT.valueOf(value));
 	}
 
 	@Override
 	public void putString(String key, String value)
 	{
-		tagMap.put(key, StringNBT.of(value));
+		tagMap.put(key, StringNBT.valueOf(value));
 	}
 
 	@Override
@@ -334,7 +334,7 @@ public class OrderedCompoundNBT extends CompoundNBT
 		}
 		catch (ClassCastException classcastexception)
 		{
-			throw new ReportedException(createCrashReport(key, ByteArrayNBT.READER, classcastexception));
+			throw new ReportedException(createCrashReport(key, ByteArrayNBT.TYPE, classcastexception));
 		}
 
 		return new byte[0];
@@ -352,7 +352,7 @@ public class OrderedCompoundNBT extends CompoundNBT
 		}
 		catch (ClassCastException classcastexception)
 		{
-			throw new ReportedException(createCrashReport(key, IntArrayNBT.READER, classcastexception));
+			throw new ReportedException(createCrashReport(key, IntArrayNBT.TYPE, classcastexception));
 		}
 
 		return new int[0];
@@ -370,7 +370,7 @@ public class OrderedCompoundNBT extends CompoundNBT
 		}
 		catch (ClassCastException classcastexception)
 		{
-			throw new ReportedException(createCrashReport(key, LongArrayNBT.READER, classcastexception));
+			throw new ReportedException(createCrashReport(key, LongArrayNBT.TYPE, classcastexception));
 		}
 
 		return new long[0];
@@ -388,7 +388,7 @@ public class OrderedCompoundNBT extends CompoundNBT
 		}
 		catch (ClassCastException classcastexception)
 		{
-			throw new ReportedException(createCrashReport(key, READER, classcastexception));
+			throw new ReportedException(createCrashReport(key, TYPE, classcastexception));
 		}
 
 		return new CompoundNBT();
@@ -412,7 +412,7 @@ public class OrderedCompoundNBT extends CompoundNBT
 		}
 		catch (ClassCastException classcastexception)
 		{
-			throw new ReportedException(createCrashReport(key, ListNBT.READER, classcastexception));
+			throw new ReportedException(createCrashReport(key, ListNBT.TYPE, classcastexception));
 		}
 
 		return new ListNBT();
@@ -440,10 +440,8 @@ public class OrderedCompoundNBT extends CompoundNBT
 	{
 		CrashReport crashreport = CrashReport.makeCrashReport(ex, "Reading NBT data");
 		CrashReportCategory crashreportcategory = crashreport.makeCategoryDepth("Corrupt NBT tag", 1);
-		crashreportcategory.addDetail("Tag type found", () -> {
-			return this.tagMap.get(key).getReader().getCrashReportName();
-		});
-		crashreportcategory.addDetail("Tag type expected", expectedType::getCrashReportName);
+		crashreportcategory.addDetail("Tag type found", () -> tagMap.get(key).getType().func_225648_a_());
+		crashreportcategory.addDetail("Tag type expected", expectedType::func_225648_a_);
 		crashreportcategory.addDetail("Tag name", key);
 		return crashreport;
 	}

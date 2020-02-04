@@ -277,11 +277,11 @@ public class PanelQuests extends Panel
 				RenderSystem.pushMatrix();
 				RenderSystem.translated(sx, sy, 0);
 				RenderSystem.rotatef((float) (Math.atan2(ey - sy, ex - sx) * 180D / Math.PI), 0F, 0F, 1F);
-				buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR_TEXTURE);
-				buffer.vertex(0, -s, 0).color(r, g, b, a).texture((float) (len / s / 2D + mu), 0).endVertex();
-				buffer.vertex(0, s, 0).color(r, g, b, a).texture((float) (len / s / 2D + mu), 1).endVertex();
-				buffer.vertex(len, s, 0).color(r * 3 / 4, g * 3 / 4, b * 3 / 4, a).texture((float) mu, 1).endVertex();
-				buffer.vertex(len, -s, 0).color(r * 3 / 4, g * 3 / 4, b * 3 / 4, a).texture((float) mu, 0).endVertex();
+				buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR_TEX);
+				buffer.pos(0, -s, 0).color(r, g, b, a).tex((float) (len / s / 2D + mu), 0).endVertex();
+				buffer.pos(0, s, 0).color(r, g, b, a).tex((float) (len / s / 2D + mu), 1).endVertex();
+				buffer.pos(len, s, 0).color(r * 3 / 4, g * 3 / 4, b * 3 / 4, a).tex((float) mu, 1).endVertex();
+				buffer.pos(len, -s, 0).color(r * 3 / 4, g * 3 / 4, b * 3 / 4, a).tex((float) mu, 0).endVertex();
 				tessellator.draw();
 
 				RenderSystem.popMatrix();
@@ -336,11 +336,11 @@ public class PanelQuests extends Panel
 				RenderSystem.pushMatrix();
 				RenderSystem.translated(sx, sy, 0);
 				RenderSystem.rotatef((float) (Math.atan2(ey - sy, ex - sx) * 180D / Math.PI), 0F, 0F, 1F);
-				buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR_TEXTURE);
-				buffer.vertex(0, -s, 0).color(r, g, b, a).texture((float) (len / s / 2D + ms), 0).endVertex();
-				buffer.vertex(0, s, 0).color(r, g, b, a).texture((float) (len / s / 2D + ms), 1).endVertex();
-				buffer.vertex(len, s, 0).color(r * 3 / 4, g * 3 / 4, b * 3 / 4, a).texture((float) ms, 1).endVertex();
-				buffer.vertex(len, -s, 0).color(r * 3 / 4, g * 3 / 4, b * 3 / 4, a).texture((float) ms, 0).endVertex();
+				buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR_TEX);
+				buffer.pos(0, -s, 0).color(r, g, b, a).tex((float) (len / s / 2D + ms), 0).endVertex();
+				buffer.pos(0, s, 0).color(r, g, b, a).tex((float) (len / s / 2D + ms), 1).endVertex();
+				buffer.pos(len, s, 0).color(r * 3 / 4, g * 3 / 4, b * 3 / 4, a).tex((float) ms, 1).endVertex();
+				buffer.pos(len, -s, 0).color(r * 3 / 4, g * 3 / 4, b * 3 / 4, a).tex((float) ms, 0).endVertex();
 				tessellator.draw();
 				RenderSystem.popMatrix();
 			}

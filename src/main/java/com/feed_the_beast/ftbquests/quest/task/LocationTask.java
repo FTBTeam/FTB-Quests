@@ -160,15 +160,15 @@ public class LocationTask extends Task
 		{
 			if (task.ignoreDimension || task.dimension == player.dimension)
 			{
-				int y = MathHelper.floor(player.getY());
+				int y = MathHelper.floor(player.getPosX());
 
 				if (y >= task.y && y < task.y + task.h)
 				{
-					int x = MathHelper.floor(player.getX());
+					int x = MathHelper.floor(player.getPosX());
 
 					if (x >= task.x && x < task.x + task.w)
 					{
-						int z = MathHelper.floor(player.getZ());
+						int z = MathHelper.floor(player.getPosZ());
 						return z >= task.z && z < task.z + task.d;
 					}
 				}

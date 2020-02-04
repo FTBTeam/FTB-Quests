@@ -61,15 +61,15 @@ public interface ThemeProperties
 			int b = out.bluei();
 			int a = out.alphai();
 
-			buffer.vertex(x + dw * 0, y + dh * 8, 0).color(r, g, b, a).endVertex();
-			buffer.vertex(x + dw * 6, y + dh * 14, 0).color(r, g, b, a).endVertex();
-			buffer.vertex(x + dw * 6, y + dh * 8, 0).color(r, g, b, a).endVertex();
-			buffer.vertex(x + dw * 3, y + dh * 5, 0).color(r, g, b, a).endVertex();
+			buffer.pos(x + dw * 0, y + dh * 8, 0).color(r, g, b, a).endVertex();
+			buffer.pos(x + dw * 6, y + dh * 14, 0).color(r, g, b, a).endVertex();
+			buffer.pos(x + dw * 6, y + dh * 8, 0).color(r, g, b, a).endVertex();
+			buffer.pos(x + dw * 3, y + dh * 5, 0).color(r, g, b, a).endVertex();
 
-			buffer.vertex(x + dw * 6, y + dh * 8, 0).color(r, g, b, a).endVertex();
-			buffer.vertex(x + dw * 6, y + dh * 14, 0).color(r, g, b, a).endVertex();
-			buffer.vertex(x + dw * 16, y + dh * 4, 0).color(r, g, b, a).endVertex();
-			buffer.vertex(x + dw * 13, y + dh * 1, 0).color(r, g, b, a).endVertex();
+			buffer.pos(x + dw * 6, y + dh * 8, 0).color(r, g, b, a).endVertex();
+			buffer.pos(x + dw * 6, y + dh * 14, 0).color(r, g, b, a).endVertex();
+			buffer.pos(x + dw * 16, y + dh * 4, 0).color(r, g, b, a).endVertex();
+			buffer.pos(x + dw * 13, y + dh * 1, 0).color(r, g, b, a).endVertex();
 
 			Color4I in = ThemeProperties.SYMBOL_IN.get();
 			r = in.redi();
@@ -77,15 +77,15 @@ public interface ThemeProperties
 			b = in.bluei();
 			a = in.alphai();
 
-			buffer.vertex(x + dw * 0 + dw, y + dh * 8, 0).color(r, g, b, a).endVertex();
-			buffer.vertex(x + dw * 6, y + dh * 14 - dh, 0).color(r, g, b, a).endVertex();
-			buffer.vertex(x + dw * 6, y + dh * 8 + dh, 0).color(r, g, b, a).endVertex();
-			buffer.vertex(x + dw * 3, y + dh * 5 + dh, 0).color(r, g, b, a).endVertex();
+			buffer.pos(x + dw * 0 + dw, y + dh * 8, 0).color(r, g, b, a).endVertex();
+			buffer.pos(x + dw * 6, y + dh * 14 - dh, 0).color(r, g, b, a).endVertex();
+			buffer.pos(x + dw * 6, y + dh * 8 + dh, 0).color(r, g, b, a).endVertex();
+			buffer.pos(x + dw * 3, y + dh * 5 + dh, 0).color(r, g, b, a).endVertex();
 
-			buffer.vertex(x + dw * 6, y + dh * 8 + dh, 0).color(r, g, b, a).endVertex();
-			buffer.vertex(x + dw * 6, y + dh * 14 - dh, 0).color(r, g, b, a).endVertex();
-			buffer.vertex(x + dw * 16 - dw, y + dh * 4, 0).color(r, g, b, a).endVertex();
-			buffer.vertex(x + dw * 13, y + dh * 1 + dh, 0).color(r, g, b, a).endVertex();
+			buffer.pos(x + dw * 6, y + dh * 8 + dh, 0).color(r, g, b, a).endVertex();
+			buffer.pos(x + dw * 6, y + dh * 14 - dh, 0).color(r, g, b, a).endVertex();
+			buffer.pos(x + dw * 16 - dw, y + dh * 4, 0).color(r, g, b, a).endVertex();
+			buffer.pos(x + dw * 13, y + dh * 1 + dh, 0).color(r, g, b, a).endVertex();
 
 			tessellator.draw();
 			GlStateManager.enableTexture();
@@ -121,15 +121,15 @@ public interface ThemeProperties
 			int b = out.bluei();
 			int a = out.alphai();
 
-			buffer.vertex(x + dw * 6, y + dh * 2, 0).color(r, g, b, a).endVertex();
-			buffer.vertex(x + dw * 6, y + dh * 14, 0).color(r, g, b, a).endVertex();
-			buffer.vertex(x + dw * 10, y + dh * 14, 0).color(r, g, b, a).endVertex();
-			buffer.vertex(x + dw * 10, y + dh * 2, 0).color(r, g, b, a).endVertex();
+			buffer.pos(x + dw * 6, y + dh * 2, 0).color(r, g, b, a).endVertex();
+			buffer.pos(x + dw * 6, y + dh * 14, 0).color(r, g, b, a).endVertex();
+			buffer.pos(x + dw * 10, y + dh * 14, 0).color(r, g, b, a).endVertex();
+			buffer.pos(x + dw * 10, y + dh * 2, 0).color(r, g, b, a).endVertex();
 
-			buffer.vertex(x + dw * 2, y + dh * 6, 0).color(r, g, b, a).endVertex();
-			buffer.vertex(x + dw * 2, y + dh * 10, 0).color(r, g, b, a).endVertex();
-			buffer.vertex(x + dw * 14, y + dh * 10, 0).color(r, g, b, a).endVertex();
-			buffer.vertex(x + dw * 14, y + dh * 6, 0).color(r, g, b, a).endVertex();
+			buffer.pos(x + dw * 2, y + dh * 6, 0).color(r, g, b, a).endVertex();
+			buffer.pos(x + dw * 2, y + dh * 10, 0).color(r, g, b, a).endVertex();
+			buffer.pos(x + dw * 14, y + dh * 10, 0).color(r, g, b, a).endVertex();
+			buffer.pos(x + dw * 14, y + dh * 6, 0).color(r, g, b, a).endVertex();
 
 			Color4I in = ThemeProperties.SYMBOL_IN.get();
 			r = in.redi();
@@ -137,15 +137,15 @@ public interface ThemeProperties
 			b = in.bluei();
 			a = in.alphai();
 
-			buffer.vertex(x + dw * 7, y + dh * 3, 0).color(r, g, b, a).endVertex();
-			buffer.vertex(x + dw * 7, y + dh * 13, 0).color(r, g, b, a).endVertex();
-			buffer.vertex(x + dw * 9, y + dh * 13, 0).color(r, g, b, a).endVertex();
-			buffer.vertex(x + dw * 9, y + dh * 3, 0).color(r, g, b, a).endVertex();
+			buffer.pos(x + dw * 7, y + dh * 3, 0).color(r, g, b, a).endVertex();
+			buffer.pos(x + dw * 7, y + dh * 13, 0).color(r, g, b, a).endVertex();
+			buffer.pos(x + dw * 9, y + dh * 13, 0).color(r, g, b, a).endVertex();
+			buffer.pos(x + dw * 9, y + dh * 3, 0).color(r, g, b, a).endVertex();
 
-			buffer.vertex(x + dw * 3, y + dh * 7, 0).color(r, g, b, a).endVertex();
-			buffer.vertex(x + dw * 3, y + dh * 9, 0).color(r, g, b, a).endVertex();
-			buffer.vertex(x + dw * 13, y + dh * 9, 0).color(r, g, b, a).endVertex();
-			buffer.vertex(x + dw * 13, y + dh * 7, 0).color(r, g, b, a).endVertex();
+			buffer.pos(x + dw * 3, y + dh * 7, 0).color(r, g, b, a).endVertex();
+			buffer.pos(x + dw * 3, y + dh * 9, 0).color(r, g, b, a).endVertex();
+			buffer.pos(x + dw * 13, y + dh * 9, 0).color(r, g, b, a).endVertex();
+			buffer.pos(x + dw * 13, y + dh * 7, 0).color(r, g, b, a).endVertex();
 
 			tessellator.draw();
 			GlStateManager.enableTexture();
