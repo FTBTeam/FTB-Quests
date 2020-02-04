@@ -129,7 +129,7 @@ public final class Quest extends QuestObject implements Movable
 
 			for (String value : description)
 			{
-				array.add(StringNBT.of(value));
+				array.add(StringNBT.valueOf(value));
 			}
 
 			nbt.put("description", array);

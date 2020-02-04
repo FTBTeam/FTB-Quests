@@ -76,7 +76,7 @@ public class QuestWrapper //FIXME: implements IRecipeWrapper
 			{
 				stack = new ItemStack(Items.PAINTING);
 				stack.setDisplayName(new StringTextComponent(task.getTitle()));
-				stack.setTagInfo("icon", StringNBT.of(task.getIcon().toString()));
+				stack.setTagInfo("icon", StringNBT.valueOf(task.getIcon().toString()));
 				input.add(Collections.singletonList(stack));
 			}
 		}
@@ -134,7 +134,7 @@ public class QuestWrapper //FIXME: implements IRecipeWrapper
 			{
 				stack = new ItemStack(Items.PAINTING);
 				stack.setDisplayName(new StringTextComponent(reward.getTitle()));
-				stack.setTagInfo("icon", StringNBT.of(reward.getIcon().toString()));
+				stack.setTagInfo("icon", StringNBT.valueOf(reward.getIcon().toString()));
 				output.add(Collections.singletonList(stack));
 			}
 		}

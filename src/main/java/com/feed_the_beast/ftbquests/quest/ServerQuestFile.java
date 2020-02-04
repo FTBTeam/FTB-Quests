@@ -7,13 +7,11 @@ import com.feed_the_beast.ftbquests.net.MessageSyncQuests;
 import com.feed_the_beast.ftbquests.util.FTBQuestsInventoryListener;
 import com.feed_the_beast.ftbquests.util.FileUtils;
 import com.feed_the_beast.ftbquests.util.NBTUtils;
-import com.teamacronymcoders.packmode.api.PackModeAPI;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.loading.FMLPaths;
 
 import java.nio.file.Files;
@@ -39,25 +37,9 @@ public class ServerQuestFile extends QuestFile
 		isLoading = false;
 	}
 
-	private String getFolderName()
-	{
-		if (ModList.get().isLoaded("packmode"))
-		{
-			return getPackmodeFolderName();
-		}
-
-		return "normal";
-	}
-
-	private static String getPackmodeFolderName()
-	{
-		return PackModeAPI.getInstance().getPackMode().toLowerCase();
-	}
-
 	public void load()
 	{
-		folderName = getFolderName();
-		folder = FMLPaths.CONFIGDIR.get().resolve("ftbquests/" + folderName);
+		folder = FMLPaths.CONFIGDIR.get().resolve("ftbquests/quests");
 
 		if (Files.exists(folder))
 		{

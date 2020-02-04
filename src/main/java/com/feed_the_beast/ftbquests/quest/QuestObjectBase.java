@@ -171,7 +171,7 @@ public abstract class QuestObjectBase
 
 			for (String s : tags)
 			{
-				tagList.add(StringNBT.of(s));
+				tagList.add(StringNBT.valueOf(s));
 			}
 
 			nbt.put("tags", tagList);
@@ -254,7 +254,7 @@ public abstract class QuestObjectBase
 		else if (cachedTextFile == null)
 		{
 			cachedTextFile = QuestObjectText.NONE;
-			File file = FMLPaths.CONFIGDIR.get().resolve("ftbquests/" + getQuestFile().folderName + "/text/en_us/" + getCodeString(this) + ".txt").toFile();
+			File file = FMLPaths.CONFIGDIR.get().resolve("ftbquests/quests/text/en_us/" + getCodeString(this) + ".txt").toFile();
 			Map<String, String[]> text = new HashMap<>();
 
 			if (file.exists())
@@ -282,7 +282,7 @@ public abstract class QuestObjectBase
 
 			if (!langCode.equals("en_us"))
 			{
-				File fileLang = FMLPaths.CONFIGDIR.get().resolve("ftbquests/" + getQuestFile().folderName + "/text/" + langCode + "/" + getCodeString(this) + ".txt").toFile();
+				File fileLang = FMLPaths.CONFIGDIR.get().resolve("ftbquests/quests/text/" + langCode + "/" + getCodeString(this) + ".txt").toFile();
 
 				if (fileLang.exists())
 				{
