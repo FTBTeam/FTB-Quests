@@ -1,9 +1,6 @@
 package com.feed_the_beast.ftbquests.net;
 
-import com.feed_the_beast.ftbquests.client.ClientQuestFile;
-import com.feed_the_beast.ftbquests.gui.ToastQuestObject;
-import com.feed_the_beast.ftbquests.quest.QuestObject;
-import net.minecraft.client.Minecraft;
+import com.feed_the_beast.ftbquests.FTBQuests;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
 
@@ -33,18 +30,6 @@ public class MessageDisplayCompletionToast extends MessageBase
 	@Override
 	public void handle(NetworkEvent.Context context)
 	{
-		if (ClientQuestFile.exists())
-		{
-			QuestObject object = ClientQuestFile.INSTANCE.get(id);
-
-			if (object != null)
-			{
-				Minecraft.getInstance().getToastGui().add(new ToastQuestObject(object));
-			}
-
-			ClientQuestFile.INSTANCE.questTreeGui.questPanel.refreshWidgets();
-			ClientQuestFile.INSTANCE.questTreeGui.chapterPanel.refreshWidgets();
-			ClientQuestFile.INSTANCE.questTreeGui.viewQuestPanel.refreshWidgets();
-		}
+		FTBQuests.PROXY.displayToast(id);
 	}
 }
