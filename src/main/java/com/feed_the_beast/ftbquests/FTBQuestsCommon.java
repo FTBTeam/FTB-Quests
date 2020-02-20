@@ -38,7 +38,8 @@ public class FTBQuestsCommon
 		throw new IllegalStateException("Can't access client data from server side!");
 	}
 
-	public void displayToast(int id)
+	public QuestFile createClientQuestFile()
 	{
+		throw new IllegalStateException("Can't create client quest file on server side!");
 	}
 }

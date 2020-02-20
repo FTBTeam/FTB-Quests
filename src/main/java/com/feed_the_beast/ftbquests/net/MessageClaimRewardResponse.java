@@ -1,11 +1,7 @@
 package com.feed_the_beast.ftbquests.net;
 
-import com.feed_the_beast.ftbquests.client.ClientQuestFile;
-import com.feed_the_beast.ftbquests.gui.quests.GuiQuests;
-import com.feed_the_beast.ftbquests.quest.PlayerData;
-import com.feed_the_beast.ftbquests.quest.reward.Reward;
+import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.util.NetUtils;
-import com.feed_the_beast.mods.ftbguilibrary.utils.ClientUtils;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
 
@@ -41,28 +37,6 @@ public class MessageClaimRewardResponse extends MessageBase
 	@Override
 	public void handle(NetworkEvent.Context context)
 	{
-		if (ClientQuestFile.exists())
-		{
-			Reward reward = ClientQuestFile.INSTANCE.getReward(id);
-
-			if (reward == null)
-			{
-				return;
-			}
-
-			PlayerData data = ClientQuestFile.INSTANCE.getData(player);
-			data.setRewardClaimed(reward.id, true);
-
-			if (data == ClientQuestFile.INSTANCE.self)
-			{
-				GuiQuests treeGui = ClientUtils.getCurrentGuiAs(GuiQuests.class);
-
-				if (treeGui != null)
-				{
-					treeGui.viewQuestPanel.refreshWidgets();
-					treeGui.otherButtonsTopPanel.refreshWidgets();
-				}
-			}
-		}
+		FTBQuests.NET_PROXY.claimReward(player, id);
 	}
 }

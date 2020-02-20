@@ -1,8 +1,6 @@
 package com.feed_the_beast.ftbquests.net;
 
-import com.feed_the_beast.ftbquests.client.ClientQuestFile;
-import com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIHelper;
-import com.feed_the_beast.ftbquests.quest.Chapter;
+import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import net.minecraft.nbt.CompoundNBT;
@@ -54,17 +52,6 @@ public class MessageCreateObjectResponse extends MessageBase
 	@Override
 	public void handle(NetworkEvent.Context context)
 	{
-		QuestObjectBase object = ClientQuestFile.INSTANCE.create(type, parent, extra == null ? new CompoundNBT() : extra);
-		object.readData(nbt);
-		object.id = id;
-		object.onCreated();
-		ClientQuestFile.INSTANCE.refreshIDMap();
-		object.editedFromGUI();
-		FTBQuestsJEIHelper.refresh(object);
-
-		if (object instanceof Chapter)
-		{
-			ClientQuestFile.INSTANCE.questTreeGui.selectChapter((Chapter) object);
-		}
+		FTBQuests.NET_PROXY.createObject(id, parent, type, nbt, extra);
 	}
 }

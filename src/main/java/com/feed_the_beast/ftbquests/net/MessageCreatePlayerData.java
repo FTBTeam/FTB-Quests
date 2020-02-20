@@ -1,6 +1,6 @@
 package com.feed_the_beast.ftbquests.net;
 
-import com.feed_the_beast.ftbquests.client.ClientQuestFile;
+import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.util.NetUtils;
 import net.minecraft.network.PacketBuffer;
@@ -38,11 +38,6 @@ public class MessageCreatePlayerData extends MessageBase
 	@Override
 	public void handle(NetworkEvent.Context context)
 	{
-		if (ClientQuestFile.exists())
-		{
-			PlayerData data = new PlayerData(ClientQuestFile.INSTANCE, uuid);
-			data.name = name;
-			data.file.addData(data);
-		}
+		FTBQuests.NET_PROXY.createPlayerData(uuid, name);
 	}
 }

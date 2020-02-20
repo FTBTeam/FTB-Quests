@@ -1,8 +1,7 @@
 package com.feed_the_beast.ftbquests.net;
 
-import com.feed_the_beast.ftbquests.client.ClientQuestFile;
+import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.ChangeProgress;
-import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.util.NetUtils;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
@@ -47,11 +46,6 @@ public class MessageChangeProgressResponse extends MessageBase
 	@Override
 	public void handle(NetworkEvent.Context context)
 	{
-		QuestObjectBase object = ClientQuestFile.INSTANCE.getBase(id);
-
-		if (object != null)
-		{
-			object.forceProgress(ClientQuestFile.INSTANCE.getData(player), type, notifications);
-		}
+		FTBQuests.NET_PROXY.changeProgress(player, id, type, notifications);
 	}
 }

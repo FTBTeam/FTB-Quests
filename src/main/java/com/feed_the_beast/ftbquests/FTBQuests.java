@@ -1,6 +1,7 @@
 package com.feed_the_beast.ftbquests;
 
 import com.feed_the_beast.ftbquests.client.FTBQuestsClient;
+import com.feed_the_beast.ftbquests.client.FTBQuestsNetClient;
 import com.feed_the_beast.ftbquests.integration.gamestages.GameStagesIntegration;
 import com.feed_the_beast.ftbquests.integration.kubejs.KubeJSIntegration;
 import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
@@ -28,6 +29,7 @@ public class FTBQuests
 	public static FTBQuests instance;
 
 	public static FTBQuestsCommon PROXY;
+	public static FTBQuestsNetCommon NET_PROXY;
 
 	public static final ItemGroup ITEM_GROUP = new ItemGroup(FTBQuests.MOD_ID)
 	{
@@ -44,6 +46,8 @@ public class FTBQuests
 		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
 		//noinspection Convert2MethodRef
 		PROXY = DistExecutor.runForDist(() -> () -> new FTBQuestsClient(), () -> () -> new FTBQuestsCommon());
+		//noinspection Convert2MethodRef
+		NET_PROXY = DistExecutor.runForDist(() -> () -> new FTBQuestsNetClient(), () -> () -> new FTBQuestsNetCommon());
 		new FTBQuestsEventHandler().init();
 
 		if (ModList.get().isLoaded("kubejs"))
