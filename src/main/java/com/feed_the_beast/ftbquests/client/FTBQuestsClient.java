@@ -2,8 +2,10 @@ package com.feed_the_beast.ftbquests.client;
 
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.FTBQuestsCommon;
+import com.feed_the_beast.ftbquests.gui.ToastQuestObject;
 import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
+import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.reward.FTBQuestsRewards;
 import com.feed_the_beast.ftbquests.quest.reward.ItemReward;
@@ -250,5 +252,23 @@ public class FTBQuestsClient extends FTBQuestsCommon
 	public PlayerData getClientPlayerData()
 	{
 		return ClientQuestFile.INSTANCE.getData(Minecraft.getInstance().player);
+	}
+
+	@Override
+	public void displayToast(int id)
+	{
+		if (ClientQuestFile.exists())
+		{
+			QuestObject object = ClientQuestFile.INSTANCE.get(id);
+
+			if (object != null)
+			{
+				Minecraft.getInstance().getToastGui().add(new ToastQuestObject(object));
+			}
+
+			ClientQuestFile.INSTANCE.questTreeGui.questPanel.refreshWidgets();
+			ClientQuestFile.INSTANCE.questTreeGui.chapterPanel.refreshWidgets();
+			ClientQuestFile.INSTANCE.questTreeGui.viewQuestPanel.refreshWidgets();
+		}
 	}
 }

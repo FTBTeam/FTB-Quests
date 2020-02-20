@@ -37,4 +37,8 @@ public class FTBQuestsCommon
 	{
 		throw new IllegalStateException("Can't access client data from server side!");
 	}
+
+	public void displayToast(int id)
+	{
+	}
 }
