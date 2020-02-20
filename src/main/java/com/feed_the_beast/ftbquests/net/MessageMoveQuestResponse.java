@@ -1,9 +1,6 @@
 package com.feed_the_beast.ftbquests.net;
 
-import com.feed_the_beast.ftbquests.client.ClientQuestFile;
-import com.feed_the_beast.ftbquests.gui.quests.GuiQuests;
-import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.mods.ftbguilibrary.utils.ClientUtils;
+import com.feed_the_beast.ftbquests.FTBQuests;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
 
@@ -44,23 +41,6 @@ public class MessageMoveQuestResponse extends MessageBase
 	@Override
 	public void handle(NetworkEvent.Context context)
 	{
-		if (ClientQuestFile.INSTANCE != null)
-		{
-			Quest quest = ClientQuestFile.INSTANCE.getQuest(id);
-
-			if (quest != null)
-			{
-				quest.moved(x, y, chapter);
-				GuiQuests gui = ClientUtils.getCurrentGuiAs(GuiQuests.class);
-
-				if (gui != null)
-				{
-					double sx = gui.questPanel.centerQuestX;
-					double sy = gui.questPanel.centerQuestY;
-					gui.questPanel.refreshWidgets();
-					gui.questPanel.scrollTo(sx, sy);
-				}
-			}
-		}
+		FTBQuests.NET_PROXY.moveQuest(id, chapter, x, y);
 	}
 }

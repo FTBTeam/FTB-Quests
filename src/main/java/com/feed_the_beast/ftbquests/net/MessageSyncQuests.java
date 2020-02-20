@@ -1,6 +1,6 @@
 package com.feed_the_beast.ftbquests.net;
 
-import com.feed_the_beast.ftbquests.client.ClientQuestFile;
+import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.util.NetUtils;
 import net.minecraft.network.PacketBuffer;
@@ -19,7 +19,7 @@ public class MessageSyncQuests extends MessageBase
 	MessageSyncQuests(PacketBuffer buffer)
 	{
 		self = NetUtils.readUUID(buffer);
-		file = new ClientQuestFile();
+		file = FTBQuests.PROXY.createClientQuestFile();
 		file.readNetDataFull(buffer, self);
 	}
 
@@ -39,6 +39,6 @@ public class MessageSyncQuests extends MessageBase
 	@Override
 	public void handle(NetworkEvent.Context context)
 	{
-		((ClientQuestFile) file).load(self);
+		file.load(self);
 	}
 }

@@ -30,6 +30,6 @@ public class MessageDisplayCompletionToast extends MessageBase
 	@Override
 	public void handle(NetworkEvent.Context context)
 	{
-		FTBQuests.PROXY.displayToast(id);
+		FTBQuests.NET_PROXY.displayCompletionToast(id);
 	}
 }

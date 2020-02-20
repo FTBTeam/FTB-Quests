@@ -1,12 +1,8 @@
 package com.feed_the_beast.ftbquests.net;
 
-import com.feed_the_beast.ftbquests.client.ClientQuestFile;
-import com.feed_the_beast.ftbquests.gui.IRewardListenerGui;
-import com.feed_the_beast.ftbquests.gui.RewardKey;
-import com.feed_the_beast.ftbquests.gui.RewardToast;
+import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.util.NetUtils;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
-import net.minecraft.client.Minecraft;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.fml.network.NetworkEvent;
@@ -45,11 +41,6 @@ public class MessageDisplayRewardToast extends MessageBase
 	@Override
 	public void handle(NetworkEvent.Context context)
 	{
-		Icon i = icon.isEmpty() ? ClientQuestFile.INSTANCE.getBase(id).getIcon() : icon;
-
-		if (!IRewardListenerGui.add(new RewardKey(text.getString(), i), 1))
-		{
-			Minecraft.getInstance().getToastGui().add(new RewardToast(text.getFormattedText(), i));
-		}
+		FTBQuests.NET_PROXY.displayRewardToast(id, text, icon);
 	}
 }

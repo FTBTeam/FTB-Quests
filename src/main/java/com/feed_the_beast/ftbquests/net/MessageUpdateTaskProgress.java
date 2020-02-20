@@ -1,8 +1,7 @@
 package com.feed_the_beast.ftbquests.net;
 
-import com.feed_the_beast.ftbquests.client.ClientQuestFile;
+import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.PlayerData;
-import com.feed_the_beast.ftbquests.quest.task.Task;
 import com.feed_the_beast.ftbquests.util.NetUtils;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
@@ -43,13 +42,6 @@ public class MessageUpdateTaskProgress extends MessageBase
 	@Override
 	public void handle(NetworkEvent.Context context)
 	{
-		Task t = ClientQuestFile.INSTANCE.getTask(task);
-
-		if (t != null)
-		{
-			PlayerData data = ClientQuestFile.INSTANCE.getData(player);
-			ClientQuestFile.INSTANCE.clearCachedProgress();
-			data.getTaskData(t).setProgress(progress);
-		}
+		FTBQuests.NET_PROXY.updateTaskProgress(player, task, progress);
 	}
 }

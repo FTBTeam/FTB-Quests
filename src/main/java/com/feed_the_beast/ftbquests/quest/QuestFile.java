@@ -135,6 +135,11 @@ public abstract class QuestFile extends QuestObject
 		throw new IllegalStateException("This quest file doesn't have a folder!");
 	}
 
+	public void load(UUID s)
+	{
+		throw new IllegalStateException("This method can only be called from client quest file!");
+	}
+
 	@Override
 	public int getRelativeProgressFromChildren(PlayerData data)
 	{

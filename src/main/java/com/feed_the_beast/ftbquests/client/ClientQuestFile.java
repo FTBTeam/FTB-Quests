@@ -33,6 +33,7 @@ public class ClientQuestFile extends QuestFile
 	public GuiQuests questTreeGui;
 	public GuiBase questGui;
 
+	@Override
 	public void load(UUID s)
 	{
 		if (INSTANCE != null)

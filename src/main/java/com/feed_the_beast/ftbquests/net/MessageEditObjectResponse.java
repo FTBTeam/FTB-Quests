@@ -1,7 +1,6 @@
 package com.feed_the_beast.ftbquests.net;
 
-import com.feed_the_beast.ftbquests.client.ClientQuestFile;
-import com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIHelper;
+import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
@@ -38,14 +37,6 @@ public class MessageEditObjectResponse extends MessageBase
 	@Override
 	public void handle(NetworkEvent.Context context)
 	{
-		ClientQuestFile.INSTANCE.clearCachedData();
-		QuestObjectBase object = ClientQuestFile.INSTANCE.getBase(id);
-
-		if (object != null)
-		{
-			object.readData(nbt);
-			object.editedFromGUI();
-			FTBQuestsJEIHelper.refresh(object);
-		}
+		FTBQuests.NET_PROXY.editObject(id, nbt);
 	}
 }
