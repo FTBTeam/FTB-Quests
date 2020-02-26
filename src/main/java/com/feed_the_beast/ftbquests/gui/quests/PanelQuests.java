@@ -21,9 +21,12 @@ import com.feed_the_beast.mods.ftbguilibrary.widget.GuiIcons;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Widget;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.Matrix4f;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.Vector3f;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.math.MathHelper;
@@ -218,12 +221,16 @@ public class PanelQuests extends Panel
 			DEFAULT_DEPENDENCY_LINE_TEXTURE.bindTexture();
 		}
 
+		MatrixStack matrixStack = new MatrixStack();
+
 		Quest selectedQuest = treeGui.getViewedQuest();
 		RenderSystem.shadeModel(GL11.GL_SMOOTH);
+		RenderSystem.enableBlend();
+		RenderSystem.blendFuncSeparate(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, GL11.GL_ONE, GL11.GL_ZERO);
 		double mt = -(System.currentTimeMillis() * 0.001D);
-		double mu = (mt * ThemeProperties.DEPENDENCY_LINE_UNSELECTED_SPEED.get(treeGui.selectedChapter)) % 1D;
-		double ms = (mt * ThemeProperties.DEPENDENCY_LINE_SELECTED_SPEED.get(treeGui.selectedChapter)) % 1D;
-		double s = treeGui.getZoom() * ThemeProperties.DEPENDENCY_LINE_THICKNESS.get(treeGui.selectedChapter) / 4D * 3D;
+		float mu = (float) ((mt * ThemeProperties.DEPENDENCY_LINE_UNSELECTED_SPEED.get(treeGui.selectedChapter)) % 1D);
+		float ms = (float) ((mt * ThemeProperties.DEPENDENCY_LINE_SELECTED_SPEED.get(treeGui.selectedChapter)) % 1D);
+		float s = (float) (treeGui.getZoom() * ThemeProperties.DEPENDENCY_LINE_THICKNESS.get(treeGui.selectedChapter) / 4D * 3D);
 
 		for (Widget widget : widgets)
 		{
@@ -268,23 +275,25 @@ public class PanelQuests extends Panel
 					a = 180;
 				}
 
-				double sx = widget.getX() + widget.width / 2D;
-				double sy = widget.getY() + widget.height / 2D;
-				double ex = button.getX() + button.width / 2D;
-				double ey = button.getY() + button.height / 2D;
-				double len = MathUtils.dist(sx, sy, ex, ey);
+				int sx = widget.getX() + widget.width / 2;
+				int sy = widget.getY() + widget.height / 2;
+				int ex = button.getX() + button.width / 2;
+				int ey = button.getY() + button.height / 2;
+				float len = (float) MathUtils.dist(sx, sy, ex, ey);
 
-				RenderSystem.pushMatrix();
-				RenderSystem.translated(sx, sy, 0);
-				RenderSystem.rotatef((float) (Math.atan2(ey - sy, ex - sx) * 180D / Math.PI), 0F, 0F, 1F);
+				matrixStack.push();
+				matrixStack.translate(sx, sy, 0);
+				matrixStack.rotate(Vector3f.ZP.rotation((float) Math.atan2(ey - sy, ex - sx)));
+				Matrix4f m = matrixStack.getLast().getPositionMatrix();
+
 				buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR_TEX);
-				buffer.pos(0, -s, 0).color(r, g, b, a).tex((float) (len / s / 2D + mu), 0).endVertex();
-				buffer.pos(0, s, 0).color(r, g, b, a).tex((float) (len / s / 2D + mu), 1).endVertex();
-				buffer.pos(len, s, 0).color(r * 3 / 4, g * 3 / 4, b * 3 / 4, a).tex((float) mu, 1).endVertex();
-				buffer.pos(len, -s, 0).color(r * 3 / 4, g * 3 / 4, b * 3 / 4, a).tex((float) mu, 0).endVertex();
+				buffer.pos(m, 0, -s, 0).color(r, g, b, a).tex(len / s / 2F + mu, 0).endVertex();
+				buffer.pos(m, 0, s, 0).color(r, g, b, a).tex(len / s / 2F + mu, 1).endVertex();
+				buffer.pos(m, len, s, 0).color(r * 3 / 4, g * 3 / 4, b * 3 / 4, a).tex(mu, 1).endVertex();
+				buffer.pos(m, len, -s, 0).color(r * 3 / 4, g * 3 / 4, b * 3 / 4, a).tex(mu, 0).endVertex();
 				tessellator.draw();
 
-				RenderSystem.popMatrix();
+				matrixStack.pop();
 			}
 		}
 
@@ -327,22 +336,25 @@ public class PanelQuests extends Panel
 					continue;
 				}
 
-				double sx = widget.getX() + widget.width / 2D;
-				double sy = widget.getY() + widget.height / 2D;
-				double ex = button.getX() + button.width / 2D;
-				double ey = button.getY() + button.height / 2D;
-				double len = MathUtils.dist(sx, sy, ex, ey);
+				int sx = widget.getX() + widget.width / 2;
+				int sy = widget.getY() + widget.height / 2;
+				int ex = button.getX() + button.width / 2;
+				int ey = button.getY() + button.height / 2;
+				float len = (float) MathUtils.dist(sx, sy, ex, ey);
 
-				RenderSystem.pushMatrix();
-				RenderSystem.translated(sx, sy, 0);
-				RenderSystem.rotatef((float) (Math.atan2(ey - sy, ex - sx) * 180D / Math.PI), 0F, 0F, 1F);
+				matrixStack.push();
+				matrixStack.translate(sx, sy, 0);
+				matrixStack.rotate(Vector3f.ZP.rotation((float) Math.atan2(ey - sy, ex - sx)));
+				Matrix4f m = matrixStack.getLast().getPositionMatrix();
+
 				buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR_TEX);
-				buffer.pos(0, -s, 0).color(r, g, b, a).tex((float) (len / s / 2D + ms), 0).endVertex();
-				buffer.pos(0, s, 0).color(r, g, b, a).tex((float) (len / s / 2D + ms), 1).endVertex();
-				buffer.pos(len, s, 0).color(r * 3 / 4, g * 3 / 4, b * 3 / 4, a).tex((float) ms, 1).endVertex();
-				buffer.pos(len, -s, 0).color(r * 3 / 4, g * 3 / 4, b * 3 / 4, a).tex((float) ms, 0).endVertex();
+				buffer.pos(m, 0, -s, 0).color(r, g, b, a).tex(len / s / 2F + ms, 0).endVertex();
+				buffer.pos(m, 0, s, 0).color(r, g, b, a).tex(len / s / 2F + ms, 1).endVertex();
+				buffer.pos(m, len, s, 0).color(r * 3 / 4, g * 3 / 4, b * 3 / 4, a).tex(ms, 1).endVertex();
+				buffer.pos(m, len, -s, 0).color(r * 3 / 4, g * 3 / 4, b * 3 / 4, a).tex(ms, 0).endVertex();
 				tessellator.draw();
-				RenderSystem.popMatrix();
+
+				matrixStack.pop();
 			}
 		}
 
@@ -384,8 +396,9 @@ public class PanelQuests extends Panel
 			if (treeGui.file.canEdit())
 			{
 				theme.pushFontUnicode(true);
+
 				RenderSystem.pushMatrix();
-				RenderSystem.translatef(0F, 0F, 1000F);
+				RenderSystem.translatef(0F, 0F, 600F);
 				theme.drawString("X:" + (questX < 0 ? "" : " ") + StringUtils.DOUBLE_FORMATTER_00.format(questX), x + 3, y + h - 18, Theme.SHADOW);
 				theme.drawString("Y:" + (questY < 0 ? "" : " ") + StringUtils.DOUBLE_FORMATTER_00.format(questY), x + 3, y + h - 10, Theme.SHADOW);
 				theme.drawString("CX:" + (centerQuestX < 0 ? "" : " ") + StringUtils.DOUBLE_FORMATTER_00.format(centerQuestX), x + w - 42, y + h - 18, Theme.SHADOW);
