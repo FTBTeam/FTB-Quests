@@ -26,6 +26,7 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.items.ItemHandlerHelper;
 
+import javax.annotation.Nullable;
 import java.util.UUID;
 
 public class FTBQuestsNetClient extends FTBQuestsNetCommon
@@ -67,7 +68,7 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon
 	}
 
 	@Override
-	public void createObject(int id, int parent, QuestObjectType type, CompoundNBT nbt, CompoundNBT extra)
+	public void createObject(int id, int parent, QuestObjectType type, CompoundNBT nbt, @Nullable CompoundNBT extra)
 	{
 		QuestObjectBase object = ClientQuestFile.INSTANCE.create(type, parent, extra == null ? new CompoundNBT() : extra);
 		object.readData(nbt);
