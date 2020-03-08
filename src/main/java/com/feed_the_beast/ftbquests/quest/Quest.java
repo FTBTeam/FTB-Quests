@@ -635,6 +635,11 @@ public final class Quest extends QuestObject implements Movable
 		config.addEnum("disable_jei", () -> disableJEI, v -> disableJEI = v, EnumTristate.NAME_MAP);
 	}
 
+	public boolean shouldCountProgress()
+	{
+		return !canRepeat && customClick.isEmpty();
+	}
+
 	@Override
 	public Chapter getChapter()
 	{
@@ -877,7 +882,7 @@ public final class Quest extends QuestObject implements Movable
 
 	public void checkRepeatableQuests(QuestData data, UUID player)
 	{
-		if (!canRepeat)
+		if (!shouldCountProgress())
 		{
 			return;
 		}
