@@ -134,6 +134,7 @@ public class ServerQuestFile extends QuestFile
 		new MessageDeleteObjectResponse(id).sendToAll();
 	}
 
+	@Override
 	public void save()
 	{
 		shouldSave = true;
@@ -209,5 +210,17 @@ public class ServerQuestFile extends QuestFile
 				data.checkAutoCompletion(quest);
 			}
 		}
+	}
+
+	@Override
+	public boolean updateChapterIndices()
+	{
+		if (super.updateChapterIndices())
+		{
+			save();
+			return true;
+		}
+
+		return false;
 	}
 }

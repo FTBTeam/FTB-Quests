@@ -36,6 +36,7 @@ public final class Chapter extends QuestObject
 	public Chapter group;
 	public QuestShape defaultQuestShape;
 	public final List<ChapterImage> images;
+	public int orderIndex;
 
 	public Chapter(QuestFile f)
 	{
@@ -47,6 +48,7 @@ public final class Chapter extends QuestObject
 		group = null;
 		defaultQuestShape = QuestShape.DEFAULT;
 		images = new ArrayList<>();
+		orderIndex = 0;
 	}
 
 	@Override
@@ -71,6 +73,7 @@ public final class Chapter extends QuestObject
 	public void writeData(CompoundNBT nbt)
 	{
 		nbt.putString("filename", filename);
+		nbt.putInt("order_index", orderIndex);
 		super.writeData(nbt);
 
 		if (!subtitle.isEmpty())
@@ -119,6 +122,7 @@ public final class Chapter extends QuestObject
 	public void readData(CompoundNBT nbt)
 	{
 		filename = nbt.getString("filename");
+		orderIndex = nbt.getInt("order_index");
 		super.readData(nbt);
 		subtitle.clear();
 

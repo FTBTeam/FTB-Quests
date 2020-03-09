@@ -1,5 +1,6 @@
 package com.feed_the_beast.ftbquests.net;
 
+import com.feed_the_beast.ftbquests.quest.Chapter;
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
@@ -55,9 +56,15 @@ public class MessageCreateObject extends MessageBase
 			object.readData(nbt);
 			object.id = ServerQuestFile.INSTANCE.newID();
 			object.onCreated();
-			ServerQuestFile.INSTANCE.refreshIDMap();
-			ServerQuestFile.INSTANCE.clearCachedData();
-			ServerQuestFile.INSTANCE.save();
+			object.getQuestFile().refreshIDMap();
+			object.getQuestFile().clearCachedData();
+			object.getQuestFile().save();
+
+			if (object instanceof Chapter)
+			{
+				object.getQuestFile().updateChapterIndices();
+			}
+
 			new MessageCreateObjectResponse(object, extra).sendToAll();
 		}
 	}

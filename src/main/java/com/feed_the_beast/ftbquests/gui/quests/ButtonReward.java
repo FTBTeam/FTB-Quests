@@ -138,6 +138,7 @@ public class ButtonReward extends Button
 
 		RenderSystem.pushMatrix();
 		RenderSystem.translatef(0F, 0F, 500F);
+		RenderSystem.enableBlend();
 		boolean completed = false;
 
 		if (!ClientQuestFile.exists())

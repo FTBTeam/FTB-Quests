@@ -221,7 +221,8 @@ public class ButtonTask extends Button
 		if (treeGui.file.self.isComplete(task))
 		{
 			RenderSystem.pushMatrix();
-			RenderSystem.translatef(0F, 0F, 500F);
+			RenderSystem.translatef(0, 0, 500);
+			RenderSystem.enableBlend();
 			ThemeProperties.CHECK_ICON.get().draw(x + w - 9, y + 1, 8, 8);
 			RenderSystem.popMatrix();
 		}
@@ -232,8 +233,9 @@ public class ButtonTask extends Button
 			if (!s.isEmpty())
 			{
 				RenderSystem.pushMatrix();
-				RenderSystem.translatef(x + 19F - theme.getStringWidth(s) / 2F, y + 15F, 500F);
+				RenderSystem.translatef(x + 19F - theme.getStringWidth(s) / 2F, y + 15F, 200F);
 				RenderSystem.scalef(0.5F, 0.5F, 1F);
+				RenderSystem.enableBlend();
 				theme.drawString(s, 0, 0, Color4I.WHITE, Theme.SHADOW);
 				RenderSystem.popMatrix();
 			}

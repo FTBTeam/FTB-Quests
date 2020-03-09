@@ -66,6 +66,7 @@ public class ButtonChapter extends ButtonTab
 		{
 			RenderSystem.pushMatrix();
 			RenderSystem.translatef(0, 0, 450);
+			RenderSystem.enableBlend();
 			ThemeProperties.CLOSE_ICON.get().draw(x + w - 10, y + 2, 8, 8);
 			RenderSystem.popMatrix();
 			return;
@@ -75,6 +76,7 @@ public class ButtonChapter extends ButtonTab
 		{
 			RenderSystem.pushMatrix();
 			RenderSystem.translatef(0, 0, 450);
+			RenderSystem.enableBlend();
 			ThemeProperties.ALERT_ICON.get().draw(x + w - 7, y + 2, 6, 6);
 			RenderSystem.popMatrix();
 		}
@@ -82,6 +84,7 @@ public class ButtonChapter extends ButtonTab
 		{
 			RenderSystem.pushMatrix();
 			RenderSystem.translatef(0, 0, 450);
+			RenderSystem.enableBlend();
 			ThemeProperties.CHECK_ICON.get().draw(x + w - 8, y + 1, 8, 8);
 			RenderSystem.popMatrix();
 		}
