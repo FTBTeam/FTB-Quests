@@ -44,6 +44,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -582,6 +583,7 @@ public abstract class QuestFile extends QuestObject
 				if (chapterNBT != null)
 				{
 					Chapter chapter = new Chapter(this);
+					chapter.orderIndex = chapters.size() + 1;
 					chapter.id = readID(chapterNBT.getInt("id"));
 					map.put(chapter.id, chapter);
 					dataCache.put(chapter.id, chapterNBT);
@@ -666,6 +668,9 @@ public abstract class QuestFile extends QuestObject
 			}
 		}
 
+		chapters.sort(Comparator.comparingInt(o -> o.orderIndex));
+		updateChapterIndices();
+
 		for (Chapter chapter : chapters)
 		{
 			for (Quest quest : chapter.quests)
@@ -681,6 +686,28 @@ public abstract class QuestFile extends QuestObject
 				MinecraftForge.EVENT_BUS.post(new CustomTaskEvent((CustomTask) object));
 			}
 		}
+	}
+
+	public void save()
+	{
+	}
+
+	public boolean updateChapterIndices()
+	{
+		boolean changed = false;
+
+		for (int i = 0; i < chapters.size(); i++)
+		{
+			Chapter c = chapters.get(i);
+
+			if (c.orderIndex != i + 1)
+			{
+				c.orderIndex = i + 1;
+				changed = true;
+			}
+		}
+
+		return changed;
 	}
 
 	@Override

@@ -70,7 +70,7 @@ public class GuiValidItems extends GuiBase
 				Color4I.WHITE.withAlpha(33).draw(x, y, w, h);
 			}
 
-			GuiHelper.drawItem(stack, x + 2D, y + 2D, 2D, 2D, true);
+			GuiHelper.drawItem(stack, x + 2, y + 2, 2, 2, true);
 		}
 	}
 
