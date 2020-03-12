@@ -882,7 +882,7 @@ public final class Quest extends QuestObject implements Movable
 
 	public void checkRepeatableQuests(QuestData data, UUID player)
 	{
-		if (!shouldCountProgress())
+		if (shouldCountProgress())
 		{
 			return;
 		}
