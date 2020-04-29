@@ -20,7 +20,9 @@ import com.feed_the_beast.mods.ftbguilibrary.widget.GuiHelper;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.toasts.SystemToast;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.client.event.ColorHandlerEvent;
 import net.minecraftforge.client.event.InputEvent;
@@ -100,7 +102,15 @@ public class FTBQuestsClientEventHandler
 	{
 		if (event.getId().getNamespace().equals(FTBQuests.MOD_ID) && "open_gui".equals(event.getId().getPath()))
 		{
-			ClientQuestFile.INSTANCE.openQuestGui();
+			if (!ClientQuestFile.exists())
+			{
+				Minecraft.getInstance().getToastGui().add(new SystemToast(SystemToast.Type.TUTORIAL_HINT, new StringTextComponent("Error?! Server doesn't have FTB Quests!"), null));
+			}
+			else
+			{
+				ClientQuestFile.INSTANCE.openQuestGui();
+			}
+
 			event.setCanceled(true);
 		}
 	}

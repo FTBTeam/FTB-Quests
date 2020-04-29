@@ -61,5 +61,5 @@ dependency_line_thickness:          0.17
 quest_spacing:                      1.0
 pinned_quest_size:                  0.75
 
-checkmark_task_active   ftbguilibrary:icons/accept
-checkmark_task_inactive ftbguilibrary:icons/accept_gray
+checkmark_task_active:   ftbguilibrary:icons/accept
+checkmark_task_inactive: ftbguilibrary:icons/accept_gray
