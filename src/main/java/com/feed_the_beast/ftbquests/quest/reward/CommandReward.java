@@ -80,7 +80,7 @@ public class CommandReward extends Reward
 	public void claim(ServerPlayerEntity player, boolean notify)
 	{
 		Map<String, Object> overrides = new HashMap<>();
-		overrides.put("p", player.getName());
+		overrides.put("p", player.getGameProfile().getName());
 
 		BlockPos pos = player.getPosition();
 		overrides.put("x", pos.getX());
