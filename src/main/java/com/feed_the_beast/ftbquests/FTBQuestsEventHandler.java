@@ -319,6 +319,11 @@ public class FTBQuestsEventHandler
 				return;
 			}
 
+			if (autoSubmitTasks == null || autoSubmitTasks.isEmpty())
+			{
+				return;
+			}
+
 			long t = event.player.world.getTotalWorldTime();
 
 			for (Task task : autoSubmitTasks)

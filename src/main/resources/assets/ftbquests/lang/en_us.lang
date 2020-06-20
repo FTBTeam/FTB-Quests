@@ -145,6 +145,7 @@ ftbquests.quest.shape.octagon=Octagon
 ftbquests.quest.shape.heart=Heart
 ftbquests.quest.shape.gear=Gear
 ftbquests.quest.can_repeat=Can be repeated
+ftbquests.quest.optional=Optional
 ftbquests.quest.tasks_ignore_dependencies=Tasks Ignore Dependencies
 ftbquests.quest.tasks_ignore_dependencies.tooltip=Allow to start tasks without completing dependencies
 ftbquests.quest.dependency_requirement=Dependency Requirement

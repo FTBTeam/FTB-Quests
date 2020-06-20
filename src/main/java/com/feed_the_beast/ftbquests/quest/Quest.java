@@ -65,6 +65,7 @@ public final class Quest extends QuestObject implements Movable
 	public boolean hideTextUntilComplete;
 	public EnumTristate disableJEI;
 	public double size;
+	public boolean optional;
 
 	private String cachedDescription = null;
 	private String[] cachedText = null;
@@ -90,6 +91,7 @@ public final class Quest extends QuestObject implements Movable
 		hideTextUntilComplete = false;
 		disableJEI = EnumTristate.DEFAULT;
 		size = 1D;
+		optional = false;
 	}
 
 	@Override
@@ -212,6 +214,11 @@ public final class Quest extends QuestObject implements Movable
 		{
 			nbt.setDouble("size", size);
 		}
+
+		if (optional)
+		{
+			nbt.setBoolean("optional", true);
+		}
 	}
 
 	@Override
@@ -282,6 +289,7 @@ public final class Quest extends QuestObject implements Movable
 		dependencyRequirement = DependencyRequirement.NAME_MAP.get(nbt.getString("dependency_requirement"));
 		hideTextUntilComplete = nbt.getBoolean("hide_text_until_complete");
 		size = nbt.hasKey("size") ? nbt.getDouble("size") : 1D;
+		optional = nbt.getBoolean("optional");
 	}
 
 	@Override
@@ -297,6 +305,7 @@ public final class Quest extends QuestObject implements Movable
 		flags = Bits.setFlag(flags, 32, !customClick.isEmpty());
 		flags = Bits.setFlag(flags, 64, hideDependencyLines);
 		flags = Bits.setFlag(flags, 128, hideTextUntilComplete);
+		flags = Bits.setFlag(flags, 256, optional);
 		data.writeVarInt(flags);
 
 		if (!subtitle.isEmpty())
@@ -367,6 +376,7 @@ public final class Quest extends QuestObject implements Movable
 		customClick = Bits.getFlag(flags, 32) ? data.readString() : "";
 		hideDependencyLines = Bits.getFlag(flags, 64);
 		hideTextUntilComplete = Bits.getFlag(flags, 128);
+		optional = Bits.getFlag(flags, 256);
 
 		minRequiredDependencies = data.readVarInt();
 		dependencyRequirement = DependencyRequirement.NAME_MAP.read(data);
@@ -622,6 +632,7 @@ public final class Quest extends QuestObject implements Movable
 		config.addDouble("size", () -> size, v -> size = v, 1, 0.5D, 3D);
 		config.addDouble("x", () -> x, v -> x = v, 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
 		config.addDouble("y", () -> y, v -> y = v, 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+		config.addBool("optional", () -> optional, v -> optional = v, false);
 
 		Predicate<QuestObjectBase> depTypes = object -> object != chapter.file && object != chapter && object instanceof QuestObject;// && !(object instanceof Task);
 
@@ -633,11 +644,6 @@ public final class Quest extends QuestObject implements Movable
 		config.addString("custom_click", () -> customClick, v -> customClick = v, "");
 		config.addBool("hide_text_until_complete", () -> hideTextUntilComplete, v -> hideTextUntilComplete = v, false);
 		config.addEnum("disable_jei", () -> disableJEI, v -> disableJEI = v, EnumTristate.NAME_MAP);
-	}
-
-	public boolean shouldCountProgress()
-	{
-		return !canRepeat && customClick.isEmpty();
 	}
 
 	@Override
@@ -681,6 +687,11 @@ public final class Quest extends QuestObject implements Movable
 	public void move(Chapter to, double x, double y)
 	{
 		new MessageMoveQuest(id, to.id, x, y).sendToServer();
+	}
+
+	public boolean isProgressionIgnored()
+	{
+		return canRepeat || optional || !customClick.isEmpty();
 	}
 
 	@Override
@@ -882,7 +893,7 @@ public final class Quest extends QuestObject implements Movable
 
 	public void checkRepeatableQuests(QuestData data, UUID player)
 	{
-		if (!shouldCountProgress())
+		if (!canRepeat)
 		{
 			return;
 		}
