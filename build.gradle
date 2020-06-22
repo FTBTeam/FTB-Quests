@@ -98,7 +98,7 @@ if (ENV.CURSEFORGE_KEY) {
 			releaseType = "release"
 			addGameVersion project.mc_version
 			relations {
-				requiredDependency 'ftblib'
+				requiredDependency 'ftb-library'
 				requiredDependency 'item-filters'
 				optionalDependency 'kubejs'
 				optionalDependency 'ftb-utilities'
