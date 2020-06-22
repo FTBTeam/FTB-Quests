@@ -5,6 +5,7 @@ import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.reward.Reward;
+import com.feed_the_beast.ftbquests.quest.reward.RewardAutoClaim;
 import com.feed_the_beast.ftbquests.quest.reward.RewardType;
 import net.darkhax.gamestages.GameStageHelper;
 import net.minecraft.client.resources.I18n;
@@ -26,6 +27,7 @@ public class GameStageReward extends Reward
 	public GameStageReward(Quest quest)
 	{
 		super(quest);
+		autoclaim = RewardAutoClaim.NO_TOAST;
 	}
 
 	@Override
