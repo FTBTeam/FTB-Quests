@@ -4,50 +4,47 @@ import com.feed_the_beast.ftbquests.events.CustomRewardEvent;
 import com.feed_the_beast.ftbquests.events.CustomTaskEvent;
 import com.feed_the_beast.ftbquests.events.ObjectCompletedEvent;
 import com.feed_the_beast.ftbquests.events.TaskStartedEvent;
-import dev.latvian.kubejs.documentation.DocumentationEvent;
 import dev.latvian.kubejs.player.AttachPlayerDataEvent;
 import dev.latvian.kubejs.script.BindingsEvent;
-import dev.latvian.kubejs.script.DataType;
 import dev.latvian.kubejs.script.ScriptType;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 /**
  * @author LatvianModder
  */
 public class KubeJSIntegration
 {
-	public void init()
+	public static void init()
 	{
-		MinecraftForge.EVENT_BUS.addListener(this::registerDocumentation);
-		MinecraftForge.EVENT_BUS.addListener(this::registerBindings);
-		MinecraftForge.EVENT_BUS.addListener(this::attachPlayerData);
-		MinecraftForge.EVENT_BUS.addListener(this::onCustomTask);
-		MinecraftForge.EVENT_BUS.addListener(this::onCustomReward);
-		MinecraftForge.EVENT_BUS.addListener(this::onCompleted);
-		MinecraftForge.EVENT_BUS.addListener(this::onTaskStarted);
+		MinecraftForge.EVENT_BUS.register(KubeJSIntegration.class);
 	}
 
-	private void registerDocumentation(DocumentationEvent event)
-	{
-		event.registerAttachedData(DataType.PLAYER, "ftbquests", FTBQuestsKubeJSPlayerData.class);
+	//@SubscribeEvent
+	//public static void registerDocumentation(DocumentationEvent event)
+	//{
+	//	event.registerAttachedData(DataType.PLAYER, "ftbquests", FTBQuestsKubeJSPlayerData.class);
+	//
+	//	event.registerEvent("ftbquests.custom_task", CustomTaskEventJS.class).doubleParam("id").canCancel();
+	//	event.registerEvent("ftbquests.custom_reward", CustomRewardEventJS.class).doubleParam("id").canCancel();
+	//	event.registerEvent("ftbquests.completed", QuestObjectCompletedEventJS.class).doubleParam("id|tag");
+	//	event.registerEvent("ftbquests.started", TaskStartedEventJS.class).doubleParam("id|tag");
+	//}
 
-		event.registerEvent("ftbquests.custom_task", CustomTaskEventJS.class).doubleParam("id").canCancel();
-		event.registerEvent("ftbquests.custom_reward", CustomRewardEventJS.class).doubleParam("id").canCancel();
-		event.registerEvent("ftbquests.completed", QuestObjectCompletedEventJS.class).doubleParam("id|tag");
-		event.registerEvent("ftbquests.started", TaskStartedEventJS.class).doubleParam("id|tag");
-	}
-
-	private void registerBindings(BindingsEvent event)
+	@SubscribeEvent
+	public static void registerBindings(BindingsEvent event)
 	{
 		event.add("ftbquests", new FTBQuestsKubeJSWrapper());
 	}
 
-	private void attachPlayerData(AttachPlayerDataEvent event)
+	@SubscribeEvent
+	public void attachPlayerData(AttachPlayerDataEvent event)
 	{
 		event.add("ftbquests", new FTBQuestsKubeJSPlayerData(event.getParent()));
 	}
 
-	private void onCustomTask(CustomTaskEvent event)
+	@SubscribeEvent
+	public static void onCustomTask(CustomTaskEvent event)
 	{
 		if (new CustomTaskEventJS(event).post(ScriptType.SERVER, "ftbquests.custom_task", event.getTask().toString()))
 		{
@@ -55,7 +52,8 @@ public class KubeJSIntegration
 		}
 	}
 
-	private void onCustomReward(CustomRewardEvent event)
+	@SubscribeEvent
+	public static void onCustomReward(CustomRewardEvent event)
 	{
 		if (new CustomRewardEventJS(event).post(ScriptType.SERVER, "ftbquests.custom_reward", event.getReward().toString()))
 		{
@@ -63,7 +61,8 @@ public class KubeJSIntegration
 		}
 	}
 
-	private void onCompleted(ObjectCompletedEvent event)
+	@SubscribeEvent
+	public static void onCompleted(ObjectCompletedEvent event)
 	{
 		QuestObjectCompletedEventJS e = new QuestObjectCompletedEventJS(event);
 		e.post(ScriptType.SERVER, "ftbquests.completed", event.getObject().toString());
@@ -74,7 +73,8 @@ public class KubeJSIntegration
 		}
 	}
 
-	private void onTaskStarted(TaskStartedEvent event)
+	@SubscribeEvent
+	public static void onTaskStarted(TaskStartedEvent event)
 	{
 		TaskStartedEventJS e = new TaskStartedEventJS(event);
 		e.post(ScriptType.SERVER, "ftbquests.started", event.getTaskData().task.toString());
