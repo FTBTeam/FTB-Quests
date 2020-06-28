@@ -52,7 +52,7 @@ public class FTBQuests
 
 		if (ModList.get().isLoaded("kubejs"))
 		{
-			new KubeJSIntegration().init();
+			KubeJSIntegration.init();
 		}
 
 		if (ModList.get().isLoaded("gamestages"))
