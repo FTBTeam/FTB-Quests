@@ -481,7 +481,7 @@ public class ServerQuestData extends QuestData implements NBTDataStorage.Data
 	@Override
 	public void checkAutoCompletion(Quest quest)
 	{
-		if (!quest.isComplete(this))
+		if (quest.rewards.isEmpty() || !quest.isComplete(this))
 		{
 			return;
 		}

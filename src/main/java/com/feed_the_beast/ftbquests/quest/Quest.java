@@ -516,6 +516,17 @@ public final class Quest extends QuestObject implements Movable
 		data.checkAutoCompletion(this);
 		new ObjectCompletedEvent.QuestEvent(data, this, onlineMembers, notifiedPlayers).post();
 
+		for (Chapter chapter : chapter.file.chapters)
+		{
+			for (Quest quest : chapter.quests)
+			{
+				if (quest.dependencies.contains(this))
+				{
+					data.checkAutoCompletion(quest);
+				}
+			}
+		}
+
 		if (chapter.isComplete(data))
 		{
 			chapter.onCompleted(data, onlineMembers, notifiedPlayers);
