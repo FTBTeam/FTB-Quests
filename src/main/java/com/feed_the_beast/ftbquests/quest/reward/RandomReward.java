@@ -11,8 +11,10 @@ import com.feed_the_beast.ftbquests.quest.loot.RewardTable;
 import com.feed_the_beast.ftbquests.quest.loot.WeightedReward;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.relauncher.Side;
@@ -20,6 +22,8 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Random;
+import java.util.UUID;
 
 /**
  * @author LatvianModder
@@ -154,6 +158,17 @@ public class RandomReward extends Reward
 				return;
 			}
 		}
+	}
+
+	@Override
+	public boolean automatedClaimPre(TileEntity tileEntity, List<ItemStack> items, Random random, UUID playerId, @Nullable EntityPlayerMP player)
+	{
+		return false;
+	}
+
+	@Override
+	public void automatedClaimPost(TileEntity tileEntity, UUID playerId, @Nullable EntityPlayerMP player)
+	{
 	}
 
 	@Override

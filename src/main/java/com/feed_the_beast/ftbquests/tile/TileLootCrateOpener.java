@@ -21,7 +21,6 @@ import net.minecraftforge.items.IItemHandler;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -142,14 +141,27 @@ public class TileLootCrateOpener extends TileBase implements IItemHandler
 
 						if (currentWeight >= number)
 						{
-							Optional<ItemStack> r = reward.reward.claimAutomated(this, owner, player, simulate);
+							List<ItemStack> stacks = new ArrayList<>();
 
-							if (r.isPresent())
+							if (reward.reward.automatedClaimPre(this, stacks, world.rand, owner, player))
 							{
+								update = true;
+
 								if (!simulate)
 								{
-									insertItem(r.get());
-									update = true;
+									ItemEntry entry = ItemEntry.get(stack);
+
+									for (ItemEntryWithCount entry1 : items)
+									{
+										if (entry1.entry.equalsEntry(entry))
+										{
+											entry1.count += stack.getCount();
+											return ItemStack.EMPTY;
+										}
+									}
+
+									items.add(new ItemEntryWithCount(entry, stack.getCount()));
+									reward.reward.automatedClaimPost(this, owner, player);
 								}
 							}
 
@@ -160,33 +172,12 @@ public class TileLootCrateOpener extends TileBase implements IItemHandler
 			}
 		}
 
-		if (update)
+		if (update && !simulate)
 		{
 			markDirty();
 		}
 
 		return ItemStack.EMPTY;
-	}
-
-	private void insertItem(ItemStack stack)
-	{
-		if (stack.isEmpty())
-		{
-			return;
-		}
-
-		ItemEntry entry = ItemEntry.get(stack);
-
-		for (ItemEntryWithCount entry1 : items)
-		{
-			if (entry1.entry.equalsEntry(entry))
-			{
-				entry1.count += stack.getCount();
-				return;
-			}
-		}
-
-		items.add(new ItemEntryWithCount(entry, stack.getCount()));
 	}
 
 	@Override

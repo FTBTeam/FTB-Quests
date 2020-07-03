@@ -21,7 +21,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.ItemHandlerHelper;
 
 import javax.annotation.Nullable;
-import java.util.Optional;
+import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
@@ -149,35 +149,23 @@ public class ItemReward extends Reward
 	}
 
 	@Override
-	public Optional<ItemStack> claimAutomated(TileEntity tileEntity, UUID playerId, @Nullable EntityPlayerMP player, boolean simulate)
+	public boolean automatedClaimPre(TileEntity tileEntity, List<ItemStack> items, Random random, UUID playerId, @Nullable EntityPlayerMP player)
 	{
-		if (count + randomBonus > item.getMaxStackSize())
+		int size = count + random.nextInt(randomBonus + 1);
+
+		while (size > 0)
 		{
-			return Optional.of(ItemStack.EMPTY);
+			int s = Math.min(size, item.getMaxStackSize());
+			items.add(ItemHandlerHelper.copyStackWithSize(item, s));
+			size -= s;
 		}
 
-		Random random = new Random(longHashCode(
-				playerId.getMostSignificantBits(),
-				playerId.getLeastSignificantBits(),
-				tileEntity.getPos().getX(),
-				tileEntity.getPos().getY(),
-				tileEntity.getPos().getZ(),
-				tileEntity.getWorld().getTotalWorldTime()
-		));
-
-		return Optional.of(ItemHandlerHelper.copyStackWithSize(item, count + random.nextInt(randomBonus + 1)));
+		return true;
 	}
 
-	private static long longHashCode(Object... objects)
+	@Override
+	public void automatedClaimPost(TileEntity tileEntity, UUID playerId, @Nullable EntityPlayerMP player)
 	{
-		long result = 1L;
-
-		for (Object element : objects)
-		{
-			result = 31L * result + (element == null ? 0L : element instanceof Number ? ((Number) element).longValue() : element.hashCode());
-		}
-
-		return result;
 	}
 
 	@Override

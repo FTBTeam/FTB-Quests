@@ -2,6 +2,7 @@ package com.feed_the_beast.ftbquests.gui.tree;
 
 import com.feed_the_beast.ftblib.lib.gui.ContextMenuItem;
 import com.feed_the_beast.ftblib.lib.gui.GuiHelper;
+import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.util.FileUtils;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
@@ -143,6 +144,8 @@ public class ButtonEditSettings extends ButtonTab
 			ThemeLoader.loadTheme(mc.getResourceManager());
 			ClientQuestFile.INSTANCE.refreshGui();
 		}));
+
+		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.wiki"), GuiIcons.INFO, () -> handleClick("https://faq.ftb.world/books/ftb-quests-112")));
 
 		treeGui.openContextMenu(contextMenu);
 	}

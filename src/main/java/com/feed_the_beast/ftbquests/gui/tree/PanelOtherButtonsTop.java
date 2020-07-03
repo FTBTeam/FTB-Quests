@@ -2,6 +2,7 @@ package com.feed_the_beast.ftbquests.gui.tree;
 
 import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.gui.WidgetLayout;
+import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.fml.common.Loader;
 
@@ -35,7 +36,10 @@ public class PanelOtherButtonsTop extends PanelOtherButtons
 			add(new ButtonEmergencyItems(this));
 		}
 
-		add(new ButtonWiki(this));
+		if (!ThemeProperties.WIKI_URL.get().equals("-"))
+		{
+			add(new ButtonWiki(this));
+		}
 	}
 
 	@Override

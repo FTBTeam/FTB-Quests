@@ -1,55 +1,68 @@
 package com.feed_the_beast.ftbquests.tile;
 
+import com.feed_the_beast.ftblib.lib.config.ConfigGroup;
+import com.feed_the_beast.ftblib.lib.config.ConfigNull;
+import com.feed_the_beast.ftblib.lib.config.IConfigCallback;
+import com.feed_the_beast.ftblib.lib.data.FTBLibAPI;
 import com.feed_the_beast.ftblib.lib.tile.EnumSaveType;
 import com.feed_the_beast.ftblib.lib.tile.TileBase;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
-import com.feed_the_beast.ftbquests.quest.Chapter;
-import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.reward.Reward;
+import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
 import com.feed_the_beast.ftbquests.util.ServerQuestData;
+import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.ITickable;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.items.CapabilityItemHandler;
-import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.items.ItemHandlerHelper;
+import net.minecraftforge.items.ItemStackHandler;
 
 import javax.annotation.Nullable;
-import java.util.Optional;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 /**
  * @author LatvianModder
  */
-public class TileRewardCollector extends TileBase implements IItemHandler
+public class TileRewardCollector extends TileBase implements ITickable, IConfigCallback
 {
 	public UUID owner = null;
+	public int reward = 0;
+	public ItemStackHandler inventory = new ItemStackHandler(9);
 
 	@Override
 	protected void writeData(NBTTagCompound nbt, EnumSaveType type)
 	{
+		nbt.setInteger("reward", reward);
+
 		if (!type.save)
 		{
 			return;
 		}
 
-		if (owner != null && !type.item)
-		{
-			nbt.setString("owner", StringUtils.fromUUID(owner));
-		}
+		nbt.setString("owner", StringUtils.fromUUID(owner));
+		nbt.setTag("inventory", inventory.serializeNBT());
 	}
 
 	@Override
 	protected void readData(NBTTagCompound nbt, EnumSaveType type)
 	{
+		reward = nbt.getInteger("reward");
+
 		if (!type.save)
 		{
 			return;
 		}
 
 		owner = nbt.hasKey("owner") ? StringUtils.fromString(nbt.getString("owner")) : null;
+		inventory.deserializeNBT(nbt.getCompoundTag("inventory"));
 	}
 
 	@Override
@@ -62,39 +75,40 @@ public class TileRewardCollector extends TileBase implements IItemHandler
 	@Nullable
 	public <T> T getCapability(Capability<T> capability, @Nullable EnumFacing facing)
 	{
-		return capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY ? (T) this : super.getCapability(capability, facing);
+		return capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY ? (T) inventory : super.getCapability(capability, facing);
 	}
 
 	@Override
-	public int getSlots()
+	public void markDirty()
 	{
-		return 1;
+		sendDirtyUpdate();
 	}
 
-	@Override
-	public ItemStack getStackInSlot(int slot)
+	private static long longHashCode(Object... objects)
 	{
-		return extractItem(0, 1, true);
-	}
+		long result = 1L;
 
-	@Override
-	public ItemStack insertItem(int slot, ItemStack stack, boolean simulate)
-	{
-		return stack;
-	}
-
-	@Override
-	public boolean isItemValid(int slot, ItemStack stack)
-	{
-		return false;
-	}
-
-	@Override
-	public ItemStack extractItem(int slot, int amount, boolean simulate)
-	{
-		if (slot != 0 || amount <= 0 || owner == null || world == null || world.isRemote)
+		for (Object element : objects)
 		{
-			return ItemStack.EMPTY;
+			result = 31L * result + (element == null ? 0L : element instanceof Number ? ((Number) element).longValue() : element.hashCode());
+		}
+
+		return result;
+	}
+
+	@Override
+	public void update()
+	{
+		if (owner == null || reward == 0 || world == null || world.isRemote)
+		{
+			return;
+		}
+
+		Reward r = ServerQuestFile.INSTANCE.getReward(reward);
+
+		if (r == null || !r.quest.canRepeat)
+		{
+			return;
 		}
 
 		ServerQuestData data = ServerQuestFile.INSTANCE.getData(owner);
@@ -103,46 +117,64 @@ public class TileRewardCollector extends TileBase implements IItemHandler
 		{
 			EntityPlayerMP player = world.getMinecraftServer().getPlayerList().getPlayerByUUID(owner);
 
-			for (Chapter chapter : ServerQuestFile.INSTANCE.chapters)
+			if (!data.isRewardClaimed(owner, r) && r.quest.isComplete(data))
 			{
-				for (Quest quest : chapter.quests)
+				List<ItemStack> stacks = new ArrayList<>();
+
+				if (r.automatedClaimPre(this, stacks, world.rand, owner, player))
 				{
-					if (quest.canRepeat && quest.rewards.size() > 0 && quest.isComplete(data))
+					ItemStackHandler handler1 = new ItemStackHandler(inventory.getSlots());
+
+					for (int i = 0; i < inventory.getSlots(); i++)
 					{
-						for (Reward reward : quest.rewards)
+						handler1.setStackInSlot(i, inventory.getStackInSlot(i));
+					}
+
+					for (ItemStack stack : stacks)
+					{
+						if (!ItemHandlerHelper.insertItem(handler1, stack, false).isEmpty())
 						{
-							if (!data.isRewardClaimed(owner, reward))
-							{
-								Optional<ItemStack> r = reward.claimAutomated(this, owner, player, simulate);
-
-								if (r.isPresent())
-								{
-									if (!simulate)
-									{
-										data.setRewardClaimed(owner, reward);
-									}
-
-									return r.get();
-								}
-							}
+							return;
 						}
 					}
+
+					for (ItemStack stack : stacks)
+					{
+						ItemHandlerHelper.insertItem(inventory, stack, false);
+					}
+
+					r.automatedClaimPost(this, owner, player);
+					data.setRewardClaimed(owner, r);
 				}
 			}
 		}
-
-		return ItemStack.EMPTY;
 	}
 
 	@Override
-	public int getSlotLimit(int slot)
+	public void onConfigSaved(ConfigGroup group, ICommandSender sender)
 	{
-		return Integer.MAX_VALUE;
 	}
 
-	@Override
-	public void markDirty()
+	public void onRightClick(EntityPlayerMP player)
 	{
-		sendDirtyUpdate();
+		if (!owner.equals(player.getUniqueID()))
+		{
+			return;
+		}
+
+		ConfigGroup group0 = ConfigGroup.newGroup("tile");
+		group0.setDisplayName(new TextComponentTranslation("tile.ftbquests.reward_collector.name"));
+		ConfigGroup config = group0.getGroup("ftbquests.reward_collector");
+
+		config.add("reward", new ConfigQuestObject(ServerQuestFile.INSTANCE, reward, o -> o instanceof Reward && ((Reward) o).quest.canRepeat && ((Reward) o).automatedClaimPre(this, new ArrayList<>(), world.rand, owner, player))
+		{
+			@Override
+			public void setObject(int v)
+			{
+				reward = v;
+			}
+		}, ConfigNull.INSTANCE).setDisplayName(new TextComponentTranslation("ftbquests.reward"));
+
+		FTBLibAPI.editServerConfig(player, group0, this);
 	}
 }

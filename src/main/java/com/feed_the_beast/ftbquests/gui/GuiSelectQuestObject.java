@@ -95,6 +95,12 @@ public class GuiSelectQuestObject extends GuiButtonListBase
 					}
 				}
 			}
+			else if (object instanceof Reward)
+			{
+				Quest quest = ((Reward) object).quest;
+				addObject(list, quest.chapter);
+				addObject(list, quest);
+			}
 			else if (object instanceof RewardTable)
 			{
 				((RewardTable) object).addMouseOverText(list, true, true);

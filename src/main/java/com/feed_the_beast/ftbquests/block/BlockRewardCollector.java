@@ -8,8 +8,13 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
@@ -54,9 +59,40 @@ public class BlockRewardCollector extends BlockSpecialDrop
 	}
 
 	@Override
+	public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ)
+	{
+		TileEntity tileEntity = world.getTileEntity(pos);
+
+		if (tileEntity instanceof TileRewardCollector && player instanceof EntityPlayerMP)
+		{
+			((TileRewardCollector) tileEntity).onRightClick((EntityPlayerMP) player);
+		}
+
+		return true;
+	}
+
+	@Override
 	@SideOnly(Side.CLIENT)
 	public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn)
 	{
 		tooltip.add(I18n.format("tile.ftbquests.reward_collector.tooltip"));
+	}
+
+	@Override
+	public void breakBlock(World world, BlockPos pos, IBlockState state)
+	{
+		TileEntity tileEntity = world.getTileEntity(pos);
+
+		if (tileEntity instanceof TileRewardCollector)
+		{
+			for (int i = 0; i < ((TileRewardCollector) tileEntity).inventory.getSlots(); i++)
+			{
+				InventoryHelper.spawnItemStack(world, pos.getX(), pos.getY(), pos.getZ(), ((TileRewardCollector) tileEntity).inventory.getStackInSlot(i));
+			}
+
+			world.updateComparatorOutputLevel(pos, this);
+		}
+
+		super.breakBlock(world, pos, state);
 	}
 }
