@@ -14,12 +14,16 @@ import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.util.StringJoiner;
 import com.feed_the_beast.ftblib.lib.util.misc.NameMap;
 import com.feed_the_beast.ftbquests.gui.tree.GuiValidItems;
+import com.feed_the_beast.ftbquests.net.MessageClaimReward;
+import com.feed_the_beast.ftbquests.net.MessageSubmitTask;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestData;
+import com.feed_the_beast.ftbquests.quest.reward.Reward;
 import com.latmod.mods.itemfilters.api.ItemFiltersAPI;
 import com.latmod.mods.itemfilters.filters.NBTMatchingMode;
 import com.latmod.mods.itemfilters.item.ItemFiltersItems;
 import com.latmod.mods.itemfilters.item.ItemMissing;
+import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -344,6 +348,20 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 		if (!consumesResources() && validItems.size() == 1 && Loader.isModLoaded("jei"))
 		{
 			showJEIRecipe(validItems.get(0));
+		}
+		else if (GuiScreen.isShiftKeyDown())
+		{
+			int r = GuiScreen.isCtrlKeyDown() ? 16 : 1;
+
+			for (int i = 0; i < r; i++)
+			{
+				new MessageSubmitTask(id).sendToServer();
+
+				for (Reward reward : quest.rewards)
+				{
+					new MessageClaimReward(reward.id, false).sendToServer();
+				}
+			}
 		}
 		else
 		{
