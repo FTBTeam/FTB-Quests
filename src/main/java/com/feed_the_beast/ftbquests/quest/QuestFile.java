@@ -948,7 +948,13 @@ public abstract class QuestFile extends QuestObject
 	public abstract QuestData getData(String team);
 
 	@Nullable
-	public abstract QuestData getData(Entity player);
+	public final QuestData getData(Entity player)
+	{
+		return getData(player.getUniqueID());
+	}
+
+	@Nullable
+	public abstract QuestData getData(UUID player);
 
 	public abstract Collection<? extends QuestData> getAllData();
 

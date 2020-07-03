@@ -21,6 +21,9 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.ItemHandlerHelper;
 
 import javax.annotation.Nullable;
+import java.util.Optional;
+import java.util.Random;
+import java.util.UUID;
 
 /**
  * @author LatvianModder
@@ -146,11 +149,35 @@ public class ItemReward extends Reward
 	}
 
 	@Override
-	public ItemStack claimAutomated(TileEntity tileEntity, @Nullable EntityPlayerMP player)
+	public Optional<ItemStack> claimAutomated(TileEntity tileEntity, UUID playerId, @Nullable EntityPlayerMP player, boolean simulate)
 	{
-		ItemStack stack1 = item.copy();
-		stack1.grow(tileEntity.getWorld().rand.nextInt(randomBonus + 1));
-		return stack1;
+		if (count + randomBonus > item.getMaxStackSize())
+		{
+			return Optional.of(ItemStack.EMPTY);
+		}
+
+		Random random = new Random(longHashCode(
+				playerId.getMostSignificantBits(),
+				playerId.getLeastSignificantBits(),
+				tileEntity.getPos().getX(),
+				tileEntity.getPos().getY(),
+				tileEntity.getPos().getZ(),
+				tileEntity.getWorld().getTotalWorldTime()
+		));
+
+		return Optional.of(ItemHandlerHelper.copyStackWithSize(item, count + random.nextInt(randomBonus + 1)));
+	}
+
+	private static long longHashCode(Object... objects)
+	{
+		long result = 1L;
+
+		for (Object element : objects)
+		{
+			result = 31L * result + (element == null ? 0L : element instanceof Number ? ((Number) element).longValue() : element.hashCode());
+		}
+
+		return result;
 	}
 
 	@Override

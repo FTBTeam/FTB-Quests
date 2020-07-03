@@ -21,6 +21,7 @@ import net.minecraftforge.items.IItemHandler;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -110,7 +111,7 @@ public class TileLootCrateOpener extends TileBase implements IItemHandler
 	@Override
 	public ItemStack insertItem(int slot, ItemStack stack, boolean simulate)
 	{
-		if (slot != 0)
+		if (slot != 0 || world == null || world.isRemote)
 		{
 			return stack;
 		}
@@ -122,40 +123,45 @@ public class TileLootCrateOpener extends TileBase implements IItemHandler
 			return stack;
 		}
 
-		if (!simulate && !world.isRemote)
+		int totalWeight = crate.table.getTotalWeight(true);
+		EntityPlayerMP player = owner == null ? null : world.getMinecraftServer().getPlayerList().getPlayerByUUID(owner);
+		boolean update = false;
+
+		if (totalWeight > 0)
 		{
-			int totalWeight = crate.table.getTotalWeight(true);
-			EntityPlayerMP player = owner == null ? null : world.getMinecraftServer().getPlayerList().getPlayerByUUID(owner);
-
-			if (totalWeight > 0)
+			for (int j = 0; j < stack.getCount() * crate.table.lootSize; j++)
 			{
-				for (int j = 0; j < stack.getCount() * crate.table.lootSize; j++)
+				int number = world.rand.nextInt(totalWeight) + 1;
+				int currentWeight = crate.table.emptyWeight;
+
+				if (currentWeight < number)
 				{
-					int number = world.rand.nextInt(totalWeight) + 1;
-					int currentWeight = crate.table.emptyWeight;
-
-					if (currentWeight < number)
+					for (WeightedReward reward : crate.table.rewards)
 					{
-						for (WeightedReward reward : crate.table.rewards)
+						currentWeight += reward.weight;
+
+						if (currentWeight >= number)
 						{
-							currentWeight += reward.weight;
+							Optional<ItemStack> r = reward.reward.claimAutomated(this, owner, player, simulate);
 
-							if (currentWeight >= number)
+							if (r.isPresent())
 							{
-								ItemStack stack1 = reward.reward.claimAutomated(this, player);
-
-								if (!stack1.isEmpty())
+								if (!simulate)
 								{
-									insertItem(stack1);
+									insertItem(r.get());
+									update = true;
 								}
-
-								break;
 							}
+
+							break;
 						}
 					}
 				}
 			}
+		}
 
+		if (update)
+		{
 			markDirty();
 		}
 
@@ -164,6 +170,11 @@ public class TileLootCrateOpener extends TileBase implements IItemHandler
 
 	private void insertItem(ItemStack stack)
 	{
+		if (stack.isEmpty())
+		{
+			return;
+		}
+
 		ItemEntry entry = ItemEntry.get(stack);
 
 		for (ItemEntryWithCount entry1 : items)

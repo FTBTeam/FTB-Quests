@@ -17,7 +17,6 @@ import com.feed_the_beast.ftbquests.quest.theme.QuestTheme;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.objects.Object2ShortOpenHashMap;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.text.TextComponentTranslation;
 
@@ -242,9 +241,9 @@ public class ClientQuestFile extends QuestFile
 
 	@Override
 	@Nullable
-	public QuestData getData(Entity player)
+	public QuestData getData(UUID player)
 	{
-		return getData(playerTeams.getShort(player.getUniqueID()));
+		return getData(playerTeams.getShort(player));
 	}
 
 	public ClientQuestData removeData(short team)

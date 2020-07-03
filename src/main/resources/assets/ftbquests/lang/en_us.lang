@@ -42,6 +42,8 @@ tile.ftbquests.chest.deprecated=This block is deprecated! Use Reward Collector
 tile.ftbquests.loot_crate_storage.name=Loot Crate Storage
 tile.ftbquests.loot_crate_opener.name=Loot Crate Opener
 tile.ftbquests.loot_crate_opener.rightclick=Stored items: %d
+tile.ftbquests.reward_collector.name=Reward Collector
+tile.ftbquests.reward_collector.tooltip=Collects rewards from repeatable quests
 
 item.ftbquests.book.name=Quest Book
 item.ftbquests.book.tooltip=Right-click to open quest window

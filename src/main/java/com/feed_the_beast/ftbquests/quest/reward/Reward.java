@@ -29,6 +29,8 @@ import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 /**
  * @author LatvianModder
@@ -133,14 +135,22 @@ public abstract class Reward extends QuestObjectBase
 
 	public abstract void claim(EntityPlayerMP player, boolean notify);
 
-	public ItemStack claimAutomated(TileEntity tileEntity, @Nullable EntityPlayerMP player)
+	/**
+	 * @return Optional.empty() if this reward doesn't support auto-claiming or item can't be returned as single stack, Optional.of(ItemStack.EMPTY) if it did something, but doesn't return item
+	 */
+	public Optional<ItemStack> claimAutomated(TileEntity tileEntity, UUID playerId, @Nullable EntityPlayerMP player, boolean simulate)
 	{
 		if (player != null)
 		{
-			claim(player, false);
+			if (!simulate)
+			{
+				claim(player, false);
+			}
+
+			return Optional.of(ItemStack.EMPTY);
 		}
 
-		return ItemStack.EMPTY;
+		return Optional.empty();
 	}
 
 	@Override

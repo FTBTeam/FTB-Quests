@@ -12,6 +12,7 @@ import com.feed_the_beast.ftbquests.block.BlockProgressScreen;
 import com.feed_the_beast.ftbquests.block.BlockProgressScreenPart;
 import com.feed_the_beast.ftbquests.block.BlockQuestBarrier;
 import com.feed_the_beast.ftbquests.block.BlockQuestChest;
+import com.feed_the_beast.ftbquests.block.BlockRewardCollector;
 import com.feed_the_beast.ftbquests.block.BlockTaskScreen;
 import com.feed_the_beast.ftbquests.block.BlockTaskScreenPart;
 import com.feed_the_beast.ftbquests.block.FTBQuestsBlocks;
@@ -64,6 +65,7 @@ import com.feed_the_beast.ftbquests.tile.TileProgressScreenCore;
 import com.feed_the_beast.ftbquests.tile.TileProgressScreenPart;
 import com.feed_the_beast.ftbquests.tile.TileQuestBarrier;
 import com.feed_the_beast.ftbquests.tile.TileQuestChest;
+import com.feed_the_beast.ftbquests.tile.TileRewardCollector;
 import com.feed_the_beast.ftbquests.tile.TileTaskScreenCore;
 import com.feed_the_beast.ftbquests.tile.TileTaskScreenPart;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
@@ -135,7 +137,8 @@ public class FTBQuestsEventHandler
 				withName(new BlockQuestChest(), "chest"),
 				withName(new BlockLootCrateStorage(), "loot_crate_storage"),
 				withName(new BlockLootCrateOpener(), "loot_crate_opener"),
-				withName(new BlockQuestBarrier(), "barrier")
+				withName(new BlockQuestBarrier(), "barrier"),
+				withName(new BlockRewardCollector(), "reward_collector")
 		);
 
 		GameRegistry.registerTileEntity(TileTaskScreenCore.class, new ResourceLocation(FTBQuests.MOD_ID, "screen_core"));
@@ -147,6 +150,7 @@ public class FTBQuestsEventHandler
 		GameRegistry.registerTileEntity(TileLootCrateStorage.class, new ResourceLocation(FTBQuests.MOD_ID, "loot_crate_storage"));
 		GameRegistry.registerTileEntity(TileLootCrateOpener.class, new ResourceLocation(FTBQuests.MOD_ID, "loot_crate_opener"));
 		GameRegistry.registerTileEntity(TileQuestBarrier.class, new ResourceLocation(FTBQuests.MOD_ID, "barrier"));
+		GameRegistry.registerTileEntity(TileRewardCollector.class, new ResourceLocation(FTBQuests.MOD_ID, "reward_collector"));
 
 		for (BlockDetector.Variant variant : BlockDetector.Variant.VALUES)
 		{
@@ -166,6 +170,7 @@ public class FTBQuestsEventHandler
 				new ItemBlock(FTBQuestsBlocks.LOOT_CRATE_STORAGE).setRegistryName("loot_crate_storage"),
 				new ItemBlock(FTBQuestsBlocks.LOOT_CRATE_OPENER).setRegistryName("loot_crate_opener"),
 				new ItemBlockBarrier(FTBQuestsBlocks.BARRIER).setRegistryName("barrier"),
+				new ItemBlock(FTBQuestsBlocks.REWARD_COLLECTOR).setRegistryName("reward_collector"),
 
 				withName(new ItemQuestBook(), "book"),
 				withName(new ItemLootCrate(), "lootcrate"),

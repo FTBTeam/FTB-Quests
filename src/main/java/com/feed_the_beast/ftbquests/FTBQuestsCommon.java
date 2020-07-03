@@ -1,11 +1,13 @@
 package com.feed_the_beast.ftbquests;
 
+import com.feed_the_beast.ftbquests.quest.QuestData;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
+import java.util.UUID;
 
 public class FTBQuestsCommon
 {
@@ -40,5 +42,12 @@ public class FTBQuestsCommon
 
 	public void openCustomIconGui(ItemStack stack)
 	{
+	}
+
+	@Nullable
+	public QuestData getQuestData(@Nullable World world, UUID owner)
+	{
+		QuestFile file = getQuestFile(world);
+		return file == null ? null : file.getData(owner);
 	}
 }

@@ -8,7 +8,6 @@ import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.net.edit.MessageDeleteObjectResponse;
 import com.feed_the_beast.ftbquests.util.ServerQuestData;
 import io.sommers.packmode.api.PackModeAPI;
-import net.minecraft.entity.Entity;
 import net.minecraftforge.fml.common.Loader;
 
 import javax.annotation.Nullable;
@@ -16,6 +15,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * @author LatvianModder
@@ -88,7 +88,7 @@ public class ServerQuestFile extends QuestFile
 
 	@Override
 	@Nullable
-	public QuestData getData(short team)
+	public ServerQuestData getData(short team)
 	{
 		if (team == 0)
 		{
@@ -101,7 +101,7 @@ public class ServerQuestFile extends QuestFile
 
 	@Override
 	@Nullable
-	public QuestData getData(String team)
+	public ServerQuestData getData(String team)
 	{
 		if (team.isEmpty())
 		{
@@ -114,9 +114,9 @@ public class ServerQuestFile extends QuestFile
 
 	@Override
 	@Nullable
-	public QuestData getData(Entity player)
+	public ServerQuestData getData(UUID player)
 	{
-		return getData(FTBLibAPI.getTeamID(player.getUniqueID()));
+		return getData(FTBLibAPI.getTeamID(player));
 	}
 
 	@Override
