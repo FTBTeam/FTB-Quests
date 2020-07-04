@@ -19,6 +19,7 @@ import com.feed_the_beast.ftbquests.net.edit.MessageEditObject;
 import com.feed_the_beast.ftbquests.quest.ChapterImage;
 import com.feed_the_beast.ftbquests.quest.Movable;
 import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.quest.QuestShape;
 import com.feed_the_beast.ftbquests.quest.task.TaskType;
 import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraft.client.renderer.BufferBuilder;
@@ -416,7 +417,7 @@ public class PanelQuests extends Panel
 						GlStateManager.translate(sx - bs * m.getWidth() / 2D, sy - bs * m.getHeight() / 2D, 0D);
 						GlStateManager.scale(bs * m.getWidth(), bs * m.getHeight(), 1D);
 						GuiHelper.setupDrawing();
-						m.getShape().shape.withColor(Color4I.WHITE.withAlpha(30)).draw(0, 0, 1, 1);
+						QuestShape.get(m.getShape()).shape.withColor(Color4I.WHITE.withAlpha(30)).draw(0, 0, 1, 1);
 						GlStateManager.popMatrix();
 					}
 
@@ -443,7 +444,7 @@ public class PanelQuests extends Panel
 					GlStateManager.translate(sx - bs / 2D, sy - bs / 2D, 0D);
 					GlStateManager.scale(bs, bs, 1D);
 					GuiHelper.setupDrawing();
-					treeGui.selectedChapter.getDefaultQuestShape().shape.withColor(Color4I.WHITE.withAlpha(10)).draw(0, 0, 1, 1);
+					QuestShape.get(treeGui.selectedChapter.getDefaultQuestShape()).shape.withColor(Color4I.WHITE.withAlpha(10)).draw(0, 0, 1, 1);
 					GlStateManager.popMatrix();
 
 					if (GuiQuestTree.grid && treeGui.viewQuestPanel.quest == null)

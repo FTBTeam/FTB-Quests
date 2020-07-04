@@ -51,7 +51,7 @@ public final class Quest extends QuestObject implements Movable
 	public String subtitle;
 	public double x, y;
 	public boolean hide;
-	public QuestShape shape;
+	public String shape;
 	public final List<String> description;
 	public final Set<QuestObject> dependencies;
 	public boolean canRepeat;
@@ -76,7 +76,7 @@ public final class Quest extends QuestObject implements Movable
 		subtitle = "";
 		x = 0;
 		y = 0;
-		shape = QuestShape.DEFAULT;
+		shape = "";
 		description = new ArrayList<>();
 		canRepeat = false;
 		dependencies = new HashSet<>(0);
@@ -125,9 +125,9 @@ public final class Quest extends QuestObject implements Movable
 		nbt.setDouble("x", x);
 		nbt.setDouble("y", y);
 
-		if (shape != QuestShape.DEFAULT)
+		if (!shape.isEmpty())
 		{
-			nbt.setString("shape", shape.getId());
+			nbt.setString("shape", shape);
 		}
 
 		if (!subtitle.isEmpty())
@@ -228,7 +228,13 @@ public final class Quest extends QuestObject implements Movable
 		subtitle = nbt.getString("description");
 		x = nbt.getDouble("x");
 		y = nbt.getDouble("y");
-		shape = nbt.hasKey("shape") ? QuestShape.NAME_MAP.get(nbt.getString("shape")) : QuestShape.DEFAULT;
+		shape = nbt.getString("shape");
+
+		if (shape.equals("default"))
+		{
+			shape = "";
+		}
+
 		description.clear();
 
 		NBTTagList list = nbt.getTagList("text", Constants.NBT.TAG_STRING);
@@ -315,7 +321,7 @@ public final class Quest extends QuestObject implements Movable
 
 		data.writeDouble(x);
 		data.writeDouble(y);
-		QuestShape.NAME_MAP.write(data, shape);
+		data.writeString(shape);
 
 		if (!description.isEmpty())
 		{
@@ -359,7 +365,7 @@ public final class Quest extends QuestObject implements Movable
 		subtitle = Bits.getFlag(flags, 8) ? data.readString() : "";
 		x = data.readDouble();
 		y = data.readDouble();
-		shape = QuestShape.NAME_MAP.read(data);
+		shape = data.readString();
 
 		if (Bits.getFlag(flags, 16))
 		{
@@ -637,7 +643,7 @@ public final class Quest extends QuestObject implements Movable
 		super.getConfig(config);
 		config.addString("subtitle", () -> subtitle, v -> subtitle = v, "");
 		config.addList("description", description, new ConfigString(""), ConfigString::new, ConfigString::getString);
-		config.addEnum("shape", () -> shape, v -> shape = v, QuestShape.NAME_MAP);
+		config.addEnum("shape", () -> shape.isEmpty() ? "default" : shape, v -> shape = v.equals("default") ? "" : v, QuestShape.idMapWithDefault);
 		config.addBool("hide", () -> hide, v -> hide = v, false);
 		config.addBool("can_repeat", () -> canRepeat, v -> canRepeat = v, false);
 		config.addDouble("size", () -> size, v -> size = v, 1, 0.5D, 3D);
@@ -688,9 +694,9 @@ public final class Quest extends QuestObject implements Movable
 	}
 
 	@Override
-	public QuestShape getShape()
+	public String getShape()
 	{
-		return shape == QuestShape.DEFAULT ? chapter.getDefaultQuestShape() : shape;
+		return shape.isEmpty() ? chapter.getDefaultQuestShape() : shape;
 	}
 
 	@Override

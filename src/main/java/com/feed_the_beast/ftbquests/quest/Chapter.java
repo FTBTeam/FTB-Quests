@@ -36,7 +36,7 @@ public final class Chapter extends QuestObject
 	public final List<String> subtitle;
 	public boolean alwaysInvisible;
 	public Chapter group;
-	public QuestShape defaultQuestShape;
+	public String defaultQuestShape;
 	public final List<ChapterImage> images;
 
 	public Chapter(QuestFile f)
@@ -46,7 +46,7 @@ public final class Chapter extends QuestObject
 		subtitle = new ArrayList<>(0);
 		alwaysInvisible = false;
 		group = null;
-		defaultQuestShape = QuestShape.DEFAULT;
+		defaultQuestShape = "";
 		images = new ArrayList<>();
 	}
 
@@ -87,7 +87,7 @@ public final class Chapter extends QuestObject
 
 		nbt.setBoolean("always_invisible", alwaysInvisible);
 		nbt.setInteger("group", group != null && !group.invalid ? group.id : 0);
-		nbt.setString("default_quest_shape", defaultQuestShape.getId());
+		nbt.setString("default_quest_shape", defaultQuestShape);
 
 		if (!images.isEmpty())
 		{
@@ -119,7 +119,12 @@ public final class Chapter extends QuestObject
 
 		alwaysInvisible = nbt.getBoolean("always_invisible");
 		group = file.getChapter(nbt.getInteger("group"));
-		defaultQuestShape = QuestShape.NAME_MAP.get(nbt.getString("default_quest_shape"));
+		defaultQuestShape = nbt.getString("default_quest_shape");
+
+		if (defaultQuestShape.equals("default"))
+		{
+			defaultQuestShape = "";
+		}
 
 		NBTTagList imgs = nbt.getTagList("images", Constants.NBT.TAG_COMPOUND);
 
@@ -140,7 +145,7 @@ public final class Chapter extends QuestObject
 		data.writeCollection(subtitle, DataOut.STRING);
 		data.writeBoolean(alwaysInvisible);
 		data.writeInt(group == null || group.invalid ? 0 : group.id);
-		QuestShape.NAME_MAP.write(data, defaultQuestShape);
+		data.writeString(defaultQuestShape);
 		data.writeCollection(images, (d, object) -> object.writeNetData(d));
 	}
 
@@ -151,7 +156,7 @@ public final class Chapter extends QuestObject
 		data.readCollection(subtitle, DataIn.STRING);
 		alwaysInvisible = data.readBoolean();
 		group = file.getChapter(data.readInt());
-		defaultQuestShape = QuestShape.NAME_MAP.read(data);
+		defaultQuestShape = data.readString();
 		data.readCollection(images, d -> {
 			ChapterImage image = new ChapterImage(this);
 			image.readNetData(d);
@@ -338,7 +343,7 @@ public final class Chapter extends QuestObject
 			}
 		}, new ConfigQuestObject(file, 0, predicate));
 
-		config.addEnum("default_quest_shape", () -> defaultQuestShape, v -> defaultQuestShape = v, QuestShape.NAME_MAP);
+		config.addEnum("default_quest_shape", () -> defaultQuestShape.isEmpty() ? "default" : defaultQuestShape, v -> defaultQuestShape = v.equals("default") ? "" : v, QuestShape.idMapWithDefault);
 	}
 
 	@Override
@@ -489,8 +494,8 @@ public final class Chapter extends QuestObject
 		return group != null && !group.invalid;
 	}
 
-	public QuestShape getDefaultQuestShape()
+	public String getDefaultQuestShape()
 	{
-		return defaultQuestShape == QuestShape.DEFAULT ? file.getDefaultQuestShape() : defaultQuestShape;
+		return defaultQuestShape.isEmpty() ? file.getDefaultQuestShape() : defaultQuestShape;
 	}
 }

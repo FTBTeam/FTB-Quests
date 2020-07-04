@@ -2,15 +2,11 @@ package com.feed_the_beast.ftbquests.quest.theme.property;
 
 import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
-import com.feed_the_beast.ftbquests.events.ThemePropertyEvent;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import org.lwjgl.opengl.GL11;
-
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 
 /**
  * @author LatvianModder
@@ -19,6 +15,7 @@ public interface ThemeProperties
 {
 	//Main GUI
 	IconProperty BACKGROUND = new IconProperty("background");
+	StringProperty EXTRA_QUEST_SHAPES = new StringProperty("extra_quest_shapes");
 
 	//Text Color
 	ColorProperty TEXT_COLOR = new ColorProperty("text_color");
@@ -201,22 +198,4 @@ public interface ThemeProperties
 	DoubleProperty DEPENDENCY_LINE_THICKNESS = new DoubleProperty("dependency_line_thickness", 0D, 3D);
 	DoubleProperty QUEST_SPACING = new DoubleProperty("quest_spacing", 0D, 8D);
 	DoubleProperty PINNED_QUEST_SIZE = new DoubleProperty("pinned_quest_size", 0D, 3D);
-
-	static void register(ThemePropertyEvent event)
-	{
-		try
-		{
-			for (Field field : ThemeProperties.class.getDeclaredFields())
-			{
-				if (Modifier.isStatic(field.getModifiers()) && ThemeProperty.class.isAssignableFrom(field.getType()))
-				{
-					field.setAccessible(true);
-					event.register((ThemeProperty) field.get(null));
-				}
-			}
-		}
-		catch (Exception ex)
-		{
-		}
-	}
 }

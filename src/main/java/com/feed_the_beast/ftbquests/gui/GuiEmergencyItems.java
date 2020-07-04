@@ -26,7 +26,7 @@ import java.util.List;
  */
 public class GuiEmergencyItems extends GuiBase
 {
-	private long endTime = System.currentTimeMillis() + ClientQuestFile.INSTANCE.emergencyItemsCooldown.millis();
+	private final long endTime = System.currentTimeMillis() + ClientQuestFile.INSTANCE.emergencyItemsCooldown.millis();
 	private boolean done = false;
 
 	private static class EmergencyItem extends Widget
@@ -50,7 +50,7 @@ public class GuiEmergencyItems extends GuiBase
 		@Override
 		public void draw(Theme theme, int x, int y, int w, int h)
 		{
-			QuestShape.RSQUARE.outline.draw(x - 3, y - 3, w + 6, h + 6);
+			QuestShape.get("rsquare").outline.draw(x - 3, y - 3, w + 6, h + 6);
 			GuiHelper.drawItem(stack, x, y, true);
 		}
 

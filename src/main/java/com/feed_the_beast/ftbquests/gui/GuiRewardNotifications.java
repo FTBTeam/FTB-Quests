@@ -51,7 +51,7 @@ public class GuiRewardNotifications extends GuiBase implements IRewardListenerGu
 		@Override
 		public void draw(Theme theme, int x, int y, int w, int h)
 		{
-			QuestShape.RSQUARE.outline.draw(x, y, w, h);
+			QuestShape.get("rsquare").outline.draw(x, y, w, h);
 			key.icon.draw(x + 3, y + 3, 16, 16);
 
 			int count = rewards.getInt(key);

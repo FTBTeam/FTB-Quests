@@ -1,35 +1,54 @@
 package com.feed_the_beast.ftbquests.quest;
 
+import com.feed_the_beast.ftblib.lib.client.PixelBuffer;
 import com.feed_the_beast.ftblib.lib.icon.Icon;
 import com.feed_the_beast.ftblib.lib.icon.ImageIcon;
 import com.feed_the_beast.ftblib.lib.util.IWithID;
 import com.feed_the_beast.ftblib.lib.util.misc.NameMap;
 import com.feed_the_beast.ftbquests.FTBQuests;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.IResource;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+
+import java.io.InputStream;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author LatvianModder
  */
 public final class QuestShape extends Icon implements IWithID
 {
-	public static final QuestShape DEFAULT = new QuestShape("default").circularCheck();
-	public static final QuestShape CIRCLE = new QuestShape("circle").circularCheck();
-	public static final QuestShape SQUARE = new QuestShape("square");
-	public static final QuestShape DIAMOND = new QuestShape("diamond").circularCheck();
-	public static final QuestShape RSQUARE = new QuestShape("rsquare");
-	public static final QuestShape PENTAGON = new QuestShape("pentagon").circularCheck();
-	public static final QuestShape HEXAGON = new QuestShape("hexagon").circularCheck();
-	public static final QuestShape OCTAGON = new QuestShape("octagon").circularCheck();
-	public static final QuestShape HEART = new QuestShape("heart");
-	public static final QuestShape GEAR = new QuestShape("gear").circularCheck();
+	public static final Map<String, QuestShape> MAP = new LinkedHashMap<>();
+	private static QuestShape defaultShape;
+	public static NameMap<String> idMap, idMapWithDefault;
 
-	public static final NameMap<QuestShape> NAME_MAP = NameMap.createWithBaseTranslationKey(DEFAULT, "ftbquests.quest.shape", DEFAULT, CIRCLE, SQUARE, DIAMOND, RSQUARE, PENTAGON, HEXAGON, OCTAGON, HEART, GEAR);
+	public static void reload(List<String> list)
+	{
+		MAP.clear();
+
+		for (String s : list)
+		{
+			MAP.put(s, new QuestShape(s));
+		}
+
+		defaultShape = MAP.values().iterator().next();
+		idMap = NameMap.createWithBaseTranslationKey(list.get(0), "ftbquests.quest.shape", list.toArray(new String[0]));
+		list.add(0, "default");
+		idMapWithDefault = NameMap.createWithBaseTranslationKey(list.get(0), "ftbquests.quest.shape", list.toArray(new String[0]));
+	}
+
+	public static QuestShape get(String id)
+	{
+		return MAP.getOrDefault(id, defaultShape);
+	}
 
 	public final String id;
 	public final ImageIcon background, outline, shape;
-	public boolean circularCheck;
+	private PixelBuffer shapePixels;
 
 	public QuestShape(String i)
 	{
@@ -37,13 +56,6 @@ public final class QuestShape extends Icon implements IWithID
 		background = new ImageIcon(new ResourceLocation(FTBQuests.MOD_ID, "textures/shapes/" + id + "/background.png"));
 		outline = new ImageIcon(new ResourceLocation(FTBQuests.MOD_ID, "textures/shapes/" + id + "/outline.png"));
 		shape = new ImageIcon(new ResourceLocation(FTBQuests.MOD_ID, "textures/shapes/" + id + "/shape.png"));
-		circularCheck = false;
-	}
-
-	public QuestShape circularCheck()
-	{
-		circularCheck = true;
-		return this;
 	}
 
 	@Override
@@ -73,5 +85,29 @@ public final class QuestShape extends Icon implements IWithID
 	public boolean equals(Object o)
 	{
 		return o == this;
+	}
+
+	public PixelBuffer getShapePixels()
+	{
+		if (shapePixels == null)
+		{
+			try
+			{
+				IResource resource = Minecraft.getMinecraft().getResourceManager().getResource(new ResourceLocation(FTBQuests.MOD_ID, "textures/shapes/" + id + "/shape.png"));
+
+				try (InputStream stream = resource.getInputStream())
+				{
+					shapePixels = PixelBuffer.from(stream);
+				}
+			}
+			catch (Exception ex)
+			{
+				shapePixels = new PixelBuffer(1, 1);
+				shapePixels.setRGB(0, 0, 0xFFFFFFFF);
+			}
+
+		}
+
+		return shapePixels;
 	}
 }
