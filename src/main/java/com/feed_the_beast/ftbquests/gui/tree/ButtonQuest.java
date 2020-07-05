@@ -67,14 +67,7 @@ public class ButtonQuest extends Button
 	{
 		super.updateMouseOver(mouseX, mouseY);
 
-		if (treeGui.questPanel.mouseOverQuest == null)
-		{
-			if (isMouseOver)
-			{
-				treeGui.questPanel.mouseOverQuest = this;
-			}
-		}
-		else if (treeGui.questPanel.mouseOverQuest != this)
+		if (treeGui.questPanel.mouseOverQuest != null && treeGui.questPanel.mouseOverQuest != this)
 		{
 			isMouseOver = false;
 		}
@@ -107,6 +100,11 @@ public class ButtonQuest extends Button
 					isMouseOver = false;
 				}
 			}
+		}
+
+		if (isMouseOver && treeGui.questPanel.mouseOverQuest == null)
+		{
+			treeGui.questPanel.mouseOverQuest = this;
 		}
 	}
 
