@@ -46,20 +46,13 @@ public class ButtonReward extends Button
 			list.add(TextFormatting.DARK_GRAY + reward.toString());
 		}
 
-		if (reward.addTitleInMouseOverText())
-		{
-			list.add(getTitle());
-		}
-
 		if (reward.isTeamReward())
 		{
-			list.add(TextFormatting.BLUE + "[" + I18n.format("ftbquests.reward.team_reward") + "]");
-		}
+			if (reward.addTitleInMouseOverText())
+			{
+				list.add(getTitle());
+			}
 
-		reward.addMouseOverText(list);
-
-		if (!list.isEmpty())
-		{
 			Object object = getIngredientUnderMouse();
 
 			if (object instanceof WrappedIngredient && ((WrappedIngredient) object).tooltip)
@@ -68,10 +61,22 @@ public class ButtonReward extends Button
 
 				if (ingredient instanceof ItemStack && !((ItemStack) ingredient).isEmpty())
 				{
-					list.add("");
 					GuiHelper.addStackTooltip((ItemStack) ingredient, list);
 				}
 			}
+
+			list.add("");
+			reward.addMouseOverText(list);
+			list.add(TextFormatting.BLUE.toString() + TextFormatting.UNDERLINE + I18n.format("ftbquests.reward.team_reward"));
+		}
+		else
+		{
+			if (reward.addTitleInMouseOverText())
+			{
+				list.add(getTitle());
+			}
+
+			reward.addMouseOverText(list);
 		}
 	}
 
