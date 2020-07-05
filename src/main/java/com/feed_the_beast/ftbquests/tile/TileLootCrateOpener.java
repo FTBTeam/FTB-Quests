@@ -149,19 +149,22 @@ public class TileLootCrateOpener extends TileBase implements IItemHandler
 
 								if (!simulate)
 								{
-									ItemEntry entry = ItemEntry.get(stack);
-
-									for (ItemEntryWithCount entry1 : items)
+									for (ItemStack stack1 : stacks)
 									{
-										if (entry1.entry.equalsEntry(entry))
-										{
-											entry1.count += stack.getCount();
-											return ItemStack.EMPTY;
-										}
-									}
+										ItemEntry entry = ItemEntry.get(stack1);
 
-									items.add(new ItemEntryWithCount(entry, stack.getCount()));
-									reward.reward.automatedClaimPost(this, owner, player);
+										for (ItemEntryWithCount entry1 : items)
+										{
+											if (entry1.entry.equalsEntry(entry))
+											{
+												entry1.count += stack1.getCount();
+												return ItemStack.EMPTY;
+											}
+										}
+
+										items.add(new ItemEntryWithCount(entry, stack1.getCount()));
+										reward.reward.automatedClaimPost(this, owner, player);
+									}
 								}
 							}
 
