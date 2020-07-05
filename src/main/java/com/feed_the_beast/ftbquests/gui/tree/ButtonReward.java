@@ -7,6 +7,7 @@ import com.feed_the_beast.ftblib.lib.gui.GuiIcons;
 import com.feed_the_beast.ftblib.lib.gui.Panel;
 import com.feed_the_beast.ftblib.lib.gui.Theme;
 import com.feed_the_beast.ftblib.lib.gui.WidgetType;
+import com.feed_the_beast.ftblib.lib.gui.WrappedIngredient;
 import com.feed_the_beast.ftblib.lib.icon.Color4I;
 import com.feed_the_beast.ftblib.lib.util.misc.MouseButton;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
@@ -14,6 +15,7 @@ import com.feed_the_beast.ftbquests.quest.reward.Reward;
 import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.TextFormatting;
 
 import javax.annotation.Nullable;
@@ -37,17 +39,6 @@ public class ButtonReward extends Button
 	}
 
 	@Override
-	public String getTitle()
-	{
-		if (reward.isTeamReward())
-		{
-			return TextFormatting.BLUE + super.getTitle();
-		}
-
-		return super.getTitle();
-	}
-
-	@Override
 	public void addMouseOverText(List<String> list)
 	{
 		if (isShiftKeyDown() && isCtrlKeyDown())
@@ -66,6 +57,22 @@ public class ButtonReward extends Button
 		}
 
 		reward.addMouseOverText(list);
+
+		if (!list.isEmpty())
+		{
+			Object object = getIngredientUnderMouse();
+
+			if (object instanceof WrappedIngredient && ((WrappedIngredient) object).tooltip)
+			{
+				Object ingredient = WrappedIngredient.unwrap(object);
+
+				if (ingredient instanceof ItemStack && !((ItemStack) ingredient).isEmpty())
+				{
+					list.add("");
+					GuiHelper.addStackTooltip((ItemStack) ingredient, list);
+				}
+			}
+		}
 	}
 
 	@Override

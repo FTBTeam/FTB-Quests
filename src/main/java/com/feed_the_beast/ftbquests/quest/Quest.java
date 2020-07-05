@@ -646,7 +646,7 @@ public final class Quest extends QuestObject implements Movable
 		config.addEnum("shape", () -> shape.isEmpty() ? "default" : shape, v -> shape = v.equals("default") ? "" : v, QuestShape.idMapWithDefault);
 		config.addBool("hide", () -> hide, v -> hide = v, false);
 		config.addBool("can_repeat", () -> canRepeat, v -> canRepeat = v, false);
-		config.addDouble("size", () -> size, v -> size = v, 1, 0.5D, 3D);
+		config.addDouble("size", () -> size, v -> size = v, 1, 0.0625D, 8D);
 		config.addDouble("x", () -> x, v -> x = v, 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
 		config.addDouble("y", () -> y, v -> y = v, 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
 		config.addBool("optional", () -> optional, v -> optional = v, false);
