@@ -6,7 +6,6 @@ import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.net.MessageToClient;
 import com.feed_the_beast.ftblib.lib.net.NetworkWrapper;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
-import com.feed_the_beast.ftbquests.gui.chest.GuiQuestChest;
 import com.feed_the_beast.ftbquests.gui.tree.GuiQuestTree;
 import com.feed_the_beast.ftbquests.quest.QuestData;
 import com.feed_the_beast.ftbquests.quest.reward.Reward;
@@ -88,15 +87,6 @@ public class MessageClaimRewardResponse extends MessageToClient
 				{
 					treeGui.viewQuestPanel.refreshWidgets();
 					treeGui.otherButtonsTopPanel.refreshWidgets();
-				}
-				else
-				{
-					GuiQuestChest guiChest = ClientUtils.getCurrentGuiAs(GuiQuestChest.class);
-
-					if (guiChest != null)
-					{
-						guiChest.updateRewards();
-					}
 				}
 			}
 		}

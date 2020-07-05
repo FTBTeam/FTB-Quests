@@ -37,7 +37,7 @@ tile.ftbquests.chest.input=Input Slot
 tile.ftbquests.chest.input_desc=Place items here to complete quests
 tile.ftbquests.chest.output=Output Slot
 tile.ftbquests.chest.output_desc=Rewards will appear here
-tile.ftbquests.chest.deprecated=This block is deprecated! Use Reward Collector
+tile.ftbquests.chest.deprecated=This block is deprecated! Use Reward Collector and Task Screen!
 
 tile.ftbquests.loot_crate_storage.name=Loot Crate Storage
 tile.ftbquests.loot_crate_opener.name=Loot Crate Opener

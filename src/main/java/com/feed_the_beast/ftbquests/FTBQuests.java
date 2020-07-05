@@ -3,7 +3,6 @@ package com.feed_the_beast.ftbquests;
 import com.feed_the_beast.ftblib.FTBLib;
 import com.feed_the_beast.ftblib.lib.util.NBTUtils;
 import com.feed_the_beast.ftbquests.command.CommandFTBQuests;
-import com.feed_the_beast.ftbquests.gui.FTBQuestsGuiHandler;
 import com.feed_the_beast.ftbquests.integration.botania.BotaniaIntegration;
 import com.feed_the_beast.ftbquests.integration.buildcraft.BuildCraftIntegration;
 import com.feed_the_beast.ftbquests.integration.customnpcs.CustomNPCsIntegration;
@@ -25,7 +24,6 @@ import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
-import net.minecraftforge.fml.common.network.NetworkRegistry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -103,7 +101,6 @@ public class FTBQuests
 			CustomNPCsIntegration.preInit();
 		}
 
-		NetworkRegistry.INSTANCE.registerGuiHandler(this, new FTBQuestsGuiHandler());
 		PROXY.preInit();
 	}
 
