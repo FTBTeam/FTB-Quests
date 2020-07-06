@@ -293,7 +293,7 @@ public final class RewardTable extends QuestObjectBase
 	@Override
 	public File getFile()
 	{
-		return new File(file.getFolder(), "reward_tables/" + getCodeString(this) + ".nbt");
+		return new File(file.getFolder(), "reward_tables/" + getCodeString(this) + ".snbt");
 	}
 
 	@Override

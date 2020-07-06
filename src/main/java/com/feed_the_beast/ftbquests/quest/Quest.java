@@ -185,14 +185,7 @@ public final class Quest extends QuestObject implements Movable
 				i++;
 			}
 
-			if (ai.length == 1)
-			{
-				nbt.setInteger("dependency", ai[0]);
-			}
-			else
-			{
-				nbt.setIntArray("dependencies", ai);
-			}
+			nbt.setIntArray("dependencies", ai);
 		}
 
 		if (hide)
@@ -633,7 +626,7 @@ public final class Quest extends QuestObject implements Movable
 	@Override
 	public File getFile()
 	{
-		return new File(chapter.file.getFolder(), "chapters/" + getCodeString(chapter) + "/" + getCodeString(this) + ".nbt");
+		return new File(chapter.file.getFolder(), "chapters/" + getCodeString(chapter) + "/" + getCodeString(this) + ".snbt");
 	}
 
 	@Override

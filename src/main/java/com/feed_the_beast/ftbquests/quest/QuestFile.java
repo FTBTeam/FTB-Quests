@@ -26,6 +26,7 @@ import com.feed_the_beast.ftbquests.quest.reward.RewardType;
 import com.feed_the_beast.ftbquests.quest.task.CustomTask;
 import com.feed_the_beast.ftbquests.quest.task.Task;
 import com.feed_the_beast.ftbquests.quest.task.TaskType;
+import com.feed_the_beast.ftbquests.util.SNBT;
 import com.latmod.mods.itemfilters.item.ItemMissing;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.client.resources.I18n;
@@ -55,7 +56,7 @@ import java.util.function.Predicate;
  */
 public abstract class QuestFile extends QuestObject
 {
-	public static final int VERSION = 6;
+	public static final int VERSION = 7;
 
 	public final List<Chapter> chapters;
 	public final List<RewardTable> rewardTables;
@@ -482,9 +483,9 @@ public abstract class QuestFile extends QuestObject
 		return nbt;
 	}
 
-	public int[] readIndex(File file)
+	public int[] readIndex(File dir, String name)
 	{
-		NBTTagCompound nbt = NBTUtils.readNBT(file);
+		NBTTagCompound nbt = SNBT.readOrTransform(dir, name);
 		return nbt == null ? new int[0] : nbt.getIntArray("index");
 	}
 
@@ -571,7 +572,7 @@ public abstract class QuestFile extends QuestObject
 
 	public final void readDataFull(File folder)
 	{
-		NBTTagCompound nbt = NBTUtils.readNBT(new File(folder, "file.nbt"));
+		NBTTagCompound nbt = SNBT.readOrTransform(folder, "file");
 
 		if (nbt != null)
 		{
@@ -584,7 +585,7 @@ public abstract class QuestFile extends QuestObject
 
 		Int2ObjectOpenHashMap<NBTTagCompound> questFileCache = new Int2ObjectOpenHashMap<>();
 
-		for (int i : readIndex(new File(folder, "chapters/index.nbt")))
+		for (int i : readIndex(folder, "chapters/index"))
 		{
 			Chapter chapter = new Chapter(this);
 			chapter.id = i;
@@ -601,9 +602,9 @@ public abstract class QuestFile extends QuestObject
 						try
 						{
 							Quest quest = new Quest(chapter);
-							quest.id = Long.decode("#" + f.getName().replace(".nbt", "")).intValue();
+							quest.id = Long.decode("#" + f.getName().replace(".nbt", "").replace(".snbt", "")).intValue();
 
-							nbt = NBTUtils.readNBT(quest.getFile());
+							nbt = SNBT.readOrTransform(chapter.file.getFolder(), "chapters/" + getCodeString(chapter) + "/" + getCodeString(quest));
 
 							if (nbt != null)
 							{
@@ -648,7 +649,7 @@ public abstract class QuestFile extends QuestObject
 			}
 		}
 
-		for (int i : readIndex(new File(folder, "reward_tables/index.nbt")))
+		for (int i : readIndex(folder, "reward_tables/index"))
 		{
 			RewardTable table = new RewardTable(this);
 			table.id = i;
@@ -659,7 +660,7 @@ public abstract class QuestFile extends QuestObject
 
 		for (Chapter chapter : chapters)
 		{
-			nbt = NBTUtils.readNBT(new File(folder, "chapters/" + getCodeString(chapter) + "/chapter.nbt"));
+			nbt = SNBT.readOrTransform(folder, "chapters/" + getCodeString(chapter) + "/chapter");
 
 			if (nbt != null)
 			{
@@ -707,7 +708,7 @@ public abstract class QuestFile extends QuestObject
 
 		for (RewardTable table : rewardTables)
 		{
-			nbt = NBTUtils.readNBT(new File(folder, "reward_tables/" + getCodeString(table) + ".nbt"));
+			nbt = SNBT.readOrTransform(folder, "reward_tables/" + getCodeString(table));
 
 			if (nbt != null)
 			{
