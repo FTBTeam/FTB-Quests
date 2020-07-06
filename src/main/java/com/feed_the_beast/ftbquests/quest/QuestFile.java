@@ -10,7 +10,6 @@ import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.math.MathUtils;
 import com.feed_the_beast.ftblib.lib.math.Ticks;
-import com.feed_the_beast.ftblib.lib.util.NBTUtils;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.events.ClearFileCacheEvent;
 import com.feed_the_beast.ftbquests.events.CustomTaskEvent;
@@ -493,17 +492,16 @@ public abstract class QuestFile extends QuestObject
 	{
 		NBTTagCompound out = new NBTTagCompound();
 		writeData(out);
-		NBTUtils.writeNBTSafe(new File(folder, "file.nbt"), out);
-
-		NBTUtils.writeNBTSafe(new File(folder, "chapters/index.nbt"), createIndex(chapters));
-		NBTUtils.writeNBTSafe(new File(folder, "reward_tables/index.nbt"), createIndex(rewardTables));
+		SNBT.write(new File(folder, "file.snbt"), out);
+		SNBT.write(new File(folder, "chapters/index.snbt"), createIndex(chapters));
+		SNBT.write(new File(folder, "reward_tables/index.snbt"), createIndex(rewardTables));
 
 		for (Chapter chapter : chapters)
 		{
 			out = new NBTTagCompound();
 			chapter.writeData(out);
 			String chapterPath = "chapters/" + getCodeString(chapter) + "/";
-			NBTUtils.writeNBTSafe(new File(folder, chapterPath + "chapter.nbt"), out);
+			SNBT.write(new File(folder, chapterPath + "chapter.snbt"), out);
 
 			if (!chapter.quests.isEmpty())
 			{
@@ -557,7 +555,7 @@ public abstract class QuestFile extends QuestObject
 						}
 					}
 
-					NBTUtils.writeNBTSafe(new File(folder, chapterPath + getCodeString(quest) + ".nbt"), out);
+					SNBT.write(new File(folder, chapterPath + getCodeString(quest) + ".snbt"), out);
 				}
 			}
 		}
@@ -566,7 +564,7 @@ public abstract class QuestFile extends QuestObject
 		{
 			out = new NBTTagCompound();
 			table.writeData(out);
-			NBTUtils.writeNBTSafe(new File(folder, "reward_tables/" + getCodeString(table) + ".nbt"), out);
+			SNBT.write(new File(folder, "reward_tables/" + getCodeString(table) + ".snbt"), out);
 		}
 	}
 
@@ -597,7 +595,7 @@ public abstract class QuestFile extends QuestObject
 			{
 				for (File f : files)
 				{
-					if (!f.getName().equals("chapter.nbt"))
+					if (!f.getName().equals("chapter.snbt") && !f.getName().equals("chapter.nbt"))
 					{
 						try
 						{
