@@ -57,6 +57,7 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 	public EnumTristate consumeItems;
 	public boolean ignoreDamage;
 	public NBTMatchingMode nbtMode;
+	public EnumTristate onlyFromCrafting;
 
 	public ItemTask(Quest quest)
 	{
@@ -65,6 +66,7 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 		consumeItems = EnumTristate.DEFAULT;
 		ignoreDamage = false;
 		nbtMode = NBTMatchingMode.MATCH;
+		onlyFromCrafting = EnumTristate.DEFAULT;
 	}
 
 	@Override
@@ -119,6 +121,8 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 		{
 			nbt.setByte("ignore_nbt", (byte) nbtMode.ordinal());
 		}
+
+		onlyFromCrafting.write(nbt, "only_from_crafting");
 	}
 
 	@Override
@@ -160,6 +164,7 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 		consumeItems = EnumTristate.read(nbt, "consume_items");
 		ignoreDamage = nbt.getBoolean("ignore_damage");
 		nbtMode = NBTMatchingMode.VALUES[nbt.getByte("ignore_nbt")];
+		onlyFromCrafting = EnumTristate.read(nbt, "only_from_crafting");
 	}
 
 	@Override
@@ -175,6 +180,7 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 		flags = Bits.setFlag(flags, 8, nbtMode == NBTMatchingMode.CONTAIN);
 		data.writeVarInt(flags);
 		EnumTristate.NAME_MAP.write(data, consumeItems);
+		EnumTristate.NAME_MAP.write(data, onlyFromCrafting);
 	}
 
 	@Override
@@ -188,6 +194,7 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 		ignoreDamage = Bits.getFlag(flags, 2);
 		nbtMode = Bits.getFlag(flags, 4) ? Bits.getFlag(flags, 8) ? NBTMatchingMode.CONTAIN : NBTMatchingMode.IGNORE : NBTMatchingMode.MATCH;
 		consumeItems = EnumTristate.NAME_MAP.read(data);
+		onlyFromCrafting = EnumTristate.NAME_MAP.read(data);
 	}
 
 	public List<ItemStack> getValidItems()
@@ -323,6 +330,7 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 		config.addEnum("consume_items", () -> consumeItems, v -> consumeItems = v, EnumTristate.NAME_MAP).setCanEdit(!quest.canRepeat);
 		config.addBool("ignore_damage", () -> ignoreDamage, v -> ignoreDamage = v, false);
 		config.addEnum("nbt_mode", () -> nbtMode, v -> nbtMode = v, NameMap.create(NBTMatchingMode.MATCH, NBTMatchingMode.VALUES));
+		config.addEnum("only_from_crafting", () -> onlyFromCrafting, v -> onlyFromCrafting = v, EnumTristate.NAME_MAP).setCanEdit(!quest.canRepeat);
 	}
 
 	@Override
@@ -464,6 +472,22 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 
 			if (!task.canInsertItem())
 			{
+				if (task.onlyFromCrafting.get(false))
+				{
+					if (item.isEmpty() || !task.test(item))
+					{
+						return;
+					}
+
+					long count = Math.min(task.count, item.getCount());
+
+					if (count > progress)
+					{
+						setProgress(count);
+						return;
+					}
+				}
+
 				long count = 0;
 
 				for (ItemStack stack : player.inventory.mainInventory)
