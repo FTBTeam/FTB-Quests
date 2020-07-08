@@ -127,6 +127,7 @@ ftbquests.chapter.image.rotation=Rotation
 ftbquests.chapter.image.image=Image
 ftbquests.chapter.image.hover=Hover Text
 ftbquests.chapter.image.click=Click
+ftbquests.chapter.image.dev=Only visible in Editing Mode
 
 ftbquests.quest=Quest
 ftbquests.quests=Quests

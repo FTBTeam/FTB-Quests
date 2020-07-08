@@ -52,6 +52,21 @@ public class ButtonChapterImage extends Button
 	}
 
 	@Override
+	public boolean mousePressed(MouseButton button)
+	{
+		if (isMouseOver())
+		{
+			if (!chapterImage.click.isEmpty() || treeGui.file.canEdit() && !button.isLeft())
+			{
+				onClicked(button);
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	@Override
 	public void onClicked(MouseButton button)
 	{
 		if (treeGui.file.canEdit() && button.isRight())
@@ -120,10 +135,16 @@ public class ButtonChapterImage extends Button
 	}
 
 	@Override
+	public boolean shouldDraw()
+	{
+		return false;
+	}
+
+	@Override
 	public void draw(Theme theme, int x, int y, int w, int h)
 	{
 		GlStateManager.pushMatrix();
-		GlStateManager.translate((int) (x + w / 2D), (int) (y + h / 2D), 10);
+		GlStateManager.translate((int) (x + w / 2D), (int) (y + h / 2D), 0);
 		GlStateManager.rotate((float) chapterImage.rotation, 0, 0, 1);
 		GlStateManager.scale(w / 2D, h / 2D, 1);
 		chapterImage.image.draw(-1, -1, 2, 2);

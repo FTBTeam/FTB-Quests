@@ -128,17 +128,20 @@ public class PanelQuests extends Panel
 			return;
 		}
 
+		for (ChapterImage image : treeGui.selectedChapter.images)
+		{
+			if (!image.dev || treeGui.file.canEdit())
+			{
+				add(new ButtonChapterImage(this, image));
+			}
+		}
+
 		for (Quest quest : treeGui.selectedChapter.quests)
 		{
 			if (treeGui.file.canEdit() || quest.isVisible(ClientQuestFile.INSTANCE.self))
 			{
 				add(new ButtonQuest(this, quest));
 			}
-		}
-
-		for (ChapterImage image : treeGui.selectedChapter.images)
-		{
-			add(new ButtonChapterImage(this, image));
 		}
 
 		alignWidgets();
@@ -202,6 +205,14 @@ public class PanelQuests extends Panel
 		if (treeGui.selectedChapter == null)
 		{
 			return;
+		}
+
+		for (Widget widget : widgets)
+		{
+			if (widget instanceof ButtonChapterImage)
+			{
+				widget.draw(theme, widget.getX(), widget.getY(), widget.width, widget.height);
+			}
 		}
 
 		GlStateManager.color(1F, 1F, 1F, 1F);
@@ -425,7 +436,7 @@ public class PanelQuests extends Panel
 						GlStateManager.translate(sx - bs * m.getWidth() / 2D, sy - bs * m.getHeight() / 2D, 0D);
 						GlStateManager.scale(bs * m.getWidth(), bs * m.getHeight(), 1D);
 						GuiHelper.setupDrawing();
-						QuestShape.get(m.getShape()).shape.withColor(Color4I.WHITE.withAlpha(30)).draw(0, 0, 1, 1);
+						m.drawMoved();
 						GlStateManager.popMatrix();
 					}
 
