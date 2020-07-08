@@ -74,6 +74,7 @@ public abstract class QuestFile extends QuestObject
 	public final EntityWeight lootCrateNoDrop;
 	public boolean disableGui;
 	public String folderName;
+	public double gridScale;
 
 	public QuestFile()
 	{
@@ -99,6 +100,7 @@ public abstract class QuestFile extends QuestObject
 		lootCrateNoDrop.boss = 0;
 		disableGui = false;
 		folderName = "";
+		gridScale = 0.5D;
 	}
 
 	public abstract boolean isClient();
@@ -425,6 +427,7 @@ public abstract class QuestFile extends QuestObject
 		lootCrateNoDrop.writeData(nbt1);
 		nbt.setTag("loot_crate_no_drop", nbt1);
 		nbt.setBoolean("disable_gui", disableGui);
+		nbt.setDouble("grid_scale", gridScale);
 	}
 
 	@Override
@@ -466,6 +469,12 @@ public abstract class QuestFile extends QuestObject
 		}
 
 		disableGui = nbt.getBoolean("disable_gui");
+		gridScale = nbt.getDouble("grid_scale");
+
+		if (gridScale == 0D)
+		{
+			gridScale = 0.5D;
+		}
 	}
 
 	private NBTTagCompound createIndex(List<? extends QuestObjectBase> list)
@@ -746,6 +755,7 @@ public abstract class QuestFile extends QuestObject
 		lootCrateNoDrop.writeNetData(data);
 		data.writeBoolean(disableGui);
 		data.writeString(folderName);
+		data.writeDouble(gridScale);
 	}
 
 	@Override
@@ -763,6 +773,7 @@ public abstract class QuestFile extends QuestObject
 		lootCrateNoDrop.readNetData(data);
 		disableGui = data.readBoolean();
 		folderName = data.readString();
+		gridScale = data.readDouble();
 	}
 
 	public final void writeNetDataFull(DataOut data)
@@ -1006,6 +1017,7 @@ public abstract class QuestFile extends QuestObject
 
 		config.addBool("drop_loot_crates", () -> dropLootCrates, v -> dropLootCrates = v, false);
 		config.addBool("disable_gui", () -> disableGui, v -> disableGui = v, false);
+		config.addDouble("grid_scale", () -> gridScale, v -> gridScale = v, 0.5D, 1D / 32D, 8D);
 
 		ConfigGroup defaultsGroup = config.getGroup("defaults");
 		defaultsGroup.addBool("reward_team", () -> defaultRewardTeam, v -> defaultRewardTeam = v, false);

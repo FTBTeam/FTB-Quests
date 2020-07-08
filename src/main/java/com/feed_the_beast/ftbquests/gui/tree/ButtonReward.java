@@ -149,6 +149,11 @@ public class ButtonReward extends Button
 		drawBackground(theme, x, y, w, h);
 		drawIcon(theme, x + (w - bs) / 2, y + (h - bs) / 2, bs, bs);
 
+		if (treeGui.file.self == null || treeGui.contextMenu != null)
+		{
+			return;
+		}
+
 		GlStateManager.pushMatrix();
 		GlStateManager.translate(0F, 0F, 500F);
 		boolean completed = false;
@@ -157,12 +162,12 @@ public class ButtonReward extends Button
 		{
 			GuiIcons.CLOSE.draw(x + w - 9, y + 1, 8, 8);
 		}
-		else if (ClientQuestFile.INSTANCE.self.isRewardClaimedSelf(reward))
+		else if (treeGui.file.self.isRewardClaimedSelf(reward))
 		{
 			ThemeProperties.CHECK_ICON.get().draw(x + w - 9, y + 1, 8, 8);
 			completed = true;
 		}
-		else if (reward.quest.isComplete(ClientQuestFile.INSTANCE.self))
+		else if (reward.quest.isComplete(treeGui.file.self))
 		{
 			ThemeProperties.ALERT_ICON.get().draw(x + w - 9, y + 1, 8, 8);
 		}

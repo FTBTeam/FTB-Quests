@@ -103,6 +103,7 @@ ftbquests.file.drop_loot_crates=Entities Drop Loot Crates
 ftbquests.file.loot_crate_no_drop=Entity Loot Crate Drop Empty Weight
 ftbquests.file.disable_gui=Disable GUI
 ftbquests.file.full_screen_quest_view=Full Screen Quest View
+ftbquests.file.grid_scale=Grid Scale
 
 ftbquests.loot.entitydrops=Entity Drops
 ftbquests.loot.entitytype.passive=Passive
@@ -204,6 +205,11 @@ ftbquests.gui.autopin.off=Auto-pin: Disabled
 ftbquests.gui.move_to_chapter=Move to another chapter
 ftbquests.gui.move_tooltip=Shortcut: Middle mouse button click
 ftbquests.gui.reload_theme=Reload Theme
+ftbquests.gui.view_dependencies=View Dependencnies
+ftbquests.gui.view_dependants=View Dependants
+ftbquests.gui.no_dependencies=No Dependencies
+ftbquests.gui.no_dependants=No Dependants
+ftbquests.gui.edit_text=Edit Text
 
 ftbquests.task=Task
 ftbquests.tasks=Tasks

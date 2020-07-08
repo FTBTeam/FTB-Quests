@@ -22,6 +22,7 @@ import com.feed_the_beast.ftbquests.quest.QuestShape;
 import com.feed_the_beast.ftbquests.quest.reward.Reward;
 import com.feed_the_beast.ftbquests.quest.reward.RewardType;
 import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
+import com.feed_the_beast.ftbquests.texteditor.TextEditorFrame;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
@@ -253,6 +254,8 @@ public class ButtonQuest extends Button
 					}
 				});
 
+				contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.edit_text"), GuiIcons.INFO, () -> TextEditorFrame.open(quest)));
+
 				contextMenu.add(ContextMenuItem.SEPARATOR);
 				GuiQuestTree.addObjectMenuItems(contextMenu, getGui(), quest);
 			}
@@ -368,8 +371,12 @@ public class ButtonQuest extends Button
 
 		if (r > 0)
 		{
-			list.add("");
 			list.add(I18n.format("ftbquests.gui.collect_rewards", TextFormatting.GOLD.toString() + r));
+		}
+
+		if (quest.optional)
+		{
+			list.add(TextFormatting.GRAY + "[" + I18n.format("ftbquests.quest.optional") + "]");
 		}
 	}
 

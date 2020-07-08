@@ -375,10 +375,18 @@ public class PanelQuests extends Panel
 				questX = qx;
 				questY = qy;
 			}
+			else if (treeGui.selectedObjects.size() == 1 && treeGui.selectedObjects.get(0) instanceof Quest)
+			{
+				Quest q = (Quest) treeGui.selectedObjects.get(0);
+				double s = (1D / treeGui.file.gridScale) / q.size;
+				questX = MathHelper.floor(qx * s + 0.5D) / s;
+				questY = MathHelper.floor(qy * s + 0.5D) / s;
+			}
 			else
 			{
-				questX = MathHelper.floor(qx * 2D + 0.5D) / 2D;
-				questY = MathHelper.floor(qy * 2D + 0.5D) / 2D;
+				double s = 1D / treeGui.file.gridScale;
+				questX = MathHelper.floor(qx * s + 0.5D) / s;
+				questY = MathHelper.floor(qy * s + 0.5D) / s;
 			}
 
 			if (treeGui.file.canEdit())
@@ -434,7 +442,7 @@ public class PanelQuests extends Panel
 						GlStateManager.popMatrix();
 					}
 				}
-				else
+				else if (treeGui.viewQuestPanel.quest == null || !treeGui.viewQuestPanel.isMouseOver())
 				{
 					int z = treeGui.getZoom();
 					double bs = treeGui.getQuestButtonSize();

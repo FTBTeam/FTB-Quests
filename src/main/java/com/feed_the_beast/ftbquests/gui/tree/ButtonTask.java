@@ -233,7 +233,12 @@ public class ButtonTask extends Button
 		drawBackground(theme, x, y, w, h);
 		drawIcon(theme, x + (w - bs) / 2, y + (h - bs) / 2, bs, bs);
 
-		if (treeGui.file.self != null && task.isComplete(treeGui.file.self))
+		if (treeGui.file.self == null || treeGui.contextMenu != null)
+		{
+			return;
+		}
+
+		if (task.isComplete(treeGui.file.self))
 		{
 			GlStateManager.pushMatrix();
 			GlStateManager.translate(0F, 0F, 500F);
