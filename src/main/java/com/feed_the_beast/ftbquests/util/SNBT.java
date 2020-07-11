@@ -1,8 +1,10 @@
 package com.feed_the_beast.ftbquests.util;
 
 import com.feed_the_beast.ftblib.lib.util.NBTUtils;
+import com.feed_the_beast.ftbquests.FTBQuests;
 import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.NBTBase;
+import net.minecraft.nbt.NBTException;
 import net.minecraft.nbt.NBTPrimitive;
 import net.minecraft.nbt.NBTTagByte;
 import net.minecraft.nbt.NBTTagByteArray;
@@ -25,6 +27,7 @@ import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -33,6 +36,8 @@ import java.util.regex.Pattern;
 public class SNBT
 {
 	private static final Pattern SIMPLE_VALUE = Pattern.compile("[A-Za-z0-9._+-]+");
+	private static final Pattern BYTE_ARRAY_MATCHER = Pattern.compile("\\[B;([\\s\\d,b]*)\\]", Pattern.CASE_INSENSITIVE);
+	private static final Pattern LONG_ARRAY_MATCHER = Pattern.compile("\\[L;([\\s\\d,l]*)\\]", Pattern.CASE_INSENSITIVE);
 
 	public static String handleEscape(String string)
 	{
@@ -115,7 +120,77 @@ public class SNBT
 				s.append(line.trim());
 			}
 
-			return JsonToNBT.getTagFromJson(s.toString());
+			String s1 = s.toString();
+
+			{
+				StringBuffer sb = new StringBuffer(s1.length());
+				Matcher matcher = BYTE_ARRAY_MATCHER.matcher(s1);
+
+				while (matcher.find())
+				{
+					String s2 = matcher.group(1);
+
+					if (!s2.isEmpty())
+					{
+						String[] s3 = s2.split(",");
+
+						for (int i = 0; i < s3.length; i++)
+						{
+							if (!s3[i].endsWith("b") && !s3[i].endsWith("B"))
+							{
+								s3[i] += 'b';
+							}
+						}
+
+						matcher.appendReplacement(sb, "[B;" + String.join(",", s3) + "]");
+					}
+					else
+					{
+						matcher.appendReplacement(sb, "[B;]");
+					}
+				}
+
+				matcher.appendTail(sb);
+				s1 = sb.toString();
+			}
+
+			{
+				StringBuffer sb = new StringBuffer(s1.length());
+				Matcher matcher = LONG_ARRAY_MATCHER.matcher(s1);
+
+				while (matcher.find())
+				{
+					String s2 = matcher.group(1);
+
+					if (!s2.isEmpty())
+					{
+						String[] s3 = s2.split(",");
+
+						for (int i = 0; i < s3.length; i++)
+						{
+							if (!s3[i].endsWith("l") && !s3[i].endsWith("L"))
+							{
+								s3[i] += 'L';
+							}
+						}
+
+						matcher.appendReplacement(sb, "[L;" + String.join(",", s3) + "]");
+					}
+					else
+					{
+						matcher.appendReplacement(sb, "[L;]");
+					}
+				}
+
+				matcher.appendTail(sb);
+				s1 = sb.toString();
+			}
+
+			return JsonToNBT.getTagFromJson(s1);
+		}
+		catch (NBTException ex)
+		{
+			FTBQuests.LOGGER.error("Failed to read " + file.getAbsolutePath() + ": " + ex);
 		}
 		catch (Exception ex)
 		{
@@ -147,7 +222,7 @@ public class SNBT
 		try (PrintWriter writer = new PrintWriter(new BufferedWriter(new FileWriter(file))))
 		{
 			SNBTBuilder builder = new SNBTBuilder();
-			append(builder, out);
+			append(builder, out, false);
 			builder.println();
 
 			for (String s : builder.lines)
@@ -160,7 +235,7 @@ public class SNBT
 		}
 	}
 
-	private static void append(SNBTBuilder builder, @Nullable NBTBase nbt)
+	private static void append(SNBTBuilder builder, @Nullable NBTBase nbt, boolean inList)
 	{
 		if (nbt == null || nbt instanceof NBTTagEnd)
 		{
@@ -186,7 +261,7 @@ public class SNBT
 				index++;
 				builder.print(handleEscape(key));
 				builder.print(": ");
-				append(builder, compound.getTag(key));
+				append(builder, compound.getTag(key), false);
 
 				if (index != compound.getSize())
 				{
@@ -229,7 +304,7 @@ public class SNBT
 		{
 			appendCollection(builder, new NBTTagList(), "L;");
 		}
-		else if (nbt instanceof NBTPrimitive)
+		else if (nbt instanceof NBTPrimitive && !inList)
 		{
 			if (nbt instanceof NBTTagFloat)
 			{
@@ -273,7 +348,7 @@ public class SNBT
 		{
 			builder.print("[");
 			builder.print(opening);
-			append(builder, nbt.get(0));
+			append(builder, nbt.get(0), true);
 			builder.print("]");
 			return;
 		}
@@ -287,7 +362,7 @@ public class SNBT
 		for (NBTBase value : nbt)
 		{
 			index++;
-			append(builder, value);
+			append(builder, value, true);
 
 			if (index != nbt.tagCount())
 			{

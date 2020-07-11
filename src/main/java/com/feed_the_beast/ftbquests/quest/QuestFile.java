@@ -55,7 +55,7 @@ import java.util.function.Predicate;
  */
 public abstract class QuestFile extends QuestObject
 {
-	public static final int VERSION = 7;
+	public static final int VERSION = 8;
 
 	public final List<Chapter> chapters;
 	public final List<RewardTable> rewardTables;
