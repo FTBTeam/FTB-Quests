@@ -176,16 +176,14 @@ public final class Quest extends QuestObject implements Movable
 
 		if (!dependencies.isEmpty())
 		{
-			int[] ai = new int[dependencies.size()];
-			int i = 0;
+			NBTTagList list = new NBTTagList();
 
 			for (QuestObject dep : dependencies)
 			{
-				ai[i] = dep.id;
-				i++;
+				list.appendTag(new NBTTagString(dep.getCodeString()));
 			}
 
-			nbt.setIntArray("dependencies", ai);
+			nbt.setTag("dependencies", list);
 		}
 
 		if (hide)
@@ -265,12 +263,24 @@ public final class Quest extends QuestObject implements Movable
 
 			for (int i = 0; i < list.tagCount(); i++)
 			{
-				NBTTagCompound nbt1 = list.getCompoundTagAt(i);
-				QuestObject object = chapter.file.get(nbt1.getInteger("id"));
-
-				if (object != null)
+				if (list.get(i) instanceof NBTTagString)
 				{
-					dependencies.add(object);
+					QuestObject object = chapter.file.get(chapter.file.getID(list.getStringTagAt(i)));
+
+					if (object != null)
+					{
+						dependencies.add(object);
+					}
+				}
+				else if (list.get(i) instanceof NBTTagCompound)
+				{
+					NBTTagCompound nbt1 = list.getCompoundTagAt(i);
+					QuestObject object = chapter.file.get(nbt1.getInteger("id"));
+
+					if (object != null)
+					{
+						dependencies.add(object);
+					}
 				}
 			}
 		}
