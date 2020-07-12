@@ -422,3 +422,4 @@ commands.ftbquests.weigh_from_emc.text=Changed item reward weight based on EMC i
 commands.ftbquests.export_rewards_to_chest.usage=/ftbquests export_rewards_to_chest <reward_table>
 commands.ftbquests.export_rewards_to_chest.text=Exported %s / %s items from '%s'
 commands.ftbquests.auto_pin.usage=/ftbquests auto_pin
+commands.ftbquests.generate_chapter_with_all_items_in_game.usage=/ftbquests generate_chapter_with_all_items_in_game
