@@ -5,18 +5,17 @@ import com.feed_the_beast.ftbquests.FTBQuests;
 import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTException;
-import net.minecraft.nbt.NBTPrimitive;
 import net.minecraft.nbt.NBTTagByte;
 import net.minecraft.nbt.NBTTagByteArray;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagDouble;
 import net.minecraft.nbt.NBTTagEnd;
-import net.minecraft.nbt.NBTTagFloat;
 import net.minecraft.nbt.NBTTagInt;
 import net.minecraft.nbt.NBTTagIntArray;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.NBTTagLong;
 import net.minecraft.nbt.NBTTagLongArray;
 import net.minecraft.nbt.NBTTagString;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
 import javax.annotation.Nullable;
 import java.io.BufferedReader;
@@ -27,6 +26,7 @@ import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -222,7 +222,7 @@ public class SNBT
 		try (PrintWriter writer = new PrintWriter(new BufferedWriter(new FileWriter(file))))
 		{
 			SNBTBuilder builder = new SNBTBuilder();
-			append(builder, out, false);
+			append(builder, out);
 			builder.println();
 
 			for (String s : builder.lines)
@@ -235,7 +235,7 @@ public class SNBT
 		}
 	}
 
-	private static void append(SNBTBuilder builder, @Nullable NBTBase nbt, boolean inList)
+	private static void append(SNBTBuilder builder, @Nullable NBTBase nbt)
 	{
 		if (nbt == null || nbt instanceof NBTTagEnd)
 		{
@@ -261,7 +261,7 @@ public class SNBT
 				index++;
 				builder.print(handleEscape(key));
 				builder.print(": ");
-				append(builder, compound.getTag(key), false);
+				append(builder, compound.getTag(key));
 
 				if (index != compound.getSize())
 				{
@@ -276,58 +276,41 @@ public class SNBT
 		}
 		else if (nbt instanceof NBTTagList)
 		{
-			appendCollection(builder, (NBTTagList) nbt, "");
+			NBTTagList list = (NBTTagList) nbt;
+			appendCollection(builder, list.tagCount(), list::get, "");
 		}
 		else if (nbt instanceof NBTTagByteArray)
 		{
-			NBTTagList list = new NBTTagList();
-
-			for (byte i : ((NBTTagByteArray) nbt).getByteArray())
-			{
-				list.appendTag(new NBTTagByte(i));
-			}
-
-			appendCollection(builder, list, "B;");
+			byte[] array = ((NBTTagByteArray) nbt).getByteArray();
+			appendCollection(builder, array.length, i -> new NBTTagByte(array[i]), "B;");
 		}
 		else if (nbt instanceof NBTTagIntArray)
 		{
-			NBTTagList list = new NBTTagList();
-
-			for (int i : ((NBTTagIntArray) nbt).getIntArray())
-			{
-				list.appendTag(new NBTTagInt(i));
-			}
-
-			appendCollection(builder, list, "I;");
+			int[] array = ((NBTTagIntArray) nbt).getIntArray();
+			appendCollection(builder, array.length, i -> new NBTTagInt(array[i]), "I;");
 		}
 		else if (nbt instanceof NBTTagLongArray)
 		{
-			appendCollection(builder, new NBTTagList(), "L;");
-		}
-		else if (nbt instanceof NBTPrimitive && !inList)
-		{
-			if (nbt instanceof NBTTagFloat)
-			{
-				builder.print(nbt.toString());
-			}
-			else if (nbt instanceof NBTTagDouble)
-			{
-				builder.print(nbt.toString());
-			}
-			else
-			{
-				long v = ((NBTPrimitive) nbt).getLong();
+			long[] array0 = new long[0];
 
-				if (v <= Integer.MAX_VALUE && v >= Integer.MIN_VALUE)
-				{
-					builder.print(v);
-				}
-				else
-				{
-					builder.print(v);
-					builder.print("L");
-				}
+			try
+			{
+				array0 = ObfuscationReflectionHelper.getPrivateValue(NBTTagLongArray.class, (NBTTagLongArray) nbt, "field_193587_b");
 			}
+			catch (Throwable ex)
+			{
+			}
+
+			long[] array = array0;
+			appendCollection(builder, array.length, i -> new NBTTagLong(array[i]), "L;");
+		}
+		else if (nbt == SNBTTagCompound.TRUE)
+		{
+			builder.print("true");
+		}
+		else if (nbt == SNBTTagCompound.FALSE)
+		{
+			builder.print("false");
 		}
 		else
 		{
@@ -335,20 +318,20 @@ public class SNBT
 		}
 	}
 
-	private static void appendCollection(SNBTBuilder builder, NBTTagList nbt, String opening)
+	private static void appendCollection(SNBTBuilder builder, int size, Function<Integer, NBTBase> function, String opening)
 	{
-		if (nbt.isEmpty())
+		if (size <= 0)
 		{
 			builder.print("[");
 			builder.print(opening);
 			builder.print("]");
 			return;
 		}
-		else if (nbt.tagCount() == 1)
+		else if (size == 1)
 		{
 			builder.print("[");
 			builder.print(opening);
-			append(builder, nbt.get(0), true);
+			append(builder, function.apply(0));
 			builder.print("]");
 			return;
 		}
@@ -357,14 +340,12 @@ public class SNBT
 		builder.print(opening);
 		builder.println();
 		builder.push();
-		int index = 0;
 
-		for (NBTBase value : nbt)
+		for (int index = 0; index < size; index++)
 		{
-			index++;
-			append(builder, value, true);
+			append(builder, function.apply(index));
 
-			if (index != nbt.tagCount())
+			if (index != size - 1)
 			{
 				builder.print(",");
 			}

@@ -26,6 +26,7 @@ import com.feed_the_beast.ftbquests.quest.task.CustomTask;
 import com.feed_the_beast.ftbquests.quest.task.Task;
 import com.feed_the_beast.ftbquests.quest.task.TaskType;
 import com.feed_the_beast.ftbquests.util.SNBT;
+import com.feed_the_beast.ftbquests.util.SNBTTagCompound;
 import com.latmod.mods.itemfilters.item.ItemMissing;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.client.resources.I18n;
@@ -34,6 +35,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.NBTTagString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.relauncher.Side;
@@ -55,7 +57,7 @@ import java.util.function.Predicate;
  */
 public abstract class QuestFile extends QuestObject
 {
-	public static final int VERSION = 8;
+	public static final int VERSION = 9;
 
 	public final List<Chapter> chapters;
 	public final List<RewardTable> rewardTables;
@@ -400,8 +402,8 @@ public abstract class QuestFile extends QuestObject
 	@Override
 	public final void writeData(NBTTagCompound nbt)
 	{
-		super.writeData(nbt);
 		nbt.setInteger("version", VERSION);
+		super.writeData(nbt);
 		nbt.setBoolean("default_reward_team", defaultRewardTeam);
 		nbt.setBoolean("default_consume_items", defaultTeamConsumeItems);
 		nbt.setString("default_autoclaim_rewards", defaultRewardAutoClaim.getId());
@@ -423,7 +425,7 @@ public abstract class QuestFile extends QuestObject
 		nbt.setString("emergency_items_cooldown", emergencyItemsCooldown.toString());
 		nbt.setBoolean("drop_loot_crates", dropLootCrates);
 
-		NBTTagCompound nbt1 = new NBTTagCompound();
+		NBTTagCompound nbt1 = new SNBTTagCompound();
 		lootCrateNoDrop.writeData(nbt1);
 		nbt.setTag("loot_crate_no_drop", nbt1);
 		nbt.setBoolean("disable_gui", disableGui);
@@ -477,29 +479,56 @@ public abstract class QuestFile extends QuestObject
 		}
 	}
 
-	private NBTTagCompound createIndex(List<? extends QuestObjectBase> list)
+	private NBTTagCompound createIndex(Iterable<? extends QuestObjectBase> list)
 	{
-		int[] index = new int[list.size()];
+		NBTTagList index = new NBTTagList();
 
-		for (int i = 0; i < index.length; i++)
+		for (QuestObjectBase o : list)
 		{
-			index[i] = list.get(i).id;
+			index.appendTag(new NBTTagString(getCodeString(o.id)));
 		}
 
-		NBTTagCompound nbt = new NBTTagCompound();
-		nbt.setIntArray("index", index);
+		NBTTagCompound nbt = new SNBTTagCompound();
+		nbt.setTag("index", index);
 		return nbt;
 	}
 
 	public int[] readIndex(File dir, String name)
 	{
 		NBTTagCompound nbt = SNBT.readOrTransform(dir, name);
-		return nbt == null ? new int[0] : nbt.getIntArray("index");
+
+		if (nbt == null)
+		{
+			return new int[0];
+		}
+
+		int[] ai = nbt.getIntArray("index");
+
+		if (ai.length > 0)
+		{
+			if (this instanceof ServerQuestFile)
+			{
+				((ServerQuestFile) this).save();
+			}
+
+			return ai;
+		}
+
+		NBTTagList list = nbt.getTagList("index", Constants.NBT.TAG_STRING);
+
+		ai = new int[list.tagCount()];
+
+		for (int i = 0; i < ai.length; i++)
+		{
+			ai[i] = getID(list.getStringTagAt(i));
+		}
+
+		return ai;
 	}
 
 	public final void writeDataFull(File folder)
 	{
-		NBTTagCompound out = new NBTTagCompound();
+		NBTTagCompound out = new SNBTTagCompound();
 		writeData(out);
 		SNBT.write(new File(folder, "file.snbt"), out);
 		SNBT.write(new File(folder, "chapters/index.snbt"), createIndex(chapters));
@@ -507,7 +536,7 @@ public abstract class QuestFile extends QuestObject
 
 		for (Chapter chapter : chapters)
 		{
-			out = new NBTTagCompound();
+			out = new SNBTTagCompound();
 			chapter.writeData(out);
 			String chapterPath = "chapters/" + getCodeString(chapter) + "/";
 			SNBT.write(new File(folder, chapterPath + "chapter.snbt"), out);
@@ -521,7 +550,7 @@ public abstract class QuestFile extends QuestObject
 						continue;
 					}
 
-					out = new NBTTagCompound();
+					out = new SNBTTagCompound();
 					quest.writeData(out);
 
 					if (!quest.tasks.isEmpty())
@@ -531,7 +560,7 @@ public abstract class QuestFile extends QuestObject
 						for (Task task : quest.tasks)
 						{
 							TaskType type = task.getType();
-							NBTTagCompound nbt3 = new NBTTagCompound();
+							NBTTagCompound nbt3 = new SNBTTagCompound();
 							task.writeData(nbt3);
 							nbt3.setInteger("uid", task.id);
 							nbt3.setString("type", type.getTypeForNBT());
@@ -551,7 +580,7 @@ public abstract class QuestFile extends QuestObject
 						for (Reward reward : quest.rewards)
 						{
 							RewardType type = reward.getType();
-							NBTTagCompound nbt3 = new NBTTagCompound();
+							NBTTagCompound nbt3 = new SNBTTagCompound();
 							reward.writeData(nbt3);
 							nbt3.setInteger("uid", reward.id);
 							nbt3.setString("type", type.getTypeForNBT());
@@ -571,7 +600,7 @@ public abstract class QuestFile extends QuestObject
 
 		for (RewardTable table : rewardTables)
 		{
-			out = new NBTTagCompound();
+			out = new SNBTTagCompound();
 			table.writeData(out);
 			SNBT.write(new File(folder, "reward_tables/" + getCodeString(table) + ".snbt"), out);
 		}

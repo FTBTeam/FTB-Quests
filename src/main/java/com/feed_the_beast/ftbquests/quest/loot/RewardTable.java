@@ -22,6 +22,7 @@ import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.quest.reward.FTBQuestsRewards;
 import com.feed_the_beast.ftbquests.quest.reward.Reward;
 import com.feed_the_beast.ftbquests.quest.reward.RewardType;
+import com.feed_the_beast.ftbquests.util.SNBTTagCompound;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -111,7 +112,7 @@ public final class RewardTable extends QuestObjectBase
 
 		for (WeightedReward reward : rewards)
 		{
-			NBTTagCompound nbt1 = new NBTTagCompound();
+			NBTTagCompound nbt1 = new SNBTTagCompound();
 			reward.reward.writeData(nbt1);
 
 			if (reward.reward.getType() != FTBQuestsRewards.ITEM)
@@ -131,7 +132,7 @@ public final class RewardTable extends QuestObjectBase
 
 		if (lootCrate != null)
 		{
-			NBTTagCompound nbt1 = new NBTTagCompound();
+			NBTTagCompound nbt1 = new SNBTTagCompound();
 			lootCrate.writeData(nbt1);
 			nbt.setTag("loot_crate", nbt1);
 		}

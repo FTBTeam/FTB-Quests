@@ -10,6 +10,7 @@ import com.feed_the_beast.ftblib.lib.util.ListUtils;
 import com.feed_the_beast.ftbquests.events.ObjectCompletedEvent;
 import com.feed_the_beast.ftbquests.net.MessageDisplayCompletionToast;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
+import com.feed_the_beast.ftbquests.util.SNBTTagCompound;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
@@ -95,7 +96,7 @@ public final class Chapter extends QuestObject
 
 			for (ChapterImage image : images)
 			{
-				NBTTagCompound nbt1 = new NBTTagCompound();
+				NBTTagCompound nbt1 = new SNBTTagCompound();
 				image.writeData(nbt1);
 				list.appendTag(nbt1);
 			}
