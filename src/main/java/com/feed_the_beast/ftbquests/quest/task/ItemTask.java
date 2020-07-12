@@ -63,6 +63,7 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 	{
 		super(quest);
 		items = new ArrayList<>();
+		count = 1L;
 		consumeItems = EnumTristate.DEFAULT;
 		ignoreDamage = false;
 		nbtMode = NBTMatchingMode.MATCH;
