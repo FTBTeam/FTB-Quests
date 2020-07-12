@@ -312,6 +312,7 @@ public final class Quest extends QuestObject implements Movable
 		flags = Bits.setFlag(flags, 8, !subtitle.isEmpty());
 		flags = Bits.setFlag(flags, 16, !description.isEmpty());
 		flags = Bits.setFlag(flags, 32, !customClick.isEmpty());
+		// dep list empty
 		flags = Bits.setFlag(flags, 64, hideDependencyLines);
 		flags = Bits.setFlag(flags, 128, hideTextUntilComplete);
 		flags = Bits.setFlag(flags, 256, optional);

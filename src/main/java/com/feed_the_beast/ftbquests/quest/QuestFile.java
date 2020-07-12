@@ -19,6 +19,7 @@ import com.feed_the_beast.ftbquests.net.MessageDisplayCompletionToast;
 import com.feed_the_beast.ftbquests.quest.loot.EntityWeight;
 import com.feed_the_beast.ftbquests.quest.loot.LootCrate;
 import com.feed_the_beast.ftbquests.quest.loot.RewardTable;
+import com.feed_the_beast.ftbquests.quest.reward.CustomReward;
 import com.feed_the_beast.ftbquests.quest.reward.Reward;
 import com.feed_the_beast.ftbquests.quest.reward.RewardAutoClaim;
 import com.feed_the_beast.ftbquests.quest.reward.RewardType;
@@ -561,9 +562,9 @@ public abstract class QuestFile extends QuestObject
 						{
 							TaskType type = task.getType();
 							NBTTagCompound nbt3 = new SNBTTagCompound();
-							task.writeData(nbt3);
-							nbt3.setInteger("uid", task.id);
+							nbt3.setString("uid", task.getCodeString());
 							nbt3.setString("type", type.getTypeForNBT());
+							task.writeData(nbt3);
 							t.appendTag(nbt3);
 						}
 
@@ -581,9 +582,9 @@ public abstract class QuestFile extends QuestObject
 						{
 							RewardType type = reward.getType();
 							NBTTagCompound nbt3 = new SNBTTagCompound();
-							reward.writeData(nbt3);
-							nbt3.setInteger("uid", reward.id);
+							nbt3.setString("uid", reward.getCodeString());
 							nbt3.setString("type", type.getTypeForNBT());
+							reward.writeData(nbt3);
 							r.appendTag(nbt3);
 						}
 
@@ -652,11 +653,20 @@ public abstract class QuestFile extends QuestObject
 									NBTTagCompound tt = t.getCompoundTagAt(k);
 									Task task = TaskType.createTask(quest, tt.getString("type"));
 
-									if (task != null)
+									if (task == null)
 									{
-										task.id = tt.getInteger("uid");
-										quest.tasks.add(task);
+										task = new CustomTask(quest);
+										task.title = "Unknown type: " + tt.getString("type");
 									}
+
+									task.id = tt.getInteger("uid");
+
+									if (task.id == 0)
+									{
+										task.id = getID(tt.getString("uid"));
+									}
+
+									quest.tasks.add(task);
 								}
 
 								NBTTagList r = nbt.getTagList("rewards", Constants.NBT.TAG_COMPOUND);
@@ -666,11 +676,20 @@ public abstract class QuestFile extends QuestObject
 									NBTTagCompound rt = r.getCompoundTagAt(k);
 									Reward reward = RewardType.createReward(quest, rt.getString("type"));
 
-									if (reward != null)
+									if (reward == null)
 									{
-										reward.id = rt.getInteger("uid");
-										quest.rewards.add(reward);
+										reward = new CustomReward(quest);
+										reward.title = "Unknown type: " + rt.getString("type");
 									}
+
+									reward.id = rt.getInteger("uid");
+
+									if (reward.id == 0)
+									{
+										reward.id = getID(rt.getString("uid"));
+									}
+
+									quest.rewards.add(reward);
 								}
 
 								chapter.quests.add(quest);
@@ -718,26 +737,14 @@ public abstract class QuestFile extends QuestObject
 
 				for (int k = 0; k < t.tagCount(); k++)
 				{
-					NBTTagCompound tt = t.getCompoundTagAt(k);
-					Task task = getTask(tt.getInteger("uid"));
-
-					if (task != null)
-					{
-						task.readData(tt);
-					}
+					quest.tasks.get(k).readData(t.getCompoundTagAt(k));
 				}
 
 				NBTTagList r = nbt.getTagList("rewards", Constants.NBT.TAG_COMPOUND);
 
 				for (int k = 0; k < r.tagCount(); k++)
 				{
-					NBTTagCompound rt = r.getCompoundTagAt(k);
-					Reward reward = getReward(rt.getInteger("uid"));
-
-					if (reward != null)
-					{
-						reward.readData(rt);
-					}
+					quest.rewards.get(k).readData(r.getCompoundTagAt(k));
 				}
 			}
 		}

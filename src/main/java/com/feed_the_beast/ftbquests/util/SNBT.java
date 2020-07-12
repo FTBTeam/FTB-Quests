@@ -15,6 +15,7 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagLong;
 import net.minecraft.nbt.NBTTagLongArray;
 import net.minecraft.nbt.NBTTagString;
+import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
 import javax.annotation.Nullable;
@@ -277,17 +278,17 @@ public class SNBT
 		else if (nbt instanceof NBTTagList)
 		{
 			NBTTagList list = (NBTTagList) nbt;
-			appendCollection(builder, list.tagCount(), list::get, "");
+			appendCollection(builder, list.getTagType(), list.tagCount(), list::get, "");
 		}
 		else if (nbt instanceof NBTTagByteArray)
 		{
 			byte[] array = ((NBTTagByteArray) nbt).getByteArray();
-			appendCollection(builder, array.length, i -> new NBTTagByte(array[i]), "B;");
+			appendCollection(builder, Constants.NBT.TAG_BYTE, array.length, i -> new NBTTagByte(array[i]), "B;");
 		}
 		else if (nbt instanceof NBTTagIntArray)
 		{
 			int[] array = ((NBTTagIntArray) nbt).getIntArray();
-			appendCollection(builder, array.length, i -> new NBTTagInt(array[i]), "I;");
+			appendCollection(builder, Constants.NBT.TAG_INT, array.length, i -> new NBTTagInt(array[i]), "I;");
 		}
 		else if (nbt instanceof NBTTagLongArray)
 		{
@@ -302,7 +303,7 @@ public class SNBT
 			}
 
 			long[] array = array0;
-			appendCollection(builder, array.length, i -> new NBTTagLong(array[i]), "L;");
+			appendCollection(builder, Constants.NBT.TAG_LONG, array.length, i -> new NBTTagLong(array[i]), "L;");
 		}
 		else if (nbt == SNBTTagCompound.TRUE)
 		{
@@ -318,7 +319,7 @@ public class SNBT
 		}
 	}
 
-	private static void appendCollection(SNBTBuilder builder, int size, Function<Integer, NBTBase> function, String opening)
+	private static void appendCollection(SNBTBuilder builder, int type, int size, Function<Integer, NBTBase> function, String opening)
 	{
 		if (size <= 0)
 		{
@@ -327,19 +328,15 @@ public class SNBT
 			builder.print("]");
 			return;
 		}
-		else if (size == 1)
-		{
-			builder.print("[");
-			builder.print(opening);
-			append(builder, function.apply(0));
-			builder.print("]");
-			return;
-		}
 
 		builder.print("[");
 		builder.print(opening);
-		builder.println();
-		builder.push();
+
+		if (type != Constants.NBT.TAG_COMPOUND && type != Constants.NBT.TAG_LIST)
+		{
+			builder.println();
+			builder.push();
+		}
 
 		for (int index = 0; index < size; index++)
 		{
@@ -348,12 +345,19 @@ public class SNBT
 			if (index != size - 1)
 			{
 				builder.print(",");
+				builder.println();
 			}
-
-			builder.println();
+			else if (type != Constants.NBT.TAG_COMPOUND && type != Constants.NBT.TAG_LIST)
+			{
+				builder.println();
+			}
 		}
 
-		builder.pop();
+		if (type != Constants.NBT.TAG_COMPOUND && type != Constants.NBT.TAG_LIST)
+		{
+			builder.pop();
+		}
+
 		builder.print("]");
 	}
 }

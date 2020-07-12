@@ -13,6 +13,7 @@ import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.util.StringJoiner;
 import com.feed_the_beast.ftblib.lib.util.misc.NameMap;
+import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.gui.tree.GuiValidItems;
 import com.feed_the_beast.ftbquests.net.MessageClaimReward;
 import com.feed_the_beast.ftbquests.net.MessageSubmitTask;
@@ -87,26 +88,19 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 	{
 		super.writeData(nbt);
 
-		if (items.size() == 1)
-		{
-			nbt.setTag("item", ItemMissing.write(items.get(0), false));
-		}
-		else
-		{
-			NBTTagList list = new NBTTagList();
+		NBTTagList list = new NBTTagList();
 
-			for (ItemStack stack : items)
+		for (ItemStack stack : items)
+		{
+			if (!stack.isEmpty())
 			{
-				if (!stack.isEmpty())
-				{
-					list.appendTag(ItemMissing.write(stack, true));
-				}
+				list.appendTag(ItemMissing.write(stack, true));
 			}
-
-			nbt.setTag("items", list);
 		}
 
-		if (count > 1)
+		nbt.setTag("items", list);
+
+		if (count > 1L)
 		{
 			nbt.setLong("count", count);
 		}
@@ -141,18 +135,31 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 			{
 				items.add(stack);
 			}
+			else
+			{
+				FTBQuests.LOGGER.warn("That's odd... Item is empty from tag " + nbt.getTag("item") + " in " + quest.chapter + "/" + quest + "/" + this);
+			}
 		}
 		else
 		{
 			for (int i = 0; i < list.tagCount(); i++)
 			{
-				ItemStack stack = ItemMissing.read(list.getCompoundTagAt(i));
+				ItemStack stack = ItemMissing.read(list.get(i));
 
 				if (!stack.isEmpty())
 				{
 					items.add(stack);
 				}
+				else
+				{
+					FTBQuests.LOGGER.warn("That's odd... Item is empty from tag " + list.get(i) + " in " + quest.chapter + "/" + quest + "/" + this);
+				}
 			}
+		}
+
+		if (items.isEmpty())
+		{
+			FTBQuests.LOGGER.warn("Item list is empty? That's not good... Task: " + quest.chapter + "/" + quest + "/" + this);
 		}
 
 		count = nbt.getLong("count");
@@ -172,30 +179,61 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 	public void writeNetData(DataOut data)
 	{
 		super.writeNetData(data);
-		data.writeCollection(items, DataOut.ITEM_STACK);
-		data.writeVarLong(count);
 		int flags = 0;
-		//flags = Bits.setFlag(flags, 1, consumeItems);
+		flags = Bits.setFlag(flags, 1, count > 1L);
 		flags = Bits.setFlag(flags, 2, ignoreDamage);
 		flags = Bits.setFlag(flags, 4, nbtMode != NBTMatchingMode.MATCH);
 		flags = Bits.setFlag(flags, 8, nbtMode == NBTMatchingMode.CONTAIN);
+		flags = Bits.setFlag(flags, 16, consumeItems != EnumTristate.DEFAULT);
+		flags = Bits.setFlag(flags, 32, consumeItems == EnumTristate.TRUE);
+		flags = Bits.setFlag(flags, 64, items.size() == 1);
+		flags = Bits.setFlag(flags, 128, onlyFromCrafting != EnumTristate.DEFAULT);
+		flags = Bits.setFlag(flags, 256, onlyFromCrafting == EnumTristate.TRUE);
 		data.writeVarInt(flags);
-		EnumTristate.NAME_MAP.write(data, consumeItems);
-		EnumTristate.NAME_MAP.write(data, onlyFromCrafting);
+
+		if (items.size() == 1)
+		{
+			DataOut.ITEM_STACK.write(data, items.get(0));
+		}
+		else
+		{
+			data.writeCollection(items, DataOut.ITEM_STACK);
+		}
+
+		if (count > 1L)
+		{
+			data.writeVarLong(count);
+		}
 	}
 
 	@Override
 	public void readNetData(DataIn data)
 	{
 		super.readNetData(data);
-		data.readCollection(items, DataIn.ITEM_STACK);
-		count = data.readVarLong();
 		int flags = data.readVarInt();
-		//consumeItems = Bits.getFlag(flags, 1);
 		ignoreDamage = Bits.getFlag(flags, 2);
 		nbtMode = Bits.getFlag(flags, 4) ? Bits.getFlag(flags, 8) ? NBTMatchingMode.CONTAIN : NBTMatchingMode.IGNORE : NBTMatchingMode.MATCH;
-		consumeItems = EnumTristate.NAME_MAP.read(data);
-		onlyFromCrafting = EnumTristate.NAME_MAP.read(data);
+		consumeItems = Bits.getFlag(flags, 16) ? Bits.getFlag(flags, 32) ? EnumTristate.TRUE : EnumTristate.FALSE : EnumTristate.DEFAULT;
+		onlyFromCrafting = Bits.getFlag(flags, 128) ? Bits.getFlag(flags, 256) ? EnumTristate.TRUE : EnumTristate.FALSE : EnumTristate.DEFAULT;
+
+		if (Bits.getFlag(flags, 64))
+		{
+			items.clear();
+			items.add(DataIn.ITEM_STACK.read(data));
+		}
+		else
+		{
+			data.readCollection(items, DataIn.ITEM_STACK);
+		}
+
+		if (Bits.getFlag(flags, 1))
+		{
+			count = data.readVarLong();
+		}
+		else
+		{
+			count = 1L;
+		}
 	}
 
 	public List<ItemStack> getValidItems()
