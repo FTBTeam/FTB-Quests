@@ -66,6 +66,7 @@ public final class Quest extends QuestObject implements Movable
 	public EnumTristate disableJEI;
 	public double size;
 	public boolean optional;
+	public int minWidth;
 
 	private String cachedDescription = null;
 	private String[] cachedText = null;
@@ -92,6 +93,7 @@ public final class Quest extends QuestObject implements Movable
 		disableJEI = EnumTristate.DEFAULT;
 		size = 1D;
 		optional = false;
+		minWidth = 0;
 	}
 
 	@Override
@@ -210,6 +212,11 @@ public final class Quest extends QuestObject implements Movable
 		{
 			nbt.setBoolean("optional", true);
 		}
+
+		if (minWidth > 0)
+		{
+			nbt.setInteger("min_width", minWidth);
+		}
 	}
 
 	@Override
@@ -299,6 +306,7 @@ public final class Quest extends QuestObject implements Movable
 		hideTextUntilComplete = nbt.getBoolean("hide_text_until_complete");
 		size = nbt.hasKey("size") ? nbt.getDouble("size") : 1D;
 		optional = nbt.getBoolean("optional");
+		minWidth = nbt.getInteger("min_width");
 	}
 
 	@Override
@@ -316,6 +324,7 @@ public final class Quest extends QuestObject implements Movable
 		flags = Bits.setFlag(flags, 64, hideDependencyLines);
 		flags = Bits.setFlag(flags, 128, hideTextUntilComplete);
 		flags = Bits.setFlag(flags, 256, optional);
+		flags = Bits.setFlag(flags, 512, minWidth > 0);
 		data.writeVarInt(flags);
 
 		if (!subtitle.isEmpty())
@@ -359,6 +368,11 @@ public final class Quest extends QuestObject implements Movable
 		}
 
 		data.writeDouble(size);
+
+		if (minWidth > 0)
+		{
+			data.writeVarInt(minWidth);
+		}
 	}
 
 	@Override
@@ -404,6 +418,7 @@ public final class Quest extends QuestObject implements Movable
 		}
 
 		size = data.readDouble();
+		minWidth = Bits.getFlag(flags, 512) ? data.readVarInt() : 0;
 	}
 
 	@Override
@@ -654,6 +669,7 @@ public final class Quest extends QuestObject implements Movable
 		config.addDouble("x", () -> x, v -> x = v, 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
 		config.addDouble("y", () -> y, v -> y = v, 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
 		config.addBool("optional", () -> optional, v -> optional = v, false);
+		config.addInt("min_width", () -> minWidth, v -> minWidth = v, 0, 0, 3000);
 
 		Predicate<QuestObjectBase> depTypes = object -> object != chapter.file && object != chapter && object instanceof QuestObject;// && !(object instanceof Task);
 
