@@ -1,6 +1,8 @@
 package com.feed_the_beast.ftbquests.quest.task;
 
+import com.feed_the_beast.ftblib.FTBLibConfig;
 import com.feed_the_beast.ftblib.lib.util.StringUtils;
+import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.events.TaskStartedEvent;
 import com.feed_the_beast.ftbquests.net.MessageUpdateTaskProgress;
 import com.feed_the_beast.ftbquests.quest.ChangeProgress;
@@ -48,6 +50,7 @@ public class TaskData<T extends Task> implements ICapabilityProvider, IItemHandl
 
 		if (progress != p)
 		{
+			long prevProgress = progress;
 			progress = p;
 			taskCompleted = false;
 			task.quest.chapter.file.clearCachedProgress();
@@ -62,6 +65,11 @@ public class TaskData<T extends Task> implements ICapabilityProvider, IItemHandl
 				if (p == 0)
 				{
 					MinecraftForge.EVENT_BUS.post(new TaskStartedEvent(this));
+				}
+
+				if (FTBLibConfig.debugging.print_more_info)
+				{
+					FTBQuests.LOGGER.info("Changed progress for " + data.getTeamID() + ":" + task + " (" + task.getType().getRegistryName() + ") from " + prevProgress + " to " + progress + "/" + task.getMaxProgress());
 				}
 
 				if (!taskCompleted && isComplete())
@@ -81,9 +89,12 @@ public class TaskData<T extends Task> implements ICapabilityProvider, IItemHandl
 
 					task.onCompleted(data, onlineMembers, notifiedPlayers);
 
-					for (EntityPlayerMP player : onlineMembers)
+					if (progress > prevProgress)
 					{
-						FTBQuestsInventoryListener.detect(player, ItemStack.EMPTY);
+						for (EntityPlayerMP player : onlineMembers)
+						{
+							FTBQuestsInventoryListener.detect(player, ItemStack.EMPTY);
+						}
 					}
 				}
 			}
