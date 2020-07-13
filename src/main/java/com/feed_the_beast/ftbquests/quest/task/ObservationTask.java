@@ -5,10 +5,13 @@ import com.feed_the_beast.ftblib.lib.config.ConfigTimer;
 import com.feed_the_beast.ftblib.lib.io.DataIn;
 import com.feed_the_beast.ftblib.lib.io.DataOut;
 import com.feed_the_beast.ftblib.lib.math.Ticks;
+import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestData;
 import com.feed_the_beast.ftbquests.util.RayMatcher;
+import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -93,6 +96,12 @@ public class ObservationTask extends Task
 	@SideOnly(Side.CLIENT)
 	public void onButtonClicked(boolean canClick)
 	{
+		if (ClientQuestFile.INSTANCE.canEdit())
+		{
+			Minecraft mc = Minecraft.getMinecraft();
+			RayMatcher.Data data = RayMatcher.Data.get(mc.world, mc.objectMouseOver);
+			mc.player.sendMessage(new TextComponentString(data.toString()));
+		}
 	}
 
 	@Override
