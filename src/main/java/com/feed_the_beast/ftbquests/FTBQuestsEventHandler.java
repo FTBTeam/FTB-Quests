@@ -353,7 +353,7 @@ public class FTBQuestsEventHandler
 	{
 		if (event.player instanceof EntityPlayerMP && !event.crafting.isEmpty())
 		{
-			FTBQuestsInventoryListener.detect((EntityPlayerMP) event.player, event.crafting);
+			FTBQuestsInventoryListener.detect((EntityPlayerMP) event.player, event.crafting, 0);
 		}
 	}
 
@@ -362,7 +362,7 @@ public class FTBQuestsEventHandler
 	{
 		if (event.player instanceof EntityPlayerMP && !event.smelting.isEmpty())
 		{
-			FTBQuestsInventoryListener.detect((EntityPlayerMP) event.player, event.smelting);
+			FTBQuestsInventoryListener.detect((EntityPlayerMP) event.player, event.smelting, 0);
 		}
 	}
 

@@ -93,7 +93,7 @@ public class TaskData<T extends Task> implements ICapabilityProvider, IItemHandl
 					{
 						for (EntityPlayerMP player : onlineMembers)
 						{
-							FTBQuestsInventoryListener.detect(player, ItemStack.EMPTY);
+							FTBQuestsInventoryListener.detect(player, ItemStack.EMPTY, task.id);
 						}
 					}
 				}

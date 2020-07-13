@@ -24,7 +24,7 @@ public class FTBQuestsInventoryListener implements IContainerListener
 		player = p;
 	}
 
-	public static void detect(EntityPlayerMP player, ItemStack item)
+	public static void detect(EntityPlayerMP player, ItemStack item, int sourceTask)
 	{
 		if (ServerQuestFile.INSTANCE == null)
 		{
@@ -38,8 +38,6 @@ public class FTBQuestsInventoryListener implements IContainerListener
 			return;
 		}
 
-		boolean redo = false;
-
 		for (Chapter chapter : ServerQuestFile.INSTANCE.chapters)
 		{
 			for (Quest quest : chapter.quests)
@@ -48,7 +46,7 @@ public class FTBQuestsInventoryListener implements IContainerListener
 				{
 					for (Task task : quest.tasks)
 					{
-						if (task.submitItemsOnInventoryChange())
+						if (task.id != sourceTask && task.submitItemsOnInventoryChange())
 						{
 							data.getTaskData(task).submitTask(player, item);
 						}
@@ -74,7 +72,7 @@ public class FTBQuestsInventoryListener implements IContainerListener
 	@Override
 	public void sendAllContents(Container container, NonNullList<ItemStack> itemsList)
 	{
-		detect(player, ItemStack.EMPTY);
+		detect(player, ItemStack.EMPTY, 0);
 	}
 
 	@Override
@@ -82,7 +80,7 @@ public class FTBQuestsInventoryListener implements IContainerListener
 	{
 		if (!stack.isEmpty() && container.getSlot(index).inventory == player.inventory)
 		{
-			detect(player, ItemStack.EMPTY);
+			detect(player, ItemStack.EMPTY, 0);
 		}
 	}
 
