@@ -67,6 +67,7 @@ public final class Quest extends QuestObject implements Movable
 	public double size;
 	public boolean optional;
 	public int minWidth;
+	public boolean orTasks;
 
 	private String cachedDescription = null;
 	private String[] cachedText = null;
@@ -217,6 +218,11 @@ public final class Quest extends QuestObject implements Movable
 		{
 			nbt.setInteger("min_width", minWidth);
 		}
+
+		if (orTasks)
+		{
+			nbt.setBoolean("or_tasks", true);
+		}
 	}
 
 	@Override
@@ -307,6 +313,7 @@ public final class Quest extends QuestObject implements Movable
 		size = nbt.hasKey("size") ? nbt.getDouble("size") : 1D;
 		optional = nbt.getBoolean("optional");
 		minWidth = nbt.getInteger("min_width");
+		orTasks = nbt.getBoolean("or_tasks");
 	}
 
 	@Override
@@ -325,6 +332,7 @@ public final class Quest extends QuestObject implements Movable
 		flags = Bits.setFlag(flags, 128, hideTextUntilComplete);
 		flags = Bits.setFlag(flags, 256, optional);
 		flags = Bits.setFlag(flags, 512, minWidth > 0);
+		flags = Bits.setFlag(flags, 1024, orTasks);
 		data.writeVarInt(flags);
 
 		if (!subtitle.isEmpty())
@@ -419,6 +427,7 @@ public final class Quest extends QuestObject implements Movable
 
 		size = data.readDouble();
 		minWidth = Bits.getFlag(flags, 512) ? data.readVarInt() : 0;
+		orTasks = Bits.getFlag(flags, 1024);
 	}
 
 	@Override
@@ -432,6 +441,24 @@ public final class Quest extends QuestObject implements Movable
 		if (tasks.isEmpty())
 		{
 			return areDependenciesComplete(data) ? 100 : 0;
+		}
+
+		if (orTasks)
+		{
+			if (!areDependenciesComplete(data))
+			{
+				return 0;
+			}
+
+			for (Task task : tasks)
+			{
+				if (task.getRelativeProgress(data) >= 100)
+				{
+					return 100;
+				}
+			}
+
+			return 0;
 		}
 
 		int progress = 0;
@@ -670,6 +697,7 @@ public final class Quest extends QuestObject implements Movable
 		config.addDouble("y", () -> y, v -> y = v, 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
 		config.addBool("optional", () -> optional, v -> optional = v, false);
 		config.addInt("min_width", () -> minWidth, v -> minWidth = v, 0, 0, 3000);
+		config.addBool("or_tasks", () -> orTasks, v -> orTasks = v, false);
 
 		Predicate<QuestObjectBase> depTypes = object -> object != chapter.file && object != chapter && object instanceof QuestObject;// && !(object instanceof Task);
 

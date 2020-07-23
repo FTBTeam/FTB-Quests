@@ -167,6 +167,7 @@ ftbquests.quest.min_required_dependencies.tooltip=If you set this to anything mo
 ftbquests.quest.hide_text_until_complete=Hide Text Until Quest is Completed
 ftbquests.quest.disable_jei=Disable JEI Recipe
 ftbquests.quest.min_width=Min Opened Quest Window Width
+ftbquests.quest.or_tasks=OR Task Logic
 
 ftbquests.gui.edit_file=Edit File
 ftbquests.gui.save_as_file=Save as File
