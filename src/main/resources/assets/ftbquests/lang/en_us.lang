@@ -254,6 +254,7 @@ ftbquests.task.ftbquests.xp.value=XP
 ftbquests.task.ftbquests.xp.points=Points
 ftbquests.task.ftbquests.xp.points.tooltip=Use XP points to complete instead of levels. Use a calculator to find out what the value should be
 ftbquests.task.ftbquests.dimension=Visit Dimension
+ftbquests.task.ftbquests.biome=Visit Biome
 
 ftbquests.task.ftbquests.stat=Stat
 ftbquests.task.ftbquests.stat.stat=Stat Name
