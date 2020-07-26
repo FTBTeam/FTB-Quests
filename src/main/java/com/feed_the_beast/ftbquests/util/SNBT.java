@@ -26,6 +26,7 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -114,7 +115,7 @@ public class SNBT
 
 		StringBuilder s = new StringBuilder();
 
-		try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8")))
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8)))
 		{
 			String line;
 
@@ -222,7 +223,7 @@ public class SNBT
 			}
 		}
 
-		try (PrintWriter writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(file),"UTF-8")))
+		try (PrintWriter writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(file),StandardCharsets.UTF_8)))
 		{
 			SNBTBuilder builder = new SNBTBuilder();
 			append(builder, out);
