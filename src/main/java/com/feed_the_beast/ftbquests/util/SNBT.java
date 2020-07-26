@@ -22,8 +22,10 @@ import javax.annotation.Nullable;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -112,7 +114,7 @@ public class SNBT
 
 		StringBuilder s = new StringBuilder();
 
-		try (BufferedReader reader = new BufferedReader(new FileReader(file)))
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8")))
 		{
 			String line;
 
@@ -220,7 +222,7 @@ public class SNBT
 			}
 		}
 
-		try (PrintWriter writer = new PrintWriter(new BufferedWriter(new FileWriter(file))))
+		try (PrintWriter writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(file),"UTF-8")))
 		{
 			SNBTBuilder builder = new SNBTBuilder();
 			append(builder, out);
