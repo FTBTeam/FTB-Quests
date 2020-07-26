@@ -223,7 +223,7 @@ public class SNBT
 			}
 		}
 
-		try (PrintWriter writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(file),StandardCharsets.UTF_8)))
+		try (PrintWriter writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8)))
 		{
 			SNBTBuilder builder = new SNBTBuilder();
 			append(builder, out);
