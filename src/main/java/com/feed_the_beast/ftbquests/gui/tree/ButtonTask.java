@@ -98,12 +98,7 @@ public class ButtonTask extends Button
 									((OreDictionaryFilter) ((ItemFilter.ItemFilterData) filter).filter).setValue(oreNames.get(0));
 
 									i.items.clear();
-									i.items.add(oreFilter);
-
-									if (i.title.isEmpty())
-									{
-										i.title = "Any " + oreNames.get(0);
-									}
+									i.items.add(oreFilter.setStackDisplayName("Any " + oreNames.get(0)));
 
 									new MessageEditObject(i).sendToServer();
 								}
@@ -125,12 +120,7 @@ public class ButtonTask extends Button
 														((OreDictionaryFilter) ((ItemFilter.ItemFilterData) filter).filter).setValue(s);
 
 														i.items.clear();
-														i.items.add(oreFilter);
-
-														if (i.title.isEmpty())
-														{
-															i.title = "Any " + s;
-														}
+														i.items.add(oreFilter.setStackDisplayName("Any " + s));
 
 														new MessageEditObject(i).sendToServer();
 													}
