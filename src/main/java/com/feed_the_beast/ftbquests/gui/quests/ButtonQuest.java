@@ -20,10 +20,14 @@ import com.feed_the_beast.mods.ftbguilibrary.widget.GuiIcons;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Widget;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.text.IFormattableTextComponent;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.ITextProperties;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import org.lwjgl.opengl.GL11;
@@ -117,7 +121,7 @@ public class ButtonQuest extends Button
 			{
 				if (!treeGui.selectedObjects.contains(quest))
 				{
-					contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.add_dependencies"), ThemeProperties.ADD_ICON.get(), () -> {
+					contextMenu.add(new ContextMenuItem(new TranslationTextComponent("ftbquests.gui.add_dependencies"), ThemeProperties.ADD_ICON.get(), () -> {
 						for (Movable q : treeGui.selectedObjects)
 						{
 							if (q instanceof Quest)
@@ -127,7 +131,7 @@ public class ButtonQuest extends Button
 						}
 					}));
 
-					contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.remove_dependencies"), ThemeProperties.DELETE_ICON.get(), () -> {
+					contextMenu.add(new ContextMenuItem(new TranslationTextComponent("ftbquests.gui.remove_dependencies"), ThemeProperties.DELETE_ICON.get(), () -> {
 						for (Movable q : treeGui.selectedObjects)
 						{
 							if (q instanceof Quest)
@@ -137,7 +141,7 @@ public class ButtonQuest extends Button
 						}
 					}));
 
-					contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.add_dependencies_self"), ThemeProperties.ADD_ICON.get(), () -> {
+					contextMenu.add(new ContextMenuItem(new TranslationTextComponent("ftbquests.gui.add_dependencies_self"), ThemeProperties.ADD_ICON.get(), () -> {
 						for (Movable q : treeGui.selectedObjects)
 						{
 							if (q instanceof Quest)
@@ -147,7 +151,7 @@ public class ButtonQuest extends Button
 						}
 					}));
 
-					contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.remove_dependencies_self"), ThemeProperties.DELETE_ICON.get(), () -> {
+					contextMenu.add(new ContextMenuItem(new TranslationTextComponent("ftbquests.gui.remove_dependencies_self"), ThemeProperties.DELETE_ICON.get(), () -> {
 						for (Movable q : treeGui.selectedObjects)
 						{
 							if (q instanceof Quest)
@@ -159,7 +163,7 @@ public class ButtonQuest extends Button
 				}
 				else
 				{
-					contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.add_reward_all"), ThemeProperties.ADD_ICON.get(quest), () -> {
+					contextMenu.add(new ContextMenuItem(new TranslationTextComponent("ftbquests.gui.add_reward_all"), ThemeProperties.ADD_ICON.get(quest), () -> {
 						List<ContextMenuItem> contextMenu2 = new ArrayList<>();
 
 						for (RewardType type : RewardType.getRegistry())
@@ -187,7 +191,7 @@ public class ButtonQuest extends Button
 						getGui().openContextMenu(contextMenu2);
 					}));
 
-					contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), ThemeProperties.DELETE_ICON.get(quest), () -> {
+					contextMenu.add(new ContextMenuItem(new TranslationTextComponent("selectServer.delete"), ThemeProperties.DELETE_ICON.get(quest), () -> {
 						treeGui.selectedObjects.forEach(q -> {
 							if (q instanceof Quest)
 							{
@@ -200,26 +204,26 @@ public class ButtonQuest extends Button
 							}
 						});
 						treeGui.selectedObjects.clear();
-					}).setYesNo(new TranslationTextComponent("delete_item", I18n.format("ftbquests.quests") + " [" + treeGui.selectedObjects.size() + "]")));
+					}).setYesNo(new TranslationTextComponent("delete_item", new TranslationTextComponent("ftbquests.quests") + " [" + treeGui.selectedObjects.size() + "]")));
 				}
 
 				contextMenu.add(ContextMenuItem.SEPARATOR);
-				contextMenu.add(new ContextMenuItem(TextFormatting.GRAY + "Ctrl+A to select all quests", GuiIcons.INFO, null));
-				contextMenu.add(new ContextMenuItem(TextFormatting.GRAY + "Ctrl+D to deselect all quests", GuiIcons.INFO, null));
-				contextMenu.add(new ContextMenuItem(TextFormatting.GRAY + "Ctrl+Arrow Key to move selected quests", GuiIcons.INFO, null));
+				contextMenu.add(new ContextMenuItem(new StringTextComponent("Ctrl+A to select all quests").mergeStyle(TextFormatting.GRAY), GuiIcons.INFO, null));
+				contextMenu.add(new ContextMenuItem(new StringTextComponent("Ctrl+D to deselect all quests").mergeStyle(TextFormatting.GRAY), GuiIcons.INFO, null));
+				contextMenu.add(new ContextMenuItem(new StringTextComponent("Ctrl+Arrow Key to move selected quests").mergeStyle(TextFormatting.GRAY), GuiIcons.INFO, null));
 			}
 			else
 			{
-				contextMenu.add(new ContextMenuItem(I18n.format("gui.move"), ThemeProperties.MOVE_UP_ICON.get(quest), () -> {
+				contextMenu.add(new ContextMenuItem(new TranslationTextComponent("gui.move"), ThemeProperties.MOVE_UP_ICON.get(quest), () -> {
 					treeGui.movingObjects = true;
 					treeGui.selectedObjects.clear();
 					treeGui.toggleSelected(quest);
 				})
 				{
 					@Override
-					public void addMouseOverText(List<String> list)
+					public void addMouseOverText(List<ITextProperties> list)
 					{
-						list.add(TextFormatting.DARK_GRAY + I18n.format("ftbquests.gui.move_tooltip"));
+						list.add(new TranslationTextComponent("ftbquests.gui.move_tooltip").mergeStyle(TextFormatting.DARK_GRAY));
 					}
 				});
 
@@ -311,9 +315,9 @@ public class ButtonQuest extends Button
 	}
 
 	@Override
-	public void addMouseOverText(List<String> list)
+	public void addMouseOverText(List<ITextProperties> list)
 	{
-		String title = getTitle();
+		ITextComponent title = getTitle();
 
 		if (treeGui.file.self != null)
 		{
@@ -321,22 +325,22 @@ public class ButtonQuest extends Button
 
 			if (p > 0 && p < 100)
 			{
-				title += " " + TextFormatting.DARK_GRAY + p + "%";
+				title = title.deepCopy().append(new StringTextComponent(" " + p + "%").mergeStyle(TextFormatting.DARK_GRAY));
 			}
 		}
 
 		list.add(title);
 
-		String description = quest.getSubtitle();
+		IFormattableTextComponent description = quest.getSubtitle();
 
-		if (!description.isEmpty())
+		if (description != StringTextComponent.EMPTY)
 		{
-			list.add(TextFormatting.GRAY + description);
+			list.add(description.mergeStyle(TextFormatting.GRAY));
 		}
 	}
 
 	@Override
-	public void draw(Theme theme, int x, int y, int w, int h)
+	public void draw(MatrixStack matrixStack, Theme theme, int x, int y, int w, int h)
 	{
 		Color4I outlineColor = Color4I.WHITE.withAlpha(150);
 		Icon qicon = Icon.EMPTY;
@@ -378,12 +382,12 @@ public class ButtonQuest extends Button
 
 		if (!icon.isEmpty())
 		{
-			double s = w * 2D / 3D;
-			RenderSystem.pushMatrix();
-			RenderSystem.translated(x + (w - s) / 2D, y + (h - s) / 2D, 0F);
-			RenderSystem.scaled(s, s, 1D);
+			float s = w * 2F / 3F;
+			matrixStack.push();
+			matrixStack.translate(x + (w - s) / 2D, y + (h - s) / 2D, 0F);
+			matrixStack.scale(s, s, 1F);
 			icon.draw(0, 0, 1, 1);
-			RenderSystem.popMatrix();
+			matrixStack.pop();
 		}
 
 		RenderSystem.enableAlphaTest();
@@ -394,38 +398,38 @@ public class ButtonQuest extends Button
 
 		if (quest == treeGui.viewQuestPanel.quest || treeGui.selectedObjects.contains(quest))
 		{
-			RenderSystem.pushMatrix();
-			RenderSystem.translatef(0, 0, 500);
+			matrixStack.push();
+			matrixStack.translate(0, 0, 500);
 			Color4I col = Color4I.WHITE.withAlpha((int) (190D + Math.sin(System.currentTimeMillis() * 0.003D) * 50D));
 			shape.outline.withColor(col).draw(x, y, w, h);
 			shape.background.withColor(col).draw(x, y, w, h);
-			RenderSystem.popMatrix();
+			matrixStack.pop();
 		}
 
 		if (cantStart)
 		{
-			RenderSystem.pushMatrix();
-			RenderSystem.translatef(0, 0, 500);
+			matrixStack.push();
+			matrixStack.translate(0, 0, 500);
 			shape.shape.withColor(Color4I.BLACK.withAlpha(100)).draw(x, y, w, h);
-			RenderSystem.popMatrix();
+			matrixStack.pop();
 		}
 
 		if (isMouseOver())
 		{
-			RenderSystem.pushMatrix();
-			RenderSystem.translatef(0, 0, 500);
+			matrixStack.push();
+			matrixStack.translate(0, 0, 500);
 			shape.shape.withColor(Color4I.WHITE.withAlpha(100)).draw(x, y, w, h);
-			RenderSystem.popMatrix();
+			matrixStack.pop();
 		}
 
 		if (!qicon.isEmpty())
 		{
-			double s = w / 2D;//(int) (treeGui.getZoom() / 2 * quest.size);
-			RenderSystem.pushMatrix();
-			RenderSystem.translated(x + w - s, y, 500);
-			RenderSystem.scaled(s, s, 1D);
+			float s = w / 2F;//(int) (treeGui.getZoom() / 2 * quest.size);
+			matrixStack.push();
+			matrixStack.translate(x + w - s, y, 500);
+			matrixStack.scale(s, s, 1F);
 			qicon.draw(0, 0, 1, 1);
-			RenderSystem.popMatrix();
+			matrixStack.pop();
 		}
 	}
 }

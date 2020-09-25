@@ -24,12 +24,12 @@ import com.feed_the_beast.mods.ftbguilibrary.widget.Widget;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.Matrix4f;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.Vector3f;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.vector.Matrix4f;
+import net.minecraft.util.math.vector.Vector3f;
+import net.minecraft.util.text.TranslationTextComponent;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
@@ -199,7 +199,7 @@ public class PanelQuests extends Panel
 	}
 
 	@Override
-	public void drawOffsetBackground(Theme theme, int x, int y, int w, int h)
+	public void drawOffsetBackground(MatrixStack matrixStack, Theme theme, int x, int y, int w, int h)
 	{
 		if (treeGui.selectedChapter == null)
 		{
@@ -220,8 +220,6 @@ public class PanelQuests extends Panel
 		{
 			DEFAULT_DEPENDENCY_LINE_TEXTURE.bindTexture();
 		}
-
-		MatrixStack matrixStack = new MatrixStack();
 
 		Quest selectedQuest = treeGui.getViewedQuest();
 		RenderSystem.shadeModel(GL11.GL_SMOOTH);
@@ -284,7 +282,7 @@ public class PanelQuests extends Panel
 				matrixStack.push();
 				matrixStack.translate(sx, sy, 0);
 				matrixStack.rotate(Vector3f.ZP.rotation((float) Math.atan2(ey - sy, ex - sx)));
-				Matrix4f m = matrixStack.getLast().getPositionMatrix();
+				Matrix4f m = matrixStack.getLast().getMatrix();
 
 				buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR_TEX);
 				buffer.pos(m, 0, -s, 0).color(r, g, b, a).tex(len / s / 2F + mu, 0).endVertex();
@@ -345,7 +343,7 @@ public class PanelQuests extends Panel
 				matrixStack.push();
 				matrixStack.translate(sx, sy, 0);
 				matrixStack.rotate(Vector3f.ZP.rotation((float) Math.atan2(ey - sy, ex - sx)));
-				Matrix4f m = matrixStack.getLast().getPositionMatrix();
+				Matrix4f m = matrixStack.getLast().getMatrix();
 
 				buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR_TEX);
 				buffer.pos(m, 0, -s, 0).color(r, g, b, a).tex(len / s / 2F + ms, 0).endVertex();
@@ -363,9 +361,9 @@ public class PanelQuests extends Panel
 	}
 
 	@Override
-	public void draw(Theme theme, int x, int y, int w, int h)
+	public void draw(MatrixStack matrixStack, Theme theme, int x, int y, int w, int h)
 	{
-		super.draw(theme, x, y, w, h);
+		super.draw(matrixStack, theme, x, y, w, h);
 
 		if (treeGui.selectedChapter != null && isMouseOver())
 		{
@@ -395,16 +393,13 @@ public class PanelQuests extends Panel
 
 			if (treeGui.file.canEdit())
 			{
-				theme.pushFontUnicode(true);
-
-				RenderSystem.pushMatrix();
-				RenderSystem.translatef(0F, 0F, 600F);
-				theme.drawString("X:" + (questX < 0 ? "" : " ") + StringUtils.DOUBLE_FORMATTER_00.format(questX), x + 3, y + h - 18, Theme.SHADOW);
-				theme.drawString("Y:" + (questY < 0 ? "" : " ") + StringUtils.DOUBLE_FORMATTER_00.format(questY), x + 3, y + h - 10, Theme.SHADOW);
-				theme.drawString("CX:" + (centerQuestX < 0 ? "" : " ") + StringUtils.DOUBLE_FORMATTER_00.format(centerQuestX), x + w - 42, y + h - 18, Theme.SHADOW);
-				theme.drawString("CY:" + (centerQuestY < 0 ? "" : " ") + StringUtils.DOUBLE_FORMATTER_00.format(centerQuestY), x + w - 42, y + h - 10, Theme.SHADOW);
-				RenderSystem.popMatrix();
-				theme.popFontUnicode();
+				matrixStack.push();
+				matrixStack.translate(0, 0, 600);
+				theme.drawString(matrixStack, "X:" + (questX < 0 ? "" : " ") + StringUtils.DOUBLE_FORMATTER_00.format(questX), x + 3, y + h - 18, Theme.SHADOW);
+				theme.drawString(matrixStack, "Y:" + (questY < 0 ? "" : " ") + StringUtils.DOUBLE_FORMATTER_00.format(questY), x + 3, y + h - 10, Theme.SHADOW);
+				theme.drawString(matrixStack, "CX:" + (centerQuestX < 0 ? "" : " ") + StringUtils.DOUBLE_FORMATTER_00.format(centerQuestX), x + w - 42, y + h - 18, Theme.SHADOW);
+				theme.drawString(matrixStack, "CY:" + (centerQuestY < 0 ? "" : " ") + StringUtils.DOUBLE_FORMATTER_00.format(centerQuestY), x + w - 42, y + h - 10, Theme.SHADOW);
+				matrixStack.pop();
 
 				if (treeGui.movingObjects && !treeGui.selectedObjects.isEmpty())
 				{
@@ -542,7 +537,7 @@ public class PanelQuests extends Panel
 				}));
 			}
 
-			contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.chapter.image"), GuiIcons.ART, () -> {
+			contextMenu.add(new ContextMenuItem(new TranslationTextComponent("ftbquests.chapter.image"), GuiIcons.ART, () -> {
 				playClickSound();
 				ChapterImage image = new ChapterImage(treeGui.selectedChapter);
 				image.x = qx;

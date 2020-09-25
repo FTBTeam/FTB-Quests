@@ -18,7 +18,6 @@ import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiEditConfig;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.icon.ItemIcon;
 import com.feed_the_beast.mods.ftbguilibrary.utils.Bits;
-import com.feed_the_beast.mods.ftbguilibrary.utils.StringUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
@@ -26,7 +25,8 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.nbt.StringNBT;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.IFormattableTextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.util.Constants;
@@ -77,7 +77,7 @@ public abstract class QuestObjectBase
 	private List<String> tags = new ArrayList<>(0);
 
 	private Icon cachedIcon = null;
-	private String cachedTitle = null;
+	private IFormattableTextComponent cachedTitle = null;
 	private QuestObjectText cachedTextFile = null;
 	private Set<String> cachedTags = null;
 
@@ -361,7 +361,7 @@ public abstract class QuestObjectBase
 	}
 
 	@OnlyIn(Dist.CLIENT)
-	public final String getTitle()
+	public final IFormattableTextComponent getTitle()
 	{
 		if (cachedTitle != null)
 		{
@@ -372,14 +372,14 @@ public abstract class QuestObjectBase
 
 		if (!textTitle.isEmpty())
 		{
-			cachedTitle = textTitle;
+			cachedTitle = new StringTextComponent(textTitle);
 			return cachedTitle;
 		}
 
 		String key = String.format("quests.%08x.title", id);
-		String t = FTBQuestsClient.addI18nAndColors(I18n.format(key));
+		IFormattableTextComponent t = FTBQuestsClient.addI18nAndColors(I18n.format(key));
 
-		if (t.isEmpty() || key.equals(t))
+		if (t == StringTextComponent.EMPTY || key.equals(I18n.format(key)))
 		{
 			if (!title.isEmpty())
 			{
@@ -387,7 +387,7 @@ public abstract class QuestObjectBase
 			}
 			else
 			{
-				cachedTitle = getAltTitle().trim();
+				cachedTitle = new StringTextComponent(getAltTitle().trim());
 			}
 		}
 		else
@@ -400,12 +400,7 @@ public abstract class QuestObjectBase
 
 	public final String getUnformattedTitle()
 	{
-		return StringUtils.unformatted(getTitle());
-	}
-
-	public final String getYellowDisplayName()
-	{
-		return TextFormatting.YELLOW + getTitle();
+		return getTitle().getString();
 	}
 
 	public void deleteSelf()

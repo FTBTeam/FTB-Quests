@@ -17,8 +17,8 @@ import com.feed_the_beast.mods.ftbguilibrary.icon.Color4I;
 import com.feed_the_beast.mods.ftbguilibrary.sidebar.SidebarButtonCreatedEvent;
 import com.feed_the_beast.mods.ftbguilibrary.widget.CustomClickEvent;
 import com.feed_the_beast.mods.ftbguilibrary.widget.GuiHelper;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.toasts.SystemToast;
 import net.minecraft.util.ResourceLocation;
@@ -176,6 +176,7 @@ public class FTBQuestsClientEventHandler
 
 		GlStateManager.enableBlend();
 		Minecraft mc = Minecraft.getInstance();
+		MatrixStack matrixStack = event.getMatrixStack();
 		int cy = event.getWindow().getScaledHeight() / 2;
 
 		if (currentlyObserving != null)
@@ -278,20 +279,20 @@ public class FTBQuestsClientEventHandler
 					mw = Math.max(mw, mc.fontRenderer.getStringWidth(s));
 				}
 
-				double scale = ThemeProperties.PINNED_QUEST_SIZE.get(file);
+				float scale = ThemeProperties.PINNED_QUEST_SIZE.get(file).floatValue();
 
-				RenderSystem.pushMatrix();
-				RenderSystem.translated(event.getWindow().getScaledWidth() - mw * scale - 8D, cy - list.size() * 4.5D * scale, 100D);
-				RenderSystem.scaled(scale, scale, 1D);
+				matrixStack.push();
+				matrixStack.translate(event.getWindow().getScaledWidth() - mw * scale - 8D, cy - list.size() * 4.5D * scale, 100D);
+				matrixStack.scale(scale, scale, 1F);
 
 				Color4I.BLACK.withAlpha(100).draw(0, 0, mw + 8, list.size() * 9 + 8);
 
 				for (int i = 0; i < list.size(); i++)
 				{
-					mc.fontRenderer.drawStringWithShadow(list.get(i), 4, i * 9 + 4, 0xFFFFFFFF);
+					mc.fontRenderer.drawStringWithShadow(matrixStack, list.get(i), 4, i * 9 + 4, 0xFFFFFFFF);
 				}
 
-				RenderSystem.popMatrix();
+				matrixStack.pop();
 			}
 		}
 	}

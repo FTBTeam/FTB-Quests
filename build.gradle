@@ -145,14 +145,13 @@ if (ENV.LOCAL_MAVEN) {
 	}
 }
 
-/*
 if (ENV.CURSEFORGE_KEY) {
 	curseforge {
 		apiKey = ENV.CURSEFORGE_KEY
 		project {
 			id = "${curseforge_id}"
 			releaseType = "release"
-			addGameVersion "1.14.4"
+			addGameVersion "1.16.1"
 			relations {
 				optionalDependency 'aurora'
 				optionalDependency 'jei'
@@ -165,4 +164,3 @@ if (ENV.CURSEFORGE_KEY) {
 		}
 	}
 }
-*/

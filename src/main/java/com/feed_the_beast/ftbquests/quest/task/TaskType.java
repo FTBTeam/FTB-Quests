@@ -8,8 +8,10 @@ import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiEditConfig;
 import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiEditConfigFromString;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.widget.GuiIcons;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.MinecraftForge;
@@ -78,7 +80,7 @@ public final class TaskType extends ForgeRegistryEntry<TaskType>
 	}
 
 	public final Provider provider;
-	private String displayName;
+	private ITextComponent displayName;
 	private Icon icon;
 	private GuiProvider guiProvider;
 
@@ -130,21 +132,21 @@ public final class TaskType extends ForgeRegistryEntry<TaskType>
 		return getRegistryName().getNamespace().equals(FTBQuests.MOD_ID) ? getRegistryName().getPath() : getRegistryName().toString();
 	}
 
-	public TaskType setDisplayName(String name)
+	public TaskType setDisplayName(ITextComponent name)
 	{
 		displayName = name;
 		return this;
 	}
 
-	public String getDisplayName()
+	public ITextComponent getDisplayName()
 	{
-		if (displayName != null)
+		if (displayName == null)
 		{
-			return displayName;
+			ResourceLocation id = getRegistryName();
+			displayName = id == null ? new StringTextComponent("error") : new TranslationTextComponent("ftbquests.task." + id.getNamespace() + '.' + id.getPath());
 		}
 
-		ResourceLocation id = getRegistryName();
-		return id == null ? "error" : I18n.format("ftbquests.task." + id.getNamespace() + '.' + id.getPath());
+		return displayName;
 	}
 
 	public TaskType setIcon(Icon i)

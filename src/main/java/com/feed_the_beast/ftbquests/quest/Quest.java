@@ -25,6 +25,8 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.nbt.StringNBT;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.text.IFormattableTextComponent;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.MinecraftForge;
@@ -57,7 +59,7 @@ public final class Quest extends QuestObject implements Movable
 	public Tristate disableJEI;
 	public double size;
 
-	private String cachedDescription = null;
+	private ITextComponent cachedDescription = null;
 	private String[] cachedText = null;
 
 	public Quest(Chapter c)
@@ -610,7 +612,7 @@ public final class Quest extends QuestObject implements Movable
 	}
 
 	@OnlyIn(Dist.CLIENT)
-	public String getSubtitle()
+	public IFormattableTextComponent getSubtitle()
 	{
 		if (cachedDescription != null)
 		{

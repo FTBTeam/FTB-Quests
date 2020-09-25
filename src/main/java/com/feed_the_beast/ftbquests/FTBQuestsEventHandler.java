@@ -49,6 +49,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.world.GameRules;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.FakePlayer;
+import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
@@ -80,6 +81,7 @@ public class FTBQuestsEventHandler
 	{
 		MinecraftForge.EVENT_BUS.addListener(this::serverAboutToStart);
 		MinecraftForge.EVENT_BUS.addListener(this::serverStarting);
+		MinecraftForge.EVENT_BUS.addListener(this::registerCommands);
 		MinecraftForge.EVENT_BUS.addListener(this::serverStarted);
 		MinecraftForge.EVENT_BUS.addListener(this::serverStopped);
 		MinecraftForge.EVENT_BUS.addListener(this::worldSaved);
@@ -106,7 +108,11 @@ public class FTBQuestsEventHandler
 
 	private void serverStarting(FMLServerStartingEvent event)
 	{
-		FTBQuestsCommands.register(event.getCommandDispatcher());
+	}
+
+	private void registerCommands(RegisterCommandsEvent event)
+	{
+		FTBQuestsCommands.register(event.getDispatcher());
 	}
 
 	private void serverStarted(FMLServerStartedEvent event)
