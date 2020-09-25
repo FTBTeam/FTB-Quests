@@ -6,6 +6,8 @@ import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
+import com.mojang.blaze3d.matrix.MatrixStack;
+import net.minecraft.util.text.ITextComponent;
 
 /**
  * @author LatvianModder
@@ -14,7 +16,7 @@ public abstract class ButtonTab extends Button
 {
 	public final GuiQuests treeGui;
 
-	public ButtonTab(Panel panel, String title, Icon icon)
+	public ButtonTab(Panel panel, ITextComponent title, Icon icon)
 	{
 		super(panel, title, icon);
 		treeGui = (GuiQuests) panel.getGui();
@@ -22,7 +24,7 @@ public abstract class ButtonTab extends Button
 	}
 
 	@Override
-	public void draw(Theme theme, int x, int y, int w, int h)
+	public void draw(MatrixStack matrixStack, Theme theme, int x, int y, int w, int h)
 	{
 		//treeGui.borderColor.draw(x - 1, y + 1, 1, h - 2);
 		//treeGui.backgroundColor.draw(x, y + 1, w, h - 2);

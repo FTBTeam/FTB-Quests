@@ -10,7 +10,7 @@ import com.feed_the_beast.ftbquests.util.NBTUtils;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.world.storage.FolderName;
 import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.loading.FMLPaths;
 
@@ -67,7 +67,7 @@ public class ServerQuestFile extends QuestFile
 
 		FTBQuests.LOGGER.info(String.format("Loaded %d chapters, %d quests, %d tasks and %d rewards. In total, %d objects", c, q, t, r, getAllObjects().size()));
 
-		Path path = server.getWorld(DimensionType.OVERWORLD).getSaveHandler().getPlayerFolder().toPath().resolve("ftbquests");
+		Path path = server.func_240776_a_(FolderName.field_237247_c_).resolve("ftbquests");
 
 		try
 		{
@@ -148,7 +148,7 @@ public class ServerQuestFile extends QuestFile
 			shouldSave = false;
 		}
 
-		Path path = server.getWorld(DimensionType.OVERWORLD).getSaveHandler().getPlayerFolder().toPath().resolve("ftbquests");
+		Path path = server.func_240776_a_(FolderName.field_237247_c_).resolve("ftbquests");
 
 		for (PlayerData data : getAllData())
 		{

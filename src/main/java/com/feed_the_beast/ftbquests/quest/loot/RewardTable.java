@@ -319,7 +319,7 @@ public final class RewardTable extends QuestObjectBase
 	{
 		if (rewards.size() == 1)
 		{
-			return rewards.get(0).reward.getTitle();
+			return rewards.get(0).reward.getTitle().getString();
 		}
 
 		return I18n.format("ftbquests.reward_table");

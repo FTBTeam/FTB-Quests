@@ -36,6 +36,8 @@ import net.minecraft.tileentity.StructureBlockTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.util.text.IFormattableTextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.IWorld;
 import net.minecraftforge.client.settings.KeyConflictContext;
 import net.minecraftforge.client.settings.KeyModifier;
@@ -54,11 +56,11 @@ public class FTBQuestsClient extends FTBQuestsCommon
 	private static final Pattern I18N_PATTERN = Pattern.compile("\\{([a-zA-Z0-9\\._\\-]*?)\\}", Pattern.MULTILINE);
 	public static KeyBinding KEY_QUESTS;
 
-	public static String addI18nAndColors(String text)
+	public static IFormattableTextComponent addI18nAndColors(String text)
 	{
 		if (text.isEmpty())
 		{
-			return text;
+			return (StringTextComponent) StringTextComponent.EMPTY;
 		}
 
 		Matcher i18nMatcher = I18N_PATTERN.matcher(text);
@@ -83,10 +85,10 @@ public class FTBQuestsClient extends FTBQuestsCommon
 
 		if (StringUtils.unformatted(text).isEmpty())
 		{
-			return "";
+			return (StringTextComponent) StringTextComponent.EMPTY;
 		}
 
-		return text;
+		return new StringTextComponent(text);
 	}
 
 	@Override
@@ -159,7 +161,7 @@ public class FTBQuestsClient extends FTBQuestsCommon
 
 		FTBQuestsTasks.DIMENSION.setGuiProvider((gui, quest, callback) -> {
 			DimensionTask task = new DimensionTask(quest);
-			task.dimension = Minecraft.getInstance().world.getDimension().getType();
+			task.dimension = Minecraft.getInstance().world.func_234923_W_().func_240901_a_();
 			callback.accept(task);
 		});
 
@@ -175,7 +177,7 @@ public class FTBQuestsClient extends FTBQuestsCommon
 				{
 					BlockPos pos = ((StructureBlockTileEntity) tileEntity).getPosition();
 					BlockPos size = ((StructureBlockTileEntity) tileEntity).getStructureSize();
-					task.dimension = mc.world.getDimension().getType();
+					task.dimension = mc.world.func_234923_W_().getRegistryName();
 					task.x = pos.getX() + tileEntity.getPos().getX();
 					task.y = pos.getY() + tileEntity.getPos().getY();
 					task.z = pos.getZ() + tileEntity.getPos().getZ();

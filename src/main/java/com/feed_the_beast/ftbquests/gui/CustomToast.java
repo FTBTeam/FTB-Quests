@@ -2,17 +2,18 @@ package com.feed_the_beast.ftbquests.gui;
 
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.misc.SimpleToast;
+import net.minecraft.util.text.ITextComponent;
 
 /**
  * @author LatvianModder
  */
 public class CustomToast extends SimpleToast
 {
-	private String title;
-	private Icon icon;
-	private String description;
+	private final ITextComponent title;
+	private final Icon icon;
+	private final ITextComponent description;
 
-	public CustomToast(String t, Icon i, String d)
+	public CustomToast(ITextComponent t, Icon i, ITextComponent d)
 	{
 		title = t;
 		icon = i;
@@ -20,13 +21,13 @@ public class CustomToast extends SimpleToast
 	}
 
 	@Override
-	public String getTitle()
+	public ITextComponent getTitle()
 	{
 		return title;
 	}
 
 	@Override
-	public String getSubtitle()
+	public ITextComponent getSubtitle()
 	{
 		return description;
 	}
