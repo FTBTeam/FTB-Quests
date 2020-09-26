@@ -22,6 +22,8 @@ import net.minecraftforge.common.util.Constants;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author LatvianModder
@@ -153,6 +155,7 @@ public final class Chapter extends QuestObject
 	public void writeNetData(PacketBuffer buffer)
 	{
 		super.writeNetData(buffer);
+		buffer.writeString(filename, Short.MAX_VALUE);
 		NetUtils.writeStrings(buffer, subtitle);
 		buffer.writeBoolean(alwaysInvisible);
 		buffer.writeInt(group == null || group.invalid ? 0 : group.id);
@@ -164,6 +167,7 @@ public final class Chapter extends QuestObject
 	public void readNetData(PacketBuffer buffer)
 	{
 		super.readNetData(buffer);
+		filename = buffer.readString(Short.MAX_VALUE);
 		NetUtils.readStrings(buffer, subtitle);
 		alwaysInvisible = buffer.readBoolean();
 		group = file.getChapter(buffer.readInt());
@@ -298,6 +302,27 @@ public final class Chapter extends QuestObject
 	@Override
 	public void onCreated()
 	{
+		if (filename.isEmpty())
+		{
+			String s = title.replace(' ', '_').replaceAll("\\W", "").toLowerCase().trim();
+
+			if (s.isEmpty())
+			{
+				s = toString();
+			}
+
+			filename = s;
+
+			Set<String> existingNames = file.chapters.stream().map(ch -> ch.filename).collect(Collectors.toSet());
+			int i = 2;
+
+			while (existingNames.contains(filename))
+			{
+				filename = s + "_" + i;
+				i++;
+			}
+		}
+
 		file.chapters.add(this);
 
 		if (!quests.isEmpty())

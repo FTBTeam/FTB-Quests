@@ -30,20 +30,10 @@ public class ButtonAddChapter extends ButtonTab
 		GuiEditConfigFromString.open(c, "", "", accepted -> {
 			treeGui.openGui();
 
-			if (accepted)
+			if (accepted && !c.value.trim().isEmpty())
 			{
 				Chapter chapter = new Chapter(treeGui.file);
-				chapter.title = c.value;
-				chapter.filename = chapter.title.replaceAll("\\W", "").toLowerCase();
-
-				for (Chapter ch : treeGui.file.chapters)
-				{
-					if (ch.filename.equals(chapter.filename))
-					{
-						return;
-					}
-				}
-
+				chapter.title = c.value.trim();
 				new MessageCreateObject(chapter, null).sendToServer();
 			}
 
