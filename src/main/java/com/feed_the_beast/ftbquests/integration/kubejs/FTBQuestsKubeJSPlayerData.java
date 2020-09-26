@@ -7,14 +7,11 @@ import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.task.Task;
-import dev.latvian.kubejs.documentation.DisplayName;
-import dev.latvian.kubejs.documentation.P;
 import dev.latvian.kubejs.player.PlayerDataJS;
 
 /**
  * @author LatvianModder
  */
-@DisplayName("FTB Quests Player Data")
 public class FTBQuestsKubeJSPlayerData
 {
 	private final PlayerDataJS playerData;
@@ -34,7 +31,7 @@ public class FTBQuestsKubeJSPlayerData
 		return getFile().getData(playerData.getId());
 	}
 
-	public void addProgress(@P("id") Object id, @P("progress") long progress)
+	public void addProgress(Object id, long progress)
 	{
 		PlayerData data = getData();
 		Task task = data.file.getTask(data.file.getID(id));
@@ -45,7 +42,7 @@ public class FTBQuestsKubeJSPlayerData
 		}
 	}
 
-	public void complete(@P("id") Object id)
+	public void complete(Object id)
 	{
 		PlayerData data = getData();
 		QuestObject object = data.file.get(data.file.getID(id));
@@ -56,7 +53,7 @@ public class FTBQuestsKubeJSPlayerData
 		}
 	}
 
-	public void reset(@P("id") Object id)
+	public void reset(Object id)
 	{
 		PlayerData data = getData();
 		QuestObject object = data.file.get(data.file.getID(id));
@@ -67,28 +64,28 @@ public class FTBQuestsKubeJSPlayerData
 		}
 	}
 
-	public boolean isCompleted(@P("id") Object id)
+	public boolean isCompleted(Object id)
 	{
 		PlayerData data = getData();
 		QuestObject object = data.file.get(data.file.getID(id));
 		return object != null && data.isComplete(object);
 	}
 
-	public boolean isStarted(@P("id") Object id)
+	public boolean isStarted(Object id)
 	{
 		PlayerData data = getData();
 		QuestObject object = data.file.get(data.file.getID(id));
 		return object != null && data.isStarted(object);
 	}
 
-	public boolean canStartQuest(@P("id") Object id)
+	public boolean canStartQuest(Object id)
 	{
 		PlayerData data = getData();
 		Quest quest = data.file.getQuest(data.file.getID(id));
 		return quest != null && data.canStartTasks(quest);
 	}
 
-	public int getProgress(@P("id") Object id)
+	public int getProgress(Object id)
 	{
 		PlayerData data = getData();
 		QuestObject object = data.file.get(data.file.getID(id));

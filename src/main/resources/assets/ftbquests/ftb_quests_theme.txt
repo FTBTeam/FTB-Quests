@@ -26,7 +26,7 @@ add_icon:             builtin
 alert_icon:           ftbquests:textures/gui/alert.png
 support_icon:         ftbguilibrary:textures/icons/support.png
 wiki_icon:            ftbquests:textures/gui/info.png
-wiki_url:             https://github.com/FTBTeam/FTB-Quests/wiki
+wiki_url:             https://faq.ftb.world/books/ftb-quests-116
 pin_icon_on:          ftbquests:textures/gui/pin.png; color=#F8BD1C
 pin_icon_off:         ftbquests:textures/gui/pin.png; color=#DBDBDB
 settings_icon:        ftbquests:textures/gui/settings.png

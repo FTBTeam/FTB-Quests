@@ -29,7 +29,10 @@ public class PanelOtherButtonsTop extends PanelOtherButtons
 			add(new ButtonEmergencyItems(this));
 		}
 
-		add(new ButtonWiki(this));
+		if (treeGui.file.canEdit())
+		{
+			add(new ButtonWiki(this));
+		}
 	}
 
 	@Override

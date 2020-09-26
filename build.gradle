@@ -95,7 +95,7 @@ dependencies {
 		transitive = false
 		changing = true
 	}))
-	compile(fg.deobf(project.dependencies.create("dev.latvian.mods:kubejs-forge-1.14.4:${kubejs_version}") {
+	compile(fg.deobf(project.dependencies.create("dev.latvian.mods:kubejs:${kubejs_version}") {
 		transitive = false
 		changing = true
 	}))
@@ -145,18 +145,17 @@ if (ENV.LOCAL_MAVEN) {
 	}
 }
 
-/*
 if (ENV.CURSEFORGE_KEY) {
 	curseforge {
 		apiKey = ENV.CURSEFORGE_KEY
 		project {
 			id = "${curseforge_id}"
-			releaseType = "release"
-			addGameVersion "1.14.4"
+			releaseType = "alpha"
+			addGameVersion "1.15.2"
 			relations {
-				optionalDependency 'aurora'
+				requiredDependency 'ftb-gui-library'
+				requiredDependency 'item-filters'
 				optionalDependency 'jei'
-				optionalDependency 'packmode'
 				optionalDependency 'game-stages'
 			}
 			changelog = getGitChangelog
@@ -165,4 +164,3 @@ if (ENV.CURSEFORGE_KEY) {
 		}
 	}
 }
-*/

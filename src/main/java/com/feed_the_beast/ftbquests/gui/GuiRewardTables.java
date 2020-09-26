@@ -172,6 +172,8 @@ public class GuiRewardTables extends GuiButtonListBase
 						table.title = c.value;
 						new MessageCreateObject(table, null).sendToServer();
 					}
+
+					openGui();
 				});
 			}
 		};
