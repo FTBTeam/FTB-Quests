@@ -141,7 +141,7 @@ public class ItemReward extends Reward
 	@Override
 	public String getAltTitle()
 	{
-		return (item.getCount() > 1 ? (randomBonus > 0 ? (item.getCount() + "-" + (item.getCount() + randomBonus) + "x ") : (item.getCount() + "x ")) : "") + item.getDisplayName();
+		return (item.getCount() > 1 ? (randomBonus > 0 ? (item.getCount() + "-" + (item.getCount() + randomBonus) + "x ") : (item.getCount() + "x ")) : "") + item.getDisplayName().getFormattedText();
 	}
 
 	@Override
