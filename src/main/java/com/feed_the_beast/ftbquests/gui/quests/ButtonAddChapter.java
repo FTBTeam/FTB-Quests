@@ -7,7 +7,7 @@ import com.feed_the_beast.mods.ftbguilibrary.config.ConfigString;
 import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiEditConfigFromString;
 import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
-import net.minecraft.client.resources.I18n;
+import net.minecraft.util.text.TranslationTextComponent;
 
 import java.util.regex.Pattern;
 
@@ -18,7 +18,7 @@ public class ButtonAddChapter extends ButtonTab
 {
 	public ButtonAddChapter(Panel panel)
 	{
-		super(panel, I18n.format("gui.add"), ThemeProperties.ADD_ICON.get());
+		super(panel, new TranslationTextComponent("gui.add"), ThemeProperties.ADD_ICON.get());
 	}
 
 	@Override
@@ -30,20 +30,10 @@ public class ButtonAddChapter extends ButtonTab
 		GuiEditConfigFromString.open(c, "", "", accepted -> {
 			treeGui.openGui();
 
-			if (accepted)
+			if (accepted && !c.value.isEmpty())
 			{
 				Chapter chapter = new Chapter(treeGui.file);
 				chapter.title = c.value;
-				chapter.filename = chapter.title.replaceAll("\\W", "").toLowerCase();
-
-				for (Chapter ch : treeGui.file.chapters)
-				{
-					if (ch.filename.equals(chapter.filename))
-					{
-						return;
-					}
-				}
-
 				new MessageCreateObject(chapter, null).sendToServer();
 			}
 

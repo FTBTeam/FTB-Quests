@@ -25,6 +25,7 @@ import com.feed_the_beast.mods.ftbguilibrary.icon.Color4I;
 import com.feed_the_beast.mods.ftbguilibrary.utils.Key;
 import com.feed_the_beast.mods.ftbguilibrary.utils.MathUtils;
 import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
+import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
 import com.feed_the_beast.mods.ftbguilibrary.widget.ContextMenuItem;
 import com.feed_the_beast.mods.ftbguilibrary.widget.GuiBase;
 import com.feed_the_beast.mods.ftbguilibrary.widget.GuiHelper;
@@ -38,7 +39,6 @@ import net.minecraft.client.gui.toasts.SystemToast;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.ITextProperties;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -213,7 +213,7 @@ public class GuiQuests extends GuiBase
 					list.add(new ContextMenuItem(name, GuiIcons.SETTINGS, null)
 					{
 						@Override
-						public void addMouseOverText(List<ITextProperties> list)
+						public void addMouseOverText(TooltipList list)
 						{
 							list.add(c.getStringForGUI(c.value));
 						}
@@ -273,7 +273,7 @@ public class GuiQuests extends GuiBase
 		contextMenu.add(new ContextMenuItem(new TranslationTextComponent("ftbquests.gui.copy_id"), ThemeProperties.WIKI_ICON.get(), () -> setClipboardString(QuestObjectBase.getCodeString(object)))
 		{
 			@Override
-			public void addMouseOverText(List<ITextProperties> list)
+			public void addMouseOverText(TooltipList list)
 			{
 				list.add(new StringTextComponent(QuestObjectBase.getCodeString(object)));
 			}

@@ -3,6 +3,7 @@ package com.feed_the_beast.ftbquests.gui.quests;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
 import com.feed_the_beast.mods.ftbguilibrary.widget.TextField;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
+import com.mojang.blaze3d.matrix.MatrixStack;
 
 /**
  * @author LatvianModder
@@ -17,7 +18,7 @@ public class TextFieldDisabledButton extends TextField
 	}
 
 	@Override
-	public void drawBackground(Theme theme, int x, int y, int w, int h)
+	public void drawBackground(MatrixStack matrixStack, Theme theme, int x, int y, int w, int h)
 	{
 	}
 }

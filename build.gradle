@@ -95,7 +95,7 @@ dependencies {
 		transitive = false
 		changing = true
 	}))
-	compile(fg.deobf(project.dependencies.create("dev.latvian.mods:kubejs-forge-1.14.4:${kubejs_version}") {
+	compileOnly(fg.deobf(project.dependencies.create("dev.latvian.mods:kubejs:${kubejs_version}") {
 		transitive = false
 		changing = true
 	}))

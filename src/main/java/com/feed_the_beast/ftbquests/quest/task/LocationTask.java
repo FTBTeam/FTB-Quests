@@ -6,8 +6,10 @@ import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -17,7 +19,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
  */
 public class LocationTask extends Task
 {
-	public ResourceLocation dimension;
+	public RegistryKey<World> dimension;
 	public boolean ignoreDimension;
 	public int x, y, z;
 	public int w, h, d;
@@ -25,7 +27,7 @@ public class LocationTask extends Task
 	public LocationTask(Quest quest)
 	{
 		super(quest);
-		dimension = World.field_234918_g_.getRegistryName();
+		dimension = World.OVERWORLD;
 		ignoreDimension = false;
 		x = 0;
 		y = 0;
@@ -55,7 +57,7 @@ public class LocationTask extends Task
 	public void readData(CompoundNBT nbt)
 	{
 		super.readData(nbt);
-		dimension = new ResourceLocation(nbt.getString("dimension"));
+		dimension = RegistryKey.getOrCreateKey(Registry.WORLD_KEY, new ResourceLocation(nbt.getString("dimension")));
 		ignoreDimension = nbt.getBoolean("ignore_dimension");
 
 		int[] pos = nbt.getIntArray("position");
@@ -81,7 +83,7 @@ public class LocationTask extends Task
 	public void writeNetData(PacketBuffer buffer)
 	{
 		super.writeNetData(buffer);
-		buffer.writeResourceLocation(dimension);
+		buffer.writeResourceLocation(dimension.getLocation());
 		buffer.writeBoolean(ignoreDimension);
 		buffer.writeVarInt(x);
 		buffer.writeVarInt(y);
@@ -95,7 +97,7 @@ public class LocationTask extends Task
 	public void readNetData(PacketBuffer buffer)
 	{
 		super.readNetData(buffer);
-		dimension = buffer.readResourceLocation();
+		dimension = RegistryKey.getOrCreateKey(Registry.WORLD_KEY, buffer.readResourceLocation());
 		ignoreDimension = buffer.readBoolean();
 		x = buffer.readVarInt();
 		y = buffer.readVarInt();
@@ -110,7 +112,7 @@ public class LocationTask extends Task
 	public void getConfig(ConfigGroup config)
 	{
 		super.getConfig(config);
-		config.addString("dim", dimension.toString(), v -> dimension = new ResourceLocation(v), "minecraft:overworld");
+		config.addString("dim", dimension.toString(), v -> dimension = RegistryKey.getOrCreateKey(Registry.WORLD_KEY, new ResourceLocation(v)), "minecraft:overworld");
 		config.addBool("ignore_dim", ignoreDimension, v -> ignoreDimension = v, false);
 		config.addInt("x", x, v -> x = v, 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
 		config.addInt("y", y, v -> y = v, 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
@@ -148,7 +150,7 @@ public class LocationTask extends Task
 		@Override
 		public boolean canSubmit(ServerPlayerEntity player)
 		{
-			if (task.ignoreDimension || player.world.func_234923_W_().getRegistryName().equals(task.dimension))
+			if (task.ignoreDimension || task.dimension == player.world.getDimensionKey())
 			{
 				int y = MathHelper.floor(player.getPosX());
 

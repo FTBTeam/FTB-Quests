@@ -5,6 +5,8 @@ import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
 import com.feed_the_beast.mods.ftbguilibrary.utils.StringUtils;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.text.IFormattableTextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -76,9 +78,9 @@ public abstract class EnergyTask extends Task implements ISingleLongValueTask
 	}
 
 	@Override
-	public String getAltTitle()
+	public IFormattableTextComponent getAltTitle()
 	{
-		return StringUtils.formatDouble(value, true);
+		return new StringTextComponent(StringUtils.formatDouble(value, true));
 	}
 
 	@Override

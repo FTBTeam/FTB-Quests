@@ -11,7 +11,6 @@ import com.feed_the_beast.mods.ftbguilibrary.icon.Color4I;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.misc.CompactGridLayout;
 import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
-import com.feed_the_beast.mods.ftbguilibrary.utils.StringUtils;
 import com.feed_the_beast.mods.ftbguilibrary.widget.BlankPanel;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
 import com.feed_the_beast.mods.ftbguilibrary.widget.ColorWidget;
@@ -24,6 +23,8 @@ import com.feed_the_beast.mods.ftbguilibrary.widget.WidgetVerticalSpace;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.IFormattableTextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 
 /**
@@ -34,7 +35,7 @@ public class PanelViewQuest extends Panel
 	public final GuiQuests gui;
 	public Quest quest = null;
 	public boolean hidePanel = false;
-	private String title = "";
+	private IFormattableTextComponent title = (IFormattableTextComponent) StringTextComponent.EMPTY;
 	private Icon icon = Icon.EMPTY;
 	public Button buttonClose;
 	public Button buttonOnScreen;
@@ -214,9 +215,9 @@ public class PanelViewQuest extends Panel
 
 		panelText.setPosAndSize(3, 16 + h + 12, panelContent.width - 6, 0);
 
-		String desc = quest.getSubtitle();
+		IFormattableTextComponent desc = quest.getSubtitle();
 
-		if (!desc.isEmpty())
+		if (desc != StringTextComponent.EMPTY)
 		{
 			panelText.add(new TextField(panelText).addFlags(Theme.CENTERED).setMaxWidth(panelText.width).setSpacing(9).setText(TextFormatting.ITALIC + TextFormatting.GRAY.toString() + desc));
 		}
@@ -225,17 +226,17 @@ public class PanelViewQuest extends Panel
 
 		if (showText && quest.getDescription().length > 0)
 		{
-			if (!desc.isEmpty())
+			if (desc != StringTextComponent.EMPTY)
 			{
 				panelText.add(new WidgetVerticalSpace(panelText, 7));
 			}
 
-			panelText.add(new TextField(panelText).setMaxWidth(panelText.width).setSpacing(9).setText(StringUtils.addFormatting(String.join("\n", quest.getDescription()))));
+			//FIXME panelText.add(new TextField(panelText).setMaxWidth(panelText.width).setSpacing(9).setText(StringUtils.addFormatting(String.join("\n", quest.getDescription()))));
 		}
 
 		if (showText && !quest.guidePage.isEmpty())
 		{
-			if (!desc.isEmpty())
+			if (desc != StringTextComponent.EMPTY)
 			{
 				panelText.add(new WidgetVerticalSpace(panelText, 7));
 			}

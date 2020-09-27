@@ -44,10 +44,8 @@ public class FTBQuests
 	public FTBQuests()
 	{
 		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
-		//noinspection Convert2MethodRef
-		PROXY = DistExecutor.runForDist(() -> () -> new FTBQuestsClient(), () -> () -> new FTBQuestsCommon());
-		//noinspection Convert2MethodRef
-		NET_PROXY = DistExecutor.runForDist(() -> () -> new FTBQuestsNetClient(), () -> () -> new FTBQuestsNetCommon());
+		PROXY = DistExecutor.safeRunForDist(() -> FTBQuestsClient::new, () -> FTBQuestsCommon::new);
+		NET_PROXY = DistExecutor.safeRunForDist(() -> FTBQuestsNetClient::new, () -> FTBQuestsNetCommon::new);
 		new FTBQuestsEventHandler().init();
 
 		if (ModList.get().isLoaded("kubejs"))

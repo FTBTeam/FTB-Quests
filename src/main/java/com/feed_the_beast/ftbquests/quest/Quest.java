@@ -18,7 +18,6 @@ import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.icon.IconAnimation;
 import com.feed_the_beast.mods.ftbguilibrary.utils.Bits;
 import com.feed_the_beast.mods.ftbguilibrary.utils.ClientUtils;
-import com.feed_the_beast.mods.ftbguilibrary.utils.StringUtils;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
@@ -26,7 +25,8 @@ import net.minecraft.nbt.ListNBT;
 import net.minecraft.nbt.StringNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.MinecraftForge;
@@ -59,8 +59,8 @@ public final class Quest extends QuestObject implements Movable
 	public Tristate disableJEI;
 	public double size;
 
-	private ITextComponent cachedDescription = null;
-	private String[] cachedText = null;
+	private IFormattableTextComponent cachedDescription = null;
+	private IFormattableTextComponent[] cachedText = null;
 
 	public Quest(Chapter c)
 	{
@@ -431,14 +431,14 @@ public final class Quest extends QuestObject implements Movable
 	}
 
 	@Override
-	public String getAltTitle()
+	public IFormattableTextComponent getAltTitle()
 	{
 		if (!tasks.isEmpty())
 		{
 			return tasks.get(0).getTitle();
 		}
 
-		return I18n.format("ftbquests.unnamed");
+		return new TranslationTextComponent("ftbquests.unnamed");
 	}
 
 	@Override
@@ -619,18 +619,18 @@ public final class Quest extends QuestObject implements Movable
 			return cachedDescription;
 		}
 
-		String textDesc = loadText().getString("description");
+		IFormattableTextComponent textDesc = loadText().getComponent("description");
 
-		if (!textDesc.isEmpty())
+		if (textDesc == StringTextComponent.EMPTY)
 		{
 			cachedDescription = textDesc;
 			return cachedDescription;
 		}
 
 		String key = String.format("quests.%08x.description", id);
-		String t = FTBQuestsClient.addI18nAndColors(I18n.format(key));
+		IFormattableTextComponent t = FTBQuestsClient.addI18nAndColors(I18n.format(key));
 
-		if (t.isEmpty() || key.equals(t))
+		if (t == StringTextComponent.EMPTY || key.equals(t.getString()))
 		{
 			cachedDescription = FTBQuestsClient.addI18nAndColors(subtitle);
 		}
@@ -643,14 +643,14 @@ public final class Quest extends QuestObject implements Movable
 	}
 
 	@OnlyIn(Dist.CLIENT)
-	public String[] getDescription()
+	public IFormattableTextComponent[] getDescription()
 	{
 		if (cachedText != null)
 		{
 			return cachedText;
 		}
 
-		cachedText = loadText().getStringArray("text");
+		cachedText = loadText().getComponentArray("text");
 
 		if (cachedText.length > 0)
 		{
@@ -659,10 +659,10 @@ public final class Quest extends QuestObject implements Movable
 
 		if (description.isEmpty())
 		{
-			return StringUtils.EMPTY_ARRAY;
+			return new IFormattableTextComponent[0];
 		}
 
-		cachedText = new String[description.size()];
+		cachedText = new IFormattableTextComponent[description.size()];
 
 		for (int i = 0; i < cachedText.length; i++)
 		{

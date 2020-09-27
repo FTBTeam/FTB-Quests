@@ -161,7 +161,7 @@ public class FTBQuestsClient extends FTBQuestsCommon
 
 		FTBQuestsTasks.DIMENSION.setGuiProvider((gui, quest, callback) -> {
 			DimensionTask task = new DimensionTask(quest);
-			task.dimension = Minecraft.getInstance().world.func_234923_W_().func_240901_a_();
+			task.dimension = Minecraft.getInstance().world.getDimensionKey();
 			callback.accept(task);
 		});
 
@@ -177,7 +177,7 @@ public class FTBQuestsClient extends FTBQuestsCommon
 				{
 					BlockPos pos = ((StructureBlockTileEntity) tileEntity).getPosition();
 					BlockPos size = ((StructureBlockTileEntity) tileEntity).getStructureSize();
-					task.dimension = mc.world.func_234923_W_().getRegistryName();
+					task.dimension = mc.world.getDimensionKey();
 					task.x = pos.getX() + tileEntity.getPos().getX();
 					task.y = pos.getY() + tileEntity.getPos().getY();
 					task.z = pos.getZ() + tileEntity.getPos().getZ();

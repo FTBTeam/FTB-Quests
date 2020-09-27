@@ -5,10 +5,12 @@ import com.feed_the_beast.ftbquests.quest.reward.Reward;
 import com.feed_the_beast.ftbquests.quest.reward.RewardType;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
 import net.darkhax.gamestages.GameStageHelper;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.Util;
+import net.minecraft.util.text.IFormattableTextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
@@ -96,18 +98,18 @@ public class GameStageReward extends Reward
 		{
 			if (remove)
 			{
-				player.sendMessage(new TranslationTextComponent("commands.gamestage.remove.target", stage));
+				player.sendMessage(new TranslationTextComponent("commands.gamestage.remove.target", stage), Util.DUMMY_UUID);
 			}
 			else
 			{
-				player.sendMessage(new TranslationTextComponent("commands.gamestage.add.target", stage));
+				player.sendMessage(new TranslationTextComponent("commands.gamestage.add.target", stage), Util.DUMMY_UUID);
 			}
 		}
 	}
 
 	@Override
-	public String getAltTitle()
+	public IFormattableTextComponent getAltTitle()
 	{
-		return I18n.format("ftbquests.reward.ftbquests.gamestage") + ": " + TextFormatting.YELLOW + stage;
+		return new TranslationTextComponent("ftbquests.reward.ftbquests.gamestage").appendString(": ").append(new StringTextComponent(stage).mergeStyle(TextFormatting.YELLOW));
 	}
 }

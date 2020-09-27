@@ -67,7 +67,7 @@ public class ServerQuestFile extends QuestFile
 
 		FTBQuests.LOGGER.info(String.format("Loaded %d chapters, %d quests, %d tasks and %d rewards. In total, %d objects", c, q, t, r, getAllObjects().size()));
 
-		Path path = server.func_240776_a_(FolderName.field_237247_c_).resolve("ftbquests");
+		Path path = server.func_240776_a_(FolderName.DOT).resolve("ftbquests");
 
 		try
 		{
@@ -148,7 +148,7 @@ public class ServerQuestFile extends QuestFile
 			shouldSave = false;
 		}
 
-		Path path = server.func_240776_a_(FolderName.field_237247_c_).resolve("ftbquests");
+		Path path = server.func_240776_a_(FolderName.DOT).resolve("ftbquests");
 
 		for (PlayerData data : getAllData())
 		{

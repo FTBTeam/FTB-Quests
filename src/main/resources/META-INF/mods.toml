@@ -1,6 +1,7 @@
-modLoader="javafml"
-loaderVersion="[30,)"
-issueTrackerURL="https://github.com/FTBTeam/FTB-Quests/issues"
+modLoader = "javafml"
+loaderVersion = "[33,)"
+issueTrackerURL = "https://github.com/FTBTeam/FTB-Quests/issues"
+license = "All Rights Reserved"
 
 [[mods]]
 modId="ftbquests"
@@ -14,16 +15,16 @@ Lets you easily create and play with quests
 
 [[dependencies.ftbquests]]
     modId="forge"
-    mandatory=true
-    versionRange="[30,)"
-    ordering="NONE"
+mandatory = true
+versionRange = "[33,)"
+ordering = "NONE"
     side="BOTH"
 
 [[dependencies.ftbquests]]
     modId="minecraft"
-    mandatory=true
-    versionRange="[1.15,)"
-    ordering="NONE"
+mandatory = true
+versionRange = "[1.16,)"
+ordering = "NONE"
     side="BOTH"
 
 [[dependencies.ftbquests]]

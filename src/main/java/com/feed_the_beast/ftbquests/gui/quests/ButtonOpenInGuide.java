@@ -6,8 +6,9 @@ import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
 import com.feed_the_beast.mods.ftbguilibrary.widget.SimpleTextButton;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
-import net.minecraft.client.resources.I18n;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.item.Items;
+import net.minecraft.util.text.TranslationTextComponent;
 
 /**
  * @author LatvianModder
@@ -18,7 +19,7 @@ public class ButtonOpenInGuide extends SimpleTextButton
 
 	public ButtonOpenInGuide(Panel panel, Quest q)
 	{
-		super(panel, I18n.format("ftbquests.gui.open_in_guide"), ItemIcon.getItemIcon(Items.BOOK));
+		super(panel, new TranslationTextComponent("ftbquests.gui.open_in_guide"), ItemIcon.getItemIcon(Items.BOOK));
 		setHeight(13);
 		setX((panel.width - width) / 2);
 		quest = q;
@@ -31,7 +32,7 @@ public class ButtonOpenInGuide extends SimpleTextButton
 	}
 
 	@Override
-	public void drawBackground(Theme theme, int x, int y, int w, int h)
+	public void drawBackground(MatrixStack matrixStack, Theme theme, int x, int y, int w, int h)
 	{
 	}
 }

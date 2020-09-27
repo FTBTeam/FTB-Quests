@@ -9,7 +9,7 @@ import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiEditConfigFromString;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.widget.GuiIcons;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
@@ -80,7 +80,7 @@ public final class TaskType extends ForgeRegistryEntry<TaskType>
 	}
 
 	public final Provider provider;
-	private ITextComponent displayName;
+	private IFormattableTextComponent displayName;
 	private Icon icon;
 	private GuiProvider guiProvider;
 
@@ -132,13 +132,13 @@ public final class TaskType extends ForgeRegistryEntry<TaskType>
 		return getRegistryName().getNamespace().equals(FTBQuests.MOD_ID) ? getRegistryName().getPath() : getRegistryName().toString();
 	}
 
-	public TaskType setDisplayName(ITextComponent name)
+	public TaskType setDisplayName(IFormattableTextComponent name)
 	{
 		displayName = name;
 		return this;
 	}
 
-	public ITextComponent getDisplayName()
+	public IFormattableTextComponent getDisplayName()
 	{
 		if (displayName == null)
 		{

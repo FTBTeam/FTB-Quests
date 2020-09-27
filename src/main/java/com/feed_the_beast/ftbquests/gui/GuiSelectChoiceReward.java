@@ -5,13 +5,13 @@ import com.feed_the_beast.ftbquests.quest.loot.WeightedReward;
 import com.feed_the_beast.ftbquests.quest.reward.ChoiceReward;
 import com.feed_the_beast.mods.ftbguilibrary.misc.GuiButtonListBase;
 import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
+import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
 import com.feed_the_beast.mods.ftbguilibrary.widget.SimpleTextButton;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
-import net.minecraft.client.resources.I18n;
+import net.minecraft.util.text.TranslationTextComponent;
 
 import javax.annotation.Nullable;
-import java.util.List;
 
 /**
  * @author LatvianModder
@@ -29,7 +29,7 @@ public class GuiSelectChoiceReward extends GuiButtonListBase
 		}
 
 		@Override
-		public void addMouseOverText(List<String> list)
+		public void addMouseOverText(TooltipList list)
 		{
 			super.addMouseOverText(list);
 			weightedReward.reward.addMouseOverText(list);
@@ -56,7 +56,7 @@ public class GuiSelectChoiceReward extends GuiButtonListBase
 	public GuiSelectChoiceReward(ChoiceReward r)
 	{
 		choiceReward = r;
-		setTitle(I18n.format("ftbquests.reward.ftbquests.choice"));
+		setTitle(new TranslationTextComponent("ftbquests.reward.ftbquests.choice"));
 		setBorder(1, 1, 1);
 	}
 

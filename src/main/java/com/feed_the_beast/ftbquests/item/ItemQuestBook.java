@@ -63,11 +63,11 @@ public class ItemQuestBook extends Item
 	{
 		if (ClientQuestFile.exists() && ClientQuestFile.INSTANCE.disableGui && !ClientQuestFile.INSTANCE.self.getCanEdit())
 		{
-			tooltip.add(new TranslationTextComponent("item.ftbquests.book.disabled").applyTextStyle(TextFormatting.RED));
+			tooltip.add(new TranslationTextComponent("item.ftbquests.book.disabled").mergeStyle(TextFormatting.RED));
 		}
 		else
 		{
-			tooltip.add(new TranslationTextComponent("item.ftbquests.book.tooltip").applyTextStyle(TextFormatting.GRAY));
+			tooltip.add(new TranslationTextComponent("item.ftbquests.book.tooltip").mergeStyle(TextFormatting.GRAY));
 		}
 	}
 }

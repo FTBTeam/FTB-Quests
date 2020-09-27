@@ -181,7 +181,7 @@ public class ItemLootCrate extends Item
 			if (crate.itemName.isEmpty())
 			{
 				tooltip.add(new StringTextComponent(""));
-				tooltip.add(new StringTextComponent(crate.table.getTitle()).mergeStyle(TextFormatting.GRAY));
+				tooltip.add(crate.table.getTitle().mergeStyle(TextFormatting.GRAY));
 			}
 		}
 		else if (stack.hasTag() && stack.getTag().contains("type"))
