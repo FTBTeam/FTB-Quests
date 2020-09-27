@@ -5,6 +5,7 @@ import com.feed_the_beast.mods.ftbguilibrary.icon.Color4I;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
 import com.feed_the_beast.mods.ftbguilibrary.utils.StringUtils;
+import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
 import com.feed_the_beast.mods.ftbguilibrary.widget.GuiBase;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
 import com.feed_the_beast.mods.ftbguilibrary.widget.SimpleTextButton;
@@ -12,11 +13,13 @@ import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Widget;
 import com.feed_the_beast.mods.ftbguilibrary.widget.WidgetLayout;
 import com.feed_the_beast.mods.ftbguilibrary.widget.WrappedIngredient;
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.IFormattableTextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.TranslationTextComponent;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -39,16 +42,16 @@ public class GuiRewardNotifications extends GuiBase implements IRewardListenerGu
 		}
 
 		@Override
-		public void addMouseOverText(List<String> list)
+		public void addMouseOverText(TooltipList list)
 		{
 			if (!key.title.isEmpty())
 			{
-				list.add(key.title);
+				list.string(key.title);
 			}
 		}
 
 		@Override
-		public void draw(Theme theme, int x, int y, int w, int h)
+		public void draw(MatrixStack matrixStack, Theme theme, int x, int y, int w, int h)
 		{
 			QuestShape.RSQUARE.outline.draw(x, y, w, h);
 			key.icon.draw(x + 3, y + 3, 16, 16);
@@ -57,11 +60,11 @@ public class GuiRewardNotifications extends GuiBase implements IRewardListenerGu
 
 			if (count > 1)
 			{
-				RenderSystem.pushMatrix();
-				RenderSystem.translatef(0, 0, 600);
-				String s = StringUtils.formatDouble(count, true);
-				theme.drawString(TextFormatting.YELLOW + s, x + 22 - theme.getStringWidth(s), y + 12, Theme.SHADOW);
-				RenderSystem.popMatrix();
+				matrixStack.push();
+				matrixStack.translate(0, 0, 600);
+				IFormattableTextComponent s = new StringTextComponent(StringUtils.formatDouble(count, true)).mergeStyle(TextFormatting.YELLOW);
+				theme.drawString(matrixStack, s, x + 22 - theme.getStringWidth(s), y + 12, Theme.SHADOW);
+				matrixStack.pop();
 			}
 		}
 
@@ -80,7 +83,7 @@ public class GuiRewardNotifications extends GuiBase implements IRewardListenerGu
 	public GuiRewardNotifications()
 	{
 		rewards = new Object2IntOpenHashMap<>();
-		closeButton = new SimpleTextButton(this, I18n.format("gui.close"), Icon.EMPTY)
+		closeButton = new SimpleTextButton(this, new TranslationTextComponent("gui.close"), Icon.EMPTY)
 		{
 			@Override
 			public void onClicked(MouseButton button)
@@ -128,7 +131,7 @@ public class GuiRewardNotifications extends GuiBase implements IRewardListenerGu
 		};
 
 		itemPanel.setOnlyRenderWidgetsInside(false);
-		itemPanel.setUnicode(true);
+		//itemPanel.setUnicode(true);
 	}
 
 	@Override
@@ -146,14 +149,14 @@ public class GuiRewardNotifications extends GuiBase implements IRewardListenerGu
 	}
 
 	@Override
-	public void drawBackground(Theme theme, int x, int y, int w, int h)
+	public void drawBackground(MatrixStack matrixStack, Theme theme, int x, int y, int w, int h)
 	{
-		RenderSystem.pushMatrix();
-		RenderSystem.translatef((int) (w / 2F), (int) (h / 5F), 0F);
-		RenderSystem.scalef(2, 2, 1);
-		String s = I18n.format("ftbquests.rewards");
-		theme.drawString(s, -theme.getStringWidth(s) / 2F, 0, Color4I.WHITE, 0);
-		RenderSystem.popMatrix();
+		matrixStack.push();
+		matrixStack.translate((int) (w / 2F), (int) (h / 5F), 0F);
+		matrixStack.scale(2, 2, 1);
+		IFormattableTextComponent s = new TranslationTextComponent("ftbquests.rewards");
+		theme.drawString(matrixStack, s, -theme.getStringWidth(s) / 2F, 0, Color4I.WHITE, 0);
+		matrixStack.pop();
 	}
 
 	@Override

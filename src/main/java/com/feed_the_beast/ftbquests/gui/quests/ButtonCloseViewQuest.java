@@ -4,7 +4,8 @@ import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
 import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
 import com.feed_the_beast.mods.ftbguilibrary.widget.SimpleTextButton;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
-import net.minecraft.client.resources.I18n;
+import com.mojang.blaze3d.matrix.MatrixStack;
+import net.minecraft.util.text.TranslationTextComponent;
 
 /**
  * @author LatvianModder
@@ -13,7 +14,7 @@ public class ButtonCloseViewQuest extends SimpleTextButton
 {
 	public ButtonCloseViewQuest(PanelViewQuest parent)
 	{
-		super(parent, I18n.format("gui.close"), ThemeProperties.CLOSE_ICON.get(parent.quest));
+		super(parent, new TranslationTextComponent("gui.close"), ThemeProperties.CLOSE_ICON.get(parent.quest));
 	}
 
 	@Override
@@ -24,7 +25,7 @@ public class ButtonCloseViewQuest extends SimpleTextButton
 	}
 
 	@Override
-	public void drawBackground(Theme theme, int x, int y, int w, int h)
+	public void drawBackground(MatrixStack matrixStack, Theme theme, int x, int y, int w, int h)
 	{
 	}
 }

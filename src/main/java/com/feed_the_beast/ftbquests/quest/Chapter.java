@@ -8,12 +8,13 @@ import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigString;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.icon.IconAnimation;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.nbt.StringNBT;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.text.IFormattableTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.MinecraftForge;
@@ -22,6 +23,8 @@ import net.minecraftforge.common.util.Constants;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author LatvianModder
@@ -153,6 +156,7 @@ public final class Chapter extends QuestObject
 	public void writeNetData(PacketBuffer buffer)
 	{
 		super.writeNetData(buffer);
+		buffer.writeString(filename, Short.MAX_VALUE);
 		NetUtils.writeStrings(buffer, subtitle);
 		buffer.writeBoolean(alwaysInvisible);
 		buffer.writeInt(group == null || group.invalid ? 0 : group.id);
@@ -164,6 +168,7 @@ public final class Chapter extends QuestObject
 	public void readNetData(PacketBuffer buffer)
 	{
 		super.readNetData(buffer);
+		filename = buffer.readString(Short.MAX_VALUE);
 		NetUtils.readStrings(buffer, subtitle);
 		alwaysInvisible = buffer.readBoolean();
 		group = file.getChapter(buffer.readInt());
@@ -271,9 +276,9 @@ public final class Chapter extends QuestObject
 	}
 
 	@Override
-	public String getAltTitle()
+	public IFormattableTextComponent getAltTitle()
 	{
-		return I18n.format("ftbquests.unnamed");
+		return new TranslationTextComponent("ftbquests.unnamed");
 	}
 
 	@Override
@@ -298,6 +303,27 @@ public final class Chapter extends QuestObject
 	@Override
 	public void onCreated()
 	{
+		if (filename.isEmpty())
+		{
+			String s = title.replace(' ', '_').replaceAll("\\W", "").toLowerCase().trim();
+
+			if (s.isEmpty())
+			{
+				s = toString();
+			}
+
+			filename = s;
+
+			Set<String> existingNames = file.chapters.stream().map(ch -> ch.filename).collect(Collectors.toSet());
+			int i = 2;
+
+			while (existingNames.contains(filename))
+			{
+				filename = s + "_" + i;
+				i++;
+			}
+		}
+
 		file.chapters.add(this);
 
 		if (!quests.isEmpty())

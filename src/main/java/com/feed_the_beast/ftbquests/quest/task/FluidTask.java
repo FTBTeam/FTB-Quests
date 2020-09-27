@@ -13,6 +13,8 @@ import net.minecraft.fluid.Fluids;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.IFormattableTextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fluids.FluidAttributes;
@@ -168,9 +170,9 @@ public class FluidTask extends Task
 	}
 
 	@Override
-	public String getAltTitle()
+	public IFormattableTextComponent getAltTitle()
 	{
-		return getVolumeString(amount) + " of " + createFluidStack().getDisplayName().getFormattedText();
+		return new StringTextComponent(getVolumeString(amount) + " of ").append(createFluidStack().getDisplayName());
 	}
 
 	@Override

@@ -5,15 +5,19 @@ import com.feed_the_beast.ftbquests.quest.reward.Reward;
 import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Color4I;
 import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
+import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
 import com.feed_the_beast.mods.ftbguilibrary.widget.ContextMenuItem;
 import com.feed_the_beast.mods.ftbguilibrary.widget.GuiIcons;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
 import com.feed_the_beast.mods.ftbguilibrary.widget.WidgetType;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.resources.I18n;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.TranslationTextComponent;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -36,22 +40,22 @@ public class ButtonReward extends Button
 	}
 
 	@Override
-	public String getTitle()
+	public ITextComponent getTitle()
 	{
 		if (reward.isTeamReward())
 		{
-			return TextFormatting.BLUE + super.getTitle();
+			return super.getTitle().deepCopy().mergeStyle(TextFormatting.BLUE);
 		}
 
 		return super.getTitle();
 	}
 
 	@Override
-	public void addMouseOverText(List<String> list)
+	public void addMouseOverText(TooltipList list)
 	{
 		if (isShiftKeyDown() && isCtrlKeyDown())
 		{
-			list.add(TextFormatting.DARK_GRAY + reward.toString());
+			list.add(new StringTextComponent(reward.toString()).mergeStyle(TextFormatting.DARK_GRAY));
 		}
 
 		if (reward.addTitleInMouseOverText())
@@ -61,7 +65,7 @@ public class ButtonReward extends Button
 
 		if (reward.isTeamReward())
 		{
-			list.add(TextFormatting.BLUE + "[" + I18n.format("ftbquests.reward.team_reward") + "]");
+			list.add(new StringTextComponent("").append(new StringTextComponent("[").append(new TranslationTextComponent("ftbquests.reward.team_reward")).appendString("]")).mergeStyle(TextFormatting.BLUE));
 		}
 
 		reward.addMouseOverText(list);
@@ -121,23 +125,23 @@ public class ButtonReward extends Button
 	}
 
 	@Override
-	public void drawBackground(Theme theme, int x, int y, int w, int h)
+	public void drawBackground(MatrixStack matrixStack, Theme theme, int x, int y, int w, int h)
 	{
 		if (isMouseOver())
 		{
-			super.drawBackground(theme, x, y, w, h);
+			super.drawBackground(matrixStack, theme, x, y, w, h);
 		}
 	}
 
 	@Override
-	public void draw(Theme theme, int x, int y, int w, int h)
+	public void draw(MatrixStack matrixStack, Theme theme, int x, int y, int w, int h)
 	{
 		int bs = h >= 32 ? 32 : 16;
-		drawBackground(theme, x, y, w, h);
-		drawIcon(theme, x + (w - bs) / 2, y + (h - bs) / 2, bs, bs);
+		drawBackground(matrixStack, theme, x, y, w, h);
+		drawIcon(matrixStack, theme, x + (w - bs) / 2, y + (h - bs) / 2, bs, bs);
 
-		RenderSystem.pushMatrix();
-		RenderSystem.translatef(0F, 0F, 500F);
+		matrixStack.push();
+		matrixStack.translate(0F, 0F, 500F);
 		RenderSystem.enableBlend();
 		boolean completed = false;
 
@@ -155,7 +159,7 @@ public class ButtonReward extends Button
 			ThemeProperties.ALERT_ICON.get().draw(x + w - 9, y + 1, 8, 8);
 		}
 
-		RenderSystem.popMatrix();
+		matrixStack.pop();
 
 		if (!completed)
 		{
@@ -163,11 +167,11 @@ public class ButtonReward extends Button
 
 			if (!s.isEmpty())
 			{
-				RenderSystem.pushMatrix();
-				RenderSystem.translatef(x + 19F - theme.getStringWidth(s) / 2F, y + 15F, 500F);
-				RenderSystem.scalef(0.5F, 0.5F, 1F);
-				theme.drawString(s, 0, 0, Color4I.WHITE, Theme.SHADOW);
-				RenderSystem.popMatrix();
+				matrixStack.push();
+				matrixStack.translate(x + 19F - theme.getStringWidth(s) / 2F, y + 15F, 500F);
+				matrixStack.scale(0.5F, 0.5F, 1F);
+				theme.drawString(matrixStack, s, 0, 0, Color4I.WHITE, Theme.SHADOW);
+				matrixStack.pop();
 			}
 		}
 	}

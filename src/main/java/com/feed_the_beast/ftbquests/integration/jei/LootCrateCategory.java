@@ -3,6 +3,7 @@ package com.feed_the_beast.ftbquests.integration.jei;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
 import com.feed_the_beast.mods.ftbguilibrary.widget.GuiHelper;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import mezz.jei.api.gui.IRecipeLayout;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.gui.ingredient.IGuiItemStackGroup;
@@ -45,7 +46,7 @@ public class LootCrateCategory implements IRecipeCategory<LootCrateWrapper>
 			}
 
 			@Override
-			public void draw(int xOffset, int yOffset)
+			public void draw(MatrixStack matrixStack, int xOffset, int yOffset)
 			{
 				if (!LootCrateRegistry.INSTANCE.list.isEmpty())
 				{

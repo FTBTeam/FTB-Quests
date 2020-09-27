@@ -5,13 +5,13 @@ import com.feed_the_beast.ftbquests.gui.GuiRewardNotifications;
 import com.feed_the_beast.ftbquests.net.MessageClaimAllRewards;
 import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
 import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
+import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
-import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.resources.I18n;
+import com.mojang.blaze3d.matrix.MatrixStack;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
-
-import java.util.List;
+import net.minecraft.util.text.TranslationTextComponent;
 
 /**
  * @author LatvianModder
@@ -22,7 +22,7 @@ public class ButtonModpack extends ButtonTab
 
 	public ButtonModpack(Panel panel)
 	{
-		super(panel, "", ClientQuestFile.INSTANCE.getIcon());
+		super(panel, StringTextComponent.EMPTY, ClientQuestFile.INSTANCE.getIcon());
 		title = treeGui.file.getTitle();
 		unclaimedRewards = treeGui.file.self.hasUnclaimedRewards();
 	}
@@ -40,30 +40,30 @@ public class ButtonModpack extends ButtonTab
 	}
 
 	@Override
-	public void addMouseOverText(List<String> list)
+	public void addMouseOverText(TooltipList list)
 	{
 		super.addMouseOverText(list);
 
 		if (unclaimedRewards)
 		{
-			list.add("");
-			list.add(TextFormatting.GOLD + I18n.format("ftbquests.gui.collect_rewards"));
+			list.blankLine();
+			list.add(new TranslationTextComponent("ftbquests.gui.collect_rewards").mergeStyle(TextFormatting.GOLD));
 		}
 	}
 
 	@Override
-	public void draw(Theme theme, int x, int y, int w, int h)
+	public void draw(MatrixStack matrixStack, Theme theme, int x, int y, int w, int h)
 	{
-		super.draw(theme, x, y, w, h);
+		super.draw(matrixStack, theme, x, y, w, h);
 
 		if (unclaimedRewards)
 		{
-			double s = w / 2D;//(int) (treeGui.getZoom() / 2 * quest.size);
-			RenderSystem.pushMatrix();
-			RenderSystem.translated(x + w - s, y, 500);
-			RenderSystem.scaled(s, s, 1D);
+			float s = w / 2F;//(int) (treeGui.getZoom() / 2 * quest.size);
+			matrixStack.push();
+			matrixStack.translate(x + w - s, y, 500);
+			matrixStack.scale(s, s, 1F);
 			ThemeProperties.ALERT_ICON.get(treeGui.file).draw(0, 0, 1, 1);
-			RenderSystem.popMatrix();
+			matrixStack.pop();
 		}
 	}
 }

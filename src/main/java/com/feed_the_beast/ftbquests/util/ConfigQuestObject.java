@@ -5,10 +5,11 @@ import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigCallback;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigValue;
 import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
-import net.minecraft.util.text.TextFormatting;
+import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 
 import javax.annotation.Nullable;
-import java.util.List;
 import java.util.function.Predicate;
 
 /**
@@ -24,11 +25,11 @@ public class ConfigQuestObject<T extends QuestObjectBase> extends ConfigValue<T>
 	}
 
 	@Override
-	public String getStringForGUI(@Nullable QuestObjectBase value)
+	public ITextComponent getStringForGUI(@Nullable QuestObjectBase value)
 	{
 		if (value == null)
 		{
-			return "";
+			return StringTextComponent.EMPTY;
 		}
 
 		return value.getTitle();
@@ -44,11 +45,11 @@ public class ConfigQuestObject<T extends QuestObjectBase> extends ConfigValue<T>
 	}
 
 	@Override
-	public void addInfo(List<String> list)
+	public void addInfo(TooltipList list)
 	{
 		if (value != null)
 		{
-			list.add(TextFormatting.AQUA + "ID: " + TextFormatting.RESET + value);
+			list.add(info("ID", value));
 		}
 	}
 }

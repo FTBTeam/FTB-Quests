@@ -4,14 +4,13 @@ import com.feed_the_beast.ftbquests.quest.Chapter;
 import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Color4I;
 import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
+import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.util.text.ITextProperties;
 
 import javax.annotation.Nullable;
-import java.util.List;
 
 /**
  * @author LatvianModder
@@ -32,7 +31,7 @@ public class ButtonChapter extends ButtonTab
 	}
 
 	@Override
-	public void addMouseOverText(List<ITextProperties> list)
+	public void addMouseOverText(TooltipList list)
 	{
 	}
 
@@ -80,7 +79,7 @@ public class ButtonChapter extends ButtonTab
 			matrixStack.translate(0, 0, 450);
 			RenderSystem.enableBlend();
 			ThemeProperties.ALERT_ICON.get().draw(x + w - 7, y + 2, 6, 6);
-			RenderSystem.popMatrix();
+			matrixStack.pop();
 		}
 		else if (treeGui.file.self.isComplete(chapter))
 		{

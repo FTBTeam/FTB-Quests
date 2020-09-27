@@ -440,8 +440,8 @@ public class OrderedCompoundNBT extends CompoundNBT
 	{
 		CrashReport crashreport = CrashReport.makeCrashReport(ex, "Reading NBT data");
 		CrashReportCategory crashreportcategory = crashreport.makeCategoryDepth("Corrupt NBT tag", 1);
-		crashreportcategory.addDetail("Tag type found", () -> tagMap.get(key).getType().func_225648_a_());
-		crashreportcategory.addDetail("Tag type expected", expectedType::func_225648_a_);
+		crashreportcategory.addDetail("Tag type found", () -> tagMap.get(key).getType().getName());
+		crashreportcategory.addDetail("Tag type expected", expectedType::getName);
 		crashreportcategory.addDetail("Tag name", key);
 		return crashreport;
 	}

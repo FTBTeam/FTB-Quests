@@ -13,11 +13,13 @@ import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.misc.GuiButtonListBase;
 import com.feed_the_beast.mods.ftbguilibrary.utils.Key;
 import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
+import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
 import com.feed_the_beast.mods.ftbguilibrary.widget.SimpleTextButton;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
-import net.minecraft.client.resources.I18n;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.TranslationTextComponent;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -34,18 +36,18 @@ public class GuiSelectQuestObject<T extends QuestObjectBase> extends GuiButtonLi
 
 		public ButtonQuestObject(Panel panel, @Nullable T o)
 		{
-			super(panel, o == null ? I18n.format("ftbquests.null") : o.getObjectType().getColor() + o.getUnformattedTitle(), o == null ? Icon.EMPTY : o.getIcon());
+			super(panel, o == null ? new TranslationTextComponent("ftbquests.null") : o.getTitle().mergeStyle(o.getObjectType().getColor()), o == null ? Icon.EMPTY : o.getIcon());
 			object = o;
 			setSize(200, 14);
 		}
 
-		private void addObject(List<String> list, QuestObjectBase o)
+		private void addObject(TooltipList list, QuestObjectBase o)
 		{
-			list.add(TextFormatting.GRAY + QuestObjectType.NAME_MAP.getDisplayName(o.getObjectType()).getString() + ": " + o.getObjectType().getColor() + o.getUnformattedTitle());
+			list.add(QuestObjectType.NAME_MAP.getDisplayName(o.getObjectType()).deepCopy().mergeStyle(TextFormatting.GRAY).appendString(": ").append(o.getTitle().mergeStyle(o.getObjectType().getColor())));
 		}
 
 		@Override
-		public void addMouseOverText(List<String> list)
+		public void addMouseOverText(TooltipList list)
 		{
 			if (object == null)
 			{
@@ -53,8 +55,8 @@ public class GuiSelectQuestObject<T extends QuestObjectBase> extends GuiButtonLi
 			}
 
 			list.add(object.getTitle());
-			list.add(TextFormatting.GRAY + "ID: " + TextFormatting.DARK_GRAY + object);
-			list.add(TextFormatting.GRAY + "Type: " + object.getObjectType().getColor() + QuestObjectType.NAME_MAP.getDisplayName(object.getObjectType()).getString());
+			list.add(new StringTextComponent("ID: ").mergeStyle(TextFormatting.GRAY).append(new StringTextComponent(object.toString()).mergeStyle(TextFormatting.DARK_GRAY)));
+			list.add(new StringTextComponent("Type: ").mergeStyle(TextFormatting.GRAY).append(QuestObjectType.NAME_MAP.getDisplayName(object.getObjectType()).deepCopy().mergeStyle(object.getObjectType().getColor())));
 
 			if (object instanceof Quest)
 			{
@@ -67,11 +69,11 @@ public class GuiSelectQuestObject<T extends QuestObjectBase> extends GuiButtonLi
 				}
 				else if (!quest.rewards.isEmpty())
 				{
-					list.add(TextFormatting.GRAY + I18n.format("ftbquests.rewards"));
+					list.add(new TranslationTextComponent("ftbquests.rewards").mergeStyle(TextFormatting.GRAY));
 
 					for (Reward reward : quest.rewards)
 					{
-						list.add("  " + QuestObjectType.REWARD.getColor() + reward.getUnformattedTitle());
+						list.add(new StringTextComponent("  ").append(reward.getTitle().mergeStyle(QuestObjectType.REWARD.getColor())));
 					}
 				}
 			}
@@ -87,11 +89,11 @@ public class GuiSelectQuestObject<T extends QuestObjectBase> extends GuiButtonLi
 				}
 				else if (!quest.rewards.isEmpty())
 				{
-					list.add(TextFormatting.GRAY + I18n.format("ftbquests.rewards"));
+					list.add(new TranslationTextComponent("ftbquests.rewards").mergeStyle(TextFormatting.GRAY));
 
 					for (Reward reward : quest.rewards)
 					{
-						list.add("  " + QuestObjectType.REWARD.getColor() + reward.getUnformattedTitle());
+						list.add(new StringTextComponent("  ").append(reward.getTitle().mergeStyle(QuestObjectType.REWARD.getColor())));
 					}
 				}
 			}
@@ -115,7 +117,7 @@ public class GuiSelectQuestObject<T extends QuestObjectBase> extends GuiButtonLi
 
 	public GuiSelectQuestObject(ConfigQuestObject<T> c, ConfigCallback cb)
 	{
-		setTitle(I18n.format("ftbquests.gui.select_quest_object"));
+		setTitle(new TranslationTextComponent("ftbquests.gui.select_quest_object"));
 		setHasSearchBox(true);
 		focus();
 		setBorder(1, 1, 1);

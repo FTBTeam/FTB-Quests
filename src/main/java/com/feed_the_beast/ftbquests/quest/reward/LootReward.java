@@ -3,12 +3,11 @@ package com.feed_the_beast.ftbquests.quest.reward;
 import com.feed_the_beast.ftbquests.gui.GuiRewardNotifications;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.loot.WeightedReward;
+import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-
-import java.util.List;
 
 /**
  * @author LatvianModder
@@ -64,7 +63,7 @@ public class LootReward extends RandomReward
 
 	@Override
 	@OnlyIn(Dist.CLIENT)
-	public void addMouseOverText(List<String> list)
+	public void addMouseOverText(TooltipList list)
 	{
 		if (getTable() != null)
 		{

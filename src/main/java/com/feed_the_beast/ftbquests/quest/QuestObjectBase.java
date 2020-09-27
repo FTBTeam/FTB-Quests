@@ -333,7 +333,7 @@ public abstract class QuestObjectBase
 
 	public abstract Icon getAltIcon();
 
-	public abstract String getAltTitle();
+	public abstract IFormattableTextComponent getAltTitle();
 
 	public final Icon getIcon()
 	{
@@ -365,7 +365,7 @@ public abstract class QuestObjectBase
 	{
 		if (cachedTitle != null)
 		{
-			return cachedTitle;
+			return cachedTitle.deepCopy();
 		}
 
 		String textTitle = loadText().getString("title");
@@ -373,7 +373,7 @@ public abstract class QuestObjectBase
 		if (!textTitle.isEmpty())
 		{
 			cachedTitle = new StringTextComponent(textTitle);
-			return cachedTitle;
+			return cachedTitle.deepCopy();
 		}
 
 		String key = String.format("quests.%08x.title", id);
@@ -387,7 +387,7 @@ public abstract class QuestObjectBase
 			}
 			else
 			{
-				cachedTitle = new StringTextComponent(getAltTitle().trim());
+				cachedTitle = getAltTitle();
 			}
 		}
 		else
@@ -395,7 +395,7 @@ public abstract class QuestObjectBase
 			cachedTitle = t;
 		}
 
-		return cachedTitle;
+		return cachedTitle.deepCopy();
 	}
 
 	public final String getUnformattedTitle()

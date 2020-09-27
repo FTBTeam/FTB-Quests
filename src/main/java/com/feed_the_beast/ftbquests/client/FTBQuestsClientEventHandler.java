@@ -11,7 +11,6 @@ import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.loot.LootCrate;
 import com.feed_the_beast.ftbquests.quest.task.ObservationTask;
-import com.feed_the_beast.ftbquests.quest.task.Task;
 import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Color4I;
 import com.feed_the_beast.mods.ftbguilibrary.sidebar.SidebarButtonCreatedEvent;
@@ -22,6 +21,7 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.toasts.SystemToast;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.client.event.ColorHandlerEvent;
@@ -182,20 +182,20 @@ public class FTBQuestsClientEventHandler
 		if (currentlyObserving != null)
 		{
 			int cx = event.getWindow().getScaledWidth() / 2;
-			String cot = TextFormatting.UNDERLINE.toString() + TextFormatting.YELLOW + currentlyObserving.getTitle();
-			int sw = mc.fontRenderer.getStringWidth(cot);
+			IFormattableTextComponent cot = currentlyObserving.getTitle().deepCopy().mergeStyle(TextFormatting.YELLOW, TextFormatting.UNDERLINE);
+			int sw = mc.fontRenderer.getStringPropertyWidth(cot);
 			int bw = Math.max(sw, 100);
 			Color4I.DARK_GRAY.withAlpha(130).draw(cx - bw / 2 - 3, cy - 63, bw + 6, 29);
 			GuiHelper.drawHollowRect(cx - bw / 2 - 3, cy - 63, bw + 6, 29, Color4I.DARK_GRAY, false);
 
-			mc.fontRenderer.drawStringWithShadow(cot, cx - sw / 2F, cy - 60, 0xFFFFFF);
+			mc.fontRenderer.func_243246_a(matrixStack, cot, cx - sw / 2F, cy - 60, 0xFFFFFF);
 			double completed = (currentlyObservingTicks + event.getPartialTicks()) / (double) currentlyObserving.ticks;
 
 			GuiHelper.drawHollowRect(cx - bw / 2, cy - 49, bw, 12, Color4I.DARK_GRAY, false);
 			Color4I.LIGHT_BLUE.withAlpha(130).draw(cx - bw / 2 + 1, cy - 48, (int) ((bw - 2D) * completed), 10);
 
 			String cop = (currentlyObservingTicks * 100L / currentlyObserving.ticks) + "%";
-			mc.fontRenderer.drawStringWithShadow(cop, cx - mc.fontRenderer.getStringWidth(cop) / 2F, cy - 47, 0xFFFFFF);
+			mc.fontRenderer.drawStringWithShadow(matrixStack, cop, cx - mc.fontRenderer.getStringWidth(cop) / 2F, cy - 47, 0xFFFFFF);
 		}
 
 		if (!data.pinnedQuests.isEmpty())
@@ -220,6 +220,7 @@ public class FTBQuestsClientEventHandler
 								list.add("");
 							}
 
+							/* FIXME
 							list.add(TextFormatting.BOLD + mc.fontRenderer.trimStringToWidth(quest.getTitle(), 160) + " " + TextFormatting.DARK_AQUA + data.getRelativeProgress(quest) + "%");
 
 							for (Task task : quest.tasks)
@@ -229,6 +230,7 @@ public class FTBQuestsClientEventHandler
 									list.add(TextFormatting.GRAY + mc.fontRenderer.trimStringToWidth(task.getTitle(), 160) + " " + TextFormatting.GREEN + data.getTaskData(task).getProgressString() + "/" + task.getMaxProgressString());
 								}
 							}
+							*/
 						}
 					}
 				}
@@ -256,6 +258,7 @@ public class FTBQuestsClientEventHandler
 						}
 						else
 						{
+							/* FIXME
 							list.add(TextFormatting.BOLD + mc.fontRenderer.trimStringToWidth(quest.getTitle(), 160) + " " + TextFormatting.DARK_AQUA + data.getRelativeProgress(quest) + "%");
 
 							for (Task task : quest.tasks)
@@ -265,6 +268,7 @@ public class FTBQuestsClientEventHandler
 									list.add(TextFormatting.GRAY + mc.fontRenderer.trimStringToWidth(task.getTitle(), 160) + " " + TextFormatting.GREEN + data.getTaskData(task).getProgressString() + "/" + task.getMaxProgressString());
 								}
 							}
+							*/
 						}
 					}
 				}

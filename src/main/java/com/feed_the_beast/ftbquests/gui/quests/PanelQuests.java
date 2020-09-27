@@ -421,12 +421,12 @@ public class PanelQuests extends Panel
 						double oy = m.getY() - ominY;
 						double sx = (questX + ox - questMinX) / dx * treeGui.scrollWidth + px;
 						double sy = (questY + oy - questMinY) / dy * treeGui.scrollHeight + py;
-						RenderSystem.pushMatrix();
-						RenderSystem.translated(sx - bs * m.getWidth() / 2D, sy - bs * m.getHeight() / 2D, 0D);
-						RenderSystem.scaled(bs * m.getWidth(), bs * m.getHeight(), 1D);
+						matrixStack.push();
+						matrixStack.translate(sx - bs * m.getWidth() / 2D, sy - bs * m.getHeight() / 2D, 0D);
+						matrixStack.scale((float) (bs * m.getWidth()), (float) (bs * m.getHeight()), 1F);
 						GuiHelper.setupDrawing();
 						m.getShape().shape.withColor(Color4I.WHITE.withAlpha(30)).draw(0, 0, 1, 1);
-						RenderSystem.popMatrix();
+						matrixStack.pop();
 					}
 
 					if (GuiQuests.grid && treeGui.viewQuestPanel.quest == null)
@@ -436,10 +436,10 @@ public class PanelQuests extends Panel
 						double boxW = omaxX / dx * treeGui.scrollWidth + px - boxX;
 						double boxH = omaxY / dy * treeGui.scrollHeight + py - boxY;
 
-						RenderSystem.pushMatrix();
-						RenderSystem.translatef(0, 0, 1000);
+						matrixStack.push();
+						matrixStack.translate(0, 0, 1000);
 						GuiHelper.drawHollowRect((int) boxX, (int) boxY, (int) boxW, (int) boxH, Color4I.WHITE.withAlpha(30), false);
-						RenderSystem.popMatrix();
+						matrixStack.pop();
 					}
 				}
 				else
@@ -448,21 +448,21 @@ public class PanelQuests extends Panel
 					double bs = treeGui.getQuestButtonSize();
 					double sx = (questX - questMinX) / dx * treeGui.scrollWidth + px;
 					double sy = (questY - questMinY) / dy * treeGui.scrollHeight + py;
-					RenderSystem.pushMatrix();
-					RenderSystem.translated(sx - bs / 2D, sy - bs / 2D, 0D);
-					RenderSystem.scaled(bs, bs, 1D);
+					matrixStack.push();
+					matrixStack.translate(sx - bs / 2D, sy - bs / 2D, 0D);
+					matrixStack.scale((float) bs, (float) bs, 1F);
 					GuiHelper.setupDrawing();
 					treeGui.selectedChapter.getDefaultQuestShape().shape.withColor(Color4I.WHITE.withAlpha(10)).draw(0, 0, 1, 1);
-					RenderSystem.popMatrix();
+					matrixStack.pop();
 
 					if (GuiQuests.grid && treeGui.viewQuestPanel.quest == null)
 					{
-						RenderSystem.pushMatrix();
-						RenderSystem.translatef(0, 0, 1000);
+						matrixStack.push();
+						matrixStack.translate(0, 0, 1000);
 						Color4I.WHITE.draw((int) sx, (int) sy, 1, 1);
 						Color4I.WHITE.withAlpha(30).draw(getX(), (int) sy, width, 1);
 						Color4I.WHITE.withAlpha(30).draw((int) sx, getY(), 1, height);
-						RenderSystem.popMatrix();
+						matrixStack.pop();
 					}
 				}
 			}

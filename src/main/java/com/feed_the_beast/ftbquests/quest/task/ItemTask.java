@@ -10,14 +10,17 @@ import com.feed_the_beast.mods.ftbguilibrary.config.Tristate;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.icon.IconAnimation;
 import com.feed_the_beast.mods.ftbguilibrary.icon.ItemIcon;
+import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
 import dev.latvian.mods.itemfilters.api.ItemFiltersAPI;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.text.IFormattableTextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.ModList;
@@ -138,14 +141,14 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 	}
 
 	@Override
-	public String getAltTitle()
+	public IFormattableTextComponent getAltTitle()
 	{
 		if (count > 1)
 		{
-			return count + "x " + item.getDisplayName().getFormattedText();
+			return new StringTextComponent(count + "x ").append(item.getDisplayName());
 		}
 
-		return item.getDisplayName().getFormattedText();
+		return new StringTextComponent("").append(item.getDisplayName());
 	}
 
 	@Override
@@ -208,22 +211,22 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 
 	@Override
 	@OnlyIn(Dist.CLIENT)
-	public void addMouseOverText(List<String> list, @Nullable TaskData data)
+	public void addMouseOverText(TooltipList list, @Nullable TaskData data)
 	{
 		if (consumesResources())
 		{
-			list.add("");
-			list.add(TextFormatting.YELLOW.toString() + TextFormatting.UNDERLINE + I18n.format("ftbquests.task.click_to_submit"));
+			list.blankLine();
+			list.add(new TranslationTextComponent("ftbquests.task.click_to_submit").mergeStyle(TextFormatting.YELLOW, TextFormatting.UNDERLINE));
 		}
 		else if (getValidItems().size() > 1)
 		{
-			list.add("");
-			list.add(TextFormatting.YELLOW.toString() + TextFormatting.UNDERLINE + I18n.format("ftbquests.task.ftbquests.item.view_items"));
+			list.blankLine();
+			list.add(new TranslationTextComponent("ftbquests.task.ftbquests.item.view_items").mergeStyle(TextFormatting.YELLOW, TextFormatting.UNDERLINE));
 		}
 		else if (ModList.get().isLoaded("jei"))
 		{
-			list.add("");
-			list.add(TextFormatting.YELLOW.toString() + TextFormatting.UNDERLINE + I18n.format("ftbquests.task.ftbquests.item.click_recipe"));
+			list.blankLine();
+			list.add(new TranslationTextComponent("ftbquests.task.ftbquests.item.click_recipe").mergeStyle(TextFormatting.YELLOW, TextFormatting.UNDERLINE));
 		}
 	}
 

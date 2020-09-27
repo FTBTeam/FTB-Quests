@@ -6,8 +6,9 @@ import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.misc.SimpleToast;
 import net.minecraft.client.audio.SimpleSound;
 import net.minecraft.client.audio.SoundHandler;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.util.SoundEvents;
+import net.minecraft.util.text.IFormattableTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 
 /**
  * @author LatvianModder
@@ -22,13 +23,13 @@ public class ToastQuestObject extends SimpleToast
 	}
 
 	@Override
-	public String getTitle()
+	public IFormattableTextComponent getTitle()
 	{
-		return I18n.format(object.getObjectType().translationKey + ".completed");
+		return new TranslationTextComponent(object.getObjectType().translationKey + ".completed");
 	}
 
 	@Override
-	public String getSubtitle()
+	public IFormattableTextComponent getSubtitle()
 	{
 		return object.getTitle();
 	}

@@ -10,6 +10,7 @@ import com.feed_the_beast.mods.ftbguilibrary.icon.ItemIcon;
 import com.feed_the_beast.mods.ftbguilibrary.misc.CompactGridLayout;
 import com.feed_the_beast.mods.ftbguilibrary.utils.Key;
 import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
+import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
 import com.feed_the_beast.mods.ftbguilibrary.widget.GuiBase;
 import com.feed_the_beast.mods.ftbguilibrary.widget.GuiHelper;
@@ -19,8 +20,11 @@ import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Widget;
 import com.feed_the_beast.mods.ftbguilibrary.widget.WidgetType;
 import com.feed_the_beast.mods.ftbguilibrary.widget.WrappedIngredient;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.fml.ModList;
 
 import javax.annotation.Nullable;
@@ -37,7 +41,7 @@ public class GuiValidItems extends GuiBase
 
 		public ButtonValidItem(Panel panel, ItemStack is)
 		{
-			super(panel, "", ItemIcon.getItemIcon(is));
+			super(panel, StringTextComponent.EMPTY, ItemIcon.getItemIcon(is));
 			stack = is;
 		}
 
@@ -63,7 +67,7 @@ public class GuiValidItems extends GuiBase
 		}
 
 		@Override
-		public void draw(Theme theme, int x, int y, int w, int h)
+		public void draw(MatrixStack matrixStack, Theme theme, int x, int y, int w, int h)
 		{
 			if (isMouseOver())
 			{
@@ -117,7 +121,7 @@ public class GuiValidItems extends GuiBase
 			}
 
 			@Override
-			public void drawBackground(Theme theme, int x, int y, int w, int h)
+			public void drawBackground(MatrixStack matrixStack, Theme theme, int x, int y, int w, int h)
 			{
 				theme.drawButton(x - 1, y - 1, w + 2, h + 2, WidgetType.NORMAL);
 			}
@@ -125,7 +129,7 @@ public class GuiValidItems extends GuiBase
 
 		itemPanel.setPosAndSize(0, 22, 144, 0);
 
-		backButton = new SimpleTextButton(this, I18n.format("gui.back"), Icon.EMPTY)
+		backButton = new SimpleTextButton(this, new TranslationTextComponent("gui.back"), Icon.EMPTY)
 		{
 			@Override
 			public void onClicked(MouseButton button)
@@ -141,7 +145,7 @@ public class GuiValidItems extends GuiBase
 			}
 		};
 
-		submitButton = new SimpleTextButton(this, "Submit", Icon.EMPTY)
+		submitButton = new SimpleTextButton(this, new StringTextComponent("Submit"), Icon.EMPTY)
 		{
 			@Override
 			public void onClicked(MouseButton button)
@@ -152,11 +156,11 @@ public class GuiValidItems extends GuiBase
 			}
 
 			@Override
-			public void addMouseOverText(List<String> list)
+			public void addMouseOverText(TooltipList list)
 			{
 				if (canClick && !task.consumesResources())
 				{
-					list.add(I18n.format("ftbquests.task.auto_detected"));
+					list.translate("ftbquests.task.auto_detected");
 				}
 			}
 
@@ -191,10 +195,10 @@ public class GuiValidItems extends GuiBase
 	}
 
 	@Override
-	public void drawBackground(Theme theme, int x, int y, int w, int h)
+	public void drawBackground(MatrixStack matrixStack, Theme theme, int x, int y, int w, int h)
 	{
-		super.drawBackground(theme, x, y, w, h);
-		theme.drawString(title, x + w / 2F, y + 6, Color4I.WHITE, Theme.CENTERED);
+		super.drawBackground(matrixStack, theme, x, y, w, h);
+		theme.drawString(matrixStack, title, x + w / 2F, y + 6, Color4I.WHITE, Theme.CENTERED);
 	}
 
 	@Override
