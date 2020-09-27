@@ -16,9 +16,9 @@ import com.feed_the_beast.ftbquests.quest.task.CustomTask;
 import com.feed_the_beast.ftbquests.quest.task.Task;
 import com.feed_the_beast.ftbquests.quest.task.TaskType;
 import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
+import com.feed_the_beast.ftbquests.util.CompoundSNBT;
 import com.feed_the_beast.ftbquests.util.NBTUtils;
 import com.feed_the_beast.ftbquests.util.NetUtils;
-import com.feed_the_beast.ftbquests.util.OrderedCompoundNBT;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigItemStack;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
@@ -57,7 +57,7 @@ import java.util.function.Predicate;
  */
 public abstract class QuestFile extends QuestObject
 {
-	public static final int VERSION = 7;
+	public static final int VERSION = 8;
 
 	private int lastID;
 	public final List<Chapter> chapters;
@@ -415,24 +415,21 @@ public abstract class QuestFile extends QuestObject
 		nbt.putString("default_quest_shape", defaultQuestShape.id);
 		nbt.putBoolean("default_quest_disable_jei", defaultQuestDisableJEI);
 
-		if (!emergencyItems.isEmpty())
+		ListNBT emergencyItemList = new ListNBT();
+
+		for (ItemStack stack : emergencyItems)
 		{
-			ListNBT list = new ListNBT();
-
-			for (ItemStack stack : emergencyItems)
-			{
-				CompoundNBT nbt1 = new OrderedCompoundNBT();
-				NBTUtils.write(nbt1, "item", stack);
-				list.add(nbt1);
-			}
-
-			nbt.put("emergency_items", list);
+			CompoundNBT nbt1 = new CompoundSNBT();
+			NBTUtils.write(nbt1, "item", stack);
+			emergencyItemList.add(nbt1);
 		}
+
+		nbt.put("emergency_items", emergencyItemList);
 
 		nbt.putInt("emergency_items_cooldown", emergencyItemsCooldown);
 		nbt.putBoolean("drop_loot_crates", dropLootCrates);
 
-		CompoundNBT nbt1 = new OrderedCompoundNBT();
+		CompoundNBT nbt1 = new CompoundSNBT();
 		lootCrateNoDrop.writeData(nbt1);
 		nbt.put("loot_crate_no_drop", nbt1);
 		nbt.putBoolean("disable_gui", disableGui);
@@ -475,7 +472,7 @@ public abstract class QuestFile extends QuestObject
 
 	public final void writeDataFull(Path folder)
 	{
-		CompoundNBT fileNBT = new OrderedCompoundNBT();
+		CompoundNBT fileNBT = new CompoundSNBT();
 		fileNBT.putInt("version", VERSION);
 		fileNBT.putInt("last_id", lastID);
 		writeData(fileNBT);
@@ -483,7 +480,7 @@ public abstract class QuestFile extends QuestObject
 
 		for (Chapter chapter : chapters)
 		{
-			CompoundNBT chapterNBT = new OrderedCompoundNBT();
+			CompoundNBT chapterNBT = new CompoundSNBT();
 			chapterNBT.putInt("id", chapter.id);
 			chapter.writeData(chapterNBT);
 
@@ -496,7 +493,7 @@ public abstract class QuestFile extends QuestObject
 					continue;
 				}
 
-				CompoundNBT questNBT = new OrderedCompoundNBT();
+				CompoundNBT questNBT = new CompoundSNBT();
 				quest.writeData(questNBT);
 				questNBT.putInt("id", quest.id);
 
@@ -507,7 +504,7 @@ public abstract class QuestFile extends QuestObject
 					for (Task task : quest.tasks)
 					{
 						TaskType type = task.getType();
-						CompoundNBT nbt3 = new OrderedCompoundNBT();
+						CompoundNBT nbt3 = new CompoundSNBT();
 						nbt3.putInt("id", task.id);
 						nbt3.putString("type", type.getTypeForNBT());
 						task.writeData(nbt3);
@@ -527,7 +524,7 @@ public abstract class QuestFile extends QuestObject
 					for (Reward reward : quest.rewards)
 					{
 						RewardType type = reward.getType();
-						CompoundNBT nbt3 = new OrderedCompoundNBT();
+						CompoundNBT nbt3 = new CompoundSNBT();
 						nbt3.putInt("id", reward.id);
 						nbt3.putString("type", type.getTypeForNBT());
 						reward.writeData(nbt3);
@@ -549,7 +546,7 @@ public abstract class QuestFile extends QuestObject
 
 		for (RewardTable table : rewardTables)
 		{
-			CompoundNBT tableNBT = new OrderedCompoundNBT();
+			CompoundNBT tableNBT = new CompoundSNBT();
 			tableNBT.putInt("id", table.id);
 			table.writeData(tableNBT);
 			NBTUtils.writeSNBT(folder, "reward_tables/" + getCodeString(table), tableNBT);

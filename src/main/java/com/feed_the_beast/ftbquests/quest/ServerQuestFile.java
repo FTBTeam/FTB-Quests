@@ -29,6 +29,7 @@ public class ServerQuestFile extends QuestFile
 	private boolean shouldSave;
 	private boolean isLoading;
 	private Path folder;
+	private Path dataFolder;
 
 	public ServerQuestFile(MinecraftServer s)
 	{
@@ -67,29 +68,32 @@ public class ServerQuestFile extends QuestFile
 
 		FTBQuests.LOGGER.info(String.format("Loaded %d chapters, %d quests, %d tasks and %d rewards. In total, %d objects", c, q, t, r, getAllObjects().size()));
 
-		Path path = server.getWorld(DimensionType.OVERWORLD).getSaveHandler().getPlayerFolder().toPath().resolve("ftbquests");
+		dataFolder = server.getWorld(DimensionType.OVERWORLD).getSaveHandler().getPlayerFolder().toPath().resolve("ftbquests");
 
-		try
+		if (Files.exists(dataFolder))
 		{
-			Files.list(path).forEach(path1 -> {
-				CompoundNBT nbt = NBTUtils.readSNBT(path1);
+			try
+			{
+				Files.list(dataFolder).forEach(path1 -> {
+					CompoundNBT nbt = NBTUtils.readSNBT(path1);
 
-				try
-				{
-					UUID uuid = UUID.fromString(nbt.getString("uuid"));
-					PlayerData data = new PlayerData(this, uuid);
-					addData(data);
-					data.deserializeNBT(nbt);
-				}
-				catch (Exception ex)
-				{
-					ex.printStackTrace();
-				}
-			});
-		}
-		catch (Exception ex)
-		{
-			ex.printStackTrace();
+					try
+					{
+						UUID uuid = UUID.fromString(nbt.getString("uuid"));
+						PlayerData data = new PlayerData(this, uuid);
+						addData(data);
+						data.deserializeNBT(nbt);
+					}
+					catch (Exception ex)
+					{
+						ex.printStackTrace();
+					}
+				});
+			}
+			catch (Exception ex)
+			{
+				ex.printStackTrace();
+			}
 		}
 	}
 
@@ -122,13 +126,14 @@ public class ServerQuestFile extends QuestFile
 
 			object.deleteChildren();
 			object.deleteSelf();
-			refreshIDMap();
-			save();
 
 			if (file != null)
 			{
-				FileUtils.delete(getFolder().resolve(file).toFile());
+				FileUtils.delete(folder.resolve(file).toFile());
 			}
+
+			refreshIDMap();
+			save();
 		}
 
 		new MessageDeleteObjectResponse(id).sendToAll();
@@ -144,17 +149,15 @@ public class ServerQuestFile extends QuestFile
 	{
 		if (shouldSave)
 		{
-			writeDataFull(getFolder());
+			writeDataFull(folder);
 			shouldSave = false;
 		}
-
-		Path path = server.getWorld(DimensionType.OVERWORLD).getSaveHandler().getPlayerFolder().toPath().resolve("ftbquests");
 
 		for (PlayerData data : getAllData())
 		{
 			if (data.shouldSave)
 			{
-				NBTUtils.writeSNBT(path, data.uuid.toString(), data.serializeNBT());
+				NBTUtils.writeSNBT(dataFolder, data.uuid.toString(), data.serializeNBT());
 				data.shouldSave = false;
 			}
 		}

@@ -288,7 +288,7 @@ public final class RewardTable extends QuestObjectBase
 	@Override
 	public String getPath()
 	{
-		return "reward_tables/" + getCodeString(this);
+		return "reward_tables/" + getCodeString(this) + ".snbt";
 	}
 
 	@Override

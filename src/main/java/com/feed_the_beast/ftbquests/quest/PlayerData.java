@@ -8,8 +8,7 @@ import com.feed_the_beast.ftbquests.quest.reward.RewardAutoClaim;
 import com.feed_the_beast.ftbquests.quest.reward.RewardClaimType;
 import com.feed_the_beast.ftbquests.quest.task.Task;
 import com.feed_the_beast.ftbquests.quest.task.TaskData;
-import com.feed_the_beast.ftbquests.util.NBTUtils;
-import com.feed_the_beast.ftbquests.util.OrderedCompoundNBT;
+import com.feed_the_beast.ftbquests.util.CompoundSNBT;
 import it.unimi.dsi.fastutil.ints.Int2ByteOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
@@ -183,14 +182,14 @@ public class PlayerData implements INBTSerializable<CompoundNBT>
 	@Override
 	public CompoundNBT serializeNBT()
 	{
-		CompoundNBT nbt = new OrderedCompoundNBT();
+		CompoundNBT nbt = new CompoundSNBT();
 		nbt.putString("uuid", uuid.toString());
 		nbt.putString("name", name);
 		nbt.putBoolean("can_edit", canEdit);
 		nbt.putLong("money", money);
 		nbt.putBoolean("auto_pin", autoPin);
 
-		CompoundNBT taskDataNBT = new OrderedCompoundNBT();
+		CompoundNBT taskDataNBT = new CompoundSNBT();
 
 		List<TaskData> taskDataList = new ArrayList<>(taskData.values());
 		taskDataList.sort(Comparator.comparingInt(o -> o.task.id));
@@ -199,7 +198,7 @@ public class PlayerData implements INBTSerializable<CompoundNBT>
 		{
 			if (data.progress > 0L)
 			{
-				NBTUtils.putVarLong(taskDataNBT, QuestObjectBase.getCodeString(data.task), data.progress);
+				taskDataNBT.putLong(QuestObjectBase.getCodeString(data.task), data.progress);
 			}
 		}
 

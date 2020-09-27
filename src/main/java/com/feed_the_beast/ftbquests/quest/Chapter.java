@@ -2,8 +2,8 @@ package com.feed_the_beast.ftbquests.quest;
 
 import com.feed_the_beast.ftbquests.events.ObjectCompletedEvent;
 import com.feed_the_beast.ftbquests.net.MessageDisplayCompletionToast;
+import com.feed_the_beast.ftbquests.util.CompoundSNBT;
 import com.feed_the_beast.ftbquests.util.NetUtils;
-import com.feed_the_beast.ftbquests.util.OrderedCompoundNBT;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigString;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
@@ -90,34 +90,21 @@ public final class Chapter extends QuestObject
 			nbt.put("subtitle", list);
 		}
 
-		if (alwaysInvisible)
+		nbt.putBoolean("always_invisible", alwaysInvisible);
+		nbt.putInt("group", group != null && !group.invalid ? group.id : 0);
+
+		nbt.putString("default_quest_shape", defaultQuestShape.id);
+
+		ListNBT imageList = new ListNBT();
+
+		for (ChapterImage image : images)
 		{
-			nbt.putBoolean("always_invisible", true);
+			CompoundNBT nbt1 = new CompoundSNBT();
+			image.writeData(nbt1);
+			imageList.add(nbt1);
 		}
 
-		if (group != null && !group.invalid)
-		{
-			nbt.putInt("group", group.id);
-		}
-
-		if (defaultQuestShape != QuestShape.DEFAULT)
-		{
-			nbt.putString("default_quest_shape", defaultQuestShape.id);
-		}
-
-		if (!images.isEmpty())
-		{
-			ListNBT list = new ListNBT();
-
-			for (ChapterImage image : images)
-			{
-				CompoundNBT nbt1 = new OrderedCompoundNBT();
-				image.writeData(nbt1);
-				list.add(nbt1);
-			}
-
-			nbt.put("images", list);
-		}
+		nbt.put("images", imageList);
 	}
 
 	@Override
@@ -339,7 +326,7 @@ public final class Chapter extends QuestObject
 	@Override
 	public String getPath()
 	{
-		return "chapters/" + filename;
+		return "chapters/" + filename + ".snbt";
 	}
 
 	@Override

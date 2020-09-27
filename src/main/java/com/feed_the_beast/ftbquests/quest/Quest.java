@@ -112,28 +112,18 @@ public final class Quest extends QuestObject implements Movable
 		super.writeData(nbt);
 		nbt.putDouble("x", x);
 		nbt.putDouble("y", y);
+		nbt.putString("shape", shape.id);
+		nbt.putString("subtitle", subtitle);
+		nbt.putDouble("size", size);
 
-		if (shape != QuestShape.DEFAULT)
+		ListNBT descriptionArray = new ListNBT();
+
+		for (String value : description)
 		{
-			nbt.putString("shape", shape.id);
+			descriptionArray.add(StringNBT.valueOf(value));
 		}
 
-		if (!subtitle.isEmpty())
-		{
-			nbt.putString("subtitle", subtitle);
-		}
-
-		if (!description.isEmpty())
-		{
-			ListNBT array = new ListNBT();
-
-			for (String value : description)
-			{
-				array.add(StringNBT.valueOf(value));
-			}
-
-			nbt.put("description", array);
-		}
+		nbt.put("description", descriptionArray);
 
 		if (!guidePage.isEmpty())
 		{
@@ -150,45 +140,31 @@ public final class Quest extends QuestObject implements Movable
 			nbt.putBoolean("hide_dependency_lines", hideDependencyLines.isTrue());
 		}
 
-		if (minRequiredDependencies > 0)
-		{
-			nbt.putInt("min_required_dependencies", (byte) minRequiredDependencies);
-		}
+		nbt.putInt("min_required_dependencies", minRequiredDependencies);
 
 		removeInvalidDependencies();
 
-		if (!dependencies.isEmpty())
+		int[] depArray = new int[dependencies.size()];
+		int i = 0;
+
+		for (QuestObject dep : dependencies)
 		{
-			int[] ai = new int[dependencies.size()];
-			int i = 0;
-
-			for (QuestObject dep : dependencies)
-			{
-				ai[i] = dep.id;
-				i++;
-			}
-
-			nbt.putIntArray("dependencies", ai);
+			depArray[i] = dep.id;
+			i++;
 		}
+
+		nbt.putIntArray("dependencies", depArray);
 
 		if (hide != Tristate.DEFAULT)
 		{
 			nbt.putBoolean("hide", hide.isTrue());
 		}
 
-		if (dependencyRequirement != DependencyRequirement.ALL_COMPLETED)
-		{
-			nbt.putString("dependency_requirement", dependencyRequirement.id);
-		}
+		nbt.putString("dependency_requirement", dependencyRequirement.id);
 
 		if (hideTextUntilComplete != Tristate.DEFAULT)
 		{
 			nbt.putBoolean("hide_text_until_complete", hideTextUntilComplete.isTrue());
-		}
-
-		if (size != 1D)
-		{
-			nbt.putDouble("size", size);
 		}
 	}
 
