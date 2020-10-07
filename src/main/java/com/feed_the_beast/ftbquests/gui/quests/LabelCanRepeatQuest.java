@@ -26,6 +26,6 @@ public class LabelCanRepeatQuest extends Widget
 	@Override
 	public void draw(MatrixStack matrixStack, Theme theme, int x, int y, int w, int h)
 	{
-		GuiIcons.REFRESH.draw(x, y, w, h);
+		GuiIcons.REFRESH.draw(matrixStack, x, y, w, h);
 	}
 }

@@ -71,10 +71,10 @@ public class GuiValidItems extends GuiBase
 		{
 			if (isMouseOver())
 			{
-				Color4I.WHITE.withAlpha(33).draw(x, y, w, h);
+				Color4I.WHITE.withAlpha(33).draw(matrixStack, x, y, w, h);
 			}
 
-			GuiHelper.drawItem(stack, x + 2, y + 2, 2, 2, true);
+			GuiHelper.drawItem(matrixStack, stack, x + 2, y + 2, 2, 2, true, null);
 		}
 	}
 
@@ -123,7 +123,7 @@ public class GuiValidItems extends GuiBase
 			@Override
 			public void drawBackground(MatrixStack matrixStack, Theme theme, int x, int y, int w, int h)
 			{
-				theme.drawButton(x - 1, y - 1, w + 2, h + 2, WidgetType.NORMAL);
+				theme.drawButton(matrixStack, x - 1, y - 1, w + 2, h + 2, WidgetType.NORMAL);
 			}
 		};
 

@@ -21,6 +21,7 @@ import com.feed_the_beast.mods.ftbguilibrary.widget.GuiIcons;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
 import com.feed_the_beast.mods.ftbguilibrary.widget.SimpleTextButton;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 
@@ -111,9 +112,9 @@ public class GuiRewardTables extends GuiButtonListBase
 			})
 			{
 				@Override
-				public void drawIcon(Theme theme, int x, int y, int w, int h)
+				public void drawIcon(MatrixStack matrixStack, Theme theme, int x, int y, int w, int h)
 				{
-					(table.lootCrate != null ? GuiIcons.ACCEPT : GuiIcons.ACCEPT_GRAY).draw(x, y, w, h);
+					(table.lootCrate != null ? GuiIcons.ACCEPT : GuiIcons.ACCEPT_GRAY).draw(matrixStack, x, y, w, h);
 				}
 			});
 			getGui().openContextMenu(contextMenu);

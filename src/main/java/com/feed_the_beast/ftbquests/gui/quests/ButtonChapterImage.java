@@ -135,7 +135,7 @@ public class ButtonChapterImage extends Button
 		matrixStack.translate((int) (x + w / 2D), (int) (y + h / 2D), 10);
 		matrixStack.rotate(Vector3f.ZP.rotationDegrees((float) chapterImage.rotation));
 		matrixStack.scale(w / 2F, h / 2F, 1);
-		chapterImage.image.draw(-1, -1, 2, 2);
+		chapterImage.image.draw(matrixStack, -1, -1, 2, 2);
 		matrixStack.pop();
 	}
 }

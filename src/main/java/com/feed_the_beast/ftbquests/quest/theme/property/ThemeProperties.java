@@ -3,10 +3,12 @@ package com.feed_the_beast.ftbquests.quest.theme.property;
 import com.feed_the_beast.ftbquests.events.ThemePropertyEvent;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Color4I;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.util.math.vector.Matrix4f;
 import org.lwjgl.opengl.GL11;
 
 import java.lang.reflect.Field;
@@ -45,15 +47,16 @@ public interface ThemeProperties
 	IconProperty CHECK_ICON = new IconProperty("check_icon", new Icon()
 	{
 		@Override
-		public void draw(int x, int y, int w, int h)
+		public void draw(MatrixStack matrixStack, int x, int y, int w, int h)
 		{
 			GlStateManager.disableTexture();
+			Matrix4f m = matrixStack.getLast().getMatrix();
 			Tessellator tessellator = Tessellator.getInstance();
 			BufferBuilder buffer = tessellator.getBuffer();
 			buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
 
-			double dw = w / 16D;
-			double dh = h / 16D;
+			float dw = w / 16F;
+			float dh = h / 16F;
 
 			Color4I out = ThemeProperties.SYMBOL_OUT.get();
 			int r = out.redi();
@@ -61,15 +64,15 @@ public interface ThemeProperties
 			int b = out.bluei();
 			int a = out.alphai();
 
-			buffer.pos(x + dw * 0, y + dh * 8, 0).color(r, g, b, a).endVertex();
-			buffer.pos(x + dw * 6, y + dh * 14, 0).color(r, g, b, a).endVertex();
-			buffer.pos(x + dw * 6, y + dh * 8, 0).color(r, g, b, a).endVertex();
-			buffer.pos(x + dw * 3, y + dh * 5, 0).color(r, g, b, a).endVertex();
+			buffer.pos(m, x + dw * 0, y + dh * 8, 0).color(r, g, b, a).endVertex();
+			buffer.pos(m, x + dw * 6, y + dh * 14, 0).color(r, g, b, a).endVertex();
+			buffer.pos(m, x + dw * 6, y + dh * 8, 0).color(r, g, b, a).endVertex();
+			buffer.pos(m, x + dw * 3, y + dh * 5, 0).color(r, g, b, a).endVertex();
 
-			buffer.pos(x + dw * 6, y + dh * 8, 0).color(r, g, b, a).endVertex();
-			buffer.pos(x + dw * 6, y + dh * 14, 0).color(r, g, b, a).endVertex();
-			buffer.pos(x + dw * 16, y + dh * 4, 0).color(r, g, b, a).endVertex();
-			buffer.pos(x + dw * 13, y + dh * 1, 0).color(r, g, b, a).endVertex();
+			buffer.pos(m, x + dw * 6, y + dh * 8, 0).color(r, g, b, a).endVertex();
+			buffer.pos(m, x + dw * 6, y + dh * 14, 0).color(r, g, b, a).endVertex();
+			buffer.pos(m, x + dw * 16, y + dh * 4, 0).color(r, g, b, a).endVertex();
+			buffer.pos(m, x + dw * 13, y + dh * 1, 0).color(r, g, b, a).endVertex();
 
 			Color4I in = ThemeProperties.SYMBOL_IN.get();
 			r = in.redi();
@@ -77,15 +80,15 @@ public interface ThemeProperties
 			b = in.bluei();
 			a = in.alphai();
 
-			buffer.pos(x + dw * 0 + dw, y + dh * 8, 0).color(r, g, b, a).endVertex();
-			buffer.pos(x + dw * 6, y + dh * 14 - dh, 0).color(r, g, b, a).endVertex();
-			buffer.pos(x + dw * 6, y + dh * 8 + dh, 0).color(r, g, b, a).endVertex();
-			buffer.pos(x + dw * 3, y + dh * 5 + dh, 0).color(r, g, b, a).endVertex();
+			buffer.pos(m, x + dw * 0 + dw, y + dh * 8, 0).color(r, g, b, a).endVertex();
+			buffer.pos(m, x + dw * 6, y + dh * 14 - dh, 0).color(r, g, b, a).endVertex();
+			buffer.pos(m, x + dw * 6, y + dh * 8 + dh, 0).color(r, g, b, a).endVertex();
+			buffer.pos(m, x + dw * 3, y + dh * 5 + dh, 0).color(r, g, b, a).endVertex();
 
-			buffer.pos(x + dw * 6, y + dh * 8 + dh, 0).color(r, g, b, a).endVertex();
-			buffer.pos(x + dw * 6, y + dh * 14 - dh, 0).color(r, g, b, a).endVertex();
-			buffer.pos(x + dw * 16 - dw, y + dh * 4, 0).color(r, g, b, a).endVertex();
-			buffer.pos(x + dw * 13, y + dh * 1 + dh, 0).color(r, g, b, a).endVertex();
+			buffer.pos(m, x + dw * 6, y + dh * 8 + dh, 0).color(r, g, b, a).endVertex();
+			buffer.pos(m, x + dw * 6, y + dh * 14 - dh, 0).color(r, g, b, a).endVertex();
+			buffer.pos(m, x + dw * 16 - dw, y + dh * 4, 0).color(r, g, b, a).endVertex();
+			buffer.pos(m, x + dw * 13, y + dh * 1 + dh, 0).color(r, g, b, a).endVertex();
 
 			tessellator.draw();
 			GlStateManager.enableTexture();
@@ -105,15 +108,16 @@ public interface ThemeProperties
 	IconProperty ADD_ICON = new IconProperty("add_icon", new Icon()
 	{
 		@Override
-		public void draw(int x, int y, int w, int h)
+		public void draw(MatrixStack matrixStack, int x, int y, int w, int h)
 		{
 			GlStateManager.disableTexture();
+			Matrix4f m = matrixStack.getLast().getMatrix();
 			Tessellator tessellator = Tessellator.getInstance();
 			BufferBuilder buffer = tessellator.getBuffer();
 			buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
 
-			double dw = w / 16D;
-			double dh = h / 16D;
+			float dw = w / 16F;
+			float dh = h / 16F;
 
 			Color4I out = ThemeProperties.SYMBOL_OUT.get();
 			int r = out.redi();
@@ -121,15 +125,15 @@ public interface ThemeProperties
 			int b = out.bluei();
 			int a = out.alphai();
 
-			buffer.pos(x + dw * 6, y + dh * 2, 0).color(r, g, b, a).endVertex();
-			buffer.pos(x + dw * 6, y + dh * 14, 0).color(r, g, b, a).endVertex();
-			buffer.pos(x + dw * 10, y + dh * 14, 0).color(r, g, b, a).endVertex();
-			buffer.pos(x + dw * 10, y + dh * 2, 0).color(r, g, b, a).endVertex();
+			buffer.pos(m, x + dw * 6, y + dh * 2, 0).color(r, g, b, a).endVertex();
+			buffer.pos(m, x + dw * 6, y + dh * 14, 0).color(r, g, b, a).endVertex();
+			buffer.pos(m, x + dw * 10, y + dh * 14, 0).color(r, g, b, a).endVertex();
+			buffer.pos(m, x + dw * 10, y + dh * 2, 0).color(r, g, b, a).endVertex();
 
-			buffer.pos(x + dw * 2, y + dh * 6, 0).color(r, g, b, a).endVertex();
-			buffer.pos(x + dw * 2, y + dh * 10, 0).color(r, g, b, a).endVertex();
-			buffer.pos(x + dw * 14, y + dh * 10, 0).color(r, g, b, a).endVertex();
-			buffer.pos(x + dw * 14, y + dh * 6, 0).color(r, g, b, a).endVertex();
+			buffer.pos(m, x + dw * 2, y + dh * 6, 0).color(r, g, b, a).endVertex();
+			buffer.pos(m, x + dw * 2, y + dh * 10, 0).color(r, g, b, a).endVertex();
+			buffer.pos(m, x + dw * 14, y + dh * 10, 0).color(r, g, b, a).endVertex();
+			buffer.pos(m, x + dw * 14, y + dh * 6, 0).color(r, g, b, a).endVertex();
 
 			Color4I in = ThemeProperties.SYMBOL_IN.get();
 			r = in.redi();
@@ -137,15 +141,15 @@ public interface ThemeProperties
 			b = in.bluei();
 			a = in.alphai();
 
-			buffer.pos(x + dw * 7, y + dh * 3, 0).color(r, g, b, a).endVertex();
-			buffer.pos(x + dw * 7, y + dh * 13, 0).color(r, g, b, a).endVertex();
-			buffer.pos(x + dw * 9, y + dh * 13, 0).color(r, g, b, a).endVertex();
-			buffer.pos(x + dw * 9, y + dh * 3, 0).color(r, g, b, a).endVertex();
+			buffer.pos(m, x + dw * 7, y + dh * 3, 0).color(r, g, b, a).endVertex();
+			buffer.pos(m, x + dw * 7, y + dh * 13, 0).color(r, g, b, a).endVertex();
+			buffer.pos(m, x + dw * 9, y + dh * 13, 0).color(r, g, b, a).endVertex();
+			buffer.pos(m, x + dw * 9, y + dh * 3, 0).color(r, g, b, a).endVertex();
 
-			buffer.pos(x + dw * 3, y + dh * 7, 0).color(r, g, b, a).endVertex();
-			buffer.pos(x + dw * 3, y + dh * 9, 0).color(r, g, b, a).endVertex();
-			buffer.pos(x + dw * 13, y + dh * 9, 0).color(r, g, b, a).endVertex();
-			buffer.pos(x + dw * 13, y + dh * 7, 0).color(r, g, b, a).endVertex();
+			buffer.pos(m, x + dw * 3, y + dh * 7, 0).color(r, g, b, a).endVertex();
+			buffer.pos(m, x + dw * 3, y + dh * 9, 0).color(r, g, b, a).endVertex();
+			buffer.pos(m, x + dw * 13, y + dh * 9, 0).color(r, g, b, a).endVertex();
+			buffer.pos(m, x + dw * 13, y + dh * 7, 0).color(r, g, b, a).endVertex();
 
 			tessellator.draw();
 			GlStateManager.enableTexture();

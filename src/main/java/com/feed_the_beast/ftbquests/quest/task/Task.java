@@ -20,6 +20,7 @@ import com.feed_the_beast.mods.ftbguilibrary.utils.StringUtils;
 import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
 import com.feed_the_beast.mods.ftbguilibrary.widget.WrappedIngredient;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.StringTextComponent;
@@ -184,9 +185,9 @@ public abstract class Task extends QuestObject
 		return group.getGroup(getObjectType().id).getGroup(type.getRegistryName().getNamespace()).getGroup(type.getRegistryName().getPath());
 	}
 
-	public void drawGUI(@Nullable TaskData data, int x, int y, int w, int h)
+	public void drawGUI(@Nullable TaskData data, MatrixStack matrixStack, int x, int y, int w, int h)
 	{
-		getIcon().draw(x, y, w, h);
+		getIcon().draw(matrixStack, x, y, w, h);
 	}
 
 	public boolean canInsertItem()

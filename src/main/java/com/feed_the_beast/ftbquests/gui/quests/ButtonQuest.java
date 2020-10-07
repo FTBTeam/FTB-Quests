@@ -376,9 +376,9 @@ public class ButtonQuest extends Button
 
 		QuestShape shape = quest.getShape();
 
-		shape.shape.withColor(Color4I.DARK_GRAY).draw(x, y, w, h);
-		shape.background.withColor(Color4I.WHITE.withAlpha(150)).draw(x, y, w, h);
-		shape.outline.withColor(outlineColor).draw(x, y, w, h);
+		shape.shape.withColor(Color4I.DARK_GRAY).draw(matrixStack, x, y, w, h);
+		shape.background.withColor(Color4I.WHITE.withAlpha(150)).draw(matrixStack, x, y, w, h);
+		shape.outline.withColor(outlineColor).draw(matrixStack, x, y, w, h);
 
 		if (!icon.isEmpty())
 		{
@@ -386,7 +386,7 @@ public class ButtonQuest extends Button
 			matrixStack.push();
 			matrixStack.translate(x + (w - s) / 2D, y + (h - s) / 2D, 0F);
 			matrixStack.scale(s, s, 1F);
-			icon.draw(0, 0, 1, 1);
+			icon.draw(matrixStack, 0, 0, 1, 1);
 			matrixStack.pop();
 		}
 
@@ -401,8 +401,8 @@ public class ButtonQuest extends Button
 			matrixStack.push();
 			matrixStack.translate(0, 0, 500);
 			Color4I col = Color4I.WHITE.withAlpha((int) (190D + Math.sin(System.currentTimeMillis() * 0.003D) * 50D));
-			shape.outline.withColor(col).draw(x, y, w, h);
-			shape.background.withColor(col).draw(x, y, w, h);
+			shape.outline.withColor(col).draw(matrixStack, x, y, w, h);
+			shape.background.withColor(col).draw(matrixStack, x, y, w, h);
 			matrixStack.pop();
 		}
 
@@ -410,7 +410,7 @@ public class ButtonQuest extends Button
 		{
 			matrixStack.push();
 			matrixStack.translate(0, 0, 500);
-			shape.shape.withColor(Color4I.BLACK.withAlpha(100)).draw(x, y, w, h);
+			shape.shape.withColor(Color4I.BLACK.withAlpha(100)).draw(matrixStack, x, y, w, h);
 			matrixStack.pop();
 		}
 
@@ -418,7 +418,7 @@ public class ButtonQuest extends Button
 		{
 			matrixStack.push();
 			matrixStack.translate(0, 0, 500);
-			shape.shape.withColor(Color4I.WHITE.withAlpha(100)).draw(x, y, w, h);
+			shape.shape.withColor(Color4I.WHITE.withAlpha(100)).draw(matrixStack, x, y, w, h);
 			matrixStack.pop();
 		}
 
@@ -428,7 +428,7 @@ public class ButtonQuest extends Button
 			matrixStack.push();
 			matrixStack.translate(x + w - s, y, 500);
 			matrixStack.scale(s, s, 1F);
-			qicon.draw(0, 0, 1, 1);
+			qicon.draw(matrixStack, 0, 0, 1, 1);
 			matrixStack.pop();
 		}
 	}

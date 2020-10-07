@@ -185,14 +185,14 @@ public class FTBQuestsClientEventHandler
 			IFormattableTextComponent cot = currentlyObserving.getTitle().deepCopy().mergeStyle(TextFormatting.YELLOW, TextFormatting.UNDERLINE);
 			int sw = mc.fontRenderer.getStringPropertyWidth(cot);
 			int bw = Math.max(sw, 100);
-			Color4I.DARK_GRAY.withAlpha(130).draw(cx - bw / 2 - 3, cy - 63, bw + 6, 29);
-			GuiHelper.drawHollowRect(cx - bw / 2 - 3, cy - 63, bw + 6, 29, Color4I.DARK_GRAY, false);
+			Color4I.DARK_GRAY.withAlpha(130).draw(matrixStack, cx - bw / 2 - 3, cy - 63, bw + 6, 29);
+			GuiHelper.drawHollowRect(matrixStack, cx - bw / 2 - 3, cy - 63, bw + 6, 29, Color4I.DARK_GRAY, false);
 
 			mc.fontRenderer.func_243246_a(matrixStack, cot, cx - sw / 2F, cy - 60, 0xFFFFFF);
 			double completed = (currentlyObservingTicks + event.getPartialTicks()) / (double) currentlyObserving.ticks;
 
-			GuiHelper.drawHollowRect(cx - bw / 2, cy - 49, bw, 12, Color4I.DARK_GRAY, false);
-			Color4I.LIGHT_BLUE.withAlpha(130).draw(cx - bw / 2 + 1, cy - 48, (int) ((bw - 2D) * completed), 10);
+			GuiHelper.drawHollowRect(matrixStack, cx - bw / 2, cy - 49, bw, 12, Color4I.DARK_GRAY, false);
+			Color4I.LIGHT_BLUE.withAlpha(130).draw(matrixStack, cx - bw / 2 + 1, cy - 48, (int) ((bw - 2D) * completed), 10);
 
 			String cop = (currentlyObservingTicks * 100L / currentlyObserving.ticks) + "%";
 			mc.fontRenderer.drawStringWithShadow(matrixStack, cop, cx - mc.fontRenderer.getStringWidth(cop) / 2F, cy - 47, 0xFFFFFF);
@@ -289,7 +289,7 @@ public class FTBQuestsClientEventHandler
 				matrixStack.translate(event.getWindow().getScaledWidth() - mw * scale - 8D, cy - list.size() * 4.5D * scale, 100D);
 				matrixStack.scale(scale, scale, 1F);
 
-				Color4I.BLACK.withAlpha(100).draw(0, 0, mw + 8, list.size() * 9 + 8);
+				Color4I.BLACK.withAlpha(100).draw(matrixStack, 0, 0, mw + 8, list.size() * 9 + 8);
 
 				for (int i = 0; i < list.size(); i++)
 				{

@@ -147,16 +147,16 @@ public class ButtonReward extends Button
 
 		if (!ClientQuestFile.exists())
 		{
-			GuiIcons.CLOSE.draw(x + w - 9, y + 1, 8, 8);
+			GuiIcons.CLOSE.draw(matrixStack, x + w - 9, y + 1, 8, 8);
 		}
 		else if (ClientQuestFile.INSTANCE.self.getClaimType(reward).isClaimed())
 		{
-			ThemeProperties.CHECK_ICON.get().draw(x + w - 9, y + 1, 8, 8);
+			ThemeProperties.CHECK_ICON.get().draw(matrixStack, x + w - 9, y + 1, 8, 8);
 			completed = true;
 		}
 		else if (ClientQuestFile.INSTANCE.self.isComplete(reward.quest))
 		{
-			ThemeProperties.ALERT_ICON.get().draw(x + w - 9, y + 1, 8, 8);
+			ThemeProperties.ALERT_ICON.get().draw(matrixStack, x + w - 9, y + 1, 8, 8);
 		}
 
 		matrixStack.pop();

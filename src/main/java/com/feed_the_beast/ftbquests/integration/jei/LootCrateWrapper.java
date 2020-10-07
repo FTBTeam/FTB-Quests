@@ -118,7 +118,7 @@ public class LootCrateWrapper implements /*IRecipeWrapper, */ITooltipCallback<It
 	//FIXME: @Override
 	public void drawInfo(MatrixStack matrixStack, Minecraft mc, int recipeWidth, int recipeHeight, int mouseX, int mouseY)
 	{
-		GuiHelper.drawItem(itemStack, 0, 0, 2, 2, true);
+		GuiHelper.drawItem(matrixStack, itemStack, 0, 0, 2, 2, true, null);
 		mc.fontRenderer.func_243246_a(matrixStack, crate.table.getTitle().mergeStyle(TextFormatting.UNDERLINE), 36, 0, 0xFF222222);
 
 		int total = ClientQuestFile.INSTANCE.lootCrateNoDrop.passive;
