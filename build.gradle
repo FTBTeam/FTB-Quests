@@ -118,21 +118,10 @@ jar {
 	}
 }
 
-task deobfJar(type: Jar) {
-	from sourceSets.main.output
-	classifier 'deobf'
-}
-
-build.dependsOn deobfJar
-
 def reobfFile = file("$buildDir/reobfJar/output.jar")
 def reobfArtifact = artifacts.add('default', reobfFile) {
 	type 'jar'
 	builtBy 'reobfJar'
-}
-
-artifacts {
-	archives deobfJar
 }
 
 if (ENV.LOCAL_MAVEN) {
@@ -149,18 +138,20 @@ if (ENV.CURSEFORGE_KEY) {
 	curseforge {
 		apiKey = ENV.CURSEFORGE_KEY
 		project {
-			id = "${curseforge_id}"
+			id = project.curseforge_id
 			releaseType = "release"
-			addGameVersion "1.16.1"
+			addGameVersion "1.16.2"
+			addGameVersion "1.16.3"
 			relations {
-				optionalDependency 'aurora'
+				requiredDependency 'ftb-gui-library'
+				requiredDependency 'item-filters'
+				optionalDependency 'kubejs'
 				optionalDependency 'jei'
 				optionalDependency 'packmode'
 				optionalDependency 'game-stages'
 			}
 			changelog = getGitChangelog
 			changelogType = 'markdown'
-			addArtifact(deobfJar)
 		}
 	}
 }
