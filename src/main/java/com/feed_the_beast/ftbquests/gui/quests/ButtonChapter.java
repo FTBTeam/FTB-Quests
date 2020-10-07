@@ -52,7 +52,7 @@ public class ButtonChapter extends ButtonTab
 		if (chapter == treeGui.selectedChapter || treeGui.selectedChapter != null && chapter == treeGui.selectedChapter.group)
 		{
 			Color4I backgroundColor = ThemeProperties.WIDGET_BACKGROUND.get(treeGui.selectedChapter);
-			backgroundColor.draw(x + 1, y, w - 2, h);
+			backgroundColor.draw(matrixStack, x + 1, y, w - 2, h);
 		}
 
 		if (treeGui.chapterHoverPanel.chapter == this)
@@ -61,14 +61,14 @@ public class ButtonChapter extends ButtonTab
 		}
 
 		int is = width < 18 ? 8 : 16;
-		icon.draw(x + (w - is) / 2, y + (h - is) / 2, is, is);
+		icon.draw(matrixStack, x + (w - is) / 2, y + (h - is) / 2, is, is);
 
 		if (chapter.quests.isEmpty() && !chapter.hasChildren())
 		{
 			matrixStack.push();
 			matrixStack.translate(0, 0, 450);
 			RenderSystem.enableBlend();
-			ThemeProperties.CLOSE_ICON.get().draw(x + w - 10, y + 2, 8, 8);
+			ThemeProperties.CLOSE_ICON.get().draw(matrixStack, x + w - 10, y + 2, 8, 8);
 			matrixStack.pop();
 			return;
 		}
@@ -78,7 +78,7 @@ public class ButtonChapter extends ButtonTab
 			matrixStack.push();
 			matrixStack.translate(0, 0, 450);
 			RenderSystem.enableBlend();
-			ThemeProperties.ALERT_ICON.get().draw(x + w - 7, y + 2, 6, 6);
+			ThemeProperties.ALERT_ICON.get().draw(matrixStack, x + w - 7, y + 2, 6, 6);
 			matrixStack.pop();
 		}
 		else if (treeGui.file.self.isComplete(chapter))
@@ -86,7 +86,7 @@ public class ButtonChapter extends ButtonTab
 			matrixStack.push();
 			matrixStack.translate(0, 0, 450);
 			RenderSystem.enableBlend();
-			ThemeProperties.CHECK_ICON.get().draw(x + w - 8, y + 1, 8, 8);
+			ThemeProperties.CHECK_ICON.get().draw(matrixStack, x + w - 8, y + 1, 8, 8);
 			matrixStack.pop();
 		}
 	}

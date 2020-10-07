@@ -62,7 +62,7 @@ public class ButtonModpack extends ButtonTab
 			matrixStack.push();
 			matrixStack.translate(x + w - s, y, 500);
 			matrixStack.scale(s, s, 1F);
-			ThemeProperties.ALERT_ICON.get(treeGui.file).draw(0, 0, 1, 1);
+			ThemeProperties.ALERT_ICON.get(treeGui.file).draw(matrixStack, 0, 0, 1, 1);
 			matrixStack.pop();
 		}
 	}

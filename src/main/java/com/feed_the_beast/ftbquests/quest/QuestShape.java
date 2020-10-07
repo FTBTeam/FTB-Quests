@@ -4,6 +4,7 @@ import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.mods.ftbguilibrary.config.NameMap;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.icon.ImageIcon;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -54,10 +55,10 @@ public final class QuestShape extends Icon
 
 	@Override
 	@OnlyIn(Dist.CLIENT)
-	public void draw(int x, int y, int w, int h)
+	public void draw(MatrixStack matrixStack, int x, int y, int w, int h)
 	{
-		background.draw(x, y, w, h);
-		outline.draw(x, y, w, h);
+		background.draw(matrixStack, x, y, w, h);
+		outline.draw(matrixStack, x, y, w, h);
 	}
 
 	public int hashCode()

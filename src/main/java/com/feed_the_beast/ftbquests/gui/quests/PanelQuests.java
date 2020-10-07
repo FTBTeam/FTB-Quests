@@ -425,7 +425,7 @@ public class PanelQuests extends Panel
 						matrixStack.translate(sx - bs * m.getWidth() / 2D, sy - bs * m.getHeight() / 2D, 0D);
 						matrixStack.scale((float) (bs * m.getWidth()), (float) (bs * m.getHeight()), 1F);
 						GuiHelper.setupDrawing();
-						m.getShape().shape.withColor(Color4I.WHITE.withAlpha(30)).draw(0, 0, 1, 1);
+						m.getShape().shape.withColor(Color4I.WHITE.withAlpha(30)).draw(matrixStack, 0, 0, 1, 1);
 						matrixStack.pop();
 					}
 
@@ -438,7 +438,7 @@ public class PanelQuests extends Panel
 
 						matrixStack.push();
 						matrixStack.translate(0, 0, 1000);
-						GuiHelper.drawHollowRect((int) boxX, (int) boxY, (int) boxW, (int) boxH, Color4I.WHITE.withAlpha(30), false);
+						GuiHelper.drawHollowRect(matrixStack, (int) boxX, (int) boxY, (int) boxW, (int) boxH, Color4I.WHITE.withAlpha(30), false);
 						matrixStack.pop();
 					}
 				}
@@ -452,16 +452,16 @@ public class PanelQuests extends Panel
 					matrixStack.translate(sx - bs / 2D, sy - bs / 2D, 0D);
 					matrixStack.scale((float) bs, (float) bs, 1F);
 					GuiHelper.setupDrawing();
-					treeGui.selectedChapter.getDefaultQuestShape().shape.withColor(Color4I.WHITE.withAlpha(10)).draw(0, 0, 1, 1);
+					treeGui.selectedChapter.getDefaultQuestShape().shape.withColor(Color4I.WHITE.withAlpha(10)).draw(matrixStack, 0, 0, 1, 1);
 					matrixStack.pop();
 
 					if (GuiQuests.grid && treeGui.viewQuestPanel.quest == null)
 					{
 						matrixStack.push();
 						matrixStack.translate(0, 0, 1000);
-						Color4I.WHITE.draw((int) sx, (int) sy, 1, 1);
-						Color4I.WHITE.withAlpha(30).draw(getX(), (int) sy, width, 1);
-						Color4I.WHITE.withAlpha(30).draw((int) sx, getY(), 1, height);
+						Color4I.WHITE.draw(matrixStack, (int) sx, (int) sy, 1, 1);
+						Color4I.WHITE.withAlpha(30).draw(matrixStack, getX(), (int) sy, width, 1);
+						Color4I.WHITE.withAlpha(30).draw(matrixStack, (int) sx, getY(), 1, height);
 						matrixStack.pop();
 					}
 				}

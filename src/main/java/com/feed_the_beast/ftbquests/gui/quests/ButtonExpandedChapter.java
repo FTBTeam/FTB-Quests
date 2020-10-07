@@ -103,34 +103,34 @@ public class ButtonExpandedChapter extends SimpleTextButton
 	@Override
 	public void drawBackground(MatrixStack matrixStack, Theme theme, int x, int y, int w, int h)
 	{
-		theme.drawGui(x, y, w, h, WidgetType.NORMAL);
+		theme.drawGui(matrixStack, x, y, w, h, WidgetType.NORMAL);
 
 		if (isMouseOver())
 		{
-			ThemeProperties.WIDGET_BACKGROUND.get().draw(x, y, w - 1, h);
+			ThemeProperties.WIDGET_BACKGROUND.get().draw(matrixStack, x, y, w - 1, h);
 		}
 
 		if (parent.widgets.size() > 1)
 		{
 			if (parent.widgets.get(0) == this)
 			{
-				theme.drawButton(x, y, w, h, WidgetType.NORMAL);
+				theme.drawButton(matrixStack, x, y, w, h, WidgetType.NORMAL);
 			}
 			else
 			{
 				Color4I borderColor = ThemeProperties.WIDGET_BORDER.get(treeGui.selectedChapter);
 				//treeGui.borderColor.draw(x, y, 1, h);
-				borderColor.draw(x + w - 1, y, 1, h);
+				borderColor.draw(matrixStack, x + w - 1, y, 1, h);
 
 				if (parent.widgets.get(parent.widgets.size() - 1) == this)
 				{
-					borderColor.draw(x, y + h - 1, w - 1, h);
+					borderColor.draw(matrixStack, x, y + h - 1, w - 1, h);
 				}
 			}
 		}
 		else
 		{
-			GuiHelper.drawHollowRect(x, y, w, h, ThemeProperties.WIDGET_BORDER.get(), false);
+			GuiHelper.drawHollowRect(matrixStack, x, y, w, h, ThemeProperties.WIDGET_BORDER.get(), false);
 		}
 	}
 
@@ -145,14 +145,14 @@ public class ButtonExpandedChapter extends SimpleTextButton
 		{
 			matrixStack.push();
 			matrixStack.translate(0, 0, 450);
-			ThemeProperties.ALERT_ICON.get().draw(x + w2 - 7, y + 3, 6, 6);
+			ThemeProperties.ALERT_ICON.get().draw(matrixStack, x + w2 - 7, y + 3, 6, 6);
 			matrixStack.pop();
 		}
 		else if (treeGui.file.self.isComplete(chapter))
 		{
 			matrixStack.push();
 			matrixStack.translate(0, 0, 450);
-			ThemeProperties.CHECK_ICON.get().draw(x + w2 - 8, y + 2, 8, 8);
+			ThemeProperties.CHECK_ICON.get().draw(matrixStack, x + w2 - 8, y + 2, 8, 8);
 			matrixStack.pop();
 		}
 	}

@@ -231,9 +231,9 @@ public class GuiQuests extends GuiBase
 						}
 
 						@Override
-						public void drawIcon(Theme theme, int x, int y, int w, int h)
+						public void drawIcon(MatrixStack matrixStack, Theme theme, int x, int y, int w, int h)
 						{
-							c.getIcon(c.value).draw(x, y, w, h);
+							c.getIcon(c.value).draw(matrixStack, x, y, w, h);
 						}
 					});
 				}
@@ -483,11 +483,11 @@ public class GuiQuests extends GuiBase
 		Color4I borderColor = ThemeProperties.WIDGET_BORDER.get(selectedChapter);
 		Color4I backgroundColor = ThemeProperties.WIDGET_BACKGROUND.get(selectedChapter);
 
-		borderColor.draw(x + pw - 1, y + 1, 1, h - 2);
-		backgroundColor.draw(x + 1, y + 1, pw - 2, h - 2);
+		borderColor.draw(matrixStack, x + pw - 1, y + 1, 1, h - 2);
+		backgroundColor.draw(matrixStack, x + 1, y + 1, pw - 2, h - 2);
 
-		borderColor.draw(x + w - pw, y + 1, 1, h - 2);
-		backgroundColor.draw(x + w - pw + 1, y + 1, pw - 2, h - 2);
+		borderColor.draw(matrixStack, x + w - pw, y + 1, 1, h - 2);
+		backgroundColor.draw(matrixStack, x + w - pw + 1, y + 1, pw - 2, h - 2);
 
 		if (grabbed != 0)
 		{
@@ -521,7 +521,7 @@ public class GuiQuests extends GuiBase
 	public void drawForeground(MatrixStack matrixStack, Theme theme, int x, int y, int w, int h)
 	{
 		Color4I borderColor = ThemeProperties.WIDGET_BORDER.get(selectedChapter);
-		GuiHelper.drawHollowRect(x, y, w, h, borderColor, false);
+		GuiHelper.drawHollowRect(matrixStack, x, y, w, h, borderColor, false);
 		super.drawForeground(matrixStack, theme, x, y, w, h);
 	}
 

@@ -212,7 +212,7 @@ public class ButtonTask extends Button
 	@Override
 	public void drawIcon(MatrixStack matrixStack, Theme theme, int x, int y, int w, int h)
 	{
-		task.drawGUI(treeGui.file.self.getTaskData(task), x, y, w, h);
+		task.drawGUI(treeGui.file.self.getTaskData(task), matrixStack, x, y, w, h);
 	}
 
 	@Override
@@ -227,7 +227,7 @@ public class ButtonTask extends Button
 			matrixStack.push();
 			matrixStack.translate(0, 0, 500);
 			RenderSystem.enableBlend();
-			ThemeProperties.CHECK_ICON.get().draw(x + w - 9, y + 1, 8, 8);
+			ThemeProperties.CHECK_ICON.get().draw(matrixStack, x + w - 9, y + 1, 8, 8);
 			matrixStack.pop();
 		}
 		else
