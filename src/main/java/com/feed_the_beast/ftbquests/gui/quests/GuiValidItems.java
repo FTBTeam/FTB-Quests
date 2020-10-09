@@ -21,7 +21,6 @@ import com.feed_the_beast.mods.ftbguilibrary.widget.Widget;
 import com.feed_the_beast.mods.ftbguilibrary.widget.WidgetType;
 import com.feed_the_beast.mods.ftbguilibrary.widget.WrappedIngredient;
 import com.mojang.blaze3d.matrix.MatrixStack;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -181,7 +180,7 @@ public class GuiValidItems extends GuiBase
 	@Override
 	public void addWidgets()
 	{
-		title = I18n.format("ftbquests.task.ftbquests.item.valid_for", task.getTitle());
+		title = new TranslationTextComponent("ftbquests.task.ftbquests.item.valid_for", task.getTitle()).getString();
 		setWidth(Math.max(156, getTheme().getStringWidth(title) + 12));
 		add(itemPanel);
 		add(backButton);

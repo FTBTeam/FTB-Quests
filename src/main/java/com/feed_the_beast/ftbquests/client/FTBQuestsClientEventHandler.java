@@ -20,6 +20,7 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.toasts.SystemToast;
+import net.minecraft.util.IReorderingProcessor;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.StringTextComponent;
@@ -200,7 +201,7 @@ public class FTBQuestsClientEventHandler
 
 		if (!data.pinnedQuests.isEmpty())
 		{
-			List<String> list = new ArrayList<>();
+			List<IReorderingProcessor> list = new ArrayList<>();
 			boolean first = true;
 
 			if (data.pinnedQuests.contains(1))
@@ -217,7 +218,7 @@ public class FTBQuestsClientEventHandler
 							}
 							else
 							{
-								list.add("");
+								list.add(IReorderingProcessor.field_242232_a);
 							}
 
 							/* FIXME
@@ -249,12 +250,15 @@ public class FTBQuestsClientEventHandler
 						}
 						else
 						{
-							list.add("");
+							list.add(IReorderingProcessor.field_242232_a);
 						}
 
 						if (data.isComplete(quest))
 						{
-							list.add(TextFormatting.BOLD.toString() + TextFormatting.GREEN + mc.fontRenderer.trimStringToWidth(quest.getTitle(), 160) + TextFormatting.DARK_GREEN + " 100%");
+							StringTextComponent component = new StringTextComponent("");
+							component.append(quest.getTitle().mergeStyle(TextFormatting.BOLD, TextFormatting.GREEN));
+							component.append(new StringTextComponent(" 100%").mergeStyle(TextFormatting.DARK_GREEN));
+							list.addAll(mc.fontRenderer.trimStringToWidth(component, 160));
 						}
 						else
 						{
@@ -278,9 +282,9 @@ public class FTBQuestsClientEventHandler
 			{
 				int mw = 0;
 
-				for (String s : list)
+				for (IReorderingProcessor s : list)
 				{
-					mw = Math.max(mw, mc.fontRenderer.getStringWidth(s));
+					mw = Math.max(mw, (int) mc.fontRenderer.getCharacterManager().func_243238_a(s));
 				}
 
 				float scale = ThemeProperties.PINNED_QUEST_SIZE.get(file).floatValue();
@@ -293,7 +297,7 @@ public class FTBQuestsClientEventHandler
 
 				for (int i = 0; i < list.size(); i++)
 				{
-					mc.fontRenderer.drawStringWithShadow(matrixStack, list.get(i), 4, i * 9 + 4, 0xFFFFFFFF);
+					mc.fontRenderer.func_238407_a_(matrixStack, list.get(i), 4, i * 9 + 4, 0xFFFFFFFF);
 				}
 
 				matrixStack.pop();
