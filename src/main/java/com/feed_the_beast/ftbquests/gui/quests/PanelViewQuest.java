@@ -38,7 +38,7 @@ public class PanelViewQuest extends Panel
 	private IFormattableTextComponent title = (IFormattableTextComponent) StringTextComponent.EMPTY;
 	private Icon icon = Icon.EMPTY;
 	public Button buttonClose;
-	public Button buttonOnScreen;
+	public Button buttonPin;
 	public BlankPanel panelContent;
 	public BlankPanel panelTasks;
 	public BlankPanel panelRewards;
@@ -153,8 +153,8 @@ public class PanelViewQuest extends Panel
 		add(buttonClose = new ButtonCloseViewQuest(this));
 		buttonClose.setPosAndSize(w - 14, 2, 12, 12);
 
-		add(buttonOnScreen = new ButtonPinViewQuest(this));
-		buttonOnScreen.setPosAndSize(w - 26, 2, 12, 12);
+		add(buttonPin = new ButtonPinViewQuest(this));
+		buttonPin.setPosAndSize(w - 26, 2, 12, 12);
 
 		TextField textFieldTasks = new TextField(panelContent)
 		{
