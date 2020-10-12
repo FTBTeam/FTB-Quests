@@ -99,9 +99,9 @@ dependencies {
 		transitive = false
 		changing = true
 	}))
-	compileOnly fg.deobf(curse.resolve('jei', project.jei_file))
-	compileOnly fg.deobf(curse.resolve('bookshelf', project.bookshelf_file))
-	compileOnly fg.deobf(curse.resolve('game-stages', project.gamestages_file))
+	compile fg.deobf(curse.resolve('jei', project.jei_file))
+	compile fg.deobf(curse.resolve('bookshelf', project.bookshelf_file))
+	compile fg.deobf(curse.resolve('game-stages', project.gamestages_file))
 }
 
 jar {
@@ -139,7 +139,7 @@ if (ENV.CURSEFORGE_KEY) {
 		apiKey = ENV.CURSEFORGE_KEY
 		project {
 			id = project.curseforge_id
-			releaseType = "release"
+			releaseType = "alpha"
 			addGameVersion "1.16.2"
 			addGameVersion "1.16.3"
 			relations {

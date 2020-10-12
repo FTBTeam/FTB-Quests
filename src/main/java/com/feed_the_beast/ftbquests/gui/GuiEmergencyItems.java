@@ -61,7 +61,10 @@ public class GuiEmergencyItems extends GuiBase
 		public void draw(MatrixStack matrixStack, Theme theme, int x, int y, int w, int h)
 		{
 			QuestShape.RSQUARE.outline.draw(matrixStack, x - 3, y - 3, w + 6, h + 6);
-			GuiHelper.drawItem(matrixStack, stack, x, y, true);
+			matrixStack.push();
+			matrixStack.translate(0, 0, 100);
+			GuiHelper.drawItem(matrixStack, stack, x, y, 1F, 1F, true, null);
+			matrixStack.pop();
 		}
 
 		@Override

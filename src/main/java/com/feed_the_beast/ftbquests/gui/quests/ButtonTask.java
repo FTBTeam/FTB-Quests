@@ -225,7 +225,7 @@ public class ButtonTask extends Button
 		if (treeGui.file.self.isComplete(task))
 		{
 			matrixStack.push();
-			matrixStack.translate(0, 0, 500);
+			matrixStack.translate(0, 0, 200);
 			RenderSystem.enableBlend();
 			ThemeProperties.CHECK_ICON.get().draw(matrixStack, x + w - 9, y + 1, 8, 8);
 			matrixStack.pop();

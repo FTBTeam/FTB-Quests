@@ -48,14 +48,19 @@ public class LootCrateCategory implements IRecipeCategory<LootCrateWrapper>
 			@Override
 			public void draw(MatrixStack matrixStack, int xOffset, int yOffset)
 			{
+				matrixStack.push();
+				matrixStack.translate(0, 0, 100);
+
 				if (!LootCrateRegistry.INSTANCE.list.isEmpty())
 				{
-					GuiHelper.drawItem(matrixStack, LootCrateRegistry.INSTANCE.list.get((int) ((System.currentTimeMillis() / 1000L) % LootCrateRegistry.INSTANCE.list.size())).itemStack, xOffset, yOffset, true);
+					GuiHelper.drawItem(matrixStack, LootCrateRegistry.INSTANCE.list.get((int) ((System.currentTimeMillis() / 1000L) % LootCrateRegistry.INSTANCE.list.size())).itemStack, xOffset, yOffset, 1F, 1F, true, null);
 				}
 				else
 				{
-					GuiHelper.drawItem(matrixStack, new ItemStack(FTBQuestsItems.LOOTCRATE), xOffset, yOffset, true);
+					GuiHelper.drawItem(matrixStack, new ItemStack(FTBQuestsItems.LOOTCRATE), xOffset, yOffset, 1F, 1F, true, null);
 				}
+
+				matrixStack.pop();
 			}
 		};
 	}
