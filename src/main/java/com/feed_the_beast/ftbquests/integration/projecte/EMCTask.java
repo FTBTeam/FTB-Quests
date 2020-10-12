@@ -131,7 +131,6 @@ public class EMCTask extends Task implements ISingleLongValueTask
 		}
 
 		@Override
-		@SuppressWarnings("deprecation")
 		public void submitTask(EntityPlayerMP player, ItemStack item)
 		{
 			if (isComplete())
@@ -141,14 +140,14 @@ public class EMCTask extends Task implements ISingleLongValueTask
 
 			IKnowledgeProvider knowledge = ProjectEAPI.getTransmutationProxy().getKnowledgeProviderFor(player.getUniqueID());
 
-			double emc = knowledge.getEmc();
-			double add = Math.min(emc, task.value - progress);
+			long emc = knowledge.getEmc();
+			long add = Math.min(emc, task.value - progress);
 
-			if (add > 0D)
+			if (add > 0L)
 			{
 				knowledge.setEmc(emc - add);
 				knowledge.sync(player);
-				addProgress((long) add);
+				addProgress(add);
 			}
 		}
 	}

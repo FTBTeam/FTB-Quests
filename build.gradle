@@ -49,8 +49,8 @@ repositories {
 dependencies {
 	deobfCompile "com.feed_the_beast.mods:FTBLib:${ftblib_version}"
 	deobfCompile "com.latmod.mods:ItemFilters:${itemfilters_version}"
-	deobfProvided "dev.latvian.kubejs:KubeJS:forge-1.12.2-${kubejs_version}"
-	deobfProvided "com.feed_the_beast.mods:FTBUtilities:${ftbutilities_version}"
+	provided "dev.latvian.kubejs:KubeJS:forge-1.12.2-${kubejs_version}"
+	provided "com.feed_the_beast.mods:FTBUtilities:${ftbutilities_version}"
 	deobfProvided curse.resolve('jei', project.jei_file)
 	deobfProvided curse.resolve('industrial-craft', project.industrialcraft_file)
 	deobfProvided curse.resolve('packmode', project.packmode_file)
