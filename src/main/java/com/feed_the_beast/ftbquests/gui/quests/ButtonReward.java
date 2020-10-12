@@ -141,7 +141,7 @@ public class ButtonReward extends Button
 		drawIcon(matrixStack, theme, x + (w - bs) / 2, y + (h - bs) / 2, bs, bs);
 
 		matrixStack.push();
-		matrixStack.translate(0F, 0F, 500F);
+		matrixStack.translate(0F, 0F, 200F);
 		RenderSystem.enableBlend();
 		boolean completed = false;
 
@@ -168,7 +168,7 @@ public class ButtonReward extends Button
 			if (!s.isEmpty())
 			{
 				matrixStack.push();
-				matrixStack.translate(x + 19F - theme.getStringWidth(s) / 2F, y + 15F, 500F);
+				matrixStack.translate(x + 19F - theme.getStringWidth(s) / 2F, y + 15F, 200F);
 				matrixStack.scale(0.5F, 0.5F, 1F);
 				theme.drawString(matrixStack, s, 0, 0, Color4I.WHITE, Theme.SHADOW);
 				matrixStack.pop();

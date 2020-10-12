@@ -42,7 +42,7 @@ public class CommandReward extends Reward
 	{
 		super.writeData(nbt);
 		nbt.putString("command", command);
-		nbt.putBoolean("player_command", true);
+		nbt.putBoolean("player_command", playerCommand);
 	}
 
 	@Override

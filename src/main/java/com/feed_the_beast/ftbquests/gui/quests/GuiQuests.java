@@ -592,4 +592,15 @@ public class GuiQuests extends GuiBase
 
 		return super.handleClick(scheme, path);
 	}
+
+	@Override
+	public void addMouseOverText(TooltipList list)
+	{
+		super.addMouseOverText(list);
+		//float hue = (float) ((System.currentTimeMillis() * 0.0001D) % 1D);
+		//int rgb = Color4I.hsb(hue, 0.8F, 1F).rgba();
+		//list.borderColorStart = rgb;
+		//list.borderColorEnd = rgb;
+		list.zOffset = 950;
+	}
 }

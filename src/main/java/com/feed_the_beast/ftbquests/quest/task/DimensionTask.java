@@ -40,7 +40,7 @@ public class DimensionTask extends Task
 	public void writeData(CompoundNBT nbt)
 	{
 		super.writeData(nbt);
-		nbt.putString("dimension", dimension.toString());
+		nbt.putString("dimension", dimension.getLocation().toString());
 	}
 
 	@Override
@@ -69,7 +69,7 @@ public class DimensionTask extends Task
 	public void getConfig(ConfigGroup config)
 	{
 		super.getConfig(config);
-		config.addString("dim", dimension.toString(), v -> dimension = RegistryKey.getOrCreateKey(Registry.WORLD_KEY, new ResourceLocation(v)), "minecraft:the_nether");
+		config.addString("dim", dimension.getLocation().toString(), v -> dimension = RegistryKey.getOrCreateKey(Registry.WORLD_KEY, new ResourceLocation(v)), "minecraft:the_nether");
 	}
 
 	@Override
