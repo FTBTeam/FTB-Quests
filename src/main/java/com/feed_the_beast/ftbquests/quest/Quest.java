@@ -621,7 +621,7 @@ public final class Quest extends QuestObject implements Movable
 
 		IFormattableTextComponent textDesc = loadText().getComponent("description");
 
-		if (textDesc == StringTextComponent.EMPTY)
+		if (textDesc != StringTextComponent.EMPTY)
 		{
 			cachedDescription = textDesc;
 			return cachedDescription;
