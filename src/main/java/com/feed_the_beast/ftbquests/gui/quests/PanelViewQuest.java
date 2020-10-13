@@ -24,8 +24,11 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.IFormattableTextComponent;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
+
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 /**
  * @author LatvianModder
@@ -219,7 +222,8 @@ public class PanelViewQuest extends Panel
 
 		if (desc != StringTextComponent.EMPTY)
 		{
-			panelText.add(new TextField(panelText).addFlags(Theme.CENTERED).setMaxWidth(panelText.width).setSpacing(9).setText(TextFormatting.ITALIC + TextFormatting.GRAY.toString() + desc));
+			//FIXME: TextFormatting.ITALIC + TextFormatting.GRAY
+			panelText.add(new TextField(panelText).addFlags(Theme.CENTERED).setMaxWidth(panelText.width).setSpacing(9).setText(desc.getString()));
 		}
 
 		boolean showText = !quest.hideTextUntilComplete.get(false) || gui.file.self != null && gui.file.self.isComplete(quest);
@@ -231,7 +235,8 @@ public class PanelViewQuest extends Panel
 				panelText.add(new WidgetVerticalSpace(panelText, 7));
 			}
 
-			//FIXME panelText.add(new TextField(panelText).setMaxWidth(panelText.width).setSpacing(9).setText(StringUtils.addFormatting(String.join("\n", quest.getDescription()))));
+			// FIXME panelText.add(new TextField(panelText).setMaxWidth(panelText.width).setSpacing(9).setText(StringUtils.addFormatting(String.join("\n", quest.getDescription()))));
+			panelText.add(new TextField(panelText).setMaxWidth(panelText.width).setSpacing(9).setText(Arrays.stream(quest.getDescription()).map(ITextComponent::getString).collect(Collectors.joining("\n"))));
 		}
 
 		if (showText && !quest.guidePage.isEmpty())
@@ -267,53 +272,6 @@ public class PanelViewQuest extends Panel
 
 		setPos((parent.width - width) / 2, (parent.height - height) / 2);
 		panelContent.setHeight(height - 17);
-
-		/* Put this somewhere
-		boolean addedText = false;
-
-		for (QuestObject dependency : selectedQuest.dependencies)
-		{
-			if (!dependency.invalid)
-			{
-				if (!addedText)
-				{
-					addedText = true;
-					add(new WidgetVerticalSpace(this, 2));
-					add(new TextField(this).setText(TextFormatting.AQUA + I18n.format("ftbquests.gui.requires") + ":"));
-				}
-
-				ITextComponent component = dependency.getDisplayName().createCopy();
-				component.getStyle().setColor(TextFormatting.GRAY);
-				component.getStyle().setClickEvent(new ClickEvent(ClickEvent.Action.CHANGE_PAGE, dependency.toString()));
-				component.getStyle().setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponentTranslation("gui.open")));
-				add(new TextField(this).setText(component));
-			}
-		}
-
-		addedText = false;
-
-		for (Chapter chapter : treeGui.file.chapters)
-		{
-			for (Quest quest : chapter.quests)
-			{
-				if (quest.hasDependency(selectedQuest))
-				{
-					if (!addedText)
-					{
-						addedText = true;
-						add(new WidgetVerticalSpace(this, 2));
-						add(new TextField(this, TextFormatting.YELLOW + I18n.format("ftbquests.gui.required_by") + ":"));
-					}
-
-					ITextComponent component = quest.getDisplayName().createCopy();
-					component.getStyle().setColor(TextFormatting.GRAY);
-					component.getStyle().setClickEvent(new ClickEvent(ClickEvent.Action.CHANGE_PAGE, quest.toString()));
-					component.getStyle().setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponentTranslation("gui.open")));
-					add(new TextField(this).setText(component));
-				}
-			}
-		}
-		*/
 
 		QuestTheme.currentObject = prev;
 	}

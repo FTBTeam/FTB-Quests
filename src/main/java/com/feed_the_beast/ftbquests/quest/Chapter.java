@@ -340,7 +340,7 @@ public final class Chapter extends QuestObject
 	@Override
 	public String getPath()
 	{
-		return "chapters/" + filename;
+		return "chapters/" + filename + ".snbt";
 	}
 
 	@Override
