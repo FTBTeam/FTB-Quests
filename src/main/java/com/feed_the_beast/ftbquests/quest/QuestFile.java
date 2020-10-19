@@ -49,7 +49,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Random;
 import java.util.UUID;
 import java.util.function.Predicate;
@@ -936,7 +935,7 @@ public abstract class QuestFile extends QuestObject
 
 	public PlayerData getData(UUID id)
 	{
-		return Objects.requireNonNull(playerDataMap.get(id));
+		return playerDataMap.computeIfAbsent(id, i -> new PlayerData(this, i));
 	}
 
 	public PlayerData getData(Entity player)
