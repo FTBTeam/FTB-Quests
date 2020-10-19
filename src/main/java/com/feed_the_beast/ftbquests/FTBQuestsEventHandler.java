@@ -190,7 +190,7 @@ public class FTBQuestsEventHandler
 
 	private void playerKill(LivingDeathEvent event)
 	{
-		if (event.getSource().getTrueSource() instanceof ServerPlayerEntity)
+		if (event.getSource().getTrueSource() instanceof ServerPlayerEntity && !(event.getSource().getTrueSource() instanceof FakePlayer))
 		{
 			if (killTasks == null)
 			{
