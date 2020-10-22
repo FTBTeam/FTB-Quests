@@ -20,6 +20,9 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.items.ItemHandlerHelper;
 
 import javax.annotation.Nullable;
+import java.util.List;
+import java.util.Random;
+import java.util.UUID;
 
 /**
  * @author LatvianModder
@@ -146,11 +149,23 @@ public class ItemReward extends Reward
 	}
 
 	@Override
-	public ItemStack claimAutomated(TileEntity tileEntity, @Nullable ServerPlayerEntity player)
+	public boolean automatedClaimPre(TileEntity tileEntity, List<ItemStack> items, Random random, UUID playerId, @Nullable ServerPlayerEntity player)
 	{
-		ItemStack stack1 = item.copy();
-		stack1.grow(tileEntity.getWorld().rand.nextInt(randomBonus + 1));
-		return stack1;
+		int size = count + random.nextInt(randomBonus + 1);
+
+		while (size > 0)
+		{
+			int s = Math.min(size, item.getMaxStackSize());
+			items.add(ItemHandlerHelper.copyStackWithSize(item, s));
+			size -= s;
+		}
+
+		return true;
+	}
+
+	@Override
+	public void automatedClaimPost(TileEntity tileEntity, UUID playerId, @Nullable ServerPlayerEntity player)
+	{
 	}
 
 	@Override

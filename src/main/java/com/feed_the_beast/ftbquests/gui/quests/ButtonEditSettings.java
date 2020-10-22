@@ -8,6 +8,7 @@ import com.feed_the_beast.ftbquests.quest.theme.ThemeLoader;
 import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
 import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
 import com.feed_the_beast.mods.ftbguilibrary.widget.ContextMenuItem;
+import com.feed_the_beast.mods.ftbguilibrary.widget.GuiIcons;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.Util;
@@ -75,6 +76,8 @@ public class ButtonEditSettings extends ButtonTab
 			ThemeLoader.loadTheme(mc.getResourceManager());
 			ClientQuestFile.INSTANCE.refreshGui();
 		}));
+
+		contextMenu.add(new ContextMenuItem(new TranslationTextComponent("ftbquests.gui.wiki"), GuiIcons.INFO, () -> handleClick("https://faq.ftb.world/books/ftb-quests")));
 
 		treeGui.openContextMenu(contextMenu);
 	}
