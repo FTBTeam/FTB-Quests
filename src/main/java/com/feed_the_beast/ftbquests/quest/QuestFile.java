@@ -26,7 +26,6 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.network.PacketBuffer;
@@ -91,7 +90,6 @@ public abstract class QuestFile extends QuestObject
 		map = new Int2ObjectOpenHashMap<>();
 
 		emergencyItems = new ArrayList<>();
-		emergencyItems.add(new ItemStack(Items.APPLE));
 		emergencyItemsCooldown = 300;
 
 		defaultRewardTeam = false;

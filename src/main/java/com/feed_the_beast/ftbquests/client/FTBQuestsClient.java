@@ -215,7 +215,9 @@ public class FTBQuestsClient extends FTBQuestsCommon
 			new GuiSelectItemStack(c, accepted -> {
 				if (accepted)
 				{
-					callback.accept(new ItemReward(quest, c.value));
+					ItemReward reward = new ItemReward(quest, ItemHandlerHelper.copyStackWithSize(c.value, 1));
+					reward.count = c.value.getCount();
+					callback.accept(reward);
 				}
 				gui.run();
 			}).openGui();
