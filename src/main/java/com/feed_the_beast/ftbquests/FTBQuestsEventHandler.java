@@ -226,7 +226,7 @@ public class FTBQuestsEventHandler
 				autoSubmitTasks = ServerQuestFile.INSTANCE.collect(Task.class, o -> o instanceof Task && ((Task) o).autoSubmitOnPlayerTick() > 0);
 			}
 
-			if (autoSubmitTasks.isEmpty())
+			if (autoSubmitTasks == null || autoSubmitTasks.isEmpty())
 			{
 				return;
 			}
