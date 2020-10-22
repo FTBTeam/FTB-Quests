@@ -385,6 +385,17 @@ public final class Quest extends QuestObject implements Movable
 		data.checkAutoCompletion(this);
 		MinecraftForge.EVENT_BUS.post(new ObjectCompletedEvent.QuestEvent(data, this, onlineMembers, notifiedPlayers));
 
+		for (Chapter chapter : chapter.file.chapters)
+		{
+			for (Quest quest : chapter.quests)
+			{
+				if (quest.dependencies.contains(this))
+				{
+					data.checkAutoCompletion(quest);
+				}
+			}
+		}
+
 		if (data.isComplete(chapter))
 		{
 			chapter.onCompleted(data, onlineMembers, notifiedPlayers);

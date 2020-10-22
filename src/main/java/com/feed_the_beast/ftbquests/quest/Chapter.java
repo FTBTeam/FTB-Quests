@@ -240,6 +240,17 @@ public final class Chapter extends QuestObject
 			}
 		}
 
+		for (Chapter chapter : file.chapters)
+		{
+			for (Quest quest : chapter.quests)
+			{
+				if (quest.dependencies.contains(this))
+				{
+					data.checkAutoCompletion(quest);
+				}
+			}
+		}
+
 		if (data.isComplete(file))
 		{
 			file.onCompleted(data, onlineMembers, notifiedPlayers);
