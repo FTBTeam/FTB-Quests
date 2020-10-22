@@ -14,6 +14,7 @@ import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Color4I;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
+import com.feed_the_beast.mods.ftbguilibrary.utils.PixelBuffer;
 import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
 import com.feed_the_beast.mods.ftbguilibrary.widget.ContextMenuItem;
@@ -79,6 +80,36 @@ public class ButtonQuest extends Button
 		else if (treeGui.questPanel.mouseOverQuest != this)
 		{
 			isMouseOver = false;
+		}
+
+		if (isMouseOver)
+		{
+			QuestShape shape = QuestShape.get(quest.getShape());
+
+			int ax = getX();
+			int ay = getY();
+
+			double relX = (mouseX - ax) / (double) width;
+			double relY = (mouseY - ay) / (double) height;
+
+			PixelBuffer pixelBuffer = shape.getShapePixels();
+
+			int rx = (int) (relX * pixelBuffer.getWidth());
+			int ry = (int) (relY * pixelBuffer.getHeight());
+
+			if (rx < 0 || ry < 0 || rx >= pixelBuffer.getWidth() || ry >= pixelBuffer.getHeight())
+			{
+				isMouseOver = false;
+			}
+			else
+			{
+				int a = (pixelBuffer.getRGB(rx, ry) >> 24) & 0xFF;
+
+				if (a < 5)
+				{
+					isMouseOver = false;
+				}
+			}
 		}
 	}
 
@@ -374,7 +405,7 @@ public class ButtonQuest extends Button
 			outlineColor = Color4I.GRAY;
 		}
 
-		QuestShape shape = quest.getShape();
+		QuestShape shape = QuestShape.get(quest.getShape());
 
 		shape.shape.withColor(Color4I.DARK_GRAY).draw(matrixStack, x, y, w, h);
 		shape.background.withColor(Color4I.WHITE.withAlpha(150)).draw(matrixStack, x, y, w, h);

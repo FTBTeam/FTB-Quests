@@ -2,6 +2,8 @@ package com.feed_the_beast.ftbquests.quest.theme;
 
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
+import com.feed_the_beast.ftbquests.quest.QuestShape;
+import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
 import com.feed_the_beast.ftbquests.quest.theme.selector.AllSelector;
 import com.feed_the_beast.ftbquests.quest.theme.selector.AndSelector;
 import com.feed_the_beast.ftbquests.quest.theme.selector.IDSelector;
@@ -20,6 +22,7 @@ import javax.annotation.Nullable;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
@@ -94,6 +97,18 @@ public class ThemeLoader implements ISelectiveResourceReloadListener
 				FTBQuests.LOGGER.debug(entry.getKey() + ": " + theme.replaceVariables(entry.getValue(), 0));
 			}
 		}
+
+		LinkedHashSet<String> list = new LinkedHashSet<>();
+		list.add("circle");
+		list.add("square");
+		list.add("rsquare");
+
+		for (String s : ThemeProperties.EXTRA_QUEST_SHAPES.get().split(","))
+		{
+			list.add(s.trim());
+		}
+
+		QuestShape.reload(new ArrayList<>(list));
 	}
 
 	private static void parse(Map<ThemeSelector, SelectorProperties> selectorPropertyMap, List<String> lines)

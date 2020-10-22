@@ -1,6 +1,5 @@
 package com.feed_the_beast.ftbquests.quest.theme.property;
 
-import com.feed_the_beast.ftbquests.events.ThemePropertyEvent;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Color4I;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -11,9 +10,6 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.math.vector.Matrix4f;
 import org.lwjgl.opengl.GL11;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-
 /**
  * @author LatvianModder
  */
@@ -21,6 +17,7 @@ public interface ThemeProperties
 {
 	// Main GUI //
 	IconProperty BACKGROUND = new IconProperty("background");
+	StringProperty EXTRA_QUEST_SHAPES = new StringProperty("extra_quest_shapes");
 
 	// Text Color //
 	ColorProperty TEXT_COLOR = new ColorProperty("text_color");
@@ -209,22 +206,4 @@ public interface ThemeProperties
 	// Task specific //
 	IconProperty CHECKMARK_TASK_ACTIVE = new IconProperty("checkmark_task_active");
 	IconProperty CHECKMARK_TASK_INACTIVE = new IconProperty("checkmark_task_inactive");
-
-	static void register(ThemePropertyEvent event)
-	{
-		try
-		{
-			for (Field field : ThemeProperties.class.getDeclaredFields())
-			{
-				if (Modifier.isStatic(field.getModifiers()) && ThemeProperty.class.isAssignableFrom(field.getType()))
-				{
-					field.setAccessible(true);
-					event.register((ThemeProperty) field.get(null));
-				}
-			}
-		}
-		catch (Exception ex)
-		{
-		}
-	}
 }

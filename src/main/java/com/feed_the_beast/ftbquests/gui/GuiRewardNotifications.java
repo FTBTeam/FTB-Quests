@@ -53,7 +53,7 @@ public class GuiRewardNotifications extends GuiBase implements IRewardListenerGu
 		@Override
 		public void draw(MatrixStack matrixStack, Theme theme, int x, int y, int w, int h)
 		{
-			QuestShape.RSQUARE.outline.draw(matrixStack, x, y, w, h);
+			QuestShape.get("rsquare").outline.draw(matrixStack, x, y, w, h);
 			key.icon.draw(matrixStack, x + 3, y + 3, 16, 16);
 
 			int count = rewards.getInt(key);

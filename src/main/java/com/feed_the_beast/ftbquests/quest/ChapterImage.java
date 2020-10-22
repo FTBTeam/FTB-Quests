@@ -149,9 +149,9 @@ public final class ChapterImage implements Movable
 	}
 
 	@Override
-	public QuestShape getShape()
+	public String getShape()
 	{
-		return QuestShape.SQUARE;
+		return "square";
 	}
 
 	@Override

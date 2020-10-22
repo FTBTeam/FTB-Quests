@@ -21,7 +21,7 @@ public class FTBQuestsKubeJSWrapper
 {
 	public Map<String, QuestShape> getQuestShapes()
 	{
-		return QuestShape.NAME_MAP.map;
+		return QuestShape.MAP;
 	}
 
 	public Map<String, QuestObjectType> getQuestObjectTypes()
