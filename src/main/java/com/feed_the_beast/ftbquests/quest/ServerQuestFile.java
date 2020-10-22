@@ -69,27 +69,30 @@ public class ServerQuestFile extends QuestFile
 
 		Path path = server.func_240776_a_(FolderName.DOT).resolve("ftbquests");
 
-		try
+		if (Files.exists(path))
 		{
-			Files.list(path).forEach(path1 -> {
-				CompoundNBT nbt = NBTUtils.readSNBT(path1);
+			try
+			{
+				Files.list(path).forEach(path1 -> {
+					CompoundNBT nbt = NBTUtils.readSNBT(path1);
 
-				try
-				{
-					UUID uuid = UUID.fromString(nbt.getString("uuid"));
-					PlayerData data = new PlayerData(this, uuid);
-					addData(data);
-					data.deserializeNBT(nbt);
-				}
-				catch (Exception ex)
-				{
-					ex.printStackTrace();
-				}
-			});
-		}
-		catch (Exception ex)
-		{
-			ex.printStackTrace();
+					try
+					{
+						UUID uuid = UUID.fromString(nbt.getString("uuid"));
+						PlayerData data = new PlayerData(this, uuid);
+						addData(data);
+						data.deserializeNBT(nbt);
+					}
+					catch (Exception ex)
+					{
+						ex.printStackTrace();
+					}
+				});
+			}
+			catch (Exception ex)
+			{
+				ex.printStackTrace();
+			}
 		}
 	}
 
