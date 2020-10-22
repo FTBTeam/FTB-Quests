@@ -114,6 +114,7 @@
 	"ftbquests.quest.x": "X",
 	"ftbquests.quest.y": "Y",
 	"ftbquests.quest.size": "Size",
+	"ftbquests.quest.optional": "Optional",
 	"ftbquests.quest.hide": "Hide Quest Until Dependencies are Visible",
 	"ftbquests.quest.shape": "Shape",
 	"ftbquests.quest.shape.default": "Default",

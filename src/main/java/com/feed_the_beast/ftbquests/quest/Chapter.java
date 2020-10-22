@@ -205,8 +205,11 @@ public final class Chapter extends QuestObject
 
 		for (Quest quest : quests)
 		{
-			progress += data.getRelativeProgress(quest);
-			count++;
+			if (!quest.isProgressionIgnored())
+			{
+				progress += data.getRelativeProgress(quest);
+				count++;
+			}
 		}
 
 		for (Chapter chapter : getChildren())

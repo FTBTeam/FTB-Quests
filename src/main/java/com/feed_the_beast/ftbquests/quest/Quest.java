@@ -52,12 +52,12 @@ public final class Quest extends QuestObject implements Movable
 	public final List<Reward> rewards;
 	public DependencyRequirement dependencyRequirement;
 	public String guidePage;
-	public String customClick;
 	public Tristate hideDependencyLines;
 	public int minRequiredDependencies;
 	public Tristate hideTextUntilComplete;
 	public Tristate disableJEI;
 	public double size;
+	public boolean optional;
 
 	private IFormattableTextComponent cachedDescription = null;
 	private IFormattableTextComponent[] cachedText = null;
@@ -74,7 +74,6 @@ public final class Quest extends QuestObject implements Movable
 		tasks = new ArrayList<>(1);
 		rewards = new ArrayList<>(1);
 		guidePage = "";
-		customClick = "";
 		hideDependencyLines = Tristate.DEFAULT;
 		hide = Tristate.DEFAULT;
 		dependencyRequirement = DependencyRequirement.ALL_COMPLETED;
@@ -82,6 +81,7 @@ public final class Quest extends QuestObject implements Movable
 		hideTextUntilComplete = Tristate.DEFAULT;
 		disableJEI = Tristate.DEFAULT;
 		size = 1D;
+		optional = false;
 	}
 
 	@Override
@@ -142,11 +142,6 @@ public final class Quest extends QuestObject implements Movable
 			nbt.putString("guide_page", guidePage);
 		}
 
-		if (!customClick.isEmpty())
-		{
-			nbt.putString("custom_click", customClick);
-		}
-
 		if (hideDependencyLines != Tristate.DEFAULT)
 		{
 			nbt.putBoolean("hide_dependency_lines", hideDependencyLines.isTrue());
@@ -192,6 +187,11 @@ public final class Quest extends QuestObject implements Movable
 		{
 			nbt.putDouble("size", size);
 		}
+
+		if (optional)
+		{
+			nbt.putBoolean("optional", true);
+		}
 	}
 
 	@Override
@@ -212,7 +212,6 @@ public final class Quest extends QuestObject implements Movable
 		}
 
 		guidePage = nbt.getString("guide_page");
-		customClick = nbt.getString("custom_click");
 		hideDependencyLines = Tristate.read(nbt, "hide_dependency_lines");
 		minRequiredDependencies = nbt.getInt("min_required_dependencies");
 
@@ -232,6 +231,7 @@ public final class Quest extends QuestObject implements Movable
 		dependencyRequirement = DependencyRequirement.NAME_MAP.get(nbt.getString("dependency_requirement"));
 		hideTextUntilComplete = Tristate.read(nbt, "hide_text_until_complete");
 		size = nbt.contains("size") ? nbt.getDouble("size") : 1D;
+		optional = nbt.getBoolean("optional");
 	}
 
 	@Override
@@ -241,8 +241,13 @@ public final class Quest extends QuestObject implements Movable
 		int flags = 0;
 		flags = Bits.setFlag(flags, 1, !subtitle.isEmpty());
 		flags = Bits.setFlag(flags, 2, !description.isEmpty());
-		flags = Bits.setFlag(flags, 4, !customClick.isEmpty());
+		//flags = Bits.setFlag(flags, 4, !customClick.isEmpty());
 		flags = Bits.setFlag(flags, 8, !guidePage.isEmpty());
+		//implement others
+		//flags = Bits.setFlag(flags, 32, !customClick.isEmpty());
+		//flags = Bits.setFlag(flags, 64, hideDependencyLines);
+		//flags = Bits.setFlag(flags, 128, hideTextUntilComplete);
+		flags = Bits.setFlag(flags, 256, optional);
 		buffer.writeVarInt(flags);
 
 		hide.write(buffer);
@@ -266,11 +271,6 @@ public final class Quest extends QuestObject implements Movable
 		if (!guidePage.isEmpty())
 		{
 			buffer.writeString(guidePage);
-		}
-
-		if (!customClick.isEmpty())
-		{
-			buffer.writeString(customClick);
 		}
 
 		buffer.writeVarInt(minRequiredDependencies);
@@ -315,8 +315,12 @@ public final class Quest extends QuestObject implements Movable
 			description.clear();
 		}
 
-		customClick = Bits.getFlag(flags, 4) ? buffer.readString() : "";
+		//customClick = Bits.getFlag(flags, 4) ? buffer.readString() : "";
 		guidePage = Bits.getFlag(flags, 8) ? buffer.readString() : "";
+		//customClick = Bits.getFlag(flags, 32) ? data.readString() : "";
+		//hideDependencyLines = Bits.getFlag(flags, 64);
+		//hideTextUntilComplete = Bits.getFlag(flags, 128);
+		optional = Bits.getFlag(flags, 256);
 
 		minRequiredDependencies = buffer.readVarInt();
 		dependencyRequirement = DependencyRequirement.NAME_MAP.read(buffer);
@@ -495,6 +499,7 @@ public final class Quest extends QuestObject implements Movable
 		config.addDouble("size", size, v -> size = v, 1, 0.5D, 3D);
 		config.addDouble("x", x, v -> x = v, 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
 		config.addDouble("y", y, v -> y = v, 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+		config.addBool("optional", optional, v -> optional = v, false);
 
 		Predicate<QuestObjectBase> depTypes = object -> object != chapter.file && object != chapter && object instanceof QuestObject;// && !(object instanceof Task);
 
@@ -503,7 +508,6 @@ public final class Quest extends QuestObject implements Movable
 		config.addInt("min_required_dependencies", minRequiredDependencies, v -> minRequiredDependencies = v, 0, 0, Integer.MAX_VALUE);
 		config.addTristate("hide_dependency_lines", hideDependencyLines, v -> hideDependencyLines = v);
 		config.addString("guide_page", guidePage, v -> guidePage = v, "");
-		config.addString("custom_click", customClick, v -> customClick = v, "");
 		config.addTristate("hide_text_until_complete", hideTextUntilComplete, v -> hideTextUntilComplete = v);
 		config.addEnum("disable_jei", disableJEI, v -> disableJEI = v, Tristate.NAME_MAP);
 	}
@@ -786,5 +790,10 @@ public final class Quest extends QuestObject implements Movable
 				chapter = c;
 			}
 		}
+	}
+
+	public boolean isProgressionIgnored()
+	{
+		return optional;
 	}
 }
