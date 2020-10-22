@@ -248,7 +248,7 @@ public class ButtonQuest extends Button
 			{
 				handleClick("guide", quest.guidePage);
 			}
-			else if (quest.customClick.isEmpty() || !handleClick(quest.customClick))
+			else
 			{
 				treeGui.open(quest, false);
 			}
