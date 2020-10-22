@@ -7,6 +7,7 @@ import com.feed_the_beast.ftbquests.net.MessageEditObject;
 import com.feed_the_beast.ftbquests.quest.ChapterImage;
 import com.feed_the_beast.ftbquests.quest.Movable;
 import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.quest.QuestShape;
 import com.feed_the_beast.ftbquests.quest.task.TaskType;
 import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Color4I;
@@ -425,7 +426,7 @@ public class PanelQuests extends Panel
 						matrixStack.translate(sx - bs * m.getWidth() / 2D, sy - bs * m.getHeight() / 2D, 0D);
 						matrixStack.scale((float) (bs * m.getWidth()), (float) (bs * m.getHeight()), 1F);
 						GuiHelper.setupDrawing();
-						m.getShape().shape.withColor(Color4I.WHITE.withAlpha(30)).draw(matrixStack, 0, 0, 1, 1);
+						QuestShape.get(m.getShape()).shape.withColor(Color4I.WHITE.withAlpha(30)).draw(matrixStack, 0, 0, 1, 1);
 						matrixStack.pop();
 					}
 
@@ -452,7 +453,7 @@ public class PanelQuests extends Panel
 					matrixStack.translate(sx - bs / 2D, sy - bs / 2D, 0D);
 					matrixStack.scale((float) bs, (float) bs, 1F);
 					GuiHelper.setupDrawing();
-					treeGui.selectedChapter.getDefaultQuestShape().shape.withColor(Color4I.WHITE.withAlpha(10)).draw(matrixStack, 0, 0, 1, 1);
+					QuestShape.get(treeGui.selectedChapter.getDefaultQuestShape()).shape.withColor(Color4I.WHITE.withAlpha(10)).draw(matrixStack, 0, 0, 1, 1);
 					matrixStack.pop();
 
 					if (GuiQuests.grid && treeGui.viewQuestPanel.quest == null)

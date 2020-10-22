@@ -2,7 +2,6 @@ package com.feed_the_beast.ftbquests.client;
 
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.events.ClearFileCacheEvent;
-import com.feed_the_beast.ftbquests.events.ThemePropertyEvent;
 import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.item.ItemLootCrate;
 import com.feed_the_beast.ftbquests.net.MessageSubmitTask;
@@ -47,7 +46,6 @@ public class FTBQuestsClientEventHandler
 
 	public void init()
 	{
-		MinecraftForge.EVENT_BUS.addListener(this::registerProperties);
 		MinecraftForge.EVENT_BUS.addListener(this::registerItemColors);
 		MinecraftForge.EVENT_BUS.addListener(this::onSidebarButtonCreated);
 		MinecraftForge.EVENT_BUS.addListener(this::onFileCacheClear);
@@ -55,11 +53,6 @@ public class FTBQuestsClientEventHandler
 		MinecraftForge.EVENT_BUS.addListener(this::onCustomClick);
 		MinecraftForge.EVENT_BUS.addListener(this::onClientTick);
 		MinecraftForge.EVENT_BUS.addListener(this::onScreenRender);
-	}
-
-	private void registerProperties(ThemePropertyEvent event)
-	{
-		ThemeProperties.register(event);
 	}
 
 	private void registerItemColors(ColorHandlerEvent.Item event)

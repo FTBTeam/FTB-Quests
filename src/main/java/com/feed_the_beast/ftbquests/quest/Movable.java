@@ -18,7 +18,7 @@ public interface Movable
 
 	double getHeight();
 
-	QuestShape getShape();
+	String getShape();
 
 	@OnlyIn(Dist.CLIENT)
 	void move(Chapter to, double x, double y);
