@@ -35,7 +35,7 @@ public class FTBQuestsNetCommon
 	{
 	}
 
-	public void displayItemRewardToast(ItemStack stack)
+	public void displayItemRewardToast(ItemStack stack, int count)
 	{
 	}
 

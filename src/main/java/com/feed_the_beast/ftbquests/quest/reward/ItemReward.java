@@ -27,6 +27,7 @@ import javax.annotation.Nullable;
 public class ItemReward extends Reward
 {
 	public ItemStack item;
+	public int count;
 	public int randomBonus;
 	public boolean onlyOne;
 
@@ -34,6 +35,7 @@ public class ItemReward extends Reward
 	{
 		super(quest);
 		item = is;
+		count = 1;
 		randomBonus = 0;
 		onlyOne = false;
 	}
@@ -55,6 +57,11 @@ public class ItemReward extends Reward
 		super.writeData(nbt);
 		NBTUtils.write(nbt, "item", item);
 
+		if (count > 1)
+		{
+			nbt.putInt("count", count);
+		}
+
 		if (randomBonus > 0)
 		{
 			nbt.putInt("random_bonus", randomBonus);
@@ -71,6 +78,15 @@ public class ItemReward extends Reward
 	{
 		super.readData(nbt);
 		item = NBTUtils.read(nbt, "item");
+
+		count = nbt.getInt("count");
+
+		if (count == 0)
+		{
+			count = item.getCount();
+			item.setCount(1);
+		}
+
 		randomBonus = nbt.getInt("random_bonus");
 		onlyOne = nbt.getBoolean("only_one");
 	}
@@ -80,6 +96,7 @@ public class ItemReward extends Reward
 	{
 		super.writeNetData(buffer);
 		buffer.writeItemStack(item);
+		buffer.writeVarInt(count);
 		buffer.writeVarInt(randomBonus);
 		buffer.writeBoolean(onlyOne);
 	}
@@ -89,6 +106,7 @@ public class ItemReward extends Reward
 	{
 		super.readNetData(buffer);
 		item = buffer.readItemStack();
+		count = buffer.readVarInt();
 		randomBonus = buffer.readVarInt();
 		onlyOne = buffer.readBoolean();
 	}
@@ -98,8 +116,9 @@ public class ItemReward extends Reward
 	public void getConfig(ConfigGroup config)
 	{
 		super.getConfig(config);
-		config.addItemStack("item", item, v -> item = v, ItemStack.EMPTY, false, false).setNameKey("ftbquests.reward.ftbquests.item");
-		config.addInt("random_bonus", randomBonus, v -> randomBonus = v, 0, 0, Integer.MAX_VALUE).setNameKey("ftbquests.reward.random_bonus");
+		config.addItemStack("item", item, v -> item = v, ItemStack.EMPTY, true, false).setNameKey("ftbquests.reward.ftbquests.item");
+		config.addInt("count", count, v -> count = v, 1, 1, 8192);
+		config.addInt("random_bonus", randomBonus, v -> randomBonus = v, 0, 0, 8192).setNameKey("ftbquests.reward.random_bonus");
 		config.addBool("only_one", onlyOne, v -> onlyOne = v, false);
 	}
 
@@ -111,13 +130,18 @@ public class ItemReward extends Reward
 			return;
 		}
 
-		ItemStack stack1 = item.copy();
-		stack1.grow(player.world.rand.nextInt(randomBonus + 1));
-		ItemHandlerHelper.giveItemToPlayer(player, stack1);
+		int size = count + player.world.rand.nextInt(randomBonus + 1);
+
+		while (size > 0)
+		{
+			int s = Math.min(size, item.getMaxStackSize());
+			ItemHandlerHelper.giveItemToPlayer(player, ItemHandlerHelper.copyStackWithSize(item, s));
+			size -= s;
+		}
 
 		if (notify)
 		{
-			new MessageDisplayItemRewardToast(stack1).sendTo(player);
+			new MessageDisplayItemRewardToast(item, size).sendTo(player);
 		}
 	}
 
@@ -143,7 +167,7 @@ public class ItemReward extends Reward
 	@Override
 	public IFormattableTextComponent getAltTitle()
 	{
-		return new StringTextComponent((item.getCount() > 1 ? (randomBonus > 0 ? (item.getCount() + "-" + (item.getCount() + randomBonus) + "x ") : (item.getCount() + "x ")) : "")).append(item.getDisplayName());
+		return new StringTextComponent((count > 1 ? (randomBonus > 0 ? (count + "-" + (count + randomBonus) + "x ") : (count + "x ")) : "")).append(item.getDisplayName());
 	}
 
 	@Override
@@ -164,9 +188,9 @@ public class ItemReward extends Reward
 	{
 		if (randomBonus > 0)
 		{
-			return item.getCount() + "-" + (item.getCount() + randomBonus);
+			return count + "-" + (count + randomBonus);
 		}
 
-		return Integer.toString(item.getCount());
+		return Integer.toString(count);
 	}
 }
