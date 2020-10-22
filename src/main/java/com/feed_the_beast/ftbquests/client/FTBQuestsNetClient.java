@@ -125,18 +125,18 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon
 	}
 
 	@Override
-	public void displayItemRewardToast(ItemStack stack)
+	public void displayItemRewardToast(ItemStack stack, int count)
 	{
 		ItemStack stack1 = ItemHandlerHelper.copyStackWithSize(stack, 1);
 		Icon icon = ItemIcon.getItemIcon(stack1);
 
-		if (!IRewardListenerGui.add(new RewardKey(stack.getDisplayName().getString(), icon).setStack(stack1), stack.getCount()))
+		if (!IRewardListenerGui.add(new RewardKey(stack.getDisplayName().getString(), icon).setStack(stack1), count))
 		{
 			IFormattableTextComponent s = stack.getDisplayName().deepCopy();
 
-			if (stack.getCount() > 1)
+			if (count > 1)
 			{
-				s = new StringTextComponent(stack.getCount() + "x ").append(s);
+				s = new StringTextComponent(count + "x ").append(s);
 			}
 
 			s.mergeStyle(stack.getRarity().color);
