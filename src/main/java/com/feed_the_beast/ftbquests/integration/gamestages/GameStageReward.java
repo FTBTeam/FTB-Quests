@@ -2,6 +2,7 @@ package com.feed_the_beast.ftbquests.integration.gamestages;
 
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.reward.Reward;
+import com.feed_the_beast.ftbquests.quest.reward.RewardAutoClaim;
 import com.feed_the_beast.ftbquests.quest.reward.RewardType;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
 import net.darkhax.gamestages.GameStageHelper;
@@ -27,6 +28,7 @@ public class GameStageReward extends Reward
 	public GameStageReward(Quest quest)
 	{
 		super(quest);
+		autoclaim = RewardAutoClaim.INVISIBLE;
 	}
 
 	@Override
