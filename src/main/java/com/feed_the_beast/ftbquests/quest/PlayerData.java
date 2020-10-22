@@ -524,7 +524,7 @@ public class PlayerData implements INBTSerializable<CompoundNBT>
 
 	public void checkAutoCompletion(Quest quest)
 	{
-		if (!isComplete(quest))
+		if (quest.rewards.isEmpty() || !isComplete(quest))
 		{
 			return;
 		}
