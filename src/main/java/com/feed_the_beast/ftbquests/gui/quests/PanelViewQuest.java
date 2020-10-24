@@ -150,6 +150,7 @@ public class PanelViewQuest extends Panel
 
 		ww = MathHelper.clamp(ww, 70, 140);
 		w = Math.max(w, ww * 2 + 10);
+		w = Math.max(w, quest.minWidth);
 
 		if (ThemeProperties.FULL_SCREEN_QUEST.get(quest) == 1)
 		{
