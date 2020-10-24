@@ -59,7 +59,7 @@ import java.util.function.Predicate;
  */
 public abstract class QuestFile extends QuestObject
 {
-	public static final int VERSION = 7;
+	public static final int VERSION = 8;
 
 	private int lastID;
 	public final List<Chapter> chapters;

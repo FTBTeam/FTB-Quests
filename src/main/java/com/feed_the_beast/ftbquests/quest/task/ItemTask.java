@@ -11,6 +11,7 @@ import com.feed_the_beast.mods.ftbguilibrary.config.Tristate;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.icon.IconAnimation;
 import com.feed_the_beast.mods.ftbguilibrary.icon.ItemIcon;
+import com.feed_the_beast.mods.ftbguilibrary.utils.Bits;
 import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
 import dev.latvian.mods.itemfilters.api.ItemFiltersAPI;
@@ -83,13 +84,7 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 	{
 		super.readData(nbt);
 		item = NBTUtils.read(nbt, "item");
-		count = nbt.getLong("count");
-
-		if (count < 1)
-		{
-			count = 1;
-		}
-
+		count = Math.max(nbt.getLong("count"), 1L);
 		consumeItems = Tristate.read(nbt, "consume_items");
 		onlyFromCrafting = Tristate.read(nbt, "only_from_crafting");
 	}
@@ -98,20 +93,37 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 	public void writeNetData(PacketBuffer buffer)
 	{
 		super.writeNetData(buffer);
+		int flags = 0;
+		flags = Bits.setFlag(flags, 1, count > 1L);
+		flags = Bits.setFlag(flags, 2, consumeItems != Tristate.DEFAULT);
+		flags = Bits.setFlag(flags, 4, consumeItems == Tristate.TRUE);
+		flags = Bits.setFlag(flags, 8, onlyFromCrafting != Tristate.DEFAULT);
+		flags = Bits.setFlag(flags, 16, onlyFromCrafting == Tristate.TRUE);
+		//flags = Bits.setFlag(flags, 32, ignoreDamage);
+		//flags = Bits.setFlag(flags, 64, nbtMode != NBTMatchingMode.MATCH);
+		//flags = Bits.setFlag(flags, 128, nbtMode == NBTMatchingMode.CONTAIN);
+		buffer.writeVarInt(flags);
+
 		FTBQuestsNetHandler.writeItemType(buffer, item);
-		buffer.writeVarLong(count);
-		Tristate.NAME_MAP.write(buffer, consumeItems);
-		Tristate.NAME_MAP.write(buffer, onlyFromCrafting);
+
+		if (count > 1L)
+		{
+			buffer.writeVarLong(count);
+		}
 	}
 
 	@Override
 	public void readNetData(PacketBuffer buffer)
 	{
 		super.readNetData(buffer);
+		int flags = buffer.readVarInt();
+
 		item = FTBQuestsNetHandler.readItemType(buffer);
-		count = buffer.readVarLong();
-		consumeItems = Tristate.NAME_MAP.read(buffer);
-		onlyFromCrafting = Tristate.NAME_MAP.read(buffer);
+		count = Bits.getFlag(flags, 1) ? buffer.readVarLong() : 1L;
+		consumeItems = Bits.getFlag(flags, 2) ? Bits.getFlag(flags, 4) ? Tristate.TRUE : Tristate.FALSE : Tristate.DEFAULT;
+		onlyFromCrafting = Bits.getFlag(flags, 8) ? Bits.getFlag(flags, 16) ? Tristate.TRUE : Tristate.FALSE : Tristate.DEFAULT;
+		//ignoreDamage = Bits.getFlag(flags, 32);
+		//nbtMode = Bits.getFlag(flags, 64) ? Bits.getFlag(flags, 128) ? NBTMatchingMode.CONTAIN : NBTMatchingMode.IGNORE : NBTMatchingMode.MATCH;
 	}
 
 	public List<ItemStack> getValidItems()

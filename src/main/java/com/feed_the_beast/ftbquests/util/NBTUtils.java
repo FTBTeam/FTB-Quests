@@ -4,14 +4,11 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.ByteArrayNBT;
 import net.minecraft.nbt.CollectionNBT;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.DoubleNBT;
 import net.minecraft.nbt.EndNBT;
-import net.minecraft.nbt.FloatNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.IntArrayNBT;
 import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.LongArrayNBT;
-import net.minecraft.nbt.NumberNBT;
 import net.minecraft.nbt.StringNBT;
 
 import javax.annotation.Nullable;
@@ -200,31 +197,6 @@ public class NBTUtils
 			else
 			{
 				appendCollection(builder, (CollectionNBT<?>) nbt, "");
-			}
-		}
-		else if (nbt instanceof NumberNBT)
-		{
-			if (nbt instanceof FloatNBT)
-			{
-				builder.print(nbt.toString());
-			}
-			else if (nbt instanceof DoubleNBT)
-			{
-				builder.print(nbt.toString());
-			}
-			else
-			{
-				long v = ((NumberNBT) nbt).getLong();
-
-				if (v <= Integer.MAX_VALUE && v >= Integer.MIN_VALUE)
-				{
-					builder.print(v);
-				}
-				else
-				{
-					builder.print(v);
-					builder.print("L");
-				}
 			}
 		}
 		else
