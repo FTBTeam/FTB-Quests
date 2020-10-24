@@ -314,11 +314,31 @@ public class PanelViewQuest extends Panel
 
 	private void showList(Collection<QuestObject> c)
 	{
+		int hidden = 0;
 		List<ContextMenuItem> contextMenu = new ArrayList<>();
 
 		for (QuestObject object : c)
 		{
-			contextMenu.add(new ContextMenuItem(object.getTitle(), Icon.EMPTY, () -> gui.open(object, true)));
+			if (gui.file.canEdit() || object.isVisible(gui.file.self))
+			{
+				contextMenu.add(new ContextMenuItem(object.getTitle(), Icon.EMPTY, () -> gui.open(object, true)));
+			}
+			else
+			{
+				hidden++;
+			}
+		}
+
+		if (hidden > 0)
+		{
+			if (hidden == c.size())
+			{
+				contextMenu.add(new ContextMenuItem(new StringTextComponent(hidden + " hidden quests"), Icon.EMPTY, () -> {}).setEnabled(false));
+			}
+			else
+			{
+				contextMenu.add(new ContextMenuItem(new StringTextComponent("+ " + hidden + " hidden quests"), Icon.EMPTY, () -> {}).setEnabled(false));
+			}
 		}
 
 		getGui().openContextMenu(contextMenu);
