@@ -2,6 +2,7 @@ package com.feed_the_beast.ftbquests.quest.task;
 
 import com.feed_the_beast.ftbquests.gui.quests.GuiValidItems;
 import com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIHelper;
+import com.feed_the_beast.ftbquests.net.FTBQuestsNetHandler;
 import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.util.NBTUtils;
@@ -96,7 +97,7 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 	public void writeNetData(PacketBuffer buffer)
 	{
 		super.writeNetData(buffer);
-		buffer.writeItemStack(item);
+		FTBQuestsNetHandler.writeItemType(buffer, item);
 		buffer.writeVarLong(count);
 		Tristate.NAME_MAP.write(buffer, consumeItems);
 	}
@@ -105,7 +106,7 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 	public void readNetData(PacketBuffer buffer)
 	{
 		super.readNetData(buffer);
-		item = buffer.readItemStack();
+		item = FTBQuestsNetHandler.readItemType(buffer);
 		count = buffer.readVarLong();
 		consumeItems = Tristate.NAME_MAP.read(buffer);
 	}

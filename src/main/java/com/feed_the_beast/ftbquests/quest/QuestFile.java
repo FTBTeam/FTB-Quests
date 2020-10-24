@@ -5,6 +5,7 @@ import com.feed_the_beast.ftbquests.events.ClearFileCacheEvent;
 import com.feed_the_beast.ftbquests.events.CustomTaskEvent;
 import com.feed_the_beast.ftbquests.events.ObjectCompletedEvent;
 import com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIHelper;
+import com.feed_the_beast.ftbquests.net.FTBQuestsNetHandler;
 import com.feed_the_beast.ftbquests.net.MessageDisplayCompletionToast;
 import com.feed_the_beast.ftbquests.quest.loot.EntityWeight;
 import com.feed_the_beast.ftbquests.quest.loot.LootCrate;
@@ -722,7 +723,7 @@ public abstract class QuestFile extends QuestObject
 	public final void writeNetData(PacketBuffer buffer)
 	{
 		super.writeNetData(buffer);
-		NetUtils.write(buffer, emergencyItems, PacketBuffer::writeItemStack);
+		NetUtils.write(buffer, emergencyItems, FTBQuestsNetHandler::writeItemType);
 		buffer.writeVarInt(emergencyItemsCooldown);
 		buffer.writeBoolean(defaultRewardTeam);
 		buffer.writeBoolean(defaultTeamConsumeItems);
@@ -739,7 +740,7 @@ public abstract class QuestFile extends QuestObject
 	public final void readNetData(PacketBuffer buffer)
 	{
 		super.readNetData(buffer);
-		NetUtils.read(buffer, emergencyItems, PacketBuffer::readItemStack);
+		NetUtils.read(buffer, emergencyItems, FTBQuestsNetHandler::readItemType);
 		emergencyItemsCooldown = buffer.readVarInt();
 		defaultRewardTeam = buffer.readBoolean();
 		defaultTeamConsumeItems = buffer.readBoolean();
