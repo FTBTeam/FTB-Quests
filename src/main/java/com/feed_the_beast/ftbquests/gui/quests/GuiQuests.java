@@ -46,8 +46,6 @@ import org.lwjgl.glfw.GLFW;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 
 public class GuiQuests extends GuiBase
@@ -56,7 +54,7 @@ public class GuiQuests extends GuiBase
 	public double scrollWidth, scrollHeight;
 	public int prevMouseX, prevMouseY, grabbed;
 	public Chapter selectedChapter;
-	public final HashSet<Movable> selectedObjects;
+	public final List<Movable> selectedObjects;
 	public final PanelChapters chapterPanel;
 	public final PanelQuests questPanel;
 	public final PanelOtherButtonsBottom otherButtonsBottomPanel;
@@ -71,7 +69,7 @@ public class GuiQuests extends GuiBase
 	public GuiQuests(ClientQuestFile q)
 	{
 		file = q;
-		selectedObjects = new LinkedHashSet<>();
+		selectedObjects = new ArrayList<>();
 
 		chapterPanel = new PanelChapters(this);
 		selectedChapter = file.chapters.isEmpty() ? null : file.chapters.get(0);

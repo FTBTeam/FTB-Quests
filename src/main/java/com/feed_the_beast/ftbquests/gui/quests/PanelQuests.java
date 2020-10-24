@@ -386,10 +386,18 @@ public class PanelQuests extends Panel
 				questX = qx;
 				questY = qy;
 			}
+			else if (treeGui.selectedObjects.size() == 1 && treeGui.selectedObjects.get(0) instanceof Quest)
+			{
+				Quest q = (Quest) treeGui.selectedObjects.get(0);
+				double s = (1D / treeGui.file.gridScale) / q.size;
+				questX = MathHelper.floor(qx * s + 0.5D) / s;
+				questY = MathHelper.floor(qy * s + 0.5D) / s;
+			}
 			else
 			{
-				questX = MathHelper.floor(qx * 2D + 0.5D) / 2D;
-				questY = MathHelper.floor(qy * 2D + 0.5D) / 2D;
+				double s = 1D / treeGui.file.gridScale;
+				questX = MathHelper.floor(qx * s + 0.5D) / s;
+				questY = MathHelper.floor(qy * s + 0.5D) / s;
 			}
 
 			if (treeGui.file.canEdit())
@@ -402,10 +410,10 @@ public class PanelQuests extends Panel
 				theme.drawString(matrixStack, "CY:" + (centerQuestY < 0 ? "" : " ") + StringUtils.DOUBLE_FORMATTER_00.format(centerQuestY), x + w - 42, y + h - 10, Theme.SHADOW);
 				matrixStack.pop();
 
+				double bs = treeGui.getQuestButtonSize();
+
 				if (treeGui.movingObjects && !treeGui.selectedObjects.isEmpty())
 				{
-					double bs = treeGui.getQuestButtonSize();
-
 					double ominX = Double.POSITIVE_INFINITY, ominY = Double.POSITIVE_INFINITY, omaxX = Double.NEGATIVE_INFINITY, omaxY = Double.NEGATIVE_INFINITY;
 
 					for (Movable q : treeGui.selectedObjects)
@@ -443,10 +451,9 @@ public class PanelQuests extends Panel
 						matrixStack.pop();
 					}
 				}
-				else
+				else if (treeGui.viewQuestPanel.quest == null || !treeGui.viewQuestPanel.isMouseOver())
 				{
 					//int z = treeGui.getZoom();
-					double bs = treeGui.getQuestButtonSize();
 					double sx = (questX - questMinX) / dx * treeGui.scrollWidth + px;
 					double sy = (questY - questMinY) / dy * treeGui.scrollHeight + py;
 					matrixStack.push();

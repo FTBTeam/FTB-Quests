@@ -77,6 +77,7 @@ public abstract class QuestFile extends QuestObject
 	public boolean dropLootCrates;
 	public final EntityWeight lootCrateNoDrop;
 	public boolean disableGui;
+	public double gridScale;
 
 	public QuestFile()
 	{
@@ -103,6 +104,7 @@ public abstract class QuestFile extends QuestObject
 		lootCrateNoDrop.monster = 600;
 		lootCrateNoDrop.boss = 0;
 		disableGui = false;
+		gridScale = 0.5D;
 	}
 
 	public abstract LogicalSide getSide();
@@ -435,6 +437,7 @@ public abstract class QuestFile extends QuestObject
 		lootCrateNoDrop.writeData(nbt1);
 		nbt.put("loot_crate_no_drop", nbt1);
 		nbt.putBoolean("disable_gui", disableGui);
+		nbt.putDouble("grid_scale", gridScale);
 	}
 
 	@Override
@@ -476,6 +479,7 @@ public abstract class QuestFile extends QuestObject
 		}
 
 		disableGui = nbt.getBoolean("disable_gui");
+		gridScale = nbt.contains("grid_scale") ? nbt.getDouble("grid_scale") : 0.5D;
 	}
 
 	public final void writeDataFull(Path folder)
@@ -728,6 +732,7 @@ public abstract class QuestFile extends QuestObject
 		buffer.writeBoolean(dropLootCrates);
 		lootCrateNoDrop.writeNetData(buffer);
 		buffer.writeBoolean(disableGui);
+		buffer.writeDouble(gridScale);
 	}
 
 	@Override
@@ -744,6 +749,7 @@ public abstract class QuestFile extends QuestObject
 		dropLootCrates = buffer.readBoolean();
 		lootCrateNoDrop.readNetData(buffer);
 		disableGui = buffer.readBoolean();
+		gridScale = buffer.readDouble();
 	}
 
 	public final void writeNetDataFull(PacketBuffer buffer, UUID self)
@@ -975,6 +981,7 @@ public abstract class QuestFile extends QuestObject
 		config.addInt("emergency_items_cooldown", emergencyItemsCooldown, v -> emergencyItemsCooldown = v, 300, 0, Integer.MAX_VALUE);
 		config.addBool("drop_loot_crates", dropLootCrates, v -> dropLootCrates = v, false);
 		config.addBool("disable_gui", disableGui, v -> disableGui = v, false);
+		config.addDouble("grid_scale", gridScale, v -> gridScale = v, 0.5D, 1D / 32D, 8D);
 
 		ConfigGroup defaultsGroup = config.getGroup("defaults");
 		defaultsGroup.addBool("reward_team", defaultRewardTeam, v -> defaultRewardTeam = v, false);

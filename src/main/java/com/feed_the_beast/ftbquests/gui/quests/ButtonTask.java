@@ -222,6 +222,15 @@ public class ButtonTask extends Button
 		drawBackground(matrixStack, theme, x, y, w, h);
 		drawIcon(matrixStack, theme, x + (w - bs) / 2, y + (h - bs) / 2, bs, bs);
 
+		if (treeGui.file.self == null)
+		{
+			return;
+		}
+		else if (treeGui.contextMenu != null)
+		{
+			//return;
+		}
+
 		if (treeGui.file.self.isComplete(task))
 		{
 			matrixStack.push();

@@ -1,6 +1,8 @@
 package com.feed_the_beast.ftbquests.gui.quests;
 
+import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.quest.reward.Reward;
 import com.feed_the_beast.ftbquests.quest.reward.RewardAutoClaim;
@@ -14,7 +16,9 @@ import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
 import com.feed_the_beast.mods.ftbguilibrary.widget.BlankPanel;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
 import com.feed_the_beast.mods.ftbguilibrary.widget.ColorWidget;
+import com.feed_the_beast.mods.ftbguilibrary.widget.ContextMenuItem;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
+import com.feed_the_beast.mods.ftbguilibrary.widget.SimpleButton;
 import com.feed_the_beast.mods.ftbguilibrary.widget.TextField;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Widget;
@@ -26,8 +30,12 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -42,6 +50,8 @@ public class PanelViewQuest extends Panel
 	private Icon icon = Icon.EMPTY;
 	public Button buttonClose;
 	public Button buttonPin;
+	public Button buttonOpenDependencies;
+	public Button buttonOpenDependants;
 	public BlankPanel panelContent;
 	public BlankPanel panelTasks;
 	public BlankPanel panelRewards;
@@ -136,6 +146,8 @@ public class PanelViewQuest extends Panel
 			ww = Math.max(ww, widget.width);
 		}
 
+		Color4I borderColor = ThemeProperties.WIDGET_BORDER.get(gui.selectedChapter);
+
 		ww = MathHelper.clamp(ww, 70, 140);
 		w = Math.max(w, ww * 2 + 10);
 
@@ -158,6 +170,27 @@ public class PanelViewQuest extends Panel
 
 		add(buttonPin = new ButtonPinViewQuest(this));
 		buttonPin.setPosAndSize(w - 26, 2, 12, 12);
+
+		if (quest.dependencies.isEmpty())
+		{
+			add(buttonOpenDependencies = new SimpleButton(this, new TranslationTextComponent("ftbquests.gui.no_dependencies"), Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/arrow_left.png").withTint(borderColor), (widget, button) -> {}));
+		}
+		else
+		{
+			add(buttonOpenDependencies = new SimpleButton(this, new TranslationTextComponent("ftbquests.gui.view_dependencies"), Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/arrow_left.png").withTint(borderColor), (widget, button) -> showList(quest.dependencies)));
+		}
+
+		if (quest.getDependants().isEmpty())
+		{
+			add(buttonOpenDependants = new SimpleButton(this, new TranslationTextComponent("ftbquests.gui.no_dependants"), Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/arrow_right.png").withTint(borderColor), (widget, button) -> {}));
+		}
+		else
+		{
+			add(buttonOpenDependants = new SimpleButton(this, new TranslationTextComponent("ftbquests.gui.view_dependants"), Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/arrow_right.png").withTint(borderColor), (widget, button) -> showList(quest.getDependants())));
+		}
+
+		buttonOpenDependencies.setPosAndSize(0, 17, 13, 13);
+		buttonOpenDependants.setPosAndSize(w - 13, 17, 13, 13);
 
 		TextField textFieldTasks = new TextField(panelContent)
 		{
@@ -249,8 +282,6 @@ public class PanelViewQuest extends Panel
 			panelText.add(new ButtonOpenInGuide(panelText, quest));
 		}
 
-		Color4I borderColor = ThemeProperties.WIDGET_BORDER.get(gui.selectedChapter);
-
 		if (panelText.widgets.isEmpty())
 		{
 			panelContent.add(new ColorWidget(panelContent, borderColor, null).setPosAndSize(w2, 0, 1, h + 40));
@@ -279,6 +310,18 @@ public class PanelViewQuest extends Panel
 	@Override
 	public void alignWidgets()
 	{
+	}
+
+	private void showList(Collection<QuestObject> c)
+	{
+		List<ContextMenuItem> contextMenu = new ArrayList<>();
+
+		for (QuestObject object : c)
+		{
+			contextMenu.add(new ContextMenuItem(object.getTitle(), Icon.EMPTY, () -> gui.open(object, true)));
+		}
+
+		getGui().openContextMenu(contextMenu);
 	}
 
 	@Override
