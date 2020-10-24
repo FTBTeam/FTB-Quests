@@ -9,7 +9,6 @@ import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
 import com.feed_the_beast.mods.ftbguilibrary.widget.ContextMenuItem;
 import com.feed_the_beast.mods.ftbguilibrary.widget.GuiHelper;
-import com.feed_the_beast.mods.ftbguilibrary.widget.GuiIcons;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
 import com.feed_the_beast.mods.ftbguilibrary.widget.WidgetType;
@@ -166,21 +165,26 @@ public class ButtonReward extends Button
 		drawBackground(matrixStack, theme, x, y, w, h);
 		drawIcon(matrixStack, theme, x + (w - bs) / 2, y + (h - bs) / 2, bs, bs);
 
+		if (treeGui.file.self == null)
+		{
+			return;
+		}
+		else if (treeGui.contextMenu != null)
+		{
+			//return;
+		}
+
 		matrixStack.push();
 		matrixStack.translate(0F, 0F, 200F);
 		RenderSystem.enableBlend();
 		boolean completed = false;
 
-		if (!ClientQuestFile.exists())
-		{
-			GuiIcons.CLOSE.draw(matrixStack, x + w - 9, y + 1, 8, 8);
-		}
-		else if (ClientQuestFile.INSTANCE.self.getClaimType(reward).isClaimed())
+		if (treeGui.file.self.getClaimType(reward).isClaimed())
 		{
 			ThemeProperties.CHECK_ICON.get().draw(matrixStack, x + w - 9, y + 1, 8, 8);
 			completed = true;
 		}
-		else if (ClientQuestFile.INSTANCE.self.isComplete(reward.quest))
+		else if (treeGui.file.self.isComplete(reward.quest))
 		{
 			ThemeProperties.ALERT_ICON.get().draw(matrixStack, x + w - 9, y + 1, 8, 8);
 		}

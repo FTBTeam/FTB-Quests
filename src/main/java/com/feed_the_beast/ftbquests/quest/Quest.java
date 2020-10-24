@@ -813,4 +813,22 @@ public final class Quest extends QuestObject implements Movable
 	{
 		return optional;
 	}
+
+	public List<QuestObject> getDependants()
+	{
+		List<QuestObject> list = new ArrayList<>();
+
+		for (Chapter c : chapter.file.chapters)
+		{
+			for (Quest q : c.quests)
+			{
+				if (q.dependencies.contains(this))
+				{
+					list.add(q);
+				}
+			}
+		}
+
+		return list;
+	}
 }
