@@ -279,7 +279,7 @@ public class FTBQuestsEventHandler
 	{
 		if (event.getPlayer() instanceof ServerPlayerEntity && !event.getCrafting().isEmpty())
 		{
-			FTBQuestsInventoryListener.detect((ServerPlayerEntity) event.getPlayer(), event.getCrafting());
+			FTBQuestsInventoryListener.detect((ServerPlayerEntity) event.getPlayer(), event.getCrafting(), 0);
 		}
 	}
 
@@ -287,7 +287,7 @@ public class FTBQuestsEventHandler
 	{
 		if (event.getPlayer() instanceof ServerPlayerEntity && !event.getSmelting().isEmpty())
 		{
-			FTBQuestsInventoryListener.detect((ServerPlayerEntity) event.getPlayer(), event.getSmelting());
+			FTBQuestsInventoryListener.detect((ServerPlayerEntity) event.getPlayer(), event.getSmelting(), 0);
 		}
 	}
 
