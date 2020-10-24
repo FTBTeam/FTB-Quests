@@ -13,55 +13,56 @@ import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.World;
+import net.minecraft.world.biome.Biome;
+import net.minecraft.world.biome.Biomes;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 /**
  * @author LatvianModder
  */
-public class DimensionTask extends Task
+public class BiomeTask extends Task
 {
-	public RegistryKey<World> dimension;
+	public RegistryKey<Biome> biome;
 
-	public DimensionTask(Quest quest)
+	public BiomeTask(Quest quest)
 	{
 		super(quest);
-		dimension = World.THE_NETHER;
+		biome = Biomes.PLAINS;
 	}
 
 	@Override
 	public TaskType getType()
 	{
-		return FTBQuestsTasks.DIMENSION;
+		return FTBQuestsTasks.BIOME;
 	}
 
 	@Override
 	public void writeData(CompoundNBT nbt)
 	{
 		super.writeData(nbt);
-		nbt.putString("dimension", dimension.getLocation().toString());
+		nbt.putString("biome", biome.getLocation().toString());
 	}
 
 	@Override
 	public void readData(CompoundNBT nbt)
 	{
 		super.readData(nbt);
-		dimension = RegistryKey.getOrCreateKey(Registry.WORLD_KEY, new ResourceLocation(nbt.getString("dimension")));
+		biome = RegistryKey.getOrCreateKey(Registry.BIOME_KEY, new ResourceLocation(nbt.getString("biome")));
 	}
 
 	@Override
 	public void writeNetData(PacketBuffer buffer)
 	{
 		super.writeNetData(buffer);
-		buffer.writeResourceLocation(dimension.getLocation());
+		buffer.writeResourceLocation(biome.getLocation());
 	}
 
 	@Override
 	public void readNetData(PacketBuffer buffer)
 	{
 		super.readNetData(buffer);
-		dimension = RegistryKey.getOrCreateKey(Registry.WORLD_KEY, buffer.readResourceLocation());
+		biome = RegistryKey.getOrCreateKey(Registry.BIOME_KEY, buffer.readResourceLocation());
 	}
 
 	@Override
@@ -69,19 +70,19 @@ public class DimensionTask extends Task
 	public void getConfig(ConfigGroup config)
 	{
 		super.getConfig(config);
-		config.addString("dim", dimension.getLocation().toString(), v -> dimension = RegistryKey.getOrCreateKey(Registry.WORLD_KEY, new ResourceLocation(v)), "minecraft:the_nether");
+		config.addString("biome", biome.getLocation().toString(), v -> biome = RegistryKey.getOrCreateKey(Registry.BIOME_KEY, new ResourceLocation(v)), "minecraft:plains");
 	}
 
 	@Override
 	public IFormattableTextComponent getAltTitle()
 	{
-		return new TranslationTextComponent("ftbquests.task.ftbquests.dimension").appendString(": ").append(new StringTextComponent(dimension.getLocation().toString()).mergeStyle(TextFormatting.DARK_GREEN));
+		return new TranslationTextComponent("ftbquests.task.ftbquests.biome").appendString(": ").append(new StringTextComponent(biome.getLocation().toString()).mergeStyle(TextFormatting.DARK_GREEN));
 	}
 
 	@Override
 	public int autoSubmitOnPlayerTick()
 	{
-		return 100;
+		return 20;
 	}
 
 	@Override
@@ -90,9 +91,9 @@ public class DimensionTask extends Task
 		return new Data(this, data);
 	}
 
-	public static class Data extends BooleanTaskData<DimensionTask>
+	public static class Data extends BooleanTaskData<BiomeTask>
 	{
-		private Data(DimensionTask task, PlayerData data)
+		private Data(BiomeTask task, PlayerData data)
 		{
 			super(task, data);
 		}
@@ -100,7 +101,7 @@ public class DimensionTask extends Task
 		@Override
 		public boolean canSubmit(ServerPlayerEntity player)
 		{
-			return !player.isSpectator() && player.world.getDimensionKey() == task.dimension;
+			return !player.isSpectator() && player.world.func_242406_i(player.getPosition()).orElse(null) == task.biome;
 		}
 	}
 }
