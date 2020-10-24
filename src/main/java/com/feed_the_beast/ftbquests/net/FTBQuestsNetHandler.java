@@ -1,6 +1,9 @@
 package com.feed_the_beast.ftbquests.net;
 
 import com.feed_the_beast.ftbquests.FTBQuests;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.network.NetworkRegistry;
@@ -64,5 +67,37 @@ public class FTBQuestsNetHandler
 		register(MessageMoveChapterResponse.class, MessageMoveChapterResponse::new);
 		register(MessageMoveQuest.class, MessageMoveQuest::new);
 		register(MessageMoveQuestResponse.class, MessageMoveQuestResponse::new);
+	}
+
+	public static void writeItemType(PacketBuffer buffer, ItemStack stack)
+	{
+		if (stack.isEmpty())
+		{
+			buffer.writeVarInt(-1);
+		}
+		else
+		{
+			buffer.writeVarInt(Item.getIdFromItem(stack.getItem()));
+			buffer.writeCompoundTag(stack.getTag());
+			buffer.writeCompoundTag((CompoundNBT) stack.serializeNBT().get("ForgeCaps"));
+		}
+	}
+
+	public static ItemStack readItemType(PacketBuffer buffer)
+	{
+		int id = buffer.readVarInt();
+
+		if (id == -1)
+		{
+			return ItemStack.EMPTY;
+		}
+		else
+		{
+			CompoundNBT tag = buffer.readCompoundTag();
+			CompoundNBT caps = buffer.readCompoundTag();
+			ItemStack item = new ItemStack(Item.getItemById(id), 1, caps);
+			item.setTag(tag);
+			return item;
+		}
 	}
 }

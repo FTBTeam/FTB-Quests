@@ -1,5 +1,6 @@
 package com.feed_the_beast.ftbquests.quest.reward;
 
+import com.feed_the_beast.ftbquests.net.FTBQuestsNetHandler;
 import com.feed_the_beast.ftbquests.net.MessageDisplayItemRewardToast;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.util.NBTUtils;
@@ -98,7 +99,7 @@ public class ItemReward extends Reward
 	public void writeNetData(PacketBuffer buffer)
 	{
 		super.writeNetData(buffer);
-		buffer.writeItemStack(item);
+		FTBQuestsNetHandler.writeItemType(buffer, item);
 		buffer.writeVarInt(count);
 		buffer.writeVarInt(randomBonus);
 		buffer.writeBoolean(onlyOne);
@@ -108,7 +109,7 @@ public class ItemReward extends Reward
 	public void readNetData(PacketBuffer buffer)
 	{
 		super.readNetData(buffer);
-		item = buffer.readItemStack();
+		item = FTBQuestsNetHandler.readItemType(buffer);
 		count = buffer.readVarInt();
 		randomBonus = buffer.readVarInt();
 		onlyOne = buffer.readBoolean();
