@@ -40,6 +40,7 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 	public ItemStack item;
 	public long count;
 	public Tristate consumeItems;
+	public Tristate onlyFromCrafting;
 
 	public ItemTask(Quest quest)
 	{
@@ -47,6 +48,7 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 		item = ItemStack.EMPTY;
 		count = 1;
 		consumeItems = Tristate.DEFAULT;
+		onlyFromCrafting = Tristate.DEFAULT;
 	}
 
 	@Override
@@ -72,10 +74,8 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 			nbt.putLong("count", count);
 		}
 
-		if (consumeItems != Tristate.DEFAULT)
-		{
-			consumeItems.write(nbt, "consume_items");
-		}
+		consumeItems.write(nbt, "consume_items");
+		onlyFromCrafting.write(nbt, "only_from_crafting");
 	}
 
 	@Override
@@ -91,6 +91,7 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 		}
 
 		consumeItems = Tristate.read(nbt, "consume_items");
+		onlyFromCrafting = Tristate.read(nbt, "only_from_crafting");
 	}
 
 	@Override
@@ -100,6 +101,7 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 		FTBQuestsNetHandler.writeItemType(buffer, item);
 		buffer.writeVarLong(count);
 		Tristate.NAME_MAP.write(buffer, consumeItems);
+		Tristate.NAME_MAP.write(buffer, onlyFromCrafting);
 	}
 
 	@Override
@@ -109,6 +111,7 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 		item = FTBQuestsNetHandler.readItemType(buffer);
 		count = buffer.readVarLong();
 		consumeItems = Tristate.NAME_MAP.read(buffer);
+		onlyFromCrafting = Tristate.NAME_MAP.read(buffer);
 	}
 
 	public List<ItemStack> getValidItems()
@@ -166,6 +169,7 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 		config.addItemStack("item", item, v -> item = v, ItemStack.EMPTY, true, false).setNameKey("ftbquests.task.ftbquests.item");
 		config.addLong("count", count, v -> count = v, 1, 1, Long.MAX_VALUE);
 		config.addEnum("consume_items", consumeItems, v -> consumeItems = v, Tristate.NAME_MAP);
+		config.addEnum("only_from_crafting", onlyFromCrafting, v -> onlyFromCrafting = v, Tristate.NAME_MAP);
 	}
 
 	@Override
@@ -274,6 +278,22 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 
 			if (!task.consumesResources())
 			{
+				if (task.onlyFromCrafting.get(false))
+				{
+					if (item.isEmpty() || !task.test(item))
+					{
+						return;
+					}
+
+					long count = Math.min(task.count, item.getCount());
+
+					if (count > progress)
+					{
+						setProgress(count);
+						return;
+					}
+				}
+
 				long count = 0;
 
 				for (ItemStack stack : player.inventory.mainInventory)
