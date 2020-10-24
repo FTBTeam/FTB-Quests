@@ -85,7 +85,12 @@ public class RandomReward extends Reward
 			}
 
 			table.id = file.newID();
-			table.title = getUnformattedTitle() + " " + toString();
+
+			if (file.getSide().isClient())
+			{
+				table.title = getUnformattedTitle() + " " + toString();
+			}
+
 			file.rewardTables.add(table);
 		}
 	}

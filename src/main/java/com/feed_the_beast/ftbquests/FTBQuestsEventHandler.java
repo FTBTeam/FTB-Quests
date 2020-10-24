@@ -20,6 +20,7 @@ import com.feed_the_beast.ftbquests.quest.reward.ToastReward;
 import com.feed_the_beast.ftbquests.quest.reward.XPLevelsReward;
 import com.feed_the_beast.ftbquests.quest.reward.XPReward;
 import com.feed_the_beast.ftbquests.quest.task.AdvancementTask;
+import com.feed_the_beast.ftbquests.quest.task.BiomeTask;
 import com.feed_the_beast.ftbquests.quest.task.CheckmarkTask;
 import com.feed_the_beast.ftbquests.quest.task.CustomTask;
 import com.feed_the_beast.ftbquests.quest.task.DimensionTask;
@@ -153,7 +154,8 @@ public class FTBQuestsEventHandler
 				FTBQuestsTasks.LOCATION = new TaskType(LocationTask::new).setRegistryName("location").setIcon(Icon.getIcon("minecraft:item/compass_00")),
 				FTBQuestsTasks.CHECKMARK = new TaskType(CheckmarkTask::new).setRegistryName("checkmark").setIcon(GuiIcons.ACCEPT_GRAY),
 				FTBQuestsTasks.ADVANCEMENT = new TaskType(AdvancementTask::new).setRegistryName("advancement").setIcon(Icon.getIcon("minecraft:item/wheat")),
-				FTBQuestsTasks.OBSERVATION = new TaskType(ObservationTask::new).setRegistryName("observation").setIcon(GuiIcons.ART)
+				FTBQuestsTasks.OBSERVATION = new TaskType(ObservationTask::new).setRegistryName("observation").setIcon(GuiIcons.ART),
+				FTBQuestsTasks.BIOME = new TaskType(BiomeTask::new).setRegistryName("biome").setIcon(Icon.getIcon("minecraft:blocks/sapling_oak"))
 		);
 
 		FTBQuests.PROXY.setTaskGuiProviders();

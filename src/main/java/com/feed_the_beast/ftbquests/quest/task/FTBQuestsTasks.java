@@ -17,4 +17,5 @@ public class FTBQuestsTasks
 	public static TaskType CHECKMARK;
 	public static TaskType ADVANCEMENT;
 	public static TaskType OBSERVATION;
+	public static TaskType BIOME;
 }
