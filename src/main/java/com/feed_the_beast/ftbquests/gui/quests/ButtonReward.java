@@ -8,12 +8,15 @@ import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
 import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
 import com.feed_the_beast.mods.ftbguilibrary.widget.ContextMenuItem;
+import com.feed_the_beast.mods.ftbguilibrary.widget.GuiHelper;
 import com.feed_the_beast.mods.ftbguilibrary.widget.GuiIcons;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
 import com.feed_the_beast.mods.ftbguilibrary.widget.WidgetType;
+import com.feed_the_beast.mods.ftbguilibrary.widget.WrappedIngredient;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
@@ -58,17 +61,40 @@ public class ButtonReward extends Button
 			list.add(new StringTextComponent(reward.toString()).mergeStyle(TextFormatting.DARK_GRAY));
 		}
 
-		if (reward.addTitleInMouseOverText())
-		{
-			list.add(getTitle());
-		}
-
 		if (reward.isTeamReward())
 		{
-			list.add(new StringTextComponent("").append(new StringTextComponent("[").append(new TranslationTextComponent("ftbquests.reward.team_reward")).appendString("]")).mergeStyle(TextFormatting.BLUE));
-		}
+			if (reward.addTitleInMouseOverText())
+			{
+				list.add(getTitle());
+			}
 
-		reward.addMouseOverText(list);
+			Object object = getIngredientUnderMouse();
+
+			if (object instanceof WrappedIngredient && ((WrappedIngredient) object).tooltip)
+			{
+				Object ingredient = WrappedIngredient.unwrap(object);
+
+				if (ingredient instanceof ItemStack && !((ItemStack) ingredient).isEmpty())
+				{
+					List<ITextComponent> list1 = new ArrayList<>();
+					GuiHelper.addStackTooltip((ItemStack) ingredient, list1);
+					list1.forEach(list::add);
+				}
+			}
+
+			list.blankLine();
+			reward.addMouseOverText(list);
+			list.add(new TranslationTextComponent("ftbquests.reward.team_reward").mergeStyle(TextFormatting.BLUE, TextFormatting.UNDERLINE));
+		}
+		else
+		{
+			if (reward.addTitleInMouseOverText())
+			{
+				list.add(getTitle());
+			}
+
+			reward.addMouseOverText(list);
+		}
 	}
 
 	@Override
