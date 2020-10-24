@@ -128,7 +128,7 @@ public class FTBQuestsEventHandler
 
 	private void worldSaved(WorldEvent.Save event)
 	{
-		ServerQuestFile.INSTANCE.checkSave();
+		ServerQuestFile.INSTANCE.saveNow();
 	}
 
 	private void registerItems(RegistryEvent.Register<Item> event)

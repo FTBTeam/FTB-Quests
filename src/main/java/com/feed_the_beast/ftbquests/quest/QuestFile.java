@@ -423,9 +423,7 @@ public abstract class QuestFile extends QuestObject
 
 			for (ItemStack stack : emergencyItems)
 			{
-				CompoundNBT nbt1 = new OrderedCompoundNBT();
-				NBTUtils.write(nbt1, "item", stack);
-				list.add(nbt1);
+				list.add(stack.serializeNBT());
 			}
 
 			nbt.put("emergency_items", list);
@@ -462,8 +460,7 @@ public abstract class QuestFile extends QuestObject
 
 		for (int i = 0; i < list.size(); i++)
 		{
-			CompoundNBT nbt1 = list.getCompound(i);
-			ItemStack stack = NBTUtils.read(nbt1, "item");
+			ItemStack stack = NBTUtils.read(list.getCompound(i), "item");
 
 			if (!stack.isEmpty())
 			{
@@ -489,7 +486,7 @@ public abstract class QuestFile extends QuestObject
 		fileNBT.putInt("version", VERSION);
 		fileNBT.putInt("last_id", lastID);
 		writeData(fileNBT);
-		NBTUtils.writeSNBT(folder, "data", fileNBT);
+		NBTUtils.writeSNBT(folder.resolve("data.snbt"), fileNBT);
 
 		for (Chapter chapter : chapters)
 		{
@@ -554,7 +551,7 @@ public abstract class QuestFile extends QuestObject
 			}
 
 			chapterNBT.put("quests", questList);
-			NBTUtils.writeSNBT(folder, "chapters/" + chapter.filename, chapterNBT);
+			NBTUtils.writeSNBT(folder.resolve("chapters/" + chapter.filename + ".snbt"), chapterNBT);
 		}
 
 		for (RewardTable table : rewardTables)
@@ -562,7 +559,7 @@ public abstract class QuestFile extends QuestObject
 			CompoundNBT tableNBT = new OrderedCompoundNBT();
 			tableNBT.putInt("id", table.id);
 			table.writeData(tableNBT);
-			NBTUtils.writeSNBT(folder, "reward_tables/" + getCodeString(table), tableNBT);
+			NBTUtils.writeSNBT(folder.resolve("reward_tables/" + getCodeString(table) + ".snbt"), tableNBT);
 		}
 	}
 
@@ -574,7 +571,7 @@ public abstract class QuestFile extends QuestObject
 		rewardTables.clear();
 
 		final Int2ObjectOpenHashMap<CompoundNBT> dataCache = new Int2ObjectOpenHashMap<>();
-		CompoundNBT fileNBT = NBTUtils.readSNBT(folder, "data");
+		CompoundNBT fileNBT = NBTUtils.readSNBT(folder.resolve("data.snbt"));
 
 		if (fileNBT != null)
 		{
