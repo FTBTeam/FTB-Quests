@@ -4,11 +4,14 @@ import com.feed_the_beast.ftbquests.net.MessageEditObject;
 import com.feed_the_beast.ftbquests.util.NetUtils;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigString;
+import com.feed_the_beast.mods.ftbguilibrary.icon.Color4I;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.nbt.StringNBT;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.math.vector.Vector3f;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.util.Constants;
@@ -28,6 +31,7 @@ public final class ChapterImage implements Movable
 	public Icon image;
 	public List<String> hover;
 	public String click;
+	public boolean dev;
 
 	public ChapterImage(Chapter c)
 	{
@@ -39,6 +43,7 @@ public final class ChapterImage implements Movable
 		image = Icon.getIcon("minecraft:textures/gui/presets/isles.png");
 		hover = new ArrayList<>();
 		click = "";
+		dev = false;
 	}
 
 	public void writeData(CompoundNBT nbt)
@@ -59,6 +64,7 @@ public final class ChapterImage implements Movable
 
 		nbt.put("hover", hoverTag);
 		nbt.putString("click", click);
+		nbt.putBoolean("dev", dev);
 	}
 
 	public void readData(CompoundNBT nbt)
@@ -79,6 +85,7 @@ public final class ChapterImage implements Movable
 		}
 
 		click = nbt.getString("click");
+		dev = nbt.getBoolean("dev");
 	}
 
 	public void writeNetData(PacketBuffer buffer)
@@ -91,6 +98,7 @@ public final class ChapterImage implements Movable
 		NetUtils.writeIcon(buffer, image);
 		NetUtils.writeStrings(buffer, hover);
 		buffer.writeString(click);
+		buffer.writeBoolean(dev);
 	}
 
 	public void readNetData(PacketBuffer buffer)
@@ -103,6 +111,7 @@ public final class ChapterImage implements Movable
 		image = NetUtils.readIcon(buffer);
 		NetUtils.readStrings(buffer, hover);
 		click = buffer.readString();
+		dev = buffer.readBoolean();
 	}
 
 	@OnlyIn(Dist.CLIENT)
@@ -116,6 +125,7 @@ public final class ChapterImage implements Movable
 		config.addString("image", image.toString(), v -> image = Icon.getIcon(v), "minecraft:textures/gui/presets/isles.png");
 		config.addList("hover", hover, new ConfigString(), "");
 		config.addString("click", click, v -> click = v, "");
+		config.addBool("dev", dev, v -> dev = v, false);
 	}
 
 	@Override
@@ -171,5 +181,19 @@ public final class ChapterImage implements Movable
 		}
 
 		new MessageEditObject(chapter).sendToServer();
+	}
+
+	@Override
+	@OnlyIn(Dist.CLIENT)
+	public void drawMoved(MatrixStack matrixStack)
+	{
+		matrixStack.push();
+		matrixStack.translate(0.5D, 0.5D, 0);
+		matrixStack.rotate(Vector3f.ZP.rotationDegrees((float) rotation));
+		matrixStack.scale(0.5F, 0.5F, 1F);
+		image.withColor(Color4I.WHITE.withAlpha(50)).draw(matrixStack, -1, -1, 2, 2);
+		matrixStack.pop();
+
+		QuestShape.get(getShape()).outline.withColor(Color4I.WHITE.withAlpha(30)).draw(matrixStack, 0, 0, 1, 1);
 	}
 }
