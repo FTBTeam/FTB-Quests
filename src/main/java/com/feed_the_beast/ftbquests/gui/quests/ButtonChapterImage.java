@@ -38,6 +38,21 @@ public class ButtonChapterImage extends Button
 	}
 
 	@Override
+	public boolean mousePressed(MouseButton button)
+	{
+		if (isMouseOver())
+		{
+			if (!chapterImage.click.isEmpty() || treeGui.file.canEdit() && !button.isLeft())
+			{
+				onClicked(button);
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	@Override
 	public boolean checkMouseOver(int mouseX, int mouseY)
 	{
 		if (treeGui.questPanel.mouseOverQuest != null || treeGui.movingObjects || treeGui.viewQuestPanel.isMouseOver() || treeGui.chapterHoverPanel.isMouseOverAnyWidget())
@@ -129,10 +144,16 @@ public class ButtonChapterImage extends Button
 	}
 
 	@Override
+	public boolean shouldDraw()
+	{
+		return false;
+	}
+
+	@Override
 	public void draw(MatrixStack matrixStack, Theme theme, int x, int y, int w, int h)
 	{
 		matrixStack.push();
-		matrixStack.translate((int) (x + w / 2D), (int) (y + h / 2D), 10);
+		matrixStack.translate((int) (x + w / 2D), (int) (y + h / 2D), 0);
 		matrixStack.rotate(Vector3f.ZP.rotationDegrees((float) chapterImage.rotation));
 		matrixStack.scale(w / 2F, h / 2F, 1);
 		chapterImage.image.draw(matrixStack, -1, -1, 2, 2);

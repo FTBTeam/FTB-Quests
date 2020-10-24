@@ -133,6 +133,14 @@ public class PanelQuests extends Panel
 			return;
 		}
 
+		for (ChapterImage image : treeGui.selectedChapter.images)
+		{
+			if (treeGui.file.canEdit() || !image.dev)
+			{
+				add(new ButtonChapterImage(this, image));
+			}
+		}
+
 		for (Quest quest : treeGui.selectedChapter.quests)
 		{
 			if (treeGui.file.canEdit() || quest.isVisible(ClientQuestFile.INSTANCE.self))
@@ -202,6 +210,14 @@ public class PanelQuests extends Panel
 		if (treeGui.selectedChapter == null)
 		{
 			return;
+		}
+
+		for (Widget widget : widgets)
+		{
+			if (widget instanceof ButtonChapterImage)
+			{
+				widget.draw(matrixStack, theme, widget.getX(), widget.getY(), widget.width, widget.height);
+			}
 		}
 
 		RenderSystem.color4f(1F, 1F, 1F, 1F);
@@ -431,7 +447,7 @@ public class PanelQuests extends Panel
 						matrixStack.translate(sx - bs * m.getWidth() / 2D, sy - bs * m.getHeight() / 2D, 0D);
 						matrixStack.scale((float) (bs * m.getWidth()), (float) (bs * m.getHeight()), 1F);
 						GuiHelper.setupDrawing();
-						QuestShape.get(m.getShape()).shape.withColor(Color4I.WHITE.withAlpha(30)).draw(matrixStack, 0, 0, 1, 1);
+						m.drawMoved(matrixStack);
 						matrixStack.pop();
 					}
 
