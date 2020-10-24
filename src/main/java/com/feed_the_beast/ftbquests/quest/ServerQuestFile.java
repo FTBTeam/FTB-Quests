@@ -143,7 +143,7 @@ public class ServerQuestFile extends QuestFile
 		shouldSave = true;
 	}
 
-	public void checkSave()
+	public void saveNow()
 	{
 		if (shouldSave)
 		{
@@ -157,7 +157,7 @@ public class ServerQuestFile extends QuestFile
 		{
 			if (data.shouldSave)
 			{
-				NBTUtils.writeSNBT(path, data.uuid.toString(), data.serializeNBT());
+				NBTUtils.writeSNBT(path.resolve(data.uuid.toString() + ".snbt"), data.serializeNBT());
 				data.shouldSave = false;
 			}
 		}
@@ -165,7 +165,7 @@ public class ServerQuestFile extends QuestFile
 
 	public void unload()
 	{
-		checkSave();
+		saveNow();
 		deleteChildren();
 		deleteSelf();
 	}
