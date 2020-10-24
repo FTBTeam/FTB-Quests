@@ -13,6 +13,7 @@ import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Color4I;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.icon.ImageIcon;
+import com.feed_the_beast.mods.ftbguilibrary.utils.Key;
 import com.feed_the_beast.mods.ftbguilibrary.utils.MathUtils;
 import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
 import com.feed_the_beast.mods.ftbguilibrary.utils.StringUtils;
@@ -31,6 +32,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.text.TranslationTextComponent;
+import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
@@ -137,11 +139,6 @@ public class PanelQuests extends Panel
 			{
 				add(new ButtonQuest(this, quest));
 			}
-		}
-
-		for (ChapterImage image : treeGui.selectedChapter.images)
-		{
-			add(new ButtonChapterImage(this, image));
 		}
 
 		alignWidgets();
@@ -593,6 +590,18 @@ public class PanelQuests extends Panel
 				break;
 			}
 		}
+	}
+
+	@Override
+	public boolean keyPressed(Key key)
+	{
+		if (treeGui.selectedChapter != null && treeGui.getViewedQuest() == null && (key.is(GLFW.GLFW_KEY_MINUS) || key.is(GLFW.GLFW_KEY_EQUAL)))
+		{
+			treeGui.addZoom(key.is(GLFW.GLFW_KEY_MINUS) ? -1D : 1D);
+			return true;
+		}
+
+		return super.keyPressed(key);
 	}
 
 	@Override
