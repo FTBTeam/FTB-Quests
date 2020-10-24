@@ -10,6 +10,7 @@ import com.feed_the_beast.ftbquests.net.MessageDisplayCompletionToast;
 import com.feed_the_beast.ftbquests.quest.loot.EntityWeight;
 import com.feed_the_beast.ftbquests.quest.loot.LootCrate;
 import com.feed_the_beast.ftbquests.quest.loot.RewardTable;
+import com.feed_the_beast.ftbquests.quest.reward.CustomReward;
 import com.feed_the_beast.ftbquests.quest.reward.Reward;
 import com.feed_the_beast.ftbquests.quest.reward.RewardAutoClaim;
 import com.feed_the_beast.ftbquests.quest.reward.RewardType;
@@ -613,13 +614,16 @@ public abstract class QuestFile extends QuestObject
 							CompoundNBT taskNBT = taskList.getCompound(j);
 							Task task = TaskType.createTask(quest, taskNBT.getString("type"));
 
-							if (task != null)
+							if (task == null)
 							{
-								task.id = readID(taskNBT.getInt("id"));
-								map.put(task.id, task);
-								dataCache.put(task.id, taskNBT);
-								quest.tasks.add(task);
+								task = new CustomTask(quest);
+								task.title = "Unknown type: " + taskNBT.getString("type");
 							}
+
+							task.id = readID(taskNBT.getInt("id"));
+							map.put(task.id, task);
+							dataCache.put(task.id, taskNBT);
+							quest.tasks.add(task);
 						}
 
 						ListNBT rewardList = questNBT.getList("rewards", Constants.NBT.TAG_COMPOUND);
@@ -629,13 +633,16 @@ public abstract class QuestFile extends QuestObject
 							CompoundNBT rewardNBT = rewardList.getCompound(j);
 							Reward reward = RewardType.createReward(quest, rewardNBT.getString("type"));
 
-							if (reward != null)
+							if (reward == null)
 							{
-								reward.id = readID(rewardNBT.getInt("id"));
-								map.put(reward.id, reward);
-								dataCache.put(reward.id, rewardNBT);
-								quest.rewards.add(reward);
+								reward = new CustomReward(quest);
+								reward.title = "Unknown type: " + rewardNBT.getString("type");
 							}
+
+							reward.id = readID(rewardNBT.getInt("id"));
+							map.put(reward.id, reward);
+							dataCache.put(reward.id, rewardNBT);
+							quest.rewards.add(reward);
 						}
 					}
 				}
