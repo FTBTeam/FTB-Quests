@@ -25,7 +25,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -74,7 +73,14 @@ public class PlayerData implements INBTSerializable<CompoundNBT>
 
 	public TaskData getTaskData(Task task)
 	{
-		return Objects.requireNonNull(taskData.get(task.id));
+		TaskData d = taskData.get(task.id);
+
+		if (d == null)
+		{
+			throw new NullPointerException("Task data null! Task: " + task + ", Quest: " + task.quest.chapter.filename + ":" + task.quest + ", Player: " + name);
+		}
+
+		return d;
 	}
 
 	public void createTaskData(Task task)

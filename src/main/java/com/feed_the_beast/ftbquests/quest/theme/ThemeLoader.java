@@ -60,10 +60,15 @@ public class ThemeLoader implements ISelectiveResourceReloadListener
 				{
 					parse(map, FileUtils.read(in));
 				}
+				catch (Exception ex)
+				{
+					ex.printStackTrace();
+				}
 			}
 		}
 		catch (Exception ex)
 		{
+			ex.printStackTrace();
 		}
 
 		QuestTheme theme = new QuestTheme();
@@ -134,7 +139,7 @@ public class ThemeLoader implements ISelectiveResourceReloadListener
 				{
 					AndSelector andSelector = new AndSelector();
 
-					for (String sel1 : sel.trim().split("\\&"))
+					for (String sel1 : sel.trim().split("&"))
 					{
 						ThemeSelector themeSelector = parse(Pattern.compile("\\s").matcher(sel1).replaceAll(""));
 
