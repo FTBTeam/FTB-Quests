@@ -175,31 +175,25 @@ public class ServerQuestFile extends QuestFile
 		UUID id = player.getUniqueID();
 		PlayerData data = playerDataMap.get(id);
 
-		if (data != null)
+		if (data == null)
+		{
+			data = new PlayerData(this, id);
+			data.save();
+		}
+
+		if (!data.name.equals(player.getGameProfile().getName()))
 		{
 			data.name = player.getGameProfile().getName();
 			data.save();
-
-			for (ServerPlayerEntity player1 : server.getPlayerList().getPlayers())
-			{
-				if (player1 != player)
-				{
-					new MessageCreatePlayerData(data).sendTo(player1);
-				}
-			}
 		}
-		else
-		{
-			data = new PlayerData(this, id);
-			data.name = player.getGameProfile().getName();
-			addData(data);
 
-			for (ServerPlayerEntity player1 : server.getPlayerList().getPlayers())
+		addData(data);
+
+		for (ServerPlayerEntity player1 : server.getPlayerList().getPlayers())
+		{
+			if (player1 != player)
 			{
-				if (player1 != player)
-				{
-					new MessageCreatePlayerData(data).sendTo(player1);
-				}
+				new MessageCreatePlayerData(data).sendTo(player1);
 			}
 		}
 
