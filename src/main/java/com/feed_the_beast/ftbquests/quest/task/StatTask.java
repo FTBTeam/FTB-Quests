@@ -8,7 +8,6 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.stats.Stat;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.IFormattableTextComponent;
@@ -24,13 +23,13 @@ import java.util.List;
  */
 public class StatTask extends Task
 {
-	public Stat<ResourceLocation> stat;
+	public ResourceLocation stat;
 	public int value = 1;
 
 	public StatTask(Quest quest)
 	{
 		super(quest);
-		stat = Stats.CUSTOM.get(Stats.MOB_KILLS);
+		stat = Stats.MOB_KILLS;
 	}
 
 	@Override
@@ -63,7 +62,7 @@ public class StatTask extends Task
 	public void readData(CompoundNBT nbt)
 	{
 		super.readData(nbt);
-		stat = Stats.CUSTOM.get(new ResourceLocation(nbt.getString("stat")));
+		stat = new ResourceLocation(nbt.getString("stat"));
 		value = nbt.getInt("value");
 	}
 
@@ -71,7 +70,7 @@ public class StatTask extends Task
 	public void writeNetData(PacketBuffer buffer)
 	{
 		super.writeNetData(buffer);
-		buffer.writeResourceLocation(stat.getValue());
+		buffer.writeResourceLocation(stat);
 		buffer.writeVarInt(value);
 	}
 
@@ -79,7 +78,7 @@ public class StatTask extends Task
 	public void readNetData(PacketBuffer buffer)
 	{
 		super.readNetData(buffer);
-		stat = Stats.CUSTOM.get(buffer.readResourceLocation());
+		stat = buffer.readResourceLocation();
 		value = buffer.readVarInt();
 	}
 
@@ -89,16 +88,16 @@ public class StatTask extends Task
 	{
 		super.getConfig(config);
 
-		List<Stat<ResourceLocation>> list = new ArrayList<>();
-		Stats.CUSTOM.iterator().forEachRemaining(list::add);
-		config.addEnum("stat", stat, v -> stat = v, NameMap.of(Stats.CUSTOM.get(Stats.MOB_KILLS), list).name(v -> new TranslationTextComponent("stat." + v.getValue().getNamespace() + "." + v.getValue().getPath())).create());
+		List<ResourceLocation> list = new ArrayList<>();
+		Stats.CUSTOM.iterator().forEachRemaining(s -> list.add(s.getValue()));
+		config.addEnum("stat", stat, v -> stat = v, NameMap.of(Stats.MOB_KILLS, list).name(v -> new TranslationTextComponent("stat." + v.getNamespace() + "." + v.getPath())).create());
 		config.addInt("value", value, v -> value = v, 1, 1, Integer.MAX_VALUE);
 	}
 
 	@Override
 	public IFormattableTextComponent getAltTitle()
 	{
-		return new TranslationTextComponent("stat." + stat.getValue().getNamespace() + "." + stat.getValue().getPath());
+		return new TranslationTextComponent("stat." + stat.getNamespace() + "." + stat.getPath());
 	}
 
 	@Override
@@ -140,7 +139,7 @@ public class StatTask extends Task
 				return;
 			}
 
-			int set = Math.min(task.value, player.getStats().getValue(task.stat));
+			int set = Math.min(task.value, player.getStats().getValue(Stats.CUSTOM.get(task.stat)));
 
 			if (set > progress)
 			{
