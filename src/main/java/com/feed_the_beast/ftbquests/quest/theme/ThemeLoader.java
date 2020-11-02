@@ -71,6 +71,11 @@ public class ThemeLoader implements ISelectiveResourceReloadListener
 			ex.printStackTrace();
 		}
 
+		if (map.isEmpty())
+		{
+			FTBQuests.LOGGER.error("FTB Quests theme file is missing! Some mod has broken resource loading, inspect log for errors");
+		}
+
 		QuestTheme theme = new QuestTheme();
 		theme.defaults = map.remove(AllSelector.INSTANCE);
 

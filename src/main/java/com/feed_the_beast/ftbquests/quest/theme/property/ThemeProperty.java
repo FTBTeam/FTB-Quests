@@ -11,10 +11,12 @@ import javax.annotation.Nullable;
 public abstract class ThemeProperty<T>
 {
 	public final String name;
+	public final T defaultValue;
 
-	public ThemeProperty(String n)
+	public ThemeProperty(String n, T def)
 	{
 		name = n;
+		defaultValue = def;
 	}
 
 	@Nullable
