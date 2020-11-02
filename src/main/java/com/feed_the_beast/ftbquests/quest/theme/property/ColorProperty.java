@@ -9,7 +9,7 @@ public class ColorProperty extends ThemeProperty<Color4I>
 {
 	public ColorProperty(String n)
 	{
-		super(n);
+		super(n, Color4I.EMPTY);
 	}
 
 	@Override

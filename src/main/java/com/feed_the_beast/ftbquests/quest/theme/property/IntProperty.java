@@ -12,7 +12,7 @@ public class IntProperty extends ThemeProperty<Integer>
 
 	public IntProperty(String n, int mn, int mx)
 	{
-		super(n);
+		super(n, 0);
 		min = mn;
 		max = mx;
 	}
