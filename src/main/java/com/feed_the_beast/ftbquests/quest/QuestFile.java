@@ -59,7 +59,7 @@ import java.util.function.Predicate;
  */
 public abstract class QuestFile extends QuestObject
 {
-	public static final int VERSION = 8;
+	public static final int VERSION = 9;
 
 	private int lastID;
 	public final List<Chapter> chapters;
@@ -935,7 +935,7 @@ public abstract class QuestFile extends QuestObject
 		for (int i = 0; i < pds; i++)
 		{
 			PlayerData data = new PlayerData(this, NetUtils.readUUID(buffer));
-			addData(data);
+			addData(data, true);
 			data.read(buffer, data.uuid.equals(self));
 		}
 
@@ -1194,7 +1194,7 @@ public abstract class QuestFile extends QuestObject
 		return defaultQuestShape;
 	}
 
-	public void addData(PlayerData data)
+	public void addData(PlayerData data, boolean strong)
 	{
 		playerDataMap.put(data.uuid, data);
 
@@ -1204,7 +1204,7 @@ public abstract class QuestFile extends QuestObject
 			{
 				for (Task task : quest.tasks)
 				{
-					data.createTaskData(task);
+					data.createTaskData(task, strong);
 				}
 			}
 		}

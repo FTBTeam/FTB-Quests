@@ -8,7 +8,6 @@ import com.feed_the_beast.ftbquests.quest.reward.RewardAutoClaim;
 import com.feed_the_beast.ftbquests.quest.reward.RewardClaimType;
 import com.feed_the_beast.ftbquests.quest.task.Task;
 import com.feed_the_beast.ftbquests.quest.task.TaskData;
-import com.feed_the_beast.ftbquests.util.NBTUtils;
 import com.feed_the_beast.ftbquests.util.OrderedCompoundNBT;
 import it.unimi.dsi.fastutil.ints.Int2ByteOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -17,7 +16,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.common.util.INBTSerializable;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -30,7 +28,7 @@ import java.util.UUID;
 /**
  * @author LatvianModder
  */
-public class PlayerData implements INBTSerializable<CompoundNBT>
+public class PlayerData
 {
 	public static PlayerData get(PlayerEntity player)
 	{
@@ -83,9 +81,12 @@ public class PlayerData implements INBTSerializable<CompoundNBT>
 		return d;
 	}
 
-	public void createTaskData(Task task)
+	public void createTaskData(Task task, boolean strong)
 	{
-		taskData.put(task.id, task.createData(this));
+		if (strong || !taskData.containsKey(task.id))
+		{
+			taskData.put(task.id, task.createData(this));
+		}
 	}
 
 	public void removeTaskData(Task task)
@@ -186,7 +187,6 @@ public class PlayerData implements INBTSerializable<CompoundNBT>
 		areDependenciesCompleteCache = null;
 	}
 
-	@Override
 	public CompoundNBT serializeNBT()
 	{
 		CompoundNBT nbt = new OrderedCompoundNBT();
@@ -205,7 +205,14 @@ public class PlayerData implements INBTSerializable<CompoundNBT>
 		{
 			if (data.progress > 0L)
 			{
-				NBTUtils.putVarLong(taskDataNBT, QuestObjectBase.getCodeString(data.task), data.progress);
+				if (data.progress <= Integer.MAX_VALUE)
+				{
+					taskDataNBT.putInt(QuestObjectBase.getCodeString(data.task), (int) data.progress);
+				}
+				else
+				{
+					taskDataNBT.putLong(QuestObjectBase.getCodeString(data.task), data.progress);
+				}
 			}
 		}
 
@@ -222,7 +229,6 @@ public class PlayerData implements INBTSerializable<CompoundNBT>
 		return nbt;
 	}
 
-	@Override
 	public void deserializeNBT(CompoundNBT nbt)
 	{
 		name = nbt.getString("name");

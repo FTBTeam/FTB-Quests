@@ -91,7 +91,7 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon
 	{
 		PlayerData data = new PlayerData(ClientQuestFile.INSTANCE, uuid);
 		data.name = name;
-		data.file.addData(data);
+		data.file.addData(data, true);
 	}
 
 	@Override
