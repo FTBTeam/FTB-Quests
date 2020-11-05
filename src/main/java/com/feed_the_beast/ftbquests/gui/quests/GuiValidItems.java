@@ -73,7 +73,10 @@ public class GuiValidItems extends GuiBase
 				Color4I.WHITE.withAlpha(33).draw(matrixStack, x, y, w, h);
 			}
 
+			matrixStack.push();
+			matrixStack.translate(0, 0, 10);
 			GuiHelper.drawItem(matrixStack, stack, x + 2, y + 2, 2, 2, true, null);
+			matrixStack.pop();
 		}
 	}
 
