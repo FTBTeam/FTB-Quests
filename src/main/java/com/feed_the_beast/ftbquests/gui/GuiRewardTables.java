@@ -55,9 +55,16 @@ public class GuiRewardTables extends GuiButtonListBase
 		public void onClicked(MouseButton button)
 		{
 			playClickSound();
+
+			if (button.isLeft())
+			{
+				table.onEditButtonClicked(this);
+				return;
+			}
+
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
 			GuiQuests.addObjectMenuItems(contextMenu, GuiRewardTables.this, table);
-			contextMenu.add(new ContextMenuItem(new TranslationTextComponent("item.ftbquests.lootcrate.name"), GuiIcons.ACCEPT, () -> {
+			contextMenu.add(new ContextMenuItem(new TranslationTextComponent("item.ftbquests.lootcrate"), GuiIcons.ACCEPT, () -> {
 				if (table.lootCrate == null)
 				{
 					table.lootCrate = new LootCrate(table);
@@ -174,6 +181,8 @@ public class GuiRewardTables extends GuiButtonListBase
 						table.title = c.value;
 						new MessageCreateObject(table, null).sendToServer();
 					}
+
+					openGui();
 				});
 			}
 		};
