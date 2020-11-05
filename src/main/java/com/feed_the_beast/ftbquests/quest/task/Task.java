@@ -157,7 +157,7 @@ public abstract class Task extends QuestObject
 
 		for (PlayerData data : quest.chapter.file.getAllData())
 		{
-			data.createTaskData(this);
+			data.createTaskData(this, true);
 		}
 
 		if (this instanceof CustomTask)

@@ -23,6 +23,8 @@ import java.util.UUID;
  */
 public class ServerQuestFile extends QuestFile
 {
+	public static final FolderName FTBQUESTS_DATA = new FolderName("ftbquests");
+
 	public static ServerQuestFile INSTANCE;
 
 	public final MinecraftServer server;
@@ -67,7 +69,7 @@ public class ServerQuestFile extends QuestFile
 
 		FTBQuests.LOGGER.info(String.format("Loaded %d chapters, %d quests, %d tasks and %d rewards. In total, %d objects", c, q, t, r, getAllObjects().size()));
 
-		Path path = server.func_240776_a_(FolderName.DOT).resolve("ftbquests");
+		Path path = server.func_240776_a_(FTBQUESTS_DATA);
 
 		if (Files.exists(path))
 		{
@@ -80,7 +82,7 @@ public class ServerQuestFile extends QuestFile
 					{
 						UUID uuid = UUID.fromString(nbt.getString("uuid"));
 						PlayerData data = new PlayerData(this, uuid);
-						addData(data);
+						addData(data, true);
 						data.deserializeNBT(nbt);
 					}
 					catch (Exception ex)
@@ -151,7 +153,7 @@ public class ServerQuestFile extends QuestFile
 			shouldSave = false;
 		}
 
-		Path path = server.func_240776_a_(FolderName.DOT).resolve("ftbquests");
+		Path path = server.func_240776_a_(FTBQUESTS_DATA);
 
 		for (PlayerData data : getAllData())
 		{
@@ -187,7 +189,7 @@ public class ServerQuestFile extends QuestFile
 			data.save();
 		}
 
-		addData(data);
+		addData(data, false);
 
 		for (ServerPlayerEntity player1 : server.getPlayerList().getPlayers())
 		{

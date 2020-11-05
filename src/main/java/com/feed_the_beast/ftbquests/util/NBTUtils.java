@@ -245,24 +245,4 @@ public class NBTUtils
 		builder.pop();
 		builder.print("]");
 	}
-
-	public static void putVarLong(CompoundNBT nbt, String key, long value)
-	{
-		if (value <= Byte.MAX_VALUE)
-		{
-			nbt.putByte(key, (byte) value);
-		}
-		else if (value <= Short.MAX_VALUE)
-		{
-			nbt.putShort(key, (short) value);
-		}
-		else if (value <= Integer.MAX_VALUE)
-		{
-			nbt.putInt(key, (int) value);
-		}
-		else
-		{
-			nbt.putLong(key, value);
-		}
-	}
 }
