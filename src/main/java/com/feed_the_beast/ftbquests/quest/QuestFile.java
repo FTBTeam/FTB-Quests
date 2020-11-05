@@ -582,93 +582,104 @@ public abstract class QuestFile extends QuestObject
 			dataCache.put(1, fileNBT);
 		}
 
-		try
+		Path chaptersFolder = folder.resolve("chapters");
+
+		if (Files.exists(chaptersFolder))
 		{
-			Files.list(folder.resolve("chapters")).forEach(path -> {
-				CompoundNBT chapterNBT = NBTUtils.readSNBT(path);
+			try
+			{
+				Files.list(chaptersFolder).forEach(path -> {
+					CompoundNBT chapterNBT = NBTUtils.readSNBT(path);
 
-				if (chapterNBT != null)
-				{
-					Chapter chapter = new Chapter(this);
-					chapter.orderIndex = chapters.size() + 1;
-					chapter.id = readID(chapterNBT.getInt("id"));
-					map.put(chapter.id, chapter);
-					dataCache.put(chapter.id, chapterNBT);
-					chapters.add(chapter);
-
-					ListNBT questList = chapterNBT.getList("quests", Constants.NBT.TAG_COMPOUND);
-
-					for (int i = 0; i < questList.size(); i++)
+					if (chapterNBT != null)
 					{
-						CompoundNBT questNBT = questList.getCompound(i);
-						Quest quest = new Quest(chapter);
-						quest.id = readID(questNBT.getInt("id"));
-						map.put(quest.id, quest);
-						dataCache.put(quest.id, questNBT);
-						chapter.quests.add(quest);
+						Chapter chapter = new Chapter(this);
+						chapter.orderIndex = chapters.size() + 1;
+						chapter.id = readID(chapterNBT.getInt("id"));
+						map.put(chapter.id, chapter);
+						dataCache.put(chapter.id, chapterNBT);
+						chapters.add(chapter);
 
-						ListNBT taskList = questNBT.getList("tasks", Constants.NBT.TAG_COMPOUND);
+						ListNBT questList = chapterNBT.getList("quests", Constants.NBT.TAG_COMPOUND);
 
-						for (int j = 0; j < taskList.size(); j++)
+						for (int i = 0; i < questList.size(); i++)
 						{
-							CompoundNBT taskNBT = taskList.getCompound(j);
-							Task task = TaskType.createTask(quest, taskNBT.getString("type"));
+							CompoundNBT questNBT = questList.getCompound(i);
+							Quest quest = new Quest(chapter);
+							quest.id = readID(questNBT.getInt("id"));
+							map.put(quest.id, quest);
+							dataCache.put(quest.id, questNBT);
+							chapter.quests.add(quest);
 
-							if (task == null)
+							ListNBT taskList = questNBT.getList("tasks", Constants.NBT.TAG_COMPOUND);
+
+							for (int j = 0; j < taskList.size(); j++)
 							{
-								task = new CustomTask(quest);
-								task.title = "Unknown type: " + taskNBT.getString("type");
+								CompoundNBT taskNBT = taskList.getCompound(j);
+								Task task = TaskType.createTask(quest, taskNBT.getString("type"));
+
+								if (task == null)
+								{
+									task = new CustomTask(quest);
+									task.title = "Unknown type: " + taskNBT.getString("type");
+								}
+
+								task.id = readID(taskNBT.getInt("id"));
+								map.put(task.id, task);
+								dataCache.put(task.id, taskNBT);
+								quest.tasks.add(task);
 							}
 
-							task.id = readID(taskNBT.getInt("id"));
-							map.put(task.id, task);
-							dataCache.put(task.id, taskNBT);
-							quest.tasks.add(task);
-						}
+							ListNBT rewardList = questNBT.getList("rewards", Constants.NBT.TAG_COMPOUND);
 
-						ListNBT rewardList = questNBT.getList("rewards", Constants.NBT.TAG_COMPOUND);
-
-						for (int j = 0; j < rewardList.size(); j++)
-						{
-							CompoundNBT rewardNBT = rewardList.getCompound(j);
-							Reward reward = RewardType.createReward(quest, rewardNBT.getString("type"));
-
-							if (reward == null)
+							for (int j = 0; j < rewardList.size(); j++)
 							{
-								reward = new CustomReward(quest);
-								reward.title = "Unknown type: " + rewardNBT.getString("type");
-							}
+								CompoundNBT rewardNBT = rewardList.getCompound(j);
+								Reward reward = RewardType.createReward(quest, rewardNBT.getString("type"));
 
-							reward.id = readID(rewardNBT.getInt("id"));
-							map.put(reward.id, reward);
-							dataCache.put(reward.id, rewardNBT);
-							quest.rewards.add(reward);
+								if (reward == null)
+								{
+									reward = new CustomReward(quest);
+									reward.title = "Unknown type: " + rewardNBT.getString("type");
+								}
+
+								reward.id = readID(rewardNBT.getInt("id"));
+								map.put(reward.id, reward);
+								dataCache.put(reward.id, rewardNBT);
+								quest.rewards.add(reward);
+							}
 						}
 					}
-				}
-			});
-		}
-		catch (Exception ex)
-		{
+				});
+			}
+			catch (Exception ex)
+			{
+			}
 		}
 
-		try
-		{
-			Files.list(folder.resolve("reward_tables")).forEach(path -> {
-				CompoundNBT tableNBT = NBTUtils.readSNBT(path);
+		Path rewardTableFolder = folder.resolve("reward_tables");
 
-				if (tableNBT != null)
-				{
-					RewardTable table = new RewardTable(this);
-					table.id = readID(tableNBT.getInt("id"));
-					map.put(table.id, table);
-					dataCache.put(table.id, tableNBT);
-					rewardTables.add(table);
-				}
-			});
-		}
-		catch (Exception ex)
+		if (Files.exists(rewardTableFolder))
 		{
+			try
+			{
+				Files.list(rewardTableFolder).forEach(path -> {
+					CompoundNBT tableNBT = NBTUtils.readSNBT(path);
+
+					if (tableNBT != null)
+					{
+						RewardTable table = new RewardTable(this);
+						table.id = readID(tableNBT.getInt("id"));
+						map.put(table.id, table);
+						dataCache.put(table.id, tableNBT);
+						rewardTables.add(table);
+					}
+				});
+			}
+			catch (Exception ex)
+			{
+				ex.printStackTrace();
+			}
 		}
 
 		for (QuestObjectBase object : map.values())
@@ -946,6 +957,12 @@ public abstract class QuestFile extends QuestObject
 	public int getParentID()
 	{
 		return 0;
+	}
+
+	@Nullable
+	public PlayerData getNullablePlayerData(UUID id)
+	{
+		return playerDataMap.get(id);
 	}
 
 	public PlayerData getData(UUID id)
