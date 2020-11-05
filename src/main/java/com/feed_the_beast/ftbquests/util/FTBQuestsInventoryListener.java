@@ -10,6 +10,7 @@ import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.IContainerListener;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
+import net.minecraftforge.common.util.FakePlayer;
 
 /**
  * @author LatvianModder
@@ -25,12 +26,17 @@ public class FTBQuestsInventoryListener implements IContainerListener
 
 	public static void detect(ServerPlayerEntity player, ItemStack item, int sourceTask)
 	{
-		if (ServerQuestFile.INSTANCE == null)
+		if (ServerQuestFile.INSTANCE == null || player instanceof FakePlayer)
 		{
 			return;
 		}
 
-		PlayerData data = ServerQuestFile.INSTANCE.getData(player);
+		PlayerData data = ServerQuestFile.INSTANCE.getNullablePlayerData(player.getUniqueID());
+
+		if (data == null)
+		{
+			return;
+		}
 
 		for (Chapter chapter : ServerQuestFile.INSTANCE.chapters)
 		{
