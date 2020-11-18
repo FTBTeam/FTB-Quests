@@ -13,6 +13,7 @@ import com.feed_the_beast.mods.ftbguilibrary.widget.ContextMenuItem;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
 import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
@@ -156,6 +157,8 @@ public class ButtonChapterImage extends Button
 		matrixStack.translate((int) (x + w / 2D), (int) (y + h / 2D), 0);
 		matrixStack.rotate(Vector3f.ZP.rotationDegrees((float) chapterImage.rotation));
 		matrixStack.scale(w / 2F, h / 2F, 1);
+		RenderSystem.enableBlend();
+		RenderSystem.defaultBlendFunc();
 		chapterImage.image.draw(matrixStack, -1, -1, 2, 2);
 		matrixStack.pop();
 	}

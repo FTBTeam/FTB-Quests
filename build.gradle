@@ -37,6 +37,7 @@ minecraft {
 			workingDirectory project.file('run')
 			args '--mixin.config', 'ftbquests.mixins.json'
 			property 'forge.logging.console.level', 'debug'
+			property 'mixin.env.disableRefMap', 'true'
 
 			if (project.hasProperty('mc_dev_uuid')) args '--uuid', project.mc_dev_uuid
 			if (project.hasProperty('mc_dev_username')) args '--username', project.mc_dev_username
@@ -101,10 +102,8 @@ dependencies {
 		transitive = false
 		changing = true
 	}))
-	compileOnly(fg.deobf(project.dependencies.create("dev.latvian.mods:kubejs:${kubejs_version}") {
-		transitive = false
-		changing = true
-	}))
+	compile fg.deobf("curse.maven:rhino:${rhino_file}")
+	compile fg.deobf("curse.maven:kubejs:${kubejs_file}")
 	compile fg.deobf("curse.maven:jei:${jei_file}")
 	compile fg.deobf("curse.maven:bookshelf:${bookshelf_file}")
 	compile fg.deobf("curse.maven:game-stages:${gamestages_file}")
@@ -149,6 +148,7 @@ if (ENV.CURSEFORGE_KEY) {
 			releaseType = "release"
 			addGameVersion "1.16.2"
 			addGameVersion "1.16.3"
+			addGameVersion "1.16.4"
 			relations {
 				requiredDependency 'ftb-gui-library'
 				requiredDependency 'item-filters'
