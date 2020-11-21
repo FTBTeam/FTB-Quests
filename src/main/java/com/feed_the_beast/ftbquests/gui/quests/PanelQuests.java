@@ -513,7 +513,7 @@ public class PanelQuests extends Panel
 					minY = Math.min(minY, q.getY());
 				}
 
-				for (Movable q : treeGui.selectedObjects)
+				for (Movable q : new ArrayList<>(treeGui.selectedObjects))
 				{
 					q.move(treeGui.selectedChapter, questX + (q.getX() - minX), questY + (q.getY() - minY));
 				}
