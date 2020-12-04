@@ -3,13 +3,15 @@ package com.feed_the_beast.ftbquests.quest.task;
 import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.text.IFormattableTextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -92,9 +94,9 @@ public class XPTask extends Task implements ISingleLongValueTask
 	}
 
 	@Override
-	public String getAltTitle()
+	public IFormattableTextComponent getAltTitle()
 	{
-		return I18n.format("ftbquests.reward.ftbquests.xp_levels") + ": " + TextFormatting.RED + getMaxProgressString();
+		return new TranslationTextComponent("ftbquests.reward.ftbquests.xp_levels").appendString(": ").append(new StringTextComponent(getMaxProgressString()).mergeStyle(TextFormatting.RED));
 	}
 
 	@Override

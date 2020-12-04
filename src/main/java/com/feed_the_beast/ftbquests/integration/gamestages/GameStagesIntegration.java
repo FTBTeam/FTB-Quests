@@ -14,6 +14,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 /**
@@ -28,9 +29,7 @@ public class GameStagesIntegration
 	{
 		FMLJavaModLoadingContext.get().getModEventBus().addGenericListener(TaskType.class, this::registerTasks);
 		FMLJavaModLoadingContext.get().getModEventBus().addGenericListener(RewardType.class, this::registerRewards);
-		MinecraftForge.EVENT_BUS.addListener(EventPriority.LOW, this::onLoggedIn);
-		MinecraftForge.EVENT_BUS.addListener(this::onGameStageAdded);
-		MinecraftForge.EVENT_BUS.addListener(this::onGameStageRemoved);
+		MinecraftForge.EVENT_BUS.register(GameStagesIntegration.class);
 	}
 
 	private void registerTasks(RegistryEvent.Register<TaskType> event)
@@ -43,7 +42,8 @@ public class GameStagesIntegration
 		event.getRegistry().register(GAMESTAGE_REWARD = new RewardType(GameStageReward::new).setRegistryName("gamestage").setIcon(GuiIcons.CONTROLLER));
 	}
 
-	private void onLoggedIn(PlayerEvent.PlayerLoggedInEvent event)
+	@SubscribeEvent(priority = EventPriority.LOW)
+	public static void onLoggedIn(PlayerEvent.PlayerLoggedInEvent event)
 	{
 		if (event.getPlayer() instanceof ServerPlayerEntity)
 		{
@@ -51,7 +51,8 @@ public class GameStagesIntegration
 		}
 	}
 
-	private void onGameStageAdded(GameStageEvent.Added event)
+	@SubscribeEvent
+	public static void onGameStageAdded(GameStageEvent.Added event)
 	{
 		if (event.getPlayer() instanceof ServerPlayerEntity)
 		{
@@ -59,7 +60,8 @@ public class GameStagesIntegration
 		}
 	}
 
-	private void onGameStageRemoved(GameStageEvent.Removed event)
+	@SubscribeEvent
+	public static void onGameStageRemoved(GameStageEvent.Removed event)
 	{
 		if (event.getPlayer() instanceof ServerPlayerEntity)
 		{
@@ -67,7 +69,7 @@ public class GameStagesIntegration
 		}
 	}
 
-	private static void checkStages(ServerPlayerEntity player)
+	public static void checkStages(ServerPlayerEntity player)
 	{
 		PlayerData data = ServerQuestFile.INSTANCE == null ? null : ServerQuestFile.INSTANCE.getData(player);
 

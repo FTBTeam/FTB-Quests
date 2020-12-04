@@ -7,6 +7,7 @@ import com.feed_the_beast.mods.ftbguilibrary.icon.Color4I;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
 import com.feed_the_beast.mods.ftbguilibrary.utils.StringUtils;
+import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
 import com.feed_the_beast.mods.ftbguilibrary.widget.GuiBase;
 import com.feed_the_beast.mods.ftbguilibrary.widget.GuiHelper;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
@@ -14,10 +15,11 @@ import com.feed_the_beast.mods.ftbguilibrary.widget.SimpleTextButton;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Widget;
 import com.feed_the_beast.mods.ftbguilibrary.widget.WidgetLayout;
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -28,7 +30,7 @@ import java.util.List;
  */
 public class GuiEmergencyItems extends GuiBase
 {
-	private long endTime = System.currentTimeMillis() + ClientQuestFile.INSTANCE.emergencyItemsCooldown * 1000L;
+	private final long endTime = System.currentTimeMillis() + ClientQuestFile.INSTANCE.emergencyItemsCooldown * 1000L;
 	private boolean done = false;
 
 	private static class EmergencyItem extends Widget
@@ -44,22 +46,25 @@ public class GuiEmergencyItems extends GuiBase
 		}
 
 		@Override
-		public void addMouseOverText(List<String> list)
+		public void addMouseOverText(TooltipList list)
 		{
 			List<ITextComponent> list1 = new ArrayList<>();
 			GuiHelper.addStackTooltip(stack, list1);
 
 			for (ITextComponent t : list1)
 			{
-				list.add(t.getFormattedText());
+				list.add(t);
 			}
 		}
 
 		@Override
-		public void draw(Theme theme, int x, int y, int w, int h)
+		public void draw(MatrixStack matrixStack, Theme theme, int x, int y, int w, int h)
 		{
-			QuestShape.RSQUARE.outline.draw(x - 3, y - 3, w + 6, h + 6);
-			GuiHelper.drawItem(stack, x, y, true);
+			QuestShape.get("rsquare").outline.draw(matrixStack, x - 3, y - 3, w + 6, h + 6);
+			matrixStack.push();
+			matrixStack.translate(0, 0, 100);
+			GuiHelper.drawItem(matrixStack, stack, x, y, 1F, 1F, true, null);
+			matrixStack.pop();
 		}
 
 		@Override
@@ -70,7 +75,7 @@ public class GuiEmergencyItems extends GuiBase
 		}
 	}
 
-	private final SimpleTextButton cancelButton = new SimpleTextButton(this, I18n.format("gui.cancel"), Icon.EMPTY)
+	private final SimpleTextButton cancelButton = new SimpleTextButton(this, new TranslationTextComponent("gui.cancel"), Icon.EMPTY)
 	{
 		@Override
 		public void onClicked(MouseButton button)
@@ -115,7 +120,7 @@ public class GuiEmergencyItems extends GuiBase
 	}
 
 	@Override
-	public void drawBackground(Theme theme, int x, int y, int w, int h)
+	public void drawBackground(MatrixStack matrixStack, Theme theme, int x, int y, int w, int h)
 	{
 		long left = endTime - System.currentTimeMillis();
 
@@ -124,31 +129,31 @@ public class GuiEmergencyItems extends GuiBase
 			if (!done)
 			{
 				done = true;
-				cancelButton.setTitle(I18n.format("gui.close"));
+				cancelButton.setTitle(new TranslationTextComponent("gui.close"));
 				new MessageGetEmergencyItems().sendToServer();
 			}
 
 			left = 0L;
 		}
 
-		RenderSystem.pushMatrix();
-		RenderSystem.translatef((int) (w / 2F), (int) (h / 5F), 0F);
-		RenderSystem.scalef(2F, 2F, 1F);
+		matrixStack.push();
+		matrixStack.translate((int) (w / 2F), (int) (h / 5F), 0F);
+		matrixStack.scale(2F, 2F, 1F);
 		String s = I18n.format("ftbquests.file.emergency_items");
-		theme.drawString(s, -theme.getStringWidth(s) / 2F, 0, Color4I.WHITE, 0);
-		RenderSystem.popMatrix();
+		theme.drawString(matrixStack, s, -theme.getStringWidth(s) / 2F, 0, Color4I.WHITE, 0);
+		matrixStack.pop();
 
-		RenderSystem.pushMatrix();
-		RenderSystem.translatef((int) (w / 2F), (int) (h / 2.5F), 0F);
-		RenderSystem.scalef(4F, 4F, 1F);
+		matrixStack.push();
+		matrixStack.translate((int) (w / 2F), (int) (h / 2.5F), 0F);
+		matrixStack.scale(4F, 4F, 1F);
 		s = left <= 0L ? "00:00" : StringUtils.getTimeString(left / 1000L * 1000L + 1000L);
 		int x1 = -theme.getStringWidth(s) / 2;
-		theme.drawString(s, x1 - 1, 0, Color4I.BLACK, 0);
-		theme.drawString(s, x1 + 1, 0, Color4I.BLACK, 0);
-		theme.drawString(s, x1, 1, Color4I.BLACK, 0);
-		theme.drawString(s, x1, -1, Color4I.BLACK, 0);
-		theme.drawString(s, x1, 0, Color4I.WHITE, 0);
-		RenderSystem.popMatrix();
+		theme.drawString(matrixStack, s, x1 - 1, 0, Color4I.BLACK, 0);
+		theme.drawString(matrixStack, s, x1 + 1, 0, Color4I.BLACK, 0);
+		theme.drawString(matrixStack, s, x1, 1, Color4I.BLACK, 0);
+		theme.drawString(matrixStack, s, x1, -1, Color4I.BLACK, 0);
+		theme.drawString(matrixStack, s, x1, 0, Color4I.WHITE, 0);
+		matrixStack.pop();
 	}
 
 	@Override

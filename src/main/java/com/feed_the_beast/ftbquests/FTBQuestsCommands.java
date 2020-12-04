@@ -1,12 +1,17 @@
 package com.feed_the_beast.ftbquests;
 
+import com.feed_the_beast.ftbquests.net.MessageCreateObjectResponse;
 import com.feed_the_beast.ftbquests.net.MessageEditObjectResponse;
 import com.feed_the_beast.ftbquests.quest.ChangeProgress;
+import com.feed_the_beast.ftbquests.quest.Chapter;
 import com.feed_the_beast.ftbquests.quest.PlayerData;
+import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.loot.RewardTable;
 import com.feed_the_beast.ftbquests.quest.loot.WeightedReward;
 import com.feed_the_beast.ftbquests.quest.reward.ItemReward;
+import com.feed_the_beast.ftbquests.quest.task.ItemTask;
+import com.feed_the_beast.mods.ftbguilibrary.config.Tristate;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -15,22 +20,31 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.command.arguments.EntityArgument;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceContext;
 import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemHandlerHelper;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nullable;
+import java.util.List;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * @author LatvianModder
@@ -77,6 +91,10 @@ public class FTBQuestsCommands
 								)
 								.executes(c -> importRewards(c.getSource(), StringArgumentType.getString(c, "reward_table"), 1, false))
 						)
+				)
+				.then(Commands.literal("generate_chapter_with_all_items_in_game")
+						.requires(permission)
+						.executes(context -> generateAllItemChapter(context.getSource()))
 				)
 		);
 	}
@@ -150,15 +168,15 @@ public class FTBQuestsCommands
 	{
 		float f = player.rotationPitch;
 		float f1 = player.rotationYaw;
-		Vec3d vec3d = player.getEyePosition(1.0F);
+		Vector3d vec3d = player.getEyePosition(1.0F);
 		float f2 = MathHelper.cos(-f1 * ((float) Math.PI / 180F) - (float) Math.PI);
 		float f3 = MathHelper.sin(-f1 * ((float) Math.PI / 180F) - (float) Math.PI);
 		float f4 = -MathHelper.cos(-f * ((float) Math.PI / 180F));
 		float f5 = MathHelper.sin(-f * ((float) Math.PI / 180F));
 		float f6 = f3 * f4;
 		float f7 = f2 * f4;
-		double d0 = player.getAttribute(PlayerEntity.REACH_DISTANCE).getValue();
-		Vec3d vec3d1 = vec3d.add((double) f6 * d0, (double) f5 * d0, (double) f7 * d0);
+		double d0 = player.getAttribute(ForgeMod.REACH_DISTANCE.get()).getValue();
+		Vector3d vec3d1 = vec3d.add((double) f6 * d0, (double) f5 * d0, (double) f7 * d0);
 		return player.world.rayTraceBlocks(new RayTraceContext(vec3d, vec3d1, RayTraceContext.BlockMode.OUTLINE, RayTraceContext.FluidMode.NONE, player));
 	}
 
@@ -250,5 +268,95 @@ public class FTBQuestsCommands
 		}
 
 		return 0;
+	}
+
+	private static int generateAllItemChapter(CommandSource source)
+	{
+		NonNullList<ItemStack> nonNullList = NonNullList.create();
+
+		for (Item item : ForgeRegistries.ITEMS)
+		{
+			try
+			{
+				int s = nonNullList.size();
+				item.fillItemGroup(ItemGroup.SEARCH, nonNullList);
+
+				if (s == nonNullList.size())
+				{
+					nonNullList.add(new ItemStack(item));
+				}
+			}
+			catch (Throwable ex)
+			{
+				FTBQuests.LOGGER.warn("Failed to get items from " + item.getRegistryName() + ": " + ex);
+			}
+		}
+
+		Chapter chapter = new Chapter(ServerQuestFile.INSTANCE);
+		chapter.id = chapter.file.newID();
+		chapter.onCreated();
+
+		chapter.title = "Generated chapter of all items in search creative tab [" + nonNullList.size() + "]";
+		chapter.icon = new ItemStack(Items.COMPASS);
+		chapter.defaultQuestShape = "rsquare";
+
+		new MessageCreateObjectResponse(chapter, null).sendToAll();
+
+		List<ItemStack> list = nonNullList.stream()
+				.filter(stack -> !stack.isEmpty() && stack.getItem().getRegistryName() != null)
+				.sorted((a, b) -> a.getItem().getRegistryName().compareNamespaced(b.getItem().getRegistryName()))
+				.collect(Collectors.toList());
+		FTBQuests.LOGGER.info("Found " + nonNullList.size() + " items in total, chapter ID: " + chapter);
+
+		if (list.isEmpty())
+		{
+			return 0;
+		}
+
+		int col = 0;
+		int row = 0;
+		String modid = list.get(0).getItem().getRegistryName().getNamespace();
+
+		for (ItemStack stack : list)
+		{
+			if (!modid.equals(stack.getItem().getRegistryName().getNamespace()))
+			{
+				modid = stack.getItem().getRegistryName().getNamespace();
+				col = 0;
+				row += 2;
+			}
+			else if (col >= 40)
+			{
+				col = 0;
+				row++;
+			}
+
+			Quest quest = new Quest(chapter);
+			quest.id = chapter.file.newID();
+			quest.onCreated();
+			quest.x = col;
+			quest.y = row;
+			quest.subtitle = stack.serializeNBT().toString();
+
+			new MessageCreateObjectResponse(quest, null).sendToAll();
+
+			ItemTask task = new ItemTask(quest);
+			task.id = chapter.file.newID();
+			task.onCreated();
+
+			task.consumeItems = Tristate.TRUE;
+			task.item = stack;
+
+			CompoundNBT extra = new CompoundNBT();
+			extra.putString("type", task.getType().getTypeForNBT());
+			new MessageCreateObjectResponse(task, extra).sendToAll();
+
+			col++;
+		}
+
+		ServerQuestFile.INSTANCE.save();
+		ServerQuestFile.INSTANCE.saveNow();
+		source.sendFeedback(new StringTextComponent("Done!"), false);
+		return 1;
 	}
 }

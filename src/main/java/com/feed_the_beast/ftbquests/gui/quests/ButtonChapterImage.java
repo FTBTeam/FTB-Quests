@@ -7,12 +7,15 @@ import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
 import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiEditConfig;
 import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
+import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
 import com.feed_the_beast.mods.ftbguilibrary.widget.ContextMenuItem;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.resources.I18n;
+import net.minecraft.util.math.vector.Vector3f;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 
@@ -29,10 +32,25 @@ public class ButtonChapterImage extends Button
 
 	public ButtonChapterImage(Panel panel, ChapterImage i)
 	{
-		super(panel, "", i.image);
+		super(panel, StringTextComponent.EMPTY, i.image);
 		treeGui = (GuiQuests) panel.getGui();
 		setSize(20, 20);
 		chapterImage = i;
+	}
+
+	@Override
+	public boolean mousePressed(MouseButton button)
+	{
+		if (isMouseOver())
+		{
+			if (!chapterImage.click.isEmpty() || treeGui.file.canEdit() && !button.isLeft())
+			{
+				onClicked(button);
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	@Override
@@ -58,7 +76,7 @@ public class ButtonChapterImage extends Button
 		{
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
 
-			contextMenu.add(new ContextMenuItem(I18n.format("selectServer.edit"), ThemeProperties.EDIT_ICON.get(), () -> {
+			contextMenu.add(new ContextMenuItem(new TranslationTextComponent("selectServer.edit"), ThemeProperties.EDIT_ICON.get(), () -> {
 				ConfigGroup group = new ConfigGroup(FTBQuests.MOD_ID);
 				chapterImage.getConfig(group.getGroup("chapter").getGroup("image"));
 				group.savedCallback = accepted -> {
@@ -71,20 +89,20 @@ public class ButtonChapterImage extends Button
 				new GuiEditConfig(group).openGui();
 			}));
 
-			contextMenu.add(new ContextMenuItem(I18n.format("gui.move"), ThemeProperties.MOVE_UP_ICON.get(chapterImage.chapter), () -> {
+			contextMenu.add(new ContextMenuItem(new TranslationTextComponent("gui.move"), ThemeProperties.MOVE_UP_ICON.get(chapterImage.chapter), () -> {
 				treeGui.movingObjects = true;
 				treeGui.selectedObjects.clear();
 				treeGui.toggleSelected(chapterImage);
 			})
 			{
 				@Override
-				public void addMouseOverText(List<String> list)
+				public void addMouseOverText(TooltipList list)
 				{
-					list.add(TextFormatting.DARK_GRAY + I18n.format("ftbquests.gui.move_tooltip"));
+					list.add(new TranslationTextComponent("ftbquests.gui.move_tooltip").mergeStyle(TextFormatting.DARK_GRAY));
 				}
 			});
 
-			contextMenu.add(new ContextMenuItem(I18n.format("selectServer.delete"), ThemeProperties.DELETE_ICON.get(), () -> {
+			contextMenu.add(new ContextMenuItem(new TranslationTextComponent("selectServer.delete"), ThemeProperties.DELETE_ICON.get(), () -> {
 				chapterImage.chapter.images.remove(chapterImage);
 				new MessageEditObject(chapterImage.chapter).sendToServer();
 			}).setYesNo(new TranslationTextComponent("delete_item", chapterImage.image.toString())));
@@ -111,29 +129,37 @@ public class ButtonChapterImage extends Button
 	}
 
 	@Override
-	public void addMouseOverText(List<String> list)
+	public void addMouseOverText(TooltipList list)
 	{
 		for (String s : chapterImage.hover)
 		{
 			if (s.startsWith("{") && s.endsWith("}"))
 			{
-				list.add(I18n.format(s.substring(1, s.length() - 1)));
+				list.add(new TranslationTextComponent(s.substring(1, s.length() - 1)));
 			}
 			else
 			{
-				list.add(s);
+				list.add(new StringTextComponent(s));
 			}
 		}
 	}
 
 	@Override
-	public void draw(Theme theme, int x, int y, int w, int h)
+	public boolean shouldDraw()
 	{
-		RenderSystem.pushMatrix();
-		RenderSystem.translated((int) (x + w / 2D), (int) (y + h / 2D), 10);
-		RenderSystem.rotatef((float) chapterImage.rotation, 0, 0, 1);
-		RenderSystem.scalef(w / 2F, h / 2F, 1);
-		chapterImage.image.draw(-1, -1, 2, 2);
-		RenderSystem.popMatrix();
+		return false;
+	}
+
+	@Override
+	public void draw(MatrixStack matrixStack, Theme theme, int x, int y, int w, int h)
+	{
+		matrixStack.push();
+		matrixStack.translate((int) (x + w / 2D), (int) (y + h / 2D), 0);
+		matrixStack.rotate(Vector3f.ZP.rotationDegrees((float) chapterImage.rotation));
+		matrixStack.scale(w / 2F, h / 2F, 1);
+		RenderSystem.enableBlend();
+		RenderSystem.defaultBlendFunc();
+		chapterImage.image.draw(matrixStack, -1, -1, 2, 2);
+		matrixStack.pop();
 	}
 }

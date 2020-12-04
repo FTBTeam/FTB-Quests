@@ -7,7 +7,6 @@ import com.feed_the_beast.mods.ftbguilibrary.config.NameMap;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.icon.ItemIcon;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.Items;
@@ -15,6 +14,8 @@ import net.minecraft.item.SpawnEggItem;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.IFormattableTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -104,9 +105,9 @@ public class KillTask extends Task
 	}
 
 	@Override
-	public String getAltTitle()
+	public IFormattableTextComponent getAltTitle()
 	{
-		return I18n.format("ftbquests.task.ftbquests.kill.title", getMaxProgressString(), I18n.format("entity." + entity.getNamespace() + "." + entity.getPath()));
+		return new TranslationTextComponent("ftbquests.task.ftbquests.kill.title", getMaxProgressString(), new TranslationTextComponent("entity." + entity.getNamespace() + "." + entity.getPath()));
 	}
 
 	@Override

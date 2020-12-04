@@ -2,6 +2,7 @@ package com.feed_the_beast.ftbquests.quest.task;
 
 import com.feed_the_beast.ftbquests.gui.quests.GuiValidItems;
 import com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIHelper;
+import com.feed_the_beast.ftbquests.net.FTBQuestsNetHandler;
 import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.util.NBTUtils;
@@ -10,14 +11,18 @@ import com.feed_the_beast.mods.ftbguilibrary.config.Tristate;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.icon.IconAnimation;
 import com.feed_the_beast.mods.ftbguilibrary.icon.ItemIcon;
+import com.feed_the_beast.mods.ftbguilibrary.utils.Bits;
+import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
 import dev.latvian.mods.itemfilters.api.ItemFiltersAPI;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.text.IFormattableTextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.ModList;
@@ -36,6 +41,7 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 	public ItemStack item;
 	public long count;
 	public Tristate consumeItems;
+	public Tristate onlyFromCrafting;
 
 	public ItemTask(Quest quest)
 	{
@@ -43,6 +49,7 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 		item = ItemStack.EMPTY;
 		count = 1;
 		consumeItems = Tristate.DEFAULT;
+		onlyFromCrafting = Tristate.DEFAULT;
 	}
 
 	@Override
@@ -68,10 +75,8 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 			nbt.putLong("count", count);
 		}
 
-		if (consumeItems != Tristate.DEFAULT)
-		{
-			consumeItems.write(nbt, "consume_items");
-		}
+		consumeItems.write(nbt, "consume_items");
+		onlyFromCrafting.write(nbt, "only_from_crafting");
 	}
 
 	@Override
@@ -79,32 +84,46 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 	{
 		super.readData(nbt);
 		item = NBTUtils.read(nbt, "item");
-		count = nbt.getLong("count");
-
-		if (count < 1)
-		{
-			count = 1;
-		}
-
+		count = Math.max(nbt.getLong("count"), 1L);
 		consumeItems = Tristate.read(nbt, "consume_items");
+		onlyFromCrafting = Tristate.read(nbt, "only_from_crafting");
 	}
 
 	@Override
 	public void writeNetData(PacketBuffer buffer)
 	{
 		super.writeNetData(buffer);
-		buffer.writeItemStack(item);
-		buffer.writeVarLong(count);
-		Tristate.NAME_MAP.write(buffer, consumeItems);
+		int flags = 0;
+		flags = Bits.setFlag(flags, 1, count > 1L);
+		flags = Bits.setFlag(flags, 2, consumeItems != Tristate.DEFAULT);
+		flags = Bits.setFlag(flags, 4, consumeItems == Tristate.TRUE);
+		flags = Bits.setFlag(flags, 8, onlyFromCrafting != Tristate.DEFAULT);
+		flags = Bits.setFlag(flags, 16, onlyFromCrafting == Tristate.TRUE);
+		//flags = Bits.setFlag(flags, 32, ignoreDamage);
+		//flags = Bits.setFlag(flags, 64, nbtMode != NBTMatchingMode.MATCH);
+		//flags = Bits.setFlag(flags, 128, nbtMode == NBTMatchingMode.CONTAIN);
+		buffer.writeVarInt(flags);
+
+		FTBQuestsNetHandler.writeItemType(buffer, item);
+
+		if (count > 1L)
+		{
+			buffer.writeVarLong(count);
+		}
 	}
 
 	@Override
 	public void readNetData(PacketBuffer buffer)
 	{
 		super.readNetData(buffer);
-		item = buffer.readItemStack();
-		count = buffer.readVarLong();
-		consumeItems = Tristate.NAME_MAP.read(buffer);
+		int flags = buffer.readVarInt();
+
+		item = FTBQuestsNetHandler.readItemType(buffer);
+		count = Bits.getFlag(flags, 1) ? buffer.readVarLong() : 1L;
+		consumeItems = Bits.getFlag(flags, 2) ? Bits.getFlag(flags, 4) ? Tristate.TRUE : Tristate.FALSE : Tristate.DEFAULT;
+		onlyFromCrafting = Bits.getFlag(flags, 8) ? Bits.getFlag(flags, 16) ? Tristate.TRUE : Tristate.FALSE : Tristate.DEFAULT;
+		//ignoreDamage = Bits.getFlag(flags, 32);
+		//nbtMode = Bits.getFlag(flags, 64) ? Bits.getFlag(flags, 128) ? NBTMatchingMode.CONTAIN : NBTMatchingMode.IGNORE : NBTMatchingMode.MATCH;
 	}
 
 	public List<ItemStack> getValidItems()
@@ -138,14 +157,14 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 	}
 
 	@Override
-	public String getAltTitle()
+	public IFormattableTextComponent getAltTitle()
 	{
 		if (count > 1)
 		{
-			return count + "x " + item.getDisplayName().getFormattedText();
+			return new StringTextComponent(count + "x ").append(item.getDisplayName());
 		}
 
-		return item.getDisplayName().getFormattedText();
+		return new StringTextComponent("").append(item.getDisplayName());
 	}
 
 	@Override
@@ -162,6 +181,7 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 		config.addItemStack("item", item, v -> item = v, ItemStack.EMPTY, true, false).setNameKey("ftbquests.task.ftbquests.item");
 		config.addLong("count", count, v -> count = v, 1, 1, Long.MAX_VALUE);
 		config.addEnum("consume_items", consumeItems, v -> consumeItems = v, Tristate.NAME_MAP);
+		config.addEnum("only_from_crafting", onlyFromCrafting, v -> onlyFromCrafting = v, Tristate.NAME_MAP);
 	}
 
 	@Override
@@ -208,22 +228,22 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 
 	@Override
 	@OnlyIn(Dist.CLIENT)
-	public void addMouseOverText(List<String> list, @Nullable TaskData data)
+	public void addMouseOverText(TooltipList list, @Nullable TaskData data)
 	{
 		if (consumesResources())
 		{
-			list.add("");
-			list.add(TextFormatting.YELLOW.toString() + TextFormatting.UNDERLINE + I18n.format("ftbquests.task.click_to_submit"));
+			list.blankLine();
+			list.add(new TranslationTextComponent("ftbquests.task.click_to_submit").mergeStyle(TextFormatting.YELLOW, TextFormatting.UNDERLINE));
 		}
 		else if (getValidItems().size() > 1)
 		{
-			list.add("");
-			list.add(TextFormatting.YELLOW.toString() + TextFormatting.UNDERLINE + I18n.format("ftbquests.task.ftbquests.item.view_items"));
+			list.blankLine();
+			list.add(new TranslationTextComponent("ftbquests.task.ftbquests.item.view_items").mergeStyle(TextFormatting.YELLOW, TextFormatting.UNDERLINE));
 		}
 		else if (ModList.get().isLoaded("jei"))
 		{
-			list.add("");
-			list.add(TextFormatting.YELLOW.toString() + TextFormatting.UNDERLINE + I18n.format("ftbquests.task.ftbquests.item.click_recipe"));
+			list.blankLine();
+			list.add(new TranslationTextComponent("ftbquests.task.ftbquests.item.click_recipe").mergeStyle(TextFormatting.YELLOW, TextFormatting.UNDERLINE));
 		}
 	}
 
@@ -270,6 +290,22 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 
 			if (!task.consumesResources())
 			{
+				if (task.onlyFromCrafting.get(false))
+				{
+					if (item.isEmpty() || !task.test(item))
+					{
+						return;
+					}
+
+					long count = Math.min(task.count, item.getCount());
+
+					if (count > progress)
+					{
+						setProgress(count);
+						return;
+					}
+				}
+
 				long count = 0;
 
 				for (ItemStack stack : player.inventory.mainInventory)

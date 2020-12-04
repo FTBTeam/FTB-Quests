@@ -1,5 +1,6 @@
 package com.feed_the_beast.ftbquests.gui.quests;
 
+import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
 import com.feed_the_beast.mods.ftbguilibrary.widget.WidgetLayout;
 import net.minecraftforge.fml.ModList;
@@ -29,7 +30,10 @@ public class PanelOtherButtonsTop extends PanelOtherButtons
 			add(new ButtonEmergencyItems(this));
 		}
 
-		add(new ButtonWiki(this));
+		if (!ThemeProperties.WIKI_URL.get().equals("-"))
+		{
+			add(new ButtonWiki(this));
+		}
 	}
 
 	@Override

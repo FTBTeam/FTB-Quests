@@ -1,5 +1,6 @@
 package com.feed_the_beast.ftbquests.quest.reward;
 
+import com.feed_the_beast.ftbquests.net.FTBQuestsNetHandler;
 import com.feed_the_beast.ftbquests.net.MessageDisplayItemRewardToast;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.util.NBTUtils;
@@ -13,11 +14,16 @@ import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.text.IFormattableTextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.items.ItemHandlerHelper;
 
 import javax.annotation.Nullable;
+import java.util.List;
+import java.util.Random;
+import java.util.UUID;
 
 /**
  * @author LatvianModder
@@ -25,6 +31,7 @@ import javax.annotation.Nullable;
 public class ItemReward extends Reward
 {
 	public ItemStack item;
+	public int count;
 	public int randomBonus;
 	public boolean onlyOne;
 
@@ -32,6 +39,7 @@ public class ItemReward extends Reward
 	{
 		super(quest);
 		item = is;
+		count = 1;
 		randomBonus = 0;
 		onlyOne = false;
 	}
@@ -53,6 +61,11 @@ public class ItemReward extends Reward
 		super.writeData(nbt);
 		NBTUtils.write(nbt, "item", item);
 
+		if (count > 1)
+		{
+			nbt.putInt("count", count);
+		}
+
 		if (randomBonus > 0)
 		{
 			nbt.putInt("random_bonus", randomBonus);
@@ -69,6 +82,15 @@ public class ItemReward extends Reward
 	{
 		super.readData(nbt);
 		item = NBTUtils.read(nbt, "item");
+
+		count = nbt.getInt("count");
+
+		if (count == 0)
+		{
+			count = item.getCount();
+			item.setCount(1);
+		}
+
 		randomBonus = nbt.getInt("random_bonus");
 		onlyOne = nbt.getBoolean("only_one");
 	}
@@ -77,7 +99,8 @@ public class ItemReward extends Reward
 	public void writeNetData(PacketBuffer buffer)
 	{
 		super.writeNetData(buffer);
-		buffer.writeItemStack(item);
+		FTBQuestsNetHandler.writeItemType(buffer, item);
+		buffer.writeVarInt(count);
 		buffer.writeVarInt(randomBonus);
 		buffer.writeBoolean(onlyOne);
 	}
@@ -86,7 +109,8 @@ public class ItemReward extends Reward
 	public void readNetData(PacketBuffer buffer)
 	{
 		super.readNetData(buffer);
-		item = buffer.readItemStack();
+		item = FTBQuestsNetHandler.readItemType(buffer);
+		count = buffer.readVarInt();
 		randomBonus = buffer.readVarInt();
 		onlyOne = buffer.readBoolean();
 	}
@@ -96,8 +120,9 @@ public class ItemReward extends Reward
 	public void getConfig(ConfigGroup config)
 	{
 		super.getConfig(config);
-		config.addItemStack("item", item, v -> item = v, ItemStack.EMPTY, false, false).setNameKey("ftbquests.reward.ftbquests.item");
-		config.addInt("random_bonus", randomBonus, v -> randomBonus = v, 0, 0, Integer.MAX_VALUE).setNameKey("ftbquests.reward.random_bonus");
+		config.addItemStack("item", item, v -> item = v, ItemStack.EMPTY, true, false).setNameKey("ftbquests.reward.ftbquests.item");
+		config.addInt("count", count, v -> count = v, 1, 1, 8192);
+		config.addInt("random_bonus", randomBonus, v -> randomBonus = v, 0, 0, 8192).setNameKey("ftbquests.reward.random_bonus");
 		config.addBool("only_one", onlyOne, v -> onlyOne = v, false);
 	}
 
@@ -109,22 +134,39 @@ public class ItemReward extends Reward
 			return;
 		}
 
-		ItemStack stack1 = item.copy();
-		stack1.grow(player.world.rand.nextInt(randomBonus + 1));
-		ItemHandlerHelper.giveItemToPlayer(player, stack1);
+		int size = count + player.world.rand.nextInt(randomBonus + 1);
+
+		while (size > 0)
+		{
+			int s = Math.min(size, item.getMaxStackSize());
+			ItemHandlerHelper.giveItemToPlayer(player, ItemHandlerHelper.copyStackWithSize(item, s));
+			size -= s;
+		}
 
 		if (notify)
 		{
-			new MessageDisplayItemRewardToast(stack1).sendTo(player);
+			new MessageDisplayItemRewardToast(item, size).sendTo(player);
 		}
 	}
 
 	@Override
-	public ItemStack claimAutomated(TileEntity tileEntity, @Nullable ServerPlayerEntity player)
+	public boolean automatedClaimPre(TileEntity tileEntity, List<ItemStack> items, Random random, UUID playerId, @Nullable ServerPlayerEntity player)
 	{
-		ItemStack stack1 = item.copy();
-		stack1.grow(tileEntity.getWorld().rand.nextInt(randomBonus + 1));
-		return stack1;
+		int size = count + random.nextInt(randomBonus + 1);
+
+		while (size > 0)
+		{
+			int s = Math.min(size, item.getMaxStackSize());
+			items.add(ItemHandlerHelper.copyStackWithSize(item, s));
+			size -= s;
+		}
+
+		return true;
+	}
+
+	@Override
+	public void automatedClaimPost(TileEntity tileEntity, UUID playerId, @Nullable ServerPlayerEntity player)
+	{
 	}
 
 	@Override
@@ -139,9 +181,9 @@ public class ItemReward extends Reward
 	}
 
 	@Override
-	public String getAltTitle()
+	public IFormattableTextComponent getAltTitle()
 	{
-		return (item.getCount() > 1 ? (randomBonus > 0 ? (item.getCount() + "-" + (item.getCount() + randomBonus) + "x ") : (item.getCount() + "x ")) : "") + item.getDisplayName();
+		return new StringTextComponent((count > 1 ? (randomBonus > 0 ? (count + "-" + (count + randomBonus) + "x ") : (count + "x ")) : "")).append(item.getDisplayName());
 	}
 
 	@Override
@@ -162,9 +204,9 @@ public class ItemReward extends Reward
 	{
 		if (randomBonus > 0)
 		{
-			return item.getCount() + "-" + (item.getCount() + randomBonus);
+			return count + "-" + (count + randomBonus);
 		}
 
-		return Integer.toString(item.getCount());
+		return Integer.toString(count);
 	}
 }

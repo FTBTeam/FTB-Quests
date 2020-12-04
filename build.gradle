@@ -1,14 +1,16 @@
 buildscript {
 	repositories {
 		jcenter()
-		maven { url = 'https://files.minecraftforge.net/maven' }
+		maven { url "https://files.minecraftforge.net/maven" }
 		maven { url "https://plugins.gradle.org/m2/" }
+		maven { url "https://dist.creeper.host/Sponge/maven" }
 		mavenCentral()
 	}
 	dependencies {
 		classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
 		classpath 'gradle.plugin.com.matthewprenger:CurseGradle:1.1.0'
-		classpath 'com.wynprice.cursemaven:CurseMaven:1.2.+'
+		classpath 'com.wynprice.cursemaven:CurseMaven:2.+'
+		classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
 	}
 }
 apply plugin: 'net.minecraftforge.gradle'
@@ -16,8 +18,9 @@ apply plugin: 'eclipse'
 apply plugin: 'com.matthewprenger.cursegradle'
 apply plugin: 'maven'
 apply plugin: 'com.wynprice.cursemaven'
+apply plugin: 'org.spongepowered.mixin'
 
-apply from: 'https://raw.githubusercontent.com/MinecraftModDevelopment/Gradle-Collection/master/generic/markdown-git-changelog.gradle'
+apply from: 'https://files.latmod.com/public/markdown-git-changelog.gradle'
 
 def ENV = System.getenv()
 version = ENV.BUILD_NUMBER ? "${mod_version}.${ENV.BUILD_NUMBER}" : "${mod_version}.custom"
@@ -32,7 +35,9 @@ minecraft {
 	runs {
 		client {
 			workingDirectory project.file('run')
+			args '--mixin.config', 'ftbquests.mixins.json'
 			property 'forge.logging.console.level', 'debug'
+			property 'mixin.env.disableRefMap', 'true'
 
 			if (project.hasProperty('mc_dev_uuid')) args '--uuid', project.mc_dev_uuid
 			if (project.hasProperty('mc_dev_username')) args '--username', project.mc_dev_username
@@ -48,6 +53,7 @@ minecraft {
 
 		server {
 			workingDirectory project.file('run')
+			args '--mixin.config', 'ftbquests.mixins.json'
 			property 'forge.logging.console.level', 'debug'
 
 			mods {
@@ -59,6 +65,7 @@ minecraft {
 
 		data {
 			workingDirectory project.file('run')
+			args '--mixin.config', 'ftbquests.mixins.json'
 			property 'forge.logging.console.level', 'debug'
 
 			args '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/')
@@ -95,18 +102,17 @@ dependencies {
 		transitive = false
 		changing = true
 	}))
-	compile(fg.deobf(project.dependencies.create("dev.latvian.mods:kubejs-forge-1.14.4:${kubejs_version}") {
-		transitive = false
-		changing = true
-	}))
-	compileOnly fg.deobf(curse.resolve('jei', project.jei_file))
-	compileOnly fg.deobf(curse.resolve('bookshelf', project.bookshelf_file))
-	compileOnly fg.deobf(curse.resolve('game-stages', project.gamestages_file))
+	compile fg.deobf("curse.maven:rhino:${rhino_file}")
+	compile fg.deobf("curse.maven:kubejs:${kubejs_file}")
+	compile fg.deobf("curse.maven:jei:${jei_file}")
+	compile fg.deobf("curse.maven:bookshelf:${bookshelf_file}")
+	compile fg.deobf("curse.maven:game-stages:${gamestages_file}")
 }
 
 jar {
 	manifest {
 		attributes([
+				"MixinConfigs"            : "ftbquests.mixins.json",
 				"Specification-Title"     : project.mod_id,
 				"Specification-Vendor"    : project.mod_author,
 				"Specification-Version"   : "1",
@@ -118,21 +124,10 @@ jar {
 	}
 }
 
-task deobfJar(type: Jar) {
-	from sourceSets.main.output
-	classifier 'deobf'
-}
-
-build.dependsOn deobfJar
-
 def reobfFile = file("$buildDir/reobfJar/output.jar")
 def reobfArtifact = artifacts.add('default', reobfFile) {
 	type 'jar'
 	builtBy 'reobfJar'
-}
-
-artifacts {
-	archives deobfJar
 }
 
 if (ENV.LOCAL_MAVEN) {
@@ -145,24 +140,29 @@ if (ENV.LOCAL_MAVEN) {
 	}
 }
 
-/*
 if (ENV.CURSEFORGE_KEY) {
 	curseforge {
 		apiKey = ENV.CURSEFORGE_KEY
 		project {
-			id = "${curseforge_id}"
+			id = project.curseforge_id
 			releaseType = "release"
-			addGameVersion "1.14.4"
+			addGameVersion "1.16.2"
+			addGameVersion "1.16.3"
+			addGameVersion "1.16.4"
 			relations {
-				optionalDependency 'aurora'
+				requiredDependency 'ftb-gui-library'
+				requiredDependency 'item-filters'
+				optionalDependency 'kubejs'
 				optionalDependency 'jei'
 				optionalDependency 'packmode'
 				optionalDependency 'game-stages'
 			}
 			changelog = getGitChangelog
 			changelogType = 'markdown'
-			addArtifact(deobfJar)
 		}
 	}
 }
-*/
+
+mixin {
+	add sourceSets.main, "ftbquests.refmap.json"
+}

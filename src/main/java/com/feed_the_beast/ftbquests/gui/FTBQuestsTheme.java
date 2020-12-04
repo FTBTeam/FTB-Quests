@@ -4,6 +4,7 @@ import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Color4I;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
 import com.feed_the_beast.mods.ftbguilibrary.widget.WidgetType;
+import com.mojang.blaze3d.matrix.MatrixStack;
 
 /**
  * @author LatvianModder
@@ -28,61 +29,61 @@ public class FTBQuestsTheme extends Theme
 	}
 
 	@Override
-	public void drawGui(int x, int y, int w, int h, WidgetType type)
+	public void drawGui(MatrixStack matrixStack, int x, int y, int w, int h, WidgetType type)
 	{
-		ThemeProperties.BACKGROUND.get().draw(x, y, w, h);
+		ThemeProperties.BACKGROUND.get().draw(matrixStack, x, y, w, h);
 	}
 
 	@Override
-	public void drawButton(int x, int y, int w, int h, WidgetType type)
+	public void drawButton(MatrixStack matrixStack, int x, int y, int w, int h, WidgetType type)
 	{
 		if (type == WidgetType.DISABLED)
 		{
-			ThemeProperties.DISABLED_BUTTON.get().draw(x, y, w, h);
+			ThemeProperties.DISABLED_BUTTON.get().draw(matrixStack, x, y, w, h);
 		}
 		else if (type == WidgetType.MOUSE_OVER)
 		{
-			ThemeProperties.HOVER_BUTTON.get().draw(x, y, w, h);
+			ThemeProperties.HOVER_BUTTON.get().draw(matrixStack, x, y, w, h);
 		}
 		else
 		{
-			ThemeProperties.BUTTON.get().draw(x, y, w, h);
+			ThemeProperties.BUTTON.get().draw(matrixStack, x, y, w, h);
 		}
 	}
 
 	@Override
-	public void drawContainerSlot(int x, int y, int w, int h)
+	public void drawContainerSlot(MatrixStack matrixStack, int x, int y, int w, int h)
 	{
-		ThemeProperties.CONTAINER_SLOT.get().draw(x, y, w, h);
+		ThemeProperties.CONTAINER_SLOT.get().draw(matrixStack, x, y, w, h);
 	}
 
 	@Override
-	public void drawPanelBackground(int x, int y, int w, int h)
+	public void drawPanelBackground(MatrixStack matrixStack, int x, int y, int w, int h)
 	{
-		ThemeProperties.PANEL.get().draw(x, y, w, h);
+		ThemeProperties.PANEL.get().draw(matrixStack, x, y, w, h);
 	}
 
 	@Override
-	public void drawContextMenuBackground(int x, int y, int w, int h)
+	public void drawContextMenuBackground(MatrixStack matrixStack, int x, int y, int w, int h)
 	{
-		ThemeProperties.CONTEXT_MENU.get().draw(x, y, w, h);
+		ThemeProperties.CONTEXT_MENU.get().draw(matrixStack, x, y, w, h);
 	}
 
 	@Override
-	public void drawScrollBarBackground(int x, int y, int w, int h, WidgetType type)
+	public void drawScrollBarBackground(MatrixStack matrixStack, int x, int y, int w, int h, WidgetType type)
 	{
-		ThemeProperties.SCROLL_BAR_BACKGROUND.get().draw(x, y, w, h);
+		ThemeProperties.SCROLL_BAR_BACKGROUND.get().draw(matrixStack, x, y, w, h);
 	}
 
 	@Override
-	public void drawScrollBar(int x, int y, int w, int h, WidgetType type, boolean vertical)
+	public void drawScrollBar(MatrixStack matrixStack, int x, int y, int w, int h, WidgetType type, boolean vertical)
 	{
-		ThemeProperties.SCROLL_BAR.get().draw(x, y, w, h);
+		ThemeProperties.SCROLL_BAR.get().draw(matrixStack, x, y, w, h);
 	}
 
 	@Override
-	public void drawTextBox(int x, int y, int w, int h)
+	public void drawTextBox(MatrixStack matrixStack, int x, int y, int w, int h)
 	{
-		ThemeProperties.TEXT_BOX.get().draw(x, y, w, h);
+		ThemeProperties.TEXT_BOX.get().draw(matrixStack, x, y, w, h);
 	}
 }

@@ -8,9 +8,10 @@ import com.feed_the_beast.ftbquests.quest.theme.ThemeLoader;
 import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
 import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
 import com.feed_the_beast.mods.ftbguilibrary.widget.ContextMenuItem;
+import com.feed_the_beast.mods.ftbguilibrary.widget.GuiIcons;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.I18n;
+import net.minecraft.util.Util;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.util.text.event.ClickEvent;
@@ -27,7 +28,7 @@ public class ButtonEditSettings extends ButtonTab
 {
 	public ButtonEditSettings(Panel panel)
 	{
-		super(panel, I18n.format("gui.settings"), ThemeProperties.SETTINGS_ICON.get());
+		super(panel, new TranslationTextComponent("gui.settings"), ThemeProperties.SETTINGS_ICON.get());
 	}
 
 	@Override
@@ -42,11 +43,11 @@ public class ButtonEditSettings extends ButtonTab
 		}
 
 		List<ContextMenuItem> contextMenu = new ArrayList<>();
-		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.edit_file"), ThemeProperties.SETTINGS_ICON.get(), () -> treeGui.file.onEditButtonClicked(this)));
-		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.reset_progress"), ThemeProperties.RELOAD_ICON.get(), () -> new MessageChangeProgress(ClientQuestFile.INSTANCE.self.uuid, treeGui.file.id, ChangeProgress.RESET).sendToServer()).setYesNo(new TranslationTextComponent("ftbquests.gui.reset_progress_q")));
-		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.complete_instantly"), ThemeProperties.CHECK_ICON.get(), () -> new MessageChangeProgress(ClientQuestFile.INSTANCE.self.uuid, treeGui.file.id, ChangeProgress.COMPLETE).sendToServer()).setYesNo(new TranslationTextComponent("ftbquests.gui.complete_instantly_q")));
-		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.reward_tables"), ThemeProperties.REWARD_TABLE_ICON.get(), () -> new GuiRewardTables().openGui()));
-		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.save_as_file"), ThemeProperties.DOWNLOAD_ICON.get(), () -> {
+		contextMenu.add(new ContextMenuItem(new TranslationTextComponent("ftbquests.gui.edit_file"), ThemeProperties.SETTINGS_ICON.get(), () -> treeGui.file.onEditButtonClicked(this)));
+		contextMenu.add(new ContextMenuItem(new TranslationTextComponent("ftbquests.gui.reset_progress"), ThemeProperties.RELOAD_ICON.get(), () -> new MessageChangeProgress(ClientQuestFile.INSTANCE.self.uuid, treeGui.file.id, ChangeProgress.RESET).sendToServer()).setYesNo(new TranslationTextComponent("ftbquests.gui.reset_progress_q")));
+		contextMenu.add(new ContextMenuItem(new TranslationTextComponent("ftbquests.gui.complete_instantly"), ThemeProperties.CHECK_ICON.get(), () -> new MessageChangeProgress(ClientQuestFile.INSTANCE.self.uuid, treeGui.file.id, ChangeProgress.COMPLETE).sendToServer()).setYesNo(new TranslationTextComponent("ftbquests.gui.complete_instantly_q")));
+		contextMenu.add(new ContextMenuItem(new TranslationTextComponent("ftbquests.reward_tables"), ThemeProperties.REWARD_TABLE_ICON.get(), () -> new GuiRewardTables().openGui()));
+		contextMenu.add(new ContextMenuItem(new TranslationTextComponent("ftbquests.gui.save_as_file"), ThemeProperties.DOWNLOAD_ICON.get(), () -> {
 			try
 			{
 				Calendar time = Calendar.getInstance();
@@ -61,7 +62,7 @@ public class ButtonEditSettings extends ButtonTab
 				ClientQuestFile.INSTANCE.writeDataFull(file.toPath());
 				ITextComponent component = new TranslationTextComponent("ftbquests.gui.saved_as_file", file.getPath().replace(Minecraft.getInstance().gameDir.getCanonicalFile().getAbsolutePath(), ""));
 				component.getStyle().setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, file.getAbsolutePath()));
-				Minecraft.getInstance().player.sendMessage(component);
+				Minecraft.getInstance().player.sendMessage(component, Util.DUMMY_UUID);
 			}
 			catch (Exception ex)
 			{
@@ -69,12 +70,14 @@ public class ButtonEditSettings extends ButtonTab
 			}
 		}));
 
-		contextMenu.add(new ContextMenuItem(I18n.format("ftbquests.gui.reload_theme"), ThemeProperties.RELOAD_ICON.get(), () -> {
+		contextMenu.add(new ContextMenuItem(new TranslationTextComponent("ftbquests.gui.reload_theme"), ThemeProperties.RELOAD_ICON.get(), () -> {
 			Minecraft mc = Minecraft.getInstance();
 			//FIXME: mc.getTextureManager().onResourceManagerReload(mc.getResourceManager());
 			ThemeLoader.loadTheme(mc.getResourceManager());
 			ClientQuestFile.INSTANCE.refreshGui();
 		}));
+
+		contextMenu.add(new ContextMenuItem(new TranslationTextComponent("ftbquests.gui.wiki"), GuiIcons.INFO, () -> handleClick("https://faq.ftb.world/books/ftb-quests")));
 
 		treeGui.openContextMenu(contextMenu);
 	}

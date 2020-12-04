@@ -4,33 +4,51 @@ import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.mods.ftbguilibrary.config.NameMap;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.icon.ImageIcon;
+import com.feed_the_beast.mods.ftbguilibrary.utils.PixelBuffer;
+import com.mojang.blaze3d.matrix.MatrixStack;
+import net.minecraft.client.Minecraft;
+import net.minecraft.resources.IResource;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
-import java.util.Arrays;
+import java.io.InputStream;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author LatvianModder
  */
 public final class QuestShape extends Icon
 {
-	public static final QuestShape DEFAULT = new QuestShape("default").circularCheck();
-	public static final QuestShape CIRCLE = new QuestShape("circle").circularCheck();
-	public static final QuestShape SQUARE = new QuestShape("square");
-	public static final QuestShape DIAMOND = new QuestShape("diamond").circularCheck();
-	public static final QuestShape RSQUARE = new QuestShape("rsquare");
-	public static final QuestShape PENTAGON = new QuestShape("pentagon").circularCheck();
-	public static final QuestShape HEXAGON = new QuestShape("hexagon").circularCheck();
-	public static final QuestShape OCTAGON = new QuestShape("octagon").circularCheck();
-	public static final QuestShape HEART = new QuestShape("heart");
-	public static final QuestShape GEAR = new QuestShape("gear").circularCheck();
+	public static final Map<String, QuestShape> MAP = new LinkedHashMap<>();
+	private static QuestShape defaultShape;
+	public static NameMap<String> idMap, idMapWithDefault;
 
-	public static final NameMap<QuestShape> NAME_MAP = NameMap.of(DEFAULT, Arrays.asList(DEFAULT, CIRCLE, SQUARE, DIAMOND, RSQUARE, PENTAGON, HEXAGON, OCTAGON, HEART, GEAR)).id(v -> v.id).baseNameKey("ftbquests.quest.shape").create();
+	public static void reload(List<String> list)
+	{
+		MAP.clear();
+
+		for (String s : list)
+		{
+			MAP.put(s, new QuestShape(s));
+		}
+
+		defaultShape = MAP.values().iterator().next();
+		idMap = NameMap.of(list.get(0), list.toArray(new String[0])).baseNameKey("ftbquests.quest.shape").create();
+		list.add(0, "default");
+		idMapWithDefault = NameMap.of(list.get(0), list.toArray(new String[0])).baseNameKey("ftbquests.quest.shape").create();
+	}
+
+	public static QuestShape get(String id)
+	{
+		return MAP.getOrDefault(id, defaultShape);
+	}
 
 	public final String id;
 	public final ImageIcon background, outline, shape;
-	public boolean circularCheck;
+	private PixelBuffer shapePixels;
 
 	public QuestShape(String i)
 	{
@@ -38,13 +56,6 @@ public final class QuestShape extends Icon
 		background = new ImageIcon(new ResourceLocation(FTBQuests.MOD_ID, "textures/shapes/" + id + "/background.png"));
 		outline = new ImageIcon(new ResourceLocation(FTBQuests.MOD_ID, "textures/shapes/" + id + "/outline.png"));
 		shape = new ImageIcon(new ResourceLocation(FTBQuests.MOD_ID, "textures/shapes/" + id + "/shape.png"));
-		circularCheck = false;
-	}
-
-	public QuestShape circularCheck()
-	{
-		circularCheck = true;
-		return this;
 	}
 
 	public String toString()
@@ -54,10 +65,10 @@ public final class QuestShape extends Icon
 
 	@Override
 	@OnlyIn(Dist.CLIENT)
-	public void draw(int x, int y, int w, int h)
+	public void draw(MatrixStack matrixStack, int x, int y, int w, int h)
 	{
-		background.draw(x, y, w, h);
-		outline.draw(x, y, w, h);
+		background.draw(matrixStack, x, y, w, h);
+		outline.draw(matrixStack, x, y, w, h);
 	}
 
 	public int hashCode()
@@ -68,5 +79,29 @@ public final class QuestShape extends Icon
 	public boolean equals(Object o)
 	{
 		return o == this;
+	}
+
+	public PixelBuffer getShapePixels()
+	{
+		if (shapePixels == null)
+		{
+			try
+			{
+				IResource resource = Minecraft.getInstance().getResourceManager().getResource(new ResourceLocation(FTBQuests.MOD_ID, "textures/shapes/" + id + "/shape.png"));
+
+				try (InputStream stream = resource.getInputStream())
+				{
+					shapePixels = PixelBuffer.from(stream);
+				}
+			}
+			catch (Exception ex)
+			{
+				shapePixels = new PixelBuffer(1, 1);
+				shapePixels.setRGB(0, 0, 0xFFFFFFFF);
+			}
+
+		}
+
+		return shapePixels;
 	}
 }

@@ -14,6 +14,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.StringNBT;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.registries.ForgeRegistries;
 
@@ -27,7 +28,7 @@ import java.util.List;
 public class QuestWrapper //FIXME: implements IRecipeWrapper
 {
 	public final Quest quest;
-	public final String name;
+	public final IFormattableTextComponent name;
 	public final List<List<ItemStack>> input;
 	public final List<List<ItemStack>> output;
 
@@ -69,13 +70,13 @@ public class QuestWrapper //FIXME: implements IRecipeWrapper
 			else if (task.getIcon() instanceof ItemIcon)
 			{
 				stack = ((ItemIcon) task.getIcon()).getStack().copy();
-				stack.setDisplayName(new StringTextComponent(task.getTitle()));
+				stack.setDisplayName(task.getTitle());
 				input.add(Collections.singletonList(stack));
 			}
 			else
 			{
 				stack = new ItemStack(Items.PAINTING);
-				stack.setDisplayName(new StringTextComponent(task.getTitle()));
+				stack.setDisplayName(task.getTitle());
 				stack.setTagInfo("icon", StringNBT.valueOf(task.getIcon().toString()));
 				input.add(Collections.singletonList(stack));
 			}
@@ -127,13 +128,13 @@ public class QuestWrapper //FIXME: implements IRecipeWrapper
 			else if (reward.getIcon() instanceof ItemIcon)
 			{
 				stack = ((ItemIcon) reward.getIcon()).getStack().copy();
-				stack.setDisplayName(new StringTextComponent(reward.getTitle()));
+				stack.setDisplayName(reward.getTitle());
 				output.add(Collections.singletonList(stack));
 			}
 			else
 			{
 				stack = new ItemStack(Items.PAINTING);
-				stack.setDisplayName(new StringTextComponent(reward.getTitle()));
+				stack.setDisplayName(reward.getTitle());
 				stack.setTagInfo("icon", StringNBT.valueOf(reward.getIcon().toString()));
 				output.add(Collections.singletonList(stack));
 			}

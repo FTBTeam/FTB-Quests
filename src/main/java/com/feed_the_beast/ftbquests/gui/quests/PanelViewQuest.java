@@ -1,6 +1,8 @@
 package com.feed_the_beast.ftbquests.gui.quests;
 
+import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.quest.reward.Reward;
 import com.feed_the_beast.ftbquests.quest.reward.RewardAutoClaim;
@@ -11,20 +13,30 @@ import com.feed_the_beast.mods.ftbguilibrary.icon.Color4I;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.misc.CompactGridLayout;
 import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
-import com.feed_the_beast.mods.ftbguilibrary.utils.StringUtils;
 import com.feed_the_beast.mods.ftbguilibrary.widget.BlankPanel;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
 import com.feed_the_beast.mods.ftbguilibrary.widget.ColorWidget;
+import com.feed_the_beast.mods.ftbguilibrary.widget.ContextMenuItem;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
+import com.feed_the_beast.mods.ftbguilibrary.widget.SimpleButton;
 import com.feed_the_beast.mods.ftbguilibrary.widget.TextField;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Widget;
 import com.feed_the_beast.mods.ftbguilibrary.widget.WidgetLayout;
 import com.feed_the_beast.mods.ftbguilibrary.widget.WidgetVerticalSpace;
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.IFormattableTextComponent;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author LatvianModder
@@ -34,10 +46,12 @@ public class PanelViewQuest extends Panel
 	public final GuiQuests gui;
 	public Quest quest = null;
 	public boolean hidePanel = false;
-	private String title = "";
+	private IFormattableTextComponent title = (IFormattableTextComponent) StringTextComponent.EMPTY;
 	private Icon icon = Icon.EMPTY;
 	public Button buttonClose;
-	public Button buttonOnScreen;
+	public Button buttonPin;
+	public Button buttonOpenDependencies;
+	public Button buttonOpenDependants;
 	public BlankPanel panelContent;
 	public BlankPanel panelTasks;
 	public BlankPanel panelRewards;
@@ -132,8 +146,11 @@ public class PanelViewQuest extends Panel
 			ww = Math.max(ww, widget.width);
 		}
 
+		Color4I borderColor = ThemeProperties.WIDGET_BORDER.get(gui.selectedChapter);
+
 		ww = MathHelper.clamp(ww, 70, 140);
 		w = Math.max(w, ww * 2 + 10);
+		w = Math.max(w, quest.minWidth);
 
 		if (ThemeProperties.FULL_SCREEN_QUEST.get(quest) == 1)
 		{
@@ -152,8 +169,29 @@ public class PanelViewQuest extends Panel
 		add(buttonClose = new ButtonCloseViewQuest(this));
 		buttonClose.setPosAndSize(w - 14, 2, 12, 12);
 
-		add(buttonOnScreen = new ButtonPinViewQuest(this));
-		buttonOnScreen.setPosAndSize(w - 26, 2, 12, 12);
+		add(buttonPin = new ButtonPinViewQuest(this));
+		buttonPin.setPosAndSize(w - 26, 2, 12, 12);
+
+		if (quest.dependencies.isEmpty())
+		{
+			add(buttonOpenDependencies = new SimpleButton(this, new TranslationTextComponent("ftbquests.gui.no_dependencies"), Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/arrow_left.png").withTint(borderColor), (widget, button) -> {}));
+		}
+		else
+		{
+			add(buttonOpenDependencies = new SimpleButton(this, new TranslationTextComponent("ftbquests.gui.view_dependencies"), Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/arrow_left.png").withTint(borderColor), (widget, button) -> showList(quest.dependencies)));
+		}
+
+		if (quest.getDependants().isEmpty())
+		{
+			add(buttonOpenDependants = new SimpleButton(this, new TranslationTextComponent("ftbquests.gui.no_dependants"), Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/arrow_right.png").withTint(borderColor), (widget, button) -> {}));
+		}
+		else
+		{
+			add(buttonOpenDependants = new SimpleButton(this, new TranslationTextComponent("ftbquests.gui.view_dependants"), Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/arrow_right.png").withTint(borderColor), (widget, button) -> showList(quest.getDependants())));
+		}
+
+		buttonOpenDependencies.setPosAndSize(0, 17, 13, 13);
+		buttonOpenDependants.setPosAndSize(w - 13, 17, 13, 13);
 
 		TextField textFieldTasks = new TextField(panelContent)
 		{
@@ -214,36 +252,36 @@ public class PanelViewQuest extends Panel
 
 		panelText.setPosAndSize(3, 16 + h + 12, panelContent.width - 6, 0);
 
-		String desc = quest.getSubtitle();
+		IFormattableTextComponent desc = quest.getSubtitle();
 
-		if (!desc.isEmpty())
+		if (desc != StringTextComponent.EMPTY)
 		{
-			panelText.add(new TextField(panelText).addFlags(Theme.CENTERED).setMaxWidth(panelText.width).setSpacing(9).setText(TextFormatting.ITALIC + TextFormatting.GRAY.toString() + desc));
+			//FIXME: TextFormatting.ITALIC + TextFormatting.GRAY
+			panelText.add(new TextField(panelText).addFlags(Theme.CENTERED).setMaxWidth(panelText.width).setSpacing(9).setText(desc.getString()));
 		}
 
 		boolean showText = !quest.hideTextUntilComplete.get(false) || gui.file.self != null && gui.file.self.isComplete(quest);
 
 		if (showText && quest.getDescription().length > 0)
 		{
-			if (!desc.isEmpty())
+			if (desc != StringTextComponent.EMPTY)
 			{
 				panelText.add(new WidgetVerticalSpace(panelText, 7));
 			}
 
-			panelText.add(new TextField(panelText).setMaxWidth(panelText.width).setSpacing(9).setText(StringUtils.addFormatting(String.join("\n", quest.getDescription()))));
+			// FIXME panelText.add(new TextField(panelText).setMaxWidth(panelText.width).setSpacing(9).setText(StringUtils.addFormatting(String.join("\n", quest.getDescription()))));
+			panelText.add(new TextField(panelText).setMaxWidth(panelText.width).setSpacing(9).setText(Arrays.stream(quest.getDescription()).map(ITextComponent::getString).collect(Collectors.joining("\n"))));
 		}
 
 		if (showText && !quest.guidePage.isEmpty())
 		{
-			if (!desc.isEmpty())
+			if (desc != StringTextComponent.EMPTY)
 			{
 				panelText.add(new WidgetVerticalSpace(panelText, 7));
 			}
 
 			panelText.add(new ButtonOpenInGuide(panelText, quest));
 		}
-
-		Color4I borderColor = ThemeProperties.WIDGET_BORDER.get(gui.selectedChapter);
 
 		if (panelText.widgets.isEmpty())
 		{
@@ -267,53 +305,6 @@ public class PanelViewQuest extends Panel
 		setPos((parent.width - width) / 2, (parent.height - height) / 2);
 		panelContent.setHeight(height - 17);
 
-		/* Put this somewhere
-		boolean addedText = false;
-
-		for (QuestObject dependency : selectedQuest.dependencies)
-		{
-			if (!dependency.invalid)
-			{
-				if (!addedText)
-				{
-					addedText = true;
-					add(new WidgetVerticalSpace(this, 2));
-					add(new TextField(this).setText(TextFormatting.AQUA + I18n.format("ftbquests.gui.requires") + ":"));
-				}
-
-				ITextComponent component = dependency.getDisplayName().createCopy();
-				component.getStyle().setColor(TextFormatting.GRAY);
-				component.getStyle().setClickEvent(new ClickEvent(ClickEvent.Action.CHANGE_PAGE, dependency.toString()));
-				component.getStyle().setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponentTranslation("gui.open")));
-				add(new TextField(this).setText(component));
-			}
-		}
-
-		addedText = false;
-
-		for (Chapter chapter : treeGui.file.chapters)
-		{
-			for (Quest quest : chapter.quests)
-			{
-				if (quest.hasDependency(selectedQuest))
-				{
-					if (!addedText)
-					{
-						addedText = true;
-						add(new WidgetVerticalSpace(this, 2));
-						add(new TextField(this, TextFormatting.YELLOW + I18n.format("ftbquests.gui.required_by") + ":"));
-					}
-
-					ITextComponent component = quest.getDisplayName().createCopy();
-					component.getStyle().setColor(TextFormatting.GRAY);
-					component.getStyle().setClickEvent(new ClickEvent(ClickEvent.Action.CHANGE_PAGE, quest.toString()));
-					component.getStyle().setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponentTranslation("gui.open")));
-					add(new TextField(this).setText(component));
-				}
-			}
-		}
-		*/
-
 		QuestTheme.currentObject = prev;
 	}
 
@@ -322,31 +313,63 @@ public class PanelViewQuest extends Panel
 	{
 	}
 
+	private void showList(Collection<QuestObject> c)
+	{
+		int hidden = 0;
+		List<ContextMenuItem> contextMenu = new ArrayList<>();
+
+		for (QuestObject object : c)
+		{
+			if (gui.file.canEdit() || object.isVisible(gui.file.self))
+			{
+				contextMenu.add(new ContextMenuItem(object.getTitle(), Icon.EMPTY, () -> gui.open(object, true)));
+			}
+			else
+			{
+				hidden++;
+			}
+		}
+
+		if (hidden > 0)
+		{
+			if (hidden == c.size())
+			{
+				contextMenu.add(new ContextMenuItem(new StringTextComponent(hidden + " hidden quests"), Icon.EMPTY, () -> {}).setEnabled(false));
+			}
+			else
+			{
+				contextMenu.add(new ContextMenuItem(new StringTextComponent("+ " + hidden + " hidden quests"), Icon.EMPTY, () -> {}).setEnabled(false));
+			}
+		}
+
+		getGui().openContextMenu(contextMenu);
+	}
+
 	@Override
-	public void draw(Theme theme, int x, int y, int w, int h)
+	public void draw(MatrixStack matrixStack, Theme theme, int x, int y, int w, int h)
 	{
 		if (quest != null && !hidePanel)
 		{
 			QuestObjectBase prev = QuestTheme.currentObject;
 			QuestTheme.currentObject = quest;
-			RenderSystem.pushMatrix();
-			RenderSystem.translatef(0F, 0F, 500F);
-			super.draw(theme, x, y, w, h);
-			RenderSystem.popMatrix();
+			matrixStack.push();
+			matrixStack.translate(0, 0, 500);
+			super.draw(matrixStack, theme, x, y, w, h);
+			matrixStack.pop();
 			QuestTheme.currentObject = prev;
 		}
 	}
 
 	@Override
-	public void drawBackground(Theme theme, int x, int y, int w, int h)
+	public void drawBackground(MatrixStack matrixStack, Theme theme, int x, int y, int w, int h)
 	{
 		Color4I borderColor = ThemeProperties.QUEST_VIEW_BORDER.get();
-		Color4I.DARK_GRAY.withAlpha(120).draw(gui.getX(), gui.getY(), gui.width, gui.height);
+		Color4I.DARK_GRAY.withAlpha(120).draw(matrixStack, gui.getX(), gui.getY(), gui.width, gui.height);
 		Icon background = ThemeProperties.QUEST_VIEW_BACKGROUND.get();
-		background.draw(x, y, w, h);
-		theme.drawString(title, x + w / 2F, y + 4, ThemeProperties.QUEST_VIEW_TITLE.get(), Theme.CENTERED);
-		icon.draw(x + 2, y + 2, 12, 12);
-		borderColor.draw(x + 1, y + 15, w - 2, 1);
+		background.draw(matrixStack, x, y, w, h);
+		theme.drawString(matrixStack, title, x + w / 2F, y + 4, ThemeProperties.QUEST_VIEW_TITLE.get(), Theme.CENTERED);
+		icon.draw(matrixStack, x + 2, y + 2, 12, 12);
+		borderColor.draw(matrixStack, x + 1, y + 15, w - 2, 1);
 	}
 
 	@Override

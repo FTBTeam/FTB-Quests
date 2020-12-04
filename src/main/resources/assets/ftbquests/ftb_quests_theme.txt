@@ -1,5 +1,6 @@
 [*]
 background:          ftbguilibrary:textures/gui/background_squares.png; color=#DCFFFFFF; tile_size=64
+extra_quest_shapes:  diamond, pentagon, hexagon, octagon, heart, gear
 
 text_color:          #FFFFFF
 hover_text_color:    #FFFFA0
@@ -26,7 +27,7 @@ add_icon:             builtin
 alert_icon:           ftbquests:textures/gui/alert.png
 support_icon:         ftbguilibrary:textures/icons/support.png
 wiki_icon:            ftbquests:textures/gui/info.png
-wiki_url:             https://github.com/FTBTeam/FTB-Quests/wiki
+wiki_url:             -
 pin_icon_on:          ftbquests:textures/gui/pin.png; color=#F8BD1C
 pin_icon_off:         ftbquests:textures/gui/pin.png; color=#DBDBDB
 settings_icon:        ftbquests:textures/gui/settings.png
@@ -61,5 +62,5 @@ dependency_line_thickness:          0.17
 quest_spacing:                      1.0
 pinned_quest_size:                  0.75
 
-checkmark_task_active   ftbguilibrary:icons/accept
-checkmark_task_inactive ftbguilibrary:icons/accept_gray
+checkmark_task_active:   ftbguilibrary:icons/accept
+checkmark_task_inactive: ftbguilibrary:icons/accept_gray

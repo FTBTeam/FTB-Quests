@@ -88,7 +88,8 @@ public class QuestTheme
 			}
 		}
 
-		throw new NullPointerException("Property " + property.name + " doesn't have a default value!");
+		return property.defaultValue;
+		// throw new NullPointerException("Property " + property.name + " doesn't have a default value!");
 	}
 
 	@SuppressWarnings("unchecked")

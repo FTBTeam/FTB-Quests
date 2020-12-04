@@ -7,7 +7,7 @@ public class StringProperty extends ThemeProperty<String>
 {
 	public StringProperty(String n)
 	{
-		super(n);
+		super(n, "");
 	}
 
 	@Override

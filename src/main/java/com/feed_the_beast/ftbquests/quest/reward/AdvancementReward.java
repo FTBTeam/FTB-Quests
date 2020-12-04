@@ -6,12 +6,13 @@ import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.icon.ItemIcon;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -99,13 +100,13 @@ public class AdvancementReward extends Reward
 	}
 
 	@Override
-	public String getAltTitle()
+	public IFormattableTextComponent getAltTitle()
 	{
 		Advancement a = Minecraft.getInstance().player.connection.getAdvancementManager().getAdvancementList().getAdvancement(new ResourceLocation(advancement));
 
 		if (a != null && a.getDisplay() != null)
 		{
-			return I18n.format("ftbquests.reward.ftbquests.advancement") + ": " + TextFormatting.YELLOW + a.getDisplay().getTitle().getFormattedText();
+			return new TranslationTextComponent("ftbquests.reward.ftbquests.advancement").appendString(": ").append(a.getDisplay().getTitle().deepCopy().mergeStyle(TextFormatting.YELLOW));
 		}
 
 		return super.getAltTitle();

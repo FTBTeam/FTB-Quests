@@ -11,7 +11,7 @@ public class IconProperty extends ThemeProperty<Icon>
 
 	public IconProperty(String n, Icon b)
 	{
-		super(n);
+		super(n, Icon.EMPTY);
 		builtin = b;
 	}
 

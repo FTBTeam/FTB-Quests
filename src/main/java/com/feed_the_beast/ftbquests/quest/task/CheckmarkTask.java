@@ -3,6 +3,7 @@ package com.feed_the_beast.ftbquests.quest.task;
 import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
+import com.mojang.blaze3d.matrix.MatrixStack;
 
 import javax.annotation.Nullable;
 
@@ -23,9 +24,9 @@ public class CheckmarkTask extends Task
 	}
 
 	@Override
-	public void drawGUI(@Nullable TaskData data, int x, int y, int w, int h)
+	public void drawGUI(@Nullable TaskData data, MatrixStack matrixStack, int x, int y, int w, int h)
 	{
-		(data == null || !data.isComplete() ? ThemeProperties.CHECKMARK_TASK_INACTIVE.get(this) : ThemeProperties.CHECKMARK_TASK_ACTIVE.get(this)).draw(x, y, w, h);
+		(data == null || !data.isComplete() ? ThemeProperties.CHECKMARK_TASK_INACTIVE.get(this) : ThemeProperties.CHECKMARK_TASK_ACTIVE.get(this)).draw(matrixStack, x, y, w, h);
 	}
 
 	@Override
