@@ -10,7 +10,7 @@ import com.feed_the_beast.ftbquests.util.NBTUtils;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.world.storage.FolderName;
 import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.loading.FMLPaths;
 
@@ -23,6 +23,8 @@ import java.util.UUID;
  */
 public class ServerQuestFile extends QuestFile
 {
+	public static final FolderName FTBQUESTS_DATA = new FolderName("ftbquests");
+
 	public static ServerQuestFile INSTANCE;
 
 	public final MinecraftServer server;
@@ -67,29 +69,32 @@ public class ServerQuestFile extends QuestFile
 
 		FTBQuests.LOGGER.info(String.format("Loaded %d chapters, %d quests, %d tasks and %d rewards. In total, %d objects", c, q, t, r, getAllObjects().size()));
 
-		Path path = server.getWorld(DimensionType.OVERWORLD).getSaveHandler().getPlayerFolder().toPath().resolve("ftbquests");
+		Path path = server.func_240776_a_(FTBQUESTS_DATA);
 
-		try
+		if (Files.exists(path))
 		{
-			Files.list(path).forEach(path1 -> {
-				CompoundNBT nbt = NBTUtils.readSNBT(path1);
+			try
+			{
+				Files.list(path).forEach(path1 -> {
+					CompoundNBT nbt = NBTUtils.readSNBT(path1);
 
-				try
-				{
-					UUID uuid = UUID.fromString(nbt.getString("uuid"));
-					PlayerData data = new PlayerData(this, uuid);
-					addData(data);
-					data.deserializeNBT(nbt);
-				}
-				catch (Exception ex)
-				{
-					ex.printStackTrace();
-				}
-			});
-		}
-		catch (Exception ex)
-		{
-			ex.printStackTrace();
+					try
+					{
+						UUID uuid = UUID.fromString(nbt.getString("uuid"));
+						PlayerData data = new PlayerData(this, uuid);
+						addData(data, true);
+						data.deserializeNBT(nbt);
+					}
+					catch (Exception ex)
+					{
+						ex.printStackTrace();
+					}
+				});
+			}
+			catch (Exception ex)
+			{
+				ex.printStackTrace();
+			}
 		}
 	}
 
@@ -140,7 +145,7 @@ public class ServerQuestFile extends QuestFile
 		shouldSave = true;
 	}
 
-	public void checkSave()
+	public void saveNow()
 	{
 		if (shouldSave)
 		{
@@ -148,13 +153,13 @@ public class ServerQuestFile extends QuestFile
 			shouldSave = false;
 		}
 
-		Path path = server.getWorld(DimensionType.OVERWORLD).getSaveHandler().getPlayerFolder().toPath().resolve("ftbquests");
+		Path path = server.func_240776_a_(FTBQUESTS_DATA);
 
 		for (PlayerData data : getAllData())
 		{
 			if (data.shouldSave)
 			{
-				NBTUtils.writeSNBT(path, data.uuid.toString(), data.serializeNBT());
+				NBTUtils.writeSNBT(path.resolve(data.uuid.toString() + ".snbt"), data.serializeNBT());
 				data.shouldSave = false;
 			}
 		}
@@ -162,7 +167,7 @@ public class ServerQuestFile extends QuestFile
 
 	public void unload()
 	{
-		checkSave();
+		saveNow();
 		deleteChildren();
 		deleteSelf();
 	}
@@ -172,31 +177,25 @@ public class ServerQuestFile extends QuestFile
 		UUID id = player.getUniqueID();
 		PlayerData data = playerDataMap.get(id);
 
-		if (data != null)
+		if (data == null)
+		{
+			data = new PlayerData(this, id);
+			data.save();
+		}
+
+		if (!data.name.equals(player.getGameProfile().getName()))
 		{
 			data.name = player.getGameProfile().getName();
 			data.save();
-
-			for (ServerPlayerEntity player1 : server.getPlayerList().getPlayers())
-			{
-				if (player1 != player)
-				{
-					new MessageCreatePlayerData(data).sendTo(player1);
-				}
-			}
 		}
-		else
-		{
-			data = new PlayerData(this, id);
-			data.name = player.getGameProfile().getName();
-			addData(data);
 
-			for (ServerPlayerEntity player1 : server.getPlayerList().getPlayers())
+		addData(data, false);
+
+		for (ServerPlayerEntity player1 : server.getPlayerList().getPlayers())
+		{
+			if (player1 != player)
 			{
-				if (player1 != player)
-				{
-					new MessageCreatePlayerData(data).sendTo(player1);
-				}
+				new MessageCreatePlayerData(data).sendTo(player1);
 			}
 		}
 

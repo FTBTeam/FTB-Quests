@@ -23,7 +23,9 @@ import com.feed_the_beast.mods.ftbguilibrary.utils.ClientUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.items.ItemHandlerHelper;
 
 import javax.annotation.Nullable;
@@ -89,7 +91,7 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon
 	{
 		PlayerData data = new PlayerData(ClientQuestFile.INSTANCE, uuid);
 		data.name = name;
-		data.file.addData(data);
+		data.file.addData(data, true);
 	}
 
 	@Override
@@ -123,21 +125,23 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon
 	}
 
 	@Override
-	public void displayItemRewardToast(ItemStack stack)
+	public void displayItemRewardToast(ItemStack stack, int count)
 	{
 		ItemStack stack1 = ItemHandlerHelper.copyStackWithSize(stack, 1);
 		Icon icon = ItemIcon.getItemIcon(stack1);
 
-		if (!IRewardListenerGui.add(new RewardKey(stack.getDisplayName().getString(), icon).setStack(stack1), stack.getCount()))
+		if (!IRewardListenerGui.add(new RewardKey(stack.getDisplayName().getString(), icon).setStack(stack1), count))
 		{
-			String s = stack.getDisplayName().getFormattedText();
+			IFormattableTextComponent s = stack.getDisplayName().deepCopy();
 
-			if (stack.getCount() > 1)
+			if (count > 1)
 			{
-				s = stack.getCount() + "x " + s;
+				s = new StringTextComponent(count + "x ").append(s);
 			}
 
-			Minecraft.getInstance().getToastGui().add(new RewardToast(stack.getRarity().color + s, icon));
+			s.mergeStyle(stack.getRarity().color);
+
+			Minecraft.getInstance().getToastGui().add(new RewardToast(s, icon));
 		}
 	}
 
@@ -148,7 +152,7 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon
 
 		if (!IRewardListenerGui.add(new RewardKey(text.getString(), i), 1))
 		{
-			Minecraft.getInstance().getToastGui().add(new RewardToast(text.getFormattedText(), i));
+			Minecraft.getInstance().getToastGui().add(new RewardToast(text, i));
 		}
 	}
 

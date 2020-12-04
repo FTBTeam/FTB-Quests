@@ -77,7 +77,7 @@ public class TaskData<T extends Task>
 
 					for (ServerPlayerEntity player : onlineMembers)
 					{
-						FTBQuestsInventoryListener.detect(player, ItemStack.EMPTY);
+						FTBQuestsInventoryListener.detect(player, ItemStack.EMPTY, task.id);
 					}
 				}
 			}

@@ -8,12 +8,13 @@ import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigString;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.icon.IconAnimation;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.nbt.StringNBT;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.text.IFormattableTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.MinecraftForge;
@@ -22,6 +23,8 @@ import net.minecraftforge.common.util.Constants;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author LatvianModder
@@ -34,7 +37,7 @@ public final class Chapter extends QuestObject
 	public final List<String> subtitle;
 	public boolean alwaysInvisible;
 	public Chapter group;
-	public QuestShape defaultQuestShape;
+	public String defaultQuestShape;
 	public final List<ChapterImage> images;
 	public int orderIndex;
 
@@ -46,7 +49,7 @@ public final class Chapter extends QuestObject
 		subtitle = new ArrayList<>(0);
 		alwaysInvisible = false;
 		group = null;
-		defaultQuestShape = QuestShape.DEFAULT;
+		defaultQuestShape = "";
 		images = new ArrayList<>();
 		orderIndex = 0;
 	}
@@ -98,10 +101,7 @@ public final class Chapter extends QuestObject
 			nbt.putInt("group", group.id);
 		}
 
-		if (defaultQuestShape != QuestShape.DEFAULT)
-		{
-			nbt.putString("default_quest_shape", defaultQuestShape.id);
-		}
+		nbt.putString("default_quest_shape", defaultQuestShape);
 
 		if (!images.isEmpty())
 		{
@@ -135,7 +135,12 @@ public final class Chapter extends QuestObject
 
 		alwaysInvisible = nbt.getBoolean("always_invisible");
 		group = file.getChapter(nbt.getInt("group"));
-		defaultQuestShape = QuestShape.NAME_MAP.get(nbt.getString("default_quest_shape"));
+		defaultQuestShape = nbt.getString("default_quest_shape");
+
+		if (defaultQuestShape.equals("default"))
+		{
+			defaultQuestShape = "";
+		}
 
 		ListNBT imgs = nbt.getList("images", Constants.NBT.TAG_COMPOUND);
 
@@ -153,10 +158,11 @@ public final class Chapter extends QuestObject
 	public void writeNetData(PacketBuffer buffer)
 	{
 		super.writeNetData(buffer);
+		buffer.writeString(filename, Short.MAX_VALUE);
 		NetUtils.writeStrings(buffer, subtitle);
 		buffer.writeBoolean(alwaysInvisible);
 		buffer.writeInt(group == null || group.invalid ? 0 : group.id);
-		QuestShape.NAME_MAP.write(buffer, defaultQuestShape);
+		buffer.writeString(defaultQuestShape, Short.MAX_VALUE);
 		NetUtils.write(buffer, images, (d, img) -> img.writeNetData(d));
 	}
 
@@ -164,10 +170,11 @@ public final class Chapter extends QuestObject
 	public void readNetData(PacketBuffer buffer)
 	{
 		super.readNetData(buffer);
+		filename = buffer.readString(Short.MAX_VALUE);
 		NetUtils.readStrings(buffer, subtitle);
 		alwaysInvisible = buffer.readBoolean();
 		group = file.getChapter(buffer.readInt());
-		defaultQuestShape = QuestShape.NAME_MAP.read(buffer);
+		defaultQuestShape = buffer.readString(Short.MAX_VALUE);
 		NetUtils.read(buffer, images, d -> {
 			ChapterImage image = new ChapterImage(this);
 			image.readNetData(d);
@@ -200,8 +207,11 @@ public final class Chapter extends QuestObject
 
 		for (Quest quest : quests)
 		{
-			progress += data.getRelativeProgress(quest);
-			count++;
+			if (!quest.isProgressionIgnored())
+			{
+				progress += data.getRelativeProgress(quest);
+				count++;
+			}
 		}
 
 		for (Chapter chapter : getChildren())
@@ -229,6 +239,17 @@ public final class Chapter extends QuestObject
 			for (ServerPlayerEntity player : notifiedPlayers)
 			{
 				new MessageDisplayCompletionToast(id).sendTo(player);
+			}
+		}
+
+		for (Chapter chapter : file.chapters)
+		{
+			for (Quest quest : chapter.quests)
+			{
+				if (quest.dependencies.contains(this))
+				{
+					data.checkAutoCompletion(quest);
+				}
 			}
 		}
 
@@ -271,9 +292,9 @@ public final class Chapter extends QuestObject
 	}
 
 	@Override
-	public String getAltTitle()
+	public IFormattableTextComponent getAltTitle()
 	{
-		return I18n.format("ftbquests.unnamed");
+		return new TranslationTextComponent("ftbquests.unnamed");
 	}
 
 	@Override
@@ -298,6 +319,27 @@ public final class Chapter extends QuestObject
 	@Override
 	public void onCreated()
 	{
+		if (filename.isEmpty())
+		{
+			String s = title.replace(' ', '_').replaceAll("\\W", "").toLowerCase().trim();
+
+			if (s.isEmpty())
+			{
+				s = toString();
+			}
+
+			filename = s;
+
+			Set<String> existingNames = file.chapters.stream().map(ch -> ch.filename).collect(Collectors.toSet());
+			int i = 2;
+
+			while (existingNames.contains(filename))
+			{
+				filename = s + "_" + i;
+				i++;
+			}
+		}
+
 		file.chapters.add(this);
 
 		if (!quests.isEmpty())
@@ -314,7 +356,7 @@ public final class Chapter extends QuestObject
 	@Override
 	public String getPath()
 	{
-		return "chapters/" + filename;
+		return "chapters/" + filename + ".snbt";
 	}
 
 	@Override
@@ -328,7 +370,7 @@ public final class Chapter extends QuestObject
 		//Predicate<QuestObjectBase> predicate = object -> object == null || (object instanceof Chapter && object != this && ((Chapter) object).group == null);
 		//config.add("group", new ConfigQuestObject<>(predicate), group, v -> group = v, null);
 
-		config.addEnum("default_quest_shape", defaultQuestShape, v -> defaultQuestShape = v, QuestShape.NAME_MAP);
+		config.addEnum("default_quest_shape", defaultQuestShape.isEmpty() ? "default" : defaultQuestShape, v -> defaultQuestShape = v.equals("default") ? "" : v, QuestShape.idMapWithDefault);
 	}
 
 	@Override
@@ -441,8 +483,8 @@ public final class Chapter extends QuestObject
 		return group != null && !group.invalid;
 	}
 
-	public QuestShape getDefaultQuestShape()
+	public String getDefaultQuestShape()
 	{
-		return defaultQuestShape == QuestShape.DEFAULT ? file.getDefaultQuestShape() : defaultQuestShape;
+		return defaultQuestShape.isEmpty() ? file.getDefaultQuestShape() : defaultQuestShape;
 	}
 }

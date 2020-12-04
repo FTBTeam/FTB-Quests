@@ -12,7 +12,7 @@ public class DoubleProperty extends ThemeProperty<Double>
 
 	public DoubleProperty(String n, double mn, double mx)
 	{
-		super(n);
+		super(n, 0D);
 		min = mn;
 		max = mx;
 	}

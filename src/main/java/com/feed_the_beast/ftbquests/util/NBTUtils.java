@@ -1,30 +1,19 @@
 package com.feed_the_beast.ftbquests.util;
 
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.nbt.ByteArrayNBT;
 import net.minecraft.nbt.CollectionNBT;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.DoubleNBT;
 import net.minecraft.nbt.EndNBT;
-import net.minecraft.nbt.FloatNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.IntArrayNBT;
 import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.LongArrayNBT;
-import net.minecraft.nbt.NumberNBT;
 import net.minecraft.nbt.StringNBT;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nullable;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,21 +37,14 @@ public class NBTUtils
 
 		if (nbt1 instanceof CompoundNBT)
 		{
-			ItemStack stack = ItemStack.read((CompoundNBT) nbt1);
-
-			if (!stack.isEmpty())
-			{
-				return stack;
-			}
+			return ItemStack.read((CompoundNBT) nbt1);
 		}
 		else if (nbt1 instanceof StringNBT)
 		{
-			Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(nbt1.getString()));
-
-			if (item != null && item != Items.AIR)
-			{
-				return new ItemStack(item);
-			}
+			CompoundNBT nbt2 = new CompoundNBT();
+			nbt2.putString("id", nbt1.getString());
+			nbt2.putByte("Count", (byte) 1);
+			return ItemStack.read(nbt2);
 		}
 
 		return ItemStack.EMPTY;
@@ -88,8 +70,8 @@ public class NBTUtils
 	private static class SNBTBuilder
 	{
 		private String indent = "";
-		private List<String> lines = new ArrayList<>();
-		private StringBuilder line = new StringBuilder();
+		private final List<String> lines = new ArrayList<>();
+		private final StringBuilder line = new StringBuilder();
 
 		private void print(Object string)
 		{
@@ -115,33 +97,18 @@ public class NBTUtils
 	}
 
 	@Nullable
-	public static CompoundNBT readSNBT(Path base, @Nullable String path)
-	{
-		if (path == null || path.isEmpty())
-		{
-			return null;
-		}
-
-		return readSNBT(base.resolve(path + ".snbt"));
-	}
-
-	@Nullable
 	public static CompoundNBT readSNBT(Path path)
 	{
-		File file = path.toFile();
-
-		if (!file.exists())
+		if (Files.notExists(path))
 		{
 			return null;
 		}
 
 		StringBuilder s = new StringBuilder();
 
-		try (BufferedReader reader = new BufferedReader(new FileReader(file)))
+		try
 		{
-			String line;
-
-			while ((line = reader.readLine()) != null)
+			for (String line : Files.readAllLines(path, StandardCharsets.UTF_8))
 			{
 				s.append(line.trim());
 			}
@@ -155,38 +122,19 @@ public class NBTUtils
 		return null;
 	}
 
-	public static void writeSNBT(Path base, String path, CompoundNBT out)
+	public static void writeSNBT(Path path, CompoundNBT nbt)
 	{
-		File file = base.resolve(path + ".snbt").toFile();
-
-		if (!file.exists())
+		try
 		{
-			File p = file.getParentFile();
-
-			if (!p.exists())
+			if (Files.notExists(path.getParent()))
 			{
-				p.mkdirs();
+				Files.createDirectories(path.getParent());
 			}
 
-			try
-			{
-				file.createNewFile();
-			}
-			catch (Exception ex)
-			{
-			}
-		}
-
-		try (PrintWriter writer = new PrintWriter(new BufferedWriter(new FileWriter(file))))
-		{
 			SNBTBuilder builder = new SNBTBuilder();
-			append(builder, out);
+			append(builder, nbt);
 			builder.println();
-
-			for (String s : builder.lines)
-			{
-				writer.println(s);
-			}
+			Files.write(path, builder.lines);
 		}
 		catch (Exception ex)
 		{
@@ -251,31 +199,6 @@ public class NBTUtils
 				appendCollection(builder, (CollectionNBT<?>) nbt, "");
 			}
 		}
-		else if (nbt instanceof NumberNBT)
-		{
-			if (nbt instanceof FloatNBT)
-			{
-				builder.print(nbt.toString());
-			}
-			else if (nbt instanceof DoubleNBT)
-			{
-				builder.print(nbt.toString());
-			}
-			else
-			{
-				long v = ((NumberNBT) nbt).getLong();
-
-				if (v <= Integer.MAX_VALUE && v >= Integer.MIN_VALUE)
-				{
-					builder.print(v);
-				}
-				else
-				{
-					builder.print(v);
-					builder.print("L");
-				}
-			}
-		}
 		else
 		{
 			builder.print(nbt.toString());
@@ -321,25 +244,5 @@ public class NBTUtils
 
 		builder.pop();
 		builder.print("]");
-	}
-
-	public static void putVarLong(CompoundNBT nbt, String key, long value)
-	{
-		if (value <= Byte.MAX_VALUE)
-		{
-			nbt.putByte(key, (byte) value);
-		}
-		else if (value <= Short.MAX_VALUE)
-		{
-			nbt.putShort(key, (short) value);
-		}
-		else if (value <= Integer.MAX_VALUE)
-		{
-			nbt.putInt(key, (int) value);
-		}
-		else
-		{
-			nbt.putLong(key, value);
-		}
 	}
 }

@@ -3,6 +3,7 @@ package com.feed_the_beast.ftbquests.integration.jei;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
 import com.feed_the_beast.mods.ftbguilibrary.widget.GuiHelper;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import mezz.jei.api.gui.IRecipeLayout;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.gui.ingredient.IGuiItemStackGroup;
@@ -45,16 +46,21 @@ public class LootCrateCategory implements IRecipeCategory<LootCrateWrapper>
 			}
 
 			@Override
-			public void draw(int xOffset, int yOffset)
+			public void draw(MatrixStack matrixStack, int xOffset, int yOffset)
 			{
+				matrixStack.push();
+				matrixStack.translate(0, 0, 100);
+
 				if (!LootCrateRegistry.INSTANCE.list.isEmpty())
 				{
-					GuiHelper.drawItem(LootCrateRegistry.INSTANCE.list.get((int) ((System.currentTimeMillis() / 1000L) % LootCrateRegistry.INSTANCE.list.size())).itemStack, xOffset, yOffset, true);
+					GuiHelper.drawItem(matrixStack, LootCrateRegistry.INSTANCE.list.get((int) ((System.currentTimeMillis() / 1000L) % LootCrateRegistry.INSTANCE.list.size())).itemStack, xOffset, yOffset, 1F, 1F, true, null);
 				}
 				else
 				{
-					GuiHelper.drawItem(new ItemStack(FTBQuestsItems.LOOTCRATE), xOffset, yOffset, true);
+					GuiHelper.drawItem(matrixStack, new ItemStack(FTBQuestsItems.LOOTCRATE), xOffset, yOffset, 1F, 1F, true, null);
 				}
+
+				matrixStack.pop();
 			}
 		};
 	}

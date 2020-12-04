@@ -10,6 +10,7 @@ import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.IContainerListener;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
+import net.minecraftforge.common.util.FakePlayer;
 
 /**
  * @author LatvianModder
@@ -23,14 +24,19 @@ public class FTBQuestsInventoryListener implements IContainerListener
 		player = p;
 	}
 
-	public static void detect(ServerPlayerEntity player, ItemStack item)
+	public static void detect(ServerPlayerEntity player, ItemStack item, int sourceTask)
 	{
-		if (ServerQuestFile.INSTANCE == null)
+		if (ServerQuestFile.INSTANCE == null || player instanceof FakePlayer)
 		{
 			return;
 		}
 
-		PlayerData data = ServerQuestFile.INSTANCE.getData(player);
+		PlayerData data = ServerQuestFile.INSTANCE.getNullablePlayerData(player.getUniqueID());
+
+		if (data == null)
+		{
+			return;
+		}
 
 		for (Chapter chapter : ServerQuestFile.INSTANCE.chapters)
 		{
@@ -40,7 +46,7 @@ public class FTBQuestsInventoryListener implements IContainerListener
 				{
 					for (Task task : quest.tasks)
 					{
-						if (task.submitItemsOnInventoryChange())
+						if (task.id != sourceTask && task.submitItemsOnInventoryChange())
 						{
 							data.getTaskData(task).submitTask(player, item);
 						}
@@ -66,7 +72,7 @@ public class FTBQuestsInventoryListener implements IContainerListener
 	@Override
 	public void sendAllContents(Container container, NonNullList<ItemStack> itemsList)
 	{
-		detect(player, ItemStack.EMPTY);
+		detect(player, ItemStack.EMPTY, 0);
 	}
 
 	@Override
@@ -74,7 +80,7 @@ public class FTBQuestsInventoryListener implements IContainerListener
 	{
 		if (!stack.isEmpty() && container.getSlot(index).inventory == player.inventory)
 		{
-			detect(player, ItemStack.EMPTY);
+			detect(player, ItemStack.EMPTY, 0);
 		}
 	}
 

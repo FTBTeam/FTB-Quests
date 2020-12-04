@@ -4,12 +4,13 @@ import com.feed_the_beast.ftbquests.quest.Chapter;
 import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Color4I;
 import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
+import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import javax.annotation.Nullable;
-import java.util.List;
 
 /**
  * @author LatvianModder
@@ -30,7 +31,7 @@ public class ButtonChapter extends ButtonTab
 	}
 
 	@Override
-	public void addMouseOverText(List<String> list)
+	public void addMouseOverText(TooltipList list)
 	{
 	}
 
@@ -46,12 +47,12 @@ public class ButtonChapter extends ButtonTab
 	}
 
 	@Override
-	public void draw(Theme theme, int x, int y, int w, int h)
+	public void draw(MatrixStack matrixStack, Theme theme, int x, int y, int w, int h)
 	{
 		if (chapter == treeGui.selectedChapter || treeGui.selectedChapter != null && chapter == treeGui.selectedChapter.group)
 		{
 			Color4I backgroundColor = ThemeProperties.WIDGET_BACKGROUND.get(treeGui.selectedChapter);
-			backgroundColor.draw(x + 1, y, w - 2, h);
+			backgroundColor.draw(matrixStack, x + 1, y, w - 2, h);
 		}
 
 		if (treeGui.chapterHoverPanel.chapter == this)
@@ -60,33 +61,33 @@ public class ButtonChapter extends ButtonTab
 		}
 
 		int is = width < 18 ? 8 : 16;
-		icon.draw(x + (w - is) / 2, y + (h - is) / 2, is, is);
+		icon.draw(matrixStack, x + (w - is) / 2, y + (h - is) / 2, is, is);
 
 		if (chapter.quests.isEmpty() && !chapter.hasChildren())
 		{
-			RenderSystem.pushMatrix();
-			RenderSystem.translatef(0, 0, 450);
+			matrixStack.push();
+			matrixStack.translate(0, 0, 450);
 			RenderSystem.enableBlend();
-			ThemeProperties.CLOSE_ICON.get().draw(x + w - 10, y + 2, 8, 8);
-			RenderSystem.popMatrix();
+			ThemeProperties.CLOSE_ICON.get().draw(matrixStack, x + w - 10, y + 2, 8, 8);
+			matrixStack.pop();
 			return;
 		}
 
 		if (treeGui.file.self.hasUnclaimedRewards(chapter))
 		{
-			RenderSystem.pushMatrix();
-			RenderSystem.translatef(0, 0, 450);
+			matrixStack.push();
+			matrixStack.translate(0, 0, 450);
 			RenderSystem.enableBlend();
-			ThemeProperties.ALERT_ICON.get().draw(x + w - 7, y + 2, 6, 6);
-			RenderSystem.popMatrix();
+			ThemeProperties.ALERT_ICON.get().draw(matrixStack, x + w - 7, y + 2, 6, 6);
+			matrixStack.pop();
 		}
 		else if (treeGui.file.self.isComplete(chapter))
 		{
-			RenderSystem.pushMatrix();
-			RenderSystem.translatef(0, 0, 450);
+			matrixStack.push();
+			matrixStack.translate(0, 0, 450);
 			RenderSystem.enableBlend();
-			ThemeProperties.CHECK_ICON.get().draw(x + w - 8, y + 1, 8, 8);
-			RenderSystem.popMatrix();
+			ThemeProperties.CHECK_ICON.get().draw(matrixStack, x + w - 8, y + 1, 8, 8);
+			matrixStack.pop();
 		}
 	}
 

@@ -20,6 +20,7 @@ import com.feed_the_beast.ftbquests.quest.reward.ToastReward;
 import com.feed_the_beast.ftbquests.quest.reward.XPLevelsReward;
 import com.feed_the_beast.ftbquests.quest.reward.XPReward;
 import com.feed_the_beast.ftbquests.quest.task.AdvancementTask;
+import com.feed_the_beast.ftbquests.quest.task.BiomeTask;
 import com.feed_the_beast.ftbquests.quest.task.CheckmarkTask;
 import com.feed_the_beast.ftbquests.quest.task.CustomTask;
 import com.feed_the_beast.ftbquests.quest.task.DimensionTask;
@@ -49,6 +50,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.world.GameRules;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.FakePlayer;
+import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
@@ -80,6 +82,7 @@ public class FTBQuestsEventHandler
 	{
 		MinecraftForge.EVENT_BUS.addListener(this::serverAboutToStart);
 		MinecraftForge.EVENT_BUS.addListener(this::serverStarting);
+		MinecraftForge.EVENT_BUS.addListener(this::registerCommands);
 		MinecraftForge.EVENT_BUS.addListener(this::serverStarted);
 		MinecraftForge.EVENT_BUS.addListener(this::serverStopped);
 		MinecraftForge.EVENT_BUS.addListener(this::worldSaved);
@@ -106,7 +109,11 @@ public class FTBQuestsEventHandler
 
 	private void serverStarting(FMLServerStartingEvent event)
 	{
-		FTBQuestsCommands.register(event.getCommandDispatcher());
+	}
+
+	private void registerCommands(RegisterCommandsEvent event)
+	{
+		FTBQuestsCommands.register(event.getDispatcher());
 	}
 
 	private void serverStarted(FMLServerStartedEvent event)
@@ -122,7 +129,7 @@ public class FTBQuestsEventHandler
 
 	private void worldSaved(WorldEvent.Save event)
 	{
-		ServerQuestFile.INSTANCE.checkSave();
+		ServerQuestFile.INSTANCE.saveNow();
 	}
 
 	private void registerItems(RegistryEvent.Register<Item> event)
@@ -147,7 +154,8 @@ public class FTBQuestsEventHandler
 				FTBQuestsTasks.LOCATION = new TaskType(LocationTask::new).setRegistryName("location").setIcon(Icon.getIcon("minecraft:item/compass_00")),
 				FTBQuestsTasks.CHECKMARK = new TaskType(CheckmarkTask::new).setRegistryName("checkmark").setIcon(GuiIcons.ACCEPT_GRAY),
 				FTBQuestsTasks.ADVANCEMENT = new TaskType(AdvancementTask::new).setRegistryName("advancement").setIcon(Icon.getIcon("minecraft:item/wheat")),
-				FTBQuestsTasks.OBSERVATION = new TaskType(ObservationTask::new).setRegistryName("observation").setIcon(GuiIcons.ART)
+				FTBQuestsTasks.OBSERVATION = new TaskType(ObservationTask::new).setRegistryName("observation").setIcon(GuiIcons.ART),
+				FTBQuestsTasks.BIOME = new TaskType(BiomeTask::new).setRegistryName("biome").setIcon(Icon.getIcon("minecraft:blocks/sapling_oak"))
 		);
 
 		FTBQuests.PROXY.setTaskGuiProviders();
@@ -184,7 +192,7 @@ public class FTBQuestsEventHandler
 
 	private void playerKill(LivingDeathEvent event)
 	{
-		if (event.getSource().getTrueSource() instanceof ServerPlayerEntity)
+		if (event.getSource().getTrueSource() instanceof ServerPlayerEntity && !(event.getSource().getTrueSource() instanceof FakePlayer))
 		{
 			if (killTasks == null)
 			{
@@ -220,7 +228,7 @@ public class FTBQuestsEventHandler
 				autoSubmitTasks = ServerQuestFile.INSTANCE.collect(Task.class, o -> o instanceof Task && ((Task) o).autoSubmitOnPlayerTick() > 0);
 			}
 
-			if (autoSubmitTasks.isEmpty())
+			if (autoSubmitTasks == null || autoSubmitTasks.isEmpty())
 			{
 				return;
 			}
@@ -273,7 +281,7 @@ public class FTBQuestsEventHandler
 	{
 		if (event.getPlayer() instanceof ServerPlayerEntity && !event.getCrafting().isEmpty())
 		{
-			FTBQuestsInventoryListener.detect((ServerPlayerEntity) event.getPlayer(), event.getCrafting());
+			FTBQuestsInventoryListener.detect((ServerPlayerEntity) event.getPlayer(), event.getCrafting(), 0);
 		}
 	}
 
@@ -281,7 +289,7 @@ public class FTBQuestsEventHandler
 	{
 		if (event.getPlayer() instanceof ServerPlayerEntity && !event.getSmelting().isEmpty())
 		{
-			FTBQuestsInventoryListener.detect((ServerPlayerEntity) event.getPlayer(), event.getSmelting());
+			FTBQuestsInventoryListener.detect((ServerPlayerEntity) event.getPlayer(), event.getSmelting(), 0);
 		}
 	}
 

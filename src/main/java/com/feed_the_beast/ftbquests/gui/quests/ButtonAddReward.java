@@ -9,8 +9,9 @@ import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
 import com.feed_the_beast.mods.ftbguilibrary.widget.ContextMenuItem;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
-import net.minecraft.client.resources.I18n;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.text.TranslationTextComponent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +25,7 @@ public class ButtonAddReward extends Button
 
 	public ButtonAddReward(Panel panel, Quest q)
 	{
-		super(panel, I18n.format("gui.add"), ThemeProperties.ADD_ICON.get());
+		super(panel, new TranslationTextComponent("gui.add"), ThemeProperties.ADD_ICON.get());
 		quest = q;
 		setSize(18, 18);
 	}
@@ -51,11 +52,11 @@ public class ButtonAddReward extends Button
 	}
 
 	@Override
-	public void drawBackground(Theme theme, int x, int y, int w, int h)
+	public void drawBackground(MatrixStack matrixStack, Theme theme, int x, int y, int w, int h)
 	{
 		if (isMouseOver())
 		{
-			super.drawBackground(theme, x, y, w, h);
+			super.drawBackground(matrixStack, theme, x, y, w, h);
 		}
 	}
 }

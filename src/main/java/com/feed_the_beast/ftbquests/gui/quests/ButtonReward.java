@@ -5,15 +5,21 @@ import com.feed_the_beast.ftbquests.quest.reward.Reward;
 import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Color4I;
 import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
+import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
 import com.feed_the_beast.mods.ftbguilibrary.widget.ContextMenuItem;
-import com.feed_the_beast.mods.ftbguilibrary.widget.GuiIcons;
+import com.feed_the_beast.mods.ftbguilibrary.widget.GuiHelper;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
 import com.feed_the_beast.mods.ftbguilibrary.widget.WidgetType;
+import com.feed_the_beast.mods.ftbguilibrary.widget.WrappedIngredient;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.resources.I18n;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.TranslationTextComponent;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -36,35 +42,58 @@ public class ButtonReward extends Button
 	}
 
 	@Override
-	public String getTitle()
+	public ITextComponent getTitle()
 	{
 		if (reward.isTeamReward())
 		{
-			return TextFormatting.BLUE + super.getTitle();
+			return super.getTitle().deepCopy().mergeStyle(TextFormatting.BLUE);
 		}
 
 		return super.getTitle();
 	}
 
 	@Override
-	public void addMouseOverText(List<String> list)
+	public void addMouseOverText(TooltipList list)
 	{
 		if (isShiftKeyDown() && isCtrlKeyDown())
 		{
-			list.add(TextFormatting.DARK_GRAY + reward.toString());
-		}
-
-		if (reward.addTitleInMouseOverText())
-		{
-			list.add(getTitle());
+			list.add(new StringTextComponent(reward.toString()).mergeStyle(TextFormatting.DARK_GRAY));
 		}
 
 		if (reward.isTeamReward())
 		{
-			list.add(TextFormatting.BLUE + "[" + I18n.format("ftbquests.reward.team_reward") + "]");
-		}
+			if (reward.addTitleInMouseOverText())
+			{
+				list.add(getTitle());
+			}
 
-		reward.addMouseOverText(list);
+			Object object = getIngredientUnderMouse();
+
+			if (object instanceof WrappedIngredient && ((WrappedIngredient) object).tooltip)
+			{
+				Object ingredient = WrappedIngredient.unwrap(object);
+
+				if (ingredient instanceof ItemStack && !((ItemStack) ingredient).isEmpty())
+				{
+					List<ITextComponent> list1 = new ArrayList<>();
+					GuiHelper.addStackTooltip((ItemStack) ingredient, list1);
+					list1.forEach(list::add);
+				}
+			}
+
+			list.blankLine();
+			reward.addMouseOverText(list);
+			list.add(new TranslationTextComponent("ftbquests.reward.team_reward").mergeStyle(TextFormatting.BLUE, TextFormatting.UNDERLINE));
+		}
+		else
+		{
+			if (reward.addTitleInMouseOverText())
+			{
+				list.add(getTitle());
+			}
+
+			reward.addMouseOverText(list);
+		}
 	}
 
 	@Override
@@ -121,41 +150,46 @@ public class ButtonReward extends Button
 	}
 
 	@Override
-	public void drawBackground(Theme theme, int x, int y, int w, int h)
+	public void drawBackground(MatrixStack matrixStack, Theme theme, int x, int y, int w, int h)
 	{
 		if (isMouseOver())
 		{
-			super.drawBackground(theme, x, y, w, h);
+			super.drawBackground(matrixStack, theme, x, y, w, h);
 		}
 	}
 
 	@Override
-	public void draw(Theme theme, int x, int y, int w, int h)
+	public void draw(MatrixStack matrixStack, Theme theme, int x, int y, int w, int h)
 	{
 		int bs = h >= 32 ? 32 : 16;
-		drawBackground(theme, x, y, w, h);
-		drawIcon(theme, x + (w - bs) / 2, y + (h - bs) / 2, bs, bs);
+		drawBackground(matrixStack, theme, x, y, w, h);
+		drawIcon(matrixStack, theme, x + (w - bs) / 2, y + (h - bs) / 2, bs, bs);
 
-		RenderSystem.pushMatrix();
-		RenderSystem.translatef(0F, 0F, 500F);
+		if (treeGui.file.self == null)
+		{
+			return;
+		}
+		else if (treeGui.contextMenu != null)
+		{
+			//return;
+		}
+
+		matrixStack.push();
+		matrixStack.translate(0F, 0F, 200F);
 		RenderSystem.enableBlend();
 		boolean completed = false;
 
-		if (!ClientQuestFile.exists())
+		if (treeGui.file.self.getClaimType(reward).isClaimed())
 		{
-			GuiIcons.CLOSE.draw(x + w - 9, y + 1, 8, 8);
-		}
-		else if (ClientQuestFile.INSTANCE.self.getClaimType(reward).isClaimed())
-		{
-			ThemeProperties.CHECK_ICON.get().draw(x + w - 9, y + 1, 8, 8);
+			ThemeProperties.CHECK_ICON.get().draw(matrixStack, x + w - 9, y + 1, 8, 8);
 			completed = true;
 		}
-		else if (ClientQuestFile.INSTANCE.self.isComplete(reward.quest))
+		else if (treeGui.file.self.isComplete(reward.quest))
 		{
-			ThemeProperties.ALERT_ICON.get().draw(x + w - 9, y + 1, 8, 8);
+			ThemeProperties.ALERT_ICON.get().draw(matrixStack, x + w - 9, y + 1, 8, 8);
 		}
 
-		RenderSystem.popMatrix();
+		matrixStack.pop();
 
 		if (!completed)
 		{
@@ -163,11 +197,11 @@ public class ButtonReward extends Button
 
 			if (!s.isEmpty())
 			{
-				RenderSystem.pushMatrix();
-				RenderSystem.translatef(x + 19F - theme.getStringWidth(s) / 2F, y + 15F, 500F);
-				RenderSystem.scalef(0.5F, 0.5F, 1F);
-				theme.drawString(s, 0, 0, Color4I.WHITE, Theme.SHADOW);
-				RenderSystem.popMatrix();
+				matrixStack.push();
+				matrixStack.translate(x + 19F - theme.getStringWidth(s) / 2F, y + 15F, 200F);
+				matrixStack.scale(0.5F, 0.5F, 1F);
+				theme.drawString(matrixStack, s, 0, 0, Color4I.WHITE, Theme.SHADOW);
+				matrixStack.pop();
 			}
 		}
 	}

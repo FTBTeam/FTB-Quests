@@ -4,8 +4,9 @@ import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.mods.ftbguilibrary.utils.StringUtils;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.IFormattableTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 
 /**
  * @author LatvianModder
@@ -27,9 +28,9 @@ public class ForgeEnergyTask extends EnergyTask
 	}
 
 	@Override
-	public String getAltTitle()
+	public IFormattableTextComponent getAltTitle()
 	{
-		return I18n.format("ftbquests.task.ftbquests.forge_energy.text", StringUtils.formatDouble(value, true));
+		return new TranslationTextComponent("ftbquests.task.ftbquests.forge_energy.text", StringUtils.formatDouble(value, true));
 	}
 
 	@Override

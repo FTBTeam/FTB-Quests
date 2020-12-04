@@ -17,11 +17,15 @@ import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.utils.ClientUtils;
 import com.feed_the_beast.mods.ftbguilibrary.utils.StringUtils;
+import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
 import com.feed_the_beast.mods.ftbguilibrary.widget.WrappedIngredient;
-import net.minecraft.client.resources.I18n;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.util.text.IFormattableTextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.MinecraftForge;
@@ -153,7 +157,7 @@ public abstract class Task extends QuestObject
 
 		for (PlayerData data : quest.chapter.file.getAllData())
 		{
-			data.createTaskData(this);
+			data.createTaskData(this, true);
 		}
 
 		if (this instanceof CustomTask)
@@ -169,7 +173,7 @@ public abstract class Task extends QuestObject
 	}
 
 	@Override
-	public String getAltTitle()
+	public IFormattableTextComponent getAltTitle()
 	{
 		return getType().getDisplayName();
 	}
@@ -181,9 +185,9 @@ public abstract class Task extends QuestObject
 		return group.getGroup(getObjectType().id).getGroup(type.getRegistryName().getNamespace()).getGroup(type.getRegistryName().getPath());
 	}
 
-	public void drawGUI(@Nullable TaskData data, int x, int y, int w, int h)
+	public void drawGUI(@Nullable TaskData data, MatrixStack matrixStack, int x, int y, int w, int h)
 	{
-		getIcon().draw(x, y, w, h);
+		getIcon().draw(matrixStack, x, y, w, h);
 	}
 
 	public boolean canInsertItem()
@@ -202,12 +206,12 @@ public abstract class Task extends QuestObject
 	}
 
 	@OnlyIn(Dist.CLIENT)
-	public void addMouseOverText(List<String> list, @Nullable TaskData data)
+	public void addMouseOverText(TooltipList list, @Nullable TaskData data)
 	{
 		if (consumesResources())
 		{
-			list.add("");
-			list.add(TextFormatting.YELLOW.toString() + TextFormatting.UNDERLINE + I18n.format("ftbquests.task.click_to_submit"));
+			list.blankLine();
+			list.add(new TranslationTextComponent("ftbquests.task.click_to_submit").mergeStyle(TextFormatting.YELLOW, TextFormatting.UNDERLINE));
 		}
 	}
 
@@ -250,9 +254,9 @@ public abstract class Task extends QuestObject
 	}
 
 	@OnlyIn(Dist.CLIENT)
-	public String getButtonText()
+	public IFormattableTextComponent getButtonText()
 	{
-		return getMaxProgress() > 1L || consumesResources() ? getMaxProgressString() : "";
+		return getMaxProgress() > 1L || consumesResources() ? new StringTextComponent(getMaxProgressString()) : (IFormattableTextComponent) StringTextComponent.EMPTY;
 	}
 
 	public int autoSubmitOnPlayerTick()

@@ -4,6 +4,7 @@ import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -90,7 +91,7 @@ public abstract class QuestObject extends QuestObjectBase
 	}
 
 	@Override
-	public abstract String getAltTitle();
+	public abstract IFormattableTextComponent getAltTitle();
 
 	protected boolean verifyDependenciesInternal(QuestObject original, boolean firstLoop)
 	{

@@ -3,11 +3,11 @@ package com.feed_the_beast.ftbquests.gui.quests;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
 import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
+import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
-import net.minecraft.client.resources.I18n;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
-
-import java.util.List;
+import net.minecraft.util.text.TranslationTextComponent;
 
 /**
  * @author LatvianModder
@@ -16,14 +16,14 @@ public class ButtonOpenShop extends ButtonTab
 {
 	public ButtonOpenShop(Panel panel)
 	{
-		super(panel, I18n.format("sidebar_button.ftbmoney.shop"), ThemeProperties.SHOP_ICON.get());
+		super(panel, new TranslationTextComponent("sidebar_button.ftbmoney.shop"), ThemeProperties.SHOP_ICON.get());
 	}
 
 	@Override
-	public void addMouseOverText(List<String> list)
+	public void addMouseOverText(TooltipList list)
 	{
 		list.add(getTitle());
-		list.add(TextFormatting.GOLD + String.format("\u0398 %,d", ClientQuestFile.INSTANCE.self.getMoney()));
+		list.add(new StringTextComponent(String.format("\u0398 %,d", ClientQuestFile.INSTANCE.self.getMoney())).mergeStyle(TextFormatting.GOLD));
 	}
 
 	@Override

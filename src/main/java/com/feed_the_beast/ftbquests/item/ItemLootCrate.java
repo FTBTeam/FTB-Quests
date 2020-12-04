@@ -23,7 +23,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvents;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
@@ -106,11 +106,11 @@ public class ItemLootCrate extends Item
 
 			for (int i = 0; i < 5; i++)
 			{
-				Vec3d vec3d = new Vec3d(((double) world.rand.nextFloat() - 0.5D) * 0.1D, Math.random() * 0.1D + 0.1D, 0.0D);
+				Vector3d vec3d = new Vector3d(((double) world.rand.nextFloat() - 0.5D) * 0.1D, Math.random() * 0.1D + 0.1D, 0.0D);
 				vec3d = vec3d.rotatePitch(-player.rotationPitch * 0.017453292F);
 				vec3d = vec3d.rotateYaw(-player.rotationYaw * 0.017453292F);
 				double d0 = (double) (-world.rand.nextFloat()) * 0.6D - 0.3D;
-				Vec3d vec3d1 = new Vec3d(((double) world.rand.nextFloat() - 0.5D) * 0.3D, d0, 0.6D);
+				Vector3d vec3d1 = new Vector3d(((double) world.rand.nextFloat() - 0.5D) * 0.3D, d0, 0.6D);
 				vec3d1 = vec3d1.rotatePitch(-player.rotationPitch * 0.017453292F);
 				vec3d1 = vec3d1.rotateYaw(-player.rotationYaw * 0.017453292F);
 				vec3d1 = vec3d1.add(player.getPosX(), player.getPosY() + (double) player.getEyeHeight(), player.getPosZ());
@@ -166,8 +166,8 @@ public class ItemLootCrate extends Item
 	@OnlyIn(Dist.CLIENT)
 	public void addInformation(ItemStack stack, @Nullable World world, List<ITextComponent> tooltip, ITooltipFlag flag)
 	{
-		tooltip.add(new TranslationTextComponent("item.ftbquests.lootcrate.tooltip_1").applyTextStyle(TextFormatting.GRAY));
-		tooltip.add(new TranslationTextComponent("item.ftbquests.lootcrate.tooltip_2").applyTextStyle(TextFormatting.GRAY));
+		tooltip.add(new TranslationTextComponent("item.ftbquests.lootcrate.tooltip_1").mergeStyle(TextFormatting.GRAY));
+		tooltip.add(new TranslationTextComponent("item.ftbquests.lootcrate.tooltip_2").mergeStyle(TextFormatting.GRAY));
 
 		if (world == null || !ClientQuestFile.exists())
 		{
@@ -181,13 +181,13 @@ public class ItemLootCrate extends Item
 			if (crate.itemName.isEmpty())
 			{
 				tooltip.add(new StringTextComponent(""));
-				tooltip.add(new StringTextComponent(crate.table.getTitle()).applyTextStyle(TextFormatting.GRAY));
+				tooltip.add(crate.table.getTitle().mergeStyle(TextFormatting.GRAY));
 			}
 		}
 		else if (stack.hasTag() && stack.getTag().contains("type"))
 		{
 			tooltip.add(new StringTextComponent(""));
-			tooltip.add(new StringTextComponent(stack.getTag().getString("type")).applyTextStyle(TextFormatting.GRAY));
+			tooltip.add(new StringTextComponent(stack.getTag().getString("type")).mergeStyle(TextFormatting.GRAY));
 		}
 	}
 }

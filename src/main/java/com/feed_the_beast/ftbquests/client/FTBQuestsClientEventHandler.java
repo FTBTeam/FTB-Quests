@@ -2,7 +2,6 @@ package com.feed_the_beast.ftbquests.client;
 
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.events.ClearFileCacheEvent;
-import com.feed_the_beast.ftbquests.events.ThemePropertyEvent;
 import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.item.ItemLootCrate;
 import com.feed_the_beast.ftbquests.net.MessageSubmitTask;
@@ -11,16 +10,19 @@ import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.loot.LootCrate;
 import com.feed_the_beast.ftbquests.quest.task.ObservationTask;
-import com.feed_the_beast.ftbquests.quest.task.Task;
 import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Color4I;
 import com.feed_the_beast.mods.ftbguilibrary.sidebar.SidebarButtonCreatedEvent;
 import com.feed_the_beast.mods.ftbguilibrary.widget.CustomClickEvent;
 import com.feed_the_beast.mods.ftbguilibrary.widget.GuiHelper;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.toasts.SystemToast;
+import net.minecraft.util.IReorderingProcessor;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.IFormattableTextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.client.event.ColorHandlerEvent;
 import net.minecraftforge.client.event.InputEvent;
@@ -44,7 +46,6 @@ public class FTBQuestsClientEventHandler
 
 	public void init()
 	{
-		MinecraftForge.EVENT_BUS.addListener(this::registerProperties);
 		MinecraftForge.EVENT_BUS.addListener(this::registerItemColors);
 		MinecraftForge.EVENT_BUS.addListener(this::onSidebarButtonCreated);
 		MinecraftForge.EVENT_BUS.addListener(this::onFileCacheClear);
@@ -52,11 +53,6 @@ public class FTBQuestsClientEventHandler
 		MinecraftForge.EVENT_BUS.addListener(this::onCustomClick);
 		MinecraftForge.EVENT_BUS.addListener(this::onClientTick);
 		MinecraftForge.EVENT_BUS.addListener(this::onScreenRender);
-	}
-
-	private void registerProperties(ThemePropertyEvent event)
-	{
-		ThemeProperties.register(event);
 	}
 
 	private void registerItemColors(ColorHandlerEvent.Item event)
@@ -100,7 +96,15 @@ public class FTBQuestsClientEventHandler
 	{
 		if (event.getId().getNamespace().equals(FTBQuests.MOD_ID) && "open_gui".equals(event.getId().getPath()))
 		{
-			ClientQuestFile.INSTANCE.openQuestGui();
+			if (!ClientQuestFile.exists())
+			{
+				Minecraft.getInstance().getToastGui().add(new SystemToast(SystemToast.Type.TUTORIAL_HINT, new StringTextComponent("Error?! Server doesn't have FTB Quests!"), null));
+			}
+			else
+			{
+				ClientQuestFile.INSTANCE.openQuestGui();
+			}
+
 			event.setCanceled(true);
 		}
 	}
@@ -166,30 +170,31 @@ public class FTBQuestsClientEventHandler
 
 		GlStateManager.enableBlend();
 		Minecraft mc = Minecraft.getInstance();
+		MatrixStack matrixStack = event.getMatrixStack();
 		int cy = event.getWindow().getScaledHeight() / 2;
 
 		if (currentlyObserving != null)
 		{
 			int cx = event.getWindow().getScaledWidth() / 2;
-			String cot = TextFormatting.UNDERLINE.toString() + TextFormatting.YELLOW + currentlyObserving.getTitle();
-			int sw = mc.fontRenderer.getStringWidth(cot);
+			IFormattableTextComponent cot = currentlyObserving.getTitle().deepCopy().mergeStyle(TextFormatting.YELLOW, TextFormatting.UNDERLINE);
+			int sw = mc.fontRenderer.getStringPropertyWidth(cot);
 			int bw = Math.max(sw, 100);
-			Color4I.DARK_GRAY.withAlpha(130).draw(cx - bw / 2 - 3, cy - 63, bw + 6, 29);
-			GuiHelper.drawHollowRect(cx - bw / 2 - 3, cy - 63, bw + 6, 29, Color4I.DARK_GRAY, false);
+			Color4I.DARK_GRAY.withAlpha(130).draw(matrixStack, cx - bw / 2 - 3, cy - 63, bw + 6, 29);
+			GuiHelper.drawHollowRect(matrixStack, cx - bw / 2 - 3, cy - 63, bw + 6, 29, Color4I.DARK_GRAY, false);
 
-			mc.fontRenderer.drawStringWithShadow(cot, cx - sw / 2F, cy - 60, 0xFFFFFF);
+			mc.fontRenderer.func_243246_a(matrixStack, cot, cx - sw / 2F, cy - 60, 0xFFFFFF);
 			double completed = (currentlyObservingTicks + event.getPartialTicks()) / (double) currentlyObserving.ticks;
 
-			GuiHelper.drawHollowRect(cx - bw / 2, cy - 49, bw, 12, Color4I.DARK_GRAY, false);
-			Color4I.LIGHT_BLUE.withAlpha(130).draw(cx - bw / 2 + 1, cy - 48, (int) ((bw - 2D) * completed), 10);
+			GuiHelper.drawHollowRect(matrixStack, cx - bw / 2, cy - 49, bw, 12, Color4I.DARK_GRAY, false);
+			Color4I.LIGHT_BLUE.withAlpha(130).draw(matrixStack, cx - bw / 2 + 1, cy - 48, (int) ((bw - 2D) * completed), 10);
 
 			String cop = (currentlyObservingTicks * 100L / currentlyObserving.ticks) + "%";
-			mc.fontRenderer.drawStringWithShadow(cop, cx - mc.fontRenderer.getStringWidth(cop) / 2F, cy - 47, 0xFFFFFF);
+			mc.fontRenderer.drawStringWithShadow(matrixStack, cop, cx - mc.fontRenderer.getStringWidth(cop) / 2F, cy - 47, 0xFFFFFF);
 		}
 
 		if (!data.pinnedQuests.isEmpty())
 		{
-			List<String> list = new ArrayList<>();
+			List<IReorderingProcessor> list = new ArrayList<>();
 			boolean first = true;
 
 			if (data.pinnedQuests.contains(1))
@@ -206,9 +211,10 @@ public class FTBQuestsClientEventHandler
 							}
 							else
 							{
-								list.add("");
+								list.add(IReorderingProcessor.field_242232_a);
 							}
 
+							/* FIXME
 							list.add(TextFormatting.BOLD + mc.fontRenderer.trimStringToWidth(quest.getTitle(), 160) + " " + TextFormatting.DARK_AQUA + data.getRelativeProgress(quest) + "%");
 
 							for (Task task : quest.tasks)
@@ -218,6 +224,7 @@ public class FTBQuestsClientEventHandler
 									list.add(TextFormatting.GRAY + mc.fontRenderer.trimStringToWidth(task.getTitle(), 160) + " " + TextFormatting.GREEN + data.getTaskData(task).getProgressString() + "/" + task.getMaxProgressString());
 								}
 							}
+							*/
 						}
 					}
 				}
@@ -236,15 +243,19 @@ public class FTBQuestsClientEventHandler
 						}
 						else
 						{
-							list.add("");
+							list.add(IReorderingProcessor.field_242232_a);
 						}
 
 						if (data.isComplete(quest))
 						{
-							list.add(TextFormatting.BOLD.toString() + TextFormatting.GREEN + mc.fontRenderer.trimStringToWidth(quest.getTitle(), 160) + TextFormatting.DARK_GREEN + " 100%");
+							StringTextComponent component = new StringTextComponent("");
+							component.append(quest.getTitle().mergeStyle(TextFormatting.BOLD, TextFormatting.GREEN));
+							component.append(new StringTextComponent(" 100%").mergeStyle(TextFormatting.DARK_GREEN));
+							list.addAll(mc.fontRenderer.trimStringToWidth(component, 160));
 						}
 						else
 						{
+							/* FIXME
 							list.add(TextFormatting.BOLD + mc.fontRenderer.trimStringToWidth(quest.getTitle(), 160) + " " + TextFormatting.DARK_AQUA + data.getRelativeProgress(quest) + "%");
 
 							for (Task task : quest.tasks)
@@ -254,6 +265,7 @@ public class FTBQuestsClientEventHandler
 									list.add(TextFormatting.GRAY + mc.fontRenderer.trimStringToWidth(task.getTitle(), 160) + " " + TextFormatting.GREEN + data.getTaskData(task).getProgressString() + "/" + task.getMaxProgressString());
 								}
 							}
+							*/
 						}
 					}
 				}
@@ -263,25 +275,25 @@ public class FTBQuestsClientEventHandler
 			{
 				int mw = 0;
 
-				for (String s : list)
+				for (IReorderingProcessor s : list)
 				{
-					mw = Math.max(mw, mc.fontRenderer.getStringWidth(s));
+					mw = Math.max(mw, (int) mc.fontRenderer.getCharacterManager().func_243238_a(s));
 				}
 
-				double scale = ThemeProperties.PINNED_QUEST_SIZE.get(file);
+				float scale = ThemeProperties.PINNED_QUEST_SIZE.get(file).floatValue();
 
-				RenderSystem.pushMatrix();
-				RenderSystem.translated(event.getWindow().getScaledWidth() - mw * scale - 8D, cy - list.size() * 4.5D * scale, 100D);
-				RenderSystem.scaled(scale, scale, 1D);
+				matrixStack.push();
+				matrixStack.translate(event.getWindow().getScaledWidth() - mw * scale - 8D, cy - list.size() * 4.5D * scale, 100D);
+				matrixStack.scale(scale, scale, 1F);
 
-				Color4I.BLACK.withAlpha(100).draw(0, 0, mw + 8, list.size() * 9 + 8);
+				Color4I.BLACK.withAlpha(100).draw(matrixStack, 0, 0, mw + 8, list.size() * 9 + 8);
 
 				for (int i = 0; i < list.size(); i++)
 				{
-					mc.fontRenderer.drawStringWithShadow(list.get(i), 4, i * 9 + 4, 0xFFFFFFFF);
+					mc.fontRenderer.func_238407_a_(matrixStack, list.get(i), 4, i * 9 + 4, 0xFFFFFFFF);
 				}
 
-				RenderSystem.popMatrix();
+				matrixStack.pop();
 			}
 		}
 	}
