@@ -9,7 +9,6 @@ buildscript {
 	dependencies {
 		classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
 		classpath 'gradle.plugin.com.matthewprenger:CurseGradle:1.1.0'
-		classpath 'com.wynprice.cursemaven:CurseMaven:2.+'
 		classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
 	}
 }
@@ -17,7 +16,6 @@ apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'eclipse'
 apply plugin: 'com.matthewprenger.cursegradle'
 apply plugin: 'maven'
-apply plugin: 'com.wynprice.cursemaven'
 apply plugin: 'org.spongepowered.mixin'
 
 apply from: 'https://files.latmod.com/public/markdown-git-changelog.gradle'
@@ -85,6 +83,7 @@ configurations.all {
 
 repositories {
 	mavenLocal()
+	maven { url = "https://www.cursemaven.com" }
 	maven { url "https://maven.latmod.com/" } //FTB GUI Library, Item Filters, FTB Teams, KubeJS
 }
 
@@ -102,11 +101,11 @@ dependencies {
 		transitive = false
 		changing = true
 	}))
-	compile fg.deobf("curse.maven:rhino:${rhino_file}")
-	compile fg.deobf("curse.maven:kubejs:${kubejs_file}")
-	compile fg.deobf("curse.maven:jei:${jei_file}")
-	compile fg.deobf("curse.maven:bookshelf:${bookshelf_file}")
-	compile fg.deobf("curse.maven:game-stages:${gamestages_file}")
+	compile fg.deobf("curse.maven:rhino-416294:${rhino_file}")
+	compile fg.deobf("curse.maven:kubejs-238086:${kubejs_file}")
+	compile fg.deobf("curse.maven:jei-238222:${jei_file}")
+	compile fg.deobf("curse.maven:bookshelf-228525:${bookshelf_file}")
+	compile fg.deobf("curse.maven:game-stages-268655:${gamestages_file}")
 }
 
 jar {
