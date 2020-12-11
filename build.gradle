@@ -60,6 +60,7 @@ dependencies {
 	deobfProvided curse.resolve('projecte', project.projecte_file)
 	deobfProvided curse.resolve('game-stages', project.gamestages_file)
 	deobfProvided curse.resolve('custom-npcs', project.customnpcs_file)
+	deobfProvided curse.resolve('reskillable', project.reskillable_file)
 }
 
 processResources {
@@ -111,6 +112,7 @@ if (ENV.CURSEFORGE_KEY) {
 				optionalDependency 'projecte'
 				optionalDependency 'game-stages'
 				optionalDependency 'custom-npcs'
+				optionalDependency 'reskillable'
 			}
 			changelog = getGitChangelog
 			changelogType = 'markdown'

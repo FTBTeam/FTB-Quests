@@ -130,6 +130,11 @@ ftbquests.task.ftbquests.botania_mana.max_input=Entrada Máxima
 ftbquests.task.ftbquests.botania_mana.show_numbers=Mostrar Valores
 ftbquests.task.ftbquests.botania_mana.text=%d Mana
 
+ftbquests.task.ftbquests.reskillable=Reskillable Habilidade
+ftbquests.task.ftbquests.reskillable.skill=Nome da Habilidade
+ftbquests.task.ftbquests.reskillable.skill_level=Nível da Habilidade
+ftbquests.task.ftbquests.reskillable.skillyouneed=Habilidade Necessária
+
 ftbquests.reward=Recompensa
 ftbquests.reward.team_reward=Recompensa do Time
 ftbquests.reward.emergency=Item de Emergência
