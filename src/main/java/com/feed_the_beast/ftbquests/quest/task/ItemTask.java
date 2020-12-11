@@ -47,6 +47,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * @author LatvianModder
@@ -238,14 +239,9 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 
 	public List<ItemStack> getValidItems()
 	{
-		if (items.size() == 1 && ItemFiltersAPI.isFilter(items.get(0)))
-		{
-			List<ItemStack> validItems = new ArrayList<>();
-			ItemFiltersAPI.getValidItems(items.get(0), validItems);
-			return validItems;
-		}
-
-		return items;
+		List<ItemStack> validItems = new ArrayList<>();
+		items.forEach(stack -> ItemFiltersAPI.getValidItems(stack, validItems));
+		return validItems.stream().distinct().collect(Collectors.toList());
 	}
 
 	@Override
@@ -307,16 +303,18 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 		{
 			return false;
 		}
-		else if (items.size() == 1 && ItemFiltersAPI.isFilter(items.get(0)))
+		// need to explicitly filter for filters here because of NBT matching modes
+		else if (items.stream().filter(ItemFiltersAPI::isFilter).anyMatch(filter -> ItemFiltersAPI.filter(filter, stack)))
 		{
-			return ItemFiltersAPI.filter(items.get(0), stack);
+			return true;
 		}
 
 		Item item = stack.getItem();
 		int meta = ignoreDamage ? 0 : stack.getMetadata();
 		NBTTagCompound nbt = nbtMode == NBTMatchingMode.CONTAIN ? stack.getTagCompound() : item.getNBTShareTag(stack);
+		List<ItemStack> items1 = items.stream().filter(s -> !ItemFiltersAPI.isFilter(s)).collect(Collectors.toList());
 
-		for (ItemStack stack1 : items)
+		for (ItemStack stack1 : items1)
 		{
 			if (item == stack1.getItem())
 			{
