@@ -11,6 +11,7 @@ import com.feed_the_beast.mods.ftbguilibrary.widget.GuiIcons;
 import net.darkhax.gamestages.event.GameStageEvent;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
@@ -71,7 +72,7 @@ public class GameStagesIntegration
 
 	public static void checkStages(ServerPlayerEntity player)
 	{
-		PlayerData data = ServerQuestFile.INSTANCE == null ? null : ServerQuestFile.INSTANCE.getData(player);
+		PlayerData data = ServerQuestFile.INSTANCE == null || (player instanceof FakePlayer) ? null : ServerQuestFile.INSTANCE.getData(player);
 
 		if (data != null)
 		{

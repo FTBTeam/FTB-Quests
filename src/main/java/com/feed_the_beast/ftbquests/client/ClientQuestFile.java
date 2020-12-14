@@ -43,6 +43,7 @@ public class ClientQuestFile extends QuestFile
 		}
 
 		self = Objects.requireNonNull(getData(s));
+		self.name = Minecraft.getInstance().getSession().getUsername();
 		INSTANCE = this;
 
 		refreshGui();

@@ -75,6 +75,14 @@ public class PlayerData
 
 		if (d == null)
 		{
+			if (name.isEmpty())
+			{
+				FTBQuests.LOGGER.warn("Something's broken! Task data is null for player " + uuid + " but that player doesn't exist! Task: " + task + ", Quest: " + task.quest.chapter.filename + ":" + task.quest);
+				d = task.createData(this);
+				taskData.put(task.id, d);
+				return d;
+			}
+
 			throw new NullPointerException("Task data null! Task: " + task + ", Quest: " + task.quest.chapter.filename + ":" + task.quest + ", Player: " + name);
 		}
 

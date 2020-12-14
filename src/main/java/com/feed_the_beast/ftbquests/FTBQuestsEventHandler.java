@@ -221,7 +221,7 @@ public class FTBQuestsEventHandler
 
 	private void playerTick(TickEvent.PlayerTickEvent event)
 	{
-		if (event.phase == TickEvent.Phase.END && !event.player.world.isRemote && ServerQuestFile.INSTANCE != null)
+		if (event.phase == TickEvent.Phase.END && !event.player.world.isRemote && ServerQuestFile.INSTANCE != null && !(event.player instanceof FakePlayer))
 		{
 			if (autoSubmitTasks == null)
 			{
@@ -351,7 +351,7 @@ public class FTBQuestsEventHandler
 
 	private void changedDimension(PlayerEvent.PlayerChangedDimensionEvent event)
 	{
-		if (event.getPlayer() instanceof ServerPlayerEntity)
+		if (event.getPlayer() instanceof ServerPlayerEntity && !(event.getPlayer() instanceof FakePlayer))
 		{
 			PlayerData data = ServerQuestFile.INSTANCE.getData(event.getPlayer());
 
@@ -364,7 +364,7 @@ public class FTBQuestsEventHandler
 
 	private void containerOpened(PlayerContainerEvent.Open event)
 	{
-		if (event.getPlayer() instanceof ServerPlayerEntity && !(event.getContainer() instanceof PlayerContainer))
+		if (event.getPlayer() instanceof ServerPlayerEntity && !(event.getPlayer() instanceof FakePlayer) && !(event.getContainer() instanceof PlayerContainer))
 		{
 			event.getContainer().addListener(new FTBQuestsInventoryListener((ServerPlayerEntity) event.getPlayer()));
 		}
