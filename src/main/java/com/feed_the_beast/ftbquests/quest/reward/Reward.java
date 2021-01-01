@@ -49,6 +49,12 @@ public abstract class Reward extends QuestObjectBase
 	}
 
 	@Override
+	public final String toString()
+	{
+		return quest.chapter.filename + ":" + quest.getCodeString() + ":R:" + getCodeString();
+	}
+
+	@Override
 	public final QuestObjectType getObjectType()
 	{
 		return QuestObjectType.REWARD;

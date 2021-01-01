@@ -51,24 +51,6 @@ public class ServerQuestFile extends QuestFile
 			isLoading = false;
 		}
 
-		int c = chapters.size();
-		int q = 0;
-		int t = 0;
-		int r = 0;
-
-		for (Chapter chapter : chapters)
-		{
-			q += chapter.quests.size();
-
-			for (Quest quest : chapter.quests)
-			{
-				t += quest.tasks.size();
-				r += quest.rewards.size();
-			}
-		}
-
-		FTBQuests.LOGGER.info(String.format("Loaded %d chapters, %d quests, %d tasks and %d rewards. In total, %d objects", c, q, t, r, getAllObjects().size()));
-
 		Path path = server.func_240776_a_(FTBQUESTS_DATA);
 
 		if (Files.exists(path))

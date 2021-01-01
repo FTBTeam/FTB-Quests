@@ -93,8 +93,7 @@ public abstract class QuestObject extends QuestObjectBase
 	@Override
 	public abstract IFormattableTextComponent getAltTitle();
 
-	protected boolean verifyDependenciesInternal(QuestObject original, boolean firstLoop)
+	protected void verifyDependenciesInternal(int original, int depth)
 	{
-		return true;
 	}
 }

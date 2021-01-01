@@ -330,6 +330,8 @@ public class ButtonQuest extends Button
 			}
 		}
 
+		quest.removeInvalidDependencies();
+
 		if (quest.verifyDependencies(false))
 		{
 			new MessageEditObject(quest).sendToServer();
