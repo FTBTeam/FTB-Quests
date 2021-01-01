@@ -654,6 +654,7 @@ public abstract class QuestFile extends QuestObject
 			}
 			catch (Exception ex)
 			{
+				ex.printStackTrace();
 			}
 		}
 
@@ -699,9 +700,19 @@ public abstract class QuestFile extends QuestObject
 		{
 			for (Quest quest : chapter.quests)
 			{
+				quest.removeInvalidDependencies();
+			}
+		}
+
+		/*
+		for (Chapter chapter : chapters)
+		{
+			for (Quest quest : chapter.quests)
+			{
 				quest.verifyDependencies(true);
 			}
 		}
+		*/
 
 		for (QuestObjectBase object : getAllObjects())
 		{

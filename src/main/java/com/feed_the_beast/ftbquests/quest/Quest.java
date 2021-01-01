@@ -87,6 +87,12 @@ public final class Quest extends QuestObject implements Movable
 	}
 
 	@Override
+	public String toString()
+	{
+		return chapter.filename + ":" + getCodeString();
+	}
+
+	@Override
 	public QuestObjectType getObjectType()
 	{
 		return QuestObjectType.QUEST;
@@ -730,7 +736,7 @@ public final class Quest extends QuestObject implements Movable
 		return false;
 	}
 
-	private void removeInvalidDependencies()
+	public void removeInvalidDependencies()
 	{
 		if (!dependencies.isEmpty())
 		{
@@ -742,52 +748,58 @@ public final class Quest extends QuestObject implements Movable
 	{
 		try
 		{
-			if (verifyDependenciesInternal(this, true))
+			verifyDependenciesInternal(id, 0);
+			return true;
+		}
+		catch (DependencyDepthException ex)
+		{
+			if (autofix)
 			{
-				return true;
+				FTBQuests.LOGGER.error("Too deep dependencies found in " + this + " (referenced in " + ex.object + ")! Deleting all dependencies...");
+				dependencies.clear();
+				chapter.file.save();
 			}
-		}
-		catch (StackOverflowError error)
-		{
-		}
-
-		if (autofix)
-		{
-			FTBQuests.LOGGER.error("Looping dependencies found in " + this + "! Deleting all dependencies...");
-			dependencies.clear();
-
-			if (chapter.file.getSide().isServer())
+			else
 			{
-				ServerQuestFile.INSTANCE.save();
+				FTBQuests.LOGGER.error("Too deep dependencies found in " + this + " (referenced in " + ex.object + ")!");
 			}
-		}
-		else
-		{
-			FTBQuests.LOGGER.error("Looping dependencies found in " + this + "!");
-		}
 
-		return false;
+			return false;
+		}
+		catch (DependencyLoopException ex)
+		{
+			if (autofix)
+			{
+				FTBQuests.LOGGER.error("Looping dependencies found in " + this + " (referenced in " + ex.object + ")! Deleting all dependencies...");
+				dependencies.clear();
+				chapter.file.save();
+			}
+			else
+			{
+				FTBQuests.LOGGER.error("Looping dependencies found in " + this + " (referenced in " + ex.object + ")!");
+			}
+
+			return false;
+		}
 	}
 
 	@Override
-	public boolean verifyDependenciesInternal(QuestObject original, boolean firstLoop)
+	protected void verifyDependenciesInternal(int original, int depth)
 	{
-		if (this == original && !firstLoop)
+		if (depth >= 1000)
 		{
-			return false;
+			throw new DependencyDepthException(this);
 		}
-
-		removeInvalidDependencies();
 
 		for (QuestObject dependency : dependencies)
 		{
-			if (!dependency.verifyDependenciesInternal(original, false))
+			if (dependency.id == original)
 			{
-				return false;
+				throw new DependencyLoopException(this);
 			}
-		}
 
-		return true;
+			dependency.verifyDependenciesInternal(original, depth + 1);
+		}
 	}
 
 	@Override

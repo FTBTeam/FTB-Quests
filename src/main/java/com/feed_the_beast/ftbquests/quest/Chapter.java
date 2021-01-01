@@ -55,6 +55,12 @@ public final class Chapter extends QuestObject
 	}
 
 	@Override
+	public String toString()
+	{
+		return filename;
+	}
+
+	@Override
 	public QuestObjectType getObjectType()
 	{
 		return QuestObjectType.CHAPTER;
@@ -460,22 +466,22 @@ public final class Chapter extends QuestObject
 	}
 
 	@Override
-	public boolean verifyDependenciesInternal(QuestObject original, boolean firstLoop)
+	protected void verifyDependenciesInternal(int original, int depth)
 	{
-		if (this == original && !firstLoop)
+		if (depth >= 1000)
 		{
-			return false;
+			throw new DependencyDepthException(this);
 		}
 
 		for (Quest quest : quests)
 		{
-			if (!quest.verifyDependenciesInternal(original, false))
+			if (quest.id == original)
 			{
-				return false;
+				throw new DependencyLoopException(this);
 			}
-		}
 
-		return true;
+			quest.verifyDependenciesInternal(original, depth + 1);
+		}
 	}
 
 	public boolean hasGroup()

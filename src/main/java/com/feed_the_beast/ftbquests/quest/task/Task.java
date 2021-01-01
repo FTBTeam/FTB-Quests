@@ -46,6 +46,12 @@ public abstract class Task extends QuestObject
 	}
 
 	@Override
+	public final String toString()
+	{
+		return quest.chapter.filename + ":" + quest.getCodeString() + ":T:" + getCodeString();
+	}
+
+	@Override
 	public final QuestObjectType getObjectType()
 	{
 		return QuestObjectType.TASK;
