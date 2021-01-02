@@ -104,7 +104,7 @@ public class CommandReward extends Reward
 		overrides.put("quest", quest);
 		overrides.put("team", FTBLibAPI.getTeam(player.getUniqueID()));
 
-		String s = command;
+		String s = command.startsWith("/") ? command.substring(1) : command;
 
 		for (Map.Entry<String, Object> entry : overrides.entrySet())
 		{
