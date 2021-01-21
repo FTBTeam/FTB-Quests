@@ -5,10 +5,10 @@ import com.feed_the_beast.mods.ftbguilibrary.config.NameMap;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.icon.ImageIcon;
 import com.feed_the_beast.mods.ftbguilibrary.utils.PixelBuffer;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.resources.IResource;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.Resource;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -65,7 +65,7 @@ public final class QuestShape extends Icon
 
 	@Override
 	@OnlyIn(Dist.CLIENT)
-	public void draw(MatrixStack matrixStack, int x, int y, int w, int h)
+	public void draw(PoseStack matrixStack, int x, int y, int w, int h)
 	{
 		background.draw(matrixStack, x, y, w, h);
 		outline.draw(matrixStack, x, y, w, h);
@@ -87,7 +87,7 @@ public final class QuestShape extends Icon
 		{
 			try
 			{
-				IResource resource = Minecraft.getInstance().getResourceManager().getResource(new ResourceLocation(FTBQuests.MOD_ID, "textures/shapes/" + id + "/shape.png"));
+				Resource resource = Minecraft.getInstance().getResourceManager().getResource(new ResourceLocation(FTBQuests.MOD_ID, "textures/shapes/" + id + "/shape.png"));
 
 				try (InputStream stream = resource.getInputStream())
 				{

@@ -10,12 +10,12 @@ import com.feed_the_beast.ftbquests.quest.task.Task;
 import com.feed_the_beast.mods.ftbguilibrary.icon.ItemIcon;
 import dev.latvian.mods.itemfilters.ItemFilters;
 import dev.latvian.mods.itemfilters.api.ItemFiltersAPI;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.nbt.StringNBT;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.ArrayList;
@@ -28,7 +28,7 @@ import java.util.List;
 public class QuestWrapper //FIXME: implements IRecipeWrapper
 {
 	public final Quest quest;
-	public final IFormattableTextComponent name;
+	public final MutableComponent name;
 	public final List<List<ItemStack>> input;
 	public final List<List<ItemStack>> output;
 
@@ -70,14 +70,14 @@ public class QuestWrapper //FIXME: implements IRecipeWrapper
 			else if (task.getIcon() instanceof ItemIcon)
 			{
 				stack = ((ItemIcon) task.getIcon()).getStack().copy();
-				stack.setDisplayName(task.getTitle());
+				stack.setHoverName(task.getTitle());
 				input.add(Collections.singletonList(stack));
 			}
 			else
 			{
 				stack = new ItemStack(Items.PAINTING);
-				stack.setDisplayName(task.getTitle());
-				stack.setTagInfo("icon", StringNBT.valueOf(task.getIcon().toString()));
+				stack.setHoverName(task.getTitle());
+				stack.addTagElement("icon", StringTag.valueOf(task.getIcon().toString()));
 				input.add(Collections.singletonList(stack));
 			}
 		}
@@ -107,7 +107,7 @@ public class QuestWrapper //FIXME: implements IRecipeWrapper
 				if (table.hideTooltip)
 				{
 					ItemStack unknown = new ItemStack(Items.BARRIER);
-					unknown.setDisplayName(new StringTextComponent("Unknown Reward"));
+					unknown.setHoverName(new TextComponent("Unknown Reward"));
 					list.add(unknown);
 				}
 				else
@@ -128,14 +128,14 @@ public class QuestWrapper //FIXME: implements IRecipeWrapper
 			else if (reward.getIcon() instanceof ItemIcon)
 			{
 				stack = ((ItemIcon) reward.getIcon()).getStack().copy();
-				stack.setDisplayName(reward.getTitle());
+				stack.setHoverName(reward.getTitle());
 				output.add(Collections.singletonList(stack));
 			}
 			else
 			{
 				stack = new ItemStack(Items.PAINTING);
-				stack.setDisplayName(reward.getTitle());
-				stack.setTagInfo("icon", StringNBT.valueOf(reward.getIcon().toString()));
+				stack.setHoverName(reward.getTitle());
+				stack.addTagElement("icon", StringTag.valueOf(reward.getIcon().toString()));
 				output.add(Collections.singletonList(stack));
 			}
 		}

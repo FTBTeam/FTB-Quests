@@ -6,12 +6,12 @@ import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigString;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Color4I;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
-import com.mojang.blaze3d.matrix.MatrixStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.nbt.StringNBT;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.math.vector.Vector3f;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Vector3f;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.util.Constants;
@@ -46,7 +46,7 @@ public final class ChapterImage implements Movable
 		dev = false;
 	}
 
-	public void writeData(CompoundNBT nbt)
+	public void writeData(CompoundTag nbt)
 	{
 		nbt.putDouble("x", x);
 		nbt.putDouble("y", y);
@@ -55,11 +55,11 @@ public final class ChapterImage implements Movable
 		nbt.putDouble("rotation", rotation);
 		nbt.putString("image", image.toString());
 
-		ListNBT hoverTag = new ListNBT();
+		ListTag hoverTag = new ListTag();
 
 		for (String s : hover)
 		{
-			hoverTag.add(StringNBT.valueOf(s));
+			hoverTag.add(StringTag.valueOf(s));
 		}
 
 		nbt.put("hover", hoverTag);
@@ -67,7 +67,7 @@ public final class ChapterImage implements Movable
 		nbt.putBoolean("dev", dev);
 	}
 
-	public void readData(CompoundNBT nbt)
+	public void readData(CompoundTag nbt)
 	{
 		x = nbt.getDouble("x");
 		y = nbt.getDouble("y");
@@ -77,7 +77,7 @@ public final class ChapterImage implements Movable
 		image = Icon.getIcon(nbt.getString("image"));
 
 		hover.clear();
-		ListNBT hoverTag = nbt.getList("hover", Constants.NBT.TAG_STRING);
+		ListTag hoverTag = nbt.getList("hover", Constants.NBT.TAG_STRING);
 
 		for (int i = 0; i < hoverTag.size(); i++)
 		{
@@ -88,7 +88,7 @@ public final class ChapterImage implements Movable
 		dev = nbt.getBoolean("dev");
 	}
 
-	public void writeNetData(PacketBuffer buffer)
+	public void writeNetData(FriendlyByteBuf buffer)
 	{
 		buffer.writeDouble(x);
 		buffer.writeDouble(y);
@@ -97,11 +97,11 @@ public final class ChapterImage implements Movable
 		buffer.writeDouble(rotation);
 		NetUtils.writeIcon(buffer, image);
 		NetUtils.writeStrings(buffer, hover);
-		buffer.writeString(click);
+		buffer.writeUtf(click);
 		buffer.writeBoolean(dev);
 	}
 
-	public void readNetData(PacketBuffer buffer)
+	public void readNetData(FriendlyByteBuf buffer)
 	{
 		x = buffer.readDouble();
 		y = buffer.readDouble();
@@ -110,7 +110,7 @@ public final class ChapterImage implements Movable
 		rotation = buffer.readDouble();
 		image = NetUtils.readIcon(buffer);
 		NetUtils.readStrings(buffer, hover);
-		click = buffer.readString();
+		click = buffer.readUtf();
 		dev = buffer.readBoolean();
 	}
 
@@ -185,14 +185,14 @@ public final class ChapterImage implements Movable
 
 	@Override
 	@OnlyIn(Dist.CLIENT)
-	public void drawMoved(MatrixStack matrixStack)
+	public void drawMoved(PoseStack matrixStack)
 	{
-		matrixStack.push();
+		matrixStack.pushPose();
 		matrixStack.translate(0.5D, 0.5D, 0);
-		matrixStack.rotate(Vector3f.ZP.rotationDegrees((float) rotation));
+		matrixStack.mulPose(Vector3f.ZP.rotationDegrees((float) rotation));
 		matrixStack.scale(0.5F, 0.5F, 1F);
 		image.withColor(Color4I.WHITE.withAlpha(50)).draw(matrixStack, -1, -1, 2, 2);
-		matrixStack.pop();
+		matrixStack.popPose();
 
 		QuestShape.get(getShape()).outline.withColor(Color4I.WHITE.withAlpha(30)).draw(matrixStack, 0, 0, 1, 1);
 	}

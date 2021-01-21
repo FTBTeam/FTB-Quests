@@ -7,9 +7,8 @@ import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
 import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
-import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
-
+import com.mojang.blaze3d.vertex.PoseStack;
 import javax.annotation.Nullable;
 
 /**
@@ -47,7 +46,7 @@ public class ButtonChapter extends ButtonTab
 	}
 
 	@Override
-	public void draw(MatrixStack matrixStack, Theme theme, int x, int y, int w, int h)
+	public void draw(PoseStack matrixStack, Theme theme, int x, int y, int w, int h)
 	{
 		if (chapter == treeGui.selectedChapter || treeGui.selectedChapter != null && chapter == treeGui.selectedChapter.group)
 		{
@@ -65,29 +64,29 @@ public class ButtonChapter extends ButtonTab
 
 		if (chapter.quests.isEmpty() && !chapter.hasChildren())
 		{
-			matrixStack.push();
+			matrixStack.pushPose();
 			matrixStack.translate(0, 0, 450);
 			RenderSystem.enableBlend();
 			ThemeProperties.CLOSE_ICON.get().draw(matrixStack, x + w - 10, y + 2, 8, 8);
-			matrixStack.pop();
+			matrixStack.popPose();
 			return;
 		}
 
 		if (treeGui.file.self.hasUnclaimedRewards(chapter))
 		{
-			matrixStack.push();
+			matrixStack.pushPose();
 			matrixStack.translate(0, 0, 450);
 			RenderSystem.enableBlend();
 			ThemeProperties.ALERT_ICON.get().draw(matrixStack, x + w - 7, y + 2, 6, 6);
-			matrixStack.pop();
+			matrixStack.popPose();
 		}
 		else if (treeGui.file.self.isComplete(chapter))
 		{
-			matrixStack.push();
+			matrixStack.pushPose();
 			matrixStack.translate(0, 0, 450);
 			RenderSystem.enableBlend();
 			ThemeProperties.CHECK_ICON.get().draw(matrixStack, x + w - 8, y + 1, 8, 8);
-			matrixStack.pop();
+			matrixStack.popPose();
 		}
 	}
 

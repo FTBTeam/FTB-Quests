@@ -9,13 +9,13 @@ import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.text.IFormattableTextComponent;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.util.Constants;
@@ -45,7 +45,7 @@ public class RandomReward extends Reward
 	}
 
 	@Override
-	public void writeData(CompoundNBT nbt)
+	public void writeData(CompoundTag nbt)
 	{
 		super.writeData(nbt);
 
@@ -56,7 +56,7 @@ public class RandomReward extends Reward
 	}
 
 	@Override
-	public void readData(CompoundNBT nbt)
+	public void readData(CompoundTag nbt)
 	{
 		super.readData(nbt);
 		int index = nbt.contains("table") ? nbt.getInt("table") : -1;
@@ -70,11 +70,11 @@ public class RandomReward extends Reward
 		else
 		{
 			table = new RewardTable(file);
-			ListNBT list = nbt.getList("rewards", Constants.NBT.TAG_COMPOUND);
+			ListTag list = nbt.getList("rewards", Constants.NBT.TAG_COMPOUND);
 
 			for (int i = 0; i < list.size(); i++)
 			{
-				CompoundNBT nbt1 = list.getCompound(i);
+				CompoundTag nbt1 = list.getCompound(i);
 				Reward reward = RewardType.createReward(table.fakeQuest, nbt1.getString("type"));
 
 				if (reward != null)
@@ -107,14 +107,14 @@ public class RandomReward extends Reward
 	}
 
 	@Override
-	public void writeNetData(PacketBuffer buffer)
+	public void writeNetData(FriendlyByteBuf buffer)
 	{
 		super.writeNetData(buffer);
 		buffer.writeInt(getTable() == null ? 0 : getTable().id);
 	}
 
 	@Override
-	public void readNetData(PacketBuffer buffer)
+	public void readNetData(FriendlyByteBuf buffer)
 	{
 		super.readNetData(buffer);
 		table = getQuestFile().getRewardTable(buffer.readInt());
@@ -129,7 +129,7 @@ public class RandomReward extends Reward
 	}
 
 	@Override
-	public void claim(ServerPlayerEntity player, boolean notify)
+	public void claim(ServerPlayer player, boolean notify)
 	{
 		if (getTable() == null)
 		{
@@ -143,7 +143,7 @@ public class RandomReward extends Reward
 			return;
 		}
 
-		int number = player.world.rand.nextInt(totalWeight) + 1;
+		int number = player.level.random.nextInt(totalWeight) + 1;
 		int currentWeight = 0;
 
 		for (WeightedReward reward : getTable().rewards)
@@ -165,7 +165,7 @@ public class RandomReward extends Reward
 	}
 
 	@Override
-	public IFormattableTextComponent getAltTitle()
+	public MutableComponent getAltTitle()
 	{
 		return getTable() == null ? super.getAltTitle() : getTable().useTitle ? getTable().getTitle() : super.getAltTitle();
 	}
@@ -194,13 +194,13 @@ public class RandomReward extends Reward
 	}
 
 	@Override
-	public boolean automatedClaimPre(TileEntity tileEntity, List<ItemStack> items, Random random, UUID playerId, @Nullable ServerPlayerEntity player)
+	public boolean automatedClaimPre(BlockEntity tileEntity, List<ItemStack> items, Random random, UUID playerId, @Nullable ServerPlayer player)
 	{
 		return false;
 	}
 
 	@Override
-	public void automatedClaimPost(TileEntity tileEntity, UUID playerId, @Nullable ServerPlayerEntity player)
+	public void automatedClaimPost(BlockEntity tileEntity, UUID playerId, @Nullable ServerPlayer player)
 	{
 	}
 }

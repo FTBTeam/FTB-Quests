@@ -8,13 +8,13 @@ import com.feed_the_beast.ftbquests.quest.task.TaskData;
 import com.feed_the_beast.ftbquests.quest.task.TaskType;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
 import net.darkhax.gamestages.GameStageHelper;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.ChatFormatting;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -37,31 +37,31 @@ public class GameStageTask extends Task
 	}
 
 	@Override
-	public void writeData(CompoundNBT nbt)
+	public void writeData(CompoundTag nbt)
 	{
 		super.writeData(nbt);
 		nbt.putString("stage", stage);
 	}
 
 	@Override
-	public void readData(CompoundNBT nbt)
+	public void readData(CompoundTag nbt)
 	{
 		super.readData(nbt);
 		stage = nbt.getString("stage");
 	}
 
 	@Override
-	public void writeNetData(PacketBuffer buffer)
+	public void writeNetData(FriendlyByteBuf buffer)
 	{
 		super.writeNetData(buffer);
-		buffer.writeString(stage);
+		buffer.writeUtf(stage);
 	}
 
 	@Override
-	public void readNetData(PacketBuffer buffer)
+	public void readNetData(FriendlyByteBuf buffer)
 	{
 		super.readNetData(buffer);
-		stage = buffer.readString();
+		stage = buffer.readUtf();
 	}
 
 	@Override
@@ -73,9 +73,9 @@ public class GameStageTask extends Task
 	}
 
 	@Override
-	public IFormattableTextComponent getAltTitle()
+	public MutableComponent getAltTitle()
 	{
-		return new TranslationTextComponent("ftbquests.task.ftbquests.gamestage").appendString(": ").append(new StringTextComponent(stage).mergeStyle(TextFormatting.YELLOW));
+		return new TranslatableComponent("ftbquests.task.ftbquests.gamestage").append(": ").append(new TextComponent(stage).withStyle(ChatFormatting.YELLOW));
 	}
 
 	@Override
@@ -92,7 +92,7 @@ public class GameStageTask extends Task
 		}
 
 		@Override
-		public boolean canSubmit(ServerPlayerEntity player)
+		public boolean canSubmit(ServerPlayer player)
 		{
 			return GameStageHelper.hasStage(player, task.stage);
 		}

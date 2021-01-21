@@ -5,9 +5,9 @@ import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -23,7 +23,7 @@ public class CustomTask extends Task
 	@FunctionalInterface
 	public interface Check
 	{
-		void check(CustomTask.Data taskData, ServerPlayerEntity player);
+		void check(CustomTask.Data taskData, ServerPlayer player);
 	}
 
 	public Check check;
@@ -70,7 +70,7 @@ public class CustomTask extends Task
 	}
 
 	@Override
-	public void writeNetData(PacketBuffer buffer)
+	public void writeNetData(FriendlyByteBuf buffer)
 	{
 		super.writeNetData(buffer);
 		buffer.writeVarInt(checkTimer);
@@ -79,7 +79,7 @@ public class CustomTask extends Task
 	}
 
 	@Override
-	public void readNetData(PacketBuffer buffer)
+	public void readNetData(FriendlyByteBuf buffer)
 	{
 		super.readNetData(buffer);
 		checkTimer = buffer.readVarInt();
@@ -101,7 +101,7 @@ public class CustomTask extends Task
 		}
 
 		@Override
-		public void submitTask(ServerPlayerEntity player, ItemStack item)
+		public void submitTask(ServerPlayer player, ItemStack item)
 		{
 			if (task.check != null && !isComplete())
 			{

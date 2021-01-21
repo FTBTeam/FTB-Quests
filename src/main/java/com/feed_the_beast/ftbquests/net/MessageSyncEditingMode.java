@@ -1,7 +1,7 @@
 package com.feed_the_beast.ftbquests.net;
 
 import com.feed_the_beast.ftbquests.FTBQuests;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.fml.network.NetworkEvent;
 
 /**
@@ -11,7 +11,7 @@ public class MessageSyncEditingMode extends MessageBase
 {
 	private final boolean editingMode;
 
-	public MessageSyncEditingMode(PacketBuffer buffer)
+	public MessageSyncEditingMode(FriendlyByteBuf buffer)
 	{
 		editingMode = buffer.readBoolean();
 	}
@@ -22,7 +22,7 @@ public class MessageSyncEditingMode extends MessageBase
 	}
 
 	@Override
-	public void write(PacketBuffer buffer)
+	public void write(FriendlyByteBuf buffer)
 	{
 		buffer.writeBoolean(editingMode);
 	}

@@ -1,11 +1,11 @@
 package com.feed_the_beast.ftbquests.net;
 
 import com.feed_the_beast.ftbquests.FTBQuests;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.fml.network.NetworkRegistry;
 import net.minecraftforge.fml.network.simple.SimpleChannel;
 
@@ -17,7 +17,7 @@ public class FTBQuestsNetHandler
 	private static final String GENERAL_VERSION = "1";
 	private static int id = 0;
 
-	private static <T extends MessageBase> void register(Class<T> c, Function<PacketBuffer, T> s)
+	private static <T extends MessageBase> void register(Class<T> c, Function<FriendlyByteBuf, T> s)
 	{
 		MAIN.registerMessage(++id, c, MessageBase::write, s, MessageBase::handle);
 	}
@@ -69,7 +69,7 @@ public class FTBQuestsNetHandler
 		register(MessageMoveQuestResponse.class, MessageMoveQuestResponse::new);
 	}
 
-	public static void writeItemType(PacketBuffer buffer, ItemStack stack)
+	public static void writeItemType(FriendlyByteBuf buffer, ItemStack stack)
 	{
 		if (stack.isEmpty())
 		{
@@ -77,13 +77,13 @@ public class FTBQuestsNetHandler
 		}
 		else
 		{
-			buffer.writeVarInt(Item.getIdFromItem(stack.getItem()));
-			buffer.writeCompoundTag(stack.getTag());
-			buffer.writeCompoundTag((CompoundNBT) stack.serializeNBT().get("ForgeCaps"));
+			buffer.writeVarInt(Item.getId(stack.getItem()));
+			buffer.writeNbt(stack.getTag());
+			buffer.writeNbt((CompoundTag) stack.serializeNBT().get("ForgeCaps"));
 		}
 	}
 
-	public static ItemStack readItemType(PacketBuffer buffer)
+	public static ItemStack readItemType(FriendlyByteBuf buffer)
 	{
 		int id = buffer.readVarInt();
 
@@ -93,9 +93,9 @@ public class FTBQuestsNetHandler
 		}
 		else
 		{
-			CompoundNBT tag = buffer.readCompoundTag();
-			CompoundNBT caps = buffer.readCompoundTag();
-			ItemStack item = new ItemStack(Item.getItemById(id), 1, caps);
+			CompoundTag tag = buffer.readNbt();
+			CompoundTag caps = buffer.readNbt();
+			ItemStack item = new ItemStack(Item.byId(id), 1, caps);
 			item.setTag(tag);
 			return item;
 		}

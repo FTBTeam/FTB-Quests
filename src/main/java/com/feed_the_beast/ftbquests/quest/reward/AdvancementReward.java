@@ -4,15 +4,15 @@ import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.icon.ItemIcon;
+import net.minecraft.ChatFormatting;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -38,7 +38,7 @@ public class AdvancementReward extends Reward
 	}
 
 	@Override
-	public void writeData(CompoundNBT nbt)
+	public void writeData(CompoundTag nbt)
 	{
 		super.writeData(nbt);
 		nbt.putString("advancement", advancement);
@@ -46,7 +46,7 @@ public class AdvancementReward extends Reward
 	}
 
 	@Override
-	public void readData(CompoundNBT nbt)
+	public void readData(CompoundTag nbt)
 	{
 		super.readData(nbt);
 		advancement = nbt.getString("advancement");
@@ -54,19 +54,19 @@ public class AdvancementReward extends Reward
 	}
 
 	@Override
-	public void writeNetData(PacketBuffer buffer)
+	public void writeNetData(FriendlyByteBuf buffer)
 	{
 		super.writeNetData(buffer);
-		buffer.writeString(advancement);
-		buffer.writeString(criterion);
+		buffer.writeUtf(advancement);
+		buffer.writeUtf(criterion);
 	}
 
 	@Override
-	public void readNetData(PacketBuffer buffer)
+	public void readNetData(FriendlyByteBuf buffer)
 	{
 		super.readNetData(buffer);
-		advancement = buffer.readString();
-		criterion = buffer.readString();
+		advancement = buffer.readUtf();
+		criterion = buffer.readUtf();
 	}
 
 	@Override
@@ -79,9 +79,9 @@ public class AdvancementReward extends Reward
 	}
 
 	@Override
-	public void claim(ServerPlayerEntity player, boolean notify)
+	public void claim(ServerPlayer player, boolean notify)
 	{
-		Advancement a = player.server.getAdvancementManager().getAdvancement(new ResourceLocation(advancement));
+		Advancement a = player.server.getAdvancements().getAdvancement(new ResourceLocation(advancement));
 
 		if (a != null)
 		{
@@ -89,24 +89,24 @@ public class AdvancementReward extends Reward
 			{
 				for (String s : a.getCriteria().keySet())
 				{
-					player.getAdvancements().grantCriterion(a, s);
+					player.getAdvancements().award(a, s);
 				}
 			}
 			else
 			{
-				player.getAdvancements().grantCriterion(a, criterion);
+				player.getAdvancements().award(a, criterion);
 			}
 		}
 	}
 
 	@Override
-	public IFormattableTextComponent getAltTitle()
+	public MutableComponent getAltTitle()
 	{
-		Advancement a = Minecraft.getInstance().player.connection.getAdvancementManager().getAdvancementList().getAdvancement(new ResourceLocation(advancement));
+		Advancement a = Minecraft.getInstance().player.connection.getAdvancements().getAdvancements().get(new ResourceLocation(advancement));
 
 		if (a != null && a.getDisplay() != null)
 		{
-			return new TranslationTextComponent("ftbquests.reward.ftbquests.advancement").appendString(": ").append(a.getDisplay().getTitle().deepCopy().mergeStyle(TextFormatting.YELLOW));
+			return new TranslatableComponent("ftbquests.reward.ftbquests.advancement").append(": ").append(a.getDisplay().getTitle().copy().withStyle(ChatFormatting.YELLOW));
 		}
 
 		return super.getAltTitle();
@@ -115,7 +115,7 @@ public class AdvancementReward extends Reward
 	@Override
 	public Icon getAltIcon()
 	{
-		Advancement a = Minecraft.getInstance().player.connection.getAdvancementManager().getAdvancementList().getAdvancement(new ResourceLocation(advancement));
+		Advancement a = Minecraft.getInstance().player.connection.getAdvancements().getAdvancements().get(new ResourceLocation(advancement));
 
 		if (a != null && a.getDisplay() != null)
 		{

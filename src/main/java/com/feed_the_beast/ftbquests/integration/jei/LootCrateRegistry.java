@@ -1,8 +1,7 @@
 package com.feed_the_beast.ftbquests.integration.jei;
 
-import net.minecraft.item.ItemStack;
-
 import java.util.ArrayList;
+import net.minecraft.world.item.ItemStack;
 
 /**
  * @author LatvianModder

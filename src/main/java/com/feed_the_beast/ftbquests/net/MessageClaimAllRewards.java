@@ -5,8 +5,8 @@ import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.reward.Reward;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.fml.network.NetworkEvent;
 
 /**
@@ -18,19 +18,19 @@ public class MessageClaimAllRewards extends MessageBase
 	{
 	}
 
-	MessageClaimAllRewards(PacketBuffer buffer)
+	MessageClaimAllRewards(FriendlyByteBuf buffer)
 	{
 	}
 
 	@Override
-	public void write(PacketBuffer buffer)
+	public void write(FriendlyByteBuf buffer)
 	{
 	}
 
 	@Override
 	public void handle(NetworkEvent.Context context)
 	{
-		ServerPlayerEntity player = context.getSender();
+		ServerPlayer player = context.getSender();
 		PlayerData data = PlayerData.get(player);
 
 		for (Chapter chapter : ServerQuestFile.INSTANCE.chapters)

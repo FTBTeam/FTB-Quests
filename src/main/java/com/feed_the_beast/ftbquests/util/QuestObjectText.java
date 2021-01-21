@@ -1,11 +1,10 @@
 package com.feed_the_beast.ftbquests.util;
 
 import com.feed_the_beast.mods.ftbguilibrary.utils.StringUtils;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.StringTextComponent;
-
 import java.util.Collections;
 import java.util.Map;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
 
 /**
  * @author LatvianModder
@@ -33,21 +32,21 @@ public final class QuestObjectText
 		return array.length == 0 ? "" : array[0];
 	}
 
-	public IFormattableTextComponent getComponent(String key)
+	public MutableComponent getComponent(String key)
 	{
 		String s = getString(key);
-		return s.isEmpty() ? (IFormattableTextComponent) StringTextComponent.EMPTY : new StringTextComponent(s);
+		return s.isEmpty() ? (MutableComponent) TextComponent.EMPTY : new TextComponent(s);
 	}
 
-	public IFormattableTextComponent[] getComponentArray(String key)
+	public MutableComponent[] getComponentArray(String key)
 	{
 		// FIXME
 		String[] s = getStringArray(key);
-		IFormattableTextComponent[] a = new IFormattableTextComponent[s.length];
+		MutableComponent[] a = new MutableComponent[s.length];
 
 		for (int i = 0; i < s.length; i++)
 		{
-			a[i] = new StringTextComponent(s[i]);
+			a[i] = new TextComponent(s[i]);
 		}
 
 		return a;

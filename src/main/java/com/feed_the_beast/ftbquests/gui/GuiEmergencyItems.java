@@ -15,13 +15,12 @@ import com.feed_the_beast.mods.ftbguilibrary.widget.SimpleTextButton;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Widget;
 import com.feed_the_beast.mods.ftbguilibrary.widget.WidgetLayout;
-import com.mojang.blaze3d.matrix.MatrixStack;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
-
+import com.mojang.blaze3d.vertex.PoseStack;
 import javax.annotation.Nullable;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.world.item.ItemStack;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,23 +47,23 @@ public class GuiEmergencyItems extends GuiBase
 		@Override
 		public void addMouseOverText(TooltipList list)
 		{
-			List<ITextComponent> list1 = new ArrayList<>();
+			List<Component> list1 = new ArrayList<>();
 			GuiHelper.addStackTooltip(stack, list1);
 
-			for (ITextComponent t : list1)
+			for (Component t : list1)
 			{
 				list.add(t);
 			}
 		}
 
 		@Override
-		public void draw(MatrixStack matrixStack, Theme theme, int x, int y, int w, int h)
+		public void draw(PoseStack matrixStack, Theme theme, int x, int y, int w, int h)
 		{
 			QuestShape.get("rsquare").outline.draw(matrixStack, x - 3, y - 3, w + 6, h + 6);
-			matrixStack.push();
+			matrixStack.pushPose();
 			matrixStack.translate(0, 0, 100);
 			GuiHelper.drawItem(matrixStack, stack, x, y, 1F, 1F, true, null);
-			matrixStack.pop();
+			matrixStack.popPose();
 		}
 
 		@Override
@@ -75,7 +74,7 @@ public class GuiEmergencyItems extends GuiBase
 		}
 	}
 
-	private final SimpleTextButton cancelButton = new SimpleTextButton(this, new TranslationTextComponent("gui.cancel"), Icon.EMPTY)
+	private final SimpleTextButton cancelButton = new SimpleTextButton(this, new TranslatableComponent("gui.cancel"), Icon.EMPTY)
 	{
 		@Override
 		public void onClicked(MouseButton button)
@@ -120,7 +119,7 @@ public class GuiEmergencyItems extends GuiBase
 	}
 
 	@Override
-	public void drawBackground(MatrixStack matrixStack, Theme theme, int x, int y, int w, int h)
+	public void drawBackground(PoseStack matrixStack, Theme theme, int x, int y, int w, int h)
 	{
 		long left = endTime - System.currentTimeMillis();
 
@@ -129,21 +128,21 @@ public class GuiEmergencyItems extends GuiBase
 			if (!done)
 			{
 				done = true;
-				cancelButton.setTitle(new TranslationTextComponent("gui.close"));
+				cancelButton.setTitle(new TranslatableComponent("gui.close"));
 				new MessageGetEmergencyItems().sendToServer();
 			}
 
 			left = 0L;
 		}
 
-		matrixStack.push();
+		matrixStack.pushPose();
 		matrixStack.translate((int) (w / 2F), (int) (h / 5F), 0F);
 		matrixStack.scale(2F, 2F, 1F);
-		String s = I18n.format("ftbquests.file.emergency_items");
+		String s = I18n.get("ftbquests.file.emergency_items");
 		theme.drawString(matrixStack, s, -theme.getStringWidth(s) / 2F, 0, Color4I.WHITE, 0);
-		matrixStack.pop();
+		matrixStack.popPose();
 
-		matrixStack.push();
+		matrixStack.pushPose();
 		matrixStack.translate((int) (w / 2F), (int) (h / 2.5F), 0F);
 		matrixStack.scale(4F, 4F, 1F);
 		s = left <= 0L ? "00:00" : StringUtils.getTimeString(left / 1000L * 1000L + 1000L);
@@ -153,7 +152,7 @@ public class GuiEmergencyItems extends GuiBase
 		theme.drawString(matrixStack, s, x1, 1, Color4I.BLACK, 0);
 		theme.drawString(matrixStack, s, x1, -1, Color4I.BLACK, 0);
 		theme.drawString(matrixStack, s, x1, 0, Color4I.WHITE, 0);
-		matrixStack.pop();
+		matrixStack.popPose();
 	}
 
 	@Override

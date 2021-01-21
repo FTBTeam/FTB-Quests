@@ -7,20 +7,19 @@ import com.feed_the_beast.ftbquests.quest.loot.WeightedReward;
 import com.feed_the_beast.mods.ftbguilibrary.icon.ItemIcon;
 import com.feed_the_beast.mods.ftbguilibrary.utils.StringUtils;
 import com.feed_the_beast.mods.ftbguilibrary.widget.GuiHelper;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.gui.ingredient.ITooltipCallback;
 import mezz.jei.api.ingredients.IIngredients;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.nbt.StringNBT;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
-
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -31,7 +30,7 @@ import java.util.List;
 public class LootCrateWrapper implements /*IRecipeWrapper, */ITooltipCallback<ItemStack>
 {
 	public final LootCrate crate;
-	public final IFormattableTextComponent name;
+	public final MutableComponent name;
 	public final ItemStack itemStack;
 	public final List<ItemStack> items;
 	public final List<WeightedReward> rewards;
@@ -59,14 +58,14 @@ public class LootCrateWrapper implements /*IRecipeWrapper, */ITooltipCallback<It
 			else if (reward.reward.getIcon() instanceof ItemIcon)
 			{
 				stack = ((ItemIcon) reward.reward.getIcon()).getStack().copy();
-				stack.setDisplayName(reward.reward.getTitle());
+				stack.setHoverName(reward.reward.getTitle());
 				items.add(stack);
 			}
 			else
 			{
 				stack = new ItemStack(Items.PAINTING);
-				stack.setDisplayName(reward.reward.getTitle());
-				stack.setTagInfo("icon", StringNBT.valueOf(reward.reward.getIcon().toString()));
+				stack.setHoverName(reward.reward.getTitle());
+				stack.addTagElement("icon", StringTag.valueOf(reward.reward.getIcon().toString()));
 				items.add(stack);
 			}
 		}
@@ -105,7 +104,7 @@ public class LootCrateWrapper implements /*IRecipeWrapper, */ITooltipCallback<It
 
 	private String chance(String type, int w, int t)
 	{
-		String s = I18n.format("ftbquests.loot.entitytype." + type) + ": " + WeightedReward.chanceString(w, t);
+		String s = I18n.get("ftbquests.loot.entitytype." + type) + ": " + WeightedReward.chanceString(w, t);
 
 		if (w > 0)
 		{
@@ -116,10 +115,10 @@ public class LootCrateWrapper implements /*IRecipeWrapper, */ITooltipCallback<It
 	}
 
 	//FIXME: @Override
-	public void drawInfo(MatrixStack matrixStack, Minecraft mc, int recipeWidth, int recipeHeight, int mouseX, int mouseY)
+	public void drawInfo(PoseStack matrixStack, Minecraft mc, int recipeWidth, int recipeHeight, int mouseX, int mouseY)
 	{
 		GuiHelper.drawItem(matrixStack, itemStack, 0, 0, 2, 2, true, null);
-		mc.fontRenderer.func_243246_a(matrixStack, crate.table.getTitle().mergeStyle(TextFormatting.UNDERLINE), 36, 0, 0xFF222222);
+		mc.font.drawShadow(matrixStack, crate.table.getTitle().withStyle(ChatFormatting.UNDERLINE), 36, 0, 0xFF222222);
 
 		int total = ClientQuestFile.INSTANCE.lootCrateNoDrop.passive;
 
@@ -131,7 +130,7 @@ public class LootCrateWrapper implements /*IRecipeWrapper, */ITooltipCallback<It
 			}
 		}
 
-		mc.fontRenderer.drawString(matrixStack, chance("passive", crate.drops.passive, total), 36, 10, 0xFF222222);
+		mc.font.draw(matrixStack, chance("passive", crate.drops.passive, total), 36, 10, 0xFF222222);
 
 		total = ClientQuestFile.INSTANCE.lootCrateNoDrop.monster;
 
@@ -143,7 +142,7 @@ public class LootCrateWrapper implements /*IRecipeWrapper, */ITooltipCallback<It
 			}
 		}
 
-		mc.fontRenderer.drawString(matrixStack, chance("monster", crate.drops.monster, total), 36, 19, 0xFF222222);
+		mc.font.draw(matrixStack, chance("monster", crate.drops.monster, total), 36, 19, 0xFF222222);
 
 		total = ClientQuestFile.INSTANCE.lootCrateNoDrop.boss;
 
@@ -155,11 +154,11 @@ public class LootCrateWrapper implements /*IRecipeWrapper, */ITooltipCallback<It
 			}
 		}
 
-		mc.fontRenderer.drawString(matrixStack, chance("boss", crate.drops.boss, total), 36, 28, 0xFF222222);
+		mc.font.draw(matrixStack, chance("boss", crate.drops.boss, total), 36, 28, 0xFF222222);
 	}
 
 	@Override
-	public void onTooltip(int slot, boolean input, ItemStack ingredient, List<ITextComponent> tooltip)
+	public void onTooltip(int slot, boolean input, ItemStack ingredient, List<Component> tooltip)
 	{
 		if (slot > 0 && slot - 1 < items.size())
 		{
@@ -167,7 +166,7 @@ public class LootCrateWrapper implements /*IRecipeWrapper, */ITooltipCallback<It
 			{
 				if (items.get(i) == ingredient)
 				{
-					tooltip.add(new TranslationTextComponent("jei.ftbquests.lootcrates.chance", TextFormatting.GOLD + WeightedReward.chanceString(rewards.get(i).weight, crate.table.getTotalWeight(true))).mergeStyle(TextFormatting.GRAY));
+					tooltip.add(new TranslatableComponent("jei.ftbquests.lootcrates.chance", ChatFormatting.GOLD + WeightedReward.chanceString(rewards.get(i).weight, crate.table.getTotalWeight(true))).withStyle(ChatFormatting.GRAY));
 					return;
 				}
 			}

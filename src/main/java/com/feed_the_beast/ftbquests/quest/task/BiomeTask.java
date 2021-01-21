@@ -3,18 +3,18 @@ package com.feed_the_beast.ftbquests.quest.task;
 import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.Biomes;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.Registry;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.Biomes;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -23,7 +23,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
  */
 public class BiomeTask extends Task
 {
-	public RegistryKey<Biome> biome;
+	public ResourceKey<Biome> biome;
 
 	public BiomeTask(Quest quest)
 	{
@@ -38,31 +38,31 @@ public class BiomeTask extends Task
 	}
 
 	@Override
-	public void writeData(CompoundNBT nbt)
+	public void writeData(CompoundTag nbt)
 	{
 		super.writeData(nbt);
-		nbt.putString("biome", biome.getLocation().toString());
+		nbt.putString("biome", biome.location().toString());
 	}
 
 	@Override
-	public void readData(CompoundNBT nbt)
+	public void readData(CompoundTag nbt)
 	{
 		super.readData(nbt);
-		biome = RegistryKey.getOrCreateKey(Registry.BIOME_KEY, new ResourceLocation(nbt.getString("biome")));
+		biome = ResourceKey.create(Registry.BIOME_REGISTRY, new ResourceLocation(nbt.getString("biome")));
 	}
 
 	@Override
-	public void writeNetData(PacketBuffer buffer)
+	public void writeNetData(FriendlyByteBuf buffer)
 	{
 		super.writeNetData(buffer);
-		buffer.writeResourceLocation(biome.getLocation());
+		buffer.writeResourceLocation(biome.location());
 	}
 
 	@Override
-	public void readNetData(PacketBuffer buffer)
+	public void readNetData(FriendlyByteBuf buffer)
 	{
 		super.readNetData(buffer);
-		biome = RegistryKey.getOrCreateKey(Registry.BIOME_KEY, buffer.readResourceLocation());
+		biome = ResourceKey.create(Registry.BIOME_REGISTRY, buffer.readResourceLocation());
 	}
 
 	@Override
@@ -70,13 +70,13 @@ public class BiomeTask extends Task
 	public void getConfig(ConfigGroup config)
 	{
 		super.getConfig(config);
-		config.addString("biome", biome.getLocation().toString(), v -> biome = RegistryKey.getOrCreateKey(Registry.BIOME_KEY, new ResourceLocation(v)), "minecraft:plains");
+		config.addString("biome", biome.location().toString(), v -> biome = ResourceKey.create(Registry.BIOME_REGISTRY, new ResourceLocation(v)), "minecraft:plains");
 	}
 
 	@Override
-	public IFormattableTextComponent getAltTitle()
+	public MutableComponent getAltTitle()
 	{
-		return new TranslationTextComponent("ftbquests.task.ftbquests.biome").appendString(": ").append(new StringTextComponent(biome.getLocation().toString()).mergeStyle(TextFormatting.DARK_GREEN));
+		return new TranslatableComponent("ftbquests.task.ftbquests.biome").append(": ").append(new TextComponent(biome.location().toString()).withStyle(ChatFormatting.DARK_GREEN));
 	}
 
 	@Override
@@ -99,9 +99,9 @@ public class BiomeTask extends Task
 		}
 
 		@Override
-		public boolean canSubmit(ServerPlayerEntity player)
+		public boolean canSubmit(ServerPlayer player)
 		{
-			return !player.isSpectator() && player.world.func_242406_i(player.getPosition()).orElse(null) == task.biome;
+			return !player.isSpectator() && player.level.getBiomeName(player.blockPosition()).orElse(null) == task.biome;
 		}
 	}
 }

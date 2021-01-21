@@ -17,24 +17,24 @@ import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
-import net.minecraft.command.arguments.EntityArgument;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.RayTraceContext;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.core.NonNullList;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Mth;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
@@ -51,17 +51,17 @@ import java.util.stream.Collectors;
  */
 public class FTBQuestsCommands
 {
-	private static final Predicate<CommandSource> permission = s -> s.getServer().isSinglePlayer() || s.hasPermissionLevel(2);
+	private static final Predicate<CommandSourceStack> permission = s -> s.getServer().isSingleplayer() || s.hasPermission(2);
 
-	public static void register(CommandDispatcher<CommandSource> dispatcher)
+	public static void register(CommandDispatcher<CommandSourceStack> dispatcher)
 	{
 		dispatcher.register(Commands.literal("ftbquests")
 				.then(Commands.literal("editing_mode")
 						.requires(permission)
-						.executes(c -> editingMode(c.getSource(), c.getSource().asPlayer(), null))
+						.executes(c -> editingMode(c.getSource(), c.getSource().getPlayerOrException(), null))
 						.then(Commands.argument("mode", BoolArgumentType.bool())
 								.requires(permission)
-								.executes(c -> editingMode(c.getSource(), c.getSource().asPlayer(), BoolArgumentType.getBool(c, "mode")))
+								.executes(c -> editingMode(c.getSource(), c.getSource().getPlayerOrException(), BoolArgumentType.getBool(c, "mode")))
 								.then(Commands.argument("player", EntityArgument.player())
 										.requires(permission)
 										.executes(c -> editingMode(c.getSource(), EntityArgument.getPlayer(c, "player"), BoolArgumentType.getBool(c, "mode")))
@@ -99,7 +99,7 @@ public class FTBQuestsCommands
 		);
 	}
 
-	private static int editingMode(CommandSource source, ServerPlayerEntity player, @Nullable Boolean canEdit)
+	private static int editingMode(CommandSourceStack source, ServerPlayer player, @Nullable Boolean canEdit)
 	{
 		PlayerData data = ServerQuestFile.INSTANCE.getData(player);
 
@@ -112,17 +112,17 @@ public class FTBQuestsCommands
 
 		if (canEdit)
 		{
-			source.sendFeedback(new TranslationTextComponent("commands.ftbquests.editing_mode.enabled", player.getDisplayName()), true);
+			source.sendSuccess(new TranslatableComponent("commands.ftbquests.editing_mode.enabled", player.getDisplayName()), true);
 		}
 		else
 		{
-			source.sendFeedback(new TranslationTextComponent("commands.ftbquests.editing_mode.disabled", player.getDisplayName()), true);
+			source.sendSuccess(new TranslatableComponent("commands.ftbquests.editing_mode.disabled", player.getDisplayName()), true);
 		}
 
 		return 1;
 	}
 
-	private static int changeProgress(CommandSource source, ServerPlayerEntity player, ChangeProgress type)
+	private static int changeProgress(CommandSourceStack source, ServerPlayer player, ChangeProgress type)
 	{
 		/*
 		Collection<ForgeTeam> teams;
@@ -160,40 +160,40 @@ public class FTBQuestsCommands
 		}
 		 */
 
-		source.sendFeedback(new TranslationTextComponent("commands.ftbquests.change_progress.text"), true);
+		source.sendSuccess(new TranslatableComponent("commands.ftbquests.change_progress.text"), true);
 		return 1;
 	}
 
-	private static RayTraceResult rayTrace(ServerPlayerEntity player)
+	private static HitResult rayTrace(ServerPlayer player)
 	{
-		float f = player.rotationPitch;
-		float f1 = player.rotationYaw;
-		Vector3d vec3d = player.getEyePosition(1.0F);
-		float f2 = MathHelper.cos(-f1 * ((float) Math.PI / 180F) - (float) Math.PI);
-		float f3 = MathHelper.sin(-f1 * ((float) Math.PI / 180F) - (float) Math.PI);
-		float f4 = -MathHelper.cos(-f * ((float) Math.PI / 180F));
-		float f5 = MathHelper.sin(-f * ((float) Math.PI / 180F));
+		float f = player.xRot;
+		float f1 = player.yRot;
+		Vec3 vec3d = player.getEyePosition(1.0F);
+		float f2 = Mth.cos(-f1 * ((float) Math.PI / 180F) - (float) Math.PI);
+		float f3 = Mth.sin(-f1 * ((float) Math.PI / 180F) - (float) Math.PI);
+		float f4 = -Mth.cos(-f * ((float) Math.PI / 180F));
+		float f5 = Mth.sin(-f * ((float) Math.PI / 180F));
 		float f6 = f3 * f4;
 		float f7 = f2 * f4;
 		double d0 = player.getAttribute(ForgeMod.REACH_DISTANCE.get()).getValue();
-		Vector3d vec3d1 = vec3d.add((double) f6 * d0, (double) f5 * d0, (double) f7 * d0);
-		return player.world.rayTraceBlocks(new RayTraceContext(vec3d, vec3d1, RayTraceContext.BlockMode.OUTLINE, RayTraceContext.FluidMode.NONE, player));
+		Vec3 vec3d1 = vec3d.add((double) f6 * d0, (double) f5 * d0, (double) f7 * d0);
+		return player.level.clip(new ClipContext(vec3d, vec3d1, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, player));
 	}
 
-	private static int importRewards(CommandSource source, String tableId, int weight, boolean replace) throws CommandSyntaxException
+	private static int importRewards(CommandSourceStack source, String tableId, int weight, boolean replace) throws CommandSyntaxException
 	{
-		ServerPlayerEntity player = source.asPlayer();
+		ServerPlayer player = source.getPlayerOrException();
 		RewardTable table = ServerQuestFile.INSTANCE.getRewardTable(tableId);
 
-		RayTraceResult ray = rayTrace(player);
+		HitResult ray = rayTrace(player);
 
-		if (ray instanceof BlockRayTraceResult)
+		if (ray instanceof BlockHitResult)
 		{
-			TileEntity tileEntity = player.world.getTileEntity(((BlockRayTraceResult) ray).getPos());
+			BlockEntity tileEntity = player.level.getBlockEntity(((BlockHitResult) ray).getBlockPos());
 
 			if (tileEntity != null)
 			{
-				IItemHandler handler = tileEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, ((BlockRayTraceResult) ray).getFace()).orElse(null);
+				IItemHandler handler = tileEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, ((BlockHitResult) ray).getDirection()).orElse(null);
 
 				if (handler != null)
 				{
@@ -218,7 +218,7 @@ public class FTBQuestsCommands
 					ServerQuestFile.INSTANCE.clearCachedData();
 					new MessageEditObjectResponse(table).sendToAll();
 					ServerQuestFile.INSTANCE.save();
-					source.sendFeedback(new TranslationTextComponent("commands.ftbquests.import_rewards_from_chest.text", r, table.toString()), true);
+					source.sendSuccess(new TranslatableComponent("commands.ftbquests.import_rewards_from_chest.text", r, table.toString()), true);
 					return 1;
 				}
 			}
@@ -227,20 +227,20 @@ public class FTBQuestsCommands
 		return 0;
 	}
 
-	private static int exportRewards(CommandSource source, String tableId) throws CommandSyntaxException
+	private static int exportRewards(CommandSourceStack source, String tableId) throws CommandSyntaxException
 	{
-		ServerPlayerEntity player = source.asPlayer();
+		ServerPlayer player = source.getPlayerOrException();
 		RewardTable table = ServerQuestFile.INSTANCE.getRewardTable(tableId);
 
-		RayTraceResult ray = rayTrace(player);
+		HitResult ray = rayTrace(player);
 
-		if (ray instanceof BlockRayTraceResult)
+		if (ray instanceof BlockHitResult)
 		{
-			TileEntity tileEntity = player.world.getTileEntity(((BlockRayTraceResult) ray).getPos());
+			BlockEntity tileEntity = player.level.getBlockEntity(((BlockHitResult) ray).getBlockPos());
 
 			if (tileEntity != null)
 			{
-				IItemHandler handler = tileEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, ((BlockRayTraceResult) ray).getFace()).orElse(null);
+				IItemHandler handler = tileEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, ((BlockHitResult) ray).getDirection()).orElse(null);
 
 				if (handler != null)
 				{
@@ -262,7 +262,7 @@ public class FTBQuestsCommands
 						}
 					}
 
-					source.sendFeedback(new TranslationTextComponent("commands.ftbquests.export_rewards_to_chest.text", Integer.toString(r), Integer.toString(table.rewards.size()), table.toString()), true);
+					source.sendSuccess(new TranslatableComponent("commands.ftbquests.export_rewards_to_chest.text", Integer.toString(r), Integer.toString(table.rewards.size()), table.toString()), true);
 				}
 			}
 		}
@@ -270,7 +270,7 @@ public class FTBQuestsCommands
 		return 0;
 	}
 
-	private static int generateAllItemChapter(CommandSource source)
+	private static int generateAllItemChapter(CommandSourceStack source)
 	{
 		NonNullList<ItemStack> nonNullList = NonNullList.create();
 
@@ -279,7 +279,7 @@ public class FTBQuestsCommands
 			try
 			{
 				int s = nonNullList.size();
-				item.fillItemGroup(ItemGroup.SEARCH, nonNullList);
+				item.fillItemCategory(CreativeModeTab.TAB_SEARCH, nonNullList);
 
 				if (s == nonNullList.size())
 				{
@@ -347,7 +347,7 @@ public class FTBQuestsCommands
 			task.consumeItems = Tristate.TRUE;
 			task.item = stack;
 
-			CompoundNBT extra = new CompoundNBT();
+			CompoundTag extra = new CompoundTag();
 			extra.putString("type", task.getType().getTypeForNBT());
 			new MessageCreateObjectResponse(task, extra).sendToAll();
 
@@ -356,7 +356,7 @@ public class FTBQuestsCommands
 
 		ServerQuestFile.INSTANCE.save();
 		ServerQuestFile.INSTANCE.saveNow();
-		source.sendFeedback(new StringTextComponent("Done!"), false);
+		source.sendSuccess(new TextComponent("Done!"), false);
 		return 1;
 	}
 }

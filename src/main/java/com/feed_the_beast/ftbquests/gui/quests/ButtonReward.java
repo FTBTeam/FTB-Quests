@@ -13,15 +13,15 @@ import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
 import com.feed_the_beast.mods.ftbguilibrary.widget.WidgetType;
 import com.feed_the_beast.mods.ftbguilibrary.widget.WrappedIngredient;
-import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
-
+import com.mojang.blaze3d.vertex.PoseStack;
 import javax.annotation.Nullable;
+
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.world.item.ItemStack;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,11 +42,11 @@ public class ButtonReward extends Button
 	}
 
 	@Override
-	public ITextComponent getTitle()
+	public Component getTitle()
 	{
 		if (reward.isTeamReward())
 		{
-			return super.getTitle().deepCopy().mergeStyle(TextFormatting.BLUE);
+			return super.getTitle().copy().withStyle(ChatFormatting.BLUE);
 		}
 
 		return super.getTitle();
@@ -57,7 +57,7 @@ public class ButtonReward extends Button
 	{
 		if (isShiftKeyDown() && isCtrlKeyDown())
 		{
-			list.add(new StringTextComponent(reward.toString()).mergeStyle(TextFormatting.DARK_GRAY));
+			list.add(new TextComponent(reward.toString()).withStyle(ChatFormatting.DARK_GRAY));
 		}
 
 		if (reward.isTeamReward())
@@ -75,7 +75,7 @@ public class ButtonReward extends Button
 
 				if (ingredient instanceof ItemStack && !((ItemStack) ingredient).isEmpty())
 				{
-					List<ITextComponent> list1 = new ArrayList<>();
+					List<Component> list1 = new ArrayList<>();
 					GuiHelper.addStackTooltip((ItemStack) ingredient, list1);
 					list1.forEach(list::add);
 				}
@@ -83,7 +83,7 @@ public class ButtonReward extends Button
 
 			list.blankLine();
 			reward.addMouseOverText(list);
-			list.add(new TranslationTextComponent("ftbquests.reward.team_reward").mergeStyle(TextFormatting.BLUE, TextFormatting.UNDERLINE));
+			list.add(new TranslatableComponent("ftbquests.reward.team_reward").withStyle(ChatFormatting.BLUE, ChatFormatting.UNDERLINE));
 		}
 		else
 		{
@@ -150,7 +150,7 @@ public class ButtonReward extends Button
 	}
 
 	@Override
-	public void drawBackground(MatrixStack matrixStack, Theme theme, int x, int y, int w, int h)
+	public void drawBackground(PoseStack matrixStack, Theme theme, int x, int y, int w, int h)
 	{
 		if (isMouseOver())
 		{
@@ -159,7 +159,7 @@ public class ButtonReward extends Button
 	}
 
 	@Override
-	public void draw(MatrixStack matrixStack, Theme theme, int x, int y, int w, int h)
+	public void draw(PoseStack matrixStack, Theme theme, int x, int y, int w, int h)
 	{
 		int bs = h >= 32 ? 32 : 16;
 		drawBackground(matrixStack, theme, x, y, w, h);
@@ -174,7 +174,7 @@ public class ButtonReward extends Button
 			//return;
 		}
 
-		matrixStack.push();
+		matrixStack.pushPose();
 		matrixStack.translate(0F, 0F, 200F);
 		RenderSystem.enableBlend();
 		boolean completed = false;
@@ -189,7 +189,7 @@ public class ButtonReward extends Button
 			ThemeProperties.ALERT_ICON.get().draw(matrixStack, x + w - 9, y + 1, 8, 8);
 		}
 
-		matrixStack.pop();
+		matrixStack.popPose();
 
 		if (!completed)
 		{
@@ -197,11 +197,11 @@ public class ButtonReward extends Button
 
 			if (!s.isEmpty())
 			{
-				matrixStack.push();
+				matrixStack.pushPose();
 				matrixStack.translate(x + 19F - theme.getStringWidth(s) / 2F, y + 15F, 200F);
 				matrixStack.scale(0.5F, 0.5F, 1F);
 				theme.drawString(matrixStack, s, 0, 0, Color4I.WHITE, Theme.SHADOW);
-				matrixStack.pop();
+				matrixStack.popPose();
 			}
 		}
 	}

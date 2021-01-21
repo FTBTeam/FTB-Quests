@@ -20,10 +20,10 @@ import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Widget;
 import com.feed_the_beast.mods.ftbguilibrary.widget.WidgetType;
 import com.feed_the_beast.mods.ftbguilibrary.widget.WrappedIngredient;
-import com.mojang.blaze3d.matrix.MatrixStack;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.fml.ModList;
 
 import javax.annotation.Nullable;
@@ -40,7 +40,7 @@ public class GuiValidItems extends GuiBase
 
 		public ButtonValidItem(Panel panel, ItemStack is)
 		{
-			super(panel, StringTextComponent.EMPTY, ItemIcon.getItemIcon(is));
+			super(panel, TextComponent.EMPTY, ItemIcon.getItemIcon(is));
 			stack = is;
 		}
 
@@ -66,17 +66,17 @@ public class GuiValidItems extends GuiBase
 		}
 
 		@Override
-		public void draw(MatrixStack matrixStack, Theme theme, int x, int y, int w, int h)
+		public void draw(PoseStack matrixStack, Theme theme, int x, int y, int w, int h)
 		{
 			if (isMouseOver())
 			{
 				Color4I.WHITE.withAlpha(33).draw(matrixStack, x, y, w, h);
 			}
 
-			matrixStack.push();
+			matrixStack.pushPose();
 			matrixStack.translate(0, 0, 10);
 			GuiHelper.drawItem(matrixStack, stack, x + 2, y + 2, 2, 2, true, null);
-			matrixStack.pop();
+			matrixStack.popPose();
 		}
 	}
 
@@ -123,7 +123,7 @@ public class GuiValidItems extends GuiBase
 			}
 
 			@Override
-			public void drawBackground(MatrixStack matrixStack, Theme theme, int x, int y, int w, int h)
+			public void drawBackground(PoseStack matrixStack, Theme theme, int x, int y, int w, int h)
 			{
 				theme.drawButton(matrixStack, x - 1, y - 1, w + 2, h + 2, WidgetType.NORMAL);
 			}
@@ -131,7 +131,7 @@ public class GuiValidItems extends GuiBase
 
 		itemPanel.setPosAndSize(0, 22, 144, 0);
 
-		backButton = new SimpleTextButton(this, new TranslationTextComponent("gui.back"), Icon.EMPTY)
+		backButton = new SimpleTextButton(this, new TranslatableComponent("gui.back"), Icon.EMPTY)
 		{
 			@Override
 			public void onClicked(MouseButton button)
@@ -147,7 +147,7 @@ public class GuiValidItems extends GuiBase
 			}
 		};
 
-		submitButton = new SimpleTextButton(this, new StringTextComponent("Submit"), Icon.EMPTY)
+		submitButton = new SimpleTextButton(this, new TextComponent("Submit"), Icon.EMPTY)
 		{
 			@Override
 			public void onClicked(MouseButton button)
@@ -183,7 +183,7 @@ public class GuiValidItems extends GuiBase
 	@Override
 	public void addWidgets()
 	{
-		title = new TranslationTextComponent("ftbquests.task.ftbquests.item.valid_for", task.getTitle()).getString();
+		title = new TranslatableComponent("ftbquests.task.ftbquests.item.valid_for", task.getTitle()).getString();
 		setWidth(Math.max(156, getTheme().getStringWidth(title) + 12));
 		add(itemPanel);
 		add(backButton);
@@ -197,7 +197,7 @@ public class GuiValidItems extends GuiBase
 	}
 
 	@Override
-	public void drawBackground(MatrixStack matrixStack, Theme theme, int x, int y, int w, int h)
+	public void drawBackground(PoseStack matrixStack, Theme theme, int x, int y, int w, int h)
 	{
 		super.drawBackground(matrixStack, theme, x, y, w, h);
 		theme.drawString(matrixStack, title, x + w / 2F, y + 6, Color4I.WHITE, Theme.CENTERED);

@@ -3,7 +3,7 @@ package com.feed_the_beast.ftbquests.net;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.util.NetUtils;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.fml.network.NetworkEvent;
 
 import java.util.UUID;
@@ -16,7 +16,7 @@ public class MessageSyncQuests extends MessageBase
 	private final UUID self;
 	private final QuestFile file;
 
-	MessageSyncQuests(PacketBuffer buffer)
+	MessageSyncQuests(FriendlyByteBuf buffer)
 	{
 		self = NetUtils.readUUID(buffer);
 		file = FTBQuests.PROXY.createClientQuestFile();
@@ -30,7 +30,7 @@ public class MessageSyncQuests extends MessageBase
 	}
 
 	@Override
-	public void write(PacketBuffer buffer)
+	public void write(FriendlyByteBuf buffer)
 	{
 		NetUtils.writeUUID(buffer, self);
 		file.writeNetDataFull(buffer, self);

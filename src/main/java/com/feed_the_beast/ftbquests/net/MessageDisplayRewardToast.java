@@ -3,8 +3,8 @@ package com.feed_the_beast.ftbquests.net;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.util.NetUtils;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraftforge.fml.network.NetworkEvent;
 
 /**
@@ -13,17 +13,17 @@ import net.minecraftforge.fml.network.NetworkEvent;
 public class MessageDisplayRewardToast extends MessageBase
 {
 	private final int id;
-	private final ITextComponent text;
+	private final Component text;
 	private final Icon icon;
 
-	MessageDisplayRewardToast(PacketBuffer buffer)
+	MessageDisplayRewardToast(FriendlyByteBuf buffer)
 	{
 		id = buffer.readVarInt();
-		text = buffer.readTextComponent();
+		text = buffer.readComponent();
 		icon = NetUtils.readIcon(buffer);
 	}
 
-	public MessageDisplayRewardToast(int _id, ITextComponent t, Icon i)
+	public MessageDisplayRewardToast(int _id, Component t, Icon i)
 	{
 		id = _id;
 		text = t;
@@ -31,10 +31,10 @@ public class MessageDisplayRewardToast extends MessageBase
 	}
 
 	@Override
-	public void write(PacketBuffer buffer)
+	public void write(FriendlyByteBuf buffer)
 	{
 		buffer.writeVarInt(id);
-		buffer.writeTextComponent(text);
+		buffer.writeComponent(text);
 		NetUtils.writeIcon(buffer, icon);
 	}
 

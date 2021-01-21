@@ -6,10 +6,9 @@ import com.feed_the_beast.mods.ftbguilibrary.config.ConfigCallback;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigValue;
 import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
 import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-
 import javax.annotation.Nullable;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import java.util.function.Predicate;
 
 /**
@@ -25,11 +24,11 @@ public class ConfigQuestObject<T extends QuestObjectBase> extends ConfigValue<T>
 	}
 
 	@Override
-	public ITextComponent getStringForGUI(@Nullable QuestObjectBase value)
+	public Component getStringForGUI(@Nullable QuestObjectBase value)
 	{
 		if (value == null)
 		{
-			return StringTextComponent.EMPTY;
+			return TextComponent.EMPTY;
 		}
 
 		return value.getTitle();

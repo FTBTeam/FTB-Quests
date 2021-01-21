@@ -1,9 +1,9 @@
 package com.feed_the_beast.ftbquests.net;
 
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.fml.network.NetworkEvent;
 import net.minecraftforge.items.ItemHandlerHelper;
 
@@ -12,7 +12,7 @@ import net.minecraftforge.items.ItemHandlerHelper;
  */
 public class MessageGetEmergencyItems extends MessageBase
 {
-	MessageGetEmergencyItems(PacketBuffer buffer)
+	MessageGetEmergencyItems(FriendlyByteBuf buffer)
 	{
 	}
 
@@ -21,7 +21,7 @@ public class MessageGetEmergencyItems extends MessageBase
 	}
 
 	@Override
-	public void write(PacketBuffer buffer)
+	public void write(FriendlyByteBuf buffer)
 	{
 	}
 
@@ -29,7 +29,7 @@ public class MessageGetEmergencyItems extends MessageBase
 	public void handle(NetworkEvent.Context context)
 	{
 		//TODO: Verify on server side
-		ServerPlayerEntity player = context.getSender();
+		ServerPlayer player = context.getSender();
 
 		for (ItemStack stack : ServerQuestFile.INSTANCE.emergencyItems)
 		{

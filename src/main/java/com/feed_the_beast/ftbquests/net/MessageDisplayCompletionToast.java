@@ -1,7 +1,7 @@
 package com.feed_the_beast.ftbquests.net;
 
 import com.feed_the_beast.ftbquests.FTBQuests;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.fml.network.NetworkEvent;
 
 /**
@@ -11,7 +11,7 @@ public class MessageDisplayCompletionToast extends MessageBase
 {
 	private final int id;
 
-	MessageDisplayCompletionToast(PacketBuffer buffer)
+	MessageDisplayCompletionToast(FriendlyByteBuf buffer)
 	{
 		id = buffer.readVarInt();
 	}
@@ -22,7 +22,7 @@ public class MessageDisplayCompletionToast extends MessageBase
 	}
 
 	@Override
-	public void write(PacketBuffer buffer)
+	public void write(FriendlyByteBuf buffer)
 	{
 		buffer.writeVarInt(id);
 	}

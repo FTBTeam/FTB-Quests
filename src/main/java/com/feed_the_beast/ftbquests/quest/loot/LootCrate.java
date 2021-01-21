@@ -4,12 +4,11 @@ import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Color4I;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.StringNBT;
-import net.minecraft.network.PacketBuffer;
-
 import java.util.regex.Pattern;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.item.ItemStack;
 
 /**
  * @author LatvianModder
@@ -33,7 +32,7 @@ public final class LootCrate
 		drops = new EntityWeight();
 	}
 
-	public void writeData(CompoundNBT nbt)
+	public void writeData(CompoundTag nbt)
 	{
 		nbt.putString("string_id", stringID);
 
@@ -49,12 +48,12 @@ public final class LootCrate
 			nbt.putBoolean("glow", true);
 		}
 
-		CompoundNBT nbt1 = new CompoundNBT();
+		CompoundTag nbt1 = new CompoundTag();
 		drops.writeData(nbt1);
 		nbt.put("drops", nbt1);
 	}
 
-	public void readData(CompoundNBT nbt)
+	public void readData(CompoundTag nbt)
 	{
 		stringID = nbt.getString("string_id");
 		itemName = nbt.getString("item_name");
@@ -63,19 +62,19 @@ public final class LootCrate
 		drops.readData(nbt.getCompound("drops"));
 	}
 
-	public void writeNetData(PacketBuffer data)
+	public void writeNetData(FriendlyByteBuf data)
 	{
-		data.writeString(stringID);
-		data.writeString(itemName);
+		data.writeUtf(stringID);
+		data.writeUtf(itemName);
 		data.writeInt(color.rgb());
 		data.writeBoolean(glow);
 		drops.writeNetData(data);
 	}
 
-	public void readNetData(PacketBuffer data)
+	public void readNetData(FriendlyByteBuf data)
 	{
-		stringID = data.readString();
-		itemName = data.readString();
+		stringID = data.readUtf();
+		itemName = data.readUtf();
 		color = Color4I.rgb(data.readInt());
 		glow = data.readBoolean();
 		drops.readNetData(data);
@@ -103,7 +102,7 @@ public final class LootCrate
 	public ItemStack createStack()
 	{
 		ItemStack stack = new ItemStack(FTBQuestsItems.LOOTCRATE);
-		stack.setTagInfo("type", StringNBT.valueOf(getStringID()));
+		stack.addTagElement("type", StringTag.valueOf(getStringID()));
 		return stack;
 	}
 }

@@ -1,17 +1,16 @@
 package com.feed_the_beast.ftbquests.util;
 
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.ByteArrayNBT;
-import net.minecraft.nbt.CollectionNBT;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.EndNBT;
-import net.minecraft.nbt.INBT;
-import net.minecraft.nbt.IntArrayNBT;
-import net.minecraft.nbt.JsonToNBT;
-import net.minecraft.nbt.LongArrayNBT;
-import net.minecraft.nbt.StringNBT;
-
 import javax.annotation.Nullable;
+import net.minecraft.nbt.ByteArrayTag;
+import net.minecraft.nbt.CollectionTag;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.EndTag;
+import net.minecraft.nbt.IntArrayTag;
+import net.minecraft.nbt.LongArrayTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.TagParser;
+import net.minecraft.world.item.ItemStack;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -28,33 +27,33 @@ public class NBTUtils
 
 	public static String handleEscape(String string)
 	{
-		return SIMPLE_VALUE.matcher(string).matches() ? string : StringNBT.quoteAndEscape(string);
+		return SIMPLE_VALUE.matcher(string).matches() ? string : StringTag.quoteAndEscape(string);
 	}
 
-	public static ItemStack read(CompoundNBT nbt, String key)
+	public static ItemStack read(CompoundTag nbt, String key)
 	{
-		INBT nbt1 = nbt.get(key);
+		Tag nbt1 = nbt.get(key);
 
-		if (nbt1 instanceof CompoundNBT)
+		if (nbt1 instanceof CompoundTag)
 		{
-			return ItemStack.read((CompoundNBT) nbt1);
+			return ItemStack.of((CompoundTag) nbt1);
 		}
-		else if (nbt1 instanceof StringNBT)
+		else if (nbt1 instanceof StringTag)
 		{
-			CompoundNBT nbt2 = new CompoundNBT();
-			nbt2.putString("id", nbt1.getString());
+			CompoundTag nbt2 = new CompoundTag();
+			nbt2.putString("id", nbt1.getAsString());
 			nbt2.putByte("Count", (byte) 1);
-			return ItemStack.read(nbt2);
+			return ItemStack.of(nbt2);
 		}
 
 		return ItemStack.EMPTY;
 	}
 
-	public static void write(CompoundNBT nbt, String key, ItemStack stack)
+	public static void write(CompoundTag nbt, String key, ItemStack stack)
 	{
 		if (!stack.isEmpty())
 		{
-			CompoundNBT nbt1 = stack.serializeNBT();
+			CompoundTag nbt1 = stack.serializeNBT();
 
 			if (nbt1.size() == 2 && nbt1.getInt("Count") == 1)
 			{
@@ -97,7 +96,7 @@ public class NBTUtils
 	}
 
 	@Nullable
-	public static CompoundNBT readSNBT(Path path)
+	public static CompoundTag readSNBT(Path path)
 	{
 		if (Files.notExists(path))
 		{
@@ -113,7 +112,7 @@ public class NBTUtils
 				s.append(line.trim());
 			}
 
-			return JsonToNBT.getTagFromJson(s.toString());
+			return TagParser.parseTag(s.toString());
 		}
 		catch (Exception ex)
 		{
@@ -122,7 +121,7 @@ public class NBTUtils
 		return null;
 	}
 
-	public static void writeSNBT(Path path, CompoundNBT nbt)
+	public static void writeSNBT(Path path, CompoundTag nbt)
 	{
 		try
 		{
@@ -141,15 +140,15 @@ public class NBTUtils
 		}
 	}
 
-	private static void append(SNBTBuilder builder, @Nullable INBT nbt)
+	private static void append(SNBTBuilder builder, @Nullable Tag nbt)
 	{
-		if (nbt == null || nbt instanceof EndNBT)
+		if (nbt == null || nbt instanceof EndTag)
 		{
 			builder.print("null");
 		}
-		else if (nbt instanceof CompoundNBT)
+		else if (nbt instanceof CompoundTag)
 		{
-			CompoundNBT compound = (CompoundNBT) nbt;
+			CompoundTag compound = (CompoundTag) nbt;
 
 			if (compound.isEmpty())
 			{
@@ -162,7 +161,7 @@ public class NBTUtils
 			builder.push();
 			int index = 0;
 
-			for (String key : compound.keySet())
+			for (String key : compound.getAllKeys())
 			{
 				index++;
 				builder.print(handleEscape(key));
@@ -180,23 +179,23 @@ public class NBTUtils
 			builder.pop();
 			builder.print("}");
 		}
-		else if (nbt instanceof CollectionNBT)
+		else if (nbt instanceof CollectionTag)
 		{
-			if (nbt instanceof ByteArrayNBT)
+			if (nbt instanceof ByteArrayTag)
 			{
-				appendCollection(builder, (CollectionNBT<?>) nbt, "B;");
+				appendCollection(builder, (CollectionTag<?>) nbt, "B;");
 			}
-			else if (nbt instanceof IntArrayNBT)
+			else if (nbt instanceof IntArrayTag)
 			{
-				appendCollection(builder, (CollectionNBT<?>) nbt, "I;");
+				appendCollection(builder, (CollectionTag<?>) nbt, "I;");
 			}
-			else if (nbt instanceof LongArrayNBT)
+			else if (nbt instanceof LongArrayTag)
 			{
-				appendCollection(builder, (CollectionNBT<?>) nbt, "L;");
+				appendCollection(builder, (CollectionTag<?>) nbt, "L;");
 			}
 			else
 			{
-				appendCollection(builder, (CollectionNBT<?>) nbt, "");
+				appendCollection(builder, (CollectionTag<?>) nbt, "");
 			}
 		}
 		else
@@ -205,7 +204,7 @@ public class NBTUtils
 		}
 	}
 
-	private static void appendCollection(SNBTBuilder builder, CollectionNBT<? extends INBT> nbt, String opening)
+	private static void appendCollection(SNBTBuilder builder, CollectionTag<? extends Tag> nbt, String opening)
 	{
 		if (nbt.isEmpty())
 		{
@@ -229,7 +228,7 @@ public class NBTUtils
 		builder.push();
 		int index = 0;
 
-		for (INBT value : nbt)
+		for (Tag value : nbt)
 		{
 			index++;
 			append(builder, value);

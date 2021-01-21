@@ -3,8 +3,8 @@ package com.feed_the_beast.ftbquests.net;
 import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.task.Task;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.fml.network.NetworkEvent;
 
 /**
@@ -14,7 +14,7 @@ public class MessageSubmitTask extends MessageBase
 {
 	private final int task;
 
-	MessageSubmitTask(PacketBuffer buffer)
+	MessageSubmitTask(FriendlyByteBuf buffer)
 	{
 		task = buffer.readVarInt();
 	}
@@ -25,7 +25,7 @@ public class MessageSubmitTask extends MessageBase
 	}
 
 	@Override
-	public void write(PacketBuffer buffer)
+	public void write(FriendlyByteBuf buffer)
 	{
 		buffer.writeVarInt(task);
 	}
@@ -33,7 +33,7 @@ public class MessageSubmitTask extends MessageBase
 	@Override
 	public void handle(NetworkEvent.Context context)
 	{
-		ServerPlayerEntity player = context.getSender();
+		ServerPlayer player = context.getSender();
 		PlayerData data = PlayerData.get(player);
 		Task t = ServerQuestFile.INSTANCE.getTask(task);
 

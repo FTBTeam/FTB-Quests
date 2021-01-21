@@ -8,8 +8,8 @@ import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.net.FTBQuestsNetHandler;
 import com.feed_the_beast.ftbquests.quest.reward.RewardType;
 import com.feed_the_beast.ftbquests.quest.task.TaskType;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.DistExecutor;
@@ -31,11 +31,11 @@ public class FTBQuests
 	public static FTBQuestsCommon PROXY;
 	public static FTBQuestsNetCommon NET_PROXY;
 
-	public static final ItemGroup ITEM_GROUP = new ItemGroup(FTBQuests.MOD_ID)
+	public static final CreativeModeTab ITEM_GROUP = new CreativeModeTab(FTBQuests.MOD_ID)
 	{
 		@Override
 		@OnlyIn(Dist.CLIENT)
-		public ItemStack createIcon()
+		public ItemStack makeIcon()
 		{
 			return new ItemStack(FTBQuestsItems.BOOK);
 		}

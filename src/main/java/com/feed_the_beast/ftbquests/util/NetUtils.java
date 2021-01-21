@@ -2,8 +2,8 @@ package com.feed_the_beast.ftbquests.util;
 
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.fml.network.NetworkEvent;
 
 import java.util.Collection;
@@ -20,11 +20,11 @@ public class NetUtils
 {
 	public static boolean canEdit(NetworkEvent.Context context)
 	{
-		ServerPlayerEntity playerEntity = context.getSender();
+		ServerPlayer playerEntity = context.getSender();
 		return playerEntity != null && ServerQuestFile.INSTANCE.getData(playerEntity).getCanEdit();
 	}
 
-	public static <T> void write(PacketBuffer buffer, Collection<T> list, BiConsumer<PacketBuffer, T> writer)
+	public static <T> void write(FriendlyByteBuf buffer, Collection<T> list, BiConsumer<FriendlyByteBuf, T> writer)
 	{
 		buffer.writeVarInt(list.size());
 
@@ -34,7 +34,7 @@ public class NetUtils
 		}
 	}
 
-	public static <K, V> void write(PacketBuffer buffer, Map<K, V> map, BiConsumer<PacketBuffer, K> keyWriter, BiConsumer<PacketBuffer, V> valueWriter)
+	public static <K, V> void write(FriendlyByteBuf buffer, Map<K, V> map, BiConsumer<FriendlyByteBuf, K> keyWriter, BiConsumer<FriendlyByteBuf, V> valueWriter)
 	{
 		buffer.writeVarInt(map.size());
 
@@ -45,12 +45,12 @@ public class NetUtils
 		}
 	}
 
-	public static void writeStrings(PacketBuffer buffer, Collection<String> list)
+	public static void writeStrings(FriendlyByteBuf buffer, Collection<String> list)
 	{
-		write(buffer, list, (b, s) -> b.writeString(s, Short.MAX_VALUE));
+		write(buffer, list, (b, s) -> b.writeUtf(s, Short.MAX_VALUE));
 	}
 
-	public static <T> void read(PacketBuffer buffer, Collection<T> list, Function<PacketBuffer, T> reader)
+	public static <T> void read(FriendlyByteBuf buffer, Collection<T> list, Function<FriendlyByteBuf, T> reader)
 	{
 		list.clear();
 
@@ -62,7 +62,7 @@ public class NetUtils
 		}
 	}
 
-	public static <K, V> void read(PacketBuffer buffer, Map<K, V> map, Function<PacketBuffer, K> keyReader, BiFunction<K, PacketBuffer, V> valueReader)
+	public static <K, V> void read(FriendlyByteBuf buffer, Map<K, V> map, Function<FriendlyByteBuf, K> keyReader, BiFunction<K, FriendlyByteBuf, V> valueReader)
 	{
 		map.clear();
 
@@ -75,31 +75,31 @@ public class NetUtils
 		}
 	}
 
-	public static void readStrings(PacketBuffer buffer, Collection<String> list)
+	public static void readStrings(FriendlyByteBuf buffer, Collection<String> list)
 	{
-		read(buffer, list, b -> b.readString(Short.MAX_VALUE));
+		read(buffer, list, b -> b.readUtf(Short.MAX_VALUE));
 	}
 
-	public static void writeUUID(PacketBuffer buffer, UUID uuid)
+	public static void writeUUID(FriendlyByteBuf buffer, UUID uuid)
 	{
 		buffer.writeLong(uuid.getMostSignificantBits());
 		buffer.writeLong(uuid.getLeastSignificantBits());
 	}
 
-	public static UUID readUUID(PacketBuffer buffer)
+	public static UUID readUUID(FriendlyByteBuf buffer)
 	{
 		long most = buffer.readLong();
 		long least = buffer.readLong();
 		return new UUID(most, least);
 	}
 
-	public static void writeIcon(PacketBuffer buffer, Icon icon)
+	public static void writeIcon(FriendlyByteBuf buffer, Icon icon)
 	{
-		buffer.writeString(icon.toString(), Short.MAX_VALUE);
+		buffer.writeUtf(icon.toString(), Short.MAX_VALUE);
 	}
 
-	public static Icon readIcon(PacketBuffer buffer)
+	public static Icon readIcon(FriendlyByteBuf buffer)
 	{
-		return Icon.getIcon(buffer.readString(Short.MAX_VALUE));
+		return Icon.getIcon(buffer.readUtf(Short.MAX_VALUE));
 	}
 }

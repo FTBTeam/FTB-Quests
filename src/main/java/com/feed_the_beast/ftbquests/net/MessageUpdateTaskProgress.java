@@ -3,7 +3,7 @@ package com.feed_the_beast.ftbquests.net;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.util.NetUtils;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.fml.network.NetworkEvent;
 
 import java.util.UUID;
@@ -17,7 +17,7 @@ public class MessageUpdateTaskProgress extends MessageBase
 	private int task;
 	private long progress;
 
-	public MessageUpdateTaskProgress(PacketBuffer buffer)
+	public MessageUpdateTaskProgress(FriendlyByteBuf buffer)
 	{
 		player = NetUtils.readUUID(buffer);
 		task = buffer.readVarInt();
@@ -32,7 +32,7 @@ public class MessageUpdateTaskProgress extends MessageBase
 	}
 
 	@Override
-	public void write(PacketBuffer buffer)
+	public void write(FriendlyByteBuf buffer)
 	{
 		NetUtils.writeUUID(buffer, player);
 		buffer.writeVarInt(task);

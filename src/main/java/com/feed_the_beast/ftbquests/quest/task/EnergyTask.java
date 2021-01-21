@@ -3,10 +3,10 @@ package com.feed_the_beast.ftbquests.quest.task;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
 import com.feed_the_beast.mods.ftbguilibrary.utils.StringUtils;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -30,7 +30,7 @@ public abstract class EnergyTask extends Task implements ISingleLongValueTask
 	}
 
 	@Override
-	public void writeData(CompoundNBT nbt)
+	public void writeData(CompoundTag nbt)
 	{
 		super.writeData(nbt);
 		nbt.putLong("value", value);
@@ -42,7 +42,7 @@ public abstract class EnergyTask extends Task implements ISingleLongValueTask
 	}
 
 	@Override
-	public void readData(CompoundNBT nbt)
+	public void readData(CompoundTag nbt)
 	{
 		super.readData(nbt);
 		value = nbt.getLong("value");
@@ -56,7 +56,7 @@ public abstract class EnergyTask extends Task implements ISingleLongValueTask
 	}
 
 	@Override
-	public void writeNetData(PacketBuffer buffer)
+	public void writeNetData(FriendlyByteBuf buffer)
 	{
 		super.writeNetData(buffer);
 		buffer.writeVarLong(value);
@@ -64,7 +64,7 @@ public abstract class EnergyTask extends Task implements ISingleLongValueTask
 	}
 
 	@Override
-	public void readNetData(PacketBuffer buffer)
+	public void readNetData(FriendlyByteBuf buffer)
 	{
 		super.readNetData(buffer);
 		value = buffer.readVarLong();
@@ -78,9 +78,9 @@ public abstract class EnergyTask extends Task implements ISingleLongValueTask
 	}
 
 	@Override
-	public IFormattableTextComponent getAltTitle()
+	public MutableComponent getAltTitle()
 	{
-		return new StringTextComponent(StringUtils.formatDouble(value, true));
+		return new TextComponent(StringUtils.formatDouble(value, true));
 	}
 
 	@Override

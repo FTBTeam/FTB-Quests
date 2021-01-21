@@ -17,11 +17,11 @@ import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
 import com.feed_the_beast.mods.ftbguilibrary.widget.SimpleTextButton;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
-
 import javax.annotation.Nullable;
+
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,14 +36,14 @@ public class GuiSelectQuestObject<T extends QuestObjectBase> extends GuiButtonLi
 
 		public ButtonQuestObject(Panel panel, @Nullable T o)
 		{
-			super(panel, o == null ? new TranslationTextComponent("ftbquests.null") : o.getTitle().mergeStyle(o.getObjectType().getColor()), o == null ? Icon.EMPTY : o.getIcon());
+			super(panel, o == null ? new TranslatableComponent("ftbquests.null") : o.getTitle().withStyle(o.getObjectType().getColor()), o == null ? Icon.EMPTY : o.getIcon());
 			object = o;
 			setSize(200, 14);
 		}
 
 		private void addObject(TooltipList list, QuestObjectBase o)
 		{
-			list.add(QuestObjectType.NAME_MAP.getDisplayName(o.getObjectType()).deepCopy().mergeStyle(TextFormatting.GRAY).appendString(": ").append(o.getTitle().mergeStyle(o.getObjectType().getColor())));
+			list.add(QuestObjectType.NAME_MAP.getDisplayName(o.getObjectType()).copy().withStyle(ChatFormatting.GRAY).append(": ").append(o.getTitle().withStyle(o.getObjectType().getColor())));
 		}
 
 		@Override
@@ -55,8 +55,8 @@ public class GuiSelectQuestObject<T extends QuestObjectBase> extends GuiButtonLi
 			}
 
 			list.add(object.getTitle());
-			list.add(new StringTextComponent("ID: ").mergeStyle(TextFormatting.GRAY).append(new StringTextComponent(object.toString()).mergeStyle(TextFormatting.DARK_GRAY)));
-			list.add(new StringTextComponent("Type: ").mergeStyle(TextFormatting.GRAY).append(QuestObjectType.NAME_MAP.getDisplayName(object.getObjectType()).deepCopy().mergeStyle(object.getObjectType().getColor())));
+			list.add(new TextComponent("ID: ").withStyle(ChatFormatting.GRAY).append(new TextComponent(object.toString()).withStyle(ChatFormatting.DARK_GRAY)));
+			list.add(new TextComponent("Type: ").withStyle(ChatFormatting.GRAY).append(QuestObjectType.NAME_MAP.getDisplayName(object.getObjectType()).copy().withStyle(object.getObjectType().getColor())));
 
 			if (object instanceof Quest)
 			{
@@ -69,11 +69,11 @@ public class GuiSelectQuestObject<T extends QuestObjectBase> extends GuiButtonLi
 				}
 				else if (!quest.rewards.isEmpty())
 				{
-					list.add(new TranslationTextComponent("ftbquests.rewards").mergeStyle(TextFormatting.GRAY));
+					list.add(new TranslatableComponent("ftbquests.rewards").withStyle(ChatFormatting.GRAY));
 
 					for (Reward reward : quest.rewards)
 					{
-						list.add(new StringTextComponent("  ").append(reward.getTitle().mergeStyle(QuestObjectType.REWARD.getColor())));
+						list.add(new TextComponent("  ").append(reward.getTitle().withStyle(QuestObjectType.REWARD.getColor())));
 					}
 				}
 			}
@@ -89,11 +89,11 @@ public class GuiSelectQuestObject<T extends QuestObjectBase> extends GuiButtonLi
 				}
 				else if (!quest.rewards.isEmpty())
 				{
-					list.add(new TranslationTextComponent("ftbquests.rewards").mergeStyle(TextFormatting.GRAY));
+					list.add(new TranslatableComponent("ftbquests.rewards").withStyle(ChatFormatting.GRAY));
 
 					for (Reward reward : quest.rewards)
 					{
-						list.add(new StringTextComponent("  ").append(reward.getTitle().mergeStyle(QuestObjectType.REWARD.getColor())));
+						list.add(new TextComponent("  ").append(reward.getTitle().withStyle(QuestObjectType.REWARD.getColor())));
 					}
 				}
 			}
@@ -123,7 +123,7 @@ public class GuiSelectQuestObject<T extends QuestObjectBase> extends GuiButtonLi
 
 	public GuiSelectQuestObject(ConfigQuestObject<T> c, ConfigCallback cb)
 	{
-		setTitle(new TranslationTextComponent("ftbquests.gui.select_quest_object"));
+		setTitle(new TranslatableComponent("ftbquests.gui.select_quest_object"));
 		setHasSearchBox(true);
 		focus();
 		setBorder(1, 1, 1);

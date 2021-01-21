@@ -5,7 +5,7 @@ import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Widget;
 import com.feed_the_beast.mods.ftbguilibrary.widget.WidgetLayout;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 
 /**
  * @author LatvianModder
@@ -88,19 +88,19 @@ public class PanelChapterHover extends Panel
 	}
 
 	@Override
-	public void drawBackground(MatrixStack matrixStack, Theme theme, int x, int y, int w, int h)
+	public void drawBackground(PoseStack matrixStack, Theme theme, int x, int y, int w, int h)
 	{
 	}
 
 	@Override
-	public void draw(MatrixStack matrixStack, Theme theme, int x, int y, int w, int h)
+	public void draw(PoseStack matrixStack, Theme theme, int x, int y, int w, int h)
 	{
 		if (type != -1)
 		{
-			matrixStack.push();
+			matrixStack.pushPose();
 			matrixStack.translate(0, 0, 500);
 			super.draw(matrixStack, theme, x, y, w, h);
-			matrixStack.pop();
+			matrixStack.popPose();
 		}
 	}
 

@@ -1,15 +1,14 @@
 package com.feed_the_beast.ftbquests.util;
 
 import com.feed_the_beast.ftbquests.core.ByteNBTFTBQ;
-import net.minecraft.nbt.ByteNBT;
-import net.minecraft.nbt.CompoundNBT;
-
 import java.util.LinkedHashMap;
+import net.minecraft.nbt.ByteTag;
+import net.minecraft.nbt.CompoundTag;
 
 /**
  * @author LatvianModder
  */
-public class OrderedCompoundNBT extends CompoundNBT
+public class OrderedCompoundNBT extends CompoundTag
 {
 	public OrderedCompoundNBT()
 	{
@@ -19,7 +18,7 @@ public class OrderedCompoundNBT extends CompoundNBT
 	@Override
 	public void putBoolean(String key, boolean value)
 	{
-		ByteNBT byteNBT = ByteNBT.valueOf(value);
+		ByteTag byteNBT = ByteTag.valueOf(value);
 
 		if (byteNBT instanceof ByteNBTFTBQ)
 		{

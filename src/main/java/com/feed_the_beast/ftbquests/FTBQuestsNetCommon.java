@@ -3,11 +3,10 @@ package com.feed_the_beast.ftbquests;
 import com.feed_the_beast.ftbquests.quest.ChangeProgress;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.text.ITextComponent;
-
 import java.util.UUID;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.ItemStack;
 
 public class FTBQuestsNetCommon
 {
@@ -19,7 +18,7 @@ public class FTBQuestsNetCommon
 	{
 	}
 
-	public void createObject(int id, int parent, QuestObjectType type, CompoundNBT nbt, CompoundNBT extra)
+	public void createObject(int id, int parent, QuestObjectType type, CompoundTag nbt, CompoundTag extra)
 	{
 	}
 
@@ -39,11 +38,11 @@ public class FTBQuestsNetCommon
 	{
 	}
 
-	public void displayRewardToast(int id, ITextComponent text, Icon icon)
+	public void displayRewardToast(int id, Component text, Icon icon)
 	{
 	}
 
-	public void editObject(int id, CompoundNBT nbt)
+	public void editObject(int id, CompoundTag nbt)
 	{
 	}
 

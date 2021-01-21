@@ -3,17 +3,17 @@ package com.feed_the_beast.ftbquests.quest.task;
 import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.World;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.Registry;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -22,12 +22,12 @@ import net.minecraftforge.api.distmarker.OnlyIn;
  */
 public class DimensionTask extends Task
 {
-	public RegistryKey<World> dimension;
+	public ResourceKey<Level> dimension;
 
 	public DimensionTask(Quest quest)
 	{
 		super(quest);
-		dimension = World.THE_NETHER;
+		dimension = Level.NETHER;
 	}
 
 	@Override
@@ -37,31 +37,31 @@ public class DimensionTask extends Task
 	}
 
 	@Override
-	public void writeData(CompoundNBT nbt)
+	public void writeData(CompoundTag nbt)
 	{
 		super.writeData(nbt);
-		nbt.putString("dimension", dimension.getLocation().toString());
+		nbt.putString("dimension", dimension.location().toString());
 	}
 
 	@Override
-	public void readData(CompoundNBT nbt)
+	public void readData(CompoundTag nbt)
 	{
 		super.readData(nbt);
-		dimension = RegistryKey.getOrCreateKey(Registry.WORLD_KEY, new ResourceLocation(nbt.getString("dimension")));
+		dimension = ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(nbt.getString("dimension")));
 	}
 
 	@Override
-	public void writeNetData(PacketBuffer buffer)
+	public void writeNetData(FriendlyByteBuf buffer)
 	{
 		super.writeNetData(buffer);
-		buffer.writeResourceLocation(dimension.getLocation());
+		buffer.writeResourceLocation(dimension.location());
 	}
 
 	@Override
-	public void readNetData(PacketBuffer buffer)
+	public void readNetData(FriendlyByteBuf buffer)
 	{
 		super.readNetData(buffer);
-		dimension = RegistryKey.getOrCreateKey(Registry.WORLD_KEY, buffer.readResourceLocation());
+		dimension = ResourceKey.create(Registry.DIMENSION_REGISTRY, buffer.readResourceLocation());
 	}
 
 	@Override
@@ -69,13 +69,13 @@ public class DimensionTask extends Task
 	public void getConfig(ConfigGroup config)
 	{
 		super.getConfig(config);
-		config.addString("dim", dimension.getLocation().toString(), v -> dimension = RegistryKey.getOrCreateKey(Registry.WORLD_KEY, new ResourceLocation(v)), "minecraft:the_nether");
+		config.addString("dim", dimension.location().toString(), v -> dimension = ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(v)), "minecraft:the_nether");
 	}
 
 	@Override
-	public IFormattableTextComponent getAltTitle()
+	public MutableComponent getAltTitle()
 	{
-		return new TranslationTextComponent("ftbquests.task.ftbquests.dimension").appendString(": ").append(new StringTextComponent(dimension.getLocation().toString()).mergeStyle(TextFormatting.DARK_GREEN));
+		return new TranslatableComponent("ftbquests.task.ftbquests.dimension").append(": ").append(new TextComponent(dimension.location().toString()).withStyle(ChatFormatting.DARK_GREEN));
 	}
 
 	@Override
@@ -98,9 +98,9 @@ public class DimensionTask extends Task
 		}
 
 		@Override
-		public boolean canSubmit(ServerPlayerEntity player)
+		public boolean canSubmit(ServerPlayer player)
 		{
-			return !player.isSpectator() && player.world.getDimensionKey() == task.dimension;
+			return !player.isSpectator() && player.level.dimension() == task.dimension;
 		}
 	}
 }

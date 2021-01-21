@@ -5,17 +5,17 @@ import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.icon.ItemIcon;
+import net.minecraft.ChatFormatting;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.advancements.CriterionProgress;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -39,7 +39,7 @@ public class AdvancementTask extends Task
 	}
 
 	@Override
-	public void writeData(CompoundNBT nbt)
+	public void writeData(CompoundTag nbt)
 	{
 		super.writeData(nbt);
 		nbt.putString("advancement", advancement);
@@ -47,7 +47,7 @@ public class AdvancementTask extends Task
 	}
 
 	@Override
-	public void readData(CompoundNBT nbt)
+	public void readData(CompoundTag nbt)
 	{
 		super.readData(nbt);
 		advancement = nbt.getString("advancement");
@@ -55,19 +55,19 @@ public class AdvancementTask extends Task
 	}
 
 	@Override
-	public void writeNetData(PacketBuffer buffer)
+	public void writeNetData(FriendlyByteBuf buffer)
 	{
 		super.writeNetData(buffer);
-		buffer.writeString(advancement);
-		buffer.writeString(criterion);
+		buffer.writeUtf(advancement);
+		buffer.writeUtf(criterion);
 	}
 
 	@Override
-	public void readNetData(PacketBuffer buffer)
+	public void readNetData(FriendlyByteBuf buffer)
 	{
 		super.readNetData(buffer);
-		advancement = buffer.readString();
-		criterion = buffer.readString();
+		advancement = buffer.readUtf();
+		criterion = buffer.readUtf();
 	}
 
 	@Override
@@ -80,13 +80,13 @@ public class AdvancementTask extends Task
 	}
 
 	@Override
-	public IFormattableTextComponent getAltTitle()
+	public MutableComponent getAltTitle()
 	{
-		Advancement a = Minecraft.getInstance().player.connection.getAdvancementManager().getAdvancementList().getAdvancement(new ResourceLocation(advancement));
+		Advancement a = Minecraft.getInstance().player.connection.getAdvancements().getAdvancements().get(new ResourceLocation(advancement));
 
 		if (a != null && a.getDisplay() != null)
 		{
-			return new TranslationTextComponent("ftbquests.task.ftbquests.advancement").appendString(": ").append(a.getDisplay().getTitle().deepCopy().mergeStyle(TextFormatting.YELLOW));
+			return new TranslatableComponent("ftbquests.task.ftbquests.advancement").append(": ").append(a.getDisplay().getTitle().copy().withStyle(ChatFormatting.YELLOW));
 		}
 
 		return super.getAltTitle();
@@ -95,7 +95,7 @@ public class AdvancementTask extends Task
 	@Override
 	public Icon getAltIcon()
 	{
-		Advancement a = Minecraft.getInstance().player.connection.getAdvancementManager().getAdvancementList().getAdvancement(new ResourceLocation(advancement));
+		Advancement a = Minecraft.getInstance().player.connection.getAdvancements().getAdvancements().get(new ResourceLocation(advancement));
 		return a == null || a.getDisplay() == null ? super.getAltIcon() : ItemIcon.getItemIcon(a.getDisplay().getIcon());
 	}
 
@@ -119,21 +119,21 @@ public class AdvancementTask extends Task
 		}
 
 		@Override
-		public boolean canSubmit(ServerPlayerEntity player)
+		public boolean canSubmit(ServerPlayer player)
 		{
 			if (task.advancement.isEmpty())
 			{
 				return false;
 			}
 
-			Advancement a = player.server.getAdvancementManager().getAdvancement(new ResourceLocation(task.advancement));
+			Advancement a = player.server.getAdvancements().getAdvancement(new ResourceLocation(task.advancement));
 
 			if (a == null)
 			{
 				return false;
 			}
 
-			AdvancementProgress progress = player.getAdvancements().getProgress(a);
+			AdvancementProgress progress = player.getAdvancements().getOrStartProgress(a);
 
 			if (task.criterion.isEmpty())
 			{
@@ -141,8 +141,8 @@ public class AdvancementTask extends Task
 			}
 			else
 			{
-				CriterionProgress criterionProgress = progress.getCriterionProgress(task.criterion);
-				return criterionProgress != null && criterionProgress.isObtained();
+				CriterionProgress criterionProgress = progress.getCriterion(task.criterion);
+				return criterionProgress != null && criterionProgress.isDone();
 			}
 		}
 	}

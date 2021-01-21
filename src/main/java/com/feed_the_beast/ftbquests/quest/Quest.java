@@ -18,15 +18,15 @@ import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.icon.IconAnimation;
 import com.feed_the_beast.mods.ftbguilibrary.utils.Bits;
 import com.feed_the_beast.mods.ftbguilibrary.utils.ClientUtils;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.nbt.StringNBT;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.MinecraftForge;
@@ -60,8 +60,8 @@ public final class Quest extends QuestObject implements Movable
 	public boolean optional;
 	public int minWidth;
 
-	private IFormattableTextComponent cachedDescription = null;
-	private IFormattableTextComponent[] cachedText = null;
+	private MutableComponent cachedDescription = null;
+	private MutableComponent[] cachedText = null;
 
 	public Quest(Chapter c)
 	{
@@ -117,7 +117,7 @@ public final class Quest extends QuestObject implements Movable
 	}
 
 	@Override
-	public void writeData(CompoundNBT nbt)
+	public void writeData(CompoundTag nbt)
 	{
 		super.writeData(nbt);
 		nbt.putDouble("x", x);
@@ -135,11 +135,11 @@ public final class Quest extends QuestObject implements Movable
 
 		if (!description.isEmpty())
 		{
-			ListNBT array = new ListNBT();
+			ListTag array = new ListTag();
 
 			for (String value : description)
 			{
-				array.add(StringNBT.valueOf(value));
+				array.add(StringTag.valueOf(value));
 			}
 
 			nbt.put("description", array);
@@ -208,7 +208,7 @@ public final class Quest extends QuestObject implements Movable
 	}
 
 	@Override
-	public void readData(CompoundNBT nbt)
+	public void readData(CompoundTag nbt)
 	{
 		super.readData(nbt);
 		subtitle = nbt.getString("subtitle");
@@ -223,7 +223,7 @@ public final class Quest extends QuestObject implements Movable
 
 		description.clear();
 
-		ListNBT list = nbt.getList("description", Constants.NBT.TAG_STRING);
+		ListTag list = nbt.getList("description", Constants.NBT.TAG_STRING);
 
 		for (int k = 0; k < list.size(); k++)
 		{
@@ -255,7 +255,7 @@ public final class Quest extends QuestObject implements Movable
 	}
 
 	@Override
-	public void writeNetData(PacketBuffer buffer)
+	public void writeNetData(FriendlyByteBuf buffer)
 	{
 		super.writeNetData(buffer);
 		int flags = 0;
@@ -277,12 +277,12 @@ public final class Quest extends QuestObject implements Movable
 
 		if (!subtitle.isEmpty())
 		{
-			buffer.writeString(subtitle);
+			buffer.writeUtf(subtitle);
 		}
 
 		buffer.writeDouble(x);
 		buffer.writeDouble(y);
-		buffer.writeString(shape, Short.MAX_VALUE);
+		buffer.writeUtf(shape, Short.MAX_VALUE);
 
 		if (!description.isEmpty())
 		{
@@ -291,7 +291,7 @@ public final class Quest extends QuestObject implements Movable
 
 		if (!guidePage.isEmpty())
 		{
-			buffer.writeString(guidePage);
+			buffer.writeUtf(guidePage);
 		}
 
 		buffer.writeVarInt(minRequiredDependencies);
@@ -322,7 +322,7 @@ public final class Quest extends QuestObject implements Movable
 	}
 
 	@Override
-	public void readNetData(PacketBuffer buffer)
+	public void readNetData(FriendlyByteBuf buffer)
 	{
 		super.readNetData(buffer);
 		int flags = buffer.readVarInt();
@@ -330,10 +330,10 @@ public final class Quest extends QuestObject implements Movable
 		hideDependencyLines = Tristate.read(buffer);
 		hideTextUntilComplete = Tristate.read(buffer);
 
-		subtitle = Bits.getFlag(flags, 1) ? buffer.readString() : "";
+		subtitle = Bits.getFlag(flags, 1) ? buffer.readUtf() : "";
 		x = buffer.readDouble();
 		y = buffer.readDouble();
-		shape = buffer.readString(Short.MAX_VALUE);
+		shape = buffer.readUtf(Short.MAX_VALUE);
 
 		if (Bits.getFlag(flags, 2))
 		{
@@ -345,7 +345,7 @@ public final class Quest extends QuestObject implements Movable
 		}
 
 		//customClick = Bits.getFlag(flags, 4) ? buffer.readString() : "";
-		guidePage = Bits.getFlag(flags, 8) ? buffer.readString() : "";
+		guidePage = Bits.getFlag(flags, 8) ? buffer.readUtf() : "";
 		//customClick = Bits.getFlag(flags, 32) ? data.readString() : "";
 		//hideDependencyLines = Bits.getFlag(flags, 64);
 		//hideTextUntilComplete = Bits.getFlag(flags, 128);
@@ -399,14 +399,14 @@ public final class Quest extends QuestObject implements Movable
 	}
 
 	@Override
-	public void onCompleted(PlayerData data, List<ServerPlayerEntity> onlineMembers, List<ServerPlayerEntity> notifiedPlayers)
+	public void onCompleted(PlayerData data, List<ServerPlayer> onlineMembers, List<ServerPlayer> notifiedPlayers)
 	{
 		//data.setTimesCompleted(this, data.getTimesCompleted(this) + 1);
 		super.onCompleted(data, onlineMembers, notifiedPlayers);
 
 		if (!disableToast)
 		{
-			for (ServerPlayerEntity player : notifiedPlayers)
+			for (ServerPlayer player : notifiedPlayers)
 			{
 				new MessageDisplayCompletionToast(id).sendTo(player);
 			}
@@ -476,14 +476,14 @@ public final class Quest extends QuestObject implements Movable
 	}
 
 	@Override
-	public IFormattableTextComponent getAltTitle()
+	public MutableComponent getAltTitle()
 	{
 		if (!tasks.isEmpty())
 		{
 			return tasks.get(0).getTitle();
 		}
 
-		return new TranslationTextComponent("ftbquests.unnamed");
+		return new TranslatableComponent("ftbquests.unnamed");
 	}
 
 	@Override
@@ -658,25 +658,25 @@ public final class Quest extends QuestObject implements Movable
 	}
 
 	@OnlyIn(Dist.CLIENT)
-	public IFormattableTextComponent getSubtitle()
+	public MutableComponent getSubtitle()
 	{
 		if (cachedDescription != null)
 		{
 			return cachedDescription;
 		}
 
-		IFormattableTextComponent textDesc = loadText().getComponent("description");
+		MutableComponent textDesc = loadText().getComponent("description");
 
-		if (textDesc != StringTextComponent.EMPTY)
+		if (textDesc != TextComponent.EMPTY)
 		{
 			cachedDescription = textDesc;
 			return cachedDescription;
 		}
 
 		String key = String.format("quests.%08x.description", id);
-		IFormattableTextComponent t = FTBQuestsClient.addI18nAndColors(I18n.format(key));
+		MutableComponent t = FTBQuestsClient.addI18nAndColors(I18n.get(key));
 
-		if (t == StringTextComponent.EMPTY || key.equals(t.getString()))
+		if (t == TextComponent.EMPTY || key.equals(t.getString()))
 		{
 			cachedDescription = FTBQuestsClient.addI18nAndColors(subtitle);
 		}
@@ -689,7 +689,7 @@ public final class Quest extends QuestObject implements Movable
 	}
 
 	@OnlyIn(Dist.CLIENT)
-	public IFormattableTextComponent[] getDescription()
+	public MutableComponent[] getDescription()
 	{
 		if (cachedText != null)
 		{
@@ -705,10 +705,10 @@ public final class Quest extends QuestObject implements Movable
 
 		if (description.isEmpty())
 		{
-			return new IFormattableTextComponent[0];
+			return new MutableComponent[0];
 		}
 
-		cachedText = new IFormattableTextComponent[description.size()];
+		cachedText = new MutableComponent[description.size()];
 
 		for (int i = 0; i < cachedText.length; i++)
 		{

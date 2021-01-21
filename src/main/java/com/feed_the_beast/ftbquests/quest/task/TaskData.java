@@ -6,8 +6,8 @@ import com.feed_the_beast.ftbquests.quest.ChangeProgress;
 import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.util.FTBQuestsInventoryListener;
 import com.feed_the_beast.mods.ftbguilibrary.utils.StringUtils;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.ItemStack;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.MinecraftForge;
 
 import java.util.Collections;
@@ -61,8 +61,8 @@ public class TaskData<T extends Task>
 				if (!taskCompleted && isComplete())
 				{
 					taskCompleted = true;
-					List<ServerPlayerEntity> onlineMembers = data.getOnlineMembers();
-					List<ServerPlayerEntity> notifiedPlayers;
+					List<ServerPlayer> onlineMembers = data.getOnlineMembers();
+					List<ServerPlayer> notifiedPlayers;
 
 					if (!task.quest.chapter.alwaysInvisible && ChangeProgress.sendNotifications.get(ChangeProgress.sendUpdates))
 					{
@@ -75,7 +75,7 @@ public class TaskData<T extends Task>
 
 					task.onCompleted(data, onlineMembers, notifiedPlayers);
 
-					for (ServerPlayerEntity player : onlineMembers)
+					for (ServerPlayer player : onlineMembers)
 					{
 						FTBQuestsInventoryListener.detect(player, ItemStack.EMPTY, task.id);
 					}
@@ -133,11 +133,11 @@ public class TaskData<T extends Task>
 		return data.toString() + "#" + task;
 	}
 
-	public void submitTask(ServerPlayerEntity player, ItemStack item)
+	public void submitTask(ServerPlayer player, ItemStack item)
 	{
 	}
 
-	public final void submitTask(ServerPlayerEntity player)
+	public final void submitTask(ServerPlayer player)
 	{
 		submitTask(player, ItemStack.EMPTY);
 	}

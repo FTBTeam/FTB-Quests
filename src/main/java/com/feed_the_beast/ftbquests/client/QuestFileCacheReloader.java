@@ -1,7 +1,7 @@
 package com.feed_the_beast.ftbquests.client;
 
 
-import net.minecraft.resources.IResourceManager;
+import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraftforge.resource.IResourceType;
 import net.minecraftforge.resource.ISelectiveResourceReloadListener;
 
@@ -13,7 +13,7 @@ import java.util.function.Predicate;
 public class QuestFileCacheReloader implements ISelectiveResourceReloadListener
 {
 	@Override
-	public void onResourceManagerReload(IResourceManager resourceManager, Predicate<IResourceType> resourcePredicate)
+	public void onResourceManagerReload(ResourceManager resourceManager, Predicate<IResourceType> resourcePredicate)
 	{
 		if (ClientQuestFile.exists())
 		{

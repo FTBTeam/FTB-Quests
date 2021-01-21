@@ -2,31 +2,31 @@ package com.feed_the_beast.ftbquests.gui;
 
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.misc.SimpleToast;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 
 /**
  * @author LatvianModder
  */
 public class RewardToast extends SimpleToast
 {
-	private final ITextComponent text;
+	private final Component text;
 	private final Icon icon;
 
-	public RewardToast(ITextComponent t, Icon i)
+	public RewardToast(Component t, Icon i)
 	{
 		text = t;
 		icon = i;
 	}
 
 	@Override
-	public ITextComponent getTitle()
+	public Component getTitle()
 	{
-		return new TranslationTextComponent("ftbquests.reward.collected");
+		return new TranslatableComponent("ftbquests.reward.collected");
 	}
 
 	@Override
-	public ITextComponent getSubtitle()
+	public Component getSubtitle()
 	{
 		return text;
 	}

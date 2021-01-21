@@ -1,7 +1,7 @@
 package com.feed_the_beast.ftbquests.net;
 
 import com.feed_the_beast.ftbquests.FTBQuests;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.fml.network.NetworkEvent;
 
 /**
@@ -12,7 +12,7 @@ public class MessageMoveChapterResponse extends MessageBase
 	private final int id;
 	private final boolean up;
 
-	MessageMoveChapterResponse(PacketBuffer buffer)
+	MessageMoveChapterResponse(FriendlyByteBuf buffer)
 	{
 		id = buffer.readVarInt();
 		up = buffer.readBoolean();
@@ -25,7 +25,7 @@ public class MessageMoveChapterResponse extends MessageBase
 	}
 
 	@Override
-	public void write(PacketBuffer buffer)
+	public void write(FriendlyByteBuf buffer)
 	{
 		buffer.writeVarInt(id);
 		buffer.writeBoolean(up);

@@ -17,12 +17,12 @@ import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
 import com.feed_the_beast.mods.ftbguilibrary.widget.SimpleTextButton;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
 import com.feed_the_beast.mods.ftbguilibrary.widget.WidgetVerticalSpace;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
-
 import javax.annotation.Nullable;
+
+import net.minecraft.ChatFormatting;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,7 +35,7 @@ public class GuiEditRewardTable extends GuiButtonListBase
 	{
 		private ButtonRewardTableSettings(Panel panel)
 		{
-			super(panel, new TranslationTextComponent("gui.settings"), GuiIcons.SETTINGS);
+			super(panel, new TranslatableComponent("gui.settings"), GuiIcons.SETTINGS);
 			setHeight(12);
 		}
 
@@ -54,7 +54,7 @@ public class GuiEditRewardTable extends GuiButtonListBase
 	{
 		private ButtonSaveRewardTable(Panel panel)
 		{
-			super(panel, new TranslationTextComponent("gui.accept"), GuiIcons.ACCEPT);
+			super(panel, new TranslatableComponent("gui.accept"), GuiIcons.ACCEPT);
 			setHeight(12);
 		}
 
@@ -63,7 +63,7 @@ public class GuiEditRewardTable extends GuiButtonListBase
 		{
 			playClickSound();
 			closeGui();
-			CompoundNBT nbt = new CompoundNBT();
+			CompoundTag nbt = new CompoundTag();
 			rewardTable.writeData(nbt);
 			originalTable.readData(nbt);
 			callback.run();
@@ -74,7 +74,7 @@ public class GuiEditRewardTable extends GuiButtonListBase
 	{
 		private ButtonAddWeightedReward(Panel panel)
 		{
-			super(panel, new TranslationTextComponent("gui.add"), GuiIcons.ADD);
+			super(panel, new TranslatableComponent("gui.add"), GuiIcons.ADD);
 			setHeight(12);
 		}
 
@@ -117,7 +117,7 @@ public class GuiEditRewardTable extends GuiButtonListBase
 		{
 			super.addMouseOverText(list);
 			reward.reward.addMouseOverText(list);
-			list.add(new TranslationTextComponent("ftbquests.reward_table.weight").appendString(": " + reward.weight).append(new StringTextComponent(" [" + WeightedReward.chanceString(reward.weight, rewardTable.getTotalWeight(true)) + "]").mergeStyle(TextFormatting.DARK_GRAY)));
+			list.add(new TranslatableComponent("ftbquests.reward_table.weight").append(": " + reward.weight).append(new TextComponent(" [" + WeightedReward.chanceString(reward.weight, rewardTable.getTotalWeight(true)) + "]").withStyle(ChatFormatting.DARK_GRAY)));
 		}
 
 		@Override
@@ -125,14 +125,14 @@ public class GuiEditRewardTable extends GuiButtonListBase
 		{
 			playClickSound();
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
-			contextMenu.add(new ContextMenuItem(new TranslationTextComponent("selectServer.edit"), GuiIcons.SETTINGS, () -> {
+			contextMenu.add(new ContextMenuItem(new TranslatableComponent("selectServer.edit"), GuiIcons.SETTINGS, () -> {
 				ConfigGroup group = new ConfigGroup(FTBQuests.MOD_ID);
 				reward.reward.getConfig(reward.reward.createSubGroup(group));
 				group.savedCallback = accepted -> run();
 				new GuiEditConfig(group).openGui();
 			}));
 
-			contextMenu.add(new ContextMenuItem(new TranslationTextComponent("ftbquests.reward_table.set_weight"), GuiIcons.SETTINGS, () -> {
+			contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.reward_table.set_weight"), GuiIcons.SETTINGS, () -> {
 				ConfigDouble c = new ConfigDouble(0D, Double.POSITIVE_INFINITY);
 				GuiEditConfigFromString.open(c, (double) reward.weight, 1D, accepted -> {
 					if (accepted)
@@ -154,10 +154,10 @@ public class GuiEditRewardTable extends GuiButtonListBase
 				});
 			}));
 
-			contextMenu.add(new ContextMenuItem(new TranslationTextComponent("selectServer.delete"), GuiIcons.REMOVE, () -> {
+			contextMenu.add(new ContextMenuItem(new TranslatableComponent("selectServer.delete"), GuiIcons.REMOVE, () -> {
 				rewardTable.rewards.remove(reward);
 				GuiEditRewardTable.this.refreshWidgets();
-			}).setYesNo(new TranslationTextComponent("delete_item", reward.reward.getTitle())));
+			}).setYesNo(new TranslatableComponent("delete_item", reward.reward.getTitle())));
 			GuiEditRewardTable.this.openContextMenu(contextMenu);
 		}
 
@@ -177,11 +177,11 @@ public class GuiEditRewardTable extends GuiButtonListBase
 	{
 		originalTable = r;
 		rewardTable = new RewardTable(originalTable.file);
-		CompoundNBT nbt = new CompoundNBT();
+		CompoundTag nbt = new CompoundTag();
 		originalTable.writeData(nbt);
 		rewardTable.readData(nbt);
 		callback = c;
-		setTitle(new TranslationTextComponent("ftbquests.reward_table"));
+		setTitle(new TranslatableComponent("ftbquests.reward_table"));
 		setBorder(1, 1, 1);
 	}
 

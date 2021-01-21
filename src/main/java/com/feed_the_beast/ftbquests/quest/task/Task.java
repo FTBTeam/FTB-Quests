@@ -20,12 +20,12 @@ import com.feed_the_beast.mods.ftbguilibrary.utils.StringUtils;
 import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
 import com.feed_the_beast.mods.ftbguilibrary.widget.WrappedIngredient;
-import com.mojang.blaze3d.matrix.MatrixStack;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.MinecraftForge;
@@ -86,7 +86,7 @@ public abstract class Task extends QuestObject
 	}
 
 	@Override
-	public final void onCompleted(PlayerData data, List<ServerPlayerEntity> onlineMembers, List<ServerPlayerEntity> notifiedPlayers)
+	public final void onCompleted(PlayerData data, List<ServerPlayer> onlineMembers, List<ServerPlayer> notifiedPlayers)
 	{
 		super.onCompleted(data, onlineMembers, notifiedPlayers);
 		MinecraftForge.EVENT_BUS.post(new ObjectCompletedEvent.TaskEvent(data, this, onlineMembers, notifiedPlayers));
@@ -179,7 +179,7 @@ public abstract class Task extends QuestObject
 	}
 
 	@Override
-	public IFormattableTextComponent getAltTitle()
+	public MutableComponent getAltTitle()
 	{
 		return getType().getDisplayName();
 	}
@@ -191,7 +191,7 @@ public abstract class Task extends QuestObject
 		return group.getGroup(getObjectType().id).getGroup(type.getRegistryName().getNamespace()).getGroup(type.getRegistryName().getPath());
 	}
 
-	public void drawGUI(@Nullable TaskData data, MatrixStack matrixStack, int x, int y, int w, int h)
+	public void drawGUI(@Nullable TaskData data, PoseStack matrixStack, int x, int y, int w, int h)
 	{
 		getIcon().draw(matrixStack, x, y, w, h);
 	}
@@ -217,7 +217,7 @@ public abstract class Task extends QuestObject
 		if (consumesResources())
 		{
 			list.blankLine();
-			list.add(new TranslationTextComponent("ftbquests.task.click_to_submit").mergeStyle(TextFormatting.YELLOW, TextFormatting.UNDERLINE));
+			list.add(new TranslatableComponent("ftbquests.task.click_to_submit").withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE));
 		}
 	}
 
@@ -260,9 +260,9 @@ public abstract class Task extends QuestObject
 	}
 
 	@OnlyIn(Dist.CLIENT)
-	public IFormattableTextComponent getButtonText()
+	public MutableComponent getButtonText()
 	{
-		return getMaxProgress() > 1L || consumesResources() ? new StringTextComponent(getMaxProgressString()) : (IFormattableTextComponent) StringTextComponent.EMPTY;
+		return getMaxProgress() > 1L || consumesResources() ? new TextComponent(getMaxProgressString()) : (MutableComponent) TextComponent.EMPTY;
 	}
 
 	public int autoSubmitOnPlayerTick()
