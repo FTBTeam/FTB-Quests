@@ -1,29 +1,52 @@
 plugins {
-	id 'forgified-fabric-loom' version '0.6.49'
-	// classpath 'gradle.plugin.com.matthewprenger:CurseGradle:1.1.0'
-	id 'maven-publish'
+    id "architectury-plugin" version "2.0.57"
+    id "forgified-fabric-loom" version "0.6.49" apply false
+    id "com.matthewprenger.cursegradle" version "1.4.0" apply false
+    id "maven-publish"
 }
 
-apply from: 'https://files.latmod.com/public/markdown-git-changelog.gradle'
-
-def ENV = System.getenv()
-version = ENV.BUILD_NUMBER ? "${mod_version}.${ENV.BUILD_NUMBER}" : "${mod_version}.custom"
-group = project.mod_package
-archivesBaseName = project.mod_name
-
-sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
-
-repositories {
-	maven { url = "https://www.cursemaven.com" }
-	maven { url "https://maven.latmod.com/" } //FTB GUI Library, Item Filters, FTB Teams, KubeJS
+architectury {
+    minecraft = rootProject.minecraft_version
 }
 
-loom {
-	mixinConfigs = ["ftbquests.mixins.json"]
-    silentMojangMappingsLicense()
-    useFabricMixin = true
+subprojects {
+    apply plugin: "forgified-fabric-loom"
+
+    loom {
+        silentMojangMappingsLicense()
+        useFabricMixin = true
+    }
 }
 
+allprojects {
+    apply plugin: "java"
+    apply plugin: "architectury-plugin"
+    apply from: "https://files.latmod.com/public/markdown-git-changelog.gradle"
+
+    archivesBaseName = rootProject.name
+    def ENV = System.getenv()
+    version = ENV.BUILD_NUMBER ? "${mod_version}.${ENV.BUILD_NUMBER}" : "${mod_version}.custom"
+    group = project.mod_package
+    archivesBaseName = project.mod_name
+
+    sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
+
+    tasks.withType(JavaCompile) {
+        options.encoding = "UTF-8"
+    }
+
+    repositories {
+        mavenLocal()
+        maven {
+            url "https://www.cursemaven.com"
+            content {
+                includeGroup "curse.maven"
+            }
+        }
+    }
+}
+
+/*
 dependencies {
 	minecraft "com.mojang:minecraft:${minecraft_version}"
 	mappings minecraft.officialMojangMappings()
@@ -70,3 +93,4 @@ if (ENV.CURSEFORGE_KEY) {
 		}
 	}
 }
+*/
