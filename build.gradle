@@ -14,7 +14,6 @@ archivesBaseName = project.mod_name
 sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
 
 repositories {
-	mavenLocal()
 	maven { url = "https://www.cursemaven.com" }
 	maven { url "https://maven.latmod.com/" } //FTB GUI Library, Item Filters, FTB Teams, KubeJS
 }
