@@ -4,9 +4,8 @@ import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.net.MessageEditObject;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.util.ResourceLocation;
-
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.resources.ResourceLocation;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -75,9 +74,9 @@ public class TextEditorFrame extends JFrame
 		panel.add(subtitle = new JTextField(originalSubtitle, 75));
 		panel.add(description = new JTextArea(originalDescription, 30, 75));
 
-		title.setBorder(new TitledBorder(BorderFactory.createLineBorder(Color.GRAY, 1, true), I18n.format("ftbquests.title")));
-		subtitle.setBorder(new TitledBorder(BorderFactory.createLineBorder(Color.GRAY, 1, true), I18n.format("ftbquests.quest.subtitle")));
-		description.setBorder(new TitledBorder(BorderFactory.createLineBorder(Color.GRAY, 1, true), I18n.format("ftbquests.quest.description")));
+		title.setBorder(new TitledBorder(BorderFactory.createLineBorder(Color.GRAY, 1, true), I18n.get("ftbquests.title")));
+		subtitle.setBorder(new TitledBorder(BorderFactory.createLineBorder(Color.GRAY, 1, true), I18n.get("ftbquests.quest.subtitle")));
+		description.setBorder(new TitledBorder(BorderFactory.createLineBorder(Color.GRAY, 1, true), I18n.get("ftbquests.quest.description")));
 
 		JPanel buttonPanel = new JPanel();
 
@@ -103,7 +102,7 @@ public class TextEditorFrame extends JFrame
 
 	private void saveClicked(ActionEvent event)
 	{
-		Minecraft.getInstance().runAsync(() -> {
+		Minecraft.getInstance().submit(() -> {
 			quest.title = title.getText().trim();
 			quest.subtitle = subtitle.getText().trim();
 			quest.description.clear();

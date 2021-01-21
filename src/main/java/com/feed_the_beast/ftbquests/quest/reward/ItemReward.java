@@ -8,14 +8,14 @@ import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.icon.ItemIcon;
 import com.feed_the_beast.mods.ftbguilibrary.widget.WrappedIngredient;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.items.ItemHandlerHelper;
@@ -56,7 +56,7 @@ public class ItemReward extends Reward
 	}
 
 	@Override
-	public void writeData(CompoundNBT nbt)
+	public void writeData(CompoundTag nbt)
 	{
 		super.writeData(nbt);
 		NBTUtils.write(nbt, "item", item);
@@ -78,7 +78,7 @@ public class ItemReward extends Reward
 	}
 
 	@Override
-	public void readData(CompoundNBT nbt)
+	public void readData(CompoundTag nbt)
 	{
 		super.readData(nbt);
 		item = NBTUtils.read(nbt, "item");
@@ -96,7 +96,7 @@ public class ItemReward extends Reward
 	}
 
 	@Override
-	public void writeNetData(PacketBuffer buffer)
+	public void writeNetData(FriendlyByteBuf buffer)
 	{
 		super.writeNetData(buffer);
 		FTBQuestsNetHandler.writeItemType(buffer, item);
@@ -106,7 +106,7 @@ public class ItemReward extends Reward
 	}
 
 	@Override
-	public void readNetData(PacketBuffer buffer)
+	public void readNetData(FriendlyByteBuf buffer)
 	{
 		super.readNetData(buffer);
 		item = FTBQuestsNetHandler.readItemType(buffer);
@@ -127,14 +127,14 @@ public class ItemReward extends Reward
 	}
 
 	@Override
-	public void claim(ServerPlayerEntity player, boolean notify)
+	public void claim(ServerPlayer player, boolean notify)
 	{
-		if (onlyOne && player.inventory.hasItemStack(item))
+		if (onlyOne && player.inventory.contains(item))
 		{
 			return;
 		}
 
-		int size = count + player.world.rand.nextInt(randomBonus + 1);
+		int size = count + player.level.random.nextInt(randomBonus + 1);
 
 		while (size > 0)
 		{
@@ -150,7 +150,7 @@ public class ItemReward extends Reward
 	}
 
 	@Override
-	public boolean automatedClaimPre(TileEntity tileEntity, List<ItemStack> items, Random random, UUID playerId, @Nullable ServerPlayerEntity player)
+	public boolean automatedClaimPre(BlockEntity tileEntity, List<ItemStack> items, Random random, UUID playerId, @Nullable ServerPlayer player)
 	{
 		int size = count + random.nextInt(randomBonus + 1);
 
@@ -165,7 +165,7 @@ public class ItemReward extends Reward
 	}
 
 	@Override
-	public void automatedClaimPost(TileEntity tileEntity, UUID playerId, @Nullable ServerPlayerEntity player)
+	public void automatedClaimPost(BlockEntity tileEntity, UUID playerId, @Nullable ServerPlayer player)
 	{
 	}
 
@@ -181,9 +181,9 @@ public class ItemReward extends Reward
 	}
 
 	@Override
-	public IFormattableTextComponent getAltTitle()
+	public MutableComponent getAltTitle()
 	{
-		return new StringTextComponent((count > 1 ? (randomBonus > 0 ? (count + "-" + (count + randomBonus) + "x ") : (count + "x ")) : "")).append(item.getDisplayName());
+		return new TextComponent((count > 1 ? (randomBonus > 0 ? (count + "-" + (count + randomBonus) + "x ") : (count + "x ")) : "")).append(item.getHoverName());
 	}
 
 	@Override

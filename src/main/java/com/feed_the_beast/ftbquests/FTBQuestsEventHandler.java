@@ -39,15 +39,15 @@ import com.feed_the_beast.ftbquests.quest.task.XPTask;
 import com.feed_the_beast.ftbquests.util.FTBQuestsInventoryListener;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.widget.GuiIcons;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.fluid.Fluids;
-import net.minecraft.inventory.container.PlayerContainer;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.world.GameRules;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.event.RegisterCommandsEvent;
@@ -187,12 +187,12 @@ public class FTBQuestsEventHandler
 
 	private void playerLoggedIn(PlayerEvent.PlayerLoggedInEvent event)
 	{
-		ServerQuestFile.INSTANCE.onLoggedIn((ServerPlayerEntity) event.getPlayer());
+		ServerQuestFile.INSTANCE.onLoggedIn((ServerPlayer) event.getPlayer());
 	}
 
 	private void playerKill(LivingDeathEvent event)
 	{
-		if (event.getSource().getTrueSource() instanceof ServerPlayerEntity && !(event.getSource().getTrueSource() instanceof FakePlayer))
+		if (event.getSource().getEntity() instanceof ServerPlayer && !(event.getSource().getEntity() instanceof FakePlayer))
 		{
 			if (killTasks == null)
 			{
@@ -204,7 +204,7 @@ public class FTBQuestsEventHandler
 				return;
 			}
 
-			ServerPlayerEntity player = (ServerPlayerEntity) event.getSource().getTrueSource();
+			ServerPlayer player = (ServerPlayer) event.getSource().getEntity();
 			PlayerData data = ServerQuestFile.INSTANCE.getData(player);
 
 			for (KillTask task : killTasks)
@@ -221,7 +221,7 @@ public class FTBQuestsEventHandler
 
 	private void playerTick(TickEvent.PlayerTickEvent event)
 	{
-		if (event.phase == TickEvent.Phase.END && !event.player.world.isRemote && ServerQuestFile.INSTANCE != null && !(event.player instanceof FakePlayer))
+		if (event.phase == TickEvent.Phase.END && !event.player.level.isClientSide && ServerQuestFile.INSTANCE != null && !(event.player instanceof FakePlayer))
 		{
 			if (autoSubmitTasks == null)
 			{
@@ -234,7 +234,7 @@ public class FTBQuestsEventHandler
 			}
 
 			PlayerData data = ServerQuestFile.INSTANCE.getData(event.player);
-			long t = event.player.world.getGameTime();
+			long t = event.player.level.getGameTime();
 
 			for (Task task : autoSubmitTasks)
 			{
@@ -246,7 +246,7 @@ public class FTBQuestsEventHandler
 
 					if (!taskData.isComplete() && data.canStartTasks(task.quest))
 					{
-						taskData.submitTask((ServerPlayerEntity) event.player);
+						taskData.submitTask((ServerPlayer) event.player);
 					}
 				}
 			}
@@ -257,7 +257,7 @@ public class FTBQuestsEventHandler
 	{
 		LivingEntity e = event.getEntityLiving();
 
-		if (e.world.isRemote || e instanceof PlayerEntity)
+		if (e.level.isClientSide || e instanceof Player)
 		{
 			return;
 		}
@@ -267,70 +267,70 @@ public class FTBQuestsEventHandler
 			return;
 		}
 
-		LootCrate crate = ServerQuestFile.INSTANCE.getRandomLootCrate(e, e.world.rand);
+		LootCrate crate = ServerQuestFile.INSTANCE.getRandomLootCrate(e, e.level.random);
 
 		if (crate != null)
 		{
-			ItemEntity ei = new ItemEntity(e.world, e.getPosX(), e.getPosY(), e.getPosZ(), crate.createStack());
-			ei.setPickupDelay(10);
+			ItemEntity ei = new ItemEntity(e.level, e.getX(), e.getY(), e.getZ(), crate.createStack());
+			ei.setPickUpDelay(10);
 			event.getDrops().add(ei);
 		}
 	}
 
 	private void itemCrafted(PlayerEvent.ItemCraftedEvent event)
 	{
-		if (event.getPlayer() instanceof ServerPlayerEntity && !event.getCrafting().isEmpty())
+		if (event.getPlayer() instanceof ServerPlayer && !event.getCrafting().isEmpty())
 		{
-			FTBQuestsInventoryListener.detect((ServerPlayerEntity) event.getPlayer(), event.getCrafting(), 0);
+			FTBQuestsInventoryListener.detect((ServerPlayer) event.getPlayer(), event.getCrafting(), 0);
 		}
 	}
 
 	private void itemSmelted(PlayerEvent.ItemSmeltedEvent event)
 	{
-		if (event.getPlayer() instanceof ServerPlayerEntity && !event.getSmelting().isEmpty())
+		if (event.getPlayer() instanceof ServerPlayer && !event.getSmelting().isEmpty())
 		{
-			FTBQuestsInventoryListener.detect((ServerPlayerEntity) event.getPlayer(), event.getSmelting(), 0);
+			FTBQuestsInventoryListener.detect((ServerPlayer) event.getPlayer(), event.getSmelting(), 0);
 		}
 	}
 
 	private void cloned(PlayerEvent.Clone event)
 	{
-		event.getPlayer().container.addListener(new FTBQuestsInventoryListener((ServerPlayerEntity) event.getPlayer()));
+		event.getPlayer().inventoryMenu.addSlotListener(new FTBQuestsInventoryListener((ServerPlayer) event.getPlayer()));
 
 		if (!event.isWasDeath())
 		{
 			return;
 		}
 
-		PlayerEntity player = event.getPlayer();
-		PlayerEntity oldPlayer = event.getOriginal();
+		Player player = event.getPlayer();
+		Player oldPlayer = event.getOriginal();
 
-		if (player instanceof FakePlayer || player.world.getGameRules().getBoolean(GameRules.KEEP_INVENTORY))
+		if (player instanceof FakePlayer || player.level.getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY))
 		{
 			return;
 		}
 
-		for (int i = 0; i < oldPlayer.inventory.mainInventory.size(); i++)
+		for (int i = 0; i < oldPlayer.inventory.items.size(); i++)
 		{
-			ItemStack stack = oldPlayer.inventory.mainInventory.get(i);
+			ItemStack stack = oldPlayer.inventory.items.get(i);
 
-			if (stack.getItem() == FTBQuestsItems.BOOK && player.addItemStackToInventory(stack))
+			if (stack.getItem() == FTBQuestsItems.BOOK && player.addItem(stack))
 			{
-				oldPlayer.inventory.mainInventory.set(i, ItemStack.EMPTY);
+				oldPlayer.inventory.items.set(i, ItemStack.EMPTY);
 			}
 		}
 	}
 
 	private void dropsEvent(LivingDropsEvent event)
 	{
-		if (!(event.getEntity() instanceof ServerPlayerEntity))
+		if (!(event.getEntity() instanceof ServerPlayer))
 		{
 			return;
 		}
 
-		ServerPlayerEntity player = (ServerPlayerEntity) event.getEntity();
+		ServerPlayer player = (ServerPlayer) event.getEntity();
 
-		if (player instanceof FakePlayer || player.world.getGameRules().getBoolean(GameRules.KEEP_INVENTORY))
+		if (player instanceof FakePlayer || player.level.getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY))
 		{
 			return;
 		}
@@ -342,7 +342,7 @@ public class FTBQuestsEventHandler
 			ItemEntity drop = iterator.next();
 			ItemStack stack = drop.getItem();
 
-			if (stack.getItem() == FTBQuestsItems.BOOK && player.addItemStackToInventory(stack))
+			if (stack.getItem() == FTBQuestsItems.BOOK && player.addItem(stack))
 			{
 				iterator.remove();
 			}
@@ -351,22 +351,22 @@ public class FTBQuestsEventHandler
 
 	private void changedDimension(PlayerEvent.PlayerChangedDimensionEvent event)
 	{
-		if (event.getPlayer() instanceof ServerPlayerEntity && !(event.getPlayer() instanceof FakePlayer))
+		if (event.getPlayer() instanceof ServerPlayer && !(event.getPlayer() instanceof FakePlayer))
 		{
 			PlayerData data = ServerQuestFile.INSTANCE.getData(event.getPlayer());
 
 			for (DimensionTask task : ServerQuestFile.INSTANCE.collect(DimensionTask.class))
 			{
-				data.getTaskData(task).submitTask((ServerPlayerEntity) event.getPlayer());
+				data.getTaskData(task).submitTask((ServerPlayer) event.getPlayer());
 			}
 		}
 	}
 
 	private void containerOpened(PlayerContainerEvent.Open event)
 	{
-		if (event.getPlayer() instanceof ServerPlayerEntity && !(event.getPlayer() instanceof FakePlayer) && !(event.getContainer() instanceof PlayerContainer))
+		if (event.getPlayer() instanceof ServerPlayer && !(event.getPlayer() instanceof FakePlayer) && !(event.getContainer() instanceof InventoryMenu))
 		{
-			event.getContainer().addListener(new FTBQuestsInventoryListener((ServerPlayerEntity) event.getPlayer()));
+			event.getContainer().addSlotListener(new FTBQuestsInventoryListener((ServerPlayer) event.getPlayer()));
 		}
 	}
 }

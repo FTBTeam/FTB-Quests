@@ -4,14 +4,14 @@ import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
 import com.feed_the_beast.mods.ftbguilibrary.config.NameMap;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.Stats;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -51,7 +51,7 @@ public class StatTask extends Task
 	}
 
 	@Override
-	public void writeData(CompoundNBT nbt)
+	public void writeData(CompoundTag nbt)
 	{
 		super.writeData(nbt);
 		nbt.putString("stat", stat.toString());
@@ -59,7 +59,7 @@ public class StatTask extends Task
 	}
 
 	@Override
-	public void readData(CompoundNBT nbt)
+	public void readData(CompoundTag nbt)
 	{
 		super.readData(nbt);
 		stat = new ResourceLocation(nbt.getString("stat"));
@@ -67,7 +67,7 @@ public class StatTask extends Task
 	}
 
 	@Override
-	public void writeNetData(PacketBuffer buffer)
+	public void writeNetData(FriendlyByteBuf buffer)
 	{
 		super.writeNetData(buffer);
 		buffer.writeResourceLocation(stat);
@@ -75,7 +75,7 @@ public class StatTask extends Task
 	}
 
 	@Override
-	public void readNetData(PacketBuffer buffer)
+	public void readNetData(FriendlyByteBuf buffer)
 	{
 		super.readNetData(buffer);
 		stat = buffer.readResourceLocation();
@@ -90,14 +90,14 @@ public class StatTask extends Task
 
 		List<ResourceLocation> list = new ArrayList<>();
 		Stats.CUSTOM.iterator().forEachRemaining(s -> list.add(s.getValue()));
-		config.addEnum("stat", stat, v -> stat = v, NameMap.of(Stats.MOB_KILLS, list).name(v -> new TranslationTextComponent("stat." + v.getNamespace() + "." + v.getPath())).create());
+		config.addEnum("stat", stat, v -> stat = v, NameMap.of(Stats.MOB_KILLS, list).name(v -> new TranslatableComponent("stat." + v.getNamespace() + "." + v.getPath())).create());
 		config.addInt("value", value, v -> value = v, 1, 1, Integer.MAX_VALUE);
 	}
 
 	@Override
-	public IFormattableTextComponent getAltTitle()
+	public MutableComponent getAltTitle()
 	{
-		return new TranslationTextComponent("stat." + stat.getNamespace() + "." + stat.getPath());
+		return new TranslatableComponent("stat." + stat.getNamespace() + "." + stat.getPath());
 	}
 
 	@Override
@@ -132,7 +132,7 @@ public class StatTask extends Task
 		}
 
 		@Override
-		public void submitTask(ServerPlayerEntity player, ItemStack item)
+		public void submitTask(ServerPlayer player, ItemStack item)
 		{
 			if (isComplete())
 			{

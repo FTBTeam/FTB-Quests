@@ -3,8 +3,8 @@ package com.feed_the_beast.ftbquests.net;
 import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.reward.Reward;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.fml.network.NetworkEvent;
 
 /**
@@ -15,7 +15,7 @@ public class MessageClaimReward extends MessageBase
 	private final int id;
 	private final boolean notify;
 
-	MessageClaimReward(PacketBuffer buffer)
+	MessageClaimReward(FriendlyByteBuf buffer)
 	{
 		id = buffer.readVarInt();
 		notify = buffer.readBoolean();
@@ -28,7 +28,7 @@ public class MessageClaimReward extends MessageBase
 	}
 
 	@Override
-	public void write(PacketBuffer buffer)
+	public void write(FriendlyByteBuf buffer)
 	{
 		buffer.writeVarInt(id);
 		buffer.writeBoolean(notify);
@@ -38,7 +38,7 @@ public class MessageClaimReward extends MessageBase
 	public void handle(NetworkEvent.Context context)
 	{
 		Reward reward = ServerQuestFile.INSTANCE.getReward(id);
-		ServerPlayerEntity player = context.getSender();
+		ServerPlayer player = context.getSender();
 
 		if (reward != null)
 		{

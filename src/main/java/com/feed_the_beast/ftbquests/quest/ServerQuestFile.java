@@ -7,10 +7,10 @@ import com.feed_the_beast.ftbquests.net.MessageSyncQuests;
 import com.feed_the_beast.ftbquests.util.FTBQuestsInventoryListener;
 import com.feed_the_beast.ftbquests.util.FileUtils;
 import com.feed_the_beast.ftbquests.util.NBTUtils;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.storage.FolderName;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.storage.LevelResource;
 import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.loading.FMLPaths;
 
@@ -23,7 +23,7 @@ import java.util.UUID;
  */
 public class ServerQuestFile extends QuestFile
 {
-	public static final FolderName FTBQUESTS_DATA = new FolderName("ftbquests");
+	public static final LevelResource FTBQUESTS_DATA = new LevelResource("ftbquests");
 
 	public static ServerQuestFile INSTANCE;
 
@@ -51,14 +51,14 @@ public class ServerQuestFile extends QuestFile
 			isLoading = false;
 		}
 
-		Path path = server.func_240776_a_(FTBQUESTS_DATA);
+		Path path = server.getWorldPath(FTBQUESTS_DATA);
 
 		if (Files.exists(path))
 		{
 			try
 			{
 				Files.list(path).forEach(path1 -> {
-					CompoundNBT nbt = NBTUtils.readSNBT(path1);
+					CompoundTag nbt = NBTUtils.readSNBT(path1);
 
 					try
 					{
@@ -135,7 +135,7 @@ public class ServerQuestFile extends QuestFile
 			shouldSave = false;
 		}
 
-		Path path = server.func_240776_a_(FTBQUESTS_DATA);
+		Path path = server.getWorldPath(FTBQUESTS_DATA);
 
 		for (PlayerData data : getAllData())
 		{
@@ -154,9 +154,9 @@ public class ServerQuestFile extends QuestFile
 		deleteSelf();
 	}
 
-	public void onLoggedIn(ServerPlayerEntity player)
+	public void onLoggedIn(ServerPlayer player)
 	{
-		UUID id = player.getUniqueID();
+		UUID id = player.getUUID();
 		PlayerData data = playerDataMap.get(id);
 
 		if (data == null)
@@ -173,7 +173,7 @@ public class ServerQuestFile extends QuestFile
 
 		addData(data, false);
 
-		for (ServerPlayerEntity player1 : server.getPlayerList().getPlayers())
+		for (ServerPlayer player1 : server.getPlayerList().getPlayers())
 		{
 			if (player1 != player)
 			{
@@ -182,7 +182,7 @@ public class ServerQuestFile extends QuestFile
 		}
 
 		new MessageSyncQuests(id, this).sendTo(player);
-		player.container.addListener(new FTBQuestsInventoryListener(player));
+		player.inventoryMenu.addSlotListener(new FTBQuestsInventoryListener(player));
 
 		for (Chapter chapter : ServerQuestFile.INSTANCE.chapters)
 		{

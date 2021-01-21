@@ -6,9 +6,8 @@ import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.task.Task;
-import net.minecraft.entity.player.ServerPlayerEntity;
-
 import java.util.List;
+import net.minecraft.server.level.ServerPlayer;
 
 /**
  * @author LatvianModder
@@ -17,10 +16,10 @@ public class ObjectCompletedEvent<T extends QuestObject> extends FTBQuestsEvent
 {
 	private final PlayerData data;
 	private final T object;
-	private final List<ServerPlayerEntity> onlineMembers;
-	private final List<ServerPlayerEntity> notifiedPlayers;
+	private final List<ServerPlayer> onlineMembers;
+	private final List<ServerPlayer> notifiedPlayers;
 
-	private ObjectCompletedEvent(PlayerData t, T o, List<ServerPlayerEntity> om, List<ServerPlayerEntity> n)
+	private ObjectCompletedEvent(PlayerData t, T o, List<ServerPlayer> om, List<ServerPlayer> n)
 	{
 		data = t;
 		object = o;
@@ -38,12 +37,12 @@ public class ObjectCompletedEvent<T extends QuestObject> extends FTBQuestsEvent
 		return object;
 	}
 
-	public List<ServerPlayerEntity> getOnlineMembers()
+	public List<ServerPlayer> getOnlineMembers()
 	{
 		return onlineMembers;
 	}
 
-	public List<ServerPlayerEntity> getNotifiedPlayers()
+	public List<ServerPlayer> getNotifiedPlayers()
 	{
 		return notifiedPlayers;
 	}
@@ -56,7 +55,7 @@ public class ObjectCompletedEvent<T extends QuestObject> extends FTBQuestsEvent
 
 	public static class FileEvent extends ObjectCompletedEvent<QuestFile>
 	{
-		public FileEvent(PlayerData t, QuestFile o, List<ServerPlayerEntity> om, List<ServerPlayerEntity> n)
+		public FileEvent(PlayerData t, QuestFile o, List<ServerPlayer> om, List<ServerPlayer> n)
 		{
 			super(t, o, om, n);
 		}
@@ -69,7 +68,7 @@ public class ObjectCompletedEvent<T extends QuestObject> extends FTBQuestsEvent
 
 	public static class ChapterEvent extends ObjectCompletedEvent<Chapter>
 	{
-		public ChapterEvent(PlayerData t, Chapter o, List<ServerPlayerEntity> om, List<ServerPlayerEntity> n)
+		public ChapterEvent(PlayerData t, Chapter o, List<ServerPlayer> om, List<ServerPlayer> n)
 		{
 			super(t, o, om, n);
 		}
@@ -82,7 +81,7 @@ public class ObjectCompletedEvent<T extends QuestObject> extends FTBQuestsEvent
 
 	public static class QuestEvent extends ObjectCompletedEvent<Quest>
 	{
-		public QuestEvent(PlayerData t, Quest o, List<ServerPlayerEntity> om, List<ServerPlayerEntity> n)
+		public QuestEvent(PlayerData t, Quest o, List<ServerPlayer> om, List<ServerPlayer> n)
 		{
 			super(t, o, om, n);
 		}
@@ -95,7 +94,7 @@ public class ObjectCompletedEvent<T extends QuestObject> extends FTBQuestsEvent
 
 	public static class TaskEvent extends ObjectCompletedEvent<Task>
 	{
-		public TaskEvent(PlayerData t, Task o, List<ServerPlayerEntity> om, List<ServerPlayerEntity> n)
+		public TaskEvent(PlayerData t, Task o, List<ServerPlayer> om, List<ServerPlayer> n)
 		{
 			super(t, o, om, n);
 		}

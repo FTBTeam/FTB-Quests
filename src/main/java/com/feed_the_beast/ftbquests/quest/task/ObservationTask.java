@@ -4,10 +4,10 @@ import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.HitResult;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -19,7 +19,7 @@ public class ObservationTask extends Task
 	@FunctionalInterface
 	public interface Check
 	{
-		boolean check(PlayerEntity player, RayTraceResult lookingAt);
+		boolean check(Player player, HitResult lookingAt);
 	}
 
 	public final Check matcher;
@@ -39,28 +39,28 @@ public class ObservationTask extends Task
 	}
 
 	@Override
-	public void writeData(CompoundNBT nbt)
+	public void writeData(CompoundTag nbt)
 	{
 		super.writeData(nbt);
 		nbt.putLong("ticks", ticks);
 	}
 
 	@Override
-	public void readData(CompoundNBT nbt)
+	public void readData(CompoundTag nbt)
 	{
 		super.readData(nbt);
 		ticks = nbt.getLong("ticks");
 	}
 
 	@Override
-	public void writeNetData(PacketBuffer buffer)
+	public void writeNetData(FriendlyByteBuf buffer)
 	{
 		super.writeNetData(buffer);
 		buffer.writeVarLong(ticks);
 	}
 
 	@Override
-	public void readNetData(PacketBuffer buffer)
+	public void readNetData(FriendlyByteBuf buffer)
 	{
 		super.readNetData(buffer);
 		ticks = buffer.readVarLong();

@@ -2,17 +2,17 @@ package com.feed_the_beast.ftbquests.item;
 
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
-import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Hand;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.World;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -26,18 +26,18 @@ public class ItemQuestBook extends Item
 {
 	public ItemQuestBook()
 	{
-		super(new Properties().maxStackSize(1).group(FTBQuests.ITEM_GROUP));
+		super(new Properties().stacksTo(1).tab(FTBQuests.ITEM_GROUP));
 	}
 
 	@Override
-	public ActionResult<ItemStack> onItemRightClick(World world, PlayerEntity player, Hand hand)
+	public InteractionResultHolder<ItemStack> use(Level world, Player player, InteractionHand hand)
 	{
-		if (world.isRemote)
+		if (world.isClientSide)
 		{
 			openGui();
 		}
 
-		return new ActionResult<>(ActionResultType.SUCCESS, player.getHeldItem(hand));
+		return new InteractionResultHolder<>(InteractionResult.SUCCESS, player.getItemInHand(hand));
 	}
 
 	private void openGui()
@@ -59,15 +59,15 @@ public class ItemQuestBook extends Item
 
 	@Override
 	@OnlyIn(Dist.CLIENT)
-	public void addInformation(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn)
+	public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn)
 	{
 		if (ClientQuestFile.exists() && ClientQuestFile.INSTANCE.disableGui && !ClientQuestFile.INSTANCE.self.getCanEdit())
 		{
-			tooltip.add(new TranslationTextComponent("item.ftbquests.book.disabled").mergeStyle(TextFormatting.RED));
+			tooltip.add(new TranslatableComponent("item.ftbquests.book.disabled").withStyle(ChatFormatting.RED));
 		}
 		else
 		{
-			tooltip.add(new TranslationTextComponent("item.ftbquests.book.tooltip").mergeStyle(TextFormatting.GRAY));
+			tooltip.add(new TranslatableComponent("item.ftbquests.book.tooltip").withStyle(ChatFormatting.GRAY));
 		}
 	}
 }

@@ -11,7 +11,7 @@ import com.feed_the_beast.ftbquests.quest.theme.QuestTheme;
 import com.feed_the_beast.mods.ftbguilibrary.utils.ClientUtils;
 import com.feed_the_beast.mods.ftbguilibrary.widget.GuiBase;
 import net.minecraft.client.Minecraft;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraftforge.fml.LogicalSide;
 
 import java.util.Objects;
@@ -43,7 +43,7 @@ public class ClientQuestFile extends QuestFile
 		}
 
 		self = Objects.requireNonNull(getData(s));
-		self.name = Minecraft.getInstance().getSession().getUsername();
+		self.name = Minecraft.getInstance().getUser().getName();
 		INSTANCE = this;
 
 		refreshGui();
@@ -129,7 +129,7 @@ public class ClientQuestFile extends QuestFile
 	{
 		if (disableGui && !self.getCanEdit())
 		{
-			Minecraft.getInstance().player.sendStatusMessage(new TranslationTextComponent("item.ftbquests.book.disabled"), true);
+			Minecraft.getInstance().player.displayClientMessage(new TranslatableComponent("item.ftbquests.book.disabled"), true);
 		}
 		else if (exists())
 		{

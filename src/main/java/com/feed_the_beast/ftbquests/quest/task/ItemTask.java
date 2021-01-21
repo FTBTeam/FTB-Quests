@@ -15,14 +15,14 @@ import com.feed_the_beast.mods.ftbguilibrary.utils.Bits;
 import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
 import dev.latvian.mods.itemfilters.api.ItemFiltersAPI;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.ChatFormatting;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.ModList;
@@ -65,7 +65,7 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 	}
 
 	@Override
-	public void writeData(CompoundNBT nbt)
+	public void writeData(CompoundTag nbt)
 	{
 		super.writeData(nbt);
 		NBTUtils.write(nbt, "item", item);
@@ -80,7 +80,7 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 	}
 
 	@Override
-	public void readData(CompoundNBT nbt)
+	public void readData(CompoundTag nbt)
 	{
 		super.readData(nbt);
 		item = NBTUtils.read(nbt, "item");
@@ -90,7 +90,7 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 	}
 
 	@Override
-	public void writeNetData(PacketBuffer buffer)
+	public void writeNetData(FriendlyByteBuf buffer)
 	{
 		super.writeNetData(buffer);
 		int flags = 0;
@@ -113,7 +113,7 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 	}
 
 	@Override
-	public void readNetData(PacketBuffer buffer)
+	public void readNetData(FriendlyByteBuf buffer)
 	{
 		super.readNetData(buffer);
 		int flags = buffer.readVarInt();
@@ -157,14 +157,14 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 	}
 
 	@Override
-	public IFormattableTextComponent getAltTitle()
+	public MutableComponent getAltTitle()
 	{
 		if (count > 1)
 		{
-			return new StringTextComponent(count + "x ").append(item.getDisplayName());
+			return new TextComponent(count + "x ").append(item.getHoverName());
 		}
 
-		return new StringTextComponent("").append(item.getDisplayName());
+		return new TextComponent("").append(item.getHoverName());
 	}
 
 	@Override
@@ -233,17 +233,17 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 		if (consumesResources())
 		{
 			list.blankLine();
-			list.add(new TranslationTextComponent("ftbquests.task.click_to_submit").mergeStyle(TextFormatting.YELLOW, TextFormatting.UNDERLINE));
+			list.add(new TranslatableComponent("ftbquests.task.click_to_submit").withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE));
 		}
 		else if (getValidItems().size() > 1)
 		{
 			list.blankLine();
-			list.add(new TranslationTextComponent("ftbquests.task.ftbquests.item.view_items").mergeStyle(TextFormatting.YELLOW, TextFormatting.UNDERLINE));
+			list.add(new TranslatableComponent("ftbquests.task.ftbquests.item.view_items").withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE));
 		}
 		else if (ModList.get().isLoaded("jei"))
 		{
 			list.blankLine();
-			list.add(new TranslationTextComponent("ftbquests.task.ftbquests.item.click_recipe").mergeStyle(TextFormatting.YELLOW, TextFormatting.UNDERLINE));
+			list.add(new TranslatableComponent("ftbquests.task.ftbquests.item.click_recipe").withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE));
 		}
 	}
 
@@ -281,7 +281,7 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 		}
 
 		@Override
-		public void submitTask(ServerPlayerEntity player, ItemStack item)
+		public void submitTask(ServerPlayer player, ItemStack item)
 		{
 			if (isComplete())
 			{
@@ -308,7 +308,7 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 
 				long count = 0;
 
-				for (ItemStack stack : player.inventory.mainInventory)
+				for (ItemStack stack : player.inventory.items)
 				{
 					if (!stack.isEmpty() && task.test(stack))
 					{
@@ -334,22 +334,22 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 
 			boolean changed = false;
 
-			for (int i = 0; i < player.inventory.mainInventory.size(); i++)
+			for (int i = 0; i < player.inventory.items.size(); i++)
 			{
-				ItemStack stack = player.inventory.mainInventory.get(i);
+				ItemStack stack = player.inventory.items.get(i);
 				ItemStack stack1 = insert(stack, false);
 
 				if (stack != stack1)
 				{
 					changed = true;
-					player.inventory.mainInventory.set(i, stack1.isEmpty() ? ItemStack.EMPTY : stack1);
+					player.inventory.items.set(i, stack1.isEmpty() ? ItemStack.EMPTY : stack1);
 				}
 			}
 
 			if (changed)
 			{
-				player.inventory.markDirty();
-				player.openContainer.detectAndSendChanges();
+				player.inventory.setChanged();
+				player.containerMenu.broadcastChanges();
 			}
 		}
 	}

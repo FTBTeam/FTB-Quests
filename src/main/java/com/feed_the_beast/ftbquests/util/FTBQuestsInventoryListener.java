@@ -5,33 +5,33 @@ import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.task.Task;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.IContainerListener;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.NonNullList;
+import net.minecraft.core.NonNullList;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerListener;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.util.FakePlayer;
 
 /**
  * @author LatvianModder
  */
-public class FTBQuestsInventoryListener implements IContainerListener
+public class FTBQuestsInventoryListener implements ContainerListener
 {
-	public final ServerPlayerEntity player;
+	public final ServerPlayer player;
 
-	public FTBQuestsInventoryListener(ServerPlayerEntity p)
+	public FTBQuestsInventoryListener(ServerPlayer p)
 	{
 		player = p;
 	}
 
-	public static void detect(ServerPlayerEntity player, ItemStack item, int sourceTask)
+	public static void detect(ServerPlayer player, ItemStack item, int sourceTask)
 	{
 		if (ServerQuestFile.INSTANCE == null || player instanceof FakePlayer)
 		{
 			return;
 		}
 
-		PlayerData data = ServerQuestFile.INSTANCE.getNullablePlayerData(player.getUniqueID());
+		PlayerData data = ServerQuestFile.INSTANCE.getNullablePlayerData(player.getUUID());
 
 		if (data == null)
 		{
@@ -70,22 +70,22 @@ public class FTBQuestsInventoryListener implements IContainerListener
 	}
 
 	@Override
-	public void sendAllContents(Container container, NonNullList<ItemStack> itemsList)
+	public void refreshContainer(AbstractContainerMenu container, NonNullList<ItemStack> itemsList)
 	{
 		detect(player, ItemStack.EMPTY, 0);
 	}
 
 	@Override
-	public void sendSlotContents(Container container, int index, ItemStack stack)
+	public void slotChanged(AbstractContainerMenu container, int index, ItemStack stack)
 	{
-		if (!stack.isEmpty() && container.getSlot(index).inventory == player.inventory)
+		if (!stack.isEmpty() && container.getSlot(index).container == player.inventory)
 		{
 			detect(player, ItemStack.EMPTY, 0);
 		}
 	}
 
 	@Override
-	public void sendWindowProperty(Container container, int id, int value)
+	public void setContainerData(AbstractContainerMenu container, int id, int value)
 	{
 	}
 }

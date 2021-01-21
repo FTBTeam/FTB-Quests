@@ -5,8 +5,8 @@ import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.util.NetUtils;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.fml.network.NetworkEvent;
 
 import javax.annotation.Nullable;
@@ -18,33 +18,33 @@ public class MessageCreateObject extends MessageBase
 {
 	private final int parent;
 	private final QuestObjectType type;
-	private final CompoundNBT nbt;
-	private final CompoundNBT extra;
+	private final CompoundTag nbt;
+	private final CompoundTag extra;
 
-	MessageCreateObject(PacketBuffer buffer)
+	MessageCreateObject(FriendlyByteBuf buffer)
 	{
 		parent = buffer.readVarInt();
 		type = QuestObjectType.NAME_MAP.read(buffer);
-		nbt = buffer.readCompoundTag();
-		extra = buffer.readCompoundTag();
+		nbt = buffer.readNbt();
+		extra = buffer.readNbt();
 	}
 
-	public MessageCreateObject(QuestObjectBase o, @Nullable CompoundNBT e)
+	public MessageCreateObject(QuestObjectBase o, @Nullable CompoundTag e)
 	{
 		parent = o.getParentID();
 		type = o.getObjectType();
-		nbt = new CompoundNBT();
+		nbt = new CompoundTag();
 		o.writeData(nbt);
 		extra = e;
 	}
 
 	@Override
-	public void write(PacketBuffer buffer)
+	public void write(FriendlyByteBuf buffer)
 	{
 		buffer.writeVarInt(parent);
 		QuestObjectType.NAME_MAP.write(buffer, type);
-		buffer.writeCompoundTag(nbt);
-		buffer.writeCompoundTag(extra);
+		buffer.writeNbt(nbt);
+		buffer.writeNbt(extra);
 	}
 
 	@Override
@@ -52,7 +52,7 @@ public class MessageCreateObject extends MessageBase
 	{
 		if (NetUtils.canEdit(context))
 		{
-			QuestObjectBase object = ServerQuestFile.INSTANCE.create(type, parent, extra == null ? new CompoundNBT() : extra);
+			QuestObjectBase object = ServerQuestFile.INSTANCE.create(type, parent, extra == null ? new CompoundTag() : extra);
 			object.readData(nbt);
 			object.id = ServerQuestFile.INSTANCE.newID();
 			object.onCreated();

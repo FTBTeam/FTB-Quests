@@ -1,9 +1,9 @@
 package com.feed_the_beast.ftbquests.quest.loot;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.monster.IMob;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.monster.Enemy;
 
 /**
  * @author LatvianModder
@@ -16,11 +16,11 @@ public class EntityWeight
 
 	public int getWeight(Entity entity)
 	{
-		if (!entity.isNonBoss())
+		if (!entity.canChangeDimensions())
 		{
 			return boss;
 		}
-		else if (entity instanceof IMob)
+		else if (entity instanceof Enemy)
 		{
 			return monster;
 		}
@@ -28,28 +28,28 @@ public class EntityWeight
 		return passive;
 	}
 
-	public void writeData(CompoundNBT nbt)
+	public void writeData(CompoundTag nbt)
 	{
 		nbt.putInt("passive", passive);
 		nbt.putInt("monster", monster);
 		nbt.putInt("boss", boss);
 	}
 
-	public void readData(CompoundNBT nbt)
+	public void readData(CompoundTag nbt)
 	{
 		passive = nbt.getInt("passive");
 		monster = nbt.getInt("monster");
 		boss = nbt.getInt("boss");
 	}
 
-	public void writeNetData(PacketBuffer data)
+	public void writeNetData(FriendlyByteBuf data)
 	{
 		data.writeVarInt(passive);
 		data.writeVarInt(monster);
 		data.writeVarInt(boss);
 	}
 
-	public void readNetData(PacketBuffer data)
+	public void readNetData(FriendlyByteBuf data)
 	{
 		passive = data.readVarInt();
 		monster = data.readVarInt();

@@ -12,12 +12,11 @@ import com.feed_the_beast.ftbquests.util.OrderedCompoundNBT;
 import it.unimi.dsi.fastutil.ints.Int2ByteOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
-
 import javax.annotation.Nullable;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -30,9 +29,9 @@ import java.util.UUID;
  */
 public class PlayerData
 {
-	public static PlayerData get(PlayerEntity player)
+	public static PlayerData get(Player player)
 	{
-		return FTBQuests.PROXY.getQuestFile(player.getEntityWorld()).getData(player);
+		return FTBQuests.PROXY.getQuestFile(player.getCommandSenderWorld()).getData(player);
 	}
 
 	public final QuestFile file;
@@ -132,7 +131,7 @@ public class PlayerData
 
 			if (file.getSide().isServer())
 			{
-				ServerPlayerEntity player = getPlayer();
+				ServerPlayer player = getPlayer();
 
 				if (player != null)
 				{
@@ -195,16 +194,16 @@ public class PlayerData
 		areDependenciesCompleteCache = null;
 	}
 
-	public CompoundNBT serializeNBT()
+	public CompoundTag serializeNBT()
 	{
-		CompoundNBT nbt = new OrderedCompoundNBT();
+		CompoundTag nbt = new OrderedCompoundNBT();
 		nbt.putString("uuid", uuid.toString());
 		nbt.putString("name", name);
 		nbt.putBoolean("can_edit", canEdit);
 		nbt.putLong("money", money);
 		nbt.putBoolean("auto_pin", autoPin);
 
-		CompoundNBT taskDataNBT = new OrderedCompoundNBT();
+		CompoundTag taskDataNBT = new OrderedCompoundNBT();
 
 		List<TaskData> taskDataList = new ArrayList<>(taskData.values());
 		taskDataList.sort(Comparator.comparingInt(o -> o.task.id));
@@ -237,16 +236,16 @@ public class PlayerData
 		return nbt;
 	}
 
-	public void deserializeNBT(CompoundNBT nbt)
+	public void deserializeNBT(CompoundTag nbt)
 	{
 		name = nbt.getString("name");
 		canEdit = nbt.getBoolean("can_edit");
 		money = nbt.getLong("money");
 		autoPin = nbt.getBoolean("auto_pin");
 
-		CompoundNBT taskDataNBT = nbt.getCompound("task_progress");
+		CompoundTag taskDataNBT = nbt.getCompound("task_progress");
 
-		for (String s : taskDataNBT.keySet())
+		for (String s : taskDataNBT.getAllKeys())
 		{
 			Task task = file.getTask(file.getID(s));
 
@@ -262,9 +261,9 @@ public class PlayerData
 		pinnedQuests.addAll(new IntOpenHashSet(nbt.getIntArray("pinned_quests")));
 	}
 
-	public void write(PacketBuffer buffer, boolean self)
+	public void write(FriendlyByteBuf buffer, boolean self)
 	{
-		buffer.writeString(name, Short.MAX_VALUE);
+		buffer.writeUtf(name, Short.MAX_VALUE);
 		buffer.writeVarLong(money);
 		int tds = 0;
 
@@ -308,9 +307,9 @@ public class PlayerData
 		}
 	}
 
-	public void read(PacketBuffer buffer, boolean self)
+	public void read(FriendlyByteBuf buffer, boolean self)
 	{
-		name = buffer.readString(Short.MAX_VALUE);
+		name = buffer.readUtf(Short.MAX_VALUE);
 		money = buffer.readVarLong();
 
 		int ts = buffer.readVarInt();
@@ -511,7 +510,7 @@ public class PlayerData
 		return false;
 	}
 
-	public void claimReward(ServerPlayerEntity player, Reward reward, boolean notify)
+	public void claimReward(ServerPlayer player, Reward reward, boolean notify)
 	{
 		if (setRewardClaimed(reward.id, true))
 		{
@@ -525,14 +524,14 @@ public class PlayerData
 	}
 
 	@Nullable
-	public ServerPlayerEntity getPlayer()
+	public ServerPlayer getPlayer()
 	{
-		return ((ServerQuestFile) file).server.getPlayerList().getPlayerByUUID(uuid);
+		return ((ServerQuestFile) file).server.getPlayerList().getPlayer(uuid);
 	}
 
-	public List<ServerPlayerEntity> getOnlineMembers()
+	public List<ServerPlayer> getOnlineMembers()
 	{
-		ServerPlayerEntity playerEntity = getPlayer();
+		ServerPlayer playerEntity = getPlayer();
 
 		if (playerEntity != null)
 		{
@@ -549,7 +548,7 @@ public class PlayerData
 			return;
 		}
 
-		List<ServerPlayerEntity> online = null;
+		List<ServerPlayer> online = null;
 
 		for (Reward reward : quest.rewards)
 		{
@@ -567,7 +566,7 @@ public class PlayerData
 					}
 				}
 
-				for (ServerPlayerEntity player : online)
+				for (ServerPlayer player : online)
 				{
 					claimReward(player, reward, auto == RewardAutoClaim.ENABLED);
 				}

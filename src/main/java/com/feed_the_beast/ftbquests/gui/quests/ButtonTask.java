@@ -17,19 +17,20 @@ import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
 import com.feed_the_beast.mods.ftbguilibrary.widget.SimpleTextButton;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
 import com.feed_the_beast.mods.ftbguilibrary.widget.WidgetType;
-import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import dev.latvian.mods.itemfilters.api.IStringValueFilter;
 import dev.latvian.mods.itemfilters.api.ItemFiltersAPI;
 import dev.latvian.mods.itemfilters.api.ItemFiltersItems;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
-
 import javax.annotation.Nullable;
+
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -84,7 +85,7 @@ public class ButtonTask extends Button
 
 				if (!tags.isEmpty() && !ItemFiltersAPI.isFilter(i.item))
 				{
-					contextMenu.add(new ContextMenuItem(new TranslationTextComponent("ftbquests.task.ftbquests.item.convert_tag"), ThemeProperties.RELOAD_ICON.get(), () -> {
+					contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.task.ftbquests.item.convert_tag"), ThemeProperties.RELOAD_ICON.get(), () -> {
 						ItemStack tagFilter = new ItemStack(ItemFiltersItems.TAG);
 
 						if (tags.size() == 1)
@@ -109,7 +110,7 @@ public class ButtonTask extends Button
 								{
 									for (ResourceLocation s : tags)
 									{
-										panel.add(new SimpleTextButton(panel, new StringTextComponent(s.toString()), Icon.EMPTY)
+										panel.add(new SimpleTextButton(panel, new TextComponent(s.toString()), Icon.EMPTY)
 										{
 											@Override
 											public void onClicked(MouseButton button)
@@ -153,7 +154,7 @@ public class ButtonTask extends Button
 	{
 		if (isShiftKeyDown() && isCtrlKeyDown())
 		{
-			list.add(new StringTextComponent(task.toString()).mergeStyle(TextFormatting.DARK_GRAY));
+			list.add(new TextComponent(task.toString()).withStyle(ChatFormatting.DARK_GRAY));
 		}
 
 		if (task.addTitleInMouseOverText())
@@ -172,7 +173,7 @@ public class ButtonTask extends Button
 			{
 				if (task.hideProgressNumbers())
 				{
-					list.add(new StringTextComponent("[" + data.getRelativeProgress() + "%]").mergeStyle(TextFormatting.DARK_GREEN));
+					list.add(new TextComponent("[" + data.getRelativeProgress() + "%]").withStyle(ChatFormatting.DARK_GREEN));
 				}
 				else
 				{
@@ -181,11 +182,11 @@ public class ButtonTask extends Button
 
 					if (maxp < 100L)
 					{
-						list.add(new StringTextComponent((data.progress > maxp ? max : prog) + " / " + max).mergeStyle(TextFormatting.DARK_GREEN));
+						list.add(new TextComponent((data.progress > maxp ? max : prog) + " / " + max).withStyle(ChatFormatting.DARK_GREEN));
 					}
 					else
 					{
-						list.add(new StringTextComponent((data.progress > maxp ? max : prog) + " / " + max).mergeStyle(TextFormatting.DARK_GREEN).append(new StringTextComponent(" [" + data.getRelativeProgress() + "%]").mergeStyle(TextFormatting.DARK_GRAY)));
+						list.add(new TextComponent((data.progress > maxp ? max : prog) + " / " + max).withStyle(ChatFormatting.DARK_GREEN).append(new TextComponent(" [" + data.getRelativeProgress() + "%]").withStyle(ChatFormatting.DARK_GRAY)));
 					}
 
 				}
@@ -201,7 +202,7 @@ public class ButtonTask extends Button
 	}
 
 	@Override
-	public void drawBackground(MatrixStack matrixStack, Theme theme, int x, int y, int w, int h)
+	public void drawBackground(PoseStack matrixStack, Theme theme, int x, int y, int w, int h)
 	{
 		if (isMouseOver())
 		{
@@ -210,13 +211,13 @@ public class ButtonTask extends Button
 	}
 
 	@Override
-	public void drawIcon(MatrixStack matrixStack, Theme theme, int x, int y, int w, int h)
+	public void drawIcon(PoseStack matrixStack, Theme theme, int x, int y, int w, int h)
 	{
 		task.drawGUI(treeGui.file.self.getTaskData(task), matrixStack, x, y, w, h);
 	}
 
 	@Override
-	public void draw(MatrixStack matrixStack, Theme theme, int x, int y, int w, int h)
+	public void draw(PoseStack matrixStack, Theme theme, int x, int y, int w, int h)
 	{
 		int bs = h >= 32 ? 32 : 16;
 		drawBackground(matrixStack, theme, x, y, w, h);
@@ -233,24 +234,24 @@ public class ButtonTask extends Button
 
 		if (treeGui.file.self.isComplete(task))
 		{
-			matrixStack.push();
+			matrixStack.pushPose();
 			matrixStack.translate(0, 0, 200);
 			RenderSystem.enableBlend();
 			ThemeProperties.CHECK_ICON.get().draw(matrixStack, x + w - 9, y + 1, 8, 8);
-			matrixStack.pop();
+			matrixStack.popPose();
 		}
 		else
 		{
-			IFormattableTextComponent s = task.getButtonText();
+			MutableComponent s = task.getButtonText();
 
-			if (s != StringTextComponent.EMPTY)
+			if (s != TextComponent.EMPTY)
 			{
-				matrixStack.push();
+				matrixStack.pushPose();
 				matrixStack.translate(x + 19F - theme.getStringWidth(s) / 2F, y + 15F, 200F);
 				matrixStack.scale(0.5F, 0.5F, 1F);
 				RenderSystem.enableBlend();
 				theme.drawString(matrixStack, s, 0, 0, Color4I.WHITE, Theme.SHADOW);
-				matrixStack.pop();
+				matrixStack.popPose();
 			}
 		}
 	}

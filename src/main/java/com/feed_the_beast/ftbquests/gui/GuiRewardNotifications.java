@@ -13,15 +13,15 @@ import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Widget;
 import com.feed_the_beast.mods.ftbguilibrary.widget.WidgetLayout;
 import com.feed_the_beast.mods.ftbguilibrary.widget.WrappedIngredient;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
-
 import javax.annotation.Nullable;
+
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.util.Mth;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,7 +51,7 @@ public class GuiRewardNotifications extends GuiBase implements IRewardListenerGu
 		}
 
 		@Override
-		public void draw(MatrixStack matrixStack, Theme theme, int x, int y, int w, int h)
+		public void draw(PoseStack matrixStack, Theme theme, int x, int y, int w, int h)
 		{
 			QuestShape.get("rsquare").outline.draw(matrixStack, x, y, w, h);
 			key.icon.draw(matrixStack, x + 3, y + 3, 16, 16);
@@ -60,11 +60,11 @@ public class GuiRewardNotifications extends GuiBase implements IRewardListenerGu
 
 			if (count > 1)
 			{
-				matrixStack.push();
+				matrixStack.pushPose();
 				matrixStack.translate(0, 0, 600);
-				IFormattableTextComponent s = new StringTextComponent(StringUtils.formatDouble(count, true)).mergeStyle(TextFormatting.YELLOW);
+				MutableComponent s = new TextComponent(StringUtils.formatDouble(count, true)).withStyle(ChatFormatting.YELLOW);
 				theme.drawString(matrixStack, s, x + 22 - theme.getStringWidth(s), y + 12, Theme.SHADOW);
-				matrixStack.pop();
+				matrixStack.popPose();
 			}
 		}
 
@@ -83,7 +83,7 @@ public class GuiRewardNotifications extends GuiBase implements IRewardListenerGu
 	public GuiRewardNotifications()
 	{
 		rewards = new Object2IntOpenHashMap<>();
-		closeButton = new SimpleTextButton(this, new TranslationTextComponent("gui.close"), Icon.EMPTY)
+		closeButton = new SimpleTextButton(this, new TranslatableComponent("gui.close"), Icon.EMPTY)
 		{
 			@Override
 			public void onClicked(MouseButton button)
@@ -118,7 +118,7 @@ public class GuiRewardNotifications extends GuiBase implements IRewardListenerGu
 				else
 				{
 					setWidth(23 * 9);
-					setHeight(23 * MathHelper.ceil(widgets.size() / 9F));
+					setHeight(23 * Mth.ceil(widgets.size() / 9F));
 
 					for (int i = 0; i < widgets.size(); i++)
 					{
@@ -149,14 +149,14 @@ public class GuiRewardNotifications extends GuiBase implements IRewardListenerGu
 	}
 
 	@Override
-	public void drawBackground(MatrixStack matrixStack, Theme theme, int x, int y, int w, int h)
+	public void drawBackground(PoseStack matrixStack, Theme theme, int x, int y, int w, int h)
 	{
-		matrixStack.push();
+		matrixStack.pushPose();
 		matrixStack.translate((int) (w / 2F), (int) (h / 5F), 0F);
 		matrixStack.scale(2, 2, 1);
-		IFormattableTextComponent s = new TranslationTextComponent("ftbquests.rewards");
+		MutableComponent s = new TranslatableComponent("ftbquests.rewards");
 		theme.drawString(matrixStack, s, -theme.getStringWidth(s) / 2F, 0, Color4I.WHITE, 0);
-		matrixStack.pop();
+		matrixStack.popPose();
 	}
 
 	@Override

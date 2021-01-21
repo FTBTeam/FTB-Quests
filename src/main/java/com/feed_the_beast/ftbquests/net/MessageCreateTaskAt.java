@@ -6,8 +6,8 @@ import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.task.Task;
 import com.feed_the_beast.ftbquests.quest.task.TaskType;
 import com.feed_the_beast.ftbquests.util.NetUtils;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.fml.network.NetworkEvent;
 
 /**
@@ -18,15 +18,15 @@ public class MessageCreateTaskAt extends MessageBase
 	private final int chapter;
 	private final double x, y;
 	private final TaskType type;
-	private final CompoundNBT nbt;
+	private final CompoundTag nbt;
 
-	MessageCreateTaskAt(PacketBuffer buffer)
+	MessageCreateTaskAt(FriendlyByteBuf buffer)
 	{
 		chapter = buffer.readVarInt();
 		x = buffer.readDouble();
 		y = buffer.readDouble();
 		type = TaskType.getRegistry().getValue(buffer.readVarInt());
-		nbt = buffer.readCompoundTag();
+		nbt = buffer.readNbt();
 	}
 
 	public MessageCreateTaskAt(Chapter c, double _x, double _y, Task task)
@@ -35,18 +35,18 @@ public class MessageCreateTaskAt extends MessageBase
 		x = _x;
 		y = _y;
 		type = task.getType();
-		nbt = new CompoundNBT();
+		nbt = new CompoundTag();
 		task.writeData(nbt);
 	}
 
 	@Override
-	public void write(PacketBuffer buffer)
+	public void write(FriendlyByteBuf buffer)
 	{
 		buffer.writeVarInt(chapter);
 		buffer.writeDouble(x);
 		buffer.writeDouble(y);
 		buffer.writeVarInt(TaskType.getRegistry().getID(type));
-		buffer.writeCompoundTag(nbt);
+		buffer.writeNbt(nbt);
 	}
 
 	@Override
@@ -69,7 +69,7 @@ public class MessageCreateTaskAt extends MessageBase
 				task.id = ServerQuestFile.INSTANCE.newID();
 				task.readData(nbt);
 				task.onCreated();
-				CompoundNBT extra = new CompoundNBT();
+				CompoundTag extra = new CompoundTag();
 				extra.putString("type", type.getTypeForNBT());
 				new MessageCreateObjectResponse(task, extra).sendToAll();
 

@@ -1,6 +1,6 @@
 package com.feed_the_beast.ftbquests.quest.theme.property;
 
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
 
 /**
  * @author LatvianModder
@@ -28,7 +28,7 @@ public class DoubleProperty extends ThemeProperty<Double>
 		try
 		{
 			double i = Double.parseDouble(string);
-			return MathHelper.clamp(i, min, max);
+			return Mth.clamp(i, min, max);
 		}
 		catch (Exception ignored)
 		{

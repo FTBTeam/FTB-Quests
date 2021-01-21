@@ -9,7 +9,7 @@ import com.feed_the_beast.ftbquests.quest.task.Task;
 import com.feed_the_beast.ftbquests.quest.task.TaskType;
 import com.feed_the_beast.mods.ftbguilibrary.widget.GuiIcons;
 import net.darkhax.gamestages.event.GameStageEvent;
-import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.event.RegistryEvent;
@@ -46,31 +46,31 @@ public class GameStagesIntegration
 	@SubscribeEvent(priority = EventPriority.LOW)
 	public static void onLoggedIn(PlayerEvent.PlayerLoggedInEvent event)
 	{
-		if (event.getPlayer() instanceof ServerPlayerEntity)
+		if (event.getPlayer() instanceof ServerPlayer)
 		{
-			checkStages((ServerPlayerEntity) event.getPlayer());
+			checkStages((ServerPlayer) event.getPlayer());
 		}
 	}
 
 	@SubscribeEvent
 	public static void onGameStageAdded(GameStageEvent.Added event)
 	{
-		if (event.getPlayer() instanceof ServerPlayerEntity)
+		if (event.getPlayer() instanceof ServerPlayer)
 		{
-			checkStages((ServerPlayerEntity) event.getPlayer());
+			checkStages((ServerPlayer) event.getPlayer());
 		}
 	}
 
 	@SubscribeEvent
 	public static void onGameStageRemoved(GameStageEvent.Removed event)
 	{
-		if (event.getPlayer() instanceof ServerPlayerEntity)
+		if (event.getPlayer() instanceof ServerPlayer)
 		{
-			checkStages((ServerPlayerEntity) event.getPlayer());
+			checkStages((ServerPlayer) event.getPlayer());
 		}
 	}
 
-	public static void checkStages(ServerPlayerEntity player)
+	public static void checkStages(ServerPlayer player)
 	{
 		PlayerData data = ServerQuestFile.INSTANCE == null || (player instanceof FakePlayer) ? null : ServerQuestFile.INSTANCE.getData(player);
 

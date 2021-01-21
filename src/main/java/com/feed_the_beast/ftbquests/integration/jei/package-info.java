@@ -1,3 +1,3 @@
 @javax.annotation.ParametersAreNonnullByDefault
-@mcp.MethodsReturnNonnullByDefault
+@com.feed_the_beast.ftbquests.MethodsReturnNonnullByDefault
 package com.feed_the_beast.ftbquests.integration.jei;

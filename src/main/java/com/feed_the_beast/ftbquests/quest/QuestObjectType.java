@@ -1,22 +1,21 @@
 package com.feed_the_beast.ftbquests.quest;
 
 import com.feed_the_beast.mods.ftbguilibrary.config.NameMap;
-import net.minecraft.util.text.TextFormatting;
-
 import java.util.function.Predicate;
+import net.minecraft.ChatFormatting;
 
 /**
  * @author LatvianModder
  */
 public enum QuestObjectType implements Predicate<QuestObjectBase>
 {
-	NULL("null", TextFormatting.BLACK),
-	FILE("file", TextFormatting.RED),
-	CHAPTER("chapter", TextFormatting.GOLD),
-	QUEST("quest", TextFormatting.GREEN),
-	TASK("task", TextFormatting.BLUE),
-	REWARD("reward", TextFormatting.LIGHT_PURPLE),
-	REWARD_TABLE("reward_table", TextFormatting.YELLOW);
+	NULL("null", ChatFormatting.BLACK),
+	FILE("file", ChatFormatting.RED),
+	CHAPTER("chapter", ChatFormatting.GOLD),
+	QUEST("quest", ChatFormatting.GREEN),
+	TASK("task", ChatFormatting.BLUE),
+	REWARD("reward", ChatFormatting.LIGHT_PURPLE),
+	REWARD_TABLE("reward_table", ChatFormatting.YELLOW);
 
 	public static final NameMap<QuestObjectType> NAME_MAP = NameMap.of(NULL, values()).id(v -> v.id).nameKey(v -> v.translationKey).create();
 	public static final Predicate<QuestObjectBase> ALL_PROGRESSING = object -> object instanceof QuestObject;
@@ -24,16 +23,16 @@ public enum QuestObjectType implements Predicate<QuestObjectBase>
 
 	public final String id;
 	public final String translationKey;
-	private final TextFormatting color;
+	private final ChatFormatting color;
 
-	QuestObjectType(String i, TextFormatting c)
+	QuestObjectType(String i, ChatFormatting c)
 	{
 		id = i;
 		translationKey = "ftbquests." + id;
 		color = c;
 	}
 
-	public TextFormatting getColor()
+	public ChatFormatting getColor()
 	{
 		return color;
 	}

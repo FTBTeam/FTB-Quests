@@ -25,20 +25,20 @@ import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiEditConfigFromString;
 import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiSelectFluid;
 import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiSelectItemStack;
 import com.feed_the_beast.mods.ftbguilibrary.utils.StringUtils;
+import com.mojang.blaze3d.platform.InputConstants;
+import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.client.settings.KeyBinding;
-import net.minecraft.client.util.InputMappings;
-import net.minecraft.fluid.Fluids;
-import net.minecraft.item.ItemStack;
-import net.minecraft.resources.IReloadableResourceManager;
-import net.minecraft.tileentity.StructureBlockTileEntity;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.world.IWorld;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.server.packs.resources.ReloadableResourceManager;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.StructureBlockEntity;
+import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraftforge.client.settings.KeyConflictContext;
 import net.minecraftforge.client.settings.KeyModifier;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
@@ -54,13 +54,13 @@ import java.util.regex.Pattern;
 public class FTBQuestsClient extends FTBQuestsCommon
 {
 	private static final Pattern I18N_PATTERN = Pattern.compile("\\{([a-zA-Z0-9\\._\\-]*?)\\}", Pattern.MULTILINE);
-	public static KeyBinding KEY_QUESTS;
+	public static KeyMapping KEY_QUESTS;
 
-	public static IFormattableTextComponent addI18nAndColors(String text)
+	public static MutableComponent addI18nAndColors(String text)
 	{
 		if (text.isEmpty())
 		{
-			return (StringTextComponent) StringTextComponent.EMPTY;
+			return (TextComponent) TextComponent.EMPTY;
 		}
 
 		Matcher i18nMatcher = I18N_PATTERN.matcher(text);
@@ -73,7 +73,7 @@ public class FTBQuestsClient extends FTBQuestsCommon
 
 			while (i18nMatcher.find())
 			{
-				i18nMatcher.appendReplacement(sb, I18n.format(i18nMatcher.group(1)));
+				i18nMatcher.appendReplacement(sb, I18n.get(i18nMatcher.group(1)));
 			}
 
 			i18nMatcher.appendTail(sb);
@@ -85,30 +85,30 @@ public class FTBQuestsClient extends FTBQuestsCommon
 
 		if (StringUtils.unformatted(text).isEmpty())
 		{
-			return (StringTextComponent) StringTextComponent.EMPTY;
+			return (TextComponent) TextComponent.EMPTY;
 		}
 
-		return new StringTextComponent(text);
+		return new TextComponent(text);
 	}
 
 	@Override
 	public void init()
 	{
 		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
-		((IReloadableResourceManager) Minecraft.getInstance().getResourceManager()).addReloadListener(new QuestFileCacheReloader());
-		((IReloadableResourceManager) Minecraft.getInstance().getResourceManager()).addReloadListener(new ThemeLoader());
+		((ReloadableResourceManager) Minecraft.getInstance().getResourceManager()).registerReloadListener(new QuestFileCacheReloader());
+		((ReloadableResourceManager) Minecraft.getInstance().getResourceManager()).registerReloadListener(new ThemeLoader());
 		new FTBQuestsClientEventHandler().init();
 	}
 
 	private void setup(FMLClientSetupEvent event)
 	{
-		ClientRegistry.registerKeyBinding(KEY_QUESTS = new KeyBinding("key.ftbquests.quests", KeyConflictContext.IN_GAME, KeyModifier.NONE, InputMappings.Type.KEYSYM, -1, "key.categories.ftbquests"));
+		ClientRegistry.registerKeyBinding(KEY_QUESTS = new KeyMapping("key.ftbquests.quests", KeyConflictContext.IN_GAME, KeyModifier.NONE, InputConstants.Type.KEYSYM, -1, "key.categories.ftbquests"));
 	}
 
 	@Override
-	public QuestFile getQuestFile(IWorld world)
+	public QuestFile getQuestFile(LevelAccessor world)
 	{
-		return world.isRemote() ? ClientQuestFile.INSTANCE : ServerQuestFile.INSTANCE;
+		return world.isClientSide() ? ClientQuestFile.INSTANCE : ServerQuestFile.INSTANCE;
 	}
 
 	@Override
@@ -161,7 +161,7 @@ public class FTBQuestsClient extends FTBQuestsCommon
 
 		FTBQuestsTasks.DIMENSION.setGuiProvider((gui, quest, callback) -> {
 			DimensionTask task = new DimensionTask(quest);
-			task.dimension = Minecraft.getInstance().world.getDimensionKey();
+			task.dimension = Minecraft.getInstance().level.dimension();
 			callback.accept(task);
 		});
 
@@ -169,18 +169,18 @@ public class FTBQuestsClient extends FTBQuestsCommon
 			LocationTask task = new LocationTask(quest);
 			Minecraft mc = Minecraft.getInstance();
 
-			if (mc.objectMouseOver instanceof BlockRayTraceResult)
+			if (mc.hitResult instanceof BlockHitResult)
 			{
-				TileEntity tileEntity = mc.world.getTileEntity(((BlockRayTraceResult) mc.objectMouseOver).getPos());
+				BlockEntity tileEntity = mc.level.getBlockEntity(((BlockHitResult) mc.hitResult).getBlockPos());
 
-				if (tileEntity instanceof StructureBlockTileEntity)
+				if (tileEntity instanceof StructureBlockEntity)
 				{
-					BlockPos pos = ((StructureBlockTileEntity) tileEntity).getPosition();
-					BlockPos size = ((StructureBlockTileEntity) tileEntity).getStructureSize();
-					task.dimension = mc.world.getDimensionKey();
-					task.x = pos.getX() + tileEntity.getPos().getX();
-					task.y = pos.getY() + tileEntity.getPos().getY();
-					task.z = pos.getZ() + tileEntity.getPos().getZ();
+					BlockPos pos = ((StructureBlockEntity) tileEntity).getStructurePos();
+					BlockPos size = ((StructureBlockEntity) tileEntity).getStructureSize();
+					task.dimension = mc.level.dimension();
+					task.x = pos.getX() + tileEntity.getBlockPos().getX();
+					task.y = pos.getY() + tileEntity.getBlockPos().getY();
+					task.z = pos.getZ() + tileEntity.getBlockPos().getZ();
 					task.w = Math.max(1, size.getX());
 					task.h = Math.max(1, size.getY());
 					task.d = Math.max(1, size.getZ());

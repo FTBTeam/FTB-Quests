@@ -19,14 +19,14 @@ import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.icon.ItemIcon;
 import com.feed_the_beast.mods.ftbguilibrary.utils.Bits;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.nbt.StringNBT;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.util.Constants;
@@ -77,7 +77,7 @@ public abstract class QuestObjectBase
 	private List<String> tags = new ArrayList<>(0);
 
 	private Icon cachedIcon = null;
-	private IFormattableTextComponent cachedTitle = null;
+	private MutableComponent cachedTitle = null;
 	private QuestObjectText cachedTextFile = null;
 	private Set<String> cachedTags = null;
 
@@ -156,7 +156,7 @@ public abstract class QuestObjectBase
 		return 1;
 	}
 
-	public void writeData(CompoundNBT nbt)
+	public void writeData(CompoundTag nbt)
 	{
 		if (!title.isEmpty())
 		{
@@ -167,23 +167,23 @@ public abstract class QuestObjectBase
 
 		if (!tags.isEmpty())
 		{
-			ListNBT tagList = new ListNBT();
+			ListTag tagList = new ListTag();
 
 			for (String s : tags)
 			{
-				tagList.add(StringNBT.valueOf(s));
+				tagList.add(StringTag.valueOf(s));
 			}
 
 			nbt.put("tags", tagList);
 		}
 	}
 
-	public void readData(CompoundNBT nbt)
+	public void readData(CompoundTag nbt)
 	{
 		title = nbt.getString("title");
 		icon = NBTUtils.read(nbt, "icon");
 
-		ListNBT tagsList = nbt.getList("tags", Constants.NBT.TAG_STRING);
+		ListTag tagsList = nbt.getList("tags", Constants.NBT.TAG_STRING);
 
 		tags = new ArrayList<>(tagsList.size());
 
@@ -198,7 +198,7 @@ public abstract class QuestObjectBase
 		}
 	}
 
-	public void writeNetData(PacketBuffer buffer)
+	public void writeNetData(FriendlyByteBuf buffer)
 	{
 		int flags = 0;
 		flags = Bits.setFlag(flags, 1, !title.isEmpty());
@@ -209,12 +209,12 @@ public abstract class QuestObjectBase
 
 		if (!title.isEmpty())
 		{
-			buffer.writeString(title);
+			buffer.writeUtf(title);
 		}
 
 		if (!icon.isEmpty())
 		{
-			buffer.writeItemStack(icon);
+			buffer.writeItem(icon);
 		}
 
 		if (!tags.isEmpty())
@@ -223,11 +223,11 @@ public abstract class QuestObjectBase
 		}
 	}
 
-	public void readNetData(PacketBuffer buffer)
+	public void readNetData(FriendlyByteBuf buffer)
 	{
 		int flags = buffer.readVarInt();
-		title = Bits.getFlag(flags, 1) ? buffer.readString() : "";
-		icon = Bits.getFlag(flags, 2) ? buffer.readItemStack() : ItemStack.EMPTY;
+		title = Bits.getFlag(flags, 1) ? buffer.readUtf() : "";
+		icon = Bits.getFlag(flags, 2) ? buffer.readItem() : ItemStack.EMPTY;
 		tags = new ArrayList<>(0);
 
 		if (Bits.getFlag(flags, 4))
@@ -278,7 +278,7 @@ public abstract class QuestObjectBase
 				loadTextAdd(text, currentKey, currentText);
 			}
 
-			String langCode = Minecraft.getInstance().getLanguageManager().getCurrentLanguage().getCode();
+			String langCode = Minecraft.getInstance().getLanguageManager().getSelected().getCode();
 
 			if (!langCode.equals("en_us"))
 			{
@@ -333,7 +333,7 @@ public abstract class QuestObjectBase
 
 	public abstract Icon getAltIcon();
 
-	public abstract IFormattableTextComponent getAltTitle();
+	public abstract MutableComponent getAltTitle();
 
 	public final Icon getIcon()
 	{
@@ -361,25 +361,25 @@ public abstract class QuestObjectBase
 	}
 
 	@OnlyIn(Dist.CLIENT)
-	public final IFormattableTextComponent getTitle()
+	public final MutableComponent getTitle()
 	{
 		if (cachedTitle != null)
 		{
-			return cachedTitle.deepCopy();
+			return cachedTitle.copy();
 		}
 
 		String textTitle = loadText().getString("title");
 
 		if (!textTitle.isEmpty())
 		{
-			cachedTitle = new StringTextComponent(textTitle);
-			return cachedTitle.deepCopy();
+			cachedTitle = new TextComponent(textTitle);
+			return cachedTitle.copy();
 		}
 
 		String key = String.format("quests.%08x.title", id);
-		IFormattableTextComponent t = FTBQuestsClient.addI18nAndColors(I18n.format(key));
+		MutableComponent t = FTBQuestsClient.addI18nAndColors(I18n.get(key));
 
-		if (t == StringTextComponent.EMPTY || key.equals(I18n.format(key)))
+		if (t == TextComponent.EMPTY || key.equals(I18n.get(key)))
 		{
 			if (!title.isEmpty())
 			{
@@ -395,7 +395,7 @@ public abstract class QuestObjectBase
 			cachedTitle = t;
 		}
 
-		return cachedTitle.deepCopy();
+		return cachedTitle.copy();
 	}
 
 	public final String getUnformattedTitle()

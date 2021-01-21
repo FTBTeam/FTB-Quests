@@ -16,12 +16,12 @@ import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.utils.ClientUtils;
 import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.text.IFormattableTextComponent;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -82,7 +82,7 @@ public abstract class Reward extends QuestObjectBase
 	public abstract RewardType getType();
 
 	@Override
-	public void writeData(CompoundNBT nbt)
+	public void writeData(CompoundTag nbt)
 	{
 		super.writeData(nbt);
 
@@ -98,7 +98,7 @@ public abstract class Reward extends QuestObjectBase
 	}
 
 	@Override
-	public void readData(CompoundNBT nbt)
+	public void readData(CompoundTag nbt)
 	{
 		super.readData(nbt);
 		team = Tristate.read(nbt, "team_reward");
@@ -106,7 +106,7 @@ public abstract class Reward extends QuestObjectBase
 	}
 
 	@Override
-	public void writeNetData(PacketBuffer buffer)
+	public void writeNetData(FriendlyByteBuf buffer)
 	{
 		super.writeNetData(buffer);
 		Tristate.NAME_MAP.write(buffer, team);
@@ -114,7 +114,7 @@ public abstract class Reward extends QuestObjectBase
 	}
 
 	@Override
-	public void readNetData(PacketBuffer buffer)
+	public void readNetData(FriendlyByteBuf buffer)
 	{
 		super.readNetData(buffer);
 		team = Tristate.NAME_MAP.read(buffer);
@@ -130,12 +130,12 @@ public abstract class Reward extends QuestObjectBase
 		config.addEnum("autoclaim", autoclaim, v -> autoclaim = v, RewardAutoClaim.NAME_MAP).setNameKey("ftbquests.reward.autoclaim");
 	}
 
-	public abstract void claim(ServerPlayerEntity player, boolean notify);
+	public abstract void claim(ServerPlayer player, boolean notify);
 
 	/**
 	 * @return Optional.empty() if this reward doesn't support auto-claiming or item can't be returned as single stack, Optional.of(ItemStack.EMPTY) if it did something, but doesn't return item
 	 */
-	public Optional<ItemStack> claimAutomated(TileEntity tileEntity, UUID playerId, @Nullable ServerPlayerEntity player, boolean simulate)
+	public Optional<ItemStack> claimAutomated(BlockEntity tileEntity, UUID playerId, @Nullable ServerPlayer player, boolean simulate)
 	{
 		if (player != null)
 		{
@@ -150,12 +150,12 @@ public abstract class Reward extends QuestObjectBase
 		return Optional.empty();
 	}
 
-	public boolean automatedClaimPre(TileEntity tileEntity, List<ItemStack> items, Random random, UUID playerId, @Nullable ServerPlayerEntity player)
+	public boolean automatedClaimPre(BlockEntity tileEntity, List<ItemStack> items, Random random, UUID playerId, @Nullable ServerPlayer player)
 	{
 		return player != null;
 	}
 
-	public void automatedClaimPost(TileEntity tileEntity, UUID playerId, @Nullable ServerPlayerEntity player)
+	public void automatedClaimPost(BlockEntity tileEntity, UUID playerId, @Nullable ServerPlayer player)
 	{
 		if (player != null)
 		{
@@ -246,7 +246,7 @@ public abstract class Reward extends QuestObjectBase
 	}
 
 	@Override
-	public IFormattableTextComponent getAltTitle()
+	public MutableComponent getAltTitle()
 	{
 		return getType().getDisplayName();
 	}

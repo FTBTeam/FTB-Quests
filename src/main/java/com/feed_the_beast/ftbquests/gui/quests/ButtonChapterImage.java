@@ -12,15 +12,15 @@ import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
 import com.feed_the_beast.mods.ftbguilibrary.widget.ContextMenuItem;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
-import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.util.math.vector.Vector3f;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
-
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Vector3f;
 import java.util.ArrayList;
 import java.util.List;
+
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 
 /**
  * @author LatvianModder
@@ -32,7 +32,7 @@ public class ButtonChapterImage extends Button
 
 	public ButtonChapterImage(Panel panel, ChapterImage i)
 	{
-		super(panel, StringTextComponent.EMPTY, i.image);
+		super(panel, TextComponent.EMPTY, i.image);
 		treeGui = (GuiQuests) panel.getGui();
 		setSize(20, 20);
 		chapterImage = i;
@@ -76,7 +76,7 @@ public class ButtonChapterImage extends Button
 		{
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
 
-			contextMenu.add(new ContextMenuItem(new TranslationTextComponent("selectServer.edit"), ThemeProperties.EDIT_ICON.get(), () -> {
+			contextMenu.add(new ContextMenuItem(new TranslatableComponent("selectServer.edit"), ThemeProperties.EDIT_ICON.get(), () -> {
 				ConfigGroup group = new ConfigGroup(FTBQuests.MOD_ID);
 				chapterImage.getConfig(group.getGroup("chapter").getGroup("image"));
 				group.savedCallback = accepted -> {
@@ -89,7 +89,7 @@ public class ButtonChapterImage extends Button
 				new GuiEditConfig(group).openGui();
 			}));
 
-			contextMenu.add(new ContextMenuItem(new TranslationTextComponent("gui.move"), ThemeProperties.MOVE_UP_ICON.get(chapterImage.chapter), () -> {
+			contextMenu.add(new ContextMenuItem(new TranslatableComponent("gui.move"), ThemeProperties.MOVE_UP_ICON.get(chapterImage.chapter), () -> {
 				treeGui.movingObjects = true;
 				treeGui.selectedObjects.clear();
 				treeGui.toggleSelected(chapterImage);
@@ -98,14 +98,14 @@ public class ButtonChapterImage extends Button
 				@Override
 				public void addMouseOverText(TooltipList list)
 				{
-					list.add(new TranslationTextComponent("ftbquests.gui.move_tooltip").mergeStyle(TextFormatting.DARK_GRAY));
+					list.add(new TranslatableComponent("ftbquests.gui.move_tooltip").withStyle(ChatFormatting.DARK_GRAY));
 				}
 			});
 
-			contextMenu.add(new ContextMenuItem(new TranslationTextComponent("selectServer.delete"), ThemeProperties.DELETE_ICON.get(), () -> {
+			contextMenu.add(new ContextMenuItem(new TranslatableComponent("selectServer.delete"), ThemeProperties.DELETE_ICON.get(), () -> {
 				chapterImage.chapter.images.remove(chapterImage);
 				new MessageEditObject(chapterImage.chapter).sendToServer();
-			}).setYesNo(new TranslationTextComponent("delete_item", chapterImage.image.toString())));
+			}).setYesNo(new TranslatableComponent("delete_item", chapterImage.image.toString())));
 
 			getGui().openContextMenu(contextMenu);
 		}
@@ -135,11 +135,11 @@ public class ButtonChapterImage extends Button
 		{
 			if (s.startsWith("{") && s.endsWith("}"))
 			{
-				list.add(new TranslationTextComponent(s.substring(1, s.length() - 1)));
+				list.add(new TranslatableComponent(s.substring(1, s.length() - 1)));
 			}
 			else
 			{
-				list.add(new StringTextComponent(s));
+				list.add(new TextComponent(s));
 			}
 		}
 	}
@@ -151,15 +151,15 @@ public class ButtonChapterImage extends Button
 	}
 
 	@Override
-	public void draw(MatrixStack matrixStack, Theme theme, int x, int y, int w, int h)
+	public void draw(PoseStack matrixStack, Theme theme, int x, int y, int w, int h)
 	{
-		matrixStack.push();
+		matrixStack.pushPose();
 		matrixStack.translate((int) (x + w / 2D), (int) (y + h / 2D), 0);
-		matrixStack.rotate(Vector3f.ZP.rotationDegrees((float) chapterImage.rotation));
+		matrixStack.mulPose(Vector3f.ZP.rotationDegrees((float) chapterImage.rotation));
 		matrixStack.scale(w / 2F, h / 2F, 1);
 		RenderSystem.enableBlend();
 		RenderSystem.defaultBlendFunc();
 		chapterImage.image.draw(matrixStack, -1, -1, 2, 2);
-		matrixStack.pop();
+		matrixStack.popPose();
 	}
 }

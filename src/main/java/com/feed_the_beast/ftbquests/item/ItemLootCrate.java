@@ -8,28 +8,28 @@ import com.feed_the_beast.ftbquests.quest.loot.LootCrate;
 import com.feed_the_beast.ftbquests.quest.loot.RewardTable;
 import com.feed_the_beast.ftbquests.quest.loot.WeightedReward;
 import com.feed_the_beast.mods.ftbguilibrary.config.Tristate;
-import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Rarity;
-import net.minecraft.particles.ItemParticleData;
-import net.minecraft.particles.ParticleTypes;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Hand;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvents;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.IWorld;
-import net.minecraft.world.World;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.NonNullList;
+import net.minecraft.core.particles.ItemParticleOption;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Rarity;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -43,11 +43,11 @@ public class ItemLootCrate extends Item
 {
 	public ItemLootCrate()
 	{
-		super(new Properties().group(FTBQuests.ITEM_GROUP));
+		super(new Properties().tab(FTBQuests.ITEM_GROUP));
 	}
 
 	@Nullable
-	public static LootCrate getCrate(@Nullable IWorld world, ItemStack stack)
+	public static LootCrate getCrate(@Nullable LevelAccessor world, ItemStack stack)
 	{
 		if (stack.hasTag() && stack.getItem() instanceof ItemLootCrate)
 		{
@@ -59,19 +59,19 @@ public class ItemLootCrate extends Item
 	}
 
 	@Override
-	public ActionResult<ItemStack> onItemRightClick(World world, PlayerEntity player, Hand hand)
+	public InteractionResultHolder<ItemStack> use(Level world, Player player, InteractionHand hand)
 	{
-		ItemStack stack = player.getHeldItem(hand);
+		ItemStack stack = player.getItemInHand(hand);
 		LootCrate crate = getCrate(world, stack);
 
 		if (crate == null)
 		{
-			return new ActionResult<>(ActionResultType.SUCCESS, stack);
+			return new InteractionResultHolder<>(InteractionResult.SUCCESS, stack);
 		}
 
 		int size = player.isCrouching() ? stack.getCount() : 1;
 
-		if (!world.isRemote)
+		if (!world.isClientSide)
 		{
 			int totalWeight = crate.table.getTotalWeight(true);
 
@@ -79,7 +79,7 @@ public class ItemLootCrate extends Item
 			{
 				for (int j = 0; j < size * crate.table.lootSize; j++)
 				{
-					int number = player.world.rand.nextInt(totalWeight) + 1;
+					int number = player.level.random.nextInt(totalWeight) + 1;
 					int currentWeight = crate.table.emptyWeight;
 
 					if (currentWeight < number)
@@ -90,7 +90,7 @@ public class ItemLootCrate extends Item
 
 							if (currentWeight >= number)
 							{
-								reward.reward.claim((ServerPlayerEntity) player, true);
+								reward.reward.claim((ServerPlayer) player, true);
 								break;
 							}
 						}
@@ -98,7 +98,7 @@ public class ItemLootCrate extends Item
 				}
 			}
 
-			world.playSound(null, player.getPosX(), player.getPosY(), player.getPosZ(), SoundEvents.ENTITY_ITEM_BREAK, SoundCategory.PLAYERS, 0.8F, 0.8F + world.rand.nextFloat() * 0.4F);
+			world.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ITEM_BREAK, SoundSource.PLAYERS, 0.8F, 0.8F + world.random.nextFloat() * 0.4F);
 		}
 		else
 		{
@@ -106,34 +106,34 @@ public class ItemLootCrate extends Item
 
 			for (int i = 0; i < 5; i++)
 			{
-				Vector3d vec3d = new Vector3d(((double) world.rand.nextFloat() - 0.5D) * 0.1D, Math.random() * 0.1D + 0.1D, 0.0D);
-				vec3d = vec3d.rotatePitch(-player.rotationPitch * 0.017453292F);
-				vec3d = vec3d.rotateYaw(-player.rotationYaw * 0.017453292F);
-				double d0 = (double) (-world.rand.nextFloat()) * 0.6D - 0.3D;
-				Vector3d vec3d1 = new Vector3d(((double) world.rand.nextFloat() - 0.5D) * 0.3D, d0, 0.6D);
-				vec3d1 = vec3d1.rotatePitch(-player.rotationPitch * 0.017453292F);
-				vec3d1 = vec3d1.rotateYaw(-player.rotationYaw * 0.017453292F);
-				vec3d1 = vec3d1.add(player.getPosX(), player.getPosY() + (double) player.getEyeHeight(), player.getPosZ());
-				world.addParticle(new ItemParticleData(ParticleTypes.ITEM, stack), vec3d1.x, vec3d1.y, vec3d1.z, vec3d.x, vec3d.y + 0.05D, vec3d.z);
+				Vec3 vec3d = new Vec3(((double) world.random.nextFloat() - 0.5D) * 0.1D, Math.random() * 0.1D + 0.1D, 0.0D);
+				vec3d = vec3d.xRot(-player.xRot * 0.017453292F);
+				vec3d = vec3d.yRot(-player.yRot * 0.017453292F);
+				double d0 = (double) (-world.random.nextFloat()) * 0.6D - 0.3D;
+				Vec3 vec3d1 = new Vec3(((double) world.random.nextFloat() - 0.5D) * 0.3D, d0, 0.6D);
+				vec3d1 = vec3d1.xRot(-player.xRot * 0.017453292F);
+				vec3d1 = vec3d1.yRot(-player.yRot * 0.017453292F);
+				vec3d1 = vec3d1.add(player.getX(), player.getY() + (double) player.getEyeHeight(), player.getZ());
+				world.addParticle(new ItemParticleOption(ParticleTypes.ITEM, stack), vec3d1.x, vec3d1.y, vec3d1.z, vec3d.x, vec3d.y + 0.05D, vec3d.z);
 			}
 		}
 
 		stack.shrink(size);
-		return new ActionResult<>(ActionResultType.SUCCESS, stack);
+		return new InteractionResultHolder<>(InteractionResult.SUCCESS, stack);
 	}
 
 	@Override
-	public boolean hasEffect(ItemStack stack)
+	public boolean isFoil(ItemStack stack)
 	{
 		LootCrate crate = getCrate(null, stack);
 		return crate != null && crate.glow;
 	}
 
 	@Override
-	public ITextComponent getDisplayName(ItemStack stack)
+	public Component getName(ItemStack stack)
 	{
 		LootCrate crate = getCrate(null, stack);
-		return crate != null && !crate.itemName.isEmpty() ? new StringTextComponent(crate.itemName) : super.getDisplayName(stack);
+		return crate != null && !crate.itemName.isEmpty() ? new TextComponent(crate.itemName) : super.getName(stack);
 	}
 
 	@Override
@@ -143,9 +143,9 @@ public class ItemLootCrate extends Item
 	}
 
 	@Override
-	public void fillItemGroup(ItemGroup tab, NonNullList<ItemStack> items)
+	public void fillItemCategory(CreativeModeTab tab, NonNullList<ItemStack> items)
 	{
-		if (isInGroup(tab))
+		if (allowdedIn(tab))
 		{
 			QuestFile file = FTBQuests.PROXY.getQuestFile(Tristate.DEFAULT);
 
@@ -164,10 +164,10 @@ public class ItemLootCrate extends Item
 
 	@Override
 	@OnlyIn(Dist.CLIENT)
-	public void addInformation(ItemStack stack, @Nullable World world, List<ITextComponent> tooltip, ITooltipFlag flag)
+	public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag flag)
 	{
-		tooltip.add(new TranslationTextComponent("item.ftbquests.lootcrate.tooltip_1").mergeStyle(TextFormatting.GRAY));
-		tooltip.add(new TranslationTextComponent("item.ftbquests.lootcrate.tooltip_2").mergeStyle(TextFormatting.GRAY));
+		tooltip.add(new TranslatableComponent("item.ftbquests.lootcrate.tooltip_1").withStyle(ChatFormatting.GRAY));
+		tooltip.add(new TranslatableComponent("item.ftbquests.lootcrate.tooltip_2").withStyle(ChatFormatting.GRAY));
 
 		if (world == null || !ClientQuestFile.exists())
 		{
@@ -180,14 +180,14 @@ public class ItemLootCrate extends Item
 		{
 			if (crate.itemName.isEmpty())
 			{
-				tooltip.add(new StringTextComponent(""));
-				tooltip.add(crate.table.getTitle().mergeStyle(TextFormatting.GRAY));
+				tooltip.add(new TextComponent(""));
+				tooltip.add(crate.table.getTitle().withStyle(ChatFormatting.GRAY));
 			}
 		}
 		else if (stack.hasTag() && stack.getTag().contains("type"))
 		{
-			tooltip.add(new StringTextComponent(""));
-			tooltip.add(new StringTextComponent(stack.getTag().getString("type")).mergeStyle(TextFormatting.GRAY));
+			tooltip.add(new TextComponent(""));
+			tooltip.add(new TextComponent(stack.getTag().getString("type")).withStyle(ChatFormatting.GRAY));
 		}
 	}
 }

@@ -5,7 +5,7 @@ import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.util.NetUtils;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.fml.network.NetworkEvent;
 
 import java.util.UUID;
@@ -19,7 +19,7 @@ public class MessageChangeProgress extends MessageBase
 	private final int id;
 	private final ChangeProgress type;
 
-	MessageChangeProgress(PacketBuffer buffer)
+	MessageChangeProgress(FriendlyByteBuf buffer)
 	{
 		team = NetUtils.readUUID(buffer);
 		id = buffer.readVarInt();
@@ -35,7 +35,7 @@ public class MessageChangeProgress extends MessageBase
 	}
 
 	@Override
-	public void write(PacketBuffer buffer)
+	public void write(FriendlyByteBuf buffer)
 	{
 		NetUtils.writeUUID(buffer, team);
 		buffer.writeVarInt(id);

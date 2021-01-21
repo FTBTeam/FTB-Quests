@@ -13,13 +13,13 @@ import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
 import com.feed_the_beast.mods.ftbguilibrary.widget.SimpleTextButton;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
 import com.feed_the_beast.mods.ftbguilibrary.widget.WidgetType;
-import com.mojang.blaze3d.matrix.MatrixStack;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
-
+import com.mojang.blaze3d.vertex.PoseStack;
 import javax.annotation.Nullable;
+
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,7 +30,7 @@ public class ButtonExpandedChapter extends SimpleTextButton
 {
 	public final GuiQuests treeGui;
 	public final Chapter chapter;
-	public List<IFormattableTextComponent> description;
+	public List<MutableComponent> description;
 
 	public ButtonExpandedChapter(Panel panel, Chapter c)
 	{
@@ -44,7 +44,7 @@ public class ButtonExpandedChapter extends SimpleTextButton
 
 			if (p > 0 && p < 100)
 			{
-				setTitle(new StringTextComponent("").append(getTitle()).appendString(" ").append(new StringTextComponent(p + "%").mergeStyle(TextFormatting.DARK_GREEN)));
+				setTitle(new TextComponent("").append(getTitle()).append(" ").append(new TextComponent(p + "%").withStyle(ChatFormatting.DARK_GREEN)));
 			}
 		}
 
@@ -52,7 +52,7 @@ public class ButtonExpandedChapter extends SimpleTextButton
 
 		for (String v : chapter.subtitle)
 		{
-			description.add(FTBQuestsClient.addI18nAndColors(v).mergeStyle(TextFormatting.GRAY));
+			description.add(FTBQuestsClient.addI18nAndColors(v).withStyle(ChatFormatting.GRAY));
 		}
 	}
 
@@ -83,8 +83,8 @@ public class ButtonExpandedChapter extends SimpleTextButton
 		if (treeGui.file.canEdit() && button.isRight())
 		{
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
-			contextMenu.add(new ContextMenuItem(new TranslationTextComponent("gui.move"), ThemeProperties.MOVE_UP_ICON.get(), () -> new MessageMoveChapter(chapter.id, true).sendToServer()).setEnabled(() -> chapter.getIndex() > 0).setCloseMenu(false));
-			contextMenu.add(new ContextMenuItem(new TranslationTextComponent("gui.move"), ThemeProperties.MOVE_DOWN_ICON.get(), () -> new MessageMoveChapter(chapter.id, false).sendToServer()).setEnabled(() -> chapter.getIndex() < treeGui.file.chapters.size() - 1).setCloseMenu(false));
+			contextMenu.add(new ContextMenuItem(new TranslatableComponent("gui.move"), ThemeProperties.MOVE_UP_ICON.get(), () -> new MessageMoveChapter(chapter.id, true).sendToServer()).setEnabled(() -> chapter.getIndex() > 0).setCloseMenu(false));
+			contextMenu.add(new ContextMenuItem(new TranslatableComponent("gui.move"), ThemeProperties.MOVE_DOWN_ICON.get(), () -> new MessageMoveChapter(chapter.id, false).sendToServer()).setEnabled(() -> chapter.getIndex() < treeGui.file.chapters.size() - 1).setCloseMenu(false));
 			contextMenu.add(ContextMenuItem.SEPARATOR);
 			GuiQuests.addObjectMenuItems(contextMenu, treeGui, chapter);
 			treeGui.openContextMenu(contextMenu);
@@ -94,14 +94,14 @@ public class ButtonExpandedChapter extends SimpleTextButton
 	@Override
 	public void addMouseOverText(TooltipList list)
 	{
-		for (IFormattableTextComponent s : description)
+		for (MutableComponent s : description)
 		{
 			list.add(s);
 		}
 	}
 
 	@Override
-	public void drawBackground(MatrixStack matrixStack, Theme theme, int x, int y, int w, int h)
+	public void drawBackground(PoseStack matrixStack, Theme theme, int x, int y, int w, int h)
 	{
 		theme.drawGui(matrixStack, x, y, w, h, WidgetType.NORMAL);
 
@@ -135,7 +135,7 @@ public class ButtonExpandedChapter extends SimpleTextButton
 	}
 
 	@Override
-	public void draw(MatrixStack matrixStack, Theme theme, int x, int y, int w, int h)
+	public void draw(PoseStack matrixStack, Theme theme, int x, int y, int w, int h)
 	{
 		super.draw(matrixStack, theme, x, y, w, h);
 
@@ -143,17 +143,17 @@ public class ButtonExpandedChapter extends SimpleTextButton
 
 		if (treeGui.file.self.hasUnclaimedRewards(chapter))
 		{
-			matrixStack.push();
+			matrixStack.pushPose();
 			matrixStack.translate(0, 0, 450);
 			ThemeProperties.ALERT_ICON.get().draw(matrixStack, x + w2 - 7, y + 3, 6, 6);
-			matrixStack.pop();
+			matrixStack.popPose();
 		}
 		else if (treeGui.file.self.isComplete(chapter))
 		{
-			matrixStack.push();
+			matrixStack.pushPose();
 			matrixStack.translate(0, 0, 450);
 			ThemeProperties.CHECK_ICON.get().draw(matrixStack, x + w2 - 8, y + 2, 8, 8);
-			matrixStack.pop();
+			matrixStack.popPose();
 		}
 	}
 

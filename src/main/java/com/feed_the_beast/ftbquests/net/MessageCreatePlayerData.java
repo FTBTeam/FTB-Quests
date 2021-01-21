@@ -3,7 +3,7 @@ package com.feed_the_beast.ftbquests.net;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.util.NetUtils;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.fml.network.NetworkEvent;
 
 import java.util.UUID;
@@ -16,10 +16,10 @@ public class MessageCreatePlayerData extends MessageBase
 	private final UUID uuid;
 	private final String name;
 
-	MessageCreatePlayerData(PacketBuffer buffer)
+	MessageCreatePlayerData(FriendlyByteBuf buffer)
 	{
 		uuid = NetUtils.readUUID(buffer);
-		name = buffer.readString();
+		name = buffer.readUtf();
 	}
 
 	public MessageCreatePlayerData(PlayerData data)
@@ -29,10 +29,10 @@ public class MessageCreatePlayerData extends MessageBase
 	}
 
 	@Override
-	public void write(PacketBuffer buffer)
+	public void write(FriendlyByteBuf buffer)
 	{
 		NetUtils.writeUUID(buffer, uuid);
-		buffer.writeString(name);
+		buffer.writeUtf(name);
 	}
 
 	@Override

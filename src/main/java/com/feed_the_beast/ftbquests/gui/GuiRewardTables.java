@@ -21,14 +21,14 @@ import com.feed_the_beast.mods.ftbguilibrary.widget.GuiIcons;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
 import com.feed_the_beast.mods.ftbguilibrary.widget.SimpleTextButton;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
-import com.mojang.blaze3d.matrix.MatrixStack;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
-
+import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.TranslatableComponent;
 
 /**
  * @author LatvianModder
@@ -47,7 +47,7 @@ public class GuiRewardTables extends GuiButtonListBase
 
 			if (table.lootCrate != null)
 			{
-				title = title.deepCopy().mergeStyle(TextFormatting.YELLOW);
+				title = title.copy().withStyle(ChatFormatting.YELLOW);
 			}
 		}
 
@@ -64,7 +64,7 @@ public class GuiRewardTables extends GuiButtonListBase
 
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
 			GuiQuests.addObjectMenuItems(contextMenu, GuiRewardTables.this, table);
-			contextMenu.add(new ContextMenuItem(new TranslationTextComponent("item.ftbquests.lootcrate"), GuiIcons.ACCEPT, () -> {
+			contextMenu.add(new ContextMenuItem(new TranslatableComponent("item.ftbquests.lootcrate"), GuiIcons.ACCEPT, () -> {
 				if (table.lootCrate == null)
 				{
 					table.lootCrate = new LootCrate(table);
@@ -107,7 +107,7 @@ public class GuiRewardTables extends GuiButtonListBase
 							break;
 					}
 
-					title = table.getTitle().mergeStyle(TextFormatting.YELLOW);
+					title = table.getTitle().withStyle(ChatFormatting.YELLOW);
 				}
 				else
 				{
@@ -119,7 +119,7 @@ public class GuiRewardTables extends GuiButtonListBase
 			})
 			{
 				@Override
-				public void drawIcon(MatrixStack matrixStack, Theme theme, int x, int y, int w, int h)
+				public void drawIcon(PoseStack matrixStack, Theme theme, int x, int y, int w, int h)
 				{
 					(table.lootCrate != null ? GuiIcons.ACCEPT : GuiIcons.ACCEPT_GRAY).draw(matrixStack, x, y, w, h);
 				}
@@ -150,7 +150,7 @@ public class GuiRewardTables extends GuiButtonListBase
 
 			if (usedIn > 0)
 			{
-				list.add(new TranslationTextComponent("ftbquests.reward_table.used_in", usedIn).mergeStyle(TextFormatting.GRAY));
+				list.add(new TranslatableComponent("ftbquests.reward_table.used_in", usedIn).withStyle(ChatFormatting.GRAY));
 			}
 
 			table.addMouseOverText(list, true, true);
@@ -159,7 +159,7 @@ public class GuiRewardTables extends GuiButtonListBase
 
 	public GuiRewardTables()
 	{
-		setTitle(new TranslationTextComponent("ftbquests.reward_tables"));
+		setTitle(new TranslatableComponent("ftbquests.reward_tables"));
 		setHasSearchBox(true);
 		setBorder(1, 1, 1);
 	}
@@ -167,7 +167,7 @@ public class GuiRewardTables extends GuiButtonListBase
 	@Override
 	public void addButtons(Panel panel)
 	{
-		SimpleTextButton button = new SimpleTextButton(panel, new TranslationTextComponent("gui.add"), GuiIcons.ADD)
+		SimpleTextButton button = new SimpleTextButton(panel, new TranslatableComponent("gui.add"), GuiIcons.ADD)
 		{
 			@Override
 			public void onClicked(MouseButton button)

@@ -2,8 +2,8 @@ package com.feed_the_beast.ftbquests.net;
 
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.fml.network.NetworkEvent;
 
 /**
@@ -12,26 +12,26 @@ import net.minecraftforge.fml.network.NetworkEvent;
 public class MessageEditObjectResponse extends MessageBase
 {
 	private final int id;
-	private final CompoundNBT nbt;
+	private final CompoundTag nbt;
 
-	MessageEditObjectResponse(PacketBuffer buffer)
+	MessageEditObjectResponse(FriendlyByteBuf buffer)
 	{
 		id = buffer.readVarInt();
-		nbt = buffer.readCompoundTag();
+		nbt = buffer.readNbt();
 	}
 
 	public MessageEditObjectResponse(QuestObjectBase o)
 	{
 		id = o.id;
-		nbt = new CompoundNBT();
+		nbt = new CompoundTag();
 		o.writeData(nbt);
 	}
 
 	@Override
-	public void write(PacketBuffer buffer)
+	public void write(FriendlyByteBuf buffer)
 	{
 		buffer.writeVarInt(id);
-		buffer.writeCompoundTag(nbt);
+		buffer.writeNbt(nbt);
 	}
 
 	@Override

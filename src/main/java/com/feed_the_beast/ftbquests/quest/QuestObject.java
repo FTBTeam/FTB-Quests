@@ -1,10 +1,10 @@
 package com.feed_the_beast.ftbquests.quest;
 
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.text.IFormattableTextComponent;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -18,7 +18,7 @@ public abstract class QuestObject extends QuestObjectBase
 	public boolean disableToast = false;
 
 	@Override
-	public void writeData(CompoundNBT nbt)
+	public void writeData(CompoundTag nbt)
 	{
 		super.writeData(nbt);
 
@@ -29,21 +29,21 @@ public abstract class QuestObject extends QuestObjectBase
 	}
 
 	@Override
-	public void readData(CompoundNBT nbt)
+	public void readData(CompoundTag nbt)
 	{
 		super.readData(nbt);
 		disableToast = nbt.getBoolean("disable_toast");
 	}
 
 	@Override
-	public void writeNetData(PacketBuffer buffer)
+	public void writeNetData(FriendlyByteBuf buffer)
 	{
 		super.writeNetData(buffer);
 		buffer.writeBoolean(disableToast);
 	}
 
 	@Override
-	public void readNetData(PacketBuffer buffer)
+	public void readNetData(FriendlyByteBuf buffer)
 	{
 		super.readNetData(buffer);
 		disableToast = buffer.readBoolean();
@@ -86,12 +86,12 @@ public abstract class QuestObject extends QuestObjectBase
 		return true;
 	}
 
-	public void onCompleted(PlayerData data, List<ServerPlayerEntity> onlineMembers, List<ServerPlayerEntity> notifiedPlayers)
+	public void onCompleted(PlayerData data, List<ServerPlayer> onlineMembers, List<ServerPlayer> notifiedPlayers)
 	{
 	}
 
 	@Override
-	public abstract IFormattableTextComponent getAltTitle();
+	public abstract MutableComponent getAltTitle();
 
 	protected void verifyDependenciesInternal(int original, int depth)
 	{

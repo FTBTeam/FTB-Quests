@@ -1,8 +1,9 @@
 package com.feed_the_beast.ftbquests.core.mixin;
 
 import com.feed_the_beast.ftbquests.core.ByteNBTFTBQ;
-import net.minecraft.nbt.ByteNBT;
+import net.minecraft.nbt.ByteTag;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -10,9 +11,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 /**
  * @author LatvianModder
  */
-@Mixin(ByteNBT.class)
+@Mixin(ByteTag.class)
 public abstract class ByteNBTMixin implements ByteNBTFTBQ
 {
+    @Unique
 	private boolean isBooleanFTBQ;
 
 	@Inject(method = "toString", at = @At("HEAD"), cancellable = true)
@@ -20,7 +22,7 @@ public abstract class ByteNBTMixin implements ByteNBTFTBQ
 	{
 		if (isBooleanFTBQ)
 		{
-			ci.setReturnValue(((ByteNBT) (Object) this).getByte() == 1 ? "true" : "false");
+			ci.setReturnValue(((ByteTag) (Object) this).getAsByte() == 1 ? "true" : "false");
 		}
 	}
 

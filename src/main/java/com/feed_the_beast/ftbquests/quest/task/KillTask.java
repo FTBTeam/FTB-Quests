@@ -7,15 +7,15 @@ import com.feed_the_beast.mods.ftbguilibrary.config.NameMap;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.icon.ItemIcon;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.item.Items;
-import net.minecraft.item.SpawnEggItem;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.SpawnEggItem;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -50,7 +50,7 @@ public class KillTask extends Task
 	}
 
 	@Override
-	public void writeData(CompoundNBT nbt)
+	public void writeData(CompoundTag nbt)
 	{
 		super.writeData(nbt);
 		nbt.putString("entity", entity.toString());
@@ -58,7 +58,7 @@ public class KillTask extends Task
 	}
 
 	@Override
-	public void readData(CompoundNBT nbt)
+	public void readData(CompoundTag nbt)
 	{
 		super.readData(nbt);
 		entity = new ResourceLocation(nbt.getString("entity"));
@@ -66,18 +66,18 @@ public class KillTask extends Task
 	}
 
 	@Override
-	public void writeNetData(PacketBuffer buffer)
+	public void writeNetData(FriendlyByteBuf buffer)
 	{
 		super.writeNetData(buffer);
-		buffer.writeString(entity.toString());
+		buffer.writeUtf(entity.toString());
 		buffer.writeVarLong(value);
 	}
 
 	@Override
-	public void readNetData(PacketBuffer buffer)
+	public void readNetData(FriendlyByteBuf buffer)
 	{
 		super.readNetData(buffer);
-		entity = new ResourceLocation(buffer.readString());
+		entity = new ResourceLocation(buffer.readUtf());
 		value = buffer.readVarInt();
 	}
 
@@ -96,7 +96,7 @@ public class KillTask extends Task
 		config.addEnum("entity", entity, v -> entity = v, NameMap.of(ZOMBIE, ids)
 				.nameKey(v -> "entity." + v.getNamespace() + "." + v.getPath())
 				.icon(v -> {
-					SpawnEggItem item = SpawnEggItem.getEgg(ForgeRegistries.ENTITIES.getValue(v));
+					SpawnEggItem item = SpawnEggItem.byId(ForgeRegistries.ENTITIES.getValue(v));
 					return ItemIcon.getItemIcon(item != null ? item : Items.SPAWNER);
 				})
 				.create(), ZOMBIE);
@@ -105,15 +105,15 @@ public class KillTask extends Task
 	}
 
 	@Override
-	public IFormattableTextComponent getAltTitle()
+	public MutableComponent getAltTitle()
 	{
-		return new TranslationTextComponent("ftbquests.task.ftbquests.kill.title", getMaxProgressString(), new TranslationTextComponent("entity." + entity.getNamespace() + "." + entity.getPath()));
+		return new TranslatableComponent("ftbquests.task.ftbquests.kill.title", getMaxProgressString(), new TranslatableComponent("entity." + entity.getNamespace() + "." + entity.getPath()));
 	}
 
 	@Override
 	public Icon getAltIcon()
 	{
-		SpawnEggItem item = SpawnEggItem.getEgg(ForgeRegistries.ENTITIES.getValue(entity));
+		SpawnEggItem item = SpawnEggItem.byId(ForgeRegistries.ENTITIES.getValue(entity));
 		return ItemIcon.getItemIcon(item != null ? item : Items.SPAWNER);
 	}
 

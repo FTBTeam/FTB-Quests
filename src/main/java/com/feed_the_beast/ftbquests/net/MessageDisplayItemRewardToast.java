@@ -1,8 +1,8 @@
 package com.feed_the_beast.ftbquests.net;
 
 import com.feed_the_beast.ftbquests.FTBQuests;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.fml.network.NetworkEvent;
 
 /**
@@ -13,9 +13,9 @@ public class MessageDisplayItemRewardToast extends MessageBase
 	private final ItemStack stack;
 	private final int count;
 
-	MessageDisplayItemRewardToast(PacketBuffer buffer)
+	MessageDisplayItemRewardToast(FriendlyByteBuf buffer)
 	{
-		stack = buffer.readItemStack();
+		stack = buffer.readItem();
 		count = buffer.readVarInt();
 	}
 
@@ -26,9 +26,9 @@ public class MessageDisplayItemRewardToast extends MessageBase
 	}
 
 	@Override
-	public void write(PacketBuffer buffer)
+	public void write(FriendlyByteBuf buffer)
 	{
-		buffer.writeItemStack(stack);
+		buffer.writeItem(stack);
 		buffer.writeVarInt(count);
 	}
 

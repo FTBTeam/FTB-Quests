@@ -21,13 +21,13 @@ import com.feed_the_beast.mods.ftbguilibrary.utils.Bits;
 import com.feed_the_beast.mods.ftbguilibrary.utils.ClientUtils;
 import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
 import com.feed_the_beast.mods.ftbguilibrary.widget.GuiIcons;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.ChatFormatting;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.util.Constants;
@@ -86,7 +86,7 @@ public final class RewardTable extends QuestObjectBase
 	}
 
 	@Override
-	public void writeData(CompoundNBT nbt)
+	public void writeData(CompoundTag nbt)
 	{
 		super.writeData(nbt);
 
@@ -107,11 +107,11 @@ public final class RewardTable extends QuestObjectBase
 			nbt.putBoolean("use_title", true);
 		}
 
-		ListNBT list = new ListNBT();
+		ListTag list = new ListTag();
 
 		for (WeightedReward reward : rewards)
 		{
-			CompoundNBT nbt1 = new CompoundNBT();
+			CompoundTag nbt1 = new CompoundTag();
 			reward.reward.writeData(nbt1);
 
 			if (reward.reward.getType() != FTBQuestsRewards.ITEM)
@@ -131,14 +131,14 @@ public final class RewardTable extends QuestObjectBase
 
 		if (lootCrate != null)
 		{
-			CompoundNBT nbt1 = new CompoundNBT();
+			CompoundTag nbt1 = new CompoundTag();
 			lootCrate.writeData(nbt1);
 			nbt.put("loot_crate", nbt1);
 		}
 	}
 
 	@Override
-	public void readData(CompoundNBT nbt)
+	public void readData(CompoundTag nbt)
 	{
 		super.readData(nbt);
 		emptyWeight = nbt.getInt("empty_weight");
@@ -147,11 +147,11 @@ public final class RewardTable extends QuestObjectBase
 		useTitle = nbt.getBoolean("use_title");
 
 		rewards.clear();
-		ListNBT list = nbt.getList("rewards", Constants.NBT.TAG_COMPOUND);
+		ListTag list = nbt.getList("rewards", Constants.NBT.TAG_COMPOUND);
 
 		for (int i = 0; i < list.size(); i++)
 		{
-			CompoundNBT nbt1 = list.getCompound(i);
+			CompoundTag nbt1 = list.getCompound(i);
 			Reward reward = RewardType.createReward(fakeQuest, nbt1.getString("type"));
 
 			if (reward != null)
@@ -171,7 +171,7 @@ public final class RewardTable extends QuestObjectBase
 	}
 
 	@Override
-	public void writeNetData(PacketBuffer buffer)
+	public void writeNetData(FriendlyByteBuf buffer)
 	{
 		super.writeNetData(buffer);
 		buffer.writeVarInt(emptyWeight);
@@ -197,7 +197,7 @@ public final class RewardTable extends QuestObjectBase
 	}
 
 	@Override
-	public void readNetData(PacketBuffer buffer)
+	public void readNetData(FriendlyByteBuf buffer)
 	{
 		super.readNetData(buffer);
 		emptyWeight = buffer.readVarInt();
@@ -318,14 +318,14 @@ public final class RewardTable extends QuestObjectBase
 	}
 
 	@Override
-	public IFormattableTextComponent getAltTitle()
+	public MutableComponent getAltTitle()
 	{
 		if (rewards.size() == 1)
 		{
 			return rewards.get(0).reward.getTitle();
 		}
 
-		return new TranslationTextComponent("ftbquests.reward_table");
+		return new TranslatableComponent("ftbquests.reward_table");
 	}
 
 	@Override
@@ -346,7 +346,7 @@ public final class RewardTable extends QuestObjectBase
 
 		if (includeWeight && includeEmpty && emptyWeight > 0)
 		{
-			list.add(new StringTextComponent("").mergeStyle(TextFormatting.GRAY).appendString("- ").append(new TranslationTextComponent("ftbquests.reward_table.nothing")).append(new StringTextComponent(" [" + WeightedReward.chanceString(emptyWeight, totalWeight) + "]").mergeStyle(TextFormatting.DARK_GRAY)));
+			list.add(new TextComponent("").withStyle(ChatFormatting.GRAY).append("- ").append(new TranslatableComponent("ftbquests.reward_table.nothing")).append(new TextComponent(" [" + WeightedReward.chanceString(emptyWeight, totalWeight) + "]").withStyle(ChatFormatting.DARK_GRAY)));
 		}
 
 		List<WeightedReward> rewards1;
@@ -365,7 +365,7 @@ public final class RewardTable extends QuestObjectBase
 		{
 			if (i == 10)
 			{
-				list.add(new StringTextComponent("").mergeStyle(TextFormatting.GRAY).appendString("- ").append(new TranslationTextComponent("ftbquests.reward_table.and_more", rewards1.size() - 10)));
+				list.add(new TextComponent("").withStyle(ChatFormatting.GRAY).append("- ").append(new TranslatableComponent("ftbquests.reward_table.and_more", rewards1.size() - 10)));
 				return;
 			}
 
@@ -373,11 +373,11 @@ public final class RewardTable extends QuestObjectBase
 
 			if (includeWeight)
 			{
-				list.add(new StringTextComponent("").mergeStyle(TextFormatting.GRAY).appendString("- ").append(r.reward.getTitle()).append(new StringTextComponent(" [" + WeightedReward.chanceString(r.weight, totalWeight) + "]").mergeStyle(TextFormatting.DARK_GRAY)));
+				list.add(new TextComponent("").withStyle(ChatFormatting.GRAY).append("- ").append(r.reward.getTitle()).append(new TextComponent(" [" + WeightedReward.chanceString(r.weight, totalWeight) + "]").withStyle(ChatFormatting.DARK_GRAY)));
 			}
 			else
 			{
-				list.add(new StringTextComponent("").mergeStyle(TextFormatting.GRAY).appendString("- ").append(r.reward.getTitle()));
+				list.add(new TextComponent("").withStyle(ChatFormatting.GRAY).append("- ").append(r.reward.getTitle()));
 			}
 		}
 	}

@@ -1,7 +1,7 @@
 package com.feed_the_beast.ftbquests.net;
 
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.fml.network.NetworkEvent;
 import net.minecraftforge.fml.network.PacketDistributor;
 
@@ -18,7 +18,7 @@ public abstract class MessageBase
 		context.get().setPacketHandled(true);
 	}
 
-	public abstract void write(PacketBuffer buffer);
+	public abstract void write(FriendlyByteBuf buffer);
 
 	public abstract void handle(NetworkEvent.Context context);
 
@@ -32,14 +32,14 @@ public abstract class MessageBase
 		FTBQuestsNetHandler.MAIN.send(PacketDistributor.ALL.noArg(), this);
 	}
 
-	public void sendTo(ServerPlayerEntity player)
+	public void sendTo(ServerPlayer player)
 	{
 		FTBQuestsNetHandler.MAIN.send(PacketDistributor.PLAYER.with(() -> player), this);
 	}
 
-	public void sendTo(Iterable<ServerPlayerEntity> players)
+	public void sendTo(Iterable<ServerPlayer> players)
 	{
-		for (ServerPlayerEntity player : players)
+		for (ServerPlayer player : players)
 		{
 			sendTo(player);
 		}

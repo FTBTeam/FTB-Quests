@@ -9,12 +9,12 @@ import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
 import com.feed_the_beast.mods.ftbguilibrary.widget.ContextMenuItem;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
-import com.mojang.blaze3d.matrix.MatrixStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.text.TranslationTextComponent;
-
+import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.ArrayList;
 import java.util.List;
+
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.TranslatableComponent;
 
 /**
  * @author LatvianModder
@@ -25,7 +25,7 @@ public class ButtonAddReward extends Button
 
 	public ButtonAddReward(Panel panel, Quest q)
 	{
-		super(panel, new TranslationTextComponent("gui.add"), ThemeProperties.ADD_ICON.get());
+		super(panel, new TranslatableComponent("gui.add"), ThemeProperties.ADD_ICON.get());
 		quest = q;
 		setSize(18, 18);
 	}
@@ -41,7 +41,7 @@ public class ButtonAddReward extends Button
 			contextMenu.add(new ContextMenuItem(type.getDisplayName(), type.getIcon(), () -> {
 				playClickSound();
 				type.getGuiProvider().openCreationGui(this, quest, reward -> {
-					CompoundNBT extra = new CompoundNBT();
+					CompoundTag extra = new CompoundTag();
 					extra.putString("type", type.getTypeForNBT());
 					new MessageCreateObject(reward, extra).sendToServer();
 				});
@@ -52,7 +52,7 @@ public class ButtonAddReward extends Button
 	}
 
 	@Override
-	public void drawBackground(MatrixStack matrixStack, Theme theme, int x, int y, int w, int h)
+	public void drawBackground(PoseStack matrixStack, Theme theme, int x, int y, int w, int h)
 	{
 		if (isMouseOver())
 		{

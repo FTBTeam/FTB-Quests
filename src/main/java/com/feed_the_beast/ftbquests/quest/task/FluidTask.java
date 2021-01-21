@@ -8,13 +8,13 @@ import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigNBT;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Color4I;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.fluid.Fluids;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fluids.FluidAttributes;
@@ -32,7 +32,7 @@ public class FluidTask extends Task
 	public static final ResourceLocation TANK_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "textures/tasks/tank.png");
 
 	public Fluid fluid = Fluids.WATER;
-	public CompoundNBT fluidNBT = null;
+	public CompoundTag fluidNBT = null;
 	public long amount = FluidAttributes.BUCKET_VOLUME;
 
 	private FluidStack cachedFluidStack = null;
@@ -61,7 +61,7 @@ public class FluidTask extends Task
 	}
 
 	@Override
-	public void writeData(CompoundNBT nbt)
+	public void writeData(CompoundTag nbt)
 	{
 		super.writeData(nbt);
 		nbt.putString("fluid", fluid.getRegistryName().toString());
@@ -74,7 +74,7 @@ public class FluidTask extends Task
 	}
 
 	@Override
-	public void readData(CompoundNBT nbt)
+	public void readData(CompoundTag nbt)
 	{
 		super.readData(nbt);
 
@@ -86,20 +86,20 @@ public class FluidTask extends Task
 		}
 
 		amount = Math.max(1L, nbt.getLong("amount"));
-		fluidNBT = (CompoundNBT) nbt.get("nbt");
+		fluidNBT = (CompoundTag) nbt.get("nbt");
 	}
 
 	@Override
-	public void writeNetData(PacketBuffer buffer)
+	public void writeNetData(FriendlyByteBuf buffer)
 	{
 		super.writeNetData(buffer);
 		buffer.writeResourceLocation(fluid.getRegistryName());
-		buffer.writeCompoundTag(fluidNBT);
+		buffer.writeNbt(fluidNBT);
 		buffer.writeVarLong(amount);
 	}
 
 	@Override
-	public void readNetData(PacketBuffer buffer)
+	public void readNetData(FriendlyByteBuf buffer)
 	{
 		super.readNetData(buffer);
 		fluid = ForgeRegistries.FLUIDS.getValue(buffer.readResourceLocation());
@@ -109,7 +109,7 @@ public class FluidTask extends Task
 			fluid = Fluids.WATER;
 		}
 
-		fluidNBT = buffer.readCompoundTag();
+		fluidNBT = buffer.readNbt();
 		amount = buffer.readVarLong();
 	}
 
@@ -170,9 +170,9 @@ public class FluidTask extends Task
 	}
 
 	@Override
-	public IFormattableTextComponent getAltTitle()
+	public MutableComponent getAltTitle()
 	{
-		return new StringTextComponent(getVolumeString(amount) + " of ").append(createFluidStack().getDisplayName());
+		return new TextComponent(getVolumeString(amount) + " of ").append(createFluidStack().getDisplayName());
 	}
 
 	@Override

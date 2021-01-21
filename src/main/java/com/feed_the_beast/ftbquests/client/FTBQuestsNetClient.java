@@ -21,11 +21,11 @@ import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.icon.ItemIcon;
 import com.feed_the_beast.mods.ftbguilibrary.utils.ClientUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.items.ItemHandlerHelper;
 
 import javax.annotation.Nullable;
@@ -70,9 +70,9 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon
 	}
 
 	@Override
-	public void createObject(int id, int parent, QuestObjectType type, CompoundNBT nbt, @Nullable CompoundNBT extra)
+	public void createObject(int id, int parent, QuestObjectType type, CompoundTag nbt, @Nullable CompoundTag extra)
 	{
-		QuestObjectBase object = ClientQuestFile.INSTANCE.create(type, parent, extra == null ? new CompoundNBT() : extra);
+		QuestObjectBase object = ClientQuestFile.INSTANCE.create(type, parent, extra == null ? new CompoundTag() : extra);
 		object.readData(nbt);
 		object.id = id;
 		object.onCreated();
@@ -116,7 +116,7 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon
 
 		if (object != null)
 		{
-			Minecraft.getInstance().getToastGui().add(new ToastQuestObject(object));
+			Minecraft.getInstance().getToasts().addToast(new ToastQuestObject(object));
 		}
 
 		ClientQuestFile.INSTANCE.questTreeGui.questPanel.refreshWidgets();
@@ -130,34 +130,34 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon
 		ItemStack stack1 = ItemHandlerHelper.copyStackWithSize(stack, 1);
 		Icon icon = ItemIcon.getItemIcon(stack1);
 
-		if (!IRewardListenerGui.add(new RewardKey(stack.getDisplayName().getString(), icon).setStack(stack1), count))
+		if (!IRewardListenerGui.add(new RewardKey(stack.getHoverName().getString(), icon).setStack(stack1), count))
 		{
-			IFormattableTextComponent s = stack.getDisplayName().deepCopy();
+			MutableComponent s = stack.getHoverName().copy();
 
 			if (count > 1)
 			{
-				s = new StringTextComponent(count + "x ").append(s);
+				s = new TextComponent(count + "x ").append(s);
 			}
 
-			s.mergeStyle(stack.getRarity().color);
+			s.withStyle(stack.getRarity().color);
 
-			Minecraft.getInstance().getToastGui().add(new RewardToast(s, icon));
+			Minecraft.getInstance().getToasts().addToast(new RewardToast(s, icon));
 		}
 	}
 
 	@Override
-	public void displayRewardToast(int id, ITextComponent text, Icon icon)
+	public void displayRewardToast(int id, Component text, Icon icon)
 	{
 		Icon i = icon.isEmpty() ? ClientQuestFile.INSTANCE.getBase(id).getIcon() : icon;
 
 		if (!IRewardListenerGui.add(new RewardKey(text.getString(), i), 1))
 		{
-			Minecraft.getInstance().getToastGui().add(new RewardToast(text, i));
+			Minecraft.getInstance().getToasts().addToast(new RewardToast(text, i));
 		}
 	}
 
 	@Override
-	public void editObject(int id, CompoundNBT nbt)
+	public void editObject(int id, CompoundTag nbt)
 	{
 		ClientQuestFile.INSTANCE.clearCachedData();
 		QuestObjectBase object = ClientQuestFile.INSTANCE.getBase(id);

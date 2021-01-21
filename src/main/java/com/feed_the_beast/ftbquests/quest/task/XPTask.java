@@ -3,15 +3,15 @@ package com.feed_the_beast.ftbquests.quest.task;
 import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.ChatFormatting;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -47,7 +47,7 @@ public class XPTask extends Task implements ISingleLongValueTask
 	}
 
 	@Override
-	public void writeData(CompoundNBT nbt)
+	public void writeData(CompoundTag nbt)
 	{
 		super.writeData(nbt);
 		nbt.putLong("value", value);
@@ -55,7 +55,7 @@ public class XPTask extends Task implements ISingleLongValueTask
 	}
 
 	@Override
-	public void readData(CompoundNBT nbt)
+	public void readData(CompoundTag nbt)
 	{
 		super.readData(nbt);
 		value = nbt.getLong("value");
@@ -63,7 +63,7 @@ public class XPTask extends Task implements ISingleLongValueTask
 	}
 
 	@Override
-	public void writeNetData(PacketBuffer buffer)
+	public void writeNetData(FriendlyByteBuf buffer)
 	{
 		super.writeNetData(buffer);
 		buffer.writeVarLong(value);
@@ -71,7 +71,7 @@ public class XPTask extends Task implements ISingleLongValueTask
 	}
 
 	@Override
-	public void readNetData(PacketBuffer buffer)
+	public void readNetData(FriendlyByteBuf buffer)
 	{
 		super.readNetData(buffer);
 		value = buffer.readVarLong();
@@ -94,9 +94,9 @@ public class XPTask extends Task implements ISingleLongValueTask
 	}
 
 	@Override
-	public IFormattableTextComponent getAltTitle()
+	public MutableComponent getAltTitle()
 	{
-		return new TranslationTextComponent("ftbquests.reward.ftbquests.xp_levels").appendString(": ").append(new StringTextComponent(getMaxProgressString()).mergeStyle(TextFormatting.RED));
+		return new TranslatableComponent("ftbquests.reward.ftbquests.xp_levels").append(": ").append(new TextComponent(getMaxProgressString()).withStyle(ChatFormatting.RED));
 	}
 
 	@Override
@@ -111,18 +111,18 @@ public class XPTask extends Task implements ISingleLongValueTask
 		return new Data(this, data);
 	}
 
-	public static int getPlayerXP(PlayerEntity player)
+	public static int getPlayerXP(Player player)
 	{
-		return (int) (getExperienceForLevel(player.experienceLevel) + (player.experience * player.xpBarCap()));
+		return (int) (getExperienceForLevel(player.experienceLevel) + (player.experienceProgress * player.getXpNeededForNextLevel()));
 	}
 
-	public static void addPlayerXP(PlayerEntity player, int amount)
+	public static void addPlayerXP(Player player, int amount)
 	{
 		int experience = getPlayerXP(player) + amount;
-		player.experienceTotal = experience;
+		player.totalExperience = experience;
 		player.experienceLevel = getLevelForExperience(experience);
 		int expForLevel = getExperienceForLevel(player.experienceLevel);
-		player.experience = (float) (experience - expForLevel) / (float) player.xpBarCap();
+		player.experienceProgress = (float) (experience - expForLevel) / (float) player.getXpNeededForNextLevel();
 	}
 
 	public static int xpBarCap(int level)
@@ -197,7 +197,7 @@ public class XPTask extends Task implements ISingleLongValueTask
 		}
 
 		@Override
-		public void submitTask(ServerPlayerEntity player, ItemStack item)
+		public void submitTask(ServerPlayer player, ItemStack item)
 		{
 			int add = (int) Math.min(task.points ? getPlayerXP(player) : player.experienceLevel, Math.min(task.value - progress, Integer.MAX_VALUE));
 
@@ -209,11 +209,11 @@ public class XPTask extends Task implements ISingleLongValueTask
 			if (task.points)
 			{
 				addPlayerXP(player, -add);
-				player.addExperienceLevel(0);
+				player.giveExperienceLevels(0);
 			}
 			else
 			{
-				player.addExperienceLevel(-add);
+				player.giveExperienceLevels(-add);
 			}
 
 			addProgress(add);

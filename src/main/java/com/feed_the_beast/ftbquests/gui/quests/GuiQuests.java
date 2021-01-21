@@ -33,15 +33,15 @@ import com.feed_the_beast.mods.ftbguilibrary.widget.GuiIcons;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Widget;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.toasts.SystemToast;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.client.gui.components.toasts.SystemToast;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.util.Mth;
 import org.lwjgl.glfw.GLFW;
 
 import javax.annotation.Nullable;
@@ -201,11 +201,11 @@ public class GuiQuests extends GuiBase
 			{
 				if (c instanceof ConfigWithVariants)
 				{
-					IFormattableTextComponent name = new TranslationTextComponent(c.getNameKey());
+					MutableComponent name = new TranslatableComponent(c.getNameKey());
 
 					if (!c.getCanEdit())
 					{
-						name = name.mergeStyle(TextFormatting.GRAY);
+						name = name.withStyle(ChatFormatting.GRAY);
 					}
 
 					list.add(new ContextMenuItem(name, GuiIcons.SETTINGS, null)
@@ -229,7 +229,7 @@ public class GuiQuests extends GuiBase
 						}
 
 						@Override
-						public void drawIcon(MatrixStack matrixStack, Theme theme, int x, int y, int w, int h)
+						public void drawIcon(PoseStack matrixStack, Theme theme, int x, int y, int w, int h)
 						{
 							c.getIcon(c.value).draw(matrixStack, x, y, w, h);
 						}
@@ -245,42 +245,42 @@ public class GuiQuests extends GuiBase
 			}
 		}
 
-		contextMenu.add(new ContextMenuItem(new TranslationTextComponent("selectServer.edit"), ThemeProperties.EDIT_ICON.get(), () -> object.onEditButtonClicked(gui)));
+		contextMenu.add(new ContextMenuItem(new TranslatableComponent("selectServer.edit"), ThemeProperties.EDIT_ICON.get(), () -> object.onEditButtonClicked(gui)));
 
 		if (object instanceof RandomReward && !QuestObjectBase.isNull(((RandomReward) object).getTable()))
 		{
-			contextMenu.add(new ContextMenuItem(new TranslationTextComponent("ftbquests.reward_table.edit"), ThemeProperties.EDIT_ICON.get(), () -> ((RandomReward) object).getTable().onEditButtonClicked(gui)));
+			contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.reward_table.edit"), ThemeProperties.EDIT_ICON.get(), () -> ((RandomReward) object).getTable().onEditButtonClicked(gui)));
 		}
 
-		ContextMenuItem delete = new ContextMenuItem(new TranslationTextComponent("selectServer.delete"), ThemeProperties.DELETE_ICON.get(), () -> ClientQuestFile.INSTANCE.deleteObject(object.id));
+		ContextMenuItem delete = new ContextMenuItem(new TranslatableComponent("selectServer.delete"), ThemeProperties.DELETE_ICON.get(), () -> ClientQuestFile.INSTANCE.deleteObject(object.id));
 
 		if (!isShiftKeyDown())
 		{
-			delete.setYesNo(new TranslationTextComponent("delete_item", object.getTitle()));
+			delete.setYesNo(new TranslatableComponent("delete_item", object.getTitle()));
 		}
 
 		contextMenu.add(delete);
 
-		contextMenu.add(new ContextMenuItem(new TranslationTextComponent("ftbquests.gui.reset_progress"), ThemeProperties.RELOAD_ICON.get(), () -> new MessageChangeProgress(ClientQuestFile.INSTANCE.self.uuid, object.id, isShiftKeyDown() ? ChangeProgress.RESET_DEPS : ChangeProgress.RESET).sendToServer()).setYesNo(new TranslationTextComponent("ftbquests.gui.reset_progress_q")));
+		contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.gui.reset_progress"), ThemeProperties.RELOAD_ICON.get(), () -> new MessageChangeProgress(ClientQuestFile.INSTANCE.self.uuid, object.id, isShiftKeyDown() ? ChangeProgress.RESET_DEPS : ChangeProgress.RESET).sendToServer()).setYesNo(new TranslatableComponent("ftbquests.gui.reset_progress_q")));
 
 		if (object instanceof QuestObject)
 		{
-			contextMenu.add(new ContextMenuItem(new TranslationTextComponent("ftbquests.gui.complete_instantly"), ThemeProperties.CHECK_ICON.get(), () -> new MessageChangeProgress(ClientQuestFile.INSTANCE.self.uuid, object.id, isShiftKeyDown() ? ChangeProgress.COMPLETE_DEPS : ChangeProgress.COMPLETE).sendToServer()).setYesNo(new TranslationTextComponent("ftbquests.gui.complete_instantly_q")));
+			contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.gui.complete_instantly"), ThemeProperties.CHECK_ICON.get(), () -> new MessageChangeProgress(ClientQuestFile.INSTANCE.self.uuid, object.id, isShiftKeyDown() ? ChangeProgress.COMPLETE_DEPS : ChangeProgress.COMPLETE).sendToServer()).setYesNo(new TranslatableComponent("ftbquests.gui.complete_instantly_q")));
 		}
 
-		contextMenu.add(new ContextMenuItem(new TranslationTextComponent("ftbquests.gui.copy_id"), ThemeProperties.WIKI_ICON.get(), () -> setClipboardString(QuestObjectBase.getCodeString(object)))
+		contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.gui.copy_id"), ThemeProperties.WIKI_ICON.get(), () -> setClipboardString(QuestObjectBase.getCodeString(object)))
 		{
 			@Override
 			public void addMouseOverText(TooltipList list)
 			{
-				list.add(new StringTextComponent(QuestObjectBase.getCodeString(object)));
+				list.add(new TextComponent(QuestObjectBase.getCodeString(object)));
 			}
 		});
 	}
 
-	public static void displayError(ITextComponent error)
+	public static void displayError(Component error)
 	{
-		Minecraft.getInstance().getToastGui().add(new SystemToast(SystemToast.Type.TUTORIAL_HINT, new TranslationTextComponent("ftbquests.gui.error"), error));
+		Minecraft.getInstance().getToasts().addToast(new SystemToast(SystemToast.SystemToastIds.TUTORIAL_HINT, new TranslatableComponent("ftbquests.gui.error"), error));
 	}
 
 	private boolean moveSelectedQuests(double x, double y)
@@ -408,7 +408,7 @@ public class GuiQuests extends GuiBase
 					});
 
 					gui.focus();
-					gui.setTitle(new TranslationTextComponent("gui.search_box"));
+					gui.setTitle(new TranslatableComponent("gui.search_box"));
 					gui.openGui();
 				}
 
@@ -458,7 +458,7 @@ public class GuiQuests extends GuiBase
 	public void addZoom(double up)
 	{
 		int z = zoom;
-		zoom = (int) MathHelper.clamp(zoom + up * 4, 4, 28);
+		zoom = (int) Mth.clamp(zoom + up * 4, 4, 28);
 
 		if (zoom != z)
 		{
@@ -471,7 +471,7 @@ public class GuiQuests extends GuiBase
 	}
 
 	@Override
-	public void drawBackground(MatrixStack matrixStack, Theme theme, int x, int y, int w, int h)
+	public void drawBackground(PoseStack matrixStack, Theme theme, int x, int y, int w, int h)
 	{
 		QuestTheme.currentObject = selectedChapter;
 		super.drawBackground(matrixStack, theme, x, y, w, h);
@@ -516,7 +516,7 @@ public class GuiQuests extends GuiBase
 	}
 
 	@Override
-	public void drawForeground(MatrixStack matrixStack, Theme theme, int x, int y, int w, int h)
+	public void drawForeground(PoseStack matrixStack, Theme theme, int x, int y, int w, int h)
 	{
 		Color4I borderColor = ThemeProperties.WIDGET_BORDER.get(selectedChapter);
 		GuiHelper.drawHollowRect(matrixStack, x, y, w, h, borderColor, false);
@@ -530,7 +530,7 @@ public class GuiQuests extends GuiBase
 	}
 
 	@Override
-	public boolean drawDefaultBackground(MatrixStack matrixStack)
+	public boolean drawDefaultBackground(PoseStack matrixStack)
 	{
 		return false;
 	}

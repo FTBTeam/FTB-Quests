@@ -5,8 +5,8 @@ import com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIHelper;
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.util.NetUtils;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.fml.network.NetworkEvent;
 
 /**
@@ -15,18 +15,18 @@ import net.minecraftforge.fml.network.NetworkEvent;
 public class MessageEditObject extends MessageBase
 {
 	private final int id;
-	private final CompoundNBT nbt;
+	private final CompoundTag nbt;
 
-	MessageEditObject(PacketBuffer buffer)
+	MessageEditObject(FriendlyByteBuf buffer)
 	{
 		id = buffer.readVarInt();
-		nbt = buffer.readCompoundTag();
+		nbt = buffer.readNbt();
 	}
 
 	public MessageEditObject(QuestObjectBase o)
 	{
 		id = o.id;
-		nbt = new CompoundNBT();
+		nbt = new CompoundTag();
 		o.writeData(nbt);
 		FTBQuestsJEIHelper.refresh(o);
 		ClientQuestFile.INSTANCE.clearCachedData();
@@ -34,10 +34,10 @@ public class MessageEditObject extends MessageBase
 	}
 
 	@Override
-	public void write(PacketBuffer buffer)
+	public void write(FriendlyByteBuf buffer)
 	{
 		buffer.writeVarInt(id);
-		buffer.writeCompoundTag(nbt);
+		buffer.writeNbt(nbt);
 	}
 
 	@Override

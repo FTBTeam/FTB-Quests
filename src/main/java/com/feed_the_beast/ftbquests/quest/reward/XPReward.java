@@ -4,13 +4,13 @@ import com.feed_the_beast.ftbquests.net.MessageDisplayRewardToast;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.ChatFormatting;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -39,28 +39,28 @@ public class XPReward extends Reward
 	}
 
 	@Override
-	public void writeData(CompoundNBT nbt)
+	public void writeData(CompoundTag nbt)
 	{
 		super.writeData(nbt);
 		nbt.putInt("xp", xp);
 	}
 
 	@Override
-	public void readData(CompoundNBT nbt)
+	public void readData(CompoundTag nbt)
 	{
 		super.readData(nbt);
 		xp = nbt.getInt("xp");
 	}
 
 	@Override
-	public void writeNetData(PacketBuffer buffer)
+	public void writeNetData(FriendlyByteBuf buffer)
 	{
 		super.writeNetData(buffer);
 		buffer.writeVarInt(xp);
 	}
 
 	@Override
-	public void readNetData(PacketBuffer buffer)
+	public void readNetData(FriendlyByteBuf buffer)
 	{
 		super.readNetData(buffer);
 		xp = buffer.readVarInt();
@@ -75,20 +75,20 @@ public class XPReward extends Reward
 	}
 
 	@Override
-	public void claim(ServerPlayerEntity player, boolean notify)
+	public void claim(ServerPlayer player, boolean notify)
 	{
 		player.giveExperiencePoints(xp);
 
 		if (notify)
 		{
-			new MessageDisplayRewardToast(id, new TranslationTextComponent("ftbquests.reward.ftbquests.xp").appendString(": ").append(new StringTextComponent("+" + xp).mergeStyle(TextFormatting.GREEN)), Icon.EMPTY).sendTo(player);
+			new MessageDisplayRewardToast(id, new TranslatableComponent("ftbquests.reward.ftbquests.xp").append(": ").append(new TextComponent("+" + xp).withStyle(ChatFormatting.GREEN)), Icon.EMPTY).sendTo(player);
 		}
 	}
 
 	@Override
-	public IFormattableTextComponent getAltTitle()
+	public MutableComponent getAltTitle()
 	{
-		return new TranslationTextComponent("ftbquests.reward.ftbquests.xp").appendString(": ").append(new StringTextComponent("+" + xp).mergeStyle(TextFormatting.GREEN));
+		return new TranslatableComponent("ftbquests.reward.ftbquests.xp").append(": ").append(new TextComponent("+" + xp).withStyle(ChatFormatting.GREEN));
 	}
 
 	@Override

@@ -25,14 +25,14 @@ import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigItemStack;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.MinecraftForge;
@@ -157,14 +157,14 @@ public abstract class QuestFile extends QuestObject
 	}
 
 	@Override
-	public void onCompleted(PlayerData data, List<ServerPlayerEntity> onlineMembers, List<ServerPlayerEntity> notifiedPlayers)
+	public void onCompleted(PlayerData data, List<ServerPlayer> onlineMembers, List<ServerPlayer> notifiedPlayers)
 	{
 		super.onCompleted(data, onlineMembers, notifiedPlayers);
 		MinecraftForge.EVENT_BUS.post(new ObjectCompletedEvent.FileEvent(data, this, onlineMembers, notifiedPlayers));
 
 		if (!disableToast)
 		{
-			for (ServerPlayerEntity player : notifiedPlayers)
+			for (ServerPlayer player : notifiedPlayers)
 			{
 				new MessageDisplayCompletionToast(id).sendTo(player);
 			}
@@ -350,7 +350,7 @@ public abstract class QuestFile extends QuestObject
 		clearCachedData();
 	}
 
-	public QuestObjectBase create(QuestObjectType type, int parent, CompoundNBT extra)
+	public QuestObjectBase create(QuestObjectType type, int parent, CompoundTag extra)
 	{
 		switch (type)
 		{
@@ -409,7 +409,7 @@ public abstract class QuestFile extends QuestObject
 	}
 
 	@Override
-	public final void writeData(CompoundNBT nbt)
+	public final void writeData(CompoundTag nbt)
 	{
 		super.writeData(nbt);
 		nbt.putBoolean("default_reward_team", defaultRewardTeam);
@@ -420,7 +420,7 @@ public abstract class QuestFile extends QuestObject
 
 		if (!emergencyItems.isEmpty())
 		{
-			ListNBT list = new ListNBT();
+			ListTag list = new ListTag();
 
 			for (ItemStack stack : emergencyItems)
 			{
@@ -433,7 +433,7 @@ public abstract class QuestFile extends QuestObject
 		nbt.putInt("emergency_items_cooldown", emergencyItemsCooldown);
 		nbt.putBoolean("drop_loot_crates", dropLootCrates);
 
-		CompoundNBT nbt1 = new OrderedCompoundNBT();
+		CompoundTag nbt1 = new OrderedCompoundNBT();
 		lootCrateNoDrop.writeData(nbt1);
 		nbt.put("loot_crate_no_drop", nbt1);
 		nbt.putBoolean("disable_gui", disableGui);
@@ -441,7 +441,7 @@ public abstract class QuestFile extends QuestObject
 	}
 
 	@Override
-	public final void readData(CompoundNBT nbt)
+	public final void readData(CompoundTag nbt)
 	{
 		super.readData(nbt);
 		defaultRewardTeam = nbt.getBoolean("default_reward_team");
@@ -457,7 +457,7 @@ public abstract class QuestFile extends QuestObject
 		defaultQuestDisableJEI = nbt.getBoolean("default_quest_disable_jei");
 		emergencyItems.clear();
 
-		ListNBT list = nbt.getList("emergency_items", Constants.NBT.TAG_COMPOUND);
+		ListTag list = nbt.getList("emergency_items", Constants.NBT.TAG_COMPOUND);
 
 		for (int i = 0; i < list.size(); i++)
 		{
@@ -483,7 +483,7 @@ public abstract class QuestFile extends QuestObject
 
 	public final void writeDataFull(Path folder)
 	{
-		CompoundNBT fileNBT = new OrderedCompoundNBT();
+		CompoundTag fileNBT = new OrderedCompoundNBT();
 		fileNBT.putInt("version", VERSION);
 		fileNBT.putInt("last_id", lastID);
 		writeData(fileNBT);
@@ -491,11 +491,11 @@ public abstract class QuestFile extends QuestObject
 
 		for (Chapter chapter : chapters)
 		{
-			CompoundNBT chapterNBT = new OrderedCompoundNBT();
+			CompoundTag chapterNBT = new OrderedCompoundNBT();
 			chapterNBT.putInt("id", chapter.id);
 			chapter.writeData(chapterNBT);
 
-			ListNBT questList = new ListNBT();
+			ListTag questList = new ListTag();
 
 			for (Quest quest : chapter.quests)
 			{
@@ -504,18 +504,18 @@ public abstract class QuestFile extends QuestObject
 					continue;
 				}
 
-				CompoundNBT questNBT = new OrderedCompoundNBT();
+				CompoundTag questNBT = new OrderedCompoundNBT();
 				quest.writeData(questNBT);
 				questNBT.putInt("id", quest.id);
 
 				if (!quest.tasks.isEmpty())
 				{
-					ListNBT t = new ListNBT();
+					ListTag t = new ListTag();
 
 					for (Task task : quest.tasks)
 					{
 						TaskType type = task.getType();
-						CompoundNBT nbt3 = new OrderedCompoundNBT();
+						CompoundTag nbt3 = new OrderedCompoundNBT();
 						nbt3.putInt("id", task.id);
 						nbt3.putString("type", type.getTypeForNBT());
 						task.writeData(nbt3);
@@ -530,12 +530,12 @@ public abstract class QuestFile extends QuestObject
 
 				if (!quest.rewards.isEmpty())
 				{
-					ListNBT r = new ListNBT();
+					ListTag r = new ListTag();
 
 					for (Reward reward : quest.rewards)
 					{
 						RewardType type = reward.getType();
-						CompoundNBT nbt3 = new OrderedCompoundNBT();
+						CompoundTag nbt3 = new OrderedCompoundNBT();
 						nbt3.putInt("id", reward.id);
 						nbt3.putString("type", type.getTypeForNBT());
 						reward.writeData(nbt3);
@@ -557,7 +557,7 @@ public abstract class QuestFile extends QuestObject
 
 		for (RewardTable table : rewardTables)
 		{
-			CompoundNBT tableNBT = new OrderedCompoundNBT();
+			CompoundTag tableNBT = new OrderedCompoundNBT();
 			tableNBT.putInt("id", table.id);
 			table.writeData(tableNBT);
 			NBTUtils.writeSNBT(folder.resolve("reward_tables/" + getCodeString(table) + ".snbt"), tableNBT);
@@ -571,8 +571,8 @@ public abstract class QuestFile extends QuestObject
 		chapters.clear();
 		rewardTables.clear();
 
-		final Int2ObjectOpenHashMap<CompoundNBT> dataCache = new Int2ObjectOpenHashMap<>();
-		CompoundNBT fileNBT = NBTUtils.readSNBT(folder.resolve("data.snbt"));
+		final Int2ObjectOpenHashMap<CompoundTag> dataCache = new Int2ObjectOpenHashMap<>();
+		CompoundTag fileNBT = NBTUtils.readSNBT(folder.resolve("data.snbt"));
 
 		if (fileNBT != null)
 		{
@@ -589,7 +589,7 @@ public abstract class QuestFile extends QuestObject
 			try
 			{
 				Files.list(chaptersFolder).forEach(path -> {
-					CompoundNBT chapterNBT = NBTUtils.readSNBT(path);
+					CompoundTag chapterNBT = NBTUtils.readSNBT(path);
 
 					if (chapterNBT != null)
 					{
@@ -600,22 +600,22 @@ public abstract class QuestFile extends QuestObject
 						dataCache.put(chapter.id, chapterNBT);
 						chapters.add(chapter);
 
-						ListNBT questList = chapterNBT.getList("quests", Constants.NBT.TAG_COMPOUND);
+						ListTag questList = chapterNBT.getList("quests", Constants.NBT.TAG_COMPOUND);
 
 						for (int i = 0; i < questList.size(); i++)
 						{
-							CompoundNBT questNBT = questList.getCompound(i);
+							CompoundTag questNBT = questList.getCompound(i);
 							Quest quest = new Quest(chapter);
 							quest.id = readID(questNBT.getInt("id"));
 							map.put(quest.id, quest);
 							dataCache.put(quest.id, questNBT);
 							chapter.quests.add(quest);
 
-							ListNBT taskList = questNBT.getList("tasks", Constants.NBT.TAG_COMPOUND);
+							ListTag taskList = questNBT.getList("tasks", Constants.NBT.TAG_COMPOUND);
 
 							for (int j = 0; j < taskList.size(); j++)
 							{
-								CompoundNBT taskNBT = taskList.getCompound(j);
+								CompoundTag taskNBT = taskList.getCompound(j);
 								Task task = TaskType.createTask(quest, taskNBT.getString("type"));
 
 								if (task == null)
@@ -630,11 +630,11 @@ public abstract class QuestFile extends QuestObject
 								quest.tasks.add(task);
 							}
 
-							ListNBT rewardList = questNBT.getList("rewards", Constants.NBT.TAG_COMPOUND);
+							ListTag rewardList = questNBT.getList("rewards", Constants.NBT.TAG_COMPOUND);
 
 							for (int j = 0; j < rewardList.size(); j++)
 							{
-								CompoundNBT rewardNBT = rewardList.getCompound(j);
+								CompoundTag rewardNBT = rewardList.getCompound(j);
 								Reward reward = RewardType.createReward(quest, rewardNBT.getString("type"));
 
 								if (reward == null)
@@ -665,7 +665,7 @@ public abstract class QuestFile extends QuestObject
 			try
 			{
 				Files.list(rewardTableFolder).forEach(path -> {
-					CompoundNBT tableNBT = NBTUtils.readSNBT(path);
+					CompoundTag tableNBT = NBTUtils.readSNBT(path);
 
 					if (tableNBT != null)
 					{
@@ -685,7 +685,7 @@ public abstract class QuestFile extends QuestObject
 
 		for (QuestObjectBase object : map.values())
 		{
-			CompoundNBT data = dataCache.get(object.id);
+			CompoundTag data = dataCache.get(object.id);
 
 			if (data != null)
 			{
@@ -746,7 +746,7 @@ public abstract class QuestFile extends QuestObject
 	}
 
 	@Override
-	public final void writeNetData(PacketBuffer buffer)
+	public final void writeNetData(FriendlyByteBuf buffer)
 	{
 		super.writeNetData(buffer);
 		NetUtils.write(buffer, emergencyItems, FTBQuestsNetHandler::writeItemType);
@@ -754,7 +754,7 @@ public abstract class QuestFile extends QuestObject
 		buffer.writeBoolean(defaultRewardTeam);
 		buffer.writeBoolean(defaultTeamConsumeItems);
 		RewardAutoClaim.NAME_MAP_NO_DEFAULT.write(buffer, defaultRewardAutoClaim);
-		buffer.writeString(defaultQuestShape, Short.MAX_VALUE);
+		buffer.writeUtf(defaultQuestShape, Short.MAX_VALUE);
 		buffer.writeBoolean(defaultQuestDisableJEI);
 		buffer.writeBoolean(dropLootCrates);
 		lootCrateNoDrop.writeNetData(buffer);
@@ -763,7 +763,7 @@ public abstract class QuestFile extends QuestObject
 	}
 
 	@Override
-	public final void readNetData(PacketBuffer buffer)
+	public final void readNetData(FriendlyByteBuf buffer)
 	{
 		super.readNetData(buffer);
 		NetUtils.read(buffer, emergencyItems, FTBQuestsNetHandler::readItemType);
@@ -771,7 +771,7 @@ public abstract class QuestFile extends QuestObject
 		defaultRewardTeam = buffer.readBoolean();
 		defaultTeamConsumeItems = buffer.readBoolean();
 		defaultRewardAutoClaim = RewardAutoClaim.NAME_MAP_NO_DEFAULT.read(buffer);
-		defaultQuestShape = buffer.readString(Short.MAX_VALUE);
+		defaultQuestShape = buffer.readUtf(Short.MAX_VALUE);
 		defaultQuestDisableJEI = buffer.readBoolean();
 		dropLootCrates = buffer.readBoolean();
 		lootCrateNoDrop.readNetData(buffer);
@@ -779,7 +779,7 @@ public abstract class QuestFile extends QuestObject
 		gridScale = buffer.readDouble();
 	}
 
-	public final void writeNetDataFull(PacketBuffer buffer, UUID self)
+	public final void writeNetDataFull(FriendlyByteBuf buffer, UUID self)
 	{
 		int pos = buffer.writerIndex();
 		writeNetData(buffer);
@@ -859,7 +859,7 @@ public abstract class QuestFile extends QuestObject
 		FTBQuests.LOGGER.debug("Wrote " + (buffer.writerIndex() - pos) + " bytes");
 	}
 
-	public final void readNetDataFull(PacketBuffer buffer, UUID self)
+	public final void readNetDataFull(FriendlyByteBuf buffer, UUID self)
 	{
 		int pos = buffer.readerIndex();
 		readNetData(buffer);
@@ -983,7 +983,7 @@ public abstract class QuestFile extends QuestObject
 
 	public PlayerData getData(Entity player)
 	{
-		return getData(player.getUniqueID());
+		return getData(player.getUUID());
 	}
 
 	public Collection<PlayerData> getAllData()
@@ -1000,9 +1000,9 @@ public abstract class QuestFile extends QuestObject
 	}
 
 	@Override
-	public IFormattableTextComponent getAltTitle()
+	public MutableComponent getAltTitle()
 	{
-		return new TranslationTextComponent("ftbquests.file");
+		return new TranslatableComponent("ftbquests.file");
 	}
 
 	@Override

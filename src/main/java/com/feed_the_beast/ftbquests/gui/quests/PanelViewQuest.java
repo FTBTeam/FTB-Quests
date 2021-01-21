@@ -24,19 +24,18 @@ import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Widget;
 import com.feed_the_beast.mods.ftbguilibrary.widget.WidgetLayout;
 import com.feed_the_beast.mods.ftbguilibrary.widget.WidgetVerticalSpace;
-import com.mojang.blaze3d.matrix.MatrixStack;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
-
+import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.util.Mth;
 
 /**
  * @author LatvianModder
@@ -46,7 +45,7 @@ public class PanelViewQuest extends Panel
 	public final GuiQuests gui;
 	public Quest quest = null;
 	public boolean hidePanel = false;
-	private IFormattableTextComponent title = (IFormattableTextComponent) StringTextComponent.EMPTY;
+	private MutableComponent title = (MutableComponent) TextComponent.EMPTY;
 	private Icon icon = Icon.EMPTY;
 	public Button buttonClose;
 	public Button buttonPin;
@@ -104,7 +103,7 @@ public class PanelViewQuest extends Panel
 
 		if (!canEdit && panelTasks.widgets.isEmpty())
 		{
-			TextFieldDisabledButton noTasks = new TextFieldDisabledButton(panelTasks, I18n.format("ftbquests.gui.no_tasks"));
+			TextFieldDisabledButton noTasks = new TextFieldDisabledButton(panelTasks, I18n.get("ftbquests.gui.no_tasks"));
 			noTasks.setSize(noTasks.width + 8, bsize);
 			noTasks.setColor(ThemeProperties.DISABLED_TEXT_COLOR.get(quest));
 			panelTasks.add(noTasks);
@@ -122,7 +121,7 @@ public class PanelViewQuest extends Panel
 
 		if (!canEdit && panelRewards.widgets.isEmpty())
 		{
-			TextFieldDisabledButton noRewards = new TextFieldDisabledButton(panelRewards, I18n.format("ftbquests.gui.no_rewards"));
+			TextFieldDisabledButton noRewards = new TextFieldDisabledButton(panelRewards, I18n.get("ftbquests.gui.no_rewards"));
 			noRewards.setSize(noRewards.width + 8, bsize);
 			noRewards.setColor(ThemeProperties.DISABLED_TEXT_COLOR.get(quest));
 			panelRewards.add(noRewards);
@@ -148,7 +147,7 @@ public class PanelViewQuest extends Panel
 
 		Color4I borderColor = ThemeProperties.WIDGET_BORDER.get(gui.selectedChapter);
 
-		ww = MathHelper.clamp(ww, 70, 140);
+		ww = Mth.clamp(ww, 70, 140);
 		w = Math.max(w, ww * 2 + 10);
 		w = Math.max(w, quest.minWidth);
 
@@ -174,20 +173,20 @@ public class PanelViewQuest extends Panel
 
 		if (quest.dependencies.isEmpty())
 		{
-			add(buttonOpenDependencies = new SimpleButton(this, new TranslationTextComponent("ftbquests.gui.no_dependencies"), Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/arrow_left.png").withTint(borderColor), (widget, button) -> {}));
+			add(buttonOpenDependencies = new SimpleButton(this, new TranslatableComponent("ftbquests.gui.no_dependencies"), Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/arrow_left.png").withTint(borderColor), (widget, button) -> {}));
 		}
 		else
 		{
-			add(buttonOpenDependencies = new SimpleButton(this, new TranslationTextComponent("ftbquests.gui.view_dependencies"), Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/arrow_left.png").withTint(borderColor), (widget, button) -> showList(quest.dependencies)));
+			add(buttonOpenDependencies = new SimpleButton(this, new TranslatableComponent("ftbquests.gui.view_dependencies"), Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/arrow_left.png").withTint(borderColor), (widget, button) -> showList(quest.dependencies)));
 		}
 
 		if (quest.getDependants().isEmpty())
 		{
-			add(buttonOpenDependants = new SimpleButton(this, new TranslationTextComponent("ftbquests.gui.no_dependants"), Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/arrow_right.png").withTint(borderColor), (widget, button) -> {}));
+			add(buttonOpenDependants = new SimpleButton(this, new TranslatableComponent("ftbquests.gui.no_dependants"), Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/arrow_right.png").withTint(borderColor), (widget, button) -> {}));
 		}
 		else
 		{
-			add(buttonOpenDependants = new SimpleButton(this, new TranslationTextComponent("ftbquests.gui.view_dependants"), Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/arrow_right.png").withTint(borderColor), (widget, button) -> showList(quest.getDependants())));
+			add(buttonOpenDependants = new SimpleButton(this, new TranslatableComponent("ftbquests.gui.view_dependants"), Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/arrow_right.png").withTint(borderColor), (widget, button) -> showList(quest.getDependants())));
 		}
 
 		buttonOpenDependencies.setPosAndSize(0, 17, 13, 13);
@@ -204,7 +203,7 @@ public class PanelViewQuest extends Panel
 
 		textFieldTasks.setPosAndSize(2, 2, w2 - 3, 13);
 		textFieldTasks.addFlags(Theme.CENTERED | Theme.CENTERED_V);
-		textFieldTasks.setText(I18n.format("ftbquests.tasks"));
+		textFieldTasks.setText(I18n.get("ftbquests.tasks"));
 		textFieldTasks.setColor(ThemeProperties.TASKS_TEXT_COLOR.get(quest));
 		panelContent.add(textFieldTasks);
 
@@ -219,7 +218,7 @@ public class PanelViewQuest extends Panel
 
 		textFieldRewards.setPosAndSize(w2 + 2, 2, w2 - 3, 13);
 		textFieldRewards.addFlags(Theme.CENTERED | Theme.CENTERED_V);
-		textFieldRewards.setText(I18n.format("ftbquests.rewards"));
+		textFieldRewards.setText(I18n.get("ftbquests.rewards"));
 		textFieldRewards.setColor(ThemeProperties.REWARDS_TEXT_COLOR.get(quest));
 		panelContent.add(textFieldRewards);
 
@@ -252,9 +251,9 @@ public class PanelViewQuest extends Panel
 
 		panelText.setPosAndSize(3, 16 + h + 12, panelContent.width - 6, 0);
 
-		IFormattableTextComponent desc = quest.getSubtitle();
+		MutableComponent desc = quest.getSubtitle();
 
-		if (desc != StringTextComponent.EMPTY)
+		if (desc != TextComponent.EMPTY)
 		{
 			//FIXME: TextFormatting.ITALIC + TextFormatting.GRAY
 			panelText.add(new TextField(panelText).addFlags(Theme.CENTERED).setMaxWidth(panelText.width).setSpacing(9).setText(desc.getString()));
@@ -264,18 +263,18 @@ public class PanelViewQuest extends Panel
 
 		if (showText && quest.getDescription().length > 0)
 		{
-			if (desc != StringTextComponent.EMPTY)
+			if (desc != TextComponent.EMPTY)
 			{
 				panelText.add(new WidgetVerticalSpace(panelText, 7));
 			}
 
 			// FIXME panelText.add(new TextField(panelText).setMaxWidth(panelText.width).setSpacing(9).setText(StringUtils.addFormatting(String.join("\n", quest.getDescription()))));
-			panelText.add(new TextField(panelText).setMaxWidth(panelText.width).setSpacing(9).setText(Arrays.stream(quest.getDescription()).map(ITextComponent::getString).collect(Collectors.joining("\n"))));
+			panelText.add(new TextField(panelText).setMaxWidth(panelText.width).setSpacing(9).setText(Arrays.stream(quest.getDescription()).map(Component::getString).collect(Collectors.joining("\n"))));
 		}
 
 		if (showText && !quest.guidePage.isEmpty())
 		{
-			if (desc != StringTextComponent.EMPTY)
+			if (desc != TextComponent.EMPTY)
 			{
 				panelText.add(new WidgetVerticalSpace(panelText, 7));
 			}
@@ -334,11 +333,11 @@ public class PanelViewQuest extends Panel
 		{
 			if (hidden == c.size())
 			{
-				contextMenu.add(new ContextMenuItem(new StringTextComponent(hidden + " hidden quests"), Icon.EMPTY, () -> {}).setEnabled(false));
+				contextMenu.add(new ContextMenuItem(new TextComponent(hidden + " hidden quests"), Icon.EMPTY, () -> {}).setEnabled(false));
 			}
 			else
 			{
-				contextMenu.add(new ContextMenuItem(new StringTextComponent("+ " + hidden + " hidden quests"), Icon.EMPTY, () -> {}).setEnabled(false));
+				contextMenu.add(new ContextMenuItem(new TextComponent("+ " + hidden + " hidden quests"), Icon.EMPTY, () -> {}).setEnabled(false));
 			}
 		}
 
@@ -346,22 +345,22 @@ public class PanelViewQuest extends Panel
 	}
 
 	@Override
-	public void draw(MatrixStack matrixStack, Theme theme, int x, int y, int w, int h)
+	public void draw(PoseStack matrixStack, Theme theme, int x, int y, int w, int h)
 	{
 		if (quest != null && !hidePanel)
 		{
 			QuestObjectBase prev = QuestTheme.currentObject;
 			QuestTheme.currentObject = quest;
-			matrixStack.push();
+			matrixStack.pushPose();
 			matrixStack.translate(0, 0, 500);
 			super.draw(matrixStack, theme, x, y, w, h);
-			matrixStack.pop();
+			matrixStack.popPose();
 			QuestTheme.currentObject = prev;
 		}
 	}
 
 	@Override
-	public void drawBackground(MatrixStack matrixStack, Theme theme, int x, int y, int w, int h)
+	public void drawBackground(PoseStack matrixStack, Theme theme, int x, int y, int w, int h)
 	{
 		Color4I borderColor = ThemeProperties.QUEST_VIEW_BORDER.get();
 		Color4I.DARK_GRAY.withAlpha(120).draw(matrixStack, gui.getX(), gui.getY(), gui.width, gui.height);

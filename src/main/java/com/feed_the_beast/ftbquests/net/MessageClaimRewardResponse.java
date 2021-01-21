@@ -2,7 +2,7 @@ package com.feed_the_beast.ftbquests.net;
 
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.util.NetUtils;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.fml.network.NetworkEvent;
 
 import java.util.UUID;
@@ -15,7 +15,7 @@ public class MessageClaimRewardResponse extends MessageBase
 	private final UUID player;
 	private final int id;
 
-	MessageClaimRewardResponse(PacketBuffer buffer)
+	MessageClaimRewardResponse(FriendlyByteBuf buffer)
 	{
 		player = NetUtils.readUUID(buffer);
 		id = buffer.readVarInt();
@@ -28,7 +28,7 @@ public class MessageClaimRewardResponse extends MessageBase
 	}
 
 	@Override
-	public void write(PacketBuffer buffer)
+	public void write(FriendlyByteBuf buffer)
 	{
 		NetUtils.writeUUID(buffer, player);
 		buffer.writeVarInt(id);

@@ -12,9 +12,9 @@ import com.feed_the_beast.ftbquests.quest.theme.selector.TagSelector;
 import com.feed_the_beast.ftbquests.quest.theme.selector.ThemeSelector;
 import com.feed_the_beast.ftbquests.quest.theme.selector.TypeSelector;
 import com.feed_the_beast.ftbquests.util.FileUtils;
-import net.minecraft.resources.IResource;
-import net.minecraft.resources.IResourceManager;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.Resource;
+import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraftforge.resource.IResourceType;
 import net.minecraftforge.resource.ISelectiveResourceReloadListener;
 
@@ -38,7 +38,7 @@ public class ThemeLoader implements ISelectiveResourceReloadListener
 	};
 
 	@Override
-	public void onResourceManagerReload(IResourceManager resourceManager, Predicate<IResourceType> resourcePredicate)
+	public void onResourceManagerReload(ResourceManager resourceManager, Predicate<IResourceType> resourcePredicate)
 	{
 		if (resourcePredicate.test(TYPE))
 		{
@@ -46,7 +46,7 @@ public class ThemeLoader implements ISelectiveResourceReloadListener
 		}
 	}
 
-	public static void loadTheme(IResourceManager resourceManager)
+	public static void loadTheme(ResourceManager resourceManager)
 	{
 		//Map<String, ThemeProperty> propertyMap = new HashMap<>();
 		//new ThemePropertyEvent(propertyMap).post();
@@ -54,7 +54,7 @@ public class ThemeLoader implements ISelectiveResourceReloadListener
 
 		try
 		{
-			for (IResource resource : resourceManager.getAllResources(new ResourceLocation(FTBQuests.MOD_ID, "ftb_quests_theme.txt")))
+			for (Resource resource : resourceManager.getResources(new ResourceLocation(FTBQuests.MOD_ID, "ftb_quests_theme.txt")))
 			{
 				try (InputStream in = resource.getInputStream())
 				{

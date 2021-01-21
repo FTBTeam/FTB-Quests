@@ -8,13 +8,13 @@ import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigString;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.icon.IconAnimation;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.nbt.StringNBT;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.MinecraftForge;
@@ -79,7 +79,7 @@ public final class Chapter extends QuestObject
 	}
 
 	@Override
-	public void writeData(CompoundNBT nbt)
+	public void writeData(CompoundTag nbt)
 	{
 		nbt.putString("filename", filename);
 		nbt.putInt("order_index", orderIndex);
@@ -87,11 +87,11 @@ public final class Chapter extends QuestObject
 
 		if (!subtitle.isEmpty())
 		{
-			ListNBT list = new ListNBT();
+			ListTag list = new ListTag();
 
 			for (String v : subtitle)
 			{
-				list.add(StringNBT.valueOf(v));
+				list.add(StringTag.valueOf(v));
 			}
 
 			nbt.put("subtitle", list);
@@ -111,11 +111,11 @@ public final class Chapter extends QuestObject
 
 		if (!images.isEmpty())
 		{
-			ListNBT list = new ListNBT();
+			ListTag list = new ListTag();
 
 			for (ChapterImage image : images)
 			{
-				CompoundNBT nbt1 = new OrderedCompoundNBT();
+				CompoundTag nbt1 = new OrderedCompoundNBT();
 				image.writeData(nbt1);
 				list.add(nbt1);
 			}
@@ -125,14 +125,14 @@ public final class Chapter extends QuestObject
 	}
 
 	@Override
-	public void readData(CompoundNBT nbt)
+	public void readData(CompoundTag nbt)
 	{
 		filename = nbt.getString("filename");
 		orderIndex = nbt.getInt("order_index");
 		super.readData(nbt);
 		subtitle.clear();
 
-		ListNBT subtitleNBT = nbt.getList("subtitle", Constants.NBT.TAG_STRING);
+		ListTag subtitleNBT = nbt.getList("subtitle", Constants.NBT.TAG_STRING);
 
 		for (int i = 0; i < subtitleNBT.size(); i++)
 		{
@@ -148,7 +148,7 @@ public final class Chapter extends QuestObject
 			defaultQuestShape = "";
 		}
 
-		ListNBT imgs = nbt.getList("images", Constants.NBT.TAG_COMPOUND);
+		ListTag imgs = nbt.getList("images", Constants.NBT.TAG_COMPOUND);
 
 		images.clear();
 
@@ -161,26 +161,26 @@ public final class Chapter extends QuestObject
 	}
 
 	@Override
-	public void writeNetData(PacketBuffer buffer)
+	public void writeNetData(FriendlyByteBuf buffer)
 	{
 		super.writeNetData(buffer);
-		buffer.writeString(filename, Short.MAX_VALUE);
+		buffer.writeUtf(filename, Short.MAX_VALUE);
 		NetUtils.writeStrings(buffer, subtitle);
 		buffer.writeBoolean(alwaysInvisible);
 		buffer.writeInt(group == null || group.invalid ? 0 : group.id);
-		buffer.writeString(defaultQuestShape, Short.MAX_VALUE);
+		buffer.writeUtf(defaultQuestShape, Short.MAX_VALUE);
 		NetUtils.write(buffer, images, (d, img) -> img.writeNetData(d));
 	}
 
 	@Override
-	public void readNetData(PacketBuffer buffer)
+	public void readNetData(FriendlyByteBuf buffer)
 	{
 		super.readNetData(buffer);
-		filename = buffer.readString(Short.MAX_VALUE);
+		filename = buffer.readUtf(Short.MAX_VALUE);
 		NetUtils.readStrings(buffer, subtitle);
 		alwaysInvisible = buffer.readBoolean();
 		group = file.getChapter(buffer.readInt());
-		defaultQuestShape = buffer.readString(Short.MAX_VALUE);
+		defaultQuestShape = buffer.readUtf(Short.MAX_VALUE);
 		NetUtils.read(buffer, images, d -> {
 			ChapterImage image = new ChapterImage(this);
 			image.readNetData(d);
@@ -235,14 +235,14 @@ public final class Chapter extends QuestObject
 	}
 
 	@Override
-	public void onCompleted(PlayerData data, List<ServerPlayerEntity> onlineMembers, List<ServerPlayerEntity> notifiedPlayers)
+	public void onCompleted(PlayerData data, List<ServerPlayer> onlineMembers, List<ServerPlayer> notifiedPlayers)
 	{
 		super.onCompleted(data, onlineMembers, notifiedPlayers);
 		MinecraftForge.EVENT_BUS.post(new ObjectCompletedEvent.ChapterEvent(data, this, onlineMembers, notifiedPlayers));
 
 		if (!disableToast)
 		{
-			for (ServerPlayerEntity player : notifiedPlayers)
+			for (ServerPlayer player : notifiedPlayers)
 			{
 				new MessageDisplayCompletionToast(id).sendTo(player);
 			}
@@ -298,9 +298,9 @@ public final class Chapter extends QuestObject
 	}
 
 	@Override
-	public IFormattableTextComponent getAltTitle()
+	public MutableComponent getAltTitle()
 	{
-		return new TranslationTextComponent("ftbquests.unnamed");
+		return new TranslatableComponent("ftbquests.unnamed");
 	}
 
 	@Override

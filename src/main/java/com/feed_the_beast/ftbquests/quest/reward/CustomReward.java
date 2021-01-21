@@ -2,7 +2,7 @@ package com.feed_the_beast.ftbquests.quest.reward;
 
 import com.feed_the_beast.ftbquests.events.CustomRewardEvent;
 import com.feed_the_beast.ftbquests.quest.Quest;
-import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.common.MinecraftForge;
 
 /**
@@ -22,7 +22,7 @@ public class CustomReward extends Reward
 	}
 
 	@Override
-	public void claim(ServerPlayerEntity player, boolean notify)
+	public void claim(ServerPlayer player, boolean notify)
 	{
 		MinecraftForge.EVENT_BUS.post(new CustomRewardEvent(this, player, notify));
 	}

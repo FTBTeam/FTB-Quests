@@ -3,14 +3,14 @@ package com.feed_the_beast.ftbquests.quest.reward;
 import com.feed_the_beast.ftbquests.quest.Chapter;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -38,7 +38,7 @@ public class CommandReward extends Reward
 	}
 
 	@Override
-	public void writeData(CompoundNBT nbt)
+	public void writeData(CompoundTag nbt)
 	{
 		super.writeData(nbt);
 		nbt.putString("command", command);
@@ -46,7 +46,7 @@ public class CommandReward extends Reward
 	}
 
 	@Override
-	public void readData(CompoundNBT nbt)
+	public void readData(CompoundTag nbt)
 	{
 		super.readData(nbt);
 		command = nbt.getString("command");
@@ -54,18 +54,18 @@ public class CommandReward extends Reward
 	}
 
 	@Override
-	public void writeNetData(PacketBuffer buffer)
+	public void writeNetData(FriendlyByteBuf buffer)
 	{
 		super.writeNetData(buffer);
-		buffer.writeString(command);
+		buffer.writeUtf(command);
 		buffer.writeBoolean(playerCommand);
 	}
 
 	@Override
-	public void readNetData(PacketBuffer buffer)
+	public void readNetData(FriendlyByteBuf buffer)
 	{
 		super.readNetData(buffer);
-		command = buffer.readString();
+		command = buffer.readUtf();
 		playerCommand = buffer.readBoolean();
 	}
 
@@ -79,12 +79,12 @@ public class CommandReward extends Reward
 	}
 
 	@Override
-	public void claim(ServerPlayerEntity player, boolean notify)
+	public void claim(ServerPlayer player, boolean notify)
 	{
 		Map<String, Object> overrides = new HashMap<>();
 		overrides.put("p", player.getGameProfile().getName());
 
-		BlockPos pos = player.getPosition();
+		BlockPos pos = player.blockPosition();
 		overrides.put("x", pos.getX());
 		overrides.put("y", pos.getY());
 		overrides.put("z", pos.getZ());
@@ -108,12 +108,12 @@ public class CommandReward extends Reward
 			}
 		}
 
-		player.server.getCommandManager().handleCommand(playerCommand ? player.getCommandSource() : player.server.getCommandSource(), s);
+		player.server.getCommands().performCommand(playerCommand ? player.createCommandSourceStack() : player.server.createCommandSourceStack(), s);
 	}
 
 	@Override
-	public IFormattableTextComponent getAltTitle()
+	public MutableComponent getAltTitle()
 	{
-		return new TranslationTextComponent("ftbquests.reward.ftbquests.command").appendString(": ").append(new StringTextComponent(command).mergeStyle(TextFormatting.RED));
+		return new TranslatableComponent("ftbquests.reward.ftbquests.command").append(": ").append(new TextComponent(command).withStyle(ChatFormatting.RED));
 	}
 }
