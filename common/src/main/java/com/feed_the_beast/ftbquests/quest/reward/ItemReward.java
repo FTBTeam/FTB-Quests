@@ -139,7 +139,9 @@ public class ItemReward extends Reward
 		while (size > 0)
 		{
 			int s = Math.min(size, item.getMaxStackSize());
-			ItemHandlerHelper.giveItemToPlayer(player, ItemHandlerHelper.copyStackWithSize(item, s));
+			ItemStack copy = item.copy();
+			copy.setCount(s);
+			ItemHandlerHelper.giveItemToPlayer(player, copy);
 			size -= s;
 		}
 
@@ -157,7 +159,9 @@ public class ItemReward extends Reward
 		while (size > 0)
 		{
 			int s = Math.min(size, item.getMaxStackSize());
-			items.add(ItemHandlerHelper.copyStackWithSize(item, s));
+			ItemStack copy = item.copy();
+			copy.setCount(s);
+			items.add(copy);
 			size -= s;
 		}
 
@@ -177,7 +181,9 @@ public class ItemReward extends Reward
 			return super.getAltIcon();
 		}
 
-		return ItemIcon.getItemIcon(ItemHandlerHelper.copyStackWithSize(item, 1));
+		ItemStack copy = item.copy();
+		copy.setCount(1);
+		return ItemIcon.getItemIcon(copy);
 	}
 
 	@Override

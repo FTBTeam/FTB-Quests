@@ -8,6 +8,10 @@ import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigNBT;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Color4I;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
+import me.shedaniel.architectury.fluid.FluidStack;
+import me.shedaniel.architectury.registry.Registries;
+import me.shedaniel.architectury.utils.Fraction;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.MutableComponent;
@@ -33,7 +37,7 @@ public class FluidTask extends Task
 
 	public Fluid fluid = Fluids.WATER;
 	public CompoundTag fluidNBT = null;
-	public long amount = FluidAttributes.BUCKET_VOLUME;
+	public long amount = FluidStack.bucketAmount().longValue();
 
 	private FluidStack cachedFluidStack = null;
 
@@ -64,7 +68,7 @@ public class FluidTask extends Task
 	public void writeData(CompoundTag nbt)
 	{
 		super.writeData(nbt);
-		nbt.putString("fluid", fluid.getRegistryName().toString());
+		nbt.putString("fluid", Registries.getId(fluid, Registry.FLUID_REGISTRY).toString());
 		nbt.putLong("amount", amount);
 
 		if (fluidNBT != null)
@@ -78,7 +82,7 @@ public class FluidTask extends Task
 	{
 		super.readData(nbt);
 
-		fluid = ForgeRegistries.FLUIDS.getValue(new ResourceLocation(nbt.getString("fluid")));
+		fluid = Registry.FLUID.get(new ResourceLocation(nbt.getString("fluid")));
 
 		if (fluid == null || fluid == Fluids.EMPTY)
 		{
@@ -93,7 +97,7 @@ public class FluidTask extends Task
 	public void writeNetData(FriendlyByteBuf buffer)
 	{
 		super.writeNetData(buffer);
-		buffer.writeResourceLocation(fluid.getRegistryName());
+		buffer.writeResourceLocation(Registries.getId(fluid, Registry.FLUID_REGISTRY));
 		buffer.writeNbt(fluidNBT);
 		buffer.writeVarLong(amount);
 	}
@@ -102,7 +106,7 @@ public class FluidTask extends Task
 	public void readNetData(FriendlyByteBuf buffer)
 	{
 		super.readNetData(buffer);
-		fluid = ForgeRegistries.FLUIDS.getValue(buffer.readResourceLocation());
+		fluid = Registry.FLUID.get(buffer.readResourceLocation());
 
 		if (fluid == null || fluid == Fluids.EMPTY)
 		{
@@ -124,7 +128,7 @@ public class FluidTask extends Task
 	{
 		if (cachedFluidStack == null)
 		{
-			cachedFluidStack = new FluidStack(fluid, FluidAttributes.BUCKET_VOLUME, fluidNBT);
+			cachedFluidStack = FluidStack.create(fluid, FluidStack.bucketAmount(), fluidNBT);
 		}
 
 		return cachedFluidStack;
@@ -134,25 +138,25 @@ public class FluidTask extends Task
 	{
 		StringBuilder builder = new StringBuilder();
 
-		if (a >= FluidAttributes.BUCKET_VOLUME)
+		if (a >= FluidStack.bucketAmount().longValue())
 		{
-			if (a % FluidAttributes.BUCKET_VOLUME != 0L)
+			if (a % FluidStack.bucketAmount().longValue() != 0L)
 			{
-				builder.append(a / (double) FluidAttributes.BUCKET_VOLUME);
+				builder.append(a / (double) FluidStack.bucketAmount().longValue());
 			}
 			else
 			{
-				builder.append(a / FluidAttributes.BUCKET_VOLUME);
+				builder.append(a / FluidStack.bucketAmount().longValue());
 			}
 		}
 		else
 		{
-			builder.append(a % FluidAttributes.BUCKET_VOLUME);
+			builder.append(a % FluidStack.bucketAmount().longValue());
 		}
 
 		builder.append(' ');
 
-		if (a < FluidAttributes.BUCKET_VOLUME)
+		if (a < FluidStack.bucketAmount().longValue())
 		{
 			builder.append('m');
 		}
@@ -172,7 +176,7 @@ public class FluidTask extends Task
 	@Override
 	public MutableComponent getAltTitle()
 	{
-		return new TextComponent(getVolumeString(amount) + " of ").append(createFluidStack().getDisplayName());
+		return new TextComponent(getVolumeString(amount) + " of ").append(createFluidStack().getName());
 	}
 
 	@Override
@@ -183,7 +187,7 @@ public class FluidTask extends Task
 
 		config.add("fluid", new ConfigFluid(false), fluid, v -> fluid = v, Fluids.WATER);
 		config.add("fluid_nbt", new ConfigNBT(), fluidNBT, v -> fluidNBT = v, null);
-		config.addLong("amount", amount, v -> amount = v, FluidAttributes.BUCKET_VOLUME, 1, Long.MAX_VALUE);
+		config.addLong("amount", amount, v -> amount = v, FluidStack.bucketAmount().longValue(), 1, Long.MAX_VALUE);
 	}
 
 	@Override

@@ -7,7 +7,7 @@ dependencies {
     modCompile "me.shedaniel:architectury:${rootProject.architectury_version}"
     modCompile "com.feed_the_beast.mods:FTB-Teams:${rootProject.ftb_teams_version}"
     modCompile "com.feed_the_beast.mods:FTB-GUI-Library:${rootProject.ftb_gui_library_version}"
-//    modCompile "curse.maven:ftb-gui-library-404465:${ftb_gui_library_version}"
+    modCompile "curse.maven:kubejs-fabric-395864:3174959"
     compileOnly "com.google.code.findbugs:jsr305:3.+"
 }
 

@@ -4,7 +4,6 @@ import com.feed_the_beast.ftbquests.FTBQuests;
 import me.shedaniel.architectury.networking.NetworkManager;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.fml.network.NetworkEvent;
 
 /**
  * @author LatvianModder

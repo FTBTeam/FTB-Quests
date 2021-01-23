@@ -1,13 +1,13 @@
 {
-	"required": true,
-	"package": "com.feed_the_beast.ftbquests.core.mixin",
-	"compatibilityLevel": "JAVA_8",
-	"mixins": [
-		"ByteNBTMixin"
-	],
-	"client": [
-	],
-	"injectors": {
-		"defaultRequire": 1
-	}
+  "required": true,
+  "package": "com.feed_the_beast.ftbquests.core.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+    "ByteNBTMixin", "ItemAccessor"
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
 }

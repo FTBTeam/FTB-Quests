@@ -185,7 +185,7 @@ public final class RewardTable extends QuestObjectBase
 
 		for (WeightedReward reward : rewards)
 		{
-			buffer.writeVarInt(RewardType.getRegistry().getID(reward.reward.getType()));
+			buffer.writeVarInt(RewardType.getRegistry().getId(reward.reward.getType()));
 			reward.reward.writeNetData(buffer);
 			buffer.writeVarInt(reward.weight);
 		}
@@ -211,7 +211,7 @@ public final class RewardTable extends QuestObjectBase
 
 		for (int i = 0; i < s; i++)
 		{
-			RewardType type = RewardType.getRegistry().getValue(buffer.readVarInt());
+			RewardType type = RewardType.getRegistry().byId(buffer.readVarInt());
 			Reward reward = type.provider.create(fakeQuest);
 			reward.readNetData(buffer);
 			int w = buffer.readVarInt();

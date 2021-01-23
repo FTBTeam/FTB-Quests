@@ -6,7 +6,6 @@ import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import me.shedaniel.architectury.networking.NetworkManager;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.fml.network.NetworkEvent;
 
 import javax.annotation.Nullable;
 

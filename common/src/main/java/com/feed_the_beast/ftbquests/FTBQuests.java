@@ -28,7 +28,7 @@ public class FTBQuests
 	public static FTBQuestsNetCommon NET_PROXY;
 
 	public static final CreativeModeTab ITEM_GROUP = CreativeTabs.create(new ResourceLocation(FTBQuests.MOD_ID, FTBQuests.MOD_ID), () ->
-			new ItemStack(FTBQuestsItems.BOOK));
+			new ItemStack(FTBQuestsItems.BOOK.get()));
 
 	public FTBQuests()
 	{

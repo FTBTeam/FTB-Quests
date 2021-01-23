@@ -8,7 +8,6 @@ import com.feed_the_beast.ftbquests.quest.reward.Reward;
 import me.shedaniel.architectury.networking.NetworkManager;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.fml.network.NetworkEvent;
 
 /**
  * @author LatvianModder

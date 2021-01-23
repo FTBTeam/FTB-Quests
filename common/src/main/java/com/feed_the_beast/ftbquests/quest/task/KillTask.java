@@ -7,18 +7,18 @@ import com.feed_the_beast.mods.ftbguilibrary.config.NameMap;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.icon.ItemIcon;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
+import me.shedaniel.architectury.registry.Registries;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.SpawnEggItem;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -86,17 +86,12 @@ public class KillTask extends Task
 	public void getConfig(ConfigGroup config)
 	{
 		super.getConfig(config);
-		List<ResourceLocation> ids = new ArrayList<>();
-
-		for (EntityType type : ForgeRegistries.ENTITIES)
-		{
-			ids.add(type.getRegistryName());
-		}
+		List<ResourceLocation> ids = new ArrayList<>(Registry.ENTITY_TYPE.keySet());
 
 		config.addEnum("entity", entity, v -> entity = v, NameMap.of(ZOMBIE, ids)
 				.nameKey(v -> "entity." + v.getNamespace() + "." + v.getPath())
 				.icon(v -> {
-					SpawnEggItem item = SpawnEggItem.byId(ForgeRegistries.ENTITIES.getValue(v));
+					SpawnEggItem item = SpawnEggItem.byId(Registry.ENTITY_TYPE.get(v));
 					return ItemIcon.getItemIcon(item != null ? item : Items.SPAWNER);
 				})
 				.create(), ZOMBIE);
@@ -113,7 +108,7 @@ public class KillTask extends Task
 	@Override
 	public Icon getAltIcon()
 	{
-		SpawnEggItem item = SpawnEggItem.byId(ForgeRegistries.ENTITIES.getValue(entity));
+		SpawnEggItem item = SpawnEggItem.byId(Registry.ENTITY_TYPE.get(entity));
 		return ItemIcon.getItemIcon(item != null ? item : Items.SPAWNER);
 	}
 
@@ -138,7 +133,7 @@ public class KillTask extends Task
 
 		public void kill(LivingEntity entity)
 		{
-			if (!isComplete() && task.entity.equals(entity.getType().getRegistryName()))
+			if (!isComplete() && task.entity.equals(Registries.getId(entity.getType(), Registry.ENTITY_TYPE_REGISTRY)))
 			{
 				addProgress(1L);
 			}

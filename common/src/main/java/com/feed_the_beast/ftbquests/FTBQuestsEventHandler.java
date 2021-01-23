@@ -44,17 +44,20 @@ import me.shedaniel.architectury.event.events.CommandRegistrationEvent;
 import me.shedaniel.architectury.event.events.EntityEvent;
 import me.shedaniel.architectury.event.events.LifecycleEvent;
 import me.shedaniel.architectury.event.events.PlayerEvent;
+import me.shedaniel.architectury.event.events.TickEvent;
 import me.shedaniel.architectury.hooks.PlayerHooks;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.Container;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -97,20 +100,20 @@ public class FTBQuestsEventHandler
         LifecycleEvent.SERVER_STARTED.register(this::serverStarted);
         LifecycleEvent.SERVER_STOPPING.register(this::serverStopped);
         LifecycleEvent.SERVER_WORLD_SAVE.register(this::worldSaved);
-		FMLJavaModLoadingContext.get().getModEventBus().addGenericListener(Item.class, this::registerItems);
+		FTBQuestsItems.register();
 		FMLJavaModLoadingContext.get().getModEventBus().addGenericListener(TaskType.class, this::registerTasks);
 		FMLJavaModLoadingContext.get().getModEventBus().addGenericListener(RewardType.class, this::registerRewards);
         ClearFileCacheEvent.EVENT.register(this::fileCacheClear);
 		PlayerEvent.PLAYER_JOIN.register(this::playerLoggedIn);
         EntityEvent.LIVING_DEATH.register(this::playerKill);
-		MinecraftForge.EVENT_BUS.register(this::playerTick);
+		TickEvent.PLAYER_POST.register(this::playerTick);
 		MinecraftForge.EVENT_BUS.register(this::livingDrops);
-		MinecraftForge.EVENT_BUS.register(this::itemCrafted);
-		MinecraftForge.EVENT_BUS.register(this::itemSmelted);
-		MinecraftForge.EVENT_BUS.register(EventPriority.HIGH, this::cloned);
+		PlayerEvent.CRAFT_ITEM.register(this::itemCrafted);
+		PlayerEvent.SMELT_ITEM.register(this::itemSmelted);
+		PlayerEvent.PLAYER_CLONE.register(this::cloned);
 		MinecraftForge.EVENT_BUS.register(EventPriority.HIGH, this::dropsEvent);
 		MinecraftForge.EVENT_BUS.register(this::changedDimension);
-		MinecraftForge.EVENT_BUS.register(this::containerOpened);
+		PlayerEvent.OPEN_MENU.register(this::containerOpened);
 	}
 
 	private void serverAboutToStart(MinecraftServer server)
@@ -137,14 +140,6 @@ public class FTBQuestsEventHandler
 	private void worldSaved(ServerLevel level)
 	{
 		ServerQuestFile.INSTANCE.saveNow();
-	}
-
-	private void registerItems(RegistryEvent.Register<Item> event)
-	{
-		event.getRegistry().registerAll(
-				new ItemQuestBook().setRegistryName("book"),
-				new ItemLootCrate().setRegistryName("lootcrate")
-		);
 	}
 
 	private void registerTasks(RegistryEvent.Register<TaskType> event)
@@ -228,9 +223,9 @@ public class FTBQuestsEventHandler
         return InteractionResult.PASS;
 	}
 
-	private void playerTick(TickEvent.PlayerTickEvent event)
+	private void playerTick(Player player)
 	{
-		if (event.phase == TickEvent.Phase.END && !event.player.level.isClientSide && ServerQuestFile.INSTANCE != null && !(event.player instanceof FakePlayer))
+		if (!player.level.isClientSide && ServerQuestFile.INSTANCE != null && !PlayerHooks.isFake(player))
 		{
 			if (autoSubmitTasks == null)
 			{
@@ -242,8 +237,8 @@ public class FTBQuestsEventHandler
 				return;
 			}
 
-			PlayerData data = ServerQuestFile.INSTANCE.getData(event.player);
-			long t = event.player.level.getGameTime();
+			PlayerData data = ServerQuestFile.INSTANCE.getData(player);
+			long t = player.level.getGameTime();
 
 			for (Task task : autoSubmitTasks)
 			{
@@ -255,7 +250,7 @@ public class FTBQuestsEventHandler
 
 					if (!taskData.isComplete() && data.canStartTasks(task.quest))
 					{
-						taskData.submitTask((ServerPlayer) event.player);
+						taskData.submitTask((ServerPlayer) player);
 					}
 				}
 			}
@@ -286,35 +281,32 @@ public class FTBQuestsEventHandler
 		}
 	}
 
-	private void itemCrafted(PlayerEvent.ItemCraftedEvent event)
+	private void itemCrafted(Player player, ItemStack crafted, Container inventory)
 	{
-		if (event.getPlayer() instanceof ServerPlayer && !event.getCrafting().isEmpty())
+		if (player instanceof ServerPlayer && !crafted.isEmpty())
 		{
-			FTBQuestsInventoryListener.detect((ServerPlayer) event.getPlayer(), event.getCrafting(), 0);
+			FTBQuestsInventoryListener.detect((ServerPlayer) player, crafted, 0);
 		}
 	}
 
-	private void itemSmelted(PlayerEvent.ItemSmeltedEvent event)
+	private void itemSmelted(Player player, ItemStack smelted)
 	{
-		if (event.getPlayer() instanceof ServerPlayer && !event.getSmelting().isEmpty())
+		if (player instanceof ServerPlayer && !smelted.isEmpty())
 		{
-			FTBQuestsInventoryListener.detect((ServerPlayer) event.getPlayer(), event.getSmelting(), 0);
+			FTBQuestsInventoryListener.detect((ServerPlayer) player, smelted, 0);
 		}
 	}
 
-	private void cloned(PlayerEvent.Clone event)
+	private void cloned(ServerPlayer oldPlayer, ServerPlayer newPlayer, boolean wonGame)
 	{
-		event.getPlayer().inventoryMenu.addSlotListener(new FTBQuestsInventoryListener((ServerPlayer) event.getPlayer()));
+		newPlayer.inventoryMenu.addSlotListener(new FTBQuestsInventoryListener((ServerPlayer) newPlayer));
 
-		if (!event.isWasDeath())
+		if (wonGame)
 		{
 			return;
 		}
 
-		Player player = event.getPlayer();
-		Player oldPlayer = event.getOriginal();
-
-		if (player instanceof FakePlayer || player.level.getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY))
+		if (PlayerHooks.isFake(newPlayer) || newPlayer.level.getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY))
 		{
 			return;
 		}
@@ -323,7 +315,7 @@ public class FTBQuestsEventHandler
 		{
 			ItemStack stack = oldPlayer.inventory.items.get(i);
 
-			if (stack.getItem() == FTBQuestsItems.BOOK && player.addItem(stack))
+			if (stack.getItem() == FTBQuestsItems.BOOK && newPlayer.addItem(stack))
 			{
 				oldPlayer.inventory.items.set(i, ItemStack.EMPTY);
 			}
@@ -371,11 +363,11 @@ public class FTBQuestsEventHandler
 		}
 	}
 
-	private void containerOpened(PlayerContainerEvent.Open event)
+	private void containerOpened(Player player, AbstractContainerMenu menu)
 	{
-		if (event.getPlayer() instanceof ServerPlayer && !(event.getPlayer() instanceof FakePlayer) && !(event.getContainer() instanceof InventoryMenu))
+		if (player instanceof ServerPlayer && !PlayerHooks.isFake(player) && !(menu instanceof InventoryMenu))
 		{
-			event.getContainer().addSlotListener(new FTBQuestsInventoryListener((ServerPlayer) event.getPlayer()));
+			menu.addSlotListener(new FTBQuestsInventoryListener((ServerPlayer) player));
 		}
 	}
 }

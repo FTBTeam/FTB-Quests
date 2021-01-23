@@ -6,7 +6,6 @@ import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import me.shedaniel.architectury.networking.NetworkManager;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraftforge.fml.network.NetworkEvent;
 
 /**
  * @author LatvianModder

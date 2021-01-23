@@ -21,10 +21,10 @@ import com.feed_the_beast.mods.ftbguilibrary.widget.Widget;
 import com.feed_the_beast.mods.ftbguilibrary.widget.WidgetType;
 import com.feed_the_beast.mods.ftbguilibrary.widget.WrappedIngredient;
 import com.mojang.blaze3d.vertex.PoseStack;
+import me.shedaniel.architectury.platform.Platform;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.fml.ModList;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -47,7 +47,7 @@ public class GuiValidItems extends GuiBase
 		@Override
 		public void onClicked(MouseButton button)
 		{
-			if (ModList.get().isLoaded("jei"))
+			if (Platform.isModLoaded("jei"))
 			{
 				showJEIRecipe();
 			}

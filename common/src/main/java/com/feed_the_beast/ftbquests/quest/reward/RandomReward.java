@@ -9,6 +9,7 @@ import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
+import me.shedaniel.architectury.utils.Env;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.FriendlyByteBuf;
@@ -86,7 +87,7 @@ public class RandomReward extends Reward
 
 			table.id = file.newID();
 
-			if (file.getSide().isClient())
+			if (file.getSide() == Env.CLIENT)
 			{
 				table.title = getUnformattedTitle() + " " + toString();
 			}
