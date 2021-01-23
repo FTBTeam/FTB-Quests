@@ -6,7 +6,6 @@ import com.feed_the_beast.ftbquests.quest.task.Task;
 import me.shedaniel.architectury.networking.NetworkManager;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.fml.network.NetworkEvent;
 
 /**
  * @author LatvianModder
@@ -34,7 +33,7 @@ public class MessageSubmitTask extends MessageBase
 	@Override
 	public void handle(NetworkManager.PacketContext context)
 	{
-		ServerPlayer player = context.getSender();
+		ServerPlayer player = (ServerPlayer) context.getPlayer();
 		PlayerData data = PlayerData.get(player);
 		Task t = ServerQuestFile.INSTANCE.getTask(task);
 

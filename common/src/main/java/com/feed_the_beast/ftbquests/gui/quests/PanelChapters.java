@@ -7,7 +7,6 @@ import com.feed_the_beast.mods.ftbguilibrary.widget.ColorWidget;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
 import com.feed_the_beast.mods.ftbguilibrary.widget.WidgetLayout;
 import me.shedaniel.architectury.platform.Platform;
-import net.minecraftforge.fml.ModList;
 
 /**
  * @author LatvianModder

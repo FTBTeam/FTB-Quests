@@ -2,6 +2,9 @@ package com.feed_the_beast.ftbquests.item;
 
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
+import com.feed_the_beast.ftbquests.core.mixin.ItemAccessor;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -13,8 +16,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -27,6 +28,7 @@ public class ItemQuestBook extends Item
 	public ItemQuestBook()
 	{
 		super(new Properties().stacksTo(1).tab(FTBQuests.ITEM_GROUP));
+		((ItemAccessor) this).setCraftingRemainingItem(this);
 	}
 
 	@Override
@@ -43,18 +45,6 @@ public class ItemQuestBook extends Item
 	private void openGui()
 	{
 		ClientQuestFile.INSTANCE.openQuestGui();
-	}
-
-	@Override
-	public ItemStack getContainerItem(ItemStack stack)
-	{
-		return stack.copy();
-	}
-
-	@Override
-	public boolean hasContainerItem(ItemStack stack)
-	{
-		return true;
 	}
 
 	@Override

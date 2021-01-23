@@ -8,7 +8,6 @@ import com.feed_the_beast.ftbquests.util.NetUtils;
 import me.shedaniel.architectury.networking.NetworkManager;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.fml.network.NetworkEvent;
 
 import javax.annotation.Nullable;
 

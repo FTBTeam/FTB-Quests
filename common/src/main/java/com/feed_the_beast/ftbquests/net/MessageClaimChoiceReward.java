@@ -7,7 +7,6 @@ import com.feed_the_beast.ftbquests.quest.reward.Reward;
 import me.shedaniel.architectury.networking.NetworkManager;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.fml.network.NetworkEvent;
 
 /**
  * @author LatvianModder
@@ -43,7 +42,7 @@ public class MessageClaimChoiceReward extends MessageBase
 
 		if (reward instanceof ChoiceReward)
 		{
-			ServerPlayer player = context.getSender();
+			ServerPlayer player = (ServerPlayer) context.getPlayer();
 			ChoiceReward r = (ChoiceReward) reward;
 			PlayerData data = PlayerData.get(player);
 

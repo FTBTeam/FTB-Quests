@@ -28,7 +28,7 @@ import java.util.function.Consumer;
 /**
  * @author LatvianModder
  */
-public final class TaskType extends ForgeRegistryEntry<TaskType>
+public final class TaskType
 {
 	private static Registry<TaskType> REGISTRY;
 	private ResourceLocation registryName;

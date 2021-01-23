@@ -3,13 +3,13 @@ package com.feed_the_beast.ftbquests.net;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import me.shedaniel.architectury.networking.NetworkChannel;
 import me.shedaniel.architectury.networking.NetworkManager;
+import me.shedaniel.architectury.platform.Platform;
+import net.fabricmc.api.EnvType;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.fml.network.NetworkRegistry;
-import net.minecraftforge.fml.network.simple.SimpleChannel;
 
 import java.util.function.Function;
 
@@ -18,16 +18,22 @@ public class FTBQuestsNetHandler
 	public static NetworkChannel MAIN;
 	private static final String GENERAL_VERSION = "1";
 
-	private static <T extends MessageBase> void register(NetworkManager.Side side, Class<T> c, Function<FriendlyByteBuf, T> s)
+	private static <T extends MessageBase> void register(Class<T> c, Function<FriendlyByteBuf, T> s)
 	{
-		MAIN.register(side, c, MessageBase::write, s, MessageBase::handle);
+		MAIN.register(NetworkManager.s2c(), c, MessageBase::write, s, MessageBase::handle);
+		if (Platform.getEnv() == EnvType.CLIENT) {
+			registerClient(c, s);
+		}
+	}
+
+	private static <T extends MessageBase> void registerClient(Class<T> c, Function<FriendlyByteBuf, T> s)
+	{
+		MAIN.register(NetworkManager.c2s(), c, MessageBase::write, s, MessageBase::handle);
 	}
 
 	public static void init()
 	{
 	    MAIN = NetworkChannel.create(new ResourceLocation(FTBQuests.MOD_ID, "main"));
-
-		id = 0;
 
 		// Game
 		register(MessageSyncQuests.class, MessageSyncQuests::new);
@@ -46,8 +52,6 @@ public class FTBQuestsNetHandler
 		register(MessageTogglePinned.class, MessageTogglePinned::new);
 		register(MessageTogglePinnedResponse.class, MessageTogglePinnedResponse::new);
 		register(MessageUpdatePlayerData.class, MessageUpdatePlayerData::new);
-
-		id = 100;
 
 		// Editing
 		register(MessageChangeProgress.class, MessageChangeProgress::new);

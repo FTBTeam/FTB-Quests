@@ -5,7 +5,6 @@ import me.shedaniel.architectury.networking.NetworkManager;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.fml.network.NetworkEvent;
 import net.minecraftforge.items.ItemHandlerHelper;
 
 /**
@@ -30,7 +29,7 @@ public class MessageGetEmergencyItems extends MessageBase
 	public void handle(NetworkManager.PacketContext context)
 	{
 		//TODO: Verify on server side
-		ServerPlayer player = context.getSender();
+		ServerPlayer player = (ServerPlayer) context.getPlayer();
 
 		for (ItemStack stack : ServerQuestFile.INSTANCE.emergencyItems)
 		{

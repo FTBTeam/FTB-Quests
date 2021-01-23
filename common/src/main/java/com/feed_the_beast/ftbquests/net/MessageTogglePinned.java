@@ -5,7 +5,6 @@ import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import me.shedaniel.architectury.networking.NetworkManager;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.fml.network.NetworkEvent;
 
 /**
  * @author LatvianModder
@@ -33,7 +32,7 @@ public class MessageTogglePinned extends MessageBase
 	@Override
 	public void handle(NetworkManager.PacketContext context)
 	{
-		ServerPlayer player = context.getSender();
+		ServerPlayer player = (ServerPlayer) context.getPlayer();
 		PlayerData data = ServerQuestFile.INSTANCE.getData(player);
 		data.setQuestPinned(id, !data.isQuestPinned(id));
 		new MessageTogglePinnedResponse(id).sendTo(player);

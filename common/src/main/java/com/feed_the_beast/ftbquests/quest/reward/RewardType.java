@@ -31,7 +31,7 @@ import java.util.function.Consumer;
 /**
  * @author LatvianModder
  */
-public final class RewardType extends ForgeRegistryEntry<RewardType>
+public final class RewardType
 {
 	private static Registry<RewardType> REGISTRY;
     private ResourceLocation registryName;

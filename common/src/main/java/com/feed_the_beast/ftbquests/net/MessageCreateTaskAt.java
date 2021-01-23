@@ -9,7 +9,6 @@ import com.feed_the_beast.ftbquests.util.NetUtils;
 import me.shedaniel.architectury.networking.NetworkManager;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.fml.network.NetworkEvent;
 
 /**
  * @author LatvianModder
@@ -26,7 +25,7 @@ public class MessageCreateTaskAt extends MessageBase
 		chapter = buffer.readVarInt();
 		x = buffer.readDouble();
 		y = buffer.readDouble();
-		type = TaskType.getRegistry().getValue(buffer.readVarInt());
+		type = TaskType.getRegistry().byId(buffer.readVarInt());
 		nbt = buffer.readNbt();
 	}
 
@@ -46,7 +45,7 @@ public class MessageCreateTaskAt extends MessageBase
 		buffer.writeVarInt(chapter);
 		buffer.writeDouble(x);
 		buffer.writeDouble(y);
-		buffer.writeVarInt(TaskType.getRegistry().getID(type));
+		buffer.writeVarInt(TaskType.getRegistry().getId(type));
 		buffer.writeNbt(nbt);
 	}
 
