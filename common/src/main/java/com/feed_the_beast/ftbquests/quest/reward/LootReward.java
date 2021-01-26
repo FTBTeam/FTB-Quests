@@ -29,7 +29,7 @@ public class LootReward extends RandomReward
 	@Override
 	public RewardType getType()
 	{
-		return FTBQuestsRewards.LOOT;
+		return FTBQuestsRewards.LOOT.get();
 	}
 
 	@Override

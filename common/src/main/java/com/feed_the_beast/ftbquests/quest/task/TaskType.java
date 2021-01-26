@@ -8,19 +8,17 @@ import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiEditConfig;
 import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiEditConfigFromString;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.widget.GuiIcons;
-import net.minecraft.core.Registry;
+import me.shedaniel.architectury.annotations.ExpectPlatform;
+import me.shedaniel.architectury.core.RegistryEntry;
+import me.shedaniel.architectury.platform.Platform;
+import me.shedaniel.architectury.registry.Registries;
+import me.shedaniel.architectury.registry.Registry;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.registries.ForgeRegistry;
-import net.minecraftforge.registries.ForgeRegistryEntry;
-import net.minecraftforge.registries.RegistryBuilder;
 
 import javax.annotation.Nullable;
 import java.util.function.Consumer;
@@ -28,23 +26,32 @@ import java.util.function.Consumer;
 /**
  * @author LatvianModder
  */
-public final class TaskType
+public final class TaskType extends RegistryEntry<TaskType>
 {
 	private static Registry<TaskType> REGISTRY;
-	private ResourceLocation registryName;
 
 	public static void createRegistry()
 	{
-		if (REGISTRY == null)
-		{
-			ResourceLocation registryName = new ResourceLocation(FTBQuests.MOD_ID, "tasks");
-			REGISTRY = (ForgeRegistry<TaskType>) new RegistryBuilder<TaskType>().setType(TaskType.class).setName(registryName).create();
-			MinecraftForge.EVENT_BUS.post(new RegistryEvent.Register<>(registryName, REGISTRY));
-		}
+		if (Platform.isForge())
+			postRegistryEvent(getRegistry());
+	}
+
+	@ExpectPlatform
+	private static void postRegistryEvent(Registry<TaskType> REGISTRY)
+	{
+		throw new AssertionError();
 	}
 
 	public static Registry<TaskType> getRegistry()
 	{
+		if (REGISTRY == null)
+		{
+			ResourceLocation registryName = new ResourceLocation(FTBQuests.MOD_ID, "tasks");
+			REGISTRY = Registries.get(FTBQuests.MOD_ID).<TaskType>builder(registryName)
+					.saveToDisc()
+					.syncToClients()
+					.build();
+		}
 		return REGISTRY;
 	}
 
@@ -134,12 +141,13 @@ public final class TaskType
 	{
 		return getRegistryName().getNamespace().equals(FTBQuests.MOD_ID) ? getRegistryName().getPath() : getRegistryName().toString();
 	}
-    
-    public ResourceLocation getRegistryName() {
-        return registryName;
-    }
-    
-    public TaskType setDisplayName(MutableComponent name)
+
+	public ResourceLocation getRegistryName()
+	{
+		return getRegistry().getId(this);
+	}
+
+	public TaskType setDisplayName(MutableComponent name)
 	{
 		displayName = name;
 		return this;

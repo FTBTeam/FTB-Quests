@@ -33,7 +33,7 @@ public class DimensionTask extends Task
 	@Override
 	public TaskType getType()
 	{
-		return FTBQuestsTasks.DIMENSION;
+		return FTBQuestsTasks.DIMENSION.get();
 	}
 
 	@Override

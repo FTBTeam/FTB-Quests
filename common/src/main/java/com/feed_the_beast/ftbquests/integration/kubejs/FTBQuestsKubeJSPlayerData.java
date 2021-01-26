@@ -23,7 +23,7 @@ public class FTBQuestsKubeJSPlayerData
 
 	public QuestFile getFile()
 	{
-		return FTBQuests.PROXY.getQuestFile(playerData.getOverworld().minecraftWorld);
+		return FTBQuests.PROXY.getQuestFile(playerData.getOverworld().minecraftWorld.isClientSide());
 	}
 
 	public PlayerData getData()

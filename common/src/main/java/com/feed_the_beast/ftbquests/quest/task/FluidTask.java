@@ -6,11 +6,13 @@ import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigFluid;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigNBT;
-import com.feed_the_beast.mods.ftbguilibrary.icon.Color4I;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import me.shedaniel.architectury.fluid.FluidStack;
+import me.shedaniel.architectury.hooks.FluidStackHooks;
 import me.shedaniel.architectury.registry.Registries;
-import me.shedaniel.architectury.utils.Fraction;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
@@ -19,14 +21,9 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraftforge.fluids.FluidAttributes;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nullable;
+import java.util.Optional;
 
 /**
  * @author LatvianModder
@@ -49,7 +46,8 @@ public class FluidTask extends Task
 	@Override
 	public TaskType getType()
 	{
-		return FTBQuestsTasks.FLUID;
+		return null;
+//		return FTBQuestsTasks.FLUID.get();
 	}
 
 	@Override
@@ -169,8 +167,7 @@ public class FluidTask extends Task
 	public Icon getAltIcon()
 	{
 		FluidStack stack = createFluidStack();
-		FluidAttributes a = stack.getFluid().getAttributes();
-		return Icon.getIcon(a.getStillTexture(stack).toString()).withTint(Color4I.rgb(a.getColor(stack))).combineWith(Icon.getIcon(FluidTask.TANK_TEXTURE.toString()));
+		return Icon.getIcon(Optional.ofNullable(FluidStackHooks.getStillTexture(stack)).map(TextureAtlasSprite::getName).map(ResourceLocation::toString).orElse("missingno"));
 	}
 
 	@Override
@@ -222,9 +219,9 @@ public class FluidTask extends Task
 			return getVolumeString((int) progress);
 		}
 
-		public int fill(FluidStack resource, IFluidHandler.FluidAction action)
+		/*public int fill(FluidStack resource, IFluidHandler.FluidAction action)
 		{
-			if (resource.getAmount() > 0 && !isComplete() && task.createFluidStack().isFluidEqual(resource) && data.canStartTasks(task.quest))
+			if ( resource.getAmount().isGreaterThan(Fraction.zero()) && !isComplete() && Objects.equals(resource.getFluid(), task.createFluidStack().getFluid()) && data.canStartTasks(task.quest))
 			{
 				int add = (int) Math.min(resource.getAmount(), Math.min(Integer.MAX_VALUE, task.amount - progress));
 
@@ -240,7 +237,7 @@ public class FluidTask extends Task
 			}
 
 			return 0;
-		}
+		}*/
 		
 		/*
 		@Override

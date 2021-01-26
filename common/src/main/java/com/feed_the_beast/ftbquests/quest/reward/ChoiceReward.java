@@ -28,7 +28,7 @@ public class ChoiceReward extends RandomReward
 	@Override
 	public RewardType getType()
 	{
-		return FTBQuestsRewards.CHOICE;
+		return FTBQuestsRewards.CHOICE.get();
 	}
 
 	@Override

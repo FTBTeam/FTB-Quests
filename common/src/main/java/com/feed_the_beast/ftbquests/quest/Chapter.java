@@ -237,7 +237,7 @@ public final class Chapter extends QuestObject
 	public void onCompleted(PlayerData data, List<ServerPlayer> onlineMembers, List<ServerPlayer> notifiedPlayers)
 	{
 		super.onCompleted(data, onlineMembers, notifiedPlayers);
-        ObjectCompletedEvent.CHAPTER.invoker().accept(new ObjectCompletedEvent.ChapterEvent(data, this, onlineMembers, notifiedPlayers));
+        ObjectCompletedEvent.CHAPTER.invoker().act(new ObjectCompletedEvent.ChapterEvent(data, this, onlineMembers, notifiedPlayers));
 
 		if (!disableToast)
 		{

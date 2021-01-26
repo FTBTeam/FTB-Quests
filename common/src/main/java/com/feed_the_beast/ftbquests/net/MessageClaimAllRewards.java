@@ -30,7 +30,7 @@ public class MessageClaimAllRewards extends MessageBase
 	@Override
 	public void handle(NetworkManager.PacketContext context)
 	{
-		ServerPlayer player = context.getSender();
+		ServerPlayer player = (ServerPlayer) context.getPlayer();
 		PlayerData data = PlayerData.get(player);
 
 		for (Chapter chapter : ServerQuestFile.INSTANCE.chapters)

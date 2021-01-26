@@ -39,11 +39,6 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.ForgeMod;
-import net.minecraftforge.items.CapabilityItemHandler;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.ItemHandlerHelper;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nullable;
 import java.util.Comparator;
@@ -76,7 +71,7 @@ public class FTBQuestsCommands
 				)
 				.then(Commands.literal("change_progress")
 				)
-				.then(Commands.literal("export_rewards_to_chest")
+				/*.then(Commands.literal("export_rewards_to_chest")
 						.requires(permission)
 						.then(Commands.argument("reward_table", StringArgumentType.word())
 								.requires(permission)
@@ -97,7 +92,7 @@ public class FTBQuestsCommands
 								)
 								.executes(c -> importRewards(c.getSource(), StringArgumentType.getString(c, "reward_table"), 1, false))
 						)
-				)
+				)*/
 				.then(Commands.literal("generate_chapter_with_all_items_in_game")
 						.requires(permission)
 						.executes(context -> generateAllItemChapter(context.getSource()))
@@ -170,7 +165,7 @@ public class FTBQuestsCommands
 		return 1;
 	}
 
-	private static HitResult rayTrace(ServerPlayer player)
+	/*private static HitResult rayTrace(ServerPlayer player)
 	{
 		float f = player.xRot;
 		float f1 = player.yRot;
@@ -274,7 +269,7 @@ public class FTBQuestsCommands
 		}
 
 		return 0;
-	}
+	}*/
 
 	private static int generateAllItemChapter(CommandSourceStack source)
 	{

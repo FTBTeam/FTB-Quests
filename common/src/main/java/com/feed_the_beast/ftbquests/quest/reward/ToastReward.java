@@ -24,7 +24,7 @@ public class ToastReward extends Reward
 	@Override
 	public RewardType getType()
 	{
-		return FTBQuestsRewards.TOAST;
+		return FTBQuestsRewards.TOAST.get();
 	}
 
 	@Override

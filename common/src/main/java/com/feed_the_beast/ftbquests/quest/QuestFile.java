@@ -25,11 +25,11 @@ import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigItemStack;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import me.shedaniel.architectury.registry.Registry;
 import me.shedaniel.architectury.utils.Env;
 import me.shedaniel.architectury.utils.NbtType;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.FriendlyByteBuf;
@@ -151,7 +151,7 @@ public abstract class QuestFile extends QuestObject
 	public void onCompleted(PlayerData data, List<ServerPlayer> onlineMembers, List<ServerPlayer> notifiedPlayers)
 	{
 		super.onCompleted(data, onlineMembers, notifiedPlayers);
-        ObjectCompletedEvent.FILE.invoker().accept(new ObjectCompletedEvent.FileEvent(data, this, onlineMembers, notifiedPlayers));
+        ObjectCompletedEvent.FILE.invoker().act(new ObjectCompletedEvent.FileEvent(data, this, onlineMembers, notifiedPlayers));
 
 		if (!disableToast)
 		{
@@ -799,7 +799,7 @@ public abstract class QuestFile extends QuestObject
 
 				for (Task task : quest.tasks)
 				{
-					buffer.writeVarInt(taskTypes.getId(task.getType()));
+					buffer.writeVarInt(taskTypes.getRawId(task.getType()));
 					buffer.writeVarInt(task.id);
 				}
 
@@ -807,7 +807,7 @@ public abstract class QuestFile extends QuestObject
 
 				for (Reward reward : quest.rewards)
 				{
-					buffer.writeVarInt(rewardTypes.getId(reward.getType()));
+					buffer.writeVarInt(rewardTypes.getRawId(reward.getType()));
 					buffer.writeVarInt(reward.id);
 				}
 			}
@@ -890,7 +890,7 @@ public abstract class QuestFile extends QuestObject
 
 				for (int k = 0; k < t; k++)
 				{
-					TaskType type = taskTypes.byId(buffer.readVarInt());
+					TaskType type = taskTypes.byRawId(buffer.readVarInt());
 					Task task = type.provider.create(quest);
 					task.id = buffer.readVarInt();
 					quest.tasks.add(task);
@@ -900,7 +900,7 @@ public abstract class QuestFile extends QuestObject
 
 				for (int k = 0; k < r; k++)
 				{
-					RewardType type = rewardTypes.byId(buffer.readVarInt());
+					RewardType type = rewardTypes.byRawId(buffer.readVarInt());
 					Reward reward = type.provider.create(quest);
 					reward.id = buffer.readVarInt();
 					quest.rewards.add(reward);

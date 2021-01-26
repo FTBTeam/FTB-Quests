@@ -7,8 +7,7 @@ import com.feed_the_beast.ftbquests.events.TaskStartedEvent;
 import dev.latvian.kubejs.player.AttachPlayerDataEvent;
 import dev.latvian.kubejs.script.BindingsEvent;
 import dev.latvian.kubejs.script.ScriptType;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraft.world.InteractionResult;
 
 /**
  * @author LatvianModder
@@ -17,7 +16,12 @@ public class KubeJSIntegration
 {
 	public static void init()
 	{
-		MinecraftForge.EVENT_BUS.register(KubeJSIntegration.class);
+		BindingsEvent.EVENT.register(KubeJSIntegration::registerBindings);
+		AttachPlayerDataEvent.EVENT.register(KubeJSIntegration::attachPlayerData);
+		CustomTaskEvent.EVENT.register(KubeJSIntegration::onCustomTask);
+		CustomRewardEvent.EVENT.register(KubeJSIntegration::onCustomReward);
+		ObjectCompletedEvent.GENERIC.register(KubeJSIntegration::onCompleted);
+		TaskStartedEvent.EVENT.register(KubeJSIntegration::onTaskStarted);
 	}
 
 	//@SubscribeEvent
@@ -31,38 +35,37 @@ public class KubeJSIntegration
 	//	event.registerEvent("ftbquests.started", TaskStartedEventJS.class).doubleParam("id|tag");
 	//}
 
-	@SubscribeEvent
 	public static void registerBindings(BindingsEvent event)
 	{
 		event.add("ftbquests", new FTBQuestsKubeJSWrapper());
 	}
 
-	@SubscribeEvent
-	public void attachPlayerData(AttachPlayerDataEvent event)
+	public static void attachPlayerData(AttachPlayerDataEvent event)
 	{
 		event.add("ftbquests", new FTBQuestsKubeJSPlayerData(event.getParent()));
 	}
 
-	@SubscribeEvent
-	public static void onCustomTask(CustomTaskEvent event)
+	public static InteractionResult onCustomTask(CustomTaskEvent event)
 	{
 		if (new CustomTaskEventJS(event).post(ScriptType.SERVER, "ftbquests.custom_task", event.getTask().toString()))
 		{
-			event.setCanceled(true);
+			return InteractionResult.FAIL;
 		}
+
+		return InteractionResult.PASS;
 	}
 
-	@SubscribeEvent
-	public static void onCustomReward(CustomRewardEvent event)
+	public static InteractionResult onCustomReward(CustomRewardEvent event)
 	{
 		if (new CustomRewardEventJS(event).post(ScriptType.SERVER, "ftbquests.custom_reward", event.getReward().toString()))
 		{
-			event.setCanceled(true);
+			return InteractionResult.FAIL;
 		}
+
+		return InteractionResult.PASS;
 	}
 
-	@SubscribeEvent
-	public static void onCompleted(ObjectCompletedEvent event)
+	public static InteractionResult onCompleted(ObjectCompletedEvent event)
 	{
 		QuestObjectCompletedEventJS e = new QuestObjectCompletedEventJS(event);
 		e.post(ScriptType.SERVER, "ftbquests.completed", event.getObject().toString());
@@ -71,9 +74,10 @@ public class KubeJSIntegration
 		{
 			e.post(ScriptType.SERVER, "ftbquests.completed." + tag);
 		}
+
+		return InteractionResult.PASS;
 	}
 
-	@SubscribeEvent
 	public static void onTaskStarted(TaskStartedEvent event)
 	{
 		TaskStartedEventJS e = new TaskStartedEventJS(event);

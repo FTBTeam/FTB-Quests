@@ -34,7 +34,7 @@ public class CommandReward extends Reward
 	@Override
 	public RewardType getType()
 	{
-		return FTBQuestsRewards.COMMAND;
+		return FTBQuestsRewards.COMMAND.get();
 	}
 
 	@Override

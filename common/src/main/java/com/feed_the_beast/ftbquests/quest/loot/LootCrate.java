@@ -101,7 +101,7 @@ public final class LootCrate
 
 	public ItemStack createStack()
 	{
-		ItemStack stack = new ItemStack(FTBQuestsItems.LOOTCRATE);
+		ItemStack stack = new ItemStack(FTBQuestsItems.LOOTCRATE.get());
 		stack.addTagElement("type", StringTag.valueOf(getStringID()));
 		return stack;
 	}

@@ -34,7 +34,7 @@ public class AdvancementReward extends Reward
 	@Override
 	public RewardType getType()
 	{
-		return FTBQuestsRewards.ADVANCEMENT;
+		return FTBQuestsRewards.ADVANCEMENT.get();
 	}
 
 	@Override

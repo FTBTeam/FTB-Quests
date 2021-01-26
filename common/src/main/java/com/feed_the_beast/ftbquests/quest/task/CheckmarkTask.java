@@ -19,7 +19,7 @@ public class CheckmarkTask extends Task
 	@Override
 	public TaskType getType()
 	{
-		return FTBQuestsTasks.CHECKMARK;
+		return FTBQuestsTasks.CHECKMARK.get();
 	}
 
 	@Override

@@ -35,7 +35,7 @@ public class ObservationTask extends Task
 	@Override
 	public TaskType getType()
 	{
-		return FTBQuestsTasks.OBSERVATION;
+		return FTBQuestsTasks.OBSERVATION.get();
 	}
 
 	@Override

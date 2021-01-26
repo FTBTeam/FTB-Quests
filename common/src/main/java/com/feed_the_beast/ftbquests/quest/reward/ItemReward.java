@@ -8,6 +8,9 @@ import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.icon.ItemIcon;
 import com.feed_the_beast.mods.ftbguilibrary.widget.WrappedIngredient;
+import me.shedaniel.architectury.hooks.ItemStackHooks;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.MutableComponent;
@@ -16,9 +19,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraftforge.items.ItemHandlerHelper;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -52,7 +52,7 @@ public class ItemReward extends Reward
 	@Override
 	public RewardType getType()
 	{
-		return FTBQuestsRewards.ITEM;
+		return FTBQuestsRewards.ITEM.get();
 	}
 
 	@Override
@@ -139,9 +139,7 @@ public class ItemReward extends Reward
 		while (size > 0)
 		{
 			int s = Math.min(size, item.getMaxStackSize());
-			ItemStack copy = item.copy();
-			copy.setCount(s);
-			ItemHandlerHelper.giveItemToPlayer(player, copy);
+			ItemStackHooks.giveItem(player, ItemStackHooks.copyWithCount(item, s));
 			size -= s;
 		}
 

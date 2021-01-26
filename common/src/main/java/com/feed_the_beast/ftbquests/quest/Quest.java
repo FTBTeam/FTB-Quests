@@ -412,7 +412,7 @@ public final class Quest extends QuestObject implements Movable
 		}
 
 		data.checkAutoCompletion(this);
-        ObjectCompletedEvent.QUEST.invoker().accept(new ObjectCompletedEvent.QuestEvent(data, this, onlineMembers, notifiedPlayers));
+        ObjectCompletedEvent.QUEST.invoker().act(new ObjectCompletedEvent.QuestEvent(data, this, onlineMembers, notifiedPlayers));
 
 		for (Chapter chapter : chapter.file.chapters)
 		{

@@ -29,9 +29,12 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.ItemLike;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * @author LatvianModder
@@ -60,7 +63,7 @@ public class FTBQuestsClientEventHandler
         ColorHandlers.registerItemColors((stack, tintIndex) -> {
             LootCrate crate = ItemLootCrate.getCrate(null, stack);
             return crate == null ? 0xFFFFFFFF : (0xFF000000 | crate.color.rgb());
-        }, FTBQuestsItems.LOOTCRATE);
+        }, FTBQuestsItems.LOOTCRATE.get());
 	}
 
 	private void onSidebarButtonCreated(SidebarButtonCreatedEvent event)

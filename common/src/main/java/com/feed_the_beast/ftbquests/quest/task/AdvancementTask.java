@@ -35,7 +35,7 @@ public class AdvancementTask extends Task
 	@Override
 	public TaskType getType()
 	{
-		return FTBQuestsTasks.ADVANCEMENT;
+		return FTBQuestsTasks.ADVANCEMENT.get();
 	}
 
 	@Override

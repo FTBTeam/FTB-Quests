@@ -1,10 +1,12 @@
 package com.feed_the_beast.ftbquests.net;
 
 import com.feed_the_beast.ftbquests.FTBQuests;
+import me.shedaniel.architectury.annotations.ExpectPlatform;
 import me.shedaniel.architectury.networking.NetworkChannel;
 import me.shedaniel.architectury.networking.NetworkManager;
 import me.shedaniel.architectury.platform.Platform;
 import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -69,36 +71,15 @@ public class FTBQuestsNetHandler
 		register(MessageMoveQuestResponse.class, MessageMoveQuestResponse::new);
 	}
 
+	@ExpectPlatform
 	public static void writeItemType(FriendlyByteBuf buffer, ItemStack stack)
 	{
-	    buffer.writeItem(stack);
-		if (stack.isEmpty())
-		{
-			buffer.writeVarInt(-1);
-		}
-		else
-		{
-			buffer.writeVarInt(Item.getId(stack.getItem()));
-			buffer.writeNbt(stack.getTag());
-			buffer.writeNbt((CompoundTag) stack.save(new CompoundTag()).get("ForgeCaps"));
-		}
+		throw new AssertionError();
 	}
 
+	@ExpectPlatform
 	public static ItemStack readItemType(FriendlyByteBuf buffer)
 	{
-		int id = buffer.readVarInt();
-
-		if (id == -1)
-		{
-			return ItemStack.EMPTY;
-		}
-		else
-		{
-			CompoundTag tag = buffer.readNbt();
-			CompoundTag caps = buffer.readNbt();
-			ItemStack item = new ItemStack(Item.byId(id), 1, caps);
-			item.setTag(tag);
-			return item;
-		}
+		throw new AssertionError();
 	}
 }

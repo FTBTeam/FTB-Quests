@@ -24,7 +24,7 @@ public class ForgeEnergyTask extends EnergyTask
 	@Override
 	public TaskType getType()
 	{
-		return FTBQuestsTasks.FORGE_ENERGY;
+		return FTBQuestsTasks.FORGE_ENERGY.get();
 	}
 
 	@Override
