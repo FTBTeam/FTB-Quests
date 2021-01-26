@@ -31,7 +31,7 @@ public class XPTask extends Task implements ISingleLongValueTask
 	@Override
 	public TaskType getType()
 	{
-		return FTBQuestsTasks.XP;
+		return FTBQuestsTasks.XP.get();
 	}
 
 	@Override

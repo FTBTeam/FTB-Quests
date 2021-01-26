@@ -43,7 +43,7 @@ public class CustomTask extends Task
 	@Override
 	public TaskType getType()
 	{
-		return FTBQuestsTasks.CUSTOM;
+		return FTBQuestsTasks.CUSTOM.get();
 	}
 
 	@Override

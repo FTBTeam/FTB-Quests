@@ -36,7 +36,7 @@ public class FTBQuestsKubeJSWrapper
 
 	public QuestFile getFile(WorldJS world)
 	{
-		return FTBQuests.PROXY.getQuestFile(world.minecraftWorld);
+		return FTBQuests.PROXY.getQuestFile(world.minecraftWorld.isClientSide());
 	}
 
 	@Nullable

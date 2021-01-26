@@ -20,6 +20,12 @@ dependencies {
     modCompile "me.shedaniel:architectury:${rootProject.architectury_version}:forge"
 
 	modCompile "curse.maven:jei-238222:${jei_file}"
+	modCompile "curse.maven:FTB-Teams-404468:${rootProject.ftb_teams_version_forge}"
+	modCompile "curse.maven:FTB-GUI-Library-404465:${rootProject.ftb_gui_library_version_forge}"
+	modCompile "curse.maven:item-filter-309674:${rootProject.itemfilters_version_forge}"
+	modCompile "curse.maven:kubejs-238086:${kubejs_file_forge}"
+	modCompile "curse.maven:game-stages-268655:${gamestages_file}"
+	modCompile "curse.maven:rhino-416294:${rhino_file}"
 
     compileOnly(project(path: ":common")) {
         transitive = false

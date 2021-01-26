@@ -35,7 +35,7 @@ public class StatTask extends Task
 	@Override
 	public TaskType getType()
 	{
-		return FTBQuestsTasks.STAT;
+		return FTBQuestsTasks.STAT.get();
 	}
 
 	@Override

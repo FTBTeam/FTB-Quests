@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "id": "ftbteams",
+  "id": "ftbquests",
   "version": "${version}",
-  "name": "FTB Teams",
+  "name": "FTB Quests",
   "description": "FTB Teams adds ability to create your own teams that can be used for quests etc.",
   "authors": [
     "LatvianModder"
@@ -14,9 +14,12 @@
   "license": "All Rights Reserved",
   "entrypoints": {
     "main": [
-      "com.feed_the_beast.mods.ftbteams.FTBTeamsFabric"
+      "com.feed_the_beast.ftbquests.FTBQuestsFabric"
     ]
   },
+  "mixins": [
+    "ftbquests.mixins.json"
+  ],
   "depends": {
     "fabric": "*",
     "minecraft": "~1.16.4",

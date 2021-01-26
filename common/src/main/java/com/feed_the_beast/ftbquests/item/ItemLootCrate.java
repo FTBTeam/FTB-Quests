@@ -8,6 +8,9 @@ import com.feed_the_beast.ftbquests.quest.loot.LootCrate;
 import com.feed_the_beast.ftbquests.quest.loot.RewardTable;
 import com.feed_the_beast.ftbquests.quest.loot.WeightedReward;
 import com.feed_the_beast.mods.ftbguilibrary.config.Tristate;
+import me.shedaniel.architectury.utils.GameInstance;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.particles.ItemParticleOption;
@@ -30,8 +33,6 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.phys.Vec3;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -51,7 +52,7 @@ public class ItemLootCrate extends Item
 	{
 		if (stack.hasTag() && stack.getItem() instanceof ItemLootCrate)
 		{
-			QuestFile file = world == null ? FTBQuests.PROXY.getQuestFile(Tristate.DEFAULT) : FTBQuests.PROXY.getQuestFile(world);
+			QuestFile file = world == null ? FTBQuests.PROXY.getQuestFile(GameInstance.getServer() == null || Thread.currentThread() != GameInstance.getServer().getRunningThread()) : FTBQuests.PROXY.getQuestFile(world.isClientSide());
 			return file == null ? null : file.getLootCrate(stack.getTag().getString("type"));
 		}
 
@@ -147,7 +148,7 @@ public class ItemLootCrate extends Item
 	{
 		if (allowdedIn(tab))
 		{
-			QuestFile file = FTBQuests.PROXY.getQuestFile(Tristate.DEFAULT);
+			QuestFile file = FTBQuests.PROXY.getQuestFile(GameInstance.getServer() == null || Thread.currentThread() != GameInstance.getServer().getRunningThread());
 
 			if (file != null)
 			{

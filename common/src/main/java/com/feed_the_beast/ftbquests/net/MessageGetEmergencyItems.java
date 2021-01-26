@@ -1,11 +1,11 @@
 package com.feed_the_beast.ftbquests.net;
 
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
+import me.shedaniel.architectury.hooks.ItemStackHooks;
 import me.shedaniel.architectury.networking.NetworkManager;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.items.ItemHandlerHelper;
 
 /**
  * @author LatvianModder
@@ -33,7 +33,7 @@ public class MessageGetEmergencyItems extends MessageBase
 
 		for (ItemStack stack : ServerQuestFile.INSTANCE.emergencyItems)
 		{
-			ItemHandlerHelper.giveItemToPlayer(player, stack.copy());
+			ItemStackHooks.giveItem(player, stack.copy());
 		}
 	}
 }

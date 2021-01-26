@@ -34,7 +34,7 @@ public class BiomeTask extends Task
 	@Override
 	public TaskType getType()
 	{
-		return FTBQuestsTasks.BIOME;
+		return FTBQuestsTasks.BIOME.get();
 	}
 
 	@Override

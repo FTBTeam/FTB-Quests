@@ -22,18 +22,18 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import dev.latvian.mods.itemfilters.api.IStringValueFilter;
 import dev.latvian.mods.itemfilters.api.ItemFiltersAPI;
 import dev.latvian.mods.itemfilters.api.ItemFiltersItems;
-import javax.annotation.Nullable;
-
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.SerializationTags;
 import net.minecraft.world.item.ItemStack;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 /**
  * @author LatvianModder
@@ -81,12 +81,12 @@ public class ButtonTask extends Button
 			if (task instanceof ItemTask)
 			{
 				ItemTask i = (ItemTask) task;
-				Set<ResourceLocation> tags = i.item.getItem().getTags();
+				Collection<ResourceLocation> tags = SerializationTags.getInstance().getItems().getMatchingTags(i.item.getItem());
 
 				if (!tags.isEmpty() && !ItemFiltersAPI.isFilter(i.item))
 				{
 					contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.task.ftbquests.item.convert_tag"), ThemeProperties.RELOAD_ICON.get(), () -> {
-						ItemStack tagFilter = new ItemStack(ItemFiltersItems.TAG);
+						ItemStack tagFilter = new ItemStack(ItemFiltersItems.TAG.get());
 
 						if (tags.size() == 1)
 						{

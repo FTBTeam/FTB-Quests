@@ -42,7 +42,7 @@ public class RandomReward extends Reward
 	@Override
 	public RewardType getType()
 	{
-		return FTBQuestsRewards.RANDOM;
+		return FTBQuestsRewards.RANDOM.get();
 	}
 
 	@Override

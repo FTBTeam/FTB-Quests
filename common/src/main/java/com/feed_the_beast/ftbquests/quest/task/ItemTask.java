@@ -15,6 +15,10 @@ import com.feed_the_beast.mods.ftbguilibrary.utils.Bits;
 import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
 import dev.latvian.mods.itemfilters.api.ItemFiltersAPI;
+import me.shedaniel.architectury.platform.Platform;
+import me.shedaniel.architectury.utils.Env;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
@@ -23,10 +27,6 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.items.ItemHandlerHelper;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -55,7 +55,7 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 	@Override
 	public TaskType getType()
 	{
-		return FTBQuestsTasks.ITEM;
+		return FTBQuestsTasks.ITEM.get();
 	}
 
 	@Override
@@ -140,7 +140,9 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 
 		for (ItemStack stack : getValidItems())
 		{
-			Icon icon = ItemIcon.getItemIcon(ItemHandlerHelper.copyStackWithSize(stack, 1));
+			ItemStack copy = stack.copy();
+			copy.setCount(1);
+			Icon icon = ItemIcon.getItemIcon(copy);
 
 			if (!icon.isEmpty())
 			{
@@ -210,7 +212,7 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 
 		List<ItemStack> validItems = getValidItems();
 
-		if (!consumesResources() && validItems.size() == 1 && ModList.get().isLoaded("jei"))
+		if (!consumesResources() && validItems.size() == 1 && Platform.isModLoaded("jei"))
 		{
 			showJEIRecipe(validItems.get(0));
 		}
@@ -240,7 +242,7 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 			list.blankLine();
 			list.add(new TranslatableComponent("ftbquests.task.ftbquests.item.view_items").withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE));
 		}
-		else if (ModList.get().isLoaded("jei"))
+		else if (Platform.isModLoaded("jei"))
 		{
 			list.blankLine();
 			list.add(new TranslatableComponent("ftbquests.task.ftbquests.item.click_recipe").withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE));
@@ -268,12 +270,14 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 
 				if (add > 0L)
 				{
-					if (!simulate && !data.file.getSide().isClient())
+					if (!simulate && data.file.getSide() != Env.CLIENT)
 					{
 						addProgress(add);
 					}
 
-					return ItemHandlerHelper.copyStackWithSize(stack, (int) (stack.getCount() - add));
+					ItemStack copy = stack.copy();
+					copy.setCount((int) (stack.getCount() - add));
+					return copy;
 				}
 			}
 

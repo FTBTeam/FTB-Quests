@@ -25,7 +25,7 @@ public class MessageCreateTaskAt extends MessageBase
 		chapter = buffer.readVarInt();
 		x = buffer.readDouble();
 		y = buffer.readDouble();
-		type = TaskType.getRegistry().byId(buffer.readVarInt());
+		type = TaskType.getRegistry().byRawId(buffer.readVarInt());
 		nbt = buffer.readNbt();
 	}
 
@@ -45,7 +45,7 @@ public class MessageCreateTaskAt extends MessageBase
 		buffer.writeVarInt(chapter);
 		buffer.writeDouble(x);
 		buffer.writeDouble(y);
-		buffer.writeVarInt(TaskType.getRegistry().getId(type));
+		buffer.writeVarInt(TaskType.getRegistry().getRawId(type));
 		buffer.writeNbt(nbt);
 	}
 

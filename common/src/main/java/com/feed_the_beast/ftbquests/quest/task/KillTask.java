@@ -40,7 +40,7 @@ public class KillTask extends Task
 	@Override
 	public TaskType getType()
 	{
-		return FTBQuestsTasks.KILL;
+		return FTBQuestsTasks.KILL.get();
 	}
 
 	@Override

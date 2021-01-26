@@ -40,7 +40,7 @@ public class LocationTask extends Task
 	@Override
 	public TaskType getType()
 	{
-		return FTBQuestsTasks.LOCATION;
+		return FTBQuestsTasks.LOCATION.get();
 	}
 
 	@Override

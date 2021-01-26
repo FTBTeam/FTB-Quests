@@ -33,7 +33,7 @@ public class PlayerData
 {
 	public static PlayerData get(Player player)
 	{
-		return FTBQuests.PROXY.getQuestFile(player.getCommandSenderWorld()).getData(player);
+		return FTBQuests.PROXY.getQuestFile(player.getCommandSenderWorld().isClientSide()).getData(player);
 	}
 
 	public final QuestFile file;

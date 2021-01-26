@@ -5,9 +5,11 @@ dependencies {
     // Do NOT use other classes from fabric loader
     modCompile "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
     modCompile "me.shedaniel:architectury:${rootProject.architectury_version}"
-    modCompile "com.feed_the_beast.mods:FTB-Teams:${rootProject.ftb_teams_version}"
-    modCompile "com.feed_the_beast.mods:FTB-GUI-Library:${rootProject.ftb_gui_library_version}"
-    modCompile "curse.maven:kubejs-fabric-395864:3174959"
+    modCompile "curse.maven:FTB-Teams-438497:${rootProject.ftb_teams_version_fabric}"
+    modCompile "curse.maven:FTB-GUI-Library-438495:${rootProject.ftb_gui_library_version_fabric}"
+    modCompile "curse.maven:item-filter-438500:${rootProject.itemfilters_version_fabric}"
+    modCompile "curse.maven:kubejs-fabric-395864:${rootProject.kubejs_file_fabric}"
+	modCompile "curse.maven:rhino-416294:${rhino_file}"
     compileOnly "com.google.code.findbugs:jsr305:3.+"
 }
 

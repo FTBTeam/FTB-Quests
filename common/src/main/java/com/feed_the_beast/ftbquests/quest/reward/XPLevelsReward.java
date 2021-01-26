@@ -35,7 +35,7 @@ public class XPLevelsReward extends Reward
 	@Override
 	public RewardType getType()
 	{
-		return FTBQuestsRewards.XP_LEVELS;
+		return FTBQuestsRewards.XP_LEVELS.get();
 	}
 
 	@Override

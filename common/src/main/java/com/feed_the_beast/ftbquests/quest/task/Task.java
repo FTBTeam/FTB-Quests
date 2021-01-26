@@ -82,7 +82,7 @@ public abstract class Task extends QuestObject
 	public final void onCompleted(PlayerData data, List<ServerPlayer> onlineMembers, List<ServerPlayer> notifiedPlayers)
 	{
 		super.onCompleted(data, onlineMembers, notifiedPlayers);
-        ObjectCompletedEvent.TASK.invoker().accept(new ObjectCompletedEvent.TaskEvent(data, this, onlineMembers, notifiedPlayers));
+        ObjectCompletedEvent.TASK.invoker().act(new ObjectCompletedEvent.TaskEvent(data, this, onlineMembers, notifiedPlayers));
 		boolean questComplete = data.isComplete(quest);
 
 		if (quest.tasks.size() > 1 && !questComplete && !disableToast)

@@ -3,9 +3,6 @@ package com.feed_the_beast.ftbquests;
 import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
-import com.feed_the_beast.mods.ftbguilibrary.config.Tristate;
-import javax.annotation.Nullable;
-import net.minecraft.world.level.LevelAccessor;
 
 public class FTBQuestsCommon
 {
@@ -13,13 +10,7 @@ public class FTBQuestsCommon
 	{
 	}
 
-	public QuestFile getQuestFile(LevelAccessor world)
-	{
-		return ServerQuestFile.INSTANCE;
-	}
-
-	@Nullable
-	public QuestFile getQuestFile(Tristate clientSide)
+	public QuestFile getQuestFile(boolean isClient)
 	{
 		return ServerQuestFile.INSTANCE;
 	}

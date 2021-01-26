@@ -2,7 +2,6 @@ package com.feed_the_beast.ftbquests;
 
 import com.feed_the_beast.ftbquests.client.FTBQuestsClient;
 import com.feed_the_beast.ftbquests.client.FTBQuestsNetClient;
-import com.feed_the_beast.ftbquests.integration.gamestages.GameStagesIntegration;
 import com.feed_the_beast.ftbquests.integration.kubejs.KubeJSIntegration;
 import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.net.FTBQuestsNetHandler;
@@ -32,6 +31,8 @@ public class FTBQuests
 
 	public FTBQuests()
 	{
+		TaskType.createRegistry();
+		RewardType.createRegistry();
 		FTBQuestsNetHandler.init();
 		PROXY = EnvExecutor.getEnvSpecific(() -> FTBQuestsClient::new, () -> FTBQuestsCommon::new);
 		NET_PROXY = EnvExecutor.getEnvSpecific(() -> FTBQuestsNetClient::new, () -> FTBQuestsNetCommon::new);
@@ -43,7 +44,5 @@ public class FTBQuests
 		}
 
 		PROXY.init();
-		TaskType.createRegistry();
-		RewardType.createRegistry();
 	}
 }

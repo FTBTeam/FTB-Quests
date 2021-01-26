@@ -9,9 +9,16 @@ import com.feed_the_beast.ftbquests.quest.reward.FTBQuestsRewards;
 import com.feed_the_beast.ftbquests.quest.reward.ItemReward;
 import com.feed_the_beast.ftbquests.quest.reward.XPLevelsReward;
 import com.feed_the_beast.ftbquests.quest.reward.XPReward;
-import com.feed_the_beast.ftbquests.quest.task.*;
+import com.feed_the_beast.ftbquests.quest.task.DimensionTask;
+import com.feed_the_beast.ftbquests.quest.task.FTBQuestsTasks;
+import com.feed_the_beast.ftbquests.quest.task.FluidTask;
+import com.feed_the_beast.ftbquests.quest.task.ItemTask;
+import com.feed_the_beast.ftbquests.quest.task.LocationTask;
 import com.feed_the_beast.ftbquests.quest.theme.ThemeLoader;
-import com.feed_the_beast.mods.ftbguilibrary.config.*;
+import com.feed_the_beast.mods.ftbguilibrary.config.ConfigFluid;
+import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
+import com.feed_the_beast.mods.ftbguilibrary.config.ConfigInt;
+import com.feed_the_beast.mods.ftbguilibrary.config.ConfigItemStack;
 import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiEditConfig;
 import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiEditConfigFromString;
 import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiSelectFluid;
@@ -29,14 +36,11 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.StructureBlockEntity;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraftforge.fml.common.thread.EffectiveSide;
 
-import javax.annotation.Nullable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -92,30 +96,20 @@ public class FTBQuestsClient extends FTBQuestsCommon
 	private void setup(Minecraft minecraft)
 	{
 		KeyBindings.registerKeyBinding(KEY_QUESTS = new KeyMapping("key.ftbquests.quests", InputConstants.Type.KEYSYM, -1, "key.categories.ftbquests"));
+		setTaskGuiProviders();
+		setRewardGuiProviders();
 	}
 
 	@Override
-	public QuestFile getQuestFile(LevelAccessor world)
+	public QuestFile getQuestFile(boolean isClient)
 	{
-		return world.isClientSide() ? ClientQuestFile.INSTANCE : ServerQuestFile.INSTANCE;
-	}
-
-	@Override
-	@Nullable
-	public QuestFile getQuestFile(Tristate clientSide)
-	{
-		if (clientSide.isDefault())
-		{
-			return getQuestFile(EffectiveSide.get().isClient() ? Tristate.TRUE : Tristate.FALSE);
-		}
-
-		return clientSide.isTrue() ? ClientQuestFile.INSTANCE : ServerQuestFile.INSTANCE;
+		return isClient ? ClientQuestFile.INSTANCE : ServerQuestFile.INSTANCE;
 	}
 
 	@Override
 	public void setTaskGuiProviders()
 	{
-		FTBQuestsTasks.ITEM.setGuiProvider((gui, quest, callback) -> {
+		FTBQuestsTasks.ITEM.get().setGuiProvider((gui, quest, callback) -> {
 			ConfigItemStack c = new ConfigItemStack(false, false);
 			c.defaultValue = ItemStack.EMPTY;
 			c.value = ItemStack.EMPTY;
@@ -133,7 +127,7 @@ public class FTBQuestsClient extends FTBQuestsCommon
 			}).openGui();
 		});
 
-		FTBQuestsTasks.FLUID.setGuiProvider((gui, quest, callback) -> {
+		/*FTBQuestsTasks.FLUID.get().setGuiProvider((gui, quest, callback) -> {
 			ConfigFluid c = new ConfigFluid(false);
 			c.defaultValue = Fluids.EMPTY;
 			c.value = Fluids.EMPTY;
@@ -147,15 +141,15 @@ public class FTBQuestsClient extends FTBQuestsCommon
 					callback.accept(fluidTask);
 				}
 			}).openGui();
-		});
+		});*/
 
-		FTBQuestsTasks.DIMENSION.setGuiProvider((gui, quest, callback) -> {
+		FTBQuestsTasks.DIMENSION.get().setGuiProvider((gui, quest, callback) -> {
 			DimensionTask task = new DimensionTask(quest);
 			task.dimension = Minecraft.getInstance().level.dimension();
 			callback.accept(task);
 		});
 
-		FTBQuestsTasks.LOCATION.setGuiProvider((gui, quest, callback) -> {
+		FTBQuestsTasks.LOCATION.get().setGuiProvider((gui, quest, callback) -> {
 			LocationTask task = new LocationTask(quest);
 			Minecraft mc = Minecraft.getInstance();
 
@@ -197,7 +191,7 @@ public class FTBQuestsClient extends FTBQuestsCommon
 	@Override
 	public void setRewardGuiProviders()
 	{
-		FTBQuestsRewards.ITEM.setGuiProvider((gui, quest, callback) -> {
+		FTBQuestsRewards.ITEM.get().setGuiProvider((gui, quest, callback) -> {
 			ConfigItemStack c = new ConfigItemStack(false, false);
 			c.defaultValue = ItemStack.EMPTY;
 			c.value = ItemStack.EMPTY;
@@ -215,7 +209,7 @@ public class FTBQuestsClient extends FTBQuestsCommon
 			}).openGui();
 		});
 
-		FTBQuestsRewards.XP.setGuiProvider((gui, quest, callback) -> {
+		FTBQuestsRewards.XP.get().setGuiProvider((gui, quest, callback) -> {
 			ConfigInt c = new ConfigInt(1, Integer.MAX_VALUE);
 
 			GuiEditConfigFromString.open(c, 100, 100, accepted -> {
@@ -228,7 +222,7 @@ public class FTBQuestsClient extends FTBQuestsCommon
 			});
 		});
 
-		FTBQuestsRewards.XP_LEVELS.setGuiProvider((gui, quest, callback) -> {
+		FTBQuestsRewards.XP_LEVELS.get().setGuiProvider((gui, quest, callback) -> {
 			ConfigInt c = new ConfigInt(1, Integer.MAX_VALUE);
 
 			GuiEditConfigFromString.open(c, 5, 5, accepted -> {

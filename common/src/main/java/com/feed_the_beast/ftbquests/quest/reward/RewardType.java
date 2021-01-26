@@ -10,20 +10,17 @@ import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
 import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiEditConfig;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.widget.GuiIcons;
+import me.shedaniel.architectury.annotations.ExpectPlatform;
+import me.shedaniel.architectury.core.RegistryEntry;
+import me.shedaniel.architectury.platform.Platform;
+import me.shedaniel.architectury.registry.Registries;
+import me.shedaniel.architectury.registry.Registry;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.core.Registry;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.registries.ForgeRegistry;
-import net.minecraftforge.registries.ForgeRegistryEntry;
-import net.minecraftforge.registries.RegistryBuilder;
 
 import javax.annotation.Nullable;
 import java.util.function.Consumer;
@@ -31,23 +28,32 @@ import java.util.function.Consumer;
 /**
  * @author LatvianModder
  */
-public final class RewardType
+public final class RewardType extends RegistryEntry<RewardType>
 {
 	private static Registry<RewardType> REGISTRY;
-    private ResourceLocation registryName;
 
 	public static void createRegistry()
 	{
-		if (REGISTRY == null)
-		{
-			ResourceLocation registryName = new ResourceLocation(FTBQuests.MOD_ID, "rewards");
-			REGISTRY = (ForgeRegistry<RewardType>) new RegistryBuilder<RewardType>().setType(RewardType.class).setName(registryName).create();
-			MinecraftForge.EVENT_BUS.post(new RegistryEvent.Register<>(registryName, REGISTRY));
-		}
+		if (Platform.isForge())
+			postRegistryEvent(getRegistry());
+	}
+
+	@ExpectPlatform
+	private static void postRegistryEvent(Registry<RewardType> REGISTRY)
+	{
+		throw new AssertionError();
 	}
 
 	public static Registry<RewardType> getRegistry()
 	{
+		if (REGISTRY == null)
+		{
+			ResourceLocation registryName = new ResourceLocation(FTBQuests.MOD_ID, "rewards");
+			REGISTRY = Registries.get(FTBQuests.MOD_ID).<RewardType>builder(registryName)
+					.saveToDisc()
+					.syncToClients()
+					.build();
+		}
 		return REGISTRY;
 	}
 
@@ -63,7 +69,7 @@ public final class RewardType
 			id = FTBQuests.MOD_ID + ':' + id;
 		}
 
-		RewardType type = REGISTRY.getValue(new ResourceLocation(id));
+		RewardType type = REGISTRY.get(new ResourceLocation(id));
 
 		if (type == null)
 		{
@@ -99,7 +105,7 @@ public final class RewardType
 		guiProvider = new GuiProvider()
 		{
 			@Override
-            @Environment(EnvType.CLIENT)
+			@Environment(EnvType.CLIENT)
 			public void openCreationGui(Runnable gui, Quest quest, Consumer<Reward> callback)
 			{
 				Reward reward = provider.create(quest);
@@ -136,10 +142,11 @@ public final class RewardType
 	{
 		return getRegistryName().getNamespace().equals(FTBQuests.MOD_ID) ? getRegistryName().getPath() : getRegistryName().toString();
 	}
-    
-    public ResourceLocation getRegistryName() {
-        return registryName;
-    }
+
+	public ResourceLocation getRegistryName()
+	{
+		return getRegistry().getId(this);
+	}
 
 	public RewardType setDisplayName(MutableComponent name)
 	{
