@@ -1,0 +1,79 @@
+plugins {
+    id "com.github.johnrengelman.shadow" version "5.0.0"
+    id "com.matthewprenger.cursegradle"
+}
+
+def ENV = System.getenv()
+
+configurations {
+    shadow
+}
+
+architectury {
+    platformSetupLoomIde()
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${rootProject.architectury.minecraft}"
+    mappings minecraft.officialMojangMappings()
+    forge "net.minecraftforge:forge:${rootProject.forge_version}"
+    modCompile "me.shedaniel:architectury:${rootProject.architectury_version}:forge"
+
+	modCompile "curse.maven:jei-238222:${jei_file}"
+	modCompile "curse.maven:FTB-Teams-404468:${rootProject.ftb_teams_version_forge}"
+	modCompile "curse.maven:FTB-GUI-Library-404465:${rootProject.ftb_gui_library_version_forge}"
+	modCompile "curse.maven:item-filter-309674:${rootProject.itemfilters_version_forge}"
+	modCompile "curse.maven:kubejs-238086:${kubejs_file_forge}"
+	modCompile "curse.maven:game-stages-268655:${gamestages_file}"
+	modCompile "curse.maven:rhino-416294:${rhino_file}"
+
+    compileOnly(project(path: ":common")) {
+        transitive = false
+    }
+    runtimeOnly(project(path: ":common", configuration: "transformDevelopmentForge")) {
+        transitive = false
+    }
+    shadow(project(path: ":common", configuration: "transformProductionForge")) {
+        transitive = false
+    }
+}
+
+processResources {
+    filesMatching("fabric.mod.json") {
+        expand "version": project.version
+    }
+    inputs.property "version", project.version
+}
+
+shadowJar {
+    configurations = [project.configurations.shadow]
+    classifier "shadow"
+}
+
+remapJar {
+    dependsOn(shadowJar)
+    input.set(shadowJar.archivePath)
+    archiveClassifier = "fabric"
+}
+
+if (ENV.CURSEFORGE_KEY) {
+    curseforge {
+        apiKey = ENV.CURSEFORGE_KEY
+        project {
+            id = project.curseforge_id_fabric
+            releaseType = "beta"
+            addGameVersion "Fabric"
+            addGameVersion "1.16.2"
+            addGameVersion "1.16.3"
+            addGameVersion "1.16.4"
+            addGameVersion "1.16.5"
+            mainArtifact(remapJar.archivePath)
+            relations {
+                requiredDependency 'architectury-fabric'
+                requiredDependency 'fabric-api'
+            }
+            changelog = getGitChangelog
+            changelogType = 'markdown'
+        }
+    }
+}

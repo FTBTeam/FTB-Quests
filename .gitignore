@@ -17,6 +17,7 @@ out
 build
 .gradle
 logs
+.vscode
 
 # other
 eclipse
