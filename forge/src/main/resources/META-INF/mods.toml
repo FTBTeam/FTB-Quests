@@ -1,0 +1,41 @@
+modLoader = "javafml"
+loaderVersion = "[33,)"
+issueTrackerURL = "https://github.com/FTBTeam/FTB-Quests/issues"
+license = "All Rights Reserved"
+
+[[mods]]
+modId = "ftbquests"
+version = "${version}"
+displayName = "FTB Quests"
+authors = "LatvianModder"
+description = '''
+Lets you easily create and play with quests
+'''
+
+[[dependencies.ftbquests]]
+modId = "forge"
+mandatory = true
+versionRange = "[32,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.ftbquests]]
+modId = "minecraft"
+mandatory = true
+versionRange = "[1.16,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.ftbquests]]
+modId = "architectury"
+mandatory = true
+versionRange = "[1.3.84,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.ftbquests]]
+    modId="ftbguilibrary"
+    mandatory=false
+    versionRange="[1.0.0,)"
+    ordering="AFTER"
+    side="CLIENT"
