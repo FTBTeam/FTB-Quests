@@ -79,13 +79,17 @@ public class FTBQuestsEventHandler
 
 	private void serverStopped(MinecraftServer server)
 	{
+		ServerQuestFile.INSTANCE.saveNow();
 		ServerQuestFile.INSTANCE.unload();
 		ServerQuestFile.INSTANCE = null;
 	}
 
 	private void worldSaved(ServerLevel level)
 	{
-		ServerQuestFile.INSTANCE.saveNow();
+		if (ServerQuestFile.INSTANCE != null)
+		{
+			ServerQuestFile.INSTANCE.saveNow();
+		}
 	}
 
 	private void fileCacheClear(ClearFileCacheEvent event)

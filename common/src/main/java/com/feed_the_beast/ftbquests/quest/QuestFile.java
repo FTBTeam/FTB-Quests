@@ -5,6 +5,7 @@ import com.feed_the_beast.ftbquests.events.ClearFileCacheEvent;
 import com.feed_the_beast.ftbquests.events.CustomTaskEvent;
 import com.feed_the_beast.ftbquests.events.ObjectCompletedEvent;
 import com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIHelper;
+import com.feed_the_beast.ftbquests.item.MissingItem;
 import com.feed_the_beast.ftbquests.net.FTBQuestsNetHandler;
 import com.feed_the_beast.ftbquests.net.MessageDisplayCompletionToast;
 import com.feed_the_beast.ftbquests.quest.loot.EntityWeight;
@@ -428,7 +429,7 @@ public abstract class QuestFile extends QuestObject
 
 			for (ItemStack stack : emergencyItems)
 			{
-				list.add(stack.save(new CompoundTag()));
+				list.add(MissingItem.writeItem(stack));
 			}
 
 			nbt.put("emergency_items", list);
@@ -465,7 +466,7 @@ public abstract class QuestFile extends QuestObject
 
 		for (int i = 0; i < list.size(); i++)
 		{
-			ItemStack stack = NBTUtils.read(list.getCompound(i), "item");
+			ItemStack stack = MissingItem.readItem(list.getCompound(i));
 
 			if (!stack.isEmpty())
 			{

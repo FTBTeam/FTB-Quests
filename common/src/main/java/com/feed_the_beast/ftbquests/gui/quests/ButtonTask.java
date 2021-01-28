@@ -97,7 +97,7 @@ public class ButtonTask extends Button
 
 							if (i.title.isEmpty())
 							{
-								i.title = "Any " + tag;
+								i.title = "Any #" + tag;
 							}
 
 							new MessageEditObject(i).sendToServer();
@@ -122,7 +122,7 @@ public class ButtonTask extends Button
 
 												if (i.title.isEmpty())
 												{
-													i.title = "Any " + s;
+													i.title = "Any #" + s;
 												}
 
 												new MessageEditObject(i).sendToServer();

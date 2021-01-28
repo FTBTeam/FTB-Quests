@@ -34,6 +34,7 @@
 	"block.ftbquests.loot_crate_opener": "Loot Crate Opener",
 	"block.ftbquests.loot_crate_opener.rightclick": "Stored items: %d",
 	"item.ftbquests.book": "Quest Book",
+	"item.ftbquests.missing_item": "Missing Item",
 	"item.ftbquests.book.tooltip": "Right-click to open quest window",
 	"item.ftbquests.book.disabled": "Quest Book GUI is disabled!",
 	"item.ftbquests.lootcrate": "Loot Crate",
