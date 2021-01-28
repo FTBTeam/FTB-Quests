@@ -32,4 +32,8 @@ public class FTBQuestsCommon
 	{
 		throw new IllegalStateException("Can't create client quest file on server side!");
 	}
+
+	public void openGui()
+	{
+	}
 }

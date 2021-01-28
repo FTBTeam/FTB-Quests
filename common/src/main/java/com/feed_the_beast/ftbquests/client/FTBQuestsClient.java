@@ -243,4 +243,10 @@ public class FTBQuestsClient extends FTBQuestsCommon
 	{
 		return new ClientQuestFile();
 	}
+
+	@Override
+	public void openGui()
+	{
+		ClientQuestFile.INSTANCE.openQuestGui();
+	}
 }
