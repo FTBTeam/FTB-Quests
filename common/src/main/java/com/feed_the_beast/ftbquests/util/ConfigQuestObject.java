@@ -6,9 +6,10 @@ import com.feed_the_beast.mods.ftbguilibrary.config.ConfigCallback;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigValue;
 import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
 import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
-import javax.annotation.Nullable;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
+
+import javax.annotation.Nullable;
 import java.util.function.Predicate;
 
 /**

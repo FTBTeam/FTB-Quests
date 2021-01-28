@@ -4,6 +4,7 @@ import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
 import com.mojang.blaze3d.vertex.PoseStack;
+
 import javax.annotation.Nullable;
 
 /**
@@ -19,7 +20,7 @@ public class CheckmarkTask extends Task
 	@Override
 	public TaskType getType()
 	{
-		return FTBQuestsTasks.CHECKMARK.get();
+		return TaskTypes.CHECKMARK;
 	}
 
 	@Override

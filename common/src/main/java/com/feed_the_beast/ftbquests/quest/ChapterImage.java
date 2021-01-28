@@ -8,13 +8,13 @@ import com.feed_the_beast.mods.ftbguilibrary.icon.Color4I;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
+import me.shedaniel.architectury.utils.NbtType;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.network.FriendlyByteBuf;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import me.shedaniel.architectury.utils.NbtType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -97,7 +97,7 @@ public final class ChapterImage implements Movable
 		buffer.writeDouble(rotation);
 		NetUtils.writeIcon(buffer, image);
 		NetUtils.writeStrings(buffer, hover);
-		buffer.writeUtf(click);
+		buffer.writeUtf(click, Short.MAX_VALUE);
 		buffer.writeBoolean(dev);
 	}
 
@@ -110,7 +110,7 @@ public final class ChapterImage implements Movable
 		rotation = buffer.readDouble();
 		image = NetUtils.readIcon(buffer);
 		NetUtils.readStrings(buffer, hover);
-		click = buffer.readUtf();
+		click = buffer.readUtf(Short.MAX_VALUE);
 		dev = buffer.readBoolean();
 	}
 

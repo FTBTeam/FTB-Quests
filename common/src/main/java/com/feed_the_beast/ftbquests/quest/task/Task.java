@@ -6,7 +6,13 @@ import com.feed_the_beast.ftbquests.gui.quests.GuiQuests;
 import com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIHelper;
 import com.feed_the_beast.ftbquests.net.MessageDisplayCompletionToast;
 import com.feed_the_beast.ftbquests.net.MessageSubmitTask;
-import com.feed_the_beast.ftbquests.quest.*;
+import com.feed_the_beast.ftbquests.quest.ChangeProgress;
+import com.feed_the_beast.ftbquests.quest.Chapter;
+import com.feed_the_beast.ftbquests.quest.PlayerData;
+import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.quest.QuestFile;
+import com.feed_the_beast.ftbquests.quest.QuestObject;
+import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.utils.ClientUtils;
@@ -82,7 +88,7 @@ public abstract class Task extends QuestObject
 	public final void onCompleted(PlayerData data, List<ServerPlayer> onlineMembers, List<ServerPlayer> notifiedPlayers)
 	{
 		super.onCompleted(data, onlineMembers, notifiedPlayers);
-        ObjectCompletedEvent.TASK.invoker().act(new ObjectCompletedEvent.TaskEvent(data, this, onlineMembers, notifiedPlayers));
+		ObjectCompletedEvent.TASK.invoker().act(new ObjectCompletedEvent.TaskEvent(data, this, onlineMembers, notifiedPlayers));
 		boolean questComplete = data.isComplete(quest);
 
 		if (quest.tasks.size() > 1 && !questComplete && !disableToast)
@@ -161,7 +167,7 @@ public abstract class Task extends QuestObject
 
 		if (this instanceof CustomTask)
 		{
-            CustomTaskEvent.EVENT.invoker().act(new CustomTaskEvent((CustomTask) this));
+			CustomTaskEvent.EVENT.invoker().act(new CustomTaskEvent((CustomTask) this));
 		}
 	}
 
@@ -181,7 +187,7 @@ public abstract class Task extends QuestObject
 	public final ConfigGroup createSubGroup(ConfigGroup group)
 	{
 		TaskType type = getType();
-		return group.getGroup(getObjectType().id).getGroup(type.getRegistryName().getNamespace()).getGroup(type.getRegistryName().getPath());
+		return group.getGroup(getObjectType().id).getGroup(type.id.getNamespace()).getGroup(type.id.getPath());
 	}
 
 	public void drawGUI(@Nullable TaskData data, PoseStack matrixStack, int x, int y, int w, int h)

@@ -17,7 +17,7 @@ public class CustomReward extends Reward
 	@Override
 	public RewardType getType()
 	{
-		return FTBQuestsRewards.CUSTOM.get();
+		return RewardTypes.CUSTOM;
 	}
 
 	@Override

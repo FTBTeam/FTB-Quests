@@ -34,8 +34,8 @@ ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.ftbquests]]
-    modId="ftbguilibrary"
-    mandatory=false
-    versionRange="[1.0.0,)"
-    ordering="AFTER"
-    side="CLIENT"
+modId = "ftbguilibrary"
+mandatory = false
+versionRange = "[1.0.0,)"
+ordering = "AFTER"
+side = "CLIENT"

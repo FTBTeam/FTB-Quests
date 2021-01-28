@@ -276,7 +276,7 @@ public final class Quest extends QuestObject implements Movable
 
 		if (!subtitle.isEmpty())
 		{
-			buffer.writeUtf(subtitle);
+			buffer.writeUtf(subtitle, Short.MAX_VALUE);
 		}
 
 		buffer.writeDouble(x);
@@ -290,7 +290,7 @@ public final class Quest extends QuestObject implements Movable
 
 		if (!guidePage.isEmpty())
 		{
-			buffer.writeUtf(guidePage);
+			buffer.writeUtf(guidePage, Short.MAX_VALUE);
 		}
 
 		buffer.writeVarInt(minRequiredDependencies);
@@ -329,7 +329,7 @@ public final class Quest extends QuestObject implements Movable
 		hideDependencyLines = Tristate.read(buffer);
 		hideTextUntilComplete = Tristate.read(buffer);
 
-		subtitle = Bits.getFlag(flags, 1) ? buffer.readUtf() : "";
+		subtitle = Bits.getFlag(flags, 1) ? buffer.readUtf(Short.MAX_VALUE) : "";
 		x = buffer.readDouble();
 		y = buffer.readDouble();
 		shape = buffer.readUtf(Short.MAX_VALUE);
@@ -344,7 +344,7 @@ public final class Quest extends QuestObject implements Movable
 		}
 
 		//customClick = Bits.getFlag(flags, 4) ? buffer.readString() : "";
-		guidePage = Bits.getFlag(flags, 8) ? buffer.readUtf() : "";
+		guidePage = Bits.getFlag(flags, 8) ? buffer.readUtf(Short.MAX_VALUE) : "";
 		//customClick = Bits.getFlag(flags, 32) ? data.readString() : "";
 		//hideDependencyLines = Bits.getFlag(flags, 64);
 		//hideTextUntilComplete = Bits.getFlag(flags, 128);
@@ -412,7 +412,7 @@ public final class Quest extends QuestObject implements Movable
 		}
 
 		data.checkAutoCompletion(this);
-        ObjectCompletedEvent.QUEST.invoker().act(new ObjectCompletedEvent.QuestEvent(data, this, onlineMembers, notifiedPlayers));
+		ObjectCompletedEvent.QUEST.invoker().act(new ObjectCompletedEvent.QuestEvent(data, this, onlineMembers, notifiedPlayers));
 
 		for (Chapter chapter : chapter.file.chapters)
 		{

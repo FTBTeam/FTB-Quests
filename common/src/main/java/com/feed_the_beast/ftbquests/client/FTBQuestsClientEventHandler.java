@@ -29,12 +29,9 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.level.ItemLike;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Supplier;
 
 /**
  * @author LatvianModder
@@ -50,20 +47,20 @@ public class FTBQuestsClientEventHandler
 	public void init()
 	{
 		ClientLifecycleEvent.CLIENT_SETUP.register(this::registerItemColors);
-        SidebarButtonCreatedEvent.EVENT.register(this::onSidebarButtonCreated);
-        ClearFileCacheEvent.EVENT.register(this::onFileCacheClear);
-        ClientTickEvent.CLIENT_PRE.register(this::onKeyEvent);
-        CustomClickEvent.EVENT.register(this::onCustomClick);
+		SidebarButtonCreatedEvent.EVENT.register(this::onSidebarButtonCreated);
+		ClearFileCacheEvent.EVENT.register(this::onFileCacheClear);
+		ClientTickEvent.CLIENT_PRE.register(this::onKeyEvent);
+		CustomClickEvent.EVENT.register(this::onCustomClick);
 		ClientTickEvent.CLIENT_PRE.register(this::onClientTick);
 		GuiEvent.RENDER_HUD.register(this::onScreenRender);
 	}
 
 	private void registerItemColors(Minecraft minecraft)
 	{
-        ColorHandlers.registerItemColors((stack, tintIndex) -> {
-            LootCrate crate = ItemLootCrate.getCrate(null, stack);
-            return crate == null ? 0xFFFFFFFF : (0xFF000000 | crate.color.rgb());
-        }, FTBQuestsItems.LOOTCRATE.get());
+		ColorHandlers.registerItemColors((stack, tintIndex) -> {
+			LootCrate crate = ItemLootCrate.getCrate(null, stack);
+			return crate == null ? 0xFFFFFFFF : (0xFF000000 | crate.color.rgb());
+		}, FTBQuestsItems.LOOTCRATE.get());
 	}
 
 	private void onSidebarButtonCreated(SidebarButtonCreatedEvent event)
@@ -110,7 +107,7 @@ public class FTBQuestsClientEventHandler
 
 			return InteractionResult.FAIL;
 		}
-		
+
 		return InteractionResult.PASS;
 	}
 

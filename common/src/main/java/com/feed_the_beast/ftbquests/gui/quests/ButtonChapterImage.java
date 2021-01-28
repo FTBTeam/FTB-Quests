@@ -15,12 +15,12 @@ import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
-import java.util.ArrayList;
-import java.util.List;
-
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author LatvianModder

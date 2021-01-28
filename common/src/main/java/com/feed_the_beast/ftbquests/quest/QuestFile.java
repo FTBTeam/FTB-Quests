@@ -14,9 +14,11 @@ import com.feed_the_beast.ftbquests.quest.reward.CustomReward;
 import com.feed_the_beast.ftbquests.quest.reward.Reward;
 import com.feed_the_beast.ftbquests.quest.reward.RewardAutoClaim;
 import com.feed_the_beast.ftbquests.quest.reward.RewardType;
+import com.feed_the_beast.ftbquests.quest.reward.RewardTypes;
 import com.feed_the_beast.ftbquests.quest.task.CustomTask;
 import com.feed_the_beast.ftbquests.quest.task.Task;
 import com.feed_the_beast.ftbquests.quest.task.TaskType;
+import com.feed_the_beast.ftbquests.quest.task.TaskTypes;
 import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
 import com.feed_the_beast.ftbquests.util.NBTUtils;
 import com.feed_the_beast.ftbquests.util.NetUtils;
@@ -25,7 +27,6 @@ import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigItemStack;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import me.shedaniel.architectury.registry.Registry;
 import me.shedaniel.architectury.utils.Env;
 import me.shedaniel.architectury.utils.NbtType;
 import net.fabricmc.api.EnvType;
@@ -42,7 +43,15 @@ import net.minecraft.world.item.ItemStack;
 import javax.annotation.Nullable;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.UUID;
 import java.util.function.Predicate;
 
 /**
@@ -58,6 +67,8 @@ public abstract class QuestFile extends QuestObject
 	protected final Map<UUID, PlayerData> playerDataMap;
 
 	private final Int2ObjectOpenHashMap<QuestObjectBase> map;
+	public final Int2ObjectOpenHashMap<TaskType> taskTypeIds;
+	public final Int2ObjectOpenHashMap<RewardType> rewardTypeIds;
 
 	public final List<ItemStack> emergencyItems;
 	public int emergencyItemsCooldown;
@@ -82,6 +93,8 @@ public abstract class QuestFile extends QuestObject
 		playerDataMap = new HashMap<>();
 
 		map = new Int2ObjectOpenHashMap<>();
+		taskTypeIds = new Int2ObjectOpenHashMap<>();
+		rewardTypeIds = new Int2ObjectOpenHashMap<>();
 
 		emergencyItems = new ArrayList<>();
 		emergencyItemsCooldown = 300;
@@ -151,7 +164,7 @@ public abstract class QuestFile extends QuestObject
 	public void onCompleted(PlayerData data, List<ServerPlayer> onlineMembers, List<ServerPlayer> notifiedPlayers)
 	{
 		super.onCompleted(data, onlineMembers, notifiedPlayers);
-        ObjectCompletedEvent.FILE.invoker().act(new ObjectCompletedEvent.FileEvent(data, this, onlineMembers, notifiedPlayers));
+		ObjectCompletedEvent.FILE.invoker().act(new ObjectCompletedEvent.FileEvent(data, this, onlineMembers, notifiedPlayers));
 
 		if (!disableToast)
 		{
@@ -709,7 +722,7 @@ public abstract class QuestFile extends QuestObject
 		{
 			if (object instanceof CustomTask)
 			{
-                CustomTaskEvent.EVENT.invoker().act(new CustomTaskEvent((CustomTask) object));
+				CustomTaskEvent.EVENT.invoker().act(new CustomTaskEvent((CustomTask) object));
 			}
 		}
 	}
@@ -773,6 +786,23 @@ public abstract class QuestFile extends QuestObject
 	public final void writeNetDataFull(FriendlyByteBuf buffer, UUID self)
 	{
 		int pos = buffer.writerIndex();
+
+		buffer.writeVarInt(TaskTypes.TYPES.size());
+
+		for (TaskType type : TaskTypes.TYPES.values())
+		{
+			buffer.writeResourceLocation(type.id);
+			buffer.writeVarInt(type.intId);
+		}
+
+		buffer.writeVarInt(RewardTypes.TYPES.size());
+
+		for (RewardType type : RewardTypes.TYPES.values())
+		{
+			buffer.writeResourceLocation(type.id);
+			buffer.writeVarInt(type.intId);
+		}
+
 		writeNetData(buffer);
 
 		buffer.writeVarInt(rewardTables.size());
@@ -783,9 +813,6 @@ public abstract class QuestFile extends QuestObject
 		}
 
 		buffer.writeVarInt(chapters.size());
-        
-        Registry<TaskType> taskTypes = TaskType.getRegistry();
-        Registry<RewardType> rewardTypes = RewardType.getRegistry();
 
 		for (Chapter chapter : chapters)
 		{
@@ -799,7 +826,7 @@ public abstract class QuestFile extends QuestObject
 
 				for (Task task : quest.tasks)
 				{
-					buffer.writeVarInt(taskTypes.getRawId(task.getType()));
+					buffer.writeVarInt(task.getType().intId);
 					buffer.writeVarInt(task.id);
 				}
 
@@ -807,7 +834,7 @@ public abstract class QuestFile extends QuestObject
 
 				for (Reward reward : quest.rewards)
 				{
-					buffer.writeVarInt(rewardTypes.getRawId(reward.getType()));
+					buffer.writeVarInt(reward.getType().intId);
 					buffer.writeVarInt(reward.id);
 				}
 			}
@@ -853,6 +880,48 @@ public abstract class QuestFile extends QuestObject
 	public final void readNetDataFull(FriendlyByteBuf buffer, UUID self)
 	{
 		int pos = buffer.readerIndex();
+
+		taskTypeIds.clear();
+		rewardTypeIds.clear();
+
+		for (TaskType type : TaskTypes.TYPES.values())
+		{
+			type.intId = 0;
+		}
+
+		for (RewardType type : RewardTypes.TYPES.values())
+		{
+			type.intId = 0;
+		}
+
+		int taskTypesSize = buffer.readVarInt();
+
+		for (int i = 0; i < taskTypesSize; i++)
+		{
+			TaskType type = TaskTypes.TYPES.get(buffer.readResourceLocation());
+			int id = buffer.readVarInt();
+
+			if (type != null)
+			{
+				type.intId = id;
+				taskTypeIds.put(type.intId, type);
+			}
+		}
+
+		int rewardTypesSize = buffer.readVarInt();
+
+		for (int i = 0; i < rewardTypesSize; i++)
+		{
+			RewardType type = RewardTypes.TYPES.get(buffer.readResourceLocation());
+			int id = buffer.readVarInt();
+
+			if (type != null)
+			{
+				type.intId = id;
+				rewardTypeIds.put(type.intId, type);
+			}
+		}
+
 		readNetData(buffer);
 
 		chapters.clear();
@@ -866,9 +935,6 @@ public abstract class QuestFile extends QuestObject
 			table.id = buffer.readVarInt();
 			rewardTables.add(table);
 		}
-
-		Registry<TaskType> taskTypes = TaskType.getRegistry();
-        Registry<RewardType> rewardTypes = RewardType.getRegistry();
 
 		int c = buffer.readVarInt();
 
@@ -890,7 +956,7 @@ public abstract class QuestFile extends QuestObject
 
 				for (int k = 0; k < t; k++)
 				{
-					TaskType type = taskTypes.byRawId(buffer.readVarInt());
+					TaskType type = taskTypeIds.get(buffer.readVarInt());
 					Task task = type.provider.create(quest);
 					task.id = buffer.readVarInt();
 					quest.tasks.add(task);
@@ -900,7 +966,7 @@ public abstract class QuestFile extends QuestObject
 
 				for (int k = 0; k < r; k++)
 				{
-					RewardType type = rewardTypes.byRawId(buffer.readVarInt());
+					RewardType type = rewardTypeIds.get(buffer.readVarInt());
 					Reward reward = type.provider.create(quest);
 					reward.id = buffer.readVarInt();
 					quest.rewards.add(reward);
@@ -939,7 +1005,7 @@ public abstract class QuestFile extends QuestObject
 		{
 			if (object instanceof CustomTask)
 			{
-                CustomTaskEvent.EVENT.invoker().act(new CustomTaskEvent((CustomTask) object));
+				CustomTaskEvent.EVENT.invoker().act(new CustomTaskEvent((CustomTask) object));
 			}
 		}
 
@@ -1031,8 +1097,8 @@ public abstract class QuestFile extends QuestObject
 		}
 
 		clearCachedProgress();
-        
-        ClearFileCacheEvent.EVENT.invoker().accept(new ClearFileCacheEvent(this));
+
+		ClearFileCacheEvent.EVENT.invoker().accept(new ClearFileCacheEvent(this));
 	}
 
 	public void clearCachedProgress()

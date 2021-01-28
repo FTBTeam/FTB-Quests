@@ -10,6 +10,7 @@ import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.QuestShape;
 import com.feed_the_beast.ftbquests.quest.reward.Reward;
 import com.feed_the_beast.ftbquests.quest.reward.RewardType;
+import com.feed_the_beast.ftbquests.quest.reward.RewardTypes;
 import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
 import com.feed_the_beast.ftbquests.texteditor.TextEditorFrame;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Color4I;
@@ -28,13 +29,13 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
-import org.lwjgl.opengl.GL11;
-
-import javax.annotation.Nullable;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
+import org.lwjgl.opengl.GL11;
+
+import javax.annotation.Nullable;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -197,7 +198,7 @@ public class ButtonQuest extends Button
 					contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.gui.add_reward_all"), ThemeProperties.ADD_ICON.get(quest), () -> {
 						List<ContextMenuItem> contextMenu2 = new ArrayList<>();
 
-						for (RewardType type : RewardType.getRegistry())
+						for (RewardType type : RewardTypes.TYPES.values())
 						{
 							contextMenu2.add(new ContextMenuItem(type.getDisplayName(), type.getIcon(), () -> {
 								playClickSound();
@@ -210,7 +211,7 @@ public class ButtonQuest extends Button
 											CompoundTag nbt1 = new CompoundTag();
 											reward.writeData(nbt1);
 											r.readData(nbt1);
-                                            CompoundTag extra = new CompoundTag();
+											CompoundTag extra = new CompoundTag();
 											extra.putString("type", type.getTypeForNBT());
 											new MessageCreateObject(r, extra).sendToServer();
 										}

@@ -1,12 +1,12 @@
 package com.feed_the_beast.ftbquests.quest;
 
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 
 import java.util.List;
 

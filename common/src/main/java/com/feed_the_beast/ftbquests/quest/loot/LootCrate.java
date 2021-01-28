@@ -4,11 +4,12 @@ import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Color4I;
-import java.util.regex.Pattern;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.item.ItemStack;
+
+import java.util.regex.Pattern;
 
 /**
  * @author LatvianModder
@@ -64,8 +65,8 @@ public final class LootCrate
 
 	public void writeNetData(FriendlyByteBuf data)
 	{
-		data.writeUtf(stringID);
-		data.writeUtf(itemName);
+		data.writeUtf(stringID, Short.MAX_VALUE);
+		data.writeUtf(itemName, Short.MAX_VALUE);
 		data.writeInt(color.rgb());
 		data.writeBoolean(glow);
 		drops.writeNetData(data);
@@ -73,8 +74,8 @@ public final class LootCrate
 
 	public void readNetData(FriendlyByteBuf data)
 	{
-		stringID = data.readUtf();
-		itemName = data.readUtf();
+		stringID = data.readUtf(Short.MAX_VALUE);
+		itemName = data.readUtf(Short.MAX_VALUE);
 		color = Color4I.rgb(data.readInt());
 		glow = data.readBoolean();
 		drops.readNetData(data);

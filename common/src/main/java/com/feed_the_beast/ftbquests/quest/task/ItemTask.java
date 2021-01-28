@@ -55,7 +55,7 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 	@Override
 	public TaskType getType()
 	{
-		return FTBQuestsTasks.ITEM.get();
+		return TaskTypes.ITEM;
 	}
 
 	@Override

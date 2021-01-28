@@ -2,11 +2,11 @@ package com.feed_the_beast.ftbquests.quest.reward;
 
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 
 /**
  * @author LatvianModder
@@ -24,7 +24,7 @@ public class ToastReward extends Reward
 	@Override
 	public RewardType getType()
 	{
-		return FTBQuestsRewards.TOAST.get();
+		return RewardTypes.TOAST;
 	}
 
 	@Override
@@ -45,14 +45,14 @@ public class ToastReward extends Reward
 	public void writeNetData(FriendlyByteBuf buffer)
 	{
 		super.writeNetData(buffer);
-		buffer.writeUtf(description);
+		buffer.writeUtf(description, Short.MAX_VALUE);
 	}
 
 	@Override
 	public void readNetData(FriendlyByteBuf buffer)
 	{
 		super.readNetData(buffer);
-		description = buffer.readUtf();
+		description = buffer.readUtf(Short.MAX_VALUE);
 	}
 
 	@Override

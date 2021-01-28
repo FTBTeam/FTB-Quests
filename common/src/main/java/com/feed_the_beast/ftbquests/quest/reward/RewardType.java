@@ -10,15 +10,10 @@ import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
 import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiEditConfig;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.widget.GuiIcons;
-import me.shedaniel.architectury.annotations.ExpectPlatform;
 import me.shedaniel.architectury.core.RegistryEntry;
-import me.shedaniel.architectury.platform.Platform;
-import me.shedaniel.architectury.registry.Registries;
-import me.shedaniel.architectury.registry.Registry;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 
@@ -30,33 +25,6 @@ import java.util.function.Consumer;
  */
 public final class RewardType extends RegistryEntry<RewardType>
 {
-	private static Registry<RewardType> REGISTRY;
-
-	public static void createRegistry()
-	{
-		if (Platform.isForge())
-			postRegistryEvent(getRegistry());
-	}
-
-	@ExpectPlatform
-	private static void postRegistryEvent(Registry<RewardType> REGISTRY)
-	{
-		throw new AssertionError();
-	}
-
-	public static Registry<RewardType> getRegistry()
-	{
-		if (REGISTRY == null)
-		{
-			ResourceLocation registryName = new ResourceLocation(FTBQuests.MOD_ID, "rewards");
-			REGISTRY = Registries.get(FTBQuests.MOD_ID).<RewardType>builder(registryName)
-					.saveToDisc()
-					.syncToClients()
-					.build();
-		}
-		return REGISTRY;
-	}
-
 	@Nullable
 	public static Reward createReward(Quest quest, String id)
 	{
@@ -69,7 +37,7 @@ public final class RewardType extends RegistryEntry<RewardType>
 			id = FTBQuests.MOD_ID + ':' + id;
 		}
 
-		RewardType type = REGISTRY.get(new ResourceLocation(id));
+		RewardType type = RewardTypes.TYPES.get(new ResourceLocation(id));
 
 		if (type == null)
 		{
@@ -91,14 +59,17 @@ public final class RewardType extends RegistryEntry<RewardType>
 		void openCreationGui(Runnable gui, Quest quest, Consumer<Reward> callback);
 	}
 
+	public final ResourceLocation id;
 	public final Provider provider;
 	private MutableComponent displayName;
 	private Icon icon;
 	private GuiProvider guiProvider;
 	private boolean excludeFromListRewards;
+	public int intId;
 
-	public RewardType(Provider p)
+	public RewardType(ResourceLocation i, Provider p)
 	{
+		id = i;
 		provider = p;
 		displayName = null;
 		icon = GuiIcons.MONEY_BAG;
@@ -140,12 +111,7 @@ public final class RewardType extends RegistryEntry<RewardType>
 
 	public String getTypeForNBT()
 	{
-		return getRegistryName().getNamespace().equals(FTBQuests.MOD_ID) ? getRegistryName().getPath() : getRegistryName().toString();
-	}
-
-	public ResourceLocation getRegistryName()
-	{
-		return getRegistry().getId(this);
+		return id.getNamespace().equals(FTBQuests.MOD_ID) ? id.getPath() : id.toString();
 	}
 
 	public RewardType setDisplayName(MutableComponent name)
@@ -158,8 +124,7 @@ public final class RewardType extends RegistryEntry<RewardType>
 	{
 		if (displayName == null)
 		{
-			ResourceLocation id = getRegistryName();
-			displayName = id == null ? new TextComponent("error") : new TranslatableComponent("ftbquests.reward." + id.getNamespace() + '.' + id.getPath());
+			displayName = new TranslatableComponent("ftbquests.reward." + id.getNamespace() + '.' + id.getPath());
 		}
 
 		return displayName;

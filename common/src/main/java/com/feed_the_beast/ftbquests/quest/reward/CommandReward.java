@@ -3,6 +3,8 @@ package com.feed_the_beast.ftbquests.quest.reward;
 import com.feed_the_beast.ftbquests.quest.Chapter;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -11,8 +13,6 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,7 +34,7 @@ public class CommandReward extends Reward
 	@Override
 	public RewardType getType()
 	{
-		return FTBQuestsRewards.COMMAND.get();
+		return RewardTypes.COMMAND;
 	}
 
 	@Override
@@ -57,7 +57,7 @@ public class CommandReward extends Reward
 	public void writeNetData(FriendlyByteBuf buffer)
 	{
 		super.writeNetData(buffer);
-		buffer.writeUtf(command);
+		buffer.writeUtf(command, Short.MAX_VALUE);
 		buffer.writeBoolean(playerCommand);
 	}
 
@@ -65,7 +65,7 @@ public class CommandReward extends Reward
 	public void readNetData(FriendlyByteBuf buffer)
 	{
 		super.readNetData(buffer);
-		command = buffer.readUtf();
+		command = buffer.readUtf(Short.MAX_VALUE);
 		playerCommand = buffer.readBoolean();
 	}
 

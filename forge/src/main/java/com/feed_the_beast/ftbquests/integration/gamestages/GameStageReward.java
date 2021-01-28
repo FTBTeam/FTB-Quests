@@ -34,7 +34,7 @@ public class GameStageReward extends Reward
 	@Override
 	public RewardType getType()
 	{
-		return GameStagesIntegration.GAMESTAGE_REWARD.get();
+		return GameStagesIntegration.GAMESTAGE_REWARD;
 	}
 
 	@Override
@@ -61,7 +61,7 @@ public class GameStageReward extends Reward
 	public void writeNetData(FriendlyByteBuf buffer)
 	{
 		super.writeNetData(buffer);
-		buffer.writeUtf(stage);
+		buffer.writeUtf(stage, Short.MAX_VALUE);
 		buffer.writeBoolean(remove);
 	}
 
@@ -69,7 +69,7 @@ public class GameStageReward extends Reward
 	public void readNetData(FriendlyByteBuf buffer)
 	{
 		super.readNetData(buffer);
-		stage = buffer.readUtf();
+		stage = buffer.readUtf(Short.MAX_VALUE);
 		remove = buffer.readBoolean();
 	}
 

@@ -5,8 +5,8 @@ import com.feed_the_beast.ftbquests.client.FTBQuestsNetClient;
 import com.feed_the_beast.ftbquests.integration.kubejs.KubeJSIntegration;
 import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.net.FTBQuestsNetHandler;
-import com.feed_the_beast.ftbquests.quest.reward.RewardType;
-import com.feed_the_beast.ftbquests.quest.task.TaskType;
+import com.feed_the_beast.ftbquests.quest.reward.RewardTypes;
+import com.feed_the_beast.ftbquests.quest.task.TaskTypes;
 import me.shedaniel.architectury.platform.Platform;
 import me.shedaniel.architectury.registry.CreativeTabs;
 import me.shedaniel.architectury.utils.EnvExecutor;
@@ -31,8 +31,8 @@ public class FTBQuests
 
 	public FTBQuests()
 	{
-		TaskType.createRegistry();
-		RewardType.createRegistry();
+		TaskTypes.init();
+		RewardTypes.init();
 		FTBQuestsNetHandler.init();
 		PROXY = EnvExecutor.getEnvSpecific(() -> FTBQuestsClient::new, () -> FTBQuestsCommon::new);
 		NET_PROXY = EnvExecutor.getEnvSpecific(() -> FTBQuestsNetClient::new, () -> FTBQuestsNetCommon::new);

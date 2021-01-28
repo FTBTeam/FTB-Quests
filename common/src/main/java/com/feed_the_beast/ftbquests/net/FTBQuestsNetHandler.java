@@ -5,12 +5,9 @@ import me.shedaniel.architectury.annotations.ExpectPlatform;
 import me.shedaniel.architectury.networking.NetworkChannel;
 import me.shedaniel.architectury.networking.NetworkManager;
 import me.shedaniel.architectury.platform.Platform;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraft.nbt.CompoundTag;
+import me.shedaniel.architectury.utils.Env;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.function.Function;
@@ -23,7 +20,8 @@ public class FTBQuestsNetHandler
 	private static <T extends MessageBase> void register(Class<T> c, Function<FriendlyByteBuf, T> s)
 	{
 		MAIN.register(NetworkManager.s2c(), c, MessageBase::write, s, MessageBase::handle);
-		if (Platform.getEnv() == EnvType.CLIENT) {
+		if (Platform.getEnvironment() == Env.CLIENT)
+		{
 			registerClient(c, s);
 		}
 	}
@@ -35,7 +33,7 @@ public class FTBQuestsNetHandler
 
 	public static void init()
 	{
-	    MAIN = NetworkChannel.create(new ResourceLocation(FTBQuests.MOD_ID, "main"));
+		MAIN = NetworkChannel.create(new ResourceLocation(FTBQuests.MOD_ID, "main"));
 
 		// Game
 		register(MessageSyncQuests.class, MessageSyncQuests::new);

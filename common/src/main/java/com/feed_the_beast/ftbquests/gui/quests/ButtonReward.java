@@ -15,13 +15,13 @@ import com.feed_the_beast.mods.ftbguilibrary.widget.WidgetType;
 import com.feed_the_beast.mods.ftbguilibrary.widget.WrappedIngredient;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import javax.annotation.Nullable;
-
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.item.ItemStack;
+
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 

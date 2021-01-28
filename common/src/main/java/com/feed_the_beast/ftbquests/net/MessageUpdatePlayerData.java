@@ -19,7 +19,7 @@ public class MessageUpdatePlayerData extends MessageBase
 	MessageUpdatePlayerData(FriendlyByteBuf buffer)
 	{
 		uuid = NetUtils.readUUID(buffer);
-		name = buffer.readUtf();
+		name = buffer.readUtf(Short.MAX_VALUE);
 	}
 
 	public MessageUpdatePlayerData(PlayerData data)
@@ -32,7 +32,7 @@ public class MessageUpdatePlayerData extends MessageBase
 	public void write(FriendlyByteBuf buffer)
 	{
 		NetUtils.writeUUID(buffer, uuid);
-		buffer.writeUtf(name);
+		buffer.writeUtf(name, Short.MAX_VALUE);
 	}
 
 	@Override

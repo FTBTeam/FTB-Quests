@@ -4,6 +4,7 @@ import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.loot.RewardTable;
 import com.feed_the_beast.ftbquests.quest.loot.WeightedReward;
 import com.feed_the_beast.ftbquests.quest.reward.RewardType;
+import com.feed_the_beast.ftbquests.quest.reward.RewardTypes;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigDouble;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
 import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiEditConfig;
@@ -17,12 +18,12 @@ import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
 import com.feed_the_beast.mods.ftbguilibrary.widget.SimpleTextButton;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
 import com.feed_the_beast.mods.ftbguilibrary.widget.WidgetVerticalSpace;
-import javax.annotation.Nullable;
-
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
+
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -84,7 +85,7 @@ public class GuiEditRewardTable extends GuiButtonListBase
 			playClickSound();
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
 
-			for (RewardType type : RewardType.getRegistry())
+			for (RewardType type : RewardTypes.TYPES.values())
 			{
 				if (!type.getExcludeFromListRewards())
 				{

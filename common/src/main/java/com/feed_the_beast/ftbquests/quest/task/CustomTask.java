@@ -5,11 +5,11 @@ import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 
 import java.util.function.Predicate;
 
@@ -43,7 +43,7 @@ public class CustomTask extends Task
 	@Override
 	public TaskType getType()
 	{
-		return FTBQuestsTasks.CUSTOM.get();
+		return TaskTypes.CUSTOM;
 	}
 
 	@Override

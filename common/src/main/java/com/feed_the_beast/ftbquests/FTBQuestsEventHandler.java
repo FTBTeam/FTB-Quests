@@ -4,9 +4,7 @@ import com.feed_the_beast.ftbquests.events.ClearFileCacheEvent;
 import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
-import com.feed_the_beast.ftbquests.quest.reward.FTBQuestsRewards;
 import com.feed_the_beast.ftbquests.quest.task.DimensionTask;
-import com.feed_the_beast.ftbquests.quest.task.FTBQuestsTasks;
 import com.feed_the_beast.ftbquests.quest.task.KillTask;
 import com.feed_the_beast.ftbquests.quest.task.Task;
 import com.feed_the_beast.ftbquests.quest.task.TaskData;
@@ -53,8 +51,6 @@ public class FTBQuestsEventHandler
 		LifecycleEvent.SERVER_STOPPING.register(this::serverStopped);
 		LifecycleEvent.SERVER_WORLD_SAVE.register(this::worldSaved);
 		FTBQuestsItems.register();
-		FTBQuestsTasks.register();
-		FTBQuestsRewards.register();
 		ClearFileCacheEvent.EVENT.register(this::fileCacheClear);
 		PlayerEvent.PLAYER_JOIN.register(this::playerLoggedIn);
 		EntityEvent.LIVING_DEATH.register(this::playerKill);

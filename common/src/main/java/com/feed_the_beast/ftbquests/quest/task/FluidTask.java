@@ -47,7 +47,7 @@ public class FluidTask extends Task
 	public TaskType getType()
 	{
 		return null;
-//		return FTBQuestsTasks.FLUID.get();
+		//		return FTBQuestsTasks.FLUID.get();
 	}
 
 	@Override

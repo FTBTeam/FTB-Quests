@@ -10,6 +10,9 @@ import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
 import me.shedaniel.architectury.utils.Env;
+import me.shedaniel.architectury.utils.NbtType;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.FriendlyByteBuf;
@@ -17,9 +20,6 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import me.shedaniel.architectury.utils.NbtType;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -42,7 +42,7 @@ public class RandomReward extends Reward
 	@Override
 	public RewardType getType()
 	{
-		return FTBQuestsRewards.RANDOM.get();
+		return RewardTypes.RANDOM;
 	}
 
 	@Override

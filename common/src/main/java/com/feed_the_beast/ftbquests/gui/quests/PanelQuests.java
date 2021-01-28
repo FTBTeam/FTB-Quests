@@ -9,6 +9,7 @@ import com.feed_the_beast.ftbquests.quest.Movable;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestShape;
 import com.feed_the_beast.ftbquests.quest.task.TaskType;
+import com.feed_the_beast.ftbquests.quest.task.TaskTypes;
 import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Color4I;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
@@ -30,13 +31,13 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.util.Mth;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 import java.util.List;
-import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.util.Mth;
 
 /**
  * @author LatvianModder
@@ -550,7 +551,7 @@ public class PanelQuests extends Panel
 			double qx = questX;
 			double qy = questY;
 
-			for (TaskType type : TaskType.getRegistry())
+			for (TaskType type : TaskTypes.TYPES.values())
 			{
 				contextMenu.add(new ContextMenuItem(type.getDisplayName(), type.getIcon(), () -> {
 					playClickSound();

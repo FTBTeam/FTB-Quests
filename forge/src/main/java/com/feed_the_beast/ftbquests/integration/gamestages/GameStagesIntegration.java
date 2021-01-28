@@ -1,16 +1,16 @@
 package com.feed_the_beast.ftbquests.integration.gamestages;
 
+import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.Chapter;
 import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
-import com.feed_the_beast.ftbquests.quest.reward.FTBQuestsRewards;
 import com.feed_the_beast.ftbquests.quest.reward.RewardType;
-import com.feed_the_beast.ftbquests.quest.task.FTBQuestsTasks;
+import com.feed_the_beast.ftbquests.quest.reward.RewardTypes;
 import com.feed_the_beast.ftbquests.quest.task.Task;
 import com.feed_the_beast.ftbquests.quest.task.TaskType;
+import com.feed_the_beast.ftbquests.quest.task.TaskTypes;
 import com.feed_the_beast.mods.ftbguilibrary.widget.GuiIcons;
-import me.shedaniel.architectury.registry.RegistrySupplier;
 import net.darkhax.gamestages.event.GameStageEvent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -25,10 +25,8 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
  */
 public class GameStagesIntegration
 {
-	public static final RegistrySupplier<TaskType> GAMESTAGE_TASK = FTBQuestsTasks.TYPES.register(new ResourceLocation("gamestage"), () ->
-			new TaskType(GameStageTask::new).setIcon(GuiIcons.CONTROLLER));
-	public static final RegistrySupplier<RewardType> GAMESTAGE_REWARD = FTBQuestsRewards.TYPES.register(new ResourceLocation("gamestage"), () ->
-			new RewardType(GameStageReward::new).setIcon(GuiIcons.CONTROLLER));
+	public static final TaskType GAMESTAGE_TASK = TaskTypes.register(new ResourceLocation(FTBQuests.MOD_ID, "gamestage"), GameStageTask::new).setIcon(GuiIcons.CONTROLLER);
+	public static final RewardType GAMESTAGE_REWARD = RewardTypes.register(new ResourceLocation(FTBQuests.MOD_ID, "gamestage"), GameStageReward::new).setIcon(GuiIcons.CONTROLLER);
 
 	public void init()
 	{

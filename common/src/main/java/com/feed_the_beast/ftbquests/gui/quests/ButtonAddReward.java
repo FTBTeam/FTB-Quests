@@ -3,6 +3,7 @@ package com.feed_the_beast.ftbquests.gui.quests;
 import com.feed_the_beast.ftbquests.net.MessageCreateObject;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.reward.RewardType;
+import com.feed_the_beast.ftbquests.quest.reward.RewardTypes;
 import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
 import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
@@ -10,11 +11,11 @@ import com.feed_the_beast.mods.ftbguilibrary.widget.ContextMenuItem;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
 import com.mojang.blaze3d.vertex.PoseStack;
-import java.util.ArrayList;
-import java.util.List;
-
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.TranslatableComponent;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author LatvianModder
@@ -36,7 +37,7 @@ public class ButtonAddReward extends Button
 		playClickSound();
 		List<ContextMenuItem> contextMenu = new ArrayList<>();
 
-		for (RewardType type : RewardType.getRegistry())
+		for (RewardType type : RewardTypes.TYPES.values())
 		{
 			contextMenu.add(new ContextMenuItem(type.getDisplayName(), type.getIcon(), () -> {
 				playClickSound();
