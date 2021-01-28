@@ -137,6 +137,7 @@ public class ButtonExpandedChapter extends SimpleTextButton
 	@Override
 	public void draw(PoseStack matrixStack, Theme theme, int x, int y, int w, int h)
 	{
+		GuiHelper.setupDrawing();
 		super.draw(matrixStack, theme, x, y, w, h);
 
 		int w2 = 20;

@@ -181,9 +181,13 @@ public class GuiQuests extends GuiBase
 			viewQuestPanel.refreshWidgets();
 		}
 
-		if (!selectedObjects.add(movable))
+		if (selectedObjects.contains(movable))
 		{
 			selectedObjects.remove(movable);
+		}
+		else
+		{
+			selectedObjects.add(movable);
 		}
 	}
 

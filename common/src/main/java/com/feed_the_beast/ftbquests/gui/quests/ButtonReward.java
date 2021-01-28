@@ -162,6 +162,7 @@ public class ButtonReward extends Button
 	public void draw(PoseStack matrixStack, Theme theme, int x, int y, int w, int h)
 	{
 		int bs = h >= 32 ? 32 : 16;
+		GuiHelper.setupDrawing();
 		drawBackground(matrixStack, theme, x, y, w, h);
 		drawIcon(matrixStack, theme, x + (w - bs) / 2, y + (h - bs) / 2, bs, bs);
 
