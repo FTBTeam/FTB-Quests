@@ -17,7 +17,7 @@ public abstract class ByteNBTMixin implements ByteNBTFTBQ
 	@Unique
 	private boolean isBooleanFTBQ;
 
-	@Inject(method = "toString", at = @At("HEAD"), cancellable = true)
+	@Inject(method = "toString", remap = false, at = @At("HEAD"), cancellable = true)
 	public void toStringFTBQ(CallbackInfoReturnable<String> ci)
 	{
 		if (isBooleanFTBQ)

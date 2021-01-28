@@ -6,13 +6,14 @@ import com.feed_the_beast.mods.ftbguilibrary.widget.GuiIcons;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 /**
  * @author LatvianModder
  */
 public class TaskTypes
 {
-	public static final HashMap<ResourceLocation, TaskType> TYPES = new HashMap<>();
+	public static final HashMap<ResourceLocation, TaskType> TYPES = new LinkedHashMap<>();
 
 	public static TaskType register(ResourceLocation name, TaskType.Provider p)
 	{

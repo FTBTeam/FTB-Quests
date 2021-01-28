@@ -1,5 +1,6 @@
 package com.feed_the_beast.ftbquests.util;
 
+import com.feed_the_beast.ftbquests.item.MissingItem;
 import net.minecraft.nbt.ByteArrayTag;
 import net.minecraft.nbt.CollectionTag;
 import net.minecraft.nbt.CompoundTag;
@@ -37,14 +38,14 @@ public class NBTUtils
 
 		if (nbt1 instanceof CompoundTag)
 		{
-			return ItemStack.of((CompoundTag) nbt1);
+			return MissingItem.readItem((CompoundTag) nbt1);
 		}
 		else if (nbt1 instanceof StringTag)
 		{
 			CompoundTag nbt2 = new CompoundTag();
 			nbt2.putString("id", nbt1.getAsString());
 			nbt2.putByte("Count", (byte) 1);
-			return ItemStack.of(nbt2);
+			return MissingItem.readItem(nbt2);
 		}
 
 		return ItemStack.EMPTY;
@@ -54,7 +55,7 @@ public class NBTUtils
 	{
 		if (!stack.isEmpty())
 		{
-			CompoundTag nbt1 = stack.save(new CompoundTag());
+			CompoundTag nbt1 = MissingItem.writeItem(stack);
 
 			if (nbt1.size() == 2 && nbt1.getInt("Count") == 1)
 			{
