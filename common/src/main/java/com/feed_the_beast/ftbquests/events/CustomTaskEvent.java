@@ -6,15 +6,13 @@ import me.shedaniel.architectury.event.Actor;
 import me.shedaniel.architectury.event.Event;
 import me.shedaniel.architectury.event.EventFactory;
 
-import java.util.function.Consumer;
-
 /**
  * @author LatvianModder
  */
 @ForgeEventCancellable
-public class CustomTaskEvent extends FTBQuestsEvent
+public class CustomTaskEvent
 {
-    public static final Event<Actor<CustomTaskEvent>> EVENT = EventFactory.createActorLoop();
+	public static final Event<Actor<CustomTaskEvent>> EVENT = EventFactory.createActorLoop();
 	private final CustomTask task;
 
 	public CustomTaskEvent(CustomTask t)

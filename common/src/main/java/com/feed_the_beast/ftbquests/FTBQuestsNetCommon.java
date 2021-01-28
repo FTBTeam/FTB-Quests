@@ -3,10 +3,11 @@ package com.feed_the_beast.ftbquests;
 import com.feed_the_beast.ftbquests.quest.ChangeProgress;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
-import java.util.UUID;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
+
+import java.util.UUID;
 
 public class FTBQuestsNetCommon
 {

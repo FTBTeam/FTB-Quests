@@ -1,9 +1,10 @@
 package com.feed_the_beast.ftbquests.util;
 
 import com.feed_the_beast.ftbquests.core.ByteNBTFTBQ;
-import java.util.LinkedHashMap;
 import net.minecraft.nbt.ByteTag;
 import net.minecraft.nbt.CompoundTag;
+
+import java.util.LinkedHashMap;
 
 /**
  * @author LatvianModder

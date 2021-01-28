@@ -14,8 +14,9 @@ public class FTBQuestsItems
 	public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(FTBQuests.MOD_ID, Registry.ITEM_REGISTRY);
 	public static final RegistrySupplier<Item> BOOK = ITEMS.register("book", ItemQuestBook::new);
 	public static final RegistrySupplier<Item> LOOTCRATE = ITEMS.register("lootcrate", ItemLootCrate::new);
-	
-	public static void register() {
+
+	public static void register()
+	{
 		ITEMS.register();
 	}
 }

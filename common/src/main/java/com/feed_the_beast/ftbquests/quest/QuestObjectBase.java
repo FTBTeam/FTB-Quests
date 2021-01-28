@@ -35,7 +35,13 @@ import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nullable;
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
@@ -204,7 +210,7 @@ public abstract class QuestObjectBase
 
 		if (!title.isEmpty())
 		{
-			buffer.writeUtf(title);
+			buffer.writeUtf(title, Short.MAX_VALUE);
 		}
 
 		if (!icon.isEmpty())
@@ -221,7 +227,7 @@ public abstract class QuestObjectBase
 	public void readNetData(FriendlyByteBuf buffer)
 	{
 		int flags = buffer.readVarInt();
-		title = Bits.getFlag(flags, 1) ? buffer.readUtf() : "";
+		title = Bits.getFlag(flags, 1) ? buffer.readUtf(Short.MAX_VALUE) : "";
 		icon = Bits.getFlag(flags, 2) ? buffer.readItem() : ItemStack.EMPTY;
 		tags = new ArrayList<>(0);
 

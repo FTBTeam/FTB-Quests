@@ -1,96 +1,47 @@
 plugins {
-    id "architectury-plugin" version "2.0.63"
-    id "forgified-fabric-loom" version "0.6.53" apply false
-    id "com.matthewprenger.cursegradle" version "1.4.0" apply false
-    id "maven-publish"
+	id "architectury-plugin" version "2.0.63"
+	id "forgified-fabric-loom" version "0.6.53" apply false
+	id "com.matthewprenger.cursegradle" version "1.4.0" apply false
+	id "maven-publish"
 }
 
 architectury {
-    minecraft = rootProject.minecraft_version
+	minecraft = rootProject.minecraft_version
 }
 
 subprojects {
-    apply plugin: "forgified-fabric-loom"
+	apply plugin: "forgified-fabric-loom"
 
-    loom {
-        silentMojangMappingsLicense()
-        useFabricMixin = true
-    }
+	loom {
+		silentMojangMappingsLicense()
+		useFabricMixin = true
+	}
 }
 
 allprojects {
-    apply plugin: "java"
-    apply plugin: "architectury-plugin"
-    apply from: "https://files.latmod.com/public/markdown-git-changelog.gradle"
+	apply plugin: "java"
+	apply plugin: "architectury-plugin"
+	apply from: "https://files.latmod.com/public/markdown-git-changelog.gradle"
 
-    archivesBaseName = rootProject.name
-    def ENV = System.getenv()
-    version = ENV.BUILD_NUMBER ? "${mod_version}.${ENV.BUILD_NUMBER}" : "${mod_version}.custom"
-    group = project.mod_package
-    archivesBaseName = project.mod_name
+	archivesBaseName = rootProject.name
+	def ENV = System.getenv()
+	version = ENV.BUILD_NUMBER ? "${mod_version}.${ENV.BUILD_NUMBER}" : "${mod_version}.custom"
+	group = project.mod_package
+	archivesBaseName = project.mod_name
 
-    sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
+	sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
 
-    tasks.withType(JavaCompile) {
-        options.encoding = "UTF-8"
-    }
+	tasks.withType(JavaCompile) {
+		options.encoding = "UTF-8"
+	}
 
-    repositories {
-        mavenLocal()
-        maven {
-            url "https://www.cursemaven.com"
-            content {
-                includeGroup "curse.maven"
-            }
-        }
-    }
-}
-
-/*
-dependencies {
-	minecraft "com.mojang:minecraft:${minecraft_version}"
-	mappings minecraft.officialMojangMappings()
-    forge "net.minecraftforge:forge:${forge_version}"
-    modCompile "curse.maven:ftb-gui-library-404465:${ftb_gui_library_version}"
-    modCompile "curse.maven:item-filters-309674:${itemfilters_version}"
-	// modCompile "com.feed_the_beast.mods:ftb-teams:${ftb_teams_version}"
-	// compile fg.deobf("curse.maven:rhino-416294:${rhino_file}")
-    modCompile("curse.maven:kubejs-238086:${kubejs_file}")
-    modCompile("curse.maven:jei-238222:${jei_file}")
-    modCompile("curse.maven:bookshelf-228525:${bookshelf_file}")
-    modCompile("curse.maven:game-stages-268655:${gamestages_file}")
-}
-
-if (ENV.LOCAL_MAVEN) {
-	uploadArchives {
-		repositories {
-			mavenDeployer {
-				repository(url: "file://${ENV.LOCAL_MAVEN}")
+	repositories {
+		mavenLocal()
+		maven {
+			url "https://www.cursemaven.com"
+			content {
+				includeGroup "curse.maven"
 			}
 		}
 	}
 }
-
-if (ENV.CURSEFORGE_KEY) {
-	curseforge {
-		apiKey = ENV.CURSEFORGE_KEY
-		project {
-			id = project.curseforge_id
-			releaseType = "release"
-			addGameVersion "1.16.2"
-			addGameVersion "1.16.3"
-			addGameVersion "1.16.4"
-			relations {
-				requiredDependency 'ftb-gui-library'
-				requiredDependency 'item-filters'
-				optionalDependency 'kubejs'
-				optionalDependency 'jei'
-				optionalDependency 'packmode'
-				optionalDependency 'game-stages'
-			}
-			changelog = getGitChangelog
-			changelogType = 'markdown'
-		}
-	}
-}
-*/

@@ -6,11 +6,11 @@ import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.icon.ImageIcon;
 import com.feed_the_beast.mods.ftbguilibrary.utils.PixelBuffer;
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 
 import java.io.InputStream;
 import java.util.LinkedHashMap;

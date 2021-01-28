@@ -52,7 +52,7 @@ public class ItemReward extends Reward
 	@Override
 	public RewardType getType()
 	{
-		return FTBQuestsRewards.ITEM.get();
+		return RewardTypes.ITEM;
 	}
 
 	@Override

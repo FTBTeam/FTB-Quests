@@ -6,32 +6,34 @@ import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.task.Task;
-import java.util.List;
-import java.util.function.Consumer;
-
+import me.shedaniel.architectury.ForgeEvent;
 import me.shedaniel.architectury.event.Actor;
 import me.shedaniel.architectury.event.Event;
 import me.shedaniel.architectury.event.EventFactory;
 import net.minecraft.server.level.ServerPlayer;
 
+import java.util.List;
+
 /**
  * @author LatvianModder
  */
-public class ObjectCompletedEvent<T extends QuestObject> extends FTBQuestsEvent
+@ForgeEvent
+public class ObjectCompletedEvent<T extends QuestObject>
 {
-    public static final Event<Actor<ObjectCompletedEvent>> GENERIC = EventFactory.createActorLoop();
-    public static final Event<Actor<FileEvent>> FILE = EventFactory.createActorLoop();
-    public static final Event<Actor<ChapterEvent>> CHAPTER = EventFactory.createActorLoop();
-    public static final Event<Actor<QuestEvent>> QUEST = EventFactory.createActorLoop();
-    public static final Event<Actor<TaskEvent>> TASK = EventFactory.createActorLoop();
-    
-    static {
-    	FILE.register(event -> GENERIC.invoker().act(event));
-	    CHAPTER.register(event -> GENERIC.invoker().act(event));
-	    QUEST.register(event -> GENERIC.invoker().act(event));
-	    TASK.register(event -> GENERIC.invoker().act(event));
-    }
-    
+	public static final Event<Actor<ObjectCompletedEvent>> GENERIC = EventFactory.createActorLoop();
+	public static final Event<Actor<FileEvent>> FILE = EventFactory.createActorLoop();
+	public static final Event<Actor<ChapterEvent>> CHAPTER = EventFactory.createActorLoop();
+	public static final Event<Actor<QuestEvent>> QUEST = EventFactory.createActorLoop();
+	public static final Event<Actor<TaskEvent>> TASK = EventFactory.createActorLoop();
+
+	static
+	{
+		FILE.register(event -> GENERIC.invoker().act(event));
+		CHAPTER.register(event -> GENERIC.invoker().act(event));
+		QUEST.register(event -> GENERIC.invoker().act(event));
+		TASK.register(event -> GENERIC.invoker().act(event));
+	}
+
 	private final PlayerData data;
 	private final T object;
 	private final List<ServerPlayer> onlineMembers;

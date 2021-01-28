@@ -40,7 +40,7 @@ public class KillTask extends Task
 	@Override
 	public TaskType getType()
 	{
-		return FTBQuestsTasks.KILL.get();
+		return TaskTypes.KILL;
 	}
 
 	@Override
@@ -69,7 +69,7 @@ public class KillTask extends Task
 	public void writeNetData(FriendlyByteBuf buffer)
 	{
 		super.writeNetData(buffer);
-		buffer.writeUtf(entity.toString());
+		buffer.writeUtf(entity.toString(), Short.MAX_VALUE);
 		buffer.writeVarLong(value);
 	}
 
@@ -77,7 +77,7 @@ public class KillTask extends Task
 	public void readNetData(FriendlyByteBuf buffer)
 	{
 		super.readNetData(buffer);
-		entity = new ResourceLocation(buffer.readUtf());
+		entity = new ResourceLocation(buffer.readUtf(Short.MAX_VALUE));
 		value = buffer.readVarInt();
 	}
 

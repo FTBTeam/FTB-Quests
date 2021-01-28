@@ -1,14 +1,13 @@
 package com.feed_the_beast.ftbquests.integration.jei.forge;
 
-import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIIntegration;
 import com.feed_the_beast.ftbquests.integration.jei.LootCrateRegistry;
 import com.feed_the_beast.ftbquests.integration.jei.QuestRegistry;
+import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import mezz.jei.api.recipe.IFocus;
 import net.minecraftforge.fml.ModList;
 
-import static com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIHelper.LOOTCRATES;
-import static com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIHelper.QUESTS;
+import static com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIHelper.*;
 
 /**
  * @author LatvianModder

@@ -1,8 +1,9 @@
 package com.feed_the_beast.ftbquests.gui;
 
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
-import java.util.Objects;
 import net.minecraft.world.item.ItemStack;
+
+import java.util.Objects;
 
 /**
  * @author LatvianModder

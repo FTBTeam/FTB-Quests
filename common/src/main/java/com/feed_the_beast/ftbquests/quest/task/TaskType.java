@@ -8,15 +8,10 @@ import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiEditConfig;
 import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiEditConfigFromString;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.widget.GuiIcons;
-import me.shedaniel.architectury.annotations.ExpectPlatform;
 import me.shedaniel.architectury.core.RegistryEntry;
-import me.shedaniel.architectury.platform.Platform;
-import me.shedaniel.architectury.registry.Registries;
-import me.shedaniel.architectury.registry.Registry;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 
@@ -28,33 +23,6 @@ import java.util.function.Consumer;
  */
 public final class TaskType extends RegistryEntry<TaskType>
 {
-	private static Registry<TaskType> REGISTRY;
-
-	public static void createRegistry()
-	{
-		if (Platform.isForge())
-			postRegistryEvent(getRegistry());
-	}
-
-	@ExpectPlatform
-	private static void postRegistryEvent(Registry<TaskType> REGISTRY)
-	{
-		throw new AssertionError();
-	}
-
-	public static Registry<TaskType> getRegistry()
-	{
-		if (REGISTRY == null)
-		{
-			ResourceLocation registryName = new ResourceLocation(FTBQuests.MOD_ID, "tasks");
-			REGISTRY = Registries.get(FTBQuests.MOD_ID).<TaskType>builder(registryName)
-					.saveToDisc()
-					.syncToClients()
-					.build();
-		}
-		return REGISTRY;
-	}
-
 	@Nullable
 	public static Task createTask(Quest quest, String id)
 	{
@@ -67,7 +35,7 @@ public final class TaskType extends RegistryEntry<TaskType>
 			id = FTBQuests.MOD_ID + ':' + id;
 		}
 
-		TaskType type = REGISTRY.get(new ResourceLocation(id));
+		TaskType type = TaskTypes.TYPES.get(new ResourceLocation(id));
 
 		if (type == null)
 		{
@@ -89,13 +57,16 @@ public final class TaskType extends RegistryEntry<TaskType>
 		void openCreationGui(Runnable gui, Quest quest, Consumer<Task> callback);
 	}
 
+	public final ResourceLocation id;
 	public final Provider provider;
 	private MutableComponent displayName;
 	private Icon icon;
 	private GuiProvider guiProvider;
+	public int intId;
 
-	public TaskType(Provider p)
+	TaskType(ResourceLocation i, Provider p)
 	{
+		id = i;
 		provider = p;
 		displayName = null;
 		icon = GuiIcons.ACCEPT;
@@ -139,12 +110,7 @@ public final class TaskType extends RegistryEntry<TaskType>
 
 	public String getTypeForNBT()
 	{
-		return getRegistryName().getNamespace().equals(FTBQuests.MOD_ID) ? getRegistryName().getPath() : getRegistryName().toString();
-	}
-
-	public ResourceLocation getRegistryName()
-	{
-		return getRegistry().getId(this);
+		return id.getNamespace().equals(FTBQuests.MOD_ID) ? id.getPath() : id.toString();
 	}
 
 	public TaskType setDisplayName(MutableComponent name)
@@ -157,8 +123,7 @@ public final class TaskType extends RegistryEntry<TaskType>
 	{
 		if (displayName == null)
 		{
-			ResourceLocation id = getRegistryName();
-			displayName = id == null ? new TextComponent("error") : new TranslatableComponent("ftbquests.task." + id.getNamespace() + '.' + id.getPath());
+			displayName = new TranslatableComponent("ftbquests.task." + id.getNamespace() + '.' + id.getPath());
 		}
 
 		return displayName;

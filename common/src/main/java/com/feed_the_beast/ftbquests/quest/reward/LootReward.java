@@ -5,11 +5,11 @@ import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.loot.WeightedReward;
 import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -29,7 +29,7 @@ public class LootReward extends RandomReward
 	@Override
 	public RewardType getType()
 	{
-		return FTBQuestsRewards.LOOT.get();
+		return RewardTypes.LOOT;
 	}
 
 	@Override

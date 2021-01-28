@@ -9,8 +9,9 @@ import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
 import com.feed_the_beast.mods.ftbguilibrary.widget.SimpleTextButton;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
-import javax.annotation.Nullable;
 import net.minecraft.network.chat.TranslatableComponent;
+
+import javax.annotation.Nullable;
 
 /**
  * @author LatvianModder

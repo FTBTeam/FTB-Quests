@@ -7,8 +7,9 @@ import com.feed_the_beast.mods.ftbguilibrary.config.ConfigString;
 import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiEditConfigFromString;
 import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
-import java.util.regex.Pattern;
 import net.minecraft.network.chat.TranslatableComponent;
+
+import java.util.regex.Pattern;
 
 /**
  * @author LatvianModder

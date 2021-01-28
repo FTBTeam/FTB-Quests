@@ -1,8 +1,9 @@
 package com.feed_the_beast.ftbquests.quest;
 
 import com.feed_the_beast.mods.ftbguilibrary.config.NameMap;
-import java.util.function.Predicate;
 import net.minecraft.ChatFormatting;
+
+import java.util.function.Predicate;
 
 /**
  * @author LatvianModder

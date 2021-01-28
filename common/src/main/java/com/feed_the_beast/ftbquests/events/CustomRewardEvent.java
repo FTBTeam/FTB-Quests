@@ -11,9 +11,9 @@ import net.minecraft.server.level.ServerPlayer;
  * @author LatvianModder
  */
 @ForgeEventCancellable
-public class CustomRewardEvent extends FTBQuestsEvent
+public class CustomRewardEvent
 {
-    public static final Event<Actor<CustomRewardEvent>> EVENT = EventFactory.createActorLoop();
+	public static final Event<Actor<CustomRewardEvent>> EVENT = EventFactory.createActorLoop();
 	private final CustomReward reward;
 	private final ServerPlayer player;
 	private final boolean notify;

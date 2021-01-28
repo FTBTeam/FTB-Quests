@@ -1,5 +1,6 @@
 package com.feed_the_beast.ftbquests.net;
 
+import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.Chapter;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
@@ -25,7 +26,7 @@ public class MessageCreateTaskAt extends MessageBase
 		chapter = buffer.readVarInt();
 		x = buffer.readDouble();
 		y = buffer.readDouble();
-		type = TaskType.getRegistry().byRawId(buffer.readVarInt());
+		type = FTBQuests.PROXY.getQuestFile(true).taskTypeIds.get(buffer.readVarInt());
 		nbt = buffer.readNbt();
 	}
 
@@ -45,7 +46,7 @@ public class MessageCreateTaskAt extends MessageBase
 		buffer.writeVarInt(chapter);
 		buffer.writeDouble(x);
 		buffer.writeDouble(y);
-		buffer.writeVarInt(TaskType.getRegistry().getRawId(type));
+		buffer.writeVarInt(type.intId);
 		buffer.writeNbt(nbt);
 	}
 

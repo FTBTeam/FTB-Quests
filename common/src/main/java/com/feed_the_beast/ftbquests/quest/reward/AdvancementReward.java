@@ -4,6 +4,8 @@ import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.icon.ItemIcon;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.client.Minecraft;
@@ -13,8 +15,6 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 
 /**
  * @author LatvianModder
@@ -34,7 +34,7 @@ public class AdvancementReward extends Reward
 	@Override
 	public RewardType getType()
 	{
-		return FTBQuestsRewards.ADVANCEMENT.get();
+		return RewardTypes.ADVANCEMENT;
 	}
 
 	@Override
@@ -57,16 +57,16 @@ public class AdvancementReward extends Reward
 	public void writeNetData(FriendlyByteBuf buffer)
 	{
 		super.writeNetData(buffer);
-		buffer.writeUtf(advancement);
-		buffer.writeUtf(criterion);
+		buffer.writeUtf(advancement, Short.MAX_VALUE);
+		buffer.writeUtf(criterion, Short.MAX_VALUE);
 	}
 
 	@Override
 	public void readNetData(FriendlyByteBuf buffer)
 	{
 		super.readNetData(buffer);
-		advancement = buffer.readUtf();
-		criterion = buffer.readUtf();
+		advancement = buffer.readUtf(Short.MAX_VALUE);
+		criterion = buffer.readUtf(Short.MAX_VALUE);
 	}
 
 	@Override

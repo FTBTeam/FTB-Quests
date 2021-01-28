@@ -5,6 +5,7 @@ import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.loot.LootCrate;
 import me.shedaniel.architectury.platform.Platform;
+import me.shedaniel.architectury.platform.forge.EventBuses;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -16,6 +17,7 @@ import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 import java.util.Iterator;
 
@@ -24,6 +26,8 @@ public class FTBQuestsForge
 {
 	public FTBQuestsForge()
 	{
+		EventBuses.registerModEventBus(FTBQuests.MOD_ID, FMLJavaModLoadingContext.get().getModEventBus());
+
 		new FTBQuests();
 
 		if (Platform.isModLoaded("gamestages"))

@@ -1,10 +1,11 @@
 package com.feed_the_beast.ftbquests.util;
 
 import com.feed_the_beast.mods.ftbguilibrary.utils.StringUtils;
-import java.util.Collections;
-import java.util.Map;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
+
+import java.util.Collections;
+import java.util.Map;
 
 /**
  * @author LatvianModder

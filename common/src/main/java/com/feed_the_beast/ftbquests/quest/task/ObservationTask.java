@@ -4,12 +4,12 @@ import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.HitResult;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 
 /**
  * @author LatvianModder
@@ -35,7 +35,7 @@ public class ObservationTask extends Task
 	@Override
 	public TaskType getType()
 	{
-		return FTBQuestsTasks.OBSERVATION.get();
+		return TaskTypes.OBSERVATION;
 	}
 
 	@Override

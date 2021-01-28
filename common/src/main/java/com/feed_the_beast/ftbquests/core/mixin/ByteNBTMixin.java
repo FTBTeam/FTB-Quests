@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(ByteTag.class)
 public abstract class ByteNBTMixin implements ByteNBTFTBQ
 {
-    @Unique
+	@Unique
 	private boolean isBooleanFTBQ;
 
 	@Inject(method = "toString", at = @At("HEAD"), cancellable = true)

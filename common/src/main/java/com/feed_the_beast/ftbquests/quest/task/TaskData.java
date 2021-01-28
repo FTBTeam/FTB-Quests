@@ -55,7 +55,7 @@ public class TaskData<T extends Task>
 
 				if (p == 0)
 				{
-                    TaskStartedEvent.EVENT.invoker().accept(new TaskStartedEvent(this));
+					TaskStartedEvent.EVENT.invoker().accept(new TaskStartedEvent(this));
 				}
 
 				if (!taskCompleted && isComplete())

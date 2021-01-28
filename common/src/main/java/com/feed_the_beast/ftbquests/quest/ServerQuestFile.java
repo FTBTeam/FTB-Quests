@@ -4,6 +4,10 @@ import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.net.MessageCreatePlayerData;
 import com.feed_the_beast.ftbquests.net.MessageDeleteObjectResponse;
 import com.feed_the_beast.ftbquests.net.MessageSyncQuests;
+import com.feed_the_beast.ftbquests.quest.reward.RewardType;
+import com.feed_the_beast.ftbquests.quest.reward.RewardTypes;
+import com.feed_the_beast.ftbquests.quest.task.TaskType;
+import com.feed_the_beast.ftbquests.quest.task.TaskTypes;
 import com.feed_the_beast.ftbquests.util.FTBQuestsInventoryListener;
 import com.feed_the_beast.ftbquests.util.FileUtils;
 import com.feed_the_beast.ftbquests.util.NBTUtils;
@@ -38,6 +42,22 @@ public class ServerQuestFile extends QuestFile
 		server = s;
 		shouldSave = false;
 		isLoading = false;
+
+		int taskTypeId = 0;
+
+		for (TaskType type : TaskTypes.TYPES.values())
+		{
+			type.intId = ++taskTypeId;
+			taskTypeIds.put(type.intId, type);
+		}
+
+		int rewardTypeId = 0;
+
+		for (RewardType type : RewardTypes.TYPES.values())
+		{
+			type.intId = ++rewardTypeId;
+			rewardTypeIds.put(type.intId, type);
+		}
 	}
 
 	public void load()

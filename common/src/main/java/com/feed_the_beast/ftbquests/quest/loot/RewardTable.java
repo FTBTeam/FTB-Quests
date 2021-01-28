@@ -10,9 +10,9 @@ import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
-import com.feed_the_beast.ftbquests.quest.reward.FTBQuestsRewards;
 import com.feed_the_beast.ftbquests.quest.reward.Reward;
 import com.feed_the_beast.ftbquests.quest.reward.RewardType;
+import com.feed_the_beast.ftbquests.quest.reward.RewardTypes;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.icon.IconAnimation;
@@ -21,6 +21,9 @@ import com.feed_the_beast.mods.ftbguilibrary.utils.Bits;
 import com.feed_the_beast.mods.ftbguilibrary.utils.ClientUtils;
 import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
 import com.feed_the_beast.mods.ftbguilibrary.widget.GuiIcons;
+import me.shedaniel.architectury.utils.NbtType;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -28,9 +31,6 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import me.shedaniel.architectury.utils.NbtType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -114,7 +114,7 @@ public final class RewardTable extends QuestObjectBase
 			CompoundTag nbt1 = new CompoundTag();
 			reward.reward.writeData(nbt1);
 
-			if (reward.reward.getType() != FTBQuestsRewards.ITEM.get())
+			if (reward.reward.getType() != RewardTypes.ITEM)
 			{
 				nbt1.putString("type", reward.reward.getType().getTypeForNBT());
 			}
@@ -185,7 +185,7 @@ public final class RewardTable extends QuestObjectBase
 
 		for (WeightedReward reward : rewards)
 		{
-			buffer.writeVarInt(RewardType.getRegistry().getRawId(reward.reward.getType()));
+			buffer.writeVarInt(reward.reward.getType().intId);
 			reward.reward.writeNetData(buffer);
 			buffer.writeVarInt(reward.weight);
 		}
@@ -211,7 +211,7 @@ public final class RewardTable extends QuestObjectBase
 
 		for (int i = 0; i < s; i++)
 		{
-			RewardType type = RewardType.getRegistry().byRawId(buffer.readVarInt());
+			RewardType type = file.rewardTypeIds.get(buffer.readVarInt());
 			Reward reward = type.provider.create(fakeQuest);
 			reward.readNetData(buffer);
 			int w = buffer.readVarInt();
