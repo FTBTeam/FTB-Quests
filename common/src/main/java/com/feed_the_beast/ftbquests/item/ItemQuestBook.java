@@ -34,17 +34,12 @@ public class ItemQuestBook extends Item
 	@Override
 	public InteractionResultHolder<ItemStack> use(Level world, Player player, InteractionHand hand)
 	{
-		if (world.isClientSide)
+		if (world.isClientSide())
 		{
-			openGui();
+			FTBQuests.PROXY.openGui();
 		}
 
 		return new InteractionResultHolder<>(InteractionResult.SUCCESS, player.getItemInHand(hand));
-	}
-
-	private void openGui()
-	{
-		ClientQuestFile.INSTANCE.openQuestGui();
 	}
 
 	@Override
