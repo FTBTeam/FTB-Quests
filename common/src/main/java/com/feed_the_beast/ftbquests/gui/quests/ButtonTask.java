@@ -12,6 +12,7 @@ import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
 import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
 import com.feed_the_beast.mods.ftbguilibrary.widget.ContextMenuItem;
+import com.feed_the_beast.mods.ftbguilibrary.widget.GuiHelper;
 import com.feed_the_beast.mods.ftbguilibrary.widget.GuiIcons;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
 import com.feed_the_beast.mods.ftbguilibrary.widget.SimpleTextButton;
@@ -220,6 +221,7 @@ public class ButtonTask extends Button
 	public void draw(PoseStack matrixStack, Theme theme, int x, int y, int w, int h)
 	{
 		int bs = h >= 32 ? 32 : 16;
+		GuiHelper.setupDrawing();
 		drawBackground(matrixStack, theme, x, y, w, h);
 		drawIcon(matrixStack, theme, x + (w - bs) / 2, y + (h - bs) / 2, bs, bs);
 
