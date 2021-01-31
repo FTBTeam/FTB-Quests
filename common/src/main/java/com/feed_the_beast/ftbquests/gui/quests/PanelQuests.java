@@ -213,6 +213,8 @@ public class PanelQuests extends Panel
 			return;
 		}
 
+		GuiHelper.setupDrawing();
+
 		for (Widget widget : widgets)
 		{
 			if (widget instanceof ButtonChapterImage)
@@ -221,7 +223,6 @@ public class PanelQuests extends Panel
 			}
 		}
 
-		RenderSystem.color4f(1F, 1F, 1F, 1F);
 		Tesselator tessellator = Tesselator.getInstance();
 		BufferBuilder buffer = tessellator.getBuilder();
 
@@ -237,9 +238,8 @@ public class PanelQuests extends Panel
 		}
 
 		Quest selectedQuest = treeGui.getViewedQuest();
+		GuiHelper.setupDrawing();
 		RenderSystem.shadeModel(GL11.GL_SMOOTH);
-		RenderSystem.enableBlend();
-		RenderSystem.blendFuncSeparate(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, GL11.GL_ONE, GL11.GL_ZERO);
 		double mt = -(System.currentTimeMillis() * 0.001D);
 		float mu = (float) ((mt * ThemeProperties.DEPENDENCY_LINE_UNSELECTED_SPEED.get(treeGui.selectedChapter)) % 1D);
 		float ms = (float) ((mt * ThemeProperties.DEPENDENCY_LINE_SELECTED_SPEED.get(treeGui.selectedChapter)) % 1D);
@@ -372,7 +372,6 @@ public class PanelQuests extends Panel
 		}
 
 		RenderSystem.shadeModel(GL11.GL_FLAT);
-		RenderSystem.color4f(1F, 1F, 1F, 1F);
 	}
 
 	@Override
@@ -474,7 +473,9 @@ public class PanelQuests extends Panel
 					matrixStack.translate(sx - bs / 2D, sy - bs / 2D, 0D);
 					matrixStack.scale((float) bs, (float) bs, 1F);
 					GuiHelper.setupDrawing();
+					RenderSystem.alphaFunc(GL11.GL_GREATER, 0.01F);
 					QuestShape.get(treeGui.selectedChapter.getDefaultQuestShape()).shape.withColor(Color4I.WHITE.withAlpha(10)).draw(matrixStack, 0, 0, 1, 1);
+					RenderSystem.defaultAlphaFunc();
 					matrixStack.popPose();
 
 					if (GuiQuests.grid && treeGui.viewQuestPanel.quest == null)
