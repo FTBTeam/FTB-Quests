@@ -2,7 +2,7 @@ package com.feed_the_beast.ftbquests.item;
 
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
-import com.feed_the_beast.ftbquests.core.mixin.ItemAccessor;
+import com.feed_the_beast.ftbquests.core.ItemFTBQ;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
@@ -28,7 +28,7 @@ public class ItemQuestBook extends Item
 	public ItemQuestBook()
 	{
 		super(new Properties().stacksTo(1).tab(FTBQuests.ITEM_GROUP));
-		((ItemAccessor) this).setCraftingRemainingItem(this);
+		((ItemFTBQ) this).setCraftingRemainingItemFTBQ(this);
 	}
 
 	@Override

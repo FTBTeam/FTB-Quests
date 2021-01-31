@@ -4,14 +4,22 @@ import com.feed_the_beast.ftbquests.integration.gamestages.GameStagesIntegration
 import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.loot.LootCrate;
+import com.feed_the_beast.ftbquests.quest.task.TaskTypes;
+import com.feed_the_beast.ftbquests.quest.task.forge.ForgeEnergyTask;
+import com.feed_the_beast.ftbquests.quest.task.forge.ForgeFluidTask;
+import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
+import me.shedaniel.architectury.hooks.FluidStackHooks;
 import me.shedaniel.architectury.platform.Platform;
 import me.shedaniel.architectury.platform.forge.EventBuses;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
@@ -20,6 +28,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 import java.util.Iterator;
+import java.util.Optional;
 
 @Mod(FTBQuests.MOD_ID)
 public class FTBQuestsForge
@@ -29,6 +38,9 @@ public class FTBQuestsForge
 		EventBuses.registerModEventBus(FTBQuests.MOD_ID, FMLJavaModLoadingContext.get().getModEventBus());
 
 		new FTBQuests();
+
+		TaskTypes.FLUID = TaskTypes.register(new ResourceLocation(FTBQuests.MOD_ID, "fluid"), ForgeFluidTask::new, () -> Icon.getIcon(Optional.ofNullable(FluidStackHooks.getStillTexture(Fluids.WATER)).map(TextureAtlasSprite::getName).map(ResourceLocation::toString).orElse("missingno")).combineWith(Icon.getIcon(ForgeFluidTask.TANK_TEXTURE.toString())));
+		TaskTypes.FORGE_ENERGY = TaskTypes.register(new ResourceLocation(FTBQuests.MOD_ID, "forge_energy"), ForgeEnergyTask::new, () -> Icon.getIcon(ForgeEnergyTask.EMPTY_TEXTURE.toString()).combineWith(Icon.getIcon(ForgeEnergyTask.FULL_TEXTURE.toString())));
 
 		if (Platform.isModLoaded("gamestages"))
 		{
@@ -84,7 +96,7 @@ public class FTBQuestsForge
 			ItemEntity drop = iterator.next();
 			ItemStack stack = drop.getItem();
 
-			if (stack.getItem() == FTBQuestsItems.BOOK && player.addItem(stack))
+			if (stack.getItem() == FTBQuestsItems.BOOK.get() && player.addItem(stack))
 			{
 				iterator.remove();
 			}

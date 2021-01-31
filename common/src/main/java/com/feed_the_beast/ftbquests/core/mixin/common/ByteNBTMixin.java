@@ -1,4 +1,4 @@
-package com.feed_the_beast.ftbquests.core.mixin;
+package com.feed_the_beast.ftbquests.core.mixin.common;
 
 import com.feed_the_beast.ftbquests.core.ByteNBTFTBQ;
 import net.minecraft.nbt.ByteTag;

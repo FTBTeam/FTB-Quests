@@ -83,6 +83,7 @@ public abstract class QuestFile extends QuestObject
 	public final EntityWeight lootCrateNoDrop;
 	public boolean disableGui;
 	public double gridScale;
+	public boolean pauseGame;
 
 	public QuestFile()
 	{
@@ -112,6 +113,7 @@ public abstract class QuestFile extends QuestObject
 		lootCrateNoDrop.boss = 0;
 		disableGui = false;
 		gridScale = 0.5D;
+		pauseGame = false;
 	}
 
 	public abstract Env getSide();
@@ -443,6 +445,7 @@ public abstract class QuestFile extends QuestObject
 		nbt.put("loot_crate_no_drop", nbt1);
 		nbt.putBoolean("disable_gui", disableGui);
 		nbt.putDouble("grid_scale", gridScale);
+		nbt.putBoolean("pause_game", pauseGame);
 	}
 
 	@Override
@@ -484,6 +487,7 @@ public abstract class QuestFile extends QuestObject
 
 		disableGui = nbt.getBoolean("disable_gui");
 		gridScale = nbt.contains("grid_scale") ? nbt.getDouble("grid_scale") : 0.5D;
+		pauseGame = nbt.getBoolean("pause_game");
 	}
 
 	public final void writeDataFull(Path folder)
@@ -765,6 +769,7 @@ public abstract class QuestFile extends QuestObject
 		lootCrateNoDrop.writeNetData(buffer);
 		buffer.writeBoolean(disableGui);
 		buffer.writeDouble(gridScale);
+		buffer.writeBoolean(pauseGame);
 	}
 
 	@Override
@@ -782,6 +787,7 @@ public abstract class QuestFile extends QuestObject
 		lootCrateNoDrop.readNetData(buffer);
 		disableGui = buffer.readBoolean();
 		gridScale = buffer.readDouble();
+		pauseGame = buffer.readBoolean();
 	}
 
 	public final void writeNetDataFull(FriendlyByteBuf buffer, UUID self)

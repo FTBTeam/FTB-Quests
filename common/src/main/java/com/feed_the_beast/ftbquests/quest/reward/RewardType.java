@@ -9,7 +9,6 @@ import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
 import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiEditConfig;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
-import com.feed_the_beast.mods.ftbguilibrary.widget.GuiIcons;
 import me.shedaniel.architectury.core.RegistryEntry;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -19,6 +18,7 @@ import net.minecraft.resources.ResourceLocation;
 
 import javax.annotation.Nullable;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * @author LatvianModder
@@ -61,18 +61,18 @@ public final class RewardType extends RegistryEntry<RewardType>
 
 	public final ResourceLocation id;
 	public final Provider provider;
+	private final Supplier<Icon> icon;
 	private MutableComponent displayName;
-	private Icon icon;
 	private GuiProvider guiProvider;
 	private boolean excludeFromListRewards;
 	public int intId;
 
-	public RewardType(ResourceLocation i, Provider p)
+	public RewardType(ResourceLocation i, Provider p, Supplier<Icon> ic)
 	{
 		id = i;
 		provider = p;
+		icon = ic;
 		displayName = null;
-		icon = GuiIcons.MONEY_BAG;
 		guiProvider = new GuiProvider()
 		{
 			@Override
@@ -130,15 +130,9 @@ public final class RewardType extends RegistryEntry<RewardType>
 		return displayName;
 	}
 
-	public RewardType setIcon(Icon i)
-	{
-		icon = i;
-		return this;
-	}
-
 	public Icon getIcon()
 	{
-		return icon;
+		return icon.get();
 	}
 
 	public RewardType setGuiProvider(GuiProvider p)

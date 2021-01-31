@@ -38,10 +38,11 @@ dependencies {
 }
 
 processResources {
+	inputs.property "version", project.version
+
 	filesMatching("fabric.mod.json") {
 		expand "version": project.version
 	}
-	inputs.property "version", project.version
 }
 
 shadowJar {
@@ -52,7 +53,7 @@ shadowJar {
 remapJar {
 	dependsOn(shadowJar)
 	input.set(shadowJar.archivePath)
-	archiveClassifier = "fabric"
+	classifier "fabric"
 }
 
 if (ENV.CURSEFORGE_KEY) {
