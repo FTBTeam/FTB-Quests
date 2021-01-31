@@ -202,7 +202,7 @@ public class FTBQuestsEventHandler
 		{
 			ItemStack stack = oldPlayer.inventory.items.get(i);
 
-			if (stack.getItem() == FTBQuestsItems.BOOK && newPlayer.addItem(stack))
+			if (stack.getItem() == FTBQuestsItems.BOOK.get() && newPlayer.addItem(stack))
 			{
 				oldPlayer.inventory.items.set(i, ItemStack.EMPTY);
 			}

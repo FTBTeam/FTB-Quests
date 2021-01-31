@@ -25,8 +25,8 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
  */
 public class GameStagesIntegration
 {
-	public static final TaskType GAMESTAGE_TASK = TaskTypes.register(new ResourceLocation(FTBQuests.MOD_ID, "gamestage"), GameStageTask::new).setIcon(GuiIcons.CONTROLLER);
-	public static final RewardType GAMESTAGE_REWARD = RewardTypes.register(new ResourceLocation(FTBQuests.MOD_ID, "gamestage"), GameStageReward::new).setIcon(GuiIcons.CONTROLLER);
+	public static final TaskType GAMESTAGE_TASK = TaskTypes.register(new ResourceLocation(FTBQuests.MOD_ID, "gamestage"), GameStageTask::new, () -> GuiIcons.CONTROLLER);
+	public static final RewardType GAMESTAGE_REWARD = RewardTypes.register(new ResourceLocation(FTBQuests.MOD_ID, "gamestage"), GameStageReward::new, () -> GuiIcons.CONTROLLER);
 
 	public void init()
 	{

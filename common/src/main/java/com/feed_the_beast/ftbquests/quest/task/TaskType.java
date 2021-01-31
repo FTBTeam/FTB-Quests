@@ -7,7 +7,6 @@ import com.feed_the_beast.mods.ftbguilibrary.config.ConfigLong;
 import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiEditConfig;
 import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiEditConfigFromString;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
-import com.feed_the_beast.mods.ftbguilibrary.widget.GuiIcons;
 import me.shedaniel.architectury.core.RegistryEntry;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -17,6 +16,7 @@ import net.minecraft.resources.ResourceLocation;
 
 import javax.annotation.Nullable;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * @author LatvianModder
@@ -59,17 +59,17 @@ public final class TaskType extends RegistryEntry<TaskType>
 
 	public final ResourceLocation id;
 	public final Provider provider;
+	private final Supplier<Icon> icon;
 	private MutableComponent displayName;
-	private Icon icon;
 	private GuiProvider guiProvider;
 	public int intId;
 
-	TaskType(ResourceLocation i, Provider p)
+	TaskType(ResourceLocation i, Provider p, Supplier<Icon> ic)
 	{
 		id = i;
 		provider = p;
+		icon = ic;
 		displayName = null;
-		icon = GuiIcons.ACCEPT;
 		guiProvider = new GuiProvider()
 		{
 			@Override
@@ -129,15 +129,9 @@ public final class TaskType extends RegistryEntry<TaskType>
 		return displayName;
 	}
 
-	public TaskType setIcon(Icon i)
-	{
-		icon = i;
-		return this;
-	}
-
 	public Icon getIcon()
 	{
-		return icon;
+		return icon.get();
 	}
 
 	public TaskType setGuiProvider(GuiProvider p)

@@ -1,7 +1,9 @@
 package com.feed_the_beast.ftbquests.quest.task;
 
+import com.feed_the_beast.ftbquests.gui.CustomToast;
 import com.feed_the_beast.ftbquests.gui.quests.GuiValidItems;
 import com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIHelper;
+import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.net.FTBQuestsNetHandler;
 import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.quest.Quest;
@@ -20,6 +22,7 @@ import me.shedaniel.architectury.utils.Env;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.MutableComponent;
@@ -152,7 +155,7 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 
 		if (icons.isEmpty())
 		{
-			return super.getAltIcon();
+			return ItemIcon.getItemIcon(FTBQuestsItems.MISSING_ITEM.get());
 		}
 
 		return IconAnimation.fromList(icons, false);
@@ -215,6 +218,10 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 		if (!consumesResources() && validItems.size() == 1 && Platform.isModLoaded("jei"))
 		{
 			showJEIRecipe(validItems.get(0));
+		}
+		else if (validItems.isEmpty())
+		{
+			Minecraft.getInstance().getToasts().addToast(new CustomToast(new TextComponent("No valid items!"), ItemIcon.getItemIcon(FTBQuestsItems.MISSING_ITEM.get()), new TextComponent("Report this bug to modpack author!")));
 		}
 		else
 		{

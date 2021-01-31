@@ -23,9 +23,8 @@ allprojects {
 	apply plugin: "architectury-plugin"
 	apply from: "https://files.latmod.com/public/markdown-git-changelog.gradle"
 
-	archivesBaseName = rootProject.name
 	def ENV = System.getenv()
-	version = ENV.BUILD_NUMBER ? "${mod_version}.${ENV.BUILD_NUMBER}" : "${mod_version}.custom"
+	version = "${mod_version}-build.${ENV.BUILD_NUMBER ?: 9999}"
 	group = project.mod_package
 	archivesBaseName = project.mod_name
 

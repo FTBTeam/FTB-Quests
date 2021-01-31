@@ -13,6 +13,11 @@ architectury {
 	platformSetupLoomIde()
 }
 
+loom {
+	mixinConfigs = [/*"ftbquests.mixins.json", */ "ftbquests-common.mixins.json"]
+	useFabricMixin = true
+}
+
 dependencies {
 	minecraft "com.mojang:minecraft:${rootProject.architectury.minecraft}"
 	mappings minecraft.officialMojangMappings()
@@ -71,6 +76,20 @@ remapJar {
 	dependsOn(shadowJar)
 	input.set(shadowJar.archivePath)
 	archiveClassifier = "forge"
+}
+
+jar {
+	manifest {
+		attributes([
+				"Specification-Title"     : project.mod_id,
+				"Specification-Vendor"    : project.mod_author,
+				"Specification-Version"   : "1",
+				"Implementation-Title"    : project.name,
+				"Implementation-Version"  : version,
+				"Implementation-Vendor"   : project.mod_author,
+				"Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+		])
+	}
 }
 
 if (ENV.CURSEFORGE_KEY) {

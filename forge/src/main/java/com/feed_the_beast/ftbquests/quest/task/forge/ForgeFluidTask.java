@@ -1,8 +1,12 @@
-package com.feed_the_beast.ftbquests.quest.task;
+package com.feed_the_beast.ftbquests.quest.task.forge;
 
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.quest.task.Task;
+import com.feed_the_beast.ftbquests.quest.task.TaskData;
+import com.feed_the_beast.ftbquests.quest.task.TaskType;
+import com.feed_the_beast.ftbquests.quest.task.TaskTypes;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigFluid;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigNBT;
@@ -10,8 +14,6 @@ import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import me.shedaniel.architectury.fluid.FluidStack;
 import me.shedaniel.architectury.hooks.FluidStackHooks;
 import me.shedaniel.architectury.registry.Registries;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
@@ -21,6 +23,8 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
@@ -28,7 +32,7 @@ import java.util.Optional;
 /**
  * @author LatvianModder
  */
-public class FluidTask extends Task
+public class ForgeFluidTask extends Task
 {
 	public static final ResourceLocation TANK_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "textures/tasks/tank.png");
 
@@ -38,7 +42,7 @@ public class FluidTask extends Task
 
 	private FluidStack cachedFluidStack = null;
 
-	public FluidTask(Quest quest)
+	public ForgeFluidTask(Quest quest)
 	{
 		super(quest);
 	}
@@ -46,8 +50,7 @@ public class FluidTask extends Task
 	@Override
 	public TaskType getType()
 	{
-		return null;
-		//		return FTBQuestsTasks.FLUID.get();
+		return TaskTypes.FLUID;
 	}
 
 	@Override
@@ -177,7 +180,7 @@ public class FluidTask extends Task
 	}
 
 	@Override
-	@Environment(EnvType.CLIENT)
+	@OnlyIn(Dist.CLIENT)
 	public void getConfig(ConfigGroup config)
 	{
 		super.getConfig(config);
@@ -206,9 +209,9 @@ public class FluidTask extends Task
 		return new Data(this, data);
 	}
 
-	public static class Data extends TaskData<FluidTask>
+	public static class Data extends TaskData<ForgeFluidTask>
 	{
-		private Data(FluidTask t, PlayerData data)
+		private Data(ForgeFluidTask t, PlayerData data)
 		{
 			super(t, data);
 		}

@@ -1,8 +1,12 @@
-package com.feed_the_beast.ftbquests.quest.task;
+package com.feed_the_beast.ftbquests.quest.task.forge;
 
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.quest.task.EnergyTask;
+import com.feed_the_beast.ftbquests.quest.task.TaskData;
+import com.feed_the_beast.ftbquests.quest.task.TaskType;
+import com.feed_the_beast.ftbquests.quest.task.TaskTypes;
 import com.feed_the_beast.mods.ftbguilibrary.utils.StringUtils;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TranslatableComponent;
