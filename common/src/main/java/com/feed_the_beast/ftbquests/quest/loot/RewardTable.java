@@ -31,6 +31,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,6 +49,7 @@ public final class RewardTable extends QuestObjectBase
 	public boolean hideTooltip;
 	public boolean useTitle;
 	public LootCrate lootCrate;
+	public ResourceLocation lootTableId;
 
 	public RewardTable(QuestFile f)
 	{
@@ -59,6 +61,7 @@ public final class RewardTable extends QuestObjectBase
 		hideTooltip = false;
 		useTitle = false;
 		lootCrate = null;
+		lootTableId = null;
 	}
 
 	@Override
@@ -135,6 +138,11 @@ public final class RewardTable extends QuestObjectBase
 			lootCrate.writeData(nbt1);
 			nbt.put("loot_crate", nbt1);
 		}
+
+		if (lootTableId != null)
+		{
+			nbt.putString("loot_table_id", lootTableId.toString());
+		}
 	}
 
 	@Override
@@ -168,6 +176,8 @@ public final class RewardTable extends QuestObjectBase
 			lootCrate = new LootCrate(this);
 			lootCrate.readData(nbt.getCompound("loot_crate"));
 		}
+
+		lootTableId = nbt.contains("loot_table_id") ? new ResourceLocation(nbt.getString("loot_table_id")) : null;
 	}
 
 	@Override
@@ -180,6 +190,7 @@ public final class RewardTable extends QuestObjectBase
 		flags = Bits.setFlag(flags, 1, hideTooltip);
 		flags = Bits.setFlag(flags, 2, useTitle);
 		flags = Bits.setFlag(flags, 4, lootCrate != null);
+		flags = Bits.setFlag(flags, 8, lootTableId != null);
 		buffer.writeVarInt(flags);
 		buffer.writeVarInt(rewards.size());
 
@@ -194,6 +205,11 @@ public final class RewardTable extends QuestObjectBase
 		{
 			lootCrate.writeNetData(buffer);
 		}
+
+		if (lootTableId != null)
+		{
+			buffer.writeResourceLocation(lootTableId);
+		}
 	}
 
 	@Override
@@ -206,6 +222,7 @@ public final class RewardTable extends QuestObjectBase
 		hideTooltip = Bits.getFlag(flags, 1);
 		useTitle = Bits.getFlag(flags, 2);
 		boolean hasCrate = Bits.getFlag(flags, 4);
+		boolean hasLootTableId = Bits.getFlag(flags, 8);
 		rewards.clear();
 		int s = buffer.readVarInt();
 
@@ -225,6 +242,8 @@ public final class RewardTable extends QuestObjectBase
 			lootCrate = new LootCrate(this);
 			lootCrate.readNetData(buffer);
 		}
+
+		lootTableId = hasLootTableId ? buffer.readResourceLocation() : null;
 	}
 
 	@Override
@@ -241,6 +260,8 @@ public final class RewardTable extends QuestObjectBase
 		{
 			lootCrate.getConfig(config.getGroup("loot_crate").setNameKey("item.ftbquests.lootcrate.name"));
 		}
+
+		// TODO: Implement this: config.addString("loot_table_id", lootTableId == null ? "" : lootTableId.toString(), v -> lootTableId = v.isEmpty() ? null : new ResourceLocation(v), "");
 	}
 
 	@Override

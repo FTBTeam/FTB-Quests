@@ -8,7 +8,7 @@ import com.feed_the_beast.ftbquests.quest.reward.RewardAutoClaim;
 import com.feed_the_beast.ftbquests.quest.reward.RewardClaimType;
 import com.feed_the_beast.ftbquests.quest.task.Task;
 import com.feed_the_beast.ftbquests.quest.task.TaskData;
-import com.feed_the_beast.ftbquests.util.OrderedCompoundNBT;
+import com.feed_the_beast.ftbquests.util.OrderedCompoundTag;
 import it.unimi.dsi.fastutil.ints.Int2ByteOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
@@ -198,14 +198,14 @@ public class PlayerData
 
 	public CompoundTag serializeNBT()
 	{
-		CompoundTag nbt = new OrderedCompoundNBT();
+		CompoundTag nbt = new OrderedCompoundTag();
 		nbt.putString("uuid", uuid.toString());
 		nbt.putString("name", name);
 		nbt.putBoolean("can_edit", canEdit);
 		nbt.putLong("money", money);
 		nbt.putBoolean("auto_pin", autoPin);
 
-		CompoundTag taskDataNBT = new OrderedCompoundNBT();
+		CompoundTag taskDataNBT = new OrderedCompoundTag();
 
 		List<TaskData> taskDataList = new ArrayList<>(taskData.values());
 		taskDataList.sort(Comparator.comparingInt(o -> o.task.id));

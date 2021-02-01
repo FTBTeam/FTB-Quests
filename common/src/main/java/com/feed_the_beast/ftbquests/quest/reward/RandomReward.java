@@ -6,14 +6,13 @@ import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.quest.loot.RewardTable;
 import com.feed_the_beast.ftbquests.quest.loot.WeightedReward;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
+import com.feed_the_beast.ftbquests.util.OrderedCompoundTag;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
-import me.shedaniel.architectury.utils.NbtType;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
@@ -56,7 +55,9 @@ public class RandomReward extends Reward
 
 		if (table.id == -1)
 		{
-
+			OrderedCompoundTag tag = new OrderedCompoundTag();
+			table.writeData(tag);
+			nbt.put("table_data", tag);
 		}
 	}
 
@@ -64,8 +65,8 @@ public class RandomReward extends Reward
 	public void readData(CompoundTag nbt)
 	{
 		super.readData(nbt);
-
 		QuestFile file = getQuestFile();
+
 		int id = nbt.getInt("table_id");
 
 		if (id != 0)
@@ -82,25 +83,12 @@ public class RandomReward extends Reward
 			}
 		}
 
-		if (table == null)
+		if (table == null && nbt.contains("table_data"))
 		{
 			table = new RewardTable(file);
+			table.readData(nbt.getCompound("table_data"));
 			table.id = -1;
 			table.title = "Internal";
-
-			ListTag list = nbt.getList("rewards", NbtType.COMPOUND);
-
-			for (int i = 0; i < list.size(); i++)
-			{
-				CompoundTag nbt1 = list.getCompound(i);
-				Reward reward = RewardType.createReward(table.fakeQuest, nbt1.getString("type"));
-
-				if (reward != null)
-				{
-					reward.readData(nbt1);
-					table.rewards.add(new WeightedReward(reward, nbt1.getInt("weight")));
-				}
-			}
 		}
 	}
 
@@ -119,14 +107,35 @@ public class RandomReward extends Reward
 	public void writeNetData(FriendlyByteBuf buffer)
 	{
 		super.writeNetData(buffer);
-		buffer.writeInt(getTable() == null ? 0 : getTable().id);
+
+		RewardTable table = getTable();
+		buffer.writeInt(table == null ? 0 : table.id);
+
+		if (table != null && table.id == -1)
+		{
+			table.writeNetData(buffer);
+		}
 	}
 
 	@Override
 	public void readNetData(FriendlyByteBuf buffer)
 	{
 		super.readNetData(buffer);
-		table = getQuestFile().getRewardTable(buffer.readInt());
+		QuestFile file = getQuestFile();
+
+		int t = buffer.readInt();
+
+		if (t == -1)
+		{
+			table = new RewardTable(file);
+			table.readNetData(buffer);
+			table.id = -1;
+			table.title = "Internal";
+		}
+		else
+		{
+			table = file.getRewardTable(t);
+		}
 	}
 
 	@Override
