@@ -9,7 +9,6 @@ import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
-import me.shedaniel.architectury.utils.Env;
 import me.shedaniel.architectury.utils.NbtType;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -52,7 +51,12 @@ public class RandomReward extends Reward
 
 		if (getTable() != null)
 		{
-			nbt.putInt("table", getQuestFile().rewardTables.indexOf(getTable()));
+			nbt.putInt("table_id", getTable().id);
+		}
+
+		if (table.id == -1)
+		{
+
 		}
 	}
 
@@ -60,17 +64,30 @@ public class RandomReward extends Reward
 	public void readData(CompoundTag nbt)
 	{
 		super.readData(nbt);
-		int index = nbt.contains("table") ? nbt.getInt("table") : -1;
 
 		QuestFile file = getQuestFile();
+		int id = nbt.getInt("table_id");
 
-		if (index >= 0 && index < file.rewardTables.size())
+		if (id != 0)
 		{
-			table = file.rewardTables.get(index);
+			table = file.getRewardTable(id);
 		}
 		else
 		{
+			int index = nbt.contains("table") ? nbt.getInt("table") : -1;
+
+			if (index >= 0 && index < file.rewardTables.size())
+			{
+				table = file.rewardTables.get(index);
+			}
+		}
+
+		if (table == null)
+		{
 			table = new RewardTable(file);
+			table.id = -1;
+			table.title = "Internal";
+
 			ListTag list = nbt.getList("rewards", NbtType.COMPOUND);
 
 			for (int i = 0; i < list.size(); i++)
@@ -84,15 +101,6 @@ public class RandomReward extends Reward
 					table.rewards.add(new WeightedReward(reward, nbt1.getInt("weight")));
 				}
 			}
-
-			table.id = file.newID();
-
-			if (file.getSide() == Env.CLIENT)
-			{
-				table.title = getUnformattedTitle() + " " + toString();
-			}
-
-			file.rewardTables.add(table);
 		}
 	}
 
