@@ -3,7 +3,7 @@ package com.feed_the_beast.ftbquests.quest;
 import com.feed_the_beast.ftbquests.events.ObjectCompletedEvent;
 import com.feed_the_beast.ftbquests.net.MessageDisplayCompletionToast;
 import com.feed_the_beast.ftbquests.util.NetUtils;
-import com.feed_the_beast.ftbquests.util.OrderedCompoundNBT;
+import com.feed_the_beast.ftbquests.util.OrderedCompoundTag;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigString;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
@@ -114,7 +114,7 @@ public final class Chapter extends QuestObject
 
 			for (ChapterImage image : images)
 			{
-				CompoundTag nbt1 = new OrderedCompoundNBT();
+				CompoundTag nbt1 = new OrderedCompoundTag();
 				image.writeData(nbt1);
 				list.add(nbt1);
 			}

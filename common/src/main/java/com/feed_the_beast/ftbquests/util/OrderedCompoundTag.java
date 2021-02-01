@@ -9,9 +9,9 @@ import java.util.LinkedHashMap;
 /**
  * @author LatvianModder
  */
-public class OrderedCompoundNBT extends CompoundTag
+public class OrderedCompoundTag extends CompoundTag
 {
-	public OrderedCompoundNBT()
+	public OrderedCompoundTag()
 	{
 		super(new LinkedHashMap<>());
 	}
