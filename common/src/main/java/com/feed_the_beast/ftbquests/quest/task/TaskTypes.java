@@ -31,7 +31,7 @@ public class TaskTypes
 	public static final TaskType CHECKMARK = register(new ResourceLocation(FTBQuests.MOD_ID, "checkmark"), CheckmarkTask::new, () -> GuiIcons.ACCEPT_GRAY);
 	public static final TaskType ADVANCEMENT = register(new ResourceLocation(FTBQuests.MOD_ID, "advancement"), AdvancementTask::new, () -> Icon.getIcon("minecraft:item/wheat"));
 	public static final TaskType OBSERVATION = register(new ResourceLocation(FTBQuests.MOD_ID, "observation"), ObservationTask::new, () -> GuiIcons.ART);
-	public static final TaskType BIOME = register(new ResourceLocation(FTBQuests.MOD_ID, "biome"), BiomeTask::new, () -> Icon.getIcon("minecraft:blocks/sapling_oak"));
+	public static final TaskType BIOME = register(new ResourceLocation(FTBQuests.MOD_ID, "biome"), BiomeTask::new, () -> Icon.getIcon("minecraft:block/oak_sapling"));
 
 	public static TaskType FLUID;
 	public static TaskType FORGE_ENERGY;
