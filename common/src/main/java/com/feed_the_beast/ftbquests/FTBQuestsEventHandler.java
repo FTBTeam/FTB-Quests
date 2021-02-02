@@ -1,5 +1,7 @@
 package com.feed_the_beast.ftbquests;
 
+import com.feed_the_beast.ftbquests.block.FTBQuestsBlocks;
+import com.feed_the_beast.ftbquests.block.entity.FTBQuestsBlockEntities;
 import com.feed_the_beast.ftbquests.events.ClearFileCacheEvent;
 import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.quest.PlayerData;
@@ -50,7 +52,9 @@ public class FTBQuestsEventHandler
 		LifecycleEvent.SERVER_STARTED.register(this::serverStarted);
 		LifecycleEvent.SERVER_STOPPING.register(this::serverStopped);
 		LifecycleEvent.SERVER_WORLD_SAVE.register(this::worldSaved);
+		FTBQuestsBlocks.register();
 		FTBQuestsItems.register();
+		FTBQuestsBlockEntities.register();
 		ClearFileCacheEvent.EVENT.register(this::fileCacheClear);
 		PlayerEvent.PLAYER_JOIN.register(this::playerLoggedIn);
 		EntityEvent.LIVING_DEATH.register(this::playerKill);

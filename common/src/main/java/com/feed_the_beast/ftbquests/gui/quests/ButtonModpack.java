@@ -6,6 +6,7 @@ import com.feed_the_beast.ftbquests.net.MessageClaimAllRewards;
 import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
 import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
 import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
+import com.feed_the_beast.mods.ftbguilibrary.widget.GuiHelper;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -58,6 +59,7 @@ public class ButtonModpack extends ButtonTab
 
 		if (unclaimedRewards)
 		{
+			GuiHelper.setupDrawing();
 			float s = w / 2F;//(int) (treeGui.getZoom() / 2 * quest.size);
 			matrixStack.pushPose();
 			matrixStack.translate(x + w - s, y, 500);

@@ -33,6 +33,7 @@
 	"block.ftbquests.loot_crate_storage": "Loot Crate Storage",
 	"block.ftbquests.loot_crate_opener": "Loot Crate Opener",
 	"block.ftbquests.loot_crate_opener.rightclick": "Stored items: %d",
+	"block.ftbquests.banner": "Quest Banner",
 	"item.ftbquests.book": "Quest Book",
 	"item.ftbquests.missing_item": "Missing Item",
 	"item.ftbquests.book.tooltip": "Right-click to open quest window",
