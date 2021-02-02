@@ -32,6 +32,11 @@ public class CustomIconItem extends Item
 	@Override
 	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand)
 	{
+		if (level.isClientSide())
+		{
+			FTBQuests.PROXY.openCustomIconGui(player, interactionHand);
+		}
+
 		return new InteractionResultHolder<>(InteractionResult.SUCCESS, player.getItemInHand(interactionHand));
 	}
 

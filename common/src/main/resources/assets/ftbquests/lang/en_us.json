@@ -111,6 +111,7 @@
 	"ftbquests.chapter.image.hover": "Hover Text",
 	"ftbquests.chapter.image.click": "Click",
 	"ftbquests.chapter.image.dev": "Only visible in Editing Mode",
+	"ftbquests.chapter.image.corner": "Rotate and offset from corner",
 	"ftbquests.quest": "Quest",
 	"ftbquests.quests": "Quests",
 	"ftbquests.quest.completed": "Quest completed!",

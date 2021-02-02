@@ -33,6 +33,7 @@ public final class ChapterImage implements Movable
 	public List<String> hover;
 	public String click;
 	public boolean dev;
+	public boolean corner;
 
 	public ChapterImage(Chapter c)
 	{
@@ -45,6 +46,7 @@ public final class ChapterImage implements Movable
 		hover = new ArrayList<>();
 		click = "";
 		dev = false;
+		corner = false;
 	}
 
 	public void writeData(CompoundTag nbt)
@@ -66,6 +68,7 @@ public final class ChapterImage implements Movable
 		nbt.put("hover", hoverTag);
 		nbt.putString("click", click);
 		nbt.putBoolean("dev", dev);
+		nbt.putBoolean("corner", corner);
 	}
 
 	public void readData(CompoundTag nbt)
@@ -87,6 +90,7 @@ public final class ChapterImage implements Movable
 
 		click = nbt.getString("click");
 		dev = nbt.getBoolean("dev");
+		corner = nbt.getBoolean("corner");
 	}
 
 	public void writeNetData(FriendlyByteBuf buffer)
@@ -100,6 +104,7 @@ public final class ChapterImage implements Movable
 		NetUtils.writeStrings(buffer, hover);
 		buffer.writeUtf(click, Short.MAX_VALUE);
 		buffer.writeBoolean(dev);
+		buffer.writeBoolean(corner);
 	}
 
 	public void readNetData(FriendlyByteBuf buffer)
@@ -113,6 +118,7 @@ public final class ChapterImage implements Movable
 		NetUtils.readStrings(buffer, hover);
 		click = buffer.readUtf(Short.MAX_VALUE);
 		dev = buffer.readBoolean();
+		corner = buffer.readBoolean();
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -127,6 +133,7 @@ public final class ChapterImage implements Movable
 		config.addList("hover", hover, new ConfigString(), "");
 		config.addString("click", click, v -> click = v, "");
 		config.addBool("dev", dev, v -> dev = v, false);
+		config.addBool("corner", corner, v -> corner = v, false);
 	}
 
 	@Override
@@ -189,10 +196,20 @@ public final class ChapterImage implements Movable
 	public void drawMoved(PoseStack matrixStack)
 	{
 		matrixStack.pushPose();
-		matrixStack.translate(0.5D, 0.5D, 0);
-		matrixStack.mulPose(Vector3f.ZP.rotationDegrees((float) rotation));
-		matrixStack.scale(0.5F, 0.5F, 1F);
-		image.withColor(Color4I.WHITE.withAlpha(50)).draw(matrixStack, -1, -1, 2, 2);
+
+		if (corner)
+		{
+			matrixStack.mulPose(Vector3f.ZP.rotationDegrees((float) rotation));
+			image.withColor(Color4I.WHITE.withAlpha(50)).draw(matrixStack, 0, 0, 1, 1);
+		}
+		else
+		{
+			matrixStack.translate(0.5D, 0.5D, 0);
+			matrixStack.mulPose(Vector3f.ZP.rotationDegrees((float) rotation));
+			matrixStack.scale(0.5F, 0.5F, 1);
+			image.withColor(Color4I.WHITE.withAlpha(50)).draw(matrixStack, -1, -1, 2, 2);
+		}
+
 		matrixStack.popPose();
 
 		QuestShape.get(getShape()).outline.withColor(Color4I.WHITE.withAlpha(30)).draw(matrixStack, 0, 0, 1, 1);
