@@ -2,6 +2,8 @@ package com.feed_the_beast.ftbquests.client;
 
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.FTBQuestsCommon;
+import com.feed_the_beast.ftbquests.gui.ImageConfig;
+import com.feed_the_beast.ftbquests.net.MessageSetCustomImage;
 import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
@@ -20,6 +22,7 @@ import com.feed_the_beast.mods.ftbguilibrary.config.ConfigItemStack;
 import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiEditConfig;
 import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiEditConfigFromString;
 import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiSelectItemStack;
+import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
 import com.feed_the_beast.mods.ftbguilibrary.utils.StringUtils;
 import com.mojang.blaze3d.platform.InputConstants;
 import me.shedaniel.architectury.event.events.client.ClientLifecycleEvent;
@@ -29,9 +32,12 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.StringTag;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.packs.PackType;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.StructureBlockEntity;
@@ -248,5 +254,28 @@ public class FTBQuestsClient extends FTBQuestsCommon
 	public void openGui()
 	{
 		ClientQuestFile.INSTANCE.openQuestGui();
+	}
+
+	@Override
+	public void openCustomIconGui(Player player, InteractionHand hand)
+	{
+		ImageConfig config = new ImageConfig();
+		config.onClicked(MouseButton.LEFT, b -> {
+			if (b)
+			{
+				if (config.value.isEmpty())
+				{
+					player.getItemInHand(hand).removeTagKey("Icon");
+				}
+				else
+				{
+					player.getItemInHand(hand).addTagElement("Icon", StringTag.valueOf(config.value));
+				}
+
+				new MessageSetCustomImage(hand, config.value).sendToServer();
+			}
+
+			Minecraft.getInstance().setScreen(null);
+		});
 	}
 }

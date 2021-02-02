@@ -10,9 +10,9 @@ import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
 import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
 import com.feed_the_beast.mods.ftbguilibrary.widget.ContextMenuItem;
+import com.feed_the_beast.mods.ftbguilibrary.widget.GuiHelper;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
 import net.minecraft.ChatFormatting;
@@ -153,13 +153,24 @@ public class ButtonChapterImage extends Button
 	@Override
 	public void draw(PoseStack matrixStack, Theme theme, int x, int y, int w, int h)
 	{
+		GuiHelper.setupDrawing();
 		matrixStack.pushPose();
-		matrixStack.translate((int) (x + w / 2D), (int) (y + h / 2D), 0);
-		matrixStack.mulPose(Vector3f.ZP.rotationDegrees((float) chapterImage.rotation));
-		matrixStack.scale(w / 2F, h / 2F, 1);
-		RenderSystem.enableBlend();
-		RenderSystem.defaultBlendFunc();
-		chapterImage.image.draw(matrixStack, -1, -1, 2, 2);
+
+		if (chapterImage.corner)
+		{
+			matrixStack.translate(x, y, 0);
+			matrixStack.mulPose(Vector3f.ZP.rotationDegrees((float) chapterImage.rotation));
+			matrixStack.scale(w, h, 1);
+			chapterImage.image.draw(matrixStack, 0, 0, 1, 1);
+		}
+		else
+		{
+			matrixStack.translate((int) (x + w / 2D), (int) (y + h / 2D), 0);
+			matrixStack.mulPose(Vector3f.ZP.rotationDegrees((float) chapterImage.rotation));
+			matrixStack.scale(w / 2F, h / 2F, 1);
+			chapterImage.image.draw(matrixStack, -1, -1, 2, 2);
+		}
+
 		matrixStack.popPose();
 	}
 }
