@@ -3,6 +3,7 @@ package com.feed_the_beast.ftbquests.quest;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.client.FTBQuestsClient;
+import com.feed_the_beast.ftbquests.item.CustomIconItem;
 import com.feed_the_beast.ftbquests.net.MessageChangeProgressResponse;
 import com.feed_the_beast.ftbquests.net.MessageEditObject;
 import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
@@ -345,7 +346,21 @@ public abstract class QuestObjectBase
 
 		if (!icon.isEmpty())
 		{
-			cachedIcon = ItemIcon.getItemIcon(icon);
+			if (icon.getItem() instanceof CustomIconItem)
+			{
+				if (icon.hasTag() && icon.getTag().contains("Icon"))
+				{
+					cachedIcon = Icon.getIcon(icon.getTag().getString("Icon"));
+				}
+				else
+				{
+					cachedIcon = Icon.getIcon("minecraft:textures/misc/unknown_pack.png");
+				}
+			}
+			else
+			{
+				cachedIcon = ItemIcon.getItemIcon(icon);
+			}
 		}
 
 		if (cachedIcon == null || cachedIcon.isEmpty())

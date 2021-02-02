@@ -1,5 +1,6 @@
 package com.feed_the_beast.ftbquests.quest;
 
+import com.feed_the_beast.ftbquests.gui.ImageConfig;
 import com.feed_the_beast.ftbquests.net.MessageEditObject;
 import com.feed_the_beast.ftbquests.util.NetUtils;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
@@ -122,7 +123,7 @@ public final class ChapterImage implements Movable
 		config.addDouble("width", width, v -> width = v, 1, 0, Double.POSITIVE_INFINITY);
 		config.addDouble("height", height, v -> height = v, 1, 0, Double.POSITIVE_INFINITY);
 		config.addDouble("rotation", rotation, v -> rotation = v, 0, -180, 180);
-		config.addString("image", image.toString(), v -> image = Icon.getIcon(v), "minecraft:textures/gui/presets/isles.png");
+		config.add("image", new ImageConfig(), image.toString(), v -> image = Icon.getIcon(v), "minecraft:textures/gui/presets/isles.png");
 		config.addList("hover", hover, new ConfigString(), "");
 		config.addString("click", click, v -> click = v, "");
 		config.addBool("dev", dev, v -> dev = v, false);
