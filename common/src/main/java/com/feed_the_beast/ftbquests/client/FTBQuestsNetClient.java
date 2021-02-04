@@ -177,13 +177,13 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon
 
 		if (chapter != null)
 		{
-			int index = ClientQuestFile.INSTANCE.chapters.indexOf(chapter);
+			int index = chapter.group.chapters.indexOf(chapter);
 
-			if (index != -1 && up ? (index > 0) : (index < ClientQuestFile.INSTANCE.chapters.size() - 1))
+			if (index != -1 && up ? (index > 0) : (index < chapter.group.chapters.size() - 1))
 			{
-				ClientQuestFile.INSTANCE.chapters.remove(index);
-				ClientQuestFile.INSTANCE.chapters.add(up ? index - 1 : index + 1, chapter);
-				ClientQuestFile.INSTANCE.refreshIDMap();
+				chapter.group.chapters.remove(index);
+				chapter.group.chapters.add(up ? index - 1 : index + 1, chapter);
+				ClientQuestFile.INSTANCE.clearCachedData();
 
 				GuiQuests gui = ClientUtils.getCurrentGuiAs(GuiQuests.class);
 

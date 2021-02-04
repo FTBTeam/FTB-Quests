@@ -8,7 +8,6 @@ import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
 import com.feed_the_beast.mods.ftbguilibrary.widget.GuiHelper;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import javax.annotation.Nullable;
@@ -52,7 +51,7 @@ public class ButtonChapter extends ButtonTab
 	{
 		GuiHelper.setupDrawing();
 
-		if (chapter == treeGui.selectedChapter || treeGui.selectedChapter != null && chapter == treeGui.selectedChapter.group)
+		if (chapter == treeGui.selectedChapter)
 		{
 			Color4I backgroundColor = ThemeProperties.WIDGET_BACKGROUND.get(treeGui.selectedChapter);
 			backgroundColor.draw(matrixStack, x + 1, y, w - 2, h);
@@ -65,12 +64,12 @@ public class ButtonChapter extends ButtonTab
 
 		int is = width < 18 ? 8 : 16;
 		icon.draw(matrixStack, x + (w - is) / 2, y + (h - is) / 2, is, is);
+		GuiHelper.setupDrawing();
 
-		if (chapter.quests.isEmpty() && !chapter.hasChildren())
+		if (chapter.quests.isEmpty())
 		{
 			matrixStack.pushPose();
 			matrixStack.translate(0, 0, 450);
-			RenderSystem.enableBlend();
 			ThemeProperties.CLOSE_ICON.get().draw(matrixStack, x + w - 10, y + 2, 8, 8);
 			matrixStack.popPose();
 			return;
@@ -80,7 +79,6 @@ public class ButtonChapter extends ButtonTab
 		{
 			matrixStack.pushPose();
 			matrixStack.translate(0, 0, 450);
-			RenderSystem.enableBlend();
 			ThemeProperties.ALERT_ICON.get().draw(matrixStack, x + w - 7, y + 2, 6, 6);
 			matrixStack.popPose();
 		}
@@ -88,7 +86,6 @@ public class ButtonChapter extends ButtonTab
 		{
 			matrixStack.pushPose();
 			matrixStack.translate(0, 0, 450);
-			RenderSystem.enableBlend();
 			ThemeProperties.CHECK_ICON.get().draw(matrixStack, x + w - 8, y + 1, 8, 8);
 			matrixStack.popPose();
 		}

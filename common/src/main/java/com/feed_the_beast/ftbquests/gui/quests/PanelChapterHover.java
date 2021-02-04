@@ -1,6 +1,5 @@
 package com.feed_the_beast.ftbquests.gui.quests;
 
-import com.feed_the_beast.ftbquests.quest.Chapter;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Widget;
@@ -30,6 +29,7 @@ public class PanelChapterHover extends Panel
 		{
 			type = 0;
 
+			/*
 			for (Chapter c : treeGui.file.chapters)
 			{
 				if (c.group == chapter.chapter && (treeGui.file.canEdit() || c.isVisible(treeGui.file.self)))
@@ -45,6 +45,7 @@ public class PanelChapterHover extends Panel
 					add(b);
 				}
 			}
+			 */
 
 			if (type == 0)
 			{

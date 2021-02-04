@@ -1,6 +1,7 @@
 package com.feed_the_beast.ftbquests.net;
 
 import com.feed_the_beast.ftbquests.quest.Chapter;
+import com.feed_the_beast.ftbquests.quest.ChapterGroup;
 import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
@@ -33,17 +34,20 @@ public class MessageClaimAllRewards extends MessageBase
 		ServerPlayer player = (ServerPlayer) context.getPlayer();
 		PlayerData data = PlayerData.get(player);
 
-		for (Chapter chapter : ServerQuestFile.INSTANCE.chapters)
+		for (ChapterGroup group : ServerQuestFile.INSTANCE.chapterGroups)
 		{
-			for (Quest quest : chapter.quests)
+			for (Chapter chapter : group.chapters)
 			{
-				if (data.isComplete(quest))
+				for (Quest quest : chapter.quests)
 				{
-					for (Reward reward : quest.rewards)
+					if (data.isComplete(quest))
 					{
-						if (!reward.getExcludeFromClaimAll())
+						for (Reward reward : quest.rewards)
 						{
-							data.claimReward(player, reward, true);
+							if (!reward.getExcludeFromClaimAll())
+							{
+								data.claimReward(player, reward, true);
+							}
 						}
 					}
 				}

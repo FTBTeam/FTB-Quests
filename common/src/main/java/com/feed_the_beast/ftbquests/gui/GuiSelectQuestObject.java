@@ -36,14 +36,14 @@ public class GuiSelectQuestObject<T extends QuestObjectBase> extends GuiButtonLi
 
 		public ButtonQuestObject(Panel panel, @Nullable T o)
 		{
-			super(panel, o == null ? new TranslatableComponent("ftbquests.null") : o.getTitle().withStyle(o.getObjectType().getColor()), o == null ? Icon.EMPTY : o.getIcon());
+			super(panel, o == null ? new TranslatableComponent("ftbquests.null") : o.getMutableTitle().withStyle(o.getObjectType().getColor()), o == null ? Icon.EMPTY : o.getIcon());
 			object = o;
 			setSize(200, 14);
 		}
 
 		private void addObject(TooltipList list, QuestObjectBase o)
 		{
-			list.add(QuestObjectType.NAME_MAP.getDisplayName(o.getObjectType()).copy().withStyle(ChatFormatting.GRAY).append(": ").append(o.getTitle().withStyle(o.getObjectType().getColor())));
+			list.add(QuestObjectType.NAME_MAP.getDisplayName(o.getObjectType()).copy().withStyle(ChatFormatting.GRAY).append(": ").append(o.getMutableTitle().withStyle(o.getObjectType().getColor())));
 		}
 
 		@Override
@@ -73,7 +73,7 @@ public class GuiSelectQuestObject<T extends QuestObjectBase> extends GuiButtonLi
 
 					for (Reward reward : quest.rewards)
 					{
-						list.add(new TextComponent("  ").append(reward.getTitle().withStyle(QuestObjectType.REWARD.getColor())));
+						list.add(new TextComponent("  ").append(reward.getMutableTitle().withStyle(QuestObjectType.REWARD.getColor())));
 					}
 				}
 			}
@@ -93,7 +93,7 @@ public class GuiSelectQuestObject<T extends QuestObjectBase> extends GuiButtonLi
 
 					for (Reward reward : quest.rewards)
 					{
-						list.add(new TextComponent("  ").append(reward.getTitle().withStyle(QuestObjectType.REWARD.getColor())));
+						list.add(new TextComponent("  ").append(reward.getMutableTitle().withStyle(QuestObjectType.REWARD.getColor())));
 					}
 				}
 			}

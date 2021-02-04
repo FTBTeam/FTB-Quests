@@ -3,6 +3,10 @@ package com.feed_the_beast.ftbquests.gui.quests;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.gui.GuiRewardNotifications;
 import com.feed_the_beast.ftbquests.net.MessageClaimAllRewards;
+import com.feed_the_beast.ftbquests.quest.Chapter;
+import com.feed_the_beast.ftbquests.quest.ChapterGroup;
+import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.quest.reward.Reward;
 import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
 import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
 import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
@@ -25,19 +29,43 @@ public class ButtonModpack extends ButtonTab
 	{
 		super(panel, TextComponent.EMPTY, ClientQuestFile.INSTANCE.getIcon());
 		title = treeGui.file.getTitle();
-		unclaimedRewards = treeGui.file.self.hasUnclaimedRewards();
+		unclaimedRewards = hasUnclaimedRewards(treeGui.file);
 	}
 
 	@Override
 	public void onClicked(MouseButton button)
 	{
-		playClickSound();
-
-		if (ClientQuestFile.exists())
+		if (ClientQuestFile.exists() && unclaimedRewards)
 		{
+			playClickSound();
 			new GuiRewardNotifications().openGui();
 			new MessageClaimAllRewards().sendToServer();
 		}
+	}
+
+	private static boolean hasUnclaimedRewards(ClientQuestFile f)
+	{
+		for (ChapterGroup group : f.chapterGroups)
+		{
+			for (Chapter chapter : group.chapters)
+			{
+				for (Quest quest : chapter.quests)
+				{
+					if (f.self.isComplete(quest))
+					{
+						for (Reward reward : quest.rewards)
+						{
+							if (!reward.getExcludeFromClaimAll() && !f.self.isRewardClaimed(reward.id))
+							{
+								return true;
+							}
+						}
+					}
+				}
+			}
+		}
+
+		return false;
 	}
 
 	@Override

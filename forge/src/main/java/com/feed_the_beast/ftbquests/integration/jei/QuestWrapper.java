@@ -11,7 +11,7 @@ import com.feed_the_beast.mods.ftbguilibrary.icon.ItemIcon;
 import dev.latvian.mods.itemfilters.ItemFilters;
 import dev.latvian.mods.itemfilters.api.ItemFiltersAPI;
 import net.minecraft.nbt.StringTag;
-import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
@@ -28,7 +28,7 @@ import java.util.List;
 public class QuestWrapper //FIXME: implements IRecipeWrapper
 {
 	public final Quest quest;
-	public final MutableComponent name;
+	public final Component name;
 	public final List<List<ItemStack>> input;
 	public final List<List<ItemStack>> output;
 

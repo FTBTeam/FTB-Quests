@@ -6,7 +6,7 @@ import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.misc.SimpleToast;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.sounds.SoundManager;
-import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.sounds.SoundEvents;
 
@@ -23,13 +23,13 @@ public class ToastQuestObject extends SimpleToast
 	}
 
 	@Override
-	public MutableComponent getTitle()
+	public Component getTitle()
 	{
 		return new TranslatableComponent(object.getObjectType().translationKey + ".completed");
 	}
 
 	@Override
-	public MutableComponent getSubtitle()
+	public Component getSubtitle()
 	{
 		return object.getTitle();
 	}

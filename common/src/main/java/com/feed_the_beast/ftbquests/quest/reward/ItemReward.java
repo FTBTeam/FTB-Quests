@@ -193,7 +193,7 @@ public class ItemReward extends Reward
 	@Override
 	public boolean addTitleInMouseOverText()
 	{
-		return !getTitle().equals(getAltTitle());
+		return !getTitle().getString().equals(getAltTitle().getString());
 	}
 
 	@Nullable

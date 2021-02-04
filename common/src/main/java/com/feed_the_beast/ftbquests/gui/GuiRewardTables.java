@@ -5,6 +5,7 @@ import com.feed_the_beast.ftbquests.gui.quests.GuiQuests;
 import com.feed_the_beast.ftbquests.net.MessageCreateObject;
 import com.feed_the_beast.ftbquests.net.MessageEditObject;
 import com.feed_the_beast.ftbquests.quest.Chapter;
+import com.feed_the_beast.ftbquests.quest.ChapterGroup;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.loot.LootCrate;
 import com.feed_the_beast.ftbquests.quest.loot.RewardTable;
@@ -107,7 +108,7 @@ public class GuiRewardTables extends GuiButtonListBase
 							break;
 					}
 
-					title = table.getTitle().withStyle(ChatFormatting.YELLOW);
+					title = table.getMutableTitle().withStyle(ChatFormatting.YELLOW);
 				}
 				else
 				{
@@ -134,15 +135,18 @@ public class GuiRewardTables extends GuiButtonListBase
 
 			int usedIn = 0;
 
-			for (Chapter chapter : table.file.chapters)
+			for (ChapterGroup group : table.file.chapterGroups)
 			{
-				for (Quest quest : chapter.quests)
+				for (Chapter chapter : group.chapters)
 				{
-					for (Reward reward : quest.rewards)
+					for (Quest quest : chapter.quests)
 					{
-						if (reward instanceof RandomReward && ((RandomReward) reward).table == table)
+						for (Reward reward : quest.rewards)
 						{
-							usedIn++;
+							if (reward instanceof RandomReward && ((RandomReward) reward).table == table)
+							{
+								usedIn++;
+							}
 						}
 					}
 				}

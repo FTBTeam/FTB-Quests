@@ -46,7 +46,7 @@ public class PanelViewQuest extends Panel
 	public final GuiQuests gui;
 	public Quest quest = null;
 	public boolean hidePanel = false;
-	private MutableComponent title = (MutableComponent) TextComponent.EMPTY;
+	private Component title = TextComponent.EMPTY;
 	private Icon icon = Icon.EMPTY;
 	public Button buttonClose;
 	public Button buttonPin;

@@ -1,6 +1,8 @@
 package com.feed_the_beast.ftbquests.item;
 
 import com.feed_the_beast.ftbquests.FTBQuests;
+import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
+import com.feed_the_beast.mods.ftbguilibrary.icon.ItemIcon;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
@@ -54,5 +56,20 @@ public class CustomIconItem extends Item
 		{
 			tooltip.add(new TextComponent("-").withStyle(ChatFormatting.DARK_GRAY));
 		}
+	}
+
+	public static Icon getIcon(ItemStack stack)
+	{
+		if (stack.getItem() instanceof CustomIconItem)
+		{
+			if (stack.hasTag() && stack.getTag().contains("Icon"))
+			{
+				return Icon.getIcon(stack.getTag().getString("Icon"));
+			}
+
+			return Icon.getIcon("minecraft:textures/misc/unknown_pack.png");
+		}
+
+		return ItemIcon.getItemIcon(stack);
 	}
 }

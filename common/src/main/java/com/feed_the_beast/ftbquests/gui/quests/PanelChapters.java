@@ -1,6 +1,7 @@
 package com.feed_the_beast.ftbquests.gui.quests;
 
 import com.feed_the_beast.ftbquests.quest.Chapter;
+import com.feed_the_beast.ftbquests.quest.ChapterGroup;
 import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Color4I;
 import com.feed_the_beast.mods.ftbguilibrary.widget.ColorWidget;
@@ -34,11 +35,14 @@ public class PanelChapters extends Panel
 
 		boolean canEdit = treeGui.file.canEdit();
 
-		for (Chapter chapter : treeGui.file.chapters)
+		for (ChapterGroup group : treeGui.file.chapterGroups)
 		{
-			if ((chapter.group == null || chapter.group.invalid) && (canEdit || chapter.isVisible(treeGui.file.self)))
+			for (Chapter chapter : group.chapters)
 			{
-				add(new ButtonChapter(this, chapter));
+				if (canEdit || chapter.isVisible(treeGui.file.self))
+				{
+					add(new ButtonChapter(this, chapter));
+				}
 			}
 		}
 

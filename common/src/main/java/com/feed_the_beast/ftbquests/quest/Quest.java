@@ -26,6 +26,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -414,13 +415,16 @@ public final class Quest extends QuestObject implements Movable
 		data.checkAutoCompletion(this);
 		ObjectCompletedEvent.QUEST.invoker().act(new ObjectCompletedEvent.QuestEvent(data, this, onlineMembers, notifiedPlayers));
 
-		for (Chapter chapter : chapter.file.chapters)
+		for (ChapterGroup group : chapter.file.chapterGroups)
 		{
-			for (Quest quest : chapter.quests)
+			for (Chapter chapter : group.chapters)
 			{
-				if (quest.dependencies.contains(this))
+				for (Quest quest : chapter.quests)
 				{
-					data.checkAutoCompletion(quest);
+					if (quest.dependencies.contains(this))
+					{
+						data.checkAutoCompletion(quest);
+					}
 				}
 			}
 		}
@@ -475,7 +479,7 @@ public final class Quest extends QuestObject implements Movable
 	}
 
 	@Override
-	public MutableComponent getAltTitle()
+	public Component getAltTitle()
 	{
 		if (!tasks.isEmpty())
 		{
@@ -848,13 +852,16 @@ public final class Quest extends QuestObject implements Movable
 	{
 		List<QuestObject> list = new ArrayList<>();
 
-		for (Chapter c : chapter.file.chapters)
+		for (ChapterGroup group : chapter.file.chapterGroups)
 		{
-			for (Quest q : c.quests)
+			for (Chapter c : group.chapters)
 			{
-				if (q.dependencies.contains(this))
+				for (Quest q : c.quests)
 				{
-					list.add(q);
+					if (q.dependencies.contains(this))
+					{
+						list.add(q);
+					}
 				}
 			}
 		}
