@@ -20,7 +20,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -246,7 +246,7 @@ public abstract class Reward extends QuestObjectBase
 	}
 
 	@Override
-	public MutableComponent getAltTitle()
+	public Component getAltTitle()
 	{
 		return getType().getDisplayName();
 	}

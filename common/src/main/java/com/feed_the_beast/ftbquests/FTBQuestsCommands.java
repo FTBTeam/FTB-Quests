@@ -281,7 +281,7 @@ public class FTBQuestsCommands
 			}
 		}
 
-		Chapter chapter = new Chapter(ServerQuestFile.INSTANCE);
+		Chapter chapter = new Chapter(ServerQuestFile.INSTANCE, ServerQuestFile.INSTANCE.defaultChapterGroup);
 		chapter.id = chapter.file.newID();
 		chapter.onCreated();
 

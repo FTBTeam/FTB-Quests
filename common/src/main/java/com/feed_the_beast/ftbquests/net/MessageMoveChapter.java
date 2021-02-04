@@ -42,16 +42,14 @@ public class MessageMoveChapter extends MessageBase
 
 			if (chapter != null)
 			{
-				int index = chapter.file.chapters.indexOf(chapter);
+				int index = chapter.group.chapters.indexOf(chapter);
 
-				if (index != -1 && left ? (index > 0) : (index < ServerQuestFile.INSTANCE.chapters.size() - 1))
+				if (index != -1 && left ? (index > 0) : (index < chapter.group.chapters.size() - 1))
 				{
-					chapter.file.chapters.remove(index);
-					chapter.file.chapters.add(left ? index - 1 : index + 1, chapter);
-					chapter.file.refreshIDMap();
+					chapter.group.chapters.remove(index);
+					chapter.group.chapters.add(left ? index - 1 : index + 1, chapter);
 					chapter.file.clearCachedData();
 					new MessageMoveChapterResponse(id, left).sendToAll();
-					chapter.file.updateChapterIndices();
 					chapter.file.save();
 				}
 			}

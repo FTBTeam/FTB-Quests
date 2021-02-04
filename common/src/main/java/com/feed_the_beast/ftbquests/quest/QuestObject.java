@@ -5,7 +5,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.List;
@@ -91,7 +91,7 @@ public abstract class QuestObject extends QuestObjectBase
 	}
 
 	@Override
-	public abstract MutableComponent getAltTitle();
+	public abstract Component getAltTitle();
 
 	protected void verifyDependenciesInternal(int original, int depth)
 	{

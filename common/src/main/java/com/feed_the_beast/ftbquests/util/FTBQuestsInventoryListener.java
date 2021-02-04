@@ -1,6 +1,7 @@
 package com.feed_the_beast.ftbquests.util;
 
 import com.feed_the_beast.ftbquests.quest.Chapter;
+import com.feed_the_beast.ftbquests.quest.ChapterGroup;
 import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
@@ -38,17 +39,20 @@ public class FTBQuestsInventoryListener implements ContainerListener
 			return;
 		}
 
-		for (Chapter chapter : ServerQuestFile.INSTANCE.chapters)
+		for (ChapterGroup group : ServerQuestFile.INSTANCE.chapterGroups)
 		{
-			for (Quest quest : chapter.quests)
+			for (Chapter chapter : group.chapters)
 			{
-				if (hasSubmitTasks(quest) && data.canStartTasks(quest))
+				for (Quest quest : chapter.quests)
 				{
-					for (Task task : quest.tasks)
+					if (hasSubmitTasks(quest) && data.canStartTasks(quest))
 					{
-						if (task.id != sourceTask && task.submitItemsOnInventoryChange())
+						for (Task task : quest.tasks)
 						{
-							data.getTaskData(task).submitTask(player, item);
+							if (task.id != sourceTask && task.submitItemsOnInventoryChange())
+							{
+								data.getTaskData(task).submitTask(player, item);
+							}
 						}
 					}
 				}

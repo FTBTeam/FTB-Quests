@@ -16,7 +16,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -31,7 +30,7 @@ import java.util.List;
 public class LootCrateWrapper implements /*IRecipeWrapper, */ITooltipCallback<ItemStack>
 {
 	public final LootCrate crate;
-	public final MutableComponent name;
+	public final Component name;
 	public final ItemStack itemStack;
 	public final List<ItemStack> items;
 	public final List<WeightedReward> rewards;
@@ -119,7 +118,7 @@ public class LootCrateWrapper implements /*IRecipeWrapper, */ITooltipCallback<It
 	public void drawInfo(PoseStack matrixStack, Minecraft mc, int recipeWidth, int recipeHeight, int mouseX, int mouseY)
 	{
 		GuiHelper.drawItem(matrixStack, itemStack, 0, 0, 2, 2, true, null);
-		mc.font.drawShadow(matrixStack, crate.table.getTitle().withStyle(ChatFormatting.UNDERLINE), 36, 0, 0xFF222222);
+		mc.font.drawShadow(matrixStack, crate.table.getMutableTitle().withStyle(ChatFormatting.UNDERLINE), 36, 0, 0xFF222222);
 
 		int total = ClientQuestFile.INSTANCE.lootCrateNoDrop.passive;
 

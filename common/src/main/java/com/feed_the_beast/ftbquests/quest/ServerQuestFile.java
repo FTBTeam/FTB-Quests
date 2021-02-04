@@ -205,24 +205,15 @@ public class ServerQuestFile extends QuestFile
 		new MessageSyncQuests(id, this).sendTo(player);
 		player.inventoryMenu.addSlotListener(new FTBQuestsInventoryListener(player));
 
-		for (Chapter chapter : ServerQuestFile.INSTANCE.chapters)
+		for (ChapterGroup group : ServerQuestFile.INSTANCE.chapterGroups)
 		{
-			for (Quest quest : chapter.quests)
+			for (Chapter chapter : group.chapters)
 			{
-				data.checkAutoCompletion(quest);
+				for (Quest quest : chapter.quests)
+				{
+					data.checkAutoCompletion(quest);
+				}
 			}
 		}
-	}
-
-	@Override
-	public boolean updateChapterIndices()
-	{
-		if (super.updateChapterIndices())
-		{
-			save();
-			return true;
-		}
-
-		return false;
 	}
 }

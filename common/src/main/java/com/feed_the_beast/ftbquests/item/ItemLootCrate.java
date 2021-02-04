@@ -180,13 +180,13 @@ public class ItemLootCrate extends Item
 		{
 			if (crate.itemName.isEmpty())
 			{
-				tooltip.add(new TextComponent(""));
-				tooltip.add(crate.table.getTitle().withStyle(ChatFormatting.GRAY));
+				tooltip.add(TextComponent.EMPTY);
+				tooltip.add(crate.table.getMutableTitle().withStyle(ChatFormatting.GRAY));
 			}
 		}
 		else if (stack.hasTag() && stack.getTag().contains("type"))
 		{
-			tooltip.add(new TextComponent(""));
+			tooltip.add(TextComponent.EMPTY);
 			tooltip.add(new TextComponent(stack.getTag().getString("type")).withStyle(ChatFormatting.GRAY));
 		}
 	}

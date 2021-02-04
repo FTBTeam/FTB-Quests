@@ -28,7 +28,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -55,7 +55,7 @@ public final class RewardTable extends QuestObjectBase
 	{
 		file = f;
 		rewards = new ArrayList<>();
-		fakeQuest = new Quest(new Chapter(file));
+		fakeQuest = new Quest(new Chapter(file, f.defaultChapterGroup));
 		emptyWeight = 0;
 		lootSize = 1;
 		hideTooltip = false;
@@ -339,7 +339,7 @@ public final class RewardTable extends QuestObjectBase
 	}
 
 	@Override
-	public MutableComponent getAltTitle()
+	public Component getAltTitle()
 	{
 		if (rewards.size() == 1)
 		{

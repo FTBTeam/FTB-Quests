@@ -6,6 +6,7 @@ import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.item.ItemLootCrate;
 import com.feed_the_beast.ftbquests.net.MessageSubmitTask;
 import com.feed_the_beast.ftbquests.quest.Chapter;
+import com.feed_the_beast.ftbquests.quest.ChapterGroup;
 import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.loot.LootCrate;
@@ -175,7 +176,7 @@ public class FTBQuestsClientEventHandler
 		if (currentlyObserving != null)
 		{
 			int cx = mc.getWindow().getGuiScaledWidth() / 2;
-			MutableComponent cot = currentlyObserving.getTitle().copy().withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE);
+			MutableComponent cot = currentlyObserving.getMutableTitle().withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE);
 			int sw = mc.font.width(cot);
 			int bw = Math.max(sw, 100);
 			Color4I.DARK_GRAY.withAlpha(130).draw(matrixStack, cx - bw / 2 - 3, cy - 63, bw + 6, 29);
@@ -198,32 +199,35 @@ public class FTBQuestsClientEventHandler
 
 			if (data.pinnedQuests.contains(1))
 			{
-				for (Chapter chapter : file.chapters)
+				for (ChapterGroup group : file.chapterGroups)
 				{
-					for (Quest quest : chapter.quests)
+					for (Chapter chapter : group.chapters)
 					{
-						if (!data.isComplete(quest) && data.canStartTasks(quest))
+						for (Quest quest : chapter.quests)
 						{
-							if (first)
+							if (!data.isComplete(quest) && data.canStartTasks(quest))
 							{
-								first = false;
-							}
-							else
-							{
-								list.add(FormattedCharSequence.EMPTY);
-							}
-
-							/* FIXME
-							list.add(TextFormatting.BOLD + mc.fontRenderer.trimStringToWidth(quest.getTitle(), 160) + " " + TextFormatting.DARK_AQUA + data.getRelativeProgress(quest) + "%");
-
-							for (Task task : quest.tasks)
-							{
-								if (!data.isComplete(task))
+								if (first)
 								{
-									list.add(TextFormatting.GRAY + mc.fontRenderer.trimStringToWidth(task.getTitle(), 160) + " " + TextFormatting.GREEN + data.getTaskData(task).getProgressString() + "/" + task.getMaxProgressString());
+									first = false;
 								}
+								else
+								{
+									list.add(FormattedCharSequence.EMPTY);
+								}
+
+								/* FIXME
+								list.add(TextFormatting.BOLD + mc.fontRenderer.trimStringToWidth(quest.getTitle(), 160) + " " + TextFormatting.DARK_AQUA + data.getRelativeProgress(quest) + "%");
+
+								for (Task task : quest.tasks)
+								{
+									if (!data.isComplete(task))
+									{
+										list.add(TextFormatting.GRAY + mc.fontRenderer.trimStringToWidth(task.getTitle(), 160) + " " + TextFormatting.GREEN + data.getTaskData(task).getProgressString() + "/" + task.getMaxProgressString());
+									}
+								}
+								*/
 							}
-							*/
 						}
 					}
 				}
@@ -248,7 +252,7 @@ public class FTBQuestsClientEventHandler
 						if (data.isComplete(quest))
 						{
 							TextComponent component = new TextComponent("");
-							component.append(quest.getTitle().withStyle(ChatFormatting.BOLD, ChatFormatting.GREEN));
+							component.append(quest.getMutableTitle().withStyle(ChatFormatting.BOLD, ChatFormatting.GREEN));
 							component.append(new TextComponent(" 100%").withStyle(ChatFormatting.DARK_GREEN));
 							list.addAll(mc.font.split(component, 160));
 						}

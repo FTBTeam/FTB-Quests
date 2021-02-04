@@ -72,7 +72,7 @@ public class GuiQuests extends GuiBase
 		selectedObjects = new ArrayList<>();
 
 		chapterPanel = new PanelChapters(this);
-		selectedChapter = file.chapters.isEmpty() ? null : file.chapters.get(0);
+		selectedChapter = file.getAllChapters().isEmpty() ? null : file.getAllChapters().get(0);
 
 		questPanel = new PanelQuests(this);
 		otherButtonsBottomPanel = new PanelOtherButtonsBottom(this);
@@ -310,9 +310,9 @@ public class GuiQuests extends GuiBase
 
 		if (key.is(GLFW.GLFW_KEY_TAB))
 		{
-			if (selectedChapter != null && file.chapters.size() > 1)
+			if (selectedChapter != null && file.getVisibleChapters(file.self, true).size() > 1)
 			{
-				List<Chapter> visibleChapters = file.canEdit() ? file.chapters : file.getVisibleChapters(file.self, true);
+				List<Chapter> visibleChapters = file.getVisibleChapters(file.self, true);
 
 				if (!visibleChapters.isEmpty())
 				{
@@ -339,9 +339,9 @@ public class GuiQuests extends GuiBase
 		{
 			int i = key.keyCode - GLFW.GLFW_KEY_1;
 
-			if (i < file.chapters.size())
+			if (i < file.getVisibleChapters(file.self, true).size())
 			{
-				selectChapter(file.chapters.get(i));
+				selectChapter(file.getVisibleChapters(file.self, true).get(i));
 			}
 
 			return true;

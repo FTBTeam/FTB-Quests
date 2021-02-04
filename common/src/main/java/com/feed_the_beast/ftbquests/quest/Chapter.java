@@ -20,7 +20,6 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -31,26 +30,25 @@ import java.util.stream.Collectors;
 public final class Chapter extends QuestObject
 {
 	public final QuestFile file;
+	public final ChapterGroup group;
 	public String filename;
 	public final List<Quest> quests;
 	public final List<String> subtitle;
 	public boolean alwaysInvisible;
-	public Chapter group;
 	public String defaultQuestShape;
 	public final List<ChapterImage> images;
 	public int orderIndex;
 
-	public Chapter(QuestFile f)
+	public Chapter(QuestFile f, ChapterGroup g)
 	{
 		file = f;
+		group = g;
 		filename = "";
 		quests = new ArrayList<>();
 		subtitle = new ArrayList<>(0);
 		alwaysInvisible = false;
-		group = null;
 		defaultQuestShape = "";
 		images = new ArrayList<>();
-		orderIndex = 0;
 	}
 
 	@Override
@@ -81,7 +79,6 @@ public final class Chapter extends QuestObject
 	public void writeData(CompoundTag nbt)
 	{
 		nbt.putString("filename", filename);
-		nbt.putInt("order_index", orderIndex);
 		super.writeData(nbt);
 
 		if (!subtitle.isEmpty())
@@ -99,11 +96,6 @@ public final class Chapter extends QuestObject
 		if (alwaysInvisible)
 		{
 			nbt.putBoolean("always_invisible", true);
-		}
-
-		if (group != null && !group.invalid)
-		{
-			nbt.putInt("group", group.id);
 		}
 
 		nbt.putString("default_quest_shape", defaultQuestShape);
@@ -127,7 +119,6 @@ public final class Chapter extends QuestObject
 	public void readData(CompoundTag nbt)
 	{
 		filename = nbt.getString("filename");
-		orderIndex = nbt.getInt("order_index");
 		super.readData(nbt);
 		subtitle.clear();
 
@@ -139,7 +130,6 @@ public final class Chapter extends QuestObject
 		}
 
 		alwaysInvisible = nbt.getBoolean("always_invisible");
-		group = file.getChapter(nbt.getInt("group"));
 		defaultQuestShape = nbt.getString("default_quest_shape");
 
 		if (defaultQuestShape.equals("default"))
@@ -166,7 +156,6 @@ public final class Chapter extends QuestObject
 		buffer.writeUtf(filename, Short.MAX_VALUE);
 		NetUtils.writeStrings(buffer, subtitle);
 		buffer.writeBoolean(alwaysInvisible);
-		buffer.writeInt(group == null || group.invalid ? 0 : group.id);
 		buffer.writeUtf(defaultQuestShape, Short.MAX_VALUE);
 		NetUtils.write(buffer, images, (d, img) -> img.writeNetData(d));
 	}
@@ -178,7 +167,6 @@ public final class Chapter extends QuestObject
 		filename = buffer.readUtf(Short.MAX_VALUE);
 		NetUtils.readStrings(buffer, subtitle);
 		alwaysInvisible = buffer.readBoolean();
-		group = file.getChapter(buffer.readInt());
 		defaultQuestShape = buffer.readUtf(Short.MAX_VALUE);
 		NetUtils.read(buffer, images, d -> {
 			ChapterImage image = new ChapterImage(this);
@@ -189,7 +177,7 @@ public final class Chapter extends QuestObject
 
 	public int getIndex()
 	{
-		return file.chapters.indexOf(this);
+		return group.chapters.indexOf(this);
 	}
 
 	@Override
@@ -200,9 +188,7 @@ public final class Chapter extends QuestObject
 			return 100;
 		}
 
-		List<Chapter> children = getChildren();
-
-		if (quests.isEmpty() && children.isEmpty())
+		if (quests.isEmpty())
 		{
 			return 100;
 		}
@@ -217,12 +203,6 @@ public final class Chapter extends QuestObject
 				progress += data.getRelativeProgress(quest);
 				count++;
 			}
-		}
-
-		for (Chapter chapter : getChildren())
-		{
-			progress += chapter.getRelativeProgressFromChildren(data);
-			count++;
 		}
 
 		if (count <= 0)
@@ -247,13 +227,16 @@ public final class Chapter extends QuestObject
 			}
 		}
 
-		for (Chapter chapter : file.chapters)
+		for (ChapterGroup g : file.chapterGroups)
 		{
-			for (Quest quest : chapter.quests)
+			for (Chapter chapter : g.chapters)
 			{
-				if (quest.dependencies.contains(this))
+				for (Quest quest : chapter.quests)
 				{
-					data.checkAutoCompletion(quest);
+					if (quest.dependencies.contains(this))
+					{
+						data.checkAutoCompletion(quest);
+					}
 				}
 			}
 		}
@@ -271,11 +254,6 @@ public final class Chapter extends QuestObject
 		{
 			quest.changeProgress(data, type);
 		}
-
-		for (Chapter chapter : getChildren())
-		{
-			chapter.changeProgress(data, type);
-		}
 	}
 
 	@Override
@@ -286,11 +264,6 @@ public final class Chapter extends QuestObject
 		for (Quest quest : quests)
 		{
 			list.add(quest.getIcon());
-		}
-
-		for (Chapter child : getChildren())
-		{
-			list.add(child.getIcon());
 		}
 
 		return IconAnimation.fromList(list, false);
@@ -306,7 +279,7 @@ public final class Chapter extends QuestObject
 	public void deleteSelf()
 	{
 		super.deleteSelf();
-		file.chapters.remove(this);
+		group.chapters.remove(this);
 	}
 
 	@Override
@@ -335,7 +308,7 @@ public final class Chapter extends QuestObject
 
 			filename = s;
 
-			Set<String> existingNames = file.chapters.stream().map(ch -> ch.filename).collect(Collectors.toSet());
+			Set<String> existingNames = group.chapters.stream().map(ch -> ch.filename).collect(Collectors.toSet());
 			int i = 2;
 
 			while (existingNames.contains(filename))
@@ -345,7 +318,7 @@ public final class Chapter extends QuestObject
 			}
 		}
 
-		file.chapters.add(this);
+		group.chapters.add(this);
 
 		if (!quests.isEmpty())
 		{
@@ -371,10 +344,6 @@ public final class Chapter extends QuestObject
 		super.getConfig(config);
 		config.addList("subtitle", subtitle, new ConfigString(null), "");
 		config.addBool("always_invisible", alwaysInvisible, v -> alwaysInvisible = v, false);
-
-		//Predicate<QuestObjectBase> predicate = object -> object == null || (object instanceof Chapter && object != this && ((Chapter) object).group == null);
-		//config.add("group", new ConfigQuestObject<>(predicate), group, v -> group = v, null);
-
 		config.addEnum("default_quest_shape", defaultQuestShape.isEmpty() ? "default" : defaultQuestShape, v -> defaultQuestShape = v.equals("default") ? "" : v, QuestShape.idMapWithDefault);
 	}
 
@@ -394,14 +363,6 @@ public final class Chapter extends QuestObject
 			}
 		}
 
-		for (Chapter child : getChildren())
-		{
-			if (child.isVisible(data))
-			{
-				return true;
-			}
-		}
-
 		return false;
 	}
 
@@ -414,54 +375,6 @@ public final class Chapter extends QuestObject
 		{
 			quest.clearCachedData();
 		}
-
-		for (Chapter chapter : getChildren())
-		{
-			chapter.clearCachedData();
-		}
-	}
-
-	public boolean hasChildren()
-	{
-		if (group != null)
-		{
-			return false;
-		}
-
-		for (Chapter chapter : file.chapters)
-		{
-			if (chapter.group == this)
-			{
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	public List<Chapter> getChildren()
-	{
-		List<Chapter> list = Collections.emptyList();
-
-		if (group != null)
-		{
-			return list;
-		}
-
-		for (Chapter chapter : file.chapters)
-		{
-			if (chapter.group == this)
-			{
-				if (list.isEmpty())
-				{
-					list = new ArrayList<>(3);
-				}
-
-				list.add(chapter);
-			}
-		}
-
-		return list;
 	}
 
 	@Override
@@ -485,7 +398,7 @@ public final class Chapter extends QuestObject
 
 	public boolean hasGroup()
 	{
-		return group != null && !group.invalid;
+		return !group.isDefaultGroup();
 	}
 
 	public String getDefaultQuestShape()

@@ -2,6 +2,7 @@ package com.feed_the_beast.ftbquests.integration.gamestages;
 
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.Chapter;
+import com.feed_the_beast.ftbquests.quest.ChapterGroup;
 import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
@@ -64,9 +65,14 @@ public class GameStagesIntegration
 	{
 		PlayerData data = ServerQuestFile.INSTANCE == null || (player instanceof FakePlayer) ? null : ServerQuestFile.INSTANCE.getData(player);
 
-		if (data != null)
+		if (data == null)
 		{
-			for (Chapter chapter : ServerQuestFile.INSTANCE.chapters)
+			return;
+		}
+
+		for (ChapterGroup group : ServerQuestFile.INSTANCE.chapterGroups)
+		{
+			for (Chapter chapter : group.chapters)
 			{
 				for (Quest quest : chapter.quests)
 				{

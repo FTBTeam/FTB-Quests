@@ -17,7 +17,6 @@ import com.feed_the_beast.mods.ftbguilibrary.config.ConfigString;
 import com.feed_the_beast.mods.ftbguilibrary.config.Tristate;
 import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiEditConfig;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
-import com.feed_the_beast.mods.ftbguilibrary.icon.ItemIcon;
 import com.feed_the_beast.mods.ftbguilibrary.utils.Bits;
 import me.shedaniel.architectury.platform.Platform;
 import me.shedaniel.architectury.utils.Env;
@@ -30,6 +29,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.item.ItemStack;
@@ -79,7 +79,7 @@ public abstract class QuestObjectBase
 	private List<String> tags = new ArrayList<>(0);
 
 	private Icon cachedIcon = null;
-	private MutableComponent cachedTitle = null;
+	private Component cachedTitle = null;
 	private QuestObjectText cachedTextFile = null;
 	private Set<String> cachedTags = null;
 
@@ -335,7 +335,7 @@ public abstract class QuestObjectBase
 
 	public abstract Icon getAltIcon();
 
-	public abstract MutableComponent getAltTitle();
+	public abstract Component getAltTitle();
 
 	public final Icon getIcon()
 	{
@@ -346,21 +346,7 @@ public abstract class QuestObjectBase
 
 		if (!icon.isEmpty())
 		{
-			if (icon.getItem() instanceof CustomIconItem)
-			{
-				if (icon.hasTag() && icon.getTag().contains("Icon"))
-				{
-					cachedIcon = Icon.getIcon(icon.getTag().getString("Icon"));
-				}
-				else
-				{
-					cachedIcon = Icon.getIcon("minecraft:textures/misc/unknown_pack.png");
-				}
-			}
-			else
-			{
-				cachedIcon = ItemIcon.getItemIcon(icon);
-			}
+			cachedIcon = CustomIconItem.getIcon(icon);
 		}
 
 		if (cachedIcon == null || cachedIcon.isEmpty())
@@ -377,7 +363,7 @@ public abstract class QuestObjectBase
 	}
 
 	@Environment(EnvType.CLIENT)
-	public final MutableComponent getTitle()
+	public final Component getTitle()
 	{
 		if (cachedTitle != null)
 		{
@@ -412,6 +398,12 @@ public abstract class QuestObjectBase
 		}
 
 		return cachedTitle.copy();
+	}
+
+	@Environment(EnvType.CLIENT)
+	public final MutableComponent getMutableTitle()
+	{
+		return new TextComponent("").append(getTitle());
 	}
 
 	public final String getUnformattedTitle()

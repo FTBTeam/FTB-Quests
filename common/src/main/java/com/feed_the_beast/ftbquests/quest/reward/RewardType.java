@@ -12,7 +12,7 @@ import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import me.shedaniel.architectury.core.RegistryEntry;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 
@@ -62,7 +62,7 @@ public final class RewardType extends RegistryEntry<RewardType>
 	public final ResourceLocation id;
 	public final Provider provider;
 	private final Supplier<Icon> icon;
-	private MutableComponent displayName;
+	private Component displayName;
 	private GuiProvider guiProvider;
 	private boolean excludeFromListRewards;
 	public int intId;
@@ -114,13 +114,13 @@ public final class RewardType extends RegistryEntry<RewardType>
 		return id.getNamespace().equals(FTBQuests.MOD_ID) ? id.getPath() : id.toString();
 	}
 
-	public RewardType setDisplayName(MutableComponent name)
+	public RewardType setDisplayName(Component name)
 	{
 		displayName = name;
 		return this;
 	}
 
-	public MutableComponent getDisplayName()
+	public Component getDisplayName()
 	{
 		if (displayName == null)
 		{

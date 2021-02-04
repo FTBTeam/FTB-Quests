@@ -464,11 +464,14 @@ public class PlayerData
 
 	public boolean hasUnclaimedRewards()
 	{
-		for (Chapter chapter : file.chapters)
+		for (ChapterGroup group : file.chapterGroups)
 		{
-			if (hasUnclaimedRewards(chapter))
+			for (Chapter chapter : group.chapters)
 			{
-				return true;
+				if (hasUnclaimedRewards(chapter))
+				{
+					return true;
+				}
 			}
 		}
 
@@ -480,14 +483,6 @@ public class PlayerData
 		for (Quest quest : chapter.quests)
 		{
 			if (hasUnclaimedRewards(quest))
-			{
-				return true;
-			}
-		}
-
-		for (Chapter chapter1 : chapter.getChildren())
-		{
-			if (hasUnclaimedRewards(chapter1))
 			{
 				return true;
 			}
