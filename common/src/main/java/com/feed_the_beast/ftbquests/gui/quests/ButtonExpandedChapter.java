@@ -4,9 +4,9 @@ import com.feed_the_beast.ftbquests.client.FTBQuestsClient;
 import com.feed_the_beast.ftbquests.net.MessageMoveChapter;
 import com.feed_the_beast.ftbquests.quest.Chapter;
 import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
-import com.feed_the_beast.ftbquests.util.TextComponentParser;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Color4I;
 import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
+import com.feed_the_beast.mods.ftbguilibrary.utils.TextComponentParser;
 import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
 import com.feed_the_beast.mods.ftbguilibrary.widget.ContextMenuItem;
 import com.feed_the_beast.mods.ftbguilibrary.widget.GuiHelper;
@@ -53,7 +53,7 @@ public class ButtonExpandedChapter extends SimpleTextButton
 
 		for (String v : chapter.subtitle)
 		{
-			description.add(new TextComponent("").append(TextComponentParser.parse(v, FTBQuestsClient.I18N)).withStyle(ChatFormatting.GRAY));
+			description.add(new TextComponent("").append(TextComponentParser.parse(v, FTBQuestsClient.DEFAULT_STRING_TO_COMPONENT)).withStyle(ChatFormatting.GRAY));
 		}
 	}
 

@@ -1,6 +1,6 @@
 package com.feed_the_beast.ftbquests.gui.quests;
 
-import com.feed_the_beast.ftbquests.gui.ComponentTextBox;
+import com.feed_the_beast.mods.ftbguilibrary.widget.ComponentTextField;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -9,7 +9,7 @@ import net.minecraft.network.chat.Component;
 /**
  * @author LatvianModder
  */
-public class TextFieldDisabledButton extends ComponentTextBox
+public class TextFieldDisabledButton extends ComponentTextField
 {
 	public TextFieldDisabledButton(Panel panel, Component text)
 	{

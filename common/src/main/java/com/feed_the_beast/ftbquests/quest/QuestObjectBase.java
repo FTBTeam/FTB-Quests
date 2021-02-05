@@ -10,13 +10,13 @@ import com.feed_the_beast.ftbquests.net.MessageEditObject;
 import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
 import com.feed_the_beast.ftbquests.util.NBTUtils;
 import com.feed_the_beast.ftbquests.util.NetUtils;
-import com.feed_the_beast.ftbquests.util.TextComponentParser;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigString;
 import com.feed_the_beast.mods.ftbguilibrary.config.Tristate;
 import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiEditConfig;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.utils.Bits;
+import com.feed_the_beast.mods.ftbguilibrary.utils.TextComponentParser;
 import me.shedaniel.architectury.utils.Env;
 import me.shedaniel.architectury.utils.NbtType;
 import net.fabricmc.api.EnvType;
@@ -258,7 +258,7 @@ public abstract class QuestObjectBase
 
 		if (!s.isEmpty())
 		{
-			cachedTitle = TextComponentParser.parse(s, FTBQuestsClient.I18N);
+			cachedTitle = TextComponentParser.parse(s, FTBQuestsClient.DEFAULT_STRING_TO_COMPONENT);
 		}
 		else
 		{
