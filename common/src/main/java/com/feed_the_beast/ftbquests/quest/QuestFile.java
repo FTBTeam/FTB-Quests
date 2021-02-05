@@ -1154,15 +1154,17 @@ public abstract class QuestFile extends QuestObject
 	public abstract void deleteObject(long id);
 
 	@Override
-	public Icon getAltIcon()
-	{
-		return ThemeProperties.MODPACK_ICON.get(this);
-	}
-
-	@Override
+	@Environment(EnvType.CLIENT)
 	public MutableComponent getAltTitle()
 	{
 		return new TranslatableComponent("ftbquests.file");
+	}
+
+	@Override
+	@Environment(EnvType.CLIENT)
+	public Icon getAltIcon()
+	{
+		return ThemeProperties.MODPACK_ICON.get(this);
 	}
 
 	@Override

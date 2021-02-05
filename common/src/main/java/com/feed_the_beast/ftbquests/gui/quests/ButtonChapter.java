@@ -70,12 +70,10 @@ public class ButtonChapter extends ButtonTab
 		{
 			matrixStack.pushPose();
 			matrixStack.translate(0, 0, 450);
-			ThemeProperties.CLOSE_ICON.get().draw(matrixStack, x + w - 10, y + 2, 8, 8);
+			ThemeProperties.CLOSE_ICON.get().draw(matrixStack, x + w - 8, y + 1, 8, 8);
 			matrixStack.popPose();
-			return;
 		}
-
-		if (treeGui.file.self.hasUnclaimedRewards(chapter))
+		else if (treeGui.file.self.hasUnclaimedRewards(chapter))
 		{
 			matrixStack.pushPose();
 			matrixStack.translate(0, 0, 450);

@@ -177,15 +177,17 @@ public class RandomReward extends Reward
 	}
 
 	@Override
-	public Icon getAltIcon()
-	{
-		return getTable() == null ? super.getAltIcon() : getTable().getIcon();
-	}
-
-	@Override
+	@Environment(EnvType.CLIENT)
 	public Component getAltTitle()
 	{
 		return getTable() == null ? super.getAltTitle() : getTable().useTitle ? getTable().getTitle() : super.getAltTitle();
+	}
+
+	@Override
+	@Environment(EnvType.CLIENT)
+	public Icon getAltIcon()
+	{
+		return getTable() == null ? super.getAltIcon() : getTable().getIcon();
 	}
 
 	@Override
@@ -206,6 +208,7 @@ public class RandomReward extends Reward
 
 	@Override
 	@Nullable
+	@Environment(EnvType.CLIENT)
 	public Object getIngredient()
 	{
 		return getTable() != null && getTable().lootCrate != null ? getTable().lootCrate.createStack() : null;

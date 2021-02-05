@@ -11,6 +11,8 @@ import com.feed_the_beast.mods.ftbguilibrary.utils.StringUtils;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 /**
  * @author LatvianModder
@@ -32,6 +34,7 @@ public class ForgeEnergyTask extends EnergyTask
 	}
 
 	@Override
+	@OnlyIn(Dist.CLIENT)
 	public MutableComponent getAltTitle()
 	{
 		return new TranslatableComponent("ftbquests.task.ftbquests.forge_energy.text", StringUtils.formatDouble(value, true));

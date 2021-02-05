@@ -240,12 +240,14 @@ public abstract class Reward extends QuestObjectBase
 	}
 
 	@Override
+	@Environment(EnvType.CLIENT)
 	public Icon getAltIcon()
 	{
 		return getType().getIcon();
 	}
 
 	@Override
+	@Environment(EnvType.CLIENT)
 	public Component getAltTitle()
 	{
 		return getType().getDisplayName();
@@ -263,6 +265,7 @@ public abstract class Reward extends QuestObjectBase
 	{
 	}
 
+	@Environment(EnvType.CLIENT)
 	public boolean addTitleInMouseOverText()
 	{
 		return true;
@@ -284,6 +287,7 @@ public abstract class Reward extends QuestObjectBase
 	}
 
 	@Nullable
+	@Environment(EnvType.CLIENT)
 	public Object getIngredient()
 	{
 		return getIcon().getIngredient();
@@ -295,6 +299,7 @@ public abstract class Reward extends QuestObjectBase
 		return FTBQuestsJEIHelper.QUESTS;
 	}
 
+	@Environment(EnvType.CLIENT)
 	public String getButtonText()
 	{
 		return "";

@@ -28,7 +28,6 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
@@ -482,6 +481,19 @@ public final class Quest extends QuestObject implements Movable
 	}
 
 	@Override
+	@Environment(EnvType.CLIENT)
+	public Component getAltTitle()
+	{
+		if (!tasks.isEmpty())
+		{
+			return tasks.get(0).getTitle();
+		}
+
+		return new TranslatableComponent("ftbquests.unnamed");
+	}
+
+	@Override
+	@Environment(EnvType.CLIENT)
 	public Icon getAltIcon()
 	{
 		List<Icon> list = new ArrayList<>();
@@ -492,17 +504,6 @@ public final class Quest extends QuestObject implements Movable
 		}
 
 		return IconAnimation.fromList(list, false);
-	}
-
-	@Override
-	public Component getAltTitle()
-	{
-		if (!tasks.isEmpty())
-		{
-			return tasks.get(0).getTitle();
-		}
-
-		return new TranslatableComponent("ftbquests.unnamed");
 	}
 
 	@Override
@@ -640,24 +641,6 @@ public final class Quest extends QuestObject implements Movable
 		return false;
 	}
 
-	public Task getTask(int index)
-	{
-		if (tasks.isEmpty())
-		{
-			throw new IllegalStateException("Quest has no tasks!");
-		}
-		else if (index <= 0)
-		{
-			return tasks.get(0);
-		}
-		else if (index >= tasks.size())
-		{
-			return tasks.get(tasks.size() - 1);
-		}
-
-		return tasks.get(index);
-	}
-
 	@Override
 	public void clearCachedData()
 	{
@@ -684,16 +667,8 @@ public final class Quest extends QuestObject implements Movable
 			return cachedDescription;
 		}
 
-		MutableComponent textDesc = loadText().getComponent("description");
-
-		if (textDesc != TextComponent.EMPTY)
-		{
-			cachedDescription = textDesc;
-			return cachedDescription;
-		}
-
-		String key = String.format("quests.%016x.description", id);
-		String s = I18n.exists(key) ? I18n.get(key) : subtitle;
+		String key = String.format("quests.%s.subtitle", getCodeString());
+		String s = subtitle.isEmpty() ? I18n.exists(key) ? I18n.get(key) : "" : subtitle;
 		cachedDescription = TextComponentParser.parse(s, FTBQuestsClient.I18N);
 
 		return cachedDescription;
@@ -707,23 +682,14 @@ public final class Quest extends QuestObject implements Movable
 			return cachedText;
 		}
 
-		cachedText = loadText().getComponentArray("text");
+		String key = String.format("quests.%s.description", getCodeString());
+		String[] desc = description.isEmpty() ? I18n.exists(key) ? I18n.get(key).split("\n") : new String[0] : description.toArray(new String[0]);
 
-		if (cachedText.length > 0)
-		{
-			return cachedText;
-		}
-
-		if (description.isEmpty())
-		{
-			return new Component[0];
-		}
-
-		cachedText = new Component[description.size()];
+		cachedText = new Component[desc.length];
 
 		for (int i = 0; i < cachedText.length; i++)
 		{
-			cachedText[i] = TextComponentParser.parse(description.get(i), FTBQuestsClient.I18N);
+			cachedText[i] = TextComponentParser.parse(desc[i], FTBQuestsClient.I18N);
 		}
 
 		return cachedText;

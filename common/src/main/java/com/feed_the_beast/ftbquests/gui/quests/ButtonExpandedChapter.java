@@ -143,7 +143,14 @@ public class ButtonExpandedChapter extends SimpleTextButton
 
 		int w2 = 20;
 
-		if (treeGui.file.self.hasUnclaimedRewards(chapter))
+		if (chapter.quests.isEmpty())
+		{
+			matrixStack.pushPose();
+			matrixStack.translate(0, 0, 450);
+			ThemeProperties.CLOSE_ICON.get().draw(matrixStack, x + w2 - 8, y + 2, 8, 8);
+			matrixStack.popPose();
+		}
+		else if (treeGui.file.self.hasUnclaimedRewards(chapter))
 		{
 			matrixStack.pushPose();
 			matrixStack.translate(0, 0, 450);

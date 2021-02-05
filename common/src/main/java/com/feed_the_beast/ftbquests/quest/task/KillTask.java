@@ -100,12 +100,14 @@ public class KillTask extends Task
 	}
 
 	@Override
+	@Environment(EnvType.CLIENT)
 	public MutableComponent getAltTitle()
 	{
 		return new TranslatableComponent("ftbquests.task.ftbquests.kill.title", getMaxProgressString(), new TranslatableComponent("entity." + entity.getNamespace() + "." + entity.getPath()));
 	}
 
 	@Override
+	@Environment(EnvType.CLIENT)
 	public Icon getAltIcon()
 	{
 		SpawnEggItem item = SpawnEggItem.byId(Registry.ENTITY_TYPE.get(entity));

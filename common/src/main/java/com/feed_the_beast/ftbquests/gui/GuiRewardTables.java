@@ -69,7 +69,7 @@ public class GuiRewardTables extends GuiButtonListBase
 				if (table.lootCrate == null)
 				{
 					table.lootCrate = new LootCrate(table);
-					Matcher matcher = Pattern.compile("[^a-z0-9_]").matcher(table.getUnformattedTitle().toLowerCase());
+					Matcher matcher = Pattern.compile("[^a-z0-9_]").matcher(table.getTitle().getString().toLowerCase());
 					Matcher matcher1 = Pattern.compile("_{2,}").matcher(matcher.replaceAll("_"));
 					table.lootCrate.stringID = matcher1.replaceAll("_");
 

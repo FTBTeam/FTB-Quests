@@ -73,6 +73,7 @@ public class DimensionTask extends Task
 	}
 
 	@Override
+	@Environment(EnvType.CLIENT)
 	public MutableComponent getAltTitle()
 	{
 		return new TranslatableComponent("ftbquests.task.ftbquests.dimension").append(": ").append(new TextComponent(dimension.location().toString()).withStyle(ChatFormatting.DARK_GREEN));

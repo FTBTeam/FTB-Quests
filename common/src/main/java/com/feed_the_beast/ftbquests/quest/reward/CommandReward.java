@@ -112,6 +112,7 @@ public class CommandReward extends Reward
 	}
 
 	@Override
+	@Environment(EnvType.CLIENT)
 	public MutableComponent getAltTitle()
 	{
 		return new TranslatableComponent("ftbquests.reward.ftbquests.command").append(": ").append(new TextComponent(command).withStyle(ChatFormatting.RED));

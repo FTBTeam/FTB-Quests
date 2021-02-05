@@ -94,6 +94,7 @@ public class XPTask extends Task implements ISingleLongValueTask
 	}
 
 	@Override
+	@Environment(EnvType.CLIENT)
 	public MutableComponent getAltTitle()
 	{
 		return new TranslatableComponent("ftbquests.reward.ftbquests.xp_levels").append(": ").append(new TextComponent(getMaxProgressString()).withStyle(ChatFormatting.RED));

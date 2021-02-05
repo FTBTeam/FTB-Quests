@@ -167,16 +167,18 @@ public class ForgeFluidTask extends Task
 	}
 
 	@Override
+	@OnlyIn(Dist.CLIENT)
+	public MutableComponent getAltTitle()
+	{
+		return new TextComponent(getVolumeString(amount) + " of ").append(createFluidStack().getName());
+	}
+
+	@Override
+	@OnlyIn(Dist.CLIENT)
 	public Icon getAltIcon()
 	{
 		FluidStack stack = createFluidStack();
 		return Icon.getIcon(Optional.ofNullable(FluidStackHooks.getStillTexture(stack)).map(TextureAtlasSprite::getName).map(ResourceLocation::toString).orElse("missingno"));
-	}
-
-	@Override
-	public MutableComponent getAltTitle()
-	{
-		return new TextComponent(getVolumeString(amount) + " of ").append(createFluidStack().getName());
 	}
 
 	@Override
@@ -198,6 +200,7 @@ public class ForgeFluidTask extends Task
 
 	@Override
 	@Nullable
+	@OnlyIn(Dist.CLIENT)
 	public Object getIngredient()
 	{
 		return createFluidStack();
