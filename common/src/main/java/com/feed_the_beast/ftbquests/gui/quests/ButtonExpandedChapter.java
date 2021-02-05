@@ -4,6 +4,7 @@ import com.feed_the_beast.ftbquests.client.FTBQuestsClient;
 import com.feed_the_beast.ftbquests.net.MessageMoveChapter;
 import com.feed_the_beast.ftbquests.quest.Chapter;
 import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
+import com.feed_the_beast.ftbquests.util.TextComponentParser;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Color4I;
 import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
 import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
@@ -15,7 +16,7 @@ import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
 import com.feed_the_beast.mods.ftbguilibrary.widget.WidgetType;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 
@@ -30,7 +31,7 @@ public class ButtonExpandedChapter extends SimpleTextButton
 {
 	public final GuiQuests treeGui;
 	public final Chapter chapter;
-	public List<MutableComponent> description;
+	public List<Component> description;
 
 	public ButtonExpandedChapter(Panel panel, Chapter c)
 	{
@@ -52,7 +53,7 @@ public class ButtonExpandedChapter extends SimpleTextButton
 
 		for (String v : chapter.subtitle)
 		{
-			description.add(FTBQuestsClient.addI18nAndColors(v).withStyle(ChatFormatting.GRAY));
+			description.add(new TextComponent("").append(TextComponentParser.parse(v, FTBQuestsClient.I18N)).withStyle(ChatFormatting.GRAY));
 		}
 	}
 
@@ -94,7 +95,7 @@ public class ButtonExpandedChapter extends SimpleTextButton
 	@Override
 	public void addMouseOverText(TooltipList list)
 	{
-		for (MutableComponent s : description)
+		for (Component s : description)
 		{
 			list.add(s);
 		}

@@ -1378,22 +1378,22 @@ public abstract class QuestFile extends QuestObject
 		return list;
 	}
 
-	public List<Chapter> getVisibleChapters(PlayerData data, boolean excludeEmpty)
+	public List<Chapter> getVisibleChapters(PlayerData data)
 	{
 		List<Chapter> list = new ArrayList<>();
 
 		for (ChapterGroup group : chapterGroups)
 		{
-			list.addAll(group.getVisibleChapters(data, excludeEmpty));
+			list.addAll(group.getVisibleChapters(data));
 		}
 
 		return list;
 	}
 
 	@Nullable
-	public Chapter getFirstVisibleChapter(PlayerData data, boolean excludeEmpty)
+	public Chapter getFirstVisibleChapter(PlayerData data)
 	{
-		List<Chapter> chapters = getVisibleChapters(data, excludeEmpty);
+		List<Chapter> chapters = getVisibleChapters(data);
 
 		if (!chapters.isEmpty())
 		{

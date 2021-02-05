@@ -11,6 +11,7 @@ import com.feed_the_beast.ftbquests.quest.reward.Reward;
 import com.feed_the_beast.ftbquests.quest.task.Task;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
 import com.feed_the_beast.ftbquests.util.NetUtils;
+import com.feed_the_beast.ftbquests.util.TextComponentParser;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigString;
 import com.feed_the_beast.mods.ftbguilibrary.config.Tristate;
@@ -60,8 +61,8 @@ public final class Quest extends QuestObject implements Movable
 	public boolean optional;
 	public int minWidth;
 
-	private MutableComponent cachedDescription = null;
-	private MutableComponent[] cachedText = null;
+	private Component cachedDescription = null;
+	private Component[] cachedText = null;
 
 	public Quest(Chapter c)
 	{
@@ -676,7 +677,7 @@ public final class Quest extends QuestObject implements Movable
 	}
 
 	@Environment(EnvType.CLIENT)
-	public MutableComponent getSubtitle()
+	public Component getSubtitle()
 	{
 		if (cachedDescription != null)
 		{
@@ -691,23 +692,15 @@ public final class Quest extends QuestObject implements Movable
 			return cachedDescription;
 		}
 
-		String key = String.format("quests.%08x.description", id);
-		MutableComponent t = FTBQuestsClient.addI18nAndColors(I18n.get(key));
-
-		if (t == TextComponent.EMPTY || key.equals(t.getString()))
-		{
-			cachedDescription = FTBQuestsClient.addI18nAndColors(subtitle);
-		}
-		else
-		{
-			cachedDescription = t;
-		}
+		String key = String.format("quests.%016x.description", id);
+		String s = I18n.exists(key) ? I18n.get(key) : subtitle;
+		cachedDescription = TextComponentParser.parse(s, FTBQuestsClient.I18N);
 
 		return cachedDescription;
 	}
 
 	@Environment(EnvType.CLIENT)
-	public MutableComponent[] getDescription()
+	public Component[] getDescription()
 	{
 		if (cachedText != null)
 		{
@@ -723,17 +716,36 @@ public final class Quest extends QuestObject implements Movable
 
 		if (description.isEmpty())
 		{
-			return new MutableComponent[0];
+			return new Component[0];
 		}
 
-		cachedText = new MutableComponent[description.size()];
+		cachedText = new Component[description.size()];
 
 		for (int i = 0; i < cachedText.length; i++)
 		{
-			cachedText[i] = FTBQuestsClient.addI18nAndColors(description.get(i));
+			cachedText[i] = TextComponentParser.parse(description.get(i), FTBQuestsClient.I18N);
 		}
 
 		return cachedText;
+	}
+
+	@Environment(EnvType.CLIENT)
+	public Component getJoinedDescription()
+	{
+		TextComponent c = new TextComponent("");
+		Component[] d = getDescription();
+
+		for (int i = 0; i < d.length; i++)
+		{
+			if (i > 0)
+			{
+				c.append("\n");
+			}
+
+			c.append(d[i]);
+		}
+
+		return c;
 	}
 
 	public boolean hasDependency(QuestObject object)

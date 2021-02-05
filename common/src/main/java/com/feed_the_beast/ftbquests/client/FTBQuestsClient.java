@@ -23,7 +23,6 @@ import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiEditConfig;
 import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiEditConfigFromString;
 import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiSelectItemStack;
 import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
-import com.feed_the_beast.mods.ftbguilibrary.utils.StringUtils;
 import com.mojang.blaze3d.platform.InputConstants;
 import me.shedaniel.architectury.event.events.client.ClientLifecycleEvent;
 import me.shedaniel.architectury.registry.KeyBindings;
@@ -33,7 +32,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.StringTag;
-import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.world.InteractionHand;
@@ -43,48 +42,12 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.StructureBlockEntity;
 import net.minecraft.world.phys.BlockHitResult;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.function.Function;
 
 public class FTBQuestsClient extends FTBQuestsCommon
 {
-	private static final Pattern I18N_PATTERN = Pattern.compile("\\{([a-zA-Z0-9\\._\\-]*?)\\}", Pattern.MULTILINE);
+	public static final Function<String, Component> I18N = s -> new TextComponent(I18n.get(s));
 	public static KeyMapping KEY_QUESTS;
-
-	public static MutableComponent addI18nAndColors(String text)
-	{
-		if (text.isEmpty())
-		{
-			return (TextComponent) TextComponent.EMPTY;
-		}
-
-		Matcher i18nMatcher = I18N_PATTERN.matcher(text);
-
-		while (i18nMatcher.find())
-		{
-			i18nMatcher.reset();
-
-			StringBuffer sb = new StringBuffer(text.length());
-
-			while (i18nMatcher.find())
-			{
-				i18nMatcher.appendReplacement(sb, I18n.get(i18nMatcher.group(1)));
-			}
-
-			i18nMatcher.appendTail(sb);
-			text = sb.toString();
-			i18nMatcher = I18N_PATTERN.matcher(text);
-		}
-
-		text = StringUtils.addFormatting(text.trim());
-
-		if (StringUtils.unformatted(text).isEmpty())
-		{
-			return (TextComponent) TextComponent.EMPTY;
-		}
-
-		return new TextComponent(text);
-	}
 
 	@Override
 	public void init()

@@ -1,6 +1,7 @@
 package com.feed_the_beast.ftbquests.gui.quests;
 
 import com.feed_the_beast.ftbquests.FTBQuests;
+import com.feed_the_beast.ftbquests.gui.ComponentTextBox;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
@@ -19,24 +20,20 @@ import com.feed_the_beast.mods.ftbguilibrary.widget.ColorWidget;
 import com.feed_the_beast.mods.ftbguilibrary.widget.ContextMenuItem;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
 import com.feed_the_beast.mods.ftbguilibrary.widget.SimpleButton;
-import com.feed_the_beast.mods.ftbguilibrary.widget.TextField;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Widget;
 import com.feed_the_beast.mods.ftbguilibrary.widget.WidgetLayout;
 import com.feed_the_beast.mods.ftbguilibrary.widget.WidgetVerticalSpace;
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.resources.language.I18n;
+import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * @author LatvianModder
@@ -104,7 +101,7 @@ public class PanelViewQuest extends Panel
 
 		if (!canEdit && panelTasks.widgets.isEmpty())
 		{
-			TextFieldDisabledButton noTasks = new TextFieldDisabledButton(panelTasks, I18n.get("ftbquests.gui.no_tasks"));
+			TextFieldDisabledButton noTasks = new TextFieldDisabledButton(panelTasks, new TranslatableComponent("ftbquests.gui.no_tasks"));
 			noTasks.setSize(noTasks.width + 8, bsize);
 			noTasks.setColor(ThemeProperties.DISABLED_TEXT_COLOR.get(quest));
 			panelTasks.add(noTasks);
@@ -122,7 +119,7 @@ public class PanelViewQuest extends Panel
 
 		if (!canEdit && panelRewards.widgets.isEmpty())
 		{
-			TextFieldDisabledButton noRewards = new TextFieldDisabledButton(panelRewards, I18n.get("ftbquests.gui.no_rewards"));
+			TextFieldDisabledButton noRewards = new TextFieldDisabledButton(panelRewards, new TranslatableComponent("ftbquests.gui.no_rewards"));
 			noRewards.setSize(noRewards.width + 8, bsize);
 			noRewards.setColor(ThemeProperties.DISABLED_TEXT_COLOR.get(quest));
 			panelRewards.add(noRewards);
@@ -193,10 +190,10 @@ public class PanelViewQuest extends Panel
 		buttonOpenDependencies.setPosAndSize(0, 17, 13, 13);
 		buttonOpenDependants.setPosAndSize(w - 13, 17, 13, 13);
 
-		TextField textFieldTasks = new TextField(panelContent)
+		ComponentTextBox textFieldTasks = new ComponentTextBox(panelContent)
 		{
 			@Override
-			public TextField resize(Theme theme)
+			public ComponentTextBox resize(Theme theme)
 			{
 				return this;
 			}
@@ -204,14 +201,14 @@ public class PanelViewQuest extends Panel
 
 		textFieldTasks.setPosAndSize(2, 2, w2 - 3, 13);
 		textFieldTasks.addFlags(Theme.CENTERED | Theme.CENTERED_V);
-		textFieldTasks.setText(I18n.get("ftbquests.tasks"));
+		textFieldTasks.setText(new TranslatableComponent("ftbquests.tasks"));
 		textFieldTasks.setColor(ThemeProperties.TASKS_TEXT_COLOR.get(quest));
 		panelContent.add(textFieldTasks);
 
-		TextField textFieldRewards = new TextField(panelContent)
+		ComponentTextBox textFieldRewards = new ComponentTextBox(panelContent)
 		{
 			@Override
-			public TextField resize(Theme theme)
+			public ComponentTextBox resize(Theme theme)
 			{
 				return this;
 			}
@@ -219,7 +216,7 @@ public class PanelViewQuest extends Panel
 
 		textFieldRewards.setPosAndSize(w2 + 2, 2, w2 - 3, 13);
 		textFieldRewards.addFlags(Theme.CENTERED | Theme.CENTERED_V);
-		textFieldRewards.setText(I18n.get("ftbquests.rewards"));
+		textFieldRewards.setText(new TranslatableComponent("ftbquests.rewards"));
 		textFieldRewards.setColor(ThemeProperties.REWARDS_TEXT_COLOR.get(quest));
 		panelContent.add(textFieldRewards);
 
@@ -252,12 +249,11 @@ public class PanelViewQuest extends Panel
 
 		panelText.setPosAndSize(3, 16 + h + 12, panelContent.width - 6, 0);
 
-		MutableComponent desc = quest.getSubtitle();
+		Component desc = quest.getSubtitle();
 
 		if (desc != TextComponent.EMPTY)
 		{
-			//FIXME: TextFormatting.ITALIC + TextFormatting.GRAY
-			panelText.add(new TextField(panelText).addFlags(Theme.CENTERED).setMaxWidth(panelText.width).setSpacing(9).setText(desc.getString()));
+			panelText.add(new ComponentTextBox(panelText).addFlags(Theme.CENTERED).setMaxWidth(panelText.width).setSpacing(9).setText(new TextComponent("").append(desc).withStyle(ChatFormatting.ITALIC, ChatFormatting.GRAY)));
 		}
 
 		boolean showText = !quest.hideTextUntilComplete.get(false) || gui.file.self != null && gui.file.self.isComplete(quest);
@@ -269,8 +265,7 @@ public class PanelViewQuest extends Panel
 				panelText.add(new WidgetVerticalSpace(panelText, 7));
 			}
 
-			// FIXME panelText.add(new TextField(panelText).setMaxWidth(panelText.width).setSpacing(9).setText(StringUtils.addFormatting(String.join("\n", quest.getDescription()))));
-			panelText.add(new TextField(panelText).setMaxWidth(panelText.width).setSpacing(9).setText(Arrays.stream(quest.getDescription()).map(Component::getString).collect(Collectors.joining("\n"))));
+			panelText.add(new ComponentTextBox(panelText).setMaxWidth(panelText.width).setSpacing(9).setText(quest.getJoinedDescription()));
 		}
 
 		if (showText && !quest.guidePage.isEmpty())

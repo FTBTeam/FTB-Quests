@@ -12,7 +12,6 @@ import com.feed_the_beast.ftbquests.quest.reward.Reward;
 import com.feed_the_beast.ftbquests.quest.reward.RewardType;
 import com.feed_the_beast.ftbquests.quest.reward.RewardTypes;
 import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
-import com.feed_the_beast.ftbquests.texteditor.TextEditorFrame;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Color4I;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
@@ -30,13 +29,11 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nullable;
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -259,10 +256,7 @@ public class ButtonQuest extends Button
 					}
 				});
 
-				if (!GraphicsEnvironment.isHeadless())
-				{
-					contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.gui.edit_text"), GuiIcons.INFO, () -> TextEditorFrame.open(quest)));
-				}
+				// contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.gui.edit_text"), GuiIcons.INFO, () -> TextEditorFrame.open(quest)));
 
 				contextMenu.add(ContextMenuItem.SEPARATOR);
 				GuiQuests.addObjectMenuItems(contextMenu, getGui(), quest);
@@ -370,11 +364,11 @@ public class ButtonQuest extends Button
 
 		list.add(title);
 
-		MutableComponent description = quest.getSubtitle();
+		Component description = quest.getSubtitle();
 
 		if (description != TextComponent.EMPTY)
 		{
-			list.add(description.withStyle(ChatFormatting.GRAY));
+			list.add(new TextComponent("").append(description).withStyle(ChatFormatting.GRAY));
 		}
 
 		if (quest.optional)

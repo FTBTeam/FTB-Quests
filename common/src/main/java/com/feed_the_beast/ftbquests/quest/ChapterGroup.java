@@ -136,9 +136,9 @@ public class ChapterGroup
 		}
 	}
 
-	public List<Chapter> getVisibleChapters(PlayerData data, boolean excludeEmpty)
+	public List<Chapter> getVisibleChapters(PlayerData data)
 	{
-		if (!excludeEmpty && file.canEdit())
+		if (file.canEdit())
 		{
 			return chapters;
 		}
@@ -147,7 +147,7 @@ public class ChapterGroup
 
 		for (Chapter chapter : chapters)
 		{
-			if ((!excludeEmpty || !chapter.quests.isEmpty()) && chapter.isVisible(data))
+			if (!chapter.quests.isEmpty() && chapter.isVisible(data))
 			{
 				list.add(chapter);
 			}
