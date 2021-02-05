@@ -103,12 +103,11 @@ if (ENV.CURSEFORGE_KEY) {
 			addGameVersion "1.16.5"
 			mainArtifact(remapJar.archivePath)
 			relations {
-				requiredDependency 'architectury-fabric'
+				requiredDependency 'architectury-forge'
 				requiredDependency 'ftb-gui-library'
 				requiredDependency 'item-filters'
 				optionalDependency 'kubejs'
 				optionalDependency 'jei'
-				optionalDependency 'packmode'
 				optionalDependency 'game-stages'
 			}
 			changelog = getGitChangelog
