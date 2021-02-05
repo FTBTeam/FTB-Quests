@@ -32,6 +32,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.StringTag;
+import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.packs.PackType;
@@ -46,7 +47,19 @@ import java.util.function.Function;
 
 public class FTBQuestsClient extends FTBQuestsCommon
 {
-	public static final Function<String, Component> I18N = s -> new TextComponent(I18n.get(s));
+	public static final Function<String, Component> DEFAULT_STRING_TO_COMPONENT = FTBQuestsClient::stringToComponent;
+
+	private static Component stringToComponent(String s)
+	{
+		if (s.startsWith("open_url:"))
+		{
+			String[] s1 = s.substring(9).split("\\|", 2);
+			return new TextComponent(s1[0]).withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, s1[1])));
+		}
+
+		return new TextComponent(I18n.get(s));
+	}
+
 	public static KeyMapping KEY_QUESTS;
 
 	@Override

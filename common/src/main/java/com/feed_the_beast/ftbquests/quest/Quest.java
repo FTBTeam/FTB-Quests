@@ -3,6 +3,7 @@ package com.feed_the_beast.ftbquests.quest;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.client.FTBQuestsClient;
 import com.feed_the_beast.ftbquests.events.ObjectCompletedEvent;
+import com.feed_the_beast.ftbquests.gui.MultilineTextEditorScreen;
 import com.feed_the_beast.ftbquests.gui.quests.GuiQuests;
 import com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIHelper;
 import com.feed_the_beast.ftbquests.net.MessageDisplayCompletionToast;
@@ -11,14 +12,17 @@ import com.feed_the_beast.ftbquests.quest.reward.Reward;
 import com.feed_the_beast.ftbquests.quest.task.Task;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
 import com.feed_the_beast.ftbquests.util.NetUtils;
-import com.feed_the_beast.ftbquests.util.TextComponentParser;
+import com.feed_the_beast.mods.ftbguilibrary.config.ConfigCallback;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
+import com.feed_the_beast.mods.ftbguilibrary.config.ConfigList;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigString;
 import com.feed_the_beast.mods.ftbguilibrary.config.Tristate;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.icon.IconAnimation;
 import com.feed_the_beast.mods.ftbguilibrary.utils.Bits;
 import com.feed_the_beast.mods.ftbguilibrary.utils.ClientUtils;
+import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
+import com.feed_the_beast.mods.ftbguilibrary.utils.TextComponentParser;
 import me.shedaniel.architectury.utils.NbtType;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -33,6 +37,7 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -554,7 +559,21 @@ public final class Quest extends QuestObject implements Movable
 	{
 		super.getConfig(config);
 		config.addString("subtitle", subtitle, v -> subtitle = v, "");
-		config.addList("description", description, new ConfigString(), "");
+
+		ConfigString descType = new ConfigString();
+		descType.defaultValue = "";
+		config.add("description", new ConfigList<String, ConfigString>(descType)
+		{
+			@Override
+			public void onClicked(MouseButton button, ConfigCallback callback)
+			{
+				new MultilineTextEditorScreen(this, callback).openGui();
+			}
+		}, description, (t) -> {
+			description.clear();
+			description.addAll(t);
+		}, Collections.emptyList());
+
 		config.addEnum("shape", shape.isEmpty() ? "default" : shape, v -> shape = v.equals("default") ? "" : v, QuestShape.idMapWithDefault);
 		config.addTristate("hide", hide, v -> hide = v);
 		config.addDouble("size", size, v -> size = v, 1, 0.0625D, 8D);
@@ -669,7 +688,7 @@ public final class Quest extends QuestObject implements Movable
 
 		String key = String.format("quests.%s.subtitle", getCodeString());
 		String s = subtitle.isEmpty() ? I18n.exists(key) ? I18n.get(key) : "" : subtitle;
-		cachedDescription = TextComponentParser.parse(s, FTBQuestsClient.I18N);
+		cachedDescription = TextComponentParser.parse(s, FTBQuestsClient.DEFAULT_STRING_TO_COMPONENT);
 
 		return cachedDescription;
 	}
@@ -689,7 +708,7 @@ public final class Quest extends QuestObject implements Movable
 
 		for (int i = 0; i < cachedText.length; i++)
 		{
-			cachedText[i] = TextComponentParser.parse(desc[i], FTBQuestsClient.I18N);
+			cachedText[i] = TextComponentParser.parse(desc[i], FTBQuestsClient.DEFAULT_STRING_TO_COMPONENT);
 		}
 
 		return cachedText;

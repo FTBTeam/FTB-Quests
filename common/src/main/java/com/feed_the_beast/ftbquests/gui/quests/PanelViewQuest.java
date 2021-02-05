@@ -1,7 +1,6 @@
 package com.feed_the_beast.ftbquests.gui.quests;
 
 import com.feed_the_beast.ftbquests.FTBQuests;
-import com.feed_the_beast.ftbquests.gui.ComponentTextBox;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
@@ -17,6 +16,7 @@ import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
 import com.feed_the_beast.mods.ftbguilibrary.widget.BlankPanel;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
 import com.feed_the_beast.mods.ftbguilibrary.widget.ColorWidget;
+import com.feed_the_beast.mods.ftbguilibrary.widget.ComponentTextField;
 import com.feed_the_beast.mods.ftbguilibrary.widget.ContextMenuItem;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
 import com.feed_the_beast.mods.ftbguilibrary.widget.SimpleButton;
@@ -190,10 +190,10 @@ public class PanelViewQuest extends Panel
 		buttonOpenDependencies.setPosAndSize(0, 17, 13, 13);
 		buttonOpenDependants.setPosAndSize(w - 13, 17, 13, 13);
 
-		ComponentTextBox textFieldTasks = new ComponentTextBox(panelContent)
+		ComponentTextField textFieldTasks = new ComponentTextField(panelContent)
 		{
 			@Override
-			public ComponentTextBox resize(Theme theme)
+			public ComponentTextField resize(Theme theme)
 			{
 				return this;
 			}
@@ -205,10 +205,10 @@ public class PanelViewQuest extends Panel
 		textFieldTasks.setColor(ThemeProperties.TASKS_TEXT_COLOR.get(quest));
 		panelContent.add(textFieldTasks);
 
-		ComponentTextBox textFieldRewards = new ComponentTextBox(panelContent)
+		ComponentTextField textFieldRewards = new ComponentTextField(panelContent)
 		{
 			@Override
-			public ComponentTextBox resize(Theme theme)
+			public ComponentTextField resize(Theme theme)
 			{
 				return this;
 			}
@@ -253,7 +253,7 @@ public class PanelViewQuest extends Panel
 
 		if (desc != TextComponent.EMPTY)
 		{
-			panelText.add(new ComponentTextBox(panelText).addFlags(Theme.CENTERED).setMaxWidth(panelText.width).setSpacing(9).setText(new TextComponent("").append(desc).withStyle(ChatFormatting.ITALIC, ChatFormatting.GRAY)));
+			panelText.add(new ComponentTextField(panelText).addFlags(Theme.CENTERED).setMaxWidth(panelText.width).setSpacing(9).setText(new TextComponent("").append(desc).withStyle(ChatFormatting.ITALIC, ChatFormatting.GRAY)));
 		}
 
 		boolean showText = !quest.hideTextUntilComplete.get(false) || gui.file.self != null && gui.file.self.isComplete(quest);
@@ -265,7 +265,7 @@ public class PanelViewQuest extends Panel
 				panelText.add(new WidgetVerticalSpace(panelText, 7));
 			}
 
-			panelText.add(new ComponentTextBox(panelText).setMaxWidth(panelText.width).setSpacing(9).setText(quest.getJoinedDescription()));
+			panelText.add(new ComponentTextField(panelText).setMaxWidth(panelText.width).setSpacing(9).setText(quest.getJoinedDescription()));
 		}
 
 		if (showText && !quest.guidePage.isEmpty())
