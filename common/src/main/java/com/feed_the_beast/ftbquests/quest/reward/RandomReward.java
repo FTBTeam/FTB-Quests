@@ -50,14 +50,14 @@ public class RandomReward extends Reward
 
 		if (getTable() != null)
 		{
-			nbt.putLong("table_id", getTable().id);
-		}
+			nbt.putLong("table_id", table.id);
 
-		if (table.id == -1)
-		{
-			OrderedCompoundTag tag = new OrderedCompoundTag();
-			table.writeData(tag);
-			nbt.put("table_data", tag);
+			if (table.id == -1L)
+			{
+				OrderedCompoundTag tag = new OrderedCompoundTag();
+				table.writeData(tag);
+				nbt.put("table_data", tag);
+			}
 		}
 	}
 
@@ -65,11 +65,12 @@ public class RandomReward extends Reward
 	public void readData(CompoundTag nbt)
 	{
 		super.readData(nbt);
+		table = null;
 		QuestFile file = getQuestFile();
 
-		int id = nbt.getInt("table_id");
+		long id = nbt.getLong("table_id");
 
-		if (id != 0)
+		if (id != 0L)
 		{
 			table = file.getRewardTable(id);
 		}
@@ -108,7 +109,7 @@ public class RandomReward extends Reward
 	{
 		super.writeNetData(buffer);
 
-		RewardTable table = getTable();
+		table = getTable();
 		buffer.writeLong(table == null ? 0L : table.id);
 
 		if (table != null && table.id == -1L)
