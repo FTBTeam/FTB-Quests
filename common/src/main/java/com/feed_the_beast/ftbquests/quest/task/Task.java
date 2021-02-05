@@ -173,15 +173,17 @@ public abstract class Task extends QuestObject
 	}
 
 	@Override
-	public Icon getAltIcon()
-	{
-		return getType().getIcon();
-	}
-
-	@Override
+	@Environment(EnvType.CLIENT)
 	public Component getAltTitle()
 	{
 		return getType().getDisplayName();
+	}
+
+	@Override
+	@Environment(EnvType.CLIENT)
+	public Icon getAltIcon()
+	{
+		return getType().getIcon();
 	}
 
 	@Override
@@ -243,6 +245,7 @@ public abstract class Task extends QuestObject
 	}
 
 	@Nullable
+	@Environment(EnvType.CLIENT)
 	public Object getIngredient()
 	{
 		if (addTitleInMouseOverText())

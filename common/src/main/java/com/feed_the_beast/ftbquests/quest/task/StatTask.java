@@ -95,6 +95,7 @@ public class StatTask extends Task
 	}
 
 	@Override
+	@Environment(EnvType.CLIENT)
 	public MutableComponent getAltTitle()
 	{
 		return new TranslatableComponent("stat." + stat.getNamespace() + "." + stat.getPath());

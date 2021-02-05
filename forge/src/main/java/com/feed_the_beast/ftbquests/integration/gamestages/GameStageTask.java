@@ -73,6 +73,7 @@ public class GameStageTask extends Task
 	}
 
 	@Override
+	@OnlyIn(Dist.CLIENT)
 	public MutableComponent getAltTitle()
 	{
 		return new TranslatableComponent("ftbquests.task.ftbquests.gamestage").append(": ").append(new TextComponent(stage).withStyle(ChatFormatting.YELLOW));

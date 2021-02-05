@@ -5,7 +5,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.List;
@@ -89,9 +88,6 @@ public abstract class QuestObject extends QuestObjectBase
 	public void onCompleted(PlayerData data, List<ServerPlayer> onlineMembers, List<ServerPlayer> notifiedPlayers)
 	{
 	}
-
-	@Override
-	public abstract Component getAltTitle();
 
 	protected void verifyDependenciesInternal(long original, int depth)
 	{

@@ -353,6 +353,19 @@ public final class RewardTable extends QuestObjectBase
 	}
 
 	@Override
+	@Environment(EnvType.CLIENT)
+	public Component getAltTitle()
+	{
+		if (rewards.size() == 1)
+		{
+			return rewards.get(0).reward.getTitle();
+		}
+
+		return new TranslatableComponent("ftbquests.reward_table");
+	}
+
+	@Override
+	@Environment(EnvType.CLIENT)
 	public Icon getAltIcon()
 	{
 		if (lootCrate != null)
@@ -373,17 +386,6 @@ public final class RewardTable extends QuestObjectBase
 		}
 
 		return IconAnimation.fromList(icons, false);
-	}
-
-	@Override
-	public Component getAltTitle()
-	{
-		if (rewards.size() == 1)
-		{
-			return rewards.get(0).reward.getTitle();
-		}
-
-		return new TranslatableComponent("ftbquests.reward_table");
 	}
 
 	@Override

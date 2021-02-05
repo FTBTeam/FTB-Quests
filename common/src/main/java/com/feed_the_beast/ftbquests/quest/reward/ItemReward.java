@@ -172,6 +172,14 @@ public class ItemReward extends Reward
 	}
 
 	@Override
+	@Environment(EnvType.CLIENT)
+	public MutableComponent getAltTitle()
+	{
+		return new TextComponent((count > 1 ? (randomBonus > 0 ? (count + "-" + (count + randomBonus) + "x ") : (count + "x ")) : "")).append(item.getHoverName());
+	}
+
+	@Override
+	@Environment(EnvType.CLIENT)
 	public Icon getAltIcon()
 	{
 		if (item.isEmpty())
@@ -185,12 +193,7 @@ public class ItemReward extends Reward
 	}
 
 	@Override
-	public MutableComponent getAltTitle()
-	{
-		return new TextComponent((count > 1 ? (randomBonus > 0 ? (count + "-" + (count + randomBonus) + "x ") : (count + "x ")) : "")).append(item.getHoverName());
-	}
-
-	@Override
+	@Environment(EnvType.CLIENT)
 	public boolean addTitleInMouseOverText()
 	{
 		return !getTitle().getString().equals(getAltTitle().getString());
@@ -198,12 +201,14 @@ public class ItemReward extends Reward
 
 	@Nullable
 	@Override
+	@Environment(EnvType.CLIENT)
 	public Object getIngredient()
 	{
 		return new WrappedIngredient(item).tooltip();
 	}
 
 	@Override
+	@Environment(EnvType.CLIENT)
 	public String getButtonText()
 	{
 		if (randomBonus > 0)

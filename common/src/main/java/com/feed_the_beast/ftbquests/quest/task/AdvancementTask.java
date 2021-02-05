@@ -111,6 +111,7 @@ public class AdvancementTask extends Task
 	}
 
 	@Override
+	@Environment(EnvType.CLIENT)
 	public Component getAltTitle()
 	{
 		if (advTitle != TextComponent.EMPTY)
@@ -122,6 +123,7 @@ public class AdvancementTask extends Task
 	}
 
 	@Override
+	@Environment(EnvType.CLIENT)
 	public Icon getAltIcon()
 	{
 		return advIcon.isEmpty() ? super.getAltIcon() : ItemIcon.getItemIcon(advIcon);

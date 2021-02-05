@@ -256,6 +256,14 @@ public final class Chapter extends QuestObject
 	}
 
 	@Override
+	@Environment(EnvType.CLIENT)
+	public MutableComponent getAltTitle()
+	{
+		return new TranslatableComponent("ftbquests.unnamed");
+	}
+
+	@Override
+	@Environment(EnvType.CLIENT)
 	public Icon getAltIcon()
 	{
 		List<Icon> list = new ArrayList<>();
@@ -266,12 +274,6 @@ public final class Chapter extends QuestObject
 		}
 
 		return IconAnimation.fromList(list, false);
-	}
-
-	@Override
-	public MutableComponent getAltTitle()
-	{
-		return new TranslatableComponent("ftbquests.unnamed");
 	}
 
 	@Override

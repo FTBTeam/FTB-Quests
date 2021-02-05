@@ -8,10 +8,8 @@ import com.feed_the_beast.ftbquests.item.CustomIconItem;
 import com.feed_the_beast.ftbquests.net.MessageChangeProgressResponse;
 import com.feed_the_beast.ftbquests.net.MessageEditObject;
 import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
-import com.feed_the_beast.ftbquests.util.FileUtils;
 import com.feed_the_beast.ftbquests.util.NBTUtils;
 import com.feed_the_beast.ftbquests.util.NetUtils;
-import com.feed_the_beast.ftbquests.util.QuestObjectText;
 import com.feed_the_beast.ftbquests.util.TextComponentParser;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigString;
@@ -19,12 +17,10 @@ import com.feed_the_beast.mods.ftbguilibrary.config.Tristate;
 import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiEditConfig;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.utils.Bits;
-import me.shedaniel.architectury.platform.Platform;
 import me.shedaniel.architectury.utils.Env;
 import me.shedaniel.architectury.utils.NbtType;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -36,13 +32,10 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nullable;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -81,7 +74,6 @@ public abstract class QuestObjectBase
 
 	private Icon cachedIcon = null;
 	private Component cachedTitle = null;
-	private QuestObjectText cachedTextFile = null;
 	private Set<String> cachedTags = null;
 
 	public final String getCodeString()
@@ -248,96 +240,41 @@ public abstract class QuestObjectBase
 	}
 
 	@Environment(EnvType.CLIENT)
-	public QuestObjectText loadText()
-	{
-		if (invalid || id == 0)
-		{
-			return QuestObjectText.NONE;
-		}
-		else if (cachedTextFile == null)
-		{
-			cachedTextFile = QuestObjectText.NONE;
-			File file = Platform.getConfigFolder().resolve("ftbquests/quests/text/en_us/" + getCodeString(this) + ".txt").toFile();
-			Map<String, String[]> text = new HashMap<>();
-
-			if (file.exists())
-			{
-				String currentKey = "";
-				List<String> currentText = new ArrayList<>();
-
-				for (String s : FileUtils.readFile(file))
-				{
-					if (s.indexOf('[') == 0 && s.indexOf(']') == s.length() - 1)
-					{
-						loadTextAdd(text, currentKey, currentText);
-						currentKey = s.substring(1, s.length() - 1);
-					}
-					else
-					{
-						currentText.add(s);
-					}
-				}
-
-				loadTextAdd(text, currentKey, currentText);
-			}
-
-			String langCode = Minecraft.getInstance().getLanguageManager().getSelected().getCode();
-
-			if (!langCode.equals("en_us"))
-			{
-				File fileLang = Platform.getConfigFolder().resolve("ftbquests/quests/text/" + langCode + "/" + getCodeString(this) + ".txt").toFile();
-
-				if (fileLang.exists())
-				{
-					String currentKey = "";
-					List<String> currentText = new ArrayList<>();
-
-					for (String s : FileUtils.readFile(fileLang))
-					{
-						if (s.indexOf('[') == 0 && s.indexOf(']') == s.length() - 1)
-						{
-							loadTextAdd(text, currentKey, currentText);
-							currentKey = s.substring(1, s.length() - 1);
-						}
-						else
-						{
-							currentText.add(s);
-						}
-					}
-
-					loadTextAdd(text, currentKey, currentText);
-				}
-			}
-
-			cachedTextFile = text.isEmpty() ? QuestObjectText.NONE : new QuestObjectText(text);
-		}
-
-		return cachedTextFile;
-	}
-
-	private void loadTextAdd(Map<String, String[]> text, String currentKey, List<String> currentText)
-	{
-		while (!currentText.isEmpty() && currentText.get(0).isEmpty())
-		{
-			currentText.remove(0);
-		}
-
-		while (!currentText.isEmpty() && currentText.get(currentText.size() - 1).isEmpty())
-		{
-			currentText.remove(currentText.size() - 1);
-		}
-
-		if (!currentText.isEmpty())
-		{
-			text.put(currentKey, currentText.toArray(new String[0]));
-			currentText.clear();
-		}
-	}
-
-	public abstract Icon getAltIcon();
-
 	public abstract Component getAltTitle();
 
+	@Environment(EnvType.CLIENT)
+	public abstract Icon getAltIcon();
+
+	@Environment(EnvType.CLIENT)
+	public final Component getTitle()
+	{
+		if (cachedTitle != null)
+		{
+			return cachedTitle.copy();
+		}
+
+		String key = String.format("quests.%s.title", getCodeString());
+		String s = title.isEmpty() ? I18n.exists(key) ? I18n.get(key) : "" : title;
+
+		if (!s.isEmpty())
+		{
+			cachedTitle = TextComponentParser.parse(s, FTBQuestsClient.I18N);
+		}
+		else
+		{
+			cachedTitle = getAltTitle();
+		}
+
+		return cachedTitle.copy();
+	}
+
+	@Environment(EnvType.CLIENT)
+	public final MutableComponent getMutableTitle()
+	{
+		return new TextComponent("").append(getTitle());
+	}
+
+	@Environment(EnvType.CLIENT)
 	public final Icon getIcon()
 	{
 		if (cachedIcon != null)
@@ -361,48 +298,6 @@ public abstract class QuestObjectBase
 		}
 
 		return cachedIcon;
-	}
-
-	@Environment(EnvType.CLIENT)
-	public final Component getTitle()
-	{
-		if (cachedTitle != null)
-		{
-			return cachedTitle.copy();
-		}
-
-		String textTitle = loadText().getString("title");
-
-		if (!textTitle.isEmpty())
-		{
-			cachedTitle = new TextComponent(textTitle);
-			return cachedTitle.copy();
-		}
-
-		String key = String.format("quests.%016x.title", id);
-		String s = I18n.exists(key) ? I18n.get(key) : title;
-
-		if (!s.isEmpty())
-		{
-			cachedTitle = TextComponentParser.parse(s, FTBQuestsClient.I18N);
-		}
-		else
-		{
-			cachedTitle = getAltTitle();
-		}
-
-		return cachedTitle.copy();
-	}
-
-	@Environment(EnvType.CLIENT)
-	public final MutableComponent getMutableTitle()
-	{
-		return new TextComponent("").append(getTitle());
-	}
-
-	public final String getUnformattedTitle()
-	{
-		return getTitle().getString();
 	}
 
 	public void deleteSelf()
@@ -434,7 +329,6 @@ public abstract class QuestObjectBase
 	{
 		cachedIcon = null;
 		cachedTitle = null;
-		cachedTextFile = null;
 		cachedTags = null;
 	}
 

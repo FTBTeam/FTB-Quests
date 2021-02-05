@@ -158,7 +158,7 @@ public class GuiSelectQuestObject<T extends QuestObjectBase> extends GuiButtonLi
 
 		list.sort((o1, o2) -> {
 			int i = Integer.compare(o1.getObjectType().ordinal(), o2.getObjectType().ordinal());
-			return i == 0 ? o1.getUnformattedTitle().compareToIgnoreCase(o2.getUnformattedTitle()) : i;
+			return i == 0 ? o1.getTitle().getString().compareToIgnoreCase(o2.getTitle().getString()) : i;
 		});
 
 		if (config.predicate.test(null))

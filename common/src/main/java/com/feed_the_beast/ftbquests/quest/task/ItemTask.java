@@ -138,6 +138,19 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 	}
 
 	@Override
+	@Environment(EnvType.CLIENT)
+	public MutableComponent getAltTitle()
+	{
+		if (count > 1)
+		{
+			return new TextComponent(count + "x ").append(item.getHoverName());
+		}
+
+		return new TextComponent("").append(item.getHoverName());
+	}
+
+	@Override
+	@Environment(EnvType.CLIENT)
 	public Icon getAltIcon()
 	{
 		List<Icon> icons = new ArrayList<>();
@@ -160,17 +173,6 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 		}
 
 		return IconAnimation.fromList(icons, false);
-	}
-
-	@Override
-	public MutableComponent getAltTitle()
-	{
-		if (count > 1)
-		{
-			return new TextComponent(count + "x ").append(item.getHoverName());
-		}
-
-		return new TextComponent("").append(item.getHoverName());
 	}
 
 	@Override

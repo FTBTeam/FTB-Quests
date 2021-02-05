@@ -74,6 +74,7 @@ public class BiomeTask extends Task
 	}
 
 	@Override
+	@Environment(EnvType.CLIENT)
 	public MutableComponent getAltTitle()
 	{
 		return new TranslatableComponent("ftbquests.task.ftbquests.biome").append(": ").append(new TextComponent(biome.location().toString()).withStyle(ChatFormatting.DARK_GREEN));

@@ -86,12 +86,14 @@ public class XPReward extends Reward
 	}
 
 	@Override
+	@Environment(EnvType.CLIENT)
 	public MutableComponent getAltTitle()
 	{
 		return new TranslatableComponent("ftbquests.reward.ftbquests.xp").append(": ").append(new TextComponent("+" + xp).withStyle(ChatFormatting.GREEN));
 	}
 
 	@Override
+	@Environment(EnvType.CLIENT)
 	public String getButtonText()
 	{
 		return "+" + xp;

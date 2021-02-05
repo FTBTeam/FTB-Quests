@@ -100,6 +100,7 @@ public class AdvancementReward extends Reward
 	}
 
 	@Override
+	@Environment(EnvType.CLIENT)
 	public Component getAltTitle()
 	{
 		Advancement a = Minecraft.getInstance().player.connection.getAdvancements().getAdvancements().get(new ResourceLocation(advancement));
@@ -113,6 +114,7 @@ public class AdvancementReward extends Reward
 	}
 
 	@Override
+	@Environment(EnvType.CLIENT)
 	public Icon getAltIcon()
 	{
 		Advancement a = Minecraft.getInstance().player.connection.getAdvancements().getAdvancements().get(new ResourceLocation(advancement));
