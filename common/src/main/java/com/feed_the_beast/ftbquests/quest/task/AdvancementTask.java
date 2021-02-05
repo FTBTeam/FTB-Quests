@@ -1,6 +1,7 @@
 package com.feed_the_beast.ftbquests.quest.task;
 
 import com.feed_the_beast.ftbquests.FTBQuests;
+import com.feed_the_beast.ftbquests.core.DisplayInfoFTBQ;
 import com.feed_the_beast.ftbquests.net.FTBQuestsNetHandler;
 import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.quest.Quest;
@@ -71,7 +72,7 @@ public class AdvancementTask extends Task
 				if (a != null && a.getDisplay() != null)
 				{
 					advTitle = a.getDisplay().getTitle().copy();
-					advIcon = a.getDisplay().getIcon().copy();
+					advIcon = ((DisplayInfoFTBQ) a.getDisplay()).getIconStackFTBQ().copy();
 				}
 			}
 		}
