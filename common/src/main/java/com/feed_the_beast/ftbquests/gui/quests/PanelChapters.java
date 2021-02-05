@@ -39,7 +39,7 @@ public class PanelChapters extends Panel
 
 		if (treeGui.file.chapterGroups.size() == 1)
 		{
-			for (Chapter chapter : treeGui.file.defaultChapterGroup.getVisibleChapters(treeGui.file.self, true))
+			for (Chapter chapter : treeGui.file.defaultChapterGroup.getVisibleChapters(treeGui.file.self))
 			{
 				add(new ButtonChapter(this, chapter));
 			}
@@ -48,7 +48,7 @@ public class PanelChapters extends Panel
 		{
 			for (ChapterGroup group : treeGui.file.chapterGroups)
 			{
-				List<Chapter> visibleChapters = group.getVisibleChapters(treeGui.file.self, true);
+				List<Chapter> visibleChapters = group.getVisibleChapters(treeGui.file.self);
 
 				for (Chapter chapter : visibleChapters)
 				{

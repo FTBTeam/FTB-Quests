@@ -12,6 +12,7 @@ import com.feed_the_beast.ftbquests.util.FileUtils;
 import com.feed_the_beast.ftbquests.util.NBTUtils;
 import com.feed_the_beast.ftbquests.util.NetUtils;
 import com.feed_the_beast.ftbquests.util.QuestObjectText;
+import com.feed_the_beast.ftbquests.util.TextComponentParser;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigString;
 import com.feed_the_beast.mods.ftbguilibrary.config.Tristate;
@@ -378,23 +379,16 @@ public abstract class QuestObjectBase
 			return cachedTitle.copy();
 		}
 
-		String key = String.format("quests.%08x.title", id);
-		MutableComponent t = FTBQuestsClient.addI18nAndColors(I18n.get(key));
+		String key = String.format("quests.%016x.title", id);
+		String s = I18n.exists(key) ? I18n.get(key) : title;
 
-		if (t == TextComponent.EMPTY || key.equals(I18n.get(key)))
+		if (!s.isEmpty())
 		{
-			if (!title.isEmpty())
-			{
-				cachedTitle = FTBQuestsClient.addI18nAndColors(title);
-			}
-			else
-			{
-				cachedTitle = getAltTitle();
-			}
+			cachedTitle = TextComponentParser.parse(s, FTBQuestsClient.I18N);
 		}
 		else
 		{
-			cachedTitle = t;
+			cachedTitle = getAltTitle();
 		}
 
 		return cachedTitle.copy();
