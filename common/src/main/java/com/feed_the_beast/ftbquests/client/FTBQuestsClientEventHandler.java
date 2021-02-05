@@ -234,7 +234,7 @@ public class FTBQuestsClientEventHandler
 			}
 			else
 			{
-				for (int q : data.pinnedQuests)
+				for (long q : data.pinnedQuests)
 				{
 					Quest quest = file.getQuest(q);
 

@@ -35,6 +35,8 @@ import net.minecraft.resources.ResourceLocation;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author LatvianModder
@@ -50,6 +52,7 @@ public final class RewardTable extends QuestObjectBase
 	public boolean useTitle;
 	public LootCrate lootCrate;
 	public ResourceLocation lootTableId;
+	public String filename;
 
 	public RewardTable(QuestFile f)
 	{
@@ -62,6 +65,7 @@ public final class RewardTable extends QuestObjectBase
 		useTitle = false;
 		lootCrate = null;
 		lootTableId = null;
+		filename = "";
 	}
 
 	@Override
@@ -184,6 +188,7 @@ public final class RewardTable extends QuestObjectBase
 	public void writeNetData(FriendlyByteBuf buffer)
 	{
 		super.writeNetData(buffer);
+		buffer.writeUtf(filename, Short.MAX_VALUE);
 		buffer.writeVarInt(emptyWeight);
 		buffer.writeVarInt(lootSize);
 		int flags = 0;
@@ -216,6 +221,7 @@ public final class RewardTable extends QuestObjectBase
 	public void readNetData(FriendlyByteBuf buffer)
 	{
 		super.readNetData(buffer);
+		filename = buffer.readUtf(Short.MAX_VALUE);
 		emptyWeight = buffer.readVarInt();
 		lootSize = buffer.readVarInt();
 		int flags = buffer.readVarInt();
@@ -306,13 +312,44 @@ public final class RewardTable extends QuestObjectBase
 	@Override
 	public void onCreated()
 	{
+		if (filename.isEmpty())
+		{
+			String s = title.replace(' ', '_').replaceAll("\\W", "").toLowerCase().trim();
+
+			if (s.isEmpty())
+			{
+				s = toString();
+			}
+
+			filename = s;
+
+			Set<String> existingNames = file.rewardTables.stream().map(rt -> rt.filename).collect(Collectors.toSet());
+			int i = 2;
+
+			while (existingNames.contains(filename))
+			{
+				filename = s + "_" + i;
+				i++;
+			}
+		}
+
 		file.rewardTables.add(this);
+	}
+
+	public String getFilename()
+	{
+		if (filename.isEmpty())
+		{
+			filename = getCodeString(this);
+		}
+
+		return filename;
 	}
 
 	@Override
 	public String getPath()
 	{
-		return "reward_tables/" + getCodeString(this) + ".snbt";
+		return "reward_tables/" + getFilename() + ".snbt";
 	}
 
 	@Override

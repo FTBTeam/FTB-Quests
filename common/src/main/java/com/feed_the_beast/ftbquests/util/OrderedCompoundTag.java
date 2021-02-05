@@ -1,9 +1,8 @@
 package com.feed_the_beast.ftbquests.util;
 
-import com.feed_the_beast.ftbquests.core.ByteNBTFTBQ;
-import net.minecraft.nbt.ByteTag;
 import net.minecraft.nbt.CompoundTag;
 
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 
 /**
@@ -11,6 +10,8 @@ import java.util.LinkedHashMap;
  */
 public class OrderedCompoundTag extends CompoundTag
 {
+	public HashSet<String> booleanKeys;
+
 	public OrderedCompoundTag()
 	{
 		super(new LinkedHashMap<>());
@@ -19,13 +20,12 @@ public class OrderedCompoundTag extends CompoundTag
 	@Override
 	public void putBoolean(String key, boolean value)
 	{
-		ByteTag byteNBT = ByteTag.valueOf(value);
-
-		if (byteNBT instanceof ByteNBTFTBQ)
+		if (booleanKeys == null)
 		{
-			((ByteNBTFTBQ) byteNBT).setBooleanFTBQ();
+			booleanKeys = new HashSet<>();
 		}
 
-		put(key, byteNBT);
+		booleanKeys.add(key);
+		super.putBoolean(key, value);
 	}
 }

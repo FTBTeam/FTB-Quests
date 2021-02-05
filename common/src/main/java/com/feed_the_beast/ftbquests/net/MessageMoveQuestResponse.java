@@ -9,19 +9,19 @@ import net.minecraft.network.FriendlyByteBuf;
  */
 public class MessageMoveQuestResponse extends MessageBase
 {
-	private final int id;
-	private final int chapter;
+	private final long id;
+	private final long chapter;
 	private final double x, y;
 
 	MessageMoveQuestResponse(FriendlyByteBuf buffer)
 	{
-		id = buffer.readVarInt();
-		chapter = buffer.readVarInt();
+		id = buffer.readLong();
+		chapter = buffer.readLong();
 		x = buffer.readDouble();
 		y = buffer.readDouble();
 	}
 
-	public MessageMoveQuestResponse(int i, int c, double _x, double _y)
+	public MessageMoveQuestResponse(long i, long c, double _x, double _y)
 	{
 		id = i;
 		chapter = c;
@@ -32,8 +32,8 @@ public class MessageMoveQuestResponse extends MessageBase
 	@Override
 	public void write(FriendlyByteBuf buffer)
 	{
-		buffer.writeVarInt(id);
-		buffer.writeVarInt(chapter);
+		buffer.writeLong(id);
+		buffer.writeLong(chapter);
 		buffer.writeDouble(x);
 		buffer.writeDouble(y);
 	}

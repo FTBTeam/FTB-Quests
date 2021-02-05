@@ -12,18 +12,18 @@ import net.minecraft.network.chat.Component;
  */
 public class MessageDisplayRewardToast extends MessageBase
 {
-	private final int id;
+	private final long id;
 	private final Component text;
 	private final Icon icon;
 
 	MessageDisplayRewardToast(FriendlyByteBuf buffer)
 	{
-		id = buffer.readVarInt();
+		id = buffer.readLong();
 		text = buffer.readComponent();
 		icon = NetUtils.readIcon(buffer);
 	}
 
-	public MessageDisplayRewardToast(int _id, Component t, Icon i)
+	public MessageDisplayRewardToast(long _id, Component t, Icon i)
 	{
 		id = _id;
 		text = t;
@@ -33,7 +33,7 @@ public class MessageDisplayRewardToast extends MessageBase
 	@Override
 	public void write(FriendlyByteBuf buffer)
 	{
-		buffer.writeVarInt(id);
+		buffer.writeLong(id);
 		buffer.writeComponent(text);
 		NetUtils.writeIcon(buffer, icon);
 	}

@@ -168,7 +168,15 @@ public class NBTUtils
 				index++;
 				builder.print(handleEscape(key));
 				builder.print(": ");
-				append(builder, compound.get(key));
+
+				if (compound instanceof OrderedCompoundTag && ((OrderedCompoundTag) compound).booleanKeys != null && ((OrderedCompoundTag) compound).booleanKeys.contains(key))
+				{
+					builder.print(compound.getBoolean(key) ? "true" : "false");
+				}
+				else
+				{
+					append(builder, compound.get(key));
+				}
 
 				if (index != compound.size())
 				{

@@ -25,7 +25,7 @@ public class FTBQuestsInventoryListener implements ContainerListener
 		player = p;
 	}
 
-	public static void detect(ServerPlayer player, ItemStack item, int sourceTask)
+	public static void detect(ServerPlayer player, ItemStack item, long sourceTask)
 	{
 		if (ServerQuestFile.INSTANCE == null || PlayerHooks.isFake(player))
 		{

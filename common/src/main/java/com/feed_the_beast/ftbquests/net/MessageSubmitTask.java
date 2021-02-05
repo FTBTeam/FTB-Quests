@@ -12,14 +12,14 @@ import net.minecraft.server.level.ServerPlayer;
  */
 public class MessageSubmitTask extends MessageBase
 {
-	private final int task;
+	private final long task;
 
 	MessageSubmitTask(FriendlyByteBuf buffer)
 	{
-		task = buffer.readVarInt();
+		task = buffer.readLong();
 	}
 
-	public MessageSubmitTask(int t)
+	public MessageSubmitTask(long t)
 	{
 		task = t;
 	}
@@ -27,7 +27,7 @@ public class MessageSubmitTask extends MessageBase
 	@Override
 	public void write(FriendlyByteBuf buffer)
 	{
-		buffer.writeVarInt(task);
+		buffer.writeLong(task);
 	}
 
 	@Override

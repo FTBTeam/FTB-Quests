@@ -4,6 +4,7 @@ import com.feed_the_beast.ftbquests.gui.CustomToast;
 import com.feed_the_beast.ftbquests.gui.quests.GuiValidItems;
 import com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIHelper;
 import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
+import com.feed_the_beast.ftbquests.item.MissingItem;
 import com.feed_the_beast.ftbquests.net.FTBQuestsNetHandler;
 import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.quest.Quest;
@@ -294,7 +295,7 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 		@Override
 		public void submitTask(ServerPlayer player, ItemStack item)
 		{
-			if (isComplete())
+			if (isComplete() || task.item.getItem() instanceof MissingItem || item.getItem() instanceof MissingItem)
 			{
 				return;
 			}

@@ -72,7 +72,7 @@ public class GuiQuests extends GuiBase
 		selectedObjects = new ArrayList<>();
 
 		chapterPanel = new PanelChapters(this);
-		selectedChapter = file.getAllChapters().isEmpty() ? null : file.getAllChapters().get(0);
+		selectedChapter = file.getFirstVisibleChapter(file.self, !file.canEdit());
 
 		questPanel = new PanelQuests(this);
 		otherButtonsBottomPanel = new PanelOtherButtonsBottom(this);
@@ -433,12 +433,7 @@ public class GuiQuests extends GuiBase
 
 		if (selectedChapter == null)
 		{
-			List<Chapter> visible = file.getVisibleChapters(file.self, !file.canEdit());
-
-			if (!visible.isEmpty())
-			{
-				selectChapter(visible.get(0));
-			}
+			selectChapter(file.getFirstVisibleChapter(file.self, !file.canEdit()));
 		}
 
 		super.tick();

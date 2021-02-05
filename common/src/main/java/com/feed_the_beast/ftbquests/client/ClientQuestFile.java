@@ -64,8 +64,8 @@ public class ClientQuestFile extends QuestFile
 		boolean guiOpen = false;
 		int zoom = 0;
 		double scrollX = 0, scrollY = 0;
-		int selectedChapter = 0;
-		int[] selectedQuests = new int[0];
+		long selectedChapter = 0L;
+		long[] selectedQuests = new long[0];
 
 		if (questTreeGui != null)
 		{
@@ -73,8 +73,8 @@ public class ClientQuestFile extends QuestFile
 			zoom = questTreeGui.zoom;
 			scrollX = questTreeGui.questPanel.centerQuestX;
 			scrollY = questTreeGui.questPanel.centerQuestY;
-			selectedChapter = questTreeGui.selectedChapter == null ? 0 : questTreeGui.selectedChapter.id;
-			selectedQuests = new int[questTreeGui.selectedObjects.size()];
+			selectedChapter = questTreeGui.selectedChapter == null ? 0L : questTreeGui.selectedChapter.id;
+			selectedQuests = new long[questTreeGui.selectedObjects.size()];
 			int i = 0;
 
 			for (Movable m : questTreeGui.selectedObjects)
@@ -101,7 +101,7 @@ public class ClientQuestFile extends QuestFile
 			questTreeGui.zoom = zoom;
 			questTreeGui.selectChapter(getChapter(selectedChapter));
 
-			for (int i : selectedQuests)
+			for (long i : selectedQuests)
 			{
 				Quest q = getQuest(i);
 
@@ -144,7 +144,7 @@ public class ClientQuestFile extends QuestFile
 	}
 
 	@Override
-	public void deleteObject(int id)
+	public void deleteObject(long id)
 	{
 		new MessageDeleteObject(id).sendToServer();
 	}

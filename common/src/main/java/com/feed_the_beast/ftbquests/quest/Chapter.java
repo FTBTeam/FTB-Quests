@@ -37,7 +37,6 @@ public final class Chapter extends QuestObject
 	public boolean alwaysInvisible;
 	public String defaultQuestShape;
 	public final List<ChapterImage> images;
-	public int orderIndex;
 
 	public Chapter(QuestFile f, ChapterGroup g)
 	{
@@ -331,10 +330,20 @@ public final class Chapter extends QuestObject
 		}
 	}
 
+	public String getFilename()
+	{
+		if (filename.isEmpty())
+		{
+			filename = getCodeString(this);
+		}
+
+		return filename;
+	}
+
 	@Override
 	public String getPath()
 	{
-		return "chapters/" + filename + ".snbt";
+		return "chapters/" + getFilename() + ".snbt";
 	}
 
 	@Override
@@ -378,7 +387,7 @@ public final class Chapter extends QuestObject
 	}
 
 	@Override
-	protected void verifyDependenciesInternal(int original, int depth)
+	protected void verifyDependenciesInternal(long original, int depth)
 	{
 		if (depth >= 1000)
 		{

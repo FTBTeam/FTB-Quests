@@ -2,8 +2,10 @@ package com.feed_the_beast.ftbquests.quest;
 
 import com.feed_the_beast.ftbquests.item.CustomIconItem;
 import com.feed_the_beast.ftbquests.net.FTBQuestsNetHandler;
+import com.feed_the_beast.ftbquests.util.NBTUtils;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.icon.IconAnimation;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.item.ItemStack;
 
@@ -18,8 +20,8 @@ public class ChapterGroup
 	public final QuestFile file;
 	public final String id;
 	public final List<Chapter> chapters;
-	public String title;
-	public ItemStack icon;
+	private String title;
+	private ItemStack icon;
 
 	public ChapterGroup(QuestFile f, String i)
 	{
@@ -58,10 +60,32 @@ public class ChapterGroup
 		FTBQuestsNetHandler.writeItemType(buffer, icon);
 	}
 
+	public void read(CompoundTag tag)
+	{
+		title = tag.getString("title");
+		icon = NBTUtils.read(tag, "icon");
+	}
+
+	public void write(CompoundTag tag)
+	{
+		tag.putString("title", title);
+		NBTUtils.write(tag, "icon", icon);
+	}
+
+	public String getTitle()
+	{
+		return title;
+	}
+
+	public ItemStack getIconItem()
+	{
+		return icon;
+	}
+
 	@Override
 	public String toString()
 	{
-		return id.isEmpty() ? "-" : id;
+		return id;
 	}
 
 	public int getIndex()
@@ -76,9 +100,9 @@ public class ChapterGroup
 
 	public Icon getIcon()
 	{
-		if (!icon.isEmpty())
+		if (!getIconItem().isEmpty())
 		{
-			return CustomIconItem.getIcon(icon);
+			return CustomIconItem.getIcon(getIconItem());
 		}
 
 		List<Icon> list = new ArrayList<>();
@@ -110,5 +134,25 @@ public class ChapterGroup
 		{
 			chapter.changeProgress(data, type);
 		}
+	}
+
+	public List<Chapter> getVisibleChapters(PlayerData data, boolean excludeEmpty)
+	{
+		if (!excludeEmpty && file.canEdit())
+		{
+			return chapters;
+		}
+
+		List<Chapter> list = new ArrayList<>();
+
+		for (Chapter chapter : chapters)
+		{
+			if ((!excludeEmpty || !chapter.quests.isEmpty()) && chapter.isVisible(data))
+			{
+				list.add(chapter);
+			}
+		}
+
+		return list;
 	}
 }

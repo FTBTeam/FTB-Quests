@@ -13,18 +13,18 @@ import java.util.UUID;
  */
 public class MessageUpdateTaskProgress extends MessageBase
 {
-	private UUID player;
-	private int task;
-	private long progress;
+	private final UUID player;
+	private final long task;
+	private final long progress;
 
 	public MessageUpdateTaskProgress(FriendlyByteBuf buffer)
 	{
 		player = NetUtils.readUUID(buffer);
-		task = buffer.readVarInt();
+		task = buffer.readLong();
 		progress = buffer.readVarLong();
 	}
 
-	public MessageUpdateTaskProgress(PlayerData t, int k, long p)
+	public MessageUpdateTaskProgress(PlayerData t, long k, long p)
 	{
 		player = t.uuid;
 		task = k;
@@ -35,7 +35,7 @@ public class MessageUpdateTaskProgress extends MessageBase
 	public void write(FriendlyByteBuf buffer)
 	{
 		NetUtils.writeUUID(buffer, player);
-		buffer.writeVarInt(task);
+		buffer.writeLong(task);
 		buffer.writeVarLong(progress);
 	}
 
