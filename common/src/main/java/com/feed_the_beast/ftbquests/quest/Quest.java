@@ -111,7 +111,7 @@ public final class Quest extends QuestObject implements Movable
 	}
 
 	@Override
-	public int getParentID()
+	public long getParentID()
 	{
 		return chapter.id;
 	}
@@ -164,16 +164,14 @@ public final class Quest extends QuestObject implements Movable
 
 		if (!dependencies.isEmpty())
 		{
-			int[] ai = new int[dependencies.size()];
-			int i = 0;
+			ListTag deps = new ListTag();
 
 			for (QuestObject dep : dependencies)
 			{
-				ai[i] = dep.id;
-				i++;
+				deps.add(StringTag.valueOf(dep.getCodeString()));
 			}
 
-			nbt.putIntArray("dependencies", ai);
+			nbt.put("dependencies", deps);
 		}
 
 		if (hide != Tristate.DEFAULT)
@@ -236,13 +234,30 @@ public final class Quest extends QuestObject implements Movable
 
 		dependencies.clear();
 
-		for (int i : nbt.getIntArray("dependencies"))
+		if (nbt.contains("dependencies", 11))
 		{
-			QuestObject object = chapter.file.get(i);
-
-			if (object != null)
+			for (int i : nbt.getIntArray("dependencies"))
 			{
-				dependencies.add(object);
+				QuestObject object = chapter.file.get(i);
+
+				if (object != null)
+				{
+					dependencies.add(object);
+				}
+			}
+		}
+		else
+		{
+			ListTag deps = nbt.getList("dependencies", 8);
+
+			for (int i = 0; i < deps.size(); i++)
+			{
+				QuestObject object = chapter.file.get(chapter.file.getID(deps.getString(i)));
+
+				if (object != null)
+				{
+					dependencies.add(object);
+				}
 			}
 		}
 
@@ -302,11 +317,11 @@ public final class Quest extends QuestObject implements Movable
 		{
 			if (d.invalid)
 			{
-				buffer.writeInt(0);
+				buffer.writeLong(0L);
 			}
 			else
 			{
-				buffer.writeInt(d.id);
+				buffer.writeLong(d.id);
 			}
 		}
 
@@ -358,7 +373,7 @@ public final class Quest extends QuestObject implements Movable
 
 		for (int i = 0; i < d; i++)
 		{
-			QuestObject object = chapter.file.get(buffer.readInt());
+			QuestObject object = chapter.file.get(buffer.readLong());
 
 			if (object != null)
 			{
@@ -787,7 +802,7 @@ public final class Quest extends QuestObject implements Movable
 	}
 
 	@Override
-	protected void verifyDependenciesInternal(int original, int depth)
+	protected void verifyDependenciesInternal(long original, int depth)
 	{
 		if (depth >= 1000)
 		{
@@ -824,7 +839,7 @@ public final class Quest extends QuestObject implements Movable
 		}
 	}
 
-	public void moved(double nx, double ny, int nc)
+	public void moved(double nx, double ny, long nc)
 	{
 		x = nx;
 		y = ny;

@@ -9,14 +9,14 @@ import net.minecraft.network.FriendlyByteBuf;
  */
 public class MessageDisplayCompletionToast extends MessageBase
 {
-	private final int id;
+	private final long id;
 
 	MessageDisplayCompletionToast(FriendlyByteBuf buffer)
 	{
-		id = buffer.readVarInt();
+		id = buffer.readLong();
 	}
 
-	public MessageDisplayCompletionToast(int i)
+	public MessageDisplayCompletionToast(long i)
 	{
 		id = i;
 	}
@@ -24,7 +24,7 @@ public class MessageDisplayCompletionToast extends MessageBase
 	@Override
 	public void write(FriendlyByteBuf buffer)
 	{
-		buffer.writeVarInt(id);
+		buffer.writeLong(id);
 	}
 
 	@Override

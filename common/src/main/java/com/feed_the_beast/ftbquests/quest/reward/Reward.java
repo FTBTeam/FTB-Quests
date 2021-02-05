@@ -74,7 +74,7 @@ public abstract class Reward extends QuestObjectBase
 	}
 
 	@Override
-	public final int getParentID()
+	public final long getParentID()
 	{
 		return quest.id;
 	}

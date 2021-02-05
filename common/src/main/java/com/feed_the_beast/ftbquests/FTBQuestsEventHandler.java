@@ -144,10 +144,10 @@ public class FTBQuestsEventHandler
 		{
 			if (autoSubmitTasks == null)
 			{
-				autoSubmitTasks = ServerQuestFile.INSTANCE.collect(Task.class, o -> o instanceof Task && ((Task) o).autoSubmitOnPlayerTick() > 0);
+				autoSubmitTasks = ServerQuestFile.INSTANCE.collect(o -> o instanceof Task && ((Task) o).autoSubmitOnPlayerTick() > 0);
 			}
 
-			if (autoSubmitTasks == null || autoSubmitTasks.isEmpty())
+			if (autoSubmitTasks == null || autoSubmitTasks.isEmpty()) // Don't be deceived, its somehow possible to be null here
 			{
 				return;
 			}

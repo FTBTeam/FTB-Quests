@@ -16,14 +16,14 @@ import net.minecraft.network.FriendlyByteBuf;
  */
 public class MessageCreateTaskAt extends MessageBase
 {
-	private final int chapter;
+	private final long chapter;
 	private final double x, y;
 	private final TaskType type;
 	private final CompoundTag nbt;
 
 	MessageCreateTaskAt(FriendlyByteBuf buffer)
 	{
-		chapter = buffer.readVarInt();
+		chapter = buffer.readLong();
 		x = buffer.readDouble();
 		y = buffer.readDouble();
 		type = FTBQuests.PROXY.getQuestFile(true).taskTypeIds.get(buffer.readVarInt());
@@ -43,7 +43,7 @@ public class MessageCreateTaskAt extends MessageBase
 	@Override
 	public void write(FriendlyByteBuf buffer)
 	{
-		buffer.writeVarInt(chapter);
+		buffer.writeLong(chapter);
 		buffer.writeDouble(x);
 		buffer.writeDouble(y);
 		buffer.writeVarInt(type.intId);

@@ -13,10 +13,10 @@ import net.minecraft.server.level.ServerPlayer;
  */
 public class MessageClaimChoiceReward extends MessageBase
 {
-	private final int id;
+	private final long id;
 	private final int index;
 
-	public MessageClaimChoiceReward(int i, int idx)
+	public MessageClaimChoiceReward(long i, int idx)
 	{
 		id = i;
 		index = idx;
@@ -24,14 +24,14 @@ public class MessageClaimChoiceReward extends MessageBase
 
 	MessageClaimChoiceReward(FriendlyByteBuf buffer)
 	{
-		id = buffer.readVarInt();
+		id = buffer.readLong();
 		index = buffer.readVarInt();
 	}
 
 	@Override
 	public void write(FriendlyByteBuf buffer)
 	{
-		buffer.writeVarInt(id);
+		buffer.writeLong(id);
 		buffer.writeVarInt(index);
 	}
 

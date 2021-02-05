@@ -11,14 +11,14 @@ import net.minecraft.server.level.ServerPlayer;
  */
 public class MessageTogglePinned extends MessageBase
 {
-	private final int id;
+	private final long id;
 
 	MessageTogglePinned(FriendlyByteBuf buffer)
 	{
-		id = buffer.readVarInt();
+		id = buffer.readLong();
 	}
 
-	public MessageTogglePinned(int i)
+	public MessageTogglePinned(long i)
 	{
 		id = i;
 	}
@@ -26,7 +26,7 @@ public class MessageTogglePinned extends MessageBase
 	@Override
 	public void write(FriendlyByteBuf buffer)
 	{
-		buffer.writeVarInt(id);
+		buffer.writeLong(id);
 	}
 
 	@Override

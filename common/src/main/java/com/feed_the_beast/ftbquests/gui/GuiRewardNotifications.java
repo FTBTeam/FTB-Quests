@@ -7,6 +7,7 @@ import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
 import com.feed_the_beast.mods.ftbguilibrary.utils.StringUtils;
 import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
 import com.feed_the_beast.mods.ftbguilibrary.widget.GuiBase;
+import com.feed_the_beast.mods.ftbguilibrary.widget.GuiHelper;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
 import com.feed_the_beast.mods.ftbguilibrary.widget.SimpleTextButton;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
@@ -53,6 +54,7 @@ public class GuiRewardNotifications extends GuiBase implements IRewardListenerGu
 		@Override
 		public void draw(PoseStack matrixStack, Theme theme, int x, int y, int w, int h)
 		{
+			GuiHelper.setupDrawing();
 			QuestShape.get("rsquare").outline.draw(matrixStack, x, y, w, h);
 			key.icon.draw(matrixStack, x + 3, y + 3, 16, 16);
 

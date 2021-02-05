@@ -3,7 +3,6 @@
 	"package": "com.feed_the_beast.ftbquests.core.mixin.common",
 	"compatibilityLevel": "JAVA_8",
 	"mixins": [
-		"ByteNBTMixin",
 		"ItemMixin"
 	],
 	"client": [

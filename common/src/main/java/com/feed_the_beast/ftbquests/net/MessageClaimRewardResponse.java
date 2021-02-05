@@ -13,15 +13,15 @@ import java.util.UUID;
 public class MessageClaimRewardResponse extends MessageBase
 {
 	private final UUID player;
-	private final int id;
+	private final long id;
 
 	MessageClaimRewardResponse(FriendlyByteBuf buffer)
 	{
 		player = NetUtils.readUUID(buffer);
-		id = buffer.readVarInt();
+		id = buffer.readLong();
 	}
 
-	public MessageClaimRewardResponse(UUID p, int i, int t)
+	public MessageClaimRewardResponse(UUID p, long i, int t)
 	{
 		player = p;
 		id = i;
@@ -31,7 +31,7 @@ public class MessageClaimRewardResponse extends MessageBase
 	public void write(FriendlyByteBuf buffer)
 	{
 		NetUtils.writeUUID(buffer, player);
-		buffer.writeVarInt(id);
+		buffer.writeLong(id);
 	}
 
 	@Override

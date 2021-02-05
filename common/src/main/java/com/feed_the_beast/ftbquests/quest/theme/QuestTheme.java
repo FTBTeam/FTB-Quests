@@ -20,9 +20,9 @@ public class QuestTheme
 	private static class QuestObjectPropertyKey
 	{
 		private final String property;
-		private final int object;
+		private final long object;
 
-		private QuestObjectPropertyKey(String p, int o)
+		private QuestObjectPropertyKey(String p, long o)
 		{
 			property = p;
 			object = o;
@@ -31,7 +31,7 @@ public class QuestTheme
 		@Override
 		public int hashCode()
 		{
-			return property.hashCode() * 31 + object;
+			return Long.hashCode(property.hashCode() * 31L + object);
 		}
 
 		@Override

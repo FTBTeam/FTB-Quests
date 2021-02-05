@@ -9,6 +9,8 @@ import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
 import com.feed_the_beast.mods.ftbguilibrary.widget.WidgetLayout;
 import me.shedaniel.architectury.platform.Platform;
 
+import java.util.List;
+
 /**
  * @author LatvianModder
  */
@@ -35,14 +37,25 @@ public class PanelChapters extends Panel
 
 		boolean canEdit = treeGui.file.canEdit();
 
-		for (ChapterGroup group : treeGui.file.chapterGroups)
+		if (treeGui.file.chapterGroups.size() == 1)
 		{
-			for (Chapter chapter : group.chapters)
+			for (Chapter chapter : treeGui.file.defaultChapterGroup.getVisibleChapters(treeGui.file.self, true))
 			{
-				if (canEdit || chapter.isVisible(treeGui.file.self))
+				add(new ButtonChapter(this, chapter));
+			}
+		}
+		else
+		{
+			for (ChapterGroup group : treeGui.file.chapterGroups)
+			{
+				List<Chapter> visibleChapters = group.getVisibleChapters(treeGui.file.self, true);
+
+				for (Chapter chapter : visibleChapters)
 				{
 					add(new ButtonChapter(this, chapter));
 				}
+
+				//add(new ButtonExpandedChapter(this, chapter));
 			}
 		}
 

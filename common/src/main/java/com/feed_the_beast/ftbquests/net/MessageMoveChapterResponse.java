@@ -9,16 +9,16 @@ import net.minecraft.network.FriendlyByteBuf;
  */
 public class MessageMoveChapterResponse extends MessageBase
 {
-	private final int id;
+	private final long id;
 	private final boolean up;
 
 	MessageMoveChapterResponse(FriendlyByteBuf buffer)
 	{
-		id = buffer.readVarInt();
+		id = buffer.readLong();
 		up = buffer.readBoolean();
 	}
 
-	public MessageMoveChapterResponse(int i, boolean u)
+	public MessageMoveChapterResponse(long i, boolean u)
 	{
 		id = i;
 		up = u;
@@ -27,7 +27,7 @@ public class MessageMoveChapterResponse extends MessageBase
 	@Override
 	public void write(FriendlyByteBuf buffer)
 	{
-		buffer.writeVarInt(id);
+		buffer.writeLong(id);
 		buffer.writeBoolean(up);
 	}
 

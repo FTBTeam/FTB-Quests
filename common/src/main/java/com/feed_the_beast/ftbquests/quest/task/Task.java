@@ -70,7 +70,7 @@ public abstract class Task extends QuestObject
 	}
 
 	@Override
-	public final int getParentID()
+	public final long getParentID()
 	{
 		return quest.id;
 	}

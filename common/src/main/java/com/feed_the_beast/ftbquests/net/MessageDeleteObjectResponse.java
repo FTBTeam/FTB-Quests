@@ -9,14 +9,14 @@ import net.minecraft.network.FriendlyByteBuf;
  */
 public class MessageDeleteObjectResponse extends MessageBase
 {
-	private final int id;
+	private final long id;
 
 	MessageDeleteObjectResponse(FriendlyByteBuf buffer)
 	{
-		id = buffer.readVarInt();
+		id = buffer.readLong();
 	}
 
-	public MessageDeleteObjectResponse(int i)
+	public MessageDeleteObjectResponse(long i)
 	{
 		id = i;
 	}
@@ -24,7 +24,7 @@ public class MessageDeleteObjectResponse extends MessageBase
 	@Override
 	public void write(FriendlyByteBuf buffer)
 	{
-		buffer.writeVarInt(id);
+		buffer.writeLong(id);
 	}
 
 	@Override

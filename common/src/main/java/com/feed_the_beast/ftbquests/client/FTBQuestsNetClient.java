@@ -33,7 +33,7 @@ import java.util.UUID;
 public class FTBQuestsNetClient extends FTBQuestsNetCommon
 {
 	@Override
-	public void changeProgress(UUID player, int id, ChangeProgress type, boolean notifications)
+	public void changeProgress(UUID player, long id, ChangeProgress type, boolean notifications)
 	{
 		QuestObjectBase object = ClientQuestFile.INSTANCE.getBase(id);
 
@@ -44,7 +44,7 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon
 	}
 
 	@Override
-	public void claimReward(UUID player, int id)
+	public void claimReward(UUID player, long id)
 	{
 		Reward reward = ClientQuestFile.INSTANCE.getReward(id);
 
@@ -69,7 +69,7 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon
 	}
 
 	@Override
-	public void createObject(int id, int parent, QuestObjectType type, CompoundTag nbt, @Nullable CompoundTag extra)
+	public void createObject(long id, long parent, QuestObjectType type, CompoundTag nbt, @Nullable CompoundTag extra)
 	{
 		QuestObjectBase object = ClientQuestFile.INSTANCE.create(type, parent, extra == null ? new CompoundTag() : extra);
 		object.readData(nbt);
@@ -94,7 +94,7 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon
 	}
 
 	@Override
-	public void deleteObject(int id)
+	public void deleteObject(long id)
 	{
 		QuestObjectBase object = ClientQuestFile.INSTANCE.getBase(id);
 
@@ -109,7 +109,7 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon
 	}
 
 	@Override
-	public void displayCompletionToast(int id)
+	public void displayCompletionToast(long id)
 	{
 		QuestObject object = ClientQuestFile.INSTANCE.get(id);
 
@@ -146,7 +146,7 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon
 	}
 
 	@Override
-	public void displayRewardToast(int id, Component text, Icon icon)
+	public void displayRewardToast(long id, Component text, Icon icon)
 	{
 		Icon i = icon.isEmpty() ? ClientQuestFile.INSTANCE.getBase(id).getIcon() : icon;
 
@@ -157,7 +157,7 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon
 	}
 
 	@Override
-	public void editObject(int id, CompoundTag nbt)
+	public void editObject(long id, CompoundTag nbt)
 	{
 		ClientQuestFile.INSTANCE.clearCachedData();
 		QuestObjectBase object = ClientQuestFile.INSTANCE.getBase(id);
@@ -171,7 +171,7 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon
 	}
 
 	@Override
-	public void moveChapter(int id, boolean up)
+	public void moveChapter(long id, boolean up)
 	{
 		Chapter chapter = ClientQuestFile.INSTANCE.getChapter(id);
 
@@ -197,7 +197,7 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon
 	}
 
 	@Override
-	public void moveQuest(int id, int chapter, double x, double y)
+	public void moveQuest(long id, long chapter, double x, double y)
 	{
 		Quest quest = ClientQuestFile.INSTANCE.getQuest(id);
 
@@ -226,7 +226,7 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon
 	}
 
 	@Override
-	public void togglePinned(int id)
+	public void togglePinned(long id)
 	{
 		PlayerData data = FTBQuests.PROXY.getClientPlayerData();
 		data.setQuestPinned(id, !data.isQuestPinned(id));
@@ -247,7 +247,7 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon
 	}
 
 	@Override
-	public void updateTaskProgress(UUID player, int task, long progress)
+	public void updateTaskProgress(UUID player, long task, long progress)
 	{
 		Task t = ClientQuestFile.INSTANCE.getTask(task);
 

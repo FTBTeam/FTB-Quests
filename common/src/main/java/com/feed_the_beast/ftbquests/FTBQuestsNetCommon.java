@@ -11,15 +11,15 @@ import java.util.UUID;
 
 public class FTBQuestsNetCommon
 {
-	public void changeProgress(UUID player, int id, ChangeProgress type, boolean notifications)
+	public void changeProgress(UUID player, long id, ChangeProgress type, boolean notifications)
 	{
 	}
 
-	public void claimReward(UUID player, int id)
+	public void claimReward(UUID player, long id)
 	{
 	}
 
-	public void createObject(int id, int parent, QuestObjectType type, CompoundTag nbt, CompoundTag extra)
+	public void createObject(long id, long parent, QuestObjectType type, CompoundTag nbt, CompoundTag extra)
 	{
 	}
 
@@ -27,11 +27,11 @@ public class FTBQuestsNetCommon
 	{
 	}
 
-	public void deleteObject(int id)
+	public void deleteObject(long id)
 	{
 	}
 
-	public void displayCompletionToast(int id)
+	public void displayCompletionToast(long id)
 	{
 	}
 
@@ -39,19 +39,19 @@ public class FTBQuestsNetCommon
 	{
 	}
 
-	public void displayRewardToast(int id, Component text, Icon icon)
+	public void displayRewardToast(long id, Component text, Icon icon)
 	{
 	}
 
-	public void editObject(int id, CompoundTag nbt)
+	public void editObject(long id, CompoundTag nbt)
 	{
 	}
 
-	public void moveChapter(int id, boolean up)
+	public void moveChapter(long id, boolean up)
 	{
 	}
 
-	public void moveQuest(int id, int chapter, double x, double y)
+	public void moveQuest(long id, long chapter, double x, double y)
 	{
 	}
 
@@ -59,7 +59,7 @@ public class FTBQuestsNetCommon
 	{
 	}
 
-	public void togglePinned(int id)
+	public void togglePinned(long id)
 	{
 	}
 
@@ -67,7 +67,7 @@ public class FTBQuestsNetCommon
 	{
 	}
 
-	public void updateTaskProgress(UUID player, int task, long progress)
+	public void updateTaskProgress(UUID player, long task, long progress)
 	{
 	}
 }

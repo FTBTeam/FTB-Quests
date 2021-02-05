@@ -2,6 +2,7 @@ package com.feed_the_beast.ftbquests.quest;
 
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
+import com.feed_the_beast.ftbquests.client.ConfigIconItemStack;
 import com.feed_the_beast.ftbquests.client.FTBQuestsClient;
 import com.feed_the_beast.ftbquests.item.CustomIconItem;
 import com.feed_the_beast.ftbquests.net.MessageChangeProgressResponse;
@@ -12,7 +13,6 @@ import com.feed_the_beast.ftbquests.util.NBTUtils;
 import com.feed_the_beast.ftbquests.util.NetUtils;
 import com.feed_the_beast.ftbquests.util.QuestObjectText;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
-import com.feed_the_beast.mods.ftbguilibrary.config.ConfigItemStack;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigString;
 import com.feed_the_beast.mods.ftbguilibrary.config.Tristate;
 import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiEditConfig;
@@ -57,14 +57,14 @@ public abstract class QuestObjectBase
 		return object == null || object.invalid;
 	}
 
-	public static int getID(@Nullable QuestObjectBase object)
+	public static long getID(@Nullable QuestObjectBase object)
 	{
-		return isNull(object) ? 0 : object.id;
+		return isNull(object) ? 0L : object.id;
 	}
 
-	public static String getCodeString(int id)
+	public static String getCodeString(long id)
 	{
-		return Integer.toUnsignedString(id);
+		return id == 0L ? "-" : id == 1L ? "*" : String.format("%016X", id);
 	}
 
 	public static String getCodeString(@Nullable QuestObjectBase object)
@@ -72,7 +72,7 @@ public abstract class QuestObjectBase
 		return getCodeString(getID(object));
 	}
 
-	public int id = 0;
+	public long id = 0L;
 	public boolean invalid = false;
 	public String title = "";
 	public ItemStack icon = ItemStack.EMPTY;
@@ -100,7 +100,7 @@ public abstract class QuestObjectBase
 
 	public final int hashCode()
 	{
-		return id;
+		return Long.hashCode(id);
 	}
 
 	public abstract QuestObjectType getObjectType();
@@ -153,9 +153,9 @@ public abstract class QuestObjectBase
 		return null;
 	}
 
-	public int getParentID()
+	public long getParentID()
 	{
-		return 1;
+		return 1L;
 	}
 
 	public void writeData(CompoundTag nbt)
@@ -242,7 +242,7 @@ public abstract class QuestObjectBase
 	public void getConfig(ConfigGroup config)
 	{
 		config.addString("title", title, v -> title = v, "").setNameKey("ftbquests.title").setOrder(-127);
-		config.add("icon", new ConfigItemStack(false, true), icon, v -> icon = v, ItemStack.EMPTY).setNameKey("ftbquests.icon").setOrder(-126);
+		config.add("icon", new ConfigIconItemStack(), icon, v -> icon = v, ItemStack.EMPTY).setNameKey("ftbquests.icon").setOrder(-126);
 		config.addList("tags", tags, new ConfigString(TAG_PATTERN), "").setNameKey("ftbquests.tags").setOrder(-125);
 	}
 

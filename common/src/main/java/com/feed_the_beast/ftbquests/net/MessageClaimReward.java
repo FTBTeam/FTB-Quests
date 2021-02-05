@@ -12,16 +12,16 @@ import net.minecraft.server.level.ServerPlayer;
  */
 public class MessageClaimReward extends MessageBase
 {
-	private final int id;
+	private final long id;
 	private final boolean notify;
 
 	MessageClaimReward(FriendlyByteBuf buffer)
 	{
-		id = buffer.readVarInt();
+		id = buffer.readLong();
 		notify = buffer.readBoolean();
 	}
 
-	public MessageClaimReward(int i, boolean n)
+	public MessageClaimReward(long i, boolean n)
 	{
 		id = i;
 		notify = n;
@@ -30,7 +30,7 @@ public class MessageClaimReward extends MessageBase
 	@Override
 	public void write(FriendlyByteBuf buffer)
 	{
-		buffer.writeVarInt(id);
+		buffer.writeLong(id);
 		buffer.writeBoolean(notify);
 	}
 

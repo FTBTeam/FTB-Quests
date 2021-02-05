@@ -16,18 +16,18 @@ import java.util.UUID;
 public class MessageChangeProgress extends MessageBase
 {
 	private final UUID team;
-	private final int id;
+	private final long id;
 	private final ChangeProgress type;
 
 	MessageChangeProgress(FriendlyByteBuf buffer)
 	{
 		team = NetUtils.readUUID(buffer);
-		id = buffer.readVarInt();
+		id = buffer.readLong();
 		type = ChangeProgress.NAME_MAP.read(buffer);
 
 	}
 
-	public MessageChangeProgress(UUID t, int i, ChangeProgress ty)
+	public MessageChangeProgress(UUID t, long i, ChangeProgress ty)
 	{
 		team = t;
 		id = i;
@@ -38,7 +38,7 @@ public class MessageChangeProgress extends MessageBase
 	public void write(FriendlyByteBuf buffer)
 	{
 		NetUtils.writeUUID(buffer, team);
-		buffer.writeVarInt(id);
+		buffer.writeLong(id);
 		ChangeProgress.NAME_MAP.write(buffer, type);
 	}
 

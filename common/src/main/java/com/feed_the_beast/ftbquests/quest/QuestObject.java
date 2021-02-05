@@ -93,7 +93,7 @@ public abstract class QuestObject extends QuestObjectBase
 	@Override
 	public abstract Component getAltTitle();
 
-	protected void verifyDependenciesInternal(int original, int depth)
+	protected void verifyDependenciesInternal(long original, int depth)
 	{
 	}
 }

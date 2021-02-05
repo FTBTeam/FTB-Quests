@@ -11,12 +11,12 @@ import net.minecraft.network.FriendlyByteBuf;
  */
 public class MessageEditObjectResponse extends MessageBase
 {
-	private final int id;
+	private final long id;
 	private final CompoundTag nbt;
 
 	MessageEditObjectResponse(FriendlyByteBuf buffer)
 	{
-		id = buffer.readVarInt();
+		id = buffer.readLong();
 		nbt = buffer.readNbt();
 	}
 
@@ -30,7 +30,7 @@ public class MessageEditObjectResponse extends MessageBase
 	@Override
 	public void write(FriendlyByteBuf buffer)
 	{
-		buffer.writeVarInt(id);
+		buffer.writeLong(id);
 		buffer.writeNbt(nbt);
 	}
 

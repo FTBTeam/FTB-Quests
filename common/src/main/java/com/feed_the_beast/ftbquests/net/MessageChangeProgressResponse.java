@@ -14,7 +14,7 @@ import java.util.UUID;
 public class MessageChangeProgressResponse extends MessageBase
 {
 	private final UUID player;
-	private final int id;
+	private final long id;
 	private final ChangeProgress type;
 	private final boolean notifications;
 
@@ -26,7 +26,7 @@ public class MessageChangeProgressResponse extends MessageBase
 		notifications = buffer.readBoolean();
 	}
 
-	public MessageChangeProgressResponse(UUID p, int i, ChangeProgress ty, boolean n)
+	public MessageChangeProgressResponse(UUID p, long i, ChangeProgress ty, boolean n)
 	{
 		player = p;
 		id = i;
@@ -38,7 +38,7 @@ public class MessageChangeProgressResponse extends MessageBase
 	public void write(FriendlyByteBuf buffer)
 	{
 		NetUtils.writeUUID(buffer, player);
-		buffer.writeVarInt(id);
+		buffer.writeLong(id);
 		ChangeProgress.NAME_MAP.write(buffer, type);
 		buffer.writeBoolean(notifications);
 	}

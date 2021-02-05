@@ -120,7 +120,7 @@ public class ServerQuestFile extends QuestFile
 	}
 
 	@Override
-	public void deleteObject(int id)
+	public void deleteObject(long id)
 	{
 		QuestObjectBase object = getBase(id);
 

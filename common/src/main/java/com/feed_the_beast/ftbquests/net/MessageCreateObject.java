@@ -15,14 +15,14 @@ import javax.annotation.Nullable;
  */
 public class MessageCreateObject extends MessageBase
 {
-	private final int parent;
+	private final long parent;
 	private final QuestObjectType type;
 	private final CompoundTag nbt;
 	private final CompoundTag extra;
 
 	MessageCreateObject(FriendlyByteBuf buffer)
 	{
-		parent = buffer.readVarInt();
+		parent = buffer.readLong();
 		type = QuestObjectType.NAME_MAP.read(buffer);
 		nbt = buffer.readNbt();
 		extra = buffer.readNbt();
@@ -40,7 +40,7 @@ public class MessageCreateObject extends MessageBase
 	@Override
 	public void write(FriendlyByteBuf buffer)
 	{
-		buffer.writeVarInt(parent);
+		buffer.writeLong(parent);
 		QuestObjectType.NAME_MAP.write(buffer, type);
 		buffer.writeNbt(nbt);
 		buffer.writeNbt(extra);
