@@ -200,6 +200,7 @@ public class PanelViewQuest extends Panel
 		};
 
 		textFieldTasks.setPosAndSize(2, 2, w2 - 3, 13);
+		textFieldTasks.setMaxWidth(panelContent.width);
 		textFieldTasks.addFlags(Theme.CENTERED | Theme.CENTERED_V);
 		textFieldTasks.setText(new TranslatableComponent("ftbquests.tasks"));
 		textFieldTasks.setColor(ThemeProperties.TASKS_TEXT_COLOR.get(quest));
@@ -215,6 +216,7 @@ public class PanelViewQuest extends Panel
 		};
 
 		textFieldRewards.setPosAndSize(w2 + 2, 2, w2 - 3, 13);
+		textFieldRewards.setMaxWidth(panelContent.width);
 		textFieldRewards.addFlags(Theme.CENTERED | Theme.CENTERED_V);
 		textFieldRewards.setText(new TranslatableComponent("ftbquests.rewards"));
 		textFieldRewards.setColor(ThemeProperties.REWARDS_TEXT_COLOR.get(quest));
