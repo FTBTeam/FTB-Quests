@@ -1,12 +1,15 @@
 package com.feed_the_beast.ftbquests;
 
 import com.feed_the_beast.ftbquests.net.MessageCreateObjectResponse;
+import com.feed_the_beast.ftbquests.net.MessageDeleteObjectResponse;
 import com.feed_the_beast.ftbquests.quest.ChangeProgress;
 import com.feed_the_beast.ftbquests.quest.Chapter;
 import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
+import com.feed_the_beast.ftbquests.quest.loot.RewardTable;
 import com.feed_the_beast.ftbquests.quest.task.ItemTask;
+import com.feed_the_beast.ftbquests.util.FileUtils;
 import com.feed_the_beast.mods.ftbguilibrary.config.Tristate;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.BoolArgumentType;
@@ -55,6 +58,9 @@ public class FTBQuestsCommands
 										.executes(c -> editingMode(c.getSource(), EntityArgument.getPlayer(c, "player"), BoolArgumentType.getBool(c, "mode")))
 								)
 						)
+				)
+				.then(Commands.literal("delete_empty_reward_tables")
+						.executes(context -> deleteEmptyRewardTables(context.getSource()))
 				)
 				//.then(Commands.literal("change_progress")
 				//)
@@ -152,111 +158,28 @@ public class FTBQuestsCommands
 		return 1;
 	}
 
-	/*private static HitResult rayTrace(ServerPlayer player)
+	private static int deleteEmptyRewardTables(CommandSourceStack source)
 	{
-		float f = player.xRot;
-		float f1 = player.yRot;
-		Vec3 vec3d = player.getEyePosition(1.0F);
-		float f2 = Mth.cos(-f1 * ((float) Math.PI / 180F) - (float) Math.PI);
-		float f3 = Mth.sin(-f1 * ((float) Math.PI / 180F) - (float) Math.PI);
-		float f4 = -Mth.cos(-f * ((float) Math.PI / 180F));
-		float f5 = Mth.sin(-f * ((float) Math.PI / 180F));
-		float f6 = f3 * f4;
-		float f7 = f2 * f4;
-		double d0 = player.getAttribute(ForgeMod.REACH_DISTANCE.get()).getValue();
-		Vec3 vec3d1 = vec3d.add((double) f6 * d0, (double) f5 * d0, (double) f7 * d0);
-		return player.level.clip(new ClipContext(vec3d, vec3d1, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, player));
-	}
+		int del = 0;
 
-	private static int importRewards(CommandSourceStack source, String tableId, int weight, boolean replace) throws CommandSyntaxException
-	{
-		ServerPlayer player = source.getPlayerOrException();
-		RewardTable table = ServerQuestFile.INSTANCE.getRewardTable(tableId);
-
-		HitResult ray = rayTrace(player);
-
-		if (ray instanceof BlockHitResult)
+		for (RewardTable table : ServerQuestFile.INSTANCE.rewardTables)
 		{
-			BlockEntity tileEntity = player.level.getBlockEntity(((BlockHitResult) ray).getBlockPos());
-
-			if (tileEntity != null)
+			if (table.rewards.isEmpty())
 			{
-				IItemHandler handler = tileEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, ((BlockHitResult) ray).getDirection()).orElse(null);
-
-				if (handler != null)
-				{
-					if (replace)
-					{
-						table.rewards.clear();
-					}
-
-					int r = 0;
-
-					for (int i = 0; i < handler.getSlots(); i++)
-					{
-						ItemStack stack = handler.getStackInSlot(i);
-
-						if (!stack.isEmpty())
-						{
-							table.rewards.add(new WeightedReward(new ItemReward(table.fakeQuest, stack.copy()), weight));
-							r++;
-						}
-					}
-
-					ServerQuestFile.INSTANCE.clearCachedData();
-					new MessageEditObjectResponse(table).sendToAll();
-					ServerQuestFile.INSTANCE.save();
-					source.sendSuccess(new TranslatableComponent("commands.ftbquests.import_rewards_from_chest.text", r, table.toString()), true);
-					return 1;
-				}
+				del++;
+				table.invalid = true;
+				FileUtils.delete(ServerQuestFile.INSTANCE.getFolder().resolve(table.getPath()).toFile());
+				new MessageDeleteObjectResponse(table.id).sendToAll();
 			}
 		}
 
-		return 0;
+		ServerQuestFile.INSTANCE.rewardTables.removeIf(rewardTable -> rewardTable.invalid);
+		ServerQuestFile.INSTANCE.refreshIDMap();
+		ServerQuestFile.INSTANCE.save();
+
+		source.sendSuccess(new TextComponent("Deleted " + del + " empty tables"), false);
+		return 1;
 	}
-
-	private static int exportRewards(CommandSourceStack source, String tableId) throws CommandSyntaxException
-	{
-		ServerPlayer player = source.getPlayerOrException();
-		RewardTable table = ServerQuestFile.INSTANCE.getRewardTable(tableId);
-
-		HitResult ray = rayTrace(player);
-
-		if (ray instanceof BlockHitResult)
-		{
-			BlockEntity tileEntity = player.level.getBlockEntity(((BlockHitResult) ray).getBlockPos());
-
-			if (tileEntity != null)
-			{
-				IItemHandler handler = tileEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, ((BlockHitResult) ray).getDirection()).orElse(null);
-
-				if (handler != null)
-				{
-					int r = 0;
-
-					for (WeightedReward reward : table.rewards)
-					{
-						Object object = reward.reward.getIngredient();
-
-						if (object instanceof ItemStack && !((ItemStack) object).isEmpty())
-						{
-							ItemStack stack1 = ((ItemStack) object).copy();
-							stack1.setCount(1);
-
-							if (ItemHandlerHelper.insertItem(handler, stack1, false).isEmpty())
-							{
-								r++;
-							}
-						}
-					}
-
-					source.sendSuccess(new TranslatableComponent("commands.ftbquests.export_rewards_to_chest.text", Integer.toString(r), Integer.toString(table.rewards.size()), table.toString()), true);
-				}
-			}
-		}
-
-		return 0;
-	}*/
 
 	private static int generateAllItemChapter(CommandSourceStack source)
 	{
