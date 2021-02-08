@@ -32,7 +32,7 @@ public class MessageMoveChapterResponse extends MessageBase
 	}
 
 	@Override
-	public void handlePacket(NetworkManager.PacketContext context)
+	public void handle(NetworkManager.PacketContext context)
 	{
 		FTBQuests.NET_PROXY.moveChapter(id, up);
 	}

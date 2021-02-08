@@ -36,7 +36,7 @@ public class MessageClaimChoiceReward extends MessageBase
 	}
 
 	@Override
-	public void handlePacket(NetworkManager.PacketContext context)
+	public void handle(NetworkManager.PacketContext context)
 	{
 		Reward reward = ServerQuestFile.INSTANCE.getReward(id);
 

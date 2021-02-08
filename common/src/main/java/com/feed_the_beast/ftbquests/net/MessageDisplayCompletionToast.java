@@ -28,7 +28,7 @@ public class MessageDisplayCompletionToast extends MessageBase
 	}
 
 	@Override
-	public void handlePacket(NetworkManager.PacketContext context)
+	public void handle(NetworkManager.PacketContext context)
 	{
 		FTBQuests.NET_PROXY.displayCompletionToast(id);
 	}

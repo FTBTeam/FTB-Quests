@@ -43,7 +43,7 @@ public class MessageChangeProgress extends MessageBase
 	}
 
 	@Override
-	public void handlePacket(NetworkManager.PacketContext context)
+	public void handle(NetworkManager.PacketContext context)
 	{
 		if (NetUtils.canEdit(context))
 		{
