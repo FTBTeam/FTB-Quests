@@ -14,12 +14,12 @@ public abstract class MessageBase
 {
 	public void handle(Supplier<NetworkManager.PacketContext> context)
 	{
-		context.get().queue(() -> handle(context.get()));
+		context.get().queue(() -> handlePacket(context.get()));
 	}
 
 	public abstract void write(FriendlyByteBuf buffer);
 
-	public abstract void handle(NetworkManager.PacketContext context);
+	public abstract void handlePacket(NetworkManager.PacketContext context);
 
 	public void sendToServer()
 	{
