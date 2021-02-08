@@ -34,7 +34,6 @@ import javax.annotation.Nullable;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -42,19 +41,15 @@ import java.util.stream.Collectors;
  */
 public class FTBQuestsCommands
 {
-	private static final Predicate<CommandSourceStack> permission = s -> s.getServer().isSingleplayer() || s.hasPermission(2);
-
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher)
 	{
 		dispatcher.register(Commands.literal("ftbquests")
+				.requires(s -> s.getServer().isSingleplayer() || s.hasPermission(2))
 				.then(Commands.literal("editing_mode")
-						.requires(permission)
 						.executes(c -> editingMode(c.getSource(), c.getSource().getPlayerOrException(), null))
 						.then(Commands.argument("mode", BoolArgumentType.bool())
-								.requires(permission)
 								.executes(c -> editingMode(c.getSource(), c.getSource().getPlayerOrException(), BoolArgumentType.getBool(c, "mode")))
 								.then(Commands.argument("player", EntityArgument.player())
-										.requires(permission)
 										.executes(c -> editingMode(c.getSource(), EntityArgument.getPlayer(c, "player"), BoolArgumentType.getBool(c, "mode")))
 								)
 						)
@@ -65,20 +60,15 @@ public class FTBQuestsCommands
 				//.then(Commands.literal("change_progress")
 				//)
 				/*.then(Commands.literal("export_rewards_to_chest")
-						.requires(permission)
 						.then(Commands.argument("reward_table", StringArgumentType.word())
-								.requires(permission)
 								.executes(c -> exportRewards(c.getSource(), StringArgumentType.getString(c, "reward_table")))
 						)
 				)
 				.then(Commands.literal("import_rewards_from_chest")
 						.requires(permission)
 						.then(Commands.argument("reward_table", StringArgumentType.word())
-								.requires(permission)
 								.then(Commands.argument("weight", IntegerArgumentType.integer(1))
-										.requires(permission)
 										.then(Commands.argument("replace", BoolArgumentType.bool())
-												.requires(permission)
 												.executes(c -> importRewards(c.getSource(), StringArgumentType.getString(c, "reward_table"), IntegerArgumentType.getInteger(c, "weight"), BoolArgumentType.getBool(c, "replace")))
 										)
 										.executes(c -> importRewards(c.getSource(), StringArgumentType.getString(c, "reward_table"), IntegerArgumentType.getInteger(c, "weight"), false))
@@ -87,7 +77,6 @@ public class FTBQuestsCommands
 						)
 				)*/
 				.then(Commands.literal("generate_chapter_with_all_items_in_game")
-						.requires(permission)
 						.executes(context -> generateAllItemChapter(context.getSource()))
 				)
 		);
