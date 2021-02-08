@@ -40,7 +40,7 @@ public class MessageMoveQuest extends MessageBase
 	}
 
 	@Override
-	public void handle(NetworkManager.PacketContext context)
+	public void handlePacket(NetworkManager.PacketContext context)
 	{
 		Quest quest = ServerQuestFile.INSTANCE.getQuest(id);
 

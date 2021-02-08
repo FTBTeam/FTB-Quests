@@ -30,7 +30,7 @@ public class MessageTogglePinned extends MessageBase
 	}
 
 	@Override
-	public void handle(NetworkManager.PacketContext context)
+	public void handlePacket(NetworkManager.PacketContext context)
 	{
 		ServerPlayer player = (ServerPlayer) context.getPlayer();
 		PlayerData data = ServerQuestFile.INSTANCE.getData(player);

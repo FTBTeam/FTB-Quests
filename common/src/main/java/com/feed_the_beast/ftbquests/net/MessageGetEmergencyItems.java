@@ -26,7 +26,7 @@ public class MessageGetEmergencyItems extends MessageBase
 	}
 
 	@Override
-	public void handle(NetworkManager.PacketContext context)
+	public void handlePacket(NetworkManager.PacketContext context)
 	{
 		//TODO: Verify on server side
 		ServerPlayer player = (ServerPlayer) context.getPlayer();

@@ -34,7 +34,7 @@ public class MessageSetCustomImage extends MessageBase
 	}
 
 	@Override
-	public void handle(NetworkManager.PacketContext context)
+	public void handlePacket(NetworkManager.PacketContext context)
 	{
 		if (context.getPlayer().getItemInHand(hand).getItem() instanceof CustomIconItem)
 		{

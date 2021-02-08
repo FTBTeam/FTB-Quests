@@ -36,7 +36,7 @@ public class MessageCreatePlayerData extends MessageBase
 	}
 
 	@Override
-	public void handle(NetworkManager.PacketContext context)
+	public void handlePacket(NetworkManager.PacketContext context)
 	{
 		FTBQuests.NET_PROXY.createPlayerData(uuid, name);
 	}

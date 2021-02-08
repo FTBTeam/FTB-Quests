@@ -10,7 +10,9 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
+import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class FTBQuestsNetHandler
 {
@@ -19,16 +21,7 @@ public class FTBQuestsNetHandler
 
 	private static <T extends MessageBase> void register(Class<T> c, Function<FriendlyByteBuf, T> s)
 	{
-		MAIN.register(NetworkManager.s2c(), c, MessageBase::write, s, MessageBase::handle);
-		if (Platform.getEnvironment() == Env.CLIENT)
-		{
-			registerClient(c, s);
-		}
-	}
-
-	private static <T extends MessageBase> void registerClient(Class<T> c, Function<FriendlyByteBuf, T> s)
-	{
-		MAIN.register(NetworkManager.c2s(), c, MessageBase::write, s, MessageBase::handle);
+		MAIN.register(c, MessageBase::write, s, MessageBase::handle);
 	}
 
 	public static void init()

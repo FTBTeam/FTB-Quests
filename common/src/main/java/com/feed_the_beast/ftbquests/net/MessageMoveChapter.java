@@ -34,7 +34,7 @@ public class MessageMoveChapter extends MessageBase
 	}
 
 	@Override
-	public void handle(NetworkManager.PacketContext context)
+	public void handlePacket(NetworkManager.PacketContext context)
 	{
 		if (NetUtils.canEdit(context))
 		{

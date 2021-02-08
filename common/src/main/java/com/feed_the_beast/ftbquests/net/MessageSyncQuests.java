@@ -37,7 +37,7 @@ public class MessageSyncQuests extends MessageBase
 	}
 
 	@Override
-	public void handle(NetworkManager.PacketContext context)
+	public void handlePacket(NetworkManager.PacketContext context)
 	{
 		file.load(self);
 	}

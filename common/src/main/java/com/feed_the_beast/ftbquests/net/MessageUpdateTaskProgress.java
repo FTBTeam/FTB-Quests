@@ -40,7 +40,7 @@ public class MessageUpdateTaskProgress extends MessageBase
 	}
 
 	@Override
-	public void handle(NetworkManager.PacketContext context)
+	public void handlePacket(NetworkManager.PacketContext context)
 	{
 		FTBQuests.NET_PROXY.updateTaskProgress(player, task, progress);
 	}

@@ -44,7 +44,7 @@ public class MessageChangeProgressResponse extends MessageBase
 	}
 
 	@Override
-	public void handle(NetworkManager.PacketContext context)
+	public void handlePacket(NetworkManager.PacketContext context)
 	{
 		FTBQuests.NET_PROXY.changeProgress(player, id, type, notifications);
 	}
