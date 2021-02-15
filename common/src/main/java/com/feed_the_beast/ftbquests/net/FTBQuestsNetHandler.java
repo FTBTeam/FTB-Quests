@@ -3,21 +3,15 @@ package com.feed_the_beast.ftbquests.net;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import me.shedaniel.architectury.annotations.ExpectPlatform;
 import me.shedaniel.architectury.networking.NetworkChannel;
-import me.shedaniel.architectury.networking.NetworkManager;
-import me.shedaniel.architectury.platform.Platform;
-import me.shedaniel.architectury.utils.Env;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
-import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 public class FTBQuestsNetHandler
 {
 	public static NetworkChannel MAIN;
-	private static final String GENERAL_VERSION = "1";
 
 	private static <T extends MessageBase> void register(Class<T> c, Function<FriendlyByteBuf, T> s)
 	{
