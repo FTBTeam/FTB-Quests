@@ -23,6 +23,6 @@
 	"depends": {
 		"fabric": "*",
 		"minecraft": "~1.16.4",
-		"architectury": ">=1.3.84"
+		"architectury": ">=1.5.112"
 	}
 }

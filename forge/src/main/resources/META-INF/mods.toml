@@ -22,20 +22,20 @@ side = "BOTH"
 [[dependencies.ftbquests]]
 modId = "minecraft"
 mandatory = true
-versionRange = "[1.16,)"
+versionRange = "[1.16.4,)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.ftbquests]]
 modId = "architectury"
 mandatory = true
-versionRange = "[1.3.84,)"
+versionRange = "[1.5.112,)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.ftbquests]]
 modId = "ftbguilibrary"
-mandatory = false
+mandatory = true
 versionRange = "[1.0.0,)"
 ordering = "AFTER"
-side = "CLIENT"
+side = "BOTH"
