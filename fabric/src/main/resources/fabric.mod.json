@@ -23,6 +23,7 @@
 	"depends": {
 		"fabric": "*",
 		"minecraft": "~1.16.4",
-		"architectury": ">=1.5.112"
+		"architectury": ">=1.5.112",
+		"itemfilters": ">=1605.2.4-build.29"
 	}
 }

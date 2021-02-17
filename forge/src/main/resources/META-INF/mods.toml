@@ -39,3 +39,10 @@ mandatory = true
 versionRange = "[1.0.0,)"
 ordering = "AFTER"
 side = "BOTH"
+
+[[dependencies.ftbquests]]
+modId = "itemfilters"
+mandatory = true
+versionRange = "[1605.2.4-build.29,)"
+ordering = "AFTER"
+side = "BOTH"

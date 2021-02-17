@@ -64,7 +64,7 @@ public class QuestWrapper //FIXME: implements IRecipeWrapper
 			if (!stack.isEmpty())
 			{
 				List<ItemStack> list = new ArrayList<>();
-				ItemFiltersAPI.getValidItems(stack, list);
+				ItemFiltersAPI.getDisplayItemStacks(stack, list);
 				input.add(list);
 			}
 			else if (task.getIcon() instanceof ItemIcon)

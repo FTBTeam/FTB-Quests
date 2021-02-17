@@ -130,10 +130,10 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 		//nbtMode = Bits.getFlag(flags, 64) ? Bits.getFlag(flags, 128) ? NBTMatchingMode.CONTAIN : NBTMatchingMode.IGNORE : NBTMatchingMode.MATCH;
 	}
 
-	public List<ItemStack> getValidItems()
+	public List<ItemStack> getValidDisplayItems()
 	{
 		List<ItemStack> list = new ArrayList<>();
-		ItemFiltersAPI.getValidItems(item, list);
+		ItemFiltersAPI.getDisplayItemStacks(item, list);
 		return list;
 	}
 
@@ -155,7 +155,7 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 	{
 		List<Icon> icons = new ArrayList<>();
 
-		for (ItemStack stack : getValidItems())
+		for (ItemStack stack : getValidDisplayItems())
 		{
 			ItemStack copy = stack.copy();
 			copy.setCount(1);
@@ -216,7 +216,7 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 	{
 		button.playClickSound();
 
-		List<ItemStack> validItems = getValidItems();
+		List<ItemStack> validItems = getValidDisplayItems();
 
 		if (!consumesResources() && validItems.size() == 1 && Platform.isModLoaded("jei"))
 		{
@@ -247,7 +247,7 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 			list.blankLine();
 			list.add(new TranslatableComponent("ftbquests.task.click_to_submit").withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE));
 		}
-		else if (getValidItems().size() > 1)
+		else if (getValidDisplayItems().size() > 1)
 		{
 			list.blankLine();
 			list.add(new TranslatableComponent("ftbquests.task.ftbquests.item.view_items").withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE));
