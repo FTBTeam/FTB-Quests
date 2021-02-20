@@ -152,7 +152,7 @@ public class LocationTask extends Task
 		{
 			if (task.ignoreDimension || task.dimension == player.level.dimension())
 			{
-				int y = Mth.floor(player.getX());
+				int y = Mth.floor(player.getY());
 
 				if (y >= task.y && y < task.y + task.h)
 				{
