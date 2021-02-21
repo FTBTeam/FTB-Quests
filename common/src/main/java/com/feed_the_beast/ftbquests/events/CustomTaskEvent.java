@@ -1,7 +1,7 @@
 package com.feed_the_beast.ftbquests.events;
 
 import com.feed_the_beast.ftbquests.quest.task.CustomTask;
-import me.shedaniel.architectury.ForgeEventCancellable;
+import me.shedaniel.architectury.ForgeEvent;
 import me.shedaniel.architectury.event.Actor;
 import me.shedaniel.architectury.event.Event;
 import me.shedaniel.architectury.event.EventFactory;
@@ -9,7 +9,7 @@ import me.shedaniel.architectury.event.EventFactory;
 /**
  * @author LatvianModder
  */
-@ForgeEventCancellable
+@ForgeEvent
 public class CustomTaskEvent
 {
 	public static final Event<Actor<CustomTaskEvent>> EVENT = EventFactory.createActorLoop();
@@ -18,6 +18,11 @@ public class CustomTaskEvent
 	public CustomTaskEvent(CustomTask t)
 	{
 		task = t;
+	}
+
+	public boolean isCancelable()
+	{
+		return true;
 	}
 
 	public CustomTask getTask()
