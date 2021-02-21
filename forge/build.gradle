@@ -6,11 +6,12 @@ plugins {
 def ENV = System.getenv()
 
 configurations {
-	shadow
+	shadowCommon
 }
 
 architectury {
 	platformSetupLoomIde()
+	forge()
 }
 
 loom {
@@ -22,7 +23,7 @@ dependencies {
 	minecraft "com.mojang:minecraft:${rootProject.architectury.minecraft}"
 	mappings minecraft.officialMojangMappings()
 	forge "net.minecraftforge:forge:${rootProject.forge_version}"
-	modCompile "me.shedaniel:architectury:${rootProject.architectury_version}:forge"
+	modApi "me.shedaniel:architectury-forge:${rootProject.architectury_version}"
 
 	modCompile "curse.maven:jei-238222:${jei_file}"
 	modCompile "curse.maven:ftb-teams-404468:${rootProject.ftb_teams_version_forge}"
@@ -36,29 +37,13 @@ dependencies {
 	compileOnly(project(path: ":common")) {
 		transitive = false
 	}
-	runtimeOnly(project(path: ":common", configuration: "transformDevelopmentForge")) {
+	developmentForge(project(path: ":common")) {
 		transitive = false
 	}
-	shadow(project(path: ":common", configuration: "transformProductionForge")) {
+	shadowCommon(project(path: ":common", configuration: "transformProductionForge")) {
 		transitive = false
 	}
 }
-
-/*
-dependencies {
-	minecraft "com.mojang:minecraft:${minecraft_version}"
-	mappings minecraft.officialMojangMappings()
-    forge "net.minecraftforge:forge:${forge_version}"
-    modCompile "curse.maven:ftb-gui-library-404465:${ftb_gui_library_version}"
-    modCompile "curse.maven:item-filters-309674:${itemfilters_version}"
-	// modCompile "com.feed_the_beast.mods:ftb-teams:${ftb_teams_version}"
-	// compile fg.deobf("curse.maven:rhino-416294:${rhino_file}")
-    modCompile("curse.maven:kubejs-238086:${kubejs_file}")
-    modCompile("curse.maven:jei-238222:${jei_file}")
-    modCompile("curse.maven:bookshelf-228525:${bookshelf_file}")
-    modCompile("curse.maven:game-stages-268655:${gamestages_file}")
-}
-*/
 
 processResources {
 	filesMatching("fabric.mod.json") {
@@ -68,14 +53,14 @@ processResources {
 }
 
 shadowJar {
-	configurations = [project.configurations.shadow]
-	classifier "shadow"
+	configurations = [project.configurations.shadowCommon]
+	classifier "dev-shadow"
 }
 
 remapJar {
-	dependsOn(shadowJar)
-	input.set(shadowJar.archivePath)
-	archiveClassifier = "forge"
+	input.set shadowJar.archiveFile
+	dependsOn shadowJar
+	classifier "forge"
 }
 
 jar {
@@ -90,6 +75,8 @@ jar {
 				"Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
 		])
 	}
+
+	classifier "dev"
 }
 
 if (ENV.CURSEFORGE_KEY) {
