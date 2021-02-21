@@ -6,7 +6,7 @@ plugins {
 def ENV = System.getenv()
 
 configurations {
-	shadow
+	shadowCommon
 }
 
 architectury {
@@ -17,9 +17,11 @@ architectury {
 dependencies {
 	minecraft "com.mojang:minecraft:${rootProject.architectury.minecraft}"
 	mappings minecraft.officialMojangMappings()
-	modCompile "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
-	modCompile "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_api_version}"
-	modCompile "me.shedaniel:architectury:${rootProject.architectury_version}:fabric"
+
+	modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
+
+	modApi "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_api_version}"
+	modApi "me.shedaniel:architectury-fabric:${rootProject.architectury_version}"
 
 	modCompile "curse.maven:ftb-teams-438497:${rootProject.ftb_teams_version_fabric}"
 	modCompile "curse.maven:ftb-gui-library-438495:${rootProject.ftb_gui_library_version_fabric}"
@@ -33,7 +35,7 @@ dependencies {
 	developmentFabric(project(path: ":common")) {
 		transitive = false
 	}
-	shadow(project(path: ":common", configuration: "transformProductionFabric")) {
+	shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) {
 		transitive = false
 	}
 }
@@ -47,14 +49,18 @@ processResources {
 }
 
 shadowJar {
-	configurations = [project.configurations.shadow]
-	classifier "shadow"
+	configurations = [project.configurations.shadowCommon]
+	classifier "dev-shadow"
 }
 
 remapJar {
-	dependsOn(shadowJar)
-	input.set(shadowJar.archivePath)
+	input.set shadowJar.archiveFile
+	dependsOn shadowJar
 	classifier "fabric"
+}
+
+jar {
+	classifier "dev"
 }
 
 if (ENV.CURSEFORGE_KEY) {
