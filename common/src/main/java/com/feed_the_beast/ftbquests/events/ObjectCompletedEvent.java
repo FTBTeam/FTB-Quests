@@ -47,6 +47,11 @@ public class ObjectCompletedEvent<T extends QuestObject>
 		notifiedPlayers = n;
 	}
 
+	public boolean isCancelable()
+	{
+		return true;
+	}
+
 	public PlayerData getData()
 	{
 		return data;

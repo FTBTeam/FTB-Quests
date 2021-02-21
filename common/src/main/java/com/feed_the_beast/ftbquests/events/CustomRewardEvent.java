@@ -1,7 +1,7 @@
 package com.feed_the_beast.ftbquests.events;
 
 import com.feed_the_beast.ftbquests.quest.reward.CustomReward;
-import me.shedaniel.architectury.ForgeEventCancellable;
+import me.shedaniel.architectury.ForgeEvent;
 import me.shedaniel.architectury.event.Actor;
 import me.shedaniel.architectury.event.Event;
 import me.shedaniel.architectury.event.EventFactory;
@@ -10,7 +10,7 @@ import net.minecraft.server.level.ServerPlayer;
 /**
  * @author LatvianModder
  */
-@ForgeEventCancellable
+@ForgeEvent
 public class CustomRewardEvent
 {
 	public static final Event<Actor<CustomRewardEvent>> EVENT = EventFactory.createActorLoop();
@@ -23,6 +23,11 @@ public class CustomRewardEvent
 		reward = r;
 		player = p;
 		notify = n;
+	}
+
+	public boolean isCancelable()
+	{
+		return true;
 	}
 
 	public CustomReward getReward()
