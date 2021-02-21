@@ -21,7 +21,7 @@ public class MessageChangeProgressResponse extends MessageBase
 	MessageChangeProgressResponse(FriendlyByteBuf buffer)
 	{
 		player = NetUtils.readUUID(buffer);
-		id = buffer.readVarInt();
+		id = buffer.readLong();
 		type = ChangeProgress.NAME_MAP.read(buffer);
 		notifications = buffer.readBoolean();
 	}
