@@ -68,7 +68,7 @@ public class KubeJSIntegration
 	public static InteractionResult onCompleted(ObjectCompletedEvent event)
 	{
 		QuestObjectCompletedEventJS e = new QuestObjectCompletedEventJS(event);
-		e.post(ScriptType.SERVER, "ftbquests.completed", event.getObject().toString());
+		e.post(ScriptType.SERVER, "ftbquests.completed", event.getObject().getCodeString());
 
 		for (String tag : event.getObject().getTags())
 		{
@@ -81,7 +81,7 @@ public class KubeJSIntegration
 	public static void onTaskStarted(TaskStartedEvent event)
 	{
 		TaskStartedEventJS e = new TaskStartedEventJS(event);
-		e.post(ScriptType.SERVER, "ftbquests.started", event.getTaskData().task.toString());
+		e.post(ScriptType.SERVER, "ftbquests.started", event.getTaskData().task.getCodeString());
 
 		for (String tag : event.getTaskData().task.getTags())
 		{
