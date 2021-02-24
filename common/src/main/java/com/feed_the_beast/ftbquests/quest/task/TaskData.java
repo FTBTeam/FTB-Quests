@@ -91,6 +91,11 @@ public class TaskData<T extends Task>
 		setProgress(progress + p);
 	}
 
+	public final void complete()
+	{
+		setProgress(task.getMaxProgress());
+	}
+
 	public final int getRelativeProgress()
 	{
 		long max = task.getMaxProgress();
