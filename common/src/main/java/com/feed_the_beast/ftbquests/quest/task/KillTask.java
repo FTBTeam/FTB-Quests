@@ -137,7 +137,7 @@ public class KillTask extends Task
 		{
 			if (!isComplete() && task.entity.equals(Registries.getId(entity.getType(), Registry.ENTITY_TYPE_REGISTRY)))
 			{
-				complete();
+				addProgress(1);
 			}
 		}
 	}
