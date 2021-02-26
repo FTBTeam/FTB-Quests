@@ -12,12 +12,10 @@ import java.util.function.Supplier;
 /**
  * @author LatvianModder
  */
-public class RewardTypes
-{
+public class RewardTypes {
 	public static final HashMap<ResourceLocation, RewardType> TYPES = new LinkedHashMap<>();
 
-	public static RewardType register(ResourceLocation name, RewardType.Provider p, Supplier<Icon> i)
-	{
+	public static RewardType register(ResourceLocation name, RewardType.Provider p, Supplier<Icon> i) {
 		return TYPES.computeIfAbsent(name, id -> new RewardType(id, p, i));
 	}
 
@@ -32,7 +30,6 @@ public class RewardTypes
 	public static RewardType ADVANCEMENT = register(new ResourceLocation(FTBQuests.MOD_ID, "advancement"), AdvancementReward::new, () -> Icon.getIcon("minecraft:item/wheat"));
 	public static RewardType TOAST = register(new ResourceLocation(FTBQuests.MOD_ID, "toast"), ToastReward::new, () -> Icon.getIcon("minecraft:item/oak_sign"));
 
-	public static void init()
-	{
+	public static void init() {
 	}
 }

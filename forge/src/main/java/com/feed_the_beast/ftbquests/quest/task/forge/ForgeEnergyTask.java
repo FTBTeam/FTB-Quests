@@ -17,57 +17,45 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 /**
  * @author LatvianModder
  */
-public class ForgeEnergyTask extends EnergyTask
-{
+public class ForgeEnergyTask extends EnergyTask {
 	public static final ResourceLocation EMPTY_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "textures/tasks/fe_empty.png");
 	public static final ResourceLocation FULL_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "textures/tasks/fe_full.png");
 
-	public ForgeEnergyTask(Quest quest)
-	{
+	public ForgeEnergyTask(Quest quest) {
 		super(quest);
 	}
 
 	@Override
-	public TaskType getType()
-	{
+	public TaskType getType() {
 		return TaskTypes.FORGE_ENERGY;
 	}
 
 	@Override
 	@OnlyIn(Dist.CLIENT)
-	public MutableComponent getAltTitle()
-	{
+	public MutableComponent getAltTitle() {
 		return new TranslatableComponent("ftbquests.task.ftbquests.forge_energy.text", StringUtils.formatDouble(value, true));
 	}
 
 	@Override
-	public TaskData createData(PlayerData data)
-	{
+	public TaskData createData(PlayerData data) {
 		return new Data(this, data);
 	}
 
-	public static class Data extends TaskData<ForgeEnergyTask>
-	{
-		private Data(ForgeEnergyTask task, PlayerData data)
-		{
+	public static class Data extends TaskData<ForgeEnergyTask> {
+		private Data(ForgeEnergyTask task, PlayerData data) {
 			super(task, data);
 		}
 
-		public int receiveEnergy(int maxReceive, boolean simulate)
-		{
-			if (maxReceive > 0 && !isComplete())
-			{
+		public int receiveEnergy(int maxReceive, boolean simulate) {
+			if (maxReceive > 0 && !isComplete()) {
 				long add = Math.min(maxReceive, task.value - progress);
 
-				if (task.maxInput > 0)
-				{
+				if (task.maxInput > 0) {
 					add = Math.min(add, task.maxInput);
 				}
 
-				if (add > 0L)
-				{
-					if (!simulate)
-					{
+				if (add > 0L) {
+					if (!simulate) {
 						addProgress(add);
 					}
 

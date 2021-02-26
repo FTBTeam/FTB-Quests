@@ -6,13 +6,7 @@ import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Color4I;
 import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
 import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
-import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
-import com.feed_the_beast.mods.ftbguilibrary.widget.ContextMenuItem;
-import com.feed_the_beast.mods.ftbguilibrary.widget.GuiHelper;
-import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
-import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
-import com.feed_the_beast.mods.ftbguilibrary.widget.WidgetType;
-import com.feed_the_beast.mods.ftbguilibrary.widget.WrappedIngredient;
+import com.feed_the_beast.mods.ftbguilibrary.widget.*;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.ChatFormatting;
@@ -28,13 +22,11 @@ import java.util.List;
 /**
  * @author LatvianModder
  */
-public class ButtonReward extends Button
-{
+public class ButtonReward extends Button {
 	public final GuiQuests treeGui;
 	public final Reward reward;
 
-	public ButtonReward(Panel panel, Reward r)
-	{
+	public ButtonReward(Panel panel, Reward r) {
 		super(panel, r.getTitle(), r.getIcon());
 		treeGui = (GuiQuests) panel.getGui();
 		reward = r;
@@ -42,10 +34,8 @@ public class ButtonReward extends Button
 	}
 
 	@Override
-	public Component getTitle()
-	{
-		if (reward.isTeamReward())
-		{
+	public Component getTitle() {
+		if (reward.isTeamReward()) {
 			return super.getTitle().copy().withStyle(ChatFormatting.BLUE);
 		}
 
@@ -53,28 +43,22 @@ public class ButtonReward extends Button
 	}
 
 	@Override
-	public void addMouseOverText(TooltipList list)
-	{
-		if (isShiftKeyDown() && isCtrlKeyDown())
-		{
+	public void addMouseOverText(TooltipList list) {
+		if (isShiftKeyDown() && isCtrlKeyDown()) {
 			list.add(new TextComponent(reward.toString()).withStyle(ChatFormatting.DARK_GRAY));
 		}
 
-		if (reward.isTeamReward())
-		{
-			if (reward.addTitleInMouseOverText())
-			{
+		if (reward.isTeamReward()) {
+			if (reward.addTitleInMouseOverText()) {
 				list.add(getTitle());
 			}
 
 			Object object = getIngredientUnderMouse();
 
-			if (object instanceof WrappedIngredient && ((WrappedIngredient) object).tooltip)
-			{
+			if (object instanceof WrappedIngredient && ((WrappedIngredient) object).tooltip) {
 				Object ingredient = WrappedIngredient.unwrap(object);
 
-				if (ingredient instanceof ItemStack && !((ItemStack) ingredient).isEmpty())
-				{
+				if (ingredient instanceof ItemStack && !((ItemStack) ingredient).isEmpty()) {
 					List<Component> list1 = new ArrayList<>();
 					GuiHelper.addStackTooltip((ItemStack) ingredient, list1);
 					list1.forEach(list::add);
@@ -84,11 +68,8 @@ public class ButtonReward extends Button
 			list.blankLine();
 			reward.addMouseOverText(list);
 			list.add(new TranslatableComponent("ftbquests.reward.team_reward").withStyle(ChatFormatting.BLUE, ChatFormatting.UNDERLINE));
-		}
-		else
-		{
-			if (reward.addTitleInMouseOverText())
-			{
+		} else {
+			if (reward.addTitleInMouseOverText()) {
 				list.add(getTitle());
 			}
 
@@ -97,12 +78,9 @@ public class ButtonReward extends Button
 	}
 
 	@Override
-	public boolean mousePressed(MouseButton button)
-	{
-		if (isMouseOver())
-		{
-			if (button.isRight() || getWidgetType() != WidgetType.DISABLED)
-			{
+	public boolean mousePressed(MouseButton button) {
+		if (isMouseOver()) {
+			if (button.isRight() || getWidgetType() != WidgetType.DISABLED) {
 				onClicked(button);
 			}
 
@@ -113,10 +91,8 @@ public class ButtonReward extends Button
 	}
 
 	@Override
-	public WidgetType getWidgetType()
-	{
-		if (!ClientQuestFile.exists() || !ClientQuestFile.INSTANCE.self.isComplete(reward.quest))
-		{
+	public WidgetType getWidgetType() {
+		if (!ClientQuestFile.exists() || !ClientQuestFile.INSTANCE.self.isComplete(reward.quest)) {
 			return WidgetType.DISABLED;
 		}
 
@@ -124,17 +100,12 @@ public class ButtonReward extends Button
 	}
 
 	@Override
-	public void onClicked(MouseButton button)
-	{
-		if (button.isLeft())
-		{
-			if (ClientQuestFile.exists())
-			{
+	public void onClicked(MouseButton button) {
+		if (button.isLeft()) {
+			if (ClientQuestFile.exists()) {
 				reward.onButtonClicked(this, ClientQuestFile.INSTANCE.self.getClaimType(reward).canClaim());
 			}
-		}
-		else if (button.isRight() && ClientQuestFile.exists() && ClientQuestFile.INSTANCE.canEdit())
-		{
+		} else if (button.isRight() && ClientQuestFile.exists() && ClientQuestFile.INSTANCE.canEdit()) {
 			playClickSound();
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
 			GuiQuests.addObjectMenuItems(contextMenu, getGui(), reward);
@@ -144,34 +115,27 @@ public class ButtonReward extends Button
 
 	@Override
 	@Nullable
-	public Object getIngredientUnderMouse()
-	{
+	public Object getIngredientUnderMouse() {
 		return reward.getIngredient();
 	}
 
 	@Override
-	public void drawBackground(PoseStack matrixStack, Theme theme, int x, int y, int w, int h)
-	{
-		if (isMouseOver())
-		{
+	public void drawBackground(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
+		if (isMouseOver()) {
 			super.drawBackground(matrixStack, theme, x, y, w, h);
 		}
 	}
 
 	@Override
-	public void draw(PoseStack matrixStack, Theme theme, int x, int y, int w, int h)
-	{
+	public void draw(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
 		int bs = h >= 32 ? 32 : 16;
 		GuiHelper.setupDrawing();
 		drawBackground(matrixStack, theme, x, y, w, h);
 		drawIcon(matrixStack, theme, x + (w - bs) / 2, y + (h - bs) / 2, bs, bs);
 
-		if (treeGui.file.self == null)
-		{
+		if (treeGui.file.self == null) {
 			return;
-		}
-		else if (treeGui.contextMenu != null)
-		{
+		} else if (treeGui.contextMenu != null) {
 			//return;
 		}
 
@@ -180,24 +144,19 @@ public class ButtonReward extends Button
 		RenderSystem.enableBlend();
 		boolean completed = false;
 
-		if (treeGui.file.self.getClaimType(reward).isClaimed())
-		{
+		if (treeGui.file.self.getClaimType(reward).isClaimed()) {
 			ThemeProperties.CHECK_ICON.get().draw(matrixStack, x + w - 9, y + 1, 8, 8);
 			completed = true;
-		}
-		else if (treeGui.file.self.isComplete(reward.quest))
-		{
+		} else if (treeGui.file.self.isComplete(reward.quest)) {
 			ThemeProperties.ALERT_ICON.get().draw(matrixStack, x + w - 9, y + 1, 8, 8);
 		}
 
 		matrixStack.popPose();
 
-		if (!completed)
-		{
+		if (!completed) {
 			String s = reward.getButtonText();
 
-			if (!s.isEmpty())
-			{
+			if (!s.isEmpty()) {
 				matrixStack.pushPose();
 				matrixStack.translate(x + 19F - theme.getStringWidth(s) / 2F, y + 15F, 200F);
 				matrixStack.scale(0.5F, 0.5F, 1F);

@@ -12,19 +12,16 @@ import net.minecraft.network.FriendlyByteBuf;
 /**
  * @author LatvianModder
  */
-public class MessageEditObject extends MessageBase
-{
+public class MessageEditObject extends MessageBase {
 	private final long id;
 	private final CompoundTag nbt;
 
-	MessageEditObject(FriendlyByteBuf buffer)
-	{
+	MessageEditObject(FriendlyByteBuf buffer) {
 		id = buffer.readLong();
 		nbt = buffer.readNbt();
 	}
 
-	public MessageEditObject(QuestObjectBase o)
-	{
+	public MessageEditObject(QuestObjectBase o) {
 		id = o.id;
 		nbt = new CompoundTag();
 		o.writeData(nbt);
@@ -34,21 +31,17 @@ public class MessageEditObject extends MessageBase
 	}
 
 	@Override
-	public void write(FriendlyByteBuf buffer)
-	{
+	public void write(FriendlyByteBuf buffer) {
 		buffer.writeLong(id);
 		buffer.writeNbt(nbt);
 	}
 
 	@Override
-	public void handle(NetworkManager.PacketContext context)
-	{
-		if (NetUtils.canEdit(context))
-		{
+	public void handle(NetworkManager.PacketContext context) {
+		if (NetUtils.canEdit(context)) {
 			QuestObjectBase object = ServerQuestFile.INSTANCE.getBase(id);
 
-			if (object != null)
-			{
+			if (object != null) {
 				object.readData(nbt);
 				ServerQuestFile.INSTANCE.clearCachedData();
 				ServerQuestFile.INSTANCE.save();

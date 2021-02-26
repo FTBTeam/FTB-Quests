@@ -15,8 +15,7 @@ import net.minecraft.world.item.ItemStack;
 /**
  * @author LatvianModder
  */
-public class QuestCategory implements IRecipeCategory<QuestWrapper>
-{
+public class QuestCategory implements IRecipeCategory<QuestWrapper> {
 	public static final ResourceLocation UID = new ResourceLocation(FTBQuests.MOD_ID, "quests");
 	public static final ResourceLocation TEXTURE = new ResourceLocation(FTBQuests.MOD_ID + ":textures/gui/jei/quest.png");
 	public static QuestCategory instance;
@@ -24,62 +23,52 @@ public class QuestCategory implements IRecipeCategory<QuestWrapper>
 	private final IDrawable background;
 	private final IDrawable icon;
 
-	public QuestCategory(IGuiHelper guiHelper)
-	{
+	public QuestCategory(IGuiHelper guiHelper) {
 		instance = this;
 		background = guiHelper.createDrawable(TEXTURE, 0, 0, 144, 74);
 		icon = guiHelper.createDrawableIngredient(new ItemStack(FTBQuestsItems.BOOK.get()));
 	}
 
 	@Override
-	public ResourceLocation getUid()
-	{
+	public ResourceLocation getUid() {
 		return UID;
 	}
 
 	@Override
-	public Class<QuestWrapper> getRecipeClass()
-	{
+	public Class<QuestWrapper> getRecipeClass() {
 		return QuestWrapper.class;
 	}
 
 	@Override
-	public String getTitle()
-	{
+	public String getTitle() {
 		return I18n.get("ftbquests.quests");
 	}
 
 	@Override
-	public IDrawable getBackground()
-	{
+	public IDrawable getBackground() {
 		return background;
 	}
 
 	@Override
-	public IDrawable getIcon()
-	{
+	public IDrawable getIcon() {
 		return icon;
 	}
 
 	@Override
-	public void setIngredients(QuestWrapper questWrapper, IIngredients iIngredients)
-	{
+	public void setIngredients(QuestWrapper questWrapper, IIngredients iIngredients) {
 		//FIXME
 	}
 
 	@Override
-	public void setRecipe(IRecipeLayout layout, QuestWrapper entry, IIngredients ingredients)
-	{
+	public void setRecipe(IRecipeLayout layout, QuestWrapper entry, IIngredients ingredients) {
 		IGuiItemStackGroup stacks = layout.getItemStacks();
 		int is = Math.min(9, entry.input.size());
 
-		for (int i = 0; i < is; i++)
-		{
+		for (int i = 0; i < is; i++) {
 			stacks.init(i, true, (i % 3) * 18, (i / 3) * 18 + 20);
 		}
 
-		for (int i = 0; i < Math.min(9, entry.output.size()); i++)
-		{
+		for (int i = 0; i < Math.min(9, entry.output.size()); i++) {
 			stacks.init(i + is, false, (i % 3) * 18 + (5 * 18), (i / 3) * 18 + 20);
 		}
 

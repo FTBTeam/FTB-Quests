@@ -12,12 +12,7 @@ import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiEditConfigFromString;
 import com.feed_the_beast.mods.ftbguilibrary.misc.GuiButtonListBase;
 import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
 import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
-import com.feed_the_beast.mods.ftbguilibrary.widget.ContextMenuItem;
-import com.feed_the_beast.mods.ftbguilibrary.widget.GuiIcons;
-import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
-import com.feed_the_beast.mods.ftbguilibrary.widget.SimpleTextButton;
-import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
-import com.feed_the_beast.mods.ftbguilibrary.widget.WidgetVerticalSpace;
+import com.feed_the_beast.mods.ftbguilibrary.widget.*;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.TextComponent;
@@ -30,19 +25,15 @@ import java.util.List;
 /**
  * @author LatvianModder
  */
-public class GuiEditRewardTable extends GuiButtonListBase
-{
-	private class ButtonRewardTableSettings extends SimpleTextButton
-	{
-		private ButtonRewardTableSettings(Panel panel)
-		{
+public class GuiEditRewardTable extends GuiButtonListBase {
+	private class ButtonRewardTableSettings extends SimpleTextButton {
+		private ButtonRewardTableSettings(Panel panel) {
 			super(panel, new TranslatableComponent("gui.settings"), GuiIcons.SETTINGS);
 			setHeight(12);
 		}
 
 		@Override
-		public void onClicked(MouseButton button)
-		{
+		public void onClicked(MouseButton button) {
 			playClickSound();
 			ConfigGroup group = new ConfigGroup(FTBQuests.MOD_ID);
 			rewardTable.getConfig(rewardTable.createSubGroup(group));
@@ -51,17 +42,14 @@ public class GuiEditRewardTable extends GuiButtonListBase
 		}
 	}
 
-	private class ButtonSaveRewardTable extends SimpleTextButton
-	{
-		private ButtonSaveRewardTable(Panel panel)
-		{
+	private class ButtonSaveRewardTable extends SimpleTextButton {
+		private ButtonSaveRewardTable(Panel panel) {
 			super(panel, new TranslatableComponent("gui.accept"), GuiIcons.ACCEPT);
 			setHeight(12);
 		}
 
 		@Override
-		public void onClicked(MouseButton button)
-		{
+		public void onClicked(MouseButton button) {
 			playClickSound();
 			closeGui();
 			CompoundTag nbt = new CompoundTag();
@@ -71,24 +59,19 @@ public class GuiEditRewardTable extends GuiButtonListBase
 		}
 	}
 
-	private class ButtonAddWeightedReward extends SimpleTextButton
-	{
-		private ButtonAddWeightedReward(Panel panel)
-		{
+	private class ButtonAddWeightedReward extends SimpleTextButton {
+		private ButtonAddWeightedReward(Panel panel) {
 			super(panel, new TranslatableComponent("gui.add"), GuiIcons.ADD);
 			setHeight(12);
 		}
 
 		@Override
-		public void onClicked(MouseButton button)
-		{
+		public void onClicked(MouseButton button) {
 			playClickSound();
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
 
-			for (RewardType type : RewardTypes.TYPES.values())
-			{
-				if (!type.getExcludeFromListRewards())
-				{
+			for (RewardType type : RewardTypes.TYPES.values()) {
+				if (!type.getExcludeFromListRewards()) {
 					contextMenu.add(new ContextMenuItem(type.getDisplayName(), type.getIcon(), () -> {
 						playClickSound();
 						type.getGuiProvider().openCreationGui(this, rewardTable.fakeQuest, reward -> {
@@ -103,27 +86,23 @@ public class GuiEditRewardTable extends GuiButtonListBase
 		}
 	}
 
-	private class ButtonWeightedReward extends SimpleTextButton
-	{
+	private class ButtonWeightedReward extends SimpleTextButton {
 		private final WeightedReward reward;
 
-		private ButtonWeightedReward(Panel panel, WeightedReward r)
-		{
+		private ButtonWeightedReward(Panel panel, WeightedReward r) {
 			super(panel, r.reward.getTitle(), r.reward.getIcon());
 			reward = r;
 		}
 
 		@Override
-		public void addMouseOverText(TooltipList list)
-		{
+		public void addMouseOverText(TooltipList list) {
 			super.addMouseOverText(list);
 			reward.reward.addMouseOverText(list);
 			list.add(new TranslatableComponent("ftbquests.reward_table.weight").append(": " + reward.weight).append(new TextComponent(" [" + WeightedReward.chanceString(reward.weight, rewardTable.getTotalWeight(true)) + "]").withStyle(ChatFormatting.DARK_GRAY)));
 		}
 
 		@Override
-		public void onClicked(MouseButton button)
-		{
+		public void onClicked(MouseButton button) {
 			playClickSound();
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
 			contextMenu.add(new ContextMenuItem(new TranslatableComponent("selectServer.edit"), GuiIcons.SETTINGS, () -> {
@@ -136,14 +115,11 @@ public class GuiEditRewardTable extends GuiButtonListBase
 			contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.reward_table.set_weight"), GuiIcons.SETTINGS, () -> {
 				ConfigDouble c = new ConfigDouble(0D, Double.POSITIVE_INFINITY);
 				GuiEditConfigFromString.open(c, (double) reward.weight, 1D, accepted -> {
-					if (accepted)
-					{
+					if (accepted) {
 						reward.weight = c.value.intValue();
 
-						if (c.value < 1D)
-						{
-							for (WeightedReward reward : rewardTable.rewards)
-							{
+						if (c.value < 1D) {
+							for (WeightedReward reward : rewardTable.rewards) {
 								reward.weight = (int) (reward.weight / c.value);
 							}
 
@@ -164,8 +140,7 @@ public class GuiEditRewardTable extends GuiButtonListBase
 
 		@Override
 		@Nullable
-		public Object getIngredientUnderMouse()
-		{
+		public Object getIngredientUnderMouse() {
 			return reward.reward.getIngredient();
 		}
 	}
@@ -174,8 +149,7 @@ public class GuiEditRewardTable extends GuiButtonListBase
 	private final RewardTable rewardTable;
 	private final Runnable callback;
 
-	public GuiEditRewardTable(RewardTable r, Runnable c)
-	{
+	public GuiEditRewardTable(RewardTable r, Runnable c) {
 		originalTable = r;
 		rewardTable = new RewardTable(originalTable.file);
 		CompoundTag nbt = new CompoundTag();
@@ -187,22 +161,19 @@ public class GuiEditRewardTable extends GuiButtonListBase
 	}
 
 	@Override
-	public void addButtons(Panel panel)
-	{
+	public void addButtons(Panel panel) {
 		panel.add(new ButtonRewardTableSettings(panel));
 		panel.add(new ButtonSaveRewardTable(panel));
 		panel.add(new ButtonAddWeightedReward(panel));
 		panel.add(new WidgetVerticalSpace(panel, 1));
 
-		for (WeightedReward r : rewardTable.rewards)
-		{
+		for (WeightedReward r : rewardTable.rewards) {
 			panel.add(new ButtonWeightedReward(panel, r));
 		}
 	}
 
 	@Override
-	public Theme getTheme()
-	{
+	public Theme getTheme() {
 		return FTBQuestsTheme.INSTANCE;
 	}
 }

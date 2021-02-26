@@ -32,8 +32,7 @@ import java.util.Optional;
 /**
  * @author LatvianModder
  */
-public class ForgeFluidTask extends Task
-{
+public class ForgeFluidTask extends Task {
 	public static final ResourceLocation TANK_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "textures/tasks/tank.png");
 
 	public Fluid fluid = Fluids.WATER;
@@ -42,51 +41,43 @@ public class ForgeFluidTask extends Task
 
 	private FluidStack cachedFluidStack = null;
 
-	public ForgeFluidTask(Quest quest)
-	{
+	public ForgeFluidTask(Quest quest) {
 		super(quest);
 	}
 
 	@Override
-	public TaskType getType()
-	{
+	public TaskType getType() {
 		return TaskTypes.FLUID;
 	}
 
 	@Override
-	public long getMaxProgress()
-	{
+	public long getMaxProgress() {
 		return amount;
 	}
 
 	@Override
-	public String getMaxProgressString()
-	{
+	public String getMaxProgressString() {
 		return getVolumeString(amount);
 	}
 
 	@Override
-	public void writeData(CompoundTag nbt)
-	{
+	public void writeData(CompoundTag nbt) {
 		super.writeData(nbt);
 		nbt.putString("fluid", Registries.getId(fluid, Registry.FLUID_REGISTRY).toString());
 		nbt.putLong("amount", amount);
 
-		if (fluidNBT != null)
-		{
+		if (fluidNBT != null) {
 			nbt.put("nbt", fluidNBT);
 		}
 	}
 
 	@Override
-	public void readData(CompoundTag nbt)
-	{
+	public void readData(CompoundTag nbt) {
 		super.readData(nbt);
 
 		fluid = Registry.FLUID.get(new ResourceLocation(nbt.getString("fluid")));
 
-		if (fluid == null || fluid == Fluids.EMPTY)
-		{
+		if (fluid == null || fluid == Fluids.EMPTY) {
 			fluid = Fluids.WATER;
 		}
 
@@ -95,8 +86,7 @@ public class ForgeFluidTask extends Task
 	}
 
 	@Override
-	public void writeNetData(FriendlyByteBuf buffer)
-	{
+	public void writeNetData(FriendlyByteBuf buffer) {
 		super.writeNetData(buffer);
 		buffer.writeResourceLocation(Registries.getId(fluid, Registry.FLUID_REGISTRY));
 		buffer.writeNbt(fluidNBT);
@@ -104,13 +94,11 @@ public class ForgeFluidTask extends Task
 	}
 
 	@Override
-	public void readNetData(FriendlyByteBuf buffer)
-	{
+	public void readNetData(FriendlyByteBuf buffer) {
 		super.readNetData(buffer);
 		fluid = Registry.FLUID.get(buffer.readResourceLocation());
 
-		if (fluid == null || fluid == Fluids.EMPTY)
-		{
+		if (fluid == null || fluid == Fluids.EMPTY) {
 			fluid = Fluids.WATER;
 		}
 
@@ -119,46 +107,35 @@ public class ForgeFluidTask extends Task
 	}
 
 	@Override
-	public void clearCachedData()
-	{
+	public void clearCachedData() {
 		super.clearCachedData();
 		cachedFluidStack = null;
 	}
 
-	public FluidStack createFluidStack()
-	{
-		if (cachedFluidStack == null)
-		{
+	public FluidStack createFluidStack() {
+		if (cachedFluidStack == null) {
 			cachedFluidStack = FluidStack.create(fluid, FluidStack.bucketAmount(), fluidNBT);
 		}
 
 		return cachedFluidStack;
 	}
 
-	public static String getVolumeString(long a)
-	{
+	public static String getVolumeString(long a) {
 		StringBuilder builder = new StringBuilder();
 
-		if (a >= FluidStack.bucketAmount().longValue())
-		{
-			if (a % FluidStack.bucketAmount().longValue() != 0L)
-			{
+		if (a >= FluidStack.bucketAmount().longValue()) {
+			if (a % FluidStack.bucketAmount().longValue() != 0L) {
 				builder.append(a / (double) FluidStack.bucketAmount().longValue());
-			}
-			else
-			{
+			} else {
 				builder.append(a / FluidStack.bucketAmount().longValue());
 			}
-		}
-		else
-		{
+		} else {
 			builder.append(a % FluidStack.bucketAmount().longValue());
 		}
 
 		builder.append(' ');
 
-		if (a < FluidStack.bucketAmount().longValue())
-		{
+		if (a < FluidStack.bucketAmount().longValue()) {
 			builder.append('m');
 		}
 
@@ -168,23 +145,20 @@ public class ForgeFluidTask extends Task
 
 	@Override
 	@OnlyIn(Dist.CLIENT)
-	public MutableComponent getAltTitle()
-	{
+	public MutableComponent getAltTitle() {
 		return new TextComponent(getVolumeString(amount) + " of ").append(createFluidStack().getName());
 	}
 
 	@Override
 	@OnlyIn(Dist.CLIENT)
-	public Icon getAltIcon()
-	{
+	public Icon getAltIcon() {
 		FluidStack stack = createFluidStack();
 		return Icon.getIcon(Optional.ofNullable(FluidStackHooks.getStillTexture(stack)).map(TextureAtlasSprite::getName).map(ResourceLocation::toString).orElse("missingno"));
 	}
 
 	@Override
 	@OnlyIn(Dist.CLIENT)
-	public void getConfig(ConfigGroup config)
-	{
+	public void getConfig(ConfigGroup config) {
 		super.getConfig(config);
 
 		config.add("fluid", new ConfigFluid(false), fluid, v -> fluid = v, Fluids.WATER);
@@ -193,35 +167,29 @@ public class ForgeFluidTask extends Task
 	}
 
 	@Override
-	public boolean canInsertItem()
-	{
+	public boolean canInsertItem() {
 		return true;
 	}
 
 	@Override
 	@Nullable
 	@OnlyIn(Dist.CLIENT)
-	public Object getIngredient()
-	{
+	public Object getIngredient() {
 		return createFluidStack();
 	}
 
 	@Override
-	public TaskData createData(PlayerData data)
-	{
+	public TaskData createData(PlayerData data) {
 		return new Data(this, data);
 	}
 
-	public static class Data extends TaskData<ForgeFluidTask>
-	{
-		private Data(ForgeFluidTask t, PlayerData data)
-		{
+	public static class Data extends TaskData<ForgeFluidTask> {
+		private Data(ForgeFluidTask t, PlayerData data) {
 			super(t, data);
 		}
 
 		@Override
-		public String getProgressString()
-		{
+		public String getProgressString() {
 			return getVolumeString((int) progress);
 		}
 

@@ -21,87 +21,73 @@ import net.minecraft.world.level.biome.Biomes;
 /**
  * @author LatvianModder
  */
-public class BiomeTask extends Task
-{
+public class BiomeTask extends Task {
 	public ResourceKey<Biome> biome;
 
-	public BiomeTask(Quest quest)
-	{
+	public BiomeTask(Quest quest) {
 		super(quest);
 		biome = Biomes.PLAINS;
 	}
 
 	@Override
-	public TaskType getType()
-	{
+	public TaskType getType() {
 		return TaskTypes.BIOME;
 	}
 
 	@Override
-	public void writeData(CompoundTag nbt)
-	{
+	public void writeData(CompoundTag nbt) {
 		super.writeData(nbt);
 		nbt.putString("biome", biome.location().toString());
 	}
 
 	@Override
-	public void readData(CompoundTag nbt)
-	{
+	public void readData(CompoundTag nbt) {
 		super.readData(nbt);
 		biome = ResourceKey.create(Registry.BIOME_REGISTRY, new ResourceLocation(nbt.getString("biome")));
 	}
 
 	@Override
-	public void writeNetData(FriendlyByteBuf buffer)
-	{
+	public void writeNetData(FriendlyByteBuf buffer) {
 		super.writeNetData(buffer);
 		buffer.writeResourceLocation(biome.location());
 	}
 
 	@Override
-	public void readNetData(FriendlyByteBuf buffer)
-	{
+	public void readNetData(FriendlyByteBuf buffer) {
 		super.readNetData(buffer);
 		biome = ResourceKey.create(Registry.BIOME_REGISTRY, buffer.readResourceLocation());
 	}
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public void getConfig(ConfigGroup config)
-	{
+	public void getConfig(ConfigGroup config) {
 		super.getConfig(config);
 		config.addString("biome", biome.location().toString(), v -> biome = ResourceKey.create(Registry.BIOME_REGISTRY, new ResourceLocation(v)), "minecraft:plains");
 	}
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public MutableComponent getAltTitle()
-	{
+	public MutableComponent getAltTitle() {
 		return new TranslatableComponent("ftbquests.task.ftbquests.biome").append(": ").append(new TextComponent(biome.location().toString()).withStyle(ChatFormatting.DARK_GREEN));
 	}
 
 	@Override
-	public int autoSubmitOnPlayerTick()
-	{
+	public int autoSubmitOnPlayerTick() {
 		return 20;
 	}
 
 	@Override
-	public TaskData createData(PlayerData data)
-	{
+	public TaskData createData(PlayerData data) {
 		return new Data(this, data);
 	}
 
-	public static class Data extends BooleanTaskData<BiomeTask>
-	{
-		private Data(BiomeTask task, PlayerData data)
-		{
+	public static class Data extends BooleanTaskData<BiomeTask> {
+		private Data(BiomeTask task, PlayerData data) {
 			super(task, data);
 		}
 
 		@Override
-		public boolean canSubmit(ServerPlayer player)
-		{
+		public boolean canSubmit(ServerPlayer player) {
 			return !player.isSpectator() && player.level.getBiomeName(player.blockPosition()).orElse(null) == task.biome;
 		}
 	}

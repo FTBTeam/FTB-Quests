@@ -10,42 +10,35 @@ import net.minecraft.server.level.ServerPlayer;
 /**
  * @author LatvianModder
  */
-public class MessageClaimReward extends MessageBase
-{
+public class MessageClaimReward extends MessageBase {
 	private final long id;
 	private final boolean notify;
 
-	MessageClaimReward(FriendlyByteBuf buffer)
-	{
+	MessageClaimReward(FriendlyByteBuf buffer) {
 		id = buffer.readLong();
 		notify = buffer.readBoolean();
 	}
 
-	public MessageClaimReward(long i, boolean n)
-	{
+	public MessageClaimReward(long i, boolean n) {
 		id = i;
 		notify = n;
 	}
 
 	@Override
-	public void write(FriendlyByteBuf buffer)
-	{
+	public void write(FriendlyByteBuf buffer) {
 		buffer.writeLong(id);
 		buffer.writeBoolean(notify);
 	}
 
 	@Override
-	public void handle(NetworkManager.PacketContext context)
-	{
+	public void handle(NetworkManager.PacketContext context) {
 		Reward reward = ServerQuestFile.INSTANCE.getReward(id);
 		ServerPlayer player = (ServerPlayer) context.getPlayer();
 
-		if (reward != null)
-		{
+		if (reward != null) {
 			PlayerData teamData = ServerQuestFile.INSTANCE.getData(player);
 
-			if (teamData.isComplete(reward.quest))
-			{
+			if (teamData.isComplete(reward.quest)) {
 				teamData.claimReward(player, reward, notify);
 			}
 		}

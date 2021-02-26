@@ -19,14 +19,12 @@ import java.util.List;
 /**
  * @author LatvianModder
  */
-public class SelectImageScreen extends GuiButtonListBase
-{
+public class SelectImageScreen extends GuiButtonListBase {
 	private final ImageConfig imageConfig;
 	private final ConfigCallback callback;
 	private final List<ResourceLocation> images;
 
-	public SelectImageScreen(ImageConfig i, ConfigCallback c)
-	{
+	public SelectImageScreen(ImageConfig i, ConfigCallback c) {
 		imageConfig = i;
 		callback = c;
 		setTitle(new TextComponent("Select Image"));
@@ -36,15 +34,11 @@ public class SelectImageScreen extends GuiButtonListBase
 
 		images = new ArrayList<>();
 
-		try
-		{
-			for (ResourceLocation res : Minecraft.getInstance().getResourceManager().listResources("textures", t -> t.endsWith(".png")))
-			{
+		try {
+			for (ResourceLocation res : Minecraft.getInstance().getResourceManager().listResources("textures", t -> t.endsWith(".png"))) {
 				images.add(res);
 			}
-		}
-		catch (Exception ex)
-		{
+		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
 
@@ -52,31 +46,24 @@ public class SelectImageScreen extends GuiButtonListBase
 	}
 
 	@Override
-	public void addButtons(Panel panel)
-	{
-		panel.add(new SimpleTextButton(panel, new TextComponent("None"), Icon.EMPTY)
-		{
+	public void addButtons(Panel panel) {
+		panel.add(new SimpleTextButton(panel, new TextComponent("None"), Icon.EMPTY) {
 			@Override
-			public void onClicked(MouseButton mouseButton)
-			{
+			public void onClicked(MouseButton mouseButton) {
 				playClickSound();
 				imageConfig.setCurrentValue("");
 				callback.save(true);
 			}
 		});
 
-		for (ResourceLocation res : images)
-		{
-			if (res.getPath().startsWith("textures/font/"))
-			{
+		for (ResourceLocation res : images) {
+			if (res.getPath().startsWith("textures/font/")) {
 				continue;
 			}
 
-			panel.add(new SimpleTextButton(panel, new TextComponent("").append(new TextComponent(res.getNamespace()).withStyle(ChatFormatting.GOLD)).append(":").append(new TextComponent(res.getPath().substring(9, res.getPath().length() - 4)).withStyle(ChatFormatting.YELLOW)), Icon.getIcon(res.toString()))
-			{
+			panel.add(new SimpleTextButton(panel, new TextComponent("").append(new TextComponent(res.getNamespace()).withStyle(ChatFormatting.GOLD)).append(":").append(new TextComponent(res.getPath().substring(9, res.getPath().length() - 4)).withStyle(ChatFormatting.YELLOW)), Icon.getIcon(res.toString())) {
 				@Override
-				public void onClicked(MouseButton mouseButton)
-				{
+				public void onClicked(MouseButton mouseButton) {
 					playClickSound();
 					imageConfig.setCurrentValue(res.toString());
 					callback.save(true);
@@ -86,16 +73,13 @@ public class SelectImageScreen extends GuiButtonListBase
 	}
 
 	@Override
-	public Theme getTheme()
-	{
+	public Theme getTheme() {
 		return FTBQuestsTheme.INSTANCE;
 	}
 
 	@Override
-	public boolean onClosedByKey(Key key)
-	{
-		if (super.onClosedByKey(key))
-		{
+	public boolean onClosedByKey(Key key) {
+		if (super.onClosedByKey(key)) {
 			callback.save(false);
 			return false;
 		}

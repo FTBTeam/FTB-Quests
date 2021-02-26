@@ -6,14 +6,7 @@ import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
 import com.feed_the_beast.mods.ftbguilibrary.utils.StringUtils;
 import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
-import com.feed_the_beast.mods.ftbguilibrary.widget.GuiBase;
-import com.feed_the_beast.mods.ftbguilibrary.widget.GuiHelper;
-import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
-import com.feed_the_beast.mods.ftbguilibrary.widget.SimpleTextButton;
-import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
-import com.feed_the_beast.mods.ftbguilibrary.widget.Widget;
-import com.feed_the_beast.mods.ftbguilibrary.widget.WidgetLayout;
-import com.feed_the_beast.mods.ftbguilibrary.widget.WrappedIngredient;
+import com.feed_the_beast.mods.ftbguilibrary.widget.*;
 import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.ChatFormatting;
@@ -29,39 +22,32 @@ import java.util.List;
 /**
  * @author LatvianModder
  */
-public class GuiRewardNotifications extends GuiBase implements IRewardListenerGui
-{
-	private class RewardNotification extends Widget
-	{
+public class GuiRewardNotifications extends GuiBase implements IRewardListenerGui {
+	private class RewardNotification extends Widget {
 		private final RewardKey key;
 
-		public RewardNotification(Panel p, RewardKey e)
-		{
+		public RewardNotification(Panel p, RewardKey e) {
 			super(p);
 			setSize(22, 22);
 			key = e;
 		}
 
 		@Override
-		public void addMouseOverText(TooltipList list)
-		{
-			if (!key.title.isEmpty())
-			{
+		public void addMouseOverText(TooltipList list) {
+			if (!key.title.isEmpty()) {
 				list.string(key.title);
 			}
 		}
 
 		@Override
-		public void draw(PoseStack matrixStack, Theme theme, int x, int y, int w, int h)
-		{
+		public void draw(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
 			GuiHelper.setupDrawing();
 			QuestShape.get("rsquare").outline.draw(matrixStack, x, y, w, h);
 			key.icon.draw(matrixStack, x + 3, y + 3, 16, 16);
 
 			int count = rewards.getInt(key);
 
-			if (count > 1)
-			{
+			if (count > 1) {
 				matrixStack.pushPose();
 				matrixStack.translate(0, 0, 600);
 				MutableComponent s = new TextComponent(StringUtils.formatDouble(count, true)).withStyle(ChatFormatting.YELLOW);
@@ -72,8 +58,7 @@ public class GuiRewardNotifications extends GuiBase implements IRewardListenerGu
 
 		@Override
 		@Nullable
-		public Object getIngredientUnderMouse()
-		{
+		public Object getIngredientUnderMouse() {
 			return new WrappedIngredient(key.icon.getIngredient()).tooltip();
 		}
 	}
@@ -82,48 +67,37 @@ public class GuiRewardNotifications extends GuiBase implements IRewardListenerGu
 	private final SimpleTextButton closeButton;
 	private final Panel itemPanel;
 
-	public GuiRewardNotifications()
-	{
+	public GuiRewardNotifications() {
 		rewards = new Object2IntOpenHashMap<>();
-		closeButton = new SimpleTextButton(this, new TranslatableComponent("gui.close"), Icon.EMPTY)
-		{
+		closeButton = new SimpleTextButton(this, new TranslatableComponent("gui.close"), Icon.EMPTY) {
 			@Override
-			public void onClicked(MouseButton button)
-			{
+			public void onClicked(MouseButton button) {
 				playClickSound();
 				getGui().closeGui();
 			}
 		};
 
-		itemPanel = new Panel(this)
-		{
+		itemPanel = new Panel(this) {
 			@Override
-			public void addWidgets()
-			{
+			public void addWidgets() {
 				List<RewardKey> keys = new ArrayList<>(rewards.keySet());
 				keys.sort((o1, o2) -> Integer.compare(rewards.getInt(o2), rewards.getInt(o1)));
 
-				for (RewardKey key : keys)
-				{
+				for (RewardKey key : keys) {
 					add(new RewardNotification(this, key));
 				}
 			}
 
 			@Override
-			public void alignWidgets()
-			{
-				if (widgets.size() < 9)
-				{
+			public void alignWidgets() {
+				if (widgets.size() < 9) {
 					setWidth(align(new WidgetLayout.Horizontal(0, 1, 0)));
 					setHeight(22);
-				}
-				else
-				{
+				} else {
 					setWidth(23 * 9);
 					setHeight(23 * Mth.ceil(widgets.size() / 9F));
 
-					for (int i = 0; i < widgets.size(); i++)
-					{
+					for (int i = 0; i < widgets.size(); i++) {
 						widgets.get(i).setPos((i % 9) * 23, (i / 9) * 23);
 					}
 				}
@@ -137,22 +111,19 @@ public class GuiRewardNotifications extends GuiBase implements IRewardListenerGu
 	}
 
 	@Override
-	public void addWidgets()
-	{
+	public void addWidgets() {
 		add(itemPanel);
 		add(closeButton);
 		closeButton.setPos((width - closeButton.width) / 2, height * 2 / 3 + 16);
 	}
 
 	@Override
-	public boolean onInit()
-	{
+	public boolean onInit() {
 		return setFullscreen();
 	}
 
 	@Override
-	public void drawBackground(PoseStack matrixStack, Theme theme, int x, int y, int w, int h)
-	{
+	public void drawBackground(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
 		matrixStack.pushPose();
 		matrixStack.translate((int) (w / 2F), (int) (h / 5F), 0F);
 		matrixStack.scale(2, 2, 1);
@@ -162,14 +133,12 @@ public class GuiRewardNotifications extends GuiBase implements IRewardListenerGu
 	}
 
 	@Override
-	public Theme getTheme()
-	{
+	public Theme getTheme() {
 		return FTBQuestsTheme.INSTANCE;
 	}
 
 	@Override
-	public void rewardReceived(RewardKey key, int count)
-	{
+	public void rewardReceived(RewardKey key, int count) {
 		rewards.put(key, rewards.getInt(key) + count);
 		itemPanel.refreshWidgets();
 	}

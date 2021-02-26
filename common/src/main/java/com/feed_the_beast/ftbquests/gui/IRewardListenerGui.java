@@ -5,16 +5,13 @@ import com.feed_the_beast.mods.ftbguilibrary.utils.ClientUtils;
 /**
  * @author LatvianModder
  */
-public interface IRewardListenerGui
-{
+public interface IRewardListenerGui {
 	void rewardReceived(RewardKey key, int count);
 
-	static boolean add(RewardKey key, int count)
-	{
+	static boolean add(RewardKey key, int count) {
 		IRewardListenerGui gui = ClientUtils.getCurrentGuiAs(IRewardListenerGui.class);
 
-		if (gui != null)
-		{
+		if (gui != null) {
 			gui.rewardReceived(key, count);
 			return true;
 		}

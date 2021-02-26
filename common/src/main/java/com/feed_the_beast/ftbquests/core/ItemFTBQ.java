@@ -5,7 +5,6 @@ import net.minecraft.world.item.Item;
 /**
  * @author LatvianModder
  */
-public interface ItemFTBQ
-{
+public interface ItemFTBQ {
 	void setCraftingRemainingItemFTBQ(Item i);
 }

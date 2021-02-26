@@ -19,51 +19,44 @@ import net.minecraft.server.level.ServerPlayer;
 /**
  * @author LatvianModder
  */
-public class AdvancementReward extends Reward
-{
+public class AdvancementReward extends Reward {
 	public String advancement;
 	public String criterion;
 
-	public AdvancementReward(Quest quest)
-	{
+	public AdvancementReward(Quest quest) {
 		super(quest);
 		advancement = "";
 		criterion = "";
 	}
 
 	@Override
-	public RewardType getType()
-	{
+	public RewardType getType() {
 		return RewardTypes.ADVANCEMENT;
 	}
 
 	@Override
-	public void writeData(CompoundTag nbt)
-	{
+	public void writeData(CompoundTag nbt) {
 		super.writeData(nbt);
 		nbt.putString("advancement", advancement);
 		nbt.putString("criterion", criterion);
 	}
 
 	@Override
-	public void readData(CompoundTag nbt)
-	{
+	public void readData(CompoundTag nbt) {
 		super.readData(nbt);
 		advancement = nbt.getString("advancement");
 		criterion = nbt.getString("criterion");
 	}
 
 	@Override
-	public void writeNetData(FriendlyByteBuf buffer)
-	{
+	public void writeNetData(FriendlyByteBuf buffer) {
 		super.writeNetData(buffer);
 		buffer.writeUtf(advancement, Short.MAX_VALUE);
 		buffer.writeUtf(criterion, Short.MAX_VALUE);
 	}
 
 	@Override
-	public void readNetData(FriendlyByteBuf buffer)
-	{
+	public void readNetData(FriendlyByteBuf buffer) {
 		super.readNetData(buffer);
 		advancement = buffer.readUtf(Short.MAX_VALUE);
 		criterion = buffer.readUtf(Short.MAX_VALUE);
@@ -71,29 +64,22 @@ public class AdvancementReward extends Reward
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public void getConfig(ConfigGroup config)
-	{
+	public void getConfig(ConfigGroup config) {
 		super.getConfig(config);
 		config.addString("advancement", advancement, v -> advancement = v, "").setNameKey("ftbquests.reward.ftbquests.advancement");
 		config.addString("criterion", criterion, v -> criterion = v, "");
 	}
 
 	@Override
-	public void claim(ServerPlayer player, boolean notify)
-	{
+	public void claim(ServerPlayer player, boolean notify) {
 		Advancement a = player.server.getAdvancements().getAdvancement(new ResourceLocation(advancement));
 
-		if (a != null)
-		{
-			if (criterion.isEmpty())
-			{
-				for (String s : a.getCriteria().keySet())
-				{
+		if (a != null) {
+			if (criterion.isEmpty()) {
+				for (String s : a.getCriteria().keySet()) {
 					player.getAdvancements().award(a, s);
 				}
-			}
-			else
-			{
+			} else {
 				player.getAdvancements().award(a, criterion);
 			}
 		}
@@ -101,12 +87,10 @@ public class AdvancementReward extends Reward
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public Component getAltTitle()
-	{
+	public Component getAltTitle() {
 		Advancement a = Minecraft.getInstance().player.connection.getAdvancements().getAdvancements().get(new ResourceLocation(advancement));
 
-		if (a != null && a.getDisplay() != null)
-		{
+		if (a != null && a.getDisplay() != null) {
 			return new TranslatableComponent("ftbquests.reward.ftbquests.advancement").append(": ").append(a.getDisplay().getTitle().copy().withStyle(ChatFormatting.YELLOW));
 		}
 
@@ -115,12 +99,10 @@ public class AdvancementReward extends Reward
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public Icon getAltIcon()
-	{
+	public Icon getAltIcon() {
 		Advancement a = Minecraft.getInstance().player.connection.getAdvancements().getAdvancements().get(new ResourceLocation(advancement));
 
-		if (a != null && a.getDisplay() != null)
-		{
+		if (a != null && a.getDisplay() != null) {
 			return ItemIcon.getItemIcon(a.getDisplay().getIcon());
 		}
 

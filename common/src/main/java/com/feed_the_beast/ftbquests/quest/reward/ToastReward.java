@@ -11,60 +11,51 @@ import net.minecraft.server.level.ServerPlayer;
 /**
  * @author LatvianModder
  */
-public class ToastReward extends Reward
-{
+public class ToastReward extends Reward {
 	public String description;
 
-	public ToastReward(Quest quest)
-	{
+	public ToastReward(Quest quest) {
 		super(quest);
 		description = "";
 	}
 
 	@Override
-	public RewardType getType()
-	{
+	public RewardType getType() {
 		return RewardTypes.TOAST;
 	}
 
 	@Override
-	public void writeData(CompoundTag nbt)
-	{
+	public void writeData(CompoundTag nbt) {
 		super.writeData(nbt);
 		nbt.putString("description", description);
 	}
 
 	@Override
-	public void readData(CompoundTag nbt)
-	{
+	public void readData(CompoundTag nbt) {
 		super.readData(nbt);
 		description = nbt.getString("description");
 	}
 
 	@Override
-	public void writeNetData(FriendlyByteBuf buffer)
-	{
+	public void writeNetData(FriendlyByteBuf buffer) {
 		super.writeNetData(buffer);
 		buffer.writeUtf(description, Short.MAX_VALUE);
 	}
 
 	@Override
-	public void readNetData(FriendlyByteBuf buffer)
-	{
+	public void readNetData(FriendlyByteBuf buffer) {
 		super.readNetData(buffer);
 		description = buffer.readUtf(Short.MAX_VALUE);
 	}
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public void getConfig(ConfigGroup config)
-	{
+	public void getConfig(ConfigGroup config) {
 		super.getConfig(config);
 		config.addString("description", description, v -> description = v, "");
 	}
 
 	@Override
-	public void claim(ServerPlayer player, boolean notify)
-	{
+	public void claim(ServerPlayer player, boolean notify) {
 	}
 }

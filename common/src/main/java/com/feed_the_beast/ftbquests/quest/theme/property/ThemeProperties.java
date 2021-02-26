@@ -3,6 +3,7 @@ package com.feed_the_beast.ftbquests.quest.theme.property;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Color4I;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -13,8 +14,7 @@ import org.lwjgl.opengl.GL11;
 /**
  * @author LatvianModder
  */
-public interface ThemeProperties
-{
+public interface ThemeProperties {
 	// Main GUI //
 	IconProperty BACKGROUND = new IconProperty("background");
 	StringProperty EXTRA_QUEST_SHAPES = new StringProperty("extra_quest_shapes");
@@ -41,12 +41,10 @@ public interface ThemeProperties
 	IconProperty TEXT_BOX = new IconProperty("text_box");
 
 	//Icons
-	IconProperty CHECK_ICON = new IconProperty("check_icon", new Icon()
-	{
+	IconProperty CHECK_ICON = new IconProperty("check_icon", new Icon() {
 		@Override
-		public void draw(PoseStack matrixStack, int x, int y, int w, int h)
-		{
-			GlStateManager._disableTexture();
+		public void draw(PoseStack matrixStack, int x, int y, int w, int h) {
+			RenderSystem.disableTexture();
 			Matrix4f m = matrixStack.last().pose();
 			Tesselator tessellator = Tesselator.getInstance();
 			BufferBuilder buffer = tessellator.getBuilder();
@@ -91,22 +89,18 @@ public interface ThemeProperties
 			GlStateManager._enableTexture();
 		}
 
-		public int hashCode()
-		{
+		public int hashCode() {
 			return 1;
 		}
 
-		public boolean equals(Object o)
-		{
+		public boolean equals(Object o) {
 			return o == this;
 		}
 	});
 
-	IconProperty ADD_ICON = new IconProperty("add_icon", new Icon()
-	{
+	IconProperty ADD_ICON = new IconProperty("add_icon", new Icon() {
 		@Override
-		public void draw(PoseStack matrixStack, int x, int y, int w, int h)
-		{
+		public void draw(PoseStack matrixStack, int x, int y, int w, int h) {
 			GlStateManager._disableTexture();
 			Matrix4f m = matrixStack.last().pose();
 			Tesselator tessellator = Tesselator.getInstance();
@@ -152,13 +146,11 @@ public interface ThemeProperties
 			GlStateManager._enableTexture();
 		}
 
-		public int hashCode()
-		{
+		public int hashCode() {
 			return 1;
 		}
 
-		public boolean equals(Object o)
-		{
+		public boolean equals(Object o) {
 			return o == this;
 		}
 	});

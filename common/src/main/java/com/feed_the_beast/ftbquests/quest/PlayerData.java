@@ -21,20 +21,13 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * @author LatvianModder
  */
-public class PlayerData
-{
-	public static PlayerData get(Player player)
-	{
+public class PlayerData {
+	public static PlayerData get(Player player) {
 		return FTBQuests.PROXY.getQuestFile(player.getCommandSenderWorld().isClientSide()).getData(player);
 	}
 
@@ -53,8 +46,7 @@ public class PlayerData
 	private Long2ByteOpenHashMap progressCache;
 	private Long2ByteOpenHashMap areDependenciesCompleteCache;
 
-	public PlayerData(QuestFile f, UUID id)
-	{
+	public PlayerData(QuestFile f, UUID id) {
 		file = f;
 		uuid = id;
 		name = "";
@@ -67,19 +59,15 @@ public class PlayerData
 		pinnedQuests = new LongOpenHashSet();
 	}
 
-	public void save()
-	{
+	public void save() {
 		shouldSave = true;
 	}
 
-	public TaskData getTaskData(Task task)
-	{
+	public TaskData getTaskData(Task task) {
 		TaskData d = taskData.get(task.id);
 
-		if (d == null)
-		{
-			if (name.isEmpty())
-			{
+		if (d == null) {
+			if (name.isEmpty()) {
 				FTBQuests.LOGGER.warn("Something's broken! Task data is null for player " + uuid + " but that player doesn't exist! Task: " + task + ", Quest: " + task.quest.chapter.filename + ":" + task.quest);
 				d = task.createData(this);
 				taskData.put(task.id, d);
@@ -92,28 +80,22 @@ public class PlayerData
 		return d;
 	}
 
-	public void createTaskData(Task task, boolean strong)
-	{
-		if (strong || !taskData.containsKey(task.id))
-		{
+	public void createTaskData(Task task, boolean strong) {
+		if (strong || !taskData.containsKey(task.id)) {
 			taskData.put(task.id, task.createData(this));
 		}
 	}
 
-	public void removeTaskData(Task task)
-	{
+	public void removeTaskData(Task task) {
 		taskData.remove(task.id);
 	}
 
-	public boolean isRewardClaimed(long id)
-	{
+	public boolean isRewardClaimed(long id) {
 		return claimedRewards.contains(id);
 	}
 
-	public boolean setRewardClaimed(long id, boolean claimed)
-	{
-		if (claimed ? claimedRewards.add(id) : claimedRewards.remove(id))
-		{
+	public boolean setRewardClaimed(long id, boolean claimed) {
+		if (claimed ? claimedRewards.add(id) : claimedRewards.remove(id)) {
 			save();
 			return true;
 		}
@@ -121,24 +103,19 @@ public class PlayerData
 		return false;
 	}
 
-	public boolean getCanEdit()
-	{
+	public boolean getCanEdit() {
 		return canEdit;
 	}
 
-	public boolean setCanEdit(boolean mode)
-	{
-		if (canEdit != mode)
-		{
+	public boolean setCanEdit(boolean mode) {
+		if (canEdit != mode) {
 			canEdit = mode;
 			save();
 
-			if (file.getSide() == Env.SERVER)
-			{
+			if (file.getSide() == Env.SERVER) {
 				ServerPlayer player = getPlayer();
 
-				if (player != null)
-				{
+				if (player != null) {
 					new MessageSyncEditingMode(canEdit).sendTo(player);
 				}
 			}
@@ -149,57 +126,46 @@ public class PlayerData
 		return false;
 	}
 
-	public long getMoney()
-	{
+	public long getMoney() {
 		return money;
 	}
 
-	public void setMoney(long value)
-	{
+	public void setMoney(long value) {
 		long m = Math.max(0L, value);
 
-		if (money != m)
-		{
+		if (money != m) {
 			money = m;
 			save();
 		}
 	}
 
-	public boolean getAutoPin()
-	{
+	public boolean getAutoPin() {
 		return autoPin;
 	}
 
-	public void setAutoPin(boolean auto)
-	{
-		if (autoPin != auto)
-		{
+	public void setAutoPin(boolean auto) {
+		if (autoPin != auto) {
 			autoPin = auto;
 			save();
 		}
 	}
 
-	public boolean isQuestPinned(long id)
-	{
+	public boolean isQuestPinned(long id) {
 		return pinnedQuests.contains(id);
 	}
 
-	public void setQuestPinned(long id, boolean pinned)
-	{
-		if (pinned ? pinnedQuests.add(id) : pinnedQuests.remove(id))
-		{
+	public void setQuestPinned(long id, boolean pinned) {
+		if (pinned ? pinnedQuests.add(id) : pinnedQuests.remove(id)) {
 			save();
 		}
 	}
 
-	public void clearCache()
-	{
+	public void clearCache() {
 		progressCache = null;
 		areDependenciesCompleteCache = null;
 	}
 
-	public CompoundTag serializeNBT()
-	{
+	public CompoundTag serializeNBT() {
 		CompoundTag nbt = new OrderedCompoundTag();
 		nbt.putString("uuid", uuid.toString());
 		nbt.putString("name", name);
@@ -212,18 +178,13 @@ public class PlayerData
 		List<TaskData> taskDataList = new ArrayList<>(taskData.values());
 		taskDataList.sort(Comparator.comparingLong(o -> o.task.id));
 
-		for (TaskData data : taskDataList)
-		{
-			if (data.progress > 0L)
-			{
+		for (TaskData data : taskDataList) {
+			if (data.progress > 0L) {
 				String key = QuestObjectBase.getCodeString(data.task.id);
 
-				if (data.progress <= Integer.MAX_VALUE)
-				{
+				if (data.progress <= Integer.MAX_VALUE) {
 					taskDataNBT.putInt(key, (int) data.progress);
-				}
-				else
-				{
+				} else {
 					taskDataNBT.putLong(key, data.progress);
 				}
 			}
@@ -235,8 +196,7 @@ public class PlayerData
 		Arrays.sort(claimedRewardsArray);
 		ListTag cr = new ListTag();
 
-		for (long l : claimedRewardsArray)
-		{
+		for (long l : claimedRewardsArray) {
 			cr.add(StringTag.valueOf(QuestObjectBase.getCodeString(l)));
 		}
 
@@ -246,8 +206,7 @@ public class PlayerData
 		Arrays.sort(pinnedQuestsArray);
 		ListTag pq = new ListTag();
 
-		for (long l : pinnedQuestsArray)
-		{
+		for (long l : pinnedQuestsArray) {
 			pq.add(StringTag.valueOf(QuestObjectBase.getCodeString(l)));
 		}
 
@@ -256,8 +215,7 @@ public class PlayerData
 		return nbt;
 	}
 
-	public void deserializeNBT(CompoundTag nbt)
-	{
+	public void deserializeNBT(CompoundTag nbt) {
 		name = nbt.getString("name");
 		canEdit = nbt.getBoolean("can_edit");
 		money = nbt.getLong("money");
@@ -268,86 +226,69 @@ public class PlayerData
 		claimedRewards.clear();
 		pinnedQuests.clear();
 
-		if (nbt.contains("claimed_rewards", 11) || nbt.contains("pinned_quests", 11))
-		{
+		if (nbt.contains("claimed_rewards", 11) || nbt.contains("pinned_quests", 11)) {
 			oldData = true;
 
-			for (int i : nbt.getIntArray("claimed_rewards"))
-			{
+			for (int i : nbt.getIntArray("claimed_rewards")) {
 				claimedRewards.add(i);
 			}
 
-			for (int i : nbt.getIntArray("pinned_quests"))
-			{
+			for (int i : nbt.getIntArray("pinned_quests")) {
 				pinnedQuests.add(i);
 			}
-		}
-		else
-		{
+		} else {
 			ListTag cr = nbt.getList("claimed_rewards", 8);
 
-			for (int i = 0; i < cr.size(); i++)
-			{
+			for (int i = 0; i < cr.size(); i++) {
 				claimedRewards.add(file.getID(cr.getString(i)));
 			}
 
 			ListTag pq = nbt.getList("pinned_quests", 8);
 
-			for (int i = 0; i < pq.size(); i++)
-			{
+			for (int i = 0; i < pq.size(); i++) {
 				pinnedQuests.add(file.getID(pq.getString(i)));
 			}
 		}
 
 		CompoundTag taskDataNBT = nbt.getCompound("task_progress");
 
-		for (String s : taskDataNBT.getAllKeys())
-		{
+		for (String s : taskDataNBT.getAllKeys()) {
 			Task task = file.getTask(oldData ? Integer.parseInt(s) : file.getID(s));
 
-			if (task != null)
-			{
+			if (task != null) {
 				taskData.get(task.id).readProgress(taskDataNBT.getLong(s));
 			}
 		}
 
-		if (oldData)
-		{
+		if (oldData) {
 			save();
 		}
 	}
 
-	public void write(FriendlyByteBuf buffer, boolean self)
-	{
+	public void write(FriendlyByteBuf buffer, boolean self) {
 		buffer.writeUtf(name, Short.MAX_VALUE);
 		buffer.writeVarLong(money);
 		int tds = 0;
 
-		for (TaskData t : taskData.values())
-		{
-			if (t.progress > 0L)
-			{
+		for (TaskData t : taskData.values()) {
+			if (t.progress > 0L) {
 				tds++;
 			}
 		}
 
 		buffer.writeVarInt(tds);
 
-		for (TaskData t : taskData.values())
-		{
-			if (t.progress > 0L)
-			{
+		for (TaskData t : taskData.values()) {
+			if (t.progress > 0L) {
 				buffer.writeLong(t.task.id);
 				buffer.writeVarLong(t.progress);
 			}
 		}
 
-		if (self)
-		{
+		if (self) {
 			buffer.writeVarInt(claimedRewards.size());
 
-			for (long i : claimedRewards)
-			{
+			for (long i : claimedRewards) {
 				buffer.writeLong(i);
 			}
 
@@ -356,27 +297,23 @@ public class PlayerData
 
 			buffer.writeVarInt(pinnedQuests.size());
 
-			for (long reward : pinnedQuests)
-			{
+			for (long reward : pinnedQuests) {
 				buffer.writeLong(reward);
 			}
 		}
 	}
 
-	public void read(FriendlyByteBuf buffer, boolean self)
-	{
+	public void read(FriendlyByteBuf buffer, boolean self) {
 		name = buffer.readUtf(Short.MAX_VALUE);
 		money = buffer.readVarLong();
 
 		int ts = buffer.readVarInt();
 
-		for (int i = 0; i < ts; i++)
-		{
+		for (int i = 0; i < ts; i++) {
 			TaskData t = taskData.get(buffer.readLong());
 			long progress = buffer.readVarLong();
 
-			if (t != null)
-			{
+			if (t != null) {
 				t.progress = progress;
 			}
 		}
@@ -386,12 +323,10 @@ public class PlayerData
 		autoPin = false;
 		pinnedQuests.clear();
 
-		if (self)
-		{
+		if (self) {
 			int crs = buffer.readVarInt();
 
-			for (int i = 0; i < crs; i++)
-			{
+			for (int i = 0; i < crs; i++) {
 				claimedRewards.add(buffer.readLong());
 			}
 
@@ -400,30 +335,25 @@ public class PlayerData
 
 			int pqs = buffer.readVarInt();
 
-			for (int i = 0; i < pqs; i++)
-			{
+			for (int i = 0; i < pqs; i++) {
 				pinnedQuests.add(buffer.readLong());
 			}
 		}
 	}
 
-	public int getRelativeProgress(QuestObject object)
-	{
-		if (!object.cacheProgress())
-		{
+	public int getRelativeProgress(QuestObject object) {
+		if (!object.cacheProgress()) {
 			return object.getRelativeProgressFromChildren(this);
 		}
 
-		if (progressCache == null)
-		{
+		if (progressCache == null) {
 			progressCache = new Long2ByteOpenHashMap();
 			progressCache.defaultReturnValue((byte) -1);
 		}
 
 		int i = progressCache.get(object.id);
 
-		if (i == -1)
-		{
+		if (i == -1) {
 			i = object.getRelativeProgressFromChildren(this);
 			progressCache.put(object.id, (byte) i);
 		}
@@ -431,33 +361,27 @@ public class PlayerData
 		return i;
 	}
 
-	public boolean isStarted(QuestObject object)
-	{
+	public boolean isStarted(QuestObject object) {
 		return getRelativeProgress(object) > 0;
 	}
 
-	public boolean isComplete(QuestObject object)
-	{
+	public boolean isComplete(QuestObject object) {
 		return getRelativeProgress(object) >= 100;
 	}
 
-	public boolean areDependenciesComplete(Quest quest)
-	{
-		if (quest.dependencies.isEmpty())
-		{
+	public boolean areDependenciesComplete(Quest quest) {
+		if (quest.dependencies.isEmpty()) {
 			return true;
 		}
 
-		if (areDependenciesCompleteCache == null)
-		{
+		if (areDependenciesCompleteCache == null) {
 			areDependenciesCompleteCache = new Long2ByteOpenHashMap();
 			areDependenciesCompleteCache.defaultReturnValue((byte) -1);
 		}
 
 		byte b = areDependenciesCompleteCache.get(quest.id);
 
-		if (b == -1)
-		{
+		if (b == -1) {
 			b = areDependenciesComplete0(quest) ? (byte) 1 : (byte) 0;
 			areDependenciesCompleteCache.put(quest.id, b);
 		}
@@ -465,20 +389,15 @@ public class PlayerData
 		return b == 1;
 	}
 
-	private boolean areDependenciesComplete0(Quest quest)
-	{
-		if (quest.minRequiredDependencies > 0)
-		{
+	private boolean areDependenciesComplete0(Quest quest) {
+		if (quest.minRequiredDependencies > 0) {
 			int complete = 0;
 
-			for (QuestObject dependency : quest.dependencies)
-			{
-				if (!dependency.invalid && isComplete(dependency))
-				{
+			for (QuestObject dependency : quest.dependencies) {
+				if (!dependency.invalid && isComplete(dependency)) {
 					complete++;
 
-					if (complete >= quest.minRequiredDependencies)
-					{
+					if (complete >= quest.minRequiredDependencies) {
 						return true;
 					}
 				}
@@ -487,12 +406,9 @@ public class PlayerData
 			return false;
 		}
 
-		if (quest.dependencyRequirement.one)
-		{
-			for (QuestObject object : quest.dependencies)
-			{
-				if (!object.invalid && (quest.dependencyRequirement.completed ? isComplete(object) : isStarted(object)))
-				{
+		if (quest.dependencyRequirement.one) {
+			for (QuestObject object : quest.dependencies) {
+				if (!object.invalid && (quest.dependencyRequirement.completed ? isComplete(object) : isStarted(object))) {
 					return true;
 				}
 			}
@@ -500,10 +416,8 @@ public class PlayerData
 			return false;
 		}
 
-		for (QuestObject object : quest.dependencies)
-		{
-			if (!object.invalid && (quest.dependencyRequirement.completed ? !isComplete(object) : !isStarted(object)))
-			{
+		for (QuestObject object : quest.dependencies) {
+			if (!object.invalid && (quest.dependencyRequirement.completed ? !isComplete(object) : !isStarted(object))) {
 				return false;
 			}
 		}
@@ -511,19 +425,14 @@ public class PlayerData
 		return true;
 	}
 
-	public boolean canStartTasks(Quest quest)
-	{
+	public boolean canStartTasks(Quest quest) {
 		return areDependenciesComplete(quest);
 	}
 
-	public boolean hasUnclaimedRewards()
-	{
-		for (ChapterGroup group : file.chapterGroups)
-		{
-			for (Chapter chapter : group.chapters)
-			{
-				if (hasUnclaimedRewards(chapter))
-				{
+	public boolean hasUnclaimedRewards() {
+		for (ChapterGroup group : file.chapterGroups) {
+			for (Chapter chapter : group.chapters) {
+				if (hasUnclaimedRewards(chapter)) {
 					return true;
 				}
 			}
@@ -532,12 +441,9 @@ public class PlayerData
 		return false;
 	}
 
-	public boolean hasUnclaimedRewards(Chapter chapter)
-	{
-		for (Quest quest : chapter.quests)
-		{
-			if (hasUnclaimedRewards(quest))
-			{
+	public boolean hasUnclaimedRewards(Chapter chapter) {
+		for (Quest quest : chapter.quests) {
+			if (hasUnclaimedRewards(quest)) {
 				return true;
 			}
 		}
@@ -545,14 +451,10 @@ public class PlayerData
 		return false;
 	}
 
-	public boolean hasUnclaimedRewards(Quest quest)
-	{
-		if (isComplete(quest))
-		{
-			for (Reward reward : quest.rewards)
-			{
-				if (getClaimType(reward) == RewardClaimType.CAN_CLAIM)
-				{
+	public boolean hasUnclaimedRewards(Quest quest) {
+		if (isComplete(quest)) {
+			for (Reward reward : quest.rewards) {
+				if (getClaimType(reward) == RewardClaimType.CAN_CLAIM) {
 					return true;
 				}
 			}
@@ -561,80 +463,63 @@ public class PlayerData
 		return false;
 	}
 
-	public void claimReward(ServerPlayer player, Reward reward, boolean notify)
-	{
-		if (setRewardClaimed(reward.id, true))
-		{
+	public void claimReward(ServerPlayer player, Reward reward, boolean notify) {
+		if (setRewardClaimed(reward.id, true)) {
 			reward.claim(player, notify);
 
-			if (file.getSide() == Env.SERVER)
-			{
+			if (file.getSide() == Env.SERVER) {
 				new MessageClaimRewardResponse(uuid, reward.id, 1).sendToAll();
 			}
 		}
 	}
 
 	@Nullable
-	public ServerPlayer getPlayer()
-	{
+	public ServerPlayer getPlayer() {
 		return ((ServerQuestFile) file).server.getPlayerList().getPlayer(uuid);
 	}
 
-	public List<ServerPlayer> getOnlineMembers()
-	{
+	public List<ServerPlayer> getOnlineMembers() {
 		ServerPlayer playerEntity = getPlayer();
 
-		if (playerEntity != null)
-		{
+		if (playerEntity != null) {
 			return Collections.singletonList(playerEntity);
 		}
 
 		return Collections.emptyList();
 	}
 
-	public void checkAutoCompletion(Quest quest)
-	{
-		if (quest.rewards.isEmpty() || !isComplete(quest))
-		{
+	public void checkAutoCompletion(Quest quest) {
+		if (quest.rewards.isEmpty() || !isComplete(quest)) {
 			return;
 		}
 
 		List<ServerPlayer> online = null;
 
-		for (Reward reward : quest.rewards)
-		{
+		for (Reward reward : quest.rewards) {
 			RewardAutoClaim auto = reward.getAutoClaimType();
 
-			if (auto != RewardAutoClaim.DISABLED)
-			{
-				if (online == null)
-				{
+			if (auto != RewardAutoClaim.DISABLED) {
+				if (online == null) {
 					online = getOnlineMembers();
 
-					if (online.isEmpty())
-					{
+					if (online.isEmpty()) {
 						return;
 					}
 				}
 
-				for (ServerPlayer player : online)
-				{
+				for (ServerPlayer player : online) {
 					claimReward(player, reward, auto == RewardAutoClaim.ENABLED);
 				}
 			}
 		}
 	}
 
-	public RewardClaimType getClaimType(Reward reward)
-	{
+	public RewardClaimType getClaimType(Reward reward) {
 		boolean r = isRewardClaimed(reward.id);
 
-		if (r)
-		{
+		if (r) {
 			return RewardClaimType.CLAIMED;
-		}
-		else if (isComplete(reward.quest))
-		{
+		} else if (isComplete(reward.quest)) {
 			return RewardClaimType.CAN_CLAIM;
 		}
 

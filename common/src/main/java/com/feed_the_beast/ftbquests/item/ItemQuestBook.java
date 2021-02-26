@@ -23,19 +23,15 @@ import java.util.List;
 /**
  * @author LatvianModder
  */
-public class ItemQuestBook extends Item
-{
-	public ItemQuestBook()
-	{
+public class ItemQuestBook extends Item {
+	public ItemQuestBook() {
 		super(new Properties().stacksTo(1).tab(FTBQuests.ITEM_GROUP));
 		((ItemFTBQ) this).setCraftingRemainingItemFTBQ(this);
 	}
 
 	@Override
-	public InteractionResultHolder<ItemStack> use(Level world, Player player, InteractionHand hand)
-	{
-		if (world.isClientSide())
-		{
+	public InteractionResultHolder<ItemStack> use(Level world, Player player, InteractionHand hand) {
+		if (world.isClientSide()) {
 			FTBQuests.PROXY.openGui();
 		}
 
@@ -44,14 +40,10 @@ public class ItemQuestBook extends Item
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn)
-	{
-		if (ClientQuestFile.exists() && ClientQuestFile.INSTANCE.disableGui && !ClientQuestFile.INSTANCE.self.getCanEdit())
-		{
+	public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
+		if (ClientQuestFile.exists() && ClientQuestFile.INSTANCE.disableGui && !ClientQuestFile.INSTANCE.self.getCanEdit()) {
 			tooltip.add(new TranslatableComponent("item.ftbquests.book.disabled").withStyle(ChatFormatting.RED));
-		}
-		else
-		{
+		} else {
 			tooltip.add(new TranslatableComponent("item.ftbquests.book.tooltip").withStyle(ChatFormatting.GRAY));
 		}
 	}

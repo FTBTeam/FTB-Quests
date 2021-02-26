@@ -32,37 +32,28 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
  * @author LatvianModder
  */
-public abstract class QuestObjectBase
-{
+public abstract class QuestObjectBase {
 	private static final Pattern TAG_PATTERN = Pattern.compile("^[a-z0-9_]*$");
 
-	public static boolean isNull(@Nullable QuestObjectBase object)
-	{
+	public static boolean isNull(@Nullable QuestObjectBase object) {
 		return object == null || object.invalid;
 	}
 
-	public static long getID(@Nullable QuestObjectBase object)
-	{
+	public static long getID(@Nullable QuestObjectBase object) {
 		return isNull(object) ? 0L : object.id;
 	}
 
-	public static String getCodeString(long id)
-	{
+	public static String getCodeString(long id) {
 		return id == 0L ? "-" : id == 1L ? "*" : String.format("%016X", id);
 	}
 
-	public static String getCodeString(@Nullable QuestObjectBase object)
-	{
+	public static String getCodeString(@Nullable QuestObjectBase object) {
 		return getCodeString(getID(object));
 	}
 
@@ -76,23 +67,19 @@ public abstract class QuestObjectBase
 	private Component cachedTitle = null;
 	private Set<String> cachedTags = null;
 
-	public final String getCodeString()
-	{
+	public final String getCodeString() {
 		return getCodeString(id);
 	}
 
-	public String toString()
-	{
+	public String toString() {
 		return getCodeString();
 	}
 
-	public final boolean equals(Object object)
-	{
+	public final boolean equals(Object object) {
 		return object == this;
 	}
 
-	public final int hashCode()
-	{
+	public final int hashCode() {
 		return Long.hashCode(id);
 	}
 
@@ -100,31 +87,24 @@ public abstract class QuestObjectBase
 
 	public abstract QuestFile getQuestFile();
 
-	public Set<String> getTags()
-	{
-		if (tags.isEmpty())
-		{
+	public Set<String> getTags() {
+		if (tags.isEmpty()) {
 			return Collections.emptySet();
-		}
-		else if (cachedTags == null)
-		{
+		} else if (cachedTags == null) {
 			cachedTags = new LinkedHashSet<>(tags);
 		}
 
 		return cachedTags;
 	}
 
-	public boolean hasTag(String tag)
-	{
+	public boolean hasTag(String tag) {
 		return !tags.isEmpty() && getTags().contains(tag);
 	}
 
-	public void changeProgress(PlayerData data, ChangeProgress type)
-	{
+	public void changeProgress(PlayerData data, ChangeProgress type) {
 	}
 
-	public void forceProgress(PlayerData data, ChangeProgress type, boolean notifications)
-	{
+	public void forceProgress(PlayerData data, ChangeProgress type, boolean notifications) {
 		ChangeProgress.sendUpdates = false;
 		ChangeProgress.sendNotifications = notifications ? Tristate.TRUE : Tristate.FALSE;
 		changeProgress(data, type);
@@ -132,8 +112,7 @@ public abstract class QuestObjectBase
 		ChangeProgress.sendNotifications = Tristate.DEFAULT;
 		getQuestFile().clearCachedProgress();
 
-		if (getQuestFile().getSide() != Env.CLIENT)
-		{
+		if (getQuestFile().getSide() != Env.CLIENT) {
 			new MessageChangeProgressResponse(data.uuid, id, type, notifications).sendToAll();
 		}
 
@@ -141,31 +120,25 @@ public abstract class QuestObjectBase
 	}
 
 	@Nullable
-	public Chapter getQuestChapter()
-	{
+	public Chapter getQuestChapter() {
 		return null;
 	}
 
-	public long getParentID()
-	{
+	public long getParentID() {
 		return 1L;
 	}
 
-	public void writeData(CompoundTag nbt)
-	{
-		if (!title.isEmpty())
-		{
+	public void writeData(CompoundTag nbt) {
+		if (!title.isEmpty()) {
 			nbt.putString("title", title);
 		}
 
 		NBTUtils.write(nbt, "icon", icon);
 
-		if (!tags.isEmpty())
-		{
+		if (!tags.isEmpty()) {
 			ListTag tagList = new ListTag();
 
-			for (String s : tags)
-			{
+			for (String s : tags) {
 				tagList.add(StringTag.valueOf(s));
 			}
 
@@ -173,8 +146,7 @@ public abstract class QuestObjectBase
 		}
 	}
 
-	public void readData(CompoundTag nbt)
-	{
+	public void readData(CompoundTag nbt) {
 		title = nbt.getString("title");
 		icon = NBTUtils.read(nbt, "icon");
 
@@ -182,19 +154,16 @@ public abstract class QuestObjectBase
 
 		tags = new ArrayList<>(tagsList.size());
 
-		for (int i = 0; i < tagsList.size(); i++)
-		{
+		for (int i = 0; i < tagsList.size(); i++) {
 			tags.add(tagsList.getString(i));
 		}
 
-		if (nbt.contains("custom_id"))
-		{
+		if (nbt.contains("custom_id")) {
 			tags.add(nbt.getString("custom_id"));
 		}
 	}
 
-	public void writeNetData(FriendlyByteBuf buffer)
-	{
+	public void writeNetData(FriendlyByteBuf buffer) {
 		int flags = 0;
 		flags = Bits.setFlag(flags, 1, !title.isEmpty());
 		flags = Bits.setFlag(flags, 2, !icon.isEmpty());
@@ -202,38 +171,32 @@ public abstract class QuestObjectBase
 
 		buffer.writeVarInt(flags);
 
-		if (!title.isEmpty())
-		{
+		if (!title.isEmpty()) {
 			buffer.writeUtf(title, Short.MAX_VALUE);
 		}
 
-		if (!icon.isEmpty())
-		{
+		if (!icon.isEmpty()) {
 			buffer.writeItem(icon);
 		}
 
-		if (!tags.isEmpty())
-		{
+		if (!tags.isEmpty()) {
 			NetUtils.writeStrings(buffer, tags);
 		}
 	}
 
-	public void readNetData(FriendlyByteBuf buffer)
-	{
+	public void readNetData(FriendlyByteBuf buffer) {
 		int flags = buffer.readVarInt();
 		title = Bits.getFlag(flags, 1) ? buffer.readUtf(Short.MAX_VALUE) : "";
 		icon = Bits.getFlag(flags, 2) ? buffer.readItem() : ItemStack.EMPTY;
 		tags = new ArrayList<>(0);
 
-		if (Bits.getFlag(flags, 4))
-		{
+		if (Bits.getFlag(flags, 4)) {
 			NetUtils.readStrings(buffer, tags);
 		}
 	}
 
 	@Environment(EnvType.CLIENT)
-	public void getConfig(ConfigGroup config)
-	{
+	public void getConfig(ConfigGroup config) {
 		config.addString("title", title, v -> title = v, "").setNameKey("ftbquests.title").setOrder(-127);
 		config.add("icon", new ConfigIconItemStack(), icon, v -> icon = v, ItemStack.EMPTY).setNameKey("ftbquests.icon").setOrder(-126);
 		config.addList("tags", tags, new ConfigString(TAG_PATTERN), "").setNameKey("ftbquests.tags").setOrder(-125);
@@ -246,22 +209,17 @@ public abstract class QuestObjectBase
 	public abstract Icon getAltIcon();
 
 	@Environment(EnvType.CLIENT)
-	public final Component getTitle()
-	{
-		if (cachedTitle != null)
-		{
+	public final Component getTitle() {
+		if (cachedTitle != null) {
 			return cachedTitle.copy();
 		}
 
 		String key = String.format("quests.%s.title", getCodeString());
 		String s = title.isEmpty() ? I18n.exists(key) ? I18n.get(key) : "" : title;
 
-		if (!s.isEmpty())
-		{
+		if (!s.isEmpty()) {
 			cachedTitle = TextComponentParser.parse(s, FTBQuestsClient.DEFAULT_STRING_TO_COMPONENT);
-		}
-		else
-		{
+		} else {
 			cachedTitle = getAltTitle();
 		}
 
@@ -269,84 +227,69 @@ public abstract class QuestObjectBase
 	}
 
 	@Environment(EnvType.CLIENT)
-	public final MutableComponent getMutableTitle()
-	{
+	public final MutableComponent getMutableTitle() {
 		return new TextComponent("").append(getTitle());
 	}
 
 	@Environment(EnvType.CLIENT)
-	public final Icon getIcon()
-	{
-		if (cachedIcon != null)
-		{
+	public final Icon getIcon() {
+		if (cachedIcon != null) {
 			return cachedIcon;
 		}
 
-		if (!icon.isEmpty())
-		{
+		if (!icon.isEmpty()) {
 			cachedIcon = CustomIconItem.getIcon(icon);
 		}
 
-		if (cachedIcon == null || cachedIcon.isEmpty())
-		{
+		if (cachedIcon == null || cachedIcon.isEmpty()) {
 			cachedIcon = ThemeProperties.ICON.get(this);
 		}
 
-		if (cachedIcon.isEmpty())
-		{
+		if (cachedIcon.isEmpty()) {
 			cachedIcon = getAltIcon();
 		}
 
 		return cachedIcon;
 	}
 
-	public void deleteSelf()
-	{
+	public void deleteSelf() {
 		getQuestFile().remove(id);
 	}
 
-	public void deleteChildren()
-	{
+	public void deleteChildren() {
 	}
 
 	@Environment(EnvType.CLIENT)
-	public void editedFromGUI()
-	{
+	public void editedFromGUI() {
 		ClientQuestFile.INSTANCE.refreshGui();
 	}
 
-	public void onCreated()
-	{
+	public void onCreated() {
 	}
 
 	@Nullable
-	public String getPath()
-	{
+	public String getPath() {
 		return null;
 	}
 
-	public void clearCachedData()
-	{
+	public void clearCachedData() {
 		cachedIcon = null;
 		cachedTitle = null;
 		cachedTags = null;
 	}
 
-	public ConfigGroup createSubGroup(ConfigGroup group)
-	{
+	public ConfigGroup createSubGroup(ConfigGroup group) {
 		return group.getGroup(getObjectType().id);
 	}
 
 	@Environment(EnvType.CLIENT)
-	public void onEditButtonClicked(Runnable gui)
-	{
+	public void onEditButtonClicked(Runnable gui) {
 		ConfigGroup group = new ConfigGroup(FTBQuests.MOD_ID);
 		getConfig(createSubGroup(group));
 
 		group.savedCallback = accepted -> {
 			gui.run();
-			if (accepted)
-			{
+			if (accepted) {
 				new MessageEditObject(this).sendToServer();
 			}
 		};
@@ -354,8 +297,7 @@ public abstract class QuestObjectBase
 		new GuiEditConfig(group).openGui();
 	}
 
-	public int refreshJEI()
-	{
+	public int refreshJEI() {
 		return 0;
 	}
 }

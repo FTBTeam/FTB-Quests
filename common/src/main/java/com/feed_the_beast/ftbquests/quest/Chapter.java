@@ -27,8 +27,7 @@ import java.util.stream.Collectors;
 /**
  * @author LatvianModder
  */
-public final class Chapter extends QuestObject
-{
+public final class Chapter extends QuestObject {
 	public final QuestFile file;
 	public final ChapterGroup group;
 	public String filename;
@@ -38,8 +37,7 @@ public final class Chapter extends QuestObject
 	public String defaultQuestShape;
 	public final List<ChapterImage> images;
 
-	public Chapter(QuestFile f, ChapterGroup g)
-	{
+	public Chapter(QuestFile f, ChapterGroup g) {
 		file = f;
 		group = g;
 		filename = "";
@@ -51,60 +49,50 @@ public final class Chapter extends QuestObject
 	}
 
 	@Override
-	public String toString()
-	{
+	public String toString() {
 		return filename;
 	}
 
 	@Override
-	public QuestObjectType getObjectType()
-	{
+	public QuestObjectType getObjectType() {
 		return QuestObjectType.CHAPTER;
 	}
 
 	@Override
-	public QuestFile getQuestFile()
-	{
+	public QuestFile getQuestFile() {
 		return file;
 	}
 
 	@Override
-	public Chapter getQuestChapter()
-	{
+	public Chapter getQuestChapter() {
 		return this;
 	}
 
 	@Override
-	public void writeData(CompoundTag nbt)
-	{
+	public void writeData(CompoundTag nbt) {
 		nbt.putString("filename", filename);
 		super.writeData(nbt);
 
-		if (!subtitle.isEmpty())
-		{
+		if (!subtitle.isEmpty()) {
 			ListTag list = new ListTag();
 
-			for (String v : subtitle)
-			{
+			for (String v : subtitle) {
 				list.add(StringTag.valueOf(v));
 			}
 
 			nbt.put("subtitle", list);
 		}
 
-		if (alwaysInvisible)
-		{
+		if (alwaysInvisible) {
 			nbt.putBoolean("always_invisible", true);
 		}
 
 		nbt.putString("default_quest_shape", defaultQuestShape);
 
-		if (!images.isEmpty())
-		{
+		if (!images.isEmpty()) {
 			ListTag list = new ListTag();
 
-			for (ChapterImage image : images)
-			{
+			for (ChapterImage image : images) {
 				CompoundTag nbt1 = new OrderedCompoundTag();
 				image.writeData(nbt1);
 				list.add(nbt1);
@@ -115,24 +103,21 @@ public final class Chapter extends QuestObject
 	}
 
 	@Override
-	public void readData(CompoundTag nbt)
-	{
+	public void readData(CompoundTag nbt) {
 		filename = nbt.getString("filename");
 		super.readData(nbt);
 		subtitle.clear();
 
 		ListTag subtitleNBT = nbt.getList("subtitle", NbtType.STRING);
 
-		for (int i = 0; i < subtitleNBT.size(); i++)
-		{
+		for (int i = 0; i < subtitleNBT.size(); i++) {
 			subtitle.add(subtitleNBT.getString(i));
 		}
 
 		alwaysInvisible = nbt.getBoolean("always_invisible");
 		defaultQuestShape = nbt.getString("default_quest_shape");
 
-		if (defaultQuestShape.equals("default"))
-		{
+		if (defaultQuestShape.equals("default")) {
 			defaultQuestShape = "";
 		}
 
@@ -140,8 +125,7 @@ public final class Chapter extends QuestObject
 
 		images.clear();
 
-		for (int i = 0; i < imgs.size(); i++)
-		{
+		for (int i = 0; i < imgs.size(); i++) {
 			ChapterImage image = new ChapterImage(this);
 			image.readData(imgs.getCompound(i));
 			images.add(image);
@@ -149,8 +133,7 @@ public final class Chapter extends QuestObject
 	}
 
 	@Override
-	public void writeNetData(FriendlyByteBuf buffer)
-	{
+	public void writeNetData(FriendlyByteBuf buffer) {
 		super.writeNetData(buffer);
 		buffer.writeUtf(filename, Short.MAX_VALUE);
 		NetUtils.writeStrings(buffer, subtitle);
@@ -160,8 +143,7 @@ public final class Chapter extends QuestObject
 	}
 
 	@Override
-	public void readNetData(FriendlyByteBuf buffer)
-	{
+	public void readNetData(FriendlyByteBuf buffer) {
 		super.readNetData(buffer);
 		filename = buffer.readUtf(Short.MAX_VALUE);
 		NetUtils.readStrings(buffer, subtitle);
@@ -174,38 +156,31 @@ public final class Chapter extends QuestObject
 		});
 	}
 
-	public int getIndex()
-	{
+	public int getIndex() {
 		return group.chapters.indexOf(this);
 	}
 
 	@Override
-	public int getRelativeProgressFromChildren(PlayerData data)
-	{
-		if (alwaysInvisible)
-		{
+	public int getRelativeProgressFromChildren(PlayerData data) {
+		if (alwaysInvisible) {
 			return 100;
 		}
 
-		if (quests.isEmpty())
-		{
+		if (quests.isEmpty()) {
 			return 100;
 		}
 
 		int progress = 0;
 		int count = 0;
 
-		for (Quest quest : quests)
-		{
-			if (!quest.isProgressionIgnored())
-			{
+		for (Quest quest : quests) {
+			if (!quest.isProgressionIgnored()) {
 				progress += data.getRelativeProgress(quest);
 				count++;
 			}
 		}
 
-		if (count <= 0)
-		{
+		if (count <= 0) {
 			return 100;
 		}
 
@@ -213,63 +188,50 @@ public final class Chapter extends QuestObject
 	}
 
 	@Override
-	public void onCompleted(PlayerData data, List<ServerPlayer> onlineMembers, List<ServerPlayer> notifiedPlayers)
-	{
+	public void onCompleted(PlayerData data, List<ServerPlayer> onlineMembers, List<ServerPlayer> notifiedPlayers) {
 		super.onCompleted(data, onlineMembers, notifiedPlayers);
 		ObjectCompletedEvent.CHAPTER.invoker().act(new ObjectCompletedEvent.ChapterEvent(data, this, onlineMembers, notifiedPlayers));
 
-		if (!disableToast)
-		{
-			for (ServerPlayer player : notifiedPlayers)
-			{
+		if (!disableToast) {
+			for (ServerPlayer player : notifiedPlayers) {
 				new MessageDisplayCompletionToast(id).sendTo(player);
 			}
 		}
 
-		for (ChapterGroup g : file.chapterGroups)
-		{
-			for (Chapter chapter : g.chapters)
-			{
-				for (Quest quest : chapter.quests)
-				{
-					if (quest.dependencies.contains(this))
-					{
+		for (ChapterGroup g : file.chapterGroups) {
+			for (Chapter chapter : g.chapters) {
+				for (Quest quest : chapter.quests) {
+					if (quest.dependencies.contains(this)) {
 						data.checkAutoCompletion(quest);
 					}
 				}
 			}
 		}
 
-		if (data.isComplete(file))
-		{
+		if (data.isComplete(file)) {
 			file.onCompleted(data, onlineMembers, notifiedPlayers);
 		}
 	}
 
 	@Override
-	public void changeProgress(PlayerData data, ChangeProgress type)
-	{
-		for (Quest quest : quests)
-		{
+	public void changeProgress(PlayerData data, ChangeProgress type) {
+		for (Quest quest : quests) {
 			quest.changeProgress(data, type);
 		}
 	}
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public MutableComponent getAltTitle()
-	{
+	public MutableComponent getAltTitle() {
 		return new TranslatableComponent("ftbquests.unnamed");
 	}
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public Icon getAltIcon()
-	{
+	public Icon getAltIcon() {
 		List<Icon> list = new ArrayList<>();
 
-		for (Quest quest : quests)
-		{
+		for (Quest quest : quests) {
 			list.add(quest.getIcon());
 		}
 
@@ -277,17 +239,14 @@ public final class Chapter extends QuestObject
 	}
 
 	@Override
-	public void deleteSelf()
-	{
+	public void deleteSelf() {
 		super.deleteSelf();
 		group.chapters.remove(this);
 	}
 
 	@Override
-	public void deleteChildren()
-	{
-		for (Quest quest : quests)
-		{
+	public void deleteChildren() {
+		for (Quest quest : quests) {
 			quest.deleteChildren();
 			quest.invalid = true;
 		}
@@ -296,14 +255,11 @@ public final class Chapter extends QuestObject
 	}
 
 	@Override
-	public void onCreated()
-	{
-		if (filename.isEmpty())
-		{
+	public void onCreated() {
+		if (filename.isEmpty()) {
 			String s = title.replace(' ', '_').replaceAll("\\W", "").toLowerCase().trim();
 
-			if (s.isEmpty())
-			{
+			if (s.isEmpty()) {
 				s = toString();
 			}
 
@@ -312,8 +268,7 @@ public final class Chapter extends QuestObject
 			Set<String> existingNames = group.chapters.stream().map(ch -> ch.filename).collect(Collectors.toSet());
 			int i = 2;
 
-			while (existingNames.contains(filename))
-			{
+			while (existingNames.contains(filename)) {
 				filename = s + "_" + i;
 				i++;
 			}
@@ -321,21 +276,17 @@ public final class Chapter extends QuestObject
 
 		group.chapters.add(this);
 
-		if (!quests.isEmpty())
-		{
+		if (!quests.isEmpty()) {
 			List<Quest> l = new ArrayList<>(quests);
 			quests.clear();
-			for (Quest quest : l)
-			{
+			for (Quest quest : l) {
 				quest.onCreated();
 			}
 		}
 	}
 
-	public String getFilename()
-	{
-		if (filename.isEmpty())
-		{
+	public String getFilename() {
+		if (filename.isEmpty()) {
 			filename = getCodeString(this);
 		}
 
@@ -343,15 +294,13 @@ public final class Chapter extends QuestObject
 	}
 
 	@Override
-	public String getPath()
-	{
+	public String getPath() {
 		return "chapters/" + getFilename() + ".snbt";
 	}
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public void getConfig(ConfigGroup config)
-	{
+	public void getConfig(ConfigGroup config) {
 		super.getConfig(config);
 		config.addList("subtitle", subtitle, new ConfigString(null), "");
 		config.addBool("always_invisible", alwaysInvisible, v -> alwaysInvisible = v, false);
@@ -359,17 +308,13 @@ public final class Chapter extends QuestObject
 	}
 
 	@Override
-	public boolean isVisible(PlayerData data)
-	{
-		if (alwaysInvisible)
-		{
+	public boolean isVisible(PlayerData data) {
+		if (alwaysInvisible) {
 			return false;
 		}
 
-		for (Quest quest : quests)
-		{
-			if (quest.isVisible(data))
-			{
+		for (Quest quest : quests) {
+			if (quest.isVisible(data)) {
 				return true;
 			}
 		}
@@ -378,28 +323,22 @@ public final class Chapter extends QuestObject
 	}
 
 	@Override
-	public void clearCachedData()
-	{
+	public void clearCachedData() {
 		super.clearCachedData();
 
-		for (Quest quest : quests)
-		{
+		for (Quest quest : quests) {
 			quest.clearCachedData();
 		}
 	}
 
 	@Override
-	protected void verifyDependenciesInternal(long original, int depth)
-	{
-		if (depth >= 1000)
-		{
+	protected void verifyDependenciesInternal(long original, int depth) {
+		if (depth >= 1000) {
 			throw new DependencyDepthException(this);
 		}
 
-		for (Quest quest : quests)
-		{
-			if (quest.id == original)
-			{
+		for (Quest quest : quests) {
+			if (quest.id == original) {
 				throw new DependencyLoopException(this);
 			}
 
@@ -407,13 +346,11 @@ public final class Chapter extends QuestObject
 		}
 	}
 
-	public boolean hasGroup()
-	{
+	public boolean hasGroup() {
 		return !group.isDefaultGroup();
 	}
 
-	public String getDefaultQuestShape()
-	{
+	public String getDefaultQuestShape() {
 		return defaultQuestShape.isEmpty() ? file.getDefaultQuestShape() : defaultQuestShape;
 	}
 }

@@ -8,32 +8,27 @@ import net.minecraft.network.chat.TranslatableComponent;
 /**
  * @author LatvianModder
  */
-public class RewardToast extends SimpleToast
-{
+public class RewardToast extends SimpleToast {
 	private final Component text;
 	private final Icon icon;
 
-	public RewardToast(Component t, Icon i)
-	{
+	public RewardToast(Component t, Icon i) {
 		text = t;
 		icon = i;
 	}
 
 	@Override
-	public Component getTitle()
-	{
+	public Component getTitle() {
 		return new TranslatableComponent("ftbquests.reward.collected");
 	}
 
 	@Override
-	public Component getSubtitle()
-	{
+	public Component getSubtitle() {
 		return text;
 	}
 
 	@Override
-	public Icon getIcon()
-	{
+	public Icon getIcon() {
 		return icon;
 	}
 }

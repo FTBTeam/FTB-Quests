@@ -6,13 +6,7 @@ import com.feed_the_beast.ftbquests.gui.FTBQuestsTheme;
 import com.feed_the_beast.ftbquests.gui.GuiSelectQuestObject;
 import com.feed_the_beast.ftbquests.net.MessageChangeProgress;
 import com.feed_the_beast.ftbquests.net.MessageEditObject;
-import com.feed_the_beast.ftbquests.quest.ChangeProgress;
-import com.feed_the_beast.ftbquests.quest.Chapter;
-import com.feed_the_beast.ftbquests.quest.Movable;
-import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.QuestObject;
-import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
-import com.feed_the_beast.ftbquests.quest.QuestObjectType;
+import com.feed_the_beast.ftbquests.quest.*;
 import com.feed_the_beast.ftbquests.quest.reward.RandomReward;
 import com.feed_the_beast.ftbquests.quest.task.Task;
 import com.feed_the_beast.ftbquests.quest.theme.QuestTheme;
@@ -26,13 +20,7 @@ import com.feed_the_beast.mods.ftbguilibrary.utils.Key;
 import com.feed_the_beast.mods.ftbguilibrary.utils.MathUtils;
 import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
 import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
-import com.feed_the_beast.mods.ftbguilibrary.widget.ContextMenuItem;
-import com.feed_the_beast.mods.ftbguilibrary.widget.GuiBase;
-import com.feed_the_beast.mods.ftbguilibrary.widget.GuiHelper;
-import com.feed_the_beast.mods.ftbguilibrary.widget.GuiIcons;
-import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
-import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
-import com.feed_the_beast.mods.ftbguilibrary.widget.Widget;
+import com.feed_the_beast.mods.ftbguilibrary.widget.*;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -48,8 +36,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GuiQuests extends GuiBase
-{
+public class GuiQuests extends GuiBase {
 	public final ClientQuestFile file;
 	public double scrollWidth, scrollHeight;
 	public int prevMouseX, prevMouseY, grabbed;
@@ -66,8 +53,7 @@ public class GuiQuests extends GuiBase
 	public long lastShiftPress = 0L;
 	public static boolean grid = false;
 
-	public GuiQuests(ClientQuestFile q)
-	{
+	public GuiQuests(ClientQuestFile q) {
 		file = q;
 		selectedObjects = new ArrayList<>();
 
@@ -84,14 +70,12 @@ public class GuiQuests extends GuiBase
 	}
 
 	@Nullable
-	public Quest getViewedQuest()
-	{
+	public Quest getViewedQuest() {
 		return viewQuestPanel.quest;
 	}
 
 	@Override
-	public void addWidgets()
-	{
+	public void addWidgets() {
 		QuestTheme.currentObject = selectedChapter;
 		add(chapterPanel);
 		add(questPanel);
@@ -102,8 +86,7 @@ public class GuiQuests extends GuiBase
 	}
 
 	@Override
-	public void alignWidgets()
-	{
+	public void alignWidgets() {
 		QuestTheme.currentObject = selectedChapter;
 		otherButtonsBottomPanel.alignWidgets();
 		otherButtonsTopPanel.alignWidgets();
@@ -111,24 +94,20 @@ public class GuiQuests extends GuiBase
 	}
 
 	@Override
-	public boolean onInit()
-	{
+	public boolean onInit() {
 		//Keyboard.enableRepeatEvents(true);
 		return setFullscreen();
 	}
 
 	@Override
-	public void onClosed()
-	{
+	public void onClosed() {
 		selectedObjects.clear();
 		super.onClosed();
 		//Keyboard.enableRepeatEvents(false);
 	}
 
-	public void selectChapter(@Nullable Chapter chapter)
-	{
-		if (selectedChapter != chapter)
-		{
+	public void selectChapter(@Nullable Chapter chapter) {
+		if (selectedChapter != chapter) {
 			//movingQuests = false;
 			closeQuest();
 			selectedChapter = chapter;
@@ -137,95 +116,73 @@ public class GuiQuests extends GuiBase
 		}
 	}
 
-	public void viewQuest(Quest quest)
-	{
+	public void viewQuest(Quest quest) {
 		//selectedQuests.clear();
 
-		if (viewQuestPanel.quest != quest)
-		{
+		if (viewQuestPanel.quest != quest) {
 			viewQuestPanel.quest = quest;
 			viewQuestPanel.refreshWidgets();
 		}
 	}
 
 	@Override
-	public void onBack()
-	{
-		if (getViewedQuest() != null)
-		{
+	public void onBack() {
+		if (getViewedQuest() != null) {
 			closeQuest();
-		}
-		else
-		{
+		} else {
 			super.onBack();
 		}
 	}
 
-	public void closeQuest()
-	{
+	public void closeQuest() {
 		//selectedQuests.clear();
 
-		if (viewQuestPanel.quest != null)
-		{
+		if (viewQuestPanel.quest != null) {
 			viewQuestPanel.quest = null;
 			viewQuestPanel.hidePanel = false;
 			viewQuestPanel.refreshWidgets();
 		}
 	}
 
-	public void toggleSelected(Movable movable)
-	{
-		if (viewQuestPanel.quest != null)
-		{
+	public void toggleSelected(Movable movable) {
+		if (viewQuestPanel.quest != null) {
 			viewQuestPanel.quest = null;
 			viewQuestPanel.refreshWidgets();
 		}
 
-		if (selectedObjects.contains(movable))
-		{
+		if (selectedObjects.contains(movable)) {
 			selectedObjects.remove(movable);
-		}
-		else
-		{
+		} else {
 			selectedObjects.add(movable);
 		}
 	}
 
-	public static void addObjectMenuItems(List<ContextMenuItem> contextMenu, Runnable gui, QuestObjectBase object)
-	{
+	public static void addObjectMenuItems(List<ContextMenuItem> contextMenu, Runnable gui, QuestObjectBase object) {
 		ConfigGroup group = new ConfigGroup(FTBQuests.MOD_ID);
 		ConfigGroup g = object.createSubGroup(group);
 		object.getConfig(g);
 
-		if (!g.getValues().isEmpty())
-		{
+		if (!g.getValues().isEmpty()) {
 			List<ContextMenuItem> list = new ArrayList<>();
 
-			for (ConfigValue c : g.getValues())
-			{
-				if (c instanceof ConfigWithVariants)
-				{
+			for (ConfigValue c : g.getValues()) {
+				if (c instanceof ConfigWithVariants) {
 					MutableComponent name = new TranslatableComponent(c.getNameKey());
 
-					if (!c.getCanEdit())
-					{
+					if (!c.getCanEdit()) {
 						name = name.withStyle(ChatFormatting.GRAY);
 					}
 
-					list.add(new ContextMenuItem(name, GuiIcons.SETTINGS, null)
-					{
+					list.add(new ContextMenuItem(name, GuiIcons.SETTINGS, null) {
 						@Override
-						public void addMouseOverText(TooltipList list)
-						{
+						public void addMouseOverText(TooltipList list) {
 							list.add(c.getStringForGUI(c.value));
 						}
 
 						@Override
-						public void onClicked(Panel panel, MouseButton button)
-						{
+						public void onClicked(Panel panel, MouseButton button) {
 							c.onClicked(button, accepted -> {
-								if (accepted)
-								{
+								if (accepted) {
 									c.setter.accept(c.value);
 									new MessageEditObject(object).sendToServer();
 								}
@@ -233,16 +190,14 @@ public class GuiQuests extends GuiBase
 						}
 
 						@Override
-						public void drawIcon(PoseStack matrixStack, Theme theme, int x, int y, int w, int h)
-						{
+						public void drawIcon(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
 							c.getIcon(c.value).draw(matrixStack, x, y, w, h);
 						}
 					});
 				}
 			}
 
-			if (!list.isEmpty())
-			{
+			if (!list.isEmpty()) {
 				list.sort(null);
 				contextMenu.addAll(list);
 				contextMenu.add(ContextMenuItem.SEPARATOR);
@@ -251,15 +206,13 @@ public class GuiQuests extends GuiBase
 
 		contextMenu.add(new ContextMenuItem(new TranslatableComponent("selectServer.edit"), ThemeProperties.EDIT_ICON.get(), () -> object.onEditButtonClicked(gui)));
 
-		if (object instanceof RandomReward && !QuestObjectBase.isNull(((RandomReward) object).getTable()))
-		{
+		if (object instanceof RandomReward && !QuestObjectBase.isNull(((RandomReward) object).getTable())) {
 			contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.reward_table.edit"), ThemeProperties.EDIT_ICON.get(), () -> ((RandomReward) object).getTable().onEditButtonClicked(gui)));
 		}
 
 		ContextMenuItem delete = new ContextMenuItem(new TranslatableComponent("selectServer.delete"), ThemeProperties.DELETE_ICON.get(), () -> ClientQuestFile.INSTANCE.deleteObject(object.id));
 
-		if (!isShiftKeyDown())
-		{
+		if (!isShiftKeyDown()) {
 			delete.setYesNo(new TranslatableComponent("delete_item", object.getTitle()));
 		}
 
@@ -267,32 +220,25 @@ public class GuiQuests extends GuiBase
 
 		contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.gui.reset_progress"), ThemeProperties.RELOAD_ICON.get(), () -> new MessageChangeProgress(ClientQuestFile.INSTANCE.self.uuid, object.id, isShiftKeyDown() ? ChangeProgress.RESET_DEPS : ChangeProgress.RESET).sendToServer()).setYesNo(new TranslatableComponent("ftbquests.gui.reset_progress_q")));
 
-		if (object instanceof QuestObject)
-		{
+		if (object instanceof QuestObject) {
 			contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.gui.complete_instantly"), ThemeProperties.CHECK_ICON.get(), () -> new MessageChangeProgress(ClientQuestFile.INSTANCE.self.uuid, object.id, isShiftKeyDown() ? ChangeProgress.COMPLETE_DEPS : ChangeProgress.COMPLETE).sendToServer()).setYesNo(new TranslatableComponent("ftbquests.gui.complete_instantly_q")));
 		}
 
-		contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.gui.copy_id"), ThemeProperties.WIKI_ICON.get(), () -> setClipboardString(object.getCodeString()))
-		{
+		contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.gui.copy_id"), ThemeProperties.WIKI_ICON.get(), () -> setClipboardString(object.getCodeString())) {
 			@Override
-			public void addMouseOverText(TooltipList list)
-			{
+			public void addMouseOverText(TooltipList list) {
 				list.add(new TextComponent(QuestObjectBase.getCodeString(object)));
 			}
 		});
 	}
 
-	public static void displayError(Component error)
-	{
+	public static void displayError(Component error) {
 		Minecraft.getInstance().getToasts().addToast(new SystemToast(SystemToast.SystemToastIds.TUTORIAL_HINT, new TranslatableComponent("ftbquests.gui.error"), error));
 	}
 
-	private boolean moveSelectedQuests(double x, double y)
-	{
-		for (Movable movable : selectedObjects)
-		{
-			if (movable.getChapter() == selectedChapter)
-			{
+	private boolean moveSelectedQuests(double x, double y) {
+		for (Movable movable : selectedObjects) {
+			if (movable.getChapter() == selectedChapter) {
 				movable.move(selectedChapter, movable.getX() + x, movable.getY() + y);
 			}
 		}
@@ -301,21 +247,16 @@ public class GuiQuests extends GuiBase
 	}
 
 	@Override
-	public boolean keyPressed(Key key)
-	{
-		if (super.keyPressed(key))
-		{
+	public boolean keyPressed(Key key) {
+		if (super.keyPressed(key)) {
 			return true;
 		}
 
-		if (key.is(GLFW.GLFW_KEY_TAB))
-		{
-			if (selectedChapter != null && file.getVisibleChapters(file.self).size() > 1)
-			{
+		if (key.is(GLFW.GLFW_KEY_TAB)) {
+			if (selectedChapter != null && file.getVisibleChapters(file.self).size() > 1) {
 				List<Chapter> visibleChapters = file.getVisibleChapters(file.self);
 
-				if (!visibleChapters.isEmpty())
-				{
+				if (!visibleChapters.isEmpty()) {
 					selectChapter(visibleChapters.get(MathUtils.mod(visibleChapters.indexOf(selectedChapter) + (isShiftKeyDown() ? -1 : 1), visibleChapters.size())));
 				}
 			}
@@ -323,45 +264,36 @@ public class GuiQuests extends GuiBase
 			return true;
 		}
 
-		if (key.is(GLFW.GLFW_KEY_SPACE))
-		{
+		if (key.is(GLFW.GLFW_KEY_SPACE)) {
 			questPanel.resetScroll();
 			return true;
 		}
 
-		if (key.is(GLFW.GLFW_KEY_R) && key.modifiers.onlyControl())
-		{
+		if (key.is(GLFW.GLFW_KEY_R) && key.modifiers.onlyControl()) {
 			grid = !grid;
 			return true;
 		}
 
-		if (key.keyCode >= GLFW.GLFW_KEY_1 && key.keyCode <= GLFW.GLFW_KEY_9)
-		{
+		if (key.keyCode >= GLFW.GLFW_KEY_1 && key.keyCode <= GLFW.GLFW_KEY_9) {
 			int i = key.keyCode - GLFW.GLFW_KEY_1;
 
-			if (i < file.getVisibleChapters(file.self).size())
-			{
+			if (i < file.getVisibleChapters(file.self).size()) {
 				selectChapter(file.getVisibleChapters(file.self).get(i));
 			}
 
 			return true;
 		}
 
-		if (key.modifiers.control() && selectedChapter != null && file.canEdit())
-		{
+		if (key.modifiers.control() && selectedChapter != null && file.canEdit()) {
 			double step;
 
-			if (key.modifiers.shift())
-			{
+			if (key.modifiers.shift()) {
 				step = 0.1D;
-			}
-			else
-			{
+			} else {
 				step = 0.5D;
 			}
 
-			switch (key.keyCode)
-			{
+			switch (key.keyCode) {
 				case GLFW.GLFW_KEY_A:
 					selectedObjects.addAll(selectedChapter.quests);
 					return true;
@@ -379,28 +311,19 @@ public class GuiQuests extends GuiBase
 			}
 		}
 
-		if (key.keyCode == GLFW.GLFW_KEY_LEFT_SHIFT || key.keyCode == GLFW.GLFW_KEY_RIGHT_SHIFT)
-		{
+		if (key.keyCode == GLFW.GLFW_KEY_LEFT_SHIFT || key.keyCode == GLFW.GLFW_KEY_RIGHT_SHIFT) {
 			long now = System.currentTimeMillis();
 
-			if (lastShiftPress == 0L)
-			{
+			if (lastShiftPress == 0L) {
 				lastShiftPress = now;
-			}
-			else
-			{
-				if (now - lastShiftPress <= 400L)
-				{
+			} else {
+				if (now - lastShiftPress <= 400L) {
 					ConfigQuestObject<QuestObject> c = new ConfigQuestObject<>(QuestObjectType.CHAPTER.or(QuestObjectType.QUEST));
 					GuiSelectQuestObject gui = new GuiSelectQuestObject<>(c, accepted -> {
-						if (accepted)
-						{
-							if (c.value instanceof Chapter)
-							{
+						if (accepted) {
+							if (c.value instanceof Chapter) {
 								selectChapter((Chapter) c.value);
-							}
-							else if (c.value instanceof Quest)
-							{
+							} else if (c.value instanceof Quest) {
 								zoom = 20;
 								selectChapter(((Quest) c.value).chapter);
 								viewQuestPanel.hidePanel = false;
@@ -424,43 +347,35 @@ public class GuiQuests extends GuiBase
 	}
 
 	@Override
-	public void tick()
-	{
-		if (selectedChapter != null && selectedChapter.invalid)
-		{
+	public void tick() {
+		if (selectedChapter != null && selectedChapter.invalid) {
 			selectChapter(null);
 		}
 
-		if (selectedChapter == null)
-		{
+		if (selectedChapter == null) {
 			selectChapter(file.getFirstVisibleChapter(file.self));
 		}
 
 		super.tick();
 	}
 
-	public int getZoom()
-	{
+	public int getZoom() {
 		return zoom;
 	}
 
-	public double getQuestButtonSize()
-	{
+	public double getQuestButtonSize() {
 		return getZoom() * 3D / 2D;
 	}
 
-	public double getQuestButtonSpacing()
-	{
+	public double getQuestButtonSpacing() {
 		return getZoom() * ThemeProperties.QUEST_SPACING.get(selectedChapter) / 4D;
 	}
 
-	public void addZoom(double up)
-	{
+	public void addZoom(double up) {
 		int z = zoom;
 		zoom = (int) Mth.clamp(zoom + up * 4, 4, 28);
 
-		if (zoom != z)
-		{
+		if (zoom != z) {
 			grabbed = 0;
 			double sx = questPanel.centerQuestX;
 			double sy = questPanel.centerQuestY;
@@ -470,8 +385,7 @@ public class GuiQuests extends GuiBase
 	}
 
 	@Override
-	public void drawBackground(PoseStack matrixStack, Theme theme, int x, int y, int w, int h)
-	{
+	public void drawBackground(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
 		QuestTheme.currentObject = selectedChapter;
 		super.drawBackground(matrixStack, theme, x, y, w, h);
 
@@ -486,26 +400,19 @@ public class GuiQuests extends GuiBase
 		borderColor.draw(matrixStack, x + w - pw, y + 1, 1, h - 2);
 		backgroundColor.draw(matrixStack, x + w - pw + 1, y + 1, pw - 2, h - 2);
 
-		if (grabbed != 0)
-		{
+		if (grabbed != 0) {
 			int mx = getMouseX();
 			int my = getMouseY();
 
-			if (scrollWidth > questPanel.width)
-			{
+			if (scrollWidth > questPanel.width) {
 				questPanel.setScrollX(Math.max(Math.min(questPanel.getScrollX() + (prevMouseX - mx), scrollWidth - questPanel.width), 0));
-			}
-			else
-			{
+			} else {
 				questPanel.setScrollX((scrollWidth - questPanel.width) / 2);
 			}
 
-			if (scrollHeight > questPanel.height)
-			{
+			if (scrollHeight > questPanel.height) {
 				questPanel.setScrollY(Math.max(Math.min(questPanel.getScrollY() + (prevMouseY - my), scrollHeight - questPanel.height), 0));
-			}
-			else
-			{
+			} else {
 				questPanel.setScrollY((scrollHeight - questPanel.height) / 2);
 			}
 
@@ -515,47 +422,37 @@ public class GuiQuests extends GuiBase
 	}
 
 	@Override
-	public void drawForeground(PoseStack matrixStack, Theme theme, int x, int y, int w, int h)
-	{
+	public void drawForeground(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
 		Color4I borderColor = ThemeProperties.WIDGET_BORDER.get(selectedChapter);
 		GuiHelper.drawHollowRect(matrixStack, x, y, w, h, borderColor, false);
 		super.drawForeground(matrixStack, theme, x, y, w, h);
 	}
 
 	@Override
-	public Theme getTheme()
-	{
+	public Theme getTheme() {
 		return FTBQuestsTheme.INSTANCE;
 	}
 
 	@Override
-	public boolean drawDefaultBackground(PoseStack matrixStack)
-	{
+	public boolean drawDefaultBackground(PoseStack matrixStack) {
 		return false;
 	}
 
-	public void open(@Nullable QuestObject object, boolean focus)
-	{
+	public void open(@Nullable QuestObject object, boolean focus) {
 		Chapter c = chapterHoverPanel.chapter == null ? null : chapterHoverPanel.chapter.chapter;
 
-		if (object instanceof Chapter)
-		{
+		if (object instanceof Chapter) {
 			selectChapter((Chapter) object);
-		}
-		else if (object instanceof Quest)
-		{
+		} else if (object instanceof Quest) {
 			viewQuestPanel.hidePanel = false;
 			Quest q = (Quest) object;
 			selectChapter(q.chapter);
 			viewQuest(q);
 
-			if (focus)
-			{
+			if (focus) {
 				questPanel.scrollTo(q.x + 0.5D, q.y + 0.5D);
 			}
-		}
-		else if (object instanceof Task)
-		{
+		} else if (object instanceof Task) {
 			viewQuestPanel.hidePanel = false;
 			selectChapter(((Task) object).quest.chapter);
 			viewQuest(((Task) object).quest);
@@ -563,12 +460,9 @@ public class GuiQuests extends GuiBase
 
 		openGui();
 
-		if (c != null)
-		{
-			for (Widget widget : chapterPanel.widgets)
-			{
-				if (widget instanceof ButtonChapter && c == ((ButtonChapter) widget).chapter)
-				{
+		if (c != null) {
+			for (Widget widget : chapterPanel.widgets) {
+				if (widget instanceof ButtonChapter && c == ((ButtonChapter) widget).chapter) {
 					chapterHoverPanel.chapter = (ButtonChapter) widget;
 					chapterHoverPanel.refreshWidgets();
 					chapterHoverPanel.updateMouseOver(getMouseX(), getMouseY());
@@ -579,10 +473,8 @@ public class GuiQuests extends GuiBase
 	}
 
 	@Override
-	public boolean handleClick(String scheme, String path)
-	{
-		if (scheme.isEmpty() && path.startsWith("#"))
-		{
+	public boolean handleClick(String scheme, String path) {
+		if (scheme.isEmpty() && path.startsWith("#")) {
 			open(file.get(file.getID(path)), true);
 			return true;
 		}
@@ -591,8 +483,7 @@ public class GuiQuests extends GuiBase
 	}
 
 	@Override
-	public void addMouseOverText(TooltipList list)
-	{
+	public void addMouseOverText(TooltipList list) {
 		super.addMouseOverText(list);
 		//float hue = (float) ((System.currentTimeMillis() * 0.0001D) % 1D);
 		//int rgb = Color4I.hsb(hue, 0.8F, 1F).rgba();

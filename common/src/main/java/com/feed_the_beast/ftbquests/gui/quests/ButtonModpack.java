@@ -21,42 +21,31 @@ import net.minecraft.network.chat.TranslatableComponent;
 /**
  * @author LatvianModder
  */
-public class ButtonModpack extends ButtonTab
-{
+public class ButtonModpack extends ButtonTab {
 	private final boolean unclaimedRewards;
 
-	public ButtonModpack(Panel panel)
-	{
+	public ButtonModpack(Panel panel) {
 		super(panel, TextComponent.EMPTY, ClientQuestFile.INSTANCE.getIcon());
 		title = treeGui.file.getTitle();
 		unclaimedRewards = hasUnclaimedRewards(treeGui.file);
 	}
 
 	@Override
-	public void onClicked(MouseButton button)
-	{
-		if (ClientQuestFile.exists() && unclaimedRewards)
-		{
+	public void onClicked(MouseButton button) {
+		if (ClientQuestFile.exists() && unclaimedRewards) {
 			playClickSound();
 			new GuiRewardNotifications().openGui();
 			new MessageClaimAllRewards().sendToServer();
 		}
 	}
 
-	private static boolean hasUnclaimedRewards(ClientQuestFile f)
-	{
-		for (ChapterGroup group : f.chapterGroups)
-		{
-			for (Chapter chapter : group.chapters)
-			{
-				for (Quest quest : chapter.quests)
-				{
-					if (f.self.isComplete(quest))
-					{
-						for (Reward reward : quest.rewards)
-						{
-							if (!reward.getExcludeFromClaimAll() && !f.self.isRewardClaimed(reward.id))
-							{
+	private static boolean hasUnclaimedRewards(ClientQuestFile f) {
+		for (ChapterGroup group : f.chapterGroups) {
+			for (Chapter chapter : group.chapters) {
+				for (Quest quest : chapter.quests) {
+					if (f.self.isComplete(quest)) {
+						for (Reward reward : quest.rewards) {
+							if (!reward.getExcludeFromClaimAll() && !f.self.isRewardClaimed(reward.id)) {
 								return true;
 							}
 						}
@@ -69,24 +58,20 @@ public class ButtonModpack extends ButtonTab
 	}
 
 	@Override
-	public void addMouseOverText(TooltipList list)
-	{
+	public void addMouseOverText(TooltipList list) {
 		super.addMouseOverText(list);
 
-		if (unclaimedRewards)
-		{
+		if (unclaimedRewards) {
 			list.blankLine();
 			list.add(new TranslatableComponent("ftbquests.gui.collect_rewards").withStyle(ChatFormatting.GOLD));
 		}
 	}
 
 	@Override
-	public void draw(PoseStack matrixStack, Theme theme, int x, int y, int w, int h)
-	{
+	public void draw(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
 		super.draw(matrixStack, theme, x, y, w, h);
 
-		if (unclaimedRewards)
-		{
+		if (unclaimedRewards) {
 			GuiHelper.setupDrawing();
 			float s = w / 2F;//(int) (treeGui.getZoom() / 2 * quest.size);
 			matrixStack.pushPose();

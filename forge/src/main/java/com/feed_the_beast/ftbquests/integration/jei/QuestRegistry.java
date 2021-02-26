@@ -5,14 +5,12 @@ import java.util.ArrayList;
 /**
  * @author LatvianModder
  */
-public enum QuestRegistry
-{
+public enum QuestRegistry {
 	INSTANCE;
 
 	public final ArrayList<QuestWrapper> list = new ArrayList<>();
 
-	public void refresh()
-	{
+	public void refresh() {
 		/*
 		if (FTBQuestsJEIIntegration.runtime != null && !list.isEmpty())
 		{

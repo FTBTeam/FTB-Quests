@@ -12,11 +12,7 @@ import com.feed_the_beast.ftbquests.quest.reward.Reward;
 import com.feed_the_beast.ftbquests.quest.task.Task;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
 import com.feed_the_beast.ftbquests.util.NetUtils;
-import com.feed_the_beast.mods.ftbguilibrary.config.ConfigCallback;
-import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
-import com.feed_the_beast.mods.ftbguilibrary.config.ConfigList;
-import com.feed_the_beast.mods.ftbguilibrary.config.ConfigString;
-import com.feed_the_beast.mods.ftbguilibrary.config.Tristate;
+import com.feed_the_beast.mods.ftbguilibrary.config.*;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.icon.IconAnimation;
 import com.feed_the_beast.mods.ftbguilibrary.utils.Bits;
@@ -45,8 +41,7 @@ import java.util.function.Predicate;
 /**
  * @author LatvianModder
  */
-public final class Quest extends QuestObject implements Movable
-{
+public final class Quest extends QuestObject implements Movable {
 	public Chapter chapter;
 	public String subtitle;
 	public double x, y;
@@ -69,8 +64,7 @@ public final class Quest extends QuestObject implements Movable
 	private Component cachedDescription = null;
 	private Component[] cachedText = null;
 
-	public Quest(Chapter c)
-	{
+	public Quest(Chapter c) {
 		chapter = c;
 		subtitle = "";
 		x = 0;
@@ -93,135 +87,112 @@ public final class Quest extends QuestObject implements Movable
 	}
 
 	@Override
-	public String toString()
-	{
+	public String toString() {
 		return chapter.filename + ":" + getCodeString();
 	}
 
 	@Override
-	public QuestObjectType getObjectType()
-	{
+	public QuestObjectType getObjectType() {
 		return QuestObjectType.QUEST;
 	}
 
 	@Override
-	public QuestFile getQuestFile()
-	{
+	public QuestFile getQuestFile() {
 		return chapter.file;
 	}
 
 	@Override
-	public Chapter getQuestChapter()
-	{
+	public Chapter getQuestChapter() {
 		return chapter;
 	}
 
 	@Override
-	public long getParentID()
-	{
+	public long getParentID() {
 		return chapter.id;
 	}
 
 	@Override
-	public void writeData(CompoundTag nbt)
-	{
+	public void writeData(CompoundTag nbt) {
 		super.writeData(nbt);
 		nbt.putDouble("x", x);
 		nbt.putDouble("y", y);
 
-		if (!shape.isEmpty())
-		{
+		if (!shape.isEmpty()) {
 			nbt.putString("shape", shape);
 		}
 
-		if (!subtitle.isEmpty())
-		{
+		if (!subtitle.isEmpty()) {
 			nbt.putString("subtitle", subtitle);
 		}
 
-		if (!description.isEmpty())
-		{
+		if (!description.isEmpty()) {
 			ListTag array = new ListTag();
 
-			for (String value : description)
-			{
+			for (String value : description) {
 				array.add(StringTag.valueOf(value));
 			}
 
 			nbt.put("description", array);
 		}
 
-		if (!guidePage.isEmpty())
-		{
+		if (!guidePage.isEmpty()) {
 			nbt.putString("guide_page", guidePage);
 		}
 
-		if (hideDependencyLines != Tristate.DEFAULT)
-		{
+		if (hideDependencyLines != Tristate.DEFAULT) {
 			nbt.putBoolean("hide_dependency_lines", hideDependencyLines.isTrue());
 		}
 
-		if (minRequiredDependencies > 0)
-		{
+		if (minRequiredDependencies > 0) {
 			nbt.putInt("min_required_dependencies", (byte) minRequiredDependencies);
 		}
 
 		removeInvalidDependencies();
 
-		if (!dependencies.isEmpty())
-		{
+		if (!dependencies.isEmpty()) {
 			ListTag deps = new ListTag();
 
-			for (QuestObject dep : dependencies)
-			{
+			for (QuestObject dep : dependencies) {
 				deps.add(StringTag.valueOf(dep.getCodeString()));
 			}
 
 			nbt.put("dependencies", deps);
 		}
 
-		if (hide != Tristate.DEFAULT)
-		{
+		if (hide != Tristate.DEFAULT) {
 			nbt.putBoolean("hide", hide.isTrue());
 		}
 
-		if (dependencyRequirement != DependencyRequirement.ALL_COMPLETED)
-		{
+		if (dependencyRequirement != DependencyRequirement.ALL_COMPLETED) {
 			nbt.putString("dependency_requirement", dependencyRequirement.id);
 		}
 
-		if (hideTextUntilComplete != Tristate.DEFAULT)
-		{
+		if (hideTextUntilComplete != Tristate.DEFAULT) {
 			nbt.putBoolean("hide_text_until_complete", hideTextUntilComplete.isTrue());
 		}
 
-		if (size != 1D)
-		{
+		if (size != 1D) {
 			nbt.putDouble("size", size);
 		}
 
-		if (optional)
-		{
+		if (optional) {
 			nbt.putBoolean("optional", true);
 		}
 
-		if (minWidth > 0)
-		{
+		if (minWidth > 0) {
 			nbt.putInt("min_width", minWidth);
 		}
 	}
 
 	@Override
-	public void readData(CompoundTag nbt)
-	{
+	public void readData(CompoundTag nbt) {
 		super.readData(nbt);
 		subtitle = nbt.getString("subtitle");
 		x = nbt.getDouble("x");
 		y = nbt.getDouble("y");
 		shape = nbt.getString("shape");
 
-		if (shape.equals("default"))
-		{
+		if (shape.equals("default")) {
 			shape = "";
 		}
 
@@ -229,8 +200,7 @@ public final class Quest extends QuestObject implements Movable
 
 		ListTag list = nbt.getList("description", NbtType.STRING);
 
-		for (int k = 0; k < list.size(); k++)
-		{
+		for (int k = 0; k < list.size(); k++) {
 			description.add(list.getString(k));
 		}
 
@@ -240,28 +210,21 @@ public final class Quest extends QuestObject implements Movable
 
 		dependencies.clear();
 
-		if (nbt.contains("dependencies", 11))
-		{
-			for (int i : nbt.getIntArray("dependencies"))
-			{
+		if (nbt.contains("dependencies", 11)) {
+			for (int i : nbt.getIntArray("dependencies")) {
 				QuestObject object = chapter.file.get(i);
 
-				if (object != null)
-				{
+				if (object != null) {
 					dependencies.add(object);
 				}
 			}
-		}
-		else
-		{
+		} else {
 			ListTag deps = nbt.getList("dependencies", 8);
 
-			for (int i = 0; i < deps.size(); i++)
-			{
+			for (int i = 0; i < deps.size(); i++) {
 				QuestObject object = chapter.file.get(chapter.file.getID(deps.getString(i)));
 
-				if (object != null)
-				{
+				if (object != null) {
 					dependencies.add(object);
 				}
 			}
@@ -276,8 +239,7 @@ public final class Quest extends QuestObject implements Movable
 	}
 
 	@Override
-	public void writeNetData(FriendlyByteBuf buffer)
-	{
+	public void writeNetData(FriendlyByteBuf buffer) {
 		super.writeNetData(buffer);
 		int flags = 0;
 		flags = Bits.setFlag(flags, 1, !subtitle.isEmpty());
@@ -296,8 +258,7 @@ public final class Quest extends QuestObject implements Movable
 		hideDependencyLines.write(buffer);
 		hideTextUntilComplete.write(buffer);
 
-		if (!subtitle.isEmpty())
-		{
+		if (!subtitle.isEmpty()) {
 			buffer.writeUtf(subtitle, Short.MAX_VALUE);
 		}
 
@@ -305,13 +266,11 @@ public final class Quest extends QuestObject implements Movable
 		buffer.writeDouble(y);
 		buffer.writeUtf(shape, Short.MAX_VALUE);
 
-		if (!description.isEmpty())
-		{
+		if (!description.isEmpty()) {
 			NetUtils.writeStrings(buffer, description);
 		}
 
-		if (!guidePage.isEmpty())
-		{
+		if (!guidePage.isEmpty()) {
 			buffer.writeUtf(guidePage, Short.MAX_VALUE);
 		}
 
@@ -319,32 +278,25 @@ public final class Quest extends QuestObject implements Movable
 		DependencyRequirement.NAME_MAP.write(buffer, dependencyRequirement);
 		buffer.writeVarInt(dependencies.size());
 
-		for (QuestObject d : dependencies)
-		{
-			if (d.invalid)
-			{
+		for (QuestObject d : dependencies) {
+			if (d.invalid) {
 				buffer.writeLong(0L);
-			}
-			else
-			{
+			} else {
 				buffer.writeLong(d.id);
 			}
 		}
 
-		if (size != 1D)
-		{
+		if (size != 1D) {
 			buffer.writeDouble(size);
 		}
 
-		if (minWidth > 0)
-		{
+		if (minWidth > 0) {
 			buffer.writeVarInt(minWidth);
 		}
 	}
 
 	@Override
-	public void readNetData(FriendlyByteBuf buffer)
-	{
+	public void readNetData(FriendlyByteBuf buffer) {
 		super.readNetData(buffer);
 		int flags = buffer.readVarInt();
 		hide = Tristate.read(buffer);
@@ -356,12 +308,9 @@ public final class Quest extends QuestObject implements Movable
 		y = buffer.readDouble();
 		shape = buffer.readUtf(Short.MAX_VALUE);
 
-		if (Bits.getFlag(flags, 2))
-		{
+		if (Bits.getFlag(flags, 2)) {
 			NetUtils.readStrings(buffer, description);
-		}
-		else
-		{
+		} else {
 			description.clear();
 		}
 
@@ -377,12 +326,10 @@ public final class Quest extends QuestObject implements Movable
 		dependencies.clear();
 		int d = buffer.readVarInt();
 
-		for (int i = 0; i < d; i++)
-		{
+		for (int i = 0; i < d; i++) {
 			QuestObject object = chapter.file.get(buffer.readLong());
 
-			if (object != null)
-			{
+			if (object != null) {
 				dependencies.add(object);
 			}
 		}
@@ -392,27 +339,23 @@ public final class Quest extends QuestObject implements Movable
 	}
 
 	@Override
-	public int getRelativeProgressFromChildren(PlayerData data)
-	{
+	public int getRelativeProgressFromChildren(PlayerData data) {
 		/*if (data.getTimesCompleted(this) > 0)
 		{
 			return 100;
 		}*/
 
-		if (tasks.isEmpty())
-		{
+		if (tasks.isEmpty()) {
 			return data.areDependenciesComplete(this) ? 100 : 0;
 		}
 
 		int progress = 0;
 
-		for (Task task : tasks)
-		{
+		for (Task task : tasks) {
 			progress += data.getRelativeProgress(task);
 		}
 
-		if (progress > 0 && !data.areDependenciesComplete(this))
-		{
+		if (progress > 0 && !data.areDependenciesComplete(this)) {
 			return 0;
 		}
 
@@ -420,15 +363,12 @@ public final class Quest extends QuestObject implements Movable
 	}
 
 	@Override
-	public void onCompleted(PlayerData data, List<ServerPlayer> onlineMembers, List<ServerPlayer> notifiedPlayers)
-	{
+	public void onCompleted(PlayerData data, List<ServerPlayer> onlineMembers, List<ServerPlayer> notifiedPlayers) {
 		//data.setTimesCompleted(this, data.getTimesCompleted(this) + 1);
 		super.onCompleted(data, onlineMembers, notifiedPlayers);
 
-		if (!disableToast)
-		{
-			for (ServerPlayer player : notifiedPlayers)
-			{
+		if (!disableToast) {
+			for (ServerPlayer player : notifiedPlayers) {
 				new MessageDisplayCompletionToast(id).sendTo(player);
 			}
 		}
@@ -436,51 +376,39 @@ public final class Quest extends QuestObject implements Movable
 		data.checkAutoCompletion(this);
 		ObjectCompletedEvent.QUEST.invoker().act(new ObjectCompletedEvent.QuestEvent(data, this, onlineMembers, notifiedPlayers));
 
-		for (ChapterGroup group : chapter.file.chapterGroups)
-		{
-			for (Chapter chapter : group.chapters)
-			{
-				for (Quest quest : chapter.quests)
-				{
-					if (quest.dependencies.contains(this))
-					{
+		for (ChapterGroup group : chapter.file.chapterGroups) {
+			for (Chapter chapter : group.chapters) {
+				for (Quest quest : chapter.quests) {
+					if (quest.dependencies.contains(this)) {
 						data.checkAutoCompletion(quest);
 					}
 				}
 			}
 		}
 
-		if (data.isComplete(chapter))
-		{
+		if (data.isComplete(chapter)) {
 			chapter.onCompleted(data, onlineMembers, notifiedPlayers);
 		}
 	}
 
 	@Override
-	public void changeProgress(PlayerData data, ChangeProgress type)
-	{
+	public void changeProgress(PlayerData data, ChangeProgress type) {
 		//FIXME: data.setTimesCompleted(this, -1);
 
-		if (type.dependencies)
-		{
-			for (QuestObject dependency : dependencies)
-			{
-				if (!dependency.invalid)
-				{
+		if (type.dependencies) {
+			for (QuestObject dependency : dependencies) {
+				if (!dependency.invalid) {
 					dependency.changeProgress(data, type);
 				}
 			}
 		}
 
-		for (Task task : tasks)
-		{
+		for (Task task : tasks) {
 			task.changeProgress(data, type);
 		}
 
-		if (type.reset)
-		{
-			for (Reward r : rewards)
-			{
+		if (type.reset) {
+			for (Reward r : rewards) {
 				data.setRewardClaimed(r.id, false);
 			}
 		}
@@ -488,10 +416,8 @@ public final class Quest extends QuestObject implements Movable
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public Component getAltTitle()
-	{
-		if (!tasks.isEmpty())
-		{
+	public Component getAltTitle() {
+		if (!tasks.isEmpty()) {
 			return tasks.get(0).getTitle();
 		}
 
@@ -500,12 +426,10 @@ public final class Quest extends QuestObject implements Movable
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public Icon getAltIcon()
-	{
+	public Icon getAltIcon() {
 		List<Icon> list = new ArrayList<>();
 
-		for (Task task : tasks)
-		{
+		for (Task task : tasks) {
 			list.add(task.getIcon());
 		}
 
@@ -513,23 +437,19 @@ public final class Quest extends QuestObject implements Movable
 	}
 
 	@Override
-	public void deleteSelf()
-	{
+	public void deleteSelf() {
 		super.deleteSelf();
 		chapter.quests.remove(this);
 	}
 
 	@Override
-	public void deleteChildren()
-	{
-		for (Task task : tasks)
-		{
+	public void deleteChildren() {
+		for (Task task : tasks) {
 			task.deleteChildren();
 			task.invalid = true;
 		}
 
-		for (Reward reward : rewards)
-		{
+		for (Reward reward : rewards) {
 			reward.deleteChildren();
 			reward.invalid = true;
 		}
@@ -539,16 +459,13 @@ public final class Quest extends QuestObject implements Movable
 	}
 
 	@Override
-	public void onCreated()
-	{
+	public void onCreated() {
 		chapter.quests.add(this);
 
-		if (!tasks.isEmpty())
-		{
+		if (!tasks.isEmpty()) {
 			List<Task> l = new ArrayList<>(tasks);
 			tasks.clear();
-			for (Task task : l)
-			{
+			for (Task task : l) {
 				task.onCreated();
 			}
 		}
@@ -556,18 +473,15 @@ public final class Quest extends QuestObject implements Movable
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public void getConfig(ConfigGroup config)
-	{
+	public void getConfig(ConfigGroup config) {
 		super.getConfig(config);
 		config.addString("subtitle", subtitle, v -> subtitle = v, "");
 
 		ConfigString descType = new ConfigString();
 		descType.defaultValue = "";
-		config.add("description", new ConfigList<String, ConfigString>(descType)
-		{
+		config.add("description", new ConfigList<String, ConfigString>(descType) {
 			@Override
-			public void onClicked(MouseButton button, ConfigCallback callback)
-			{
+			public void onClicked(MouseButton button, ConfigCallback callback) {
 				new MultilineTextEditorScreen(this, callback).openGui();
 			}
 		}, description, (t) -> {
@@ -596,65 +510,53 @@ public final class Quest extends QuestObject implements Movable
 	}
 
 	@Override
-	public Chapter getChapter()
-	{
+	public Chapter getChapter() {
 		return chapter;
 	}
 
 	@Override
-	public double getX()
-	{
+	public double getX() {
 		return x;
 	}
 
 	@Override
-	public double getY()
-	{
+	public double getY() {
 		return y;
 	}
 
 	@Override
-	public double getWidth()
-	{
+	public double getWidth() {
 		return size;
 	}
 
 	@Override
-	public double getHeight()
-	{
+	public double getHeight() {
 		return size;
 	}
 
 	@Override
-	public String getShape()
-	{
+	public String getShape() {
 		return shape.isEmpty() ? chapter.getDefaultQuestShape() : shape;
 	}
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public void move(Chapter to, double x, double y)
-	{
+	public void move(Chapter to, double x, double y) {
 		new MessageMoveQuest(id, to.id, x, y).sendToServer();
 	}
 
 	@Override
-	public boolean isVisible(PlayerData data)
-	{
-		if (dependencies.isEmpty())
-		{
+	public boolean isVisible(PlayerData data) {
+		if (dependencies.isEmpty()) {
 			return true;
 		}
 
-		if (hide.get(false))
-		{
+		if (hide.get(false)) {
 			return data.areDependenciesComplete(this);
 		}
 
-		for (QuestObject object : dependencies)
-		{
-			if (object.isVisible(data))
-			{
+		for (QuestObject object : dependencies) {
+			if (object.isVisible(data)) {
 				return true;
 			}
 		}
@@ -663,28 +565,23 @@ public final class Quest extends QuestObject implements Movable
 	}
 
 	@Override
-	public void clearCachedData()
-	{
+	public void clearCachedData() {
 		super.clearCachedData();
 		cachedDescription = null;
 		cachedText = null;
 
-		for (Task task : tasks)
-		{
+		for (Task task : tasks) {
 			task.clearCachedData();
 		}
 
-		for (Reward reward : rewards)
-		{
+		for (Reward reward : rewards) {
 			reward.clearCachedData();
 		}
 	}
 
 	@Environment(EnvType.CLIENT)
-	public Component getSubtitle()
-	{
-		if (cachedDescription != null)
-		{
+	public Component getSubtitle() {
+		if (cachedDescription != null) {
 			return cachedDescription;
 		}
 
@@ -696,10 +593,8 @@ public final class Quest extends QuestObject implements Movable
 	}
 
 	@Environment(EnvType.CLIENT)
-	public Component[] getDescription()
-	{
-		if (cachedText != null)
-		{
+	public Component[] getDescription() {
+		if (cachedText != null) {
 			return cachedText;
 		}
 
@@ -708,8 +603,7 @@ public final class Quest extends QuestObject implements Movable
 
 		cachedText = new Component[desc.length];
 
-		for (int i = 0; i < cachedText.length; i++)
-		{
+		for (int i = 0; i < cachedText.length; i++) {
 			cachedText[i] = TextComponentParser.parse(desc[i], FTBQuestsClient.DEFAULT_STRING_TO_COMPONENT);
 		}
 
@@ -717,15 +611,12 @@ public final class Quest extends QuestObject implements Movable
 	}
 
 	@Environment(EnvType.CLIENT)
-	public Component getJoinedDescription()
-	{
+	public Component getJoinedDescription() {
 		TextComponent c = new TextComponent("");
 		Component[] d = getDescription();
 
-		for (int i = 0; i < d.length; i++)
-		{
-			if (i > 0)
-			{
+		for (int i = 0; i < d.length; i++) {
+			if (i > 0) {
 				c.append("\n");
 			}
 
@@ -735,17 +626,13 @@ public final class Quest extends QuestObject implements Movable
 		return c;
 	}
 
-	public boolean hasDependency(QuestObject object)
-	{
-		if (object.invalid)
-		{
+	public boolean hasDependency(QuestObject object) {
+		if (object.invalid) {
 			return false;
 		}
 
-		for (QuestObject dependency : dependencies)
-		{
-			if (dependency == object)
-			{
+		for (QuestObject dependency : dependencies) {
+			if (dependency == object) {
 				return true;
 			}
 		}
@@ -753,46 +640,32 @@ public final class Quest extends QuestObject implements Movable
 		return false;
 	}
 
-	public void removeInvalidDependencies()
-	{
-		if (!dependencies.isEmpty())
-		{
+	public void removeInvalidDependencies() {
+		if (!dependencies.isEmpty()) {
 			dependencies.removeIf(o -> o == null || o.invalid || o == this);
 		}
 	}
 
-	public boolean verifyDependencies(boolean autofix)
-	{
-		try
-		{
+	public boolean verifyDependencies(boolean autofix) {
+		try {
 			verifyDependenciesInternal(id, 0);
 			return true;
-		}
-		catch (DependencyDepthException ex)
-		{
-			if (autofix)
-			{
+		} catch (DependencyDepthException ex) {
+			if (autofix) {
 				FTBQuests.LOGGER.error("Too deep dependencies found in " + this + " (referenced in " + ex.object + ")! Deleting all dependencies...");
 				dependencies.clear();
 				chapter.file.save();
-			}
-			else
-			{
+			} else {
 				FTBQuests.LOGGER.error("Too deep dependencies found in " + this + " (referenced in " + ex.object + ")!");
 			}
 
 			return false;
-		}
-		catch (DependencyLoopException ex)
-		{
-			if (autofix)
-			{
+		} catch (DependencyLoopException ex) {
+			if (autofix) {
 				FTBQuests.LOGGER.error("Looping dependencies found in " + this + " (referenced in " + ex.object + ")! Deleting all dependencies...");
 				dependencies.clear();
 				chapter.file.save();
-			}
-			else
-			{
+			} else {
 				FTBQuests.LOGGER.error("Looping dependencies found in " + this + " (referenced in " + ex.object + ")!");
 			}
 
@@ -801,17 +674,13 @@ public final class Quest extends QuestObject implements Movable
 	}
 
 	@Override
-	protected void verifyDependenciesInternal(long original, int depth)
-	{
-		if (depth >= 1000)
-		{
+	protected void verifyDependenciesInternal(long original, int depth) {
+		if (depth >= 1000) {
 			throw new DependencyDepthException(this);
 		}
 
-		for (QuestObject dependency : dependencies)
-		{
-			if (dependency.id == original)
-			{
+		for (QuestObject dependency : dependencies) {
+			if (dependency.id == original) {
 				throw new DependencyLoopException(this);
 			}
 
@@ -820,36 +689,30 @@ public final class Quest extends QuestObject implements Movable
 	}
 
 	@Override
-	public int refreshJEI()
-	{
+	public int refreshJEI() {
 		return FTBQuestsJEIHelper.QUESTS;
 	}
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public void editedFromGUI()
-	{
+	public void editedFromGUI() {
 		GuiQuests gui = ClientUtils.getCurrentGuiAs(GuiQuests.class);
 
-		if (gui != null)
-		{
+		if (gui != null) {
 			gui.questPanel.refreshWidgets();
 			gui.viewQuestPanel.refreshWidgets();
 		}
 	}
 
-	public void moved(double nx, double ny, long nc)
-	{
+	public void moved(double nx, double ny, long nc) {
 		x = nx;
 		y = ny;
 
-		if (nc != chapter.id)
-		{
+		if (nc != chapter.id) {
 			QuestFile f = getQuestFile();
 			Chapter c = f.getChapter(nc);
 
-			if (c != null)
-			{
+			if (c != null) {
 				chapter.quests.remove(this);
 				c.quests.add(this);
 				chapter = c;
@@ -857,23 +720,17 @@ public final class Quest extends QuestObject implements Movable
 		}
 	}
 
-	public boolean isProgressionIgnored()
-	{
+	public boolean isProgressionIgnored() {
 		return optional;
 	}
 
-	public List<QuestObject> getDependants()
-	{
+	public List<QuestObject> getDependants() {
 		List<QuestObject> list = new ArrayList<>();
 
-		for (ChapterGroup group : chapter.file.chapterGroups)
-		{
-			for (Chapter c : group.chapters)
-			{
-				for (Quest q : c.quests)
-				{
-					if (q.dependencies.contains(this))
-					{
+		for (ChapterGroup group : chapter.file.chapterGroups) {
+			for (Chapter c : group.chapters) {
+				for (Quest q : c.quests) {
+					if (q.dependencies.contains(this)) {
 						list.add(q);
 					}
 				}

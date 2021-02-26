@@ -5,48 +5,38 @@ import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 /**
  * @author LatvianModder
  */
-public class IDSelector extends ThemeSelector
-{
+public class IDSelector extends ThemeSelector {
 	public final int id;
 
-	public IDSelector(int i)
-	{
+	public IDSelector(int i) {
 		id = i;
 	}
 
 	@Override
-	public boolean matches(QuestObjectBase object)
-	{
+	public boolean matches(QuestObjectBase object) {
 		return object.id == id;
 	}
 
 	@Override
-	public ThemeSelectorType getType()
-	{
+	public ThemeSelectorType getType() {
 		return ThemeSelectorType.ID;
 	}
 
 	@Override
-	public String toString()
-	{
+	public String toString() {
 		return QuestObjectBase.getCodeString(id);
 	}
 
 	@Override
-	public int hashCode()
-	{
+	public int hashCode() {
 		return id;
 	}
 
 	@Override
-	public boolean equals(Object o)
-	{
-		if (o == this)
-		{
+	public boolean equals(Object o) {
+		if (o == this) {
 			return true;
-		}
-		else if (o instanceof IDSelector)
-		{
+		} else if (o instanceof IDSelector) {
 			return id == ((IDSelector) o).id;
 		}
 

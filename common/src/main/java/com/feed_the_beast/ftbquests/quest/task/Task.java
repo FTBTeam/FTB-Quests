@@ -6,13 +6,7 @@ import com.feed_the_beast.ftbquests.gui.quests.GuiQuests;
 import com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIHelper;
 import com.feed_the_beast.ftbquests.net.MessageDisplayCompletionToast;
 import com.feed_the_beast.ftbquests.net.MessageSubmitTask;
-import com.feed_the_beast.ftbquests.quest.ChangeProgress;
-import com.feed_the_beast.ftbquests.quest.Chapter;
-import com.feed_the_beast.ftbquests.quest.PlayerData;
-import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.QuestFile;
-import com.feed_the_beast.ftbquests.quest.QuestObject;
-import com.feed_the_beast.ftbquests.quest.QuestObjectType;
+import com.feed_the_beast.ftbquests.quest.*;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.utils.ClientUtils;
@@ -36,42 +30,35 @@ import java.util.List;
 /**
  * @author LatvianModder
  */
-public abstract class Task extends QuestObject
-{
+public abstract class Task extends QuestObject {
 	public final Quest quest;
 
-	public Task(Quest q)
-	{
+	public Task(Quest q) {
 		quest = q;
 	}
 
 	@Override
-	public final String toString()
-	{
+	public final String toString() {
 		return quest.chapter.filename + ":" + quest.getCodeString() + ":T:" + getCodeString();
 	}
 
 	@Override
-	public final QuestObjectType getObjectType()
-	{
+	public final QuestObjectType getObjectType() {
 		return QuestObjectType.TASK;
 	}
 
 	@Override
-	public final QuestFile getQuestFile()
-	{
+	public final QuestFile getQuestFile() {
 		return quest.chapter.file;
 	}
 
 	@Override
-	public final Chapter getQuestChapter()
-	{
+	public final Chapter getQuestChapter() {
 		return quest.chapter;
 	}
 
 	@Override
-	public final long getParentID()
-	{
+	public final long getParentID() {
 		return quest.id;
 	}
 
@@ -80,52 +67,43 @@ public abstract class Task extends QuestObject
 	public abstract TaskData createData(PlayerData data);
 
 	@Override
-	public final int getRelativeProgressFromChildren(PlayerData data)
-	{
+	public final int getRelativeProgressFromChildren(PlayerData data) {
 		return data.getTaskData(this).getRelativeProgress();
 	}
 
 	@Override
-	public final void onCompleted(PlayerData data, List<ServerPlayer> onlineMembers, List<ServerPlayer> notifiedPlayers)
-	{
+	public final void onCompleted(PlayerData data, List<ServerPlayer> onlineMembers, List<ServerPlayer> notifiedPlayers) {
 		super.onCompleted(data, onlineMembers, notifiedPlayers);
 		ObjectCompletedEvent.TASK.invoker().act(new ObjectCompletedEvent.TaskEvent(data, this, onlineMembers, notifiedPlayers));
 		boolean questComplete = data.isComplete(quest);
 
-		if (quest.tasks.size() > 1 && !questComplete && !disableToast)
-		{
+		if (quest.tasks.size() > 1 && !questComplete && !disableToast) {
 			new MessageDisplayCompletionToast(id).sendTo(notifiedPlayers);
 		}
 
-		if (questComplete)
-		{
+		if (questComplete) {
 			quest.onCompleted(data, onlineMembers, notifiedPlayers);
 		}
 	}
 
-	public long getMaxProgress()
-	{
+	public long getMaxProgress() {
 		return 1L;
 	}
 
-	public String getMaxProgressString()
-	{
+	public String getMaxProgressString() {
 		return StringUtils.formatDouble(getMaxProgress(), true);
 	}
 
 	@Override
-	public final void changeProgress(PlayerData data, ChangeProgress type)
-	{
+	public final void changeProgress(PlayerData data, ChangeProgress type) {
 		data.getTaskData(this).setProgress(type.reset ? 0L : getMaxProgress());
 	}
 
 	@Override
-	public final void deleteSelf()
-	{
+	public final void deleteSelf() {
 		quest.tasks.remove(this);
 
-		for (PlayerData data : quest.chapter.file.getAllData())
-		{
+		for (PlayerData data : quest.chapter.file.getAllData()) {
 			data.removeTaskData(this);
 		}
 
@@ -133,10 +111,8 @@ public abstract class Task extends QuestObject
 	}
 
 	@Override
-	public final void deleteChildren()
-	{
-		for (PlayerData data : quest.chapter.file.getAllData())
-		{
+	public final void deleteChildren() {
+		for (PlayerData data : quest.chapter.file.getAllData()) {
 			data.removeTaskData(this);
 		}
 
@@ -145,111 +121,91 @@ public abstract class Task extends QuestObject
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public void editedFromGUI()
-	{
+	public void editedFromGUI() {
 		GuiQuests gui = ClientUtils.getCurrentGuiAs(GuiQuests.class);
 
-		if (gui != null)
-		{
+		if (gui != null) {
 			gui.questPanel.refreshWidgets();
 			gui.viewQuestPanel.refreshWidgets();
 		}
 	}
 
 	@Override
-	public final void onCreated()
-	{
+	public final void onCreated() {
 		quest.tasks.add(this);
 
-		for (PlayerData data : quest.chapter.file.getAllData())
-		{
+		for (PlayerData data : quest.chapter.file.getAllData()) {
 			data.createTaskData(this, true);
 		}
 
-		if (this instanceof CustomTask)
-		{
+		if (this instanceof CustomTask) {
 			CustomTaskEvent.EVENT.invoker().act(new CustomTaskEvent((CustomTask) this));
 		}
 	}
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public Component getAltTitle()
-	{
+	public Component getAltTitle() {
 		return getType().getDisplayName();
 	}
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public Icon getAltIcon()
-	{
+	public Icon getAltIcon() {
 		return getType().getIcon();
 	}
 
 	@Override
-	public final ConfigGroup createSubGroup(ConfigGroup group)
-	{
+	public final ConfigGroup createSubGroup(ConfigGroup group) {
 		TaskType type = getType();
 		return group.getGroup(getObjectType().id).getGroup(type.id.getNamespace()).getGroup(type.id.getPath());
 	}
 
-	public void drawGUI(@Nullable TaskData data, PoseStack matrixStack, int x, int y, int w, int h)
-	{
+	public void drawGUI(@Nullable TaskData data, PoseStack matrixStack, int x, int y, int w, int h) {
 		getIcon().draw(matrixStack, x, y, w, h);
 	}
 
-	public boolean canInsertItem()
-	{
+	public boolean canInsertItem() {
 		return false;
 	}
 
-	public boolean consumesResources()
-	{
+	public boolean consumesResources() {
 		return canInsertItem();
 	}
 
-	public boolean hideProgressNumbers()
-	{
+	public boolean hideProgressNumbers() {
 		return getMaxProgress() <= 1L;
 	}
 
 	@Environment(EnvType.CLIENT)
-	public void addMouseOverText(TooltipList list, @Nullable TaskData data)
-	{
-		if (consumesResources())
-		{
+	public void addMouseOverText(TooltipList list, @Nullable TaskData data) {
+		if (consumesResources()) {
 			list.blankLine();
 			list.add(new TranslatableComponent("ftbquests.task.click_to_submit").withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE));
 		}
 	}
 
 	@Environment(EnvType.CLIENT)
-	public boolean addTitleInMouseOverText()
-	{
+	public boolean addTitleInMouseOverText() {
 		return true;
 	}
 
 	@Environment(EnvType.CLIENT)
-	public void onButtonClicked(Button button, boolean canClick)
-	{
-		if (canClick && autoSubmitOnPlayerTick() <= 0)
-		{
+	public void onButtonClicked(Button button, boolean canClick) {
+		if (canClick && autoSubmitOnPlayerTick() <= 0) {
 			button.playClickSound();
 			new MessageSubmitTask(id).sendToServer();
 		}
 	}
 
-	public boolean submitItemsOnInventoryChange()
-	{
+	public boolean submitItemsOnInventoryChange() {
 		return false;
 	}
 
 	@Nullable
 	@Environment(EnvType.CLIENT)
-	public Object getIngredient()
-	{
-		if (addTitleInMouseOverText())
-		{
+	public Object getIngredient() {
+		if (addTitleInMouseOverText()) {
 			return getIcon().getIngredient();
 		}
 
@@ -257,25 +213,21 @@ public abstract class Task extends QuestObject
 	}
 
 	@Override
-	public final int refreshJEI()
-	{
+	public final int refreshJEI() {
 		return FTBQuestsJEIHelper.QUESTS;
 	}
 
 	@Environment(EnvType.CLIENT)
-	public MutableComponent getButtonText()
-	{
+	public MutableComponent getButtonText() {
 		return getMaxProgress() > 1L || consumesResources() ? new TextComponent(getMaxProgressString()) : (MutableComponent) TextComponent.EMPTY;
 	}
 
-	public int autoSubmitOnPlayerTick()
-	{
+	public int autoSubmitOnPlayerTick() {
 		return 0;
 	}
 
 	@Override
-	public final boolean cacheProgress()
-	{
+	public final boolean cacheProgress() {
 		return false;
 	}
 }

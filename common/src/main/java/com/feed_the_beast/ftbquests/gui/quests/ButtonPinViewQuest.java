@@ -11,23 +11,19 @@ import net.minecraft.network.chat.TranslatableComponent;
 /**
  * @author LatvianModder
  */
-public class ButtonPinViewQuest extends SimpleTextButton
-{
-	public ButtonPinViewQuest(PanelViewQuest parent)
-	{
+public class ButtonPinViewQuest extends SimpleTextButton {
+	public ButtonPinViewQuest(PanelViewQuest parent) {
 		super(parent, new TranslatableComponent(parent.gui.file.self.pinnedQuests.contains(parent.quest.id) ? "ftbquests.gui.unpin" : "ftbquests.gui.pin"), parent.gui.file.self.pinnedQuests.contains(parent.quest.id) ? ThemeProperties.PIN_ICON_ON.get() : ThemeProperties.PIN_ICON_OFF.get());
 	}
 
 	@Override
-	public void onClicked(MouseButton button)
-	{
+	public void onClicked(MouseButton button) {
 		playClickSound();
 		new MessageTogglePinned(((PanelViewQuest) parent).quest.id).sendToServer();
 	}
 
 	@Override
-	public void draw(PoseStack matrixStack, Theme theme, int x, int y, int w, int h)
-	{
+	public void draw(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
 		drawIcon(matrixStack, theme, x + (w - 8) / 2, y + (h - 8) / 2, 8, 8);
 	}
 }

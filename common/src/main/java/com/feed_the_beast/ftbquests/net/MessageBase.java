@@ -10,10 +10,8 @@ import java.util.function.Supplier;
 /**
  * @author LatvianModder
  */
-public abstract class MessageBase
-{
-	public void handle(Supplier<NetworkManager.PacketContext> context)
-	{
+public abstract class MessageBase {
+	public void handle(Supplier<NetworkManager.PacketContext> context) {
 		context.get().queue(() -> handle(context.get()));
 	}
 
@@ -21,25 +19,20 @@ public abstract class MessageBase
 
 	public abstract void handle(NetworkManager.PacketContext context);
 
-	public void sendToServer()
-	{
+	public void sendToServer() {
 		FTBQuestsNetHandler.MAIN.sendToServer(this);
 	}
 
-	public void sendToAll()
-	{
+	public void sendToAll() {
 		FTBQuestsNetHandler.MAIN.sendToPlayers(GameInstance.getServer().getPlayerList().getPlayers(), this);
 	}
 
-	public void sendTo(ServerPlayer player)
-	{
+	public void sendTo(ServerPlayer player) {
 		FTBQuestsNetHandler.MAIN.sendToPlayer(player, this);
 	}
 
-	public void sendTo(Iterable<ServerPlayer> players)
-	{
-		for (ServerPlayer player : players)
-		{
+	public void sendTo(Iterable<ServerPlayer> players) {
+		for (ServerPlayer player : players) {
 			sendTo(player);
 		}
 	}

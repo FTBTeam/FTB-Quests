@@ -23,8 +23,7 @@ import java.util.List;
 /**
  * @author LatvianModder
  */
-public final class ChapterImage implements Movable
-{
+public final class ChapterImage implements Movable {
 	public Chapter chapter;
 	public double x, y;
 	public double width, height;
@@ -35,8 +34,7 @@ public final class ChapterImage implements Movable
 	public boolean dev;
 	public boolean corner;
 
-	public ChapterImage(Chapter c)
-	{
+	public ChapterImage(Chapter c) {
 		chapter = c;
 		x = y = 0D;
 		width = 1D;
@@ -49,8 +47,7 @@ public final class ChapterImage implements Movable
 		corner = false;
 	}
 
-	public void writeData(CompoundTag nbt)
-	{
+	public void writeData(CompoundTag nbt) {
 		nbt.putDouble("x", x);
 		nbt.putDouble("y", y);
 		nbt.putDouble("width", width);
@@ -60,8 +57,7 @@ public final class ChapterImage implements Movable
 
 		ListTag hoverTag = new ListTag();
 
-		for (String s : hover)
-		{
+		for (String s : hover) {
 			hoverTag.add(StringTag.valueOf(s));
 		}
 
@@ -71,8 +67,7 @@ public final class ChapterImage implements Movable
 		nbt.putBoolean("corner", corner);
 	}
 
-	public void readData(CompoundTag nbt)
-	{
+	public void readData(CompoundTag nbt) {
 		x = nbt.getDouble("x");
 		y = nbt.getDouble("y");
 		width = nbt.getDouble("width");
@@ -83,8 +78,7 @@ public final class ChapterImage implements Movable
 		hover.clear();
 		ListTag hoverTag = nbt.getList("hover", NbtType.STRING);
 
-		for (int i = 0; i < hoverTag.size(); i++)
-		{
+		for (int i = 0; i < hoverTag.size(); i++) {
 			hover.add(hoverTag.getString(i));
 		}
 
@@ -93,8 +87,7 @@ public final class ChapterImage implements Movable
 		corner = nbt.getBoolean("corner");
 	}
 
-	public void writeNetData(FriendlyByteBuf buffer)
-	{
+	public void writeNetData(FriendlyByteBuf buffer) {
 		buffer.writeDouble(x);
 		buffer.writeDouble(y);
 		buffer.writeDouble(width);
@@ -107,8 +100,7 @@ public final class ChapterImage implements Movable
 		buffer.writeBoolean(corner);
 	}
 
-	public void readNetData(FriendlyByteBuf buffer)
-	{
+	public void readNetData(FriendlyByteBuf buffer) {
 		x = buffer.readDouble();
 		y = buffer.readDouble();
 		width = buffer.readDouble();
@@ -122,8 +114,7 @@ public final class ChapterImage implements Movable
 	}
 
 	@Environment(EnvType.CLIENT)
-	public void getConfig(ConfigGroup config)
-	{
+	public void getConfig(ConfigGroup config) {
 		config.addDouble("x", x, v -> x = v, 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
 		config.addDouble("y", y, v -> y = v, 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
 		config.addDouble("width", width, v -> width = v, 1, 0, Double.POSITIVE_INFINITY);
@@ -137,50 +128,42 @@ public final class ChapterImage implements Movable
 	}
 
 	@Override
-	public Chapter getChapter()
-	{
+	public Chapter getChapter() {
 		return chapter;
 	}
 
 	@Override
-	public double getX()
-	{
+	public double getX() {
 		return x;
 	}
 
 	@Override
-	public double getY()
-	{
+	public double getY() {
 		return y;
 	}
 
 	@Override
-	public double getWidth()
-	{
+	public double getWidth() {
 		return width;
 	}
 
 	@Override
-	public double getHeight()
-	{
+	public double getHeight() {
 		return height;
 	}
 
 	@Override
-	public String getShape()
-	{
+	public String getShape() {
 		return "square";
 	}
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public void move(Chapter to, double _x, double _y)
-	{
+	public void move(Chapter to, double _x, double _y) {
 		x = _x;
 		y = _y;
 
-		if (to != chapter)
-		{
+		if (to != chapter) {
 			chapter.images.remove(this);
 			new MessageEditObject(chapter).sendToServer();
 
@@ -193,17 +176,13 @@ public final class ChapterImage implements Movable
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public void drawMoved(PoseStack matrixStack)
-	{
+	public void drawMoved(PoseStack matrixStack) {
 		matrixStack.pushPose();
 
-		if (corner)
-		{
+		if (corner) {
 			matrixStack.mulPose(Vector3f.ZP.rotationDegrees((float) rotation));
 			image.withColor(Color4I.WHITE.withAlpha(50)).draw(matrixStack, 0, 0, 1, 1);
-		}
-		else
-		{
+		} else {
 			matrixStack.translate(0.5D, 0.5D, 0);
 			matrixStack.mulPose(Vector3f.ZP.rotationDegrees((float) rotation));
 			matrixStack.scale(0.5F, 0.5F, 1);

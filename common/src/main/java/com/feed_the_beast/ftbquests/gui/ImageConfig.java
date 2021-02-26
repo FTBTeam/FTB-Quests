@@ -7,16 +7,13 @@ import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
 /**
  * @author LatvianModder
  */
-public class ImageConfig extends ConfigString
-{
-	public ImageConfig()
-	{
+public class ImageConfig extends ConfigString {
+	public ImageConfig() {
 		super(null);
 	}
 
 	@Override
-	public void onClicked(MouseButton button, ConfigCallback callback)
-	{
+	public void onClicked(MouseButton button, ConfigCallback callback) {
 		new SelectImageScreen(this, callback).openGui();
 	}
 }

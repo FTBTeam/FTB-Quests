@@ -21,80 +21,67 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 /**
  * @author LatvianModder
  */
-public class GameStageTask extends Task
-{
+public class GameStageTask extends Task {
 	public String stage = "";
 
-	public GameStageTask(Quest quest)
-	{
+	public GameStageTask(Quest quest) {
 		super(quest);
 	}
 
 	@Override
-	public TaskType getType()
-	{
+	public TaskType getType() {
 		return GameStagesIntegration.GAMESTAGE_TASK;
 	}
 
 	@Override
-	public void writeData(CompoundTag nbt)
-	{
+	public void writeData(CompoundTag nbt) {
 		super.writeData(nbt);
 		nbt.putString("stage", stage);
 	}
 
 	@Override
-	public void readData(CompoundTag nbt)
-	{
+	public void readData(CompoundTag nbt) {
 		super.readData(nbt);
 		stage = nbt.getString("stage");
 	}
 
 	@Override
-	public void writeNetData(FriendlyByteBuf buffer)
-	{
+	public void writeNetData(FriendlyByteBuf buffer) {
 		super.writeNetData(buffer);
 		buffer.writeUtf(stage, Short.MAX_VALUE);
 	}
 
 	@Override
-	public void readNetData(FriendlyByteBuf buffer)
-	{
+	public void readNetData(FriendlyByteBuf buffer) {
 		super.readNetData(buffer);
 		stage = buffer.readUtf(Short.MAX_VALUE);
 	}
 
 	@Override
 	@OnlyIn(Dist.CLIENT)
-	public void getConfig(ConfigGroup config)
-	{
+	public void getConfig(ConfigGroup config) {
 		super.getConfig(config);
 		config.addString("stage", stage, v -> stage = v, "").setNameKey("ftbquests.task.ftbquests.gamestage");
 	}
 
 	@Override
 	@OnlyIn(Dist.CLIENT)
-	public MutableComponent getAltTitle()
-	{
+	public MutableComponent getAltTitle() {
 		return new TranslatableComponent("ftbquests.task.ftbquests.gamestage").append(": ").append(new TextComponent(stage).withStyle(ChatFormatting.YELLOW));
 	}
 
 	@Override
-	public TaskData createData(PlayerData data)
-	{
+	public TaskData createData(PlayerData data) {
 		return new Data(this, data);
 	}
 
-	public static class Data extends BooleanTaskData<GameStageTask>
-	{
-		private Data(GameStageTask task, PlayerData data)
-		{
+	public static class Data extends BooleanTaskData<GameStageTask> {
+		private Data(GameStageTask task, PlayerData data) {
 			super(task, data);
 		}
 
 		@Override
-		public boolean canSubmit(ServerPlayer player)
-		{
+		public boolean canSubmit(ServerPlayer player) {
 			return GameStageHelper.hasStage(player, task.stage);
 		}
 	}

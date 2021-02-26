@@ -15,24 +15,20 @@ import java.util.regex.Pattern;
 /**
  * @author LatvianModder
  */
-public class ButtonAddChapter extends ButtonTab
-{
-	public ButtonAddChapter(Panel panel)
-	{
+public class ButtonAddChapter extends ButtonTab {
+	public ButtonAddChapter(Panel panel) {
 		super(panel, new TranslatableComponent("gui.add"), ThemeProperties.ADD_ICON.get());
 	}
 
 	@Override
-	public void onClicked(MouseButton button)
-	{
+	public void onClicked(MouseButton button) {
 		playClickSound();
 
 		ConfigString c = new ConfigString(Pattern.compile("^.+$"));
 		GuiEditConfigFromString.open(c, "", "", accepted -> {
 			treeGui.openGui();
 
-			if (accepted && !c.value.isEmpty())
-			{
+			if (accepted && !c.value.isEmpty()) {
 				Chapter chapter = new Chapter(treeGui.file, treeGui.file.defaultChapterGroup);
 				chapter.title = c.value;
 				CompoundTag extra = new CompoundTag();

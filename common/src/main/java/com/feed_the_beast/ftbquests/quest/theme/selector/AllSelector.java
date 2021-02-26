@@ -5,41 +5,34 @@ import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 /**
  * @author LatvianModder
  */
-public class AllSelector extends ThemeSelector
-{
+public class AllSelector extends ThemeSelector {
 	public static final AllSelector INSTANCE = new AllSelector();
 
-	private AllSelector()
-	{
+	private AllSelector() {
 	}
 
 	@Override
-	public boolean matches(QuestObjectBase object)
-	{
+	public boolean matches(QuestObjectBase object) {
 		return true;
 	}
 
 	@Override
-	public ThemeSelectorType getType()
-	{
+	public ThemeSelectorType getType() {
 		return ThemeSelectorType.ALL;
 	}
 
 	@Override
-	public String toString()
-	{
+	public String toString() {
 		return "*";
 	}
 
 	@Override
-	public int hashCode()
-	{
+	public int hashCode() {
 		return '*';
 	}
 
 	@Override
-	public boolean equals(Object o)
-	{
+	public boolean equals(Object o) {
 		return o == this;
 	}
 }

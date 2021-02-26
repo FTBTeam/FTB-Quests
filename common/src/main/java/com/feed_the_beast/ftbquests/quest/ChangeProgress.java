@@ -6,8 +6,7 @@ import com.feed_the_beast.mods.ftbguilibrary.config.Tristate;
 /**
  * @author LatvianModder
  */
-public enum ChangeProgress
-{
+public enum ChangeProgress {
 	RESET("reset", true, false),
 	RESET_DEPS("reset_deps", true, true),
 	COMPLETE("complete", false, false),
@@ -20,8 +19,7 @@ public enum ChangeProgress
 	public final String id;
 	public final boolean reset, complete, dependencies;
 
-	ChangeProgress(String n, boolean r, boolean d)
-	{
+	ChangeProgress(String n, boolean r, boolean d) {
 		id = n;
 		reset = r;
 		complete = !r;

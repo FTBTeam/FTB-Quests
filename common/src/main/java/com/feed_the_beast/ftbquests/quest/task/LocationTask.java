@@ -17,15 +17,13 @@ import net.minecraft.world.level.Level;
 /**
  * @author LatvianModder
  */
-public class LocationTask extends Task
-{
+public class LocationTask extends Task {
 	public ResourceKey<Level> dimension;
 	public boolean ignoreDimension;
 	public int x, y, z;
 	public int w, h, d;
 
-	public LocationTask(Quest quest)
-	{
+	public LocationTask(Quest quest) {
 		super(quest);
 		dimension = Level.OVERWORLD;
 		ignoreDimension = false;
@@ -38,32 +36,28 @@ public class LocationTask extends Task
 	}
 
 	@Override
-	public TaskType getType()
-	{
+	public TaskType getType() {
 		return TaskTypes.LOCATION;
 	}
 
 	@Override
-	public void writeData(CompoundTag nbt)
-	{
+	public void writeData(CompoundTag nbt) {
 		super.writeData(nbt);
 		nbt.putString("dimension", dimension.location().toString());
 		nbt.putBoolean("ignore_dimension", ignoreDimension);
-		nbt.putIntArray("position", new int[] {x, y, z});
-		nbt.putIntArray("size", new int[] {w, h, d});
+		nbt.putIntArray("position", new int[]{x, y, z});
+		nbt.putIntArray("size", new int[]{w, h, d});
 	}
 
 	@Override
-	public void readData(CompoundTag nbt)
-	{
+	public void readData(CompoundTag nbt) {
 		super.readData(nbt);
 		dimension = ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(nbt.getString("dimension")));
 		ignoreDimension = nbt.getBoolean("ignore_dimension");
 
 		int[] pos = nbt.getIntArray("position");
 
-		if (pos.length == 3)
-		{
+		if (pos.length == 3) {
 			x = pos[0];
 			y = pos[1];
 			z = pos[2];
@@ -71,8 +65,7 @@ public class LocationTask extends Task
 
 		int[] size = nbt.getIntArray("size");
 
-		if (pos.length == 3)
-		{
+		if (pos.length == 3) {
 			w = size[0];
 			h = size[1];
 			d = size[2];
@@ -80,8 +73,7 @@ public class LocationTask extends Task
 	}
 
 	@Override
-	public void writeNetData(FriendlyByteBuf buffer)
-	{
+	public void writeNetData(FriendlyByteBuf buffer) {
 		super.writeNetData(buffer);
 		buffer.writeResourceLocation(dimension.location());
 		buffer.writeBoolean(ignoreDimension);
@@ -94,8 +86,7 @@ public class LocationTask extends Task
 	}
 
 	@Override
-	public void readNetData(FriendlyByteBuf buffer)
-	{
+	public void readNetData(FriendlyByteBuf buffer) {
 		super.readNetData(buffer);
 		dimension = ResourceKey.create(Registry.DIMENSION_REGISTRY, buffer.readResourceLocation());
 		ignoreDimension = buffer.readBoolean();
@@ -109,8 +100,7 @@ public class LocationTask extends Task
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public void getConfig(ConfigGroup config)
-	{
+	public void getConfig(ConfigGroup config) {
 		super.getConfig(config);
 		config.addString("dim", dimension.location().toString(), v -> dimension = ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(v)), "minecraft:overworld");
 		config.addBool("ignore_dim", ignoreDimension, v -> ignoreDimension = v, false);
@@ -123,43 +113,34 @@ public class LocationTask extends Task
 	}
 
 	@Override
-	public int autoSubmitOnPlayerTick()
-	{
+	public int autoSubmitOnPlayerTick() {
 		return 3;
 	}
 
 	@Override
-	public TaskData createData(PlayerData data)
-	{
+	public TaskData createData(PlayerData data) {
 		return new Data(this, data);
 	}
 
-	public static class Data extends BooleanTaskData<LocationTask>
-	{
-		private Data(LocationTask task, PlayerData data)
-		{
+	public static class Data extends BooleanTaskData<LocationTask> {
+		private Data(LocationTask task, PlayerData data) {
 			super(task, data);
 		}
 
 		@Override
-		public String getProgressString()
-		{
+		public String getProgressString() {
 			return progress > 0 ? "1" : "0";
 		}
 
 		@Override
-		public boolean canSubmit(ServerPlayer player)
-		{
-			if (task.ignoreDimension || task.dimension == player.level.dimension())
-			{
+		public boolean canSubmit(ServerPlayer player) {
+			if (task.ignoreDimension || task.dimension == player.level.dimension()) {
 				int y = Mth.floor(player.getY());
 
-				if (y >= task.y && y < task.y + task.h)
-				{
+				if (y >= task.y && y < task.y + task.h) {
 					int x = Mth.floor(player.getX());
 
-					if (x >= task.x && x < task.x + task.w)
-					{
+					if (x >= task.x && x < task.x + task.w) {
 						int z = Mth.floor(player.getZ());
 						return z >= task.z && z < task.z + task.d;
 					}

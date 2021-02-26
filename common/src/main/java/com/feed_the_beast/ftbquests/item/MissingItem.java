@@ -22,28 +22,23 @@ import java.util.List;
 /**
  * @author LatvianModder
  */
-public class MissingItem extends Item
-{
+public class MissingItem extends Item {
 	private static final ResourceLocation AIR = new ResourceLocation("minecraft:air");
 
-	public static ItemStack readItem(CompoundTag tag)
-	{
-		if (tag.isEmpty())
-		{
+	public static ItemStack readItem(CompoundTag tag) {
+		if (tag.isEmpty()) {
 			return ItemStack.EMPTY;
 		}
 
 		ResourceLocation id = new ResourceLocation(tag.getString("id"));
 
-		if (id.equals(AIR))
-		{
+		if (id.equals(AIR)) {
 			return ItemStack.EMPTY;
 		}
 
 		Item item = Registry.ITEM.get(id);
 
-		if (item == Items.AIR)
-		{
+		if (item == Items.AIR) {
 			ItemStack stack = new ItemStack(FTBQuestsItems.MISSING_ITEM.get());
 			stack.addTagElement("Item", tag);
 			return stack;
@@ -52,36 +47,28 @@ public class MissingItem extends Item
 		return ItemStack.of(tag);
 	}
 
-	public static CompoundTag writeItem(ItemStack stack)
-	{
-		if (stack.getItem() instanceof MissingItem && stack.hasTag() && stack.getTag().contains("Item"))
-		{
+	public static CompoundTag writeItem(ItemStack stack) {
+		if (stack.getItem() instanceof MissingItem && stack.hasTag() && stack.getTag().contains("Item")) {
 			return stack.getTag().getCompound("Item");
 		}
 
 		return stack.save(new CompoundTag());
 	}
 
-	public MissingItem()
-	{
+	public MissingItem() {
 		super(new Properties().stacksTo(1).tab(FTBQuests.ITEM_GROUP));
 	}
 
 	@Override
-	public Component getName(ItemStack stack)
-	{
-		if (stack.hasTag() && stack.getTag().contains("Item"))
-		{
+	public Component getName(ItemStack stack) {
+		if (stack.hasTag() && stack.getTag().contains("Item")) {
 			CompoundTag tag = stack.getTag().getCompound("Item");
 			String id = tag.getString("id");
 			int c = Math.max(1, tag.getInt("Count"));
 
-			if (c == 1)
-			{
+			if (c == 1) {
 				return new TextComponent(id);
-			}
-			else
-			{
+			} else {
 				return new TextComponent(c + "x " + id);
 			}
 		}
@@ -91,10 +78,8 @@ public class MissingItem extends Item
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn)
-	{
-		if (stack.hasTag() && stack.getTag().contains("Item"))
-		{
+	public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
+		if (stack.hasTag() && stack.getTag().contains("Item")) {
 			tooltip.add(new TranslatableComponent("item.ftbquests.missing_item").withStyle(ChatFormatting.RED));
 		}
 	}

@@ -5,39 +5,29 @@ import com.feed_the_beast.ftbquests.quest.reward.Reward;
 /**
  * @author LatvianModder
  */
-public class WeightedReward implements Comparable<WeightedReward>
-{
+public class WeightedReward implements Comparable<WeightedReward> {
 	public final Reward reward;
 	public int weight;
 
-	public WeightedReward(Reward r, int w)
-	{
+	public WeightedReward(Reward r, int w) {
 		reward = r;
 		weight = Math.max(w, 1);
 	}
 
-	public static String chanceString(int weight, int totalWeight)
-	{
-		if (totalWeight <= 0)
-		{
+	public static String chanceString(int weight, int totalWeight) {
+		if (totalWeight <= 0) {
 			return "??%";
-		}
-		else if (weight <= 0)
-		{
+		} else if (weight <= 0) {
 			return "0%";
-		}
-		else if (weight >= totalWeight)
-		{
+		} else if (weight >= totalWeight) {
 			return "100%";
 		}
 
 		int chance = weight * 100 / totalWeight;
 		double chanced = weight * 100D / (double) totalWeight;
 
-		if (chance != chanced)
-		{
-			if (chanced < 0.01D)
-			{
+		if (chance != chanced) {
+			if (chanced < 0.01D) {
 				return "<0.01%";
 			}
 
@@ -48,8 +38,7 @@ public class WeightedReward implements Comparable<WeightedReward>
 	}
 
 	@Override
-	public int compareTo(WeightedReward o)
-	{
+	public int compareTo(WeightedReward o) {
 		return Integer.compare(weight, o.weight);
 	}
 }

@@ -27,64 +27,53 @@ import net.minecraft.world.item.ItemStack;
 /**
  * @author LatvianModder
  */
-public class AdvancementTask extends Task
-{
+public class AdvancementTask extends Task {
 	public String advancement = "";
 	public String criterion = "";
 
 	private Component advTitle = TextComponent.EMPTY;
 	private ItemStack advIcon = ItemStack.EMPTY;
 
-	public AdvancementTask(Quest quest)
-	{
+	public AdvancementTask(Quest quest) {
 		super(quest);
 	}
 
 	@Override
-	public TaskType getType()
-	{
+	public TaskType getType() {
 		return TaskTypes.ADVANCEMENT;
 	}
 
 	@Override
-	public void writeData(CompoundTag nbt)
-	{
+	public void writeData(CompoundTag nbt) {
 		super.writeData(nbt);
 		nbt.putString("advancement", advancement);
 		nbt.putString("criterion", criterion);
 	}
 
 	@Override
-	public void readData(CompoundTag nbt)
-	{
+	public void readData(CompoundTag nbt) {
 		super.readData(nbt);
 		advancement = nbt.getString("advancement");
 		criterion = nbt.getString("criterion");
 		advTitle = TextComponent.EMPTY;
 		advIcon = ItemStack.EMPTY;
 
-		try
-		{
-			if (!advancement.isEmpty() && getQuestFile() == ServerQuestFile.INSTANCE)
-			{
+		try {
+			if (!advancement.isEmpty() && getQuestFile() == ServerQuestFile.INSTANCE) {
 				Advancement a = ServerQuestFile.INSTANCE.server.getAdvancements().getAdvancement(new ResourceLocation(advancement));
 
-				if (a != null && a.getDisplay() != null)
-				{
+				if (a != null && a.getDisplay() != null) {
 					advTitle = a.getDisplay().getTitle().copy();
 					advIcon = ((DisplayInfoFTBQ) a.getDisplay()).getIconStackFTBQ().copy();
 				}
 			}
-		}
-		catch (Exception ex)
-		{
+		} catch (Exception ex) {
 			FTBQuests.LOGGER.warn("Failed to load advancement '" + advancement + "' task icon and title: " + ex);
 		}
 	}
 
 	@Override
-	public void writeNetData(FriendlyByteBuf buffer)
-	{
+	public void writeNetData(FriendlyByteBuf buffer) {
 		super.writeNetData(buffer);
 		buffer.writeUtf(advancement, Short.MAX_VALUE);
 		buffer.writeUtf(criterion, Short.MAX_VALUE);
@@ -93,8 +82,7 @@ public class AdvancementTask extends Task
 	}
 
 	@Override
-	public void readNetData(FriendlyByteBuf buffer)
-	{
+	public void readNetData(FriendlyByteBuf buffer) {
 		super.readNetData(buffer);
 		advancement = buffer.readUtf(Short.MAX_VALUE);
 		criterion = buffer.readUtf(Short.MAX_VALUE);
@@ -104,8 +92,7 @@ public class AdvancementTask extends Task
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public void getConfig(ConfigGroup config)
-	{
+	public void getConfig(ConfigGroup config) {
 		super.getConfig(config);
 		config.addString("advancement", advancement, v -> advancement = v, "").setNameKey("ftbquests.task.ftbquests.advancement");
 		config.addString("criterion", criterion, v -> criterion = v, "");
@@ -113,10 +100,8 @@ public class AdvancementTask extends Task
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public Component getAltTitle()
-	{
-		if (advTitle != TextComponent.EMPTY)
-		{
+	public Component getAltTitle() {
+		if (advTitle != TextComponent.EMPTY) {
 			return new TranslatableComponent("ftbquests.task.ftbquests.advancement").append(": ").append(new TextComponent("").append(advTitle).withStyle(ChatFormatting.YELLOW));
 		}
 
@@ -125,53 +110,42 @@ public class AdvancementTask extends Task
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public Icon getAltIcon()
-	{
+	public Icon getAltIcon() {
 		return advIcon.isEmpty() ? super.getAltIcon() : ItemIcon.getItemIcon(advIcon);
 	}
 
 	@Override
-	public int autoSubmitOnPlayerTick()
-	{
+	public int autoSubmitOnPlayerTick() {
 		return 5;
 	}
 
 	@Override
-	public TaskData createData(PlayerData data)
-	{
+	public TaskData createData(PlayerData data) {
 		return new Data(this, data);
 	}
 
-	public static class Data extends BooleanTaskData<AdvancementTask>
-	{
-		private Data(AdvancementTask task, PlayerData data)
-		{
+	public static class Data extends BooleanTaskData<AdvancementTask> {
+		private Data(AdvancementTask task, PlayerData data) {
 			super(task, data);
 		}
 
 		@Override
-		public boolean canSubmit(ServerPlayer player)
-		{
-			if (task.advancement.isEmpty())
-			{
+		public boolean canSubmit(ServerPlayer player) {
+			if (task.advancement.isEmpty()) {
 				return false;
 			}
 
 			Advancement a = player.server.getAdvancements().getAdvancement(new ResourceLocation(task.advancement));
 
-			if (a == null)
-			{
+			if (a == null) {
 				return false;
 			}
 
 			AdvancementProgress progress = player.getAdvancements().getOrStartProgress(a);
 
-			if (task.criterion.isEmpty())
-			{
+			if (task.criterion.isEmpty()) {
 				return progress.isDone();
-			}
-			else
-			{
+			} else {
 				CriterionProgress criterionProgress = progress.getCriterion(task.criterion);
 				return criterionProgress != null && criterionProgress.isDone();
 			}

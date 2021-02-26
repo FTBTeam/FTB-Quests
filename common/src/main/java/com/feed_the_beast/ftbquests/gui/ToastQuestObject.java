@@ -13,44 +13,36 @@ import net.minecraft.sounds.SoundEvents;
 /**
  * @author LatvianModder
  */
-public class ToastQuestObject extends SimpleToast
-{
+public class ToastQuestObject extends SimpleToast {
 	private final QuestObject object;
 
-	public ToastQuestObject(QuestObject q)
-	{
+	public ToastQuestObject(QuestObject q) {
 		object = q;
 	}
 
 	@Override
-	public Component getTitle()
-	{
+	public Component getTitle() {
 		return new TranslatableComponent(object.getObjectType().translationKey + ".completed");
 	}
 
 	@Override
-	public Component getSubtitle()
-	{
+	public Component getSubtitle() {
 		return object.getTitle();
 	}
 
 	@Override
-	public boolean isImportant()
-	{
+	public boolean isImportant() {
 		return object instanceof Chapter;
 	}
 
 	@Override
-	public Icon getIcon()
-	{
+	public Icon getIcon() {
 		return object.getIcon();
 	}
 
 	@Override
-	public void playSound(SoundManager handler)
-	{
-		if (object instanceof Chapter)
-		{
+	public void playSound(SoundManager handler) {
+		if (object instanceof Chapter) {
 			handler.play(SimpleSoundInstance.forUI(SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, 1F, 1F));
 		}
 	}

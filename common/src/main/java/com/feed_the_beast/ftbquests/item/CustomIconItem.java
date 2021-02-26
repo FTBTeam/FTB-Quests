@@ -24,18 +24,14 @@ import java.util.List;
 /**
  * @author LatvianModder
  */
-public class CustomIconItem extends Item
-{
-	public CustomIconItem()
-	{
+public class CustomIconItem extends Item {
+	public CustomIconItem() {
 		super(new Properties().stacksTo(1).tab(FTBQuests.ITEM_GROUP));
 	}
 
 	@Override
-	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand)
-	{
-		if (level.isClientSide())
-		{
+	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand) {
+		if (level.isClientSide()) {
 			FTBQuests.PROXY.openCustomIconGui(player, interactionHand);
 		}
 
@@ -44,26 +40,19 @@ public class CustomIconItem extends Item
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn)
-	{
+	public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
 		tooltip.add(new TranslatableComponent("item.ftbquests.custom_icon.tooltip").withStyle(ChatFormatting.GRAY));
 
-		if (stack.hasTag() && stack.getTag().contains("Icon"))
-		{
+		if (stack.hasTag() && stack.getTag().contains("Icon")) {
 			tooltip.add(new TextComponent(stack.getTag().getString("Icon")).withStyle(ChatFormatting.DARK_GRAY));
-		}
-		else
-		{
+		} else {
 			tooltip.add(new TextComponent("-").withStyle(ChatFormatting.DARK_GRAY));
 		}
 	}
 
-	public static Icon getIcon(ItemStack stack)
-	{
-		if (stack.getItem() instanceof CustomIconItem)
-		{
-			if (stack.hasTag() && stack.getTag().contains("Icon"))
-			{
+	public static Icon getIcon(ItemStack stack) {
+		if (stack.getItem() instanceof CustomIconItem) {
+			if (stack.hasTag() && stack.getTag().contains("Icon")) {
 				return Icon.getIcon(stack.getTag().getString("Icon"));
 			}
 

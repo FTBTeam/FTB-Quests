@@ -40,15 +40,13 @@ import java.util.function.Predicate;
 /**
  * @author LatvianModder
  */
-public class ItemTask extends Task implements Predicate<ItemStack>
-{
+public class ItemTask extends Task implements Predicate<ItemStack> {
 	public ItemStack item;
 	public long count;
 	public Tristate consumeItems;
 	public Tristate onlyFromCrafting;
 
-	public ItemTask(Quest quest)
-	{
+	public ItemTask(Quest quest) {
 		super(quest);
 		item = ItemStack.EMPTY;
 		count = 1;
@@ -57,25 +55,21 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 	}
 
 	@Override
-	public TaskType getType()
-	{
+	public TaskType getType() {
 		return TaskTypes.ITEM;
 	}
 
 	@Override
-	public long getMaxProgress()
-	{
+	public long getMaxProgress() {
 		return count;
 	}
 
 	@Override
-	public void writeData(CompoundTag nbt)
-	{
+	public void writeData(CompoundTag nbt) {
 		super.writeData(nbt);
 		NBTUtils.write(nbt, "item", item);
 
-		if (count > 1)
-		{
+		if (count > 1) {
 			nbt.putLong("count", count);
 		}
 
@@ -84,8 +78,7 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 	}
 
 	@Override
-	public void readData(CompoundTag nbt)
-	{
+	public void readData(CompoundTag nbt) {
 		super.readData(nbt);
 		item = NBTUtils.read(nbt, "item");
 		count = Math.max(nbt.getLong("count"), 1L);
@@ -94,8 +87,7 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 	}
 
 	@Override
-	public void writeNetData(FriendlyByteBuf buffer)
-	{
+	public void writeNetData(FriendlyByteBuf buffer) {
 		super.writeNetData(buffer);
 		int flags = 0;
 		flags = Bits.setFlag(flags, 1, count > 1L);
@@ -110,15 +102,13 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 
 		FTBQuestsNetHandler.writeItemType(buffer, item);
 
-		if (count > 1L)
-		{
+		if (count > 1L) {
 			buffer.writeVarLong(count);
 		}
 	}
 
 	@Override
-	public void readNetData(FriendlyByteBuf buffer)
-	{
+	public void readNetData(FriendlyByteBuf buffer) {
 		super.readNetData(buffer);
 		int flags = buffer.readVarInt();
 
@@ -130,8 +120,7 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 		//nbtMode = Bits.getFlag(flags, 64) ? Bits.getFlag(flags, 128) ? NBTMatchingMode.CONTAIN : NBTMatchingMode.IGNORE : NBTMatchingMode.MATCH;
 	}
 
-	public List<ItemStack> getValidDisplayItems()
-	{
+	public List<ItemStack> getValidDisplayItems() {
 		List<ItemStack> list = new ArrayList<>();
 		ItemFiltersAPI.getDisplayItemStacks(item, list);
 		return list;
@@ -139,10 +128,8 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public MutableComponent getAltTitle()
-	{
-		if (count > 1)
-		{
+	public MutableComponent getAltTitle() {
+		if (count > 1) {
 			return new TextComponent(count + "x ").append(item.getHoverName());
 		}
 
@@ -151,24 +138,20 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public Icon getAltIcon()
-	{
+	public Icon getAltIcon() {
 		List<Icon> icons = new ArrayList<>();
 
-		for (ItemStack stack : getValidDisplayItems())
-		{
+		for (ItemStack stack : getValidDisplayItems()) {
 			ItemStack copy = stack.copy();
 			copy.setCount(1);
 			Icon icon = ItemIcon.getItemIcon(copy);
 
-			if (!icon.isEmpty())
-			{
+			if (!icon.isEmpty()) {
 				icons.add(icon);
 			}
 		}
 
-		if (icons.isEmpty())
-		{
+		if (icons.isEmpty()) {
 			return ItemIcon.getItemIcon(FTBQuestsItems.MISSING_ITEM.get());
 		}
 
@@ -176,15 +159,13 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 	}
 
 	@Override
-	public boolean test(ItemStack stack)
-	{
+	public boolean test(ItemStack stack) {
 		return ItemFiltersAPI.filter(item, stack);
 	}
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public void getConfig(ConfigGroup config)
-	{
+	public void getConfig(ConfigGroup config) {
 		super.getConfig(config);
 		config.addItemStack("item", item, v -> item = v, ItemStack.EMPTY, true, false).setNameKey("ftbquests.task.ftbquests.item");
 		config.addLong("count", count, v -> count = v, 1, 1, Long.MAX_VALUE);
@@ -193,95 +174,72 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 	}
 
 	@Override
-	public boolean consumesResources()
-	{
+	public boolean consumesResources() {
 		return consumeItems.get(quest.chapter.file.defaultTeamConsumeItems);
 	}
 
 	@Override
-	public boolean canInsertItem()
-	{
+	public boolean canInsertItem() {
 		return consumesResources();
 	}
 
 	@Override
-	public boolean submitItemsOnInventoryChange()
-	{
+	public boolean submitItemsOnInventoryChange() {
 		return !consumesResources();
 	}
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public void onButtonClicked(Button button, boolean canClick)
-	{
+	public void onButtonClicked(Button button, boolean canClick) {
 		button.playClickSound();
 
 		List<ItemStack> validItems = getValidDisplayItems();
 
-		if (!consumesResources() && validItems.size() == 1 && Platform.isModLoaded("jei"))
-		{
+		if (!consumesResources() && validItems.size() == 1 && Platform.isModLoaded("jei")) {
 			showJEIRecipe(validItems.get(0));
-		}
-		else if (validItems.isEmpty())
-		{
+		} else if (validItems.isEmpty()) {
 			Minecraft.getInstance().getToasts().addToast(new CustomToast(new TextComponent("No valid items!"), ItemIcon.getItemIcon(FTBQuestsItems.MISSING_ITEM.get()), new TextComponent("Report this bug to modpack author!")));
-		}
-		else
-		{
+		} else {
 			new GuiValidItems(this, validItems, canClick).openGui();
 		}
 	}
 
 	@Environment(EnvType.CLIENT)
-	private void showJEIRecipe(ItemStack stack)
-	{
+	private void showJEIRecipe(ItemStack stack) {
 		FTBQuestsJEIHelper.showRecipes(stack);
 	}
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public void addMouseOverText(TooltipList list, @Nullable TaskData data)
-	{
-		if (consumesResources())
-		{
+	public void addMouseOverText(TooltipList list, @Nullable TaskData data) {
+		if (consumesResources()) {
 			list.blankLine();
 			list.add(new TranslatableComponent("ftbquests.task.click_to_submit").withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE));
-		}
-		else if (getValidDisplayItems().size() > 1)
-		{
+		} else if (getValidDisplayItems().size() > 1) {
 			list.blankLine();
 			list.add(new TranslatableComponent("ftbquests.task.ftbquests.item.view_items").withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE));
-		}
-		else if (Platform.isModLoaded("jei"))
-		{
+		} else if (Platform.isModLoaded("jei")) {
 			list.blankLine();
 			list.add(new TranslatableComponent("ftbquests.task.ftbquests.item.click_recipe").withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE));
 		}
 	}
 
 	@Override
-	public TaskData createData(PlayerData data)
-	{
+	public TaskData createData(PlayerData data) {
 		return new Data(this, data);
 	}
 
-	public static class Data extends TaskData<ItemTask>
-	{
-		private Data(ItemTask t, PlayerData data)
-		{
+	public static class Data extends TaskData<ItemTask> {
+		private Data(ItemTask t, PlayerData data) {
 			super(t, data);
 		}
 
-		public ItemStack insert(ItemStack stack, boolean simulate)
-		{
-			if (!isComplete() && task.test(stack))
-			{
+		public ItemStack insert(ItemStack stack, boolean simulate) {
+			if (!isComplete() && task.test(stack)) {
 				long add = Math.min(stack.getCount(), task.count - progress);
 
-				if (add > 0L)
-				{
-					if (!simulate && data.file.getSide() != Env.CLIENT)
-					{
+				if (add > 0L) {
+					if (!simulate && data.file.getSide() != Env.CLIENT) {
 						addProgress(add);
 					}
 
@@ -295,26 +253,20 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 		}
 
 		@Override
-		public void submitTask(ServerPlayer player, ItemStack item)
-		{
-			if (isComplete() || task.item.getItem() instanceof MissingItem || item.getItem() instanceof MissingItem)
-			{
+		public void submitTask(ServerPlayer player, ItemStack item) {
+			if (isComplete() || task.item.getItem() instanceof MissingItem || item.getItem() instanceof MissingItem) {
 				return;
 			}
 
-			if (!task.consumesResources())
-			{
-				if (task.onlyFromCrafting.get(false))
-				{
-					if (item.isEmpty() || !task.test(item))
-					{
+			if (!task.consumesResources()) {
+				if (task.onlyFromCrafting.get(false)) {
+					if (item.isEmpty() || !task.test(item)) {
 						return;
 					}
 
 					long count = Math.min(task.count, item.getCount());
 
-					if (count > progress)
-					{
+					if (count > progress) {
 						setProgress(count);
 						return;
 					}
@@ -322,18 +274,15 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 
 				long count = 0;
 
-				for (ItemStack stack : player.inventory.items)
-				{
-					if (!stack.isEmpty() && task.test(stack))
-					{
+				for (ItemStack stack : player.inventory.items) {
+					if (!stack.isEmpty() && task.test(stack)) {
 						count += stack.getCount();
 					}
 				}
 
 				count = Math.min(task.count, count);
 
-				if (count > progress)
-				{
+				if (count > progress) {
 					setProgress(count);
 					return;
 				}
@@ -341,27 +290,23 @@ public class ItemTask extends Task implements Predicate<ItemStack>
 				return;
 			}
 
-			if (!item.isEmpty())
-			{
+			if (!item.isEmpty()) {
 				return;
 			}
 
 			boolean changed = false;
 
-			for (int i = 0; i < player.inventory.items.size(); i++)
-			{
+			for (int i = 0; i < player.inventory.items.size(); i++) {
 				ItemStack stack = player.inventory.items.get(i);
 				ItemStack stack1 = insert(stack, false);
 
-				if (stack != stack1)
-				{
+				if (stack != stack1) {
 					changed = true;
 					player.inventory.items.set(i, stack1.isEmpty() ? ItemStack.EMPTY : stack1);
 				}
 			}
 
-			if (changed)
-			{
+			if (changed) {
 				player.inventory.setChanged();
 				player.containerMenu.broadcastChanges();
 			}

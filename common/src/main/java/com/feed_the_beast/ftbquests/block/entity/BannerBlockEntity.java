@@ -6,8 +6,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 /**
  * @author LatvianModder
  */
-public class BannerBlockEntity extends BlockEntity
-{
+public class BannerBlockEntity extends BlockEntity {
 	public ResourceLocation texture = new ResourceLocation("minecraft:textures/misc/unknown_pack.png");
 	public float rotationX = 0F;
 	public float rotationY = 0F;
@@ -19,8 +18,7 @@ public class BannerBlockEntity extends BlockEntity
 	public float sizeZ = 0F;
 	public String bannerId = "";
 
-	public BannerBlockEntity()
-	{
+	public BannerBlockEntity() {
 		super(FTBQuestsBlockEntities.BANNER.get());
 	}
 }

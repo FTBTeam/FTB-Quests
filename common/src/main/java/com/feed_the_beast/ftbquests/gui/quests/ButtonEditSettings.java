@@ -24,20 +24,16 @@ import java.util.List;
 /**
  * @author LatvianModder
  */
-public class ButtonEditSettings extends ButtonTab
-{
-	public ButtonEditSettings(Panel panel)
-	{
+public class ButtonEditSettings extends ButtonTab {
+	public ButtonEditSettings(Panel panel) {
 		super(panel, new TranslatableComponent("gui.settings"), ThemeProperties.SETTINGS_ICON.get());
 	}
 
 	@Override
-	public void onClicked(MouseButton button)
-	{
+	public void onClicked(MouseButton button) {
 		playClickSound();
 
-		if (treeGui.contextMenu != null)
-		{
+		if (treeGui.contextMenu != null) {
 			treeGui.closeContextMenu();
 			return;
 		}
@@ -48,8 +44,7 @@ public class ButtonEditSettings extends ButtonTab
 		contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.gui.complete_instantly"), ThemeProperties.CHECK_ICON.get(), () -> new MessageChangeProgress(ClientQuestFile.INSTANCE.self.uuid, treeGui.file.id, ChangeProgress.COMPLETE).sendToServer()).setYesNo(new TranslatableComponent("ftbquests.gui.complete_instantly_q")));
 		contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.reward_tables"), ThemeProperties.REWARD_TABLE_ICON.get(), () -> new GuiRewardTables().openGui()));
 		contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.gui.save_as_file"), ThemeProperties.DOWNLOAD_ICON.get(), () -> {
-			try
-			{
+			try {
 				Calendar time = Calendar.getInstance();
 				StringBuilder fileName = new StringBuilder("local/ftbquests/saved/");
 				appendNum(fileName, time.get(Calendar.YEAR), '-');
@@ -63,9 +58,7 @@ public class ButtonEditSettings extends ButtonTab
 				Component component = new TranslatableComponent("ftbquests.gui.saved_as_file", file.getPath().replace(Minecraft.getInstance().gameDirectory.getCanonicalFile().getAbsolutePath(), ""));
 				component.getStyle().withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, file.getAbsolutePath()));
 				Minecraft.getInstance().player.sendMessage(component, Util.NIL_UUID);
-			}
-			catch (Exception ex)
-			{
+			} catch (Exception ex) {
 				ex.printStackTrace();
 			}
 		}));
@@ -82,15 +75,12 @@ public class ButtonEditSettings extends ButtonTab
 		treeGui.openContextMenu(contextMenu);
 	}
 
-	private void appendNum(StringBuilder sb, int num, char c)
-	{
-		if (num < 10)
-		{
+	private void appendNum(StringBuilder sb, int num, char c) {
+		if (num < 10) {
 			sb.append('0');
 		}
 		sb.append(num);
-		if (c != '\0')
-		{
+		if (c != '\0') {
 			sb.append(c);
 		}
 	}

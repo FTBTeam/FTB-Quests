@@ -13,23 +13,20 @@ import javax.annotation.Nullable;
 /**
  * @author LatvianModder
  */
-public class MessageCreateObject extends MessageBase
-{
+public class MessageCreateObject extends MessageBase {
 	private final long parent;
 	private final QuestObjectType type;
 	private final CompoundTag nbt;
 	private final CompoundTag extra;
 
-	MessageCreateObject(FriendlyByteBuf buffer)
-	{
+	MessageCreateObject(FriendlyByteBuf buffer) {
 		parent = buffer.readLong();
 		type = QuestObjectType.NAME_MAP.read(buffer);
 		nbt = buffer.readNbt();
 		extra = buffer.readNbt();
 	}
 
-	public MessageCreateObject(QuestObjectBase o, @Nullable CompoundTag e)
-	{
+	public MessageCreateObject(QuestObjectBase o, @Nullable CompoundTag e) {
 		parent = o.getParentID();
 		type = o.getObjectType();
 		nbt = new CompoundTag();
@@ -38,8 +35,7 @@ public class MessageCreateObject extends MessageBase
 	}
 
 	@Override
-	public void write(FriendlyByteBuf buffer)
-	{
+	public void write(FriendlyByteBuf buffer) {
 		buffer.writeLong(parent);
 		QuestObjectType.NAME_MAP.write(buffer, type);
 		buffer.writeNbt(nbt);
@@ -47,10 +43,8 @@ public class MessageCreateObject extends MessageBase
 	}
 
 	@Override
-	public void handle(NetworkManager.PacketContext context)
-	{
-		if (NetUtils.canEdit(context))
-		{
+	public void handle(NetworkManager.PacketContext context) {
+		if (NetUtils.canEdit(context)) {
 			QuestObjectBase object = ServerQuestFile.INSTANCE.create(type, parent, extra == null ? new CompoundTag() : extra);
 			object.readData(nbt);
 			object.id = ServerQuestFile.INSTANCE.newID();

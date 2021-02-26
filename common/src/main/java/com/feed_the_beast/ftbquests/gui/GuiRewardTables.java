@@ -17,11 +17,7 @@ import com.feed_the_beast.mods.ftbguilibrary.icon.Color4I;
 import com.feed_the_beast.mods.ftbguilibrary.misc.GuiButtonListBase;
 import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
 import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
-import com.feed_the_beast.mods.ftbguilibrary.widget.ContextMenuItem;
-import com.feed_the_beast.mods.ftbguilibrary.widget.GuiIcons;
-import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
-import com.feed_the_beast.mods.ftbguilibrary.widget.SimpleTextButton;
-import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
+import com.feed_the_beast.mods.ftbguilibrary.widget.*;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -34,31 +30,25 @@ import java.util.regex.Pattern;
 /**
  * @author LatvianModder
  */
-public class GuiRewardTables extends GuiButtonListBase
-{
-	private class ButtonRewardTable extends SimpleTextButton
-	{
+public class GuiRewardTables extends GuiButtonListBase {
+	private class ButtonRewardTable extends SimpleTextButton {
 		private final RewardTable table;
 
-		public ButtonRewardTable(Panel panel, RewardTable t)
-		{
+		public ButtonRewardTable(Panel panel, RewardTable t) {
 			super(panel, t.getTitle(), t.getIcon());
 			table = t;
 			setHeight(14);
 
-			if (table.lootCrate != null)
-			{
+			if (table.lootCrate != null) {
 				title = title.copy().withStyle(ChatFormatting.YELLOW);
 			}
 		}
 
 		@Override
-		public void onClicked(MouseButton button)
-		{
+		public void onClicked(MouseButton button) {
 			playClickSound();
 
-			if (button.isLeft())
-			{
+			if (button.isLeft()) {
 				table.onEditButtonClicked(this);
 				return;
 			}
@@ -66,15 +56,13 @@ public class GuiRewardTables extends GuiButtonListBase
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
 			GuiQuests.addObjectMenuItems(contextMenu, GuiRewardTables.this, table);
 			contextMenu.add(new ContextMenuItem(new TranslatableComponent("item.ftbquests.lootcrate"), GuiIcons.ACCEPT, () -> {
-				if (table.lootCrate == null)
-				{
+				if (table.lootCrate == null) {
 					table.lootCrate = new LootCrate(table);
 					Matcher matcher = Pattern.compile("[^a-z0-9_]").matcher(table.getTitle().getString().toLowerCase());
 					Matcher matcher1 = Pattern.compile("_{2,}").matcher(matcher.replaceAll("_"));
 					table.lootCrate.stringID = matcher1.replaceAll("_");
 
-					switch (table.lootCrate.stringID)
-					{
+					switch (table.lootCrate.stringID) {
 						case "common":
 							table.lootCrate.color = Color4I.rgb(0x92999A);
 							table.lootCrate.drops.passive = 350;
@@ -109,19 +97,15 @@ public class GuiRewardTables extends GuiButtonListBase
 					}
 
 					title = table.getMutableTitle().withStyle(ChatFormatting.YELLOW);
-				}
-				else
-				{
+				} else {
 					table.lootCrate = null;
 					title = table.getTitle();
 				}
 
 				new MessageEditObject(table).sendToServer();
-			})
-			{
+			}) {
 				@Override
-				public void drawIcon(PoseStack matrixStack, Theme theme, int x, int y, int w, int h)
-				{
+				public void drawIcon(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
 					(table.lootCrate != null ? GuiIcons.ACCEPT : GuiIcons.ACCEPT_GRAY).draw(matrixStack, x, y, w, h);
 				}
 			});
@@ -129,22 +113,16 @@ public class GuiRewardTables extends GuiButtonListBase
 		}
 
 		@Override
-		public void addMouseOverText(TooltipList list)
-		{
+		public void addMouseOverText(TooltipList list) {
 			super.addMouseOverText(list);
 
 			int usedIn = 0;
 
-			for (ChapterGroup group : table.file.chapterGroups)
-			{
-				for (Chapter chapter : group.chapters)
-				{
-					for (Quest quest : chapter.quests)
-					{
-						for (Reward reward : quest.rewards)
-						{
-							if (reward instanceof RandomReward && ((RandomReward) reward).table == table)
-							{
+			for (ChapterGroup group : table.file.chapterGroups) {
+				for (Chapter chapter : group.chapters) {
+					for (Quest quest : chapter.quests) {
+						for (Reward reward : quest.rewards) {
+							if (reward instanceof RandomReward && ((RandomReward) reward).table == table) {
 								usedIn++;
 							}
 						}
@@ -152,8 +130,7 @@ public class GuiRewardTables extends GuiButtonListBase
 				}
 			}
 
-			if (usedIn > 0)
-			{
+			if (usedIn > 0) {
 				list.add(new TranslatableComponent("ftbquests.reward_table.used_in", usedIn).withStyle(ChatFormatting.GRAY));
 			}
 
@@ -161,26 +138,21 @@ public class GuiRewardTables extends GuiButtonListBase
 		}
 	}
 
-	public GuiRewardTables()
-	{
+	public GuiRewardTables() {
 		setTitle(new TranslatableComponent("ftbquests.reward_tables"));
 		setHasSearchBox(true);
 		setBorder(1, 1, 1);
 	}
 
 	@Override
-	public void addButtons(Panel panel)
-	{
-		SimpleTextButton button = new SimpleTextButton(panel, new TranslatableComponent("gui.add"), GuiIcons.ADD)
-		{
+	public void addButtons(Panel panel) {
+		SimpleTextButton button = new SimpleTextButton(panel, new TranslatableComponent("gui.add"), GuiIcons.ADD) {
 			@Override
-			public void onClicked(MouseButton button)
-			{
+			public void onClicked(MouseButton button) {
 				playClickSound();
 				ConfigString c = new ConfigString();
 				GuiEditConfigFromString.open(c, "", "", accepted -> {
-					if (accepted)
-					{
+					if (accepted) {
 						RewardTable table = new RewardTable(ClientQuestFile.INSTANCE);
 						table.title = c.value;
 						new MessageCreateObject(table, null).sendToServer();
@@ -194,15 +166,13 @@ public class GuiRewardTables extends GuiButtonListBase
 		button.setHeight(14);
 		panel.add(button);
 
-		for (RewardTable table : ClientQuestFile.INSTANCE.rewardTables)
-		{
+		for (RewardTable table : ClientQuestFile.INSTANCE.rewardTables) {
 			panel.add(new ButtonRewardTable(panel, table));
 		}
 	}
 
 	@Override
-	public Theme getTheme()
-	{
+	public Theme getTheme() {
 		return FTBQuestsTheme.INSTANCE;
 	}
 }

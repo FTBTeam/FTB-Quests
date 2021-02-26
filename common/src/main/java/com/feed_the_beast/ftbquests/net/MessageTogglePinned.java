@@ -9,29 +9,24 @@ import net.minecraft.server.level.ServerPlayer;
 /**
  * @author LatvianModder
  */
-public class MessageTogglePinned extends MessageBase
-{
+public class MessageTogglePinned extends MessageBase {
 	private final long id;
 
-	MessageTogglePinned(FriendlyByteBuf buffer)
-	{
+	MessageTogglePinned(FriendlyByteBuf buffer) {
 		id = buffer.readLong();
 	}
 
-	public MessageTogglePinned(long i)
-	{
+	public MessageTogglePinned(long i) {
 		id = i;
 	}
 
 	@Override
-	public void write(FriendlyByteBuf buffer)
-	{
+	public void write(FriendlyByteBuf buffer) {
 		buffer.writeLong(id);
 	}
 
 	@Override
-	public void handle(NetworkManager.PacketContext context)
-	{
+	public void handle(NetworkManager.PacketContext context) {
 		ServerPlayer player = (ServerPlayer) context.getPlayer();
 		PlayerData data = ServerQuestFile.INSTANCE.getData(player);
 		data.setQuestPinned(id, !data.isQuestPinned(id));

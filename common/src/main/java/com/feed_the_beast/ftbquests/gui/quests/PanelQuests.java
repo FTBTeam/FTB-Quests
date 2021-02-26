@@ -18,12 +18,7 @@ import com.feed_the_beast.mods.ftbguilibrary.utils.Key;
 import com.feed_the_beast.mods.ftbguilibrary.utils.MathUtils;
 import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
 import com.feed_the_beast.mods.ftbguilibrary.utils.StringUtils;
-import com.feed_the_beast.mods.ftbguilibrary.widget.ContextMenuItem;
-import com.feed_the_beast.mods.ftbguilibrary.widget.GuiHelper;
-import com.feed_the_beast.mods.ftbguilibrary.widget.GuiIcons;
-import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
-import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
-import com.feed_the_beast.mods.ftbguilibrary.widget.Widget;
+import com.feed_the_beast.mods.ftbguilibrary.widget.*;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
@@ -42,8 +37,7 @@ import java.util.List;
 /**
  * @author LatvianModder
  */
-public class PanelQuests extends Panel
-{
+public class PanelQuests extends Panel {
 	private static final ImageIcon DEFAULT_DEPENDENCY_LINE_TEXTURE = (ImageIcon) Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/dependency.png");
 	public final GuiQuests treeGui;
 	public double questX = 0;
@@ -53,41 +47,33 @@ public class PanelQuests extends Panel
 	public ButtonQuest mouseOverQuest = null;
 	public double questMinX, questMinY, questMaxX, questMaxY;
 
-	public PanelQuests(Panel panel)
-	{
+	public PanelQuests(Panel panel) {
 		super(panel);
 		treeGui = (GuiQuests) panel.getGui();
 	}
 
-	public void updateMinMax()
-	{
+	public void updateMinMax() {
 		questMinX = Double.POSITIVE_INFINITY;
 		questMinY = Double.POSITIVE_INFINITY;
 		questMaxX = Double.NEGATIVE_INFINITY;
 		questMaxY = Double.NEGATIVE_INFINITY;
 
-		for (Widget w : widgets)
-		{
+		for (Widget w : widgets) {
 			double qx, qy, qw, qh;
 
-			if (w instanceof ButtonQuest)
-			{
+			if (w instanceof ButtonQuest) {
 				Quest q = ((ButtonQuest) w).quest;
 				qx = q.x;
 				qy = q.y;
 				qw = q.size;
 				qh = q.size;
-			}
-			else if (w instanceof ButtonChapterImage)
-			{
+			} else if (w instanceof ButtonChapterImage) {
 				ChapterImage q = ((ButtonChapterImage) w).chapterImage;
 				qx = q.x;
 				qy = q.y;
 				qw = q.width;
 				qh = q.height;
-			}
-			else
-			{
+			} else {
 				continue;
 			}
 
@@ -97,8 +83,7 @@ public class PanelQuests extends Panel
 			questMaxY = Math.max(questMaxY, qy + qh / 2D);
 		}
 
-		if (questMinX == Double.POSITIVE_INFINITY)
-		{
+		if (questMinX == Double.POSITIVE_INFINITY) {
 			questMinX = questMinY = questMaxX = questMaxY = 0D;
 		}
 
@@ -108,8 +93,7 @@ public class PanelQuests extends Panel
 		questMaxY += 30D;
 	}
 
-	public void scrollTo(double x, double y)
-	{
+	public void scrollTo(double x, double y) {
 		updateMinMax();
 
 		double dx = (questMaxX - questMinX);
@@ -119,33 +103,26 @@ public class PanelQuests extends Panel
 		setScrollY((y - questMinY) / dy * treeGui.scrollHeight - height / 2D);
 	}
 
-	public void resetScroll()
-	{
+	public void resetScroll() {
 		alignWidgets();
 		setScrollX((treeGui.scrollWidth - width) / 2D);
 		setScrollY((treeGui.scrollHeight - height) / 2D);
 	}
 
 	@Override
-	public void addWidgets()
-	{
-		if (treeGui.selectedChapter == null)
-		{
+	public void addWidgets() {
+		if (treeGui.selectedChapter == null) {
 			return;
 		}
 
-		for (ChapterImage image : treeGui.selectedChapter.images)
-		{
-			if (treeGui.file.canEdit() || !image.dev)
-			{
+		for (ChapterImage image : treeGui.selectedChapter.images) {
+			if (treeGui.file.canEdit() || !image.dev) {
 				add(new ButtonChapterImage(this, image));
 			}
 		}
 
-		for (Quest quest : treeGui.selectedChapter.quests)
-		{
-			if (treeGui.file.canEdit() || quest.isVisible(ClientQuestFile.INSTANCE.self))
-			{
+		for (Quest quest : treeGui.selectedChapter.quests) {
+			if (treeGui.file.canEdit() || quest.isVisible(ClientQuestFile.INSTANCE.self)) {
 				add(new ButtonQuest(this, quest));
 			}
 		}
@@ -154,10 +131,8 @@ public class PanelQuests extends Panel
 	}
 
 	@Override
-	public void alignWidgets()
-	{
-		if (treeGui.selectedChapter == null)
-		{
+	public void alignWidgets() {
+		if (treeGui.selectedChapter == null) {
 			return;
 		}
 
@@ -172,28 +147,22 @@ public class PanelQuests extends Panel
 		treeGui.scrollWidth = (questMaxX - questMinX) * (bs + bp);
 		treeGui.scrollHeight = (questMaxY - questMinY) * (bs + bp);
 
-		for (Widget w : widgets)
-		{
+		for (Widget w : widgets) {
 			double qx, qy, qw, qh;
 
-			if (w instanceof ButtonQuest)
-			{
+			if (w instanceof ButtonQuest) {
 				Quest q = ((ButtonQuest) w).quest;
 				qx = q.x;
 				qy = q.y;
 				qw = q.size;
 				qh = q.size;
-			}
-			else if (w instanceof ButtonChapterImage)
-			{
+			} else if (w instanceof ButtonChapterImage) {
 				ChapterImage q = ((ButtonChapterImage) w).chapterImage;
 				qx = q.x;
 				qy = q.y;
 				qw = q.width;
 				qh = q.height;
-			}
-			else
-			{
+			} else {
 				continue;
 			}
 
@@ -206,19 +175,15 @@ public class PanelQuests extends Panel
 	}
 
 	@Override
-	public void drawOffsetBackground(PoseStack matrixStack, Theme theme, int x, int y, int w, int h)
-	{
-		if (treeGui.selectedChapter == null)
-		{
+	public void drawOffsetBackground(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
+		if (treeGui.selectedChapter == null) {
 			return;
 		}
 
 		GuiHelper.setupDrawing();
 
-		for (Widget widget : widgets)
-		{
-			if (widget instanceof ButtonChapterImage)
-			{
+		for (Widget widget : widgets) {
+			if (widget instanceof ButtonChapterImage) {
 				widget.draw(matrixStack, theme, widget.getX(), widget.getY(), widget.width, widget.height);
 			}
 		}
@@ -228,12 +193,9 @@ public class PanelQuests extends Panel
 
 		Icon icon = ThemeProperties.DEPENDENCY_LINE_TEXTURE.get(treeGui.selectedChapter);
 
-		if (icon instanceof ImageIcon)
-		{
+		if (icon instanceof ImageIcon) {
 			icon.bindTexture();
-		}
-		else
-		{
+		} else {
 			DEFAULT_DEPENDENCY_LINE_TEXTURE.bindTexture();
 		}
 
@@ -245,42 +207,34 @@ public class PanelQuests extends Panel
 		float ms = (float) ((mt * ThemeProperties.DEPENDENCY_LINE_SELECTED_SPEED.get(treeGui.selectedChapter)) % 1D);
 		float s = (float) (treeGui.getZoom() * ThemeProperties.DEPENDENCY_LINE_THICKNESS.get(treeGui.selectedChapter) / 4D * 3D);
 
-		for (Widget widget : widgets)
-		{
-			if (!(widget instanceof ButtonQuest))
-			{
+		for (Widget widget : widgets) {
+			if (!(widget instanceof ButtonQuest)) {
 				continue;
 			}
 
 			Quest wquest = ((ButtonQuest) widget).quest;
 
-			if (wquest.hideDependencyLines.get(false))
-			{
+			if (wquest.hideDependencyLines.get(false)) {
 				continue;
 			}
 
 			boolean unavailable = treeGui.file.self == null || !treeGui.file.self.canStartTasks(wquest);
 			boolean complete = !unavailable && treeGui.file.self != null && treeGui.file.self.isComplete(wquest);
 
-			for (ButtonQuest button : ((ButtonQuest) widget).getDependencies())
-			{
-				if (button.quest == selectedQuest || wquest == selectedQuest)
-				{
+			for (ButtonQuest button : ((ButtonQuest) widget).getDependencies()) {
+				if (button.quest == selectedQuest || wquest == selectedQuest) {
 					continue;
 				}
 
 				int r, g, b, a;
 
-				if (complete)
-				{
+				if (complete) {
 					Color4I c = ThemeProperties.DEPENDENCY_LINE_COMPLETED_COLOR.get(treeGui.selectedChapter);
 					r = c.redi();
 					g = c.greeni();
 					b = c.bluei();
 					a = c.alphai();
-				}
-				else
-				{
+				} else {
 					Color4I c = Color4I.hsb(button.quest.id / 1000F, 0.2F, unavailable ? 0.3F : 0.8F);
 					r = c.redi();
 					g = c.greeni();
@@ -310,42 +264,33 @@ public class PanelQuests extends Panel
 			}
 		}
 
-		for (Widget widget : widgets)
-		{
-			if (!(widget instanceof ButtonQuest))
-			{
+		for (Widget widget : widgets) {
+			if (!(widget instanceof ButtonQuest)) {
 				continue;
 			}
 
 			Quest wquest = ((ButtonQuest) widget).quest;
 
-			if (wquest.hideDependencyLines.get(false))
-			{
+			if (wquest.hideDependencyLines.get(false)) {
 				continue;
 			}
 
-			for (ButtonQuest button : ((ButtonQuest) widget).getDependencies())
-			{
+			for (ButtonQuest button : ((ButtonQuest) widget).getDependencies()) {
 				int r, g, b, a;
 
-				if (button.quest == selectedQuest)
-				{
+				if (button.quest == selectedQuest) {
 					Color4I c = ThemeProperties.DEPENDENCY_LINE_REQUIRED_FOR_COLOR.get(treeGui.selectedChapter);
 					r = c.redi();
 					g = c.greeni();
 					b = c.bluei();
 					a = c.alphai();
-				}
-				else if (wquest == selectedQuest)
-				{
+				} else if (wquest == selectedQuest) {
 					Color4I c = ThemeProperties.DEPENDENCY_LINE_REQUIRES_COLOR.get(treeGui.selectedChapter);
 					r = c.redi();
 					g = c.greeni();
 					b = c.bluei();
 					a = c.alphai();
-				}
-				else
-				{
+				} else {
 					continue;
 				}
 
@@ -375,12 +320,10 @@ public class PanelQuests extends Panel
 	}
 
 	@Override
-	public void draw(PoseStack matrixStack, Theme theme, int x, int y, int w, int h)
-	{
+	public void draw(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
 		super.draw(matrixStack, theme, x, y, w, h);
 
-		if (treeGui.selectedChapter != null && isMouseOver())
-		{
+		if (treeGui.selectedChapter != null && isMouseOver()) {
 			//updateMinMax();
 
 			double dx = (questMaxX - questMinX);
@@ -394,27 +337,21 @@ public class PanelQuests extends Panel
 			centerQuestX = (treeGui.width / 2D - px) / treeGui.scrollWidth * dx + questMinX;
 			centerQuestY = (treeGui.height / 2D - py) / treeGui.scrollHeight * dy + questMinY;
 
-			if (isShiftKeyDown())
-			{
+			if (isShiftKeyDown()) {
 				questX = qx;
 				questY = qy;
-			}
-			else if (treeGui.selectedObjects.size() == 1 && treeGui.selectedObjects.get(0) instanceof Quest)
-			{
+			} else if (treeGui.selectedObjects.size() == 1 && treeGui.selectedObjects.get(0) instanceof Quest) {
 				Quest q = (Quest) treeGui.selectedObjects.get(0);
 				double s = (1D / treeGui.file.gridScale) / q.size;
 				questX = Mth.floor(qx * s + 0.5D) / s;
 				questY = Mth.floor(qy * s + 0.5D) / s;
-			}
-			else
-			{
+			} else {
 				double s = 1D / treeGui.file.gridScale;
 				questX = Mth.floor(qx * s + 0.5D) / s;
 				questY = Mth.floor(qy * s + 0.5D) / s;
 			}
 
-			if (treeGui.file.canEdit())
-			{
+			if (treeGui.file.canEdit()) {
 				matrixStack.pushPose();
 				matrixStack.translate(0, 0, 600);
 				theme.drawString(matrixStack, "X:" + (questX < 0 ? "" : " ") + StringUtils.DOUBLE_FORMATTER_00.format(questX), x + 3, y + h - 18, Theme.SHADOW);
@@ -425,20 +362,17 @@ public class PanelQuests extends Panel
 
 				double bs = treeGui.getQuestButtonSize();
 
-				if (treeGui.movingObjects && !treeGui.selectedObjects.isEmpty())
-				{
+				if (treeGui.movingObjects && !treeGui.selectedObjects.isEmpty()) {
 					double ominX = Double.POSITIVE_INFINITY, ominY = Double.POSITIVE_INFINITY, omaxX = Double.NEGATIVE_INFINITY, omaxY = Double.NEGATIVE_INFINITY;
 
-					for (Movable q : treeGui.selectedObjects)
-					{
+					for (Movable q : treeGui.selectedObjects) {
 						ominX = Math.min(ominX, q.getX());
 						ominY = Math.min(ominY, q.getY());
 						omaxX = Math.max(omaxX, q.getX());
 						omaxY = Math.max(omaxY, q.getY());
 					}
 
-					for (Movable m : treeGui.selectedObjects)
-					{
+					for (Movable m : treeGui.selectedObjects) {
 						double ox = m.getX() - ominX;
 						double oy = m.getY() - ominY;
 						double sx = (questX + ox - questMinX) / dx * treeGui.scrollWidth + px;
@@ -451,8 +385,7 @@ public class PanelQuests extends Panel
 						matrixStack.popPose();
 					}
 
-					if (GuiQuests.grid && treeGui.viewQuestPanel.quest == null)
-					{
+					if (GuiQuests.grid && treeGui.viewQuestPanel.quest == null) {
 						double boxX = ominX / dx * treeGui.scrollWidth + px;
 						double boxY = ominY / dy * treeGui.scrollHeight + py;
 						double boxW = omaxX / dx * treeGui.scrollWidth + px - boxX;
@@ -463,9 +396,7 @@ public class PanelQuests extends Panel
 						GuiHelper.drawHollowRect(matrixStack, (int) boxX, (int) boxY, (int) boxW, (int) boxH, Color4I.WHITE.withAlpha(30), false);
 						matrixStack.popPose();
 					}
-				}
-				else if (treeGui.viewQuestPanel.quest == null || !treeGui.viewQuestPanel.isMouseOver())
-				{
+				} else if (treeGui.viewQuestPanel.quest == null || !treeGui.viewQuestPanel.isMouseOver()) {
 					//int z = treeGui.getZoom();
 					double sx = (questX - questMinX) / dx * treeGui.scrollWidth + px;
 					double sy = (questY - questMinY) / dy * treeGui.scrollHeight + py;
@@ -478,8 +409,7 @@ public class PanelQuests extends Panel
 					RenderSystem.defaultAlphaFunc();
 					matrixStack.popPose();
 
-					if (GuiQuests.grid && treeGui.viewQuestPanel.quest == null)
-					{
+					if (GuiQuests.grid && treeGui.viewQuestPanel.quest == null) {
 						matrixStack.pushPose();
 						matrixStack.translate(0, 0, 1000);
 						Color4I.WHITE.draw(matrixStack, (int) sx, (int) sy, 1, 1);
@@ -493,30 +423,24 @@ public class PanelQuests extends Panel
 	}
 
 	@Override
-	public boolean mousePressed(MouseButton button)
-	{
-		if (treeGui.selectedChapter == null)
-		{
+	public boolean mousePressed(MouseButton button) {
+		if (treeGui.selectedChapter == null) {
 			return false;
 		}
 
-		if (treeGui.movingObjects && treeGui.file.canEdit())
-		{
-			if (treeGui.selectedChapter != null && !button.isRight() && !treeGui.selectedObjects.isEmpty())
-			{
+		if (treeGui.movingObjects && treeGui.file.canEdit()) {
+			if (treeGui.selectedChapter != null && !button.isRight() && !treeGui.selectedObjects.isEmpty()) {
 				playClickSound();
 
 				double minX = Double.POSITIVE_INFINITY;
 				double minY = Double.POSITIVE_INFINITY;
 
-				for (Movable q : treeGui.selectedObjects)
-				{
+				for (Movable q : treeGui.selectedObjects) {
 					minX = Math.min(minX, q.getX());
 					minY = Math.min(minY, q.getY());
 				}
 
-				for (Movable q : new ArrayList<>(treeGui.selectedObjects))
-				{
+				for (Movable q : new ArrayList<>(treeGui.selectedObjects)) {
 					q.move(treeGui.selectedChapter, questX + (q.getX() - minX), questY + (q.getY() - minY));
 				}
 			}
@@ -526,34 +450,29 @@ public class PanelQuests extends Panel
 			return true;
 		}
 
-		if (super.mousePressed(button))
-		{
+		if (super.mousePressed(button)) {
 			return true;
 		}
 
-		if (!treeGui.viewQuestPanel.hidePanel && treeGui.getViewedQuest() != null)
-		{
+		if (!treeGui.viewQuestPanel.hidePanel && treeGui.getViewedQuest() != null) {
 			treeGui.closeQuest();
 			return true;
 		}
 
-		if (button.isLeft() && isMouseOver() && (treeGui.viewQuestPanel.hidePanel || treeGui.getViewedQuest() == null))
-		{
+		if (button.isLeft() && isMouseOver() && (treeGui.viewQuestPanel.hidePanel || treeGui.getViewedQuest() == null)) {
 			treeGui.prevMouseX = getMouseX();
 			treeGui.prevMouseY = getMouseY();
 			treeGui.grabbed = 1;
 			return true;
 		}
 
-		if (button.isRight() && treeGui.file.canEdit())
-		{
+		if (button.isRight() && treeGui.file.canEdit()) {
 			playClickSound();
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
 			double qx = questX;
 			double qy = questY;
 
-			for (TaskType type : TaskTypes.TYPES.values())
-			{
+			for (TaskType type : TaskTypes.TYPES.values()) {
 				contextMenu.add(new ContextMenuItem(type.getDisplayName(), type.getIcon(), () -> {
 					playClickSound();
 					type.getGuiProvider().openCreationGui(this, new Quest(treeGui.selectedChapter), task -> new MessageCreateTaskAt(treeGui.selectedChapter, qx, qy, task).sendToServer());
@@ -577,17 +496,14 @@ public class PanelQuests extends Panel
 	}
 
 	@Override
-	public void mouseReleased(MouseButton button)
-	{
+	public void mouseReleased(MouseButton button) {
 		super.mouseReleased(button);
 		treeGui.grabbed = 0;
 	}
 
 	@Override
-	public boolean checkMouseOver(int mouseX, int mouseY)
-	{
-		if (!treeGui.chapterHoverPanel.widgets.isEmpty())
-		{
+	public boolean checkMouseOver(int mouseX, int mouseY) {
+		if (!treeGui.chapterHoverPanel.widgets.isEmpty()) {
 			return false;
 		}
 
@@ -595,15 +511,12 @@ public class PanelQuests extends Panel
 	}
 
 	@Override
-	public void updateMouseOver(int mouseX, int mouseY)
-	{
+	public void updateMouseOver(int mouseX, int mouseY) {
 		mouseOverQuest = null;
 		super.updateMouseOver(mouseX, mouseY);
 
-		for (Widget widget : widgets)
-		{
-			if (widget.isMouseOver() && widget instanceof ButtonQuest)
-			{
+		for (Widget widget : widgets) {
+			if (widget.isMouseOver() && widget instanceof ButtonQuest) {
 				mouseOverQuest = (ButtonQuest) widget;
 				break;
 			}
@@ -611,10 +524,8 @@ public class PanelQuests extends Panel
 	}
 
 	@Override
-	public boolean keyPressed(Key key)
-	{
-		if (treeGui.selectedChapter != null && treeGui.getViewedQuest() == null && (key.is(GLFW.GLFW_KEY_MINUS) || key.is(GLFW.GLFW_KEY_EQUAL)))
-		{
+	public boolean keyPressed(Key key) {
+		if (treeGui.selectedChapter != null && treeGui.getViewedQuest() == null && (key.is(GLFW.GLFW_KEY_MINUS) || key.is(GLFW.GLFW_KEY_EQUAL))) {
 			treeGui.addZoom(key.is(GLFW.GLFW_KEY_MINUS) ? -1D : 1D);
 			return true;
 		}
@@ -623,10 +534,8 @@ public class PanelQuests extends Panel
 	}
 
 	@Override
-	public boolean scrollPanel(double scroll)
-	{
-		if (treeGui.selectedChapter != null && treeGui.getViewedQuest() == null && isMouseOver())
-		{
+	public boolean scrollPanel(double scroll) {
+		if (treeGui.selectedChapter != null && treeGui.getViewedQuest() == null && isMouseOver()) {
 			treeGui.addZoom(scroll);
 			return true;
 		}

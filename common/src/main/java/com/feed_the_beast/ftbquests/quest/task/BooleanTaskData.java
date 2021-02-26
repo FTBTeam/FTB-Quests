@@ -7,23 +7,18 @@ import net.minecraft.world.item.ItemStack;
 /**
  * @author LatvianModder
  */
-public class BooleanTaskData<T extends Task> extends TaskData<T>
-{
-	public BooleanTaskData(T q, PlayerData d)
-	{
+public class BooleanTaskData<T extends Task> extends TaskData<T> {
+	public BooleanTaskData(T q, PlayerData d) {
 		super(q, d);
 	}
 
-	public boolean canSubmit(ServerPlayer player)
-	{
+	public boolean canSubmit(ServerPlayer player) {
 		return true;
 	}
 
 	@Override
-	public void submitTask(ServerPlayer player, ItemStack item)
-	{
-		if (!isComplete() && canSubmit(player))
-		{
+	public void submitTask(ServerPlayer player, ItemStack item) {
+		if (!isComplete() && canSubmit(player)) {
 			setProgress(1L);
 		}
 	}

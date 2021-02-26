@@ -5,7 +5,6 @@ import net.minecraft.world.item.ItemStack;
 /**
  * @author LatvianModder
  */
-public interface DisplayInfoFTBQ
-{
+public interface DisplayInfoFTBQ {
 	ItemStack getIconStackFTBQ();
 }

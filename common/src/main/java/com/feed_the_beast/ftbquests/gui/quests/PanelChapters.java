@@ -14,22 +14,18 @@ import java.util.List;
 /**
  * @author LatvianModder
  */
-public class PanelChapters extends Panel
-{
+public class PanelChapters extends Panel {
 	public final GuiQuests treeGui;
 
-	public PanelChapters(Panel panel)
-	{
+	public PanelChapters(Panel panel) {
 		super(panel);
 		treeGui = (GuiQuests) panel.getGui();
 		setPosAndSize(0, 1, 20, 0);
 	}
 
 	@Override
-	public void addWidgets()
-	{
-		if (Platform.isModLoaded("ftbmoney"))
-		{
+	public void addWidgets() {
+		if (Platform.isModLoaded("ftbmoney")) {
 			add(new ButtonOpenShop(this));
 			Color4I borderColor = ThemeProperties.WIDGET_BORDER.get(treeGui.selectedChapter);
 			add(new ColorWidget(this, borderColor, null).setPosAndSize(1, 0, width - 2, 1));
@@ -37,21 +33,15 @@ public class PanelChapters extends Panel
 
 		boolean canEdit = treeGui.file.canEdit();
 
-		if (treeGui.file.chapterGroups.size() == 1)
-		{
-			for (Chapter chapter : treeGui.file.defaultChapterGroup.getVisibleChapters(treeGui.file.self))
-			{
+		if (treeGui.file.chapterGroups.size() == 1) {
+			for (Chapter chapter : treeGui.file.defaultChapterGroup.getVisibleChapters(treeGui.file.self)) {
 				add(new ButtonChapter(this, chapter));
 			}
-		}
-		else
-		{
-			for (ChapterGroup group : treeGui.file.chapterGroups)
-			{
+		} else {
+			for (ChapterGroup group : treeGui.file.chapterGroups) {
 				List<Chapter> visibleChapters = group.getVisibleChapters(treeGui.file.self);
 
-				for (Chapter chapter : visibleChapters)
-				{
+				for (Chapter chapter : visibleChapters) {
 					add(new ButtonChapter(this, chapter));
 				}
 
@@ -59,15 +49,13 @@ public class PanelChapters extends Panel
 			}
 		}
 
-		if (canEdit)
-		{
+		if (canEdit) {
 			add(new ButtonAddChapter(this));
 		}
 	}
 
 	@Override
-	public void alignWidgets()
-	{
+	public void alignWidgets() {
 		setHeight(treeGui.height - 2);
 		align(WidgetLayout.VERTICAL);
 	}

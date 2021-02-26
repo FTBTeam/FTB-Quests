@@ -14,15 +14,13 @@ import net.minecraft.network.FriendlyByteBuf;
 /**
  * @author LatvianModder
  */
-public class MessageCreateTaskAt extends MessageBase
-{
+public class MessageCreateTaskAt extends MessageBase {
 	private final long chapter;
 	private final double x, y;
 	private final TaskType type;
 	private final CompoundTag nbt;
 
-	MessageCreateTaskAt(FriendlyByteBuf buffer)
-	{
+	MessageCreateTaskAt(FriendlyByteBuf buffer) {
 		chapter = buffer.readLong();
 		x = buffer.readDouble();
 		y = buffer.readDouble();
@@ -30,8 +28,7 @@ public class MessageCreateTaskAt extends MessageBase
 		nbt = buffer.readNbt();
 	}
 
-	public MessageCreateTaskAt(Chapter c, double _x, double _y, Task task)
-	{
+	public MessageCreateTaskAt(Chapter c, double _x, double _y, Task task) {
 		chapter = c.id;
 		x = _x;
 		y = _y;
@@ -41,8 +38,7 @@ public class MessageCreateTaskAt extends MessageBase
 	}
 
 	@Override
-	public void write(FriendlyByteBuf buffer)
-	{
+	public void write(FriendlyByteBuf buffer) {
 		buffer.writeLong(chapter);
 		buffer.writeDouble(x);
 		buffer.writeDouble(y);
@@ -51,14 +47,11 @@ public class MessageCreateTaskAt extends MessageBase
 	}
 
 	@Override
-	public void handle(NetworkManager.PacketContext context)
-	{
-		if (NetUtils.canEdit(context))
-		{
+	public void handle(NetworkManager.PacketContext context) {
+		if (NetUtils.canEdit(context)) {
 			Chapter c = ServerQuestFile.INSTANCE.getChapter(chapter);
 
-			if (c != null)
-			{
+			if (c != null) {
 				Quest quest = new Quest(c);
 				quest.x = x;
 				quest.y = y;

@@ -7,22 +7,18 @@ import net.minecraft.server.level.ServerPlayer;
 /**
  * @author LatvianModder
  */
-public class CustomReward extends Reward
-{
-	public CustomReward(Quest quest)
-	{
+public class CustomReward extends Reward {
+	public CustomReward(Quest quest) {
 		super(quest);
 	}
 
 	@Override
-	public RewardType getType()
-	{
+	public RewardType getType() {
 		return RewardTypes.CUSTOM;
 	}
 
 	@Override
-	public void claim(ServerPlayer player, boolean notify)
-	{
+	public void claim(ServerPlayer player, boolean notify) {
 		CustomRewardEvent.EVENT.invoker().act(new CustomRewardEvent(this, player, notify));
 	}
 }

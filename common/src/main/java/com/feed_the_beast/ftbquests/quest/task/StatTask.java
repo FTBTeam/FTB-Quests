@@ -21,62 +21,53 @@ import java.util.List;
 /**
  * @author LatvianModder
  */
-public class StatTask extends Task
-{
+public class StatTask extends Task {
 	public ResourceLocation stat;
 	public int value = 1;
 
-	public StatTask(Quest quest)
-	{
+	public StatTask(Quest quest) {
 		super(quest);
 		stat = Stats.MOB_KILLS;
 	}
 
 	@Override
-	public TaskType getType()
-	{
+	public TaskType getType() {
 		return TaskTypes.STAT;
 	}
 
 	@Override
-	public long getMaxProgress()
-	{
+	public long getMaxProgress() {
 		return value;
 	}
 
 	@Override
-	public String getMaxProgressString()
-	{
+	public String getMaxProgressString() {
 		return Integer.toString(value);
 	}
 
 	@Override
-	public void writeData(CompoundTag nbt)
-	{
+	public void writeData(CompoundTag nbt) {
 		super.writeData(nbt);
 		nbt.putString("stat", stat.toString());
 		nbt.putInt("value", value);
 	}
 
 	@Override
-	public void readData(CompoundTag nbt)
-	{
+	public void readData(CompoundTag nbt) {
 		super.readData(nbt);
 		stat = new ResourceLocation(nbt.getString("stat"));
 		value = nbt.getInt("value");
 	}
 
 	@Override
-	public void writeNetData(FriendlyByteBuf buffer)
-	{
+	public void writeNetData(FriendlyByteBuf buffer) {
 		super.writeNetData(buffer);
 		buffer.writeResourceLocation(stat);
 		buffer.writeVarInt(value);
 	}
 
 	@Override
-	public void readNetData(FriendlyByteBuf buffer)
-	{
+	public void readNetData(FriendlyByteBuf buffer) {
 		super.readNetData(buffer);
 		stat = buffer.readResourceLocation();
 		value = buffer.readVarInt();
@@ -84,8 +75,7 @@ public class StatTask extends Task
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public void getConfig(ConfigGroup config)
-	{
+	public void getConfig(ConfigGroup config) {
 		super.getConfig(config);
 
 		List<ResourceLocation> list = new ArrayList<>();
@@ -96,54 +86,44 @@ public class StatTask extends Task
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public MutableComponent getAltTitle()
-	{
+	public MutableComponent getAltTitle() {
 		return new TranslatableComponent("stat." + stat.getNamespace() + "." + stat.getPath());
 	}
 
 	@Override
-	public boolean consumesResources()
-	{
+	public boolean consumesResources() {
 		return true;
 	}
 
 	@Override
-	public int autoSubmitOnPlayerTick()
-	{
+	public int autoSubmitOnPlayerTick() {
 		return 3;
 	}
 
 	@Override
-	public TaskData createData(PlayerData data)
-	{
+	public TaskData createData(PlayerData data) {
 		return new Data(this, data);
 	}
 
-	public static class Data extends TaskData<StatTask>
-	{
-		private Data(StatTask task, PlayerData data)
-		{
+	public static class Data extends TaskData<StatTask> {
+		private Data(StatTask task, PlayerData data) {
 			super(task, data);
 		}
 
 		@Override
-		public String getProgressString()
-		{
+		public String getProgressString() {
 			return Integer.toString((int) progress);
 		}
 
 		@Override
-		public void submitTask(ServerPlayer player, ItemStack item)
-		{
-			if (isComplete())
-			{
+		public void submitTask(ServerPlayer player, ItemStack item) {
+			if (isComplete()) {
 				return;
 			}
 
 			int set = Math.min(task.value, player.getStats().getValue(Stats.CUSTOM.get(task.stat)));
 
-			if (set > progress)
-			{
+			if (set > progress) {
 				setProgress(set);
 			}
 		}

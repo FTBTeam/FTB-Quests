@@ -16,13 +16,11 @@ import java.util.function.Predicate;
 /**
  * @author LatvianModder
  */
-public class CustomTask extends Task
-{
+public class CustomTask extends Task {
 	public static final Predicate<QuestObjectBase> PREDICATE = object -> object instanceof CustomTask;
 
 	@FunctionalInterface
-	public interface Check
-	{
+	public interface Check {
 		void check(CustomTask.Data taskData, ServerPlayer player);
 	}
 
@@ -31,8 +29,7 @@ public class CustomTask extends Task
 	public long maxProgress;
 	public boolean enableButton;
 
-	public CustomTask(Quest quest)
-	{
+	public CustomTask(Quest quest) {
 		super(quest);
 		check = null;
 		checkTimer = 1;
@@ -41,37 +38,31 @@ public class CustomTask extends Task
 	}
 
 	@Override
-	public TaskType getType()
-	{
+	public TaskType getType() {
 		return TaskTypes.CUSTOM;
 	}
 
 	@Override
-	public long getMaxProgress()
-	{
+	public long getMaxProgress() {
 		return maxProgress;
 	}
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public void onButtonClicked(Button button, boolean canClick)
-	{
-		if (enableButton && canClick)
-		{
+	public void onButtonClicked(Button button, boolean canClick) {
+		if (enableButton && canClick) {
 			button.playClickSound();
 			new MessageSubmitTask(id).sendToServer();
 		}
 	}
 
 	@Override
-	public int autoSubmitOnPlayerTick()
-	{
+	public int autoSubmitOnPlayerTick() {
 		return check == null ? 0 : checkTimer;
 	}
 
 	@Override
-	public void writeNetData(FriendlyByteBuf buffer)
-	{
+	public void writeNetData(FriendlyByteBuf buffer) {
 		super.writeNetData(buffer);
 		buffer.writeVarInt(checkTimer);
 		buffer.writeVarLong(maxProgress);
@@ -79,8 +70,7 @@ public class CustomTask extends Task
 	}
 
 	@Override
-	public void readNetData(FriendlyByteBuf buffer)
-	{
+	public void readNetData(FriendlyByteBuf buffer) {
 		super.readNetData(buffer);
 		checkTimer = buffer.readVarInt();
 		maxProgress = buffer.readVarLong();
@@ -88,23 +78,18 @@ public class CustomTask extends Task
 	}
 
 	@Override
-	public TaskData createData(PlayerData data)
-	{
+	public TaskData createData(PlayerData data) {
 		return new Data(this, data);
 	}
 
-	public static class Data extends TaskData<CustomTask>
-	{
-		private Data(CustomTask task, PlayerData data)
-		{
+	public static class Data extends TaskData<CustomTask> {
+		private Data(CustomTask task, PlayerData data) {
 			super(task, data);
 		}
 
 		@Override
-		public void submitTask(ServerPlayer player, ItemStack item)
-		{
-			if (task.check != null && !isComplete())
-			{
+		public void submitTask(ServerPlayer player, ItemStack item) {
+			if (task.check != null && !isComplete()) {
 				task.check.check(this, player);
 			}
 		}
