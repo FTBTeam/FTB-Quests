@@ -12,33 +12,27 @@ import java.util.Map;
 /**
  * @author LatvianModder
  */
-public class QuestTheme
-{
+public class QuestTheme {
 	public static QuestTheme instance;
 	public static QuestObjectBase currentObject;
 
-	private static class QuestObjectPropertyKey
-	{
+	private static class QuestObjectPropertyKey {
 		private final String property;
 		private final long object;
 
-		private QuestObjectPropertyKey(String p, long o)
-		{
+		private QuestObjectPropertyKey(String p, long o) {
 			property = p;
 			object = o;
 		}
 
 		@Override
-		public int hashCode()
-		{
+		public int hashCode() {
 			return Long.hashCode(property.hashCode() * 31L + object);
 		}
 
 		@Override
-		public boolean equals(Object o)
-		{
-			if (o instanceof QuestObjectPropertyKey)
-			{
+		public boolean equals(Object o) {
+			if (o instanceof QuestObjectPropertyKey) {
 				QuestObjectPropertyKey key = (QuestObjectPropertyKey) o;
 				return object == key.object && property.equals(key.property);
 			}
@@ -52,37 +46,31 @@ public class QuestTheme
 	private final Map<String, Object> defaultCache;
 	public SelectorProperties defaults;
 
-	public QuestTheme()
-	{
+	public QuestTheme() {
 		selectors = new ArrayList<>();
 		cache = new HashMap<>();
 		defaultCache = new HashMap<>();
 	}
 
-	public void clearCache()
-	{
+	public void clearCache() {
 		cache.clear();
 		defaultCache.clear();
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T> T get(ThemeProperty<T> property)
-	{
+	public <T> T get(ThemeProperty<T> property) {
 		T cachedValue = (T) defaultCache.get(property.name);
 
-		if (cachedValue != null)
-		{
+		if (cachedValue != null) {
 			return cachedValue;
 		}
 
 		String value = defaults.properties.get(property.name);
 
-		if (value != null)
-		{
+		if (value != null) {
 			cachedValue = property.parse(replaceVariables(value, 0));
 
-			if (cachedValue != null)
-			{
+			if (cachedValue != null) {
 				defaultCache.put(property.name, cachedValue);
 				return cachedValue;
 			}
@@ -93,42 +81,33 @@ public class QuestTheme
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T> T get(ThemeProperty<T> property, @Nullable QuestObjectBase object)
-	{
-		if (object == null)
-		{
+	public <T> T get(ThemeProperty<T> property, @Nullable QuestObjectBase object) {
+		if (object == null) {
 			object = currentObject;
 		}
 
-		if (object == null)
-		{
+		if (object == null) {
 			return get(property);
 		}
 
 		QuestObjectPropertyKey key = new QuestObjectPropertyKey(property.name, object.id);
 		T cachedValue = (T) cache.get(key);
 
-		if (cachedValue != null)
-		{
+		if (cachedValue != null) {
 			return cachedValue;
 		}
 
 		QuestObjectBase o = object;
 
-		do
-		{
-			for (SelectorProperties selectorProperties : selectors)
-			{
-				if (selectorProperties.selector.matches(o))
-				{
+		do {
+			for (SelectorProperties selectorProperties : selectors) {
+				if (selectorProperties.selector.matches(o)) {
 					String value = selectorProperties.properties.get(property.name);
 
-					if (value != null)
-					{
+					if (value != null) {
 						cachedValue = property.parse(replaceVariables(value, 0));
 
-						if (cachedValue != null)
-						{
+						if (cachedValue != null) {
 							cache.put(key, cachedValue);
 							return cachedValue;
 						}
@@ -143,17 +122,14 @@ public class QuestTheme
 		return get(property);
 	}
 
-	public String replaceVariables(String value, int iteration)
-	{
-		if (iteration >= 30)
-		{
+	public String replaceVariables(String value, int iteration) {
+		if (iteration >= 30) {
 			return value;
 		}
 
 		String original = value;
 
-		for (String k : defaults.properties.keySet())
-		{
+		for (String k : defaults.properties.keySet()) {
 			value = value.replace("{{" + k + "}}", defaults.properties.get(k));
 		}
 

@@ -10,22 +10,18 @@ import com.mojang.blaze3d.vertex.PoseStack;
 /**
  * @author LatvianModder
  */
-public class LabelCanRepeatQuest extends Widget
-{
-	public LabelCanRepeatQuest(Panel panel)
-	{
+public class LabelCanRepeatQuest extends Widget {
+	public LabelCanRepeatQuest(Panel panel) {
 		super(panel);
 	}
 
 	@Override
-	public void addMouseOverText(TooltipList list)
-	{
+	public void addMouseOverText(TooltipList list) {
 		list.translate("ftbquests.quest.can_repeat");
 	}
 
 	@Override
-	public void draw(PoseStack matrixStack, Theme theme, int x, int y, int w, int h)
-	{
+	public void draw(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
 		GuiIcons.REFRESH.draw(matrixStack, x, y, w, h);
 	}
 }

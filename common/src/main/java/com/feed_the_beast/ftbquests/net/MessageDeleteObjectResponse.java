@@ -7,29 +7,24 @@ import net.minecraft.network.FriendlyByteBuf;
 /**
  * @author LatvianModder
  */
-public class MessageDeleteObjectResponse extends MessageBase
-{
+public class MessageDeleteObjectResponse extends MessageBase {
 	private final long id;
 
-	MessageDeleteObjectResponse(FriendlyByteBuf buffer)
-	{
+	MessageDeleteObjectResponse(FriendlyByteBuf buffer) {
 		id = buffer.readLong();
 	}
 
-	public MessageDeleteObjectResponse(long i)
-	{
+	public MessageDeleteObjectResponse(long i) {
 		id = i;
 	}
 
 	@Override
-	public void write(FriendlyByteBuf buffer)
-	{
+	public void write(FriendlyByteBuf buffer) {
 		buffer.writeLong(id);
 	}
 
 	@Override
-	public void handle(NetworkManager.PacketContext context)
-	{
+	public void handle(NetworkManager.PacketContext context) {
 		FTBQuests.NET_PROXY.deleteObject(id);
 	}
 }

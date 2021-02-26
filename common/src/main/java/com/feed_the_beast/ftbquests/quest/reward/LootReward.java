@@ -19,47 +19,37 @@ import java.util.UUID;
 /**
  * @author LatvianModder
  */
-public class LootReward extends RandomReward
-{
-	public LootReward(Quest quest)
-	{
+public class LootReward extends RandomReward {
+	public LootReward(Quest quest) {
 		super(quest);
 	}
 
 	@Override
-	public RewardType getType()
-	{
+	public RewardType getType() {
 		return RewardTypes.LOOT;
 	}
 
 	@Override
-	public void claim(ServerPlayer player, boolean notify)
-	{
-		if (getTable() == null)
-		{
+	public void claim(ServerPlayer player, boolean notify) {
+		if (getTable() == null) {
 			return;
 		}
 
 		int totalWeight = getTable().getTotalWeight(true);
 
-		if (totalWeight <= 0)
-		{
+		if (totalWeight <= 0) {
 			return;
 		}
 
-		for (int i = 0; i < getTable().lootSize; i++)
-		{
+		for (int i = 0; i < getTable().lootSize; i++) {
 			int number = player.level.random.nextInt(totalWeight) + 1;
 			int currentWeight = getTable().emptyWeight;
 
-			if (currentWeight < number)
-			{
-				for (WeightedReward reward : getTable().rewards)
-				{
+			if (currentWeight < number) {
+				for (WeightedReward reward : getTable().rewards) {
 					currentWeight += reward.weight;
 
-					if (currentWeight >= number)
-					{
+					if (currentWeight >= number) {
 						reward.reward.claim(player, notify);
 						break;
 					}
@@ -70,20 +60,16 @@ public class LootReward extends RandomReward
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public void addMouseOverText(TooltipList list)
-	{
-		if (getTable() != null)
-		{
+	public void addMouseOverText(TooltipList list) {
+		if (getTable() != null) {
 			getTable().addMouseOverText(list, true, true);
 		}
 	}
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public void onButtonClicked(Button button, boolean canClick)
-	{
-		if (canClick)
-		{
+	public void onButtonClicked(Button button, boolean canClick) {
+		if (canClick) {
 			new GuiRewardNotifications().openGui();
 		}
 
@@ -91,19 +77,16 @@ public class LootReward extends RandomReward
 	}
 
 	@Override
-	public boolean getExcludeFromClaimAll()
-	{
+	public boolean getExcludeFromClaimAll() {
 		return true;
 	}
 
 	@Override
-	public boolean automatedClaimPre(BlockEntity tileEntity, List<ItemStack> items, Random random, UUID playerId, @Nullable ServerPlayer player)
-	{
+	public boolean automatedClaimPre(BlockEntity tileEntity, List<ItemStack> items, Random random, UUID playerId, @Nullable ServerPlayer player) {
 		return false;
 	}
 
 	@Override
-	public void automatedClaimPost(BlockEntity tileEntity, UUID playerId, @Nullable ServerPlayer player)
-	{
+	public void automatedClaimPost(BlockEntity tileEntity, UUID playerId, @Nullable ServerPlayer player) {
 	}
 }

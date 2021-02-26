@@ -7,16 +7,14 @@ import java.util.ArrayList;
 /**
  * @author LatvianModder
  */
-public enum LootCrateRegistry
-{
+public enum LootCrateRegistry {
 	INSTANCE;
 
 	public final ArrayList<LootCrateWrapper> list = new ArrayList<>();
 	public final ArrayList<ItemStack> crates = new ArrayList<>();
 
 	@SuppressWarnings("deprecation")
-	public void refresh()
-	{
+	public void refresh() {
 		/* FIXME: JEI
 		if (FTBQuestsJEIIntegration.runtime != null && !list.isEmpty())
 		{

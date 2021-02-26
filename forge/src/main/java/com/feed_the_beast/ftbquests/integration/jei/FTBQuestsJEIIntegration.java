@@ -14,32 +14,27 @@ import net.minecraft.resources.ResourceLocation;
  * @author LatvianModder
  */
 @JeiPlugin
-public class FTBQuestsJEIIntegration implements IModPlugin
-{
+public class FTBQuestsJEIIntegration implements IModPlugin {
 	private static final ResourceLocation UID = new ResourceLocation(FTBQuests.MOD_ID, "jei");
 	public static IJeiRuntime runtime;
 
 	@Override
-	public void onRuntimeAvailable(IJeiRuntime r)
-	{
+	public void onRuntimeAvailable(IJeiRuntime r) {
 		runtime = r;
 	}
 
 	@Override
-	public ResourceLocation getPluginUid()
-	{
+	public ResourceLocation getPluginUid() {
 		return UID;
 	}
 
 	@Override
-	public void registerItemSubtypes(ISubtypeRegistration r)
-	{
+	public void registerItemSubtypes(ISubtypeRegistration r) {
 		r.registerSubtypeInterpreter(FTBQuestsItems.LOOTCRATE.get(), stack -> stack.hasTag() ? stack.getTag().getString("type") : "");
 	}
 
 	@Override
-	public void registerRecipes(IRecipeRegistration r)
-	{
+	public void registerRecipes(IRecipeRegistration r) {
 		//r.handleRecipes(QuestWrapper.class, recipe -> recipe, QuestCategory.UID);
 		//r.addRecipeCatalyst(new ItemStack(FTBQuestsItems.BOOK), QuestCategory.UID);
 
@@ -49,8 +44,7 @@ public class FTBQuestsJEIIntegration implements IModPlugin
 	}
 
 	@Override
-	public void registerCategories(IRecipeCategoryRegistration r)
-	{
+	public void registerCategories(IRecipeCategoryRegistration r) {
 		//r.addRecipeCategories(new QuestCategory(r.getJeiHelpers().getGuiHelper()));
 		//r.addRecipeCategories(new LootCrateCategory(r.getJeiHelpers().getGuiHelper()));
 	}

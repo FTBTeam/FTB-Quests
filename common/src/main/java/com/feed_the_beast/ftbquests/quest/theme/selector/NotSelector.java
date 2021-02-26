@@ -5,32 +5,26 @@ import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 /**
  * @author LatvianModder
  */
-public class NotSelector extends ThemeSelector
-{
+public class NotSelector extends ThemeSelector {
 	public final ThemeSelector selector;
 
-	public NotSelector(ThemeSelector s)
-	{
+	public NotSelector(ThemeSelector s) {
 		selector = s;
 	}
 
 	@Override
-	public boolean matches(QuestObjectBase object)
-	{
+	public boolean matches(QuestObjectBase object) {
 		return !selector.matches(object);
 	}
 
 	@Override
-	public ThemeSelectorType getType()
-	{
+	public ThemeSelectorType getType() {
 		return ThemeSelectorType.NOT;
 	}
 
 	@Override
-	public int compareTo(ThemeSelector o)
-	{
-		if (o instanceof NotSelector)
-		{
+	public int compareTo(ThemeSelector o) {
+		if (o instanceof NotSelector) {
 			return ((NotSelector) o).selector.compareTo(selector);
 		}
 
@@ -38,26 +32,20 @@ public class NotSelector extends ThemeSelector
 	}
 
 	@Override
-	public String toString()
-	{
+	public String toString() {
 		return "!" + selector;
 	}
 
 	@Override
-	public int hashCode()
-	{
+	public int hashCode() {
 		return -selector.hashCode();
 	}
 
 	@Override
-	public boolean equals(Object o)
-	{
-		if (o == this)
-		{
+	public boolean equals(Object o) {
+		if (o == this) {
 			return true;
-		}
-		else if (o instanceof NotSelector)
-		{
+		} else if (o instanceof NotSelector) {
 			return selector.equals(((NotSelector) o).selector);
 		}
 

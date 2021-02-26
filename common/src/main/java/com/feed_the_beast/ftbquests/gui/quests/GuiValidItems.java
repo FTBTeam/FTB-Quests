@@ -11,15 +11,7 @@ import com.feed_the_beast.mods.ftbguilibrary.misc.CompactGridLayout;
 import com.feed_the_beast.mods.ftbguilibrary.utils.Key;
 import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
 import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
-import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
-import com.feed_the_beast.mods.ftbguilibrary.widget.GuiBase;
-import com.feed_the_beast.mods.ftbguilibrary.widget.GuiHelper;
-import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
-import com.feed_the_beast.mods.ftbguilibrary.widget.SimpleTextButton;
-import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
-import com.feed_the_beast.mods.ftbguilibrary.widget.Widget;
-import com.feed_the_beast.mods.ftbguilibrary.widget.WidgetType;
-import com.feed_the_beast.mods.ftbguilibrary.widget.WrappedIngredient;
+import com.feed_the_beast.mods.ftbguilibrary.widget.*;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.architectury.platform.Platform;
 import net.minecraft.network.chat.TextComponent;
@@ -32,44 +24,35 @@ import java.util.List;
 /**
  * @author LatvianModder
  */
-public class GuiValidItems extends GuiBase
-{
-	public class ButtonValidItem extends Button
-	{
+public class GuiValidItems extends GuiBase {
+	public class ButtonValidItem extends Button {
 		public final ItemStack stack;
 
-		public ButtonValidItem(Panel panel, ItemStack is)
-		{
+		public ButtonValidItem(Panel panel, ItemStack is) {
 			super(panel, TextComponent.EMPTY, ItemIcon.getItemIcon(is));
 			stack = is;
 		}
 
 		@Override
-		public void onClicked(MouseButton button)
-		{
-			if (Platform.isModLoaded("jei"))
-			{
+		public void onClicked(MouseButton button) {
+			if (Platform.isModLoaded("jei")) {
 				showJEIRecipe();
 			}
 		}
 
-		private void showJEIRecipe()
-		{
+		private void showJEIRecipe() {
 			FTBQuestsJEIHelper.showRecipes(stack);
 		}
 
 		@Nullable
 		@Override
-		public Object getIngredientUnderMouse()
-		{
+		public Object getIngredientUnderMouse() {
 			return new WrappedIngredient(stack).tooltip();
 		}
 
 		@Override
-		public void draw(PoseStack matrixStack, Theme theme, int x, int y, int w, int h)
-		{
-			if (isMouseOver())
-			{
+		public void draw(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
+			if (isMouseOver()) {
 				Color4I.WHITE.withAlpha(33).draw(matrixStack, x, y, w, h);
 			}
 
@@ -87,33 +70,27 @@ public class GuiValidItems extends GuiBase
 	public final Panel itemPanel;
 	public final Button backButton, submitButton;
 
-	public GuiValidItems(ItemTask t, List<ItemStack> v, boolean c)
-	{
+	public GuiValidItems(ItemTask t, List<ItemStack> v, boolean c) {
 		task = t;
 		validItems = v;
 		canClick = c;
 
-		itemPanel = new Panel(this)
-		{
+		itemPanel = new Panel(this) {
 			@Override
-			public void addWidgets()
-			{
-				for (ItemStack validItem : validItems)
-				{
+			public void addWidgets() {
+				for (ItemStack validItem : validItems) {
 					add(new ButtonValidItem(this, validItem));
 				}
 			}
 
 			@Override
-			public void alignWidgets()
-			{
+			public void alignWidgets() {
 				align(new CompactGridLayout(36));
 				setHeight(Math.min(160, getContentHeight()));
 				parent.setHeight(height + 53);
 				int off = (width - getContentWidth()) / 2;
 
-				for (Widget widget : widgets)
-				{
+				for (Widget widget : widgets) {
 					widget.setX(widget.posX + off);
 				}
 
@@ -123,66 +100,55 @@ public class GuiValidItems extends GuiBase
 			}
 
 			@Override
-			public void drawBackground(PoseStack matrixStack, Theme theme, int x, int y, int w, int h)
-			{
+			public void drawBackground(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
 				theme.drawButton(matrixStack, x - 1, y - 1, w + 2, h + 2, WidgetType.NORMAL);
 			}
 		};
 
 		itemPanel.setPosAndSize(0, 22, 144, 0);
 
-		backButton = new SimpleTextButton(this, new TranslatableComponent("gui.back"), Icon.EMPTY)
-		{
+		backButton = new SimpleTextButton(this, new TranslatableComponent("gui.back"), Icon.EMPTY) {
 			@Override
-			public void onClicked(MouseButton button)
-			{
+			public void onClicked(MouseButton button) {
 				playClickSound();
 				onBack();
 			}
 
 			@Override
-			public boolean renderTitleInCenter()
-			{
+			public boolean renderTitleInCenter() {
 				return true;
 			}
 		};
 
-		submitButton = new SimpleTextButton(this, new TextComponent("Submit"), Icon.EMPTY)
-		{
+		submitButton = new SimpleTextButton(this, new TextComponent("Submit"), Icon.EMPTY) {
 			@Override
-			public void onClicked(MouseButton button)
-			{
+			public void onClicked(MouseButton button) {
 				playClickSound();
 				new MessageSubmitTask(task.id).sendToServer();
 				onBack();
 			}
 
 			@Override
-			public void addMouseOverText(TooltipList list)
-			{
-				if (canClick && !task.consumesResources())
-				{
+			public void addMouseOverText(TooltipList list) {
+				if (canClick && !task.consumesResources()) {
 					list.translate("ftbquests.task.auto_detected");
 				}
 			}
 
 			@Override
-			public WidgetType getWidgetType()
-			{
+			public WidgetType getWidgetType() {
 				return canClick && task.consumesResources() ? super.getWidgetType() : WidgetType.DISABLED;
 			}
 
 			@Override
-			public boolean renderTitleInCenter()
-			{
+			public boolean renderTitleInCenter() {
 				return true;
 			}
 		};
 	}
 
 	@Override
-	public void addWidgets()
-	{
+	public void addWidgets() {
 		title = new TranslatableComponent("ftbquests.task.ftbquests.item.valid_for", task.getTitle()).getString();
 		setWidth(Math.max(156, getTheme().getStringWidth(title) + 12));
 		add(itemPanel);
@@ -191,23 +157,19 @@ public class GuiValidItems extends GuiBase
 	}
 
 	@Override
-	public Theme getTheme()
-	{
+	public Theme getTheme() {
 		return FTBQuestsTheme.INSTANCE;
 	}
 
 	@Override
-	public void drawBackground(PoseStack matrixStack, Theme theme, int x, int y, int w, int h)
-	{
+	public void drawBackground(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
 		super.drawBackground(matrixStack, theme, x, y, w, h);
 		theme.drawString(matrixStack, title, x + w / 2F, y + 6, Color4I.WHITE, Theme.CENTERED);
 	}
 
 	@Override
-	public boolean onClosedByKey(Key key)
-	{
-		if (super.onClosedByKey(key))
-		{
+	public boolean onClosedByKey(Key key) {
+		if (super.onClosedByKey(key)) {
 			onBack();
 		}
 

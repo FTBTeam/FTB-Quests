@@ -10,29 +10,23 @@ import net.minecraft.world.item.ItemStack;
 /**
  * @author LatvianModder
  */
-public class MessageGetEmergencyItems extends MessageBase
-{
-	MessageGetEmergencyItems(FriendlyByteBuf buffer)
-	{
+public class MessageGetEmergencyItems extends MessageBase {
+	MessageGetEmergencyItems(FriendlyByteBuf buffer) {
 	}
 
-	public MessageGetEmergencyItems()
-	{
+	public MessageGetEmergencyItems() {
 	}
 
 	@Override
-	public void write(FriendlyByteBuf buffer)
-	{
+	public void write(FriendlyByteBuf buffer) {
 	}
 
 	@Override
-	public void handle(NetworkManager.PacketContext context)
-	{
+	public void handle(NetworkManager.PacketContext context) {
 		//TODO: Verify on server side
 		ServerPlayer player = (ServerPlayer) context.getPlayer();
 
-		for (ItemStack stack : ServerQuestFile.INSTANCE.emergencyItems)
-		{
+		for (ItemStack stack : ServerQuestFile.INSTANCE.emergencyItems) {
 			ItemStackHooks.giveItem(player, stack.copy());
 		}
 	}

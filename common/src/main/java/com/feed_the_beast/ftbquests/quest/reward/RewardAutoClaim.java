@@ -7,8 +7,7 @@ import java.util.Arrays;
 /**
  * @author LatvianModder
  */
-public enum RewardAutoClaim
-{
+public enum RewardAutoClaim {
 	DEFAULT("default"),
 	DISABLED("disabled"),
 	ENABLED("enabled"),
@@ -20,8 +19,7 @@ public enum RewardAutoClaim
 
 	public String id;
 
-	RewardAutoClaim(String s)
-	{
+	RewardAutoClaim(String s) {
 		id = s;
 	}
 }

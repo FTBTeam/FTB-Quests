@@ -9,17 +9,14 @@ import net.minecraft.world.item.ItemStack;
 
 import java.util.function.Function;
 
-public class FTBQuestsNetHandler
-{
+public class FTBQuestsNetHandler {
 	public static NetworkChannel MAIN;
 
-	private static <T extends MessageBase> void register(Class<T> c, Function<FriendlyByteBuf, T> s)
-	{
+	private static <T extends MessageBase> void register(Class<T> c, Function<FriendlyByteBuf, T> s) {
 		MAIN.register(c, MessageBase::write, s, MessageBase::handle);
 	}
 
-	public static void init()
-	{
+	public static void init() {
 		MAIN = NetworkChannel.create(new ResourceLocation(FTBQuests.MOD_ID, "main"));
 
 		// Game
@@ -58,14 +55,12 @@ public class FTBQuestsNetHandler
 	}
 
 	@ExpectPlatform
-	public static void writeItemType(FriendlyByteBuf buffer, ItemStack stack)
-	{
+	public static void writeItemType(FriendlyByteBuf buffer, ItemStack stack) {
 		throw new AssertionError();
 	}
 
 	@ExpectPlatform
-	public static ItemStack readItemType(FriendlyByteBuf buffer)
-	{
+	public static ItemStack readItemType(FriendlyByteBuf buffer) {
 		throw new AssertionError();
 	}
 }

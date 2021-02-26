@@ -7,29 +7,24 @@ import net.minecraft.network.FriendlyByteBuf;
 /**
  * @author LatvianModder
  */
-public class MessageSyncEditingMode extends MessageBase
-{
+public class MessageSyncEditingMode extends MessageBase {
 	private final boolean editingMode;
 
-	public MessageSyncEditingMode(FriendlyByteBuf buffer)
-	{
+	public MessageSyncEditingMode(FriendlyByteBuf buffer) {
 		editingMode = buffer.readBoolean();
 	}
 
-	public MessageSyncEditingMode(boolean e)
-	{
+	public MessageSyncEditingMode(boolean e) {
 		editingMode = e;
 	}
 
 	@Override
-	public void write(FriendlyByteBuf buffer)
-	{
+	public void write(FriendlyByteBuf buffer) {
 		buffer.writeBoolean(editingMode);
 	}
 
 	@Override
-	public void handle(NetworkManager.PacketContext context)
-	{
+	public void handle(NetworkManager.PacketContext context) {
 		FTBQuests.NET_PROXY.syncEditingMode(editingMode);
 	}
 }

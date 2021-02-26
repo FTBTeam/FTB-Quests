@@ -6,28 +6,23 @@ import com.feed_the_beast.mods.ftbguilibrary.widget.WidgetLayout;
 /**
  * @author LatvianModder
  */
-public class PanelOtherButtonsBottom extends PanelOtherButtons
-{
-	public PanelOtherButtonsBottom(Panel panel)
-	{
+public class PanelOtherButtonsBottom extends PanelOtherButtons {
+	public PanelOtherButtonsBottom(Panel panel) {
 		super(panel);
 	}
 
 	@Override
-	public void addWidgets()
-	{
+	public void addWidgets() {
 		add(new ButtonAutopin(this));
 		add(new ButtonSupport(this));
 
-		if (treeGui.file.canEdit())
-		{
+		if (treeGui.file.canEdit()) {
 			add(new ButtonEditSettings(this));
 		}
 	}
 
 	@Override
-	public void alignWidgets()
-	{
+	public void alignWidgets() {
 		setHeight(align(WidgetLayout.VERTICAL));
 		setPos(treeGui.width - width, treeGui.height - height - 1);
 	}

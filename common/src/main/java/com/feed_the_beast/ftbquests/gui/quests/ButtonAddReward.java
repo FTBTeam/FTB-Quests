@@ -20,25 +20,21 @@ import java.util.List;
 /**
  * @author LatvianModder
  */
-public class ButtonAddReward extends Button
-{
+public class ButtonAddReward extends Button {
 	private final Quest quest;
 
-	public ButtonAddReward(Panel panel, Quest q)
-	{
+	public ButtonAddReward(Panel panel, Quest q) {
 		super(panel, new TranslatableComponent("gui.add"), ThemeProperties.ADD_ICON.get());
 		quest = q;
 		setSize(18, 18);
 	}
 
 	@Override
-	public void onClicked(MouseButton button)
-	{
+	public void onClicked(MouseButton button) {
 		playClickSound();
 		List<ContextMenuItem> contextMenu = new ArrayList<>();
 
-		for (RewardType type : RewardTypes.TYPES.values())
-		{
+		for (RewardType type : RewardTypes.TYPES.values()) {
 			contextMenu.add(new ContextMenuItem(type.getDisplayName(), type.getIcon(), () -> {
 				playClickSound();
 				type.getGuiProvider().openCreationGui(this, quest, reward -> {
@@ -53,10 +49,8 @@ public class ButtonAddReward extends Button
 	}
 
 	@Override
-	public void drawBackground(PoseStack matrixStack, Theme theme, int x, int y, int w, int h)
-	{
-		if (isMouseOver())
-		{
+	public void drawBackground(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
+		if (isMouseOver()) {
 			super.drawBackground(matrixStack, theme, x, y, w, h);
 		}
 	}

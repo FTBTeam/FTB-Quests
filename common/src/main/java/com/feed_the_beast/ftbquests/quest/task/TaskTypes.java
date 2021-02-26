@@ -12,12 +12,10 @@ import java.util.function.Supplier;
 /**
  * @author LatvianModder
  */
-public class TaskTypes
-{
+public class TaskTypes {
 	public static final HashMap<ResourceLocation, TaskType> TYPES = new LinkedHashMap<>();
 
-	public static TaskType register(ResourceLocation name, TaskType.Provider p, Supplier<Icon> i)
-	{
+	public static TaskType register(ResourceLocation name, TaskType.Provider p, Supplier<Icon> i) {
 		return TYPES.computeIfAbsent(name, id -> new TaskType(id, p, i));
 	}
 
@@ -36,7 +34,6 @@ public class TaskTypes
 	public static TaskType FLUID;
 	public static TaskType FORGE_ENERGY;
 
-	public static void init()
-	{
+	public static void init() {
 	}
 }

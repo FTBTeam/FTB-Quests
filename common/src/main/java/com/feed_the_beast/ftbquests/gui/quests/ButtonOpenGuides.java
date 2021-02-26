@@ -8,16 +8,13 @@ import net.minecraft.network.chat.TranslatableComponent;
 /**
  * @author LatvianModder
  */
-public class ButtonOpenGuides extends ButtonTab
-{
-	public ButtonOpenGuides(Panel panel)
-	{
+public class ButtonOpenGuides extends ButtonTab {
+	public ButtonOpenGuides(Panel panel) {
 		super(panel, new TranslatableComponent("sidebar_button.ftbguides.guides"), ThemeProperties.GUIDE_ICON.get());
 	}
 
 	@Override
-	public void onClicked(MouseButton button)
-	{
+	public void onClicked(MouseButton button) {
 		playClickSound();
 		handleClick("ftbguides:open_gui");
 	}

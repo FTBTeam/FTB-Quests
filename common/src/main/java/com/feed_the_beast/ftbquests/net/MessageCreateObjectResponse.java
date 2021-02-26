@@ -12,16 +12,14 @@ import javax.annotation.Nullable;
 /**
  * @author LatvianModder
  */
-public class MessageCreateObjectResponse extends MessageBase
-{
+public class MessageCreateObjectResponse extends MessageBase {
 	private final long id;
 	private final long parent;
 	private final QuestObjectType type;
 	private final CompoundTag nbt;
 	private final CompoundTag extra;
 
-	public MessageCreateObjectResponse(FriendlyByteBuf buffer)
-	{
+	public MessageCreateObjectResponse(FriendlyByteBuf buffer) {
 		id = buffer.readLong();
 		parent = buffer.readLong();
 		type = QuestObjectType.NAME_MAP.read(buffer);
@@ -29,8 +27,7 @@ public class MessageCreateObjectResponse extends MessageBase
 		extra = buffer.readNbt();
 	}
 
-	public MessageCreateObjectResponse(QuestObjectBase o, @Nullable CompoundTag e)
-	{
+	public MessageCreateObjectResponse(QuestObjectBase o, @Nullable CompoundTag e) {
 		id = o.id;
 		parent = o.getParentID();
 		type = o.getObjectType();
@@ -40,8 +37,7 @@ public class MessageCreateObjectResponse extends MessageBase
 	}
 
 	@Override
-	public void write(FriendlyByteBuf buffer)
-	{
+	public void write(FriendlyByteBuf buffer) {
 		buffer.writeLong(id);
 		buffer.writeLong(parent);
 		QuestObjectType.NAME_MAP.write(buffer, type);
@@ -50,8 +46,7 @@ public class MessageCreateObjectResponse extends MessageBase
 	}
 
 	@Override
-	public void handle(NetworkManager.PacketContext context)
-	{
+	public void handle(NetworkManager.PacketContext context) {
 		FTBQuests.NET_PROXY.createObject(id, parent, type, nbt, extra);
 	}
 }

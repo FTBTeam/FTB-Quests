@@ -15,16 +15,14 @@ import java.util.List;
 /**
  * @author LatvianModder
  */
-public class ChapterGroup
-{
+public class ChapterGroup {
 	public final QuestFile file;
 	public final String id;
 	public final List<Chapter> chapters;
 	private String title;
 	private ItemStack icon;
 
-	public ChapterGroup(QuestFile f, String i)
-	{
+	public ChapterGroup(QuestFile f, String i) {
 		file = f;
 		id = i;
 		chapters = new ArrayList<>();
@@ -32,12 +30,10 @@ public class ChapterGroup
 		icon = ItemStack.EMPTY;
 	}
 
-	public static ChapterGroup readNet(QuestFile f, FriendlyByteBuf buffer)
-	{
+	public static ChapterGroup readNet(QuestFile f, FriendlyByteBuf buffer) {
 		String id = buffer.readUtf(Short.MAX_VALUE);
 
-		if (id.isEmpty())
-		{
+		if (id.isEmpty()) {
 			return f.defaultChapterGroup;
 		}
 
@@ -47,12 +43,10 @@ public class ChapterGroup
 		return g;
 	}
 
-	public void writeNet(FriendlyByteBuf buffer)
-	{
+	public void writeNet(FriendlyByteBuf buffer) {
 		buffer.writeUtf(id, Short.MAX_VALUE);
 
-		if (id.isEmpty())
-		{
+		if (id.isEmpty()) {
 			return;
 		}
 
@@ -60,67 +54,54 @@ public class ChapterGroup
 		FTBQuestsNetHandler.writeItemType(buffer, icon);
 	}
 
-	public void read(CompoundTag tag)
-	{
+	public void read(CompoundTag tag) {
 		title = tag.getString("title");
 		icon = NBTUtils.read(tag, "icon");
 	}
 
-	public void write(CompoundTag tag)
-	{
+	public void write(CompoundTag tag) {
 		tag.putString("title", title);
 		NBTUtils.write(tag, "icon", icon);
 	}
 
-	public String getTitle()
-	{
+	public String getTitle() {
 		return title;
 	}
 
-	public ItemStack getIconItem()
-	{
+	public ItemStack getIconItem() {
 		return icon;
 	}
 
 	@Override
-	public String toString()
-	{
+	public String toString() {
 		return id;
 	}
 
-	public int getIndex()
-	{
+	public int getIndex() {
 		return file.chapterGroups.indexOf(this);
 	}
 
-	public boolean isDefaultGroup()
-	{
+	public boolean isDefaultGroup() {
 		return this == file.defaultChapterGroup;
 	}
 
-	public Icon getIcon()
-	{
-		if (!getIconItem().isEmpty())
-		{
+	public Icon getIcon() {
+		if (!getIconItem().isEmpty()) {
 			return CustomIconItem.getIcon(getIconItem());
 		}
 
 		List<Icon> list = new ArrayList<>();
 
-		for (Chapter chapter : chapters)
-		{
+		for (Chapter chapter : chapters) {
 			list.add(chapter.getIcon());
 		}
 
 		return IconAnimation.fromList(list, false);
 	}
 
-	public boolean isVisible(PlayerData data)
-	{
-		for (Chapter chapter : chapters)
-		{
-			if (chapter.isVisible(data))
-			{
+	public boolean isVisible(PlayerData data) {
+		for (Chapter chapter : chapters) {
+			if (chapter.isVisible(data)) {
 				return true;
 			}
 		}
@@ -128,27 +109,21 @@ public class ChapterGroup
 		return false;
 	}
 
-	public void changeProgress(PlayerData data, ChangeProgress type)
-	{
-		for (Chapter chapter : chapters)
-		{
+	public void changeProgress(PlayerData data, ChangeProgress type) {
+		for (Chapter chapter : chapters) {
 			chapter.changeProgress(data, type);
 		}
 	}
 
-	public List<Chapter> getVisibleChapters(PlayerData data)
-	{
-		if (file.canEdit())
-		{
+	public List<Chapter> getVisibleChapters(PlayerData data) {
+		if (file.canEdit()) {
 			return chapters;
 		}
 
 		List<Chapter> list = new ArrayList<>();
 
-		for (Chapter chapter : chapters)
-		{
-			if (!chapter.quests.isEmpty() && chapter.isVisible(data))
-			{
+		for (Chapter chapter : chapters) {
+			if (!chapter.quests.isEmpty() && chapter.isVisible(data)) {
 				list.add(chapter);
 			}
 		}

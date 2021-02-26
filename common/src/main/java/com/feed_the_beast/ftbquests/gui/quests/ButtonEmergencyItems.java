@@ -9,16 +9,13 @@ import net.minecraft.network.chat.TranslatableComponent;
 /**
  * @author LatvianModder
  */
-public class ButtonEmergencyItems extends ButtonTab
-{
-	public ButtonEmergencyItems(Panel panel)
-	{
+public class ButtonEmergencyItems extends ButtonTab {
+	public ButtonEmergencyItems(Panel panel) {
 		super(panel, new TranslatableComponent("ftbquests.file.emergency_items"), ThemeProperties.EMERGENCY_ITEMS_ICON.get());
 	}
 
 	@Override
-	public void onClicked(MouseButton button)
-	{
+	public void onClicked(MouseButton button) {
 		playClickSound();
 		new GuiEmergencyItems().openGui();
 	}

@@ -8,16 +8,13 @@ import net.minecraft.network.chat.TranslatableComponent;
 /**
  * @author LatvianModder
  */
-public class ButtonSupport extends ButtonTab
-{
-	public ButtonSupport(Panel panel)
-	{
+public class ButtonSupport extends ButtonTab {
+	public ButtonSupport(Panel panel) {
 		super(panel, new TranslatableComponent("lat_support"), ThemeProperties.SUPPORT_ICON.get());
 	}
 
 	@Override
-	public void onClicked(MouseButton button)
-	{
+	public void onClicked(MouseButton button) {
 		playClickSound();
 		handleClick("https://latvian.dev/supporting");
 	}

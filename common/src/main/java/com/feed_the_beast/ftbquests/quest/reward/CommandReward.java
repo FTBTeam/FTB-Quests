@@ -20,50 +20,43 @@ import java.util.Map;
 /**
  * @author LatvianModder
  */
-public class CommandReward extends Reward
-{
+public class CommandReward extends Reward {
 	public String command;
 	public boolean playerCommand;
 
-	public CommandReward(Quest quest)
-	{
+	public CommandReward(Quest quest) {
 		super(quest);
 		command = "/say Hi, @p!";
 	}
 
 	@Override
-	public RewardType getType()
-	{
+	public RewardType getType() {
 		return RewardTypes.COMMAND;
 	}
 
 	@Override
-	public void writeData(CompoundTag nbt)
-	{
+	public void writeData(CompoundTag nbt) {
 		super.writeData(nbt);
 		nbt.putString("command", command);
 		nbt.putBoolean("player_command", playerCommand);
 	}
 
 	@Override
-	public void readData(CompoundTag nbt)
-	{
+	public void readData(CompoundTag nbt) {
 		super.readData(nbt);
 		command = nbt.getString("command");
 		playerCommand = nbt.getBoolean("player_command");
 	}
 
 	@Override
-	public void writeNetData(FriendlyByteBuf buffer)
-	{
+	public void writeNetData(FriendlyByteBuf buffer) {
 		super.writeNetData(buffer);
 		buffer.writeUtf(command, Short.MAX_VALUE);
 		buffer.writeBoolean(playerCommand);
 	}
 
 	@Override
-	public void readNetData(FriendlyByteBuf buffer)
-	{
+	public void readNetData(FriendlyByteBuf buffer) {
 		super.readNetData(buffer);
 		command = buffer.readUtf(Short.MAX_VALUE);
 		playerCommand = buffer.readBoolean();
@@ -71,16 +64,14 @@ public class CommandReward extends Reward
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public void getConfig(ConfigGroup config)
-	{
+	public void getConfig(ConfigGroup config) {
 		super.getConfig(config);
 		config.addString("command", command, v -> command = v, "/say Hi, @team!").setNameKey("ftbquests.reward.ftbquests.command");
 		config.addBool("player", playerCommand, v -> playerCommand = v, false);
 	}
 
 	@Override
-	public void claim(ServerPlayer player, boolean notify)
-	{
+	public void claim(ServerPlayer player, boolean notify) {
 		Map<String, Object> overrides = new HashMap<>();
 		overrides.put("p", player.getGameProfile().getName());
 
@@ -91,8 +82,7 @@ public class CommandReward extends Reward
 
 		Chapter chapter = getQuestChapter();
 
-		if (chapter != null)
-		{
+		if (chapter != null) {
 			overrides.put("chapter", chapter);
 		}
 
@@ -100,10 +90,8 @@ public class CommandReward extends Reward
 
 		String s = command;
 
-		for (Map.Entry<String, Object> entry : overrides.entrySet())
-		{
-			if (entry.getValue() != null)
-			{
+		for (Map.Entry<String, Object> entry : overrides.entrySet()) {
+			if (entry.getValue() != null) {
 				s = s.replace("@" + entry.getKey(), entry.getValue().toString());
 			}
 		}
@@ -113,8 +101,7 @@ public class CommandReward extends Reward
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public MutableComponent getAltTitle()
-	{
+	public MutableComponent getAltTitle() {
 		return new TranslatableComponent("ftbquests.reward.ftbquests.command").append(": ").append(new TextComponent(command).withStyle(ChatFormatting.RED));
 	}
 }

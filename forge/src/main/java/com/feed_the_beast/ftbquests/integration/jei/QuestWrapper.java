@@ -32,26 +32,22 @@ public class QuestWrapper //FIXME: implements IRecipeWrapper
 	public final List<List<ItemStack>> input;
 	public final List<List<ItemStack>> output;
 
-	public QuestWrapper(Quest q, List<Reward> rewards)
-	{
+	public QuestWrapper(Quest q, List<Reward> rewards) {
 		quest = q;
 		name = quest.getTitle();
 
 		input = new ArrayList<>(5);
 		output = new ArrayList<>(5);
 
-		if (quest.tasks.size() == 1)
-		{
+		if (quest.tasks.size() == 1) {
 			input.add(Collections.emptyList());
 			input.add(Collections.emptyList());
 			input.add(Collections.emptyList());
 			input.add(Collections.emptyList());
 		}
 
-		for (Task task : quest.tasks)
-		{
-			if (task instanceof ItemTask)
-			{
+		for (Task task : quest.tasks) {
+			if (task instanceof ItemTask) {
 				ItemStack filter = new ItemStack(ForgeRegistries.ITEMS.getValue(new ResourceLocation(ItemFilters.MOD_ID, "or")));
 				//FIXME: filter.items.addAll(((ItemTask) task).items);
 				input.add(Collections.singletonList(filter));
@@ -61,20 +57,15 @@ public class QuestWrapper //FIXME: implements IRecipeWrapper
 			Object object = task.getIngredient();
 			ItemStack stack = object instanceof ItemStack ? (ItemStack) object : ItemStack.EMPTY;
 
-			if (!stack.isEmpty())
-			{
+			if (!stack.isEmpty()) {
 				List<ItemStack> list = new ArrayList<>();
 				ItemFiltersAPI.getDisplayItemStacks(stack, list);
 				input.add(list);
-			}
-			else if (task.getIcon() instanceof ItemIcon)
-			{
+			} else if (task.getIcon() instanceof ItemIcon) {
 				stack = ((ItemIcon) task.getIcon()).getStack().copy();
 				stack.setHoverName(task.getTitle());
 				input.add(Collections.singletonList(stack));
-			}
-			else
-			{
+			} else {
 				stack = new ItemStack(Items.PAINTING);
 				stack.setHoverName(task.getTitle());
 				stack.addTagElement("icon", StringTag.valueOf(task.getIcon().toString()));
@@ -82,57 +73,43 @@ public class QuestWrapper //FIXME: implements IRecipeWrapper
 			}
 		}
 
-		if (rewards.size() == 1)
-		{
+		if (rewards.size() == 1) {
 			output.add(Collections.emptyList());
 			output.add(Collections.emptyList());
 			output.add(Collections.emptyList());
 			output.add(Collections.emptyList());
 		}
 
-		for (Reward reward : rewards)
-		{
+		for (Reward reward : rewards) {
 			Object object = reward.getIngredient();
 			ItemStack stack = object instanceof ItemStack ? (ItemStack) object : ItemStack.EMPTY;
 
-			if (!stack.isEmpty())
-			{
+			if (!stack.isEmpty()) {
 				output.add(Collections.singletonList(stack.copy()));
-			}
-			else if (reward instanceof RandomReward)
-			{
+			} else if (reward instanceof RandomReward) {
 				List<ItemStack> list = new ArrayList<>();
 				RewardTable table = ((RandomReward) reward).getTable();
 
-				if (table.hideTooltip)
-				{
+				if (table.hideTooltip) {
 					ItemStack unknown = new ItemStack(Items.BARRIER);
 					unknown.setHoverName(new TextComponent("Unknown Reward"));
 					list.add(unknown);
-				}
-				else
-				{
-					for (WeightedReward reward1 : table.rewards)
-					{
+				} else {
+					for (WeightedReward reward1 : table.rewards) {
 						Object object1 = reward1.reward.getIngredient();
 
-						if (object1 instanceof ItemStack)
-						{
+						if (object1 instanceof ItemStack) {
 							list.add((ItemStack) object1);
 						}
 					}
 				}
 
 				output.add(list);
-			}
-			else if (reward.getIcon() instanceof ItemIcon)
-			{
+			} else if (reward.getIcon() instanceof ItemIcon) {
 				stack = ((ItemIcon) reward.getIcon()).getStack().copy();
 				stack.setHoverName(reward.getTitle());
 				output.add(Collections.singletonList(stack));
-			}
-			else
-			{
+			} else {
 				stack = new ItemStack(Items.PAINTING);
 				stack.setHoverName(reward.getTitle());
 				stack.addTagElement("icon", StringTag.valueOf(reward.getIcon().toString()));

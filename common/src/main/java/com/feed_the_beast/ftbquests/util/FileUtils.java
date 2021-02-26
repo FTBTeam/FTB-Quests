@@ -1,11 +1,6 @@
 package com.feed_the_beast.ftbquests.util;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -13,50 +8,37 @@ import java.util.List;
 /**
  * @author LatvianModder
  */
-public class FileUtils
-{
-	public static List<String> read(InputStream in) throws IOException
-	{
+public class FileUtils {
+	public static List<String> read(InputStream in) throws IOException {
 		List<String> list = new ArrayList<>();
 		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
 		String line;
 
-		while ((line = reader.readLine()) != null)
-		{
+		while ((line = reader.readLine()) != null) {
 			list.add(line);
 		}
 
 		return list;
 	}
 
-	public static List<String> readFile(File file)
-	{
-		try (InputStream in = new FileInputStream(file))
-		{
+	public static List<String> readFile(File file) {
+		try (InputStream in = new FileInputStream(file)) {
 			return read(in);
-		}
-		catch (IOException ex)
-		{
+		} catch (IOException ex) {
 			return Collections.emptyList();
 		}
 	}
 
-	public static void delete(File file)
-	{
-		if (file.isDirectory())
-		{
+	public static void delete(File file) {
+		if (file.isDirectory()) {
 			File[] files = file.listFiles();
 
-			if (files != null)
-			{
-				for (File f : files)
-				{
+			if (files != null) {
+				for (File f : files) {
 					delete(f);
 				}
 			}
-		}
-		else
-		{
+		} else {
 			file.delete();
 		}
 	}

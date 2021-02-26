@@ -9,43 +9,35 @@ import net.minecraft.network.FriendlyByteBuf;
 /**
  * @author LatvianModder
  */
-public class MessageMoveChapter extends MessageBase
-{
+public class MessageMoveChapter extends MessageBase {
 	private final long id;
 	private final boolean left;
 
-	public MessageMoveChapter(FriendlyByteBuf buffer)
-	{
+	public MessageMoveChapter(FriendlyByteBuf buffer) {
 		id = buffer.readLong();
 		left = buffer.readBoolean();
 	}
 
-	public MessageMoveChapter(long i, boolean l)
-	{
+	public MessageMoveChapter(long i, boolean l) {
 		id = i;
 		left = l;
 	}
 
 	@Override
-	public void write(FriendlyByteBuf buffer)
-	{
+	public void write(FriendlyByteBuf buffer) {
 		buffer.writeLong(id);
 		buffer.writeBoolean(left);
 	}
 
 	@Override
-	public void handle(NetworkManager.PacketContext context)
-	{
-		if (NetUtils.canEdit(context))
-		{
+	public void handle(NetworkManager.PacketContext context) {
+		if (NetUtils.canEdit(context)) {
 			Chapter chapter = ServerQuestFile.INSTANCE.getChapter(id);
 
-			if (chapter != null)
-			{
+			if (chapter != null) {
 				int index = chapter.group.chapters.indexOf(chapter);
 
-				if (index != -1 && left ? (index > 0) : (index < chapter.group.chapters.size() - 1))
-				{
+				if (index != -1 && left ? (index > 0) : (index < chapter.group.chapters.size() - 1)) {
 					chapter.group.chapters.remove(index);
 					chapter.group.chapters.add(left ? index - 1 : index + 1, chapter);
 					chapter.file.clearCachedData();

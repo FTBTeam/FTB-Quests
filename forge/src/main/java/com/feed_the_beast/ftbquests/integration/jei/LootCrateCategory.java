@@ -17,8 +17,7 @@ import net.minecraft.world.item.ItemStack;
 /**
  * @author LatvianModder
  */
-public class LootCrateCategory implements IRecipeCategory<LootCrateWrapper>
-{
+public class LootCrateCategory implements IRecipeCategory<LootCrateWrapper> {
 	public static final ResourceLocation UID = new ResourceLocation(FTBQuests.MOD_ID, "lootcrates");
 
 	public static final int ITEMSX = 10;
@@ -28,35 +27,27 @@ public class LootCrateCategory implements IRecipeCategory<LootCrateWrapper>
 	private final IDrawable background;
 	private final IDrawable icon;
 
-	public LootCrateCategory(IGuiHelper guiHelper)
-	{
+	public LootCrateCategory(IGuiHelper guiHelper) {
 		background = guiHelper.createBlankDrawable(ITEMSX * 18, ITEMSY * 18 + 36);
-		icon = new IDrawable()
-		{
+		icon = new IDrawable() {
 			@Override
-			public int getWidth()
-			{
+			public int getWidth() {
 				return 16;
 			}
 
 			@Override
-			public int getHeight()
-			{
+			public int getHeight() {
 				return 16;
 			}
 
 			@Override
-			public void draw(PoseStack matrixStack, int xOffset, int yOffset)
-			{
+			public void draw(PoseStack matrixStack, int xOffset, int yOffset) {
 				matrixStack.pushPose();
 				matrixStack.translate(0, 0, 100);
 
-				if (!LootCrateRegistry.INSTANCE.list.isEmpty())
-				{
+				if (!LootCrateRegistry.INSTANCE.list.isEmpty()) {
 					GuiHelper.drawItem(matrixStack, LootCrateRegistry.INSTANCE.list.get((int) ((System.currentTimeMillis() / 1000L) % LootCrateRegistry.INSTANCE.list.size())).itemStack, xOffset, yOffset, 1F, 1F, true, null);
-				}
-				else
-				{
+				} else {
 					GuiHelper.drawItem(matrixStack, new ItemStack(FTBQuestsItems.LOOTCRATE.get()), xOffset, yOffset, 1F, 1F, true, null);
 				}
 
@@ -66,49 +57,41 @@ public class LootCrateCategory implements IRecipeCategory<LootCrateWrapper>
 	}
 
 	@Override
-	public ResourceLocation getUid()
-	{
+	public ResourceLocation getUid() {
 		return UID;
 	}
 
 	@Override
-	public Class<LootCrateWrapper> getRecipeClass()
-	{
+	public Class<LootCrateWrapper> getRecipeClass() {
 		return LootCrateWrapper.class;
 	}
 
 	@Override
-	public String getTitle()
-	{
+	public String getTitle() {
 		return I18n.get("jei.ftbquests.lootcrates");
 	}
 
 	@Override
-	public IDrawable getBackground()
-	{
+	public IDrawable getBackground() {
 		return background;
 	}
 
 	@Override
-	public IDrawable getIcon()
-	{
+	public IDrawable getIcon() {
 		return icon;
 	}
 
 	@Override
-	public void setIngredients(LootCrateWrapper wrapper, IIngredients iIngredients)
-	{
+	public void setIngredients(LootCrateWrapper wrapper, IIngredients iIngredients) {
 		//FIXME
 	}
 
 	@Override
-	public void setRecipe(IRecipeLayout layout, LootCrateWrapper entry, IIngredients ingredients)
-	{
+	public void setRecipe(IRecipeLayout layout, LootCrateWrapper entry, IIngredients ingredients) {
 		IGuiItemStackGroup stacks = layout.getItemStacks();
 		stacks.addTooltipCallback(entry);
 
-		for (int slot = 0; slot < Math.min(ITEMS, entry.items.size()); slot++)
-		{
+		for (int slot = 0; slot < Math.min(ITEMS, entry.items.size()); slot++) {
 			stacks.init(slot + 1, false, (slot % ITEMSX) * 18, (slot / ITEMSX) * 18 + 36);
 		}
 

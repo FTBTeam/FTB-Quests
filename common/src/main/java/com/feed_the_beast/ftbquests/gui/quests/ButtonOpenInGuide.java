@@ -13,12 +13,10 @@ import net.minecraft.world.item.Items;
 /**
  * @author LatvianModder
  */
-public class ButtonOpenInGuide extends SimpleTextButton
-{
+public class ButtonOpenInGuide extends SimpleTextButton {
 	private final Quest quest;
 
-	public ButtonOpenInGuide(Panel panel, Quest q)
-	{
+	public ButtonOpenInGuide(Panel panel, Quest q) {
 		super(panel, new TranslatableComponent("ftbquests.gui.open_in_guide"), ItemIcon.getItemIcon(Items.BOOK));
 		setHeight(13);
 		setX((panel.width - width) / 2);
@@ -26,13 +24,11 @@ public class ButtonOpenInGuide extends SimpleTextButton
 	}
 
 	@Override
-	public void onClicked(MouseButton button)
-	{
+	public void onClicked(MouseButton button) {
 		handleClick("guide", quest.guidePage);
 	}
 
 	@Override
-	public void drawBackground(PoseStack matrixStack, Theme theme, int x, int y, int w, int h)
-	{
+	public void drawBackground(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
 	}
 }

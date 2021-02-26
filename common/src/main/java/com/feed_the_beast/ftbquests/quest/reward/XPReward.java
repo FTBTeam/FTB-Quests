@@ -17,85 +17,72 @@ import net.minecraft.server.level.ServerPlayer;
 /**
  * @author LatvianModder
  */
-public class XPReward extends Reward
-{
+public class XPReward extends Reward {
 	public int xp;
 
-	public XPReward(Quest quest, int x)
-	{
+	public XPReward(Quest quest, int x) {
 		super(quest);
 		xp = x;
 	}
 
-	public XPReward(Quest quest)
-	{
+	public XPReward(Quest quest) {
 		this(quest, 100);
 	}
 
 	@Override
-	public RewardType getType()
-	{
+	public RewardType getType() {
 		return RewardTypes.XP;
 	}
 
 	@Override
-	public void writeData(CompoundTag nbt)
-	{
+	public void writeData(CompoundTag nbt) {
 		super.writeData(nbt);
 		nbt.putInt("xp", xp);
 	}
 
 	@Override
-	public void readData(CompoundTag nbt)
-	{
+	public void readData(CompoundTag nbt) {
 		super.readData(nbt);
 		xp = nbt.getInt("xp");
 	}
 
 	@Override
-	public void writeNetData(FriendlyByteBuf buffer)
-	{
+	public void writeNetData(FriendlyByteBuf buffer) {
 		super.writeNetData(buffer);
 		buffer.writeVarInt(xp);
 	}
 
 	@Override
-	public void readNetData(FriendlyByteBuf buffer)
-	{
+	public void readNetData(FriendlyByteBuf buffer) {
 		super.readNetData(buffer);
 		xp = buffer.readVarInt();
 	}
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public void getConfig(ConfigGroup config)
-	{
+	public void getConfig(ConfigGroup config) {
 		super.getConfig(config);
 		config.addInt("xp", xp, v -> xp = v, 100, 1, Integer.MAX_VALUE).setNameKey("ftbquests.reward.ftbquests.xp");
 	}
 
 	@Override
-	public void claim(ServerPlayer player, boolean notify)
-	{
+	public void claim(ServerPlayer player, boolean notify) {
 		player.giveExperiencePoints(xp);
 
-		if (notify)
-		{
+		if (notify) {
 			new MessageDisplayRewardToast(id, new TranslatableComponent("ftbquests.reward.ftbquests.xp").append(": ").append(new TextComponent("+" + xp).withStyle(ChatFormatting.GREEN)), Icon.EMPTY).sendTo(player);
 		}
 	}
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public MutableComponent getAltTitle()
-	{
+	public MutableComponent getAltTitle() {
 		return new TranslatableComponent("ftbquests.reward.ftbquests.xp").append(": ").append(new TextComponent("+" + xp).withStyle(ChatFormatting.GREEN));
 	}
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public String getButtonText()
-	{
+	public String getButtonText() {
 		return "+" + xp;
 	}
 }

@@ -14,8 +14,7 @@ import java.util.function.Supplier;
 /**
  * @author LatvianModder
  */
-public class FTBQuestsItems
-{
+public class FTBQuestsItems {
 	public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(FTBQuests.MOD_ID, Registry.ITEM_REGISTRY);
 
 	public static final RegistrySupplier<Item> BOOK = ITEMS.register("book", ItemQuestBook::new);
@@ -23,15 +22,13 @@ public class FTBQuestsItems
 	public static final RegistrySupplier<Item> MISSING_ITEM = ITEMS.register("missing_item", MissingItem::new);
 	public static final RegistrySupplier<Item> CUSTOM_ICON = ITEMS.register("custom_icon", CustomIconItem::new);
 
-	private static RegistrySupplier<Item> blockItem(String id, Supplier<Block> b)
-	{
+	private static RegistrySupplier<Item> blockItem(String id, Supplier<Block> b) {
 		return ITEMS.register(id, () -> new BlockItem(b.get(), new Item.Properties().tab(FTBQuests.ITEM_GROUP)));
 	}
 
 	public static final RegistrySupplier<Item> BANNER = blockItem("banner", FTBQuestsBlocks.BANNER);
 
-	public static void register()
-	{
+	public static void register() {
 		ITEMS.register();
 	}
 }

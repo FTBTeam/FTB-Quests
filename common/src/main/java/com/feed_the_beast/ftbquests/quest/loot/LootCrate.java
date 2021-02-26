@@ -14,8 +14,7 @@ import java.util.regex.Pattern;
 /**
  * @author LatvianModder
  */
-public final class LootCrate
-{
+public final class LootCrate {
 	public final RewardTable table;
 	public String stringID;
 	public String itemName;
@@ -23,8 +22,7 @@ public final class LootCrate
 	public boolean glow;
 	public EntityWeight drops;
 
-	public LootCrate(RewardTable t)
-	{
+	public LootCrate(RewardTable t) {
 		table = t;
 		stringID = t.toString();
 		itemName = "";
@@ -33,19 +31,16 @@ public final class LootCrate
 		drops = new EntityWeight();
 	}
 
-	public void writeData(CompoundTag nbt)
-	{
+	public void writeData(CompoundTag nbt) {
 		nbt.putString("string_id", stringID);
 
-		if (!itemName.isEmpty())
-		{
+		if (!itemName.isEmpty()) {
 			nbt.putString("item_name", itemName);
 		}
 
 		nbt.putInt("color", color.rgb());
 
-		if (glow)
-		{
+		if (glow) {
 			nbt.putBoolean("glow", true);
 		}
 
@@ -54,8 +49,7 @@ public final class LootCrate
 		nbt.put("drops", nbt1);
 	}
 
-	public void readData(CompoundTag nbt)
-	{
+	public void readData(CompoundTag nbt) {
 		stringID = nbt.getString("string_id");
 		itemName = nbt.getString("item_name");
 		color = Color4I.rgb(nbt.getInt("color"));
@@ -63,8 +57,7 @@ public final class LootCrate
 		drops.readData(nbt.getCompound("drops"));
 	}
 
-	public void writeNetData(FriendlyByteBuf data)
-	{
+	public void writeNetData(FriendlyByteBuf data) {
 		data.writeUtf(stringID, Short.MAX_VALUE);
 		data.writeUtf(itemName, Short.MAX_VALUE);
 		data.writeInt(color.rgb());
@@ -72,8 +65,7 @@ public final class LootCrate
 		drops.writeNetData(data);
 	}
 
-	public void readNetData(FriendlyByteBuf data)
-	{
+	public void readNetData(FriendlyByteBuf data) {
 		stringID = data.readUtf(Short.MAX_VALUE);
 		itemName = data.readUtf(Short.MAX_VALUE);
 		color = Color4I.rgb(data.readInt());
@@ -81,8 +73,7 @@ public final class LootCrate
 		drops.readNetData(data);
 	}
 
-	public void getConfig(ConfigGroup config)
-	{
+	public void getConfig(ConfigGroup config) {
 		config.addString("id", stringID, v -> stringID = v, "", Pattern.compile("[a-z0-9_]+"));
 		config.addString("item_name", itemName, v -> itemName = v, "");
 		config.addString("color", color.toString(), v -> color = Color4I.fromString(v), "#FFFFFF", Pattern.compile("^#[a-fA-F0-9]{6}$"));
@@ -95,13 +86,11 @@ public final class LootCrate
 		d.addInt("boss", drops.boss, v -> drops.boss = v, 0, 0, Integer.MAX_VALUE).setNameKey("ftbquests.loot.entitytype.boss");
 	}
 
-	public String getStringID()
-	{
+	public String getStringID() {
 		return stringID.isEmpty() ? QuestObjectBase.getCodeString(table) : stringID;
 	}
 
-	public ItemStack createStack()
-	{
+	public ItemStack createStack() {
 		ItemStack stack = new ItemStack(FTBQuestsItems.LOOTCRATE.get());
 		stack.addTagElement("type", StringTag.valueOf(getStringID()));
 		return stack;

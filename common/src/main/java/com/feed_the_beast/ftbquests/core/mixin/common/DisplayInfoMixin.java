@@ -10,8 +10,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
  * @author LatvianModder
  */
 @Mixin(DisplayInfo.class)
-public abstract class DisplayInfoMixin implements DisplayInfoFTBQ
-{
+public abstract class DisplayInfoMixin implements DisplayInfoFTBQ {
 	@Override
 	@Accessor("icon")
 	public abstract ItemStack getIconStackFTBQ();

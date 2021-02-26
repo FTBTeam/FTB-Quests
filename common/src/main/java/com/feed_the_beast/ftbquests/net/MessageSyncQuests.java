@@ -11,34 +11,29 @@ import java.util.UUID;
 /**
  * @author LatvianModder
  */
-public class MessageSyncQuests extends MessageBase
-{
+public class MessageSyncQuests extends MessageBase {
 	private final UUID self;
 	private final QuestFile file;
 
-	MessageSyncQuests(FriendlyByteBuf buffer)
-	{
+	MessageSyncQuests(FriendlyByteBuf buffer) {
 		self = NetUtils.readUUID(buffer);
 		file = FTBQuests.PROXY.createClientQuestFile();
 		file.readNetDataFull(buffer, self);
 	}
 
-	public MessageSyncQuests(UUID s, QuestFile f)
-	{
+	public MessageSyncQuests(UUID s, QuestFile f) {
 		self = s;
 		file = f;
 	}
 
 	@Override
-	public void write(FriendlyByteBuf buffer)
-	{
+	public void write(FriendlyByteBuf buffer) {
 		NetUtils.writeUUID(buffer, self);
 		file.writeNetDataFull(buffer, self);
 	}
 
 	@Override
-	public void handle(NetworkManager.PacketContext context)
-	{
+	public void handle(NetworkManager.PacketContext context) {
 		file.load(self);
 	}
 }

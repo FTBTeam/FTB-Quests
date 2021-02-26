@@ -10,16 +10,13 @@ import net.minecraft.world.level.material.Material;
 /**
  * @author LatvianModder
  */
-public class BannerBlock extends BaseEntityBlock
-{
-	public BannerBlock()
-	{
+public class BannerBlock extends BaseEntityBlock {
+	public BannerBlock() {
 		super(BlockBehaviour.Properties.of(Material.BARRIER));
 	}
 
 	@Override
-	public BlockEntity newBlockEntity(BlockGetter world)
-	{
+	public BlockEntity newBlockEntity(BlockGetter world) {
 		return new BannerBlockEntity();
 	}
 }

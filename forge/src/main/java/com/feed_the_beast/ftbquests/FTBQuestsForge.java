@@ -31,10 +31,8 @@ import java.util.Iterator;
 import java.util.Optional;
 
 @Mod(FTBQuests.MOD_ID)
-public class FTBQuestsForge
-{
-	public FTBQuestsForge()
-	{
+public class FTBQuestsForge {
+	public FTBQuestsForge() {
 		EventBuses.registerModEventBus(FTBQuests.MOD_ID, FMLJavaModLoadingContext.get().getModEventBus());
 
 		new FTBQuests();
@@ -42,8 +40,7 @@ public class FTBQuestsForge
 		TaskTypes.FLUID = TaskTypes.register(new ResourceLocation(FTBQuests.MOD_ID, "fluid"), ForgeFluidTask::new, () -> Icon.getIcon(Optional.ofNullable(FluidStackHooks.getStillTexture(Fluids.WATER)).map(TextureAtlasSprite::getName).map(ResourceLocation::toString).orElse("missingno")).combineWith(Icon.getIcon(ForgeFluidTask.TANK_TEXTURE.toString())));
 		TaskTypes.FORGE_ENERGY = TaskTypes.register(new ResourceLocation(FTBQuests.MOD_ID, "forge_energy"), ForgeEnergyTask::new, () -> Icon.getIcon(ForgeEnergyTask.EMPTY_TEXTURE.toString()).combineWith(Icon.getIcon(ForgeEnergyTask.FULL_TEXTURE.toString())));
 
-		if (Platform.isModLoaded("gamestages"))
-		{
+		if (Platform.isModLoaded("gamestages")) {
 			new GameStagesIntegration().init();
 		}
 
@@ -51,53 +48,44 @@ public class FTBQuestsForge
 		MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGH, FTBQuestsForge::dropsEvent);
 	}
 
-	private static void livingDrops(LivingDropsEvent event)
-	{
+	private static void livingDrops(LivingDropsEvent event) {
 		LivingEntity e = event.getEntityLiving();
 
-		if (e.level.isClientSide || e instanceof Player)
-		{
+		if (e.level.isClientSide || e instanceof Player) {
 			return;
 		}
 
-		if (ServerQuestFile.INSTANCE == null || !ServerQuestFile.INSTANCE.dropLootCrates)
-		{
+		if (ServerQuestFile.INSTANCE == null || !ServerQuestFile.INSTANCE.dropLootCrates) {
 			return;
 		}
 
 		LootCrate crate = ServerQuestFile.INSTANCE.getRandomLootCrate(e, e.level.random);
 
-		if (crate != null)
-		{
+		if (crate != null) {
 			ItemEntity ei = new ItemEntity(e.level, e.getX(), e.getY(), e.getZ(), crate.createStack());
 			ei.setPickUpDelay(10);
 			event.getDrops().add(ei);
 		}
 	}
 
-	private static void dropsEvent(LivingDropsEvent event)
-	{
-		if (!(event.getEntity() instanceof ServerPlayer))
-		{
+	private static void dropsEvent(LivingDropsEvent event) {
+		if (!(event.getEntity() instanceof ServerPlayer)) {
 			return;
 		}
 
 		ServerPlayer player = (ServerPlayer) event.getEntity();
 
-		if (player instanceof FakePlayer || player.level.getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY))
-		{
+		if (player instanceof FakePlayer || player.level.getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY)) {
 			return;
 		}
 
 		Iterator<ItemEntity> iterator = event.getDrops().iterator();
 
-		while (iterator.hasNext())
-		{
+		while (iterator.hasNext()) {
 			ItemEntity drop = iterator.next();
 			ItemStack stack = drop.getItem();
 
-			if (stack.getItem() == FTBQuestsItems.BOOK.get() && player.addItem(stack))
-			{
+			if (stack.getItem() == FTBQuestsItems.BOOK.get() && player.addItem(stack)) {
 				iterator.remove();
 			}
 		}

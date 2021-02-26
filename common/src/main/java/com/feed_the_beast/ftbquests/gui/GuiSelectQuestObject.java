@@ -28,29 +28,23 @@ import java.util.List;
 /**
  * @author LatvianModder
  */
-public class GuiSelectQuestObject<T extends QuestObjectBase> extends GuiButtonListBase
-{
-	public class ButtonQuestObject extends SimpleTextButton
-	{
+public class GuiSelectQuestObject<T extends QuestObjectBase> extends GuiButtonListBase {
+	public class ButtonQuestObject extends SimpleTextButton {
 		public final T object;
 
-		public ButtonQuestObject(Panel panel, @Nullable T o)
-		{
+		public ButtonQuestObject(Panel panel, @Nullable T o) {
 			super(panel, o == null ? new TranslatableComponent("ftbquests.null") : o.getMutableTitle().withStyle(o.getObjectType().getColor()), o == null ? Icon.EMPTY : o.getIcon());
 			object = o;
 			setSize(200, 14);
 		}
 
-		private void addObject(TooltipList list, QuestObjectBase o)
-		{
+		private void addObject(TooltipList list, QuestObjectBase o) {
 			list.add(QuestObjectType.NAME_MAP.getDisplayName(o.getObjectType()).copy().withStyle(ChatFormatting.GRAY).append(": ").append(o.getMutableTitle().withStyle(o.getObjectType().getColor())));
 		}
 
 		@Override
-		public void addMouseOverText(TooltipList list)
-		{
-			if (object == null)
-			{
+		public void addMouseOverText(TooltipList list) {
+			if (object == null) {
 				return;
 			}
 
@@ -58,60 +52,44 @@ public class GuiSelectQuestObject<T extends QuestObjectBase> extends GuiButtonLi
 			list.add(new TextComponent("ID: ").withStyle(ChatFormatting.GRAY).append(new TextComponent(object.toString()).withStyle(ChatFormatting.DARK_GRAY)));
 			list.add(new TextComponent("Type: ").withStyle(ChatFormatting.GRAY).append(QuestObjectType.NAME_MAP.getDisplayName(object.getObjectType()).copy().withStyle(object.getObjectType().getColor())));
 
-			if (object instanceof Quest)
-			{
+			if (object instanceof Quest) {
 				Quest quest = (Quest) object;
 				addObject(list, quest.chapter);
 
-				if (quest.rewards.size() == 1)
-				{
+				if (quest.rewards.size() == 1) {
 					addObject(list, quest.rewards.get(0));
-				}
-				else if (!quest.rewards.isEmpty())
-				{
+				} else if (!quest.rewards.isEmpty()) {
 					list.add(new TranslatableComponent("ftbquests.rewards").withStyle(ChatFormatting.GRAY));
 
-					for (Reward reward : quest.rewards)
-					{
+					for (Reward reward : quest.rewards) {
 						list.add(new TextComponent("  ").append(reward.getMutableTitle().withStyle(QuestObjectType.REWARD.getColor())));
 					}
 				}
-			}
-			else if (object instanceof Task)
-			{
+			} else if (object instanceof Task) {
 				Quest quest = ((Task) object).quest;
 				addObject(list, quest.chapter);
 				addObject(list, quest);
 
-				if (quest.rewards.size() == 1)
-				{
+				if (quest.rewards.size() == 1) {
 					addObject(list, quest.rewards.get(0));
-				}
-				else if (!quest.rewards.isEmpty())
-				{
+				} else if (!quest.rewards.isEmpty()) {
 					list.add(new TranslatableComponent("ftbquests.rewards").withStyle(ChatFormatting.GRAY));
 
-					for (Reward reward : quest.rewards)
-					{
+					for (Reward reward : quest.rewards) {
 						list.add(new TextComponent("  ").append(reward.getMutableTitle().withStyle(QuestObjectType.REWARD.getColor())));
 					}
 				}
-			}
-			else if (object instanceof Reward)
-			{
+			} else if (object instanceof Reward) {
 				Quest quest = ((Reward) object).quest;
 				addObject(list, quest.chapter);
 				addObject(list, quest);
-			}
-			else if (object instanceof RewardTable)
-			{
+			} else if (object instanceof RewardTable) {
 				((RewardTable) object).addMouseOverText(list, true, true);
 			}
 		}
 
 		@Override
-		public void onClicked(MouseButton button)
-		{
+		public void onClicked(MouseButton button) {
 			playClickSound();
 			config.setCurrentValue(object);
 			callback.save(true);
@@ -121,8 +99,7 @@ public class GuiSelectQuestObject<T extends QuestObjectBase> extends GuiButtonLi
 	private final ConfigQuestObject<T> config;
 	private final ConfigCallback callback;
 
-	public GuiSelectQuestObject(ConfigQuestObject<T> c, ConfigCallback cb)
-	{
+	public GuiSelectQuestObject(ConfigQuestObject<T> c, ConfigCallback cb) {
 		setTitle(new TranslatableComponent("ftbquests.gui.select_quest_object"));
 		setHasSearchBox(true);
 		focus();
@@ -132,10 +109,8 @@ public class GuiSelectQuestObject<T extends QuestObjectBase> extends GuiButtonLi
 	}
 
 	@Override
-	public boolean onClosedByKey(Key key)
-	{
-		if (super.onClosedByKey(key))
-		{
+	public boolean onClosedByKey(Key key) {
+		if (super.onClosedByKey(key)) {
 			callback.save(false);
 			return false;
 		}
@@ -144,14 +119,11 @@ public class GuiSelectQuestObject<T extends QuestObjectBase> extends GuiButtonLi
 	}
 
 	@Override
-	public void addButtons(Panel panel)
-	{
+	public void addButtons(Panel panel) {
 		List<T> list = new ArrayList<>();
 
-		for (QuestObjectBase objectBase : ClientQuestFile.INSTANCE.getAllObjects())
-		{
-			if (config.predicate.test(objectBase))
-			{
+		for (QuestObjectBase objectBase : ClientQuestFile.INSTANCE.getAllObjects()) {
+			if (config.predicate.test(objectBase)) {
 				list.add((T) objectBase);
 			}
 		}
@@ -161,20 +133,17 @@ public class GuiSelectQuestObject<T extends QuestObjectBase> extends GuiButtonLi
 			return i == 0 ? o1.getTitle().getString().compareToIgnoreCase(o2.getTitle().getString()) : i;
 		});
 
-		if (config.predicate.test(null))
-		{
+		if (config.predicate.test(null)) {
 			panel.add(new ButtonQuestObject(panel, null));
 		}
 
-		for (T objectBase : list)
-		{
+		for (T objectBase : list) {
 			panel.add(new ButtonQuestObject(panel, objectBase));
 		}
 	}
 
 	@Override
-	public Theme getTheme()
-	{
+	public Theme getTheme() {
 		return FTBQuestsTheme.INSTANCE;
 	}
 }

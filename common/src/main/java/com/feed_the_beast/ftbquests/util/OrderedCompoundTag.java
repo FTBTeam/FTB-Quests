@@ -8,20 +8,16 @@ import java.util.LinkedHashMap;
 /**
  * @author LatvianModder
  */
-public class OrderedCompoundTag extends CompoundTag
-{
+public class OrderedCompoundTag extends CompoundTag {
 	public HashSet<String> booleanKeys;
 
-	public OrderedCompoundTag()
-	{
+	public OrderedCompoundTag() {
 		super(new LinkedHashMap<>());
 	}
 
 	@Override
-	public void putBoolean(String key, boolean value)
-	{
-		if (booleanKeys == null)
-		{
+	public void putBoolean(String key, boolean value) {
+		if (booleanKeys == null) {
 			booleanKeys = new HashSet<>();
 		}
 

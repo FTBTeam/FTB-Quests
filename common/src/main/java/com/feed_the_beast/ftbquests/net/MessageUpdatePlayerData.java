@@ -11,33 +11,28 @@ import java.util.UUID;
 /**
  * @author LatvianModder
  */
-public class MessageUpdatePlayerData extends MessageBase
-{
+public class MessageUpdatePlayerData extends MessageBase {
 	private final UUID uuid;
 	private final String name;
 
-	MessageUpdatePlayerData(FriendlyByteBuf buffer)
-	{
+	MessageUpdatePlayerData(FriendlyByteBuf buffer) {
 		uuid = NetUtils.readUUID(buffer);
 		name = buffer.readUtf(Short.MAX_VALUE);
 	}
 
-	public MessageUpdatePlayerData(PlayerData data)
-	{
+	public MessageUpdatePlayerData(PlayerData data) {
 		uuid = data.uuid;
 		name = data.name;
 	}
 
 	@Override
-	public void write(FriendlyByteBuf buffer)
-	{
+	public void write(FriendlyByteBuf buffer) {
 		NetUtils.writeUUID(buffer, uuid);
 		buffer.writeUtf(name, Short.MAX_VALUE);
 	}
 
 	@Override
-	public void handle(NetworkManager.PacketContext context)
-	{
+	public void handle(NetworkManager.PacketContext context) {
 		FTBQuests.NET_PROXY.updatePlayerData(uuid, name);
 	}
 }

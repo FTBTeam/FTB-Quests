@@ -7,34 +7,29 @@ import net.minecraft.network.chat.Component;
 /**
  * @author LatvianModder
  */
-public class CustomToast extends SimpleToast
-{
+public class CustomToast extends SimpleToast {
 	private final Component title;
 	private final Icon icon;
 	private final Component description;
 
-	public CustomToast(Component t, Icon i, Component d)
-	{
+	public CustomToast(Component t, Icon i, Component d) {
 		title = t;
 		icon = i;
 		description = d;
 	}
 
 	@Override
-	public Component getTitle()
-	{
+	public Component getTitle() {
 		return title;
 	}
 
 	@Override
-	public Component getSubtitle()
-	{
+	public Component getSubtitle() {
 		return description;
 	}
 
 	@Override
-	public Icon getIcon()
-	{
+	public Icon getIcon() {
 		return icon;
 	}
 }
