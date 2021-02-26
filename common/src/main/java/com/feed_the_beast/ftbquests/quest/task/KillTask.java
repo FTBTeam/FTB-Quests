@@ -26,48 +26,56 @@ import java.util.List;
 /**
  * @author LatvianModder
  */
-public class KillTask extends Task {
+public class KillTask extends Task
+{
 	public static final ResourceLocation ZOMBIE = new ResourceLocation("minecraft:zombie");
 	public ResourceLocation entity = ZOMBIE;
 	public long value = 100L;
 
-	public KillTask(Quest quest) {
+	public KillTask(Quest quest)
+	{
 		super(quest);
 	}
 
 	@Override
-	public TaskType getType() {
+	public TaskType getType()
+	{
 		return TaskTypes.KILL;
 	}
 
 	@Override
-	public long getMaxProgress() {
+	public long getMaxProgress()
+	{
 		return value;
 	}
 
 	@Override
-	public void writeData(CompoundTag nbt) {
+	public void writeData(CompoundTag nbt)
+	{
 		super.writeData(nbt);
 		nbt.putString("entity", entity.toString());
 		nbt.putLong("value", value);
 	}
 
 	@Override
-	public void readData(CompoundTag nbt) {
+	public void readData(CompoundTag nbt)
+	{
 		super.readData(nbt);
 		entity = new ResourceLocation(nbt.getString("entity"));
 		value = nbt.getLong("value");
 	}
 
 	@Override
-	public void writeNetData(FriendlyByteBuf buffer) {
+	public void writeNetData(FriendlyByteBuf buffer)
+	{
 		super.writeNetData(buffer);
 		buffer.writeUtf(entity.toString(), Short.MAX_VALUE);
 		buffer.writeVarLong(value);
 	}
 
 	@Override
-	public void readNetData(FriendlyByteBuf buffer) {
+	public void readNetData(FriendlyByteBuf buffer)
+	{
 		super.readNetData(buffer);
 		entity = new ResourceLocation(buffer.readUtf(Short.MAX_VALUE));
 		value = buffer.readVarInt();
@@ -75,7 +83,8 @@ public class KillTask extends Task {
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public void getConfig(ConfigGroup config) {
+	public void getConfig(ConfigGroup config)
+	{
 		super.getConfig(config);
 		List<ResourceLocation> ids = new ArrayList<>(Registry.ENTITY_TYPE.keySet());
 
@@ -92,35 +101,43 @@ public class KillTask extends Task {
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public MutableComponent getAltTitle() {
+	public MutableComponent getAltTitle()
+	{
 		return new TranslatableComponent("ftbquests.task.ftbquests.kill.title", getMaxProgressString(), new TranslatableComponent("entity." + entity.getNamespace() + "." + entity.getPath()));
 	}
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public Icon getAltIcon() {
+	public Icon getAltIcon()
+	{
 		SpawnEggItem item = SpawnEggItem.byId(Registry.ENTITY_TYPE.get(entity));
 		return ItemIcon.getItemIcon(item != null ? item : Items.SPAWNER);
 	}
 
 	@Override
-	public TaskData createData(PlayerData data) {
+	public TaskData createData(PlayerData data)
+	{
 		return new Data(this, data);
 	}
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public void onButtonClicked(Button button, boolean canClick) {
+	public void onButtonClicked(Button button, boolean canClick)
+	{
 	}
 
-	public static class Data extends TaskData<KillTask> {
-		private Data(KillTask task, PlayerData data) {
+	public static class Data extends TaskData<KillTask>
+	{
+		private Data(KillTask task, PlayerData data)
+		{
 			super(task, data);
 		}
 
-		public void kill(LivingEntity entity) {
-			if (!isComplete() && task.entity.equals(Registries.getId(entity.getType(), Registry.ENTITY_TYPE_REGISTRY))) {
-				complete();
+		public void kill(LivingEntity entity)
+		{
+			if (!isComplete() && task.entity.equals(Registries.getId(entity.getType(), Registry.ENTITY_TYPE_REGISTRY)))
+			{
+				addProgress(1);
 			}
 		}
 	}
