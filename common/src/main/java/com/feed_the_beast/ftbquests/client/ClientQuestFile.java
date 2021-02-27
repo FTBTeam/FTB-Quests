@@ -1,6 +1,6 @@
 package com.feed_the_beast.ftbquests.client;
 
-import com.feed_the_beast.ftbquests.gui.quests.GuiQuests;
+import com.feed_the_beast.ftbquests.gui.quests.QuestsScreen;
 import com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIHelper;
 import com.feed_the_beast.ftbquests.net.MessageDeleteObject;
 import com.feed_the_beast.ftbquests.quest.Movable;
@@ -20,24 +20,20 @@ import java.util.UUID;
 /**
  * @author LatvianModder
  */
-public class ClientQuestFile extends QuestFile
-{
+public class ClientQuestFile extends QuestFile {
 	public static ClientQuestFile INSTANCE;
 
-	public static boolean exists()
-	{
+	public static boolean exists() {
 		return INSTANCE != null && !INSTANCE.invalid;
 	}
 
 	public PlayerData self;
-	public GuiQuests questTreeGui;
+	public QuestsScreen questTreeGui;
 	public GuiBase questGui;
 
 	@Override
-	public void load(UUID s)
-	{
-		if (INSTANCE != null)
-		{
+	public void load(UUID s) {
+		if (INSTANCE != null) {
 			INSTANCE.deleteChildren();
 			INSTANCE.deleteSelf();
 		}
@@ -77,32 +73,27 @@ public class ClientQuestFile extends QuestFile
 			selectedQuests = new long[questTreeGui.selectedObjects.size()];
 			int i = 0;
 
-			for (Movable m : questTreeGui.selectedObjects)
-			{
-				if (m instanceof Quest)
-				{
+			for (Movable m : questTreeGui.selectedObjects) {
+				if (m instanceof Quest) {
 					selectedQuests[i] = ((Quest) m).id;
 				}
 
 				i++;
 			}
 
-			if (ClientUtils.getCurrentGuiAs(GuiQuests.class) != null)
-			{
+			if (ClientUtils.getCurrentGuiAs(QuestsScreen.class) != null) {
 				guiOpen = true;
 			}
 		}
 
-		questTreeGui = new GuiQuests(this);
+		questTreeGui = new QuestsScreen(this);
 		questGui = questTreeGui;
 
-		if (hasPrev)
-		{
+		if (hasPrev) {
 			questTreeGui.zoom = zoom;
 			questTreeGui.selectChapter(getChapter(selectedChapter));
 
-			for (long i : selectedQuests)
-			{
+			for (long i : selectedQuests) {
 				Quest q = getQuest(i);
 
 				if (q != null)

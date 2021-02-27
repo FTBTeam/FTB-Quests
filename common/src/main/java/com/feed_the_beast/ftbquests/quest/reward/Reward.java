@@ -1,6 +1,6 @@
 package com.feed_the_beast.ftbquests.quest.reward;
 
-import com.feed_the_beast.ftbquests.gui.quests.GuiQuests;
+import com.feed_the_beast.ftbquests.gui.quests.QuestsScreen;
 import com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIHelper;
 import com.feed_the_beast.ftbquests.net.MessageClaimReward;
 import com.feed_the_beast.ftbquests.quest.*;
@@ -160,7 +160,7 @@ public abstract class Reward extends QuestObjectBase {
 	@Override
 	@Environment(EnvType.CLIENT)
 	public void editedFromGUI() {
-		GuiQuests gui = ClientUtils.getCurrentGuiAs(GuiQuests.class);
+		QuestsScreen gui = ClientUtils.getCurrentGuiAs(QuestsScreen.class);
 
 		if (gui != null && gui.getViewedQuest() != null) {
 			gui.viewQuestPanel.refreshWidgets();

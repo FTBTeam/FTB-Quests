@@ -2,7 +2,7 @@ package com.feed_the_beast.ftbquests.quest.task;
 
 import com.feed_the_beast.ftbquests.events.CustomTaskEvent;
 import com.feed_the_beast.ftbquests.events.ObjectCompletedEvent;
-import com.feed_the_beast.ftbquests.gui.quests.GuiQuests;
+import com.feed_the_beast.ftbquests.gui.quests.QuestsScreen;
 import com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIHelper;
 import com.feed_the_beast.ftbquests.net.MessageDisplayCompletionToast;
 import com.feed_the_beast.ftbquests.net.MessageSubmitTask;
@@ -122,7 +122,7 @@ public abstract class Task extends QuestObject {
 	@Override
 	@Environment(EnvType.CLIENT)
 	public void editedFromGUI() {
-		GuiQuests gui = ClientUtils.getCurrentGuiAs(GuiQuests.class);
+		QuestsScreen gui = ClientUtils.getCurrentGuiAs(QuestsScreen.class);
 
 		if (gui != null) {
 			gui.questPanel.refreshWidgets();

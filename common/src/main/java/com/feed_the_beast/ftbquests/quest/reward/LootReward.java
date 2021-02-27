@@ -1,6 +1,6 @@
 package com.feed_the_beast.ftbquests.quest.reward;
 
-import com.feed_the_beast.ftbquests.gui.GuiRewardNotifications;
+import com.feed_the_beast.ftbquests.gui.RewardNotificationsScreen;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.loot.WeightedReward;
 import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
@@ -70,7 +70,7 @@ public class LootReward extends RandomReward {
 	@Environment(EnvType.CLIENT)
 	public void onButtonClicked(Button button, boolean canClick) {
 		if (canClick) {
-			new GuiRewardNotifications().openGui();
+			new RewardNotificationsScreen().openGui();
 		}
 
 		super.onButtonClicked(button, canClick);

@@ -1,6 +1,6 @@
 package com.feed_the_beast.ftbquests.util;
 
-import com.feed_the_beast.ftbquests.gui.GuiSelectQuestObject;
+import com.feed_the_beast.ftbquests.gui.SelectQuestObjectScreen;
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigCallback;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigValue;
@@ -34,7 +34,7 @@ public class ConfigQuestObject<T extends QuestObjectBase> extends ConfigValue<T>
 	@Override
 	public void onClicked(MouseButton button, ConfigCallback callback) {
 		if (getCanEdit()) {
-			new GuiSelectQuestObject<>(this, callback).openGui();
+			new SelectQuestObjectScreen<>(this, callback).openGui();
 		}
 	}
 
