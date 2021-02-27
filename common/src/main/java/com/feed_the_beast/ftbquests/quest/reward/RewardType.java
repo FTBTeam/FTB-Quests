@@ -1,7 +1,7 @@
 package com.feed_the_beast.ftbquests.quest.reward;
 
 import com.feed_the_beast.ftbquests.FTBQuests;
-import com.feed_the_beast.ftbquests.gui.GuiSelectQuestObject;
+import com.feed_the_beast.ftbquests.gui.SelectQuestObjectScreen;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.quest.loot.RewardTable;
@@ -72,7 +72,7 @@ public final class RewardType extends RegistryEntry<RewardType> {
 
 				if (reward instanceof RandomReward) {
 					ConfigQuestObject<RewardTable> config = new ConfigQuestObject<>(QuestObjectType.REWARD_TABLE);
-					new GuiSelectQuestObject<>(config, accepted -> {
+					new SelectQuestObjectScreen<>(config, accepted -> {
 						if (accepted) {
 							((RandomReward) reward).table = config.value;
 							callback.accept(reward);

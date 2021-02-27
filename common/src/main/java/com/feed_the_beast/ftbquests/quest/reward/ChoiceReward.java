@@ -1,6 +1,6 @@
 package com.feed_the_beast.ftbquests.quest.reward;
 
-import com.feed_the_beast.ftbquests.gui.GuiSelectChoiceReward;
+import com.feed_the_beast.ftbquests.gui.SelectChoiceRewardScreen;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
@@ -45,7 +45,7 @@ public class ChoiceReward extends RandomReward {
 	public void onButtonClicked(Button button, boolean canClick) {
 		if (canClick) {
 			button.playClickSound();
-			new GuiSelectChoiceReward(this).openGui();
+			new SelectChoiceRewardScreen(this).openGui();
 		}
 	}
 

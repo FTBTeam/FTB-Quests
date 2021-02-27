@@ -2,19 +2,13 @@ package com.feed_the_beast.ftbquests.client;
 
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.FTBQuestsNetCommon;
-import com.feed_the_beast.ftbquests.gui.IRewardListenerGui;
+import com.feed_the_beast.ftbquests.gui.IRewardListenerScreen;
 import com.feed_the_beast.ftbquests.gui.RewardKey;
 import com.feed_the_beast.ftbquests.gui.RewardToast;
 import com.feed_the_beast.ftbquests.gui.ToastQuestObject;
-import com.feed_the_beast.ftbquests.gui.quests.GuiQuests;
+import com.feed_the_beast.ftbquests.gui.quests.QuestsScreen;
 import com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIHelper;
-import com.feed_the_beast.ftbquests.quest.ChangeProgress;
-import com.feed_the_beast.ftbquests.quest.Chapter;
-import com.feed_the_beast.ftbquests.quest.PlayerData;
-import com.feed_the_beast.ftbquests.quest.Quest;
-import com.feed_the_beast.ftbquests.quest.QuestObject;
-import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
-import com.feed_the_beast.ftbquests.quest.QuestObjectType;
+import com.feed_the_beast.ftbquests.quest.*;
 import com.feed_the_beast.ftbquests.quest.reward.Reward;
 import com.feed_the_beast.ftbquests.quest.task.Task;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
@@ -56,12 +50,10 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon
 		PlayerData data = ClientQuestFile.INSTANCE.getData(player);
 		data.setRewardClaimed(reward.id, true);
 
-		if (data == ClientQuestFile.INSTANCE.self)
-		{
-			GuiQuests treeGui = ClientUtils.getCurrentGuiAs(GuiQuests.class);
+		if (data == ClientQuestFile.INSTANCE.self) {
+			QuestsScreen treeGui = ClientUtils.getCurrentGuiAs(QuestsScreen.class);
 
-			if (treeGui != null)
-			{
+			if (treeGui != null) {
 				treeGui.viewQuestPanel.refreshWidgets();
 				treeGui.otherButtonsTopPanel.refreshWidgets();
 			}
@@ -124,18 +116,15 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon
 	}
 
 	@Override
-	public void displayItemRewardToast(ItemStack stack, int count)
-	{
+	public void displayItemRewardToast(ItemStack stack, int count) {
 		ItemStack stack1 = stack.copy();
 		stack1.setCount(1);
 		Icon icon = ItemIcon.getItemIcon(stack1);
 
-		if (!IRewardListenerGui.add(new RewardKey(stack.getHoverName().getString(), icon).setStack(stack1), count))
-		{
+		if (!IRewardListenerScreen.add(new RewardKey(stack.getHoverName().getString(), icon).setStack(stack1), count)) {
 			MutableComponent s = stack.getHoverName().copy();
 
-			if (count > 1)
-			{
+			if (count > 1) {
 				s = new TextComponent(count + "x ").append(s);
 			}
 
@@ -146,12 +135,10 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon
 	}
 
 	@Override
-	public void displayRewardToast(long id, Component text, Icon icon)
-	{
+	public void displayRewardToast(long id, Component text, Icon icon) {
 		Icon i = icon.isEmpty() ? ClientQuestFile.INSTANCE.getBase(id).getIcon() : icon;
 
-		if (!IRewardListenerGui.add(new RewardKey(text.getString(), i), 1))
-		{
+		if (!IRewardListenerScreen.add(new RewardKey(text.getString(), i), 1)) {
 			Minecraft.getInstance().getToasts().addToast(new RewardToast(text, i));
 		}
 	}
@@ -179,16 +166,14 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon
 		{
 			int index = chapter.group.chapters.indexOf(chapter);
 
-			if (index != -1 && up ? (index > 0) : (index < chapter.group.chapters.size() - 1))
-			{
+			if (index != -1 && up ? (index > 0) : (index < chapter.group.chapters.size() - 1)) {
 				chapter.group.chapters.remove(index);
 				chapter.group.chapters.add(up ? index - 1 : index + 1, chapter);
 				ClientQuestFile.INSTANCE.clearCachedData();
 
-				GuiQuests gui = ClientUtils.getCurrentGuiAs(GuiQuests.class);
+				QuestsScreen gui = ClientUtils.getCurrentGuiAs(QuestsScreen.class);
 
-				if (gui != null)
-				{
+				if (gui != null) {
 					gui.chapterPanel.refreshWidgets();
 					gui.chapterPanel.alignWidgets();
 				}
@@ -201,13 +186,11 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon
 	{
 		Quest quest = ClientQuestFile.INSTANCE.getQuest(id);
 
-		if (quest != null)
-		{
+		if (quest != null) {
 			quest.moved(x, y, chapter);
-			GuiQuests gui = ClientUtils.getCurrentGuiAs(GuiQuests.class);
+			QuestsScreen gui = ClientUtils.getCurrentGuiAs(QuestsScreen.class);
 
-			if (gui != null)
-			{
+			if (gui != null) {
 				double sx = gui.questPanel.centerQuestX;
 				double sy = gui.questPanel.centerQuestY;
 				gui.questPanel.refreshWidgets();

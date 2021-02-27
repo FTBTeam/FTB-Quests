@@ -2,7 +2,7 @@ package com.feed_the_beast.ftbquests.item;
 
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
-import com.feed_the_beast.ftbquests.gui.GuiRewardNotifications;
+import com.feed_the_beast.ftbquests.gui.RewardNotificationsScreen;
 import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.loot.LootCrate;
 import com.feed_the_beast.ftbquests.quest.loot.RewardTable;
@@ -84,7 +84,7 @@ public class ItemLootCrate extends Item {
 
 			world.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ITEM_BREAK, SoundSource.PLAYERS, 0.8F, 0.8F + world.random.nextFloat() * 0.4F);
 		} else {
-			new GuiRewardNotifications().openGui();
+			new RewardNotificationsScreen().openGui();
 
 			for (int i = 0; i < 5; i++) {
 				Vec3 vec3d = new Vec3(((double) world.random.nextFloat() - 0.5D) * 0.1D, Math.random() * 0.1D + 0.1D, 0.0D);

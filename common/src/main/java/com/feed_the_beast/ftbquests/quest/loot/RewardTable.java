@@ -1,8 +1,8 @@
 package com.feed_the_beast.ftbquests.quest.loot;
 
-import com.feed_the_beast.ftbquests.gui.GuiEditRewardTable;
-import com.feed_the_beast.ftbquests.gui.GuiRewardTables;
-import com.feed_the_beast.ftbquests.gui.quests.GuiQuests;
+import com.feed_the_beast.ftbquests.gui.EditRewardTableScreen;
+import com.feed_the_beast.ftbquests.gui.RewardTablesScreen;
+import com.feed_the_beast.ftbquests.gui.quests.QuestsScreen;
 import com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIHelper;
 import com.feed_the_beast.ftbquests.net.MessageEditObject;
 import com.feed_the_beast.ftbquests.quest.*;
@@ -256,12 +256,12 @@ public final class RewardTable extends QuestObjectBase {
 	@Override
 	@Environment(EnvType.CLIENT)
 	public void editedFromGUI() {
-		GuiQuests gui = ClientUtils.getCurrentGuiAs(GuiQuests.class);
+		QuestsScreen gui = ClientUtils.getCurrentGuiAs(QuestsScreen.class);
 
 		if (gui != null && gui.getViewedQuest() != null) {
 			gui.viewQuestPanel.refreshWidgets();
 		} else {
-			GuiRewardTables gui1 = ClientUtils.getCurrentGuiAs(GuiRewardTables.class);
+			RewardTablesScreen gui1 = ClientUtils.getCurrentGuiAs(RewardTablesScreen.class);
 
 			if (gui1 != null) {
 				gui1.refreshWidgets();
@@ -338,7 +338,7 @@ public final class RewardTable extends QuestObjectBase {
 	@Override
 	@Environment(EnvType.CLIENT)
 	public void onEditButtonClicked(Runnable gui) {
-		new GuiEditRewardTable(this, () -> new MessageEditObject(this).sendToServer()).openGui();
+		new EditRewardTableScreen(this, () -> new MessageEditObject(this).sendToServer()).openGui();
 	}
 
 	public void addMouseOverText(TooltipList list, boolean includeWeight, boolean includeEmpty) {

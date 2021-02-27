@@ -1,7 +1,7 @@
 package com.feed_the_beast.ftbquests.quest.task;
 
 import com.feed_the_beast.ftbquests.gui.CustomToast;
-import com.feed_the_beast.ftbquests.gui.quests.GuiValidItems;
+import com.feed_the_beast.ftbquests.gui.quests.ValidItemsScreen;
 import com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIHelper;
 import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.item.MissingItem;
@@ -200,7 +200,7 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 		} else if (validItems.isEmpty()) {
 			Minecraft.getInstance().getToasts().addToast(new CustomToast(new TextComponent("No valid items!"), ItemIcon.getItemIcon(FTBQuestsItems.MISSING_ITEM.get()), new TextComponent("Report this bug to modpack author!")));
 		} else {
-			new GuiValidItems(this, validItems, canClick).openGui();
+			new ValidItemsScreen(this, validItems, canClick).openGui();
 		}
 	}
 
