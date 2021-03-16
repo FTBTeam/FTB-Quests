@@ -47,13 +47,12 @@ public class ClientQuestFile extends QuestFile {
 	}
 
 	@Override
-	public boolean canEdit()
-	{
+	public boolean canEdit() {
 		return self.getCanEdit();
 	}
 
-	public void refreshGui()
-	{
+	@Override
+	public void refreshGui() {
 		clearCachedData();
 
 		boolean hasPrev = false;
@@ -63,8 +62,7 @@ public class ClientQuestFile extends QuestFile {
 		long selectedChapter = 0L;
 		long[] selectedQuests = new long[0];
 
-		if (questTreeGui != null)
-		{
+		if (questTreeGui != null) {
 			hasPrev = true;
 			zoom = questTreeGui.zoom;
 			scrollX = questTreeGui.questPanel.centerQuestX;
@@ -96,53 +94,43 @@ public class ClientQuestFile extends QuestFile {
 			for (long i : selectedQuests) {
 				Quest q = getQuest(i);
 
-				if (q != null)
-				{
+				if (q != null) {
 					questTreeGui.selectedObjects.add(q);
 				}
 			}
 
-			if (guiOpen)
-			{
+			if (guiOpen) {
 				questTreeGui.openGui();
 			}
 		}
 
 		questTreeGui.refreshWidgets();
 
-		if (hasPrev)
-		{
+		if (hasPrev) {
 			questTreeGui.questPanel.scrollTo(scrollX, scrollY);
 		}
 	}
 
-	public void openQuestGui()
-	{
-		if (disableGui && !self.getCanEdit())
-		{
+	public void openQuestGui() {
+		if (disableGui && !self.getCanEdit()) {
 			Minecraft.getInstance().player.displayClientMessage(new TranslatableComponent("item.ftbquests.book.disabled"), true);
-		}
-		else if (exists())
-		{
+		} else if (exists()) {
 			questGui.openGui();
 		}
 	}
 
 	@Override
-	public Env getSide()
-	{
+	public Env getSide() {
 		return Env.CLIENT;
 	}
 
 	@Override
-	public void deleteObject(long id)
-	{
+	public void deleteObject(long id) {
 		new MessageDeleteObject(id).sendToServer();
 	}
 
 	@Override
-	public void clearCachedData()
-	{
+	public void clearCachedData() {
 		super.clearCachedData();
 		QuestTheme.instance.clearCache();
 	}

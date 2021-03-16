@@ -1,38 +1,37 @@
 package com.feed_the_beast.ftbquests.gui.quests;
 
-import com.feed_the_beast.ftbquests.quest.Chapter;
-import com.feed_the_beast.ftbquests.quest.ChapterGroup;
-import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
-import com.feed_the_beast.mods.ftbguilibrary.icon.Color4I;
-import com.feed_the_beast.mods.ftbguilibrary.widget.ColorWidget;
+import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
-import com.feed_the_beast.mods.ftbguilibrary.widget.WidgetLayout;
-import me.shedaniel.architectury.platform.Platform;
-
-import java.util.List;
 
 /**
  * @author LatvianModder
  */
 public class ChaptersPanel extends Panel {
-	public final QuestsScreen treeGui;
+	public static final Icon ARROW_RIGHT = Icon.getIcon("ftbquests:textures/gui/arrow_right.png");
+	public static final Icon ARROW_DOWN = Icon.getIcon("ftbquests:textures/gui/arrow_down.png");
+
+	public final QuestsScreen questsScreen;
+	public boolean expanded = false;
 
 	public ChaptersPanel(Panel panel) {
 		super(panel);
-		treeGui = (QuestsScreen) panel.getGui();
-		setPosAndSize(0, 1, 20, 0);
+		questsScreen = (QuestsScreen) panel.getGui();
 	}
 
 	@Override
 	public void addWidgets() {
+
+		/*
 		if (Platform.isModLoaded("ftbmoney")) {
 			add(new OpenShopButton(this));
 			Color4I borderColor = ThemeProperties.WIDGET_BORDER.get(treeGui.selectedChapter);
 			add(new ColorWidget(this, borderColor, null).setPosAndSize(1, 0, width - 2, 1));
 		}
+		 */
 
-		boolean canEdit = treeGui.file.canEdit();
+		boolean canEdit = questsScreen.file.canEdit();
 
+		/*
 		if (treeGui.file.chapterGroups.size() == 1) {
 			for (Chapter chapter : treeGui.file.defaultChapterGroup.getVisibleChapters(treeGui.file.self)) {
 				add(new ChapterButton(this, chapter));
@@ -48,15 +47,29 @@ public class ChaptersPanel extends Panel {
 				//add(new ButtonExpandedChapter(this, chapter));
 			}
 		}
+		 */
 
 		if (canEdit) {
-			add(new AddChapterButton(this));
+			//add(new ExpandChaptersButton(this));
 		}
 	}
 
 	@Override
 	public void alignWidgets() {
-		setHeight(treeGui.height - 2);
-		align(WidgetLayout.VERTICAL);
+		if (expanded) {
+			setPosAndSize(0, 0, 100, questsScreen.height);
+		} else {
+			setPosAndSize(-1, 0, 0, 0);
+		}
+	}
+
+	@Override
+	public void updateMouseOver(int mouseX, int mouseY) {
+		super.updateMouseOver(mouseX, mouseY);
+
+		if (expanded && !isMouseOver()) {
+			expanded = false;
+			refreshWidgets();
+		}
 	}
 }

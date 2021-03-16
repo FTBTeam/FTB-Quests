@@ -3,7 +3,7 @@ package com.feed_the_beast.ftbquests.client;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.events.ClearFileCacheEvent;
 import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
-import com.feed_the_beast.ftbquests.item.ItemLootCrate;
+import com.feed_the_beast.ftbquests.item.LootCrateItem;
 import com.feed_the_beast.ftbquests.net.MessageSubmitTask;
 import com.feed_the_beast.ftbquests.quest.Chapter;
 import com.feed_the_beast.ftbquests.quest.ChapterGroup;
@@ -59,7 +59,7 @@ public class FTBQuestsClientEventHandler
 	private void registerItemColors(Minecraft minecraft)
 	{
 		ColorHandlers.registerItemColors((stack, tintIndex) -> {
-			LootCrate crate = ItemLootCrate.getCrate(null, stack);
+			LootCrate crate = LootCrateItem.getCrate(null, stack);
 			return crate == null ? 0xFFFFFFFF : (0xFF000000 | crate.color.rgb());
 		}, FTBQuestsItems.LOOTCRATE.get());
 	}

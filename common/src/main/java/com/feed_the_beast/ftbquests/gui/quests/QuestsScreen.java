@@ -2,11 +2,18 @@ package com.feed_the_beast.ftbquests.gui.quests;
 
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
+import com.feed_the_beast.ftbquests.gui.CustomToast;
 import com.feed_the_beast.ftbquests.gui.FTBQuestsTheme;
 import com.feed_the_beast.ftbquests.gui.SelectQuestObjectScreen;
 import com.feed_the_beast.ftbquests.net.MessageChangeProgress;
 import com.feed_the_beast.ftbquests.net.MessageEditObject;
-import com.feed_the_beast.ftbquests.quest.*;
+import com.feed_the_beast.ftbquests.quest.ChangeProgress;
+import com.feed_the_beast.ftbquests.quest.Chapter;
+import com.feed_the_beast.ftbquests.quest.Movable;
+import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.quest.QuestObject;
+import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
+import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.quest.reward.RandomReward;
 import com.feed_the_beast.ftbquests.quest.task.Task;
 import com.feed_the_beast.ftbquests.quest.theme.QuestTheme;
@@ -20,7 +27,13 @@ import com.feed_the_beast.mods.ftbguilibrary.utils.Key;
 import com.feed_the_beast.mods.ftbguilibrary.utils.MathUtils;
 import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
 import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
-import com.feed_the_beast.mods.ftbguilibrary.widget.*;
+import com.feed_the_beast.mods.ftbguilibrary.widget.ContextMenuItem;
+import com.feed_the_beast.mods.ftbguilibrary.widget.GuiBase;
+import com.feed_the_beast.mods.ftbguilibrary.widget.GuiHelper;
+import com.feed_the_beast.mods.ftbguilibrary.widget.GuiIcons;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Widget;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -42,6 +55,7 @@ public class QuestsScreen extends GuiBase {
 	public int prevMouseX, prevMouseY, grabbed;
 	public Chapter selectedChapter;
 	public final List<Movable> selectedObjects;
+	public final ExpandChaptersButton expandChaptersButton;
 	public final ChaptersPanel chapterPanel;
 	public final QuestsPanel questPanel;
 	public final OtherButtonsPanelBottom otherButtonsBottomPanel;
@@ -57,6 +71,7 @@ public class QuestsScreen extends GuiBase {
 		file = q;
 		selectedObjects = new ArrayList<>();
 
+		expandChaptersButton = new ExpandChaptersButton(this);
 		chapterPanel = new ChaptersPanel(this);
 		selectedChapter = file.getFirstVisibleChapter(file.self);
 
@@ -77,8 +92,9 @@ public class QuestsScreen extends GuiBase {
 	@Override
 	public void addWidgets() {
 		QuestTheme.currentObject = selectedChapter;
-		add(chapterPanel);
 		add(questPanel);
+		add(expandChaptersButton);
+		add(chapterPanel);
 		add(otherButtonsBottomPanel);
 		add(otherButtonsTopPanel);
 		add(chapterHoverPanel);
@@ -91,6 +107,7 @@ public class QuestsScreen extends GuiBase {
 		otherButtonsBottomPanel.alignWidgets();
 		otherButtonsTopPanel.alignWidgets();
 		chapterPanel.alignWidgets();
+		expandChaptersButton.setPosAndSize(0, 0, 16, height);
 	}
 
 	@Override
@@ -249,6 +266,16 @@ public class QuestsScreen extends GuiBase {
 	@Override
 	public boolean keyPressed(Key key) {
 		if (super.keyPressed(key)) {
+			return true;
+		}
+
+		if (key.is(GLFW.GLFW_KEY_B)) {
+			Theme.renderDebugBoxes = !Theme.renderDebugBoxes;
+
+			if (Theme.renderDebugBoxes) {
+				Minecraft.getInstance().getToasts().addToast(new CustomToast(new TextComponent("Debug rendering enabled!"), GuiIcons.BUG, new TextComponent("Press B to disable")));
+			}
+
 			return true;
 		}
 

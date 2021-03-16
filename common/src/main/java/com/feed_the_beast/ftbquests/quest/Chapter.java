@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
  */
 public final class Chapter extends QuestObject {
 	public final QuestFile file;
-	public final ChapterGroup group;
+	public ChapterGroup group;
 	public String filename;
 	public final List<Quest> quests;
 	public final List<String> subtitle;
@@ -257,12 +257,7 @@ public final class Chapter extends QuestObject {
 	@Override
 	public void onCreated() {
 		if (filename.isEmpty()) {
-			String s = title.replace(' ', '_').replaceAll("\\W", "").toLowerCase().trim();
-
-			if (s.isEmpty()) {
-				s = toString();
-			}
-
+			String s = titleToID(title).orElse(toString());
 			filename = s;
 
 			Set<String> existingNames = group.chapters.stream().map(ch -> ch.filename).collect(Collectors.toSet());

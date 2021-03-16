@@ -3,12 +3,19 @@ package com.feed_the_beast.ftbquests.client;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.FTBQuestsNetCommon;
 import com.feed_the_beast.ftbquests.gui.IRewardListenerScreen;
+import com.feed_the_beast.ftbquests.gui.QuestObjectUpdateListener;
 import com.feed_the_beast.ftbquests.gui.RewardKey;
 import com.feed_the_beast.ftbquests.gui.RewardToast;
 import com.feed_the_beast.ftbquests.gui.ToastQuestObject;
 import com.feed_the_beast.ftbquests.gui.quests.QuestsScreen;
 import com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIHelper;
-import com.feed_the_beast.ftbquests.quest.*;
+import com.feed_the_beast.ftbquests.quest.ChangeProgress;
+import com.feed_the_beast.ftbquests.quest.Chapter;
+import com.feed_the_beast.ftbquests.quest.PlayerData;
+import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.quest.QuestObject;
+import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
+import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.quest.reward.Reward;
 import com.feed_the_beast.ftbquests.quest.task.Task;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
@@ -24,26 +31,21 @@ import net.minecraft.world.item.ItemStack;
 import javax.annotation.Nullable;
 import java.util.UUID;
 
-public class FTBQuestsNetClient extends FTBQuestsNetCommon
-{
+public class FTBQuestsNetClient extends FTBQuestsNetCommon {
 	@Override
-	public void changeProgress(UUID player, long id, ChangeProgress type, boolean notifications)
-	{
+	public void changeProgress(UUID player, long id, ChangeProgress type, boolean notifications) {
 		QuestObjectBase object = ClientQuestFile.INSTANCE.getBase(id);
 
-		if (object != null)
-		{
+		if (object != null) {
 			object.forceProgress(ClientQuestFile.INSTANCE.getData(player), type, notifications);
 		}
 	}
 
 	@Override
-	public void claimReward(UUID player, long id)
-	{
+	public void claimReward(UUID player, long id) {
 		Reward reward = ClientQuestFile.INSTANCE.getReward(id);
 
-		if (reward == null)
-		{
+		if (reward == null) {
 			return;
 		}
 
@@ -61,8 +63,7 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon
 	}
 
 	@Override
-	public void createObject(long id, long parent, QuestObjectType type, CompoundTag nbt, @Nullable CompoundTag extra)
-	{
+	public void createObject(long id, long parent, QuestObjectType type, CompoundTag nbt, @Nullable CompoundTag extra) {
 		QuestObjectBase object = ClientQuestFile.INSTANCE.create(type, parent, extra == null ? new CompoundTag() : extra);
 		object.readData(nbt);
 		object.id = id;
@@ -71,27 +72,29 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon
 		object.editedFromGUI();
 		FTBQuestsJEIHelper.refresh(object);
 
-		if (object instanceof Chapter)
-		{
+		if (object instanceof Chapter) {
 			ClientQuestFile.INSTANCE.questTreeGui.selectChapter((Chapter) object);
+		}
+
+		QuestObjectUpdateListener listener = ClientUtils.getCurrentGuiAs(QuestObjectUpdateListener.class);
+
+		if (listener != null) {
+			listener.onQuestObjectUpdate(object);
 		}
 	}
 
 	@Override
-	public void createPlayerData(UUID uuid, String name)
-	{
+	public void createPlayerData(UUID uuid, String name) {
 		PlayerData data = new PlayerData(ClientQuestFile.INSTANCE, uuid);
 		data.name = name;
 		data.file.addData(data, true);
 	}
 
 	@Override
-	public void deleteObject(long id)
-	{
+	public void deleteObject(long id) {
 		QuestObjectBase object = ClientQuestFile.INSTANCE.getBase(id);
 
-		if (object != null)
-		{
+		if (object != null) {
 			object.deleteChildren();
 			object.deleteSelf();
 			ClientQuestFile.INSTANCE.refreshIDMap();
@@ -101,12 +104,10 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon
 	}
 
 	@Override
-	public void displayCompletionToast(long id)
-	{
+	public void displayCompletionToast(long id) {
 		QuestObject object = ClientQuestFile.INSTANCE.get(id);
 
-		if (object != null)
-		{
+		if (object != null) {
 			Minecraft.getInstance().getToasts().addToast(new ToastQuestObject(object));
 		}
 
@@ -144,13 +145,11 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon
 	}
 
 	@Override
-	public void editObject(long id, CompoundTag nbt)
-	{
+	public void editObject(long id, CompoundTag nbt) {
 		ClientQuestFile.INSTANCE.clearCachedData();
 		QuestObjectBase object = ClientQuestFile.INSTANCE.getBase(id);
 
-		if (object != null)
-		{
+		if (object != null) {
 			object.readData(nbt);
 			object.editedFromGUI();
 			FTBQuestsJEIHelper.refresh(object);
@@ -158,12 +157,10 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon
 	}
 
 	@Override
-	public void moveChapter(long id, boolean up)
-	{
+	public void moveChapter(long id, boolean up) {
 		Chapter chapter = ClientQuestFile.INSTANCE.getChapter(id);
 
-		if (chapter != null)
-		{
+		if (chapter != null) {
 			int index = chapter.group.chapters.indexOf(chapter);
 
 			if (index != -1 && up ? (index > 0) : (index < chapter.group.chapters.size() - 1)) {
@@ -182,8 +179,7 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon
 	}
 
 	@Override
-	public void moveQuest(long id, long chapter, double x, double y)
-	{
+	public void moveQuest(long id, long chapter, double x, double y) {
 		Quest quest = ClientQuestFile.INSTANCE.getQuest(id);
 
 		if (quest != null) {
@@ -200,42 +196,35 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon
 	}
 
 	@Override
-	public void syncEditingMode(boolean editingMode)
-	{
-		if (ClientQuestFile.INSTANCE.self.setCanEdit(editingMode))
-		{
+	public void syncEditingMode(boolean editingMode) {
+		if (ClientQuestFile.INSTANCE.self.setCanEdit(editingMode)) {
 			ClientQuestFile.INSTANCE.refreshGui();
 		}
 	}
 
 	@Override
-	public void togglePinned(long id)
-	{
+	public void togglePinned(long id) {
 		PlayerData data = FTBQuests.PROXY.getClientPlayerData();
 		data.setQuestPinned(id, !data.isQuestPinned(id));
 
 		ClientQuestFile.INSTANCE.questTreeGui.otherButtonsBottomPanel.refreshWidgets();
 
-		if (ClientQuestFile.INSTANCE.questTreeGui.viewQuestPanel != null)
-		{
+		if (ClientQuestFile.INSTANCE.questTreeGui.viewQuestPanel != null) {
 			ClientQuestFile.INSTANCE.questTreeGui.viewQuestPanel.refreshWidgets();
 		}
 	}
 
 	@Override
-	public void updatePlayerData(UUID uuid, String name)
-	{
+	public void updatePlayerData(UUID uuid, String name) {
 		PlayerData data = ClientQuestFile.INSTANCE.getData(uuid);
 		data.name = name;
 	}
 
 	@Override
-	public void updateTaskProgress(UUID player, long task, long progress)
-	{
+	public void updateTaskProgress(UUID player, long task, long progress) {
 		Task t = ClientQuestFile.INSTANCE.getTask(task);
 
-		if (t != null)
-		{
+		if (t != null) {
 			PlayerData data = ClientQuestFile.INSTANCE.getData(player);
 			ClientQuestFile.INSTANCE.clearCachedProgress();
 			data.getTaskData(t).setProgress(progress);

@@ -2,9 +2,9 @@ package com.feed_the_beast.ftbquests.gui.quests;
 
 import com.feed_the_beast.ftbquests.net.MessageCreateObject;
 import com.feed_the_beast.ftbquests.quest.Chapter;
-import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigString;
 import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiEditConfigFromString;
+import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
 import net.minecraft.nbt.CompoundTag;
@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
  */
 public class AddChapterButton extends TabButton {
 	public AddChapterButton(Panel panel) {
-		super(panel, new TranslatableComponent("gui.add"), ThemeProperties.ADD_ICON.get());
+		super(panel, new TranslatableComponent("gui.add"), Icon.getIcon("ftbquests:textures/gui/burger.png"));
 	}
 
 	@Override
@@ -32,7 +32,7 @@ public class AddChapterButton extends TabButton {
 				Chapter chapter = new Chapter(treeGui.file, treeGui.file.defaultChapterGroup);
 				chapter.title = c.value;
 				CompoundTag extra = new CompoundTag();
-				extra.putString("group", treeGui.file.defaultChapterGroup.id);
+				extra.putLong("group", 0L);
 				new MessageCreateObject(chapter, extra).sendToServer();
 			}
 

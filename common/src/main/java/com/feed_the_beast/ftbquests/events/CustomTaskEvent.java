@@ -10,23 +10,19 @@ import me.shedaniel.architectury.event.EventFactory;
  * @author LatvianModder
  */
 @ForgeEvent
-public class CustomTaskEvent
-{
+public class CustomTaskEvent {
 	public static final Event<Actor<CustomTaskEvent>> EVENT = EventFactory.createActorLoop();
 	private final CustomTask task;
 
-	public CustomTaskEvent(CustomTask t)
-	{
+	public CustomTaskEvent(CustomTask t) {
 		task = t;
 	}
 
-	public boolean isCancelable()
-	{
+	public boolean isCancelable() {
 		return true;
 	}
 
-	public CustomTask getTask()
-	{
+	public CustomTask getTask() {
 		return task;
 	}
 }

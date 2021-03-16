@@ -6,7 +6,6 @@ import com.feed_the_beast.ftbquests.quest.ChangeProgress;
 import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.util.FTBQuestsInventoryListener;
 import com.feed_the_beast.mods.ftbguilibrary.utils.StringUtils;
-import me.shedaniel.architectury.utils.Env;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 
@@ -41,7 +40,7 @@ public class TaskData<T extends Task> {
 			taskCompleted = false;
 			task.quest.chapter.file.clearCachedProgress();
 
-			if (data.file.getSide() == Env.SERVER) {
+			if (data.file.isServerSide()) {
 				if (ChangeProgress.sendUpdates) {
 					new MessageUpdateTaskProgress(data, task.id, progress).sendToAll();
 				}

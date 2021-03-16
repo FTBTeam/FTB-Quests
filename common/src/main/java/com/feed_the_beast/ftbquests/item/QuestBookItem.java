@@ -23,8 +23,8 @@ import java.util.List;
 /**
  * @author LatvianModder
  */
-public class ItemQuestBook extends Item {
-	public ItemQuestBook() {
+public class QuestBookItem extends Item {
+	public QuestBookItem() {
 		super(new Properties().stacksTo(1).tab(FTBQuests.ITEM_GROUP));
 		((ItemFTBQ) this).setCraftingRemainingItemFTBQ(this);
 	}

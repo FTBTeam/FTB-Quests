@@ -11,7 +11,11 @@ import com.feed_the_beast.ftbquests.net.MessageDisplayCompletionToast;
 import com.feed_the_beast.ftbquests.quest.loot.EntityWeight;
 import com.feed_the_beast.ftbquests.quest.loot.LootCrate;
 import com.feed_the_beast.ftbquests.quest.loot.RewardTable;
-import com.feed_the_beast.ftbquests.quest.reward.*;
+import com.feed_the_beast.ftbquests.quest.reward.CustomReward;
+import com.feed_the_beast.ftbquests.quest.reward.Reward;
+import com.feed_the_beast.ftbquests.quest.reward.RewardAutoClaim;
+import com.feed_the_beast.ftbquests.quest.reward.RewardType;
+import com.feed_the_beast.ftbquests.quest.reward.RewardTypes;
 import com.feed_the_beast.ftbquests.quest.task.CustomTask;
 import com.feed_the_beast.ftbquests.quest.task.Task;
 import com.feed_the_beast.ftbquests.quest.task.TaskType;
@@ -31,7 +35,11 @@ import me.shedaniel.architectury.utils.Env;
 import me.shedaniel.architectury.utils.NbtType;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.nbt.*;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NumericTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -42,14 +50,22 @@ import net.minecraft.world.item.ItemStack;
 import javax.annotation.Nullable;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.UUID;
 import java.util.function.Predicate;
 
 /**
  * @author LatvianModder
  */
 public abstract class QuestFile extends QuestObject {
-	public static final int VERSION = 10;
+	public static final int VERSION = 11;
 
 	public final DefaultChapterGroup defaultChapterGroup;
 	public final List<ChapterGroup> chapterGroups;
@@ -106,6 +122,10 @@ public abstract class QuestFile extends QuestObject {
 	}
 
 	public abstract Env getSide();
+
+	public final boolean isServerSide() {
+		return getSide() == Env.SERVER;
+	}
 
 	@Override
 	public QuestFile getQuestFile() {
@@ -236,20 +256,6 @@ public abstract class QuestFile extends QuestObject {
 		return null;
 	}
 
-	public ChapterGroup getChapterGroup(String id) {
-		if (id.isEmpty() || id.equals("-")) {
-			return defaultChapterGroup;
-		}
-
-		for (ChapterGroup group : chapterGroups) {
-			if (group.id.equals(id)) {
-				return group;
-			}
-		}
-
-		return defaultChapterGroup;
-	}
-
 	@Nullable
 	public Chapter getChapter(long id) {
 		QuestObjectBase object = getBase(id);
@@ -294,15 +300,18 @@ public abstract class QuestFile extends QuestObject {
 		return table == null ? null : table.lootCrate;
 	}
 
-	@Nullable
-	public RewardTable getRewardTable(String id) {
-		LootCrate crate = getLootCrate(id);
-		return crate != null ? crate.table : getRewardTable(getID(id));
+	public ChapterGroup getChapterGroup(long id) {
+		QuestObjectBase object = getBase(id);
+		return object instanceof ChapterGroup ? (ChapterGroup) object : defaultChapterGroup;
 	}
 
 	public void refreshIDMap() {
 		clearCachedData();
 		map.clear();
+
+		for (ChapterGroup group : chapterGroups) {
+			map.put(group.id, group);
+		}
 
 		for (RewardTable table : rewardTables) {
 			map.put(table.id, table);
@@ -332,7 +341,7 @@ public abstract class QuestFile extends QuestObject {
 	public QuestObjectBase create(QuestObjectType type, long parent, CompoundTag extra) {
 		switch (type) {
 			case CHAPTER:
-				return new Chapter(this, getChapterGroup(extra.getString("group")));
+				return new Chapter(this, getChapterGroup(extra.getLong("group")));
 			case QUEST: {
 				Chapter chapter = getChapter(parent);
 
@@ -373,6 +382,8 @@ public abstract class QuestFile extends QuestObject {
 				throw new IllegalArgumentException("Parent quest not found!");
 			case REWARD_TABLE:
 				return new RewardTable(this);
+			case CHAPTER_GROUP:
+				return new ChapterGroup(this);
 			default:
 				throw new IllegalArgumentException("Unknown type: " + type);
 		}
@@ -406,19 +417,6 @@ public abstract class QuestFile extends QuestObject {
 		nbt.putBoolean("disable_gui", disableGui);
 		nbt.putDouble("grid_scale", gridScale);
 		nbt.putBoolean("pause_game", pauseGame);
-
-		ListTag chapterGroupTag = new ListTag();
-
-		for (ChapterGroup group : chapterGroups) {
-			if (!group.isDefaultGroup()) {
-				CompoundTag groupTag = new OrderedCompoundTag();
-				groupTag.putString("id", group.id);
-				group.write(groupTag);
-				chapterGroupTag.add(groupTag);
-			}
-		}
-
-		nbt.put("chapter_groups", chapterGroupTag);
 	}
 
 	@Override
@@ -459,19 +457,6 @@ public abstract class QuestFile extends QuestObject {
 
 		chapterGroups.clear();
 		chapterGroups.add(defaultChapterGroup);
-
-		ListTag chapterGroupsTag = nbt.getList("chapter_groups", NbtType.COMPOUND);
-
-		for (int i = 0; i < chapterGroupsTag.size(); i++) {
-			CompoundTag nbt1 = chapterGroupsTag.getCompound(i);
-			String gid = nbt1.getString("id");
-			ChapterGroup group = gid.isEmpty() ? defaultChapterGroup : new ChapterGroup(this, gid);
-			group.read(nbt1);
-
-			if (group != defaultChapterGroup) {
-				chapterGroups.add(group);
-			}
-		}
 	}
 
 	public final void writeDataFull(Path folder) {
@@ -485,7 +470,7 @@ public abstract class QuestFile extends QuestObject {
 				Chapter chapter = group.chapters.get(ci);
 				CompoundTag chapterNBT = new OrderedCompoundTag();
 				chapterNBT.putString("id", chapter.getCodeString());
-				chapterNBT.putString("group", group.id);
+				chapterNBT.putString("group", group.isDefaultGroup() ? "" : group.getCodeString());
 				chapterNBT.putInt("order_index", ci);
 				chapter.writeData(chapterNBT);
 
@@ -550,6 +535,21 @@ public abstract class QuestFile extends QuestObject {
 			table.writeData(tableNBT);
 			NBTUtils.writeSNBT(folder.resolve("reward_tables/" + table.getFilename() + ".snbt"), tableNBT);
 		}
+
+		ListTag chapterGroupTag = new ListTag();
+
+		for (ChapterGroup group : chapterGroups) {
+			if (!group.isDefaultGroup()) {
+				CompoundTag groupTag = new OrderedCompoundTag();
+				groupTag.putString("id", group.getCodeString());
+				group.writeData(groupTag);
+				chapterGroupTag.add(groupTag);
+			}
+		}
+
+		CompoundTag groupNBT = new OrderedCompoundTag();
+		groupNBT.put("chapter_groups", chapterGroupTag);
+		NBTUtils.writeSNBT(folder.resolve("chapter_groups.snbt"), groupNBT);
 	}
 
 	public final void readDataFull(Path folder) {
@@ -569,6 +569,25 @@ public abstract class QuestFile extends QuestObject {
 			readData(fileNBT);
 		}
 
+		Path groupsFile = folder.resolve("chapter_groups.snbt");
+
+		if (Files.exists(groupsFile)) {
+			CompoundTag chapterGroupsTag = NBTUtils.readSNBT(groupsFile);
+
+			if (chapterGroupsTag != null) {
+				ListTag groupListTag = chapterGroupsTag.getList("chapter_groups", NbtType.COMPOUND);
+
+				for (int i = 0; i < groupListTag.size(); i++) {
+					CompoundTag groupNBT = groupListTag.getCompound(i);
+					ChapterGroup chapterGroup = new ChapterGroup(this);
+					chapterGroup.id = readID(groupNBT.get("id"));
+					map.put(chapterGroup.id, chapterGroup);
+					dataCache.put(chapterGroup.id, groupNBT);
+					chapterGroups.add(chapterGroup);
+				}
+			}
+		}
+
 		Path chaptersFolder = folder.resolve("chapters");
 
 		Long2IntOpenHashMap objectOrderMap = new Long2IntOpenHashMap();
@@ -580,7 +599,7 @@ public abstract class QuestFile extends QuestObject {
 					CompoundTag chapterNBT = NBTUtils.readSNBT(path);
 
 					if (chapterNBT != null) {
-						Chapter chapter = new Chapter(this, getChapterGroup(chapterNBT.getString("group")));
+						Chapter chapter = new Chapter(this, getChapterGroup(getID(chapterNBT.get("group"))));
 						chapter.id = readID(chapterNBT.get("id"));
 						chapter.filename = path.getFileName().toString().replace(".snbt", "");
 						objectOrderMap.put(chapter.id, chapterNBT.getInt("order_index"));
@@ -720,9 +739,6 @@ public abstract class QuestFile extends QuestObject {
 		buffer.writeBoolean(disableGui);
 		buffer.writeDouble(gridScale);
 		buffer.writeBoolean(pauseGame);
-		chapterGroups.remove(defaultChapterGroup);
-		NetUtils.write(buffer, chapterGroups, (b, group) -> group.writeNet(b));
-		chapterGroups.add(0, defaultChapterGroup);
 	}
 
 	@Override
@@ -740,9 +756,6 @@ public abstract class QuestFile extends QuestObject {
 		disableGui = buffer.readBoolean();
 		gridScale = buffer.readDouble();
 		pauseGame = buffer.readBoolean();
-		defaultChapterGroup.chapters.clear();
-		NetUtils.read(buffer, chapterGroups, b -> ChapterGroup.readNet(this, b));
-		chapterGroups.add(0, defaultChapterGroup);
 	}
 
 	public final void writeNetDataFull(FriendlyByteBuf buffer, UUID self) {
@@ -768,6 +781,14 @@ public abstract class QuestFile extends QuestObject {
 
 		for (RewardTable table : rewardTables) {
 			buffer.writeLong(table.id);
+		}
+
+		buffer.writeVarInt(chapterGroups.size() - 1);
+
+		for (ChapterGroup group : chapterGroups) {
+			if (!group.isDefaultGroup()) {
+				buffer.writeLong(group.id);
+			}
 		}
 
 		for (ChapterGroup group : chapterGroups) {
@@ -798,6 +819,12 @@ public abstract class QuestFile extends QuestObject {
 
 		for (RewardTable table : rewardTables) {
 			table.writeNetData(buffer);
+		}
+
+		for (ChapterGroup group : chapterGroups) {
+			if (!group.isDefaultGroup()) {
+				group.writeNetData(buffer);
+			}
 		}
 
 		for (ChapterGroup group : chapterGroups) {
@@ -879,6 +906,17 @@ public abstract class QuestFile extends QuestObject {
 			rewardTables.add(table);
 		}
 
+		chapterGroups.clear();
+		chapterGroups.add(defaultChapterGroup);
+
+		int cgl = buffer.readVarInt();
+
+		for (int i = 0; i < cgl; i++) {
+			ChapterGroup group = new ChapterGroup(this);
+			group.id = buffer.readLong();
+			chapterGroups.add(group);
+		}
+
 		for (ChapterGroup group : chapterGroups) {
 			int c = buffer.readVarInt();
 
@@ -922,6 +960,12 @@ public abstract class QuestFile extends QuestObject {
 		}
 
 		for (ChapterGroup group : chapterGroups) {
+			if (!group.isDefaultGroup()) {
+				group.readNetData(buffer);
+			}
+		}
+
+		for (ChapterGroup group : chapterGroups) {
 			for (Chapter chapter : group.chapters) {
 				chapter.readNetData(buffer);
 
@@ -936,12 +980,6 @@ public abstract class QuestFile extends QuestObject {
 						reward.readNetData(buffer);
 					}
 				}
-			}
-		}
-
-		for (QuestObjectBase object : getAllObjects()) {
-			if (object instanceof CustomTask) {
-				CustomTaskEvent.EVENT.invoker().act(new CustomTaskEvent((CustomTask) object));
 			}
 		}
 
@@ -1043,6 +1081,7 @@ public abstract class QuestFile extends QuestObject {
 	public long readID(long id) {
 		while (id == 0L || id == 1L || map.get(id) != null) {
 			id = Math.abs(MathUtils.RAND.nextLong());
+			save();
 		}
 
 		return id;
@@ -1060,7 +1099,7 @@ public abstract class QuestFile extends QuestObject {
 			}
 		}
 
-		return readID(0L);
+		return newID();
 	}
 
 	public long getID(@Nullable Object o) {
@@ -1070,6 +1109,8 @@ public abstract class QuestFile extends QuestObject {
 			return ((Number) o).longValue();
 		} else if (o instanceof NumericTag) {
 			return ((NumericTag) o).getAsLong();
+		} else if (o instanceof StringTag) {
+			return getID(((StringTag) o).getAsString());
 		}
 
 		String id = o.toString();
@@ -1218,5 +1259,9 @@ public abstract class QuestFile extends QuestObject {
 				}
 			}
 		}
+	}
+
+	public void refreshGui() {
+		clearCachedData();
 	}
 }

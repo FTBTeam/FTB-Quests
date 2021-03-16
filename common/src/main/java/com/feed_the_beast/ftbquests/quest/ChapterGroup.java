@@ -1,13 +1,14 @@
 package com.feed_the_beast.ftbquests.quest;
 
-import com.feed_the_beast.ftbquests.item.CustomIconItem;
-import com.feed_the_beast.ftbquests.net.FTBQuestsNetHandler;
-import com.feed_the_beast.ftbquests.util.NBTUtils;
+import com.feed_the_beast.ftbquests.gui.ChapterGroupsScreen;
+import com.feed_the_beast.ftbquests.gui.quests.QuestsScreen;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.icon.IconAnimation;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.item.ItemStack;
+import com.feed_the_beast.mods.ftbguilibrary.utils.ClientUtils;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,66 +16,23 @@ import java.util.List;
 /**
  * @author LatvianModder
  */
-public class ChapterGroup {
+public class ChapterGroup extends QuestObjectBase {
 	public final QuestFile file;
-	public final String id;
 	public final List<Chapter> chapters;
-	private String title;
-	private ItemStack icon;
 
-	public ChapterGroup(QuestFile f, String i) {
+	public ChapterGroup(QuestFile f) {
 		file = f;
-		id = i;
 		chapters = new ArrayList<>();
-		title = "Unnamed Group";
-		icon = ItemStack.EMPTY;
-	}
-
-	public static ChapterGroup readNet(QuestFile f, FriendlyByteBuf buffer) {
-		String id = buffer.readUtf(Short.MAX_VALUE);
-
-		if (id.isEmpty()) {
-			return f.defaultChapterGroup;
-		}
-
-		ChapterGroup g = new ChapterGroup(f, id);
-		g.title = buffer.readUtf(Short.MAX_VALUE);
-		g.icon = FTBQuestsNetHandler.readItemType(buffer);
-		return g;
-	}
-
-	public void writeNet(FriendlyByteBuf buffer) {
-		buffer.writeUtf(id, Short.MAX_VALUE);
-
-		if (id.isEmpty()) {
-			return;
-		}
-
-		buffer.writeUtf(title, Short.MAX_VALUE);
-		FTBQuestsNetHandler.writeItemType(buffer, icon);
-	}
-
-	public void read(CompoundTag tag) {
-		title = tag.getString("title");
-		icon = NBTUtils.read(tag, "icon");
-	}
-
-	public void write(CompoundTag tag) {
-		tag.putString("title", title);
-		NBTUtils.write(tag, "icon", icon);
-	}
-
-	public String getTitle() {
-		return title;
-	}
-
-	public ItemStack getIconItem() {
-		return icon;
 	}
 
 	@Override
-	public String toString() {
-		return id;
+	public QuestObjectType getObjectType() {
+		return QuestObjectType.CHAPTER_GROUP;
+	}
+
+	@Override
+	public QuestFile getQuestFile() {
+		return file;
 	}
 
 	public int getIndex() {
@@ -85,11 +43,57 @@ public class ChapterGroup {
 		return this == file.defaultChapterGroup;
 	}
 
-	public Icon getIcon() {
-		if (!getIconItem().isEmpty()) {
-			return CustomIconItem.getIcon(getIconItem());
+	@Override
+	public void onCreated() {
+		file.chapterGroups.add(this);
+	}
+
+	@Override
+	public void clearCachedData() {
+		super.clearCachedData();
+
+		for (Chapter chapter : chapters) {
+			chapter.clearCachedData();
+		}
+	}
+
+	@Override
+	public void deleteSelf() {
+		file.chapterGroups.remove(this);
+
+		for (Chapter chapter : chapters) {
+			chapter.group = file.defaultChapterGroup;
+			file.defaultChapterGroup.chapters.add(chapter);
 		}
 
+		super.deleteSelf();
+	}
+
+	@Override
+	@Environment(EnvType.CLIENT)
+	public void editedFromGUI() {
+		QuestsScreen gui = ClientUtils.getCurrentGuiAs(QuestsScreen.class);
+
+		if (gui != null && gui.getViewedQuest() != null) {
+			gui.refreshWidgets();
+		} else {
+			ChapterGroupsScreen gui1 = ClientUtils.getCurrentGuiAs(ChapterGroupsScreen.class);
+
+			if (gui1 != null) {
+				gui1.refreshWidgets();
+			}
+		}
+	}
+
+	@Override
+	@Environment(EnvType.CLIENT)
+	public Component getAltTitle() {
+		return new TextComponent("Unnamed Group");
+	}
+
+	@Override
+	@Environment(EnvType.CLIENT)
+	public Icon getAltIcon() {
 		List<Icon> list = new ArrayList<>();
 
 		for (Chapter chapter : chapters) {
@@ -109,6 +113,7 @@ public class ChapterGroup {
 		return false;
 	}
 
+	@Override
 	public void changeProgress(PlayerData data, ChangeProgress type) {
 		for (Chapter chapter : chapters) {
 			chapter.changeProgress(data, type);
