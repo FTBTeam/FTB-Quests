@@ -7,10 +7,12 @@ import com.feed_the_beast.ftbquests.gui.QuestObjectUpdateListener;
 import com.feed_the_beast.ftbquests.gui.RewardKey;
 import com.feed_the_beast.ftbquests.gui.RewardToast;
 import com.feed_the_beast.ftbquests.gui.ToastQuestObject;
-import com.feed_the_beast.ftbquests.gui.quests.QuestsScreen;
+import com.feed_the_beast.ftbquests.gui.quests.QuestScreen;
 import com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIHelper;
+import com.feed_the_beast.ftbquests.net.MessageChangeChapterGroupResponse;
 import com.feed_the_beast.ftbquests.quest.ChangeProgress;
 import com.feed_the_beast.ftbquests.quest.Chapter;
+import com.feed_the_beast.ftbquests.quest.ChapterGroup;
 import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
@@ -53,7 +55,7 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon {
 		data.setRewardClaimed(reward.id, true);
 
 		if (data == ClientQuestFile.INSTANCE.self) {
-			QuestsScreen treeGui = ClientUtils.getCurrentGuiAs(QuestsScreen.class);
+			QuestScreen treeGui = ClientUtils.getCurrentGuiAs(QuestScreen.class);
 
 			if (treeGui != null) {
 				treeGui.viewQuestPanel.refreshWidgets();
@@ -73,7 +75,7 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon {
 		FTBQuestsJEIHelper.refresh(object);
 
 		if (object instanceof Chapter) {
-			ClientQuestFile.INSTANCE.questTreeGui.selectChapter((Chapter) object);
+			ClientQuestFile.INSTANCE.questScreen.selectChapter((Chapter) object);
 		}
 
 		QuestObjectUpdateListener listener = ClientUtils.getCurrentGuiAs(QuestObjectUpdateListener.class);
@@ -111,9 +113,9 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon {
 			Minecraft.getInstance().getToasts().addToast(new ToastQuestObject(object));
 		}
 
-		ClientQuestFile.INSTANCE.questTreeGui.questPanel.refreshWidgets();
-		ClientQuestFile.INSTANCE.questTreeGui.chapterPanel.refreshWidgets();
-		ClientQuestFile.INSTANCE.questTreeGui.viewQuestPanel.refreshWidgets();
+		ClientQuestFile.INSTANCE.questScreen.questPanel.refreshWidgets();
+		ClientQuestFile.INSTANCE.questScreen.chapterPanel.refreshWidgets();
+		ClientQuestFile.INSTANCE.questScreen.viewQuestPanel.refreshWidgets();
 	}
 
 	@Override
@@ -168,7 +170,7 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon {
 				chapter.group.chapters.add(up ? index - 1 : index + 1, chapter);
 				ClientQuestFile.INSTANCE.clearCachedData();
 
-				QuestsScreen gui = ClientUtils.getCurrentGuiAs(QuestsScreen.class);
+				QuestScreen gui = ClientUtils.getCurrentGuiAs(QuestScreen.class);
 
 				if (gui != null) {
 					gui.chapterPanel.refreshWidgets();
@@ -184,7 +186,7 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon {
 
 		if (quest != null) {
 			quest.moved(x, y, chapter);
-			QuestsScreen gui = ClientUtils.getCurrentGuiAs(QuestsScreen.class);
+			QuestScreen gui = ClientUtils.getCurrentGuiAs(QuestScreen.class);
 
 			if (gui != null) {
 				double sx = gui.questPanel.centerQuestX;
@@ -207,10 +209,10 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon {
 		PlayerData data = FTBQuests.PROXY.getClientPlayerData();
 		data.setQuestPinned(id, !data.isQuestPinned(id));
 
-		ClientQuestFile.INSTANCE.questTreeGui.otherButtonsBottomPanel.refreshWidgets();
+		ClientQuestFile.INSTANCE.questScreen.otherButtonsBottomPanel.refreshWidgets();
 
-		if (ClientQuestFile.INSTANCE.questTreeGui.viewQuestPanel != null) {
-			ClientQuestFile.INSTANCE.questTreeGui.viewQuestPanel.refreshWidgets();
+		if (ClientQuestFile.INSTANCE.questScreen.viewQuestPanel != null) {
+			ClientQuestFile.INSTANCE.questScreen.viewQuestPanel.refreshWidgets();
 		}
 	}
 
@@ -228,6 +230,24 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon {
 			PlayerData data = ClientQuestFile.INSTANCE.getData(player);
 			ClientQuestFile.INSTANCE.clearCachedProgress();
 			data.getTaskData(t).setProgress(progress);
+		}
+	}
+
+	@Override
+	public void changeChapterGroup(long id, long group) {
+		Chapter chapter = ClientQuestFile.INSTANCE.getChapter(id);
+
+		if (chapter != null) {
+			ChapterGroup g = ClientQuestFile.INSTANCE.getChapterGroup(group);
+
+			if (chapter.group != g) {
+				chapter.group.chapters.remove(chapter);
+				chapter.group = g;
+				g.chapters.add(chapter);
+				chapter.file.clearCachedData();
+				chapter.editedFromGUI();
+				new MessageChangeChapterGroupResponse(id, group).sendToAll();
+			}
 		}
 	}
 }

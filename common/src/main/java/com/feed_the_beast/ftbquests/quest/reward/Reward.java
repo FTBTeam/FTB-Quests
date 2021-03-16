@@ -1,9 +1,15 @@
 package com.feed_the_beast.ftbquests.quest.reward;
 
-import com.feed_the_beast.ftbquests.gui.quests.QuestsScreen;
+import com.feed_the_beast.ftbquests.gui.quests.QuestScreen;
 import com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIHelper;
 import com.feed_the_beast.ftbquests.net.MessageClaimReward;
-import com.feed_the_beast.ftbquests.quest.*;
+import com.feed_the_beast.ftbquests.quest.ChangeProgress;
+import com.feed_the_beast.ftbquests.quest.Chapter;
+import com.feed_the_beast.ftbquests.quest.PlayerData;
+import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.quest.QuestFile;
+import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
+import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
 import com.feed_the_beast.mods.ftbguilibrary.config.Tristate;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
@@ -160,7 +166,7 @@ public abstract class Reward extends QuestObjectBase {
 	@Override
 	@Environment(EnvType.CLIENT)
 	public void editedFromGUI() {
-		QuestsScreen gui = ClientUtils.getCurrentGuiAs(QuestsScreen.class);
+		QuestScreen gui = ClientUtils.getCurrentGuiAs(QuestScreen.class);
 
 		if (gui != null && gui.getViewedQuest() != null) {
 			gui.viewQuestPanel.refreshWidgets();

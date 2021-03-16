@@ -10,7 +10,14 @@ import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.misc.GuiButtonListBase;
 import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
 import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
-import com.feed_the_beast.mods.ftbguilibrary.widget.*;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
+import com.feed_the_beast.mods.ftbguilibrary.widget.ContextMenuItem;
+import com.feed_the_beast.mods.ftbguilibrary.widget.GuiHelper;
+import com.feed_the_beast.mods.ftbguilibrary.widget.GuiIcons;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
+import com.feed_the_beast.mods.ftbguilibrary.widget.SimpleTextButton;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
+import com.feed_the_beast.mods.ftbguilibrary.widget.WidgetType;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.latvian.mods.itemfilters.api.IStringValueFilter;
@@ -33,12 +40,12 @@ import java.util.List;
  * @author LatvianModder
  */
 public class TaskButton extends Button {
-	public final QuestsScreen treeGui;
+	public final QuestScreen questScreen;
 	public Task task;
 
 	public TaskButton(Panel panel, Task t) {
 		super(panel, t.getTitle(), GuiIcons.ACCEPT);
-		treeGui = (QuestsScreen) panel.getGui();
+		questScreen = (QuestScreen) panel.getGui();
 		task = t;
 	}
 
@@ -58,8 +65,8 @@ public class TaskButton extends Button {
 	@Override
 	public void onClicked(MouseButton button) {
 		if (button.isLeft()) {
-			task.onButtonClicked(this, !(task.invalid || !treeGui.file.self.canStartTasks(task.quest) || treeGui.file.self.isComplete(task)));
-		} else if (button.isRight() && treeGui.file.canEdit()) {
+			task.onButtonClicked(this, !(task.invalid || !questScreen.file.self.canStartTasks(task.quest) || questScreen.file.self.isComplete(task)));
+		} else if (button.isRight() && questScreen.file.canEdit()) {
 			playClickSound();
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
 
@@ -89,7 +96,7 @@ public class TaskButton extends Button {
 										panel.add(new SimpleTextButton(panel, new TextComponent(s.toString()), Icon.EMPTY) {
 											@Override
 											public void onClicked(MouseButton button) {
-												treeGui.openGui();
+												questScreen.openGui();
 												((IStringValueFilter) tagFilter.getItem()).setValue(tagFilter, s.toString());
 												i.item = tagFilter;
 
@@ -110,7 +117,7 @@ public class TaskButton extends Button {
 				}
 			}
 
-			QuestsScreen.addObjectMenuItems(contextMenu, getGui(), task);
+			QuestScreen.addObjectMenuItems(contextMenu, getGui(), task);
 			getGui().openContextMenu(contextMenu);
 		}
 	}
@@ -133,8 +140,8 @@ public class TaskButton extends Button {
 
 		TaskData data;
 
-		if (treeGui.file.self.canStartTasks(task.quest)) {
-			data = treeGui.file.self.getTaskData(task);
+		if (questScreen.file.self.canStartTasks(task.quest)) {
+			data = questScreen.file.self.getTaskData(task);
 			long maxp = task.getMaxProgress();
 
 			if (maxp > 1L) {
@@ -169,7 +176,7 @@ public class TaskButton extends Button {
 
 	@Override
 	public void drawIcon(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
-		task.drawGUI(treeGui.file.self.getTaskData(task), matrixStack, x, y, w, h);
+		task.drawGUI(questScreen.file.self.getTaskData(task), matrixStack, x, y, w, h);
 	}
 
 	@Override
@@ -179,13 +186,13 @@ public class TaskButton extends Button {
 		drawBackground(matrixStack, theme, x, y, w, h);
 		drawIcon(matrixStack, theme, x + (w - bs) / 2, y + (h - bs) / 2, bs, bs);
 
-		if (treeGui.file.self == null) {
+		if (questScreen.file.self == null) {
 			return;
-		} else if (treeGui.contextMenu != null) {
+		} else if (questScreen.contextMenu != null) {
 			//return;
 		}
 
-		if (treeGui.file.self.isComplete(task)) {
+		if (questScreen.file.self.isComplete(task)) {
 			matrixStack.pushPose();
 			matrixStack.translate(0, 0, 200);
 			RenderSystem.enableBlend();

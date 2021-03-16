@@ -1,6 +1,6 @@
 package com.feed_the_beast.ftbquests.client;
 
-import com.feed_the_beast.ftbquests.gui.quests.QuestsScreen;
+import com.feed_the_beast.ftbquests.gui.quests.QuestScreen;
 import com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIHelper;
 import com.feed_the_beast.ftbquests.net.MessageDeleteObject;
 import com.feed_the_beast.ftbquests.quest.Movable;
@@ -28,7 +28,7 @@ public class ClientQuestFile extends QuestFile {
 	}
 
 	public PlayerData self;
-	public QuestsScreen questTreeGui;
+	public QuestScreen questScreen;
 	public GuiBase questGui;
 
 	@Override
@@ -61,17 +61,18 @@ public class ClientQuestFile extends QuestFile {
 		double scrollX = 0, scrollY = 0;
 		long selectedChapter = 0L;
 		long[] selectedQuests = new long[0];
+		boolean chaptersExpanded = false;
 
-		if (questTreeGui != null) {
+		if (questScreen != null) {
 			hasPrev = true;
-			zoom = questTreeGui.zoom;
-			scrollX = questTreeGui.questPanel.centerQuestX;
-			scrollY = questTreeGui.questPanel.centerQuestY;
-			selectedChapter = questTreeGui.selectedChapter == null ? 0L : questTreeGui.selectedChapter.id;
-			selectedQuests = new long[questTreeGui.selectedObjects.size()];
+			zoom = questScreen.zoom;
+			scrollX = questScreen.questPanel.centerQuestX;
+			scrollY = questScreen.questPanel.centerQuestY;
+			selectedChapter = questScreen.selectedChapter == null ? 0L : questScreen.selectedChapter.id;
+			selectedQuests = new long[questScreen.selectedObjects.size()];
 			int i = 0;
 
-			for (Movable m : questTreeGui.selectedObjects) {
+			for (Movable m : questScreen.selectedObjects) {
 				if (m instanceof Quest) {
 					selectedQuests[i] = ((Quest) m).id;
 				}
@@ -79,36 +80,40 @@ public class ClientQuestFile extends QuestFile {
 				i++;
 			}
 
-			if (ClientUtils.getCurrentGuiAs(QuestsScreen.class) != null) {
+			if (ClientUtils.getCurrentGuiAs(QuestScreen.class) != null) {
 				guiOpen = true;
 			}
+
+			chaptersExpanded = questScreen.chapterPanel.expanded;
 		}
 
-		questTreeGui = new QuestsScreen(this);
-		questGui = questTreeGui;
+		questScreen = new QuestScreen(this);
+		questGui = questScreen;
 
 		if (hasPrev) {
-			questTreeGui.zoom = zoom;
-			questTreeGui.selectChapter(getChapter(selectedChapter));
+			questScreen.zoom = zoom;
+			questScreen.selectChapter(getChapter(selectedChapter));
 
 			for (long i : selectedQuests) {
 				Quest q = getQuest(i);
 
 				if (q != null) {
-					questTreeGui.selectedObjects.add(q);
+					questScreen.selectedObjects.add(q);
 				}
 			}
 
 			if (guiOpen) {
-				questTreeGui.openGui();
+				questScreen.openGui();
 			}
 		}
 
-		questTreeGui.refreshWidgets();
+		questScreen.refreshWidgets();
 
 		if (hasPrev) {
-			questTreeGui.questPanel.scrollTo(scrollX, scrollY);
+			questScreen.questPanel.scrollTo(scrollX, scrollY);
 		}
+
+		questScreen.chapterPanel.setExpanded(chaptersExpanded);
 	}
 
 	public void openQuestGui() {

@@ -26,10 +26,10 @@ public class AddChapterButton extends TabButton {
 
 		ConfigString c = new ConfigString(Pattern.compile("^.+$"));
 		GuiEditConfigFromString.open(c, "", "", accepted -> {
-			treeGui.openGui();
+			questScreen.openGui();
 
 			if (accepted && !c.value.isEmpty()) {
-				Chapter chapter = new Chapter(treeGui.file, treeGui.file.defaultChapterGroup);
+				Chapter chapter = new Chapter(questScreen.file, questScreen.file.defaultChapterGroup);
 				chapter.title = c.value;
 				CompoundTag extra = new CompoundTag();
 				extra.putLong("group", 0L);

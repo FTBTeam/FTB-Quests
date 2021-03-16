@@ -8,7 +8,11 @@ import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
 import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiEditConfig;
 import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
 import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
-import com.feed_the_beast.mods.ftbguilibrary.widget.*;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
+import com.feed_the_beast.mods.ftbguilibrary.widget.ContextMenuItem;
+import com.feed_the_beast.mods.ftbguilibrary.widget.GuiHelper;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
 import net.minecraft.ChatFormatting;
@@ -22,12 +26,12 @@ import java.util.List;
  * @author LatvianModder
  */
 public class ChapterImageButton extends Button {
-	public QuestsScreen treeGui;
+	public QuestScreen treeGui;
 	public ChapterImage chapterImage;
 
 	public ChapterImageButton(Panel panel, ChapterImage i) {
 		super(panel, TextComponent.EMPTY, i.image);
-		treeGui = (QuestsScreen) panel.getGui();
+		treeGui = (QuestScreen) panel.getGui();
 		setSize(20, 20);
 		chapterImage = i;
 	}
@@ -46,7 +50,7 @@ public class ChapterImageButton extends Button {
 
 	@Override
 	public boolean checkMouseOver(int mouseX, int mouseY) {
-		if (treeGui.questPanel.mouseOverQuest != null || treeGui.movingObjects || treeGui.viewQuestPanel.isMouseOver() || treeGui.chapterHoverPanel.isMouseOverAnyWidget()) {
+		if (treeGui.questPanel.mouseOverQuest != null || treeGui.movingObjects || treeGui.viewQuestPanel.isMouseOver() || treeGui.chapterPanel.expanded) {
 			return false;
 		}
 

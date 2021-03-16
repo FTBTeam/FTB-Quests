@@ -1,7 +1,7 @@
 package com.feed_the_beast.ftbquests.gui;
 
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
-import com.feed_the_beast.ftbquests.gui.quests.QuestsScreen;
+import com.feed_the_beast.ftbquests.gui.quests.QuestScreen;
 import com.feed_the_beast.ftbquests.net.MessageCreateObject;
 import com.feed_the_beast.ftbquests.net.MessageEditObject;
 import com.feed_the_beast.ftbquests.quest.Chapter;
@@ -17,7 +17,11 @@ import com.feed_the_beast.mods.ftbguilibrary.icon.Color4I;
 import com.feed_the_beast.mods.ftbguilibrary.misc.GuiButtonListBase;
 import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
 import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
-import com.feed_the_beast.mods.ftbguilibrary.widget.*;
+import com.feed_the_beast.mods.ftbguilibrary.widget.ContextMenuItem;
+import com.feed_the_beast.mods.ftbguilibrary.widget.GuiIcons;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
+import com.feed_the_beast.mods.ftbguilibrary.widget.SimpleTextButton;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -54,7 +58,7 @@ public class RewardTablesScreen extends GuiButtonListBase {
 			}
 
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
-			QuestsScreen.addObjectMenuItems(contextMenu, RewardTablesScreen.this, table);
+			QuestScreen.addObjectMenuItems(contextMenu, RewardTablesScreen.this, table);
 			contextMenu.add(new ContextMenuItem(new TranslatableComponent("item.ftbquests.lootcrate"), GuiIcons.ACCEPT, () -> {
 				if (table.lootCrate == null) {
 					table.lootCrate = new LootCrate(table);

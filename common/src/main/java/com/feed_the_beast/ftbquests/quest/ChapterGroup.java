@@ -1,7 +1,8 @@
 package com.feed_the_beast.ftbquests.quest;
 
 import com.feed_the_beast.ftbquests.gui.ChapterGroupsScreen;
-import com.feed_the_beast.ftbquests.gui.quests.QuestsScreen;
+import com.feed_the_beast.ftbquests.gui.quests.QuestScreen;
+import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.icon.IconAnimation;
 import com.feed_the_beast.mods.ftbguilibrary.utils.ClientUtils;
@@ -20,9 +21,13 @@ public class ChapterGroup extends QuestObjectBase {
 	public final QuestFile file;
 	public final List<Chapter> chapters;
 
+	public boolean guiCollapsed;
+
 	public ChapterGroup(QuestFile f) {
 		file = f;
 		chapters = new ArrayList<>();
+
+		guiCollapsed = false;
 	}
 
 	@Override
@@ -71,11 +76,17 @@ public class ChapterGroup extends QuestObjectBase {
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public void editedFromGUI() {
-		QuestsScreen gui = ClientUtils.getCurrentGuiAs(QuestsScreen.class);
+	public void getConfig(ConfigGroup config) {
+		config.addString("title", title, v -> title = v, "").setNameKey("ftbquests.title").setOrder(-127);
+	}
 
-		if (gui != null && gui.getViewedQuest() != null) {
-			gui.refreshWidgets();
+	@Override
+	@Environment(EnvType.CLIENT)
+	public void editedFromGUI() {
+		QuestScreen gui = ClientUtils.getCurrentGuiAs(QuestScreen.class);
+
+		if (gui != null) {
+			gui.chapterPanel.refreshWidgets();
 		} else {
 			ChapterGroupsScreen gui1 = ClientUtils.getCurrentGuiAs(ChapterGroupsScreen.class);
 
