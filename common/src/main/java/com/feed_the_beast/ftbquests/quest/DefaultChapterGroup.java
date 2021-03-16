@@ -1,43 +1,32 @@
 package com.feed_the_beast.ftbquests.quest;
 
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.item.ItemStack;
+import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.network.chat.Component;
 
 /**
  * @author LatvianModder
  */
-public class DefaultChapterGroup extends ChapterGroup
-{
-	public DefaultChapterGroup(QuestFile f)
-	{
-		super(f, "");
+public class DefaultChapterGroup extends ChapterGroup {
+	public DefaultChapterGroup(QuestFile f) {
+		super(f);
 	}
 
 	@Override
-	public String toString()
-	{
+	public String toString() {
 		return "-";
 	}
 
 	@Override
-	public String getTitle()
-	{
-		return file.title;
+	@Environment(EnvType.CLIENT)
+	public Component getAltTitle() {
+		return file.getTitle();
 	}
 
 	@Override
-	public ItemStack getIconItem()
-	{
-		return file.icon;
-	}
-
-	@Override
-	public void read(CompoundTag tag)
-	{
-	}
-
-	@Override
-	public void write(CompoundTag tag)
-	{
+	@Environment(EnvType.CLIENT)
+	public Icon getAltIcon() {
+		return file.getIcon();
 	}
 }

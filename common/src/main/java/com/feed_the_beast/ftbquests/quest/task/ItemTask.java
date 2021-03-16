@@ -19,7 +19,6 @@ import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
 import dev.latvian.mods.itemfilters.api.ItemFiltersAPI;
 import me.shedaniel.architectury.platform.Platform;
-import me.shedaniel.architectury.utils.Env;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
@@ -239,7 +238,7 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 				long add = Math.min(stack.getCount(), task.count - progress);
 
 				if (add > 0L) {
-					if (!simulate && data.file.getSide() != Env.CLIENT) {
+					if (!simulate && data.file.isServerSide()) {
 						addProgress(add);
 					}
 

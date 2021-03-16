@@ -12,7 +12,6 @@ import com.feed_the_beast.ftbquests.util.OrderedCompoundTag;
 import it.unimi.dsi.fastutil.longs.Long2ByteOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
-import me.shedaniel.architectury.utils.Env;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
@@ -21,7 +20,12 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * @author LatvianModder
@@ -112,7 +116,7 @@ public class PlayerData {
 			canEdit = mode;
 			save();
 
-			if (file.getSide() == Env.SERVER) {
+			if (file.isServerSide()) {
 				ServerPlayer player = getPlayer();
 
 				if (player != null) {
@@ -467,7 +471,7 @@ public class PlayerData {
 		if (setRewardClaimed(reward.id, true)) {
 			reward.claim(player, notify);
 
-			if (file.getSide() == Env.SERVER) {
+			if (file.isServerSide()) {
 				new MessageClaimRewardResponse(uuid, reward.id, 1).sendToAll();
 			}
 		}

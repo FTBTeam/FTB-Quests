@@ -5,7 +5,11 @@ import com.feed_the_beast.ftbquests.gui.RewardTablesScreen;
 import com.feed_the_beast.ftbquests.gui.quests.QuestsScreen;
 import com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIHelper;
 import com.feed_the_beast.ftbquests.net.MessageEditObject;
-import com.feed_the_beast.ftbquests.quest.*;
+import com.feed_the_beast.ftbquests.quest.Chapter;
+import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.quest.QuestFile;
+import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
+import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.quest.reward.Reward;
 import com.feed_the_beast.ftbquests.quest.reward.RewardType;
 import com.feed_the_beast.ftbquests.quest.reward.RewardTypes;
@@ -272,12 +276,7 @@ public final class RewardTable extends QuestObjectBase {
 	@Override
 	public void onCreated() {
 		if (filename.isEmpty()) {
-			String s = title.replace(' ', '_').replaceAll("\\W", "").toLowerCase().trim();
-
-			if (s.isEmpty()) {
-				s = toString();
-			}
-
+			String s = titleToID(title).orElse(toString());
 			filename = s;
 
 			Set<String> existingNames = file.rewardTables.stream().map(rt -> rt.filename).collect(Collectors.toSet());

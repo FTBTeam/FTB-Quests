@@ -149,6 +149,8 @@
 	"ftbquests.quest.disable_jei": "Disable JEI Recipe",
 	"ftbquests.quest.optional": "Optional",
 	"ftbquests.quest.min_width": "Min Opened Quest Window Width",
+	"ftbquests.chapter_group": "Chapter Group",
+	"ftbquests.chapter_groups": "Chapter Groups",
 	"ftbquests.gui.edit_file": "Edit File",
 	"ftbquests.gui.save_as_file": "Save as File",
 	"ftbquests.gui.export_spreadsheet": "Export Spreadsheet",

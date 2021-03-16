@@ -17,7 +17,6 @@ import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiEditConfig;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.utils.Bits;
 import com.feed_the_beast.mods.ftbguilibrary.utils.TextComponentParser;
-import me.shedaniel.architectury.utils.Env;
 import me.shedaniel.architectury.utils.NbtType;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -32,7 +31,12 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
@@ -55,6 +59,20 @@ public abstract class QuestObjectBase {
 
 	public static String getCodeString(@Nullable QuestObjectBase object) {
 		return getCodeString(getID(object));
+	}
+
+	public static Optional<String> titleToID(String s) {
+		s = s.replace(' ', '_').replaceAll("\\W", "").toLowerCase().trim();
+
+		while (s.startsWith("_")) {
+			s = s.substring(1);
+		}
+
+		while (s.endsWith("_")) {
+			s = s.substring(0, s.length() - 1);
+		}
+
+		return s.isEmpty() ? Optional.empty() : Optional.of(s);
 	}
 
 	public long id = 0L;
@@ -112,7 +130,7 @@ public abstract class QuestObjectBase {
 		ChangeProgress.sendNotifications = Tristate.DEFAULT;
 		getQuestFile().clearCachedProgress();
 
-		if (getQuestFile().getSide() != Env.CLIENT) {
+		if (getQuestFile().isServerSide()) {
 			new MessageChangeProgressResponse(data.uuid, id, type, notifications).sendToAll();
 		}
 

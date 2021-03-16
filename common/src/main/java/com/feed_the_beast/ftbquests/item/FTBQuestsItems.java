@@ -17,8 +17,8 @@ import java.util.function.Supplier;
 public class FTBQuestsItems {
 	public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(FTBQuests.MOD_ID, Registry.ITEM_REGISTRY);
 
-	public static final RegistrySupplier<Item> BOOK = ITEMS.register("book", ItemQuestBook::new);
-	public static final RegistrySupplier<Item> LOOTCRATE = ITEMS.register("lootcrate", ItemLootCrate::new);
+	public static final RegistrySupplier<Item> BOOK = ITEMS.register("book", QuestBookItem::new);
+	public static final RegistrySupplier<Item> LOOTCRATE = ITEMS.register("lootcrate", LootCrateItem::new);
 	public static final RegistrySupplier<Item> MISSING_ITEM = ITEMS.register("missing_item", MissingItem::new);
 	public static final RegistrySupplier<Item> CUSTOM_ICON = ITEMS.register("custom_icon", CustomIconItem::new);
 
