@@ -3,7 +3,11 @@ package com.feed_the_beast.ftbquests.gui.quests;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.net.MessageCreateObject;
 import com.feed_the_beast.ftbquests.net.MessageEditObject;
-import com.feed_the_beast.ftbquests.quest.*;
+import com.feed_the_beast.ftbquests.quest.ChapterImage;
+import com.feed_the_beast.ftbquests.quest.Movable;
+import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.quest.QuestObject;
+import com.feed_the_beast.ftbquests.quest.QuestShape;
 import com.feed_the_beast.ftbquests.quest.reward.Reward;
 import com.feed_the_beast.ftbquests.quest.reward.RewardType;
 import com.feed_the_beast.ftbquests.quest.reward.RewardTypes;
@@ -13,8 +17,13 @@ import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
 import com.feed_the_beast.mods.ftbguilibrary.utils.PixelBuffer;
 import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
-import com.feed_the_beast.mods.ftbguilibrary.widget.*;
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
+import com.feed_the_beast.mods.ftbguilibrary.widget.ContextMenuItem;
+import com.feed_the_beast.mods.ftbguilibrary.widget.GuiHelper;
+import com.feed_the_beast.mods.ftbguilibrary.widget.GuiIcons;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Widget;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.ChatFormatting;
@@ -32,20 +41,20 @@ import java.util.List;
  * @author LatvianModder
  */
 public class QuestButton extends Button {
-	public QuestsScreen treeGui;
+	public QuestScreen questScreen;
 	public Quest quest;
 	public QuestButton[] dependencies = null;
 
 	public QuestButton(Panel panel, Quest q) {
 		super(panel, q.getTitle(), q.getIcon());
-		treeGui = (QuestsScreen) panel.getGui();
+		questScreen = (QuestScreen) panel.getGui();
 		setSize(20, 20);
 		quest = q;
 	}
 
 	@Override
 	public boolean checkMouseOver(int mouseX, int mouseY) {
-		if (treeGui.movingObjects || treeGui.viewQuestPanel.isMouseOver() || treeGui.chapterHoverPanel.isMouseOverAnyWidget()) {
+		if (questScreen.movingObjects || questScreen.viewQuestPanel.isMouseOver() || questScreen.chapterPanel.expanded) {
 			return false;
 		}
 
@@ -56,7 +65,7 @@ public class QuestButton extends Button {
 	public void updateMouseOver(int mouseX, int mouseY) {
 		super.updateMouseOver(mouseX, mouseY);
 
-		if (treeGui.questPanel.mouseOverQuest != null && treeGui.questPanel.mouseOverQuest != this) {
+		if (questScreen.questPanel.mouseOverQuest != null && questScreen.questPanel.mouseOverQuest != this) {
 			isMouseOver = false;
 		}
 
@@ -85,8 +94,8 @@ public class QuestButton extends Button {
 			}
 		}
 
-		if (isMouseOver && treeGui.questPanel.mouseOverQuest == null) {
-			treeGui.questPanel.mouseOverQuest = this;
+		if (isMouseOver && questScreen.questPanel.mouseOverQuest == null) {
+			questScreen.questPanel.mouseOverQuest = this;
 		}
 	}
 
@@ -96,7 +105,7 @@ public class QuestButton extends Button {
 
 			for (QuestObject dependency : quest.dependencies) {
 				if (!dependency.invalid && dependency instanceof Quest) {
-					for (Widget widget : treeGui.questPanel.widgets) {
+					for (Widget widget : questScreen.questPanel.widgets) {
 						if (widget instanceof QuestButton && dependency == ((QuestButton) widget).quest) {
 							list.add((QuestButton) widget);
 						}
@@ -114,13 +123,13 @@ public class QuestButton extends Button {
 	public void onClicked(MouseButton button) {
 		playClickSound();
 
-		if (treeGui.file.canEdit() && button.isRight()) {
+		if (questScreen.file.canEdit() && button.isRight()) {
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
 
-			if (!treeGui.selectedObjects.isEmpty()) {
-				if (!treeGui.selectedObjects.contains(quest)) {
+			if (!questScreen.selectedObjects.isEmpty()) {
+				if (!questScreen.selectedObjects.contains(quest)) {
 					contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.gui.add_dependencies"), ThemeProperties.ADD_ICON.get(), () -> {
-						for (Movable q : treeGui.selectedObjects) {
+						for (Movable q : questScreen.selectedObjects) {
 							if (q instanceof Quest) {
 								editDependency(quest, (Quest) q, true);
 							}
@@ -128,7 +137,7 @@ public class QuestButton extends Button {
 					}));
 
 					contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.gui.remove_dependencies"), ThemeProperties.DELETE_ICON.get(), () -> {
-						for (Movable q : treeGui.selectedObjects) {
+						for (Movable q : questScreen.selectedObjects) {
 							if (q instanceof Quest) {
 								editDependency(quest, (Quest) q, false);
 							}
@@ -136,7 +145,7 @@ public class QuestButton extends Button {
 					}));
 
 					contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.gui.add_dependencies_self"), ThemeProperties.ADD_ICON.get(), () -> {
-						for (Movable q : treeGui.selectedObjects) {
+						for (Movable q : questScreen.selectedObjects) {
 							if (q instanceof Quest) {
 								editDependency((Quest) q, quest, true);
 							}
@@ -144,7 +153,7 @@ public class QuestButton extends Button {
 					}));
 
 					contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.gui.remove_dependencies_self"), ThemeProperties.DELETE_ICON.get(), () -> {
-						for (Movable q : treeGui.selectedObjects) {
+						for (Movable q : questScreen.selectedObjects) {
 							if (q instanceof Quest) {
 								editDependency((Quest) q, quest, false);
 							}
@@ -158,7 +167,7 @@ public class QuestButton extends Button {
 							contextMenu2.add(new ContextMenuItem(type.getDisplayName(), type.getIcon(), () -> {
 								playClickSound();
 								type.getGuiProvider().openCreationGui(this, quest, reward -> {
-									for (Movable movable : treeGui.selectedObjects) {
+									for (Movable movable : questScreen.selectedObjects) {
 										if (movable instanceof Quest) {
 											Reward r = type.provider.create((Quest) movable);
 											CompoundTag nbt1 = new CompoundTag();
@@ -177,7 +186,7 @@ public class QuestButton extends Button {
 					}));
 
 					contextMenu.add(new ContextMenuItem(new TranslatableComponent("selectServer.delete"), ThemeProperties.DELETE_ICON.get(quest), () -> {
-						treeGui.selectedObjects.forEach(q -> {
+						questScreen.selectedObjects.forEach(q -> {
 							if (q instanceof Quest) {
 								ClientQuestFile.INSTANCE.deleteObject(((Quest) q).id);
 							} else if (q instanceof ChapterImage) {
@@ -185,8 +194,8 @@ public class QuestButton extends Button {
 								new MessageEditObject(((ChapterImage) q).chapter).sendToServer();
 							}
 						});
-						treeGui.selectedObjects.clear();
-					}).setYesNo(new TranslatableComponent("delete_item", new TranslatableComponent("ftbquests.quests") + " [" + treeGui.selectedObjects.size() + "]")));
+						questScreen.selectedObjects.clear();
+					}).setYesNo(new TranslatableComponent("delete_item", new TranslatableComponent("ftbquests.quests") + " [" + questScreen.selectedObjects.size() + "]")));
 				}
 
 				contextMenu.add(ContextMenuItem.SEPARATOR);
@@ -195,9 +204,9 @@ public class QuestButton extends Button {
 				contextMenu.add(new ContextMenuItem(new TextComponent("Ctrl+Arrow Key to move selected quests").withStyle(ChatFormatting.GRAY), GuiIcons.INFO, null));
 			} else {
 				contextMenu.add(new ContextMenuItem(new TranslatableComponent("gui.move"), ThemeProperties.MOVE_UP_ICON.get(quest), () -> {
-					treeGui.movingObjects = true;
-					treeGui.selectedObjects.clear();
-					treeGui.toggleSelected(quest);
+					questScreen.movingObjects = true;
+					questScreen.selectedObjects.clear();
+					questScreen.toggleSelected(quest);
 				}) {
 					@Override
 					public void addMouseOverText(TooltipList list) {
@@ -208,36 +217,36 @@ public class QuestButton extends Button {
 				// contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.gui.edit_text"), GuiIcons.INFO, () -> TextEditorFrame.open(quest)));
 
 				contextMenu.add(ContextMenuItem.SEPARATOR);
-				QuestsScreen.addObjectMenuItems(contextMenu, getGui(), quest);
+				QuestScreen.addObjectMenuItems(contextMenu, getGui(), quest);
 			}
 
 			getGui().openContextMenu(contextMenu);
 		} else if (button.isLeft()) {
-			if (isCtrlKeyDown() && treeGui.file.canEdit()) {
-				if (treeGui.getViewedQuest() != null) {
-					treeGui.closeQuest();
+			if (isCtrlKeyDown() && questScreen.file.canEdit()) {
+				if (questScreen.getViewedQuest() != null) {
+					questScreen.closeQuest();
 				}
 
-				treeGui.toggleSelected(quest);
+				questScreen.toggleSelected(quest);
 			} else if (!quest.guidePage.isEmpty() && quest.tasks.isEmpty() && quest.rewards.isEmpty() && quest.getDescription().length == 0) {
 				handleClick("guide", quest.guidePage);
 			} else {
-				treeGui.open(quest, false);
+				questScreen.open(quest, false);
 			}
-		} else if (treeGui.file.canEdit() && button.isMiddle()) {
-			if (!treeGui.selectedObjects.contains(quest)) {
-				treeGui.toggleSelected(quest);
+		} else if (questScreen.file.canEdit() && button.isMiddle()) {
+			if (!questScreen.selectedObjects.contains(quest)) {
+				questScreen.toggleSelected(quest);
 			}
 
-			treeGui.movingObjects = true;
+			questScreen.movingObjects = true;
 		} else if (button.isRight()) {
-			treeGui.movingObjects = false;
+			questScreen.movingObjects = false;
 
-			if (treeGui.getViewedQuest() != quest) {
-				treeGui.viewQuestPanel.hidePanel = true;
-				treeGui.viewQuest(quest);
+			if (questScreen.getViewedQuest() != quest) {
+				questScreen.viewQuestPanel.hidePanel = true;
+				questScreen.viewQuest(quest);
 			} else {
-				treeGui.closeQuest();
+				questScreen.closeQuest();
 			}
 		}
 	}
@@ -257,11 +266,11 @@ public class QuestButton extends Button {
 
 		if (quest.verifyDependencies(false)) {
 			new MessageEditObject(quest).sendToServer();
-			treeGui.questPanel.refreshWidgets();
+			questScreen.questPanel.refreshWidgets();
 		} else {
 			quest.dependencies.clear();
 			quest.dependencies.addAll(prevDeps);
-			QuestsScreen.displayError(new TranslatableComponent("ftbquests.gui.looping_dependencies"));
+			QuestScreen.displayError(new TranslatableComponent("ftbquests.gui.looping_dependencies"));
 		}
 	}
 
@@ -275,8 +284,8 @@ public class QuestButton extends Button {
 	public void addMouseOverText(TooltipList list) {
 		Component title = getTitle();
 
-		if (treeGui.file.self != null) {
-			int p = treeGui.file.self.getRelativeProgress(quest);
+		if (questScreen.file.self != null) {
+			int p = questScreen.file.self.getRelativeProgress(quest);
 
 			if (p > 0 && p < 100) {
 				title = title.copy().append(new TextComponent(" " + p + "%").withStyle(ChatFormatting.DARK_GRAY));
@@ -301,13 +310,13 @@ public class QuestButton extends Button {
 		Color4I outlineColor = Color4I.WHITE.withAlpha(150);
 		Icon qicon = Icon.EMPTY;
 
-		boolean cantStart = !treeGui.file.self.canStartTasks(quest);
+		boolean cantStart = !questScreen.file.self.canStartTasks(quest);
 
 		if (!cantStart) {
-			int progress = treeGui.file.self.getRelativeProgress(quest);
+			int progress = questScreen.file.self.getRelativeProgress(quest);
 
 			if (progress >= 100) {
-				if (treeGui.file.self.hasUnclaimedRewards(quest)) {
+				if (questScreen.file.self.hasUnclaimedRewards(quest)) {
 					qicon = ThemeProperties.ALERT_ICON.get(quest);
 				} else {
 					qicon = ThemeProperties.CHECK_ICON.get(quest);
@@ -336,15 +345,12 @@ public class QuestButton extends Button {
 			matrixStack.popPose();
 		}
 
-		RenderSystem.enableAlphaTest();
+		GuiHelper.setupDrawing();
 		RenderSystem.alphaFunc(GL11.GL_GREATER, 0.1F);
-		RenderSystem.enableBlend();
-		RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-		RenderSystem.color4f(1F, 1F, 1F, 1F);
 
-		if (quest == treeGui.viewQuestPanel.quest || treeGui.selectedObjects.contains(quest)) {
+		if (quest == questScreen.viewQuestPanel.quest || questScreen.selectedObjects.contains(quest)) {
 			matrixStack.pushPose();
-			matrixStack.translate(0, 0, 500);
+			matrixStack.translate(0, 0, 100);
 			Color4I col = Color4I.WHITE.withAlpha((int) (190D + Math.sin(System.currentTimeMillis() * 0.003D) * 50D));
 			shape.outline.withColor(col).draw(matrixStack, x, y, w, h);
 			shape.background.withColor(col).draw(matrixStack, x, y, w, h);
@@ -353,14 +359,14 @@ public class QuestButton extends Button {
 
 		if (cantStart) {
 			matrixStack.pushPose();
-			matrixStack.translate(0, 0, 500);
+			matrixStack.translate(0, 0, 100);
 			shape.shape.withColor(Color4I.BLACK.withAlpha(100)).draw(matrixStack, x, y, w, h);
 			matrixStack.popPose();
 		}
 
 		if (isMouseOver()) {
 			matrixStack.pushPose();
-			matrixStack.translate(0, 0, 500);
+			matrixStack.translate(0, 0, 100);
 			shape.shape.withColor(Color4I.WHITE.withAlpha(100)).draw(matrixStack, x, y, w, h);
 			matrixStack.popPose();
 		}
@@ -368,7 +374,7 @@ public class QuestButton extends Button {
 		if (!qicon.isEmpty()) {
 			float s = w / 2F;//(int) (treeGui.getZoom() / 2 * quest.size);
 			matrixStack.pushPose();
-			matrixStack.translate(x + w - s, y, 500);
+			matrixStack.translate(x + w - s, y, 100);
 			matrixStack.scale(s, s, 1F);
 			qicon.draw(matrixStack, 0, 0, 1, 1);
 			matrixStack.popPose();

@@ -21,7 +21,7 @@ public class OtherButtonsPanelTop extends OtherButtonsPanel {
 			add(new OpenGuidesButton(this));
 		}
 
-		if (!treeGui.file.emergencyItems.isEmpty() && (treeGui.file.self != null || treeGui.file.canEdit())) {
+		if (!questScreen.file.emergencyItems.isEmpty() && (questScreen.file.self != null || questScreen.file.canEdit())) {
 			add(new EmergencyItemsButton(this));
 		}
 
@@ -32,6 +32,6 @@ public class OtherButtonsPanelTop extends OtherButtonsPanel {
 
 	@Override
 	public void alignWidgets() {
-		setPosAndSize(treeGui.width - width, 1, width, align(WidgetLayout.VERTICAL));
+		setPosAndSize(questScreen.width - width, 1, width, align(WidgetLayout.VERTICAL));
 	}
 }

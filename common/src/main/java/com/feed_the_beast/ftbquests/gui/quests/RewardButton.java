@@ -6,7 +6,13 @@ import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Color4I;
 import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
 import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
-import com.feed_the_beast.mods.ftbguilibrary.widget.*;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
+import com.feed_the_beast.mods.ftbguilibrary.widget.ContextMenuItem;
+import com.feed_the_beast.mods.ftbguilibrary.widget.GuiHelper;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
+import com.feed_the_beast.mods.ftbguilibrary.widget.WidgetType;
+import com.feed_the_beast.mods.ftbguilibrary.widget.WrappedIngredient;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.ChatFormatting;
@@ -23,12 +29,12 @@ import java.util.List;
  * @author LatvianModder
  */
 public class RewardButton extends Button {
-	public final QuestsScreen treeGui;
+	public final QuestScreen questScreen;
 	public final Reward reward;
 
 	public RewardButton(Panel panel, Reward r) {
 		super(panel, r.getTitle(), r.getIcon());
-		treeGui = (QuestsScreen) panel.getGui();
+		questScreen = (QuestScreen) panel.getGui();
 		reward = r;
 		setSize(18, 18);
 	}
@@ -108,7 +114,7 @@ public class RewardButton extends Button {
 		} else if (button.isRight() && ClientQuestFile.exists() && ClientQuestFile.INSTANCE.canEdit()) {
 			playClickSound();
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
-			QuestsScreen.addObjectMenuItems(contextMenu, getGui(), reward);
+			QuestScreen.addObjectMenuItems(contextMenu, getGui(), reward);
 			getGui().openContextMenu(contextMenu);
 		}
 	}
@@ -133,9 +139,9 @@ public class RewardButton extends Button {
 		drawBackground(matrixStack, theme, x, y, w, h);
 		drawIcon(matrixStack, theme, x + (w - bs) / 2, y + (h - bs) / 2, bs, bs);
 
-		if (treeGui.file.self == null) {
+		if (questScreen.file.self == null) {
 			return;
-		} else if (treeGui.contextMenu != null) {
+		} else if (questScreen.contextMenu != null) {
 			//return;
 		}
 
@@ -144,10 +150,10 @@ public class RewardButton extends Button {
 		RenderSystem.enableBlend();
 		boolean completed = false;
 
-		if (treeGui.file.self.getClaimType(reward).isClaimed()) {
+		if (questScreen.file.self.getClaimType(reward).isClaimed()) {
 			ThemeProperties.CHECK_ICON.get().draw(matrixStack, x + w - 9, y + 1, 8, 8);
 			completed = true;
-		} else if (treeGui.file.self.isComplete(reward.quest)) {
+		} else if (questScreen.file.self.isComplete(reward.quest)) {
 			ThemeProperties.ALERT_ICON.get().draw(matrixStack, x + w - 9, y + 1, 8, 8);
 		}
 

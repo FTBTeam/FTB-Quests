@@ -13,11 +13,11 @@ import net.minecraft.network.chat.Component;
  * @author LatvianModder
  */
 public abstract class TabButton extends Button {
-	public final QuestsScreen treeGui;
+	public final QuestScreen questScreen;
 
 	public TabButton(Panel panel, Component title, Icon icon) {
 		super(panel, title, icon);
-		treeGui = (QuestsScreen) panel.getGui();
+		questScreen = (QuestScreen) panel.getGui();
 		setSize(20, 18);
 	}
 
@@ -28,7 +28,7 @@ public abstract class TabButton extends Button {
 		icon.draw(matrixStack, x + (w - 16) / 2, y + (h - 16) / 2, 16, 16);
 
 		if (isMouseOver()) {
-			Color4I backgroundColor = ThemeProperties.WIDGET_BACKGROUND.get(treeGui.selectedChapter);
+			Color4I backgroundColor = ThemeProperties.WIDGET_BACKGROUND.get(questScreen.selectedChapter);
 			backgroundColor.draw(matrixStack, x + 1, y, w - 2, h);
 		}
 	}

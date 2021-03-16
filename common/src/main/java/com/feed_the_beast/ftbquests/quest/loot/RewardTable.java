@@ -2,7 +2,7 @@ package com.feed_the_beast.ftbquests.quest.loot;
 
 import com.feed_the_beast.ftbquests.gui.EditRewardTableScreen;
 import com.feed_the_beast.ftbquests.gui.RewardTablesScreen;
-import com.feed_the_beast.ftbquests.gui.quests.QuestsScreen;
+import com.feed_the_beast.ftbquests.gui.quests.QuestScreen;
 import com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIHelper;
 import com.feed_the_beast.ftbquests.net.MessageEditObject;
 import com.feed_the_beast.ftbquests.quest.Chapter;
@@ -260,7 +260,7 @@ public final class RewardTable extends QuestObjectBase {
 	@Override
 	@Environment(EnvType.CLIENT)
 	public void editedFromGUI() {
-		QuestsScreen gui = ClientUtils.getCurrentGuiAs(QuestsScreen.class);
+		QuestScreen gui = ClientUtils.getCurrentGuiAs(QuestScreen.class);
 
 		if (gui != null && gui.getViewedQuest() != null) {
 			gui.viewQuestPanel.refreshWidgets();

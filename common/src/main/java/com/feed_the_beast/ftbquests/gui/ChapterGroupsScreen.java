@@ -1,11 +1,12 @@
 package com.feed_the_beast.ftbquests.gui;
 
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
-import com.feed_the_beast.ftbquests.gui.quests.QuestsScreen;
+import com.feed_the_beast.ftbquests.gui.quests.QuestScreen;
 import com.feed_the_beast.ftbquests.net.MessageCreateObject;
 import com.feed_the_beast.ftbquests.quest.ChapterGroup;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigString;
 import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiEditConfigFromString;
+import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.misc.GuiButtonListBase;
 import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
 import com.feed_the_beast.mods.ftbguilibrary.widget.ContextMenuItem;
@@ -26,7 +27,7 @@ public class ChapterGroupsScreen extends GuiButtonListBase implements QuestObjec
 		private final ChapterGroup chaperGroup;
 
 		public ChapterGroupButton(Panel panel, ChapterGroup t) {
-			super(panel, t.getTitle(), t.getIcon());
+			super(panel, t.getTitle(), Icon.EMPTY);
 			chaperGroup = t;
 			setHeight(14);
 		}
@@ -35,7 +36,7 @@ public class ChapterGroupsScreen extends GuiButtonListBase implements QuestObjec
 		public void onClicked(MouseButton button) {
 			playClickSound();
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
-			QuestsScreen.addObjectMenuItems(contextMenu, ChapterGroupsScreen.this, chaperGroup);
+			QuestScreen.addObjectMenuItems(contextMenu, ChapterGroupsScreen.this, chaperGroup);
 			getGui().openContextMenu(contextMenu);
 		}
 	}

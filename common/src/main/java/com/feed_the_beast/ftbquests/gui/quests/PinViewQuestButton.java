@@ -13,7 +13,7 @@ import net.minecraft.network.chat.TranslatableComponent;
  */
 public class PinViewQuestButton extends SimpleTextButton {
 	public PinViewQuestButton(ViewQuestPanel parent) {
-		super(parent, new TranslatableComponent(parent.gui.file.self.pinnedQuests.contains(parent.quest.id) ? "ftbquests.gui.unpin" : "ftbquests.gui.pin"), parent.gui.file.self.pinnedQuests.contains(parent.quest.id) ? ThemeProperties.PIN_ICON_ON.get() : ThemeProperties.PIN_ICON_OFF.get());
+		super(parent, new TranslatableComponent(parent.questScreen.file.self.pinnedQuests.contains(parent.quest.id) ? "ftbquests.gui.unpin" : "ftbquests.gui.pin"), parent.questScreen.file.self.pinnedQuests.contains(parent.quest.id) ? ThemeProperties.PIN_ICON_ON.get() : ThemeProperties.PIN_ICON_OFF.get());
 	}
 
 	@Override

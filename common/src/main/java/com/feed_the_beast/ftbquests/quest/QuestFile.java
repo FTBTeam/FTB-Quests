@@ -454,9 +454,6 @@ public abstract class QuestFile extends QuestObject {
 		disableGui = nbt.getBoolean("disable_gui");
 		gridScale = nbt.contains("grid_scale") ? nbt.getDouble("grid_scale") : 0.5D;
 		pauseGame = nbt.getBoolean("pause_game");
-
-		chapterGroups.clear();
-		chapterGroups.add(defaultChapterGroup);
 	}
 
 	public final void writeDataFull(Path folder) {
@@ -1058,9 +1055,7 @@ public abstract class QuestFile extends QuestObject {
 		super.clearCachedData();
 
 		for (ChapterGroup group : chapterGroups) {
-			for (Chapter chapter : group.chapters) {
-				chapter.clearCachedData();
-			}
+			group.clearCachedData();
 		}
 
 		clearCachedProgress();

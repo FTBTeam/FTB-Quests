@@ -54,4 +54,7 @@ public class FTBQuestsNetCommon {
 
 	public void updateTaskProgress(UUID player, long task, long progress) {
 	}
+
+	public void changeChapterGroup(long id, long group) {
+	}
 }

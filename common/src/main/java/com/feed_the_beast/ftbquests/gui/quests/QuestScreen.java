@@ -33,7 +33,6 @@ import com.feed_the_beast.mods.ftbguilibrary.widget.GuiHelper;
 import com.feed_the_beast.mods.ftbguilibrary.widget.GuiIcons;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
-import com.feed_the_beast.mods.ftbguilibrary.widget.Widget;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -49,36 +48,34 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class QuestsScreen extends GuiBase {
+public class QuestScreen extends GuiBase {
 	public final ClientQuestFile file;
 	public double scrollWidth, scrollHeight;
 	public int prevMouseX, prevMouseY, grabbed;
 	public Chapter selectedChapter;
 	public final List<Movable> selectedObjects;
 	public final ExpandChaptersButton expandChaptersButton;
-	public final ChaptersPanel chapterPanel;
-	public final QuestsPanel questPanel;
+	public final ChapterPanel chapterPanel;
+	public final QuestPanel questPanel;
 	public final OtherButtonsPanelBottom otherButtonsBottomPanel;
 	public final OtherButtonsPanelTop otherButtonsTopPanel;
-	public final ChapterHoverPanel chapterHoverPanel;
 	public final ViewQuestPanel viewQuestPanel;
 	public boolean movingObjects = false;
 	public int zoom = 16;
 	public long lastShiftPress = 0L;
 	public static boolean grid = false;
 
-	public QuestsScreen(ClientQuestFile q) {
+	public QuestScreen(ClientQuestFile q) {
 		file = q;
 		selectedObjects = new ArrayList<>();
 
 		expandChaptersButton = new ExpandChaptersButton(this);
-		chapterPanel = new ChaptersPanel(this);
+		chapterPanel = new ChapterPanel(this);
 		selectedChapter = file.getFirstVisibleChapter(file.self);
 
-		questPanel = new QuestsPanel(this);
+		questPanel = new QuestPanel(this);
 		otherButtonsBottomPanel = new OtherButtonsPanelBottom(this);
 		otherButtonsTopPanel = new OtherButtonsPanelTop(this);
-		chapterHoverPanel = new ChapterHoverPanel(this);
 		viewQuestPanel = new ViewQuestPanel(this);
 
 		selectChapter(null);
@@ -92,12 +89,11 @@ public class QuestsScreen extends GuiBase {
 	@Override
 	public void addWidgets() {
 		QuestTheme.currentObject = selectedChapter;
+		add(chapterPanel);
 		add(questPanel);
 		add(expandChaptersButton);
-		add(chapterPanel);
 		add(otherButtonsBottomPanel);
 		add(otherButtonsTopPanel);
-		add(chapterHoverPanel);
 		add(viewQuestPanel);
 	}
 
@@ -107,7 +103,7 @@ public class QuestsScreen extends GuiBase {
 		otherButtonsBottomPanel.alignWidgets();
 		otherButtonsTopPanel.alignWidgets();
 		chapterPanel.alignWidgets();
-		expandChaptersButton.setPosAndSize(0, 0, 16, height);
+		expandChaptersButton.setPosAndSize(0, 0, 20, height);
 	}
 
 	@Override
@@ -358,7 +354,7 @@ public class QuestsScreen extends GuiBase {
 							}
 						}
 
-						QuestsScreen.this.openGui();
+						QuestScreen.this.openGui();
 					});
 
 					gui.focus();
@@ -466,8 +462,6 @@ public class QuestsScreen extends GuiBase {
 	}
 
 	public void open(@Nullable QuestObject object, boolean focus) {
-		Chapter c = chapterHoverPanel.chapter == null ? null : chapterHoverPanel.chapter.chapter;
-
 		if (object instanceof Chapter) {
 			selectChapter((Chapter) object);
 		} else if (object instanceof Quest) {
@@ -486,17 +480,6 @@ public class QuestsScreen extends GuiBase {
 		}
 
 		openGui();
-
-		if (c != null) {
-			for (Widget widget : chapterPanel.widgets) {
-				if (widget instanceof ChapterButton && c == ((ChapterButton) widget).chapter) {
-					chapterHoverPanel.chapter = (ChapterButton) widget;
-					chapterHoverPanel.refreshWidgets();
-					chapterHoverPanel.updateMouseOver(getMouseX(), getMouseY());
-					break;
-				}
-			}
-		}
 	}
 
 	@Override

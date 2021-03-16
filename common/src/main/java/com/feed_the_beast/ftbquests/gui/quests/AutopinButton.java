@@ -11,7 +11,7 @@ import net.minecraft.network.chat.TranslatableComponent;
  */
 public class AutopinButton extends TabButton {
 	public AutopinButton(Panel panel) {
-		super(panel, new TranslatableComponent(((QuestsScreen) panel.getGui()).file.self.getAutoPin() ? "ftbquests.gui.autopin.on" : "ftbquests.gui.autopin.off"), ((QuestsScreen) panel.getGui()).file.self.getAutoPin() ? ThemeProperties.PIN_ICON_ON.get() : ThemeProperties.PIN_ICON_OFF.get());
+		super(panel, new TranslatableComponent(((QuestScreen) panel.getGui()).file.self.getAutoPin() ? "ftbquests.gui.autopin.on" : "ftbquests.gui.autopin.off"), ((QuestScreen) panel.getGui()).file.self.getAutoPin() ? ThemeProperties.PIN_ICON_ON.get() : ThemeProperties.PIN_ICON_OFF.get());
 	}
 
 	@Override

@@ -4,7 +4,7 @@ import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.client.FTBQuestsClient;
 import com.feed_the_beast.ftbquests.events.ObjectCompletedEvent;
 import com.feed_the_beast.ftbquests.gui.MultilineTextEditorScreen;
-import com.feed_the_beast.ftbquests.gui.quests.QuestsScreen;
+import com.feed_the_beast.ftbquests.gui.quests.QuestScreen;
 import com.feed_the_beast.ftbquests.integration.jei.FTBQuestsJEIHelper;
 import com.feed_the_beast.ftbquests.net.MessageDisplayCompletionToast;
 import com.feed_the_beast.ftbquests.net.MessageMoveQuest;
@@ -12,7 +12,11 @@ import com.feed_the_beast.ftbquests.quest.reward.Reward;
 import com.feed_the_beast.ftbquests.quest.task.Task;
 import com.feed_the_beast.ftbquests.util.ConfigQuestObject;
 import com.feed_the_beast.ftbquests.util.NetUtils;
-import com.feed_the_beast.mods.ftbguilibrary.config.*;
+import com.feed_the_beast.mods.ftbguilibrary.config.ConfigCallback;
+import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
+import com.feed_the_beast.mods.ftbguilibrary.config.ConfigList;
+import com.feed_the_beast.mods.ftbguilibrary.config.ConfigString;
+import com.feed_the_beast.mods.ftbguilibrary.config.Tristate;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.icon.IconAnimation;
 import com.feed_the_beast.mods.ftbguilibrary.utils.Bits;
@@ -696,7 +700,7 @@ public final class Quest extends QuestObject implements Movable {
 	@Override
 	@Environment(EnvType.CLIENT)
 	public void editedFromGUI() {
-		QuestsScreen gui = ClientUtils.getCurrentGuiAs(QuestsScreen.class);
+		QuestScreen gui = ClientUtils.getCurrentGuiAs(QuestScreen.class);
 
 		if (gui != null) {
 			gui.questPanel.refreshWidgets();

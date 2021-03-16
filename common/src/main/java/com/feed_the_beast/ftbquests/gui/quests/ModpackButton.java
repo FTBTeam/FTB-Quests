@@ -26,8 +26,8 @@ public class ModpackButton extends TabButton {
 
 	public ModpackButton(Panel panel) {
 		super(panel, TextComponent.EMPTY, ClientQuestFile.INSTANCE.getIcon());
-		title = treeGui.file.getTitle();
-		unclaimedRewards = hasUnclaimedRewards(treeGui.file);
+		title = questScreen.file.getTitle();
+		unclaimedRewards = hasUnclaimedRewards(questScreen.file);
 	}
 
 	@Override
@@ -77,7 +77,7 @@ public class ModpackButton extends TabButton {
 			matrixStack.pushPose();
 			matrixStack.translate(x + w - s, y, 500);
 			matrixStack.scale(s, s, 1F);
-			ThemeProperties.ALERT_ICON.get(treeGui.file).draw(matrixStack, 0, 0, 1, 1);
+			ThemeProperties.ALERT_ICON.get(questScreen.file).draw(matrixStack, 0, 0, 1, 1);
 			matrixStack.popPose();
 		}
 	}

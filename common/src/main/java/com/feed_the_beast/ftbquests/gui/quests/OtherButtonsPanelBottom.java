@@ -16,7 +16,7 @@ public class OtherButtonsPanelBottom extends OtherButtonsPanel {
 		add(new AutopinButton(this));
 		add(new SupportButton(this));
 
-		if (treeGui.file.canEdit()) {
+		if (questScreen.file.canEdit()) {
 			add(new EditSettingsButton(this));
 		}
 	}
@@ -24,6 +24,6 @@ public class OtherButtonsPanelBottom extends OtherButtonsPanel {
 	@Override
 	public void alignWidgets() {
 		setHeight(align(WidgetLayout.VERTICAL));
-		setPos(treeGui.width - width, treeGui.height - height - 1);
+		setPos(questScreen.width - width, questScreen.height - height - 1);
 	}
 }

@@ -13,7 +13,17 @@ import com.feed_the_beast.mods.ftbguilibrary.icon.Color4I;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.misc.CompactGridLayout;
 import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
-import com.feed_the_beast.mods.ftbguilibrary.widget.*;
+import com.feed_the_beast.mods.ftbguilibrary.widget.BlankPanel;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
+import com.feed_the_beast.mods.ftbguilibrary.widget.ColorWidget;
+import com.feed_the_beast.mods.ftbguilibrary.widget.ComponentTextField;
+import com.feed_the_beast.mods.ftbguilibrary.widget.ContextMenuItem;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
+import com.feed_the_beast.mods.ftbguilibrary.widget.SimpleButton;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Widget;
+import com.feed_the_beast.mods.ftbguilibrary.widget.WidgetLayout;
+import com.feed_the_beast.mods.ftbguilibrary.widget.WidgetVerticalSpace;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -29,7 +39,7 @@ import java.util.List;
  * @author LatvianModder
  */
 public class ViewQuestPanel extends Panel {
-	public final QuestsScreen gui;
+	public final QuestScreen questScreen;
 	public Quest quest = null;
 	public boolean hidePanel = false;
 	private Component title = TextComponent.EMPTY;
@@ -43,9 +53,9 @@ public class ViewQuestPanel extends Panel {
 	public BlankPanel panelRewards;
 	public BlankPanel panelText;
 
-	public ViewQuestPanel(QuestsScreen g) {
+	public ViewQuestPanel(QuestScreen g) {
 		super(g);
-		gui = g;
+		questScreen = g;
 		setPosAndSize(-1, -1, 0, 0);
 		setOnlyRenderWidgetsInside(true);
 		setOnlyInteractWithWidgetsInside(true);
@@ -68,14 +78,14 @@ public class ViewQuestPanel extends Panel {
 		title = quest.getTitle();
 		icon = quest.getIcon();
 
-		int w = Math.max(200, gui.getTheme().getStringWidth(title) + 30);
+		int w = Math.max(200, questScreen.getTheme().getStringWidth(title) + 30);
 
 		add(panelContent = new BlankPanel(this, "ContentPanel"));
 		panelContent.add(panelTasks = new BlankPanel(panelContent, "TasksPanel"));
 		panelContent.add(panelRewards = new BlankPanel(panelContent, "RewardsPanel"));
 		panelContent.add(panelText = new BlankPanel(panelContent, "TextPanel"));
 
-		boolean canEdit = gui.file.canEdit();
+		boolean canEdit = questScreen.file.canEdit();
 		int bsize = 18;
 
 		for (Task task : quest.tasks) {
@@ -106,7 +116,7 @@ public class ViewQuestPanel extends Panel {
 			panelRewards.add(noRewards);
 		}
 
-		if (gui.file.canEdit()) {
+		if (questScreen.file.canEdit()) {
 			panelTasks.add(new AddTaskButton(panelTasks, quest));
 			panelRewards.add(new AddRewardButton(panelRewards, quest));
 		}
@@ -121,14 +131,14 @@ public class ViewQuestPanel extends Panel {
 			ww = Math.max(ww, widget.width);
 		}
 
-		Color4I borderColor = ThemeProperties.WIDGET_BORDER.get(gui.selectedChapter);
+		Color4I borderColor = ThemeProperties.WIDGET_BORDER.get(questScreen.selectedChapter);
 
 		ww = Mth.clamp(ww, 70, 140);
 		w = Math.max(w, ww * 2 + 10);
 		w = Math.max(w, quest.minWidth);
 
 		if (ThemeProperties.FULL_SCREEN_QUEST.get(quest) == 1) {
-			w = gui.width - 1;
+			w = questScreen.width - 1;
 		}
 
 		if (w % 2 == 0) {
@@ -223,7 +233,7 @@ public class ViewQuestPanel extends Panel {
 			panelText.add(new ComponentTextField(panelText).addFlags(Theme.CENTERED).setMaxWidth(panelText.width).setSpacing(9).setText(new TextComponent("").append(desc).withStyle(ChatFormatting.ITALIC, ChatFormatting.GRAY)));
 		}
 
-		boolean showText = !quest.hideTextUntilComplete.get(false) || gui.file.self != null && gui.file.self.isComplete(quest);
+		boolean showText = !quest.hideTextUntilComplete.get(false) || questScreen.file.self != null && questScreen.file.self.isComplete(quest);
 
 		if (showText && quest.getDescription().length > 0) {
 			if (desc != TextComponent.EMPTY) {
@@ -253,7 +263,7 @@ public class ViewQuestPanel extends Panel {
 		}
 
 		if (ThemeProperties.FULL_SCREEN_QUEST.get(quest) == 1) {
-			height = gui.height;
+			height = questScreen.height;
 		}
 
 		setPos((parent.width - width) / 2, (parent.height - height) / 2);
@@ -271,8 +281,8 @@ public class ViewQuestPanel extends Panel {
 		List<ContextMenuItem> contextMenu = new ArrayList<>();
 
 		for (QuestObject object : c) {
-			if (gui.file.canEdit() || object.isVisible(gui.file.self)) {
-				contextMenu.add(new ContextMenuItem(object.getTitle(), Icon.EMPTY, () -> gui.open(object, true)));
+			if (questScreen.file.canEdit() || object.isVisible(questScreen.file.self)) {
+				contextMenu.add(new ContextMenuItem(object.getTitle(), Icon.EMPTY, () -> questScreen.open(object, true)));
 			} else {
 				hidden++;
 			}
@@ -307,7 +317,7 @@ public class ViewQuestPanel extends Panel {
 	@Override
 	public void drawBackground(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
 		Color4I borderColor = ThemeProperties.QUEST_VIEW_BORDER.get();
-		Color4I.DARK_GRAY.withAlpha(120).draw(matrixStack, gui.getX(), gui.getY(), gui.width, gui.height);
+		Color4I.DARK_GRAY.withAlpha(120).draw(matrixStack, questScreen.getX(), questScreen.getY(), questScreen.width, questScreen.height);
 		Icon background = ThemeProperties.QUEST_VIEW_BACKGROUND.get();
 		background.draw(matrixStack, x, y, w, h);
 		theme.drawString(matrixStack, title, x + w / 2F, y + 4, ThemeProperties.QUEST_VIEW_TITLE.get(), Theme.CENTERED);
