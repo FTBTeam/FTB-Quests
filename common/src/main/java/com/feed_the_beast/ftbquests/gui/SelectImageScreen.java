@@ -1,5 +1,6 @@
 package com.feed_the_beast.ftbquests.gui;
 
+import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigCallback;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.misc.GuiButtonListBase;
@@ -35,11 +36,9 @@ public class SelectImageScreen extends GuiButtonListBase {
 		images = new ArrayList<>();
 
 		try {
-			for (ResourceLocation res : Minecraft.getInstance().getResourceManager().listResources("textures", t -> t.endsWith(".png"))) {
-				images.add(res);
-			}
+			images.addAll(Minecraft.getInstance().getResourceManager().listResources("textures", t -> t.endsWith(".png") && ResourceLocation.isValidResourceLocation(t)));
 		} catch (Exception ex) {
-			ex.printStackTrace();
+			FTBQuests.LOGGER.error("A mod has broken resource preventing this list from loading: " + ex);
 		}
 
 		images.sort(null);
