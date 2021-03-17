@@ -8,7 +8,13 @@ import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
 import com.feed_the_beast.mods.ftbguilibrary.utils.StringUtils;
 import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
-import com.feed_the_beast.mods.ftbguilibrary.widget.*;
+import com.feed_the_beast.mods.ftbguilibrary.widget.GuiBase;
+import com.feed_the_beast.mods.ftbguilibrary.widget.GuiHelper;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
+import com.feed_the_beast.mods.ftbguilibrary.widget.SimpleTextButton;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Widget;
+import com.feed_the_beast.mods.ftbguilibrary.widget.WidgetLayout;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
@@ -114,14 +120,14 @@ public class EmergencyItemsScreen extends GuiBase {
 		}
 
 		matrixStack.pushPose();
-		matrixStack.translate((int) (w / 2F), (int) (h / 5F), 0F);
+		matrixStack.translate((int) (w / 2D), (int) (h / 5D), 0);
 		matrixStack.scale(2F, 2F, 1F);
 		String s = I18n.get("ftbquests.file.emergency_items");
 		theme.drawString(matrixStack, s, -theme.getStringWidth(s) / 2F, 0, Color4I.WHITE, 0);
 		matrixStack.popPose();
 
 		matrixStack.pushPose();
-		matrixStack.translate((int) (w / 2F), (int) (h / 2.5F), 0F);
+		matrixStack.translate((int) (w / 2D), (int) (h / 2.5D), 0);
 		matrixStack.scale(4F, 4F, 1F);
 		s = left <= 0L ? "00:00" : StringUtils.getTimeString(left / 1000L * 1000L + 1000L);
 		int x1 = -theme.getStringWidth(s) / 2;

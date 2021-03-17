@@ -339,7 +339,7 @@ public class QuestButton extends Button {
 		if (!icon.isEmpty()) {
 			float s = w * 2F / 3F;
 			matrixStack.pushPose();
-			matrixStack.translate(x + (w - s) / 2D, y + (h - s) / 2D, 0F);
+			matrixStack.translate(x + (w - s) / 2D, y + (h - s) / 2D, 0);
 			matrixStack.scale(s, s, 1F);
 			icon.draw(matrixStack, 0, 0, 1, 1);
 			matrixStack.popPose();
@@ -350,7 +350,7 @@ public class QuestButton extends Button {
 
 		if (quest == questScreen.viewQuestPanel.quest || questScreen.selectedObjects.contains(quest)) {
 			matrixStack.pushPose();
-			matrixStack.translate(0, 0, 100);
+			matrixStack.translate(0, 0, 200);
 			Color4I col = Color4I.WHITE.withAlpha((int) (190D + Math.sin(System.currentTimeMillis() * 0.003D) * 50D));
 			shape.outline.withColor(col).draw(matrixStack, x, y, w, h);
 			shape.background.withColor(col).draw(matrixStack, x, y, w, h);
@@ -359,14 +359,14 @@ public class QuestButton extends Button {
 
 		if (cantStart) {
 			matrixStack.pushPose();
-			matrixStack.translate(0, 0, 100);
+			matrixStack.translate(0, 0, 200);
 			shape.shape.withColor(Color4I.BLACK.withAlpha(100)).draw(matrixStack, x, y, w, h);
 			matrixStack.popPose();
 		}
 
 		if (isMouseOver()) {
 			matrixStack.pushPose();
-			matrixStack.translate(0, 0, 100);
+			matrixStack.translate(0, 0, 200);
 			shape.shape.withColor(Color4I.WHITE.withAlpha(100)).draw(matrixStack, x, y, w, h);
 			matrixStack.popPose();
 		}
@@ -374,7 +374,7 @@ public class QuestButton extends Button {
 		if (!qicon.isEmpty()) {
 			float s = w / 2F;//(int) (treeGui.getZoom() / 2 * quest.size);
 			matrixStack.pushPose();
-			matrixStack.translate(x + w - s, y, 100);
+			matrixStack.translate(x + w - s, y, 200);
 			matrixStack.scale(s, s, 1F);
 			qicon.draw(matrixStack, 0, 0, 1, 1);
 			matrixStack.popPose();

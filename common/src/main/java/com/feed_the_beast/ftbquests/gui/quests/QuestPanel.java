@@ -206,6 +206,7 @@ public class QuestPanel extends Panel {
 
 		Quest selectedQuest = questScreen.getViewedQuest();
 		GuiHelper.setupDrawing();
+		RenderSystem.enableDepthTest();
 		RenderSystem.shadeModel(GL11.GL_SMOOTH);
 		double mt = -(System.currentTimeMillis() * 0.001D);
 		float mu = (float) ((mt * ThemeProperties.DEPENDENCY_LINE_UNSELECTED_SPEED.get(questScreen.selectedChapter)) % 1D);

@@ -6,7 +6,14 @@ import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
 import com.feed_the_beast.mods.ftbguilibrary.utils.StringUtils;
 import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
-import com.feed_the_beast.mods.ftbguilibrary.widget.*;
+import com.feed_the_beast.mods.ftbguilibrary.widget.GuiBase;
+import com.feed_the_beast.mods.ftbguilibrary.widget.GuiHelper;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
+import com.feed_the_beast.mods.ftbguilibrary.widget.SimpleTextButton;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Widget;
+import com.feed_the_beast.mods.ftbguilibrary.widget.WidgetLayout;
+import com.feed_the_beast.mods.ftbguilibrary.widget.WrappedIngredient;
 import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.ChatFormatting;
@@ -125,7 +132,7 @@ public class RewardNotificationsScreen extends GuiBase implements IRewardListene
 	@Override
 	public void drawBackground(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
 		matrixStack.pushPose();
-		matrixStack.translate((int) (w / 2F), (int) (h / 5F), 0F);
+		matrixStack.translate((int) (w / 2D), (int) (h / 5D), 0);
 		matrixStack.scale(2, 2, 1);
 		MutableComponent s = new TranslatableComponent("ftbquests.rewards");
 		theme.drawString(matrixStack, s, -theme.getStringWidth(s) / 2F, 0, Color4I.WHITE, 0);
