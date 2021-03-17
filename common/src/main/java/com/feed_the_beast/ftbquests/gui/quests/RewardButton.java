@@ -146,7 +146,7 @@ public class RewardButton extends Button {
 		}
 
 		matrixStack.pushPose();
-		matrixStack.translate(0F, 0F, 200F);
+		matrixStack.translate(0, 0, 200);
 		RenderSystem.enableBlend();
 		boolean completed = false;
 
@@ -164,7 +164,7 @@ public class RewardButton extends Button {
 
 			if (!s.isEmpty()) {
 				matrixStack.pushPose();
-				matrixStack.translate(x + 19F - theme.getStringWidth(s) / 2F, y + 15F, 200F);
+				matrixStack.translate(x + 19 - theme.getStringWidth(s) / 2D, y + 15, 200);
 				matrixStack.scale(0.5F, 0.5F, 1F);
 				theme.drawString(matrixStack, s, 0, 0, Color4I.WHITE, Theme.SHADOW);
 				matrixStack.popPose();

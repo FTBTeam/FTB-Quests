@@ -75,7 +75,7 @@ public class ModpackButton extends TabButton {
 			GuiHelper.setupDrawing();
 			float s = w / 2F;//(int) (treeGui.getZoom() / 2 * quest.size);
 			matrixStack.pushPose();
-			matrixStack.translate(x + w - s, y, 500);
+			matrixStack.translate(x + w - s, y, 200);
 			matrixStack.scale(s, s, 1F);
 			ThemeProperties.ALERT_ICON.get(questScreen.file).draw(matrixStack, 0, 0, 1, 1);
 			matrixStack.popPose();

@@ -1,11 +1,15 @@
 package com.feed_the_beast.ftbquests.gui.quests;
 
+import com.feed_the_beast.ftbquests.client.ClientQuestFile;
 import com.feed_the_beast.ftbquests.client.FTBQuestsClient;
 import com.feed_the_beast.ftbquests.gui.ChangeChapterGroupScreen;
+import com.feed_the_beast.ftbquests.net.MessageCreateObject;
 import com.feed_the_beast.ftbquests.net.MessageMoveChapter;
 import com.feed_the_beast.ftbquests.quest.Chapter;
 import com.feed_the_beast.ftbquests.quest.ChapterGroup;
 import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
+import com.feed_the_beast.mods.ftbguilibrary.config.ConfigString;
+import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiEditConfigFromString;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Color4I;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
@@ -21,14 +25,15 @@ import com.feed_the_beast.mods.ftbguilibrary.widget.Widget;
 import com.feed_the_beast.mods.ftbguilibrary.widget.WidgetLayout;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.ChatFormatting;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * @author LatvianModder
@@ -37,11 +42,87 @@ public class ChapterPanel extends Panel {
 	public static final Icon ARROW_COLLAPSED = Icon.getIcon("ftbquests:textures/gui/arrow_collapsed.png");
 	public static final Icon ARROW_EXPANDED = Icon.getIcon("ftbquests:textures/gui/arrow_expanded.png");
 
-	public interface ActualWidth {
-		int getActualWidth(QuestScreen screen);
+	public static abstract class ListButton extends Button {
+		public final ChapterPanel chapterPanel;
+
+		public ListButton(ChapterPanel panel, Component t, Icon i) {
+			super(panel, t, i);
+			setSize(100, 14);
+			chapterPanel = panel;
+		}
+
+		public int getActualWidth(QuestScreen screen) {
+			return screen.getTheme().getStringWidth(title) + 20;
+		}
+
+		@Override
+		public void addMouseOverText(TooltipList list) {
+		}
+
+		@Nullable
+		public Object getIngredientUnderMouse() {
+			return icon.getIngredient();
+		}
 	}
 
-	public static class ChapterGroupButton extends Button implements ActualWidth {
+	public static class ModpackButton extends ListButton {
+		public ModpackButton(ChapterPanel panel, ClientQuestFile f) {
+			super(panel, f.getTitle(), f.getIcon());
+			setSize(100, 18);
+		}
+
+		@Override
+		public void onClicked(MouseButton button) {
+			if (chapterPanel.questScreen.file.canEdit() && getMouseX() > getX() + width - 15) {
+				playClickSound();
+
+				ConfigString c = new ConfigString(Pattern.compile("^.+$"));
+				GuiEditConfigFromString.open(c, "", "", accepted -> {
+					chapterPanel.questScreen.openGui();
+
+					if (accepted && !c.value.isEmpty()) {
+						Chapter chapter = new Chapter(chapterPanel.questScreen.file, chapterPanel.questScreen.file.defaultChapterGroup);
+						chapter.title = c.value;
+						CompoundTag extra = new CompoundTag();
+						extra.putLong("group", 0L);
+						new MessageCreateObject(chapter, extra).sendToServer();
+					}
+
+					run();
+				});
+			}
+		}
+
+		@Override
+		public void draw(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
+			GuiHelper.setupDrawing();
+
+			if (isMouseOver()) {
+				Color4I.WHITE.withAlpha(40).draw(matrixStack, x + 1, y + 1, w - 2, h - 2);
+			}
+
+			ChatFormatting f = isMouseOver() ? ChatFormatting.WHITE : ChatFormatting.GRAY;
+
+			icon.draw(matrixStack, x + 2, y + 3, 12, 12);
+			theme.drawString(matrixStack, new TextComponent("").append(title).withStyle(f), x + 16, y + 5);
+
+			ThemeProperties.WIDGET_BORDER.get(ClientQuestFile.INSTANCE).draw(matrixStack, x, y + h - 1, w, 1);
+
+			boolean canEdit = chapterPanel.questScreen.file.canEdit();
+
+			if (canEdit) {
+				ThemeProperties.ADD_ICON.get().draw(matrixStack, x + w - 16, y + 3, 12, 12);
+			}
+		}
+
+		@Override
+		public int getActualWidth(QuestScreen screen) {
+			boolean canEdit = chapterPanel.questScreen.file.canEdit();
+			return screen.getTheme().getStringWidth(title) + 20 + (canEdit ? 16 : 0);
+		}
+	}
+
+	public static class ChapterGroupButton extends ListButton {
 		public final ChapterGroup group;
 		public final List<Chapter> visibleChapters;
 
@@ -54,6 +135,27 @@ public class ChapterPanel extends Panel {
 
 		@Override
 		public void onClicked(MouseButton mouseButton) {
+			if (chapterPanel.questScreen.file.canEdit() && getMouseX() > getX() + width - 15) {
+				playClickSound();
+
+				ConfigString c = new ConfigString(Pattern.compile("^.+$"));
+				GuiEditConfigFromString.open(c, "", "", accepted -> {
+					chapterPanel.questScreen.openGui();
+
+					if (accepted && !c.value.isEmpty()) {
+						Chapter chapter = new Chapter(chapterPanel.questScreen.file, chapterPanel.questScreen.file.defaultChapterGroup);
+						chapter.title = c.value;
+						CompoundTag extra = new CompoundTag();
+						extra.putLong("group", group.id);
+						new MessageCreateObject(chapter, extra).sendToServer();
+					}
+
+					run();
+				});
+
+				return;
+			}
+
 			group.guiCollapsed = !group.guiCollapsed;
 			parent.refreshWidgets();
 		}
@@ -70,31 +172,28 @@ public class ChapterPanel extends Panel {
 
 			(group.guiCollapsed ? ARROW_COLLAPSED : ARROW_EXPANDED).withColor(Color4I.getChatFormattingColor(f)).draw(matrixStack, x + 3, y + 5, 8, 8);
 			theme.drawString(matrixStack, new TextComponent("").append(title).withStyle(f), x + 15, y + 5);
-		}
 
-		@Override
-		public void addMouseOverText(TooltipList list) {
-		}
+			boolean canEdit = chapterPanel.questScreen.file.canEdit();
 
-		@Nullable
-		public Object getIngredientUnderMouse() {
-			return icon.getIngredient();
+			if (canEdit) {
+				ThemeProperties.ADD_ICON.get().draw(matrixStack, x + w - 16, y + 3, 12, 12);
+			}
 		}
 
 		@Override
 		public int getActualWidth(QuestScreen screen) {
-			return screen.getTheme().getStringWidth(title) + 20;
+			boolean canEdit = chapterPanel.questScreen.file.canEdit();
+			return screen.getTheme().getStringWidth(title) + 20 + (canEdit ? 16 : 0);
 		}
 	}
 
-	public static class ChapterButton extends Button implements ActualWidth {
+	public static class ChapterButton extends ListButton {
 		public final Chapter chapter;
 		public List<Component> description;
 
 		public ChapterButton(ChapterPanel panel, Chapter c) {
 			super(panel, c.getTitle(), c.getIcon());
 			chapter = c;
-			setSize(100, 14);
 
 			/*
 			if (panel.questScreen.file.self != null) {
@@ -115,7 +214,7 @@ public class ChapterPanel extends Panel {
 
 		@Override
 		public void onClicked(MouseButton button) {
-			QuestScreen questScreen = ((ChapterPanel) parent).questScreen;
+			QuestScreen questScreen = chapterPanel.questScreen;
 
 			if (questScreen.file.canEdit() || !chapter.quests.isEmpty()) {
 				playClickSound();
@@ -181,11 +280,6 @@ public class ChapterPanel extends Panel {
 			}
 		}
 
-		@Nullable
-		public Object getIngredientUnderMouse() {
-			return icon.getIngredient();
-		}
-
 		@Override
 		public int getActualWidth(QuestScreen screen) {
 			int o = chapter.group.isDefaultGroup() ? 0 : 7;
@@ -195,8 +289,6 @@ public class ChapterPanel extends Panel {
 
 	public final QuestScreen questScreen;
 	public boolean expanded = false;
-	public float position = 0F;
-	public float prevPosition = 0F;
 
 	public ChapterPanel(Panel panel) {
 		super(panel);
@@ -205,6 +297,8 @@ public class ChapterPanel extends Panel {
 
 	@Override
 	public void addWidgets() {
+		add(new ModpackButton(this, questScreen.file));
+
 		/*
 		if (Platform.isModLoaded("ftbmoney")) {
 			add(new OpenShopButton(this));
@@ -219,6 +313,10 @@ public class ChapterPanel extends Panel {
 			add(new ChapterButton(this, chapter));
 		}
 
+		if (canEdit) {
+			//add(new AddChapterButton(this, questScreen.file.defaultChapterGroup));
+		}
+
 		for (ChapterGroup group : questScreen.file.chapterGroups) {
 			if (group.isDefaultGroup()) {
 				continue;
@@ -226,7 +324,7 @@ public class ChapterPanel extends Panel {
 
 			ChapterGroupButton b = new ChapterGroupButton(this, group);
 
-			if (!b.visibleChapters.isEmpty()) {
+			if (canEdit || !b.visibleChapters.isEmpty()) {
 				add(b);
 
 				if (!group.guiCollapsed) {
@@ -235,10 +333,10 @@ public class ChapterPanel extends Panel {
 					}
 				}
 			}
-		}
 
-		if (canEdit) {
-			//add(new ExpandChaptersButton(this));
+			if (canEdit) {
+				//add(new AddChapterButton(this, group));
+			}
 		}
 	}
 
@@ -247,7 +345,7 @@ public class ChapterPanel extends Panel {
 		int wd = 100;
 
 		for (Widget w : widgets) {
-			wd = Math.min(Math.max(wd, ((ActualWidth) w).getActualWidth(questScreen)), 800);
+			wd = Math.min(Math.max(wd, ((ListButton) w).getActualWidth(questScreen)), 800);
 		}
 
 		setPosAndSize(expanded ? 0 : -wd, 0, wd, questScreen.height);
@@ -269,30 +367,7 @@ public class ChapterPanel extends Panel {
 	}
 
 	@Override
-	public void tick() {
-		super.tick();
-
-		prevPosition = position;
-
-		if (expanded) {
-			position += 0.1F;
-		} else {
-			position -= 0.1F;
-		}
-
-		position = Mth.clamp(position, 0F, 1F);
-	}
-
-	public static float smoothstep(float edge0, float edge1, float s) {
-		// Scale, bias and saturate x to 0..1 range
-		float x = Mth.clamp((s - edge0) / (edge1 - edge0), 0F, 1F);
-		// Evaluate polynomial
-		return x * x * (3F - 2F * x);
-	}
-
-	@Override
 	public int getX() {
-		//return (int) (width * smoothstep(0F, 1F, Mth.lerp(questScreen.getPartialTicks(), prevPosition, position)) - width);
 		return expanded ? 0 : -width;
 	}
 
@@ -304,7 +379,7 @@ public class ChapterPanel extends Panel {
 	@Override
 	public void draw(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
 		matrixStack.pushPose();
-		matrixStack.translate(0D, 0D, 850D);
+		matrixStack.translate(0, 0, 600);
 		super.draw(matrixStack, theme, x, y, w, h);
 		matrixStack.popPose();
 	}
