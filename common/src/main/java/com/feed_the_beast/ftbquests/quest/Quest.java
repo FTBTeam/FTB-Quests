@@ -22,7 +22,6 @@ import com.feed_the_beast.mods.ftbguilibrary.icon.IconAnimation;
 import com.feed_the_beast.mods.ftbguilibrary.utils.Bits;
 import com.feed_the_beast.mods.ftbguilibrary.utils.ClientUtils;
 import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
-import com.feed_the_beast.mods.ftbguilibrary.utils.TextComponentParser;
 import me.shedaniel.architectury.utils.NbtType;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -32,7 +31,6 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -65,8 +63,8 @@ public final class Quest extends QuestObject implements Movable {
 	public boolean optional;
 	public int minWidth;
 
-	private Component cachedDescription = null;
-	private Component[] cachedText = null;
+	private Component cachedSubtitle = null;
+	private Component[] cachedDescription = null;
 
 	public Quest(Chapter c) {
 		chapter = c;
@@ -571,8 +569,8 @@ public final class Quest extends QuestObject implements Movable {
 	@Override
 	public void clearCachedData() {
 		super.clearCachedData();
+		cachedSubtitle = null;
 		cachedDescription = null;
-		cachedText = null;
 
 		for (Task task : tasks) {
 			task.clearCachedData();
@@ -585,49 +583,33 @@ public final class Quest extends QuestObject implements Movable {
 
 	@Environment(EnvType.CLIENT)
 	public Component getSubtitle() {
-		if (cachedDescription != null) {
-			return cachedDescription;
+		if (cachedSubtitle != null) {
+			return cachedSubtitle;
 		}
 
 		String key = String.format("quests.%s.subtitle", getCodeString());
 		String s = subtitle.isEmpty() ? I18n.exists(key) ? I18n.get(key) : "" : subtitle;
-		cachedDescription = TextComponentParser.parse(s, FTBQuestsClient.DEFAULT_STRING_TO_COMPONENT);
+		cachedSubtitle = FTBQuestsClient.parse(s);
 
-		return cachedDescription;
+		return cachedSubtitle;
 	}
 
 	@Environment(EnvType.CLIENT)
 	public Component[] getDescription() {
-		if (cachedText != null) {
-			return cachedText;
+		if (cachedDescription != null) {
+			return cachedDescription;
 		}
 
 		String key = String.format("quests.%s.description", getCodeString());
 		String[] desc = description.isEmpty() ? I18n.exists(key) ? I18n.get(key).split("\n") : new String[0] : description.toArray(new String[0]);
 
-		cachedText = new Component[desc.length];
+		cachedDescription = new Component[desc.length];
 
-		for (int i = 0; i < cachedText.length; i++) {
-			cachedText[i] = TextComponentParser.parse(desc[i], FTBQuestsClient.DEFAULT_STRING_TO_COMPONENT);
+		for (int i = 0; i < cachedDescription.length; i++) {
+			cachedDescription[i] = FTBQuestsClient.parse(desc[i]);
 		}
 
-		return cachedText;
-	}
-
-	@Environment(EnvType.CLIENT)
-	public Component getJoinedDescription() {
-		TextComponent c = new TextComponent("");
-		Component[] d = getDescription();
-
-		for (int i = 0; i < d.length; i++) {
-			if (i > 0) {
-				c.append("\n");
-			}
-
-			c.append(d[i]);
-		}
-
-		return c;
+		return cachedDescription;
 	}
 
 	public boolean hasDependency(QuestObject object) {

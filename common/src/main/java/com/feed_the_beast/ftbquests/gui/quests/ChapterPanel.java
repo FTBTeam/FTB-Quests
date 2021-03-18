@@ -14,7 +14,6 @@ import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiEditConfigFromString;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Color4I;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
-import com.feed_the_beast.mods.ftbguilibrary.utils.TextComponentParser;
 import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
 import com.feed_the_beast.mods.ftbguilibrary.widget.ContextMenuItem;
@@ -241,7 +240,7 @@ public class ChapterPanel extends Panel {
 			description = new ArrayList<>();
 
 			for (String v : chapter.subtitle) {
-				description.add(new TextComponent("").append(TextComponentParser.parse(v, FTBQuestsClient.DEFAULT_STRING_TO_COMPONENT)).withStyle(ChatFormatting.GRAY));
+				description.add(new TextComponent("").append(FTBQuestsClient.parse(v)).withStyle(ChatFormatting.GRAY));
 			}
 		}
 

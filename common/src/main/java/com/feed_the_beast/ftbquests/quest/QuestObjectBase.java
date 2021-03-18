@@ -16,7 +16,6 @@ import com.feed_the_beast.mods.ftbguilibrary.config.Tristate;
 import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiEditConfig;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.utils.Bits;
-import com.feed_the_beast.mods.ftbguilibrary.utils.TextComponentParser;
 import me.shedaniel.architectury.utils.NbtType;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -236,7 +235,7 @@ public abstract class QuestObjectBase {
 		String s = title.isEmpty() ? I18n.exists(key) ? I18n.get(key) : "" : title;
 
 		if (!s.isEmpty()) {
-			cachedTitle = TextComponentParser.parse(s, FTBQuestsClient.DEFAULT_STRING_TO_COMPONENT);
+			cachedTitle = FTBQuestsClient.parse(s);
 		} else {
 			cachedTitle = getAltTitle();
 		}

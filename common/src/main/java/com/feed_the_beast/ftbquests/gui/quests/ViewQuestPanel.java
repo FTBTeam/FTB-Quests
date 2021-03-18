@@ -1,6 +1,8 @@
 package com.feed_the_beast.ftbquests.gui.quests;
 
 import com.feed_the_beast.ftbquests.FTBQuests;
+import com.feed_the_beast.ftbquests.client.ImageComponent;
+import com.feed_the_beast.ftbquests.gui.ImageComponentWidget;
 import com.feed_the_beast.ftbquests.quest.Quest;
 import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
@@ -240,7 +242,15 @@ public class ViewQuestPanel extends Panel {
 				panelText.add(new WidgetVerticalSpace(panelText, 7));
 			}
 
-			panelText.add(new ComponentTextField(panelText).setMaxWidth(panelText.width).setSpacing(9).setText(quest.getJoinedDescription()));
+			// panelText.add(new ComponentTextField(panelText).setMaxWidth(panelText.width).setSpacing(9).setText(quest.getJoinedDescription()));
+
+			for (Component component : quest.getDescription()) {
+				if (component instanceof ImageComponent) {
+					panelText.add(new ImageComponentWidget(panelText, (ImageComponent) component));
+				} else {
+					panelText.add(new ComponentTextField(panelText).setMaxWidth(panelText.width).setSpacing(9).setText(component));
+				}
+			}
 		}
 
 		if (showText && !quest.guidePage.isEmpty()) {
