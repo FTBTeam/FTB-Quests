@@ -23,6 +23,7 @@ import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiEditConfig;
 import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiEditConfigFromString;
 import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiSelectItemStack;
 import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
+import com.feed_the_beast.mods.ftbguilibrary.utils.TextComponentParser;
 import com.mojang.blaze3d.platform.InputConstants;
 import me.shedaniel.architectury.event.events.client.ClientLifecycleEvent;
 import me.shedaniel.architectury.registry.KeyBindings;
@@ -45,48 +46,41 @@ import net.minecraft.world.phys.BlockHitResult;
 
 import java.util.function.Function;
 
-public class FTBQuestsClient extends FTBQuestsCommon
-{
+public class FTBQuestsClient extends FTBQuestsCommon {
 	public static final Function<String, Component> DEFAULT_STRING_TO_COMPONENT = FTBQuestsClient::stringToComponent;
 
-	private static Component stringToComponent(String s)
-	{
-		if (s.startsWith("open_url:"))
-		{
+	private static Component stringToComponent(String s) {
+		if (s.startsWith("open_url:")) {
 			String[] s1 = s.substring(9).split("\\|", 2);
 			return new TextComponent(s1[0]).withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, s1[1])));
 		}
 
-		return new TextComponent(I18n.get(s));
+		return TextComponentParser.parse(I18n.get(s), DEFAULT_STRING_TO_COMPONENT);
 	}
 
 	public static KeyMapping KEY_QUESTS;
 
 	@Override
-	public void init()
-	{
+	public void init() {
 		ClientLifecycleEvent.CLIENT_SETUP.register(this::setup);
 		ReloadListeners.registerReloadListener(PackType.CLIENT_RESOURCES, new QuestFileCacheReloader());
 		ReloadListeners.registerReloadListener(PackType.CLIENT_RESOURCES, new ThemeLoader());
 		new FTBQuestsClientEventHandler().init();
 	}
 
-	private void setup(Minecraft minecraft)
-	{
+	private void setup(Minecraft minecraft) {
 		KeyBindings.registerKeyBinding(KEY_QUESTS = new KeyMapping("key.ftbquests.quests", InputConstants.Type.KEYSYM, -1, "key.categories.ftbquests"));
 		setTaskGuiProviders();
 		setRewardGuiProviders();
 	}
 
 	@Override
-	public QuestFile getQuestFile(boolean isClient)
-	{
+	public QuestFile getQuestFile(boolean isClient) {
 		return isClient ? ClientQuestFile.INSTANCE : ServerQuestFile.INSTANCE;
 	}
 
 	@Override
-	public void setTaskGuiProviders()
-	{
+	public void setTaskGuiProviders() {
 		TaskTypes.ITEM.setGuiProvider((gui, quest, callback) -> {
 			ConfigItemStack c = new ConfigItemStack(false, false);
 			c.defaultValue = ItemStack.EMPTY;
@@ -94,8 +88,7 @@ public class FTBQuestsClient extends FTBQuestsCommon
 
 			new GuiSelectItemStack(c, accepted -> {
 				gui.run();
-				if (accepted)
-				{
+				if (accepted) {
 					ItemTask itemTask = new ItemTask(quest);
 					itemTask.item = c.value.copy();
 					itemTask.item.setCount(1);
@@ -131,12 +124,10 @@ public class FTBQuestsClient extends FTBQuestsCommon
 			LocationTask task = new LocationTask(quest);
 			Minecraft mc = Minecraft.getInstance();
 
-			if (mc.hitResult instanceof BlockHitResult)
-			{
+			if (mc.hitResult instanceof BlockHitResult) {
 				BlockEntity tileEntity = mc.level.getBlockEntity(((BlockHitResult) mc.hitResult).getBlockPos());
 
-				if (tileEntity instanceof StructureBlockEntity)
-				{
+				if (tileEntity instanceof StructureBlockEntity) {
 					BlockPos pos = ((StructureBlockEntity) tileEntity).getStructurePos();
 					BlockPos size = ((StructureBlockEntity) tileEntity).getStructureSize();
 					task.dimension = mc.level.dimension();
@@ -156,8 +147,7 @@ public class FTBQuestsClient extends FTBQuestsCommon
 
 			group.savedCallback = accepted -> {
 				gui.run();
-				if (accepted)
-				{
+				if (accepted) {
 					callback.accept(task);
 				}
 			};
@@ -167,16 +157,14 @@ public class FTBQuestsClient extends FTBQuestsCommon
 	}
 
 	@Override
-	public void setRewardGuiProviders()
-	{
+	public void setRewardGuiProviders() {
 		RewardTypes.ITEM.setGuiProvider((gui, quest, callback) -> {
 			ConfigItemStack c = new ConfigItemStack(false, false);
 			c.defaultValue = ItemStack.EMPTY;
 			c.value = ItemStack.EMPTY;
 
 			new GuiSelectItemStack(c, accepted -> {
-				if (accepted)
-				{
+				if (accepted) {
 					ItemStack copy = c.value.copy();
 					copy.setCount(1);
 					ItemReward reward = new ItemReward(quest, copy);
@@ -191,8 +179,7 @@ public class FTBQuestsClient extends FTBQuestsCommon
 			ConfigInt c = new ConfigInt(1, Integer.MAX_VALUE);
 
 			GuiEditConfigFromString.open(c, 100, 100, accepted -> {
-				if (accepted)
-				{
+				if (accepted) {
 					callback.accept(new XPReward(quest, c.value));
 				}
 
@@ -204,8 +191,7 @@ public class FTBQuestsClient extends FTBQuestsCommon
 			ConfigInt c = new ConfigInt(1, Integer.MAX_VALUE);
 
 			GuiEditConfigFromString.open(c, 5, 5, accepted -> {
-				if (accepted)
-				{
+				if (accepted) {
 					callback.accept(new XPLevelsReward(quest, c.value));
 				}
 
@@ -215,36 +201,28 @@ public class FTBQuestsClient extends FTBQuestsCommon
 	}
 
 	@Override
-	public PlayerData getClientPlayerData()
-	{
+	public PlayerData getClientPlayerData() {
 		return ClientQuestFile.INSTANCE.getData(Minecraft.getInstance().player);
 	}
 
 	@Override
-	public QuestFile createClientQuestFile()
-	{
+	public QuestFile createClientQuestFile() {
 		return new ClientQuestFile();
 	}
 
 	@Override
-	public void openGui()
-	{
+	public void openGui() {
 		ClientQuestFile.INSTANCE.openQuestGui();
 	}
 
 	@Override
-	public void openCustomIconGui(Player player, InteractionHand hand)
-	{
+	public void openCustomIconGui(Player player, InteractionHand hand) {
 		ImageConfig config = new ImageConfig();
 		config.onClicked(MouseButton.LEFT, b -> {
-			if (b)
-			{
-				if (config.value.isEmpty())
-				{
+			if (b) {
+				if (config.value.isEmpty()) {
 					player.getItemInHand(hand).removeTagKey("Icon");
-				}
-				else
-				{
+				} else {
 					player.getItemInHand(hand).addTagElement("Icon", StringTag.valueOf(config.value));
 				}
 
