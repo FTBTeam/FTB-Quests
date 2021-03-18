@@ -54,6 +54,8 @@ public class FTBQuestsNetHandler {
 		register(MessageMoveQuestResponse.class, MessageMoveQuestResponse::new);
 		register(MessageChangeChapterGroup.class, MessageChangeChapterGroup::new);
 		register(MessageChangeChapterGroupResponse.class, MessageChangeChapterGroupResponse::new);
+		register(MessageMoveChapterGroup.class, MessageMoveChapterGroup::new);
+		register(MessageMoveChapterGroupResponse.class, MessageMoveChapterGroupResponse::new);
 	}
 
 	@ExpectPlatform

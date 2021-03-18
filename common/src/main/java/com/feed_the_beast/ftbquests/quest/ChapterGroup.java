@@ -1,6 +1,5 @@
 package com.feed_the_beast.ftbquests.quest;
 
-import com.feed_the_beast.ftbquests.gui.ChapterGroupsScreen;
 import com.feed_the_beast.ftbquests.gui.quests.QuestScreen;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
@@ -87,12 +86,6 @@ public class ChapterGroup extends QuestObjectBase {
 
 		if (gui != null) {
 			gui.chapterPanel.refreshWidgets();
-		} else {
-			ChapterGroupsScreen gui1 = ClientUtils.getCurrentGuiAs(ChapterGroupsScreen.class);
-
-			if (gui1 != null) {
-				gui1.refreshWidgets();
-			}
 		}
 	}
 

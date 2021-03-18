@@ -387,6 +387,7 @@ public class QuestPanel extends Panel {
 						matrixStack.translate(sx - bs * m.getWidth() / 2D, sy - bs * m.getHeight() / 2D, 0D);
 						matrixStack.scale((float) (bs * m.getWidth()), (float) (bs * m.getHeight()), 1F);
 						GuiHelper.setupDrawing();
+						RenderSystem.enableDepthTest();
 						m.drawMoved(matrixStack);
 						matrixStack.popPose();
 					}
@@ -410,6 +411,7 @@ public class QuestPanel extends Panel {
 					matrixStack.translate(sx - bs / 2D, sy - bs / 2D, 0D);
 					matrixStack.scale((float) bs, (float) bs, 1F);
 					GuiHelper.setupDrawing();
+					RenderSystem.enableDepthTest();
 					RenderSystem.alphaFunc(GL11.GL_GREATER, 0.01F);
 					QuestShape.get(questScreen.selectedChapter.getDefaultQuestShape()).shape.withColor(Color4I.WHITE.withAlpha(10)).draw(matrixStack, 0, 0, 1, 1);
 					RenderSystem.defaultAlphaFunc();

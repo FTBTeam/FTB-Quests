@@ -1,7 +1,6 @@
 package com.feed_the_beast.ftbquests.gui.quests;
 
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
-import com.feed_the_beast.ftbquests.gui.ChapterGroupsScreen;
 import com.feed_the_beast.ftbquests.gui.RewardTablesScreen;
 import com.feed_the_beast.ftbquests.net.MessageChangeProgress;
 import com.feed_the_beast.ftbquests.quest.ChangeProgress;
@@ -44,7 +43,6 @@ public class EditSettingsButton extends TabButton {
 		contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.gui.reset_progress"), ThemeProperties.RELOAD_ICON.get(), () -> new MessageChangeProgress(ClientQuestFile.INSTANCE.self.uuid, questScreen.file.id, ChangeProgress.RESET).sendToServer()).setYesNo(new TranslatableComponent("ftbquests.gui.reset_progress_q")));
 		contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.gui.complete_instantly"), ThemeProperties.CHECK_ICON.get(), () -> new MessageChangeProgress(ClientQuestFile.INSTANCE.self.uuid, questScreen.file.id, ChangeProgress.COMPLETE).sendToServer()).setYesNo(new TranslatableComponent("ftbquests.gui.complete_instantly_q")));
 		contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.reward_tables"), ThemeProperties.REWARD_TABLE_ICON.get(), () -> new RewardTablesScreen().openGui()));
-		contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.chapter_groups"), GuiIcons.COLOR_RGB, () -> new ChapterGroupsScreen().openGui()));
 		contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.gui.save_as_file"), ThemeProperties.DOWNLOAD_ICON.get(), () -> {
 			try {
 				Calendar time = Calendar.getInstance();
