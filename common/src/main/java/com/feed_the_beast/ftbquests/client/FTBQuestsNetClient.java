@@ -174,7 +174,6 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon {
 
 				if (gui != null) {
 					gui.chapterPanel.refreshWidgets();
-					gui.chapterPanel.alignWidgets();
 				}
 			}
 		}
@@ -247,6 +246,27 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon {
 				chapter.file.clearCachedData();
 				chapter.editedFromGUI();
 				new MessageChangeChapterGroupResponse(id, group).sendToAll();
+			}
+		}
+	}
+
+	@Override
+	public void moveChapterGroup(long id, boolean up) {
+		ChapterGroup group = ClientQuestFile.INSTANCE.getChapterGroup(id);
+
+		if (!group.isDefaultGroup()) {
+			int index = group.file.chapterGroups.indexOf(group);
+
+			if (index != -1 && up ? (index > 1) : (index < group.file.chapterGroups.size() - 1)) {
+				group.file.chapterGroups.remove(index);
+				group.file.chapterGroups.add(up ? index - 1 : index + 1, group);
+				ClientQuestFile.INSTANCE.clearCachedData();
+
+				QuestScreen gui = ClientUtils.getCurrentGuiAs(QuestScreen.class);
+
+				if (gui != null) {
+					gui.chapterPanel.refreshWidgets();
+				}
 			}
 		}
 	}

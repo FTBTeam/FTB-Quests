@@ -5,6 +5,7 @@ import com.feed_the_beast.ftbquests.client.FTBQuestsClient;
 import com.feed_the_beast.ftbquests.gui.ChangeChapterGroupScreen;
 import com.feed_the_beast.ftbquests.net.MessageCreateObject;
 import com.feed_the_beast.ftbquests.net.MessageMoveChapter;
+import com.feed_the_beast.ftbquests.net.MessageMoveChapterGroup;
 import com.feed_the_beast.ftbquests.quest.Chapter;
 import com.feed_the_beast.ftbquests.quest.ChapterGroup;
 import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
@@ -23,10 +24,13 @@ import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Widget;
 import com.feed_the_beast.mods.ftbguilibrary.widget.WidgetLayout;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextColor;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import org.jetbrains.annotations.Nullable;
@@ -76,20 +80,39 @@ public class ChapterPanel extends Panel {
 			if (chapterPanel.questScreen.file.canEdit() && getMouseX() > getX() + width - 15) {
 				playClickSound();
 
-				ConfigString c = new ConfigString(Pattern.compile("^.+$"));
-				GuiEditConfigFromString.open(c, "", "", accepted -> {
-					chapterPanel.questScreen.openGui();
+				List<ContextMenuItem> contextMenu = new ArrayList<>();
+				contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.chapter"), ThemeProperties.ADD_ICON.get(), () -> {
+					ConfigString c = new ConfigString(Pattern.compile("^.+$"));
+					GuiEditConfigFromString.open(c, "", "", accepted -> {
+						chapterPanel.questScreen.openGui();
 
-					if (accepted && !c.value.isEmpty()) {
-						Chapter chapter = new Chapter(chapterPanel.questScreen.file, chapterPanel.questScreen.file.defaultChapterGroup);
-						chapter.title = c.value;
-						CompoundTag extra = new CompoundTag();
-						extra.putLong("group", 0L);
-						new MessageCreateObject(chapter, extra).sendToServer();
-					}
+						if (accepted && !c.value.isEmpty()) {
+							Chapter chapter = new Chapter(chapterPanel.questScreen.file, chapterPanel.questScreen.file.defaultChapterGroup);
+							chapter.title = c.value;
+							CompoundTag extra = new CompoundTag();
+							extra.putLong("group", 0L);
+							new MessageCreateObject(chapter, extra).sendToServer();
+						}
 
-					run();
-				});
+						run();
+					});
+				}));
+
+				contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.chapter_group"), ThemeProperties.ADD_ICON.get(), () -> {
+					playClickSound();
+					ConfigString c = new ConfigString(Pattern.compile("^.+$"));
+					GuiEditConfigFromString.open(c, "", "", accepted -> {
+						chapterPanel.questScreen.openGui();
+
+						if (accepted) {
+							ChapterGroup group = new ChapterGroup(ClientQuestFile.INSTANCE);
+							group.title = c.value;
+							new MessageCreateObject(group, null).sendToServer();
+						}
+					});
+				}));
+
+				chapterPanel.questScreen.openContextMenu(contextMenu);
 			}
 		}
 
@@ -134,7 +157,7 @@ public class ChapterPanel extends Panel {
 		}
 
 		@Override
-		public void onClicked(MouseButton mouseButton) {
+		public void onClicked(MouseButton button) {
 			if (chapterPanel.questScreen.file.canEdit() && getMouseX() > getX() + width - 15) {
 				playClickSound();
 
@@ -153,6 +176,16 @@ public class ChapterPanel extends Panel {
 					run();
 				});
 
+				return;
+			}
+
+			if (chapterPanel.questScreen.file.canEdit() && button.isRight() && !group.isDefaultGroup()) {
+				List<ContextMenuItem> contextMenu = new ArrayList<>();
+				contextMenu.add(new ContextMenuItem(new TranslatableComponent("gui.move"), ThemeProperties.MOVE_UP_ICON.get(), () -> new MessageMoveChapterGroup(group.id, true).sendToServer()).setEnabled(() -> group.getIndex() > 1).setCloseMenu(false));
+				contextMenu.add(new ContextMenuItem(new TranslatableComponent("gui.move"), ThemeProperties.MOVE_DOWN_ICON.get(), () -> new MessageMoveChapterGroup(group.id, false).sendToServer()).setEnabled(() -> group.getIndex() < group.file.chapterGroups.size() - 1).setCloseMenu(false));
+				contextMenu.add(ContextMenuItem.SEPARATOR);
+				QuestScreen.addObjectMenuItems(contextMenu, chapterPanel.questScreen, group);
+				chapterPanel.questScreen.openContextMenu(contextMenu);
 				return;
 			}
 
@@ -214,24 +247,22 @@ public class ChapterPanel extends Panel {
 
 		@Override
 		public void onClicked(MouseButton button) {
-			QuestScreen questScreen = chapterPanel.questScreen;
-
-			if (questScreen.file.canEdit() || !chapter.quests.isEmpty()) {
+			if (chapterPanel.questScreen.file.canEdit() || !chapter.quests.isEmpty()) {
 				playClickSound();
 
-				if (questScreen.selectedChapter != chapter) {
-					questScreen.open(chapter, false);
+				if (chapterPanel.questScreen.selectedChapter != chapter) {
+					chapterPanel.questScreen.open(chapter, false);
 				}
 			}
 
-			if (questScreen.file.canEdit() && button.isRight()) {
+			if (chapterPanel.questScreen.file.canEdit() && button.isRight()) {
 				List<ContextMenuItem> contextMenu = new ArrayList<>();
 				contextMenu.add(new ContextMenuItem(new TranslatableComponent("gui.move"), ThemeProperties.MOVE_UP_ICON.get(), () -> new MessageMoveChapter(chapter.id, true).sendToServer()).setEnabled(() -> chapter.getIndex() > 0).setCloseMenu(false));
 				contextMenu.add(new ContextMenuItem(new TranslatableComponent("gui.move"), ThemeProperties.MOVE_DOWN_ICON.get(), () -> new MessageMoveChapter(chapter.id, false).sendToServer()).setEnabled(() -> chapter.getIndex() < chapter.group.chapters.size() - 1).setCloseMenu(false));
 				contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.gui.change_group"), GuiIcons.COLOR_RGB, () -> new ChangeChapterGroupScreen(chapter).openGui()));
 				contextMenu.add(ContextMenuItem.SEPARATOR);
-				QuestScreen.addObjectMenuItems(contextMenu, questScreen, chapter);
-				questScreen.openContextMenu(contextMenu);
+				QuestScreen.addObjectMenuItems(contextMenu, chapterPanel.questScreen, chapter);
+				chapterPanel.questScreen.openContextMenu(contextMenu);
 			}
 		}
 
@@ -243,11 +274,11 @@ public class ChapterPanel extends Panel {
 				Color4I.WHITE.withAlpha(40).draw(matrixStack, x + 1, y, w - 2, h);
 			}
 
-			ChatFormatting f = isMouseOver() ? ChatFormatting.WHITE : ChatFormatting.GRAY;
+			Color4I c = chapter.getProgressColor(chapterPanel.questScreen.file.self, !isMouseOver());
 			int o = chapter.group.isDefaultGroup() ? 0 : 7;
 
 			icon.draw(matrixStack, x + 2 + o, y + 1, 12, 12);
-			theme.drawString(matrixStack, new TextComponent("").append(title).withStyle(f), x + 16 + o, y + 3);
+			theme.drawString(matrixStack, new TextComponent("").append(title).withStyle(Style.EMPTY.withColor(TextColor.fromRgb(c.rgb()))), x + 16 + o, y + 3);
 
 			GuiHelper.setupDrawing();
 
@@ -380,6 +411,7 @@ public class ChapterPanel extends Panel {
 	public void draw(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
 		matrixStack.pushPose();
 		matrixStack.translate(0, 0, 600);
+		RenderSystem.enableDepthTest();
 		super.draw(matrixStack, theme, x, y, w, h);
 		matrixStack.popPose();
 	}

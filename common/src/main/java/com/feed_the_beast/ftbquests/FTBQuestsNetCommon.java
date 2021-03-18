@@ -57,4 +57,7 @@ public class FTBQuestsNetCommon {
 
 	public void changeChapterGroup(long id, long group) {
 	}
+
+	public void moveChapterGroup(long id, boolean up) {
+	}
 }
