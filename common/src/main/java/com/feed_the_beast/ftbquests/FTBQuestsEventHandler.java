@@ -2,6 +2,7 @@ package com.feed_the_beast.ftbquests;
 
 import com.feed_the_beast.ftbquests.block.FTBQuestsBlocks;
 import com.feed_the_beast.ftbquests.block.entity.FTBQuestsBlockEntities;
+import com.feed_the_beast.ftbquests.command.FTBQuestsCommands;
 import com.feed_the_beast.ftbquests.events.ClearFileCacheEvent;
 import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.quest.PlayerData;
