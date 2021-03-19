@@ -7,18 +7,15 @@ import net.minecraft.server.level.ServerPlayer;
 /**
  * @author LatvianModder
  */
-public class CheckWrapper implements CustomTask.Check
-{
+public class CheckWrapper implements CustomTask.Check {
 	private final CustomTaskCheckerJS checkerJS;
 
-	CheckWrapper(CustomTaskCheckerJS c)
-	{
+	CheckWrapper(CustomTaskCheckerJS c) {
 		checkerJS = c;
 	}
 
 	@Override
-	public void check(CustomTask.Data taskData, ServerPlayer player)
-	{
+	public void check(CustomTask.Data taskData, ServerPlayer player) {
 		checkerJS.check(taskData, ServerJS.instance.getPlayer(player));
 	}
 }

@@ -7,43 +7,35 @@ import dev.latvian.kubejs.event.EventJS;
 /**
  * @author LatvianModder
  */
-public class CustomTaskEventJS extends EventJS
-{
+public class CustomTaskEventJS extends EventJS {
 	public final CustomTaskEvent event;
 
-	CustomTaskEventJS(CustomTaskEvent e)
-	{
+	CustomTaskEventJS(CustomTaskEvent e) {
 		event = e;
 	}
 
 	@Override
-	public boolean canCancel()
-	{
+	public boolean canCancel() {
 		return true;
 	}
 
-	public CustomTask getTask()
-	{
+	public CustomTask getTask() {
 		return event.getTask();
 	}
 
-	public void setCheck(CustomTaskCheckerJS c)
-	{
+	public void setCheck(CustomTaskCheckerJS c) {
 		getTask().check = new CheckWrapper(c);
 	}
 
-	public void setCheckTimer(int t)
-	{
+	public void setCheckTimer(int t) {
 		getTask().checkTimer = t;
 	}
 
-	public void setEnableButton(boolean b)
-	{
+	public void setEnableButton(boolean b) {
 		getTask().enableButton = b;
 	}
 
-	public void setMaxProgress(long max)
-	{
+	public void setMaxProgress(long max) {
 		getTask().maxProgress = max;
 	}
 }

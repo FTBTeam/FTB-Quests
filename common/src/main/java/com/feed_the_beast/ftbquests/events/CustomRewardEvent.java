@@ -11,37 +11,31 @@ import net.minecraft.server.level.ServerPlayer;
  * @author LatvianModder
  */
 @ForgeEvent
-public class CustomRewardEvent
-{
+public class CustomRewardEvent {
 	public static final Event<Actor<CustomRewardEvent>> EVENT = EventFactory.createActorLoop();
 	private final CustomReward reward;
 	private final ServerPlayer player;
 	private final boolean notify;
 
-	public CustomRewardEvent(CustomReward r, ServerPlayer p, boolean n)
-	{
+	public CustomRewardEvent(CustomReward r, ServerPlayer p, boolean n) {
 		reward = r;
 		player = p;
 		notify = n;
 	}
 
-	public boolean isCancelable()
-	{
+	public boolean isCancelable() {
 		return true;
 	}
 
-	public CustomReward getReward()
-	{
+	public CustomReward getReward() {
 		return reward;
 	}
 
-	public ServerPlayer getPlayer()
-	{
+	public ServerPlayer getPlayer() {
 		return player;
 	}
 
-	public boolean getNotify()
-	{
+	public boolean getNotify() {
 		return notify;
 	}
 }

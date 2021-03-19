@@ -2,12 +2,12 @@ package com.feed_the_beast.ftbquests;
 
 import com.feed_the_beast.ftbquests.client.FTBQuestsClient;
 import com.feed_the_beast.ftbquests.client.FTBQuestsNetClient;
+import com.feed_the_beast.ftbquests.command.ChangeProgressArgument;
 import com.feed_the_beast.ftbquests.integration.kubejs.KubeJSIntegration;
 import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.net.FTBQuestsNetHandler;
 import com.feed_the_beast.ftbquests.quest.reward.RewardTypes;
 import com.feed_the_beast.ftbquests.quest.task.TaskTypes;
-import com.feed_the_beast.ftbquests.command.ChangeProgressArgument;
 import me.shedaniel.architectury.platform.Platform;
 import me.shedaniel.architectury.registry.CreativeTabs;
 import me.shedaniel.architectury.utils.EnvExecutor;
