@@ -9,6 +9,5 @@ import java.lang.annotation.RetentionPolicy;
 @Nonnull
 @TypeQualifierDefault(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface MethodsReturnNonnullByDefault
-{
+public @interface MethodsReturnNonnullByDefault {
 }

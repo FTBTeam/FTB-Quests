@@ -4,7 +4,13 @@ import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.quest.QuestObjectType;
 import com.feed_the_beast.ftbquests.quest.QuestShape;
 import com.feed_the_beast.ftbquests.quest.theme.property.ThemeProperties;
-import com.feed_the_beast.ftbquests.quest.theme.selector.*;
+import com.feed_the_beast.ftbquests.quest.theme.selector.AllSelector;
+import com.feed_the_beast.ftbquests.quest.theme.selector.AndSelector;
+import com.feed_the_beast.ftbquests.quest.theme.selector.IDSelector;
+import com.feed_the_beast.ftbquests.quest.theme.selector.NotSelector;
+import com.feed_the_beast.ftbquests.quest.theme.selector.TagSelector;
+import com.feed_the_beast.ftbquests.quest.theme.selector.ThemeSelector;
+import com.feed_the_beast.ftbquests.quest.theme.selector.TypeSelector;
 import com.feed_the_beast.ftbquests.util.FileUtils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
@@ -13,7 +19,11 @@ import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 
 import javax.annotation.Nullable;
 import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 /**

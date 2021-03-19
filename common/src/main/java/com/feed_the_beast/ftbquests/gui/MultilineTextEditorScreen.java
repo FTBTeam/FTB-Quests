@@ -5,7 +5,12 @@ import com.feed_the_beast.mods.ftbguilibrary.config.ConfigList;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigString;
 import com.feed_the_beast.mods.ftbguilibrary.utils.Key;
 import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
-import com.feed_the_beast.mods.ftbguilibrary.widget.*;
+import com.feed_the_beast.mods.ftbguilibrary.widget.GuiBase;
+import com.feed_the_beast.mods.ftbguilibrary.widget.GuiIcons;
+import com.feed_the_beast.mods.ftbguilibrary.widget.SimpleButton;
+import com.feed_the_beast.mods.ftbguilibrary.widget.TextBox;
+import com.feed_the_beast.mods.ftbguilibrary.widget.TextField;
+import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
 import net.minecraft.network.chat.TranslatableComponent;
 import org.lwjgl.glfw.GLFW;
 

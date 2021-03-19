@@ -1,16 +1,19 @@
-package com.feed_the_beast.ftbquests;
+package com.feed_the_beast.ftbquests.command;
 
+import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.net.MessageCreateObjectResponse;
 import com.feed_the_beast.ftbquests.net.MessageDeleteObjectResponse;
 import com.feed_the_beast.ftbquests.quest.ChangeProgress;
 import com.feed_the_beast.ftbquests.quest.Chapter;
 import com.feed_the_beast.ftbquests.quest.PlayerData;
 import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.quest.QuestObjectBase;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.loot.RewardTable;
 import com.feed_the_beast.ftbquests.quest.task.ItemTask;
 import com.feed_the_beast.ftbquests.util.FileUtils;
 import com.feed_the_beast.mods.ftbguilibrary.config.Tristate;
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import me.shedaniel.architectury.registry.Registries;
@@ -31,6 +34,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
 import javax.annotation.Nullable;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -39,10 +43,8 @@ import java.util.stream.Collectors;
 /**
  * @author LatvianModder
  */
-public class FTBQuestsCommands
-{
-	public static void register(CommandDispatcher<CommandSourceStack> dispatcher)
-	{
+public class FTBQuestsCommands {
+	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
 		dispatcher.register(Commands.literal("ftbquests")
 				.requires(s -> s.getServer().isSingleplayer() || s.hasPermission(2))
 				.then(Commands.literal("editing_mode")
@@ -57,8 +59,21 @@ public class FTBQuestsCommands
 				.then(Commands.literal("delete_empty_reward_tables")
 						.executes(context -> deleteEmptyRewardTables(context.getSource()))
 				)
-				//.then(Commands.literal("change_progress")
-				//)
+				.then(Commands.literal("change_progress")
+						.requires(s -> s.hasPermission(2))
+						.then(Commands.argument("players", EntityArgument.players())
+								.then(Commands.argument("type", ChangeProgressArgument.changeProgress())
+										.then(Commands.argument("quest_object", QuestObjectArgument.questObject())
+												.executes(ctx -> {
+													Collection<ServerPlayer> players = EntityArgument.getPlayers(ctx, "players");
+													ChangeProgress type = ctx.getArgument("type", ChangeProgress.class);
+													QuestObjectBase questObject = ctx.getArgument("quest_object", QuestObjectBase.class);
+													return changeProgress(ctx.getSource(), players, type, questObject);
+												})
+										)
+								)
+						)
+				)
 				/*.then(Commands.literal("export_rewards_to_chest")
 						.then(Commands.argument("reward_table", StringArgumentType.word())
 								.executes(c -> exportRewards(c.getSource(), StringArgumentType.getString(c, "reward_table")))
@@ -82,79 +97,37 @@ public class FTBQuestsCommands
 		);
 	}
 
-	private static int editingMode(CommandSourceStack source, ServerPlayer player, @Nullable Boolean canEdit)
-	{
+	private static int editingMode(CommandSourceStack source, ServerPlayer player, @Nullable Boolean canEdit) {
 		PlayerData data = ServerQuestFile.INSTANCE.getData(player);
 
-		if (canEdit == null)
-		{
+		if (canEdit == null) {
 			canEdit = !data.getCanEdit();
 		}
 
 		data.setCanEdit(canEdit);
 
-		if (canEdit)
-		{
+		if (canEdit) {
 			source.sendSuccess(new TranslatableComponent("commands.ftbquests.editing_mode.enabled", player.getDisplayName()), true);
-		}
-		else
-		{
+		} else {
 			source.sendSuccess(new TranslatableComponent("commands.ftbquests.editing_mode.disabled", player.getDisplayName()), true);
 		}
 
 		return 1;
 	}
 
-	private static int changeProgress(CommandSourceStack source, ServerPlayer player, ChangeProgress type)
-	{
-		/*
-		Collection<ForgeTeam> teams;
-
-		if (args.length == 1)
-		{
-			teams = Collections.singleton(Universe.get().getPlayer(getCommandSenderAsPlayer(sender)).team);
+	private static int changeProgress(CommandSourceStack source, Collection<ServerPlayer> players, ChangeProgress type, QuestObjectBase questObject) {
+		for (ServerPlayer player : players) {
+			questObject.changeProgress(ServerQuestFile.INSTANCE.getData(player), type);
 		}
-		else if (args[1].equals("*"))
-		{
-			teams = Universe.get().getTeams();
-		}
-		else
-		{
-			ForgeTeam team = Universe.get().getTeam(args[1]);
-
-			if (!team.isValid())
-			{
-				throw new CommandException("ftblib.lang.team.error.not_found", args[1]);
-			}
-
-			teams = Collections.singleton(team);
-		}
-
-		QuestObject object = args.length == 2 ? ServerQuestFile.INSTANCE : ServerQuestFile.INSTANCE.get(ServerQuestFile.INSTANCE.getID(args[2]));
-
-		if (object == null)
-		{
-			throw CommandUtils.error(SidedUtils.lang(sender, FTBQuests.MOD_ID, "commands.ftbquests.change_progress.invalid_id", args[2]));
-		}
-
-		for (ForgeTeam team : teams)
-		{
-			object.forceProgress(ServerQuestData.get(team), type, true);
-		}
-		 */
-
 		source.sendSuccess(new TranslatableComponent("commands.ftbquests.change_progress.text"), true);
-		return 1;
+		return Command.SINGLE_SUCCESS;
 	}
 
-	private static int deleteEmptyRewardTables(CommandSourceStack source)
-	{
+	private static int deleteEmptyRewardTables(CommandSourceStack source) {
 		int del = 0;
 
-		for (RewardTable table : ServerQuestFile.INSTANCE.rewardTables)
-		{
-			if (table.rewards.isEmpty())
-			{
+		for (RewardTable table : ServerQuestFile.INSTANCE.rewardTables) {
+			if (table.rewards.isEmpty()) {
 				del++;
 				table.invalid = true;
 				FileUtils.delete(ServerQuestFile.INSTANCE.getFolder().resolve(table.getPath()).toFile());
@@ -170,25 +143,19 @@ public class FTBQuestsCommands
 		return 1;
 	}
 
-	private static int generateAllItemChapter(CommandSourceStack source)
-	{
+	private static int generateAllItemChapter(CommandSourceStack source) {
 		NonNullList<ItemStack> nonNullList = NonNullList.create();
 
-		for (Map.Entry<ResourceKey<Item>, Item> entry : Registry.ITEM.entrySet())
-		{
+		for (Map.Entry<ResourceKey<Item>, Item> entry : Registry.ITEM.entrySet()) {
 			Item item = entry.getValue();
-			try
-			{
+			try {
 				int s = nonNullList.size();
 				item.fillItemCategory(CreativeModeTab.TAB_SEARCH, nonNullList);
 
-				if (s == nonNullList.size())
-				{
+				if (s == nonNullList.size()) {
 					nonNullList.add(new ItemStack(item));
 				}
-			}
-			catch (Throwable ex)
-			{
+			} catch (Throwable ex) {
 				FTBQuests.LOGGER.warn("Failed to get items from " + entry.getKey() + ": " + ex);
 			}
 		}
@@ -209,8 +176,7 @@ public class FTBQuestsCommands
 				.collect(Collectors.toList());
 		FTBQuests.LOGGER.info("Found " + nonNullList.size() + " items in total, chapter ID: " + chapter);
 
-		if (list.isEmpty())
-		{
+		if (list.isEmpty()) {
 			return 0;
 		}
 
@@ -218,17 +184,13 @@ public class FTBQuestsCommands
 		int row = 0;
 		String modid = Registries.getId(list.get(0).getItem(), Registry.ITEM_REGISTRY).getNamespace();
 
-		for (ItemStack stack : list)
-		{
+		for (ItemStack stack : list) {
 			ResourceLocation id = Registries.getId(stack.getItem(), Registry.ITEM_REGISTRY);
-			if (!modid.equals(id.getNamespace()))
-			{
+			if (!modid.equals(id.getNamespace())) {
 				modid = id.getNamespace();
 				col = 0;
 				row += 2;
-			}
-			else if (col >= 40)
-			{
+			} else if (col >= 40) {
 				col = 0;
 				row++;
 			}

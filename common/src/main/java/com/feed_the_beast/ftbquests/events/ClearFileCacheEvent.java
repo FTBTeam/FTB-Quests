@@ -11,18 +11,15 @@ import java.util.function.Consumer;
  * @author LatvianModder
  */
 @ForgeEvent
-public class ClearFileCacheEvent
-{
+public class ClearFileCacheEvent {
 	public static final Event<Consumer<ClearFileCacheEvent>> EVENT = EventFactory.createConsumerLoop(ClearFileCacheEvent.class);
 	private final QuestFile file;
 
-	public ClearFileCacheEvent(QuestFile f)
-	{
+	public ClearFileCacheEvent(QuestFile f) {
 		file = f;
 	}
 
-	public QuestFile getFile()
-	{
+	public QuestFile getFile() {
 		return file;
 	}
 }
