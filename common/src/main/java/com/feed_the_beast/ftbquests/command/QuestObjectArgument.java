@@ -43,7 +43,7 @@ public class QuestObjectArgument implements ArgumentType<QuestObjectBase> {
 			throw NO_OBJECT.createWithContext(reader, id);
 		} else {
 			try {
-				long num = Long.decode(id);
+				long num = ServerQuestFile.INSTANCE.getID(id);
 				QuestObjectBase object = ServerQuestFile.INSTANCE.getBase(num);
 				if (object == null) {
 					throw NO_OBJECT.createWithContext(reader, id);
