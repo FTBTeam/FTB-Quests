@@ -7,7 +7,6 @@ import dev.latvian.kubejs.player.PlayerJS;
  * @author LatvianModder
  */
 @FunctionalInterface
-public interface CustomTaskCheckerJS
-{
+public interface CustomTaskCheckerJS {
 	void check(CustomTask.Data taskData, PlayerJS player);
 }

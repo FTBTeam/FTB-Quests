@@ -12,18 +12,15 @@ import java.util.function.Consumer;
  * @author LatvianModder
  */
 @ForgeEvent
-public class ThemePropertyEvent
-{
+public class ThemePropertyEvent {
 	public static final Event<Consumer<ThemePropertyEvent>> EVENT = EventFactory.createConsumerLoop(ThemePropertyEvent.class);
 	private final Map<String, ThemeProperty> map;
 
-	public ThemePropertyEvent(Map<String, ThemeProperty> m)
-	{
+	public ThemePropertyEvent(Map<String, ThemeProperty> m) {
 		map = m;
 	}
 
-	public void register(ThemeProperty property)
-	{
+	public void register(ThemeProperty property) {
 		map.put(property.name, property);
 	}
 }

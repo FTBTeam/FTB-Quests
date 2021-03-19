@@ -1,7 +1,15 @@
 package com.feed_the_beast.ftbquests.util;
 
 import com.feed_the_beast.ftbquests.item.MissingItem;
-import net.minecraft.nbt.*;
+import net.minecraft.nbt.ByteArrayTag;
+import net.minecraft.nbt.CollectionTag;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.EndTag;
+import net.minecraft.nbt.IntArrayTag;
+import net.minecraft.nbt.LongArrayTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.TagParser;
 import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nullable;

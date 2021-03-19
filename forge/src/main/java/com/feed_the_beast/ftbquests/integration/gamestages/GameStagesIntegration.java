@@ -1,7 +1,11 @@
 package com.feed_the_beast.ftbquests.integration.gamestages;
 
 import com.feed_the_beast.ftbquests.FTBQuests;
-import com.feed_the_beast.ftbquests.quest.*;
+import com.feed_the_beast.ftbquests.quest.Chapter;
+import com.feed_the_beast.ftbquests.quest.ChapterGroup;
+import com.feed_the_beast.ftbquests.quest.PlayerData;
+import com.feed_the_beast.ftbquests.quest.Quest;
+import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import com.feed_the_beast.ftbquests.quest.reward.RewardType;
 import com.feed_the_beast.ftbquests.quest.reward.RewardTypes;
 import com.feed_the_beast.ftbquests.quest.task.Task;

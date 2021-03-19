@@ -5,8 +5,7 @@ import com.feed_the_beast.mods.ftbguilibrary.config.NameMap;
 /**
  * @author LatvianModder
  */
-public enum DependencyRequirement
-{
+public enum DependencyRequirement {
 	ALL_COMPLETED("all_completed", false, true),
 	ONE_COMPLETED("one_completed", true, true),
 	ALL_STARTED("all_started", false, false),
@@ -18,8 +17,7 @@ public enum DependencyRequirement
 	public final boolean one;
 	public final boolean completed;
 
-	DependencyRequirement(String s, boolean o, boolean c)
-	{
+	DependencyRequirement(String s, boolean o, boolean c) {
 		id = s;
 		one = o;
 		completed = c;

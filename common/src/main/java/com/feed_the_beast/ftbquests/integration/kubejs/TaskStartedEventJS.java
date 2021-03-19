@@ -7,17 +7,14 @@ import dev.latvian.kubejs.event.EventJS;
 /**
  * @author LatvianModder
  */
-public class TaskStartedEventJS extends EventJS
-{
+public class TaskStartedEventJS extends EventJS {
 	public final transient TaskStartedEvent event;
 
-	public TaskStartedEventJS(TaskStartedEvent e)
-	{
+	public TaskStartedEventJS(TaskStartedEvent e) {
 		event = e;
 	}
 
-	public TaskData getTaskData()
-	{
+	public TaskData getTaskData() {
 		return event.getTaskData();
 	}
 }
