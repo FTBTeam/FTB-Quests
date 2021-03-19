@@ -7,17 +7,19 @@ import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.net.FTBQuestsNetHandler;
 import com.feed_the_beast.ftbquests.quest.reward.RewardTypes;
 import com.feed_the_beast.ftbquests.quest.task.TaskTypes;
+import com.feed_the_beast.ftbquests.command.ChangeProgressArgument;
 import me.shedaniel.architectury.platform.Platform;
 import me.shedaniel.architectury.registry.CreativeTabs;
 import me.shedaniel.architectury.utils.EnvExecutor;
+import net.minecraft.commands.synchronization.ArgumentTypes;
+import net.minecraft.commands.synchronization.EmptyArgumentSerializer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class FTBQuests
-{
+public class FTBQuests {
 	public static final String MOD_ID = "ftbquests";
 	public static final Logger LOGGER = LogManager.getLogger("FTB Quests");
 
@@ -29,8 +31,7 @@ public class FTBQuests
 	public static final CreativeModeTab ITEM_GROUP = CreativeTabs.create(new ResourceLocation(FTBQuests.MOD_ID, FTBQuests.MOD_ID), () ->
 			new ItemStack(FTBQuestsItems.BOOK.get()));
 
-	public FTBQuests()
-	{
+	public FTBQuests() {
 		TaskTypes.init();
 		RewardTypes.init();
 		FTBQuestsNetHandler.init();
@@ -38,11 +39,14 @@ public class FTBQuests
 		NET_PROXY = EnvExecutor.getEnvSpecific(() -> FTBQuestsNetClient::new, () -> FTBQuestsNetCommon::new);
 		new FTBQuestsEventHandler().init();
 
-		if (Platform.isModLoaded("kubejs"))
-		{
+		if (Platform.isModLoaded("kubejs")) {
 			KubeJSIntegration.init();
 		}
 
 		PROXY.init();
+	}
+
+	public void setup() {
+		ArgumentTypes.register("ftbquests:change_progress", ChangeProgressArgument.class, new EmptyArgumentSerializer<>(ChangeProgressArgument::changeProgress));
 	}
 }
