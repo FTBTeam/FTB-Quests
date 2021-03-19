@@ -11,18 +11,15 @@ import java.util.function.Consumer;
  * @author LatvianModder
  */
 @ForgeEvent
-public class TaskStartedEvent
-{
+public class TaskStartedEvent {
 	public static final Event<Consumer<TaskStartedEvent>> EVENT = EventFactory.createConsumerLoop(TaskStartedEvent.class);
 	private final TaskData data;
 
-	public TaskStartedEvent(TaskData d)
-	{
+	public TaskStartedEvent(TaskData d) {
 		data = d;
 	}
 
-	public TaskData getTaskData()
-	{
+	public TaskData getTaskData() {
 		return data;
 	}
 }

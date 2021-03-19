@@ -12,10 +12,8 @@ import net.minecraft.world.InteractionResult;
 /**
  * @author LatvianModder
  */
-public class KubeJSIntegration
-{
-	public static void init()
-	{
+public class KubeJSIntegration {
+	public static void init() {
 		BindingsEvent.EVENT.register(KubeJSIntegration::registerBindings);
 		AttachPlayerDataEvent.EVENT.register(KubeJSIntegration::attachPlayerData);
 		CustomTaskEvent.EVENT.register(KubeJSIntegration::onCustomTask);
@@ -35,56 +33,46 @@ public class KubeJSIntegration
 	//	event.registerEvent("ftbquests.started", TaskStartedEventJS.class).doubleParam("id|tag");
 	//}
 
-	public static void registerBindings(BindingsEvent event)
-	{
+	public static void registerBindings(BindingsEvent event) {
 		event.add("ftbquests", new FTBQuestsKubeJSWrapper());
 	}
 
-	public static void attachPlayerData(AttachPlayerDataEvent event)
-	{
+	public static void attachPlayerData(AttachPlayerDataEvent event) {
 		event.add("ftbquests", new FTBQuestsKubeJSPlayerData(event.getParent()));
 	}
 
-	public static InteractionResult onCustomTask(CustomTaskEvent event)
-	{
-		if (new CustomTaskEventJS(event).post(ScriptType.SERVER, "ftbquests.custom_task", event.getTask().toString()))
-		{
+	public static InteractionResult onCustomTask(CustomTaskEvent event) {
+		if (new CustomTaskEventJS(event).post(ScriptType.SERVER, "ftbquests.custom_task", event.getTask().toString())) {
 			return InteractionResult.FAIL;
 		}
 
 		return InteractionResult.PASS;
 	}
 
-	public static InteractionResult onCustomReward(CustomRewardEvent event)
-	{
-		if (new CustomRewardEventJS(event).post(ScriptType.SERVER, "ftbquests.custom_reward", event.getReward().toString()))
-		{
+	public static InteractionResult onCustomReward(CustomRewardEvent event) {
+		if (new CustomRewardEventJS(event).post(ScriptType.SERVER, "ftbquests.custom_reward", event.getReward().toString())) {
 			return InteractionResult.FAIL;
 		}
 
 		return InteractionResult.PASS;
 	}
 
-	public static InteractionResult onCompleted(ObjectCompletedEvent event)
-	{
+	public static InteractionResult onCompleted(ObjectCompletedEvent event) {
 		QuestObjectCompletedEventJS e = new QuestObjectCompletedEventJS(event);
 		e.post(ScriptType.SERVER, "ftbquests.completed", event.getObject().getCodeString());
 
-		for (String tag : event.getObject().getTags())
-		{
+		for (String tag : event.getObject().getTags()) {
 			e.post(ScriptType.SERVER, "ftbquests.completed." + tag);
 		}
 
 		return InteractionResult.PASS;
 	}
 
-	public static void onTaskStarted(TaskStartedEvent event)
-	{
+	public static void onTaskStarted(TaskStartedEvent event) {
 		TaskStartedEventJS e = new TaskStartedEventJS(event);
 		e.post(ScriptType.SERVER, "ftbquests.started", event.getTaskData().task.getCodeString());
 
-		for (String tag : event.getTaskData().task.getTags())
-		{
+		for (String tag : event.getTaskData().task.getTags()) {
 			e.post(ScriptType.SERVER, "ftbquests.started." + tag);
 		}
 	}

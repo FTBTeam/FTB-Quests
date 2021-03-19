@@ -10,38 +10,31 @@ import dev.latvian.kubejs.server.ServerJS;
 /**
  * @author LatvianModder
  */
-public class QuestObjectCompletedEventJS extends ServerEventJS
-{
+public class QuestObjectCompletedEventJS extends ServerEventJS {
 	public final ObjectCompletedEvent event;
 
 	@Override
-	public ServerJS getServer()
-	{
+	public ServerJS getServer() {
 		return ServerJS.instance;
 	}
 
-	public QuestObjectCompletedEventJS(ObjectCompletedEvent e)
-	{
+	public QuestObjectCompletedEventJS(ObjectCompletedEvent e) {
 		event = e;
 	}
 
-	public PlayerData getData()
-	{
+	public PlayerData getData() {
 		return event.getData();
 	}
 
-	public QuestObject getObject()
-	{
+	public QuestObject getObject() {
 		return event.getObject();
 	}
 
-	public EntityArrayList getNotifiedPlayers()
-	{
+	public EntityArrayList getNotifiedPlayers() {
 		return ServerJS.instance.getOverworld().createEntityList(event.getNotifiedPlayers());
 	}
 
-	public EntityArrayList getOnlineMembers()
-	{
+	public EntityArrayList getOnlineMembers() {
 		return ServerJS.instance.getOverworld().createEntityList(getData().getOnlineMembers());
 	}
 }
