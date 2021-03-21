@@ -27,6 +27,7 @@ public class FTBQuestsItems {
 	}
 
 	public static final RegistrySupplier<Item> BANNER = blockItem("banner", FTBQuestsBlocks.BANNER);
+	public static final RegistrySupplier<Item> BARRIER = blockItem("barrier", FTBQuestsBlocks.BARRIER);
 
 	public static void register() {
 		ITEMS.register();

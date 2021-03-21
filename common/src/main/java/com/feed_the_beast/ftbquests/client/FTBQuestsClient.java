@@ -2,6 +2,7 @@ package com.feed_the_beast.ftbquests.client;
 
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.FTBQuestsCommon;
+import com.feed_the_beast.ftbquests.block.FTBQuestsBlocks;
 import com.feed_the_beast.ftbquests.gui.ImageConfig;
 import com.feed_the_beast.ftbquests.net.MessageSetCustomImage;
 import com.feed_the_beast.ftbquests.quest.PlayerData;
@@ -29,8 +30,10 @@ import com.mojang.blaze3d.platform.InputConstants;
 import me.shedaniel.architectury.event.events.client.ClientLifecycleEvent;
 import me.shedaniel.architectury.registry.KeyBindings;
 import me.shedaniel.architectury.registry.ReloadListeners;
+import me.shedaniel.architectury.registry.RenderTypes;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.StringTag;
@@ -118,6 +121,7 @@ public class FTBQuestsClient extends FTBQuestsCommon {
 
 	private void setup(Minecraft minecraft) {
 		KeyBindings.registerKeyBinding(KEY_QUESTS = new KeyMapping("key.ftbquests.quests", InputConstants.Type.KEYSYM, -1, "key.categories.ftbquests"));
+		RenderTypes.register(RenderType.cutout(), FTBQuestsBlocks.BARRIER.get());
 		setTaskGuiProviders();
 		setRewardGuiProviders();
 	}

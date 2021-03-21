@@ -13,6 +13,7 @@ public class FTBQuestsBlocks {
 	public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(FTBQuests.MOD_ID, Registry.BLOCK_REGISTRY);
 
 	public static final RegistrySupplier<Block> BANNER = BLOCKS.register("banner", BannerBlock::new);
+	public static final RegistrySupplier<Block> BARRIER = BLOCKS.register("barrier", QuestBarrierBlock::new);
 
 	public static void register() {
 		BLOCKS.register();

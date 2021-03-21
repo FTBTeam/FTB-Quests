@@ -22,6 +22,7 @@ public class FTBQuestsBlockEntities {
 	}
 
 	public static final RegistrySupplier<BlockEntityType<?>> BANNER = register("banner", BannerBlockEntity::new, FTBQuestsBlocks.BANNER);
+	public static final RegistrySupplier<BlockEntityType<?>> BARRIER = register("barrier", QuestBarrierBlockEntity::new, FTBQuestsBlocks.BARRIER);
 
 	public static void register() {
 		BLOCK_ENTITIES.register();
