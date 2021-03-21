@@ -1,0 +1,14 @@
+{
+	"variants": {
+		"completed=false": [
+			{
+				"model": "ftbquests:block/barrier"
+			}
+		],
+		"completed=true": [
+			{
+				"model": "ftbquests:block/barrier_completed"
+			}
+		]
+	}
+}
