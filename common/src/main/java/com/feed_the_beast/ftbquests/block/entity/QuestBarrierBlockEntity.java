@@ -24,7 +24,6 @@ public class QuestBarrierBlockEntity extends BlockEntity implements TickableBloc
 	public long object = 0;
 	public DependencyRequirement requirement = DependencyRequirement.ALL_COMPLETED;
 
-	private Boolean prevCompleted = null;
 	public boolean completed = false;
 
 	public QuestBarrierBlockEntity() {
@@ -65,12 +64,11 @@ public class QuestBarrierBlockEntity extends BlockEntity implements TickableBloc
 
 	@Override
 	public void tick() {
-		if (level != null && level.isClientSide && level.getGameTime() % 20L == 0L) {
+		if (level != null && level.isClientSide && level.getGameTime() % 5L == 0L) {
 			PlayerData data = ClientQuestFile.INSTANCE.self;
 			completed = isComplete(data);
 
-			if (prevCompleted == null || prevCompleted != completed) {
-				prevCompleted = completed;
+			if (completed != getBlockState().getValue(COMPLETED)) {
 				level.setBlockAndUpdate(getBlockPos(), getBlockState().setValue(COMPLETED, completed));
 				setChanged();
 			}
