@@ -70,11 +70,12 @@ public class QuestBarrierBlock extends BaseEntityBlock {
 	public VoxelShape getCollisionShape(BlockState state, BlockGetter bg, BlockPos pos, CollisionContext ctx) {
 		Entity entity = EntityHooks.fromCollision(ctx);
 		BlockEntity be = bg.getBlockEntity(pos);
-		if (entity instanceof Player && be instanceof QuestBarrierBlockEntity) {
+		QuestFile file = ServerQuestFile.INSTANCE;
+		if (file != null && entity instanceof Player && be instanceof QuestBarrierBlockEntity) {
 			Player player = (Player) entity;
 			QuestBarrierBlockEntity barrier = (QuestBarrierBlockEntity) be;
 
-			if (barrier.isComplete(ServerQuestFile.INSTANCE.getData(player))) {
+			if (barrier.isComplete(file.getData(player))) {
 				return Shapes.empty();
 			}
 		}
