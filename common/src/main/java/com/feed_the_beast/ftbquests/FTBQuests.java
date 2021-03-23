@@ -3,9 +3,11 @@ package com.feed_the_beast.ftbquests;
 import com.feed_the_beast.ftbquests.client.FTBQuestsClient;
 import com.feed_the_beast.ftbquests.client.FTBQuestsNetClient;
 import com.feed_the_beast.ftbquests.command.ChangeProgressArgument;
+import com.feed_the_beast.ftbquests.command.QuestObjectArgument;
 import com.feed_the_beast.ftbquests.integration.kubejs.KubeJSIntegration;
 import com.feed_the_beast.ftbquests.item.FTBQuestsItems;
 import com.feed_the_beast.ftbquests.net.FTBQuestsNetHandler;
+import com.feed_the_beast.ftbquests.quest.QuestObject;
 import com.feed_the_beast.ftbquests.quest.reward.RewardTypes;
 import com.feed_the_beast.ftbquests.quest.task.TaskTypes;
 import me.shedaniel.architectury.platform.Platform;
@@ -48,5 +50,6 @@ public class FTBQuests {
 
 	public void setup() {
 		ArgumentTypes.register("ftbquests:change_progress", ChangeProgressArgument.class, new EmptyArgumentSerializer<>(ChangeProgressArgument::changeProgress));
+		ArgumentTypes.register("ftbquests:quest_object", QuestObjectArgument.class, new EmptyArgumentSerializer<>(QuestObjectArgument::new));
 	}
 }
