@@ -362,6 +362,7 @@
 	"commands.ftbquests.editing_mode.enabled": "Editing Mode for %s Enabled",
 	"commands.ftbquests.editing_mode.disabled": "Editing Mode for %s Disabled",
 	"commands.ftbquests.change_progress.no_object": "No quest object found for ID %s!",
+	"commands.ftbquests.change_progress.no_file": "No quest file was found, what's going on?!",
 	"commands.ftbquests.change_progress.invalid_id": "Invalid Object ID: %s!",
 	"commands.ftbquests.change_progress.invalid_type": "Invalid changeProgress type: %s!",
 	"commands.ftbquests.change_progress.text": "Progress has been changed!",

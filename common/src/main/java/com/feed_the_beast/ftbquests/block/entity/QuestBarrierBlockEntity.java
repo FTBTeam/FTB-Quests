@@ -75,6 +75,11 @@ public class QuestBarrierBlockEntity extends BlockEntity implements TickableBloc
 		}
 	}
 
+	public void updateObject(long id) {
+		object = id;
+		syncData();
+	}
+
 	@Nullable
 	public QuestObject getObject(QuestFile file) {
 		return file.get(object);
