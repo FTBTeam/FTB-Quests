@@ -3,7 +3,6 @@ package com.feed_the_beast.ftbquests.block;
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.block.entity.QuestBarrierBlockEntity;
 import com.feed_the_beast.ftbquests.client.ClientQuestFile;
-import com.feed_the_beast.ftbquests.quest.QuestFile;
 import com.feed_the_beast.ftbquests.quest.ServerQuestFile;
 import me.shedaniel.architectury.hooks.EntityHooks;
 import net.fabricmc.api.EnvType;
@@ -70,12 +69,12 @@ public class QuestBarrierBlock extends BaseEntityBlock {
 	public VoxelShape getCollisionShape(BlockState state, BlockGetter bg, BlockPos pos, CollisionContext ctx) {
 		Entity entity = EntityHooks.fromCollision(ctx);
 		BlockEntity be = bg.getBlockEntity(pos);
-		QuestFile file = ServerQuestFile.INSTANCE;
-		if (file != null && entity instanceof Player && be instanceof QuestBarrierBlockEntity) {
+		if (be instanceof QuestBarrierBlockEntity
+				&& entity instanceof Player) {
 			Player player = (Player) entity;
 			QuestBarrierBlockEntity barrier = (QuestBarrierBlockEntity) be;
 
-			if (barrier.isComplete(file.getData(player))) {
+			if (barrier.isComplete(FTBQuests.PROXY.getQuestFile(player.level.isClientSide).getData(player))) {
 				return Shapes.empty();
 			}
 		}
@@ -105,8 +104,9 @@ public class QuestBarrierBlock extends BaseEntityBlock {
 	@Override
 	public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity entity, ItemStack stack) {
 		super.setPlacedBy(level, pos, state, entity, stack);
-		BlockEntity be = level.getBlockEntity(pos);
-		if (be instanceof QuestBarrierBlockEntity
+		BlockEntity be;
+		if (!level.isClientSide()
+				&& (be = level.getBlockEntity(pos)) instanceof QuestBarrierBlockEntity
 				&& stack.hasCustomHoverName()) {
 			((QuestBarrierBlockEntity) be).object = ServerQuestFile.INSTANCE.getID(stack.getHoverName().getString());
 		}
@@ -114,14 +114,14 @@ public class QuestBarrierBlock extends BaseEntityBlock {
 
 	@Override
 	public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult result) {
-		BlockEntity be = level.getBlockEntity(pos);
-		QuestFile file = ServerQuestFile.INSTANCE;
-		ItemStack stack = player.getItemInHand(InteractionHand.MAIN_HAND);
-		if (be instanceof QuestBarrierBlockEntity
-				&& file.getData(player).getCanEdit()
-				&& stack.getItem() == Items.NAME_TAG
-				&& stack.hasCustomHoverName()) {
-			((QuestBarrierBlockEntity) be).object = file.getID(stack.getHoverName().getString());
+		BlockEntity be;
+		ItemStack stack;
+		if (!level.isClientSide()
+				&& (be = level.getBlockEntity(pos)) instanceof QuestBarrierBlockEntity
+				&& (stack = player.getItemInHand(InteractionHand.MAIN_HAND)).getItem() == Items.NAME_TAG
+				&& stack.hasCustomHoverName()
+				&& ServerQuestFile.INSTANCE.getData(player).getCanEdit()) {
+			((QuestBarrierBlockEntity) be).object = ServerQuestFile.INSTANCE.getID(stack.getHoverName().getString());
 			player.swing(hand);
 		}
 		return super.use(state, level, pos, player, hand, result);
