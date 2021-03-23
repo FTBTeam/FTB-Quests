@@ -108,7 +108,7 @@ public class QuestBarrierBlock extends BaseEntityBlock {
 		if (!level.isClientSide()
 				&& (be = level.getBlockEntity(pos)) instanceof QuestBarrierBlockEntity
 				&& stack.hasCustomHoverName()) {
-			((QuestBarrierBlockEntity) be).object = ServerQuestFile.INSTANCE.getID(stack.getHoverName().getString());
+			((QuestBarrierBlockEntity) be).updateObject(ServerQuestFile.INSTANCE.getID(stack.getHoverName().getString()));
 		}
 	}
 
@@ -121,7 +121,7 @@ public class QuestBarrierBlock extends BaseEntityBlock {
 				&& (stack = player.getItemInHand(InteractionHand.MAIN_HAND)).getItem() == Items.NAME_TAG
 				&& stack.hasCustomHoverName()
 				&& ServerQuestFile.INSTANCE.getData(player).getCanEdit()) {
-			((QuestBarrierBlockEntity) be).object = ServerQuestFile.INSTANCE.getID(stack.getHoverName().getString());
+			((QuestBarrierBlockEntity) be).updateObject(ServerQuestFile.INSTANCE.getID(stack.getHoverName().getString()));
 			player.swing(hand);
 		}
 		return super.use(state, level, pos, player, hand, result);
