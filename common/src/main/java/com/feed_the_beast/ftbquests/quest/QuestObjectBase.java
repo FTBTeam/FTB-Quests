@@ -53,11 +53,23 @@ public abstract class QuestObjectBase {
 	}
 
 	public static String getCodeString(long id) {
-		return id == 0L ? "-" : id == 1L ? "*" : String.format("%016X", id);
+		return id == 0L ? "-" : String.format("%016X", id);
 	}
 
 	public static String getCodeString(@Nullable QuestObjectBase object) {
 		return getCodeString(getID(object));
+	}
+
+	public static long parseCodeString(String id) {
+		if (id.isEmpty() || id.equals("-")) {
+			return 0L;
+		}
+
+		try {
+			return Long.parseLong(id.charAt(0) == '#' ? id.substring(1) : id, 16);
+		} catch (Exception ex) {
+			return 0L;
+		}
 	}
 
 	public static Optional<String> titleToID(String s) {

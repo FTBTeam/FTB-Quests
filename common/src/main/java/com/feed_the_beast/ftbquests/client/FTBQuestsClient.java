@@ -253,8 +253,13 @@ public class FTBQuestsClient extends FTBQuestsCommon {
 	}
 
 	@Override
+	public boolean isClientDataLoaded() {
+		return ClientQuestFile.INSTANCE != null;
+	}
+
+	@Override
 	public PlayerData getClientPlayerData() {
-		return ClientQuestFile.INSTANCE.getData(Minecraft.getInstance().player);
+		return ClientQuestFile.INSTANCE.self;
 	}
 
 	@Override
