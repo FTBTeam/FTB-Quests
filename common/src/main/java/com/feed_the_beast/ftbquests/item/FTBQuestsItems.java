@@ -2,7 +2,6 @@ package com.feed_the_beast.ftbquests.item;
 
 import com.feed_the_beast.ftbquests.FTBQuests;
 import com.feed_the_beast.ftbquests.block.FTBQuestsBlocks;
-import com.feed_the_beast.ftbquests.block.QuestBarrierBlock;
 import me.shedaniel.architectury.registry.DeferredRegister;
 import me.shedaniel.architectury.registry.RegistrySupplier;
 import net.minecraft.core.Registry;
@@ -28,7 +27,7 @@ public class FTBQuestsItems {
 	}
 
 	public static final RegistrySupplier<Item> BANNER = blockItem("banner", FTBQuestsBlocks.BANNER);
-	public static final RegistrySupplier<Item> BARRIER = ITEMS.register("barrier", QuestBarrierBlock.Item::new);
+	public static final RegistrySupplier<Item> BARRIER = ITEMS.register("barrier", QuestBarrierBlockItem::new);
 
 	public static void register() {
 		ITEMS.register();

@@ -1109,28 +1109,19 @@ public abstract class QuestFile extends QuestObject {
 		}
 
 		String id = o.toString();
+		long idl = parseCodeString(id);
 
-		if (id.isEmpty() || id.charAt(0) == '-') {
-			return 0L;
-		} else if (id.charAt(0) == '*') {
-			return 1L;
-		}
+		if (idl == 0L && id.length() >= 2 && id.charAt(0) == '#') {
+			String t = id.substring(1);
 
-		try {
-			return Long.parseLong(id.charAt(0) == '#' ? id.substring(1) : id, 16);
-		} catch (Exception ex) {
-			if (id.charAt(0) == '#') {
-				String t = id.substring(1);
-
-				for (QuestObjectBase b : map.values()) {
-					if (b.hasTag(t)) {
-						return b.id;
-					}
+			for (QuestObjectBase b : map.values()) {
+				if (b.hasTag(t)) {
+					return b.id;
 				}
 			}
-
-			return 0L;
 		}
+
+		return idl;
 	}
 
 	@Nullable

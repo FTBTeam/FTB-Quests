@@ -20,6 +20,10 @@ public class FTBQuestsCommon {
 	public void setRewardGuiProviders() {
 	}
 
+	public boolean isClientDataLoaded() {
+		return false;
+	}
+
 	public PlayerData getClientPlayerData() {
 		throw new IllegalStateException("Can't access client data from server side!");
 	}
