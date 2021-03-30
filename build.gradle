@@ -37,6 +37,7 @@ allprojects {
 	repositories {
 		mavenLocal()
 		maven { url "https://maven.shedaniel.me/" }
+		maven { url "https://maven.latvian.dev" }
 		maven {
 			url "https://www.cursemaven.com"
 			content {

@@ -23,7 +23,7 @@ dependencies {
 	modApi "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_api_version}"
 	modApi "me.shedaniel:architectury-fabric:${rootProject.architectury_version}"
 
-	modCompile "curse.maven:ftb-teams-438497:${rootProject.ftb_teams_version_fabric}"
+	modImplementation "dev.ftb.mods:ftb-teams-fabric:${rootProject.ftb_teams_version}"
 	modCompile "curse.maven:ftb-gui-library-438495:${rootProject.ftb_gui_library_version_fabric}"
 	modCompile "curse.maven:item-filter-438500:${rootProject.itemfilters_version_fabric}"
 	modCompile "curse.maven:kubejs-fabric-395864:${rootProject.kubejs_file_fabric}"
@@ -76,6 +76,7 @@ if (ENV.CURSEFORGE_KEY) {
 			relations {
 				requiredDependency 'architectury-fabric'
 				requiredDependency 'fabric-api'
+				requiredDependency 'ftb-teams-fabric'
 				requiredDependency 'ftb-gui-library-fabric'
 				requiredDependency 'item-filters-fabric'
 				optionalDependency 'kubejs-fabric'
