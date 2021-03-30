@@ -26,7 +26,7 @@ dependencies {
 	modApi "me.shedaniel:architectury-forge:${rootProject.architectury_version}"
 
 	modCompile "curse.maven:jei-238222:${jei_file}"
-	modCompile "curse.maven:ftb-teams-404468:${rootProject.ftb_teams_version_forge}"
+	modImplementation "dev.ftb.mods:ftb-teams-forge:${rootProject.ftb_teams_version}"
 	modCompile "curse.maven:ftb-gui-library-404465:${rootProject.ftb_gui_library_version_forge}"
 	modCompile "curse.maven:item-filter-309674:${rootProject.itemfilters_version_forge}"
 	modCompile "curse.maven:kubejs-238086:${kubejs_file_forge}"
@@ -94,6 +94,7 @@ if (ENV.CURSEFORGE_KEY) {
 			mainArtifact(remapJar.archivePath)
 			relations {
 				requiredDependency 'architectury-forge'
+				requiredDependency 'ftb-teams'
 				requiredDependency 'ftb-gui-library'
 				requiredDependency 'item-filters'
 				optionalDependency 'kubejs'
