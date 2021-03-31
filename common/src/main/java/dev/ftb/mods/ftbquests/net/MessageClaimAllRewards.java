@@ -2,9 +2,9 @@ package dev.ftb.mods.ftbquests.net;
 
 import dev.ftb.mods.ftbquests.quest.Chapter;
 import dev.ftb.mods.ftbquests.quest.ChapterGroup;
-import dev.ftb.mods.ftbquests.quest.PlayerData;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
+import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import me.shedaniel.architectury.networking.NetworkManager;
 import net.minecraft.network.FriendlyByteBuf;
@@ -27,7 +27,7 @@ public class MessageClaimAllRewards extends MessageBase {
 	@Override
 	public void handle(NetworkManager.PacketContext context) {
 		ServerPlayer player = (ServerPlayer) context.getPlayer();
-		PlayerData data = PlayerData.get(player);
+		TeamData data = TeamData.get(player);
 
 		for (ChapterGroup group : ServerQuestFile.INSTANCE.chapterGroups) {
 			for (Chapter chapter : group.chapters) {

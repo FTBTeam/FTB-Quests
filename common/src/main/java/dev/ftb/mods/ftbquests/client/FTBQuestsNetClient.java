@@ -16,13 +16,14 @@ import dev.ftb.mods.ftbquests.net.MessageChangeChapterGroupResponse;
 import dev.ftb.mods.ftbquests.quest.ChangeProgress;
 import dev.ftb.mods.ftbquests.quest.Chapter;
 import dev.ftb.mods.ftbquests.quest.ChapterGroup;
-import dev.ftb.mods.ftbquests.quest.PlayerData;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestObject;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.QuestObjectType;
+import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.task.Task;
+import dev.ftb.mods.ftbquests.util.QuestKey;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -35,24 +36,24 @@ import java.util.UUID;
 
 public class FTBQuestsNetClient extends FTBQuestsNetCommon {
 	@Override
-	public void changeProgress(UUID player, long id, ChangeProgress type, boolean notifications) {
+	public void changeProgress(UUID teamId, long id, ChangeProgress type, boolean notifications) {
 		QuestObjectBase object = ClientQuestFile.INSTANCE.getBase(id);
 
 		if (object != null) {
-			object.forceProgress(ClientQuestFile.INSTANCE.getData(player), type, notifications);
+			object.forceProgress(ClientQuestFile.INSTANCE.getData(teamId), type, notifications);
 		}
 	}
 
 	@Override
-	public void claimReward(UUID player, long id) {
-		Reward reward = ClientQuestFile.INSTANCE.getReward(id);
+	public void claimReward(QuestKey key) {
+		Reward reward = ClientQuestFile.INSTANCE.getReward(key.id);
 
 		if (reward == null) {
 			return;
 		}
 
-		PlayerData data = ClientQuestFile.INSTANCE.getData(player);
-		data.setRewardClaimed(reward.id, true);
+		TeamData data = ClientQuestFile.INSTANCE.getData(key.uuid);
+		data.claimReward(key);
 
 		if (data == ClientQuestFile.INSTANCE.self) {
 			QuestScreen treeGui = ClientUtils.getCurrentGuiAs(QuestScreen.class);
@@ -86,8 +87,8 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon {
 	}
 
 	@Override
-	public void createPlayerData(UUID uuid, String name) {
-		PlayerData data = new PlayerData(ClientQuestFile.INSTANCE, uuid);
+	public void createTeamData(UUID teamId, String name) {
+		TeamData data = new TeamData(ClientQuestFile.INSTANCE, teamId);
 		data.name = name;
 		data.file.addData(data, true);
 	}
@@ -205,7 +206,7 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon {
 
 	@Override
 	public void togglePinned(long id) {
-		PlayerData data = FTBQuests.PROXY.getClientPlayerData();
+		TeamData data = FTBQuests.PROXY.getClientPlayerData();
 		data.setQuestPinned(id, !data.isQuestPinned(id));
 
 		ClientQuestFile.INSTANCE.questScreen.otherButtonsBottomPanel.refreshWidgets();
@@ -216,17 +217,17 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon {
 	}
 
 	@Override
-	public void updatePlayerData(UUID uuid, String name) {
-		PlayerData data = ClientQuestFile.INSTANCE.getData(uuid);
+	public void updateTeamData(UUID teamId, String name) {
+		TeamData data = ClientQuestFile.INSTANCE.getData(teamId);
 		data.name = name;
 	}
 
 	@Override
-	public void updateTaskProgress(UUID player, long task, long progress) {
+	public void updateTaskProgress(UUID teamId, long task, long progress) {
 		Task t = ClientQuestFile.INSTANCE.getTask(task);
 
 		if (t != null) {
-			PlayerData data = ClientQuestFile.INSTANCE.getData(player);
+			TeamData data = ClientQuestFile.INSTANCE.getData(teamId);
 			ClientQuestFile.INSTANCE.clearCachedProgress();
 			data.getTaskData(t).setProgress(progress);
 		}

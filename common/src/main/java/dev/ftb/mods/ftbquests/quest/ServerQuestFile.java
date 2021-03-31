@@ -1,7 +1,7 @@
 package dev.ftb.mods.ftbquests.quest;
 
 import dev.ftb.mods.ftbquests.FTBQuests;
-import dev.ftb.mods.ftbquests.net.MessageCreatePlayerData;
+import dev.ftb.mods.ftbquests.net.MessageCreateTeamData;
 import dev.ftb.mods.ftbquests.net.MessageDeleteObjectResponse;
 import dev.ftb.mods.ftbquests.net.MessageSyncQuests;
 import dev.ftb.mods.ftbquests.quest.reward.RewardType;
@@ -75,7 +75,7 @@ public class ServerQuestFile extends QuestFile {
 
 					try {
 						UUID uuid = UUID.fromString(nbt.getString("uuid"));
-						PlayerData data = new PlayerData(this, uuid);
+						TeamData data = new TeamData(this, uuid);
 						addData(data, true);
 						data.deserializeNBT(nbt);
 					} catch (Exception ex) {
@@ -136,7 +136,7 @@ public class ServerQuestFile extends QuestFile {
 
 		Path path = server.getWorldPath(FTBQUESTS_DATA);
 
-		for (PlayerData data : getAllData()) {
+		for (TeamData data : getAllData()) {
 			if (data.shouldSave) {
 				NBTUtils.writeSNBT(path.resolve(data.uuid.toString() + ".snbt"), data.serializeNBT());
 				data.shouldSave = false;
@@ -152,10 +152,10 @@ public class ServerQuestFile extends QuestFile {
 
 	public void onLoggedIn(ServerPlayer player) {
 		UUID id = player.getUUID();
-		PlayerData data = playerDataMap.get(id);
+		TeamData data = playerDataMap.get(id);
 
 		if (data == null) {
-			data = new PlayerData(this, id);
+			data = new TeamData(this, id);
 			data.save();
 		}
 
@@ -168,7 +168,7 @@ public class ServerQuestFile extends QuestFile {
 
 		for (ServerPlayer player1 : server.getPlayerList().getPlayers()) {
 			if (player1 != player) {
-				new MessageCreatePlayerData(data).sendTo(player1);
+				new MessageCreateTeamData(data).sendTo(player1);
 			}
 		}
 

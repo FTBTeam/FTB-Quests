@@ -28,6 +28,8 @@ import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import dev.ftb.mods.ftbquests.util.NBTUtils;
 import dev.ftb.mods.ftbquests.util.NetUtils;
 import dev.ftb.mods.ftbquests.util.OrderedCompoundTag;
+import dev.ftb.mods.ftbteams.FTBTeamsAPI;
+import dev.ftb.mods.ftbteams.data.Team;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
@@ -70,7 +72,7 @@ public abstract class QuestFile extends QuestObject {
 	public final DefaultChapterGroup defaultChapterGroup;
 	public final List<ChapterGroup> chapterGroups;
 	public final List<RewardTable> rewardTables;
-	protected final Map<UUID, PlayerData> playerDataMap;
+	protected final Map<UUID, TeamData> playerDataMap;
 
 	private final Long2ObjectOpenHashMap<QuestObjectBase> map;
 	public final Int2ObjectOpenHashMap<TaskType> taskTypeIds;
@@ -154,7 +156,7 @@ public abstract class QuestFile extends QuestObject {
 	}
 
 	@Override
-	public int getRelativeProgressFromChildren(PlayerData data) {
+	public int getRelativeProgressFromChildren(TeamData data) {
 		int progress = 0;
 		int chapters = 0;
 
@@ -169,7 +171,7 @@ public abstract class QuestFile extends QuestObject {
 	}
 
 	@Override
-	public void onCompleted(PlayerData data, List<ServerPlayer> onlineMembers, List<ServerPlayer> notifiedPlayers) {
+	public void onCompleted(TeamData data, List<ServerPlayer> onlineMembers, List<ServerPlayer> notifiedPlayers) {
 		super.onCompleted(data, onlineMembers, notifiedPlayers);
 		ObjectCompletedEvent.FILE.invoker().act(new ObjectCompletedEvent.FileEvent(data, this, onlineMembers, notifiedPlayers));
 
@@ -181,7 +183,7 @@ public abstract class QuestFile extends QuestObject {
 	}
 
 	@Override
-	public void changeProgress(PlayerData data, ChangeProgress type) {
+	public void changeProgress(TeamData data, ChangeProgress type) {
 		for (ChapterGroup group : chapterGroups) {
 			group.changeProgress(data, type);
 		}
@@ -842,12 +844,12 @@ public abstract class QuestFile extends QuestObject {
 			}
 		}
 
-		PlayerData selfPlayerData = getData(self);
+		TeamData selfTeamData = getData(self);
 		buffer.writeVarInt(playerDataMap.size());
 
-		for (PlayerData data : playerDataMap.values()) {
-			NetUtils.writeUUID(buffer, data.uuid);
-			data.write(buffer, data == selfPlayerData);
+		for (TeamData data : playerDataMap.values()) {
+			buffer.writeUUID(data.uuid);
+			data.write(buffer, data == selfTeamData);
 		}
 
 		FTBQuests.LOGGER.debug("Wrote " + (buffer.writerIndex() - pos) + " bytes, " + map.size() + " objects");
@@ -983,7 +985,7 @@ public abstract class QuestFile extends QuestObject {
 		int pds = buffer.readVarInt();
 
 		for (int i = 0; i < pds; i++) {
-			PlayerData data = new PlayerData(this, NetUtils.readUUID(buffer));
+			TeamData data = new TeamData(this, buffer.readUUID());
 			addData(data, true);
 			data.read(buffer, data.uuid.equals(self));
 		}
@@ -997,19 +999,23 @@ public abstract class QuestFile extends QuestObject {
 	}
 
 	@Nullable
-	public PlayerData getNullablePlayerData(UUID id) {
+	public TeamData getNullablePlayerData(UUID id) {
 		return playerDataMap.get(id);
 	}
 
-	public PlayerData getData(UUID id) {
-		return playerDataMap.computeIfAbsent(id, i -> new PlayerData(this, i));
+	public TeamData getData(UUID id) {
+		return playerDataMap.computeIfAbsent(id, i -> new TeamData(this, i));
 	}
 
-	public PlayerData getData(Entity player) {
-		return getData(player.getUUID());
+	public TeamData getData(Team team) {
+		return getData(team.getId());
 	}
 
-	public Collection<PlayerData> getAllData() {
+	public TeamData getData(Entity player) {
+		return getData(FTBTeamsAPI.getPlayerTeamID(player.getUUID()));
+	}
+
+	public Collection<TeamData> getAllData() {
 		return playerDataMap.values();
 	}
 
@@ -1064,7 +1070,7 @@ public abstract class QuestFile extends QuestObject {
 	}
 
 	public void clearCachedProgress() {
-		for (PlayerData data : getAllData()) {
+		for (TeamData data : getAllData()) {
 			data.clearCache();
 		}
 	}
@@ -1166,7 +1172,7 @@ public abstract class QuestFile extends QuestObject {
 	}
 
 	@Override
-	public boolean isVisible(PlayerData data) {
+	public boolean isVisible(TeamData data) {
 		for (ChapterGroup group : chapterGroups) {
 			if (group.isVisible(data)) {
 				return true;
@@ -1186,7 +1192,7 @@ public abstract class QuestFile extends QuestObject {
 		return list;
 	}
 
-	public List<Chapter> getVisibleChapters(PlayerData data) {
+	public List<Chapter> getVisibleChapters(TeamData data) {
 		List<Chapter> list = new ArrayList<>();
 
 		for (ChapterGroup group : chapterGroups) {
@@ -1197,7 +1203,7 @@ public abstract class QuestFile extends QuestObject {
 	}
 
 	@Nullable
-	public Chapter getFirstVisibleChapter(PlayerData data) {
+	public Chapter getFirstVisibleChapter(TeamData data) {
 		List<Chapter> chapters = getVisibleChapters(data);
 
 		if (!chapters.isEmpty()) {
@@ -1233,7 +1239,7 @@ public abstract class QuestFile extends QuestObject {
 		return defaultQuestShape;
 	}
 
-	public void addData(PlayerData data, boolean strong) {
+	public void addData(TeamData data, boolean strong) {
 		playerDataMap.put(data.uuid, data);
 
 		for (ChapterGroup group : chapterGroups) {

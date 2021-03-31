@@ -107,7 +107,7 @@ public class ChapterGroup extends QuestObjectBase {
 		return IconAnimation.fromList(list, false);
 	}
 
-	public boolean isVisible(PlayerData data) {
+	public boolean isVisible(TeamData data) {
 		for (Chapter chapter : chapters) {
 			if (chapter.isVisible(data)) {
 				return true;
@@ -118,13 +118,13 @@ public class ChapterGroup extends QuestObjectBase {
 	}
 
 	@Override
-	public void changeProgress(PlayerData data, ChangeProgress type) {
+	public void changeProgress(TeamData data, ChangeProgress type) {
 		for (Chapter chapter : chapters) {
 			chapter.changeProgress(data, type);
 		}
 	}
 
-	public List<Chapter> getVisibleChapters(PlayerData data) {
+	public List<Chapter> getVisibleChapters(TeamData data) {
 		if (file.canEdit()) {
 			return chapters;
 		}

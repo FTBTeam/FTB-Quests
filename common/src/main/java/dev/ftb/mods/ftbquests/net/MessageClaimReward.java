@@ -1,7 +1,7 @@
 package dev.ftb.mods.ftbquests.net;
 
-import dev.ftb.mods.ftbquests.quest.PlayerData;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
+import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import me.shedaniel.architectury.networking.NetworkManager;
 import net.minecraft.network.FriendlyByteBuf;
@@ -36,7 +36,7 @@ public class MessageClaimReward extends MessageBase {
 		ServerPlayer player = (ServerPlayer) context.getPlayer();
 
 		if (reward != null) {
-			PlayerData teamData = ServerQuestFile.INSTANCE.getData(player);
+			TeamData teamData = ServerQuestFile.INSTANCE.getData(player);
 
 			if (teamData.isComplete(reward.quest)) {
 				teamData.claimReward(player, reward, notify);

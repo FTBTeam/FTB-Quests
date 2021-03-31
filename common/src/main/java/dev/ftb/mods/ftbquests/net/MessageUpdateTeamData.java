@@ -1,8 +1,7 @@
 package dev.ftb.mods.ftbquests.net;
 
 import dev.ftb.mods.ftbquests.FTBQuests;
-import dev.ftb.mods.ftbquests.quest.PlayerData;
-import dev.ftb.mods.ftbquests.util.NetUtils;
+import dev.ftb.mods.ftbquests.quest.TeamData;
 import me.shedaniel.architectury.networking.NetworkManager;
 import net.minecraft.network.FriendlyByteBuf;
 
@@ -11,28 +10,28 @@ import java.util.UUID;
 /**
  * @author LatvianModder
  */
-public class MessageCreatePlayerData extends MessageBase {
-	private final UUID uuid;
+public class MessageUpdateTeamData extends MessageBase {
+	private final UUID team;
 	private final String name;
 
-	MessageCreatePlayerData(FriendlyByteBuf buffer) {
-		uuid = NetUtils.readUUID(buffer);
+	MessageUpdateTeamData(FriendlyByteBuf buffer) {
+		team = buffer.readUUID();
 		name = buffer.readUtf(Short.MAX_VALUE);
 	}
 
-	public MessageCreatePlayerData(PlayerData data) {
-		uuid = data.uuid;
+	public MessageUpdateTeamData(TeamData data) {
+		team = data.uuid;
 		name = data.name;
 	}
 
 	@Override
 	public void write(FriendlyByteBuf buffer) {
-		NetUtils.writeUUID(buffer, uuid);
+		buffer.writeUUID(team);
 		buffer.writeUtf(name, Short.MAX_VALUE);
 	}
 
 	@Override
 	public void handle(NetworkManager.PacketContext context) {
-		FTBQuests.NET_PROXY.createPlayerData(uuid, name);
+		FTBQuests.NET_PROXY.updateTeamData(team, name);
 	}
 }

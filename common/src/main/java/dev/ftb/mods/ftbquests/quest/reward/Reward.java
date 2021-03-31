@@ -11,11 +11,11 @@ import dev.ftb.mods.ftbquests.integration.jei.FTBQuestsJEIHelper;
 import dev.ftb.mods.ftbquests.net.MessageClaimReward;
 import dev.ftb.mods.ftbquests.quest.ChangeProgress;
 import dev.ftb.mods.ftbquests.quest.Chapter;
-import dev.ftb.mods.ftbquests.quest.PlayerData;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestFile;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.QuestObjectType;
+import dev.ftb.mods.ftbquests.quest.TeamData;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
@@ -147,8 +147,8 @@ public abstract class Reward extends QuestObjectBase {
 	public final void deleteSelf() {
 		quest.rewards.remove(this);
 
-		for (PlayerData data : getQuestFile().getAllData()) {
-			data.setRewardClaimed(id, false);
+		for (TeamData data : getQuestFile().getAllData()) {
+			data.resetReward(id);
 		}
 
 		super.deleteSelf();
@@ -156,8 +156,8 @@ public abstract class Reward extends QuestObjectBase {
 
 	@Override
 	public final void deleteChildren() {
-		for (PlayerData data : getQuestFile().getAllData()) {
-			data.setRewardClaimed(id, false);
+		for (TeamData data : getQuestFile().getAllData()) {
+			data.resetReward(id);
 		}
 
 		super.deleteChildren();
@@ -199,9 +199,9 @@ public abstract class Reward extends QuestObjectBase {
 	}
 
 	@Override
-	public final void changeProgress(PlayerData data, ChangeProgress type) {
+	public final void changeProgress(TeamData data, ChangeProgress type) {
 		if (type == ChangeProgress.RESET || type == ChangeProgress.RESET_DEPS) {
-			data.setRewardClaimed(id, false);
+			data.resetReward(id);
 		}
 	}
 

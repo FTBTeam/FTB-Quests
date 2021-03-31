@@ -1,10 +1,10 @@
 package dev.ftb.mods.ftbquests.events;
 
 import dev.ftb.mods.ftbquests.quest.Chapter;
-import dev.ftb.mods.ftbquests.quest.PlayerData;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestFile;
 import dev.ftb.mods.ftbquests.quest.QuestObject;
+import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import me.shedaniel.architectury.ForgeEvent;
 import me.shedaniel.architectury.event.Actor;
@@ -32,12 +32,12 @@ public class ObjectCompletedEvent<T extends QuestObject> {
 		TASK.register(event -> GENERIC.invoker().act(event));
 	}
 
-	private final PlayerData data;
+	private final TeamData data;
 	private final T object;
 	private final List<ServerPlayer> onlineMembers;
 	private final List<ServerPlayer> notifiedPlayers;
 
-	private ObjectCompletedEvent(PlayerData t, T o, List<ServerPlayer> om, List<ServerPlayer> n) {
+	private ObjectCompletedEvent(TeamData t, T o, List<ServerPlayer> om, List<ServerPlayer> n) {
 		data = t;
 		object = o;
 		onlineMembers = om;
@@ -48,7 +48,7 @@ public class ObjectCompletedEvent<T extends QuestObject> {
 		return true;
 	}
 
-	public PlayerData getData() {
+	public TeamData getData() {
 		return data;
 	}
 
@@ -65,12 +65,12 @@ public class ObjectCompletedEvent<T extends QuestObject> {
 	}
 
 	@Deprecated
-	public PlayerData getTeam() {
+	public TeamData getTeam() {
 		return getData();
 	}
 
 	public static class FileEvent extends ObjectCompletedEvent<QuestFile> {
-		public FileEvent(PlayerData t, QuestFile o, List<ServerPlayer> om, List<ServerPlayer> n) {
+		public FileEvent(TeamData t, QuestFile o, List<ServerPlayer> om, List<ServerPlayer> n) {
 			super(t, o, om, n);
 		}
 
@@ -80,7 +80,7 @@ public class ObjectCompletedEvent<T extends QuestObject> {
 	}
 
 	public static class ChapterEvent extends ObjectCompletedEvent<Chapter> {
-		public ChapterEvent(PlayerData t, Chapter o, List<ServerPlayer> om, List<ServerPlayer> n) {
+		public ChapterEvent(TeamData t, Chapter o, List<ServerPlayer> om, List<ServerPlayer> n) {
 			super(t, o, om, n);
 		}
 
@@ -90,7 +90,7 @@ public class ObjectCompletedEvent<T extends QuestObject> {
 	}
 
 	public static class QuestEvent extends ObjectCompletedEvent<Quest> {
-		public QuestEvent(PlayerData t, Quest o, List<ServerPlayer> om, List<ServerPlayer> n) {
+		public QuestEvent(TeamData t, Quest o, List<ServerPlayer> om, List<ServerPlayer> n) {
 			super(t, o, om, n);
 		}
 
@@ -100,7 +100,7 @@ public class ObjectCompletedEvent<T extends QuestObject> {
 	}
 
 	public static class TaskEvent extends ObjectCompletedEvent<Task> {
-		public TaskEvent(PlayerData t, Task o, List<ServerPlayer> om, List<ServerPlayer> n) {
+		public TaskEvent(TeamData t, Task o, List<ServerPlayer> om, List<ServerPlayer> n) {
 			super(t, o, om, n);
 		}
 

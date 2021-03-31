@@ -27,7 +27,7 @@ public class FTBQuestsNetHandler {
 		register(MessageClaimRewardResponse.class, MessageClaimRewardResponse::new);
 		register(MessageSyncEditingMode.class, MessageSyncEditingMode::new);
 		register(MessageGetEmergencyItems.class, MessageGetEmergencyItems::new);
-		register(MessageCreatePlayerData.class, MessageCreatePlayerData::new);
+		register(MessageCreateTeamData.class, MessageCreateTeamData::new);
 		register(MessageClaimAllRewards.class, MessageClaimAllRewards::new);
 		register(MessageClaimChoiceReward.class, MessageClaimChoiceReward::new);
 		register(MessageDisplayCompletionToast.class, MessageDisplayCompletionToast::new);
@@ -35,7 +35,7 @@ public class FTBQuestsNetHandler {
 		register(MessageDisplayItemRewardToast.class, MessageDisplayItemRewardToast::new);
 		register(MessageTogglePinned.class, MessageTogglePinned::new);
 		register(MessageTogglePinnedResponse.class, MessageTogglePinnedResponse::new);
-		register(MessageUpdatePlayerData.class, MessageUpdatePlayerData::new);
+		register(MessageUpdateTeamData.class, MessageUpdateTeamData::new);
 		register(MessageSetCustomImage.class, MessageSetCustomImage::new);
 
 		// Editing

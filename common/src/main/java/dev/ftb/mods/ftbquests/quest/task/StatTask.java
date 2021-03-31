@@ -2,8 +2,8 @@ package dev.ftb.mods.ftbquests.quest.task;
 
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
 import com.feed_the_beast.mods.ftbguilibrary.config.NameMap;
-import dev.ftb.mods.ftbquests.quest.PlayerData;
 import dev.ftb.mods.ftbquests.quest.Quest;
+import dev.ftb.mods.ftbquests.quest.TeamData;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
@@ -101,12 +101,12 @@ public class StatTask extends Task {
 	}
 
 	@Override
-	public TaskData createData(PlayerData data) {
+	public TaskData createData(TeamData data) {
 		return new Data(this, data);
 	}
 
 	public static class Data extends TaskData<StatTask> {
-		private Data(StatTask task, PlayerData data) {
+		private Data(StatTask task, TeamData data) {
 			super(task, data);
 		}
 

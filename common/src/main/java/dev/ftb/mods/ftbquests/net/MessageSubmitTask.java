@@ -1,7 +1,7 @@
 package dev.ftb.mods.ftbquests.net;
 
-import dev.ftb.mods.ftbquests.quest.PlayerData;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
+import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import me.shedaniel.architectury.networking.NetworkManager;
 import net.minecraft.network.FriendlyByteBuf;
@@ -29,7 +29,7 @@ public class MessageSubmitTask extends MessageBase {
 	@Override
 	public void handle(NetworkManager.PacketContext context) {
 		ServerPlayer player = (ServerPlayer) context.getPlayer();
-		PlayerData data = PlayerData.get(player);
+		TeamData data = TeamData.get(player);
 		Task t = ServerQuestFile.INSTANCE.getTask(task);
 
 		if (t != null && data.canStartTasks(t.quest)) {

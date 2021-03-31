@@ -16,11 +16,11 @@ import dev.ftb.mods.ftbquests.net.MessageDisplayCompletionToast;
 import dev.ftb.mods.ftbquests.net.MessageSubmitTask;
 import dev.ftb.mods.ftbquests.quest.ChangeProgress;
 import dev.ftb.mods.ftbquests.quest.Chapter;
-import dev.ftb.mods.ftbquests.quest.PlayerData;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestFile;
 import dev.ftb.mods.ftbquests.quest.QuestObject;
 import dev.ftb.mods.ftbquests.quest.QuestObjectType;
+import dev.ftb.mods.ftbquests.quest.TeamData;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
@@ -70,15 +70,15 @@ public abstract class Task extends QuestObject {
 
 	public abstract TaskType getType();
 
-	public abstract TaskData createData(PlayerData data);
+	public abstract TaskData createData(TeamData data);
 
 	@Override
-	public final int getRelativeProgressFromChildren(PlayerData data) {
+	public final int getRelativeProgressFromChildren(TeamData data) {
 		return data.getTaskData(this).getRelativeProgress();
 	}
 
 	@Override
-	public final void onCompleted(PlayerData data, List<ServerPlayer> onlineMembers, List<ServerPlayer> notifiedPlayers) {
+	public final void onCompleted(TeamData data, List<ServerPlayer> onlineMembers, List<ServerPlayer> notifiedPlayers) {
 		super.onCompleted(data, onlineMembers, notifiedPlayers);
 		ObjectCompletedEvent.TASK.invoker().act(new ObjectCompletedEvent.TaskEvent(data, this, onlineMembers, notifiedPlayers));
 		boolean questComplete = data.isComplete(quest);
@@ -101,7 +101,7 @@ public abstract class Task extends QuestObject {
 	}
 
 	@Override
-	public final void changeProgress(PlayerData data, ChangeProgress type) {
+	public final void changeProgress(TeamData data, ChangeProgress type) {
 		data.getTaskData(this).setProgress(type.reset ? 0L : getMaxProgress());
 	}
 
@@ -109,7 +109,7 @@ public abstract class Task extends QuestObject {
 	public final void deleteSelf() {
 		quest.tasks.remove(this);
 
-		for (PlayerData data : quest.chapter.file.getAllData()) {
+		for (TeamData data : quest.chapter.file.getAllData()) {
 			data.removeTaskData(this);
 		}
 
@@ -118,7 +118,7 @@ public abstract class Task extends QuestObject {
 
 	@Override
 	public final void deleteChildren() {
-		for (PlayerData data : quest.chapter.file.getAllData()) {
+		for (TeamData data : quest.chapter.file.getAllData()) {
 			data.removeTaskData(this);
 		}
 
@@ -140,7 +140,7 @@ public abstract class Task extends QuestObject {
 	public final void onCreated() {
 		quest.tasks.add(this);
 
-		for (PlayerData data : quest.chapter.file.getAllData()) {
+		for (TeamData data : quest.chapter.file.getAllData()) {
 			data.createTaskData(this, true);
 		}
 

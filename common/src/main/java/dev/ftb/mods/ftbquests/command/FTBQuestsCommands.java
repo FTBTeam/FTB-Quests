@@ -9,10 +9,10 @@ import dev.ftb.mods.ftbquests.net.MessageCreateObjectResponse;
 import dev.ftb.mods.ftbquests.net.MessageDeleteObjectResponse;
 import dev.ftb.mods.ftbquests.quest.ChangeProgress;
 import dev.ftb.mods.ftbquests.quest.Chapter;
-import dev.ftb.mods.ftbquests.quest.PlayerData;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
+import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
 import dev.ftb.mods.ftbquests.quest.task.ItemTask;
 import dev.ftb.mods.ftbquests.util.FileUtils;
@@ -98,7 +98,7 @@ public class FTBQuestsCommands {
 	}
 
 	private static int editingMode(CommandSourceStack source, ServerPlayer player, @Nullable Boolean canEdit) {
-		PlayerData data = ServerQuestFile.INSTANCE.getData(player);
+		TeamData data = ServerQuestFile.INSTANCE.getData(player);
 
 		if (canEdit == null) {
 			canEdit = !data.getCanEdit();

@@ -1,8 +1,8 @@
 package dev.ftb.mods.ftbquests.quest.task;
 
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
-import dev.ftb.mods.ftbquests.quest.PlayerData;
 import dev.ftb.mods.ftbquests.quest.Quest;
+import dev.ftb.mods.ftbquests.quest.TeamData;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.Registry;
@@ -118,12 +118,12 @@ public class LocationTask extends Task {
 	}
 
 	@Override
-	public TaskData createData(PlayerData data) {
+	public TaskData createData(TeamData data) {
 		return new Data(this, data);
 	}
 
 	public static class Data extends BooleanTaskData<LocationTask> {
-		private Data(LocationTask task, PlayerData data) {
+		private Data(LocationTask task, TeamData data) {
 			super(task, data);
 		}
 

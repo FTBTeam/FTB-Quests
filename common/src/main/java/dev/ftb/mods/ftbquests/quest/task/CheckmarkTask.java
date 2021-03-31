@@ -1,8 +1,8 @@
 package dev.ftb.mods.ftbquests.quest.task;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import dev.ftb.mods.ftbquests.quest.PlayerData;
 import dev.ftb.mods.ftbquests.quest.Quest;
+import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 
 import javax.annotation.Nullable;
@@ -26,7 +26,7 @@ public class CheckmarkTask extends Task {
 	}
 
 	@Override
-	public TaskData createData(PlayerData data) {
+	public TaskData createData(TeamData data) {
 		return new BooleanTaskData<>(this, data);
 	}
 }

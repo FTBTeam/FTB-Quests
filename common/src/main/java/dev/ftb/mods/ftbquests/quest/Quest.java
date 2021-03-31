@@ -341,7 +341,7 @@ public final class Quest extends QuestObject implements Movable {
 	}
 
 	@Override
-	public int getRelativeProgressFromChildren(PlayerData data) {
+	public int getRelativeProgressFromChildren(TeamData data) {
 		/*if (data.getTimesCompleted(this) > 0)
 		{
 			return 100;
@@ -365,7 +365,7 @@ public final class Quest extends QuestObject implements Movable {
 	}
 
 	@Override
-	public void onCompleted(PlayerData data, List<ServerPlayer> onlineMembers, List<ServerPlayer> notifiedPlayers) {
+	public void onCompleted(TeamData data, List<ServerPlayer> onlineMembers, List<ServerPlayer> notifiedPlayers) {
 		//data.setTimesCompleted(this, data.getTimesCompleted(this) + 1);
 		super.onCompleted(data, onlineMembers, notifiedPlayers);
 
@@ -394,7 +394,7 @@ public final class Quest extends QuestObject implements Movable {
 	}
 
 	@Override
-	public void changeProgress(PlayerData data, ChangeProgress type) {
+	public void changeProgress(TeamData data, ChangeProgress type) {
 		//FIXME: data.setTimesCompleted(this, -1);
 
 		if (type.dependencies) {
@@ -411,7 +411,7 @@ public final class Quest extends QuestObject implements Movable {
 
 		if (type.reset) {
 			for (Reward r : rewards) {
-				data.setRewardClaimed(r.id, false);
+				data.resetReward(r.id);
 			}
 		}
 	}
@@ -548,7 +548,7 @@ public final class Quest extends QuestObject implements Movable {
 	}
 
 	@Override
-	public boolean isVisible(PlayerData data) {
+	public boolean isVisible(TeamData data) {
 		if (dependencies.isEmpty()) {
 			return true;
 		}

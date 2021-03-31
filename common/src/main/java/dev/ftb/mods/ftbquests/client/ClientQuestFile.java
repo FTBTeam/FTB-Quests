@@ -6,9 +6,9 @@ import dev.ftb.mods.ftbquests.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.integration.jei.FTBQuestsJEIHelper;
 import dev.ftb.mods.ftbquests.net.MessageDeleteObject;
 import dev.ftb.mods.ftbquests.quest.Movable;
-import dev.ftb.mods.ftbquests.quest.PlayerData;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestFile;
+import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.theme.QuestTheme;
 import me.shedaniel.architectury.utils.Env;
 import net.minecraft.client.Minecraft;
@@ -27,7 +27,7 @@ public class ClientQuestFile extends QuestFile {
 		return INSTANCE != null && !INSTANCE.invalid;
 	}
 
-	public PlayerData self;
+	public TeamData self;
 	public QuestScreen questScreen;
 	public GuiBase questGui;
 

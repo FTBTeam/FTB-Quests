@@ -1,8 +1,8 @@
 package dev.ftb.mods.ftbquests.integration.kubejs;
 
 import dev.ftb.mods.ftbquests.events.ObjectCompletedEvent;
-import dev.ftb.mods.ftbquests.quest.PlayerData;
 import dev.ftb.mods.ftbquests.quest.QuestObject;
+import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.latvian.kubejs.player.EntityArrayList;
 import dev.latvian.kubejs.server.ServerEventJS;
 import dev.latvian.kubejs.server.ServerJS;
@@ -22,7 +22,7 @@ public class QuestObjectCompletedEventJS extends ServerEventJS {
 		event = e;
 	}
 
-	public PlayerData getData() {
+	public TeamData getData() {
 		return event.getData();
 	}
 

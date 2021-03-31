@@ -2,9 +2,9 @@ package dev.ftb.mods.ftbquests.util;
 
 import dev.ftb.mods.ftbquests.quest.Chapter;
 import dev.ftb.mods.ftbquests.quest.ChapterGroup;
-import dev.ftb.mods.ftbquests.quest.PlayerData;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
+import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import me.shedaniel.architectury.hooks.PlayerHooks;
 import net.minecraft.core.NonNullList;
@@ -28,7 +28,7 @@ public class FTBQuestsInventoryListener implements ContainerListener {
 			return;
 		}
 
-		PlayerData data = ServerQuestFile.INSTANCE.getNullablePlayerData(player.getUUID());
+		TeamData data = ServerQuestFile.INSTANCE.getNullablePlayerData(player.getUUID());
 
 		if (data == null) {
 			return;

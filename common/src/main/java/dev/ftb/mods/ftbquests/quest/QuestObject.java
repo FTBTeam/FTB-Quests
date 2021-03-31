@@ -52,9 +52,9 @@ public abstract class QuestObject extends QuestObjectBase {
 	}
 
 	@Override
-	public abstract void changeProgress(PlayerData data, ChangeProgress type);
+	public abstract void changeProgress(TeamData data, ChangeProgress type);
 
-	public abstract int getRelativeProgressFromChildren(PlayerData data);
+	public abstract int getRelativeProgressFromChildren(TeamData data);
 
 	public boolean cacheProgress() {
 		return true;
@@ -70,18 +70,18 @@ public abstract class QuestObject extends QuestObjectBase {
 		return Math.max(1, (int) (progressSum / (double) count));
 	}
 
-	public boolean isVisible(PlayerData data) {
+	public boolean isVisible(TeamData data) {
 		return true;
 	}
 
-	public void onCompleted(PlayerData data, List<ServerPlayer> onlineMembers, List<ServerPlayer> notifiedPlayers) {
+	public void onCompleted(TeamData data, List<ServerPlayer> onlineMembers, List<ServerPlayer> notifiedPlayers) {
 	}
 
 	protected void verifyDependenciesInternal(long original, int depth) {
 	}
 
 	@Environment(EnvType.CLIENT)
-	public Color4I getProgressColor(PlayerData data) {
+	public Color4I getProgressColor(TeamData data) {
 		if (data.isComplete(this)) {
 			return ThemeProperties.QUEST_COMPLETED_COLOR.get();
 		} else if (data.isStarted(this)) {
@@ -92,7 +92,7 @@ public abstract class QuestObject extends QuestObjectBase {
 	}
 
 	@Environment(EnvType.CLIENT)
-	public Color4I getProgressColor(PlayerData data, boolean dim) {
+	public Color4I getProgressColor(TeamData data, boolean dim) {
 		Color4I c = getProgressColor(data);
 
 		if (dim) {

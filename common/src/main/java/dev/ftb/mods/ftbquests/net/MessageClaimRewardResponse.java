@@ -1,37 +1,31 @@
 package dev.ftb.mods.ftbquests.net;
 
 import dev.ftb.mods.ftbquests.FTBQuests;
-import dev.ftb.mods.ftbquests.util.NetUtils;
+import dev.ftb.mods.ftbquests.util.QuestKey;
 import me.shedaniel.architectury.networking.NetworkManager;
 import net.minecraft.network.FriendlyByteBuf;
-
-import java.util.UUID;
 
 /**
  * @author LatvianModder
  */
 public class MessageClaimRewardResponse extends MessageBase {
-	private final UUID player;
-	private final long id;
+	private final QuestKey key;
 
 	MessageClaimRewardResponse(FriendlyByteBuf buffer) {
-		player = NetUtils.readUUID(buffer);
-		id = buffer.readLong();
+		key = QuestKey.of(buffer);
 	}
 
-	public MessageClaimRewardResponse(UUID p, long i, int t) {
-		player = p;
-		id = i;
+	public MessageClaimRewardResponse(QuestKey k) {
+		key = k;
 	}
 
 	@Override
 	public void write(FriendlyByteBuf buffer) {
-		NetUtils.writeUUID(buffer, player);
-		buffer.writeLong(id);
+		key.write(buffer);
 	}
 
 	@Override
 	public void handle(NetworkManager.PacketContext context) {
-		FTBQuests.NET_PROXY.claimReward(player, id);
+		FTBQuests.NET_PROXY.claimReward(key);
 	}
 }

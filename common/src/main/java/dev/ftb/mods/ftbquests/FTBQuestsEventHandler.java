@@ -6,8 +6,8 @@ import dev.ftb.mods.ftbquests.block.entity.FTBQuestsBlockEntities;
 import dev.ftb.mods.ftbquests.command.FTBQuestsCommands;
 import dev.ftb.mods.ftbquests.events.ClearFileCacheEvent;
 import dev.ftb.mods.ftbquests.item.FTBQuestsItems;
-import dev.ftb.mods.ftbquests.quest.PlayerData;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
+import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.task.DimensionTask;
 import dev.ftb.mods.ftbquests.quest.task.KillTask;
 import dev.ftb.mods.ftbquests.quest.task.Task;
@@ -109,7 +109,7 @@ public class FTBQuestsEventHandler {
 			}
 
 			ServerPlayer player = (ServerPlayer) source.getDirectEntity();
-			PlayerData data = ServerQuestFile.INSTANCE.getData(player);
+			TeamData data = ServerQuestFile.INSTANCE.getData(player);
 
 			for (KillTask task : killTasks) {
 				TaskData taskData = data.getTaskData(task);
@@ -134,7 +134,7 @@ public class FTBQuestsEventHandler {
 				return;
 			}
 
-			PlayerData data = ServerQuestFile.INSTANCE.getData(player);
+			TeamData data = ServerQuestFile.INSTANCE.getData(player);
 			long t = player.level.getGameTime();
 
 			for (Task task : autoSubmitTasks) {
@@ -185,7 +185,7 @@ public class FTBQuestsEventHandler {
 
 	private void changedDimension(ServerPlayer player, ResourceKey<Level> oldLevel, ResourceKey<Level> newLevel) {
 		if (!PlayerHooks.isFake(player)) {
-			PlayerData data = ServerQuestFile.INSTANCE.getData(player);
+			TeamData data = ServerQuestFile.INSTANCE.getData(player);
 
 			for (DimensionTask task : ServerQuestFile.INSTANCE.collect(DimensionTask.class)) {
 				data.getTaskData(task).submitTask(player);

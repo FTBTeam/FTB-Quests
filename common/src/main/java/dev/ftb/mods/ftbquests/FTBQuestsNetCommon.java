@@ -3,6 +3,7 @@ package dev.ftb.mods.ftbquests;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import dev.ftb.mods.ftbquests.quest.ChangeProgress;
 import dev.ftb.mods.ftbquests.quest.QuestObjectType;
+import dev.ftb.mods.ftbquests.util.QuestKey;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
@@ -10,16 +11,16 @@ import net.minecraft.world.item.ItemStack;
 import java.util.UUID;
 
 public class FTBQuestsNetCommon {
-	public void changeProgress(UUID player, long id, ChangeProgress type, boolean notifications) {
+	public void changeProgress(UUID teamId, long id, ChangeProgress type, boolean notifications) {
 	}
 
-	public void claimReward(UUID player, long id) {
+	public void claimReward(QuestKey key) {
 	}
 
 	public void createObject(long id, long parent, QuestObjectType type, CompoundTag nbt, CompoundTag extra) {
 	}
 
-	public void createPlayerData(UUID uuid, String name) {
+	public void createTeamData(UUID teamId, String name) {
 	}
 
 	public void deleteObject(long id) {
@@ -49,10 +50,10 @@ public class FTBQuestsNetCommon {
 	public void togglePinned(long id) {
 	}
 
-	public void updatePlayerData(UUID uuid, String name) {
+	public void updateTeamData(UUID teamId, String name) {
 	}
 
-	public void updateTaskProgress(UUID player, long task, long progress) {
+	public void updateTaskProgress(UUID teamId, long task, long progress) {
 	}
 
 	public void changeChapterGroup(long id, long group) {

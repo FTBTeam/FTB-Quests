@@ -4,7 +4,7 @@ import com.feed_the_beast.mods.ftbguilibrary.utils.StringUtils;
 import dev.ftb.mods.ftbquests.events.TaskStartedEvent;
 import dev.ftb.mods.ftbquests.net.MessageUpdateTaskProgress;
 import dev.ftb.mods.ftbquests.quest.ChangeProgress;
-import dev.ftb.mods.ftbquests.quest.PlayerData;
+import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.util.FTBQuestsInventoryListener;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
@@ -17,11 +17,11 @@ import java.util.List;
  */
 public class TaskData<T extends Task> {
 	public final T task;
-	public final PlayerData data;
+	public final TeamData data;
 	public long progress = 0L;
 	private boolean taskCompleted = false;
 
-	public TaskData(T q, PlayerData d) {
+	public TaskData(T q, TeamData d) {
 		task = q;
 		data = d;
 	}

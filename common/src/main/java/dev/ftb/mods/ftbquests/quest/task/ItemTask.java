@@ -14,8 +14,8 @@ import dev.ftb.mods.ftbquests.integration.jei.FTBQuestsJEIHelper;
 import dev.ftb.mods.ftbquests.item.FTBQuestsItems;
 import dev.ftb.mods.ftbquests.item.MissingItem;
 import dev.ftb.mods.ftbquests.net.FTBQuestsNetHandler;
-import dev.ftb.mods.ftbquests.quest.PlayerData;
 import dev.ftb.mods.ftbquests.quest.Quest;
+import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.util.NBTUtils;
 import dev.latvian.mods.itemfilters.api.ItemFiltersAPI;
 import me.shedaniel.architectury.platform.Platform;
@@ -224,12 +224,12 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 	}
 
 	@Override
-	public TaskData createData(PlayerData data) {
+	public TaskData createData(TeamData data) {
 		return new Data(this, data);
 	}
 
 	public static class Data extends TaskData<ItemTask> {
-		private Data(ItemTask t, PlayerData data) {
+		private Data(ItemTask t, TeamData data) {
 			super(t, data);
 		}
 
