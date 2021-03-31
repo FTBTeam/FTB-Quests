@@ -2,14 +2,15 @@ package dev.ftb.mods.ftbquests.quest;
 
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Color4I;
+import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.server.level.ServerPlayer;
 
-import java.util.List;
+import java.util.Collection;
+import java.util.Collections;
 
 /**
  * @author LatvianModder
@@ -74,7 +75,10 @@ public abstract class QuestObject extends QuestObjectBase {
 		return true;
 	}
 
-	public void onCompleted(TeamData data, List<ServerPlayer> onlineMembers, List<ServerPlayer> notifiedPlayers) {
+	public void onStarted(QuestProgressEventData<?> data) {
+	}
+
+	public void onCompleted(QuestProgressEventData<?> data) {
 	}
 
 	protected void verifyDependenciesInternal(long original, int depth) {
@@ -82,7 +86,7 @@ public abstract class QuestObject extends QuestObjectBase {
 
 	@Environment(EnvType.CLIENT)
 	public Color4I getProgressColor(TeamData data) {
-		if (data.isComplete(this)) {
+		if (data.isCompleted(this)) {
 			return ThemeProperties.QUEST_COMPLETED_COLOR.get();
 		} else if (data.isStarted(this)) {
 			return ThemeProperties.QUEST_STARTED_COLOR.get();
@@ -100,5 +104,9 @@ public abstract class QuestObject extends QuestObjectBase {
 		}
 
 		return c;
+	}
+
+	public Collection<? extends QuestObject> getChildren() {
+		return Collections.emptyList();
 	}
 }

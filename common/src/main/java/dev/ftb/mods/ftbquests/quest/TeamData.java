@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbquests.quest;
 
+import com.mojang.util.UUIDTypeAdapter;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.net.MessageClaimRewardResponse;
 import dev.ftb.mods.ftbquests.net.MessageSyncEditingMode;
@@ -11,9 +12,12 @@ import dev.ftb.mods.ftbquests.quest.task.TaskData;
 import dev.ftb.mods.ftbquests.util.OrderedCompoundTag;
 import dev.ftb.mods.ftbquests.util.QuestKey;
 import it.unimi.dsi.fastutil.longs.Long2ByteOpenHashMap;
+import it.unimi.dsi.fastutil.longs.Long2LongMap;
+import it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import me.shedaniel.architectury.utils.NbtType;
+import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
@@ -45,14 +49,15 @@ public class TeamData {
 	public String name;
 	public boolean shouldSave;
 
-	private final Long2ObjectOpenHashMap<TaskData> taskData;
+	private final Long2ObjectOpenHashMap<TaskData<?>> taskData;
 	private final Map<QuestKey, Instant> claimedRewards;
+	private final Long2LongOpenHashMap started;
+	private final Long2LongOpenHashMap completed;
 	private boolean canEdit;
 	private long money;
 	private boolean autoPin;
 	public final LongOpenHashSet pinnedQuests;
 
-	private Long2ByteOpenHashMap progressCache;
 	private Long2ByteOpenHashMap areDependenciesCompleteCache;
 
 	public TeamData(QuestFile f, UUID id) {
@@ -62,6 +67,8 @@ public class TeamData {
 		shouldSave = false;
 		taskData = new Long2ObjectOpenHashMap<>();
 		claimedRewards = new HashMap<>();
+		started = new Long2LongOpenHashMap();
+		completed = new Long2LongOpenHashMap();
 		canEdit = false;
 		money = 0L;
 		autoPin = false;
@@ -72,8 +79,8 @@ public class TeamData {
 		shouldSave = true;
 	}
 
-	public TaskData getTaskData(Task task) {
-		TaskData d = taskData.get(task.id);
+	public TaskData<?> getTaskData(Task task) {
+		TaskData<?> d = taskData.get(task.id);
 
 		if (d == null) {
 			if (name.isEmpty()) {
@@ -100,6 +107,28 @@ public class TeamData {
 	}
 
 	@Nullable
+	public Instant getStartedTime(long id) {
+		long t = started.get(id);
+		return t == 0L ? null : Instant.ofEpochMilli(t);
+	}
+
+	public void setStarted(long id, Instant time) {
+		started.put(id, time.toEpochMilli());
+		save();
+	}
+
+	@Nullable
+	public Instant getCompletedTime(long id) {
+		long t = completed.get(id);
+		return t == 0L ? null : Instant.ofEpochMilli(t);
+	}
+
+	public void setCompleted(long id, Instant time) {
+		completed.put(id, time.toEpochMilli());
+		save();
+	}
+
+	@Nullable
 	public Instant getRewardClaimTime(QuestKey key) {
 		return claimedRewards.get(key);
 	}
@@ -118,7 +147,9 @@ public class TeamData {
 		return false;
 	}
 
-	public boolean claimReward(QuestKey key) {
+	public boolean claimReward(UUID player, Reward reward) {
+		QuestKey key = QuestKey.of(reward.isTeamReward() ? Util.NIL_UUID : player, reward.id);
+
 		if (!claimedRewards.containsKey(key)) {
 			Instant now = Instant.now();
 			claimedRewards.put(key, now);
@@ -130,8 +161,8 @@ public class TeamData {
 		return false;
 	}
 
-	public boolean resetReward(long id) {
-		if (claimedRewards.entrySet().removeIf(e -> e.getKey().id == id)) {
+	public boolean resetReward(Reward reward) {
+		if (claimedRewards.entrySet().removeIf(e -> e.getKey().id == reward.id)) {
 			save();
 			return true;
 		}
@@ -197,13 +228,12 @@ public class TeamData {
 	}
 
 	public void clearCache() {
-		progressCache = null;
 		areDependenciesCompleteCache = null;
 	}
 
 	public CompoundTag serializeNBT() {
 		CompoundTag nbt = new OrderedCompoundTag();
-		nbt.putString("uuid", uuid.toString());
+		nbt.putString("uuid", UUIDTypeAdapter.fromUUID(uuid));
 		nbt.putString("name", name);
 		nbt.putBoolean("can_edit", canEdit);
 		nbt.putLong("money", money);
@@ -211,10 +241,10 @@ public class TeamData {
 
 		CompoundTag taskDataNBT = new OrderedCompoundTag();
 
-		List<TaskData> taskDataList = new ArrayList<>(taskData.values());
+		List<TaskData<?>> taskDataList = new ArrayList<>(taskData.values());
 		taskDataList.sort(Comparator.comparingLong(o -> o.task.id));
 
-		for (TaskData data : taskDataList) {
+		for (TaskData<?> data : taskDataList) {
 			if (data.progress > 0L) {
 				String key = QuestObjectBase.getCodeString(data.task.id);
 
@@ -228,12 +258,29 @@ public class TeamData {
 
 		nbt.put("task_progress", taskDataNBT);
 
-		long[] claimedRewardsArray = claimedRewards.toLongArray();
-		Arrays.sort(claimedRewardsArray);
-		ListTag cr = new ListTag();
+		CompoundTag sl = new OrderedCompoundTag();
 
-		for (long l : claimedRewardsArray) {
-			cr.add(StringTag.valueOf(QuestObjectBase.getCodeString(l)));
+		for (Long2LongMap.Entry entry : started.long2LongEntrySet()) {
+			sl.putLong(QuestObjectBase.getCodeString(entry.getLongKey()), entry.getLongValue());
+		}
+
+		nbt.put("started", sl);
+
+		CompoundTag cl = new OrderedCompoundTag();
+
+		for (Long2LongMap.Entry entry : completed.long2LongEntrySet()) {
+			cl.putLong(QuestObjectBase.getCodeString(entry.getLongKey()), entry.getLongValue());
+		}
+
+		nbt.put("completed", cl);
+
+		CompoundTag cr = new OrderedCompoundTag();
+
+		List<Map.Entry<QuestKey, Instant>> claimedRewardsList = new ArrayList<>(claimedRewards.entrySet());
+		claimedRewardsList.sort(Map.Entry.comparingByValue());
+
+		for (Map.Entry<QuestKey, Instant> e : claimedRewardsList) {
+			cr.putLong(e.getKey().toString(), e.getValue().toEpochMilli());
 		}
 
 		nbt.put("claimed_rewards", cr);
@@ -257,54 +304,29 @@ public class TeamData {
 		money = nbt.getLong("money");
 		autoPin = nbt.getBoolean("auto_pin");
 
-		boolean oldData = false;
-
 		claimedRewards.clear();
 		pinnedQuests.clear();
 
-		if (nbt.contains("claimed_rewards", NbtType.INT_ARRAY) || nbt.contains("pinned_quests", NbtType.INT_ARRAY)) {
-			oldData = true;
+		CompoundTag cr = nbt.getCompound("claimed_rewards");
 
-			for (int i : nbt.getIntArray("claimed_rewards")) {
-				claimedRewards.add(i);
-			}
+		for (String k : cr.getAllKeys()) {
+			claimedRewards.put(QuestKey.of(k), Instant.ofEpochMilli(cr.getLong(k)));
+		}
 
-			for (int i : nbt.getIntArray("pinned_quests")) {
-				pinnedQuests.add(i);
-			}
-		} else if (nbt.contains("claimed_rewards", NbtType.LIST)) {
-			oldData = true;
-			ListTag cr = nbt.getList("claimed_rewards", NbtType.STRING);
+		ListTag pq = nbt.getList("pinned_quests", NbtType.STRING);
 
-			for (int i = 0; i < cr.size(); i++) {
-				claimedRewards.add(file.getID(cr.getString(i)));
-			}
-
-			ListTag pq = nbt.getList("pinned_quests", NbtType.STRING);
-
-			for (int i = 0; i < pq.size(); i++) {
-				pinnedQuests.add(file.getID(pq.getString(i)));
-			}
-		} else {
-			ListTag pq = nbt.getList("pinned_quests", NbtType.STRING);
-
-			for (int i = 0; i < pq.size(); i++) {
-				pinnedQuests.add(file.getID(pq.getString(i)));
-			}
+		for (int i = 0; i < pq.size(); i++) {
+			pinnedQuests.add(file.getID(pq.getString(i)));
 		}
 
 		CompoundTag taskDataNBT = nbt.getCompound("task_progress");
 
 		for (String s : taskDataNBT.getAllKeys()) {
-			Task task = file.getTask(oldData ? Integer.parseInt(s) : file.getID(s));
+			Task task = file.getTask(file.getID(s));
 
 			if (task != null) {
 				taskData.get(task.id).readProgress(taskDataNBT.getLong(s));
 			}
-		}
-
-		if (oldData) {
-			save();
 		}
 	}
 
@@ -313,7 +335,7 @@ public class TeamData {
 		buffer.writeVarLong(money);
 		int tds = 0;
 
-		for (TaskData t : taskData.values()) {
+		for (TaskData<?> t : taskData.values()) {
 			if (t.progress > 0L) {
 				tds++;
 			}
@@ -321,20 +343,35 @@ public class TeamData {
 
 		buffer.writeVarInt(tds);
 
-		for (TaskData t : taskData.values()) {
+		for (TaskData<?> t : taskData.values()) {
 			if (t.progress > 0L) {
 				buffer.writeLong(t.task.id);
 				buffer.writeVarLong(t.progress);
 			}
 		}
 
+		long now = Instant.now().toEpochMilli();
+
+		buffer.writeVarInt(started.size());
+
+		for (Long2LongOpenHashMap.Entry entry : started.long2LongEntrySet()) {
+			buffer.writeLong(entry.getLongKey());
+			buffer.writeVarLong(now - entry.getValue());
+		}
+
+		buffer.writeVarInt(completed.size());
+
+		for (Long2LongOpenHashMap.Entry entry : completed.long2LongEntrySet()) {
+			buffer.writeLong(entry.getLongKey());
+			buffer.writeVarLong(now - entry.getValue());
+		}
+
 		if (self) {
-			long now = Instant.now().toEpochMilli();
 			buffer.writeVarInt(claimedRewards.size());
 
 			for (Map.Entry<QuestKey, Instant> i : claimedRewards.entrySet()) {
 				i.getKey().write(buffer);
-				buffer.writeLong(now - i.getValue().toEpochMilli());
+				buffer.writeVarLong(now - i.getValue().toEpochMilli());
 			}
 
 			buffer.writeBoolean(canEdit);
@@ -355,12 +392,30 @@ public class TeamData {
 		int ts = buffer.readVarInt();
 
 		for (int i = 0; i < ts; i++) {
-			TaskData t = taskData.get(buffer.readLong());
+			TaskData<?> t = taskData.get(buffer.readLong());
 			long progress = buffer.readVarLong();
 
 			if (t != null) {
 				t.progress = progress;
 			}
+		}
+
+		long now = Instant.now().toEpochMilli();
+
+		started.clear();
+
+		int ss = buffer.readVarInt();
+
+		for (int i = 0; i < ss; i++) {
+			started.put(buffer.readLong(), now - buffer.readVarLong());
+		}
+
+		completed.clear();
+
+		int cs = buffer.readVarInt();
+
+		for (int i = 0; i < cs; i++) {
+			completed.put(buffer.readLong(), now - buffer.readVarLong());
 		}
 
 		claimedRewards.clear();
@@ -369,12 +424,11 @@ public class TeamData {
 		pinnedQuests.clear();
 
 		if (self) {
-			long now = Instant.now().toEpochMilli();
 			int crs = buffer.readVarInt();
 
 			for (int i = 0; i < crs; i++) {
 				QuestKey key = QuestKey.of(buffer);
-				claimedRewards.put(key, Instant.ofEpochMilli(now - buffer.readLong()));
+				claimedRewards.put(key, Instant.ofEpochMilli(now - buffer.readVarLong()));
 			}
 
 			canEdit = buffer.readBoolean();
@@ -389,31 +443,26 @@ public class TeamData {
 	}
 
 	public int getRelativeProgress(QuestObject object) {
-		if (!object.cacheProgress()) {
-			return object.getRelativeProgressFromChildren(this);
+		if (isCompleted(object)) {
+			return 100;
+		} else if (!isStarted(object)) {
+			return 0;
 		}
 
-		if (progressCache == null) {
-			progressCache = new Long2ByteOpenHashMap();
-			progressCache.defaultReturnValue((byte) -1);
-		}
+		//} else if (!object.cacheProgress()) {
+		//  return object.getRelativeProgressFromChildren(this);
+		//}
 
-		int i = progressCache.get(object.id);
-
-		if (i == -1) {
-			i = object.getRelativeProgressFromChildren(this);
-			progressCache.put(object.id, (byte) i);
-		}
-
-		return i;
+		// FIXME?
+		return object.getRelativeProgressFromChildren(this);
 	}
 
 	public boolean isStarted(QuestObject object) {
-		return getRelativeProgress(object) > 0;
+		return started.containsKey(object.id);
 	}
 
-	public boolean isComplete(QuestObject object) {
-		return getRelativeProgress(object) >= 100;
+	public boolean isCompleted(QuestObject object) {
+		return completed.containsKey(object.id);
 	}
 
 	public boolean areDependenciesComplete(Quest quest) {
@@ -441,7 +490,7 @@ public class TeamData {
 			int complete = 0;
 
 			for (QuestObject dependency : quest.dependencies) {
-				if (!dependency.invalid && isComplete(dependency)) {
+				if (!dependency.invalid && isCompleted(dependency)) {
 					complete++;
 
 					if (complete >= quest.minRequiredDependencies) {
@@ -455,7 +504,7 @@ public class TeamData {
 
 		if (quest.dependencyRequirement.one) {
 			for (QuestObject object : quest.dependencies) {
-				if (!object.invalid && (quest.dependencyRequirement.completed ? isComplete(object) : isStarted(object))) {
+				if (!object.invalid && (quest.dependencyRequirement.completed ? isCompleted(object) : isStarted(object))) {
 					return true;
 				}
 			}
@@ -464,7 +513,7 @@ public class TeamData {
 		}
 
 		for (QuestObject object : quest.dependencies) {
-			if (!object.invalid && (quest.dependencyRequirement.completed ? !isComplete(object) : !isStarted(object))) {
+			if (!object.invalid && (quest.dependencyRequirement.completed ? !isCompleted(object) : !isStarted(object))) {
 				return false;
 			}
 		}
@@ -499,7 +548,7 @@ public class TeamData {
 	}
 
 	public boolean hasUnclaimedRewards(Quest quest) {
-		if (isComplete(quest)) {
+		if (isCompleted(quest)) {
 			for (Reward reward : quest.rewards) {
 				if (getClaimType(reward) == RewardClaimType.CAN_CLAIM) {
 					return true;
@@ -511,13 +560,11 @@ public class TeamData {
 	}
 
 	public void claimReward(ServerPlayer player, Reward reward, boolean notify) {
-		QuestKey k = QuestKey.of(player.getUUID(), reward.id);
-
-		if (claimReward(k)) {
+		if (claimReward(player.getUUID(), reward)) {
 			reward.claim(player, notify);
 
 			if (file.isServerSide()) {
-				new MessageClaimRewardResponse(k).sendToAll();
+				new MessageClaimRewardResponse(QuestKey.of(reward.isTeamReward() ? Util.NIL_UUID : player.getUUID(), reward.id)).sendToAll();
 			}
 		}
 	}
@@ -538,7 +585,7 @@ public class TeamData {
 	}
 
 	public void checkAutoCompletion(Quest quest) {
-		if (quest.rewards.isEmpty() || !isComplete(quest)) {
+		if (quest.rewards.isEmpty() || !isCompleted(quest)) {
 			return;
 		}
 
@@ -568,7 +615,7 @@ public class TeamData {
 
 		if (r) {
 			return RewardClaimType.CLAIMED;
-		} else if (isComplete(reward.quest)) {
+		} else if (isCompleted(reward.quest)) {
 			return RewardClaimType.CAN_CLAIM;
 		}
 

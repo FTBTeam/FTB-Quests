@@ -13,6 +13,8 @@ import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.events.ObjectCompletedEvent;
+import dev.ftb.mods.ftbquests.events.ObjectStartedEvent;
+import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
 import dev.ftb.mods.ftbquests.gui.MultilineTextEditorScreen;
 import dev.ftb.mods.ftbquests.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.integration.jei.FTBQuestsJEIHelper;
@@ -35,6 +37,7 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -221,7 +224,7 @@ public final class Quest extends QuestObject implements Movable {
 				}
 			}
 		} else {
-			ListTag deps = nbt.getList("dependencies", 8);
+			ListTag deps = nbt.getList("dependencies", NbtType.STRING);
 
 			for (int i = 0; i < deps.size(); i++) {
 				QuestObject object = chapter.file.get(chapter.file.getID(deps.getString(i)));
@@ -365,31 +368,38 @@ public final class Quest extends QuestObject implements Movable {
 	}
 
 	@Override
-	public void onCompleted(TeamData data, List<ServerPlayer> onlineMembers, List<ServerPlayer> notifiedPlayers) {
+	public void onStarted(QuestProgressEventData<?> data) {
+		if (!data.teamData.isStarted(this)) {
+			ObjectStartedEvent.QUEST.invoker().act(new ObjectStartedEvent.QuestEvent(data.withObject(this)));
+			chapter.onStarted(data.withObject(chapter));
+		}
+	}
+
+	@Override
+	public void onCompleted(QuestProgressEventData<?> data) {
 		//data.setTimesCompleted(this, data.getTimesCompleted(this) + 1);
-		super.onCompleted(data, onlineMembers, notifiedPlayers);
 
 		if (!disableToast) {
-			for (ServerPlayer player : notifiedPlayers) {
+			for (ServerPlayer player : data.notifiedPlayers) {
 				new MessageDisplayCompletionToast(id).sendTo(player);
 			}
 		}
 
-		data.checkAutoCompletion(this);
-		ObjectCompletedEvent.QUEST.invoker().act(new ObjectCompletedEvent.QuestEvent(data, this, onlineMembers, notifiedPlayers));
+		data.teamData.checkAutoCompletion(this);
+		ObjectCompletedEvent.QUEST.invoker().act(new ObjectCompletedEvent.QuestEvent(data.withObject(this)));
 
 		for (ChapterGroup group : chapter.file.chapterGroups) {
 			for (Chapter chapter : group.chapters) {
 				for (Quest quest : chapter.quests) {
 					if (quest.dependencies.contains(this)) {
-						data.checkAutoCompletion(quest);
+						data.teamData.checkAutoCompletion(quest);
 					}
 				}
 			}
 		}
 
-		if (data.isComplete(chapter)) {
-			chapter.onCompleted(data, onlineMembers, notifiedPlayers);
+		if (data.teamData.isCompleted(chapter)) {
+			chapter.onCompleted(data.withObject(chapter));
 		}
 	}
 
@@ -411,7 +421,7 @@ public final class Quest extends QuestObject implements Movable {
 
 		if (type.reset) {
 			for (Reward r : rewards) {
-				data.resetReward(r.id);
+				data.resetReward(r);
 			}
 		}
 	}
@@ -724,5 +734,10 @@ public final class Quest extends QuestObject implements Movable {
 		}
 
 		return list;
+	}
+
+	@Override
+	public Collection<? extends QuestObject> getChildren() {
+		return tasks;
 	}
 }

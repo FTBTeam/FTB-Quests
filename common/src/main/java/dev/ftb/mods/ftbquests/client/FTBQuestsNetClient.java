@@ -53,7 +53,7 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon {
 		}
 
 		TeamData data = ClientQuestFile.INSTANCE.getData(key.uuid);
-		data.claimReward(key);
+		data.claimReward(key.uuid, reward);
 
 		if (data == ClientQuestFile.INSTANCE.self) {
 			QuestScreen treeGui = ClientUtils.getCurrentGuiAs(QuestScreen.class);

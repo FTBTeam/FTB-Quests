@@ -40,7 +40,7 @@ public class MessageClaimChoiceReward extends MessageBase {
 			ChoiceReward r = (ChoiceReward) reward;
 			TeamData data = TeamData.get(player);
 
-			if (r.getTable() != null && data.isComplete(reward.quest)) {
+			if (r.getTable() != null && data.isCompleted(reward.quest)) {
 				if (index >= 0 && index < r.getTable().rewards.size()) {
 					r.getTable().rewards.get(index).reward.claim(player, true);
 					data.claimReward(player, reward, true);

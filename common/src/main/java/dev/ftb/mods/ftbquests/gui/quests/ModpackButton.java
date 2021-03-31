@@ -43,7 +43,7 @@ public class ModpackButton extends TabButton {
 		for (ChapterGroup group : f.chapterGroups) {
 			for (Chapter chapter : group.chapters) {
 				for (Quest quest : chapter.quests) {
-					if (f.self.isComplete(quest)) {
+					if (f.self.isCompleted(quest)) {
 						for (Reward reward : quest.rewards) {
 							if (!reward.getExcludeFromClaimAll() && !f.self.isRewardClaimed(reward.id)) {
 								return true;

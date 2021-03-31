@@ -17,8 +17,8 @@ import java.util.List;
 /**
  * @author LatvianModder
  */
-public class ObjectCompletedEvent<T extends QuestObject> {
-	public static final Event<Actor<ObjectCompletedEvent<?>>> GENERIC = EventFactory.createActorLoop();
+public class ObjectStartedEvent<T extends QuestObject> {
+	public static final Event<Actor<ObjectStartedEvent<?>>> GENERIC = EventFactory.createActorLoop();
 	public static final Event<Actor<FileEvent>> FILE = EventFactory.createActorLoop();
 	public static final Event<Actor<ChapterEvent>> CHAPTER = EventFactory.createActorLoop();
 	public static final Event<Actor<QuestEvent>> QUEST = EventFactory.createActorLoop();
@@ -33,7 +33,7 @@ public class ObjectCompletedEvent<T extends QuestObject> {
 
 	private final QuestProgressEventData<T> data;
 
-	private ObjectCompletedEvent(QuestProgressEventData<T> d) {
+	private ObjectStartedEvent(QuestProgressEventData<T> d) {
 		data = d;
 	}
 
@@ -66,7 +66,7 @@ public class ObjectCompletedEvent<T extends QuestObject> {
 		return getData();
 	}
 
-	public static class FileEvent extends ObjectCompletedEvent<QuestFile> {
+	public static class FileEvent extends ObjectStartedEvent<QuestFile> {
 		public FileEvent(QuestProgressEventData<QuestFile> d) {
 			super(d);
 		}
@@ -76,7 +76,7 @@ public class ObjectCompletedEvent<T extends QuestObject> {
 		}
 	}
 
-	public static class ChapterEvent extends ObjectCompletedEvent<Chapter> {
+	public static class ChapterEvent extends ObjectStartedEvent<Chapter> {
 		public ChapterEvent(QuestProgressEventData<Chapter> d) {
 			super(d);
 		}
@@ -86,7 +86,7 @@ public class ObjectCompletedEvent<T extends QuestObject> {
 		}
 	}
 
-	public static class QuestEvent extends ObjectCompletedEvent<Quest> {
+	public static class QuestEvent extends ObjectStartedEvent<Quest> {
 		public QuestEvent(QuestProgressEventData<Quest> d) {
 			super(d);
 		}
@@ -96,7 +96,7 @@ public class ObjectCompletedEvent<T extends QuestObject> {
 		}
 	}
 
-	public static class TaskEvent extends ObjectCompletedEvent<Task> {
+	public static class TaskEvent extends ObjectStartedEvent<Task> {
 		public TaskEvent(QuestProgressEventData<Task> d) {
 			super(d);
 		}

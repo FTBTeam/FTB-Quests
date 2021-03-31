@@ -225,7 +225,7 @@ public class QuestPanel extends Panel {
 			}
 
 			boolean unavailable = questScreen.file.self == null || !questScreen.file.self.canStartTasks(wquest);
-			boolean complete = !unavailable && questScreen.file.self != null && questScreen.file.self.isComplete(wquest);
+			boolean complete = !unavailable && questScreen.file.self != null && questScreen.file.self.isCompleted(wquest);
 
 			for (QuestButton button : ((QuestButton) widget).getDependencies()) {
 				if (button.quest == selectedQuest || wquest == selectedQuest) {

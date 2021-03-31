@@ -8,6 +8,8 @@ import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.events.ClearFileCacheEvent;
 import dev.ftb.mods.ftbquests.events.CustomTaskEvent;
 import dev.ftb.mods.ftbquests.events.ObjectCompletedEvent;
+import dev.ftb.mods.ftbquests.events.ObjectStartedEvent;
+import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
 import dev.ftb.mods.ftbquests.integration.jei.FTBQuestsJEIHelper;
 import dev.ftb.mods.ftbquests.item.MissingItem;
 import dev.ftb.mods.ftbquests.net.FTBQuestsNetHandler;
@@ -171,12 +173,18 @@ public abstract class QuestFile extends QuestObject {
 	}
 
 	@Override
-	public void onCompleted(TeamData data, List<ServerPlayer> onlineMembers, List<ServerPlayer> notifiedPlayers) {
-		super.onCompleted(data, onlineMembers, notifiedPlayers);
-		ObjectCompletedEvent.FILE.invoker().act(new ObjectCompletedEvent.FileEvent(data, this, onlineMembers, notifiedPlayers));
+	public void onStarted(QuestProgressEventData<?> data) {
+		if (!data.teamData.isStarted(this)) {
+			ObjectStartedEvent.FILE.invoker().act(new ObjectStartedEvent.FileEvent(data.withObject(this)));
+		}
+	}
+
+	@Override
+	public void onCompleted(QuestProgressEventData<?> data) {
+		ObjectCompletedEvent.FILE.invoker().act(new ObjectCompletedEvent.FileEvent(data.withObject(this)));
 
 		if (!disableToast) {
-			for (ServerPlayer player : notifiedPlayers) {
+			for (ServerPlayer player : data.notifiedPlayers) {
 				new MessageDisplayCompletionToast(id).sendTo(player);
 			}
 		}
@@ -1255,5 +1263,10 @@ public abstract class QuestFile extends QuestObject {
 
 	public void refreshGui() {
 		clearCachedData();
+	}
+
+	@Override
+	public Collection<? extends QuestObject> getChildren() {
+		return chapterGroups;
 	}
 }

@@ -11,12 +11,13 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
  * @author LatvianModder
  */
-public class ChapterGroup extends QuestObjectBase {
+public class ChapterGroup extends QuestObject {
 	public final QuestFile file;
 	public final List<Chapter> chapters;
 
@@ -124,6 +125,21 @@ public class ChapterGroup extends QuestObjectBase {
 		}
 	}
 
+	@Override
+	public int getRelativeProgressFromChildren(TeamData data) {
+		if (chapters.isEmpty()) {
+			return 100;
+		}
+
+		int progress = 0;
+
+		for (Chapter chapter : chapters) {
+			progress += data.getRelativeProgress(chapter);
+		}
+
+		return getRelativeProgressFromChildren(progress, chapters.size());
+	}
+
 	public List<Chapter> getVisibleChapters(TeamData data) {
 		if (file.canEdit()) {
 			return chapters;
@@ -138,5 +154,10 @@ public class ChapterGroup extends QuestObjectBase {
 		}
 
 		return list;
+	}
+
+	@Override
+	public Collection<? extends QuestObject> getChildren() {
+		return chapters;
 	}
 }

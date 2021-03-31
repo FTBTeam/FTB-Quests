@@ -235,7 +235,7 @@ public class ViewQuestPanel extends Panel {
 			panelText.add(new ComponentTextField(panelText).addFlags(Theme.CENTERED).setMaxWidth(panelText.width).setSpacing(9).setText(new TextComponent("").append(desc).withStyle(ChatFormatting.ITALIC, ChatFormatting.GRAY)));
 		}
 
-		boolean showText = !quest.hideTextUntilComplete.get(false) || questScreen.file.self != null && questScreen.file.self.isComplete(quest);
+		boolean showText = !quest.hideTextUntilComplete.get(false) || questScreen.file.self != null && questScreen.file.self.isCompleted(quest);
 
 		if (showText && quest.getDescription().length > 0) {
 			if (desc != TextComponent.EMPTY) {

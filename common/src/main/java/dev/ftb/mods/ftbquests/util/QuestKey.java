@@ -20,6 +20,10 @@ public final class QuestKey implements Comparable<QuestKey> {
 		return of(buf.readUUID(), buf.readLong());
 	}
 
+	public static QuestKey of(String string) {
+		return of(UUIDTypeAdapter.fromString(string.substring(0, 32)), QuestObjectBase.parseCodeString(string.substring(33)));
+	}
+
 	private QuestKey(UUID i, long r) {
 		uuid = i;
 		id = r;
@@ -27,7 +31,7 @@ public final class QuestKey implements Comparable<QuestKey> {
 
 	@Override
 	public String toString() {
-		return UUIDTypeAdapter.fromUUID(uuid) + "#" + QuestObjectBase.getCodeString(id);
+		return UUIDTypeAdapter.fromUUID(uuid) + ":" + QuestObjectBase.getCodeString(id);
 	}
 
 	@Override
