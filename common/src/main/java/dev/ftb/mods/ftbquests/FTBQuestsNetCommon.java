@@ -8,6 +8,8 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 
+import javax.annotation.Nullable;
+import java.time.Instant;
 import java.util.UUID;
 
 public class FTBQuestsNetCommon {
@@ -60,5 +62,11 @@ public class FTBQuestsNetCommon {
 	}
 
 	public void moveChapterGroup(long id, boolean up) {
+	}
+
+	public void objectStarted(UUID teamId, long id, @Nullable Instant time) {
+	}
+
+	public void objectCompleted(UUID teamId, long id, @Nullable Instant time) {
 	}
 }

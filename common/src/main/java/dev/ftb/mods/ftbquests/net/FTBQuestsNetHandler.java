@@ -37,6 +37,10 @@ public class FTBQuestsNetHandler {
 		register(MessageTogglePinnedResponse.class, MessageTogglePinnedResponse::new);
 		register(MessageUpdateTeamData.class, MessageUpdateTeamData::new);
 		register(MessageSetCustomImage.class, MessageSetCustomImage::new);
+		register(MessageObjectStarted.class, MessageObjectStarted::new);
+		register(MessageObjectCompleted.class, MessageObjectCompleted::new);
+		register(MessageObjectStartedReset.class, MessageObjectStartedReset::new);
+		register(MessageObjectCompletedReset.class, MessageObjectCompletedReset::new);
 
 		// Editing
 		register(MessageChangeProgress.class, MessageChangeProgress::new);

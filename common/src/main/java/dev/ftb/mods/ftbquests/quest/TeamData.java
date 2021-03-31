@@ -3,6 +3,10 @@ package dev.ftb.mods.ftbquests.quest;
 import com.mojang.util.UUIDTypeAdapter;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.net.MessageClaimRewardResponse;
+import dev.ftb.mods.ftbquests.net.MessageObjectCompleted;
+import dev.ftb.mods.ftbquests.net.MessageObjectCompletedReset;
+import dev.ftb.mods.ftbquests.net.MessageObjectStarted;
+import dev.ftb.mods.ftbquests.net.MessageObjectStartedReset;
 import dev.ftb.mods.ftbquests.net.MessageSyncEditingMode;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.reward.RewardAutoClaim;
@@ -16,6 +20,8 @@ import it.unimi.dsi.fastutil.longs.Long2LongMap;
 import it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
+import it.unimi.dsi.fastutil.objects.Object2LongMap;
+import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 import me.shedaniel.architectury.utils.NbtType;
 import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
@@ -31,7 +37,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -50,7 +55,7 @@ public class TeamData {
 	public boolean shouldSave;
 
 	private final Long2ObjectOpenHashMap<TaskData<?>> taskData;
-	private final Map<QuestKey, Instant> claimedRewards;
+	private final Object2LongOpenHashMap<QuestKey> claimedRewards;
 	private final Long2LongOpenHashMap started;
 	private final Long2LongOpenHashMap completed;
 	private boolean canEdit;
@@ -66,9 +71,12 @@ public class TeamData {
 		name = "";
 		shouldSave = false;
 		taskData = new Long2ObjectOpenHashMap<>();
-		claimedRewards = new HashMap<>();
+		claimedRewards = new Object2LongOpenHashMap<>();
+		claimedRewards.defaultReturnValue(0L);
 		started = new Long2LongOpenHashMap();
+		started.defaultReturnValue(0L);
 		completed = new Long2LongOpenHashMap();
+		completed.defaultReturnValue(0L);
 		canEdit = false;
 		money = 0L;
 		autoPin = false;
@@ -115,8 +123,16 @@ public class TeamData {
 	public void setStarted(long id, @Nullable Instant time) {
 		if (time == null) {
 			started.remove(id);
+
+			if (file.isServerSide()) {
+				new MessageObjectStartedReset(uuid, id).sendToAll();
+			}
 		} else {
 			started.put(id, time.toEpochMilli());
+
+			if (file.isServerSide()) {
+				new MessageObjectStarted(uuid, id).sendToAll();
+			}
 		}
 
 		save();
@@ -131,8 +147,16 @@ public class TeamData {
 	public void setCompleted(long id, @Nullable Instant time) {
 		if (time == null) {
 			completed.remove(id);
+
+			if (file.isServerSide()) {
+				new MessageObjectCompletedReset(uuid, id).sendToAll();
+			}
 		} else {
 			completed.put(id, time.toEpochMilli());
+
+			if (file.isServerSide()) {
+				new MessageObjectCompleted(uuid, id).sendToAll();
+			}
 		}
 
 		save();
@@ -140,7 +164,8 @@ public class TeamData {
 
 	@Nullable
 	public Instant getRewardClaimTime(QuestKey key) {
-		return claimedRewards.get(key);
+		long t = claimedRewards.get(key);
+		return t == 0L ? null : Instant.ofEpochMilli(t);
 	}
 
 	public boolean isRewardClaimed(QuestKey key) {
@@ -148,7 +173,7 @@ public class TeamData {
 	}
 
 	public boolean isRewardClaimed(long id) {
-		for (Map.Entry<QuestKey, Instant> entry : claimedRewards.entrySet()) {
+		for (Object2LongMap.Entry<QuestKey> entry : claimedRewards.object2LongEntrySet()) {
 			if (entry.getKey().id == id) {
 				return true;
 			}
@@ -161,9 +186,7 @@ public class TeamData {
 		QuestKey key = QuestKey.of(reward.isTeamReward() ? Util.NIL_UUID : player, reward.id);
 
 		if (!claimedRewards.containsKey(key)) {
-			Instant now = Instant.now();
-			claimedRewards.put(key, now);
-			claimedRewards.put(QuestKey.of(uuid, key.id), now);
+			claimedRewards.put(key, Instant.now().toEpochMilli());
 			save();
 			return true;
 		}
@@ -286,11 +309,11 @@ public class TeamData {
 
 		CompoundTag cr = new OrderedCompoundTag();
 
-		List<Map.Entry<QuestKey, Instant>> claimedRewardsList = new ArrayList<>(claimedRewards.entrySet());
+		List<Object2LongMap.Entry<QuestKey>> claimedRewardsList = new ArrayList<>(claimedRewards.object2LongEntrySet());
 		claimedRewardsList.sort(Map.Entry.comparingByValue());
 
-		for (Map.Entry<QuestKey, Instant> e : claimedRewardsList) {
-			cr.putLong(e.getKey().toString(), e.getValue().toEpochMilli());
+		for (Object2LongMap.Entry<QuestKey> e : claimedRewardsList) {
+			cr.putLong(e.getKey().toString(), e.getValue());
 		}
 
 		nbt.put("claimed_rewards", cr);
@@ -320,7 +343,7 @@ public class TeamData {
 		CompoundTag cr = nbt.getCompound("claimed_rewards");
 
 		for (String k : cr.getAllKeys()) {
-			claimedRewards.put(QuestKey.of(k), Instant.ofEpochMilli(cr.getLong(k)));
+			claimedRewards.put(QuestKey.of(k), cr.getLong(k));
 		}
 
 		ListTag pq = nbt.getList("pinned_quests", NbtType.STRING);
@@ -337,6 +360,18 @@ public class TeamData {
 			if (task != null) {
 				taskData.get(task.id).readProgress(taskDataNBT.getLong(s));
 			}
+		}
+
+		CompoundTag startedNBT = nbt.getCompound("started");
+
+		for (String s : startedNBT.getAllKeys()) {
+			started.put(QuestObjectBase.parseCodeString(s), startedNBT.getLong(s));
+		}
+
+		CompoundTag completedNBT = nbt.getCompound("completed");
+
+		for (String s : completedNBT.getAllKeys()) {
+			completed.put(QuestObjectBase.parseCodeString(s), completedNBT.getLong(s));
 		}
 	}
 
@@ -379,9 +414,9 @@ public class TeamData {
 		if (self) {
 			buffer.writeVarInt(claimedRewards.size());
 
-			for (Map.Entry<QuestKey, Instant> i : claimedRewards.entrySet()) {
-				i.getKey().write(buffer);
-				buffer.writeVarLong(now - i.getValue().toEpochMilli());
+			for (Object2LongMap.Entry<QuestKey> entry : claimedRewards.object2LongEntrySet()) {
+				entry.getKey().write(buffer);
+				buffer.writeVarLong(now - entry.getLongValue());
 			}
 
 			buffer.writeBoolean(canEdit);
@@ -438,7 +473,7 @@ public class TeamData {
 
 			for (int i = 0; i < crs; i++) {
 				QuestKey key = QuestKey.of(buffer);
-				claimedRewards.put(key, Instant.ofEpochMilli(now - buffer.readVarLong()));
+				claimedRewards.put(key, now - buffer.readVarLong());
 			}
 
 			canEdit = buffer.readBoolean();

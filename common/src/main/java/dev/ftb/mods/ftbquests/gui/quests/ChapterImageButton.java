@@ -2,6 +2,7 @@ package dev.ftb.mods.ftbquests.gui.quests;
 
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
 import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiEditConfig;
+import com.feed_the_beast.mods.ftbguilibrary.icon.Color4I;
 import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
 import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
 import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
@@ -26,12 +27,12 @@ import java.util.List;
  * @author LatvianModder
  */
 public class ChapterImageButton extends Button {
-	public QuestScreen treeGui;
+	public QuestScreen questScreen;
 	public ChapterImage chapterImage;
 
 	public ChapterImageButton(Panel panel, ChapterImage i) {
 		super(panel, TextComponent.EMPTY, i.image);
-		treeGui = (QuestScreen) panel.getGui();
+		questScreen = (QuestScreen) panel.getGui();
 		setSize(20, 20);
 		chapterImage = i;
 	}
@@ -39,7 +40,7 @@ public class ChapterImageButton extends Button {
 	@Override
 	public boolean mousePressed(MouseButton button) {
 		if (isMouseOver()) {
-			if (!chapterImage.click.isEmpty() || treeGui.file.canEdit() && !button.isLeft()) {
+			if (!chapterImage.click.isEmpty() || questScreen.file.canEdit() && !button.isLeft()) {
 				onClicked(button);
 				return true;
 			}
@@ -50,11 +51,11 @@ public class ChapterImageButton extends Button {
 
 	@Override
 	public boolean checkMouseOver(int mouseX, int mouseY) {
-		if (treeGui.questPanel.mouseOverQuest != null || treeGui.movingObjects || treeGui.viewQuestPanel.isMouseOver() || treeGui.chapterPanel.expanded) {
+		if (questScreen.questPanel.mouseOverQuest != null || questScreen.movingObjects || questScreen.viewQuestPanel.isMouseOver() || questScreen.chapterPanel.expanded) {
 			return false;
 		}
 
-		if (chapterImage.click.isEmpty() && !treeGui.file.canEdit()) {
+		if (chapterImage.click.isEmpty() && !questScreen.file.canEdit()) {
 			return false;
 		}
 
@@ -63,7 +64,7 @@ public class ChapterImageButton extends Button {
 
 	@Override
 	public void onClicked(MouseButton button) {
-		if (treeGui.file.canEdit() && button.isRight()) {
+		if (questScreen.file.canEdit() && button.isRight()) {
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
 
 			contextMenu.add(new ContextMenuItem(new TranslatableComponent("selectServer.edit"), ThemeProperties.EDIT_ICON.get(), () -> {
@@ -79,9 +80,9 @@ public class ChapterImageButton extends Button {
 			}));
 
 			contextMenu.add(new ContextMenuItem(new TranslatableComponent("gui.move"), ThemeProperties.MOVE_UP_ICON.get(chapterImage.chapter), () -> {
-				treeGui.movingObjects = true;
-				treeGui.selectedObjects.clear();
-				treeGui.toggleSelected(chapterImage);
+				questScreen.movingObjects = true;
+				questScreen.selectedObjects.clear();
+				questScreen.toggleSelected(chapterImage);
 			}) {
 				@Override
 				public void addMouseOverText(TooltipList list) {
@@ -100,12 +101,12 @@ public class ChapterImageButton extends Button {
 				playClickSound();
 				handleClick(chapterImage.click);
 			}
-		} else if (treeGui.file.canEdit() && button.isMiddle()) {
-			if (!treeGui.selectedObjects.contains(chapterImage)) {
-				treeGui.toggleSelected(chapterImage);
+		} else if (questScreen.file.canEdit() && button.isMiddle()) {
+			if (!questScreen.selectedObjects.contains(chapterImage)) {
+				questScreen.toggleSelected(chapterImage);
 			}
 
-			treeGui.movingObjects = true;
+			questScreen.movingObjects = true;
 		}
 	}
 
@@ -127,6 +128,8 @@ public class ChapterImageButton extends Button {
 
 	@Override
 	public void draw(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
+		boolean transparent = chapterImage.dependency != null && !questScreen.file.self.isCompleted(chapterImage.dependency);
+
 		GuiHelper.setupDrawing();
 		matrixStack.pushPose();
 
@@ -134,12 +137,12 @@ public class ChapterImageButton extends Button {
 			matrixStack.translate(x, y, 0);
 			matrixStack.mulPose(Vector3f.ZP.rotationDegrees((float) chapterImage.rotation));
 			matrixStack.scale(w, h, 1);
-			chapterImage.image.draw(matrixStack, 0, 0, 1, 1);
+			(transparent ? chapterImage.image.withColor(Color4I.WHITE.withAlpha(100)) : chapterImage.image).draw(matrixStack, 0, 0, 1, 1);
 		} else {
 			matrixStack.translate((int) (x + w / 2D), (int) (y + h / 2D), 0);
 			matrixStack.mulPose(Vector3f.ZP.rotationDegrees((float) chapterImage.rotation));
 			matrixStack.scale(w / 2F, h / 2F, 1);
-			chapterImage.image.draw(matrixStack, -1, -1, 2, 2);
+			(transparent ? chapterImage.image.withColor(Color4I.WHITE.withAlpha(100)) : chapterImage.image).draw(matrixStack, -1, -1, 2, 2);
 		}
 
 		matrixStack.popPose();

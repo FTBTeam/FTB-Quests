@@ -74,7 +74,7 @@ public abstract class QuestFile extends QuestObject {
 	public final DefaultChapterGroup defaultChapterGroup;
 	public final List<ChapterGroup> chapterGroups;
 	public final List<RewardTable> rewardTables;
-	protected final Map<UUID, TeamData> playerDataMap;
+	protected final Map<UUID, TeamData> teamDataMap;
 
 	private final Long2ObjectOpenHashMap<QuestObjectBase> map;
 	public final Int2ObjectOpenHashMap<TaskType> taskTypeIds;
@@ -101,7 +101,7 @@ public abstract class QuestFile extends QuestObject {
 		chapterGroups = new ArrayList<>();
 		chapterGroups.add(defaultChapterGroup);
 		rewardTables = new ArrayList<>();
-		playerDataMap = new HashMap<>();
+		teamDataMap = new HashMap<>();
 
 		map = new Long2ObjectOpenHashMap<>();
 		taskTypeIds = new Int2ObjectOpenHashMap<>();
@@ -853,9 +853,9 @@ public abstract class QuestFile extends QuestObject {
 		}
 
 		TeamData selfTeamData = getData(self);
-		buffer.writeVarInt(playerDataMap.size());
+		buffer.writeVarInt(teamDataMap.size());
 
-		for (TeamData data : playerDataMap.values()) {
+		for (TeamData data : teamDataMap.values()) {
 			buffer.writeUUID(data.uuid);
 			data.write(buffer, data == selfTeamData);
 		}
@@ -1008,11 +1008,11 @@ public abstract class QuestFile extends QuestObject {
 
 	@Nullable
 	public TeamData getNullablePlayerData(UUID id) {
-		return playerDataMap.get(id);
+		return teamDataMap.get(id);
 	}
 
 	public TeamData getData(UUID id) {
-		return playerDataMap.computeIfAbsent(id, i -> new TeamData(this, i));
+		return teamDataMap.computeIfAbsent(id, i -> new TeamData(this, i));
 	}
 
 	public TeamData getData(Team team) {
@@ -1024,7 +1024,7 @@ public abstract class QuestFile extends QuestObject {
 	}
 
 	public Collection<TeamData> getAllData() {
-		return playerDataMap.values();
+		return teamDataMap.values();
 	}
 
 	public abstract void deleteObject(long id);
@@ -1248,7 +1248,7 @@ public abstract class QuestFile extends QuestObject {
 	}
 
 	public void addData(TeamData data, boolean strong) {
-		playerDataMap.put(data.uuid, data);
+		teamDataMap.put(data.uuid, data);
 
 		for (ChapterGroup group : chapterGroups) {
 			for (Chapter chapter : group.chapters) {

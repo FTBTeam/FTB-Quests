@@ -21,7 +21,6 @@ import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
 import dev.ftb.mods.ftbquests.FTBQuests;
-import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.net.MessageCreateTaskAt;
 import dev.ftb.mods.ftbquests.net.MessageEditObject;
 import dev.ftb.mods.ftbquests.quest.ChapterImage;
@@ -121,13 +120,13 @@ public class QuestPanel extends Panel {
 		}
 
 		for (ChapterImage image : questScreen.selectedChapter.images) {
-			if (questScreen.file.canEdit() || !image.dev) {
+			if (questScreen.file.canEdit() || (!image.dev && (image.dependency == null || questScreen.file.self.isCompleted(image.dependency)))) {
 				add(new ChapterImageButton(this, image));
 			}
 		}
 
 		for (Quest quest : questScreen.selectedChapter.quests) {
-			if (questScreen.file.canEdit() || quest.isVisible(ClientQuestFile.INSTANCE.self)) {
+			if (questScreen.file.canEdit() || quest.isVisible(questScreen.file.self)) {
 				add(new QuestButton(this, quest));
 			}
 		}
