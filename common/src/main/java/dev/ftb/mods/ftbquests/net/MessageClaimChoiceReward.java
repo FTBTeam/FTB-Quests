@@ -1,7 +1,7 @@
 package dev.ftb.mods.ftbquests.net;
 
-import dev.ftb.mods.ftbquests.quest.PlayerData;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
+import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.reward.ChoiceReward;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import me.shedaniel.architectury.networking.NetworkManager;
@@ -38,7 +38,7 @@ public class MessageClaimChoiceReward extends MessageBase {
 		if (reward instanceof ChoiceReward) {
 			ServerPlayer player = (ServerPlayer) context.getPlayer();
 			ChoiceReward r = (ChoiceReward) reward;
-			PlayerData data = PlayerData.get(player);
+			TeamData data = TeamData.get(player);
 
 			if (r.getTable() != null && data.isComplete(reward.quest)) {
 				if (index >= 0 && index < r.getTable().rewards.size()) {

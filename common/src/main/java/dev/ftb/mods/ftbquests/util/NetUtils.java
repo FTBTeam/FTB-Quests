@@ -8,7 +8,6 @@ import net.minecraft.world.entity.player.Player;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.UUID;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -66,17 +65,6 @@ public class NetUtils {
 
 	public static void readStrings(FriendlyByteBuf buffer, Collection<String> list) {
 		read(buffer, list, b -> b.readUtf(Short.MAX_VALUE));
-	}
-
-	public static void writeUUID(FriendlyByteBuf buffer, UUID uuid) {
-		buffer.writeLong(uuid.getMostSignificantBits());
-		buffer.writeLong(uuid.getLeastSignificantBits());
-	}
-
-	public static UUID readUUID(FriendlyByteBuf buffer) {
-		long most = buffer.readLong();
-		long least = buffer.readLong();
-		return new UUID(most, least);
 	}
 
 	public static void writeIcon(FriendlyByteBuf buffer, Icon icon) {

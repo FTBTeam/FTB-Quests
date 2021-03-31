@@ -161,7 +161,7 @@ public final class Chapter extends QuestObject {
 	}
 
 	@Override
-	public int getRelativeProgressFromChildren(PlayerData data) {
+	public int getRelativeProgressFromChildren(TeamData data) {
 		if (alwaysInvisible) {
 			return 100;
 		}
@@ -188,7 +188,7 @@ public final class Chapter extends QuestObject {
 	}
 
 	@Override
-	public void onCompleted(PlayerData data, List<ServerPlayer> onlineMembers, List<ServerPlayer> notifiedPlayers) {
+	public void onCompleted(TeamData data, List<ServerPlayer> onlineMembers, List<ServerPlayer> notifiedPlayers) {
 		super.onCompleted(data, onlineMembers, notifiedPlayers);
 		ObjectCompletedEvent.CHAPTER.invoker().act(new ObjectCompletedEvent.ChapterEvent(data, this, onlineMembers, notifiedPlayers));
 
@@ -214,7 +214,7 @@ public final class Chapter extends QuestObject {
 	}
 
 	@Override
-	public void changeProgress(PlayerData data, ChangeProgress type) {
+	public void changeProgress(TeamData data, ChangeProgress type) {
 		for (Quest quest : quests) {
 			quest.changeProgress(data, type);
 		}
@@ -303,7 +303,7 @@ public final class Chapter extends QuestObject {
 	}
 
 	@Override
-	public boolean isVisible(PlayerData data) {
+	public boolean isVisible(TeamData data) {
 		if (alwaysInvisible) {
 			return false;
 		}

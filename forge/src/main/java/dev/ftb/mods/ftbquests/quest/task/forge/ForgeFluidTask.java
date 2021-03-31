@@ -5,8 +5,8 @@ import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigNBT;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import dev.ftb.mods.ftbquests.FTBQuests;
-import dev.ftb.mods.ftbquests.quest.PlayerData;
 import dev.ftb.mods.ftbquests.quest.Quest;
+import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.quest.task.TaskData;
 import dev.ftb.mods.ftbquests.quest.task.TaskType;
@@ -179,12 +179,12 @@ public class ForgeFluidTask extends Task {
 	}
 
 	@Override
-	public TaskData createData(PlayerData data) {
+	public TaskData createData(TeamData data) {
 		return new Data(this, data);
 	}
 
 	public static class Data extends TaskData<ForgeFluidTask> {
-		private Data(ForgeFluidTask t, PlayerData data) {
+		private Data(ForgeFluidTask t, TeamData data) {
 			super(t, data);
 		}
 

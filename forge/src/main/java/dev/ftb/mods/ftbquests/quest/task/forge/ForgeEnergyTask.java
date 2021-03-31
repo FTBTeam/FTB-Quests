@@ -2,8 +2,8 @@ package dev.ftb.mods.ftbquests.quest.task.forge;
 
 import com.feed_the_beast.mods.ftbguilibrary.utils.StringUtils;
 import dev.ftb.mods.ftbquests.FTBQuests;
-import dev.ftb.mods.ftbquests.quest.PlayerData;
 import dev.ftb.mods.ftbquests.quest.Quest;
+import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.task.EnergyTask;
 import dev.ftb.mods.ftbquests.quest.task.TaskData;
 import dev.ftb.mods.ftbquests.quest.task.TaskType;
@@ -37,12 +37,12 @@ public class ForgeEnergyTask extends EnergyTask {
 	}
 
 	@Override
-	public TaskData createData(PlayerData data) {
+	public TaskData createData(TeamData data) {
 		return new Data(this, data);
 	}
 
 	public static class Data extends TaskData<ForgeEnergyTask> {
-		private Data(ForgeEnergyTask task, PlayerData data) {
+		private Data(ForgeEnergyTask task, TeamData data) {
 			super(task, data);
 		}
 

@@ -2,11 +2,12 @@ package dev.ftb.mods.ftbquests.integration.kubejs;
 
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.quest.ChangeProgress;
-import dev.ftb.mods.ftbquests.quest.PlayerData;
 import dev.ftb.mods.ftbquests.quest.QuestFile;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.QuestObjectType;
 import dev.ftb.mods.ftbquests.quest.QuestShape;
+import dev.ftb.mods.ftbquests.quest.TeamData;
+import dev.ftb.mods.ftbteams.FTBTeamsAPI;
 import dev.latvian.kubejs.player.PlayerJS;
 import dev.latvian.kubejs.world.WorldJS;
 
@@ -35,12 +36,12 @@ public class FTBQuestsKubeJSWrapper {
 	}
 
 	@Nullable
-	public PlayerData getData(WorldJS world, UUID uuid) {
-		return getFile(world).getData(uuid);
+	public TeamData getData(WorldJS world, UUID uuid) {
+		return getFile(world).getData(FTBTeamsAPI.getPlayerTeamID(uuid));
 	}
 
 	@Nullable
-	public PlayerData getData(PlayerJS player) {
+	public TeamData getData(PlayerJS player) {
 		return getFile(player.getWorld()).getData(player.minecraftPlayer);
 	}
 

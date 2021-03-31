@@ -2,7 +2,6 @@ package dev.ftb.mods.ftbquests.net;
 
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.quest.QuestFile;
-import dev.ftb.mods.ftbquests.util.NetUtils;
 import me.shedaniel.architectury.networking.NetworkManager;
 import net.minecraft.network.FriendlyByteBuf;
 
@@ -16,7 +15,7 @@ public class MessageSyncQuests extends MessageBase {
 	private final QuestFile file;
 
 	MessageSyncQuests(FriendlyByteBuf buffer) {
-		self = NetUtils.readUUID(buffer);
+		self = buffer.readUUID();
 		file = FTBQuests.PROXY.createClientQuestFile();
 		file.readNetDataFull(buffer, self);
 	}
@@ -28,7 +27,7 @@ public class MessageSyncQuests extends MessageBase {
 
 	@Override
 	public void write(FriendlyByteBuf buffer) {
-		NetUtils.writeUUID(buffer, self);
+		buffer.writeUUID(self);
 		file.writeNetDataFull(buffer, self);
 	}
 

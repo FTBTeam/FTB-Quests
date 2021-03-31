@@ -1,8 +1,8 @@
 package dev.ftb.mods.ftbquests.integration.gamestages;
 
 import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
-import dev.ftb.mods.ftbquests.quest.PlayerData;
 import dev.ftb.mods.ftbquests.quest.Quest;
+import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.task.BooleanTaskData;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.quest.task.TaskData;
@@ -71,12 +71,12 @@ public class GameStageTask extends Task {
 	}
 
 	@Override
-	public TaskData createData(PlayerData data) {
+	public TaskData createData(TeamData data) {
 		return new Data(this, data);
 	}
 
 	public static class Data extends BooleanTaskData<GameStageTask> {
-		private Data(GameStageTask task, PlayerData data) {
+		private Data(GameStageTask task, TeamData data) {
 			super(task, data);
 		}
 

@@ -1,6 +1,6 @@
 package dev.ftb.mods.ftbquests.quest.task;
 
-import dev.ftb.mods.ftbquests.quest.PlayerData;
+import dev.ftb.mods.ftbquests.quest.TeamData;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 
@@ -8,7 +8,7 @@ import net.minecraft.world.item.ItemStack;
  * @author LatvianModder
  */
 public class BooleanTaskData<T extends Task> extends TaskData<T> {
-	public BooleanTaskData(T q, PlayerData d) {
+	public BooleanTaskData(T q, TeamData d) {
 		super(q, d);
 	}
 

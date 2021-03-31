@@ -15,9 +15,9 @@ import dev.ftb.mods.ftbquests.FTBQuestsCommon;
 import dev.ftb.mods.ftbquests.block.FTBQuestsBlocks;
 import dev.ftb.mods.ftbquests.gui.ImageConfig;
 import dev.ftb.mods.ftbquests.net.MessageSetCustomImage;
-import dev.ftb.mods.ftbquests.quest.PlayerData;
 import dev.ftb.mods.ftbquests.quest.QuestFile;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
+import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.reward.ItemReward;
 import dev.ftb.mods.ftbquests.quest.reward.RewardTypes;
 import dev.ftb.mods.ftbquests.quest.reward.XPLevelsReward;
@@ -258,7 +258,7 @@ public class FTBQuestsClient extends FTBQuestsCommon {
 	}
 
 	@Override
-	public PlayerData getClientPlayerData() {
+	public TeamData getClientPlayerData() {
 		return ClientQuestFile.INSTANCE.self;
 	}
 

@@ -130,10 +130,10 @@ public abstract class QuestObjectBase {
 		return !tags.isEmpty() && getTags().contains(tag);
 	}
 
-	public void changeProgress(PlayerData data, ChangeProgress type) {
+	public void changeProgress(TeamData data, ChangeProgress type) {
 	}
 
-	public void forceProgress(PlayerData data, ChangeProgress type, boolean notifications) {
+	public void forceProgress(TeamData data, ChangeProgress type, boolean notifications) {
 		ChangeProgress.sendUpdates = false;
 		ChangeProgress.sendNotifications = notifications ? Tristate.TRUE : Tristate.FALSE;
 		changeProgress(data, type);

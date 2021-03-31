@@ -1,8 +1,8 @@
 package dev.ftb.mods.ftbquests;
 
-import dev.ftb.mods.ftbquests.quest.PlayerData;
 import dev.ftb.mods.ftbquests.quest.QuestFile;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
+import dev.ftb.mods.ftbquests.quest.TeamData;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 
@@ -24,7 +24,7 @@ public class FTBQuestsCommon {
 		return false;
 	}
 
-	public PlayerData getClientPlayerData() {
+	public TeamData getClientPlayerData() {
 		throw new IllegalStateException("Can't access client data from server side!");
 	}
 

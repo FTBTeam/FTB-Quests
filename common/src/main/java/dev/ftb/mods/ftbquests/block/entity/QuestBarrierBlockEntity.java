@@ -1,9 +1,9 @@
 package dev.ftb.mods.ftbquests.block.entity;
 
 import dev.ftb.mods.ftbquests.FTBQuests;
-import dev.ftb.mods.ftbquests.quest.PlayerData;
 import dev.ftb.mods.ftbquests.quest.QuestObject;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
+import dev.ftb.mods.ftbquests.quest.TeamData;
 import me.shedaniel.architectury.extensions.BlockEntityExtension;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -77,7 +77,7 @@ public class QuestBarrierBlockEntity extends BlockEntity implements TickableBloc
 		syncData();
 	}
 
-	public boolean isComplete(PlayerData data) {
+	public boolean isComplete(TeamData data) {
 		QuestObject o = data.file.get(object);
 		return o != null && data.isComplete(o);
 	}

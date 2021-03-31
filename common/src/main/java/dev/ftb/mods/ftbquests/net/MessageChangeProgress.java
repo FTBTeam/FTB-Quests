@@ -1,9 +1,9 @@
 package dev.ftb.mods.ftbquests.net;
 
 import dev.ftb.mods.ftbquests.quest.ChangeProgress;
-import dev.ftb.mods.ftbquests.quest.PlayerData;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
+import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.util.NetUtils;
 import me.shedaniel.architectury.networking.NetworkManager;
 import net.minecraft.network.FriendlyByteBuf;
@@ -19,7 +19,7 @@ public class MessageChangeProgress extends MessageBase {
 	private final ChangeProgress type;
 
 	MessageChangeProgress(FriendlyByteBuf buffer) {
-		team = NetUtils.readUUID(buffer);
+		team = buffer.readUUID();
 		id = buffer.readLong();
 		type = ChangeProgress.NAME_MAP.read(buffer);
 
@@ -33,7 +33,7 @@ public class MessageChangeProgress extends MessageBase {
 
 	@Override
 	public void write(FriendlyByteBuf buffer) {
-		NetUtils.writeUUID(buffer, team);
+		buffer.writeUUID(team);
 		buffer.writeLong(id);
 		ChangeProgress.NAME_MAP.write(buffer, type);
 	}
@@ -44,7 +44,7 @@ public class MessageChangeProgress extends MessageBase {
 			QuestObjectBase object = ServerQuestFile.INSTANCE.getBase(id);
 
 			if (object != null) {
-				PlayerData t = ServerQuestFile.INSTANCE.getData(team);
+				TeamData t = ServerQuestFile.INSTANCE.getData(team);
 				object.forceProgress(t, type, false);
 			}
 		}

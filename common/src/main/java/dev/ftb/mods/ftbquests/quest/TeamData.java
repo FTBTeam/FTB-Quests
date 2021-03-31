@@ -9,9 +9,11 @@ import dev.ftb.mods.ftbquests.quest.reward.RewardClaimType;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.quest.task.TaskData;
 import dev.ftb.mods.ftbquests.util.OrderedCompoundTag;
+import dev.ftb.mods.ftbquests.util.QuestKey;
 import it.unimi.dsi.fastutil.longs.Long2ByteOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
+import me.shedaniel.architectury.utils.NbtType;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
@@ -20,18 +22,21 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 
 import javax.annotation.Nullable;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
  * @author LatvianModder
  */
-public class PlayerData {
-	public static PlayerData get(Player player) {
+public class TeamData {
+	public static TeamData get(Player player) {
 		return FTBQuests.PROXY.getQuestFile(player.getCommandSenderWorld().isClientSide()).getData(player);
 	}
 
@@ -41,7 +46,7 @@ public class PlayerData {
 	public boolean shouldSave;
 
 	private final Long2ObjectOpenHashMap<TaskData> taskData;
-	private final LongOpenHashSet claimedRewards;
+	private final Map<QuestKey, Instant> claimedRewards;
 	private boolean canEdit;
 	private long money;
 	private boolean autoPin;
@@ -50,13 +55,13 @@ public class PlayerData {
 	private Long2ByteOpenHashMap progressCache;
 	private Long2ByteOpenHashMap areDependenciesCompleteCache;
 
-	public PlayerData(QuestFile f, UUID id) {
+	public TeamData(QuestFile f, UUID id) {
 		file = f;
 		uuid = id;
 		name = "";
 		shouldSave = false;
 		taskData = new Long2ObjectOpenHashMap<>();
-		claimedRewards = new LongOpenHashSet();
+		claimedRewards = new HashMap<>();
 		canEdit = false;
 		money = 0L;
 		autoPin = false;
@@ -72,13 +77,13 @@ public class PlayerData {
 
 		if (d == null) {
 			if (name.isEmpty()) {
-				FTBQuests.LOGGER.warn("Something's broken! Task data is null for player " + uuid + " but that player doesn't exist! Task: " + task + ", Quest: " + task.quest.chapter.filename + ":" + task.quest);
+				FTBQuests.LOGGER.warn("Something's broken! Task data is null for team " + uuid + " but that team doesn't exist! Task: " + task + ", Quest: " + task.quest.chapter.filename + ":" + task.quest);
 				d = task.createData(this);
 				taskData.put(task.id, d);
 				return d;
 			}
 
-			throw new NullPointerException("Task data null! Task: " + task + ", Quest: " + task.quest.chapter.filename + ":" + task.quest + ", Player: " + name);
+			throw new NullPointerException("Task data null! Task: " + task + ", Quest: " + task.quest.chapter.filename + ":" + task.quest + ", Team: " + name);
 		}
 
 		return d;
@@ -94,12 +99,39 @@ public class PlayerData {
 		taskData.remove(task.id);
 	}
 
-	public boolean isRewardClaimed(long id) {
-		return claimedRewards.contains(id);
+	@Nullable
+	public Instant getRewardClaimTime(QuestKey key) {
+		return claimedRewards.get(key);
 	}
 
-	public boolean setRewardClaimed(long id, boolean claimed) {
-		if (claimed ? claimedRewards.add(id) : claimedRewards.remove(id)) {
+	public boolean isRewardClaimed(QuestKey key) {
+		return getRewardClaimTime(key) != null;
+	}
+
+	public boolean isRewardClaimed(long id) {
+		for (Map.Entry<QuestKey, Instant> entry : claimedRewards.entrySet()) {
+			if (entry.getKey().id == id) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	public boolean claimReward(QuestKey key) {
+		if (!claimedRewards.containsKey(key)) {
+			Instant now = Instant.now();
+			claimedRewards.put(key, now);
+			claimedRewards.put(QuestKey.of(uuid, key.id), now);
+			save();
+			return true;
+		}
+
+		return false;
+	}
+
+	public boolean resetReward(long id) {
+		if (claimedRewards.entrySet().removeIf(e -> e.getKey().id == id)) {
 			save();
 			return true;
 		}
@@ -230,7 +262,7 @@ public class PlayerData {
 		claimedRewards.clear();
 		pinnedQuests.clear();
 
-		if (nbt.contains("claimed_rewards", 11) || nbt.contains("pinned_quests", 11)) {
+		if (nbt.contains("claimed_rewards", NbtType.INT_ARRAY) || nbt.contains("pinned_quests", NbtType.INT_ARRAY)) {
 			oldData = true;
 
 			for (int i : nbt.getIntArray("claimed_rewards")) {
@@ -240,14 +272,21 @@ public class PlayerData {
 			for (int i : nbt.getIntArray("pinned_quests")) {
 				pinnedQuests.add(i);
 			}
-		} else {
-			ListTag cr = nbt.getList("claimed_rewards", 8);
+		} else if (nbt.contains("claimed_rewards", NbtType.LIST)) {
+			oldData = true;
+			ListTag cr = nbt.getList("claimed_rewards", NbtType.STRING);
 
 			for (int i = 0; i < cr.size(); i++) {
 				claimedRewards.add(file.getID(cr.getString(i)));
 			}
 
-			ListTag pq = nbt.getList("pinned_quests", 8);
+			ListTag pq = nbt.getList("pinned_quests", NbtType.STRING);
+
+			for (int i = 0; i < pq.size(); i++) {
+				pinnedQuests.add(file.getID(pq.getString(i)));
+			}
+		} else {
+			ListTag pq = nbt.getList("pinned_quests", NbtType.STRING);
 
 			for (int i = 0; i < pq.size(); i++) {
 				pinnedQuests.add(file.getID(pq.getString(i)));
@@ -290,10 +329,12 @@ public class PlayerData {
 		}
 
 		if (self) {
+			long now = Instant.now().toEpochMilli();
 			buffer.writeVarInt(claimedRewards.size());
 
-			for (long i : claimedRewards) {
-				buffer.writeLong(i);
+			for (Map.Entry<QuestKey, Instant> i : claimedRewards.entrySet()) {
+				i.getKey().write(buffer);
+				buffer.writeLong(now - i.getValue().toEpochMilli());
 			}
 
 			buffer.writeBoolean(canEdit);
@@ -328,10 +369,12 @@ public class PlayerData {
 		pinnedQuests.clear();
 
 		if (self) {
+			long now = Instant.now().toEpochMilli();
 			int crs = buffer.readVarInt();
 
 			for (int i = 0; i < crs; i++) {
-				claimedRewards.add(buffer.readLong());
+				QuestKey key = QuestKey.of(buffer);
+				claimedRewards.put(key, Instant.ofEpochMilli(now - buffer.readLong()));
 			}
 
 			canEdit = buffer.readBoolean();
@@ -468,11 +511,13 @@ public class PlayerData {
 	}
 
 	public void claimReward(ServerPlayer player, Reward reward, boolean notify) {
-		if (setRewardClaimed(reward.id, true)) {
+		QuestKey k = QuestKey.of(player.getUUID(), reward.id);
+
+		if (claimReward(k)) {
 			reward.claim(player, notify);
 
 			if (file.isServerSide()) {
-				new MessageClaimRewardResponse(uuid, reward.id, 1).sendToAll();
+				new MessageClaimRewardResponse(k).sendToAll();
 			}
 		}
 	}

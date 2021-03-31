@@ -13,8 +13,8 @@ import dev.ftb.mods.ftbquests.item.LootCrateItem;
 import dev.ftb.mods.ftbquests.net.MessageSubmitTask;
 import dev.ftb.mods.ftbquests.quest.Chapter;
 import dev.ftb.mods.ftbquests.quest.ChapterGroup;
-import dev.ftb.mods.ftbquests.quest.PlayerData;
 import dev.ftb.mods.ftbquests.quest.Quest;
+import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.loot.LootCrate;
 import dev.ftb.mods.ftbquests.quest.task.ObservationTask;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
@@ -140,7 +140,7 @@ public class FTBQuestsClientEventHandler {
 		}
 
 		ClientQuestFile file = ClientQuestFile.INSTANCE;
-		PlayerData data = file.self;
+		TeamData data = file.self;
 
 		GlStateManager._enableBlend();
 		Minecraft mc = Minecraft.getInstance();

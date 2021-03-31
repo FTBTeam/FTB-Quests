@@ -2,9 +2,9 @@ package dev.ftb.mods.ftbquests.quest.task;
 
 import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
 import dev.ftb.mods.ftbquests.net.MessageSubmitTask;
-import dev.ftb.mods.ftbquests.quest.PlayerData;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
+import dev.ftb.mods.ftbquests.quest.TeamData;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
@@ -78,12 +78,12 @@ public class CustomTask extends Task {
 	}
 
 	@Override
-	public TaskData createData(PlayerData data) {
+	public TaskData createData(TeamData data) {
 		return new Data(this, data);
 	}
 
 	public static class Data extends TaskData<CustomTask> {
-		private Data(CustomTask task, PlayerData data) {
+		private Data(CustomTask task, TeamData data) {
 			super(task, data);
 		}
 
