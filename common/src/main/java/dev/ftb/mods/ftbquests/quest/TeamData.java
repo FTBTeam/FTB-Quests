@@ -112,8 +112,13 @@ public class TeamData {
 		return t == 0L ? null : Instant.ofEpochMilli(t);
 	}
 
-	public void setStarted(long id, Instant time) {
-		started.put(id, time.toEpochMilli());
+	public void setStarted(long id, @Nullable Instant time) {
+		if (time == null) {
+			started.remove(id);
+		} else {
+			started.put(id, time.toEpochMilli());
+		}
+
 		save();
 	}
 
@@ -123,8 +128,13 @@ public class TeamData {
 		return t == 0L ? null : Instant.ofEpochMilli(t);
 	}
 
-	public void setCompleted(long id, Instant time) {
-		completed.put(id, time.toEpochMilli());
+	public void setCompleted(long id, @Nullable Instant time) {
+		if (time == null) {
+			completed.remove(id);
+		} else {
+			completed.put(id, time.toEpochMilli());
+		}
+
 		save();
 	}
 

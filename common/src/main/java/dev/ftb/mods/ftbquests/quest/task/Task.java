@@ -79,13 +79,16 @@ public abstract class Task extends QuestObject {
 
 	@Override
 	public void onStarted(QuestProgressEventData<?> data) {
+		data.teamData.setStarted(id, data.time);
 		ObjectStartedEvent.TASK.invoker().act(new ObjectStartedEvent.TaskEvent(data.withObject(this)));
 		quest.onStarted(data.withObject(quest));
 	}
 
 	@Override
 	public final void onCompleted(QuestProgressEventData<?> data) {
+		data.teamData.setCompleted(id, data.time);
 		ObjectCompletedEvent.TASK.invoker().act(new ObjectCompletedEvent.TaskEvent(data.withObject(this)));
+
 		boolean questComplete = data.teamData.isCompleted(quest);
 
 		if (quest.tasks.size() > 1 && !questComplete && !disableToast) {

@@ -3,7 +3,7 @@ package dev.ftb.mods.ftbquests.integration.kubejs;
 import dev.ftb.mods.ftbquests.events.CustomRewardEvent;
 import dev.ftb.mods.ftbquests.events.CustomTaskEvent;
 import dev.ftb.mods.ftbquests.events.ObjectCompletedEvent;
-import dev.ftb.mods.ftbquests.events.TaskStartedEvent;
+import dev.ftb.mods.ftbquests.events.ObjectStartedEvent;
 import dev.latvian.kubejs.player.AttachPlayerDataEvent;
 import dev.latvian.kubejs.script.BindingsEvent;
 import dev.latvian.kubejs.script.ScriptType;
@@ -19,7 +19,7 @@ public class KubeJSIntegration {
 		CustomTaskEvent.EVENT.register(KubeJSIntegration::onCustomTask);
 		CustomRewardEvent.EVENT.register(KubeJSIntegration::onCustomReward);
 		ObjectCompletedEvent.GENERIC.register(KubeJSIntegration::onCompleted);
-		TaskStartedEvent.EVENT.register(KubeJSIntegration::onTaskStarted);
+		ObjectStartedEvent.GENERIC.register(KubeJSIntegration::onStarted);
 	}
 
 	//@SubscribeEvent
@@ -57,7 +57,7 @@ public class KubeJSIntegration {
 		return InteractionResult.PASS;
 	}
 
-	public static InteractionResult onCompleted(ObjectCompletedEvent event) {
+	public static InteractionResult onCompleted(ObjectCompletedEvent<?> event) {
 		QuestObjectCompletedEventJS e = new QuestObjectCompletedEventJS(event);
 		e.post(ScriptType.SERVER, "ftbquests.completed", event.getObject().getCodeString());
 
@@ -68,12 +68,14 @@ public class KubeJSIntegration {
 		return InteractionResult.PASS;
 	}
 
-	public static void onTaskStarted(TaskStartedEvent event) {
-		TaskStartedEventJS e = new TaskStartedEventJS(event);
-		e.post(ScriptType.SERVER, "ftbquests.started", event.getTaskData().task.getCodeString());
+	public static InteractionResult onStarted(ObjectStartedEvent<?> event) {
+		QuestObjectStartedEventJS e = new QuestObjectStartedEventJS(event);
+		e.post(ScriptType.SERVER, "ftbquests.started", event.getObject().getCodeString());
 
-		for (String tag : event.getTaskData().task.getTags()) {
+		for (String tag : event.getObject().getTags()) {
 			e.post(ScriptType.SERVER, "ftbquests.started." + tag);
 		}
+
+		return InteractionResult.PASS;
 	}
 }
