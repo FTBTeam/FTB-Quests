@@ -176,7 +176,7 @@ public class TaskButton extends Button {
 
 	@Override
 	public void drawIcon(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
-		task.drawGUI(questScreen.file.self.getTaskData(task), matrixStack, x, y, w, h);
+		task.drawGUI(questScreen.file.self, matrixStack, x, y, w, h);
 	}
 
 	@Override

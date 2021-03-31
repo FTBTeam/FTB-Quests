@@ -221,15 +221,8 @@ public final class Chapter extends QuestObject {
 			}
 		}
 
-		if (data.teamData.isCompleted(file)) {
-			file.onCompleted(data.withObject(file));
-		}
-	}
-
-	@Override
-	public void changeProgress(TeamData data, ChangeProgress type) {
-		for (Quest quest : quests) {
-			quest.changeProgress(data, type);
+		if (group.isCompletedRaw(data.teamData)) {
+			group.onCompleted(data.withObject(group));
 		}
 	}
 

@@ -4,6 +4,7 @@ import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.icon.IconAnimation;
 import com.feed_the_beast.mods.ftbguilibrary.utils.ClientUtils;
+import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
 import dev.ftb.mods.ftbquests.gui.quests.QuestScreen;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -119,13 +120,6 @@ public class ChapterGroup extends QuestObject {
 	}
 
 	@Override
-	public void changeProgress(TeamData data, ChangeProgress type) {
-		for (Chapter chapter : chapters) {
-			chapter.changeProgress(data, type);
-		}
-	}
-
-	@Override
 	public int getRelativeProgressFromChildren(TeamData data) {
 		if (chapters.isEmpty()) {
 			return 100;
@@ -138,6 +132,15 @@ public class ChapterGroup extends QuestObject {
 		}
 
 		return getRelativeProgressFromChildren(progress, chapters.size());
+	}
+
+	@Override
+	public void onCompleted(QuestProgressEventData<?> data) {
+		data.teamData.setCompleted(id, data.time);
+
+		if (file.isCompletedRaw(data.teamData)) {
+			file.onCompleted(data.withObject(file));
+		}
 	}
 
 	public List<Chapter> getVisibleChapters(TeamData data) {

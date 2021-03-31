@@ -120,7 +120,7 @@ public class KillTask extends Task {
 
 		public void kill(LivingEntity entity) {
 			if (!isComplete() && task.entity.equals(Registries.getId(entity.getType(), Registry.ENTITY_TYPE_REGISTRY))) {
-				addProgress(1);
+				addProgress(1L);
 			}
 		}
 	}

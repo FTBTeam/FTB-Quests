@@ -69,7 +69,7 @@ import java.util.function.Predicate;
  * @author LatvianModder
  */
 public abstract class QuestFile extends QuestObject {
-	public static final int VERSION = 11;
+	public static int VERSION = 11;
 
 	public final DefaultChapterGroup defaultChapterGroup;
 	public final List<ChapterGroup> chapterGroups;
@@ -187,13 +187,6 @@ public abstract class QuestFile extends QuestObject {
 			for (ServerPlayer player : data.notifiedPlayers) {
 				new MessageDisplayCompletionToast(id).sendTo(player);
 			}
-		}
-	}
-
-	@Override
-	public void changeProgress(TeamData data, ChangeProgress type) {
-		for (ChapterGroup group : chapterGroups) {
-			group.changeProgress(data, type);
 		}
 	}
 

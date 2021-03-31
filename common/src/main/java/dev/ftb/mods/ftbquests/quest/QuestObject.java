@@ -9,6 +9,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 
+import java.time.Instant;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -53,7 +54,29 @@ public abstract class QuestObject extends QuestObjectBase {
 	}
 
 	@Override
-	public abstract void changeProgress(TeamData data, ChangeProgress type);
+	public void changeProgress(Instant time, TeamData data, ChangeProgress type) {
+		if (type.reset) {
+			if (data.isStarted(this)) {
+				data.setStarted(id, null);
+			}
+
+			if (data.isCompleted(this)) {
+				data.setCompleted(id, null);
+			}
+		} else {
+			if (!data.isStarted(this)) {
+				data.setStarted(id, time);
+			}
+
+			if (!data.isCompleted(this)) {
+				data.setCompleted(id, time);
+			}
+		}
+
+		for (QuestObject child : getChildren()) {
+			child.changeProgress(time, data, type);
+		}
+	}
 
 	public abstract int getRelativeProgressFromChildren(TeamData data);
 
@@ -108,5 +131,15 @@ public abstract class QuestObject extends QuestObjectBase {
 
 	public Collection<? extends QuestObject> getChildren() {
 		return Collections.emptyList();
+	}
+
+	public boolean isCompletedRaw(TeamData data) {
+		for (QuestObject child : getChildren()) {
+			if (data.isCompleted(child)) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 }

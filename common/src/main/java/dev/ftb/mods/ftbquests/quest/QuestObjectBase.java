@@ -30,6 +30,7 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nullable;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -130,13 +131,13 @@ public abstract class QuestObjectBase {
 		return !tags.isEmpty() && getTags().contains(tag);
 	}
 
-	public void changeProgress(TeamData data, ChangeProgress type) {
+	public void changeProgress(Instant time, TeamData data, ChangeProgress type) {
 	}
 
 	public void forceProgress(TeamData data, ChangeProgress type, boolean notifications) {
 		ChangeProgress.sendUpdates = false;
 		ChangeProgress.sendNotifications = notifications ? Tristate.TRUE : Tristate.FALSE;
-		changeProgress(data, type);
+		changeProgress(Instant.now(), data, type);
 		ChangeProgress.sendUpdates = true;
 		ChangeProgress.sendNotifications = Tristate.DEFAULT;
 		getQuestFile().clearCachedProgress();

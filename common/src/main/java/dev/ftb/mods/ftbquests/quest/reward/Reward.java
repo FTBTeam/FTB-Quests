@@ -26,6 +26,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
 import javax.annotation.Nullable;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -199,8 +200,8 @@ public abstract class Reward extends QuestObjectBase {
 	}
 
 	@Override
-	public final void changeProgress(TeamData data, ChangeProgress type) {
-		if (type == ChangeProgress.RESET || type == ChangeProgress.RESET_DEPS) {
+	public final void changeProgress(Instant time, TeamData data, ChangeProgress type) {
+		if (type.reset) {
 			data.resetReward(this);
 		}
 	}
