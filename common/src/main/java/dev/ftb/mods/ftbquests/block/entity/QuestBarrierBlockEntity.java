@@ -79,6 +79,6 @@ public class QuestBarrierBlockEntity extends BlockEntity implements TickableBloc
 
 	public boolean isComplete(TeamData data) {
 		QuestObject o = data.file.get(object);
-		return o != null && data.isComplete(o);
+		return o != null && data.isCompleted(o);
 	}
 }

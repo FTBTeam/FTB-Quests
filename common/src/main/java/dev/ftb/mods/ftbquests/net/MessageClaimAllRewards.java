@@ -32,7 +32,7 @@ public class MessageClaimAllRewards extends MessageBase {
 		for (ChapterGroup group : ServerQuestFile.INSTANCE.chapterGroups) {
 			for (Chapter chapter : group.chapters) {
 				for (Quest quest : chapter.quests) {
-					if (data.isComplete(quest)) {
+					if (data.isCompleted(quest)) {
 						for (Reward reward : quest.rewards) {
 							if (!reward.getExcludeFromClaimAll()) {
 								data.claimReward(player, reward, true);

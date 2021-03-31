@@ -65,7 +65,7 @@ public class TaskButton extends Button {
 	@Override
 	public void onClicked(MouseButton button) {
 		if (button.isLeft()) {
-			task.onButtonClicked(this, !(task.invalid || !questScreen.file.self.canStartTasks(task.quest) || questScreen.file.self.isComplete(task)));
+			task.onButtonClicked(this, !(task.invalid || !questScreen.file.self.canStartTasks(task.quest) || questScreen.file.self.isCompleted(task)));
 		} else if (button.isRight() && questScreen.file.canEdit()) {
 			playClickSound();
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
@@ -192,7 +192,7 @@ public class TaskButton extends Button {
 			//return;
 		}
 
-		if (questScreen.file.self.isComplete(task)) {
+		if (questScreen.file.self.isCompleted(task)) {
 			matrixStack.pushPose();
 			matrixStack.translate(0, 0, 200);
 			RenderSystem.enableBlend();

@@ -148,7 +148,7 @@ public abstract class Reward extends QuestObjectBase {
 		quest.rewards.remove(this);
 
 		for (TeamData data : getQuestFile().getAllData()) {
-			data.resetReward(id);
+			data.resetReward(this);
 		}
 
 		super.deleteSelf();
@@ -157,7 +157,7 @@ public abstract class Reward extends QuestObjectBase {
 	@Override
 	public final void deleteChildren() {
 		for (TeamData data : getQuestFile().getAllData()) {
-			data.resetReward(id);
+			data.resetReward(this);
 		}
 
 		super.deleteChildren();
@@ -201,7 +201,7 @@ public abstract class Reward extends QuestObjectBase {
 	@Override
 	public final void changeProgress(TeamData data, ChangeProgress type) {
 		if (type == ChangeProgress.RESET || type == ChangeProgress.RESET_DEPS) {
-			data.resetReward(id);
+			data.resetReward(this);
 		}
 	}
 

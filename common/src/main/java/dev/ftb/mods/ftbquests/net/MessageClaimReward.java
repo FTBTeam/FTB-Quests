@@ -38,7 +38,7 @@ public class MessageClaimReward extends MessageBase {
 		if (reward != null) {
 			TeamData teamData = ServerQuestFile.INSTANCE.getData(player);
 
-			if (teamData.isComplete(reward.quest)) {
+			if (teamData.isCompleted(reward.quest)) {
 				teamData.claimReward(player, reward, notify);
 			}
 		}

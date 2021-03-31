@@ -98,7 +98,7 @@ public class RewardButton extends Button {
 
 	@Override
 	public WidgetType getWidgetType() {
-		if (!ClientQuestFile.exists() || !ClientQuestFile.INSTANCE.self.isComplete(reward.quest)) {
+		if (!ClientQuestFile.exists() || !ClientQuestFile.INSTANCE.self.isCompleted(reward.quest)) {
 			return WidgetType.DISABLED;
 		}
 
@@ -153,7 +153,7 @@ public class RewardButton extends Button {
 		if (questScreen.file.self.getClaimType(reward).isClaimed()) {
 			ThemeProperties.CHECK_ICON.get().draw(matrixStack, x + w - 9, y + 1, 8, 8);
 			completed = true;
-		} else if (questScreen.file.self.isComplete(reward.quest)) {
+		} else if (questScreen.file.self.isCompleted(reward.quest)) {
 			ThemeProperties.ALERT_ICON.get().draw(matrixStack, x + w - 9, y + 1, 8, 8);
 		}
 

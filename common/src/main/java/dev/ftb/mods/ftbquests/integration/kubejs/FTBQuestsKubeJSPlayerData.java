@@ -58,7 +58,7 @@ public class FTBQuestsKubeJSPlayerData {
 	public boolean isCompleted(Object id) {
 		TeamData data = getData();
 		QuestObject object = data.file.get(data.file.getID(id));
-		return object != null && data.isComplete(object);
+		return object != null && data.isCompleted(object);
 	}
 
 	public boolean isStarted(Object id) {

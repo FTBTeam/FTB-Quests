@@ -111,7 +111,7 @@ public class FTBQuestsClientEventHandler {
 			currentlyObserving = null;
 
 			for (ObservationTask task : observationTasks) {
-				if (!ClientQuestFile.INSTANCE.self.isComplete(task) && task.matcher.check(mc.player, mc.hitResult) && ClientQuestFile.INSTANCE.self.canStartTasks(task.quest)) {
+				if (!ClientQuestFile.INSTANCE.self.isCompleted(task) && task.matcher.check(mc.player, mc.hitResult) && ClientQuestFile.INSTANCE.self.canStartTasks(task.quest)) {
 					currentlyObserving = task;
 					break;
 				}
@@ -172,7 +172,7 @@ public class FTBQuestsClientEventHandler {
 				for (ChapterGroup group : file.chapterGroups) {
 					for (Chapter chapter : group.chapters) {
 						for (Quest quest : chapter.quests) {
-							if (!data.isComplete(quest) && data.canStartTasks(quest)) {
+							if (!data.isCompleted(quest) && data.canStartTasks(quest)) {
 								if (first) {
 									first = false;
 								} else {
@@ -205,7 +205,7 @@ public class FTBQuestsClientEventHandler {
 							list.add(FormattedCharSequence.EMPTY);
 						}
 
-						if (data.isComplete(quest)) {
+						if (data.isCompleted(quest)) {
 							TextComponent component = new TextComponent("");
 							component.append(quest.getMutableTitle().withStyle(ChatFormatting.BOLD, ChatFormatting.GREEN));
 							component.append(new TextComponent(" 100%").withStyle(ChatFormatting.DARK_GREEN));

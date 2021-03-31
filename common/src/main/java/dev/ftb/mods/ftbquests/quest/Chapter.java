@@ -5,6 +5,8 @@ import com.feed_the_beast.mods.ftbguilibrary.config.ConfigString;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.feed_the_beast.mods.ftbguilibrary.icon.IconAnimation;
 import dev.ftb.mods.ftbquests.events.ObjectCompletedEvent;
+import dev.ftb.mods.ftbquests.events.ObjectStartedEvent;
+import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
 import dev.ftb.mods.ftbquests.net.MessageDisplayCompletionToast;
 import dev.ftb.mods.ftbquests.util.NetUtils;
 import dev.ftb.mods.ftbquests.util.OrderedCompoundTag;
@@ -20,6 +22,7 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -188,12 +191,19 @@ public final class Chapter extends QuestObject {
 	}
 
 	@Override
-	public void onCompleted(TeamData data, List<ServerPlayer> onlineMembers, List<ServerPlayer> notifiedPlayers) {
-		super.onCompleted(data, onlineMembers, notifiedPlayers);
-		ObjectCompletedEvent.CHAPTER.invoker().act(new ObjectCompletedEvent.ChapterEvent(data, this, onlineMembers, notifiedPlayers));
+	public void onStarted(QuestProgressEventData<?> data) {
+		if (!data.teamData.isStarted(this)) {
+			ObjectStartedEvent.CHAPTER.invoker().act(new ObjectStartedEvent.ChapterEvent(data.withObject(this)));
+			file.onStarted(data.withObject(file));
+		}
+	}
+
+	@Override
+	public void onCompleted(QuestProgressEventData<?> data) {
+		ObjectCompletedEvent.CHAPTER.invoker().act(new ObjectCompletedEvent.ChapterEvent(data.withObject(this)));
 
 		if (!disableToast) {
-			for (ServerPlayer player : notifiedPlayers) {
+			for (ServerPlayer player : data.notifiedPlayers) {
 				new MessageDisplayCompletionToast(id).sendTo(player);
 			}
 		}
@@ -202,14 +212,14 @@ public final class Chapter extends QuestObject {
 			for (Chapter chapter : g.chapters) {
 				for (Quest quest : chapter.quests) {
 					if (quest.dependencies.contains(this)) {
-						data.checkAutoCompletion(quest);
+						data.teamData.checkAutoCompletion(quest);
 					}
 				}
 			}
 		}
 
-		if (data.isComplete(file)) {
-			file.onCompleted(data, onlineMembers, notifiedPlayers);
+		if (data.teamData.isCompleted(file)) {
+			file.onCompleted(data.withObject(file));
 		}
 	}
 
@@ -347,5 +357,10 @@ public final class Chapter extends QuestObject {
 
 	public String getDefaultQuestShape() {
 		return defaultQuestShape.isEmpty() ? file.getDefaultQuestShape() : defaultQuestShape;
+	}
+
+	@Override
+	public Collection<? extends QuestObject> getChildren() {
+		return quests;
 	}
 }

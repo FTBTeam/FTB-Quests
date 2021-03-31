@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbquests.quest;
 
+import com.mojang.util.UUIDTypeAdapter;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.net.MessageCreateTeamData;
 import dev.ftb.mods.ftbquests.net.MessageDeleteObjectResponse;
@@ -70,11 +71,11 @@ public class ServerQuestFile extends QuestFile {
 
 		if (Files.exists(path)) {
 			try {
-				Files.list(path).forEach(path1 -> {
+				Files.list(path).filter(p -> !p.getFileName().toString().contains("-")).forEach(path1 -> {
 					CompoundTag nbt = NBTUtils.readSNBT(path1);
 
 					try {
-						UUID uuid = UUID.fromString(nbt.getString("uuid"));
+						UUID uuid = UUIDTypeAdapter.fromString(nbt.getString("uuid"));
 						TeamData data = new TeamData(this, uuid);
 						addData(data, true);
 						data.deserializeNBT(nbt);
@@ -138,7 +139,7 @@ public class ServerQuestFile extends QuestFile {
 
 		for (TeamData data : getAllData()) {
 			if (data.shouldSave) {
-				NBTUtils.writeSNBT(path.resolve(data.uuid.toString() + ".snbt"), data.serializeNBT());
+				NBTUtils.writeSNBT(path.resolve(UUIDTypeAdapter.fromUUID(data.uuid) + ".snbt"), data.serializeNBT());
 				data.shouldSave = false;
 			}
 		}

@@ -10,6 +10,8 @@ import com.feed_the_beast.mods.ftbguilibrary.widget.WrappedIngredient;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.ftb.mods.ftbquests.events.CustomTaskEvent;
 import dev.ftb.mods.ftbquests.events.ObjectCompletedEvent;
+import dev.ftb.mods.ftbquests.events.ObjectStartedEvent;
+import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
 import dev.ftb.mods.ftbquests.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.integration.jei.FTBQuestsJEIHelper;
 import dev.ftb.mods.ftbquests.net.MessageDisplayCompletionToast;
@@ -28,10 +30,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.server.level.ServerPlayer;
 
 import javax.annotation.Nullable;
-import java.util.List;
 
 /**
  * @author LatvianModder
@@ -78,17 +78,22 @@ public abstract class Task extends QuestObject {
 	}
 
 	@Override
-	public final void onCompleted(TeamData data, List<ServerPlayer> onlineMembers, List<ServerPlayer> notifiedPlayers) {
-		super.onCompleted(data, onlineMembers, notifiedPlayers);
-		ObjectCompletedEvent.TASK.invoker().act(new ObjectCompletedEvent.TaskEvent(data, this, onlineMembers, notifiedPlayers));
-		boolean questComplete = data.isComplete(quest);
+	public void onStarted(QuestProgressEventData<?> data) {
+		ObjectStartedEvent.TASK.invoker().act(new ObjectStartedEvent.TaskEvent(data.withObject(this)));
+		quest.onStarted(data.withObject(quest));
+	}
+
+	@Override
+	public final void onCompleted(QuestProgressEventData<?> data) {
+		ObjectCompletedEvent.TASK.invoker().act(new ObjectCompletedEvent.TaskEvent(data.withObject(this)));
+		boolean questComplete = data.teamData.isCompleted(quest);
 
 		if (quest.tasks.size() > 1 && !questComplete && !disableToast) {
-			new MessageDisplayCompletionToast(id).sendTo(notifiedPlayers);
+			new MessageDisplayCompletionToast(id).sendTo(data.notifiedPlayers);
 		}
 
 		if (questComplete) {
-			quest.onCompleted(data, onlineMembers, notifiedPlayers);
+			quest.onCompleted(data.withObject(quest));
 		}
 	}
 

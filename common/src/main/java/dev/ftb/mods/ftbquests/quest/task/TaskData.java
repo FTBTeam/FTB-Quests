@@ -1,6 +1,7 @@
 package dev.ftb.mods.ftbquests.quest.task;
 
 import com.feed_the_beast.mods.ftbguilibrary.utils.StringUtils;
+import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
 import dev.ftb.mods.ftbquests.events.TaskStartedEvent;
 import dev.ftb.mods.ftbquests.net.MessageUpdateTaskProgress;
 import dev.ftb.mods.ftbquests.quest.ChangeProgress;
@@ -9,6 +10,7 @@ import dev.ftb.mods.ftbquests.util.FTBQuestsInventoryListener;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 
+import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 
@@ -41,6 +43,8 @@ public class TaskData<T extends Task> {
 			task.quest.chapter.file.clearCachedProgress();
 
 			if (data.file.isServerSide()) {
+				Instant now = Instant.now();
+
 				if (ChangeProgress.sendUpdates) {
 					new MessageUpdateTaskProgress(data, task.id, progress).sendToAll();
 				}
@@ -60,7 +64,7 @@ public class TaskData<T extends Task> {
 						notifiedPlayers = Collections.emptyList();
 					}
 
-					task.onCompleted(data, onlineMembers, notifiedPlayers);
+					task.onCompleted(new QuestProgressEventData<>(now, data, task, onlineMembers, notifiedPlayers));
 
 					for (ServerPlayer player : onlineMembers) {
 						FTBQuestsInventoryListener.detect(player, ItemStack.EMPTY, task.id);
