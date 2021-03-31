@@ -63,7 +63,7 @@ public final class Chapter extends QuestObject {
 
 	@Override
 	public QuestFile getQuestFile() {
-		return file;
+		return group.file;
 	}
 
 	@Override

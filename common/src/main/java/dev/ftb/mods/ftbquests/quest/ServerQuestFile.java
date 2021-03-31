@@ -153,7 +153,7 @@ public class ServerQuestFile extends QuestFile {
 
 	public void onLoggedIn(ServerPlayer player) {
 		UUID id = player.getUUID();
-		TeamData data = playerDataMap.get(id);
+		TeamData data = teamDataMap.get(id);
 
 		if (data == null) {
 			data = new TeamData(this, id);

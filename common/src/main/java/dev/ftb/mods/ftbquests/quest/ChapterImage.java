@@ -8,6 +8,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
 import dev.ftb.mods.ftbquests.gui.ImageConfig;
 import dev.ftb.mods.ftbquests.net.MessageEditObject;
+import dev.ftb.mods.ftbquests.util.ConfigQuestObject;
 import dev.ftb.mods.ftbquests.util.NetUtils;
 import me.shedaniel.architectury.utils.NbtType;
 import net.fabricmc.api.EnvType;
@@ -19,6 +20,7 @@ import net.minecraft.network.FriendlyByteBuf;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 
 /**
  * @author LatvianModder
@@ -33,6 +35,7 @@ public final class ChapterImage implements Movable {
 	public String click;
 	public boolean dev;
 	public boolean corner;
+	public Quest dependency;
 
 	public ChapterImage(Chapter c) {
 		chapter = c;
@@ -45,6 +48,7 @@ public final class ChapterImage implements Movable {
 		click = "";
 		dev = false;
 		corner = false;
+		dependency = null;
 	}
 
 	public void writeData(CompoundTag nbt) {
@@ -65,6 +69,10 @@ public final class ChapterImage implements Movable {
 		nbt.putString("click", click);
 		nbt.putBoolean("dev", dev);
 		nbt.putBoolean("corner", corner);
+
+		if (dependency != null) {
+			nbt.putString("dependency", dependency.getCodeString());
+		}
 	}
 
 	public void readData(CompoundTag nbt) {
@@ -85,6 +93,8 @@ public final class ChapterImage implements Movable {
 		click = nbt.getString("click");
 		dev = nbt.getBoolean("dev");
 		corner = nbt.getBoolean("corner");
+
+		dependency = nbt.contains("dependency") ? chapter.file.getQuest(chapter.file.getID(nbt.get("dependency"))) : null;
 	}
 
 	public void writeNetData(FriendlyByteBuf buffer) {
@@ -98,6 +108,7 @@ public final class ChapterImage implements Movable {
 		buffer.writeUtf(click, Short.MAX_VALUE);
 		buffer.writeBoolean(dev);
 		buffer.writeBoolean(corner);
+		buffer.writeLong(dependency == null ? 0L : dependency.id);
 	}
 
 	public void readNetData(FriendlyByteBuf buffer) {
@@ -111,6 +122,7 @@ public final class ChapterImage implements Movable {
 		click = buffer.readUtf(Short.MAX_VALUE);
 		dev = buffer.readBoolean();
 		corner = buffer.readBoolean();
+		dependency = chapter.file.getQuest(buffer.readLong());
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -125,6 +137,9 @@ public final class ChapterImage implements Movable {
 		config.addString("click", click, v -> click = v, "");
 		config.addBool("dev", dev, v -> dev = v, false);
 		config.addBool("corner", corner, v -> corner = v, false);
+
+		Predicate<QuestObjectBase> depTypes = object -> object == null || object instanceof Quest;
+		config.add("dependency", new ConfigQuestObject<>(depTypes), dependency, v -> dependency = v, null).setNameKey("ftbquests.dependency");
 	}
 
 	@Override
