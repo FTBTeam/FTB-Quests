@@ -192,14 +192,17 @@ public final class Chapter extends QuestObject {
 
 	@Override
 	public void onStarted(QuestProgressEventData<?> data) {
-		if (!data.teamData.isStarted(this)) {
-			ObjectStartedEvent.CHAPTER.invoker().act(new ObjectStartedEvent.ChapterEvent(data.withObject(this)));
+		data.teamData.setStarted(id, data.time);
+		ObjectStartedEvent.CHAPTER.invoker().act(new ObjectStartedEvent.ChapterEvent(data.withObject(this)));
+
+		if (!data.teamData.isStarted(file)) {
 			file.onStarted(data.withObject(file));
 		}
 	}
 
 	@Override
 	public void onCompleted(QuestProgressEventData<?> data) {
+		data.teamData.setCompleted(id, data.time);
 		ObjectCompletedEvent.CHAPTER.invoker().act(new ObjectCompletedEvent.ChapterEvent(data.withObject(this)));
 
 		if (!disableToast) {

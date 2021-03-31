@@ -238,7 +238,7 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 				long add = Math.min(stack.getCount(), task.count - progress);
 
 				if (add > 0L) {
-					if (!simulate && data.file.isServerSide()) {
+					if (!simulate && teamData.file.isServerSide()) {
 						addProgress(add);
 					}
 

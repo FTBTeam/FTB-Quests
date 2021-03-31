@@ -369,15 +369,18 @@ public final class Quest extends QuestObject implements Movable {
 
 	@Override
 	public void onStarted(QuestProgressEventData<?> data) {
-		if (!data.teamData.isStarted(this)) {
-			ObjectStartedEvent.QUEST.invoker().act(new ObjectStartedEvent.QuestEvent(data.withObject(this)));
+		data.teamData.setStarted(id, data.time);
+		ObjectStartedEvent.QUEST.invoker().act(new ObjectStartedEvent.QuestEvent(data.withObject(this)));
+
+		if (!data.teamData.isStarted(chapter)) {
 			chapter.onStarted(data.withObject(chapter));
 		}
 	}
 
 	@Override
 	public void onCompleted(QuestProgressEventData<?> data) {
-		//data.setTimesCompleted(this, data.getTimesCompleted(this) + 1);
+		data.teamData.setCompleted(id, data.time);
+		ObjectCompletedEvent.QUEST.invoker().act(new ObjectCompletedEvent.QuestEvent(data.withObject(this)));
 
 		if (!disableToast) {
 			for (ServerPlayer player : data.notifiedPlayers) {
@@ -385,8 +388,11 @@ public final class Quest extends QuestObject implements Movable {
 			}
 		}
 
+		if (data.teamData.isCompleted(chapter)) {
+			chapter.onCompleted(data.withObject(chapter));
+		}
+
 		data.teamData.checkAutoCompletion(this);
-		ObjectCompletedEvent.QUEST.invoker().act(new ObjectCompletedEvent.QuestEvent(data.withObject(this)));
 
 		for (ChapterGroup group : chapter.file.chapterGroups) {
 			for (Chapter chapter : group.chapters) {
@@ -396,10 +402,6 @@ public final class Quest extends QuestObject implements Movable {
 					}
 				}
 			}
-		}
-
-		if (data.teamData.isCompleted(chapter)) {
-			chapter.onCompleted(data.withObject(chapter));
 		}
 	}
 

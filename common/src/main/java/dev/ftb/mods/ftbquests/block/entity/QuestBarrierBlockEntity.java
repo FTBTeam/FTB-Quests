@@ -4,28 +4,24 @@ import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.quest.QuestObject;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.TeamData;
-import me.shedaniel.architectury.extensions.BlockEntityExtension;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.TickableBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import org.jetbrains.annotations.NotNull;
 
 import static dev.ftb.mods.ftbquests.block.QuestBarrierBlock.COMPLETED;
 
 /**
  * @author LatvianModder
  */
-public class QuestBarrierBlockEntity extends BlockEntity implements TickableBlockEntity, BlockEntityExtension {
+public class QuestBarrierBlockEntity extends BlockEntity implements TickableBlockEntity {
 	public long object = 0L;
 
 	public QuestBarrierBlockEntity() {
 		super(FTBQuestsBlockEntities.BARRIER.get());
 	}
 
-	private void readBarrier(CompoundTag tag) {
+	public void readBarrier(CompoundTag tag) {
 		object = QuestObjectBase.parseCodeString(tag.getString("Object"));
 
 		if (object == 0L) {
@@ -33,20 +29,9 @@ public class QuestBarrierBlockEntity extends BlockEntity implements TickableBloc
 		}
 	}
 
-	private CompoundTag writeBarrier(CompoundTag tag) {
+	public CompoundTag writeBarrier(CompoundTag tag) {
 		tag.putString("Object", QuestObjectBase.getCodeString(object));
 		return tag;
-	}
-
-	@Override
-	@Environment(EnvType.CLIENT)
-	public void loadClientData(@NotNull BlockState state, @NotNull CompoundTag tag) {
-		readBarrier(tag);
-	}
-
-	@Override
-	public CompoundTag saveClientData(@NotNull CompoundTag tag) {
-		return writeBarrier(tag);
 	}
 
 	@Override
@@ -74,7 +59,13 @@ public class QuestBarrierBlockEntity extends BlockEntity implements TickableBloc
 
 	public void updateObject(long id) {
 		object = id;
-		syncData();
+
+		if (!level.isClientSide()) {
+			syncData();
+		}
+	}
+
+	public void syncData() {
 	}
 
 	public boolean isComplete(TeamData data) {

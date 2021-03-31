@@ -2,7 +2,6 @@ package dev.ftb.mods.ftbquests.quest.task;
 
 import com.feed_the_beast.mods.ftbguilibrary.utils.StringUtils;
 import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
-import dev.ftb.mods.ftbquests.events.TaskStartedEvent;
 import dev.ftb.mods.ftbquests.net.MessageUpdateTaskProgress;
 import dev.ftb.mods.ftbquests.quest.ChangeProgress;
 import dev.ftb.mods.ftbquests.quest.TeamData;
@@ -19,13 +18,13 @@ import java.util.List;
  */
 public class TaskData<T extends Task> {
 	public final T task;
-	public final TeamData data;
+	public final TeamData teamData;
 	public long progress = 0L;
 	private boolean taskCompleted = false;
 
 	public TaskData(T q, TeamData d) {
 		task = q;
-		data = d;
+		teamData = d;
 	}
 
 	public final void readProgress(long p) {
@@ -36,26 +35,27 @@ public class TaskData<T extends Task> {
 
 	public final void setProgress(long p) {
 		p = Math.max(0L, Math.min(p, task.getMaxProgress()));
+		long prevProgress = progress;
 
 		if (progress != p) {
 			progress = p;
 			taskCompleted = false;
 			task.quest.chapter.file.clearCachedProgress();
 
-			if (data.file.isServerSide()) {
+			if (teamData.file.isServerSide()) {
 				Instant now = Instant.now();
 
 				if (ChangeProgress.sendUpdates) {
-					new MessageUpdateTaskProgress(data, task.id, progress).sendToAll();
+					new MessageUpdateTaskProgress(teamData, task.id, progress).sendToAll();
 				}
 
-				if (p == 0) {
-					TaskStartedEvent.EVENT.invoker().accept(new TaskStartedEvent(this));
+				if (prevProgress == 0) {
+					task.onStarted(new QuestProgressEventData<>(now, teamData, task, teamData.getOnlineMembers(), Collections.emptyList()));
 				}
 
 				if (!taskCompleted && isComplete()) {
 					taskCompleted = true;
-					List<ServerPlayer> onlineMembers = data.getOnlineMembers();
+					List<ServerPlayer> onlineMembers = teamData.getOnlineMembers();
 					List<ServerPlayer> notifiedPlayers;
 
 					if (!task.quest.chapter.alwaysInvisible && ChangeProgress.sendNotifications.get(ChangeProgress.sendUpdates)) {
@@ -64,7 +64,7 @@ public class TaskData<T extends Task> {
 						notifiedPlayers = Collections.emptyList();
 					}
 
-					task.onCompleted(new QuestProgressEventData<>(now, data, task, onlineMembers, notifiedPlayers));
+					task.onCompleted(new QuestProgressEventData<>(now, teamData, task, onlineMembers, notifiedPlayers));
 
 					for (ServerPlayer player : onlineMembers) {
 						FTBQuestsInventoryListener.detect(player, ItemStack.EMPTY, task.id);
@@ -72,7 +72,7 @@ public class TaskData<T extends Task> {
 				}
 			}
 
-			data.save();
+			teamData.save();
 		}
 	}
 
@@ -114,7 +114,7 @@ public class TaskData<T extends Task> {
 	}
 
 	public String toString() {
-		return data.toString() + "#" + task;
+		return teamData.toString() + "#" + task;
 	}
 
 	public void submitTask(ServerPlayer player, ItemStack item) {

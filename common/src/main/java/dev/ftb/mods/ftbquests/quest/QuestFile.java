@@ -174,13 +174,13 @@ public abstract class QuestFile extends QuestObject {
 
 	@Override
 	public void onStarted(QuestProgressEventData<?> data) {
-		if (!data.teamData.isStarted(this)) {
-			ObjectStartedEvent.FILE.invoker().act(new ObjectStartedEvent.FileEvent(data.withObject(this)));
-		}
+		data.teamData.setStarted(id, data.time);
+		ObjectStartedEvent.FILE.invoker().act(new ObjectStartedEvent.FileEvent(data.withObject(this)));
 	}
 
 	@Override
 	public void onCompleted(QuestProgressEventData<?> data) {
+		data.teamData.setCompleted(id, data.time);
 		ObjectCompletedEvent.FILE.invoker().act(new ObjectCompletedEvent.FileEvent(data.withObject(this)));
 
 		if (!disableToast) {

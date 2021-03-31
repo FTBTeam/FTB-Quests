@@ -2,6 +2,7 @@ package dev.ftb.mods.ftbquests.block.entity;
 
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.block.FTBQuestsBlocks;
+import me.shedaniel.architectury.annotations.ExpectPlatform;
 import me.shedaniel.architectury.registry.DeferredRegister;
 import me.shedaniel.architectury.registry.RegistrySupplier;
 import net.minecraft.core.Registry;
@@ -22,9 +23,14 @@ public class FTBQuestsBlockEntities {
 	}
 
 	public static final RegistrySupplier<BlockEntityType<?>> BANNER = register("banner", BannerBlockEntity::new, FTBQuestsBlocks.BANNER);
-	public static final RegistrySupplier<BlockEntityType<?>> BARRIER = register("barrier", QuestBarrierBlockEntity::new, FTBQuestsBlocks.BARRIER);
+	public static final RegistrySupplier<BlockEntityType<?>> BARRIER = register("barrier", FTBQuestsBlockEntities::createBarrierEntity, FTBQuestsBlocks.BARRIER);
 
 	public static void register() {
 		BLOCK_ENTITIES.register();
+	}
+
+	@ExpectPlatform
+	public static QuestBarrierBlockEntity createBarrierEntity() {
+		throw new AssertionError();
 	}
 }

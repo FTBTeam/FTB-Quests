@@ -1,6 +1,7 @@
 package dev.ftb.mods.ftbquests.block;
 
 import dev.ftb.mods.ftbquests.FTBQuests;
+import dev.ftb.mods.ftbquests.block.entity.FTBQuestsBlockEntities;
 import dev.ftb.mods.ftbquests.block.entity.QuestBarrierBlockEntity;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import me.shedaniel.architectury.hooks.EntityHooks;
@@ -126,6 +127,6 @@ public class QuestBarrierBlock extends BaseEntityBlock {
 	@Nullable
 	@Override
 	public BlockEntity newBlockEntity(BlockGetter bg) {
-		return new QuestBarrierBlockEntity();
+		return FTBQuestsBlockEntities.createBarrierEntity();
 	}
 }
