@@ -2,17 +2,20 @@ package dev.ftb.mods.ftbquests.quest;
 
 import com.mojang.util.UUIDTypeAdapter;
 import dev.ftb.mods.ftbquests.FTBQuests;
+import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
 import dev.ftb.mods.ftbquests.net.MessageClaimRewardResponse;
 import dev.ftb.mods.ftbquests.net.MessageObjectCompleted;
 import dev.ftb.mods.ftbquests.net.MessageObjectCompletedReset;
 import dev.ftb.mods.ftbquests.net.MessageObjectStarted;
 import dev.ftb.mods.ftbquests.net.MessageObjectStartedReset;
 import dev.ftb.mods.ftbquests.net.MessageSyncEditingMode;
+import dev.ftb.mods.ftbquests.net.MessageUpdateTaskProgress;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.reward.RewardAutoClaim;
 import dev.ftb.mods.ftbquests.quest.reward.RewardClaimType;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.quest.task.TaskData;
+import dev.ftb.mods.ftbquests.util.FTBQuestsInventoryListener;
 import dev.ftb.mods.ftbquests.util.OrderedCompoundTag;
 import dev.ftb.mods.ftbquests.util.QuestKey;
 import it.unimi.dsi.fastutil.longs.Long2ByteOpenHashMap;
@@ -30,6 +33,7 @@ import net.minecraft.nbt.StringTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nullable;
 import java.time.Instant;
@@ -45,6 +49,8 @@ import java.util.UUID;
  * @author LatvianModder
  */
 public class TeamData {
+	public static int VERSION = 1;
+
 	public static TeamData get(Player player) {
 		return FTBQuests.PROXY.getQuestFile(player.getCommandSenderWorld().isClientSide()).getData(player);
 	}
@@ -85,6 +91,15 @@ public class TeamData {
 
 	public void save() {
 		shouldSave = true;
+	}
+
+	@Override
+	public String toString() {
+		return name.isEmpty() ? uuid.toString() : name;
+	}
+
+	public long getProgress(Task task) {
+		return taskData.get(task.id).progress;
 	}
 
 	public TaskData<?> getTaskData(Task task) {
@@ -266,6 +281,7 @@ public class TeamData {
 
 	public CompoundTag serializeNBT() {
 		CompoundTag nbt = new OrderedCompoundTag();
+		nbt.putInt("version", VERSION);
 		nbt.putString("uuid", UUIDTypeAdapter.fromUUID(uuid));
 		nbt.putString("name", name);
 		nbt.putBoolean("can_edit", canEdit);
@@ -332,6 +348,10 @@ public class TeamData {
 	}
 
 	public void deserializeNBT(CompoundTag nbt) {
+		if (nbt.getInt("version") != VERSION) {
+			save();
+		}
+
 		name = nbt.getString("name");
 		canEdit = nbt.getBoolean("can_edit");
 		money = nbt.getLong("money");
@@ -358,20 +378,20 @@ public class TeamData {
 			Task task = file.getTask(file.getID(s));
 
 			if (task != null) {
-				taskData.get(task.id).readProgress(taskDataNBT.getLong(s));
+				taskData.get(task.id).progress = Math.max(0L, Math.min(taskDataNBT.getLong(s), task.getMaxProgress()));
 			}
 		}
 
 		CompoundTag startedNBT = nbt.getCompound("started");
 
 		for (String s : startedNBT.getAllKeys()) {
-			started.put(QuestObjectBase.parseCodeString(s), startedNBT.getLong(s));
+			started.put(file.getID(s), startedNBT.getLong(s));
 		}
 
 		CompoundTag completedNBT = nbt.getCompound("completed");
 
 		for (String s : completedNBT.getAllKeys()) {
-			completed.put(QuestObjectBase.parseCodeString(s), completedNBT.getLong(s));
+			completed.put(file.getID(s), completedNBT.getLong(s));
 		}
 	}
 
@@ -665,5 +685,41 @@ public class TeamData {
 		}
 
 		return RewardClaimType.CANT_CLAIM;
+	}
+
+	public void progressChanged(TaskData<?> taskData, long prevProgress) {
+		// file.clearCachedProgress();
+		clearCache();
+
+		if (file.isServerSide()) {
+			Instant now = Instant.now();
+
+			if (ChangeProgress.sendUpdates) {
+				new MessageUpdateTaskProgress(this, taskData.task.id, taskData.progress).sendToAll();
+			}
+
+			if (prevProgress == 0L) {
+				taskData.task.onStarted(new QuestProgressEventData<>(now, this, taskData.task, getOnlineMembers(), Collections.emptyList()));
+			}
+
+			if (taskData.isComplete()) {
+				List<ServerPlayer> onlineMembers = getOnlineMembers();
+				List<ServerPlayer> notifiedPlayers;
+
+				if (!taskData.task.quest.chapter.alwaysInvisible && ChangeProgress.sendNotifications.get(ChangeProgress.sendUpdates)) {
+					notifiedPlayers = onlineMembers;
+				} else {
+					notifiedPlayers = Collections.emptyList();
+				}
+
+				taskData.task.onCompleted(new QuestProgressEventData<>(now, this, taskData.task, onlineMembers, notifiedPlayers));
+
+				for (ServerPlayer player : onlineMembers) {
+					FTBQuestsInventoryListener.detect(player, ItemStack.EMPTY, taskData.task.id);
+				}
+			}
+
+			save();
+		}
 	}
 }

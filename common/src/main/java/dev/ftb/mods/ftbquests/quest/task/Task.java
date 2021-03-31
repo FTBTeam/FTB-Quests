@@ -32,6 +32,7 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 
 import javax.annotation.Nullable;
+import java.time.Instant;
 
 /**
  * @author LatvianModder
@@ -72,6 +73,14 @@ public abstract class Task extends QuestObject {
 
 	public abstract TaskData createData(TeamData data);
 
+	public long calculateProgress(TeamData data) {
+		return 0L;
+	}
+
+	public String formatProgress(TeamData data, long progress) {
+		return StringUtils.formatDouble(progress, true);
+	}
+
 	@Override
 	public final int getRelativeProgressFromChildren(TeamData data) {
 		return data.getTaskData(this).getRelativeProgress();
@@ -89,13 +98,13 @@ public abstract class Task extends QuestObject {
 		data.teamData.setCompleted(id, data.time);
 		ObjectCompletedEvent.TASK.invoker().act(new ObjectCompletedEvent.TaskEvent(data.withObject(this)));
 
-		boolean questComplete = data.teamData.isCompleted(quest);
+		boolean questCompleted = quest.isCompletedRaw(data.teamData);
 
-		if (quest.tasks.size() > 1 && !questComplete && !disableToast) {
+		if (quest.tasks.size() > 1 && !questCompleted && !disableToast) {
 			new MessageDisplayCompletionToast(id).sendTo(data.notifiedPlayers);
 		}
 
-		if (questComplete) {
+		if (questCompleted) {
 			quest.onCompleted(data.withObject(quest));
 		}
 	}
@@ -109,7 +118,7 @@ public abstract class Task extends QuestObject {
 	}
 
 	@Override
-	public final void changeProgress(TeamData data, ChangeProgress type) {
+	public final void changeProgress(Instant time, TeamData data, ChangeProgress type) {
 		data.getTaskData(this).setProgress(type.reset ? 0L : getMaxProgress());
 	}
 
@@ -175,7 +184,8 @@ public abstract class Task extends QuestObject {
 		return group.getGroup(getObjectType().id).getGroup(type.id.getNamespace()).getGroup(type.id.getPath());
 	}
 
-	public void drawGUI(@Nullable TaskData data, PoseStack matrixStack, int x, int y, int w, int h) {
+	@Environment(EnvType.CLIENT)
+	public void drawGUI(TeamData teamData, PoseStack matrixStack, int x, int y, int w, int h) {
 		getIcon().draw(matrixStack, x, y, w, h);
 	}
 

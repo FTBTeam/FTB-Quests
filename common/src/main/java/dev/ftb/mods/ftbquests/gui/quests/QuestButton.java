@@ -285,10 +285,8 @@ public class QuestButton extends Button {
 		Component title = getTitle();
 
 		if (questScreen.file.self != null) {
-			int p = questScreen.file.self.getRelativeProgress(quest);
-
-			if (p > 0 && p < 100) {
-				title = title.copy().append(new TextComponent(" " + p + "%").withStyle(ChatFormatting.DARK_GRAY));
+			if (questScreen.file.self.isStarted(quest) && !questScreen.file.self.isCompleted(quest)) {
+				title = title.copy().append(new TextComponent(" " + questScreen.file.self.getRelativeProgress(quest) + "%").withStyle(ChatFormatting.DARK_GRAY));
 			}
 		}
 
@@ -313,9 +311,7 @@ public class QuestButton extends Button {
 		boolean cantStart = !questScreen.file.self.canStartTasks(quest);
 
 		if (!cantStart) {
-			int progress = questScreen.file.self.getRelativeProgress(quest);
-
-			if (progress >= 100) {
+			if (questScreen.file.self.isCompleted(quest)) {
 				if (questScreen.file.self.hasUnclaimedRewards(quest)) {
 					qicon = ThemeProperties.ALERT_ICON.get(quest);
 				} else {
@@ -323,7 +319,7 @@ public class QuestButton extends Button {
 				}
 
 				outlineColor = ThemeProperties.QUEST_COMPLETED_COLOR.get(quest);
-			} else if (progress > 0) {
+			} else if (questScreen.file.self.isStarted(quest)) {
 				outlineColor = ThemeProperties.QUEST_STARTED_COLOR.get(quest);
 			}
 		} else {

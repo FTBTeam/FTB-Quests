@@ -36,6 +36,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -388,7 +389,7 @@ public final class Quest extends QuestObject implements Movable {
 			}
 		}
 
-		if (data.teamData.isCompleted(chapter)) {
+		if (chapter.isCompletedRaw(data.teamData)) {
 			chapter.onCompleted(data.withObject(chapter));
 		}
 
@@ -406,20 +407,8 @@ public final class Quest extends QuestObject implements Movable {
 	}
 
 	@Override
-	public void changeProgress(TeamData data, ChangeProgress type) {
-		//FIXME: data.setTimesCompleted(this, -1);
-
-		if (type.dependencies) {
-			for (QuestObject dependency : dependencies) {
-				if (!dependency.invalid) {
-					dependency.changeProgress(data, type);
-				}
-			}
-		}
-
-		for (Task task : tasks) {
-			task.changeProgress(data, type);
-		}
+	public void changeProgress(Instant time, TeamData data, ChangeProgress type) {
+		super.changeProgress(time, data, type);
 
 		if (type.reset) {
 			for (Reward r : rewards) {
@@ -741,5 +730,10 @@ public final class Quest extends QuestObject implements Movable {
 	@Override
 	public Collection<? extends QuestObject> getChildren() {
 		return tasks;
+	}
+
+	@Override
+	public boolean isCompletedRaw(TeamData data) {
+		return data.canStartTasks(this) && super.isCompletedRaw(data);
 	}
 }
