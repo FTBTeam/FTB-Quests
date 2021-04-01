@@ -66,7 +66,7 @@ public class GameStagesIntegration {
 					if (data.canStartTasks(quest)) {
 						for (Task task : quest.tasks) {
 							if (task instanceof GameStageTask) {
-								data.getTaskData(task).submitTask(player);
+								task.submitTask(data, player);
 							}
 						}
 					}

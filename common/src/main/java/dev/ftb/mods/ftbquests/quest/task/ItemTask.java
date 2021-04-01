@@ -223,92 +223,81 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 		}
 	}
 
-	@Override
-	public TaskData createData(TeamData data) {
-		return new Data(this, data);
+	public ItemStack insert(TeamData teamData, ItemStack stack, boolean simulate) {
+		if (!teamData.isCompleted(this) && test(stack)) {
+			long add = Math.min(stack.getCount(), count - teamData.getProgress(this));
+
+			if (add > 0L) {
+				if (!simulate && teamData.file.isServerSide()) {
+					teamData.addProgress(this, add);
+				}
+
+				ItemStack copy = stack.copy();
+				copy.setCount((int) (stack.getCount() - add));
+				return copy;
+			}
+		}
+
+		return stack;
 	}
 
-	public static class Data extends TaskData<ItemTask> {
-		private Data(ItemTask t, TeamData data) {
-			super(t, data);
+	@Override
+	public void submitTask(TeamData teamData, ServerPlayer player, ItemStack item) {
+		if (teamData.isCompleted(this) || item.getItem() instanceof MissingItem || item.getItem() instanceof MissingItem) {
+			return;
 		}
 
-		public ItemStack insert(ItemStack stack, boolean simulate) {
-			if (!isComplete() && task.test(stack)) {
-				long add = Math.min(stack.getCount(), task.count - progress);
-
-				if (add > 0L) {
-					if (!simulate && teamData.file.isServerSide()) {
-						addProgress(add);
-					}
-
-					ItemStack copy = stack.copy();
-					copy.setCount((int) (stack.getCount() - add));
-					return copy;
-				}
-			}
-
-			return stack;
-		}
-
-		@Override
-		public void submitTask(ServerPlayer player, ItemStack item) {
-			if (isComplete() || task.item.getItem() instanceof MissingItem || item.getItem() instanceof MissingItem) {
-				return;
-			}
-
-			if (!task.consumesResources()) {
-				if (task.onlyFromCrafting.get(false)) {
-					if (item.isEmpty() || !task.test(item)) {
-						return;
-					}
-
-					long count = Math.min(task.count, item.getCount());
-
-					if (count > progress) {
-						setProgress(count);
-						return;
-					}
-				}
-
-				long count = 0;
-
-				for (ItemStack stack : player.inventory.items) {
-					if (!stack.isEmpty() && task.test(stack)) {
-						count += stack.getCount();
-					}
-				}
-
-				count = Math.min(task.count, count);
-
-				if (count > progress) {
-					setProgress(count);
+		if (!consumesResources()) {
+			if (onlyFromCrafting.get(false)) {
+				if (item.isEmpty() || !test(item)) {
 					return;
 				}
 
-				return;
-			}
+				long c = Math.min(count, item.getCount());
 
-			if (!item.isEmpty()) {
-				return;
-			}
-
-			boolean changed = false;
-
-			for (int i = 0; i < player.inventory.items.size(); i++) {
-				ItemStack stack = player.inventory.items.get(i);
-				ItemStack stack1 = insert(stack, false);
-
-				if (stack != stack1) {
-					changed = true;
-					player.inventory.items.set(i, stack1.isEmpty() ? ItemStack.EMPTY : stack1);
+				if (c > teamData.getProgress(this)) {
+					teamData.setProgress(this, c);
+					return;
 				}
 			}
 
-			if (changed) {
-				player.inventory.setChanged();
-				player.containerMenu.broadcastChanges();
+			long c = 0;
+
+			for (ItemStack stack : player.inventory.items) {
+				if (!stack.isEmpty() && test(stack)) {
+					count += stack.getCount();
+				}
 			}
+
+			c = Math.min(count, c);
+
+			if (c > teamData.getProgress(this)) {
+				teamData.setProgress(this, c);
+				return;
+			}
+
+			return;
+		}
+
+		if (!item.isEmpty()) {
+			return;
+		}
+
+		boolean changed = false;
+
+		for (int i = 0; i < player.inventory.items.size(); i++) {
+			ItemStack stack = player.inventory.items.get(i);
+			ItemStack stack1 = insert(teamData, stack, false);
+
+			if (stack != stack1) {
+				changed = true;
+				player.inventory.items.set(i, stack1.isEmpty() ? ItemStack.EMPTY : stack1);
+			}
+		}
+
+		if (changed) {
+			player.inventory.setChanged();
+			player.containerMenu.broadcastChanges();
 		}
 	}
 }

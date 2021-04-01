@@ -27,7 +27,7 @@ import net.minecraft.world.item.ItemStack;
 /**
  * @author LatvianModder
  */
-public class AdvancementTask extends Task {
+public class AdvancementTask extends BooleanTask {
 	public String advancement = "";
 	public String criterion = "";
 
@@ -120,35 +120,24 @@ public class AdvancementTask extends Task {
 	}
 
 	@Override
-	public TaskData createData(TeamData data) {
-		return new Data(this, data);
-	}
-
-	public static class Data extends BooleanTaskData<AdvancementTask> {
-		private Data(AdvancementTask task, TeamData data) {
-			super(task, data);
+	public boolean canSubmit(TeamData teamData, ServerPlayer player) {
+		if (advancement.isEmpty()) {
+			return false;
 		}
 
-		@Override
-		public boolean canSubmit(ServerPlayer player) {
-			if (task.advancement.isEmpty()) {
-				return false;
-			}
+		Advancement a = player.server.getAdvancements().getAdvancement(new ResourceLocation(advancement));
 
-			Advancement a = player.server.getAdvancements().getAdvancement(new ResourceLocation(task.advancement));
+		if (a == null) {
+			return false;
+		}
 
-			if (a == null) {
-				return false;
-			}
+		AdvancementProgress progress = player.getAdvancements().getOrStartProgress(a);
 
-			AdvancementProgress progress = player.getAdvancements().getOrStartProgress(a);
-
-			if (task.criterion.isEmpty()) {
-				return progress.isDone();
-			} else {
-				CriterionProgress criterionProgress = progress.getCriterion(task.criterion);
-				return criterionProgress != null && criterionProgress.isDone();
-			}
+		if (criterion.isEmpty()) {
+			return progress.isDone();
+		} else {
+			CriterionProgress criterionProgress = progress.getCriterion(criterion);
+			return criterionProgress != null && criterionProgress.isDone();
 		}
 	}
 }

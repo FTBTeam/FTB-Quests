@@ -21,7 +21,7 @@ import net.minecraft.world.level.biome.Biomes;
 /**
  * @author LatvianModder
  */
-public class BiomeTask extends Task {
+public class BiomeTask extends BooleanTask {
 	public ResourceKey<Biome> biome;
 
 	public BiomeTask(Quest quest) {
@@ -77,18 +77,7 @@ public class BiomeTask extends Task {
 	}
 
 	@Override
-	public TaskData createData(TeamData data) {
-		return new Data(this, data);
-	}
-
-	public static class Data extends BooleanTaskData<BiomeTask> {
-		private Data(BiomeTask task, TeamData data) {
-			super(task, data);
-		}
-
-		@Override
-		public boolean canSubmit(ServerPlayer player) {
-			return !player.isSpectator() && player.level.getBiomeName(player.blockPosition()).orElse(null) == task.biome;
-		}
+	public boolean canSubmit(TeamData teamData, ServerPlayer player) {
+		return !player.isSpectator() && player.level.getBiomeName(player.blockPosition()).orElse(null) == biome;
 	}
 }

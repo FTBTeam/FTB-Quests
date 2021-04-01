@@ -40,7 +40,7 @@ public class FTBQuestsInventoryListener implements ContainerListener {
 					if (hasSubmitTasks(quest) && data.canStartTasks(quest)) {
 						for (Task task : quest.tasks) {
 							if (task.id != sourceTask && task.submitItemsOnInventoryChange()) {
-								data.getTaskData(task).submitTask(player, item);
+								task.submitTask(data, player, item);
 							}
 						}
 					}

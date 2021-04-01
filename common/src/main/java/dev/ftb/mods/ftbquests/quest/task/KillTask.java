@@ -93,7 +93,7 @@ public class KillTask extends Task {
 	@Override
 	@Environment(EnvType.CLIENT)
 	public MutableComponent getAltTitle() {
-		return new TranslatableComponent("ftbquests.task.ftbquests.kill.title", getMaxProgressString(), new TranslatableComponent("entity." + entity.getNamespace() + "." + entity.getPath()));
+		return new TranslatableComponent("ftbquests.task.ftbquests.kill.title", formatMaxProgress(), new TranslatableComponent("entity." + entity.getNamespace() + "." + entity.getPath()));
 	}
 
 	@Override
@@ -104,24 +104,13 @@ public class KillTask extends Task {
 	}
 
 	@Override
-	public TaskData createData(TeamData data) {
-		return new Data(this, data);
-	}
-
-	@Override
 	@Environment(EnvType.CLIENT)
 	public void onButtonClicked(Button button, boolean canClick) {
 	}
 
-	public static class Data extends TaskData<KillTask> {
-		private Data(KillTask task, TeamData data) {
-			super(task, data);
-		}
-
-		public void kill(LivingEntity entity) {
-			if (!isComplete() && task.entity.equals(Registries.getId(entity.getType(), Registry.ENTITY_TYPE_REGISTRY))) {
-				addProgress(1L);
-			}
+	public void kill(TeamData teamData, LivingEntity e) {
+		if (!teamData.isCompleted(this) && entity.equals(Registries.getId(e.getType(), Registry.ENTITY_TYPE_REGISTRY))) {
+			teamData.addProgress(this, 1L);
 		}
 	}
 }

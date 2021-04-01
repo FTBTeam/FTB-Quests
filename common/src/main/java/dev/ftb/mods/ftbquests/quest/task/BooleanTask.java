@@ -2,6 +2,8 @@ package dev.ftb.mods.ftbquests.quest.task;
 
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.TeamData;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
 
 public abstract class BooleanTask extends Task {
 	public BooleanTask(Quest q) {
@@ -9,9 +11,21 @@ public abstract class BooleanTask extends Task {
 	}
 
 	@Override
-	public long calculateProgress(TeamData data) {
-		return checkProgress(data) ? 1L : 0L;
+	public String formatMaxProgress() {
+		return "1";
 	}
 
-	public abstract boolean checkProgress(TeamData data);
+	@Override
+	public String formatProgress(TeamData teamData, long progress) {
+		return progress >= 1L ? "1" : "0";
+	}
+
+	public abstract boolean canSubmit(TeamData teamData, ServerPlayer player);
+
+	@Override
+	public void submitTask(TeamData teamData, ServerPlayer player, ItemStack item) {
+		if (!teamData.isCompleted(this) && canSubmit(teamData, player)) {
+			teamData.setProgress(this, 1L);
+		}
+	}
 }

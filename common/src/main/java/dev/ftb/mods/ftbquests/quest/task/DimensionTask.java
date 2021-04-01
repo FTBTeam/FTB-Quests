@@ -20,7 +20,7 @@ import net.minecraft.world.level.Level;
 /**
  * @author LatvianModder
  */
-public class DimensionTask extends Task {
+public class DimensionTask extends BooleanTask {
 	public ResourceKey<Level> dimension;
 
 	public DimensionTask(Quest quest) {
@@ -76,18 +76,7 @@ public class DimensionTask extends Task {
 	}
 
 	@Override
-	public TaskData createData(TeamData data) {
-		return new Data(this, data);
-	}
-
-	public static class Data extends BooleanTaskData<DimensionTask> {
-		private Data(DimensionTask task, TeamData data) {
-			super(task, data);
-		}
-
-		@Override
-		public boolean canSubmit(ServerPlayer player) {
-			return !player.isSpectator() && player.level.dimension() == task.dimension;
-		}
+	public boolean canSubmit(TeamData teamData, ServerPlayer player) {
+		return !player.isSpectator() && player.level.dimension() == dimension;
 	}
 }

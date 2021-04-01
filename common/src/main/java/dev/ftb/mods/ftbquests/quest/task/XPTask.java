@@ -37,8 +37,13 @@ public class XPTask extends Task implements ISingleLongValueTask {
 	}
 
 	@Override
-	public String getMaxProgressString() {
+	public String formatMaxProgress() {
 		return Long.toUnsignedString(points && value <= Integer.MAX_VALUE ? getLevelForExperience((int) value) : value);
+	}
+
+	@Override
+	public String formatProgress(TeamData teamData, long progress) {
+		return Long.toUnsignedString(points && value <= Integer.MAX_VALUE ? getLevelForExperience((int) progress) : progress);
 	}
 
 	@Override
@@ -85,17 +90,12 @@ public class XPTask extends Task implements ISingleLongValueTask {
 	@Override
 	@Environment(EnvType.CLIENT)
 	public MutableComponent getAltTitle() {
-		return new TranslatableComponent("ftbquests.reward.ftbquests.xp_levels").append(": ").append(new TextComponent(getMaxProgressString()).withStyle(ChatFormatting.RED));
+		return new TranslatableComponent("ftbquests.reward.ftbquests.xp_levels").append(": ").append(new TextComponent(formatMaxProgress()).withStyle(ChatFormatting.RED));
 	}
 
 	@Override
 	public boolean consumesResources() {
 		return true;
-	}
-
-	@Override
-	public TaskData createData(TeamData data) {
-		return new Data(this, data);
 	}
 
 	public static int getPlayerXP(Player player) {
@@ -157,32 +157,21 @@ public class XPTask extends Task implements ISingleLongValueTask {
 		}
 	}
 
-	public static class Data extends TaskData<XPTask> {
-		private Data(XPTask task, TeamData data) {
-			super(task, data);
+	@Override
+	public void submitTask(TeamData teamData, ServerPlayer player, ItemStack item) {
+		int add = (int) Math.min(points ? getPlayerXP(player) : player.experienceLevel, Math.min(value - teamData.getProgress(this), Integer.MAX_VALUE));
+
+		if (add <= 0) {
+			return;
 		}
 
-		@Override
-		public String getProgressString() {
-			return Long.toUnsignedString(task.points && task.value <= Integer.MAX_VALUE ? getLevelForExperience((int) progress) : progress);
+		if (points) {
+			addPlayerXP(player, -add);
+			player.giveExperienceLevels(0);
+		} else {
+			player.giveExperienceLevels(-add);
 		}
 
-		@Override
-		public void submitTask(ServerPlayer player, ItemStack item) {
-			int add = (int) Math.min(task.points ? getPlayerXP(player) : player.experienceLevel, Math.min(task.value - progress, Integer.MAX_VALUE));
-
-			if (add <= 0) {
-				return;
-			}
-
-			if (task.points) {
-				addPlayerXP(player, -add);
-				player.giveExperienceLevels(0);
-			} else {
-				player.giveExperienceLevels(-add);
-			}
-
-			addProgress(add);
-		}
+		teamData.addProgress(this, add);
 	}
 }
