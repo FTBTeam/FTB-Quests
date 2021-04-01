@@ -15,18 +15,21 @@ import java.util.UUID;
  */
 public class MessageChangeProgress extends MessageBase {
 	private final UUID team;
+	private final UUID player;
 	private final long id;
 	private final ChangeProgress type;
 
 	MessageChangeProgress(FriendlyByteBuf buffer) {
 		team = buffer.readUUID();
+		player = buffer.readUUID();
 		id = buffer.readLong();
 		type = ChangeProgress.NAME_MAP.read(buffer);
 
 	}
 
-	public MessageChangeProgress(UUID t, long i, ChangeProgress ty) {
+	public MessageChangeProgress(UUID t, UUID p, long i, ChangeProgress ty) {
 		team = t;
+		player = p;
 		id = i;
 		type = ty;
 	}
@@ -34,6 +37,7 @@ public class MessageChangeProgress extends MessageBase {
 	@Override
 	public void write(FriendlyByteBuf buffer) {
 		buffer.writeUUID(team);
+		buffer.writeUUID(player);
 		buffer.writeLong(id);
 		ChangeProgress.NAME_MAP.write(buffer, type);
 	}
@@ -45,7 +49,7 @@ public class MessageChangeProgress extends MessageBase {
 
 			if (object != null) {
 				TeamData t = ServerQuestFile.INSTANCE.getData(team);
-				object.forceProgress(t, type, false);
+				object.forceProgress(t, player, type, false);
 			}
 		}
 	}

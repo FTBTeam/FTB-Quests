@@ -14,14 +14,12 @@ import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.reward.RewardAutoClaim;
 import dev.ftb.mods.ftbquests.quest.reward.RewardClaimType;
 import dev.ftb.mods.ftbquests.quest.task.Task;
-import dev.ftb.mods.ftbquests.quest.task.TaskData;
 import dev.ftb.mods.ftbquests.util.FTBQuestsInventoryListener;
 import dev.ftb.mods.ftbquests.util.OrderedCompoundTag;
 import dev.ftb.mods.ftbquests.util.QuestKey;
 import it.unimi.dsi.fastutil.longs.Long2ByteOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2LongMap;
 import it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap;
-import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
@@ -36,11 +34,10 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nullable;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -60,7 +57,7 @@ public class TeamData {
 	public String name;
 	public boolean shouldSave;
 
-	private final Long2ObjectOpenHashMap<TaskData<?>> taskData;
+	private final Long2LongOpenHashMap taskProgress;
 	private final Object2LongOpenHashMap<QuestKey> claimedRewards;
 	private final Long2LongOpenHashMap started;
 	private final Long2LongOpenHashMap completed;
@@ -76,7 +73,8 @@ public class TeamData {
 		uuid = id;
 		name = "";
 		shouldSave = false;
-		taskData = new Long2ObjectOpenHashMap<>();
+		taskProgress = new Long2LongOpenHashMap();
+		taskProgress.defaultReturnValue(0L);
 		claimedRewards = new Object2LongOpenHashMap<>();
 		claimedRewards.defaultReturnValue(0L);
 		started = new Long2LongOpenHashMap();
@@ -98,89 +96,82 @@ public class TeamData {
 		return name.isEmpty() ? uuid.toString() : name;
 	}
 
+	public long getProgress(long task) {
+		return taskProgress.get(task);
+	}
+
 	public long getProgress(Task task) {
-		return taskData.get(task.id).progress;
-	}
-
-	public TaskData<?> getTaskData(Task task) {
-		TaskData<?> d = taskData.get(task.id);
-
-		if (d == null) {
-			if (name.isEmpty()) {
-				FTBQuests.LOGGER.warn("Something's broken! Task data is null for team " + uuid + " but that team doesn't exist! Task: " + task + ", Quest: " + task.quest.chapter.filename + ":" + task.quest);
-				d = task.createData(this);
-				taskData.put(task.id, d);
-				return d;
-			}
-
-			throw new NullPointerException("Task data null! Task: " + task + ", Quest: " + task.quest.chapter.filename + ":" + task.quest + ", Team: " + name);
-		}
-
-		return d;
-	}
-
-	public void createTaskData(Task task, boolean strong) {
-		if (strong || !taskData.containsKey(task.id)) {
-			taskData.put(task.id, task.createData(this));
-		}
-	}
-
-	public void removeTaskData(Task task) {
-		taskData.remove(task.id);
+		return getProgress(task.id);
 	}
 
 	@Nullable
-	public Instant getStartedTime(long id) {
+	public Date getStartedTime(long id) {
 		long t = started.get(id);
-		return t == 0L ? null : Instant.ofEpochMilli(t);
+		return t == 0L ? null : new Date(t);
 	}
 
-	public void setStarted(long id, @Nullable Instant time) {
+	public boolean setStarted(long id, @Nullable Date time) {
 		if (time == null) {
-			started.remove(id);
+			if (started.remove(id) >= 0L) {
+				save();
 
-			if (file.isServerSide()) {
-				new MessageObjectStartedReset(uuid, id).sendToAll();
+				if (ChangeProgress.sendUpdates && file.isServerSide()) {
+					new MessageObjectStartedReset(uuid, id).sendToAll();
+				}
+
+				return true;
 			}
 		} else {
-			started.put(id, time.toEpochMilli());
+			if (started.put(id, time.getTime()) == 0L) {
+				save();
 
-			if (file.isServerSide()) {
-				new MessageObjectStarted(uuid, id).sendToAll();
+				if (ChangeProgress.sendUpdates && file.isServerSide()) {
+					new MessageObjectStarted(uuid, id).sendToAll();
+				}
+
+				return true;
 			}
 		}
 
-		save();
+		return false;
 	}
 
 	@Nullable
-	public Instant getCompletedTime(long id) {
+	public Date getCompletedTime(long id) {
 		long t = completed.get(id);
-		return t == 0L ? null : Instant.ofEpochMilli(t);
+		return t == 0L ? null : new Date(t);
 	}
 
-	public void setCompleted(long id, @Nullable Instant time) {
+	public boolean setCompleted(long id, @Nullable Date time) {
 		if (time == null) {
-			completed.remove(id);
+			if (completed.remove(id) >= 0L) {
+				save();
 
-			if (file.isServerSide()) {
-				new MessageObjectCompletedReset(uuid, id).sendToAll();
+				if (ChangeProgress.sendUpdates && file.isServerSide()) {
+					new MessageObjectCompletedReset(uuid, id).sendToAll();
+				}
+
+				return true;
 			}
 		} else {
-			completed.put(id, time.toEpochMilli());
+			if (completed.put(id, time.getTime()) == 0L) {
+				save();
 
-			if (file.isServerSide()) {
-				new MessageObjectCompleted(uuid, id).sendToAll();
+				if (ChangeProgress.sendUpdates && file.isServerSide()) {
+					new MessageObjectCompleted(uuid, id).sendToAll();
+				}
+
+				return true;
 			}
 		}
 
-		save();
+		return false;
 	}
 
 	@Nullable
-	public Instant getRewardClaimTime(QuestKey key) {
+	public Date getRewardClaimTime(QuestKey key) {
 		long t = claimedRewards.get(key);
-		return t == 0L ? null : Instant.ofEpochMilli(t);
+		return t == 0L ? null : new Date(t);
 	}
 
 	public boolean isRewardClaimed(QuestKey key) {
@@ -201,7 +192,7 @@ public class TeamData {
 		QuestKey key = QuestKey.of(reward.isTeamReward() ? Util.NIL_UUID : player, reward.id);
 
 		if (!claimedRewards.containsKey(key)) {
-			claimedRewards.put(key, Instant.now().toEpochMilli());
+			claimedRewards.put(key, System.currentTimeMillis());
 			save();
 			return true;
 		}
@@ -211,6 +202,24 @@ public class TeamData {
 
 	public boolean resetReward(Reward reward) {
 		if (claimedRewards.entrySet().removeIf(e -> e.getKey().id == reward.id)) {
+			save();
+			return true;
+		}
+
+		return false;
+	}
+
+	public boolean resetReward(UUID player, Reward reward) {
+		if (claimedRewards.removeLong(QuestKey.of(reward.isTeamReward() ? Util.NIL_UUID : player, reward.id)) != 0L) {
+			save();
+			return true;
+		}
+
+		return false;
+	}
+
+	public boolean setRewardClaimed(UUID player, Reward reward, Date time) {
+		if (claimedRewards.put(QuestKey.of(reward.isTeamReward() ? Util.NIL_UUID : player, reward.id), time.getTime()) != 0L) {
 			save();
 			return true;
 		}
@@ -275,7 +284,7 @@ public class TeamData {
 		}
 	}
 
-	public void clearCache() {
+	public void clearCachedProgress() {
 		areDependenciesCompleteCache = null;
 	}
 
@@ -290,18 +299,11 @@ public class TeamData {
 
 		CompoundTag taskDataNBT = new OrderedCompoundTag();
 
-		List<TaskData<?>> taskDataList = new ArrayList<>(taskData.values());
-		taskDataList.sort(Comparator.comparingLong(o -> o.task.id));
-
-		for (TaskData<?> data : taskDataList) {
-			if (data.progress > 0L) {
-				String key = QuestObjectBase.getCodeString(data.task.id);
-
-				if (data.progress <= Integer.MAX_VALUE) {
-					taskDataNBT.putInt(key, (int) data.progress);
-				} else {
-					taskDataNBT.putLong(key, data.progress);
-				}
+		for (Long2LongMap.Entry entry : taskProgress.long2LongEntrySet()) {
+			if (entry.getLongValue() <= Integer.MAX_VALUE) {
+				taskDataNBT.putInt(QuestObjectBase.getCodeString(entry.getLongKey()), (int) entry.getLongValue());
+			} else {
+				taskDataNBT.putLong(QuestObjectBase.getCodeString(entry.getLongKey()), entry.getLongValue());
 			}
 		}
 
@@ -357,6 +359,7 @@ public class TeamData {
 		money = nbt.getLong("money");
 		autoPin = nbt.getBoolean("auto_pin");
 
+		taskProgress.clear();
 		claimedRewards.clear();
 		pinnedQuests.clear();
 
@@ -375,11 +378,7 @@ public class TeamData {
 		CompoundTag taskDataNBT = nbt.getCompound("task_progress");
 
 		for (String s : taskDataNBT.getAllKeys()) {
-			Task task = file.getTask(file.getID(s));
-
-			if (task != null) {
-				taskData.get(task.id).progress = Math.max(0L, Math.min(taskDataNBT.getLong(s), task.getMaxProgress()));
-			}
+			taskProgress.put(file.getID(s), taskDataNBT.getLong(s));
 		}
 
 		CompoundTag startedNBT = nbt.getCompound("started");
@@ -398,24 +397,14 @@ public class TeamData {
 	public void write(FriendlyByteBuf buffer, boolean self) {
 		buffer.writeUtf(name, Short.MAX_VALUE);
 		buffer.writeVarLong(money);
-		int tds = 0;
+		buffer.writeVarInt(taskProgress.size());
 
-		for (TaskData<?> t : taskData.values()) {
-			if (t.progress > 0L) {
-				tds++;
-			}
+		for (Long2LongMap.Entry entry : taskProgress.long2LongEntrySet()) {
+			buffer.writeLong(entry.getLongKey());
+			buffer.writeVarLong(entry.getLongValue());
 		}
 
-		buffer.writeVarInt(tds);
-
-		for (TaskData<?> t : taskData.values()) {
-			if (t.progress > 0L) {
-				buffer.writeLong(t.task.id);
-				buffer.writeVarLong(t.progress);
-			}
-		}
-
-		long now = Instant.now().toEpochMilli();
+		long now = System.currentTimeMillis();
 
 		buffer.writeVarInt(started.size());
 
@@ -454,18 +443,14 @@ public class TeamData {
 		name = buffer.readUtf(Short.MAX_VALUE);
 		money = buffer.readVarLong();
 
+		taskProgress.clear();
 		int ts = buffer.readVarInt();
 
 		for (int i = 0; i < ts; i++) {
-			TaskData<?> t = taskData.get(buffer.readLong());
-			long progress = buffer.readVarLong();
-
-			if (t != null) {
-				t.progress = progress;
-			}
+			taskProgress.put(buffer.readLong(), buffer.readVarLong());
 		}
 
-		long now = Instant.now().toEpochMilli();
+		long now = System.currentTimeMillis();
 
 		started.clear();
 
@@ -687,53 +672,60 @@ public class TeamData {
 		return RewardClaimType.CANT_CLAIM;
 	}
 
-
-	public final void setProgress(Task task, long progress) {
-		progress = Math.max(0L, Math.min(progress, task.getMaxProgress()));
-		long prevProgress = getProgress(task);
-
-		if (prevProgress != progress) {
-			progressChanged(task, prevProgress, progress);
+	public void resetProgress(Task task) {
+		if (taskProgress.remove(task.id) > 0L) {
+			save();
 		}
 	}
 
-	public final void addProgress(Task task, long p) {
-		setProgress(task, getProgress(task) + p);
-	}
+	public final void setProgress(Task task, long progress) {
+		long maxProgress = task.getMaxProgress();
+		progress = Math.max(0L, Math.min(progress, maxProgress));
+		long prevProgress = getProgress(task);
 
-	public void progressChanged(Task task, long prevProgress, long progress) {
-		// file.clearCachedProgress();
-		clearCache();
-
-		if (file.isServerSide()) {
-			Instant now = Instant.now();
-
-			if (ChangeProgress.sendUpdates) {
-				new MessageUpdateTaskProgress(this, task.id, progress).sendToAll();
+		if (prevProgress != progress) {
+			if (progress == 0L) {
+				taskProgress.remove(task.id);
+			} else {
+				taskProgress.put(task.id, progress);
 			}
 
-			if (prevProgress == 0L) {
-				task.onStarted(new QuestProgressEventData<>(now, this, task, getOnlineMembers(), Collections.emptyList()));
-			}
+			clearCachedProgress();
 
-			if (isCompleted(task)) {
-				List<ServerPlayer> onlineMembers = getOnlineMembers();
-				List<ServerPlayer> notifiedPlayers;
+			if (file.isServerSide()) {
+				Date now = new Date();
 
-				if (!task.quest.chapter.alwaysInvisible && ChangeProgress.sendNotifications.get(ChangeProgress.sendUpdates)) {
-					notifiedPlayers = onlineMembers;
-				} else {
-					notifiedPlayers = Collections.emptyList();
+				if (ChangeProgress.sendUpdates) {
+					new MessageUpdateTaskProgress(this, task.id, progress).sendToAll();
 				}
 
-				task.onCompleted(new QuestProgressEventData<>(now, this, task, onlineMembers, notifiedPlayers));
+				if (prevProgress == 0L) {
+					task.onStarted(new QuestProgressEventData<>(now, this, task, getOnlineMembers(), Collections.emptyList()));
+				}
 
-				for (ServerPlayer player : onlineMembers) {
-					FTBQuestsInventoryListener.detect(player, ItemStack.EMPTY, task.id);
+				if (progress >= maxProgress) {
+					List<ServerPlayer> onlineMembers = getOnlineMembers();
+					List<ServerPlayer> notifiedPlayers;
+
+					if (!task.quest.chapter.alwaysInvisible && ChangeProgress.sendNotifications.get(ChangeProgress.sendUpdates)) {
+						notifiedPlayers = onlineMembers;
+					} else {
+						notifiedPlayers = Collections.emptyList();
+					}
+
+					task.onCompleted(new QuestProgressEventData<>(now, this, task, onlineMembers, notifiedPlayers));
+
+					for (ServerPlayer player : onlineMembers) {
+						FTBQuestsInventoryListener.detect(player, ItemStack.EMPTY, task.id);
+					}
 				}
 			}
 
 			save();
 		}
+	}
+
+	public final void addProgress(Task task, long p) {
+		setProgress(task, getProgress(task) + p);
 	}
 }

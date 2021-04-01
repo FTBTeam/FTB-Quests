@@ -18,7 +18,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import dev.ftb.mods.ftbquests.net.MessageEditObject;
 import dev.ftb.mods.ftbquests.quest.task.ItemTask;
 import dev.ftb.mods.ftbquests.quest.task.Task;
-import dev.ftb.mods.ftbquests.quest.task.TaskData;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import dev.latvian.mods.itemfilters.api.IStringValueFilter;
 import dev.latvian.mods.itemfilters.api.ItemFiltersAPI;
@@ -138,10 +137,7 @@ public class TaskButton extends Button {
 			list.add(getTitle());
 		}
 
-		TaskData data;
-
 		if (questScreen.file.self.canStartTasks(task.quest)) {
-			data = questScreen.file.self.getTaskData(task);
 			long maxp = task.getMaxProgress();
 			long progress = questScreen.file.self.getProgress(task);
 
@@ -161,11 +157,10 @@ public class TaskButton extends Button {
 				}
 			}
 		} else {
-			data = null;
 			//list.add(TextFormatting.DARK_GRAY + "[0%]");
 		}
 
-		task.addMouseOverText(list, data);
+		task.addMouseOverText(list, questScreen.file.self);
 	}
 
 	@Override

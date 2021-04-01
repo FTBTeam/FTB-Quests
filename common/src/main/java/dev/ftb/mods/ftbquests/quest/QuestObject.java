@@ -9,9 +9,10 @@ import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 
-import java.time.Instant;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
+import java.util.UUID;
 
 /**
  * @author LatvianModder
@@ -54,27 +55,17 @@ public abstract class QuestObject extends QuestObjectBase {
 	}
 
 	@Override
-	public void changeProgress(Instant time, TeamData data, ChangeProgress type) {
+	public void forceProgress(Date time, TeamData data, UUID player, ChangeProgress type) {
 		if (type.reset) {
-			if (data.isStarted(this)) {
-				data.setStarted(id, null);
-			}
-
-			if (data.isCompleted(this)) {
-				data.setCompleted(id, null);
-			}
+			data.setStarted(id, null);
+			data.setCompleted(id, null);
 		} else {
-			if (!data.isStarted(this)) {
-				data.setStarted(id, time);
-			}
-
-			if (!data.isCompleted(this)) {
-				data.setCompleted(id, time);
-			}
+			data.setStarted(id, time);
+			data.setCompleted(id, time);
 		}
 
 		for (QuestObject child : getChildren()) {
-			child.changeProgress(time, data, type);
+			child.forceProgress(time, data, player, type);
 		}
 	}
 

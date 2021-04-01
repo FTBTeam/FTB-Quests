@@ -1072,7 +1072,7 @@ public abstract class QuestFile extends QuestObject {
 
 	public void clearCachedProgress() {
 		for (TeamData data : getAllData()) {
-			data.clearCache();
+			data.clearCachedProgress();
 		}
 	}
 
@@ -1242,16 +1242,6 @@ public abstract class QuestFile extends QuestObject {
 
 	public void addData(TeamData data, boolean strong) {
 		teamDataMap.put(data.uuid, data);
-
-		for (ChapterGroup group : chapterGroups) {
-			for (Chapter chapter : group.chapters) {
-				for (Quest quest : chapter.quests) {
-					for (Task task : quest.tasks) {
-						data.createTaskData(task, strong);
-					}
-				}
-			}
-		}
 	}
 
 	public void refreshGui() {
