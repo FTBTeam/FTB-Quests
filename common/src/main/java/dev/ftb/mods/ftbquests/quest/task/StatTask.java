@@ -41,8 +41,13 @@ public class StatTask extends Task {
 	}
 
 	@Override
-	public String getMaxProgressString() {
+	public String formatMaxProgress() {
 		return Integer.toString(value);
+	}
+
+	@Override
+	public String formatProgress(TeamData teamData, long progress) {
+		return Long.toUnsignedString(progress);
 	}
 
 	@Override
@@ -101,31 +106,15 @@ public class StatTask extends Task {
 	}
 
 	@Override
-	public TaskData createData(TeamData data) {
-		return new Data(this, data);
-	}
-
-	public static class Data extends TaskData<StatTask> {
-		private Data(StatTask task, TeamData data) {
-			super(task, data);
+	public void submitTask(TeamData teamData, ServerPlayer player, ItemStack item) {
+		if (teamData.isCompleted(this)) {
+			return;
 		}
 
-		@Override
-		public String getProgressString() {
-			return Integer.toString((int) progress);
-		}
+		int set = Math.min(value, player.getStats().getValue(Stats.CUSTOM.get(stat)));
 
-		@Override
-		public void submitTask(ServerPlayer player, ItemStack item) {
-			if (isComplete()) {
-				return;
-			}
-
-			int set = Math.min(task.value, player.getStats().getValue(Stats.CUSTOM.get(task.stat)));
-
-			if (set > progress) {
-				setProgress(set);
-			}
+		if (set > teamData.getProgress(this)) {
+			teamData.setProgress(this, set);
 		}
 	}
 }

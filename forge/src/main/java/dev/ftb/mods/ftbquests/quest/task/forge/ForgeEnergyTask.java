@@ -5,7 +5,6 @@ import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.task.EnergyTask;
-import dev.ftb.mods.ftbquests.quest.task.TaskData;
 import dev.ftb.mods.ftbquests.quest.task.TaskType;
 import dev.ftb.mods.ftbquests.quest.task.TaskTypes;
 import net.minecraft.network.chat.MutableComponent;
@@ -36,34 +35,23 @@ public class ForgeEnergyTask extends EnergyTask {
 		return new TranslatableComponent("ftbquests.task.ftbquests.forge_energy.text", StringUtils.formatDouble(value, true));
 	}
 
-	@Override
-	public TaskData createData(TeamData data) {
-		return new Data(this, data);
-	}
+	public int receiveEnergy(TeamData teamData, int maxReceive, boolean simulate) {
+		if (maxReceive > 0 && !teamData.isCompleted(this)) {
+			long add = Math.min(maxReceive, value - teamData.getProgress(this));
 
-	public static class Data extends TaskData<ForgeEnergyTask> {
-		private Data(ForgeEnergyTask task, TeamData data) {
-			super(task, data);
-		}
-
-		public int receiveEnergy(int maxReceive, boolean simulate) {
-			if (maxReceive > 0 && !isComplete()) {
-				long add = Math.min(maxReceive, task.value - progress);
-
-				if (task.maxInput > 0) {
-					add = Math.min(add, task.maxInput);
-				}
-
-				if (add > 0L) {
-					if (!simulate) {
-						addProgress(add);
-					}
-
-					return (int) add;
-				}
+			if (maxInput > 0) {
+				add = Math.min(add, maxInput);
 			}
 
-			return 0;
+			if (add > 0L) {
+				if (!simulate) {
+					teamData.addProgress(this, add);
+				}
+
+				return (int) add;
+			}
 		}
+
+		return 0;
 	}
 }

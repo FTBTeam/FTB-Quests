@@ -30,6 +30,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nullable;
 import java.time.Instant;
@@ -71,19 +73,27 @@ public abstract class Task extends QuestObject {
 
 	public abstract TaskType getType();
 
-	public abstract TaskData createData(TeamData data);
-
-	public long calculateProgress(TeamData data) {
-		return 0L;
-	}
-
-	public String formatProgress(TeamData data, long progress) {
-		return StringUtils.formatDouble(progress, true);
+	public final TaskData<?> createData(TeamData data) {
+		return new TaskData(this, data);
 	}
 
 	@Override
 	public final int getRelativeProgressFromChildren(TeamData data) {
-		return data.getTaskData(this).getRelativeProgress();
+		long max = getMaxProgress();
+
+		if (max <= 0L) {
+			return 0;
+		}
+
+		long progress = data.getProgress(this);
+
+		if (progress <= 0L) {
+			return 0;
+		} else if (progress >= max) {
+			return 100;
+		}
+
+		return (int) Math.max(1L, (progress * 100D / (double) max));
 	}
 
 	@Override
@@ -113,13 +123,17 @@ public abstract class Task extends QuestObject {
 		return 1L;
 	}
 
-	public String getMaxProgressString() {
+	public String formatMaxProgress() {
 		return StringUtils.formatDouble(getMaxProgress(), true);
+	}
+
+	public String formatProgress(TeamData teamData, long progress) {
+		return StringUtils.formatDouble(progress, true);
 	}
 
 	@Override
 	public final void changeProgress(Instant time, TeamData data, ChangeProgress type) {
-		data.getTaskData(this).setProgress(type.reset ? 0L : getMaxProgress());
+		data.setProgress(this, type.reset ? 0L : getMaxProgress());
 	}
 
 	@Override
@@ -243,7 +257,7 @@ public abstract class Task extends QuestObject {
 
 	@Environment(EnvType.CLIENT)
 	public MutableComponent getButtonText() {
-		return getMaxProgress() > 1L || consumesResources() ? new TextComponent(getMaxProgressString()) : (MutableComponent) TextComponent.EMPTY;
+		return getMaxProgress() > 1L || consumesResources() ? new TextComponent(formatMaxProgress()) : (MutableComponent) TextComponent.EMPTY;
 	}
 
 	public int autoSubmitOnPlayerTick() {
@@ -253,5 +267,12 @@ public abstract class Task extends QuestObject {
 	@Override
 	public final boolean cacheProgress() {
 		return false;
+	}
+
+	public void submitTask(TeamData teamData, ServerPlayer player, ItemStack item) {
+	}
+
+	public final void submitTask(TeamData teamData, ServerPlayer player) {
+		submitTask(teamData, player, ItemStack.EMPTY);
 	}
 }

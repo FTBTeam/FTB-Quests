@@ -8,13 +8,14 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.HitResult;
 
 /**
  * @author LatvianModder
  */
-public class ObservationTask extends Task {
+public class ObservationTask extends BooleanTask {
 	@FunctionalInterface
 	public interface Check {
 		boolean check(Player player, HitResult lookingAt);
@@ -71,7 +72,7 @@ public class ObservationTask extends Task {
 	}
 
 	@Override
-	public TaskData createData(TeamData data) {
-		return new BooleanTaskData<>(this, data);
+	public boolean canSubmit(TeamData teamData, ServerPlayer player) {
+		return true;
 	}
 }

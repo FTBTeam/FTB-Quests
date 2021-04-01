@@ -8,7 +8,6 @@ import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.task.Task;
-import dev.ftb.mods.ftbquests.quest.task.TaskData;
 import dev.ftb.mods.ftbquests.quest.task.TaskType;
 import dev.ftb.mods.ftbquests.quest.task.TaskTypes;
 import me.shedaniel.architectury.fluid.FluidStack;
@@ -56,8 +55,13 @@ public class ForgeFluidTask extends Task {
 	}
 
 	@Override
-	public String getMaxProgressString() {
+	public String formatMaxProgress() {
 		return getVolumeString(amount);
+	}
+
+	@Override
+	public String formatProgress(TeamData teamData, long progress) {
+		return getVolumeString((int) Math.min(Integer.MAX_VALUE, progress));
 	}
 
 	@Override
@@ -178,21 +182,6 @@ public class ForgeFluidTask extends Task {
 		return createFluidStack();
 	}
 
-	@Override
-	public TaskData createData(TeamData data) {
-		return new Data(this, data);
-	}
-
-	public static class Data extends TaskData<ForgeFluidTask> {
-		private Data(ForgeFluidTask t, TeamData data) {
-			super(t, data);
-		}
-
-		@Override
-		public String getProgressString() {
-			return getVolumeString((int) progress);
-		}
-
 		/*public int fill(FluidStack resource, IFluidHandler.FluidAction action)
 		{
 			if ( resource.getAmount().isGreaterThan(Fraction.zero()) && !isComplete() && Objects.equals(resource.getFluid(), task.createFluidStack().getFluid()) && data.canStartTasks(task.quest))
@@ -212,10 +201,10 @@ public class ForgeFluidTask extends Task {
 
 			return 0;
 		}*/
-		
+
 		/*
 		@Override
-		public ItemStack insertItem(ItemStack stack, boolean singleItem, boolean simulate, @Nullable PlayerEntity player)
+		public ItemStack insertItem(ItemStack stack, boolean singleItem, boolean simulate, @Nullable Player player)
 		{
 			if (isComplete())
 			{
@@ -229,7 +218,7 @@ public class ForgeFluidTask extends Task {
 				return stack;
 			}
 
-			FluidStack toDrain = task.createFluidStack(Fluid.BUCKET_VOLUME);
+			FluidStack toDrain = task.createFluidStack();
 			FluidStack drainedFluid = handlerItem.drain(toDrain, false);
 
 			if (drainedFluid == null || drainedFluid.amount <= 0)
@@ -261,5 +250,4 @@ public class ForgeFluidTask extends Task {
 		}
 
 		*/
-	}
 }

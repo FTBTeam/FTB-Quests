@@ -33,7 +33,7 @@ public class FTBQuestsKubeJSPlayerData {
 		Task task = data.file.getTask(data.file.getID(id));
 
 		if (task != null) {
-			data.getTaskData(task).addProgress(progress);
+			data.addProgress(task, progress);
 		}
 	}
 
@@ -42,7 +42,7 @@ public class FTBQuestsKubeJSPlayerData {
 		Task task = data.file.getTask(data.file.getID(id));
 
 		if (task != null) {
-			data.getTaskData(task).complete();
+			data.setProgress(task, task.getMaxProgress());
 		}
 	}
 
@@ -82,6 +82,6 @@ public class FTBQuestsKubeJSPlayerData {
 	public long getTaskProgress(Object id) {
 		TeamData data = getData();
 		Task task = data.file.getTask(data.file.getID(id));
-		return task != null ? data.getTaskData(task).progress : 0L;
+		return task != null ? data.getProgress(task) : 0L;
 	}
 }

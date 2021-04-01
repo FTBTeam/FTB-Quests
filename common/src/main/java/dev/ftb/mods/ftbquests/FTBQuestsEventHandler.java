@@ -11,7 +11,6 @@ import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.task.DimensionTask;
 import dev.ftb.mods.ftbquests.quest.task.KillTask;
 import dev.ftb.mods.ftbquests.quest.task.Task;
-import dev.ftb.mods.ftbquests.quest.task.TaskData;
 import dev.ftb.mods.ftbquests.util.FTBQuestsInventoryListener;
 import me.shedaniel.architectury.event.events.CommandRegistrationEvent;
 import me.shedaniel.architectury.event.events.EntityEvent;
@@ -112,10 +111,8 @@ public class FTBQuestsEventHandler {
 			TeamData data = ServerQuestFile.INSTANCE.getData(player);
 
 			for (KillTask task : killTasks) {
-				TaskData taskData = data.getTaskData(task);
-
-				if (taskData.progress < task.getMaxProgress() && data.canStartTasks(task.quest)) {
-					((KillTask.Data) taskData).kill(entity);
+				if (data.getProgress(task) < task.getMaxProgress() && data.canStartTasks(task.quest)) {
+					task.kill(data, entity);
 				}
 			}
 		}
@@ -141,10 +138,8 @@ public class FTBQuestsEventHandler {
 				long d = task.autoSubmitOnPlayerTick();
 
 				if (d > 0L && t % d == 0L) {
-					TaskData taskData = data.getTaskData(task);
-
-					if (!taskData.isComplete() && data.canStartTasks(task.quest)) {
-						taskData.submitTask((ServerPlayer) player);
+					if (!data.isCompleted(task) && data.canStartTasks(task.quest)) {
+						task.submitTask(data, (ServerPlayer) player);
 					}
 				}
 			}
@@ -188,7 +183,7 @@ public class FTBQuestsEventHandler {
 			TeamData data = ServerQuestFile.INSTANCE.getData(player);
 
 			for (DimensionTask task : ServerQuestFile.INSTANCE.collect(DimensionTask.class)) {
-				data.getTaskData(task).submitTask(player);
+				task.submitTask(data, player);
 			}
 		}
 	}

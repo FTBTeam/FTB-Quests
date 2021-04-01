@@ -230,7 +230,7 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon {
 		if (t != null) {
 			TeamData data = ClientQuestFile.INSTANCE.getData(teamId);
 			ClientQuestFile.INSTANCE.clearCachedProgress();
-			data.getTaskData(t).setProgress(progress);
+			data.setProgress(t, progress);
 		}
 	}
 

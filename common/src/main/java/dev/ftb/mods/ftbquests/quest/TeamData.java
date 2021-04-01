@@ -687,7 +687,21 @@ public class TeamData {
 		return RewardClaimType.CANT_CLAIM;
 	}
 
-	public void progressChanged(TaskData<?> taskData, long prevProgress) {
+
+	public final void setProgress(Task task, long progress) {
+		progress = Math.max(0L, Math.min(progress, task.getMaxProgress()));
+		long prevProgress = getProgress(task);
+
+		if (prevProgress != progress) {
+			progressChanged(task, prevProgress, progress);
+		}
+	}
+
+	public final void addProgress(Task task, long p) {
+		setProgress(task, getProgress(task) + p);
+	}
+
+	public void progressChanged(Task task, long prevProgress, long progress) {
 		// file.clearCachedProgress();
 		clearCache();
 
@@ -695,27 +709,27 @@ public class TeamData {
 			Instant now = Instant.now();
 
 			if (ChangeProgress.sendUpdates) {
-				new MessageUpdateTaskProgress(this, taskData.task.id, taskData.progress).sendToAll();
+				new MessageUpdateTaskProgress(this, task.id, progress).sendToAll();
 			}
 
 			if (prevProgress == 0L) {
-				taskData.task.onStarted(new QuestProgressEventData<>(now, this, taskData.task, getOnlineMembers(), Collections.emptyList()));
+				task.onStarted(new QuestProgressEventData<>(now, this, task, getOnlineMembers(), Collections.emptyList()));
 			}
 
-			if (taskData.isComplete()) {
+			if (isCompleted(task)) {
 				List<ServerPlayer> onlineMembers = getOnlineMembers();
 				List<ServerPlayer> notifiedPlayers;
 
-				if (!taskData.task.quest.chapter.alwaysInvisible && ChangeProgress.sendNotifications.get(ChangeProgress.sendUpdates)) {
+				if (!task.quest.chapter.alwaysInvisible && ChangeProgress.sendNotifications.get(ChangeProgress.sendUpdates)) {
 					notifiedPlayers = onlineMembers;
 				} else {
 					notifiedPlayers = Collections.emptyList();
 				}
 
-				taskData.task.onCompleted(new QuestProgressEventData<>(now, this, taskData.task, onlineMembers, notifiedPlayers));
+				task.onCompleted(new QuestProgressEventData<>(now, this, task, onlineMembers, notifiedPlayers));
 
 				for (ServerPlayer player : onlineMembers) {
-					FTBQuestsInventoryListener.detect(player, ItemStack.EMPTY, taskData.task.id);
+					FTBQuestsInventoryListener.detect(player, ItemStack.EMPTY, task.id);
 				}
 			}
 

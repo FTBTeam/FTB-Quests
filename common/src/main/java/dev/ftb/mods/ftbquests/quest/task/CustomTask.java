@@ -78,20 +78,31 @@ public class CustomTask extends Task {
 	}
 
 	@Override
-	public TaskData createData(TeamData data) {
-		return new Data(this, data);
+	public void submitTask(TeamData teamData, ServerPlayer player, ItemStack item) {
+		if (check != null && !teamData.isCompleted(this)) {
+			check.check(new Data(this, teamData), player);
+		}
 	}
 
-	public static class Data extends TaskData<CustomTask> {
-		private Data(CustomTask task, TeamData data) {
-			super(task, data);
+	public static class Data {
+		public final CustomTask task;
+		public final TeamData teamData;
+
+		public Data(CustomTask t, TeamData d) {
+			task = t;
+			teamData = d;
 		}
 
-		@Override
-		public void submitTask(ServerPlayer player, ItemStack item) {
-			if (task.check != null && !isComplete()) {
-				task.check.check(this, player);
-			}
+		public long getProgress() {
+			return teamData.getProgress(task);
+		}
+
+		public void setProgress(long l) {
+			teamData.setProgress(task, l);
+		}
+
+		public void addProgress(long l) {
+			teamData.addProgress(task, l);
 		}
 	}
 }

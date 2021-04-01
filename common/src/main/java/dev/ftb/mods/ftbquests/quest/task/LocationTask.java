@@ -17,7 +17,7 @@ import net.minecraft.world.level.Level;
 /**
  * @author LatvianModder
  */
-public class LocationTask extends Task {
+public class LocationTask extends BooleanTask {
 	public ResourceKey<Level> dimension;
 	public boolean ignoreDimension;
 	public int x, y, z;
@@ -118,36 +118,20 @@ public class LocationTask extends Task {
 	}
 
 	@Override
-	public TaskData createData(TeamData data) {
-		return new Data(this, data);
-	}
+	public boolean canSubmit(TeamData teamData, ServerPlayer player) {
+		if (ignoreDimension || dimension == player.level.dimension()) {
+			int py = Mth.floor(player.getY());
 
-	public static class Data extends BooleanTaskData<LocationTask> {
-		private Data(LocationTask task, TeamData data) {
-			super(task, data);
-		}
+			if (py >= y && py < y + h) {
+				int px = Mth.floor(player.getX());
 
-		@Override
-		public String getProgressString() {
-			return progress > 0 ? "1" : "0";
-		}
-
-		@Override
-		public boolean canSubmit(ServerPlayer player) {
-			if (task.ignoreDimension || task.dimension == player.level.dimension()) {
-				int y = Mth.floor(player.getY());
-
-				if (y >= task.y && y < task.y + task.h) {
-					int x = Mth.floor(player.getX());
-
-					if (x >= task.x && x < task.x + task.w) {
-						int z = Mth.floor(player.getZ());
-						return z >= task.z && z < task.z + task.d;
-					}
+				if (px >= x && px < x + w) {
+					int pz = Mth.floor(player.getZ());
+					return pz >= z && pz < z + d;
 				}
 			}
-
-			return false;
 		}
+
+		return false;
 	}
 }

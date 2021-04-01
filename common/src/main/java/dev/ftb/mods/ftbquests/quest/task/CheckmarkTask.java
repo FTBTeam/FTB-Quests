@@ -6,11 +6,12 @@ import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.server.level.ServerPlayer;
 
 /**
  * @author LatvianModder
  */
-public class CheckmarkTask extends Task {
+public class CheckmarkTask extends BooleanTask {
 	public CheckmarkTask(Quest quest) {
 		super(quest);
 	}
@@ -27,12 +28,7 @@ public class CheckmarkTask extends Task {
 	}
 
 	@Override
-	public TaskData createData(TeamData data) {
-		return new BooleanTaskData<>(this, data);
-	}
-
-	@Override
-	public long calculateProgress(TeamData data) {
-		return 0L;
+	public boolean canSubmit(TeamData teamData, ServerPlayer player) {
+		return true;
 	}
 }

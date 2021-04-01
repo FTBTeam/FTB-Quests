@@ -33,7 +33,7 @@ public class MessageSubmitTask extends MessageBase {
 		Task t = ServerQuestFile.INSTANCE.getTask(task);
 
 		if (t != null && data.canStartTasks(t.quest)) {
-			data.getTaskData(t).submitTask(player);
+			t.submitTask(data, player);
 		}
 	}
 }

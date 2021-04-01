@@ -143,18 +143,19 @@ public class TaskButton extends Button {
 		if (questScreen.file.self.canStartTasks(task.quest)) {
 			data = questScreen.file.self.getTaskData(task);
 			long maxp = task.getMaxProgress();
+			long progress = questScreen.file.self.getProgress(task);
 
 			if (maxp > 1L) {
 				if (task.hideProgressNumbers()) {
-					list.add(new TextComponent("[" + data.getRelativeProgress() + "%]").withStyle(ChatFormatting.DARK_GREEN));
+					list.add(new TextComponent("[" + task.getRelativeProgressFromChildren(questScreen.file.self) + "%]").withStyle(ChatFormatting.DARK_GREEN));
 				} else {
-					String max = isShiftKeyDown() ? Long.toUnsignedString(maxp) : task.getMaxProgressString();
-					String prog = isShiftKeyDown() ? Long.toUnsignedString(data.progress) : data.getProgressString();
+					String max = isShiftKeyDown() ? Long.toUnsignedString(maxp) : task.formatMaxProgress();
+					String prog = isShiftKeyDown() ? Long.toUnsignedString(progress) : task.formatProgress(questScreen.file.self, progress);
 
 					if (maxp < 100L) {
-						list.add(new TextComponent((data.progress > maxp ? max : prog) + " / " + max).withStyle(ChatFormatting.DARK_GREEN));
+						list.add(new TextComponent((progress > maxp ? max : prog) + " / " + max).withStyle(ChatFormatting.DARK_GREEN));
 					} else {
-						list.add(new TextComponent((data.progress > maxp ? max : prog) + " / " + max).withStyle(ChatFormatting.DARK_GREEN).append(new TextComponent(" [" + data.getRelativeProgress() + "%]").withStyle(ChatFormatting.DARK_GRAY)));
+						list.add(new TextComponent((progress > maxp ? max : prog) + " / " + max).withStyle(ChatFormatting.DARK_GREEN).append(new TextComponent(" [" + task.getRelativeProgressFromChildren(questScreen.file.self) + "%]").withStyle(ChatFormatting.DARK_GRAY)));
 					}
 
 				}

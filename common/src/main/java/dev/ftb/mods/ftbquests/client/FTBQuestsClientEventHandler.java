@@ -124,7 +124,7 @@ public class FTBQuestsClientEventHandler {
 
 				if (currentlyObservingTicks >= currentlyObserving.ticks) {
 					new MessageSubmitTask(currentlyObserving.id).sendToServer();
-					ClientQuestFile.INSTANCE.self.getTaskData(currentlyObserving).addProgress(1L);
+					ClientQuestFile.INSTANCE.self.addProgress(currentlyObserving, 1L);
 					currentlyObserving = null;
 					currentlyObservingTicks = 0L;
 				}
