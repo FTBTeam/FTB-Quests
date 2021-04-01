@@ -30,13 +30,14 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nullable;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.regex.Pattern;
 
 /**
@@ -54,7 +55,7 @@ public abstract class QuestObjectBase {
 	}
 
 	public static String getCodeString(long id) {
-		return id == 0L ? "-" : String.format("%016X", id);
+		return String.format("%016X", id);
 	}
 
 	public static String getCodeString(@Nullable QuestObjectBase object) {
@@ -131,19 +132,19 @@ public abstract class QuestObjectBase {
 		return !tags.isEmpty() && getTags().contains(tag);
 	}
 
-	public void changeProgress(Instant time, TeamData data, ChangeProgress type) {
+	public void forceProgress(Date time, TeamData data, UUID player, ChangeProgress type) {
 	}
 
-	public void forceProgress(TeamData data, ChangeProgress type, boolean notifications) {
+	public final void forceProgress(TeamData data, UUID player, ChangeProgress type, boolean notifications) {
 		ChangeProgress.sendUpdates = false;
 		ChangeProgress.sendNotifications = notifications ? Tristate.TRUE : Tristate.FALSE;
-		changeProgress(Instant.now(), data, type);
+		forceProgress(new Date(), data, player, type);
 		ChangeProgress.sendUpdates = true;
 		ChangeProgress.sendNotifications = Tristate.DEFAULT;
-		getQuestFile().clearCachedProgress();
+		data.clearCachedProgress();
 
 		if (getQuestFile().isServerSide()) {
-			new MessageChangeProgressResponse(data.uuid, id, type, notifications).sendToAll();
+			new MessageChangeProgressResponse(data.uuid, player, id, type, notifications).sendToAll();
 		}
 
 		data.save();

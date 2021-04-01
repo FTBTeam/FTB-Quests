@@ -31,7 +31,6 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
@@ -210,7 +209,7 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public void addMouseOverText(TooltipList list, @Nullable TaskData data) {
+	public void addMouseOverText(TooltipList list, TeamData teamData) {
 		if (consumesResources()) {
 			list.blankLine();
 			list.add(new TranslatableComponent("ftbquests.task.click_to_submit").withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE));

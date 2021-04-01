@@ -9,6 +9,9 @@ import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbteams.FTBTeamsAPI;
 import dev.latvian.kubejs.player.PlayerDataJS;
+import net.minecraft.Util;
+
+import java.util.UUID;
 
 /**
  * @author LatvianModder
@@ -46,13 +49,17 @@ public class FTBQuestsKubeJSPlayerData {
 		}
 	}
 
-	public void reset(Object id) {
+	public void reset(Object id, UUID player) {
 		TeamData data = getData();
 		QuestObject object = data.file.get(data.file.getID(id));
 
 		if (object != null) {
-			object.forceProgress(data, ChangeProgress.RESET, false);
+			object.forceProgress(data, player, ChangeProgress.RESET, false);
 		}
+	}
+
+	public void reset(Object id) {
+		reset(id, Util.NIL_UUID);
 	}
 
 	public boolean isCompleted(Object id) {
@@ -81,7 +88,6 @@ public class FTBQuestsKubeJSPlayerData {
 
 	public long getTaskProgress(Object id) {
 		TeamData data = getData();
-		Task task = data.file.getTask(data.file.getID(id));
-		return task != null ? data.getProgress(task) : 0L;
+		return data.getProgress(data.file.getID(id));
 	}
 }

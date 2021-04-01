@@ -56,7 +56,7 @@
 	"ftbquests.raymatcher.block_entity_class": "Block Entity Class",
 	"ftbquests.raymatcher.entity_id": "Entity ID",
 	"ftbquests.raymatcher.entity_class": "Entity Class",
-	"itemGroup.ftbquests": "FTB Quests",
+	"itemGroup.ftbquests.ftbquests": "FTB Quests",
 	"sidebar_button.ftbquests.quests": "Quests",
 	"sidebar_button.ftbquests.quests.no_team": "Join a team to complete quests!",
 	"key.categories.ftbquests": "FTB Quests",

@@ -34,7 +34,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nullable;
-import java.time.Instant;
+import java.util.Date;
+import java.util.UUID;
 
 /**
  * @author LatvianModder
@@ -72,10 +73,6 @@ public abstract class Task extends QuestObject {
 	}
 
 	public abstract TaskType getType();
-
-	public final TaskData<?> createData(TeamData data) {
-		return new TaskData(this, data);
-	}
 
 	@Override
 	public final int getRelativeProgressFromChildren(TeamData data) {
@@ -132,8 +129,9 @@ public abstract class Task extends QuestObject {
 	}
 
 	@Override
-	public final void changeProgress(Instant time, TeamData data, ChangeProgress type) {
-		data.setProgress(this, type.reset ? 0L : getMaxProgress());
+	public final void forceProgress(Date time, TeamData data, UUID player, ChangeProgress type) {
+		super.forceProgress(time, data, player, type);
+		data.resetProgress(this);
 	}
 
 	@Override
@@ -141,7 +139,7 @@ public abstract class Task extends QuestObject {
 		quest.tasks.remove(this);
 
 		for (TeamData data : quest.chapter.file.getAllData()) {
-			data.removeTaskData(this);
+			data.resetProgress(this);
 		}
 
 		super.deleteSelf();
@@ -150,7 +148,7 @@ public abstract class Task extends QuestObject {
 	@Override
 	public final void deleteChildren() {
 		for (TeamData data : quest.chapter.file.getAllData()) {
-			data.removeTaskData(this);
+			data.resetProgress(this);
 		}
 
 		super.deleteChildren();
@@ -170,10 +168,6 @@ public abstract class Task extends QuestObject {
 	@Override
 	public final void onCreated() {
 		quest.tasks.add(this);
-
-		for (TeamData data : quest.chapter.file.getAllData()) {
-			data.createTaskData(this, true);
-		}
 
 		if (this instanceof CustomTask && quest.chapter.file.isServerSide()) {
 			CustomTaskEvent.EVENT.invoker().act(new CustomTaskEvent((CustomTask) this));
@@ -216,7 +210,7 @@ public abstract class Task extends QuestObject {
 	}
 
 	@Environment(EnvType.CLIENT)
-	public void addMouseOverText(TooltipList list, @Nullable TaskData data) {
+	public void addMouseOverText(TooltipList list, TeamData teamData) {
 		if (consumesResources()) {
 			list.blankLine();
 			list.add(new TranslatableComponent("ftbquests.task.click_to_submit").withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE));

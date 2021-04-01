@@ -4,7 +4,7 @@ import dev.ftb.mods.ftbquests.FTBQuests;
 import me.shedaniel.architectury.networking.NetworkManager;
 import net.minecraft.network.FriendlyByteBuf;
 
-import java.time.Instant;
+import java.util.Date;
 import java.util.UUID;
 
 /**
@@ -32,6 +32,6 @@ public class MessageObjectStarted extends MessageBase {
 
 	@Override
 	public void handle(NetworkManager.PacketContext context) {
-		FTBQuests.NET_PROXY.objectStarted(team, id, Instant.now());
+		FTBQuests.NET_PROXY.objectStarted(team, id, new Date());
 	}
 }

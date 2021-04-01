@@ -34,9 +34,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
 import javax.annotation.Nullable;
-import java.time.Instant;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -118,7 +118,7 @@ public class FTBQuestsCommands {
 
 	private static int changeProgress(CommandSourceStack source, Collection<ServerPlayer> players, ChangeProgress type, QuestObjectBase questObject) {
 		for (ServerPlayer player : players) {
-			questObject.changeProgress(Instant.now(), ServerQuestFile.INSTANCE.getData(player), type);
+			questObject.forceProgress(new Date(), ServerQuestFile.INSTANCE.getData(player), player.getUUID(), type);
 		}
 		source.sendSuccess(new TranslatableComponent("commands.ftbquests.change_progress.text"), true);
 		return Command.SINGLE_SUCCESS;

@@ -36,12 +36,13 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.function.Predicate;
 
 /**
@@ -407,13 +408,11 @@ public final class Quest extends QuestObject implements Movable {
 	}
 
 	@Override
-	public void changeProgress(Instant time, TeamData data, ChangeProgress type) {
-		super.changeProgress(time, data, type);
+	public void forceProgress(Date time, TeamData data, UUID player, ChangeProgress type) {
+		super.forceProgress(time, data, player, type);
 
-		if (type.reset) {
-			for (Reward r : rewards) {
-				data.resetReward(r);
-			}
+		for (Reward r : rewards) {
+			r.forceProgress(time, data, player, type);
 		}
 	}
 

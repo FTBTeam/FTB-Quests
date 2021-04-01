@@ -11,7 +11,7 @@ import me.shedaniel.architectury.event.Event;
 import me.shedaniel.architectury.event.EventFactory;
 import net.minecraft.server.level.ServerPlayer;
 
-import java.time.Instant;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -41,7 +41,7 @@ public class ObjectCompletedEvent<T extends QuestObject> {
 		return true;
 	}
 
-	public Instant getTime() {
+	public Date getTime() {
 		return data.time;
 	}
 

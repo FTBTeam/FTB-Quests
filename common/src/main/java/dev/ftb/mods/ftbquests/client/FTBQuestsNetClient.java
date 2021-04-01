@@ -32,16 +32,16 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nullable;
-import java.time.Instant;
+import java.util.Date;
 import java.util.UUID;
 
 public class FTBQuestsNetClient extends FTBQuestsNetCommon {
 	@Override
-	public void changeProgress(UUID teamId, long id, ChangeProgress type, boolean notifications) {
+	public void changeProgress(UUID teamId, UUID player, long id, ChangeProgress type, boolean notifications) {
 		QuestObjectBase object = ClientQuestFile.INSTANCE.getBase(id);
 
 		if (object != null) {
-			object.forceProgress(ClientQuestFile.INSTANCE.getData(teamId), type, notifications);
+			object.forceProgress(ClientQuestFile.INSTANCE.getData(teamId), player, type, notifications);
 		}
 	}
 
@@ -274,7 +274,7 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon {
 	}
 
 	@Override
-	public void objectStarted(UUID teamId, long id, @Nullable Instant time) {
+	public void objectStarted(UUID teamId, long id, @Nullable Date time) {
 		TeamData teamData = ClientQuestFile.INSTANCE.getData(teamId);
 		teamData.setStarted(id, time);
 
@@ -290,7 +290,7 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon {
 	}
 
 	@Override
-	public void objectCompleted(UUID teamId, long id, @Nullable Instant time) {
+	public void objectCompleted(UUID teamId, long id, @Nullable Date time) {
 		TeamData teamData = ClientQuestFile.INSTANCE.getData(teamId);
 		teamData.setCompleted(id, time);
 
