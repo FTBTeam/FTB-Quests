@@ -24,7 +24,7 @@ public class CheckmarkTask extends BooleanTask {
 	@Override
 	@Environment(EnvType.CLIENT)
 	public void drawGUI(TeamData teamData, PoseStack matrixStack, int x, int y, int w, int h) {
-		(teamData.isCompleted(this) ? ThemeProperties.CHECKMARK_TASK_INACTIVE.get(this) : ThemeProperties.CHECKMARK_TASK_ACTIVE.get(this)).draw(matrixStack, x, y, w, h);
+		(teamData.isCompleted(this) ? ThemeProperties.CHECKMARK_TASK_ACTIVE.get(this) : ThemeProperties.CHECKMARK_TASK_INACTIVE.get(this)).draw(matrixStack, x, y, w, h);
 	}
 
 	@Override
