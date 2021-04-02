@@ -121,7 +121,7 @@ public class FTBQuestsClient extends FTBQuestsCommon {
 
 	private void setup(Minecraft minecraft) {
 		KeyBindings.registerKeyBinding(KEY_QUESTS = new KeyMapping("key.ftbquests.quests", InputConstants.Type.KEYSYM, -1, "key.categories.ftbquests"));
-		RenderTypes.register(RenderType.cutout(), FTBQuestsBlocks.BARRIER.get());
+		RenderTypes.register(RenderType.translucent(), FTBQuestsBlocks.BARRIER.get());
 		setTaskGuiProviders();
 		setRewardGuiProviders();
 	}

@@ -33,6 +33,7 @@ dependencies {
 	modCompile "curse.maven:bookshelf-228525:${bookshelf_file}"
 	modCompile "curse.maven:game-stages-268655:${gamestages_file}"
 	modCompile "curse.maven:rhino-416294:${rhino_file}"
+	modCompile "curse.maven:ctm-267602:3137659"
 
 	implementation(project(path: ":common")) {
 		transitive = false
