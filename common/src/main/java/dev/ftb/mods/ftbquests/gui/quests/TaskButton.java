@@ -129,9 +129,7 @@ public class TaskButton extends Button {
 
 	@Override
 	public void addMouseOverText(TooltipList list) {
-		if (isShiftKeyDown() && isCtrlKeyDown()) {
-			list.add(new TextComponent(task.toString()).withStyle(ChatFormatting.DARK_GRAY));
-		}
+		questScreen.addInfoTooltip(list, task);
 
 		if (task.addTitleInMouseOverText()) {
 			list.add(getTitle());

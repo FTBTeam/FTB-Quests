@@ -17,7 +17,6 @@ import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.item.ItemStack;
 
@@ -50,9 +49,7 @@ public class RewardButton extends Button {
 
 	@Override
 	public void addMouseOverText(TooltipList list) {
-		if (isShiftKeyDown() && isCtrlKeyDown()) {
-			list.add(new TextComponent(reward.toString()).withStyle(ChatFormatting.DARK_GRAY));
-		}
+		questScreen.addInfoTooltip(list, reward);
 
 		if (reward.isTeamReward()) {
 			if (reward.addTitleInMouseOverText()) {

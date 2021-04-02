@@ -126,7 +126,7 @@ public abstract class QuestObject extends QuestObjectBase {
 
 	public boolean isCompletedRaw(TeamData data) {
 		for (QuestObject child : getChildren()) {
-			if (data.isCompleted(child)) {
+			if (!data.isCompleted(child)) {
 				return false;
 			}
 		}
