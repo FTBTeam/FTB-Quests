@@ -35,13 +35,14 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * @author LatvianModder
@@ -51,6 +52,8 @@ public class TeamData {
 	private static final byte BOOL_NONE = -1;
 	private static final byte BOOL_FALSE = 0;
 	private static final byte BOOL_TRUE = 1;
+	private static final Comparator<Long2LongMap.Entry> LONG2LONG_COMPARATOR = (e1, e2) -> Long.compareUnsigned(e1.getLongValue(), e2.getLongValue());
+	private static final Comparator<Object2LongMap.Entry<QuestKey>> OBJECT2LONG_COMPARATOR = (e1, e2) -> Long.compareUnsigned(e1.getLongValue(), e2.getLongValue());
 
 	public static TeamData get(Player player) {
 		return FTBQuests.PROXY.getQuestFile(player.getCommandSenderWorld().isClientSide()).getData(player);
@@ -319,54 +322,51 @@ public class TeamData {
 		nbt.putLong("money", money);
 		nbt.putBoolean("auto_pin", autoPin);
 
-		CompoundTag taskDataNBT = new OrderedCompoundTag();
+		CompoundTag taskProgressNBT = new OrderedCompoundTag();
 
 		for (Long2LongMap.Entry entry : taskProgress.long2LongEntrySet()) {
 			if (entry.getLongValue() <= Integer.MAX_VALUE) {
-				taskDataNBT.putInt(QuestObjectBase.getCodeString(entry.getLongKey()), (int) entry.getLongValue());
+				taskProgressNBT.putInt(QuestObjectBase.getCodeString(entry.getLongKey()), (int) entry.getLongValue());
 			} else {
-				taskDataNBT.putLong(QuestObjectBase.getCodeString(entry.getLongKey()), entry.getLongValue());
+				taskProgressNBT.putLong(QuestObjectBase.getCodeString(entry.getLongKey()), entry.getLongValue());
 			}
 		}
 
-		nbt.put("task_progress", taskDataNBT);
+		nbt.put("task_progress", taskProgressNBT);
 
-		CompoundTag sl = new OrderedCompoundTag();
+		CompoundTag startedNBT = new OrderedCompoundTag();
 
-		for (Long2LongMap.Entry entry : started.long2LongEntrySet()) {
-			sl.putLong(QuestObjectBase.getCodeString(entry.getLongKey()), entry.getLongValue());
+		for (Long2LongMap.Entry entry : started.long2LongEntrySet().stream().sorted(LONG2LONG_COMPARATOR).collect(Collectors.toList())) {
+			startedNBT.putString(QuestObjectBase.getCodeString(entry.getLongKey()), Instant.ofEpochMilli(entry.getLongValue()).toString());
 		}
 
-		nbt.put("started", sl);
+		nbt.put("started", startedNBT);
 
-		CompoundTag cl = new OrderedCompoundTag();
+		CompoundTag completedNBT = new OrderedCompoundTag();
 
-		for (Long2LongMap.Entry entry : completed.long2LongEntrySet()) {
-			cl.putLong(QuestObjectBase.getCodeString(entry.getLongKey()), entry.getLongValue());
+		for (Long2LongMap.Entry entry : completed.long2LongEntrySet().stream().sorted(LONG2LONG_COMPARATOR).collect(Collectors.toList())) {
+			completedNBT.putString(QuestObjectBase.getCodeString(entry.getLongKey()), Instant.ofEpochMilli(entry.getLongValue()).toString());
 		}
 
-		nbt.put("completed", cl);
+		nbt.put("completed", completedNBT);
 
-		CompoundTag cr = new OrderedCompoundTag();
+		CompoundTag claimedRewardsNBT = new OrderedCompoundTag();
 
-		List<Object2LongMap.Entry<QuestKey>> claimedRewardsList = new ArrayList<>(claimedRewards.object2LongEntrySet());
-		claimedRewardsList.sort(Map.Entry.comparingByValue());
-
-		for (Object2LongMap.Entry<QuestKey> e : claimedRewardsList) {
-			cr.putLong(e.getKey().toString(), e.getValue());
+		for (Object2LongMap.Entry<QuestKey> entry : claimedRewards.object2LongEntrySet().stream().sorted(OBJECT2LONG_COMPARATOR).collect(Collectors.toList())) {
+			claimedRewardsNBT.putString(entry.getKey().toString(), Instant.ofEpochMilli(entry.getLongValue()).toString());
 		}
 
-		nbt.put("claimed_rewards", cr);
+		nbt.put("claimed_rewards", claimedRewardsNBT);
 
 		long[] pinnedQuestsArray = pinnedQuests.toLongArray();
 		Arrays.sort(pinnedQuestsArray);
-		ListTag pq = new ListTag();
+		ListTag pinnedQuestsNBT = new ListTag();
 
 		for (long l : pinnedQuestsArray) {
-			pq.add(StringTag.valueOf(QuestObjectBase.getCodeString(l)));
+			pinnedQuestsNBT.add(StringTag.valueOf(QuestObjectBase.getCodeString(l)));
 		}
 
-		nbt.put("pinned_quests", pq);
+		nbt.put("pinned_quests", pinnedQuestsNBT);
 
 		return nbt;
 	}
@@ -385,34 +385,34 @@ public class TeamData {
 		claimedRewards.clear();
 		pinnedQuests.clear();
 
-		CompoundTag cr = nbt.getCompound("claimed_rewards");
+		CompoundTag claimedRewardsNBT = nbt.getCompound("claimed_rewards");
 
-		for (String k : cr.getAllKeys()) {
-			claimedRewards.put(QuestKey.of(k), cr.getLong(k));
+		for (String s : claimedRewardsNBT.getAllKeys()) {
+			claimedRewards.put(QuestKey.of(s), Instant.parse(claimedRewardsNBT.getString(s)).toEpochMilli());
 		}
 
-		ListTag pq = nbt.getList("pinned_quests", NbtType.STRING);
+		ListTag pinnedQuestsNBT = nbt.getList("pinned_quests", NbtType.STRING);
 
-		for (int i = 0; i < pq.size(); i++) {
-			pinnedQuests.add(file.getID(pq.getString(i)));
+		for (int i = 0; i < pinnedQuestsNBT.size(); i++) {
+			pinnedQuests.add(file.getID(pinnedQuestsNBT.getString(i)));
 		}
 
-		CompoundTag taskDataNBT = nbt.getCompound("task_progress");
+		CompoundTag taskProgressNBT = nbt.getCompound("task_progress");
 
-		for (String s : taskDataNBT.getAllKeys()) {
-			taskProgress.put(file.getID(s), taskDataNBT.getLong(s));
+		for (String s : taskProgressNBT.getAllKeys()) {
+			taskProgress.put(file.getID(s), taskProgressNBT.getLong(s));
 		}
 
 		CompoundTag startedNBT = nbt.getCompound("started");
 
 		for (String s : startedNBT.getAllKeys()) {
-			started.put(file.getID(s), startedNBT.getLong(s));
+			started.put(file.getID(s), Instant.parse(startedNBT.getString(s)).toEpochMilli());
 		}
 
 		CompoundTag completedNBT = nbt.getCompound("completed");
 
 		for (String s : completedNBT.getAllKeys()) {
-			completed.put(file.getID(s), completedNBT.getLong(s));
+			completed.put(file.getID(s), Instant.parse(completedNBT.getString(s)).toEpochMilli());
 		}
 	}
 

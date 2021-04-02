@@ -9,10 +9,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.gui.RewardNotificationsScreen;
 import dev.ftb.mods.ftbquests.net.MessageClaimAllRewards;
-import dev.ftb.mods.ftbquests.quest.Chapter;
-import dev.ftb.mods.ftbquests.quest.ChapterGroup;
-import dev.ftb.mods.ftbquests.quest.Quest;
-import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -23,46 +19,25 @@ import net.minecraft.network.chat.TranslatableComponent;
  * @author LatvianModder
  */
 public class ModpackButton extends TabButton {
-	private final boolean unclaimedRewards;
-
 	public ModpackButton(Panel panel) {
 		super(panel, TextComponent.EMPTY, ClientQuestFile.INSTANCE.getIcon());
 		title = questScreen.file.getTitle();
-		unclaimedRewards = hasUnclaimedRewards(questScreen.file);
 	}
 
 	@Override
 	public void onClicked(MouseButton button) {
-		if (ClientQuestFile.exists() && unclaimedRewards) {
+		if (questScreen.file.self.hasUnclaimedRewards(Minecraft.getInstance().player.getUUID(), questScreen.file)) {
 			playClickSound();
 			new RewardNotificationsScreen().openGui();
 			new MessageClaimAllRewards().sendToServer();
 		}
 	}
 
-	private static boolean hasUnclaimedRewards(ClientQuestFile f) {
-		for (ChapterGroup group : f.chapterGroups) {
-			for (Chapter chapter : group.chapters) {
-				for (Quest quest : chapter.quests) {
-					if (f.self.isCompleted(quest)) {
-						for (Reward reward : quest.rewards) {
-							if (!reward.getExcludeFromClaimAll() && !f.self.getClaimType(Minecraft.getInstance().player.getUUID(), reward).canClaim()) {
-								return true;
-							}
-						}
-					}
-				}
-			}
-		}
-
-		return false;
-	}
-
 	@Override
 	public void addMouseOverText(TooltipList list) {
 		super.addMouseOverText(list);
 
-		if (unclaimedRewards) {
+		if (questScreen.file.self.hasUnclaimedRewards(Minecraft.getInstance().player.getUUID(), questScreen.file)) {
 			list.blankLine();
 			list.add(new TranslatableComponent("ftbquests.gui.collect_rewards").withStyle(ChatFormatting.GOLD));
 		}
@@ -72,7 +47,7 @@ public class ModpackButton extends TabButton {
 	public void draw(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
 		super.draw(matrixStack, theme, x, y, w, h);
 
-		if (unclaimedRewards) {
+		if (questScreen.file.self.hasUnclaimedRewards(Minecraft.getInstance().player.getUUID(), questScreen.file)) {
 			GuiHelper.setupDrawing();
 			int s = w / 2;//(int) (treeGui.getZoom() / 2 * quest.size);
 			matrixStack.pushPose();
