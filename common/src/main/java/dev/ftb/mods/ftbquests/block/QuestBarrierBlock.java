@@ -37,7 +37,10 @@ public class QuestBarrierBlock extends BaseEntityBlock {
 				.noOcclusion()
 				.noDrops()
 				.isViewBlocking((a, b, c) -> false)
-				.strength(-1, 6000000F));
+				.strength(-1, 6000000F)
+				.lightLevel(blockState -> 3)
+				.emissiveRendering((blockState, blockGetter, blockPos) -> true)
+		);
 
 		registerDefaultState(defaultBlockState().setValue(COMPLETED, false));
 	}
