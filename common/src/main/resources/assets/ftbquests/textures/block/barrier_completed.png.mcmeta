@@ -1,1 +1,14 @@
-{"animation": {"frametime": 2, "interpolate": true}}
+{
+  "animation": {
+    "frametime": 2,
+    "interpolate": true
+  },
+  "ctm": {
+    "ctm_version": 1,
+    "type": "CTM",
+    "layer": "TRANSLUCENT",
+    "textures": [
+      "ftbquests:block/barrier_completed_ctm"
+    ]
+  }
+}
