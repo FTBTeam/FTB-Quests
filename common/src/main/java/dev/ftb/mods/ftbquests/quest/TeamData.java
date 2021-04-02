@@ -169,13 +169,13 @@ public class TeamData {
 	}
 
 	@Nullable
-	public Date getRewardClaimTime(QuestKey key) {
-		long t = claimedRewards.get(key);
+	public Date getRewardClaimTime(UUID player, Reward reward) {
+		long t = claimedRewards.get(QuestKey.of(reward.isTeamReward() ? Util.NIL_UUID : player, reward.id));
 		return t == 0L ? null : new Date(t);
 	}
 
-	public boolean isRewardClaimed(QuestKey key) {
-		return getRewardClaimTime(key) != null;
+	public boolean isRewardClaimed(UUID player, Reward reward) {
+		return getRewardClaimTime(player, reward) != null;
 	}
 
 	public boolean isRewardClaimed(long id) {

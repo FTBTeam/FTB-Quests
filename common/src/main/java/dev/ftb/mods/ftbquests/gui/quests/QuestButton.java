@@ -282,6 +282,8 @@ public class QuestButton extends Button {
 
 	@Override
 	public void addMouseOverText(TooltipList list) {
+		questScreen.addInfoTooltip(list, quest);
+
 		Component title = getTitle();
 
 		if (questScreen.file.self != null) {

@@ -142,6 +142,11 @@ public class ChapterPanel extends Panel {
 			boolean canEdit = chapterPanel.questScreen.file.canEdit();
 			return screen.getTheme().getStringWidth(title) + 20 + (canEdit ? 16 : 0);
 		}
+
+		@Override
+		public void addMouseOverText(TooltipList list) {
+			chapterPanel.questScreen.addInfoTooltip(list, chapterPanel.questScreen.file);
+		}
 	}
 
 	public static class ChapterGroupButton extends ListButton {
@@ -216,6 +221,11 @@ public class ChapterPanel extends Panel {
 		public int getActualWidth(QuestScreen screen) {
 			boolean canEdit = chapterPanel.questScreen.file.canEdit();
 			return screen.getTheme().getStringWidth(title) + 20 + (canEdit ? 16 : 0);
+		}
+
+		@Override
+		public void addMouseOverText(TooltipList list) {
+			chapterPanel.questScreen.addInfoTooltip(list, group);
 		}
 	}
 
@@ -305,6 +315,8 @@ public class ChapterPanel extends Panel {
 
 		@Override
 		public void addMouseOverText(TooltipList list) {
+			chapterPanel.questScreen.addInfoTooltip(list, chapter);
+
 			for (Component s : description) {
 				list.add(s);
 			}

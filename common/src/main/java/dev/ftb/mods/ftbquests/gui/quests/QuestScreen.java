@@ -30,6 +30,7 @@ import dev.ftb.mods.ftbquests.quest.QuestObject;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.QuestObjectType;
 import dev.ftb.mods.ftbquests.quest.reward.RandomReward;
+import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.quest.theme.QuestTheme;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
@@ -46,6 +47,7 @@ import org.lwjgl.glfw.GLFW;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class QuestScreen extends GuiBase {
@@ -500,5 +502,31 @@ public class QuestScreen extends GuiBase {
 		//list.borderColorStart = rgb;
 		//list.borderColorEnd = rgb;
 		list.zOffset = 950;
+	}
+
+	public void addInfoTooltip(TooltipList list, QuestObjectBase object) {
+		if (isKeyDown(GLFW.GLFW_KEY_F1) || isShiftKeyDown() && isCtrlKeyDown()) {
+			list.add(new TextComponent(object.getCodeString()).withStyle(ChatFormatting.DARK_GRAY));
+
+			if (object instanceof QuestObject) {
+				Date s = file.self.getStartedTime(object.id);
+
+				if (s != null) {
+					list.add(new TextComponent("Started: ").append(s.toLocaleString()).withStyle(ChatFormatting.DARK_GRAY));
+				}
+
+				Date c = file.self.getStartedTime(object.id);
+
+				if (c != null) {
+					list.add(new TextComponent("Completed: ").append(c.toLocaleString()).withStyle(ChatFormatting.DARK_GRAY));
+				}
+			} else if (object instanceof Reward) {
+				Date c = file.self.getRewardClaimTime(Minecraft.getInstance().player.getUUID(), (Reward) object);
+
+				if (c != null) {
+					list.add(new TextComponent("Claimed: ").append(c.toLocaleString()).withStyle(ChatFormatting.DARK_GRAY));
+				}
+			}
+		}
 	}
 }

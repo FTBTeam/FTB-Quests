@@ -248,23 +248,18 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 
 		if (!consumesResources()) {
 			if (onlyFromCrafting.get(false)) {
-				if (item.isEmpty() || !test(item)) {
-					return;
+				if (!item.isEmpty() && test(item)) {
+					teamData.addProgress(this, item.getCount());
 				}
 
-				long c = Math.min(count, item.getCount());
-
-				if (c > teamData.getProgress(this)) {
-					teamData.setProgress(this, c);
-					return;
-				}
+				return;
 			}
 
 			long c = 0;
 
 			for (ItemStack stack : player.inventory.items) {
 				if (!stack.isEmpty() && test(stack)) {
-					count += stack.getCount();
+					c += stack.getCount();
 				}
 			}
 
