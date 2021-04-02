@@ -25,6 +25,7 @@ import dev.ftb.mods.ftbquests.quest.reward.RewardClaimType;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.util.ConfigQuestObject;
 import dev.ftb.mods.ftbquests.util.NetUtils;
+import dev.ftb.mods.ftbquests.util.ProgressChange;
 import me.shedaniel.architectury.utils.NbtType;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -40,7 +41,6 @@ import net.minecraft.server.level.ServerPlayer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -409,11 +409,11 @@ public final class Quest extends QuestObject implements Movable {
 	}
 
 	@Override
-	public void forceProgress(Date time, TeamData data, UUID player, ChangeProgress type) {
-		super.forceProgress(time, data, player, type);
+	public void forceProgress(TeamData teamData, ProgressChange progressChange) {
+		super.forceProgress(teamData, progressChange);
 
 		for (Reward r : rewards) {
-			r.forceProgress(time, data, player, type);
+			r.forceProgress(teamData, progressChange);
 		}
 	}
 

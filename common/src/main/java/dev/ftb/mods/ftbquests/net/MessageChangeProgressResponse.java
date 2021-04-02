@@ -1,7 +1,8 @@
 package dev.ftb.mods.ftbquests.net;
 
 import dev.ftb.mods.ftbquests.FTBQuests;
-import dev.ftb.mods.ftbquests.quest.ChangeProgress;
+import dev.ftb.mods.ftbquests.client.ClientQuestFile;
+import dev.ftb.mods.ftbquests.util.ProgressChange;
 import me.shedaniel.architectury.networking.NetworkManager;
 import net.minecraft.network.FriendlyByteBuf;
 
@@ -12,38 +13,26 @@ import java.util.UUID;
  */
 public class MessageChangeProgressResponse extends MessageBase {
 	private final UUID team;
-	private final UUID player;
-	private final long id;
-	private final ChangeProgress type;
-	private final boolean notifications;
+	private final ProgressChange progressChange;
 
 	MessageChangeProgressResponse(FriendlyByteBuf buffer) {
 		team = buffer.readUUID();
-		player = buffer.readUUID();
-		id = buffer.readLong();
-		type = ChangeProgress.NAME_MAP.read(buffer);
-		notifications = buffer.readBoolean();
+		progressChange = new ProgressChange(ClientQuestFile.INSTANCE, buffer);
 	}
 
-	public MessageChangeProgressResponse(UUID t, UUID p, long i, ChangeProgress ty, boolean n) {
+	public MessageChangeProgressResponse(UUID t, ProgressChange p) {
 		team = t;
-		player = p;
-		id = i;
-		type = ty;
-		notifications = n;
+		progressChange = p;
 	}
 
 	@Override
 	public void write(FriendlyByteBuf buffer) {
 		buffer.writeUUID(team);
-		buffer.writeUUID(player);
-		buffer.writeLong(id);
-		ChangeProgress.NAME_MAP.write(buffer, type);
-		buffer.writeBoolean(notifications);
+		progressChange.write(buffer);
 	}
 
 	@Override
 	public void handle(NetworkManager.PacketContext context) {
-		FTBQuests.NET_PROXY.changeProgress(team, player, id, type, notifications);
+		FTBQuests.NET_PROXY.changeProgress(team, progressChange);
 	}
 }

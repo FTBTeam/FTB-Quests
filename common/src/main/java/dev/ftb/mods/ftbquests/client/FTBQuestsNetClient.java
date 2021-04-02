@@ -13,7 +13,6 @@ import dev.ftb.mods.ftbquests.gui.ToastQuestObject;
 import dev.ftb.mods.ftbquests.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.integration.jei.FTBQuestsJEIHelper;
 import dev.ftb.mods.ftbquests.net.MessageChangeChapterGroupResponse;
-import dev.ftb.mods.ftbquests.quest.ChangeProgress;
 import dev.ftb.mods.ftbquests.quest.Chapter;
 import dev.ftb.mods.ftbquests.quest.ChapterGroup;
 import dev.ftb.mods.ftbquests.quest.Quest;
@@ -23,7 +22,7 @@ import dev.ftb.mods.ftbquests.quest.QuestObjectType;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.task.Task;
-import dev.ftb.mods.ftbquests.util.QuestKey;
+import dev.ftb.mods.ftbquests.util.ProgressChange;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -37,24 +36,22 @@ import java.util.UUID;
 
 public class FTBQuestsNetClient extends FTBQuestsNetCommon {
 	@Override
-	public void changeProgress(UUID teamId, UUID player, long id, ChangeProgress type, boolean notifications) {
-		QuestObjectBase object = ClientQuestFile.INSTANCE.getBase(id);
-
-		if (object != null) {
-			object.forceProgress(ClientQuestFile.INSTANCE.getData(teamId), player, type, notifications);
+	public void changeProgress(UUID teamId, ProgressChange progressChange) {
+		if (progressChange.origin != null) {
+			progressChange.origin.forceProgressRaw(ClientQuestFile.INSTANCE.getData(teamId), progressChange);
 		}
 	}
 
 	@Override
-	public void claimReward(QuestKey key) {
-		Reward reward = ClientQuestFile.INSTANCE.getReward(key.id);
+	public void claimReward(UUID teamId, UUID player, long rewardId) {
+		Reward reward = ClientQuestFile.INSTANCE.getReward(rewardId);
 
 		if (reward == null) {
 			return;
 		}
 
-		TeamData data = ClientQuestFile.INSTANCE.getData(key.uuid);
-		data.claimReward(key.uuid, reward);
+		TeamData data = ClientQuestFile.INSTANCE.getData(teamId);
+		data.claimReward(player, reward);
 
 		if (data == ClientQuestFile.INSTANCE.self) {
 			QuestScreen treeGui = ClientUtils.getCurrentGuiAs(QuestScreen.class);

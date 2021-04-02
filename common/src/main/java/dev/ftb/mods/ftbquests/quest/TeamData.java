@@ -182,7 +182,8 @@ public class TeamData {
 
 	@Nullable
 	public Date getRewardClaimTime(UUID player, Reward reward) {
-		long t = claimedRewards.getLong(QuestKey.of(reward.isTeamReward() ? Util.NIL_UUID : player, reward.id));
+		QuestKey key = QuestKey.of(reward.isTeamReward() ? Util.NIL_UUID : player, reward.id);
+		long t = claimedRewards.getLong(key);
 		return t == 0L ? null : new Date(t);
 	}
 
@@ -602,7 +603,7 @@ public class TeamData {
 			reward.claim(player, notify);
 
 			if (file.isServerSide()) {
-				new MessageClaimRewardResponse(QuestKey.of(reward.isTeamReward() ? Util.NIL_UUID : player.getUUID(), reward.id)).sendToAll();
+				new MessageClaimRewardResponse(uuid, player.getUUID(), reward.id).sendToAll();
 			}
 		}
 	}

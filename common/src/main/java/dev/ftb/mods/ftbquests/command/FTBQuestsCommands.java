@@ -16,6 +16,7 @@ import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
 import dev.ftb.mods.ftbquests.quest.task.ItemTask;
 import dev.ftb.mods.ftbquests.util.FileUtils;
+import dev.ftb.mods.ftbquests.util.ProgressChange;
 import me.shedaniel.architectury.registry.Registries;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -36,7 +37,6 @@ import net.minecraft.world.item.Items;
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -117,9 +117,15 @@ public class FTBQuestsCommands {
 	}
 
 	private static int changeProgress(CommandSourceStack source, Collection<ServerPlayer> players, ChangeProgress type, QuestObjectBase questObject) {
+		ProgressChange progressChange = new ProgressChange(ServerQuestFile.INSTANCE);
+		progressChange.origin = questObject;
+		progressChange.reset = type.reset;
+
 		for (ServerPlayer player : players) {
-			questObject.forceProgress(new Date(), ServerQuestFile.INSTANCE.getData(player), player.getUUID(), type);
+			progressChange.player = player.getUUID();
+			questObject.forceProgress(ServerQuestFile.INSTANCE.getData(player), progressChange);
 		}
+
 		source.sendSuccess(new TranslatableComponent("commands.ftbquests.change_progress.text"), true);
 		return Command.SINGLE_SUCCESS;
 	}

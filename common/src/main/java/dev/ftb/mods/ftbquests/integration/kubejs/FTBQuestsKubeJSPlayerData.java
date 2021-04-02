@@ -1,17 +1,16 @@
 package dev.ftb.mods.ftbquests.integration.kubejs;
 
 import dev.ftb.mods.ftbquests.FTBQuests;
-import dev.ftb.mods.ftbquests.quest.ChangeProgress;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestFile;
 import dev.ftb.mods.ftbquests.quest.QuestObject;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.task.Task;
+import dev.ftb.mods.ftbquests.util.ProgressChange;
 import dev.ftb.mods.ftbteams.FTBTeamsAPI;
 import dev.latvian.kubejs.player.PlayerDataJS;
-import net.minecraft.Util;
 
-import java.util.UUID;
+import java.util.function.Consumer;
 
 /**
  * @author LatvianModder
@@ -40,26 +39,15 @@ public class FTBQuestsKubeJSPlayerData {
 		}
 	}
 
-	public void complete(Object id) {
+	public void changeProgress(Object id, Consumer<ProgressChange> consumer) {
 		TeamData data = getData();
-		Task task = data.file.getTask(data.file.getID(id));
+		ProgressChange progressChange = new ProgressChange(data.file);
+		progressChange.origin = data.file.getBase(data.file.getID(id));
 
-		if (task != null) {
-			data.setProgress(task, task.getMaxProgress());
+		if (progressChange.origin != null) {
+			consumer.accept(progressChange);
+			progressChange.origin.forceProgressRaw(data, progressChange);
 		}
-	}
-
-	public void reset(Object id, UUID player) {
-		TeamData data = getData();
-		QuestObject object = data.file.get(data.file.getID(id));
-
-		if (object != null) {
-			object.forceProgress(data, player, ChangeProgress.RESET, false);
-		}
-	}
-
-	public void reset(Object id) {
-		reset(id, Util.NIL_UUID);
 	}
 
 	public boolean isCompleted(Object id) {
