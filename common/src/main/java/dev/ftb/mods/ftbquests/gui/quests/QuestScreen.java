@@ -515,7 +515,7 @@ public class QuestScreen extends GuiBase {
 					list.add(new TextComponent("Started: ").append(s.toLocaleString()).withStyle(ChatFormatting.DARK_GRAY));
 				}
 
-				Date c = file.self.getStartedTime(object.id);
+				Date c = file.self.getCompletedTime(object.id);
 
 				if (c != null) {
 					list.add(new TextComponent("Completed: ").append(c.toLocaleString()).withStyle(ChatFormatting.DARK_GRAY));

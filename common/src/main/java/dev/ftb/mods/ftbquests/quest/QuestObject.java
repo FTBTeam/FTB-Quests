@@ -133,4 +133,8 @@ public abstract class QuestObject extends QuestObjectBase {
 
 		return true;
 	}
+
+	public boolean hasUnclaimedRewardsRaw(TeamData teamData, UUID player) {
+		return false;
+	}
 }

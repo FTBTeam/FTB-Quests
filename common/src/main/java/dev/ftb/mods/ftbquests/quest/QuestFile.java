@@ -1252,4 +1252,15 @@ public abstract class QuestFile extends QuestObject {
 	public Collection<? extends QuestObject> getChildren() {
 		return chapterGroups;
 	}
+
+	@Override
+	public boolean hasUnclaimedRewardsRaw(TeamData teamData, UUID player) {
+		for (ChapterGroup group : chapterGroups) {
+			if (teamData.hasUnclaimedRewards(player, group)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
 }

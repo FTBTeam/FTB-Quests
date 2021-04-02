@@ -23,7 +23,7 @@ public abstract class BooleanTask extends Task {
 	public abstract boolean canSubmit(TeamData teamData, ServerPlayer player);
 
 	@Override
-	public void submitTask(TeamData teamData, ServerPlayer player, ItemStack item) {
+	public void submitTask(TeamData teamData, ServerPlayer player, ItemStack craftedItem) {
 		if (!teamData.isCompleted(this) && canSubmit(teamData, player)) {
 			teamData.setProgress(this, 1L);
 		}

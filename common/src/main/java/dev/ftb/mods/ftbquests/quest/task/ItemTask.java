@@ -241,15 +241,15 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 	}
 
 	@Override
-	public void submitTask(TeamData teamData, ServerPlayer player, ItemStack item) {
-		if (teamData.isCompleted(this) || item.getItem() instanceof MissingItem || item.getItem() instanceof MissingItem) {
+	public void submitTask(TeamData teamData, ServerPlayer player, ItemStack craftedItem) {
+		if (teamData.isCompleted(this) || item.getItem() instanceof MissingItem || craftedItem.getItem() instanceof MissingItem) {
 			return;
 		}
 
 		if (!consumesResources()) {
 			if (onlyFromCrafting.get(false)) {
-				if (!item.isEmpty() && test(item)) {
-					teamData.addProgress(this, item.getCount());
+				if (!craftedItem.isEmpty() && test(craftedItem)) {
+					teamData.addProgress(this, craftedItem.getCount());
 				}
 
 				return;
@@ -273,7 +273,7 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 			return;
 		}
 
-		if (!item.isEmpty()) {
+		if (!craftedItem.isEmpty()) {
 			return;
 		}
 

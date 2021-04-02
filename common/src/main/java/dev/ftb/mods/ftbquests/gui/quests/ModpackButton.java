@@ -15,6 +15,7 @@ import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 
@@ -45,7 +46,7 @@ public class ModpackButton extends TabButton {
 				for (Quest quest : chapter.quests) {
 					if (f.self.isCompleted(quest)) {
 						for (Reward reward : quest.rewards) {
-							if (!reward.getExcludeFromClaimAll() && !f.self.isRewardClaimed(reward.id)) {
+							if (!reward.getExcludeFromClaimAll() && !f.self.getClaimType(Minecraft.getInstance().player.getUUID(), reward).canClaim()) {
 								return true;
 							}
 						}
@@ -73,11 +74,10 @@ public class ModpackButton extends TabButton {
 
 		if (unclaimedRewards) {
 			GuiHelper.setupDrawing();
-			float s = w / 2F;//(int) (treeGui.getZoom() / 2 * quest.size);
+			int s = w / 2;//(int) (treeGui.getZoom() / 2 * quest.size);
 			matrixStack.pushPose();
 			matrixStack.translate(x + w - s, y, 200);
-			matrixStack.scale(s, s, 1F);
-			ThemeProperties.ALERT_ICON.get(questScreen.file).draw(matrixStack, 0, 0, 1, 1);
+			ThemeProperties.ALERT_ICON.get(questScreen.file).draw(matrixStack, 0, 0, s, s);
 			matrixStack.popPose();
 		}
 	}

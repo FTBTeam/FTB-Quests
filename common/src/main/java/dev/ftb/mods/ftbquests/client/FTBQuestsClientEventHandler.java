@@ -30,6 +30,7 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.phys.HitResult;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -65,7 +66,7 @@ public class FTBQuestsClientEventHandler {
 		if (event.getButton().id.equals(QUESTS_BUTTON)) {
 			event.getButton().setCustomTextHandler(() ->
 			{
-				if (ClientQuestFile.exists() && ClientQuestFile.INSTANCE.self.hasUnclaimedRewards()) {
+				if (ClientQuestFile.exists() && ClientQuestFile.INSTANCE.self.hasUnclaimedRewards(Minecraft.getInstance().player.getUUID(), ClientQuestFile.INSTANCE)) {
 					return "[!]";
 				}
 
@@ -99,7 +100,7 @@ public class FTBQuestsClientEventHandler {
 	}
 
 	private void onClientTick(Minecraft mc) {
-		if (mc.level != null && ClientQuestFile.exists()) {
+		if (mc.level != null && ClientQuestFile.exists() && mc.player != null) {
 			if (observationTasks == null) {
 				observationTasks = ClientQuestFile.INSTANCE.collect(ObservationTask.class);
 			}
@@ -110,10 +111,12 @@ public class FTBQuestsClientEventHandler {
 
 			currentlyObserving = null;
 
-			for (ObservationTask task : observationTasks) {
-				if (!ClientQuestFile.INSTANCE.self.isCompleted(task) && task.matcher.check(mc.player, mc.hitResult) && ClientQuestFile.INSTANCE.self.canStartTasks(task.quest)) {
-					currentlyObserving = task;
-					break;
+			if (mc.hitResult != null && mc.hitResult.getType() != HitResult.Type.MISS) {
+				for (ObservationTask task : observationTasks) {
+					if (!ClientQuestFile.INSTANCE.self.isCompleted(task) && task.observe(mc.player, mc.hitResult) && ClientQuestFile.INSTANCE.self.canStartTasks(task.quest)) {
+						currentlyObserving = task;
+						break;
+					}
 				}
 			}
 
@@ -122,7 +125,7 @@ public class FTBQuestsClientEventHandler {
 					currentlyObservingTicks++;
 				}
 
-				if (currentlyObservingTicks >= currentlyObserving.ticks) {
+				if (currentlyObservingTicks >= currentlyObserving.timer) {
 					new MessageSubmitTask(currentlyObserving.id).sendToServer();
 					ClientQuestFile.INSTANCE.self.addProgress(currentlyObserving, 1L);
 					currentlyObserving = null;
@@ -155,12 +158,12 @@ public class FTBQuestsClientEventHandler {
 			GuiHelper.drawHollowRect(matrixStack, cx - bw / 2 - 3, cy - 63, bw + 6, 29, Color4I.DARK_GRAY, false);
 
 			mc.font.drawShadow(matrixStack, cot, cx - sw / 2F, cy - 60, 0xFFFFFF);
-			double completed = (currentlyObservingTicks + tickDelta) / (double) currentlyObserving.ticks;
+			double completed = (currentlyObservingTicks + tickDelta) / (double) currentlyObserving.timer;
 
 			GuiHelper.drawHollowRect(matrixStack, cx - bw / 2, cy - 49, bw, 12, Color4I.DARK_GRAY, false);
 			Color4I.LIGHT_BLUE.withAlpha(130).draw(matrixStack, cx - bw / 2 + 1, cy - 48, (int) ((bw - 2D) * completed), 10);
 
-			String cop = (currentlyObservingTicks * 100L / currentlyObserving.ticks) + "%";
+			String cop = (currentlyObservingTicks * 100L / currentlyObserving.timer) + "%";
 			mc.font.drawShadow(matrixStack, cop, cx - mc.font.width(cop) / 2F, cy - 47, 0xFFFFFF);
 		}
 

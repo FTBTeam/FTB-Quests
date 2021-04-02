@@ -27,6 +27,7 @@ import dev.ftb.mods.ftbquests.quest.reward.RewardType;
 import dev.ftb.mods.ftbquests.quest.reward.RewardTypes;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
@@ -314,7 +315,7 @@ public class QuestButton extends Button {
 
 		if (!cantStart) {
 			if (questScreen.file.self.isCompleted(quest)) {
-				if (questScreen.file.self.hasUnclaimedRewards(quest)) {
+				if (questScreen.file.self.hasUnclaimedRewards(Minecraft.getInstance().player.getUUID(), quest)) {
 					qicon = ThemeProperties.ALERT_ICON.get(quest);
 				} else {
 					qicon = ThemeProperties.CHECK_ICON.get(quest);

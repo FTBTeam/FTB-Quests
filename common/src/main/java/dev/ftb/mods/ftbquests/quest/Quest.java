@@ -21,6 +21,7 @@ import dev.ftb.mods.ftbquests.integration.jei.FTBQuestsJEIHelper;
 import dev.ftb.mods.ftbquests.net.MessageDisplayCompletionToast;
 import dev.ftb.mods.ftbquests.net.MessageMoveQuest;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
+import dev.ftb.mods.ftbquests.quest.reward.RewardClaimType;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.util.ConfigQuestObject;
 import dev.ftb.mods.ftbquests.util.NetUtils;
@@ -734,5 +735,18 @@ public final class Quest extends QuestObject implements Movable {
 	@Override
 	public boolean isCompletedRaw(TeamData data) {
 		return data.canStartTasks(this) && super.isCompletedRaw(data);
+	}
+
+	@Override
+	public boolean hasUnclaimedRewardsRaw(TeamData teamData, UUID player) {
+		if (teamData.isCompleted(this)) {
+			for (Reward reward : rewards) {
+				if (teamData.getClaimType(player, reward) == RewardClaimType.CAN_CLAIM) {
+					return true;
+				}
+			}
+		}
+
+		return false;
 	}
 }

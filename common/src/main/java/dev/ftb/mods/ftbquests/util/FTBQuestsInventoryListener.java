@@ -23,7 +23,7 @@ public class FTBQuestsInventoryListener implements ContainerListener {
 		player = p;
 	}
 
-	public static void detect(ServerPlayer player, ItemStack item, long sourceTask) {
+	public static void detect(ServerPlayer player, ItemStack craftedItem, long sourceTask) {
 		if (ServerQuestFile.INSTANCE == null || PlayerHooks.isFake(player)) {
 			return;
 		}
@@ -40,7 +40,7 @@ public class FTBQuestsInventoryListener implements ContainerListener {
 					if (hasSubmitTasks(quest) && data.canStartTasks(quest)) {
 						for (Task task : quest.tasks) {
 							if (task.id != sourceTask && task.submitItemsOnInventoryChange()) {
-								task.submitTask(data, player, item);
+								task.submitTask(data, player, craftedItem);
 							}
 						}
 					}
