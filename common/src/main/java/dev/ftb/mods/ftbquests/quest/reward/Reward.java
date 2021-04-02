@@ -202,7 +202,7 @@ public abstract class Reward extends QuestObjectBase {
 	@Override
 	public final void forceProgress(Date time, TeamData data, UUID player, ChangeProgress type) {
 		if (type.reset) {
-			data.resetReward(this);
+			data.resetReward(player, this);
 		} else {
 			data.setRewardClaimed(player, this, time);
 		}

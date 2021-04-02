@@ -158,7 +158,7 @@ public class XPTask extends Task implements ISingleLongValueTask {
 	}
 
 	@Override
-	public void submitTask(TeamData teamData, ServerPlayer player, ItemStack item) {
+	public void submitTask(TeamData teamData, ServerPlayer player, ItemStack craftedItem) {
 		int add = (int) Math.min(points ? getPlayerXP(player) : player.experienceLevel, Math.min(value - teamData.getProgress(this), Integer.MAX_VALUE));
 
 		if (add <= 0) {

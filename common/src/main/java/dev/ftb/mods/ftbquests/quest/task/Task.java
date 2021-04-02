@@ -263,7 +263,7 @@ public abstract class Task extends QuestObject {
 		return false;
 	}
 
-	public void submitTask(TeamData teamData, ServerPlayer player, ItemStack item) {
+	public void submitTask(TeamData teamData, ServerPlayer player, ItemStack craftedItem) {
 	}
 
 	public final void submitTask(TeamData teamData, ServerPlayer player) {

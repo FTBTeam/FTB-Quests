@@ -16,6 +16,7 @@ import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.item.ItemStack;
@@ -106,7 +107,7 @@ public class RewardButton extends Button {
 	public void onClicked(MouseButton button) {
 		if (button.isLeft()) {
 			if (ClientQuestFile.exists()) {
-				reward.onButtonClicked(this, ClientQuestFile.INSTANCE.self.getClaimType(reward).canClaim());
+				reward.onButtonClicked(this, ClientQuestFile.INSTANCE.self.getClaimType(Minecraft.getInstance().player.getUUID(), reward).canClaim());
 			}
 		} else if (button.isRight() && ClientQuestFile.exists() && ClientQuestFile.INSTANCE.canEdit()) {
 			playClickSound();
@@ -147,7 +148,7 @@ public class RewardButton extends Button {
 		RenderSystem.enableBlend();
 		boolean completed = false;
 
-		if (questScreen.file.self.getClaimType(reward).isClaimed()) {
+		if (questScreen.file.self.getClaimType(Minecraft.getInstance().player.getUUID(), reward).isClaimed()) {
 			ThemeProperties.CHECK_ICON.get().draw(matrixStack, x + w - 9, y + 1, 8, 8);
 			completed = true;
 		} else if (questScreen.file.self.isCompleted(reward.quest)) {

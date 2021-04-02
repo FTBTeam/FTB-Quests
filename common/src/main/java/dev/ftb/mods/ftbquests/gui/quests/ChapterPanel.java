@@ -26,6 +26,7 @@ import dev.ftb.mods.ftbquests.quest.Chapter;
 import dev.ftb.mods.ftbquests.quest.ChapterGroup;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
@@ -213,7 +214,7 @@ public class ChapterPanel extends Panel {
 			boolean canEdit = chapterPanel.questScreen.file.canEdit();
 
 			if (canEdit) {
-				ThemeProperties.ADD_ICON.get().draw(matrixStack, x + w - 16, y + 3, 12, 12);
+				ThemeProperties.ADD_ICON.get().draw(matrixStack, x + w - 14, y + 3, 12, 12);
 			}
 		}
 
@@ -291,26 +292,11 @@ public class ChapterPanel extends Panel {
 
 			GuiHelper.setupDrawing();
 
-			/*
-			int w2 = 20;
-
 			if (chapter.quests.isEmpty()) {
-				matrixStack.pushPose();
-				matrixStack.translate(0, 0, 450);
-				ThemeProperties.CLOSE_ICON.get().draw(matrixStack, x + w2 - 8, y + 2, 8, 8);
-				matrixStack.popPose();
-			} else if (questScreen.file.self.hasUnclaimedRewards(chapter)) {
-				matrixStack.pushPose();
-				matrixStack.translate(0, 0, 450);
-				ThemeProperties.ALERT_ICON.get().draw(matrixStack, x + w2 - 7, y + 3, 6, 6);
-				matrixStack.popPose();
-			} else if (questScreen.file.self.isComplete(chapter)) {
-				matrixStack.pushPose();
-				matrixStack.translate(0, 0, 450);
-				ThemeProperties.CHECK_ICON.get().draw(matrixStack, x + w2 - 8, y + 2, 8, 8);
-				matrixStack.popPose();
+				ThemeProperties.CLOSE_ICON.get().draw(matrixStack, x + w - 12, y + 3, 8, 8);
+			} else if (chapterPanel.questScreen.file.self.hasUnclaimedRewards(Minecraft.getInstance().player.getUUID(), chapter)) {
+				ThemeProperties.ALERT_ICON.get().draw(matrixStack, x + w - 12, y + 3, 8, 8);
 			}
-			 */
 		}
 
 		@Override
@@ -325,6 +311,11 @@ public class ChapterPanel extends Panel {
 		@Override
 		public int getActualWidth(QuestScreen screen) {
 			int o = chapter.group.isDefaultGroup() ? 0 : 7;
+
+			if (chapter.quests.isEmpty() || chapterPanel.questScreen.file.self.hasUnclaimedRewards(Minecraft.getInstance().player.getUUID(), chapter)) {
+				o += 16;
+			}
+
 			return screen.getTheme().getStringWidth(title) + 20 + o;
 		}
 	}

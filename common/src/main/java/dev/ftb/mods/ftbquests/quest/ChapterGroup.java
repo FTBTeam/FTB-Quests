@@ -14,6 +14,7 @@ import net.minecraft.network.chat.TextComponent;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * @author LatvianModder
@@ -162,5 +163,16 @@ public class ChapterGroup extends QuestObject {
 	@Override
 	public Collection<? extends QuestObject> getChildren() {
 		return chapters;
+	}
+
+	@Override
+	public boolean hasUnclaimedRewardsRaw(TeamData teamData, UUID player) {
+		for (Chapter chapter : chapters) {
+			if (teamData.hasUnclaimedRewards(player, chapter)) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 }

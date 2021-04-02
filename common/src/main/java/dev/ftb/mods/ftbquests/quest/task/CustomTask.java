@@ -78,7 +78,7 @@ public class CustomTask extends Task {
 	}
 
 	@Override
-	public void submitTask(TeamData teamData, ServerPlayer player, ItemStack item) {
+	public void submitTask(TeamData teamData, ServerPlayer player, ItemStack craftedItem) {
 		if (check != null && !teamData.isCompleted(this)) {
 			check.check(new Data(this, teamData), player);
 		}

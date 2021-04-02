@@ -21,6 +21,7 @@ import it.unimi.dsi.fastutil.longs.Long2ByteOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2LongMap;
 import it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
+import it.unimi.dsi.fastutil.objects.Object2ByteOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 import me.shedaniel.architectury.utils.NbtType;
@@ -47,6 +48,9 @@ import java.util.UUID;
  */
 public class TeamData {
 	public static int VERSION = 1;
+	private static final byte BOOL_NONE = -1;
+	private static final byte BOOL_FALSE = 0;
+	private static final byte BOOL_TRUE = 1;
 
 	public static TeamData get(Player player) {
 		return FTBQuests.PROXY.getQuestFile(player.getCommandSenderWorld().isClientSide()).getData(player);
@@ -67,6 +71,7 @@ public class TeamData {
 	public final LongOpenHashSet pinnedQuests;
 
 	private Long2ByteOpenHashMap areDependenciesCompleteCache;
+	private Object2ByteOpenHashMap<QuestKey> unclaimedRewardsCache;
 
 	public TeamData(QuestFile f, UUID id) {
 		file = f;
@@ -113,6 +118,7 @@ public class TeamData {
 	public boolean setStarted(long id, @Nullable Date time) {
 		if (time == null) {
 			if (started.remove(id) >= 0L) {
+				clearCachedProgress();
 				save();
 
 				if (ChangeProgress.sendUpdates && file.isServerSide()) {
@@ -123,6 +129,7 @@ public class TeamData {
 			}
 		} else {
 			if (started.put(id, time.getTime()) == 0L) {
+				clearCachedProgress();
 				save();
 
 				if (ChangeProgress.sendUpdates && file.isServerSide()) {
@@ -145,6 +152,7 @@ public class TeamData {
 	public boolean setCompleted(long id, @Nullable Date time) {
 		if (time == null) {
 			if (completed.remove(id) >= 0L) {
+				clearCachedProgress();
 				save();
 
 				if (ChangeProgress.sendUpdates && file.isServerSide()) {
@@ -155,6 +163,7 @@ public class TeamData {
 			}
 		} else {
 			if (completed.put(id, time.getTime()) == 0L) {
+				clearCachedProgress();
 				save();
 
 				if (ChangeProgress.sendUpdates && file.isServerSide()) {
@@ -170,7 +179,7 @@ public class TeamData {
 
 	@Nullable
 	public Date getRewardClaimTime(UUID player, Reward reward) {
-		long t = claimedRewards.get(QuestKey.of(reward.isTeamReward() ? Util.NIL_UUID : player, reward.id));
+		long t = claimedRewards.getLong(QuestKey.of(reward.isTeamReward() ? Util.NIL_UUID : player, reward.id));
 		return t == 0L ? null : new Date(t);
 	}
 
@@ -178,14 +187,21 @@ public class TeamData {
 		return getRewardClaimTime(player, reward) != null;
 	}
 
-	public boolean isRewardClaimed(long id) {
-		for (Object2LongMap.Entry<QuestKey> entry : claimedRewards.object2LongEntrySet()) {
-			if (entry.getKey().id == id) {
-				return true;
-			}
+	public boolean hasUnclaimedRewards(UUID player, QuestObject object) {
+		if (unclaimedRewardsCache == null) {
+			unclaimedRewardsCache = new Object2ByteOpenHashMap<>();
+			unclaimedRewardsCache.defaultReturnValue(BOOL_NONE);
 		}
 
-		return false;
+		QuestKey key = QuestKey.of(player, object.id);
+		byte b = unclaimedRewardsCache.getByte(key);
+
+		if (b == -1) {
+			b = object.hasUnclaimedRewardsRaw(this, player) ? BOOL_TRUE : BOOL_FALSE;
+			unclaimedRewardsCache.put(key, b);
+		}
+
+		return b == BOOL_TRUE;
 	}
 
 	public boolean claimReward(UUID player, Reward reward) {
@@ -193,6 +209,7 @@ public class TeamData {
 
 		if (!claimedRewards.containsKey(key)) {
 			claimedRewards.put(key, System.currentTimeMillis());
+			clearCachedProgress();
 			save();
 			return true;
 		}
@@ -201,7 +218,8 @@ public class TeamData {
 	}
 
 	public boolean resetReward(Reward reward) {
-		if (claimedRewards.entrySet().removeIf(e -> e.getKey().id == reward.id)) {
+		if (claimedRewards.object2LongEntrySet().removeIf(e -> e.getKey().id == reward.id)) {
+			clearCachedProgress();
 			save();
 			return true;
 		}
@@ -211,6 +229,7 @@ public class TeamData {
 
 	public boolean resetReward(UUID player, Reward reward) {
 		if (claimedRewards.removeLong(QuestKey.of(reward.isTeamReward() ? Util.NIL_UUID : player, reward.id)) != 0L) {
+			clearCachedProgress();
 			save();
 			return true;
 		}
@@ -220,6 +239,7 @@ public class TeamData {
 
 	public boolean setRewardClaimed(UUID player, Reward reward, Date time) {
 		if (claimedRewards.put(QuestKey.of(reward.isTeamReward() ? Util.NIL_UUID : player, reward.id), time.getTime()) != 0L) {
+			clearCachedProgress();
 			save();
 			return true;
 		}
@@ -234,6 +254,7 @@ public class TeamData {
 	public boolean setCanEdit(boolean mode) {
 		if (canEdit != mode) {
 			canEdit = mode;
+			clearCachedProgress();
 			save();
 
 			if (file.isServerSide()) {
@@ -286,6 +307,7 @@ public class TeamData {
 
 	public void clearCachedProgress() {
 		areDependenciesCompleteCache = null;
+		unclaimedRewardsCache = null;
 	}
 
 	public CompoundTag serializeNBT() {
@@ -522,17 +544,17 @@ public class TeamData {
 
 		if (areDependenciesCompleteCache == null) {
 			areDependenciesCompleteCache = new Long2ByteOpenHashMap();
-			areDependenciesCompleteCache.defaultReturnValue((byte) -1);
+			areDependenciesCompleteCache.defaultReturnValue(BOOL_NONE);
 		}
 
 		byte b = areDependenciesCompleteCache.get(quest.id);
 
 		if (b == -1) {
-			b = areDependenciesComplete0(quest) ? (byte) 1 : (byte) 0;
+			b = areDependenciesComplete0(quest) ? BOOL_TRUE : BOOL_FALSE;
 			areDependenciesCompleteCache.put(quest.id, b);
 		}
 
-		return b == 1;
+		return b == BOOL_TRUE;
 	}
 
 	private boolean areDependenciesComplete0(Quest quest) {
@@ -573,40 +595,6 @@ public class TeamData {
 
 	public boolean canStartTasks(Quest quest) {
 		return areDependenciesComplete(quest);
-	}
-
-	public boolean hasUnclaimedRewards() {
-		for (ChapterGroup group : file.chapterGroups) {
-			for (Chapter chapter : group.chapters) {
-				if (hasUnclaimedRewards(chapter)) {
-					return true;
-				}
-			}
-		}
-
-		return false;
-	}
-
-	public boolean hasUnclaimedRewards(Chapter chapter) {
-		for (Quest quest : chapter.quests) {
-			if (hasUnclaimedRewards(quest)) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	public boolean hasUnclaimedRewards(Quest quest) {
-		if (isCompleted(quest)) {
-			for (Reward reward : quest.rewards) {
-				if (getClaimType(reward) == RewardClaimType.CAN_CLAIM) {
-					return true;
-				}
-			}
-		}
-
-		return false;
 	}
 
 	public void claimReward(ServerPlayer player, Reward reward, boolean notify) {
@@ -660,8 +648,8 @@ public class TeamData {
 		}
 	}
 
-	public RewardClaimType getClaimType(Reward reward) {
-		boolean r = isRewardClaimed(reward.id);
+	public RewardClaimType getClaimType(UUID player, Reward reward) {
+		boolean r = isRewardClaimed(player, reward);
 
 		if (r) {
 			return RewardClaimType.CLAIMED;

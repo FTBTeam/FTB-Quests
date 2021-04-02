@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -358,5 +359,16 @@ public final class Chapter extends QuestObject {
 	@Override
 	public Collection<? extends QuestObject> getChildren() {
 		return quests;
+	}
+
+	@Override
+	public boolean hasUnclaimedRewardsRaw(TeamData teamData, UUID player) {
+		for (Quest quest : quests) {
+			if (teamData.hasUnclaimedRewards(player, quest)) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 }
