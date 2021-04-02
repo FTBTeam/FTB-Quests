@@ -311,10 +311,12 @@ public class QuestButton extends Button {
 		Color4I outlineColor = Color4I.WHITE.withAlpha(150);
 		Icon qicon = Icon.EMPTY;
 
-		boolean cantStart = !questScreen.file.self.canStartTasks(quest);
+		boolean isCompleted = questScreen.file.self.isCompleted(quest);
+		boolean isStarted = isCompleted || questScreen.file.self.isStarted(quest);
+		boolean canStart = isCompleted || isStarted || questScreen.file.self.canStartTasks(quest);
 
-		if (!cantStart) {
-			if (questScreen.file.self.isCompleted(quest)) {
+		if (canStart) {
+			if (isCompleted) {
 				if (questScreen.file.self.hasUnclaimedRewards(Minecraft.getInstance().player.getUUID(), quest)) {
 					qicon = ThemeProperties.ALERT_ICON.get(quest);
 				} else {
@@ -322,7 +324,7 @@ public class QuestButton extends Button {
 				}
 
 				outlineColor = ThemeProperties.QUEST_COMPLETED_COLOR.get(quest);
-			} else if (questScreen.file.self.isStarted(quest)) {
+			} else if (isStarted) {
 				outlineColor = ThemeProperties.QUEST_STARTED_COLOR.get(quest);
 			}
 		} else {
@@ -356,7 +358,7 @@ public class QuestButton extends Button {
 			matrixStack.popPose();
 		}
 
-		if (cantStart) {
+		if (!canStart) {
 			matrixStack.pushPose();
 			matrixStack.translate(0, 0, 200);
 			shape.shape.withColor(Color4I.BLACK.withAlpha(100)).draw(matrixStack, x, y, w, h);

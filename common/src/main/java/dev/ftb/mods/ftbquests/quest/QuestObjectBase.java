@@ -16,6 +16,7 @@ import dev.ftb.mods.ftbquests.net.MessageEditObject;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import dev.ftb.mods.ftbquests.util.NBTUtils;
 import dev.ftb.mods.ftbquests.util.NetUtils;
+import dev.ftb.mods.ftbquests.util.ProgressChange;
 import me.shedaniel.architectury.utils.NbtType;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -32,12 +33,10 @@ import net.minecraft.world.item.ItemStack;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 import java.util.regex.Pattern;
 
 /**
@@ -132,22 +131,23 @@ public abstract class QuestObjectBase {
 		return !tags.isEmpty() && getTags().contains(tag);
 	}
 
-	public void forceProgress(Date time, TeamData data, UUID player, ChangeProgress type) {
+	public void forceProgress(TeamData teamData, ProgressChange progressChange) {
 	}
 
-	public final void forceProgress(TeamData data, UUID player, ChangeProgress type, boolean notifications) {
+	public final void forceProgressRaw(TeamData teamData, ProgressChange progressChange) {
+		teamData.clearCachedProgress();
 		ChangeProgress.sendUpdates = false;
-		ChangeProgress.sendNotifications = notifications ? Tristate.TRUE : Tristate.FALSE;
-		forceProgress(new Date(), data, player, type);
+		ChangeProgress.sendNotifications = progressChange.notifications ? Tristate.TRUE : Tristate.FALSE;
+		forceProgress(teamData, progressChange);
 		ChangeProgress.sendUpdates = true;
 		ChangeProgress.sendNotifications = Tristate.DEFAULT;
-		data.clearCachedProgress();
+		teamData.clearCachedProgress();
 
 		if (getQuestFile().isServerSide()) {
-			new MessageChangeProgressResponse(data.uuid, player, id, type, notifications).sendToAll();
+			new MessageChangeProgressResponse(teamData.uuid, progressChange).sendToAll();
 		}
 
-		data.save();
+		teamData.save();
 	}
 
 	@Nullable

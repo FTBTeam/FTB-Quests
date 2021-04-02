@@ -9,13 +9,13 @@ import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
 import dev.ftb.mods.ftbquests.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.integration.jei.FTBQuestsJEIHelper;
 import dev.ftb.mods.ftbquests.net.MessageClaimReward;
-import dev.ftb.mods.ftbquests.quest.ChangeProgress;
 import dev.ftb.mods.ftbquests.quest.Chapter;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestFile;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.QuestObjectType;
 import dev.ftb.mods.ftbquests.quest.TeamData;
+import dev.ftb.mods.ftbquests.util.ProgressChange;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
@@ -26,7 +26,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
 import javax.annotation.Nullable;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -200,11 +199,11 @@ public abstract class Reward extends QuestObjectBase {
 	}
 
 	@Override
-	public final void forceProgress(Date time, TeamData data, UUID player, ChangeProgress type) {
-		if (type.reset) {
-			data.resetReward(player, this);
+	public final void forceProgress(TeamData teamData, ProgressChange progressChange) {
+		if (progressChange.reset) {
+			teamData.resetReward(progressChange.player, this);
 		} else {
-			data.setRewardClaimed(player, this, time);
+			teamData.setRewardClaimed(progressChange.player, this, progressChange.time);
 		}
 	}
 

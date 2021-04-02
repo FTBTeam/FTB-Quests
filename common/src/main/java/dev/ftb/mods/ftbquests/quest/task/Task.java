@@ -16,13 +16,13 @@ import dev.ftb.mods.ftbquests.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.integration.jei.FTBQuestsJEIHelper;
 import dev.ftb.mods.ftbquests.net.MessageDisplayCompletionToast;
 import dev.ftb.mods.ftbquests.net.MessageSubmitTask;
-import dev.ftb.mods.ftbquests.quest.ChangeProgress;
 import dev.ftb.mods.ftbquests.quest.Chapter;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestFile;
 import dev.ftb.mods.ftbquests.quest.QuestObject;
 import dev.ftb.mods.ftbquests.quest.QuestObjectType;
 import dev.ftb.mods.ftbquests.quest.TeamData;
+import dev.ftb.mods.ftbquests.util.ProgressChange;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
@@ -34,8 +34,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nullable;
-import java.util.Date;
-import java.util.UUID;
 
 /**
  * @author LatvianModder
@@ -129,9 +127,9 @@ public abstract class Task extends QuestObject {
 	}
 
 	@Override
-	public final void forceProgress(Date time, TeamData data, UUID player, ChangeProgress type) {
-		super.forceProgress(time, data, player, type);
-		data.resetProgress(this);
+	public final void forceProgress(TeamData teamData, ProgressChange progressChange) {
+		super.forceProgress(teamData, progressChange);
+		teamData.resetProgress(this);
 	}
 
 	@Override

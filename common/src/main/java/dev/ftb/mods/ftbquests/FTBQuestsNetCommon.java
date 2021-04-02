@@ -1,9 +1,8 @@
 package dev.ftb.mods.ftbquests;
 
 import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
-import dev.ftb.mods.ftbquests.quest.ChangeProgress;
 import dev.ftb.mods.ftbquests.quest.QuestObjectType;
-import dev.ftb.mods.ftbquests.util.QuestKey;
+import dev.ftb.mods.ftbquests.util.ProgressChange;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
@@ -13,10 +12,10 @@ import java.util.Date;
 import java.util.UUID;
 
 public class FTBQuestsNetCommon {
-	public void changeProgress(UUID teamId, UUID player, long id, ChangeProgress type, boolean notifications) {
+	public void changeProgress(UUID teamId, ProgressChange progressChange) {
 	}
 
-	public void claimReward(QuestKey key) {
+	public void claimReward(UUID teamId, UUID player, long reward) {
 	}
 
 	public void createObject(long id, long parent, QuestObjectType type, CompoundTag nbt, CompoundTag extra) {

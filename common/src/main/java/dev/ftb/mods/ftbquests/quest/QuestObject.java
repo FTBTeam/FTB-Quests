@@ -4,6 +4,7 @@ import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
 import com.feed_the_beast.mods.ftbguilibrary.icon.Color4I;
 import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
+import dev.ftb.mods.ftbquests.util.ProgressChange;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
@@ -11,7 +12,6 @@ import net.minecraft.network.FriendlyByteBuf;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.UUID;
 
 /**
@@ -55,17 +55,17 @@ public abstract class QuestObject extends QuestObjectBase {
 	}
 
 	@Override
-	public void forceProgress(Date time, TeamData data, UUID player, ChangeProgress type) {
-		if (type.reset) {
-			data.setStarted(id, null);
-			data.setCompleted(id, null);
+	public void forceProgress(TeamData teamData, ProgressChange progressChange) {
+		if (progressChange.reset) {
+			teamData.setStarted(id, null);
+			teamData.setCompleted(id, null);
 		} else {
-			data.setStarted(id, time);
-			data.setCompleted(id, time);
+			teamData.setStarted(id, progressChange.time);
+			teamData.setCompleted(id, progressChange.time);
 		}
 
 		for (QuestObject child : getChildren()) {
-			child.forceProgress(time, data, player, type);
+			child.forceProgress(teamData, progressChange);
 		}
 	}
 
