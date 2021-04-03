@@ -4,6 +4,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 import dev.ftb.mods.ftbguilibrary.config.ConfigGroup;
 import dev.ftb.mods.ftbguilibrary.config.IntConfig;
 import dev.ftb.mods.ftbguilibrary.config.ItemStackConfig;
+import dev.ftb.mods.ftbguilibrary.config.StringConfig;
 import dev.ftb.mods.ftbguilibrary.config.gui.EditConfigFromStringScreen;
 import dev.ftb.mods.ftbguilibrary.config.gui.EditConfigScreen;
 import dev.ftb.mods.ftbguilibrary.config.gui.SelectItemStackScreen;
@@ -22,6 +23,7 @@ import dev.ftb.mods.ftbquests.quest.reward.ItemReward;
 import dev.ftb.mods.ftbquests.quest.reward.RewardTypes;
 import dev.ftb.mods.ftbquests.quest.reward.XPLevelsReward;
 import dev.ftb.mods.ftbquests.quest.reward.XPReward;
+import dev.ftb.mods.ftbquests.quest.task.CheckmarkTask;
 import dev.ftb.mods.ftbquests.quest.task.DimensionTask;
 import dev.ftb.mods.ftbquests.quest.task.ItemTask;
 import dev.ftb.mods.ftbquests.quest.task.LocationTask;
@@ -148,6 +150,20 @@ public class FTBQuestsClient extends FTBQuestsCommon {
 					callback.accept(itemTask);
 				}
 			}).openGui();
+		});
+
+		TaskTypes.CHECKMARK.setGuiProvider((gui, quest, callback) -> {
+			StringConfig c = new StringConfig(null);
+
+			EditConfigFromStringScreen.open(c, "", "", accepted -> {
+				if (accepted) {
+					CheckmarkTask checkmarkTask = new CheckmarkTask(quest);
+					checkmarkTask.title = c.value;
+					callback.accept(checkmarkTask);
+				}
+
+				gui.run();
+			});
 		});
 
 		/*FTBQuestsTasks.FLUID.get().setGuiProvider((gui, quest, callback) -> {
