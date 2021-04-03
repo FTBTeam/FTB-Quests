@@ -78,6 +78,10 @@ public class RewardButton extends Button {
 			}
 
 			reward.addMouseOverText(list);
+
+			if (!list.shouldRender()) {
+				list.zOffset = 580;
+			}
 		}
 	}
 
