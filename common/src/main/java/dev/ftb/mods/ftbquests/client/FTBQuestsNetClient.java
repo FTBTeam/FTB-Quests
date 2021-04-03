@@ -1,8 +1,8 @@
 package dev.ftb.mods.ftbquests.client;
 
-import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
-import com.feed_the_beast.mods.ftbguilibrary.icon.ItemIcon;
-import com.feed_the_beast.mods.ftbguilibrary.utils.ClientUtils;
+import dev.ftb.mods.ftbguilibrary.icon.Icon;
+import dev.ftb.mods.ftbguilibrary.icon.ItemIcon;
+import dev.ftb.mods.ftbguilibrary.utils.ClientUtils;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.FTBQuestsNetCommon;
 import dev.ftb.mods.ftbquests.gui.IRewardListenerScreen;

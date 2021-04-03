@@ -1,9 +1,9 @@
 package dev.ftb.mods.ftbquests.gui;
 
-import com.feed_the_beast.mods.ftbguilibrary.icon.Color4I;
-import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
-import com.feed_the_beast.mods.ftbguilibrary.widget.WidgetType;
 import com.mojang.blaze3d.vertex.PoseStack;
+import dev.ftb.mods.ftbguilibrary.icon.Color4I;
+import dev.ftb.mods.ftbguilibrary.widget.Theme;
+import dev.ftb.mods.ftbguilibrary.widget.WidgetType;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 
 /**

@@ -1,11 +1,11 @@
 package dev.ftb.mods.ftbquests.gui.quests;
 
-import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
-import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
-import com.feed_the_beast.mods.ftbguilibrary.widget.GuiHelper;
-import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
-import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
 import com.mojang.blaze3d.vertex.PoseStack;
+import dev.ftb.mods.ftbguilibrary.utils.MouseButton;
+import dev.ftb.mods.ftbguilibrary.utils.TooltipList;
+import dev.ftb.mods.ftbguilibrary.widget.GuiHelper;
+import dev.ftb.mods.ftbguilibrary.widget.Panel;
+import dev.ftb.mods.ftbguilibrary.widget.Theme;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.gui.RewardNotificationsScreen;
 import dev.ftb.mods.ftbquests.net.MessageClaimAllRewards;

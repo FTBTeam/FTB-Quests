@@ -1,6 +1,6 @@
 package dev.ftb.mods.ftbquests;
 
-import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
+import dev.ftb.mods.ftbguilibrary.icon.Icon;
 import dev.ftb.mods.ftbquests.quest.QuestObjectType;
 import dev.ftb.mods.ftbquests.util.ProgressChange;
 import net.minecraft.nbt.CompoundTag;

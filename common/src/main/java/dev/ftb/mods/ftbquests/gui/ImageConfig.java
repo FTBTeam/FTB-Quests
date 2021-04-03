@@ -1,13 +1,13 @@
 package dev.ftb.mods.ftbquests.gui;
 
-import com.feed_the_beast.mods.ftbguilibrary.config.ConfigCallback;
-import com.feed_the_beast.mods.ftbguilibrary.config.ConfigString;
-import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
+import dev.ftb.mods.ftbguilibrary.config.ConfigCallback;
+import dev.ftb.mods.ftbguilibrary.config.StringConfig;
+import dev.ftb.mods.ftbguilibrary.utils.MouseButton;
 
 /**
  * @author LatvianModder
  */
-public class ImageConfig extends ConfigString {
+public class ImageConfig extends StringConfig {
 	public ImageConfig() {
 		super(null);
 	}

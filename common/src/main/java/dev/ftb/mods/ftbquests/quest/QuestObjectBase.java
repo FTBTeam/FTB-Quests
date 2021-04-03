@@ -1,11 +1,11 @@
 package dev.ftb.mods.ftbquests.quest;
 
-import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
-import com.feed_the_beast.mods.ftbguilibrary.config.ConfigString;
-import com.feed_the_beast.mods.ftbguilibrary.config.Tristate;
-import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiEditConfig;
-import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
-import com.feed_the_beast.mods.ftbguilibrary.utils.Bits;
+import dev.ftb.mods.ftbguilibrary.config.ConfigGroup;
+import dev.ftb.mods.ftbguilibrary.config.StringConfig;
+import dev.ftb.mods.ftbguilibrary.config.Tristate;
+import dev.ftb.mods.ftbguilibrary.config.gui.EditConfigScreen;
+import dev.ftb.mods.ftbguilibrary.icon.Icon;
+import dev.ftb.mods.ftbguilibrary.utils.Bits;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.client.ConfigIconItemStack;
@@ -230,7 +230,7 @@ public abstract class QuestObjectBase {
 	public void getConfig(ConfigGroup config) {
 		config.addString("title", title, v -> title = v, "").setNameKey("ftbquests.title").setOrder(-127);
 		config.add("icon", new ConfigIconItemStack(), icon, v -> icon = v, ItemStack.EMPTY).setNameKey("ftbquests.icon").setOrder(-126);
-		config.addList("tags", tags, new ConfigString(TAG_PATTERN), "").setNameKey("ftbquests.tags").setOrder(-125);
+		config.addList("tags", tags, new StringConfig(TAG_PATTERN), "").setNameKey("ftbquests.tags").setOrder(-125);
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -325,7 +325,7 @@ public abstract class QuestObjectBase {
 			}
 		};
 
-		new GuiEditConfig(group).openGui();
+		new EditConfigScreen(group).openGui();
 	}
 
 	public int refreshJEI() {

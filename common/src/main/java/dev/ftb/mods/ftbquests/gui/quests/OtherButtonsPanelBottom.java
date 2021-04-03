@@ -1,7 +1,7 @@
 package dev.ftb.mods.ftbquests.gui.quests;
 
-import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
-import com.feed_the_beast.mods.ftbguilibrary.widget.WidgetLayout;
+import dev.ftb.mods.ftbguilibrary.widget.Panel;
+import dev.ftb.mods.ftbguilibrary.widget.WidgetLayout;
 
 /**
  * @author LatvianModder

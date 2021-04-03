@@ -1,11 +1,11 @@
 package dev.ftb.mods.ftbquests.gui;
 
-import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
-import com.feed_the_beast.mods.ftbguilibrary.misc.GuiButtonListBase;
-import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
-import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
-import com.feed_the_beast.mods.ftbguilibrary.widget.SimpleTextButton;
-import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
+import dev.ftb.mods.ftbguilibrary.icon.Icon;
+import dev.ftb.mods.ftbguilibrary.misc.ButtonListBaseScreen;
+import dev.ftb.mods.ftbguilibrary.utils.MouseButton;
+import dev.ftb.mods.ftbguilibrary.widget.Panel;
+import dev.ftb.mods.ftbguilibrary.widget.SimpleTextButton;
+import dev.ftb.mods.ftbguilibrary.widget.Theme;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.net.MessageChangeChapterGroup;
 import dev.ftb.mods.ftbquests.quest.Chapter;
@@ -15,7 +15,7 @@ import net.minecraft.network.chat.TranslatableComponent;
 /**
  * @author LatvianModder
  */
-public class ChangeChapterGroupScreen extends GuiButtonListBase {
+public class ChangeChapterGroupScreen extends ButtonListBaseScreen {
 	private class ChapterGroupButton extends SimpleTextButton {
 		private final ChapterGroup chapterGroup;
 

@@ -1,6 +1,6 @@
 package dev.ftb.mods.ftbquests.quest.task.forge;
 
-import com.feed_the_beast.mods.ftbguilibrary.utils.StringUtils;
+import dev.ftb.mods.ftbguilibrary.utils.StringUtils;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.TeamData;

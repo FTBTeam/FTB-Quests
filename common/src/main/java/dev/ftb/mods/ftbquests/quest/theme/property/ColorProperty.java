@@ -1,6 +1,6 @@
 package dev.ftb.mods.ftbquests.quest.theme.property;
 
-import com.feed_the_beast.mods.ftbguilibrary.icon.Color4I;
+import dev.ftb.mods.ftbguilibrary.icon.Color4I;
 
 /**
  * @author LatvianModder

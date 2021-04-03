@@ -1,6 +1,6 @@
 package dev.ftb.mods.ftbquests.quest.reward;
 
-import com.feed_the_beast.mods.ftbguilibrary.config.NameMap;
+import dev.ftb.mods.ftbguilibrary.config.NameMap;
 
 import java.util.Arrays;
 

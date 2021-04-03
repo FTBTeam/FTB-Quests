@@ -1,15 +1,15 @@
 package dev.ftb.mods.ftbquests.client;
 
-import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
-import com.feed_the_beast.mods.ftbguilibrary.config.ConfigInt;
-import com.feed_the_beast.mods.ftbguilibrary.config.ConfigItemStack;
-import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiEditConfig;
-import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiEditConfigFromString;
-import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiSelectItemStack;
-import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
-import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
-import com.feed_the_beast.mods.ftbguilibrary.utils.TextComponentParser;
 import com.mojang.blaze3d.platform.InputConstants;
+import dev.ftb.mods.ftbguilibrary.config.ConfigGroup;
+import dev.ftb.mods.ftbguilibrary.config.IntConfig;
+import dev.ftb.mods.ftbguilibrary.config.ItemStackConfig;
+import dev.ftb.mods.ftbguilibrary.config.gui.EditConfigFromStringScreen;
+import dev.ftb.mods.ftbguilibrary.config.gui.EditConfigScreen;
+import dev.ftb.mods.ftbguilibrary.config.gui.SelectItemStackScreen;
+import dev.ftb.mods.ftbguilibrary.icon.Icon;
+import dev.ftb.mods.ftbguilibrary.utils.MouseButton;
+import dev.ftb.mods.ftbguilibrary.utils.TextComponentParser;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.FTBQuestsCommon;
 import dev.ftb.mods.ftbquests.block.FTBQuestsBlocks;
@@ -134,11 +134,11 @@ public class FTBQuestsClient extends FTBQuestsCommon {
 	@Override
 	public void setTaskGuiProviders() {
 		TaskTypes.ITEM.setGuiProvider((gui, quest, callback) -> {
-			ConfigItemStack c = new ConfigItemStack(false, false);
+			ItemStackConfig c = new ItemStackConfig(false, false);
 			c.defaultValue = ItemStack.EMPTY;
 			c.value = ItemStack.EMPTY;
 
-			new GuiSelectItemStack(c, accepted -> {
+			new SelectItemStackScreen(c, accepted -> {
 				gui.run();
 				if (accepted) {
 					ItemTask itemTask = new ItemTask(quest);
@@ -204,18 +204,18 @@ public class FTBQuestsClient extends FTBQuestsCommon {
 				}
 			};
 
-			new GuiEditConfig(group).openGui();
+			new EditConfigScreen(group).openGui();
 		});
 	}
 
 	@Override
 	public void setRewardGuiProviders() {
 		RewardTypes.ITEM.setGuiProvider((gui, quest, callback) -> {
-			ConfigItemStack c = new ConfigItemStack(false, false);
+			ItemStackConfig c = new ItemStackConfig(false, false);
 			c.defaultValue = ItemStack.EMPTY;
 			c.value = ItemStack.EMPTY;
 
-			new GuiSelectItemStack(c, accepted -> {
+			new SelectItemStackScreen(c, accepted -> {
 				if (accepted) {
 					ItemStack copy = c.value.copy();
 					copy.setCount(1);
@@ -228,9 +228,9 @@ public class FTBQuestsClient extends FTBQuestsCommon {
 		});
 
 		RewardTypes.XP.setGuiProvider((gui, quest, callback) -> {
-			ConfigInt c = new ConfigInt(1, Integer.MAX_VALUE);
+			IntConfig c = new IntConfig(1, Integer.MAX_VALUE);
 
-			GuiEditConfigFromString.open(c, 100, 100, accepted -> {
+			EditConfigFromStringScreen.open(c, 100, 100, accepted -> {
 				if (accepted) {
 					callback.accept(new XPReward(quest, c.value));
 				}
@@ -240,9 +240,9 @@ public class FTBQuestsClient extends FTBQuestsCommon {
 		});
 
 		RewardTypes.XP_LEVELS.setGuiProvider((gui, quest, callback) -> {
-			ConfigInt c = new ConfigInt(1, Integer.MAX_VALUE);
+			IntConfig c = new IntConfig(1, Integer.MAX_VALUE);
 
-			GuiEditConfigFromString.open(c, 5, 5, accepted -> {
+			EditConfigFromStringScreen.open(c, 5, 5, accepted -> {
 				if (accepted) {
 					callback.accept(new XPLevelsReward(quest, c.value));
 				}

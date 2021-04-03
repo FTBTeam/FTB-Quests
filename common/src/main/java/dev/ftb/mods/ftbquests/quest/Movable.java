@@ -1,7 +1,7 @@
 package dev.ftb.mods.ftbquests.quest;
 
-import com.feed_the_beast.mods.ftbguilibrary.icon.Color4I;
 import com.mojang.blaze3d.vertex.PoseStack;
+import dev.ftb.mods.ftbguilibrary.icon.Color4I;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 

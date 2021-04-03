@@ -1,11 +1,11 @@
 package dev.ftb.mods.ftbquests.quest.reward;
 
-import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
-import com.feed_the_beast.mods.ftbguilibrary.config.Tristate;
-import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
-import com.feed_the_beast.mods.ftbguilibrary.utils.ClientUtils;
-import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
-import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
+import dev.ftb.mods.ftbguilibrary.config.ConfigGroup;
+import dev.ftb.mods.ftbguilibrary.config.Tristate;
+import dev.ftb.mods.ftbguilibrary.icon.Icon;
+import dev.ftb.mods.ftbguilibrary.utils.ClientUtils;
+import dev.ftb.mods.ftbguilibrary.utils.TooltipList;
+import dev.ftb.mods.ftbguilibrary.widget.Button;
 import dev.ftb.mods.ftbquests.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.integration.jei.FTBQuestsJEIHelper;
 import dev.ftb.mods.ftbquests.net.MessageClaimReward;

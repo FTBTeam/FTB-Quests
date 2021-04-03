@@ -26,8 +26,8 @@ dependencies {
 	modApi "me.shedaniel:architectury-forge:${rootProject.architectury_version}"
 
 	modCompile "curse.maven:jei-238222:${jei_file}"
+	modImplementation "dev.ftb.mods:ftb-gui-library-forge:${rootProject.ftb_gui_library_version}"
 	modImplementation "dev.ftb.mods:ftb-teams-forge:${rootProject.ftb_teams_version}"
-	modCompile "curse.maven:ftb-gui-library-404465:${rootProject.ftb_gui_library_version_forge}"
 	modCompile "curse.maven:item-filter-309674:${rootProject.itemfilters_version_forge}"
 	modCompile "curse.maven:kubejs-238086:${kubejs_file_forge}"
 	modCompile "curse.maven:bookshelf-228525:${bookshelf_file}"

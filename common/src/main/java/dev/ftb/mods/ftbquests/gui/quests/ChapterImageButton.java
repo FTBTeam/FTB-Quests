@@ -1,17 +1,17 @@
 package dev.ftb.mods.ftbquests.gui.quests;
 
-import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
-import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiEditConfig;
-import com.feed_the_beast.mods.ftbguilibrary.icon.Color4I;
-import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
-import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
-import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
-import com.feed_the_beast.mods.ftbguilibrary.widget.ContextMenuItem;
-import com.feed_the_beast.mods.ftbguilibrary.widget.GuiHelper;
-import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
-import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
+import dev.ftb.mods.ftbguilibrary.config.ConfigGroup;
+import dev.ftb.mods.ftbguilibrary.config.gui.EditConfigScreen;
+import dev.ftb.mods.ftbguilibrary.icon.Color4I;
+import dev.ftb.mods.ftbguilibrary.utils.MouseButton;
+import dev.ftb.mods.ftbguilibrary.utils.TooltipList;
+import dev.ftb.mods.ftbguilibrary.widget.Button;
+import dev.ftb.mods.ftbguilibrary.widget.ContextMenuItem;
+import dev.ftb.mods.ftbguilibrary.widget.GuiHelper;
+import dev.ftb.mods.ftbguilibrary.widget.Panel;
+import dev.ftb.mods.ftbguilibrary.widget.Theme;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.net.MessageEditObject;
 import dev.ftb.mods.ftbquests.quest.ChapterImage;
@@ -76,7 +76,7 @@ public class ChapterImageButton extends Button {
 					}
 					run();
 				};
-				new GuiEditConfig(group).openGui();
+				new EditConfigScreen(group).openGui();
 			}));
 
 			contextMenu.add(new ContextMenuItem(new TranslatableComponent("gui.move"), ThemeProperties.MOVE_UP_ICON.get(chapterImage.chapter), () -> {

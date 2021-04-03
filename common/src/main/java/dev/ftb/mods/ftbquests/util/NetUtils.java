@@ -1,6 +1,6 @@
 package dev.ftb.mods.ftbquests.util;
 
-import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
+import dev.ftb.mods.ftbguilibrary.icon.Icon;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import me.shedaniel.architectury.networking.NetworkManager;
 import net.minecraft.network.FriendlyByteBuf;

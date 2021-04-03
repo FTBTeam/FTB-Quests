@@ -1,10 +1,10 @@
 package dev.ftb.mods.ftbquests.quest;
 
-import com.feed_the_beast.mods.ftbguilibrary.config.NameMap;
-import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
-import com.feed_the_beast.mods.ftbguilibrary.icon.ImageIcon;
-import com.feed_the_beast.mods.ftbguilibrary.utils.PixelBuffer;
 import com.mojang.blaze3d.vertex.PoseStack;
+import dev.ftb.mods.ftbguilibrary.config.NameMap;
+import dev.ftb.mods.ftbguilibrary.icon.Icon;
+import dev.ftb.mods.ftbguilibrary.icon.ImageIcon;
+import dev.ftb.mods.ftbguilibrary.utils.PixelBuffer;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;

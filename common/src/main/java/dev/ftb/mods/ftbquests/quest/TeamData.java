@@ -373,7 +373,9 @@ public class TeamData {
 	}
 
 	public void deserializeNBT(CompoundTag nbt) {
-		if (nbt.getInt("version") != VERSION) {
+		int fileVersion = nbt.getInt("version");
+
+		if (fileVersion != VERSION) {
 			save();
 		}
 

@@ -1,7 +1,7 @@
 package dev.ftb.mods.ftbquests.quest.task;
 
-import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
-import com.feed_the_beast.mods.ftbguilibrary.widget.GuiIcons;
+import dev.ftb.mods.ftbguilibrary.icon.Icon;
+import dev.ftb.mods.ftbguilibrary.widget.GuiIcons;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import net.minecraft.resources.ResourceLocation;
 

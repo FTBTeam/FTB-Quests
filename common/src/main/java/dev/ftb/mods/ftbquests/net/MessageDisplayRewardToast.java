@@ -1,6 +1,6 @@
 package dev.ftb.mods.ftbquests.net;
 
-import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
+import dev.ftb.mods.ftbguilibrary.icon.Icon;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.util.NetUtils;
 import me.shedaniel.architectury.networking.NetworkManager;

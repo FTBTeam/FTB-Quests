@@ -1,18 +1,18 @@
 package dev.ftb.mods.ftbquests.gui;
 
-import com.feed_the_beast.mods.ftbguilibrary.config.ConfigDouble;
-import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
-import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiEditConfig;
-import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiEditConfigFromString;
-import com.feed_the_beast.mods.ftbguilibrary.misc.GuiButtonListBase;
-import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
-import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
-import com.feed_the_beast.mods.ftbguilibrary.widget.ContextMenuItem;
-import com.feed_the_beast.mods.ftbguilibrary.widget.GuiIcons;
-import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
-import com.feed_the_beast.mods.ftbguilibrary.widget.SimpleTextButton;
-import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
-import com.feed_the_beast.mods.ftbguilibrary.widget.WidgetVerticalSpace;
+import dev.ftb.mods.ftbguilibrary.config.ConfigGroup;
+import dev.ftb.mods.ftbguilibrary.config.DoubleConfig;
+import dev.ftb.mods.ftbguilibrary.config.gui.EditConfigFromStringScreen;
+import dev.ftb.mods.ftbguilibrary.config.gui.EditConfigScreen;
+import dev.ftb.mods.ftbguilibrary.misc.ButtonListBaseScreen;
+import dev.ftb.mods.ftbguilibrary.utils.MouseButton;
+import dev.ftb.mods.ftbguilibrary.utils.TooltipList;
+import dev.ftb.mods.ftbguilibrary.widget.ContextMenuItem;
+import dev.ftb.mods.ftbguilibrary.widget.GuiIcons;
+import dev.ftb.mods.ftbguilibrary.widget.Panel;
+import dev.ftb.mods.ftbguilibrary.widget.SimpleTextButton;
+import dev.ftb.mods.ftbguilibrary.widget.Theme;
+import dev.ftb.mods.ftbguilibrary.widget.VerticalSpaceWidget;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
 import dev.ftb.mods.ftbquests.quest.loot.WeightedReward;
@@ -30,7 +30,7 @@ import java.util.List;
 /**
  * @author LatvianModder
  */
-public class EditRewardTableScreen extends GuiButtonListBase {
+public class EditRewardTableScreen extends ButtonListBaseScreen {
 	private class RewardTableSettingsButton extends SimpleTextButton {
 		private RewardTableSettingsButton(Panel panel) {
 			super(panel, new TranslatableComponent("gui.settings"), GuiIcons.SETTINGS);
@@ -43,7 +43,7 @@ public class EditRewardTableScreen extends GuiButtonListBase {
 			ConfigGroup group = new ConfigGroup(FTBQuests.MOD_ID);
 			rewardTable.getConfig(rewardTable.createSubGroup(group));
 			group.savedCallback = accepted -> run();
-			new GuiEditConfig(group).openGui();
+			new EditConfigScreen(group).openGui();
 		}
 	}
 
@@ -114,12 +114,12 @@ public class EditRewardTableScreen extends GuiButtonListBase {
 				ConfigGroup group = new ConfigGroup(FTBQuests.MOD_ID);
 				reward.reward.getConfig(reward.reward.createSubGroup(group));
 				group.savedCallback = accepted -> run();
-				new GuiEditConfig(group).openGui();
+				new EditConfigScreen(group).openGui();
 			}));
 
 			contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.reward_table.set_weight"), GuiIcons.SETTINGS, () -> {
-				ConfigDouble c = new ConfigDouble(0D, Double.POSITIVE_INFINITY);
-				GuiEditConfigFromString.open(c, (double) reward.weight, 1D, accepted -> {
+				DoubleConfig c = new DoubleConfig(0D, Double.POSITIVE_INFINITY);
+				EditConfigFromStringScreen.open(c, (double) reward.weight, 1D, accepted -> {
 					if (accepted) {
 						reward.weight = c.value.intValue();
 
@@ -170,7 +170,7 @@ public class EditRewardTableScreen extends GuiButtonListBase {
 		panel.add(new RewardTableSettingsButton(panel));
 		panel.add(new SaveRewardTableButton(panel));
 		panel.add(new AddWeightedRewardButton(panel));
-		panel.add(new WidgetVerticalSpace(panel, 1));
+		panel.add(new VerticalSpaceWidget(panel, 1));
 
 		for (WeightedReward r : rewardTable.rewards) {
 			panel.add(new WeightedRewardButton(panel, r));

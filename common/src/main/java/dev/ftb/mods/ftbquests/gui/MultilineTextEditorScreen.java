@@ -1,16 +1,16 @@
 package dev.ftb.mods.ftbquests.gui;
 
-import com.feed_the_beast.mods.ftbguilibrary.config.ConfigCallback;
-import com.feed_the_beast.mods.ftbguilibrary.config.ConfigList;
-import com.feed_the_beast.mods.ftbguilibrary.config.ConfigString;
-import com.feed_the_beast.mods.ftbguilibrary.utils.Key;
-import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
-import com.feed_the_beast.mods.ftbguilibrary.widget.GuiBase;
-import com.feed_the_beast.mods.ftbguilibrary.widget.GuiIcons;
-import com.feed_the_beast.mods.ftbguilibrary.widget.SimpleButton;
-import com.feed_the_beast.mods.ftbguilibrary.widget.TextBox;
-import com.feed_the_beast.mods.ftbguilibrary.widget.TextField;
-import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
+import dev.ftb.mods.ftbguilibrary.config.ConfigCallback;
+import dev.ftb.mods.ftbguilibrary.config.ListConfig;
+import dev.ftb.mods.ftbguilibrary.config.StringConfig;
+import dev.ftb.mods.ftbguilibrary.utils.Key;
+import dev.ftb.mods.ftbguilibrary.utils.MouseButton;
+import dev.ftb.mods.ftbguilibrary.widget.BaseScreen;
+import dev.ftb.mods.ftbguilibrary.widget.GuiIcons;
+import dev.ftb.mods.ftbguilibrary.widget.SimpleButton;
+import dev.ftb.mods.ftbguilibrary.widget.TextBox;
+import dev.ftb.mods.ftbguilibrary.widget.TextField;
+import dev.ftb.mods.ftbguilibrary.widget.Theme;
 import net.minecraft.network.chat.TranslatableComponent;
 import org.lwjgl.glfw.GLFW;
 
@@ -20,13 +20,13 @@ import java.util.List;
 /**
  * @author LatvianModder
  */
-public class MultilineTextEditorScreen extends GuiBase {
-	public final ConfigList<String, ConfigString> config;
+public class MultilineTextEditorScreen extends BaseScreen {
+	public final ListConfig<String, StringConfig> config;
 	public final ConfigCallback callback;
 	public List<TextBox> textBoxes;
 	public int active = 0;
 
-	public MultilineTextEditorScreen(ConfigList<String, ConfigString> c, ConfigCallback ca) {
+	public MultilineTextEditorScreen(ListConfig<String, StringConfig> c, ConfigCallback ca) {
 		config = c;
 		callback = ca;
 		textBoxes = new ArrayList<>();

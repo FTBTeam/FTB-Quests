@@ -1,9 +1,9 @@
 package dev.ftb.mods.ftbquests.quest;
 
-import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
-import com.feed_the_beast.mods.ftbguilibrary.config.ConfigString;
-import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
-import com.feed_the_beast.mods.ftbguilibrary.icon.IconAnimation;
+import dev.ftb.mods.ftbguilibrary.config.ConfigGroup;
+import dev.ftb.mods.ftbguilibrary.config.StringConfig;
+import dev.ftb.mods.ftbguilibrary.icon.Icon;
+import dev.ftb.mods.ftbguilibrary.icon.IconAnimation;
 import dev.ftb.mods.ftbquests.events.ObjectCompletedEvent;
 import dev.ftb.mods.ftbquests.events.ObjectStartedEvent;
 import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
@@ -304,7 +304,7 @@ public final class Chapter extends QuestObject {
 	@Environment(EnvType.CLIENT)
 	public void getConfig(ConfigGroup config) {
 		super.getConfig(config);
-		config.addList("subtitle", subtitle, new ConfigString(null), "");
+		config.addList("subtitle", subtitle, new StringConfig(null), "");
 		config.addBool("always_invisible", alwaysInvisible, v -> alwaysInvisible = v, false);
 		config.addEnum("default_quest_shape", defaultQuestShape.isEmpty() ? "default" : defaultQuestShape, v -> defaultQuestShape = v.equals("default") ? "" : v, QuestShape.idMapWithDefault);
 	}

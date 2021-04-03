@@ -1,7 +1,7 @@
 package dev.ftb.mods.ftbquests.client;
 
-import com.feed_the_beast.mods.ftbguilibrary.utils.ClientUtils;
-import com.feed_the_beast.mods.ftbguilibrary.widget.GuiBase;
+import dev.ftb.mods.ftbguilibrary.utils.ClientUtils;
+import dev.ftb.mods.ftbguilibrary.widget.BaseScreen;
 import dev.ftb.mods.ftbquests.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.integration.jei.FTBQuestsJEIHelper;
 import dev.ftb.mods.ftbquests.net.MessageDeleteObject;
@@ -29,7 +29,7 @@ public class ClientQuestFile extends QuestFile {
 
 	public TeamData self;
 	public QuestScreen questScreen;
-	public GuiBase questGui;
+	public BaseScreen questGui;
 
 	@Override
 	public void load(UUID s) {

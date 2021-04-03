@@ -1,9 +1,9 @@
 package dev.ftb.mods.ftbquests.command;
 
-import com.feed_the_beast.mods.ftbguilibrary.config.Tristate;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.BoolArgumentType;
+import dev.ftb.mods.ftbguilibrary.config.Tristate;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.net.MessageCreateObjectResponse;
 import dev.ftb.mods.ftbquests.net.MessageDeleteObjectResponse;
