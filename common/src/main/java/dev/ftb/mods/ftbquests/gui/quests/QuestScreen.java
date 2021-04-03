@@ -497,12 +497,12 @@ public class QuestScreen extends BaseScreen {
 
 	@Override
 	public void addMouseOverText(TooltipList list) {
+		list.zOffset = 950;
 		super.addMouseOverText(list);
 		//float hue = (float) ((System.currentTimeMillis() * 0.0001D) % 1D);
 		//int rgb = Color4I.hsb(hue, 0.8F, 1F).rgba();
 		//list.borderColorStart = rgb;
 		//list.borderColorEnd = rgb;
-		list.zOffset = 950;
 	}
 
 	public void addInfoTooltip(TooltipList list, QuestObjectBase object) {
