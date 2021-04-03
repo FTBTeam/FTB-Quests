@@ -1,9 +1,7 @@
 package dev.ftb.mods.ftbquests.block;
 
-import dev.ftb.mods.ftbquests.FTBQuests;
+import dev.ftb.mods.ftbquests.block.entity.BarrierBlockEntity;
 import dev.ftb.mods.ftbquests.block.entity.FTBQuestsBlockEntities;
-import dev.ftb.mods.ftbquests.block.entity.QuestBarrierBlockEntity;
-import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import me.shedaniel.architectury.hooks.EntityHooks;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -30,7 +28,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 public class QuestBarrierBlock extends BaseEntityBlock {
-	public static final BooleanProperty COMPLETED = BooleanProperty.create("completed");
+	public static final BooleanProperty OPEN = BooleanProperty.create("open");
 
 	protected QuestBarrierBlock() {
 		super(Properties.of(Material.BARRIER, MaterialColor.COLOR_LIGHT_BLUE)
@@ -42,12 +40,12 @@ public class QuestBarrierBlock extends BaseEntityBlock {
 				.emissiveRendering((blockState, blockGetter, blockPos) -> true)
 		);
 
-		registerDefaultState(defaultBlockState().setValue(COMPLETED, false));
+		registerDefaultState(defaultBlockState().setValue(OPEN, false));
 	}
 
 	@Override
 	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-		builder.add(COMPLETED);
+		builder.add(OPEN);
 	}
 
 	@Override
@@ -62,13 +60,8 @@ public class QuestBarrierBlock extends BaseEntityBlock {
 		if (entity instanceof Player) {
 			BlockEntity be = bg.getBlockEntity(pos);
 
-			if (be instanceof QuestBarrierBlockEntity) {
-				Player player = (Player) entity;
-				QuestBarrierBlockEntity barrier = (QuestBarrierBlockEntity) be;
-
-				if (barrier.isComplete(FTBQuests.PROXY.getQuestFile(player.level.isClientSide()).getData(player))) {
-					return Shapes.empty();
-				}
+			if (be instanceof BarrierBlockEntity && ((BarrierBlockEntity) be).isOpen((Player) entity)) {
+				return Shapes.empty();
 			}
 		}
 
@@ -104,8 +97,8 @@ public class QuestBarrierBlock extends BaseEntityBlock {
 		if (!level.isClientSide() && stack.hasCustomHoverName()) {
 			BlockEntity blockEntity = level.getBlockEntity(pos);
 
-			if (blockEntity instanceof QuestBarrierBlockEntity) {
-				((QuestBarrierBlockEntity) blockEntity).updateObject(ServerQuestFile.INSTANCE.getID(stack.getHoverName().getString()));
+			if (blockEntity instanceof BarrierBlockEntity) {
+				((BarrierBlockEntity) blockEntity).update(stack.getHoverName().getString());
 			}
 		}
 	}
@@ -113,6 +106,6 @@ public class QuestBarrierBlock extends BaseEntityBlock {
 	@Nullable
 	@Override
 	public BlockEntity newBlockEntity(BlockGetter bg) {
-		return FTBQuestsBlockEntities.createBarrierEntity();
+		return FTBQuestsBlockEntities.createQuestBarrierEntity();
 	}
 }

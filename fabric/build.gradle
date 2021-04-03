@@ -86,3 +86,24 @@ if (ENV.CURSEFORGE_KEY) {
 		}
 	}
 }
+
+publishing {
+	publications {
+		mavenFabric(MavenPublication) {
+			artifactId = rootProject.archivesBaseName + "-fabric"
+			artifact(remapJar.archivePath) {
+				builtBy build
+				classifier null
+			}
+		}
+	}
+
+	repositories {
+		if (ENV.LOCAL_MAVEN) {
+			maven {
+				// upload to local maven repo
+				url = "file://${ENV.LOCAL_MAVEN}"
+			}
+		}
+	}
+}

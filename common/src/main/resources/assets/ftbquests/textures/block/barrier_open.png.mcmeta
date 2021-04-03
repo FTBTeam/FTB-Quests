@@ -8,7 +8,7 @@
     "type": "CTM",
     "layer": "TRANSLUCENT",
     "textures": [
-      "ftbquests:block/barrier_completed_ctm"
+      "ftbquests:block/barrier_open_ctm"
     ]
   }
 }

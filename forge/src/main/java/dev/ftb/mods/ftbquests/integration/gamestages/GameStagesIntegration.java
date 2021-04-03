@@ -15,11 +15,13 @@ import dev.ftb.mods.ftbquests.quest.task.TaskTypes;
 import net.darkhax.gamestages.event.GameStageEvent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.DistExecutor;
 
 /**
  * @author LatvianModder
@@ -27,8 +29,10 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 public class GameStagesIntegration {
 	public static final TaskType GAMESTAGE_TASK = TaskTypes.register(new ResourceLocation(FTBQuests.MOD_ID, "gamestage"), GameStageTask::new, () -> GuiIcons.CONTROLLER);
 	public static final RewardType GAMESTAGE_REWARD = RewardTypes.register(new ResourceLocation(FTBQuests.MOD_ID, "gamestage"), GameStageReward::new, () -> GuiIcons.CONTROLLER);
+	public static GameStageHelperCommon proxy;
 
 	public void init() {
+		proxy = DistExecutor.safeRunForDist(() -> GameStageHelperClient::new, () -> GameStageHelperCommon::new);
 		MinecraftForge.EVENT_BUS.register(GameStagesIntegration.class);
 	}
 
@@ -73,5 +77,9 @@ public class GameStagesIntegration {
 				}
 			}
 		}
+	}
+
+	public static boolean hasStage(Player player, String stage) {
+		return proxy.hasStage(player, stage);
 	}
 }
