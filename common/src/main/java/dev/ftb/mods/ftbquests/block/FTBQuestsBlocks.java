@@ -14,6 +14,7 @@ public class FTBQuestsBlocks {
 
 	public static final RegistrySupplier<Block> BANNER = BLOCKS.register("banner", BannerBlock::new);
 	public static final RegistrySupplier<Block> BARRIER = BLOCKS.register("barrier", QuestBarrierBlock::new);
+	public static final RegistrySupplier<Block> STAGE_BARRIER = BLOCKS.register("stage_barrier", StageBarrierBlock::new);
 
 	public static void register() {
 		BLOCKS.register();

@@ -5,7 +5,6 @@ import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.task.BooleanTask;
 import dev.ftb.mods.ftbquests.quest.task.TaskType;
-import net.darkhax.gamestages.GameStageHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
@@ -70,6 +69,6 @@ public class GameStageTask extends BooleanTask {
 
 	@Override
 	public boolean canSubmit(TeamData teamData, ServerPlayer player) {
-		return GameStageHelper.hasStage(player, stage);
+		return GameStagesIntegration.hasStage(player, stage);
 	}
 }

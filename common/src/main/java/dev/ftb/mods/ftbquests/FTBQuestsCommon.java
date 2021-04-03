@@ -24,6 +24,10 @@ public class FTBQuestsCommon {
 		return false;
 	}
 
+	public Player getClientPlayer() {
+		throw new IllegalStateException("Can't access client player from server side!");
+	}
+
 	public TeamData getClientPlayerData() {
 		throw new IllegalStateException("Can't access client data from server side!");
 	}

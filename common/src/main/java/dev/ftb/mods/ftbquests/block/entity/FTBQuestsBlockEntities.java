@@ -23,14 +23,20 @@ public class FTBQuestsBlockEntities {
 	}
 
 	public static final RegistrySupplier<BlockEntityType<?>> BANNER = register("banner", BannerBlockEntity::new, FTBQuestsBlocks.BANNER);
-	public static final RegistrySupplier<BlockEntityType<?>> BARRIER = register("barrier", FTBQuestsBlockEntities::createBarrierEntity, FTBQuestsBlocks.BARRIER);
+	public static final RegistrySupplier<BlockEntityType<?>> BARRIER = register("barrier", FTBQuestsBlockEntities::createQuestBarrierEntity, FTBQuestsBlocks.BARRIER);
+	public static final RegistrySupplier<BlockEntityType<?>> STAGE_BARRIER = register("stage_barrier", FTBQuestsBlockEntities::createStageBarrierEntity, FTBQuestsBlocks.STAGE_BARRIER);
 
 	public static void register() {
 		BLOCK_ENTITIES.register();
 	}
 
 	@ExpectPlatform
-	public static QuestBarrierBlockEntity createBarrierEntity() {
+	public static QuestBarrierBlockEntity createQuestBarrierEntity() {
+		throw new AssertionError();
+	}
+
+	@ExpectPlatform
+	public static StageBarrierBlockEntity createStageBarrierEntity() {
 		throw new AssertionError();
 	}
 }

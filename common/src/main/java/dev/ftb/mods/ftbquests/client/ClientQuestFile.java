@@ -13,6 +13,7 @@ import dev.ftb.mods.ftbquests.quest.theme.QuestTheme;
 import me.shedaniel.architectury.utils.Env;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.world.entity.Entity;
 
 import java.util.Objects;
 import java.util.UUID;
@@ -138,5 +139,10 @@ public class ClientQuestFile extends QuestFile {
 	public void clearCachedData() {
 		super.clearCachedData();
 		QuestTheme.instance.clearCache();
+	}
+
+	@Override
+	public TeamData getData(Entity player) {
+		return player == Minecraft.getInstance().player ? self : super.getData(player);
 	}
 }
