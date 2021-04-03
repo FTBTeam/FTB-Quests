@@ -1,15 +1,15 @@
 package dev.ftb.mods.ftbquests.quest;
 
-import com.feed_the_beast.mods.ftbguilibrary.config.ConfigCallback;
-import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
-import com.feed_the_beast.mods.ftbguilibrary.config.ConfigList;
-import com.feed_the_beast.mods.ftbguilibrary.config.ConfigString;
-import com.feed_the_beast.mods.ftbguilibrary.config.Tristate;
-import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
-import com.feed_the_beast.mods.ftbguilibrary.icon.IconAnimation;
-import com.feed_the_beast.mods.ftbguilibrary.utils.Bits;
-import com.feed_the_beast.mods.ftbguilibrary.utils.ClientUtils;
-import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
+import dev.ftb.mods.ftbguilibrary.config.ConfigCallback;
+import dev.ftb.mods.ftbguilibrary.config.ConfigGroup;
+import dev.ftb.mods.ftbguilibrary.config.ListConfig;
+import dev.ftb.mods.ftbguilibrary.config.StringConfig;
+import dev.ftb.mods.ftbguilibrary.config.Tristate;
+import dev.ftb.mods.ftbguilibrary.icon.Icon;
+import dev.ftb.mods.ftbguilibrary.icon.IconAnimation;
+import dev.ftb.mods.ftbguilibrary.utils.Bits;
+import dev.ftb.mods.ftbguilibrary.utils.ClientUtils;
+import dev.ftb.mods.ftbguilibrary.utils.MouseButton;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.events.ObjectCompletedEvent;
@@ -480,9 +480,9 @@ public final class Quest extends QuestObject implements Movable {
 		super.getConfig(config);
 		config.addString("subtitle", subtitle, v -> subtitle = v, "");
 
-		ConfigString descType = new ConfigString();
+		StringConfig descType = new StringConfig();
 		descType.defaultValue = "";
-		config.add("description", new ConfigList<String, ConfigString>(descType) {
+		config.add("description", new ListConfig<String, StringConfig>(descType) {
 			@Override
 			public void onClicked(MouseButton button, ConfigCallback callback) {
 				new MultilineTextEditorScreen(this, callback).openGui();

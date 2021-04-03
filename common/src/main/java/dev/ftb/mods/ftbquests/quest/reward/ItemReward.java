@@ -1,9 +1,9 @@
 package dev.ftb.mods.ftbquests.quest.reward;
 
-import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
-import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
-import com.feed_the_beast.mods.ftbguilibrary.icon.ItemIcon;
-import com.feed_the_beast.mods.ftbguilibrary.widget.WrappedIngredient;
+import dev.ftb.mods.ftbguilibrary.config.ConfigGroup;
+import dev.ftb.mods.ftbguilibrary.icon.Icon;
+import dev.ftb.mods.ftbguilibrary.icon.ItemIcon;
+import dev.ftb.mods.ftbguilibrary.widget.WrappedIngredient;
 import dev.ftb.mods.ftbquests.net.FTBQuestsNetHandler;
 import dev.ftb.mods.ftbquests.net.MessageDisplayItemRewardToast;
 import dev.ftb.mods.ftbquests.quest.Quest;

@@ -1,7 +1,7 @@
 package dev.ftb.mods.ftbquests.quest.reward;
 
-import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
-import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
+import dev.ftb.mods.ftbguilibrary.utils.TooltipList;
+import dev.ftb.mods.ftbguilibrary.widget.Button;
 import dev.ftb.mods.ftbquests.gui.SelectChoiceRewardScreen;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import net.fabricmc.api.EnvType;

@@ -1,13 +1,13 @@
 package dev.ftb.mods.ftbquests.gui;
 
-import com.feed_the_beast.mods.ftbguilibrary.config.ConfigCallback;
-import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
-import com.feed_the_beast.mods.ftbguilibrary.misc.GuiButtonListBase;
-import com.feed_the_beast.mods.ftbguilibrary.utils.Key;
-import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
-import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
-import com.feed_the_beast.mods.ftbguilibrary.widget.SimpleTextButton;
-import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
+import dev.ftb.mods.ftbguilibrary.config.ConfigCallback;
+import dev.ftb.mods.ftbguilibrary.icon.Icon;
+import dev.ftb.mods.ftbguilibrary.misc.ButtonListBaseScreen;
+import dev.ftb.mods.ftbguilibrary.utils.Key;
+import dev.ftb.mods.ftbguilibrary.utils.MouseButton;
+import dev.ftb.mods.ftbguilibrary.widget.Panel;
+import dev.ftb.mods.ftbguilibrary.widget.SimpleTextButton;
+import dev.ftb.mods.ftbguilibrary.widget.Theme;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -20,7 +20,7 @@ import java.util.List;
 /**
  * @author LatvianModder
  */
-public class SelectImageScreen extends GuiButtonListBase {
+public class SelectImageScreen extends ButtonListBaseScreen {
 	private final ImageConfig imageConfig;
 	private final ConfigCallback callback;
 	private final List<ResourceLocation> images;

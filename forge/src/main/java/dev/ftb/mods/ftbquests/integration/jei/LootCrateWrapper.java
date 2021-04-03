@@ -1,9 +1,9 @@
 package dev.ftb.mods.ftbquests.integration.jei;
 
-import com.feed_the_beast.mods.ftbguilibrary.icon.ItemIcon;
-import com.feed_the_beast.mods.ftbguilibrary.utils.StringUtils;
-import com.feed_the_beast.mods.ftbguilibrary.widget.GuiHelper;
 import com.mojang.blaze3d.vertex.PoseStack;
+import dev.ftb.mods.ftbguilibrary.icon.ItemIcon;
+import dev.ftb.mods.ftbguilibrary.utils.StringUtils;
+import dev.ftb.mods.ftbguilibrary.widget.GuiHelper;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.quest.loot.LootCrate;
 import dev.ftb.mods.ftbquests.quest.loot.RewardTable;

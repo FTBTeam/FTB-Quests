@@ -1,10 +1,10 @@
 package dev.ftb.mods.ftbquests.quest.task;
 
-import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
-import com.feed_the_beast.mods.ftbguilibrary.config.ConfigLong;
-import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiEditConfig;
-import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiEditConfigFromString;
-import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
+import dev.ftb.mods.ftbguilibrary.config.ConfigGroup;
+import dev.ftb.mods.ftbguilibrary.config.LongConfig;
+import dev.ftb.mods.ftbguilibrary.config.gui.EditConfigFromStringScreen;
+import dev.ftb.mods.ftbguilibrary.config.gui.EditConfigScreen;
+import dev.ftb.mods.ftbguilibrary.icon.Icon;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import me.shedaniel.architectury.core.RegistryEntry;
@@ -69,9 +69,9 @@ public final class TaskType extends RegistryEntry<TaskType> {
 
 				if (task instanceof ISingleLongValueTask) {
 					ISingleLongValueTask t = (ISingleLongValueTask) task;
-					ConfigLong c = new ConfigLong(0L, t.getMaxConfigValue());
+					LongConfig c = new LongConfig(0L, t.getMaxConfigValue());
 
-					GuiEditConfigFromString.open(c, t.getDefaultConfigValue(), t.getDefaultConfigValue(), accepted -> {
+					EditConfigFromStringScreen.open(c, t.getDefaultConfigValue(), t.getDefaultConfigValue(), accepted -> {
 						if (accepted) {
 							((ISingleLongValueTask) task).setValue(c.value);
 							callback.accept(task);
@@ -89,7 +89,7 @@ public final class TaskType extends RegistryEntry<TaskType> {
 					}
 					gui.run();
 				};
-				new GuiEditConfig(group).openGui();
+				new EditConfigScreen(group).openGui();
 			}
 		};
 	}

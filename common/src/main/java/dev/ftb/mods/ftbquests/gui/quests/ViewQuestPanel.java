@@ -1,21 +1,21 @@
 package dev.ftb.mods.ftbquests.gui.quests;
 
-import com.feed_the_beast.mods.ftbguilibrary.icon.Color4I;
-import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
-import com.feed_the_beast.mods.ftbguilibrary.misc.CompactGridLayout;
-import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
-import com.feed_the_beast.mods.ftbguilibrary.widget.BlankPanel;
-import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
-import com.feed_the_beast.mods.ftbguilibrary.widget.ColorWidget;
-import com.feed_the_beast.mods.ftbguilibrary.widget.ComponentTextField;
-import com.feed_the_beast.mods.ftbguilibrary.widget.ContextMenuItem;
-import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
-import com.feed_the_beast.mods.ftbguilibrary.widget.SimpleButton;
-import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
-import com.feed_the_beast.mods.ftbguilibrary.widget.Widget;
-import com.feed_the_beast.mods.ftbguilibrary.widget.WidgetLayout;
-import com.feed_the_beast.mods.ftbguilibrary.widget.WidgetVerticalSpace;
 import com.mojang.blaze3d.vertex.PoseStack;
+import dev.ftb.mods.ftbguilibrary.icon.Color4I;
+import dev.ftb.mods.ftbguilibrary.icon.Icon;
+import dev.ftb.mods.ftbguilibrary.misc.CompactGridLayout;
+import dev.ftb.mods.ftbguilibrary.utils.MouseButton;
+import dev.ftb.mods.ftbguilibrary.widget.BlankPanel;
+import dev.ftb.mods.ftbguilibrary.widget.Button;
+import dev.ftb.mods.ftbguilibrary.widget.ColorWidget;
+import dev.ftb.mods.ftbguilibrary.widget.ComponentTextField;
+import dev.ftb.mods.ftbguilibrary.widget.ContextMenuItem;
+import dev.ftb.mods.ftbguilibrary.widget.Panel;
+import dev.ftb.mods.ftbguilibrary.widget.SimpleButton;
+import dev.ftb.mods.ftbguilibrary.widget.Theme;
+import dev.ftb.mods.ftbguilibrary.widget.VerticalSpaceWidget;
+import dev.ftb.mods.ftbguilibrary.widget.Widget;
+import dev.ftb.mods.ftbguilibrary.widget.WidgetLayout;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.client.ImageComponent;
 import dev.ftb.mods.ftbquests.gui.ImageComponentWidget;
@@ -239,7 +239,7 @@ public class ViewQuestPanel extends Panel {
 
 		if (showText && quest.getDescription().length > 0) {
 			if (desc != TextComponent.EMPTY) {
-				panelText.add(new WidgetVerticalSpace(panelText, 7));
+				panelText.add(new VerticalSpaceWidget(panelText, 7));
 			}
 
 			// panelText.add(new ComponentTextField(panelText).setMaxWidth(panelText.width).setSpacing(9).setText(quest.getJoinedDescription()));
@@ -255,7 +255,7 @@ public class ViewQuestPanel extends Panel {
 
 		if (showText && !quest.guidePage.isEmpty()) {
 			if (desc != TextComponent.EMPTY) {
-				panelText.add(new WidgetVerticalSpace(panelText, 7));
+				panelText.add(new VerticalSpaceWidget(panelText, 7));
 			}
 
 			panelText.add(new OpenInGuideButton(panelText, quest));

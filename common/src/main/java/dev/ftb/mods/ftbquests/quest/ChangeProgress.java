@@ -1,7 +1,7 @@
 package dev.ftb.mods.ftbquests.quest;
 
-import com.feed_the_beast.mods.ftbguilibrary.config.NameMap;
-import com.feed_the_beast.mods.ftbguilibrary.config.Tristate;
+import dev.ftb.mods.ftbguilibrary.config.NameMap;
+import dev.ftb.mods.ftbguilibrary.config.Tristate;
 
 /**
  * @author LatvianModder

@@ -1,11 +1,11 @@
 package dev.ftb.mods.ftbquests.quest;
 
-import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
-import com.feed_the_beast.mods.ftbguilibrary.config.ConfigString;
-import com.feed_the_beast.mods.ftbguilibrary.icon.Color4I;
-import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
+import dev.ftb.mods.ftbguilibrary.config.ConfigGroup;
+import dev.ftb.mods.ftbguilibrary.config.StringConfig;
+import dev.ftb.mods.ftbguilibrary.icon.Color4I;
+import dev.ftb.mods.ftbguilibrary.icon.Icon;
 import dev.ftb.mods.ftbquests.gui.ImageConfig;
 import dev.ftb.mods.ftbquests.net.MessageEditObject;
 import dev.ftb.mods.ftbquests.util.ConfigQuestObject;
@@ -133,7 +133,7 @@ public final class ChapterImage implements Movable {
 		config.addDouble("height", height, v -> height = v, 1, 0, Double.POSITIVE_INFINITY);
 		config.addDouble("rotation", rotation, v -> rotation = v, 0, -180, 180);
 		config.add("image", new ImageConfig(), image.toString(), v -> image = Icon.getIcon(v), "minecraft:textures/gui/presets/isles.png");
-		config.addList("hover", hover, new ConfigString(), "");
+		config.addList("hover", hover, new StringConfig(), "");
 		config.addString("click", click, v -> click = v, "");
 		config.addBool("dev", dev, v -> dev = v, false);
 		config.addBool("corner", corner, v -> corner = v, false);

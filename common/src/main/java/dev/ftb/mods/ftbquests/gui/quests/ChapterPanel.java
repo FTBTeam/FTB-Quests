@@ -1,21 +1,21 @@
 package dev.ftb.mods.ftbquests.gui.quests;
 
-import com.feed_the_beast.mods.ftbguilibrary.config.ConfigString;
-import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiEditConfigFromString;
-import com.feed_the_beast.mods.ftbguilibrary.icon.Color4I;
-import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
-import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
-import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
-import com.feed_the_beast.mods.ftbguilibrary.widget.Button;
-import com.feed_the_beast.mods.ftbguilibrary.widget.ContextMenuItem;
-import com.feed_the_beast.mods.ftbguilibrary.widget.GuiHelper;
-import com.feed_the_beast.mods.ftbguilibrary.widget.GuiIcons;
-import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
-import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
-import com.feed_the_beast.mods.ftbguilibrary.widget.Widget;
-import com.feed_the_beast.mods.ftbguilibrary.widget.WidgetLayout;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import dev.ftb.mods.ftbguilibrary.config.StringConfig;
+import dev.ftb.mods.ftbguilibrary.config.gui.EditConfigFromStringScreen;
+import dev.ftb.mods.ftbguilibrary.icon.Color4I;
+import dev.ftb.mods.ftbguilibrary.icon.Icon;
+import dev.ftb.mods.ftbguilibrary.utils.MouseButton;
+import dev.ftb.mods.ftbguilibrary.utils.TooltipList;
+import dev.ftb.mods.ftbguilibrary.widget.Button;
+import dev.ftb.mods.ftbguilibrary.widget.ContextMenuItem;
+import dev.ftb.mods.ftbguilibrary.widget.GuiHelper;
+import dev.ftb.mods.ftbguilibrary.widget.GuiIcons;
+import dev.ftb.mods.ftbguilibrary.widget.Panel;
+import dev.ftb.mods.ftbguilibrary.widget.Theme;
+import dev.ftb.mods.ftbguilibrary.widget.Widget;
+import dev.ftb.mods.ftbguilibrary.widget.WidgetLayout;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.gui.ChangeChapterGroupScreen;
@@ -82,8 +82,8 @@ public class ChapterPanel extends Panel {
 
 				List<ContextMenuItem> contextMenu = new ArrayList<>();
 				contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.chapter"), ThemeProperties.ADD_ICON.get(), () -> {
-					ConfigString c = new ConfigString(Pattern.compile("^.+$"));
-					GuiEditConfigFromString.open(c, "", "", accepted -> {
+					StringConfig c = new StringConfig(Pattern.compile("^.+$"));
+					EditConfigFromStringScreen.open(c, "", "", accepted -> {
 						chapterPanel.questScreen.openGui();
 
 						if (accepted && !c.value.isEmpty()) {
@@ -100,8 +100,8 @@ public class ChapterPanel extends Panel {
 
 				contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.chapter_group"), ThemeProperties.ADD_ICON.get(), () -> {
 					playClickSound();
-					ConfigString c = new ConfigString(Pattern.compile("^.+$"));
-					GuiEditConfigFromString.open(c, "", "", accepted -> {
+					StringConfig c = new StringConfig(Pattern.compile("^.+$"));
+					EditConfigFromStringScreen.open(c, "", "", accepted -> {
 						chapterPanel.questScreen.openGui();
 
 						if (accepted) {
@@ -166,8 +166,8 @@ public class ChapterPanel extends Panel {
 			if (chapterPanel.questScreen.file.canEdit() && getMouseX() > getX() + width - 15) {
 				playClickSound();
 
-				ConfigString c = new ConfigString(Pattern.compile("^.+$"));
-				GuiEditConfigFromString.open(c, "", "", accepted -> {
+				StringConfig c = new StringConfig(Pattern.compile("^.+$"));
+				EditConfigFromStringScreen.open(c, "", "", accepted -> {
 					chapterPanel.questScreen.openGui();
 
 					if (accepted && !c.value.isEmpty()) {

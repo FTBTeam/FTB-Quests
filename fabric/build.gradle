@@ -23,8 +23,8 @@ dependencies {
 	modApi "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_api_version}"
 	modApi "me.shedaniel:architectury-fabric:${rootProject.architectury_version}"
 
+	modImplementation "dev.ftb.mods:ftb-gui-library-fabric:${rootProject.ftb_gui_library_version}"
 	modImplementation "dev.ftb.mods:ftb-teams-fabric:${rootProject.ftb_teams_version}"
-	modCompile "curse.maven:ftb-gui-library-438495:${rootProject.ftb_gui_library_version_fabric}"
 	modCompile "curse.maven:item-filter-438500:${rootProject.itemfilters_version_fabric}"
 	modCompile "curse.maven:kubejs-fabric-395864:${rootProject.kubejs_file_fabric}"
 	modCompile "curse.maven:rhino-416294:${rhino_file}"

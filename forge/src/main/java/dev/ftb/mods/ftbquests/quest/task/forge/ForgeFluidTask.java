@@ -1,9 +1,9 @@
 package dev.ftb.mods.ftbquests.quest.task.forge;
 
-import com.feed_the_beast.mods.ftbguilibrary.config.ConfigFluid;
-import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
-import com.feed_the_beast.mods.ftbguilibrary.config.ConfigNBT;
-import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
+import dev.ftb.mods.ftbguilibrary.config.ConfigGroup;
+import dev.ftb.mods.ftbguilibrary.config.FluidConfig;
+import dev.ftb.mods.ftbguilibrary.config.NBTConfig;
+import dev.ftb.mods.ftbguilibrary.icon.Icon;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.TeamData;
@@ -165,8 +165,8 @@ public class ForgeFluidTask extends Task {
 	public void getConfig(ConfigGroup config) {
 		super.getConfig(config);
 
-		config.add("fluid", new ConfigFluid(false), fluid, v -> fluid = v, Fluids.WATER);
-		config.add("fluid_nbt", new ConfigNBT(), fluidNBT, v -> fluidNBT = v, null);
+		config.add("fluid", new FluidConfig(false), fluid, v -> fluid = v, Fluids.WATER);
+		config.add("fluid_nbt", new NBTConfig(), fluidNBT, v -> fluidNBT = v, null);
 		config.addLong("amount", amount, v -> amount = v, FluidStack.bucketAmount().longValue(), 1, Long.MAX_VALUE);
 	}
 

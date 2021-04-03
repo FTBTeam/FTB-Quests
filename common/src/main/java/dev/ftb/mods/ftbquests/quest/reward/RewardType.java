@@ -1,8 +1,8 @@
 package dev.ftb.mods.ftbquests.quest.reward;
 
-import com.feed_the_beast.mods.ftbguilibrary.config.ConfigGroup;
-import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiEditConfig;
-import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
+import dev.ftb.mods.ftbguilibrary.config.ConfigGroup;
+import dev.ftb.mods.ftbguilibrary.config.gui.EditConfigScreen;
+import dev.ftb.mods.ftbguilibrary.icon.Icon;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.gui.SelectQuestObjectScreen;
 import dev.ftb.mods.ftbquests.quest.Quest;
@@ -90,7 +90,7 @@ public final class RewardType extends RegistryEntry<RewardType> {
 					}
 					gui.run();
 				};
-				new GuiEditConfig(group).openGui();
+				new EditConfigScreen(group).openGui();
 			}
 		};
 	}

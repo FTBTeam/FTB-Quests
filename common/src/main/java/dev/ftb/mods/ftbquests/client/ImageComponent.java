@@ -1,6 +1,6 @@
 package dev.ftb.mods.ftbquests.client;
 
-import com.feed_the_beast.mods.ftbguilibrary.icon.Icon;
+import dev.ftb.mods.ftbguilibrary.icon.Icon;
 import net.minecraft.network.chat.TextComponent;
 
 public class ImageComponent extends TextComponent {

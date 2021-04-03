@@ -1,17 +1,17 @@
 package dev.ftb.mods.ftbquests.gui;
 
-import com.feed_the_beast.mods.ftbguilibrary.config.ConfigString;
-import com.feed_the_beast.mods.ftbguilibrary.config.gui.GuiEditConfigFromString;
-import com.feed_the_beast.mods.ftbguilibrary.icon.Color4I;
-import com.feed_the_beast.mods.ftbguilibrary.misc.GuiButtonListBase;
-import com.feed_the_beast.mods.ftbguilibrary.utils.MouseButton;
-import com.feed_the_beast.mods.ftbguilibrary.utils.TooltipList;
-import com.feed_the_beast.mods.ftbguilibrary.widget.ContextMenuItem;
-import com.feed_the_beast.mods.ftbguilibrary.widget.GuiIcons;
-import com.feed_the_beast.mods.ftbguilibrary.widget.Panel;
-import com.feed_the_beast.mods.ftbguilibrary.widget.SimpleTextButton;
-import com.feed_the_beast.mods.ftbguilibrary.widget.Theme;
 import com.mojang.blaze3d.vertex.PoseStack;
+import dev.ftb.mods.ftbguilibrary.config.StringConfig;
+import dev.ftb.mods.ftbguilibrary.config.gui.EditConfigFromStringScreen;
+import dev.ftb.mods.ftbguilibrary.icon.Color4I;
+import dev.ftb.mods.ftbguilibrary.misc.ButtonListBaseScreen;
+import dev.ftb.mods.ftbguilibrary.utils.MouseButton;
+import dev.ftb.mods.ftbguilibrary.utils.TooltipList;
+import dev.ftb.mods.ftbguilibrary.widget.ContextMenuItem;
+import dev.ftb.mods.ftbguilibrary.widget.GuiIcons;
+import dev.ftb.mods.ftbguilibrary.widget.Panel;
+import dev.ftb.mods.ftbguilibrary.widget.SimpleTextButton;
+import dev.ftb.mods.ftbguilibrary.widget.Theme;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.net.MessageCreateObject;
@@ -34,7 +34,7 @@ import java.util.regex.Pattern;
 /**
  * @author LatvianModder
  */
-public class RewardTablesScreen extends GuiButtonListBase {
+public class RewardTablesScreen extends ButtonListBaseScreen {
 	private class RewardTableButton extends SimpleTextButton {
 		private final RewardTable table;
 
@@ -154,8 +154,8 @@ public class RewardTablesScreen extends GuiButtonListBase {
 			@Override
 			public void onClicked(MouseButton button) {
 				playClickSound();
-				ConfigString c = new ConfigString();
-				GuiEditConfigFromString.open(c, "", "", accepted -> {
+				StringConfig c = new StringConfig();
+				EditConfigFromStringScreen.open(c, "", "", accepted -> {
 					if (accepted) {
 						RewardTable table = new RewardTable(ClientQuestFile.INSTANCE);
 						table.title = c.value;

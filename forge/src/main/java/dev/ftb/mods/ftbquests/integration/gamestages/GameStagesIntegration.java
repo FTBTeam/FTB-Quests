@@ -1,6 +1,6 @@
 package dev.ftb.mods.ftbquests.integration.gamestages;
 
-import com.feed_the_beast.mods.ftbguilibrary.widget.GuiIcons;
+import dev.ftb.mods.ftbguilibrary.widget.GuiIcons;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.quest.Chapter;
 import dev.ftb.mods.ftbquests.quest.ChapterGroup;
