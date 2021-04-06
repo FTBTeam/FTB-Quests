@@ -126,5 +126,15 @@ publishing {
 				url = "file://${ENV.LOCAL_MAVEN}"
 			}
 		}
+
+		if (ENV.SAPS_TOKEN) {
+			maven {
+				url "https://maven.saps.dev/minecraft"
+				credentials {
+					username = "latvian"
+					password = "${ENV.SAPS_TOKEN}"
+				}
+			}
+		}
 	}
 }
