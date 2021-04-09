@@ -301,4 +301,11 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon {
 			}
 		}
 	}
+
+	@Override
+	public void syncLock(UUID id, boolean lock) {
+		if (ClientQuestFile.INSTANCE.getData(id).setLocked(lock)) {
+			ClientQuestFile.INSTANCE.refreshGui();
+		}
+	}
 }

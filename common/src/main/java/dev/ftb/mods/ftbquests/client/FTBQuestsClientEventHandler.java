@@ -66,8 +66,14 @@ public class FTBQuestsClientEventHandler {
 		if (event.getButton().id.equals(QUESTS_BUTTON)) {
 			event.getButton().setCustomTextHandler(() ->
 			{
-				if (ClientQuestFile.exists() && ClientQuestFile.INSTANCE.self.hasUnclaimedRewards(Minecraft.getInstance().player.getUUID(), ClientQuestFile.INSTANCE)) {
-					return "[!]";
+				if (ClientQuestFile.exists()) {
+					if (ClientQuestFile.INSTANCE.disableGui && !ClientQuestFile.INSTANCE.self.getCanEdit()) {
+						return "[X]";
+					} else if (ClientQuestFile.INSTANCE.self.isLocked()) {
+						return "[X]";
+					} else if (ClientQuestFile.INSTANCE.self.hasUnclaimedRewards(Minecraft.getInstance().player.getUUID(), ClientQuestFile.INSTANCE)) {
+						return "[!]";
+					}
 				}
 
 				return "";

@@ -126,12 +126,17 @@ public class FTBQuestsEventHandler {
 				autoSubmitTasks = ServerQuestFile.INSTANCE.collect(o -> o instanceof Task && ((Task) o).autoSubmitOnPlayerTick() > 0);
 			}
 
-			if (autoSubmitTasks == null || autoSubmitTasks.isEmpty()) // Don't be deceived, its somehow possible to be null here
-			{
+			// Don't be deceived, its somehow possible to be null here
+			if (autoSubmitTasks == null || autoSubmitTasks.isEmpty()) {
 				return;
 			}
 
 			TeamData data = ServerQuestFile.INSTANCE.getData(player);
+
+			if (data.isLocked()) {
+				return;
+			}
+
 			long t = player.level.getGameTime();
 
 			for (Task task : autoSubmitTasks) {
@@ -181,6 +186,10 @@ public class FTBQuestsEventHandler {
 	private void changedDimension(ServerPlayer player, ResourceKey<Level> oldLevel, ResourceKey<Level> newLevel) {
 		if (!PlayerHooks.isFake(player)) {
 			TeamData data = ServerQuestFile.INSTANCE.getData(player);
+
+			if (data.isLocked()) {
+				return;
+			}
 
 			for (DimensionTask task : ServerQuestFile.INSTANCE.collect(DimensionTask.class)) {
 				task.submitTask(data, player);

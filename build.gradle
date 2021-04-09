@@ -37,7 +37,13 @@ allprojects {
 	repositories {
 		mavenLocal()
 		maven { url "https://maven.shedaniel.me/" }
-		maven { url "https://maven.latvian.dev" }
+		maven {
+			url "https://maven.saps.dev/minecraft"
+			content {
+				includeGroup "dev.ftb.mods"
+				includeGroup "dev.latvian.mods"
+			}
+		}
 		maven {
 			url "https://www.cursemaven.com"
 			content {

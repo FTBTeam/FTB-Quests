@@ -13,7 +13,6 @@ import dev.ftb.mods.ftbguilibrary.widget.Panel;
 import dev.ftb.mods.ftbguilibrary.widget.SimpleTextButton;
 import dev.ftb.mods.ftbguilibrary.widget.Theme;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
-import dev.ftb.mods.ftbquests.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.net.MessageCreateObject;
 import dev.ftb.mods.ftbquests.net.MessageEditObject;
 import dev.ftb.mods.ftbquests.quest.Chapter;
@@ -58,7 +57,7 @@ public class RewardTablesScreen extends ButtonListBaseScreen {
 			}
 
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
-			QuestScreen.addObjectMenuItems(contextMenu, RewardTablesScreen.this, table);
+			ClientQuestFile.INSTANCE.questScreen.addObjectMenuItems(contextMenu, RewardTablesScreen.this, table);
 			contextMenu.add(new ContextMenuItem(new TranslatableComponent("item.ftbquests.lootcrate"), GuiIcons.ACCEPT, () -> {
 				if (table.lootCrate == null) {
 					table.lootCrate = new LootCrate(table);

@@ -9,6 +9,7 @@ import dev.ftb.mods.ftbquests.net.MessageObjectCompletedReset;
 import dev.ftb.mods.ftbquests.net.MessageObjectStarted;
 import dev.ftb.mods.ftbquests.net.MessageObjectStartedReset;
 import dev.ftb.mods.ftbquests.net.MessageSyncEditingMode;
+import dev.ftb.mods.ftbquests.net.MessageSyncLock;
 import dev.ftb.mods.ftbquests.net.MessageUpdateTaskProgress;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.reward.RewardAutoClaim;
@@ -63,6 +64,7 @@ public class TeamData {
 	public final UUID uuid;
 	public String name;
 	public boolean shouldSave;
+	private boolean locked;
 
 	private final Long2LongOpenHashMap taskProgress;
 	private final Object2LongOpenHashMap<QuestKey> claimedRewards;
@@ -119,6 +121,10 @@ public class TeamData {
 	}
 
 	public boolean setStarted(long id, @Nullable Date time) {
+		if (locked) {
+			return false;
+		}
+
 		if (time == null) {
 			if (started.remove(id) >= 0L) {
 				clearCachedProgress();
@@ -153,6 +159,10 @@ public class TeamData {
 	}
 
 	public boolean setCompleted(long id, @Nullable Date time) {
+		if (locked) {
+			return false;
+		}
+
 		if (time == null) {
 			if (completed.remove(id) >= 0L) {
 				clearCachedProgress();
@@ -209,6 +219,10 @@ public class TeamData {
 	}
 
 	public boolean claimReward(UUID player, Reward reward) {
+		if (locked) {
+			return false;
+		}
+
 		QuestKey key = QuestKey.of(reward.isTeamReward() ? Util.NIL_UUID : player, reward.id);
 
 		if (!claimedRewards.containsKey(key)) {
@@ -222,7 +236,7 @@ public class TeamData {
 	}
 
 	public boolean resetReward(Reward reward) {
-		if (claimedRewards.object2LongEntrySet().removeIf(e -> e.getKey().id == reward.id)) {
+		if (!locked && claimedRewards.object2LongEntrySet().removeIf(e -> e.getKey().id == reward.id)) {
 			clearCachedProgress();
 			save();
 			return true;
@@ -232,7 +246,7 @@ public class TeamData {
 	}
 
 	public boolean resetReward(UUID player, Reward reward) {
-		if (claimedRewards.removeLong(QuestKey.of(reward.isTeamReward() ? Util.NIL_UUID : player, reward.id)) != 0L) {
+		if (!locked && claimedRewards.removeLong(QuestKey.of(reward.isTeamReward() ? Util.NIL_UUID : player, reward.id)) != 0L) {
 			clearCachedProgress();
 			save();
 			return true;
@@ -242,7 +256,7 @@ public class TeamData {
 	}
 
 	public boolean setRewardClaimed(UUID player, Reward reward, Date time) {
-		if (claimedRewards.put(QuestKey.of(reward.isTeamReward() ? Util.NIL_UUID : player, reward.id), time.getTime()) != 0L) {
+		if (!locked && claimedRewards.put(QuestKey.of(reward.isTeamReward() ? Util.NIL_UUID : player, reward.id), time.getTime()) != 0L) {
 			clearCachedProgress();
 			save();
 			return true;
@@ -320,6 +334,7 @@ public class TeamData {
 		nbt.putString("uuid", UUIDTypeAdapter.fromUUID(uuid));
 		nbt.putString("name", name);
 		nbt.putBoolean("can_edit", canEdit);
+		nbt.putBoolean("lock", locked);
 		nbt.putLong("money", money);
 		nbt.putBoolean("auto_pin", autoPin);
 
@@ -381,6 +396,7 @@ public class TeamData {
 
 		name = nbt.getString("name");
 		canEdit = nbt.getBoolean("can_edit");
+		locked = nbt.getBoolean("lock");
 		money = nbt.getLong("money");
 		autoPin = nbt.getBoolean("auto_pin");
 
@@ -445,6 +461,8 @@ public class TeamData {
 			buffer.writeVarLong(now - entry.getValue());
 		}
 
+		buffer.writeBoolean(locked);
+
 		if (self) {
 			buffer.writeVarInt(claimedRewards.size());
 
@@ -492,6 +510,8 @@ public class TeamData {
 		for (int i = 0; i < cs; i++) {
 			completed.put(buffer.readLong(), now - buffer.readVarLong());
 		}
+
+		locked = buffer.readBoolean();
 
 		claimedRewards.clear();
 		canEdit = false;
@@ -670,6 +690,10 @@ public class TeamData {
 	}
 
 	public final void setProgress(Task task, long progress) {
+		if (locked) {
+			return;
+		}
+
 		long maxProgress = task.getMaxProgress();
 		progress = Math.max(0L, Math.min(progress, maxProgress));
 		long prevProgress = getProgress(task);
@@ -718,5 +742,29 @@ public class TeamData {
 
 	public final void addProgress(Task task, long p) {
 		setProgress(task, getProgress(task) + p);
+	}
+
+	public boolean isLocked() {
+		return locked;
+	}
+
+	public boolean setLocked(boolean b) {
+		if (locked != b) {
+			locked = b;
+			clearCachedProgress();
+			save();
+
+			if (file.isServerSide()) {
+				ServerPlayer player = getPlayer();
+
+				if (player != null) {
+					new MessageSyncLock(uuid, locked).sendTo(player);
+				}
+			}
+
+			return true;
+		}
+
+		return false;
 	}
 }

@@ -171,7 +171,7 @@ public class QuestScreen extends BaseScreen {
 		}
 	}
 
-	public static void addObjectMenuItems(List<ContextMenuItem> contextMenu, Runnable gui, QuestObjectBase object) {
+	public void addObjectMenuItems(List<ContextMenuItem> contextMenu, Runnable gui, QuestObjectBase object) {
 		ConfigGroup group = new ConfigGroup(FTBQuests.MOD_ID);
 		ConfigGroup g = object.createSubGroup(group);
 		object.getConfig(g);
@@ -232,11 +232,11 @@ public class QuestScreen extends BaseScreen {
 
 		contextMenu.add(delete);
 
-		contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.gui.reset_progress"), ThemeProperties.RELOAD_ICON.get(), () -> MessageChangeProgress.send(object, progressChange -> {
+		contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.gui.reset_progress"), ThemeProperties.RELOAD_ICON.get(), () -> MessageChangeProgress.send(file.self, object, progressChange -> {
 			progressChange.reset = true;
 		})).setYesNo(new TranslatableComponent("ftbquests.gui.reset_progress_q")));
 
-		contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.gui.complete_instantly"), ThemeProperties.CHECK_ICON.get(), () -> MessageChangeProgress.send(object, progressChange -> {
+		contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.gui.complete_instantly"), ThemeProperties.CHECK_ICON.get(), () -> MessageChangeProgress.send(file.self, object, progressChange -> {
 			progressChange.reset = false;
 		})).setYesNo(new TranslatableComponent("ftbquests.gui.complete_instantly_q")));
 

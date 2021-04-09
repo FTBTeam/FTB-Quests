@@ -60,7 +60,7 @@ public class GameStagesIntegration {
 	public static void checkStages(ServerPlayer player) {
 		TeamData data = ServerQuestFile.INSTANCE == null || (player instanceof FakePlayer) ? null : ServerQuestFile.INSTANCE.getData(player);
 
-		if (data == null) {
+		if (data == null || data.isLocked()) {
 			return;
 		}
 

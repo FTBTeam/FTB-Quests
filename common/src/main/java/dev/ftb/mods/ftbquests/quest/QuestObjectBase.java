@@ -135,6 +135,10 @@ public abstract class QuestObjectBase {
 	}
 
 	public final void forceProgressRaw(TeamData teamData, ProgressChange progressChange) {
+		if (teamData.isLocked()) {
+			return;
+		}
+
 		teamData.clearCachedProgress();
 		ChangeProgress.sendUpdates = false;
 		ChangeProgress.sendNotifications = progressChange.notifications ? Tristate.TRUE : Tristate.FALSE;

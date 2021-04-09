@@ -116,7 +116,7 @@ public class TaskButton extends Button {
 				}
 			}
 
-			QuestScreen.addObjectMenuItems(contextMenu, getGui(), task);
+			questScreen.addObjectMenuItems(contextMenu, getGui(), task);
 			getGui().openContextMenu(contextMenu);
 		}
 	}
