@@ -68,4 +68,7 @@ public class FTBQuestsNetCommon {
 
 	public void objectCompleted(UUID teamId, long id, @Nullable Date time) {
 	}
+
+	public void syncLock(UUID id, boolean lock) {
+	}
 }

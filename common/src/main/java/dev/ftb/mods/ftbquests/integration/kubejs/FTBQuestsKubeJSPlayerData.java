@@ -78,4 +78,14 @@ public class FTBQuestsKubeJSPlayerData {
 		TeamData data = getData();
 		return data.getProgress(data.file.getID(id));
 	}
+
+	public boolean getLocked() {
+		TeamData data = getData();
+		return data.isLocked();
+	}
+
+	public void setLocked(boolean v) {
+		TeamData data = getData();
+		data.setLocked(v);
+	}
 }

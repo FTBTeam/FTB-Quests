@@ -93,6 +93,7 @@ public abstract class QuestFile extends QuestObject {
 	public boolean disableGui;
 	public double gridScale;
 	public boolean pauseGame;
+	public String lockMessage;
 
 	public QuestFile() {
 		id = 1;
@@ -123,6 +124,7 @@ public abstract class QuestFile extends QuestObject {
 		disableGui = false;
 		gridScale = 0.5D;
 		pauseGame = false;
+		lockMessage = "";
 	}
 
 	public abstract Env getSide();
@@ -420,6 +422,7 @@ public abstract class QuestFile extends QuestObject {
 		nbt.putBoolean("disable_gui", disableGui);
 		nbt.putDouble("grid_scale", gridScale);
 		nbt.putBoolean("pause_game", pauseGame);
+		nbt.putString("lock_message", lockMessage);
 	}
 
 	@Override
@@ -457,6 +460,7 @@ public abstract class QuestFile extends QuestObject {
 		disableGui = nbt.getBoolean("disable_gui");
 		gridScale = nbt.contains("grid_scale") ? nbt.getDouble("grid_scale") : 0.5D;
 		pauseGame = nbt.getBoolean("pause_game");
+		lockMessage = nbt.getString("lock_message");
 	}
 
 	public final void writeDataFull(Path folder) {
@@ -739,6 +743,7 @@ public abstract class QuestFile extends QuestObject {
 		buffer.writeBoolean(disableGui);
 		buffer.writeDouble(gridScale);
 		buffer.writeBoolean(pauseGame);
+		buffer.writeUtf(lockMessage, Short.MAX_VALUE);
 	}
 
 	@Override
@@ -756,6 +761,7 @@ public abstract class QuestFile extends QuestObject {
 		disableGui = buffer.readBoolean();
 		gridScale = buffer.readDouble();
 		pauseGame = buffer.readBoolean();
+		lockMessage = buffer.readUtf(Short.MAX_VALUE);
 	}
 
 	public final void writeNetDataFull(FriendlyByteBuf buffer, UUID self) {
@@ -1043,6 +1049,7 @@ public abstract class QuestFile extends QuestObject {
 		config.addBool("drop_loot_crates", dropLootCrates, v -> dropLootCrates = v, false);
 		config.addBool("disable_gui", disableGui, v -> disableGui = v, false);
 		config.addDouble("grid_scale", gridScale, v -> gridScale = v, 0.5D, 1D / 32D, 8D);
+		config.addString("lock_message", lockMessage, v -> lockMessage = v, "");
 
 		ConfigGroup defaultsGroup = config.getGroup("defaults");
 		defaultsGroup.addBool("reward_team", defaultRewardTeam, v -> defaultRewardTeam = v, false);

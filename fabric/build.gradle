@@ -29,6 +29,8 @@ dependencies {
 	modCompile "curse.maven:kubejs-fabric-395864:${rootProject.kubejs_file_fabric}"
 	modCompile "curse.maven:rhino-416294:${rhino_file}"
 
+	modCompile "curse.maven:ctm-fabric-432493:3233998"
+
 	implementation(project(path: ":common")) {
 		transitive = false
 	}

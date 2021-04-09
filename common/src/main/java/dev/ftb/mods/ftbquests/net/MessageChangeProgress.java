@@ -1,6 +1,5 @@
 package dev.ftb.mods.ftbquests.net;
 
-import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.TeamData;
@@ -33,12 +32,16 @@ public class MessageChangeProgress extends MessageBase {
 	}
 
 	@Environment(EnvType.CLIENT)
-	public static void send(QuestObjectBase object, Consumer<ProgressChange> progressChange) {
-		ProgressChange change = new ProgressChange(ClientQuestFile.INSTANCE);
+	public static void send(TeamData team, QuestObjectBase object, Consumer<ProgressChange> progressChange) {
+		if (team.isLocked()) {
+			return;
+		}
+
+		ProgressChange change = new ProgressChange(team.file);
 		change.origin = object;
 		change.player = Minecraft.getInstance().player.getUUID();
 		progressChange.accept(change);
-		new MessageChangeProgress(ClientQuestFile.INSTANCE.self.uuid, change).sendToServer();
+		new MessageChangeProgress(team.uuid, change).sendToServer();
 	}
 
 	@Override

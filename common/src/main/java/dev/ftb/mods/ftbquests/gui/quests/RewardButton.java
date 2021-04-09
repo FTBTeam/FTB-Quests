@@ -116,7 +116,7 @@ public class RewardButton extends Button {
 		} else if (button.isRight() && ClientQuestFile.exists() && ClientQuestFile.INSTANCE.canEdit()) {
 			playClickSound();
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
-			QuestScreen.addObjectMenuItems(contextMenu, getGui(), reward);
+			questScreen.addObjectMenuItems(contextMenu, getGui(), reward);
 			getGui().openContextMenu(contextMenu);
 		}
 	}

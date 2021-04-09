@@ -218,7 +218,7 @@ public class QuestButton extends Button {
 				// contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.gui.edit_text"), GuiIcons.INFO, () -> TextEditorFrame.open(quest)));
 
 				contextMenu.add(ContextMenuItem.SEPARATOR);
-				QuestScreen.addObjectMenuItems(contextMenu, getGui(), quest);
+				questScreen.addObjectMenuItems(contextMenu, getGui(), quest);
 			}
 
 			getGui().openContextMenu(contextMenu);

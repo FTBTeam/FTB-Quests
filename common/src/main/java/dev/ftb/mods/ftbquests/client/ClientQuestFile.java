@@ -2,6 +2,8 @@ package dev.ftb.mods.ftbquests.client;
 
 import dev.ftb.mods.ftbguilibrary.utils.ClientUtils;
 import dev.ftb.mods.ftbguilibrary.widget.BaseScreen;
+import dev.ftb.mods.ftbguilibrary.widget.GuiIcons;
+import dev.ftb.mods.ftbquests.gui.CustomToast;
 import dev.ftb.mods.ftbquests.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.integration.jei.FTBQuestsJEIHelper;
 import dev.ftb.mods.ftbquests.net.MessageDeleteObject;
@@ -12,6 +14,7 @@ import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.theme.QuestTheme;
 import me.shedaniel.architectury.utils.Env;
 import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.entity.Entity;
 
@@ -118,10 +121,14 @@ public class ClientQuestFile extends QuestFile {
 	}
 
 	public void openQuestGui() {
-		if (disableGui && !self.getCanEdit()) {
-			Minecraft.getInstance().player.displayClientMessage(new TranslatableComponent("item.ftbquests.book.disabled"), true);
-		} else if (exists()) {
-			questGui.openGui();
+		if (exists()) {
+			if (disableGui && !self.getCanEdit()) {
+				Minecraft.getInstance().getToasts().addToast(new CustomToast(new TranslatableComponent("item.ftbquests.book.disabled"), GuiIcons.BARRIER, TextComponent.EMPTY));
+			} else if (self.isLocked()) {
+				Minecraft.getInstance().getToasts().addToast(new CustomToast(lockMessage.isEmpty() ? new TextComponent("Quests locked!") : FTBQuestsClient.parse(lockMessage), GuiIcons.BARRIER, TextComponent.EMPTY));
+			} else {
+				questGui.openGui();
+			}
 		}
 	}
 

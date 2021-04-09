@@ -50,10 +50,19 @@ public class FTBQuestsCommands {
 				.requires(s -> s.getServer().isSingleplayer() || s.hasPermission(2))
 				.then(Commands.literal("editing_mode")
 						.executes(c -> editingMode(c.getSource(), c.getSource().getPlayerOrException(), null))
-						.then(Commands.argument("mode", BoolArgumentType.bool())
-								.executes(c -> editingMode(c.getSource(), c.getSource().getPlayerOrException(), BoolArgumentType.getBool(c, "mode")))
+						.then(Commands.argument("enabled", BoolArgumentType.bool())
+								.executes(c -> editingMode(c.getSource(), c.getSource().getPlayerOrException(), BoolArgumentType.getBool(c, "enabled")))
 								.then(Commands.argument("player", EntityArgument.player())
-										.executes(c -> editingMode(c.getSource(), EntityArgument.getPlayer(c, "player"), BoolArgumentType.getBool(c, "mode")))
+										.executes(c -> editingMode(c.getSource(), EntityArgument.getPlayer(c, "player"), BoolArgumentType.getBool(c, "enabled")))
+								)
+						)
+				)
+				.then(Commands.literal("locked")
+						.executes(c -> locked(c.getSource(), c.getSource().getPlayerOrException(), null))
+						.then(Commands.argument("enabled", BoolArgumentType.bool())
+								.executes(c -> locked(c.getSource(), c.getSource().getPlayerOrException(), BoolArgumentType.getBool(c, "enabled")))
+								.then(Commands.argument("player", EntityArgument.player())
+										.executes(c -> locked(c.getSource(), EntityArgument.getPlayer(c, "player"), BoolArgumentType.getBool(c, "enabled")))
 								)
 						)
 				)
@@ -111,6 +120,24 @@ public class FTBQuestsCommands {
 			source.sendSuccess(new TranslatableComponent("commands.ftbquests.editing_mode.enabled", player.getDisplayName()), true);
 		} else {
 			source.sendSuccess(new TranslatableComponent("commands.ftbquests.editing_mode.disabled", player.getDisplayName()), true);
+		}
+
+		return 1;
+	}
+
+	private static int locked(CommandSourceStack source, ServerPlayer player, @Nullable Boolean locked) {
+		TeamData data = ServerQuestFile.INSTANCE.getData(player);
+
+		if (locked == null) {
+			locked = !data.isLocked();
+		}
+
+		data.setLocked(locked);
+
+		if (locked) {
+			source.sendSuccess(new TranslatableComponent("commands.ftbquests.locked.enabled", player.getDisplayName()), true);
+		} else {
+			source.sendSuccess(new TranslatableComponent("commands.ftbquests.locked.disabled", player.getDisplayName()), true);
 		}
 
 		return 1;
