@@ -22,6 +22,8 @@ import java.util.UUID;
  * @author LatvianModder
  */
 public class FTBQuestsKubeJSWrapper {
+	public static final FTBQuestsKubeJSWrapper INSTANCE = new FTBQuestsKubeJSWrapper();
+
 	public Map<String, QuestShape> getQuestShapes() {
 		return QuestShape.MAP;
 	}

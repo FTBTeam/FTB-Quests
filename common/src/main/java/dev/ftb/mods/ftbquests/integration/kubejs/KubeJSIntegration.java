@@ -34,8 +34,7 @@ public class KubeJSIntegration {
 	//}
 
 	public static void registerBindings(BindingsEvent event) {
-		event.add("FTBQuests", new FTBQuestsKubeJSWrapper());
-		event.add("ftbquests", new FTBQuestsKubeJSWrapper());
+		event.add("FTBQuests", FTBQuestsKubeJSWrapper.INSTANCE);
 	}
 
 	public static void attachPlayerData(AttachPlayerDataEvent event) {
