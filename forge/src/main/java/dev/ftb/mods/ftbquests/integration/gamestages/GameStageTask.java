@@ -68,6 +68,11 @@ public class GameStageTask extends BooleanTask {
 	}
 
 	@Override
+	public int autoSubmitOnPlayerTick() {
+		return 20;
+	}
+
+	@Override
 	public boolean canSubmit(TeamData teamData, ServerPlayer player) {
 		return GameStagesIntegration.hasStage(player, stage);
 	}
