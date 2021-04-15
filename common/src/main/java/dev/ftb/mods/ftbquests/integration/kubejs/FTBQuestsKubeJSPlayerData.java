@@ -50,6 +50,17 @@ public class FTBQuestsKubeJSPlayerData {
 		}
 	}
 
+	public void reset(Object id) {
+		changeProgress(id, progressChange -> {
+		});
+	}
+
+	public void complete(Object id) {
+		changeProgress(id, progressChange -> {
+			progressChange.reset = false;
+		});
+	}
+
 	public boolean isCompleted(Object id) {
 		TeamData data = getData();
 		QuestObject object = data.file.get(data.file.getID(id));
