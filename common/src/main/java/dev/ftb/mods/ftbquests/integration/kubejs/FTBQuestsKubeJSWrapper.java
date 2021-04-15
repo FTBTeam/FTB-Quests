@@ -9,9 +9,12 @@ import dev.ftb.mods.ftbquests.quest.QuestShape;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbteams.FTBTeamsAPI;
 import dev.latvian.kubejs.player.PlayerJS;
+import dev.latvian.kubejs.server.ServerJS;
 import dev.latvian.kubejs.world.WorldJS;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.world.entity.player.Player;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Map;
 import java.util.UUID;
 
@@ -49,5 +52,23 @@ public class FTBQuestsKubeJSWrapper {
 	public QuestObjectBase getObject(WorldJS world, Object id) {
 		QuestFile file = getFile(world);
 		return file.getBase(file.getID(id));
+	}
+
+	@Nullable
+	public FTBQuestsKubeJSPlayerData getServerDataFromPlayer(Player player) {
+		try {
+			return (FTBQuestsKubeJSPlayerData) ServerJS.instance.getPlayer(player).getData().get("ftbquests");
+		} catch (Throwable e) {
+			return null;
+		}
+	}
+
+	@Nullable
+	public FTBQuestsKubeJSPlayerData getServerDataFromSource(CommandSourceStack source) {
+		try {
+			return (FTBQuestsKubeJSPlayerData) ServerJS.instance.getPlayer(source.getPlayerOrException()).getData().get("ftbquests");
+		} catch (Throwable e) {
+			return null;
+		}
 	}
 }
