@@ -11,7 +11,6 @@ import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.client.ConfigIconItemStack;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.item.CustomIconItem;
-import dev.ftb.mods.ftbquests.net.MessageChangeProgressResponse;
 import dev.ftb.mods.ftbquests.net.MessageEditObject;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import dev.ftb.mods.ftbquests.util.NBTUtils;
@@ -44,6 +43,7 @@ import java.util.regex.Pattern;
  */
 public abstract class QuestObjectBase {
 	private static final Pattern TAG_PATTERN = Pattern.compile("^[a-z0-9_]*$");
+	public static Tristate sendNotifications = Tristate.DEFAULT;
 
 	public static boolean isNull(@Nullable QuestObjectBase object) {
 		return object == null || object.invalid;
@@ -140,17 +140,10 @@ public abstract class QuestObjectBase {
 		}
 
 		teamData.clearCachedProgress();
-		ChangeProgress.sendUpdates = false;
-		ChangeProgress.sendNotifications = progressChange.notifications ? Tristate.TRUE : Tristate.FALSE;
+		sendNotifications = progressChange.notifications ? Tristate.TRUE : Tristate.FALSE;
 		forceProgress(teamData, progressChange);
-		ChangeProgress.sendUpdates = true;
-		ChangeProgress.sendNotifications = Tristate.DEFAULT;
+		sendNotifications = Tristate.DEFAULT;
 		teamData.clearCachedProgress();
-
-		if (getQuestFile().isServerSide()) {
-			new MessageChangeProgressResponse(teamData.uuid, progressChange).sendToAll();
-		}
-
 		teamData.save();
 	}
 

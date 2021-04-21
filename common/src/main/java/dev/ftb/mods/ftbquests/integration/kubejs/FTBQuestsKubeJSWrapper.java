@@ -1,7 +1,6 @@
 package dev.ftb.mods.ftbquests.integration.kubejs;
 
 import dev.ftb.mods.ftbquests.FTBQuests;
-import dev.ftb.mods.ftbquests.quest.ChangeProgress;
 import dev.ftb.mods.ftbquests.quest.QuestFile;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.QuestObjectType;
@@ -30,10 +29,6 @@ public class FTBQuestsKubeJSWrapper {
 
 	public Map<String, QuestObjectType> getQuestObjectTypes() {
 		return QuestObjectType.NAME_MAP.map;
-	}
-
-	public Map<String, ChangeProgress> getChangeProgressTypes() {
-		return ChangeProgress.NAME_MAP.map;
 	}
 
 	public QuestFile getFile(WorldJS world) {

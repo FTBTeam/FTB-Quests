@@ -45,7 +45,6 @@ public class FTBQuestsNetHandler {
 
 		// Editing
 		register(MessageChangeProgress.class, MessageChangeProgress::new);
-		register(MessageChangeProgressResponse.class, MessageChangeProgressResponse::new);
 		register(MessageCreateObject.class, MessageCreateObject::new);
 		register(MessageCreateObjectResponse.class, MessageCreateObjectResponse::new);
 		register(MessageCreateTaskAt.class, MessageCreateTaskAt::new);
