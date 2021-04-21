@@ -53,11 +53,6 @@ public final class Chapter extends QuestObject {
 	}
 
 	@Override
-	public String toString() {
-		return filename;
-	}
-
-	@Override
 	public QuestObjectType getObjectType() {
 		return QuestObjectType.CHAPTER;
 	}

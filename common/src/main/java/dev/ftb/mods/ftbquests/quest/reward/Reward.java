@@ -47,11 +47,6 @@ public abstract class Reward extends QuestObjectBase {
 	}
 
 	@Override
-	public final String toString() {
-		return quest.chapter.filename + ":" + quest.getCodeString() + ":R:" + getCodeString();
-	}
-
-	@Override
 	public final QuestObjectType getObjectType() {
 		return QuestObjectType.REWARD;
 	}
@@ -148,7 +143,7 @@ public abstract class Reward extends QuestObjectBase {
 		quest.rewards.remove(this);
 
 		for (TeamData data : getQuestFile().getAllData()) {
-			data.resetReward(this);
+			data.deleteReward(this);
 		}
 
 		super.deleteSelf();
@@ -157,7 +152,7 @@ public abstract class Reward extends QuestObjectBase {
 	@Override
 	public final void deleteChildren() {
 		for (TeamData data : getQuestFile().getAllData()) {
-			data.resetReward(this);
+			data.deleteReward(this);
 		}
 
 		super.deleteChildren();
@@ -203,7 +198,7 @@ public abstract class Reward extends QuestObjectBase {
 		if (progressChange.reset) {
 			teamData.resetReward(progressChange.player, this);
 		} else {
-			teamData.setRewardClaimed(progressChange.player, this, progressChange.time);
+			teamData.claimReward(progressChange.player, this, progressChange.time.getTime());
 		}
 	}
 

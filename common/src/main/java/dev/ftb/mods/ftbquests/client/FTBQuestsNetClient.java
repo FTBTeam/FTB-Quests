@@ -43,7 +43,7 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon {
 		}
 
 		TeamData data = ClientQuestFile.INSTANCE.getData(teamId);
-		data.claimReward(player, reward);
+		data.claimReward(player, reward, System.currentTimeMillis());
 
 		if (data == ClientQuestFile.INSTANCE.self) {
 			QuestScreen treeGui = ClientUtils.getCurrentGuiAs(QuestScreen.class);
@@ -298,6 +298,29 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon {
 	public void syncLock(UUID id, boolean lock) {
 		if (ClientQuestFile.INSTANCE.getData(id).setLocked(lock)) {
 			ClientQuestFile.INSTANCE.refreshGui();
+		}
+	}
+
+	@Override
+	public void resetReward(UUID teamId, UUID player, long rewardId) {
+		Reward reward = ClientQuestFile.INSTANCE.getReward(rewardId);
+
+		if (reward == null) {
+			return;
+		}
+
+		TeamData teamData = ClientQuestFile.INSTANCE.getData(teamId);
+
+		if (teamData.resetReward(player, reward)) {
+			QuestScreen gui = ClientUtils.getCurrentGuiAs(QuestScreen.class);
+
+			if (gui != null) {
+				gui.chapterPanel.refreshWidgets();
+
+				if (gui.viewQuestPanel != null) {
+					gui.viewQuestPanel.refreshWidgets();
+				}
+			}
 		}
 	}
 }

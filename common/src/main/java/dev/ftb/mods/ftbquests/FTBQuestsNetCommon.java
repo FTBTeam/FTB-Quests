@@ -67,4 +67,7 @@ public class FTBQuestsNetCommon {
 
 	public void syncLock(UUID id, boolean lock) {
 	}
+
+	public void resetReward(UUID teamId, UUID player, long rewardId) {
+	}
 }
