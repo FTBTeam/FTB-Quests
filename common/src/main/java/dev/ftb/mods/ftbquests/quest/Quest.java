@@ -95,11 +95,6 @@ public final class Quest extends QuestObject implements Movable {
 	}
 
 	@Override
-	public String toString() {
-		return chapter.filename + ":" + getCodeString();
-	}
-
-	@Override
 	public QuestObjectType getObjectType() {
 		return QuestObjectType.QUEST;
 	}

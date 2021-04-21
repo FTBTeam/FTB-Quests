@@ -101,7 +101,7 @@ public abstract class QuestObjectBase {
 		return getCodeString(id);
 	}
 
-	public String toString() {
+	public final String toString() {
 		return getCodeString();
 	}
 

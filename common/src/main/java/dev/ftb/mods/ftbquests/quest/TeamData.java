@@ -8,6 +8,7 @@ import dev.ftb.mods.ftbquests.net.MessageObjectCompleted;
 import dev.ftb.mods.ftbquests.net.MessageObjectCompletedReset;
 import dev.ftb.mods.ftbquests.net.MessageObjectStarted;
 import dev.ftb.mods.ftbquests.net.MessageObjectStartedReset;
+import dev.ftb.mods.ftbquests.net.MessageResetReward;
 import dev.ftb.mods.ftbquests.net.MessageSyncEditingMode;
 import dev.ftb.mods.ftbquests.net.MessageSyncLock;
 import dev.ftb.mods.ftbquests.net.MessageUpdateTaskProgress;
@@ -218,7 +219,7 @@ public class TeamData {
 		return b == BOOL_TRUE;
 	}
 
-	public boolean claimReward(UUID player, Reward reward) {
+	public boolean claimReward(UUID player, Reward reward, long date) {
 		if (locked) {
 			return false;
 		}
@@ -226,39 +227,36 @@ public class TeamData {
 		QuestKey key = QuestKey.of(reward.isTeamReward() ? Util.NIL_UUID : player, reward.id);
 
 		if (!claimedRewards.containsKey(key)) {
-			claimedRewards.put(key, System.currentTimeMillis());
+			claimedRewards.put(key, date);
 			clearCachedProgress();
 			save();
+
+			if (file.isServerSide()) {
+				new MessageClaimRewardResponse(uuid, player, reward.id).sendToAll();
+			}
+
 			return true;
 		}
 
 		return false;
 	}
 
-	public boolean resetReward(Reward reward) {
+	public void deleteReward(Reward reward) {
 		if (!locked && claimedRewards.object2LongEntrySet().removeIf(e -> e.getKey().id == reward.id)) {
 			clearCachedProgress();
 			save();
-			return true;
 		}
-
-		return false;
 	}
 
 	public boolean resetReward(UUID player, Reward reward) {
 		if (!locked && claimedRewards.removeLong(QuestKey.of(reward.isTeamReward() ? Util.NIL_UUID : player, reward.id)) != 0L) {
 			clearCachedProgress();
 			save();
-			return true;
-		}
 
-		return false;
-	}
+			if (file.isServerSide()) {
+				new MessageResetReward(uuid, player, reward.id).sendToAll();
+			}
 
-	public boolean setRewardClaimed(UUID player, Reward reward, Date time) {
-		if (!locked && claimedRewards.put(QuestKey.of(reward.isTeamReward() ? Util.NIL_UUID : player, reward.id), time.getTime()) != 0L) {
-			clearCachedProgress();
-			save();
 			return true;
 		}
 
@@ -621,7 +619,7 @@ public class TeamData {
 	}
 
 	public void claimReward(ServerPlayer player, Reward reward, boolean notify) {
-		if (claimReward(player.getUUID(), reward)) {
+		if (claimReward(player.getUUID(), reward, System.currentTimeMillis())) {
 			reward.claim(player, notify);
 
 			if (file.isServerSide()) {
@@ -698,7 +696,7 @@ public class TeamData {
 		progress = Math.max(0L, Math.min(progress, maxProgress));
 		long prevProgress = getProgress(task);
 
-		if (prevProgress != progress) {
+		if (prevProgress != progress || progress == 0L && isStarted(task)) {
 			if (progress == 0L) {
 				taskProgress.remove(task.id);
 				started.remove(task.id);

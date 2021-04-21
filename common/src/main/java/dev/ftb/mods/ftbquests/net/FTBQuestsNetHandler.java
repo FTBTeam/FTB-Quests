@@ -42,6 +42,7 @@ public class FTBQuestsNetHandler {
 		register(MessageObjectStartedReset.class, MessageObjectStartedReset::new);
 		register(MessageObjectCompletedReset.class, MessageObjectCompletedReset::new);
 		register(MessageSyncLock.class, MessageSyncLock::new);
+		register(MessageResetReward.class, MessageResetReward::new);
 
 		// Editing
 		register(MessageChangeProgress.class, MessageChangeProgress::new);
