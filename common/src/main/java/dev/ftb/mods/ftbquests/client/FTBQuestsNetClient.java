@@ -22,7 +22,6 @@ import dev.ftb.mods.ftbquests.quest.QuestObjectType;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.task.Task;
-import dev.ftb.mods.ftbquests.util.ProgressChange;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -35,13 +34,6 @@ import java.util.Date;
 import java.util.UUID;
 
 public class FTBQuestsNetClient extends FTBQuestsNetCommon {
-	@Override
-	public void changeProgress(UUID teamId, ProgressChange progressChange) {
-		if (progressChange.origin != null) {
-			progressChange.origin.forceProgressRaw(ClientQuestFile.INSTANCE.getData(teamId), progressChange);
-		}
-	}
-
 	@Override
 	public void claimReward(UUID teamId, UUID player, long rewardId) {
 		Reward reward = ClientQuestFile.INSTANCE.getReward(rewardId);

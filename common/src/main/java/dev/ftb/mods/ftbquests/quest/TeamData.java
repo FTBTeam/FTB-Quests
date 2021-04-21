@@ -130,7 +130,7 @@ public class TeamData {
 				clearCachedProgress();
 				save();
 
-				if (ChangeProgress.sendUpdates && file.isServerSide()) {
+				if (file.isServerSide()) {
 					new MessageObjectStartedReset(uuid, id).sendToAll();
 				}
 
@@ -141,7 +141,7 @@ public class TeamData {
 				clearCachedProgress();
 				save();
 
-				if (ChangeProgress.sendUpdates && file.isServerSide()) {
+				if (file.isServerSide()) {
 					new MessageObjectStarted(uuid, id).sendToAll();
 				}
 
@@ -168,7 +168,7 @@ public class TeamData {
 				clearCachedProgress();
 				save();
 
-				if (ChangeProgress.sendUpdates && file.isServerSide()) {
+				if (file.isServerSide()) {
 					new MessageObjectCompletedReset(uuid, id).sendToAll();
 				}
 
@@ -179,7 +179,7 @@ public class TeamData {
 				clearCachedProgress();
 				save();
 
-				if (ChangeProgress.sendUpdates && file.isServerSide()) {
+				if (file.isServerSide()) {
 					new MessageObjectCompleted(uuid, id).sendToAll();
 				}
 
@@ -701,6 +701,8 @@ public class TeamData {
 		if (prevProgress != progress) {
 			if (progress == 0L) {
 				taskProgress.remove(task.id);
+				started.remove(task.id);
+				completed.remove(task.id);
 			} else {
 				taskProgress.put(task.id, progress);
 			}
@@ -709,10 +711,7 @@ public class TeamData {
 
 			if (file.isServerSide()) {
 				Date now = new Date();
-
-				if (ChangeProgress.sendUpdates) {
-					new MessageUpdateTaskProgress(this, task.id, progress).sendToAll();
-				}
+				new MessageUpdateTaskProgress(this, task.id, progress).sendToAll();
 
 				if (prevProgress == 0L) {
 					task.onStarted(new QuestProgressEventData<>(now, this, task, getOnlineMembers(), Collections.emptyList()));
@@ -722,7 +721,7 @@ public class TeamData {
 					List<ServerPlayer> onlineMembers = getOnlineMembers();
 					List<ServerPlayer> notifiedPlayers;
 
-					if (!task.quest.chapter.alwaysInvisible && ChangeProgress.sendNotifications.get(ChangeProgress.sendUpdates)) {
+					if (!task.quest.chapter.alwaysInvisible && QuestObjectBase.sendNotifications.get(true)) {
 						notifiedPlayers = onlineMembers;
 					} else {
 						notifiedPlayers = Collections.emptyList();

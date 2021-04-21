@@ -7,7 +7,6 @@ import dev.ftb.mods.ftbguilibrary.config.Tristate;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.net.MessageCreateObjectResponse;
 import dev.ftb.mods.ftbquests.net.MessageDeleteObjectResponse;
-import dev.ftb.mods.ftbquests.quest.ChangeProgress;
 import dev.ftb.mods.ftbquests.quest.Chapter;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
@@ -72,13 +71,21 @@ public class FTBQuestsCommands {
 				.then(Commands.literal("change_progress")
 						.requires(s -> s.hasPermission(2))
 						.then(Commands.argument("players", EntityArgument.players())
-								.then(Commands.argument("type", ChangeProgressArgument.changeProgress())
+								.then(Commands.literal("reset")
 										.then(Commands.argument("quest_object", QuestObjectArgument.questObject())
 												.executes(ctx -> {
 													Collection<ServerPlayer> players = EntityArgument.getPlayers(ctx, "players");
-													ChangeProgress type = ctx.getArgument("type", ChangeProgress.class);
 													QuestObjectBase questObject = ctx.getArgument("quest_object", QuestObjectBase.class);
-													return changeProgress(ctx.getSource(), players, type, questObject);
+													return changeProgress(ctx.getSource(), players, true, questObject);
+												})
+										)
+								)
+								.then(Commands.literal("complete")
+										.then(Commands.argument("quest_object", QuestObjectArgument.questObject())
+												.executes(ctx -> {
+													Collection<ServerPlayer> players = EntityArgument.getPlayers(ctx, "players");
+													QuestObjectBase questObject = ctx.getArgument("quest_object", QuestObjectBase.class);
+													return changeProgress(ctx.getSource(), players, false, questObject);
 												})
 										)
 								)
@@ -143,10 +150,10 @@ public class FTBQuestsCommands {
 		return 1;
 	}
 
-	private static int changeProgress(CommandSourceStack source, Collection<ServerPlayer> players, ChangeProgress type, QuestObjectBase questObject) {
+	private static int changeProgress(CommandSourceStack source, Collection<ServerPlayer> players, boolean reset, QuestObjectBase questObject) {
 		ProgressChange progressChange = new ProgressChange(ServerQuestFile.INSTANCE);
 		progressChange.origin = questObject;
-		progressChange.reset = type.reset;
+		progressChange.reset = reset;
 
 		for (ServerPlayer player : players) {
 			progressChange.player = player.getUUID();
