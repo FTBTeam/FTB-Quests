@@ -58,22 +58,26 @@ public class KubeJSIntegration {
 	}
 
 	public static InteractionResult onCompleted(ObjectCompletedEvent<?> event) {
-		QuestObjectCompletedEventJS e = new QuestObjectCompletedEventJS(event);
-		e.post(ScriptType.SERVER, "ftbquests.completed", event.getObject().getCodeString());
+		if (event.getData().file.isServerSide()) {
+			QuestObjectCompletedEventJS e = new QuestObjectCompletedEventJS(event);
+			e.post(ScriptType.SERVER, "ftbquests.completed", event.getObject().getCodeString());
 
-		for (String tag : event.getObject().getTags()) {
-			e.post(ScriptType.SERVER, "ftbquests.completed." + tag);
+			for (String tag : event.getObject().getTags()) {
+				e.post(ScriptType.SERVER, "ftbquests.completed." + tag);
+			}
 		}
 
 		return InteractionResult.PASS;
 	}
 
 	public static InteractionResult onStarted(ObjectStartedEvent<?> event) {
-		QuestObjectStartedEventJS e = new QuestObjectStartedEventJS(event);
-		e.post(ScriptType.SERVER, "ftbquests.started", event.getObject().getCodeString());
+		if (event.getData().file.isServerSide()) {
+			QuestObjectStartedEventJS e = new QuestObjectStartedEventJS(event);
+			e.post(ScriptType.SERVER, "ftbquests.started", event.getObject().getCodeString());
 
-		for (String tag : event.getObject().getTags()) {
-			e.post(ScriptType.SERVER, "ftbquests.started." + tag);
+			for (String tag : event.getObject().getTags()) {
+				e.post(ScriptType.SERVER, "ftbquests.started." + tag);
+			}
 		}
 
 		return InteractionResult.PASS;
