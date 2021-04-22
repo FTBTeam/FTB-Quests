@@ -64,6 +64,8 @@ public class GameStagesIntegration {
 			return;
 		}
 
+		TeamData.currentPlayer = player;
+
 		for (ChapterGroup group : ServerQuestFile.INSTANCE.chapterGroups) {
 			for (Chapter chapter : group.chapters) {
 				for (Quest quest : chapter.quests) {
@@ -77,6 +79,8 @@ public class GameStagesIntegration {
 				}
 			}
 		}
+
+		TeamData.currentPlayer = null;
 	}
 
 	public static boolean hasStage(Player player, String stage) {

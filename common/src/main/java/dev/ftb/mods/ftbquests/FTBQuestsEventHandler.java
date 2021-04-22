@@ -121,7 +121,7 @@ public class FTBQuestsEventHandler {
 	}
 
 	private void playerTick(Player player) {
-		if (!player.level.isClientSide && ServerQuestFile.INSTANCE != null && !PlayerHooks.isFake(player)) {
+		if (player instanceof ServerPlayer && ServerQuestFile.INSTANCE != null && !PlayerHooks.isFake(player)) {
 			if (autoSubmitTasks == null) {
 				autoSubmitTasks = ServerQuestFile.INSTANCE.collect(o -> o instanceof Task && ((Task) o).autoSubmitOnPlayerTick() > 0);
 			}
@@ -138,6 +138,7 @@ public class FTBQuestsEventHandler {
 			}
 
 			long t = player.level.getGameTime();
+			TeamData.currentPlayer = (ServerPlayer) player;
 
 			for (Task task : autoSubmitTasks) {
 				long d = task.autoSubmitOnPlayerTick();
@@ -148,6 +149,8 @@ public class FTBQuestsEventHandler {
 					}
 				}
 			}
+
+			TeamData.currentPlayer = null;
 		}
 	}
 
@@ -191,9 +194,13 @@ public class FTBQuestsEventHandler {
 				return;
 			}
 
+			TeamData.currentPlayer = player;
+
 			for (DimensionTask task : ServerQuestFile.INSTANCE.collect(DimensionTask.class)) {
 				task.submitTask(data, player);
 			}
+
+			TeamData.currentPlayer = null;
 		}
 	}
 

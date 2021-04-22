@@ -34,6 +34,8 @@ public class FTBQuestsInventoryListener implements ContainerListener {
 			return;
 		}
 
+		TeamData.currentPlayer = player;
+
 		for (ChapterGroup group : ServerQuestFile.INSTANCE.chapterGroups) {
 			for (Chapter chapter : group.chapters) {
 				for (Quest quest : chapter.quests) {
@@ -47,6 +49,8 @@ public class FTBQuestsInventoryListener implements ContainerListener {
 				}
 			}
 		}
+
+		TeamData.currentPlayer = null;
 	}
 
 	private static boolean hasSubmitTasks(Quest quest) {

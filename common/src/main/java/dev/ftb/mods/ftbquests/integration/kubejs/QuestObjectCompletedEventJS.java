@@ -4,14 +4,17 @@ import dev.ftb.mods.ftbquests.events.ObjectCompletedEvent;
 import dev.ftb.mods.ftbquests.quest.QuestObject;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.latvian.kubejs.player.EntityArrayList;
+import dev.latvian.kubejs.player.ServerPlayerJS;
 import dev.latvian.kubejs.server.ServerEventJS;
 import dev.latvian.kubejs.server.ServerJS;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * @author LatvianModder
  */
 public class QuestObjectCompletedEventJS extends ServerEventJS {
 	public final ObjectCompletedEvent<?> event;
+	private final FTBQuestsKubeJSTeamDataWrapper wrapper;
 
 	@Override
 	public ServerJS getServer() {
@@ -20,10 +23,11 @@ public class QuestObjectCompletedEventJS extends ServerEventJS {
 
 	public QuestObjectCompletedEventJS(ObjectCompletedEvent<?> e) {
 		event = e;
+		wrapper = new FTBQuestsKubeJSTeamDataWrapper(event.getData());
 	}
 
-	public TeamData getData() {
-		return event.getData();
+	public FTBQuestsKubeJSTeamDataWrapper getData() {
+		return wrapper;
 	}
 
 	public QuestObject getObject() {
@@ -35,6 +39,11 @@ public class QuestObjectCompletedEventJS extends ServerEventJS {
 	}
 
 	public EntityArrayList getOnlineMembers() {
-		return ServerJS.instance.getOverworld().createEntityList(getData().getOnlineMembers());
+		return getData().getOnlineMembers();
+	}
+
+	@Nullable
+	public ServerPlayerJS getPlayer() {
+		return TeamData.currentPlayer == null ? null : ServerJS.instance.getPlayer(TeamData.currentPlayer);
 	}
 }
