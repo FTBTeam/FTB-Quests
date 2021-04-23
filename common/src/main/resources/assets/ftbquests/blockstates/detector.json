@@ -1,0 +1,14 @@
+{
+	"variants": {
+		"powered=false": [
+			{
+				"model": "ftbquests:block/detector"
+			}
+		],
+		"powered=true": [
+			{
+				"model": "ftbquests:block/detector_on"
+			}
+		]
+	}
+}

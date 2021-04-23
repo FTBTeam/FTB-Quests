@@ -16,6 +16,7 @@
 	"block.ftbquests.barrier": "Quest Barrier",
 	"block.ftbquests.stage_barrier": "Stage Barrier",
 	"block.ftbquests.barrier.object": "Object ID",
+	"block.ftbquests.detector": "Quest Detector",
 	"block.ftbquests.detector.task": "Task",
 	"block.ftbquests.detector.notifications": "Notifications",
 	"block.ftbquests.detector.redstone": "Redstone Detector",
