@@ -1,6 +1,5 @@
 package dev.ftb.mods.ftbquests.block.entity;
 
-import dev.ftb.mods.ftbquests.quest.QuestObject;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.TeamData;
@@ -54,7 +53,7 @@ public class DetectorBlockEntity extends BlockEntity {
 	}
 
 	public void powered(Level level, BlockPos p) {
-		QuestObject o = ServerQuestFile.INSTANCE.get(object);
+		QuestObjectBase o = ServerQuestFile.INSTANCE.getBase(object);
 
 		if (o == null) {
 			return;
