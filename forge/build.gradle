@@ -95,10 +95,10 @@ if (ENV.CURSEFORGE_KEY) {
             mainArtifact(remapJar.archivePath)
             relations {
                 requiredDependency 'architectury-forge'
-                requiredDependency 'ftb-teams'
-                requiredDependency 'ftb-gui-library'
-                requiredDependency 'item-filters'
-                optionalDependency 'kubejs'
+                requiredDependency 'ftb-teams-forge'
+                requiredDependency 'ftb-library-forge'
+                requiredDependency 'item-filters-forge'
+                optionalDependency 'kubejs-forge'
                 optionalDependency 'jei'
                 optionalDependency 'game-stages'
             }

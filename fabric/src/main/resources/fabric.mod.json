@@ -24,6 +24,7 @@
 		"fabric": "*",
 		"minecraft": "~1.16.4",
 		"architectury": ">=1.10",
+		"ftblibrary": "*",
 		"ftbteams": ">=1605.2.0-build.23",
 		"itemfilters": ">=1605.2.4-build.29"
 	}

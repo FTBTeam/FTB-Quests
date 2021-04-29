@@ -79,7 +79,7 @@ if (ENV.CURSEFORGE_KEY) {
                 requiredDependency 'architectury-fabric'
                 requiredDependency 'fabric-api'
                 requiredDependency 'ftb-teams-fabric'
-                requiredDependency 'ftb-gui-library-fabric'
+                requiredDependency 'ftb-library-fabric'
                 requiredDependency 'item-filters-fabric'
                 optionalDependency 'kubejs-fabric'
             }
