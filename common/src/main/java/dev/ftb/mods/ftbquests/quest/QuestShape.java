@@ -1,10 +1,10 @@
 package dev.ftb.mods.ftbquests.quest;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import dev.ftb.mods.ftbguilibrary.config.NameMap;
-import dev.ftb.mods.ftbguilibrary.icon.Icon;
-import dev.ftb.mods.ftbguilibrary.icon.ImageIcon;
-import dev.ftb.mods.ftbguilibrary.utils.PixelBuffer;
+import dev.ftb.mods.ftblibrary.config.NameMap;
+import dev.ftb.mods.ftblibrary.icon.Icon;
+import dev.ftb.mods.ftblibrary.icon.ImageIcon;
+import dev.ftb.mods.ftblibrary.math.PixelBuffer;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;

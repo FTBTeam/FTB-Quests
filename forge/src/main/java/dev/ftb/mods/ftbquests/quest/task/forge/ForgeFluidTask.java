@@ -1,9 +1,9 @@
 package dev.ftb.mods.ftbquests.quest.task.forge;
 
-import dev.ftb.mods.ftbguilibrary.config.ConfigGroup;
-import dev.ftb.mods.ftbguilibrary.config.FluidConfig;
-import dev.ftb.mods.ftbguilibrary.config.NBTConfig;
-import dev.ftb.mods.ftbguilibrary.icon.Icon;
+import dev.ftb.mods.ftblibrary.config.ConfigGroup;
+import dev.ftb.mods.ftblibrary.config.FluidConfig;
+import dev.ftb.mods.ftblibrary.config.NBTConfig;
+import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.TeamData;

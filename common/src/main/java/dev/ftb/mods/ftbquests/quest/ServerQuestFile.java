@@ -1,6 +1,7 @@
 package dev.ftb.mods.ftbquests.quest;
 
 import com.mojang.util.UUIDTypeAdapter;
+import dev.ftb.mods.ftblibrary.snbt.SNBT;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.net.MessageCreateTeamData;
 import dev.ftb.mods.ftbquests.net.MessageDeleteObjectResponse;
@@ -11,7 +12,6 @@ import dev.ftb.mods.ftbquests.quest.task.TaskType;
 import dev.ftb.mods.ftbquests.quest.task.TaskTypes;
 import dev.ftb.mods.ftbquests.util.FTBQuestsInventoryListener;
 import dev.ftb.mods.ftbquests.util.FileUtils;
-import dev.ftb.mods.ftbquests.util.NBTUtils;
 import me.shedaniel.architectury.hooks.LevelResourceHooks;
 import me.shedaniel.architectury.platform.Platform;
 import me.shedaniel.architectury.utils.Env;
@@ -71,8 +71,8 @@ public class ServerQuestFile extends QuestFile {
 
 		if (Files.exists(path)) {
 			try {
-				Files.list(path).filter(p -> !p.getFileName().toString().contains("-")).forEach(path1 -> {
-					CompoundTag nbt = NBTUtils.readSNBT(path1);
+				Files.list(path).filter(p -> p.getFileName().toString().contains("-")).forEach(path1 -> {
+					CompoundTag nbt = SNBT.read(path1);
 
 					try {
 						UUID uuid = UUIDTypeAdapter.fromString(nbt.getString("uuid"));
@@ -139,7 +139,7 @@ public class ServerQuestFile extends QuestFile {
 
 		for (TeamData data : getAllData()) {
 			if (data.shouldSave) {
-				NBTUtils.writeSNBT(path.resolve(UUIDTypeAdapter.fromUUID(data.uuid) + ".snbt"), data.serializeNBT());
+				SNBT.write(path.resolve(data.uuid + ".snbt"), data.serializeNBT());
 				data.shouldSave = false;
 			}
 		}

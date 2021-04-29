@@ -22,7 +22,6 @@ public class FTBQuestsBlockEntities {
 		return BLOCK_ENTITIES.register(id, () -> BlockEntityType.Builder.of(factory, block.get()).build(null));
 	}
 
-	public static final RegistrySupplier<BlockEntityType<?>> BANNER = register("banner", BannerBlockEntity::new, FTBQuestsBlocks.BANNER);
 	public static final RegistrySupplier<BlockEntityType<?>> BARRIER = register("barrier", FTBQuestsBlockEntities::createQuestBarrierEntity, FTBQuestsBlocks.BARRIER);
 	public static final RegistrySupplier<BlockEntityType<?>> STAGE_BARRIER = register("stage_barrier", FTBQuestsBlockEntities::createStageBarrierEntity, FTBQuestsBlocks.STAGE_BARRIER);
 	public static final RegistrySupplier<BlockEntityType<?>> DETECTOR = register("detector", DetectorBlockEntity::new, FTBQuestsBlocks.DETECTOR);

@@ -1,17 +1,17 @@
 package dev.ftb.mods.ftbquests.gui;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import dev.ftb.mods.ftbguilibrary.config.StringConfig;
-import dev.ftb.mods.ftbguilibrary.config.gui.EditConfigFromStringScreen;
-import dev.ftb.mods.ftbguilibrary.icon.Color4I;
-import dev.ftb.mods.ftbguilibrary.misc.ButtonListBaseScreen;
-import dev.ftb.mods.ftbguilibrary.utils.MouseButton;
-import dev.ftb.mods.ftbguilibrary.utils.TooltipList;
-import dev.ftb.mods.ftbguilibrary.widget.ContextMenuItem;
-import dev.ftb.mods.ftbguilibrary.widget.GuiIcons;
-import dev.ftb.mods.ftbguilibrary.widget.Panel;
-import dev.ftb.mods.ftbguilibrary.widget.SimpleTextButton;
-import dev.ftb.mods.ftbguilibrary.widget.Theme;
+import dev.ftb.mods.ftblibrary.config.StringConfig;
+import dev.ftb.mods.ftblibrary.config.ui.EditConfigFromStringScreen;
+import dev.ftb.mods.ftblibrary.icon.Color4I;
+import dev.ftb.mods.ftblibrary.icon.Icons;
+import dev.ftb.mods.ftblibrary.ui.ContextMenuItem;
+import dev.ftb.mods.ftblibrary.ui.Panel;
+import dev.ftb.mods.ftblibrary.ui.SimpleTextButton;
+import dev.ftb.mods.ftblibrary.ui.Theme;
+import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
+import dev.ftb.mods.ftblibrary.ui.misc.ButtonListBaseScreen;
+import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.net.MessageCreateObject;
 import dev.ftb.mods.ftbquests.net.MessageEditObject;
@@ -58,7 +58,7 @@ public class RewardTablesScreen extends ButtonListBaseScreen {
 
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
 			ClientQuestFile.INSTANCE.questScreen.addObjectMenuItems(contextMenu, RewardTablesScreen.this, table);
-			contextMenu.add(new ContextMenuItem(new TranslatableComponent("item.ftbquests.lootcrate"), GuiIcons.ACCEPT, () -> {
+			contextMenu.add(new ContextMenuItem(new TranslatableComponent("item.ftbquests.lootcrate"), Icons.ACCEPT, () -> {
 				if (table.lootCrate == null) {
 					table.lootCrate = new LootCrate(table);
 					Matcher matcher = Pattern.compile("[^a-z0-9_]").matcher(table.getTitle().getString().toLowerCase());
@@ -109,7 +109,7 @@ public class RewardTablesScreen extends ButtonListBaseScreen {
 			}) {
 				@Override
 				public void drawIcon(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
-					(table.lootCrate != null ? GuiIcons.ACCEPT : GuiIcons.ACCEPT_GRAY).draw(matrixStack, x, y, w, h);
+					(table.lootCrate != null ? Icons.ACCEPT : Icons.ACCEPT_GRAY).draw(matrixStack, x, y, w, h);
 				}
 			});
 			getGui().openContextMenu(contextMenu);
@@ -149,7 +149,7 @@ public class RewardTablesScreen extends ButtonListBaseScreen {
 
 	@Override
 	public void addButtons(Panel panel) {
-		SimpleTextButton button = new SimpleTextButton(panel, new TranslatableComponent("gui.add"), GuiIcons.ADD) {
+		SimpleTextButton button = new SimpleTextButton(panel, new TranslatableComponent("gui.add"), Icons.ADD) {
 			@Override
 			public void onClicked(MouseButton button) {
 				playClickSound();

@@ -1,6 +1,6 @@
 package dev.ftb.mods.ftbquests.quest.theme.property;
 
-import dev.ftb.mods.ftbguilibrary.icon.Icon;
+import dev.ftb.mods.ftblibrary.icon.Icon;
 
 /**
  * @author LatvianModder

@@ -1,121 +1,121 @@
 plugins {
-	id "com.github.johnrengelman.shadow" version "5.0.0"
-	id "com.matthewprenger.cursegradle"
+    id "com.github.johnrengelman.shadow" version "5.0.0"
+    id "com.matthewprenger.cursegradle"
 }
 
 def ENV = System.getenv()
 
 configurations {
-	shadowCommon
+    shadowCommon
 }
 
 architectury {
-	platformSetupLoomIde()
-	fabric()
+    platformSetupLoomIde()
+    fabric()
 }
 
 dependencies {
-	minecraft "com.mojang:minecraft:${rootProject.architectury.minecraft}"
-	mappings minecraft.officialMojangMappings()
+    minecraft "com.mojang:minecraft:${rootProject.architectury.minecraft}"
+    mappings minecraft.officialMojangMappings()
 
-	modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
+    modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
 
-	modApi "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_api_version}"
-	modApi "me.shedaniel:architectury-fabric:${rootProject.architectury_version}"
+    modApi "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_api_version}"
+    modApi "me.shedaniel:architectury-fabric:${rootProject.architectury_version}"
 
-	modImplementation "dev.ftb.mods:ftb-gui-library-fabric:${rootProject.ftb_gui_library_version}"
-	modImplementation "dev.ftb.mods:ftb-teams-fabric:${rootProject.ftb_teams_version}"
-	modCompile "curse.maven:item-filter-438500:${rootProject.itemfilters_version_fabric}"
-	modCompile "curse.maven:kubejs-fabric-395864:${rootProject.kubejs_file_fabric}"
-	modCompile "curse.maven:rhino-416294:${rhino_file}"
+    modImplementation "dev.ftb.mods:ftb-library-fabric:${rootProject.ftb_library_version}"
+    modImplementation "dev.ftb.mods:ftb-teams-fabric:${rootProject.ftb_teams_version}"
+    modCompile "curse.maven:item-filter-438500:${rootProject.itemfilters_version_fabric}"
+    modCompile "curse.maven:kubejs-fabric-395864:${rootProject.kubejs_file_fabric}"
+    modCompile "curse.maven:rhino-416294:${rhino_file}"
 
-	modCompile "curse.maven:ctm-fabric-432493:3233998"
+    modCompile "curse.maven:ctm-fabric-432493:3233998"
 
-	implementation(project(path: ":common")) {
-		transitive = false
-	}
-	developmentFabric(project(path: ":common")) {
-		transitive = false
-	}
-	shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) {
-		transitive = false
-	}
+    implementation(project(path: ":common")) {
+        transitive = false
+    }
+    developmentFabric(project(path: ":common")) {
+        transitive = false
+    }
+    shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) {
+        transitive = false
+    }
 }
 
 processResources {
-	inputs.property "version", project.version
+    inputs.property "version", project.version
 
-	filesMatching("fabric.mod.json") {
-		expand "version": project.version
-	}
+    filesMatching("fabric.mod.json") {
+        expand "version": project.version
+    }
 }
 
 shadowJar {
-	configurations = [project.configurations.shadowCommon]
-	classifier "dev-shadow"
+    configurations = [project.configurations.shadowCommon]
+    classifier "dev-shadow"
 }
 
 remapJar {
-	input.set shadowJar.archiveFile
-	dependsOn shadowJar
-	classifier "fabric"
+    input.set shadowJar.archiveFile
+    dependsOn shadowJar
+    classifier "fabric"
 }
 
 jar {
-	classifier "dev"
+    classifier "dev"
 }
 
 if (ENV.CURSEFORGE_KEY) {
-	curseforge {
-		apiKey = ENV.CURSEFORGE_KEY
-		project {
-			id = project.curseforge_id_fabric
-			releaseType = "release"
-			addGameVersion "Fabric"
-			addGameVersion "1.16.4"
-			addGameVersion "1.16.5"
-			mainArtifact(remapJar.archivePath)
-			relations {
-				requiredDependency 'architectury-fabric'
-				requiredDependency 'fabric-api'
-				requiredDependency 'ftb-teams-fabric'
-				requiredDependency 'ftb-gui-library-fabric'
-				requiredDependency 'item-filters-fabric'
-				optionalDependency 'kubejs-fabric'
-			}
-			changelog = getGitChangelog
-			changelogType = 'markdown'
-		}
-	}
+    curseforge {
+        apiKey = ENV.CURSEFORGE_KEY
+        project {
+            id = project.curseforge_id_fabric
+            releaseType = "release"
+            addGameVersion "Fabric"
+            addGameVersion "1.16.4"
+            addGameVersion "1.16.5"
+            mainArtifact(remapJar.archivePath)
+            relations {
+                requiredDependency 'architectury-fabric'
+                requiredDependency 'fabric-api'
+                requiredDependency 'ftb-teams-fabric'
+                requiredDependency 'ftb-gui-library-fabric'
+                requiredDependency 'item-filters-fabric'
+                optionalDependency 'kubejs-fabric'
+            }
+            changelog = getGitChangelog
+            changelogType = 'markdown'
+        }
+    }
 }
 
 publishing {
-	publications {
-		mavenFabric(MavenPublication) {
-			artifactId = rootProject.archivesBaseName + "-fabric"
-			artifact(remapJar.archivePath) {
-				builtBy build
-				classifier null
-			}
-		}
-	}
+    publications {
+        mavenFabric(MavenPublication) {
+            artifactId = rootProject.archivesBaseName + "-fabric"
+            artifact(remapJar.archivePath) {
+                builtBy build
+                classifier null
+            }
+        }
+    }
 
-	repositories {
-		if (ENV.LOCAL_MAVEN) {
-			maven {
-				// upload to local maven repo
-				url = "file://${ENV.LOCAL_MAVEN}"
-			}
-		}
+    repositories {
+        if (ENV.LOCAL_MAVEN) {
+            maven {
+                // upload to local maven repo
+                url = "file://${ENV.LOCAL_MAVEN}"
+            }
+        }
 
-		if (ENV.SAPS_TOKEN) {
-			maven {
-				url "https://maven.saps.dev/minecraft"
-				credentials {
-					username = "latvian"
-					password = "${ENV.SAPS_TOKEN}"
-				}
-			}
-		}
-	}
+        if (ENV.SAPS_TOKEN) {
+            maven {
+                url "https://maven.saps.dev/minecraft"
+                credentials {
+                    username = "latvian"
+                    password = "${ENV.SAPS_TOKEN}"
+                }
+            }
+        }
+    }
 }

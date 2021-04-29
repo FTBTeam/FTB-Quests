@@ -1,10 +1,10 @@
 package dev.ftb.mods.ftbquests.quest.task;
 
-import dev.ftb.mods.ftbguilibrary.config.ConfigGroup;
-import dev.ftb.mods.ftbguilibrary.config.LongConfig;
-import dev.ftb.mods.ftbguilibrary.config.gui.EditConfigFromStringScreen;
-import dev.ftb.mods.ftbguilibrary.config.gui.EditConfigScreen;
-import dev.ftb.mods.ftbguilibrary.icon.Icon;
+import dev.ftb.mods.ftblibrary.config.ConfigGroup;
+import dev.ftb.mods.ftblibrary.config.LongConfig;
+import dev.ftb.mods.ftblibrary.config.ui.EditConfigFromStringScreen;
+import dev.ftb.mods.ftblibrary.config.ui.EditConfigScreen;
+import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import me.shedaniel.architectury.core.RegistryEntry;

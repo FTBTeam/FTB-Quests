@@ -1,9 +1,9 @@
 package dev.ftb.mods.ftbquests.gui.quests;
 
-import dev.ftb.mods.ftbguilibrary.utils.MouseButton;
-import dev.ftb.mods.ftbguilibrary.widget.ContextMenuItem;
-import dev.ftb.mods.ftbguilibrary.widget.GuiIcons;
-import dev.ftb.mods.ftbguilibrary.widget.Panel;
+import dev.ftb.mods.ftblibrary.icon.Icons;
+import dev.ftb.mods.ftblibrary.ui.ContextMenuItem;
+import dev.ftb.mods.ftblibrary.ui.Panel;
+import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.gui.RewardTablesScreen;
 import dev.ftb.mods.ftbquests.net.MessageChangeProgress;
@@ -76,7 +76,7 @@ public class EditSettingsButton extends TabButton {
 			ClientQuestFile.INSTANCE.refreshGui();
 		}));
 
-		contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.gui.wiki"), GuiIcons.INFO, () -> handleClick("https://help.ftb.team/mods")));
+		contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.gui.wiki"), Icons.INFO, () -> handleClick("https://help.ftb.team/mods")));
 
 		questScreen.openContextMenu(contextMenu);
 	}

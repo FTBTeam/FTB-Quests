@@ -1,8 +1,8 @@
 package dev.ftb.mods.ftbquests.gui;
 
-import dev.ftb.mods.ftbguilibrary.config.ConfigCallback;
-import dev.ftb.mods.ftbguilibrary.config.StringConfig;
-import dev.ftb.mods.ftbguilibrary.utils.MouseButton;
+import dev.ftb.mods.ftblibrary.config.ConfigCallback;
+import dev.ftb.mods.ftblibrary.config.StringConfig;
+import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 
 /**
  * @author LatvianModder

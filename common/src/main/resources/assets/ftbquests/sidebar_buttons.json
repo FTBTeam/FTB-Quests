@@ -1,6 +1,6 @@
 {
 	"quests": {
-		"group": "ftbguilibrary:info",
+		"group": "ftblibrary:info",
 		"icon": "ftbquests:item/book",
 		"x": 610,
 		"click": "ftbquests:open_gui",

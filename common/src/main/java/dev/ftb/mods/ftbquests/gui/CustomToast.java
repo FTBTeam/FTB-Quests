@@ -1,7 +1,7 @@
 package dev.ftb.mods.ftbquests.gui;
 
-import dev.ftb.mods.ftbguilibrary.icon.Icon;
-import dev.ftb.mods.ftbguilibrary.misc.SimpleToast;
+import dev.ftb.mods.ftblibrary.icon.Icon;
+import dev.ftb.mods.ftblibrary.ui.misc.SimpleToast;
 import net.minecraft.network.chat.Component;
 
 /**

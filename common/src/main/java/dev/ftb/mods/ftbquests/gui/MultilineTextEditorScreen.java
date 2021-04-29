@@ -1,16 +1,16 @@
 package dev.ftb.mods.ftbquests.gui;
 
-import dev.ftb.mods.ftbguilibrary.config.ConfigCallback;
-import dev.ftb.mods.ftbguilibrary.config.ListConfig;
-import dev.ftb.mods.ftbguilibrary.config.StringConfig;
-import dev.ftb.mods.ftbguilibrary.utils.Key;
-import dev.ftb.mods.ftbguilibrary.utils.MouseButton;
-import dev.ftb.mods.ftbguilibrary.widget.BaseScreen;
-import dev.ftb.mods.ftbguilibrary.widget.GuiIcons;
-import dev.ftb.mods.ftbguilibrary.widget.SimpleButton;
-import dev.ftb.mods.ftbguilibrary.widget.TextBox;
-import dev.ftb.mods.ftbguilibrary.widget.TextField;
-import dev.ftb.mods.ftbguilibrary.widget.Theme;
+import dev.ftb.mods.ftblibrary.config.ConfigCallback;
+import dev.ftb.mods.ftblibrary.config.ListConfig;
+import dev.ftb.mods.ftblibrary.config.StringConfig;
+import dev.ftb.mods.ftblibrary.icon.Icons;
+import dev.ftb.mods.ftblibrary.ui.BaseScreen;
+import dev.ftb.mods.ftblibrary.ui.SimpleButton;
+import dev.ftb.mods.ftblibrary.ui.TextBox;
+import dev.ftb.mods.ftblibrary.ui.TextField;
+import dev.ftb.mods.ftblibrary.ui.Theme;
+import dev.ftb.mods.ftblibrary.ui.input.Key;
+import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import net.minecraft.network.chat.TranslatableComponent;
 import org.lwjgl.glfw.GLFW;
 
@@ -48,7 +48,7 @@ public class MultilineTextEditorScreen extends BaseScreen {
 	public void addWidgets() {
 		add(new TextField(this).setText("This is a lame solution but there will be a better one eventually"));
 		widgets.get(0).setPos((width - widgets.get(0).width) / 2, -15);
-		add(new SimpleButton(this, new TranslatableComponent("gui.accept"), GuiIcons.ACCEPT, (simpleButton, mouseButton) -> saveAndExit()).setPosAndSize(width + 6, 6, 16, 16));
+		add(new SimpleButton(this, new TranslatableComponent("gui.accept"), Icons.ACCEPT, (simpleButton, mouseButton) -> saveAndExit()).setPosAndSize(width + 6, 6, 16, 16));
 
 		for (int i = 0; i < textBoxes.size(); i++) {
 			textBoxes.get(i).setPosAndSize(2, 2 + i * 12, width - 4, 12);

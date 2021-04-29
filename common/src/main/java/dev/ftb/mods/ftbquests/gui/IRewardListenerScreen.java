@@ -1,6 +1,6 @@
 package dev.ftb.mods.ftbquests.gui;
 
-import dev.ftb.mods.ftbguilibrary.utils.ClientUtils;
+import dev.ftb.mods.ftblibrary.util.ClientUtils;
 
 /**
  * @author LatvianModder

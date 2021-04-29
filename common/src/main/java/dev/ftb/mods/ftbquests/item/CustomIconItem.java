@@ -1,7 +1,7 @@
 package dev.ftb.mods.ftbquests.item;
 
-import dev.ftb.mods.ftbguilibrary.icon.Icon;
-import dev.ftb.mods.ftbguilibrary.icon.ItemIcon;
+import dev.ftb.mods.ftblibrary.icon.Icon;
+import dev.ftb.mods.ftblibrary.icon.ItemIcon;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;

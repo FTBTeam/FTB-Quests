@@ -1,13 +1,14 @@
 package dev.ftb.mods.ftbquests.quest.loot;
 
-import dev.ftb.mods.ftbguilibrary.config.ConfigGroup;
-import dev.ftb.mods.ftbguilibrary.icon.Icon;
-import dev.ftb.mods.ftbguilibrary.icon.IconAnimation;
-import dev.ftb.mods.ftbguilibrary.icon.ItemIcon;
-import dev.ftb.mods.ftbguilibrary.utils.Bits;
-import dev.ftb.mods.ftbguilibrary.utils.ClientUtils;
-import dev.ftb.mods.ftbguilibrary.utils.TooltipList;
-import dev.ftb.mods.ftbguilibrary.widget.GuiIcons;
+import dev.ftb.mods.ftblibrary.config.ConfigGroup;
+import dev.ftb.mods.ftblibrary.icon.Icon;
+import dev.ftb.mods.ftblibrary.icon.IconAnimation;
+import dev.ftb.mods.ftblibrary.icon.Icons;
+import dev.ftb.mods.ftblibrary.icon.ItemIcon;
+import dev.ftb.mods.ftblibrary.math.Bits;
+import dev.ftb.mods.ftblibrary.snbt.OrderedCompoundTag;
+import dev.ftb.mods.ftblibrary.util.ClientUtils;
+import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.gui.EditRewardTableScreen;
 import dev.ftb.mods.ftbquests.gui.RewardTablesScreen;
 import dev.ftb.mods.ftbquests.gui.quests.QuestScreen;
@@ -107,11 +108,13 @@ public final class RewardTable extends QuestObjectBase {
 		ListTag list = new ListTag();
 
 		for (WeightedReward reward : rewards) {
-			CompoundTag nbt1 = new CompoundTag();
+			OrderedCompoundTag nbt1 = new OrderedCompoundTag();
 			reward.reward.writeData(nbt1);
 
 			if (reward.reward.getType() != RewardTypes.ITEM) {
 				nbt1.putString("type", reward.reward.getType().getTypeForNBT());
+			} else if (nbt1.getTagType("item") == NbtType.STRING) {
+				nbt1.singleLine = true;
 			}
 
 			if (reward.weight > 1) {
@@ -322,7 +325,7 @@ public final class RewardTable extends QuestObjectBase {
 		}
 
 		if (rewards.isEmpty()) {
-			return GuiIcons.DICE;
+			return Icons.DICE;
 		}
 
 		List<Icon> icons = new ArrayList<>();
