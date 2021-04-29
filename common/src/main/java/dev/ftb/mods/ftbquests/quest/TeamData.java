@@ -37,7 +37,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nullable;
-import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -353,7 +352,7 @@ public class TeamData {
 		CompoundTag startedNBT = new OrderedCompoundTag();
 
 		for (Long2LongMap.Entry entry : started.long2LongEntrySet().stream().sorted(LONG2LONG_COMPARATOR).collect(Collectors.toList())) {
-			startedNBT.putString(QuestObjectBase.getCodeString(entry.getLongKey()), Instant.ofEpochMilli(entry.getLongValue()).toString());
+			startedNBT.putLong(QuestObjectBase.getCodeString(entry.getLongKey()), entry.getLongValue());
 		}
 
 		nbt.put("started", startedNBT);
@@ -361,7 +360,7 @@ public class TeamData {
 		CompoundTag completedNBT = new OrderedCompoundTag();
 
 		for (Long2LongMap.Entry entry : completed.long2LongEntrySet().stream().sorted(LONG2LONG_COMPARATOR).collect(Collectors.toList())) {
-			completedNBT.putString(QuestObjectBase.getCodeString(entry.getLongKey()), Instant.ofEpochMilli(entry.getLongValue()).toString());
+			completedNBT.putLong(QuestObjectBase.getCodeString(entry.getLongKey()), entry.getLongValue());
 		}
 
 		nbt.put("completed", completedNBT);
@@ -369,7 +368,7 @@ public class TeamData {
 		CompoundTag claimedRewardsNBT = new OrderedCompoundTag();
 
 		for (Object2LongMap.Entry<QuestKey> entry : claimedRewards.object2LongEntrySet().stream().sorted(OBJECT2LONG_COMPARATOR).collect(Collectors.toList())) {
-			claimedRewardsNBT.putString(entry.getKey().toString(), Instant.ofEpochMilli(entry.getLongValue()).toString());
+			claimedRewardsNBT.putLong(entry.getKey().toString(), entry.getLongValue());
 		}
 
 		nbt.put("claimed_rewards", claimedRewardsNBT);
@@ -407,7 +406,7 @@ public class TeamData {
 		CompoundTag claimedRewardsNBT = nbt.getCompound("claimed_rewards");
 
 		for (String s : claimedRewardsNBT.getAllKeys()) {
-			claimedRewards.put(QuestKey.of(s), Instant.parse(claimedRewardsNBT.getString(s)).toEpochMilli());
+			claimedRewards.put(QuestKey.of(s), claimedRewardsNBT.getLong(s));
 		}
 
 		ListTag pinnedQuestsNBT = nbt.getList("pinned_quests", NbtType.STRING);
@@ -425,13 +424,13 @@ public class TeamData {
 		CompoundTag startedNBT = nbt.getCompound("started");
 
 		for (String s : startedNBT.getAllKeys()) {
-			started.put(file.getID(s), Instant.parse(startedNBT.getString(s)).toEpochMilli());
+			started.put(file.getID(s), startedNBT.getLong(s));
 		}
 
 		CompoundTag completedNBT = nbt.getCompound("completed");
 
 		for (String s : completedNBT.getAllKeys()) {
-			completed.put(file.getID(s), Instant.parse(completedNBT.getString(s)).toEpochMilli());
+			completed.put(file.getID(s), completedNBT.getLong(s));
 		}
 	}
 
