@@ -1,6 +1,6 @@
 package dev.ftb.mods.ftbquests.quest.task;
 
-import dev.ftb.mods.ftbguilibrary.widget.Button;
+import dev.ftb.mods.ftblibrary.ui.Button;
 import dev.ftb.mods.ftbquests.net.MessageSubmitTask;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;

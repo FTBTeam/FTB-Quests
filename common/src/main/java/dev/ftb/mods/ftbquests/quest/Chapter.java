@@ -1,15 +1,15 @@
 package dev.ftb.mods.ftbquests.quest;
 
-import dev.ftb.mods.ftbguilibrary.config.ConfigGroup;
-import dev.ftb.mods.ftbguilibrary.config.StringConfig;
-import dev.ftb.mods.ftbguilibrary.icon.Icon;
-import dev.ftb.mods.ftbguilibrary.icon.IconAnimation;
+import dev.ftb.mods.ftblibrary.config.ConfigGroup;
+import dev.ftb.mods.ftblibrary.config.StringConfig;
+import dev.ftb.mods.ftblibrary.icon.Icon;
+import dev.ftb.mods.ftblibrary.icon.IconAnimation;
+import dev.ftb.mods.ftblibrary.snbt.OrderedCompoundTag;
 import dev.ftb.mods.ftbquests.events.ObjectCompletedEvent;
 import dev.ftb.mods.ftbquests.events.ObjectStartedEvent;
 import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
 import dev.ftb.mods.ftbquests.net.MessageDisplayCompletionToast;
 import dev.ftb.mods.ftbquests.util.NetUtils;
-import dev.ftb.mods.ftbquests.util.OrderedCompoundTag;
 import me.shedaniel.architectury.utils.NbtType;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;

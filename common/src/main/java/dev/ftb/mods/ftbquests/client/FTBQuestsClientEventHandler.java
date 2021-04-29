@@ -2,10 +2,10 @@ package dev.ftb.mods.ftbquests.client;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.vertex.PoseStack;
-import dev.ftb.mods.ftbguilibrary.icon.Color4I;
-import dev.ftb.mods.ftbguilibrary.sidebar.SidebarButtonCreatedEvent;
-import dev.ftb.mods.ftbguilibrary.widget.CustomClickEvent;
-import dev.ftb.mods.ftbguilibrary.widget.GuiHelper;
+import dev.ftb.mods.ftblibrary.icon.Color4I;
+import dev.ftb.mods.ftblibrary.sidebar.SidebarButtonCreatedEvent;
+import dev.ftb.mods.ftblibrary.ui.CustomClickEvent;
+import dev.ftb.mods.ftblibrary.ui.GuiHelper;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.events.ClearFileCacheEvent;
 import dev.ftb.mods.ftbquests.item.FTBQuestsItems;

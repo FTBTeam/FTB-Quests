@@ -1,23 +1,22 @@
 package dev.ftb.mods.ftbquests.gui.quests;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import dev.ftb.mods.ftbguilibrary.config.ConfigGroup;
-import dev.ftb.mods.ftbguilibrary.config.ConfigValue;
-import dev.ftb.mods.ftbguilibrary.config.ConfigWithVariants;
-import dev.ftb.mods.ftbguilibrary.icon.Color4I;
-import dev.ftb.mods.ftbguilibrary.utils.Key;
-import dev.ftb.mods.ftbguilibrary.utils.MathUtils;
-import dev.ftb.mods.ftbguilibrary.utils.MouseButton;
-import dev.ftb.mods.ftbguilibrary.utils.TooltipList;
-import dev.ftb.mods.ftbguilibrary.widget.BaseScreen;
-import dev.ftb.mods.ftbguilibrary.widget.ContextMenuItem;
-import dev.ftb.mods.ftbguilibrary.widget.GuiHelper;
-import dev.ftb.mods.ftbguilibrary.widget.GuiIcons;
-import dev.ftb.mods.ftbguilibrary.widget.Panel;
-import dev.ftb.mods.ftbguilibrary.widget.Theme;
+import dev.ftb.mods.ftblibrary.config.ConfigGroup;
+import dev.ftb.mods.ftblibrary.config.ConfigValue;
+import dev.ftb.mods.ftblibrary.config.ConfigWithVariants;
+import dev.ftb.mods.ftblibrary.icon.Color4I;
+import dev.ftb.mods.ftblibrary.icon.Icons;
+import dev.ftb.mods.ftblibrary.math.MathUtils;
+import dev.ftb.mods.ftblibrary.ui.BaseScreen;
+import dev.ftb.mods.ftblibrary.ui.ContextMenuItem;
+import dev.ftb.mods.ftblibrary.ui.GuiHelper;
+import dev.ftb.mods.ftblibrary.ui.Panel;
+import dev.ftb.mods.ftblibrary.ui.Theme;
+import dev.ftb.mods.ftblibrary.ui.input.Key;
+import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
+import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
-import dev.ftb.mods.ftbquests.gui.CustomToast;
 import dev.ftb.mods.ftbquests.gui.FTBQuestsTheme;
 import dev.ftb.mods.ftbquests.gui.SelectQuestObjectScreen;
 import dev.ftb.mods.ftbquests.net.MessageChangeProgress;
@@ -187,7 +186,7 @@ public class QuestScreen extends BaseScreen {
 						name = name.withStyle(ChatFormatting.GRAY);
 					}
 
-					list.add(new ContextMenuItem(name, GuiIcons.SETTINGS, null) {
+					list.add(new ContextMenuItem(name, Icons.SETTINGS, null) {
 						@Override
 						public void addMouseOverText(TooltipList list) {
 							list.add(c.getStringForGUI(c.value));
@@ -265,16 +264,6 @@ public class QuestScreen extends BaseScreen {
 	@Override
 	public boolean keyPressed(Key key) {
 		if (super.keyPressed(key)) {
-			return true;
-		}
-
-		if (key.is(GLFW.GLFW_KEY_B)) {
-			Theme.renderDebugBoxes = !Theme.renderDebugBoxes;
-
-			if (Theme.renderDebugBoxes) {
-				Minecraft.getInstance().getToasts().addToast(new CustomToast(new TextComponent("Debug rendering enabled!"), GuiIcons.BUG, new TextComponent("Press B to disable")));
-			}
-
 			return true;
 		}
 

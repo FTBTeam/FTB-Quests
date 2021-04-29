@@ -1,6 +1,6 @@
 package dev.ftb.mods.ftbquests.integration.jei;
 
-import dev.ftb.mods.ftbguilibrary.icon.ItemIcon;
+import dev.ftb.mods.ftblibrary.icon.ItemIcon;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
 import dev.ftb.mods.ftbquests.quest.loot.WeightedReward;

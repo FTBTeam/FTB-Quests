@@ -1,6 +1,6 @@
 package dev.ftb.mods.ftbquests.integration.gamestages;
 
-import dev.ftb.mods.ftbguilibrary.widget.GuiIcons;
+import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.quest.Chapter;
 import dev.ftb.mods.ftbquests.quest.ChapterGroup;
@@ -27,8 +27,8 @@ import net.minecraftforge.fml.DistExecutor;
  * @author LatvianModder
  */
 public class GameStagesIntegration {
-	public static final TaskType GAMESTAGE_TASK = TaskTypes.register(new ResourceLocation(FTBQuests.MOD_ID, "gamestage"), GameStageTask::new, () -> GuiIcons.CONTROLLER);
-	public static final RewardType GAMESTAGE_REWARD = RewardTypes.register(new ResourceLocation(FTBQuests.MOD_ID, "gamestage"), GameStageReward::new, () -> GuiIcons.CONTROLLER);
+	public static final TaskType GAMESTAGE_TASK = TaskTypes.register(new ResourceLocation(FTBQuests.MOD_ID, "gamestage"), GameStageTask::new, () -> Icons.CONTROLLER);
+	public static final RewardType GAMESTAGE_REWARD = RewardTypes.register(new ResourceLocation(FTBQuests.MOD_ID, "gamestage"), GameStageReward::new, () -> Icons.CONTROLLER);
 	public static GameStageHelperCommon proxy;
 
 	public void init() {

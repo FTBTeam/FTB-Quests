@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbquests.item;
 
+import dev.ftb.mods.ftblibrary.snbt.OrderedCompoundTag;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -52,7 +53,14 @@ public class MissingItem extends Item {
 			return stack.getTag().getCompound("Item");
 		}
 
-		return stack.save(new CompoundTag());
+		OrderedCompoundTag tag = new OrderedCompoundTag();
+		stack.save(tag);
+
+		if (tag.size() == 2) {
+			tag.singleLine = true;
+		}
+
+		return tag;
 	}
 
 	public MissingItem() {

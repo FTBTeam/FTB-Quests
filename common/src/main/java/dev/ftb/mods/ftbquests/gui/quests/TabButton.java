@@ -1,11 +1,11 @@
 package dev.ftb.mods.ftbquests.gui.quests;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import dev.ftb.mods.ftbguilibrary.icon.Color4I;
-import dev.ftb.mods.ftbguilibrary.icon.Icon;
-import dev.ftb.mods.ftbguilibrary.widget.Button;
-import dev.ftb.mods.ftbguilibrary.widget.Panel;
-import dev.ftb.mods.ftbguilibrary.widget.Theme;
+import dev.ftb.mods.ftblibrary.icon.Color4I;
+import dev.ftb.mods.ftblibrary.icon.Icon;
+import dev.ftb.mods.ftblibrary.ui.Button;
+import dev.ftb.mods.ftblibrary.ui.Panel;
+import dev.ftb.mods.ftblibrary.ui.Theme;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraft.network.chat.Component;
 

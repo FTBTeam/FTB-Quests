@@ -1,6 +1,6 @@
 package dev.ftb.mods.ftbquests.quest;
 
-import dev.ftb.mods.ftbguilibrary.config.NameMap;
+import dev.ftb.mods.ftblibrary.config.NameMap;
 
 /**
  * @author LatvianModder

@@ -1,7 +1,7 @@
 package dev.ftb.mods.ftbquests.quest.task;
 
-import dev.ftb.mods.ftbguilibrary.config.ConfigGroup;
-import dev.ftb.mods.ftbguilibrary.utils.StringUtils;
+import dev.ftb.mods.ftblibrary.config.ConfigGroup;
+import dev.ftb.mods.ftblibrary.util.StringUtils;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;

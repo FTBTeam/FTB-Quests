@@ -7,8 +7,8 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.math.Matrix4f;
-import dev.ftb.mods.ftbguilibrary.icon.Color4I;
-import dev.ftb.mods.ftbguilibrary.icon.Icon;
+import dev.ftb.mods.ftblibrary.icon.Color4I;
+import dev.ftb.mods.ftblibrary.icon.Icon;
 import org.lwjgl.opengl.GL11;
 
 /**

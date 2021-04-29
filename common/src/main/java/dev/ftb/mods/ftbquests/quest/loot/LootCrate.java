@@ -1,7 +1,7 @@
 package dev.ftb.mods.ftbquests.quest.loot;
 
-import dev.ftb.mods.ftbguilibrary.config.ConfigGroup;
-import dev.ftb.mods.ftbguilibrary.icon.Color4I;
+import dev.ftb.mods.ftblibrary.config.ConfigGroup;
+import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftbquests.item.FTBQuestsItems;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import net.minecraft.nbt.CompoundTag;

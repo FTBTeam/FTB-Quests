@@ -2,10 +2,10 @@ package dev.ftb.mods.ftbquests.quest;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
-import dev.ftb.mods.ftbguilibrary.config.ConfigGroup;
-import dev.ftb.mods.ftbguilibrary.config.StringConfig;
-import dev.ftb.mods.ftbguilibrary.icon.Color4I;
-import dev.ftb.mods.ftbguilibrary.icon.Icon;
+import dev.ftb.mods.ftblibrary.config.ConfigGroup;
+import dev.ftb.mods.ftblibrary.config.StringConfig;
+import dev.ftb.mods.ftblibrary.icon.Color4I;
+import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftbquests.gui.ImageConfig;
 import dev.ftb.mods.ftbquests.net.MessageEditObject;
 import dev.ftb.mods.ftbquests.util.ConfigQuestObject;

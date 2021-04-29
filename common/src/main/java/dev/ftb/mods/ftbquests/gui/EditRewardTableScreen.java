@@ -1,18 +1,18 @@
 package dev.ftb.mods.ftbquests.gui;
 
-import dev.ftb.mods.ftbguilibrary.config.ConfigGroup;
-import dev.ftb.mods.ftbguilibrary.config.DoubleConfig;
-import dev.ftb.mods.ftbguilibrary.config.gui.EditConfigFromStringScreen;
-import dev.ftb.mods.ftbguilibrary.config.gui.EditConfigScreen;
-import dev.ftb.mods.ftbguilibrary.misc.ButtonListBaseScreen;
-import dev.ftb.mods.ftbguilibrary.utils.MouseButton;
-import dev.ftb.mods.ftbguilibrary.utils.TooltipList;
-import dev.ftb.mods.ftbguilibrary.widget.ContextMenuItem;
-import dev.ftb.mods.ftbguilibrary.widget.GuiIcons;
-import dev.ftb.mods.ftbguilibrary.widget.Panel;
-import dev.ftb.mods.ftbguilibrary.widget.SimpleTextButton;
-import dev.ftb.mods.ftbguilibrary.widget.Theme;
-import dev.ftb.mods.ftbguilibrary.widget.VerticalSpaceWidget;
+import dev.ftb.mods.ftblibrary.config.ConfigGroup;
+import dev.ftb.mods.ftblibrary.config.DoubleConfig;
+import dev.ftb.mods.ftblibrary.config.ui.EditConfigFromStringScreen;
+import dev.ftb.mods.ftblibrary.config.ui.EditConfigScreen;
+import dev.ftb.mods.ftblibrary.icon.Icons;
+import dev.ftb.mods.ftblibrary.ui.ContextMenuItem;
+import dev.ftb.mods.ftblibrary.ui.Panel;
+import dev.ftb.mods.ftblibrary.ui.SimpleTextButton;
+import dev.ftb.mods.ftblibrary.ui.Theme;
+import dev.ftb.mods.ftblibrary.ui.VerticalSpaceWidget;
+import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
+import dev.ftb.mods.ftblibrary.ui.misc.ButtonListBaseScreen;
+import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
 import dev.ftb.mods.ftbquests.quest.loot.WeightedReward;
@@ -33,7 +33,7 @@ import java.util.List;
 public class EditRewardTableScreen extends ButtonListBaseScreen {
 	private class RewardTableSettingsButton extends SimpleTextButton {
 		private RewardTableSettingsButton(Panel panel) {
-			super(panel, new TranslatableComponent("gui.settings"), GuiIcons.SETTINGS);
+			super(panel, new TranslatableComponent("gui.settings"), Icons.SETTINGS);
 			setHeight(12);
 		}
 
@@ -49,7 +49,7 @@ public class EditRewardTableScreen extends ButtonListBaseScreen {
 
 	private class SaveRewardTableButton extends SimpleTextButton {
 		private SaveRewardTableButton(Panel panel) {
-			super(panel, new TranslatableComponent("gui.accept"), GuiIcons.ACCEPT);
+			super(panel, new TranslatableComponent("gui.accept"), Icons.ACCEPT);
 			setHeight(12);
 		}
 
@@ -66,7 +66,7 @@ public class EditRewardTableScreen extends ButtonListBaseScreen {
 
 	private class AddWeightedRewardButton extends SimpleTextButton {
 		private AddWeightedRewardButton(Panel panel) {
-			super(panel, new TranslatableComponent("gui.add"), GuiIcons.ADD);
+			super(panel, new TranslatableComponent("gui.add"), Icons.ADD);
 			setHeight(12);
 		}
 
@@ -110,14 +110,14 @@ public class EditRewardTableScreen extends ButtonListBaseScreen {
 		public void onClicked(MouseButton button) {
 			playClickSound();
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
-			contextMenu.add(new ContextMenuItem(new TranslatableComponent("selectServer.edit"), GuiIcons.SETTINGS, () -> {
+			contextMenu.add(new ContextMenuItem(new TranslatableComponent("selectServer.edit"), Icons.SETTINGS, () -> {
 				ConfigGroup group = new ConfigGroup(FTBQuests.MOD_ID);
 				reward.reward.getConfig(reward.reward.createSubGroup(group));
 				group.savedCallback = accepted -> run();
 				new EditConfigScreen(group).openGui();
 			}));
 
-			contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.reward_table.set_weight"), GuiIcons.SETTINGS, () -> {
+			contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.reward_table.set_weight"), Icons.SETTINGS, () -> {
 				DoubleConfig c = new DoubleConfig(0D, Double.POSITIVE_INFINITY);
 				EditConfigFromStringScreen.open(c, (double) reward.weight, 1D, accepted -> {
 					if (accepted) {
@@ -136,7 +136,7 @@ public class EditRewardTableScreen extends ButtonListBaseScreen {
 				});
 			}));
 
-			contextMenu.add(new ContextMenuItem(new TranslatableComponent("selectServer.delete"), GuiIcons.REMOVE, () -> {
+			contextMenu.add(new ContextMenuItem(new TranslatableComponent("selectServer.delete"), Icons.REMOVE, () -> {
 				rewardTable.rewards.remove(reward);
 				EditRewardTableScreen.this.refreshWidgets();
 			}).setYesNo(new TranslatableComponent("delete_item", reward.reward.getTitle())));

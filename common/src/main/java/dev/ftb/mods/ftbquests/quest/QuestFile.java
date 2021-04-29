@@ -1,9 +1,11 @@
 package dev.ftb.mods.ftbquests.quest;
 
-import dev.ftb.mods.ftbguilibrary.config.ConfigGroup;
-import dev.ftb.mods.ftbguilibrary.config.ItemStackConfig;
-import dev.ftb.mods.ftbguilibrary.icon.Icon;
-import dev.ftb.mods.ftbguilibrary.utils.MathUtils;
+import dev.ftb.mods.ftblibrary.config.ConfigGroup;
+import dev.ftb.mods.ftblibrary.config.ItemStackConfig;
+import dev.ftb.mods.ftblibrary.icon.Icon;
+import dev.ftb.mods.ftblibrary.math.MathUtils;
+import dev.ftb.mods.ftblibrary.snbt.OrderedCompoundTag;
+import dev.ftb.mods.ftblibrary.snbt.SNBT;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.events.ClearFileCacheEvent;
 import dev.ftb.mods.ftbquests.events.CustomTaskEvent;
@@ -27,9 +29,7 @@ import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.quest.task.TaskType;
 import dev.ftb.mods.ftbquests.quest.task.TaskTypes;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
-import dev.ftb.mods.ftbquests.util.NBTUtils;
 import dev.ftb.mods.ftbquests.util.NetUtils;
-import dev.ftb.mods.ftbquests.util.OrderedCompoundTag;
 import dev.ftb.mods.ftbteams.FTBTeamsAPI;
 import dev.ftb.mods.ftbteams.data.Team;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -69,7 +69,7 @@ import java.util.function.Predicate;
  * @author LatvianModder
  */
 public abstract class QuestFile extends QuestObject {
-	public static int VERSION = 11;
+	public static int VERSION = 12;
 
 	public final DefaultChapterGroup defaultChapterGroup;
 	public final List<ChapterGroup> chapterGroups;
@@ -467,7 +467,7 @@ public abstract class QuestFile extends QuestObject {
 		CompoundTag fileNBT = new OrderedCompoundTag();
 		fileNBT.putInt("version", VERSION);
 		writeData(fileNBT);
-		NBTUtils.writeSNBT(folder.resolve("data.snbt"), fileNBT);
+		SNBT.write(folder.resolve("data.snbt"), fileNBT);
 
 		for (ChapterGroup group : chapterGroups) {
 			for (int ci = 0; ci < group.chapters.size(); ci++) {
@@ -527,7 +527,7 @@ public abstract class QuestFile extends QuestObject {
 				}
 
 				chapterNBT.put("quests", questList);
-				NBTUtils.writeSNBT(folder.resolve("chapters/" + chapter.getFilename() + ".snbt"), chapterNBT);
+				SNBT.write(folder.resolve("chapters/" + chapter.getFilename() + ".snbt"), chapterNBT);
 			}
 		}
 
@@ -537,14 +537,15 @@ public abstract class QuestFile extends QuestObject {
 			tableNBT.putString("id", table.getCodeString());
 			tableNBT.putInt("order_index", ri);
 			table.writeData(tableNBT);
-			NBTUtils.writeSNBT(folder.resolve("reward_tables/" + table.getFilename() + ".snbt"), tableNBT);
+			SNBT.write(folder.resolve("reward_tables/" + table.getFilename() + ".snbt"), tableNBT);
 		}
 
 		ListTag chapterGroupTag = new ListTag();
 
 		for (ChapterGroup group : chapterGroups) {
 			if (!group.isDefaultGroup()) {
-				CompoundTag groupTag = new OrderedCompoundTag();
+				OrderedCompoundTag groupTag = new OrderedCompoundTag();
+				groupTag.singleLine = true;
 				groupTag.putString("id", group.getCodeString());
 				group.writeData(groupTag);
 				chapterGroupTag.add(groupTag);
@@ -553,7 +554,7 @@ public abstract class QuestFile extends QuestObject {
 
 		CompoundTag groupNBT = new OrderedCompoundTag();
 		groupNBT.put("chapter_groups", chapterGroupTag);
-		NBTUtils.writeSNBT(folder.resolve("chapter_groups.snbt"), groupNBT);
+		SNBT.write(folder.resolve("chapter_groups.snbt"), groupNBT);
 	}
 
 	public final void readDataFull(Path folder) {
@@ -565,7 +566,7 @@ public abstract class QuestFile extends QuestObject {
 		rewardTables.clear();
 
 		final Long2ObjectOpenHashMap<CompoundTag> dataCache = new Long2ObjectOpenHashMap<>();
-		CompoundTag fileNBT = NBTUtils.readSNBT(folder.resolve("data.snbt"));
+		CompoundTag fileNBT = SNBT.read(folder.resolve("data.snbt"));
 
 		if (fileNBT != null) {
 			fileVersion = fileNBT.getInt("version");
@@ -576,7 +577,7 @@ public abstract class QuestFile extends QuestObject {
 		Path groupsFile = folder.resolve("chapter_groups.snbt");
 
 		if (Files.exists(groupsFile)) {
-			CompoundTag chapterGroupsTag = NBTUtils.readSNBT(groupsFile);
+			CompoundTag chapterGroupsTag = SNBT.read(groupsFile);
 
 			if (chapterGroupsTag != null) {
 				ListTag groupListTag = chapterGroupsTag.getList("chapter_groups", NbtType.COMPOUND);
@@ -600,7 +601,7 @@ public abstract class QuestFile extends QuestObject {
 		if (Files.exists(chaptersFolder)) {
 			try {
 				Files.list(chaptersFolder).forEach(path -> {
-					CompoundTag chapterNBT = NBTUtils.readSNBT(path);
+					CompoundTag chapterNBT = SNBT.read(path);
 
 					if (chapterNBT != null) {
 						Chapter chapter = new Chapter(this, getChapterGroup(getID(chapterNBT.get("group"))));
@@ -667,7 +668,7 @@ public abstract class QuestFile extends QuestObject {
 		if (Files.exists(rewardTableFolder)) {
 			try {
 				Files.list(rewardTableFolder).forEach(path -> {
-					CompoundTag tableNBT = NBTUtils.readSNBT(path);
+					CompoundTag tableNBT = SNBT.read(path);
 
 					if (tableNBT != null) {
 						RewardTable table = new RewardTable(this);

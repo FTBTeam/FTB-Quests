@@ -1,7 +1,7 @@
 package dev.ftb.mods.ftbquests.quest;
 
-import dev.ftb.mods.ftbguilibrary.config.ConfigGroup;
-import dev.ftb.mods.ftbguilibrary.icon.Color4I;
+import dev.ftb.mods.ftblibrary.config.ConfigGroup;
+import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import dev.ftb.mods.ftbquests.util.ProgressChange;

@@ -1,6 +1,6 @@
 package dev.ftb.mods.ftbquests;
 
-import dev.ftb.mods.ftbguilibrary.icon.Icon;
+import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftbquests.integration.gamestages.GameStagesIntegration;
 import dev.ftb.mods.ftbquests.item.FTBQuestsItems;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;

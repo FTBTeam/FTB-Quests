@@ -1,6 +1,6 @@
 package dev.ftb.mods.ftbquests.integration.gamestages;
 
-import dev.ftb.mods.ftbguilibrary.config.ConfigGroup;
+import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.reward.RewardAutoClaim;

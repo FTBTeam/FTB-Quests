@@ -1,5 +1,5 @@
 [*]
-background:          ftbguilibrary:textures/gui/background_squares.png; color=#DCFFFFFF; tile_size=64
+background:          ftblibrary:textures/gui/background_squares.png; color=#DCFFFFFF; tile_size=64
 extra_quest_shapes:  diamond, pentagon, hexagon, octagon, heart, gear
 
 text_color:          #FFFFFF
@@ -25,7 +25,7 @@ icon:                 none
 check_icon:           builtin
 add_icon:             builtin
 alert_icon:           ftbquests:textures/gui/alert.png
-support_icon:         ftbguilibrary:textures/icons/support.png
+support_icon:         ftblibrary:textures/icons/support.png
 wiki_icon:            ftbquests:textures/gui/info.png
 wiki_url:             -
 pin_icon_on:          ftbquests:textures/gui/pin.png; color=#F8BD1C
@@ -35,14 +35,14 @@ close_icon:           ftbquests:textures/gui/close.png
 emergency_items_icon: ftbquests:textures/gui/emergency_items.png; color=#F3D9FF
 guide_icon:           ftbquests:textures/gui/guide.png; color=#EF9E1A
 modpack_icon:         ftbquests:textures/item/book.png
-reward_table_icon:    ftbguilibrary:icons/money_bag
+reward_table_icon:    ftblibrary:icons/money_bag
 shop_icon:            ftbquests:textures/gui/shop.png; color=#EF9E1A
-delete_icon:          ftbguilibrary:icons/remove
-reload_icon:          ftbguilibrary:icons/refresh
-download_icon:        ftbguilibrary:icons/down
-edit_icon:            ftbguilibrary:icons/settings
-move_up_icon:         ftbguilibrary:icons/up
-move_down_icon:       ftbguilibrary:icons/down
+delete_icon:          ftblibrary:icons/remove
+reload_icon:          ftblibrary:icons/refresh
+download_icon:        ftblibrary:icons/down
+edit_icon:            ftblibrary:icons/settings
+move_up_icon:         ftblibrary:icons/up
+move_down_icon:       ftblibrary:icons/down
 
 full_screen_quest:                  0
 tasks_text_color:                   #5555FF
@@ -62,5 +62,5 @@ dependency_line_thickness:          0.17
 quest_spacing:                      1.0
 pinned_quest_size:                  0.75
 
-checkmark_task_active:   ftbguilibrary:icons/accept
-checkmark_task_inactive: ftbguilibrary:icons/accept_gray
+checkmark_task_active:   ftblibrary:icons/accept
+checkmark_task_inactive: ftblibrary:icons/accept_gray

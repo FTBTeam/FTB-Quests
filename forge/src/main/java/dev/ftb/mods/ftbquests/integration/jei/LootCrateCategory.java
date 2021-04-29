@@ -1,7 +1,7 @@
 package dev.ftb.mods.ftbquests.integration.jei;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import dev.ftb.mods.ftbguilibrary.widget.GuiHelper;
+import dev.ftb.mods.ftblibrary.ui.GuiHelper;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.item.FTBQuestsItems;
 import mezz.jei.api.gui.IRecipeLayout;

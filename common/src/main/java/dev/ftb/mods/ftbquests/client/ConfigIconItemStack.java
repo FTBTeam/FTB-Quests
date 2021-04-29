@@ -1,9 +1,9 @@
 package dev.ftb.mods.ftbquests.client;
 
-import dev.ftb.mods.ftbguilibrary.config.ConfigCallback;
-import dev.ftb.mods.ftbguilibrary.config.ItemStackConfig;
-import dev.ftb.mods.ftbguilibrary.config.gui.SelectItemStackScreen;
-import dev.ftb.mods.ftbguilibrary.utils.MouseButton;
+import dev.ftb.mods.ftblibrary.config.ConfigCallback;
+import dev.ftb.mods.ftblibrary.config.ItemStackConfig;
+import dev.ftb.mods.ftblibrary.config.ui.SelectItemStackScreen;
+import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftbquests.gui.ImageConfig;
 import dev.ftb.mods.ftbquests.gui.SelectImageScreen;
 import dev.ftb.mods.ftbquests.item.FTBQuestsItems;

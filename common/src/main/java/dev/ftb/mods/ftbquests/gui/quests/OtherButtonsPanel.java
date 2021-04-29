@@ -1,6 +1,6 @@
 package dev.ftb.mods.ftbquests.gui.quests;
 
-import dev.ftb.mods.ftbguilibrary.widget.Panel;
+import dev.ftb.mods.ftblibrary.ui.Panel;
 
 /**
  * @author LatvianModder

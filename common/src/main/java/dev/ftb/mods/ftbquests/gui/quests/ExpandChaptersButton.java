@@ -1,8 +1,8 @@
 package dev.ftb.mods.ftbquests.gui.quests;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import dev.ftb.mods.ftbguilibrary.widget.Theme;
-import dev.ftb.mods.ftbguilibrary.widget.Widget;
+import dev.ftb.mods.ftblibrary.ui.Theme;
+import dev.ftb.mods.ftblibrary.ui.Widget;
 
 public class ExpandChaptersButton extends Widget {
 	private final QuestScreen questScreen;

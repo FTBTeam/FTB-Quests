@@ -1,11 +1,11 @@
 package dev.ftb.mods.ftbquests.gui;
 
-import dev.ftb.mods.ftbguilibrary.misc.ButtonListBaseScreen;
-import dev.ftb.mods.ftbguilibrary.utils.MouseButton;
-import dev.ftb.mods.ftbguilibrary.utils.TooltipList;
-import dev.ftb.mods.ftbguilibrary.widget.Panel;
-import dev.ftb.mods.ftbguilibrary.widget.SimpleTextButton;
-import dev.ftb.mods.ftbguilibrary.widget.Theme;
+import dev.ftb.mods.ftblibrary.ui.Panel;
+import dev.ftb.mods.ftblibrary.ui.SimpleTextButton;
+import dev.ftb.mods.ftblibrary.ui.Theme;
+import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
+import dev.ftb.mods.ftblibrary.ui.misc.ButtonListBaseScreen;
+import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.net.MessageClaimChoiceReward;
 import dev.ftb.mods.ftbquests.quest.loot.WeightedReward;
 import dev.ftb.mods.ftbquests.quest.reward.ChoiceReward;

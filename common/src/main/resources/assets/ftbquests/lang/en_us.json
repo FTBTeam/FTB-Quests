@@ -35,7 +35,6 @@
 	"block.ftbquests.loot_crate_storage": "Loot Crate Storage",
 	"block.ftbquests.loot_crate_opener": "Loot Crate Opener",
 	"block.ftbquests.loot_crate_opener.rightclick": "Stored items: %d",
-	"block.ftbquests.banner": "Quest Banner [WIP]",
 	"item.ftbquests.book": "Quest Book",
 	"item.ftbquests.missing_item": "Missing Item",
 	"item.ftbquests.barrier.nogui": "GUI is still work in progress",
