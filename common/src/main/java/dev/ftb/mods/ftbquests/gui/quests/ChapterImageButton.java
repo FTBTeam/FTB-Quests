@@ -13,7 +13,7 @@ import dev.ftb.mods.ftblibrary.ui.Theme;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.FTBQuests;
-import dev.ftb.mods.ftbquests.net.MessageEditObject;
+import dev.ftb.mods.ftbquests.net.EditObjectPacket;
 import dev.ftb.mods.ftbquests.quest.ChapterImage;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraft.ChatFormatting;
@@ -72,7 +72,7 @@ public class ChapterImageButton extends Button {
 				chapterImage.getConfig(group.getGroup("chapter").getGroup("image"));
 				group.savedCallback = accepted -> {
 					if (accepted) {
-						new MessageEditObject(chapterImage.chapter).sendToServer();
+						new EditObjectPacket(chapterImage.chapter).sendToServer();
 					}
 					run();
 				};
@@ -92,7 +92,7 @@ public class ChapterImageButton extends Button {
 
 			contextMenu.add(new ContextMenuItem(new TranslatableComponent("selectServer.delete"), ThemeProperties.DELETE_ICON.get(), () -> {
 				chapterImage.chapter.images.remove(chapterImage);
-				new MessageEditObject(chapterImage.chapter).sendToServer();
+				new EditObjectPacket(chapterImage.chapter).sendToServer();
 			}).setYesNo(new TranslatableComponent("delete_item", chapterImage.image.toString())));
 
 			getGui().openContextMenu(contextMenu);

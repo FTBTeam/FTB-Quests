@@ -14,8 +14,8 @@ import dev.ftb.mods.ftbquests.events.ObjectStartedEvent;
 import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
 import dev.ftb.mods.ftbquests.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.integration.jei.FTBQuestsJEIHelper;
-import dev.ftb.mods.ftbquests.net.MessageDisplayCompletionToast;
-import dev.ftb.mods.ftbquests.net.MessageSubmitTask;
+import dev.ftb.mods.ftbquests.net.DisplayCompletionToastPacket;
+import dev.ftb.mods.ftbquests.net.SubmitTaskPacket;
 import dev.ftb.mods.ftbquests.quest.Chapter;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestFile;
@@ -101,7 +101,7 @@ public abstract class Task extends QuestObject {
 		boolean questCompleted = quest.isCompletedRaw(data.teamData);
 
 		if (quest.tasks.size() > 1 && !questCompleted && !disableToast) {
-			new MessageDisplayCompletionToast(id).sendTo(data.notifiedPlayers);
+			new DisplayCompletionToastPacket(id).sendTo(data.notifiedPlayers);
 		}
 
 		if (questCompleted) {
@@ -218,7 +218,7 @@ public abstract class Task extends QuestObject {
 	public void onButtonClicked(Button button, boolean canClick) {
 		if (canClick && autoSubmitOnPlayerTick() <= 0) {
 			button.playClickSound();
-			new MessageSubmitTask(id).sendToServer();
+			new SubmitTaskPacket(id).sendToServer();
 		}
 	}
 

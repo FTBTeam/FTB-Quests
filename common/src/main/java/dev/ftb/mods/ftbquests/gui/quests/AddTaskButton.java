@@ -6,7 +6,7 @@ import dev.ftb.mods.ftblibrary.ui.ContextMenuItem;
 import dev.ftb.mods.ftblibrary.ui.Panel;
 import dev.ftb.mods.ftblibrary.ui.Theme;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
-import dev.ftb.mods.ftbquests.net.MessageCreateObject;
+import dev.ftb.mods.ftbquests.net.CreateObjectPacket;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.task.TaskType;
 import dev.ftb.mods.ftbquests.quest.task.TaskTypes;
@@ -40,7 +40,7 @@ public class AddTaskButton extends Button {
 				type.getGuiProvider().openCreationGui(this, quest, task -> {
 					CompoundTag extra = new CompoundTag();
 					extra.putString("type", type.getTypeForNBT());
-					new MessageCreateObject(task, extra).sendToServer();
+					new CreateObjectPacket(task, extra).sendToServer();
 				});
 			}));
 		}

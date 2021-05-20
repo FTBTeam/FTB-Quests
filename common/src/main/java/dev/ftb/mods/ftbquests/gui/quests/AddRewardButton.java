@@ -6,7 +6,7 @@ import dev.ftb.mods.ftblibrary.ui.ContextMenuItem;
 import dev.ftb.mods.ftblibrary.ui.Panel;
 import dev.ftb.mods.ftblibrary.ui.Theme;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
-import dev.ftb.mods.ftbquests.net.MessageCreateObject;
+import dev.ftb.mods.ftbquests.net.CreateObjectPacket;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.reward.RewardType;
 import dev.ftb.mods.ftbquests.quest.reward.RewardTypes;
@@ -40,7 +40,7 @@ public class AddRewardButton extends Button {
 				type.getGuiProvider().openCreationGui(this, quest, reward -> {
 					CompoundTag extra = new CompoundTag();
 					extra.putString("type", type.getTypeForNBT());
-					new MessageCreateObject(reward, extra).sendToServer();
+					new CreateObjectPacket(reward, extra).sendToServer();
 				});
 			}));
 		}

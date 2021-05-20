@@ -18,8 +18,8 @@ import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
 import dev.ftb.mods.ftbquests.gui.MultilineTextEditorScreen;
 import dev.ftb.mods.ftbquests.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.integration.jei.FTBQuestsJEIHelper;
-import dev.ftb.mods.ftbquests.net.MessageDisplayCompletionToast;
-import dev.ftb.mods.ftbquests.net.MessageMoveQuest;
+import dev.ftb.mods.ftbquests.net.DisplayCompletionToastPacket;
+import dev.ftb.mods.ftbquests.net.MoveQuestPacket;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.reward.RewardClaimType;
 import dev.ftb.mods.ftbquests.quest.task.Task;
@@ -382,7 +382,7 @@ public final class Quest extends QuestObject implements Movable {
 
 		if (!disableToast) {
 			for (ServerPlayer player : data.notifiedPlayers) {
-				new MessageDisplayCompletionToast(id).sendTo(player);
+				new DisplayCompletionToastPacket(id).sendTo(player);
 			}
 		}
 
@@ -540,7 +540,7 @@ public final class Quest extends QuestObject implements Movable {
 	@Override
 	@Environment(EnvType.CLIENT)
 	public void move(Chapter to, double x, double y) {
-		new MessageMoveQuest(id, to.id, x, y).sendToServer();
+		new MoveQuestPacket(id, to.id, x, y).sendToServer();
 	}
 
 	@Override

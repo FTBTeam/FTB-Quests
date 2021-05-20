@@ -10,7 +10,7 @@ import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.events.ClearFileCacheEvent;
 import dev.ftb.mods.ftbquests.item.FTBQuestsItems;
 import dev.ftb.mods.ftbquests.item.LootCrateItem;
-import dev.ftb.mods.ftbquests.net.MessageSubmitTask;
+import dev.ftb.mods.ftbquests.net.SubmitTaskPacket;
 import dev.ftb.mods.ftbquests.quest.Chapter;
 import dev.ftb.mods.ftbquests.quest.ChapterGroup;
 import dev.ftb.mods.ftbquests.quest.Quest;
@@ -132,7 +132,7 @@ public class FTBQuestsClientEventHandler {
 				}
 
 				if (currentlyObservingTicks >= currentlyObserving.timer) {
-					new MessageSubmitTask(currentlyObserving.id).sendToServer();
+					new SubmitTaskPacket(currentlyObserving.id).sendToServer();
 					ClientQuestFile.INSTANCE.self.addProgress(currentlyObserving, 1L);
 					currentlyObserving = null;
 					currentlyObservingTicks = 0L;

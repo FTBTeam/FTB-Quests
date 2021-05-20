@@ -14,8 +14,8 @@ import dev.ftb.mods.ftbquests.events.ObjectStartedEvent;
 import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
 import dev.ftb.mods.ftbquests.integration.jei.FTBQuestsJEIHelper;
 import dev.ftb.mods.ftbquests.item.MissingItem;
+import dev.ftb.mods.ftbquests.net.DisplayCompletionToastPacket;
 import dev.ftb.mods.ftbquests.net.FTBQuestsNetHandler;
-import dev.ftb.mods.ftbquests.net.MessageDisplayCompletionToast;
 import dev.ftb.mods.ftbquests.quest.loot.EntityWeight;
 import dev.ftb.mods.ftbquests.quest.loot.LootCrate;
 import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
@@ -187,7 +187,7 @@ public abstract class QuestFile extends QuestObject {
 
 		if (!disableToast) {
 			for (ServerPlayer player : data.notifiedPlayers) {
-				new MessageDisplayCompletionToast(id).sendTo(player);
+				new DisplayCompletionToastPacket(id).sendTo(player);
 			}
 		}
 	}

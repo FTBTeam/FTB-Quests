@@ -21,8 +21,8 @@ import dev.ftb.mods.ftblibrary.ui.input.Key;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.util.StringUtils;
 import dev.ftb.mods.ftbquests.FTBQuests;
-import dev.ftb.mods.ftbquests.net.MessageCreateTaskAt;
-import dev.ftb.mods.ftbquests.net.MessageEditObject;
+import dev.ftb.mods.ftbquests.net.CreateTaskAtPacket;
+import dev.ftb.mods.ftbquests.net.EditObjectPacket;
 import dev.ftb.mods.ftbquests.quest.ChapterImage;
 import dev.ftb.mods.ftbquests.quest.Movable;
 import dev.ftb.mods.ftbquests.quest.Quest;
@@ -482,7 +482,7 @@ public class QuestPanel extends Panel {
 			for (TaskType type : TaskTypes.TYPES.values()) {
 				contextMenu.add(new ContextMenuItem(type.getDisplayName(), type.getIcon(), () -> {
 					playClickSound();
-					type.getGuiProvider().openCreationGui(this, new Quest(questScreen.selectedChapter), task -> new MessageCreateTaskAt(questScreen.selectedChapter, qx, qy, task).sendToServer());
+					type.getGuiProvider().openCreationGui(this, new Quest(questScreen.selectedChapter), task -> new CreateTaskAtPacket(questScreen.selectedChapter, qx, qy, task).sendToServer());
 				}));
 			}
 
@@ -492,7 +492,7 @@ public class QuestPanel extends Panel {
 				image.x = qx;
 				image.y = qy;
 				questScreen.selectedChapter.images.add(image);
-				new MessageEditObject(questScreen.selectedChapter).sendToServer();
+				new EditObjectPacket(questScreen.selectedChapter).sendToServer();
 			}));
 
 			questScreen.openContextMenu(contextMenu);

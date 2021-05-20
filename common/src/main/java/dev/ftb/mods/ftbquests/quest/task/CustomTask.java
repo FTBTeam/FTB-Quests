@@ -1,7 +1,7 @@
 package dev.ftb.mods.ftbquests.quest.task;
 
 import dev.ftb.mods.ftblibrary.ui.Button;
-import dev.ftb.mods.ftbquests.net.MessageSubmitTask;
+import dev.ftb.mods.ftbquests.net.SubmitTaskPacket;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.TeamData;
@@ -52,7 +52,7 @@ public class CustomTask extends Task {
 	public void onButtonClicked(Button button, boolean canClick) {
 		if (enableButton && canClick) {
 			button.playClickSound();
-			new MessageSubmitTask(id).sendToServer();
+			new SubmitTaskPacket(id).sendToServer();
 		}
 	}
 

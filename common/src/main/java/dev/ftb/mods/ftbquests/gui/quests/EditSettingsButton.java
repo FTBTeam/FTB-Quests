@@ -6,7 +6,7 @@ import dev.ftb.mods.ftblibrary.ui.Panel;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.gui.RewardTablesScreen;
-import dev.ftb.mods.ftbquests.net.MessageChangeProgress;
+import dev.ftb.mods.ftbquests.net.ChangeProgressPacket;
 import dev.ftb.mods.ftbquests.quest.theme.ThemeLoader;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraft.Util;
@@ -40,11 +40,11 @@ public class EditSettingsButton extends TabButton {
 		List<ContextMenuItem> contextMenu = new ArrayList<>();
 		contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.gui.edit_file"), ThemeProperties.SETTINGS_ICON.get(), () -> questScreen.file.onEditButtonClicked(this)));
 
-		contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.gui.reset_progress"), ThemeProperties.RELOAD_ICON.get(), () -> MessageChangeProgress.send(questScreen.file.self, questScreen.file, progressChange -> {
+		contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.gui.reset_progress"), ThemeProperties.RELOAD_ICON.get(), () -> ChangeProgressPacket.send(questScreen.file.self, questScreen.file, progressChange -> {
 			progressChange.reset = true;
 		})).setYesNo(new TranslatableComponent("ftbquests.gui.reset_progress_q")));
 
-		contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.gui.complete_instantly"), ThemeProperties.CHECK_ICON.get(), () -> MessageChangeProgress.send(questScreen.file.self, questScreen.file, progressChange -> {
+		contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.gui.complete_instantly"), ThemeProperties.CHECK_ICON.get(), () -> ChangeProgressPacket.send(questScreen.file.self, questScreen.file, progressChange -> {
 			progressChange.reset = false;
 		})).setYesNo(new TranslatableComponent("ftbquests.gui.complete_instantly_q")));
 

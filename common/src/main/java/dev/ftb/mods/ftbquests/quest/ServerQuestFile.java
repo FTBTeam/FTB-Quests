@@ -3,9 +3,9 @@ package dev.ftb.mods.ftbquests.quest;
 import com.mojang.util.UUIDTypeAdapter;
 import dev.ftb.mods.ftblibrary.snbt.SNBT;
 import dev.ftb.mods.ftbquests.FTBQuests;
-import dev.ftb.mods.ftbquests.net.MessageCreateTeamData;
-import dev.ftb.mods.ftbquests.net.MessageDeleteObjectResponse;
-import dev.ftb.mods.ftbquests.net.MessageSyncQuests;
+import dev.ftb.mods.ftbquests.net.CreateTeamDataPacket;
+import dev.ftb.mods.ftbquests.net.DeleteObjectResponsePacket;
+import dev.ftb.mods.ftbquests.net.SyncQuestsPacket;
 import dev.ftb.mods.ftbquests.quest.reward.RewardType;
 import dev.ftb.mods.ftbquests.quest.reward.RewardTypes;
 import dev.ftb.mods.ftbquests.quest.task.TaskType;
@@ -121,7 +121,7 @@ public class ServerQuestFile extends QuestFile {
 			}
 		}
 
-		new MessageDeleteObjectResponse(id).sendToAll();
+		new DeleteObjectResponsePacket(id).sendToAll(server);
 	}
 
 	@Override
@@ -169,11 +169,11 @@ public class ServerQuestFile extends QuestFile {
 
 		for (ServerPlayer player1 : server.getPlayerList().getPlayers()) {
 			if (player1 != player) {
-				new MessageCreateTeamData(data).sendTo(player1);
+				new CreateTeamDataPacket(data).sendTo(player1);
 			}
 		}
 
-		new MessageSyncQuests(id, this).sendTo(player);
+		new SyncQuestsPacket(id, this).sendTo(player);
 		player.inventoryMenu.addSlotListener(new FTBQuestsInventoryListener(player));
 
 		for (ChapterGroup group : ServerQuestFile.INSTANCE.chapterGroups) {

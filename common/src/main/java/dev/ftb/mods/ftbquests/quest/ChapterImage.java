@@ -7,7 +7,7 @@ import dev.ftb.mods.ftblibrary.config.StringConfig;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftbquests.gui.ImageConfig;
-import dev.ftb.mods.ftbquests.net.MessageEditObject;
+import dev.ftb.mods.ftbquests.net.EditObjectPacket;
 import dev.ftb.mods.ftbquests.util.ConfigQuestObject;
 import dev.ftb.mods.ftbquests.util.NetUtils;
 import me.shedaniel.architectury.utils.NbtType;
@@ -180,13 +180,13 @@ public final class ChapterImage implements Movable {
 
 		if (to != chapter) {
 			chapter.images.remove(this);
-			new MessageEditObject(chapter).sendToServer();
+			new EditObjectPacket(chapter).sendToServer();
 
 			chapter = to;
 			chapter.images.add(this);
 		}
 
-		new MessageEditObject(chapter).sendToServer();
+		new EditObjectPacket(chapter).sendToServer();
 	}
 
 	@Override

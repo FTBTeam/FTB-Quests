@@ -12,7 +12,6 @@ import dev.ftb.mods.ftbquests.gui.RewardToast;
 import dev.ftb.mods.ftbquests.gui.ToastQuestObject;
 import dev.ftb.mods.ftbquests.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.integration.jei.FTBQuestsJEIHelper;
-import dev.ftb.mods.ftbquests.net.MessageChangeChapterGroupResponse;
 import dev.ftb.mods.ftbquests.quest.Chapter;
 import dev.ftb.mods.ftbquests.quest.ChapterGroup;
 import dev.ftb.mods.ftbquests.quest.Quest;
@@ -236,7 +235,6 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon {
 				g.chapters.add(chapter);
 				chapter.file.clearCachedData();
 				chapter.editedFromGUI();
-				new MessageChangeChapterGroupResponse(id, group).sendToAll();
 			}
 		}
 	}

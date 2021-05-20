@@ -1,75 +1,66 @@
 package dev.ftb.mods.ftbquests.net;
 
+import dev.ftb.mods.ftblibrary.net.snm.PacketID;
+import dev.ftb.mods.ftblibrary.net.snm.SimpleNetworkManager;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import me.shedaniel.architectury.annotations.ExpectPlatform;
-import me.shedaniel.architectury.networking.NetworkChannel;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
-import java.util.function.Function;
+public interface FTBQuestsNetHandler {
+	SimpleNetworkManager NET = SimpleNetworkManager.create(FTBQuests.MOD_ID);
 
-public class FTBQuestsNetHandler {
-	public static NetworkChannel MAIN;
+	PacketID SYNC_QUESTS = NET.registerS2C("sync_quests", SyncQuestsPacket::new);
+	PacketID UPDATE_TASK_PROGRESS = NET.registerS2C("update_task_progress", UpdateTaskProgressPacket::new);
+	PacketID SUBMIT_TASK = NET.registerC2S("submit_task", SubmitTaskPacket::new);
+	PacketID CLAIM_REWARD = NET.registerC2S("claim_reward", ClaimRewardPacket::new);
+	PacketID CLAIM_REWARD_RESPONSE = NET.registerS2C("claim_reward_response", ClaimRewardResponsePacket::new);
+	PacketID SYNC_EDITING_MODE = NET.registerS2C("sync_editing_mode", SyncEditingModePacket::new);
+	PacketID GET_EMERGENCY_ITEMS = NET.registerC2S("get_emergency_items", GetEmergencyItemsPacket::new);
+	PacketID CREATE_TEAM_DATA = NET.registerS2C("create_team_data", CreateTeamDataPacket::new);
+	PacketID CLAIM_ALL_REWARDS = NET.registerC2S("claim_all_rewards", ClaimAllRewardsPacket::new);
+	PacketID CLAIM_CHOICE_REWARD = NET.registerC2S("claim_choice_reward", ClaimChoiceRewardPacket::new);
+	PacketID DISPLAY_COMPLETION_TOAST = NET.registerS2C("display_completion_toast", DisplayCompletionToastPacket::new);
+	PacketID DISPLAY_REWARD_TOAST = NET.registerS2C("display_reward_toast", DisplayRewardToastPacket::new);
+	PacketID DISPLAY_ITEM_REWARD_TOAST = NET.registerS2C("display_item_reward_toast", DisplayItemRewardToastPacket::new);
+	PacketID TOGGLE_PINNED = NET.registerC2S("toggle_pinned", TogglePinnedPacket::new);
+	PacketID TOGGLE_PINNED_RESPONSE = NET.registerS2C("toggle_pinned_response", TogglePinnedResponsePacket::new);
+	PacketID UPDATE_TEAM_DATA = NET.registerS2C("update_team_data", UpdateTeamDataPacket::new);
+	PacketID SET_CUSTOM_IMAGE = NET.registerC2S("set_custom_image", SetCustomImagePacket::new);
+	PacketID OBJECT_STARTED = NET.registerS2C("object_started", ObjectStartedPacket::new);
+	PacketID OBJECT_COMPLETED = NET.registerS2C("object_completed", ObjectCompletedPacket::new);
+	PacketID OBJECT_STARTED_RESET = NET.registerS2C("object_started_reset", ObjectStartedResetPacket::new);
+	PacketID OBJECT_COMPLETED_RESET = NET.registerS2C("object_completed_reset", ObjectCompletedResetPacket::new);
+	PacketID SYNC_LOCK = NET.registerS2C("sync_lock", SyncLockPacket::new);
+	PacketID RESET_REWARD = NET.registerS2C("reset_reward", ResetRewardPacket::new);
 
-	private static <T extends MessageBase> void register(Class<T> c, Function<FriendlyByteBuf, T> s) {
-		MAIN.register(c, MessageBase::write, s, MessageBase::handle);
-	}
+	PacketID CHANGE_PROGRESS = NET.registerC2S("change_progress", ChangeProgressPacket::new);
+	PacketID CREATE_OBJECT = NET.registerC2S("create_object", CreateObjectPacket::new);
+	PacketID CREATE_OBJECT_RESPONSE = NET.registerS2C("create_object_response", CreateObjectResponsePacket::new);
+	PacketID CREATE_TASK_AT = NET.registerC2S("create_task_at", CreateTaskAtPacket::new);
+	PacketID DELETE_OBJECT = NET.registerC2S("delete_object", DeleteObjectPacket::new);
+	PacketID DELETE_OBJECT_RESPONSE = NET.registerS2C("delete_object_response", DeleteObjectResponsePacket::new);
+	PacketID EDIT_OBJECT = NET.registerC2S("edit_object", EditObjectPacket::new);
+	PacketID EDIT_OBJECT_RESPONSE = NET.registerS2C("edit_object_response", EditObjectResponsePacket::new);
+	PacketID MOVE_CHAPTER = NET.registerC2S("move_chapter", MoveChapterPacket::new);
+	PacketID MOVE_CHAPTER_RESPONSE = NET.registerS2C("move_chapter_response", MoveChapterResponsePacket::new);
+	PacketID MOVE_QUEST = NET.registerC2S("move_quest", MoveQuestPacket::new);
+	PacketID MOVE_QUEST_RESPONSE = NET.registerS2C("move_quest_response", MoveQuestResponsePacket::new);
+	PacketID CHANGE_CHAPTER_GROUP = NET.registerC2S("change_chapter_group", ChangeChapterGroupPacket::new);
+	PacketID CHANGE_CHAPTER_GROUP_RESPONSE = NET.registerS2C("change_chapter_group_response", ChangeChapterGroupResponsePacket::new);
+	PacketID MOVE_CHAPTER_GROUP = NET.registerC2S("move_chapter_group", MoveChapterGroupPacket::new);
+	PacketID MOVE_CHAPTER_GROUP_RESPONSE = NET.registerS2C("move_chapter_group_response", MoveChapterGroupResponsePacket::new);
 
-	public static void init() {
-		MAIN = NetworkChannel.create(new ResourceLocation(FTBQuests.MOD_ID, "main"));
-
-		// Game
-		register(MessageSyncQuests.class, MessageSyncQuests::new);
-		register(MessageUpdateTaskProgress.class, MessageUpdateTaskProgress::new);
-		register(MessageSubmitTask.class, MessageSubmitTask::new);
-		register(MessageClaimReward.class, MessageClaimReward::new);
-		register(MessageClaimRewardResponse.class, MessageClaimRewardResponse::new);
-		register(MessageSyncEditingMode.class, MessageSyncEditingMode::new);
-		register(MessageGetEmergencyItems.class, MessageGetEmergencyItems::new);
-		register(MessageCreateTeamData.class, MessageCreateTeamData::new);
-		register(MessageClaimAllRewards.class, MessageClaimAllRewards::new);
-		register(MessageClaimChoiceReward.class, MessageClaimChoiceReward::new);
-		register(MessageDisplayCompletionToast.class, MessageDisplayCompletionToast::new);
-		register(MessageDisplayRewardToast.class, MessageDisplayRewardToast::new);
-		register(MessageDisplayItemRewardToast.class, MessageDisplayItemRewardToast::new);
-		register(MessageTogglePinned.class, MessageTogglePinned::new);
-		register(MessageTogglePinnedResponse.class, MessageTogglePinnedResponse::new);
-		register(MessageUpdateTeamData.class, MessageUpdateTeamData::new);
-		register(MessageSetCustomImage.class, MessageSetCustomImage::new);
-		register(MessageObjectStarted.class, MessageObjectStarted::new);
-		register(MessageObjectCompleted.class, MessageObjectCompleted::new);
-		register(MessageObjectStartedReset.class, MessageObjectStartedReset::new);
-		register(MessageObjectCompletedReset.class, MessageObjectCompletedReset::new);
-		register(MessageSyncLock.class, MessageSyncLock::new);
-		register(MessageResetReward.class, MessageResetReward::new);
-
-		// Editing
-		register(MessageChangeProgress.class, MessageChangeProgress::new);
-		register(MessageCreateObject.class, MessageCreateObject::new);
-		register(MessageCreateObjectResponse.class, MessageCreateObjectResponse::new);
-		register(MessageCreateTaskAt.class, MessageCreateTaskAt::new);
-		register(MessageDeleteObject.class, MessageDeleteObject::new);
-		register(MessageDeleteObjectResponse.class, MessageDeleteObjectResponse::new);
-		register(MessageEditObject.class, MessageEditObject::new);
-		register(MessageEditObjectResponse.class, MessageEditObjectResponse::new);
-		register(MessageMoveChapter.class, MessageMoveChapter::new);
-		register(MessageMoveChapterResponse.class, MessageMoveChapterResponse::new);
-		register(MessageMoveQuest.class, MessageMoveQuest::new);
-		register(MessageMoveQuestResponse.class, MessageMoveQuestResponse::new);
-		register(MessageChangeChapterGroup.class, MessageChangeChapterGroup::new);
-		register(MessageChangeChapterGroupResponse.class, MessageChangeChapterGroupResponse::new);
-		register(MessageMoveChapterGroup.class, MessageMoveChapterGroup::new);
-		register(MessageMoveChapterGroupResponse.class, MessageMoveChapterGroupResponse::new);
+	static void init() {
 	}
 
 	@ExpectPlatform
-	public static void writeItemType(FriendlyByteBuf buffer, ItemStack stack) {
+	static void writeItemType(FriendlyByteBuf buffer, ItemStack stack) {
 		throw new AssertionError();
 	}
 
 	@ExpectPlatform
-	public static ItemStack readItemType(FriendlyByteBuf buffer) {
+	static ItemStack readItemType(FriendlyByteBuf buffer) {
 		throw new AssertionError();
 	}
 }
