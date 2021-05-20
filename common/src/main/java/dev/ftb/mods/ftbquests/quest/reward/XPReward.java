@@ -2,7 +2,7 @@ package dev.ftb.mods.ftbquests.quest.reward;
 
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.icon.Icon;
-import dev.ftb.mods.ftbquests.net.MessageDisplayRewardToast;
+import dev.ftb.mods.ftbquests.net.DisplayRewardToastPacket;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -70,7 +70,7 @@ public class XPReward extends Reward {
 		player.giveExperiencePoints(xp);
 
 		if (notify) {
-			new MessageDisplayRewardToast(id, new TranslatableComponent("ftbquests.reward.ftbquests.xp").append(": ").append(new TextComponent("+" + xp).withStyle(ChatFormatting.GREEN)), Icon.EMPTY).sendTo(player);
+			new DisplayRewardToastPacket(id, new TranslatableComponent("ftbquests.reward.ftbquests.xp").append(": ").append(new TextComponent("+" + xp).withStyle(ChatFormatting.GREEN)), Icon.EMPTY).sendTo(player);
 		}
 	}
 

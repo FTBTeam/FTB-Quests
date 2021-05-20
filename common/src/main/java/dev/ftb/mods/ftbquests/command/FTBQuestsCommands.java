@@ -5,8 +5,8 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import dev.ftb.mods.ftblibrary.config.Tristate;
 import dev.ftb.mods.ftbquests.FTBQuests;
-import dev.ftb.mods.ftbquests.net.MessageCreateObjectResponse;
-import dev.ftb.mods.ftbquests.net.MessageDeleteObjectResponse;
+import dev.ftb.mods.ftbquests.net.CreateObjectResponsePacket;
+import dev.ftb.mods.ftbquests.net.DeleteObjectResponsePacket;
 import dev.ftb.mods.ftbquests.quest.Chapter;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
@@ -172,7 +172,7 @@ public class FTBQuestsCommands {
 				del++;
 				table.invalid = true;
 				FileUtils.delete(ServerQuestFile.INSTANCE.getFolder().resolve(table.getPath()).toFile());
-				new MessageDeleteObjectResponse(table.id).sendToAll();
+				new DeleteObjectResponsePacket(table.id).sendToAll(source.getServer());
 			}
 		}
 
@@ -209,7 +209,7 @@ public class FTBQuestsCommands {
 		chapter.icon = new ItemStack(Items.COMPASS);
 		chapter.defaultQuestShape = "rsquare";
 
-		new MessageCreateObjectResponse(chapter, null).sendToAll();
+		new CreateObjectResponsePacket(chapter, null).sendToAll(source.getServer());
 
 		List<ItemStack> list = nonNullList.stream()
 				.filter(stack -> !stack.isEmpty() && Registries.getId(stack.getItem(), Registry.ITEM_REGISTRY) != null)
@@ -243,7 +243,7 @@ public class FTBQuestsCommands {
 			quest.y = row;
 			quest.subtitle = stack.save(new CompoundTag()).toString();
 
-			new MessageCreateObjectResponse(quest, null).sendToAll();
+			new CreateObjectResponsePacket(quest, null).sendToAll(source.getServer());
 
 			ItemTask task = new ItemTask(quest);
 			task.id = chapter.file.newID();
@@ -254,7 +254,7 @@ public class FTBQuestsCommands {
 
 			CompoundTag extra = new CompoundTag();
 			extra.putString("type", task.getType().getTypeForNBT());
-			new MessageCreateObjectResponse(task, extra).sendToAll();
+			new CreateObjectResponsePacket(task, extra).sendToAll(source.getServer());
 
 			col++;
 		}

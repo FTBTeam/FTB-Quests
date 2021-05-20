@@ -6,7 +6,7 @@ import dev.ftb.mods.ftblibrary.ui.Theme;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.ui.misc.ButtonListBaseScreen;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
-import dev.ftb.mods.ftbquests.net.MessageClaimChoiceReward;
+import dev.ftb.mods.ftbquests.net.ClaimChoiceRewardPacket;
 import dev.ftb.mods.ftbquests.quest.loot.WeightedReward;
 import dev.ftb.mods.ftbquests.quest.reward.ChoiceReward;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -35,7 +35,7 @@ public class SelectChoiceRewardScreen extends ButtonListBaseScreen {
 		public void onClicked(MouseButton button) {
 			playClickSound();
 			closeGui();
-			new MessageClaimChoiceReward(choiceReward.id, choiceReward.getTable().rewards.indexOf(weightedReward)).sendToServer();
+			new ClaimChoiceRewardPacket(choiceReward.id, choiceReward.getTable().rewards.indexOf(weightedReward)).sendToServer();
 		}
 
 		@Override

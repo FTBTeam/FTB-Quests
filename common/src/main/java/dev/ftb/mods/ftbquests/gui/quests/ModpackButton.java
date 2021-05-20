@@ -8,7 +8,7 @@ import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.gui.RewardNotificationsScreen;
-import dev.ftb.mods.ftbquests.net.MessageClaimAllRewards;
+import dev.ftb.mods.ftbquests.net.ClaimAllRewardsPacket;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -29,7 +29,7 @@ public class ModpackButton extends TabButton {
 		if (questScreen.file.self.hasUnclaimedRewards(Minecraft.getInstance().player.getUUID(), questScreen.file)) {
 			playClickSound();
 			new RewardNotificationsScreen().openGui();
-			new MessageClaimAllRewards().sendToServer();
+			new ClaimAllRewardsPacket().sendToServer();
 		}
 	}
 

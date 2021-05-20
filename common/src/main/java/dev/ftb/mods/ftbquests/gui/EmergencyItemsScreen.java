@@ -14,7 +14,7 @@ import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.util.TimeUtils;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
-import dev.ftb.mods.ftbquests.net.MessageGetEmergencyItems;
+import dev.ftb.mods.ftbquests.net.GetEmergencyItemsPacket;
 import dev.ftb.mods.ftbquests.quest.QuestShape;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
@@ -113,7 +113,7 @@ public class EmergencyItemsScreen extends BaseScreen {
 			if (!done) {
 				done = true;
 				cancelButton.setTitle(new TranslatableComponent("gui.close"));
-				new MessageGetEmergencyItems().sendToServer();
+				new GetEmergencyItemsPacket().sendToServer();
 			}
 
 			left = 0L;

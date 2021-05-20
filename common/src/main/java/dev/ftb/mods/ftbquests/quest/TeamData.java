@@ -4,15 +4,15 @@ import com.mojang.util.UUIDTypeAdapter;
 import dev.ftb.mods.ftblibrary.snbt.OrderedCompoundTag;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
-import dev.ftb.mods.ftbquests.net.MessageClaimRewardResponse;
-import dev.ftb.mods.ftbquests.net.MessageObjectCompleted;
-import dev.ftb.mods.ftbquests.net.MessageObjectCompletedReset;
-import dev.ftb.mods.ftbquests.net.MessageObjectStarted;
-import dev.ftb.mods.ftbquests.net.MessageObjectStartedReset;
-import dev.ftb.mods.ftbquests.net.MessageResetReward;
-import dev.ftb.mods.ftbquests.net.MessageSyncEditingMode;
-import dev.ftb.mods.ftbquests.net.MessageSyncLock;
-import dev.ftb.mods.ftbquests.net.MessageUpdateTaskProgress;
+import dev.ftb.mods.ftbquests.net.ClaimRewardResponsePacket;
+import dev.ftb.mods.ftbquests.net.ObjectCompletedPacket;
+import dev.ftb.mods.ftbquests.net.ObjectCompletedResetPacket;
+import dev.ftb.mods.ftbquests.net.ObjectStartedPacket;
+import dev.ftb.mods.ftbquests.net.ObjectStartedResetPacket;
+import dev.ftb.mods.ftbquests.net.ResetRewardPacket;
+import dev.ftb.mods.ftbquests.net.SyncEditingModePacket;
+import dev.ftb.mods.ftbquests.net.SyncLockPacket;
+import dev.ftb.mods.ftbquests.net.UpdateTaskProgressPacket;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.reward.RewardAutoClaim;
 import dev.ftb.mods.ftbquests.quest.reward.RewardClaimType;
@@ -133,7 +133,7 @@ public class TeamData {
 				save();
 
 				if (file.isServerSide()) {
-					new MessageObjectStartedReset(uuid, id).sendToAll();
+					new ObjectStartedResetPacket(uuid, id).sendToAll(((ServerQuestFile) file).server);
 				}
 
 				return true;
@@ -144,7 +144,7 @@ public class TeamData {
 				save();
 
 				if (file.isServerSide()) {
-					new MessageObjectStarted(uuid, id).sendToAll();
+					new ObjectStartedPacket(uuid, id).sendToAll(((ServerQuestFile) file).server);
 				}
 
 				return true;
@@ -171,7 +171,7 @@ public class TeamData {
 				save();
 
 				if (file.isServerSide()) {
-					new MessageObjectCompletedReset(uuid, id).sendToAll();
+					new ObjectCompletedResetPacket(uuid, id).sendToAll(((ServerQuestFile) file).server);
 				}
 
 				return true;
@@ -182,7 +182,7 @@ public class TeamData {
 				save();
 
 				if (file.isServerSide()) {
-					new MessageObjectCompleted(uuid, id).sendToAll();
+					new ObjectCompletedPacket(uuid, id).sendToAll(((ServerQuestFile) file).server);
 				}
 
 				return true;
@@ -233,7 +233,7 @@ public class TeamData {
 			save();
 
 			if (file.isServerSide()) {
-				new MessageClaimRewardResponse(uuid, player, reward.id).sendToAll();
+				new ClaimRewardResponsePacket(uuid, player, reward.id).sendToAll(((ServerQuestFile) file).server);
 			}
 
 			return true;
@@ -255,7 +255,7 @@ public class TeamData {
 			save();
 
 			if (file.isServerSide()) {
-				new MessageResetReward(uuid, player, reward.id).sendToAll();
+				new ResetRewardPacket(uuid, player, reward.id).sendToAll(((ServerQuestFile) file).server);
 			}
 
 			return true;
@@ -278,7 +278,7 @@ public class TeamData {
 				ServerPlayer player = getPlayer();
 
 				if (player != null) {
-					new MessageSyncEditingMode(canEdit).sendTo(player);
+					new SyncEditingModePacket(canEdit).sendTo(player);
 				}
 			}
 
@@ -624,7 +624,7 @@ public class TeamData {
 			reward.claim(player, notify);
 
 			if (file.isServerSide()) {
-				new MessageClaimRewardResponse(uuid, player.getUUID(), reward.id).sendToAll();
+				new ClaimRewardResponsePacket(uuid, player.getUUID(), reward.id).sendToAll(((ServerQuestFile) file).server);
 			}
 		}
 	}
@@ -710,7 +710,7 @@ public class TeamData {
 
 			if (file.isServerSide()) {
 				Date now = new Date();
-				new MessageUpdateTaskProgress(this, task.id, progress).sendToAll();
+				new UpdateTaskProgressPacket(this, task.id, progress).sendToAll(((ServerQuestFile) file).server);
 
 				if (prevProgress == 0L) {
 					task.onStarted(new QuestProgressEventData<>(now, this, task, getOnlineMembers(), Collections.emptyList()));
@@ -756,7 +756,7 @@ public class TeamData {
 				ServerPlayer player = getPlayer();
 
 				if (player != null) {
-					new MessageSyncLock(uuid, locked).sendTo(player);
+					new SyncLockPacket(uuid, locked).sendTo(player);
 				}
 			}
 

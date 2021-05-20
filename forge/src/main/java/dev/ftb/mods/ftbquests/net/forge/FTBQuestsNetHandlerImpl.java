@@ -5,8 +5,8 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
-public class FTBQuestsNetHandlerImpl {
-	public static void writeItemType(FriendlyByteBuf buffer, ItemStack stack) {
+public interface FTBQuestsNetHandlerImpl {
+	static void writeItemType(FriendlyByteBuf buffer, ItemStack stack) {
 		if (stack.isEmpty()) {
 			buffer.writeVarInt(-1);
 		} else {
@@ -16,7 +16,7 @@ public class FTBQuestsNetHandlerImpl {
 		}
 	}
 
-	public static ItemStack readItemType(FriendlyByteBuf buffer) {
+	static ItemStack readItemType(FriendlyByteBuf buffer) {
 		int id = buffer.readVarInt();
 
 		if (id == -1) {

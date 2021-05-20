@@ -13,7 +13,7 @@ import dev.ftb.mods.ftbquests.gui.EditRewardTableScreen;
 import dev.ftb.mods.ftbquests.gui.RewardTablesScreen;
 import dev.ftb.mods.ftbquests.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.integration.jei.FTBQuestsJEIHelper;
-import dev.ftb.mods.ftbquests.net.MessageEditObject;
+import dev.ftb.mods.ftbquests.net.EditObjectPacket;
 import dev.ftb.mods.ftbquests.quest.Chapter;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestFile;
@@ -340,7 +340,7 @@ public final class RewardTable extends QuestObjectBase {
 	@Override
 	@Environment(EnvType.CLIENT)
 	public void onEditButtonClicked(Runnable gui) {
-		new EditRewardTableScreen(this, () -> new MessageEditObject(this).sendToServer()).openGui();
+		new EditRewardTableScreen(this, () -> new EditObjectPacket(this).sendToServer()).openGui();
 	}
 
 	public void addMouseOverText(TooltipList list, boolean includeWeight, boolean includeEmpty) {
