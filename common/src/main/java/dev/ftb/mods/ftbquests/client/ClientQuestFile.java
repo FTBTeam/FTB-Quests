@@ -122,7 +122,7 @@ public class ClientQuestFile extends QuestFile {
 
 	public void openQuestGui() {
 		if (exists()) {
-			if (disableGui && !self.getCanEdit()) {
+			if (disableGui && !canEdit()) {
 				Minecraft.getInstance().getToasts().addToast(new CustomToast(new TranslatableComponent("item.ftbquests.book.disabled"), Icons.BARRIER, TextComponent.EMPTY));
 			} else if (self.isLocked()) {
 				Minecraft.getInstance().getToasts().addToast(new CustomToast(lockMessage.isEmpty() ? new TextComponent("Quests locked!") : FTBQuestsClient.parse(lockMessage), Icons.BARRIER, TextComponent.EMPTY));

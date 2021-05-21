@@ -11,8 +11,8 @@ dependencies {
     modImplementation "dev.ftb.mods:ftb-teams-fabric:${rootProject.ftb_teams_version}"
     modApi "curse.maven:item-filter-438500:${rootProject.itemfilters_version_fabric}"
 
-    modImplementation "curse.maven:kubejs-fabric-395864:${rootProject.kubejs_file_fabric}"
-    modImplementation "curse.maven:rhino-416294:${rhino_file}"
+    modImplementation "dev.latvian.mods:kubejs-fabric:${rootProject.kubejs_version}"
+    modImplementation "dev.latvian.mods:rhino:${rootProject.rhino_version}"
 
     compileOnly "com.google.code.findbugs:jsr305:3.+"
 }

@@ -41,7 +41,7 @@ public class QuestBookItem extends Item {
 	@Override
 	@Environment(EnvType.CLIENT)
 	public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
-		if (ClientQuestFile.exists() && ClientQuestFile.INSTANCE.disableGui && !ClientQuestFile.INSTANCE.self.getCanEdit()) {
+		if (ClientQuestFile.exists() && ClientQuestFile.INSTANCE.disableGui && !ClientQuestFile.INSTANCE.canEdit()) {
 			tooltip.add(new TranslatableComponent("item.ftbquests.book.disabled").withStyle(ChatFormatting.RED));
 		} else {
 			tooltip.add(new TranslatableComponent("item.ftbquests.book.tooltip").withStyle(ChatFormatting.GRAY));

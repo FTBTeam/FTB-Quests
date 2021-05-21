@@ -25,7 +25,7 @@ public class QuestBarrierBlockItem extends BlockItem {
 	@Environment(EnvType.CLIENT)
 	public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
 		tooltip.add(new TranslatableComponent("item.ftbquests.barrier.nogui").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
-		if (ClientQuestFile.exists() && !ClientQuestFile.INSTANCE.self.getCanEdit()) {
+		if (ClientQuestFile.exists() && !ClientQuestFile.INSTANCE.canEdit()) {
 			tooltip.add(new TranslatableComponent("item.ftbquests.barrier.disabled").withStyle(ChatFormatting.RED));
 		} else {
 			tooltip.add(new TranslatableComponent("item.ftbquests.barrier.config").withStyle(ChatFormatting.GRAY));

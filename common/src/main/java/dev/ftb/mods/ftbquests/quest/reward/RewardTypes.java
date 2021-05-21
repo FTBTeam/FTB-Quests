@@ -5,15 +5,15 @@ import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import net.minecraft.resources.ResourceLocation;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.function.Supplier;
 
 /**
  * @author LatvianModder
  */
 public class RewardTypes {
-	public static final HashMap<ResourceLocation, RewardType> TYPES = new LinkedHashMap<>();
+	public static final Map<ResourceLocation, RewardType> TYPES = new LinkedHashMap<>();
 
 	public static RewardType register(ResourceLocation name, RewardType.Provider p, Supplier<Icon> i) {
 		return TYPES.computeIfAbsent(name, id -> new RewardType(id, p, i));
