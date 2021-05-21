@@ -5,15 +5,15 @@ import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import net.minecraft.resources.ResourceLocation;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.function.Supplier;
 
 /**
  * @author LatvianModder
  */
 public class TaskTypes {
-	public static final HashMap<ResourceLocation, TaskType> TYPES = new LinkedHashMap<>();
+	public static final Map<ResourceLocation, TaskType> TYPES = new LinkedHashMap<>();
 
 	public static TaskType register(ResourceLocation name, TaskType.Provider p, Supplier<Icon> i) {
 		return TYPES.computeIfAbsent(name, id -> new TaskType(id, p, i));

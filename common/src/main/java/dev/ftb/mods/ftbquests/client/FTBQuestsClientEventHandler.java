@@ -67,7 +67,7 @@ public class FTBQuestsClientEventHandler {
 			event.getButton().setCustomTextHandler(() ->
 			{
 				if (ClientQuestFile.exists()) {
-					if (ClientQuestFile.INSTANCE.disableGui && !ClientQuestFile.INSTANCE.self.getCanEdit()) {
+					if (ClientQuestFile.INSTANCE.disableGui && !ClientQuestFile.INSTANCE.canEdit()) {
 						return "[X]";
 					} else if (ClientQuestFile.INSTANCE.self.isLocked()) {
 						return "[X]";

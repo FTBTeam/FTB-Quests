@@ -26,8 +26,8 @@ dependencies {
     modImplementation "dev.ftb.mods:ftb-library-fabric:${rootProject.ftb_library_version}"
     modImplementation "dev.ftb.mods:ftb-teams-fabric:${rootProject.ftb_teams_version}"
     modCompile "curse.maven:item-filter-438500:${rootProject.itemfilters_version_fabric}"
-    modCompile "curse.maven:kubejs-fabric-395864:${rootProject.kubejs_file_fabric}"
-    modCompile "curse.maven:rhino-416294:${rhino_file}"
+    modImplementation "dev.latvian.mods:kubejs-fabric:${rootProject.kubejs_version}"
+    modImplementation "dev.latvian.mods:rhino:${rootProject.rhino_version}"
 
     modCompile "curse.maven:ctm-fabric-432493:3233998"
 
@@ -70,7 +70,7 @@ if (ENV.CURSEFORGE_KEY) {
         apiKey = ENV.CURSEFORGE_KEY
         project {
             id = project.curseforge_id_fabric
-            releaseType = "release"
+            releaseType = project.curseforge_type
             addGameVersion "Fabric"
             addGameVersion "1.16.4"
             addGameVersion "1.16.5"
