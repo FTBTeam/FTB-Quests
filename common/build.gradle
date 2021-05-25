@@ -1,54 +1,52 @@
 dependencies {
-    minecraft "com.mojang:minecraft:${rootProject.architectury.minecraft}"
-    mappings minecraft.officialMojangMappings()
-    // We depend on fabric loader here to use the fabric @Environment annotations
-    // Do NOT use other classes from fabric loader
-    modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
+	minecraft "com.mojang:minecraft:${rootProject.architectury.minecraft}"
+	mappings minecraft.officialMojangMappings()
+	// We depend on fabric loader here to use the fabric @Environment annotations
+	// Do NOT use other classes from fabric loader
+	modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
 
-    modApi "me.shedaniel:architectury:${rootProject.architectury_version}"
+	modApi "me.shedaniel:architectury:${rootProject.architectury_version}"
 
-    modImplementation "dev.ftb.mods:ftb-library-fabric:${rootProject.ftb_library_version}"
-    modImplementation "dev.ftb.mods:ftb-teams-fabric:${rootProject.ftb_teams_version}"
-    modApi "curse.maven:item-filter-438500:${rootProject.itemfilters_version_fabric}"
+	modImplementation "dev.ftb.mods:ftb-library-fabric:${rootProject.ftb_library_version}"
+	modImplementation "dev.ftb.mods:ftb-teams-fabric:${rootProject.ftb_teams_version}"
+	modApi "curse.maven:item-filter-438500:${rootProject.itemfilters_version_fabric}"
 
-    modImplementation "dev.latvian.mods:kubejs-fabric:${rootProject.kubejs_version}"
-    modImplementation "dev.latvian.mods:rhino:${rootProject.rhino_version}"
-
-    compileOnly "com.google.code.findbugs:jsr305:3.+"
+	modImplementation "dev.latvian.mods:kubejs-fabric:${rootProject.kubejs_version}"
+	modImplementation "dev.latvian.mods:rhino:${rootProject.rhino_version}"
 }
 
 def ENV = System.getenv()
 
 architectury {
-    common()
+	common()
 }
 
 publishing {
-    publications {
-        mavenCommon(MavenPublication) {
-            artifactId = rootProject.archivesBaseName
-            artifact(file("${project.buildDir}/libs/${project.archivesBaseName}-${project.version}.jar")) {
-                builtBy build
-            }
-        }
-    }
+	publications {
+		mavenCommon(MavenPublication) {
+			artifactId = rootProject.archivesBaseName
+			artifact(file("${project.buildDir}/libs/${project.archivesBaseName}-${project.version}.jar")) {
+				builtBy build
+			}
+		}
+	}
 
-    repositories {
-        if (ENV.LOCAL_MAVEN) {
-            maven {
-                // upload to local maven repo
-                url = "file://${ENV.LOCAL_MAVEN}"
-            }
-        }
+	repositories {
+		if (ENV.LOCAL_MAVEN) {
+			maven {
+				// upload to local maven repo
+				url = "file://${ENV.LOCAL_MAVEN}"
+			}
+		}
 
-        if (ENV.SAPS_TOKEN) {
-            maven {
-                url "https://maven.saps.dev/minecraft"
-                credentials {
-                    username = "latvian"
-                    password = "${ENV.SAPS_TOKEN}"
-                }
-            }
-        }
-    }
+		if (ENV.SAPS_TOKEN) {
+			maven {
+				url "https://maven.saps.dev/minecraft"
+				credentials {
+					username = "ftb"
+					password = "${ENV.SAPS_TOKEN}"
+				}
+			}
+		}
+	}
 }

@@ -50,8 +50,8 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -572,6 +572,8 @@ public abstract class QuestFile extends QuestObject {
 			fileVersion = fileNBT.getInt("version");
 			map.put(1, this);
 			readData(fileNBT);
+		} else {
+			FTBQuests.LOGGER.error("Failed to load info from " + folder.resolve("data.snbt"));
 		}
 
 		Path groupsFile = folder.resolve("chapter_groups.snbt");
@@ -590,6 +592,8 @@ public abstract class QuestFile extends QuestObject {
 					dataCache.put(chapterGroup.id, groupNBT);
 					chapterGroups.add(chapterGroup);
 				}
+			} else {
+				FTBQuests.LOGGER.error("Failed to load chapter group from " + groupsFile);
 			}
 		}
 
@@ -656,6 +660,8 @@ public abstract class QuestFile extends QuestObject {
 								quest.rewards.add(reward);
 							}
 						}
+					} else {
+						FTBQuests.LOGGER.error("Failed to load chapter from " + path);
 					}
 				});
 			} catch (Exception ex) {
@@ -678,6 +684,8 @@ public abstract class QuestFile extends QuestObject {
 						map.put(table.id, table);
 						dataCache.put(table.id, tableNBT);
 						rewardTables.add(table);
+					} else {
+						FTBQuests.LOGGER.error("Failed to load reward table from " + path);
 					}
 				});
 			} catch (Exception ex) {

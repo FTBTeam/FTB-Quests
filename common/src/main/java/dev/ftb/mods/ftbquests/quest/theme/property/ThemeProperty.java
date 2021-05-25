@@ -2,8 +2,7 @@ package dev.ftb.mods.ftbquests.quest.theme.property;
 
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.theme.QuestTheme;
-
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * @author LatvianModder

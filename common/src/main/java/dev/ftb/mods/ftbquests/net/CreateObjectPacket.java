@@ -9,8 +9,7 @@ import dev.ftb.mods.ftbquests.util.NetUtils;
 import me.shedaniel.architectury.networking.NetworkManager;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
-
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * @author LatvianModder
