@@ -10,8 +10,7 @@ import dev.ftb.mods.ftbquests.net.ClaimChoiceRewardPacket;
 import dev.ftb.mods.ftbquests.quest.loot.WeightedReward;
 import dev.ftb.mods.ftbquests.quest.reward.ChoiceReward;
 import net.minecraft.network.chat.TranslatableComponent;
-
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * @author LatvianModder

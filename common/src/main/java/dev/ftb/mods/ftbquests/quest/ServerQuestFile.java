@@ -74,13 +74,17 @@ public class ServerQuestFile extends QuestFile {
 				Files.list(path).filter(p -> p.getFileName().toString().contains("-")).forEach(path1 -> {
 					CompoundTag nbt = SNBT.read(path1);
 
-					try {
-						UUID uuid = UUIDTypeAdapter.fromString(nbt.getString("uuid"));
-						TeamData data = new TeamData(this, uuid);
-						addData(data, true);
-						data.deserializeNBT(nbt);
-					} catch (Exception ex) {
-						ex.printStackTrace();
+					if (nbt != null) {
+						try {
+							UUID uuid = UUIDTypeAdapter.fromString(nbt.getString("uuid"));
+							TeamData data = new TeamData(this, uuid);
+							addData(data, true);
+							data.deserializeNBT(nbt);
+						} catch (Exception ex) {
+							ex.printStackTrace();
+						}
+					} else {
+						FTBQuests.LOGGER.error("Failed to load team data from " + path1);
 					}
 				});
 			} catch (Exception ex) {
