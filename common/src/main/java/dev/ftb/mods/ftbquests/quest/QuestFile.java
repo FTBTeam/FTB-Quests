@@ -50,6 +50,7 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Files;
@@ -565,6 +566,9 @@ public abstract class QuestFile extends QuestObject {
 		chapterGroups.add(defaultChapterGroup);
 		rewardTables.clear();
 
+		MutableInt chapterCounter = new MutableInt();
+		MutableInt questCounter = new MutableInt();
+
 		final Long2ObjectOpenHashMap<CompoundTag> dataCache = new Long2ObjectOpenHashMap<>();
 		CompoundTag fileNBT = SNBT.read(folder.resolve("data.snbt"));
 
@@ -572,8 +576,6 @@ public abstract class QuestFile extends QuestObject {
 			fileVersion = fileNBT.getInt("version");
 			map.put(1, this);
 			readData(fileNBT);
-		} else {
-			FTBQuests.LOGGER.error("Failed to load info from " + folder.resolve("data.snbt"));
 		}
 
 		Path groupsFile = folder.resolve("chapter_groups.snbt");
@@ -592,8 +594,6 @@ public abstract class QuestFile extends QuestObject {
 					dataCache.put(chapterGroup.id, groupNBT);
 					chapterGroups.add(chapterGroup);
 				}
-			} else {
-				FTBQuests.LOGGER.error("Failed to load chapter group from " + groupsFile);
 			}
 		}
 
@@ -660,8 +660,6 @@ public abstract class QuestFile extends QuestObject {
 								quest.rewards.add(reward);
 							}
 						}
-					} else {
-						FTBQuests.LOGGER.error("Failed to load chapter from " + path);
 					}
 				});
 			} catch (Exception ex) {
@@ -684,8 +682,6 @@ public abstract class QuestFile extends QuestObject {
 						map.put(table.id, table);
 						dataCache.put(table.id, tableNBT);
 						rewardTables.add(table);
-					} else {
-						FTBQuests.LOGGER.error("Failed to load reward table from " + path);
 					}
 				});
 			} catch (Exception ex) {
@@ -732,6 +728,8 @@ public abstract class QuestFile extends QuestObject {
 		if (fileVersion != VERSION) {
 			save();
 		}
+
+		FTBQuests.LOGGER.info("Loaded " + chapterGroups.size() + " chapter groups, " + chapterCounter + " chapters, " + questCounter + " quests, " + rewardTables.size() + " reward tables");
 	}
 
 	public void save() {

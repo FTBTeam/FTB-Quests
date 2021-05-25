@@ -83,8 +83,6 @@ public class ServerQuestFile extends QuestFile {
 						} catch (Exception ex) {
 							ex.printStackTrace();
 						}
-					} else {
-						FTBQuests.LOGGER.error("Failed to load team data from " + path1);
 					}
 				});
 			} catch (Exception ex) {
