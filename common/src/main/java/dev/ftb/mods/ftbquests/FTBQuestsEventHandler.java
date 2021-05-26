@@ -89,8 +89,10 @@ public class FTBQuestsEventHandler {
 	}
 
 	private void fileCacheClear(ClearFileCacheEvent event) {
-		killTasks = null;
-		autoSubmitTasks = null;
+		if (event.getFile().isServerSide()) {
+			killTasks = null;
+			autoSubmitTasks = null;
+		}
 	}
 
 	private void playerLoggedIn(ServerPlayer player) {
@@ -134,11 +136,6 @@ public class FTBQuestsEventHandler {
 			TeamData data = ServerQuestFile.INSTANCE.getData(player);
 
 			if (data.isLocked()) {
-				return;
-			}
-
-			// Yup, same check again
-			if (autoSubmitTasks == null || autoSubmitTasks.isEmpty()) {
 				return;
 			}
 
