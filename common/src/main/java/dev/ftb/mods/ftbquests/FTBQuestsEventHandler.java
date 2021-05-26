@@ -137,6 +137,11 @@ public class FTBQuestsEventHandler {
 				return;
 			}
 
+			// Yup, same check again
+			if (autoSubmitTasks == null || autoSubmitTasks.isEmpty()) {
+				return;
+			}
+
 			long t = player.level.getGameTime();
 			TeamData.currentPlayer = (ServerPlayer) player;
 
