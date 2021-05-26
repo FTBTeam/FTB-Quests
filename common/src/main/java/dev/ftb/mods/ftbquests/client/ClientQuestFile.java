@@ -12,6 +12,7 @@ import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestFile;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.theme.QuestTheme;
+import dev.ftb.mods.ftbteams.FTBTeamsAPI;
 import me.shedaniel.architectury.utils.Env;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.TextComponent;
@@ -43,7 +44,7 @@ public class ClientQuestFile extends QuestFile {
 		}
 
 		self = Objects.requireNonNull(getData(s));
-		self.name = Minecraft.getInstance().getUser().getName();
+		self.name = FTBTeamsAPI.getClientManager().getName(s).getString();
 		INSTANCE = this;
 
 		refreshGui();
