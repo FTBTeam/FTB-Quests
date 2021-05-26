@@ -70,7 +70,7 @@ import java.util.function.Predicate;
  * @author LatvianModder
  */
 public abstract class QuestFile extends QuestObject {
-	public static int VERSION = 12;
+	public static int VERSION = 13;
 
 	public final DefaultChapterGroup defaultChapterGroup;
 	public final List<ChapterGroup> chapterGroups;
@@ -659,7 +659,11 @@ public abstract class QuestFile extends QuestObject {
 								dataCache.put(reward.id, rewardNBT);
 								quest.rewards.add(reward);
 							}
+
+							questCounter.increment();
 						}
+
+						chapterCounter.increment();
 					}
 				});
 			} catch (Exception ex) {
