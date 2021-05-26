@@ -12,6 +12,7 @@ import dev.ftb.mods.ftbquests.quest.task.TaskType;
 import dev.ftb.mods.ftbquests.quest.task.TaskTypes;
 import dev.ftb.mods.ftbquests.util.FTBQuestsInventoryListener;
 import dev.ftb.mods.ftbquests.util.FileUtils;
+import dev.ftb.mods.ftbteams.FTBTeamsAPI;
 import me.shedaniel.architectury.hooks.LevelResourceHooks;
 import me.shedaniel.architectury.platform.Platform;
 import me.shedaniel.architectury.utils.Env;
@@ -154,7 +155,7 @@ public class ServerQuestFile extends QuestFile {
 	}
 
 	public void onLoggedIn(ServerPlayer player) {
-		UUID id = player.getUUID();
+		UUID id = FTBTeamsAPI.getPlayerTeamID(player.getUUID());
 		TeamData data = teamDataMap.get(id);
 
 		if (data == null) {
@@ -163,7 +164,7 @@ public class ServerQuestFile extends QuestFile {
 		}
 
 		if (!data.name.equals(player.getGameProfile().getName())) {
-			data.name = player.getGameProfile().getName();
+			data.name = FTBTeamsAPI.getPlayerTeam(player).getDisplayName();
 			data.save();
 		}
 
