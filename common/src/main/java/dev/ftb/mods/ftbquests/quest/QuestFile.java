@@ -1259,7 +1259,9 @@ public abstract class QuestFile extends QuestObject {
 	}
 
 	public void addData(TeamData data, boolean strong) {
-		teamDataMap.put(data.uuid, data);
+		if(!teamDataMap.containsKey(data.uuid)) {
+			teamDataMap.put(data.uuid, data);
+		}
 	}
 
 	public void refreshGui() {
