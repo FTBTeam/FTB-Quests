@@ -29,7 +29,7 @@ public class FTBQuestsInventoryListener implements ContainerListener {
 			return;
 		}
 
-		TeamData data = ServerQuestFile.INSTANCE.getNullablePlayerData(FTBTeamsAPI.getPlayerTeamID(player.getUUID()));
+		TeamData data = ServerQuestFile.INSTANCE.getNullableTeamData(FTBTeamsAPI.getPlayerTeamID(player.getUUID()));
 
 		if (data == null || data.isLocked()) {
 			return;

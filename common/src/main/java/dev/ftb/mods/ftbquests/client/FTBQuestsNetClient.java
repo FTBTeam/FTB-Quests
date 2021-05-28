@@ -76,10 +76,14 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon {
 	}
 
 	@Override
-	public void createTeamData(UUID teamId, String name) {
+	public void createTeamData(UUID teamId, String name, boolean self) {
 		TeamData data = new TeamData(ClientQuestFile.INSTANCE, teamId);
 		data.name = name;
 		data.file.addData(data, true);
+
+		if (self) {
+			ClientQuestFile.INSTANCE.self = data;
+		}
 	}
 
 	@Override

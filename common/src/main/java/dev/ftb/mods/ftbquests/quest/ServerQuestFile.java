@@ -13,6 +13,7 @@ import dev.ftb.mods.ftbquests.quest.task.TaskTypes;
 import dev.ftb.mods.ftbquests.util.FTBQuestsInventoryListener;
 import dev.ftb.mods.ftbquests.util.FileUtils;
 import dev.ftb.mods.ftbteams.FTBTeamsAPI;
+import dev.ftb.mods.ftbteams.event.PlayerLoggedInAfterTeamEvent;
 import me.shedaniel.architectury.hooks.LevelResourceHooks;
 import me.shedaniel.architectury.platform.Platform;
 import me.shedaniel.architectury.utils.Env;
@@ -154,7 +155,8 @@ public class ServerQuestFile extends QuestFile {
 		deleteSelf();
 	}
 
-	public void onLoggedIn(ServerPlayer player) {
+	public void onLoggedIn(PlayerLoggedInAfterTeamEvent event) {
+		ServerPlayer player = event.getPlayer();
 		UUID id = FTBTeamsAPI.getPlayerTeamID(player.getUUID());
 		TeamData data = teamDataMap.get(id);
 
@@ -163,20 +165,20 @@ public class ServerQuestFile extends QuestFile {
 			data.save();
 		}
 
-		if (!data.name.equals(player.getGameProfile().getName())) {
-			data.name = FTBTeamsAPI.getPlayerTeam(player).getDisplayName();
+		String displayName = event.getTeam().getDisplayName();
+
+		if (!data.name.equals(displayName)) {
+			data.name = displayName;
 			data.save();
 		}
 
 		addData(data, false);
 
 		for (ServerPlayer player1 : server.getPlayerList().getPlayers()) {
-			if (player1 != player) {
-				new CreateTeamDataPacket(data).sendTo(player1);
-			}
+			new CreateTeamDataPacket(data, player1 == player).sendTo(player1);
 		}
 
-		new SyncQuestsPacket(id, this).sendTo(player);
+		new SyncQuestsPacket(id, displayName, this).sendTo(player);
 		player.inventoryMenu.addSlotListener(new FTBQuestsInventoryListener(player));
 
 		for (ChapterGroup group : ServerQuestFile.INSTANCE.chapterGroups) {

@@ -351,7 +351,7 @@ public final class RewardTable extends QuestObjectBase {
 		int totalWeight = getTotalWeight(includeEmpty);
 
 		if (includeWeight && includeEmpty && emptyWeight > 0) {
-			list.add(new TextComponent("").withStyle(ChatFormatting.GRAY).append("- ").append(new TranslatableComponent("ftbquests.reward_table.nothing")).append(new TextComponent(" [" + WeightedReward.chanceString(emptyWeight, totalWeight) + "]").withStyle(ChatFormatting.DARK_GRAY)));
+			list.add(new TextComponent("").withStyle(ChatFormatting.GRAY).append("- ").append(new TranslatableComponent("ftbquests.reward_table.nothing")).append(new TextComponent(" [" + WeightedReward.chanceString(emptyWeight, totalWeight, true) + "]").withStyle(ChatFormatting.DARK_GRAY)));
 		}
 
 		List<WeightedReward> rewards1;

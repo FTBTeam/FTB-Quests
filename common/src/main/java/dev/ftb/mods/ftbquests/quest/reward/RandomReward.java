@@ -94,7 +94,7 @@ public class RandomReward extends Reward {
 	public void writeNetData(FriendlyByteBuf buffer) {
 		super.writeNetData(buffer);
 
-		table = getTable();
+		RewardTable table = getTable();
 		buffer.writeLong(table == null ? 0L : table.id);
 
 		if (table != null && table.id == -1L) {
@@ -128,11 +128,19 @@ public class RandomReward extends Reward {
 
 	@Override
 	public void claim(ServerPlayer player, boolean notify) {
-		if (getTable() == null) {
+		RewardTable table = getTable();
+
+		if (table == null) {
 			return;
 		}
 
-		int totalWeight = getTable().getTotalWeight(false);
+		for (WeightedReward reward : table.rewards) {
+			if (reward.weight == 0) {
+				reward.reward.claim(player, notify);
+			}
+		}
+
+		int totalWeight = table.getTotalWeight(false);
 
 		if (totalWeight <= 0) {
 			return;
@@ -141,7 +149,7 @@ public class RandomReward extends Reward {
 		int number = player.level.random.nextInt(totalWeight) + 1;
 		int currentWeight = 0;
 
-		for (WeightedReward reward : getTable().rewards) {
+		for (WeightedReward reward : table.rewards) {
 			currentWeight += reward.weight;
 
 			if (currentWeight >= number) {

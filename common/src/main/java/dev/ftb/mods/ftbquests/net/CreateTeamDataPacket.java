@@ -15,15 +15,18 @@ import java.util.UUID;
 public class CreateTeamDataPacket extends BaseS2CPacket {
 	private final UUID uuid;
 	private final String name;
+	private final boolean self;
 
 	CreateTeamDataPacket(FriendlyByteBuf buffer) {
 		uuid = buffer.readUUID();
 		name = buffer.readUtf(Short.MAX_VALUE);
+		self = buffer.readBoolean();
 	}
 
-	public CreateTeamDataPacket(TeamData data) {
+	public CreateTeamDataPacket(TeamData data, boolean s) {
 		uuid = data.uuid;
 		name = data.name;
+		self = s;
 	}
 
 	@Override
@@ -35,10 +38,11 @@ public class CreateTeamDataPacket extends BaseS2CPacket {
 	public void write(FriendlyByteBuf buffer) {
 		buffer.writeUUID(uuid);
 		buffer.writeUtf(name, Short.MAX_VALUE);
+		buffer.writeBoolean(self);
 	}
 
 	@Override
 	public void handle(NetworkManager.PacketContext context) {
-		FTBQuests.NET_PROXY.createTeamData(uuid, name);
+		FTBQuests.NET_PROXY.createTeamData(uuid, name, self);
 	}
 }

@@ -11,14 +11,14 @@ public class WeightedReward implements Comparable<WeightedReward> {
 
 	public WeightedReward(Reward r, int w) {
 		reward = r;
-		weight = Math.max(w, 1);
+		weight = Math.max(w, 0);
 	}
 
-	public static String chanceString(int weight, int totalWeight) {
+	public static String chanceString(int weight, int totalWeight, boolean empty) {
 		if (totalWeight <= 0) {
 			return "??%";
 		} else if (weight <= 0) {
-			return "0%";
+			return empty ? "0%" : "100%";
 		} else if (weight >= totalWeight) {
 			return "100%";
 		}
@@ -35,6 +35,10 @@ public class WeightedReward implements Comparable<WeightedReward> {
 		}
 
 		return chance + "%";
+	}
+
+	public static String chanceString(int weight, int totalWeight) {
+		return chanceString(weight, totalWeight, false);
 	}
 
 	@Override
