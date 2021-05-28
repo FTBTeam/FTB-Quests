@@ -6,6 +6,7 @@ import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.task.Task;
+import dev.ftb.mods.ftbteams.FTBTeamsAPI;
 import me.shedaniel.architectury.hooks.PlayerHooks;
 import net.minecraft.core.NonNullList;
 import net.minecraft.server.level.ServerPlayer;
@@ -28,7 +29,7 @@ public class FTBQuestsInventoryListener implements ContainerListener {
 			return;
 		}
 
-		TeamData data = ServerQuestFile.INSTANCE.getNullablePlayerData(player.getUUID());
+		TeamData data = ServerQuestFile.INSTANCE.getNullablePlayerData(FTBTeamsAPI.getPlayerTeamID(player.getUUID()));
 
 		if (data == null || data.isLocked()) {
 			return;
