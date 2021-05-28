@@ -12,7 +12,6 @@ import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestFile;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.theme.QuestTheme;
-import dev.ftb.mods.ftbteams.FTBTeamsAPI;
 import me.shedaniel.architectury.utils.Env;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.TextComponent;
@@ -37,14 +36,14 @@ public class ClientQuestFile extends QuestFile {
 	public BaseScreen questGui;
 
 	@Override
-	public void load(UUID s) {
+	public void load(UUID s, String sn) {
 		if (INSTANCE != null) {
 			INSTANCE.deleteChildren();
 			INSTANCE.deleteSelf();
 		}
 
 		self = Objects.requireNonNull(getData(s));
-		self.name = FTBTeamsAPI.getClientManager().getName(s).getString();
+		self.name = sn;
 		INSTANCE = this;
 
 		refreshGui();

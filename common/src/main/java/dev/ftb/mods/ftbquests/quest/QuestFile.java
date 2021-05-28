@@ -156,7 +156,7 @@ public abstract class QuestFile extends QuestObject {
 		throw new IllegalStateException("This quest file doesn't have a folder!");
 	}
 
-	public void load(UUID s) {
+	public void load(UUID s, String sn) {
 		throw new IllegalStateException("This method can only be called from client quest file!");
 	}
 
@@ -1017,7 +1017,7 @@ public abstract class QuestFile extends QuestObject {
 	}
 
 	@Nullable
-	public TeamData getNullablePlayerData(UUID id) {
+	public TeamData getNullableTeamData(UUID id) {
 		return teamDataMap.get(id);
 	}
 
@@ -1259,7 +1259,7 @@ public abstract class QuestFile extends QuestObject {
 	}
 
 	public void addData(TeamData data, boolean strong) {
-		if(!teamDataMap.containsKey(data.uuid)) {
+		if (strong || !teamDataMap.containsKey(data.uuid)) {
 			teamDataMap.put(data.uuid, data);
 		}
 	}

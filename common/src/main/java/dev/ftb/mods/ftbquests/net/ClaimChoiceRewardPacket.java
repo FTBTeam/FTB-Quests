@@ -4,6 +4,7 @@ import dev.ftb.mods.ftblibrary.net.snm.BaseC2SPacket;
 import dev.ftb.mods.ftblibrary.net.snm.PacketID;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.TeamData;
+import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
 import dev.ftb.mods.ftbquests.quest.reward.ChoiceReward;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import me.shedaniel.architectury.networking.NetworkManager;
@@ -46,10 +47,11 @@ public class ClaimChoiceRewardPacket extends BaseC2SPacket {
 			ServerPlayer player = (ServerPlayer) context.getPlayer();
 			ChoiceReward r = (ChoiceReward) reward;
 			TeamData data = TeamData.get(player);
+			RewardTable table = r.getTable();
 
-			if (r.getTable() != null && data.isCompleted(reward.quest)) {
-				if (index >= 0 && index < r.getTable().rewards.size()) {
-					r.getTable().rewards.get(index).reward.claim(player, true);
+			if (table != null && data.isCompleted(reward.quest)) {
+				if (index >= 0 && index < table.rewards.size()) {
+					table.rewards.get(index).reward.claim(player, true);
 					data.claimReward(player, reward, true);
 				}
 			}

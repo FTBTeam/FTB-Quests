@@ -17,7 +17,7 @@ public class FTBQuestsNetCommon {
 	public void createObject(long id, long parent, QuestObjectType type, CompoundTag nbt, CompoundTag extra) {
 	}
 
-	public void createTeamData(UUID teamId, String name) {
+	public void createTeamData(UUID teamId, String name, boolean self) {
 	}
 
 	public void deleteObject(long id) {

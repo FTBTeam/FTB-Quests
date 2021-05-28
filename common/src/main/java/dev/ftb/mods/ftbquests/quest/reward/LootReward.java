@@ -4,6 +4,7 @@ import dev.ftb.mods.ftblibrary.ui.Button;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.gui.RewardNotificationsScreen;
 import dev.ftb.mods.ftbquests.quest.Quest;
+import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
 import dev.ftb.mods.ftbquests.quest.loot.WeightedReward;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -31,22 +32,30 @@ public class LootReward extends RandomReward {
 
 	@Override
 	public void claim(ServerPlayer player, boolean notify) {
-		if (getTable() == null) {
+		RewardTable table = getTable();
+
+		if (table == null) {
 			return;
 		}
 
-		int totalWeight = getTable().getTotalWeight(true);
+		for (WeightedReward reward : table.rewards) {
+			if (reward.weight == 0) {
+				reward.reward.claim(player, notify);
+			}
+		}
+
+		int totalWeight = table.getTotalWeight(true);
 
 		if (totalWeight <= 0) {
 			return;
 		}
 
-		for (int i = 0; i < getTable().lootSize; i++) {
+		for (int i = 0; i < table.lootSize; i++) {
 			int number = player.level.random.nextInt(totalWeight) + 1;
-			int currentWeight = getTable().emptyWeight;
+			int currentWeight = table.emptyWeight;
 
 			if (currentWeight < number) {
-				for (WeightedReward reward : getTable().rewards) {
+				for (WeightedReward reward : table.rewards) {
 					currentWeight += reward.weight;
 
 					if (currentWeight >= number) {

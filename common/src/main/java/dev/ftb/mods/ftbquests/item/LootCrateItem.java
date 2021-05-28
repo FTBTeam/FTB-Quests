@@ -66,6 +66,12 @@ public class LootCrateItem extends Item {
 		int size = player.isCrouching() ? stack.getCount() : 1;
 
 		if (!world.isClientSide) {
+			for (WeightedReward reward : crate.table.rewards) {
+				if (reward.weight == 0) {
+					reward.reward.claim((ServerPlayer) player, true);
+				}
+			}
+
 			int totalWeight = crate.table.getTotalWeight(true);
 
 			if (totalWeight > 0) {
