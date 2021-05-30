@@ -19,6 +19,8 @@ import dev.ftb.mods.ftbquests.quest.reward.RewardClaimType;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.util.FTBQuestsInventoryListener;
 import dev.ftb.mods.ftbquests.util.QuestKey;
+import dev.ftb.mods.ftbteams.FTBTeamsAPI;
+import dev.ftb.mods.ftbteams.data.Team;
 import it.unimi.dsi.fastutil.longs.Long2ByteOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2LongMap;
 import it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap;
@@ -275,11 +277,7 @@ public class TeamData {
 			save();
 
 			if (file.isServerSide()) {
-				ServerPlayer player = getPlayer();
-
-				if (player != null) {
-					new SyncEditingModePacket(canEdit).sendTo(player);
-				}
+				new SyncEditingModePacket(uuid, canEdit).sendToAll(((ServerQuestFile) file).server);
 			}
 
 			return true;
@@ -629,19 +627,9 @@ public class TeamData {
 		}
 	}
 
-	@Nullable
-	public ServerPlayer getPlayer() {
-		return ((ServerQuestFile) file).server.getPlayerList().getPlayer(uuid);
-	}
-
 	public List<ServerPlayer> getOnlineMembers() {
-		ServerPlayer playerEntity = getPlayer();
-
-		if (playerEntity != null) {
-			return Collections.singletonList(playerEntity);
-		}
-
-		return Collections.emptyList();
+		Team team = FTBTeamsAPI.getManager().getTeamByID(uuid);
+		return team == null ? Collections.emptyList() : team.getOnlineMembers();
 	}
 
 	public void checkAutoCompletion(Quest quest) {
@@ -753,11 +741,7 @@ public class TeamData {
 			save();
 
 			if (file.isServerSide()) {
-				ServerPlayer player = getPlayer();
-
-				if (player != null) {
-					new SyncLockPacket(uuid, locked).sendTo(player);
-				}
+				new SyncLockPacket(uuid, locked).sendToAll(((ServerQuestFile) file).server);
 			}
 
 			return true;

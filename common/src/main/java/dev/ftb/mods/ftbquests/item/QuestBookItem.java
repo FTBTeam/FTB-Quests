@@ -1,8 +1,8 @@
 package dev.ftb.mods.ftbquests.item;
 
+import dev.ftb.mods.ftblibrary.core.ItemFTBL;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
-import dev.ftb.mods.ftbquests.core.ItemFTBQ;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
@@ -26,7 +26,7 @@ import java.util.List;
 public class QuestBookItem extends Item {
 	public QuestBookItem() {
 		super(new Properties().stacksTo(1).tab(FTBQuests.ITEM_GROUP));
-		((ItemFTBQ) this).setCraftingRemainingItemFTBQ(this);
+		((ItemFTBL) this).setCraftingRemainingItemFTBL(this);
 	}
 
 	@Override

@@ -11,13 +11,14 @@ public interface FTBQuestsNetHandler {
 	SimpleNetworkManager NET = SimpleNetworkManager.create(FTBQuests.MOD_ID);
 
 	PacketID SYNC_QUESTS = NET.registerS2C("sync_quests", SyncQuestsPacket::new);
+	PacketID SYNC_TEAM_DATA = NET.registerS2C("sync_team_data", SyncTeamDataPacket::new);
 	PacketID UPDATE_TASK_PROGRESS = NET.registerS2C("update_task_progress", UpdateTaskProgressPacket::new);
 	PacketID SUBMIT_TASK = NET.registerC2S("submit_task", SubmitTaskPacket::new);
 	PacketID CLAIM_REWARD = NET.registerC2S("claim_reward", ClaimRewardPacket::new);
 	PacketID CLAIM_REWARD_RESPONSE = NET.registerS2C("claim_reward_response", ClaimRewardResponsePacket::new);
 	PacketID SYNC_EDITING_MODE = NET.registerS2C("sync_editing_mode", SyncEditingModePacket::new);
 	PacketID GET_EMERGENCY_ITEMS = NET.registerC2S("get_emergency_items", GetEmergencyItemsPacket::new);
-	PacketID CREATE_TEAM_DATA = NET.registerS2C("create_team_data", CreateTeamDataPacket::new);
+	PacketID CREATE_OTHER_TEAM_DATA = NET.registerS2C("create_other_team_data", CreateOtherTeamDataPacket::new);
 	PacketID CLAIM_ALL_REWARDS = NET.registerC2S("claim_all_rewards", ClaimAllRewardsPacket::new);
 	PacketID CLAIM_CHOICE_REWARD = NET.registerC2S("claim_choice_reward", ClaimChoiceRewardPacket::new);
 	PacketID DISPLAY_COMPLETION_TOAST = NET.registerS2C("display_completion_toast", DisplayCompletionToastPacket::new);
@@ -33,6 +34,7 @@ public interface FTBQuestsNetHandler {
 	PacketID OBJECT_COMPLETED_RESET = NET.registerS2C("object_completed_reset", ObjectCompletedResetPacket::new);
 	PacketID SYNC_LOCK = NET.registerS2C("sync_lock", SyncLockPacket::new);
 	PacketID RESET_REWARD = NET.registerS2C("reset_reward", ResetRewardPacket::new);
+	PacketID TEAM_DATA_CHANGED = NET.registerS2C("team_data_changed", TeamDataChangedPacket::new);
 
 	PacketID CHANGE_PROGRESS = NET.registerC2S("change_progress", ChangeProgressPacket::new);
 	PacketID CREATE_OBJECT = NET.registerC2S("create_object", CreateObjectPacket::new);

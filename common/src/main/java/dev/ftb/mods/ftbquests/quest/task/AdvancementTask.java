@@ -1,13 +1,11 @@
 package dev.ftb.mods.ftbquests.quest.task;
 
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
+import dev.ftb.mods.ftblibrary.config.NameMap;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;
-import dev.ftb.mods.ftbquests.FTBQuests;
-import dev.ftb.mods.ftbquests.core.DisplayInfoFTBQ;
-import dev.ftb.mods.ftbquests.net.FTBQuestsNetHandler;
+import dev.ftb.mods.ftblibrary.util.KnownServerRegistries;
 import dev.ftb.mods.ftbquests.quest.Quest;
-import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -22,17 +20,13 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.item.ItemStack;
 
 /**
  * @author LatvianModder
  */
 public class AdvancementTask extends BooleanTask {
-	public String advancement = "";
+	public ResourceLocation advancement = new ResourceLocation("minecraft:story/root");
 	public String criterion = "";
-
-	private Component advTitle = TextComponent.EMPTY;
-	private ItemStack advIcon = ItemStack.EMPTY;
 
 	public AdvancementTask(Quest quest) {
 		super(quest);
@@ -46,63 +40,55 @@ public class AdvancementTask extends BooleanTask {
 	@Override
 	public void writeData(CompoundTag nbt) {
 		super.writeData(nbt);
-		nbt.putString("advancement", advancement);
+		nbt.putString("advancement", advancement.toString());
 		nbt.putString("criterion", criterion);
 	}
 
 	@Override
 	public void readData(CompoundTag nbt) {
 		super.readData(nbt);
-		advancement = nbt.getString("advancement");
+		advancement = new ResourceLocation(nbt.getString("advancement"));
 		criterion = nbt.getString("criterion");
-		advTitle = TextComponent.EMPTY;
-		advIcon = ItemStack.EMPTY;
-
-		try {
-			if (!advancement.isEmpty() && getQuestFile() == ServerQuestFile.INSTANCE) {
-				Advancement a = ServerQuestFile.INSTANCE.server.getAdvancements().getAdvancement(new ResourceLocation(advancement));
-
-				if (a != null && a.getDisplay() != null) {
-					advTitle = a.getDisplay().getTitle().copy();
-					advIcon = ((DisplayInfoFTBQ) a.getDisplay()).getIconStackFTBQ().copy();
-				}
-			}
-		} catch (Exception ex) {
-			FTBQuests.LOGGER.warn("Failed to load advancement '" + advancement + "' task icon and title: " + ex);
-		}
 	}
 
 	@Override
 	public void writeNetData(FriendlyByteBuf buffer) {
 		super.writeNetData(buffer);
-		buffer.writeUtf(advancement, Short.MAX_VALUE);
+		buffer.writeResourceLocation(advancement);
 		buffer.writeUtf(criterion, Short.MAX_VALUE);
-		buffer.writeComponent(advTitle);
-		FTBQuestsNetHandler.writeItemType(buffer, advIcon);
 	}
 
 	@Override
 	public void readNetData(FriendlyByteBuf buffer) {
 		super.readNetData(buffer);
-		advancement = buffer.readUtf(Short.MAX_VALUE);
+		advancement = buffer.readResourceLocation();
 		criterion = buffer.readUtf(Short.MAX_VALUE);
-		advTitle = buffer.readComponent();
-		advIcon = FTBQuestsNetHandler.readItemType(buffer);
 	}
 
 	@Override
 	@Environment(EnvType.CLIENT)
 	public void getConfig(ConfigGroup config) {
 		super.getConfig(config);
-		config.addString("advancement", advancement, v -> advancement = v, "").setNameKey("ftbquests.task.ftbquests.advancement");
+
+		if (KnownServerRegistries.client != null && !KnownServerRegistries.client.advancements.isEmpty()) {
+			config.addEnum("advancement", advancement, v -> advancement = v, NameMap.of(KnownServerRegistries.client.advancements.keySet().iterator().next(), KnownServerRegistries.client.advancements.keySet().toArray(new ResourceLocation[0]))
+					.icon(resourceLocation -> ItemIcon.getItemIcon(KnownServerRegistries.client.advancements.get(resourceLocation).icon))
+					.name(resourceLocation -> KnownServerRegistries.client.advancements.get(resourceLocation).name)
+					.create()).setNameKey("ftbquests.task.ftbquests.advancement");
+		} else {
+			config.addString("advancement", advancement.toString(), v -> advancement = new ResourceLocation(v), "minecraft:story/root").setNameKey("ftbquests.task.ftbquests.advancement");
+		}
+
 		config.addString("criterion", criterion, v -> criterion = v, "");
 	}
 
 	@Override
 	@Environment(EnvType.CLIENT)
 	public Component getAltTitle() {
-		if (advTitle != TextComponent.EMPTY) {
-			return new TranslatableComponent("ftbquests.task.ftbquests.advancement").append(": ").append(new TextComponent("").append(advTitle).withStyle(ChatFormatting.YELLOW));
+		KnownServerRegistries.AdvancementInfo info = KnownServerRegistries.client == null ? null : KnownServerRegistries.client.advancements.get(advancement);
+
+		if (info != null && info.name != TextComponent.EMPTY) {
+			return new TranslatableComponent("ftbquests.task.ftbquests.advancement").append(": ").append(new TextComponent("").append(info.name).withStyle(ChatFormatting.YELLOW));
 		}
 
 		return super.getAltTitle();
@@ -111,7 +97,13 @@ public class AdvancementTask extends BooleanTask {
 	@Override
 	@Environment(EnvType.CLIENT)
 	public Icon getAltIcon() {
-		return advIcon.isEmpty() ? super.getAltIcon() : ItemIcon.getItemIcon(advIcon);
+		KnownServerRegistries.AdvancementInfo info = KnownServerRegistries.client == null ? null : KnownServerRegistries.client.advancements.get(advancement);
+
+		if (info != null && !info.icon.isEmpty()) {
+			return ItemIcon.getItemIcon(info.icon);
+		}
+
+		return super.getAltIcon();
 	}
 
 	@Override
@@ -121,11 +113,7 @@ public class AdvancementTask extends BooleanTask {
 
 	@Override
 	public boolean canSubmit(TeamData teamData, ServerPlayer player) {
-		if (advancement.isEmpty()) {
-			return false;
-		}
-
-		Advancement a = player.server.getAdvancements().getAdvancement(new ResourceLocation(advancement));
+		Advancement a = player.server.getAdvancements().getAdvancement(advancement);
 
 		if (a == null) {
 			return false;

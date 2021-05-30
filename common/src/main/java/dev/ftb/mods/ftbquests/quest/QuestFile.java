@@ -31,7 +31,7 @@ import dev.ftb.mods.ftbquests.quest.task.TaskTypes;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import dev.ftb.mods.ftbquests.util.NetUtils;
 import dev.ftb.mods.ftbteams.FTBTeamsAPI;
-import dev.ftb.mods.ftbteams.data.Team;
+import dev.ftb.mods.ftbteams.data.TeamBase;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
@@ -62,6 +62,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
 import java.util.UUID;
 import java.util.function.Predicate;
@@ -156,7 +157,7 @@ public abstract class QuestFile extends QuestObject {
 		throw new IllegalStateException("This quest file doesn't have a folder!");
 	}
 
-	public void load(UUID s, String sn) {
+	public void load() {
 		throw new IllegalStateException("This method can only be called from client quest file!");
 	}
 
@@ -775,7 +776,7 @@ public abstract class QuestFile extends QuestObject {
 		lockMessage = buffer.readUtf(Short.MAX_VALUE);
 	}
 
-	public final void writeNetDataFull(FriendlyByteBuf buffer, UUID self) {
+	public final void writeNetDataFull(FriendlyByteBuf buffer) {
 		int pos = buffer.writerIndex();
 
 		buffer.writeVarInt(TaskTypes.TYPES.size());
@@ -862,18 +863,10 @@ public abstract class QuestFile extends QuestObject {
 			}
 		}
 
-		TeamData selfTeamData = getData(self);
-		buffer.writeVarInt(teamDataMap.size());
-
-		for (TeamData data : teamDataMap.values()) {
-			buffer.writeUUID(data.uuid);
-			data.write(buffer, data == selfTeamData);
-		}
-
 		FTBQuests.LOGGER.debug("Wrote " + (buffer.writerIndex() - pos) + " bytes, " + map.size() + " objects");
 	}
 
-	public final void readNetDataFull(FriendlyByteBuf buffer, UUID self) {
+	public final void readNetDataFull(FriendlyByteBuf buffer) {
 		int pos = buffer.readerIndex();
 
 		taskTypeIds.clear();
@@ -1000,14 +993,6 @@ public abstract class QuestFile extends QuestObject {
 			}
 		}
 
-		int pds = buffer.readVarInt();
-
-		for (int i = 0; i < pds; i++) {
-			TeamData data = new TeamData(this, buffer.readUUID());
-			addData(data, true);
-			data.read(buffer, data.uuid.equals(self));
-		}
-
 		FTBQuests.LOGGER.info("Read " + (buffer.readerIndex() - pos) + " bytes, " + map.size() + " objects");
 	}
 
@@ -1022,11 +1007,18 @@ public abstract class QuestFile extends QuestObject {
 	}
 
 	public TeamData getData(UUID id) {
-		return teamDataMap.computeIfAbsent(id, i -> new TeamData(this, i));
+		TeamData teamData = teamDataMap.get(id);
+
+		if (teamData == null) {
+			teamData = new TeamData(this, id);
+			teamDataMap.put(teamData.uuid, teamData);
+		}
+
+		return teamData;
 	}
 
-	public TeamData getData(Team team) {
-		return getData(team.getId());
+	public TeamData getData(TeamBase team) {
+		return getData(Objects.requireNonNull(team, "Non-null team required!").getId());
 	}
 
 	public TeamData getData(Entity player) {
@@ -1262,6 +1254,9 @@ public abstract class QuestFile extends QuestObject {
 		if (strong || !teamDataMap.containsKey(data.uuid)) {
 			teamDataMap.put(data.uuid, data);
 		}
+	}
+
+	public void setSelf(TeamData data) {
 	}
 
 	public void refreshGui() {

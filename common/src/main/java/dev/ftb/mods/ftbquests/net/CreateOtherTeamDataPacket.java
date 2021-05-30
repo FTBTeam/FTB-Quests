@@ -3,37 +3,35 @@ package dev.ftb.mods.ftbquests.net;
 import dev.ftb.mods.ftblibrary.net.snm.BaseS2CPacket;
 import dev.ftb.mods.ftblibrary.net.snm.PacketID;
 import dev.ftb.mods.ftbquests.FTBQuests;
-import dev.ftb.mods.ftbquests.quest.QuestFile;
 import me.shedaniel.architectury.networking.NetworkManager;
 import net.minecraft.network.FriendlyByteBuf;
 
 /**
  * @author LatvianModder
  */
-public class SyncQuestsPacket extends BaseS2CPacket {
-	private final QuestFile file;
+public class CreateOtherTeamDataPacket extends BaseS2CPacket {
+	private final TeamDataUpdate dataUpdate;
 
-	SyncQuestsPacket(FriendlyByteBuf buffer) {
-		file = FTBQuests.PROXY.createClientQuestFile();
-		file.readNetDataFull(buffer);
+	CreateOtherTeamDataPacket(FriendlyByteBuf buffer) {
+		dataUpdate = new TeamDataUpdate(buffer);
 	}
 
-	public SyncQuestsPacket(QuestFile f) {
-		file = f;
+	public CreateOtherTeamDataPacket(TeamDataUpdate update) {
+		dataUpdate = update;
 	}
 
 	@Override
 	public PacketID getId() {
-		return FTBQuestsNetHandler.SYNC_QUESTS;
+		return FTBQuestsNetHandler.CREATE_OTHER_TEAM_DATA;
 	}
 
 	@Override
 	public void write(FriendlyByteBuf buffer) {
-		file.writeNetDataFull(buffer);
+		dataUpdate.write(buffer);
 	}
 
 	@Override
 	public void handle(NetworkManager.PacketContext context) {
-		file.load();
+		FTBQuests.NET_PROXY.createOtherTeamData(dataUpdate);
 	}
 }

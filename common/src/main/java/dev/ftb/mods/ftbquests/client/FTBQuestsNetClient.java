@@ -12,6 +12,7 @@ import dev.ftb.mods.ftbquests.gui.RewardToast;
 import dev.ftb.mods.ftbquests.gui.ToastQuestObject;
 import dev.ftb.mods.ftbquests.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.integration.jei.FTBQuestsJEIHelper;
+import dev.ftb.mods.ftbquests.net.TeamDataUpdate;
 import dev.ftb.mods.ftbquests.quest.Chapter;
 import dev.ftb.mods.ftbquests.quest.ChapterGroup;
 import dev.ftb.mods.ftbquests.quest.Quest;
@@ -76,13 +77,20 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon {
 	}
 
 	@Override
-	public void createTeamData(UUID teamId, String name, boolean self) {
-		TeamData data = new TeamData(ClientQuestFile.INSTANCE, teamId);
-		data.name = name;
-		data.file.addData(data, true);
+	public void createOtherTeamData(TeamDataUpdate dataUpdate) {
+		if (ClientQuestFile.INSTANCE != null) {
+			TeamData data = new TeamData(ClientQuestFile.INSTANCE, dataUpdate.uuid);
+			data.name = dataUpdate.name;
+			data.file.addData(data, true);
+		}
+	}
 
-		if (self) {
-			ClientQuestFile.INSTANCE.self = data;
+	@Override
+	public void teamDataChanged(TeamDataUpdate oldDataUpdate, TeamDataUpdate newDataUpdate) {
+		if (ClientQuestFile.INSTANCE != null) {
+			TeamData data = new TeamData(ClientQuestFile.INSTANCE, newDataUpdate.uuid);
+			data.name = newDataUpdate.name;
+			data.file.addData(data, false);
 		}
 	}
 
@@ -191,8 +199,8 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon {
 	}
 
 	@Override
-	public void syncEditingMode(boolean editingMode) {
-		if (ClientQuestFile.INSTANCE.self.setCanEdit(editingMode)) {
+	public void syncEditingMode(UUID teamId, boolean editingMode) {
+		if (ClientQuestFile.INSTANCE.getData(teamId).setCanEdit(editingMode)) {
 			ClientQuestFile.INSTANCE.refreshGui();
 		}
 	}
