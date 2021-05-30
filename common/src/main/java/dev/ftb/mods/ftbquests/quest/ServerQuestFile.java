@@ -3,17 +3,21 @@ package dev.ftb.mods.ftbquests.quest;
 import com.mojang.util.UUIDTypeAdapter;
 import dev.ftb.mods.ftblibrary.snbt.SNBT;
 import dev.ftb.mods.ftbquests.FTBQuests;
-import dev.ftb.mods.ftbquests.net.CreateTeamDataPacket;
+import dev.ftb.mods.ftbquests.net.CreateOtherTeamDataPacket;
 import dev.ftb.mods.ftbquests.net.DeleteObjectResponsePacket;
 import dev.ftb.mods.ftbquests.net.SyncQuestsPacket;
+import dev.ftb.mods.ftbquests.net.SyncTeamDataPacket;
+import dev.ftb.mods.ftbquests.net.TeamDataChangedPacket;
+import dev.ftb.mods.ftbquests.net.TeamDataUpdate;
 import dev.ftb.mods.ftbquests.quest.reward.RewardType;
 import dev.ftb.mods.ftbquests.quest.reward.RewardTypes;
 import dev.ftb.mods.ftbquests.quest.task.TaskType;
 import dev.ftb.mods.ftbquests.quest.task.TaskTypes;
 import dev.ftb.mods.ftbquests.util.FTBQuestsInventoryListener;
 import dev.ftb.mods.ftbquests.util.FileUtils;
-import dev.ftb.mods.ftbteams.FTBTeamsAPI;
+import dev.ftb.mods.ftbteams.event.PlayerChangedTeamEvent;
 import dev.ftb.mods.ftbteams.event.PlayerLoggedInAfterTeamEvent;
+import dev.ftb.mods.ftbteams.event.TeamCreatedEvent;
 import me.shedaniel.architectury.hooks.LevelResourceHooks;
 import me.shedaniel.architectury.platform.Platform;
 import me.shedaniel.architectury.utils.Env;
@@ -155,9 +159,29 @@ public class ServerQuestFile extends QuestFile {
 		deleteSelf();
 	}
 
-	public void onLoggedIn(PlayerLoggedInAfterTeamEvent event) {
+	public void playerLoggedIn(PlayerLoggedInAfterTeamEvent event) {
 		ServerPlayer player = event.getPlayer();
-		UUID id = FTBTeamsAPI.getPlayerTeamID(player.getUUID());
+		TeamData data = getData(event.getTeam());
+
+		new SyncQuestsPacket(this).sendTo(player);
+
+		for (TeamData teamData : teamDataMap.values()) {
+			new SyncTeamDataPacket(teamData, teamData == data).sendTo(player);
+		}
+
+		player.inventoryMenu.addSlotListener(new FTBQuestsInventoryListener(player));
+
+		for (ChapterGroup group : chapterGroups) {
+			for (Chapter chapter : group.chapters) {
+				for (Quest quest : chapter.quests) {
+					data.checkAutoCompletion(quest);
+				}
+			}
+		}
+	}
+
+	public void teamCreated(TeamCreatedEvent event) {
+		UUID id = event.getTeam().getId();
 		TeamData data = teamDataMap.get(id);
 
 		if (data == null) {
@@ -173,20 +197,17 @@ public class ServerQuestFile extends QuestFile {
 		}
 
 		addData(data, false);
+		TeamDataUpdate self = new TeamDataUpdate(data);
 
-		for (ServerPlayer player1 : server.getPlayerList().getPlayers()) {
-			new CreateTeamDataPacket(data, player1 == player).sendTo(player1);
-		}
+		new CreateOtherTeamDataPacket(self).sendToAll(server);
+	}
 
-		new SyncQuestsPacket(id, displayName, this).sendTo(player);
-		player.inventoryMenu.addSlotListener(new FTBQuestsInventoryListener(player));
+	public void playerChangedTeam(PlayerChangedTeamEvent event) {
+		if (event.getPreviousTeam().isPresent()) {
+			TeamData oldTeamData = getData(event.getPreviousTeam().get());
+			TeamData newTeamData = getData(event.getTeam());
 
-		for (ChapterGroup group : ServerQuestFile.INSTANCE.chapterGroups) {
-			for (Chapter chapter : group.chapters) {
-				for (Quest quest : chapter.quests) {
-					data.checkAutoCompletion(quest);
-				}
-			}
+			new TeamDataChangedPacket(new TeamDataUpdate(oldTeamData), new TeamDataUpdate(newTeamData)).sendToAll(server);
 		}
 	}
 }

@@ -12,14 +12,13 @@ import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestFile;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.theme.QuestTheme;
+import dev.ftb.mods.ftbteams.data.ClientTeamManager;
 import me.shedaniel.architectury.utils.Env;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.entity.Entity;
-
-import java.util.Objects;
-import java.util.UUID;
 
 /**
  * @author LatvianModder
@@ -36,14 +35,15 @@ public class ClientQuestFile extends QuestFile {
 	public BaseScreen questGui;
 
 	@Override
-	public void load(UUID s, String sn) {
+	public void load() {
 		if (INSTANCE != null) {
 			INSTANCE.deleteChildren();
 			INSTANCE.deleteSelf();
 		}
 
-		self = Objects.requireNonNull(getData(s));
-		self.name = sn;
+		self = new TeamData(this, Util.NIL_UUID);
+		self.name = "Loading...";
+		self.setLocked(true);
 		INSTANCE = this;
 
 		refreshGui();
@@ -53,6 +53,11 @@ public class ClientQuestFile extends QuestFile {
 	@Override
 	public boolean canEdit() {
 		return self.getCanEdit();
+	}
+
+	@Override
+	public void setSelf(TeamData s) {
+		self = s;
 	}
 
 	@Override
@@ -150,6 +155,6 @@ public class ClientQuestFile extends QuestFile {
 
 	@Override
 	public TeamData getData(Entity player) {
-		return player == Minecraft.getInstance().player ? self : super.getData(player);
+		return player == Minecraft.getInstance().player ? self : getData(ClientTeamManager.INSTANCE.playerTeamMap.get(player.getUUID()));
 	}
 }

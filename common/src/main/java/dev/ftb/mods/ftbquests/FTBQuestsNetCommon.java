@@ -1,6 +1,7 @@
 package dev.ftb.mods.ftbquests;
 
 import dev.ftb.mods.ftblibrary.icon.Icon;
+import dev.ftb.mods.ftbquests.net.TeamDataUpdate;
 import dev.ftb.mods.ftbquests.quest.QuestObjectType;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -17,7 +18,10 @@ public class FTBQuestsNetCommon {
 	public void createObject(long id, long parent, QuestObjectType type, CompoundTag nbt, CompoundTag extra) {
 	}
 
-	public void createTeamData(UUID teamId, String name, boolean self) {
+	public void createOtherTeamData(TeamDataUpdate dataUpdate) {
+	}
+
+	public void teamDataChanged(TeamDataUpdate oldDataUpdate, TeamDataUpdate newDataUpdate) {
 	}
 
 	public void deleteObject(long id) {
@@ -41,7 +45,7 @@ public class FTBQuestsNetCommon {
 	public void moveQuest(long id, long chapter, double x, double y) {
 	}
 
-	public void syncEditingMode(boolean editingMode) {
+	public void syncEditingMode(UUID teamId, boolean editingMode) {
 	}
 
 	public void togglePinned(long id) {

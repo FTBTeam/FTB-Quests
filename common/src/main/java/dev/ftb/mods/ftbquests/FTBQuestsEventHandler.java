@@ -12,7 +12,9 @@ import dev.ftb.mods.ftbquests.quest.task.DimensionTask;
 import dev.ftb.mods.ftbquests.quest.task.KillTask;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.util.FTBQuestsInventoryListener;
+import dev.ftb.mods.ftbteams.event.PlayerChangedTeamEvent;
 import dev.ftb.mods.ftbteams.event.PlayerLoggedInAfterTeamEvent;
+import dev.ftb.mods.ftbteams.event.TeamCreatedEvent;
 import dev.ftb.mods.ftbteams.event.TeamEvent;
 import me.shedaniel.architectury.event.events.CommandRegistrationEvent;
 import me.shedaniel.architectury.event.events.EntityEvent;
@@ -56,8 +58,9 @@ public class FTBQuestsEventHandler {
 		FTBQuestsItems.register();
 		FTBQuestsBlockEntities.register();
 		ClearFileCacheEvent.EVENT.register(this::fileCacheClear);
-		//PlayerEvent.PLAYER_JOIN.register(this::playerLoggedIn);
 		TeamEvent.PLAYER_LOGGED_IN.register(this::playerLoggedIn);
+		TeamEvent.CREATED.register(this::teamCreated);
+		TeamEvent.PLAYER_CHANGED.register(this::playerChangedTeam);
 		EntityEvent.LIVING_DEATH.register(this::playerKill);
 		TickEvent.PLAYER_POST.register(this::playerTick);
 		PlayerEvent.CRAFT_ITEM.register(this::itemCrafted);
@@ -99,7 +102,15 @@ public class FTBQuestsEventHandler {
 	}
 
 	private void playerLoggedIn(PlayerLoggedInAfterTeamEvent event) {
-		ServerQuestFile.INSTANCE.onLoggedIn(event);
+		ServerQuestFile.INSTANCE.playerLoggedIn(event);
+	}
+
+	private void teamCreated(TeamCreatedEvent event) {
+		ServerQuestFile.INSTANCE.teamCreated(event);
+	}
+
+	private void playerChangedTeam(PlayerChangedTeamEvent event) {
+		ServerQuestFile.INSTANCE.playerChangedTeam(event);
 	}
 
 	private InteractionResult playerKill(LivingEntity entity, DamageSource source) {

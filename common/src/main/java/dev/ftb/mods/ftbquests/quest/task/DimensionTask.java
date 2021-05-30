@@ -1,6 +1,8 @@
 package dev.ftb.mods.ftbquests.quest.task;
 
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
+import dev.ftb.mods.ftblibrary.config.NameMap;
+import dev.ftb.mods.ftblibrary.util.KnownServerRegistries;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import net.fabricmc.api.EnvType;
@@ -61,7 +63,12 @@ public class DimensionTask extends BooleanTask {
 	@Environment(EnvType.CLIENT)
 	public void getConfig(ConfigGroup config) {
 		super.getConfig(config);
-		config.addString("dim", dimension.location().toString(), v -> dimension = ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(v)), "minecraft:the_nether");
+
+		if (KnownServerRegistries.client != null && !KnownServerRegistries.client.dimensions.isEmpty()) {
+			config.addEnum("dim", dimension.location(), v -> dimension = ResourceKey.create(Registry.DIMENSION_REGISTRY, v), NameMap.of(KnownServerRegistries.client.dimensions.iterator().next(), KnownServerRegistries.client.dimensions.toArray(new ResourceLocation[0])).create());
+		} else {
+			config.addString("dim", dimension.location().toString(), v -> dimension = ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(v)), "minecraft:the_nether");
+		}
 	}
 
 	@Override
