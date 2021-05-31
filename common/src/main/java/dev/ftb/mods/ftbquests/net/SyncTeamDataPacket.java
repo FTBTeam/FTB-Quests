@@ -3,7 +3,6 @@ package dev.ftb.mods.ftbquests.net;
 import dev.ftb.mods.ftblibrary.net.snm.BaseS2CPacket;
 import dev.ftb.mods.ftblibrary.net.snm.PacketID;
 import dev.ftb.mods.ftbquests.FTBQuests;
-import dev.ftb.mods.ftbquests.quest.QuestFile;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import me.shedaniel.architectury.networking.NetworkManager;
 import net.minecraft.network.FriendlyByteBuf;
@@ -17,8 +16,7 @@ public class SyncTeamDataPacket extends BaseS2CPacket {
 
 	SyncTeamDataPacket(FriendlyByteBuf buffer) {
 		self = buffer.readBoolean();
-		QuestFile file = FTBQuests.PROXY.getQuestFile(true);
-		teamData = new TeamData(file, buffer.readUUID());
+		teamData = new TeamData(buffer.readUUID());
 		teamData.read(buffer, self);
 	}
 
@@ -41,6 +39,7 @@ public class SyncTeamDataPacket extends BaseS2CPacket {
 
 	@Override
 	public void handle(NetworkManager.PacketContext context) {
+		teamData.file = FTBQuests.PROXY.getClientQuestFile();
 		teamData.file.addData(teamData, true);
 
 		if (self) {

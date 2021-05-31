@@ -83,7 +83,8 @@ public class ServerQuestFile extends QuestFile {
 					if (nbt != null) {
 						try {
 							UUID uuid = UUIDTypeAdapter.fromString(nbt.getString("uuid"));
-							TeamData data = new TeamData(this, uuid);
+							TeamData data = new TeamData(uuid);
+							data.file = this;
 							addData(data, true);
 							data.deserializeNBT(nbt);
 						} catch (Exception ex) {
@@ -185,7 +186,8 @@ public class ServerQuestFile extends QuestFile {
 		TeamData data = teamDataMap.get(id);
 
 		if (data == null) {
-			data = new TeamData(this, id);
+			data = new TeamData(id);
+			data.file = this;
 			data.save();
 		}
 

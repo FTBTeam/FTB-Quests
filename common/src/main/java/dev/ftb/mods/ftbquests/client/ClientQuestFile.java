@@ -41,7 +41,8 @@ public class ClientQuestFile extends QuestFile {
 			INSTANCE.deleteSelf();
 		}
 
-		self = new TeamData(this, Util.NIL_UUID);
+		self = new TeamData(Util.NIL_UUID);
+		self.file = this;
 		self.name = "Loading...";
 		self.setLocked(true);
 		INSTANCE = this;

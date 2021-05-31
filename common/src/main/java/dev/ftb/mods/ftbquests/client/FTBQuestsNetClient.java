@@ -79,7 +79,8 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon {
 	@Override
 	public void createOtherTeamData(TeamDataUpdate dataUpdate) {
 		if (ClientQuestFile.INSTANCE != null) {
-			TeamData data = new TeamData(ClientQuestFile.INSTANCE, dataUpdate.uuid);
+			TeamData data = new TeamData(dataUpdate.uuid);
+			data.file = ClientQuestFile.INSTANCE;
 			data.name = dataUpdate.name;
 			data.file.addData(data, true);
 		}
@@ -88,7 +89,8 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon {
 	@Override
 	public void teamDataChanged(TeamDataUpdate oldDataUpdate, TeamDataUpdate newDataUpdate) {
 		if (ClientQuestFile.INSTANCE != null) {
-			TeamData data = new TeamData(ClientQuestFile.INSTANCE, newDataUpdate.uuid);
+			TeamData data = new TeamData(newDataUpdate.uuid);
+			data.file = ClientQuestFile.INSTANCE;
 			data.name = newDataUpdate.name;
 			data.file.addData(data, false);
 		}

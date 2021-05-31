@@ -713,6 +713,7 @@ public abstract class QuestFile extends QuestObject {
 		}
 
 		rewardTables.sort(Comparator.comparingInt(c -> objectOrderMap.get(c.id)));
+		updateLootCrates();
 
 		/*
 		for (Chapter chapter : chapters)
@@ -735,6 +736,18 @@ public abstract class QuestFile extends QuestObject {
 		}
 
 		FTBQuests.LOGGER.info("Loaded " + chapterGroups.size() + " chapter groups, " + chapterCounter + " chapters, " + questCounter + " quests, " + rewardTables.size() + " reward tables");
+	}
+
+	public void updateLootCrates() {
+		LootCrate.LOOT_CRATES.clear();
+
+		for (RewardTable table : rewardTables) {
+			if (table.lootCrate != null) {
+				LootCrate.LOOT_CRATES.put(table.lootCrate.getStringID(), table.lootCrate);
+			}
+		}
+
+		FTBQuests.LOGGER.debug("Updated " + LootCrate.LOOT_CRATES.size() + " loot crates");
 	}
 
 	public void save() {
@@ -993,6 +1006,8 @@ public abstract class QuestFile extends QuestObject {
 			}
 		}
 
+		updateLootCrates();
+
 		FTBQuests.LOGGER.info("Read " + (buffer.readerIndex() - pos) + " bytes, " + map.size() + " objects");
 	}
 
@@ -1010,7 +1025,8 @@ public abstract class QuestFile extends QuestObject {
 		TeamData teamData = teamDataMap.get(id);
 
 		if (teamData == null) {
-			teamData = new TeamData(this, id);
+			teamData = new TeamData(id);
+			teamData.file = this;
 			teamDataMap.put(teamData.uuid, teamData);
 		}
 

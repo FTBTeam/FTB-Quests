@@ -3,11 +3,8 @@ package dev.ftb.mods.ftbquests.item;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.gui.RewardNotificationsScreen;
-import dev.ftb.mods.ftbquests.quest.QuestFile;
 import dev.ftb.mods.ftbquests.quest.loot.LootCrate;
-import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
 import dev.ftb.mods.ftbquests.quest.loot.WeightedReward;
-import me.shedaniel.architectury.utils.GameInstance;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
@@ -30,7 +27,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
@@ -45,10 +41,9 @@ public class LootCrateItem extends Item {
 	}
 
 	@Nullable
-	public static LootCrate getCrate(@Nullable LevelAccessor world, ItemStack stack) {
+	public static LootCrate getCrate(ItemStack stack) {
 		if (stack.hasTag() && stack.getItem() instanceof LootCrateItem) {
-			QuestFile file = world == null ? FTBQuests.PROXY.getQuestFile(GameInstance.getServer() == null || Thread.currentThread() != GameInstance.getServer().getRunningThread()) : FTBQuests.PROXY.getQuestFile(world.isClientSide());
-			return file == null ? null : file.getLootCrate(stack.getTag().getString("type"));
+			return LootCrate.LOOT_CRATES.get(stack.getTag().getString("type"));
 		}
 
 		return null;
@@ -57,7 +52,7 @@ public class LootCrateItem extends Item {
 	@Override
 	public InteractionResultHolder<ItemStack> use(Level world, Player player, InteractionHand hand) {
 		ItemStack stack = player.getItemInHand(hand);
-		LootCrate crate = getCrate(world, stack);
+		LootCrate crate = getCrate(stack);
 
 		if (crate == null) {
 			return new InteractionResultHolder<>(InteractionResult.SUCCESS, stack);
@@ -115,13 +110,13 @@ public class LootCrateItem extends Item {
 
 	@Override
 	public boolean isFoil(ItemStack stack) {
-		LootCrate crate = getCrate(null, stack);
+		LootCrate crate = getCrate(stack);
 		return crate != null && crate.glow;
 	}
 
 	@Override
 	public Component getName(ItemStack stack) {
-		LootCrate crate = getCrate(null, stack);
+		LootCrate crate = getCrate(stack);
 		return crate != null && !crate.itemName.isEmpty() ? new TextComponent(crate.itemName) : super.getName(stack);
 	}
 
@@ -133,14 +128,8 @@ public class LootCrateItem extends Item {
 	@Override
 	public void fillItemCategory(CreativeModeTab tab, NonNullList<ItemStack> items) {
 		if (allowdedIn(tab)) {
-			QuestFile file = FTBQuests.PROXY.getQuestFile(GameInstance.getServer() == null || Thread.currentThread() != GameInstance.getServer().getRunningThread());
-
-			if (file != null) {
-				for (RewardTable table : file.rewardTables) {
-					if (table.lootCrate != null) {
-						items.add(table.lootCrate.createStack());
-					}
-				}
+			for (LootCrate lootCrate : LootCrate.LOOT_CRATES.values()) {
+				items.add(lootCrate.createStack());
 			}
 		}
 	}
@@ -155,7 +144,7 @@ public class LootCrateItem extends Item {
 			return;
 		}
 
-		LootCrate crate = getCrate(world, stack);
+		LootCrate crate = getCrate(stack);
 
 		if (crate != null) {
 			if (crate.itemName.isEmpty()) {

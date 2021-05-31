@@ -64,8 +64,8 @@ public class TeamData {
 
 	public static ServerPlayer currentPlayer = null;
 
-	public final QuestFile file;
 	public final UUID uuid;
+	public QuestFile file;
 	public String name;
 	public boolean shouldSave;
 	private boolean locked;
@@ -82,8 +82,7 @@ public class TeamData {
 	private Long2ByteOpenHashMap areDependenciesCompleteCache;
 	private Object2ByteOpenHashMap<QuestKey> unclaimedRewardsCache;
 
-	public TeamData(QuestFile f, UUID id) {
-		file = f;
+	public TeamData(UUID id) {
 		uuid = id;
 		name = "";
 		shouldSave = false;
