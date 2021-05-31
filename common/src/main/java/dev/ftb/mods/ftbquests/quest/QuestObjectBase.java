@@ -292,6 +292,9 @@ public abstract class QuestObjectBase {
 		ClientQuestFile.INSTANCE.refreshGui();
 	}
 
+	public void editedFromGUIOnServer() {
+	}
+
 	public void onCreated() {
 	}
 

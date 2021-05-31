@@ -26,7 +26,7 @@ public class CreateTaskAtPacket extends BaseC2SPacket {
 		chapter = buffer.readLong();
 		x = buffer.readDouble();
 		y = buffer.readDouble();
-		type = FTBQuests.PROXY.getQuestFile(true).taskTypeIds.get(buffer.readVarInt());
+		type = FTBQuests.PROXY.getClientQuestFile().taskTypeIds.get(buffer.readVarInt());
 		nbt = buffer.readNbt();
 	}
 

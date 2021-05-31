@@ -10,6 +10,10 @@ public class FTBQuestsCommon {
 	public void init() {
 	}
 
+	public QuestFile getClientQuestFile() {
+		throw new NullPointerException("Client quest file not loaded!");
+	}
+
 	public QuestFile getQuestFile(boolean isClient) {
 		return ServerQuestFile.INSTANCE;
 	}

@@ -50,6 +50,7 @@ public class EditObjectPacket extends BaseC2SPacket {
 
 			if (object != null) {
 				object.readData(nbt);
+				object.editedFromGUIOnServer();
 				ServerQuestFile.INSTANCE.clearCachedData();
 				ServerQuestFile.INSTANCE.save();
 				new EditObjectResponsePacket(object).sendToAll(context.getPlayer().getServer());

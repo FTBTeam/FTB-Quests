@@ -130,8 +130,17 @@ public class FTBQuestsClient extends FTBQuestsCommon {
 	}
 
 	@Override
+	public QuestFile getClientQuestFile() {
+		if (ClientQuestFile.INSTANCE != null) {
+			return ClientQuestFile.INSTANCE;
+		}
+
+		throw new NullPointerException("Client quest file not loaded!");
+	}
+
+	@Override
 	public QuestFile getQuestFile(boolean isClient) {
-		return isClient ? ClientQuestFile.INSTANCE : ServerQuestFile.INSTANCE;
+		return isClient ? getClientQuestFile() : ServerQuestFile.INSTANCE;
 	}
 
 	@Override

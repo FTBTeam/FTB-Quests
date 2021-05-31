@@ -274,6 +274,13 @@ public final class RewardTable extends QuestObjectBase {
 				gui1.refreshWidgets();
 			}
 		}
+
+		file.updateLootCrates();
+	}
+
+	@Override
+	public void editedFromGUIOnServer() {
+		file.updateLootCrates();
 	}
 
 	@Override

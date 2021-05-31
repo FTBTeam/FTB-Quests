@@ -9,12 +9,16 @@ import net.minecraft.nbt.StringTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.item.ItemStack;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
  * @author LatvianModder
  */
 public final class LootCrate {
+	public static Map<String, LootCrate> LOOT_CRATES = new LinkedHashMap<>();
+
 	public final RewardTable table;
 	public String stringID;
 	public String itemName;
