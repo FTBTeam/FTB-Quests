@@ -6,10 +6,10 @@ import dev.ftb.mods.ftblibrary.config.Tristate;
 import dev.ftb.mods.ftblibrary.config.ui.EditConfigScreen;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.math.Bits;
+import dev.ftb.mods.ftblibrary.util.ClientTextComponentUtils;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.client.ConfigIconItemStack;
-import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.item.CustomIconItem;
 import dev.ftb.mods.ftbquests.net.EditObjectPacket;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
@@ -246,7 +246,7 @@ public abstract class QuestObjectBase {
 		String s = title.isEmpty() ? I18n.exists(key) ? I18n.get(key) : "" : title;
 
 		if (!s.isEmpty()) {
-			cachedTitle = FTBQuestsClient.parse(s);
+			cachedTitle = ClientTextComponentUtils.parse(s);
 		} else {
 			cachedTitle = getAltTitle();
 		}

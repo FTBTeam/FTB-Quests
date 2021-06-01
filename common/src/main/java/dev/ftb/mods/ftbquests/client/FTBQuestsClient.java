@@ -8,9 +8,7 @@ import dev.ftb.mods.ftblibrary.config.StringConfig;
 import dev.ftb.mods.ftblibrary.config.ui.EditConfigFromStringScreen;
 import dev.ftb.mods.ftblibrary.config.ui.EditConfigScreen;
 import dev.ftb.mods.ftblibrary.config.ui.SelectItemStackScreen;
-import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
-import dev.ftb.mods.ftblibrary.util.TextComponentParser;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.FTBQuestsCommon;
 import dev.ftb.mods.ftbquests.block.FTBQuestsBlocks;
@@ -36,14 +34,8 @@ import me.shedaniel.architectury.registry.RenderTypes;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.StringTag;
-import net.minecraft.network.chat.ClickEvent;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.HoverEvent;
-import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
@@ -52,65 +44,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.StructureBlockEntity;
 import net.minecraft.world.phys.BlockHitResult;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Function;
-
 public class FTBQuestsClient extends FTBQuestsCommon {
-	public static final Function<String, Component> DEFAULT_STRING_TO_COMPONENT = FTBQuestsClient::stringToComponent;
-
-	public static Component parse(String s) {
-		Component c = TextComponentParser.parse(s, DEFAULT_STRING_TO_COMPONENT);
-
-		if (c == TextComponent.EMPTY) {
-			return c;
-		}
-
-		while (c.getContents().isEmpty() && c.getStyle().equals(Style.EMPTY) && c.getSiblings().size() == 1) {
-			c = c.getSiblings().get(0);
-		}
-
-		return c;
-	}
-
-	private static Component stringToComponent(String s) {
-		if (s.isEmpty()) {
-			return TextComponent.EMPTY;
-		}
-
-		if (s.startsWith("open_url:")) {
-			String[] s1 = s.substring(9).split("\\|", 2);
-			return new TextComponent(s1[0]).withStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, s1[1])));
-		} else if (s.startsWith("image:")) {
-			Map<String, String> map = splitProperties(s);
-			ImageComponent c = new ImageComponent();
-			c.image = Icon.getIcon(map.get("image"));
-			c.width = Integer.parseInt(map.getOrDefault("width", "100"));
-			c.height = Integer.parseInt(map.getOrDefault("height", "100"));
-
-			if (map.containsKey("text")) {
-				c.withStyle(Style.EMPTY.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, parse(map.get("text")))));
-			}
-
-			return c;
-		}
-
-		return parse(I18n.get(s));
-	}
-
-	private static Map<String, String> splitProperties(String s) {
-		Map<String, String> map = new HashMap<>();
-
-		for (String s1 : s.split(" ")) {
-			if (!s1.isEmpty()) {
-				String[] s2 = s1.split(":", 2);
-				map.put(s2[0], s2.length == 2 ? s2[1].replace("%20", " ") : "");
-			}
-		}
-
-		return map;
-	}
-
 	public static KeyMapping KEY_QUESTS;
 
 	@Override
