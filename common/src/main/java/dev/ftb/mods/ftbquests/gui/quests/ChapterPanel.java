@@ -15,9 +15,9 @@ import dev.ftb.mods.ftblibrary.ui.Theme;
 import dev.ftb.mods.ftblibrary.ui.Widget;
 import dev.ftb.mods.ftblibrary.ui.WidgetLayout;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
+import dev.ftb.mods.ftblibrary.util.ClientTextComponentUtils;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
-import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.gui.ChangeChapterGroupScreen;
 import dev.ftb.mods.ftbquests.net.CreateObjectPacket;
 import dev.ftb.mods.ftbquests.net.MoveChapterGroupPacket;
@@ -251,7 +251,7 @@ public class ChapterPanel extends Panel {
 			description = new ArrayList<>();
 
 			for (String v : chapter.subtitle) {
-				description.add(new TextComponent("").append(FTBQuestsClient.parse(v)).withStyle(ChatFormatting.GRAY));
+				description.add(new TextComponent("").append(ClientTextComponentUtils.parse(v)).withStyle(ChatFormatting.GRAY));
 			}
 		}
 

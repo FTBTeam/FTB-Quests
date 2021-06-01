@@ -9,9 +9,9 @@ import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.IconAnimation;
 import dev.ftb.mods.ftblibrary.math.Bits;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
+import dev.ftb.mods.ftblibrary.util.ClientTextComponentUtils;
 import dev.ftb.mods.ftblibrary.util.ClientUtils;
 import dev.ftb.mods.ftbquests.FTBQuests;
-import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.events.ObjectCompletedEvent;
 import dev.ftb.mods.ftbquests.events.ObjectStartedEvent;
 import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
@@ -585,7 +585,7 @@ public final class Quest extends QuestObject implements Movable {
 
 		String key = String.format("quests.%s.subtitle", getCodeString());
 		String s = subtitle.isEmpty() ? I18n.exists(key) ? I18n.get(key) : "" : subtitle;
-		cachedSubtitle = FTBQuestsClient.parse(s);
+		cachedSubtitle = ClientTextComponentUtils.parse(s);
 
 		return cachedSubtitle;
 	}
@@ -602,7 +602,7 @@ public final class Quest extends QuestObject implements Movable {
 		cachedDescription = new Component[desc.length];
 
 		for (int i = 0; i < cachedDescription.length; i++) {
-			cachedDescription[i] = FTBQuestsClient.parse(desc[i]);
+			cachedDescription[i] = ClientTextComponentUtils.parse(desc[i]);
 		}
 
 		return cachedDescription;
