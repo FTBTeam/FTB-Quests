@@ -6,10 +6,10 @@ import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.ui.BlankPanel;
 import dev.ftb.mods.ftblibrary.ui.Button;
 import dev.ftb.mods.ftblibrary.ui.ColorWidget;
-import dev.ftb.mods.ftblibrary.ui.ComponentTextField;
 import dev.ftb.mods.ftblibrary.ui.ContextMenuItem;
 import dev.ftb.mods.ftblibrary.ui.Panel;
 import dev.ftb.mods.ftblibrary.ui.SimpleButton;
+import dev.ftb.mods.ftblibrary.ui.TextField;
 import dev.ftb.mods.ftblibrary.ui.Theme;
 import dev.ftb.mods.ftblibrary.ui.VerticalSpaceWidget;
 import dev.ftb.mods.ftblibrary.ui.Widget;
@@ -29,6 +29,8 @@ import dev.ftb.mods.ftbquests.quest.theme.QuestTheme;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextColor;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
@@ -44,7 +46,6 @@ public class ViewQuestPanel extends Panel {
 	public final QuestScreen questScreen;
 	public Quest quest = null;
 	public boolean hidePanel = false;
-	private Component title = TextComponent.EMPTY;
 	private Icon icon = Icon.EMPTY;
 	public Button buttonClose;
 	public Button buttonPin;
@@ -77,17 +78,32 @@ public class ViewQuestPanel extends Panel {
 		setScrollX(0);
 		setScrollY(0);
 
-		title = quest.getTitle();
 		icon = quest.getIcon();
 
-		int w = Math.max(200, questScreen.getTheme().getStringWidth(title) + 30);
+		boolean canEdit = questScreen.file.canEdit();
+
+		TextField titleField = new TextField(this) {
+			@Override
+			public boolean mousePressed(MouseButton button) {
+				if (canEdit && button.isRight()) {
+					editTitle();
+					return true;
+				}
+
+				return super.mousePressed(button);
+			}
+		}.addFlags(Theme.CENTERED).setMinWidth(150).setMaxWidth(500).setSpacing(9).setText(new TextComponent("").append(quest.getTitle()).withStyle(Style.EMPTY.withColor(TextColor.fromRgb(ThemeProperties.QUEST_VIEW_TITLE.get().rgb()))));
+
+		int w = Math.max(200, titleField.width + 54);
+
+		titleField.setPosAndSize(27, 4, w - 54, 8);
+		add(titleField);
 
 		add(panelContent = new BlankPanel(this, "ContentPanel"));
 		panelContent.add(panelTasks = new BlankPanel(panelContent, "TasksPanel"));
 		panelContent.add(panelRewards = new BlankPanel(panelContent, "RewardsPanel"));
 		panelContent.add(panelText = new BlankPanel(panelContent, "TextPanel"));
 
-		boolean canEdit = questScreen.file.canEdit();
 		int bsize = 18;
 
 		for (Task task : quest.tasks) {
@@ -149,7 +165,8 @@ public class ViewQuestPanel extends Panel {
 
 		setWidth(w);
 		panelContent.setPosAndSize(0, 16, w, 0);
-		int w2 = panelContent.width / 2;
+
+		int w2 = w / 2;
 
 		add(buttonClose = new CloseViewQuestButton(this));
 		buttonClose.setPosAndSize(w - 14, 2, 12, 12);
@@ -174,29 +191,29 @@ public class ViewQuestPanel extends Panel {
 		buttonOpenDependencies.setPosAndSize(0, 17, 13, 13);
 		buttonOpenDependants.setPosAndSize(w - 13, 17, 13, 13);
 
-		ComponentTextField textFieldTasks = new ComponentTextField(panelContent) {
+		TextField textFieldTasks = new TextField(panelContent) {
 			@Override
-			public ComponentTextField resize(Theme theme) {
+			public TextField resize(Theme theme) {
 				return this;
 			}
 		};
 
 		textFieldTasks.setPosAndSize(2, 2, w2 - 3, 13);
-		textFieldTasks.setMaxWidth(panelContent.width);
+		textFieldTasks.setMaxWidth(w);
 		textFieldTasks.addFlags(Theme.CENTERED | Theme.CENTERED_V);
 		textFieldTasks.setText(new TranslatableComponent("ftbquests.tasks"));
 		textFieldTasks.setColor(ThemeProperties.TASKS_TEXT_COLOR.get(quest));
 		panelContent.add(textFieldTasks);
 
-		ComponentTextField textFieldRewards = new ComponentTextField(panelContent) {
+		TextField textFieldRewards = new TextField(panelContent) {
 			@Override
-			public ComponentTextField resize(Theme theme) {
+			public TextField resize(Theme theme) {
 				return this;
 			}
 		};
 
 		textFieldRewards.setPosAndSize(w2 + 2, 2, w2 - 3, 13);
-		textFieldRewards.setMaxWidth(panelContent.width);
+		textFieldRewards.setMaxWidth(w);
 		textFieldRewards.addFlags(Theme.CENTERED | Theme.CENTERED_V);
 		textFieldRewards.setText(new TranslatableComponent("ftbquests.rewards"));
 		textFieldRewards.setColor(ThemeProperties.REWARDS_TEXT_COLOR.get(quest));
@@ -227,18 +244,32 @@ public class ViewQuestPanel extends Panel {
 			widget.setY(widget.posY + roy);
 		}
 
-		panelText.setPosAndSize(3, 16 + h + 12, panelContent.width - 6, 0);
+		panelText.setPosAndSize(3, 16 + h + 12, w - 6, 0);
 
-		Component desc = quest.getSubtitle();
+		Component subtitle = quest.getSubtitle();
 
-		if (desc != TextComponent.EMPTY) {
-			panelText.add(new ComponentTextField(panelText).addFlags(Theme.CENTERED).setMaxWidth(panelText.width).setSpacing(9).setText(new TextComponent("").append(desc).withStyle(ChatFormatting.ITALIC, ChatFormatting.GRAY)));
+		if (subtitle == TextComponent.EMPTY && canEdit) {
+			subtitle = new TextComponent("[No Subtitle]");
+		}
+
+		if (subtitle != TextComponent.EMPTY) {
+			panelText.add(new TextField(panelText) {
+				@Override
+				public boolean mousePressed(MouseButton button) {
+					if (canEdit && button.isRight()) {
+						editSubtitle();
+						return true;
+					}
+
+					return super.mousePressed(button);
+				}
+			}.addFlags(Theme.CENTERED).setMinWidth(panelText.width).setMaxWidth(panelText.width).setSpacing(9).setText(new TextComponent("").append(subtitle).withStyle(ChatFormatting.ITALIC, ChatFormatting.GRAY)));
 		}
 
 		boolean showText = !quest.hideTextUntilComplete.get(false) || questScreen.file.self != null && questScreen.file.self.isCompleted(quest);
 
 		if (showText && quest.getDescription().length > 0) {
-			if (desc != TextComponent.EMPTY) {
+			if (subtitle != TextComponent.EMPTY) {
 				panelText.add(new VerticalSpaceWidget(panelText, 7));
 			}
 
@@ -248,17 +279,31 @@ public class ViewQuestPanel extends Panel {
 				if (component instanceof ImageComponent) {
 					panelText.add(new ImageComponentWidget(panelText, (ImageComponent) component));
 				} else {
-					panelText.add(new ComponentTextField(panelText).setMaxWidth(panelText.width).setSpacing(9).setText(component));
+					panelText.add(new TextField(panelText).setMaxWidth(panelText.width).setSpacing(9).setText(component));
 				}
 			}
 		}
 
 		if (showText && !quest.guidePage.isEmpty()) {
-			if (desc != TextComponent.EMPTY) {
+			if (subtitle != TextComponent.EMPTY) {
 				panelText.add(new VerticalSpaceWidget(panelText, 7));
 			}
 
 			panelText.add(new OpenInGuideButton(panelText, quest));
+		}
+
+		if (canEdit) {
+			/*
+			SimpleTextButton add = new SimpleTextButton(panelText, new TranslatableComponent("gui.add"), Icons.ADD) {
+				@Override
+				public void onClicked(MouseButton mouseButton) {
+					addDescLine();
+				}
+			};
+
+			add.setHeight(14);
+			panelText.add(add);
+			 */
 		}
 
 		if (panelText.widgets.isEmpty()) {
@@ -267,8 +312,8 @@ public class ViewQuestPanel extends Panel {
 			setHeight(Math.min(panelContent.getContentHeight(), parent.height - 10));
 		} else {
 			panelContent.add(new ColorWidget(panelContent, borderColor, null).setPosAndSize(w2, 0, 1, 16 + h + 6));
-			panelContent.add(new ColorWidget(panelContent, borderColor, null).setPosAndSize(1, 16 + h + 6, panelContent.width - 2, 1));
-			panelText.setHeight(panelText.align(new WidgetLayout.Vertical(0, 0, 1)));
+			panelContent.add(new ColorWidget(panelContent, borderColor, null).setPosAndSize(1, 16 + h + 6, w - 2, 1));
+			panelText.setHeight(panelText.align(new WidgetLayout.Vertical(0, 1, 1)));
 			setHeight(Math.min(panelContent.getContentHeight() + 20, parent.height - 10));
 		}
 
@@ -311,6 +356,32 @@ public class ViewQuestPanel extends Panel {
 		getGui().openContextMenu(contextMenu);
 	}
 
+	private void editSubtitle() {
+	}
+
+	private void editTitle() {
+	}
+
+	private void addDescLine() {
+		List<ContextMenuItem> contextMenu = new ArrayList<>();
+		contextMenu.add(new ContextMenuItem(new TextComponent("Text"), Icon.EMPTY, () -> {
+		}));
+		contextMenu.add(new ContextMenuItem(new TextComponent("Image"), Icon.EMPTY, () -> {
+		}));
+
+		getGui().openContextMenu(contextMenu);
+	}
+
+	private void editDescLine(int line) {
+		List<ContextMenuItem> contextMenu = new ArrayList<>();
+		contextMenu.add(new ContextMenuItem(new TranslatableComponent("gui.edit"), Icon.EMPTY, () -> {
+		}));
+		contextMenu.add(new ContextMenuItem(new TranslatableComponent("gui.remove"), Icon.EMPTY, () -> {
+		}));
+
+		getGui().openContextMenu(contextMenu);
+	}
+
 	@Override
 	public void draw(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
 		if (quest != null && !hidePanel) {
@@ -330,7 +401,6 @@ public class ViewQuestPanel extends Panel {
 		Color4I.DARK_GRAY.withAlpha(120).draw(matrixStack, questScreen.getX(), questScreen.getY(), questScreen.width, questScreen.height);
 		Icon background = ThemeProperties.QUEST_VIEW_BACKGROUND.get();
 		background.draw(matrixStack, x, y, w, h);
-		theme.drawString(matrixStack, title, x + w / 2F, y + 4, ThemeProperties.QUEST_VIEW_TITLE.get(), Theme.CENTERED);
 		icon.draw(matrixStack, x + 2, y + 2, 12, 12);
 		borderColor.draw(matrixStack, x + 1, y + 15, w - 2, 1);
 	}
