@@ -117,7 +117,7 @@ public final class RewardTable extends QuestObjectBase {
 				nbt1.singleLine = true;
 			}
 
-			if (reward.weight > 1) {
+			if (reward.weight != 1) {
 				nbt1.putInt("weight", reward.weight);
 			}
 
@@ -154,7 +154,7 @@ public final class RewardTable extends QuestObjectBase {
 
 			if (reward != null) {
 				reward.readData(nbt1);
-				rewards.add(new WeightedReward(reward, nbt1.getInt("weight")));
+				rewards.add(new WeightedReward(reward, nbt1.contains("weight") ? nbt1.getInt("weight") : 1));
 			}
 		}
 
