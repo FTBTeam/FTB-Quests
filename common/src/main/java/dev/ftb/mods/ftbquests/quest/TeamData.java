@@ -12,6 +12,7 @@ import dev.ftb.mods.ftbquests.net.ObjectStartedResetPacket;
 import dev.ftb.mods.ftbquests.net.ResetRewardPacket;
 import dev.ftb.mods.ftbquests.net.SyncEditingModePacket;
 import dev.ftb.mods.ftbquests.net.SyncLockPacket;
+import dev.ftb.mods.ftbquests.net.TogglePinnedResponsePacket;
 import dev.ftb.mods.ftbquests.net.UpdateTaskProgressPacket;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.reward.RewardAutoClaim;
@@ -717,6 +718,11 @@ public class TeamData {
 
 					for (ServerPlayer player : onlineMembers) {
 						FTBQuestsInventoryListener.detect(player, ItemStack.EMPTY, task.id);
+					}
+
+					if (isCompleted(task.quest)) {
+						setQuestPinned(task.quest.id, false);
+						new TogglePinnedResponsePacket(task.quest.id).sendTo(onlineMembers);
 					}
 				}
 			}

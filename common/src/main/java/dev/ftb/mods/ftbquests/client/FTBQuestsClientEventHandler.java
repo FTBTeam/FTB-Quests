@@ -17,6 +17,7 @@ import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.loot.LootCrate;
 import dev.ftb.mods.ftbquests.quest.task.ObservationTask;
+import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import me.shedaniel.architectury.event.events.GuiEvent;
 import me.shedaniel.architectury.event.events.client.ClientLifecycleEvent;
@@ -25,7 +26,9 @@ import me.shedaniel.architectury.registry.ColorHandlers;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.toasts.SystemToast;
+import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
@@ -220,17 +223,25 @@ public class FTBQuestsClientEventHandler {
 							component.append(new TextComponent(" 100%").withStyle(ChatFormatting.DARK_GREEN));
 							list.addAll(mc.font.split(component, 160));
 						} else {
-							/* FIXME
-							list.add(TextFormatting.BOLD + mc.fontRenderer.trimStringToWidth(quest.getTitle(), 160) + " " + TextFormatting.DARK_AQUA + data.getRelativeProgress(quest) + "%");
+							list.addAll(mc.font.split(FormattedText.composite(
+									mc.font.getSplitter().headByWidth(quest.getTitle(), 160, Style.EMPTY.withBold(true)),
+									new TextComponent(" ")
+											.withStyle(ChatFormatting.DARK_AQUA)
+											.append(data.getRelativeProgress(quest) + "%")
+							), 500));
 
-							for (Task task : quest.tasks)
-							{
-								if (!data.isComplete(task))
-								{
-									list.add(TextFormatting.GRAY + mc.fontRenderer.trimStringToWidth(task.getTitle(), 160) + " " + TextFormatting.GREEN + data.getTaskData(task).getProgressString() + "/" + task.getMaxProgressString());
+							for (Task task : quest.tasks) {
+								if (!data.isCompleted(task)) {
+									list.addAll(mc.font.split(FormattedText.composite(
+											mc.font.getSplitter().headByWidth(task.getTitle(), 160, Style.EMPTY.applyFormat(ChatFormatting.GRAY)),
+											new TextComponent(" ")
+													.withStyle(ChatFormatting.GREEN)
+													.append(task.formatProgress(data, data.getProgress(task)))
+													.append("/")
+													.append(task.formatMaxProgress())
+									), 500));
 								}
 							}
-							*/
 						}
 					}
 				}
