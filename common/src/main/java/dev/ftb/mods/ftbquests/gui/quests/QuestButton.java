@@ -319,6 +319,8 @@ public class QuestButton extends Button {
 			if (isCompleted) {
 				if (questScreen.file.self.hasUnclaimedRewards(Minecraft.getInstance().player.getUUID(), quest)) {
 					qicon = ThemeProperties.ALERT_ICON.get(quest);
+				} else if (questScreen.file.self.isQuestPinned(quest.id)) {
+					qicon = ThemeProperties.PIN_ICON_ON.get();
 				} else {
 					qicon = ThemeProperties.CHECK_ICON.get(quest);
 				}
@@ -329,6 +331,10 @@ public class QuestButton extends Button {
 			}
 		} else {
 			outlineColor = Color4I.GRAY;
+		}
+
+		if (qicon == Icon.EMPTY && questScreen.file.self.isQuestPinned(quest.id)) {
+			qicon = ThemeProperties.PIN_ICON_ON.get();
 		}
 
 		QuestShape shape = QuestShape.get(quest.getShape());
@@ -373,7 +379,7 @@ public class QuestButton extends Button {
 		}
 
 		if (!qicon.isEmpty()) {
-			float s = w / 2F;//(int) (treeGui.getZoom() / 2 * quest.size);
+			float s = w / 8F * 3F;//(int) (treeGui.getZoom() / 2 * quest.size);
 			matrixStack.pushPose();
 			matrixStack.translate(x + w - s, y, 200);
 			matrixStack.scale(s, s, 1F);
