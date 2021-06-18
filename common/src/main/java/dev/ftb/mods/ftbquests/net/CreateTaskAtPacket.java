@@ -2,7 +2,6 @@ package dev.ftb.mods.ftbquests.net;
 
 import dev.ftb.mods.ftblibrary.net.snm.BaseC2SPacket;
 import dev.ftb.mods.ftblibrary.net.snm.PacketID;
-import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.quest.Chapter;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
@@ -26,7 +25,7 @@ public class CreateTaskAtPacket extends BaseC2SPacket {
 		chapter = buffer.readLong();
 		x = buffer.readDouble();
 		y = buffer.readDouble();
-		type = FTBQuests.PROXY.getClientQuestFile().taskTypeIds.get(buffer.readVarInt());
+		type = ServerQuestFile.INSTANCE.taskTypeIds.get(buffer.readVarInt());
 		nbt = buffer.readNbt();
 	}
 
