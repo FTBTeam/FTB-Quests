@@ -277,7 +277,20 @@ public class ViewQuestPanel extends Panel {
 
 			for (Component component : quest.getDescription()) {
 				if (component instanceof ImageComponent) {
-					panelText.add(new ImageComponentWidget(panelText, (ImageComponent) component));
+					ImageComponentWidget c = new ImageComponentWidget(panelText, (ImageComponent) component);
+
+					if (c.component.fit) {
+						double scale = panelText.width / (double) c.width;
+						c.setSize((int) (c.width * scale), (int) (c.height * scale));
+					} else if (c.component.align == 1) {
+						c.setX((panelText.width - c.width) / 2);
+					} else if (c.component.align == 2) {
+						c.setX(panelText.width - c.width);
+					} else {
+						c.setX(0);
+					}
+
+					panelText.add(c);
 				} else {
 					panelText.add(new TextField(panelText).setMaxWidth(panelText.width).setSpacing(9).setText(component));
 				}
