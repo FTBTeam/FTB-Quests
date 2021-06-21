@@ -36,7 +36,8 @@ public class TogglePinnedPacket extends BaseC2SPacket {
 	public void handle(NetworkManager.PacketContext context) {
 		ServerPlayer player = (ServerPlayer) context.getPlayer();
 		TeamData data = ServerQuestFile.INSTANCE.getData(player);
-		data.setQuestPinned(id, !data.isQuestPinned(id));
-		new TogglePinnedResponsePacket(id).sendTo(player);
+		boolean p = !data.isQuestPinned(id);
+		data.setQuestPinned(id, p);
+		new TogglePinnedResponsePacket(id, p).sendTo(player);
 	}
 }

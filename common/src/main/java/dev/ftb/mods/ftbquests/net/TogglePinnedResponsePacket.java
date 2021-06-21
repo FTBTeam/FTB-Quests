@@ -11,13 +11,16 @@ import net.minecraft.network.FriendlyByteBuf;
  */
 public class TogglePinnedResponsePacket extends BaseS2CPacket {
 	private final long id;
+	private final boolean pinned;
 
 	TogglePinnedResponsePacket(FriendlyByteBuf buffer) {
 		id = buffer.readLong();
+		pinned = buffer.readBoolean();
 	}
 
-	public TogglePinnedResponsePacket(long i) {
+	public TogglePinnedResponsePacket(long i, boolean p) {
 		id = i;
+		pinned = p;
 	}
 
 	@Override
@@ -28,10 +31,11 @@ public class TogglePinnedResponsePacket extends BaseS2CPacket {
 	@Override
 	public void write(FriendlyByteBuf buffer) {
 		buffer.writeLong(id);
+		buffer.writeBoolean(pinned);
 	}
 
 	@Override
 	public void handle(NetworkManager.PacketContext context) {
-		FTBQuests.NET_PROXY.togglePinned(id);
+		FTBQuests.NET_PROXY.togglePinned(id, pinned);
 	}
 }

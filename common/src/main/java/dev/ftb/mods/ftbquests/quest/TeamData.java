@@ -722,7 +722,7 @@ public class TeamData {
 
 					if (isCompleted(task.quest)) {
 						setQuestPinned(task.quest.id, false);
-						new TogglePinnedResponsePacket(task.quest.id).sendTo(onlineMembers);
+						new TogglePinnedResponsePacket(task.quest.id, false).sendTo(onlineMembers);
 					}
 				}
 			}
