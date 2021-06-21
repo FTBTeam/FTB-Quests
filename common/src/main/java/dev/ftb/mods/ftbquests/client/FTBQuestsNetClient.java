@@ -208,9 +208,9 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon {
 	}
 
 	@Override
-	public void togglePinned(long id) {
+	public void togglePinned(long id, boolean pinned) {
 		TeamData data = FTBQuests.PROXY.getClientPlayerData();
-		data.setQuestPinned(id, !data.isQuestPinned(id));
+		data.setQuestPinned(id, pinned);
 
 		ClientQuestFile.INSTANCE.questScreen.otherButtonsBottomPanel.refreshWidgets();
 

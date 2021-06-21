@@ -48,7 +48,7 @@ public class FTBQuestsNetCommon {
 	public void syncEditingMode(UUID teamId, boolean editingMode) {
 	}
 
-	public void togglePinned(long id) {
+	public void togglePinned(long id, boolean pinned) {
 	}
 
 	public void updateTeamData(UUID teamId, String name) {
