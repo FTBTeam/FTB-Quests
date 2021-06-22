@@ -1,14 +1,21 @@
 package dev.ftb.mods.ftbquests.gui.quests;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import dev.ftb.mods.ftblibrary.config.ConfigGroup;
+import dev.ftb.mods.ftblibrary.config.StringConfig;
+import dev.ftb.mods.ftblibrary.config.ui.EditConfigFromStringScreen;
+import dev.ftb.mods.ftblibrary.config.ui.EditConfigScreen;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
+import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.ui.BlankPanel;
 import dev.ftb.mods.ftblibrary.ui.Button;
 import dev.ftb.mods.ftblibrary.ui.ColorWidget;
 import dev.ftb.mods.ftblibrary.ui.ContextMenuItem;
+import dev.ftb.mods.ftblibrary.ui.CursorType;
 import dev.ftb.mods.ftblibrary.ui.Panel;
 import dev.ftb.mods.ftblibrary.ui.SimpleButton;
+import dev.ftb.mods.ftblibrary.ui.SimpleTextButton;
 import dev.ftb.mods.ftblibrary.ui.TextField;
 import dev.ftb.mods.ftblibrary.ui.Theme;
 import dev.ftb.mods.ftblibrary.ui.VerticalSpaceWidget;
@@ -19,6 +26,8 @@ import dev.ftb.mods.ftblibrary.ui.misc.CompactGridLayout;
 import dev.ftb.mods.ftblibrary.util.ImageComponent;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.gui.ImageComponentWidget;
+import dev.ftb.mods.ftbquests.gui.ImageConfig;
+import dev.ftb.mods.ftbquests.net.EditObjectPacket;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestObject;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
@@ -34,6 +43,7 @@ import net.minecraft.network.chat.TextColor;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -85,16 +95,36 @@ public class ViewQuestPanel extends Panel {
 		TextField titleField = new TextField(this) {
 			@Override
 			public boolean mousePressed(MouseButton button) {
-				if (canEdit && button.isRight()) {
+				if (isMouseOver() && canEdit && button.isRight()) {
 					editTitle();
 					return true;
 				}
 
 				return super.mousePressed(button);
 			}
+
+			@Override
+			public boolean mouseDoubleClicked(MouseButton button) {
+				if (isMouseOver() && canEdit) {
+					editTitle();
+					return true;
+				}
+
+				return false;
+			}
+
+			@Override
+			@Nullable
+			public CursorType getCursor() {
+				return canEdit ? CursorType.IBEAM : null;
+			}
 		}.addFlags(Theme.CENTERED).setMinWidth(150).setMaxWidth(500).setSpacing(9).setText(new TextComponent("").append(quest.getTitle()).withStyle(Style.EMPTY.withColor(TextColor.fromRgb(ThemeProperties.QUEST_VIEW_TITLE.get().rgb()))));
 
 		int w = Math.max(200, titleField.width + 54);
+
+		if (quest.minWidth > 0) {
+			w = Math.max(quest.minWidth, w);
+		}
 
 		titleField.setPosAndSize(27, 4, w - 54, 8);
 		add(titleField);
@@ -153,7 +183,6 @@ public class ViewQuestPanel extends Panel {
 
 		ww = Mth.clamp(ww, 70, 140);
 		w = Math.max(w, ww * 2 + 10);
-		w = Math.max(w, quest.minWidth);
 
 		if (ThemeProperties.FULL_SCREEN_QUEST.get(quest) == 1) {
 			w = questScreen.width - 1;
@@ -256,12 +285,28 @@ public class ViewQuestPanel extends Panel {
 			panelText.add(new TextField(panelText) {
 				@Override
 				public boolean mousePressed(MouseButton button) {
-					if (canEdit && button.isRight()) {
+					if (isMouseOver() && canEdit && button.isRight()) {
 						editSubtitle();
 						return true;
 					}
 
 					return super.mousePressed(button);
+				}
+
+				@Override
+				public boolean mouseDoubleClicked(MouseButton button) {
+					if (isMouseOver() && canEdit) {
+						editSubtitle();
+						return true;
+					}
+
+					return false;
+				}
+
+				@Override
+				@Nullable
+				public CursorType getCursor() {
+					return canEdit ? CursorType.IBEAM : null;
 				}
 			}.addFlags(Theme.CENTERED).setMinWidth(panelText.width).setMaxWidth(panelText.width).setSpacing(9).setText(new TextComponent("").append(subtitle).withStyle(ChatFormatting.ITALIC, ChatFormatting.GRAY)));
 		}
@@ -273,11 +318,11 @@ public class ViewQuestPanel extends Panel {
 				panelText.add(new VerticalSpaceWidget(panelText, 7));
 			}
 
-			// panelText.add(new ComponentTextField(panelText).setMaxWidth(panelText.width).setSpacing(9).setText(quest.getJoinedDescription()));
+			for (int i = 0; i < quest.getDescription().length; i++) {
+				Component component = quest.getDescription()[i];
 
-			for (Component component : quest.getDescription()) {
 				if (component instanceof ImageComponent) {
-					ImageComponentWidget c = new ImageComponentWidget(panelText, (ImageComponent) component);
+					ImageComponentWidget c = new ImageComponentWidget(this, panelText, (ImageComponent) component, i);
 
 					if (c.component.fit) {
 						double scale = panelText.width / (double) c.width;
@@ -292,7 +337,38 @@ public class ViewQuestPanel extends Panel {
 
 					panelText.add(c);
 				} else {
-					panelText.add(new TextField(panelText).setMaxWidth(panelText.width).setSpacing(9).setText(component));
+					int index = i;
+
+					TextField field = new TextField(panelText) {
+						@Override
+						public boolean mousePressed(MouseButton button) {
+							if (isMouseOver() && canEdit && button.isRight()) {
+								editDescLine(index, true, null);
+								return true;
+							}
+
+							return super.mousePressed(button);
+						}
+
+						@Override
+						public boolean mouseDoubleClicked(MouseButton button) {
+							if (isMouseOver() && canEdit) {
+								editDescLine(index, false, null);
+								return true;
+							}
+
+							return false;
+						}
+
+						@Override
+						@Nullable
+						public CursorType getCursor() {
+							return canEdit ? CursorType.IBEAM : null;
+						}
+					}.setMaxWidth(panelText.width).setSpacing(9).setText(component);
+
+					field.setWidth(panelText.width);
+					panelText.add(field);
 				}
 			}
 		}
@@ -306,17 +382,18 @@ public class ViewQuestPanel extends Panel {
 		}
 
 		if (canEdit) {
-			/*
-			SimpleTextButton add = new SimpleTextButton(panelText, new TranslatableComponent("gui.add"), Icons.ADD) {
+			panelText.add(new VerticalSpaceWidget(panelText, 3));
+
+			SimpleTextButton add = new SimpleTextButton(panelText, new TranslatableComponent("gui.add"), ThemeProperties.ADD_ICON.get()) {
 				@Override
 				public void onClicked(MouseButton mouseButton) {
 					addDescLine();
 				}
 			};
 
+			add.setX((panelText.width - add.width) / 2);
 			add.setHeight(14);
 			panelText.add(add);
-			 */
 		}
 
 		if (panelText.widgets.isEmpty()) {
@@ -326,7 +403,7 @@ public class ViewQuestPanel extends Panel {
 		} else {
 			panelContent.add(new ColorWidget(panelContent, borderColor, null).setPosAndSize(w2, 0, 1, 16 + h + 6));
 			panelContent.add(new ColorWidget(panelContent, borderColor, null).setPosAndSize(1, 16 + h + 6, w - 2, 1));
-			panelText.setHeight(panelText.align(new WidgetLayout.Vertical(0, 1, 1)));
+			panelText.setHeight(panelText.align(new WidgetLayout.Vertical(0, 1, 2)));
 			setHeight(Math.min(panelContent.getContentHeight() + 20, parent.height - 10));
 		}
 
@@ -369,30 +446,104 @@ public class ViewQuestPanel extends Panel {
 		getGui().openContextMenu(contextMenu);
 	}
 
-	private void editSubtitle() {
+	private void editTitle() {
+		StringConfig c = new StringConfig(null);
+
+		EditConfigFromStringScreen.open(c, quest.title, "", accepted -> {
+			if (accepted) {
+				quest.title = c.value;
+				new EditObjectPacket(quest).sendToServer();
+			}
+
+			openGui();
+		});
 	}
 
-	private void editTitle() {
+	private void editSubtitle() {
+		StringConfig c = new StringConfig(null);
+
+		EditConfigFromStringScreen.open(c, quest.subtitle, "", accepted -> {
+			if (accepted) {
+				quest.subtitle = c.value;
+				new EditObjectPacket(quest).sendToServer();
+			}
+
+			openGui();
+		});
 	}
 
 	private void addDescLine() {
 		List<ContextMenuItem> contextMenu = new ArrayList<>();
-		contextMenu.add(new ContextMenuItem(new TextComponent("Text"), Icon.EMPTY, () -> {
-		}));
-		contextMenu.add(new ContextMenuItem(new TextComponent("Image"), Icon.EMPTY, () -> {
-		}));
-
+		contextMenu.add(new ContextMenuItem(new TextComponent("Text"), Icons.NOTES, () -> editDescLine0(-1, null)));
+		contextMenu.add(new ContextMenuItem(new TextComponent("Image"), Icons.ART, () -> editDescLine0(-1, new ImageComponent())));
 		getGui().openContextMenu(contextMenu);
 	}
 
-	private void editDescLine(int line) {
-		List<ContextMenuItem> contextMenu = new ArrayList<>();
-		contextMenu.add(new ContextMenuItem(new TranslatableComponent("gui.edit"), Icon.EMPTY, () -> {
-		}));
-		contextMenu.add(new ContextMenuItem(new TranslatableComponent("gui.remove"), Icon.EMPTY, () -> {
-		}));
+	private void editDescLine0(int line, @Nullable Object type) {
+		if (type instanceof ImageComponent) {
+			editImage(line, (ImageComponent) type);
+			return;
+		}
 
-		getGui().openContextMenu(contextMenu);
+		StringConfig c = new StringConfig(null);
+
+		EditConfigFromStringScreen.open(c, line == -1 ? "" : quest.description.get(line), "", accepted -> {
+			if (accepted) {
+				if (line == -1) {
+					quest.description.add(c.value);
+				} else {
+					quest.description.set(line, c.value);
+				}
+
+				new EditObjectPacket(quest).sendToServer();
+			}
+
+			openGui();
+		});
+	}
+
+	private void editImage(int line, ImageComponent component) {
+		ConfigGroup group = new ConfigGroup(FTBQuests.MOD_ID);
+		//task.getConfig(task.createSubGroup(group));
+
+		group.add("image", new ImageConfig(), component.image.toString(), v -> component.image = Icon.getIcon(v), "");
+		group.addInt("width", component.width, v -> component.width = v, 0, 1000, 100);
+		group.addInt("height", component.height, v -> component.height = v, 0, 1000, 100);
+		group.addInt("align", component.align, v -> component.align = v, 0, 2, 1);
+		group.addBool("fit", component.fit, v -> component.fit = v, false);
+
+		group.savedCallback = accepted -> {
+			openGui();
+			if (accepted) {
+				if (line == -1) {
+					quest.description.add(component.toString());
+				} else {
+					quest.description.set(line, component.toString());
+				}
+				new EditObjectPacket(quest).sendToServer();
+			}
+		};
+
+		new EditConfigScreen(group).openGui();
+	}
+
+	public void editDescLine(int line, boolean context, @Nullable Object type) {
+		if (context) {
+			List<ContextMenuItem> contextMenu = new ArrayList<>();
+			//contextMenu.add(new ContextMenuItem(new TranslatableComponent("gui.move"), ThemeProperties.MOVE_UP_ICON.get(), () -> {}).setEnabled(() -> chapter.getIndex() > 0));
+			//contextMenu.add(new ContextMenuItem(new TranslatableComponent("gui.move"), ThemeProperties.MOVE_DOWN_ICON.get(), () -> {}).setEnabled(() -> chapter.getIndex() < chapter.group.chapters.size() - 1));
+
+			contextMenu.add(new ContextMenuItem(new TranslatableComponent("selectServer.edit"), ThemeProperties.EDIT_ICON.get(), () -> editDescLine0(line, type)));
+
+			contextMenu.add(new ContextMenuItem(new TranslatableComponent("selectServer.delete"), ThemeProperties.DELETE_ICON.get(), () -> {
+				quest.description.remove(line);
+				new EditObjectPacket(quest).sendToServer();
+			}));
+
+			getGui().openContextMenu(contextMenu);
+		} else {
+			editDescLine0(line, type);
+		}
 	}
 
 	@Override
