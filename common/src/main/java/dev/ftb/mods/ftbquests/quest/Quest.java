@@ -29,7 +29,6 @@ import dev.ftb.mods.ftbquests.util.ProgressChange;
 import me.shedaniel.architectury.utils.NbtType;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
@@ -583,9 +582,7 @@ public final class Quest extends QuestObject implements Movable {
 			return cachedSubtitle;
 		}
 
-		String key = String.format("quests.%s.subtitle", getCodeString());
-		String s = subtitle.isEmpty() ? I18n.exists(key) ? I18n.get(key) : "" : subtitle;
-		cachedSubtitle = ClientTextComponentUtils.parse(s);
+		cachedSubtitle = ClientTextComponentUtils.parse(subtitle);
 
 		return cachedSubtitle;
 	}
@@ -596,13 +593,10 @@ public final class Quest extends QuestObject implements Movable {
 			return cachedDescription;
 		}
 
-		String key = String.format("quests.%s.description", getCodeString());
-		String[] desc = description.isEmpty() ? I18n.exists(key) ? I18n.get(key).split("\n") : new String[0] : description.toArray(new String[0]);
-
-		cachedDescription = new Component[desc.length];
+		cachedDescription = new Component[description.size()];
 
 		for (int i = 0; i < cachedDescription.length; i++) {
-			cachedDescription[i] = ClientTextComponentUtils.parse(desc[i]);
+			cachedDescription[i] = ClientTextComponentUtils.parse(description.get(i));
 		}
 
 		return cachedDescription;

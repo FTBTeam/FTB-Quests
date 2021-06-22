@@ -19,7 +19,6 @@ import dev.ftb.mods.ftbquests.util.ProgressChange;
 import me.shedaniel.architectury.utils.NbtType;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
@@ -223,10 +222,24 @@ public abstract class QuestObjectBase {
 		}
 	}
 
+	protected boolean hasTitleConfig() {
+		return true;
+	}
+
+	protected boolean hasIconConfig() {
+		return true;
+	}
+
 	@Environment(EnvType.CLIENT)
 	public void getConfig(ConfigGroup config) {
-		config.addString("title", title, v -> title = v, "").setNameKey("ftbquests.title").setOrder(-127);
-		config.add("icon", new ConfigIconItemStack(), icon, v -> icon = v, ItemStack.EMPTY).setNameKey("ftbquests.icon").setOrder(-126);
+		if (hasTitleConfig()) {
+			config.addString("title", title, v -> title = v, "").setNameKey("ftbquests.title").setOrder(-127);
+		}
+
+		if (hasIconConfig()) {
+			config.add("icon", new ConfigIconItemStack(), icon, v -> icon = v, ItemStack.EMPTY).setNameKey("ftbquests.icon").setOrder(-126);
+		}
+
 		config.addList("tags", tags, new StringConfig(TAG_PATTERN), "").setNameKey("ftbquests.tags").setOrder(-125);
 	}
 
@@ -242,11 +255,8 @@ public abstract class QuestObjectBase {
 			return cachedTitle.copy();
 		}
 
-		String key = String.format("quests.%s.title", getCodeString());
-		String s = title.isEmpty() ? I18n.exists(key) ? I18n.get(key) : "" : title;
-
-		if (!s.isEmpty()) {
-			cachedTitle = ClientTextComponentUtils.parse(s);
+		if (!title.isEmpty()) {
+			cachedTitle = ClientTextComponentUtils.parse(title);
 		} else {
 			cachedTitle = getAltTitle();
 		}
