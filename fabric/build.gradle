@@ -25,7 +25,7 @@ dependencies {
 
 	modImplementation "dev.ftb.mods:ftb-library-fabric:${rootProject.ftb_library_version}"
 	modImplementation "dev.ftb.mods:ftb-teams-fabric:${rootProject.ftb_teams_version}"
-	modImplementation "curse.maven:item-filter-438500:${rootProject.itemfilters_version_fabric}"
+	modImplementation "dev.latvian.mods:item-filters-fabric:${rootProject.itemfilters_version}"
 	modImplementation "dev.latvian.mods:kubejs-fabric:${rootProject.kubejs_version}"
 	modImplementation "dev.latvian.mods:rhino:${rootProject.rhino_version}"
 
