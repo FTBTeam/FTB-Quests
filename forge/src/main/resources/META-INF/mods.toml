@@ -29,27 +29,27 @@ side = "BOTH"
 [[dependencies.ftbquests]]
 modId = "architectury"
 mandatory = true
-versionRange = "[1.10,)"
+versionRange = "[1.15.13,)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.ftbquests]]
 modId = "ftblibrary"
 mandatory = true
-versionRange = "[1,)"
+versionRange = "[1605.3.1-build.35,)"
 ordering = "AFTER"
 side = "BOTH"
 
 [[dependencies.ftbquests]]
 modId = "ftbteams"
 mandatory = true
-versionRange = "[1605.2.0-build.23,)"
+versionRange = "[1605.2.1-build.12,)"
 ordering = "AFTER"
 side = "BOTH"
 
 [[dependencies.ftbquests]]
 modId = "itemfilters"
 mandatory = true
-versionRange = "[1605.2.4-build.29,)"
+versionRange = "[1605.2.5-build.4,)"
 ordering = "AFTER"
 side = "BOTH"

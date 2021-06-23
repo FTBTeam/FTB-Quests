@@ -3,13 +3,13 @@
 	"id": "ftbquests",
 	"version": "${version}",
 	"name": "FTB Quests",
-	"description": "FTB Teams adds ability to create your own teams that can be used for quests etc.",
+	"description": "Lets you easily create and play with quests",
 	"authors": [
 		"LatvianModder"
 	],
 	"contact": {
-		"sources": "https://github.com/FTBTeam/FTB-Teams",
-		"issues": "https://github.com/FTBTeam/FTB-Teams/issues"
+		"sources": "https://github.com/FTBTeam/FTB-Quests",
+		"issues": "https://github.com/FTBTeam/FTB-Quests/issues"
 	},
 	"license": "All Rights Reserved",
 	"entrypoints": {
@@ -22,9 +22,9 @@
 	"depends": {
 		"fabric": "*",
 		"minecraft": "~1.16.4",
-		"architectury": ">=1.10",
-		"ftblibrary": "*",
-		"ftbteams": ">=1605.2.0-build.23",
-		"itemfilters": ">=1605.2.4-build.29"
+		"architectury": ">=1.15.13",
+		"ftblibrary": ">=1605.3.1-build.35",
+		"ftbteams": ">=1605.2.1-build.12",
+		"itemfilters": ">=1605.2.5-build.4"
 	}
 }
