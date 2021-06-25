@@ -210,6 +210,7 @@ public class ServerQuestFile extends QuestFile {
 			TeamData newTeamData = getData(event.getTeam());
 
 			new TeamDataChangedPacket(new TeamDataUpdate(oldTeamData), new TeamDataUpdate(newTeamData)).sendToAll(server);
+			new SyncTeamDataPacket(newTeamData, true).sendTo(event.getPlayer());
 		}
 	}
 }
