@@ -23,7 +23,7 @@ dependencies {
 	modImplementation "curse.maven:jei-238222:${jei_file}"
 	modImplementation "dev.ftb.mods:ftb-library-forge:${rootProject.ftb_library_version}"
 	modImplementation "dev.ftb.mods:ftb-teams-forge:${rootProject.ftb_teams_version}"
-	modImplementation "curse.maven:item-filter-309674:${rootProject.itemfilters_version_forge}"
+	modImplementation "dev.latvian.mods:item-filters-forge:${rootProject.itemfilters_version}"
 	modImplementation "dev.latvian.mods:kubejs-forge:${rootProject.kubejs_version}"
 	modImplementation "dev.latvian.mods:rhino:${rootProject.rhino_version}"
 	modImplementation "curse.maven:bookshelf-228525:${bookshelf_file}"
