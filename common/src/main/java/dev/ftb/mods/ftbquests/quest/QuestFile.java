@@ -4,8 +4,8 @@ import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.ItemStackConfig;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.math.MathUtils;
-import dev.ftb.mods.ftblibrary.snbt.OrderedCompoundTag;
 import dev.ftb.mods.ftblibrary.snbt.SNBT;
+import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.events.ClearFileCacheEvent;
 import dev.ftb.mods.ftbquests.events.CustomTaskEvent;
@@ -418,7 +418,7 @@ public abstract class QuestFile extends QuestObject {
 		nbt.putInt("emergency_items_cooldown", emergencyItemsCooldown);
 		nbt.putBoolean("drop_loot_crates", dropLootCrates);
 
-		CompoundTag lootCrateNoDropTag = new OrderedCompoundTag();
+		SNBTCompoundTag lootCrateNoDropTag = new SNBTCompoundTag();
 		lootCrateNoDrop.writeData(lootCrateNoDropTag);
 		nbt.put("loot_crate_no_drop", lootCrateNoDropTag);
 		nbt.putBoolean("disable_gui", disableGui);
@@ -466,7 +466,7 @@ public abstract class QuestFile extends QuestObject {
 	}
 
 	public final void writeDataFull(Path folder) {
-		CompoundTag fileNBT = new OrderedCompoundTag();
+		SNBTCompoundTag fileNBT = new SNBTCompoundTag();
 		fileNBT.putInt("version", VERSION);
 		writeData(fileNBT);
 		SNBT.write(folder.resolve("data.snbt"), fileNBT);
@@ -474,7 +474,7 @@ public abstract class QuestFile extends QuestObject {
 		for (ChapterGroup group : chapterGroups) {
 			for (int ci = 0; ci < group.chapters.size(); ci++) {
 				Chapter chapter = group.chapters.get(ci);
-				CompoundTag chapterNBT = new OrderedCompoundTag();
+				SNBTCompoundTag chapterNBT = new SNBTCompoundTag();
 				chapterNBT.putString("id", chapter.getCodeString());
 				chapterNBT.putString("group", group.isDefaultGroup() ? "" : group.getCodeString());
 				chapterNBT.putInt("order_index", ci);
@@ -487,7 +487,7 @@ public abstract class QuestFile extends QuestObject {
 						continue;
 					}
 
-					CompoundTag questNBT = new OrderedCompoundTag();
+					SNBTCompoundTag questNBT = new SNBTCompoundTag();
 					quest.writeData(questNBT);
 					questNBT.putString("id", quest.getCodeString());
 
@@ -496,7 +496,7 @@ public abstract class QuestFile extends QuestObject {
 
 						for (Task task : quest.tasks) {
 							TaskType type = task.getType();
-							CompoundTag nbt3 = new OrderedCompoundTag();
+							SNBTCompoundTag nbt3 = new SNBTCompoundTag();
 							nbt3.putString("id", task.getCodeString());
 							nbt3.putString("type", type.getTypeForNBT());
 							task.writeData(nbt3);
@@ -513,7 +513,7 @@ public abstract class QuestFile extends QuestObject {
 
 						for (Reward reward : quest.rewards) {
 							RewardType type = reward.getType();
-							CompoundTag nbt3 = new OrderedCompoundTag();
+							SNBTCompoundTag nbt3 = new SNBTCompoundTag();
 							nbt3.putString("id", reward.getCodeString());
 							nbt3.putString("type", type.getTypeForNBT());
 							reward.writeData(nbt3);
@@ -535,7 +535,7 @@ public abstract class QuestFile extends QuestObject {
 
 		for (int ri = 0; ri < rewardTables.size(); ri++) {
 			RewardTable table = rewardTables.get(ri);
-			CompoundTag tableNBT = new OrderedCompoundTag();
+			SNBTCompoundTag tableNBT = new SNBTCompoundTag();
 			tableNBT.putString("id", table.getCodeString());
 			tableNBT.putInt("order_index", ri);
 			table.writeData(tableNBT);
@@ -546,15 +546,15 @@ public abstract class QuestFile extends QuestObject {
 
 		for (ChapterGroup group : chapterGroups) {
 			if (!group.isDefaultGroup()) {
-				OrderedCompoundTag groupTag = new OrderedCompoundTag();
-				groupTag.singleLine = true;
+				SNBTCompoundTag groupTag = new SNBTCompoundTag();
+				groupTag.singleLine();
 				groupTag.putString("id", group.getCodeString());
 				group.writeData(groupTag);
 				chapterGroupTag.add(groupTag);
 			}
 		}
 
-		CompoundTag groupNBT = new OrderedCompoundTag();
+		SNBTCompoundTag groupNBT = new SNBTCompoundTag();
 		groupNBT.put("chapter_groups", chapterGroupTag);
 		SNBT.write(folder.resolve("chapter_groups.snbt"), groupNBT);
 	}

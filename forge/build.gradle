@@ -100,7 +100,6 @@ if (ENV.CURSEFORGE_KEY) {
 				requiredDependency 'item-filters-forge'
 				optionalDependency 'kubejs-forge'
 				optionalDependency 'jei'
-				optionalDependency 'game-stages'
 			}
 			changelog = getGitChangelog
 			changelogType = 'markdown'

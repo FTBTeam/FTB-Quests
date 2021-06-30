@@ -2,6 +2,7 @@ package dev.ftb.mods.ftbquests.quest;
 
 import com.mojang.util.UUIDTypeAdapter;
 import dev.ftb.mods.ftblibrary.snbt.SNBT;
+import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.net.CreateOtherTeamDataPacket;
 import dev.ftb.mods.ftbquests.net.DeleteObjectResponsePacket;
@@ -21,7 +22,6 @@ import dev.ftb.mods.ftbteams.event.TeamCreatedEvent;
 import me.shedaniel.architectury.hooks.LevelResourceHooks;
 import me.shedaniel.architectury.platform.Platform;
 import me.shedaniel.architectury.utils.Env;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.storage.LevelResource;
@@ -78,7 +78,7 @@ public class ServerQuestFile extends QuestFile {
 		if (Files.exists(path)) {
 			try {
 				Files.list(path).filter(p -> p.getFileName().toString().contains("-")).forEach(path1 -> {
-					CompoundTag nbt = SNBT.read(path1);
+					SNBTCompoundTag nbt = SNBT.read(path1);
 
 					if (nbt != null) {
 						try {
