@@ -1,7 +1,7 @@
 package dev.ftb.mods.ftbquests.quest;
 
 import com.mojang.util.UUIDTypeAdapter;
-import dev.ftb.mods.ftblibrary.snbt.OrderedCompoundTag;
+import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
 import dev.ftb.mods.ftbquests.net.ClaimRewardResponsePacket;
@@ -325,8 +325,8 @@ public class TeamData {
 		unclaimedRewardsCache = null;
 	}
 
-	public CompoundTag serializeNBT() {
-		CompoundTag nbt = new OrderedCompoundTag();
+	public SNBTCompoundTag serializeNBT() {
+		SNBTCompoundTag nbt = new SNBTCompoundTag();
 		nbt.putInt("version", VERSION);
 		nbt.putString("uuid", UUIDTypeAdapter.fromUUID(uuid));
 		nbt.putString("name", name);
@@ -335,7 +335,7 @@ public class TeamData {
 		nbt.putLong("money", money);
 		nbt.putBoolean("auto_pin", autoPin);
 
-		CompoundTag taskProgressNBT = new OrderedCompoundTag();
+		SNBTCompoundTag taskProgressNBT = new SNBTCompoundTag();
 
 		for (Long2LongMap.Entry entry : taskProgress.long2LongEntrySet()) {
 			if (entry.getLongValue() <= Integer.MAX_VALUE) {
@@ -347,7 +347,7 @@ public class TeamData {
 
 		nbt.put("task_progress", taskProgressNBT);
 
-		CompoundTag startedNBT = new OrderedCompoundTag();
+		SNBTCompoundTag startedNBT = new SNBTCompoundTag();
 
 		for (Long2LongMap.Entry entry : started.long2LongEntrySet().stream().sorted(LONG2LONG_COMPARATOR).collect(Collectors.toList())) {
 			startedNBT.putLong(QuestObjectBase.getCodeString(entry.getLongKey()), entry.getLongValue());
@@ -355,7 +355,7 @@ public class TeamData {
 
 		nbt.put("started", startedNBT);
 
-		CompoundTag completedNBT = new OrderedCompoundTag();
+		SNBTCompoundTag completedNBT = new SNBTCompoundTag();
 
 		for (Long2LongMap.Entry entry : completed.long2LongEntrySet().stream().sorted(LONG2LONG_COMPARATOR).collect(Collectors.toList())) {
 			completedNBT.putLong(QuestObjectBase.getCodeString(entry.getLongKey()), entry.getLongValue());
@@ -363,7 +363,7 @@ public class TeamData {
 
 		nbt.put("completed", completedNBT);
 
-		CompoundTag claimedRewardsNBT = new OrderedCompoundTag();
+		SNBTCompoundTag claimedRewardsNBT = new SNBTCompoundTag();
 
 		for (Object2LongMap.Entry<QuestKey> entry : claimedRewards.object2LongEntrySet().stream().sorted(OBJECT2LONG_COMPARATOR).collect(Collectors.toList())) {
 			claimedRewardsNBT.putLong(entry.getKey().toString(), entry.getLongValue());
@@ -384,7 +384,7 @@ public class TeamData {
 		return nbt;
 	}
 
-	public void deserializeNBT(CompoundTag nbt) {
+	public void deserializeNBT(SNBTCompoundTag nbt) {
 		int fileVersion = nbt.getInt("version");
 
 		if (fileVersion != VERSION) {

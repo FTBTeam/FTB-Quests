@@ -2,7 +2,7 @@ package dev.ftb.mods.ftbquests.quest.reward;
 
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.icon.Icon;
-import dev.ftb.mods.ftblibrary.snbt.OrderedCompoundTag;
+import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestFile;
@@ -48,7 +48,7 @@ public class RandomReward extends Reward {
 			nbt.putLong("table_id", table.id);
 
 			if (table.id == -1L) {
-				OrderedCompoundTag tag = new OrderedCompoundTag();
+				SNBTCompoundTag tag = new SNBTCompoundTag();
 				table.writeData(tag);
 				nbt.put("table_data", tag);
 			}

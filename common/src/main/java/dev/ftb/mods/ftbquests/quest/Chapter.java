@@ -4,7 +4,7 @@ import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.StringConfig;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.IconAnimation;
-import dev.ftb.mods.ftblibrary.snbt.OrderedCompoundTag;
+import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
 import dev.ftb.mods.ftbquests.events.ObjectCompletedEvent;
 import dev.ftb.mods.ftbquests.events.ObjectStartedEvent;
 import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
@@ -92,7 +92,7 @@ public final class Chapter extends QuestObject {
 			ListTag list = new ListTag();
 
 			for (ChapterImage image : images) {
-				CompoundTag nbt1 = new OrderedCompoundTag();
+				SNBTCompoundTag nbt1 = new SNBTCompoundTag();
 				image.writeData(nbt1);
 				list.add(nbt1);
 			}

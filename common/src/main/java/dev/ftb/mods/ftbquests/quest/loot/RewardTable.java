@@ -6,7 +6,7 @@ import dev.ftb.mods.ftblibrary.icon.IconAnimation;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;
 import dev.ftb.mods.ftblibrary.math.Bits;
-import dev.ftb.mods.ftblibrary.snbt.OrderedCompoundTag;
+import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
 import dev.ftb.mods.ftblibrary.util.ClientUtils;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.gui.EditRewardTableScreen;
@@ -108,13 +108,13 @@ public final class RewardTable extends QuestObjectBase {
 		ListTag list = new ListTag();
 
 		for (WeightedReward reward : rewards) {
-			OrderedCompoundTag nbt1 = new OrderedCompoundTag();
+			SNBTCompoundTag nbt1 = new SNBTCompoundTag();
 			reward.reward.writeData(nbt1);
 
 			if (reward.reward.getType() != RewardTypes.ITEM) {
 				nbt1.putString("type", reward.reward.getType().getTypeForNBT());
 			} else if (nbt1.getTagType("item") == NbtType.STRING) {
-				nbt1.singleLine = true;
+				nbt1.singleLine();
 			}
 
 			if (reward.weight != 1) {
