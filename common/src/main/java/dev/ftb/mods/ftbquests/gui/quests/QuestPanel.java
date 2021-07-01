@@ -219,7 +219,7 @@ public class QuestPanel extends Panel {
 
 			Quest wquest = ((QuestButton) widget).quest;
 
-			if (wquest.hideDependencyLines.get(false)) {
+			if (wquest.getHideDependencyLines()) {
 				continue;
 			}
 
@@ -276,7 +276,7 @@ public class QuestPanel extends Panel {
 
 			Quest wquest = ((QuestButton) widget).quest;
 
-			if (wquest.hideDependencyLines.get(false)) {
+			if (wquest.getHideDependencyLines()) {
 				continue;
 			}
 

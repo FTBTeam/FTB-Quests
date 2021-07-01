@@ -40,6 +40,7 @@ public final class Chapter extends QuestObject {
 	public boolean alwaysInvisible;
 	public String defaultQuestShape;
 	public final List<ChapterImage> images;
+	public boolean defaultHideDependencyLines;
 
 	public Chapter(QuestFile f, ChapterGroup g) {
 		file = f;
@@ -50,6 +51,7 @@ public final class Chapter extends QuestObject {
 		alwaysInvisible = false;
 		defaultQuestShape = "";
 		images = new ArrayList<>();
+		defaultHideDependencyLines = false;
 	}
 
 	@Override
@@ -87,6 +89,7 @@ public final class Chapter extends QuestObject {
 		}
 
 		nbt.putString("default_quest_shape", defaultQuestShape);
+		nbt.putBoolean("default_hide_dependency_lines", defaultHideDependencyLines);
 
 		if (!images.isEmpty()) {
 			ListTag list = new ListTag();
@@ -120,6 +123,8 @@ public final class Chapter extends QuestObject {
 			defaultQuestShape = "";
 		}
 
+		defaultHideDependencyLines = nbt.getBoolean("default_hide_dependency_lines");
+
 		ListTag imgs = nbt.getList("images", NbtType.COMPOUND);
 
 		images.clear();
@@ -139,6 +144,7 @@ public final class Chapter extends QuestObject {
 		buffer.writeBoolean(alwaysInvisible);
 		buffer.writeUtf(defaultQuestShape, Short.MAX_VALUE);
 		NetUtils.write(buffer, images, (d, img) -> img.writeNetData(d));
+		buffer.writeBoolean(defaultHideDependencyLines);
 	}
 
 	@Override
@@ -153,6 +159,7 @@ public final class Chapter extends QuestObject {
 			image.readNetData(d);
 			return image;
 		});
+		defaultHideDependencyLines = buffer.readBoolean();
 	}
 
 	public int getIndex() {
@@ -302,6 +309,7 @@ public final class Chapter extends QuestObject {
 		config.addList("subtitle", subtitle, new StringConfig(null), "");
 		config.addBool("always_invisible", alwaysInvisible, v -> alwaysInvisible = v, false);
 		config.addEnum("default_quest_shape", defaultQuestShape.isEmpty() ? "default" : defaultQuestShape, v -> defaultQuestShape = v.equals("default") ? "" : v, QuestShape.idMapWithDefault);
+		config.addBool("default_hide_dependency_lines", defaultHideDependencyLines, v -> defaultHideDependencyLines = v, false);
 	}
 
 	@Override
