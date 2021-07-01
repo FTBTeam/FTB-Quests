@@ -506,6 +506,10 @@ public final class Quest extends QuestObject implements Movable {
 		config.addInt("min_width", minWidth, v -> minWidth = v, 0, 0, 3000);
 	}
 
+	public boolean getHideDependencyLines() {
+		return hideDependencyLines.get(chapter.defaultHideDependencyLines);
+	}
+
 	@Override
 	public Chapter getChapter() {
 		return chapter;
