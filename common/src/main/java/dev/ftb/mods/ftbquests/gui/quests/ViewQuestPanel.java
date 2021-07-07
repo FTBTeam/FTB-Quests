@@ -509,7 +509,7 @@ public class ViewQuestPanel extends Panel {
 		group.add("image", new ImageConfig(), component.image.toString(), v -> component.image = Icon.getIcon(v), "");
 		group.addInt("width", component.width, v -> component.width = v, 0, 100, 1000);
 		group.addInt("height", component.height, v -> component.height = v, 0, 100, 1000);
-		group.addInt("align", component.align, v -> component.align = v, 0, 2, 1);
+		group.addInt("align", component.align, v -> component.align = v, 0, 1, 2);
 		group.addBool("fit", component.fit, v -> component.fit = v, false);
 
 		group.savedCallback = accepted -> {
