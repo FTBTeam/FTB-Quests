@@ -55,7 +55,7 @@ public class QuestButton extends Button {
 
 	@Override
 	public boolean checkMouseOver(int mouseX, int mouseY) {
-		if (questScreen.movingObjects || questScreen.viewQuestPanel.isMouseOver() || questScreen.chapterPanel.expanded) {
+		if (questScreen.movingObjects || questScreen.viewQuestPanel.isMouseOver() || questScreen.chapterPanel.isMouseOver()) {
 			return false;
 		}
 
@@ -224,7 +224,7 @@ public class QuestButton extends Button {
 			getGui().openContextMenu(contextMenu);
 		} else if (button.isLeft()) {
 			if (isCtrlKeyDown() && questScreen.file.canEdit()) {
-				if (questScreen.getViewedQuest() != null) {
+				if (questScreen.isViewingQuest()) {
 					questScreen.closeQuest();
 				}
 

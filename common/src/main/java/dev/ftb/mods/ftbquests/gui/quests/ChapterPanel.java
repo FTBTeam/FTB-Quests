@@ -43,6 +43,8 @@ import java.util.regex.Pattern;
  * @author LatvianModder
  */
 public class ChapterPanel extends Panel {
+	public static boolean pinned = false;
+
 	public static final Icon ARROW_COLLAPSED = Icon.getIcon("ftbquests:textures/gui/arrow_collapsed.png");
 	public static final Icon ARROW_EXPANDED = Icon.getIcon("ftbquests:textures/gui/arrow_expanded.png");
 
@@ -77,7 +79,10 @@ public class ChapterPanel extends Panel {
 
 		@Override
 		public void onClicked(MouseButton button) {
-			if (chapterPanel.questScreen.file.canEdit() && getMouseX() > getX() + width - 15) {
+			if (getMouseX() > getX() + width - 18) {
+				playClickSound();
+				pinned = !pinned;
+			} else if (chapterPanel.questScreen.file.canEdit() && getMouseX() > getX() + width - 34) {
 				playClickSound();
 
 				List<ContextMenuItem> contextMenu = new ArrayList<>();
@@ -133,20 +138,28 @@ public class ChapterPanel extends Panel {
 
 			boolean canEdit = chapterPanel.questScreen.file.canEdit();
 
+			(pinned ? ThemeProperties.PIN_ICON_ON : ThemeProperties.PIN_ICON_OFF).get().draw(matrixStack, x + w - 16, y + 3, 12, 12);
+
 			if (canEdit) {
-				ThemeProperties.ADD_ICON.get().draw(matrixStack, x + w - 16, y + 3, 12, 12);
+				ThemeProperties.ADD_ICON.get().draw(matrixStack, x + w - 31, y + 3, 12, 12);
 			}
 		}
 
 		@Override
 		public int getActualWidth(QuestScreen screen) {
 			boolean canEdit = chapterPanel.questScreen.file.canEdit();
-			return screen.getTheme().getStringWidth(title) + 20 + (canEdit ? 16 : 0);
+			return screen.getTheme().getStringWidth(title) + 36 + (canEdit ? 16 : 0);
 		}
 
 		@Override
 		public void addMouseOverText(TooltipList list) {
 			chapterPanel.questScreen.addInfoTooltip(list, chapterPanel.questScreen.file);
+
+			if (getMouseX() > getX() + width - 18) {
+				list.string(pinned ? "Stays open" : "Doesn't stay open");
+			} else if (chapterPanel.questScreen.file.canEdit() && getMouseX() > getX() + width - 34) {
+				list.translate("gui.add");
+			}
 		}
 	}
 
@@ -321,11 +334,20 @@ public class ChapterPanel extends Panel {
 	}
 
 	public final QuestScreen questScreen;
-	public boolean expanded = false;
+	public boolean expanded = pinned;
 
 	public ChapterPanel(Panel panel) {
 		super(panel);
 		questScreen = (QuestScreen) panel.getGui();
+	}
+
+	@Override
+	public boolean checkMouseOver(int mouseX, int mouseY) {
+		if (questScreen.viewQuestPanel.quest != null) {
+			return false;
+		}
+
+		return super.checkMouseOver(mouseX, mouseY);
 	}
 
 	@Override
@@ -381,7 +403,7 @@ public class ChapterPanel extends Panel {
 			wd = Math.min(Math.max(wd, ((ListButton) w).getActualWidth(questScreen)), 800);
 		}
 
-		setPosAndSize(expanded ? 0 : -wd, 0, wd, questScreen.height);
+		setPosAndSize(((expanded || pinned) && !questScreen.isViewingQuest()) ? 0 : -wd, 0, wd, questScreen.height);
 
 		for (Widget w : widgets) {
 			w.setWidth(wd);
@@ -394,14 +416,14 @@ public class ChapterPanel extends Panel {
 	public void updateMouseOver(int mouseX, int mouseY) {
 		super.updateMouseOver(mouseX, mouseY);
 
-		if (expanded && !isMouseOver()) {
+		if (expanded && !pinned && !isMouseOver()) {
 			setExpanded(false);
 		}
 	}
 
 	@Override
 	public int getX() {
-		return expanded ? 0 : -width;
+		return (expanded || pinned) && !questScreen.isViewingQuest() ? 0 : -width;
 	}
 
 	@Override

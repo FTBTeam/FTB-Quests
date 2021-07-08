@@ -461,12 +461,12 @@ public class QuestPanel extends Panel {
 			return true;
 		}
 
-		if (!questScreen.viewQuestPanel.hidePanel && questScreen.getViewedQuest() != null) {
+		if (!questScreen.viewQuestPanel.hidePanel && questScreen.isViewingQuest()) {
 			questScreen.closeQuest();
 			return true;
 		}
 
-		if (button.isLeft() && isMouseOver() && (questScreen.viewQuestPanel.hidePanel || questScreen.getViewedQuest() == null)) {
+		if (button.isLeft() && isMouseOver() && (questScreen.viewQuestPanel.hidePanel || !questScreen.isViewingQuest())) {
 			questScreen.prevMouseX = getMouseX();
 			questScreen.prevMouseY = getMouseY();
 			questScreen.grabbed = 1;
@@ -510,7 +510,7 @@ public class QuestPanel extends Panel {
 
 	@Override
 	public boolean checkMouseOver(int mouseX, int mouseY) {
-		if (questScreen.chapterPanel.expanded) {
+		if (questScreen.chapterPanel.isMouseOver()) {
 			return false;
 		}
 
@@ -532,7 +532,7 @@ public class QuestPanel extends Panel {
 
 	@Override
 	public boolean keyPressed(Key key) {
-		if (questScreen.selectedChapter != null && questScreen.getViewedQuest() == null && (key.is(GLFW.GLFW_KEY_MINUS) || key.is(GLFW.GLFW_KEY_EQUAL))) {
+		if (questScreen.selectedChapter != null && !questScreen.isViewingQuest() && (key.is(GLFW.GLFW_KEY_MINUS) || key.is(GLFW.GLFW_KEY_EQUAL))) {
 			questScreen.addZoom(key.is(GLFW.GLFW_KEY_MINUS) ? -1D : 1D);
 			return true;
 		}
@@ -542,7 +542,7 @@ public class QuestPanel extends Panel {
 
 	@Override
 	public boolean scrollPanel(double scroll) {
-		if (questScreen.selectedChapter != null && questScreen.getViewedQuest() == null && isMouseOver()) {
+		if (questScreen.selectedChapter != null && !questScreen.isViewingQuest() && isMouseOver()) {
 			questScreen.addZoom(scroll);
 			return true;
 		}

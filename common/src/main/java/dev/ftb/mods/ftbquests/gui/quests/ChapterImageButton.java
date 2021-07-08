@@ -51,7 +51,7 @@ public class ChapterImageButton extends Button {
 
 	@Override
 	public boolean checkMouseOver(int mouseX, int mouseY) {
-		if (questScreen.questPanel.mouseOverQuest != null || questScreen.movingObjects || questScreen.viewQuestPanel.isMouseOver() || questScreen.chapterPanel.expanded) {
+		if (questScreen.questPanel.mouseOverQuest != null || questScreen.movingObjects || questScreen.viewQuestPanel.isMouseOver() || questScreen.chapterPanel.isMouseOver()) {
 			return false;
 		}
 
