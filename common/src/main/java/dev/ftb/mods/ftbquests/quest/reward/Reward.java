@@ -163,7 +163,7 @@ public abstract class Reward extends QuestObjectBase {
 	public void editedFromGUI() {
 		QuestScreen gui = ClientUtils.getCurrentGuiAs(QuestScreen.class);
 
-		if (gui != null && gui.getViewedQuest() != null) {
+		if (gui != null && gui.isViewingQuest()) {
 			gui.viewQuestPanel.refreshWidgets();
 		}
 

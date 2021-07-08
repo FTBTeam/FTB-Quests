@@ -86,6 +86,10 @@ public class QuestScreen extends BaseScreen {
 		return viewQuestPanel.quest;
 	}
 
+	public boolean isViewingQuest() {
+		return getViewedQuest() != null;
+	}
+
 	@Override
 	public void addWidgets() {
 		QuestTheme.currentObject = selectedChapter;
@@ -140,7 +144,7 @@ public class QuestScreen extends BaseScreen {
 
 	@Override
 	public void onBack() {
-		if (getViewedQuest() != null) {
+		if (isViewingQuest()) {
 			closeQuest();
 		} else {
 			super.onBack();
