@@ -393,10 +393,6 @@ public class ChapterPanel extends Panel {
 	@Override
 	public void updateMouseOver(int mouseX, int mouseY) {
 		super.updateMouseOver(mouseX, mouseY);
-
-		if (expanded && !isMouseOver()) {
-			setExpanded(false);
-		}
 	}
 
 	@Override
