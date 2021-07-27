@@ -118,7 +118,7 @@ public class QuestScreen extends BaseScreen {
 
 	@Override
 	public void onClosed() {
-		selectedObjects.clear();
+		// selectedObjects.clear();
 		super.onClosed();
 		//Keyboard.enableRepeatEvents(false);
 	}
