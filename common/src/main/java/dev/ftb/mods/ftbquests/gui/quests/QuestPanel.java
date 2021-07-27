@@ -361,6 +361,11 @@ public class QuestPanel extends Panel {
 				matrixStack.translate(0, 0, 600);
 				theme.drawString(matrixStack, "X:" + (questX < 0 ? "" : " ") + StringUtils.DOUBLE_FORMATTER_00.format(questX), x + 3, y + h - 18, Theme.SHADOW);
 				theme.drawString(matrixStack, "Y:" + (questY < 0 ? "" : " ") + StringUtils.DOUBLE_FORMATTER_00.format(questY), x + 3, y + h - 10, Theme.SHADOW);
+
+				if (!questScreen.selectedObjects.isEmpty()) {
+					theme.drawString(matrixStack, "Selected: " + questScreen.selectedObjects.size(), x + 3, y + h - 26, Theme.SHADOW);
+				}
+
 				theme.drawString(matrixStack, "CX:" + (centerQuestX < 0 ? "" : " ") + StringUtils.DOUBLE_FORMATTER_00.format(centerQuestX), x + w - 42, y + h - 18, Theme.SHADOW);
 				theme.drawString(matrixStack, "CY:" + (centerQuestY < 0 ? "" : " ") + StringUtils.DOUBLE_FORMATTER_00.format(centerQuestY), x + w - 42, y + h - 10, Theme.SHADOW);
 				matrixStack.popPose();
