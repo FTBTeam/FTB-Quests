@@ -2,6 +2,7 @@ package dev.ftb.mods.ftbquests.client;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
+import dev.ftb.mods.ftblibrary.config.ImageConfig;
 import dev.ftb.mods.ftblibrary.config.IntConfig;
 import dev.ftb.mods.ftblibrary.config.ItemStackConfig;
 import dev.ftb.mods.ftblibrary.config.StringConfig;
@@ -12,7 +13,6 @@ import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.FTBQuestsCommon;
 import dev.ftb.mods.ftbquests.block.FTBQuestsBlocks;
-import dev.ftb.mods.ftbquests.gui.ImageConfig;
 import dev.ftb.mods.ftbquests.net.SetCustomImagePacket;
 import dev.ftb.mods.ftbquests.quest.QuestFile;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;

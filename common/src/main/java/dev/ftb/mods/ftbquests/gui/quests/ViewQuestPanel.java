@@ -2,6 +2,7 @@ package dev.ftb.mods.ftbquests.gui.quests;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
+import dev.ftb.mods.ftblibrary.config.ImageConfig;
 import dev.ftb.mods.ftblibrary.config.StringConfig;
 import dev.ftb.mods.ftblibrary.config.ui.EditConfigFromStringScreen;
 import dev.ftb.mods.ftblibrary.config.ui.EditConfigScreen;
@@ -26,7 +27,6 @@ import dev.ftb.mods.ftblibrary.ui.misc.CompactGridLayout;
 import dev.ftb.mods.ftblibrary.util.ImageComponent;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.gui.ImageComponentWidget;
-import dev.ftb.mods.ftbquests.gui.ImageConfig;
 import dev.ftb.mods.ftbquests.net.EditObjectPacket;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestObject;
