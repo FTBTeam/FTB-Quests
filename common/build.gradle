@@ -25,8 +25,9 @@ publishing {
 	publications {
 		mavenCommon(MavenPublication) {
 			artifactId = rootProject.archivesBaseName
-			artifact(file("${project.buildDir}/libs/${project.archivesBaseName}-${project.version}.jar")) {
-				builtBy build
+			artifact remapJar
+			artifact(sourcesJar) {
+				builtBy remapSourcesJar
 			}
 		}
 	}
