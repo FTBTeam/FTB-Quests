@@ -66,10 +66,6 @@ jar {
 	classifier "dev"
 }
 
-java {
-	withSourcesJar()
-}
-
 if (ENV.CURSEFORGE_KEY) {
 	curseforge {
 		apiKey = ENV.CURSEFORGE_KEY
