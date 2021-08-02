@@ -1,8 +1,6 @@
 plugins {
 	id "architectury-plugin" version "3.1-SNAPSHOT"
 	id "dev.architectury.loom" version "0.7.2-SNAPSHOT" apply false
-	id "com.matthewprenger.cursegradle" version "1.4.0" apply false
-	id "maven-publish"
 }
 
 architectury {
@@ -16,11 +14,17 @@ subprojects {
 		silentMojangMappingsLicense()
 		useFabricMixin = true
 	}
+
+	dependencies {
+		minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
+		mappings loom.officialMojangMappings()
+	}
 }
 
 allprojects {
 	apply plugin: "java"
 	apply plugin: "architectury-plugin"
+	apply plugin: "maven-publish"
 	apply from: "https://files.latmod.com/public/markdown-git-changelog.gradle"
 
 	def ENV = System.getenv()
@@ -30,8 +34,26 @@ allprojects {
 
 	sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
 
+	configurations {
+		modOptional
+		modCompileOnly.extendsFrom(modOptional)
+		modRuntime.extendsFrom(modOptional)
+
+		optional
+		compileOnly.extendsFrom(optional)
+		runtime.extendsFrom(optional)
+	}
+
 	tasks.withType(JavaCompile) {
 		options.encoding = "UTF-8"
+
+		// The Minecraft launcher currently installs Java 8 for users, so your mod probably wants to target Java 8 too
+		// JDK 9 introduced a new way of specifying this that will make sure no newer classes or methods are used.
+		// We'll use that if it's available, but otherwise we'll use the older option.
+		def targetVersion = 8
+		if (JavaVersion.current().isJava9Compatible()) {
+			options.release = targetVersion
+		}
 	}
 
 	java {
@@ -39,8 +61,10 @@ allprojects {
 	}
 
 	repositories {
-		mavenLocal()
-		maven { url "https://maven.shedaniel.me/" }
+		maven {
+			url "https://maven.architectury.dev/"
+		}
+
 		maven {
 			url "https://maven.saps.dev/minecraft"
 			content {
@@ -48,6 +72,7 @@ allprojects {
 				includeGroup "dev.latvian.mods"
 			}
 		}
+
 		maven {
 			url "https://www.cursemaven.com"
 			content {

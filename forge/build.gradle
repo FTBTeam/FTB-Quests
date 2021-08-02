@@ -1,6 +1,6 @@
 plugins {
 	id "com.github.johnrengelman.shadow" version "5.0.0"
-	id "com.matthewprenger.cursegradle"
+	id "com.matthewprenger.cursegradle" version "1.4.0"
 }
 
 def ENV = System.getenv()
@@ -15,10 +15,9 @@ architectury {
 }
 
 dependencies {
-	minecraft "com.mojang:minecraft:${rootProject.architectury.minecraft}"
-	mappings minecraft.officialMojangMappings()
-	forge "net.minecraftforge:forge:${rootProject.minecraft_version}-${rootProject.forge_version}"
-	modApi "me.shedaniel:architectury-forge:${rootProject.architectury_version}"
+	forge("net.minecraftforge:forge:${rootProject.architectury.minecraft}-${rootProject.forge_version}")
+
+	modApi("me.shedaniel:architectury-forge:${rootProject.architectury_version}")
 
 	modImplementation "curse.maven:jei-238222:${jei_file}"
 	modImplementation "dev.ftb.mods:ftb-library-forge:${rootProject.ftb_library_version}"
@@ -86,7 +85,6 @@ if (ENV.CURSEFORGE_KEY) {
 			id = project.curseforge_id_forge
 			releaseType = project.curseforge_type
 			addGameVersion "Forge"
-			addGameVersion "1.16.4"
 			addGameVersion "1.16.5"
 			mainArtifact(remapJar.archivePath)
 			relations {
