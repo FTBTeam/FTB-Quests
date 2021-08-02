@@ -34,6 +34,10 @@ allprojects {
 		options.encoding = "UTF-8"
 	}
 
+	java {
+		withSourcesJar()
+	}
+
 	repositories {
 		mavenLocal()
 		maven { url "https://maven.shedaniel.me/" }
