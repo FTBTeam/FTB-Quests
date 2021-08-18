@@ -21,6 +21,8 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 
+import java.util.Map;
+
 /**
  * @author LatvianModder
  */
@@ -71,9 +73,11 @@ public class AdvancementTask extends BooleanTask {
 		super.getConfig(config);
 
 		if (KnownServerRegistries.client != null && !KnownServerRegistries.client.advancements.isEmpty()) {
-			config.addEnum("advancement", advancement, v -> advancement = v, NameMap.of(KnownServerRegistries.client.advancements.keySet().iterator().next(), KnownServerRegistries.client.advancements.keySet().toArray(new ResourceLocation[0]))
-					.icon(resourceLocation -> ItemIcon.getItemIcon(KnownServerRegistries.client.advancements.get(resourceLocation).icon))
-					.name(resourceLocation -> KnownServerRegistries.client.advancements.get(resourceLocation).name)
+			Map<ResourceLocation, KnownServerRegistries.AdvancementInfo> advancements = KnownServerRegistries.client.advancements;
+			KnownServerRegistries.AdvancementInfo def = advancements.values().iterator().next();
+			config.addEnum("advancement", advancement, v -> advancement = v, NameMap.of(def.id, advancements.keySet().toArray(new ResourceLocation[0]))
+					.icon(id -> ItemIcon.getItemIcon(KnownServerRegistries.client.advancements.getOrDefault(id, def).icon))
+					.name(id -> KnownServerRegistries.client.advancements.getOrDefault(id, def).name)
 					.create()).setNameKey("ftbquests.task.ftbquests.advancement");
 		} else {
 			config.addString("advancement", advancement.toString(), v -> advancement = new ResourceLocation(v), "minecraft:story/root").setNameKey("ftbquests.task.ftbquests.advancement");
