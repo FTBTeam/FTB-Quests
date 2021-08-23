@@ -96,11 +96,6 @@ public class StatTask extends Task {
 	}
 
 	@Override
-	public boolean consumesResources() {
-		return true;
-	}
-
-	@Override
 	public int autoSubmitOnPlayerTick() {
 		return 3;
 	}
