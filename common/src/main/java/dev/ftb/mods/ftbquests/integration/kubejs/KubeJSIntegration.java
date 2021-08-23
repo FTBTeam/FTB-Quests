@@ -7,7 +7,7 @@ import dev.ftb.mods.ftbquests.events.ObjectStartedEvent;
 import dev.latvian.kubejs.player.AttachPlayerDataEvent;
 import dev.latvian.kubejs.script.BindingsEvent;
 import dev.latvian.kubejs.script.ScriptType;
-import net.minecraft.world.InteractionResult;
+import me.shedaniel.architectury.event.EventResult;
 
 /**
  * @author LatvianModder
@@ -41,23 +41,23 @@ public class KubeJSIntegration {
 		event.add("ftbquests", new FTBQuestsKubeJSPlayerData(event.getParent()));
 	}
 
-	public static InteractionResult onCustomTask(CustomTaskEvent event) {
+	public static EventResult onCustomTask(CustomTaskEvent event) {
 		if (new CustomTaskEventJS(event).post(ScriptType.SERVER, "ftbquests.custom_task", event.getTask().toString())) {
-			return InteractionResult.FAIL;
+			return EventResult.interruptTrue();
 		}
 
-		return InteractionResult.PASS;
+		return EventResult.pass();
 	}
 
-	public static InteractionResult onCustomReward(CustomRewardEvent event) {
+	public static EventResult onCustomReward(CustomRewardEvent event) {
 		if (new CustomRewardEventJS(event).post(ScriptType.SERVER, "ftbquests.custom_reward", event.getReward().toString())) {
-			return InteractionResult.FAIL;
+			return EventResult.interruptTrue();
 		}
 
-		return InteractionResult.PASS;
+		return EventResult.pass();
 	}
 
-	public static InteractionResult onCompleted(ObjectCompletedEvent<?> event) {
+	public static EventResult onCompleted(ObjectCompletedEvent<?> event) {
 		if (event.getData().file.isServerSide()) {
 			QuestObjectCompletedEventJS e = new QuestObjectCompletedEventJS(event);
 			e.post(ScriptType.SERVER, "ftbquests.completed", event.getObject().getCodeString());
@@ -67,10 +67,10 @@ public class KubeJSIntegration {
 			}
 		}
 
-		return InteractionResult.PASS;
+		return EventResult.pass();
 	}
 
-	public static InteractionResult onStarted(ObjectStartedEvent<?> event) {
+	public static EventResult onStarted(ObjectStartedEvent<?> event) {
 		if (event.getData().file.isServerSide()) {
 			QuestObjectStartedEventJS e = new QuestObjectStartedEventJS(event);
 			e.post(ScriptType.SERVER, "ftbquests.started", event.getObject().getCodeString());
@@ -80,6 +80,6 @@ public class KubeJSIntegration {
 			}
 		}
 
-		return InteractionResult.PASS;
+		return EventResult.pass();
 	}
 }

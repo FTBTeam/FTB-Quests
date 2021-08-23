@@ -6,8 +6,8 @@ import dev.ftb.mods.ftbquests.quest.QuestFile;
 import dev.ftb.mods.ftbquests.quest.QuestObject;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.task.Task;
-import me.shedaniel.architectury.event.Actor;
 import me.shedaniel.architectury.event.Event;
+import me.shedaniel.architectury.event.EventActor;
 import me.shedaniel.architectury.event.EventFactory;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -18,11 +18,11 @@ import java.util.List;
  * @author LatvianModder
  */
 public class ObjectCompletedEvent<T extends QuestObject> {
-	public static final Event<Actor<ObjectCompletedEvent<?>>> GENERIC = EventFactory.createActorLoop();
-	public static final Event<Actor<FileEvent>> FILE = EventFactory.createActorLoop();
-	public static final Event<Actor<ChapterEvent>> CHAPTER = EventFactory.createActorLoop();
-	public static final Event<Actor<QuestEvent>> QUEST = EventFactory.createActorLoop();
-	public static final Event<Actor<TaskEvent>> TASK = EventFactory.createActorLoop();
+	public static final Event<EventActor<ObjectCompletedEvent<?>>> GENERIC = EventFactory.createEventActorLoop();
+	public static final Event<EventActor<FileEvent>> FILE = EventFactory.createEventActorLoop();
+	public static final Event<EventActor<ChapterEvent>> CHAPTER = EventFactory.createEventActorLoop();
+	public static final Event<EventActor<QuestEvent>> QUEST = EventFactory.createEventActorLoop();
+	public static final Event<EventActor<TaskEvent>> TASK = EventFactory.createEventActorLoop();
 
 	static {
 		FILE.register(event -> GENERIC.invoker().act(event));

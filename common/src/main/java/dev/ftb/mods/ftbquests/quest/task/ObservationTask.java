@@ -117,6 +117,11 @@ public class ObservationTask extends BooleanTask {
 		return true;
 	}
 
+	@Override
+	public boolean checkOnLogin() {
+		return false;
+	}
+
 	public boolean observe(Player player, HitResult result) {
 		if (observeId.isEmpty() || type <= 0) {
 			return false;

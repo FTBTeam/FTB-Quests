@@ -9,7 +9,6 @@ import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.quest.task.TaskType;
-import dev.ftb.mods.ftbquests.quest.task.TaskTypes;
 import me.shedaniel.architectury.fluid.FluidStack;
 import me.shedaniel.architectury.hooks.FluidStackHooks;
 import me.shedaniel.architectury.registry.Registries;
@@ -32,6 +31,7 @@ import java.util.Optional;
  * @author LatvianModder
  */
 public class ForgeFluidTask extends Task {
+	public static TaskType TYPE;
 	public static final ResourceLocation TANK_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "textures/tasks/tank.png");
 
 	public Fluid fluid = Fluids.WATER;
@@ -46,7 +46,7 @@ public class ForgeFluidTask extends Task {
 
 	@Override
 	public TaskType getType() {
-		return TaskTypes.FLUID;
+		return TYPE;
 	}
 
 	@Override
@@ -62,6 +62,11 @@ public class ForgeFluidTask extends Task {
 	@Override
 	public String formatProgress(TeamData teamData, long progress) {
 		return getVolumeString((int) Math.min(Integer.MAX_VALUE, progress));
+	}
+
+	@Override
+	public boolean consumesResources() {
+		return true;
 	}
 
 	@Override
