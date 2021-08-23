@@ -1,10 +1,15 @@
-package dev.ftb.mods.ftbquests.integration.gamestages;
+package dev.ftb.mods.ftbquests.quest.task;
 
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
+import dev.ftb.mods.ftbquests.integration.StageHelper;
+import dev.ftb.mods.ftbquests.quest.Chapter;
+import dev.ftb.mods.ftbquests.quest.ChapterGroup;
 import dev.ftb.mods.ftbquests.quest.Quest;
+import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.TeamData;
-import dev.ftb.mods.ftbquests.quest.task.BooleanTask;
-import dev.ftb.mods.ftbquests.quest.task.TaskType;
+import me.shedaniel.architectury.hooks.PlayerHooks;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
@@ -12,22 +17,20 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 
 /**
  * @author LatvianModder
  */
-public class GameStageTask extends BooleanTask {
+public class StageTask extends BooleanTask {
 	public String stage = "";
 
-	public GameStageTask(Quest quest) {
+	public StageTask(Quest quest) {
 		super(quest);
 	}
 
 	@Override
 	public TaskType getType() {
-		return GameStagesIntegration.GAMESTAGE_TASK;
+		return TaskTypes.STAGE;
 	}
 
 	@Override
@@ -55,14 +58,14 @@ public class GameStageTask extends BooleanTask {
 	}
 
 	@Override
-	@OnlyIn(Dist.CLIENT)
+	@Environment(EnvType.CLIENT)
 	public void getConfig(ConfigGroup config) {
 		super.getConfig(config);
 		config.addString("stage", stage, v -> stage = v, "").setNameKey("ftbquests.task.ftbquests.gamestage");
 	}
 
 	@Override
-	@OnlyIn(Dist.CLIENT)
+	@Environment(EnvType.CLIENT)
 	public MutableComponent getAltTitle() {
 		return new TranslatableComponent("ftbquests.task.ftbquests.gamestage").append(": ").append(new TextComponent(stage).withStyle(ChatFormatting.YELLOW));
 	}
@@ -74,6 +77,32 @@ public class GameStageTask extends BooleanTask {
 
 	@Override
 	public boolean canSubmit(TeamData teamData, ServerPlayer player) {
-		return GameStagesIntegration.hasStage(player, stage);
+		return StageHelper.instance.get().has(player, stage);
+	}
+
+	public static void checkStages(ServerPlayer player) {
+		TeamData data = ServerQuestFile.INSTANCE == null || PlayerHooks.isFake(player) ? null : ServerQuestFile.INSTANCE.getData(player);
+
+		if (data == null || data.isLocked()) {
+			return;
+		}
+
+		TeamData.currentPlayer = player;
+
+		for (ChapterGroup group : ServerQuestFile.INSTANCE.chapterGroups) {
+			for (Chapter chapter : group.chapters) {
+				for (Quest quest : chapter.quests) {
+					if (data.canStartTasks(quest)) {
+						for (Task task : quest.tasks) {
+							if (task instanceof StageTask) {
+								task.submitTask(data, player);
+							}
+						}
+					}
+				}
+			}
+		}
+
+		TeamData.currentPlayer = null;
 	}
 }

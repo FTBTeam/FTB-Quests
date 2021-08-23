@@ -1,6 +1,7 @@
 package dev.ftb.mods.ftbquests;
 
 import dev.ftb.mods.ftblibrary.icon.Icon;
+import dev.ftb.mods.ftbquests.integration.StageHelper;
 import dev.ftb.mods.ftbquests.integration.gamestages.GameStagesIntegration;
 import dev.ftb.mods.ftbquests.item.FTBQuestsItems;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
@@ -14,6 +15,7 @@ import me.shedaniel.architectury.platform.forge.EventBuses;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.LazyLoadedValue;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
@@ -33,20 +35,16 @@ import java.util.Optional;
 
 @Mod(FTBQuests.MOD_ID)
 public class FTBQuestsForge {
-	public static boolean hasGameStages;
-
 	public FTBQuestsForge() {
 		EventBuses.registerModEventBus(FTBQuests.MOD_ID, FMLJavaModLoadingContext.get().getModEventBus());
 
 		FTBQuests quests = new FTBQuests();
 
-		TaskTypes.FLUID = TaskTypes.register(new ResourceLocation(FTBQuests.MOD_ID, "fluid"), ForgeFluidTask::new, () -> Icon.getIcon(Optional.ofNullable(FluidStackHooks.getStillTexture(Fluids.WATER)).map(TextureAtlasSprite::getName).map(ResourceLocation::toString).orElse("missingno")).combineWith(Icon.getIcon(ForgeFluidTask.TANK_TEXTURE.toString())));
-		TaskTypes.FORGE_ENERGY = TaskTypes.register(new ResourceLocation(FTBQuests.MOD_ID, "forge_energy"), ForgeEnergyTask::new, () -> Icon.getIcon(ForgeEnergyTask.EMPTY_TEXTURE.toString()).combineWith(Icon.getIcon(ForgeEnergyTask.FULL_TEXTURE.toString())));
+		ForgeFluidTask.TYPE = TaskTypes.register(new ResourceLocation(FTBQuests.MOD_ID, "fluid"), ForgeFluidTask::new, () -> Icon.getIcon(Optional.ofNullable(FluidStackHooks.getStillTexture(Fluids.WATER)).map(TextureAtlasSprite::getName).map(ResourceLocation::toString).orElse("missingno")).combineWith(Icon.getIcon(ForgeFluidTask.TANK_TEXTURE.toString())));
+		ForgeEnergyTask.TYPE = TaskTypes.register(new ResourceLocation(FTBQuests.MOD_ID, "forge_energy"), ForgeEnergyTask::new, () -> Icon.getIcon(ForgeEnergyTask.EMPTY_TEXTURE.toString()).combineWith(Icon.getIcon(ForgeEnergyTask.FULL_TEXTURE.toString())));
 
-		hasGameStages = Platform.isModLoaded("gamestages");
-
-		if (hasGameStages) {
-			new GameStagesIntegration().init();
+		if (Platform.isModLoaded("gamestages") && !Platform.isModLoaded("kubejs")) {
+			StageHelper.instance = new LazyLoadedValue<>(GameStagesIntegration::new);
 		}
 
 		FMLJavaModLoadingContext.get().getModEventBus().<FMLCommonSetupEvent>addListener(event -> quests.setup());

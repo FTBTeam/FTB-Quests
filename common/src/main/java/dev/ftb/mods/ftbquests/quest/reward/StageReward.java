@@ -1,11 +1,10 @@
-package dev.ftb.mods.ftbquests.integration.gamestages;
+package dev.ftb.mods.ftbquests.quest.reward;
 
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
+import dev.ftb.mods.ftbquests.integration.StageHelper;
 import dev.ftb.mods.ftbquests.quest.Quest;
-import dev.ftb.mods.ftbquests.quest.reward.Reward;
-import dev.ftb.mods.ftbquests.quest.reward.RewardAutoClaim;
-import dev.ftb.mods.ftbquests.quest.reward.RewardType;
-import net.darkhax.gamestages.GameStageHelper;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
@@ -14,24 +13,22 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 
 /**
  * @author LatvianModder
  */
-public class GameStageReward extends Reward {
+public class StageReward extends Reward {
 	public String stage = "";
 	public boolean remove = false;
 
-	public GameStageReward(Quest quest) {
+	public StageReward(Quest quest) {
 		super(quest);
 		autoclaim = RewardAutoClaim.INVISIBLE;
 	}
 
 	@Override
 	public RewardType getType() {
-		return GameStagesIntegration.GAMESTAGE_REWARD;
+		return RewardTypes.STAGE;
 	}
 
 	@Override
@@ -66,7 +63,7 @@ public class GameStageReward extends Reward {
 	}
 
 	@Override
-	@OnlyIn(Dist.CLIENT)
+	@Environment(EnvType.CLIENT)
 	public void getConfig(ConfigGroup config) {
 		super.getConfig(config);
 		config.addString("stage", stage, v -> stage = v, "").setNameKey("ftbquests.reward.ftbquests.gamestage");
@@ -76,12 +73,10 @@ public class GameStageReward extends Reward {
 	@Override
 	public void claim(ServerPlayer player, boolean notify) {
 		if (remove) {
-			GameStageHelper.removeStage(player, stage);
+			StageHelper.instance.get().remove(player, stage);
 		} else {
-			GameStageHelper.addStage(player, stage);
+			StageHelper.instance.get().add(player, stage);
 		}
-
-		GameStageHelper.syncPlayer(player);
 
 		if (notify) {
 			if (remove) {
@@ -93,7 +88,7 @@ public class GameStageReward extends Reward {
 	}
 
 	@Override
-	@OnlyIn(Dist.CLIENT)
+	@Environment(EnvType.CLIENT)
 	public MutableComponent getAltTitle() {
 		return new TranslatableComponent("ftbquests.reward.ftbquests.gamestage").append(": ").append(new TextComponent(stage).withStyle(ChatFormatting.YELLOW));
 	}
