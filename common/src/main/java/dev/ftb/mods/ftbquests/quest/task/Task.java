@@ -260,4 +260,8 @@ public abstract class Task extends QuestObject {
 	public final void submitTask(TeamData teamData, ServerPlayer player) {
 		submitTask(teamData, player, ItemStack.EMPTY);
 	}
+
+	public boolean checkOnLogin() {
+		return !consumesResources();
+	}
 }

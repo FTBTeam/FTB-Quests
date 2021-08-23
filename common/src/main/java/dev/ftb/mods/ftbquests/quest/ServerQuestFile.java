@@ -12,6 +12,7 @@ import dev.ftb.mods.ftbquests.net.TeamDataChangedPacket;
 import dev.ftb.mods.ftbquests.net.TeamDataUpdate;
 import dev.ftb.mods.ftbquests.quest.reward.RewardType;
 import dev.ftb.mods.ftbquests.quest.reward.RewardTypes;
+import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.quest.task.TaskType;
 import dev.ftb.mods.ftbquests.quest.task.TaskTypes;
 import dev.ftb.mods.ftbquests.util.FTBQuestsInventoryListener;
@@ -172,12 +173,24 @@ public class ServerQuestFile extends QuestFile {
 
 		player.inventoryMenu.addSlotListener(new FTBQuestsInventoryListener(player));
 
-		for (ChapterGroup group : chapterGroups) {
-			for (Chapter chapter : group.chapters) {
-				for (Quest quest : chapter.quests) {
-					data.checkAutoCompletion(quest);
+		if (!data.isLocked()) {
+			TeamData.currentPlayer = player;
+
+			for (ChapterGroup group : chapterGroups) {
+				for (Chapter chapter : group.chapters) {
+					for (Quest quest : chapter.quests) {
+						data.checkAutoCompletion(quest);
+
+						for (Task task : quest.tasks) {
+							if (task.checkOnLogin()) {
+								task.submitTask(data, player);
+							}
+						}
+					}
 				}
 			}
+
+			TeamData.currentPlayer = null;
 		}
 	}
 

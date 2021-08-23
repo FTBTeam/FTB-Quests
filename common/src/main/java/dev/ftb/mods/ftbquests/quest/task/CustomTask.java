@@ -84,6 +84,11 @@ public class CustomTask extends Task {
 		}
 	}
 
+	@Override
+	public boolean checkOnLogin() {
+		return false;
+	}
+
 	public static class Data {
 		public final CustomTask task;
 		public final TeamData teamData;

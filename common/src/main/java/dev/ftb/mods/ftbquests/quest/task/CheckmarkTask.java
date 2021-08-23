@@ -31,4 +31,9 @@ public class CheckmarkTask extends BooleanTask {
 	public boolean canSubmit(TeamData teamData, ServerPlayer player) {
 		return true;
 	}
+
+	@Override
+	public boolean checkOnLogin() {
+		return false;
+	}
 }

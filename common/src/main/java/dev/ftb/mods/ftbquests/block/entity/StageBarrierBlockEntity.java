@@ -1,14 +1,13 @@
 package dev.ftb.mods.ftbquests.block.entity;
 
 import dev.ftb.mods.ftbquests.FTBQuests;
-import dev.ftb.mods.ftbquests.block.StageBarrierBlock;
+import dev.ftb.mods.ftbquests.block.QuestBarrierBlock;
+import dev.ftb.mods.ftbquests.integration.StageHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.TickableBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-
-import static dev.ftb.mods.ftbquests.block.QuestBarrierBlock.OPEN;
 
 /**
  * @author LatvianModder
@@ -45,8 +44,8 @@ public class StageBarrierBlockEntity extends BlockEntity implements TickableBloc
 		if (level != null && level.isClientSide() && FTBQuests.PROXY.isClientDataLoaded() && level.getGameTime() % 5L == 0L) {
 			boolean open = isOpen(FTBQuests.PROXY.getClientPlayer());
 
-			if (open != getBlockState().getValue(OPEN)) {
-				level.setBlock(getBlockPos(), getBlockState().setValue(OPEN, open), 2 | 8);
+			if (open != getBlockState().getValue(QuestBarrierBlock.OPEN)) {
+				level.setBlock(getBlockPos(), getBlockState().setValue(QuestBarrierBlock.OPEN, open), 2 | 8);
 				clearCache();
 			}
 		}
@@ -63,6 +62,6 @@ public class StageBarrierBlockEntity extends BlockEntity implements TickableBloc
 
 	@Override
 	public boolean isOpen(Player player) {
-		return !stage.isEmpty() && StageBarrierBlock.hasStage(player, stage);
+		return !stage.isEmpty() && StageHelper.instance.get().has(player, stage);
 	}
 }

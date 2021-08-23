@@ -2,8 +2,8 @@ package dev.ftb.mods.ftbquests.events;
 
 import dev.ftb.mods.ftbquests.quest.reward.CustomReward;
 import me.shedaniel.architectury.ForgeEvent;
-import me.shedaniel.architectury.event.Actor;
 import me.shedaniel.architectury.event.Event;
+import me.shedaniel.architectury.event.EventActor;
 import me.shedaniel.architectury.event.EventFactory;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -12,7 +12,7 @@ import net.minecraft.server.level.ServerPlayer;
  */
 @ForgeEvent
 public class CustomRewardEvent {
-	public static final Event<Actor<CustomRewardEvent>> EVENT = EventFactory.createActorLoop();
+	public static final Event<EventActor<CustomRewardEvent>> EVENT = EventFactory.createEventActorLoop();
 	private final CustomReward reward;
 	private final ServerPlayer player;
 	private final boolean notify;
