@@ -28,14 +28,14 @@ public class QuestObjectArgument implements ArgumentType<QuestObjectBase> {
 			"#importantquests"
 	);
 
-	private static final SimpleCommandExceptionType NO_FILE = new SimpleCommandExceptionType(
-			new TranslatableComponent("commands.ftbquests.change_progress.no_file"));
+	public static final SimpleCommandExceptionType NO_FILE = new SimpleCommandExceptionType(
+			new TranslatableComponent("commands.ftbquests.command.error.no_file"));
 
-	private static final DynamicCommandExceptionType NO_OBJECT = new DynamicCommandExceptionType(
-			(object) -> new TranslatableComponent("commands.ftbquests.change_progress.no_object", object));
+	public static final DynamicCommandExceptionType NO_OBJECT = new DynamicCommandExceptionType(
+			(object) -> new TranslatableComponent("commands.ftbquests.command.error.no_object", object));
 
-	private static final DynamicCommandExceptionType INVALID_ID = new DynamicCommandExceptionType(
-			(id) -> new TranslatableComponent("commands.ftbquests.change_progress.invalid_id", id));
+	public static final DynamicCommandExceptionType INVALID_ID = new DynamicCommandExceptionType(
+			(id) -> new TranslatableComponent("commands.ftbquests.command.error.invalid_id", id));
 
 	@Override
 	public QuestObjectBase parse(StringReader reader) throws CommandSyntaxException {
