@@ -44,6 +44,8 @@ public class ServerQuestFile extends QuestFile {
 	private boolean isLoading;
 	private Path folder;
 
+	public ServerPlayer currentPlayer = null;
+
 	public ServerQuestFile(MinecraftServer s) {
 		server = s;
 		shouldSave = false;
@@ -174,23 +176,25 @@ public class ServerQuestFile extends QuestFile {
 		player.inventoryMenu.addSlotListener(new FTBQuestsInventoryListener(player));
 
 		if (!data.isLocked()) {
-			TeamData.currentPlayer = player;
+			currentPlayer = player;
 
 			for (ChapterGroup group : chapterGroups) {
 				for (Chapter chapter : group.chapters) {
 					for (Quest quest : chapter.quests) {
 						data.checkAutoCompletion(quest);
 
-						for (Task task : quest.tasks) {
-							if (task.checkOnLogin()) {
-								task.submitTask(data, player);
+						if (data.canStartTasks(quest)) {
+							for (Task task : quest.tasks) {
+								if (task.checkOnLogin()) {
+									task.submitTask(data, player);
+								}
 							}
 						}
 					}
 				}
 			}
 
-			TeamData.currentPlayer = null;
+			currentPlayer = null;
 		}
 	}
 

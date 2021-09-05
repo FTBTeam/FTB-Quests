@@ -137,9 +137,11 @@ public class FTBQuestsEventHandler {
 	}
 
 	private void playerTick(Player player) {
-		if (player instanceof ServerPlayer && ServerQuestFile.INSTANCE != null && !PlayerHooks.isFake(player)) {
+		ServerQuestFile file = ServerQuestFile.INSTANCE;
+
+		if (player instanceof ServerPlayer && file != null && !PlayerHooks.isFake(player)) {
 			if (autoSubmitTasks == null) {
-				autoSubmitTasks = ServerQuestFile.INSTANCE.collect(o -> o instanceof Task && ((Task) o).autoSubmitOnPlayerTick() > 0);
+				autoSubmitTasks = file.collect(o -> o instanceof Task && ((Task) o).autoSubmitOnPlayerTick() > 0);
 			}
 
 			// Don't be deceived, its somehow possible to be null here
@@ -147,14 +149,14 @@ public class FTBQuestsEventHandler {
 				return;
 			}
 
-			TeamData data = ServerQuestFile.INSTANCE.getData(player);
+			TeamData data = file.getData(player);
 
 			if (data.isLocked()) {
 				return;
 			}
 
 			long t = player.level.getGameTime();
-			TeamData.currentPlayer = (ServerPlayer) player;
+			file.currentPlayer = (ServerPlayer) player;
 
 			for (Task task : autoSubmitTasks) {
 				long d = task.autoSubmitOnPlayerTick();
@@ -166,7 +168,7 @@ public class FTBQuestsEventHandler {
 				}
 			}
 
-			TeamData.currentPlayer = null;
+			file.currentPlayer = null;
 		}
 	}
 
@@ -204,19 +206,20 @@ public class FTBQuestsEventHandler {
 
 	private void changedDimension(ServerPlayer player, ResourceKey<Level> oldLevel, ResourceKey<Level> newLevel) {
 		if (!PlayerHooks.isFake(player)) {
-			TeamData data = ServerQuestFile.INSTANCE.getData(player);
+			ServerQuestFile file = ServerQuestFile.INSTANCE;
+			TeamData data = file.getData(player);
 
 			if (data.isLocked()) {
 				return;
 			}
 
-			TeamData.currentPlayer = player;
+			file.currentPlayer = player;
 
-			for (DimensionTask task : ServerQuestFile.INSTANCE.collect(DimensionTask.class)) {
+			for (DimensionTask task : file.collect(DimensionTask.class)) {
 				task.submitTask(data, player);
 			}
 
-			TeamData.currentPlayer = null;
+			file.currentPlayer = null;
 		}
 	}
 

@@ -2,8 +2,6 @@ package dev.ftb.mods.ftbquests.quest.task;
 
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftbquests.integration.StageHelper;
-import dev.ftb.mods.ftbquests.quest.Chapter;
-import dev.ftb.mods.ftbquests.quest.ChapterGroup;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.TeamData;
@@ -87,22 +85,14 @@ public class StageTask extends BooleanTask {
 			return;
 		}
 
-		TeamData.currentPlayer = player;
+		ServerQuestFile.INSTANCE.currentPlayer = player;
 
-		for (ChapterGroup group : ServerQuestFile.INSTANCE.chapterGroups) {
-			for (Chapter chapter : group.chapters) {
-				for (Quest quest : chapter.quests) {
-					if (data.canStartTasks(quest)) {
-						for (Task task : quest.tasks) {
-							if (task instanceof StageTask) {
-								task.submitTask(data, player);
-							}
-						}
-					}
-				}
+		for (Task task : ServerQuestFile.INSTANCE.getAllTasks()) {
+			if (task instanceof StageTask && data.canStartTasks(task.quest)) {
+				task.submitTask(data, player);
 			}
 		}
 
-		TeamData.currentPlayer = null;
+		ServerQuestFile.INSTANCE.currentPlayer = null;
 	}
 }
