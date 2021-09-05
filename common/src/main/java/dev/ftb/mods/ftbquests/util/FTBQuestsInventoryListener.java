@@ -1,8 +1,5 @@
 package dev.ftb.mods.ftbquests.util;
 
-import dev.ftb.mods.ftbquests.quest.Chapter;
-import dev.ftb.mods.ftbquests.quest.ChapterGroup;
-import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.task.Task;
@@ -25,43 +22,27 @@ public class FTBQuestsInventoryListener implements ContainerListener {
 	}
 
 	public static void detect(ServerPlayer player, ItemStack craftedItem, long sourceTask) {
-		if (ServerQuestFile.INSTANCE == null || PlayerHooks.isFake(player)) {
+		ServerQuestFile file = ServerQuestFile.INSTANCE;
+
+		if (file == null || PlayerHooks.isFake(player)) {
 			return;
 		}
 
-		TeamData data = ServerQuestFile.INSTANCE.getNullableTeamData(FTBTeamsAPI.getPlayerTeamID(player.getUUID()));
+		TeamData data = file.getNullableTeamData(FTBTeamsAPI.getPlayerTeamID(player.getUUID()));
 
 		if (data == null || data.isLocked()) {
 			return;
 		}
 
-		TeamData.currentPlayer = player;
+		file.currentPlayer = player;
 
-		for (ChapterGroup group : ServerQuestFile.INSTANCE.chapterGroups) {
-			for (Chapter chapter : group.chapters) {
-				for (Quest quest : chapter.quests) {
-					if (hasSubmitTasks(quest) && data.canStartTasks(quest)) {
-						for (Task task : quest.tasks) {
-							if (task.id != sourceTask && task.submitItemsOnInventoryChange()) {
-								task.submitTask(data, player, craftedItem);
-							}
-						}
-					}
-				}
+		for (Task task : file.getSubmitTasks()) {
+			if (task.id != sourceTask && data.canStartTasks(task.quest)) {
+				task.submitTask(data, player, craftedItem);
 			}
 		}
 
-		TeamData.currentPlayer = null;
-	}
-
-	private static boolean hasSubmitTasks(Quest quest) {
-		for (Task task : quest.tasks) {
-			if (task.submitItemsOnInventoryChange()) {
-				return true;
-			}
-		}
-
-		return false;
+		file.currentPlayer = null;
 	}
 
 	@Override

@@ -63,8 +63,6 @@ public class TeamData {
 		return FTBQuests.PROXY.getQuestFile(player.getCommandSenderWorld().isClientSide()).getData(player);
 	}
 
-	public static ServerPlayer currentPlayer = null;
-
 	public final UUID uuid;
 	public QuestFile file;
 	public String name;

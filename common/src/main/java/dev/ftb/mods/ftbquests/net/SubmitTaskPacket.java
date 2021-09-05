@@ -42,12 +42,12 @@ public class SubmitTaskPacket extends BaseC2SPacket {
 			return;
 		}
 
-		Task t = ServerQuestFile.INSTANCE.getTask(task);
+		Task t = data.file.getTask(task);
 
 		if (t != null && data.canStartTasks(t.quest)) {
-			TeamData.currentPlayer = player;
+			((ServerQuestFile) data.file).currentPlayer = player;
 			t.submitTask(data, player);
-			TeamData.currentPlayer = null;
+			((ServerQuestFile) data.file).currentPlayer = null;
 		}
 	}
 }

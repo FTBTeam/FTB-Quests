@@ -97,6 +97,9 @@ public abstract class QuestFile extends QuestObject {
 	public boolean pauseGame;
 	public String lockMessage;
 
+	private List<Task> allTasks;
+	private List<Task> submitTasks;
+
 	public QuestFile() {
 		id = 1;
 		fileVersion = 0;
@@ -127,6 +130,8 @@ public abstract class QuestFile extends QuestObject {
 		gridScale = 0.5D;
 		pauseGame = false;
 		lockMessage = "";
+
+		allTasks = null;
 	}
 
 	public abstract Env getSide();
@@ -1087,6 +1092,9 @@ public abstract class QuestFile extends QuestObject {
 	public void clearCachedData() {
 		super.clearCachedData();
 
+		allTasks = null;
+		submitTasks = null;
+
 		for (ChapterGroup group : chapterGroups) {
 			group.clearCachedData();
 		}
@@ -1219,6 +1227,36 @@ public abstract class QuestFile extends QuestObject {
 		return list;
 	}
 
+	public List<Task> getAllTasks() {
+		if (allTasks == null) {
+			allTasks = new ArrayList<>();
+
+			for (ChapterGroup g : chapterGroups) {
+				for (Chapter c : g.chapters) {
+					for (Quest q : c.quests) {
+						allTasks.addAll(q.tasks);
+					}
+				}
+			}
+		}
+
+		return allTasks;
+	}
+
+	public List<Task> getSubmitTasks() {
+		if (submitTasks == null) {
+			submitTasks = new ArrayList<>();
+
+			for (Task task : getAllTasks()) {
+				if (task.submitItemsOnInventoryChange()) {
+					submitTasks.add(task);
+				}
+			}
+		}
+
+		return submitTasks;
+	}
+
 	public List<Chapter> getVisibleChapters(TeamData data) {
 		List<Chapter> list = new ArrayList<>();
 
@@ -1231,10 +1269,12 @@ public abstract class QuestFile extends QuestObject {
 
 	@Nullable
 	public Chapter getFirstVisibleChapter(TeamData data) {
-		List<Chapter> chapters = getVisibleChapters(data);
+		for (ChapterGroup group : chapterGroups) {
+			Chapter c = group.getFirstVisibleChapter(data);
 
-		if (!chapters.isEmpty()) {
-			return chapters.get(0);
+			if (c != null) {
+				return c;
+			}
 		}
 
 		return null;

@@ -10,6 +10,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -158,6 +159,23 @@ public class ChapterGroup extends QuestObject {
 		}
 
 		return list;
+	}
+
+	@Nullable
+	public Chapter getFirstVisibleChapter(TeamData data) {
+		if (chapters.isEmpty()) {
+			return null;
+		} else if (file.canEdit()) {
+			return chapters.get(0);
+		}
+
+		for (Chapter chapter : chapters) {
+			if (!chapter.quests.isEmpty() && chapter.isVisible(data)) {
+				return chapter;
+			}
+		}
+
+		return null;
 	}
 
 	@Override
