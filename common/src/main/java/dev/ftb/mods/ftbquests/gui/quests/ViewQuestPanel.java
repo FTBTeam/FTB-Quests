@@ -27,7 +27,7 @@ import dev.ftb.mods.ftblibrary.ui.misc.CompactGridLayout;
 import dev.ftb.mods.ftblibrary.util.ImageComponent;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.gui.ImageComponentWidget;
-import dev.ftb.mods.ftbquests.net.EditObjectPacket;
+import dev.ftb.mods.ftbquests.net.EditObjectMessage;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestObject;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
@@ -452,7 +452,7 @@ public class ViewQuestPanel extends Panel {
 		EditConfigFromStringScreen.open(c, quest.title, "", accepted -> {
 			if (accepted) {
 				quest.title = c.value;
-				new EditObjectPacket(quest).sendToServer();
+				new EditObjectMessage(quest).sendToServer();
 			}
 
 			openGui();
@@ -465,7 +465,7 @@ public class ViewQuestPanel extends Panel {
 		EditConfigFromStringScreen.open(c, quest.subtitle, "", accepted -> {
 			if (accepted) {
 				quest.subtitle = c.value;
-				new EditObjectPacket(quest).sendToServer();
+				new EditObjectMessage(quest).sendToServer();
 			}
 
 			openGui();
@@ -495,7 +495,7 @@ public class ViewQuestPanel extends Panel {
 					quest.description.set(line, c.value);
 				}
 
-				new EditObjectPacket(quest).sendToServer();
+				new EditObjectMessage(quest).sendToServer();
 			}
 
 			openGui();
@@ -520,7 +520,7 @@ public class ViewQuestPanel extends Panel {
 				} else {
 					quest.description.set(line, component.toString());
 				}
-				new EditObjectPacket(quest).sendToServer();
+				new EditObjectMessage(quest).sendToServer();
 			}
 		};
 
@@ -537,7 +537,7 @@ public class ViewQuestPanel extends Panel {
 
 			contextMenu.add(new ContextMenuItem(new TranslatableComponent("selectServer.delete"), ThemeProperties.DELETE_ICON.get(), () -> {
 				quest.description.remove(line);
-				new EditObjectPacket(quest).sendToServer();
+				new EditObjectMessage(quest).sendToServer();
 			}));
 
 			getGui().openContextMenu(contextMenu);

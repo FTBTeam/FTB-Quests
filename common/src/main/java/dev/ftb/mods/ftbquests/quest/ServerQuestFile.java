@@ -4,11 +4,11 @@ import com.mojang.util.UUIDTypeAdapter;
 import dev.ftb.mods.ftblibrary.snbt.SNBT;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
 import dev.ftb.mods.ftbquests.FTBQuests;
-import dev.ftb.mods.ftbquests.net.CreateOtherTeamDataPacket;
-import dev.ftb.mods.ftbquests.net.DeleteObjectResponsePacket;
-import dev.ftb.mods.ftbquests.net.SyncQuestsPacket;
-import dev.ftb.mods.ftbquests.net.SyncTeamDataPacket;
-import dev.ftb.mods.ftbquests.net.TeamDataChangedPacket;
+import dev.ftb.mods.ftbquests.net.CreateOtherTeamDataMessage;
+import dev.ftb.mods.ftbquests.net.DeleteObjectResponseMessage;
+import dev.ftb.mods.ftbquests.net.SyncQuestsMessage;
+import dev.ftb.mods.ftbquests.net.SyncTeamDataMessage;
+import dev.ftb.mods.ftbquests.net.TeamDataChangedMessage;
 import dev.ftb.mods.ftbquests.net.TeamDataUpdate;
 import dev.ftb.mods.ftbquests.quest.reward.RewardType;
 import dev.ftb.mods.ftbquests.quest.reward.RewardTypes;
@@ -133,7 +133,7 @@ public class ServerQuestFile extends QuestFile {
 			}
 		}
 
-		new DeleteObjectResponsePacket(id).sendToAll(server);
+		new DeleteObjectResponseMessage(id).sendToAll(server);
 	}
 
 	@Override
@@ -167,10 +167,10 @@ public class ServerQuestFile extends QuestFile {
 		ServerPlayer player = event.getPlayer();
 		TeamData data = getData(event.getTeam());
 
-		new SyncQuestsPacket(this).sendTo(player);
+		new SyncQuestsMessage(this).sendTo(player);
 
 		for (TeamData teamData : teamDataMap.values()) {
-			new SyncTeamDataPacket(teamData, teamData == data).sendTo(player);
+			new SyncTeamDataMessage(teamData, teamData == data).sendTo(player);
 		}
 
 		player.inventoryMenu.addSlotListener(new FTBQuestsInventoryListener(player));
@@ -218,7 +218,7 @@ public class ServerQuestFile extends QuestFile {
 		addData(data, false);
 		TeamDataUpdate self = new TeamDataUpdate(data);
 
-		new CreateOtherTeamDataPacket(self).sendToAll(server);
+		new CreateOtherTeamDataMessage(self).sendToAll(server);
 	}
 
 	public void playerChangedTeam(PlayerChangedTeamEvent event) {
@@ -226,8 +226,8 @@ public class ServerQuestFile extends QuestFile {
 			TeamData oldTeamData = getData(event.getPreviousTeam().get());
 			TeamData newTeamData = getData(event.getTeam());
 
-			new TeamDataChangedPacket(new TeamDataUpdate(oldTeamData), new TeamDataUpdate(newTeamData)).sendToAll(server);
-			new SyncTeamDataPacket(newTeamData, true).sendTo(event.getPlayer());
+			new TeamDataChangedMessage(new TeamDataUpdate(oldTeamData), new TeamDataUpdate(newTeamData)).sendToAll(server);
+			new SyncTeamDataMessage(newTeamData, true).sendTo(event.getPlayer());
 		}
 	}
 }

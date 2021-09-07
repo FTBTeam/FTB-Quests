@@ -8,8 +8,8 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import dev.ftb.mods.ftblibrary.config.Tristate;
 import dev.ftb.mods.ftbquests.FTBQuests;
-import dev.ftb.mods.ftbquests.net.CreateObjectResponsePacket;
-import dev.ftb.mods.ftbquests.net.DeleteObjectResponsePacket;
+import dev.ftb.mods.ftbquests.net.CreateObjectResponseMessage;
+import dev.ftb.mods.ftbquests.net.DeleteObjectResponseMessage;
 import dev.ftb.mods.ftbquests.quest.Chapter;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
@@ -55,7 +55,7 @@ import java.util.stream.Collectors;
  */
 public class FTBQuestsCommands {
 
-	private static SimpleCommandExceptionType NO_INVENTORY = new SimpleCommandExceptionType(new TranslatableComponent("commands.ftbquests.command.error.no_inventory"));
+	private static final SimpleCommandExceptionType NO_INVENTORY = new SimpleCommandExceptionType(new TranslatableComponent("commands.ftbquests.command.error.no_inventory"));
 
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
 		dispatcher.register(Commands.literal("ftbquests")
@@ -211,7 +211,7 @@ public class FTBQuestsCommands {
 		file.rewardTables.add(table);
 		file.save();
 
-		new CreateObjectResponsePacket(table, null).sendToAll(level.getServer());
+		new CreateObjectResponseMessage(table, null).sendToAll(level.getServer());
 
 		source.sendSuccess(new TranslatableComponent("commands.ftbquests.command.feedback.table_imported", name, table.rewards.size()), false);
 
@@ -276,7 +276,7 @@ public class FTBQuestsCommands {
 				del++;
 				table.invalid = true;
 				FileUtils.delete(ServerQuestFile.INSTANCE.getFolder().resolve(table.getPath()).toFile());
-				new DeleteObjectResponsePacket(table.id).sendToAll(source.getServer());
+				new DeleteObjectResponseMessage(table.id).sendToAll(source.getServer());
 			}
 		}
 
@@ -313,7 +313,7 @@ public class FTBQuestsCommands {
 		chapter.icon = new ItemStack(Items.COMPASS);
 		chapter.defaultQuestShape = "rsquare";
 
-		new CreateObjectResponsePacket(chapter, null).sendToAll(source.getServer());
+		new CreateObjectResponseMessage(chapter, null).sendToAll(source.getServer());
 
 		List<ItemStack> list = nonNullList.stream()
 				.filter(stack -> !stack.isEmpty() && Registries.getId(stack.getItem(), Registry.ITEM_REGISTRY) != null)
@@ -347,7 +347,7 @@ public class FTBQuestsCommands {
 			quest.y = row;
 			quest.subtitle = stack.save(new CompoundTag()).toString();
 
-			new CreateObjectResponsePacket(quest, null).sendToAll(source.getServer());
+			new CreateObjectResponseMessage(quest, null).sendToAll(source.getServer());
 
 			ItemTask task = new ItemTask(quest);
 			task.id = chapter.file.newID();
@@ -358,7 +358,7 @@ public class FTBQuestsCommands {
 
 			CompoundTag extra = new CompoundTag();
 			extra.putString("type", task.getType().getTypeForNBT());
-			new CreateObjectResponsePacket(task, extra).sendToAll(source.getServer());
+			new CreateObjectResponseMessage(task, extra).sendToAll(source.getServer());
 
 			col++;
 		}

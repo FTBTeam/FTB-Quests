@@ -19,7 +19,7 @@ import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftblibrary.util.WrappedIngredient;
 import dev.ftb.mods.ftbquests.gui.FTBQuestsTheme;
 import dev.ftb.mods.ftbquests.integration.jei.FTBQuestsJEIHelper;
-import dev.ftb.mods.ftbquests.net.SubmitTaskPacket;
+import dev.ftb.mods.ftbquests.net.SubmitTaskMessage;
 import dev.ftb.mods.ftbquests.quest.task.ItemTask;
 import me.shedaniel.architectury.platform.Platform;
 import net.minecraft.network.chat.TextComponent;
@@ -132,7 +132,7 @@ public class ValidItemsScreen extends BaseScreen {
 			@Override
 			public void onClicked(MouseButton button) {
 				playClickSound();
-				new SubmitTaskPacket(task.id).sendToServer();
+				new SubmitTaskMessage(task.id).sendToServer();
 				onBack();
 			}
 

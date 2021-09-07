@@ -11,7 +11,7 @@ import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.client.ConfigIconItemStack;
 import dev.ftb.mods.ftbquests.item.CustomIconItem;
-import dev.ftb.mods.ftbquests.net.EditObjectPacket;
+import dev.ftb.mods.ftbquests.net.EditObjectMessage;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import dev.ftb.mods.ftbquests.util.NBTUtils;
 import dev.ftb.mods.ftbquests.util.NetUtils;
@@ -331,7 +331,7 @@ public abstract class QuestObjectBase {
 		group.savedCallback = accepted -> {
 			gui.run();
 			if (accepted) {
-				new EditObjectPacket(this).sendToServer();
+				new EditObjectMessage(this).sendToServer();
 			}
 		};
 

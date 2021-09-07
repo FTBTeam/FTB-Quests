@@ -7,7 +7,7 @@ import dev.ftb.mods.ftblibrary.util.ClientUtils;
 import dev.ftb.mods.ftbquests.gui.CustomToast;
 import dev.ftb.mods.ftbquests.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.integration.jei.FTBQuestsJEIHelper;
-import dev.ftb.mods.ftbquests.net.DeleteObjectPacket;
+import dev.ftb.mods.ftbquests.net.DeleteObjectMessage;
 import dev.ftb.mods.ftbquests.quest.Movable;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestFile;
@@ -146,7 +146,7 @@ public class ClientQuestFile extends QuestFile {
 
 	@Override
 	public void deleteObject(long id) {
-		new DeleteObjectPacket(id).sendToServer();
+		new DeleteObjectMessage(id).sendToServer();
 	}
 
 	@Override

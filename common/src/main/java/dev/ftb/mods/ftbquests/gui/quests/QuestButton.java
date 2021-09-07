@@ -15,8 +15,8 @@ import dev.ftb.mods.ftblibrary.ui.Widget;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
-import dev.ftb.mods.ftbquests.net.CreateObjectPacket;
-import dev.ftb.mods.ftbquests.net.EditObjectPacket;
+import dev.ftb.mods.ftbquests.net.CreateObjectMessage;
+import dev.ftb.mods.ftbquests.net.EditObjectMessage;
 import dev.ftb.mods.ftbquests.quest.ChapterImage;
 import dev.ftb.mods.ftbquests.quest.Movable;
 import dev.ftb.mods.ftbquests.quest.Quest;
@@ -176,7 +176,7 @@ public class QuestButton extends Button {
 											r.readData(nbt1);
 											CompoundTag extra = new CompoundTag();
 											extra.putString("type", type.getTypeForNBT());
-											new CreateObjectPacket(r, extra).sendToServer();
+											new CreateObjectMessage(r, extra).sendToServer();
 										}
 									}
 								});
@@ -192,7 +192,7 @@ public class QuestButton extends Button {
 								ClientQuestFile.INSTANCE.deleteObject(((Quest) q).id);
 							} else if (q instanceof ChapterImage) {
 								((ChapterImage) q).chapter.images.remove(q);
-								new EditObjectPacket(((ChapterImage) q).chapter).sendToServer();
+								new EditObjectMessage(((ChapterImage) q).chapter).sendToServer();
 							}
 						});
 						questScreen.selectedObjects.clear();
@@ -266,7 +266,7 @@ public class QuestButton extends Button {
 		quest.removeInvalidDependencies();
 
 		if (quest.verifyDependencies(false)) {
-			new EditObjectPacket(quest).sendToServer();
+			new EditObjectMessage(quest).sendToServer();
 			questScreen.questPanel.refreshWidgets();
 		} else {
 			quest.dependencies.clear();

@@ -2,7 +2,7 @@ package dev.ftb.mods.ftbquests.gui.quests;
 
 import dev.ftb.mods.ftblibrary.ui.Panel;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
-import dev.ftb.mods.ftbquests.net.TogglePinnedPacket;
+import dev.ftb.mods.ftbquests.net.TogglePinnedMessage;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraft.network.chat.TranslatableComponent;
 
@@ -17,6 +17,6 @@ public class AutopinButton extends TabButton {
 	@Override
 	public void onClicked(MouseButton button) {
 		playClickSound();
-		new TogglePinnedPacket(1).sendToServer();
+		new TogglePinnedMessage(1).sendToServer();
 	}
 }

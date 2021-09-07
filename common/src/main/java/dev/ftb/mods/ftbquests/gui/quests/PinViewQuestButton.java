@@ -4,7 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import dev.ftb.mods.ftblibrary.ui.SimpleTextButton;
 import dev.ftb.mods.ftblibrary.ui.Theme;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
-import dev.ftb.mods.ftbquests.net.TogglePinnedPacket;
+import dev.ftb.mods.ftbquests.net.TogglePinnedMessage;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraft.network.chat.TranslatableComponent;
 
@@ -19,7 +19,7 @@ public class PinViewQuestButton extends SimpleTextButton {
 	@Override
 	public void onClicked(MouseButton button) {
 		playClickSound();
-		new TogglePinnedPacket(((ViewQuestPanel) parent).quest.id).sendToServer();
+		new TogglePinnedMessage(((ViewQuestPanel) parent).quest.id).sendToServer();
 	}
 
 	@Override

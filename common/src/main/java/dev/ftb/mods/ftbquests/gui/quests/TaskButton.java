@@ -15,7 +15,7 @@ import dev.ftb.mods.ftblibrary.ui.WidgetType;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.ui.misc.ButtonListBaseScreen;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
-import dev.ftb.mods.ftbquests.net.EditObjectPacket;
+import dev.ftb.mods.ftbquests.net.EditObjectMessage;
 import dev.ftb.mods.ftbquests.quest.task.ItemTask;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
@@ -86,7 +86,7 @@ public class TaskButton extends Button {
 								i.title = "Any #" + tag;
 							}
 
-							new EditObjectPacket(i).sendToServer();
+							new EditObjectMessage(i).sendToServer();
 						} else {
 							new ButtonListBaseScreen() {
 								@Override
@@ -103,7 +103,7 @@ public class TaskButton extends Button {
 													i.title = "Any #" + s;
 												}
 
-												new EditObjectPacket(i).sendToServer();
+												new EditObjectMessage(i).sendToServer();
 											}
 										});
 									}
