@@ -13,8 +13,8 @@ import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.ui.misc.ButtonListBaseScreen;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
-import dev.ftb.mods.ftbquests.net.CreateObjectPacket;
-import dev.ftb.mods.ftbquests.net.EditObjectPacket;
+import dev.ftb.mods.ftbquests.net.CreateObjectMessage;
+import dev.ftb.mods.ftbquests.net.EditObjectMessage;
 import dev.ftb.mods.ftbquests.quest.Chapter;
 import dev.ftb.mods.ftbquests.quest.ChapterGroup;
 import dev.ftb.mods.ftbquests.quest.Quest;
@@ -105,7 +105,7 @@ public class RewardTablesScreen extends ButtonListBaseScreen {
 					title = table.getTitle();
 				}
 
-				new EditObjectPacket(table).sendToServer();
+				new EditObjectMessage(table).sendToServer();
 			}) {
 				@Override
 				public void drawIcon(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
@@ -158,7 +158,7 @@ public class RewardTablesScreen extends ButtonListBaseScreen {
 					if (accepted) {
 						RewardTable table = new RewardTable(ClientQuestFile.INSTANCE);
 						table.title = c.value;
-						new CreateObjectPacket(table, null).sendToServer();
+						new CreateObjectMessage(table, null).sendToServer();
 					}
 
 					openGui();

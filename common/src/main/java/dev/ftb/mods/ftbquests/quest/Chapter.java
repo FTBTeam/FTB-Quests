@@ -8,7 +8,7 @@ import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
 import dev.ftb.mods.ftbquests.events.ObjectCompletedEvent;
 import dev.ftb.mods.ftbquests.events.ObjectStartedEvent;
 import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
-import dev.ftb.mods.ftbquests.net.DisplayCompletionToastPacket;
+import dev.ftb.mods.ftbquests.net.DisplayCompletionToastMessage;
 import dev.ftb.mods.ftbquests.util.NetUtils;
 import me.shedaniel.architectury.utils.NbtType;
 import net.fabricmc.api.EnvType;
@@ -210,7 +210,7 @@ public final class Chapter extends QuestObject {
 
 		if (!disableToast) {
 			for (ServerPlayer player : data.notifiedPlayers) {
-				new DisplayCompletionToastPacket(id).sendTo(player);
+				new DisplayCompletionToastMessage(id).sendTo(player);
 			}
 		}
 

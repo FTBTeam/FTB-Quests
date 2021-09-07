@@ -13,7 +13,7 @@ import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.FTBQuestsCommon;
 import dev.ftb.mods.ftbquests.block.FTBQuestsBlocks;
-import dev.ftb.mods.ftbquests.net.SetCustomImagePacket;
+import dev.ftb.mods.ftbquests.net.SetCustomImageMessage;
 import dev.ftb.mods.ftbquests.quest.QuestFile;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.TeamData;
@@ -248,7 +248,7 @@ public class FTBQuestsClient extends FTBQuestsCommon {
 					player.getItemInHand(hand).addTagElement("Icon", StringTag.valueOf(config.value));
 				}
 
-				new SetCustomImagePacket(hand, config.value).sendToServer();
+				new SetCustomImageMessage(hand, config.value).sendToServer();
 			}
 
 			Minecraft.getInstance().setScreen(null);

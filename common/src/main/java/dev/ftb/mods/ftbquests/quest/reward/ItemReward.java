@@ -4,7 +4,7 @@ import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;
 import dev.ftb.mods.ftblibrary.util.WrappedIngredient;
-import dev.ftb.mods.ftbquests.net.DisplayItemRewardToastPacket;
+import dev.ftb.mods.ftbquests.net.DisplayItemRewardToastMessage;
 import dev.ftb.mods.ftbquests.net.FTBQuestsNetHandler;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.util.NBTUtils;
@@ -128,7 +128,7 @@ public class ItemReward extends Reward {
 		}
 
 		if (notify) {
-			new DisplayItemRewardToastPacket(item, size).sendTo(player);
+			new DisplayItemRewardToastMessage(item, size).sendTo(player);
 		}
 	}
 

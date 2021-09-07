@@ -2,7 +2,7 @@ package dev.ftb.mods.ftbquests.quest.reward;
 
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.icon.Icon;
-import dev.ftb.mods.ftbquests.net.DisplayRewardToastPacket;
+import dev.ftb.mods.ftbquests.net.DisplayRewardToastMessage;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -70,7 +70,7 @@ public class XPLevelsReward extends Reward {
 		player.giveExperienceLevels(xpLevels);
 
 		if (notify) {
-			new DisplayRewardToastPacket(id, new TranslatableComponent("ftbquests.reward.ftbquests.xp_levels").append(": ").append(new TextComponent("+" + xpLevels).withStyle(ChatFormatting.GREEN)), Icon.EMPTY).sendTo(player);
+			new DisplayRewardToastMessage(id, new TranslatableComponent("ftbquests.reward.ftbquests.xp_levels").append(": ").append(new TextComponent("+" + xpLevels).withStyle(ChatFormatting.GREEN)), Icon.EMPTY).sendTo(player);
 		}
 	}
 

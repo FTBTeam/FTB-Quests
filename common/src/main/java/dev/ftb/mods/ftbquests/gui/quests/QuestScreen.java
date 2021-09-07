@@ -19,8 +19,8 @@ import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.gui.FTBQuestsTheme;
 import dev.ftb.mods.ftbquests.gui.SelectQuestObjectScreen;
-import dev.ftb.mods.ftbquests.net.ChangeProgressPacket;
-import dev.ftb.mods.ftbquests.net.EditObjectPacket;
+import dev.ftb.mods.ftbquests.net.ChangeProgressMessage;
+import dev.ftb.mods.ftbquests.net.EditObjectMessage;
 import dev.ftb.mods.ftbquests.quest.Chapter;
 import dev.ftb.mods.ftbquests.quest.Movable;
 import dev.ftb.mods.ftbquests.quest.Quest;
@@ -201,7 +201,7 @@ public class QuestScreen extends BaseScreen {
 							c.onClicked(button, accepted -> {
 								if (accepted) {
 									c.setter.accept(c.value);
-									new EditObjectPacket(object).sendToServer();
+									new EditObjectMessage(object).sendToServer();
 								}
 							});
 						}
@@ -235,11 +235,11 @@ public class QuestScreen extends BaseScreen {
 
 		contextMenu.add(delete);
 
-		contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.gui.reset_progress"), ThemeProperties.RELOAD_ICON.get(), () -> ChangeProgressPacket.send(file.self, object, progressChange -> {
+		contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.gui.reset_progress"), ThemeProperties.RELOAD_ICON.get(), () -> ChangeProgressMessage.send(file.self, object, progressChange -> {
 			progressChange.reset = true;
 		})).setYesNo(new TranslatableComponent("ftbquests.gui.reset_progress_q")));
 
-		contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.gui.complete_instantly"), ThemeProperties.CHECK_ICON.get(), () -> ChangeProgressPacket.send(file.self, object, progressChange -> {
+		contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.gui.complete_instantly"), ThemeProperties.CHECK_ICON.get(), () -> ChangeProgressMessage.send(file.self, object, progressChange -> {
 			progressChange.reset = false;
 		})).setYesNo(new TranslatableComponent("ftbquests.gui.complete_instantly_q")));
 

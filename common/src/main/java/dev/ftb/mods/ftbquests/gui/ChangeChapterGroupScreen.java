@@ -7,7 +7,7 @@ import dev.ftb.mods.ftblibrary.ui.Theme;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.ui.misc.ButtonListBaseScreen;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
-import dev.ftb.mods.ftbquests.net.ChangeChapterGroupPacket;
+import dev.ftb.mods.ftbquests.net.ChangeChapterGroupMessage;
 import dev.ftb.mods.ftbquests.quest.Chapter;
 import dev.ftb.mods.ftbquests.quest.ChapterGroup;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -28,7 +28,7 @@ public class ChangeChapterGroupScreen extends ButtonListBaseScreen {
 		@Override
 		public void onClicked(MouseButton button) {
 			playClickSound();
-			new ChangeChapterGroupPacket(chapter.id, chapterGroup.id).sendToServer();
+			new ChangeChapterGroupMessage(chapter.id, chapterGroup.id).sendToServer();
 			ClientQuestFile.INSTANCE.questScreen.open(chapter, false);
 		}
 	}
