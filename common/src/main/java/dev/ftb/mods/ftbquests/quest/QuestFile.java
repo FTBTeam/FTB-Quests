@@ -1026,11 +1026,11 @@ public abstract class QuestFile extends QuestObject {
 		return teamDataMap.get(id);
 	}
 
-	public TeamData getData(UUID id) {
-		TeamData teamData = teamDataMap.get(id);
+	public TeamData getData(UUID teamId) {
+		TeamData teamData = teamDataMap.get(teamId);
 
 		if (teamData == null) {
-			teamData = new TeamData(id);
+			teamData = new TeamData(teamId);
 			teamData.file = this;
 			teamDataMap.put(teamData.uuid, teamData);
 		}
