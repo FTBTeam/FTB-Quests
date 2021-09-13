@@ -21,6 +21,8 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.entity.Entity;
 
+import java.util.Objects;
+
 /**
  * @author LatvianModder
  */
@@ -157,6 +159,6 @@ public class ClientQuestFile extends QuestFile {
 
 	@Override
 	public TeamData getData(Entity player) {
-		return player == Minecraft.getInstance().player ? self : getData(ClientTeamManager.INSTANCE.playerTeamMap.get(player.getUUID()));
+		return player == Minecraft.getInstance().player ? self : getData(Objects.requireNonNull(ClientTeamManager.INSTANCE.getKnownPlayer(player.getUUID()), "Non-null team required!").teamId);
 	}
 }
