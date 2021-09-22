@@ -24,7 +24,7 @@ dependencies {
 	modImplementation "dev.ftb.mods:ftb-teams-forge:${rootProject.ftb_teams_version}"
 	modImplementation "dev.latvian.mods:item-filters-forge:${rootProject.itemfilters_version}"
 	modImplementation "dev.latvian.mods:kubejs-forge:${rootProject.kubejs_version}"
-	modImplementation "dev.latvian.mods:rhino:${rootProject.rhino_version}"
+	modImplementation "dev.latvian.mods:rhino-forge:${rootProject.rhino_version}"
 	modImplementation "curse.maven:bookshelf-228525:${bookshelf_file}"
 	modImplementation "curse.maven:game-stages-268655:${gamestages_file}"
 	modImplementation "curse.maven:ctm-267602:3137659"

@@ -226,8 +226,12 @@ public class ServerQuestFile extends QuestFile {
 			TeamData oldTeamData = getData(event.getPreviousTeam().get());
 			TeamData newTeamData = getData(event.getTeam());
 
+			if (event.getTeam().getType().isParty()) {
+				newTeamData.mergeProgress(oldTeamData);
+			}
+
 			new TeamDataChangedMessage(new TeamDataUpdate(oldTeamData), new TeamDataUpdate(newTeamData)).sendToAll(server);
-			new SyncTeamDataMessage(newTeamData, true).sendTo(event.getPlayer());
+			new SyncTeamDataMessage(newTeamData, true).sendTo(event.getTeam().getOnlineMembers());
 		}
 	}
 }

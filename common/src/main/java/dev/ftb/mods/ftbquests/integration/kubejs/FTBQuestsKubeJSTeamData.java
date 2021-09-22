@@ -16,13 +16,16 @@ public abstract class FTBQuestsKubeJSTeamData {
 
 	public abstract TeamData getData();
 
-	public void addProgress(Object id, long progress) {
+	public boolean addProgress(Object id, long progress) {
 		TeamData data = getData();
 		Task task = data.file.getTask(data.file.getID(id));
 
-		if (task != null) {
+		if (task != null && data.canStartTasks(task.quest)) {
 			data.addProgress(task, progress);
+			return true;
 		}
+
+		return false;
 	}
 
 	public void changeProgress(Object id, Consumer<ProgressChange> consumer) {

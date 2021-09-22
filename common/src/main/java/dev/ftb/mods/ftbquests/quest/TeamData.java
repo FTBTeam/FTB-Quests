@@ -752,4 +752,18 @@ public class TeamData {
 
 		return false;
 	}
+
+	public void mergeProgress(TeamData from) {
+		if (!locked) {
+			/*
+			for (Long2LongMap.Entry entry : from.taskProgress.long2LongEntrySet()) {
+				Task task = file.getTask(entry.getLongKey());
+
+				if (task != null) {
+					setProgress(task, Math.max(getProgress(task.id), entry.getLongValue()));
+				}
+			}
+			 */
+		}
+	}
 }
