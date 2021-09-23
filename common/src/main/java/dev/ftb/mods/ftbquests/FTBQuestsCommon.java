@@ -5,13 +5,15 @@ import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
+import org.jetbrains.annotations.Nullable;
 
 public class FTBQuestsCommon {
 	public void init() {
 	}
 
+	@Nullable
 	public QuestFile getClientQuestFile() {
-		throw new NullPointerException("Client quest file not loaded!");
+		return null;
 	}
 
 	public QuestFile getQuestFile(boolean isClient) {
