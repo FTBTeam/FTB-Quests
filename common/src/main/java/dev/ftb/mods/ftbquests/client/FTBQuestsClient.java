@@ -43,6 +43,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.StructureBlockEntity;
 import net.minecraft.world.phys.BlockHitResult;
+import org.jetbrains.annotations.Nullable;
 
 public class FTBQuestsClient extends FTBQuestsCommon {
 	public static KeyMapping KEY_QUESTS;
@@ -64,17 +65,24 @@ public class FTBQuestsClient extends FTBQuestsCommon {
 	}
 
 	@Override
+	@Nullable
 	public QuestFile getClientQuestFile() {
-		if (ClientQuestFile.INSTANCE != null) {
-			return ClientQuestFile.INSTANCE;
-		}
-
-		throw new NullPointerException("Client quest file not loaded!");
+		return ClientQuestFile.INSTANCE;
 	}
 
 	@Override
 	public QuestFile getQuestFile(boolean isClient) {
-		return isClient ? getClientQuestFile() : ServerQuestFile.INSTANCE;
+		if (isClient) {
+			QuestFile f = getClientQuestFile();
+
+			if (f == null) {
+				throw new NullPointerException("Client quest file not loaded!");
+			}
+
+			return f;
+		}
+
+		return ServerQuestFile.INSTANCE;
 	}
 
 	@Override
