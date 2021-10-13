@@ -17,6 +17,7 @@ import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
+import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.gui.FTBQuestsTheme;
 import dev.ftb.mods.ftbquests.gui.SelectQuestObjectScreen;
 import dev.ftb.mods.ftbquests.net.ChangeProgressMessage;
@@ -268,6 +269,9 @@ public class QuestScreen extends BaseScreen {
 	@Override
 	public boolean keyPressed(Key key) {
 		if (super.keyPressed(key)) {
+			return true;
+		} else if (FTBQuestsClient.KEY_QUESTS.matches(key.keyCode, key.scanCode)) {
+			closeGui(true);
 			return true;
 		}
 
