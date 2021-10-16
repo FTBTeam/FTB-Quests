@@ -15,7 +15,7 @@ public class OtherButtonsPanelTop extends OtherButtonsPanel {
 
 	@Override
 	public void addWidgets() {
-		add(new ModpackButton(this));
+		add(new CollectRewardsButton(this));
 
 		if (Platform.isModLoaded("ftbguides")) {
 			add(new OpenGuidesButton(this));
@@ -27,6 +27,10 @@ public class OtherButtonsPanelTop extends OtherButtonsPanel {
 
 		if (!ThemeProperties.WIKI_URL.get().equals("-")) {
 			add(new WikiButton(this));
+		}
+
+		if (Platform.isModLoaded("ftbmoney")) {
+			add(new OpenShopButton(this));
 		}
 	}
 

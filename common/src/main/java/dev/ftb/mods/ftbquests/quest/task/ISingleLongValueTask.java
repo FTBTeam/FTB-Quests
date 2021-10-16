@@ -8,6 +8,10 @@ public interface ISingleLongValueTask {
 		return 1L;
 	}
 
+	default long getMinConfigValue() {
+		return 1L;
+	}
+
 	default long getMaxConfigValue() {
 		return Long.MAX_VALUE;
 	}

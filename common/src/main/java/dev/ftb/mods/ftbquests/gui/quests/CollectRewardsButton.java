@@ -6,21 +6,18 @@ import dev.ftb.mods.ftblibrary.ui.Panel;
 import dev.ftb.mods.ftblibrary.ui.Theme;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
-import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.gui.RewardNotificationsScreen;
 import dev.ftb.mods.ftbquests.net.ClaimAllRewardsMessage;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 
 /**
  * @author LatvianModder
  */
-public class ModpackButton extends TabButton {
-	public ModpackButton(Panel panel) {
-		super(panel, TextComponent.EMPTY, ClientQuestFile.INSTANCE.getIcon());
+public class CollectRewardsButton extends TabButton {
+	public CollectRewardsButton(Panel panel) {
+		super(panel, TextComponent.EMPTY, ThemeProperties.COLLECT_REWARDS_ICON.get());
 		title = questScreen.file.getTitle();
 	}
 
@@ -35,12 +32,7 @@ public class ModpackButton extends TabButton {
 
 	@Override
 	public void addMouseOverText(TooltipList list) {
-		super.addMouseOverText(list);
-
-		if (questScreen.file.self.hasUnclaimedRewards(Minecraft.getInstance().player.getUUID(), questScreen.file)) {
-			list.blankLine();
-			list.add(new TranslatableComponent("ftbquests.gui.collect_rewards").withStyle(ChatFormatting.GOLD));
-		}
+		list.translate("ftbquests.gui.collect_rewards");
 	}
 
 	@Override

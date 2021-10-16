@@ -168,6 +168,7 @@ public interface ThemeProperties {
 	IconProperty MODPACK_ICON = new IconProperty("modpack_icon");
 	IconProperty REWARD_TABLE_ICON = new IconProperty("reward_table_icon");
 	IconProperty SHOP_ICON = new IconProperty("shop_icon");
+	IconProperty COLLECT_REWARDS_ICON = new IconProperty("collect_rewards_icon");
 	IconProperty DELETE_ICON = new IconProperty("delete_icon");
 	IconProperty RELOAD_ICON = new IconProperty("reload_icon");
 	IconProperty DOWNLOAD_ICON = new IconProperty("download_icon");

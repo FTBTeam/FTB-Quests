@@ -37,6 +37,7 @@ guide_icon:           ftbquests:textures/gui/guide.png; color=#EF9E1A
 modpack_icon:         ftbquests:textures/item/book.png
 reward_table_icon:    ftblibrary:icons/money_bag
 shop_icon:            ftbquests:textures/gui/shop.png; color=#EF9E1A
+collect_rewards_icon: ftbquests:textures/gui/collect_rewards.png; color=#EF9E1A
 delete_icon:          ftblibrary:icons/remove
 reload_icon:          ftblibrary:icons/refresh
 download_icon:        ftblibrary:icons/down
