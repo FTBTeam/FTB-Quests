@@ -28,6 +28,7 @@ dependencies {
 	modImplementation "curse.maven:bookshelf-228525:${bookshelf_file}"
 	modImplementation "curse.maven:game-stages-268655:${gamestages_file}"
 	modImplementation "curse.maven:ctm-267602:3137659"
+	modRuntime "dev.ftb.mods:ftb-money:${rootProject.ftb_money_version}"
 
 	implementation(project(path: ":common")) {
 		transitive = false

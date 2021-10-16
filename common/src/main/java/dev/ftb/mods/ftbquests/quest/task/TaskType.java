@@ -69,7 +69,7 @@ public final class TaskType extends RegistryEntry<TaskType> {
 
 				if (task instanceof ISingleLongValueTask) {
 					ISingleLongValueTask t = (ISingleLongValueTask) task;
-					LongConfig c = new LongConfig(0L, t.getMaxConfigValue());
+					LongConfig c = new LongConfig(t.getMinConfigValue(), t.getMaxConfigValue());
 
 					EditConfigFromStringScreen.open(c, t.getDefaultConfigValue(), t.getDefaultConfigValue(), accepted -> {
 						if (accepted) {

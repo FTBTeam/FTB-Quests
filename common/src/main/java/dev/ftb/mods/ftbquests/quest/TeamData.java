@@ -74,7 +74,6 @@ public class TeamData {
 	private final Long2LongOpenHashMap started;
 	private final Long2LongOpenHashMap completed;
 	private boolean canEdit;
-	private long money;
 	private boolean autoPin;
 	public final LongOpenHashSet pinnedQuests;
 
@@ -94,7 +93,6 @@ public class TeamData {
 		completed = new Long2LongOpenHashMap();
 		completed.defaultReturnValue(0L);
 		canEdit = false;
-		money = 0L;
 		autoPin = false;
 		pinnedQuests = new LongOpenHashSet();
 	}
@@ -284,19 +282,6 @@ public class TeamData {
 		return false;
 	}
 
-	public long getMoney() {
-		return money;
-	}
-
-	public void setMoney(long value) {
-		long m = Math.max(0L, value);
-
-		if (money != m) {
-			money = m;
-			save();
-		}
-	}
-
 	public boolean getAutoPin() {
 		return autoPin;
 	}
@@ -330,7 +315,6 @@ public class TeamData {
 		nbt.putString("name", name);
 		nbt.putBoolean("can_edit", canEdit);
 		nbt.putBoolean("lock", locked);
-		nbt.putLong("money", money);
 		nbt.putBoolean("auto_pin", autoPin);
 
 		SNBTCompoundTag taskProgressNBT = new SNBTCompoundTag();
@@ -392,7 +376,6 @@ public class TeamData {
 		name = nbt.getString("name");
 		canEdit = nbt.getBoolean("can_edit");
 		locked = nbt.getBoolean("lock");
-		money = nbt.getLong("money");
 		autoPin = nbt.getBoolean("auto_pin");
 
 		taskProgress.clear();
@@ -432,7 +415,6 @@ public class TeamData {
 
 	public void write(FriendlyByteBuf buffer, boolean self) {
 		buffer.writeUtf(name, Short.MAX_VALUE);
-		buffer.writeVarLong(money);
 		buffer.writeVarInt(taskProgress.size());
 
 		for (Long2LongMap.Entry entry : taskProgress.long2LongEntrySet()) {
@@ -479,7 +461,6 @@ public class TeamData {
 
 	public void read(FriendlyByteBuf buffer, boolean self) {
 		name = buffer.readUtf(Short.MAX_VALUE);
-		money = buffer.readVarLong();
 
 		taskProgress.clear();
 		int ts = buffer.readVarInt();
