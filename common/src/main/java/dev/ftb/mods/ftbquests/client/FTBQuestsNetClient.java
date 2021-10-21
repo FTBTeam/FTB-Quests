@@ -35,6 +35,16 @@ import java.util.UUID;
 
 public class FTBQuestsNetClient extends FTBQuestsNetCommon {
 	@Override
+	public void syncTeamData(boolean self, TeamData data) {
+		data.file = ClientQuestFile.INSTANCE;
+		data.file.addData(data, true);
+
+		if (self) {
+			ClientQuestFile.INSTANCE.self = data;
+		}
+	}
+
+	@Override
 	public void claimReward(UUID teamId, UUID player, long rewardId) {
 		Reward reward = ClientQuestFile.INSTANCE.getReward(rewardId);
 
