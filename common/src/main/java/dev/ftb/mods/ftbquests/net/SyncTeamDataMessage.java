@@ -39,16 +39,6 @@ public class SyncTeamDataMessage extends BaseS2CMessage {
 
 	@Override
 	public void handle(NetworkManager.PacketContext context) {
-		teamData.file = FTBQuests.PROXY.getClientQuestFile();
-
-		if (teamData.file == null) {
-			return;
-		}
-
-		teamData.file.addData(teamData, true);
-
-		if (self) {
-			teamData.file.setSelf(teamData);
-		}
+		FTBQuests.NET_PROXY.syncTeamData(self, teamData);
 	}
 }

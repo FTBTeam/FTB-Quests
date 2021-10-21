@@ -60,11 +60,6 @@ public class ClientQuestFile extends QuestFile {
 	}
 
 	@Override
-	public void setSelf(TeamData s) {
-		self = s;
-	}
-
-	@Override
 	public void refreshGui() {
 		clearCachedData();
 

@@ -1306,13 +1306,10 @@ public abstract class QuestFile extends QuestObject {
 		return defaultQuestShape;
 	}
 
-	public void addData(TeamData data, boolean strong) {
-		if (strong || !teamDataMap.containsKey(data.uuid)) {
+	public void addData(TeamData data, boolean override) {
+		if (override || !teamDataMap.containsKey(data.uuid)) {
 			teamDataMap.put(data.uuid, data);
 		}
-	}
-
-	public void setSelf(TeamData data) {
 	}
 
 	public void refreshGui() {

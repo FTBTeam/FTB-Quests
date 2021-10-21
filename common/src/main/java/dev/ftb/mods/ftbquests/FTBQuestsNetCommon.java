@@ -3,6 +3,7 @@ package dev.ftb.mods.ftbquests;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftbquests.net.TeamDataUpdate;
 import dev.ftb.mods.ftbquests.quest.QuestObjectType;
+import dev.ftb.mods.ftbquests.quest.TeamData;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
@@ -12,6 +13,9 @@ import java.util.Date;
 import java.util.UUID;
 
 public class FTBQuestsNetCommon {
+	public void syncTeamData(boolean self, TeamData data) {
+	}
+
 	public void claimReward(UUID teamId, UUID player, long reward) {
 	}
 
