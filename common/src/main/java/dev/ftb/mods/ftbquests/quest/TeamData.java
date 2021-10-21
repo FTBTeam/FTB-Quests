@@ -73,6 +73,8 @@ public class TeamData {
 	private final Object2LongOpenHashMap<QuestKey> claimedRewards;
 	private final Long2LongOpenHashMap started;
 	private final Long2LongOpenHashMap completed;
+
+	// TODO: Move these to player data
 	private boolean canEdit;
 	private boolean autoPin;
 	public final LongOpenHashSet pinnedQuests;
@@ -84,6 +86,7 @@ public class TeamData {
 		uuid = id;
 		name = "";
 		shouldSave = false;
+
 		taskProgress = new Long2LongOpenHashMap();
 		taskProgress.defaultReturnValue(0L);
 		claimedRewards = new Object2LongOpenHashMap<>();
@@ -92,6 +95,7 @@ public class TeamData {
 		started.defaultReturnValue(0L);
 		completed = new Long2LongOpenHashMap();
 		completed.defaultReturnValue(0L);
+
 		canEdit = false;
 		autoPin = false;
 		pinnedQuests = new LongOpenHashSet();
@@ -734,17 +738,38 @@ public class TeamData {
 		return false;
 	}
 
-	public void mergeProgress(TeamData from) {
-		if (!locked) {
-			/*
-			for (Long2LongMap.Entry entry : from.taskProgress.long2LongEntrySet()) {
-				Task task = file.getTask(entry.getLongKey());
-
-				if (task != null) {
-					setProgress(task, Math.max(getProgress(task.id), entry.getLongValue()));
-				}
-			}
-			 */
+	public void mergeData(TeamData from) {
+		for (Long2LongMap.Entry entry : from.taskProgress.long2LongEntrySet()) {
+			taskProgress.put(entry.getLongKey(), Long.max(entry.getLongValue(), taskProgress.getOrDefault(entry.getLongKey(), 0L)));
 		}
+
+		for (Object2LongMap.Entry<QuestKey> entry : from.claimedRewards.object2LongEntrySet()) {
+			if (!claimedRewards.containsKey(entry.getKey())) {
+				claimedRewards.put(entry.getKey(), entry.getLongValue());
+			}
+		}
+
+		for (Long2LongMap.Entry entry : from.started.long2LongEntrySet()) {
+			if (!started.containsKey(entry.getLongKey())) {
+				started.put(entry.getLongKey(), entry.getLongValue());
+			}
+		}
+
+		for (Long2LongMap.Entry entry : from.completed.long2LongEntrySet()) {
+			if (!completed.containsKey(entry.getLongKey())) {
+				completed.put(entry.getLongKey(), entry.getLongValue());
+			}
+		}
+	}
+
+	public void copyData(TeamData from) {
+		locked = from.locked;
+		taskProgress.putAll(from.taskProgress);
+		claimedRewards.putAll(from.claimedRewards);
+		started.putAll(from.started);
+		completed.putAll(from.completed);
+		canEdit = from.canEdit;
+		autoPin = from.autoPin;
+		pinnedQuests.addAll(from.pinnedQuests);
 	}
 }

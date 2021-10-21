@@ -17,6 +17,8 @@ import dev.ftb.mods.ftbquests.quest.task.TaskType;
 import dev.ftb.mods.ftbquests.quest.task.TaskTypes;
 import dev.ftb.mods.ftbquests.util.FTBQuestsInventoryListener;
 import dev.ftb.mods.ftbquests.util.FileUtils;
+import dev.ftb.mods.ftbteams.data.PartyTeam;
+import dev.ftb.mods.ftbteams.data.PlayerTeam;
 import dev.ftb.mods.ftbteams.event.PlayerChangedTeamEvent;
 import dev.ftb.mods.ftbteams.event.PlayerLoggedInAfterTeamEvent;
 import dev.ftb.mods.ftbteams.event.TeamCreatedEvent;
@@ -216,6 +218,13 @@ public class ServerQuestFile extends QuestFile {
 		}
 
 		addData(data, false);
+
+		if (event.getTeam() instanceof PartyTeam) {
+			PlayerTeam pt = event.getTeam().manager.getInternalPlayerTeam(event.getCreator().getUUID());
+			TeamData oldTeamData = getData(pt);
+			data.copyData(oldTeamData);
+		}
+
 		TeamDataUpdate self = new TeamDataUpdate(data);
 
 		new CreateOtherTeamDataMessage(self).sendToAll(server);
@@ -226,8 +235,8 @@ public class ServerQuestFile extends QuestFile {
 			TeamData oldTeamData = getData(event.getPreviousTeam().get());
 			TeamData newTeamData = getData(event.getTeam());
 
-			if (event.getTeam().getType().isParty()) {
-				newTeamData.mergeProgress(oldTeamData);
+			if (event.getPreviousTeam().get() instanceof PlayerTeam && event.getTeam() instanceof PartyTeam && !((PartyTeam) event.getTeam()).isOwner(event.getPlayerId())) {
+				newTeamData.mergeData(oldTeamData);
 			}
 
 			new TeamDataChangedMessage(new TeamDataUpdate(oldTeamData), new TeamDataUpdate(newTeamData)).sendToAll(server);
