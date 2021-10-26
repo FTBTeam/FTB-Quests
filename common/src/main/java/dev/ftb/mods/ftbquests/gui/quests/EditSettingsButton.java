@@ -61,7 +61,7 @@ public class EditSettingsButton extends TabButton {
 				appendNum(fileName, time.get(Calendar.SECOND), '\0');
 				File file = new File(Minecraft.getInstance().gameDirectory, fileName.toString()).getCanonicalFile();
 				ClientQuestFile.INSTANCE.writeDataFull(file.toPath());
-				Component component = new TranslatableComponent("ftbquests.gui.saved_as_file", file.getPath().replace(Minecraft.getInstance().gameDirectory.getCanonicalFile().getAbsolutePath(), ""));
+				Component component = new TranslatableComponent("ftbquests.gui.saved_as_file", "." + file.getPath().replace(Minecraft.getInstance().gameDirectory.getCanonicalFile().getAbsolutePath(), ""));
 				component.getStyle().withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, file.getAbsolutePath()));
 				Minecraft.getInstance().player.sendMessage(component, Util.NIL_UUID);
 			} catch (Exception ex) {
