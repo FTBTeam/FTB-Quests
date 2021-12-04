@@ -30,6 +30,7 @@ public interface RewardTypes {
 	RewardType ADVANCEMENT = register(new ResourceLocation(FTBQuests.MOD_ID, "advancement"), AdvancementReward::new, () -> Icon.getIcon("minecraft:item/wheat"));
 	RewardType TOAST = register(new ResourceLocation(FTBQuests.MOD_ID, "toast"), ToastReward::new, () -> Icon.getIcon("minecraft:item/oak_sign"));
 	RewardType STAGE = RewardTypes.register(new ResourceLocation(FTBQuests.MOD_ID, "gamestage"), StageReward::new, () -> Icons.CONTROLLER);
+	RewardType REPEAT = RewardTypes.register(new ResourceLocation(FTBQuests.MOD_ID, "repeat"), RepeatReward::new, () -> Icons.COLOR_HSB);
 
 	static void init() {
 	}
