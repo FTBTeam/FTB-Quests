@@ -54,7 +54,7 @@ public final class RewardType {
 	private final Supplier<Icon> icon;
 	private Component displayName;
 	private GuiProvider guiProvider;
-	private boolean excludeFromListRewards;
+	private boolean excludeFromListRewards = false;
 	public int intId;
 
 	public RewardType(ResourceLocation i, Provider p, Supplier<Icon> ic) {
