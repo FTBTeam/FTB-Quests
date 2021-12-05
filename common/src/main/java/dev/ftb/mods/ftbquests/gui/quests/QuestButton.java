@@ -224,11 +224,8 @@ public class QuestButton extends Button {
 						list.add(new TranslatableComponent("ftbquests.gui.move_tooltip").withStyle(ChatFormatting.DARK_GRAY));
 					}
 				});
-
-				// contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.gui.edit_text"), GuiIcons.INFO, () -> TextEditorFrame.open(quest)));
-
-				contextMenu.add(ContextMenuItem.SEPARATOR);
 				questScreen.addObjectMenuItems(contextMenu, getGui(), quest);
+				// contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.gui.edit_text"), GuiIcons.INFO, () -> TextEditorFrame.open(quest)));
 			}
 
 			getGui().openContextMenu(contextMenu);
