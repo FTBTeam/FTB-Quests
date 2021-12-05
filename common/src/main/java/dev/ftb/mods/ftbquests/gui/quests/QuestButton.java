@@ -186,6 +186,16 @@ public class QuestButton extends Button {
 						getGui().openContextMenu(contextMenu2);
 					}));
 
+					contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.gui.clear_reward_all"), ThemeProperties.DELETE_ICON.get(quest), () -> {
+						for (Movable movable : questScreen.selectedObjects) {
+							if (movable instanceof Quest) {
+								Quest q = (Quest)movable;
+								q.rewards.clear();
+								new EditObjectMessage(q).sendToServer();
+							}
+						}
+					}));
+
 					contextMenu.add(new ContextMenuItem(new TranslatableComponent("selectServer.delete"), ThemeProperties.DELETE_ICON.get(quest), () -> {
 						questScreen.selectedObjects.forEach(q -> {
 							if (q instanceof Quest) {
