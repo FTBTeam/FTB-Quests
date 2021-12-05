@@ -10,6 +10,7 @@ import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.net.CreateObjectMessage;
+import dev.ftb.mods.ftbquests.net.DeleteObjectMessage;
 import dev.ftb.mods.ftbquests.net.EditObjectMessage;
 import dev.ftb.mods.ftbquests.quest.*;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
@@ -182,6 +183,14 @@ public class QuestButton extends Button {
 						}
 
 						getGui().openContextMenu(contextMenu2);
+					}));
+
+					contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.clear_reward_all"), ThemeProperties.CLOSE_ICON.get(quest), () -> {
+						for (Movable movable : questScreen.selectedObjects) {
+							if (movable instanceof Quest q) {
+								q.rewards.forEach(r -> new DeleteObjectMessage(r.id).sendToServer());
+							}
+						}
 					}));
 
 					contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.delete"), ThemeProperties.DELETE_ICON.get(quest), () -> {
