@@ -166,6 +166,7 @@
 	"ftbquests.gui.saved_on_server": "Quests saved on server",
 	"ftbquests.gui.error": "Error!",
 	"ftbquests.gui.add_reward_all": "Add reward to all",
+	"ftbquests.gui.clear_reward_all": "Clear rewards from all",
 	"ftbquests.gui.select_quest_object": "Select Quest Object",
 	"ftbquests.gui.select_task_type": "Select Task Type",
 	"ftbquests.gui.select_reward_table": "Select Reward Table",
