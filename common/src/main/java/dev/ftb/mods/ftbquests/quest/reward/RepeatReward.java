@@ -8,6 +8,8 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
+import dev.ftb.mods.ftbquests.quest.TeamData;
+import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.util.ProgressChange;
 
 /**
@@ -30,7 +32,17 @@ public class RepeatReward extends Reward {
 		progressChange.origin = quest;
 		progressChange.reset = true;
 		progressChange.player = player.getUUID();
-		quest.forceProgress(ServerQuestFile.INSTANCE.getData(player), progressChange);
+
+		TeamData teamData = ServerQuestFile.INSTANCE.getData(player);
+
+		for (Reward reward : quest.rewards) {
+			reward.forceProgress(teamData, progressChange);
+		}
+
+		for (Task task : quest.tasks) {
+			task.forceProgress(teamData, progressChange);
+		}
+
 
 		if (notify) {
 			player.sendMessage(new TranslatableComponent("ftbquests.reward.ftbquests.repeat"), Util.NIL_UUID);
