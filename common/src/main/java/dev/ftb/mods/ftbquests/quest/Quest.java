@@ -67,6 +67,7 @@ public final class Quest extends QuestObject implements Movable {
 	public double size;
 	public boolean optional;
 	public int minWidth;
+	public boolean invisible;
 
 	private Component cachedSubtitle = null;
 	private Component[] cachedDescription = null;
@@ -184,6 +185,10 @@ public final class Quest extends QuestObject implements Movable {
 		if (minWidth > 0) {
 			nbt.putInt("min_width", minWidth);
 		}
+
+		if (invisible) {
+			nbt.putBoolean("invisible", true);
+		}
 	}
 
 	@Override
@@ -238,6 +243,7 @@ public final class Quest extends QuestObject implements Movable {
 		size = nbt.contains("size") ? nbt.getDouble("size") : 1D;
 		optional = nbt.getBoolean("optional");
 		minWidth = nbt.getInt("min_width");
+		invisible = nbt.getBoolean("invisible");
 	}
 
 	@Override
@@ -254,6 +260,7 @@ public final class Quest extends QuestObject implements Movable {
 		//flags = Bits.setFlag(flags, 128, hideTextUntilComplete);
 		flags = Bits.setFlag(flags, 256, optional);
 		flags = Bits.setFlag(flags, 512, minWidth > 0);
+		flags = Bits.setFlag(flags, 1024, invisible);
 		buffer.writeVarInt(flags);
 
 		hide.write(buffer);
@@ -295,6 +302,8 @@ public final class Quest extends QuestObject implements Movable {
 		if (minWidth > 0) {
 			buffer.writeVarInt(minWidth);
 		}
+
+
 	}
 
 	@Override
@@ -338,6 +347,7 @@ public final class Quest extends QuestObject implements Movable {
 
 		size = Bits.getFlag(flags, 4) ? buffer.readDouble() : 1D;
 		minWidth = Bits.getFlag(flags, 512) ? buffer.readVarInt() : 0;
+		invisible = Bits.getFlag(flags, 1024);
 	}
 
 	@Override
@@ -504,6 +514,7 @@ public final class Quest extends QuestObject implements Movable {
 		config.addEnum("disable_jei", disableJEI, v -> disableJEI = v, Tristate.NAME_MAP);
 		config.addBool("optional", optional, v -> optional = v, false);
 		config.addInt("min_width", minWidth, v -> minWidth = v, 0, 0, 3000);
+		config.addBool("invisible", invisible, v -> invisible = v, false);
 	}
 
 	public boolean getHideDependencyLines() {
@@ -548,6 +559,10 @@ public final class Quest extends QuestObject implements Movable {
 
 	@Override
 	public boolean isVisible(TeamData data) {
+		if (invisible && !data.isCompleted(this)) {
+			return false;
+		}
+
 		if (dependencies.isEmpty()) {
 			return true;
 		}
