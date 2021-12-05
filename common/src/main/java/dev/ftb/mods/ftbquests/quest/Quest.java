@@ -68,6 +68,7 @@ public final class Quest extends QuestObject implements Movable {
 	public boolean optional;
 	public int minWidth;
 	public boolean invisible;
+	public int invisibleUntilTasks;
 
 	private Component cachedSubtitle = null;
 	private Component[] cachedDescription = null;
@@ -189,6 +190,10 @@ public final class Quest extends QuestObject implements Movable {
 		if (invisible) {
 			nbt.putBoolean("invisible", true);
 		}
+
+		if (invisibleUntilTasks > 0) {
+			nbt.putInt("invisible_until_tasks", invisibleUntilTasks);
+		}
 	}
 
 	@Override
@@ -261,6 +266,7 @@ public final class Quest extends QuestObject implements Movable {
 		flags = Bits.setFlag(flags, 256, optional);
 		flags = Bits.setFlag(flags, 512, minWidth > 0);
 		flags = Bits.setFlag(flags, 1024, invisible);
+		flags = Bits.setFlag(flags, 2048, invisibleUntilTasks > 0);
 		buffer.writeVarInt(flags);
 
 		hide.write(buffer);
@@ -303,7 +309,9 @@ public final class Quest extends QuestObject implements Movable {
 			buffer.writeVarInt(minWidth);
 		}
 
-
+		if (invisibleUntilTasks > 0) {
+			buffer.writeVarInt(invisibleUntilTasks);
+		}
 	}
 
 	@Override
@@ -348,6 +356,7 @@ public final class Quest extends QuestObject implements Movable {
 		size = Bits.getFlag(flags, 4) ? buffer.readDouble() : 1D;
 		minWidth = Bits.getFlag(flags, 512) ? buffer.readVarInt() : 0;
 		invisible = Bits.getFlag(flags, 1024);
+		invisibleUntilTasks = Bits.getFlag(flags, 2048) ? buffer.readVarInt() : 0;
 	}
 
 	@Override
@@ -515,6 +524,7 @@ public final class Quest extends QuestObject implements Movable {
 		config.addBool("optional", optional, v -> optional = v, false);
 		config.addInt("min_width", minWidth, v -> minWidth = v, 0, 0, 3000);
 		config.addBool("invisible", invisible, v -> invisible = v, false);
+		config.addInt("invisible_until_tasks", invisibleUntilTasks, v -> invisibleUntilTasks = v, 0, 0, Integer.MAX_VALUE);
 	}
 
 	public boolean getHideDependencyLines() {
@@ -561,6 +571,18 @@ public final class Quest extends QuestObject implements Movable {
 	public boolean isVisible(TeamData data) {
 		if (invisible && !data.isCompleted(this)) {
 			return false;
+		}
+
+		if (invisibleUntilTasks > 0) {
+			int completedTasks = 0;
+			for (Task task : tasks) {
+				if (data.isCompleted(task)) {
+					completedTasks++;
+				}
+			}
+			if (invisibleUntilTasks > completedTasks) {
+				return false;
+			}
 		}
 
 		if (dependencies.isEmpty()) {

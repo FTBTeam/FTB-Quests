@@ -157,6 +157,7 @@
 	"ftbquests.quest.optional": "Optional",
 	"ftbquests.quest.min_width": "Min Opened Quest Window Width",
 	"ftbquests.quest.invisible": "Invisible",
+	"ftbquests.quest.invisible_until_tasks": "Invisible until X tasks are completed",
 	"ftbquests.chapter_group": "Chapter Group",
 	"ftbquests.chapter_groups": "Chapter Groups",
 	"ftbquests.gui.edit_file": "Edit File",
