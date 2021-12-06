@@ -119,6 +119,7 @@
 	"ftbquests.chapter.image.click": "Click",
 	"ftbquests.chapter.image.dev": "Only visible in Editing Mode",
 	"ftbquests.chapter.image.corner": "Rotate and offset from corner",
+	"ftbquests.chapter.default_min_width": "Default Min Opened Quest Window Width",
 	"ftbquests.quest": "Quest",
 	"ftbquests.quests": "Quests",
 	"ftbquests.quest.completed": "Quest completed!",
