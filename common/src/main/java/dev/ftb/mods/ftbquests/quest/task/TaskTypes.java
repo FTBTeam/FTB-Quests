@@ -31,6 +31,7 @@ public interface TaskTypes {
 	TaskType OBSERVATION = register(new ResourceLocation(FTBQuests.MOD_ID, "observation"), ObservationTask::new, () -> Icons.ART);
 	TaskType BIOME = register(new ResourceLocation(FTBQuests.MOD_ID, "biome"), BiomeTask::new, () -> Icon.getIcon("minecraft:block/oak_sapling"));
 	TaskType STAGE = TaskTypes.register(new ResourceLocation(FTBQuests.MOD_ID, "gamestage"), StageTask::new, () -> Icons.CONTROLLER);
+	TaskType SCOREBOARD = register(new ResourceLocation(FTBQuests.MOD_ID, "scoreboard"), ScoreboardTask::new, () -> Icon.getIcon("minecraft:item/painting"));
 
 	static void init() {
 	}

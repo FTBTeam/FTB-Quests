@@ -10,6 +10,7 @@ import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.task.DimensionTask;
 import dev.ftb.mods.ftbquests.quest.task.KillTask;
+import dev.ftb.mods.ftbquests.quest.task.ScoreboardTask;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.util.FTBQuestsInventoryListener;
 import dev.ftb.mods.ftbteams.event.PlayerChangedTeamEvent;
@@ -26,6 +27,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.ServerScoreboard;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
@@ -38,7 +40,6 @@ import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
-
 import java.util.List;
 
 /**
@@ -72,6 +73,13 @@ public class FTBQuestsEventHandler {
 
 	private void serverAboutToStart(MinecraftServer server) {
 		ServerQuestFile.INSTANCE = new ServerQuestFile(server);
+		final ServerScoreboard scoreboard = ServerQuestFile.INSTANCE.server.getScoreboard();
+		scoreboard.addDirtyListener(() -> {
+			ServerQuestFile file = ServerQuestFile.INSTANCE;
+			for (ScoreboardTask task : file.collect(ScoreboardTask.class)) {
+				task.test(file, scoreboard);
+			}
+		});
 	}
 
 	private void registerCommands(CommandDispatcher<CommandSourceStack> dispatcher, Commands.CommandSelection selection) {
