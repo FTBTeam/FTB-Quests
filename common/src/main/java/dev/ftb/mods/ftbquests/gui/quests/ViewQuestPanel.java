@@ -124,6 +124,8 @@ public class ViewQuestPanel extends Panel {
 
 		if (quest.minWidth > 0) {
 			w = Math.max(quest.minWidth, w);
+		} else if (questScreen.selectedChapter.defaultMinWidth > 0) {
+			w = Math.max(questScreen.selectedChapter.defaultMinWidth, w);
 		}
 
 		titleField.setPosAndSize(27, 4, w - 54, 8);
