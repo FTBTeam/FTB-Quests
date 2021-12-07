@@ -249,6 +249,7 @@ public final class Quest extends QuestObject implements Movable {
 		optional = nbt.getBoolean("optional");
 		minWidth = nbt.getInt("min_width");
 		invisible = nbt.getBoolean("invisible");
+		invisibleUntilTasks = nbt.getInt("invisible_until_tasks");
 	}
 
 	@Override
