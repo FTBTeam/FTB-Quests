@@ -241,8 +241,13 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 	}
 
 	@Override
+	public boolean canExclusive() {
+		return true;
+	}
+
+	@Override
 	public void submitTask(TeamData teamData, ServerPlayer player, ItemStack craftedItem) {
-		if (teamData.isCompleted(this) || item.getItem() instanceof MissingItem || craftedItem.getItem() instanceof MissingItem) {
+		if ((exclusive ? false : teamData.isCompleted(this)) || item.getItem() instanceof MissingItem || craftedItem.getItem() instanceof MissingItem) {
 			return;
 		}
 
@@ -265,9 +270,13 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 
 			c = Math.min(count, c);
 
-			if (c > teamData.getProgress(this)) {
+			long progress = teamData.getProgress(this);
+
+			if (c > progress) {
 				teamData.setProgress(this, c);
 				return;
+			} else if (exclusive && progress != c) {
+				teamData.setProgress(this, 0L);
 			}
 
 			return;

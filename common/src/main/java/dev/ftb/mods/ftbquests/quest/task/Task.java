@@ -26,6 +26,8 @@ import dev.ftb.mods.ftbquests.util.ProgressChange;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
@@ -39,6 +41,8 @@ import org.jetbrains.annotations.Nullable;
  */
 public abstract class Task extends QuestObject {
 	public final Quest quest;
+
+	public boolean exclusive = false;
 
 	public Task(Quest q) {
 		quest = q;
@@ -106,6 +110,42 @@ public abstract class Task extends QuestObject {
 		if (questCompleted) {
 			quest.onCompleted(data.withObject(quest));
 		}
+	}
+
+	@Override
+	public void writeData(CompoundTag nbt) {
+		super.writeData(nbt);
+
+		if (exclusive) { nbt.putBoolean("exclusive", exclusive); }
+	}
+
+	@Override
+	public void readData(CompoundTag nbt) {
+		super.readData(nbt);
+		exclusive = nbt.getBoolean("exclusive");
+	}
+
+	@Override
+	public void writeNetData(FriendlyByteBuf buffer) {
+		super.writeNetData(buffer);
+		buffer.writeBoolean(exclusive);
+	}
+
+	@Override
+	public void readNetData(FriendlyByteBuf buffer) {
+		super.readNetData(buffer);
+		exclusive = buffer.readBoolean();
+	}
+
+	public boolean canExclusive() {
+		return false;
+	};
+
+	@Override
+	@Environment(EnvType.CLIENT)
+	public void getConfig(ConfigGroup config) {
+		super.getConfig(config);
+		if (canExclusive()) config.addBool("exclusive", exclusive, v -> exclusive = v, false).setNameKey("ftbquests.task.exclusive");
 	}
 
 	public long getMaxProgress() {

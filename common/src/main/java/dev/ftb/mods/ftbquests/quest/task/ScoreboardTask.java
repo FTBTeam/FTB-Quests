@@ -69,6 +69,13 @@ public class ScoreboardTask extends Task {
 		value = buffer.readInt();
 	}
 
+	@Override
+	public boolean canExclusive() {
+		return true;
+	}
+
+	private int lastVal = -1;
+
 	public void test(ServerQuestFile file, ServerScoreboard scoreboard) {
 		Objective obj = scoreboard.getObjective(objective);
 		Collection<Score> scores = scoreboard.getPlayerScores(obj);
@@ -82,9 +89,18 @@ public class ScoreboardTask extends Task {
 			if (data.isLocked()) {
 				return;
 			}
+
+			if (exclusive ? false : data.isCompleted(this)) { 
+				continue;
+			}
 			
-			if (!data.isCompleted(this) && score.getScore() >= value) {
+			int val = score.getScore();
+
+			if (val >= value) {
 				data.addProgress(this, 1L);
+				lastVal = val;
+			} else if (exclusive && val != lastVal){
+				data.setProgress(this, 0L);
 			}
 		}
 	}
