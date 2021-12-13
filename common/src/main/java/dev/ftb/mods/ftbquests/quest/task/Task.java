@@ -43,6 +43,7 @@ public abstract class Task extends QuestObject {
 	public final Quest quest;
 
 	public boolean exclusive = false;
+	public boolean global = false;
 
 	public Task(Quest q) {
 		quest = q;
@@ -92,6 +93,7 @@ public abstract class Task extends QuestObject {
 	@Override
 	public void onStarted(QuestProgressEventData<?> data) {
 		data.teamData.setStarted(id, data.time);
+		
 		ObjectStartedEvent.TASK.invoker().act(new ObjectStartedEvent.TaskEvent(data.withObject(this)));
 		quest.onStarted(data.withObject(quest));
 	}
@@ -99,6 +101,7 @@ public abstract class Task extends QuestObject {
 	@Override
 	public final void onCompleted(QuestProgressEventData<?> data) {
 		data.teamData.setCompleted(id, data.time);
+		
 		ObjectCompletedEvent.TASK.invoker().act(new ObjectCompletedEvent.TaskEvent(data.withObject(this)));
 
 		boolean questCompleted = quest.isCompletedRaw(data.teamData);
@@ -117,24 +120,28 @@ public abstract class Task extends QuestObject {
 		super.writeData(nbt);
 
 		if (exclusive) { nbt.putBoolean("exclusive", exclusive); }
+		if (global) { nbt.putBoolean("global", global); }
 	}
 
 	@Override
 	public void readData(CompoundTag nbt) {
 		super.readData(nbt);
 		exclusive = nbt.getBoolean("exclusive");
+		global = nbt.getBoolean("global");
 	}
 
 	@Override
 	public void writeNetData(FriendlyByteBuf buffer) {
 		super.writeNetData(buffer);
 		buffer.writeBoolean(exclusive);
+		buffer.writeBoolean(global);
 	}
 
 	@Override
 	public void readNetData(FriendlyByteBuf buffer) {
 		super.readNetData(buffer);
 		exclusive = buffer.readBoolean();
+		global = buffer.readBoolean();
 	}
 
 	public boolean canExclusive() {
@@ -146,6 +153,7 @@ public abstract class Task extends QuestObject {
 	public void getConfig(ConfigGroup config) {
 		super.getConfig(config);
 		if (canExclusive()) config.addBool("exclusive", exclusive, v -> exclusive = v, false).setNameKey("ftbquests.task.exclusive");
+		config.addBool("global", global, v -> global = v, false).setNameKey("ftbquests.task.global");
 	}
 
 	public long getMaxProgress() {

@@ -97,6 +97,12 @@ public class ServerQuestFile extends QuestFile {
 						}
 					}
 				});
+
+				// for inital load, when this is not on disk
+				if (TeamData.GLOBAL.file != this) {
+					TeamData.GLOBAL.file = this;
+					addData(TeamData.GLOBAL, true);
+				}
 			} catch (Exception ex) {
 				ex.printStackTrace();
 			}

@@ -53,6 +53,13 @@ import java.util.stream.Collectors;
  */
 public class TeamData {
 	public static int VERSION = 1;
+	public static final TeamData GLOBAL = new TeamData(new UUID(0L, 0L)) { 
+		@Override
+		public boolean isGlobal() {
+			return true;
+		}
+	};
+
 	private static final byte BOOL_NONE = -1;
 	private static final byte BOOL_FALSE = 0;
 	private static final byte BOOL_TRUE = 1;
@@ -105,13 +112,18 @@ public class TeamData {
 		shouldSave = true;
 	}
 
+	public boolean isGlobal() {
+		return false;
+	}
+
 	@Override
 	public String toString() {
 		return name.isEmpty() ? uuid.toString() : name;
 	}
 
 	public long getProgress(long task) {
-		return taskProgress.get(task);
+		long globalProgress = isGlobal() ? 0L : TeamData.GLOBAL.getProgress(task);
+		return globalProgress == 0L ? taskProgress.get(task) : globalProgress;
 	}
 
 	public long getProgress(Task task) {
@@ -127,6 +139,10 @@ public class TeamData {
 	public boolean setStarted(long id, @Nullable Date time) {
 		if (locked) {
 			return false;
+		}
+
+		if (!isGlobal()) {
+			TeamData.GLOBAL.setStarted(id, time);
 		}
 
 		if (time == null) {
@@ -173,7 +189,7 @@ public class TeamData {
 				save();
 
 				if (file.isServerSide()) {
-					new ObjectCompletedResetMessage(uuid, id).sendToAll(((ServerQuestFile) file).server);
+					new ObjectCompletedResetMessage(isGlobal() ? GLOBAL.uuid : uuid, id).sendToAll(((ServerQuestFile) file).server);
 				}
 
 				return true;
@@ -184,7 +200,7 @@ public class TeamData {
 				save();
 
 				if (file.isServerSide()) {
-					new ObjectCompletedMessage(uuid, id).sendToAll(((ServerQuestFile) file).server);
+					new ObjectCompletedMessage(isGlobal() ? GLOBAL.uuid : uuid, id).sendToAll(((ServerQuestFile) file).server);
 				}
 
 				return true;
@@ -533,10 +549,16 @@ public class TeamData {
 	}
 
 	public boolean isStarted(QuestObject object) {
+		if (!isGlobal() && object instanceof Task && ((Task) object).global) {
+			return TeamData.GLOBAL.isStarted(object);
+		}
 		return started.containsKey(object.id);
 	}
 
 	public boolean isCompleted(QuestObject object) {
+		if (!isGlobal() && object instanceof Task && ((Task) object).global) {
+			return TeamData.GLOBAL.isCompleted(object);
+		}
 		return completed.containsKey(object.id);
 	}
 
@@ -662,6 +684,10 @@ public class TeamData {
 	public final void setProgress(Task task, long progress) {
 		if (locked) {
 			return;
+		}
+
+		if (task.global && !isGlobal()) {
+			TeamData.GLOBAL.setProgress(task, progress);
 		}
 
 		long maxProgress = task.getMaxProgress();
