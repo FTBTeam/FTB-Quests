@@ -9,6 +9,8 @@ import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.ingredients.IIngredients;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
@@ -40,8 +42,8 @@ public class QuestCategory implements IRecipeCategory<QuestWrapper> {
 	}
 
 	@Override
-	public String getTitle() {
-		return I18n.get("ftbquests.quests");
+	public Component getTitle() {
+		return new TranslatableComponent("ftbquests.quests");
 	}
 
 	@Override

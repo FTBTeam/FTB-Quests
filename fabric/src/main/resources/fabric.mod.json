@@ -14,20 +14,17 @@
 	"license": "All Rights Reserved",
 	"entrypoints": {
 		"main": [
-			"dev.ftb.mods.ftbquests.FTBQuestsFabric"
+			"dev.ftb.mods.ftbquests.fabric.FTBQuestsFabric"
 		]
 	},
 	"mixins": [
 	],
 	"depends": {
 		"fabric": "*",
-		"minecraft": "~1.16.4",
-		"architectury": ">=1.15.13",
-		"ftblibrary": ">=1605.3.1-build.56",
-		"ftbteams": ">=1605.2.1-build.13",
-		"itemfilters": ">=1605.2.5-build.4"
-	},
-	"breaks": {
-		"kubejs": "<1605.3.11-build.31"
+		"minecraft": "~1.18.1",
+		"architectury": ">=3.2.52",
+		"ftblibrary": ">=1801.3.5-build.99",
+		"ftbteams": ">=1801.2.4-build.43",
+		"itemfilters": ">=1801.2.6-build.12"
 	}
 }

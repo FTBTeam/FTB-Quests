@@ -1,4 +1,4 @@
-package dev.ftb.mods.ftbquests.integration.jei.fabric;
+package dev.ftb.mods.ftbquests.integration.fabric;
 
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 

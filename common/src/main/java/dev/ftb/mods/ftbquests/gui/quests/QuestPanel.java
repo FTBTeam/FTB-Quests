@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
@@ -33,7 +34,6 @@ import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
 import org.lwjgl.glfw.GLFW;
-import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -206,7 +206,6 @@ public class QuestPanel extends Panel {
 		Quest selectedQuest = questScreen.getViewedQuest();
 		GuiHelper.setupDrawing();
 		RenderSystem.enableDepthTest();
-		RenderSystem.shadeModel(GL11.GL_SMOOTH);
 		double mt = -(System.currentTimeMillis() * 0.001D);
 		float mu = (float) ((mt * ThemeProperties.DEPENDENCY_LINE_UNSELECTED_SPEED.get(questScreen.selectedChapter)) % 1D);
 		float ms = (float) ((mt * ThemeProperties.DEPENDENCY_LINE_SELECTED_SPEED.get(questScreen.selectedChapter)) % 1D);
@@ -258,7 +257,7 @@ public class QuestPanel extends Panel {
 				matrixStack.mulPose(Vector3f.ZP.rotation((float) Math.atan2(ey - sy, ex - sx)));
 				Matrix4f m = matrixStack.last().pose();
 
-				buffer.begin(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX);
+				buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_TEX);
 				buffer.vertex(m, 0, -s, 0).color(r, g, b, a).uv(len / s / 2F + mu, 0).endVertex();
 				buffer.vertex(m, 0, s, 0).color(r, g, b, a).uv(len / s / 2F + mu, 1).endVertex();
 				buffer.vertex(m, len, s, 0).color(r * 3 / 4, g * 3 / 4, b * 3 / 4, a).uv(mu, 1).endVertex();
@@ -310,7 +309,7 @@ public class QuestPanel extends Panel {
 				matrixStack.mulPose(Vector3f.ZP.rotation((float) Math.atan2(ey - sy, ex - sx)));
 				Matrix4f m = matrixStack.last().pose();
 
-				buffer.begin(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX);
+				buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_TEX);
 				buffer.vertex(m, 0, -s, 0).color(r, g, b, a).uv(len / s / 2F + ms, 0).endVertex();
 				buffer.vertex(m, 0, s, 0).color(r, g, b, a).uv(len / s / 2F + ms, 1).endVertex();
 				buffer.vertex(m, len, s, 0).color(r * 3 / 4, g * 3 / 4, b * 3 / 4, a).uv(ms, 1).endVertex();
@@ -320,8 +319,6 @@ public class QuestPanel extends Panel {
 				matrixStack.popPose();
 			}
 		}
-
-		RenderSystem.shadeModel(GL11.GL_FLAT);
 	}
 
 	@Override
@@ -416,9 +413,10 @@ public class QuestPanel extends Panel {
 					matrixStack.scale((float) bs, (float) bs, 1F);
 					GuiHelper.setupDrawing();
 					RenderSystem.enableDepthTest();
-					RenderSystem.alphaFunc(GL11.GL_GREATER, 0.01F);
+					// TODO: custom shader to implement alphaFunc?
+					//RenderSystem.alphaFunc(GL11.GL_GREATER, 0.01F);
 					QuestShape.get(questScreen.selectedChapter.getDefaultQuestShape()).shape.withColor(Color4I.WHITE.withAlpha(10)).draw(matrixStack, 0, 0, 1, 1);
-					RenderSystem.defaultAlphaFunc();
+					//RenderSystem.defaultAlphaFunc();
 					matrixStack.popPose();
 
 					if (QuestScreen.grid && questScreen.viewQuestPanel.quest == null) {

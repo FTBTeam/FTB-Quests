@@ -7,17 +7,19 @@ import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.TickableBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-
-import static dev.ftb.mods.ftbquests.block.QuestBarrierBlock.OPEN;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * @author LatvianModder
  */
-public class QuestBarrierBlockEntity extends BlockEntity implements TickableBlockEntity, BarrierBlockEntity {
+public class QuestBarrierBlockEntity extends BlockEntity implements BarrierBlockEntity {
 	public long object = 0L;
 
 	public QuestBarrierBlockEntity(BlockPos blockPos, BlockState blockState) {
@@ -45,28 +47,33 @@ public class QuestBarrierBlockEntity extends BlockEntity implements TickableBloc
 
 	@Override
 	public void saveAdditional(CompoundTag tag) {
+		super.saveAdditional(tag);
 		writeBarrier(tag);
 	}
 
+	@Nullable
 	@Override
-	public void tick() {
-		if (level != null && level.isClientSide() && FTBQuests.PROXY.isClientDataLoaded() && level.getGameTime() % 5L == 0L) {
-			boolean completed = isOpen(FTBQuests.PROXY.getClientPlayer());
+	public Packet<ClientGamePacketListener> getUpdatePacket() {
+		return ClientboundBlockEntityDataPacket.create(this);
+	}
 
-			if (completed != getBlockState().getValue(OPEN)) {
-				level.setBlock(getBlockPos(), getBlockState().setValue(OPEN, completed), 2 | 8);
-				clearCache();
-			}
+	@Override
+	public CompoundTag getUpdateTag() {
+		return saveWithoutMetadata();
+	}
+
+	@Override
+	public void setChanged() {
+		super.setChanged();
+		if (level != null && !level.isClientSide) {
+			((ServerLevel) level).getChunkSource().blockChanged(getBlockPos());
 		}
 	}
 
 	@Override
 	public void update(String s) {
 		object = ServerQuestFile.INSTANCE.getID(s);
-		syncData();
-	}
-
-	public void syncData() {
+		setChanged();
 	}
 
 	@Override

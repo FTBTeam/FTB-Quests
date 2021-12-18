@@ -7,7 +7,7 @@ import dev.ftb.mods.ftblibrary.util.ClientTextComponentUtils;
 import dev.ftb.mods.ftblibrary.util.ClientUtils;
 import dev.ftb.mods.ftbquests.gui.CustomToast;
 import dev.ftb.mods.ftbquests.gui.quests.QuestScreen;
-import dev.ftb.mods.ftbquests.integration.jei.FTBQuestsJEIHelper;
+import dev.ftb.mods.ftbquests.integration.FTBQuestsJEIHelper;
 import dev.ftb.mods.ftbquests.net.DeleteObjectMessage;
 import dev.ftb.mods.ftbquests.quest.Movable;
 import dev.ftb.mods.ftbquests.quest.Quest;

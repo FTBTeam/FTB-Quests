@@ -30,7 +30,7 @@ public class FTBQuestsJEIIntegration implements IModPlugin {
 
 	@Override
 	public void registerItemSubtypes(ISubtypeRegistration r) {
-		r.registerSubtypeInterpreter(FTBQuestsItems.LOOTCRATE.get(), stack -> stack.hasTag() ? stack.getTag().getString("type") : "");
+		r.registerSubtypeInterpreter(FTBQuestsItems.LOOTCRATE.get(), (stack, uidContext) -> stack.hasTag() ? stack.getTag().getString("type") : "");
 	}
 
 	@Override

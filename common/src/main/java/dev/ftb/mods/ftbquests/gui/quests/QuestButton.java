@@ -353,7 +353,8 @@ public class QuestButton extends Button {
 		}
 
 		GuiHelper.setupDrawing();
-		RenderSystem.alphaFunc(GL11.GL_GREATER, 0.1F);
+		// TODO: custom shader to implement alphaFunc?
+		//RenderSystem.alphaFunc(GL11.GL_GREATER, 0.1F);
 
 		if (quest == questScreen.viewQuestPanel.quest || questScreen.selectedObjects.contains(quest)) {
 			matrixStack.pushPose();

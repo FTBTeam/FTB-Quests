@@ -27,6 +27,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.SerializationTags;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
@@ -71,7 +72,7 @@ public class TaskButton extends Button {
 
 			if (task instanceof ItemTask) {
 				ItemTask i = (ItemTask) task;
-				Collection<ResourceLocation> tags = SerializationTags.getInstance().getItems().getMatchingTags(i.item.getItem());
+				Collection<ResourceLocation> tags = ItemTags.getAllTags().getMatchingTags(i.item.getItem());
 
 				if (!tags.isEmpty() && !ItemFiltersAPI.isFilter(i.item)) {
 					contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.task.ftbquests.item.convert_tag"), ThemeProperties.RELOAD_ICON.get(), () -> {
