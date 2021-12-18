@@ -2,13 +2,15 @@ package dev.ftb.mods.ftbquests.net.fabric;
 
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.ApiStatus;
 
-public interface FTBQuestsNetHandlerImpl {
-	static void writeItemType(FriendlyByteBuf buffer, ItemStack stack) {
+@ApiStatus.Internal
+public class FTBQuestsNetHandlerImpl {
+	public static void writeItemType(FriendlyByteBuf buffer, ItemStack stack) {
 		buffer.writeItem(stack);
 	}
 
-	static ItemStack readItemType(FriendlyByteBuf buffer) {
+	public static ItemStack readItemType(FriendlyByteBuf buffer) {
 		return buffer.readItem();
 	}
 }

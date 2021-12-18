@@ -1,7 +1,5 @@
 package dev.ftb.mods.ftbquests.block;
 
-import dev.ftb.mods.ftbquests.block.entity.FTBQuestsBlockEntities;
-import dev.ftb.mods.ftbquests.block.entity.QuestBarrierBlockEntity;
 import dev.ftb.mods.ftbquests.block.entity.StageBarrierBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.entity.BlockEntity;
