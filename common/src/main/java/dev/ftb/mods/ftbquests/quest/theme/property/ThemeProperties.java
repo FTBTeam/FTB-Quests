@@ -10,7 +10,7 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.math.Matrix4f;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
-import org.lwjgl.opengl.GL11;
+import net.minecraft.client.renderer.GameRenderer;
 
 /**
  * @author LatvianModder
@@ -49,6 +49,9 @@ public interface ThemeProperties {
 			Matrix4f m = matrixStack.last().pose();
 			Tesselator tesselator = Tesselator.getInstance();
 			BufferBuilder buffer = tesselator.getBuilder();
+
+			RenderSystem.enableBlend();
+			RenderSystem.setShader(GameRenderer::getPositionColorShader);
 			buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
 
 			float dw = w / 16F;
@@ -87,7 +90,8 @@ public interface ThemeProperties {
 			buffer.vertex(m, x + dw * 13, y + dh * 1 + dh, 0).color(r, g, b, a).endVertex();
 
 			tesselator.end();
-			GlStateManager._enableTexture();
+			RenderSystem.disableBlend();
+			RenderSystem.enableTexture();
 		}
 
 		public int hashCode() {
@@ -106,6 +110,10 @@ public interface ThemeProperties {
 			Matrix4f m = matrixStack.last().pose();
 			Tesselator tesselator = Tesselator.getInstance();
 			BufferBuilder buffer = tesselator.getBuilder();
+
+			RenderSystem.enableBlend();
+			RenderSystem.setShader(GameRenderer::getPositionColorShader);
+
 			buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
 
 			float dw = w / 16F;
@@ -144,7 +152,8 @@ public interface ThemeProperties {
 			buffer.vertex(m, x + dw * 13, y + dh * 7, 0).color(r, g, b, a).endVertex();
 
 			tesselator.end();
-			GlStateManager._enableTexture();
+			RenderSystem.disableBlend();
+			RenderSystem.enableTexture();
 		}
 
 		public int hashCode() {
