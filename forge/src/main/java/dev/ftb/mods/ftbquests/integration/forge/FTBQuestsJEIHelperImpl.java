@@ -1,4 +1,4 @@
-package dev.ftb.mods.ftbquests.integration.jei.forge;
+package dev.ftb.mods.ftbquests.integration.forge;
 
 import dev.ftb.mods.ftbquests.integration.jei.FTBQuestsJEIIntegration;
 import dev.ftb.mods.ftbquests.integration.jei.LootCrateRegistry;
@@ -7,8 +7,8 @@ import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import mezz.jei.api.recipe.IFocus;
 import net.minecraftforge.fml.ModList;
 
-import static dev.ftb.mods.ftbquests.integration.jei.FTBQuestsJEIHelper.LOOTCRATES;
-import static dev.ftb.mods.ftbquests.integration.jei.FTBQuestsJEIHelper.QUESTS;
+import static dev.ftb.mods.ftbquests.integration.FTBQuestsJEIHelper.LOOTCRATES;
+import static dev.ftb.mods.ftbquests.integration.FTBQuestsJEIHelper.QUESTS;
 
 /**
  * @author LatvianModder

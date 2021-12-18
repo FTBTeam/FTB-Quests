@@ -11,7 +11,7 @@ import dev.ftb.mods.ftbquests.gui.RewardKey;
 import dev.ftb.mods.ftbquests.gui.RewardToast;
 import dev.ftb.mods.ftbquests.gui.ToastQuestObject;
 import dev.ftb.mods.ftbquests.gui.quests.QuestScreen;
-import dev.ftb.mods.ftbquests.integration.jei.FTBQuestsJEIHelper;
+import dev.ftb.mods.ftbquests.integration.FTBQuestsJEIHelper;
 import dev.ftb.mods.ftbquests.net.TeamDataUpdate;
 import dev.ftb.mods.ftbquests.quest.Chapter;
 import dev.ftb.mods.ftbquests.quest.ChapterGroup;

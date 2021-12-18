@@ -1,4 +1,4 @@
-package dev.ftb.mods.ftbquests.integration.jei;
+package dev.ftb.mods.ftbquests.integration;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;

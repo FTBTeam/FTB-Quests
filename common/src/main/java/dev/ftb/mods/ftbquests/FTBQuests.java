@@ -39,10 +39,6 @@ public class FTBQuests {
 		NET_PROXY = EnvExecutor.getEnvSpecific(() -> FTBQuestsNetClient::new, () -> FTBQuestsNetCommon::new);
 		new FTBQuestsEventHandler().init();
 
-		if (Platform.isModLoaded("kubejs")) {
-			KubeJSIntegration.init();
-		}
-
 		PROXY.init();
 	}
 

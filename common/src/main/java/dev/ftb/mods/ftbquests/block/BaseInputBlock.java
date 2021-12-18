@@ -21,7 +21,7 @@ public abstract class BaseInputBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public abstract BaseInputBlockEntity newBlockEntity(BlockGetter blockGetter);
+	public abstract BaseInputBlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState);
 
 	@Override
 	public RenderShape getRenderShape(BlockState blockState) {

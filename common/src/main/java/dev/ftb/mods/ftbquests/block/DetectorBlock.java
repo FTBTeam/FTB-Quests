@@ -25,8 +25,8 @@ public class DetectorBlock extends BaseEntityBlock {
 
 	@Nullable
 	@Override
-	public BlockEntity newBlockEntity(BlockGetter blockGetter) {
-		return new DetectorBlockEntity();
+	public BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
+		return new DetectorBlockEntity(blockPos, blockState);
 	}
 
 	@Override

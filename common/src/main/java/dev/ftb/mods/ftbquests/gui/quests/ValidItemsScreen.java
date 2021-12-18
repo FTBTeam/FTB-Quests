@@ -19,7 +19,7 @@ import dev.ftb.mods.ftblibrary.ui.misc.CompactGridLayout;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftblibrary.util.WrappedIngredient;
 import dev.ftb.mods.ftbquests.gui.FTBQuestsTheme;
-import dev.ftb.mods.ftbquests.integration.jei.FTBQuestsJEIHelper;
+import dev.ftb.mods.ftbquests.integration.FTBQuestsJEIHelper;
 import dev.ftb.mods.ftbquests.net.SubmitTaskMessage;
 import dev.ftb.mods.ftbquests.quest.task.ItemTask;
 import net.minecraft.network.chat.TextComponent;

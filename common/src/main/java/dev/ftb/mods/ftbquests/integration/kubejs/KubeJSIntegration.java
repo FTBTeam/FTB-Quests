@@ -5,6 +5,7 @@ import dev.ftb.mods.ftbquests.events.CustomRewardEvent;
 import dev.ftb.mods.ftbquests.events.CustomTaskEvent;
 import dev.ftb.mods.ftbquests.events.ObjectCompletedEvent;
 import dev.ftb.mods.ftbquests.events.ObjectStartedEvent;
+import dev.latvian.mods.kubejs.KubeJSPlugin;
 import dev.latvian.mods.kubejs.player.AttachPlayerDataEvent;
 import dev.latvian.mods.kubejs.script.BindingsEvent;
 import dev.latvian.mods.kubejs.script.ScriptType;
@@ -12,10 +13,8 @@ import dev.latvian.mods.kubejs.script.ScriptType;
 /**
  * @author LatvianModder
  */
-public class KubeJSIntegration {
-	public static void init() {
-		BindingsEvent.EVENT.register(KubeJSIntegration::registerBindings);
-		AttachPlayerDataEvent.EVENT.register(KubeJSIntegration::attachPlayerData);
+public class KubeJSIntegration extends KubeJSPlugin {
+	public void init() {
 		CustomTaskEvent.EVENT.register(KubeJSIntegration::onCustomTask);
 		CustomRewardEvent.EVENT.register(KubeJSIntegration::onCustomReward);
 		ObjectCompletedEvent.GENERIC.register(KubeJSIntegration::onCompleted);
@@ -33,11 +32,13 @@ public class KubeJSIntegration {
 	//	event.registerEvent("ftbquests.started", TaskStartedEventJS.class).doubleParam("id|tag");
 	//}
 
-	public static void registerBindings(BindingsEvent event) {
+	@Override
+	public void addBindings(BindingsEvent event) {
 		event.add("FTBQuests", FTBQuestsKubeJSWrapper.INSTANCE);
 	}
 
-	public static void attachPlayerData(AttachPlayerDataEvent event) {
+	@Override
+	public void attachPlayerData(AttachPlayerDataEvent event) {
 		event.add("ftbquests", new FTBQuestsKubeJSPlayerData(event.getParent()));
 	}
 

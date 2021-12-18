@@ -1,7 +1,7 @@
 package dev.ftb.mods.ftbquests.quest.task.forge;
 
 import dev.architectury.fluid.FluidStack;
-import dev.architectury.hooks.FluidStackHooks;
+import dev.architectury.hooks.fluid.FluidStackHooks;
 import dev.architectury.registry.registries.Registries;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.FluidConfig;
@@ -36,7 +36,7 @@ public class ForgeFluidTask extends Task {
 
 	public Fluid fluid = Fluids.WATER;
 	public CompoundTag fluidNBT = null;
-	public long amount = FluidStack.bucketAmount().longValue();
+	public long amount = FluidStack.bucketAmount();
 
 	private FluidStack cachedFluidStack = null;
 
@@ -132,19 +132,19 @@ public class ForgeFluidTask extends Task {
 	public static String getVolumeString(long a) {
 		StringBuilder builder = new StringBuilder();
 
-		if (a >= FluidStack.bucketAmount().longValue()) {
-			if (a % FluidStack.bucketAmount().longValue() != 0L) {
-				builder.append(a / (double) FluidStack.bucketAmount().longValue());
+		if (a >= FluidStack.bucketAmount()) {
+			if (a % FluidStack.bucketAmount() != 0L) {
+				builder.append(a / (double) FluidStack.bucketAmount());
 			} else {
-				builder.append(a / FluidStack.bucketAmount().longValue());
+				builder.append(a / FluidStack.bucketAmount());
 			}
 		} else {
-			builder.append(a % FluidStack.bucketAmount().longValue());
+			builder.append(a % FluidStack.bucketAmount());
 		}
 
 		builder.append(' ');
 
-		if (a < FluidStack.bucketAmount().longValue()) {
+		if (a < FluidStack.bucketAmount()) {
 			builder.append('m');
 		}
 
@@ -172,7 +172,7 @@ public class ForgeFluidTask extends Task {
 
 		config.add("fluid", new FluidConfig(false), fluid, v -> fluid = v, Fluids.WATER);
 		config.add("fluid_nbt", new NBTConfig(), fluidNBT, v -> fluidNBT = v, null);
-		config.addLong("amount", amount, v -> amount = v, FluidStack.bucketAmount().longValue(), 1, Long.MAX_VALUE);
+		config.addLong("amount", amount, v -> amount = v, FluidStack.bucketAmount(), 1, Long.MAX_VALUE);
 	}
 
 	@Override

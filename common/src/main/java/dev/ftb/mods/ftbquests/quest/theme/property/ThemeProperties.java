@@ -6,6 +6,7 @@ import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.math.Matrix4f;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
@@ -46,9 +47,9 @@ public interface ThemeProperties {
 		public void draw(PoseStack matrixStack, int x, int y, int w, int h) {
 			RenderSystem.disableTexture();
 			Matrix4f m = matrixStack.last().pose();
-			Tesselator tessellator = Tesselator.getInstance();
-			BufferBuilder buffer = tessellator.getBuilder();
-			buffer.begin(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR);
+			Tesselator tesselator = Tesselator.getInstance();
+			BufferBuilder buffer = tesselator.getBuilder();
+			buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
 
 			float dw = w / 16F;
 			float dh = h / 16F;
@@ -85,7 +86,7 @@ public interface ThemeProperties {
 			buffer.vertex(m, x + dw * 16 - dw, y + dh * 4, 0).color(r, g, b, a).endVertex();
 			buffer.vertex(m, x + dw * 13, y + dh * 1 + dh, 0).color(r, g, b, a).endVertex();
 
-			tessellator.end();
+			tesselator.end();
 			GlStateManager._enableTexture();
 		}
 
@@ -103,9 +104,9 @@ public interface ThemeProperties {
 		public void draw(PoseStack matrixStack, int x, int y, int w, int h) {
 			GlStateManager._disableTexture();
 			Matrix4f m = matrixStack.last().pose();
-			Tesselator tessellator = Tesselator.getInstance();
-			BufferBuilder buffer = tessellator.getBuilder();
-			buffer.begin(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR);
+			Tesselator tesselator = Tesselator.getInstance();
+			BufferBuilder buffer = tesselator.getBuilder();
+			buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
 
 			float dw = w / 16F;
 			float dh = h / 16F;
@@ -142,7 +143,7 @@ public interface ThemeProperties {
 			buffer.vertex(m, x + dw * 13, y + dh * 9, 0).color(r, g, b, a).endVertex();
 			buffer.vertex(m, x + dw * 13, y + dh * 7, 0).color(r, g, b, a).endVertex();
 
-			tessellator.end();
+			tesselator.end();
 			GlStateManager._enableTexture();
 		}
 

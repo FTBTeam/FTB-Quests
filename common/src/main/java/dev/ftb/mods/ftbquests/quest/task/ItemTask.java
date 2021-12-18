@@ -11,7 +11,7 @@ import dev.ftb.mods.ftblibrary.ui.Button;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.gui.CustomToast;
 import dev.ftb.mods.ftbquests.gui.quests.ValidItemsScreen;
-import dev.ftb.mods.ftbquests.integration.jei.FTBQuestsJEIHelper;
+import dev.ftb.mods.ftbquests.integration.FTBQuestsJEIHelper;
 import dev.ftb.mods.ftbquests.item.FTBQuestsItems;
 import dev.ftb.mods.ftbquests.item.MissingItem;
 import dev.ftb.mods.ftbquests.net.FTBQuestsNetHandler;
@@ -257,7 +257,7 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 
 			long c = 0;
 
-			for (ItemStack stack : player.inventory.items) {
+			for (ItemStack stack : player.getInventory().items) {
 				if (!stack.isEmpty() && test(stack)) {
 					c += stack.getCount();
 				}
@@ -279,18 +279,18 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 
 		boolean changed = false;
 
-		for (int i = 0; i < player.inventory.items.size(); i++) {
-			ItemStack stack = player.inventory.items.get(i);
+		for (int i = 0; i < player.getInventory().items.size(); i++) {
+			ItemStack stack = player.getInventory().items.get(i);
 			ItemStack stack1 = insert(teamData, stack, false);
 
 			if (stack != stack1) {
 				changed = true;
-				player.inventory.items.set(i, stack1.isEmpty() ? ItemStack.EMPTY : stack1);
+				player.getInventory().items.set(i, stack1.isEmpty() ? ItemStack.EMPTY : stack1);
 			}
 		}
 
 		if (changed) {
-			player.inventory.setChanged();
+			player.getInventory().setChanged();
 			player.containerMenu.broadcastChanges();
 		}
 	}

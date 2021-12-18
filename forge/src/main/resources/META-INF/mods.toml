@@ -1,5 +1,5 @@
 modLoader = "javafml"
-loaderVersion = "[33,)"
+loaderVersion = "[39,)"
 issueTrackerURL = "https://github.com/FTBTeam/FTB-Quests/issues"
 license = "All Rights Reserved"
 
@@ -15,48 +15,48 @@ Lets you easily create and play with quests
 [[dependencies.ftbquests]]
 modId = "forge"
 mandatory = true
-versionRange = "[32,)"
+versionRange = "[39,)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.ftbquests]]
 modId = "minecraft"
 mandatory = true
-versionRange = "[1.16.4,)"
+versionRange = "[1.18.1,)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.ftbquests]]
 modId = "architectury"
 mandatory = true
-versionRange = "[1.15.13,)"
+versionRange = "[3.2.52,)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.ftbquests]]
 modId = "ftblibrary"
 mandatory = true
-versionRange = "[1605.3.1-build.56,)"
+versionRange = "[1801.3.5-build.99,)"
 ordering = "AFTER"
 side = "BOTH"
 
 [[dependencies.ftbquests]]
 modId = "ftbteams"
 mandatory = true
-versionRange = "[1605.2.1-build.13,)"
+versionRange = "[1801.2.4-build.43,)"
 ordering = "AFTER"
 side = "BOTH"
 
 [[dependencies.ftbquests]]
 modId = "itemfilters"
 mandatory = true
-versionRange = "[1605.2.5-build.4,)"
+versionRange = "[1801.2.6-build.12,)"
 ordering = "AFTER"
 side = "BOTH"
 
 [[dependencies.ftbquests]]
 modId = "kubejs"
 mandatory = false
-versionRange = "[1605.3.11-build.31,)"
+versionRange = "[1801.4.0-build.245,)"
 ordering = "AFTER"
 side = "BOTH"

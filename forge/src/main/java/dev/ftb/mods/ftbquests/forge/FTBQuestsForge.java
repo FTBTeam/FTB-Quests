@@ -1,11 +1,9 @@
-package dev.ftb.mods.ftbquests;
+package dev.ftb.mods.ftbquests.forge;
 
-import dev.architectury.hooks.FluidStackHooks;
-import dev.architectury.platform.Platform;
+import dev.architectury.hooks.fluid.FluidStackHooks;
 import dev.architectury.platform.forge.EventBuses;
 import dev.ftb.mods.ftblibrary.icon.Icon;
-import dev.ftb.mods.ftbquests.integration.StageHelper;
-import dev.ftb.mods.ftbquests.integration.gamestages.GameStagesIntegration;
+import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.item.FTBQuestsItems;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.loot.LootCrate;
@@ -15,7 +13,6 @@ import dev.ftb.mods.ftbquests.quest.task.forge.ForgeFluidTask;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.LazyLoadedValue;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
@@ -43,9 +40,10 @@ public class FTBQuestsForge {
 		ForgeFluidTask.TYPE = TaskTypes.register(new ResourceLocation(FTBQuests.MOD_ID, "fluid"), ForgeFluidTask::new, () -> Icon.getIcon(Optional.ofNullable(FluidStackHooks.getStillTexture(Fluids.WATER)).map(TextureAtlasSprite::getName).map(ResourceLocation::toString).orElse("missingno")).combineWith(Icon.getIcon(ForgeFluidTask.TANK_TEXTURE.toString())));
 		ForgeEnergyTask.TYPE = TaskTypes.register(new ResourceLocation(FTBQuests.MOD_ID, "forge_energy"), ForgeEnergyTask::new, () -> Icon.getIcon(ForgeEnergyTask.EMPTY_TEXTURE.toString()).combineWith(Icon.getIcon(ForgeEnergyTask.FULL_TEXTURE.toString())));
 
-		if (Platform.isModLoaded("gamestages") && !Platform.isModLoaded("kubejs")) {
+		// TODO: reintroduce? or maybe we can just use entity tags / KubeJS?
+		/*if (Platform.isModLoaded("gamestages") && !Platform.isModLoaded("kubejs")) {
 			StageHelper.instance = new LazyLoadedValue<>(GameStagesIntegration::new);
-		}
+		}*/
 
 		FMLJavaModLoadingContext.get().getModEventBus().<FMLCommonSetupEvent>addListener(event -> quests.setup());
 

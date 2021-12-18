@@ -117,7 +117,7 @@ public class FTBQuestsCommands {
 								.then(Commands.argument("pos", BlockPosArgument.blockPos())
 										.executes(ctx -> {
 											QuestObjectBase table = ctx.getArgument("reward_table", QuestObjectBase.class);
-											BlockPos pos = BlockPosArgument.getOrLoadBlockPos(ctx, "pos");
+											BlockPos pos = BlockPosArgument.getSpawnablePos(ctx, "pos");
 											if (!(table instanceof RewardTable)) {
 												throw QuestObjectArgument.NO_OBJECT.create(table.getCodeString());
 											}
@@ -136,7 +136,7 @@ public class FTBQuestsCommands {
 								.then(Commands.argument("pos", BlockPosArgument.blockPos())
 										.executes(ctx -> {
 											String name = StringArgumentType.getString(ctx, "name");
-											BlockPos pos = BlockPosArgument.getOrLoadBlockPos(ctx, "pos");
+											BlockPos pos = BlockPosArgument.getSpawnablePos(ctx, "pos");
 											return importRewards(ctx.getSource(), name, pos);
 										})
 								)
