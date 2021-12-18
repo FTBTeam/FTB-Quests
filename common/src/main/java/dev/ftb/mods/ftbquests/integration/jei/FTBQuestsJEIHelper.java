@@ -1,7 +1,7 @@
 package dev.ftb.mods.ftbquests.integration.jei;
 
+import dev.architectury.injectables.annotations.ExpectPlatform;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
-import me.shedaniel.architectury.annotations.ExpectPlatform;
 
 public class FTBQuestsJEIHelper {
 	public static int QUESTS = 1;

@@ -3,6 +3,7 @@ package dev.ftb.mods.ftbquests.block.entity;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.block.QuestBarrierBlock;
 import dev.ftb.mods.ftbquests.integration.StageHelper;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -15,8 +16,8 @@ import net.minecraft.world.level.block.state.BlockState;
 public class StageBarrierBlockEntity extends BlockEntity implements TickableBlockEntity, BarrierBlockEntity {
 	public String stage = "";
 
-	public StageBarrierBlockEntity() {
-		super(FTBQuestsBlockEntities.STAGE_BARRIER.get());
+	public StageBarrierBlockEntity(BlockPos blockPos, BlockState blockState) {
+		super(FTBQuestsBlockEntities.STAGE_BARRIER.get(), blockPos, blockState);
 	}
 
 	public void readBarrier(CompoundTag tag) {
@@ -29,14 +30,14 @@ public class StageBarrierBlockEntity extends BlockEntity implements TickableBloc
 	}
 
 	@Override
-	public void load(BlockState state, CompoundTag tag) {
-		super.load(state, tag);
+	public void load(CompoundTag tag) {
+		super.load(tag);
 		readBarrier(tag);
 	}
 
 	@Override
-	public CompoundTag save(CompoundTag tag) {
-		return writeBarrier(super.save(tag));
+	public void saveAdditional(CompoundTag tag) {
+		writeBarrier(tag);
 	}
 
 	@Override

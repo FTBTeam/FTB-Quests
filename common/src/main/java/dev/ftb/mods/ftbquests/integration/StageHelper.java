@@ -1,6 +1,6 @@
 package dev.ftb.mods.ftbquests.integration;
 
-import me.shedaniel.architectury.platform.Platform;
+import dev.architectury.platform.Platform;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.LazyLoadedValue;
 import net.minecraft.world.entity.player.Player;

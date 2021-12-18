@@ -1,11 +1,19 @@
 package dev.ftb.mods.ftbquests;
 
 import com.mojang.brigadier.CommandDispatcher;
+import dev.architectury.event.EventResult;
+import dev.architectury.event.events.common.CommandRegistrationEvent;
+import dev.architectury.event.events.common.EntityEvent;
+import dev.architectury.event.events.common.LifecycleEvent;
+import dev.architectury.event.events.common.PlayerEvent;
+import dev.architectury.event.events.common.TickEvent;
+import dev.architectury.hooks.level.entity.PlayerHooks;
 import dev.ftb.mods.ftbquests.block.FTBQuestsBlocks;
 import dev.ftb.mods.ftbquests.block.entity.FTBQuestsBlockEntities;
 import dev.ftb.mods.ftbquests.command.FTBQuestsCommands;
 import dev.ftb.mods.ftbquests.events.ClearFileCacheEvent;
 import dev.ftb.mods.ftbquests.item.FTBQuestsItems;
+import dev.ftb.mods.ftbquests.quest.QuestFile;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.task.DimensionTask;
@@ -16,12 +24,6 @@ import dev.ftb.mods.ftbteams.event.PlayerChangedTeamEvent;
 import dev.ftb.mods.ftbteams.event.PlayerLoggedInAfterTeamEvent;
 import dev.ftb.mods.ftbteams.event.TeamCreatedEvent;
 import dev.ftb.mods.ftbteams.event.TeamEvent;
-import me.shedaniel.architectury.event.events.CommandRegistrationEvent;
-import me.shedaniel.architectury.event.events.EntityEvent;
-import me.shedaniel.architectury.event.events.LifecycleEvent;
-import me.shedaniel.architectury.event.events.PlayerEvent;
-import me.shedaniel.architectury.event.events.TickEvent;
-import me.shedaniel.architectury.hooks.PlayerHooks;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.resources.ResourceKey;
@@ -29,7 +31,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -53,7 +54,7 @@ public class FTBQuestsEventHandler {
 		CommandRegistrationEvent.EVENT.register(this::registerCommands);
 		LifecycleEvent.SERVER_STARTED.register(this::serverStarted);
 		LifecycleEvent.SERVER_STOPPING.register(this::serverStopped);
-		LifecycleEvent.SERVER_WORLD_SAVE.register(this::worldSaved);
+		LifecycleEvent.SERVER_LEVEL_SAVE.register(this::worldSaved);
 		FTBQuestsBlocks.register();
 		FTBQuestsItems.register();
 		FTBQuestsBlockEntities.register();
@@ -94,8 +95,8 @@ public class FTBQuestsEventHandler {
 		}
 	}
 
-	private void fileCacheClear(ClearFileCacheEvent event) {
-		if (event.getFile().isServerSide()) {
+	private void fileCacheClear(QuestFile file) {
+		if (file.isServerSide()) {
 			killTasks = null;
 			autoSubmitTasks = null;
 		}
@@ -113,14 +114,14 @@ public class FTBQuestsEventHandler {
 		ServerQuestFile.INSTANCE.playerChangedTeam(event);
 	}
 
-	private InteractionResult playerKill(LivingEntity entity, DamageSource source) {
+	private EventResult playerKill(LivingEntity entity, DamageSource source) {
 		if (source.getEntity() instanceof ServerPlayer && !PlayerHooks.isFake((Player) source.getEntity())) {
 			if (killTasks == null) {
 				killTasks = ServerQuestFile.INSTANCE.collect(KillTask.class);
 			}
 
 			if (killTasks.isEmpty()) {
-				return InteractionResult.PASS;
+				return EventResult.pass();
 			}
 
 			ServerPlayer player = (ServerPlayer) source.getEntity();
@@ -133,7 +134,7 @@ public class FTBQuestsEventHandler {
 			}
 		}
 
-		return InteractionResult.PASS;
+		return EventResult.pass();
 	}
 
 	private void playerTick(Player player) {
@@ -195,11 +196,11 @@ public class FTBQuestsEventHandler {
 			return;
 		}
 
-		for (int i = 0; i < oldPlayer.inventory.items.size(); i++) {
-			ItemStack stack = oldPlayer.inventory.items.get(i);
+		for (int i = 0; i < oldPlayer.getInventory().items.size(); i++) {
+			ItemStack stack = oldPlayer.getInventory().items.get(i);
 
 			if (stack.getItem() == FTBQuestsItems.BOOK.get() && newPlayer.addItem(stack)) {
-				oldPlayer.inventory.items.set(i, ItemStack.EMPTY);
+				oldPlayer.getInventory().items.set(i, ItemStack.EMPTY);
 			}
 		}
 	}

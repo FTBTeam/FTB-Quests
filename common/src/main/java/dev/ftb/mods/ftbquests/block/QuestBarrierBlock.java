@@ -1,8 +1,8 @@
 package dev.ftb.mods.ftbquests.block;
 
+import dev.architectury.hooks.level.entity.EntityHooks;
 import dev.ftb.mods.ftbquests.block.entity.BarrierBlockEntity;
 import dev.ftb.mods.ftbquests.block.entity.FTBQuestsBlockEntities;
-import me.shedaniel.architectury.hooks.EntityHooks;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
@@ -105,7 +105,7 @@ public class QuestBarrierBlock extends BaseEntityBlock {
 
 	@Nullable
 	@Override
-	public BlockEntity newBlockEntity(BlockGetter bg) {
-		return FTBQuestsBlockEntities.createQuestBarrierEntity();
+	public BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
+		return FTBQuestsBlockEntities.createQuestBarrierEntity(blockPos, blockState);
 	}
 }

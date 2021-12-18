@@ -1,6 +1,9 @@
 package dev.ftb.mods.ftbquests.quest;
 
 import com.mojang.util.UUIDTypeAdapter;
+import dev.architectury.hooks.LevelResourceHooks;
+import dev.architectury.platform.Platform;
+import dev.architectury.utils.Env;
 import dev.ftb.mods.ftblibrary.snbt.SNBT;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
 import dev.ftb.mods.ftbquests.FTBQuests;
@@ -22,9 +25,6 @@ import dev.ftb.mods.ftbteams.data.PlayerTeam;
 import dev.ftb.mods.ftbteams.event.PlayerChangedTeamEvent;
 import dev.ftb.mods.ftbteams.event.PlayerLoggedInAfterTeamEvent;
 import dev.ftb.mods.ftbteams.event.TeamCreatedEvent;
-import me.shedaniel.architectury.hooks.LevelResourceHooks;
-import me.shedaniel.architectury.platform.Platform;
-import me.shedaniel.architectury.utils.Env;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.storage.LevelResource;

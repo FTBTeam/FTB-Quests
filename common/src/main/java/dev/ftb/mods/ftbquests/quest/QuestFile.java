@@ -1,5 +1,7 @@
 package dev.ftb.mods.ftbquests.quest;
 
+import dev.architectury.utils.Env;
+import dev.architectury.utils.NbtType;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.ItemStackConfig;
 import dev.ftb.mods.ftblibrary.icon.Icon;
@@ -35,8 +37,6 @@ import dev.ftb.mods.ftbteams.data.TeamBase;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
-import me.shedaniel.architectury.utils.Env;
-import me.shedaniel.architectury.utils.NbtType;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
@@ -1101,7 +1101,7 @@ public abstract class QuestFile extends QuestObject {
 
 		clearCachedProgress();
 
-		ClearFileCacheEvent.EVENT.invoker().accept(new ClearFileCacheEvent(this));
+		ClearFileCacheEvent.EVENT.invoker().accept(this);
 	}
 
 	public void clearCachedProgress() {

@@ -2,8 +2,8 @@ package dev.ftb.mods.ftbquests.integration.kubejs;
 
 import dev.ftb.mods.ftbquests.events.CustomRewardEvent;
 import dev.ftb.mods.ftbquests.quest.reward.CustomReward;
-import dev.latvian.kubejs.entity.EntityJS;
-import dev.latvian.kubejs.player.PlayerEventJS;
+import dev.latvian.mods.kubejs.entity.EntityJS;
+import dev.latvian.mods.kubejs.player.PlayerEventJS;
 
 /**
  * @author LatvianModder

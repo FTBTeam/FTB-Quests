@@ -1,6 +1,6 @@
 plugins {
-	id "com.github.johnrengelman.shadow" version "5.0.0"
-	id "com.matthewprenger.cursegradle" version "1.4.0"
+	id "com.github.johnrengelman.shadow" version "7.1.0"
+	id "com.matthewprenger.cursegradle"
 }
 
 def ENV = System.getenv()
@@ -14,29 +14,29 @@ architectury {
 	fabric()
 }
 
+configurations {
+	common
+	shadowCommon // Don't use shadow from the shadow plugin because we don't want IDEA to index this.
+	compileClasspath.extendsFrom common
+	runtimeClasspath.extendsFrom common
+	developmentFabric.extendsFrom common
+}
+
 dependencies {
-	modImplementation("net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}")
-	modImplementation("net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_api_version}")
+	modApi "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
 
-	modApi "me.shedaniel:architectury-fabric:${rootProject.architectury_version}"
+	modApi "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_api_version}"
+	modApi "dev.architectury:architectury-fabric:${rootProject.architectury_version}"
 
-	modImplementation "dev.ftb.mods:ftb-library-fabric:${rootProject.ftb_library_version}"
-	modImplementation "dev.ftb.mods:ftb-teams-fabric:${rootProject.ftb_teams_version}"
-	modImplementation "dev.latvian.mods:item-filters-fabric:${rootProject.itemfilters_version}"
+	modApi("dev.ftb.mods:ftb-library-fabric:${rootProject.ftb_library_version}") { transitive false }
+	modApi "dev.ftb.mods:ftb-teams-fabric:${rootProject.ftb_teams_version}"
+	modApi "dev.latvian.mods:item-filters-fabric:${rootProject.itemfilters_version}"
+
 	modImplementation "dev.latvian.mods:kubejs-fabric:${rootProject.kubejs_version}"
 	modImplementation "dev.latvian.mods:rhino-fabric:${rootProject.rhino_version}"
 
-	modImplementation "curse.maven:ctm-fabric-432493:3233998"
-
-	implementation(project(path: ":common")) {
-		transitive = false
-	}
-	developmentFabric(project(path: ":common")) {
-		transitive = false
-	}
-	shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) {
-		transitive = false
-	}
+	common(project(path: ":common", configuration: "namedElements")) { transitive false }
+	shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }
 }
 
 processResources {
@@ -55,12 +55,18 @@ shadowJar {
 remapJar {
 	input.set shadowJar.archiveFile
 	dependsOn shadowJar
-	archiveBaseName.set "${rootProject.mod_name}-${project.name}"
+	archiveBaseName.set "${rootProject.archives_base_name}-${project.name}"
 	archiveClassifier.set null
 }
 
 jar {
 	classifier "dev"
+}
+
+components.java {
+	withVariantsFromConfiguration(project.configurations.shadowRuntimeElements) {
+		skip()
+	}
 }
 
 if (ENV.CURSEFORGE_KEY) {
@@ -70,13 +76,13 @@ if (ENV.CURSEFORGE_KEY) {
 			id = project.curseforge_id_fabric
 			releaseType = project.curseforge_type
 			addGameVersion "Fabric"
-			addGameVersion "1.16.5"
+			addGameVersion "1.18.1"
 			mainArtifact(remapJar.archivePath)
 			relations {
 				requiredDependency 'architectury-fabric'
 				requiredDependency 'fabric-api'
-				requiredDependency 'ftb-teams-fabric'
 				requiredDependency 'ftb-library-fabric'
+				requiredDependency 'ftb-teams-fabric'
 				requiredDependency 'item-filters-fabric'
 				optionalDependency 'kubejs-fabric'
 			}
@@ -89,11 +95,8 @@ if (ENV.CURSEFORGE_KEY) {
 publishing {
 	publications {
 		mavenFabric(MavenPublication) {
-			artifactId = "${rootProject.mod_name}-${project.name}"
-			artifact(remapJar)
-			artifact(sourcesJar) {
-				builtBy remapSourcesJar
-			}
+			artifactId = "${rootProject.archives_base_name}-${project.name}"
+			from components.java
 		}
 	}
 

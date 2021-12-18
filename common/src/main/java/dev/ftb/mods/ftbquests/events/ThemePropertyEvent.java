@@ -1,9 +1,8 @@
 package dev.ftb.mods.ftbquests.events;
 
+import dev.architectury.event.Event;
+import dev.architectury.event.EventFactory;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperty;
-import me.shedaniel.architectury.ForgeEvent;
-import me.shedaniel.architectury.event.Event;
-import me.shedaniel.architectury.event.EventFactory;
 
 import java.util.Map;
 import java.util.function.Consumer;
@@ -11,7 +10,6 @@ import java.util.function.Consumer;
 /**
  * @author LatvianModder
  */
-@ForgeEvent
 public class ThemePropertyEvent {
 	public static final Event<Consumer<ThemePropertyEvent>> EVENT = EventFactory.createConsumerLoop(ThemePropertyEvent.class);
 	private final Map<String, ThemeProperty> map;

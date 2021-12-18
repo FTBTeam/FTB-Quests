@@ -1,14 +1,14 @@
 package dev.ftb.mods.ftbquests.events;
 
+import dev.architectury.event.Event;
+import dev.architectury.event.EventActor;
+import dev.architectury.event.EventFactory;
 import dev.ftb.mods.ftbquests.quest.Chapter;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestFile;
 import dev.ftb.mods.ftbquests.quest.QuestObject;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.task.Task;
-import me.shedaniel.architectury.event.Event;
-import me.shedaniel.architectury.event.EventActor;
-import me.shedaniel.architectury.event.EventFactory;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.Date;

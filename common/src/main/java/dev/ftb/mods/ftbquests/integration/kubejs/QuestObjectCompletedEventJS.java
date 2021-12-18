@@ -3,10 +3,10 @@ package dev.ftb.mods.ftbquests.integration.kubejs;
 import dev.ftb.mods.ftbquests.events.ObjectCompletedEvent;
 import dev.ftb.mods.ftbquests.quest.QuestObject;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
-import dev.latvian.kubejs.player.EntityArrayList;
-import dev.latvian.kubejs.player.ServerPlayerJS;
-import dev.latvian.kubejs.server.ServerEventJS;
-import dev.latvian.kubejs.server.ServerJS;
+import dev.latvian.mods.kubejs.player.EntityArrayList;
+import dev.latvian.mods.kubejs.player.ServerPlayerJS;
+import dev.latvian.mods.kubejs.server.ServerEventJS;
+import dev.latvian.mods.kubejs.server.ServerJS;
 import org.jetbrains.annotations.Nullable;
 
 /**

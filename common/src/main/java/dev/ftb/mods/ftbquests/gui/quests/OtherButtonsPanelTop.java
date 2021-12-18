@@ -1,9 +1,9 @@
 package dev.ftb.mods.ftbquests.gui.quests;
 
+import dev.architectury.platform.Platform;
 import dev.ftb.mods.ftblibrary.ui.Panel;
 import dev.ftb.mods.ftblibrary.ui.WidgetLayout;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
-import me.shedaniel.architectury.platform.Platform;
 
 /**
  * @author LatvianModder

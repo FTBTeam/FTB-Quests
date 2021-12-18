@@ -1,10 +1,10 @@
 package dev.ftb.mods.ftbquests.quest.task;
 
+import dev.architectury.registry.registries.Registries;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.ui.Button;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.TeamData;
-import me.shedaniel.architectury.registry.Registries;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.Registry;

@@ -1,11 +1,11 @@
 package dev.ftb.mods.ftbquests.quest.task;
 
+import dev.architectury.hooks.level.entity.PlayerHooks;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftbquests.integration.StageHelper;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.TeamData;
-import me.shedaniel.architectury.hooks.PlayerHooks;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;

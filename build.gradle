@@ -1,6 +1,8 @@
 plugins {
-	id "architectury-plugin" version "3.1-SNAPSHOT"
-	id "dev.architectury.loom" version "0.7.3-SNAPSHOT" apply false
+	id "architectury-plugin" version "3.4-SNAPSHOT"
+	id "dev.architectury.loom" version "0.10.0-SNAPSHOT" apply false
+	id "com.matthewprenger.cursegradle" version "1.4.0" apply false
+	id "maven-publish"
 }
 
 architectury {
@@ -12,7 +14,6 @@ subprojects {
 
 	loom {
 		silentMojangMappingsLicense()
-		useFabricMixin = true
 	}
 
 	dependencies {
@@ -24,40 +25,17 @@ subprojects {
 allprojects {
 	apply plugin: "java"
 	apply plugin: "architectury-plugin"
-	apply plugin: "maven-publish"
 	apply from: "https://files.latmod.com/public/markdown-git-changelog.gradle"
 
 	def ENV = System.getenv()
 	version = "${mod_version}-build.${ENV.GITHUB_RUN_NUMBER ?: 9999}"
-	group = project.mod_package
-	archivesBaseName = project.mod_name
+	group = project.maven_group
+	archivesBaseName = project.archives_base_name
 
-	sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
+	sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = 17
 
-	configurations {
-		modOptional
-		modCompileOnly.extendsFrom(modOptional)
-		modRuntime.extendsFrom(modOptional)
-
-		optional
-		compileOnly.extendsFrom(optional)
-		runtime.extendsFrom(optional)
-	}
-
-	tasks.withType(JavaCompile) {
+	compileJava {
 		options.encoding = "UTF-8"
-
-		// The Minecraft launcher currently installs Java 8 for users, so your mod probably wants to target Java 8 too
-		// JDK 9 introduced a new way of specifying this that will make sure no newer classes or methods are used.
-		// We'll use that if it's available, but otherwise we'll use the older option.
-		def targetVersion = 8
-		if (JavaVersion.current().isJava9Compatible()) {
-			options.release = targetVersion
-		}
-	}
-
-	java {
-		withSourcesJar()
 	}
 
 	repositories {
@@ -68,17 +46,14 @@ allprojects {
 		maven {
 			url "https://maven.saps.dev/minecraft"
 			content {
-				includeGroup "dev.ftb.mods"
 				includeGroup "dev.latvian.mods"
+				includeGroup "dev.ftb.mods"
 			}
 		}
+	}
 
-		maven {
-			url "https://www.cursemaven.com"
-			content {
-				includeGroup "curse.maven"
-			}
-		}
+	java {
+		withSourcesJar()
 	}
 }
 

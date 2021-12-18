@@ -5,6 +5,7 @@ import dev.ftb.mods.ftbquests.quest.QuestObject;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.TeamData;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -19,8 +20,8 @@ import static dev.ftb.mods.ftbquests.block.QuestBarrierBlock.OPEN;
 public class QuestBarrierBlockEntity extends BlockEntity implements TickableBlockEntity, BarrierBlockEntity {
 	public long object = 0L;
 
-	public QuestBarrierBlockEntity() {
-		super(FTBQuestsBlockEntities.BARRIER.get());
+	public QuestBarrierBlockEntity(BlockPos blockPos, BlockState blockState) {
+		super(FTBQuestsBlockEntities.BARRIER.get(), blockPos, blockState);
 	}
 
 	public void readBarrier(CompoundTag tag) {
@@ -37,14 +38,14 @@ public class QuestBarrierBlockEntity extends BlockEntity implements TickableBloc
 	}
 
 	@Override
-	public void load(BlockState state, CompoundTag tag) {
-		super.load(state, tag);
+	public void load(CompoundTag tag) {
+		super.load(tag);
 		readBarrier(tag);
 	}
 
 	@Override
-	public CompoundTag save(CompoundTag tag) {
-		return writeBarrier(super.save(tag));
+	public void saveAdditional(CompoundTag tag) {
+		writeBarrier(tag);
 	}
 
 	@Override

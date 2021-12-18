@@ -4,7 +4,7 @@ import dev.ftb.mods.ftbquests.quest.QuestFile;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbteams.FTBTeamsAPI;
-import dev.latvian.kubejs.player.PlayerDataJS;
+import dev.latvian.mods.kubejs.player.PlayerDataJS;
 
 /**
  * @author LatvianModder

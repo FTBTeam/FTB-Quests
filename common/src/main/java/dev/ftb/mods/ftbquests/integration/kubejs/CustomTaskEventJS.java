@@ -2,7 +2,7 @@ package dev.ftb.mods.ftbquests.integration.kubejs;
 
 import dev.ftb.mods.ftbquests.events.CustomTaskEvent;
 import dev.ftb.mods.ftbquests.quest.task.CustomTask;
-import dev.latvian.kubejs.event.EventJS;
+import dev.latvian.mods.kubejs.event.EventJS;
 
 /**
  * @author LatvianModder

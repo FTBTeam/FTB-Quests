@@ -1,9 +1,9 @@
 package dev.ftb.mods.ftbquests.net;
 
+import dev.architectury.injectables.annotations.ExpectPlatform;
+import dev.architectury.networking.simple.MessageType;
+import dev.architectury.networking.simple.SimpleNetworkManager;
 import dev.ftb.mods.ftbquests.FTBQuests;
-import me.shedaniel.architectury.annotations.ExpectPlatform;
-import me.shedaniel.architectury.networking.simple.MessageType;
-import me.shedaniel.architectury.networking.simple.SimpleNetworkManager;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.item.ItemStack;
 
