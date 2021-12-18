@@ -2,6 +2,11 @@ package dev.ftb.mods.ftbquests.client;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.vertex.PoseStack;
+import dev.architectury.event.EventResult;
+import dev.architectury.event.events.client.ClientGuiEvent;
+import dev.architectury.event.events.client.ClientLifecycleEvent;
+import dev.architectury.event.events.client.ClientTickEvent;
+import dev.architectury.registry.client.rendering.ColorHandlerRegistry;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.sidebar.SidebarButtonCreatedEvent;
 import dev.ftb.mods.ftblibrary.ui.CustomClickEvent;
@@ -14,15 +19,12 @@ import dev.ftb.mods.ftbquests.net.SubmitTaskMessage;
 import dev.ftb.mods.ftbquests.quest.Chapter;
 import dev.ftb.mods.ftbquests.quest.ChapterGroup;
 import dev.ftb.mods.ftbquests.quest.Quest;
+import dev.ftb.mods.ftbquests.quest.QuestFile;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.loot.LootCrate;
 import dev.ftb.mods.ftbquests.quest.task.ObservationTask;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
-import me.shedaniel.architectury.event.events.GuiEvent;
-import me.shedaniel.architectury.event.events.client.ClientLifecycleEvent;
-import me.shedaniel.architectury.event.events.client.ClientTickEvent;
-import me.shedaniel.architectury.registry.ColorHandlers;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.toasts.SystemToast;
@@ -32,7 +34,6 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.phys.HitResult;
 
 import java.util.ArrayList;
@@ -55,11 +56,11 @@ public class FTBQuestsClientEventHandler {
 		ClientTickEvent.CLIENT_PRE.register(this::onKeyEvent);
 		CustomClickEvent.EVENT.register(this::onCustomClick);
 		ClientTickEvent.CLIENT_PRE.register(this::onClientTick);
-		GuiEvent.RENDER_HUD.register(this::onScreenRender);
+		ClientGuiEvent.RENDER_HUD.register(this::onScreenRender);
 	}
 
 	private void registerItemColors(Minecraft minecraft) {
-		ColorHandlers.registerItemColors((stack, tintIndex) -> {
+		ColorHandlerRegistry.registerItemColors((stack, tintIndex) -> {
 			LootCrate crate = LootCrateItem.getCrate(stack);
 			return crate == null ? 0xFFFFFFFF : (0xFF000000 | crate.color.rgb());
 		}, FTBQuestsItems.LOOTCRATE.get());
@@ -84,7 +85,7 @@ public class FTBQuestsClientEventHandler {
 		}
 	}
 
-	private void onFileCacheClear(ClearFileCacheEvent event) {
+	private void onFileCacheClear(QuestFile file) {
 		observationTasks = null;
 	}
 
@@ -94,18 +95,18 @@ public class FTBQuestsClientEventHandler {
 		}
 	}
 
-	private InteractionResult onCustomClick(CustomClickEvent event) {
-		if (event.getId().getNamespace().equals(FTBQuests.MOD_ID) && "open_gui".equals(event.getId().getPath())) {
+	private EventResult onCustomClick(CustomClickEvent event) {
+		if (event.id().getNamespace().equals(FTBQuests.MOD_ID) && "open_gui".equals(event.id().getPath())) {
 			if (!ClientQuestFile.exists()) {
 				Minecraft.getInstance().getToasts().addToast(new SystemToast(SystemToast.SystemToastIds.TUTORIAL_HINT, new TextComponent("Error?! Server doesn't have FTB Quests!"), null));
 			} else {
 				ClientQuestFile.INSTANCE.openQuestGui();
 			}
 
-			return InteractionResult.FAIL;
+			return EventResult.interruptFalse();
 		}
 
-		return InteractionResult.PASS;
+		return EventResult.pass();
 	}
 
 	private void onClientTick(Minecraft mc) {

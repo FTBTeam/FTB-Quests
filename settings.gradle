@@ -1,11 +1,11 @@
 pluginManagement {
 	repositories {
 		maven { url "https://maven.creeperhost.net/" }
-		maven { url "https://maven.shedaniel.me/" }
+		maven { url "https://maven.architectury.dev/" }
 		gradlePluginPortal()
 	}
 }
 
 include "common", "fabric", "forge"
 
-rootProject.name = 'FTB-Quests-1.16.5'
+rootProject.name = 'FTB-Quests-1.18.1'

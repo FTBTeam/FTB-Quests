@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbquests.quest.reward;
 
+import dev.architectury.hooks.item.ItemStackHooks;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;
@@ -8,7 +9,6 @@ import dev.ftb.mods.ftbquests.net.DisplayItemRewardToastMessage;
 import dev.ftb.mods.ftbquests.net.FTBQuestsNetHandler;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.util.NBTUtils;
-import me.shedaniel.architectury.hooks.ItemStackHooks;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
@@ -115,7 +115,7 @@ public class ItemReward extends Reward {
 
 	@Override
 	public void claim(ServerPlayer player, boolean notify) {
-		if (onlyOne && player.inventory.contains(item)) {
+		if (onlyOne && player.getInventory().contains(item)) {
 			return;
 		}
 

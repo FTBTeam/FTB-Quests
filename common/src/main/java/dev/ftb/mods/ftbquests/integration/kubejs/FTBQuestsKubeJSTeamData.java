@@ -6,8 +6,8 @@ import dev.ftb.mods.ftbquests.quest.QuestObject;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.util.ProgressChange;
-import dev.latvian.kubejs.player.EntityArrayList;
-import dev.latvian.kubejs.server.ServerJS;
+import dev.latvian.mods.kubejs.player.EntityArrayList;
+import dev.latvian.mods.kubejs.server.ServerJS;
 
 import java.util.function.Consumer;
 

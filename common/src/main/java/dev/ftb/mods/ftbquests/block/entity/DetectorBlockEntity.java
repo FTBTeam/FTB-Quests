@@ -1,10 +1,10 @@
 package dev.ftb.mods.ftbquests.block.entity;
 
+import dev.architectury.hooks.level.entity.PlayerHooks;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.util.ProgressChange;
-import me.shedaniel.architectury.hooks.PlayerHooks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
@@ -20,13 +20,13 @@ public class DetectorBlockEntity extends BlockEntity {
 	public long object = 0L;
 	public int radius = 8;
 
-	public DetectorBlockEntity() {
-		super(FTBQuestsBlockEntities.DETECTOR.get());
+	public DetectorBlockEntity(BlockPos blockPos, BlockState blockState) {
+		super(FTBQuestsBlockEntities.DETECTOR.get(), blockPos, blockState);
 	}
 
 	@Override
-	public void load(BlockState state, CompoundTag tag) {
-		super.load(state, tag);
+	public void load(CompoundTag tag) {
+		super.load(tag);
 
 		object = QuestObjectBase.parseCodeString(tag.getString("Object"));
 
@@ -38,10 +38,9 @@ public class DetectorBlockEntity extends BlockEntity {
 	}
 
 	@Override
-	public CompoundTag save(CompoundTag tag) {
+	public void saveAdditional(CompoundTag tag) {
 		tag.putString("Object", QuestObjectBase.getCodeString(object));
 		tag.putInt("Radius", radius);
-		return super.save(tag);
 	}
 
 	public void update(String s) {

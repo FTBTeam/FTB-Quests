@@ -1,6 +1,6 @@
 package dev.ftb.mods.ftbquests.integration;
 
-import dev.latvian.kubejs.stages.Stages;
+import dev.latvian.mods.kubejs.stages.Stages;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 

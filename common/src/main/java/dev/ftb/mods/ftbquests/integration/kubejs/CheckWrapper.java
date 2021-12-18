@@ -1,7 +1,7 @@
 package dev.ftb.mods.ftbquests.integration.kubejs;
 
 import dev.ftb.mods.ftbquests.quest.task.CustomTask;
-import dev.latvian.kubejs.server.ServerJS;
+import dev.latvian.mods.kubejs.server.ServerJS;
 import net.minecraft.server.level.ServerPlayer;
 
 /**

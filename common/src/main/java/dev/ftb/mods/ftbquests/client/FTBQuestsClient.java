@@ -1,6 +1,10 @@
 package dev.ftb.mods.ftbquests.client;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import dev.architectury.event.events.client.ClientLifecycleEvent;
+import dev.architectury.registry.ReloadListenerRegistry;
+import dev.architectury.registry.client.keymappings.KeyMappingRegistry;
+import dev.architectury.registry.client.rendering.RenderTypeRegistry;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.ImageConfig;
 import dev.ftb.mods.ftblibrary.config.IntConfig;
@@ -27,20 +31,14 @@ import dev.ftb.mods.ftbquests.quest.task.ItemTask;
 import dev.ftb.mods.ftbquests.quest.task.LocationTask;
 import dev.ftb.mods.ftbquests.quest.task.TaskTypes;
 import dev.ftb.mods.ftbquests.quest.theme.ThemeLoader;
-import me.shedaniel.architectury.event.events.client.ClientLifecycleEvent;
-import me.shedaniel.architectury.registry.KeyBindings;
-import me.shedaniel.architectury.registry.ReloadListeners;
-import me.shedaniel.architectury.registry.RenderTypes;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.StructureBlockEntity;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
@@ -51,15 +49,15 @@ public class FTBQuestsClient extends FTBQuestsCommon {
 	@Override
 	public void init() {
 		ClientLifecycleEvent.CLIENT_SETUP.register(this::setup);
-		ReloadListeners.registerReloadListener(PackType.CLIENT_RESOURCES, new QuestFileCacheReloader());
-		ReloadListeners.registerReloadListener(PackType.CLIENT_RESOURCES, new ThemeLoader());
+		ReloadListenerRegistry.register(PackType.CLIENT_RESOURCES, new QuestFileCacheReloader());
+		ReloadListenerRegistry.register(PackType.CLIENT_RESOURCES, new ThemeLoader());
 		new FTBQuestsClientEventHandler().init();
 	}
 
 	private void setup(Minecraft minecraft) {
-		KeyBindings.registerKeyBinding(KEY_QUESTS = new KeyMapping("key.ftbquests.quests", InputConstants.Type.KEYSYM, -1, "key.categories.ftbquests"));
-		RenderTypes.register(RenderType.translucent(), FTBQuestsBlocks.BARRIER.get());
-		RenderTypes.register(RenderType.translucent(), FTBQuestsBlocks.STAGE_BARRIER.get());
+		KeyMappingRegistry.register(KEY_QUESTS = new KeyMapping("key.ftbquests.quests", InputConstants.Type.KEYSYM, -1, "key.categories.ftbquests"));
+		RenderTypeRegistry.register(RenderType.translucent(), FTBQuestsBlocks.BARRIER.get());
+		RenderTypeRegistry.register(RenderType.translucent(), FTBQuestsBlocks.STAGE_BARRIER.get());
 		setTaskGuiProviders();
 		setRewardGuiProviders();
 	}
@@ -145,15 +143,15 @@ public class FTBQuestsClient extends FTBQuestsCommon {
 			Minecraft mc = Minecraft.getInstance();
 
 			if (mc.hitResult instanceof BlockHitResult) {
-				BlockEntity tileEntity = mc.level.getBlockEntity(((BlockHitResult) mc.hitResult).getBlockPos());
+				var blockEntity = mc.level.getBlockEntity(((BlockHitResult) mc.hitResult).getBlockPos());
 
-				if (tileEntity instanceof StructureBlockEntity) {
-					BlockPos pos = ((StructureBlockEntity) tileEntity).getStructurePos();
-					BlockPos size = ((StructureBlockEntity) tileEntity).getStructureSize();
+				if (blockEntity instanceof StructureBlockEntity) {
+					var pos = ((StructureBlockEntity) blockEntity).getStructurePos();
+					var size = ((StructureBlockEntity) blockEntity).getStructureSize();
 					task.dimension = mc.level.dimension();
-					task.x = pos.getX() + tileEntity.getBlockPos().getX();
-					task.y = pos.getY() + tileEntity.getBlockPos().getY();
-					task.z = pos.getZ() + tileEntity.getBlockPos().getZ();
+					task.x = pos.getX() + blockEntity.getBlockPos().getX();
+					task.y = pos.getY() + blockEntity.getBlockPos().getY();
+					task.z = pos.getZ() + blockEntity.getBlockPos().getZ();
 					task.w = Math.max(1, size.getX());
 					task.h = Math.max(1, size.getY());
 					task.d = Math.max(1, size.getZ());

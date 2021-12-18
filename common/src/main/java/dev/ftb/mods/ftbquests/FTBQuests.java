@@ -1,5 +1,8 @@
 package dev.ftb.mods.ftbquests;
 
+import dev.architectury.platform.Platform;
+import dev.architectury.registry.CreativeTabRegistry;
+import dev.architectury.utils.EnvExecutor;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.client.FTBQuestsNetClient;
 import dev.ftb.mods.ftbquests.command.ChangeProgressArgument;
@@ -9,9 +12,6 @@ import dev.ftb.mods.ftbquests.item.FTBQuestsItems;
 import dev.ftb.mods.ftbquests.net.FTBQuestsNetHandler;
 import dev.ftb.mods.ftbquests.quest.reward.RewardTypes;
 import dev.ftb.mods.ftbquests.quest.task.TaskTypes;
-import me.shedaniel.architectury.platform.Platform;
-import me.shedaniel.architectury.registry.CreativeTabs;
-import me.shedaniel.architectury.utils.EnvExecutor;
 import net.minecraft.commands.synchronization.ArgumentTypes;
 import net.minecraft.commands.synchronization.EmptyArgumentSerializer;
 import net.minecraft.resources.ResourceLocation;
@@ -29,7 +29,7 @@ public class FTBQuests {
 	public static FTBQuestsCommon PROXY;
 	public static FTBQuestsNetCommon NET_PROXY;
 
-	public static final CreativeModeTab ITEM_GROUP = CreativeTabs.create(new ResourceLocation(FTBQuests.MOD_ID, FTBQuests.MOD_ID), () -> new ItemStack(FTBQuestsItems.BOOK.get()));
+	public static final CreativeModeTab ITEM_GROUP = CreativeTabRegistry.create(new ResourceLocation(FTBQuests.MOD_ID, FTBQuests.MOD_ID), () -> new ItemStack(FTBQuestsItems.BOOK.get()));
 
 	public FTBQuests() {
 		TaskTypes.init();

@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbquests.client;
 
+import dev.architectury.utils.Env;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.ui.BaseScreen;
 import dev.ftb.mods.ftblibrary.util.ClientTextComponentUtils;
@@ -14,7 +15,6 @@ import dev.ftb.mods.ftbquests.quest.QuestFile;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.theme.QuestTheme;
 import dev.ftb.mods.ftbteams.data.ClientTeamManager;
-import me.shedaniel.architectury.utils.Env;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.TextComponent;

@@ -1,11 +1,10 @@
 package dev.ftb.mods.ftbquests.util;
 
+import dev.architectury.hooks.level.entity.PlayerHooks;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbteams.FTBTeamsAPI;
-import me.shedaniel.architectury.hooks.PlayerHooks;
-import net.minecraft.core.NonNullList;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerListener;
@@ -46,18 +45,14 @@ public class FTBQuestsInventoryListener implements ContainerListener {
 	}
 
 	@Override
-	public void refreshContainer(AbstractContainerMenu container, NonNullList<ItemStack> itemsList) {
-		detect(player, ItemStack.EMPTY, 0);
+	public void dataChanged(AbstractContainerMenu abstractContainerMenu, int i, int j) {
 	}
 
 	@Override
 	public void slotChanged(AbstractContainerMenu container, int index, ItemStack stack) {
-		if (!stack.isEmpty() && container.getSlot(index).container == player.inventory) {
+		if (!stack.isEmpty() && container.getSlot(index).container == player.getInventory()) {
 			detect(player, ItemStack.EMPTY, 0);
 		}
 	}
 
-	@Override
-	public void setContainerData(AbstractContainerMenu container, int id, int value) {
-	}
 }

@@ -1,5 +1,8 @@
 package dev.ftb.mods.ftbquests;
 
+import dev.architectury.hooks.FluidStackHooks;
+import dev.architectury.platform.Platform;
+import dev.architectury.platform.forge.EventBuses;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftbquests.integration.StageHelper;
 import dev.ftb.mods.ftbquests.integration.gamestages.GameStagesIntegration;
@@ -9,9 +12,6 @@ import dev.ftb.mods.ftbquests.quest.loot.LootCrate;
 import dev.ftb.mods.ftbquests.quest.task.TaskTypes;
 import dev.ftb.mods.ftbquests.quest.task.forge.ForgeEnergyTask;
 import dev.ftb.mods.ftbquests.quest.task.forge.ForgeFluidTask;
-import me.shedaniel.architectury.hooks.FluidStackHooks;
-import me.shedaniel.architectury.platform.Platform;
-import me.shedaniel.architectury.platform.forge.EventBuses;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;

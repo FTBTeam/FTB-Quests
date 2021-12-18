@@ -1,16 +1,14 @@
 package dev.ftb.mods.ftbquests.events;
 
+import dev.architectury.event.Event;
+import dev.architectury.event.EventActor;
+import dev.architectury.event.EventFactory;
 import dev.ftb.mods.ftbquests.quest.reward.CustomReward;
-import me.shedaniel.architectury.ForgeEvent;
-import me.shedaniel.architectury.event.Event;
-import me.shedaniel.architectury.event.EventActor;
-import me.shedaniel.architectury.event.EventFactory;
 import net.minecraft.server.level.ServerPlayer;
 
 /**
  * @author LatvianModder
  */
-@ForgeEvent
 public class CustomRewardEvent {
 	public static final Event<EventActor<CustomRewardEvent>> EVENT = EventFactory.createEventActorLoop();
 	private final CustomReward reward;
@@ -21,10 +19,6 @@ public class CustomRewardEvent {
 		reward = r;
 		player = p;
 		notify = n;
-	}
-
-	public boolean isCancelable() {
-		return true;
 	}
 
 	public CustomReward getReward() {

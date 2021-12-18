@@ -1,5 +1,8 @@
 package dev.ftb.mods.ftbquests.quest.task.forge;
 
+import dev.architectury.fluid.FluidStack;
+import dev.architectury.hooks.FluidStackHooks;
+import dev.architectury.registry.registries.Registries;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.FluidConfig;
 import dev.ftb.mods.ftblibrary.config.NBTConfig;
@@ -9,9 +12,6 @@ import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.quest.task.TaskType;
-import me.shedaniel.architectury.fluid.FluidStack;
-import me.shedaniel.architectury.hooks.FluidStackHooks;
-import me.shedaniel.architectury.registry.Registries;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;

@@ -1,13 +1,13 @@
 package dev.ftb.mods.ftbquests.integration.kubejs;
 
+import dev.architectury.event.EventResult;
 import dev.ftb.mods.ftbquests.events.CustomRewardEvent;
 import dev.ftb.mods.ftbquests.events.CustomTaskEvent;
 import dev.ftb.mods.ftbquests.events.ObjectCompletedEvent;
 import dev.ftb.mods.ftbquests.events.ObjectStartedEvent;
-import dev.latvian.kubejs.player.AttachPlayerDataEvent;
-import dev.latvian.kubejs.script.BindingsEvent;
-import dev.latvian.kubejs.script.ScriptType;
-import me.shedaniel.architectury.event.EventResult;
+import dev.latvian.mods.kubejs.player.AttachPlayerDataEvent;
+import dev.latvian.mods.kubejs.script.BindingsEvent;
+import dev.latvian.mods.kubejs.script.ScriptType;
 
 /**
  * @author LatvianModder
