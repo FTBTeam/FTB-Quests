@@ -1,19 +1,30 @@
 package dev.ftb.mods.ftbquests.quest.task;
 
+import com.mojang.brigadier.StringReader;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
+import dev.ftb.mods.ftblibrary.config.NameMap;
 import dev.ftb.mods.ftblibrary.ui.Button;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import me.shedaniel.architectury.registry.Registries;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.commands.arguments.blocks.BlockInput;
+import net.minecraft.commands.arguments.blocks.BlockStateParser;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 
 /**
@@ -21,14 +32,14 @@ import net.minecraft.world.phys.HitResult;
  */
 public class ObservationTask extends BooleanTask {
 	public long timer;
-	public int type;
-	public String observeId;
+	public ObserveType observeType;
+	public String toObserve;
 
 	public ObservationTask(Quest quest) {
 		super(quest);
 		timer = 0L;
-		type = 1;
-		observeId = "minecraft:dirt";
+		observeType = ObserveType.BLOCK;
+		toObserve = "minecraft:dirt";
 	}
 
 	@Override
@@ -36,67 +47,36 @@ public class ObservationTask extends BooleanTask {
 		return TaskTypes.OBSERVATION;
 	}
 
-	private String toStringO() {
-		if (type <= 0 || observeId.isEmpty()) {
-			return "";
-		}
-
-		if (type == 1) {
-			return "block:" + observeId;
-		} else if (type == 2) {
-			return "block_entity:" + observeId;
-		} else if (type == 3) {
-			return "block_entity_class:" + observeId;
-		}
-
-		return "";
-	}
-
-	private void fromStringO(String string) {
-		type = 0;
-		observeId = "";
-
-		try {
-			if (string.startsWith("block:")) {
-				observeId = string.substring(6);
-				type = 1;
-			} else if (string.startsWith("block_entity:")) {
-				observeId = string.substring(6);
-				type = 1;
-			} else if (string.startsWith("block_entity_class:")) {
-				observeId = string.substring(6);
-				type = 1;
-			}
-		} catch (Exception ex) {
-		}
-	}
-
 	@Override
 	public void writeData(CompoundTag nbt) {
 		super.writeData(nbt);
 		nbt.putLong("timer", timer);
-		nbt.putString("observe", toStringO());
+		nbt.putInt("observe_type", observeType.ordinal());
+		nbt.putString("to_observe", toObserve);
 	}
 
 	@Override
 	public void readData(CompoundTag nbt) {
 		super.readData(nbt);
 		timer = nbt.getLong("timer");
-		fromStringO(nbt.getString("observe"));
+		observeType = ObserveType.values()[nbt.getInt("observe_type")];
+		toObserve = nbt.getString("to_observe");
 	}
 
 	@Override
 	public void writeNetData(FriendlyByteBuf buffer) {
 		super.writeNetData(buffer);
 		buffer.writeVarLong(timer);
-		buffer.writeUtf(toStringO(), Short.MAX_VALUE);
+		buffer.writeEnum(observeType);
+		buffer.writeUtf(toObserve);
 	}
 
 	@Override
 	public void readNetData(FriendlyByteBuf buffer) {
 		super.readNetData(buffer);
 		timer = buffer.readVarLong();
-		fromStringO(buffer.readUtf(Short.MAX_VALUE));
+		observeType = buffer.readEnum(ObserveType.class);
+		toObserve = buffer.readUtf(Short.MAX_VALUE);
 	}
 
 	@Override
@@ -104,7 +84,8 @@ public class ObservationTask extends BooleanTask {
 	public void getConfig(ConfigGroup config) {
 		super.getConfig(config);
 		config.addLong("timer", timer, v -> timer = v, 0L, 0L, 1200L);
-		config.addString("observe", toStringO(), this::fromStringO, "block:minecraft:dirt");
+		config.addEnum("observe_type", observeType, v -> observeType = v, ObserveType.NAME_MAP);
+		config.addString("to_observe", toObserve, v -> toObserve = v, "minecraft:dirt");
 	}
 
 	@Override
@@ -123,22 +104,64 @@ public class ObservationTask extends BooleanTask {
 	}
 
 	public boolean observe(Player player, HitResult result) {
-		if (observeId.isEmpty() || type <= 0) {
+		if (toObserve.isEmpty()) {
 			return false;
 		}
 
 		if (result instanceof BlockHitResult) {
-			if (type == 1) {
-				return observeId.equals(String.valueOf(Registries.getId(player.level.getBlockState(((BlockHitResult) result).getBlockPos()).getBlock(), Registry.BLOCK_REGISTRY)));
-			} else if (type == 2) {
-				BlockEntity blockEntity = player.level.getBlockEntity(((BlockHitResult) result).getBlockPos());
-				return blockEntity != null && observeId.equals(String.valueOf(Registries.getId(blockEntity.getType(), Registry.BLOCK_ENTITY_TYPE_REGISTRY)));
-			} else if (type == 3) {
-				BlockEntity blockEntity = player.level.getBlockEntity(((BlockHitResult) result).getBlockPos());
-				return blockEntity != null && observeId.equals(blockEntity.getClass().getName());
+			BlockHitResult blockResult = (BlockHitResult) result;
+			BlockInWorld blockInWorld = new BlockInWorld(player.level, blockResult.getBlockPos(), false);
+
+			BlockState state = blockInWorld.getState();
+			Block block = state.getBlock();
+			BlockEntity blockEntity = blockInWorld.getEntity();
+
+			switch (observeType) {
+				case BLOCK:
+					return String.valueOf(Registries.getId(block, Registry.BLOCK_REGISTRY)).equals(toObserve);
+				case BLOCK_TAG:
+					return state.is(BlockTags.getAllTags().getTagOrEmpty(new ResourceLocation(toObserve)));
+				case BLOCK_STATE:
+					BlockInput stateMatch = tryMatchBlock(toObserve, false);
+					return stateMatch != null && stateMatch.test(blockInWorld);
+				case BLOCK_ENTITY:
+					BlockInput stateNbtMatch = tryMatchBlock(toObserve, true);
+					return stateNbtMatch != null && stateNbtMatch.test(blockInWorld);
+				case BLOCK_ENTITY_TYPE:
+					return blockEntity != null && toObserve.equals(String.valueOf(Registries.getId(blockEntity.getType(), Registry.BLOCK_ENTITY_TYPE_REGISTRY)));
+				default:
+					return false;
+			}
+		} else if (result instanceof EntityHitResult) {
+			EntityHitResult entityResult = (EntityHitResult) result;
+			if (observeType == ObserveType.ENTITY_TYPE) {
+				return toObserve.equals(String.valueOf(Registries.getId(entityResult.getEntity().getType(), Registry.ENTITY_TYPE_REGISTRY)));
+			} else if (observeType == ObserveType.ENTITY_TYPE_TAG) {
+				return entityResult.getEntity().getType().is(EntityTypeTags.getAllTags().getTagOrEmpty(new ResourceLocation(toObserve)));
 			}
 		}
 
 		return false;
+	}
+
+	private BlockInput tryMatchBlock(String string, boolean parseNbt) {
+		try {
+			BlockStateParser blockStateParser = (new BlockStateParser(new StringReader(string), false)).parse(parseNbt);
+			return new BlockInput(blockStateParser.getState(), blockStateParser.getProperties().keySet(), blockStateParser.getNbt());
+		} catch (Exception ex) {
+			return null;
+		}
+	}
+
+	enum ObserveType {
+		BLOCK,
+		BLOCK_TAG,
+		BLOCK_STATE,
+		BLOCK_ENTITY,
+		BLOCK_ENTITY_TYPE,
+		ENTITY_TYPE,
+		ENTITY_TYPE_TAG;
+
+		public static final NameMap<ObserveType> NAME_MAP = NameMap.of(BLOCK, values()).id(v -> v.name().toLowerCase()).create();
 	}
 }
