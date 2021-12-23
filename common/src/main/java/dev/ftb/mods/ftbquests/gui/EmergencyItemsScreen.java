@@ -57,8 +57,8 @@ public class EmergencyItemsScreen extends BaseScreen {
 			GuiHelper.setupDrawing();
 			QuestShape.get("rsquare").outline.draw(matrixStack, x - 3, y - 3, w + 6, h + 6);
 			matrixStack.pushPose();
-			matrixStack.translate(0, 0, 100);
-			GuiHelper.drawItem(matrixStack, stack, x, y, 1F, 1F, true, null);
+			matrixStack.translate(x + w / 2D, y + h / 2D, 100);
+			GuiHelper.drawItem(matrixStack, stack, 0, true, null);
 			matrixStack.popPose();
 		}
 

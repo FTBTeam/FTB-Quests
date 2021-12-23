@@ -65,8 +65,9 @@ public class ValidItemsScreen extends BaseScreen {
 			}
 
 			matrixStack.pushPose();
-			matrixStack.translate(0, 0, 10);
-			GuiHelper.drawItem(matrixStack, stack, x + 2, y + 2, 2, 2, true, null);
+			matrixStack.translate(x + w / 2D, y + h / 2D, 10);
+			matrixStack.scale(2F, 2F, 2F);
+			GuiHelper.drawItem(matrixStack, stack, 0, true, null);
 			matrixStack.popPose();
 		}
 	}

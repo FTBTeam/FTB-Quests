@@ -2,7 +2,6 @@ package dev.ftb.mods.ftbquests.integration.jei;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;
-import dev.ftb.mods.ftblibrary.ui.GuiHelper;
 import dev.ftb.mods.ftblibrary.util.StringUtils;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.quest.loot.LootCrate;
@@ -99,7 +98,7 @@ public class LootCrateWrapper implements /*IRecipeWrapper, */ITooltipCallback<It
 
 	//FIXME: @Override
 	public void drawInfo(PoseStack matrixStack, Minecraft mc, int recipeWidth, int recipeHeight, int mouseX, int mouseY) {
-		GuiHelper.drawItem(matrixStack, itemStack, 0, 0, 2, 2, true, null);
+		// GuiHelper.drawItem(matrixStack, itemStack, 0, 0, 2, 2, true, null);
 		mc.font.drawShadow(matrixStack, crate.table.getMutableTitle().withStyle(ChatFormatting.UNDERLINE), 36, 0, 0xFF222222);
 
 		int total = ClientQuestFile.INSTANCE.lootCrateNoDrop.passive;
