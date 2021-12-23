@@ -1,6 +1,5 @@
 package dev.ftb.mods.ftbquests.quest.theme.property;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
@@ -106,7 +105,7 @@ public interface ThemeProperties {
 	IconProperty ADD_ICON = new IconProperty("add_icon", new Icon() {
 		@Override
 		public void draw(PoseStack matrixStack, int x, int y, int w, int h) {
-			GlStateManager._disableTexture();
+			RenderSystem.disableTexture();
 			Matrix4f m = matrixStack.last().pose();
 			Tesselator tesselator = Tesselator.getInstance();
 			BufferBuilder buffer = tesselator.getBuilder();
