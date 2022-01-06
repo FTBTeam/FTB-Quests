@@ -6,7 +6,8 @@ import dev.ftb.mods.ftbquests.events.CustomTaskEvent;
 import dev.ftb.mods.ftbquests.events.ObjectCompletedEvent;
 import dev.ftb.mods.ftbquests.events.ObjectStartedEvent;
 import dev.latvian.mods.kubejs.KubeJSPlugin;
-import dev.latvian.mods.kubejs.player.AttachPlayerDataEvent;
+import dev.latvian.mods.kubejs.player.PlayerDataJS;
+import dev.latvian.mods.kubejs.script.AttachDataEvent;
 import dev.latvian.mods.kubejs.script.BindingsEvent;
 import dev.latvian.mods.kubejs.script.ScriptType;
 
@@ -38,8 +39,8 @@ public class KubeJSIntegration extends KubeJSPlugin {
 	}
 
 	@Override
-	public void attachPlayerData(AttachPlayerDataEvent event) {
-		event.add("ftbquests", new FTBQuestsKubeJSPlayerData(event.getParent()));
+	public void attachPlayerData(AttachDataEvent<PlayerDataJS> event) {
+		event.add("ftbquests", new FTBQuestsKubeJSPlayerData(event.parent()));
 	}
 
 	public static EventResult onCustomTask(CustomTaskEvent event) {

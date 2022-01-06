@@ -26,5 +26,8 @@
 		"ftblibrary": ">=1801.3.5-build.99",
 		"ftbteams": ">=1801.2.4-build.43",
 		"itemfilters": ">=1801.2.6-build.12"
+	},
+	"breaks": {
+		"kubejs": "<=1801.4.0"
 	}
 }
