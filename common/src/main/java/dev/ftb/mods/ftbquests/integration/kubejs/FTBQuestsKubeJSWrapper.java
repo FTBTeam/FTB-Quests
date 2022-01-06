@@ -7,9 +7,9 @@ import dev.ftb.mods.ftbquests.quest.QuestObjectType;
 import dev.ftb.mods.ftbquests.quest.QuestShape;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbteams.FTBTeamsAPI;
+import dev.latvian.mods.kubejs.level.world.LevelJS;
 import dev.latvian.mods.kubejs.player.PlayerJS;
 import dev.latvian.mods.kubejs.server.ServerJS;
-import dev.latvian.mods.kubejs.world.WorldJS;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
@@ -31,22 +31,22 @@ public class FTBQuestsKubeJSWrapper {
 		return QuestObjectType.NAME_MAP.map;
 	}
 
-	public QuestFile getFile(WorldJS world) {
-		return FTBQuests.PROXY.getQuestFile(world.minecraftWorld.isClientSide());
+	public QuestFile getFile(LevelJS world) {
+		return FTBQuests.PROXY.getQuestFile(world.minecraftLevel.isClientSide());
 	}
 
 	@Nullable
-	public TeamData getData(WorldJS world, UUID uuid) {
+	public TeamData getData(LevelJS world, UUID uuid) {
 		return getFile(world).getData(FTBTeamsAPI.getPlayerTeamID(uuid));
 	}
 
 	@Nullable
 	public TeamData getData(PlayerJS player) {
-		return getFile(player.getWorld()).getData(player.minecraftPlayer);
+		return getFile(player.getLevel()).getData(player.minecraftPlayer);
 	}
 
 	@Nullable
-	public QuestObjectBase getObject(WorldJS world, Object id) {
+	public QuestObjectBase getObject(LevelJS world, Object id) {
 		QuestFile file = getFile(world);
 		return file.getBase(file.getID(id));
 	}
