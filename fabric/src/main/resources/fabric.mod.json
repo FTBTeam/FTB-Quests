@@ -15,6 +15,9 @@
 	"entrypoints": {
 		"main": [
 			"dev.ftb.mods.ftbquests.fabric.FTBQuestsFabric"
+		],
+		"rei": [
+			"dev.ftb.mods.ftbquests.integration.jei.FTBQuestsREIIntegration"
 		]
 	},
 	"mixins": [
