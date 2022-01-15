@@ -43,7 +43,7 @@ public class ValidItemsScreen extends BaseScreen {
 
 		@Override
 		public void onClicked(MouseButton button) {
-			if (Platform.isModLoaded("jei")) {
+			if (Platform.isModLoaded("jei") || Platform.isModLoaded("roughlyenoughitems")) {
 				showJEIRecipe();
 			}
 		}

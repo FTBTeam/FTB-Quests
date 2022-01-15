@@ -27,6 +27,7 @@ dependencies {
 
 	modApi "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_api_version}"
 	modApi "dev.architectury:architectury-fabric:${rootProject.architectury_version}"
+	modApi "me.shedaniel:RoughlyEnoughItems-fabric:${rootProject.forge_rei_version}"
 
 	modApi("dev.ftb.mods:ftb-library-fabric:${rootProject.ftb_library_version}") { transitive false }
 	modApi("dev.ftb.mods:ftb-teams-fabric:${rootProject.ftb_teams_version}") { transitive false }
