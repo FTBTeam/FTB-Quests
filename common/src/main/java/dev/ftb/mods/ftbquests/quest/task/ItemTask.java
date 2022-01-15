@@ -193,7 +193,7 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 
 		List<ItemStack> validItems = getValidDisplayItems();
 
-		if (!consumesResources() && validItems.size() == 1 && Platform.isModLoaded("jei")) {
+		if (!consumesResources() && validItems.size() == 1 && (Platform.isModLoaded("jei") || Platform.isModLoaded("roughlyenoughitems"))) {
 			showJEIRecipe(validItems.get(0));
 		} else if (validItems.isEmpty()) {
 			Minecraft.getInstance().getToasts().addToast(new CustomToast(new TextComponent("No valid items!"), ItemIcon.getItemIcon(FTBQuestsItems.MISSING_ITEM.get()), new TextComponent("Report this bug to modpack author!")));
@@ -216,7 +216,7 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 		} else if (getValidDisplayItems().size() > 1) {
 			list.blankLine();
 			list.add(new TranslatableComponent("ftbquests.task.ftbquests.item.view_items").withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE));
-		} else if (Platform.isModLoaded("jei")) {
+		} else if (Platform.isModLoaded("jei") || Platform.isModLoaded("roughlyenoughitems")) {
 			list.blankLine();
 			list.add(new TranslatableComponent("ftbquests.task.ftbquests.item.click_recipe").withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE));
 		}
