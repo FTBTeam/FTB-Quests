@@ -1,12 +1,31 @@
 package dev.ftb.mods.ftbquests.integration.fabric;
 
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
+import net.fabricmc.loader.api.FabricLoader;
+
+import java.util.function.Consumer;
+
+import static dev.ftb.mods.ftbquests.integration.FTBQuestsJEIHelper.LOOTCRATES;
+import static dev.ftb.mods.ftbquests.integration.FTBQuestsJEIHelper.QUESTS;
 
 /**
  * @author LatvianModder
  */
 public class FTBQuestsJEIHelperImpl {
+	public static Consumer<Object> view = o -> {};
+
 	public static void refresh(QuestObjectBase object) {
+		int i = object.refreshJEI();
+
+		if (i != 0 && FabricLoader.getInstance().isModLoaded("roughlyenoughitems")) {
+			if ((i & QUESTS) != 0) {
+				refreshQuests();
+			}
+
+			if ((i & LOOTCRATES) != 0) {
+				refreshLootcrates();
+			}
+		}
 	}
 
 	private static void refreshQuests() {
@@ -16,5 +35,6 @@ public class FTBQuestsJEIHelperImpl {
 	}
 
 	public static void showRecipes(Object object) {
+		view.accept(object);
 	}
 }

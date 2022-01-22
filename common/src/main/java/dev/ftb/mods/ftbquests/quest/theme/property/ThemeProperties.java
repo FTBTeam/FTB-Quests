@@ -89,7 +89,6 @@ public interface ThemeProperties {
 			buffer.vertex(m, x + dw * 13, y + dh * 1 + dh, 0).color(r, g, b, a).endVertex();
 
 			tesselator.end();
-			RenderSystem.disableBlend();
 			RenderSystem.enableTexture();
 		}
 
@@ -151,7 +150,6 @@ public interface ThemeProperties {
 			buffer.vertex(m, x + dw * 13, y + dh * 7, 0).color(r, g, b, a).endVertex();
 
 			tesselator.end();
-			RenderSystem.disableBlend();
 			RenderSystem.enableTexture();
 		}
 
