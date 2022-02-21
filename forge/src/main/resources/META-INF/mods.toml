@@ -1,6 +1,6 @@
 modLoader = "javafml"
 loaderVersion = "[39,)"
-issueTrackerURL = "https://github.com/FTBTeam/FTB-Quests/issues"
+issueTrackerURL = "https://github.com/FTBTeam/FTB-Mods-Issues/issues"
 license = "All Rights Reserved"
 
 [[mods]]
