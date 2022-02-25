@@ -9,7 +9,7 @@
 	],
 	"contact": {
 		"sources": "https://github.com/FTBTeam/FTB-Quests",
-		"issues": "https://github.com/FTBTeam/FTB-Quests/issues"
+		"issues": "https://github.com/FTBTeam/FTB-Mods-Issues/issues"
 	},
 	"license": "All Rights Reserved",
 	"entrypoints": {
