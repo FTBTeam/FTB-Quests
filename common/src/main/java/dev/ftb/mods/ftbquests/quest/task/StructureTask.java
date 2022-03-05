@@ -82,7 +82,7 @@ public class StructureTask extends BooleanTask {
 	public boolean canSubmit(TeamData teamData, ServerPlayer player) {
 		ServerLevel level = (ServerLevel) player.level;
 		// TODO: Move to KnownServerRegistries if needed
-		ConfiguredStructureFeature<?, ?> feature = BuiltinRegistries.CONFIGURED_STRUCTURE_FEATURE.get(structure);
+		ConfiguredStructureFeature<?, ?> feature = player.server.registryAccess().registryOrThrow(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY).get(structure);
 		return feature != null && level.structureFeatureManager().getStructureWithPieceAt(player.blockPosition(), feature.feature).isValid();
 	}
 }
