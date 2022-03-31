@@ -6,6 +6,7 @@ import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.MutableComponent;
@@ -106,7 +107,7 @@ public class StatTask extends Task {
 			return;
 		}
 
-		int set = Math.min(value, player.getStats().getValue(Stats.CUSTOM.get(stat)));
+		int set = Math.min(value, player.getStats().getValue(Stats.CUSTOM.get(Registry.CUSTOM_STAT.get(stat))));
 
 		if (set > teamData.getProgress(this)) {
 			teamData.setProgress(this, set);
