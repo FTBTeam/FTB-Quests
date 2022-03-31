@@ -78,6 +78,6 @@ public class BiomeTask extends BooleanTask {
 
 	@Override
 	public boolean canSubmit(TeamData teamData, ServerPlayer player) {
-		return !player.isSpectator() && player.level.getBiomeName(player.blockPosition()).orElse(null) == biome;
+		return !player.isSpectator() && player.level.getBiome(player.blockPosition()).unwrapKey().orElse(null) == biome;
 	}
 }
