@@ -24,7 +24,7 @@
 	],
 	"depends": {
 		"fabric": "*",
-		"minecraft": "~1.18.1",
+		"minecraft": "~1.18.2",
 		"architectury": ">=3.2.52",
 		"ftblibrary": ">=1801.3.5-build.99",
 		"ftbteams": ">=1801.2.4-build.43",
