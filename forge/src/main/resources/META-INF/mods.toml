@@ -22,7 +22,7 @@ side = "BOTH"
 [[dependencies.ftbquests]]
 modId = "minecraft"
 mandatory = true
-versionRange = "[1.18.1,)"
+versionRange = "[1.18.2,)"
 ordering = "NONE"
 side = "BOTH"
 
