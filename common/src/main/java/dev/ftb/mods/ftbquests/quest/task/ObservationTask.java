@@ -18,6 +18,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.EntityTypeTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -120,7 +121,7 @@ public class ObservationTask extends BooleanTask {
 				case BLOCK:
 					return String.valueOf(Registries.getId(block, Registry.BLOCK_REGISTRY)).equals(toObserve);
 				case BLOCK_TAG:
-					return state.is(BlockTags.getAllTags().getTagOrEmpty(new ResourceLocation(toObserve)));
+					return state.is(TagKey.create(Registry.BLOCK_REGISTRY, new ResourceLocation(toObserve)));
 				case BLOCK_STATE:
 					BlockInput stateMatch = tryMatchBlock(toObserve, false);
 					return stateMatch != null && stateMatch.test(blockInWorld);
@@ -137,7 +138,7 @@ public class ObservationTask extends BooleanTask {
 			if (observeType == ObserveType.ENTITY_TYPE) {
 				return toObserve.equals(String.valueOf(Registries.getId(entityResult.getEntity().getType(), Registry.ENTITY_TYPE_REGISTRY)));
 			} else if (observeType == ObserveType.ENTITY_TYPE_TAG) {
-				return entityResult.getEntity().getType().is(EntityTypeTags.getAllTags().getTagOrEmpty(new ResourceLocation(toObserve)));
+				return entityResult.getEntity().getType().is(TagKey.create(Registry.ENTITY_TYPE_REGISTRY, new ResourceLocation(toObserve)));
 			}
 		}
 
