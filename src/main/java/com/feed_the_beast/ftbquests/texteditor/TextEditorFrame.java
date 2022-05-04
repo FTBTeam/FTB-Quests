@@ -88,7 +88,12 @@ public class TextEditorFrame extends JFrame
 
 		panel.add(buttonPanel);
 
-		setContentPane(panel);
+		JScrollPane scrollablePanel = new JScrollPane(panel);
+		scrollablePanel.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+		scrollablePanel.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+
+		setContentPane(scrollablePanel);
+
 		pack();
 		setLocationRelativeTo(null);
 		setVisible(true);
