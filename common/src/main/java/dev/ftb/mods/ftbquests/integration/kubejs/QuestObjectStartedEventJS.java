@@ -3,6 +3,7 @@ package dev.ftb.mods.ftbquests.integration.kubejs;
 import dev.ftb.mods.ftbquests.events.ObjectStartedEvent;
 import dev.ftb.mods.ftbquests.quest.QuestObject;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
+import dev.latvian.mods.kubejs.core.PlayerSelector;
 import dev.latvian.mods.kubejs.player.EntityArrayList;
 import dev.latvian.mods.kubejs.player.ServerPlayerJS;
 import dev.latvian.mods.kubejs.server.ServerEventJS;
@@ -48,6 +49,6 @@ public class QuestObjectStartedEventJS extends ServerEventJS {
 			return null;
 		}
 
-		return ServerJS.instance.getPlayer(((ServerQuestFile) event.getData().file).currentPlayer);
+		return ServerJS.instance.getPlayer(PlayerSelector.mc(((ServerQuestFile) event.getData().file).currentPlayer));
 	}
 }

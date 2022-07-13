@@ -1,6 +1,7 @@
 package dev.ftb.mods.ftbquests.integration.kubejs;
 
 import dev.ftb.mods.ftbquests.quest.task.CustomTask;
+import dev.latvian.mods.kubejs.core.PlayerSelector;
 import dev.latvian.mods.kubejs.server.ServerJS;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -16,6 +17,6 @@ public class CheckWrapper implements CustomTask.Check {
 
 	@Override
 	public void check(CustomTask.Data taskData, ServerPlayer player) {
-		checkerJS.check(taskData, ServerJS.instance.getPlayer(player));
+		checkerJS.check(taskData, ServerJS.instance.getPlayer(PlayerSelector.mc(player)));
 	}
 }
