@@ -80,7 +80,7 @@ if (ENV.CURSEFORGE_KEY) {
 			addGameVersion "1.18.2"
 			mainArtifact(remapJar.archivePath)
 			relations {
-				requiredDependency 'architectury-fabric'
+				requiredDependency 'architectury-api'
 				requiredDependency 'fabric-api'
 				requiredDependency 'ftb-library-fabric'
 				requiredDependency 'ftb-teams-fabric'

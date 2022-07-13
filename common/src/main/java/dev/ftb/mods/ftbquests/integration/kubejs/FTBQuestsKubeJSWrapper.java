@@ -7,6 +7,7 @@ import dev.ftb.mods.ftbquests.quest.QuestObjectType;
 import dev.ftb.mods.ftbquests.quest.QuestShape;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbteams.FTBTeamsAPI;
+import dev.latvian.mods.kubejs.core.PlayerSelector;
 import dev.latvian.mods.kubejs.level.LevelJS;
 import dev.latvian.mods.kubejs.player.PlayerJS;
 import dev.latvian.mods.kubejs.server.ServerJS;
@@ -54,7 +55,7 @@ public class FTBQuestsKubeJSWrapper {
 	@Nullable
 	public FTBQuestsKubeJSPlayerData getServerDataFromPlayer(Player player) {
 		try {
-			return (FTBQuestsKubeJSPlayerData) ServerJS.instance.getPlayer(player).getData().get("ftbquests");
+			return (FTBQuestsKubeJSPlayerData) ServerJS.instance.getPlayer(PlayerSelector.mc(player)).getData().get("ftbquests");
 		} catch (Throwable e) {
 			return null;
 		}
@@ -63,7 +64,7 @@ public class FTBQuestsKubeJSWrapper {
 	@Nullable
 	public FTBQuestsKubeJSPlayerData getServerDataFromSource(CommandSourceStack source) {
 		try {
-			return (FTBQuestsKubeJSPlayerData) ServerJS.instance.getPlayer(source.getPlayerOrException()).getData().get("ftbquests");
+			return (FTBQuestsKubeJSPlayerData) ServerJS.instance.getPlayer(PlayerSelector.mc(source.getPlayerOrException())).getData().get("ftbquests");
 		} catch (Throwable e) {
 			return null;
 		}
