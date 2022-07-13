@@ -7,8 +7,8 @@ dependencies {
 	modApi "dev.ftb.mods:ftb-teams:${rootProject.ftb_teams_version}"
 	modApi "dev.latvian.mods:item-filters:${rootProject.itemfilters_version}"
 
-	modImplementation "dev.latvian.mods:kubejs:${rootProject.kubejs_version}"
-	modImplementation "dev.latvian.mods:rhino:${rootProject.rhino_version}"
+//	modImplementation "dev.latvian.mods:kubejs:${rootProject.kubejs_version}"
+//	modImplementation "dev.latvian.mods:rhino:${rootProject.rhino_version}"
 }
 
 def ENV = System.getenv()
