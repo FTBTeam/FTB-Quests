@@ -1,11 +1,6 @@
 package dev.ftb.mods.ftbquests.quest;
 
-import dev.architectury.utils.NbtType;
-import dev.ftb.mods.ftblibrary.config.ConfigCallback;
-import dev.ftb.mods.ftblibrary.config.ConfigGroup;
-import dev.ftb.mods.ftblibrary.config.ListConfig;
-import dev.ftb.mods.ftblibrary.config.StringConfig;
-import dev.ftb.mods.ftblibrary.config.Tristate;
+import dev.ftb.mods.ftblibrary.config.*;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.IconAnimation;
 import dev.ftb.mods.ftblibrary.math.Bits;
@@ -32,17 +27,12 @@ import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Predicate;
 
 /**
@@ -200,7 +190,7 @@ public final class Quest extends QuestObject implements Movable {
 
 		description.clear();
 
-		ListTag list = nbt.getList("description", NbtType.STRING);
+		ListTag list = nbt.getList("description", Tag.TAG_STRING);
 
 		for (int k = 0; k < list.size(); k++) {
 			description.add(list.getString(k));
@@ -221,7 +211,7 @@ public final class Quest extends QuestObject implements Movable {
 				}
 			}
 		} else {
-			ListTag deps = nbt.getList("dependencies", NbtType.STRING);
+			ListTag deps = nbt.getList("dependencies", Tag.TAG_STRING);
 
 			for (int i = 0; i < deps.size(); i++) {
 				QuestObject object = chapter.file.get(chapter.file.getID(deps.getString(i)));
@@ -418,7 +408,7 @@ public final class Quest extends QuestObject implements Movable {
 			return tasks.get(0).getTitle();
 		}
 
-		return new TranslatableComponent("ftbquests.unnamed");
+		return Component.translatable("ftbquests.unnamed");
 	}
 
 	@Override

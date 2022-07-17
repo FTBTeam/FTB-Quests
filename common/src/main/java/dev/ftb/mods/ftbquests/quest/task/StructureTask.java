@@ -7,28 +7,26 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Registry;
-import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
-import net.minecraft.world.level.levelgen.structure.StructureStart;
+import net.minecraft.world.level.levelgen.structure.Structure;
 
 /**
  * @author MaxNeedsSnacks
  */
 public class StructureTask extends BooleanTask {
-	public ResourceKey<ConfiguredStructureFeature<?, ?>> structure;
+	// TODO: validate
+	public ResourceKey<Structure> structure;
 
 	public StructureTask(Quest quest) {
 		super(quest);
-		structure = ResourceKey.create(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY, new ResourceLocation("minecraft:mineshaft"));
+		structure = ResourceKey.create(Registry.STRUCTURE_REGISTRY, new ResourceLocation("minecraft:mineshaft"));
 	}
 
 	@Override
@@ -45,7 +43,7 @@ public class StructureTask extends BooleanTask {
 	@Override
 	public void readData(CompoundTag nbt) {
 		super.readData(nbt);
-		structure = ResourceKey.create(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY, new ResourceLocation(nbt.getString("structure")));
+		structure = ResourceKey.create(Registry.STRUCTURE_REGISTRY, new ResourceLocation(nbt.getString("structure")));
 	}
 
 	@Override
@@ -57,20 +55,20 @@ public class StructureTask extends BooleanTask {
 	@Override
 	public void readNetData(FriendlyByteBuf buffer) {
 		super.readNetData(buffer);
-		structure = ResourceKey.create(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY, buffer.readResourceLocation());
+		structure = ResourceKey.create(Registry.STRUCTURE_REGISTRY, buffer.readResourceLocation());
 	}
 
 	@Override
 	@Environment(EnvType.CLIENT)
 	public void getConfig(ConfigGroup config) {
 		super.getConfig(config);
-		config.addString("structure", structure.location().toString(), v -> structure = ResourceKey.create(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY, new ResourceLocation(v)), "minecraft:mineshaft");
+		config.addString("structure", structure.location().toString(), v -> structure = ResourceKey.create(Registry.STRUCTURE_REGISTRY, new ResourceLocation(v)), "minecraft:mineshaft");
 	}
 
 	@Override
 	@Environment(EnvType.CLIENT)
 	public MutableComponent getAltTitle() {
-		return new TranslatableComponent("ftbquests.task.ftbquests.structure").append(": ").append(new TextComponent(structure.location().toString()).withStyle(ChatFormatting.DARK_GREEN));
+		return Component.translatable("ftbquests.task.ftbquests.structure").append(": ").append(Component.literal(structure.location().toString()).withStyle(ChatFormatting.DARK_GREEN));
 	}
 
 	@Override
@@ -80,6 +78,6 @@ public class StructureTask extends BooleanTask {
 
 	@Override
 	public boolean canSubmit(TeamData teamData, ServerPlayer player) {
-		return ((ServerLevel) player.level).structureFeatureManager().getStructureWithPieceAt(player.blockPosition(), structure).isValid();
+		return ((ServerLevel) player.level).structureManager().getStructureWithPieceAt(player.blockPosition(), structure).isValid();
 	}
 }

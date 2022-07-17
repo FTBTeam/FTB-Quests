@@ -1,6 +1,5 @@
 package dev.ftb.mods.ftbquests.quest.reward;
 
-import dev.architectury.core.RegistryEntry;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.ui.EditConfigScreen;
 import dev.ftb.mods.ftblibrary.icon.Icon;
@@ -13,7 +12,6 @@ import dev.ftb.mods.ftbquests.util.ConfigQuestObject;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
@@ -23,7 +21,7 @@ import java.util.function.Supplier;
 /**
  * @author LatvianModder
  */
-public final class RewardType extends RegistryEntry<RewardType> {
+public final class RewardType {
 	@Nullable
 	public static Reward createReward(Quest quest, String id) {
 		if (id.isEmpty()) {
@@ -106,7 +104,7 @@ public final class RewardType extends RegistryEntry<RewardType> {
 
 	public Component getDisplayName() {
 		if (displayName == null) {
-			displayName = new TranslatableComponent("ftbquests.reward." + id.getNamespace() + '.' + id.getPath());
+			displayName = Component.translatable("ftbquests.reward." + id.getNamespace() + '.' + id.getPath());
 		}
 
 		return displayName;

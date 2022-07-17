@@ -16,8 +16,8 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
@@ -155,7 +155,7 @@ public class ForgeFluidTask extends Task {
 	@Override
 	@OnlyIn(Dist.CLIENT)
 	public MutableComponent getAltTitle() {
-		return new TextComponent(getVolumeString(amount) + " of ").append(createFluidStack().getName());
+		return Component.literal(getVolumeString(amount) + " of ").append(createFluidStack().getName());
 	}
 
 	@Override

@@ -3,12 +3,7 @@ package dev.ftb.mods.ftbquests.gui.quests;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
-import dev.ftb.mods.ftblibrary.ui.Button;
-import dev.ftb.mods.ftblibrary.ui.ContextMenuItem;
-import dev.ftb.mods.ftblibrary.ui.GuiHelper;
-import dev.ftb.mods.ftblibrary.ui.Panel;
-import dev.ftb.mods.ftblibrary.ui.Theme;
-import dev.ftb.mods.ftblibrary.ui.WidgetType;
+import dev.ftb.mods.ftblibrary.ui.*;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftblibrary.util.WrappedIngredient;
@@ -18,7 +13,6 @@ import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
@@ -71,7 +65,7 @@ public class RewardButton extends Button {
 
 			list.blankLine();
 			reward.addMouseOverText(list);
-			list.add(new TranslatableComponent("ftbquests.reward.team_reward").withStyle(ChatFormatting.BLUE, ChatFormatting.UNDERLINE));
+			list.add(Component.translatable("ftbquests.reward.team_reward").withStyle(ChatFormatting.BLUE, ChatFormatting.UNDERLINE));
 		} else {
 			if (reward.addTitleInMouseOverText()) {
 				list.add(getTitle());

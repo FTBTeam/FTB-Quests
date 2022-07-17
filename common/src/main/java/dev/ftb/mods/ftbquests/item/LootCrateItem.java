@@ -12,8 +12,6 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -21,11 +19,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Rarity;
-import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.*;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -117,7 +111,7 @@ public class LootCrateItem extends Item {
 	@Override
 	public Component getName(ItemStack stack) {
 		LootCrate crate = getCrate(stack);
-		return crate != null && !crate.itemName.isEmpty() ? new TextComponent(crate.itemName) : super.getName(stack);
+		return crate != null && !crate.itemName.isEmpty() ? Component.literal(crate.itemName) : super.getName(stack);
 	}
 
 	@Override
@@ -127,7 +121,7 @@ public class LootCrateItem extends Item {
 
 	@Override
 	public void fillItemCategory(CreativeModeTab tab, NonNullList<ItemStack> items) {
-		if (allowdedIn(tab)) {
+		if (allowedIn(tab)) {
 			for (LootCrate lootCrate : LootCrate.LOOT_CRATES.values()) {
 				items.add(lootCrate.createStack());
 			}
@@ -137,8 +131,8 @@ public class LootCrateItem extends Item {
 	@Override
 	@Environment(EnvType.CLIENT)
 	public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag flag) {
-		tooltip.add(new TranslatableComponent("item.ftbquests.lootcrate.tooltip_1").withStyle(ChatFormatting.GRAY));
-		tooltip.add(new TranslatableComponent("item.ftbquests.lootcrate.tooltip_2").withStyle(ChatFormatting.GRAY));
+		tooltip.add(Component.translatable("item.ftbquests.lootcrate.tooltip_1").withStyle(ChatFormatting.GRAY));
+		tooltip.add(Component.translatable("item.ftbquests.lootcrate.tooltip_2").withStyle(ChatFormatting.GRAY));
 
 		if (world == null || !ClientQuestFile.exists()) {
 			return;
@@ -148,12 +142,12 @@ public class LootCrateItem extends Item {
 
 		if (crate != null) {
 			if (crate.itemName.isEmpty()) {
-				tooltip.add(TextComponent.EMPTY);
+				tooltip.add(Component.empty());
 				tooltip.add(crate.table.getMutableTitle().withStyle(ChatFormatting.GRAY));
 			}
 		} else if (stack.hasTag() && stack.getTag().contains("type")) {
-			tooltip.add(TextComponent.EMPTY);
-			tooltip.add(new TextComponent(stack.getTag().getString("type")).withStyle(ChatFormatting.GRAY));
+			tooltip.add(Component.empty());
+			tooltip.add(Component.literal(stack.getTag().getString("type")).withStyle(ChatFormatting.GRAY));
 		}
 	}
 }

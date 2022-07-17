@@ -75,9 +75,9 @@ public final class QuestShape extends Icon {
 	public PixelBuffer getShapePixels() {
 		if (shapePixels == null) {
 			try {
-				Resource resource = Minecraft.getInstance().getResourceManager().getResource(new ResourceLocation(FTBQuests.MOD_ID, "textures/shapes/" + id + "/shape.png"));
+				Resource resource = Minecraft.getInstance().getResourceManager().getResource(new ResourceLocation(FTBQuests.MOD_ID, "textures/shapes/" + id + "/shape.png")).get();
 
-				try (InputStream stream = resource.getInputStream()) {
+				try (InputStream stream = resource.open()) {
 					shapePixels = PixelBuffer.from(stream);
 				}
 			} catch (Exception ex) {

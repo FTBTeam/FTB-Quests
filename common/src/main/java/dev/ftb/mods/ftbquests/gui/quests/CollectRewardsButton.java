@@ -10,14 +10,14 @@ import dev.ftb.mods.ftbquests.gui.RewardNotificationsScreen;
 import dev.ftb.mods.ftbquests.net.ClaimAllRewardsMessage;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.Component;
 
 /**
  * @author LatvianModder
  */
 public class CollectRewardsButton extends TabButton {
 	public CollectRewardsButton(Panel panel) {
-		super(panel, TextComponent.EMPTY, ThemeProperties.COLLECT_REWARDS_ICON.get());
+		super(panel, Component.empty(), ThemeProperties.COLLECT_REWARDS_ICON.get());
 		title = questScreen.file.getTitle();
 	}
 

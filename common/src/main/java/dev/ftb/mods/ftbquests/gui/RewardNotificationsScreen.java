@@ -3,13 +3,7 @@ package dev.ftb.mods.ftbquests.gui;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
-import dev.ftb.mods.ftblibrary.ui.BaseScreen;
-import dev.ftb.mods.ftblibrary.ui.GuiHelper;
-import dev.ftb.mods.ftblibrary.ui.Panel;
-import dev.ftb.mods.ftblibrary.ui.SimpleTextButton;
-import dev.ftb.mods.ftblibrary.ui.Theme;
-import dev.ftb.mods.ftblibrary.ui.Widget;
-import dev.ftb.mods.ftblibrary.ui.WidgetLayout;
+import dev.ftb.mods.ftblibrary.ui.*;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.util.StringUtils;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
@@ -17,9 +11,8 @@ import dev.ftb.mods.ftblibrary.util.WrappedIngredient;
 import dev.ftb.mods.ftbquests.quest.QuestShape;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 
@@ -57,7 +50,7 @@ public class RewardNotificationsScreen extends BaseScreen implements IRewardList
 			if (count > 1) {
 				matrixStack.pushPose();
 				matrixStack.translate(0, 0, 600);
-				MutableComponent s = new TextComponent(StringUtils.formatDouble(count, true)).withStyle(ChatFormatting.YELLOW);
+				MutableComponent s = Component.literal(StringUtils.formatDouble(count, true)).withStyle(ChatFormatting.YELLOW);
 				theme.drawString(matrixStack, s, x + 22 - theme.getStringWidth(s), y + 12, Theme.SHADOW);
 				matrixStack.popPose();
 			}
@@ -76,7 +69,7 @@ public class RewardNotificationsScreen extends BaseScreen implements IRewardList
 
 	public RewardNotificationsScreen() {
 		rewards = new Object2IntOpenHashMap<>();
-		closeButton = new SimpleTextButton(this, new TranslatableComponent("gui.close"), Icon.EMPTY) {
+		closeButton = new SimpleTextButton(this, Component.translatable("gui.close"), Icon.EMPTY) {
 			@Override
 			public void onClicked(MouseButton button) {
 				playClickSound();
@@ -134,7 +127,7 @@ public class RewardNotificationsScreen extends BaseScreen implements IRewardList
 		matrixStack.pushPose();
 		matrixStack.translate((int) (w / 2D), (int) (h / 5D), 0);
 		matrixStack.scale(2, 2, 1);
-		MutableComponent s = new TranslatableComponent("ftbquests.rewards");
+		MutableComponent s = Component.translatable("ftbquests.rewards");
 		theme.drawString(matrixStack, s, -theme.getStringWidth(s) / 2F, 0, Color4I.WHITE, 0);
 		matrixStack.popPose();
 	}

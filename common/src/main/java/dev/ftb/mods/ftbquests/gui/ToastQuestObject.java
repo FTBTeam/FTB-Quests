@@ -7,7 +7,6 @@ import dev.ftb.mods.ftbquests.quest.QuestObject;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.sounds.SoundEvents;
 
 /**
@@ -22,7 +21,7 @@ public class ToastQuestObject extends SimpleToast {
 
 	@Override
 	public Component getTitle() {
-		return new TranslatableComponent(object.getObjectType().translationKey + ".completed");
+		return Component.translatable(object.getObjectType().translationKey + ".completed");
 	}
 
 	@Override

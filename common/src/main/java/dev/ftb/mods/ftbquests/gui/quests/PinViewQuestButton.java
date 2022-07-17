@@ -6,14 +6,14 @@ import dev.ftb.mods.ftblibrary.ui.Theme;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftbquests.net.TogglePinnedMessage;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 
 /**
  * @author LatvianModder
  */
 public class PinViewQuestButton extends SimpleTextButton {
 	public PinViewQuestButton(ViewQuestPanel parent) {
-		super(parent, new TranslatableComponent(parent.questScreen.file.self.pinnedQuests.contains(parent.quest.id) ? "ftbquests.gui.unpin" : "ftbquests.gui.pin"), parent.questScreen.file.self.pinnedQuests.contains(parent.quest.id) ? ThemeProperties.PIN_ICON_ON.get() : ThemeProperties.PIN_ICON_OFF.get());
+		super(parent, Component.translatable(parent.questScreen.file.self.pinnedQuests.contains(parent.quest.id) ? "ftbquests.gui.unpin" : "ftbquests.gui.pin"), parent.questScreen.file.self.pinnedQuests.contains(parent.quest.id) ? ThemeProperties.PIN_ICON_ON.get() : ThemeProperties.PIN_ICON_OFF.get());
 	}
 
 	@Override

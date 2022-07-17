@@ -12,7 +12,7 @@ import dev.ftb.mods.ftbquests.quest.reward.RewardType;
 import dev.ftb.mods.ftbquests.quest.reward.RewardTypes;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +24,7 @@ public class AddRewardButton extends Button {
 	private final Quest quest;
 
 	public AddRewardButton(Panel panel, Quest q) {
-		super(panel, new TranslatableComponent("gui.add"), ThemeProperties.ADD_ICON.get());
+		super(panel, Component.translatable("gui.add"), ThemeProperties.ADD_ICON.get());
 		quest = q;
 		setSize(18, 18);
 	}

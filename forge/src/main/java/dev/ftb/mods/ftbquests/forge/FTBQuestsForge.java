@@ -4,13 +4,20 @@ import dev.architectury.hooks.fluid.FluidStackHooks;
 import dev.architectury.platform.forge.EventBuses;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftbquests.FTBQuests;
+import dev.ftb.mods.ftbquests.command.ChangeProgressArgument;
+import dev.ftb.mods.ftbquests.command.QuestObjectArgument;
 import dev.ftb.mods.ftbquests.item.FTBQuestsItems;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.loot.LootCrate;
 import dev.ftb.mods.ftbquests.quest.task.TaskTypes;
 import dev.ftb.mods.ftbquests.quest.task.forge.ForgeEnergyTask;
 import dev.ftb.mods.ftbquests.quest.task.forge.ForgeFluidTask;
+import dev.ftb.mods.ftbteams.FTBTeams;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.commands.synchronization.ArgumentTypeInfo;
+import net.minecraft.commands.synchronization.ArgumentTypeInfos;
+import net.minecraft.commands.synchronization.SingletonArgumentInfo;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
@@ -26,14 +33,21 @@ import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.RegistryObject;
 
 import java.util.Iterator;
 import java.util.Optional;
 
 @Mod(FTBQuests.MOD_ID)
 public class FTBQuestsForge {
+	private static final DeferredRegister<ArgumentTypeInfo<?, ?>> COMMAND_ARGUMENT_TYPES = DeferredRegister.create(Registry.COMMAND_ARGUMENT_TYPE_REGISTRY, FTBTeams.MOD_ID);
+	private static final RegistryObject<SingletonArgumentInfo<ChangeProgressArgument>> CHANGE_PROGRESS = COMMAND_ARGUMENT_TYPES.register("change_progress", () -> ArgumentTypeInfos.registerByClass(ChangeProgressArgument.class, SingletonArgumentInfo.contextFree(ChangeProgressArgument::changeProgress)));
+	private static final RegistryObject<SingletonArgumentInfo<QuestObjectArgument>> QUEST_OBJECT = COMMAND_ARGUMENT_TYPES.register("quest_object", () -> ArgumentTypeInfos.registerByClass(QuestObjectArgument.class, SingletonArgumentInfo.contextFree(QuestObjectArgument::new)));
+
 	public FTBQuestsForge() {
 		EventBuses.registerModEventBus(FTBQuests.MOD_ID, FMLJavaModLoadingContext.get().getModEventBus());
+		COMMAND_ARGUMENT_TYPES.register(FMLJavaModLoadingContext.get().getModEventBus());
 
 		FTBQuests quests = new FTBQuests();
 
@@ -52,7 +66,7 @@ public class FTBQuestsForge {
 	}
 
 	private static void livingDrops(LivingDropsEvent event) {
-		LivingEntity e = event.getEntityLiving();
+		LivingEntity e = event.getEntity();
 
 		if (e.level.isClientSide || e instanceof Player) {
 			return;

@@ -9,7 +9,6 @@ import dev.ftb.mods.ftbquests.gui.quests.QuestScreen;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -96,7 +95,7 @@ public class ChapterGroup extends QuestObject {
 	@Override
 	@Environment(EnvType.CLIENT)
 	public Component getAltTitle() {
-		return new TextComponent("Unnamed Group");
+		return Component.literal("Unnamed Group");
 	}
 
 	@Override

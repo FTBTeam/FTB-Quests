@@ -9,7 +9,7 @@ import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.net.ClaimChoiceRewardMessage;
 import dev.ftb.mods.ftbquests.quest.loot.WeightedReward;
 import dev.ftb.mods.ftbquests.quest.reward.ChoiceReward;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -48,7 +48,7 @@ public class SelectChoiceRewardScreen extends ButtonListBaseScreen {
 
 	public SelectChoiceRewardScreen(ChoiceReward r) {
 		choiceReward = r;
-		setTitle(new TranslatableComponent("ftbquests.reward.ftbquests.choice"));
+		setTitle(Component.translatable("ftbquests.reward.ftbquests.choice"));
 		setBorder(1, 1, 1);
 	}
 

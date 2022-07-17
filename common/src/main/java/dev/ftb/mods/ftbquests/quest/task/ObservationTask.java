@@ -1,7 +1,7 @@
 package dev.ftb.mods.ftbquests.quest.task;
 
-import dev.architectury.registry.registries.Registries;
 import com.mojang.brigadier.StringReader;
+import dev.architectury.registry.registries.Registries;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.NameMap;
 import dev.ftb.mods.ftblibrary.ui.Button;
@@ -16,8 +16,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Block;
@@ -147,8 +145,8 @@ public class ObservationTask extends BooleanTask {
 
 	private BlockInput tryMatchBlock(String string, boolean parseNbt) {
 		try {
-			BlockStateParser blockStateParser = (new BlockStateParser(new StringReader(string), false)).parse(parseNbt);
-			return new BlockInput(blockStateParser.getState(), blockStateParser.getProperties().keySet(), blockStateParser.getNbt());
+			BlockStateParser.BlockResult blockStateParser = (BlockStateParser.parseForBlock(Registry.BLOCK, new StringReader(string), false));
+			return new BlockInput(blockStateParser.blockState(), blockStateParser.properties().keySet(), parseNbt ? blockStateParser.nbt() : null);
 		} catch (Exception ex) {
 			return null;
 		}

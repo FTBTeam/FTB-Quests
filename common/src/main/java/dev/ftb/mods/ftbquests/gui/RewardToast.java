@@ -3,7 +3,6 @@ package dev.ftb.mods.ftbquests.gui;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.ui.misc.SimpleToast;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 
 /**
  * @author LatvianModder
@@ -19,7 +18,7 @@ public class RewardToast extends SimpleToast {
 
 	@Override
 	public Component getTitle() {
-		return new TranslatableComponent("ftbquests.reward.collected");
+		return Component.translatable("ftbquests.reward.collected");
 	}
 
 	@Override

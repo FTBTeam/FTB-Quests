@@ -9,7 +9,7 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import dev.ftb.mods.ftbquests.quest.ChangeProgress;
 import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
@@ -17,7 +17,7 @@ import java.util.concurrent.CompletableFuture;
 public class ChangeProgressArgument implements ArgumentType<ChangeProgress> {
 
 	private static final DynamicCommandExceptionType INVALID_TYPE = new DynamicCommandExceptionType(
-			(type) -> new TranslatableComponent("commands.ftbquests.change_progress.invalid_type", type));
+			(type) -> Component.translatable("commands.ftbquests.change_progress.invalid_type", type));
 
 	@Override
 	public ChangeProgress parse(StringReader reader) throws CommandSyntaxException {

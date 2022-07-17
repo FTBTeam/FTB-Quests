@@ -9,9 +9,8 @@ import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
 
 /**
@@ -70,14 +69,14 @@ public class XPReward extends Reward {
 		player.giveExperiencePoints(xp);
 
 		if (notify) {
-			new DisplayRewardToastMessage(id, new TranslatableComponent("ftbquests.reward.ftbquests.xp").append(": ").append(new TextComponent("+" + xp).withStyle(ChatFormatting.GREEN)), Icon.EMPTY).sendTo(player);
+			new DisplayRewardToastMessage(id, Component.translatable("ftbquests.reward.ftbquests.xp").append(": ").append(Component.literal("+" + xp).withStyle(ChatFormatting.GREEN)), Icon.EMPTY).sendTo(player);
 		}
 	}
 
 	@Override
 	@Environment(EnvType.CLIENT)
 	public MutableComponent getAltTitle() {
-		return new TranslatableComponent("ftbquests.reward.ftbquests.xp").append(": ").append(new TextComponent("+" + xp).withStyle(ChatFormatting.GREEN));
+		return Component.translatable("ftbquests.reward.ftbquests.xp").append(": ").append(Component.literal("+" + xp).withStyle(ChatFormatting.GREEN));
 	}
 
 	@Override

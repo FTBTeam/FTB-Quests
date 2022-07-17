@@ -14,7 +14,7 @@ import dev.ftb.mods.ftbquests.quest.QuestFile;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
@@ -29,13 +29,13 @@ public class QuestObjectArgument implements ArgumentType<QuestObjectBase> {
 	);
 
 	public static final SimpleCommandExceptionType NO_FILE = new SimpleCommandExceptionType(
-			new TranslatableComponent("commands.ftbquests.command.error.no_file"));
+			Component.translatable("commands.ftbquests.command.error.no_file"));
 
 	public static final DynamicCommandExceptionType NO_OBJECT = new DynamicCommandExceptionType(
-			(object) -> new TranslatableComponent("commands.ftbquests.command.error.no_object", object));
+			(object) -> Component.translatable("commands.ftbquests.command.error.no_object", object));
 
 	public static final DynamicCommandExceptionType INVALID_ID = new DynamicCommandExceptionType(
-			(id) -> new TranslatableComponent("commands.ftbquests.command.error.invalid_id", id));
+			(id) -> Component.translatable("commands.ftbquests.command.error.invalid_id", id));
 
 	@Override
 	public QuestObjectBase parse(StringReader reader) throws CommandSyntaxException {

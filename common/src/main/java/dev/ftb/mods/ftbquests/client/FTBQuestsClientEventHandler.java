@@ -16,11 +16,7 @@ import dev.ftb.mods.ftbquests.events.ClearFileCacheEvent;
 import dev.ftb.mods.ftbquests.item.FTBQuestsItems;
 import dev.ftb.mods.ftbquests.item.LootCrateItem;
 import dev.ftb.mods.ftbquests.net.SubmitTaskMessage;
-import dev.ftb.mods.ftbquests.quest.Chapter;
-import dev.ftb.mods.ftbquests.quest.ChapterGroup;
-import dev.ftb.mods.ftbquests.quest.Quest;
-import dev.ftb.mods.ftbquests.quest.QuestFile;
-import dev.ftb.mods.ftbquests.quest.TeamData;
+import dev.ftb.mods.ftbquests.quest.*;
 import dev.ftb.mods.ftbquests.quest.loot.LootCrate;
 import dev.ftb.mods.ftbquests.quest.task.ObservationTask;
 import dev.ftb.mods.ftbquests.quest.task.Task;
@@ -28,10 +24,10 @@ import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.toasts.SystemToast;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.phys.HitResult;
@@ -98,7 +94,7 @@ public class FTBQuestsClientEventHandler {
 	private EventResult onCustomClick(CustomClickEvent event) {
 		if (event.id().getNamespace().equals(FTBQuests.MOD_ID) && "open_gui".equals(event.id().getPath())) {
 			if (!ClientQuestFile.exists()) {
-				Minecraft.getInstance().getToasts().addToast(new SystemToast(SystemToast.SystemToastIds.TUTORIAL_HINT, new TextComponent("Error?! Server doesn't have FTB Quests!"), null));
+				Minecraft.getInstance().getToasts().addToast(new SystemToast(SystemToast.SystemToastIds.TUTORIAL_HINT, Component.literal("Error?! Server doesn't have FTB Quests!"), null));
 			} else {
 				ClientQuestFile.INSTANCE.openQuestGui();
 			}
@@ -219,14 +215,14 @@ public class FTBQuestsClientEventHandler {
 						}
 
 						if (data.isCompleted(quest)) {
-							TextComponent component = new TextComponent("");
+							MutableComponent component = Component.literal("");
 							component.append(quest.getMutableTitle().withStyle(ChatFormatting.BOLD, ChatFormatting.GREEN));
-							component.append(new TextComponent(" 100%").withStyle(ChatFormatting.DARK_GREEN));
+							component.append(Component.literal(" 100%").withStyle(ChatFormatting.DARK_GREEN));
 							list.addAll(mc.font.split(component, 160));
 						} else {
 							list.addAll(mc.font.split(FormattedText.composite(
 									mc.font.getSplitter().headByWidth(quest.getTitle(), 160, Style.EMPTY.withBold(true)),
-									new TextComponent(" ")
+									Component.literal(" ")
 											.withStyle(ChatFormatting.DARK_AQUA)
 											.append(data.getRelativeProgress(quest) + "%")
 							), 500));
@@ -235,7 +231,7 @@ public class FTBQuestsClientEventHandler {
 								if (!data.isCompleted(task)) {
 									list.addAll(mc.font.split(FormattedText.composite(
 											mc.font.getSplitter().headByWidth(task.getTitle(), 160, Style.EMPTY.applyFormat(ChatFormatting.GRAY)),
-											new TextComponent(" ")
+											Component.literal(" ")
 													.withStyle(ChatFormatting.GREEN)
 													.append(task.formatProgress(data, data.getProgress(task)))
 													.append("/")

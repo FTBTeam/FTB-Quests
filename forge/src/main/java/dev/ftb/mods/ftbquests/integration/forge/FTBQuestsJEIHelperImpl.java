@@ -1,10 +1,6 @@
 package dev.ftb.mods.ftbquests.integration.forge;
 
-import dev.ftb.mods.ftbquests.integration.jei.FTBQuestsJEIIntegration;
-import dev.ftb.mods.ftbquests.integration.jei.LootCrateRegistry;
-import dev.ftb.mods.ftbquests.integration.jei.QuestRegistry;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
-import mezz.jei.api.recipe.IFocus;
 import net.minecraftforge.fml.ModList;
 
 import static dev.ftb.mods.ftbquests.integration.FTBQuestsJEIHelper.LOOTCRATES;
@@ -29,14 +25,14 @@ public class FTBQuestsJEIHelperImpl {
 	}
 
 	private static void refreshQuests() {
-		QuestRegistry.INSTANCE.refresh();
+//		QuestRegistry.INSTANCE.refresh();
 	}
 
 	private static void refreshLootcrates() {
-		LootCrateRegistry.INSTANCE.refresh();
+//		LootCrateRegistry.INSTANCE.refresh();
 	}
 
 	public static void showRecipes(Object object) {
-		FTBQuestsJEIIntegration.runtime.getRecipesGui().show(FTBQuestsJEIIntegration.runtime.getRecipeManager().createFocus(IFocus.Mode.OUTPUT, object));
+//		FTBQuestsJEIIntegration.runtime.getRecipesGui().show(FTBQuestsJEIIntegration.runtime.getRecipeManager().createFocus(IFocus.Mode.OUTPUT, object));
 	}
 }

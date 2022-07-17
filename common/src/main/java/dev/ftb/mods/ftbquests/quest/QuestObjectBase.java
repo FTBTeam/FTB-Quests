@@ -1,6 +1,5 @@
 package dev.ftb.mods.ftbquests.quest;
 
-import dev.architectury.utils.NbtType;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.StringConfig;
 import dev.ftb.mods.ftblibrary.config.Tristate;
@@ -22,10 +21,10 @@ import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
@@ -177,7 +176,7 @@ public abstract class QuestObjectBase {
 		title = nbt.getString("title");
 		icon = NBTUtils.read(nbt, "icon");
 
-		ListTag tagsList = nbt.getList("tags", NbtType.STRING);
+		ListTag tagsList = nbt.getList("tags", Tag.TAG_STRING);
 
 		tags = new ArrayList<>(tagsList.size());
 
@@ -266,7 +265,7 @@ public abstract class QuestObjectBase {
 
 	@Environment(EnvType.CLIENT)
 	public final MutableComponent getMutableTitle() {
-		return new TextComponent("").append(getTitle());
+		return Component.empty().append(getTitle());
 	}
 
 	@Environment(EnvType.CLIENT)

@@ -41,8 +41,8 @@ public class ThemeLoader implements ResourceManagerReloadListener {
 		Map<ThemeSelector, SelectorProperties> map = new HashMap<>();
 
 		try {
-			for (Resource resource : resourceManager.getResources(new ResourceLocation(FTBQuests.MOD_ID, "ftb_quests_theme.txt"))) {
-				try (InputStream in = resource.getInputStream()) {
+			for (Resource resource : resourceManager.getResourceStack(new ResourceLocation(FTBQuests.MOD_ID, "ftb_quests_theme.txt"))) {
+				try (InputStream in = resource.open()) {
 					parse(map, FileUtils.read(in));
 				} catch (Exception ex) {
 					ex.printStackTrace();

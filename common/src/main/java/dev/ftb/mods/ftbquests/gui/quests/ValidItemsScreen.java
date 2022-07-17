@@ -5,14 +5,7 @@ import dev.architectury.platform.Platform;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;
-import dev.ftb.mods.ftblibrary.ui.BaseScreen;
-import dev.ftb.mods.ftblibrary.ui.Button;
-import dev.ftb.mods.ftblibrary.ui.GuiHelper;
-import dev.ftb.mods.ftblibrary.ui.Panel;
-import dev.ftb.mods.ftblibrary.ui.SimpleTextButton;
-import dev.ftb.mods.ftblibrary.ui.Theme;
-import dev.ftb.mods.ftblibrary.ui.Widget;
-import dev.ftb.mods.ftblibrary.ui.WidgetType;
+import dev.ftb.mods.ftblibrary.ui.*;
 import dev.ftb.mods.ftblibrary.ui.input.Key;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.ui.misc.CompactGridLayout;
@@ -22,8 +15,7 @@ import dev.ftb.mods.ftbquests.gui.FTBQuestsTheme;
 import dev.ftb.mods.ftbquests.integration.FTBQuestsJEIHelper;
 import dev.ftb.mods.ftbquests.net.SubmitTaskMessage;
 import dev.ftb.mods.ftbquests.quest.task.ItemTask;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
@@ -37,7 +29,7 @@ public class ValidItemsScreen extends BaseScreen {
 		public final ItemStack stack;
 
 		public ValidItemButton(Panel panel, ItemStack is) {
-			super(panel, TextComponent.EMPTY, ItemIcon.getItemIcon(is));
+			super(panel, Component.empty(), ItemIcon.getItemIcon(is));
 			stack = is;
 		}
 
@@ -116,7 +108,7 @@ public class ValidItemsScreen extends BaseScreen {
 
 		itemPanel.setPosAndSize(0, 22, 144, 0);
 
-		backButton = new SimpleTextButton(this, new TranslatableComponent("gui.back"), Icon.EMPTY) {
+		backButton = new SimpleTextButton(this, Component.translatable("gui.back"), Icon.EMPTY) {
 			@Override
 			public void onClicked(MouseButton button) {
 				playClickSound();
@@ -129,7 +121,7 @@ public class ValidItemsScreen extends BaseScreen {
 			}
 		};
 
-		submitButton = new SimpleTextButton(this, new TextComponent("Submit"), Icon.EMPTY) {
+		submitButton = new SimpleTextButton(this, Component.literal("Submit"), Icon.EMPTY) {
 			@Override
 			public void onClicked(MouseButton button) {
 				playClickSound();
@@ -158,7 +150,7 @@ public class ValidItemsScreen extends BaseScreen {
 
 	@Override
 	public void addWidgets() {
-		title = new TranslatableComponent("ftbquests.task.ftbquests.item.valid_for", task.getTitle()).getString();
+		title = Component.translatable("ftbquests.task.ftbquests.item.valid_for", task.getTitle()).getString();
 		setWidth(Math.max(156, getTheme().getStringWidth(title) + 12));
 		add(itemPanel);
 		add(backButton);

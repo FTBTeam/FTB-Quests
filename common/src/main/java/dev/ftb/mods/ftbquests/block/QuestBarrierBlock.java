@@ -35,7 +35,6 @@ public class QuestBarrierBlock extends BaseEntityBlock {
 	protected QuestBarrierBlock() {
 		super(Properties.of(Material.BARRIER, MaterialColor.COLOR_LIGHT_BLUE)
 				.noOcclusion()
-				.noDrops()
 				.isViewBlocking((a, b, c) -> false)
 				.strength(-1, 6000000F)
 				.lightLevel(blockState -> 3)

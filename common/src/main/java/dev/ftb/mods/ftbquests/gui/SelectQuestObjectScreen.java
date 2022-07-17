@@ -18,8 +18,7 @@ import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.util.ConfigQuestObject;
 import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -33,7 +32,7 @@ public class SelectQuestObjectScreen<T extends QuestObjectBase> extends ButtonLi
 		public final T object;
 
 		public QuestObjectButton(Panel panel, @Nullable T o) {
-			super(panel, o == null ? new TranslatableComponent("ftbquests.null") : o.getMutableTitle().withStyle(o.getObjectType().getColor()), o == null ? Icon.EMPTY : o.getIcon());
+			super(panel, o == null ? Component.translatable("ftbquests.null") : o.getMutableTitle().withStyle(o.getObjectType().getColor()), o == null ? Icon.EMPTY : o.getIcon());
 			object = o;
 			setSize(200, 14);
 		}
@@ -49,8 +48,8 @@ public class SelectQuestObjectScreen<T extends QuestObjectBase> extends ButtonLi
 			}
 
 			list.add(object.getTitle());
-			list.add(new TextComponent("ID: ").withStyle(ChatFormatting.GRAY).append(new TextComponent(object.toString()).withStyle(ChatFormatting.DARK_GRAY)));
-			list.add(new TextComponent("Type: ").withStyle(ChatFormatting.GRAY).append(QuestObjectType.NAME_MAP.getDisplayName(object.getObjectType()).copy().withStyle(object.getObjectType().getColor())));
+			list.add(Component.literal("ID: ").withStyle(ChatFormatting.GRAY).append(Component.literal(object.toString()).withStyle(ChatFormatting.DARK_GRAY)));
+			list.add(Component.literal("Type: ").withStyle(ChatFormatting.GRAY).append(QuestObjectType.NAME_MAP.getDisplayName(object.getObjectType()).copy().withStyle(object.getObjectType().getColor())));
 
 			if (object instanceof Quest) {
 				Quest quest = (Quest) object;
@@ -59,10 +58,10 @@ public class SelectQuestObjectScreen<T extends QuestObjectBase> extends ButtonLi
 				if (quest.rewards.size() == 1) {
 					addObject(list, quest.rewards.get(0));
 				} else if (!quest.rewards.isEmpty()) {
-					list.add(new TranslatableComponent("ftbquests.rewards").withStyle(ChatFormatting.GRAY));
+					list.add(Component.translatable("ftbquests.rewards").withStyle(ChatFormatting.GRAY));
 
 					for (Reward reward : quest.rewards) {
-						list.add(new TextComponent("  ").append(reward.getMutableTitle().withStyle(QuestObjectType.REWARD.getColor())));
+						list.add(Component.literal("  ").append(reward.getMutableTitle().withStyle(QuestObjectType.REWARD.getColor())));
 					}
 				}
 			} else if (object instanceof Task) {
@@ -73,10 +72,10 @@ public class SelectQuestObjectScreen<T extends QuestObjectBase> extends ButtonLi
 				if (quest.rewards.size() == 1) {
 					addObject(list, quest.rewards.get(0));
 				} else if (!quest.rewards.isEmpty()) {
-					list.add(new TranslatableComponent("ftbquests.rewards").withStyle(ChatFormatting.GRAY));
+					list.add(Component.translatable("ftbquests.rewards").withStyle(ChatFormatting.GRAY));
 
 					for (Reward reward : quest.rewards) {
-						list.add(new TextComponent("  ").append(reward.getMutableTitle().withStyle(QuestObjectType.REWARD.getColor())));
+						list.add(Component.literal("  ").append(reward.getMutableTitle().withStyle(QuestObjectType.REWARD.getColor())));
 					}
 				}
 			} else if (object instanceof Reward) {
@@ -100,7 +99,7 @@ public class SelectQuestObjectScreen<T extends QuestObjectBase> extends ButtonLi
 	private final ConfigCallback callback;
 
 	public SelectQuestObjectScreen(ConfigQuestObject<T> c, ConfigCallback cb) {
-		setTitle(new TranslatableComponent("ftbquests.gui.select_quest_object"));
+		setTitle(Component.translatable("ftbquests.gui.select_quest_object"));
 		setHasSearchBox(true);
 		focus();
 		setBorder(1, 1, 1);

@@ -4,14 +4,14 @@ import dev.ftb.mods.ftblibrary.ui.Panel;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftbquests.net.TogglePinnedMessage;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 
 /**
  * @author LatvianModder
  */
 public class AutopinButton extends TabButton {
 	public AutopinButton(Panel panel) {
-		super(panel, new TranslatableComponent(((QuestScreen) panel.getGui()).file.self.getAutoPin() ? "ftbquests.gui.autopin.on" : "ftbquests.gui.autopin.off"), ((QuestScreen) panel.getGui()).file.self.getAutoPin() ? ThemeProperties.PIN_ICON_ON.get() : ThemeProperties.PIN_ICON_OFF.get());
+		super(panel, Component.translatable(((QuestScreen) panel.getGui()).file.self.getAutoPin() ? "ftbquests.gui.autopin.on" : "ftbquests.gui.autopin.off"), ((QuestScreen) panel.getGui()).file.self.getAutoPin() ? ThemeProperties.PIN_ICON_ON.get() : ThemeProperties.PIN_ICON_OFF.get());
 	}
 
 	@Override
