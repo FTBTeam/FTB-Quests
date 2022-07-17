@@ -5,14 +5,14 @@ import dev.ftb.mods.ftblibrary.ui.SimpleTextButton;
 import dev.ftb.mods.ftblibrary.ui.Theme;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 
 /**
  * @author LatvianModder
  */
 public class CloseViewQuestButton extends SimpleTextButton {
 	public CloseViewQuestButton(ViewQuestPanel parent) {
-		super(parent, new TranslatableComponent("gui.close"), ThemeProperties.CLOSE_ICON.get(parent.quest));
+		super(parent, Component.translatable("gui.close"), ThemeProperties.CLOSE_ICON.get(parent.quest));
 	}
 
 	@Override

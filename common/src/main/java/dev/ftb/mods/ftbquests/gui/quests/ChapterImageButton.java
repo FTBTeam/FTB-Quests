@@ -5,11 +5,7 @@ import com.mojang.math.Vector3f;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.ui.EditConfigScreen;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
-import dev.ftb.mods.ftblibrary.ui.Button;
-import dev.ftb.mods.ftblibrary.ui.ContextMenuItem;
-import dev.ftb.mods.ftblibrary.ui.GuiHelper;
-import dev.ftb.mods.ftblibrary.ui.Panel;
-import dev.ftb.mods.ftblibrary.ui.Theme;
+import dev.ftb.mods.ftblibrary.ui.*;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.FTBQuests;
@@ -17,8 +13,7 @@ import dev.ftb.mods.ftbquests.net.EditObjectMessage;
 import dev.ftb.mods.ftbquests.quest.ChapterImage;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +26,7 @@ public class ChapterImageButton extends Button {
 	public ChapterImage chapterImage;
 
 	public ChapterImageButton(Panel panel, ChapterImage i) {
-		super(panel, TextComponent.EMPTY, i.image);
+		super(panel, Component.empty(), i.image);
 		questScreen = (QuestScreen) panel.getGui();
 		setSize(20, 20);
 		chapterImage = i;
@@ -67,7 +62,7 @@ public class ChapterImageButton extends Button {
 		if (questScreen.file.canEdit() && button.isRight()) {
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
 
-			contextMenu.add(new ContextMenuItem(new TranslatableComponent("selectServer.edit"), ThemeProperties.EDIT_ICON.get(), () -> {
+			contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.edit"), ThemeProperties.EDIT_ICON.get(), () -> {
 				ConfigGroup group = new ConfigGroup(FTBQuests.MOD_ID);
 				chapterImage.getConfig(group.getGroup("chapter").getGroup("image"));
 				group.savedCallback = accepted -> {
@@ -79,21 +74,21 @@ public class ChapterImageButton extends Button {
 				new EditConfigScreen(group).openGui();
 			}));
 
-			contextMenu.add(new ContextMenuItem(new TranslatableComponent("gui.move"), ThemeProperties.MOVE_UP_ICON.get(chapterImage.chapter), () -> {
+			contextMenu.add(new ContextMenuItem(Component.translatable("gui.move"), ThemeProperties.MOVE_UP_ICON.get(chapterImage.chapter), () -> {
 				questScreen.movingObjects = true;
 				questScreen.selectedObjects.clear();
 				questScreen.toggleSelected(chapterImage);
 			}) {
 				@Override
 				public void addMouseOverText(TooltipList list) {
-					list.add(new TranslatableComponent("ftbquests.gui.move_tooltip").withStyle(ChatFormatting.DARK_GRAY));
+					list.add(Component.translatable("ftbquests.gui.move_tooltip").withStyle(ChatFormatting.DARK_GRAY));
 				}
 			});
 
-			contextMenu.add(new ContextMenuItem(new TranslatableComponent("selectServer.delete"), ThemeProperties.DELETE_ICON.get(), () -> {
+			contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.delete"), ThemeProperties.DELETE_ICON.get(), () -> {
 				chapterImage.chapter.images.remove(chapterImage);
 				new EditObjectMessage(chapterImage.chapter).sendToServer();
-			}).setYesNo(new TranslatableComponent("delete_item", chapterImage.image.toString())));
+			}).setYesNo(Component.translatable("delete_item", chapterImage.image.toString())));
 
 			getGui().openContextMenu(contextMenu);
 		} else if (button.isLeft()) {
@@ -114,9 +109,9 @@ public class ChapterImageButton extends Button {
 	public void addMouseOverText(TooltipList list) {
 		for (String s : chapterImage.hover) {
 			if (s.startsWith("{") && s.endsWith("}")) {
-				list.add(new TranslatableComponent(s.substring(1, s.length() - 1)));
+				list.add(Component.translatable(s.substring(1, s.length() - 1)));
 			} else {
-				list.add(new TextComponent(s));
+				list.add(Component.literal(s));
 			}
 		}
 	}

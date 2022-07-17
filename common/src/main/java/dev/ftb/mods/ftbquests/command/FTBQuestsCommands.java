@@ -11,11 +11,7 @@ import dev.ftb.mods.ftblibrary.config.Tristate;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.net.CreateObjectResponseMessage;
 import dev.ftb.mods.ftbquests.net.DeleteObjectResponseMessage;
-import dev.ftb.mods.ftbquests.quest.Chapter;
-import dev.ftb.mods.ftbquests.quest.Quest;
-import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
-import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
-import dev.ftb.mods.ftbquests.quest.TeamData;
+import dev.ftb.mods.ftbquests.quest.*;
 import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
 import dev.ftb.mods.ftbquests.quest.loot.WeightedReward;
 import dev.ftb.mods.ftbquests.quest.reward.ItemReward;
@@ -30,8 +26,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -55,7 +50,7 @@ import java.util.stream.Collectors;
  */
 public class FTBQuestsCommands {
 
-	private static final SimpleCommandExceptionType NO_INVENTORY = new SimpleCommandExceptionType(new TranslatableComponent("commands.ftbquests.command.error.no_inventory"));
+	private static final SimpleCommandExceptionType NO_INVENTORY = new SimpleCommandExceptionType(Component.translatable("commands.ftbquests.command.error.no_inventory"));
 
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
 		dispatcher.register(Commands.literal("ftbquests")
@@ -167,7 +162,7 @@ public class FTBQuestsCommands {
 		int s = 0;
 		for (WeightedReward reward : table.rewards) {
 			if (s >= container.getContainerSize()) {
-				source.sendSuccess(new TranslatableComponent("commands.ftbquests.command.feedback.table_too_many_items", table.getTitle()), false);
+				source.sendSuccess(Component.translatable("commands.ftbquests.command.feedback.table_too_many_items", table.getTitle()), false);
 				return 0;
 			} else if (!(reward.reward instanceof ItemReward)) {
 				continue;
@@ -175,7 +170,7 @@ public class FTBQuestsCommands {
 			container.setItem(s++, ((ItemReward) reward.reward).item);
 		}
 
-		source.sendSuccess(new TranslatableComponent("commands.ftbquests.command.feedback.table_imported", table.getTitle(), table.rewards.size()), false);
+		source.sendSuccess(Component.translatable("commands.ftbquests.command.feedback.table_imported", table.getTitle(), table.rewards.size()), false);
 
 		return 1;
 	}
@@ -213,7 +208,7 @@ public class FTBQuestsCommands {
 
 		new CreateObjectResponseMessage(table, null).sendToAll(level.getServer());
 
-		source.sendSuccess(new TranslatableComponent("commands.ftbquests.command.feedback.table_imported", name, table.rewards.size()), false);
+		source.sendSuccess(Component.translatable("commands.ftbquests.command.feedback.table_imported", name, table.rewards.size()), false);
 
 		return 1;
 	}
@@ -228,9 +223,9 @@ public class FTBQuestsCommands {
 		data.setCanEdit(canEdit);
 
 		if (canEdit) {
-			source.sendSuccess(new TranslatableComponent("commands.ftbquests.editing_mode.enabled", player.getDisplayName()), true);
+			source.sendSuccess(Component.translatable("commands.ftbquests.editing_mode.enabled", player.getDisplayName()), true);
 		} else {
-			source.sendSuccess(new TranslatableComponent("commands.ftbquests.editing_mode.disabled", player.getDisplayName()), true);
+			source.sendSuccess(Component.translatable("commands.ftbquests.editing_mode.disabled", player.getDisplayName()), true);
 		}
 
 		return 1;
@@ -246,9 +241,9 @@ public class FTBQuestsCommands {
 		data.setLocked(locked);
 
 		if (locked) {
-			source.sendSuccess(new TranslatableComponent("commands.ftbquests.locked.enabled", player.getDisplayName()), true);
+			source.sendSuccess(Component.translatable("commands.ftbquests.locked.enabled", player.getDisplayName()), true);
 		} else {
-			source.sendSuccess(new TranslatableComponent("commands.ftbquests.locked.disabled", player.getDisplayName()), true);
+			source.sendSuccess(Component.translatable("commands.ftbquests.locked.disabled", player.getDisplayName()), true);
 		}
 
 		return 1;
@@ -264,7 +259,7 @@ public class FTBQuestsCommands {
 			questObject.forceProgress(ServerQuestFile.INSTANCE.getData(player), progressChange);
 		}
 
-		source.sendSuccess(new TranslatableComponent("commands.ftbquests.change_progress.text"), true);
+		source.sendSuccess(Component.translatable("commands.ftbquests.change_progress.text"), true);
 		return Command.SINGLE_SUCCESS;
 	}
 
@@ -284,7 +279,7 @@ public class FTBQuestsCommands {
 		ServerQuestFile.INSTANCE.refreshIDMap();
 		ServerQuestFile.INSTANCE.save();
 
-		source.sendSuccess(new TextComponent("Deleted " + del + " empty tables"), false);
+		source.sendSuccess(Component.literal("Deleted " + del + " empty tables"), false);
 		return 1;
 	}
 
@@ -365,7 +360,7 @@ public class FTBQuestsCommands {
 
 		ServerQuestFile.INSTANCE.save();
 		ServerQuestFile.INSTANCE.saveNow();
-		source.sendSuccess(new TextComponent("Done!"), false);
+		source.sendSuccess(Component.literal("Done!"), false);
 		return 1;
 	}
 }

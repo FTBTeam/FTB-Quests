@@ -14,7 +14,6 @@ public class OtherButtonsPanelBottom extends OtherButtonsPanel {
 	@Override
 	public void addWidgets() {
 		add(new AutopinButton(this));
-		add(new SupportButton(this));
 
 		if (questScreen.file.canEdit()) {
 			add(new EditSettingsButton(this));

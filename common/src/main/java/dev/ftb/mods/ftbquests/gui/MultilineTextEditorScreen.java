@@ -4,15 +4,10 @@ import dev.ftb.mods.ftblibrary.config.ConfigCallback;
 import dev.ftb.mods.ftblibrary.config.ListConfig;
 import dev.ftb.mods.ftblibrary.config.StringConfig;
 import dev.ftb.mods.ftblibrary.icon.Icons;
-import dev.ftb.mods.ftblibrary.ui.BaseScreen;
-import dev.ftb.mods.ftblibrary.ui.SimpleButton;
-import dev.ftb.mods.ftblibrary.ui.TextBox;
-import dev.ftb.mods.ftblibrary.ui.TextField;
-import dev.ftb.mods.ftblibrary.ui.Theme;
+import dev.ftb.mods.ftblibrary.ui.*;
 import dev.ftb.mods.ftblibrary.ui.input.Key;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -47,9 +42,9 @@ public class MultilineTextEditorScreen extends BaseScreen {
 
 	@Override
 	public void addWidgets() {
-		add(new TextField(this).setText(new TextComponent("This is a lame solution but there will be a better one eventually")));
+		add(new TextField(this).setText(Component.literal("This is a lame solution but there will be a better one eventually")));
 		widgets.get(0).setPos((width - widgets.get(0).width) / 2, -15);
-		add(new SimpleButton(this, new TranslatableComponent("gui.accept"), Icons.ACCEPT, (simpleButton, mouseButton) -> saveAndExit()).setPosAndSize(width + 6, 6, 16, 16));
+		add(new SimpleButton(this, Component.translatable("gui.accept"), Icons.ACCEPT, (simpleButton, mouseButton) -> saveAndExit()).setPosAndSize(width + 6, 6, 16, 16));
 
 		for (int i = 0; i < textBoxes.size(); i++) {
 			textBoxes.get(i).setPosAndSize(2, 2 + i * 12, width - 4, 12);

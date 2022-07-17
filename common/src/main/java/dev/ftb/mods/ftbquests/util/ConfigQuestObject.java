@@ -7,7 +7,6 @@ import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.gui.SelectQuestObjectScreen;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Predicate;
@@ -25,7 +24,7 @@ public class ConfigQuestObject<T extends QuestObjectBase> extends ConfigValue<T>
 	@Override
 	public Component getStringForGUI(@Nullable QuestObjectBase value) {
 		if (value == null) {
-			return TextComponent.EMPTY;
+			return Component.empty();
 		}
 
 		return value.getTitle();

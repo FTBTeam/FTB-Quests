@@ -7,8 +7,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
@@ -41,12 +39,12 @@ public class CustomIconItem extends Item {
 	@Override
 	@Environment(EnvType.CLIENT)
 	public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
-		tooltip.add(new TranslatableComponent("item.ftbquests.custom_icon.tooltip").withStyle(ChatFormatting.GRAY));
+		tooltip.add(Component.translatable("item.ftbquests.custom_icon.tooltip").withStyle(ChatFormatting.GRAY));
 
 		if (stack.hasTag() && stack.getTag().contains("Icon")) {
-			tooltip.add(new TextComponent(stack.getTag().getString("Icon")).withStyle(ChatFormatting.DARK_GRAY));
+			tooltip.add(Component.literal(stack.getTag().getString("Icon")).withStyle(ChatFormatting.DARK_GRAY));
 		} else {
-			tooltip.add(new TextComponent("-").withStyle(ChatFormatting.DARK_GRAY));
+			tooltip.add(Component.literal("-").withStyle(ChatFormatting.DARK_GRAY));
 		}
 	}
 

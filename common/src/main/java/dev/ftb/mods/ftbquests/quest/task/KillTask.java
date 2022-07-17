@@ -13,8 +13,8 @@ import net.fabricmc.api.Environment;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Items;
@@ -93,7 +93,7 @@ public class KillTask extends Task {
 	@Override
 	@Environment(EnvType.CLIENT)
 	public MutableComponent getAltTitle() {
-		return new TranslatableComponent("ftbquests.task.ftbquests.kill.title", formatMaxProgress(), new TranslatableComponent("entity." + entity.getNamespace() + "." + entity.getPath()));
+		return Component.translatable("ftbquests.task.ftbquests.kill.title", formatMaxProgress(), Component.translatable("entity." + entity.getNamespace() + "." + entity.getPath()));
 	}
 
 	@Override

@@ -11,9 +11,8 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -74,7 +73,7 @@ public class DimensionTask extends BooleanTask {
 	@Override
 	@Environment(EnvType.CLIENT)
 	public MutableComponent getAltTitle() {
-		return new TranslatableComponent("ftbquests.task.ftbquests.dimension").append(": ").append(new TextComponent(dimension.location().toString()).withStyle(ChatFormatting.DARK_GREEN));
+		return Component.translatable("ftbquests.task.ftbquests.dimension").append(": ").append(Component.literal(dimension.location().toString()).withStyle(ChatFormatting.DARK_GREEN));
 	}
 
 	@Override

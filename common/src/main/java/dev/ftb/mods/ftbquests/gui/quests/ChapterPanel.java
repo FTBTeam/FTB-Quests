@@ -7,13 +7,7 @@ import dev.ftb.mods.ftblibrary.config.ui.EditConfigFromStringScreen;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.Icons;
-import dev.ftb.mods.ftblibrary.ui.Button;
-import dev.ftb.mods.ftblibrary.ui.ContextMenuItem;
-import dev.ftb.mods.ftblibrary.ui.GuiHelper;
-import dev.ftb.mods.ftblibrary.ui.Panel;
-import dev.ftb.mods.ftblibrary.ui.Theme;
-import dev.ftb.mods.ftblibrary.ui.Widget;
-import dev.ftb.mods.ftblibrary.ui.WidgetLayout;
+import dev.ftb.mods.ftblibrary.ui.*;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.util.ClientTextComponentUtils;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
@@ -31,8 +25,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -86,7 +78,7 @@ public class ChapterPanel extends Panel {
 				playClickSound();
 
 				List<ContextMenuItem> contextMenu = new ArrayList<>();
-				contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.chapter"), ThemeProperties.ADD_ICON.get(), () -> {
+				contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.chapter"), ThemeProperties.ADD_ICON.get(), () -> {
 					StringConfig c = new StringConfig(Pattern.compile("^.+$"));
 					EditConfigFromStringScreen.open(c, "", "", accepted -> {
 						chapterPanel.questScreen.openGui();
@@ -103,7 +95,7 @@ public class ChapterPanel extends Panel {
 					});
 				}));
 
-				contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.chapter_group"), ThemeProperties.ADD_ICON.get(), () -> {
+				contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.chapter_group"), ThemeProperties.ADD_ICON.get(), () -> {
 					playClickSound();
 					StringConfig c = new StringConfig(Pattern.compile("^.+$"));
 					EditConfigFromStringScreen.open(c, "", "", accepted -> {
@@ -132,7 +124,7 @@ public class ChapterPanel extends Panel {
 			ChatFormatting f = isMouseOver() ? ChatFormatting.WHITE : ChatFormatting.GRAY;
 
 			icon.draw(matrixStack, x + 2, y + 3, 12, 12);
-			theme.drawString(matrixStack, new TextComponent("").append(title).withStyle(f), x + 16, y + 5);
+			theme.drawString(matrixStack, Component.literal("").append(title).withStyle(f), x + 16, y + 5);
 
 			ThemeProperties.WIDGET_BORDER.get(ClientQuestFile.INSTANCE).draw(matrixStack, x, y + h - 1, w, 1);
 
@@ -199,8 +191,8 @@ public class ChapterPanel extends Panel {
 
 			if (chapterPanel.questScreen.file.canEdit() && button.isRight() && !group.isDefaultGroup()) {
 				List<ContextMenuItem> contextMenu = new ArrayList<>();
-				contextMenu.add(new ContextMenuItem(new TranslatableComponent("gui.move"), ThemeProperties.MOVE_UP_ICON.get(), () -> new MoveChapterGroupMessage(group.id, true).sendToServer()).setEnabled(() -> group.getIndex() > 1).setCloseMenu(false));
-				contextMenu.add(new ContextMenuItem(new TranslatableComponent("gui.move"), ThemeProperties.MOVE_DOWN_ICON.get(), () -> new MoveChapterGroupMessage(group.id, false).sendToServer()).setEnabled(() -> group.getIndex() < group.file.chapterGroups.size() - 1).setCloseMenu(false));
+				contextMenu.add(new ContextMenuItem(Component.translatable("gui.move"), ThemeProperties.MOVE_UP_ICON.get(), () -> new MoveChapterGroupMessage(group.id, true).sendToServer()).setEnabled(() -> group.getIndex() > 1).setCloseMenu(false));
+				contextMenu.add(new ContextMenuItem(Component.translatable("gui.move"), ThemeProperties.MOVE_DOWN_ICON.get(), () -> new MoveChapterGroupMessage(group.id, false).sendToServer()).setEnabled(() -> group.getIndex() < group.file.chapterGroups.size() - 1).setCloseMenu(false));
 				contextMenu.add(ContextMenuItem.SEPARATOR);
 				chapterPanel.questScreen.addObjectMenuItems(contextMenu, chapterPanel.questScreen, group);
 				chapterPanel.questScreen.openContextMenu(contextMenu);
@@ -222,7 +214,7 @@ public class ChapterPanel extends Panel {
 			ChatFormatting f = isMouseOver() ? ChatFormatting.WHITE : ChatFormatting.GRAY;
 
 			(group.guiCollapsed ? ARROW_COLLAPSED : ARROW_EXPANDED).withColor(Color4I.getChatFormattingColor(f)).draw(matrixStack, x + 3, y + 5, 8, 8);
-			theme.drawString(matrixStack, new TextComponent("").append(title).withStyle(f), x + 15, y + 5);
+			theme.drawString(matrixStack, Component.literal("").append(title).withStyle(f), x + 15, y + 5);
 
 			boolean canEdit = chapterPanel.questScreen.file.canEdit();
 
@@ -256,7 +248,7 @@ public class ChapterPanel extends Panel {
 				int p = panel.questScreen.file.self.getRelativeProgress(c);
 
 				if (p > 0 && p < 100) {
-					setTitle(new TextComponent("").append(getTitle()).append(" ").append(new TextComponent(p + "%").withStyle(ChatFormatting.DARK_GREEN)));
+					setTitle(Component.literal("").append(getTitle()).append(" ").append(Component.literal(p + "%").withStyle(ChatFormatting.DARK_GREEN)));
 				}
 			}
 			*/
@@ -264,7 +256,7 @@ public class ChapterPanel extends Panel {
 			description = new ArrayList<>();
 
 			for (String v : chapter.subtitle) {
-				description.add(new TextComponent("").append(ClientTextComponentUtils.parse(v)).withStyle(ChatFormatting.GRAY));
+				description.add(Component.literal("").append(ClientTextComponentUtils.parse(v)).withStyle(ChatFormatting.GRAY));
 			}
 		}
 
@@ -280,9 +272,9 @@ public class ChapterPanel extends Panel {
 
 			if (chapterPanel.questScreen.file.canEdit() && button.isRight()) {
 				List<ContextMenuItem> contextMenu = new ArrayList<>();
-				contextMenu.add(new ContextMenuItem(new TranslatableComponent("gui.move"), ThemeProperties.MOVE_UP_ICON.get(), () -> new MoveChapterMessage(chapter.id, true).sendToServer()).setEnabled(() -> chapter.getIndex() > 0).setCloseMenu(false));
-				contextMenu.add(new ContextMenuItem(new TranslatableComponent("gui.move"), ThemeProperties.MOVE_DOWN_ICON.get(), () -> new MoveChapterMessage(chapter.id, false).sendToServer()).setEnabled(() -> chapter.getIndex() < chapter.group.chapters.size() - 1).setCloseMenu(false));
-				contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.gui.change_group"), Icons.COLOR_RGB, () -> new ChangeChapterGroupScreen(chapter).openGui()));
+				contextMenu.add(new ContextMenuItem(Component.translatable("gui.move"), ThemeProperties.MOVE_UP_ICON.get(), () -> new MoveChapterMessage(chapter.id, true).sendToServer()).setEnabled(() -> chapter.getIndex() > 0).setCloseMenu(false));
+				contextMenu.add(new ContextMenuItem(Component.translatable("gui.move"), ThemeProperties.MOVE_DOWN_ICON.get(), () -> new MoveChapterMessage(chapter.id, false).sendToServer()).setEnabled(() -> chapter.getIndex() < chapter.group.chapters.size() - 1).setCloseMenu(false));
+				contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.change_group"), Icons.COLOR_RGB, () -> new ChangeChapterGroupScreen(chapter).openGui()));
 				contextMenu.add(ContextMenuItem.SEPARATOR);
 				chapterPanel.questScreen.addObjectMenuItems(contextMenu, chapterPanel.questScreen, chapter);
 				chapterPanel.questScreen.openContextMenu(contextMenu);
@@ -301,7 +293,7 @@ public class ChapterPanel extends Panel {
 			int o = chapter.group.isDefaultGroup() ? 0 : 7;
 
 			icon.draw(matrixStack, x + 2 + o, y + 1, 12, 12);
-			theme.drawString(matrixStack, new TextComponent("").append(title).withStyle(Style.EMPTY.withColor(TextColor.fromRgb(c.rgb()))), x + 16 + o, y + 3);
+			theme.drawString(matrixStack, Component.literal("").append(title).withStyle(Style.EMPTY.withColor(TextColor.fromRgb(c.rgb()))), x + 16 + o, y + 3);
 
 			GuiHelper.setupDrawing();
 

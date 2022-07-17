@@ -23,7 +23,7 @@ import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
 import dev.ftb.mods.ftbquests.quest.reward.RandomReward;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,7 +58,7 @@ public class RewardTablesScreen extends ButtonListBaseScreen {
 
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
 			ClientQuestFile.INSTANCE.questScreen.addObjectMenuItems(contextMenu, RewardTablesScreen.this, table);
-			contextMenu.add(new ContextMenuItem(new TranslatableComponent("item.ftbquests.lootcrate"), Icons.ACCEPT, () -> {
+			contextMenu.add(new ContextMenuItem(Component.translatable("item.ftbquests.lootcrate"), Icons.ACCEPT, () -> {
 				if (table.lootCrate == null) {
 					table.lootCrate = new LootCrate(table);
 					Matcher matcher = Pattern.compile("[^a-z0-9_]").matcher(table.getTitle().getString().toLowerCase());
@@ -134,7 +134,7 @@ public class RewardTablesScreen extends ButtonListBaseScreen {
 			}
 
 			if (usedIn > 0) {
-				list.add(new TranslatableComponent("ftbquests.reward_table.used_in", usedIn).withStyle(ChatFormatting.GRAY));
+				list.add(Component.translatable("ftbquests.reward_table.used_in", usedIn).withStyle(ChatFormatting.GRAY));
 			}
 
 			table.addMouseOverText(list, true, true);
@@ -142,14 +142,14 @@ public class RewardTablesScreen extends ButtonListBaseScreen {
 	}
 
 	public RewardTablesScreen() {
-		setTitle(new TranslatableComponent("ftbquests.reward_tables"));
+		setTitle(Component.translatable("ftbquests.reward_tables"));
 		setHasSearchBox(true);
 		setBorder(1, 1, 1);
 	}
 
 	@Override
 	public void addButtons(Panel panel) {
-		SimpleTextButton button = new SimpleTextButton(panel, new TranslatableComponent("gui.add"), Icons.ADD) {
+		SimpleTextButton button = new SimpleTextButton(panel, Component.translatable("gui.add"), Icons.ADD) {
 			@Override
 			public void onClicked(MouseButton button) {
 				playClickSound();

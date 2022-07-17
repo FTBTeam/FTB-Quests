@@ -5,11 +5,7 @@ import dev.ftb.mods.ftblibrary.config.DoubleConfig;
 import dev.ftb.mods.ftblibrary.config.ui.EditConfigFromStringScreen;
 import dev.ftb.mods.ftblibrary.config.ui.EditConfigScreen;
 import dev.ftb.mods.ftblibrary.icon.Icons;
-import dev.ftb.mods.ftblibrary.ui.ContextMenuItem;
-import dev.ftb.mods.ftblibrary.ui.Panel;
-import dev.ftb.mods.ftblibrary.ui.SimpleTextButton;
-import dev.ftb.mods.ftblibrary.ui.Theme;
-import dev.ftb.mods.ftblibrary.ui.VerticalSpaceWidget;
+import dev.ftb.mods.ftblibrary.ui.*;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.ui.misc.ButtonListBaseScreen;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
@@ -20,8 +16,7 @@ import dev.ftb.mods.ftbquests.quest.reward.RewardType;
 import dev.ftb.mods.ftbquests.quest.reward.RewardTypes;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -33,7 +28,7 @@ import java.util.List;
 public class EditRewardTableScreen extends ButtonListBaseScreen {
 	private class RewardTableSettingsButton extends SimpleTextButton {
 		private RewardTableSettingsButton(Panel panel) {
-			super(panel, new TranslatableComponent("gui.settings"), Icons.SETTINGS);
+			super(panel, Component.translatable("gui.settings"), Icons.SETTINGS);
 			setHeight(12);
 		}
 
@@ -49,7 +44,7 @@ public class EditRewardTableScreen extends ButtonListBaseScreen {
 
 	private class SaveRewardTableButton extends SimpleTextButton {
 		private SaveRewardTableButton(Panel panel) {
-			super(panel, new TranslatableComponent("gui.accept"), Icons.ACCEPT);
+			super(panel, Component.translatable("gui.accept"), Icons.ACCEPT);
 			setHeight(12);
 		}
 
@@ -66,7 +61,7 @@ public class EditRewardTableScreen extends ButtonListBaseScreen {
 
 	private class AddWeightedRewardButton extends SimpleTextButton {
 		private AddWeightedRewardButton(Panel panel) {
-			super(panel, new TranslatableComponent("gui.add"), Icons.ADD);
+			super(panel, Component.translatable("gui.add"), Icons.ADD);
 			setHeight(12);
 		}
 
@@ -103,21 +98,21 @@ public class EditRewardTableScreen extends ButtonListBaseScreen {
 		public void addMouseOverText(TooltipList list) {
 			super.addMouseOverText(list);
 			reward.reward.addMouseOverText(list);
-			list.add(new TranslatableComponent("ftbquests.reward_table.weight").append(": " + reward.weight).append(new TextComponent(" [" + WeightedReward.chanceString(reward.weight, rewardTable.getTotalWeight(true)) + "]").withStyle(ChatFormatting.DARK_GRAY)));
+			list.add(Component.translatable("ftbquests.reward_table.weight").append(": " + reward.weight).append(Component.literal(" [" + WeightedReward.chanceString(reward.weight, rewardTable.getTotalWeight(true)) + "]").withStyle(ChatFormatting.DARK_GRAY)));
 		}
 
 		@Override
 		public void onClicked(MouseButton button) {
 			playClickSound();
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
-			contextMenu.add(new ContextMenuItem(new TranslatableComponent("selectServer.edit"), Icons.SETTINGS, () -> {
+			contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.edit"), Icons.SETTINGS, () -> {
 				ConfigGroup group = new ConfigGroup(FTBQuests.MOD_ID);
 				reward.reward.getConfig(reward.reward.createSubGroup(group));
 				group.savedCallback = accepted -> run();
 				new EditConfigScreen(group).openGui();
 			}));
 
-			contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.reward_table.set_weight"), Icons.SETTINGS, () -> {
+			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.reward_table.set_weight"), Icons.SETTINGS, () -> {
 				DoubleConfig c = new DoubleConfig(0D, Double.POSITIVE_INFINITY);
 				EditConfigFromStringScreen.open(c, (double) reward.weight, 1D, accepted -> {
 					if (accepted) {
@@ -136,10 +131,10 @@ public class EditRewardTableScreen extends ButtonListBaseScreen {
 				});
 			}));
 
-			contextMenu.add(new ContextMenuItem(new TranslatableComponent("selectServer.delete"), Icons.REMOVE, () -> {
+			contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.delete"), Icons.REMOVE, () -> {
 				rewardTable.rewards.remove(reward);
 				EditRewardTableScreen.this.refreshWidgets();
-			}).setYesNo(new TranslatableComponent("delete_item", reward.reward.getTitle())));
+			}).setYesNo(Component.translatable("delete_item", reward.reward.getTitle())));
 			EditRewardTableScreen.this.openContextMenu(contextMenu);
 		}
 
@@ -161,7 +156,7 @@ public class EditRewardTableScreen extends ButtonListBaseScreen {
 		originalTable.writeData(nbt);
 		rewardTable.readData(nbt);
 		callback = c;
-		setTitle(new TranslatableComponent("ftbquests.reward_table"));
+		setTitle(Component.translatable("ftbquests.reward_table"));
 		setBorder(1, 1, 1);
 	}
 

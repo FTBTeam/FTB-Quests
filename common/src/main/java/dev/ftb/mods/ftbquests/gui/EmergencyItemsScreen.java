@@ -3,13 +3,7 @@ package dev.ftb.mods.ftbquests.gui;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
-import dev.ftb.mods.ftblibrary.ui.BaseScreen;
-import dev.ftb.mods.ftblibrary.ui.GuiHelper;
-import dev.ftb.mods.ftblibrary.ui.Panel;
-import dev.ftb.mods.ftblibrary.ui.SimpleTextButton;
-import dev.ftb.mods.ftblibrary.ui.Theme;
-import dev.ftb.mods.ftblibrary.ui.Widget;
-import dev.ftb.mods.ftblibrary.ui.WidgetLayout;
+import dev.ftb.mods.ftblibrary.ui.*;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.util.TimeUtils;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
@@ -18,7 +12,6 @@ import dev.ftb.mods.ftbquests.net.GetEmergencyItemsMessage;
 import dev.ftb.mods.ftbquests.quest.QuestShape;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
@@ -69,7 +62,7 @@ public class EmergencyItemsScreen extends BaseScreen {
 		}
 	}
 
-	private final SimpleTextButton cancelButton = new SimpleTextButton(this, new TranslatableComponent("gui.cancel"), Icon.EMPTY) {
+	private final SimpleTextButton cancelButton = new SimpleTextButton(this, Component.translatable("gui.cancel"), Icon.EMPTY) {
 		@Override
 		public void onClicked(MouseButton button) {
 			playClickSound();
@@ -112,7 +105,7 @@ public class EmergencyItemsScreen extends BaseScreen {
 		if (left <= 0L) {
 			if (!done) {
 				done = true;
-				cancelButton.setTitle(new TranslatableComponent("gui.close"));
+				cancelButton.setTitle(Component.translatable("gui.close"));
 				new GetEmergencyItemsMessage().sendToServer();
 			}
 

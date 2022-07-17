@@ -25,9 +25,8 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 
@@ -128,10 +127,10 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 	@Environment(EnvType.CLIENT)
 	public MutableComponent getAltTitle() {
 		if (count > 1) {
-			return new TextComponent(count + "x ").append(item.getHoverName());
+			return Component.literal(count + "x ").append(item.getHoverName());
 		}
 
-		return new TextComponent("").append(item.getHoverName());
+		return Component.literal("").append(item.getHoverName());
 	}
 
 	@Override
@@ -196,7 +195,7 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 		if (!consumesResources() && validItems.size() == 1 && (Platform.isModLoaded("jei") || Platform.isModLoaded("roughlyenoughitems"))) {
 			showJEIRecipe(validItems.get(0));
 		} else if (validItems.isEmpty()) {
-			Minecraft.getInstance().getToasts().addToast(new CustomToast(new TextComponent("No valid items!"), ItemIcon.getItemIcon(FTBQuestsItems.MISSING_ITEM.get()), new TextComponent("Report this bug to modpack author!")));
+			Minecraft.getInstance().getToasts().addToast(new CustomToast(Component.literal("No valid items!"), ItemIcon.getItemIcon(FTBQuestsItems.MISSING_ITEM.get()), Component.literal("Report this bug to modpack author!")));
 		} else {
 			new ValidItemsScreen(this, validItems, canClick).openGui();
 		}
@@ -212,13 +211,13 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 	public void addMouseOverText(TooltipList list, TeamData teamData) {
 		if (consumesResources()) {
 			list.blankLine();
-			list.add(new TranslatableComponent("ftbquests.task.click_to_submit").withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE));
+			list.add(Component.translatable("ftbquests.task.click_to_submit").withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE));
 		} else if (getValidDisplayItems().size() > 1) {
 			list.blankLine();
-			list.add(new TranslatableComponent("ftbquests.task.ftbquests.item.view_items").withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE));
+			list.add(Component.translatable("ftbquests.task.ftbquests.item.view_items").withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE));
 		} else if (Platform.isModLoaded("jei") || Platform.isModLoaded("roughlyenoughitems")) {
 			list.blankLine();
-			list.add(new TranslatableComponent("ftbquests.task.ftbquests.item.click_recipe").withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE));
+			list.add(Component.translatable("ftbquests.task.ftbquests.item.click_recipe").withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE));
 		}
 	}
 

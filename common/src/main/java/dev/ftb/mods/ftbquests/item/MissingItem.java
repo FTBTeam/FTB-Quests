@@ -8,8 +8,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -75,9 +73,9 @@ public class MissingItem extends Item {
 			int c = Math.max(1, tag.getInt("Count"));
 
 			if (c == 1) {
-				return new TextComponent(id);
+				return Component.literal(id);
 			} else {
-				return new TextComponent(c + "x " + id);
+				return Component.literal(c + "x " + id);
 			}
 		}
 
@@ -88,7 +86,7 @@ public class MissingItem extends Item {
 	@Environment(EnvType.CLIENT)
 	public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
 		if (stack.hasTag() && stack.getTag().contains("Item")) {
-			tooltip.add(new TranslatableComponent("item.ftbquests.missing_item").withStyle(ChatFormatting.RED));
+			tooltip.add(Component.translatable("item.ftbquests.missing_item").withStyle(ChatFormatting.RED));
 		}
 	}
 }

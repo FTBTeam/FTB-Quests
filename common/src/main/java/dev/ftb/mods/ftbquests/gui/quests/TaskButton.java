@@ -5,13 +5,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.Icons;
-import dev.ftb.mods.ftblibrary.ui.Button;
-import dev.ftb.mods.ftblibrary.ui.ContextMenuItem;
-import dev.ftb.mods.ftblibrary.ui.GuiHelper;
-import dev.ftb.mods.ftblibrary.ui.Panel;
-import dev.ftb.mods.ftblibrary.ui.SimpleTextButton;
-import dev.ftb.mods.ftblibrary.ui.Theme;
-import dev.ftb.mods.ftblibrary.ui.WidgetType;
+import dev.ftb.mods.ftblibrary.ui.*;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.ui.misc.ButtonListBaseScreen;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
@@ -23,18 +17,15 @@ import dev.latvian.mods.itemfilters.api.IStringValueFilter;
 import dev.latvian.mods.itemfilters.api.ItemFiltersAPI;
 import dev.latvian.mods.itemfilters.api.ItemFiltersItems;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.Registry;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentContents;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -76,7 +67,7 @@ public class TaskButton extends Button {
 				var tags = i.item.getItem().builtInRegistryHolder().tags().map(TagKey::location).toList();
 
 				if (!tags.isEmpty() && !ItemFiltersAPI.isFilter(i.item)) {
-					contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.task.ftbquests.item.convert_tag"), ThemeProperties.RELOAD_ICON.get(), () -> {
+					contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.task.ftbquests.item.convert_tag"), ThemeProperties.RELOAD_ICON.get(), () -> {
 						ItemStack tagFilter = new ItemStack(ItemFiltersItems.TAG.get());
 
 						if (tags.size() == 1) {
@@ -94,7 +85,7 @@ public class TaskButton extends Button {
 								@Override
 								public void addButtons(Panel panel) {
 									for (ResourceLocation s : tags) {
-										panel.add(new SimpleTextButton(panel, new TextComponent(s.toString()), Icon.EMPTY) {
+										panel.add(new SimpleTextButton(panel, Component.literal(s.toString()), Icon.EMPTY) {
 											@Override
 											public void onClicked(MouseButton button) {
 												questScreen.openGui();
@@ -143,15 +134,15 @@ public class TaskButton extends Button {
 
 			if (maxp > 1L) {
 				if (task.hideProgressNumbers()) {
-					list.add(new TextComponent("[" + task.getRelativeProgressFromChildren(questScreen.file.self) + "%]").withStyle(ChatFormatting.DARK_GREEN));
+					list.add(Component.literal("[" + task.getRelativeProgressFromChildren(questScreen.file.self) + "%]").withStyle(ChatFormatting.DARK_GREEN));
 				} else {
 					String max = isShiftKeyDown() ? Long.toUnsignedString(maxp) : task.formatMaxProgress();
 					String prog = isShiftKeyDown() ? Long.toUnsignedString(progress) : task.formatProgress(questScreen.file.self, progress);
 
 					if (maxp < 100L) {
-						list.add(new TextComponent((progress > maxp ? max : prog) + " / " + max).withStyle(ChatFormatting.DARK_GREEN));
+						list.add(Component.literal((progress > maxp ? max : prog) + " / " + max).withStyle(ChatFormatting.DARK_GREEN));
 					} else {
-						list.add(new TextComponent((progress > maxp ? max : prog) + " / " + max).withStyle(ChatFormatting.DARK_GREEN).append(new TextComponent(" [" + task.getRelativeProgressFromChildren(questScreen.file.self) + "%]").withStyle(ChatFormatting.DARK_GRAY)));
+						list.add(Component.literal((progress > maxp ? max : prog) + " / " + max).withStyle(ChatFormatting.DARK_GREEN).append(Component.literal(" [" + task.getRelativeProgressFromChildren(questScreen.file.self) + "%]").withStyle(ChatFormatting.DARK_GRAY)));
 					}
 
 				}
@@ -197,7 +188,7 @@ public class TaskButton extends Button {
 		} else {
 			MutableComponent s = task.getButtonText();
 
-			if (s != TextComponent.EMPTY) {
+			if (s.getContents() != ComponentContents.EMPTY) {
 				matrixStack.pushPose();
 				matrixStack.translate(x + 19F - theme.getStringWidth(s) / 2F, y + 15F, 200F);
 				matrixStack.scale(0.5F, 0.5F, 1F);

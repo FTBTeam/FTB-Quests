@@ -10,7 +10,7 @@ import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.net.ChangeChapterGroupMessage;
 import dev.ftb.mods.ftbquests.quest.Chapter;
 import dev.ftb.mods.ftbquests.quest.ChapterGroup;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 
 /**
  * @author LatvianModder
@@ -37,7 +37,7 @@ public class ChangeChapterGroupScreen extends ButtonListBaseScreen {
 
 	public ChangeChapterGroupScreen(Chapter c) {
 		chapter = c;
-		setTitle(new TranslatableComponent("ftbquests.gui.change_group"));
+		setTitle(Component.translatable("ftbquests.gui.change_group"));
 		setHasSearchBox(true);
 		setBorder(1, 1, 1);
 	}

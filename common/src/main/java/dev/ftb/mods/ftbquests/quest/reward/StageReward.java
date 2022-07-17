@@ -6,12 +6,11 @@ import dev.ftb.mods.ftbquests.quest.Quest;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.ChatType;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
 
 /**
@@ -80,9 +79,9 @@ public class StageReward extends Reward {
 
 		if (notify) {
 			if (remove) {
-				player.sendMessage(new TranslatableComponent("commands.gamestage.remove.target", stage), Util.NIL_UUID);
+				player.sendSystemMessage(Component.translatable("commands.gamestage.remove.target", stage), ChatType.SYSTEM);
 			} else {
-				player.sendMessage(new TranslatableComponent("commands.gamestage.add.target", stage), Util.NIL_UUID);
+				player.sendSystemMessage(Component.translatable("commands.gamestage.add.target", stage), ChatType.SYSTEM);
 			}
 		}
 	}
@@ -90,6 +89,6 @@ public class StageReward extends Reward {
 	@Override
 	@Environment(EnvType.CLIENT)
 	public MutableComponent getAltTitle() {
-		return new TranslatableComponent("ftbquests.reward.ftbquests.gamestage").append(": ").append(new TextComponent(stage).withStyle(ChatFormatting.YELLOW));
+		return Component.translatable("ftbquests.reward.ftbquests.gamestage").append(": ").append(Component.literal(stage).withStyle(ChatFormatting.YELLOW));
 	}
 }

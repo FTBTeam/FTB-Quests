@@ -17,8 +17,7 @@ import dev.ftb.mods.ftbquests.quest.theme.QuestTheme;
 import dev.ftb.mods.ftbteams.data.ClientTeamManager;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 
 import java.util.Objects;
@@ -127,9 +126,9 @@ public class ClientQuestFile extends QuestFile {
 	public void openQuestGui() {
 		if (exists()) {
 			if (disableGui && !canEdit()) {
-				Minecraft.getInstance().getToasts().addToast(new CustomToast(new TranslatableComponent("item.ftbquests.book.disabled"), Icons.BARRIER, TextComponent.EMPTY));
+				Minecraft.getInstance().getToasts().addToast(new CustomToast(Component.translatable("item.ftbquests.book.disabled"), Icons.BARRIER, Component.empty()));
 			} else if (self.isLocked()) {
-				Minecraft.getInstance().getToasts().addToast(new CustomToast(lockMessage.isEmpty() ? new TextComponent("Quests locked!") : ClientTextComponentUtils.parse(lockMessage), Icons.BARRIER, TextComponent.EMPTY));
+				Minecraft.getInstance().getToasts().addToast(new CustomToast(lockMessage.isEmpty() ? Component.literal("Quests locked!") : ClientTextComponentUtils.parse(lockMessage), Icons.BARRIER, Component.empty()));
 			} else {
 				questGui.openGui();
 			}

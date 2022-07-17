@@ -7,8 +7,8 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
 
 /**
  * @author LatvianModder
@@ -70,7 +70,7 @@ public abstract class EnergyTask extends Task implements ISingleLongValueTask {
 	@Override
 	@Environment(EnvType.CLIENT)
 	public MutableComponent getAltTitle() {
-		return new TextComponent(StringUtils.formatDouble(value, true));
+		return Component.literal(StringUtils.formatDouble(value, true));
 	}
 
 	@Override

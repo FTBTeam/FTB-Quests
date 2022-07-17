@@ -8,9 +8,8 @@ import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -90,7 +89,7 @@ public class XPTask extends Task implements ISingleLongValueTask {
 	@Override
 	@Environment(EnvType.CLIENT)
 	public MutableComponent getAltTitle() {
-		return new TranslatableComponent("ftbquests.reward.ftbquests.xp_levels").append(": ").append(new TextComponent(formatMaxProgress()).withStyle(ChatFormatting.RED));
+		return Component.translatable("ftbquests.reward.ftbquests.xp_levels").append(": ").append(Component.literal(formatMaxProgress()).withStyle(ChatFormatting.RED));
 	}
 
 	@Override

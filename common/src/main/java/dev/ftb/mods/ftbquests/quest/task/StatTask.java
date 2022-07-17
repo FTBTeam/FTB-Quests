@@ -9,8 +9,8 @@ import net.fabricmc.api.Environment;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.Stats;
@@ -86,14 +86,14 @@ public class StatTask extends Task {
 
 		List<ResourceLocation> list = new ArrayList<>();
 		Stats.CUSTOM.iterator().forEachRemaining(s -> list.add(s.getValue()));
-		config.addEnum("stat", stat, v -> stat = v, NameMap.of(Stats.MOB_KILLS, list).name(v -> new TranslatableComponent("stat." + v.getNamespace() + "." + v.getPath())).create());
+		config.addEnum("stat", stat, v -> stat = v, NameMap.of(Stats.MOB_KILLS, list).name(v -> Component.translatable("stat." + v.getNamespace() + "." + v.getPath())).create());
 		config.addInt("value", value, v -> value = v, 1, 1, Integer.MAX_VALUE);
 	}
 
 	@Override
 	@Environment(EnvType.CLIENT)
 	public MutableComponent getAltTitle() {
-		return new TranslatableComponent("stat." + stat.getNamespace() + "." + stat.getPath());
+		return Component.translatable("stat." + stat.getNamespace() + "." + stat.getPath());
 	}
 
 	@Override

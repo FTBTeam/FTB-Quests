@@ -7,11 +7,7 @@ import dev.ftb.mods.ftblibrary.config.ConfigWithVariants;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.math.MathUtils;
-import dev.ftb.mods.ftblibrary.ui.BaseScreen;
-import dev.ftb.mods.ftblibrary.ui.ContextMenuItem;
-import dev.ftb.mods.ftblibrary.ui.GuiHelper;
-import dev.ftb.mods.ftblibrary.ui.Panel;
-import dev.ftb.mods.ftblibrary.ui.Theme;
+import dev.ftb.mods.ftblibrary.ui.*;
 import dev.ftb.mods.ftblibrary.ui.input.Key;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
@@ -22,12 +18,7 @@ import dev.ftb.mods.ftbquests.gui.FTBQuestsTheme;
 import dev.ftb.mods.ftbquests.gui.SelectQuestObjectScreen;
 import dev.ftb.mods.ftbquests.net.ChangeProgressMessage;
 import dev.ftb.mods.ftbquests.net.EditObjectMessage;
-import dev.ftb.mods.ftbquests.quest.Chapter;
-import dev.ftb.mods.ftbquests.quest.Movable;
-import dev.ftb.mods.ftbquests.quest.Quest;
-import dev.ftb.mods.ftbquests.quest.QuestObject;
-import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
-import dev.ftb.mods.ftbquests.quest.QuestObjectType;
+import dev.ftb.mods.ftbquests.quest.*;
 import dev.ftb.mods.ftbquests.quest.reward.RandomReward;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.task.Task;
@@ -39,8 +30,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
@@ -185,7 +174,7 @@ public class QuestScreen extends BaseScreen {
 
 			for (ConfigValue c : g.getValues()) {
 				if (c instanceof ConfigWithVariants) {
-					MutableComponent name = new TranslatableComponent(c.getNameKey());
+					MutableComponent name = Component.translatable(c.getNameKey());
 
 					if (!c.getCanEdit()) {
 						name = name.withStyle(ChatFormatting.GRAY);
@@ -222,38 +211,38 @@ public class QuestScreen extends BaseScreen {
 			}
 		}
 
-		contextMenu.add(new ContextMenuItem(new TranslatableComponent("selectServer.edit"), ThemeProperties.EDIT_ICON.get(), () -> object.onEditButtonClicked(gui)));
+		contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.edit"), ThemeProperties.EDIT_ICON.get(), () -> object.onEditButtonClicked(gui)));
 
 		if (object instanceof RandomReward && !QuestObjectBase.isNull(((RandomReward) object).getTable())) {
-			contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.reward_table.edit"), ThemeProperties.EDIT_ICON.get(), () -> ((RandomReward) object).getTable().onEditButtonClicked(gui)));
+			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.reward_table.edit"), ThemeProperties.EDIT_ICON.get(), () -> ((RandomReward) object).getTable().onEditButtonClicked(gui)));
 		}
 
-		ContextMenuItem delete = new ContextMenuItem(new TranslatableComponent("selectServer.delete"), ThemeProperties.DELETE_ICON.get(), () -> ClientQuestFile.INSTANCE.deleteObject(object.id));
+		ContextMenuItem delete = new ContextMenuItem(Component.translatable("selectServer.delete"), ThemeProperties.DELETE_ICON.get(), () -> ClientQuestFile.INSTANCE.deleteObject(object.id));
 
 		if (!isShiftKeyDown()) {
-			delete.setYesNo(new TranslatableComponent("delete_item", object.getTitle()));
+			delete.setYesNo(Component.translatable("delete_item", object.getTitle()));
 		}
 
 		contextMenu.add(delete);
 
-		contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.gui.reset_progress"), ThemeProperties.RELOAD_ICON.get(), () -> ChangeProgressMessage.send(file.self, object, progressChange -> {
+		contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.reset_progress"), ThemeProperties.RELOAD_ICON.get(), () -> ChangeProgressMessage.send(file.self, object, progressChange -> {
 			progressChange.reset = true;
-		})).setYesNo(new TranslatableComponent("ftbquests.gui.reset_progress_q")));
+		})).setYesNo(Component.translatable("ftbquests.gui.reset_progress_q")));
 
-		contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.gui.complete_instantly"), ThemeProperties.CHECK_ICON.get(), () -> ChangeProgressMessage.send(file.self, object, progressChange -> {
+		contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.complete_instantly"), ThemeProperties.CHECK_ICON.get(), () -> ChangeProgressMessage.send(file.self, object, progressChange -> {
 			progressChange.reset = false;
-		})).setYesNo(new TranslatableComponent("ftbquests.gui.complete_instantly_q")));
+		})).setYesNo(Component.translatable("ftbquests.gui.complete_instantly_q")));
 
-		contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.gui.copy_id"), ThemeProperties.WIKI_ICON.get(), () -> setClipboardString(object.getCodeString())) {
+		contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.copy_id"), ThemeProperties.WIKI_ICON.get(), () -> setClipboardString(object.getCodeString())) {
 			@Override
 			public void addMouseOverText(TooltipList list) {
-				list.add(new TextComponent(QuestObjectBase.getCodeString(object)));
+				list.add(Component.literal(QuestObjectBase.getCodeString(object)));
 			}
 		});
 	}
 
 	public static void displayError(Component error) {
-		Minecraft.getInstance().getToasts().addToast(new SystemToast(SystemToast.SystemToastIds.TUTORIAL_HINT, new TranslatableComponent("ftbquests.gui.error"), error));
+		Minecraft.getInstance().getToasts().addToast(new SystemToast(SystemToast.SystemToastIds.TUTORIAL_HINT, Component.translatable("ftbquests.gui.error"), error));
 	}
 
 	private boolean moveSelectedQuests(double x, double y) {
@@ -358,7 +347,7 @@ public class QuestScreen extends BaseScreen {
 					});
 
 					gui.focus();
-					gui.setTitle(new TranslatableComponent("gui.search_box"));
+					gui.setTitle(Component.translatable("gui.search_box"));
 					gui.openGui();
 				}
 
@@ -505,25 +494,25 @@ public class QuestScreen extends BaseScreen {
 
 	public void addInfoTooltip(TooltipList list, QuestObjectBase object) {
 		if (isKeyDown(GLFW.GLFW_KEY_F1) || isShiftKeyDown() && isCtrlKeyDown()) {
-			list.add(new TextComponent(object.getCodeString()).withStyle(ChatFormatting.DARK_GRAY));
+			list.add(Component.literal(object.getCodeString()).withStyle(ChatFormatting.DARK_GRAY));
 
 			if (object instanceof QuestObject) {
 				Date s = file.self.getStartedTime(object.id);
 
 				if (s != null) {
-					list.add(new TextComponent("Started: ").append(s.toLocaleString()).withStyle(ChatFormatting.DARK_GRAY));
+					list.add(Component.literal("Started: ").append(s.toLocaleString()).withStyle(ChatFormatting.DARK_GRAY));
 				}
 
 				Date c = file.self.getCompletedTime(object.id);
 
 				if (c != null) {
-					list.add(new TextComponent("Completed: ").append(c.toLocaleString()).withStyle(ChatFormatting.DARK_GRAY));
+					list.add(Component.literal("Completed: ").append(c.toLocaleString()).withStyle(ChatFormatting.DARK_GRAY));
 				}
 			} else if (object instanceof Reward) {
 				Date c = file.self.getRewardClaimTime(Minecraft.getInstance().player.getUUID(), (Reward) object);
 
 				if (c != null) {
-					list.add(new TextComponent("Claimed: ").append(c.toLocaleString()).withStyle(ChatFormatting.DARK_GRAY));
+					list.add(Component.literal("Claimed: ").append(c.toLocaleString()).withStyle(ChatFormatting.DARK_GRAY));
 				}
 			}
 		}

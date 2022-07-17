@@ -1,7 +1,6 @@
 package dev.ftb.mods.ftbquests.quest;
 
 import com.mojang.util.UUIDTypeAdapter;
-import dev.architectury.hooks.LevelResourceHooks;
 import dev.architectury.platform.Platform;
 import dev.architectury.utils.Env;
 import dev.ftb.mods.ftblibrary.snbt.SNBT;
@@ -37,7 +36,8 @@ import java.util.UUID;
  * @author LatvianModder
  */
 public class ServerQuestFile extends QuestFile {
-	public static final LevelResource FTBQUESTS_DATA = LevelResourceHooks.create("ftbquests");
+	// TODO: validate
+	public static final LevelResource FTBQUESTS_DATA = new LevelResource("ftbquests");
 
 	public static ServerQuestFile INSTANCE;
 
