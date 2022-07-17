@@ -33,7 +33,6 @@ dependencies {
 	modApi "dev.latvian.mods:item-filters-fabric:${rootProject.itemfilters_version}"
 
 	modImplementation "dev.latvian.mods:kubejs-fabric:${rootProject.kubejs_version}"
-	modImplementation "dev.latvian.mods:rhino-fabric:${rootProject.rhino_version}"
 	modImplementation "me.shedaniel:RoughlyEnoughItems-fabric:${rootProject.rei_version}"
 
 	common(project(path: ":common", configuration: "namedElements")) { transitive false }

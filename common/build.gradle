@@ -10,7 +10,6 @@ dependencies {
 	modCompileOnly "me.shedaniel:RoughlyEnoughItems-api:${rootProject.rei_version}"
 
 	modImplementation "dev.latvian.mods:kubejs:${rootProject.kubejs_version}"
-	modImplementation "dev.latvian.mods:rhino:${rootProject.rhino_version}"
 }
 
 def ENV = System.getenv()

@@ -24,6 +24,7 @@ repositories {
 		url "https://modmaven.dev/"
 		content {
 			includeGroup "mezz.jei"
+			includeGroup "net.darkhax.gamestages"
 			// includeGroup "team.chisel.ctm"
 		}
 	}
@@ -39,15 +40,12 @@ dependencies {
 	modApi "dev.latvian.mods:item-filters-forge:${rootProject.itemfilters_version}"
 
 	modImplementation "dev.latvian.mods:kubejs-forge:${rootProject.kubejs_version}"
-	modImplementation "dev.latvian.mods:rhino-forge:${rootProject.rhino_version}"
 
-//	modLocalRuntime modImplementation("me.shedaniel:RoughlyEnoughItems-forge:${rootProject.rei_version}")
-//	modLocalRuntime modCompileOnly("me.shedaniel:RoughlyEnoughItems-plugin-compatibilities-forge:${rootProject.rei_version}")
+	modLocalRuntime modImplementation("me.shedaniel:RoughlyEnoughItems-forge:${rootProject.rei_version}")
+	modLocalRuntime modCompileOnly("me.shedaniel:RoughlyEnoughItems-plugin-compatibilities-forge:${rootProject.rei_version}")
 
 	// TODO: re-add some form of GameStages integration!
-	//modImplementation "curse.maven:bookshelf-228525:${bookshelf_file}"
-	//modImplementation "curse.maven:game-stages-268655:${gamestages_file}"
-	//modImplementation "curse.maven:ctm-267602:3137659"
+	modImplementation("net.darkhax.gamestages:GameStages-Forge-1.19:${rootProject.gamestages_version}")
 
 	common(project(path: ":common", configuration: "namedElements")) { transitive false }
 	shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive false }
