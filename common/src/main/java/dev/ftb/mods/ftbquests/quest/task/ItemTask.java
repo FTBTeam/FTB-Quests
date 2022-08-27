@@ -215,6 +215,9 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 		} else if (getValidDisplayItems().size() > 1) {
 			list.blankLine();
 			list.add(Component.translatable("ftbquests.task.ftbquests.item.view_items").withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE));
+		} else if (Platform.isModLoaded("jei") || Platform.isModLoaded("roughlyenoughitems")) {
+			list.blankLine();
+			list.add(Component.translatable("ftbquests.task.ftbquests.item.click_recipe").withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE));
 		}
 	}
 
