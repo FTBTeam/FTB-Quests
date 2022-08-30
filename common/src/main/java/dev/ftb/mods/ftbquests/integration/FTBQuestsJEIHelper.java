@@ -2,6 +2,7 @@ package dev.ftb.mods.ftbquests.integration;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
+import net.minecraft.world.item.ItemStack;
 
 public class FTBQuestsJEIHelper {
 	public static int QUESTS = 1;
@@ -23,7 +24,7 @@ public class FTBQuestsJEIHelper {
 	}
 
 	@ExpectPlatform
-	public static void showRecipes(Object object) {
+	public static void showRecipes(ItemStack object) {
 		throw new AssertionError();
 	}
 }
