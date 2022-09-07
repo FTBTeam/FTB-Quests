@@ -95,7 +95,7 @@ public class CommandReward extends Reward {
 			}
 		}
 
-		player.server.getCommands().performCommand(playerCommand ? player.createCommandSourceStack() : player.server.createCommandSourceStack(), s);
+		player.server.getCommands().performPrefixedCommand(playerCommand ? player.createCommandSourceStack() : player.server.createCommandSourceStack(), s);
 	}
 
 	@Override

@@ -3,17 +3,16 @@ package dev.ftb.mods.ftbquests.integration.kubejs;
 import dev.ftb.mods.ftbquests.quest.QuestFile;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.TeamData;
-import dev.ftb.mods.ftbteams.FTBTeamsAPI;
-import dev.latvian.mods.kubejs.player.PlayerDataJS;
+import net.minecraft.world.entity.player.Player;
 
 /**
  * @author LatvianModder
  */
 public class FTBQuestsKubeJSPlayerData extends FTBQuestsKubeJSTeamData {
-	private final PlayerDataJS playerData;
+	private final Player player;
 
-	public FTBQuestsKubeJSPlayerData(PlayerDataJS p) {
-		playerData = p;
+	public FTBQuestsKubeJSPlayerData(Player p) {
+		player = p;
 	}
 
 	public QuestFile getFile() {
@@ -21,6 +20,6 @@ public class FTBQuestsKubeJSPlayerData extends FTBQuestsKubeJSTeamData {
 	}
 
 	public TeamData getData() {
-		return ServerQuestFile.INSTANCE.getData(FTBTeamsAPI.getPlayerTeamID(playerData.getId()));
+		return ServerQuestFile.INSTANCE.getData(player);
 	}
 }

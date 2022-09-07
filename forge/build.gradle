@@ -46,8 +46,8 @@ dependencies {
 	modLocalRuntime modCompileOnly("me.shedaniel:RoughlyEnoughItems-plugin-compatibilities-forge:${rootProject.rei_version}")
 
 	// TODO: re-add some form of GameStages integration!
-	modRuntimeOnly("net.darkhax.bookshelf:Bookshelf-Forge-1.19:${rootProject.bookshelf_version}")
-	modImplementation("net.darkhax.gamestages:GameStages-Forge-1.19:${rootProject.gamestages_version}")
+	modRuntimeOnly("net.darkhax.bookshelf:Bookshelf-Forge-1.19.2:${rootProject.bookshelf_version}")
+	modImplementation("net.darkhax.gamestages:GameStages-Forge-1.19.2:${rootProject.gamestages_version}")
 
 	common(project(path: ":common", configuration: "namedElements")) { transitive false }
 	shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive false }
@@ -104,7 +104,7 @@ if (ENV.CURSEFORGE_KEY) {
 			id = project.curseforge_id_forge
 			releaseType = project.curseforge_type
 			addGameVersion "Forge"
-			addGameVersion "1.18.2"
+			addGameVersion "1.19.2"
 			mainArtifact(remapJar.archivePath)
 			relations {
 				requiredDependency 'architectury-api'

@@ -6,10 +6,9 @@ import dev.ftb.mods.ftbquests.events.CustomTaskEvent;
 import dev.ftb.mods.ftbquests.events.ObjectCompletedEvent;
 import dev.ftb.mods.ftbquests.events.ObjectStartedEvent;
 import dev.latvian.mods.kubejs.KubeJSPlugin;
-import dev.latvian.mods.kubejs.player.PlayerDataJS;
-import dev.latvian.mods.kubejs.script.AttachDataEvent;
 import dev.latvian.mods.kubejs.script.BindingsEvent;
-import dev.latvian.mods.kubejs.script.ScriptType;
+import dev.latvian.mods.kubejs.util.AttachedData;
+import net.minecraft.world.entity.player.Player;
 
 /**
  * @author LatvianModder
@@ -34,17 +33,22 @@ public class KubeJSIntegration extends KubeJSPlugin {
 	//}
 
 	@Override
-	public void addBindings(BindingsEvent event) {
+	public void registerBindings(BindingsEvent event) {
 		event.add("FTBQuests", FTBQuestsKubeJSWrapper.INSTANCE);
 	}
 
 	@Override
-	public void attachPlayerData(AttachDataEvent<PlayerDataJS> event) {
-		event.add("ftbquests", new FTBQuestsKubeJSPlayerData(event.parent()));
+	public void attachPlayerData(AttachedData<Player> event) {
+		event.add("ftbquests", new FTBQuestsKubeJSPlayerData(event.getParent()));
+	}
+
+	@Override
+	public void registerEvents() {
+		FTBQuestsKubeJSEvents.EVENT_GROUP.register();
 	}
 
 	public static EventResult onCustomTask(CustomTaskEvent event) {
-		if (new CustomTaskEventJS(event).post(ScriptType.SERVER, "ftbquests.custom_task", event.getTask().toString())) {
+		if (FTBQuestsKubeJSEvents.CUSTOM_TASK.post(event.getTask(), new CustomTaskEventJS(event))) {
 			return EventResult.interruptTrue();
 		}
 
@@ -52,7 +56,7 @@ public class KubeJSIntegration extends KubeJSPlugin {
 	}
 
 	public static EventResult onCustomReward(CustomRewardEvent event) {
-		if (new CustomRewardEventJS(event).post(ScriptType.SERVER, "ftbquests.custom_reward", event.getReward().toString())) {
+		if (FTBQuestsKubeJSEvents.CUSTOM_REWARD.post(event.getReward(), new CustomRewardEventJS(event))) {
 			return EventResult.interruptTrue();
 		}
 
@@ -61,11 +65,12 @@ public class KubeJSIntegration extends KubeJSPlugin {
 
 	public static EventResult onCompleted(ObjectCompletedEvent<?> event) {
 		if (event.getData().file.isServerSide()) {
-			QuestObjectCompletedEventJS e = new QuestObjectCompletedEventJS(event);
-			e.post(ScriptType.SERVER, "ftbquests.completed", event.getObject().getCodeString());
+			var kjsEvent = new QuestObjectCompletedEventJS(event);
+			var object = event.getObject();
 
-			for (String tag : event.getObject().getTags()) {
-				e.post(ScriptType.SERVER, "ftbquests.completed." + tag);
+			FTBQuestsKubeJSEvents.OBJECT_COMPLETED.post(event.getObject(), kjsEvent);
+			for (String tag : object.getTags()) {
+				FTBQuestsKubeJSEvents.OBJECT_COMPLETED.post('#' + tag, kjsEvent);
 			}
 		}
 
@@ -74,11 +79,12 @@ public class KubeJSIntegration extends KubeJSPlugin {
 
 	public static EventResult onStarted(ObjectStartedEvent<?> event) {
 		if (event.getData().file.isServerSide()) {
-			QuestObjectStartedEventJS e = new QuestObjectStartedEventJS(event);
-			e.post(ScriptType.SERVER, "ftbquests.started", event.getObject().getCodeString());
+			var kjsEvent = new QuestObjectStartedEventJS(event);
+			var object = event.getObject();
 
-			for (String tag : event.getObject().getTags()) {
-				e.post(ScriptType.SERVER, "ftbquests.started." + tag);
+			FTBQuestsKubeJSEvents.OBJECT_STARTED.post(event.getObject(), kjsEvent);
+			for (String tag : object.getTags()) {
+				FTBQuestsKubeJSEvents.OBJECT_STARTED.post('#' + tag, kjsEvent);
 			}
 		}
 
