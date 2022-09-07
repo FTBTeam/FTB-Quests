@@ -44,6 +44,10 @@ allprojects {
 		}
 
 		maven {
+			url "https://maven.blamejared.com/"
+		}
+
+		maven {
 			url "https://maven.saps.dev/minecraft"
 			content {
 				includeGroup "dev.latvian.mods"
