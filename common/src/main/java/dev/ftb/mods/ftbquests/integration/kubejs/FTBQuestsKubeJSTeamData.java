@@ -7,7 +7,7 @@ import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.util.ProgressChange;
 import dev.latvian.mods.kubejs.player.EntityArrayList;
-import dev.latvian.mods.kubejs.server.ServerJS;
+import dev.latvian.mods.kubejs.util.UtilsJS;
 
 import java.util.function.Consumer;
 
@@ -90,6 +90,6 @@ public abstract class FTBQuestsKubeJSTeamData {
 	}
 
 	public EntityArrayList getOnlineMembers() {
-		return ServerJS.instance.getOverworld().createEntityList(getData().getOnlineMembers());
+		return new EntityArrayList(UtilsJS.staticServer.overworld(), getData().getOnlineMembers());
 	}
 }

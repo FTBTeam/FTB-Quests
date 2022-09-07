@@ -24,6 +24,7 @@ import dev.ftb.mods.ftbteams.event.PlayerChangedTeamEvent;
 import dev.ftb.mods.ftbteams.event.PlayerLoggedInAfterTeamEvent;
 import dev.ftb.mods.ftbteams.event.TeamCreatedEvent;
 import dev.ftb.mods.ftbteams.event.TeamEvent;
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.resources.ResourceKey;
@@ -75,7 +76,7 @@ public class FTBQuestsEventHandler {
 		ServerQuestFile.INSTANCE = new ServerQuestFile(server);
 	}
 
-	private void registerCommands(CommandDispatcher<CommandSourceStack> dispatcher, Commands.CommandSelection selection) {
+	private void registerCommands(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext ctx, Commands.CommandSelection selection) {
 		FTBQuestsCommands.register(dispatcher);
 	}
 

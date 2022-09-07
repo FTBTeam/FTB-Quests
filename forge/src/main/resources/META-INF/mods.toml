@@ -13,50 +13,43 @@ Lets you easily create and play with quests
 '''
 
 [[dependencies.ftbquests]]
-modId = "forge"
-mandatory = true
-versionRange = "[39,)"
-ordering = "NONE"
-side = "BOTH"
-
-[[dependencies.ftbquests]]
 modId = "minecraft"
 mandatory = true
-versionRange = "[1.18.2,)"
+versionRange = "[1.19.2,1.20)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.ftbquests]]
 modId = "architectury"
 mandatory = true
-versionRange = "[3.2.52,)"
+versionRange = "[6.2.43,)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.ftbquests]]
 modId = "ftblibrary"
 mandatory = true
-versionRange = "[1801.3.5-build.99,)"
+versionRange = "[1902.3.9-build.144,)"
 ordering = "AFTER"
 side = "BOTH"
 
 [[dependencies.ftbquests]]
 modId = "ftbteams"
 mandatory = true
-versionRange = "[1801.2.4-build.43,)"
+versionRange = "[1902.2.9-build.61,)"
 ordering = "AFTER"
 side = "BOTH"
 
 [[dependencies.ftbquests]]
 modId = "itemfilters"
 mandatory = true
-versionRange = "[1801.2.6-build.12,)"
+versionRange = "[1902.2.9-build.34,)"
 ordering = "AFTER"
 side = "BOTH"
 
 [[dependencies.ftbquests]]
 modId = "kubejs"
 mandatory = false
-versionRange = "[1801.4.1-build.268,)"
+versionRange = "[1902.6.0-,)"
 ordering = "AFTER"
 side = "BOTH"
