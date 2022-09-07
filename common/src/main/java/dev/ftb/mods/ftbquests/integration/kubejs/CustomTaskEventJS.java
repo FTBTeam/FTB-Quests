@@ -14,17 +14,12 @@ public class CustomTaskEventJS extends EventJS {
 		event = e;
 	}
 
-	@Override
-	public boolean canCancel() {
-		return true;
-	}
-
 	public CustomTask getTask() {
 		return event.getTask();
 	}
 
-	public void setCheck(CustomTaskCheckerJS c) {
-		getTask().check = new CheckWrapper(c);
+	public void setCheck(CustomTask.Check c) {
+		getTask().check = c;
 	}
 
 	public void setCheckTimer(int t) {

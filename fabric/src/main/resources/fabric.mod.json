@@ -24,13 +24,13 @@
 	],
 	"depends": {
 		"fabric": "*",
-		"minecraft": "~1.18.2",
-		"architectury": ">=3.2.52",
-		"ftblibrary": ">=1801.3.5-build.99",
-		"ftbteams": ">=1801.2.4-build.43",
-		"itemfilters": ">=1801.2.6-build.12"
+		"minecraft": "~1.19.2",
+		"architectury": ">=6.2.43",
+		"ftblibrary": ">=1902.3.9-build.144",
+		"ftbteams": ">=1902.2.9-build.61",
+		"itemfilters": ">=1902.2.9-build.34"
 	},
 	"breaks": {
-		"kubejs": "<=1801.4.0"
+		"kubejs": "<1902.6.0-"
 	}
 }

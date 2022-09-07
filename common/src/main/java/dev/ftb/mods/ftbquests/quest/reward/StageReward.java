@@ -8,7 +8,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
@@ -79,9 +78,9 @@ public class StageReward extends Reward {
 
 		if (notify) {
 			if (remove) {
-				player.sendSystemMessage(Component.translatable("commands.gamestage.remove.target", stage), ChatType.SYSTEM);
+				player.sendSystemMessage(Component.translatable("commands.gamestage.remove.target", stage), true);
 			} else {
-				player.sendSystemMessage(Component.translatable("commands.gamestage.add.target", stage), ChatType.SYSTEM);
+				player.sendSystemMessage(Component.translatable("commands.gamestage.add.target", stage), true);
 			}
 		}
 	}
