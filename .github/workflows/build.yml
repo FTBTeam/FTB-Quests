@@ -4,8 +4,8 @@ on:
   push:
     branches:
       # main and dev versions for each mc ver here
-      - "1.18/main"
-      - "1.18/dev"
+      - "1.19/main"
+      - "1.19/dev"
   workflow_dispatch:
     inputs:
       norelease:
