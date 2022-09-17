@@ -85,7 +85,7 @@ if (ENV.CURSEFORGE_KEY) {
 				requiredDependency 'ftb-library-fabric'
 				requiredDependency 'ftb-teams-fabric'
 				requiredDependency 'item-filters-fabric'
-				optionalDependency 'kubejs-fabric'
+				optionalDependency 'kubejs'
 			}
 			changelog = getGitChangelog
 			changelogType = 'markdown'
