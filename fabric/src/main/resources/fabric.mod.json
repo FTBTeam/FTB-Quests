@@ -16,7 +16,7 @@
 		"main": [
 			"dev.ftb.mods.ftbquests.fabric.FTBQuestsFabric"
 		],
-		"rei": [
+		"rei_client": [
 			"dev.ftb.mods.ftbquests.integration.jei.FTBQuestsREIIntegration"
 		]
 	},
