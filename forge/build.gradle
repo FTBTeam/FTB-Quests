@@ -111,7 +111,7 @@ if (ENV.CURSEFORGE_KEY) {
 				requiredDependency 'architectury-api'
 				requiredDependency 'ftb-library-forge'
 				requiredDependency 'ftb-teams-forge'
-				requiredDependency 'item-filters'
+				requiredDependency 'item-filters-forge'
 				optionalDependency 'kubejs'
 				optionalDependency 'jei'
 			}
