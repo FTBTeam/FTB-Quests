@@ -110,7 +110,7 @@ if (ENV.CURSEFORGE_KEY) {
 				requiredDependency 'ftb-library-forge'
 				requiredDependency 'ftb-teams-forge'
 				requiredDependency 'item-filters-forge'
-				optionalDependency 'kubejs-forge'
+				optionalDependency 'kubejs'
 				optionalDependency 'jei'
 			}
 			changelog = getGitChangelog
