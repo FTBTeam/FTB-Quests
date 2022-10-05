@@ -161,7 +161,7 @@ public class ThemeLoader implements ResourceManagerReloadListener {
 		}
 
 		try {
-			return new IDSelector(Long.valueOf(sel, 16).intValue());
+			return new IDSelector(Long.valueOf(sel, 16));
 		} catch (Exception ex) {
 			return null;
 		}
