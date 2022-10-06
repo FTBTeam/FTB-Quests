@@ -40,6 +40,6 @@ public class QuestObjectCompletedEventJS extends ServerEventJS {
 
 	@Nullable
 	public ServerPlayer getPlayer() {
-		return event.getData().file instanceof ServerQuestFile file ? file.currentPlayer : null;
+		return event.getData().file instanceof ServerQuestFile file ? file.getCurrentPlayer() : null;
 	}
 }

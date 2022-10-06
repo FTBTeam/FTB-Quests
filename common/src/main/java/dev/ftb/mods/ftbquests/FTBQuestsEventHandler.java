@@ -158,19 +158,18 @@ public class FTBQuestsEventHandler {
 			}
 
 			long t = player.level.getGameTime();
-			file.currentPlayer = (ServerPlayer) player;
 
-			for (Task task : autoSubmitTasks) {
-				long d = task.autoSubmitOnPlayerTick();
+			file.withPlayerContext((ServerPlayer) player, () -> {
+				for (Task task : autoSubmitTasks) {
+					long d = task.autoSubmitOnPlayerTick();
 
-				if (d > 0L && t % d == 0L) {
-					if (!data.isCompleted(task) && data.canStartTasks(task.quest)) {
-						task.submitTask(data, (ServerPlayer) player);
+					if (d > 0L && t % d == 0L) {
+						if (!data.isCompleted(task) && data.canStartTasks(task.quest)) {
+							task.submitTask(data, (ServerPlayer) player);
+						}
 					}
 				}
-			}
-
-			file.currentPlayer = null;
+			});
 		}
 	}
 
@@ -215,15 +214,13 @@ public class FTBQuestsEventHandler {
 				return;
 			}
 
-			file.currentPlayer = player;
-
-			for (DimensionTask task : file.collect(DimensionTask.class)) {
-				if (data.canStartTasks(task.quest)) {
-					task.submitTask(data, player);
+			file.withPlayerContext(player, () -> {
+				for (DimensionTask task : file.collect(DimensionTask.class)) {
+					if (data.canStartTasks(task.quest)) {
+						task.submitTask(data, player);
+					}
 				}
-			}
-
-			file.currentPlayer = null;
+			});
 		}
 	}
 
