@@ -25,10 +25,7 @@ import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.quest.theme.QuestTheme;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.ComponentContents;
-import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextColor;
+import net.minecraft.network.chat.*;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 
@@ -414,7 +411,12 @@ public class ViewQuestPanel extends Panel {
 
 		for (QuestObject object : c) {
 			if (questScreen.file.canEdit() || object.isVisible(questScreen.file.self)) {
-				contextMenu.add(new ContextMenuItem(object.getTitle(), Icon.EMPTY, () -> questScreen.open(object, true)));
+				MutableComponent title = object.getMutableTitle();
+				if (object.getQuestChapter() != null && object.getQuestChapter() != quest.getQuestChapter()) {
+					Component suffix = new TextComponent(" (").append(object.getQuestChapter().getTitle()).append(")").withStyle(ChatFormatting.GRAY);
+					title.append(suffix);
+				}
+				contextMenu.add(new ContextMenuItem(title, Icon.EMPTY, () -> questScreen.open(object, true)));
 			} else {
 				hidden++;
 			}
