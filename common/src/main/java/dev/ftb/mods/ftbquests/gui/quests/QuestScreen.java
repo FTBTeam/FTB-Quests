@@ -94,8 +94,8 @@ public class QuestScreen extends BaseScreen {
 	@Override
 	public void addWidgets() {
 		QuestTheme.currentObject = selectedChapter;
-		add(chapterPanel);
 		add(questPanel);
+		add(chapterPanel);
 		add(expandChaptersButton);
 		add(otherButtonsBottomPanel);
 		add(otherButtonsTopPanel);
