@@ -218,7 +218,9 @@ public class FTBQuestsEventHandler {
 			file.currentPlayer = player;
 
 			for (DimensionTask task : file.collect(DimensionTask.class)) {
-				task.submitTask(data, player);
+				if (data.canStartTasks(task.quest)) {
+					task.submitTask(data, player);
+				}
 			}
 
 			file.currentPlayer = null;
