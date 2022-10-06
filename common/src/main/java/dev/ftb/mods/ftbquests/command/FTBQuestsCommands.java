@@ -11,6 +11,8 @@ import dev.ftb.mods.ftblibrary.config.Tristate;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.net.CreateObjectResponseMessage;
 import dev.ftb.mods.ftbquests.net.DeleteObjectResponseMessage;
+import dev.ftb.mods.ftbquests.net.SyncQuestsMessage;
+import dev.ftb.mods.ftbquests.net.SyncTeamDataMessage;
 import dev.ftb.mods.ftbquests.quest.*;
 import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
 import dev.ftb.mods.ftbquests.quest.loot.WeightedReward;
@@ -18,6 +20,7 @@ import dev.ftb.mods.ftbquests.quest.reward.ItemReward;
 import dev.ftb.mods.ftbquests.quest.task.ItemTask;
 import dev.ftb.mods.ftbquests.util.FileUtils;
 import dev.ftb.mods.ftbquests.util.ProgressChange;
+import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
@@ -39,11 +42,7 @@ import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.*;
 
 /**
  * @author LatvianModder
@@ -140,6 +139,10 @@ public class FTBQuestsCommands {
 				.then(Commands.literal("generate_chapter_with_all_items_in_game")
 						.executes(context -> generateAllItemChapter(context.getSource()))
 				)
+				.then(Commands.literal("reload")
+						.requires(s -> s.hasPermission(2))
+						.executes(context -> doReload(context.getSource()))
+				)
 		);
 	}
 
@@ -152,17 +155,16 @@ public class FTBQuestsCommands {
 		}
 
 		BlockEntity be = level.getBlockEntity(pos);
-		if (!(be instanceof BaseContainerBlockEntity)) {
+		if (!(be instanceof BaseContainerBlockEntity container)) {
 			throw NO_INVENTORY.create();
 		}
 
-		BaseContainerBlockEntity container = (BaseContainerBlockEntity) be;
 		container.clearContent();
 
 		int s = 0;
 		for (WeightedReward reward : table.rewards) {
 			if (s >= container.getContainerSize()) {
-				source.sendSuccess(Component.translatable("commands.ftbquests.command.feedback.table_too_many_items", table.getTitle()), false);
+				source.sendFailure(Component.translatable("commands.ftbquests.command.feedback.table_too_many_items", table.getTitle()));
 				return 0;
 			} else if (!(reward.reward instanceof ItemReward)) {
 				continue;
@@ -190,11 +192,10 @@ public class FTBQuestsCommands {
 		table.icon = Items.CHEST.getDefaultInstance();
 
 		BlockEntity be = level.getBlockEntity(pos);
-		if (!(be instanceof BaseContainerBlockEntity)) {
+		if (!(be instanceof BaseContainerBlockEntity container)) {
 			throw NO_INVENTORY.create();
 		}
 
-		BaseContainerBlockEntity container = (BaseContainerBlockEntity) be;
 		for (int i = 0; i < container.getContainerSize(); i++) {
 			ItemStack stack = container.getItem(i);
 			if (!stack.isEmpty()) {
@@ -313,7 +314,7 @@ public class FTBQuestsCommands {
 		List<ItemStack> list = nonNullList.stream()
 				.filter(stack -> !stack.isEmpty() && Registries.getId(stack.getItem(), Registry.ITEM_REGISTRY) != null)
 				.sorted(Comparator.comparing(a -> Registries.getId(a.getItem(), Registry.ITEM_REGISTRY)))
-				.collect(Collectors.toList());
+				.toList();
 		FTBQuests.LOGGER.info("Found " + nonNullList.size() + " items in total, chapter ID: " + chapter);
 
 		if (list.isEmpty()) {
@@ -363,4 +364,36 @@ public class FTBQuestsCommands {
 		source.sendSuccess(Component.literal("Done!"), false);
 		return 1;
 	}
+<<<<<<< HEAD
 }
+=======
+
+	private static final Set<UUID> warnedPlayers = new HashSet<>();
+	private static int doReload(CommandSourceStack source) throws CommandSyntaxException {
+		ServerQuestFile instance = ServerQuestFile.INSTANCE;
+		ServerPlayer sender = source.getPlayerOrException();
+
+		if (!instance.getData(sender).getCanEdit()) {
+			source.sendFailure(new TranslatableComponent("commands.ftbquests.command.error.not_editing"));
+			return 1;
+		}
+
+		instance.load();
+		new SyncQuestsMessage(instance).sendToAll(source.getServer());
+		for (ServerPlayer player : source.getServer().getPlayerList().getPlayers()) {
+			TeamData data = instance.getData(player);
+			for (TeamData teamData: instance.getAllData()) {
+				new SyncTeamDataMessage(teamData, teamData == data).sendTo(player);
+			}
+		}
+
+		source.sendSuccess(new TranslatableComponent("commands.ftbquests.command.feedback.reloaded"), false);
+		if (!warnedPlayers.contains(sender.getUUID())) {
+			source.sendSuccess(new TranslatableComponent("commands.ftbquests.command.feedback.reloaded.disclaimer").withStyle(ChatFormatting.GOLD), false);
+			warnedPlayers.add(sender.getUUID());
+		}
+
+		return 1;
+	}
+}
+>>>>>>> a5c89175... feat: added /ftbquests reload command to reload quest book data from file
