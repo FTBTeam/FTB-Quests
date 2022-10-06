@@ -287,7 +287,7 @@ public class TeamData {
 	}
 
 	public boolean getAutoPin() {
-		return autoPin;
+		return isQuestPinned(1);
 	}
 
 	public void setAutoPin(boolean auto) {

@@ -37,6 +37,7 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.phys.HitResult;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -48,6 +49,7 @@ public class FTBQuestsClientEventHandler {
 	private List<ObservationTask> observationTasks = null;
 	private ObservationTask currentlyObserving = null;
 	private long currentlyObservingTicks = 0L;
+	private final List<FormattedCharSequence> pinnedQuestText = new ArrayList<>();
 
 	public void init() {
 		ClientLifecycleEvent.CLIENT_SETUP.register(this::registerItemColors);
@@ -111,6 +113,8 @@ public class FTBQuestsClientEventHandler {
 
 	private void onClientTick(Minecraft mc) {
 		if (mc.level != null && ClientQuestFile.exists() && mc.player != null) {
+			collectPinnedQuests(ClientQuestFile.INSTANCE);
+
 			if (observationTasks == null) {
 				observationTasks = ClientQuestFile.INSTANCE.collect(ObservationTask.class);
 			}
@@ -147,15 +151,71 @@ public class FTBQuestsClientEventHandler {
 		}
 	}
 
+	private void collectPinnedQuests(ClientQuestFile file) {
+		TeamData data = file.self;
+
+		List<Quest> pinnedQuests = new ArrayList<>();
+
+		if (!data.pinnedQuests.isEmpty()) {
+			if (data.pinnedQuests.contains(1)) {
+				// special auto-pin value: collect all quests which can be done now
+				for (ChapterGroup group : file.chapterGroups) {
+					for (Chapter chapter : group.chapters) {
+						for (Quest quest : chapter.quests) {
+							if (!data.isCompleted(quest) && data.canStartTasks(quest)) {
+								pinnedQuests.add(quest);
+							}
+						}
+					}
+				}
+			} else {
+				for (long qId : data.pinnedQuests) {
+					Quest quest = file.getQuest(qId);
+					if (quest != null) pinnedQuests.add(quest);
+				}
+			}
+		}
+
+		Minecraft mc = Minecraft.getInstance();
+
+		pinnedQuestText.clear();
+
+		for (int i = 0; i < pinnedQuests.size(); i++) {
+			Quest quest = pinnedQuests.get(i);
+
+			if (i > 0) pinnedQuestText.add(FormattedCharSequence.EMPTY);  // separator line between quests
+
+			pinnedQuestText.addAll(mc.font.split(FormattedText.composite(
+					mc.font.getSplitter().headByWidth(quest.getTitle(), 160, Style.EMPTY.withBold(true)),
+					new TextComponent(" ")
+							.withStyle(ChatFormatting.DARK_AQUA)
+							.append(data.getRelativeProgress(quest) + "%")
+			), 500));
+
+			for (Task task : quest.tasks) {
+				if (!data.isCompleted(task)) {
+					pinnedQuestText.addAll(mc.font.split(FormattedText.composite(
+							mc.font.getSplitter().headByWidth(task.getMutableTitle().withStyle(ChatFormatting.GRAY), 160, Style.EMPTY.applyFormat(ChatFormatting.GRAY)),
+							new TextComponent(" ")
+									.withStyle(ChatFormatting.GREEN)
+									.append(task.formatProgress(data, data.getProgress(task)))
+									.append("/")
+									.append(task.formatMaxProgress())
+					), 500));
+				}
+			}
+		}
+
+	}
+
 	private void onScreenRender(PoseStack matrixStack, float tickDelta) {
 		if (!ClientQuestFile.exists()) {
 			return;
 		}
 
 		ClientQuestFile file = ClientQuestFile.INSTANCE;
-		TeamData data = file.self;
 
-		GlStateManager._enableBlend();
+//		GlStateManager._enableBlend();
 		Minecraft mc = Minecraft.getInstance();
 		int cy = mc.getWindow().getGuiScaledHeight() / 2;
 
@@ -177,98 +237,25 @@ public class FTBQuestsClientEventHandler {
 			mc.font.drawShadow(matrixStack, cop, cx - mc.font.width(cop) / 2F, cy - 47, 0xFFFFFF);
 		}
 
-		if (!data.pinnedQuests.isEmpty()) {
-			List<FormattedCharSequence> list = new ArrayList<>();
-			boolean first = true;
-
-			if (data.pinnedQuests.contains(1)) {
-				for (ChapterGroup group : file.chapterGroups) {
-					for (Chapter chapter : group.chapters) {
-						for (Quest quest : chapter.quests) {
-							if (!data.isCompleted(quest) && data.canStartTasks(quest)) {
-								if (first) {
-									first = false;
-								} else {
-									list.add(FormattedCharSequence.EMPTY);
-								}
-
-								/* FIXME
-								list.add(TextFormatting.BOLD + mc.fontRenderer.trimStringToWidth(quest.getTitle(), 160) + " " + TextFormatting.DARK_AQUA + data.getRelativeProgress(quest) + "%");
-
-								for (Task task : quest.tasks)
-								{
-									if (!data.isComplete(task))
-									{
-										list.add(TextFormatting.GRAY + mc.fontRenderer.trimStringToWidth(task.getTitle(), 160) + " " + TextFormatting.GREEN + data.getTaskData(task).getProgressString() + "/" + task.getMaxProgressString());
-									}
-								}
-								*/
-							}
-						}
-					}
-				}
-			} else {
-				for (long q : data.pinnedQuests) {
-					Quest quest = file.getQuest(q);
-
-					if (quest != null) {
-						if (first) {
-							first = false;
-						} else {
-							list.add(FormattedCharSequence.EMPTY);
-						}
-
-						if (data.isCompleted(quest)) {
-							TextComponent component = new TextComponent("");
-							component.append(quest.getMutableTitle().withStyle(ChatFormatting.BOLD, ChatFormatting.GREEN));
-							component.append(new TextComponent(" 100%").withStyle(ChatFormatting.DARK_GREEN));
-							list.addAll(mc.font.split(component, 160));
-						} else {
-							list.addAll(mc.font.split(FormattedText.composite(
-									mc.font.getSplitter().headByWidth(quest.getTitle(), 160, Style.EMPTY.withBold(true)),
-									new TextComponent(" ")
-											.withStyle(ChatFormatting.DARK_AQUA)
-											.append(data.getRelativeProgress(quest) + "%")
-							), 500));
-
-							for (Task task : quest.tasks) {
-								if (!data.isCompleted(task)) {
-									list.addAll(mc.font.split(FormattedText.composite(
-											mc.font.getSplitter().headByWidth(task.getTitle(), 160, Style.EMPTY.applyFormat(ChatFormatting.GRAY)),
-											new TextComponent(" ")
-													.withStyle(ChatFormatting.GREEN)
-													.append(task.formatProgress(data, data.getProgress(task)))
-													.append("/")
-													.append(task.formatMaxProgress())
-									), 500));
-								}
-							}
-						}
-					}
-				}
+		if (!pinnedQuestText.isEmpty()) {
+			int width = 0;
+			for (FormattedCharSequence s : pinnedQuestText) {
+				width = Math.max(width, (int) mc.font.getSplitter().stringWidth(s));
 			}
 
-			if (!list.isEmpty()) {
-				int mw = 0;
+			float scale = ThemeProperties.PINNED_QUEST_SIZE.get(file).floatValue();
 
-				for (FormattedCharSequence s : list) {
-					mw = Math.max(mw, (int) mc.font.getSplitter().stringWidth(s));
-				}
+			matrixStack.pushPose();
+			matrixStack.translate(mc.getWindow().getGuiScaledWidth() - width * scale - 8D, cy - pinnedQuestText.size() * 4.5D * scale, 100);
+			matrixStack.scale(scale, scale, 1F);
 
-				float scale = ThemeProperties.PINNED_QUEST_SIZE.get(file).floatValue();
+			Color4I.BLACK.withAlpha(100).draw(matrixStack, 0, 0, width + 8, pinnedQuestText.size() * 9 + 8);
 
-				matrixStack.pushPose();
-				matrixStack.translate(mc.getWindow().getGuiScaledWidth() - mw * scale - 8D, cy - list.size() * 4.5D * scale, 100);
-				matrixStack.scale(scale, scale, 1F);
-
-				Color4I.BLACK.withAlpha(100).draw(matrixStack, 0, 0, mw + 8, list.size() * 9 + 8);
-
-				for (int i = 0; i < list.size(); i++) {
-					mc.font.drawShadow(matrixStack, list.get(i), 4, i * 9 + 4, 0xFFFFFFFF);
-				}
-
-				matrixStack.popPose();
+			for (int i = 0; i < pinnedQuestText.size(); i++) {
+				mc.font.drawShadow(matrixStack, pinnedQuestText.get(i), 4, i * 9 + 4, 0xFFFFFFFF);
 			}
+
+			matrixStack.popPose();
 		}
 	}
 }
