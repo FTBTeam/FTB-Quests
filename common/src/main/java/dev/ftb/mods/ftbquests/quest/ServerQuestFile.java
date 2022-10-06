@@ -1,18 +1,12 @@
 package dev.ftb.mods.ftbquests.quest;
 
 import com.mojang.util.UUIDTypeAdapter;
-import dev.architectury.hooks.LevelResourceHooks;
 import dev.architectury.platform.Platform;
 import dev.architectury.utils.Env;
 import dev.ftb.mods.ftblibrary.snbt.SNBT;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
 import dev.ftb.mods.ftbquests.FTBQuests;
-import dev.ftb.mods.ftbquests.net.CreateOtherTeamDataMessage;
-import dev.ftb.mods.ftbquests.net.DeleteObjectResponseMessage;
-import dev.ftb.mods.ftbquests.net.SyncQuestsMessage;
-import dev.ftb.mods.ftbquests.net.SyncTeamDataMessage;
-import dev.ftb.mods.ftbquests.net.TeamDataChangedMessage;
-import dev.ftb.mods.ftbquests.net.TeamDataUpdate;
+import dev.ftb.mods.ftbquests.net.*;
 import dev.ftb.mods.ftbquests.quest.reward.RewardType;
 import dev.ftb.mods.ftbquests.quest.reward.RewardTypes;
 import dev.ftb.mods.ftbquests.quest.task.Task;
@@ -37,7 +31,7 @@ import java.util.UUID;
  * @author LatvianModder
  */
 public class ServerQuestFile extends QuestFile {
-	public static final LevelResource FTBQUESTS_DATA = LevelResourceHooks.create("ftbquests");
+	public static final LevelResource FTBQUESTS_DATA = new LevelResource("ftbquests");
 
 	public static ServerQuestFile INSTANCE;
 
@@ -45,8 +39,7 @@ public class ServerQuestFile extends QuestFile {
 	private boolean shouldSave;
 	private boolean isLoading;
 	private Path folder;
-
-	public ServerPlayer currentPlayer = null;
+	private ServerPlayer currentPlayer = null;
 
 	public ServerQuestFile(MinecraftServer s) {
 		server = s;
@@ -165,6 +158,19 @@ public class ServerQuestFile extends QuestFile {
 		deleteSelf();
 	}
 
+	public ServerPlayer getCurrentPlayer() {
+		return currentPlayer;
+	}
+
+	public void withPlayerContext(ServerPlayer player, Runnable toDo) {
+		currentPlayer = player;
+		try {
+			toDo.run();
+		} finally {
+			currentPlayer = null;
+		}
+	}
+
 	public void playerLoggedIn(PlayerLoggedInAfterTeamEvent event) {
 		ServerPlayer player = event.getPlayer();
 		TeamData data = getData(event.getTeam());
@@ -178,25 +184,23 @@ public class ServerQuestFile extends QuestFile {
 		player.inventoryMenu.addSlotListener(new FTBQuestsInventoryListener(player));
 
 		if (!data.isLocked()) {
-			currentPlayer = player;
+			withPlayerContext(player, () -> {
+				for (ChapterGroup group : chapterGroups) {
+					for (Chapter chapter : group.chapters) {
+						for (Quest quest : chapter.quests) {
+							data.checkAutoCompletion(quest);
 
-			for (ChapterGroup group : chapterGroups) {
-				for (Chapter chapter : group.chapters) {
-					for (Quest quest : chapter.quests) {
-						data.checkAutoCompletion(quest);
-
-						if (data.canStartTasks(quest)) {
-							for (Task task : quest.tasks) {
-								if (task.checkOnLogin()) {
-									task.submitTask(data, player);
+							if (data.canStartTasks(quest)) {
+								for (Task task : quest.tasks) {
+									if (task.checkOnLogin()) {
+										task.submitTask(data, player);
+									}
 								}
 							}
 						}
 					}
 				}
-			}
-
-			currentPlayer = null;
+			});
 		}
 	}
 

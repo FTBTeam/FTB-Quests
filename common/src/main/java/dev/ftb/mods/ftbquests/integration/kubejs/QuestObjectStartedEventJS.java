@@ -49,6 +49,6 @@ public class QuestObjectStartedEventJS extends ServerEventJS {
 			return null;
 		}
 
-		return ServerJS.instance.getPlayer(PlayerSelector.mc(((ServerQuestFile) event.getData().file).currentPlayer));
+		return ServerJS.instance.getPlayer(PlayerSelector.mc(((ServerQuestFile) event.getData().file).getCurrentPlayer()));
 	}
 }

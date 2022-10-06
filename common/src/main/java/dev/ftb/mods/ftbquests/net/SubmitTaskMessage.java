@@ -45,9 +45,7 @@ public class SubmitTaskMessage extends BaseC2SMessage {
 		Task t = data.file.getTask(task);
 
 		if (t != null && data.canStartTasks(t.quest)) {
-			((ServerQuestFile) data.file).currentPlayer = player;
-			t.submitTask(data, player);
-			((ServerQuestFile) data.file).currentPlayer = null;
+			((ServerQuestFile) data.file).withPlayerContext(player, () -> t.submitTask(data, player));
 		}
 	}
 }

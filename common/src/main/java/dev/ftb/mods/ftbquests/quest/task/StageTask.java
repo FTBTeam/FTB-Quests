@@ -85,14 +85,12 @@ public class StageTask extends BooleanTask {
 			return;
 		}
 
-		ServerQuestFile.INSTANCE.currentPlayer = player;
-
-		for (Task task : ServerQuestFile.INSTANCE.getAllTasks()) {
-			if (task instanceof StageTask && data.canStartTasks(task.quest)) {
-				task.submitTask(data, player);
+		ServerQuestFile.INSTANCE.withPlayerContext(player, () -> {
+			for (Task task : ServerQuestFile.INSTANCE.getAllTasks()) {
+				if (task instanceof StageTask && data.canStartTasks(task.quest)) {
+					task.submitTask(data, player);
+				}
 			}
-		}
-
-		ServerQuestFile.INSTANCE.currentPlayer = null;
+		});
 	}
 }
