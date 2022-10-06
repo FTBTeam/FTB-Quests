@@ -194,7 +194,7 @@ public class QuestButton extends Button {
 							}
 						});
 						questScreen.selectedObjects.clear();
-					}).setYesNo(new TranslatableComponent("delete_item", new TranslatableComponent("ftbquests.quests") + " [" + questScreen.selectedObjects.size() + "]")));
+					}).setYesNo(new TranslatableComponent("delete_item", new TranslatableComponent("ftbquests.quests").append(" [" + questScreen.selectedObjects.size() + "]"))));
 				}
 
 				contextMenu.add(ContextMenuItem.SEPARATOR);
