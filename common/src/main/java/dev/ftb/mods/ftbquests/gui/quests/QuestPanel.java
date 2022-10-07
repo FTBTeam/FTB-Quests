@@ -409,9 +409,9 @@ public class QuestPanel extends Panel {
 					matrixStack.scale((float) bs, (float) bs, 1F);
 					GuiHelper.setupDrawing();
 					RenderSystem.enableDepthTest();
-					// TODO: custom shader to implement alphaFunc?
+					// TODO: custom shader to implement alphaFunc? for now however, rendering outline at alpha 30 works well
 					//RenderSystem.alphaFunc(GL11.GL_GREATER, 0.01F);
-					QuestShape.get(questScreen.selectedChapter.getDefaultQuestShape()).shape.withColor(Color4I.WHITE.withAlpha(10)).draw(matrixStack, 0, 0, 1, 1);
+					QuestShape.get(questScreen.selectedChapter.getDefaultQuestShape()).outline.withColor(Color4I.WHITE.withAlpha(30)).draw(matrixStack, 0, 0, 1, 1);
 					//RenderSystem.defaultAlphaFunc();
 					matrixStack.popPose();
 
