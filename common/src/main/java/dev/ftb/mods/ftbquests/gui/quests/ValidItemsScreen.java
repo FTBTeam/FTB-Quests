@@ -169,6 +169,16 @@ public class ValidItemsScreen extends BaseScreen {
 	}
 
 	@Override
+	public boolean keyPressed(Key key) {
+		if (super.keyPressed(key)) return true;
+		if (key.esc()) {
+			onBack();
+			return true;
+		}
+		return false;
+	}
+
+	@Override
 	public boolean onClosedByKey(Key key) {
 		if (super.onClosedByKey(key)) {
 			onBack();
