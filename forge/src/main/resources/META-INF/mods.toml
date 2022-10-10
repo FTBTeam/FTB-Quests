@@ -53,3 +53,10 @@ mandatory = false
 versionRange = "[1902.6.0-,)"
 ordering = "AFTER"
 side = "BOTH"
+
+[[dependencies.ftbquests]]
+modId = "jei"
+mandatory = false
+versionRange = "[9.7.0,)"
+ordering = "AFTER"
+side = "BOTH"
