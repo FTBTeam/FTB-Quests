@@ -41,7 +41,7 @@ dependencies {
 	modImplementation "dev.latvian.mods:kubejs-forge:${rootProject.kubejs_version}"
 	modImplementation "dev.latvian.mods:rhino-forge:${rootProject.rhino_version}"
 
-	modCompileOnly "mezz.jei:jei-1.18:${rootProject.forge_jei_version}"
+	modImplementation "mezz.jei:jei-${rootProject.minecraft_version}:${rootProject.forge_jei_version}"
 
 	// TODO: re-add some form of GameStages integration!
 	//modImplementation "curse.maven:bookshelf-228525:${bookshelf_file}"
