@@ -303,6 +303,8 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon {
 				gui.viewQuestPanel.refreshWidgets();
 			}
 		}
+
+		FTBQuestsJEIHelper.refresh(ClientQuestFile.INSTANCE.get(id));
 	}
 
 	@Override

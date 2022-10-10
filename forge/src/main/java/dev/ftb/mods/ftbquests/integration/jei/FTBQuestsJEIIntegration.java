@@ -3,11 +3,11 @@ package dev.ftb.mods.ftbquests.integration.jei;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
-import mezz.jei.api.registration.IRecipeCategoryRegistration;
-import mezz.jei.api.registration.IRecipeRegistration;
-import mezz.jei.api.registration.ISubtypeRegistration;
+import mezz.jei.api.constants.VanillaTypes;
+import mezz.jei.api.registration.*;
 import mezz.jei.api.runtime.IJeiRuntime;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
 
 /**
  * @author LatvianModder
@@ -29,22 +29,31 @@ public class FTBQuestsJEIIntegration implements IModPlugin {
 
 	@Override
 	public void registerItemSubtypes(ISubtypeRegistration r) {
-//		r.registerSubtypeInterpreter(FTBQuestsItems.LOOTCRATE.get(), (stack, uidContext) -> stack.hasTag() ? stack.getTag().getString("type") : "");
+		r.registerSubtypeInterpreter(VanillaTypes.ITEM_STACK, FTBQuestsItems.LOOTCRATE.get(),
+				(stack, uidContext) -> stack.hasTag() ? stack.getTag().getString("type") : "");
 	}
 
 	@Override
 	public void registerRecipes(IRecipeRegistration r) {
-//		r.handleRecipes(QuestWrapper.class, recipe -> recipe, QuestCategory.UID);
-//		r.addRecipeCatalyst(new ItemStack(FTBQuestsItems.BOOK), QuestCategory.UID);
-//
-//		r.handleRecipes(LootCrateWrapper.class, recipe -> recipe, LootCrateCategory.UID);
-//		r.addRecipeCatalyst(new ItemStack(FTBQuestsItems.BOOK), LootCrateCategory.UID);
-//		r.addRecipeCatalyst(new ItemStack(FTBQuestsItems.LOOTCRATE), LootCrateCategory.UID);
+		// NOTE: doing nothing here since quest and loot crate "recipes" are dynamic,
+		//   and handled by custom recipe manager plugins
+	}
+
+	@Override
+	public void registerRecipeCatalysts(IRecipeCatalystRegistration registration) {
+		registration.addRecipeCatalyst(new ItemStack(FTBQuestsItems.BOOK.get()), JEIRecipeTypes.QUEST);
+		registration.addRecipeCatalyst(new ItemStack(FTBQuestsItems.LOOTCRATE.get()), JEIRecipeTypes.LOOT_CRATE);
 	}
 
 	@Override
 	public void registerCategories(IRecipeCategoryRegistration r) {
-//		r.addRecipeCategories(new QuestCategory(r.getJeiHelpers().getGuiHelper()));
-//		r.addRecipeCategories(new LootCrateCategory(r.getJeiHelpers().getGuiHelper()));
+		r.addRecipeCategories(new QuestCategory(r.getJeiHelpers().getGuiHelper()));
+		r.addRecipeCategories(new LootCrateCategory(r.getJeiHelpers().getGuiHelper()));
+	}
+
+	@Override
+	public void registerAdvanced(IAdvancedRegistration registration) {
+		registration.addRecipeManagerPlugin(QuestRecipeManagerPlugin.INSTANCE);
+		registration.addRecipeManagerPlugin(LootCrateRecipeManagerPlugin.INSTANCE);
 	}
 }
