@@ -16,7 +16,7 @@ public class FTBQuestsJEIHelperImpl {
 	public static Consumer<ItemStack> view = o -> {};
 
 	public static void refresh(QuestObjectBase object) {
-		int i = object.refreshJEI();
+		int i = object == null ? 0 : object.refreshJEI();
 
 		if (i != 0 && FabricLoader.getInstance().isModLoaded("roughlyenoughitems")) {
 			if ((i & QUESTS) != 0) {

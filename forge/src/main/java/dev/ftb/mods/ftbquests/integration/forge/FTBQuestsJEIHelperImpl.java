@@ -16,7 +16,7 @@ import static dev.ftb.mods.ftbquests.integration.FTBQuestsJEIHelper.QUESTS;
  */
 public class FTBQuestsJEIHelperImpl {
 	public static void refresh(QuestObjectBase object) {
-		int i = object.refreshJEI();
+		int i = object == null ? 0 : object.refreshJEI();
 
 		if (i != 0 && ModList.get().isLoaded("jei")) {
 			if ((i & QUESTS) != 0) {
