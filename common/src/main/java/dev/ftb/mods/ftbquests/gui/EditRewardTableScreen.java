@@ -176,4 +176,14 @@ public class EditRewardTableScreen extends ButtonListBaseScreen {
 	public Theme getTheme() {
 		return FTBQuestsTheme.INSTANCE;
 	}
+
+	@Override
+	public boolean keyPressed(Key key) {
+		if (key.esc()) {
+			onBack();
+			return true;
+		} else {
+			return super.keyPressed(key);
+		}
+	}
 }
