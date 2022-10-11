@@ -1,11 +1,7 @@
 package dev.ftb.mods.ftbquests.gui.quests;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
@@ -13,11 +9,7 @@ import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.icon.ImageIcon;
 import dev.ftb.mods.ftblibrary.math.MathUtils;
-import dev.ftb.mods.ftblibrary.ui.ContextMenuItem;
-import dev.ftb.mods.ftblibrary.ui.GuiHelper;
-import dev.ftb.mods.ftblibrary.ui.Panel;
-import dev.ftb.mods.ftblibrary.ui.Theme;
-import dev.ftb.mods.ftblibrary.ui.Widget;
+import dev.ftb.mods.ftblibrary.ui.*;
 import dev.ftb.mods.ftblibrary.ui.input.Key;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.util.StringUtils;
@@ -473,10 +465,10 @@ public class QuestPanel extends Panel {
 			return true;
 		}
 
-		if (button.isLeft() && isMouseOver() && (questScreen.viewQuestPanel.hidePanel || !questScreen.isViewingQuest())) {
+		if ((button.isLeft() || button.isMiddle() && questScreen.file.canEdit()) && isMouseOver() && (questScreen.viewQuestPanel.hidePanel || !questScreen.isViewingQuest())) {
 			questScreen.prevMouseX = getMouseX();
 			questScreen.prevMouseY = getMouseY();
-			questScreen.grabbed = 1;
+			questScreen.grabbed = button;
 			return true;
 		}
 
@@ -512,7 +504,13 @@ public class QuestPanel extends Panel {
 	@Override
 	public void mouseReleased(MouseButton button) {
 		super.mouseReleased(button);
-		questScreen.grabbed = 0;
+
+		if (questScreen.grabbed != null && questScreen.grabbed.isMiddle() && questScreen.file.canEdit()) {
+			// select any quests in the box
+			questScreen.selectAllQuestsInBox(getMouseX(), getMouseY(), getScrollX(), getScrollY());
+		}
+
+		questScreen.grabbed = null;
 	}
 
 	@Override
