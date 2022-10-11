@@ -26,6 +26,8 @@ public interface FTBQuestsNetHandler {
 	MessageType DISPLAY_ITEM_REWARD_TOAST = NET.registerS2C("display_item_reward_toast", DisplayItemRewardToastMessage::new);
 	MessageType TOGGLE_PINNED = NET.registerC2S("toggle_pinned", TogglePinnedMessage::new);
 	MessageType TOGGLE_PINNED_RESPONSE = NET.registerS2C("toggle_pinned_response", TogglePinnedResponseMessage::new);
+	MessageType TOGGLE_CHAPTER_PINNED = NET.registerC2S("toggle_chapter_pinned", ToggleChapterPinnedMessage::new);
+	MessageType TOGGLE_CHAPTER_PINNED_RESPONSE = NET.registerS2C("toggle_chapter_pinned_response", ToggleChapterPinnedResponseMessage::new);
 	MessageType UPDATE_TEAM_DATA = NET.registerS2C("update_team_data", UpdateTeamDataMessage::new);
 	MessageType SET_CUSTOM_IMAGE = NET.registerC2S("set_custom_image", SetCustomImageMessage::new);
 	MessageType OBJECT_STARTED = NET.registerS2C("object_started", ObjectStartedMessage::new);
