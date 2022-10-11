@@ -63,6 +63,7 @@ public class TeamData {
 	// TODO: Move these to player data
 	private boolean canEdit;
 	private boolean autoPin;
+	private boolean chapterPinned;
 	public final LongOpenHashSet pinnedQuests;
 
 	private Long2ByteOpenHashMap areDependenciesCompleteCache;
@@ -306,6 +307,7 @@ public class TeamData {
 		nbt.putBoolean("can_edit", canEdit);
 		nbt.putBoolean("lock", locked);
 		nbt.putBoolean("auto_pin", autoPin);
+		nbt.putBoolean("chapter_pinned", chapterPinned);
 
 		SNBTCompoundTag taskProgressNBT = new SNBTCompoundTag();
 
@@ -367,6 +369,7 @@ public class TeamData {
 		canEdit = nbt.getBoolean("can_edit");
 		locked = nbt.getBoolean("lock");
 		autoPin = nbt.getBoolean("auto_pin");
+		chapterPinned = nbt.getBoolean("chapter_pinned");
 
 		taskProgress.clear();
 		claimedRewards.clear();
@@ -440,6 +443,7 @@ public class TeamData {
 
 			buffer.writeBoolean(canEdit);
 			buffer.writeBoolean(autoPin);
+			buffer.writeBoolean(chapterPinned);
 
 			buffer.writeVarInt(pinnedQuests.size());
 
@@ -494,6 +498,7 @@ public class TeamData {
 
 			canEdit = buffer.readBoolean();
 			autoPin = buffer.readBoolean();
+			chapterPinned = buffer.readBoolean();
 
 			int pqs = buffer.readVarInt();
 
@@ -757,5 +762,14 @@ public class TeamData {
 		canEdit = from.canEdit;
 		autoPin = from.autoPin;
 		pinnedQuests.addAll(from.pinnedQuests);
+	}
+
+	public void setChapterPinned(boolean pinned) {
+		chapterPinned = pinned;
+		save();
+	}
+
+	public boolean isChapterPinned() {
+		return chapterPinned;
 	}
 }
