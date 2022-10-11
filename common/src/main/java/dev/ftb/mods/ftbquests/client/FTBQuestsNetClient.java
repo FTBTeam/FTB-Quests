@@ -336,4 +336,10 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon {
 			}
 		}
 	}
+
+	@Override
+	public void toggleChapterPinned(boolean pinned) {
+		ClientQuestFile.INSTANCE.self.setChapterPinned(pinned);
+		ClientQuestFile.INSTANCE.questScreen.chapterPanel.refreshWidgets();
+	}
 }
