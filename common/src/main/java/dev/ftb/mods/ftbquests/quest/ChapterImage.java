@@ -2,7 +2,6 @@ package dev.ftb.mods.ftbquests.quest;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
-import dev.architectury.utils.NbtType;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.ImageConfig;
 import dev.ftb.mods.ftblibrary.config.StringConfig;
@@ -16,6 +15,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 
 import java.util.ArrayList;
@@ -84,7 +84,7 @@ public final class ChapterImage implements Movable {
 		image = Icon.getIcon(nbt.getString("image"));
 
 		hover.clear();
-		ListTag hoverTag = nbt.getList("hover", NbtType.STRING);
+		ListTag hoverTag = nbt.getList("hover", Tag.TAG_STRING);
 
 		for (int i = 0; i < hoverTag.size(); i++) {
 			hover.add(hoverTag.getString(i));

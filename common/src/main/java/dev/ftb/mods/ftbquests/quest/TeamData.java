@@ -1,20 +1,10 @@
 package dev.ftb.mods.ftbquests.quest;
 
 import com.mojang.util.UUIDTypeAdapter;
-import dev.architectury.utils.NbtType;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
-import dev.ftb.mods.ftbquests.net.ClaimRewardResponseMessage;
-import dev.ftb.mods.ftbquests.net.ObjectCompletedMessage;
-import dev.ftb.mods.ftbquests.net.ObjectCompletedResetMessage;
-import dev.ftb.mods.ftbquests.net.ObjectStartedMessage;
-import dev.ftb.mods.ftbquests.net.ObjectStartedResetMessage;
-import dev.ftb.mods.ftbquests.net.ResetRewardMessage;
-import dev.ftb.mods.ftbquests.net.SyncEditingModeMessage;
-import dev.ftb.mods.ftbquests.net.SyncLockMessage;
-import dev.ftb.mods.ftbquests.net.TogglePinnedResponseMessage;
-import dev.ftb.mods.ftbquests.net.UpdateTaskProgressMessage;
+import dev.ftb.mods.ftbquests.net.*;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.reward.RewardAutoClaim;
 import dev.ftb.mods.ftbquests.quest.reward.RewardClaimType;
@@ -34,18 +24,14 @@ import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -392,7 +378,7 @@ public class TeamData {
 			claimedRewards.put(QuestKey.of(s), claimedRewardsNBT.getLong(s));
 		}
 
-		ListTag pinnedQuestsNBT = nbt.getList("pinned_quests", NbtType.STRING);
+		ListTag pinnedQuestsNBT = nbt.getList("pinned_quests", Tag.TAG_STRING);
 
 		for (int i = 0; i < pinnedQuestsNBT.size(); i++) {
 			pinnedQuests.add(file.getID(pinnedQuestsNBT.getString(i)));

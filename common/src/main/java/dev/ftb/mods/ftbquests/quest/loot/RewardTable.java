@@ -1,6 +1,5 @@
 package dev.ftb.mods.ftbquests.quest.loot;
 
-import dev.architectury.utils.NbtType;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.IconAnimation;
@@ -15,11 +14,7 @@ import dev.ftb.mods.ftbquests.gui.RewardTablesScreen;
 import dev.ftb.mods.ftbquests.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.integration.FTBQuestsJEIHelper;
 import dev.ftb.mods.ftbquests.net.EditObjectMessage;
-import dev.ftb.mods.ftbquests.quest.Chapter;
-import dev.ftb.mods.ftbquests.quest.Quest;
-import dev.ftb.mods.ftbquests.quest.QuestFile;
-import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
-import dev.ftb.mods.ftbquests.quest.QuestObjectType;
+import dev.ftb.mods.ftbquests.quest.*;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.reward.RewardType;
 import dev.ftb.mods.ftbquests.quest.reward.RewardTypes;
@@ -28,6 +23,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
@@ -113,7 +109,7 @@ public final class RewardTable extends QuestObjectBase {
 
 			if (reward.reward.getType() != RewardTypes.ITEM) {
 				nbt1.putString("type", reward.reward.getType().getTypeForNBT());
-			} else if (nbt1.getTagType("item") == NbtType.STRING) {
+			} else if (nbt1.getTagType("item") == Tag.TAG_STRING) {
 				nbt1.singleLine();
 			}
 
@@ -146,7 +142,7 @@ public final class RewardTable extends QuestObjectBase {
 		useTitle = nbt.getBoolean("use_title");
 
 		rewards.clear();
-		ListTag list = nbt.getList("rewards", NbtType.COMPOUND);
+		ListTag list = nbt.getList("rewards", Tag.TAG_COMPOUND);
 
 		for (int i = 0; i < list.size(); i++) {
 			CompoundTag nbt1 = list.getCompound(i);
