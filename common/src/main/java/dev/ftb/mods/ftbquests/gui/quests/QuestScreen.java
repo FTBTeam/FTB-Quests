@@ -342,7 +342,7 @@ public class QuestScreen extends BaseScreen {
 			} else {
 				if (now - lastShiftPress <= 400L) {
 					ConfigQuestObject<QuestObject> c = new ConfigQuestObject<>(QuestObjectType.CHAPTER.or(QuestObjectType.QUEST));
-					SelectQuestObjectScreen gui = new SelectQuestObjectScreen<>(c, accepted -> {
+					SelectQuestObjectScreen<?> gui = new SelectQuestObjectScreen<>(c, accepted -> {
 						if (accepted) {
 							if (c.value instanceof Chapter) {
 								selectChapter((Chapter) c.value);
