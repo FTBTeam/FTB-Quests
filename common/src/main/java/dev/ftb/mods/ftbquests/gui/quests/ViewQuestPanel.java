@@ -25,6 +25,7 @@ import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.quest.theme.QuestTheme;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.*;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
@@ -191,14 +192,14 @@ public class ViewQuestPanel extends Panel {
 			add(buttonOpenDependencies = new SimpleButton(this, new TranslatableComponent("ftbquests.gui.no_dependencies"), Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/arrow_left.png").withTint(borderColor), (widget, button) -> {
 			}));
 		} else {
-			add(buttonOpenDependencies = new SimpleButton(this, new TranslatableComponent("ftbquests.gui.view_dependencies"), Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/arrow_left.png").withTint(borderColor), (widget, button) -> showList(quest.dependencies)));
+			add(buttonOpenDependencies = new SimpleButton(this, new TranslatableComponent("ftbquests.gui.view_dependencies"), Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/arrow_left.png").withTint(ThemeProperties.QUEST_VIEW_TITLE.get()), (widget, button) -> showList(quest.dependencies)));
 		}
 
 		if (quest.getDependants().isEmpty()) {
 			add(buttonOpenDependants = new SimpleButton(this, new TranslatableComponent("ftbquests.gui.no_dependants"), Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/arrow_right.png").withTint(borderColor), (widget, button) -> {
 			}));
 		} else {
-			add(buttonOpenDependants = new SimpleButton(this, new TranslatableComponent("ftbquests.gui.view_dependants"), Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/arrow_right.png").withTint(borderColor), (widget, button) -> showList(quest.getDependants())));
+			add(buttonOpenDependants = new SimpleButton(this, new TranslatableComponent("ftbquests.gui.view_dependants"), Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/arrow_right.png").withTint(ThemeProperties.QUEST_VIEW_TITLE.get()), (widget, button) -> showList(quest.getDependants())));
 		}
 
 		buttonOpenDependencies.setPosAndSize(0, 17, 13, 13);
@@ -403,6 +404,18 @@ public class ViewQuestPanel extends Panel {
 
 	@Override
 	public void alignWidgets() {
+	}
+
+	@Override
+	public void tick() {
+		super.tick();
+
+		if (quest != null && quest.dependencies != null && !quest.dependencies.isEmpty() && !questScreen.file.self.canStartTasks(quest)) {
+			Color4I col = Minecraft.getInstance().level.getGameTime() % 40 < 20 ?
+					ThemeProperties.QUEST_VIEW_TITLE.get() :
+					ThemeProperties.QUEST_VIEW_BORDER.get();
+			buttonOpenDependencies.setIcon(Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/arrow_left.png").withTint(col));
+		}
 	}
 
 	private void showList(Collection<QuestObject> c) {
