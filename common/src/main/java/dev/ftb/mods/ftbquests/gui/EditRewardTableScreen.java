@@ -10,6 +10,7 @@ import dev.ftb.mods.ftblibrary.ui.Panel;
 import dev.ftb.mods.ftblibrary.ui.SimpleTextButton;
 import dev.ftb.mods.ftblibrary.ui.Theme;
 import dev.ftb.mods.ftblibrary.ui.VerticalSpaceWidget;
+import dev.ftb.mods.ftblibrary.ui.input.Key;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.ui.misc.ButtonListBaseScreen;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
@@ -180,5 +181,15 @@ public class EditRewardTableScreen extends ButtonListBaseScreen {
 	@Override
 	public Theme getTheme() {
 		return FTBQuestsTheme.INSTANCE;
+	}
+
+	@Override
+	public boolean keyPressed(Key key) {
+		if (key.esc()) {
+			onBack();
+			return true;
+		} else {
+			return super.keyPressed(key);
+		}
 	}
 }
