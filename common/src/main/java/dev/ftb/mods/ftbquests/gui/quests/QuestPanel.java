@@ -465,10 +465,10 @@ public class QuestPanel extends Panel {
 			return true;
 		}
 
-		if (button.isLeft() && isMouseOver() && (questScreen.viewQuestPanel.hidePanel || !questScreen.isViewingQuest())) {
+		if ((button.isLeft() || button.isMiddle() && questScreen.file.canEdit()) && isMouseOver() && (questScreen.viewQuestPanel.hidePanel || !questScreen.isViewingQuest())) {
 			questScreen.prevMouseX = getMouseX();
 			questScreen.prevMouseY = getMouseY();
-			questScreen.grabbed = 1;
+			questScreen.grabbed = button;
 			return true;
 		}
 
@@ -504,7 +504,13 @@ public class QuestPanel extends Panel {
 	@Override
 	public void mouseReleased(MouseButton button) {
 		super.mouseReleased(button);
-		questScreen.grabbed = 0;
+
+		if (questScreen.grabbed != null && questScreen.grabbed.isMiddle() && questScreen.file.canEdit()) {
+			// select any quests in the box
+			questScreen.selectAllQuestsInBox(getMouseX(), getMouseY(), getScrollX(), getScrollY());
+		}
+
+		questScreen.grabbed = null;
 	}
 
 	@Override
