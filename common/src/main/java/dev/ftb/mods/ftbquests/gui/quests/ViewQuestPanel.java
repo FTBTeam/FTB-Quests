@@ -426,7 +426,7 @@ public class ViewQuestPanel extends Panel {
 			if (questScreen.file.canEdit() || object.isVisible(questScreen.file.self)) {
 				MutableComponent title = object.getMutableTitle();
 				if (object.getQuestChapter() != null && object.getQuestChapter() != quest.getQuestChapter()) {
-					Component suffix = new TextComponent(" (").append(object.getQuestChapter().getTitle()).append(")").withStyle(ChatFormatting.GRAY);
+					Component suffix = new TextComponent(" [").append(object.getQuestChapter().getTitle()).append("]").withStyle(ChatFormatting.GRAY);
 					title.append(suffix);
 				}
 				contextMenu.add(new ContextMenuItem(title, Icon.EMPTY, () -> questScreen.open(object, true)));
