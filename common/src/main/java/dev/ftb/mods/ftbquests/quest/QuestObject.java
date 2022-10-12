@@ -51,7 +51,7 @@ public abstract class QuestObject extends QuestObjectBase {
 	@Environment(EnvType.CLIENT)
 	public void getConfig(ConfigGroup config) {
 		super.getConfig(config);
-		config.addBool("disable_toast", disableToast, v -> disableToast = v, false).setNameKey("ftbquests.disable_completion_toast").setCanEdit(getQuestChapter() == null || !getQuestChapter().alwaysInvisible).setOrder(10);
+		config.addBool("disable_toast", disableToast, v -> disableToast = v, false).setNameKey("ftbquests.disable_completion_toast").setCanEdit(getQuestChapter() == null || !getQuestChapter().alwaysInvisible).setOrder(127);
 	}
 
 	@Override
