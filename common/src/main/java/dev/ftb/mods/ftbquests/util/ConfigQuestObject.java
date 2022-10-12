@@ -8,6 +8,7 @@ import dev.ftb.mods.ftbquests.gui.SelectQuestObjectScreen;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Predicate;
@@ -34,7 +35,9 @@ public class ConfigQuestObject<T extends QuestObjectBase> extends ConfigValue<T>
 	@Override
 	public void onClicked(MouseButton button, ConfigCallback callback) {
 		if (getCanEdit()) {
-			new SelectQuestObjectScreen<>(this, callback).openGui();
+			SelectQuestObjectScreen<?> s = new SelectQuestObjectScreen<>(this, callback);
+			s.setTitle(new TranslatableComponent(getNameKey()));
+			s.openGui();
 		}
 	}
 
