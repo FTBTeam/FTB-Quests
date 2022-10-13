@@ -33,9 +33,7 @@ public class ConfigQuestObject<T extends QuestObjectBase> extends ConfigValue<T>
 	@Override
 	public void onClicked(MouseButton button, ConfigCallback callback) {
 		if (getCanEdit()) {
-			SelectQuestObjectScreen<?> s = new SelectQuestObjectScreen<>(this, callback);
-			s.setTitle(new TranslatableComponent(getNameKey()));
-			s.openGui();
+			new SelectQuestObjectScreen<>(this, callback).openGui();
 		}
 	}
 
