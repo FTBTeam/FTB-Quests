@@ -32,6 +32,7 @@ pin_icon_on:          ftbquests:textures/gui/pin.png; color=#F8BD1C
 pin_icon_off:         ftbquests:textures/gui/pin.png; color=#DBDBDB
 editor_icon_on:       ftbquests:textures/gui/editor.png; color=#F8BD1C
 editor_icon_off:      ftbquests:textures/gui/editor.png; color=#DBDBDB
+hidden_icon:          ftbquests:textures/gui/hidden.png; color=#DBDBDB
 settings_icon:        ftbquests:textures/gui/settings.png
 close_icon:           ftbquests:textures/gui/close.png
 emergency_items_icon: ftbquests:textures/gui/emergency_items.png; color=#F3D9FF
