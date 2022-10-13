@@ -42,6 +42,16 @@ public class QuestButton extends Button {
 	}
 
 	@Override
+	public boolean isEnabled() {
+		return questScreen.file.canEdit() || quest.isVisible(questScreen.file.self);
+	}
+
+	@Override
+	public boolean shouldDraw() {
+		return questScreen.file.canEdit() || quest.isVisible(questScreen.file.self);
+	}
+
+	@Override
 	public boolean checkMouseOver(int mouseX, int mouseY) {
 		if (questScreen.movingObjects || questScreen.viewQuestPanel.isMouseOver() || questScreen.chapterPanel.isMouseOver()) {
 			return false;
