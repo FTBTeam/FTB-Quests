@@ -6,6 +6,10 @@ import dev.ftb.mods.ftblibrary.config.ui.EditConfigFromStringScreen;
 import dev.ftb.mods.ftblibrary.config.ui.EditConfigScreen;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.ui.*;
+<<<<<<< HEAD
+=======
+import dev.ftb.mods.ftblibrary.ui.input.Key;
+>>>>>>> ded2d9c7... fix: edit reward table screen width shrinking on refresh
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.ui.misc.ButtonListBaseScreen;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
@@ -156,7 +160,7 @@ public class EditRewardTableScreen extends ButtonListBaseScreen {
 		originalTable.writeData(nbt);
 		rewardTable.readData(nbt);
 		callback = c;
-		setTitle(Component.translatable("ftbquests.reward_table"));
+		setTitle(Component.translatable("ftbquests.reward_table").append(": " + rewardTable.title));
 		setBorder(1, 1, 1);
 	}
 
@@ -170,6 +174,13 @@ public class EditRewardTableScreen extends ButtonListBaseScreen {
 		for (WeightedReward r : rewardTable.rewards) {
 			panel.add(new WeightedRewardButton(panel, r));
 		}
+	}
+
+	@Override
+	public void alignWidgets() {
+		// bit of a kludge, but stops the screen getting a bit narrower each time it's re-opened after adding/deleting an entry
+		this.width = 186;
+		super.alignWidgets();
 	}
 
 	@Override
