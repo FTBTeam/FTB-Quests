@@ -18,21 +18,20 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.level.levelgen.structure.Structure;
 
 /**
  * @author MaxNeedsSnacks
  */
 public class StructureTask extends BooleanTask {
-	// FIXME port to 1.19
 	private static final ResourceLocation DEFAULT_STRUCTURE = new ResourceLocation("minecraft:mineshaft");
 
-	private Either<ResourceKey<ConfiguredStructureFeature<?, ?>>, TagKey<ConfiguredStructureFeature<?, ?>>> structure;
+	private Either<ResourceKey<Structure>, TagKey<Structure>> structure;
 
 	public StructureTask(Quest quest) {
 		super(quest);
-		structure = Either.left(ResourceKey.create(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY, DEFAULT_STRUCTURE));
+		structure = Either.left(ResourceKey.create(Registry.STRUCTURE_REGISTRY, DEFAULT_STRUCTURE));
 	}
 
 	@Override
@@ -75,7 +74,7 @@ public class StructureTask extends BooleanTask {
 	@Environment(EnvType.CLIENT)
 	public MutableComponent getAltTitle() {
 		return Component.translatable("ftbquests.task.ftbquests.structure")
-				.append(": ").append(new TextComponent(getStructure()).withStyle(ChatFormatting.DARK_GREEN));
+				.append(": ").append(Component.literal(getStructure()).withStyle(ChatFormatting.DARK_GREEN));
 	}
 
 	@Override
@@ -87,11 +86,11 @@ public class StructureTask extends BooleanTask {
 	public boolean canSubmit(TeamData teamData, ServerPlayer player) {
 		ServerLevel level = (ServerLevel) player.level;
 		return structure.map(
-				key -> level.structureFeatureManager().getStructureWithPieceAt(player.blockPosition(), key).isValid(),
+				key -> level.structureManager().getStructureWithPieceAt(player.blockPosition(), key).isValid(),
 				tag -> {
-					var reg = level.registryAccess().registry(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY).orElseThrow();
+					var reg = level.registryAccess().registry(Registry.STRUCTURE_REGISTRY).orElseThrow();
 					for (var holder : reg.getTagOrEmpty(tag)) {
-						if (level.structureFeatureManager().getStructureWithPieceAt(player.blockPosition(), holder.value()).isValid()) {
+						if (level.structureManager().getStructureWithPieceAt(player.blockPosition(), holder.value()).isValid()) {
 							return true;
 						}
 					}
@@ -102,8 +101,8 @@ public class StructureTask extends BooleanTask {
 
 	private void setStructure(String resLoc) {
 		structure = resLoc.startsWith("#") ?
-				Either.right(TagKey.create(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY, safeResourceLocation(resLoc.substring(1)))) :
-				Either.left(ResourceKey.create(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY, safeResourceLocation(resLoc)));
+				Either.right(TagKey.create(Registry.STRUCTURE_REGISTRY, safeResourceLocation(resLoc.substring(1)))) :
+				Either.left(ResourceKey.create(Registry.STRUCTURE_REGISTRY, safeResourceLocation(resLoc)));
 	}
 
 	private String getStructure() {
@@ -118,7 +117,7 @@ public class StructureTask extends BooleanTask {
 				FTBQuests.LOGGER.warn("Ignoring bad structure resource location '{}' for structure task {}", str, id);
 			} else {
 				FTBQuests.PROXY.getClientPlayer().displayClientMessage(
-						new TextComponent("Ignoring bad structure resource location: " + str).withStyle(ChatFormatting.RED), false);
+						Component.literal("Ignoring bad structure resource location: " + str).withStyle(ChatFormatting.RED), false);
 			}
 			return DEFAULT_STRUCTURE;
 		}

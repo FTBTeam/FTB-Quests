@@ -1,6 +1,5 @@
 package dev.ftb.mods.ftbquests.client;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.architectury.event.EventResult;
 import dev.architectury.event.events.client.ClientGuiEvent;
@@ -33,7 +32,6 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.phys.HitResult;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -183,7 +181,7 @@ public class FTBQuestsClientEventHandler {
 
 			pinnedQuestText.addAll(mc.font.split(FormattedText.composite(
 					mc.font.getSplitter().headByWidth(quest.getTitle(), 160, Style.EMPTY.withBold(true)),
-					new TextComponent(" ")
+					Component.literal(" ")
 							.withStyle(ChatFormatting.DARK_AQUA)
 							.append(data.getRelativeProgress(quest) + "%")
 			), 500));
@@ -192,7 +190,7 @@ public class FTBQuestsClientEventHandler {
 				if (!data.isCompleted(task)) {
 					pinnedQuestText.addAll(mc.font.split(FormattedText.composite(
 							mc.font.getSplitter().headByWidth(task.getMutableTitle().withStyle(ChatFormatting.GRAY), 160, Style.EMPTY.applyFormat(ChatFormatting.GRAY)),
-							new TextComponent(" ")
+							Component.literal(" ")
 									.withStyle(ChatFormatting.GREEN)
 									.append(task.formatProgress(data, data.getProgress(task)))
 									.append("/")

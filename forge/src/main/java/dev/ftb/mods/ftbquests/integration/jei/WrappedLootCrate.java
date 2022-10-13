@@ -4,13 +4,11 @@ import dev.ftb.mods.ftblibrary.icon.ItemIcon;
 import dev.ftb.mods.ftbquests.quest.loot.LootCrate;
 import dev.ftb.mods.ftbquests.quest.loot.WeightedReward;
 import net.minecraft.nbt.StringTag;
-import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 /**

@@ -23,7 +23,9 @@ import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.*;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextColor;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;

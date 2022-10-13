@@ -6,7 +6,6 @@ import dev.ftb.mods.ftbquests.net.ToggleEditingModeMessage;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 
 /**
  * @author desht
@@ -19,7 +18,7 @@ public class ToggleEditModeButton extends TabButton {
 	private static Component makeTooltip(Panel panel) {
 		TeamData self = ((QuestScreen) panel.getGui()).file.self;
 		String key = self.getCanEdit() ? "commands.ftbquests.editing_mode.enabled" : "commands.ftbquests.editing_mode.disabled";
-		return new TranslatableComponent(key, self.name);
+		return Component.translatable(key, self.name);
 	}
 
 	@Override

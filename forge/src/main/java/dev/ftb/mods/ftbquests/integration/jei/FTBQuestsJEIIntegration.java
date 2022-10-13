@@ -1,6 +1,7 @@
 package dev.ftb.mods.ftbquests.integration.jei;
 
 import dev.ftb.mods.ftbquests.FTBQuests;
+import dev.ftb.mods.ftbquests.item.FTBQuestsItems;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.constants.VanillaTypes;

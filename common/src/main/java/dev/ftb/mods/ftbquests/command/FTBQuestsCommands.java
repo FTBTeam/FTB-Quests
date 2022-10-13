@@ -364,9 +364,6 @@ public class FTBQuestsCommands {
 		source.sendSuccess(Component.literal("Done!"), false);
 		return 1;
 	}
-<<<<<<< HEAD
-}
-=======
 
 	private static final Set<UUID> warnedPlayers = new HashSet<>();
 	private static int doReload(CommandSourceStack source) throws CommandSyntaxException {
@@ -374,7 +371,7 @@ public class FTBQuestsCommands {
 		ServerPlayer sender = source.getPlayerOrException();
 
 		if (!instance.getData(sender).getCanEdit()) {
-			source.sendFailure(new TranslatableComponent("commands.ftbquests.command.error.not_editing"));
+			source.sendFailure(Component.translatable("commands.ftbquests.command.error.not_editing"));
 			return 1;
 		}
 
@@ -387,13 +384,12 @@ public class FTBQuestsCommands {
 			}
 		}
 
-		source.sendSuccess(new TranslatableComponent("commands.ftbquests.command.feedback.reloaded"), false);
+		source.sendSuccess(Component.translatable("commands.ftbquests.command.feedback.reloaded"), false);
 		if (!warnedPlayers.contains(sender.getUUID())) {
-			source.sendSuccess(new TranslatableComponent("commands.ftbquests.command.feedback.reloaded.disclaimer").withStyle(ChatFormatting.GOLD), false);
+			source.sendSuccess(Component.translatable("commands.ftbquests.command.feedback.reloaded.disclaimer").withStyle(ChatFormatting.GOLD), false);
 			warnedPlayers.add(sender.getUUID());
 		}
 
 		return 1;
 	}
 }
->>>>>>> a5c89175... feat: added /ftbquests reload command to reload quest book data from file
