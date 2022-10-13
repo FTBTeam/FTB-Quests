@@ -166,6 +166,7 @@ public interface ThemeProperties {
 	IconProperty PIN_ICON_OFF = new IconProperty("pin_icon_off");
 	IconProperty EDITOR_ICON_ON = new IconProperty("editor_icon_on");
 	IconProperty EDITOR_ICON_OFF = new IconProperty("editor_icon_off");
+	IconProperty HIDDEN_ICON = new IconProperty("hidden_icon");
 	IconProperty SETTINGS_ICON = new IconProperty("settings_icon");
 	IconProperty CLOSE_ICON = new IconProperty("close_icon");
 	IconProperty EMERGENCY_ITEMS_ICON = new IconProperty("emergency_items_icon");
