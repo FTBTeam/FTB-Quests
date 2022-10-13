@@ -6,10 +6,7 @@ import dev.ftb.mods.ftblibrary.config.ui.EditConfigFromStringScreen;
 import dev.ftb.mods.ftblibrary.config.ui.EditConfigScreen;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.ui.*;
-<<<<<<< HEAD
-=======
 import dev.ftb.mods.ftblibrary.ui.input.Key;
->>>>>>> ded2d9c7... fix: edit reward table screen width shrinking on refresh
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.ui.misc.ButtonListBaseScreen;
 import dev.ftb.mods.ftblibrary.util.TooltipList;

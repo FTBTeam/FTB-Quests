@@ -2,11 +2,7 @@ package dev.ftb.mods.ftbquests;
 
 import com.mojang.brigadier.CommandDispatcher;
 import dev.architectury.event.EventResult;
-import dev.architectury.event.events.common.CommandRegistrationEvent;
-import dev.architectury.event.events.common.EntityEvent;
-import dev.architectury.event.events.common.LifecycleEvent;
-import dev.architectury.event.events.common.PlayerEvent;
-import dev.architectury.event.events.common.TickEvent;
+import dev.architectury.event.events.common.*;
 import dev.architectury.hooks.level.entity.PlayerHooks;
 import dev.ftb.mods.ftbquests.block.FTBQuestsBlocks;
 import dev.ftb.mods.ftbquests.block.entity.FTBQuestsBlockEntities;

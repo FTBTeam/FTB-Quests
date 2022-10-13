@@ -17,7 +17,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
@@ -37,18 +36,8 @@ public class QuestCategory implements IRecipeCategory<WrappedQuest> {
 	}
 
 	@Override
-	public ResourceLocation getUid() {
-		return UID;
-	}
-
-	@Override
-	public Class<WrappedQuest> getRecipeClass() {
-		return WrappedQuest.class;
-	}
-
-	@Override
 	public Component getTitle() {
-		return new TranslatableComponent("ftbquests.quests");
+		return Component.translatable("ftbquests.quests");
 	}
 
 	@Override

@@ -2,11 +2,8 @@ package dev.ftb.mods.ftbquests.quest.task;
 
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.Icons;
-import dev.ftb.mods.ftblibrary.icon.ItemIcon;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.level.block.Blocks;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

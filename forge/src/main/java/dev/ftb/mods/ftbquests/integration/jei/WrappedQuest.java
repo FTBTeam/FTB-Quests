@@ -13,7 +13,7 @@ import dev.ftb.mods.ftbquests.quest.task.ItemTask;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.latvian.mods.itemfilters.api.ItemFiltersAPI;
 import net.minecraft.nbt.StringTag;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
@@ -92,7 +92,7 @@ public class WrappedQuest {
                     ImmutableList.Builder<ItemStack> builder = ImmutableList.builder();
                     if (table.hideTooltip) {
                         ItemStack unknown = new ItemStack(Items.BARRIER);
-                        unknown.setHoverName(new TextComponent("Unknown Reward"));
+                        unknown.setHoverName(Component.literal("Unknown Reward"));
                         builder.add(unknown);
                     } else {
                         for (WeightedReward wr : table.rewards) {

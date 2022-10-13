@@ -1,6 +1,5 @@
 package dev.ftb.mods.ftbquests.integration.jei;
 
-import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.item.FTBQuestsItems;
 import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
@@ -10,7 +9,6 @@ import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.advanced.IRecipeManagerPlugin;
 import mezz.jei.api.recipe.category.IRecipeCategory;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
@@ -66,7 +64,7 @@ public enum LootCrateRecipeManagerPlugin implements IRecipeManagerPlugin {
 
     @Override
     public <V> List<RecipeType<?>> getRecipeTypes(IFocus<V> focus) {
-        return IRecipeManagerPlugin.super.getRecipeTypes(focus);
+        return List.of();
     }
 
     @Override
@@ -109,11 +107,4 @@ public enum LootCrateRecipeManagerPlugin implements IRecipeManagerPlugin {
         }
         return Collections.emptyList();
     }
-
-    @Override
-    public <V> List<ResourceLocation> getRecipeCategoryUids(IFocus<V> focus) {
-        // TODO 1.19 remove this
-        return Collections.singletonList(new ResourceLocation(FTBQuests.MOD_ID, "loot_crate"));
-    }
-
 }

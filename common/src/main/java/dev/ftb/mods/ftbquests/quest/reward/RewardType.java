@@ -74,7 +74,7 @@ public final class RewardType {
 					}
 					gui.run();
 				});
-				s.setTitle(new TranslatableComponent("ftbquests.gui.select_reward_table"));
+				s.setTitle(Component.translatable("ftbquests.gui.select_reward_table"));
 				s.setHasSearchBox(true);
 				s.openGui();
 			} else {

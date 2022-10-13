@@ -23,7 +23,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
@@ -73,23 +72,13 @@ public class LootCrateCategory implements IRecipeCategory<WrappedLootCrate> {
 	}
 
 	@Override
-	public ResourceLocation getUid() {
-		return UID;
-	}
-
-	@Override
-	public Class<WrappedLootCrate> getRecipeClass() {
-		return WrappedLootCrate.class;
-	}
-
-	@Override
 	public RecipeType<WrappedLootCrate> getRecipeType() {
 		return JEIRecipeTypes.LOOT_CRATE;
 	}
 
 	@Override
 	public Component getTitle() {
-		return new TranslatableComponent("jei.ftbquests.lootcrates");
+		return Component.translatable("jei.ftbquests.lootcrates");
 	}
 
 	@Override
@@ -115,7 +104,7 @@ public class LootCrateCategory implements IRecipeCategory<WrappedLootCrate> {
 											recipe.sortedRewards.get(finalSlot).weight,
 											recipe.crate.table.getTotalWeight(true)
 									);
-									tooltip.add(new TranslatableComponent("jei.ftbquests.lootcrates.chance", chanceStr)
+									tooltip.add(Component.translatable("jei.ftbquests.lootcrates.chance", chanceStr)
 											.withStyle(ChatFormatting.GRAY));
 								}
 							})
@@ -157,7 +146,7 @@ public class LootCrateCategory implements IRecipeCategory<WrappedLootCrate> {
 	}
 
 	private Component chance(String type, int w, int t) {
-		MutableComponent c = new TranslatableComponent("ftbquests.loot.entitytype." + type).append(": " + WeightedReward.chanceString(w, t));
+		MutableComponent c = Component.translatable("ftbquests.loot.entitytype." + type).append(": " + WeightedReward.chanceString(w, t));
 		if (w > 0) {
 			c.append(" (1 in " + StringUtils.formatDouble00(1D / ((double) w / (double) t)) + ")");
 		}
