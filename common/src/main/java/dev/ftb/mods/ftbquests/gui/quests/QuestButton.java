@@ -309,6 +309,7 @@ public class QuestButton extends Button {
 	public void draw(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
 		Color4I outlineColor = Color4I.WHITE.withAlpha(150);
 		Icon qicon = Icon.EMPTY;
+		Icon hicon = Icon.EMPTY;
 
 		boolean isCompleted = questScreen.file.self.isCompleted(quest);
 		boolean isStarted = isCompleted || questScreen.file.self.isStarted(quest);
@@ -334,6 +335,9 @@ public class QuestButton extends Button {
 
 		if (qicon == Icon.EMPTY && questScreen.file.self.isQuestPinned(quest.id)) {
 			qicon = ThemeProperties.PIN_ICON_ON.get();
+		}
+		if (questScreen.file.canEdit() && !quest.isVisible(questScreen.file.self)) {
+			hicon = ThemeProperties.HIDDEN_ICON.get();
 		}
 
 		QuestShape shape = QuestShape.get(quest.getShape());
@@ -384,6 +388,15 @@ public class QuestButton extends Button {
 			matrixStack.translate(x + w - s, y, 200);
 			matrixStack.scale(s, s, 1F);
 			qicon.draw(matrixStack, 0, 0, 1, 1);
+			matrixStack.popPose();
+		}
+
+		if (!hicon.isEmpty()) {
+			float s = w / 8F * 3F;//(int) (treeGui.getZoom() / 2 * quest.size);
+			matrixStack.pushPose();
+			matrixStack.translate(x, y, 200);
+			matrixStack.scale(s, s, 1F);
+			hicon.draw(matrixStack, 0, 0, 1, 1);
 			matrixStack.popPose();
 		}
 	}
