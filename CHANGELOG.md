@@ -7,16 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Multiple quests can now be selected by dragging a box with the middle mouse button. Hold Control to toggle selected status of quests.
+- Edit mode can now be toggled from within the Quests GUI (new button in bottom right)
+- Multiple quests can now be selected by dragging a box with the middle mouse button
+  - Hold Control to toggle selected status of quests
 - The Left-hand Chapter panel now remembers its pinned status across runs of the game
-- When viewing a quest, the dependencies and dependents buttons are now a more visible colour when deps exist. In addition the dependencies button will blink if the current quest can't be started.
-- The dependencies and dependents button tooltips now also show the chapter for dependent quests, if they in a different chapter to the current one.
+- When viewing a quest, the dependencies and dependents buttons are now a more visible colour when deps exist
+  - In addition, the dependencies button will blink if the current quest can't be started.
+- The dependencies and dependents button tooltips now also show the chapter for dependent quests, if they're in a different chapter to the current one
 - The Structure Task now supports structure tags (e.g. `#minecraft:villages` will match any village)
-- Added a `/ftbquests reload` command to reload quest data from file. Requires user to be in editing mode. Caution: not recommended to use on live servers. Take care when editing quest file data directly. Make a backup!
+- Added a `/ftbquests reload` command to reload quest data from file. Requires user to be in editing mode
+  - Caution: not recommended for use on live servers. Take care when editing quest file data directly. Make a backup!
+- When outside editing mode, selecting a quest (right or left-click) will preview any hidden dependents
+  - Dependency lines and quest box outlines will be shown, but no other information
+- When in editing mode, hidden quests which would be invisible outside editing mode now have an "eye" icon to indicate that
 
 ### Fixed
 - Fixed an NPE in the Stats Task if the resource location is unknown
-- Item Tasks have two new settings in the config screen: "Match NBT" and "Weak NBT Matching". "Match NBT" is a tristate: Default means to use the current behaviour; items must be in the `itemfilters:check_nbt` tag, False means to never try NBT matching, and True means to always try NBT matching. "Weak NBT Matching" is a boolean; when true, only top-level NBT fields in the filter item will be check (so if the item being checked has extra NBT data, it will still match)
+- Item Tasks have two new settings in the config screen: "Match NBT" and "Weak NBT Matching"
+  - "Match NBT" is a tristate: Default means to use the current behaviour; items must be in the `itemfilters:check_nbt` tag, False means to never try NBT matching, and True means to always try NBT matching. 
+  - "Weak NBT Matching" is a boolean; when true, only top-level NBT fields in the filter item will be matched (so if the item being checked has extra NBT data, it will still match)
 - Pressing Escape in various screens now goes to back to the previous screen instead of closing the entire GUI
 - Similarly, pressing Escape when viewing a quest pops down the quest view, and when a context menu is popped up, that will be popped down
 - Full JEI support has returned for quests (items -> rewards) and loot crates (reward table -> list of reward items and their weights)
@@ -30,4 +39,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed Dimension Tasks triggering even when dependencies weren't met
 - Fixed item durability bars in quest buttons rendering over the chapter panel
 - Fixed quest-specific theme data not being loaded from ftb_quests_theme.txt (which can be overridden in resource packs) 
-
+- Better behaviour for the multiline text editor used to edit quest description paragraphs (right click quest -> Edit -> Description)
+- Fixed Reward Table editing screen shrinking every time it was reopened when adding/deleting entries
