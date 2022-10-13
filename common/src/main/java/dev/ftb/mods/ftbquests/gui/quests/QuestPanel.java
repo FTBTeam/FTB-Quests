@@ -119,9 +119,7 @@ public class QuestPanel extends Panel {
 		}
 
 		for (Quest quest : questScreen.selectedChapter.quests) {
-			if (questScreen.file.canEdit() || quest.isVisible(questScreen.file.self)) {
-				add(new QuestButton(this, quest));
-			}
+			add(new QuestButton(this, quest));
 		}
 
 		alignWidgets();
@@ -208,11 +206,11 @@ public class QuestPanel extends Panel {
 		RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
 
 		for (Widget widget : widgets) {
-			if (!(widget instanceof QuestButton)) {
+			if (!widget.shouldDraw() || !(widget instanceof QuestButton qb)) {
 				continue;
 			}
 
-			Quest wquest = ((QuestButton) widget).quest;
+			Quest wquest = qb.quest;
 
 			if (wquest.getHideDependencyLines()) {
 				continue;
@@ -221,7 +219,7 @@ public class QuestPanel extends Panel {
 			boolean unavailable = questScreen.file.self == null || !questScreen.file.self.canStartTasks(wquest);
 			boolean complete = !unavailable && questScreen.file.self != null && questScreen.file.self.isCompleted(wquest);
 
-			for (QuestButton button : ((QuestButton) widget).getDependencies()) {
+			for (QuestButton button : qb.getDependencies()) {
 				if (button.quest == selectedQuest || wquest == selectedQuest) {
 					continue;
 				}
@@ -276,20 +274,22 @@ public class QuestPanel extends Panel {
 			}
 
 			for (QuestButton button : ((QuestButton) widget).getDependencies()) {
-				int r, g, b, a;
+				int r, g, b, a, a2;
 
 				if (button.quest == selectedQuest) {
 					Color4I c = ThemeProperties.DEPENDENCY_LINE_REQUIRED_FOR_COLOR.get(questScreen.selectedChapter);
 					r = c.redi();
 					g = c.greeni();
 					b = c.bluei();
-					a = c.alphai();
+					a = widget.shouldDraw() ? c.alphai() : c.alphai() / 2;
+					a2 = widget.shouldDraw() ? c.alphai() : 0;
 				} else if (wquest == selectedQuest) {
 					Color4I c = ThemeProperties.DEPENDENCY_LINE_REQUIRES_COLOR.get(questScreen.selectedChapter);
 					r = c.redi();
 					g = c.greeni();
 					b = c.bluei();
 					a = c.alphai();
+					a2 = a;
 				} else {
 					continue;
 				}
@@ -306,8 +306,8 @@ public class QuestPanel extends Panel {
 				Matrix4f m = matrixStack.last().pose();
 
 				buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_TEX);
-				buffer.vertex(m, 0, -s, 0).color(r, g, b, a).uv(len / s / 2F + ms, 0).endVertex();
-				buffer.vertex(m, 0, s, 0).color(r, g, b, a).uv(len / s / 2F + ms, 1).endVertex();
+				buffer.vertex(m, 0, -s, 0).color(r, g, b, a2).uv(len / s / 2F + ms, 0).endVertex();
+				buffer.vertex(m, 0, s, 0).color(r, g, b, a2).uv(len / s / 2F + ms, 1).endVertex();
 				buffer.vertex(m, len, s, 0).color(r * 3 / 4, g * 3 / 4, b * 3 / 4, a).uv(ms, 1).endVertex();
 				buffer.vertex(m, len, -s, 0).color(r * 3 / 4, g * 3 / 4, b * 3 / 4, a).uv(ms, 0).endVertex();
 				tesselator.end();
@@ -338,8 +338,7 @@ public class QuestPanel extends Panel {
 			if (isShiftKeyDown()) {
 				questX = qx;
 				questY = qy;
-			} else if (questScreen.selectedObjects.size() == 1 && questScreen.selectedObjects.get(0) instanceof Quest) {
-				Quest q = (Quest) questScreen.selectedObjects.get(0);
+			} else if (questScreen.selectedObjects.size() == 1 && questScreen.selectedObjects.get(0) instanceof Quest q) {
 				double s = (1D / questScreen.file.gridScale) / q.size;
 				questX = Mth.floor(qx * s + 0.5D) / s;
 				questY = Mth.floor(qy * s + 0.5D) / s;
