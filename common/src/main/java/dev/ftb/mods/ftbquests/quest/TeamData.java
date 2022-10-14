@@ -225,6 +225,8 @@ public class TeamData {
 				new ClaimRewardResponseMessage(uuid, player, reward.id).sendToAll(((ServerQuestFile) file).server);
 			}
 
+			reward.quest.checkRepeatable(this, player);
+
 			return true;
 		}
 
