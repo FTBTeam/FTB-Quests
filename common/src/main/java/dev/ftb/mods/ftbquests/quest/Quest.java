@@ -59,6 +59,8 @@ public final class Quest extends QuestObject implements Movable {
 	public boolean optional;
 	public int minWidth;
 	public boolean canRepeat;
+	public boolean invisible;  // invisible to players (not the same as hidden!)
+	public int invisibleUntilTasks;  // invisible until at least X number of tasks have been completed
 
 	private Component cachedSubtitle = null;
 	private Component[] cachedDescription = null;
@@ -84,6 +86,8 @@ public final class Quest extends QuestObject implements Movable {
 		optional = false;
 		minWidth = 0;
 		canRepeat = false;
+		invisible = false;
+		invisibleUntilTasks = 0;
 	}
 
 	@Override
@@ -181,6 +185,13 @@ public final class Quest extends QuestObject implements Movable {
 		if (canRepeat) {
 			nbt.putBoolean("can_repeat", true);
 		}
+
+		if (invisible) {
+			nbt.putBoolean("invisible", true);
+		}
+		if (invisibleUntilTasks > 0) {
+			nbt.putInt("invisible_until_tasks", invisibleUntilTasks);
+		}
 	}
 
 	@Override
@@ -236,6 +247,8 @@ public final class Quest extends QuestObject implements Movable {
 		optional = nbt.getBoolean("optional");
 		minWidth = nbt.getInt("min_width");
 		canRepeat = nbt.getBoolean("can_repeat");
+		invisible = nbt.getBoolean("invisible");
+		invisibleUntilTasks = nbt.getInt("invisible_until_tasks");
 	}
 
 	@Override
@@ -248,11 +261,11 @@ public final class Quest extends QuestObject implements Movable {
 		flags = Bits.setFlag(flags, 8, !guidePage.isEmpty());
 		//implement others
 		//flags = Bits.setFlag(flags, 32, !customClick.isEmpty());
-		//flags = Bits.setFlag(flags, 64, hideDependencyLines);
-		//flags = Bits.setFlag(flags, 128, hideTextUntilComplete);
+		flags = Bits.setFlag(flags, 64, canRepeat);
+		flags = Bits.setFlag(flags, 128, invisible);
 		flags = Bits.setFlag(flags, 256, optional);
 		flags = Bits.setFlag(flags, 512, minWidth > 0);
-		flags = Bits.setFlag(flags, 1024, canRepeat);
+		flags = Bits.setFlag(flags, 1024, invisibleUntilTasks > 0);
 		buffer.writeVarInt(flags);
 
 		hide.write(buffer);
@@ -296,6 +309,10 @@ public final class Quest extends QuestObject implements Movable {
 		}
 
 		buffer.writeBoolean(canRepeat);
+
+		if (invisibleUntilTasks > 0) {
+			buffer.writeVarInt(invisibleUntilTasks);
+		}
 	}
 
 	@Override
@@ -317,12 +334,9 @@ public final class Quest extends QuestObject implements Movable {
 			description.clear();
 		}
 
-		//customClick = Bits.getFlag(flags, 4) ? buffer.readString() : "";
 		guidePage = Bits.getFlag(flags, 8) ? buffer.readUtf(Short.MAX_VALUE) : "";
 		//customClick = Bits.getFlag(flags, 32) ? data.readString() : "";
-		//hideDependencyLines = Bits.getFlag(flags, 64);
-		//hideTextUntilComplete = Bits.getFlag(flags, 128);
-		optional = Bits.getFlag(flags, 256);
+		optional = Bits.getFlag(flags, 64);
 
 		minRequiredDependencies = buffer.readVarInt();
 		dependencyRequirement = DependencyRequirement.NAME_MAP.read(buffer);
@@ -340,6 +354,8 @@ public final class Quest extends QuestObject implements Movable {
 		size = Bits.getFlag(flags, 4) ? buffer.readDouble() : 1D;
 		minWidth = Bits.getFlag(flags, 512) ? buffer.readVarInt() : 0;
 		canRepeat = buffer.readBoolean();
+		invisible = Bits.getFlag(flags, 128);
+		invisibleUntilTasks = Bits.getFlag(flags, 1024) ? buffer.readVarInt() : 0;
 	}
 
 	@Override
@@ -507,6 +523,8 @@ public final class Quest extends QuestObject implements Movable {
 		config.addEnum("disable_jei", disableJEI, v -> disableJEI = v, Tristate.NAME_MAP);
 		config.addBool("optional", optional, v -> optional = v, false);
 		config.addInt("min_width", minWidth, v -> minWidth = v, 0, 0, 3000);
+		config.addBool("invisible", invisible, v -> invisible = v, false);
+		config.addInt("invisible_until_tasks", invisibleUntilTasks, v -> invisibleUntilTasks = v, 0, 0, Integer.MAX_VALUE);
 	}
 
 	public boolean getHideDependencyLines() {
@@ -551,6 +569,12 @@ public final class Quest extends QuestObject implements Movable {
 
 	@Override
 	public boolean isVisible(TeamData data) {
+		if (invisible && !data.isCompleted(this)) {
+			if (invisibleUntilTasks == 0 || tasks.stream().filter(data::isCompleted).limit(invisibleUntilTasks).count() < invisibleUntilTasks) {
+				return false;
+			}
+		}
+
 		if (dependencies.isEmpty()) {
 			return true;
 		}
