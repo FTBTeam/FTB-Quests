@@ -303,6 +303,9 @@ public class QuestButton extends Button {
 		if (quest.optional) {
 			list.add(new TextComponent("[").withStyle(ChatFormatting.GRAY).append(new TranslatableComponent("ftbquests.quest.optional")).append("]"));
 		}
+		if (quest.canRepeat) {
+			list.add(new TranslatableComponent("ftbquests.quest.can_repeat").withStyle(ChatFormatting.GRAY));
+		}
 	}
 
 	@Override

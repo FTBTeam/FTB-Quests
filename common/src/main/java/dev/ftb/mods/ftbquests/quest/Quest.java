@@ -58,6 +58,7 @@ public final class Quest extends QuestObject implements Movable {
 	public double size;
 	public boolean optional;
 	public int minWidth;
+	public boolean canRepeat;
 
 	private Component cachedSubtitle = null;
 	private Component[] cachedDescription = null;
@@ -82,6 +83,7 @@ public final class Quest extends QuestObject implements Movable {
 		size = 1D;
 		optional = false;
 		minWidth = 0;
+		canRepeat = false;
 	}
 
 	@Override
@@ -175,6 +177,10 @@ public final class Quest extends QuestObject implements Movable {
 		if (minWidth > 0) {
 			nbt.putInt("min_width", minWidth);
 		}
+
+		if (canRepeat) {
+			nbt.putBoolean("can_repeat", true);
+		}
 	}
 
 	@Override
@@ -229,6 +235,7 @@ public final class Quest extends QuestObject implements Movable {
 		size = nbt.contains("size") ? nbt.getDouble("size") : 1D;
 		optional = nbt.getBoolean("optional");
 		minWidth = nbt.getInt("min_width");
+		canRepeat = nbt.getBoolean("can_repeat");
 	}
 
 	@Override
@@ -245,6 +252,7 @@ public final class Quest extends QuestObject implements Movable {
 		//flags = Bits.setFlag(flags, 128, hideTextUntilComplete);
 		flags = Bits.setFlag(flags, 256, optional);
 		flags = Bits.setFlag(flags, 512, minWidth > 0);
+		flags = Bits.setFlag(flags, 1024, canRepeat);
 		buffer.writeVarInt(flags);
 
 		hide.write(buffer);
@@ -286,6 +294,8 @@ public final class Quest extends QuestObject implements Movable {
 		if (minWidth > 0) {
 			buffer.writeVarInt(minWidth);
 		}
+
+		buffer.writeBoolean(canRepeat);
 	}
 
 	@Override
@@ -329,6 +339,7 @@ public final class Quest extends QuestObject implements Movable {
 
 		size = Bits.getFlag(flags, 4) ? buffer.readDouble() : 1D;
 		minWidth = Bits.getFlag(flags, 512) ? buffer.readVarInt() : 0;
+		canRepeat = buffer.readBoolean();
 	}
 
 	@Override
@@ -486,6 +497,7 @@ public final class Quest extends QuestObject implements Movable {
 		Predicate<QuestObjectBase> depTypes = object -> object != chapter.file && object != chapter && object instanceof QuestObject;// && !(object instanceof Task);
 
 		dependencies.removeIf(Objects::isNull);
+		config.addBool("can_repeat", canRepeat, v -> canRepeat = v, false);
 		config.addList("dependencies", dependencies, new ConfigQuestObject<>(depTypes), null).setNameKey("ftbquests.dependencies");
 		config.addEnum("dependency_requirement", dependencyRequirement, v -> dependencyRequirement = v, DependencyRequirement.NAME_MAP);
 		config.addInt("min_required_dependencies", minRequiredDependencies, v -> minRequiredDependencies = v, 0, 0, Integer.MAX_VALUE);
@@ -692,7 +704,7 @@ public final class Quest extends QuestObject implements Movable {
 	}
 
 	public boolean isProgressionIgnored() {
-		return optional;
+		return canRepeat || optional;
 	}
 
 	public List<QuestObject> getDependants() {
@@ -709,6 +721,16 @@ public final class Quest extends QuestObject implements Movable {
 		}
 
 		return list;
+	}
+
+	public void checkRepeatable(TeamData data, UUID player) {
+		if (canRepeat && rewards.stream().allMatch(r -> data.isRewardClaimed(player, r))) {
+			ProgressChange change = new ProgressChange(data.file);
+			change.reset = true;
+			change.origin = this;
+			change.player = player;
+			forceProgress(data, change);
+		}
 	}
 
 	@Override
