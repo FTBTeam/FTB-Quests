@@ -174,6 +174,9 @@ public class QuestScreen extends BaseScreen {
 		ConfigGroup g = object.createSubGroup(group);
 		object.getConfig(g);
 
+		contextMenu.add(new ContextMenuItem(new TranslatableComponent("selectServer.edit"), ThemeProperties.EDIT_ICON.get(), () -> object.onEditButtonClicked(gui)));
+		contextMenu.add(ContextMenuItem.SEPARATOR);
+
 		if (!g.getValues().isEmpty()) {
 			List<ContextMenuItem> list = new ArrayList<>();
 
@@ -215,8 +218,6 @@ public class QuestScreen extends BaseScreen {
 				contextMenu.add(ContextMenuItem.SEPARATOR);
 			}
 		}
-
-		contextMenu.add(new ContextMenuItem(new TranslatableComponent("selectServer.edit"), ThemeProperties.EDIT_ICON.get(), () -> object.onEditButtonClicked(gui)));
 
 		if (object instanceof RandomReward && !QuestObjectBase.isNull(((RandomReward) object).getTable())) {
 			contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.reward_table.edit"), ThemeProperties.EDIT_ICON.get(), () -> ((RandomReward) object).getTable().onEditButtonClicked(gui)));
