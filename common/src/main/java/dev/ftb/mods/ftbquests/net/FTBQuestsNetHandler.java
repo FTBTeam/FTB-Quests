@@ -29,6 +29,7 @@ public interface FTBQuestsNetHandler {
 	MessageType TOGGLE_CHAPTER_PINNED = NET.registerC2S("toggle_chapter_pinned", ToggleChapterPinnedMessage::new);
 	MessageType TOGGLE_CHAPTER_PINNED_RESPONSE = NET.registerS2C("toggle_chapter_pinned_response", ToggleChapterPinnedResponseMessage::new);
 	MessageType TOGGLE_EDITING_MODE = NET.registerC2S("toggle_editing_mode", ToggleEditingModeMessage::new);
+	MessageType FORCE_SAVE = NET.registerC2S("force_save", ForceSaveMessage::new);
 	MessageType UPDATE_TEAM_DATA = NET.registerS2C("update_team_data", UpdateTeamDataMessage::new);
 	MessageType SET_CUSTOM_IMAGE = NET.registerC2S("set_custom_image", SetCustomImageMessage::new);
 	MessageType OBJECT_STARTED = NET.registerS2C("object_started", ObjectStartedMessage::new);
