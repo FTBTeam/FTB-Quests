@@ -80,41 +80,10 @@ public class ViewQuestPanel extends Panel {
 
 		boolean canEdit = questScreen.file.canEdit();
 
-<<<<<<< HEAD
-		TextField titleField = new TextField(this) {
-			@Override
-			public boolean mousePressed(MouseButton button) {
-				if (isMouseOver() && canEdit && button.isRight()) {
-					editTitle();
-					return true;
-				}
-
-				return super.mousePressed(button);
-			}
-
-			@Override
-			public boolean mouseDoubleClicked(MouseButton button) {
-				if (isMouseOver() && canEdit) {
-					editTitle();
-					return true;
-				}
-
-				return false;
-			}
-
-			@Override
-			@Nullable
-			public CursorType getCursor() {
-				return canEdit ? CursorType.IBEAM : null;
-			}
-		}.addFlags(Theme.CENTERED).setMinWidth(150).setMaxWidth(500).setSpacing(9).setText(Component.literal("").append(quest.getTitle()).withStyle(Style.EMPTY.withColor(TextColor.fromRgb(ThemeProperties.QUEST_VIEW_TITLE.get().rgb()))));
-
-=======
 		TextField titleField = new QuestDescriptionField(this, canEdit, b -> editTitle())
 				.addFlags(Theme.CENTERED)
 				.setMinWidth(150).setMaxWidth(500).setSpacing(9)
-				.setText(new TextComponent("").append(quest.getTitle()).withStyle(Style.EMPTY.withColor(TextColor.fromRgb(ThemeProperties.QUEST_VIEW_TITLE.get().rgb()))));
->>>>>>> 6abd5eb3... feat: support raw JSON text in quest subtitle & descriptions
+				.setText(Component.literal("").append(quest.getTitle()).withStyle(Style.EMPTY.withColor(TextColor.fromRgb(ThemeProperties.QUEST_VIEW_TITLE.get().rgb()))));
 		int w = Math.max(200, titleField.width + 54);
 
 		if (quest.minWidth > 0) {
@@ -204,14 +173,22 @@ public class ViewQuestPanel extends Panel {
 			add(buttonOpenDependencies = new SimpleButton(this, Component.translatable("ftbquests.gui.no_dependencies"), Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/arrow_left.png").withTint(borderColor), (widget, button) -> {
 			}));
 		} else {
+<<<<<<< HEAD
 			add(buttonOpenDependencies = new SimpleButton(this, Component.translatable("ftbquests.gui.view_dependencies"), Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/arrow_left.png").withTint(ThemeProperties.QUEST_VIEW_TITLE.get()), (widget, button) -> showList(quest.dependencies)));
+=======
+			add(buttonOpenDependencies = new SimpleButton(this, new TranslatableComponent("ftbquests.gui.view_dependencies"), Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/arrow_left.png").withTint(ThemeProperties.QUEST_VIEW_TITLE.get()), (widget, button) -> showList(quest.dependencies, true)));
+>>>>>>> 26c737bd... feat: make quest dependency info clear in quest view panel
 		}
 
 		if (quest.getDependants().isEmpty()) {
 			add(buttonOpenDependants = new SimpleButton(this, Component.translatable("ftbquests.gui.no_dependants"), Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/arrow_right.png").withTint(borderColor), (widget, button) -> {
 			}));
 		} else {
+<<<<<<< HEAD
 			add(buttonOpenDependants = new SimpleButton(this, Component.translatable("ftbquests.gui.view_dependants"), Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/arrow_right.png").withTint(ThemeProperties.QUEST_VIEW_TITLE.get()), (widget, button) -> showList(quest.getDependants())));
+=======
+			add(buttonOpenDependants = new SimpleButton(this, new TranslatableComponent("ftbquests.gui.view_dependants"), Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/arrow_right.png").withTint(ThemeProperties.QUEST_VIEW_TITLE.get()), (widget, button) -> showList(quest.getDependants(), false)));
+>>>>>>> 26c737bd... feat: make quest dependency info clear in quest view panel
 		}
 
 		buttonOpenDependencies.setPosAndSize(0, 17, 13, 13);
@@ -381,9 +358,16 @@ public class ViewQuestPanel extends Panel {
 		}
 	}
 
-	private void showList(Collection<QuestObject> c) {
+	private void showList(Collection<QuestObject> c, boolean dependencies) {
 		int hidden = 0;
 		List<ContextMenuItem> contextMenu = new ArrayList<>();
+
+		if (dependencies && quest.minRequiredDependencies > 0) {
+			contextMenu.add(new ContextMenuItem(
+					new TranslatableComponent("ftbquests.quest.min_required_header", quest.minRequiredDependencies)
+							.withStyle(ChatFormatting.UNDERLINE), Icon.EMPTY, null).setEnabled(false)
+			);
+		}
 
 		for (QuestObject object : c) {
 			if (questScreen.file.canEdit() || object.isVisible(questScreen.file.self)) {
@@ -399,6 +383,7 @@ public class ViewQuestPanel extends Panel {
 		}
 
 		if (hidden > 0) {
+<<<<<<< HEAD
 			if (hidden == c.size()) {
 				contextMenu.add(new ContextMenuItem(Component.literal(hidden + " hidden quests"), Icon.EMPTY, () -> {
 				}).setEnabled(false));
@@ -406,6 +391,12 @@ public class ViewQuestPanel extends Panel {
 				contextMenu.add(new ContextMenuItem(Component.literal("+ " + hidden + " hidden quests"), Icon.EMPTY, () -> {
 				}).setEnabled(false));
 			}
+=======
+			MutableComponent prefix = hidden == c.size() ? TextComponent.EMPTY.copy() : new TextComponent("+ ");
+			contextMenu.add(new ContextMenuItem(
+					prefix.append(new TranslatableComponent("ftbquests.quest.hidden_quests_footer", hidden)), Icon.EMPTY, null).setEnabled(false)
+			);
+>>>>>>> 26c737bd... feat: make quest dependency info clear in quest view panel
 		}
 
 		getGui().openContextMenu(contextMenu);
