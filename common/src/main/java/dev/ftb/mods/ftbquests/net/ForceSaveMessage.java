@@ -33,7 +33,7 @@ public class ForceSaveMessage extends BaseC2SMessage {
 		if (player.hasPermissions(2)) {
 			ServerQuestFile.INSTANCE.save();
 			ServerQuestFile.INSTANCE.saveNow();
-			player.displayClientMessage(new TranslatableComponent("ftbquests.gui.saved_on_server"), false);
+			player.displayClientMessage(Component.translatable("ftbquests.gui.saved_on_server"), false);
 		}
 	}
 }

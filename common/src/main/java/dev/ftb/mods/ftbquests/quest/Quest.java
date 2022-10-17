@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbquests.quest;
 
+import com.google.gson.JsonParseException;
 import dev.ftb.mods.ftblibrary.config.*;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.IconAnimation;
@@ -24,6 +25,7 @@ import dev.ftb.mods.ftbquests.util.NetUtils;
 import dev.ftb.mods.ftbquests.util.ProgressChange;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
@@ -34,11 +36,14 @@ import net.minecraft.server.level.ServerPlayer;
 
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.regex.Pattern;
 
 /**
  * @author LatvianModder
  */
 public final class Quest extends QuestObject implements Movable {
+	private static final Pattern JSON_TEXT_PAT = Pattern.compile("^\\{\\s*\"");
+
 	public Chapter chapter;
 	public String subtitle;
 	public double x, y;
@@ -612,7 +617,9 @@ public final class Quest extends QuestObject implements Movable {
 			return cachedSubtitle;
 		}
 
-		cachedSubtitle = ClientTextComponentUtils.parse(subtitle);
+		cachedSubtitle = JSON_TEXT_PAT.matcher(subtitle).find() ?
+				rawTextToComponent(subtitle) :
+				ClientTextComponentUtils.parse(subtitle);
 
 		return cachedSubtitle;
 	}
@@ -626,10 +633,20 @@ public final class Quest extends QuestObject implements Movable {
 		cachedDescription = new Component[description.size()];
 
 		for (int i = 0; i < cachedDescription.length; i++) {
-			cachedDescription[i] = ClientTextComponentUtils.parse(description.get(i));
+			cachedDescription[i] = JSON_TEXT_PAT.matcher(description.get(i)).find() ?
+					rawTextToComponent(description.get(i)) :
+					ClientTextComponentUtils.parse(description.get(i));
 		}
 
 		return cachedDescription;
+	}
+
+	private Component rawTextToComponent(String raw) {
+		try {
+			return Component.Serializer.fromJson(raw);
+		} catch (JsonParseException e) {
+			return new TextComponent("ERROR: " + e.getMessage()).withStyle(ChatFormatting.RED);
+		}
 	}
 
 	public boolean hasDependency(QuestObject object) {
