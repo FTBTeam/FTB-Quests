@@ -13,6 +13,7 @@ import dev.ftb.mods.ftblibrary.ui.*;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.ui.misc.CompactGridLayout;
 import dev.ftb.mods.ftblibrary.util.ImageComponent;
+import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.gui.ImageComponentWidget;
 import dev.ftb.mods.ftbquests.net.EditObjectMessage;
@@ -28,11 +29,13 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.*;
 import net.minecraft.util.Mth;
+import net.minecraft.world.item.TooltipFlag;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * @author LatvianModder
@@ -77,34 +80,10 @@ public class ViewQuestPanel extends Panel {
 
 		boolean canEdit = questScreen.file.canEdit();
 
-		TextField titleField = new TextField(this) {
-			@Override
-			public boolean mousePressed(MouseButton button) {
-				if (isMouseOver() && canEdit && button.isRight()) {
-					editTitle();
-					return true;
-				}
-
-				return super.mousePressed(button);
-			}
-
-			@Override
-			public boolean mouseDoubleClicked(MouseButton button) {
-				if (isMouseOver() && canEdit) {
-					editTitle();
-					return true;
-				}
-
-				return false;
-			}
-
-			@Override
-			@Nullable
-			public CursorType getCursor() {
-				return canEdit ? CursorType.IBEAM : null;
-			}
-		}.addFlags(Theme.CENTERED).setMinWidth(150).setMaxWidth(500).setSpacing(9).setText(new TextComponent("").append(quest.getTitle()).withStyle(Style.EMPTY.withColor(TextColor.fromRgb(ThemeProperties.QUEST_VIEW_TITLE.get().rgb()))));
-
+		TextField titleField = new QuestDescriptionField(this, canEdit, b -> editTitle())
+				.addFlags(Theme.CENTERED)
+				.setMinWidth(150).setMaxWidth(500).setSpacing(9)
+				.setText(new TextComponent("").append(quest.getTitle()).withStyle(Style.EMPTY.withColor(TextColor.fromRgb(ThemeProperties.QUEST_VIEW_TITLE.get().rgb()))));
 		int w = Math.max(200, titleField.width + 54);
 
 		if (quest.minWidth > 0) {
@@ -269,33 +248,11 @@ public class ViewQuestPanel extends Panel {
 		}
 
 		if (subtitle != TextComponent.EMPTY) {
-			panelText.add(new TextField(panelText) {
-				@Override
-				public boolean mousePressed(MouseButton button) {
-					if (isMouseOver() && canEdit && button.isRight()) {
-						editSubtitle();
-						return true;
-					}
-
-					return super.mousePressed(button);
-				}
-
-				@Override
-				public boolean mouseDoubleClicked(MouseButton button) {
-					if (isMouseOver() && canEdit) {
-						editSubtitle();
-						return true;
-					}
-
-					return false;
-				}
-
-				@Override
-				@Nullable
-				public CursorType getCursor() {
-					return canEdit ? CursorType.IBEAM : null;
-				}
-			}.addFlags(Theme.CENTERED).setMinWidth(panelText.width).setMaxWidth(panelText.width).setSpacing(9).setText(new TextComponent("").append(subtitle).withStyle(ChatFormatting.ITALIC, ChatFormatting.GRAY)));
+			panelText.add(new QuestDescriptionField(panelText, canEdit, b -> editSubtitle())
+					.addFlags(Theme.CENTERED)
+					.setMinWidth(panelText.width).setMaxWidth(panelText.width)
+					.setSpacing(9)
+					.setText(new TextComponent("").append(subtitle).withStyle(ChatFormatting.ITALIC, ChatFormatting.GRAY)));
 		}
 
 		boolean showText = !quest.hideTextUntilComplete.get(false) || questScreen.file.self != null && questScreen.file.self.isCompleted(quest);
@@ -324,36 +281,9 @@ public class ViewQuestPanel extends Panel {
 
 					panelText.add(c);
 				} else {
-					int index = i;
-
-					TextField field = new TextField(panelText) {
-						@Override
-						public boolean mousePressed(MouseButton button) {
-							if (isMouseOver() && canEdit && button.isRight()) {
-								editDescLine(index, true, null);
-								return true;
-							}
-
-							return super.mousePressed(button);
-						}
-
-						@Override
-						public boolean mouseDoubleClicked(MouseButton button) {
-							if (isMouseOver() && canEdit) {
-								editDescLine(index, false, null);
-								return true;
-							}
-
-							return false;
-						}
-
-						@Override
-						@Nullable
-						public CursorType getCursor() {
-							return canEdit ? CursorType.IBEAM : null;
-						}
-					}.setMaxWidth(panelText.width).setSpacing(9).setText(component);
-
+					final int line = i;
+					TextField field = new QuestDescriptionField(panelText, canEdit, context -> editDescLine(line, context, null))
+							.setMaxWidth(panelText.width).setSpacing(9).setText(component);
 					field.setWidth(panelText.width);
 					panelText.add(field);
 				}
@@ -576,5 +506,76 @@ public class ViewQuestPanel extends Panel {
 	@Override
 	public boolean mousePressed(MouseButton button) {
 		return super.mousePressed(button) || isMouseOver();
+	}
+
+	private class QuestDescriptionField extends TextField {
+		private final boolean canEdit;
+		private final Consumer<Boolean> editCallback;
+
+		QuestDescriptionField(Panel panel, boolean canEdit, Consumer<Boolean> editCallback) {
+			super(panel);
+			this.canEdit = canEdit;
+			this.editCallback = editCallback;
+		}
+
+		@Override
+		public boolean mousePressed(MouseButton button) {
+			if (isMouseOver())
+				if (canEdit && button.isRight()) {
+					editCallback.accept(true);
+					return true;
+				} else if (button.isLeft() && Minecraft.getInstance().screen != null) {
+					Style style = getComponentStyleAt(questScreen.getTheme(), getMouseX(), getMouseY());
+					return Minecraft.getInstance().screen.handleComponentClicked(style);
+				}
+
+			return super.mousePressed(button);
+		}
+
+		@Override
+		public boolean mouseDoubleClicked(MouseButton button) {
+			if (isMouseOver() && canEdit) {
+				editCallback.accept(false);
+				return true;
+			}
+
+			return false;
+		}
+
+		@Override
+		@Nullable
+		public CursorType getCursor() {
+			return canEdit ? CursorType.IBEAM : null;
+		}
+
+		@Override
+		public void addMouseOverText(TooltipList list) {
+			if (!isMouseOver()) return;
+
+			super.addMouseOverText(list);
+
+			Style style = getComponentStyleAt(questScreen.getTheme(), getMouseX(), getMouseY());
+			if (style != null && style.getHoverEvent() != null) {
+				HoverEvent hoverevent = style.getHoverEvent();
+				HoverEvent.ItemStackInfo stackInfo = hoverevent.getValue(HoverEvent.Action.SHOW_ITEM);
+				Minecraft mc = Minecraft.getInstance();
+				TooltipFlag flag = mc.options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL;
+				if (stackInfo != null) {
+					stackInfo.getItemStack().getTooltipLines(mc.player, flag).forEach(list::add);
+				} else {
+					HoverEvent.EntityTooltipInfo entityInfo = hoverevent.getValue(HoverEvent.Action.SHOW_ENTITY);
+					if (entityInfo != null) {
+						if (flag.isAdvanced()) {
+							entityInfo.getTooltipLines().forEach(list::add);
+						}
+					} else {
+						Component component = hoverevent.getValue(HoverEvent.Action.SHOW_TEXT);
+						if (component != null) {
+							list.add(component);
+						}
+					}
+				}
+			}
+		}
 	}
 }
