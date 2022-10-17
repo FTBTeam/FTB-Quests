@@ -4,6 +4,7 @@ import dev.architectury.hooks.fluid.FluidStackHooks;
 import dev.architectury.platform.forge.EventBuses;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftbquests.FTBQuests;
+import dev.ftb.mods.ftbquests.FTBQuestsTags;
 import dev.ftb.mods.ftbquests.item.FTBQuestsItems;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.loot.LootCrate;
@@ -54,7 +55,7 @@ public class FTBQuestsForge {
 	private static void livingDrops(LivingDropsEvent event) {
 		LivingEntity e = event.getEntityLiving();
 
-		if (e.level.isClientSide || e instanceof Player) {
+		if (e.level.isClientSide || e instanceof Player || e.getType().is(FTBQuestsTags.EntityTypes.NO_LOOT_CRATES)) {
 			return;
 		}
 
@@ -72,11 +73,9 @@ public class FTBQuestsForge {
 	}
 
 	private static void dropsEvent(LivingDropsEvent event) {
-		if (!(event.getEntity() instanceof ServerPlayer)) {
+		if (!(event.getEntity() instanceof ServerPlayer player)) {
 			return;
 		}
-
-		ServerPlayer player = (ServerPlayer) event.getEntity();
 
 		if (player instanceof FakePlayer || player.level.getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY)) {
 			return;
