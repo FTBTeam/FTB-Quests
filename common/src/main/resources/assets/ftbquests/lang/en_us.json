@@ -161,6 +161,8 @@
 	"ftbquests.quest.invisible.tooltip": "Quest is invisible to players until completed",
 	"ftbquests.quest.invisible_until_tasks": "Invisible until X tasks are completed",
 	"ftbquests.quest.invisible_until_tasks.tooltip": "Only applies if Invisible is true.\nIf > 0, quest becomes visible if X or more tasks are completed.",
+	"ftbquests.quest.min_required_header": "%d required",
+	"ftbquests.quest.hidden_quests_footer": "%d hidden",
 	"ftbquests.chapter_group": "Chapter Group",
 	"ftbquests.chapter_groups": "Chapter Groups",
 	"ftbquests.gui.edit_file": "Edit File",
