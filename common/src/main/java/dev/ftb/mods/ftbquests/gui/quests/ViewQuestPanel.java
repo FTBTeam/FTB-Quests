@@ -173,14 +173,14 @@ public class ViewQuestPanel extends Panel {
 			add(buttonOpenDependencies = new SimpleButton(this, new TranslatableComponent("ftbquests.gui.no_dependencies"), Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/arrow_left.png").withTint(borderColor), (widget, button) -> {
 			}));
 		} else {
-			add(buttonOpenDependencies = new SimpleButton(this, new TranslatableComponent("ftbquests.gui.view_dependencies"), Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/arrow_left.png").withTint(ThemeProperties.QUEST_VIEW_TITLE.get()), (widget, button) -> showList(quest.dependencies)));
+			add(buttonOpenDependencies = new SimpleButton(this, new TranslatableComponent("ftbquests.gui.view_dependencies"), Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/arrow_left.png").withTint(ThemeProperties.QUEST_VIEW_TITLE.get()), (widget, button) -> showList(quest.dependencies, true)));
 		}
 
 		if (quest.getDependants().isEmpty()) {
 			add(buttonOpenDependants = new SimpleButton(this, new TranslatableComponent("ftbquests.gui.no_dependants"), Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/arrow_right.png").withTint(borderColor), (widget, button) -> {
 			}));
 		} else {
-			add(buttonOpenDependants = new SimpleButton(this, new TranslatableComponent("ftbquests.gui.view_dependants"), Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/arrow_right.png").withTint(ThemeProperties.QUEST_VIEW_TITLE.get()), (widget, button) -> showList(quest.getDependants())));
+			add(buttonOpenDependants = new SimpleButton(this, new TranslatableComponent("ftbquests.gui.view_dependants"), Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/arrow_right.png").withTint(ThemeProperties.QUEST_VIEW_TITLE.get()), (widget, button) -> showList(quest.getDependants(), false)));
 		}
 
 		buttonOpenDependencies.setPosAndSize(0, 17, 13, 13);
@@ -350,9 +350,16 @@ public class ViewQuestPanel extends Panel {
 		}
 	}
 
-	private void showList(Collection<QuestObject> c) {
+	private void showList(Collection<QuestObject> c, boolean dependencies) {
 		int hidden = 0;
 		List<ContextMenuItem> contextMenu = new ArrayList<>();
+
+		if (dependencies && quest.minRequiredDependencies > 0) {
+			contextMenu.add(new ContextMenuItem(
+					new TranslatableComponent("ftbquests.quest.min_required_header", quest.minRequiredDependencies)
+							.withStyle(ChatFormatting.UNDERLINE), Icon.EMPTY, null).setEnabled(false)
+			);
+		}
 
 		for (QuestObject object : c) {
 			if (questScreen.file.canEdit() || object.isVisible(questScreen.file.self)) {
@@ -368,13 +375,10 @@ public class ViewQuestPanel extends Panel {
 		}
 
 		if (hidden > 0) {
-			if (hidden == c.size()) {
-				contextMenu.add(new ContextMenuItem(new TextComponent(hidden + " hidden quests"), Icon.EMPTY, () -> {
-				}).setEnabled(false));
-			} else {
-				contextMenu.add(new ContextMenuItem(new TextComponent("+ " + hidden + " hidden quests"), Icon.EMPTY, () -> {
-				}).setEnabled(false));
-			}
+			MutableComponent prefix = hidden == c.size() ? TextComponent.EMPTY.copy() : new TextComponent("+ ");
+			contextMenu.add(new ContextMenuItem(
+					prefix.append(new TranslatableComponent("ftbquests.quest.hidden_quests_footer", hidden)), Icon.EMPTY, null).setEnabled(false)
+			);
 		}
 
 		getGui().openContextMenu(contextMenu);
