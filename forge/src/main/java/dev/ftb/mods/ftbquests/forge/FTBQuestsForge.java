@@ -10,6 +10,7 @@ import dev.ftb.mods.ftbquests.command.ChangeProgressArgument;
 import dev.ftb.mods.ftbquests.command.QuestObjectArgument;
 import dev.ftb.mods.ftbquests.integration.StageHelper;
 import dev.ftb.mods.ftbquests.integration.gamestages.GameStagesStageHelper;
+import dev.ftb.mods.ftbquests.FTBQuestsTags;
 import dev.ftb.mods.ftbquests.item.FTBQuestsItems;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.loot.LootCrate;
@@ -71,7 +72,7 @@ public class FTBQuestsForge {
 	private static void livingDrops(LivingDropsEvent event) {
 		LivingEntity e = event.getEntity();
 
-		if (e.level.isClientSide || e instanceof Player) {
+		if (e.level.isClientSide || e instanceof Player || e.getType().is(FTBQuestsTags.EntityTypes.NO_LOOT_CRATES)) {
 			return;
 		}
 
@@ -89,11 +90,9 @@ public class FTBQuestsForge {
 	}
 
 	private static void dropsEvent(LivingDropsEvent event) {
-		if (!(event.getEntity() instanceof ServerPlayer)) {
+		if (!(event.getEntity() instanceof ServerPlayer player)) {
 			return;
 		}
-
-		ServerPlayer player = (ServerPlayer) event.getEntity();
 
 		if (player instanceof FakePlayer || player.level.getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY)) {
 			return;
