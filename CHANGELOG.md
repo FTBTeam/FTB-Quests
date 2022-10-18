@@ -17,9 +17,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The Structure Task now supports structure tags (e.g. `#minecraft:villages` will match any village)
 - Added a `/ftbquests reload` command to reload quest data from file. Requires user to be in editing mode
   - Caution: not recommended for use on live servers. Take care when editing quest file data directly. Make a backup!
+- Added a "Save to Server" button in the settings context menu which allows quest data to be saved immediately
+  - Quest data is normally saved with a world-save, but this is a convenience to allow quest developers to save without leaving the GUI
 - When outside editing mode, selecting a quest (right or left-click) will preview any hidden dependents
   - Dependency lines and quest box outlines will be shown, but no other information
 - When in editing mode, hidden quests which would be invisible outside editing mode now have an "eye" icon to indicate that
+- Quest subtitle and description text now supports vanilla-style raw JSON text (https://minecraft.fandom.com/wiki/Raw_JSON_text_format)
+  - Standard markup (colour, bold, etc.) is supported, in addition to `clickEvent` and `hoverEvent`
+  - Any line starting with `{` followed by 0 or more whitespace followed by `"` will be treated as raw JSON text, e.g. `{"text": "hello", "color": "green"}`
+  - Old-style markup is still supported for brevity (i.e. lines which start with `{`)
+- Added an entity type tag `ftbquests:no_loot_crates`; any entity in this tag will never drop a loot crate on death
+- Quest view minimum width config setting now also has a chapter default setting (thanks @MasterOfBob777/@DarkMega18)
+- Quests now have an "Invisible" setting; if true, the quests is hidden until completed (thanks @MasterOfBob777/@DarkMega18)
+  - There's a related "Invisible until X tasks completed" setting which allows the quest to appear after one or more tasks have been completed
+- Quests now have a "Repeatable" setting again; the quest will reset and be available once more after any rewards are claimed (thanks @MasterOfBob777/@DarkMega18)
+- Quests now have an "Exclude from Claim All" setting which allows them to ignore the "Claim All" button (thanks @MasterOfBob777/@DarkMega18)
+  - May be useful for quests which have some kind of special non-item reward (e.g. running a command) which is more suitable for clicking directly
 
 ### Fixed
 - Fixed an NPE in the Stats Task if the resource location is unknown
