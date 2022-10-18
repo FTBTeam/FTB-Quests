@@ -1,0 +1,59 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "name": "screen_5",
+      "rolls": 1.0,
+      "bonus_rolls": 0.0,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "ftbquests:screen_5",
+          "functions": [
+            {
+              "function": "minecraft:copy_nbt",
+              "source": "block_entity",
+              "ops": [
+                {
+                  "source": "TaskID",
+                  "target": "BlockEntityTag.TaskID",
+                  "op": "replace"
+                },
+                {
+                  "source": "Skin",
+                  "target": "BlockEntityTag.Skin",
+                  "op": "replace"
+                },
+                {
+                  "source": "Indestructible",
+                  "target": "BlockEntityTag.Indestructible",
+                  "op": "replace"
+                },
+                {
+                  "source": "InputOnly",
+                  "target": "BlockEntityTag.InputOnly",
+                  "op": "replace"
+                },
+                {
+                  "source": "InputModeIcon",
+                  "target": "BlockEntityTag.InputModeIcon",
+                  "op": "replace"
+                },
+                {
+                  "source": "TextShadow",
+                  "target": "BlockEntityTag.TextShadow",
+                  "op": "replace"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ]
+    }
+  ]
+}
