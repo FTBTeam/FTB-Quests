@@ -95,6 +95,7 @@ public class ClientQuestFile extends QuestFile {
 			chaptersExpanded = questScreen.chapterPanel.expanded;
 		}
 
+		Minecraft.getInstance().setScreen(null);  // ensures prevScreen is null, so we can close correctly
 		questScreen = new QuestScreen(this);
 		questGui = questScreen;
 
