@@ -1,4 +1,4 @@
-package dev.ftb.mods.ftbquests.quest.task.forge;
+package dev.ftb.mods.ftbquests.quest.task;
 
 import dev.architectury.fluid.FluidStack;
 import dev.architectury.hooks.fluid.FluidStackHooks;
@@ -6,12 +6,12 @@ import dev.architectury.registry.registries.Registries;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.FluidConfig;
 import dev.ftb.mods.ftblibrary.config.NBTConfig;
+import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
+import dev.ftb.mods.ftblibrary.util.StringUtils;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.TeamData;
-import dev.ftb.mods.ftbquests.quest.task.Task;
-import dev.ftb.mods.ftbquests.quest.task.TaskType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
@@ -21,8 +21,6 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
@@ -30,8 +28,7 @@ import java.util.Optional;
 /**
  * @author LatvianModder
  */
-public class ForgeFluidTask extends Task {
-	public static TaskType TYPE;
+public class FluidTask extends Task {
 	public static final ResourceLocation TANK_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "textures/tasks/tank.png");
 
 	public Fluid fluid = Fluids.WATER;
@@ -40,13 +37,13 @@ public class ForgeFluidTask extends Task {
 
 	private FluidStack cachedFluidStack = null;
 
-	public ForgeFluidTask(Quest quest) {
+	public FluidTask(Quest quest) {
 		super(quest);
 	}
 
 	@Override
 	public TaskType getType() {
-		return TYPE;
+		return TaskTypes.FLUID;
 	}
 
 	@Override
@@ -134,39 +131,33 @@ public class ForgeFluidTask extends Task {
 
 		if (a >= FluidStack.bucketAmount()) {
 			if (a % FluidStack.bucketAmount() != 0L) {
-				builder.append(a / (double) FluidStack.bucketAmount());
+				builder.append(StringUtils.formatDouble(a / (double) FluidStack.bucketAmount()));
 			} else {
 				builder.append(a / FluidStack.bucketAmount());
 			}
+			builder.append(" B");
 		} else {
-			builder.append(a % FluidStack.bucketAmount());
+			builder.append(a).append(" mB");
 		}
 
-		builder.append(' ');
-
-		if (a < FluidStack.bucketAmount()) {
-			builder.append('m');
-		}
-
-		builder.append('B');
 		return builder.toString();
 	}
 
 	@Override
-	@OnlyIn(Dist.CLIENT)
 	public MutableComponent getAltTitle() {
 		return Component.literal(getVolumeString(amount) + " of ").append(createFluidStack().getName());
 	}
 
 	@Override
-	@OnlyIn(Dist.CLIENT)
 	public Icon getAltIcon() {
 		FluidStack stack = createFluidStack();
-		return Icon.getIcon(Optional.ofNullable(FluidStackHooks.getStillTexture(stack)).map(TextureAtlasSprite::getName).map(ResourceLocation::toString).orElse("missingno"));
+		String id = Optional.ofNullable(FluidStackHooks.getStillTexture(stack))
+				.map(TextureAtlasSprite::getName).map(ResourceLocation::toString)
+				.orElse("missingno");
+		return Icon.getIcon(id).withTint(Color4I.rgb(FluidStackHooks.getColor(stack)));
 	}
 
 	@Override
-	@OnlyIn(Dist.CLIENT)
 	public void getConfig(ConfigGroup config) {
 		super.getConfig(config);
 
@@ -182,77 +173,8 @@ public class ForgeFluidTask extends Task {
 
 	@Override
 	@Nullable
-	@OnlyIn(Dist.CLIENT)
 	public Object getIngredient() {
 		return createFluidStack();
 	}
 
-		/*public int fill(FluidStack resource, IFluidHandler.FluidAction action)
-		{
-			if ( resource.getAmount().isGreaterThan(Fraction.zero()) && !isComplete() && Objects.equals(resource.getFluid(), task.createFluidStack().getFluid()) && data.canStartTasks(task.quest))
-			{
-				int add = (int) Math.min(resource.getAmount(), Math.min(Integer.MAX_VALUE, task.amount - progress));
-
-				if (add > 0)
-				{
-					if (action.execute() && data.file.getSide().isServer())
-					{
-						addProgress(add);
-					}
-
-					return add;
-				}
-			}
-
-			return 0;
-		}*/
-
-		/*
-		@Override
-		public ItemStack insertItem(ItemStack stack, boolean singleItem, boolean simulate, @Nullable Player player)
-		{
-			if (isComplete())
-			{
-				return stack;
-			}
-
-			IFluidHandlerItem handlerItem = stack.getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY, null);
-
-			if (handlerItem == null)
-			{
-				return stack;
-			}
-
-			FluidStack toDrain = task.createFluidStack();
-			FluidStack drainedFluid = handlerItem.drain(toDrain, false);
-
-			if (drainedFluid == null || drainedFluid.amount <= 0)
-			{
-				return stack;
-			}
-
-			IItemHandler inv = player == null ? null : player.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
-
-			if (inv == null)
-			{
-				inv = ItemDestroyingInventory.INSTANCE;
-			}
-
-			ItemStack stack1 = stack.copy();
-			FluidActionResult result = FluidUtil.tryFillContainerAndStow(stack1, this, inv, Integer.MAX_VALUE, player, !simulate);
-
-			if (!result.isSuccess())
-			{
-				result = FluidUtil.tryEmptyContainerAndStow(stack1, this, inv, Integer.MAX_VALUE, player, !simulate);
-			}
-
-			if (result.isSuccess())
-			{
-				return player == null ? ItemStack.EMPTY : result.getResult();
-			}
-
-			return stack;
-		}
-
-		*/
 }

@@ -2,6 +2,7 @@ package dev.ftb.mods.ftbquests.quest.task;
 
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.util.StringUtils;
+import dev.ftb.mods.ftbquests.client.EnergyTaskClientData;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -15,7 +16,7 @@ import net.minecraft.network.chat.MutableComponent;
  */
 public abstract class EnergyTask extends Task implements ISingleLongValueTask {
 	public long value = 1000L;
-	public long maxInput = 0L;
+	public long maxInput = 1000L;
 
 	public EnergyTask(Quest quest) {
 		super(quest);
@@ -83,6 +84,8 @@ public abstract class EnergyTask extends Task implements ISingleLongValueTask {
 	public void getConfig(ConfigGroup config) {
 		super.getConfig(config);
 		config.addLong("value", value, v -> value = v, 1000L, 1L, Long.MAX_VALUE);
-		config.addLong("max_input", maxInput, v -> maxInput = v, 0L, 0L, Integer.MAX_VALUE).setNameKey("ftbquests.task.max_input");
+		config.addLong("max_input", maxInput, v -> maxInput = v, 1000L, 0L, Integer.MAX_VALUE).setNameKey("ftbquests.task.max_input");
 	}
+
+	public abstract EnergyTaskClientData getClientData();
 }

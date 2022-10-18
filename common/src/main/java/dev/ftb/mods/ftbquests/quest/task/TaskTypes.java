@@ -1,12 +1,16 @@
 package dev.ftb.mods.ftbquests.quest.task;
 
+import dev.architectury.hooks.fluid.FluidStackHooks;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftbquests.FTBQuests;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.material.Fluids;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 /**
@@ -32,6 +36,7 @@ public interface TaskTypes {
 	TaskType BIOME = register(new ResourceLocation(FTBQuests.MOD_ID, "biome"), BiomeTask::new, () -> Icon.getIcon("minecraft:block/oak_sapling"));
 	TaskType STRUCTURE = register(new ResourceLocation(FTBQuests.MOD_ID, "structure"), StructureTask::new, () -> Icon.getIcon("minecraft:item/filled_map"));
 	TaskType STAGE = TaskTypes.register(new ResourceLocation(FTBQuests.MOD_ID, "gamestage"), StageTask::new, () -> Icons.CONTROLLER);
+	TaskType FLUID = TaskTypes.register(new ResourceLocation(FTBQuests.MOD_ID, "fluid"), FluidTask::new, () -> Icon.getIcon(Optional.ofNullable(FluidStackHooks.getStillTexture(Fluids.WATER)).map(TextureAtlasSprite::getName).map(ResourceLocation::toString).orElse("missingno")).combineWith(Icon.getIcon(FluidTask.TANK_TEXTURE.toString())));
 
 	static void init() {
 	}
