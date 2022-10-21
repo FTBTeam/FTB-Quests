@@ -1,26 +1,24 @@
 package dev.ftb.mods.ftbquests.client;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.architectury.event.EventResult;
 import dev.architectury.event.events.client.ClientGuiEvent;
 import dev.architectury.event.events.client.ClientLifecycleEvent;
+import dev.architectury.event.events.client.ClientTextureStitchEvent;
 import dev.architectury.event.events.client.ClientTickEvent;
+import dev.architectury.registry.client.rendering.BlockEntityRendererRegistry;
 import dev.architectury.registry.client.rendering.ColorHandlerRegistry;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.sidebar.SidebarButtonCreatedEvent;
 import dev.ftb.mods.ftblibrary.ui.CustomClickEvent;
 import dev.ftb.mods.ftblibrary.ui.GuiHelper;
 import dev.ftb.mods.ftbquests.FTBQuests;
+import dev.ftb.mods.ftbquests.block.entity.FTBQuestsBlockEntities;
 import dev.ftb.mods.ftbquests.events.ClearFileCacheEvent;
 import dev.ftb.mods.ftbquests.item.FTBQuestsItems;
 import dev.ftb.mods.ftbquests.item.LootCrateItem;
 import dev.ftb.mods.ftbquests.net.SubmitTaskMessage;
-import dev.ftb.mods.ftbquests.quest.Chapter;
-import dev.ftb.mods.ftbquests.quest.ChapterGroup;
-import dev.ftb.mods.ftbquests.quest.Quest;
-import dev.ftb.mods.ftbquests.quest.QuestFile;
-import dev.ftb.mods.ftbquests.quest.TeamData;
+import dev.ftb.mods.ftbquests.quest.*;
 import dev.ftb.mods.ftbquests.quest.loot.LootCrate;
 import dev.ftb.mods.ftbquests.quest.task.ObservationTask;
 import dev.ftb.mods.ftbquests.quest.task.Task;
@@ -28,17 +26,22 @@ import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.toasts.SystemToast;
+import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.phys.HitResult;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
+
+import static dev.ftb.mods.ftbquests.client.TaskScreenRenderer.*;
 
 /**
  * @author LatvianModder
@@ -51,14 +54,50 @@ public class FTBQuestsClientEventHandler {
 	private long currentlyObservingTicks = 0L;
 	private final List<FormattedCharSequence> pinnedQuestText = new ArrayList<>();
 
+	public static TextureAtlasSprite inputOnlySprite;
+	public static TextureAtlasSprite tankSprite;
+	public static TextureAtlasSprite feEnergyEmptySprite;
+	public static TextureAtlasSprite feEnergyFullSprite;
+	public static TextureAtlasSprite trEnergyEmptySprite;
+	public static TextureAtlasSprite trEnergyFullSprite;
+
 	public void init() {
 		ClientLifecycleEvent.CLIENT_SETUP.register(this::registerItemColors);
+		ClientLifecycleEvent.CLIENT_SETUP.register(this::registerBERs);
 		SidebarButtonCreatedEvent.EVENT.register(this::onSidebarButtonCreated);
 		ClearFileCacheEvent.EVENT.register(this::onFileCacheClear);
 		ClientTickEvent.CLIENT_PRE.register(this::onKeyEvent);
 		CustomClickEvent.EVENT.register(this::onCustomClick);
 		ClientTickEvent.CLIENT_PRE.register(this::onClientTick);
 		ClientGuiEvent.RENDER_HUD.register(this::onScreenRender);
+		ClientTextureStitchEvent.PRE.register(this::onTextureStitchPre);
+		ClientTextureStitchEvent.POST.register(this::onTextureStitchPost);
+	}
+
+	private void onTextureStitchPre(TextureAtlas textureAtlas, Consumer<ResourceLocation> stitcher) {
+		if (textureAtlas.location().equals(InventoryMenu.BLOCK_ATLAS)) {
+			stitcher.accept(INPUT_ONLY_TEXTURE);
+			stitcher.accept(TANK_TEXTURE);
+			stitcher.accept(FE_ENERGY_EMPTY_TEXTURE);
+			stitcher.accept(FE_ENERGY_FULL_TEXTURE);
+			stitcher.accept(TR_ENERGY_EMPTY_TEXTURE);
+			stitcher.accept(TR_ENERGY_FULL_TEXTURE);
+		}
+	}
+
+	private void onTextureStitchPost(TextureAtlas textureAtlas) {
+		if (textureAtlas.location().equals(InventoryMenu.BLOCK_ATLAS)) {
+			inputOnlySprite = textureAtlas.getSprite(INPUT_ONLY_TEXTURE);
+			tankSprite = textureAtlas.getSprite(TANK_TEXTURE);
+			feEnergyEmptySprite = textureAtlas.getSprite(FE_ENERGY_EMPTY_TEXTURE);
+			feEnergyFullSprite = textureAtlas.getSprite(FE_ENERGY_FULL_TEXTURE);
+			trEnergyEmptySprite = textureAtlas.getSprite(TR_ENERGY_EMPTY_TEXTURE);
+			trEnergyFullSprite = textureAtlas.getSprite(TR_ENERGY_FULL_TEXTURE);
+		}
+	}
+
+	private void registerBERs(Minecraft minecraft) {
+		BlockEntityRendererRegistry.register(FTBQuestsBlockEntities.CORE_TASK_SCREEN.get(), TaskScreenRenderer::new);
 	}
 
 	private void registerItemColors(Minecraft minecraft) {

@@ -3,8 +3,11 @@ package dev.ftb.mods.ftbquests;
 import dev.ftb.mods.ftbquests.quest.QuestFile;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.TeamData;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
 public class FTBQuestsCommon {
@@ -46,5 +49,12 @@ public class FTBQuestsCommon {
 	}
 
 	public void openCustomIconGui(Player player, InteractionHand hand) {
+	}
+
+	public void openScreenConfigGui(BlockPos pos) {
+	}
+
+	public float[] getTextureUV(BlockState state, Direction face) {
+		return null;
 	}
 }
