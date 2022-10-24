@@ -25,7 +25,6 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.level.block.WallSignBlock;
@@ -79,10 +78,10 @@ public class TaskScreenRenderer implements BlockEntityRenderer<TaskScreenBlockEn
         double iconY = 0.5D;
 
         // render quest and task title at top of screen
-        Component top1 = taskScreen.isInputOnly() ? TextComponent.EMPTY : task.quest.getTitle();
-        Component top2 = taskScreen.isInputOnly() ? TextComponent.EMPTY : task.getTitle();
+        Component top1 = taskScreen.isInputOnly() ? Component.empty() : task.quest.getTitle();
+        Component top2 = taskScreen.isInputOnly() ? Component.empty() : task.getTitle();
         drawString(taskScreen, font, poseStack, top1, 0.02D, 0.15D);
-        if (top2 != TextComponent.EMPTY) {
+        if (!top2.equals(Component.empty())) {
             drawString(taskScreen, font, poseStack, top2, 0.17D, 0.07D);
             iconY = 0.54D;
         }
@@ -91,7 +90,7 @@ public class TaskScreenRenderer implements BlockEntityRenderer<TaskScreenBlockEn
         if (!taskScreen.isInputOnly() && !task.hideProgressNumbers() /*&& data.isCompleted(task)*/) {
             long progress = data.getProgress(task);
             ChatFormatting col = progress == 0 ? ChatFormatting.GOLD : (progress < task.getMaxProgress() ? ChatFormatting.YELLOW : ChatFormatting.GREEN);
-            Component txt = new TextComponent(task.formatProgress(data, progress) + " / " + task.formatMaxProgress()).withStyle(col);
+            Component txt = Component.literal(task.formatProgress(data, progress) + " / " + task.formatMaxProgress()).withStyle(col);
             drawString(taskScreen, font, poseStack, txt, 0.83D, 0.15D);
         }
 
@@ -188,7 +187,7 @@ public class TaskScreenRenderer implements BlockEntityRenderer<TaskScreenBlockEn
     }
 
     private void drawString(TaskScreenBlockEntity taskScreen, Font font, PoseStack poseStack, Component text, double y, double size) {
-        if (text != TextComponent.EMPTY) {
+        if (!text.equals(Component.empty())) {
             poseStack.pushPose();
             poseStack.translate(0.5D, y, 0D);
 

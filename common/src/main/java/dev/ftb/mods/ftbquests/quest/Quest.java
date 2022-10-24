@@ -645,7 +645,7 @@ public final class Quest extends QuestObject implements Movable {
 		try {
 			return Component.Serializer.fromJson(raw);
 		} catch (JsonParseException e) {
-			return new TextComponent("ERROR: " + e.getMessage()).withStyle(ChatFormatting.RED);
+			return Component.literal("ERROR: " + e.getMessage()).withStyle(ChatFormatting.RED);
 		}
 	}
 

@@ -5,7 +5,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.Nameable;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -28,7 +27,7 @@ public class TaskScreenAuxBlockEntity extends BlockEntity implements ITaskScreen
 
     @Override
     public Component getName() {
-        return getCoreScreen().map(s -> s.getBlockState().getBlock().getName()).orElse(new TextComponent("Task Screen"));
+        return getCoreScreen().map(s -> s.getBlockState().getBlock().getName()).orElse(Component.literal("Task Screen"));
     }
 
     @Override

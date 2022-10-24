@@ -18,7 +18,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -158,7 +157,7 @@ public class TaskScreenBlock extends BaseEntityBlock {
         if (player instanceof ServerPlayer sp && level.getBlockEntity(blockPos) instanceof ITaskScreen taskScreen) {
             TeamRank rank = FTBTeamsAPI.getHighestRank(taskScreen.getTeamId(), sp.getUUID());
             if (!rank.isMember()) {
-                sp.displayClientMessage(new TranslatableComponent("block.ftbquests.screen.no_permission").withStyle(ChatFormatting.RED), true);
+                sp.displayClientMessage(Component.translatable("block.ftbquests.screen.no_permission").withStyle(ChatFormatting.RED), true);
                 return InteractionResult.FAIL;
             }
             taskScreen.getCoreScreen().ifPresent(coreScreen -> new TaskScreenConfigRequest(coreScreen.getBlockPos()).sendTo(sp));
@@ -176,9 +175,9 @@ public class TaskScreenBlock extends BaseEntityBlock {
             if (questFile != null) {
                 Task task = questFile.getTask(subTag.getLong("TaskID"));
                 if (task != null) {
-                    list.add(new TranslatableComponent("ftbquests.chapter").append(": ").append(task.quest.chapter.getTitle().copy().withStyle(ChatFormatting.YELLOW)));
-                    list.add(new TranslatableComponent("ftbquests.quest").append(": ").append(task.quest.getTitle().copy().withStyle(ChatFormatting.YELLOW)));
-                    list.add(new TranslatableComponent("ftbquests.task").append(": ").append(task.getTitle().copy().withStyle(ChatFormatting.YELLOW)));
+                    list.add(Component.translatable("ftbquests.chapter").append(": ").append(task.quest.chapter.getTitle().copy().withStyle(ChatFormatting.YELLOW)));
+                    list.add(Component.translatable("ftbquests.quest").append(": ").append(task.quest.getTitle().copy().withStyle(ChatFormatting.YELLOW)));
+                    list.add(Component.translatable("ftbquests.task").append(": ").append(task.getTitle().copy().withStyle(ChatFormatting.YELLOW)));
                 }
             }
         }

@@ -6,8 +6,8 @@ import dev.ftb.mods.ftbquests.client.EnergyTaskClientData;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 
 public class TechRebornEnergyTask extends EnergyTask {
@@ -32,6 +32,6 @@ public class TechRebornEnergyTask extends EnergyTask {
     @Override
     @Environment(EnvType.CLIENT)
     public MutableComponent getAltTitle() {
-        return new TranslatableComponent("ftbquests.task.ftbquests.tech_reborn_energy.text", StringUtils.formatDouble(value, true));
+        return Component.translatable("ftbquests.task.ftbquests.tech_reborn_energy.text", StringUtils.formatDouble(value, true));
     }
 }
