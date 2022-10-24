@@ -193,6 +193,8 @@ public interface ThemeProperties {
 	ColorProperty QUEST_VIEW_TITLE = new ColorProperty("quest_view_title");
 	ColorProperty QUEST_COMPLETED_COLOR = new ColorProperty("quest_completed_color");
 	ColorProperty QUEST_STARTED_COLOR = new ColorProperty("quest_started_color");
+	ColorProperty QUEST_NOT_STARTED_COLOR = new ColorProperty("quest_not_started_color");
+	ColorProperty QUEST_LOCKED_COLOR = new ColorProperty("quest_locked_color");
 	IconProperty DEPENDENCY_LINE_TEXTURE = new IconProperty("dependency_line_texture");
 	ColorProperty DEPENDENCY_LINE_COMPLETED_COLOR = new ColorProperty("dependency_line_completed_color");
 	ColorProperty DEPENDENCY_LINE_REQUIRES_COLOR = new ColorProperty("dependency_line_requires_color");
