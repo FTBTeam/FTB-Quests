@@ -318,7 +318,7 @@ public class QuestButton extends Button {
 
 	@Override
 	public void draw(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
-		Color4I outlineColor = Color4I.WHITE.withAlpha(150);
+		Color4I outlineColor = ThemeProperties.QUEST_NOT_STARTED_COLOR.get(quest); //Color4I.WHITE.withAlpha(150);
 		Icon qicon = Icon.EMPTY;
 		Icon hicon = Icon.EMPTY;
 
@@ -341,7 +341,7 @@ public class QuestButton extends Button {
 				outlineColor = ThemeProperties.QUEST_STARTED_COLOR.get(quest);
 			}
 		} else {
-			outlineColor = Color4I.GRAY;
+			outlineColor = ThemeProperties.QUEST_LOCKED_COLOR.get(quest); //Color4I.GRAY;
 		}
 
 		if (qicon == Icon.EMPTY && questScreen.file.self.isQuestPinned(quest.id)) {
