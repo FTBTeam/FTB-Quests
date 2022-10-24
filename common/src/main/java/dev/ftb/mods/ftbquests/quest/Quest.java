@@ -42,7 +42,7 @@ import java.util.regex.Pattern;
  * @author LatvianModder
  */
 public final class Quest extends QuestObject implements Movable {
-	private static final Pattern JSON_TEXT_PAT = Pattern.compile("^\\{\\s*\"");
+	private static final Pattern JSON_TEXT_PAT = Pattern.compile("^[{\\[]\\s*\"");
 
 	public Chapter chapter;
 	public String subtitle;

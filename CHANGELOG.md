@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Task Screens have returned! Task display and automated completion are now possible
+  - Item Tasks and Fluid Tasks can be used on both Forge and Fabric
+  - Forge Energy Tasks can be used on Forge
+  - Tech Reborn Energy Tasks can be used on Fabric
 - Edit mode can now be toggled from within the Quests GUI (new button in bottom right)
 - Multiple quests can now be selected by dragging a box with the middle mouse button
   - Hold Control to toggle selected status of quests
