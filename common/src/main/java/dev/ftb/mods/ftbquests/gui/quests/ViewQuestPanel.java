@@ -173,22 +173,14 @@ public class ViewQuestPanel extends Panel {
 			add(buttonOpenDependencies = new SimpleButton(this, Component.translatable("ftbquests.gui.no_dependencies"), Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/arrow_left.png").withTint(borderColor), (widget, button) -> {
 			}));
 		} else {
-<<<<<<< HEAD
-			add(buttonOpenDependencies = new SimpleButton(this, Component.translatable("ftbquests.gui.view_dependencies"), Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/arrow_left.png").withTint(ThemeProperties.QUEST_VIEW_TITLE.get()), (widget, button) -> showList(quest.dependencies)));
-=======
-			add(buttonOpenDependencies = new SimpleButton(this, new TranslatableComponent("ftbquests.gui.view_dependencies"), Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/arrow_left.png").withTint(ThemeProperties.QUEST_VIEW_TITLE.get()), (widget, button) -> showList(quest.dependencies, true)));
->>>>>>> 26c737bd... feat: make quest dependency info clear in quest view panel
+			add(buttonOpenDependencies = new SimpleButton(this, Component.translatable("ftbquests.gui.view_dependencies"), Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/arrow_left.png").withTint(ThemeProperties.QUEST_VIEW_TITLE.get()), (widget, button) -> showList(quest.dependencies, true)));
 		}
 
 		if (quest.getDependants().isEmpty()) {
 			add(buttonOpenDependants = new SimpleButton(this, Component.translatable("ftbquests.gui.no_dependants"), Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/arrow_right.png").withTint(borderColor), (widget, button) -> {
 			}));
 		} else {
-<<<<<<< HEAD
-			add(buttonOpenDependants = new SimpleButton(this, Component.translatable("ftbquests.gui.view_dependants"), Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/arrow_right.png").withTint(ThemeProperties.QUEST_VIEW_TITLE.get()), (widget, button) -> showList(quest.getDependants())));
-=======
-			add(buttonOpenDependants = new SimpleButton(this, new TranslatableComponent("ftbquests.gui.view_dependants"), Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/arrow_right.png").withTint(ThemeProperties.QUEST_VIEW_TITLE.get()), (widget, button) -> showList(quest.getDependants(), false)));
->>>>>>> 26c737bd... feat: make quest dependency info clear in quest view panel
+			add(buttonOpenDependants = new SimpleButton(this, Component.translatable("ftbquests.gui.view_dependants"), Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/arrow_right.png").withTint(ThemeProperties.QUEST_VIEW_TITLE.get()), (widget, button) -> showList(quest.getDependants(), false)));
 		}
 
 		buttonOpenDependencies.setPosAndSize(0, 17, 13, 13);
@@ -255,7 +247,7 @@ public class ViewQuestPanel extends Panel {
 			subtitle = Component.literal("[No Subtitle]");
 		}
 
-		if (subtitle != TextComponent.EMPTY) {
+		if (!subtitle.equals(Component.empty())) {
 			panelText.add(new QuestDescriptionField(panelText, canEdit, b -> editSubtitle())
 					.addFlags(Theme.CENTERED)
 					.setMinWidth(panelText.width).setMaxWidth(panelText.width)
@@ -364,7 +356,7 @@ public class ViewQuestPanel extends Panel {
 
 		if (dependencies && quest.minRequiredDependencies > 0) {
 			contextMenu.add(new ContextMenuItem(
-					new TranslatableComponent("ftbquests.quest.min_required_header", quest.minRequiredDependencies)
+					Component.translatable("ftbquests.quest.min_required_header", quest.minRequiredDependencies)
 							.withStyle(ChatFormatting.UNDERLINE), Icon.EMPTY, null).setEnabled(false)
 			);
 		}
@@ -383,20 +375,10 @@ public class ViewQuestPanel extends Panel {
 		}
 
 		if (hidden > 0) {
-<<<<<<< HEAD
-			if (hidden == c.size()) {
-				contextMenu.add(new ContextMenuItem(Component.literal(hidden + " hidden quests"), Icon.EMPTY, () -> {
-				}).setEnabled(false));
-			} else {
-				contextMenu.add(new ContextMenuItem(Component.literal("+ " + hidden + " hidden quests"), Icon.EMPTY, () -> {
-				}).setEnabled(false));
-			}
-=======
-			MutableComponent prefix = hidden == c.size() ? TextComponent.EMPTY.copy() : new TextComponent("+ ");
+			MutableComponent prefix = hidden == c.size() ? Component.empty() : Component.literal("+ ");
 			contextMenu.add(new ContextMenuItem(
-					prefix.append(new TranslatableComponent("ftbquests.quest.hidden_quests_footer", hidden)), Icon.EMPTY, null).setEnabled(false)
+					prefix.append(Component.translatable("ftbquests.quest.hidden_quests_footer", hidden)), Icon.EMPTY, null).setEnabled(false)
 			);
->>>>>>> 26c737bd... feat: make quest dependency info clear in quest view panel
 		}
 
 		getGui().openContextMenu(contextMenu);

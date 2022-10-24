@@ -1,24 +1,21 @@
 package dev.ftb.mods.ftbquests.forge;
 
 import com.google.common.base.Suppliers;
-import dev.architectury.hooks.fluid.FluidStackHooks;
 import dev.architectury.platform.Platform;
 import dev.architectury.platform.forge.EventBuses;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftbquests.FTBQuests;
+import dev.ftb.mods.ftbquests.FTBQuestsTags;
 import dev.ftb.mods.ftbquests.command.ChangeProgressArgument;
 import dev.ftb.mods.ftbquests.command.QuestObjectArgument;
 import dev.ftb.mods.ftbquests.integration.StageHelper;
 import dev.ftb.mods.ftbquests.integration.gamestages.GameStagesStageHelper;
-import dev.ftb.mods.ftbquests.FTBQuestsTags;
 import dev.ftb.mods.ftbquests.item.FTBQuestsItems;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.loot.LootCrate;
 import dev.ftb.mods.ftbquests.quest.task.TaskTypes;
 import dev.ftb.mods.ftbquests.quest.task.forge.ForgeEnergyTask;
-import dev.ftb.mods.ftbquests.quest.task.forge.ForgeFluidTask;
 import dev.ftb.mods.ftbteams.FTBTeams;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.commands.synchronization.ArgumentTypeInfos;
 import net.minecraft.commands.synchronization.SingletonArgumentInfo;

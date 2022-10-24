@@ -312,7 +312,7 @@ public class QuestButton extends Button {
 			list.add(Component.literal("[").withStyle(ChatFormatting.GRAY).append(Component.translatable("ftbquests.quest.optional")).append("]"));
 		}
 		if (quest.canRepeat) {
-			list.add(new TranslatableComponent("ftbquests.quest.can_repeat").withStyle(ChatFormatting.GRAY));
+			list.add(Component.translatable("ftbquests.quest.can_repeat").withStyle(ChatFormatting.GRAY));
 		}
 	}
 
