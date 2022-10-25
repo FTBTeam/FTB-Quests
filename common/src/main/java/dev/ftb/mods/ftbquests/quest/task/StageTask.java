@@ -74,7 +74,7 @@ public class StageTask extends BooleanTask {
 
 	@Override
 	public boolean canSubmit(TeamData teamData, ServerPlayer player) {
-		return StageHelper.instance.get().has(player, stage);
+		return StageHelper.INSTANCE.get().has(player, stage);
 	}
 
 	public static void checkStages(ServerPlayer player) {

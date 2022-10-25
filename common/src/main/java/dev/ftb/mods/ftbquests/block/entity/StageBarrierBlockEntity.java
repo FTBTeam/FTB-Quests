@@ -70,6 +70,6 @@ public class StageBarrierBlockEntity extends BlockEntity implements BarrierBlock
 
 	@Override
 	public boolean isOpen(Player player) {
-		return !stage.isEmpty() && StageHelper.instance.get().has(player, stage);
+		return !stage.isEmpty() && StageHelper.INSTANCE.get().has(player, stage);
 	}
 }
