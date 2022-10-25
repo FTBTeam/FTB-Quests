@@ -43,9 +43,8 @@ dependencies {
 
 	modImplementation "mezz.jei:jei-${rootProject.minecraft_version}:${rootProject.forge_jei_version}"
 
-	// TODO: re-add some form of GameStages integration!
-	//modImplementation "curse.maven:bookshelf-228525:${bookshelf_file}"
-	//modImplementation "curse.maven:game-stages-268655:${gamestages_file}"
+	modCompileOnlyApi "net.darkhax.gamestages:GameStages-Forge-${rootProject.minecraft_version}:${rootProject.gamestages_version}"
+
 	//modImplementation "curse.maven:ctm-267602:3137659"
 
 	common(project(path: ":common", configuration: "namedElements")) { transitive false }

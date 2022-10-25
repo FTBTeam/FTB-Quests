@@ -31,6 +31,6 @@
 		"itemfilters": ">=1801.2.6-build.12"
 	},
 	"breaks": {
-		"kubejs": "<=1801.4.0"
+		"kubejs": "<=1802.5.5"
 	}
 }

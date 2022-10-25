@@ -57,7 +57,7 @@ side = "BOTH"
 [[dependencies.ftbquests]]
 modId = "kubejs"
 mandatory = false
-versionRange = "[1801.4.1-build.268,)"
+versionRange = "[1802.5.5,)"
 ordering = "AFTER"
 side = "BOTH"
 
