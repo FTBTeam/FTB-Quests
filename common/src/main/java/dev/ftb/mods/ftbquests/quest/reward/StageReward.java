@@ -71,9 +71,9 @@ public class StageReward extends Reward {
 	@Override
 	public void claim(ServerPlayer player, boolean notify) {
 		if (remove) {
-			StageHelper.instance.get().remove(player, stage);
+			StageHelper.INSTANCE.get().remove(player, stage);
 		} else {
-			StageHelper.instance.get().add(player, stage);
+			StageHelper.INSTANCE.get().add(player, stage);
 		}
 
 		if (notify) {
