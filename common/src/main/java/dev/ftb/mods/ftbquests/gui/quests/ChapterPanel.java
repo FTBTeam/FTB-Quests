@@ -9,7 +9,6 @@ import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.ui.*;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
-import dev.ftb.mods.ftblibrary.util.ClientTextComponentUtils;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.gui.ChangeChapterGroupScreen;
@@ -20,6 +19,7 @@ import dev.ftb.mods.ftbquests.net.ToggleChapterPinnedMessage;
 import dev.ftb.mods.ftbquests.quest.Chapter;
 import dev.ftb.mods.ftbquests.quest.ChapterGroup;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
+import dev.ftb.mods.ftbquests.util.TextUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
@@ -255,7 +255,7 @@ public class ChapterPanel extends Panel {
 			description = new ArrayList<>();
 
 			for (String v : chapter.subtitle) {
-				description.add(Component.literal("").append(ClientTextComponentUtils.parse(v)).withStyle(ChatFormatting.GRAY));
+				description.add(Component.empty().append(TextUtils.parseRawText(v)).withStyle(ChatFormatting.GRAY));
 			}
 		}
 
