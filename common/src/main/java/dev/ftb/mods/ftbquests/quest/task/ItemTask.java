@@ -9,6 +9,7 @@ import dev.ftb.mods.ftblibrary.icon.ItemIcon;
 import dev.ftb.mods.ftblibrary.math.Bits;
 import dev.ftb.mods.ftblibrary.ui.Button;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
+import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.gui.CustomToast;
 import dev.ftb.mods.ftbquests.gui.quests.ValidItemsScreen;
 import dev.ftb.mods.ftbquests.integration.FTBQuestsJEIHelper;
@@ -26,11 +27,13 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -257,6 +260,21 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 	@Environment(EnvType.CLIENT)
 	private void showJEIRecipe(ItemStack stack) {
 		FTBQuestsJEIHelper.showRecipes(stack);
+	}
+
+	@Override
+	public void addMouseOverHeader(TooltipList list, TeamData teamData, boolean advanced) {
+		List<Component> lines = item.getTooltipLines(FTBQuests.PROXY.getClientPlayer(), advanced ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL);
+
+		int s = 0;
+		if (!lines.isEmpty() && lines.get(0).getContents().equals(item.getHoverName().getContents())) {
+			// skip the first tooltip line (item name) if the same as the task title
+			s = 1;
+		}
+
+		for (int i = s; i < lines.size(); i++) {
+			list.add(lines.get(i));
+		}
 	}
 
 	@Override

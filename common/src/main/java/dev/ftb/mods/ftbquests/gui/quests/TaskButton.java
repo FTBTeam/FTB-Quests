@@ -5,13 +5,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.Icons;
-import dev.ftb.mods.ftblibrary.ui.Button;
-import dev.ftb.mods.ftblibrary.ui.ContextMenuItem;
-import dev.ftb.mods.ftblibrary.ui.GuiHelper;
-import dev.ftb.mods.ftblibrary.ui.Panel;
-import dev.ftb.mods.ftblibrary.ui.SimpleTextButton;
-import dev.ftb.mods.ftblibrary.ui.Theme;
-import dev.ftb.mods.ftblibrary.ui.WidgetType;
+import dev.ftb.mods.ftblibrary.ui.*;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.ui.misc.ButtonListBaseScreen;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
@@ -23,18 +17,16 @@ import dev.latvian.mods.itemfilters.api.IStringValueFilter;
 import dev.latvian.mods.itemfilters.api.ItemFiltersAPI;
 import dev.latvian.mods.itemfilters.api.ItemFiltersItems;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.Registry;
+import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -136,6 +128,7 @@ public class TaskButton extends Button {
 		if (task.addTitleInMouseOverText()) {
 			list.add(getTitle());
 		}
+		task.addMouseOverHeader(list, questScreen.file.self, Minecraft.getInstance().options.advancedItemTooltips);
 
 		if (questScreen.file.self.canStartTasks(task.quest)) {
 			long maxp = task.getMaxProgress();
@@ -148,10 +141,11 @@ public class TaskButton extends Button {
 					String max = isShiftKeyDown() ? Long.toUnsignedString(maxp) : task.formatMaxProgress();
 					String prog = isShiftKeyDown() ? Long.toUnsignedString(progress) : task.formatProgress(questScreen.file.self, progress);
 
+					String s = (progress > maxp ? max : prog) + " / " + max;
 					if (maxp < 100L) {
-						list.add(new TextComponent((progress > maxp ? max : prog) + " / " + max).withStyle(ChatFormatting.DARK_GREEN));
+						list.add(new TextComponent(s).withStyle(ChatFormatting.DARK_GREEN));
 					} else {
-						list.add(new TextComponent((progress > maxp ? max : prog) + " / " + max).withStyle(ChatFormatting.DARK_GREEN).append(new TextComponent(" [" + task.getRelativeProgressFromChildren(questScreen.file.self) + "%]").withStyle(ChatFormatting.DARK_GRAY)));
+						list.add(new TextComponent(s).withStyle(ChatFormatting.DARK_GREEN).append(new TextComponent(" [" + task.getRelativeProgressFromChildren(questScreen.file.self) + "%]").withStyle(ChatFormatting.DARK_GRAY)));
 					}
 
 				}
