@@ -3,6 +3,7 @@ package dev.ftb.mods.ftbquests.gui.quests;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.ImageConfig;
+import dev.ftb.mods.ftblibrary.config.ListConfig;
 import dev.ftb.mods.ftblibrary.config.StringConfig;
 import dev.ftb.mods.ftblibrary.config.ui.EditConfigFromStringScreen;
 import dev.ftb.mods.ftblibrary.config.ui.EditConfigScreen;
@@ -10,12 +11,14 @@ import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.ui.*;
+import dev.ftb.mods.ftblibrary.ui.input.Key;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.ui.misc.CompactGridLayout;
 import dev.ftb.mods.ftblibrary.util.ImageComponent;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.gui.ImageComponentWidget;
+import dev.ftb.mods.ftbquests.gui.MultilineTextEditorScreen;
 import dev.ftb.mods.ftbquests.net.EditObjectMessage;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestObject;
@@ -31,6 +34,7 @@ import net.minecraft.network.chat.*;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.TooltipFlag;
 import org.jetbrains.annotations.Nullable;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -382,6 +386,28 @@ public class ViewQuestPanel extends Panel {
 		}
 
 		getGui().openContextMenu(contextMenu);
+	}
+
+	@Override
+	public void keyReleased(Key key) {
+		// released rather than pressed; if we used pressed, keypress would be picked up by the next screen
+
+		if (hidePanel || quest == null) return;
+
+		if (key.is(GLFW.GLFW_KEY_S)) {
+			editSubtitle();
+		} else if (key.is(GLFW.GLFW_KEY_T)) {
+			editTitle();
+		} else if (key.is(GLFW.GLFW_KEY_D)) {
+			ListConfig<String,StringConfig> lc = new ListConfig<>(new StringConfig());
+			lc.value = quest.description;
+			new MultilineTextEditorScreen(lc, accepted -> {
+				if (accepted) {
+					new EditObjectMessage(quest).sendToServer();
+				}
+				openGui();
+			}).openGui();
+		}
 	}
 
 	private void editTitle() {
