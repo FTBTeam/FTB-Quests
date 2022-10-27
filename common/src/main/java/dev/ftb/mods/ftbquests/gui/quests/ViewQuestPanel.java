@@ -29,16 +29,22 @@ import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.quest.theme.QuestTheme;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.ConfirmLinkScreen;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.*;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.TooltipFlag;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.function.Consumer;
 
 /**
@@ -550,16 +556,67 @@ public class ViewQuestPanel extends Panel {
 
 		@Override
 		public boolean mousePressed(MouseButton button) {
-			if (isMouseOver())
+			if (isMouseOver()) {
 				if (canEdit && button.isRight()) {
 					editCallback.accept(true);
 					return true;
 				} else if (button.isLeft() && Minecraft.getInstance().screen != null) {
 					Style style = getComponentStyleAt(questScreen.getTheme(), getMouseX(), getMouseY());
-					return Minecraft.getInstance().screen.handleComponentClicked(style);
+					return handleCustomClickEvent(style) || Minecraft.getInstance().screen.handleComponentClicked(style);
 				}
+			}
 
 			return super.mousePressed(button);
+		}
+
+		private boolean handleCustomClickEvent(Style style) {
+			if (style == null) return false;
+
+			ClickEvent clickEvent = style.getClickEvent();
+			if (clickEvent == null) return false;
+
+			if (clickEvent.getAction() == ClickEvent.Action.CHANGE_PAGE) {
+				try {
+					long questId = Long.valueOf(clickEvent.getValue(), 16);
+					QuestObject qo = FTBQuests.PROXY.getQuestFile(true).get(questId);
+					if (qo != null) {
+						questScreen.open(qo, false);
+					} else {
+						errorToPlayer("Unknown quest object id: %s", clickEvent.getValue());
+					}
+				} catch (NumberFormatException e) {
+					errorToPlayer("Invalid quest object id: %s (%s)",clickEvent.getValue(), e.getMessage());
+				}
+				return true;
+			} else if (clickEvent.getAction() == ClickEvent.Action.OPEN_URL) {
+				try {
+					URI uri = new URI(clickEvent.getValue());
+					String scheme = uri.getScheme();
+					if (scheme == null) {
+						throw new URISyntaxException(clickEvent.getValue(), "Missing protocol");
+					}
+					if (!scheme.equalsIgnoreCase("http") && !scheme.equalsIgnoreCase("https")) {
+						throw new URISyntaxException(clickEvent.getValue(), "Unsupported protocol: " + scheme.toLowerCase(Locale.ROOT));
+					}
+
+					final Screen curScreen = Minecraft.getInstance().screen;
+					Minecraft.getInstance().setScreen(new ConfirmLinkScreen(accepted -> {
+						if (accepted) {
+							Util.getPlatform().openUri(uri);
+						}
+						Minecraft.getInstance().setScreen(curScreen);
+					}, clickEvent.getValue(), false));
+					return true;
+				} catch (URISyntaxException e) {
+					errorToPlayer("Can't open url for %s (%s)", clickEvent.getValue(), e.getMessage());
+				}
+				return true;
+			}
+			return false;
+		}
+
+		private void errorToPlayer(String msg, Object... args) {
+			FTBQuests.PROXY.getClientPlayer().displayClientMessage(new TextComponent(String.format(msg, args)).withStyle(ChatFormatting.RED), false);
 		}
 
 		@Override
