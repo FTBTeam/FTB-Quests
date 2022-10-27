@@ -38,6 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - "T" edits the quest title
   - "S" edits the quest subtitle
   - "D" edits the quest description
+  - Old-style markup (previously used by FTB Quests) is still supported for brevity (that is, lines which start with `{`, e.g. `{my.translation.key}`)
 - Added an entity type tag `ftbquests:no_loot_crates`; any entity in this tag will never drop a loot crate on death
 - Quest view minimum width config setting now also has a chapter default setting (thanks @MasterOfBob777/@DarkMega18)
 - Quests now have an "Invisible" setting; if true, the quests is hidden until completed (thanks @MasterOfBob777/@DarkMega18)
@@ -53,6 +54,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Fixed an NPE in the Stats Task if the resource location is unknown
+- The Location Task config screen has had tooltips added to the X/Y/Z entries to clearly explain how they are interpreted in conjunction with the W/H/D entries)
+- The focused grid position (where a quest would be added) is now highlighted again
 - Pressing Escape in various screens now goes back to the previous screen instead of closing the entire GUI
   - Similarly, pressing Escape when viewing a quest pops down the quest view, and when a context menu is popped up, that will be popped down
 - Full JEI support has returned for quests (items -> rewards) and loot crates (reward table -> list of reward items and their weights)
