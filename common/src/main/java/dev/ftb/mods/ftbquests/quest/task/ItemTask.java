@@ -264,10 +264,12 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 
 	@Override
 	public void addMouseOverHeader(TooltipList list, TeamData teamData, boolean advanced) {
+		if (!title.isEmpty()) return;
+
 		List<Component> lines = item.getTooltipLines(FTBQuests.PROXY.getClientPlayer(), advanced ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL);
 
 		int s = 0;
-		if (!lines.isEmpty() && lines.get(0).getContents().equals(item.getHoverName().getContents())) {
+		if (!lines.isEmpty() && lines.get(0).getString().equals(item.getHoverName().getString())) {
 			// skip the first tooltip line (item name) if the same as the task title
 			s = 1;
 		}
