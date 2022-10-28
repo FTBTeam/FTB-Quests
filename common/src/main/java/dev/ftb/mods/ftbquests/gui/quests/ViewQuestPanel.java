@@ -419,10 +419,22 @@ public class ViewQuestPanel extends Panel {
 	private void editTitle() {
 		StringConfig c = new StringConfig(null);
 
-		EditConfigFromStringScreen.open(c, quest.title, "", accepted -> {
+		// pressing T while mousing over a task button allows editing the task title
+		QuestObject qo = quest;
+		String titleKey = "ftbquests.title";
+		for (Widget w : panelTasks.widgets) {
+			if (w instanceof TaskButton b && b.isMouseOver()) {
+				qo = b.task;
+				titleKey = "ftbquests.task_title";
+				break;
+			}
+		}
+
+		final var qo1 = qo;
+		EditConfigFromStringScreen.open(c, qo1.title, "", new TranslatableComponent(titleKey), accepted -> {
 			if (accepted) {
-				quest.title = c.value;
-				new EditObjectMessage(quest).sendToServer();
+				qo1.title = c.value;
+				new EditObjectMessage(qo1).sendToServer();
 			}
 
 			openGui();
@@ -432,7 +444,7 @@ public class ViewQuestPanel extends Panel {
 	private void editSubtitle() {
 		StringConfig c = new StringConfig(null);
 
-		EditConfigFromStringScreen.open(c, quest.subtitle, "", accepted -> {
+		EditConfigFromStringScreen.open(c, quest.subtitle, "", new TranslatableComponent("ftbquests.quest.subtitle"), accepted -> {
 			if (accepted) {
 				quest.subtitle = c.value;
 				new EditObjectMessage(quest).sendToServer();
@@ -457,7 +469,16 @@ public class ViewQuestPanel extends Panel {
 
 		StringConfig c = new StringConfig(null);
 
-		EditConfigFromStringScreen.open(c, line == -1 ? "" : quest.description.get(line), "", accepted -> {
+		int l = line + 1;
+		int s = quest.description.size();
+		if (l == 0) {
+			// adding a new line
+			l = quest.description.size() + 1;
+			s++;
+		}
+		Component title = new TranslatableComponent("ftbquests.quest.description").append(String.format(": %d/%d", l, s));
+
+		EditConfigFromStringScreen.open(c, line == -1 ? "" : quest.description.get(line), "", title, accepted -> {
 			if (accepted) {
 				if (line == -1) {
 					quest.description.add(c.value);

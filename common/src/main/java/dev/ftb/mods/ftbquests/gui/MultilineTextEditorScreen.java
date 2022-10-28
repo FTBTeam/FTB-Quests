@@ -7,7 +7,7 @@ import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.ui.*;
 import dev.ftb.mods.ftblibrary.ui.input.Key;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.TranslatableComponent;
 import org.lwjgl.glfw.GLFW;
 
@@ -51,8 +51,11 @@ public class MultilineTextEditorScreen extends BaseScreen {
 
 	@Override
 	public void addWidgets() {
-		add(new TextField(this).setText(new TextComponent("This is a lame solution but there will be a better one eventually")));
-		widgets.get(0).setPos((width - widgets.get(0).width) / 2, -15);
+		add(new TextField(this).setText(new TranslatableComponent("ftbquests.gui.edit_description")));
+		widgets.get(0).setPos((width - widgets.get(0).width) / 2, -getTheme().getFontHeight() - 2);
+		add(new TextField(this).setText(new TranslatableComponent("ftbquests.gui.edit_description.help").withStyle(ChatFormatting.GRAY)));
+		widgets.get(1).setPos((width - widgets.get(1).width) / 2, height + 5);
+
 		add(new SimpleButton(this, new TranslatableComponent("gui.accept"), Icons.ACCEPT, (simpleButton, mouseButton) -> saveAndExit()).setPosAndSize(width + 6, 6, 16, 16));
 		add(new SimpleButton(this, new TranslatableComponent("gui.cancel"), Icons.CANCEL, (simpleButton, mouseButton) -> cancel()).setPosAndSize(width + 6, 24, 16, 16));
 
