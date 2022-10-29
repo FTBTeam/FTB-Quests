@@ -652,6 +652,26 @@ public class TeamData {
 		}
 	}
 
+	public void resetAllCompleted() {
+		this.completed.clear();
+	}
+
+	public void resetAllStarted() {
+		this.started.clear();
+	}
+
+	public void resetAllProgress() {
+		this.taskProgress.clear();
+	}
+
+	public void resetAllClaimedRewards() {
+		this.claimedRewards.clear();
+	}
+
+	public void resetAllPinned() {
+		this.pinnedQuests.clear();
+	}
+
 	public final void setProgress(Task task, long progress) {
 		if (locked) {
 			return;

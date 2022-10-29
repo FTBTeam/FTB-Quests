@@ -92,4 +92,16 @@ public abstract class FTBQuestsKubeJSTeamData {
 	public EntityArrayList getOnlineMembers() {
 		return ServerJS.instance.getOverworld().createEntityList(getData().getOnlineMembers());
 	}
+
+	public void completeResetQuests() {
+		TeamData data = getData();
+
+		data.resetAllCompleted();
+		data.resetAllStarted();
+		data.resetAllProgress();
+		data.resetAllClaimedRewards();
+		data.resetAllPinned();
+
+		data.save();
+	}
 }
