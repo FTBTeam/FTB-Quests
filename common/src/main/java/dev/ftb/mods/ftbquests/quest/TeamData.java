@@ -1,20 +1,10 @@
 package dev.ftb.mods.ftbquests.quest;
 
 import com.mojang.util.UUIDTypeAdapter;
-import dev.architectury.utils.NbtType;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
-import dev.ftb.mods.ftbquests.net.ClaimRewardResponseMessage;
-import dev.ftb.mods.ftbquests.net.ObjectCompletedMessage;
-import dev.ftb.mods.ftbquests.net.ObjectCompletedResetMessage;
-import dev.ftb.mods.ftbquests.net.ObjectStartedMessage;
-import dev.ftb.mods.ftbquests.net.ObjectStartedResetMessage;
-import dev.ftb.mods.ftbquests.net.ResetRewardMessage;
-import dev.ftb.mods.ftbquests.net.SyncEditingModeMessage;
-import dev.ftb.mods.ftbquests.net.SyncLockMessage;
-import dev.ftb.mods.ftbquests.net.TogglePinnedResponseMessage;
-import dev.ftb.mods.ftbquests.net.UpdateTaskProgressMessage;
+import dev.ftb.mods.ftbquests.net.*;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.reward.RewardAutoClaim;
 import dev.ftb.mods.ftbquests.quest.reward.RewardClaimType;
@@ -34,18 +24,14 @@ import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -77,6 +63,7 @@ public class TeamData {
 	// TODO: Move these to player data
 	private boolean canEdit;
 	private boolean autoPin;
+	private boolean chapterPinned;
 	public final LongOpenHashSet pinnedQuests;
 
 	private Long2ByteOpenHashMap areDependenciesCompleteCache;
@@ -238,6 +225,8 @@ public class TeamData {
 				new ClaimRewardResponseMessage(uuid, player, reward.id).sendToAll(((ServerQuestFile) file).server);
 			}
 
+			reward.quest.checkRepeatable(this, player);
+
 			return true;
 		}
 
@@ -287,7 +276,7 @@ public class TeamData {
 	}
 
 	public boolean getAutoPin() {
-		return autoPin;
+		return isQuestPinned(1);
 	}
 
 	public void setAutoPin(boolean auto) {
@@ -320,6 +309,7 @@ public class TeamData {
 		nbt.putBoolean("can_edit", canEdit);
 		nbt.putBoolean("lock", locked);
 		nbt.putBoolean("auto_pin", autoPin);
+		nbt.putBoolean("chapter_pinned", chapterPinned);
 
 		SNBTCompoundTag taskProgressNBT = new SNBTCompoundTag();
 
@@ -381,6 +371,7 @@ public class TeamData {
 		canEdit = nbt.getBoolean("can_edit");
 		locked = nbt.getBoolean("lock");
 		autoPin = nbt.getBoolean("auto_pin");
+		chapterPinned = nbt.getBoolean("chapter_pinned");
 
 		taskProgress.clear();
 		claimedRewards.clear();
@@ -392,7 +383,7 @@ public class TeamData {
 			claimedRewards.put(QuestKey.of(s), claimedRewardsNBT.getLong(s));
 		}
 
-		ListTag pinnedQuestsNBT = nbt.getList("pinned_quests", NbtType.STRING);
+		ListTag pinnedQuestsNBT = nbt.getList("pinned_quests", Tag.TAG_STRING);
 
 		for (int i = 0; i < pinnedQuestsNBT.size(); i++) {
 			pinnedQuests.add(file.getID(pinnedQuestsNBT.getString(i)));
@@ -454,6 +445,7 @@ public class TeamData {
 
 			buffer.writeBoolean(canEdit);
 			buffer.writeBoolean(autoPin);
+			buffer.writeBoolean(chapterPinned);
 
 			buffer.writeVarInt(pinnedQuests.size());
 
@@ -508,6 +500,7 @@ public class TeamData {
 
 			canEdit = buffer.readBoolean();
 			autoPin = buffer.readBoolean();
+			chapterPinned = buffer.readBoolean();
 
 			int pqs = buffer.readVarInt();
 
@@ -771,5 +764,14 @@ public class TeamData {
 		canEdit = from.canEdit;
 		autoPin = from.autoPin;
 		pinnedQuests.addAll(from.pinnedQuests);
+	}
+
+	public void setChapterPinned(boolean pinned) {
+		chapterPinned = pinned;
+		save();
+	}
+
+	public boolean isChapterPinned() {
+		return chapterPinned;
 	}
 }

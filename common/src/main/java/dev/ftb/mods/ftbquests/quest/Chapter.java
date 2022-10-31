@@ -1,6 +1,5 @@
 package dev.ftb.mods.ftbquests.quest;
 
-import dev.architectury.utils.NbtType;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.StringConfig;
 import dev.ftb.mods.ftblibrary.icon.Icon;
@@ -16,16 +15,13 @@ import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -41,6 +37,7 @@ public final class Chapter extends QuestObject {
 	public String defaultQuestShape;
 	public final List<ChapterImage> images;
 	public boolean defaultHideDependencyLines;
+	public int defaultMinWidth = 0;
 
 	public Chapter(QuestFile f, ChapterGroup g) {
 		file = f;
@@ -102,6 +99,10 @@ public final class Chapter extends QuestObject {
 
 			nbt.put("images", list);
 		}
+
+		if (defaultMinWidth > 0) {
+			nbt.putInt("default_min_width", defaultMinWidth);
+		}
 	}
 
 	@Override
@@ -110,7 +111,7 @@ public final class Chapter extends QuestObject {
 		super.readData(nbt);
 		subtitle.clear();
 
-		ListTag subtitleNBT = nbt.getList("subtitle", NbtType.STRING);
+		ListTag subtitleNBT = nbt.getList("subtitle", Tag.TAG_STRING);
 
 		for (int i = 0; i < subtitleNBT.size(); i++) {
 			subtitle.add(subtitleNBT.getString(i));
@@ -125,7 +126,7 @@ public final class Chapter extends QuestObject {
 
 		defaultHideDependencyLines = nbt.getBoolean("default_hide_dependency_lines");
 
-		ListTag imgs = nbt.getList("images", NbtType.COMPOUND);
+		ListTag imgs = nbt.getList("images", Tag.TAG_COMPOUND);
 
 		images.clear();
 
@@ -134,6 +135,8 @@ public final class Chapter extends QuestObject {
 			image.readData(imgs.getCompound(i));
 			images.add(image);
 		}
+
+		defaultMinWidth = nbt.getInt("default_min_width");
 	}
 
 	@Override
@@ -145,6 +148,7 @@ public final class Chapter extends QuestObject {
 		buffer.writeUtf(defaultQuestShape, Short.MAX_VALUE);
 		NetUtils.write(buffer, images, (d, img) -> img.writeNetData(d));
 		buffer.writeBoolean(defaultHideDependencyLines);
+		buffer.writeInt(defaultMinWidth);
 	}
 
 	@Override
@@ -160,6 +164,7 @@ public final class Chapter extends QuestObject {
 			return image;
 		});
 		defaultHideDependencyLines = buffer.readBoolean();
+		defaultMinWidth = buffer.readInt();
 	}
 
 	public int getIndex() {
@@ -310,6 +315,7 @@ public final class Chapter extends QuestObject {
 		config.addBool("always_invisible", alwaysInvisible, v -> alwaysInvisible = v, false);
 		config.addEnum("default_quest_shape", defaultQuestShape.isEmpty() ? "default" : defaultQuestShape, v -> defaultQuestShape = v.equals("default") ? "" : v, QuestShape.idMapWithDefault);
 		config.addBool("default_hide_dependency_lines", defaultHideDependencyLines, v -> defaultHideDependencyLines = v, false);
+		config.addInt("default_min_width", defaultMinWidth, v -> defaultMinWidth = v, 0, 0, 3000);
 	}
 
 	@Override

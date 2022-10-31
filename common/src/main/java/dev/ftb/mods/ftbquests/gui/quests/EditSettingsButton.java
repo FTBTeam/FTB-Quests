@@ -7,6 +7,7 @@ import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.gui.RewardTablesScreen;
 import dev.ftb.mods.ftbquests.net.ChangeProgressMessage;
+import dev.ftb.mods.ftbquests.net.ForceSaveMessage;
 import dev.ftb.mods.ftbquests.quest.theme.ThemeLoader;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraft.Util;
@@ -49,6 +50,7 @@ public class EditSettingsButton extends TabButton {
 		})).setYesNo(new TranslatableComponent("ftbquests.gui.complete_instantly_q")));
 
 		contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.reward_tables"), ThemeProperties.REWARD_TABLE_ICON.get(), () -> new RewardTablesScreen().openGui()));
+		contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.gui.save_on_server"), ThemeProperties.SAVE_ICON.get(), () -> new ForceSaveMessage().sendToServer()));
 		contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.gui.save_as_file"), ThemeProperties.DOWNLOAD_ICON.get(), () -> {
 			try {
 				Calendar time = Calendar.getInstance();

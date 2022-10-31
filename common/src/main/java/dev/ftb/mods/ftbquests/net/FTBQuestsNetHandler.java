@@ -26,6 +26,10 @@ public interface FTBQuestsNetHandler {
 	MessageType DISPLAY_ITEM_REWARD_TOAST = NET.registerS2C("display_item_reward_toast", DisplayItemRewardToastMessage::new);
 	MessageType TOGGLE_PINNED = NET.registerC2S("toggle_pinned", TogglePinnedMessage::new);
 	MessageType TOGGLE_PINNED_RESPONSE = NET.registerS2C("toggle_pinned_response", TogglePinnedResponseMessage::new);
+	MessageType TOGGLE_CHAPTER_PINNED = NET.registerC2S("toggle_chapter_pinned", ToggleChapterPinnedMessage::new);
+	MessageType TOGGLE_CHAPTER_PINNED_RESPONSE = NET.registerS2C("toggle_chapter_pinned_response", ToggleChapterPinnedResponseMessage::new);
+	MessageType TOGGLE_EDITING_MODE = NET.registerC2S("toggle_editing_mode", ToggleEditingModeMessage::new);
+	MessageType FORCE_SAVE = NET.registerC2S("force_save", ForceSaveMessage::new);
 	MessageType UPDATE_TEAM_DATA = NET.registerS2C("update_team_data", UpdateTeamDataMessage::new);
 	MessageType SET_CUSTOM_IMAGE = NET.registerC2S("set_custom_image", SetCustomImageMessage::new);
 	MessageType OBJECT_STARTED = NET.registerS2C("object_started", ObjectStartedMessage::new);
@@ -35,6 +39,8 @@ public interface FTBQuestsNetHandler {
 	MessageType SYNC_LOCK = NET.registerS2C("sync_lock", SyncLockMessage::new);
 	MessageType RESET_REWARD = NET.registerS2C("reset_reward", ResetRewardMessage::new);
 	MessageType TEAM_DATA_CHANGED = NET.registerS2C("team_data_changed", TeamDataChangedMessage::new);
+	MessageType TASK_SCREEN_CONFIG_REQ = NET.registerS2C("task_screen_config_req", TaskScreenConfigRequest::new);
+	MessageType TASK_SCREEN_CONFIG_RESP = NET.registerC2S("task_screen_config_resp", TaskScreenConfigResponse::new);
 
 	MessageType CHANGE_PROGRESS = NET.registerC2S("change_progress", ChangeProgressMessage::new);
 	MessageType CREATE_OBJECT = NET.registerC2S("create_object", CreateObjectMessage::new);

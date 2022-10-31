@@ -41,11 +41,10 @@ dependencies {
 	modImplementation "dev.latvian.mods:kubejs-forge:${rootProject.kubejs_version}"
 	modImplementation "dev.latvian.mods:rhino-forge:${rootProject.rhino_version}"
 
-	modCompileOnly "mezz.jei:jei-1.18:${rootProject.forge_jei_version}"
+	modImplementation "mezz.jei:jei-${rootProject.minecraft_version}:${rootProject.forge_jei_version}"
 
-	// TODO: re-add some form of GameStages integration!
-	//modImplementation "curse.maven:bookshelf-228525:${bookshelf_file}"
-	//modImplementation "curse.maven:game-stages-268655:${gamestages_file}"
+	modCompileOnlyApi "net.darkhax.gamestages:GameStages-Forge-${rootProject.minecraft_version}:${rootProject.gamestages_version}"
+
 	//modImplementation "curse.maven:ctm-267602:3137659"
 
 	common(project(path: ":common", configuration: "namedElements")) { transitive false }
@@ -110,7 +109,7 @@ if (ENV.CURSEFORGE_KEY) {
 				requiredDependency 'ftb-library-forge'
 				requiredDependency 'ftb-teams-forge'
 				requiredDependency 'item-filters-forge'
-				optionalDependency 'kubejs-forge'
+				optionalDependency 'kubejs'
 				optionalDependency 'jei'
 			}
 			changelog = getGitChangelog

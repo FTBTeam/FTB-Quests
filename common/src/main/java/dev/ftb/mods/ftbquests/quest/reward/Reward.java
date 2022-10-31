@@ -9,12 +9,7 @@ import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.integration.FTBQuestsJEIHelper;
 import dev.ftb.mods.ftbquests.net.ClaimRewardMessage;
-import dev.ftb.mods.ftbquests.quest.Chapter;
-import dev.ftb.mods.ftbquests.quest.Quest;
-import dev.ftb.mods.ftbquests.quest.QuestFile;
-import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
-import dev.ftb.mods.ftbquests.quest.QuestObjectType;
-import dev.ftb.mods.ftbquests.quest.TeamData;
+import dev.ftb.mods.ftbquests.quest.*;
 import dev.ftb.mods.ftbquests.util.ProgressChange;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -35,15 +30,17 @@ import java.util.UUID;
  * @author LatvianModder
  */
 public abstract class Reward extends QuestObjectBase {
-	public Quest quest;
+	public final Quest quest;
 
-	public Tristate team;
-	public RewardAutoClaim autoclaim;
+	private Tristate team;
+	protected RewardAutoClaim autoclaim;
+	private boolean excludeFromClaimAll;
 
 	public Reward(Quest q) {
 		quest = q;
 		team = Tristate.DEFAULT;
 		autoclaim = RewardAutoClaim.DEFAULT;
+		excludeFromClaimAll = getType().getExcludeFromListRewards();
 	}
 
 	@Override
@@ -80,6 +77,8 @@ public abstract class Reward extends QuestObjectBase {
 		if (autoclaim != RewardAutoClaim.DEFAULT) {
 			nbt.putString("auto", autoclaim.id);
 		}
+
+		if (excludeFromClaimAll) nbt.putBoolean("exclude_from_claim_all", excludeFromClaimAll);
 	}
 
 	@Override
@@ -87,6 +86,7 @@ public abstract class Reward extends QuestObjectBase {
 		super.readData(nbt);
 		team = Tristate.read(nbt, "team_reward");
 		autoclaim = RewardAutoClaim.NAME_MAP.get(nbt.getString("auto"));
+		excludeFromClaimAll = nbt.getBoolean("exclude_from_claim_all");
 	}
 
 	@Override
@@ -94,6 +94,7 @@ public abstract class Reward extends QuestObjectBase {
 		super.writeNetData(buffer);
 		Tristate.NAME_MAP.write(buffer, team);
 		RewardAutoClaim.NAME_MAP.write(buffer, autoclaim);
+		buffer.writeBoolean(excludeFromClaimAll);
 	}
 
 	@Override
@@ -101,6 +102,7 @@ public abstract class Reward extends QuestObjectBase {
 		super.readNetData(buffer);
 		team = Tristate.NAME_MAP.read(buffer);
 		autoclaim = RewardAutoClaim.NAME_MAP.read(buffer);
+		excludeFromClaimAll = buffer.readBoolean();
 	}
 
 	@Override
@@ -109,6 +111,7 @@ public abstract class Reward extends QuestObjectBase {
 		super.getConfig(config);
 		config.addEnum("team", team, v -> team = v, Tristate.NAME_MAP).setNameKey("ftbquests.reward.team_reward");
 		config.addEnum("autoclaim", autoclaim, v -> autoclaim = v, RewardAutoClaim.NAME_MAP).setNameKey("ftbquests.reward.autoclaim");
+		config.addBool("exclude_from_claim_all", excludeFromClaimAll, v -> excludeFromClaimAll = v, excludeFromClaimAll).setNameKey("ftbquests.reward.exclude_from_claim_all");
 	}
 
 	public abstract void claim(ServerPlayer player, boolean notify);
@@ -238,7 +241,7 @@ public abstract class Reward extends QuestObjectBase {
 	}
 
 	public boolean getExcludeFromClaimAll() {
-		return getType().getExcludeFromListRewards();
+		return excludeFromClaimAll;
 	}
 
 	@Nullable

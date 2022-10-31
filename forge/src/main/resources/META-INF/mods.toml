@@ -36,7 +36,7 @@ side = "BOTH"
 [[dependencies.ftbquests]]
 modId = "ftblibrary"
 mandatory = true
-versionRange = "[1801.3.5-build.99,)"
+versionRange = "[1802.3.7-build.153,)"
 ordering = "AFTER"
 side = "BOTH"
 
@@ -57,6 +57,13 @@ side = "BOTH"
 [[dependencies.ftbquests]]
 modId = "kubejs"
 mandatory = false
-versionRange = "[1801.4.1-build.268,)"
+versionRange = "[1802.5.5,)"
+ordering = "AFTER"
+side = "BOTH"
+
+[[dependencies.ftbquests]]
+modId = "jei"
+mandatory = false
+versionRange = "[9.7.0,)"
 ordering = "AFTER"
 side = "BOTH"

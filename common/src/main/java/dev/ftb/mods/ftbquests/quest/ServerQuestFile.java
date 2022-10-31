@@ -1,18 +1,13 @@
 package dev.ftb.mods.ftbquests.quest;
 
 import com.mojang.util.UUIDTypeAdapter;
-import dev.architectury.hooks.LevelResourceHooks;
 import dev.architectury.platform.Platform;
 import dev.architectury.utils.Env;
 import dev.ftb.mods.ftblibrary.snbt.SNBT;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
 import dev.ftb.mods.ftbquests.FTBQuests;
-import dev.ftb.mods.ftbquests.net.CreateOtherTeamDataMessage;
-import dev.ftb.mods.ftbquests.net.DeleteObjectResponseMessage;
-import dev.ftb.mods.ftbquests.net.SyncQuestsMessage;
-import dev.ftb.mods.ftbquests.net.SyncTeamDataMessage;
-import dev.ftb.mods.ftbquests.net.TeamDataChangedMessage;
-import dev.ftb.mods.ftbquests.net.TeamDataUpdate;
+import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
+import dev.ftb.mods.ftbquests.net.*;
 import dev.ftb.mods.ftbquests.quest.reward.RewardType;
 import dev.ftb.mods.ftbquests.quest.reward.RewardTypes;
 import dev.ftb.mods.ftbquests.quest.task.Task;
@@ -31,13 +26,15 @@ import net.minecraft.world.level.storage.LevelResource;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collections;
+import java.util.Date;
 import java.util.UUID;
 
 /**
  * @author LatvianModder
  */
 public class ServerQuestFile extends QuestFile {
-	public static final LevelResource FTBQUESTS_DATA = LevelResourceHooks.create("ftbquests");
+	public static final LevelResource FTBQUESTS_DATA = new LevelResource("ftbquests");
 
 	public static ServerQuestFile INSTANCE;
 
@@ -45,8 +42,7 @@ public class ServerQuestFile extends QuestFile {
 	private boolean shouldSave;
 	private boolean isLoading;
 	private Path folder;
-
-	public ServerPlayer currentPlayer = null;
+	private ServerPlayer currentPlayer = null;
 
 	public ServerQuestFile(MinecraftServer s) {
 		server = s;
@@ -82,7 +78,7 @@ public class ServerQuestFile extends QuestFile {
 
 		if (Files.exists(path)) {
 			try {
-				Files.list(path).filter(p -> p.getFileName().toString().contains("-")).forEach(path1 -> {
+				Files.list(path).filter(p -> p.getFileName().toString().contains("-") && p.getFileName().toString().endsWith(".snbt")).forEach(path1 -> {
 					SNBTCompoundTag nbt = SNBT.read(path1);
 
 					if (nbt != null) {
@@ -165,6 +161,19 @@ public class ServerQuestFile extends QuestFile {
 		deleteSelf();
 	}
 
+	public ServerPlayer getCurrentPlayer() {
+		return currentPlayer;
+	}
+
+	public void withPlayerContext(ServerPlayer player, Runnable toDo) {
+		currentPlayer = player;
+		try {
+			toDo.run();
+		} finally {
+			currentPlayer = null;
+		}
+	}
+
 	public void playerLoggedIn(PlayerLoggedInAfterTeamEvent event) {
 		ServerPlayer player = event.getPlayer();
 		TeamData data = getData(event.getTeam());
@@ -178,25 +187,31 @@ public class ServerQuestFile extends QuestFile {
 		player.inventoryMenu.addSlotListener(new FTBQuestsInventoryListener(player));
 
 		if (!data.isLocked()) {
-			currentPlayer = player;
+			withPlayerContext(player, () -> {
+				for (ChapterGroup group : chapterGroups) {
+					for (Chapter chapter : group.chapters) {
+						for (Quest quest : chapter.quests) {
+							if (!data.isCompleted(quest) && quest.isCompletedRaw(data)) {
+								// Handles possible situation where quest book has been modified to remove a task from a quest
+								// It can leave a player having completed all the other tasks, but unable to complete the quest
+								//   since quests are normally marked completed when the last task in that quest is completed
+								// https://github.com/FTBBeta/Beta-Testing-Issues/issues/755
+								quest.onCompleted(new QuestProgressEventData<>(new Date(), data, quest, data.getOnlineMembers(), Collections.singletonList(player)));
+							}
 
-			for (ChapterGroup group : chapterGroups) {
-				for (Chapter chapter : group.chapters) {
-					for (Quest quest : chapter.quests) {
-						data.checkAutoCompletion(quest);
+							data.checkAutoCompletion(quest);
 
-						if (data.canStartTasks(quest)) {
-							for (Task task : quest.tasks) {
-								if (task.checkOnLogin()) {
-									task.submitTask(data, player);
+							if (data.canStartTasks(quest)) {
+								for (Task task : quest.tasks) {
+									if (task.checkOnLogin()) {
+										task.submitTask(data, player);
+									}
 								}
 							}
 						}
 					}
 				}
-			}
-
-			currentPlayer = null;
+			});
 		}
 	}
 

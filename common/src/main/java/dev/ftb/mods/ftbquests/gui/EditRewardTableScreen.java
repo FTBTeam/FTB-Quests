@@ -5,11 +5,8 @@ import dev.ftb.mods.ftblibrary.config.DoubleConfig;
 import dev.ftb.mods.ftblibrary.config.ui.EditConfigFromStringScreen;
 import dev.ftb.mods.ftblibrary.config.ui.EditConfigScreen;
 import dev.ftb.mods.ftblibrary.icon.Icons;
-import dev.ftb.mods.ftblibrary.ui.ContextMenuItem;
-import dev.ftb.mods.ftblibrary.ui.Panel;
-import dev.ftb.mods.ftblibrary.ui.SimpleTextButton;
-import dev.ftb.mods.ftblibrary.ui.Theme;
-import dev.ftb.mods.ftblibrary.ui.VerticalSpaceWidget;
+import dev.ftb.mods.ftblibrary.ui.*;
+import dev.ftb.mods.ftblibrary.ui.input.Key;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.ui.misc.ButtonListBaseScreen;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
@@ -161,7 +158,7 @@ public class EditRewardTableScreen extends ButtonListBaseScreen {
 		originalTable.writeData(nbt);
 		rewardTable.readData(nbt);
 		callback = c;
-		setTitle(new TranslatableComponent("ftbquests.reward_table"));
+		setTitle(new TranslatableComponent("ftbquests.reward_table").append(": " + rewardTable.title));
 		setBorder(1, 1, 1);
 	}
 
@@ -178,7 +175,24 @@ public class EditRewardTableScreen extends ButtonListBaseScreen {
 	}
 
 	@Override
+	public void alignWidgets() {
+		// bit of a kludge, but stops the screen getting a bit narrower each time it's re-opened after adding/deleting an entry
+		this.width = 186;
+		super.alignWidgets();
+	}
+
+	@Override
 	public Theme getTheme() {
 		return FTBQuestsTheme.INSTANCE;
+	}
+
+	@Override
+	public boolean keyPressed(Key key) {
+		if (key.esc()) {
+			onBack();
+			return true;
+		} else {
+			return super.keyPressed(key);
+		}
 	}
 }

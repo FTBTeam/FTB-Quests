@@ -1,13 +1,11 @@
 package dev.ftb.mods.ftbquests.quest;
 
-import dev.architectury.utils.NbtType;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.StringConfig;
 import dev.ftb.mods.ftblibrary.config.Tristate;
 import dev.ftb.mods.ftblibrary.config.ui.EditConfigScreen;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.math.Bits;
-import dev.ftb.mods.ftblibrary.util.ClientTextComponentUtils;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.client.ConfigIconItemStack;
@@ -17,11 +15,13 @@ import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import dev.ftb.mods.ftbquests.util.NBTUtils;
 import dev.ftb.mods.ftbquests.util.NetUtils;
 import dev.ftb.mods.ftbquests.util.ProgressChange;
+import dev.ftb.mods.ftbquests.util.TextUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -29,12 +29,7 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
@@ -95,6 +90,7 @@ public abstract class QuestObjectBase {
 	private Icon cachedIcon = null;
 	private Component cachedTitle = null;
 	private Set<String> cachedTags = null;
+
 
 	public final String getCodeString() {
 		return getCodeString(id);
@@ -177,7 +173,7 @@ public abstract class QuestObjectBase {
 		title = nbt.getString("title");
 		icon = NBTUtils.read(nbt, "icon");
 
-		ListTag tagsList = nbt.getList("tags", NbtType.STRING);
+		ListTag tagsList = nbt.getList("tags", Tag.TAG_STRING);
 
 		tags = new ArrayList<>(tagsList.size());
 
@@ -256,7 +252,7 @@ public abstract class QuestObjectBase {
 		}
 
 		if (!title.isEmpty()) {
-			cachedTitle = ClientTextComponentUtils.parse(title);
+			cachedTitle = TextUtils.parseRawText(title);
 		} else {
 			cachedTitle = getAltTitle();
 		}

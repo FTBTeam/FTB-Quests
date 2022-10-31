@@ -9,6 +9,7 @@ import dev.ftb.mods.ftblibrary.icon.ItemIcon;
 import dev.ftb.mods.ftblibrary.math.Bits;
 import dev.ftb.mods.ftblibrary.ui.Button;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
+import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.gui.CustomToast;
 import dev.ftb.mods.ftbquests.gui.quests.ValidItemsScreen;
 import dev.ftb.mods.ftbquests.integration.FTBQuestsJEIHelper;
@@ -18,6 +19,7 @@ import dev.ftb.mods.ftbquests.net.FTBQuestsNetHandler;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.util.NBTUtils;
+import dev.latvian.mods.itemfilters.api.IItemFilter;
 import dev.latvian.mods.itemfilters.api.ItemFiltersAPI;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -25,11 +27,13 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,6 +47,8 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 	public long count;
 	public Tristate consumeItems;
 	public Tristate onlyFromCrafting;
+	public Tristate matchNBT;
+	public boolean weakNBTmatch;
 
 	public ItemTask(Quest quest) {
 		super(quest);
@@ -50,6 +56,8 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 		count = 1;
 		consumeItems = Tristate.DEFAULT;
 		onlyFromCrafting = Tristate.DEFAULT;
+		matchNBT = Tristate.DEFAULT;
+		weakNBTmatch = false;
 	}
 
 	@Override
@@ -73,6 +81,10 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 
 		consumeItems.write(nbt, "consume_items");
 		onlyFromCrafting.write(nbt, "only_from_crafting");
+		matchNBT.write(nbt, "match_nbt");
+		if (weakNBTmatch) {
+			nbt.putBoolean("weak_nbt_match", true);
+		}
 	}
 
 	@Override
@@ -82,20 +94,22 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 		count = Math.max(nbt.getLong("count"), 1L);
 		consumeItems = Tristate.read(nbt, "consume_items");
 		onlyFromCrafting = Tristate.read(nbt, "only_from_crafting");
+		matchNBT = Tristate.read(nbt, "match_nbt");
+		weakNBTmatch = nbt.getBoolean("weak_nbt_match");
 	}
 
 	@Override
 	public void writeNetData(FriendlyByteBuf buffer) {
 		super.writeNetData(buffer);
 		int flags = 0;
-		flags = Bits.setFlag(flags, 1, count > 1L);
-		flags = Bits.setFlag(flags, 2, consumeItems != Tristate.DEFAULT);
-		flags = Bits.setFlag(flags, 4, consumeItems == Tristate.TRUE);
-		flags = Bits.setFlag(flags, 8, onlyFromCrafting != Tristate.DEFAULT);
-		flags = Bits.setFlag(flags, 16, onlyFromCrafting == Tristate.TRUE);
-		//flags = Bits.setFlag(flags, 32, ignoreDamage);
-		//flags = Bits.setFlag(flags, 64, nbtMode != NBTMatchingMode.MATCH);
-		//flags = Bits.setFlag(flags, 128, nbtMode == NBTMatchingMode.CONTAIN);
+		flags = Bits.setFlag(flags, 0x01, count > 1L);
+		flags = Bits.setFlag(flags, 0x02, consumeItems != Tristate.DEFAULT);
+		flags = Bits.setFlag(flags, 0x04, consumeItems == Tristate.TRUE);
+		flags = Bits.setFlag(flags, 0x08, onlyFromCrafting != Tristate.DEFAULT);
+		flags = Bits.setFlag(flags, 0x10, onlyFromCrafting == Tristate.TRUE);
+		flags = Bits.setFlag(flags, 0x20, matchNBT != Tristate.DEFAULT);
+		flags = Bits.setFlag(flags, 0x40, matchNBT == Tristate.TRUE);
+		flags = Bits.setFlag(flags, 0x80, weakNBTmatch);
 		buffer.writeVarInt(flags);
 
 		FTBQuestsNetHandler.writeItemType(buffer, item);
@@ -111,11 +125,11 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 		int flags = buffer.readVarInt();
 
 		item = FTBQuestsNetHandler.readItemType(buffer);
-		count = Bits.getFlag(flags, 1) ? buffer.readVarLong() : 1L;
-		consumeItems = Bits.getFlag(flags, 2) ? Bits.getFlag(flags, 4) ? Tristate.TRUE : Tristate.FALSE : Tristate.DEFAULT;
-		onlyFromCrafting = Bits.getFlag(flags, 8) ? Bits.getFlag(flags, 16) ? Tristate.TRUE : Tristate.FALSE : Tristate.DEFAULT;
-		//ignoreDamage = Bits.getFlag(flags, 32);
-		//nbtMode = Bits.getFlag(flags, 64) ? Bits.getFlag(flags, 128) ? NBTMatchingMode.CONTAIN : NBTMatchingMode.IGNORE : NBTMatchingMode.MATCH;
+		count = Bits.getFlag(flags, 0x01) ? buffer.readVarLong() : 1L;
+		consumeItems = Bits.getFlag(flags, 0x02) ? Bits.getFlag(flags, 0x04) ? Tristate.TRUE : Tristate.FALSE : Tristate.DEFAULT;
+		onlyFromCrafting = Bits.getFlag(flags, 0x08) ? Bits.getFlag(flags, 0x10) ? Tristate.TRUE : Tristate.FALSE : Tristate.DEFAULT;
+		matchNBT = Bits.getFlag(flags, 0x20) ? Bits.getFlag(flags, 0x40) ? Tristate.TRUE : Tristate.FALSE : Tristate.DEFAULT;
+		weakNBTmatch = Bits.getFlag(flags, 0x80);
 	}
 
 	public List<ItemStack> getValidDisplayItems() {
@@ -158,7 +172,46 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 
 	@Override
 	public boolean test(ItemStack stack) {
-		return ItemFiltersAPI.filter(item, stack);
+		if (item.isEmpty()) {
+			return true;
+		}
+
+		IItemFilter f = ItemFiltersAPI.getFilter(item);
+		return f != null ? f.filter(item, stack) : areItemStacksEqual(item, stack);
+	}
+
+	private boolean areItemStacksEqual(ItemStack stackA, ItemStack stackB) {
+		if (stackA == stackB) {
+			return true;
+		} else if (stackA.getItem() != stackB.getItem()) {
+			return false;
+		} else if (!stackA.hasTag() && !stackB.hasTag()) {
+			return true;
+		} else {
+			return !shouldMatchNBT() || (weakNBTmatch ? weakNBTmatch(stackA, stackB) : ItemStack.tagMatches(stackA, stackB));
+		}
+	}
+
+	private boolean weakNBTmatch(ItemStack stackA, ItemStack stackB) {
+		CompoundTag tagA = stackA.getTag();
+		CompoundTag tagB = stackB.getTag();
+		if (tagA == null && tagB == null) {
+			return true;
+		} else if (tagA == null || tagB == null) {
+			return false;
+		} else {
+			// .equals() is safe here because the key is from getAllKeys() and will definitely exist
+			//noinspection ConstantConditions
+			return tagA.getAllKeys().stream().allMatch(key -> tagA.get(key).equals(tagB.get(key)));
+		}
+	}
+
+	private boolean shouldMatchNBT() {
+		return switch (matchNBT) {
+			case TRUE -> true;
+			case FALSE -> false;
+			case DEFAULT -> item.getItem().builtInRegistryHolder().is(ItemFiltersAPI.CHECK_NBT_ITEM_TAG);
+		};
 	}
 
 	@Override
@@ -169,6 +222,8 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 		config.addLong("count", count, v -> count = v, 1, 1, Long.MAX_VALUE);
 		config.addEnum("consume_items", consumeItems, v -> consumeItems = v, Tristate.NAME_MAP);
 		config.addEnum("only_from_crafting", onlyFromCrafting, v -> onlyFromCrafting = v, Tristate.NAME_MAP);
+		config.addEnum("match_nbt", matchNBT, v -> matchNBT = v, Tristate.NAME_MAP);
+		config.addBool("weak_nbt_match", weakNBTmatch, v -> weakNBTmatch = v, false);
 	}
 
 	@Override
@@ -205,6 +260,23 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 	@Environment(EnvType.CLIENT)
 	private void showJEIRecipe(ItemStack stack) {
 		FTBQuestsJEIHelper.showRecipes(stack);
+	}
+
+	@Override
+	public void addMouseOverHeader(TooltipList list, TeamData teamData, boolean advanced) {
+		if (!title.isEmpty()) return;
+
+		List<Component> lines = item.getTooltipLines(FTBQuests.PROXY.getClientPlayer(), advanced ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL);
+
+		int s = 0;
+		if (!lines.isEmpty() && lines.get(0).getString().equals(item.getHoverName().getString())) {
+			// skip the first tooltip line (item name) if the same as the task title
+			s = 1;
+		}
+
+		for (int i = s; i < lines.size(); i++) {
+			list.add(lines.get(i));
+		}
 	}
 
 	@Override

@@ -107,10 +107,13 @@ public class StatTask extends Task {
 			return;
 		}
 
-		int set = Math.min(value, player.getStats().getValue(Stats.CUSTOM.get(Registry.CUSTOM_STAT.get(stat))));
-
-		if (set > teamData.getProgress(this)) {
-			teamData.setProgress(this, set);
+		ResourceLocation statId = Registry.CUSTOM_STAT.get(stat);
+		if (statId != null) {
+			// could be null, if someone brought an FTB Quests save from a different world and the stat's missing here
+			int set = Math.min(value, player.getStats().getValue(Stats.CUSTOM.get(statId)));
+			if (set > teamData.getProgress(this)) {
+				teamData.setProgress(this, set);
+			}
 		}
 	}
 }

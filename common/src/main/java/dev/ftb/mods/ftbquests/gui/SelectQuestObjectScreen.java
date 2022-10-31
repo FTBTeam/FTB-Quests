@@ -109,6 +109,16 @@ public class SelectQuestObjectScreen<T extends QuestObjectBase> extends ButtonLi
 	}
 
 	@Override
+	public boolean keyPressed(Key key) {
+		if (key.esc()) {
+			onBack();
+			return true;
+		} else {
+			return super.keyPressed(key);
+		}
+	}
+
+	@Override
 	public boolean onClosedByKey(Key key) {
 		if (super.onClosedByKey(key)) {
 			callback.save(false);

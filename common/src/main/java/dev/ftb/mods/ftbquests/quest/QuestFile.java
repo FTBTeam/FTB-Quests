@@ -1,7 +1,6 @@
 package dev.ftb.mods.ftbquests.quest;
 
 import dev.architectury.utils.Env;
-import dev.architectury.utils.NbtType;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.ItemStackConfig;
 import dev.ftb.mods.ftblibrary.icon.Icon;
@@ -9,11 +8,7 @@ import dev.ftb.mods.ftblibrary.math.MathUtils;
 import dev.ftb.mods.ftblibrary.snbt.SNBT;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
 import dev.ftb.mods.ftbquests.FTBQuests;
-import dev.ftb.mods.ftbquests.events.ClearFileCacheEvent;
-import dev.ftb.mods.ftbquests.events.CustomTaskEvent;
-import dev.ftb.mods.ftbquests.events.ObjectCompletedEvent;
-import dev.ftb.mods.ftbquests.events.ObjectStartedEvent;
-import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
+import dev.ftb.mods.ftbquests.events.*;
 import dev.ftb.mods.ftbquests.integration.FTBQuestsJEIHelper;
 import dev.ftb.mods.ftbquests.item.MissingItem;
 import dev.ftb.mods.ftbquests.net.DisplayCompletionToastMessage;
@@ -21,11 +16,7 @@ import dev.ftb.mods.ftbquests.net.FTBQuestsNetHandler;
 import dev.ftb.mods.ftbquests.quest.loot.EntityWeight;
 import dev.ftb.mods.ftbquests.quest.loot.LootCrate;
 import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
-import dev.ftb.mods.ftbquests.quest.reward.CustomReward;
-import dev.ftb.mods.ftbquests.quest.reward.Reward;
-import dev.ftb.mods.ftbquests.quest.reward.RewardAutoClaim;
-import dev.ftb.mods.ftbquests.quest.reward.RewardType;
-import dev.ftb.mods.ftbquests.quest.reward.RewardTypes;
+import dev.ftb.mods.ftbquests.quest.reward.*;
 import dev.ftb.mods.ftbquests.quest.task.CustomTask;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.quest.task.TaskType;
@@ -39,11 +30,7 @@ import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.NumericTag;
-import net.minecraft.nbt.StringTag;
-import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.*;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -55,16 +42,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Predicate;
 
 /**
@@ -447,7 +425,7 @@ public abstract class QuestFile extends QuestObject {
 		defaultQuestDisableJEI = nbt.getBoolean("default_quest_disable_jei");
 		emergencyItems.clear();
 
-		ListTag emergencyItemsTag = nbt.getList("emergency_items", NbtType.COMPOUND);
+		ListTag emergencyItemsTag = nbt.getList("emergency_items", Tag.TAG_COMPOUND);
 
 		for (int i = 0; i < emergencyItemsTag.size(); i++) {
 			ItemStack stack = MissingItem.readItem(emergencyItemsTag.getCompound(i));
@@ -590,7 +568,7 @@ public abstract class QuestFile extends QuestObject {
 			CompoundTag chapterGroupsTag = SNBT.read(groupsFile);
 
 			if (chapterGroupsTag != null) {
-				ListTag groupListTag = chapterGroupsTag.getList("chapter_groups", NbtType.COMPOUND);
+				ListTag groupListTag = chapterGroupsTag.getList("chapter_groups", Tag.TAG_COMPOUND);
 
 				for (int i = 0; i < groupListTag.size(); i++) {
 					CompoundTag groupNBT = groupListTag.getCompound(i);
@@ -622,7 +600,7 @@ public abstract class QuestFile extends QuestObject {
 						dataCache.put(chapter.id, chapterNBT);
 						chapter.group.chapters.add(chapter);
 
-						ListTag questList = chapterNBT.getList("quests", NbtType.COMPOUND);
+						ListTag questList = chapterNBT.getList("quests", Tag.TAG_COMPOUND);
 
 						for (int i = 0; i < questList.size(); i++) {
 							CompoundTag questNBT = questList.getCompound(i);
@@ -632,7 +610,7 @@ public abstract class QuestFile extends QuestObject {
 							dataCache.put(quest.id, questNBT);
 							chapter.quests.add(quest);
 
-							ListTag taskList = questNBT.getList("tasks", NbtType.COMPOUND);
+							ListTag taskList = questNBT.getList("tasks", Tag.TAG_COMPOUND);
 
 							for (int j = 0; j < taskList.size(); j++) {
 								CompoundTag taskNBT = taskList.getCompound(j);
@@ -649,7 +627,7 @@ public abstract class QuestFile extends QuestObject {
 								quest.tasks.add(task);
 							}
 
-							ListTag rewardList = questNBT.getList("rewards", NbtType.COMPOUND);
+							ListTag rewardList = questNBT.getList("rewards", Tag.TAG_COMPOUND);
 
 							for (int j = 0; j < rewardList.size(); j++) {
 								CompoundTag rewardNBT = rewardList.getCompound(j);

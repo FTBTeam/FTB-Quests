@@ -5,21 +5,11 @@ import dev.ftb.mods.ftblibrary.icon.ItemIcon;
 import dev.ftb.mods.ftblibrary.util.ClientUtils;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.FTBQuestsNetCommon;
-import dev.ftb.mods.ftbquests.gui.IRewardListenerScreen;
-import dev.ftb.mods.ftbquests.gui.QuestObjectUpdateListener;
-import dev.ftb.mods.ftbquests.gui.RewardKey;
-import dev.ftb.mods.ftbquests.gui.RewardToast;
-import dev.ftb.mods.ftbquests.gui.ToastQuestObject;
+import dev.ftb.mods.ftbquests.gui.*;
 import dev.ftb.mods.ftbquests.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.integration.FTBQuestsJEIHelper;
 import dev.ftb.mods.ftbquests.net.TeamDataUpdate;
-import dev.ftb.mods.ftbquests.quest.Chapter;
-import dev.ftb.mods.ftbquests.quest.ChapterGroup;
-import dev.ftb.mods.ftbquests.quest.Quest;
-import dev.ftb.mods.ftbquests.quest.QuestObject;
-import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
-import dev.ftb.mods.ftbquests.quest.QuestObjectType;
-import dev.ftb.mods.ftbquests.quest.TeamData;
+import dev.ftb.mods.ftbquests.quest.*;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import net.minecraft.client.Minecraft;
@@ -314,6 +304,8 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon {
 				gui.viewQuestPanel.refreshWidgets();
 			}
 		}
+
+		FTBQuestsJEIHelper.refresh(ClientQuestFile.INSTANCE.get(id));
 	}
 
 	@Override
@@ -344,5 +336,11 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon {
 				}
 			}
 		}
+	}
+
+	@Override
+	public void toggleChapterPinned(boolean pinned) {
+		ClientQuestFile.INSTANCE.self.setChapterPinned(pinned);
+		ClientQuestFile.INSTANCE.questScreen.chapterPanel.refreshWidgets();
 	}
 }

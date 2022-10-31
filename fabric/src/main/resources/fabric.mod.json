@@ -26,11 +26,11 @@
 		"fabric": "*",
 		"minecraft": "~1.18.2",
 		"architectury": ">=3.2.52",
-		"ftblibrary": ">=1801.3.5-build.99",
+		"ftblibrary": ">=1802.3.7-build.153",
 		"ftbteams": ">=1801.2.4-build.43",
 		"itemfilters": ">=1801.2.6-build.12"
 	},
 	"breaks": {
-		"kubejs": "<=1801.4.0"
+		"kubejs": "<=1802.5.5"
 	}
 }

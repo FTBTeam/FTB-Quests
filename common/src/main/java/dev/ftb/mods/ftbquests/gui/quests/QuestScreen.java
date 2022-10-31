@@ -7,11 +7,7 @@ import dev.ftb.mods.ftblibrary.config.ConfigWithVariants;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.math.MathUtils;
-import dev.ftb.mods.ftblibrary.ui.BaseScreen;
-import dev.ftb.mods.ftblibrary.ui.ContextMenuItem;
-import dev.ftb.mods.ftblibrary.ui.GuiHelper;
-import dev.ftb.mods.ftblibrary.ui.Panel;
-import dev.ftb.mods.ftblibrary.ui.Theme;
+import dev.ftb.mods.ftblibrary.ui.*;
 import dev.ftb.mods.ftblibrary.ui.input.Key;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
@@ -22,12 +18,7 @@ import dev.ftb.mods.ftbquests.gui.FTBQuestsTheme;
 import dev.ftb.mods.ftbquests.gui.SelectQuestObjectScreen;
 import dev.ftb.mods.ftbquests.net.ChangeProgressMessage;
 import dev.ftb.mods.ftbquests.net.EditObjectMessage;
-import dev.ftb.mods.ftbquests.quest.Chapter;
-import dev.ftb.mods.ftbquests.quest.Movable;
-import dev.ftb.mods.ftbquests.quest.Quest;
-import dev.ftb.mods.ftbquests.quest.QuestObject;
-import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
-import dev.ftb.mods.ftbquests.quest.QuestObjectType;
+import dev.ftb.mods.ftbquests.quest.*;
 import dev.ftb.mods.ftbquests.quest.reward.RandomReward;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.task.Task;
@@ -37,6 +28,8 @@ import dev.ftb.mods.ftbquests.util.ConfigQuestObject;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.toasts.SystemToast;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
@@ -52,7 +45,8 @@ import java.util.List;
 public class QuestScreen extends BaseScreen {
 	public final ClientQuestFile file;
 	public double scrollWidth, scrollHeight;
-	public int prevMouseX, prevMouseY, grabbed;
+	public int prevMouseX, prevMouseY;
+	public MouseButton grabbed = null;
 	public Chapter selectedChapter;
 	public final List<Movable> selectedObjects;
 	public final ExpandChaptersButton expandChaptersButton;
@@ -94,8 +88,8 @@ public class QuestScreen extends BaseScreen {
 	@Override
 	public void addWidgets() {
 		QuestTheme.currentObject = selectedChapter;
-		add(chapterPanel);
 		add(questPanel);
+		add(chapterPanel);
 		add(expandChaptersButton);
 		add(otherButtonsBottomPanel);
 		add(otherButtonsTopPanel);
@@ -180,6 +174,9 @@ public class QuestScreen extends BaseScreen {
 		ConfigGroup g = object.createSubGroup(group);
 		object.getConfig(g);
 
+		contextMenu.add(new ContextMenuItem(new TranslatableComponent("selectServer.edit"), ThemeProperties.EDIT_ICON.get(), () -> object.onEditButtonClicked(gui)));
+		contextMenu.add(ContextMenuItem.SEPARATOR);
+
 		if (!g.getValues().isEmpty()) {
 			List<ContextMenuItem> list = new ArrayList<>();
 
@@ -221,8 +218,6 @@ public class QuestScreen extends BaseScreen {
 				contextMenu.add(ContextMenuItem.SEPARATOR);
 			}
 		}
-
-		contextMenu.add(new ContextMenuItem(new TranslatableComponent("selectServer.edit"), ThemeProperties.EDIT_ICON.get(), () -> object.onEditButtonClicked(gui)));
 
 		if (object instanceof RandomReward && !QuestObjectBase.isNull(((RandomReward) object).getTable())) {
 			contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.reward_table.edit"), ThemeProperties.EDIT_ICON.get(), () -> ((RandomReward) object).getTable().onEditButtonClicked(gui)));
@@ -268,6 +263,17 @@ public class QuestScreen extends BaseScreen {
 
 	@Override
 	public boolean keyPressed(Key key) {
+		if (key.esc()) {
+			// checking for open context menu first is important
+			if (contextMenu != null) {
+				openContextMenu((Panel) null);
+				return true;
+			} else if (isViewingQuest()) {
+				closeQuest();
+				return true;
+			}
+		}
+
 		if (super.keyPressed(key)) {
 			return true;
 		} else if (FTBQuestsClient.KEY_QUESTS.matches(key.keyCode, key.scanCode)) {
@@ -342,7 +348,7 @@ public class QuestScreen extends BaseScreen {
 			} else {
 				if (now - lastShiftPress <= 400L) {
 					ConfigQuestObject<QuestObject> c = new ConfigQuestObject<>(QuestObjectType.CHAPTER.or(QuestObjectType.QUEST));
-					SelectQuestObjectScreen gui = new SelectQuestObjectScreen<>(c, accepted -> {
+					SelectQuestObjectScreen<?> gui = new SelectQuestObjectScreen<>(c, accepted -> {
 						if (accepted) {
 							if (c.value instanceof Chapter) {
 								selectChapter((Chapter) c.value);
@@ -399,7 +405,7 @@ public class QuestScreen extends BaseScreen {
 		zoom = (int) Mth.clamp(zoom + up * 4, 4, 28);
 
 		if (zoom != z) {
-			grabbed = 0;
+			grabbed = null;
 			double sx = questPanel.centerQuestX;
 			double sy = questPanel.centerQuestY;
 			questPanel.resetScroll();
@@ -423,25 +429,50 @@ public class QuestScreen extends BaseScreen {
 		borderColor.draw(matrixStack, x + w - pw, y + 1, 1, h - 2);
 		backgroundColor.draw(matrixStack, x + w - pw + 1, y + 1, pw - 2, h - 2);
 
-		if (grabbed != 0) {
+		if (grabbed != null) {
 			int mx = getMouseX();
 			int my = getMouseY();
+			if (grabbed.isLeft()) {
 
-			if (scrollWidth > questPanel.width) {
-				questPanel.setScrollX(Math.max(Math.min(questPanel.getScrollX() + (prevMouseX - mx), scrollWidth - questPanel.width), 0));
-			} else {
-				questPanel.setScrollX((scrollWidth - questPanel.width) / 2);
+				if (scrollWidth > questPanel.width) {
+					questPanel.setScrollX(Math.max(Math.min(questPanel.getScrollX() + (prevMouseX - mx), scrollWidth - questPanel.width), 0));
+				} else {
+					questPanel.setScrollX((scrollWidth - questPanel.width) / 2);
+				}
+
+				if (scrollHeight > questPanel.height) {
+					questPanel.setScrollY(Math.max(Math.min(questPanel.getScrollY() + (prevMouseY - my), scrollHeight - questPanel.height), 0));
+				} else {
+					questPanel.setScrollY((scrollHeight - questPanel.height) / 2);
+				}
+
+				prevMouseX = mx;
+				prevMouseY = my;
+			} else if (grabbed.isMiddle()) {
+				int boxX = Math.min(prevMouseX, mx);
+				int boxY = Math.min(prevMouseY, my);
+				int boxW = Math.abs(mx - prevMouseX);
+				int boxH = Math.abs(my - prevMouseY);
+				GuiHelper.drawHollowRect(matrixStack, boxX, boxY, boxW, boxH, Color4I.DARK_GRAY, false);
+				Color4I.DARK_GRAY.withAlpha(40).draw(matrixStack, boxX, boxY, boxW, boxH);
 			}
-
-			if (scrollHeight > questPanel.height) {
-				questPanel.setScrollY(Math.max(Math.min(questPanel.getScrollY() + (prevMouseY - my), scrollHeight - questPanel.height), 0));
-			} else {
-				questPanel.setScrollY((scrollHeight - questPanel.height) / 2);
-			}
-
-			prevMouseX = mx;
-			prevMouseY = my;
 		}
+	}
+
+	void selectAllQuestsInBox(int mouseX, int mouseY, double scrollX, double scrollY) {
+		int x1 = Math.min(prevMouseX, mouseX);
+		int x2 = Math.max(prevMouseX, mouseX);
+		int y1 = Math.min(prevMouseY, mouseY);
+		int y2 = Math.max(prevMouseY, mouseY);
+		Rect2i rect = new Rect2i(x1, y1, x2 - x1, y2 - y1);
+
+		if (!Screen.hasControlDown()) selectedObjects.clear();
+
+		questPanel.widgets.forEach(w -> {
+			if (w instanceof QuestButton qb && rect.contains((int) (w.getX() - scrollX), (int) (w.getY() - scrollY))) {
+				toggleSelected(qb.quest);
+			}
+		});
 	}
 
 	@Override

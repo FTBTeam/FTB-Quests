@@ -7,32 +7,23 @@ import dev.ftb.mods.ftblibrary.config.ui.EditConfigFromStringScreen;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.Icons;
-import dev.ftb.mods.ftblibrary.ui.Button;
-import dev.ftb.mods.ftblibrary.ui.ContextMenuItem;
-import dev.ftb.mods.ftblibrary.ui.GuiHelper;
-import dev.ftb.mods.ftblibrary.ui.Panel;
-import dev.ftb.mods.ftblibrary.ui.Theme;
-import dev.ftb.mods.ftblibrary.ui.Widget;
-import dev.ftb.mods.ftblibrary.ui.WidgetLayout;
+import dev.ftb.mods.ftblibrary.ui.*;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
-import dev.ftb.mods.ftblibrary.util.ClientTextComponentUtils;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.gui.ChangeChapterGroupScreen;
 import dev.ftb.mods.ftbquests.net.CreateObjectMessage;
 import dev.ftb.mods.ftbquests.net.MoveChapterGroupMessage;
 import dev.ftb.mods.ftbquests.net.MoveChapterMessage;
+import dev.ftb.mods.ftbquests.net.ToggleChapterPinnedMessage;
 import dev.ftb.mods.ftbquests.quest.Chapter;
 import dev.ftb.mods.ftbquests.quest.ChapterGroup;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
+import dev.ftb.mods.ftbquests.util.TextUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextColor;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.*;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -43,8 +34,6 @@ import java.util.regex.Pattern;
  * @author LatvianModder
  */
 public class ChapterPanel extends Panel {
-	public static boolean pinned = false;
-
 	public static final Icon ARROW_COLLAPSED = Icon.getIcon("ftbquests:textures/gui/arrow_collapsed.png");
 	public static final Icon ARROW_EXPANDED = Icon.getIcon("ftbquests:textures/gui/arrow_expanded.png");
 
@@ -81,7 +70,7 @@ public class ChapterPanel extends Panel {
 		public void onClicked(MouseButton button) {
 			if (getMouseX() > getX() + width - 18) {
 				playClickSound();
-				pinned = !pinned;
+				new ToggleChapterPinnedMessage().sendToServer();
 			} else if (chapterPanel.questScreen.file.canEdit() && getMouseX() > getX() + width - 34) {
 				playClickSound();
 
@@ -138,7 +127,7 @@ public class ChapterPanel extends Panel {
 
 			boolean canEdit = chapterPanel.questScreen.file.canEdit();
 
-			(pinned ? ThemeProperties.PIN_ICON_ON : ThemeProperties.PIN_ICON_OFF).get().draw(matrixStack, x + w - 16, y + 3, 12, 12);
+			(chapterPanel.isPinned() ? ThemeProperties.PIN_ICON_ON : ThemeProperties.PIN_ICON_OFF).get().draw(matrixStack, x + w - 16, y + 3, 12, 12);
 
 			if (canEdit) {
 				ThemeProperties.ADD_ICON.get().draw(matrixStack, x + w - 31, y + 3, 12, 12);
@@ -156,7 +145,7 @@ public class ChapterPanel extends Panel {
 			chapterPanel.questScreen.addInfoTooltip(list, chapterPanel.questScreen.file);
 
 			if (getMouseX() > getX() + width - 18) {
-				list.string(pinned ? "Stays open" : "Doesn't stay open");
+				list.string(chapterPanel.isPinned() ? "Stays open" : "Doesn't stay open");
 			} else if (chapterPanel.questScreen.file.canEdit() && getMouseX() > getX() + width - 34) {
 				list.translate("gui.add");
 			}
@@ -264,7 +253,7 @@ public class ChapterPanel extends Panel {
 			description = new ArrayList<>();
 
 			for (String v : chapter.subtitle) {
-				description.add(new TextComponent("").append(ClientTextComponentUtils.parse(v)).withStyle(ChatFormatting.GRAY));
+				description.add(new TextComponent("").append(TextUtils.parseRawText(v)).withStyle(ChatFormatting.GRAY));
 			}
 		}
 
@@ -334,7 +323,7 @@ public class ChapterPanel extends Panel {
 	}
 
 	public final QuestScreen questScreen;
-	public boolean expanded = pinned;
+	public boolean expanded = isPinned();
 
 	public ChapterPanel(Panel panel) {
 		super(panel);
@@ -403,7 +392,7 @@ public class ChapterPanel extends Panel {
 			wd = Math.min(Math.max(wd, ((ListButton) w).getActualWidth(questScreen)), 800);
 		}
 
-		setPosAndSize(((expanded || pinned) && !questScreen.isViewingQuest()) ? 0 : -wd, 0, wd, questScreen.height);
+		setPosAndSize(((expanded || isPinned()) && !questScreen.isViewingQuest()) ? 0 : -wd, 0, wd, questScreen.height);
 
 		for (Widget w : widgets) {
 			w.setWidth(wd);
@@ -416,14 +405,14 @@ public class ChapterPanel extends Panel {
 	public void updateMouseOver(int mouseX, int mouseY) {
 		super.updateMouseOver(mouseX, mouseY);
 
-		if (expanded && !pinned && !isMouseOver()) {
+		if (expanded && !isPinned() && !isMouseOver()) {
 			setExpanded(false);
 		}
 	}
 
 	@Override
 	public int getX() {
-		return (expanded || pinned) && !questScreen.isViewingQuest() ? 0 : -width;
+		return (expanded || isPinned()) && !questScreen.isViewingQuest() ? 0 : -width;
 	}
 
 	@Override
@@ -442,5 +431,9 @@ public class ChapterPanel extends Panel {
 
 	public void setExpanded(boolean b) {
 		expanded = b;
+	}
+
+	boolean isPinned() {
+		return ClientQuestFile.INSTANCE.self.isChapterPinned();
 	}
 }

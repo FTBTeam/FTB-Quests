@@ -1,8 +1,8 @@
 package dev.ftb.mods.ftbquests.integration.forge;
 
 import dev.ftb.mods.ftbquests.integration.jei.FTBQuestsJEIIntegration;
-import dev.ftb.mods.ftbquests.integration.jei.LootCrateRegistry;
-import dev.ftb.mods.ftbquests.integration.jei.QuestRegistry;
+import dev.ftb.mods.ftbquests.integration.jei.LootCrateRecipeManagerPlugin;
+import dev.ftb.mods.ftbquests.integration.jei.QuestRecipeManagerPlugin;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import mezz.jei.api.recipe.IFocus;
 import net.minecraftforge.fml.ModList;
@@ -15,7 +15,7 @@ import static dev.ftb.mods.ftbquests.integration.FTBQuestsJEIHelper.QUESTS;
  */
 public class FTBQuestsJEIHelperImpl {
 	public static void refresh(QuestObjectBase object) {
-		int i = object.refreshJEI();
+		int i = object == null ? 0 : object.refreshJEI();
 
 		if (i != 0 && ModList.get().isLoaded("jei")) {
 			if ((i & QUESTS) != 0) {
@@ -29,11 +29,11 @@ public class FTBQuestsJEIHelperImpl {
 	}
 
 	private static void refreshQuests() {
-		QuestRegistry.INSTANCE.refresh();
+		QuestRecipeManagerPlugin.INSTANCE.refresh();
 	}
 
 	private static void refreshLootcrates() {
-		LootCrateRegistry.INSTANCE.refresh();
+		LootCrateRecipeManagerPlugin.INSTANCE.refresh();
 	}
 
 	public static void showRecipes(Object object) {
