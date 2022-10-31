@@ -6,6 +6,7 @@ import dev.architectury.utils.Env;
 import dev.ftb.mods.ftblibrary.snbt.SNBT;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
 import dev.ftb.mods.ftbquests.FTBQuests;
+import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
 import dev.ftb.mods.ftbquests.net.*;
 import dev.ftb.mods.ftbquests.quest.reward.RewardType;
 import dev.ftb.mods.ftbquests.quest.reward.RewardTypes;
@@ -25,6 +26,8 @@ import net.minecraft.world.level.storage.LevelResource;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collections;
+import java.util.Date;
 import java.util.UUID;
 
 /**
@@ -188,6 +191,14 @@ public class ServerQuestFile extends QuestFile {
 				for (ChapterGroup group : chapterGroups) {
 					for (Chapter chapter : group.chapters) {
 						for (Quest quest : chapter.quests) {
+							if (!data.isCompleted(quest) && quest.isCompletedRaw(data)) {
+								// Handles possible situation where quest book has been modified to remove a task from a quest
+								// It can leave a player having completed all the other tasks, but unable to complete the quest
+								//   since quests are normally marked completed when the last task in that quest is completed
+								// https://github.com/FTBBeta/Beta-Testing-Issues/issues/755
+								quest.onCompleted(new QuestProgressEventData<>(new Date(), data, quest, data.getOnlineMembers(), Collections.singletonList(player)));
+							}
+
 							data.checkAutoCompletion(quest);
 
 							if (data.canStartTasks(quest)) {
