@@ -36,7 +36,7 @@ dependencies {
 
 	modApi("dev.ftb.mods:ftb-library-forge:${rootProject.ftb_library_version}") { transitive false }
 	modApi("dev.ftb.mods:ftb-teams-forge:${rootProject.ftb_teams_version}") { transitive false }
-	modApi "dev.latvian.mods:item-filters:${rootProject.itemfilters_version}"
+	modApi "dev.latvian.mods:item-filters-forge:${rootProject.itemfilters_version}"
 
 	modImplementation "dev.latvian.mods:kubejs-forge:${rootProject.kubejs_version}"
 	modImplementation "dev.latvian.mods:rhino-forge:${rootProject.rhino_version}"
@@ -108,7 +108,7 @@ if (ENV.CURSEFORGE_KEY) {
 				requiredDependency 'architectury-api'
 				requiredDependency 'ftb-library-forge'
 				requiredDependency 'ftb-teams-forge'
-				requiredDependency 'item-filters-forge'
+				requiredDependency 'item-filters'
 				optionalDependency 'kubejs'
 				optionalDependency 'jei'
 			}
