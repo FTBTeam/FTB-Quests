@@ -88,7 +88,7 @@ if (ENV.CURSEFORGE_KEY) {
 				requiredDependency 'fabric-api'
 				requiredDependency 'ftb-library-fabric'
 				requiredDependency 'ftb-teams-fabric'
-				requiredDependency 'item-filters-fabric'
+				requiredDependency 'item-filters'
 				optionalDependency 'kubejs-fabric'
 			}
 			changelog = getGitChangelog
