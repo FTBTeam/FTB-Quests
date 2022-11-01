@@ -78,7 +78,7 @@ public abstract class Reward extends QuestObjectBase {
 			nbt.putString("auto", autoclaim.id);
 		}
 
-		if (excludeFromClaimAll) nbt.putBoolean("exclude_from_claim_all", excludeFromClaimAll);
+		if (excludeFromClaimAll) nbt.putBoolean("exclude_from_claim_all", true);
 	}
 
 	@Override
@@ -111,7 +111,8 @@ public abstract class Reward extends QuestObjectBase {
 		super.getConfig(config);
 		config.addEnum("team", team, v -> team = v, Tristate.NAME_MAP).setNameKey("ftbquests.reward.team_reward");
 		config.addEnum("autoclaim", autoclaim, v -> autoclaim = v, RewardAutoClaim.NAME_MAP).setNameKey("ftbquests.reward.autoclaim");
-		config.addBool("exclude_from_claim_all", excludeFromClaimAll, v -> excludeFromClaimAll = v, excludeFromClaimAll).setNameKey("ftbquests.reward.exclude_from_claim_all");
+		config.addBool("exclude_from_claim_all", excludeFromClaimAll, v -> excludeFromClaimAll = v, excludeFromClaimAll)
+				.setNameKey("ftbquests.reward.exclude_from_claim_all").setCanEdit(!isClaimAllHardcoded());
 	}
 
 	public abstract void claim(ServerPlayer player, boolean notify);
@@ -242,6 +243,10 @@ public abstract class Reward extends QuestObjectBase {
 
 	public boolean getExcludeFromClaimAll() {
 		return excludeFromClaimAll;
+	}
+
+	public boolean isClaimAllHardcoded() {
+		return false;
 	}
 
 	@Nullable
