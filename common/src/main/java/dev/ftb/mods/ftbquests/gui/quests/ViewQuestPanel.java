@@ -431,7 +431,7 @@ public class ViewQuestPanel extends Panel {
 		}
 
 		final var qo1 = qo;
-		EditConfigFromStringScreen.open(c, qo1.title, "", new TranslatableComponent(titleKey), accepted -> {
+		EditConfigFromStringScreen.open(c, qo1.title, "", Component.translatable(titleKey), accepted -> {
 			if (accepted) {
 				qo1.title = c.value;
 				new EditObjectMessage(qo1).sendToServer();
@@ -444,7 +444,7 @@ public class ViewQuestPanel extends Panel {
 	private void editSubtitle() {
 		StringConfig c = new StringConfig(null);
 
-		EditConfigFromStringScreen.open(c, quest.subtitle, "", new TranslatableComponent("ftbquests.quest.subtitle"), accepted -> {
+		EditConfigFromStringScreen.open(c, quest.subtitle, "", Component.translatable("ftbquests.quest.subtitle"), accepted -> {
 			if (accepted) {
 				quest.subtitle = c.value;
 				new EditObjectMessage(quest).sendToServer();
@@ -476,7 +476,7 @@ public class ViewQuestPanel extends Panel {
 			l = quest.description.size() + 1;
 			s++;
 		}
-		Component title = new TranslatableComponent("ftbquests.quest.description").append(String.format(": %d/%d", l, s));
+		Component title = Component.translatable("ftbquests.quest.description").append(String.format(": %d/%d", l, s));
 
 		EditConfigFromStringScreen.open(c, line == -1 ? "" : quest.description.get(line), "", title, accepted -> {
 			if (accepted) {
@@ -637,7 +637,7 @@ public class ViewQuestPanel extends Panel {
 		}
 
 		private void errorToPlayer(String msg, Object... args) {
-			FTBQuests.PROXY.getClientPlayer().displayClientMessage(new TextComponent(String.format(msg, args)).withStyle(ChatFormatting.RED), false);
+			FTBQuests.PROXY.getClientPlayer().displayClientMessage(Component.literal(String.format(msg, args)).withStyle(ChatFormatting.RED), false);
 		}
 
 		@Override

@@ -13,14 +13,14 @@ public class GameStagesEventHandler {
     }
 
     private static void onStageAdded(GameStageEvent.Added event) {
-        if (event.getPlayer() instanceof ServerPlayer sp) StageTask.checkStages(sp);
+        if (event.getEntity() instanceof ServerPlayer sp) StageTask.checkStages(sp);
     }
 
     private static void onStageRemoved(GameStageEvent.Removed event) {
-        if (event.getPlayer() instanceof ServerPlayer sp) StageTask.checkStages(sp);
+        if (event.getEntity() instanceof ServerPlayer sp) StageTask.checkStages(sp);
     }
 
     private static void onStagesCleared(GameStageEvent.Cleared event) {
-        if (event.getPlayer() instanceof ServerPlayer sp) StageTask.checkStages(sp);
+        if (event.getEntity() instanceof ServerPlayer sp) StageTask.checkStages(sp);
     }
 }
