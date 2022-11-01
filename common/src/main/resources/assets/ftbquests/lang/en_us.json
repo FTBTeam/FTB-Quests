@@ -333,6 +333,7 @@
 	"ftbquests.reward.claim_all": "Claim All Rewards",
 	"ftbquests.reward.collected": "Reward Collected!",
 	"ftbquests.reward.exclude_from_claim_all": "Exclude from Claim All",
+	"ftbquests.reward.exclude_from_claim_all.tooltip": "Ignore this reward when the \"Claim All\" button is clicked\nThis setting cannot be changed for Loot, Random\n and Choice reward types",
 	"ftbquests.reward.random_bonus": "Random Bonus",
 	"ftbquests.reward.ftbquests.item": "Item",
 	"ftbquests.reward.ftbquests.item.count": "Count",
