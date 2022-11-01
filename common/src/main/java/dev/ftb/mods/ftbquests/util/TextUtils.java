@@ -4,7 +4,6 @@ import com.google.gson.JsonParseException;
 import dev.ftb.mods.ftblibrary.util.ClientTextComponentUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 
 import java.util.regex.Pattern;
 
@@ -28,7 +27,7 @@ public class TextUtils {
         try {
             return Component.Serializer.fromJson(raw);
         } catch (JsonParseException e) {
-            return new TextComponent("ERROR: " + e.getMessage()).withStyle(ChatFormatting.RED);
+            return Component.literal("ERROR: " + e.getMessage()).withStyle(ChatFormatting.RED);
         }
     }
 }
