@@ -22,7 +22,7 @@ side = "BOTH"
 [[dependencies.ftbquests]]
 modId = "architectury"
 mandatory = true
-versionRange = "[6.2.43,)"
+versionRange = "[6.3.49,)"
 ordering = "NONE"
 side = "BOTH"
 
