@@ -185,6 +185,11 @@ public class RandomReward extends Reward {
 	}
 
 	@Override
+	public boolean isClaimAllHardcoded() {
+		return true;
+	}
+
+	@Override
 	@Nullable
 	@Environment(EnvType.CLIENT)
 	public Object getIngredient() {
