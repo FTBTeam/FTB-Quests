@@ -193,6 +193,21 @@ public abstract class Task extends QuestObject {
 		return getMaxProgress() <= 1L;
 	}
 
+	/**
+	 * Called before any progress information is added to the task tooltip
+	 * @param list list to append text to
+	 * @param teamData the team / player data
+	 * @param advanced true for advanced tooltips (when F3+H is in use)
+	 */
+	@Environment(EnvType.CLIENT)
+	public void addMouseOverHeader(TooltipList list, TeamData teamData, boolean advanced) {
+	}
+
+	/**
+	 * Called after any progress information is added to the task tooltip
+	 * @param list list to append text to
+	 * @param teamData the team / player data
+	 */
 	@Environment(EnvType.CLIENT)
 	public void addMouseOverText(TooltipList list, TeamData teamData) {
 		if (consumesResources()) {
