@@ -5,6 +5,7 @@ import dev.ftb.mods.ftbquests.item.FTBQuestsItems;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.constants.VanillaTypes;
+import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.registration.*;
 import mezz.jei.api.runtime.IJeiRuntime;
 import net.minecraft.resources.ResourceLocation;
@@ -17,6 +18,12 @@ import net.minecraft.world.item.ItemStack;
 public class FTBQuestsJEIIntegration implements IModPlugin {
 	private static final ResourceLocation UID = new ResourceLocation(FTBQuests.MOD_ID, "jei");
 	public static IJeiRuntime runtime;
+
+	public static void showRecipes(ItemStack stack) {
+		if (runtime != null) {
+			runtime.getRecipesGui().show(runtime.getJeiHelpers().getFocusFactory().createFocus(RecipeIngredientRole.OUTPUT, runtime.getIngredientManager().getIngredientType(stack), stack));
+		}
+	}
 
 	@Override
 	public void onRuntimeAvailable(IJeiRuntime r) {
