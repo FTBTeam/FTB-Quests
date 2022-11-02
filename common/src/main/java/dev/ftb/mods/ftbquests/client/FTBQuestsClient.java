@@ -247,7 +247,7 @@ public class FTBQuestsClient extends FTBQuestsCommon {
 
 	@Override
 	public void openGui() {
-		ClientQuestFile.INSTANCE.openQuestGui();
+		ClientQuestFile.openGui();
 	}
 
 	@Override

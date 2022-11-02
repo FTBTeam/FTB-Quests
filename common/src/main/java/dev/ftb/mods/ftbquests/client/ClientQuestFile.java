@@ -15,17 +15,26 @@ import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.theme.QuestTheme;
 import dev.ftb.mods.ftbquests.util.TextUtils;
 import dev.ftb.mods.ftbteams.data.ClientTeamManager;
+import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
  * @author LatvianModder
  */
 public class ClientQuestFile extends QuestFile {
+	private static final List<String> MISSING_DATA_ERR = List.of(
+			"Unable to open Quest GUI: no quest book data received from server!",
+			"- Check that FTB Quests and FTB Teams are installed on the server",
+			"  and that no server-side errors were logged when you connected."
+	);
+
 	public static ClientQuestFile INSTANCE;
 
 	public static boolean exists() {
@@ -122,6 +131,17 @@ public class ClientQuestFile extends QuestFile {
 		}
 
 		questScreen.chapterPanel.setExpanded(chaptersExpanded);
+	}
+
+	public static void openGui() {
+		if (INSTANCE != null) {
+			INSTANCE.openQuestGui();
+		} else {
+			LocalPlayer player = Minecraft.getInstance().player;
+			if (player != null) {
+				MISSING_DATA_ERR.forEach(s -> player.displayClientMessage(Component.literal(s).withStyle(ChatFormatting.RED), false));
+			}
+		}
 	}
 
 	public void openQuestGui() {

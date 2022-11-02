@@ -25,10 +25,9 @@ import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.toasts.SystemToast;
-import net.minecraft.network.chat.Component;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
@@ -132,18 +131,13 @@ public class FTBQuestsClientEventHandler {
 
 	private void onKeyEvent(Minecraft mc) {
 		if (FTBQuestsClient.KEY_QUESTS.consumeClick()) {
-			ClientQuestFile.INSTANCE.openQuestGui();
+			ClientQuestFile.openGui();
 		}
 	}
 
 	private EventResult onCustomClick(CustomClickEvent event) {
 		if (event.id().getNamespace().equals(FTBQuests.MOD_ID) && "open_gui".equals(event.id().getPath())) {
-			if (!ClientQuestFile.exists()) {
-				Minecraft.getInstance().getToasts().addToast(new SystemToast(SystemToast.SystemToastIds.TUTORIAL_HINT, Component.literal("Error?! Server doesn't have FTB Quests!"), null));
-			} else {
-				ClientQuestFile.INSTANCE.openQuestGui();
-			}
-
+			ClientQuestFile.openGui();
 			return EventResult.interruptFalse();
 		}
 
