@@ -1,7 +1,6 @@
 package dev.ftb.mods.ftbquests.gui.quests;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import dev.architectury.platform.Platform;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;
@@ -35,13 +34,9 @@ public class ValidItemsScreen extends BaseScreen {
 
 		@Override
 		public void onClicked(MouseButton button) {
-			if (Platform.isModLoaded("jei") || Platform.isModLoaded("roughlyenoughitems")) {
-				showJEIRecipe();
+			if (FTBQuestsJEIHelper.isRecipeModAvailable()) {
+				FTBQuestsJEIHelper.showRecipes(stack);
 			}
-		}
-
-		private void showJEIRecipe() {
-			FTBQuestsJEIHelper.showRecipes(stack);
 		}
 
 		@Nullable
