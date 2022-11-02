@@ -53,11 +53,11 @@ public class FTBQuestsClient extends FTBQuestsCommon {
 		ClientLifecycleEvent.CLIENT_SETUP.register(this::setup);
 		ReloadListenerRegistry.register(PackType.CLIENT_RESOURCES, new QuestFileCacheReloader());
 		ReloadListenerRegistry.register(PackType.CLIENT_RESOURCES, new ThemeLoader());
+		KeyMappingRegistry.register(KEY_QUESTS = new KeyMapping("key.ftbquests.quests", InputConstants.Type.KEYSYM, -1, "key.categories.ftbquests"));
 		new FTBQuestsClientEventHandler().init();
 	}
 
 	private void setup(Minecraft minecraft) {
-		KeyMappingRegistry.register(KEY_QUESTS = new KeyMapping("key.ftbquests.quests", InputConstants.Type.KEYSYM, -1, "key.categories.ftbquests"));
 		RenderTypeRegistry.register(RenderType.translucent(), FTBQuestsBlocks.BARRIER.get());
 		RenderTypeRegistry.register(RenderType.translucent(), FTBQuestsBlocks.STAGE_BARRIER.get());
 		RenderTypeRegistry.register(RenderType.solid(), FTBQuestsBlocks.TASK_SCREEN_1.get());
