@@ -112,7 +112,7 @@ public class FTBQuestsEventHandler {
 	}
 
 	private EventResult playerKill(LivingEntity entity, DamageSource source) {
-		if (source.getEntity() instanceof ServerPlayer && !PlayerHooks.isFake((Player) source.getEntity())) {
+		if (source.getEntity() instanceof ServerPlayer player && !PlayerHooks.isFake(player)) {
 			if (killTasks == null) {
 				killTasks = ServerQuestFile.INSTANCE.collect(KillTask.class);
 			}
@@ -121,7 +121,6 @@ public class FTBQuestsEventHandler {
 				return EventResult.pass();
 			}
 
-			ServerPlayer player = (ServerPlayer) source.getEntity();
 			TeamData data = ServerQuestFile.INSTANCE.getData(player);
 
 			for (KillTask task : killTasks) {
