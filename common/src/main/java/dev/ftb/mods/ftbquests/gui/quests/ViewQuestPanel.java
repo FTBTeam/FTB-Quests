@@ -125,93 +125,83 @@ public class ViewQuestPanel extends Panel {
 			panelTasks.add(noTasks);
 		}
 
-		int blockedRewards = 0;
 		for (Reward reward : quest.rewards) {
-			if (!canEdit && questScreen.file.self.isRewardBlocked(reward)) {
-				blockedRewards++;
-			} else if (canEdit || reward.getAutoClaimType() != RewardAutoClaim.INVISIBLE) {
+			if (canEdit || !questScreen.file.self.isRewardBlocked(reward) && reward.getAutoClaimType() != RewardAutoClaim.INVISIBLE) {
 				RewardButton b = new RewardButton(panelRewards, reward);
 				panelRewards.add(b);
 				b.setSize(bsize, bsize);
 			}
 		}
-		if (blockedRewards > 0) {
-			Component text = new TranslatableComponent("ftbquests.reward.blocked", blockedRewards, questScreen.file.self)
-					.withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC);
-			SimpleButton b = new SimpleButton(panelRewards, text, Icons.BARRIER, (widget, button) -> {});
-			panelRewards.add(b);
-			b.setSize(bsize, bsize);
-		}
 
 		if (!canEdit && panelRewards.widgets.isEmpty()) {
-		DisabledButtonTextField noRewards = new DisabledButtonTextField(panelRewards, new TranslatableComponent("ftbquests.gui.no_rewards"));
-		noRewards.setSize(noRewards.width + 8, bsize);
-		noRewards.setColor(ThemeProperties.DISABLED_TEXT_COLOR.get(quest));
-		panelRewards.add(noRewards);
-	}
+			DisabledButtonTextField noRewards = new DisabledButtonTextField(panelRewards, new TranslatableComponent("ftbquests.gui.no_rewards"));
+			noRewards.setSize(noRewards.width + 8, bsize);
+			noRewards.setColor(ThemeProperties.DISABLED_TEXT_COLOR.get(quest));
+			panelRewards.add(noRewards);
+		}
 
 		if (questScreen.file.canEdit()) {
-		panelTasks.add(new AddTaskButton(panelTasks, quest));
-		panelRewards.add(new AddRewardButton(panelRewards, quest));
-	}
+			panelTasks.add(new AddTaskButton(panelTasks, quest));
+			panelRewards.add(new AddRewardButton(panelRewards, quest));
+		}
 
-	int ww = 0;
+		int ww = 0;
 
 		for (Widget widget : panelTasks.widgets) {
-		ww = Math.max(ww, widget.width);
-	}
+			ww = Math.max(ww, widget.width);
+		}
 
 		for (Widget widget : panelRewards.widgets) {
-		ww = Math.max(ww, widget.width);
-	}
+			ww = Math.max(ww, widget.width);
+		}
 
-	Color4I borderColor = ThemeProperties.WIDGET_BORDER.get(questScreen.selectedChapter);
+		Color4I borderColor = ThemeProperties.WIDGET_BORDER.get(questScreen.selectedChapter);
 
-	ww = Mth.clamp(ww, 70, 140);
-	w = Math.max(w, ww * 2 + 10);
+		ww = Mth.clamp(ww, 70, 140);
+		w = Math.max(w, ww * 2 + 10);
 
 		if (ThemeProperties.FULL_SCREEN_QUEST.get(quest) == 1) {
-		w = questScreen.width - 1;
-	}
+			w = questScreen.width - 1;
+		}
 
 		if (w % 2 == 0) {
-		w++;
-	}
+			w++;
+		}
 
-	setWidth(w);
+		setWidth(w);
 		panelContent.setPosAndSize(0, 16, w, 0);
 
-	int w2 = w / 2;
+		int w2 = w / 2;
 
-	add(buttonClose = new CloseViewQuestButton(this));
+		add(buttonClose = new CloseViewQuestButton(this));
 		buttonClose.setPosAndSize(w - 14, 2, 12, 12);
 
-	add(buttonPin = new PinViewQuestButton(this));
+		add(buttonPin = new PinViewQuestButton(this));
 		buttonPin.setPosAndSize(w - 26, 2, 12, 12);
 
 		if (quest.dependencies.isEmpty()) {
-		add(buttonOpenDependencies = new SimpleButton(this, new TranslatableComponent("ftbquests.gui.no_dependencies"), Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/arrow_left.png").withTint(borderColor), (widget, button) -> {
-		}));
-	} else {
-		add(buttonOpenDependencies = new SimpleButton(this, new TranslatableComponent("ftbquests.gui.view_dependencies"), Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/arrow_left.png").withTint(ThemeProperties.QUEST_VIEW_TITLE.get()), (widget, button) -> showList(quest.dependencies, true)));
-	}
+			add(buttonOpenDependencies = new SimpleButton(this, new TranslatableComponent("ftbquests.gui.no_dependencies"), Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/arrow_left.png").withTint(borderColor), (widget, button) -> {
+			}));
+		} else {
+			add(buttonOpenDependencies = new SimpleButton(this, new TranslatableComponent("ftbquests.gui.view_dependencies"), Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/arrow_left.png").withTint(ThemeProperties.QUEST_VIEW_TITLE.get()), (widget, button) -> showList(quest.dependencies, true)));
+		}
 
 		if (quest.getDependants().isEmpty()) {
-		add(buttonOpenDependants = new SimpleButton(this, new TranslatableComponent("ftbquests.gui.no_dependants"), Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/arrow_right.png").withTint(borderColor), (widget, button) -> {
-		}));
-	} else {
-		add(buttonOpenDependants = new SimpleButton(this, new TranslatableComponent("ftbquests.gui.view_dependants"), Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/arrow_right.png").withTint(ThemeProperties.QUEST_VIEW_TITLE.get()), (widget, button) -> showList(quest.getDependants(), false)));
-	}
+			add(buttonOpenDependants = new SimpleButton(this, new TranslatableComponent("ftbquests.gui.no_dependants"), Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/arrow_right.png").withTint(borderColor), (widget, button) -> {
+			}));
+		} else {
+			add(buttonOpenDependants = new SimpleButton(this, new TranslatableComponent("ftbquests.gui.view_dependants"), Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/arrow_right.png").withTint(ThemeProperties.QUEST_VIEW_TITLE.get()), (widget, button) -> showList(quest.getDependants(), false)));
+		}
 
 		buttonOpenDependencies.setPosAndSize(0, 17, 13, 13);
 		buttonOpenDependants.setPosAndSize(w - 13, 17, 13, 13);
 
-	TextField textFieldTasks = new TextField(panelContent) {
-		@Override
-		public TextField resize(Theme theme) {
-			return this;
-		}
-	};
+		TextField textFieldTasks = new TextField(panelContent) {
+			@Override
+			public TextField resize(Theme theme) {
+				return this;
+			}
+		};
 
 		textFieldTasks.setPosAndSize(2, 2, w2 - 3, 13);
 		textFieldTasks.setMaxWidth(w);
@@ -220,12 +210,12 @@ public class ViewQuestPanel extends Panel {
 		textFieldTasks.setColor(ThemeProperties.TASKS_TEXT_COLOR.get(quest));
 		panelContent.add(textFieldTasks);
 
-	TextField textFieldRewards = new TextField(panelContent) {
-		@Override
-		public TextField resize(Theme theme) {
-			return this;
-		}
-	};
+		TextField textFieldRewards = new TextField(panelContent) {
+			@Override
+			public TextField resize(Theme theme) {
+				return this;
+			}
+		};
 
 		textFieldRewards.setPosAndSize(w2 + 2, 2, w2 - 3, 13);
 		textFieldRewards.setMaxWidth(w);
@@ -237,122 +227,122 @@ public class ViewQuestPanel extends Panel {
 		panelTasks.setPosAndSize(2, 16, w2 - 3, 0);
 		panelRewards.setPosAndSize(w2 + 2, 16, w2 - 3, 0);
 
-	int at = panelTasks.align(new CompactGridLayout(bsize + 2));
-	int ar = panelRewards.align(new CompactGridLayout(bsize + 2));
+		int at = panelTasks.align(new CompactGridLayout(bsize + 2));
+		int ar = panelRewards.align(new CompactGridLayout(bsize + 2));
 
-	int h = Math.max(at, ar);
+		int h = Math.max(at, ar);
 		panelTasks.setHeight(h);
 		panelRewards.setHeight(h);
 
-	int tox = (panelTasks.width - panelTasks.getContentWidth()) / 2;
-	int rox = (panelRewards.width - panelRewards.getContentWidth()) / 2;
-	int toy = (panelTasks.height - panelTasks.getContentHeight()) / 2;
-	int roy = (panelRewards.height - panelRewards.getContentHeight()) / 2;
+		int tox = (panelTasks.width - panelTasks.getContentWidth()) / 2;
+		int rox = (panelRewards.width - panelRewards.getContentWidth()) / 2;
+		int toy = (panelTasks.height - panelTasks.getContentHeight()) / 2;
+		int roy = (panelRewards.height - panelRewards.getContentHeight()) / 2;
 
 		for (Widget widget : panelTasks.widgets) {
-		widget.setX(widget.posX + tox);
-		widget.setY(widget.posY + toy);
-	}
+			widget.setX(widget.posX + tox);
+			widget.setY(widget.posY + toy);
+		}
 
 		for (Widget widget : panelRewards.widgets) {
-		widget.setX(widget.posX + rox);
-		widget.setY(widget.posY + roy);
-	}
+			widget.setX(widget.posX + rox);
+			widget.setY(widget.posY + roy);
+		}
 
 		panelText.setPosAndSize(3, 16 + h + 12, w - 6, 0);
 
-	Component subtitle = quest.getSubtitle();
+		Component subtitle = quest.getSubtitle();
 
 		if (subtitle == TextComponent.EMPTY && canEdit) {
-		subtitle = new TextComponent("[No Subtitle]");
-	}
+			subtitle = new TextComponent("[No Subtitle]");
+		}
 
 		if (subtitle != TextComponent.EMPTY) {
-		panelText.add(new QuestDescriptionField(panelText, canEdit, b -> editSubtitle())
-				.addFlags(Theme.CENTERED)
-				.setMinWidth(panelText.width).setMaxWidth(panelText.width)
-				.setSpacing(9)
-				.setText(new TextComponent("").append(subtitle).withStyle(ChatFormatting.ITALIC, ChatFormatting.GRAY)));
-	}
+			panelText.add(new QuestDescriptionField(panelText, canEdit, b -> editSubtitle())
+					.addFlags(Theme.CENTERED)
+					.setMinWidth(panelText.width).setMaxWidth(panelText.width)
+					.setSpacing(9)
+					.setText(new TextComponent("").append(subtitle).withStyle(ChatFormatting.ITALIC, ChatFormatting.GRAY)));
+		}
 
-	boolean showText = !quest.hideTextUntilComplete.get(false) || questScreen.file.self != null && questScreen.file.self.isCompleted(quest);
+		boolean showText = !quest.hideTextUntilComplete.get(false) || questScreen.file.self != null && questScreen.file.self.isCompleted(quest);
 
 		if (showText && quest.getDescription().length > 0) {
-		if (subtitle != TextComponent.EMPTY) {
-			panelText.add(new VerticalSpaceWidget(panelText, 7));
-		}
+			if (subtitle != TextComponent.EMPTY) {
+				panelText.add(new VerticalSpaceWidget(panelText, 7));
+			}
 
-		for (int i = 0; i < quest.getDescription().length; i++) {
-			Component component = quest.getDescription()[i];
+			for (int i = 0; i < quest.getDescription().length; i++) {
+				Component component = quest.getDescription()[i];
 
-			if (component instanceof ImageComponent) {
-				ImageComponentWidget c = new ImageComponentWidget(this, panelText, (ImageComponent) component, i);
+				if (component instanceof ImageComponent) {
+					ImageComponentWidget c = new ImageComponentWidget(this, panelText, (ImageComponent) component, i);
 
-				if (c.component.fit) {
-					double scale = panelText.width / (double) c.width;
-					c.setSize((int) (c.width * scale), (int) (c.height * scale));
-				} else if (c.component.align == 1) {
-					c.setX((panelText.width - c.width) / 2);
-				} else if (c.component.align == 2) {
-					c.setX(panelText.width - c.width);
+					if (c.component.fit) {
+						double scale = panelText.width / (double) c.width;
+						c.setSize((int) (c.width * scale), (int) (c.height * scale));
+					} else if (c.component.align == 1) {
+						c.setX((panelText.width - c.width) / 2);
+					} else if (c.component.align == 2) {
+						c.setX(panelText.width - c.width);
+					} else {
+						c.setX(0);
+					}
+
+					panelText.add(c);
 				} else {
-					c.setX(0);
+					final int line = i;
+					TextField field = new QuestDescriptionField(panelText, canEdit, context -> editDescLine(line, context, null))
+							.setMaxWidth(panelText.width).setSpacing(9).setText(component);
+					field.setWidth(panelText.width);
+					panelText.add(field);
 				}
-
-				panelText.add(c);
-			} else {
-				final int line = i;
-				TextField field = new QuestDescriptionField(panelText, canEdit, context -> editDescLine(line, context, null))
-						.setMaxWidth(panelText.width).setSpacing(9).setText(component);
-				field.setWidth(panelText.width);
-				panelText.add(field);
 			}
 		}
-	}
 
 		if (showText && !quest.guidePage.isEmpty()) {
-		if (subtitle != TextComponent.EMPTY) {
-			panelText.add(new VerticalSpaceWidget(panelText, 7));
+			if (subtitle != TextComponent.EMPTY) {
+				panelText.add(new VerticalSpaceWidget(panelText, 7));
+			}
+
+			panelText.add(new OpenInGuideButton(panelText, quest));
 		}
 
-		panelText.add(new OpenInGuideButton(panelText, quest));
-	}
-
 		if (canEdit) {
-		panelText.add(new VerticalSpaceWidget(panelText, 3));
+			panelText.add(new VerticalSpaceWidget(panelText, 3));
 
-		SimpleTextButton add = new SimpleTextButton(panelText, new TranslatableComponent("gui.add"), ThemeProperties.ADD_ICON.get()) {
-			@Override
-			public void onClicked(MouseButton mouseButton) {
-				addDescLine();
-			}
-		};
+			SimpleTextButton add = new SimpleTextButton(panelText, new TranslatableComponent("gui.add"), ThemeProperties.ADD_ICON.get()) {
+				@Override
+				public void onClicked(MouseButton mouseButton) {
+					addDescLine();
+				}
+			};
 
-		add.setX((panelText.width - add.width) / 2);
-		add.setHeight(14);
-		panelText.add(add);
-	}
+			add.setX((panelText.width - add.width) / 2);
+			add.setHeight(14);
+			panelText.add(add);
+		}
 
 		if (panelText.widgets.isEmpty()) {
-		panelContent.add(new ColorWidget(panelContent, borderColor, null).setPosAndSize(w2, 0, 1, h + 40));
-		panelText.setHeight(0);
-		setHeight(Math.min(panelContent.getContentHeight(), parent.height - 10));
-	} else {
-		panelContent.add(new ColorWidget(panelContent, borderColor, null).setPosAndSize(w2, 0, 1, 16 + h + 6));
-		panelContent.add(new ColorWidget(panelContent, borderColor, null).setPosAndSize(1, 16 + h + 6, w - 2, 1));
-		panelText.setHeight(panelText.align(new WidgetLayout.Vertical(0, 1, 2)));
-		setHeight(Math.min(panelContent.getContentHeight() + 20, parent.height - 10));
-	}
+			panelContent.add(new ColorWidget(panelContent, borderColor, null).setPosAndSize(w2, 0, 1, h + 40));
+			panelText.setHeight(0);
+			setHeight(Math.min(panelContent.getContentHeight(), parent.height - 10));
+		} else {
+			panelContent.add(new ColorWidget(panelContent, borderColor, null).setPosAndSize(w2, 0, 1, 16 + h + 6));
+			panelContent.add(new ColorWidget(panelContent, borderColor, null).setPosAndSize(1, 16 + h + 6, w - 2, 1));
+			panelText.setHeight(panelText.align(new WidgetLayout.Vertical(0, 1, 2)));
+			setHeight(Math.min(panelContent.getContentHeight() + 20, parent.height - 10));
+		}
 
 		if (ThemeProperties.FULL_SCREEN_QUEST.get(quest) == 1) {
-		height = questScreen.height;
-	}
+			height = questScreen.height;
+		}
 
-	setPos((parent.width - width) / 2, (parent.height - height) / 2);
+		setPos((parent.width - width) / 2, (parent.height - height) / 2);
 		panelContent.setHeight(height - 17);
 
-	QuestTheme.currentObject = prev;
-}
+		QuestTheme.currentObject = prev;
+	}
 
 	@Override
 	public void alignWidgets() {
@@ -575,126 +565,126 @@ public class ViewQuestPanel extends Panel {
 		return super.mousePressed(button) || isMouseOver();
 	}
 
-private class QuestDescriptionField extends TextField {
-	private final boolean canEdit;
-	private final Consumer<Boolean> editCallback;
+	private class QuestDescriptionField extends TextField {
+		private final boolean canEdit;
+		private final Consumer<Boolean> editCallback;
 
-	QuestDescriptionField(Panel panel, boolean canEdit, Consumer<Boolean> editCallback) {
-		super(panel);
-		this.canEdit = canEdit;
-		this.editCallback = editCallback;
-	}
+		QuestDescriptionField(Panel panel, boolean canEdit, Consumer<Boolean> editCallback) {
+			super(panel);
+			this.canEdit = canEdit;
+			this.editCallback = editCallback;
+		}
 
-	@Override
-	public boolean mousePressed(MouseButton button) {
-		if (isMouseOver()) {
-			if (canEdit && button.isRight()) {
-				editCallback.accept(true);
+		@Override
+		public boolean mousePressed(MouseButton button) {
+			if (isMouseOver()) {
+				if (canEdit && button.isRight()) {
+					editCallback.accept(true);
+					return true;
+				} else if (button.isLeft() && Minecraft.getInstance().screen != null) {
+					Style style = getComponentStyleAt(questScreen.getTheme(), getMouseX(), getMouseY());
+					return handleCustomClickEvent(style) || Minecraft.getInstance().screen.handleComponentClicked(style);
+				}
+			}
+
+			return super.mousePressed(button);
+		}
+
+		private boolean handleCustomClickEvent(Style style) {
+			if (style == null) return false;
+
+			ClickEvent clickEvent = style.getClickEvent();
+			if (clickEvent == null) return false;
+
+			if (clickEvent.getAction() == ClickEvent.Action.CHANGE_PAGE) {
+				try {
+					long questId = Long.valueOf(clickEvent.getValue(), 16);
+					QuestObject qo = FTBQuests.PROXY.getQuestFile(true).get(questId);
+					if (qo != null) {
+						questScreen.open(qo, false);
+					} else {
+						errorToPlayer("Unknown quest object id: %s", clickEvent.getValue());
+					}
+				} catch (NumberFormatException e) {
+					errorToPlayer("Invalid quest object id: %s (%s)",clickEvent.getValue(), e.getMessage());
+				}
 				return true;
-			} else if (button.isLeft() && Minecraft.getInstance().screen != null) {
-				Style style = getComponentStyleAt(questScreen.getTheme(), getMouseX(), getMouseY());
-				return handleCustomClickEvent(style) || Minecraft.getInstance().screen.handleComponentClicked(style);
-			}
-		}
-
-		return super.mousePressed(button);
-	}
-
-	private boolean handleCustomClickEvent(Style style) {
-		if (style == null) return false;
-
-		ClickEvent clickEvent = style.getClickEvent();
-		if (clickEvent == null) return false;
-
-		if (clickEvent.getAction() == ClickEvent.Action.CHANGE_PAGE) {
-			try {
-				long questId = Long.valueOf(clickEvent.getValue(), 16);
-				QuestObject qo = FTBQuests.PROXY.getQuestFile(true).get(questId);
-				if (qo != null) {
-					questScreen.open(qo, false);
-				} else {
-					errorToPlayer("Unknown quest object id: %s", clickEvent.getValue());
-				}
-			} catch (NumberFormatException e) {
-				errorToPlayer("Invalid quest object id: %s (%s)",clickEvent.getValue(), e.getMessage());
-			}
-			return true;
-		} else if (clickEvent.getAction() == ClickEvent.Action.OPEN_URL) {
-			try {
-				URI uri = new URI(clickEvent.getValue());
-				String scheme = uri.getScheme();
-				if (scheme == null) {
-					throw new URISyntaxException(clickEvent.getValue(), "Missing protocol");
-				}
-				if (!scheme.equalsIgnoreCase("http") && !scheme.equalsIgnoreCase("https")) {
-					throw new URISyntaxException(clickEvent.getValue(), "Unsupported protocol: " + scheme.toLowerCase(Locale.ROOT));
-				}
-
-				final Screen curScreen = Minecraft.getInstance().screen;
-				Minecraft.getInstance().setScreen(new ConfirmLinkScreen(accepted -> {
-					if (accepted) {
-						Util.getPlatform().openUri(uri);
+			} else if (clickEvent.getAction() == ClickEvent.Action.OPEN_URL) {
+				try {
+					URI uri = new URI(clickEvent.getValue());
+					String scheme = uri.getScheme();
+					if (scheme == null) {
+						throw new URISyntaxException(clickEvent.getValue(), "Missing protocol");
 					}
-					Minecraft.getInstance().setScreen(curScreen);
-				}, clickEvent.getValue(), false));
+					if (!scheme.equalsIgnoreCase("http") && !scheme.equalsIgnoreCase("https")) {
+						throw new URISyntaxException(clickEvent.getValue(), "Unsupported protocol: " + scheme.toLowerCase(Locale.ROOT));
+					}
+
+					final Screen curScreen = Minecraft.getInstance().screen;
+					Minecraft.getInstance().setScreen(new ConfirmLinkScreen(accepted -> {
+						if (accepted) {
+							Util.getPlatform().openUri(uri);
+						}
+						Minecraft.getInstance().setScreen(curScreen);
+					}, clickEvent.getValue(), false));
+					return true;
+				} catch (URISyntaxException e) {
+					errorToPlayer("Can't open url for %s (%s)", clickEvent.getValue(), e.getMessage());
+				}
 				return true;
-			} catch (URISyntaxException e) {
-				errorToPlayer("Can't open url for %s (%s)", clickEvent.getValue(), e.getMessage());
 			}
-			return true;
-		}
-		return false;
-	}
-
-	private void errorToPlayer(String msg, Object... args) {
-		FTBQuests.PROXY.getClientPlayer().displayClientMessage(new TextComponent(String.format(msg, args)).withStyle(ChatFormatting.RED), false);
-	}
-
-	@Override
-	public boolean mouseDoubleClicked(MouseButton button) {
-		if (isMouseOver() && canEdit) {
-			editCallback.accept(false);
-			return true;
+			return false;
 		}
 
-		return false;
-	}
+		private void errorToPlayer(String msg, Object... args) {
+			FTBQuests.PROXY.getClientPlayer().displayClientMessage(new TextComponent(String.format(msg, args)).withStyle(ChatFormatting.RED), false);
+		}
 
-	@Override
-	@Nullable
-	public CursorType getCursor() {
-		return canEdit ? CursorType.IBEAM : null;
-	}
+		@Override
+		public boolean mouseDoubleClicked(MouseButton button) {
+			if (isMouseOver() && canEdit) {
+				editCallback.accept(false);
+				return true;
+			}
 
-	@Override
-	public void addMouseOverText(TooltipList list) {
-		if (!isMouseOver()) return;
+			return false;
+		}
 
-		super.addMouseOverText(list);
+		@Override
+		@Nullable
+		public CursorType getCursor() {
+			return canEdit ? CursorType.IBEAM : null;
+		}
 
-		Style style = getComponentStyleAt(questScreen.getTheme(), getMouseX(), getMouseY());
-		if (style != null && style.getHoverEvent() != null) {
-			HoverEvent hoverevent = style.getHoverEvent();
-			HoverEvent.ItemStackInfo stackInfo = hoverevent.getValue(HoverEvent.Action.SHOW_ITEM);
-			Minecraft mc = Minecraft.getInstance();
-			TooltipFlag flag = mc.options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL;
-			if (stackInfo != null) {
-				stackInfo.getItemStack().getTooltipLines(mc.player, flag).forEach(list::add);
-			} else {
-				HoverEvent.EntityTooltipInfo entityInfo = hoverevent.getValue(HoverEvent.Action.SHOW_ENTITY);
-				if (entityInfo != null) {
-					if (flag.isAdvanced()) {
-						entityInfo.getTooltipLines().forEach(list::add);
-					}
+		@Override
+		public void addMouseOverText(TooltipList list) {
+			if (!isMouseOver()) return;
+
+			super.addMouseOverText(list);
+
+			Style style = getComponentStyleAt(questScreen.getTheme(), getMouseX(), getMouseY());
+			if (style != null && style.getHoverEvent() != null) {
+				HoverEvent hoverevent = style.getHoverEvent();
+				HoverEvent.ItemStackInfo stackInfo = hoverevent.getValue(HoverEvent.Action.SHOW_ITEM);
+				Minecraft mc = Minecraft.getInstance();
+				TooltipFlag flag = mc.options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL;
+				if (stackInfo != null) {
+					stackInfo.getItemStack().getTooltipLines(mc.player, flag).forEach(list::add);
 				} else {
-					Component component = hoverevent.getValue(HoverEvent.Action.SHOW_TEXT);
-					if (component != null) {
-						list.add(component);
+					HoverEvent.EntityTooltipInfo entityInfo = hoverevent.getValue(HoverEvent.Action.SHOW_ENTITY);
+					if (entityInfo != null) {
+						if (flag.isAdvanced()) {
+							entityInfo.getTooltipLines().forEach(list::add);
+						}
+					} else {
+						Component component = hoverevent.getValue(HoverEvent.Action.SHOW_TEXT);
+						if (component != null) {
+							list.add(component);
+						}
 					}
 				}
 			}
 		}
 	}
-}
 
 }
