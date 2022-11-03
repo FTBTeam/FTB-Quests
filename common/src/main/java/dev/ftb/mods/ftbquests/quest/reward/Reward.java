@@ -35,12 +35,14 @@ public abstract class Reward extends QuestObjectBase {
 	private Tristate team;
 	protected RewardAutoClaim autoclaim;
 	private boolean excludeFromClaimAll;
+	private boolean ignoreRewardBlocking;
 
 	public Reward(Quest q) {
 		quest = q;
 		team = Tristate.DEFAULT;
 		autoclaim = RewardAutoClaim.DEFAULT;
 		excludeFromClaimAll = getType().getExcludeFromListRewards();
+		ignoreRewardBlocking = false;
 	}
 
 	@Override
@@ -79,6 +81,7 @@ public abstract class Reward extends QuestObjectBase {
 		}
 
 		if (excludeFromClaimAll) nbt.putBoolean("exclude_from_claim_all", true);
+		if (ignoreRewardBlocking) nbt.putBoolean("ignore_reward_blocking", true);
 	}
 
 	@Override
@@ -87,6 +90,7 @@ public abstract class Reward extends QuestObjectBase {
 		team = Tristate.read(nbt, "team_reward");
 		autoclaim = RewardAutoClaim.NAME_MAP.get(nbt.getString("auto"));
 		excludeFromClaimAll = nbt.getBoolean("exclude_from_claim_all");
+		ignoreRewardBlocking = nbt.getBoolean("ignore_reward_blocking");
 	}
 
 	@Override
@@ -95,6 +99,7 @@ public abstract class Reward extends QuestObjectBase {
 		Tristate.NAME_MAP.write(buffer, team);
 		RewardAutoClaim.NAME_MAP.write(buffer, autoclaim);
 		buffer.writeBoolean(excludeFromClaimAll);
+		buffer.writeBoolean(ignoreRewardBlocking);
 	}
 
 	@Override
@@ -103,6 +108,7 @@ public abstract class Reward extends QuestObjectBase {
 		team = Tristate.NAME_MAP.read(buffer);
 		autoclaim = RewardAutoClaim.NAME_MAP.read(buffer);
 		excludeFromClaimAll = buffer.readBoolean();
+		ignoreRewardBlocking = buffer.readBoolean();
 	}
 
 	@Override
@@ -111,8 +117,10 @@ public abstract class Reward extends QuestObjectBase {
 		super.getConfig(config);
 		config.addEnum("team", team, v -> team = v, Tristate.NAME_MAP).setNameKey("ftbquests.reward.team_reward");
 		config.addEnum("autoclaim", autoclaim, v -> autoclaim = v, RewardAutoClaim.NAME_MAP).setNameKey("ftbquests.reward.autoclaim");
-		config.addBool("exclude_from_claim_all", excludeFromClaimAll, v -> excludeFromClaimAll = v, excludeFromClaimAll)
+		config.addBool("exclude_from_claim_all", getExcludeFromClaimAll(), v -> excludeFromClaimAll = v, excludeFromClaimAll)
 				.setNameKey("ftbquests.reward.exclude_from_claim_all").setCanEdit(!isClaimAllHardcoded());
+		config.addBool("ignore_reward_blocking", ignoreRewardBlocking(), v -> ignoreRewardBlocking = v, ignoreRewardBlocking)
+				.setNameKey("ftbquests.quest.ignore_reward_blocking").setCanEdit(!isIgnoreRewardBlockingHardcoded());
 	}
 
 	public abstract void claim(ServerPlayer player, boolean notify);
@@ -263,5 +271,13 @@ public abstract class Reward extends QuestObjectBase {
 	@Environment(EnvType.CLIENT)
 	public String getButtonText() {
 		return "";
+	}
+
+	public boolean ignoreRewardBlocking() {
+		return ignoreRewardBlocking;
+	}
+
+	protected boolean isIgnoreRewardBlockingHardcoded() {
+		return false;
 	}
 }

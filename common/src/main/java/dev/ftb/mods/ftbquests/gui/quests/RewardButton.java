@@ -3,12 +3,7 @@ package dev.ftb.mods.ftbquests.gui.quests;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
-import dev.ftb.mods.ftblibrary.ui.Button;
-import dev.ftb.mods.ftblibrary.ui.ContextMenuItem;
-import dev.ftb.mods.ftblibrary.ui.GuiHelper;
-import dev.ftb.mods.ftblibrary.ui.Panel;
-import dev.ftb.mods.ftblibrary.ui.Theme;
-import dev.ftb.mods.ftblibrary.ui.WidgetType;
+import dev.ftb.mods.ftblibrary.ui.*;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftblibrary.util.WrappedIngredient;
@@ -52,31 +47,31 @@ public class RewardButton extends Button {
 	public void addMouseOverText(TooltipList list) {
 		questScreen.addInfoTooltip(list, reward);
 
-		if (reward.isTeamReward()) {
-			if (reward.addTitleInMouseOverText()) {
-				list.add(getTitle());
-			}
+		if (reward.addTitleInMouseOverText()) {
+			list.add(getTitle());
+		}
 
+		if (reward.isTeamReward() || questScreen.file.self.isRewardBlocked(reward)) {
 			Object object = getIngredientUnderMouse();
 
-			if (object instanceof WrappedIngredient && ((WrappedIngredient) object).tooltip) {
+			if (object instanceof WrappedIngredient wi && wi.tooltip) {
 				Object ingredient = WrappedIngredient.unwrap(object);
 
-				if (ingredient instanceof ItemStack && !((ItemStack) ingredient).isEmpty()) {
+				if (ingredient instanceof ItemStack stack && !stack.isEmpty()) {
 					List<Component> list1 = new ArrayList<>();
-					GuiHelper.addStackTooltip((ItemStack) ingredient, list1);
+					GuiHelper.addStackTooltip(stack, list1);
 					list1.forEach(list::add);
 				}
 			}
 
 			list.blankLine();
 			reward.addMouseOverText(list);
-			list.add(new TranslatableComponent("ftbquests.reward.team_reward").withStyle(ChatFormatting.BLUE, ChatFormatting.UNDERLINE));
-		} else {
-			if (reward.addTitleInMouseOverText()) {
-				list.add(getTitle());
+			if (reward.isTeamReward()) {
+				list.add(new TranslatableComponent("ftbquests.reward.team_reward").withStyle(ChatFormatting.BLUE, ChatFormatting.UNDERLINE));
+			} else if (questScreen.file.self.isRewardBlocked(reward)) {
+				list.add(new TranslatableComponent("ftbquests.reward.this_blocked", questScreen.file.self).withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
 			}
-
+		} else {
 			reward.addMouseOverText(list);
 
 			if (!list.shouldRender()) {

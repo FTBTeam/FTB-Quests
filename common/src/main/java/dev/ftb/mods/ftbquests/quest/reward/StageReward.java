@@ -92,4 +92,14 @@ public class StageReward extends Reward {
 	public MutableComponent getAltTitle() {
 		return new TranslatableComponent("ftbquests.reward.ftbquests.gamestage").append(": ").append(new TextComponent(stage).withStyle(ChatFormatting.YELLOW));
 	}
+
+	@Override
+	public boolean ignoreRewardBlocking() {
+		return true;
+	}
+
+	@Override
+	protected boolean isIgnoreRewardBlockingHardcoded() {
+		return true;
+	}
 }
