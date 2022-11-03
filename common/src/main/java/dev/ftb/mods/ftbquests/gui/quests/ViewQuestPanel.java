@@ -125,12 +125,22 @@ public class ViewQuestPanel extends Panel {
 			panelTasks.add(noTasks);
 		}
 
+		int blockedRewards = 0;
 		for (Reward reward : quest.rewards) {
-			if (canEdit || reward.getAutoClaimType() != RewardAutoClaim.INVISIBLE) {
+			if (!canEdit && questScreen.file.self.isRewardBlocked(reward)) {
+				blockedRewards++;
+			} else if (canEdit || reward.getAutoClaimType() != RewardAutoClaim.INVISIBLE) {
 				RewardButton b = new RewardButton(panelRewards, reward);
 				panelRewards.add(b);
 				b.setSize(bsize, bsize);
 			}
+		}
+		if (blockedRewards > 0) {
+			Component text = Component.translatable("ftbquests.reward.blocked", blockedRewards, questScreen.file.self)
+					.withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC);
+			SimpleButton b = new SimpleButton(panelRewards, text, Icons.BARRIER, (widget, button) -> {});
+			panelRewards.add(b);
+			b.setSize(bsize, bsize);
 		}
 
 		if (!canEdit && panelRewards.widgets.isEmpty()) {
@@ -304,6 +314,8 @@ public class ViewQuestPanel extends Panel {
 			if (subtitle.getContents() != ComponentContents.EMPTY) {
 				panelText.add(new VerticalSpaceWidget(panelText, 7));
 			}
+
+			panelText.add(new OpenInGuideButton(panelText, quest));
 
 			panelText.add(new OpenInGuideButton(panelText, quest));
 		}

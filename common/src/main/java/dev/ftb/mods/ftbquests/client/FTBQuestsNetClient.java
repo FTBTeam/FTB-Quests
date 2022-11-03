@@ -342,4 +342,11 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon {
 		ClientQuestFile.INSTANCE.self.setChapterPinned(pinned);
 		ClientQuestFile.INSTANCE.questScreen.chapterPanel.refreshWidgets();
 	}
+
+	@Override
+	public void syncRewardBlocking(UUID uuid, boolean rewardsBlocked) {
+		if (ClientQuestFile.INSTANCE.getData(uuid).setRewardsBlocked(rewardsBlocked)) {
+			ClientQuestFile.INSTANCE.refreshGui();
+		}
+	}
 }
