@@ -143,6 +143,16 @@ public class FTBQuestsCommands {
 						.requires(s -> s.hasPermission(2))
 						.executes(context -> doReload(context.getSource()))
 				)
+				.then(Commands.literal("block_rewards")
+						.executes(c -> toggleRewardBlocking(c.getSource(), c.getSource().getPlayerOrException(), null))
+						.then(Commands.argument("enabled", BoolArgumentType.bool())
+								.executes(c -> toggleRewardBlocking(c.getSource(), c.getSource().getPlayerOrException(), BoolArgumentType.getBool(c, "enabled")))
+								.then(Commands.argument("player", EntityArgument.player())
+										.requires(s -> s.hasPermission(2))
+										.executes(c -> toggleRewardBlocking(c.getSource(), EntityArgument.getPlayer(c, "player"), BoolArgumentType.getBool(c, "enabled")))
+								)
+						)
+				)
 		);
 	}
 
@@ -389,6 +399,20 @@ public class FTBQuestsCommands {
 			source.sendSuccess(Component.translatable("commands.ftbquests.command.feedback.reloaded.disclaimer").withStyle(ChatFormatting.GOLD), false);
 			warnedPlayers.add(sender.getUUID());
 		}
+
+		return 1;
+	}
+
+	private static int toggleRewardBlocking(CommandSourceStack source, ServerPlayer player, Boolean doBlocking) {
+		TeamData data = ServerQuestFile.INSTANCE.getData(player);
+
+		if (doBlocking == null) {
+			doBlocking = !data.areRewardsBlocked();
+		}
+
+		data.setRewardsBlocked(doBlocking);
+
+		source.sendSuccess(Component.translatable("commands.ftbquests.command.feedback.rewards_blocked", data, data.areRewardsBlocked()), false);
 
 		return 1;
 	}

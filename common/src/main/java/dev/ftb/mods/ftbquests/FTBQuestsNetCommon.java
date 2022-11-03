@@ -81,4 +81,7 @@ public class FTBQuestsNetCommon {
 
 	public void toggleChapterPinned(boolean pinned) {
 	}
+
+	public void syncRewardBlocking(UUID uuid, boolean rewardsBlocked) {
+	}
 }

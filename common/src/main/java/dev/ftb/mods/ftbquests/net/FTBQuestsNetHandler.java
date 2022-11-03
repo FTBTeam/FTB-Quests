@@ -58,6 +58,7 @@ public interface FTBQuestsNetHandler {
 	MessageType CHANGE_CHAPTER_GROUP_RESPONSE = NET.registerS2C("change_chapter_group_response", ChangeChapterGroupResponseMessage::new);
 	MessageType MOVE_CHAPTER_GROUP = NET.registerC2S("move_chapter_group", MoveChapterGroupMessage::new);
 	MessageType MOVE_CHAPTER_GROUP_RESPONSE = NET.registerS2C("move_chapter_group_response", MoveChapterGroupResponseMessage::new);
+	MessageType SYNC_REWARD_BLOCKING = NET.registerS2C("sync_reward_blocking", SyncRewardBlockingMessage::new);
 
 	static void init() {
 	}

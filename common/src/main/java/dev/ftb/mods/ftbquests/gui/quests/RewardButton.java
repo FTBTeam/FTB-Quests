@@ -46,31 +46,31 @@ public class RewardButton extends Button {
 	public void addMouseOverText(TooltipList list) {
 		questScreen.addInfoTooltip(list, reward);
 
-		if (reward.isTeamReward()) {
-			if (reward.addTitleInMouseOverText()) {
-				list.add(getTitle());
-			}
+		if (reward.addTitleInMouseOverText()) {
+			list.add(getTitle());
+		}
 
+		if (reward.isTeamReward() || questScreen.file.self.isRewardBlocked(reward)) {
 			Object object = getIngredientUnderMouse();
 
-			if (object instanceof WrappedIngredient && ((WrappedIngredient) object).tooltip) {
+			if (object instanceof WrappedIngredient wi && wi.tooltip) {
 				Object ingredient = WrappedIngredient.unwrap(object);
 
-				if (ingredient instanceof ItemStack && !((ItemStack) ingredient).isEmpty()) {
+				if (ingredient instanceof ItemStack stack && !stack.isEmpty()) {
 					List<Component> list1 = new ArrayList<>();
-					GuiHelper.addStackTooltip((ItemStack) ingredient, list1);
+					GuiHelper.addStackTooltip(stack, list1);
 					list1.forEach(list::add);
 				}
 			}
 
 			list.blankLine();
 			reward.addMouseOverText(list);
-			list.add(Component.translatable("ftbquests.reward.team_reward").withStyle(ChatFormatting.BLUE, ChatFormatting.UNDERLINE));
-		} else {
-			if (reward.addTitleInMouseOverText()) {
-				list.add(getTitle());
+			if (reward.isTeamReward()) {
+				list.add(Component.translatable("ftbquests.reward.team_reward").withStyle(ChatFormatting.BLUE, ChatFormatting.UNDERLINE));
+			} else if (questScreen.file.self.isRewardBlocked(reward)) {
+				list.add(Component.translatable("ftbquests.reward.this_blocked", questScreen.file.self).withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
 			}
-
+		} else {
 			reward.addMouseOverText(list);
 
 			if (!list.shouldRender()) {
