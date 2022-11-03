@@ -2,11 +2,7 @@ package dev.ftb.mods.ftbquests;
 
 import com.mojang.brigadier.CommandDispatcher;
 import dev.architectury.event.EventResult;
-import dev.architectury.event.events.common.CommandRegistrationEvent;
-import dev.architectury.event.events.common.EntityEvent;
-import dev.architectury.event.events.common.LifecycleEvent;
-import dev.architectury.event.events.common.PlayerEvent;
-import dev.architectury.event.events.common.TickEvent;
+import dev.architectury.event.events.common.*;
 import dev.architectury.hooks.level.entity.PlayerHooks;
 import dev.ftb.mods.ftbquests.block.FTBQuestsBlocks;
 import dev.ftb.mods.ftbquests.block.entity.FTBQuestsBlockEntities;
@@ -115,7 +111,7 @@ public class FTBQuestsEventHandler {
 	}
 
 	private EventResult playerKill(LivingEntity entity, DamageSource source) {
-		if (source.getEntity() instanceof ServerPlayer && !PlayerHooks.isFake((Player) source.getEntity())) {
+		if (source.getEntity() instanceof ServerPlayer player && !PlayerHooks.isFake(player)) {
 			if (killTasks == null) {
 				killTasks = ServerQuestFile.INSTANCE.collect(KillTask.class);
 			}
@@ -124,7 +120,6 @@ public class FTBQuestsEventHandler {
 				return EventResult.pass();
 			}
 
-			ServerPlayer player = (ServerPlayer) source.getEntity();
 			TeamData data = ServerQuestFile.INSTANCE.getData(player);
 
 			for (KillTask task : killTasks) {

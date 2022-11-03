@@ -34,6 +34,7 @@ public class FTBQuestsItems {
 	public static final RegistrySupplier<Item> BARRIER = ITEMS.register("barrier", QuestBarrierBlockItem::new);
 	public static final RegistrySupplier<Item> STAGE_BARRIER = ITEMS.register("stage_barrier", StageBarrierBlockItem::new);
 	public static final RegistrySupplier<Item> DETECTOR = blockItem("detector", FTBQuestsBlocks.DETECTOR);
+	public static final RegistrySupplier<Item> LOOT_CRATE_OPENER = blockItem("loot_crate_opener", FTBQuestsBlocks.LOOT_CRATE_OPENER);
 
 	public static final RegistrySupplier<Item> TASK_SCREEN_1 = blockItemFor("screen_1",
 			() -> new ScreenBlockItem(FTBQuestsBlocks.TASK_SCREEN_1.get(), ScreenSize.ONE_X_ONE));
@@ -43,6 +44,7 @@ public class FTBQuestsItems {
 			() -> new ScreenBlockItem(FTBQuestsBlocks.TASK_SCREEN_5.get(), ScreenSize.FIVE_X_FIVE));
 	public static final RegistrySupplier<Item> TASK_SCREEN_7 = blockItemFor("screen_7",
 			() -> new ScreenBlockItem(FTBQuestsBlocks.TASK_SCREEN_7.get(), ScreenSize.SEVEN_X_SEVEN));
+
 
 	public static void register() {
 		ITEMS.register();

@@ -4,6 +4,7 @@ import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrySupplier;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.block.FTBQuestsBlocks;
+import dev.ftb.mods.ftbquests.block.LootCrateOpenerBlock;
 import dev.ftb.mods.ftbquests.block.TaskScreenBlock;
 import net.minecraft.core.Registry;
 import net.minecraft.world.level.block.Block;
@@ -34,6 +35,9 @@ public class FTBQuestsBlockEntities {
 			= register("stage_barrier", StageBarrierBlockEntity::new, FTBQuestsBlocks.STAGE_BARRIER);
 	public static final RegistrySupplier<BlockEntityType<DetectorBlockEntity>> DETECTOR
 			= register("detector", DetectorBlockEntity::new, FTBQuestsBlocks.DETECTOR);
+
+	public static final RegistrySupplier<BlockEntityType<LootCrateOpenerBlockEntity>> LOOT_CRATE_OPENER
+			= register("loot_crate_opener", LootCrateOpenerBlock.blockEntityProvider(), FTBQuestsBlocks.LOOT_CRATE_OPENER);
 
 	public static final RegistrySupplier<BlockEntityType<TaskScreenBlockEntity>> CORE_TASK_SCREEN
 			= register("core_task_screen", TaskScreenBlock.blockEntityProvider(),
