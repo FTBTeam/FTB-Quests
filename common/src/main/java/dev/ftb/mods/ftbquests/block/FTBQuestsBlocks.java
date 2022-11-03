@@ -15,6 +15,7 @@ public class FTBQuestsBlocks {
 	public static final RegistrySupplier<Block> BARRIER = BLOCKS.register("barrier", QuestBarrierBlock::new);
 	public static final RegistrySupplier<Block> STAGE_BARRIER = BLOCKS.register("stage_barrier", StageBarrierBlock::new);
 	public static final RegistrySupplier<Block> DETECTOR = BLOCKS.register("detector", DetectorBlock::new);
+	public static final RegistrySupplier<Block> LOOT_CRATE_OPENER = BLOCKS.register("loot_crate_opener", LootCrateOpenerBlock::new);
 
 	public static final RegistrySupplier<Block> TASK_SCREEN_1 = BLOCKS.register("screen_1", () -> new TaskScreenBlock(1));
 	public static final RegistrySupplier<Block> TASK_SCREEN_3 = BLOCKS.register("screen_3", () -> new TaskScreenBlock(3));
