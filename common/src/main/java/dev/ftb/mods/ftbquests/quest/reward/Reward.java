@@ -23,7 +23,6 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -126,25 +125,31 @@ public abstract class Reward extends QuestObjectBase {
 	public abstract void claim(ServerPlayer player, boolean notify);
 
 	/**
-	 * @return Optional.empty() if this reward doesn't support auto-claiming or item can't be returned as single stack, Optional.of(ItemStack.EMPTY) if it did something, but doesn't return item
+	 * Called by the Loot Crate Opener when it's about to open a crate. Can be overridden to add any itemstacks the
+	 * crate would produce to the {@code items} list; items in this list will be stored in the loot crate opener.
+	 *
+	 * @param blockEntity the loot crate opener
+	 * @param items list of items to add to
+	 * @param random random value
+	 * @param playerId UUID of the player who placed the loot crate opener
+	 * @param player the player, may be null if not online
+	 * @return true if the crate opening should proceed, false if not
 	 */
-	public Optional<ItemStack> claimAutomated(BlockEntity tileEntity, UUID playerId, @Nullable ServerPlayer player, boolean simulate) {
-		if (player != null) {
-			if (!simulate) {
-				claim(player, false);
-			}
-
-			return Optional.of(ItemStack.EMPTY);
-		}
-
-		return Optional.empty();
-	}
-
-	public boolean automatedClaimPre(BlockEntity tileEntity, List<ItemStack> items, RandomSource random, UUID playerId, @Nullable ServerPlayer player) {
+	public boolean automatedClaimPre(BlockEntity blockEntity, List<ItemStack> items, RandomSource random, UUID playerId, @Nullable ServerPlayer player) {
 		return player != null;
 	}
 
-	public void automatedClaimPost(BlockEntity tileEntity, UUID playerId, @Nullable ServerPlayer player) {
+	/**
+	 * Called after a crate has been opened by the Loot Crate Opener. Default behaviour is to follow the reward's normal
+	 * claim behaviour, but any items added to the {@code items} list in
+	 * {@link #automatedClaimPre(BlockEntity, List, RandomSource, UUID, ServerPlayer)} must <strong>not</strong> be given to
+	 * the player now!
+	 *
+	 * @param blockEntity the loot crate opener
+	 * @param playerId UUID of the player who placed the loot crate opener
+	 * @param player the player, may be null if not online
+	 */
+	public void automatedClaimPost(BlockEntity blockEntity, UUID playerId, @Nullable ServerPlayer player) {
 		if (player != null) {
 			claim(player, false);
 		}

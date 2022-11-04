@@ -55,7 +55,7 @@ public class ChoiceReward extends RandomReward {
 	}
 
 	@Override
-	public boolean automatedClaimPre(BlockEntity tileEntity, List<ItemStack> items, RandomSource random, UUID playerId, @Nullable ServerPlayer player) {
+	public boolean automatedClaimPre(BlockEntity blockEntity, List<ItemStack> items, RandomSource random, UUID playerId, @Nullable ServerPlayer player) {
 		return false;
 	}
 }

@@ -133,7 +133,7 @@ public class ItemReward extends Reward {
 	}
 
 	@Override
-	public boolean automatedClaimPre(BlockEntity tileEntity, List<ItemStack> items, RandomSource random, UUID playerId, @Nullable ServerPlayer player) {
+	public boolean automatedClaimPre(BlockEntity blockEntity, List<ItemStack> items, RandomSource random, UUID playerId, @Nullable ServerPlayer player) {
 		int size = count + random.nextInt(randomBonus + 1);
 
 		while (size > 0) {
@@ -148,7 +148,7 @@ public class ItemReward extends Reward {
 	}
 
 	@Override
-	public void automatedClaimPost(BlockEntity tileEntity, UUID playerId, @Nullable ServerPlayer player) {
+	public void automatedClaimPost(BlockEntity blockEntity, UUID playerId, @Nullable ServerPlayer player) {
 	}
 
 	@Override
