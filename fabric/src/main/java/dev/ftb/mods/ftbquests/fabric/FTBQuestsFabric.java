@@ -3,6 +3,7 @@ package dev.ftb.mods.ftbquests.fabric;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.block.entity.FTBQuestsBlockEntities;
+import dev.ftb.mods.ftbquests.block.fabric.FabricLootCrateOpenerBlockEntity;
 import dev.ftb.mods.ftbquests.block.fabric.FabricTaskScreenAuxBlockEntity;
 import dev.ftb.mods.ftbquests.block.fabric.FabricTaskScreenBlockEntity;
 import dev.ftb.mods.ftbquests.quest.task.TaskTypes;
@@ -40,6 +41,10 @@ public class FTBQuestsFabric implements ModInitializer {
 		);
 		EnergyStorage.SIDED.registerForBlockEntity(
 				((blockEntity, direction) -> ((FabricTaskScreenAuxBlockEntity) blockEntity).getEnergyStorage()), FTBQuestsBlockEntities.AUX_TASK_SCREEN.get()
+		);
+
+		ItemStorage.SIDED.registerForBlockEntity(
+				((blockEntity, direction) -> ((FabricLootCrateOpenerBlockEntity) blockEntity).getItemStorage()), FTBQuestsBlockEntities.LOOT_CRATE_OPENER.get()
 		);
 	}
 }
