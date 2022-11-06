@@ -2,7 +2,6 @@ package dev.ftb.mods.ftbquests.integration.jei;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.ftb.mods.ftblibrary.ui.GuiHelper;
-import dev.ftb.mods.ftblibrary.util.StringUtils;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.item.FTBQuestsItems;
@@ -22,7 +21,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
@@ -137,7 +135,7 @@ public class LootCrateCategory implements IRecipeCategory<WrappedLootCrate> {
 				total += table.lootCrate.drops.passive;
 			}
 		}
-		font.draw(poseStack, chance("passive", crate.drops.passive, total), 36, 0, 0xFF404040);
+		Component p = chance("passive", crate.drops.passive, total);
 
 		total = ClientQuestFile.INSTANCE.lootCrateNoDrop.monster;
 		for (RewardTable table : ClientQuestFile.INSTANCE.rewardTables) {
@@ -145,7 +143,7 @@ public class LootCrateCategory implements IRecipeCategory<WrappedLootCrate> {
 				total += table.lootCrate.drops.monster;
 			}
 		}
-		font.draw(poseStack, chance("monster", crate.drops.monster, total), 36, 10, 0xFF404040);
+		Component m = chance("monster", crate.drops.monster, total);
 
 		total = ClientQuestFile.INSTANCE.lootCrateNoDrop.boss;
 		for (RewardTable table : ClientQuestFile.INSTANCE.rewardTables) {
@@ -153,14 +151,16 @@ public class LootCrateCategory implements IRecipeCategory<WrappedLootCrate> {
 				total += table.lootCrate.drops.boss;
 			}
 		}
-		font.draw(poseStack, chance("boss", crate.drops.boss, total), 36, 20, 0xFF404040);
+		Component b = chance("boss", crate.drops.boss, total);
+
+		int w = Math.max(font.width(p), Math.max(font.width(m), font.width(b)));
+		int drawX = background.getWidth() - w - 2;
+		font.draw(poseStack, p, drawX, 0, 0xFF404040);
+		font.draw(poseStack, m, drawX, font.lineHeight, 0xFF404040);
+		font.draw(poseStack, b, drawX, font.lineHeight * 2, 0xFF404040);
 	}
 
 	private Component chance(String type, int w, int t) {
-		MutableComponent c = new TranslatableComponent("ftbquests.loot.entitytype." + type).append(": " + WeightedReward.chanceString(w, t));
-		if (w > 0) {
-			c.append(" (1 in " + StringUtils.formatDouble00(1D / ((double) w / (double) t)) + ")");
-		}
-		return c;
+		return new TranslatableComponent("ftbquests.loot.entitytype." + type).append(": " + WeightedReward.chanceString(w, t, true));
 	}
 }

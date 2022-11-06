@@ -185,6 +185,11 @@ public class RandomReward extends Reward {
 	}
 
 	@Override
+	public boolean isClaimAllHardcoded() {
+		return true;
+	}
+
+	@Override
 	@Nullable
 	@Environment(EnvType.CLIENT)
 	public Object getIngredient() {
@@ -192,11 +197,11 @@ public class RandomReward extends Reward {
 	}
 
 	@Override
-	public boolean automatedClaimPre(BlockEntity tileEntity, List<ItemStack> items, Random random, UUID playerId, @Nullable ServerPlayer player) {
+	public boolean automatedClaimPre(BlockEntity blockEntity, List<ItemStack> items, Random random, UUID playerId, @Nullable ServerPlayer player) {
 		return false;
 	}
 
 	@Override
-	public void automatedClaimPost(BlockEntity tileEntity, UUID playerId, @Nullable ServerPlayer player) {
+	public void automatedClaimPost(BlockEntity blockEntity, UUID playerId, @Nullable ServerPlayer player) {
 	}
 }

@@ -22,7 +22,6 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
 
@@ -35,12 +34,14 @@ public abstract class Reward extends QuestObjectBase {
 	private Tristate team;
 	protected RewardAutoClaim autoclaim;
 	private boolean excludeFromClaimAll;
+	private boolean ignoreRewardBlocking;
 
 	public Reward(Quest q) {
 		quest = q;
 		team = Tristate.DEFAULT;
 		autoclaim = RewardAutoClaim.DEFAULT;
 		excludeFromClaimAll = getType().getExcludeFromListRewards();
+		ignoreRewardBlocking = false;
 	}
 
 	@Override
@@ -78,7 +79,8 @@ public abstract class Reward extends QuestObjectBase {
 			nbt.putString("auto", autoclaim.id);
 		}
 
-		if (excludeFromClaimAll) nbt.putBoolean("exclude_from_claim_all", excludeFromClaimAll);
+		if (excludeFromClaimAll) nbt.putBoolean("exclude_from_claim_all", true);
+		if (ignoreRewardBlocking) nbt.putBoolean("ignore_reward_blocking", true);
 	}
 
 	@Override
@@ -87,6 +89,7 @@ public abstract class Reward extends QuestObjectBase {
 		team = Tristate.read(nbt, "team_reward");
 		autoclaim = RewardAutoClaim.NAME_MAP.get(nbt.getString("auto"));
 		excludeFromClaimAll = nbt.getBoolean("exclude_from_claim_all");
+		ignoreRewardBlocking = nbt.getBoolean("ignore_reward_blocking");
 	}
 
 	@Override
@@ -95,6 +98,7 @@ public abstract class Reward extends QuestObjectBase {
 		Tristate.NAME_MAP.write(buffer, team);
 		RewardAutoClaim.NAME_MAP.write(buffer, autoclaim);
 		buffer.writeBoolean(excludeFromClaimAll);
+		buffer.writeBoolean(ignoreRewardBlocking);
 	}
 
 	@Override
@@ -103,6 +107,7 @@ public abstract class Reward extends QuestObjectBase {
 		team = Tristate.NAME_MAP.read(buffer);
 		autoclaim = RewardAutoClaim.NAME_MAP.read(buffer);
 		excludeFromClaimAll = buffer.readBoolean();
+		ignoreRewardBlocking = buffer.readBoolean();
 	}
 
 	@Override
@@ -111,31 +116,40 @@ public abstract class Reward extends QuestObjectBase {
 		super.getConfig(config);
 		config.addEnum("team", team, v -> team = v, Tristate.NAME_MAP).setNameKey("ftbquests.reward.team_reward");
 		config.addEnum("autoclaim", autoclaim, v -> autoclaim = v, RewardAutoClaim.NAME_MAP).setNameKey("ftbquests.reward.autoclaim");
-		config.addBool("exclude_from_claim_all", excludeFromClaimAll, v -> excludeFromClaimAll = v, excludeFromClaimAll).setNameKey("ftbquests.reward.exclude_from_claim_all");
+		config.addBool("exclude_from_claim_all", getExcludeFromClaimAll(), v -> excludeFromClaimAll = v, excludeFromClaimAll)
+				.setNameKey("ftbquests.reward.exclude_from_claim_all").setCanEdit(!isClaimAllHardcoded());
+		config.addBool("ignore_reward_blocking", ignoreRewardBlocking(), v -> ignoreRewardBlocking = v, ignoreRewardBlocking)
+				.setNameKey("ftbquests.quest.ignore_reward_blocking").setCanEdit(!isIgnoreRewardBlockingHardcoded());
 	}
 
 	public abstract void claim(ServerPlayer player, boolean notify);
 
 	/**
-	 * @return Optional.empty() if this reward doesn't support auto-claiming or item can't be returned as single stack, Optional.of(ItemStack.EMPTY) if it did something, but doesn't return item
+	 * Called by the Loot Crate Opener when it's about to open a crate. Can be overridden to add any itemstacks the
+	 * crate would produce to the {@code items} list; items in this list will be stored in the loot crate opener.
+	 *
+	 * @param blockEntity the loot crate opener
+	 * @param items list of items to add to
+	 * @param random random value
+	 * @param playerId UUID of the player who placed the loot crate opener
+	 * @param player the player, may be null if not online
+	 * @return true if the crate opening should proceed, false if not
 	 */
-	public Optional<ItemStack> claimAutomated(BlockEntity tileEntity, UUID playerId, @Nullable ServerPlayer player, boolean simulate) {
-		if (player != null) {
-			if (!simulate) {
-				claim(player, false);
-			}
-
-			return Optional.of(ItemStack.EMPTY);
-		}
-
-		return Optional.empty();
-	}
-
-	public boolean automatedClaimPre(BlockEntity tileEntity, List<ItemStack> items, Random random, UUID playerId, @Nullable ServerPlayer player) {
+	public boolean automatedClaimPre(BlockEntity blockEntity, List<ItemStack> items, Random random, UUID playerId, @Nullable ServerPlayer player) {
 		return player != null;
 	}
 
-	public void automatedClaimPost(BlockEntity tileEntity, UUID playerId, @Nullable ServerPlayer player) {
+	/**
+	 * Called after a crate has been opened by the Loot Crate Opener. Default behaviour is to follow the reward's normal
+	 * claim behaviour, but any items added to the {@code items} list in
+	 * {@link #automatedClaimPre(BlockEntity, List, Random, UUID, ServerPlayer)} must <strong>not</strong> be given to
+	 * the player now!
+	 *
+	 * @param blockEntity the loot crate opener
+	 * @param playerId UUID of the player who placed the loot crate opener
+	 * @param player the player, may be null if not online
+	 */
+	public void automatedClaimPost(BlockEntity blockEntity, UUID playerId, @Nullable ServerPlayer player) {
 		if (player != null) {
 			claim(player, false);
 		}
@@ -244,6 +258,10 @@ public abstract class Reward extends QuestObjectBase {
 		return excludeFromClaimAll;
 	}
 
+	public boolean isClaimAllHardcoded() {
+		return false;
+	}
+
 	@Nullable
 	@Environment(EnvType.CLIENT)
 	public Object getIngredient() {
@@ -258,5 +276,13 @@ public abstract class Reward extends QuestObjectBase {
 	@Environment(EnvType.CLIENT)
 	public String getButtonText() {
 		return "";
+	}
+
+	public boolean ignoreRewardBlocking() {
+		return ignoreRewardBlocking;
+	}
+
+	protected boolean isIgnoreRewardBlockingHardcoded() {
+		return false;
 	}
 }

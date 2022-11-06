@@ -65,6 +65,7 @@ public final class Quest extends QuestObject implements Movable {
 
 	private Component cachedSubtitle = null;
 	private Component[] cachedDescription = null;
+	private boolean ignoreRewardBlocking;
 
 	public Quest(Chapter c) {
 		chapter = c;
@@ -89,6 +90,7 @@ public final class Quest extends QuestObject implements Movable {
 		canRepeat = false;
 		invisible = false;
 		invisibleUntilTasks = 0;
+		ignoreRewardBlocking = false;
 	}
 
 	@Override
@@ -193,6 +195,10 @@ public final class Quest extends QuestObject implements Movable {
 		if (invisibleUntilTasks > 0) {
 			nbt.putInt("invisible_until_tasks", invisibleUntilTasks);
 		}
+
+		if (ignoreRewardBlocking) {
+			nbt.putBoolean("ignore_reward_blocking", true);
+		}
 	}
 
 	@Override
@@ -250,6 +256,7 @@ public final class Quest extends QuestObject implements Movable {
 		canRepeat = nbt.getBoolean("can_repeat");
 		invisible = nbt.getBoolean("invisible");
 		invisibleUntilTasks = nbt.getInt("invisible_until_tasks");
+		ignoreRewardBlocking = nbt.getBoolean("ignore_reward_blocking");
 	}
 
 	@Override
@@ -314,6 +321,8 @@ public final class Quest extends QuestObject implements Movable {
 		if (invisibleUntilTasks > 0) {
 			buffer.writeVarInt(invisibleUntilTasks);
 		}
+
+		buffer.writeBoolean(ignoreRewardBlocking);
 	}
 
 	@Override
@@ -357,6 +366,7 @@ public final class Quest extends QuestObject implements Movable {
 		canRepeat = buffer.readBoolean();
 		invisible = Bits.getFlag(flags, 128);
 		invisibleUntilTasks = Bits.getFlag(flags, 1024) ? buffer.readVarInt() : 0;
+		ignoreRewardBlocking = buffer.readBoolean();
 	}
 
 	@Override
@@ -526,6 +536,7 @@ public final class Quest extends QuestObject implements Movable {
 		config.addInt("min_width", minWidth, v -> minWidth = v, 0, 0, 3000);
 		config.addBool("invisible", invisible, v -> invisible = v, false);
 		config.addInt("invisible_until_tasks", invisibleUntilTasks, v -> invisibleUntilTasks = v, 0, 0, Integer.MAX_VALUE);
+		config.addBool("ignore_reward_blocking", ignoreRewardBlocking, v -> ignoreRewardBlocking = v, false);
 	}
 
 	public boolean getHideDependencyLines() {
@@ -772,12 +783,16 @@ public final class Quest extends QuestObject implements Movable {
 	public boolean hasUnclaimedRewardsRaw(TeamData teamData, UUID player) {
 		if (teamData.isCompleted(this)) {
 			for (Reward reward : rewards) {
-				if (teamData.getClaimType(player, reward) == RewardClaimType.CAN_CLAIM) {
+				if (!teamData.isRewardBlocked(reward) && teamData.getClaimType(player, reward) == RewardClaimType.CAN_CLAIM) {
 					return true;
 				}
 			}
 		}
 
 		return false;
+	}
+
+	public boolean ignoreRewardBlocking() {
+		return ignoreRewardBlocking;
 	}
 }

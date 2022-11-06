@@ -126,7 +126,7 @@ public class ViewQuestPanel extends Panel {
 		}
 
 		for (Reward reward : quest.rewards) {
-			if (canEdit || reward.getAutoClaimType() != RewardAutoClaim.INVISIBLE) {
+			if (canEdit || !questScreen.file.self.isRewardBlocked(reward) && reward.getAutoClaimType() != RewardAutoClaim.INVISIBLE) {
 				RewardButton b = new RewardButton(panelRewards, reward);
 				panelRewards.add(b);
 				b.setSize(bsize, bsize);
