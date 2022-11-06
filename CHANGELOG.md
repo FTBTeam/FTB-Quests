@@ -4,7 +4,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1802.3.10]
+
+### Added
+- The Loot Crate Opener is back! Pipe crates in, pipe rewards out.
+- Added a feature whereby players can choose to opt out of quest rewards (as an elective challenge)
+  - Use the `/ftbquests block_rewards <true|false> [<player-name>]`
+  - Reward blocking is by team only
+  - This is toggleable by anyone in single-player mode, but admin privileges are required on dedicated server
+  - Can be used as a command reward to make repeatable checkmark quests to enable and disable rewards from the quest book, if desired
+
+### Fixes
+- Added missing recipes for Task Screens
+- Fixed KubeJS version depdendency on Fabric (was rejecting valid up-to-date KubeJS releases)
+
+## [1802.3.9]
 
 ### Added
 - Task Screens have returned! Task display and automated completion are now possible
