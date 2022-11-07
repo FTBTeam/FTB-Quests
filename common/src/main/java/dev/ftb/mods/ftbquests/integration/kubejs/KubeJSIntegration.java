@@ -32,17 +32,6 @@ public class KubeJSIntegration extends KubeJSPlugin {
 		});
 	}
 
-	//@SubscribeEvent
-	//public static void registerDocumentation(DocumentationEvent event)
-	//{
-	//	event.registerAttachedData(DataType.PLAYER, "ftbquests", FTBQuestsKubeJSPlayerData.class);
-	//
-	//	event.registerEvent("ftbquests.custom_task", CustomTaskEventJS.class).doubleParam("id").canCancel();
-	//	event.registerEvent("ftbquests.custom_reward", CustomRewardEventJS.class).doubleParam("id").canCancel();
-	//	event.registerEvent("ftbquests.completed", QuestObjectCompletedEventJS.class).doubleParam("id|tag");
-	//	event.registerEvent("ftbquests.started", TaskStartedEventJS.class).doubleParam("id|tag");
-	//}
-
 	@Override
 	public void registerBindings(BindingsEvent event) {
 		event.add("FTBQuests", FTBQuestsKubeJSWrapper.INSTANCE);
