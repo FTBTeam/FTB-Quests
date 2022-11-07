@@ -31,6 +31,6 @@
 		"itemfilters": ">=1902.2.9-build.46"
 	},
 	"breaks": {
-		"kubejs": "<1902.6.0-"
+		"kubejs": "<1902.6.0-build.107"
 	}
 }
