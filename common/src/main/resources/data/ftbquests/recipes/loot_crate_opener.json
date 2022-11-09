@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "group": "ftbquests:loot_crate_opener",
+  "result": {
+    "item": "ftbquests:loot_crate_opener",
+    "count": 1
+  },
+  "pattern": [
+    "PCP",
+    "PBP",
+    "PPP"
+  ],
+  "key": {
+    "B": {
+      "item": "book"
+    },
+    "P": {
+      "tag": "minecraft:planks"
+    },
+    "C": {
+      "item": "minecraft:stone_pickaxe"
+    }
+  }
+}

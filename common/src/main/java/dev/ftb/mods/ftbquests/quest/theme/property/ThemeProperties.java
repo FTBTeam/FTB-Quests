@@ -1,11 +1,7 @@
 package dev.ftb.mods.ftbquests.quest.theme.property;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Matrix4f;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
@@ -168,6 +164,10 @@ public interface ThemeProperties {
 	StringProperty WIKI_URL = new StringProperty("wiki_url");
 	IconProperty PIN_ICON_ON = new IconProperty("pin_icon_on");
 	IconProperty PIN_ICON_OFF = new IconProperty("pin_icon_off");
+	IconProperty EDITOR_ICON_ON = new IconProperty("editor_icon_on");
+	IconProperty EDITOR_ICON_OFF = new IconProperty("editor_icon_off");
+	IconProperty HIDDEN_ICON = new IconProperty("hidden_icon");
+	IconProperty SAVE_ICON = new IconProperty("save_icon");
 	IconProperty SETTINGS_ICON = new IconProperty("settings_icon");
 	IconProperty CLOSE_ICON = new IconProperty("close_icon");
 	IconProperty EMERGENCY_ITEMS_ICON = new IconProperty("emergency_items_icon");
@@ -193,6 +193,8 @@ public interface ThemeProperties {
 	ColorProperty QUEST_VIEW_TITLE = new ColorProperty("quest_view_title");
 	ColorProperty QUEST_COMPLETED_COLOR = new ColorProperty("quest_completed_color");
 	ColorProperty QUEST_STARTED_COLOR = new ColorProperty("quest_started_color");
+	ColorProperty QUEST_NOT_STARTED_COLOR = new ColorProperty("quest_not_started_color");
+	ColorProperty QUEST_LOCKED_COLOR = new ColorProperty("quest_locked_color");
 	IconProperty DEPENDENCY_LINE_TEXTURE = new IconProperty("dependency_line_texture");
 	ColorProperty DEPENDENCY_LINE_COMPLETED_COLOR = new ColorProperty("dependency_line_completed_color");
 	ColorProperty DEPENDENCY_LINE_REQUIRES_COLOR = new ColorProperty("dependency_line_requires_color");

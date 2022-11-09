@@ -303,6 +303,8 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon {
 				gui.viewQuestPanel.refreshWidgets();
 			}
 		}
+
+		FTBQuestsJEIHelper.refresh(ClientQuestFile.INSTANCE.get(id));
 	}
 
 	@Override
@@ -332,6 +334,19 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon {
 					gui.viewQuestPanel.refreshWidgets();
 				}
 			}
+		}
+	}
+
+	@Override
+	public void toggleChapterPinned(boolean pinned) {
+		ClientQuestFile.INSTANCE.self.setChapterPinned(pinned);
+		ClientQuestFile.INSTANCE.questScreen.chapterPanel.refreshWidgets();
+	}
+
+	@Override
+	public void syncRewardBlocking(UUID uuid, boolean rewardsBlocked) {
+		if (ClientQuestFile.INSTANCE.getData(uuid).setRewardsBlocked(rewardsBlocked)) {
+			ClientQuestFile.INSTANCE.refreshGui();
 		}
 	}
 }

@@ -71,9 +71,9 @@ public class StageReward extends Reward {
 	@Override
 	public void claim(ServerPlayer player, boolean notify) {
 		if (remove) {
-			StageHelper.instance.get().remove(player, stage);
+			StageHelper.INSTANCE.get().remove(player, stage);
 		} else {
-			StageHelper.instance.get().add(player, stage);
+			StageHelper.INSTANCE.get().add(player, stage);
 		}
 
 		if (notify) {
@@ -89,5 +89,15 @@ public class StageReward extends Reward {
 	@Environment(EnvType.CLIENT)
 	public MutableComponent getAltTitle() {
 		return Component.translatable("ftbquests.reward.ftbquests.gamestage").append(": ").append(Component.literal(stage).withStyle(ChatFormatting.YELLOW));
+	}
+
+	@Override
+	public boolean ignoreRewardBlocking() {
+		return true;
+	}
+
+	@Override
+	protected boolean isIgnoreRewardBlockingHardcoded() {
+		return true;
 	}
 }

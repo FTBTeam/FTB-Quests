@@ -1,0 +1,19 @@
+{
+	"variants": {
+		"facing=east": {
+			"model": "ftbquests:block/screen",
+			"y": 90
+		},
+		"facing=north": {
+			"model": "ftbquests:block/screen"
+		},
+		"facing=south": {
+			"model": "ftbquests:block/screen",
+			"y": 180
+		},
+		"facing=west": {
+			"model": "ftbquests:block/screen",
+			"y": 270
+		}
+	}
+}

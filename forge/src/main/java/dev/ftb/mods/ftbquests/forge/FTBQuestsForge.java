@@ -1,23 +1,19 @@
 package dev.ftb.mods.ftbquests.forge;
 
-import com.google.common.base.Suppliers;
-import dev.architectury.hooks.fluid.FluidStackHooks;
 import dev.architectury.platform.Platform;
 import dev.architectury.platform.forge.EventBuses;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftbquests.FTBQuests;
+import dev.ftb.mods.ftbquests.FTBQuestsTags;
 import dev.ftb.mods.ftbquests.command.ChangeProgressArgument;
 import dev.ftb.mods.ftbquests.command.QuestObjectArgument;
-import dev.ftb.mods.ftbquests.integration.StageHelper;
-import dev.ftb.mods.ftbquests.integration.gamestages.GameStagesStageHelper;
+import dev.ftb.mods.ftbquests.integration.stages.GameStagesEventHandler;
 import dev.ftb.mods.ftbquests.item.FTBQuestsItems;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.loot.LootCrate;
 import dev.ftb.mods.ftbquests.quest.task.TaskTypes;
 import dev.ftb.mods.ftbquests.quest.task.forge.ForgeEnergyTask;
-import dev.ftb.mods.ftbquests.quest.task.forge.ForgeFluidTask;
 import dev.ftb.mods.ftbteams.FTBTeams;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.commands.synchronization.ArgumentTypeInfos;
 import net.minecraft.commands.synchronization.SingletonArgumentInfo;
@@ -29,7 +25,6 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameRules;
-import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
@@ -41,7 +36,6 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryObject;
 
 import java.util.Iterator;
-import java.util.Optional;
 
 @Mod(FTBQuests.MOD_ID)
 public class FTBQuestsForge {
@@ -55,11 +49,12 @@ public class FTBQuestsForge {
 
 		FTBQuests quests = new FTBQuests();
 
-		ForgeFluidTask.TYPE = TaskTypes.register(new ResourceLocation(FTBQuests.MOD_ID, "fluid"), ForgeFluidTask::new, () -> Icon.getIcon(Optional.ofNullable(FluidStackHooks.getStillTexture(Fluids.WATER)).map(TextureAtlasSprite::getName).map(ResourceLocation::toString).orElse("missingno")).combineWith(Icon.getIcon(ForgeFluidTask.TANK_TEXTURE.toString())));
 		ForgeEnergyTask.TYPE = TaskTypes.register(new ResourceLocation(FTBQuests.MOD_ID, "forge_energy"), ForgeEnergyTask::new, () -> Icon.getIcon(ForgeEnergyTask.EMPTY_TEXTURE.toString()).combineWith(Icon.getIcon(ForgeEnergyTask.FULL_TEXTURE.toString())));
 
+		// KubeJS handles gamestage functionality when it's installed
+		// but this covers the case where Gamestages is present but KubeJS is not
 		if (Platform.isModLoaded("gamestages") && !Platform.isModLoaded("kubejs")) {
-			StageHelper.instance = Suppliers.memoize(GameStagesStageHelper::new);
+			GameStagesEventHandler.register();
 		}
 
 		FMLJavaModLoadingContext.get().getModEventBus().<FMLCommonSetupEvent>addListener(event -> quests.setup());
@@ -71,7 +66,7 @@ public class FTBQuestsForge {
 	private static void livingDrops(LivingDropsEvent event) {
 		LivingEntity e = event.getEntity();
 
-		if (e.level.isClientSide || e instanceof Player) {
+		if (e.level.isClientSide || e instanceof Player || e.getType().is(FTBQuestsTags.EntityTypes.NO_LOOT_CRATES)) {
 			return;
 		}
 
@@ -89,11 +84,9 @@ public class FTBQuestsForge {
 	}
 
 	private static void dropsEvent(LivingDropsEvent event) {
-		if (!(event.getEntity() instanceof ServerPlayer)) {
+		if (!(event.getEntity() instanceof ServerPlayer player)) {
 			return;
 		}
-
-		ServerPlayer player = (ServerPlayer) event.getEntity();
 
 		if (player instanceof FakePlayer || player.level.getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY)) {
 			return;

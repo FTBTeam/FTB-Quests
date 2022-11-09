@@ -33,15 +33,13 @@ public class FTBQuestsInventoryListener implements ContainerListener {
 			return;
 		}
 
-		file.currentPlayer = player;
-
-		for (Task task : file.getSubmitTasks()) {
-			if (task.id != sourceTask && data.canStartTasks(task.quest)) {
-				task.submitTask(data, player, craftedItem);
+		file.withPlayerContext(player, () -> {
+			for (Task task : file.getSubmitTasks()) {
+				if (task.id != sourceTask && data.canStartTasks(task.quest)) {
+					task.submitTask(data, player, craftedItem);
+				}
 			}
-		}
-
-		file.currentPlayer = null;
+		});
 	}
 
 	@Override

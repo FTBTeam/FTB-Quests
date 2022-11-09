@@ -5,7 +5,6 @@ import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.IconAnimation;
 import dev.ftb.mods.ftblibrary.math.Bits;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
-import dev.ftb.mods.ftblibrary.util.ClientTextComponentUtils;
 import dev.ftb.mods.ftblibrary.util.ClientUtils;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.events.ObjectCompletedEvent;
@@ -22,6 +21,7 @@ import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.util.ConfigQuestObject;
 import dev.ftb.mods.ftbquests.util.NetUtils;
 import dev.ftb.mods.ftbquests.util.ProgressChange;
+import dev.ftb.mods.ftbquests.util.TextUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
@@ -39,6 +39,7 @@ import java.util.function.Predicate;
  * @author LatvianModder
  */
 public final class Quest extends QuestObject implements Movable {
+
 	public Chapter chapter;
 	public String subtitle;
 	public double x, y;
@@ -57,9 +58,13 @@ public final class Quest extends QuestObject implements Movable {
 	public double size;
 	public boolean optional;
 	public int minWidth;
+	public boolean canRepeat;
+	public boolean invisible;  // invisible to players (not the same as hidden!)
+	public int invisibleUntilTasks;  // invisible until at least X number of tasks have been completed
 
 	private Component cachedSubtitle = null;
 	private Component[] cachedDescription = null;
+	private boolean ignoreRewardBlocking;
 
 	public Quest(Chapter c) {
 		chapter = c;
@@ -81,6 +86,10 @@ public final class Quest extends QuestObject implements Movable {
 		size = 1D;
 		optional = false;
 		minWidth = 0;
+		canRepeat = false;
+		invisible = false;
+		invisibleUntilTasks = 0;
+		ignoreRewardBlocking = false;
 	}
 
 	@Override
@@ -174,6 +183,21 @@ public final class Quest extends QuestObject implements Movable {
 		if (minWidth > 0) {
 			nbt.putInt("min_width", minWidth);
 		}
+
+		if (canRepeat) {
+			nbt.putBoolean("can_repeat", true);
+		}
+
+		if (invisible) {
+			nbt.putBoolean("invisible", true);
+		}
+		if (invisibleUntilTasks > 0) {
+			nbt.putInt("invisible_until_tasks", invisibleUntilTasks);
+		}
+
+		if (ignoreRewardBlocking) {
+			nbt.putBoolean("ignore_reward_blocking", true);
+		}
 	}
 
 	@Override
@@ -228,6 +252,10 @@ public final class Quest extends QuestObject implements Movable {
 		size = nbt.contains("size") ? nbt.getDouble("size") : 1D;
 		optional = nbt.getBoolean("optional");
 		minWidth = nbt.getInt("min_width");
+		canRepeat = nbt.getBoolean("can_repeat");
+		invisible = nbt.getBoolean("invisible");
+		invisibleUntilTasks = nbt.getInt("invisible_until_tasks");
+		ignoreRewardBlocking = nbt.getBoolean("ignore_reward_blocking");
 	}
 
 	@Override
@@ -240,10 +268,11 @@ public final class Quest extends QuestObject implements Movable {
 		flags = Bits.setFlag(flags, 8, !guidePage.isEmpty());
 		//implement others
 		//flags = Bits.setFlag(flags, 32, !customClick.isEmpty());
-		//flags = Bits.setFlag(flags, 64, hideDependencyLines);
-		//flags = Bits.setFlag(flags, 128, hideTextUntilComplete);
+		flags = Bits.setFlag(flags, 64, canRepeat);
+		flags = Bits.setFlag(flags, 128, invisible);
 		flags = Bits.setFlag(flags, 256, optional);
 		flags = Bits.setFlag(flags, 512, minWidth > 0);
+		flags = Bits.setFlag(flags, 1024, invisibleUntilTasks > 0);
 		buffer.writeVarInt(flags);
 
 		hide.write(buffer);
@@ -285,6 +314,14 @@ public final class Quest extends QuestObject implements Movable {
 		if (minWidth > 0) {
 			buffer.writeVarInt(minWidth);
 		}
+
+		buffer.writeBoolean(canRepeat);
+
+		if (invisibleUntilTasks > 0) {
+			buffer.writeVarInt(invisibleUntilTasks);
+		}
+
+		buffer.writeBoolean(ignoreRewardBlocking);
 	}
 
 	@Override
@@ -306,12 +343,9 @@ public final class Quest extends QuestObject implements Movable {
 			description.clear();
 		}
 
-		//customClick = Bits.getFlag(flags, 4) ? buffer.readString() : "";
 		guidePage = Bits.getFlag(flags, 8) ? buffer.readUtf(Short.MAX_VALUE) : "";
 		//customClick = Bits.getFlag(flags, 32) ? data.readString() : "";
-		//hideDependencyLines = Bits.getFlag(flags, 64);
-		//hideTextUntilComplete = Bits.getFlag(flags, 128);
-		optional = Bits.getFlag(flags, 256);
+		optional = Bits.getFlag(flags, 64);
 
 		minRequiredDependencies = buffer.readVarInt();
 		dependencyRequirement = DependencyRequirement.NAME_MAP.read(buffer);
@@ -328,6 +362,10 @@ public final class Quest extends QuestObject implements Movable {
 
 		size = Bits.getFlag(flags, 4) ? buffer.readDouble() : 1D;
 		minWidth = Bits.getFlag(flags, 512) ? buffer.readVarInt() : 0;
+		canRepeat = buffer.readBoolean();
+		invisible = Bits.getFlag(flags, 128);
+		invisibleUntilTasks = Bits.getFlag(flags, 1024) ? buffer.readVarInt() : 0;
+		ignoreRewardBlocking = buffer.readBoolean();
 	}
 
 	@Override
@@ -485,6 +523,7 @@ public final class Quest extends QuestObject implements Movable {
 		Predicate<QuestObjectBase> depTypes = object -> object != chapter.file && object != chapter && object instanceof QuestObject;// && !(object instanceof Task);
 
 		dependencies.removeIf(Objects::isNull);
+		config.addBool("can_repeat", canRepeat, v -> canRepeat = v, false);
 		config.addList("dependencies", dependencies, new ConfigQuestObject<>(depTypes), null).setNameKey("ftbquests.dependencies");
 		config.addEnum("dependency_requirement", dependencyRequirement, v -> dependencyRequirement = v, DependencyRequirement.NAME_MAP);
 		config.addInt("min_required_dependencies", minRequiredDependencies, v -> minRequiredDependencies = v, 0, 0, Integer.MAX_VALUE);
@@ -494,6 +533,9 @@ public final class Quest extends QuestObject implements Movable {
 		config.addEnum("disable_jei", disableJEI, v -> disableJEI = v, Tristate.NAME_MAP);
 		config.addBool("optional", optional, v -> optional = v, false);
 		config.addInt("min_width", minWidth, v -> minWidth = v, 0, 0, 3000);
+		config.addBool("invisible", invisible, v -> invisible = v, false);
+		config.addInt("invisible_until_tasks", invisibleUntilTasks, v -> invisibleUntilTasks = v, 0, 0, Integer.MAX_VALUE);
+		config.addBool("ignore_reward_blocking", ignoreRewardBlocking, v -> ignoreRewardBlocking = v, false);
 	}
 
 	public boolean getHideDependencyLines() {
@@ -538,6 +580,12 @@ public final class Quest extends QuestObject implements Movable {
 
 	@Override
 	public boolean isVisible(TeamData data) {
+		if (invisible && !data.isCompleted(this)) {
+			if (invisibleUntilTasks == 0 || tasks.stream().filter(data::isCompleted).limit(invisibleUntilTasks).count() < invisibleUntilTasks) {
+				return false;
+			}
+		}
+
 		if (dependencies.isEmpty()) {
 			return true;
 		}
@@ -576,7 +624,7 @@ public final class Quest extends QuestObject implements Movable {
 			return cachedSubtitle;
 		}
 
-		cachedSubtitle = ClientTextComponentUtils.parse(subtitle);
+		cachedSubtitle = TextUtils.parseRawText(subtitle);
 
 		return cachedSubtitle;
 	}
@@ -590,7 +638,7 @@ public final class Quest extends QuestObject implements Movable {
 		cachedDescription = new Component[description.size()];
 
 		for (int i = 0; i < cachedDescription.length; i++) {
-			cachedDescription[i] = ClientTextComponentUtils.parse(description.get(i));
+			cachedDescription[i] = TextUtils.parseRawText(description.get(i));
 		}
 
 		return cachedDescription;
@@ -691,7 +739,7 @@ public final class Quest extends QuestObject implements Movable {
 	}
 
 	public boolean isProgressionIgnored() {
-		return optional;
+		return canRepeat || optional;
 	}
 
 	public List<QuestObject> getDependants() {
@@ -710,6 +758,16 @@ public final class Quest extends QuestObject implements Movable {
 		return list;
 	}
 
+	public void checkRepeatable(TeamData data, UUID player) {
+		if (canRepeat && rewards.stream().allMatch(r -> data.isRewardClaimed(player, r))) {
+			ProgressChange change = new ProgressChange(data.file);
+			change.reset = true;
+			change.origin = this;
+			change.player = player;
+			forceProgress(data, change);
+		}
+	}
+
 	@Override
 	public Collection<? extends QuestObject> getChildren() {
 		return tasks;
@@ -724,12 +782,16 @@ public final class Quest extends QuestObject implements Movable {
 	public boolean hasUnclaimedRewardsRaw(TeamData teamData, UUID player) {
 		if (teamData.isCompleted(this)) {
 			for (Reward reward : rewards) {
-				if (teamData.getClaimType(player, reward) == RewardClaimType.CAN_CLAIM) {
+				if (!teamData.isRewardBlocked(reward) && teamData.getClaimType(player, reward) == RewardClaimType.CAN_CLAIM) {
 					return true;
 				}
 			}
 		}
 
 		return false;
+	}
+
+	public boolean ignoreRewardBlocking() {
+		return ignoreRewardBlocking;
 	}
 }

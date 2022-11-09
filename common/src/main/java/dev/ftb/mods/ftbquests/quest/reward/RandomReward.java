@@ -16,12 +16,12 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.Random;
 import java.util.UUID;
 
 /**
@@ -185,6 +185,11 @@ public class RandomReward extends Reward {
 	}
 
 	@Override
+	public boolean isClaimAllHardcoded() {
+		return true;
+	}
+
+	@Override
 	@Nullable
 	@Environment(EnvType.CLIENT)
 	public Object getIngredient() {
@@ -192,11 +197,11 @@ public class RandomReward extends Reward {
 	}
 
 	@Override
-	public boolean automatedClaimPre(BlockEntity tileEntity, List<ItemStack> items, Random random, UUID playerId, @Nullable ServerPlayer player) {
+	public boolean automatedClaimPre(BlockEntity blockEntity, List<ItemStack> items, RandomSource random, UUID playerId, @Nullable ServerPlayer player) {
 		return false;
 	}
 
 	@Override
-	public void automatedClaimPost(BlockEntity tileEntity, UUID playerId, @Nullable ServerPlayer player) {
+	public void automatedClaimPost(BlockEntity blockEntity, UUID playerId, @Nullable ServerPlayer player) {
 	}
 }

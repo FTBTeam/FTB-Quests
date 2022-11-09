@@ -22,14 +22,14 @@ side = "BOTH"
 [[dependencies.ftbquests]]
 modId = "architectury"
 mandatory = true
-versionRange = "[6.2.43,)"
+versionRange = "[6.3.49,)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.ftbquests]]
 modId = "ftblibrary"
 mandatory = true
-versionRange = "[1902.3.9-build.144,)"
+versionRange = "[1902.3.10-build.155,)"
 ordering = "AFTER"
 side = "BOTH"
 
@@ -43,13 +43,20 @@ side = "BOTH"
 [[dependencies.ftbquests]]
 modId = "itemfilters"
 mandatory = true
-versionRange = "[1902.2.9-build.34,)"
+versionRange = "[1902.2.9-build.46,)"
 ordering = "AFTER"
 side = "BOTH"
 
 [[dependencies.ftbquests]]
 modId = "kubejs"
 mandatory = false
-versionRange = "[1902.6.0-,)"
+versionRange = "[1902.6.0-build.107,)"
+ordering = "AFTER"
+side = "BOTH"
+
+[[dependencies.ftbquests]]
+modId = "jei"
+mandatory = false
+versionRange = "[9.7.0,)"
 ordering = "AFTER"
 side = "BOTH"

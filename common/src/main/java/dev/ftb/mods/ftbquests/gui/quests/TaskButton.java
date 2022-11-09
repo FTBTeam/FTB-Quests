@@ -17,6 +17,7 @@ import dev.latvian.mods.itemfilters.api.IStringValueFilter;
 import dev.latvian.mods.itemfilters.api.ItemFiltersAPI;
 import dev.latvian.mods.itemfilters.api.ItemFiltersItems;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentContents;
 import net.minecraft.network.chat.MutableComponent;
@@ -127,6 +128,7 @@ public class TaskButton extends Button {
 		if (task.addTitleInMouseOverText()) {
 			list.add(getTitle());
 		}
+		task.addMouseOverHeader(list, questScreen.file.self, Minecraft.getInstance().options.advancedItemTooltips);
 
 		if (questScreen.file.self.canStartTasks(task.quest)) {
 			long maxp = task.getMaxProgress();
@@ -139,10 +141,11 @@ public class TaskButton extends Button {
 					String max = isShiftKeyDown() ? Long.toUnsignedString(maxp) : task.formatMaxProgress();
 					String prog = isShiftKeyDown() ? Long.toUnsignedString(progress) : task.formatProgress(questScreen.file.self, progress);
 
+					String s = (progress > maxp ? max : prog) + " / " + max;
 					if (maxp < 100L) {
-						list.add(Component.literal((progress > maxp ? max : prog) + " / " + max).withStyle(ChatFormatting.DARK_GREEN));
+						list.add(Component.literal(s).withStyle(ChatFormatting.DARK_GREEN));
 					} else {
-						list.add(Component.literal((progress > maxp ? max : prog) + " / " + max).withStyle(ChatFormatting.DARK_GREEN).append(Component.literal(" [" + task.getRelativeProgressFromChildren(questScreen.file.self) + "%]").withStyle(ChatFormatting.DARK_GRAY)));
+						list.add(Component.literal(s).withStyle(ChatFormatting.DARK_GREEN).append(Component.literal(" [" + task.getRelativeProgressFromChildren(questScreen.file.self) + "%]").withStyle(ChatFormatting.DARK_GRAY)));
 					}
 
 				}

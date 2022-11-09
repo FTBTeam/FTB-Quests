@@ -233,7 +233,7 @@ public final class RewardTable extends QuestObjectBase {
 		config.addBool("use_title", useTitle, v -> useTitle = v, false);
 
 		if (lootCrate != null) {
-			lootCrate.getConfig(config.getGroup("loot_crate").setNameKey("item.ftbquests.lootcrate.name"));
+			lootCrate.getConfig(config.getGroup("loot_crate").setNameKey("item.ftbquests.lootcrate"));
 		}
 
 		// TODO: Implement this: config.addString("loot_table_id", lootTableId == null ? "" : lootTableId.toString(), v -> lootTableId = v.isEmpty() ? null : new ResourceLocation(v), "");

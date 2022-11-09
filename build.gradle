@@ -25,7 +25,7 @@ allprojects {
 	apply plugin: "java"
 	apply plugin: "architectury-plugin"
 	apply plugin: "maven-publish"
-	apply from: "https://files.latmod.com/public/markdown-git-changelog.gradle"
+	apply from: "https://files.saps.dev/ci/git-md-changelog.gradle"
 
 	def ENV = System.getenv()
 	version = "${mod_version}-build.${ENV.GITHUB_RUN_NUMBER ?: 9999}"
@@ -52,6 +52,13 @@ allprojects {
 			content {
 				includeGroup "dev.latvian.mods"
 				includeGroup "dev.ftb.mods"
+			}
+		}
+
+		maven {
+			url "https://maven.blamejared.com"
+			content {
+				includeGroup "net.darkhax.gamestages"
 			}
 		}
 	}

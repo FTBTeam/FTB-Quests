@@ -5,10 +5,14 @@ import dev.ftb.mods.ftbquests.events.CustomRewardEvent;
 import dev.ftb.mods.ftbquests.events.CustomTaskEvent;
 import dev.ftb.mods.ftbquests.events.ObjectCompletedEvent;
 import dev.ftb.mods.ftbquests.events.ObjectStartedEvent;
+import dev.ftb.mods.ftbquests.quest.task.StageTask;
 import dev.latvian.mods.kubejs.KubeJSPlugin;
 import dev.latvian.mods.kubejs.script.BindingsEvent;
 import dev.latvian.mods.kubejs.util.AttachedData;
 import net.minecraft.world.entity.player.Player;
+import dev.latvian.mods.kubejs.script.ScriptType;
+import dev.latvian.mods.kubejs.stages.Stages;
+import net.minecraft.server.level.ServerPlayer;
 
 /**
  * @author LatvianModder
@@ -19,18 +23,14 @@ public class KubeJSIntegration extends KubeJSPlugin {
 		CustomRewardEvent.EVENT.register(KubeJSIntegration::onCustomReward);
 		ObjectCompletedEvent.GENERIC.register(KubeJSIntegration::onCompleted);
 		ObjectStartedEvent.GENERIC.register(KubeJSIntegration::onStarted);
-	}
 
-	//@SubscribeEvent
-	//public static void registerDocumentation(DocumentationEvent event)
-	//{
-	//	event.registerAttachedData(DataType.PLAYER, "ftbquests", FTBQuestsKubeJSPlayerData.class);
-	//
-	//	event.registerEvent("ftbquests.custom_task", CustomTaskEventJS.class).doubleParam("id").canCancel();
-	//	event.registerEvent("ftbquests.custom_reward", CustomRewardEventJS.class).doubleParam("id").canCancel();
-	//	event.registerEvent("ftbquests.completed", QuestObjectCompletedEventJS.class).doubleParam("id|tag");
-	//	event.registerEvent("ftbquests.started", TaskStartedEventJS.class).doubleParam("id|tag");
-	//}
+		Stages.added(event -> {
+			if (event.getPlayer() instanceof ServerPlayer sp) StageTask.checkStages(sp);
+		});
+		Stages.removed(event -> {
+			if (event.getPlayer() instanceof ServerPlayer sp) StageTask.checkStages(sp);
+		});
+	}
 
 	@Override
 	public void registerBindings(BindingsEvent event) {

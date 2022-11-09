@@ -78,4 +78,10 @@ public class FTBQuestsNetCommon {
 
 	public void resetReward(UUID teamId, UUID player, long rewardId) {
 	}
+
+	public void toggleChapterPinned(boolean pinned) {
+	}
+
+	public void syncRewardBlocking(UUID uuid, boolean rewardsBlocked) {
+	}
 }
