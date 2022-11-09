@@ -6,9 +6,9 @@ import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
  * @author LatvianModder
  */
 public class IDSelector extends ThemeSelector {
-	public final int id;
+	public final long id;
 
-	public IDSelector(int i) {
+	public IDSelector(long i) {
 		id = i;
 	}
 
@@ -29,7 +29,7 @@ public class IDSelector extends ThemeSelector {
 
 	@Override
 	public int hashCode() {
-		return id;
+		return Long.hashCode(id);
 	}
 
 	@Override

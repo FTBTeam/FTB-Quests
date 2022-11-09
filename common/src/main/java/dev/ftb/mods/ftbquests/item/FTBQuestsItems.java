@@ -4,6 +4,7 @@ import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrySupplier;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.block.FTBQuestsBlocks;
+import dev.ftb.mods.ftbquests.item.ScreenBlockItem.ScreenSize;
 import net.minecraft.core.Registry;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -26,9 +27,24 @@ public class FTBQuestsItems {
 		return ITEMS.register(id, () -> new BlockItem(b.get(), new Item.Properties().tab(FTBQuests.ITEM_GROUP)));
 	}
 
+	private static RegistrySupplier<Item> blockItemFor(String id, Supplier<BlockItem> bi) {
+		return ITEMS.register(id, bi);
+	}
+
 	public static final RegistrySupplier<Item> BARRIER = ITEMS.register("barrier", QuestBarrierBlockItem::new);
 	public static final RegistrySupplier<Item> STAGE_BARRIER = ITEMS.register("stage_barrier", StageBarrierBlockItem::new);
 	public static final RegistrySupplier<Item> DETECTOR = blockItem("detector", FTBQuestsBlocks.DETECTOR);
+	public static final RegistrySupplier<Item> LOOT_CRATE_OPENER = blockItem("loot_crate_opener", FTBQuestsBlocks.LOOT_CRATE_OPENER);
+
+	public static final RegistrySupplier<Item> TASK_SCREEN_1 = blockItemFor("screen_1",
+			() -> new ScreenBlockItem(FTBQuestsBlocks.TASK_SCREEN_1.get(), ScreenSize.ONE_X_ONE));
+	public static final RegistrySupplier<Item> TASK_SCREEN_3 = blockItemFor("screen_3",
+			() -> new ScreenBlockItem(FTBQuestsBlocks.TASK_SCREEN_3.get(), ScreenSize.THREE_X_THREE));
+	public static final RegistrySupplier<Item> TASK_SCREEN_5 = blockItemFor("screen_5",
+			() -> new ScreenBlockItem(FTBQuestsBlocks.TASK_SCREEN_5.get(), ScreenSize.FIVE_X_FIVE));
+	public static final RegistrySupplier<Item> TASK_SCREEN_7 = blockItemFor("screen_7",
+			() -> new ScreenBlockItem(FTBQuestsBlocks.TASK_SCREEN_7.get(), ScreenSize.SEVEN_X_SEVEN));
+
 
 	public static void register() {
 		ITEMS.register();

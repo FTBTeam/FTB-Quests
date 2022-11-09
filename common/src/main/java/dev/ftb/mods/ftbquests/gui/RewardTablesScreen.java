@@ -9,6 +9,7 @@ import dev.ftb.mods.ftblibrary.ui.ContextMenuItem;
 import dev.ftb.mods.ftblibrary.ui.Panel;
 import dev.ftb.mods.ftblibrary.ui.SimpleTextButton;
 import dev.ftb.mods.ftblibrary.ui.Theme;
+import dev.ftb.mods.ftblibrary.ui.input.Key;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.ui.misc.ButtonListBaseScreen;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
@@ -66,37 +67,37 @@ public class RewardTablesScreen extends ButtonListBaseScreen {
 					table.lootCrate.stringID = matcher1.replaceAll("_");
 
 					switch (table.lootCrate.stringID) {
-						case "common":
+						case "common" -> {
 							table.lootCrate.color = Color4I.rgb(0x92999A);
 							table.lootCrate.drops.passive = 350;
 							table.lootCrate.drops.monster = 10;
 							table.lootCrate.drops.boss = 0;
-							break;
-						case "uncommon":
+						}
+						case "uncommon" -> {
 							table.lootCrate.color = Color4I.rgb(0x37AA69);
 							table.lootCrate.drops.passive = 200;
 							table.lootCrate.drops.monster = 90;
 							table.lootCrate.drops.boss = 0;
-							break;
-						case "rare":
+						}
+						case "rare" -> {
 							table.lootCrate.color = Color4I.rgb(0x0094FF);
 							table.lootCrate.drops.passive = 50;
 							table.lootCrate.drops.monster = 200;
 							table.lootCrate.drops.boss = 0;
-							break;
-						case "epic":
+						}
+						case "epic" -> {
 							table.lootCrate.color = Color4I.rgb(0x8000FF);
 							table.lootCrate.drops.passive = 9;
 							table.lootCrate.drops.monster = 10;
 							table.lootCrate.drops.boss = 10;
-							break;
-						case "legendary":
+						}
+						case "legendary" -> {
 							table.lootCrate.color = Color4I.rgb(0xFFC147);
 							table.lootCrate.glow = true;
 							table.lootCrate.drops.passive = 1;
 							table.lootCrate.drops.monster = 1;
 							table.lootCrate.drops.boss = 190;
-							break;
+						}
 					}
 
 					title = table.getMutableTitle().withStyle(ChatFormatting.YELLOW);
@@ -178,4 +179,14 @@ public class RewardTablesScreen extends ButtonListBaseScreen {
 	public Theme getTheme() {
 		return FTBQuestsTheme.INSTANCE;
 	}
+
+    @Override
+    public boolean keyPressed(Key key) {
+        if (key.esc()) {
+            onBack();
+            return true;
+        } else {
+            return super.keyPressed(key);
+        }
+    }
 }

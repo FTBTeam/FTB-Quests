@@ -54,7 +54,7 @@ public final class RewardType {
 	private final Supplier<Icon> icon;
 	private Component displayName;
 	private GuiProvider guiProvider;
-	private boolean excludeFromListRewards;
+	private boolean excludeFromListRewards = false;
 	public int intId;
 
 	public RewardType(ResourceLocation i, Provider p, Supplier<Icon> ic) {
@@ -62,24 +62,22 @@ public final class RewardType {
 		provider = p;
 		icon = ic;
 		displayName = null;
-		guiProvider = new GuiProvider() {
-			@Override
-			@Environment(EnvType.CLIENT)
-			public void openCreationGui(Runnable gui, Quest quest, Consumer<Reward> callback) {
-				Reward reward = provider.create(quest);
+		guiProvider = (gui, quest, callback) -> {
+			Reward reward = provider.create(quest);
 
-				if (reward instanceof RandomReward) {
-					ConfigQuestObject<RewardTable> config = new ConfigQuestObject<>(QuestObjectType.REWARD_TABLE);
-					new SelectQuestObjectScreen<>(config, accepted -> {
-						if (accepted) {
-							((RandomReward) reward).table = config.value;
-							callback.accept(reward);
-						}
-						gui.run();
-					}).openGui();
-					return;
-				}
-
+			if (reward instanceof RandomReward rnd) {
+				ConfigQuestObject<RewardTable> config = new ConfigQuestObject<>(QuestObjectType.REWARD_TABLE);
+				SelectQuestObjectScreen<?> s = new SelectQuestObjectScreen<>(config, accepted -> {
+					if (accepted) {
+						rnd.table = config.value;
+						callback.accept(reward);
+					}
+					gui.run();
+				});
+				s.setTitle(Component.translatable("ftbquests.gui.select_reward_table"));
+				s.setHasSearchBox(true);
+				s.openGui();
+			} else {
 				ConfigGroup group = new ConfigGroup(FTBQuests.MOD_ID);
 				reward.getConfig(reward.createSubGroup(group));
 				group.savedCallback = accepted -> {

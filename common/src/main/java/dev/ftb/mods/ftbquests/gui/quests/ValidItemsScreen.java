@@ -1,7 +1,6 @@
 package dev.ftb.mods.ftbquests.gui.quests;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import dev.architectury.platform.Platform;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;
@@ -35,13 +34,9 @@ public class ValidItemsScreen extends BaseScreen {
 
 		@Override
 		public void onClicked(MouseButton button) {
-			if (Platform.isModLoaded("jei") || Platform.isModLoaded("roughlyenoughitems")) {
-				showJEIRecipe();
+			if (FTBQuestsJEIHelper.isRecipeModAvailable()) {
+				FTBQuestsJEIHelper.showRecipes(stack);
 			}
-		}
-
-		private void showJEIRecipe() {
-			FTBQuestsJEIHelper.showRecipes(stack);
 		}
 
 		@Nullable
@@ -166,6 +161,16 @@ public class ValidItemsScreen extends BaseScreen {
 	public void drawBackground(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
 		super.drawBackground(matrixStack, theme, x, y, w, h);
 		theme.drawString(matrixStack, title, x + w / 2F, y + 6, Color4I.WHITE, Theme.CENTERED);
+	}
+
+	@Override
+	public boolean keyPressed(Key key) {
+		if (super.keyPressed(key)) return true;
+		if (key.esc()) {
+			onBack();
+			return true;
+		}
+		return false;
 	}
 
 	@Override

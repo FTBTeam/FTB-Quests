@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "ftbquests:block/loot_crate_opener"
+    }
+  }
+}

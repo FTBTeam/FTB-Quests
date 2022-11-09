@@ -1,6 +1,7 @@
 package dev.ftb.mods.ftbquests.integration;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
+import dev.architectury.platform.Platform;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import net.minecraft.world.item.ItemStack;
 
@@ -26,5 +27,10 @@ public class FTBQuestsJEIHelper {
 	@ExpectPlatform
 	public static void showRecipes(ItemStack object) {
 		throw new AssertionError();
+	}
+
+	public static boolean isRecipeModAvailable() {
+		return Platform.isFabric() && Platform.isModLoaded("roughlyenoughitems")
+				|| Platform.isForge() && Platform.isModLoaded("jei");
 	}
 }

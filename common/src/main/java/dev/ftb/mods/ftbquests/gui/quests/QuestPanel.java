@@ -119,9 +119,7 @@ public class QuestPanel extends Panel {
 		}
 
 		for (Quest quest : questScreen.selectedChapter.quests) {
-			if (questScreen.file.canEdit() || quest.isVisible(questScreen.file.self)) {
-				add(new QuestButton(this, quest));
-			}
+			add(new QuestButton(this, quest));
 		}
 
 		alignWidgets();
@@ -189,9 +187,8 @@ public class QuestPanel extends Panel {
 		BufferBuilder buffer = tesselator.getBuilder();
 
 		Icon icon = ThemeProperties.DEPENDENCY_LINE_TEXTURE.get(questScreen.selectedChapter);
-
-		if (icon instanceof ImageIcon) {
-			((ImageIcon) icon).bindTexture();
+		if (icon instanceof ImageIcon img) {
+			img.bindTexture();
 		} else {
 			DEFAULT_DEPENDENCY_LINE_TEXTURE.bindTexture();
 		}
@@ -200,121 +197,101 @@ public class QuestPanel extends Panel {
 		GuiHelper.setupDrawing();
 		RenderSystem.enableDepthTest();
 		double mt = -(System.currentTimeMillis() * 0.001D);
-		float mu = (float) ((mt * ThemeProperties.DEPENDENCY_LINE_UNSELECTED_SPEED.get(questScreen.selectedChapter)) % 1D);
-		float ms = (float) ((mt * ThemeProperties.DEPENDENCY_LINE_SELECTED_SPEED.get(questScreen.selectedChapter)) % 1D);
-		float s = (float) (questScreen.getZoom() * ThemeProperties.DEPENDENCY_LINE_THICKNESS.get(questScreen.selectedChapter) / 4D * 3D);
+		float lineWidth = (float) (questScreen.getZoom() * ThemeProperties.DEPENDENCY_LINE_THICKNESS.get(questScreen.selectedChapter) / 4D * 3D);
 
 		RenderSystem.setShader(GameRenderer::getPositionColorTexShader);
 		RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
 
+		// pass 1: render connections for all visible quests
+		float mu = (float) ((mt * ThemeProperties.DEPENDENCY_LINE_UNSELECTED_SPEED.get(questScreen.selectedChapter)) % 1D);
 		for (Widget widget : widgets) {
-			if (!(widget instanceof QuestButton)) {
-				continue;
-			}
+			if (widget.shouldDraw() && widget instanceof QuestButton qb && !qb.quest.getHideDependencyLines()) {
+				boolean unavailable = questScreen.file.self == null || !questScreen.file.self.canStartTasks(qb.quest);
+				boolean complete = !unavailable && questScreen.file.self != null && questScreen.file.self.isCompleted(qb.quest);
 
-			Quest wquest = ((QuestButton) widget).quest;
-
-			if (wquest.getHideDependencyLines()) {
-				continue;
-			}
-
-			boolean unavailable = questScreen.file.self == null || !questScreen.file.self.canStartTasks(wquest);
-			boolean complete = !unavailable && questScreen.file.self != null && questScreen.file.self.isCompleted(wquest);
-
-			for (QuestButton button : ((QuestButton) widget).getDependencies()) {
-				if (button.quest == selectedQuest || wquest == selectedQuest) {
-					continue;
+				for (QuestButton button : qb.getDependencies()) {
+					if (button.quest != selectedQuest && qb.quest != selectedQuest) {
+						int r, g, b, a;
+						if (complete) {
+							Color4I c = ThemeProperties.DEPENDENCY_LINE_COMPLETED_COLOR.get(questScreen.selectedChapter);
+							r = c.redi();
+							g = c.greeni();
+							b = c.bluei();
+							a = c.alphai();
+						} else {
+							Color4I c = Color4I.hsb(button.quest.id / 1000F, 0.2F, unavailable ? 0.3F : 0.8F);
+							r = c.redi();
+							g = c.greeni();
+							b = c.bluei();
+							a = 180;
+						}
+						renderConnection(widget, button, matrixStack, buffer, lineWidth, r, g, b, a, a, mu, tesselator);
+					}
 				}
-
-				int r, g, b, a;
-
-				if (complete) {
-					Color4I c = ThemeProperties.DEPENDENCY_LINE_COMPLETED_COLOR.get(questScreen.selectedChapter);
-					r = c.redi();
-					g = c.greeni();
-					b = c.bluei();
-					a = c.alphai();
-				} else {
-					Color4I c = Color4I.hsb(button.quest.id / 1000F, 0.2F, unavailable ? 0.3F : 0.8F);
-					r = c.redi();
-					g = c.greeni();
-					b = c.bluei();
-					a = 180;
-				}
-
-				int sx = widget.getX() + widget.width / 2;
-				int sy = widget.getY() + widget.height / 2;
-				int ex = button.getX() + button.width / 2;
-				int ey = button.getY() + button.height / 2;
-				float len = (float) MathUtils.dist(sx, sy, ex, ey);
-
-				matrixStack.pushPose();
-				matrixStack.translate(sx, sy, 0);
-				matrixStack.mulPose(Vector3f.ZP.rotation((float) Math.atan2(ey - sy, ex - sx)));
-				Matrix4f m = matrixStack.last().pose();
-
-				buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_TEX);
-				buffer.vertex(m, 0, -s, 0).color(r, g, b, a).uv(len / s / 2F + mu, 0).endVertex();
-				buffer.vertex(m, 0, s, 0).color(r, g, b, a).uv(len / s / 2F + mu, 1).endVertex();
-				buffer.vertex(m, len, s, 0).color(r * 3 / 4, g * 3 / 4, b * 3 / 4, a).uv(mu, 1).endVertex();
-				buffer.vertex(m, len, -s, 0).color(r * 3 / 4, g * 3 / 4, b * 3 / 4, a).uv(mu, 0).endVertex();
-				tesselator.end();
-
-				matrixStack.popPose();
 			}
+
 		}
 
+		// pass 2: render highlighted connections for selected quest(s) dependencies/dependents
+		float ms = (float) ((mt * ThemeProperties.DEPENDENCY_LINE_SELECTED_SPEED.get(questScreen.selectedChapter)) % 1D);
+		List<QuestButton> toOutline = new ArrayList<>();
 		for (Widget widget : widgets) {
-			if (!(widget instanceof QuestButton)) {
-				continue;
-			}
-
-			Quest wquest = ((QuestButton) widget).quest;
-
-			if (wquest.getHideDependencyLines()) {
-				continue;
-			}
-
-			for (QuestButton button : ((QuestButton) widget).getDependencies()) {
-				int r, g, b, a;
-
-				if (button.quest == selectedQuest) {
-					Color4I c = ThemeProperties.DEPENDENCY_LINE_REQUIRED_FOR_COLOR.get(questScreen.selectedChapter);
-					r = c.redi();
-					g = c.greeni();
-					b = c.bluei();
-					a = c.alphai();
-				} else if (wquest == selectedQuest) {
-					Color4I c = ThemeProperties.DEPENDENCY_LINE_REQUIRES_COLOR.get(questScreen.selectedChapter);
-					r = c.redi();
-					g = c.greeni();
-					b = c.bluei();
-					a = c.alphai();
-				} else {
-					continue;
+			if (widget instanceof QuestButton qb && !qb.quest.getHideDependencyLines()) {
+				for (QuestButton button : qb.getDependencies()) {
+					int r, g, b, a, a2;
+					if (button.quest == selectedQuest) {
+						Color4I c = ThemeProperties.DEPENDENCY_LINE_REQUIRED_FOR_COLOR.get(questScreen.selectedChapter);
+						r = c.redi();
+						g = c.greeni();
+						b = c.bluei();
+						if (qb.shouldDraw()) {
+							a = a2 = c.alphai();
+						} else {
+							a = c.alphai() / 4 * 3;
+							a2 = 30;
+							toOutline.add(qb);
+						}
+					} else if (qb.quest == selectedQuest) {
+						Color4I c = ThemeProperties.DEPENDENCY_LINE_REQUIRES_COLOR.get(questScreen.selectedChapter);
+						r = c.redi();
+						g = c.greeni();
+						b = c.bluei();
+						a = c.alphai();
+						a2 = a;
+					} else {
+						continue;
+					}
+					renderConnection(widget, button, matrixStack, buffer, lineWidth, r, g, b, a2, a, ms, tesselator);
 				}
-
-				int sx = widget.getX() + widget.width / 2;
-				int sy = widget.getY() + widget.height / 2;
-				int ex = button.getX() + button.width / 2;
-				int ey = button.getY() + button.height / 2;
-				float len = (float) MathUtils.dist(sx, sy, ex, ey);
-
-				matrixStack.pushPose();
-				matrixStack.translate(sx, sy, 0);
-				matrixStack.mulPose(Vector3f.ZP.rotation((float) Math.atan2(ey - sy, ex - sx)));
-				Matrix4f m = matrixStack.last().pose();
-
-				buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_TEX);
-				buffer.vertex(m, 0, -s, 0).color(r, g, b, a).uv(len / s / 2F + ms, 0).endVertex();
-				buffer.vertex(m, 0, s, 0).color(r, g, b, a).uv(len / s / 2F + ms, 1).endVertex();
-				buffer.vertex(m, len, s, 0).color(r * 3 / 4, g * 3 / 4, b * 3 / 4, a).uv(ms, 1).endVertex();
-				buffer.vertex(m, len, -s, 0).color(r * 3 / 4, g * 3 / 4, b * 3 / 4, a).uv(ms, 0).endVertex();
-				tesselator.end();
-
-				matrixStack.popPose();
 			}
+
 		}
+		toOutline.forEach(qb -> {
+			QuestShape.get(qb.quest.getShape()).shape.withColor(Color4I.BLACK.withAlpha(30)).draw(matrixStack, qb.getX(), qb.getY(), qb.width, qb.height);
+			QuestShape.get(qb.quest.getShape()).outline.withColor(Color4I.BLACK.withAlpha(90)).draw(matrixStack, qb.getX(), qb.getY(), qb.width, qb.height);
+		});
+	}
+
+	private void renderConnection(Widget widget, QuestButton button, PoseStack matrixStack, BufferBuilder buffer, float s, int r, int g, int b, int a, int a1, float mu, Tesselator tesselator) {
+		int sx = widget.getX() + widget.width / 2;
+		int sy = widget.getY() + widget.height / 2;
+		int ex = button.getX() + button.width / 2;
+		int ey = button.getY() + button.height / 2;
+		float len = (float) MathUtils.dist(sx, sy, ex, ey);
+
+		matrixStack.pushPose();
+		matrixStack.translate(sx, sy, 0);
+		matrixStack.mulPose(Vector3f.ZP.rotation((float) Math.atan2(ey - sy, ex - sx)));
+		Matrix4f m = matrixStack.last().pose();
+
+		buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_TEX);
+		buffer.vertex(m, 0, -s, 0).color(r, g, b, a).uv(len / s / 2F + mu, 0).endVertex();
+		buffer.vertex(m, 0, s, 0).color(r, g, b, a).uv(len / s / 2F + mu, 1).endVertex();
+		buffer.vertex(m, len, s, 0).color(r * 3 / 4, g * 3 / 4, b * 3 / 4, a1).uv(mu, 1).endVertex();
+		buffer.vertex(m, len, -s, 0).color(r * 3 / 4, g * 3 / 4, b * 3 / 4, a1).uv(mu, 0).endVertex();
+		tesselator.end();
+
+		matrixStack.popPose();
 	}
 
 	@Override
@@ -338,8 +315,7 @@ public class QuestPanel extends Panel {
 			if (isShiftKeyDown()) {
 				questX = qx;
 				questY = qy;
-			} else if (questScreen.selectedObjects.size() == 1 && questScreen.selectedObjects.get(0) instanceof Quest) {
-				Quest q = (Quest) questScreen.selectedObjects.get(0);
+			} else if (questScreen.selectedObjects.size() == 1 && questScreen.selectedObjects.get(0) instanceof Quest q) {
 				double s = (1D / questScreen.file.gridScale) / q.size;
 				questX = Mth.floor(qx * s + 0.5D) / s;
 				questY = Mth.floor(qy * s + 0.5D) / s;
@@ -409,9 +385,9 @@ public class QuestPanel extends Panel {
 					matrixStack.scale((float) bs, (float) bs, 1F);
 					GuiHelper.setupDrawing();
 					RenderSystem.enableDepthTest();
-					// TODO: custom shader to implement alphaFunc?
+					// TODO: custom shader to implement alphaFunc? for now however, rendering outline at alpha 30 works well
 					//RenderSystem.alphaFunc(GL11.GL_GREATER, 0.01F);
-					QuestShape.get(questScreen.selectedChapter.getDefaultQuestShape()).shape.withColor(Color4I.WHITE.withAlpha(10)).draw(matrixStack, 0, 0, 1, 1);
+					QuestShape.get(questScreen.selectedChapter.getDefaultQuestShape()).outline.withColor(Color4I.WHITE.withAlpha(30)).draw(matrixStack, 0, 0, 1, 1);
 					//RenderSystem.defaultAlphaFunc();
 					matrixStack.popPose();
 
@@ -465,10 +441,10 @@ public class QuestPanel extends Panel {
 			return true;
 		}
 
-		if (button.isLeft() && isMouseOver() && (questScreen.viewQuestPanel.hidePanel || !questScreen.isViewingQuest())) {
+		if ((button.isLeft() || button.isMiddle() && questScreen.file.canEdit()) && isMouseOver() && (questScreen.viewQuestPanel.hidePanel || !questScreen.isViewingQuest())) {
 			questScreen.prevMouseX = getMouseX();
 			questScreen.prevMouseY = getMouseY();
-			questScreen.grabbed = 1;
+			questScreen.grabbed = button;
 			return true;
 		}
 
@@ -504,7 +480,13 @@ public class QuestPanel extends Panel {
 	@Override
 	public void mouseReleased(MouseButton button) {
 		super.mouseReleased(button);
-		questScreen.grabbed = 0;
+
+		if (questScreen.grabbed != null && questScreen.grabbed.isMiddle() && questScreen.file.canEdit()) {
+			// select any quests in the box
+			questScreen.selectAllQuestsInBox(getMouseX(), getMouseY(), getScrollX(), getScrollY());
+		}
+
+		questScreen.grabbed = null;
 	}
 
 	@Override

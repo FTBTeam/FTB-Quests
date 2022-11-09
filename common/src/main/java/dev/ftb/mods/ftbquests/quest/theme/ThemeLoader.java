@@ -4,13 +4,7 @@ import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.quest.QuestObjectType;
 import dev.ftb.mods.ftbquests.quest.QuestShape;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
-import dev.ftb.mods.ftbquests.quest.theme.selector.AllSelector;
-import dev.ftb.mods.ftbquests.quest.theme.selector.AndSelector;
-import dev.ftb.mods.ftbquests.quest.theme.selector.IDSelector;
-import dev.ftb.mods.ftbquests.quest.theme.selector.NotSelector;
-import dev.ftb.mods.ftbquests.quest.theme.selector.TagSelector;
-import dev.ftb.mods.ftbquests.quest.theme.selector.ThemeSelector;
-import dev.ftb.mods.ftbquests.quest.theme.selector.TypeSelector;
+import dev.ftb.mods.ftbquests.quest.theme.selector.*;
 import dev.ftb.mods.ftbquests.util.FileUtils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
@@ -19,11 +13,7 @@ import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
@@ -161,7 +151,7 @@ public class ThemeLoader implements ResourceManagerReloadListener {
 		}
 
 		try {
-			return new IDSelector(Long.valueOf(sel, 16).intValue());
+			return new IDSelector(Long.valueOf(sel, 16));
 		} catch (Exception ex) {
 			return null;
 		}

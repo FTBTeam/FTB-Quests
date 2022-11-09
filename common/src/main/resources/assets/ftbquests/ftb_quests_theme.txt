@@ -30,6 +30,10 @@ wiki_icon:            ftbquests:textures/gui/info.png
 wiki_url:             -
 pin_icon_on:          ftbquests:textures/gui/pin.png; color=#F8BD1C
 pin_icon_off:         ftbquests:textures/gui/pin.png; color=#DBDBDB
+editor_icon_on:       ftbquests:textures/gui/editor.png; color=#F8BD1C
+editor_icon_off:      ftbquests:textures/gui/editor.png; color=#DBDBDB
+hidden_icon:          ftbquests:textures/gui/hidden.png; color=#DBDBDB
+save_icon:            ftbquests:textures/gui/save.png
 settings_icon:        ftbquests:textures/gui/settings.png
 close_icon:           ftbquests:textures/gui/close.png
 emergency_items_icon: ftbquests:textures/gui/emergency_items.png; color=#F3D9FF
@@ -53,6 +57,8 @@ quest_view_border:                  {{widget_border}}
 quest_view_title:                   #AAAAAA
 quest_completed_color:              #C856FF56
 quest_started_color:                #C800FFFF
+quest_not_started_color:            #96FFFFFF
+quest_locked_color:                 #FF999999
 dependency_line_texture:            ftbquests:textures/gui/dependency.png
 dependency_line_completed_color:    #64DC64
 dependency_line_requires_color:     #00C8C8

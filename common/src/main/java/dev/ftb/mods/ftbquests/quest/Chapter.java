@@ -37,6 +37,7 @@ public final class Chapter extends QuestObject {
 	public String defaultQuestShape;
 	public final List<ChapterImage> images;
 	public boolean defaultHideDependencyLines;
+	public int defaultMinWidth = 0;
 
 	public Chapter(QuestFile f, ChapterGroup g) {
 		file = f;
@@ -98,6 +99,10 @@ public final class Chapter extends QuestObject {
 
 			nbt.put("images", list);
 		}
+
+		if (defaultMinWidth > 0) {
+			nbt.putInt("default_min_width", defaultMinWidth);
+		}
 	}
 
 	@Override
@@ -130,6 +135,8 @@ public final class Chapter extends QuestObject {
 			image.readData(imgs.getCompound(i));
 			images.add(image);
 		}
+
+		defaultMinWidth = nbt.getInt("default_min_width");
 	}
 
 	@Override
@@ -141,6 +148,7 @@ public final class Chapter extends QuestObject {
 		buffer.writeUtf(defaultQuestShape, Short.MAX_VALUE);
 		NetUtils.write(buffer, images, (d, img) -> img.writeNetData(d));
 		buffer.writeBoolean(defaultHideDependencyLines);
+		buffer.writeInt(defaultMinWidth);
 	}
 
 	@Override
@@ -156,6 +164,7 @@ public final class Chapter extends QuestObject {
 			return image;
 		});
 		defaultHideDependencyLines = buffer.readBoolean();
+		defaultMinWidth = buffer.readInt();
 	}
 
 	public int getIndex() {
@@ -306,6 +315,7 @@ public final class Chapter extends QuestObject {
 		config.addBool("always_invisible", alwaysInvisible, v -> alwaysInvisible = v, false);
 		config.addEnum("default_quest_shape", defaultQuestShape.isEmpty() ? "default" : defaultQuestShape, v -> defaultQuestShape = v.equals("default") ? "" : v, QuestShape.idMapWithDefault);
 		config.addBool("default_hide_dependency_lines", defaultHideDependencyLines, v -> defaultHideDependencyLines = v, false);
+		config.addInt("default_min_width", defaultMinWidth, v -> defaultMinWidth = v, 0, 0, 3000);
 	}
 
 	@Override

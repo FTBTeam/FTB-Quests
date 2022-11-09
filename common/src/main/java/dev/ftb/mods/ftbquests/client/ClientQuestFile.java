@@ -3,7 +3,6 @@ package dev.ftb.mods.ftbquests.client;
 import dev.architectury.utils.Env;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.ui.BaseScreen;
-import dev.ftb.mods.ftblibrary.util.ClientTextComponentUtils;
 import dev.ftb.mods.ftblibrary.util.ClientUtils;
 import dev.ftb.mods.ftbquests.gui.CustomToast;
 import dev.ftb.mods.ftbquests.gui.quests.QuestScreen;
@@ -14,18 +13,28 @@ import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestFile;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.theme.QuestTheme;
+import dev.ftb.mods.ftbquests.util.TextUtils;
 import dev.ftb.mods.ftbteams.data.ClientTeamManager;
+import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
  * @author LatvianModder
  */
 public class ClientQuestFile extends QuestFile {
+	private static final List<String> MISSING_DATA_ERR = List.of(
+			"Unable to open Quest GUI: no quest book data received from server!",
+			"- Check that FTB Quests and FTB Teams are installed on the server",
+			"  and that no server-side errors were logged when you connected."
+	);
+
 	public static ClientQuestFile INSTANCE;
 
 	public static boolean exists() {
@@ -94,6 +103,7 @@ public class ClientQuestFile extends QuestFile {
 			chaptersExpanded = questScreen.chapterPanel.expanded;
 		}
 
+		Minecraft.getInstance().setScreen(null);  // ensures prevScreen is null, so we can close correctly
 		questScreen = new QuestScreen(this);
 		questGui = questScreen;
 
@@ -123,12 +133,23 @@ public class ClientQuestFile extends QuestFile {
 		questScreen.chapterPanel.setExpanded(chaptersExpanded);
 	}
 
+	public static void openGui() {
+		if (INSTANCE != null) {
+			INSTANCE.openQuestGui();
+		} else {
+			LocalPlayer player = Minecraft.getInstance().player;
+			if (player != null) {
+				MISSING_DATA_ERR.forEach(s -> player.displayClientMessage(Component.literal(s).withStyle(ChatFormatting.RED), false));
+			}
+		}
+	}
+
 	public void openQuestGui() {
 		if (exists()) {
 			if (disableGui && !canEdit()) {
 				Minecraft.getInstance().getToasts().addToast(new CustomToast(Component.translatable("item.ftbquests.book.disabled"), Icons.BARRIER, Component.empty()));
 			} else if (self.isLocked()) {
-				Minecraft.getInstance().getToasts().addToast(new CustomToast(lockMessage.isEmpty() ? Component.literal("Quests locked!") : ClientTextComponentUtils.parse(lockMessage), Icons.BARRIER, Component.empty()));
+				Minecraft.getInstance().getToasts().addToast(new CustomToast(lockMessage.isEmpty() ? Component.literal("Quests locked!") : TextUtils.parseRawText(lockMessage), Icons.BARRIER, Component.empty()));
 			} else {
 				questGui.openGui();
 			}

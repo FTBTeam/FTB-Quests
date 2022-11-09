@@ -5,11 +5,7 @@ import dev.architectury.event.events.client.ClientLifecycleEvent;
 import dev.architectury.registry.ReloadListenerRegistry;
 import dev.architectury.registry.client.keymappings.KeyMappingRegistry;
 import dev.architectury.registry.client.rendering.RenderTypeRegistry;
-import dev.ftb.mods.ftblibrary.config.ConfigGroup;
-import dev.ftb.mods.ftblibrary.config.ImageConfig;
-import dev.ftb.mods.ftblibrary.config.IntConfig;
-import dev.ftb.mods.ftblibrary.config.ItemStackConfig;
-import dev.ftb.mods.ftblibrary.config.StringConfig;
+import dev.ftb.mods.ftblibrary.config.*;
 import dev.ftb.mods.ftblibrary.config.ui.EditConfigFromStringScreen;
 import dev.ftb.mods.ftblibrary.config.ui.EditConfigScreen;
 import dev.ftb.mods.ftblibrary.config.ui.SelectItemStackScreen;
@@ -17,6 +13,7 @@ import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.FTBQuestsCommon;
 import dev.ftb.mods.ftbquests.block.FTBQuestsBlocks;
+import dev.ftb.mods.ftbquests.block.entity.TaskScreenBlockEntity;
 import dev.ftb.mods.ftbquests.net.SetCustomImageMessage;
 import dev.ftb.mods.ftbquests.quest.QuestFile;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
@@ -25,23 +22,28 @@ import dev.ftb.mods.ftbquests.quest.reward.ItemReward;
 import dev.ftb.mods.ftbquests.quest.reward.RewardTypes;
 import dev.ftb.mods.ftbquests.quest.reward.XPLevelsReward;
 import dev.ftb.mods.ftbquests.quest.reward.XPReward;
-import dev.ftb.mods.ftbquests.quest.task.CheckmarkTask;
-import dev.ftb.mods.ftbquests.quest.task.DimensionTask;
-import dev.ftb.mods.ftbquests.quest.task.ItemTask;
-import dev.ftb.mods.ftbquests.quest.task.LocationTask;
-import dev.ftb.mods.ftbquests.quest.task.TaskTypes;
+import dev.ftb.mods.ftbquests.quest.task.*;
 import dev.ftb.mods.ftbquests.quest.theme.ThemeLoader;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.server.packs.PackType;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.StructureBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 public class FTBQuestsClient extends FTBQuestsCommon {
 	public static KeyMapping KEY_QUESTS;
@@ -51,13 +53,18 @@ public class FTBQuestsClient extends FTBQuestsCommon {
 		ClientLifecycleEvent.CLIENT_SETUP.register(this::setup);
 		ReloadListenerRegistry.register(PackType.CLIENT_RESOURCES, new QuestFileCacheReloader());
 		ReloadListenerRegistry.register(PackType.CLIENT_RESOURCES, new ThemeLoader());
+		KeyMappingRegistry.register(KEY_QUESTS = new KeyMapping("key.ftbquests.quests", InputConstants.Type.KEYSYM, -1, "key.categories.ftbquests"));
 		new FTBQuestsClientEventHandler().init();
 	}
 
 	private void setup(Minecraft minecraft) {
-		KeyMappingRegistry.register(KEY_QUESTS = new KeyMapping("key.ftbquests.quests", InputConstants.Type.KEYSYM, -1, "key.categories.ftbquests"));
 		RenderTypeRegistry.register(RenderType.translucent(), FTBQuestsBlocks.BARRIER.get());
 		RenderTypeRegistry.register(RenderType.translucent(), FTBQuestsBlocks.STAGE_BARRIER.get());
+		RenderTypeRegistry.register(RenderType.solid(), FTBQuestsBlocks.TASK_SCREEN_1.get());
+		RenderTypeRegistry.register(RenderType.solid(), FTBQuestsBlocks.TASK_SCREEN_3.get());
+		RenderTypeRegistry.register(RenderType.solid(), FTBQuestsBlocks.TASK_SCREEN_5.get());
+		RenderTypeRegistry.register(RenderType.solid(), FTBQuestsBlocks.TASK_SCREEN_7.get());
+		RenderTypeRegistry.register(RenderType.solid(), FTBQuestsBlocks.AUX_SCREEN.get());
 		setTaskGuiProviders();
 		setRewardGuiProviders();
 	}
@@ -240,7 +247,7 @@ public class FTBQuestsClient extends FTBQuestsCommon {
 
 	@Override
 	public void openGui() {
-		ClientQuestFile.INSTANCE.openQuestGui();
+		ClientQuestFile.openGui();
 	}
 
 	@Override
@@ -259,5 +266,25 @@ public class FTBQuestsClient extends FTBQuestsCommon {
 
 			Minecraft.getInstance().setScreen(null);
 		});
+	}
+
+	@Override
+	public void openScreenConfigGui(BlockPos pos) {
+		if (Minecraft.getInstance().level.getBlockEntity(pos) instanceof TaskScreenBlockEntity coreScreen) {
+			new EditConfigScreen(coreScreen.getConfigGroup(ClientQuestFile.INSTANCE.getData(coreScreen.getTeamId()))).setAutoclose(true).openGui();
+		}
+	}
+
+	@Override
+	public float[] getTextureUV(BlockState state, Direction face) {
+		if (state == null) return null;
+		BakedModel model = Minecraft.getInstance().getBlockRenderer().getBlockModel(state);
+		List<BakedQuad> quads = model.getQuads(state, face, RandomSource.create());
+		if (!quads.isEmpty()) {
+			TextureAtlasSprite sprite = quads.get(0).getSprite();
+			return new float[] { sprite.getU0(), sprite.getV0(), sprite.getU1(), sprite.getV1() };
+		} else {
+			return new float[0];
+		}
 	}
 }

@@ -36,4 +36,9 @@ public class CheckmarkTask extends BooleanTask {
 	public boolean checkOnLogin() {
 		return false;
 	}
+
+	@Override
+	protected boolean hasIconConfig() {
+		return false;
+	}
 }

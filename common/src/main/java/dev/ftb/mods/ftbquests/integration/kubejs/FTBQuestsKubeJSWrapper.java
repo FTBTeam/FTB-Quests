@@ -1,11 +1,7 @@
 package dev.ftb.mods.ftbquests.integration.kubejs;
 
 import dev.ftb.mods.ftbquests.FTBQuests;
-import dev.ftb.mods.ftbquests.quest.QuestFile;
-import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
-import dev.ftb.mods.ftbquests.quest.QuestObjectType;
-import dev.ftb.mods.ftbquests.quest.QuestShape;
-import dev.ftb.mods.ftbquests.quest.TeamData;
+import dev.ftb.mods.ftbquests.quest.*;
 import dev.ftb.mods.ftbteams.FTBTeamsAPI;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.world.entity.player.Player;

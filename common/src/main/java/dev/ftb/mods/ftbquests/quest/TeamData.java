@@ -55,6 +55,8 @@ public class TeamData {
 	public boolean shouldSave;
 	private boolean locked;
 
+	private boolean rewardsBlocked;
+
 	private final Long2LongOpenHashMap taskProgress;
 	private final Object2LongOpenHashMap<QuestKey> claimedRewards;
 	private final Long2LongOpenHashMap started;
@@ -63,6 +65,7 @@ public class TeamData {
 	// TODO: Move these to player data
 	private boolean canEdit;
 	private boolean autoPin;
+	private boolean chapterPinned;
 	public final LongOpenHashSet pinnedQuests;
 
 	private Long2ByteOpenHashMap areDependenciesCompleteCache;
@@ -187,6 +190,27 @@ public class TeamData {
 		return t == 0L ? null : new Date(t);
 	}
 
+	public boolean areRewardsBlocked() {
+		return rewardsBlocked;
+	}
+
+	public boolean isRewardBlocked(Reward reward) {
+		return areRewardsBlocked() && !reward.ignoreRewardBlocking() && !reward.quest.ignoreRewardBlocking();
+	}
+
+	public boolean setRewardsBlocked(boolean rewardsBlocked) {
+		if (rewardsBlocked != this.rewardsBlocked) {
+			this.rewardsBlocked = rewardsBlocked;
+			clearCachedProgress();
+			save();
+			if (file.isServerSide()) {
+				new SyncRewardBlockingMessage(uuid, rewardsBlocked).sendToAll(((ServerQuestFile) file).server);
+			}
+			return true;
+		}
+		return false;
+	}
+
 	public boolean isRewardClaimed(UUID player, Reward reward) {
 		return getRewardClaimTime(player, reward) != null;
 	}
@@ -209,7 +233,7 @@ public class TeamData {
 	}
 
 	public boolean claimReward(UUID player, Reward reward, long date) {
-		if (locked) {
+		if (locked || isRewardBlocked(reward)) {
 			return false;
 		}
 
@@ -223,6 +247,8 @@ public class TeamData {
 			if (file.isServerSide()) {
 				new ClaimRewardResponseMessage(uuid, player, reward.id).sendToAll(((ServerQuestFile) file).server);
 			}
+
+			reward.quest.checkRepeatable(this, player);
 
 			return true;
 		}
@@ -273,7 +299,7 @@ public class TeamData {
 	}
 
 	public boolean getAutoPin() {
-		return autoPin;
+		return isQuestPinned(1);
 	}
 
 	public void setAutoPin(boolean auto) {
@@ -306,6 +332,8 @@ public class TeamData {
 		nbt.putBoolean("can_edit", canEdit);
 		nbt.putBoolean("lock", locked);
 		nbt.putBoolean("auto_pin", autoPin);
+		nbt.putBoolean("chapter_pinned", chapterPinned);
+		nbt.putBoolean("rewards_blocked", rewardsBlocked);
 
 		SNBTCompoundTag taskProgressNBT = new SNBTCompoundTag();
 
@@ -367,6 +395,8 @@ public class TeamData {
 		canEdit = nbt.getBoolean("can_edit");
 		locked = nbt.getBoolean("lock");
 		autoPin = nbt.getBoolean("auto_pin");
+		chapterPinned = nbt.getBoolean("chapter_pinned");
+		rewardsBlocked = nbt.getBoolean("rewards_blocked");
 
 		taskProgress.clear();
 		claimedRewards.clear();
@@ -429,6 +459,7 @@ public class TeamData {
 		}
 
 		buffer.writeBoolean(locked);
+		buffer.writeBoolean(rewardsBlocked);
 
 		if (self) {
 			buffer.writeVarInt(claimedRewards.size());
@@ -440,6 +471,7 @@ public class TeamData {
 
 			buffer.writeBoolean(canEdit);
 			buffer.writeBoolean(autoPin);
+			buffer.writeBoolean(chapterPinned);
 
 			buffer.writeVarInt(pinnedQuests.size());
 
@@ -478,6 +510,7 @@ public class TeamData {
 		}
 
 		locked = buffer.readBoolean();
+		rewardsBlocked = buffer.readBoolean();
 
 		claimedRewards.clear();
 		canEdit = false;
@@ -494,6 +527,7 @@ public class TeamData {
 
 			canEdit = buffer.readBoolean();
 			autoPin = buffer.readBoolean();
+			chapterPinned = buffer.readBoolean();
 
 			int pqs = buffer.readVarInt();
 
@@ -757,5 +791,15 @@ public class TeamData {
 		canEdit = from.canEdit;
 		autoPin = from.autoPin;
 		pinnedQuests.addAll(from.pinnedQuests);
+		rewardsBlocked = from.rewardsBlocked;
+	}
+
+	public void setChapterPinned(boolean pinned) {
+		chapterPinned = pinned;
+		save();
+	}
+
+	public boolean isChapterPinned() {
+		return chapterPinned;
 	}
 }
