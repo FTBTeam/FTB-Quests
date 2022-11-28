@@ -354,7 +354,7 @@ public class ViewQuestPanel extends Panel {
 	public void tick() {
 		super.tick();
 
-		if (quest != null && quest.dependencies != null && !quest.dependencies.isEmpty() && !questScreen.file.self.canStartTasks(quest)) {
+		if (quest != null && quest.dependencies != null && !quest.dependencies.isEmpty() && !questScreen.file.self.canStartTasks(quest) && buttonOpenDependencies != null) {
 			Color4I col = Minecraft.getInstance().level.getGameTime() % 40 < 20 ?
 					ThemeProperties.QUEST_VIEW_TITLE.get() :
 					ThemeProperties.QUEST_VIEW_BORDER.get();
