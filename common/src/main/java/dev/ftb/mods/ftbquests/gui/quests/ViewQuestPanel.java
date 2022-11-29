@@ -20,6 +20,7 @@ import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.gui.ImageComponentWidget;
 import dev.ftb.mods.ftbquests.gui.MultilineTextEditorScreen;
 import dev.ftb.mods.ftbquests.net.EditObjectMessage;
+import dev.ftb.mods.ftbquests.net.TogglePinnedMessage;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestObject;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
@@ -173,11 +174,17 @@ public class ViewQuestPanel extends Panel {
 
 		int w2 = w / 2;
 
-		add(buttonClose = new CloseViewQuestButton(this));
+		add(buttonClose = new CloseViewQuestButton());
 		buttonClose.setPosAndSize(w - 14, 2, 12, 12);
 
-		add(buttonPin = new PinViewQuestButton(this));
+		add(buttonPin = new PinViewQuestButton());
 		buttonPin.setPosAndSize(w - 26, 2, 12, 12);
+
+		if (canEdit && questScreen.selectedChapter.id != quest.chapter.id) {
+			GotoLinkedQuestButton b = new GotoLinkedQuestButton();
+			add(b);
+			b.setPosAndSize(14, 2, 12, 12);
+		}
 
 		if (quest.dependencies.isEmpty()) {
 			add(buttonOpenDependencies = new SimpleButton(this, new TranslatableComponent("ftbquests.gui.no_dependencies"), Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/arrow_left.png").withTint(borderColor), (widget, button) -> {
@@ -639,7 +646,7 @@ public class ViewQuestPanel extends Panel {
 		}
 
 		private void errorToPlayer(String msg, Object... args) {
-			FTBQuests.PROXY.getClientPlayer().displayClientMessage(new TextComponent(String.format(msg, args)).withStyle(ChatFormatting.RED), false);
+			QuestScreen.displayError(new TextComponent(String.format(msg, args)).withStyle(ChatFormatting.RED));
 		}
 
 		@Override
@@ -689,4 +696,64 @@ public class ViewQuestPanel extends Panel {
 		}
 	}
 
+	private class GotoLinkedQuestButton extends SimpleTextButton {
+		public GotoLinkedQuestButton() {
+			super(ViewQuestPanel.this, new TranslatableComponent("ftbquests.gui.goto_linked_quest", quest.chapter.getTitle().copy().withStyle(ChatFormatting.YELLOW)), ThemeProperties.LINK_ICON.get());
+		}
+
+		@Override
+		public void onClicked(MouseButton button) {
+			double qx = quest.x + 0.5D;
+			double qy = quest.y + 0.5D;
+			questScreen.selectChapter(quest.chapter);
+			questScreen.questPanel.scrollTo(qx, qy);
+		}
+
+		@Override
+		public void draw(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
+			drawIcon(matrixStack, theme, x + (w - 8) / 2, y + (h - 16) / 2, 12, 12);
+		}
+	}
+
+	/**
+	 * @author LatvianModder
+	 */
+	public class PinViewQuestButton extends SimpleTextButton {
+		public PinViewQuestButton() {
+			super(ViewQuestPanel.this,
+					new TranslatableComponent(questScreen.file.self.pinnedQuests.contains(quest.id) ? "ftbquests.gui.unpin" : "ftbquests.gui.pin"),
+					questScreen.file.self.pinnedQuests.contains(quest.id) ? ThemeProperties.PIN_ICON_ON.get() : ThemeProperties.PIN_ICON_OFF.get());
+		}
+
+		@Override
+		public void onClicked(MouseButton button) {
+			playClickSound();
+			new TogglePinnedMessage(quest.id).sendToServer();
+		}
+
+		@Override
+		public void draw(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
+			drawIcon(matrixStack, theme, x + (w - 8) / 2, y + (h - 8) / 2, 8, 8);
+		}
+	}
+
+	/**
+	 * @author LatvianModder
+	 */
+	public class CloseViewQuestButton extends SimpleTextButton {
+		public CloseViewQuestButton() {
+			super(ViewQuestPanel.this, new TranslatableComponent("gui.close"), ThemeProperties.CLOSE_ICON.get(quest));
+		}
+
+		@Override
+		public void onClicked(MouseButton button) {
+			playClickSound();
+			questScreen.closeQuest();
+		}
+
+		@Override
+		public void draw(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
+			drawIcon(matrixStack, theme, x + (w - 8) / 2, y + (h - 8) / 2, 8, 8);
+		}
+	}
 }

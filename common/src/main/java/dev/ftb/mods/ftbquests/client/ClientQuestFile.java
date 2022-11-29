@@ -9,7 +9,6 @@ import dev.ftb.mods.ftbquests.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.integration.FTBQuestsJEIHelper;
 import dev.ftb.mods.ftbquests.net.DeleteObjectMessage;
 import dev.ftb.mods.ftbquests.quest.Movable;
-import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestFile;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.theme.QuestTheme;
@@ -81,10 +80,7 @@ public class ClientQuestFile extends QuestFile {
 			int i = 0;
 
 			for (Movable m : questScreen.selectedObjects) {
-				if (m instanceof Quest) {
-					selectedQuests[i] = ((Quest) m).id;
-				}
-
+				selectedQuests[i] = m.getMovableID();
 				i++;
 			}
 
@@ -103,11 +99,9 @@ public class ClientQuestFile extends QuestFile {
 			questScreen.zoom = zoom;
 			questScreen.selectChapter(getChapter(selectedChapter));
 
-			for (long i : selectedQuests) {
-				Quest q = getQuest(i);
-
-				if (q != null) {
-					questScreen.selectedObjects.add(q);
+			for (long id : selectedQuests) {
+				if (get(id) instanceof Movable m) {
+					questScreen.selectedObjects.add(m);
 				}
 			}
 
