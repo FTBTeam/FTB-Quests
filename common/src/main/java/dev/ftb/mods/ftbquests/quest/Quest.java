@@ -4,6 +4,7 @@ import dev.ftb.mods.ftblibrary.config.*;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.IconAnimation;
 import dev.ftb.mods.ftblibrary.math.Bits;
+import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.util.ClientUtils;
 import dev.ftb.mods.ftbquests.FTBQuests;
@@ -14,10 +15,12 @@ import dev.ftb.mods.ftbquests.gui.MultilineTextEditorScreen;
 import dev.ftb.mods.ftbquests.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.integration.FTBQuestsJEIHelper;
 import dev.ftb.mods.ftbquests.net.DisplayCompletionToastMessage;
-import dev.ftb.mods.ftbquests.net.MoveQuestMessage;
+import dev.ftb.mods.ftbquests.net.MoveMovableMessage;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.reward.RewardClaimType;
+import dev.ftb.mods.ftbquests.quest.reward.RewardType;
 import dev.ftb.mods.ftbquests.quest.task.Task;
+import dev.ftb.mods.ftbquests.quest.task.TaskType;
 import dev.ftb.mods.ftbquests.util.ConfigQuestObject;
 import dev.ftb.mods.ftbquests.util.NetUtils;
 import dev.ftb.mods.ftbquests.util.ProgressChange;
@@ -465,6 +468,12 @@ public final class Quest extends QuestObject implements Movable {
 	public void deleteSelf() {
 		super.deleteSelf();
 		chapter.quests.remove(this);
+
+		List<QuestLink> linksToDel = new ArrayList<>();
+		chapter.file.chapterGroups.forEach(cg -> cg.chapters.forEach(c -> c.questLinks.forEach(l -> {
+			if (l.linksTo(this)) linksToDel.add(l);
+		})));
+		linksToDel.forEach(l -> chapter.file.deleteObject(l.id));
 	}
 
 	@Override
@@ -543,6 +552,11 @@ public final class Quest extends QuestObject implements Movable {
 	}
 
 	@Override
+	public long getMovableID() {
+		return id;
+	}
+
+	@Override
 	public Chapter getChapter() {
 		return chapter;
 	}
@@ -575,7 +589,7 @@ public final class Quest extends QuestObject implements Movable {
 	@Override
 	@Environment(EnvType.CLIENT)
 	public void move(Chapter to, double x, double y) {
-		new MoveQuestMessage(id, to.id, x, y).sendToServer();
+		new MoveMovableMessage(this, to.id, x, y).sendToServer();
 	}
 
 	@Override
@@ -722,7 +736,8 @@ public final class Quest extends QuestObject implements Movable {
 		}
 	}
 
-	public void moved(double nx, double ny, long nc) {
+	@Override
+	public void onMoved(double nx, double ny, long nc) {
 		x = nx;
 		y = ny;
 
@@ -793,5 +808,35 @@ public final class Quest extends QuestObject implements Movable {
 
 	public boolean ignoreRewardBlocking() {
 		return ignoreRewardBlocking;
+	}
+
+	public void writeTasks(CompoundTag tag) {
+		ListTag t = new ListTag();
+		for (Task task : tasks) {
+			TaskType type = task.getType();
+			SNBTCompoundTag nbt3 = new SNBTCompoundTag();
+			nbt3.putString("id", task.getCodeString());
+			nbt3.putString("type", type.getTypeForNBT());
+			task.writeData(nbt3);
+			t.add(nbt3);
+		}
+		tag.put("tasks", t);
+	}
+
+	public void writeRewards(CompoundTag tag) {
+		ListTag r = new ListTag();
+		for (Reward reward : rewards) {
+			RewardType type = reward.getType();
+			SNBTCompoundTag nbt3 = new SNBTCompoundTag();
+			nbt3.putString("id", reward.getCodeString());
+			nbt3.putString("type", type.getTypeForNBT());
+			reward.writeData(nbt3);
+			r.add(nbt3);
+		}
+		tag.put("rewards", r);
+	}
+
+	public Quest deepCopy(Chapter newChapter) {
+		return null;
 	}
 }

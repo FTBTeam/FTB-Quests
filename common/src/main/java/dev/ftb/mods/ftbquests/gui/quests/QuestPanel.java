@@ -13,19 +13,22 @@ import dev.ftb.mods.ftblibrary.ui.*;
 import dev.ftb.mods.ftblibrary.ui.input.Key;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.util.StringUtils;
+import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.FTBQuests;
+import dev.ftb.mods.ftbquests.net.CopyQuestMessage;
+import dev.ftb.mods.ftbquests.net.CreateObjectMessage;
 import dev.ftb.mods.ftbquests.net.CreateTaskAtMessage;
 import dev.ftb.mods.ftbquests.net.EditObjectMessage;
-import dev.ftb.mods.ftbquests.quest.ChapterImage;
-import dev.ftb.mods.ftbquests.quest.Movable;
-import dev.ftb.mods.ftbquests.quest.Quest;
-import dev.ftb.mods.ftbquests.quest.QuestShape;
+import dev.ftb.mods.ftbquests.quest.*;
 import dev.ftb.mods.ftbquests.quest.task.TaskType;
 import dev.ftb.mods.ftbquests.quest.task.TaskTypes;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
+import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -122,6 +125,10 @@ public class QuestPanel extends Panel {
 			add(new QuestButton(this, quest));
 		}
 
+		for (QuestLink link : questScreen.selectedChapter.questLinks) {
+			link.getQuest().ifPresent(quest -> add(new QuestLinkButton(this, link, quest)));
+		}
+
 		alignWidgets();
 	}
 
@@ -143,27 +150,16 @@ public class QuestPanel extends Panel {
 		questScreen.scrollHeight = (questMaxY - questMinY) * (bs + bp);
 
 		for (Widget w : widgets) {
-			double qx, qy, qw, qh;
+			if (w instanceof QuestPositionableButton pos) {
+				double qx = pos.getPosition().x();
+				double qy = pos.getPosition().y();
+				double qw = pos.getPosition().w();
+				double qh = pos.getPosition().h();
 
-			if (w instanceof QuestButton) {
-				Quest q = ((QuestButton) w).quest;
-				qx = q.x;
-				qy = q.y;
-				qw = q.size;
-				qh = q.size;
-			} else if (w instanceof ChapterImageButton) {
-				ChapterImage q = ((ChapterImageButton) w).chapterImage;
-				qx = q.x;
-				qy = q.y;
-				qw = q.width;
-				qh = q.height;
-			} else {
-				continue;
+				double x = (qx - questMinX - qw / 2D) * (bs + bp) + bp / 2D + bp * (qw - 1D) / 2D;
+				double y = (qy - questMinY - qh / 2D) * (bs + bp) + bp / 2D + bp * (qh - 1D) / 2D;
+				w.setPosAndSize((int) x, (int) y, (int) (bs * qw), (int) (bs * qh));
 			}
-
-			double x = (qx - questMinX - qw / 2D) * (bs + bp) + bp / 2D + bp * (qw - 1D) / 2D;
-			double y = (qy - questMinY - qh / 2D) * (bs + bp) + bp / 2D + bp * (qh - 1D) / 2D;
-			w.setPosAndSize((int) x, (int) y, (int) (bs * qw), (int) (bs * qh));
 		}
 
 		setPosAndSize(20, 1, questScreen.width - 40, questScreen.height - 2);
@@ -422,7 +418,7 @@ public class QuestPanel extends Panel {
 					minY = Math.min(minY, q.getY());
 				}
 
-				for (Movable q : new ArrayList<>(questScreen.selectedObjects)) {
+				for (Movable q : questScreen.selectedObjects) {
 					q.move(questScreen.selectedChapter, questX + (q.getX() - minX), questY + (q.getY() - minY));
 				}
 			}
@@ -469,6 +465,32 @@ public class QuestPanel extends Panel {
 				questScreen.selectedChapter.images.add(image);
 				new EditObjectMessage(questScreen.selectedChapter).sendToServer();
 			}));
+
+			String clip = getClipboardString();
+			if (!clip.isEmpty()) {
+				try {
+					long questId = Long.valueOf(clip, 16);
+					if (FTBQuests.PROXY.getQuestFile(true).get(questId) instanceof Quest quest) {
+						contextMenu.add(ContextMenuItem.SEPARATOR);
+						contextMenu.add(new PasteMenuItem(quest, Component.translatable("ftbquests.gui.paste"),
+								Icons.ADD,
+								() -> new CopyQuestMessage(quest, questScreen.selectedChapter, qx, qy, true).sendToServer()));
+						if (!quest.dependencies.isEmpty()) {
+							contextMenu.add(new PasteMenuItem(quest, Component.translatable("ftbquests.gui.paste_no_deps"),
+									Icons.ADD_GRAY.withTint(Color4I.rgb(0x008000)),
+									() -> new CopyQuestMessage(quest, questScreen.selectedChapter, qx, qy, false).sendToServer()));
+						}
+						contextMenu.add(new PasteMenuItem(quest, Component.translatable("ftbquests.gui.paste_link"),
+								Icons.ADD_GRAY.withTint(Color4I.rgb(0x8080C0)),
+								() -> {
+									QuestLink link = new QuestLink(questScreen.selectedChapter, quest.id);
+									link.setPosition(qx, qy);
+									new CreateObjectMessage(link, new CompoundTag()).sendToServer();
+								}));
+					}
+				} catch (NumberFormatException ignored) {
+				}
+			}
 
 			questScreen.openContextMenu(contextMenu);
 			return true;
@@ -529,5 +551,20 @@ public class QuestPanel extends Panel {
 		}
 
 		return false;
+	}
+
+	private static class PasteMenuItem extends ContextMenuItem {
+		private final Quest quest;
+
+		public PasteMenuItem(Quest quest, Component t, Icon i, @Nullable Runnable c) {
+			super(t, i, c);
+			this.quest = quest;
+		}
+
+		@Override
+		public void addMouseOverText(TooltipList list) {
+			list.add(Component.literal("\"").append(quest.getTitle()).append("\""));
+			list.add(Component.literal(QuestObjectBase.getCodeString(quest.id)).withStyle(ChatFormatting.DARK_GRAY));
+		}
 	}
 }
