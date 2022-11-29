@@ -583,7 +583,9 @@ public class ViewQuestPanel extends Panel {
 					return true;
 				} else if (button.isLeft() && Minecraft.getInstance().screen != null) {
 					Style style = getComponentStyleAt(questScreen.getTheme(), getMouseX(), getMouseY());
-					return handleCustomClickEvent(style) || Minecraft.getInstance().screen.handleComponentClicked(style);
+					if (style != null) {
+						return handleCustomClickEvent(style) || Minecraft.getInstance().screen.handleComponentClicked(style);
+					}
 				}
 			}
 
