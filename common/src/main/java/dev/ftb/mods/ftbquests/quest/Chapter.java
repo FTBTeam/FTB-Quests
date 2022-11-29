@@ -32,6 +32,7 @@ public final class Chapter extends QuestObject {
 	public ChapterGroup group;
 	public String filename;
 	public final List<Quest> quests;
+	public final List<QuestLink> questLinks;
 	public final List<String> subtitle;
 	public boolean alwaysInvisible;
 	public String defaultQuestShape;
@@ -44,6 +45,7 @@ public final class Chapter extends QuestObject {
 		group = g;
 		filename = "";
 		quests = new ArrayList<>();
+		questLinks = new ArrayList<>();
 		subtitle = new ArrayList<>(0);
 		alwaysInvisible = false;
 		defaultQuestShape = "";

@@ -143,6 +143,11 @@ public final class ChapterImage implements Movable {
 	}
 
 	@Override
+	public long getMovableID() {
+		return 0L;
+	}
+
+	@Override
 	public Chapter getChapter() {
 		return chapter;
 	}
@@ -187,6 +192,11 @@ public final class ChapterImage implements Movable {
 		}
 
 		new EditObjectMessage(chapter).sendToServer();
+	}
+
+	@Override
+	public void onMoved(double x, double y, long chapterId) {
+		// do nothing; image moving is handled via EditObjectMessage
 	}
 
 	@Override

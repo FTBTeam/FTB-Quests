@@ -21,7 +21,7 @@ import java.util.List;
 /**
  * @author LatvianModder
  */
-public class ChapterImageButton extends Button {
+public class ChapterImageButton extends Button implements QuestPositionableButton {
 	public QuestScreen questScreen;
 	public ChapterImage chapterImage;
 
@@ -141,5 +141,10 @@ public class ChapterImageButton extends Button {
 		}
 
 		matrixStack.popPose();
+	}
+
+	@Override
+	public Position getPosition() {
+		return new Position(chapterImage.x, chapterImage.y, chapterImage.width, chapterImage.height);
 	}
 }

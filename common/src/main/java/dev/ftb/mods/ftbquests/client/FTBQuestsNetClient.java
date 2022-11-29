@@ -184,10 +184,8 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon {
 
 	@Override
 	public void moveQuest(long id, long chapter, double x, double y) {
-		Quest quest = ClientQuestFile.INSTANCE.getQuest(id);
-
-		if (quest != null) {
-			quest.moved(x, y, chapter);
+		if (ClientQuestFile.INSTANCE.get(id) instanceof Movable movable) {
+			movable.onMoved(x, y, chapter);
 			QuestScreen gui = ClientUtils.getCurrentGuiAs(QuestScreen.class);
 
 			if (gui != null) {
