@@ -286,7 +286,11 @@ public class ChapterPanel extends Panel {
 			int o = chapter.group.isDefaultGroup() ? 0 : 7;
 
 			icon.draw(matrixStack, x + 2 + o, y + 1, 12, 12);
-			theme.drawString(matrixStack, new TextComponent("").append(title).withStyle(Style.EMPTY.withColor(TextColor.fromRgb(c.rgb()))), x + 16 + o, y + 3);
+			MutableComponent text = title.copy().withStyle(Style.EMPTY.withColor(TextColor.fromRgb(c.rgb())));
+			if (chapterPanel.questScreen.selectedChapter != null && chapter.id == chapterPanel.questScreen.selectedChapter.id) {
+				text.append(new TextComponent(" \u25C0").withStyle(ChatFormatting.GRAY));
+			}
+			theme.drawString(matrixStack, text, x + 16 + o, y + 3);
 
 			GuiHelper.setupDrawing();
 

@@ -77,6 +77,7 @@ public abstract class QuestFile extends QuestObject {
 	public double gridScale;
 	public boolean pauseGame;
 	public String lockMessage;
+	private ProgressionMode progressionMode;
 
 	private List<Task> allTasks;
 	private List<Task> submitTasks;
@@ -111,6 +112,7 @@ public abstract class QuestFile extends QuestObject {
 		gridScale = 0.5D;
 		pauseGame = false;
 		lockMessage = "";
+		progressionMode = ProgressionMode.LINEAR;
 
 		allTasks = null;
 	}
@@ -233,7 +235,7 @@ public abstract class QuestFile extends QuestObject {
 				for (ChapterGroup group : chapterGroups) {
 					for (Chapter chapter : group.chapters) {
 						for (Quest quest : chapter.quests) {
-							quest.dependencies.remove(qo);
+							quest.removeDependency(qo);
 						}
 					}
 				}
@@ -418,6 +420,7 @@ public abstract class QuestFile extends QuestObject {
 		nbt.putDouble("grid_scale", gridScale);
 		nbt.putBoolean("pause_game", pauseGame);
 		nbt.putString("lock_message", lockMessage);
+		nbt.putString("progression_mode", progressionMode.getId());
 	}
 
 	@Override
@@ -456,6 +459,7 @@ public abstract class QuestFile extends QuestObject {
 		gridScale = nbt.contains("grid_scale") ? nbt.getDouble("grid_scale") : 0.5D;
 		pauseGame = nbt.getBoolean("pause_game");
 		lockMessage = nbt.getString("lock_message");
+		progressionMode = ProgressionMode.NAME_MAP_NO_DEFAULT.get(nbt.getString("progression_mode"));
 	}
 
 	public final void writeDataFull(Path folder) {
@@ -751,6 +755,7 @@ public abstract class QuestFile extends QuestObject {
 		buffer.writeDouble(gridScale);
 		buffer.writeBoolean(pauseGame);
 		buffer.writeUtf(lockMessage, Short.MAX_VALUE);
+		ProgressionMode.NAME_MAP_NO_DEFAULT.write(buffer, progressionMode);
 	}
 
 	@Override
@@ -769,6 +774,7 @@ public abstract class QuestFile extends QuestObject {
 		gridScale = buffer.readDouble();
 		pauseGame = buffer.readBoolean();
 		lockMessage = buffer.readUtf(Short.MAX_VALUE);
+		progressionMode = ProgressionMode.NAME_MAP_NO_DEFAULT.read(buffer);
 	}
 
 	public final void writeNetDataFull(FriendlyByteBuf buffer) {
@@ -1061,6 +1067,7 @@ public abstract class QuestFile extends QuestObject {
 		config.addBool("disable_gui", disableGui, v -> disableGui = v, false);
 		config.addDouble("grid_scale", gridScale, v -> gridScale = v, 0.5D, 1D / 32D, 8D);
 		config.addString("lock_message", lockMessage, v -> lockMessage = v, "");
+		config.addEnum("progression_mode", progressionMode, v -> progressionMode = v, ProgressionMode.NAME_MAP_NO_DEFAULT);
 
 		ConfigGroup defaultsGroup = config.getGroup("defaults");
 		defaultsGroup.addBool("reward_team", defaultRewardTeam, v -> defaultRewardTeam = v, false);
@@ -1317,5 +1324,9 @@ public abstract class QuestFile extends QuestObject {
 		}
 
 		return false;
+	}
+
+	public ProgressionMode getProgressionMode() {
+		return progressionMode;
 	}
 }
