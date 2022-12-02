@@ -15,10 +15,7 @@ import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.util.StringUtils;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.FTBQuests;
-import dev.ftb.mods.ftbquests.net.CopyQuestMessage;
-import dev.ftb.mods.ftbquests.net.CreateObjectMessage;
-import dev.ftb.mods.ftbquests.net.CreateTaskAtMessage;
-import dev.ftb.mods.ftbquests.net.EditObjectMessage;
+import dev.ftb.mods.ftbquests.net.*;
 import dev.ftb.mods.ftbquests.quest.*;
 import dev.ftb.mods.ftbquests.quest.task.TaskType;
 import dev.ftb.mods.ftbquests.quest.task.TaskTypes;
@@ -30,6 +27,7 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
+import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
@@ -469,11 +467,13 @@ public class QuestPanel extends Panel {
 			}));
 
 			String clip = getClipboardString();
+			MutableBoolean addedSeparator = new MutableBoolean(false);
 			if (!clip.isEmpty()) {
 				try {
 					long questId = Long.valueOf(clip, 16);
 					if (FTBQuests.PROXY.getQuestFile(true).get(questId) instanceof Quest quest) {
 						contextMenu.add(ContextMenuItem.SEPARATOR);
+						addedSeparator.setTrue();
 						contextMenu.add(new PasteMenuItem(quest, new TranslatableComponent("ftbquests.gui.paste"),
 								Icons.ADD,
 								() -> new CopyQuestMessage(quest, questScreen.selectedChapter, qx, qy, true).sendToServer()));
@@ -493,6 +493,17 @@ public class QuestPanel extends Panel {
 				} catch (NumberFormatException ignored) {
 				}
 			}
+			ChapterImageButton.getClipboard().ifPresent(clipImg -> {
+				if (!addedSeparator.getValue()) contextMenu.add(ContextMenuItem.SEPARATOR);
+				contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.gui.paste_image"),
+						Icons.ADD,
+						() -> new CopyChapterImageMessage(clipImg, questScreen.selectedChapter, qx, qy).sendToServer()) {
+					@Override
+					public void addMouseOverText(TooltipList list) {
+						list.add(new TextComponent(clipImg.image.toString()).withStyle(ChatFormatting.GRAY));
+					}
+				});
+			});
 
 			questScreen.openContextMenu(contextMenu);
 			return true;
