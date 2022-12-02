@@ -189,12 +189,10 @@ public class ChapterPanel extends Panel {
 			}
 
 			if (chapterPanel.questScreen.file.canEdit() && button.isRight() && !group.isDefaultGroup()) {
-				List<ContextMenuItem> contextMenu = new ArrayList<>();
-				contextMenu.add(new ContextMenuItem(Component.translatable("gui.move"), ThemeProperties.MOVE_UP_ICON.get(), () -> new MoveChapterGroupMessage(group.id, true).sendToServer()).setEnabled(() -> group.getIndex() > 1).setCloseMenu(false));
-				contextMenu.add(new ContextMenuItem(Component.translatable("gui.move"), ThemeProperties.MOVE_DOWN_ICON.get(), () -> new MoveChapterGroupMessage(group.id, false).sendToServer()).setEnabled(() -> group.getIndex() < group.file.chapterGroups.size() - 1).setCloseMenu(false));
-				contextMenu.add(ContextMenuItem.SEPARATOR);
-				chapterPanel.questScreen.addObjectMenuItems(contextMenu, chapterPanel.questScreen, group);
-				chapterPanel.questScreen.openContextMenu(contextMenu);
+				ContextMenuBuilder.create(group, chapterPanel.questScreen).insertAtTop(List.of(
+						new ContextMenuItem(Component.translatable("gui.move"), ThemeProperties.MOVE_UP_ICON.get(), () -> new MoveChapterGroupMessage(group.id, true).sendToServer()).setEnabled(() -> group.getIndex() > 1).setCloseMenu(false),
+						new ContextMenuItem(Component.translatable("gui.move"), ThemeProperties.MOVE_DOWN_ICON.get(), () -> new MoveChapterGroupMessage(group.id, false).sendToServer()).setEnabled(() -> group.getIndex() < group.file.chapterGroups.size() - 1).setCloseMenu(false)
+				)).openContextMenu(chapterPanel.questScreen);
 				return;
 			}
 
@@ -270,13 +268,11 @@ public class ChapterPanel extends Panel {
 			}
 
 			if (chapterPanel.questScreen.file.canEdit() && button.isRight()) {
-				List<ContextMenuItem> contextMenu = new ArrayList<>();
-				contextMenu.add(new ContextMenuItem(Component.translatable("gui.move"), ThemeProperties.MOVE_UP_ICON.get(), () -> new MoveChapterMessage(chapter.id, true).sendToServer()).setEnabled(() -> chapter.getIndex() > 0).setCloseMenu(false));
-				contextMenu.add(new ContextMenuItem(Component.translatable("gui.move"), ThemeProperties.MOVE_DOWN_ICON.get(), () -> new MoveChapterMessage(chapter.id, false).sendToServer()).setEnabled(() -> chapter.getIndex() < chapter.group.chapters.size() - 1).setCloseMenu(false));
-				contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.change_group"), Icons.COLOR_RGB, () -> new ChangeChapterGroupScreen(chapter).openGui()));
-				contextMenu.add(ContextMenuItem.SEPARATOR);
-				chapterPanel.questScreen.addObjectMenuItems(contextMenu, chapterPanel.questScreen, chapter);
-				chapterPanel.questScreen.openContextMenu(contextMenu);
+				ContextMenuBuilder.create(chapter, chapterPanel.questScreen).insertAtTop(List.of(
+						new ContextMenuItem(Component.translatable("gui.move"), ThemeProperties.MOVE_UP_ICON.get(), () -> new MoveChapterMessage(chapter.id, true).sendToServer()).setEnabled(() -> chapter.getIndex() > 0).setCloseMenu(false),
+						new ContextMenuItem(Component.translatable("gui.move"), ThemeProperties.MOVE_DOWN_ICON.get(), () -> new MoveChapterMessage(chapter.id, false).sendToServer()).setEnabled(() -> chapter.getIndex() < chapter.group.chapters.size() - 1).setCloseMenu(false),
+						new ContextMenuItem(Component.translatable("ftbquests.gui.change_group"), Icons.COLOR_RGB, () -> new ChangeChapterGroupScreen(chapter).openGui())
+				)).openContextMenu(chapterPanel.questScreen);
 			}
 		}
 

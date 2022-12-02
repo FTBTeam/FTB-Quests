@@ -5,6 +5,7 @@ import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.ConfigValue;
 import dev.ftb.mods.ftblibrary.config.ConfigWithVariants;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
+import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.math.MathUtils;
 import dev.ftb.mods.ftblibrary.ui.*;
@@ -179,83 +180,103 @@ public class QuestScreen extends BaseScreen {
 	 */
 	public void addObjectMenuItems(List<ContextMenuItem> contextMenu, Runnable gui, QuestObjectBase object, Movable deletionFocus) {
 		ConfigGroup group = new ConfigGroup(FTBQuests.MOD_ID);
-		ConfigGroup g = object.createSubGroup(group);
-		object.getConfig(g);
+		ConfigGroup subGroup = object.createSubGroup(group);
+		object.getConfig(subGroup);
 
-		contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.edit"), ThemeProperties.EDIT_ICON.get(), () -> object.onEditButtonClicked(gui)));
-		contextMenu.add(ContextMenuItem.SEPARATOR);
+		contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.edit"),
+				ThemeProperties.EDIT_ICON.get(),
+				() -> object.onEditButtonClicked(gui))
+		);
 
-		if (!g.getValues().isEmpty()) {
-			List<ContextMenuItem> list = new ArrayList<>();
-
-			for (ConfigValue c : g.getValues()) {
-				if (c instanceof ConfigWithVariants) {
-					MutableComponent name = Component.translatable(c.getNameKey());
-
-					if (!c.getCanEdit()) {
-						name = name.withStyle(ChatFormatting.GRAY);
-					}
-
-					list.add(new ContextMenuItem(name, Icons.SETTINGS, null) {
-						@Override
-						public void addMouseOverText(TooltipList list) {
-							list.add(c.getStringForGUI(c.value));
-						}
-
-						@Override
-						public void onClicked(Panel panel, MouseButton button) {
-							c.onClicked(button, accepted -> {
-								if (accepted) {
-									c.setter.accept(c.value);
-									new EditObjectMessage(object).sendToServer();
-								}
-							});
-						}
-
-						@Override
-						public void drawIcon(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
-							c.getIcon(c.value).draw(matrixStack, x, y, w, h);
-						}
-					});
-				}
-			}
-
-			if (!list.isEmpty()) {
-				list.sort(null);
-				contextMenu.addAll(list);
-				contextMenu.add(ContextMenuItem.SEPARATOR);
-			}
+		if (!subGroup.getValues().isEmpty()) {
+			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.copy_id.quick_properties"),
+					Icons.SETTINGS,
+					() -> openPropertiesSubMenu(object, subGroup))
+			);
 		}
 
-		if (object instanceof RandomReward && !QuestObjectBase.isNull(((RandomReward) object).getTable())) {
-			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.reward_table.edit"), ThemeProperties.EDIT_ICON.get(), () -> ((RandomReward) object).getTable().onEditButtonClicked(gui)));
+		if (object instanceof RandomReward rr && !QuestObjectBase.isNull(rr.getTable())) {
+			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.reward_table.edit"),
+					ThemeProperties.EDIT_ICON.get(),
+					() -> rr.getTable().onEditButtonClicked(gui))
+			);
 		}
 
 		long delId = deletionFocus == null ? object.id : deletionFocus.getMovableID();
 		QuestObject delObject = ClientQuestFile.INSTANCE.get(delId);
 		if (delObject != null) {
-			ContextMenuItem delete = new ContextMenuItem(Component.translatable("selectServer.delete"), ThemeProperties.DELETE_ICON.get(), () -> ClientQuestFile.INSTANCE.deleteObject(delId));
+			ContextMenuItem delete = new ContextMenuItem(Component.translatable("selectServer.delete"),
+					ThemeProperties.DELETE_ICON.get(),
+					() -> ClientQuestFile.INSTANCE.deleteObject(delId));
 			if (!isShiftKeyDown()) {
 				delete.setYesNo(Component.translatable("delete_item", delObject.getTitle()));
 			}
 			contextMenu.add(delete);
 		}
 
-		contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.reset_progress"), ThemeProperties.RELOAD_ICON.get(), () -> ChangeProgressMessage.send(file.self, object, progressChange -> {
-			progressChange.reset = true;
-		})).setYesNo(Component.translatable("ftbquests.gui.reset_progress_q")));
+		contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.reset_progress"),
+				ThemeProperties.RELOAD_ICON.get(),
+				() -> ChangeProgressMessage.send(file.self, object, progressChange -> progressChange.reset = true)
+		).setYesNo(Component.translatable("ftbquests.gui.reset_progress_q")));
 
-		contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.complete_instantly"), ThemeProperties.CHECK_ICON.get(), () -> ChangeProgressMessage.send(file.self, object, progressChange -> {
-			progressChange.reset = false;
-		})).setYesNo(Component.translatable("ftbquests.gui.complete_instantly_q")));
+		contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.complete_instantly"),
+				ThemeProperties.CHECK_ICON.get(), () -> ChangeProgressMessage.send(file.self, object,
+				progressChange -> progressChange.reset = false)
+		).setYesNo(Component.translatable("ftbquests.gui.complete_instantly_q")));
 
-		contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.copy_id"), ThemeProperties.WIKI_ICON.get(), () -> setClipboardString(object.getCodeString())) {
-			@Override
-			public void addMouseOverText(TooltipList list) {
-				list.add(Component.literal(QuestObjectBase.getCodeString(object)));
-				list.add(Component.translatable("ftbquests.gui.copy_id.paste_hint").withStyle(ChatFormatting.GRAY));
+		Component[] tooltip = object instanceof Quest ?
+				new Component[] {
+						Component.literal(QuestObjectBase.getCodeString(object)),
+						Component.translatable("ftbquests.gui.copy_id.paste_hint").withStyle(ChatFormatting.GRAY)
+				} :
+				new Component[] {
+						Component.literal(QuestObjectBase.getCodeString(object))
+				};
+		contextMenu.add(new TooltipContextMenuItem(Component.translatable("ftbquests.gui.copy_id"),
+				ThemeProperties.WIKI_ICON.get(),
+				() -> setClipboardString(object.getCodeString()),
+				tooltip)
+		);
+	}
+
+	private void openPropertiesSubMenu(QuestObjectBase object, ConfigGroup g) {
+		List<ContextMenuItem> subMenu = new ArrayList<>();
+
+		subMenu.add(new ContextMenuItem(object.getTitle(), Icon.EMPTY, null).setCloseMenu(false));
+		subMenu.add(ContextMenuItem.SEPARATOR);
+		for (ConfigValue c : g.getValues()) {
+			if (c instanceof ConfigWithVariants) {
+				MutableComponent name = Component.translatable(c.getNameKey());
+
+				if (!c.getCanEdit()) {
+					name = name.withStyle(ChatFormatting.GRAY);
+				}
+
+				subMenu.add(new ContextMenuItem(name, Icons.SETTINGS, null) {
+					@Override
+					public void addMouseOverText(TooltipList list) {
+						list.add(c.getStringForGUI(c.value));
+					}
+
+					@Override
+					public void onClicked(Panel panel, MouseButton button) {
+						c.onClicked(button, accepted -> {
+							if (accepted) {
+								c.setter.accept(c.value);
+								new EditObjectMessage(object).sendToServer();
+							}
+						});
+					}
+
+					@Override
+					public void drawIcon(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
+						c.getIcon(c.value).draw(matrixStack, x, y, w, h);
+					}
+				});
 			}
-		});
+		}
+
+		getGui().openContextMenu(subMenu);
 	}
 
 	public static void displayError(Component error) {

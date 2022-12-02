@@ -163,24 +163,22 @@ public class QuestButton extends Button implements QuestPositionableButton {
 				contextMenu.add(new ContextMenuItem(Component.literal("Ctrl+A to select all quests").withStyle(ChatFormatting.GRAY), Icons.INFO, null).setCloseMenu(false));
 				contextMenu.add(new ContextMenuItem(Component.literal("Ctrl+D to deselect all quests").withStyle(ChatFormatting.GRAY), Icons.INFO, null).setCloseMenu(false));
 				contextMenu.add(new ContextMenuItem(Component.literal("Ctrl+Arrow Key to move selected quests").withStyle(ChatFormatting.GRAY), Icons.INFO, null).setCloseMenu(false));
+
+				getGui().openContextMenu(contextMenu);
 			} else {
-				contextMenu.add(new ContextMenuItem(Component.translatable("gui.move"),
-						ThemeProperties.MOVE_UP_ICON.get(quest),
-						() -> {
-							questScreen.movingObjects = true;
-							questScreen.selectedObjects.clear();
-							questScreen.toggleSelected(moveAndDeleteFocus());
-						}) {
-					@Override
-					public void addMouseOverText(TooltipList list) {
-						list.add(Component.translatable("ftbquests.gui.move_tooltip").withStyle(ChatFormatting.DARK_GRAY));
-					}
-				});
-
-				questScreen.addObjectMenuItems(contextMenu, getGui(), quest, moveAndDeleteFocus());
+				ContextMenuBuilder.create(quest, questScreen)
+						.withDeletionFocus(moveAndDeleteFocus())
+						.insertAtTop(List.of(new TooltipContextMenuItem(Component.translatable("gui.move"),
+								ThemeProperties.MOVE_UP_ICON.get(quest),
+								() -> {
+									questScreen.movingObjects = true;
+									questScreen.selectedObjects.clear();
+									questScreen.toggleSelected(moveAndDeleteFocus());
+								},
+								Component.translatable("ftbquests.gui.move_tooltip").withStyle(ChatFormatting.DARK_GRAY))
+						))
+						.openContextMenu(getGui());
 			}
-
-			getGui().openContextMenu(contextMenu);
 		} else if (button.isLeft()) {
 			if (isCtrlKeyDown() && questScreen.file.canEdit()) {
 				if (questScreen.isViewingQuest()) {
