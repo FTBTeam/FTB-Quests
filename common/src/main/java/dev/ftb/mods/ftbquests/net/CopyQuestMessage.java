@@ -63,7 +63,7 @@ public class CopyQuestMessage extends BaseC2SMessage {
             Quest newQuest = new Quest(chapter);
             newQuest.readData(tag);
             if (!copyDeps) {
-                newQuest.dependencies.clear();
+                newQuest.clearDependencies();
             }
             newQuest.id = file.newID();
             newQuest.x = qx;

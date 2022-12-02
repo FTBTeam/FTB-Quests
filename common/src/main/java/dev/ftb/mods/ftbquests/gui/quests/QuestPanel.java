@@ -474,7 +474,7 @@ public class QuestPanel extends Panel {
 						contextMenu.add(new PasteQuestMenuItem(quest, Component.translatable("ftbquests.gui.paste"),
 								Icons.ADD,
 								() -> new CopyQuestMessage(quest, questScreen.selectedChapter, qx, qy, true).sendToServer()));
-						if (!quest.dependencies.isEmpty()) {
+						if (quest.hasDependencies()) {
 							contextMenu.add(new PasteQuestMenuItem(quest, Component.translatable("ftbquests.gui.paste_no_deps"),
 									Icons.ADD_GRAY.withTint(Color4I.rgb(0x008000)),
 									() -> new CopyQuestMessage(quest, questScreen.selectedChapter, qx, qy, false).sendToServer()));

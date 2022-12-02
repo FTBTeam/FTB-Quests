@@ -102,7 +102,7 @@ public class QuestButton extends Button implements QuestPositionableButton {
 	public Collection<QuestButton> getDependencies() {
 		if (dependencies == null) {
 			List<QuestButton> list = new ArrayList<>();
-			for (QuestObject dependency : quest.dependencies) {
+			quest.getDependencies().forEach(dependency -> {
 				if (!dependency.invalid && dependency instanceof Quest) {
 					for (Widget widget : questScreen.questPanel.widgets) {
 						if (widget instanceof QuestButton qb && dependency == qb.quest) {
@@ -110,7 +110,7 @@ public class QuestButton extends Button implements QuestPositionableButton {
 						}
 					}
 				}
-			}
+			});
 			dependencies = List.copyOf(list);
 		}
 
@@ -244,13 +244,13 @@ public class QuestButton extends Button implements QuestPositionableButton {
 	}
 
 	private void editDependency(Quest quest, QuestObject object, boolean add) {
-		List<QuestObject> prevDeps = new ArrayList<>(quest.dependencies);
+		List<QuestObject> prevDeps = quest.getDependencies().toList();
 
 		if (add != quest.hasDependency(object)) {
 			if (add) {
-				quest.dependencies.add(object);
+				quest.addDependency(object);
 			} else {
-				quest.dependencies.remove(object);
+				quest.removeDependency(object);
 			}
 		}
 
@@ -260,8 +260,8 @@ public class QuestButton extends Button implements QuestPositionableButton {
 			new EditObjectMessage(quest).sendToServer();
 			questScreen.questPanel.refreshWidgets();
 		} else {
-			quest.dependencies.clear();
-			quest.dependencies.addAll(prevDeps);
+			quest.clearDependencies();
+			prevDeps.forEach(quest::addDependency);
 			QuestScreen.displayError(Component.translatable("ftbquests.gui.looping_dependencies"));
 		}
 	}
@@ -302,19 +302,20 @@ public class QuestButton extends Button implements QuestPositionableButton {
 
 	@Override
 	public void draw(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
-		Color4I outlineColor = ThemeProperties.QUEST_NOT_STARTED_COLOR.get(quest); //Color4I.WHITE.withAlpha(150);
+		Color4I outlineColor = ThemeProperties.QUEST_NOT_STARTED_COLOR.get(quest);
 		Icon questIcon = Icon.EMPTY;
 		Icon hiddenIcon = Icon.EMPTY;
 
-		boolean isCompleted = questScreen.file.self.isCompleted(quest);
-		boolean isStarted = isCompleted || questScreen.file.self.isStarted(quest);
-		boolean canStart = isCompleted || isStarted || questScreen.file.self.canStartTasks(quest);
+		TeamData teamData = questScreen.file.self;
+		boolean isCompleted = teamData.isCompleted(quest);
+		boolean isStarted = isCompleted || teamData.isStarted(quest);
+		boolean canStart = isCompleted || isStarted || teamData.canStartTasks(quest);
 
 		if (canStart) {
 			if (isCompleted) {
-				if (questScreen.file.self.hasUnclaimedRewards(Minecraft.getInstance().player.getUUID(), quest)) {
+				if (teamData.hasUnclaimedRewards(Minecraft.getInstance().player.getUUID(), quest)) {
 					questIcon = ThemeProperties.ALERT_ICON.get(quest);
-				} else if (questScreen.file.self.isQuestPinned(quest.id)) {
+				} else if (teamData.isQuestPinned(quest.id)) {
 					questIcon = ThemeProperties.PIN_ICON_ON.get();
 				} else {
 					questIcon = ThemeProperties.CHECK_ICON.get(quest);
@@ -323,15 +324,18 @@ public class QuestButton extends Button implements QuestPositionableButton {
 				outlineColor = ThemeProperties.QUEST_COMPLETED_COLOR.get(quest);
 			} else if (isStarted) {
 				outlineColor = ThemeProperties.QUEST_STARTED_COLOR.get(quest);
+				if (quest.getProgressionMode() == ProgressionMode.FLEXIBLE && quest.allTasksCompleted(teamData)) {
+					questIcon = new ThemeProperties.CheckIcon(Color4I.rgb(0x606060), Color4I.rgb(0x808080));
+				}
 			}
 		} else {
-			outlineColor = ThemeProperties.QUEST_LOCKED_COLOR.get(quest); //Color4I.GRAY;
+			outlineColor = ThemeProperties.QUEST_LOCKED_COLOR.get(quest);
 		}
 
-		if (questIcon == Icon.EMPTY && questScreen.file.self.isQuestPinned(quest.id)) {
+		if (questIcon == Icon.EMPTY && teamData.isQuestPinned(quest.id)) {
 			questIcon = ThemeProperties.PIN_ICON_ON.get();
 		}
-		if (questScreen.file.canEdit() && !quest.isVisible(questScreen.file.self)) {
+		if (questScreen.file.canEdit() && !quest.isVisible(teamData)) {
 			hiddenIcon = ThemeProperties.HIDDEN_ICON.get();
 		}
 

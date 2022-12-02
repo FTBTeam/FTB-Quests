@@ -186,11 +186,11 @@ public class ViewQuestPanel extends Panel {
 			b.setPosAndSize(14, 2, 12, 12);
 		}
 
-		if (quest.dependencies.isEmpty()) {
+		if (!quest.hasDependencies()) {
 			add(buttonOpenDependencies = new SimpleButton(this, Component.translatable("ftbquests.gui.no_dependencies"), Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/arrow_left.png").withTint(borderColor), (widget, button) -> {
 			}));
 		} else {
-			add(buttonOpenDependencies = new SimpleButton(this, Component.translatable("ftbquests.gui.view_dependencies"), Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/arrow_left.png").withTint(ThemeProperties.QUEST_VIEW_TITLE.get()), (widget, button) -> showList(quest.dependencies, true)));
+			add(buttonOpenDependencies = new SimpleButton(this, Component.translatable("ftbquests.gui.view_dependencies"), Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/arrow_left.png").withTint(ThemeProperties.QUEST_VIEW_TITLE.get()), (widget, button) -> showList(quest.getDependencies().toList(), true)));
 		}
 
 		if (quest.getDependants().isEmpty()) {
@@ -361,7 +361,7 @@ public class ViewQuestPanel extends Panel {
 	public void tick() {
 		super.tick();
 
-		if (quest != null && quest.dependencies != null && !quest.dependencies.isEmpty() && !questScreen.file.self.canStartTasks(quest) && buttonOpenDependencies != null) {
+		if (quest != null && quest.hasDependencies() && !questScreen.file.self.canStartTasks(quest) && buttonOpenDependencies != null) {
 			Color4I col = Minecraft.getInstance().level.getGameTime() % 40 < 20 ?
 					ThemeProperties.QUEST_VIEW_TITLE.get() :
 					ThemeProperties.QUEST_VIEW_BORDER.get();
