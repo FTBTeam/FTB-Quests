@@ -13,7 +13,6 @@ import dev.ftb.mods.ftblibrary.ui.*;
 import dev.ftb.mods.ftblibrary.ui.input.Key;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.util.StringUtils;
-import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.net.*;
 import dev.ftb.mods.ftbquests.quest.*;
@@ -472,15 +471,15 @@ public class QuestPanel extends Panel {
 					if (FTBQuests.PROXY.getQuestFile(true).get(questId) instanceof Quest quest) {
 						contextMenu.add(ContextMenuItem.SEPARATOR);
 						addedSeparator.setTrue();
-						contextMenu.add(new PasteMenuItem(quest, Component.translatable("ftbquests.gui.paste"),
+						contextMenu.add(new PasteQuestMenuItem(quest, Component.translatable("ftbquests.gui.paste"),
 								Icons.ADD,
 								() -> new CopyQuestMessage(quest, questScreen.selectedChapter, qx, qy, true).sendToServer()));
 						if (!quest.dependencies.isEmpty()) {
-							contextMenu.add(new PasteMenuItem(quest, Component.translatable("ftbquests.gui.paste_no_deps"),
+							contextMenu.add(new PasteQuestMenuItem(quest, Component.translatable("ftbquests.gui.paste_no_deps"),
 									Icons.ADD_GRAY.withTint(Color4I.rgb(0x008000)),
 									() -> new CopyQuestMessage(quest, questScreen.selectedChapter, qx, qy, false).sendToServer()));
 						}
-						contextMenu.add(new PasteMenuItem(quest, Component.translatable("ftbquests.gui.paste_link"),
+						contextMenu.add(new PasteQuestMenuItem(quest, Component.translatable("ftbquests.gui.paste_link"),
 								Icons.ADD_GRAY.withTint(Color4I.rgb(0x8080C0)),
 								() -> {
 									QuestLink link = new QuestLink(questScreen.selectedChapter, quest.id);
@@ -493,14 +492,10 @@ public class QuestPanel extends Panel {
 			}
 			ChapterImageButton.getClipboard().ifPresent(clipImg -> {
 				if (!addedSeparator.getValue()) contextMenu.add(ContextMenuItem.SEPARATOR);
-				contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.paste_image"),
+				contextMenu.add(new TooltipContextMenuItem(Component.translatable("ftbquests.gui.paste_image"),
 						Icons.ADD,
-						() -> new CopyChapterImageMessage(clipImg, questScreen.selectedChapter, qx, qy).sendToServer()) {
-					@Override
-					public void addMouseOverText(TooltipList list) {
-						list.add(Component.literal(clipImg.image.toString()).withStyle(ChatFormatting.GRAY));
-					}
-				});
+						() -> new CopyChapterImageMessage(clipImg, questScreen.selectedChapter, qx, qy).sendToServer(),
+						Component.literal(clipImg.image.toString()).withStyle(ChatFormatting.GRAY)));
 			});
 
 			questScreen.openContextMenu(contextMenu);
@@ -564,18 +559,12 @@ public class QuestPanel extends Panel {
 		return false;
 	}
 
-	private static class PasteMenuItem extends ContextMenuItem {
-		private final Quest quest;
-
-		public PasteMenuItem(Quest quest, Component t, Icon i, @Nullable Runnable c) {
-			super(t, i, c);
-			this.quest = quest;
-		}
-
-		@Override
-		public void addMouseOverText(TooltipList list) {
-			list.add(Component.literal("\"").append(quest.getTitle()).append("\""));
-			list.add(Component.literal(QuestObjectBase.getCodeString(quest.id)).withStyle(ChatFormatting.DARK_GRAY));
+	private static class PasteQuestMenuItem extends TooltipContextMenuItem {
+		public PasteQuestMenuItem(Quest quest, Component title, Icon icon, @Nullable Runnable callback) {
+			super(title, icon, callback,
+					Component.literal("\"").append(quest.getTitle()).append("\""),
+					Component.literal(QuestObjectBase.getCodeString(quest.id)).withStyle(ChatFormatting.DARK_GRAY)
+			);
 		}
 	}
 }
