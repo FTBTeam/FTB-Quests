@@ -5,6 +5,7 @@ import dev.ftb.mods.ftbquests.net.MoveMovableMessage;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 
 import java.util.Optional;
 
@@ -32,7 +33,7 @@ public class QuestLink extends QuestObject implements Movable {
 
     @Override
     public Component getAltTitle() {
-        return getQuest().map(Quest::getAltTitle).orElse(Component.empty());
+        return getQuest().map(Quest::getAltTitle).orElse(TextComponent.EMPTY);
     }
 
     @Override
