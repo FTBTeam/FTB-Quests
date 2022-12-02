@@ -60,6 +60,7 @@ public interface FTBQuestsNetHandler {
 	MessageType MOVE_CHAPTER_GROUP_RESPONSE = NET.registerS2C("move_chapter_group_response", MoveChapterGroupResponseMessage::new);
 	MessageType SYNC_REWARD_BLOCKING = NET.registerS2C("sync_reward_blocking", SyncRewardBlockingMessage::new);
 	MessageType COPY_QUEST = NET.registerC2S("copy_quest", CopyQuestMessage::new);
+	MessageType COPY_CHAPTER_IMAGE = NET.registerC2S("copy_chapter_image", CopyChapterImageMessage::new);
 
 	static void init() {
 	}
