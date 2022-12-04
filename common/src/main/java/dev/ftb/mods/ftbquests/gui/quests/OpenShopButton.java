@@ -5,6 +5,7 @@ import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import dev.ftb.mods.ftbteams.data.ClientTeamManager;
+import dev.ftb.mods.ftbteams.data.KnownClientPlayer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -20,7 +21,10 @@ public class OpenShopButton extends TabButton {
 	@Override
 	public void addMouseOverText(TooltipList list) {
 		list.add(getTitle());
-		list.add(new TextComponent(String.format("◎ %,d", ClientTeamManager.INSTANCE.selfKnownPlayer.getExtraData().getLong("Money"))).withStyle(ChatFormatting.GOLD));
+		KnownClientPlayer player = ClientTeamManager.INSTANCE.selfKnownPlayer;
+		if (player != null && player.getExtraData() != null) {
+			list.add(new TextComponent(String.format("◎ %,d", player.getExtraData().getLong("Money"))).withStyle(ChatFormatting.GOLD));
+		}
 	}
 
 	@Override
