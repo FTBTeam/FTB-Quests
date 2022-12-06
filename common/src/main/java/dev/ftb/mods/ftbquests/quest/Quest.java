@@ -739,8 +739,9 @@ public final class Quest extends QuestObject implements Movable {
 		}
 	}
 
-	public boolean isProgressionIgnored() {
-		return canRepeat || optional;
+	@Override
+	public boolean countsTowardParentCompletion() {
+		return !canRepeat && !optional;
 	}
 
 	public List<QuestObject> getDependants() {
