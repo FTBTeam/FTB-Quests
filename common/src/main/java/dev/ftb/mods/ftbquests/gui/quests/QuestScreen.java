@@ -268,6 +268,17 @@ public class QuestScreen extends BaseScreen {
 
 	@Override
 	public boolean keyPressed(Key key) {
+		if (key.esc()) {
+			// checking for open context menu first is important
+			if (contextMenu != null) {
+				openContextMenu((Panel) null);
+				return true;
+			} else if (isViewingQuest()) {
+				closeQuest();
+				return true;
+			}
+		}
+
 		if (super.keyPressed(key)) {
 			return true;
 		} else if (FTBQuestsClient.KEY_QUESTS.matches(key.keyCode, key.scanCode)) {
