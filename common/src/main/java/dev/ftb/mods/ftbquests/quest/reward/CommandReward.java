@@ -1,6 +1,7 @@
 package dev.ftb.mods.ftbquests.quest.reward;
 
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
+import dev.ftb.mods.ftbquests.util.DeferredJobs;
 import dev.ftb.mods.ftbquests.quest.Chapter;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import net.fabricmc.api.EnvType;
@@ -95,8 +96,14 @@ public class CommandReward extends Reward {
 				s = s.replace("@" + entry.getKey(), entry.getValue().toString());
 			}
 		}
+		String s2 = s;
 
-		player.server.getCommands().performCommand(playerCommand ? player.createCommandSourceStack() : player.server.createCommandSourceStack(), s);
+		DeferredJobs.INSTANCE.add(() -> {
+					if (player.isAlive()) {
+						player.server.getCommands().performCommand(playerCommand ? player.createCommandSourceStack() : player.server.createCommandSourceStack(), s2);
+					}
+				}
+		);
 	}
 
 	@Override
