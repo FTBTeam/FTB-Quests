@@ -25,7 +25,6 @@ import me.shedaniel.architectury.event.events.client.ClientTickEvent;
 import me.shedaniel.architectury.registry.ColorHandlers;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
@@ -90,19 +89,14 @@ public class FTBQuestsClientEventHandler {
 
 	private void onKeyEvent(Minecraft mc) {
 		if (FTBQuestsClient.KEY_QUESTS.consumeClick()) {
-			ClientQuestFile.INSTANCE.openQuestGui();
+			FTBQuests.PROXY.openGui();
 		}
 	}
 
 	private InteractionResult onCustomClick(CustomClickEvent event) {
 		if (event.getId().getNamespace().equals(FTBQuests.MOD_ID) && "open_gui".equals(event.getId().getPath())) {
-			if (!ClientQuestFile.exists()) {
-				Minecraft.getInstance().getToasts().addToast(new SystemToast(SystemToast.SystemToastIds.TUTORIAL_HINT, new TextComponent("Error?! Server doesn't have FTB Quests!"), null));
-			} else {
-				ClientQuestFile.INSTANCE.openQuestGui();
-			}
-
-			return InteractionResult.FAIL;
+			FTBQuests.PROXY.openGui();
+			return InteractionResult.SUCCESS;
 		}
 
 		return InteractionResult.PASS;
