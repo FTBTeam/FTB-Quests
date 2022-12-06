@@ -126,7 +126,7 @@ public abstract class QuestObject extends QuestObjectBase {
 
 	public boolean isCompletedRaw(TeamData data) {
 		for (QuestObject child : getChildren()) {
-			if (!data.isCompleted(child)) {
+			if (child.countsTowardParentCompletion() && !data.isCompleted(child)) {
 				return false;
 			}
 		}
@@ -136,5 +136,9 @@ public abstract class QuestObject extends QuestObjectBase {
 
 	public boolean hasUnclaimedRewardsRaw(TeamData teamData, UUID player) {
 		return false;
+	}
+
+	public boolean countsTowardParentCompletion() {
+		return true;
 	}
 }
