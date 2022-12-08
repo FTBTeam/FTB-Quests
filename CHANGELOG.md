@@ -4,7 +4,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1902.4.4]
+
+### Added
+* The currently selected chapter is now marked on the left-hand chapter panel with a small arrow
+* (Editor mode) Added ability to copy & paste quests
+  * Use the existing "Copy ID" context menu entry on a quest
+  * When creating new quests, additional paste options will be available if the current clipboard contents is a valid quest ID
+* Related, added the ability to paste quest links
+  * These are basically symlinks for existing quests, and may be useful to provide continuity of progression; you can paste a link to an existing in a new chapter
+* Added the ability to copy and paste images
+* Cleaned up the context menus for quest objects a little, by moving quick property adjustments into a submenu
+  * Existing context menu was getting far too large and unwieldy, for quests in particular
+* Added a new "flexible" progression mode for quests
+  * Quests in "Flexible" mode can have their tasks progressed (but not fully completed) even if dependencies are not yet completed, effectively allowing "pre-completion" of quests
+  * Progression mode can be set on quests, chapters, or the entire quest book; the mode is inherited from above if set to "Default", which is the case for quests and chapters
+  * Default progression mode for the quest book is the existing "Linear" mode, where dependencies must be completed before a quest can be started
+
+### Fixed
+* (Editor mode) Fixed NPE when clicking in certain areas of the quest description text in the view quest panel
+* (Editor mode) Fixed NPE after creating a new quest under some circumstances
+
+## [1902.4.3]
 
 ### Added
 - Task Screens have returned! Task display and automated completion are now possible
