@@ -435,11 +435,13 @@ public final class Quest extends QuestObject implements Movable {
 		getDependants().forEach(questObject -> {
 			if (questObject instanceof Quest quest) {
 				if (quest.getProgressionMode() == ProgressionMode.FLEXIBLE) {
-					quest.tasks.forEach(task -> {
-						if (data.getProgress(task.id) >= task.getMaxProgress()) {
-							data.markTaskCompleted(task);
-						}
-					});
+					if (quest.getDependencies().allMatch(data::isCompleted)) {
+						quest.tasks.forEach(task -> {
+							if (data.getProgress(task.id) >= task.getMaxProgress()) {
+								data.markTaskCompleted(task);
+							}
+						});
+					}
 				}
 
 				data.checkAutoCompletion(quest);
