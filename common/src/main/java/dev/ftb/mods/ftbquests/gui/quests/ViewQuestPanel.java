@@ -282,8 +282,9 @@ public class ViewQuestPanel extends Panel {
 			for (int i = 0; i < quest.getDescription().length; i++) {
 				Component component = quest.getDescription()[i];
 
-				if (component instanceof ImageComponent) {
-					ImageComponentWidget c = new ImageComponentWidget(this, panelText, (ImageComponent) component, i);
+				ImageComponent img = findImageComponent(component);
+				if (img != null) {
+					ImageComponentWidget c = new ImageComponentWidget(this, panelText, img, i);
 
 					if (c.component.fit) {
 						double scale = panelText.width / (double) c.width;
@@ -351,6 +352,18 @@ public class ViewQuestPanel extends Panel {
 		panelContent.setHeight(height - 17);
 
 		QuestTheme.currentObject = prev;
+	}
+
+	private ImageComponent findImageComponent(Component c) {
+		// FIXME: this isn't ideal and needs a proper fix in ftb library, but works for now
+		for (Component c1 : c.getSiblings()) {
+			if (c1.getContents() instanceof ImageComponent img) {
+				return img;
+			} else {
+				return findImageComponent(c1);
+			}
+		}
+		return null;
 	}
 
 	@Override
