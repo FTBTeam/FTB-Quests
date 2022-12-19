@@ -2,6 +2,7 @@ package dev.ftb.mods.ftbquests.quest.theme.property;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
+import com.mojang.datafixers.util.Either;
 import com.mojang.math.Matrix4f;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
@@ -37,66 +38,7 @@ public interface ThemeProperties {
 	IconProperty TEXT_BOX = new IconProperty("text_box");
 
 	//Icons
-	IconProperty CHECK_ICON = new IconProperty("check_icon", new Icon() {
-		@Override
-		public void draw(PoseStack matrixStack, int x, int y, int w, int h) {
-			RenderSystem.disableTexture();
-			Matrix4f m = matrixStack.last().pose();
-			Tesselator tesselator = Tesselator.getInstance();
-			BufferBuilder buffer = tesselator.getBuilder();
-
-			RenderSystem.enableBlend();
-			RenderSystem.setShader(GameRenderer::getPositionColorShader);
-			buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-
-			float dw = w / 16F;
-			float dh = h / 16F;
-
-			Color4I out = ThemeProperties.SYMBOL_OUT.get();
-			int r = out.redi();
-			int g = out.greeni();
-			int b = out.bluei();
-			int a = out.alphai();
-
-			buffer.vertex(m, x + dw * 0, y + dh * 8, 0).color(r, g, b, a).endVertex();
-			buffer.vertex(m, x + dw * 6, y + dh * 14, 0).color(r, g, b, a).endVertex();
-			buffer.vertex(m, x + dw * 6, y + dh * 8, 0).color(r, g, b, a).endVertex();
-			buffer.vertex(m, x + dw * 3, y + dh * 5, 0).color(r, g, b, a).endVertex();
-
-			buffer.vertex(m, x + dw * 6, y + dh * 8, 0).color(r, g, b, a).endVertex();
-			buffer.vertex(m, x + dw * 6, y + dh * 14, 0).color(r, g, b, a).endVertex();
-			buffer.vertex(m, x + dw * 16, y + dh * 4, 0).color(r, g, b, a).endVertex();
-			buffer.vertex(m, x + dw * 13, y + dh * 1, 0).color(r, g, b, a).endVertex();
-
-			Color4I in = ThemeProperties.SYMBOL_IN.get();
-			r = in.redi();
-			g = in.greeni();
-			b = in.bluei();
-			a = in.alphai();
-
-			buffer.vertex(m, x + dw * 0 + dw, y + dh * 8, 0).color(r, g, b, a).endVertex();
-			buffer.vertex(m, x + dw * 6, y + dh * 14 - dh, 0).color(r, g, b, a).endVertex();
-			buffer.vertex(m, x + dw * 6, y + dh * 8 + dh, 0).color(r, g, b, a).endVertex();
-			buffer.vertex(m, x + dw * 3, y + dh * 5 + dh, 0).color(r, g, b, a).endVertex();
-
-			buffer.vertex(m, x + dw * 6, y + dh * 8 + dh, 0).color(r, g, b, a).endVertex();
-			buffer.vertex(m, x + dw * 6, y + dh * 14 - dh, 0).color(r, g, b, a).endVertex();
-			buffer.vertex(m, x + dw * 16 - dw, y + dh * 4, 0).color(r, g, b, a).endVertex();
-			buffer.vertex(m, x + dw * 13, y + dh * 1 + dh, 0).color(r, g, b, a).endVertex();
-
-			tesselator.end();
-			RenderSystem.enableTexture();
-		}
-
-		public int hashCode() {
-			return 1;
-		}
-
-		public boolean equals(Object o) {
-			return o == this;
-		}
-	});
-
+	IconProperty CHECK_ICON = new IconProperty("check_icon", new CheckIcon(ThemeProperties.SYMBOL_OUT, ThemeProperties.SYMBOL_IN));
 	IconProperty ADD_ICON = new IconProperty("add_icon", new Icon() {
 		@Override
 		public void draw(PoseStack matrixStack, int x, int y, int w, int h) {
@@ -167,6 +109,7 @@ public interface ThemeProperties {
 	IconProperty EDITOR_ICON_ON = new IconProperty("editor_icon_on");
 	IconProperty EDITOR_ICON_OFF = new IconProperty("editor_icon_off");
 	IconProperty HIDDEN_ICON = new IconProperty("hidden_icon");
+	IconProperty LINK_ICON = new IconProperty("link_icon");
 	IconProperty SAVE_ICON = new IconProperty("save_icon");
 	IconProperty SETTINGS_ICON = new IconProperty("settings_icon");
 	IconProperty CLOSE_ICON = new IconProperty("close_icon");
@@ -208,4 +151,78 @@ public interface ThemeProperties {
 	// Task specific //
 	IconProperty CHECKMARK_TASK_ACTIVE = new IconProperty("checkmark_task_active");
 	IconProperty CHECKMARK_TASK_INACTIVE = new IconProperty("checkmark_task_inactive");
+
+
+	class CheckIcon extends Icon {
+		private final Either<Color4I,ColorProperty> out;
+		private final Either <Color4I,ColorProperty> in;
+
+		public CheckIcon(Color4I out, Color4I in) {
+			this.out = Either.left(out);
+			this.in = Either.left(in);
+		}
+
+		public CheckIcon(ColorProperty out, ColorProperty in) {
+			this.out = Either.right(out);
+			this.in = Either.right(in);
+		}
+
+		@Override
+		public void draw(PoseStack matrixStack, int x, int y, int w, int h) {
+			RenderSystem.disableTexture();
+			Matrix4f m = matrixStack.last().pose();
+			Tesselator tesselator = Tesselator.getInstance();
+			BufferBuilder buffer = tesselator.getBuilder();
+
+			RenderSystem.enableBlend();
+			RenderSystem.setShader(GameRenderer::getPositionColorShader);
+			buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+
+			float dw = w / 16F;
+			float dh = h / 16F;
+
+			Color4I cOut = out.map(col -> col, ThemeProperty::get);
+			int r = cOut.redi();
+			int g = cOut.greeni();
+			int b = cOut.bluei();
+			int a = cOut.alphai();
+
+			buffer.vertex(m, x + dw * 0, y + dh * 8, 0).color(r, g, b, a).endVertex();
+			buffer.vertex(m, x + dw * 6, y + dh * 14, 0).color(r, g, b, a).endVertex();
+			buffer.vertex(m, x + dw * 6, y + dh * 8, 0).color(r, g, b, a).endVertex();
+			buffer.vertex(m, x + dw * 3, y + dh * 5, 0).color(r, g, b, a).endVertex();
+
+			buffer.vertex(m, x + dw * 6, y + dh * 8, 0).color(r, g, b, a).endVertex();
+			buffer.vertex(m, x + dw * 6, y + dh * 14, 0).color(r, g, b, a).endVertex();
+			buffer.vertex(m, x + dw * 16, y + dh * 4, 0).color(r, g, b, a).endVertex();
+			buffer.vertex(m, x + dw * 13, y + dh * 1, 0).color(r, g, b, a).endVertex();
+
+			Color4I cIn = in.map(col -> col, ThemeProperty::get);
+			r = cIn.redi();
+			g = cIn.greeni();
+			b = cIn.bluei();
+			a = cIn.alphai();
+
+			buffer.vertex(m, x + dw * 0 + dw, y + dh * 8, 0).color(r, g, b, a).endVertex();
+			buffer.vertex(m, x + dw * 6, y + dh * 14 - dh, 0).color(r, g, b, a).endVertex();
+			buffer.vertex(m, x + dw * 6, y + dh * 8 + dh, 0).color(r, g, b, a).endVertex();
+			buffer.vertex(m, x + dw * 3, y + dh * 5 + dh, 0).color(r, g, b, a).endVertex();
+
+			buffer.vertex(m, x + dw * 6, y + dh * 8 + dh, 0).color(r, g, b, a).endVertex();
+			buffer.vertex(m, x + dw * 6, y + dh * 14 - dh, 0).color(r, g, b, a).endVertex();
+			buffer.vertex(m, x + dw * 16 - dw, y + dh * 4, 0).color(r, g, b, a).endVertex();
+			buffer.vertex(m, x + dw * 13, y + dh * 1 + dh, 0).color(r, g, b, a).endVertex();
+
+			tesselator.end();
+			RenderSystem.enableTexture();
+		}
+
+		public int hashCode() {
+			return 1;
+		}
+
+		public boolean equals(Object o) {
+			return o == this;
+		}
+	}
 }

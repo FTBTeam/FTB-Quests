@@ -9,6 +9,8 @@ import net.fabricmc.api.Environment;
  * @author LatvianModder
  */
 public interface Movable {
+	long getMovableID();
+
 	Chapter getChapter();
 
 	double getX();
@@ -21,8 +23,25 @@ public interface Movable {
 
 	String getShape();
 
+	/**
+	 * Called client-side to initiate moving the object
+	 *
+	 * @param to new chapter
+	 * @param x new X pos
+	 * @param y new Y pos
+	 */
 	@Environment(EnvType.CLIENT)
 	void move(Chapter to, double x, double y);
+
+	/**
+	 * Called on both server and client to actually update the object's position; must also update any related objects,
+	 * e.g. chapter links if the chapter ID is changing.
+	 *
+	 * @param x new X pos
+	 * @param y new Y pos
+	 * @param chapterId new chapter ID
+	 */
+	void onMoved(double x, double y, long chapterId);
 
 	@Environment(EnvType.CLIENT)
 	default void drawMoved(PoseStack matrixStack) {

@@ -29,6 +29,7 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Date;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 /**
  * @author LatvianModder
@@ -77,8 +78,8 @@ public class ServerQuestFile extends QuestFile {
 		Path path = server.getWorldPath(FTBQUESTS_DATA);
 
 		if (Files.exists(path)) {
-			try {
-				Files.list(path).filter(p -> p.getFileName().toString().contains("-") && p.getFileName().toString().endsWith(".snbt")).forEach(path1 -> {
+			try (Stream<Path> s = Files.list(path)) {
+				s.filter(p -> p.getFileName().toString().contains("-") && p.getFileName().toString().endsWith(".snbt")).forEach(path1 -> {
 					SNBTCompoundTag nbt = SNBT.read(path1);
 
 					if (nbt != null) {
