@@ -17,6 +17,7 @@ public enum QuestObjectType implements Predicate<QuestObjectBase> {
 	REWARD("reward", ChatFormatting.LIGHT_PURPLE),
 	REWARD_TABLE("reward_table", ChatFormatting.YELLOW),
 	CHAPTER_GROUP("chapter_group", ChatFormatting.YELLOW),
+	QUEST_LINK("quest_link", ChatFormatting.DARK_GREEN),
 
 	;
 

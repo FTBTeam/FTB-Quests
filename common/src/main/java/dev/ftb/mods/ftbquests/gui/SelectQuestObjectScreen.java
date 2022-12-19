@@ -11,6 +11,7 @@ import dev.ftb.mods.ftblibrary.ui.misc.ButtonListBaseScreen;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.quest.Quest;
+import dev.ftb.mods.ftbquests.quest.QuestLink;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.QuestObjectType;
 import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
@@ -28,73 +29,6 @@ import java.util.List;
  * @author LatvianModder
  */
 public class SelectQuestObjectScreen<T extends QuestObjectBase> extends ButtonListBaseScreen {
-	public class QuestObjectButton extends SimpleTextButton {
-		public final T object;
-
-		public QuestObjectButton(Panel panel, @Nullable T o) {
-			super(panel, o == null ? Component.translatable("ftbquests.null") : o.getMutableTitle().withStyle(o.getObjectType().getColor()), o == null ? Icon.EMPTY : o.getIcon());
-			object = o;
-			setSize(200, 14);
-		}
-
-		private void addObject(TooltipList list, QuestObjectBase o) {
-			list.add(QuestObjectType.NAME_MAP.getDisplayName(o.getObjectType()).copy().withStyle(ChatFormatting.GRAY).append(": ").append(o.getMutableTitle().withStyle(o.getObjectType().getColor())));
-		}
-
-		@Override
-		public void addMouseOverText(TooltipList list) {
-			if (object == null) {
-				return;
-			}
-
-			list.add(object.getTitle());
-			list.add(Component.literal("ID: ").withStyle(ChatFormatting.GRAY).append(Component.literal(object.toString()).withStyle(ChatFormatting.DARK_GRAY)));
-			list.add(Component.literal("Type: ").withStyle(ChatFormatting.GRAY).append(QuestObjectType.NAME_MAP.getDisplayName(object.getObjectType()).copy().withStyle(object.getObjectType().getColor())));
-
-			if (object instanceof Quest) {
-				Quest quest = (Quest) object;
-				addObject(list, quest.chapter);
-
-				if (quest.rewards.size() == 1) {
-					addObject(list, quest.rewards.get(0));
-				} else if (!quest.rewards.isEmpty()) {
-					list.add(Component.translatable("ftbquests.rewards").withStyle(ChatFormatting.GRAY));
-
-					for (Reward reward : quest.rewards) {
-						list.add(Component.literal("  ").append(reward.getMutableTitle().withStyle(QuestObjectType.REWARD.getColor())));
-					}
-				}
-			} else if (object instanceof Task) {
-				Quest quest = ((Task) object).quest;
-				addObject(list, quest.chapter);
-				addObject(list, quest);
-
-				if (quest.rewards.size() == 1) {
-					addObject(list, quest.rewards.get(0));
-				} else if (!quest.rewards.isEmpty()) {
-					list.add(Component.translatable("ftbquests.rewards").withStyle(ChatFormatting.GRAY));
-
-					for (Reward reward : quest.rewards) {
-						list.add(Component.literal("  ").append(reward.getMutableTitle().withStyle(QuestObjectType.REWARD.getColor())));
-					}
-				}
-			} else if (object instanceof Reward) {
-				Quest quest = ((Reward) object).quest;
-				addObject(list, quest.chapter);
-				addObject(list, quest);
-			} else if (object instanceof RewardTable) {
-				((RewardTable) object).addMouseOverText(list, true, true);
-			}
-		}
-
-		@Override
-		public void onClicked(MouseButton button) {
-			playClickSound();
-			config.setCurrentValue(object);
-			callback.save(true);
-		}
-	}
-
 	private final ConfigQuestObject<T> config;
 	private final ConfigCallback callback;
 
@@ -154,5 +88,77 @@ public class SelectQuestObjectScreen<T extends QuestObjectBase> extends ButtonLi
 	@Override
 	public Theme getTheme() {
 		return FTBQuestsTheme.INSTANCE;
+	}
+
+	private class QuestObjectButton extends SimpleTextButton {
+		public final T object;
+
+		public QuestObjectButton(Panel panel, @Nullable T o) {
+			super(panel, o == null ? Component.translatable("ftbquests.null") : o.getMutableTitle().withStyle(o.getObjectType().getColor()), o == null ? Icon.EMPTY : o.getIcon());
+			object = o;
+			setSize(200, 14);
+		}
+
+		private void addObject(TooltipList list, QuestObjectBase o) {
+			list.add(QuestObjectType.NAME_MAP.getDisplayName(o.getObjectType()).copy().withStyle(ChatFormatting.GRAY).append(": ").append(o.getMutableTitle().withStyle(o.getObjectType().getColor())));
+		}
+
+		@Override
+		public void addMouseOverText(TooltipList list) {
+			if (object == null) {
+				return;
+			}
+
+			list.add(object.getTitle());
+			list.add(Component.literal("ID: ").withStyle(ChatFormatting.GRAY).append(Component.literal(object.toString()).withStyle(ChatFormatting.DARK_GRAY)));
+			list.add(Component.literal("Type: ").withStyle(ChatFormatting.GRAY).append(QuestObjectType.NAME_MAP.getDisplayName(object.getObjectType()).copy().withStyle(object.getObjectType().getColor())));
+
+			if (object instanceof Quest quest) {
+				addObject(list, quest.chapter);
+
+				if (quest.rewards.size() == 1) {
+					addObject(list, quest.rewards.get(0));
+				} else if (!quest.rewards.isEmpty()) {
+					list.add(Component.translatable("ftbquests.rewards").withStyle(ChatFormatting.GRAY));
+					for (Reward reward : quest.rewards) {
+						list.add(Component.literal("  ").append(reward.getMutableTitle().withStyle(QuestObjectType.REWARD.getColor())));
+					}
+				}
+			} else if (object instanceof QuestLink link) {
+				link.getQuest().ifPresent(quest -> {
+					addObject(list, link.getChapter());
+					list.add(Component.empty());
+					list.add(Component.translatable("ftbquests.gui.linked_quest_id", Component.literal(quest.getCodeString()).withStyle(ChatFormatting.DARK_GRAY)).withStyle(ChatFormatting.GRAY));
+					addObject(list, quest.chapter);
+				});
+			} else if (object instanceof Task task) {
+				Quest quest = task.quest;
+				addObject(list, quest.chapter);
+				addObject(list, quest);
+
+				if (quest.rewards.size() == 1) {
+					addObject(list, quest.rewards.get(0));
+				} else if (!quest.rewards.isEmpty()) {
+					list.add(Component.translatable("ftbquests.rewards").withStyle(ChatFormatting.GRAY));
+
+					for (Reward reward : quest.rewards) {
+						list.add(Component.literal("  ").append(reward.getMutableTitle().withStyle(QuestObjectType.REWARD.getColor())));
+					}
+				}
+			} else if (object instanceof Reward reward) {
+				Quest quest = reward.quest;
+				addObject(list, quest.chapter);
+				addObject(list, quest);
+			} else if (object instanceof RewardTable rewardTable) {
+				rewardTable.addMouseOverText(list, true, true);
+			}
+		}
+
+		@Override
+		public void onClicked(MouseButton button) {
+			playClickSound();
+			config.setCurrentValue(object);
+			callback.save(true);
+		}
 	}
 }

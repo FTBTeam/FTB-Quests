@@ -26,7 +26,6 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -61,58 +60,40 @@ public class TaskButton extends Button {
 			task.onButtonClicked(this, !(task.invalid || !questScreen.file.self.canStartTasks(task.quest) || questScreen.file.self.isCompleted(task)));
 		} else if (button.isRight() && questScreen.file.canEdit()) {
 			playClickSound();
-			List<ContextMenuItem> contextMenu = new ArrayList<>();
 
-			if (task instanceof ItemTask) {
-				ItemTask i = (ItemTask) task;
-				var tags = i.item.getItem().builtInRegistryHolder().tags().map(TagKey::location).toList();
+			ContextMenuBuilder builder = ContextMenuBuilder.create(task, questScreen);
 
-				if (!tags.isEmpty() && !ItemFiltersAPI.isFilter(i.item)) {
-					contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.task.ftbquests.item.convert_tag"), ThemeProperties.RELOAD_ICON.get(), () -> {
-						ItemStack tagFilter = new ItemStack(ItemFiltersItems.TAG.get());
-
-						if (tags.size() == 1) {
-							String tag = tags.iterator().next().toString();
-							((IStringValueFilter) tagFilter.getItem()).setValue(tagFilter, tag);
-							i.item = tagFilter;
-
-							if (i.title.isEmpty()) {
-								i.title = "Any #" + tag;
-							}
-
-							new EditObjectMessage(i).sendToServer();
-						} else {
-							new ButtonListBaseScreen() {
-								@Override
-								public void addButtons(Panel panel) {
-									for (ResourceLocation s : tags) {
-										panel.add(new SimpleTextButton(panel, Component.literal(s.toString()), Icon.EMPTY) {
-											@Override
-											public void onClicked(MouseButton button) {
-												questScreen.openGui();
-												((IStringValueFilter) tagFilter.getItem()).setValue(tagFilter, s.toString());
-												i.item = tagFilter;
-
-												if (i.title.isEmpty()) {
-													i.title = "Any #" + s;
-												}
-
-												new EditObjectMessage(i).sendToServer();
-											}
-										});
-									}
+			if (task instanceof ItemTask itemTask) {
+				var tags = itemTask.item.getItem().builtInRegistryHolder().tags().map(TagKey::location).toList();
+				if (!tags.isEmpty() && !ItemFiltersAPI.isFilter(itemTask.item)) {
+					builder.insertAtTop(List.of(new ContextMenuItem(Component.translatable("ftbquests.task.ftbquests.item.convert_tag"),
+							ThemeProperties.RELOAD_ICON.get(),
+							() -> {
+								ItemStack tagFilter = new ItemStack(ItemFiltersItems.TAG.get());
+								if (tags.size() == 1) {
+									convertToSingleTag(itemTask, tags, tagFilter);
+								} else {
+									new TagSelectionScreen(tags, tagFilter, itemTask).openGui();
 								}
-							}.openGui();
-						}
-					}));
-
-					contextMenu.add(ContextMenuItem.SEPARATOR);
+							})
+					));
 				}
 			}
 
-			questScreen.addObjectMenuItems(contextMenu, getGui(), task);
-			getGui().openContextMenu(contextMenu);
+			builder.openContextMenu(getGui());
 		}
+	}
+
+	private static void convertToSingleTag(ItemTask itemTask, List<ResourceLocation> tags, ItemStack tagFilter) {
+		String tag = tags.iterator().next().toString();
+		((IStringValueFilter) tagFilter.getItem()).setValue(tagFilter, tag);
+		itemTask.item = tagFilter;
+
+		if (itemTask.title.isEmpty()) {
+			itemTask.title = "Any #" + tag;
+		}
+
+		new EditObjectMessage(itemTask).sendToServer();
 	}
 
 	@Override
@@ -198,6 +179,38 @@ public class TaskButton extends Button {
 				RenderSystem.enableBlend();
 				theme.drawString(matrixStack, s, 0, 0, Color4I.WHITE, Theme.SHADOW);
 				matrixStack.popPose();
+			}
+		}
+	}
+
+	private class TagSelectionScreen extends ButtonListBaseScreen {
+		private final List<ResourceLocation> tags;
+		private final ItemStack tagFilter;
+		private final ItemTask itemTask;
+
+		public TagSelectionScreen(List<ResourceLocation> tags, ItemStack tagFilter, ItemTask itemTask) {
+			this.tags = tags;
+			this.tagFilter = tagFilter;
+			this.itemTask = itemTask;
+		}
+
+		@Override
+		public void addButtons(Panel panel) {
+			for (ResourceLocation tag : tags) {
+				panel.add(new SimpleTextButton(panel, Component.literal(tag.toString()), Icon.EMPTY) {
+					@Override
+					public void onClicked(MouseButton button) {
+						questScreen.openGui();
+						((IStringValueFilter) tagFilter.getItem()).setValue(tagFilter, tag.toString());
+						itemTask.item = tagFilter;
+
+						if (itemTask.title.isEmpty()) {
+							itemTask.title = "Any #" + tag;
+						}
+
+						new EditObjectMessage(itemTask).sendToServer();
+					}
+				});
 			}
 		}
 	}

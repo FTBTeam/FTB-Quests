@@ -4,6 +4,7 @@ import dev.ftb.mods.ftblibrary.config.*;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.IconAnimation;
 import dev.ftb.mods.ftblibrary.math.Bits;
+import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.util.ClientUtils;
 import dev.ftb.mods.ftbquests.FTBQuests;
@@ -14,10 +15,12 @@ import dev.ftb.mods.ftbquests.gui.MultilineTextEditorScreen;
 import dev.ftb.mods.ftbquests.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.integration.FTBQuestsJEIHelper;
 import dev.ftb.mods.ftbquests.net.DisplayCompletionToastMessage;
-import dev.ftb.mods.ftbquests.net.MoveQuestMessage;
+import dev.ftb.mods.ftbquests.net.MoveMovableMessage;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.reward.RewardClaimType;
+import dev.ftb.mods.ftbquests.quest.reward.RewardType;
 import dev.ftb.mods.ftbquests.quest.task.Task;
+import dev.ftb.mods.ftbquests.quest.task.TaskType;
 import dev.ftb.mods.ftbquests.util.ConfigQuestObject;
 import dev.ftb.mods.ftbquests.util.NetUtils;
 import dev.ftb.mods.ftbquests.util.ProgressChange;
@@ -34,6 +37,7 @@ import net.minecraft.server.level.ServerPlayer;
 
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 /**
  * @author LatvianModder
@@ -46,7 +50,7 @@ public final class Quest extends QuestObject implements Movable {
 	public Tristate hide;
 	public String shape;
 	public final List<String> description;
-	public final List<QuestObject> dependencies;
+	private final List<QuestObject> dependencies;
 	public final List<Task> tasks;
 	public final List<Reward> rewards;
 	public DependencyRequirement dependencyRequirement;
@@ -65,6 +69,8 @@ public final class Quest extends QuestObject implements Movable {
 	private Component cachedSubtitle = null;
 	private Component[] cachedDescription = null;
 	private boolean ignoreRewardBlocking;
+	private ProgressionMode progressionMode;
+	private final Set<Long> dependantIDs;
 
 	public Quest(Chapter c) {
 		chapter = c;
@@ -90,6 +96,8 @@ public final class Quest extends QuestObject implements Movable {
 		invisible = false;
 		invisibleUntilTasks = 0;
 		ignoreRewardBlocking = false;
+		progressionMode = ProgressionMode.DEFAULT;
+		dependantIDs = new HashSet<>();
 	}
 
 	@Override
@@ -150,13 +158,11 @@ public final class Quest extends QuestObject implements Movable {
 
 		removeInvalidDependencies();
 
-		if (!dependencies.isEmpty()) {
+		if (hasDependencies()) {
 			ListTag deps = new ListTag();
-
 			for (QuestObject dep : dependencies) {
 				deps.add(StringTag.valueOf(dep.getCodeString()));
 			}
-
 			nbt.put("dependencies", deps);
 		}
 
@@ -198,6 +204,10 @@ public final class Quest extends QuestObject implements Movable {
 		if (ignoreRewardBlocking) {
 			nbt.putBoolean("ignore_reward_blocking", true);
 		}
+
+		if (progressionMode != ProgressionMode.DEFAULT) {
+			nbt.putString("progression_mode", progressionMode.getId());
+		}
 	}
 
 	@Override
@@ -224,14 +234,14 @@ public final class Quest extends QuestObject implements Movable {
 		hideDependencyLines = Tristate.read(nbt, "hide_dependency_lines");
 		minRequiredDependencies = nbt.getInt("min_required_dependencies");
 
-		dependencies.clear();
+		clearDependencies();
 
 		if (nbt.contains("dependencies", 11)) {
 			for (int i : nbt.getIntArray("dependencies")) {
 				QuestObject object = chapter.file.get(i);
 
 				if (object != null) {
-					dependencies.add(object);
+					addDependency(object);
 				}
 			}
 		} else {
@@ -241,7 +251,7 @@ public final class Quest extends QuestObject implements Movable {
 				QuestObject object = chapter.file.get(chapter.file.getID(deps.getString(i)));
 
 				if (object != null) {
-					dependencies.add(object);
+					addDependency(object);
 				}
 			}
 		}
@@ -256,6 +266,7 @@ public final class Quest extends QuestObject implements Movable {
 		invisible = nbt.getBoolean("invisible");
 		invisibleUntilTasks = nbt.getInt("invisible_until_tasks");
 		ignoreRewardBlocking = nbt.getBoolean("ignore_reward_blocking");
+		progressionMode = ProgressionMode.NAME_MAP.get(nbt.getString("progression_mode"));
 	}
 
 	@Override
@@ -300,11 +311,7 @@ public final class Quest extends QuestObject implements Movable {
 		buffer.writeVarInt(dependencies.size());
 
 		for (QuestObject d : dependencies) {
-			if (d.invalid) {
-				buffer.writeLong(0L);
-			} else {
-				buffer.writeLong(d.id);
-			}
+			buffer.writeLong(d.invalid ? 0L : d.id);
 		}
 
 		if (size != 1D) {
@@ -322,6 +329,7 @@ public final class Quest extends QuestObject implements Movable {
 		}
 
 		buffer.writeBoolean(ignoreRewardBlocking);
+		ProgressionMode.NAME_MAP.write(buffer, progressionMode);
 	}
 
 	@Override
@@ -349,14 +357,14 @@ public final class Quest extends QuestObject implements Movable {
 
 		minRequiredDependencies = buffer.readVarInt();
 		dependencyRequirement = DependencyRequirement.NAME_MAP.read(buffer);
-		dependencies.clear();
+		clearDependencies();
 		int d = buffer.readVarInt();
 
 		for (int i = 0; i < d; i++) {
 			QuestObject object = chapter.file.get(buffer.readLong());
 
 			if (object != null) {
-				dependencies.add(object);
+				addDependency(object);
 			}
 		}
 
@@ -366,6 +374,7 @@ public final class Quest extends QuestObject implements Movable {
 		invisible = Bits.getFlag(flags, 128);
 		invisibleUntilTasks = Bits.getFlag(flags, 1024) ? buffer.readVarInt() : 0;
 		ignoreRewardBlocking = buffer.readBoolean();
+		progressionMode = ProgressionMode.NAME_MAP.read(buffer);
 	}
 
 	@Override
@@ -419,15 +428,29 @@ public final class Quest extends QuestObject implements Movable {
 
 		data.teamData.checkAutoCompletion(this);
 
-		for (ChapterGroup group : chapter.file.chapterGroups) {
-			for (Chapter chapter : group.chapters) {
-				for (Quest quest : chapter.quests) {
-					if (quest.dependencies.contains(this)) {
-						data.teamData.checkAutoCompletion(quest);
+		checkForDependantCompletion(data.teamData);
+	}
+
+	private void checkForDependantCompletion(TeamData data) {
+		getDependants().forEach(questObject -> {
+			if (questObject instanceof Quest quest) {
+				if (quest.getProgressionMode() == ProgressionMode.FLEXIBLE) {
+					if (quest.getDependencies().allMatch(data::isCompleted)) {
+						quest.tasks.forEach(task -> {
+							if (data.getProgress(task.id) >= task.getMaxProgress()) {
+								data.markTaskCompleted(task);
+							}
+						});
 					}
 				}
+
+				data.checkAutoCompletion(quest);
 			}
-		}
+		});
+	}
+
+	public ProgressionMode getProgressionMode() {
+		return progressionMode == ProgressionMode.DEFAULT ? chapter.getProgressionMode() : progressionMode;
 	}
 
 	@Override
@@ -465,6 +488,12 @@ public final class Quest extends QuestObject implements Movable {
 	public void deleteSelf() {
 		super.deleteSelf();
 		chapter.quests.remove(this);
+
+		List<QuestLink> linksToDel = new ArrayList<>();
+		chapter.file.chapterGroups.forEach(cg -> cg.chapters.forEach(c -> c.questLinks.forEach(l -> {
+			if (l.linksTo(this)) linksToDel.add(l);
+		})));
+		linksToDel.forEach(l -> chapter.file.deleteObject(l.id));
 	}
 
 	@Override
@@ -522,7 +551,8 @@ public final class Quest extends QuestObject implements Movable {
 
 		Predicate<QuestObjectBase> depTypes = object -> object != chapter.file && object != chapter && object instanceof QuestObject;// && !(object instanceof Task);
 
-		dependencies.removeIf(Objects::isNull);
+		removeInvalidDependencies();
+
 		config.addBool("can_repeat", canRepeat, v -> canRepeat = v, false);
 		config.addList("dependencies", dependencies, new ConfigQuestObject<>(depTypes), null).setNameKey("ftbquests.dependencies");
 		config.addEnum("dependency_requirement", dependencyRequirement, v -> dependencyRequirement = v, DependencyRequirement.NAME_MAP);
@@ -536,10 +566,16 @@ public final class Quest extends QuestObject implements Movable {
 		config.addBool("invisible", invisible, v -> invisible = v, false);
 		config.addInt("invisible_until_tasks", invisibleUntilTasks, v -> invisibleUntilTasks = v, 0, 0, Integer.MAX_VALUE);
 		config.addBool("ignore_reward_blocking", ignoreRewardBlocking, v -> ignoreRewardBlocking = v, false);
+		config.addEnum("progression_mode", progressionMode, v -> progressionMode = v, ProgressionMode.NAME_MAP);
 	}
 
 	public boolean getHideDependencyLines() {
 		return hideDependencyLines.get(chapter.defaultHideDependencyLines);
+	}
+
+	@Override
+	public long getMovableID() {
+		return id;
 	}
 
 	@Override
@@ -575,7 +611,7 @@ public final class Quest extends QuestObject implements Movable {
 	@Override
 	@Environment(EnvType.CLIENT)
 	public void move(Chapter to, double x, double y) {
-		new MoveQuestMessage(id, to.id, x, y).sendToServer();
+		new MoveMovableMessage(this, to.id, x, y).sendToServer();
 	}
 
 	@Override
@@ -594,13 +630,7 @@ public final class Quest extends QuestObject implements Movable {
 			return data.areDependenciesComplete(this);
 		}
 
-		for (QuestObject object : dependencies) {
-			if (object.isVisible(data)) {
-				return true;
-			}
-		}
-
-		return false;
+		return getDependencies().anyMatch(object -> object.isVisible(data));
 	}
 
 	@Override
@@ -658,12 +688,6 @@ public final class Quest extends QuestObject implements Movable {
 		return false;
 	}
 
-	public void removeInvalidDependencies() {
-		if (!dependencies.isEmpty()) {
-			dependencies.removeIf(o -> o == null || o.invalid || o == this);
-		}
-	}
-
 	public boolean verifyDependencies(boolean autofix) {
 		try {
 			verifyDependenciesInternal(id, 0);
@@ -671,7 +695,7 @@ public final class Quest extends QuestObject implements Movable {
 		} catch (DependencyDepthException ex) {
 			if (autofix) {
 				FTBQuests.LOGGER.error("Too deep dependencies found in " + this + " (referenced in " + ex.object + ")! Deleting all dependencies...");
-				dependencies.clear();
+				clearDependencies();
 				chapter.file.save();
 			} else {
 				FTBQuests.LOGGER.error("Too deep dependencies found in " + this + " (referenced in " + ex.object + ")!");
@@ -681,7 +705,7 @@ public final class Quest extends QuestObject implements Movable {
 		} catch (DependencyLoopException ex) {
 			if (autofix) {
 				FTBQuests.LOGGER.error("Looping dependencies found in " + this + " (referenced in " + ex.object + ")! Deleting all dependencies...");
-				dependencies.clear();
+				clearDependencies();
 				chapter.file.save();
 			} else {
 				FTBQuests.LOGGER.error("Looping dependencies found in " + this + " (referenced in " + ex.object + ")!");
@@ -722,7 +746,8 @@ public final class Quest extends QuestObject implements Movable {
 		}
 	}
 
-	public void moved(double nx, double ny, long nc) {
+	@Override
+	public void onMoved(double nx, double ny, long nc) {
 		x = nx;
 		y = ny;
 
@@ -742,20 +767,15 @@ public final class Quest extends QuestObject implements Movable {
 		return canRepeat || optional;
 	}
 
-	public List<QuestObject> getDependants() {
-		List<QuestObject> list = new ArrayList<>();
-
-		for (ChapterGroup group : chapter.file.chapterGroups) {
-			for (Chapter c : group.chapters) {
-				for (Quest q : c.quests) {
-					if (q.dependencies.contains(this)) {
-						list.add(q);
-					}
-				}
-			}
-		}
-
-		return list;
+	/**
+	 * Get a collection of dependent quest ID's; quests which can't be progressed until this quest is completed.
+	 * @return a collection of quest objects, checked for validity
+	 */
+	public Collection<QuestObject> getDependants() {
+		return dependantIDs.stream()
+				.map(id -> getQuestFile().get(id))
+				.filter(q -> q != null && !q.invalid)
+				.toList();
 	}
 
 	public void checkRepeatable(TeamData data, UUID player) {
@@ -793,5 +813,87 @@ public final class Quest extends QuestObject implements Movable {
 
 	public boolean ignoreRewardBlocking() {
 		return ignoreRewardBlocking;
+	}
+
+	public void writeTasks(CompoundTag tag) {
+		ListTag t = new ListTag();
+		for (Task task : tasks) {
+			TaskType type = task.getType();
+			SNBTCompoundTag nbt3 = new SNBTCompoundTag();
+			nbt3.putString("id", task.getCodeString());
+			nbt3.putString("type", type.getTypeForNBT());
+			task.writeData(nbt3);
+			t.add(nbt3);
+		}
+		tag.put("tasks", t);
+	}
+
+	public void writeRewards(CompoundTag tag) {
+		ListTag r = new ListTag();
+		for (Reward reward : rewards) {
+			RewardType type = reward.getType();
+			SNBTCompoundTag nbt3 = new SNBTCompoundTag();
+			nbt3.putString("id", reward.getCodeString());
+			nbt3.putString("type", type.getTypeForNBT());
+			reward.writeData(nbt3);
+			r.add(nbt3);
+		}
+		tag.put("rewards", r);
+	}
+
+	public boolean hasDependencies() {
+		return !dependencies.isEmpty();
+	}
+
+	public Stream<QuestObject> getDependencies() {
+		return dependencies.stream();
+	}
+
+	public void addDependency(QuestObject object) {
+		dependencies.add(object);
+		if (object instanceof Quest q) {
+			q.addDependant(id);
+		}
+	}
+
+	public void removeDependency(QuestObject object) {
+		dependencies.remove(object);
+		if (object instanceof Quest q) {
+			q.removeDependant(id);
+		}
+	}
+
+	public void removeInvalidDependencies() {
+		Iterator<QuestObject> iter = dependencies.iterator();
+		while (iter.hasNext()) {
+			QuestObject qo = iter.next();
+			if (qo == null || qo.invalid || qo == this) {
+				iter.remove();
+				if (qo instanceof Quest q) {
+					q.removeDependant(id);
+				}
+			}
+		}
+	}
+
+	public void clearDependencies() {
+		dependencies.forEach(qo -> {
+			if (qo instanceof Quest q) {
+				q.removeDependant(id);
+			}
+		});
+		dependencies.clear();
+	}
+
+	private void addDependant(long id) {
+		dependantIDs.add(id);
+	}
+
+	private void removeDependant(long id) {
+		dependantIDs.remove(id);
+	}
+
+	public boolean allTasksCompleted(TeamData teamData) {
+		return tasks.stream().allMatch(task -> teamData.getProgress(task) >= task.getMaxProgress());
 	}
 }

@@ -3,28 +3,28 @@ package dev.ftb.mods.ftbquests.net;
 import dev.architectury.networking.NetworkManager;
 import dev.architectury.networking.simple.BaseC2SMessage;
 import dev.architectury.networking.simple.MessageType;
-import dev.ftb.mods.ftbquests.quest.Quest;
+import dev.ftb.mods.ftbquests.quest.Movable;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import net.minecraft.network.FriendlyByteBuf;
 
 /**
  * @author LatvianModder
  */
-public class MoveQuestMessage extends BaseC2SMessage {
+public class MoveMovableMessage extends BaseC2SMessage {
 	private final long id;
-	private final long chapter;
+	private final long chapterID;
 	private final double x, y;
 
-	MoveQuestMessage(FriendlyByteBuf buffer) {
+	MoveMovableMessage(FriendlyByteBuf buffer) {
 		id = buffer.readLong();
-		chapter = buffer.readLong();
+		chapterID = buffer.readLong();
 		x = buffer.readDouble();
 		y = buffer.readDouble();
 	}
 
-	public MoveQuestMessage(long i, long c, double _x, double _y) {
-		id = i;
-		chapter = c;
+	public MoveMovableMessage(Movable obj, long c, double _x, double _y) {
+		id = obj.getMovableID();
+		chapterID = c;
 		x = _x;
 		y = _y;
 	}
@@ -37,19 +37,17 @@ public class MoveQuestMessage extends BaseC2SMessage {
 	@Override
 	public void write(FriendlyByteBuf buffer) {
 		buffer.writeLong(id);
-		buffer.writeLong(chapter);
+		buffer.writeLong(chapterID);
 		buffer.writeDouble(x);
 		buffer.writeDouble(y);
 	}
 
 	@Override
 	public void handle(NetworkManager.PacketContext context) {
-		Quest quest = ServerQuestFile.INSTANCE.getQuest(id);
-
-		if (quest != null) {
-			quest.moved(x, y, chapter);
+		if (ServerQuestFile.INSTANCE.get(id) instanceof Movable movable) {
+			movable.onMoved(x, y, chapterID);
 			ServerQuestFile.INSTANCE.save();
-			new MoveQuestResponseMessage(id, chapter, x, y).sendToAll(context.getPlayer().getServer());
+			new MoveMovableResponseMessage(movable, chapterID, x, y).sendToAll(context.getPlayer().getServer());
 		}
 	}
 }
