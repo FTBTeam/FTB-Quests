@@ -19,10 +19,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * Quests in "Flexible" mode can have their tasks progressed (but not fully completed) even if dependencies are not yet completed, effectively allowing "pre-completion" of quests
   * Progression mode can be set on quests, chapters, or the entire quest book; the mode is inherited from above if set to "Default", which is the case for quests and chapters
   * Default progression mode for the quest book is "Linear" mode, where dependencies must be completed before a quest can be started (i.e. current behaviour)
+* (Editor mode) Quest titles can now contain embedded newlines (just put a "\n" sequence in the title text)
+  * Useful for very long quest titles which would cause an excessively wide quest view panel
+* (Editor mode) When moving one or more quests, "Moving" is displayed in the bottom left of the screen, along with the "<x> selected" message
+  * More clearly differentiates selecting quests and moving them, which are similar but different operations
 
 ### Fixed
 * (Editor mode) Fixed NPE when clicking in certain areas of the quest description text in the view quest panel
 * (Editor mode) Fixed NPE after creating a new quest under some circumstances
+* Background images now display correctly again (1.19-specific fix, due to the way MC 1.19 text component handling has changed)
 
 ## [1902.4.3]
 
