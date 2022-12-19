@@ -32,23 +32,27 @@ public final class Chapter extends QuestObject {
 	public ChapterGroup group;
 	public String filename;
 	public final List<Quest> quests;
+	public final List<QuestLink> questLinks;
 	public final List<String> subtitle;
 	public boolean alwaysInvisible;
 	public String defaultQuestShape;
 	public final List<ChapterImage> images;
 	public boolean defaultHideDependencyLines;
 	public int defaultMinWidth = 0;
+	private ProgressionMode progressionMode;
 
 	public Chapter(QuestFile f, ChapterGroup g) {
 		file = f;
 		group = g;
 		filename = "";
 		quests = new ArrayList<>();
+		questLinks = new ArrayList<>();
 		subtitle = new ArrayList<>(0);
 		alwaysInvisible = false;
 		defaultQuestShape = "";
 		images = new ArrayList<>();
 		defaultHideDependencyLines = false;
+		progressionMode = ProgressionMode.DEFAULT;
 	}
 
 	@Override
@@ -103,6 +107,10 @@ public final class Chapter extends QuestObject {
 		if (defaultMinWidth > 0) {
 			nbt.putInt("default_min_width", defaultMinWidth);
 		}
+
+		if (progressionMode != ProgressionMode.DEFAULT) {
+			nbt.putString("progression_mode", progressionMode.getId());
+		}
 	}
 
 	@Override
@@ -137,6 +145,7 @@ public final class Chapter extends QuestObject {
 		}
 
 		defaultMinWidth = nbt.getInt("default_min_width");
+		progressionMode = ProgressionMode.NAME_MAP.get(nbt.getString("progression_mode"));
 	}
 
 	@Override
@@ -149,6 +158,7 @@ public final class Chapter extends QuestObject {
 		NetUtils.write(buffer, images, (d, img) -> img.writeNetData(d));
 		buffer.writeBoolean(defaultHideDependencyLines);
 		buffer.writeInt(defaultMinWidth);
+		ProgressionMode.NAME_MAP.write(buffer, progressionMode);
 	}
 
 	@Override
@@ -165,6 +175,7 @@ public final class Chapter extends QuestObject {
 		});
 		defaultHideDependencyLines = buffer.readBoolean();
 		defaultMinWidth = buffer.readInt();
+		progressionMode = ProgressionMode.NAME_MAP.read(buffer);
 	}
 
 	public int getIndex() {
@@ -185,7 +196,7 @@ public final class Chapter extends QuestObject {
 		int count = 0;
 
 		for (Quest quest : quests) {
-			if (!quest.isProgressionIgnored()) {
+			if (quest.countsTowardParentCompletion()) {
 				progress += data.getRelativeProgress(quest);
 				count++;
 			}
@@ -222,7 +233,7 @@ public final class Chapter extends QuestObject {
 		for (ChapterGroup g : file.chapterGroups) {
 			for (Chapter chapter : g.chapters) {
 				for (Quest quest : chapter.quests) {
-					if (quest.dependencies.contains(this)) {
+					if (quest.hasDependency(this)) {
 						data.teamData.checkAutoCompletion(quest);
 					}
 				}
@@ -316,6 +327,7 @@ public final class Chapter extends QuestObject {
 		config.addEnum("default_quest_shape", defaultQuestShape.isEmpty() ? "default" : defaultQuestShape, v -> defaultQuestShape = v.equals("default") ? "" : v, QuestShape.idMapWithDefault);
 		config.addBool("default_hide_dependency_lines", defaultHideDependencyLines, v -> defaultHideDependencyLines = v, false);
 		config.addInt("default_min_width", defaultMinWidth, v -> defaultMinWidth = v, 0, 0, 3000);
+		config.addEnum("progression_mode", progressionMode, v -> progressionMode = v, ProgressionMode.NAME_MAP);
 	}
 
 	@Override
@@ -379,5 +391,9 @@ public final class Chapter extends QuestObject {
 		}
 
 		return false;
+	}
+
+	public ProgressionMode getProgressionMode() {
+		return progressionMode == ProgressionMode.DEFAULT ? file.getProgressionMode() : progressionMode;
 	}
 }

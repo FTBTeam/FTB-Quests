@@ -125,16 +125,14 @@ public abstract class QuestObject extends QuestObjectBase {
 	}
 
 	public boolean isCompletedRaw(TeamData data) {
-		for (QuestObject child : getChildren()) {
-			if (!data.isCompleted(child)) {
-				return false;
-			}
-		}
-
-		return true;
+		return getChildren().stream().noneMatch(child -> child.countsTowardParentCompletion() && !data.isCompleted(child));
 	}
 
 	public boolean hasUnclaimedRewardsRaw(TeamData teamData, UUID player) {
 		return false;
+	}
+
+	public boolean countsTowardParentCompletion() {
+		return true;
 	}
 }

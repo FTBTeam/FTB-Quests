@@ -5,11 +5,8 @@ import com.mojang.math.Vector3f;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.ui.EditConfigScreen;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
-import dev.ftb.mods.ftblibrary.ui.Button;
-import dev.ftb.mods.ftblibrary.ui.ContextMenuItem;
-import dev.ftb.mods.ftblibrary.ui.GuiHelper;
-import dev.ftb.mods.ftblibrary.ui.Panel;
-import dev.ftb.mods.ftblibrary.ui.Theme;
+import dev.ftb.mods.ftblibrary.icon.Icons;
+import dev.ftb.mods.ftblibrary.ui.*;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.FTBQuests;
@@ -20,15 +17,31 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author LatvianModder
  */
-public class ChapterImageButton extends Button {
+public class ChapterImageButton extends Button implements QuestPositionableButton {
+	private static WeakReference<ChapterImage> clipboard = new WeakReference<>(null);
+
 	public QuestScreen questScreen;
 	public ChapterImage chapterImage;
+
+	public static Optional<ChapterImage> getClipboard() {
+		ChapterImage img = clipboard.get();
+		if (img != null) {
+			if (!img.chapter.invalid) {
+				return Optional.of(img);
+			} else {
+				clipboard = new WeakReference<>(null);
+			}
+		}
+		return Optional.empty();
+	}
 
 	public ChapterImageButton(Panel panel, ChapterImage i) {
 		super(panel, TextComponent.EMPTY, i.image);
@@ -90,6 +103,15 @@ public class ChapterImageButton extends Button {
 				}
 			});
 
+			contextMenu.add(new ContextMenuItem(new TranslatableComponent("gui.copy"), Icons.INFO, () -> {
+				clipboard = new WeakReference<>(chapterImage);
+			}) {
+				@Override
+				public void addMouseOverText(TooltipList list) {
+					list.add(new TextComponent(chapterImage.image.toString()).withStyle(ChatFormatting.DARK_GRAY));
+				}
+			});
+
 			contextMenu.add(new ContextMenuItem(new TranslatableComponent("selectServer.delete"), ThemeProperties.DELETE_ICON.get(), () -> {
 				chapterImage.chapter.images.remove(chapterImage);
 				new EditObjectMessage(chapterImage.chapter).sendToServer();
@@ -146,5 +168,10 @@ public class ChapterImageButton extends Button {
 		}
 
 		matrixStack.popPose();
+	}
+
+	@Override
+	public Position getPosition() {
+		return new Position(chapterImage.x, chapterImage.y, chapterImage.width, chapterImage.height);
 	}
 }

@@ -187,12 +187,10 @@ public class ChapterPanel extends Panel {
 			}
 
 			if (chapterPanel.questScreen.file.canEdit() && button.isRight() && !group.isDefaultGroup()) {
-				List<ContextMenuItem> contextMenu = new ArrayList<>();
-				contextMenu.add(new ContextMenuItem(new TranslatableComponent("gui.move"), ThemeProperties.MOVE_UP_ICON.get(), () -> new MoveChapterGroupMessage(group.id, true).sendToServer()).setEnabled(() -> group.getIndex() > 1).setCloseMenu(false));
-				contextMenu.add(new ContextMenuItem(new TranslatableComponent("gui.move"), ThemeProperties.MOVE_DOWN_ICON.get(), () -> new MoveChapterGroupMessage(group.id, false).sendToServer()).setEnabled(() -> group.getIndex() < group.file.chapterGroups.size() - 1).setCloseMenu(false));
-				contextMenu.add(ContextMenuItem.SEPARATOR);
-				chapterPanel.questScreen.addObjectMenuItems(contextMenu, chapterPanel.questScreen, group);
-				chapterPanel.questScreen.openContextMenu(contextMenu);
+				ContextMenuBuilder.create(group, chapterPanel.questScreen).insertAtTop(List.of(
+						new ContextMenuItem(new TranslatableComponent("gui.move"), ThemeProperties.MOVE_UP_ICON.get(), () -> new MoveChapterGroupMessage(group.id, true).sendToServer()).setEnabled(() -> group.getIndex() > 1).setCloseMenu(false),
+						new ContextMenuItem(new TranslatableComponent("gui.move"), ThemeProperties.MOVE_DOWN_ICON.get(), () -> new MoveChapterGroupMessage(group.id, false).sendToServer()).setEnabled(() -> group.getIndex() < group.file.chapterGroups.size() - 1).setCloseMenu(false)
+				)).openContextMenu(chapterPanel.questScreen);
 				return;
 			}
 
@@ -268,13 +266,11 @@ public class ChapterPanel extends Panel {
 			}
 
 			if (chapterPanel.questScreen.file.canEdit() && button.isRight()) {
-				List<ContextMenuItem> contextMenu = new ArrayList<>();
-				contextMenu.add(new ContextMenuItem(new TranslatableComponent("gui.move"), ThemeProperties.MOVE_UP_ICON.get(), () -> new MoveChapterMessage(chapter.id, true).sendToServer()).setEnabled(() -> chapter.getIndex() > 0).setCloseMenu(false));
-				contextMenu.add(new ContextMenuItem(new TranslatableComponent("gui.move"), ThemeProperties.MOVE_DOWN_ICON.get(), () -> new MoveChapterMessage(chapter.id, false).sendToServer()).setEnabled(() -> chapter.getIndex() < chapter.group.chapters.size() - 1).setCloseMenu(false));
-				contextMenu.add(new ContextMenuItem(new TranslatableComponent("ftbquests.gui.change_group"), Icons.COLOR_RGB, () -> new ChangeChapterGroupScreen(chapter).openGui()));
-				contextMenu.add(ContextMenuItem.SEPARATOR);
-				chapterPanel.questScreen.addObjectMenuItems(contextMenu, chapterPanel.questScreen, chapter);
-				chapterPanel.questScreen.openContextMenu(contextMenu);
+				ContextMenuBuilder.create(chapter, chapterPanel.questScreen).insertAtTop(List.of(
+						new ContextMenuItem(new TranslatableComponent("gui.move"), ThemeProperties.MOVE_UP_ICON.get(), () -> new MoveChapterMessage(chapter.id, true).sendToServer()).setEnabled(() -> chapter.getIndex() > 0).setCloseMenu(false),
+						new ContextMenuItem(new TranslatableComponent("gui.move"), ThemeProperties.MOVE_DOWN_ICON.get(), () -> new MoveChapterMessage(chapter.id, false).sendToServer()).setEnabled(() -> chapter.getIndex() < chapter.group.chapters.size() - 1).setCloseMenu(false),
+						new ContextMenuItem(new TranslatableComponent("ftbquests.gui.change_group"), Icons.COLOR_RGB, () -> new ChangeChapterGroupScreen(chapter).openGui())
+				)).openContextMenu(chapterPanel.questScreen);
 			}
 		}
 
@@ -290,7 +286,11 @@ public class ChapterPanel extends Panel {
 			int o = chapter.group.isDefaultGroup() ? 0 : 7;
 
 			icon.draw(matrixStack, x + 2 + o, y + 1, 12, 12);
-			theme.drawString(matrixStack, new TextComponent("").append(title).withStyle(Style.EMPTY.withColor(TextColor.fromRgb(c.rgb()))), x + 16 + o, y + 3);
+			MutableComponent text = title.copy().withStyle(Style.EMPTY.withColor(TextColor.fromRgb(c.rgb())));
+			if (chapterPanel.questScreen.selectedChapter != null && chapter.id == chapterPanel.questScreen.selectedChapter.id) {
+				text.append(new TextComponent(" \u25C0").withStyle(ChatFormatting.GRAY));
+			}
+			theme.drawString(matrixStack, text, x + 16 + o, y + 3);
 
 			GuiHelper.setupDrawing();
 

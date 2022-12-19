@@ -19,6 +19,7 @@ configurations {
 }
 
 repositories {
+	mavenLocal()
 	maven {
 		name "ModMaven (JEI)"
 		url "https://modmaven.dev/"

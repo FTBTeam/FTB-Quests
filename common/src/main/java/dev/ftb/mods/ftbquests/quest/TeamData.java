@@ -561,7 +561,7 @@ public class TeamData {
 	}
 
 	public boolean areDependenciesComplete(Quest quest) {
-		if (quest.dependencies.isEmpty()) {
+		if (!quest.hasDependencies()) {
 			return true;
 		}
 
@@ -582,42 +582,21 @@ public class TeamData {
 
 	private boolean areDependenciesComplete0(Quest quest) {
 		if (quest.minRequiredDependencies > 0) {
-			int complete = 0;
-
-			for (QuestObject dependency : quest.dependencies) {
-				if (!dependency.invalid && isCompleted(dependency)) {
-					complete++;
-
-					if (complete >= quest.minRequiredDependencies) {
-						return true;
-					}
-				}
-			}
-
-			return false;
+			return quest.getDependencies()
+					.filter(dep -> isCompleted(dep) && !dep.invalid)
+					.limit(quest.minRequiredDependencies)
+					.count() == quest.minRequiredDependencies;
+		} else if (quest.dependencyRequirement.one) {
+			return quest.getDependencies()
+					.anyMatch(dep -> !dep.invalid && (quest.dependencyRequirement.completed ? isCompleted(dep) : isStarted(dep)));
+		} else {
+			return quest.getDependencies()
+					.allMatch(dep -> !dep.invalid && (quest.dependencyRequirement.completed ? isCompleted(dep) : isStarted(dep)));
 		}
-
-		if (quest.dependencyRequirement.one) {
-			for (QuestObject object : quest.dependencies) {
-				if (!object.invalid && (quest.dependencyRequirement.completed ? isCompleted(object) : isStarted(object))) {
-					return true;
-				}
-			}
-
-			return false;
-		}
-
-		for (QuestObject object : quest.dependencies) {
-			if (!object.invalid && (quest.dependencyRequirement.completed ? !isCompleted(object) : !isStarted(object))) {
-				return false;
-			}
-		}
-
-		return true;
 	}
 
 	public boolean canStartTasks(Quest quest) {
-		return areDependenciesComplete(quest);
+		return quest.getProgressionMode() == ProgressionMode.FLEXIBLE || areDependenciesComplete(quest);
 	}
 
 	public void claimReward(ServerPlayer player, Reward reward, boolean notify) {
@@ -707,30 +686,35 @@ public class TeamData {
 					task.onStarted(new QuestProgressEventData<>(now, this, task, getOnlineMembers(), Collections.emptyList()));
 				}
 
-				if (progress >= maxProgress) {
-					List<ServerPlayer> onlineMembers = getOnlineMembers();
-					List<ServerPlayer> notifiedPlayers;
-
-					if (!task.quest.chapter.alwaysInvisible && QuestObjectBase.sendNotifications.get(true)) {
-						notifiedPlayers = onlineMembers;
-					} else {
-						notifiedPlayers = Collections.emptyList();
-					}
-
-					task.onCompleted(new QuestProgressEventData<>(now, this, task, onlineMembers, notifiedPlayers));
-
-					for (ServerPlayer player : onlineMembers) {
-						FTBQuestsInventoryListener.detect(player, ItemStack.EMPTY, task.id);
-					}
-
-					if (isCompleted(task.quest)) {
-						setQuestPinned(task.quest.id, false);
-						new TogglePinnedResponseMessage(task.quest.id, false).sendTo(onlineMembers);
-					}
+				// if we're in flexible progress mode, we can get here without dependencies being complete yet
+				if (progress >= maxProgress && areDependenciesComplete(task.quest)) {
+					markTaskCompleted(task);
 				}
 			}
 
 			save();
+		}
+	}
+
+	public void markTaskCompleted(Task task) {
+		List<ServerPlayer> onlineMembers = getOnlineMembers();
+		List<ServerPlayer> notifiedPlayers;
+
+		if (!task.quest.chapter.alwaysInvisible && QuestObjectBase.sendNotifications.get(true)) {
+			notifiedPlayers = onlineMembers;
+		} else {
+			notifiedPlayers = Collections.emptyList();
+		}
+
+		task.onCompleted(new QuestProgressEventData<>(new Date(), this, task, onlineMembers, notifiedPlayers));
+
+		for (ServerPlayer player : onlineMembers) {
+			FTBQuestsInventoryListener.detect(player, ItemStack.EMPTY, task.id);
+		}
+
+		if (isCompleted(task.quest)) {
+			setQuestPinned(task.quest.id, false);
+			new TogglePinnedResponseMessage(task.quest.id, false).sendTo(onlineMembers);
 		}
 	}
 

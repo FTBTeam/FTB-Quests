@@ -14,6 +14,7 @@ import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.ui.misc.ButtonListBaseScreen;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
+import dev.ftb.mods.ftbquests.gui.quests.ContextMenuBuilder;
 import dev.ftb.mods.ftbquests.net.CreateObjectMessage;
 import dev.ftb.mods.ftbquests.net.EditObjectMessage;
 import dev.ftb.mods.ftbquests.quest.Chapter;
@@ -26,7 +27,6 @@ import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.TranslatableComponent;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -57,63 +57,66 @@ public class RewardTablesScreen extends ButtonListBaseScreen {
 				return;
 			}
 
-			List<ContextMenuItem> contextMenu = new ArrayList<>();
-			ClientQuestFile.INSTANCE.questScreen.addObjectMenuItems(contextMenu, RewardTablesScreen.this, table);
-			contextMenu.add(new ContextMenuItem(new TranslatableComponent("item.ftbquests.lootcrate"), Icons.ACCEPT, () -> {
-				if (table.lootCrate == null) {
-					table.lootCrate = new LootCrate(table);
-					Matcher matcher = Pattern.compile("[^a-z0-9_]").matcher(table.getTitle().getString().toLowerCase());
-					Matcher matcher1 = Pattern.compile("_{2,}").matcher(matcher.replaceAll("_"));
-					table.lootCrate.stringID = matcher1.replaceAll("_");
+			ContextMenuBuilder.create(table, ClientQuestFile.INSTANCE.questScreen)
+					.insertAtBottom(List.of(new ContextMenuItem(new TranslatableComponent("item.ftbquests.lootcrate"),
+							Icons.ACCEPT,
+							this::addLootCrate) {
+						@Override
+						public void drawIcon(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
+							(table.lootCrate != null ? Icons.ACCEPT : Icons.ACCEPT_GRAY).draw(matrixStack, x, y, w, h);
+						}
+					}))
+					.openContextMenu(RewardTablesScreen.this);
+		}
 
-					switch (table.lootCrate.stringID) {
-						case "common" -> {
-							table.lootCrate.color = Color4I.rgb(0x92999A);
-							table.lootCrate.drops.passive = 350;
-							table.lootCrate.drops.monster = 10;
-							table.lootCrate.drops.boss = 0;
-						}
-						case "uncommon" -> {
-							table.lootCrate.color = Color4I.rgb(0x37AA69);
-							table.lootCrate.drops.passive = 200;
-							table.lootCrate.drops.monster = 90;
-							table.lootCrate.drops.boss = 0;
-						}
-						case "rare" -> {
-							table.lootCrate.color = Color4I.rgb(0x0094FF);
-							table.lootCrate.drops.passive = 50;
-							table.lootCrate.drops.monster = 200;
-							table.lootCrate.drops.boss = 0;
-						}
-						case "epic" -> {
-							table.lootCrate.color = Color4I.rgb(0x8000FF);
-							table.lootCrate.drops.passive = 9;
-							table.lootCrate.drops.monster = 10;
-							table.lootCrate.drops.boss = 10;
-						}
-						case "legendary" -> {
-							table.lootCrate.color = Color4I.rgb(0xFFC147);
-							table.lootCrate.glow = true;
-							table.lootCrate.drops.passive = 1;
-							table.lootCrate.drops.monster = 1;
-							table.lootCrate.drops.boss = 190;
-						}
+		private void addLootCrate() {
+			if (table.lootCrate == null) {
+				table.lootCrate = new LootCrate(table);
+				Matcher matcher = Pattern.compile("[^a-z0-9_]").matcher(table.getTitle().getString().toLowerCase());
+				Matcher matcher1 = Pattern.compile("_{2,}").matcher(matcher.replaceAll("_"));
+				table.lootCrate.stringID = matcher1.replaceAll("_");
+
+				switch (table.lootCrate.stringID) {
+					case "common" -> {
+						table.lootCrate.color = Color4I.rgb(0x92999A);
+						table.lootCrate.drops.passive = 350;
+						table.lootCrate.drops.monster = 10;
+						table.lootCrate.drops.boss = 0;
 					}
-
-					title = table.getMutableTitle().withStyle(ChatFormatting.YELLOW);
-				} else {
-					table.lootCrate = null;
-					title = table.getTitle();
+					case "uncommon" -> {
+						table.lootCrate.color = Color4I.rgb(0x37AA69);
+						table.lootCrate.drops.passive = 200;
+						table.lootCrate.drops.monster = 90;
+						table.lootCrate.drops.boss = 0;
+					}
+					case "rare" -> {
+						table.lootCrate.color = Color4I.rgb(0x0094FF);
+						table.lootCrate.drops.passive = 50;
+						table.lootCrate.drops.monster = 200;
+						table.lootCrate.drops.boss = 0;
+					}
+					case "epic" -> {
+						table.lootCrate.color = Color4I.rgb(0x8000FF);
+						table.lootCrate.drops.passive = 9;
+						table.lootCrate.drops.monster = 10;
+						table.lootCrate.drops.boss = 10;
+					}
+					case "legendary" -> {
+						table.lootCrate.color = Color4I.rgb(0xFFC147);
+						table.lootCrate.glow = true;
+						table.lootCrate.drops.passive = 1;
+						table.lootCrate.drops.monster = 1;
+						table.lootCrate.drops.boss = 190;
+					}
 				}
 
-				new EditObjectMessage(table).sendToServer();
-			}) {
-				@Override
-				public void drawIcon(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
-					(table.lootCrate != null ? Icons.ACCEPT : Icons.ACCEPT_GRAY).draw(matrixStack, x, y, w, h);
-				}
-			});
-			getGui().openContextMenu(contextMenu);
+				title = table.getMutableTitle().withStyle(ChatFormatting.YELLOW);
+			} else {
+				table.lootCrate = null;
+				title = table.getTitle();
+			}
+
+			new EditObjectMessage(table).sendToServer();
 		}
 
 		@Override
@@ -180,13 +183,13 @@ public class RewardTablesScreen extends ButtonListBaseScreen {
 		return FTBQuestsTheme.INSTANCE;
 	}
 
-    @Override
-    public boolean keyPressed(Key key) {
-        if (key.esc()) {
-            onBack();
-            return true;
-        } else {
-            return super.keyPressed(key);
-        }
-    }
+	@Override
+	public boolean keyPressed(Key key) {
+		if (key.esc()) {
+			onBack();
+			return true;
+		} else {
+			return super.keyPressed(key);
+		}
+	}
 }

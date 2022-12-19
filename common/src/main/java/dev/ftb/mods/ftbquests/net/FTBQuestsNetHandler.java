@@ -52,13 +52,15 @@ public interface FTBQuestsNetHandler {
 	MessageType EDIT_OBJECT_RESPONSE = NET.registerS2C("edit_object_response", EditObjectResponseMessage::new);
 	MessageType MOVE_CHAPTER = NET.registerC2S("move_chapter", MoveChapterMessage::new);
 	MessageType MOVE_CHAPTER_RESPONSE = NET.registerS2C("move_chapter_response", MoveChapterResponseMessage::new);
-	MessageType MOVE_QUEST = NET.registerC2S("move_quest", MoveQuestMessage::new);
-	MessageType MOVE_QUEST_RESPONSE = NET.registerS2C("move_quest_response", MoveQuestResponseMessage::new);
+	MessageType MOVE_QUEST = NET.registerC2S("move_quest", MoveMovableMessage::new);
+	MessageType MOVE_QUEST_RESPONSE = NET.registerS2C("move_quest_response", MoveMovableResponseMessage::new);
 	MessageType CHANGE_CHAPTER_GROUP = NET.registerC2S("change_chapter_group", ChangeChapterGroupMessage::new);
 	MessageType CHANGE_CHAPTER_GROUP_RESPONSE = NET.registerS2C("change_chapter_group_response", ChangeChapterGroupResponseMessage::new);
 	MessageType MOVE_CHAPTER_GROUP = NET.registerC2S("move_chapter_group", MoveChapterGroupMessage::new);
 	MessageType MOVE_CHAPTER_GROUP_RESPONSE = NET.registerS2C("move_chapter_group_response", MoveChapterGroupResponseMessage::new);
 	MessageType SYNC_REWARD_BLOCKING = NET.registerS2C("sync_reward_blocking", SyncRewardBlockingMessage::new);
+	MessageType COPY_QUEST = NET.registerC2S("copy_quest", CopyQuestMessage::new);
+	MessageType COPY_CHAPTER_IMAGE = NET.registerC2S("copy_chapter_image", CopyChapterImageMessage::new);
 
 	static void init() {
 	}

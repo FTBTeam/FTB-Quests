@@ -4,25 +4,26 @@ import dev.architectury.networking.NetworkManager;
 import dev.architectury.networking.simple.BaseS2CMessage;
 import dev.architectury.networking.simple.MessageType;
 import dev.ftb.mods.ftbquests.FTBQuests;
+import dev.ftb.mods.ftbquests.quest.Movable;
 import net.minecraft.network.FriendlyByteBuf;
 
 /**
  * @author LatvianModder
  */
-public class MoveQuestResponseMessage extends BaseS2CMessage {
+public class MoveMovableResponseMessage extends BaseS2CMessage {
 	private final long id;
 	private final long chapter;
 	private final double x, y;
 
-	MoveQuestResponseMessage(FriendlyByteBuf buffer) {
+	MoveMovableResponseMessage(FriendlyByteBuf buffer) {
 		id = buffer.readLong();
 		chapter = buffer.readLong();
 		x = buffer.readDouble();
 		y = buffer.readDouble();
 	}
 
-	public MoveQuestResponseMessage(long i, long c, double _x, double _y) {
-		id = i;
+	public MoveMovableResponseMessage(Movable movable, long c, double _x, double _y) {
+		id = movable.getMovableID();
 		chapter = c;
 		x = _x;
 		y = _y;
