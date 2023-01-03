@@ -23,8 +23,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.jetbrains.annotations.Nullable;
