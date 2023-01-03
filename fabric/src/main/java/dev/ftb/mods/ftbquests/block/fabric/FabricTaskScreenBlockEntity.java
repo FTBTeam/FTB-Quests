@@ -5,6 +5,7 @@ import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.task.EnergyTask;
 import dev.ftb.mods.ftbquests.quest.task.FluidTask;
 import dev.ftb.mods.ftbquests.quest.task.ItemTask;
+import dev.latvian.mods.itemfilters.api.ItemFiltersAPI;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
@@ -65,7 +66,7 @@ public class FabricTaskScreenBlockEntity extends TaskScreenBlockEntity {
 
         @Override
         public long extract(ItemVariant extractedVariant, long maxAmount, TransactionContext transaction) {
-            if (!isInputOnly() && getTask() instanceof ItemTask task) {
+            if (!isInputOnly() && getTask() instanceof ItemTask task && !ItemFiltersAPI.isFilter(task.item)) {
                 TeamData data = getCachedTeamData();
                 if (data != null && data.canStartTasks(task.quest) && !data.isCompleted(task)) {
                     int itemsRemoved = (int) Math.min(data.getProgress(task), maxAmount);

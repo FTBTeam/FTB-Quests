@@ -6,6 +6,7 @@ import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.task.FluidTask;
 import dev.ftb.mods.ftbquests.quest.task.ItemTask;
 import dev.ftb.mods.ftbquests.quest.task.forge.ForgeEnergyTask;
+import dev.latvian.mods.itemfilters.api.ItemFiltersAPI;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.ItemStack;
@@ -103,7 +104,7 @@ public class ForgeTaskScreenBlockEntity extends TaskScreenBlockEntity {
         @NotNull
         @Override
         public ItemStack extractItem(int slot, int count, boolean simulate) {
-            if (!isInputOnly() && getTask() instanceof ItemTask task) {
+            if (!isInputOnly() && getTask() instanceof ItemTask task && !ItemFiltersAPI.isFilter(task.item)) {
                 TeamData data = getCachedTeamData();
                 if (data != null && data.canStartTasks(task.quest) && !data.isCompleted(task)) {
                     int itemsRemoved = (int) Math.min(data.getProgress(task), count);
