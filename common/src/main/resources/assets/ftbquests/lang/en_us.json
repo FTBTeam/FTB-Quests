@@ -170,6 +170,7 @@
 	"ftbquests.quest.hide_text_until_complete": "Hide Text Until Quest is Completed",
 	"ftbquests.quest.disable_jei": "Disable JEI Recipe",
 	"ftbquests.quest.optional": "Optional",
+	"ftbquests.quest.locked": "Locked: uncompleted dependencies",
 	"ftbquests.quest.min_width": "Min Opened Quest Window Width",
 	"ftbquests.quest.ignore_reward_blocking": "Ignore reward blocking",
 	"ftbquests.quest.ignore_reward_blocking.tooltip": "Offer the quest reward(s) even if rewards are blocked for the team by the '/ftbquests block_rewards' command",
