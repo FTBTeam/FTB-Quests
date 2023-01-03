@@ -11,7 +11,7 @@ import dev.ftb.mods.ftbquests.quest.QuestFile;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbteams.FTBTeamsAPI;
-import dev.ftb.mods.ftbteams.data.TeamRank;
+import dev.ftb.mods.ftbteams.data.Team;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -156,12 +156,12 @@ public class TaskScreenBlock extends BaseEntityBlock {
     @Override
     public InteractionResult use(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
         if (player instanceof ServerPlayer sp && level.getBlockEntity(blockPos) instanceof ITaskScreen taskScreen) {
-            TeamRank rank = FTBTeamsAPI.getHighestRank(taskScreen.getTeamId(), sp.getUUID());
-            if (!rank.isMember()) {
+            if (hasPermissionToEdit(sp, taskScreen)) {
+                taskScreen.getCoreScreen().ifPresent(coreScreen -> new TaskScreenConfigRequest(coreScreen.getBlockPos()).sendTo(sp));
+            } else {
                 sp.displayClientMessage(new TranslatableComponent("block.ftbquests.screen.no_permission").withStyle(ChatFormatting.RED), true);
                 return InteractionResult.FAIL;
             }
-            taskScreen.getCoreScreen().ifPresent(coreScreen -> new TaskScreenConfigRequest(coreScreen.getBlockPos()).sendTo(sp));
         }
         return InteractionResult.sidedSuccess(level.isClientSide);
     }
@@ -182,6 +182,17 @@ public class TaskScreenBlock extends BaseEntityBlock {
                 }
             }
         }
+    }
+
+    public static boolean hasPermissionToEdit(ServerPlayer player, ITaskScreen screen) {
+        // either the player must be the owner of the screen...
+        if (player.getUUID().equals(screen.getTeamId())) {
+            return true;
+        }
+
+        // ...or in the same team as the owner of the screen
+        Team team = FTBTeamsAPI.getManager().getTeamByID(screen.getTeamId());
+        return team != null && team.isMember(player.getUUID());
     }
 
     /**
