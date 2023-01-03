@@ -4,6 +4,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1902.4.5]
+
+### Added
+
+* Made locked quests (which can't be started due to incomplete dependencies) more obvious in the GUI
+  * Tooltip text when hovering the button states it's locked
+  * The dependency button (left arrow) in the view quest panel now pulses more obviously if the quest is currently locked
+* Quest link icon is now shown (top-left) in the view quest panel outside of edit mode too; click it to jump to the original quest
+* The view quest panel for quest with links now shows a second link button (top-right); click it to get a context menu of quests which link to this one
+
+### Fixed
+
+* Restored the "Delete" context menu entry for Rewards which went missing in the last release
+* Prevent invisible quest buttons from consuming mouse clicks (e.g. when an invisible quest is in the same position as a visible one)
+* Fixed dependency lines being drawn to invisible quests (and appearing to end... nowhere)
+* Fixed Task Screens allowing item filters to be pulled out of them
+* Fixed Task Screens not rendering items when the task has more than one type of item (e.g. when using an "OR" or "Tag" filter)
+
 ## [1902.4.4]
 
 ### Added
