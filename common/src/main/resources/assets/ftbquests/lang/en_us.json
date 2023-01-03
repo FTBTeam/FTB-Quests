@@ -242,6 +242,7 @@
 	"ftbquests.gui.paste_image": "Paste Image",
 	"ftbquests.gui.goto_linked_quest": "Go to Linked Quest (in chapter: %s)",
 	"ftbquests.gui.linked_quest_id": "Linked Quest ID: %s",
+	"ftbquests.gui.view_quest_links": "View Quest Link(s)",
 	"ftbquests.task": "Task",
 	"ftbquests.tasks": "Tasks",
 	"ftbquests.task.completed": "Task completed!",
