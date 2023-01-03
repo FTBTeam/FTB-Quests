@@ -205,7 +205,7 @@ public class QuestScreen extends BaseScreen {
 		}
 
 		long delId = deletionFocus == null ? object.id : deletionFocus.getMovableID();
-		QuestObject delObject = ClientQuestFile.INSTANCE.get(delId);
+		QuestObjectBase delObject = ClientQuestFile.INSTANCE.getBase(delId);
 		if (delObject != null) {
 			ContextMenuItem delete = new ContextMenuItem(new TranslatableComponent("selectServer.delete"),
 					ThemeProperties.DELETE_ICON.get(),
