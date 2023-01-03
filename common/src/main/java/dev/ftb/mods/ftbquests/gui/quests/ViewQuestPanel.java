@@ -363,9 +363,8 @@ public class ViewQuestPanel extends Panel {
 		super.tick();
 
 		if (quest != null && quest.hasDependencies() && !questScreen.file.self.canStartTasks(quest) && buttonOpenDependencies != null) {
-			Color4I col = Minecraft.getInstance().level.getGameTime() % 40 < 20 ?
-					ThemeProperties.QUEST_VIEW_TITLE.get() :
-					ThemeProperties.QUEST_VIEW_BORDER.get();
+			float red = Mth.sin((System.currentTimeMillis() % 1200) * (3.1415927f / 1200f));
+			Color4I col = Color4I.rgb((int) (red * 127 + 63), 0, 0);
 			buttonOpenDependencies.setIcon(Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/arrow_left.png").withTint(col));
 		}
 	}
