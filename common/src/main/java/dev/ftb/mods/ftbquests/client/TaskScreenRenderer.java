@@ -6,6 +6,7 @@ import com.mojang.math.Vector3f;
 import dev.architectury.hooks.fluid.FluidStackHooks;
 import dev.ftb.mods.ftblibrary.icon.AtlasSpriteIcon;
 import dev.ftb.mods.ftblibrary.icon.Icon;
+import dev.ftb.mods.ftblibrary.icon.IconAnimation;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.block.TaskScreenBlock;
@@ -140,6 +141,10 @@ public class TaskScreenRenderer implements BlockEntityRenderer<TaskScreenBlockEn
 
         poseStack.pushPose();
         poseStack.scale(1 / 16f, 1 / 16f, 1 / 16f);
+
+        if (icon instanceof IconAnimation anim) {
+            icon = anim.list.get((int)(System.currentTimeMillis() / 1000L % (long)anim.list.size()));
+        }
 
         if (task instanceof FluidTask fluidTask && fluidTask.getIcon() instanceof AtlasSpriteIcon as && FTBQuestsClientEventHandler.tankSprite != null) {
             TextureAtlasSprite sprite = Minecraft.getInstance().getModelManager().getAtlas(InventoryMenu.BLOCK_ATLAS).getSprite(as.id);

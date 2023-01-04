@@ -21,10 +21,10 @@ import dev.ftb.mods.ftbquests.quest.task.TaskTypes;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.jetbrains.annotations.Nullable;
@@ -205,7 +205,7 @@ public class QuestPanel extends Panel {
 				boolean complete = !unavailable && questScreen.file.self != null && questScreen.file.self.isCompleted(qb.quest);
 
 				for (QuestButton button : qb.getDependencies()) {
-					if (button.quest != selectedQuest && qb.quest != selectedQuest) {
+					if (button.shouldDraw() && button.quest != selectedQuest && qb.quest != selectedQuest) {
 						int r, g, b, a;
 						if (complete) {
 							Color4I c = ThemeProperties.DEPENDENCY_LINE_COMPLETED_COLOR.get(questScreen.selectedChapter);
