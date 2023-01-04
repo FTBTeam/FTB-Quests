@@ -34,7 +34,7 @@ import static dev.ftb.mods.ftbquests.block.TaskScreenBlock.FACING;
 
 public class TaskScreenBlockEntity extends BlockEntity implements ITaskScreen {
     private long taskId = 0L;
-    protected Task task = null;
+    private Task task = null;
     private boolean indestructible = false;
     private boolean inputOnly = false;
     private boolean textShadow = false;

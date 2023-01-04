@@ -54,7 +54,7 @@ public class QuestButton extends Button implements QuestPositionableButton {
 
 	@Override
 	public boolean checkMouseOver(int mouseX, int mouseY) {
-		if (questScreen.movingObjects || questScreen.viewQuestPanel.isMouseOver() || questScreen.chapterPanel.isMouseOver()) {
+		if (!shouldDraw() || questScreen.movingObjects || questScreen.viewQuestPanel.isMouseOver() || questScreen.chapterPanel.isMouseOver()) {
 			return false;
 		}
 
@@ -297,6 +297,9 @@ public class QuestButton extends Button implements QuestPositionableButton {
 		}
 		if (quest.canRepeat) {
 			list.add(Component.translatable("ftbquests.quest.can_repeat").withStyle(ChatFormatting.GRAY));
+		}
+		if (!questScreen.file.self.canStartTasks(quest)) {
+			list.add(Component.literal("[").withStyle(ChatFormatting.DARK_GRAY).append(Component.translatable("ftbquests.quest.locked")).append("]"));
 		}
 	}
 
