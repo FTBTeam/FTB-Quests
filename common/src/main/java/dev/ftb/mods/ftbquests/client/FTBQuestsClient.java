@@ -33,9 +33,11 @@ import me.shedaniel.architectury.registry.ReloadListeners;
 import me.shedaniel.architectury.registry.RenderTypes;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.StringTag;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
@@ -242,7 +244,11 @@ public class FTBQuestsClient extends FTBQuestsCommon {
 
 	@Override
 	public void openGui() {
-		ClientQuestFile.INSTANCE.openQuestGui();
+		if (ClientQuestFile.exists()) {
+			ClientQuestFile.INSTANCE.openQuestGui();
+		} else {
+			Minecraft.getInstance().getToasts().addToast(new SystemToast(SystemToast.SystemToastIds.TUTORIAL_HINT, new TextComponent("Error?! Server doesn't have FTB Quests!"), null));
+		}
 	}
 
 	@Override

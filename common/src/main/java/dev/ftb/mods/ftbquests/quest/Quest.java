@@ -700,10 +700,6 @@ public final class Quest extends QuestObject implements Movable {
 		}
 	}
 
-	public boolean isProgressionIgnored() {
-		return optional;
-	}
-
 	public List<QuestObject> getDependants() {
 		List<QuestObject> list = new ArrayList<>();
 
@@ -741,5 +737,10 @@ public final class Quest extends QuestObject implements Movable {
 		}
 
 		return false;
+	}
+
+	@Override
+	public boolean countsTowardParentCompletion() {
+		return !optional;
 	}
 }
