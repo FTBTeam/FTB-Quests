@@ -203,7 +203,7 @@ public class QuestPanel extends Panel {
 				boolean complete = !unavailable && questScreen.file.self != null && questScreen.file.self.isCompleted(qb.quest);
 
 				for (QuestButton button : qb.getDependencies()) {
-					if (button.quest != selectedQuest && qb.quest != selectedQuest) {
+					if (button.shouldDraw() && button.quest != selectedQuest && qb.quest != selectedQuest) {
 						int r, g, b, a;
 						if (complete) {
 							Color4I c = ThemeProperties.DEPENDENCY_LINE_COMPLETED_COLOR.get(questScreen.selectedChapter);
