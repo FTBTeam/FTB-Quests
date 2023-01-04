@@ -17,7 +17,7 @@ public class QuestLinkButton extends QuestButton {
 
     @Override
     public Position getPosition() {
-        return new Position(link.getX(), link.getY(), quest.size, quest.size);
+        return new Position(link.getX(), link.getY(), link.getWidth(), link.getHeight());
     }
 
     @Override
@@ -37,5 +37,10 @@ public class QuestLinkButton extends QuestButton {
             ThemeProperties.LINK_ICON.get().draw(matrixStack, 0, 0, 1, 1);
             matrixStack.popPose();
         }
+    }
+
+    @Override
+    protected String getShape() {
+        return link.getShape();
     }
 }
