@@ -1,7 +1,12 @@
 package dev.ftb.mods.ftbquests.quest;
 
+import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.icon.Icon;
+import dev.ftb.mods.ftblibrary.util.ClientUtils;
+import dev.ftb.mods.ftbquests.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.net.MoveMovableMessage;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -14,10 +19,15 @@ public class QuestLink extends QuestObject implements Movable {
 
     private double x;
     private double y;
+    private String shape;
+    private double size;
 
     public QuestLink(Chapter chapter, long linkId) {
         this.chapter = chapter;
         this.linkId = linkId;
+
+        shape = "";
+        size = 1D;
     }
 
     @Override
@@ -66,12 +76,39 @@ public class QuestLink extends QuestObject implements Movable {
     }
 
     @Override
+    public void getConfig(ConfigGroup config) {
+        super.getConfig(config);
+
+        config.addEnum("shape", shape.isEmpty() ? "default" : shape, v -> shape = v.equals("default") ? "" : v, QuestShape.idMapWithDefault);
+        config.addDouble("size", size, v -> size = v, 1, 0.0625D, 8D);
+        config.addDouble("x", x, v -> x = v, 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+        config.addDouble("y", y, v -> y = v, 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+    }
+
+    @Override
+    @Environment(EnvType.CLIENT)
+    public void editedFromGUI() {
+        QuestScreen gui = ClientUtils.getCurrentGuiAs(QuestScreen.class);
+
+        if (gui != null) {
+            gui.questPanel.refreshWidgets();
+            gui.viewQuestPanel.refreshWidgets();
+        }
+    }
+
+    @Override
     public void writeData(CompoundTag nbt) {
         super.writeData(nbt);
 
         nbt.putString("linked_quest", getCodeString(linkId));
         nbt.putDouble("x", x);
         nbt.putDouble("y", y);
+        if (!shape.isEmpty()) {
+            nbt.putString("shape", shape);
+        }
+        if (size != 1D) {
+            nbt.putDouble("size", size);
+        }
     }
 
     @Override
@@ -81,6 +118,11 @@ public class QuestLink extends QuestObject implements Movable {
         linkId = Long.parseLong(nbt.getString("linked_quest"), 16);
         x = nbt.getDouble("x");
         y = nbt.getDouble("y");
+        shape = nbt.getString("shape");
+        if (shape.equals("default")) {
+            shape = "";
+        }
+        size = nbt.contains("size") ? nbt.getDouble("size") : 1D;
     }
 
     @Override
@@ -90,6 +132,8 @@ public class QuestLink extends QuestObject implements Movable {
         buffer.writeLong(linkId);
         buffer.writeDouble(x);
         buffer.writeDouble(y);
+        buffer.writeDouble(size);
+        buffer.writeUtf(shape);
     }
 
     @Override
@@ -99,6 +143,8 @@ public class QuestLink extends QuestObject implements Movable {
         linkId = buffer.readLong();
         x = buffer.readDouble();
         y = buffer.readDouble();
+        size = buffer.readDouble();
+        shape = buffer.readUtf(64);
     }
 
     public void setPosition(double qx, double qy) {
@@ -128,17 +174,17 @@ public class QuestLink extends QuestObject implements Movable {
 
     @Override
     public double getWidth() {
-        return getQuest().map(Quest::getWidth).orElse(20.0);
+        return size;
     }
 
     @Override
     public double getHeight() {
-        return getQuest().map(Quest::getHeight).orElse(20.0);
+        return size;
     }
 
     @Override
     public String getShape() {
-        return getQuest().map(Quest::getShape).orElse("");
+        return shape.isEmpty() ? chapter.getDefaultQuestShape() : shape;
     }
 
     @Override

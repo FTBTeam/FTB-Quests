@@ -188,6 +188,15 @@ public class QuestScreen extends BaseScreen {
 				() -> object.onEditButtonClicked(gui))
 		);
 
+		if (object instanceof QuestLink link) {
+			link.getQuest().ifPresent(quest -> {
+				contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.edit_linked_quest"),
+						ThemeProperties.EDIT_ICON.get(),
+						() -> quest.onEditButtonClicked(gui))
+				);
+			});
+		}
+
 		if (!subGroup.getValues().isEmpty()) {
 			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.copy_id.quick_properties"),
 					Icons.SETTINGS,
