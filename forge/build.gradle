@@ -92,8 +92,8 @@ if (ENV.CURSEFORGE_KEY) {
 				requiredDependency 'architectury-api'
 				requiredDependency 'ftb-teams-forge'
 				requiredDependency 'ftb-library-forge'
-				requiredDependency 'item-filters-forge'
-				optionalDependency 'kubejs-forge'
+				requiredDependency 'item-filters'
+				optionalDependency 'kubejs'
 				optionalDependency 'jei'
 			}
 			changelog = getGitChangelog
