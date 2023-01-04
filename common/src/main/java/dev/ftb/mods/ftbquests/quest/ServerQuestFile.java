@@ -15,6 +15,7 @@ import dev.ftb.mods.ftbquests.quest.task.TaskType;
 import dev.ftb.mods.ftbquests.quest.task.TaskTypes;
 import dev.ftb.mods.ftbquests.util.FTBQuestsInventoryListener;
 import dev.ftb.mods.ftbquests.util.FileUtils;
+import dev.ftb.mods.ftbteams.FTBTeamsAPI;
 import dev.ftb.mods.ftbteams.data.PartyTeam;
 import dev.ftb.mods.ftbteams.data.PlayerTeam;
 import dev.ftb.mods.ftbteams.event.PlayerChangedTeamEvent;
@@ -78,6 +79,7 @@ public class ServerQuestFile extends QuestFile {
 		Path path = server.getWorldPath(FTBQUESTS_DATA);
 
 		if (Files.exists(path)) {
+			FTBQuests.LOGGER.info("Loading quest progression data from " + folder);
 			try (Stream<Path> s = Files.list(path)) {
 				s.filter(p -> p.getFileName().toString().contains("-") && p.getFileName().toString().endsWith(".snbt")).forEach(path1 -> {
 					SNBTCompoundTag nbt = SNBT.read(path1);
@@ -179,10 +181,14 @@ public class ServerQuestFile extends QuestFile {
 		ServerPlayer player = event.getPlayer();
 		TeamData data = getData(event.getTeam());
 
+		FTBQuests.LOGGER.debug("received teams login event for player {}, team = {}", player.getUUID(), data.name);
 		new SyncQuestsMessage(this).sendTo(player);
 
 		for (TeamData teamData : teamDataMap.values()) {
-			new SyncTeamDataMessage(teamData, teamData == data).sendTo(player);
+			if (FTBTeamsAPI.getManager().getTeamByID(teamData.uuid) != null) {
+				FTBQuests.LOGGER.debug("sending team data for team {} to player {}, self = {}", teamData.name, player.getUUID(), data == teamData);
+				new SyncTeamDataMessage(teamData, teamData == data).sendTo(player);
+			}
 		}
 
 		player.inventoryMenu.addSlotListener(new FTBQuestsInventoryListener(player));
