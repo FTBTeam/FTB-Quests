@@ -277,6 +277,7 @@ public final class Quest extends QuestObject implements Movable {
 		flags = Bits.setFlag(flags, 2, !description.isEmpty());
 		flags = Bits.setFlag(flags, 4, size != 1D);
 		flags = Bits.setFlag(flags, 8, !guidePage.isEmpty());
+		flags = Bits.setFlag(flags, 16, ignoreRewardBlocking);
 		//implement others
 		//flags = Bits.setFlag(flags, 32, !customClick.isEmpty());
 		flags = Bits.setFlag(flags, 64, canRepeat);
@@ -322,13 +323,10 @@ public final class Quest extends QuestObject implements Movable {
 			buffer.writeVarInt(minWidth);
 		}
 
-		buffer.writeBoolean(canRepeat);
-
 		if (invisibleUntilTasks > 0) {
 			buffer.writeVarInt(invisibleUntilTasks);
 		}
 
-		buffer.writeBoolean(ignoreRewardBlocking);
 		ProgressionMode.NAME_MAP.write(buffer, progressionMode);
 	}
 
@@ -353,7 +351,6 @@ public final class Quest extends QuestObject implements Movable {
 
 		guidePage = Bits.getFlag(flags, 8) ? buffer.readUtf(Short.MAX_VALUE) : "";
 		//customClick = Bits.getFlag(flags, 32) ? data.readString() : "";
-		optional = Bits.getFlag(flags, 64);
 
 		minRequiredDependencies = buffer.readVarInt();
 		dependencyRequirement = DependencyRequirement.NAME_MAP.read(buffer);
@@ -370,10 +367,11 @@ public final class Quest extends QuestObject implements Movable {
 
 		size = Bits.getFlag(flags, 4) ? buffer.readDouble() : 1D;
 		minWidth = Bits.getFlag(flags, 512) ? buffer.readVarInt() : 0;
-		canRepeat = buffer.readBoolean();
+		ignoreRewardBlocking = Bits.getFlag(flags, 16);
+		canRepeat = Bits.getFlag(flags, 64);
 		invisible = Bits.getFlag(flags, 128);
+		optional = Bits.getFlag(flags, 256);
 		invisibleUntilTasks = Bits.getFlag(flags, 1024) ? buffer.readVarInt() : 0;
-		ignoreRewardBlocking = buffer.readBoolean();
 		progressionMode = ProgressionMode.NAME_MAP.read(buffer);
 	}
 
