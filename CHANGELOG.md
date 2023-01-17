@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 * Fixed changes to Task Screens not being sync'd to nearby players on SMP 
 * Fixed the "Optional" quest flag not being sync'd correctly to clients
+* Fixed Observation task crashing if given a resource location with bad syntax (for block tag and entity type tag observation types)
 
 ## [1902.4.5]
 
