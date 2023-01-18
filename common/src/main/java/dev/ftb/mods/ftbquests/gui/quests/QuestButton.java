@@ -167,7 +167,7 @@ public class QuestButton extends Button implements QuestPositionableButton {
 
 				getGui().openContextMenu(contextMenu);
 			} else {
-				ContextMenuBuilder.create(quest, questScreen)
+				ContextMenuBuilder.create(theQuestObject(), questScreen)
 						.withDeletionFocus(moveAndDeleteFocus())
 						.insertAtTop(List.of(new TooltipContextMenuItem(new TranslatableComponent("gui.move"),
 								ThemeProperties.MOVE_UP_ICON.get(quest),
@@ -343,7 +343,7 @@ public class QuestButton extends Button implements QuestPositionableButton {
 			hiddenIcon = ThemeProperties.HIDDEN_ICON.get();
 		}
 
-		QuestShape shape = QuestShape.get(quest.getShape());
+		QuestShape shape = QuestShape.get(getShape());
 
 		shape.shape.withColor(Color4I.DARK_GRAY).draw(matrixStack, x, y, w, h);
 		shape.background.withColor(Color4I.WHITE.withAlpha(150)).draw(matrixStack, x, y, w, h);
@@ -402,6 +402,10 @@ public class QuestButton extends Button implements QuestPositionableButton {
 			hiddenIcon.draw(matrixStack, 0, 0, 1, 1);
 			matrixStack.popPose();
 		}
+	}
+
+	protected String getShape() {
+		return quest.getShape();
 	}
 
 	/**

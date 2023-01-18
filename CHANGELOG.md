@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1802.3.13]
+
+### Added
+* Quest Links can now be configured more independently of the quest they link to
+  * They can have their own size and shape now
+  * Editing a Quest Link via the "Edit" context menu now pops up a config screen with only the link properties
+  * A new "Edit Linked Quest" context menu entry has been added to allow editing of the original quest via the link GUI item
+
+### Fixed
+* Fixed changes to Task Screens not being sync'd to nearby players on SMP
+* Fixed the "Optional" quest flag not being sync'd correctly to clients
+* Fixed Observation task crashing if given a resource location with bad syntax (for block tag and entity type tag observation types)
+
 ## [1802.3.12]
 
 ### Added

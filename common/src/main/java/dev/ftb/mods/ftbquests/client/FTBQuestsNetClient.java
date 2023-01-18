@@ -31,6 +31,7 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon {
 
 		if (self) {
 			ClientQuestFile.INSTANCE.self = data;
+			FTBQuests.LOGGER.debug("received self team data from server!");
 		}
 	}
 

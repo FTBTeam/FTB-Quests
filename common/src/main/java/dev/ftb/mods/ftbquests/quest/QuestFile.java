@@ -868,7 +868,7 @@ public abstract class QuestFile extends QuestObject {
 			}
 		}
 
-		FTBQuests.LOGGER.debug("Wrote " + (buffer.writerIndex() - pos) + " bytes, " + map.size() + " objects");
+		FTBQuests.LOGGER.debug("sent quest book to client: {} objects in {} bytes", map.size(), buffer.writerIndex() - pos);
 	}
 
 	public final void readNetDataFull(FriendlyByteBuf buffer) {
@@ -1006,7 +1006,7 @@ public abstract class QuestFile extends QuestObject {
 
 		updateLootCrates();
 
-		FTBQuests.LOGGER.info("Read " + (buffer.readerIndex() - pos) + " bytes, " + map.size() + " objects");
+		FTBQuests.LOGGER.debug("received quest book from server: {} objects in {} bytes", map.size(), buffer.readerIndex() - pos);
 	}
 
 	@Override
