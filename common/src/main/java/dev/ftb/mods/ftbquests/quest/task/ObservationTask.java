@@ -9,6 +9,7 @@ import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.ResourceLocationException;
 import net.minecraft.commands.arguments.blocks.BlockInput;
 import net.minecraft.commands.arguments.blocks.BlockStateParser;
 import net.minecraft.core.Registry;
@@ -25,6 +26,8 @@ import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
+
+import java.util.Optional;
 
 /**
  * @author LatvianModder
@@ -107,8 +110,7 @@ public class ObservationTask extends BooleanTask {
 			return false;
 		}
 
-		if (result instanceof BlockHitResult) {
-			BlockHitResult blockResult = (BlockHitResult) result;
+		if (result instanceof BlockHitResult blockResult) {
 			BlockInWorld blockInWorld = new BlockInWorld(player.level, blockResult.getBlockPos(), false);
 
 			BlockState state = blockInWorld.getState();
@@ -119,7 +121,9 @@ public class ObservationTask extends BooleanTask {
 				case BLOCK:
 					return String.valueOf(Registries.getId(block, Registry.BLOCK_REGISTRY)).equals(toObserve);
 				case BLOCK_TAG:
-					return state.is(TagKey.create(Registry.BLOCK_REGISTRY, new ResourceLocation(toObserve)));
+					return asTagRL(toObserve)
+							.map(rl -> state.is(TagKey.create(Registry.BLOCK_REGISTRY, rl)))
+							.orElse(false);
 				case BLOCK_STATE:
 					BlockInput stateMatch = tryMatchBlock(toObserve, false);
 					return stateMatch != null && stateMatch.test(blockInWorld);
@@ -131,16 +135,25 @@ public class ObservationTask extends BooleanTask {
 				default:
 					return false;
 			}
-		} else if (result instanceof EntityHitResult) {
-			EntityHitResult entityResult = (EntityHitResult) result;
+		} else if (result instanceof EntityHitResult entityResult) {
 			if (observeType == ObserveType.ENTITY_TYPE) {
 				return toObserve.equals(String.valueOf(Registries.getId(entityResult.getEntity().getType(), Registry.ENTITY_TYPE_REGISTRY)));
 			} else if (observeType == ObserveType.ENTITY_TYPE_TAG) {
-				return entityResult.getEntity().getType().is(TagKey.create(Registry.ENTITY_TYPE_REGISTRY, new ResourceLocation(toObserve)));
+				return asTagRL(toObserve)
+						.map(rl -> entityResult.getEntity().getType().is(TagKey.create(Registry.ENTITY_TYPE_REGISTRY, rl)))
+						.orElse(false);
 			}
 		}
 
 		return false;
+	}
+
+	private Optional<ResourceLocation> asTagRL(String str) {
+		try {
+			return Optional.of(new ResourceLocation(str.startsWith("#") ? str.substring(1) : str));
+		} catch (ResourceLocationException e) {
+			return Optional.empty();
+		}
 	}
 
 	private BlockInput tryMatchBlock(String string, boolean parseNbt) {
