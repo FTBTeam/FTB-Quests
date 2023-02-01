@@ -49,6 +49,7 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 	public Tristate onlyFromCrafting;
 	public Tristate matchNBT;
 	public boolean weakNBTmatch;
+	public boolean taskScreenOnly;
 
 	public ItemTask(Quest quest) {
 		super(quest);
@@ -58,6 +59,7 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 		onlyFromCrafting = Tristate.DEFAULT;
 		matchNBT = Tristate.DEFAULT;
 		weakNBTmatch = false;
+		taskScreenOnly = false;
 	}
 
 	@Override
@@ -85,6 +87,9 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 		if (weakNBTmatch) {
 			nbt.putBoolean("weak_nbt_match", true);
 		}
+		if (taskScreenOnly) {
+			nbt.putBoolean("task_screen_only", true);
+		}
 	}
 
 	@Override
@@ -96,6 +101,7 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 		onlyFromCrafting = Tristate.read(nbt, "only_from_crafting");
 		matchNBT = Tristate.read(nbt, "match_nbt");
 		weakNBTmatch = nbt.getBoolean("weak_nbt_match");
+		taskScreenOnly = nbt.getBoolean("task_screen_only");
 	}
 
 	@Override
@@ -110,6 +116,7 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 		flags = Bits.setFlag(flags, 0x20, matchNBT != Tristate.DEFAULT);
 		flags = Bits.setFlag(flags, 0x40, matchNBT == Tristate.TRUE);
 		flags = Bits.setFlag(flags, 0x80, weakNBTmatch);
+		flags = Bits.setFlag(flags, 0x100, taskScreenOnly);
 		buffer.writeVarInt(flags);
 
 		FTBQuestsNetHandler.writeItemType(buffer, item);
@@ -130,6 +137,7 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 		onlyFromCrafting = Bits.getFlag(flags, 0x08) ? Bits.getFlag(flags, 0x10) ? Tristate.TRUE : Tristate.FALSE : Tristate.DEFAULT;
 		matchNBT = Bits.getFlag(flags, 0x20) ? Bits.getFlag(flags, 0x40) ? Tristate.TRUE : Tristate.FALSE : Tristate.DEFAULT;
 		weakNBTmatch = Bits.getFlag(flags, 0x80);
+		taskScreenOnly = Bits.getFlag(flags, 0x100);
 	}
 
 	public List<ItemStack> getValidDisplayItems() {
@@ -224,6 +232,7 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 		config.addEnum("only_from_crafting", onlyFromCrafting, v -> onlyFromCrafting = v, Tristate.NAME_MAP);
 		config.addEnum("match_nbt", matchNBT, v -> matchNBT = v, Tristate.NAME_MAP);
 		config.addBool("weak_nbt_match", weakNBTmatch, v -> weakNBTmatch = v, false);
+		config.addBool("task_screen_only", taskScreenOnly, v -> taskScreenOnly = v, false);
 	}
 
 	@Override
@@ -282,7 +291,10 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 	@Override
 	@Environment(EnvType.CLIENT)
 	public void addMouseOverText(TooltipList list, TeamData teamData) {
-		if (consumesResources()) {
+		if (taskScreenOnly) {
+			list.blankLine();
+			list.add(new TranslatableComponent("ftbquests.task.task_screen_only").withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE));
+		} else if (consumesResources()) {
 			list.blankLine();
 			list.add(new TranslatableComponent("ftbquests.task.click_to_submit").withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE));
 		} else if (getValidDisplayItems().size() > 1) {
@@ -314,7 +326,7 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 
 	@Override
 	public void submitTask(TeamData teamData, ServerPlayer player, ItemStack craftedItem) {
-		if (teamData.isCompleted(this) || item.getItem() instanceof MissingItem || craftedItem.getItem() instanceof MissingItem) {
+		if (taskScreenOnly || teamData.isCompleted(this) || item.getItem() instanceof MissingItem || craftedItem.getItem() instanceof MissingItem) {
 			return;
 		}
 
@@ -323,47 +335,29 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 				if (!craftedItem.isEmpty() && test(craftedItem)) {
 					teamData.addProgress(this, craftedItem.getCount());
 				}
-
-				return;
+			} else {
+				long c = Math.min(count, player.getInventory().items.stream().filter(this).mapToLong(ItemStack::getCount).sum());
+				if (c > teamData.getProgress(this)) {
+					teamData.setProgress(this, c);
+				}
 			}
+		} else if (craftedItem.isEmpty()) {
+			boolean changed = false;
 
-			long c = 0;
+			for (int i = 0; i < player.getInventory().items.size(); i++) {
+				ItemStack stack = player.getInventory().items.get(i);
+				ItemStack stack1 = insert(teamData, stack, false);
 
-			for (ItemStack stack : player.getInventory().items) {
-				if (!stack.isEmpty() && test(stack)) {
-					c += stack.getCount();
+				if (stack != stack1) {
+					changed = true;
+					player.getInventory().items.set(i, stack1.isEmpty() ? ItemStack.EMPTY : stack1);
 				}
 			}
 
-			c = Math.min(count, c);
-
-			if (c > teamData.getProgress(this)) {
-				teamData.setProgress(this, c);
-				return;
+			if (changed) {
+				player.getInventory().setChanged();
+				player.containerMenu.broadcastChanges();
 			}
-
-			return;
-		}
-
-		if (!craftedItem.isEmpty()) {
-			return;
-		}
-
-		boolean changed = false;
-
-		for (int i = 0; i < player.getInventory().items.size(); i++) {
-			ItemStack stack = player.getInventory().items.get(i);
-			ItemStack stack1 = insert(teamData, stack, false);
-
-			if (stack != stack1) {
-				changed = true;
-				player.getInventory().items.set(i, stack1.isEmpty() ? ItemStack.EMPTY : stack1);
-			}
-		}
-
-		if (changed) {
-			player.getInventory().setChanged();
-			player.containerMenu.broadcastChanges();
 		}
 	}
 }
