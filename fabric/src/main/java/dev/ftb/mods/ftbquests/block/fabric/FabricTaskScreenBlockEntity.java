@@ -12,6 +12,7 @@ import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.SingleVariantStorage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import team.reborn.energy.api.EnergyStorage;
 
@@ -50,16 +51,18 @@ public class FabricTaskScreenBlockEntity extends TaskScreenBlockEntity {
 
         @Override
         public long insert(ItemVariant insertedVariant, long maxAmount, TransactionContext transaction) {
-            if (getTask() instanceof ItemTask task && insertedVariant.matches(task.item)) {
-                TeamData data = getCachedTeamData();
-                if (data != null && data.canStartTasks(task.quest) && !data.isCompleted(task)) {
-                    updateSnapshots(transaction);
-                    int toAdd = (int) Math.min(maxAmount, task.getMaxProgress() - data.getProgress(task));
+            TeamData data = getCachedTeamData();
+            ItemStack stack = insertedVariant.toStack();
+            if (getTask() instanceof ItemTask task && data.canStartTasks(task.quest)) {
+                // task.insert() handles testing the item is valid and the task isn't already completed
+                ItemStack res = task.insert(data, stack, true);
+                int nAdded = stack.getCount() - res.getCount();
+                if (nAdded > 0) {
                     transaction.addCloseCallback((transaction1, result) -> {
-                        if (result.wasCommitted()) data.addProgress(task, toAdd);
+                        if (result.wasCommitted()) data.addProgress(task, nAdded);
                     });
-                    return toAdd;
                 }
+                return nAdded;
             }
             return 0L;
         }
