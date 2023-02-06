@@ -307,7 +307,7 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 	}
 
 	public ItemStack insert(TeamData teamData, ItemStack stack, boolean simulate) {
-		if (!teamData.isCompleted(this) && test(stack)) {
+		if (!teamData.isCompleted(this) && consumesResources() && test(stack)) {
 			long add = Math.min(stack.getCount(), count - teamData.getProgress(this));
 
 			if (add > 0L) {
@@ -359,5 +359,9 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 				player.containerMenu.broadcastChanges();
 			}
 		}
+	}
+
+	public boolean isTaskScreenOnly() {
+		return taskScreenOnly;
 	}
 }
