@@ -60,6 +60,7 @@ public final class Quest extends QuestObject implements Movable {
 	public int minRequiredDependencies;
 	public Tristate hideTextUntilComplete;
 	public Tristate disableJEI;
+	public Tristate hideDetailsUntilStartable;
 	public double size;
 	public boolean optional;
 	public int minWidth;
@@ -149,9 +150,7 @@ public final class Quest extends QuestObject implements Movable {
 			nbt.putString("guide_page", guidePage);
 		}
 
-		if (hideDependencyLines != Tristate.DEFAULT) {
-			nbt.putBoolean("hide_dependency_lines", hideDependencyLines.isTrue());
-		}
+		hideDependencyLines.write(nbt, "hide_dependency_lines");
 
 		if (minRequiredDependencies > 0) {
 			nbt.putInt("min_required_dependencies", (byte) minRequiredDependencies);
@@ -167,17 +166,13 @@ public final class Quest extends QuestObject implements Movable {
 			nbt.put("dependencies", deps);
 		}
 
-		if (hide != Tristate.DEFAULT) {
-			nbt.putBoolean("hide", hide.isTrue());
-		}
+		hide.write(nbt, "hide");
 
 		if (dependencyRequirement != DependencyRequirement.ALL_COMPLETED) {
 			nbt.putString("dependency_requirement", dependencyRequirement.id);
 		}
 
-		if (hideTextUntilComplete != Tristate.DEFAULT) {
-			nbt.putBoolean("hide_text_until_complete", hideTextUntilComplete.isTrue());
-		}
+		hideTextUntilComplete.write(nbt,"hide_text_until_complete");
 
 		if (size != 1D) {
 			nbt.putDouble("size", size);
@@ -209,6 +204,8 @@ public final class Quest extends QuestObject implements Movable {
 		if (progressionMode != ProgressionMode.DEFAULT) {
 			nbt.putString("progression_mode", progressionMode.getId());
 		}
+
+		hideDetailsUntilStartable.write(nbt, "hide_details_until_startable");
 	}
 
 	@Override
@@ -268,24 +265,27 @@ public final class Quest extends QuestObject implements Movable {
 		invisibleUntilTasks = nbt.getInt("invisible_until_tasks");
 		ignoreRewardBlocking = nbt.getBoolean("ignore_reward_blocking");
 		progressionMode = ProgressionMode.NAME_MAP.get(nbt.getString("progression_mode"));
+		hideDetailsUntilStartable = Tristate.read(nbt, "hide_details_until_startable");
 	}
 
 	@Override
 	public void writeNetData(FriendlyByteBuf buffer) {
 		super.writeNetData(buffer);
 		int flags = 0;
-		flags = Bits.setFlag(flags, 1, !subtitle.isEmpty());
-		flags = Bits.setFlag(flags, 2, !description.isEmpty());
-		flags = Bits.setFlag(flags, 4, size != 1D);
-		flags = Bits.setFlag(flags, 8, !guidePage.isEmpty());
-		flags = Bits.setFlag(flags, 16, ignoreRewardBlocking);
+		flags = Bits.setFlag(flags, 0x01, !subtitle.isEmpty());
+		flags = Bits.setFlag(flags, 0x02, !description.isEmpty());
+		flags = Bits.setFlag(flags, 0x04, size != 1D);
+		flags = Bits.setFlag(flags, 0x08, !guidePage.isEmpty());
+		flags = Bits.setFlag(flags, 0x10, ignoreRewardBlocking);
 		//implement others
 		//flags = Bits.setFlag(flags, 32, !customClick.isEmpty());
-		flags = Bits.setFlag(flags, 64, canRepeat);
-		flags = Bits.setFlag(flags, 128, invisible);
-		flags = Bits.setFlag(flags, 256, optional);
-		flags = Bits.setFlag(flags, 512, minWidth > 0);
-		flags = Bits.setFlag(flags, 1024, invisibleUntilTasks > 0);
+		flags = Bits.setFlag(flags, 0x40, canRepeat);
+		flags = Bits.setFlag(flags, 0x80, invisible);
+		flags = Bits.setFlag(flags, 0x100, optional);
+		flags = Bits.setFlag(flags, 0x200, minWidth > 0);
+		flags = Bits.setFlag(flags, 0x400, invisibleUntilTasks > 0);
+		flags = Bits.setFlag(flags, 0x800, hideDetailsUntilStartable != Tristate.DEFAULT);
+		flags = Bits.setFlag(flags, 0x1000, hideDetailsUntilStartable == Tristate.TRUE);
 		buffer.writeVarInt(flags);
 
 		hide.write(buffer);
@@ -339,18 +339,18 @@ public final class Quest extends QuestObject implements Movable {
 		hideDependencyLines = Tristate.read(buffer);
 		hideTextUntilComplete = Tristate.read(buffer);
 
-		subtitle = Bits.getFlag(flags, 1) ? buffer.readUtf(Short.MAX_VALUE) : "";
+		subtitle = Bits.getFlag(flags, 0x01) ? buffer.readUtf(Short.MAX_VALUE) : "";
 		x = buffer.readDouble();
 		y = buffer.readDouble();
 		shape = buffer.readUtf(Short.MAX_VALUE);
 
-		if (Bits.getFlag(flags, 2)) {
+		if (Bits.getFlag(flags, 0x02)) {
 			NetUtils.readStrings(buffer, description);
 		} else {
 			description.clear();
 		}
 
-		guidePage = Bits.getFlag(flags, 8) ? buffer.readUtf(Short.MAX_VALUE) : "";
+		guidePage = Bits.getFlag(flags, 0x08) ? buffer.readUtf(Short.MAX_VALUE) : "";
 		//customClick = Bits.getFlag(flags, 32) ? data.readString() : "";
 
 		minRequiredDependencies = buffer.readVarInt();
@@ -366,14 +366,16 @@ public final class Quest extends QuestObject implements Movable {
 			}
 		}
 
-		size = Bits.getFlag(flags, 4) ? buffer.readDouble() : 1D;
-		minWidth = Bits.getFlag(flags, 512) ? buffer.readVarInt() : 0;
-		ignoreRewardBlocking = Bits.getFlag(flags, 16);
-		canRepeat = Bits.getFlag(flags, 64);
-		invisible = Bits.getFlag(flags, 128);
-		optional = Bits.getFlag(flags, 256);
-		invisibleUntilTasks = Bits.getFlag(flags, 1024) ? buffer.readVarInt() : 0;
 		progressionMode = ProgressionMode.NAME_MAP.read(buffer);
+
+		size = Bits.getFlag(flags, 0x04) ? buffer.readDouble() : 1D;
+		minWidth = Bits.getFlag(flags, 0x200) ? buffer.readVarInt() : 0;
+		ignoreRewardBlocking = Bits.getFlag(flags, 0x10);
+		canRepeat = Bits.getFlag(flags, 0x40);
+		invisible = Bits.getFlag(flags, 0x80);
+		optional = Bits.getFlag(flags, 0x100);
+		invisibleUntilTasks = Bits.getFlag(flags, 0x400) ? buffer.readVarInt() : 0;
+		hideDetailsUntilStartable = Bits.getFlag(flags, 0x800) ? Bits.getFlag(flags, 0x1000) ? Tristate.TRUE : Tristate.FALSE : Tristate.DEFAULT;
 	}
 
 	@Override
@@ -566,6 +568,7 @@ public final class Quest extends QuestObject implements Movable {
 		config.addInt("invisible_until_tasks", invisibleUntilTasks, v -> invisibleUntilTasks = v, 0, 0, Integer.MAX_VALUE);
 		config.addBool("ignore_reward_blocking", ignoreRewardBlocking, v -> ignoreRewardBlocking = v, false);
 		config.addEnum("progression_mode", progressionMode, v -> progressionMode = v, ProgressionMode.NAME_MAP);
+		config.addTristate("hide_details_until_startable", hideDetailsUntilStartable, v -> hideDetailsUntilStartable = v);
 	}
 
 	public boolean getHideDependencyLines() {
@@ -895,5 +898,9 @@ public final class Quest extends QuestObject implements Movable {
 
 	public boolean allTasksCompleted(TeamData teamData) {
 		return tasks.stream().allMatch(task -> teamData.getProgress(task) >= task.getMaxProgress());
+	}
+
+	public boolean hideDetailsUntilStartable() {
+		return hideDetailsUntilStartable.get(chapter.hideQuestDetailsUntilStartable());
 	}
 }
