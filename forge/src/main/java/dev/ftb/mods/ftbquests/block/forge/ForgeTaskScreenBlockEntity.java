@@ -88,15 +88,10 @@ public class ForgeTaskScreenBlockEntity extends TaskScreenBlockEntity {
         @NotNull
         @Override
         public ItemStack insertItem(int slot, @NotNull ItemStack stack, boolean simulate) {
-            if (getTask() instanceof ItemTask task && task.test(stack)) {
-                TeamData data = getCachedTeamData();
-                if (data != null && data.canStartTasks(task.quest) && !data.isCompleted(task)) {
-                    int itemsAdded = (int) Math.min(stack.getCount(), task.getMaxProgress() - data.getProgress(task));
-                    if (!simulate) {
-                        data.addProgress(task, itemsAdded);
-                    }
-                    return ItemHandlerHelper.copyStackWithSize(stack, stack.getCount() - itemsAdded);
-                }
+            TeamData data = getCachedTeamData();
+            if (getTask() instanceof ItemTask task && data.canStartTasks(task.quest)) {
+                // task.insert() handles testing the item is valid and the task isn't already completed
+                return task.insert(data, stack, simulate);
             }
             return stack;
         }
