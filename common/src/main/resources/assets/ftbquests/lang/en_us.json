@@ -245,6 +245,7 @@
 	"ftbquests.gui.paste_no_deps": "Paste Quest (no dependencies)",
 	"ftbquests.gui.paste_link": "Paste Quest Link",
 	"ftbquests.gui.paste_image": "Paste Image",
+	"ftbquests.gui.paste_task": "Paste Task",
 	"ftbquests.gui.goto_linked_quest": "Go to Linked Quest (in chapter: %s)",
 	"ftbquests.gui.linked_quest_id": "Linked Quest ID: %s",
 	"ftbquests.gui.view_quest_links": "View Quest Link(s)",
