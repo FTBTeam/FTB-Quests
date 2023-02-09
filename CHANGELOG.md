@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1902.4.7]
+
+### Added
+* New Item Task property "Only From Task Screen", false by default
+  * When true, items can only be submitted via Task Screen, and the "Submit" button is greyed out when clicking the task 
+* New quest option "Hide Quest Details Until Startable" - when true, quests are visible in the quest tree but can't be opened to view their description or tasks until all dependencies are complete
+  * Can be also be set on a per-chapter basis (true or false)
+  * Quests use the chapter setting by default, chapter setting is False by default
+* Tasks can now be copy/pasted like quests can, using the "Copy ID" context menu entry
+  * Can be pasted using the context menu from the "+" add task button in the quest view panel, or as a new quest on the main quest screen
+
+### Fixed
+* In flexible mode, quests which have uncompleted depdendcies are now rendered darker (even if their tasks can be progressed)
+* Task Screens now only accept items for tasks which are in "Consume Resources" mode
+
 ## [1902.4.6]
 
 ### Added
