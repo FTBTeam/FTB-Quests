@@ -313,7 +313,7 @@ public class QuestButton extends Button implements QuestPositionableButton {
 		TeamData teamData = questScreen.file.self;
 		boolean isCompleted = teamData.isCompleted(quest);
 		boolean isStarted = isCompleted || teamData.isStarted(quest);
-		boolean canStart = isCompleted || isStarted || teamData.canStartTasks(quest);
+		boolean canStart = isCompleted || isStarted || teamData.areDependenciesComplete(quest);
 
 		if (canStart) {
 			if (isCompleted) {
