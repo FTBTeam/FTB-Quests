@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 * In flexible mode, quests which have uncompleted depdendcies are now rendered darker (even if their tasks can be progressed)
 * Task Screens now only accept items for tasks which are in "Consume Resources" mode
+* Fixed chapters with the same name but in different groups overwriting one another when saved to disk
 
 ## [1902.4.6]
 
