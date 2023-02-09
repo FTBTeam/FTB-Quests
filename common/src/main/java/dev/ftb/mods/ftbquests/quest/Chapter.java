@@ -292,12 +292,13 @@ public final class Chapter extends QuestObject {
 			String s = titleToID(title).orElse(toString());
 			filename = s;
 
-			Set<String> existingNames = group.chapters.stream().map(ch -> ch.filename).collect(Collectors.toSet());
-			int i = 2;
+			Set<String> existingNames = group.file.chapterGroups.stream()
+					.flatMap(g -> g.chapters.stream())
+					.map(ch -> ch.filename)
+					.collect(Collectors.toSet());
 
-			while (existingNames.contains(filename)) {
+			for (int i = 2; existingNames.contains(filename); i++) {
 				filename = s + "_" + i;
-				i++;
 			}
 		}
 

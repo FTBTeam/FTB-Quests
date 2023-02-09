@@ -90,6 +90,7 @@ public final class Quest extends QuestObject implements Movable {
 		minRequiredDependencies = 0;
 		hideTextUntilComplete = Tristate.DEFAULT;
 		disableJEI = Tristate.DEFAULT;
+		hideDetailsUntilStartable = Tristate.DEFAULT;
 		size = 1D;
 		optional = false;
 		minWidth = 0;
