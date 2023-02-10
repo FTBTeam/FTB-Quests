@@ -193,21 +193,7 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 		} else if (!stackA.hasTag() && !stackB.hasTag()) {
 			return true;
 		} else {
-			return !shouldMatchNBT() || (weakNBTmatch ? weakNBTmatch(stackA, stackB) : ItemStack.tagMatches(stackA, stackB));
-		}
-	}
-
-	private boolean weakNBTmatch(ItemStack stackA, ItemStack stackB) {
-		CompoundTag tagA = stackA.getTag();
-		CompoundTag tagB = stackB.getTag();
-		if (tagA == null && tagB == null) {
-			return true;
-		} else if (tagA == null || tagB == null) {
-			return false;
-		} else {
-			// .equals() is safe here because the key is from getAllKeys() and will definitely exist
-			//noinspection ConstantConditions
-			return tagA.getAllKeys().stream().allMatch(key -> tagA.get(key).equals(tagB.get(key)));
+			return !shouldMatchNBT() || NBTUtils.compareNbt(stackA.getTag(), stackB.getTag(), weakNBTmatch, true);
 		}
 	}
 

@@ -19,6 +19,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * In flexible mode, quests which have uncompleted depdendcies are now rendered darker (even if their tasks can be progressed)
 * Task Screens now only accept items for tasks which are in "Consume Resources" mode
 * Fixed chapters with the same name but in different groups overwriting one another when saved to disk
+* Item Task tag matching now does a full recursive check of the item NBT, even when "Weak NBT Matching" is true
+  * Reminder: in weak-matching mode, NBT fields in the item being checked but not in the filter do not cause a match failure
+  * This does not apply if using filters from the Item Filters mod - that mod has its own NBT matching functionality
 
 ## [1902.4.6]
 

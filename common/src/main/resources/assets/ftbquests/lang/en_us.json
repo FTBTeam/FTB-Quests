@@ -279,7 +279,7 @@
 	"ftbquests.task.ftbquests.item.task_screen_only": "Only From Task Screen",
 	"ftbquests.task.ftbquests.item.task_screen_only.tooltip": "When true, items may only be submitted by piping into a Task Screen\nOnly applies when Consume Items is true for this task.",
 	"ftbquests.task.ftbquests.item.weak_nbt_match": "Weak NBT Match",
-	"ftbquests.task.ftbquests.item.weak_nbt_match.tooltip": "False: exact NBT match required\nTrue: only match on top-level NBT fields\n   which are in the filter item",
+	"ftbquests.task.ftbquests.item.weak_nbt_match.tooltip": "False: exact NBT match required\nTrue: NBT fields in the checked item but not in the filter item won't cause a match failure",
 	"ftbquests.task.ftbquests.fluid": "Fluid",
 	"ftbquests.task.ftbquests.fluid.fluid": "Fluid",
 	"ftbquests.task.ftbquests.fluid.fluid_nbt": "Fluid NBT",
