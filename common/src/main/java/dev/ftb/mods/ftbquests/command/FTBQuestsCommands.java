@@ -21,6 +21,7 @@ import dev.ftb.mods.ftbquests.quest.task.ItemTask;
 import dev.ftb.mods.ftbquests.util.FileUtils;
 import dev.ftb.mods.ftbquests.util.ProgressChange;
 import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
@@ -378,9 +379,9 @@ public class FTBQuestsCommands {
 	private static final Set<UUID> warnedPlayers = new HashSet<>();
 	private static int doReload(CommandSourceStack source) throws CommandSyntaxException {
 		ServerQuestFile instance = ServerQuestFile.INSTANCE;
-		ServerPlayer sender = source.getPlayerOrException();
+		ServerPlayer sender = source.getPlayer();
 
-		if (!instance.getData(sender).getCanEdit()) {
+		if (sender != null && !instance.getData(sender).getCanEdit()) {
 			source.sendFailure(Component.translatable("commands.ftbquests.command.error.not_editing"));
 			return 1;
 		}
@@ -395,9 +396,10 @@ public class FTBQuestsCommands {
 		}
 
 		source.sendSuccess(Component.translatable("commands.ftbquests.command.feedback.reloaded"), false);
-		if (!warnedPlayers.contains(sender.getUUID())) {
+		UUID id = sender == null ? Util.NIL_UUID : sender.getUUID();
+		if (!warnedPlayers.contains(id)) {
 			source.sendSuccess(Component.translatable("commands.ftbquests.command.feedback.reloaded.disclaimer").withStyle(ChatFormatting.GOLD), false);
-			warnedPlayers.add(sender.getUUID());
+			warnedPlayers.add(id);
 		}
 
 		return 1;
