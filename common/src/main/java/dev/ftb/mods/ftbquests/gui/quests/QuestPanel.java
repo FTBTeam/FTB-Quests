@@ -16,6 +16,7 @@ import dev.ftb.mods.ftblibrary.util.StringUtils;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.net.*;
 import dev.ftb.mods.ftbquests.quest.*;
+import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.quest.task.TaskType;
 import dev.ftb.mods.ftbquests.quest.task.TaskTypes;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
@@ -471,7 +472,8 @@ public class QuestPanel extends Panel {
 			if (!clip.isEmpty()) {
 				try {
 					long questId = Long.valueOf(clip, 16);
-					if (FTBQuests.PROXY.getQuestFile(true).get(questId) instanceof Quest quest) {
+					QuestObject qo = FTBQuests.PROXY.getQuestFile(true).get(questId);
+					if (qo instanceof Quest quest) {
 						contextMenu.add(ContextMenuItem.SEPARATOR);
 						addedSeparator.setTrue();
 						contextMenu.add(new PasteQuestMenuItem(quest, Component.translatable("ftbquests.gui.paste"),
@@ -489,6 +491,10 @@ public class QuestPanel extends Panel {
 									link.setPosition(qx, qy);
 									new CreateObjectMessage(link, new CompoundTag()).sendToServer();
 								}));
+					} else if (qo instanceof Task task) {
+						contextMenu.add(ContextMenuItem.SEPARATOR);
+						addedSeparator.setTrue();
+						contextMenu.add(new AddTaskButton.PasteTaskMenuItem(task, () -> copyAndCreateTask(task, qx, qy)));
 					}
 				} catch (NumberFormatException ignored) {
 				}
@@ -506,6 +512,16 @@ public class QuestPanel extends Panel {
 		}
 
 		return false;
+	}
+
+	private void copyAndCreateTask(Task task, double qx, double qy) {
+		Task task2 = TaskType.createTask(new Quest(questScreen.selectedChapter), task.getType().id.toString());
+		if (task2 != null) {
+			CompoundTag tag = new CompoundTag();
+			task.writeData(tag);
+			task2.readData(tag);
+			new CreateTaskAtMessage(questScreen.selectedChapter, qx, qy, task).sendToServer();
+		}
 	}
 
 	@Override
