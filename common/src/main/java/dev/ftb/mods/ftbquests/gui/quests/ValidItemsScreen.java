@@ -126,14 +126,14 @@ public class ValidItemsScreen extends BaseScreen {
 
 			@Override
 			public void addMouseOverText(TooltipList list) {
-				if (canClick && !task.consumesResources()) {
+				if (canClick && !task.consumesResources() && !task.isTaskScreenOnly()) {
 					list.translate("ftbquests.task.auto_detected");
 				}
 			}
 
 			@Override
 			public WidgetType getWidgetType() {
-				return canClick && task.consumesResources() ? super.getWidgetType() : WidgetType.DISABLED;
+				return canClick && task.consumesResources() && !task.isTaskScreenOnly() ? super.getWidgetType() : WidgetType.DISABLED;
 			}
 
 			@Override
