@@ -188,7 +188,7 @@ public class QuestButton extends Button implements QuestPositionableButton {
 				questScreen.toggleSelected(moveAndDeleteFocus());
 			} else if (!quest.guidePage.isEmpty() && quest.tasks.isEmpty() && quest.rewards.isEmpty() && quest.getDescription().length == 0) {
 				handleClick("guide", quest.guidePage);
-			} else {
+			} else if (questScreen.file.canEdit() || !quest.hideDetailsUntilStartable() || questScreen.file.self.canStartTasks(quest)) {
 				questScreen.open(theQuestObject(), false);
 			}
 		} else if (questScreen.file.canEdit() && button.isMiddle()) {
@@ -313,7 +313,7 @@ public class QuestButton extends Button implements QuestPositionableButton {
 		TeamData teamData = questScreen.file.self;
 		boolean isCompleted = teamData.isCompleted(quest);
 		boolean isStarted = isCompleted || teamData.isStarted(quest);
-		boolean canStart = isCompleted || isStarted || teamData.canStartTasks(quest);
+		boolean canStart = isCompleted || isStarted || teamData.areDependenciesComplete(quest);
 
 		if (canStart) {
 			if (isCompleted) {
