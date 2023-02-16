@@ -367,8 +367,6 @@ public final class Quest extends QuestObject implements Movable {
 			}
 		}
 
-		progressionMode = ProgressionMode.NAME_MAP.read(buffer);
-
 		size = Bits.getFlag(flags, 0x04) ? buffer.readDouble() : 1D;
 		minWidth = Bits.getFlag(flags, 0x200) ? buffer.readVarInt() : 0;
 		ignoreRewardBlocking = Bits.getFlag(flags, 0x10);
@@ -377,6 +375,8 @@ public final class Quest extends QuestObject implements Movable {
 		optional = Bits.getFlag(flags, 0x100);
 		invisibleUntilTasks = Bits.getFlag(flags, 0x400) ? buffer.readVarInt() : 0;
 		hideDetailsUntilStartable = Bits.getFlag(flags, 0x800) ? Bits.getFlag(flags, 0x1000) ? Tristate.TRUE : Tristate.FALSE : Tristate.DEFAULT;
+
+		progressionMode = ProgressionMode.NAME_MAP.read(buffer);
 	}
 
 	@Override
