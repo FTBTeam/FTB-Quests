@@ -62,10 +62,9 @@ public class NBTUtils {
 			return true;
 		} else if (tagB == null) {
 			return false;
-		} else if (!tagA.getClass().equals(tagB.getClass())) {
+		} else if (!tagA.getType().equals(tagB.getType())) {
 			return false;
-		} else if (tagA instanceof CompoundTag compoundA) {
-			CompoundTag compoundB = (CompoundTag) tagB; // safe cast due to previous class comparison
+		} else if (tagA instanceof CompoundTag compoundA && tagB instanceof CompoundTag compoundB) {
 			Set<String> keysA = compoundA.getAllKeys();
 			Set<String> keysB = compoundB.getAllKeys();
 			if (!fuzzy) {
@@ -74,8 +73,7 @@ public class NBTUtils {
 				}
 			}
 			return keysA.stream().allMatch(key -> compareNbt(compoundA.get(key), compoundB.get(key), fuzzy, compareLists));
-		} else if (tagA instanceof ListTag listA && compareLists) {
-			ListTag listB = (ListTag) tagB;
+		} else if (compareLists && tagA instanceof ListTag listA && tagB instanceof ListTag listB) {
 			if (listA.isEmpty()) {
 				return listB.isEmpty();
 			} else if (listA.size() != listB.size()) {
