@@ -13,6 +13,7 @@ import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.net.EditObjectMessage;
 import dev.ftb.mods.ftbquests.quest.ChapterImage;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
+import dev.ftb.mods.ftbquests.util.TextUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 
@@ -134,11 +135,7 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 	@Override
 	public void addMouseOverText(TooltipList list) {
 		for (String s : chapterImage.hover) {
-			if (s.startsWith("{") && s.endsWith("}")) {
-				list.add(Component.translatable(s.substring(1, s.length() - 1)));
-			} else {
-				list.add(Component.literal(s));
-			}
+			list.add(TextUtils.parseRawText(s));
 		}
 	}
 
