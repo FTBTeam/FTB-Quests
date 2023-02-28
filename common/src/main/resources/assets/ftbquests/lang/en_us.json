@@ -130,6 +130,7 @@
 	"ftbquests.chapter.image.image": "Image",
 	"ftbquests.chapter.image.hover": "Hover Text",
 	"ftbquests.chapter.image.click": "Click",
+	"ftbquests.chapter.image.click.tooltip": "Provide custom functionality when the image is clicked:\n• Open a page or file with http://, https:// or file:/// URL\n• Run a command with 'command:<cmd>'\n• Jump to a quest with '#<quest_id>' (use Copy ID to get quest id's)\n• Fire a CustomClickEvent (for KubeJS or other mods) with 'custom:<resource_location>'",
 	"ftbquests.chapter.image.dev": "Only visible in Editing Mode",
 	"ftbquests.chapter.image.corner": "Rotate and offset from corner",
 	"ftbquests.chapter.default_min_width": "Default Min Opened Quest Window Width",
