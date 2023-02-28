@@ -29,7 +29,7 @@ side = "BOTH"
 [[dependencies.ftbquests]]
 modId = "ftblibrary"
 mandatory = true
-versionRange = "[1902.3.13-build.175,)"
+versionRange = "[1902.3.14-build.182,)"
 ordering = "AFTER"
 side = "BOTH"
 

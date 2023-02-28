@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1902.4.9]
+
+### Fixed
+* Fixed NBT comparisons failing on data reloaded from disk
+* Fixed tooltips for Image objects not supporting color markup codes
+* Several fixes from FTB Library (FTB Library 1902.3.14-build.182 or later required)
+  * Fixed fluid selector screen skipping fluids with source blocks instead of without (inverted check)
+  * Using `command:<cmd>` as an Image object "click" field now works properly again
+  * Fix crashing on invalid data in the Image object "click" field (now logs a client-side warning)
+  * Animated textures (e.g. fluids) now work correctly when used as textures for Image objects
+
 ## [1902.4.8]
 
 ### Fixed
