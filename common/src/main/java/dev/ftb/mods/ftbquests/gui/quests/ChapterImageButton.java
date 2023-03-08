@@ -5,6 +5,7 @@ import com.mojang.math.Vector3f;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.ui.EditConfigScreen;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
+import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.ui.*;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
@@ -44,7 +45,7 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 	}
 
 	public ChapterImageButton(Panel panel, ChapterImage i) {
-		super(panel, Component.empty(), i.image);
+		super(panel, Component.empty(), i.getImage());
 		questScreen = (QuestScreen) panel.getGui();
 		setSize(20, 20);
 		chapterImage = i;
@@ -108,14 +109,21 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 			}) {
 				@Override
 				public void addMouseOverText(TooltipList list) {
-					list.add(Component.literal(chapterImage.image.toString()).withStyle(ChatFormatting.DARK_GRAY));
+					list.add(Component.literal(chapterImage.getImage().toString()).withStyle(ChatFormatting.DARK_GRAY));
 				}
 			});
+
+			if (chapterImage.isAspectRatioOff()) {
+				contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.fix_aspect_ratio_w"), Icons.ART,
+						() -> chapterImage.fixupAspectRatio(true)));
+				contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.fix_aspect_ratio_h"), Icons.ART,
+						() -> chapterImage.fixupAspectRatio(false)));
+			}
 
 			contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.delete"), ThemeProperties.DELETE_ICON.get(), () -> {
 				chapterImage.chapter.images.remove(chapterImage);
 				new EditObjectMessage(chapterImage.chapter).sendToServer();
-			}).setYesNo(Component.translatable("delete_item", chapterImage.image.toString())));
+			}).setYesNo(Component.translatable("delete_item", chapterImage.getImage().toString())));
 
 			getGui().openContextMenu(contextMenu);
 		} else if (button.isLeft()) {
@@ -147,6 +155,7 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 	@Override
 	public void draw(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
 		boolean transparent = chapterImage.dependency != null && !questScreen.file.self.isCompleted(chapterImage.dependency);
+		Icon image = transparent ? chapterImage.getImage().withColor(Color4I.WHITE.withAlpha(100)) : chapterImage.getImage();
 
 		GuiHelper.setupDrawing();
 		matrixStack.pushPose();
@@ -155,12 +164,12 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 			matrixStack.translate(x, y, 0);
 			matrixStack.mulPose(Vector3f.ZP.rotationDegrees((float) chapterImage.rotation));
 			matrixStack.scale(w, h, 1);
-			(transparent ? chapterImage.image.withColor(Color4I.WHITE.withAlpha(100)) : chapterImage.image).draw(matrixStack, 0, 0, 1, 1);
+			image.draw(matrixStack, 0, 0, 1, 1);
 		} else {
 			matrixStack.translate((int) (x + w / 2D), (int) (y + h / 2D), 0);
 			matrixStack.mulPose(Vector3f.ZP.rotationDegrees((float) chapterImage.rotation));
 			matrixStack.scale(w / 2F, h / 2F, 1);
-			(transparent ? chapterImage.image.withColor(Color4I.WHITE.withAlpha(100)) : chapterImage.image).draw(matrixStack, -1, -1, 2, 2);
+			image.draw(matrixStack, -1, -1, 2, 2);
 		}
 
 		matrixStack.popPose();

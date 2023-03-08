@@ -4,6 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
+import dev.ftb.mods.ftblibrary.config.ImageConfig;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.Icons;
@@ -12,6 +13,7 @@ import dev.ftb.mods.ftblibrary.math.MathUtils;
 import dev.ftb.mods.ftblibrary.ui.*;
 import dev.ftb.mods.ftblibrary.ui.input.Key;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
+import dev.ftb.mods.ftblibrary.ui.misc.SelectImagePreScreen;
 import dev.ftb.mods.ftblibrary.util.StringUtils;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.net.*;
@@ -458,14 +460,7 @@ public class QuestPanel extends Panel {
 				}));
 			}
 
-			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.chapter.image"), Icons.ART, () -> {
-				playClickSound();
-				ChapterImage image = new ChapterImage(questScreen.selectedChapter);
-				image.x = qx;
-				image.y = qy;
-				questScreen.selectedChapter.images.add(image);
-				new EditObjectMessage(questScreen.selectedChapter).sendToServer();
-			}));
+			contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.chapter.image"), Icons.ART, () -> showImageCreationScreen(qx, qy)));
 
 			String clip = getClipboardString();
 			MutableBoolean addedSeparator = new MutableBoolean(false);
@@ -504,7 +499,7 @@ public class QuestPanel extends Panel {
 				contextMenu.add(new TooltipContextMenuItem(Component.translatable("ftbquests.gui.paste_image"),
 						Icons.ADD,
 						() -> new CopyChapterImageMessage(clipImg, questScreen.selectedChapter, qx, qy).sendToServer(),
-						Component.literal(clipImg.image.toString()).withStyle(ChatFormatting.GRAY)));
+						Component.literal(clipImg.getImage().toString()).withStyle(ChatFormatting.GRAY)));
 			});
 
 			questScreen.openContextMenu(contextMenu);
@@ -512,6 +507,22 @@ public class QuestPanel extends Panel {
 		}
 
 		return false;
+	}
+
+	private void showImageCreationScreen(double qx, double qy) {
+		ImageConfig imageConfig = new ImageConfig();
+		new SelectImagePreScreen(imageConfig, accepted -> {
+			if (accepted) {
+				playClickSound();
+				ChapterImage image = new ChapterImage(questScreen.selectedChapter).setImage(Icon.getIcon(imageConfig.value));
+				image.x = qx;
+				image.y = qy;
+				image.fixupAspectRatio(true);
+				questScreen.selectedChapter.images.add(image);
+				new EditObjectMessage(questScreen.selectedChapter).sendToServer();
+			}
+			QuestPanel.this.questScreen.openGui();
+		}).openGui();
 	}
 
 	private void copyAndCreateTask(Task task, double qx, double qy) {
