@@ -26,6 +26,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author LatvianModder
@@ -284,7 +285,18 @@ public class QuestButton extends Button implements QuestPositionableButton {
 			}
 		}
 
-		list.add(title);
+		if (title.getString().contains("\n")) {
+			// I'm not proud of this kludge but getting titles with embedded newlines and possible styling
+			// to work well as tooltips is not fun
+			title.visit((style, txt) -> {
+				for (String s : txt.split("\n")) {
+					if (!s.isEmpty()) list.add(Component.literal(s).withStyle(style));
+				}
+				return Optional.empty();
+			}, title.getStyle());
+		} else {
+			list.add(title);
+		}
 
 		Component description = quest.getSubtitle();
 
