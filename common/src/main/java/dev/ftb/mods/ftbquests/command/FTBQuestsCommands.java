@@ -210,7 +210,7 @@ public class FTBQuestsCommands {
 		for (int i = 0; i < container.getContainerSize(); i++) {
 			ItemStack stack = container.getItem(i);
 			if (!stack.isEmpty()) {
-				table.rewards.add(new WeightedReward(new ItemReward(table.fakeQuest, stack), 1));
+				table.rewards.add(new WeightedReward(new ItemReward(table.fakeQuest, stack), 1f));
 			}
 		}
 

@@ -34,35 +34,9 @@ public class LootReward extends RandomReward {
 	public void claim(ServerPlayer player, boolean notify) {
 		RewardTable table = getTable();
 
-		if (table == null) {
-			return;
-		}
-
-		for (WeightedReward reward : table.rewards) {
-			if (reward.weight == 0) {
+		if (table != null) {
+			for (WeightedReward reward : table.generateWeightedRandomRewards(player.getRandom(), table.lootSize, true)) {
 				reward.reward.claim(player, notify);
-			}
-		}
-
-		int totalWeight = table.getTotalWeight(true);
-
-		if (totalWeight <= 0) {
-			return;
-		}
-
-		for (int i = 0; i < table.lootSize; i++) {
-			int number = player.level.random.nextInt(totalWeight) + 1;
-			int currentWeight = table.emptyWeight;
-
-			if (currentWeight < number) {
-				for (WeightedReward reward : table.rewards) {
-					currentWeight += reward.weight;
-
-					if (currentWeight >= number) {
-						reward.reward.claim(player, notify);
-						break;
-					}
-				}
 			}
 		}
 	}

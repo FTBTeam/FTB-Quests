@@ -76,7 +76,7 @@ public class EditRewardTableScreen extends ButtonListBaseScreen {
 					contextMenu.add(new ContextMenuItem(type.getDisplayName(), type.getIcon(), () -> {
 						playClickSound();
 						type.getGuiProvider().openCreationGui(this, rewardTable.fakeQuest, reward -> {
-							rewardTable.rewards.add(new WeightedReward(reward, 1));
+							rewardTable.rewards.add(new WeightedReward(reward, 1f));
 							openGui();
 						});
 					}));
@@ -99,7 +99,8 @@ public class EditRewardTableScreen extends ButtonListBaseScreen {
 		public void addMouseOverText(TooltipList list) {
 			super.addMouseOverText(list);
 			reward.reward.addMouseOverText(list);
-			list.add(Component.translatable("ftbquests.reward_table.weight").append(": " + reward.weight).append(Component.literal(" [" + WeightedReward.chanceString(reward.weight, rewardTable.getTotalWeight(true)) + "]").withStyle(ChatFormatting.DARK_GRAY)));
+			String w = String.format("%.2f", reward.weight);
+			list.add(Component.translatable("ftbquests.reward_table.weight").append(": " + w).append(Component.literal(" [" + WeightedReward.chanceString(reward.weight, rewardTable.getTotalWeight(true)) + "]").withStyle(ChatFormatting.DARK_GRAY)));
 		}
 
 		@Override
@@ -117,15 +118,7 @@ public class EditRewardTableScreen extends ButtonListBaseScreen {
 				DoubleConfig c = new DoubleConfig(0D, Double.POSITIVE_INFINITY);
 				EditConfigFromStringScreen.open(c, (double) reward.weight, 1D, accepted -> {
 					if (accepted) {
-						reward.weight = c.value.intValue();
-
-						if (c.value < 1D) {
-							for (WeightedReward reward : rewardTable.rewards) {
-								reward.weight = (int) (reward.weight / c.value);
-							}
-
-							reward.weight = 1;
-						}
+						reward.weight = c.value.floatValue();
 					}
 
 					run();
