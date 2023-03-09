@@ -113,37 +113,23 @@ public class LootCrateOpenerBlockEntity extends BlockEntity {
             return stack;
         }
 
-        int totalWeight = crate.table.getTotalWeight(true);
         ServerPlayer player = owner == null ? null : level.getServer().getPlayerList().getPlayer(owner);
         boolean update = false;
 
-        if (totalWeight > 0) {
-            for (int j = 0; j < stack.getCount() * crate.table.lootSize; j++) {
-                int number = level.random.nextInt(totalWeight) + 1;
-                int currentWeight = crate.table.emptyWeight;
-                if (currentWeight < number) {
-                    for (WeightedReward reward : crate.table.rewards) {
-                        currentWeight += reward.weight;
+        int nAttempts = stack.getCount() * crate.table.lootSize;
+        for (WeightedReward reward : crate.table.generateWeightedRandomRewards(level.getRandom(), nAttempts, true)) {
+            List<ItemStack> stacks = new ArrayList<>();
+            if (reward.reward.automatedClaimPre(this, stacks, level.random, owner, player)) {
+                update = true;
 
-                        if (currentWeight >= number) {
-                            List<ItemStack> stacks = new ArrayList<>();
-                            if (reward.reward.automatedClaimPre(this, stacks, level.random, owner, player)) {
-                                update = true;
+                if (!simulate) {
+                    for (ItemStack stack1 : stacks) {
+                        ItemEntry entry = new ItemEntry(stack1);
+                        int newAmount = outputs.getOrDefault(entry, 0) + stack1.getCount();
+                        outputs.put(entry, newAmount);
 
-                                if (!simulate) {
-                                    for (ItemStack stack1 : stacks) {
-                                        ItemEntry entry = new ItemEntry(stack1);
-                                        int newAmount = outputs.getOrDefault(entry, 0) + stack1.getCount();
-                                        outputs.put(entry, newAmount);
-
-                                    }
-                                    reward.reward.automatedClaimPost(this, owner, player);
-                                }
-                            }
-
-                            break;
-                        }
                     }
+                    reward.reward.automatedClaimPost(this, owner, player);
                 }
             }
         }

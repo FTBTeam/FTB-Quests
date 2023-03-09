@@ -55,31 +55,34 @@ public class LootCrateItem extends Item {
 		int size = player.isCrouching() ? stack.getCount() : 1;
 
 		if (!world.isClientSide) {
-			for (WeightedReward reward : crate.table.rewards) {
-				if (reward.weight == 0) {
-					reward.reward.claim((ServerPlayer) player, true);
-				}
+			for (WeightedReward reward : crate.table.generateWeightedRandomRewards(player.getRandom(), crate.table.lootSize * size, true)) {
+				reward.reward.claim((ServerPlayer) player, true);
 			}
 
-			int totalWeight = crate.table.getTotalWeight(true);
-
-			if (totalWeight > 0) {
-				for (int j = 0; j < size * crate.table.lootSize; j++) {
-					int number = player.level.random.nextInt(totalWeight) + 1;
-					int currentWeight = crate.table.emptyWeight;
-
-					if (currentWeight < number) {
-						for (WeightedReward reward : crate.table.rewards) {
-							currentWeight += reward.weight;
-
-							if (currentWeight >= number) {
-								reward.reward.claim((ServerPlayer) player, true);
-								break;
-							}
-						}
-					}
-				}
-			}
+//			for (WeightedReward reward : crate.table.rewards) {
+//				if (reward.weight == 0f) {
+//					reward.reward.claim((ServerPlayer) player, true);
+//				}
+//			}
+//			int totalWeight = (int) crate.table.getTotalWeight(true);
+//
+//			if (totalWeight > 0f) {
+//				for (int j = 0; j < size * crate.table.lootSize; j++) {
+//					int number = player.level.random.nextInt(totalWeight) + 1;
+//					int currentWeight = crate.table.emptyWeight;
+//
+//					if (currentWeight < number) {
+//						for (WeightedReward reward : crate.table.rewards) {
+//							currentWeight += reward.weight;
+//
+//							if (currentWeight >= number) {
+//								reward.reward.claim((ServerPlayer) player, true);
+//								break;
+//							}
+//						}
+//					}
+//				}
+//			}
 
 			world.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ITEM_BREAK, SoundSource.PLAYERS, 0.8F, 0.8F + world.random.nextFloat() * 0.4F);
 		} else {
