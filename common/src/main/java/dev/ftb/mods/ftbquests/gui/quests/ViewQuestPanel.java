@@ -436,19 +436,21 @@ public class ViewQuestPanel extends Panel {
 
 		if (hidePanel || quest == null) return;
 
-		if (key.is(GLFW.GLFW_KEY_S)) {
-			editSubtitle();
-		} else if (key.is(GLFW.GLFW_KEY_T)) {
-			editTitle();
-		} else if (key.is(GLFW.GLFW_KEY_D)) {
-			ListConfig<String,StringConfig> lc = new ListConfig<>(new StringConfig());
-			lc.value = quest.description;
-			new MultilineTextEditorScreen(lc, accepted -> {
-				if (accepted) {
-					new EditObjectMessage(quest).sendToServer();
-				}
-				openGui();
-			}).openGui();
+		if (questScreen.file.canEdit()) {
+			if (key.is(GLFW.GLFW_KEY_S)) {
+				editSubtitle();
+			} else if (key.is(GLFW.GLFW_KEY_T)) {
+				editTitle();
+			} else if (key.is(GLFW.GLFW_KEY_D)) {
+				ListConfig<String, StringConfig> lc = new ListConfig<>(new StringConfig());
+				lc.value = quest.description;
+				new MultilineTextEditorScreen(lc, accepted -> {
+					if (accepted) {
+						new EditObjectMessage(quest).sendToServer();
+					}
+					openGui();
+				}).openGui();
+			}
 		}
 	}
 
