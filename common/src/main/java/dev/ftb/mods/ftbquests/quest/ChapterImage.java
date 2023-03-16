@@ -23,16 +23,21 @@ import net.minecraft.util.Mth;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
+import java.util.regex.Pattern;
 
 /**
  * @author LatvianModder
  */
 public final class ChapterImage implements Movable {
+	private static final Pattern COLOR_PATTERN = Pattern.compile("^#[a-fA-F0-9]{6}$");
+
 	public Chapter chapter;
 	public double x, y;
 	public double width, height;
 	public double rotation;
 	private Icon image;
+	private Color4I color;
+	private int alpha;
 	public List<String> hover;
 	public String click;
 	public boolean dev;
@@ -48,6 +53,8 @@ public final class ChapterImage implements Movable {
 		height = 1D;
 		rotation = 0D;
 		image = Icon.EMPTY; //getIcon("minecraft:textures/gui/presets/isles.png");
+		color = Color4I.WHITE;
+		alpha = 255;
 		needAspectRecalc = true;
 		hover = new ArrayList<>();
 		click = "";
@@ -66,6 +73,14 @@ public final class ChapterImage implements Movable {
 		return this;
 	}
 
+	public Color4I getColor() {
+		return color;
+	}
+
+	public int getAlpha() {
+		return alpha;
+	}
+
 	public void writeData(CompoundTag nbt) {
 		nbt.putDouble("x", x);
 		nbt.putDouble("y", y);
@@ -73,6 +88,12 @@ public final class ChapterImage implements Movable {
 		nbt.putDouble("height", height);
 		nbt.putDouble("rotation", rotation);
 		nbt.putString("image", image.toString());
+		if (!color.equals(Color4I.WHITE)) {
+			nbt.putInt("color", color.rgb());
+		}
+		if (alpha != 255) {
+			nbt.putInt("alpha", alpha);
+		}
 
 		ListTag hoverTag = new ListTag();
 
@@ -97,6 +118,8 @@ public final class ChapterImage implements Movable {
 		height = nbt.getDouble("height");
 		rotation = nbt.getDouble("rotation");
 		setImage(Icon.getIcon(nbt.getString("image")));
+		color = nbt.contains("color") ? Color4I.rgb(nbt.getInt("color")) : Color4I.WHITE;
+		alpha = nbt.contains("alpha") ? nbt.getInt("alpha") : 255;
 
 		hover.clear();
 		ListTag hoverTag = nbt.getList("hover", Tag.TAG_STRING);
@@ -119,6 +142,8 @@ public final class ChapterImage implements Movable {
 		buffer.writeDouble(height);
 		buffer.writeDouble(rotation);
 		NetUtils.writeIcon(buffer, image);
+		buffer.writeInt(color.rgb());
+		buffer.writeInt(alpha);
 		NetUtils.writeStrings(buffer, hover);
 		buffer.writeUtf(click, Short.MAX_VALUE);
 		buffer.writeBoolean(dev);
@@ -133,6 +158,8 @@ public final class ChapterImage implements Movable {
 		height = buffer.readDouble();
 		rotation = buffer.readDouble();
 		setImage(NetUtils.readIcon(buffer));
+		color = Color4I.rgb(buffer.readInt());
+		alpha = buffer.readInt();
 		NetUtils.readStrings(buffer, hover);
 		click = buffer.readUtf(Short.MAX_VALUE);
 		dev = buffer.readBoolean();
@@ -147,7 +174,9 @@ public final class ChapterImage implements Movable {
 		config.addDouble("width", width, v -> width = v, 1, 0, Double.POSITIVE_INFINITY);
 		config.addDouble("height", height, v -> height = v, 1, 0, Double.POSITIVE_INFINITY);
 		config.addDouble("rotation", rotation, v -> rotation = v, 0, -180, 180);
-		config.add("image", new ImageConfig(), image.toString(), v -> setImage(Icon.getIcon(v)), "minecraft:textures/gui/presets/isles.png");
+		config.add("image", new ImageConfig(), image instanceof Color4I ? "" : image.toString(), v -> setImage(Icon.getIcon(v)), "minecraft:textures/gui/presets/isles.png");
+		config.addString("color", color.toString(), v -> color = Color4I.fromString(v), "#FFFFFF", COLOR_PATTERN);
+		config.addInt("alpha", alpha, v -> alpha = v, 255, 0, 255);
 		config.addList("hover", hover, new StringConfig(), "");
 		config.addString("click", click, v -> click = v, "");
 		config.addBool("dev", dev, v -> dev = v, false);

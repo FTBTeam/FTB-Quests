@@ -154,8 +154,14 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 
 	@Override
 	public void draw(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
+		Icon image = chapterImage.getImage();
 		boolean transparent = chapterImage.dependency != null && !questScreen.file.self.isCompleted(chapterImage.dependency);
-		Icon image = transparent ? chapterImage.getImage().withColor(Color4I.WHITE.withAlpha(100)) : chapterImage.getImage();
+
+		if (transparent) {
+			image = image.withColor(Color4I.WHITE.withAlpha(100));
+		} else if (!chapterImage.getColor().equals(Color4I.WHITE) || chapterImage.getAlpha() < 255) {
+			image = image.withColor(chapterImage.getColor().withAlpha(chapterImage.getAlpha()));
+		}
 
 		GuiHelper.setupDrawing();
 		matrixStack.pushPose();
