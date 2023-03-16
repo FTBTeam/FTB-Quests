@@ -7,15 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1902.4.10]
 
 ### Added
-* Improvements to adding image objects
+* Improvements to image objects
   * When an image is added, the image selection GUI immediately appears now, instead of creating an object with a default image which will almost need to be changed first thing 
   * Images with a non 1:1 aspect ratio are now added with a height of 1, and a width automatically chosen to match the aspect ratio
   * When the width/height of an image (as set in the editable properties) doesn't match the image's aspect ratio, "Fix up Aspect Ratio" context menu entries appear, allowing the width/height to be auto-adjusted accordingly
+  * Added an "Image Tint" field to the image config, which can be used to tint images with an RGB hex code
+  * Added an "Image Alpha" field to the image config, which is a 0..255 alpha value for the image
+  * Note that empty tinted images can be used to add blocks of color, if desired
 * Quest reward weights are now all handled as floating-point values
   * This makes it much easier to adjust and fine-tune reward weightings if your current weights are small numbers
 
 ### Fixed
 * Fixed an issue with multiline quest titles showing a unicode "LF" character in the quest tooltip when mousing over it
+* Fixed the T/S/D keys working to edit quest title/subtitle/description outside edit mode
+  * A cosmetic problem, since server still wouldn't accept any clientside changes made by users not in edit mode
 
 ## [1902.4.9]
 
