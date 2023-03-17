@@ -37,6 +37,8 @@ public class FTBQuestsJEIHelperImpl {
 	}
 
 	public static void showRecipes(Object object) {
+		if(FTBQuestsJEIIntegration.runtime == null)
+			return;
 		FTBQuestsJEIIntegration.runtime.getRecipesGui().show(FTBQuestsJEIIntegration.runtime.getRecipeManager().createFocus(IFocus.Mode.OUTPUT, object));
 	}
 }
