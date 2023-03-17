@@ -45,6 +45,7 @@ public final class ChapterImage implements Movable {
 	public Quest dependency;
 	private double aspectRatio;
 	private boolean needAspectRecalc;
+	private int order;
 
 	public ChapterImage(Chapter c) {
 		chapter = c;
@@ -61,6 +62,7 @@ public final class ChapterImage implements Movable {
 		dev = false;
 		corner = false;
 		dependency = null;
+		order = 0;
 	}
 
 	public Icon getImage() {
@@ -81,6 +83,10 @@ public final class ChapterImage implements Movable {
 		return alpha;
 	}
 
+	public int getOrder() {
+		return order;
+	}
+
 	public void writeData(CompoundTag nbt) {
 		nbt.putDouble("x", x);
 		nbt.putDouble("y", y);
@@ -93,6 +99,9 @@ public final class ChapterImage implements Movable {
 		}
 		if (alpha != 255) {
 			nbt.putInt("alpha", alpha);
+		}
+		if (order != 0) {
+			nbt.putInt("order", order);
 		}
 
 		ListTag hoverTag = new ListTag();
@@ -120,6 +129,7 @@ public final class ChapterImage implements Movable {
 		setImage(Icon.getIcon(nbt.getString("image")));
 		color = nbt.contains("color") ? Color4I.rgb(nbt.getInt("color")) : Color4I.WHITE;
 		alpha = nbt.contains("alpha") ? nbt.getInt("alpha") : 255;
+		order = nbt.getInt("order");
 
 		hover.clear();
 		ListTag hoverTag = nbt.getList("hover", Tag.TAG_STRING);
@@ -144,6 +154,7 @@ public final class ChapterImage implements Movable {
 		NetUtils.writeIcon(buffer, image);
 		buffer.writeInt(color.rgb());
 		buffer.writeInt(alpha);
+		buffer.writeInt(order);
 		NetUtils.writeStrings(buffer, hover);
 		buffer.writeUtf(click, Short.MAX_VALUE);
 		buffer.writeBoolean(dev);
@@ -160,6 +171,7 @@ public final class ChapterImage implements Movable {
 		setImage(NetUtils.readIcon(buffer));
 		color = Color4I.rgb(buffer.readInt());
 		alpha = buffer.readInt();
+		order = buffer.readInt();
 		NetUtils.readStrings(buffer, hover);
 		click = buffer.readUtf(Short.MAX_VALUE);
 		dev = buffer.readBoolean();
@@ -176,6 +188,7 @@ public final class ChapterImage implements Movable {
 		config.addDouble("rotation", rotation, v -> rotation = v, 0, -180, 180);
 		config.add("image", new ImageConfig(), image instanceof Color4I ? "" : image.toString(), v -> setImage(Icon.getIcon(v)), "minecraft:textures/gui/presets/isles.png");
 		config.addString("color", color.toString(), v -> color = Color4I.fromString(v), "#FFFFFF", COLOR_PATTERN);
+		config.addInt("order", order, v -> order = v, 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
 		config.addInt("alpha", alpha, v -> alpha = v, 255, 0, 255);
 		config.addList("hover", hover, new StringConfig(), "");
 		config.addString("click", click, v -> click = v, "");

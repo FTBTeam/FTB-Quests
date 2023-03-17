@@ -32,6 +32,7 @@ import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -59,28 +60,16 @@ public class QuestPanel extends Panel {
 		questMaxY = Double.NEGATIVE_INFINITY;
 
 		for (Widget w : widgets) {
-			double qx, qy, qw, qh;
-
-			if (w instanceof QuestButton) {
-				Quest q = ((QuestButton) w).quest;
-				qx = q.x;
-				qy = q.y;
-				qw = q.size;
-				qh = q.size;
-			} else if (w instanceof ChapterImageButton) {
-				ChapterImage q = ((ChapterImageButton) w).chapterImage;
-				qx = q.x;
-				qy = q.y;
-				qw = q.width;
-				qh = q.height;
-			} else {
-				continue;
+			if (w instanceof QuestPositionableButton qb) {
+				double qx = qb.getPosition().x();
+				double qy = qb.getPosition().y();
+				double qw = qb.getPosition().w();
+				double qh = qb.getPosition().h();
+				questMinX = Math.min(questMinX, qx - qw / 2D);
+				questMinY = Math.min(questMinY, qy - qh / 2D);
+				questMaxX = Math.max(questMaxX, qx + qw / 2D);
+				questMaxY = Math.max(questMaxY, qy + qh / 2D);
 			}
-
-			questMinX = Math.min(questMinX, qx - qw / 2D);
-			questMinY = Math.min(questMinY, qy - qh / 2D);
-			questMaxX = Math.max(questMaxX, qx + qw / 2D);
-			questMaxY = Math.max(questMaxY, qy + qh / 2D);
 		}
 
 		if (questMinX == Double.POSITIVE_INFINITY) {
@@ -115,19 +104,14 @@ public class QuestPanel extends Panel {
 			return;
 		}
 
-		for (ChapterImage image : questScreen.selectedChapter.images) {
-			if (questScreen.file.canEdit() || (!image.dev && (image.dependency == null || questScreen.file.self.isCompleted(image.dependency)))) {
-				add(new ChapterImageButton(this, image));
-			}
-		}
+		questScreen.selectedChapter.images.stream()
+				.filter(image -> questScreen.file.canEdit() || (!image.dev && (image.dependency == null || questScreen.file.self.isCompleted(image.dependency))))
+				.sorted(Comparator.comparingInt(ChapterImage::getOrder))
+				.forEach(image -> add(new ChapterImageButton(this, image)));
 
-		for (Quest quest : questScreen.selectedChapter.quests) {
-			add(new QuestButton(this, quest));
-		}
+		questScreen.selectedChapter.quests.forEach(quest -> add(new QuestButton(this, quest)));
 
-		for (QuestLink link : questScreen.selectedChapter.questLinks) {
-			link.getQuest().ifPresent(quest -> add(new QuestLinkButton(this, link, quest)));
-		}
+		questScreen.selectedChapter.questLinks.forEach(link -> link.getQuest().ifPresent(quest -> add(new QuestLinkButton(this, link, quest))));
 
 		alignWidgets();
 	}
@@ -167,17 +151,16 @@ public class QuestPanel extends Panel {
 
 	@Override
 	public void drawOffsetBackground(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
-		if (questScreen.selectedChapter == null) {
+		if (questScreen.selectedChapter == null || questScreen.file.self == null) {
 			return;
 		}
 
 		GuiHelper.setupDrawing();
 
-		for (Widget widget : widgets) {
-			if (widget instanceof ChapterImageButton) {
-				widget.draw(matrixStack, theme, widget.getX(), widget.getY(), widget.width, widget.height);
-			}
-		}
+		widgets.stream()
+				.filter(o -> o instanceof ChapterImageButton)
+				.sorted(Comparator.comparingInt(o -> ((ChapterImageButton) o).chapterImage.getOrder()))
+				.forEach(o -> o.draw(matrixStack, theme, o.getX(), o.getY(), o.width, o.height));
 
 		Tesselator tesselator = Tesselator.getInstance();
 		BufferBuilder buffer = tesselator.getBuilder();
@@ -190,8 +173,6 @@ public class QuestPanel extends Panel {
 		}
 
 		Quest selectedQuest = questScreen.getViewedQuest();
-		GuiHelper.setupDrawing();
-		RenderSystem.enableDepthTest();
 		double mt = -(System.currentTimeMillis() * 0.001D);
 		float lineWidth = (float) (questScreen.getZoom() * ThemeProperties.DEPENDENCY_LINE_THICKNESS.get(questScreen.selectedChapter) / 4D * 3D);
 
@@ -202,8 +183,8 @@ public class QuestPanel extends Panel {
 		float mu = (float) ((mt * ThemeProperties.DEPENDENCY_LINE_UNSELECTED_SPEED.get(questScreen.selectedChapter)) % 1D);
 		for (Widget widget : widgets) {
 			if (widget.shouldDraw() && widget instanceof QuestButton qb && !qb.quest.getHideDependencyLines()) {
-				boolean unavailable = questScreen.file.self == null || !questScreen.file.self.canStartTasks(qb.quest);
-				boolean complete = !unavailable && questScreen.file.self != null && questScreen.file.self.isCompleted(qb.quest);
+				boolean unavailable = !questScreen.file.self.canStartTasks(qb.quest);
+				boolean complete = !unavailable && questScreen.file.self.isCompleted(qb.quest);
 
 				for (QuestButton button : qb.getDependencies()) {
 					if (button.shouldDraw() && button.quest != selectedQuest && qb.quest != selectedQuest) {
