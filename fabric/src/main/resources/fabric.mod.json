@@ -26,7 +26,7 @@
 		"fabric": "*",
 		"minecraft": "~1.19.2",
 		"architectury": ">=6.3.49",
-		"ftblibrary": ">=1902.3.14-build.182",
+		"ftblibrary": ">=1902.3.16-build.190",
 		"ftbteams": ">=1902.2.9-build.61",
 		"itemfilters": ">=1902.2.9-build.46"
 	},

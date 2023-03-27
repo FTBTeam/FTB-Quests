@@ -7,6 +7,7 @@ import dev.ftb.mods.ftblibrary.config.ImageConfig;
 import dev.ftb.mods.ftblibrary.config.StringConfig;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
+import dev.ftb.mods.ftblibrary.math.PixelBuffer;
 import dev.ftb.mods.ftbquests.net.EditObjectMessage;
 import dev.ftb.mods.ftbquests.util.ConfigQuestObject;
 import dev.ftb.mods.ftbquests.util.NetUtils;
@@ -17,25 +18,34 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.util.Mth;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
+import java.util.regex.Pattern;
 
 /**
  * @author LatvianModder
  */
 public final class ChapterImage implements Movable {
+	private static final Pattern COLOR_PATTERN = Pattern.compile("^#[a-fA-F0-9]{6}$");
+
 	public Chapter chapter;
 	public double x, y;
 	public double width, height;
 	public double rotation;
-	public Icon image;
+	private Icon image;
+	private Color4I color;
+	private int alpha;
 	public List<String> hover;
 	public String click;
 	public boolean dev;
 	public boolean corner;
 	public Quest dependency;
+	private double aspectRatio;
+	private boolean needAspectRecalc;
+	private int order;
 
 	public ChapterImage(Chapter c) {
 		chapter = c;
@@ -43,12 +53,38 @@ public final class ChapterImage implements Movable {
 		width = 1D;
 		height = 1D;
 		rotation = 0D;
-		image = Icon.getIcon("minecraft:textures/gui/presets/isles.png");
+		image = Icon.EMPTY; //getIcon("minecraft:textures/gui/presets/isles.png");
+		color = Color4I.WHITE;
+		alpha = 255;
+		needAspectRecalc = true;
 		hover = new ArrayList<>();
 		click = "";
 		dev = false;
 		corner = false;
 		dependency = null;
+		order = 0;
+	}
+
+	public Icon getImage() {
+		return image;
+	}
+
+	public ChapterImage setImage(Icon image) {
+		this.image = image;
+		needAspectRecalc = true;
+		return this;
+	}
+
+	public Color4I getColor() {
+		return color;
+	}
+
+	public int getAlpha() {
+		return alpha;
+	}
+
+	public int getOrder() {
+		return order;
 	}
 
 	public void writeData(CompoundTag nbt) {
@@ -58,6 +94,15 @@ public final class ChapterImage implements Movable {
 		nbt.putDouble("height", height);
 		nbt.putDouble("rotation", rotation);
 		nbt.putString("image", image.toString());
+		if (!color.equals(Color4I.WHITE)) {
+			nbt.putInt("color", color.rgb());
+		}
+		if (alpha != 255) {
+			nbt.putInt("alpha", alpha);
+		}
+		if (order != 0) {
+			nbt.putInt("order", order);
+		}
 
 		ListTag hoverTag = new ListTag();
 
@@ -81,7 +126,10 @@ public final class ChapterImage implements Movable {
 		width = nbt.getDouble("width");
 		height = nbt.getDouble("height");
 		rotation = nbt.getDouble("rotation");
-		image = Icon.getIcon(nbt.getString("image"));
+		setImage(Icon.getIcon(nbt.getString("image")));
+		color = nbt.contains("color") ? Color4I.rgb(nbt.getInt("color")) : Color4I.WHITE;
+		alpha = nbt.contains("alpha") ? nbt.getInt("alpha") : 255;
+		order = nbt.getInt("order");
 
 		hover.clear();
 		ListTag hoverTag = nbt.getList("hover", Tag.TAG_STRING);
@@ -104,6 +152,9 @@ public final class ChapterImage implements Movable {
 		buffer.writeDouble(height);
 		buffer.writeDouble(rotation);
 		NetUtils.writeIcon(buffer, image);
+		buffer.writeInt(color.rgb());
+		buffer.writeInt(alpha);
+		buffer.writeInt(order);
 		NetUtils.writeStrings(buffer, hover);
 		buffer.writeUtf(click, Short.MAX_VALUE);
 		buffer.writeBoolean(dev);
@@ -117,7 +168,10 @@ public final class ChapterImage implements Movable {
 		width = buffer.readDouble();
 		height = buffer.readDouble();
 		rotation = buffer.readDouble();
-		image = NetUtils.readIcon(buffer);
+		setImage(NetUtils.readIcon(buffer));
+		color = Color4I.rgb(buffer.readInt());
+		alpha = buffer.readInt();
+		order = buffer.readInt();
 		NetUtils.readStrings(buffer, hover);
 		click = buffer.readUtf(Short.MAX_VALUE);
 		dev = buffer.readBoolean();
@@ -132,7 +186,10 @@ public final class ChapterImage implements Movable {
 		config.addDouble("width", width, v -> width = v, 1, 0, Double.POSITIVE_INFINITY);
 		config.addDouble("height", height, v -> height = v, 1, 0, Double.POSITIVE_INFINITY);
 		config.addDouble("rotation", rotation, v -> rotation = v, 0, -180, 180);
-		config.add("image", new ImageConfig(), image.toString(), v -> image = Icon.getIcon(v), "minecraft:textures/gui/presets/isles.png");
+		config.add("image", new ImageConfig(), image instanceof Color4I ? "" : image.toString(), v -> setImage(Icon.getIcon(v)), "minecraft:textures/gui/presets/isles.png");
+		config.addString("color", color.toString(), v -> color = Color4I.fromString(v), "#FFFFFF", COLOR_PATTERN);
+		config.addInt("order", order, v -> order = v, 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
+		config.addInt("alpha", alpha, v -> alpha = v, 255, 0, 255);
 		config.addList("hover", hover, new StringConfig(), "");
 		config.addString("click", click, v -> click = v, "");
 		config.addBool("dev", dev, v -> dev = v, false);
@@ -217,5 +274,33 @@ public final class ChapterImage implements Movable {
 		matrixStack.popPose();
 
 		QuestShape.get(getShape()).outline.withColor(Color4I.WHITE.withAlpha(30)).draw(matrixStack, 0, 0, 1, 1);
+	}
+
+	public boolean isAspectRatioOff() {
+		return image.hasPixelBuffer() && !Mth.equal(getAspectRatio(), width / height);
+	}
+
+	public void fixupAspectRatio(boolean adjustWidth) {
+		if (isAspectRatioOff()) {
+			if (adjustWidth) {
+				width = height * getAspectRatio();
+			} else {
+				height = width / getAspectRatio();
+			}
+			new EditObjectMessage(chapter).sendToServer();
+		}
+	}
+
+	private double getAspectRatio() {
+		if (needAspectRecalc) {
+			PixelBuffer buffer = image.createPixelBuffer();
+			if (buffer != null) {
+				aspectRatio = (double) buffer.getWidth() / (double) buffer.getHeight();
+			} else {
+				aspectRatio = 1d;
+			}
+			needAspectRecalc = false;
+		}
+		return aspectRatio;
 	}
 }

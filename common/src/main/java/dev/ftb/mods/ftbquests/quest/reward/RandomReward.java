@@ -130,33 +130,12 @@ public class RandomReward extends Reward {
 	public void claim(ServerPlayer player, boolean notify) {
 		RewardTable table = getTable();
 
-		if (table == null) {
-			return;
-		}
-
-		for (WeightedReward reward : table.rewards) {
-			if (reward.weight == 0) {
+		if (table != null) {
+			for (WeightedReward reward : table.generateWeightedRandomRewards(player.getRandom(), 1, false)) {
 				reward.reward.claim(player, notify);
 			}
 		}
 
-		int totalWeight = table.getTotalWeight(false);
-
-		if (totalWeight <= 0) {
-			return;
-		}
-
-		int number = player.level.random.nextInt(totalWeight) + 1;
-		int currentWeight = 0;
-
-		for (WeightedReward reward : table.rewards) {
-			currentWeight += reward.weight;
-
-			if (currentWeight >= number) {
-				reward.reward.claim(player, notify);
-				return;
-			}
-		}
 	}
 
 	@Override
