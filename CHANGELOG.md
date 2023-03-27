@@ -23,6 +23,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Fixed an issue with multiline quest titles showing a unicode "LF" character in the quest tooltip when mousing over it
 * Fixed the T/S/D keys working to edit quest title/subtitle/description outside edit mode
   * A cosmetic problem, since the server wouldn't accept any clientside changes made by users not in edit mode
+* Fixed reward table title and icon not updating in the GUI (until client restart) after editing
+  * Another cosmetic problem (updated title & icon did get sent to server correctly)
 
 ## [1902.4.9]
 
