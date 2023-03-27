@@ -373,7 +373,10 @@ public final class RewardTable extends QuestObjectBase {
 	@Override
 	@Environment(EnvType.CLIENT)
 	public void onEditButtonClicked(Runnable gui) {
-		new EditRewardTableScreen(this, () -> new EditObjectMessage(this).sendToServer()).openGui();
+		new EditRewardTableScreen(this, () -> {
+			new EditObjectMessage(this).sendToServer();
+			clearCachedData();
+		}).openGui();
 	}
 
 	public void addMouseOverText(TooltipList list, boolean includeWeight, boolean includeEmpty) {
