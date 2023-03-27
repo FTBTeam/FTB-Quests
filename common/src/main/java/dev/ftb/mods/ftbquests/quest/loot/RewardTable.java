@@ -27,8 +27,10 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.RandomSource;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -40,7 +42,7 @@ public final class RewardTable extends QuestObjectBase {
 	public final QuestFile file;
 	public final List<WeightedReward> rewards;
 	public final Quest fakeQuest;
-	public int emptyWeight;
+	public float emptyWeight;
 	public int lootSize;
 	public boolean hideTooltip;
 	public boolean useTitle;
@@ -52,7 +54,7 @@ public final class RewardTable extends QuestObjectBase {
 		file = f;
 		rewards = new ArrayList<>();
 		fakeQuest = new Quest(new Chapter(file, f.defaultChapterGroup));
-		emptyWeight = 0;
+		emptyWeight = 0f;
 		lootSize = 1;
 		hideTooltip = false;
 		useTitle = false;
@@ -71,8 +73,8 @@ public final class RewardTable extends QuestObjectBase {
 		return file;
 	}
 
-	public int getTotalWeight(boolean includeEmpty) {
-		int w = includeEmpty ? emptyWeight : 0;
+	public float getTotalWeight(boolean includeEmpty) {
+		float w = includeEmpty ? emptyWeight : 0f;
 
 		for (WeightedReward r : rewards) {
 			w += r.weight;
@@ -81,12 +83,42 @@ public final class RewardTable extends QuestObjectBase {
 		return w;
 	}
 
+	public Collection<WeightedReward> generateWeightedRandomRewards(RandomSource random, int nAttempts, boolean includeEmpty) {
+		float total = getTotalWeight(includeEmpty);
+		if (total <= 0f) return List.of();
+
+		List<WeightedReward> res  = new ArrayList<>();
+
+		for (WeightedReward reward : rewards) {
+			// rewards with a weight of 0 are auto-granted
+			if (reward.weight == 0f) {
+				res.add(reward);
+			}
+		}
+
+		for (int i = 0; i < nAttempts; i++) {
+			float threshold = random.nextFloat() * total;
+			float currentWeight = includeEmpty ? emptyWeight : 0f;
+
+			if (currentWeight < threshold) {
+				for (WeightedReward reward : rewards) {
+					currentWeight += reward.weight;
+					if (currentWeight >= threshold) {
+						res.add(reward);
+						break;
+					}
+				}
+			}
+		}
+		return res;
+	}
+
 	@Override
 	public void writeData(CompoundTag nbt) {
 		super.writeData(nbt);
 
-		if (emptyWeight > 0) {
-			nbt.putInt("empty_weight", emptyWeight);
+		if (emptyWeight > 0f) {
+			nbt.putFloat("empty_weight", emptyWeight);
 		}
 
 		nbt.putInt("loot_size", lootSize);
@@ -111,8 +143,8 @@ public final class RewardTable extends QuestObjectBase {
 				nbt1.singleLine();
 			}
 
-			if (reward.weight != 1) {
-				nbt1.putInt("weight", reward.weight);
+			if (reward.weight != 1f) {
+				nbt1.putFloat("weight", reward.weight);
 			}
 
 			list.add(nbt1);
@@ -134,7 +166,7 @@ public final class RewardTable extends QuestObjectBase {
 	@Override
 	public void readData(CompoundTag nbt) {
 		super.readData(nbt);
-		emptyWeight = nbt.getInt("empty_weight");
+		emptyWeight = nbt.getFloat("empty_weight");
 		lootSize = nbt.getInt("loot_size");
 		hideTooltip = nbt.getBoolean("hide_tooltip");
 		useTitle = nbt.getBoolean("use_title");
@@ -148,7 +180,7 @@ public final class RewardTable extends QuestObjectBase {
 
 			if (reward != null) {
 				reward.readData(nbt1);
-				rewards.add(new WeightedReward(reward, nbt1.contains("weight") ? nbt1.getInt("weight") : 1));
+				rewards.add(new WeightedReward(reward, nbt1.contains("weight") ? nbt1.getFloat("weight") : 1));
 			}
 		}
 
@@ -166,7 +198,7 @@ public final class RewardTable extends QuestObjectBase {
 	public void writeNetData(FriendlyByteBuf buffer) {
 		super.writeNetData(buffer);
 		buffer.writeUtf(filename, Short.MAX_VALUE);
-		buffer.writeVarInt(emptyWeight);
+		buffer.writeFloat(emptyWeight);
 		buffer.writeVarInt(lootSize);
 		int flags = 0;
 		flags = Bits.setFlag(flags, 1, hideTooltip);
@@ -179,7 +211,7 @@ public final class RewardTable extends QuestObjectBase {
 		for (WeightedReward reward : rewards) {
 			buffer.writeVarInt(reward.reward.getType().intId);
 			reward.reward.writeNetData(buffer);
-			buffer.writeVarInt(reward.weight);
+			buffer.writeFloat(reward.weight);
 		}
 
 		if (lootCrate != null) {
@@ -195,7 +227,7 @@ public final class RewardTable extends QuestObjectBase {
 	public void readNetData(FriendlyByteBuf buffer) {
 		super.readNetData(buffer);
 		filename = buffer.readUtf(Short.MAX_VALUE);
-		emptyWeight = buffer.readVarInt();
+		emptyWeight = buffer.readFloat();
 		lootSize = buffer.readVarInt();
 		int flags = buffer.readVarInt();
 		hideTooltip = Bits.getFlag(flags, 1);
@@ -209,8 +241,8 @@ public final class RewardTable extends QuestObjectBase {
 			RewardType type = file.rewardTypeIds.get(buffer.readVarInt());
 			Reward reward = type.provider.create(fakeQuest);
 			reward.readNetData(buffer);
-			int w = buffer.readVarInt();
-			rewards.add(new WeightedReward(reward, w));
+			float weight = buffer.readFloat();
+			rewards.add(new WeightedReward(reward, weight));
 		}
 
 		lootCrate = null;
@@ -227,7 +259,7 @@ public final class RewardTable extends QuestObjectBase {
 	@Environment(EnvType.CLIENT)
 	public void getConfig(ConfigGroup config) {
 		super.getConfig(config);
-		config.addInt("empty_weight", emptyWeight, v -> emptyWeight = v, 0, 0, Integer.MAX_VALUE);
+		config.addDouble("empty_weight", emptyWeight, v -> emptyWeight = v.floatValue(), 0, 0, Integer.MAX_VALUE);
 		config.addInt("loot_size", lootSize, v -> lootSize = v, 1, 1, Integer.MAX_VALUE);
 		config.addBool("hide_tooltip", hideTooltip, v -> hideTooltip = v, false);
 		config.addBool("use_title", useTitle, v -> useTitle = v, false);
@@ -341,7 +373,10 @@ public final class RewardTable extends QuestObjectBase {
 	@Override
 	@Environment(EnvType.CLIENT)
 	public void onEditButtonClicked(Runnable gui) {
-		new EditRewardTableScreen(this, () -> new EditObjectMessage(this).sendToServer()).openGui();
+		new EditRewardTableScreen(this, () -> {
+			new EditObjectMessage(this).sendToServer();
+			clearCachedData();
+		}).openGui();
 	}
 
 	public void addMouseOverText(TooltipList list, boolean includeWeight, boolean includeEmpty) {
@@ -349,7 +384,7 @@ public final class RewardTable extends QuestObjectBase {
 			return;
 		}
 
-		int totalWeight = getTotalWeight(includeEmpty);
+		float totalWeight = getTotalWeight(includeEmpty);
 
 		if (includeWeight && includeEmpty && emptyWeight > 0) {
 			list.add(Component.literal("").withStyle(ChatFormatting.GRAY).append("- ").append(Component.translatable("ftbquests.reward_table.nothing")).append(Component.literal(" [" + WeightedReward.chanceString(emptyWeight, totalWeight, true) + "]").withStyle(ChatFormatting.DARK_GRAY)));
