@@ -216,7 +216,7 @@ public class QuestPanel extends Panel {
 			if (widget instanceof QuestButton qb && !qb.quest.getHideDependencyLines()) {
 				for (QuestButton button : qb.getDependencies()) {
 					int r, g, b, a, a2;
-					if (button.quest == selectedQuest) {
+					if (button.quest == selectedQuest || button.isMouseOver()) {
 						Color4I c = ThemeProperties.DEPENDENCY_LINE_REQUIRED_FOR_COLOR.get(questScreen.selectedChapter);
 						r = c.redi();
 						g = c.greeni();
@@ -228,7 +228,7 @@ public class QuestPanel extends Panel {
 							a2 = 30;
 							toOutline.add(qb);
 						}
-					} else if (qb.quest == selectedQuest) {
+					} else if (qb.quest == selectedQuest || qb.isMouseOver()) {
 						Color4I c = ThemeProperties.DEPENDENCY_LINE_REQUIRES_COLOR.get(questScreen.selectedChapter);
 						r = c.redi();
 						g = c.greeni();
