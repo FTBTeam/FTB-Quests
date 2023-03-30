@@ -338,7 +338,9 @@ public class QuestButton extends Button implements QuestPositionableButton {
 
 				outlineColor = ThemeProperties.QUEST_COMPLETED_COLOR.get(quest);
 			} else if (isStarted) {
-				outlineColor = ThemeProperties.QUEST_STARTED_COLOR.get(quest);
+				if (teamData.areDependenciesComplete(quest)) {
+					outlineColor = ThemeProperties.QUEST_STARTED_COLOR.get(quest);
+				}
 				if (quest.getProgressionMode() == ProgressionMode.FLEXIBLE && quest.allTasksCompleted(teamData)) {
 					questIcon = new ThemeProperties.CheckIcon(Color4I.rgb(0x606060), Color4I.rgb(0x808080));
 				}
@@ -382,7 +384,7 @@ public class QuestButton extends Button implements QuestPositionableButton {
 			matrixStack.popPose();
 		}
 
-		if (!canStart) {
+		if (!canStart || !teamData.areDependenciesComplete(quest)) {
 			matrixStack.pushPose();
 			matrixStack.translate(0, 0, 200);
 			shape.shape.withColor(Color4I.BLACK.withAlpha(100)).draw(matrixStack, x, y, w, h);
