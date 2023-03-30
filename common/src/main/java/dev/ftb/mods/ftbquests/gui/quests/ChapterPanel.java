@@ -402,6 +402,10 @@ public class ChapterPanel extends Panel {
 		}
 
 		align(WidgetLayout.VERTICAL);
+
+		if (getContentHeight() <= height) {
+			setScrollY(0);
+		}
 	}
 
 	@Override
