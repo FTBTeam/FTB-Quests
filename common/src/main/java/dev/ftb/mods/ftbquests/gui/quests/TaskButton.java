@@ -106,9 +106,6 @@ public class TaskButton extends Button {
 	public void addMouseOverText(TooltipList list) {
 		questScreen.addInfoTooltip(list, task);
 
-		if (task.addTitleInMouseOverText()) {
-			list.add(getTitle());
-		}
 		task.addMouseOverHeader(list, questScreen.file.self, Minecraft.getInstance().options.advancedItemTooltips);
 
 		if (questScreen.file.self.canStartTasks(task.quest)) {
