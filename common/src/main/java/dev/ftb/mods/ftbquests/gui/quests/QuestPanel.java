@@ -209,11 +209,11 @@ public class QuestPanel extends Panel {
 
 		}
 
-		// pass 2: render highlighted connections for selected quest(s) dependencies/dependents
+		// pass 2: render highlighted connections for hovered quest(s) dependencies/dependents
 		float ms = (float) ((mt * ThemeProperties.DEPENDENCY_LINE_SELECTED_SPEED.get(questScreen.selectedChapter)) % 1D);
 		List<QuestButton> toOutline = new ArrayList<>();
 		for (Widget widget : widgets) {
-			if (widget instanceof QuestButton qb && !qb.quest.getHideDependencyLines()) {
+			if (widget.shouldDraw() && widget instanceof QuestButton qb && !qb.quest.getHideDependencyLines()) {
 				for (QuestButton button : qb.getDependencies()) {
 					int r, g, b, a, a2;
 					if (button.quest == selectedQuest || button.isMouseOver()) {
