@@ -1,6 +1,6 @@
 package dev.ftb.mods.ftbquests.gui.quests;
 
-import dev.ftb.mods.ftblibrary.icon.Icon;
+import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.ui.BaseScreen;
 import dev.ftb.mods.ftblibrary.ui.ContextMenuItem;
 import dev.ftb.mods.ftbquests.quest.Movable;
@@ -49,7 +49,7 @@ public class ContextMenuBuilder {
     public List<ContextMenuItem> build(BaseScreen gui) {
         List<ContextMenuItem> res = new ArrayList<>();
 
-        res.add(new ContextMenuItem(Component.literal("\"").append(object.getTitle()).append("\""), Icon.EMPTY, null).setCloseMenu(false));
+        res.add(new ContextMenuItem(Component.literal("\"").append(object.getTitle()).append("\""), Color4I.EMPTY, null).setCloseMenu(false));
         res.add(ContextMenuItem.SEPARATOR);
         res.addAll(atTop);
         screen.addObjectMenuItems(res, gui, object, deletionFocus);

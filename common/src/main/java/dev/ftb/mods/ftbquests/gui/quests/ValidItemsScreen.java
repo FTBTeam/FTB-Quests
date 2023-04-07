@@ -2,7 +2,6 @@ package dev.ftb.mods.ftbquests.gui.quests;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
-import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;
 import dev.ftb.mods.ftblibrary.ui.*;
 import dev.ftb.mods.ftblibrary.ui.input.Key;
@@ -103,7 +102,7 @@ public class ValidItemsScreen extends BaseScreen {
 
 		itemPanel.setPosAndSize(0, 22, 144, 0);
 
-		backButton = new SimpleTextButton(this, Component.translatable("gui.back"), Icon.EMPTY) {
+		backButton = new SimpleTextButton(this, Component.translatable("gui.back"), Color4I.EMPTY) {
 			@Override
 			public void onClicked(MouseButton button) {
 				playClickSound();
@@ -116,7 +115,7 @@ public class ValidItemsScreen extends BaseScreen {
 			}
 		};
 
-		submitButton = new SimpleTextButton(this, Component.literal("Submit"), Icon.EMPTY) {
+		submitButton = new SimpleTextButton(this, Component.literal("Submit"), Color4I.EMPTY) {
 			@Override
 			public void onClicked(MouseButton button) {
 				playClickSound();

@@ -318,8 +318,8 @@ public class QuestButton extends Button implements QuestPositionableButton {
 	@Override
 	public void draw(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
 		Color4I outlineColor = ThemeProperties.QUEST_NOT_STARTED_COLOR.get(quest);
-		Icon questIcon = Icon.EMPTY;
-		Icon hiddenIcon = Icon.EMPTY;
+		Icon questIcon = Color4I.EMPTY;
+		Icon hiddenIcon = Color4I.EMPTY;
 
 		TeamData teamData = questScreen.file.self;
 		boolean isCompleted = teamData.isCompleted(quest);
@@ -349,7 +349,7 @@ public class QuestButton extends Button implements QuestPositionableButton {
 			outlineColor = ThemeProperties.QUEST_LOCKED_COLOR.get(quest);
 		}
 
-		if (questIcon == Icon.EMPTY && teamData.isQuestPinned(quest.id)) {
+		if (questIcon == Color4I.EMPTY && teamData.isQuestPinned(quest.id)) {
 			questIcon = ThemeProperties.PIN_ICON_ON.get();
 		}
 		if (questScreen.file.canEdit() && !quest.isVisible(teamData)) {
