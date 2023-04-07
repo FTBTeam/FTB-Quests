@@ -4,6 +4,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1902.4.11]
+
+### Added
+
+* Quest connection lines now animate when a quest is hovered with the mouse (as well as when clicked to select)
+  * Makes the quest flow a little more obvious
+* Pre-completed quests in flexible mode now render dark like other uncompleted quests
+  * The grey tick icon is still shown
+
+### Changed
+* Bumped the minimum version of FTB Lib
+
+### Fixed
+
+* Fixed item names for certain items appearing twice in task tooltips
+* Fixed chapter panel not scrolling after group collapsed
+* Tasks with custom titles now only show the title in the tooltip
+
 ## [1902.4.10]
 
 ### Added

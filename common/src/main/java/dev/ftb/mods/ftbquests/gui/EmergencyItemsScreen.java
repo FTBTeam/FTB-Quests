@@ -2,7 +2,6 @@ package dev.ftb.mods.ftbquests.gui;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
-import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.ui.*;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.util.TimeUtils;
@@ -62,7 +61,7 @@ public class EmergencyItemsScreen extends BaseScreen {
 		}
 	}
 
-	private final SimpleTextButton cancelButton = new SimpleTextButton(this, Component.translatable("gui.cancel"), Icon.EMPTY) {
+	private final SimpleTextButton cancelButton = new SimpleTextButton(this, Component.translatable("gui.cancel"), Color4I.EMPTY) {
 		@Override
 		public void onClicked(MouseButton button) {
 			playClickSound();

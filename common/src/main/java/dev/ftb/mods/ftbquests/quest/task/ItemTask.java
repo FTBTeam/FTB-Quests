@@ -251,18 +251,16 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 
 	@Override
 	public void addMouseOverHeader(TooltipList list, TeamData teamData, boolean advanced) {
-		if (!title.isEmpty()) return;
-
 		List<Component> lines = item.getTooltipLines(FTBQuests.PROXY.getClientPlayer(), advanced ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL);
-
-		int s = 0;
-		if (!lines.isEmpty() && lines.get(0).getString().equals(item.getHoverName().getString())) {
-			// skip the first tooltip line (item name) if the same as the task title
-			s = 1;
-		}
-
-		for (int i = s; i < lines.size(); i++) {
-			list.add(lines.get(i));
+		if (!title.isEmpty()) {
+			list.add(Component.literal(title));
+		} else {
+			if (!lines.isEmpty()) {
+				lines.set(0, getTitle());
+			} else {
+				lines.add(getTitle());
+			}
+			lines.forEach(list::add);
 		}
 	}
 
@@ -272,7 +270,7 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 		if (taskScreenOnly) {
 			list.blankLine();
 			list.add(Component.translatable("ftbquests.task.task_screen_only").withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE));
-		} else if (consumesResources()) {
+		} else if (consumesResources() && !teamData.isCompleted(this)) {
 			list.blankLine();
 			list.add(Component.translatable("ftbquests.task.click_to_submit").withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE));
 		} else if (getValidDisplayItems().size() > 1) {

@@ -201,6 +201,7 @@ public abstract class Task extends QuestObject {
 	 */
 	@Environment(EnvType.CLIENT)
 	public void addMouseOverHeader(TooltipList list, TeamData teamData, boolean advanced) {
+		list.add(getTitle());
 	}
 
 	/**

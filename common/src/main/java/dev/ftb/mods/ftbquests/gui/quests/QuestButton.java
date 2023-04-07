@@ -318,8 +318,8 @@ public class QuestButton extends Button implements QuestPositionableButton {
 	@Override
 	public void draw(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
 		Color4I outlineColor = ThemeProperties.QUEST_NOT_STARTED_COLOR.get(quest);
-		Icon questIcon = Icon.EMPTY;
-		Icon hiddenIcon = Icon.EMPTY;
+		Icon questIcon = Color4I.EMPTY;
+		Icon hiddenIcon = Color4I.EMPTY;
 
 		TeamData teamData = questScreen.file.self;
 		boolean isCompleted = teamData.isCompleted(quest);
@@ -338,7 +338,9 @@ public class QuestButton extends Button implements QuestPositionableButton {
 
 				outlineColor = ThemeProperties.QUEST_COMPLETED_COLOR.get(quest);
 			} else if (isStarted) {
-				outlineColor = ThemeProperties.QUEST_STARTED_COLOR.get(quest);
+				if (teamData.areDependenciesComplete(quest)) {
+					outlineColor = ThemeProperties.QUEST_STARTED_COLOR.get(quest);
+				}
 				if (quest.getProgressionMode() == ProgressionMode.FLEXIBLE && quest.allTasksCompleted(teamData)) {
 					questIcon = new ThemeProperties.CheckIcon(Color4I.rgb(0x606060), Color4I.rgb(0x808080));
 				}
@@ -347,7 +349,7 @@ public class QuestButton extends Button implements QuestPositionableButton {
 			outlineColor = ThemeProperties.QUEST_LOCKED_COLOR.get(quest);
 		}
 
-		if (questIcon == Icon.EMPTY && teamData.isQuestPinned(quest.id)) {
+		if (questIcon == Color4I.EMPTY && teamData.isQuestPinned(quest.id)) {
 			questIcon = ThemeProperties.PIN_ICON_ON.get();
 		}
 		if (questScreen.file.canEdit() && !quest.isVisible(teamData)) {
@@ -382,7 +384,7 @@ public class QuestButton extends Button implements QuestPositionableButton {
 			matrixStack.popPose();
 		}
 
-		if (!canStart) {
+		if (!canStart || !teamData.areDependenciesComplete(quest)) {
 			matrixStack.pushPose();
 			matrixStack.translate(0, 0, 200);
 			shape.shape.withColor(Color4I.BLACK.withAlpha(100)).draw(matrixStack, x, y, w, h);

@@ -1,7 +1,7 @@
 package dev.ftb.mods.ftbquests.gui;
 
 import dev.ftb.mods.ftblibrary.config.ConfigCallback;
-import dev.ftb.mods.ftblibrary.icon.Icon;
+import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.ui.Panel;
 import dev.ftb.mods.ftblibrary.ui.SimpleTextButton;
 import dev.ftb.mods.ftblibrary.ui.Theme;
@@ -94,7 +94,7 @@ public class SelectQuestObjectScreen<T extends QuestObjectBase> extends ButtonLi
 		public final T object;
 
 		public QuestObjectButton(Panel panel, @Nullable T o) {
-			super(panel, o == null ? Component.translatable("ftbquests.null") : o.getMutableTitle().withStyle(o.getObjectType().getColor()), o == null ? Icon.EMPTY : o.getIcon());
+			super(panel, o == null ? Component.translatable("ftbquests.null") : o.getMutableTitle().withStyle(o.getObjectType().getColor()), o == null ? Color4I.EMPTY : o.getIcon());
 			object = o;
 			setSize(200, 14);
 		}
