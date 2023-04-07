@@ -2,7 +2,6 @@ package dev.ftb.mods.ftbquests.gui;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
-import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.ui.*;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.util.StringUtils;
@@ -69,7 +68,7 @@ public class RewardNotificationsScreen extends BaseScreen implements IRewardList
 
 	public RewardNotificationsScreen() {
 		rewards = new Object2IntOpenHashMap<>();
-		closeButton = new SimpleTextButton(this, Component.translatable("gui.close"), Icon.EMPTY) {
+		closeButton = new SimpleTextButton(this, Component.translatable("gui.close"), Color4I.EMPTY) {
 			@Override
 			public void onClicked(MouseButton button) {
 				playClickSound();
