@@ -53,7 +53,7 @@ public final class ChapterImage implements Movable {
 		width = 1D;
 		height = 1D;
 		rotation = 0D;
-		image = Icon.EMPTY; //getIcon("minecraft:textures/gui/presets/isles.png");
+		image = Color4I.EMPTY; //getIcon("minecraft:textures/gui/presets/isles.png");
 		color = Color4I.WHITE;
 		alpha = 255;
 		needAspectRecalc = true;

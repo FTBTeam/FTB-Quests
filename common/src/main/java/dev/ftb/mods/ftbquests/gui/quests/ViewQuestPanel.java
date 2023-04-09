@@ -56,7 +56,7 @@ public class ViewQuestPanel extends Panel {
 	public final QuestScreen questScreen;
 	public Quest quest = null;
 	public boolean hidePanel = false;
-	private Icon icon = Icon.EMPTY;
+	private Icon icon = Color4I.EMPTY;
 	public Button buttonClose;
 	public Button buttonPin;
 	public Button buttonOpenDependencies;
@@ -403,7 +403,7 @@ public class ViewQuestPanel extends Panel {
 		if (dependencies && quest.minRequiredDependencies > 0) {
 			contextMenu.add(new ContextMenuItem(
 					Component.translatable("ftbquests.quest.min_required_header", quest.minRequiredDependencies)
-							.withStyle(ChatFormatting.UNDERLINE), Icon.EMPTY, null).setEnabled(false)
+							.withStyle(ChatFormatting.UNDERLINE), Color4I.EMPTY, null).setEnabled(false)
 			);
 		}
 
@@ -414,7 +414,7 @@ public class ViewQuestPanel extends Panel {
 					Component suffix = Component.literal(" [").append(object.getQuestChapter().getTitle()).append("]").withStyle(ChatFormatting.GRAY);
 					title.append(suffix);
 				}
-				contextMenu.add(new ContextMenuItem(title, Icon.EMPTY, () -> questScreen.open(object, true)));
+				contextMenu.add(new ContextMenuItem(title, Color4I.EMPTY, () -> questScreen.open(object, true)));
 			} else {
 				hidden++;
 			}
@@ -423,7 +423,7 @@ public class ViewQuestPanel extends Panel {
 		if (hidden > 0) {
 			MutableComponent prefix = hidden == c.size() ? Component.empty() : Component.literal("+ ");
 			contextMenu.add(new ContextMenuItem(
-					prefix.append(Component.translatable("ftbquests.quest.hidden_quests_footer", hidden)), Icon.EMPTY, null).setEnabled(false)
+					prefix.append(Component.translatable("ftbquests.quest.hidden_quests_footer", hidden)), Color4I.EMPTY, null).setEnabled(false)
 			);
 		}
 

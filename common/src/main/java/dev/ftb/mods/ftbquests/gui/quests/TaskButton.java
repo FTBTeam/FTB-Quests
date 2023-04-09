@@ -3,7 +3,6 @@ package dev.ftb.mods.ftbquests.gui.quests;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
-import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.ui.*;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
@@ -194,7 +193,7 @@ public class TaskButton extends Button {
 		@Override
 		public void addButtons(Panel panel) {
 			for (ResourceLocation tag : tags) {
-				panel.add(new SimpleTextButton(panel, Component.literal(tag.toString()), Icon.EMPTY) {
+				panel.add(new SimpleTextButton(panel, Component.literal(tag.toString()), Color4I.EMPTY) {
 					@Override
 					public void onClicked(MouseButton button) {
 						questScreen.openGui();

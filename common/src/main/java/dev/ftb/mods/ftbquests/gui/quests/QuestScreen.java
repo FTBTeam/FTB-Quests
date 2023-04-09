@@ -5,7 +5,6 @@ import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.ConfigValue;
 import dev.ftb.mods.ftblibrary.config.ConfigWithVariants;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
-import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.math.MathUtils;
 import dev.ftb.mods.ftblibrary.ui.*;
@@ -251,7 +250,7 @@ public class QuestScreen extends BaseScreen {
 	private void openPropertiesSubMenu(QuestObjectBase object, ConfigGroup g) {
 		List<ContextMenuItem> subMenu = new ArrayList<>();
 
-		subMenu.add(new ContextMenuItem(object.getTitle(), Icon.EMPTY, null).setCloseMenu(false));
+		subMenu.add(new ContextMenuItem(object.getTitle(), Color4I.EMPTY, null).setCloseMenu(false));
 		subMenu.add(ContextMenuItem.SEPARATOR);
 		for (ConfigValue c : g.getValues()) {
 			if (c instanceof ConfigWithVariants) {

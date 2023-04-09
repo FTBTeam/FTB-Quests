@@ -1,6 +1,6 @@
 package dev.ftb.mods.ftbquests.gui;
 
-import dev.ftb.mods.ftblibrary.icon.Icon;
+import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.ui.Panel;
 import dev.ftb.mods.ftblibrary.ui.SimpleTextButton;
 import dev.ftb.mods.ftblibrary.ui.Theme;
@@ -20,7 +20,7 @@ public class ChangeChapterGroupScreen extends ButtonListBaseScreen {
 		private final ChapterGroup chapterGroup;
 
 		public ChapterGroupButton(Panel panel, ChapterGroup t) {
-			super(panel, t.getTitle(), Icon.EMPTY);
+			super(panel, t.getTitle(), Color4I.EMPTY);
 			chapterGroup = t;
 			setHeight(14);
 		}
