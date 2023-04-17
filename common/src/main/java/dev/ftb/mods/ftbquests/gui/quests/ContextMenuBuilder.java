@@ -49,7 +49,13 @@ public class ContextMenuBuilder {
     public List<ContextMenuItem> build(BaseScreen gui) {
         List<ContextMenuItem> res = new ArrayList<>();
 
-        res.add(new ContextMenuItem(Component.literal("\"").append(object.getTitle()).append("\""), Color4I.EMPTY, null).setCloseMenu(false));
+        String titleStr = object.getTitle().getString();
+        String closeQuote = "\"";
+        if (titleStr.contains("\n")) {
+            titleStr = titleStr.split("\n")[0];
+            closeQuote = "\" ...";
+        }
+        res.add(new ContextMenuItem(Component.literal("\"").append(titleStr).append(closeQuote), Color4I.EMPTY, null).setCloseMenu(false));
         res.add(ContextMenuItem.SEPARATOR);
         res.addAll(atTop);
         screen.addObjectMenuItems(res, gui, object, deletionFocus);
