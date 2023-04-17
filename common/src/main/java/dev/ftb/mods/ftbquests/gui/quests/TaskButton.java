@@ -4,6 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icons;
+import dev.ftb.mods.ftblibrary.icon.ItemIcon;
 import dev.ftb.mods.ftblibrary.ui.*;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.ui.misc.ButtonListBaseScreen;
@@ -65,18 +66,31 @@ public class TaskButton extends Button {
 			if (task instanceof ItemTask itemTask) {
 				var tags = itemTask.item.getItem().builtInRegistryHolder().tags().map(TagKey::location).toList();
 				if (!tags.isEmpty() && !ItemFiltersAPI.isFilter(itemTask.item)) {
-					builder.insertAtTop(List.of(new ContextMenuItem(Component.translatable("ftbquests.task.ftbquests.item.convert_tag"),
-							ThemeProperties.RELOAD_ICON.get(),
-							() -> {
-								ItemStack tagFilter = new ItemStack(ItemFiltersItems.TAG.get());
-								if (tags.size() == 1) {
-									convertToSingleTag(itemTask, tags, tagFilter);
-								} else {
-									new TagSelectionScreen(tags, tagFilter, itemTask).openGui();
-								}
-							})
+					builder.insertAtTop(List.of(
+							new ContextMenuItem(Component.translatable("ftbquests.task.ftbquests.item.convert_tag"),
+									ThemeProperties.RELOAD_ICON.get(),
+									() -> {
+										ItemStack tagFilter = new ItemStack(ItemFiltersItems.TAG.get());
+										if (tags.size() == 1) {
+											convertToSingleTag(itemTask, tags, tagFilter);
+										} else {
+											new TagSelectionScreen(tags, tagFilter, itemTask).openGui();
+										}
+									})
 					));
 				}
+			}
+			if (task.getIcon() instanceof ItemIcon itemIcon) {
+				builder.insertAtTop(List.of(
+								new ContextMenuItem(Component.translatable("ftbquests.gui.use_as_quest_icon"),
+										ThemeProperties.EDIT_ICON.get(),
+										() -> {
+											task.quest.icon = itemIcon.getStack().copy();
+											task.quest.clearCachedData();
+											new EditObjectMessage(task.quest).sendToServer();
+										})
+						)
+				);
 			}
 
 			builder.openContextMenu(getGui());
