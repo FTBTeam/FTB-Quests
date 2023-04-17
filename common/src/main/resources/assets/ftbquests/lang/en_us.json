@@ -259,6 +259,7 @@
 	"ftbquests.gui.view_quest_links": "View Quest Link(s)",
 	"ftbquests.gui.fix_aspect_ratio_w": "Adjust Width to Aspect Ratio",
 	"ftbquests.gui.fix_aspect_ratio_h": "Adjust Height to Aspect Ratio",
+	"ftbquests.gui.bulk_change_size": "Change Size for all...",
 	"ftbquests.task": "Task",
 	"ftbquests.tasks": "Tasks",
 	"ftbquests.task.completed": "Task completed!",
