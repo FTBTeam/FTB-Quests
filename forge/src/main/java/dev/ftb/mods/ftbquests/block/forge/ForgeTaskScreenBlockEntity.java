@@ -149,7 +149,7 @@ public class ForgeTaskScreenBlockEntity extends TaskScreenBlockEntity {
 
         @Override
         public int fill(FluidStack fluidStack, FluidAction fluidAction) {
-            if (getTask() instanceof FluidTask task) {
+            if (getTask() instanceof FluidTask task && isFluidValid(0, fluidStack)) {
                 TeamData data = getCachedTeamData();
                 if (data != null && data.canStartTasks(task.quest) && !data.isCompleted(task)) {
                     long space = task.getMaxProgress() - data.getProgress(task);
