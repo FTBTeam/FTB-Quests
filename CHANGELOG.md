@@ -4,10 +4,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1902.4.12]
+
+### Added
+* Multi-page support for quest description text, useful for very large descriptions
+  * Split text into pages by adding a literal `{@pagebreak}` code on its own line
+  * Alternatively, use "Add" -> "Page Break" in the quest view panel to add a new page after the current one
+  * Multi-page descriptions have left & right buttons in the lower left, along with a page number display
+  * Alternatively, you can move between pages with Page Up & Page Down keys, or by scrolling the mouse
+* When creating observation tasks, the default block is now what the player is looking at, not just `minecraft:dirt`
+* Creating a fluid task now pops up the fluid selection screen instead of defaulting to water
+* The task button context menu (in the view quest panel) now includes a "Use as Quest Icon" entry
+  * Convenient if your quest has multiple tasks, and you want to choose a single fixed icon for the quest
+* When multiple quests are selected, the context menu now includes a "Change Size for all..." entry
+
+### Fixed
+* Task screens now correctly filter what fluids they accept
+* Fixed translation keys not working in task button tooltips
+
 ## [1902.4.11]
 
 ### Added
-
 * Quest connection lines now animate when a quest is hovered with the mouse (as well as when clicked to select)
   * Makes the quest flow a little more obvious
 * Pre-completed quests in flexible mode now render dark like other uncompleted quests
