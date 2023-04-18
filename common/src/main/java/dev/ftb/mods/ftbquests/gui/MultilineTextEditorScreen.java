@@ -7,8 +7,8 @@ import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.ui.*;
 import dev.ftb.mods.ftblibrary.ui.input.Key;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
-import net.minecraft.network.chat.Component;
 import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -21,21 +21,23 @@ public class MultilineTextEditorScreen extends BaseScreen {
 	public final ListConfig<String, StringConfig> config;
 	public final ConfigCallback callback;
 	public List<EntryTextBox> textBoxes;
+	public Panel textBoxPanel;
 	public int active = 0;
 
 	public MultilineTextEditorScreen(ListConfig<String, StringConfig> c, ConfigCallback ca) {
 		config = c;
 		callback = ca;
 		textBoxes = new ArrayList<>();
+		textBoxPanel = new BlankPanel(this);
 
 		for (String s : c.value) {
-			EntryTextBox box = new EntryTextBox(this);
+			EntryTextBox box = new EntryTextBox(textBoxPanel);
 			box.setText(s);
 			textBoxes.add(box);
 		}
 
 		if (textBoxes.isEmpty()) {
-			textBoxes.add(new EntryTextBox(this));
+			textBoxes.add(new EntryTextBox(textBoxPanel));
 		}
 
 		textBoxes.get(0).setFocused(true);
@@ -56,14 +58,20 @@ public class MultilineTextEditorScreen extends BaseScreen {
 		add(new TextField(this).setText(Component.translatable("ftbquests.gui.edit_description.help").withStyle(ChatFormatting.GRAY)));
 		widgets.get(1).setPos((width - widgets.get(1).width) / 2, height + 5);
 
-		add(new SimpleButton(this, Component.translatable("gui.accept"), Icons.ACCEPT, (simpleButton, mouseButton) -> saveAndExit()).setPosAndSize(width + 6, 6, 16, 16));
-		add(new SimpleButton(this, Component.translatable("gui.cancel"), Icons.CANCEL, (simpleButton, mouseButton) -> cancel()).setPosAndSize(width + 6, 24, 16, 16));
+		add(new SimpleButton(this, Component.translatable("gui.accept"), Icons.ACCEPT,
+				(simpleButton, mouseButton) -> saveAndExit()).setPosAndSize(width + 6, 6, 16, 16));
+		add(new SimpleButton(this, Component.translatable("gui.cancel"), Icons.CANCEL,
+				(simpleButton, mouseButton) -> cancel()).setPosAndSize(width + 6, 24, 16, 16));
 
+		add(textBoxPanel);
+		textBoxPanel.setPosAndSize(2, 2, width - 4, height - 4);
+
+		int h = getTheme().getFontHeight() + 2;
 		for (int i = 0; i < textBoxes.size(); i++) {
-			textBoxes.get(i).setPosAndSize(2, 2 + i * 12, width - 4, 12);
+			textBoxes.get(i).setPosAndSize(0, 2 + i * h, textBoxPanel.width, 12);
 		}
 
-		addAll(textBoxes);
+		textBoxPanel.addAll(textBoxes);
 	}
 
 	private void cancel() {
