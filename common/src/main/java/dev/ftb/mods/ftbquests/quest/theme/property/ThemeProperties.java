@@ -147,6 +147,8 @@ public interface ThemeProperties {
 	DoubleProperty DEPENDENCY_LINE_THICKNESS = new DoubleProperty("dependency_line_thickness", 0D, 3D);
 	DoubleProperty QUEST_SPACING = new DoubleProperty("quest_spacing", 0D, 8D);
 	DoubleProperty PINNED_QUEST_SIZE = new DoubleProperty("pinned_quest_size", 0D, 3D);
+	IconProperty LEFT_ARROW = new IconProperty("left_arrow");
+	IconProperty RIGHT_ARROW = new IconProperty("right_arrow");
 
 	// Task specific //
 	IconProperty CHECKMARK_TASK_ACTIVE = new IconProperty("checkmark_task_active");

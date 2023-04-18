@@ -1,6 +1,7 @@
 package dev.ftb.mods.ftbquests.gui.quests;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.datafixers.util.Pair;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.ImageConfig;
 import dev.ftb.mods.ftblibrary.config.ListConfig;
@@ -53,8 +54,10 @@ import java.util.function.Consumer;
  * @author LatvianModder
  */
 public class ViewQuestPanel extends Panel {
+	private static final String PAGEBREAK_CODE = "{@pagebreak}";
+
 	public final QuestScreen questScreen;
-	public Quest quest = null;
+	private Quest quest = null;
 	public boolean hidePanel = false;
 	private Icon icon = Color4I.EMPTY;
 	public Button buttonClose;
@@ -66,6 +69,8 @@ public class ViewQuestPanel extends Panel {
 	public BlankPanel panelRewards;
 	public BlankPanel panelText;
 	private TextField titleField;
+	private final List<Pair<Integer,Integer>> pageIndices = new ArrayList<>();
+	private int currentPage = 0;
 
 	public ViewQuestPanel(QuestScreen g) {
 		super(g);
@@ -73,6 +78,52 @@ public class ViewQuestPanel extends Panel {
 		setPosAndSize(-1, -1, 0, 0);
 		setOnlyRenderWidgetsInside(true);
 		setOnlyInteractWithWidgetsInside(true);
+	}
+
+	public boolean viewingQuest() {
+		return quest != null;
+	}
+
+	public boolean viewingQuest(Quest quest) {
+		return this.quest == quest;
+	}
+
+	public Quest getViewedQuest() {
+		return quest;
+	}
+
+	public boolean setViewedQuest(Quest newQuest) {
+		if (quest != newQuest) {
+			quest = newQuest;
+			refreshWidgets();
+			return true;
+		}
+		return false;
+	}
+
+	public boolean canEdit() {
+		return quest.getQuestFile().canEdit();
+	}
+
+	private void buildPageIndices() {
+		pageIndices.clear();
+
+		if (quest != null) {
+			int l1 = 0;
+			for (int l2 = l1; l2 < quest.description.size(); l2++) {
+				if (quest.description.get(l2).equals(PAGEBREAK_CODE)) {
+					pageIndices.add(Pair.of(l1, l2 - 1));
+					l1 = l2 + 1;
+				}
+			}
+			if (l1 < quest.description.size()) {
+				pageIndices.add(Pair.of(l1, quest.description.size() - 1));
+			}
+
+			if (currentPage < 0 || currentPage >= pageIndices.size()) {
+				currentPage = 0;
+			}
+		}
 	}
 
 	@Override
@@ -289,38 +340,10 @@ public class ViewQuestPanel extends Panel {
 
 		boolean showText = !quest.hideTextUntilComplete.get(false) || questScreen.file.self != null && questScreen.file.self.isCompleted(quest);
 
-		if (showText && quest.getDescription().length > 0) {
-			if (subtitle.getContents() != ComponentContents.EMPTY) {
-				panelText.add(new VerticalSpaceWidget(panelText, 7));
-			}
+		buildPageIndices();
 
-			for (int i = 0; i < quest.getDescription().length; i++) {
-				Component component = quest.getDescription()[i];
-
-				ImageComponent img = findImageComponent(component);
-				if (img != null) {
-					ImageComponentWidget c = new ImageComponentWidget(this, panelText, img, i);
-
-					if (c.component.fit) {
-						double scale = panelText.width / (double) c.width;
-						c.setSize((int) (c.width * scale), (int) (c.height * scale));
-					} else if (c.component.align == 1) {
-						c.setX((panelText.width - c.width) / 2);
-					} else if (c.component.align == 2) {
-						c.setX(panelText.width - c.width);
-					} else {
-						c.setX(0);
-					}
-
-					panelText.add(c);
-				} else {
-					final int line = i;
-					TextField field = new QuestDescriptionField(panelText, canEdit, context -> editDescLine(line, context, null))
-							.setMaxWidth(panelText.width).setSpacing(9).setText(component);
-					field.setWidth(panelText.width);
-					panelText.add(field);
-				}
-			}
+		if (showText && !pageIndices.isEmpty()) {
+			addDescriptionText(canEdit, subtitle);
 		}
 
 		if (showText && !quest.guidePage.isEmpty()) {
@@ -333,19 +356,8 @@ public class ViewQuestPanel extends Panel {
 			panelText.add(new OpenInGuideButton(panelText, quest));
 		}
 
-		if (canEdit) {
-			panelText.add(new VerticalSpaceWidget(panelText, 3));
-
-			SimpleTextButton add = new SimpleTextButton(panelText, Component.translatable("gui.add"), ThemeProperties.ADD_ICON.get()) {
-				@Override
-				public void onClicked(MouseButton mouseButton) {
-					addDescLine();
-				}
-			};
-
-			add.setX((panelText.width - add.width) / 2);
-			add.setHeight(14);
-			panelText.add(add);
+		if (pageIndices.size() > 1 || canEdit) {
+			addButtonBar(canEdit);
 		}
 
 		if (panelText.widgets.isEmpty()) {
@@ -367,6 +379,108 @@ public class ViewQuestPanel extends Panel {
 		panelContent.setHeight(height - 17);
 
 		QuestTheme.currentObject = prev;
+	}
+
+	private void addDescriptionText(boolean canEdit, Component subtitle) {
+		Pair<Integer,Integer> pageSpan = pageIndices.get(currentPage);
+		if (subtitle.getContents() != ComponentContents.EMPTY) {
+			panelText.add(new VerticalSpaceWidget(panelText, 7));
+		}
+
+		for (int i = pageSpan.getFirst(); i <= pageSpan.getSecond() && i < quest.getDescription().length; i++) {
+			Component component = quest.getDescription()[i];
+
+			ImageComponent img = findImageComponent(component);
+			if (img != null) {
+				ImageComponentWidget c = new ImageComponentWidget(this, panelText, img, i);
+
+				if (c.component.fit) {
+					double scale = panelText.width / (double) c.width;
+					c.setSize((int) (c.width * scale), (int) (c.height * scale));
+				} else if (c.component.align == 1) {
+					c.setX((panelText.width - c.width) / 2);
+				} else if (c.component.align == 2) {
+					c.setX(panelText.width - c.width);
+				} else {
+					c.setX(0);
+				}
+
+				panelText.add(c);
+			} else {
+				final int line = i;
+				TextField field = new QuestDescriptionField(panelText, canEdit, context -> editDescLine(line, context, null))
+						.setMaxWidth(panelText.width).setSpacing(9).setText(component);
+				field.setWidth(panelText.width);
+				panelText.add(field);
+			}
+		}
+	}
+
+	private void addButtonBar(boolean canEdit) {
+		// button bar has page navigation buttons for multi-page text, and the Add button in edit mode
+
+		panelText.add(new VerticalSpaceWidget(panelText, 3));
+
+		Panel buttonPanel = new BlankPanel(panelText);
+		buttonPanel.setSize(panelText.width, 14);
+		panelText.add(buttonPanel);
+
+		Component page = Component.literal((currentPage + 1) + "/" + pageIndices.size()).withStyle(ChatFormatting.GRAY);
+		int labelWidth = questScreen.getTheme().getStringWidth(page);
+
+		if (currentPage > 0) {
+			SimpleTextButton prevPage = new SimpleTextButton(buttonPanel, Component.empty(), ThemeProperties.LEFT_ARROW.get()) {
+				@Override
+				public void onClicked(MouseButton mouseButton) {
+					currentPage = Math.max(0, currentPage - 1);
+					refreshWidgets();
+				}
+
+				@Override
+				public void addMouseOverText(TooltipList list) {
+					list.add(Component.literal("[Page Up]").withStyle(ChatFormatting.DARK_GRAY));
+				}
+			};
+			prevPage.setX(panelText.width - 43 - labelWidth);
+			prevPage.setSize(16, 14);
+			buttonPanel.add(prevPage);
+		}
+		if (pageIndices.size() > 1) {
+			TextField pageLabel = new TextField(buttonPanel);
+			pageLabel.setText(page);
+			pageLabel.setPosAndSize(panelText.width - 24 - labelWidth, 3, 20, 14);
+			buttonPanel.add(pageLabel);
+		}
+		if (currentPage < pageIndices.size() - 1) {
+			SimpleTextButton nextPage = new SimpleTextButton(buttonPanel, Component.empty(), ThemeProperties.RIGHT_ARROW.get()) {
+				@Override
+				public void onClicked(MouseButton mouseButton) {
+					currentPage = Math.min(pageIndices.size() + 1, currentPage + 1);
+					refreshWidgets();
+				}
+
+				@Override
+				public void addMouseOverText(TooltipList list) {
+					list.add(Component.literal("[Page Down]").withStyle(ChatFormatting.DARK_GRAY));
+				}
+			};
+			nextPage.setSize(16, 14);
+			nextPage.setX(panelText.width - 5 - nextPage.width);
+			buttonPanel.add(nextPage);
+		}
+
+		if (canEdit) {
+			SimpleTextButton add = new SimpleTextButton(buttonPanel, Component.translatable("gui.add"), ThemeProperties.ADD_ICON.get()) {
+				@Override
+				public void onClicked(MouseButton mouseButton) {
+					openAddButtonContextMenu();
+				}
+			};
+
+			add.setX((panelText.width - add.width) / 2);
+			add.setHeight(14);
+			buttonPanel.add(add);
+		}
 	}
 
 	private ImageComponent findImageComponent(Component c) {
@@ -447,10 +561,19 @@ public class ViewQuestPanel extends Panel {
 				new MultilineTextEditorScreen(lc, accepted -> {
 					if (accepted) {
 						new EditObjectMessage(quest).sendToServer();
+						refreshWidgets();
 					}
 					openGui();
 				}).openGui();
 			}
+		}
+
+		if (key.is(GLFW.GLFW_KEY_PAGE_UP) || key.is(GLFW.GLFW_KEY_LEFT)) {
+			currentPage = Math.max(0, currentPage - 1);
+			refreshWidgets();
+		} else if (key.is(GLFW.GLFW_KEY_PAGE_DOWN) || key.is(GLFW.GLFW_KEY_RIGHT)) {
+			currentPage = Math.min(pageIndices.size() - 1, currentPage + 1);
+			refreshWidgets();
 		}
 	}
 
@@ -492,10 +615,21 @@ public class ViewQuestPanel extends Panel {
 		});
 	}
 
-	private void addDescLine() {
+	private void openAddButtonContextMenu() {
 		List<ContextMenuItem> contextMenu = new ArrayList<>();
-		contextMenu.add(new ContextMenuItem(Component.literal("Text"), Icons.NOTES, () -> editDescLine0(-1, null)));
-		contextMenu.add(new ContextMenuItem(Component.literal("Image"), Icons.ART, () -> editDescLine0(-1, new ImageComponent())));
+
+		contextMenu.add(new ContextMenuItem(Component.literal("Text"), Icons.NOTES,
+				() -> editDescLine0(-1, null)));
+		contextMenu.add(new ContextMenuItem(Component.literal("Page Break"), Icons.COLOR_BLANK,
+				() -> {
+					appendToPage(quest.description, List.of(PAGEBREAK_CODE, "(new page placeholder text)"), currentPage);
+					new EditObjectMessage(quest).sendToServer();
+					currentPage = Math.min(pageIndices.size() - 1, currentPage + 1);
+					refreshWidgets();
+				}));
+		contextMenu.add(new ContextMenuItem(Component.literal("Image"), Icons.ART,
+				() -> editDescLine0(-1, new ImageComponent())));
+
 		getGui().openContextMenu(contextMenu);
 	}
 
@@ -519,12 +653,13 @@ public class ViewQuestPanel extends Panel {
 		EditConfigFromStringScreen.open(c, line == -1 ? "" : quest.description.get(line), "", title, accepted -> {
 			if (accepted) {
 				if (line == -1) {
-					quest.description.add(c.value);
+					appendToPage(quest.description, List.of(c.value), currentPage);
 				} else {
 					quest.description.set(line, c.value);
 				}
 
 				new EditObjectMessage(quest).sendToServer();
+				refreshWidgets();
 			}
 
 			openGui();
@@ -545,15 +680,26 @@ public class ViewQuestPanel extends Panel {
 			openGui();
 			if (accepted) {
 				if (line == -1) {
-					quest.description.add(component.toString());
+					appendToPage(quest.description, List.of(component.toString()), currentPage);
 				} else {
 					quest.description.set(line, component.toString());
 				}
 				new EditObjectMessage(quest).sendToServer();
+
+				refreshWidgets();
 			}
 		};
 
 		new EditConfigScreen(group).openGui();
+	}
+
+	private void appendToPage(List<String> list, List<String> toAdd, int pageNumber) {
+		int idx = pageIndices.get(pageNumber).getSecond() + 1;
+
+		for (String line : toAdd) {
+			list.add(idx, line);
+			idx++;
+		}
 	}
 
 	public void editDescLine(int line, boolean context, @Nullable Object type) {
@@ -567,6 +713,7 @@ public class ViewQuestPanel extends Panel {
 			contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.delete"), ThemeProperties.DELETE_ICON.get(), () -> {
 				quest.description.remove(line);
 				new EditObjectMessage(quest).sendToServer();
+				refreshWidgets();
 			}));
 
 			getGui().openContextMenu(contextMenu);
@@ -602,6 +749,25 @@ public class ViewQuestPanel extends Panel {
 	@Override
 	public boolean mousePressed(MouseButton button) {
 		return super.mousePressed(button) || isMouseOver();
+	}
+
+	@Override
+	public boolean mouseScrolled(double scroll) {
+		if (super.mouseScrolled(scroll)) {
+			return true;
+		}
+
+		if (scroll < 0 && currentPage < pageIndices.size() - 1) {
+			currentPage++;
+			refreshWidgets();
+			return true;
+		} else if (scroll > 0 && currentPage > 0) {
+			currentPage--;
+			refreshWidgets();
+			return true;
+		}
+
+		return false;
 	}
 
 	private class QuestDescriptionField extends TextField {
