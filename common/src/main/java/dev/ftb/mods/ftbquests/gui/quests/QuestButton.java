@@ -398,7 +398,7 @@ public class QuestButton extends Button implements QuestPositionableButton {
 		// TODO: custom shader to implement alphaFunc?
 		//RenderSystem.alphaFunc(GL11.GL_GREATER, 0.1F);
 
-		if (quest == questScreen.viewQuestPanel.quest || questScreen.selectedObjects.contains(moveAndDeleteFocus())) {
+		if (questScreen.viewQuestPanel.viewingQuest(quest) || questScreen.selectedObjects.contains(moveAndDeleteFocus())) {
 			matrixStack.pushPose();
 			matrixStack.translate(0, 0, 200);
 			Color4I col = Color4I.WHITE.withAlpha((int) (190D + Math.sin(System.currentTimeMillis() * 0.003D) * 50D));

@@ -335,7 +335,7 @@ public class ChapterPanel extends Panel {
 
 	@Override
 	public boolean checkMouseOver(int mouseX, int mouseY) {
-		if (questScreen.viewQuestPanel.quest != null) {
+		if (questScreen.viewQuestPanel.viewingQuest()) {
 			return false;
 		}
 

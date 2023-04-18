@@ -74,7 +74,7 @@ public class QuestScreen extends BaseScreen {
 
 	@Nullable
 	public Quest getViewedQuest() {
-		return viewQuestPanel.quest;
+		return viewQuestPanel.getViewedQuest();
 	}
 
 	public boolean isViewingQuest() {
@@ -125,12 +125,7 @@ public class QuestScreen extends BaseScreen {
 	}
 
 	public void viewQuest(Quest quest) {
-		//selectedQuests.clear();
-
-		if (viewQuestPanel.quest != quest) {
-			viewQuestPanel.quest = quest;
-			viewQuestPanel.refreshWidgets();
-		}
+		viewQuestPanel.setViewedQuest(quest);
 	}
 
 	@Override
@@ -143,20 +138,13 @@ public class QuestScreen extends BaseScreen {
 	}
 
 	public void closeQuest() {
-		//selectedQuests.clear();
-
-		if (viewQuestPanel.quest != null) {
-			viewQuestPanel.quest = null;
+		if (viewQuestPanel.setViewedQuest(null)) {
 			viewQuestPanel.hidePanel = false;
-			viewQuestPanel.refreshWidgets();
 		}
 	}
 
 	public void toggleSelected(Movable movable) {
-		if (viewQuestPanel.quest != null) {
-			viewQuestPanel.quest = null;
-			viewQuestPanel.refreshWidgets();
-		}
+		viewQuestPanel.setViewedQuest(null);
 
 		if (selectedObjects.contains(movable)) {
 			selectedObjects.remove(movable);
