@@ -37,6 +37,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.ConfirmLinkScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.*;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.TooltipFlag;
 import org.jetbrains.annotations.Nullable;
@@ -55,6 +56,7 @@ import java.util.function.Consumer;
  */
 public class ViewQuestPanel extends Panel {
 	public static final String PAGEBREAK_CODE = "{@pagebreak}";
+	public static final Icon PAGEBREAK_ICON = Icon.getIcon(new ResourceLocation(FTBQuests.MOD_ID, "textures/gui/pagebreak.png"));
 
 	public final QuestScreen questScreen;
 	private Quest quest = null;
@@ -470,14 +472,25 @@ public class ViewQuestPanel extends Panel {
 		}
 
 		if (canEdit) {
-			SimpleTextButton add = new SimpleTextButton(buttonPanel, Component.translatable("gui.add"), ThemeProperties.ADD_ICON.get()) {
+			SimpleTextButton edit = new SimpleTextButton(buttonPanel, Component.translatable("ftbquests.gui.edit").append(" \u25bc"), ThemeProperties.EDIT_ICON.get()) {
+				@Override
+				public void onClicked(MouseButton mouseButton) {
+					openEditButtonContextMenu();
+				}
+			};
+
+			edit.setX(panelText.width / 2 - edit.width - 5);
+			edit.setHeight(14);
+			buttonPanel.add(edit);
+
+			SimpleTextButton add = new SimpleTextButton(buttonPanel, Component.translatable("gui.add").append(" \u25bc"), ThemeProperties.ADD_ICON.get()) {
 				@Override
 				public void onClicked(MouseButton mouseButton) {
 					openAddButtonContextMenu();
 				}
 			};
 
-			add.setX((panelText.width - add.width) / 2);
+			add.setX(panelText.width / 2 + 5);
 			add.setHeight(14);
 			buttonPanel.add(add);
 		}
@@ -556,15 +569,7 @@ public class ViewQuestPanel extends Panel {
 			} else if (key.is(GLFW.GLFW_KEY_T)) {
 				editTitle();
 			} else if (key.is(GLFW.GLFW_KEY_D)) {
-				ListConfig<String, StringConfig> lc = new ListConfig<>(new StringConfig());
-				lc.value = quest.description;
-				new MultilineTextEditorScreen(lc, accepted -> {
-					if (accepted) {
-						new EditObjectMessage(quest).sendToServer();
-						refreshWidgets();
-					}
-					openGui();
-				}).openGui();
+				editDescription();
 			}
 		}
 
@@ -615,19 +620,42 @@ public class ViewQuestPanel extends Panel {
 		});
 	}
 
+	private void editDescription() {
+		ListConfig<String, StringConfig> lc = new ListConfig<>(new StringConfig());
+		lc.value = quest.description;
+		new MultilineTextEditorScreen(lc, accepted -> {
+			if (accepted) {
+				new EditObjectMessage(quest).sendToServer();
+				refreshWidgets();
+			}
+			openGui();
+		}).openGui();
+	}
+
+
+	private void openEditButtonContextMenu() {
+		List<ContextMenuItem> contextMenu = new ArrayList<>();
+
+		contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.title").append(Component.literal(" [T]").withStyle(ChatFormatting.DARK_GRAY)), Icons.NOTES, this::editTitle));
+		contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.quest.subtitle").append(Component.literal(" [S]").withStyle(ChatFormatting.DARK_GRAY)), Icons.NOTES, this::editSubtitle));
+		contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.quest.description").append(Component.literal(" [D]").withStyle(ChatFormatting.DARK_GRAY)), Icons.NOTES, this::editDescription));
+
+		getGui().openContextMenu(contextMenu);
+	}
+
 	private void openAddButtonContextMenu() {
 		List<ContextMenuItem> contextMenu = new ArrayList<>();
 
-		contextMenu.add(new ContextMenuItem(Component.literal("Text"), Icons.NOTES,
+		contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.text"), Icons.NOTES,
 				() -> editDescLine0(-1, null)));
-		contextMenu.add(new ContextMenuItem(Component.literal("Page Break"), Icons.COLOR_BLANK,
+		contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.page_break"), PAGEBREAK_ICON,
 				() -> {
 					appendToPage(quest.description, List.of(PAGEBREAK_CODE, "(new page placeholder text)"), currentPage);
 					new EditObjectMessage(quest).sendToServer();
 					currentPage = Math.min(pageIndices.size() - 1, currentPage + 1);
 					refreshWidgets();
 				}));
-		contextMenu.add(new ContextMenuItem(Component.literal("Image"), Icons.ART,
+		contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.chapter.image"), Icons.ART,
 				() -> editDescLine0(-1, new ImageComponent())));
 
 		getGui().openContextMenu(contextMenu);
