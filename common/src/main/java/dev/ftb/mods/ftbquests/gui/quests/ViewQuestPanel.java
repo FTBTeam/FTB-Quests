@@ -54,7 +54,7 @@ import java.util.function.Consumer;
  * @author LatvianModder
  */
 public class ViewQuestPanel extends Panel {
-	private static final String PAGEBREAK_CODE = "{@pagebreak}";
+	public static final String PAGEBREAK_CODE = "{@pagebreak}";
 
 	public final QuestScreen questScreen;
 	private Quest quest = null;
