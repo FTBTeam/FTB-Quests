@@ -14,7 +14,6 @@ import dev.ftb.mods.ftblibrary.ui.input.KeyModifiers;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.ui.misc.NordColors;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
-import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.gui.quests.ViewQuestPanel;
 import joptsimple.internal.Strings;
 import net.minecraft.ChatFormatting;
@@ -22,7 +21,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Whence;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 
 import javax.annotation.Nonnull;
 import java.util.*;
@@ -30,7 +28,6 @@ import java.util.regex.Pattern;
 
 public class MultilineTextEditorScreen extends BaseScreen {
 	private static final Pattern STRIP_FORMATTING_PATTERN = Pattern.compile("(?i)&[0-9A-FK-OR]");
-	private static final Icon PAGEBREAK_ICON = Icon.getIcon(new ResourceLocation(FTBQuests.MOD_ID, "textures/gui/pagebreak.png"));
 	private static final int MAX_UNDO = 10;
 
 	private final ListConfig<String, StringConfig> config;
@@ -279,9 +276,9 @@ public class MultilineTextEditorScreen extends BaseScreen {
 			resetButton = new ToolbarButton(this, Component.literal("r"),
 					MultilineTextEditorScreen.this::resetFormatting)
 					.withTooltip(Component.translatable("ftbquests.gui.clear_formatting"), hotkey("Alt + R"));
-			pageBreakButton = new ToolbarButton(this, Component.empty(), PAGEBREAK_ICON,
+			pageBreakButton = new ToolbarButton(this, Component.empty(), ViewQuestPanel.PAGEBREAK_ICON,
 					() -> insertAtEndOfLine("\n" + ViewQuestPanel.PAGEBREAK_CODE))
-					.withTooltip(Component.translatable("ftbquests.gui.insert_page_break"), hotkey("Alt + P"));
+					.withTooltip(Component.translatable("ftbquests.gui.page_break"), hotkey("Alt + P"));
 			undoButton = new ToolbarButton(this, Component.empty(), Icons.REFRESH,
 					MultilineTextEditorScreen.this::undoLast)
 					.withTooltip(hotkey("Ctrl + Z"));
