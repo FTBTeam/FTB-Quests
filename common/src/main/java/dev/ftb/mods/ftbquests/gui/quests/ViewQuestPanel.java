@@ -623,7 +623,7 @@ public class ViewQuestPanel extends Panel {
 	private void editDescription() {
 		ListConfig<String, StringConfig> lc = new ListConfig<>(new StringConfig());
 		lc.value = quest.description;
-		new MultilineTextEditorScreen(lc, accepted -> {
+		new MultilineTextEditorScreen(Component.translatable("ftbquests.gui.edit_description"), lc, accepted -> {
 			if (accepted) {
 				new EditObjectMessage(quest).sendToServer();
 				refreshWidgets();

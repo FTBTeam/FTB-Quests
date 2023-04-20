@@ -30,6 +30,7 @@ public class MultilineTextEditorScreen extends BaseScreen {
 	private static final Pattern STRIP_FORMATTING_PATTERN = Pattern.compile("(?i)&[0-9A-FK-OR]");
 	private static final int MAX_UNDO = 10;
 
+	private final Component title;
 	private final ListConfig<String, StringConfig> config;
 	private final ConfigCallback callback;
 	private final Panel outerPanel;
@@ -51,9 +52,11 @@ public class MultilineTextEditorScreen extends BaseScreen {
 			InputConstants.KEY_Z, this::undoLast
 	);
 
-	public MultilineTextEditorScreen(ListConfig<String, StringConfig> c, ConfigCallback ca) {
-		config = c;
-		callback = ca;
+	public MultilineTextEditorScreen(Component title, ListConfig<String, StringConfig> config, ConfigCallback callback) {
+		this.title = title;
+		this.config = config;
+		this.callback = callback;
+
 		outerPanel = new BlankPanel(this) {
 			@Override
 			public void drawBackground(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
@@ -69,9 +72,10 @@ public class MultilineTextEditorScreen extends BaseScreen {
 		textBoxPanel = new TextBoxPanel(outerPanel);
 
 		textBox = new MultilineTextBox(textBoxPanel);
-		textBox.setText(Strings.join(c.value, "\n"));
+		textBox.setText(Strings.join(config.value, "\n"));
 		textBox.setFocused(true);
 		textBox.setValueListener(this::onValueChanged);
+		textBox.seekCursor(Whence.ABSOLUTE, 0);
 
 		redoStack.addLast(new HistoryElement(textBox.getText(), textBox.cursorPos()));
 
@@ -120,18 +124,14 @@ public class MultilineTextEditorScreen extends BaseScreen {
 		textBoxPanel.setPosAndSize(2, toolbarPanel.height + 4, width - 18, height - toolbarPanel.height - 6);
 		textBoxPanel.alignWidgets();
 
-		scrollBar.setPosAndSize(width - 14, textBoxPanel.posY, 12, height - 4);
+		scrollBar.setPosAndSize(width - 14, textBoxPanel.posY, 12, height - textBoxPanel.posY - 4);
 	}
 
 	@Override
 	public void drawBackground(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
 		super.drawBackground(matrixStack, theme, x, y, w, h);
 
-		Component title = Component.translatable("ftbquests.gui.edit_description");
 		theme.drawString(matrixStack, title, x + (width - theme.getStringWidth(title)) / 2, y - theme.getFontHeight() - 2, Theme.SHADOW);
-
-		Component helpText = Component.translatable("ftbquests.gui.edit_description.help").withStyle(ChatFormatting.GRAY);
-		theme.drawString(matrixStack, helpText, x + (width - theme.getStringWidth(helpText)) / 2, y + height + 3, Theme.SHADOW);
 	}
 
 	@Override
@@ -142,16 +142,22 @@ public class MultilineTextEditorScreen extends BaseScreen {
 		} else if (key.enter() && Screen.hasShiftDown()) {
 			saveAndExit();
 			return true;
-		} else if (hotKeys.containsKey(key.keyCode)) {
-			if (isHotKeyModiferPressed(key.keyCode)) {
-				hotKeys.get(key.keyCode).run();
-				return true;
-			}
+		} else if (excecuteHotkey(key.keyCode, true)) {
+			return true;
 		} else if (textBox.isFocused()) {
 			textBox.keyPressed(key);
 			return true;
 		}
 
+		return false;
+	}
+
+	private boolean excecuteHotkey(int keycode, boolean checkModifier) {
+		if (hotKeys.containsKey(keycode) && (!checkModifier || isHotKeyModiferPressed(keycode))) {
+			hotKeys.get(keycode).run();
+			textBox.setFocused(true);
+			return true;
+		}
 		return false;
 	}
 
@@ -236,10 +242,19 @@ public class MultilineTextEditorScreen extends BaseScreen {
 
 		@Override
 		public void alignWidgets() {
-			textBox.setWidth(width - 3);
-			scrollBar.setMaxValue(align(WidgetLayout.VERTICAL));
+			textBox.setWidth(width - 3);  // also forces height recalculation based on contents
+			scrollBar.setMaxValue(textBox.height);
 			setScrollY(0);
 			textBox.seekCursor(Whence.ABSOLUTE, 0);
+		}
+
+		@Override
+		public boolean mousePressed(MouseButton button) {
+			boolean res = super.mousePressed(button);
+
+			textBox.setFocused(isMouseOver());
+
+			return res;
 		}
 	}
 
@@ -255,32 +270,34 @@ public class MultilineTextEditorScreen extends BaseScreen {
 			super(outerPanel);
 
 			acceptButton = new ToolbarButton(this, Component.translatable("gui.accept"), Icons.ACCEPT,
-					MultilineTextEditorScreen.this::saveAndExit);
+					MultilineTextEditorScreen.this::saveAndExit)
+					.withTooltip(hotkey("Shift + Enter"));
 			cancelButton = new ToolbarButton(this, Component.translatable("gui.cancel"), Icons.CANCEL,
-					MultilineTextEditorScreen.this::cancel);
+					MultilineTextEditorScreen.this::cancel)
+					.withTooltip(hotkey("Escape"));
 
 			boldButton = new ToolbarButton(this, Component.literal("B").withStyle(ChatFormatting.BOLD),
-					() -> insertFormatting(ChatFormatting.BOLD))
+					() -> excecuteHotkey(InputConstants.KEY_B, false))
 					.withTooltip(hotkey("Alt + B"));
 			italicButton = new ToolbarButton(this, Component.literal("I").withStyle(ChatFormatting.ITALIC),
-					() -> insertFormatting(ChatFormatting.ITALIC))
+					() -> excecuteHotkey(InputConstants.KEY_I, false))
 					.withTooltip(hotkey("Alt + I"));
 			underlineButton = new ToolbarButton(this, Component.literal("U").withStyle(ChatFormatting.UNDERLINE),
-					() -> insertFormatting(ChatFormatting.UNDERLINE))
+					() -> excecuteHotkey(InputConstants.KEY_U, false))
 					.withTooltip(hotkey("Alt + U"));
 			strikethroughButton = new ToolbarButton(this, Component.literal("S").withStyle(ChatFormatting.STRIKETHROUGH),
-					() -> insertFormatting(ChatFormatting.STRIKETHROUGH))
+					() -> excecuteHotkey(InputConstants.KEY_S, false))
 					.withTooltip(hotkey("Alt + S"));
 			colorButton = new ToolbarButton(this, Component.empty(), Icons.COLOR_RGB,
 					this::openColorContextMenu);
 			resetButton = new ToolbarButton(this, Component.literal("r"),
-					MultilineTextEditorScreen.this::resetFormatting)
+					() -> excecuteHotkey(InputConstants.KEY_R, false))
 					.withTooltip(Component.translatable("ftbquests.gui.clear_formatting"), hotkey("Alt + R"));
 			pageBreakButton = new ToolbarButton(this, Component.empty(), ViewQuestPanel.PAGEBREAK_ICON,
-					() -> insertAtEndOfLine("\n" + ViewQuestPanel.PAGEBREAK_CODE))
+					() -> excecuteHotkey(InputConstants.KEY_P, false))
 					.withTooltip(Component.translatable("ftbquests.gui.page_break"), hotkey("Alt + P"));
 			undoButton = new ToolbarButton(this, Component.empty(), Icons.REFRESH,
-					MultilineTextEditorScreen.this::undoLast)
+					() -> excecuteHotkey(InputConstants.KEY_Z, false))
 					.withTooltip(hotkey("Ctrl + Z"));
 		}
 
@@ -373,6 +390,7 @@ public class MultilineTextEditorScreen extends BaseScreen {
 
 		@Override
 		public void addMouseOverText(TooltipList list) {
+			super.addMouseOverText(list);
 			if (visible) {
 				tooltip.forEach(list::add);
 			}
