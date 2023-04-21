@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 * Added a proper multi-line text editor for editing quest description text
-  * Also includes a small toolbar with some handy operations (adding formatting, pagebreaks & undo functionality)
+  * Also includes a small toolbar with some handy operations (adding formatting, pagebreaks, images & undo functionality)
   * Hotkeys are available for most operations; see tooltips on each toolbar button
   * Standard edit box hotkeys (Ctrl-C, Ctrl-V, etc) all work too
   * Full text selection support; also, double-click on a word to select the word
@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * Alternatively, use "Add" -> "Page Break" in the quest view panel to add a new page after the current one
   * Multi-page descriptions have left & right buttons in the lower left, along with a page number display
   * Alternatively, you can move between pages with Page Up & Page Down keys, or by scrolling the mouse
-* Quest view panel has a new "Edit" button (in edit mode only of course) for convenience
+* Quest view panel has a new "Edit" button (in edit mode only, of course) for convenience
   * Dropdown for quick edit of title, subtitle and description text
   * Note: hotkeys already existed for this (T/S/D) but this makes it clearer
 * When creating observation tasks, the default block is now what the player is looking at, not just `minecraft:dirt`
@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 * Task screens now correctly filter what fluids they accept
 * Fixed translation keys not working in task button tooltips
+* Fixed GUI view sometimes re-centering to (0,0) after adding or moving an image
 
 ## [1902.4.11]
 
