@@ -73,6 +73,7 @@ public class ViewQuestPanel extends Panel {
 	private TextField titleField;
 	private final List<Pair<Integer,Integer>> pageIndices = new ArrayList<>();
 	private int currentPage = 0;
+	private long lastScrollTime = 0L;
 
 	public ViewQuestPanel(QuestScreen g) {
 		super(g);
@@ -441,6 +442,7 @@ public class ViewQuestPanel extends Panel {
 				@Override
 				public void addMouseOverText(TooltipList list) {
 					list.add(Component.literal("[Page Up]").withStyle(ChatFormatting.DARK_GRAY));
+					list.add(Component.literal("[Mousewheel Up]").withStyle(ChatFormatting.DARK_GRAY));
 				}
 			};
 			prevPage.setX(panelText.width - 43 - labelWidth);
@@ -464,6 +466,7 @@ public class ViewQuestPanel extends Panel {
 				@Override
 				public void addMouseOverText(TooltipList list) {
 					list.add(Component.literal("[Page Down]").withStyle(ChatFormatting.DARK_GRAY));
+					list.add(Component.literal("[Mousewheel Down]").withStyle(ChatFormatting.DARK_GRAY));
 				}
 			};
 			nextPage.setSize(16, 14);
@@ -781,18 +784,25 @@ public class ViewQuestPanel extends Panel {
 
 	@Override
 	public boolean mouseScrolled(double scroll) {
+		long now = System.currentTimeMillis();
+
 		if (super.mouseScrolled(scroll)) {
+			lastScrollTime = now;
 			return true;
 		}
 
-		if (scroll < 0 && currentPage < pageIndices.size() - 1) {
-			currentPage++;
-			refreshWidgets();
-			return true;
-		} else if (scroll > 0 && currentPage > 0) {
-			currentPage--;
-			refreshWidgets();
-			return true;
+		if (now - lastScrollTime > 500L) {
+			if (scroll < 0 && currentPage < pageIndices.size() - 1) {
+				currentPage++;
+				refreshWidgets();
+				lastScrollTime = now;
+				return true;
+			} else if (scroll > 0 && currentPage > 0) {
+				currentPage--;
+				refreshWidgets();
+				lastScrollTime = now;
+				return true;
+			}
 		}
 
 		return false;
