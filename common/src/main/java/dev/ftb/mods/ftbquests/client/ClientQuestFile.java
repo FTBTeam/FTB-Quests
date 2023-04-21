@@ -122,6 +122,8 @@ public class ClientQuestFile extends QuestFile {
 
 		if (hasPrev) {
 			questScreen.questPanel.scrollTo(scrollX, scrollY);
+			questScreen.questPanel.centerQuestX = scrollX;
+			questScreen.questPanel.centerQuestY = scrollY;
 		}
 
 		questScreen.chapterPanel.setExpanded(chaptersExpanded);
