@@ -21,9 +21,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * @author LatvianModder
- */
 public class WrappedQuest {
     final Quest quest;
     final List<List<ItemStack>> input;

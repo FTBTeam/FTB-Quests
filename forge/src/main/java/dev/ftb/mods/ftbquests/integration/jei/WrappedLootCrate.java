@@ -11,9 +11,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * @author LatvianModder
- */
 public class WrappedLootCrate {
 	public final LootCrate crate;
 	public final ItemStack crateStack;
