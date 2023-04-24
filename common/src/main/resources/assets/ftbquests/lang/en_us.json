@@ -433,6 +433,7 @@
 	"ftbquests.reward_table.enable_loot_crate": "Loot Crate",
 	"ftbquests.reward_table.loot_crate.id": "ID",
 	"ftbquests.reward_table.loot_crate.item_name": "Item Name",
+	"ftbquests.reward_table.loot_crate.item_name.tooltip": "This may be a translation key",
 	"ftbquests.reward_table.loot_crate.color": "Color",
 	"ftbquests.reward_table.loot_crate.glow": "Glow",
 	"ftbquests.reward_table.loot_crate.passive_weight": "Weight (Passive)",

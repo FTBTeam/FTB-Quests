@@ -15,16 +15,14 @@ import mezz.jei.api.recipe.category.IRecipeCategory;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
-/**
- * @author LatvianModder
- */
 public enum QuestRecipeManagerPlugin implements IRecipeManagerPlugin {
     INSTANCE;
 
     private final List<WrappedQuest> wrappedQuestsCache = new ArrayList<>();
+    private final ItemStackToListCache<WrappedQuest> inputCache = new ItemStackToListCache<>();
+    private final ItemStackToListCache<WrappedQuest> outputCache = new ItemStackToListCache<>();
     private boolean needsRefresh = true;
 
     private List<WrappedQuest> getWrappedQuests() {
@@ -61,6 +59,9 @@ public enum QuestRecipeManagerPlugin implements IRecipeManagerPlugin {
      */
     public void refresh() {
         needsRefresh = true;
+
+        inputCache.clear();
+        outputCache.clear();
     }
 
     @Override
@@ -76,45 +77,45 @@ public enum QuestRecipeManagerPlugin implements IRecipeManagerPlugin {
                         (List<T>) findQuestsWithInput(stack);
                 case OUTPUT -> //noinspection unchecked
                         (List<T>) findQuestsWithOutput(stack);
-                default -> Collections.emptyList();
+                default -> List.of();
             };
         } else {
-            return Collections.emptyList();
+            return List.of();
         }
     }
 
     @Override
     public <T> List<T> getRecipes(IRecipeCategory<T> recipeCategory) {
-        if (recipeCategory instanceof QuestCategory) {
-            // safe to cast since we verified the category already
-            //noinspection unchecked
-            return (List<T>) getWrappedQuests();
-        } else {
-            return Collections.emptyList();
-        }
+        // safe to cast since we verified the category already
+        //noinspection unchecked
+        return recipeCategory instanceof QuestCategory ? (List<T>) getWrappedQuests() : List.of();
     }
 
     @Override
     public <V> List<RecipeType<?>> getRecipeTypes(IFocus<V> focus) {
-        V value = focus.getTypedValue().getIngredient();
-        if( !(value instanceof ItemStack stack) ) return Collections.emptyList();
-
-        if (focus.getRole() == RecipeIngredientRole.INPUT && stack.getItem() == FTBQuestsItems.BOOK.get()) {
-            return List.of(JEIRecipeTypes.QUEST);
+        if (focus.getTypedValue().getIngredient() instanceof ItemStack stack) {
+            if (focus.getRole() == RecipeIngredientRole.INPUT && (stack.getItem() == FTBQuestsItems.BOOK.get() || !findQuestsWithInput(stack).isEmpty())
+                    || focus.getRole() == RecipeIngredientRole.OUTPUT && !findQuestsWithOutput(stack).isEmpty()) {
+                return List.of(JEIRecipeTypes.QUEST);
+            }
         }
-        return Collections.emptyList();
+
+        return List.of();
+
     }
 
-    // TODO caching for these
     private List<WrappedQuest> findQuestsWithInput(ItemStack stack) {
-        return getWrappedQuests().stream()
-                .filter(q -> q.hasInput(stack))
-                .toList();
+        return inputCache.getList(stack, k ->
+                getWrappedQuests().stream()
+                        .filter(q -> q.hasInput(stack))
+                        .toList()
+        );
     }
 
     private List<WrappedQuest> findQuestsWithOutput(ItemStack stack) {
-        return getWrappedQuests().stream()
+        return outputCache.getList(stack, k -> getWrappedQuests().stream()
                 .filter(q -> q.hasOutput(stack))
-                .toList();
+                .toList()
+        );
     }
 }

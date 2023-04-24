@@ -30,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Task screens now correctly filter what fluids they accept
 * Fixed translation keys not working in task button tooltips
 * Fixed GUI view sometimes re-centering to (0,0) after adding or moving an image
+* Fixed quest rewards and loot crate output not always showing up in JEI/REI display
 
 ## [1902.4.11]
 

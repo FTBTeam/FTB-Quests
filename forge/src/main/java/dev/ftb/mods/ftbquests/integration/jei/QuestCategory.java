@@ -20,11 +20,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
-/**
- * @author LatvianModder
- */
 public class QuestCategory implements IRecipeCategory<WrappedQuest> {
-	public static final ResourceLocation UID = new ResourceLocation(FTBQuests.MOD_ID, "quest");
 	public static final ResourceLocation TEXTURE = new ResourceLocation(FTBQuests.MOD_ID + ":textures/gui/jei/quest.png");
 
 	private final IDrawable background;
