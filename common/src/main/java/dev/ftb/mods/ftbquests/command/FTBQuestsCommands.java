@@ -54,7 +54,7 @@ public class FTBQuestsCommands {
 
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
 		dispatcher.register(Commands.literal("ftbquests")
-				.requires(s -> s.getServer().isSingleplayer() || s.hasPermission(2))
+				.requires(s -> s.getServer() != null && s.getServer().isSingleplayer() || s.hasPermission(2))
 				.then(Commands.literal("editing_mode")
 						.executes(c -> editingMode(c.getSource(), c.getSource().getPlayerOrException(), null))
 						.then(Commands.argument("enabled", BoolArgumentType.bool())
