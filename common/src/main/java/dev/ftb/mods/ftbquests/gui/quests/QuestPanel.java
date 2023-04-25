@@ -209,11 +209,11 @@ public class QuestPanel extends Panel {
 
 		}
 
-		// pass 2: render highlighted connections for selected quest(s) dependencies/dependents
+		// pass 2: render highlighted connections for hovered quest(s) dependencies/dependents
 		float ms = (float) ((mt * ThemeProperties.DEPENDENCY_LINE_SELECTED_SPEED.get(questScreen.selectedChapter)) % 1D);
 		List<QuestButton> toOutline = new ArrayList<>();
 		for (Widget widget : widgets) {
-			if (widget instanceof QuestButton qb && !qb.quest.getHideDependencyLines()) {
+			if (widget.shouldDraw() && widget instanceof QuestButton qb && !qb.quest.getHideDependencyLines()) {
 				for (QuestButton button : qb.getDependencies()) {
 					int r, g, b, a, a2;
 					if (button.quest == selectedQuest || button.isMouseOver()) {
@@ -345,7 +345,7 @@ public class QuestPanel extends Panel {
 						matrixStack.popPose();
 					}
 
-					if (QuestScreen.grid && questScreen.viewQuestPanel.quest == null) {
+					if (QuestScreen.grid && !questScreen.viewQuestPanel.viewingQuest()) {
 						double boxX = ominX / dx * questScreen.scrollWidth + px;
 						double boxY = ominY / dy * questScreen.scrollHeight + py;
 						double boxW = omaxX / dx * questScreen.scrollWidth + px - boxX;
@@ -356,7 +356,7 @@ public class QuestPanel extends Panel {
 						GuiHelper.drawHollowRect(matrixStack, (int) boxX, (int) boxY, (int) boxW, (int) boxH, Color4I.WHITE.withAlpha(30), false);
 						matrixStack.popPose();
 					}
-				} else if (questScreen.viewQuestPanel.quest == null || !questScreen.viewQuestPanel.isMouseOver()) {
+				} else if (!questScreen.viewQuestPanel.viewingQuest() || !questScreen.viewQuestPanel.isMouseOver()) {
 					//int z = treeGui.getZoom();
 					double sx = (questX - questMinX) / dx * questScreen.scrollWidth + px;
 					double sy = (questY - questMinY) / dy * questScreen.scrollHeight + py;
@@ -371,7 +371,7 @@ public class QuestPanel extends Panel {
 					//RenderSystem.defaultAlphaFunc();
 					matrixStack.popPose();
 
-					if (QuestScreen.grid && questScreen.viewQuestPanel.quest == null) {
+					if (QuestScreen.grid && !questScreen.viewQuestPanel.viewingQuest()) {
 						matrixStack.pushPose();
 						matrixStack.translate(0, 0, 1000);
 						Color4I.WHITE.draw(matrixStack, (int) sx, (int) sy, 1, 1);

@@ -49,6 +49,8 @@ download_icon:        ftblibrary:icons/down
 edit_icon:            ftblibrary:icons/settings
 move_up_icon:         ftblibrary:icons/up
 move_down_icon:       ftblibrary:icons/down
+left_arrow:           ftblibrary:icons/left
+right_arrow:          ftblibrary:icons/right
 
 full_screen_quest:                  0
 tasks_text_color:                   #5555FF

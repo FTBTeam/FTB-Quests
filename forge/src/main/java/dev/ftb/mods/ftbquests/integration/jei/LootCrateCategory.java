@@ -2,7 +2,6 @@ package dev.ftb.mods.ftbquests.integration.jei;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.ftb.mods.ftblibrary.ui.GuiHelper;
-import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.item.FTBQuestsItems;
 import dev.ftb.mods.ftbquests.quest.loot.LootCrate;
@@ -21,18 +20,11 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
 
-/**
- * @author LatvianModder
- */
 public class LootCrateCategory implements IRecipeCategory<WrappedLootCrate> {
-	public static final ResourceLocation UID = new ResourceLocation(FTBQuests.MOD_ID, "loot_crate");
-
 	public static final int ITEMSX = 10;
 	public static final int ITEMSY = 5;
 	public static final int ITEMS = ITEMSX * ITEMSY;
@@ -117,7 +109,7 @@ public class LootCrateCategory implements IRecipeCategory<WrappedLootCrate> {
 
 		Font font = Minecraft.getInstance().font;
 
-		font.drawShadow(poseStack, crate.table.getMutableTitle().withStyle(ChatFormatting.UNDERLINE), 0, 0, 0xFFFFFF00);
+		font.drawShadow(poseStack, Component.translatable(crate.itemName).withStyle(ChatFormatting.UNDERLINE), 0, 0, 0xFFFFFF00);
 
 		int total = ClientQuestFile.INSTANCE.lootCrateNoDrop.passive;
 		for (RewardTable table : ClientQuestFile.INSTANCE.rewardTables) {
