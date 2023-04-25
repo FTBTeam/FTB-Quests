@@ -537,7 +537,7 @@ public final class Quest extends QuestObject implements Movable {
 		config.add("description", new ListConfig<String, StringConfig>(descType) {
 			@Override
 			public void onClicked(MouseButton button, ConfigCallback callback) {
-				new MultilineTextEditorScreen(this, callback).openGui();
+				new MultilineTextEditorScreen(Component.translatable("ftbquests.gui.edit_description"), this, callback).openGui();
 			}
 		}, description, (t) -> {
 			description.clear();

@@ -118,22 +118,28 @@ public class ObservationTask extends BooleanTask {
 			BlockEntity blockEntity = blockInWorld.getEntity();
 
 			switch (observeType) {
-				case BLOCK:
+				case BLOCK -> {
 					return String.valueOf(Registries.getId(block, Registry.BLOCK_REGISTRY)).equals(toObserve);
-				case BLOCK_TAG:
+				}
+				case BLOCK_TAG -> {
 					return asTagRL(toObserve)
 							.map(rl -> state.is(TagKey.create(Registry.BLOCK_REGISTRY, rl)))
 							.orElse(false);
-				case BLOCK_STATE:
+				}
+				case BLOCK_STATE -> {
 					BlockInput stateMatch = tryMatchBlock(toObserve, false);
 					return stateMatch != null && stateMatch.test(blockInWorld);
-				case BLOCK_ENTITY:
+				}
+				case BLOCK_ENTITY -> {
 					BlockInput stateNbtMatch = tryMatchBlock(toObserve, true);
 					return stateNbtMatch != null && stateNbtMatch.test(blockInWorld);
-				case BLOCK_ENTITY_TYPE:
+				}
+				case BLOCK_ENTITY_TYPE -> {
 					return blockEntity != null && toObserve.equals(String.valueOf(Registries.getId(blockEntity.getType(), Registry.BLOCK_ENTITY_TYPE_REGISTRY)));
-				default:
+				}
+				default -> {
 					return false;
+				}
 			}
 		} else if (result instanceof EntityHitResult entityResult) {
 			if (observeType == ObserveType.ENTITY_TYPE) {

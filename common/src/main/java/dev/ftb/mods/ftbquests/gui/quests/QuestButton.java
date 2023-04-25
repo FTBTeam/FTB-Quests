@@ -1,6 +1,8 @@
 package dev.ftb.mods.ftbquests.gui.quests;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import dev.ftb.mods.ftblibrary.config.DoubleConfig;
+import dev.ftb.mods.ftblibrary.config.ui.EditConfigFromStringScreen;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.Icons;
@@ -154,6 +156,9 @@ public class QuestButton extends Button implements QuestPositionableButton {
 					contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.clear_reward_all"),
 							ThemeProperties.CLOSE_ICON.get(quest),
 							() -> selected.forEach(q -> q.rewards.forEach(r -> new DeleteObjectMessage(r.id).sendToServer()))));
+					contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.bulk_change_size"),
+							Icons.SETTINGS,
+							this::bulkChangeSize));
 					contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.delete"),
 							ThemeProperties.DELETE_ICON.get(quest),
 							this::deleteSelectedObjects)
@@ -207,6 +212,24 @@ public class QuestButton extends Button implements QuestPositionableButton {
 				questScreen.closeQuest();
 			}
 		}
+	}
+
+	private void bulkChangeSize() {
+		Collection<Quest> quests = questScreen.getSelectedQuests();
+		if (quests.isEmpty()) return;
+
+		double val = quests.stream().findFirst().map(q -> q.size).orElse(1.0);
+		var c = new DoubleConfig(0.0625D, 8D);
+
+		EditConfigFromStringScreen.open(c, val, 1.0, Component.translatable("ftbquests.quest.size"), accepted -> {
+			if (accepted) {
+				quests.forEach(q -> {
+					q.size = c.value;
+					new EditObjectMessage(q).sendToServer();
+				});
+			}
+			run();
+		});
 	}
 
 	private void openAddRewardContextMenu() {
@@ -375,7 +398,7 @@ public class QuestButton extends Button implements QuestPositionableButton {
 		// TODO: custom shader to implement alphaFunc?
 		//RenderSystem.alphaFunc(GL11.GL_GREATER, 0.1F);
 
-		if (quest == questScreen.viewQuestPanel.quest || questScreen.selectedObjects.contains(moveAndDeleteFocus())) {
+		if (questScreen.viewQuestPanel.viewingQuest(quest) || questScreen.selectedObjects.contains(moveAndDeleteFocus())) {
 			matrixStack.pushPose();
 			matrixStack.translate(0, 0, 200);
 			Color4I col = Color4I.WHITE.withAlpha((int) (190D + Math.sin(System.currentTimeMillis() * 0.003D) * 50D));

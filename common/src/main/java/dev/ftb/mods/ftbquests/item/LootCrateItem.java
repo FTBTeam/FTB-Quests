@@ -59,31 +59,6 @@ public class LootCrateItem extends Item {
 				reward.reward.claim((ServerPlayer) player, true);
 			}
 
-//			for (WeightedReward reward : crate.table.rewards) {
-//				if (reward.weight == 0f) {
-//					reward.reward.claim((ServerPlayer) player, true);
-//				}
-//			}
-//			int totalWeight = (int) crate.table.getTotalWeight(true);
-//
-//			if (totalWeight > 0f) {
-//				for (int j = 0; j < size * crate.table.lootSize; j++) {
-//					int number = player.level.random.nextInt(totalWeight) + 1;
-//					int currentWeight = crate.table.emptyWeight;
-//
-//					if (currentWeight < number) {
-//						for (WeightedReward reward : crate.table.rewards) {
-//							currentWeight += reward.weight;
-//
-//							if (currentWeight >= number) {
-//								reward.reward.claim((ServerPlayer) player, true);
-//								break;
-//							}
-//						}
-//					}
-//				}
-//			}
-
 			world.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ITEM_BREAK, SoundSource.PLAYERS, 0.8F, 0.8F + world.random.nextFloat() * 0.4F);
 		} else {
 			new RewardNotificationsScreen().openGui();
@@ -114,7 +89,7 @@ public class LootCrateItem extends Item {
 	@Override
 	public Component getName(ItemStack stack) {
 		LootCrate crate = getCrate(stack);
-		return crate != null && !crate.itemName.isEmpty() ? Component.literal(crate.itemName) : super.getName(stack);
+		return crate != null && !crate.itemName.isEmpty() ? Component.translatable(crate.itemName) : super.getName(stack);
 	}
 
 	@Override

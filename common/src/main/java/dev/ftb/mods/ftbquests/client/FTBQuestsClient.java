@@ -8,6 +8,7 @@ import dev.architectury.registry.client.rendering.RenderTypeRegistry;
 import dev.ftb.mods.ftblibrary.config.*;
 import dev.ftb.mods.ftblibrary.config.ui.EditConfigFromStringScreen;
 import dev.ftb.mods.ftblibrary.config.ui.EditConfigScreen;
+import dev.ftb.mods.ftblibrary.config.ui.SelectFluidScreen;
 import dev.ftb.mods.ftblibrary.config.ui.SelectItemStackScreen;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftbquests.FTBQuests;
@@ -32,18 +33,21 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.StructureBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 public class FTBQuestsClient extends FTBQuestsCommon {
 	public static KeyMapping KEY_QUESTS;
@@ -123,38 +127,44 @@ public class FTBQuestsClient extends FTBQuestsCommon {
 			});
 		});
 
-		/*FTBQuestsTasks.FLUID.get().setGuiProvider((gui, quest, callback) -> {
-			ConfigFluid c = new ConfigFluid(false);
-			c.defaultValue = Fluids.EMPTY;
-			c.value = Fluids.EMPTY;
+        TaskTypes.FLUID.setGuiProvider((gui, quest, callback) -> {
+			FluidConfig c = new FluidConfig(false);
 
-			new GuiSelectFluid(c, accepted -> {
+			new SelectFluidScreen(c, accepted -> {
 				gui.run();
-				if (accepted)
-				{
+				if (accepted) {
 					FluidTask fluidTask = new FluidTask(quest);
 					fluidTask.fluid = c.value;
 					callback.accept(fluidTask);
 				}
 			}).openGui();
-		});*/
+		});
 
 		TaskTypes.DIMENSION.setGuiProvider((gui, quest, callback) -> {
 			DimensionTask task = new DimensionTask(quest);
 			task.dimension = Minecraft.getInstance().level.dimension();
-			callback.accept(task);
+			openSetupGui(gui, callback, task);
+		});
+
+		TaskTypes.OBSERVATION.setGuiProvider((gui, quest, callback) -> {
+			ObservationTask task = new ObservationTask(quest);
+			if (Minecraft.getInstance().hitResult instanceof BlockHitResult bhr) {
+				Block block = Minecraft.getInstance().level.getBlockState(bhr.getBlockPos()).getBlock();
+				task.toObserve = Registry.BLOCK.getKey(block).toString();
+			}
+			openSetupGui(gui, callback, task);
 		});
 
 		TaskTypes.LOCATION.setGuiProvider((gui, quest, callback) -> {
 			LocationTask task = new LocationTask(quest);
 			Minecraft mc = Minecraft.getInstance();
 
-			if (mc.hitResult instanceof BlockHitResult) {
-				var blockEntity = mc.level.getBlockEntity(((BlockHitResult) mc.hitResult).getBlockPos());
+			if (mc.hitResult instanceof BlockHitResult bhr) {
+				var blockEntity = mc.level.getBlockEntity(bhr.getBlockPos());
 
-				if (blockEntity instanceof StructureBlockEntity) {
-					var pos = ((StructureBlockEntity) blockEntity).getStructurePos();
-					var size = ((StructureBlockEntity) blockEntity).getStructureSize();
+				if (blockEntity instanceof StructureBlockEntity structure) {
+					var pos = structure.getStructurePos();
+					var size = structure.getStructureSize();
 					task.dimension = mc.level.dimension();
 					task.x = pos.getX() + blockEntity.getBlockPos().getX();
 					task.y = pos.getY() + blockEntity.getBlockPos().getY();
@@ -167,18 +177,22 @@ public class FTBQuestsClient extends FTBQuestsCommon {
 				}
 			}
 
-			ConfigGroup group = new ConfigGroup(FTBQuests.MOD_ID);
-			task.getConfig(task.createSubGroup(group));
-
-			group.savedCallback = accepted -> {
-				gui.run();
-				if (accepted) {
-					callback.accept(task);
-				}
-			};
-
-			new EditConfigScreen(group).openGui();
+			openSetupGui(gui, callback, task);
 		});
+	}
+
+	private static void openSetupGui(Runnable gui, Consumer<Task> callback, Task task) {
+		ConfigGroup group = new ConfigGroup(FTBQuests.MOD_ID);
+		task.getConfig(task.createSubGroup(group));
+
+		group.savedCallback = accepted -> {
+			gui.run();
+			if (accepted) {
+				callback.accept(task);
+			}
+		};
+
+		new EditConfigScreen(group).openGui();
 	}
 
 	@Override

@@ -108,6 +108,11 @@ public class StatTask extends Task {
 		}
 
 		ResourceLocation statId = Registry.CUSTOM_STAT.get(stat);
+
+		// workaround for a bug where mods might register a modded stat in the vanilla namespace
+		//  https://github.com/FTBTeam/FTB-Mods-Issues/issues/724
+		if (statId == null) statId = Registry.CUSTOM_STAT.get(new ResourceLocation(stat.getPath()));
+
 		if (statId != null) {
 			// could be null, if someone brought an FTB Quests save from a different world and the stat's missing here
 			int set = Math.min(value, player.getStats().getValue(Stats.CUSTOM.get(statId)));
