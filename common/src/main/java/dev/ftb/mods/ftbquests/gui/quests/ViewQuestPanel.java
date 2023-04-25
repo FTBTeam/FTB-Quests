@@ -725,11 +725,16 @@ public class ViewQuestPanel extends Panel {
 	}
 
 	private void appendToPage(List<String> list, List<String> toAdd, int pageNumber) {
-		int idx = pageIndices.get(pageNumber).getSecond() + 1;
+        if (pageIndices.isEmpty()) {
+			list.addAll(toAdd);
+			buildPageIndices();
+		} else {
+			int idx = pageIndices.get(pageNumber).getSecond() + 1;
 
-		for (String line : toAdd) {
-			list.add(idx, line);
-			idx++;
+			for (String line : toAdd) {
+				list.add(idx, line);
+				idx++;
+			}
 		}
 	}
 
