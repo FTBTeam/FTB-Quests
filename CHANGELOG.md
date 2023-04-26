@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1902.4.13]
+
+### Fixed
+* Fixed crash when using Add -> Text on an empty quest description
+* Fixed (or mitigated) excessive server CPU usage while scanning player inventories for item task completion in some situations
+  * Player inventories are now scanned no more than every 20 ticks (configurable - see "Item Auto-detection Minimum Interval" setting in quest file settings)
+  * Raising the interval is kinder to server TPS, but does result in a longer delay between picking up an item and getting a related quest completion update. Default delay of 1 second is reasonable, while avoiding lag on the server.
+  * Items equipped in armor slots are no longer checked. Some modded armor items (Mekanism, PneumaticCraft, etc. can have rapidly changing NBT, which caused unnecessary inventory rescans).
+* Merged the Edit and Add dropdowns in the view quest panel into a single Edit dropdown. Two buttons was unnecessary and took up excessive screen space, potentially overlapping the page number display in multi-page quests.
+  * Also added more hotkeys to the view quest panel: "P" adds a page break, "I" appends an image, "L" appends a line
+
 ## [1902.4.12]
 
 ### Added
