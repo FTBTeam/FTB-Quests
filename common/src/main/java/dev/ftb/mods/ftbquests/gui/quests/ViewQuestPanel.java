@@ -475,27 +475,16 @@ public class ViewQuestPanel extends Panel {
 		}
 
 		if (canEdit) {
-			SimpleTextButton edit = new SimpleTextButton(buttonPanel, Component.translatable("ftbquests.gui.edit").append(" \u25bc"), ThemeProperties.EDIT_ICON.get()) {
+			SimpleTextButton edit = new SimpleTextButton(buttonPanel, Component.translatable("ftbquests.gui.edit").append(" ▼"), ThemeProperties.EDIT_ICON.get()) {
 				@Override
 				public void onClicked(MouseButton mouseButton) {
 					openEditButtonContextMenu();
 				}
 			};
 
-			edit.setX(panelText.width / 2 - edit.width - 5);
+			edit.setX((panelText.width - edit.width) / 2);
 			edit.setHeight(14);
 			buttonPanel.add(edit);
-
-			SimpleTextButton add = new SimpleTextButton(buttonPanel, Component.translatable("gui.add").append(" \u25bc"), ThemeProperties.ADD_ICON.get()) {
-				@Override
-				public void onClicked(MouseButton mouseButton) {
-					openAddButtonContextMenu();
-				}
-			};
-
-			add.setX(panelText.width / 2 + 5);
-			add.setHeight(14);
-			buttonPanel.add(add);
 		}
 	}
 
@@ -573,6 +562,12 @@ public class ViewQuestPanel extends Panel {
 				editTitle();
 			} else if (key.is(GLFW.GLFW_KEY_D)) {
 				editDescription();
+			} else if (key.is(GLFW.GLFW_KEY_P)) {
+				addPageBreak();
+			} else if (key.is(GLFW.GLFW_KEY_L)) {
+				editDescLine0(-1, null);
+			} else if (key.is(GLFW.GLFW_KEY_I)) {
+				editDescLine0(-1, new ImageComponent());
 			}
 		}
 
@@ -635,33 +630,43 @@ public class ViewQuestPanel extends Panel {
 		}).openGui();
 	}
 
-
 	private void openEditButtonContextMenu() {
 		List<ContextMenuItem> contextMenu = new ArrayList<>();
 
-		contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.title").append(Component.literal(" [T]").withStyle(ChatFormatting.DARK_GRAY)), Icons.NOTES, this::editTitle));
-		contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.quest.subtitle").append(Component.literal(" [S]").withStyle(ChatFormatting.DARK_GRAY)), Icons.NOTES, this::editSubtitle));
-		contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.quest.description").append(Component.literal(" [D]").withStyle(ChatFormatting.DARK_GRAY)), Icons.NOTES, this::editDescription));
+		contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.title").append(hotkey("T")),
+				Icons.NOTES,
+				this::editTitle));
+		contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.quest.subtitle").append(hotkey("S")),
+				Icons.NOTES,
+				this::editSubtitle));
+		contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.quest.description").append(hotkey("D")),
+				Icons.NOTES,
+				this::editDescription));
+
+		contextMenu.add(ContextMenuItem.SEPARATOR);
+
+		contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.line").append(hotkey("L")),
+				Icons.NOTES,
+				() -> editDescLine0(-1, null)));
+		contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.page_break").append(hotkey("P")),
+				PAGEBREAK_ICON,
+				this::addPageBreak));
+		contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.image").append(hotkey("I")),
+				Icons.ART,
+				() -> editDescLine0(-1, new ImageComponent())));
 
 		getGui().openContextMenu(contextMenu);
 	}
 
-	private void openAddButtonContextMenu() {
-		List<ContextMenuItem> contextMenu = new ArrayList<>();
+	private static Component hotkey(String key) {
+		return Component.literal(" [" + key + "]").withStyle(ChatFormatting.DARK_GRAY);
+	}
 
-		contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.text"), Icons.NOTES,
-				() -> editDescLine0(-1, null)));
-		contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.page_break"), PAGEBREAK_ICON,
-				() -> {
-					appendToPage(quest.description, List.of(PAGEBREAK_CODE, "(new page placeholder text)"), currentPage);
-					new EditObjectMessage(quest).sendToServer();
-					currentPage = Math.min(pageIndices.size() - 1, currentPage + 1);
-					refreshWidgets();
-				}));
-		contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.chapter.image"), Icons.ART,
-				() -> editDescLine0(-1, new ImageComponent())));
-
-		getGui().openContextMenu(contextMenu);
+	private void addPageBreak() {
+		appendToPage(quest.description, List.of(PAGEBREAK_CODE, "(new page placeholder text)"), currentPage);
+		new EditObjectMessage(quest).sendToServer();
+		currentPage = Math.min(pageIndices.size() - 1, currentPage + 1);
+		refreshWidgets();
 	}
 
 	private void editDescLine0(int line, @Nullable Object type) {
@@ -725,7 +730,7 @@ public class ViewQuestPanel extends Panel {
 	}
 
 	private void appendToPage(List<String> list, List<String> toAdd, int pageNumber) {
-        if (pageIndices.isEmpty()) {
+		if (pageIndices.isEmpty()) {
 			list.addAll(toAdd);
 			buildPageIndices();
 		} else {
@@ -741,11 +746,7 @@ public class ViewQuestPanel extends Panel {
 	public void editDescLine(int line, boolean context, @Nullable Object type) {
 		if (context) {
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
-			//contextMenu.add(new ContextMenuItem(Component.translatable("gui.move"), ThemeProperties.MOVE_UP_ICON.get(), () -> {}).setEnabled(() -> chapter.getIndex() > 0));
-			//contextMenu.add(new ContextMenuItem(Component.translatable("gui.move"), ThemeProperties.MOVE_DOWN_ICON.get(), () -> {}).setEnabled(() -> chapter.getIndex() < chapter.group.chapters.size() - 1));
-
 			contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.edit"), ThemeProperties.EDIT_ICON.get(), () -> editDescLine0(line, type)));
-
 			contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.delete"), ThemeProperties.DELETE_ICON.get(), () -> {
 				quest.description.remove(line);
 				new EditObjectMessage(quest).sendToServer();
