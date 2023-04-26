@@ -15,6 +15,7 @@ import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.task.DimensionTask;
 import dev.ftb.mods.ftbquests.quest.task.KillTask;
 import dev.ftb.mods.ftbquests.quest.task.Task;
+import dev.ftb.mods.ftbquests.util.DeferredInventoryDetection;
 import dev.ftb.mods.ftbquests.util.FTBQuestsInventoryListener;
 import dev.ftb.mods.ftbteams.event.PlayerChangedTeamEvent;
 import dev.ftb.mods.ftbteams.event.PlayerLoggedInAfterTeamEvent;
@@ -66,6 +67,7 @@ public class FTBQuestsEventHandler {
 		PlayerEvent.PLAYER_CLONE.register(this::cloned);
 		PlayerEvent.CHANGE_DIMENSION.register(this::changedDimension);
 		PlayerEvent.OPEN_MENU.register(this::containerOpened);
+		TickEvent.SERVER_POST.register(DeferredInventoryDetection::tick);
 	}
 
 	private void serverAboutToStart(MinecraftServer server) {
