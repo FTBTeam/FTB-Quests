@@ -39,6 +39,7 @@ public class MultilineTextEditorScreen extends BaseScreen {
 	private final Panel textBoxPanel;
 	private final MultilineTextBox textBox;
 	private final PanelScrollBar scrollBar;
+	private long ticksOpen = 0;  // ticks since opening (not creation), reset when gui returned to from image selector
 
 	private long lastChange = 0L;
 	private final Deque<HistoryElement> redoStack = new ArrayDeque<>();
@@ -85,6 +86,8 @@ public class MultilineTextEditorScreen extends BaseScreen {
 	public void tick() {
 		super.tick();
 
+		ticksOpen++;
+
 		if (lastChange > 0 && Minecraft.getInstance().level.getGameTime() - lastChange > 5) {
 			redoStack.addLast(new HistoryElement(textBox.getText(), textBox.cursorPos()));
 			while (redoStack.size() > MAX_UNDO) {
@@ -98,6 +101,7 @@ public class MultilineTextEditorScreen extends BaseScreen {
 	public boolean onInit() {
 		setWidth(getScreen().getGuiScaledWidth() / 5 * 4);
 		setHeight(getScreen().getGuiScaledHeight() / 5 * 4);
+		ticksOpen = 0L;
 		return true;
 	}
 
@@ -155,6 +159,11 @@ public class MultilineTextEditorScreen extends BaseScreen {
 
 	@Override
 	public boolean charTyped(char c, KeyModifiers modifiers) {
+		if (ticksOpen < 2) {
+			// small kludge to avoid 'e' being inserted if image select screen is exited by pressing E
+			return true;
+		}
+
 		// need to intercept this, or the character is sent on to the text box
 		int keyCode = Character.toUpperCase(c);
 		if (isHotKeyModifierPressed(keyCode) && hotKeys.containsKey(keyCode)) {
