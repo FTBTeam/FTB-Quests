@@ -56,6 +56,7 @@ public final class Quest extends QuestObject implements Movable {
 	public DependencyRequirement dependencyRequirement;
 	public String guidePage;
 	public Tristate hideDependencyLines;
+	public boolean hideDependentLines;
 	public int minRequiredDependencies;
 	public Tristate hideTextUntilComplete;
 	public Tristate disableJEI;
@@ -85,6 +86,7 @@ public final class Quest extends QuestObject implements Movable {
 		rewards = new ArrayList<>(1);
 		guidePage = "";
 		hideDependencyLines = Tristate.DEFAULT;
+		hideDependentLines = false;
 		hide = Tristate.DEFAULT;
 		dependencyRequirement = DependencyRequirement.ALL_COMPLETED;
 		minRequiredDependencies = 0;
@@ -151,6 +153,10 @@ public final class Quest extends QuestObject implements Movable {
 		}
 
 		hideDependencyLines.write(nbt, "hide_dependency_lines");
+
+		if (hideDependentLines) {
+			nbt.putBoolean("hide_dependent_lines", true);
+		}
 
 		if (minRequiredDependencies > 0) {
 			nbt.putInt("min_required_dependencies", (byte) minRequiredDependencies);
@@ -230,6 +236,7 @@ public final class Quest extends QuestObject implements Movable {
 
 		guidePage = nbt.getString("guide_page");
 		hideDependencyLines = Tristate.read(nbt, "hide_dependency_lines");
+		hideDependentLines = nbt.getBoolean("hide_dependent_lines");
 		minRequiredDependencies = nbt.getInt("min_required_dependencies");
 
 		clearDependencies();
@@ -277,6 +284,7 @@ public final class Quest extends QuestObject implements Movable {
 		flags = Bits.setFlag(flags, 0x04, size != 1D);
 		flags = Bits.setFlag(flags, 0x08, !guidePage.isEmpty());
 		flags = Bits.setFlag(flags, 0x10, ignoreRewardBlocking);
+		flags = Bits.setFlag(flags, 0x20, hideDependentLines);
 		//implement others
 		//flags = Bits.setFlag(flags, 32, !customClick.isEmpty());
 		flags = Bits.setFlag(flags, 0x40, canRepeat);
@@ -369,6 +377,7 @@ public final class Quest extends QuestObject implements Movable {
 		size = Bits.getFlag(flags, 0x04) ? buffer.readDouble() : 1D;
 		minWidth = Bits.getFlag(flags, 0x200) ? buffer.readVarInt() : 0;
 		ignoreRewardBlocking = Bits.getFlag(flags, 0x10);
+		hideDependentLines = Bits.getFlag(flags, 0x20);
 		canRepeat = Bits.getFlag(flags, 0x40);
 		invisible = Bits.getFlag(flags, 0x80);
 		optional = Bits.getFlag(flags, 0x100);
@@ -559,6 +568,7 @@ public final class Quest extends QuestObject implements Movable {
 		config.addEnum("dependency_requirement", dependencyRequirement, v -> dependencyRequirement = v, DependencyRequirement.NAME_MAP);
 		config.addInt("min_required_dependencies", minRequiredDependencies, v -> minRequiredDependencies = v, 0, 0, Integer.MAX_VALUE);
 		config.addTristate("hide_dependency_lines", hideDependencyLines, v -> hideDependencyLines = v);
+		config.addBool("hide_dependent_lines", hideDependentLines, v -> hideDependentLines = v, false);
 		config.addString("guide_page", guidePage, v -> guidePage = v, "");
 		config.addTristate("hide_text_until_complete", hideTextUntilComplete, v -> hideTextUntilComplete = v);
 		config.addEnum("disable_jei", disableJEI, v -> disableJEI = v, Tristate.NAME_MAP);
