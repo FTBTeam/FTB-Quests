@@ -6,9 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1902.4.14]
 
+### Added
+* New boolean quest property "Hide Dependent Lines".
+  * Default is false; if set to true, lines to dependent quests (quests which are unlocked _by_ this one) are hidden unless the quest is hovered.
+
 ### Fixed
 * Fixed items not always getting detected for item task completion (depending on which GUI screen was open at the time)
   * Related to performance fixes added in 1902.4.13
+* Multiline quest description editor: closing the image selection screen by pressing 'E' no longer inserts an 'e' into the editor
 
 ## [1902.4.13]
 
