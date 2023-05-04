@@ -124,7 +124,7 @@ public class TeamData {
 				save();
 
 				if (file.isServerSide()) {
-					new ObjectStartedResetMessage(uuid, id).sendToAll(((ServerQuestFile) file).server);
+					new ObjectStartedResetMessage(uuid, id).sendTo(getOnlineMembers());
 				}
 
 				return true;
@@ -135,7 +135,7 @@ public class TeamData {
 				save();
 
 				if (file.isServerSide()) {
-					new ObjectStartedMessage(uuid, id).sendToAll(((ServerQuestFile) file).server);
+					new ObjectStartedMessage(uuid, id).sendTo(getOnlineMembers());
 				}
 
 				return true;
@@ -162,7 +162,7 @@ public class TeamData {
 				save();
 
 				if (file.isServerSide()) {
-					new ObjectCompletedResetMessage(uuid, id).sendToAll(((ServerQuestFile) file).server);
+					new ObjectCompletedResetMessage(uuid, id).sendTo(getOnlineMembers());
 				}
 
 				return true;
@@ -173,7 +173,7 @@ public class TeamData {
 				save();
 
 				if (file.isServerSide()) {
-					new ObjectCompletedMessage(uuid, id).sendToAll(((ServerQuestFile) file).server);
+					new ObjectCompletedMessage(uuid, id).sendTo(getOnlineMembers());
 				}
 
 				return true;
@@ -204,7 +204,7 @@ public class TeamData {
 			clearCachedProgress();
 			save();
 			if (file.isServerSide()) {
-				new SyncRewardBlockingMessage(uuid, rewardsBlocked).sendToAll(((ServerQuestFile) file).server);
+				new SyncRewardBlockingMessage(uuid, rewardsBlocked).sendTo(getOnlineMembers());
 			}
 			return true;
 		}
@@ -245,7 +245,7 @@ public class TeamData {
 			save();
 
 			if (file.isServerSide()) {
-				new ClaimRewardResponseMessage(uuid, player, reward.id).sendToAll(((ServerQuestFile) file).server);
+				new ClaimRewardResponseMessage(uuid, player, reward.id).sendTo(getOnlineMembers());
 			}
 
 			reward.quest.checkRepeatable(this, player);
@@ -269,7 +269,7 @@ public class TeamData {
 			save();
 
 			if (file.isServerSide()) {
-				new ResetRewardMessage(uuid, player, reward.id).sendToAll(((ServerQuestFile) file).server);
+				new ResetRewardMessage(uuid, player, reward.id).sendTo(getOnlineMembers());
 			}
 
 			return true;
@@ -289,7 +289,7 @@ public class TeamData {
 			save();
 
 			if (file.isServerSide()) {
-				new SyncEditingModeMessage(uuid, canEdit).sendToAll(((ServerQuestFile) file).server);
+				new SyncEditingModeMessage(uuid, canEdit).sendTo(getOnlineMembers());
 			}
 
 			return true;
@@ -604,7 +604,7 @@ public class TeamData {
 			reward.claim(player, notify);
 
 			if (file.isServerSide()) {
-				new ClaimRewardResponseMessage(uuid, player.getUUID(), reward.id).sendToAll(((ServerQuestFile) file).server);
+				new ClaimRewardResponseMessage(uuid, player.getUUID(), reward.id).sendTo(getOnlineMembers());
 			}
 		}
 	}
@@ -680,10 +680,12 @@ public class TeamData {
 
 			if (file.isServerSide()) {
 				Date now = new Date();
-				new UpdateTaskProgressMessage(this, task.id, progress).sendToAll(((ServerQuestFile) file).server);
+				List<ServerPlayer> onlineMembers = getOnlineMembers();
+
+				new UpdateTaskProgressMessage(this, task.id, progress).sendTo(onlineMembers);
 
 				if (prevProgress == 0L) {
-					task.onStarted(new QuestProgressEventData<>(now, this, task, getOnlineMembers(), Collections.emptyList()));
+					task.onStarted(new QuestProgressEventData<>(now, this, task, onlineMembers, Collections.emptyList()));
 				}
 
 				// if we're in flexible progress mode, we can get here without dependencies being complete yet
@@ -733,7 +735,7 @@ public class TeamData {
 			save();
 
 			if (file.isServerSide()) {
-				new SyncLockMessage(uuid, locked).sendToAll(((ServerQuestFile) file).server);
+				new SyncLockMessage(uuid, locked).sendTo(getOnlineMembers());
 			}
 
 			return true;
