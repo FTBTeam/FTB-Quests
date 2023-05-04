@@ -32,6 +32,7 @@ import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 
@@ -173,6 +174,13 @@ public class QuestPanel extends Panel {
 		}
 
 		Quest selectedQuest = questScreen.getViewedQuest();
+		if (selectedQuest == null) {
+			Collection<Quest> sel = questScreen.getSelectedQuests();
+			if (sel.size() == 1) {
+				selectedQuest = questScreen.getSelectedQuests().stream().findFirst().orElse(null);
+			}
+		}
+
 		double mt = -(System.currentTimeMillis() * 0.001D);
 		float lineWidth = (float) (questScreen.getZoom() * ThemeProperties.DEPENDENCY_LINE_THICKNESS.get(questScreen.selectedChapter) / 4D * 3D);
 
@@ -187,7 +195,7 @@ public class QuestPanel extends Panel {
 				boolean complete = !unavailable && questScreen.file.self.isCompleted(qb.quest);
 
 				for (QuestButton button : qb.getDependencies()) {
-					if (button.shouldDraw() && button.quest != selectedQuest && qb.quest != selectedQuest) {
+					if (button.shouldDraw() && button.quest != selectedQuest && qb.quest != selectedQuest && !button.quest.hideDependentLines) {
 						int r, g, b, a;
 						if (complete) {
 							Color4I c = ThemeProperties.DEPENDENCY_LINE_COMPLETED_COLOR.get(questScreen.selectedChapter);
