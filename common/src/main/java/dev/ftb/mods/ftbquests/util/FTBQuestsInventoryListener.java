@@ -8,7 +8,6 @@ import dev.ftb.mods.ftbteams.FTBTeamsAPI;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerListener;
-import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
 
 /**
@@ -49,12 +48,14 @@ public class FTBQuestsInventoryListener implements ContainerListener {
 
 	@Override
 	public void slotChanged(AbstractContainerMenu container, int index, ItemStack stack) {
-		if (!stack.isEmpty() && container.getSlot(index).container == player.getInventory()
-			&& index >= InventoryMenu.INV_SLOT_START && index < InventoryMenu.USE_ROW_SLOT_END) {
-			// Only checking for items in the main inventory & hotbar
-			// Armor slots can contain items with rapidly changing NBT (especially powered modded armor)
-			//  which can trigger a lot of unnecessary inventory scans
-			DeferredInventoryDetection.scheduleInventoryCheck(player);
+		if (!stack.isEmpty() && container.getSlot(index).container == player.getInventory()) {
+			int slotNum = container.getSlot(index).getContainerSlot();
+			if (slotNum >= 0 && slotNum < player.getInventory().items.size()) {
+				// Only checking for items in the main inventory & hotbar
+				// Armor slots can contain items with rapidly changing NBT (especially powered modded armor)
+				//  which can trigger a lot of unnecessary inventory scans
+				DeferredInventoryDetection.scheduleInventoryCheck(player);
+			}
 		}
 	}
 }
