@@ -15,6 +15,7 @@ import dev.ftb.mods.ftbquests.quest.task.TaskType;
 import dev.ftb.mods.ftbquests.quest.task.TaskTypes;
 import dev.ftb.mods.ftbquests.util.FTBQuestsInventoryListener;
 import dev.ftb.mods.ftbquests.util.FileUtils;
+import dev.ftb.mods.ftbteams.FTBTeamsAPI;
 import dev.ftb.mods.ftbteams.data.PartyTeam;
 import dev.ftb.mods.ftbteams.data.PlayerTeam;
 import dev.ftb.mods.ftbteams.event.PlayerChangedTeamEvent;
@@ -22,6 +23,7 @@ import dev.ftb.mods.ftbteams.event.PlayerLoggedInAfterTeamEvent;
 import dev.ftb.mods.ftbteams.event.TeamCreatedEvent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.storage.LevelResource;
 
 import java.nio.file.Files;
@@ -146,14 +148,7 @@ public class ServerQuestFile extends QuestFile {
 			shouldSave = false;
 		}
 
-		Path path = server.getWorldPath(FTBQUESTS_DATA);
-
-		for (TeamData data : getAllData()) {
-			if (data.shouldSave) {
-				SNBT.write(path.resolve(data.uuid + ".snbt"), data.serializeNBT());
-				data.shouldSave = false;
-			}
-		}
+		getAllData().forEach(TeamData::saveIfChanged);
 	}
 
 	public void unload() {
@@ -223,14 +218,14 @@ public class ServerQuestFile extends QuestFile {
 		if (data == null) {
 			data = new TeamData(id);
 			data.file = this;
-			data.save();
+			data.markDirty();
 		}
 
 		String displayName = event.getTeam().getDisplayName();
 
 		if (!data.name.equals(displayName)) {
 			data.name = displayName;
-			data.save();
+			data.markDirty();
 		}
 
 		addData(data, false);
@@ -258,5 +253,10 @@ public class ServerQuestFile extends QuestFile {
 			new TeamDataChangedMessage(new TeamDataUpdate(oldTeamData), new TeamDataUpdate(newTeamData)).sendToAll(server);
 			new SyncTeamDataMessage(newTeamData, true).sendTo(event.getTeam().getOnlineMembers());
 		}
+	}
+
+	@Override
+	public boolean isPlayerOnTeam(Player player, TeamData teamData) {
+		return FTBTeamsAPI.getPlayerTeamID(player.getUUID()).equals(teamData.uuid);
 	}
 }

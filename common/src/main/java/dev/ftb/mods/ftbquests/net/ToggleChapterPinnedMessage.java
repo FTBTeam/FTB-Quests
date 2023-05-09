@@ -28,7 +28,8 @@ public class ToggleChapterPinnedMessage extends BaseC2SMessage {
     public void handle(NetworkManager.PacketContext context) {
         ServerPlayer player = (ServerPlayer) context.getPlayer();
         TeamData data = ServerQuestFile.INSTANCE.getData(player);
-        data.setChapterPinned(!data.isChapterPinned());
-        new ToggleChapterPinnedResponseMessage(data.isChapterPinned()).sendTo(player);
+        boolean newPinned = !data.isChapterPinned(player);
+        data.setChapterPinned(player, newPinned);
+        new ToggleChapterPinnedResponseMessage(newPinned).sendTo(player);
     }
 }
