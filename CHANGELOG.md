@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 * Fixed some Quest GUI operations causing other players' open GUIs to close, on multiplayer servers
+* Another fix to item autodetection
 
 ## [1902.4.14]
 
