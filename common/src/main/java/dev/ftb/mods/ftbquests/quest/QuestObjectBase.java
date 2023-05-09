@@ -138,7 +138,7 @@ public abstract class QuestObjectBase {
 		forceProgress(teamData, progressChange);
 		sendNotifications = Tristate.DEFAULT;
 		teamData.clearCachedProgress();
-		teamData.save();
+		teamData.markDirty();
 	}
 
 	@Nullable

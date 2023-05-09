@@ -241,7 +241,7 @@ public class ChapterPanel extends Panel {
 			super(panel, c.getTitle(), c.getIcon());
 			chapter = c;
 
-			/*
+            /*
 			if (panel.questScreen.file.self != null) {
 				int p = panel.questScreen.file.self.getRelativeProgress(c);
 
@@ -346,7 +346,7 @@ public class ChapterPanel extends Panel {
 	public void addWidgets() {
 		add(new ModpackButton(this, questScreen.file));
 
-		/*
+        /*
 		if (Platform.isModLoaded("ftbmoney")) {
 			add(new OpenShopButton(this));
 			Color4I borderColor = ThemeProperties.WIDGET_BORDER.get(treeGui.selectedChapter);
@@ -441,6 +441,6 @@ public class ChapterPanel extends Panel {
 	}
 
 	boolean isPinned() {
-		return ClientQuestFile.INSTANCE.self.isChapterPinned();
+		return ClientQuestFile.INSTANCE.self.isChapterPinned(Minecraft.getInstance().player);
 	}
 }

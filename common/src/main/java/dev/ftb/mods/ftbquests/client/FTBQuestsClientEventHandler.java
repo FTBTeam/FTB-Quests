@@ -21,6 +21,7 @@ import dev.ftb.mods.ftbquests.quest.task.ObservationTask;
 import dev.ftb.mods.ftbquests.quest.task.StructureTask;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
+import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -38,6 +39,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 import static dev.ftb.mods.ftbquests.client.TaskScreenRenderer.*;
@@ -197,8 +199,10 @@ public class FTBQuestsClientEventHandler {
 
 		List<Quest> pinnedQuests = new ArrayList<>();
 
-		if (!data.pinnedQuests.isEmpty()) {
-			if (data.pinnedQuests.contains(1)) {
+		LongSet pinnedIds = data.getPinnedQuestIds(FTBQuests.PROXY.getClientPlayer());
+
+		if (!pinnedIds.isEmpty()) {
+			if (pinnedIds.contains(TeamData.AUTO_PIN_ID)) {
 				// special auto-pin value: collect all quests which can be done now
 				for (ChapterGroup group : file.chapterGroups) {
 					for (Chapter chapter : group.chapters) {
@@ -210,10 +214,10 @@ public class FTBQuestsClientEventHandler {
 					}
 				}
 			} else {
-				for (long qId : data.pinnedQuests) {
-					Quest quest = file.getQuest(qId);
-					if (quest != null) pinnedQuests.add(quest);
-				}
+				pinnedQuests = pinnedIds.longStream()
+						.mapToObj(file::getQuest)
+						.filter(Objects::nonNull)
+						.toList();
 			}
 		}
 
