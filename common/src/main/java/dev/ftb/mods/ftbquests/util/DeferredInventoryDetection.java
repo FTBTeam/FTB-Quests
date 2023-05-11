@@ -1,10 +1,8 @@
 package dev.ftb.mods.ftbquests.util;
 
-import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.HashSet;
@@ -34,8 +32,7 @@ public class DeferredInventoryDetection {
         }
     }
 
-    static void scheduleInventoryCheck(ServerPlayer sp) {
-        int delay = Mth.clamp(ServerQuestFile.INSTANCE.detectionDelay, 1, 200);
+    static void scheduleInventoryCheck(ServerPlayer sp, int delay) {
         playerMap.putIfAbsent(sp.getUUID(), System.currentTimeMillis() + delay * MILLIS_IN_TICK);
     }
 }

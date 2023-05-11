@@ -1077,7 +1077,7 @@ public abstract class QuestFile extends QuestObject {
 		config.addDouble("grid_scale", gridScale, v -> gridScale = v, 0.5D, 1D / 32D, 8D);
 		config.addString("lock_message", lockMessage, v -> lockMessage = v, "");
 		config.addEnum("progression_mode", progressionMode, v -> progressionMode = v, ProgressionMode.NAME_MAP_NO_DEFAULT);
-		config.addInt("detection_delay", detectionDelay, v -> detectionDelay = v, 20, 1, 200);
+		config.addInt("detection_delay", detectionDelay, v -> detectionDelay = v, 20, 0, 200);
 
 		ConfigGroup defaultsGroup = config.getGroup("defaults");
 		defaultsGroup.addBool("reward_team", defaultRewardTeam, v -> defaultRewardTeam = v, false);
