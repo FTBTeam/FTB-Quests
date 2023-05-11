@@ -21,6 +21,8 @@ import dev.ftb.mods.ftbquests.util.ProgressChange;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
@@ -32,9 +34,11 @@ import org.jetbrains.annotations.Nullable;
  */
 public abstract class Task extends QuestObject {
 	public final Quest quest;
+	private boolean optionalTask;
 
 	public Task(Quest q) {
 		quest = q;
+		optionalTask = false;
 	}
 
 	@Override
@@ -99,6 +103,11 @@ public abstract class Task extends QuestObject {
 		if (questCompleted) {
 			quest.onCompleted(data.withObject(quest));
 		}
+	}
+
+	@Override
+	public boolean isOptionalForProgression() {
+		return optionalTask;
 	}
 
 	public long getMaxProgress() {
@@ -272,5 +281,39 @@ public abstract class Task extends QuestObject {
 
 	public boolean checkOnLogin() {
 		return !consumesResources();
+	}
+
+	@Override
+	public void writeData(CompoundTag nbt) {
+		super.writeData(nbt);
+		if (optionalTask) nbt.putBoolean("optional_task", true);
+	}
+
+	@Override
+	public void readData(CompoundTag nbt) {
+		super.readData(nbt);
+
+		optionalTask = nbt.getBoolean("optional_task");
+	}
+
+	@Override
+	public void writeNetData(FriendlyByteBuf buffer) {
+		super.writeNetData(buffer);
+
+		buffer.writeBoolean(optionalTask);
+	}
+
+	@Override
+	public void readNetData(FriendlyByteBuf buffer) {
+		super.readNetData(buffer);
+
+		optionalTask = buffer.readBoolean();
+	}
+
+	@Override
+	public void getConfig(ConfigGroup config) {
+		super.getConfig(config);
+
+		config.addBool("optional_task", optionalTask, v -> optionalTask = v, false).setNameKey("ftbquests.quest.optional");
 	}
 }
