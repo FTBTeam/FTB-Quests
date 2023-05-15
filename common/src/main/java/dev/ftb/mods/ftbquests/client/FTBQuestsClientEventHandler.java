@@ -126,7 +126,9 @@ public class FTBQuestsClientEventHandler {
 	}
 
 	private void onFileCacheClear(QuestFile file) {
-		observationTasks = null;
+		if (!file.isServerSide()) {
+			observationTasks = null;
+		}
 	}
 
 	private void onKeyEvent(Minecraft mc) {
