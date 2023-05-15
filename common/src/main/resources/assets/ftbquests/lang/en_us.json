@@ -141,6 +141,7 @@
 	"ftbquests.chapter.image.corner": "Rotate and offset from corner",
 	"ftbquests.chapter.default_min_width": "Default Min Opened Quest Window Width",
 	"ftbquests.chapter.hide_quest_details_until_startable": "Hide Quest Details Until Startable",
+	"ftbquests.chapter.hide_quest_until_deps_visible": "Hide Quests Until Dependencies Visible",
 	"ftbquests.quest": "Quest",
 	"ftbquests.quests": "Quests",
 	"ftbquests.quest.completed": "Quest completed!",

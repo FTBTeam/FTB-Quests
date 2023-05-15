@@ -47,7 +47,7 @@ public final class Quest extends QuestObject implements Movable {
 	public Chapter chapter;
 	public String subtitle;
 	public double x, y;
-	public Tristate hide;
+	public Tristate hideUntilDepsVisible;
 	public String shape;
 	public final List<String> description;
 	private final List<QuestObject> dependencies;
@@ -87,7 +87,7 @@ public final class Quest extends QuestObject implements Movable {
 		guidePage = "";
 		hideDependencyLines = Tristate.DEFAULT;
 		hideDependentLines = false;
-		hide = Tristate.DEFAULT;
+		hideUntilDepsVisible = Tristate.DEFAULT;
 		dependencyRequirement = DependencyRequirement.ALL_COMPLETED;
 		minRequiredDependencies = 0;
 		hideTextUntilComplete = Tristate.DEFAULT;
@@ -172,7 +172,7 @@ public final class Quest extends QuestObject implements Movable {
 			nbt.put("dependencies", deps);
 		}
 
-		hide.write(nbt, "hide");
+		hideUntilDepsVisible.write(nbt, "hide");
 
 		if (dependencyRequirement != DependencyRequirement.ALL_COMPLETED) {
 			nbt.putString("dependency_requirement", dependencyRequirement.id);
@@ -261,7 +261,7 @@ public final class Quest extends QuestObject implements Movable {
 			}
 		}
 
-		hide = Tristate.read(nbt, "hide");
+		hideUntilDepsVisible = Tristate.read(nbt, "hide");
 		dependencyRequirement = DependencyRequirement.NAME_MAP.get(nbt.getString("dependency_requirement"));
 		hideTextUntilComplete = Tristate.read(nbt, "hide_text_until_complete");
 		size = nbt.contains("size") ? nbt.getDouble("size") : 1D;
@@ -296,7 +296,7 @@ public final class Quest extends QuestObject implements Movable {
 		flags = Bits.setFlag(flags, 0x1000, hideDetailsUntilStartable == Tristate.TRUE);
 		buffer.writeVarInt(flags);
 
-		hide.write(buffer);
+		hideUntilDepsVisible.write(buffer);
 		hideDependencyLines.write(buffer);
 		hideTextUntilComplete.write(buffer);
 
@@ -343,7 +343,7 @@ public final class Quest extends QuestObject implements Movable {
 	public void readNetData(FriendlyByteBuf buffer) {
 		super.readNetData(buffer);
 		int flags = buffer.readVarInt();
-		hide = Tristate.read(buffer);
+		hideUntilDepsVisible = Tristate.read(buffer);
 		hideDependencyLines = Tristate.read(buffer);
 		hideTextUntilComplete = Tristate.read(buffer);
 
@@ -554,7 +554,7 @@ public final class Quest extends QuestObject implements Movable {
 		}, Collections.emptyList());
 
 		config.addEnum("shape", shape.isEmpty() ? "default" : shape, v -> shape = v.equals("default") ? "" : v, QuestShape.idMapWithDefault);
-		config.addTristate("hide", hide, v -> hide = v);
+		config.addTristate("hide", hideUntilDepsVisible, v -> hideUntilDepsVisible = v);
 		config.addDouble("size", size, v -> size = v, 1, 0.0625D, 8D);
 		config.addDouble("x", x, v -> x = v, 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
 		config.addDouble("y", y, v -> y = v, 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
@@ -638,7 +638,7 @@ public final class Quest extends QuestObject implements Movable {
 			return true;
 		}
 
-		if (hide.get(false)) {
+		if (hideUntilDepsVisible.get(chapter.hideQuestUntilDepsVisible())) {
 			return data.areDependenciesComplete(this);
 		}
 

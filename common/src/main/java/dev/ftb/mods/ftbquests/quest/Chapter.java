@@ -41,6 +41,7 @@ public final class Chapter extends QuestObject {
 	public int defaultMinWidth = 0;
 	private ProgressionMode progressionMode;
 	private boolean hideQuestDetailsUntilStartable;
+	private boolean hideQuestUntilDepsVisible;
 
 	public Chapter(QuestFile f, ChapterGroup g) {
 		file = f;
@@ -54,6 +55,7 @@ public final class Chapter extends QuestObject {
 		images = new ArrayList<>();
 		defaultHideDependencyLines = false;
 		progressionMode = ProgressionMode.DEFAULT;
+		hideQuestUntilDepsVisible = false;
 		hideQuestDetailsUntilStartable = false;
 	}
 
@@ -115,6 +117,7 @@ public final class Chapter extends QuestObject {
 		}
 
 		if (hideQuestDetailsUntilStartable) nbt.putBoolean("hide_quest_details_until_startable", true);
+		if (hideQuestUntilDepsVisible) nbt.putBoolean("hide_quest_until_deps_visible", true);
 	}
 
 	@Override
@@ -151,6 +154,7 @@ public final class Chapter extends QuestObject {
 		defaultMinWidth = nbt.getInt("default_min_width");
 		progressionMode = ProgressionMode.NAME_MAP.get(nbt.getString("progression_mode"));
 		hideQuestDetailsUntilStartable = nbt.getBoolean("hide_quest_details_until_startable");
+		hideQuestUntilDepsVisible = nbt.getBoolean("hide_quest_until_deps_visible");
 	}
 
 	@Override
@@ -165,6 +169,7 @@ public final class Chapter extends QuestObject {
 		buffer.writeInt(defaultMinWidth);
 		ProgressionMode.NAME_MAP.write(buffer, progressionMode);
 		buffer.writeBoolean(hideQuestDetailsUntilStartable);
+		buffer.writeBoolean(hideQuestUntilDepsVisible);
 	}
 
 	@Override
@@ -183,6 +188,7 @@ public final class Chapter extends QuestObject {
 		defaultMinWidth = buffer.readInt();
 		progressionMode = ProgressionMode.NAME_MAP.read(buffer);
 		hideQuestDetailsUntilStartable = buffer.readBoolean();
+		hideQuestUntilDepsVisible = buffer.readBoolean();
 	}
 
 	public int getIndex() {
@@ -337,6 +343,7 @@ public final class Chapter extends QuestObject {
 		config.addInt("default_min_width", defaultMinWidth, v -> defaultMinWidth = v, 0, 0, 3000);
 		config.addEnum("progression_mode", progressionMode, v -> progressionMode = v, ProgressionMode.NAME_MAP);
 		config.addBool("hide_quest_details_until_startable", hideQuestDetailsUntilStartable, v -> hideQuestDetailsUntilStartable = v, false);
+		config.addBool("hide_quest_until_deps_visible", hideQuestUntilDepsVisible, v -> hideQuestUntilDepsVisible = v, false);
 	}
 
 	@Override
@@ -408,5 +415,9 @@ public final class Chapter extends QuestObject {
 
 	public boolean hideQuestDetailsUntilStartable() {
 		return hideQuestDetailsUntilStartable;
+	}
+
+	public boolean hideQuestUntilDepsVisible() {
+		return hideQuestUntilDepsVisible;
 	}
 }
