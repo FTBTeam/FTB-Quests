@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1902.4.16]
+
+### Fixed
+* Ensure that quest dependency loops are checked for when dependencies are edited via the large "Edit" screen
+  * Note that it's much easier to add/remove dependencies by selecting a quest (Ctrl + Click), then right-clicking another quest and choosing "Add Selected as Dependency" or "Add as Dependency to Selected" as appropriate (and this method has always checked for dependency loops)
+
 ## [1902.4.15]
 
 ### Fixed
