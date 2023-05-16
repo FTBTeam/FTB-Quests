@@ -700,6 +700,21 @@ public final class Quest extends QuestObject implements Movable {
 		return false;
 	}
 
+	@Override
+	protected boolean validateEditedConfig() {
+		try {
+			verifyDependenciesInternal(id, 0);
+			return true;
+		} catch (DependencyDepthException | DependencyLoopException ex) {
+			clearDependencies();
+			// should always be on the client at this point, but let's be paranoid
+			if (!getQuestFile().isServerSide()) {
+				QuestScreen.displayError(Component.translatable("ftbquests.gui.looping_dependencies"));
+			}
+			return false;
+		}
+	}
+
 	public boolean verifyDependencies(boolean autofix) {
 		try {
 			verifyDependenciesInternal(id, 0);
