@@ -55,8 +55,11 @@ public class QuestScreen extends BaseScreen {
 	public int zoom = 16;
 	public long lastShiftPress = 0L;
 	public static boolean grid = false;
+	private PersistedData pendingPersistedData;
 
-	public QuestScreen(ClientQuestFile q) {
+	public QuestScreen(ClientQuestFile q, @Nullable PersistedData persistedData) {
+		super();
+
 		file = q;
 		selectedObjects = new ArrayList<>();
 
@@ -68,6 +71,10 @@ public class QuestScreen extends BaseScreen {
 		otherButtonsBottomPanel = new OtherButtonsPanelBottom(this);
 		otherButtonsTopPanel = new OtherButtonsPanelTop(this);
 		viewQuestPanel = new ViewQuestPanel(this);
+
+		// defer restoring data till the first tick; things like scroll pos etc. are dependent
+		// on all the widgets being present
+		this.pendingPersistedData = persistedData;
 
 		selectChapter(null);
 	}
@@ -103,20 +110,17 @@ public class QuestScreen extends BaseScreen {
 
 	@Override
 	public boolean onInit() {
-		//Keyboard.enableRepeatEvents(true);
 		return setFullscreen();
 	}
 
 	@Override
 	public void onClosed() {
-		// selectedObjects.clear();
+		file.setPersistedScreenInfo(new PersistedData(this));
 		super.onClosed();
-		//Keyboard.enableRepeatEvents(false);
 	}
 
 	public void selectChapter(@Nullable Chapter chapter) {
 		if (selectedChapter != chapter) {
-			//movingQuests = false;
 			closeQuest();
 			selectedChapter = chapter;
 			questPanel.refreshWidgets();
@@ -417,6 +421,11 @@ public class QuestScreen extends BaseScreen {
 
 	@Override
 	public void tick() {
+		if (pendingPersistedData != null) {
+			restorePersistedScreenData(file, pendingPersistedData);
+			pendingPersistedData = null;
+		}
+
 		if (selectedChapter != null && selectedChapter.invalid) {
 			selectChapter(null);
 		}
@@ -616,5 +625,46 @@ public class QuestScreen extends BaseScreen {
 			}
 		});
 		return List.copyOf(questMap.values());
+	}
+
+	public PersistedData getPersistedScreenData() {
+		return new PersistedData(this);
+	}
+
+	private void restorePersistedScreenData(QuestFile file, PersistedData persistedData) {
+		zoom = persistedData.zoom;
+		selectChapter(file.getChapter(persistedData.selectedChapter));
+
+		selectedObjects.clear();
+		persistedData.selectedQuests.stream()
+				.mapToLong(id -> id)
+				.filter(id -> file.get(id) instanceof Movable)
+				.mapToObj(id -> (Movable) file.get(id))
+				.forEach(selectedObjects::add);
+
+		questPanel.scrollTo(persistedData.scrollX, persistedData.scrollY);
+		questPanel.centerQuestX = persistedData.scrollX;
+		questPanel.centerQuestY = persistedData.scrollY;
+		chapterPanel.setExpanded(persistedData.chaptersExpanded);
+	}
+
+	/**
+	 * Allows certain attributes of the GUI to be remembered between invocations
+	 */
+	public static class PersistedData {
+		private final int zoom;
+		private final double scrollX, scrollY;
+		private final long selectedChapter;
+		private final List<Long> selectedQuests;
+		private final boolean chaptersExpanded;
+
+		private PersistedData(QuestScreen questScreen) {
+			zoom = questScreen.zoom;
+			scrollX = questScreen.questPanel.centerQuestX;
+			scrollY = questScreen.questPanel.centerQuestY;
+			selectedChapter = questScreen.selectedChapter == null ? 0L : questScreen.selectedChapter.id;
+			selectedQuests = questScreen.selectedObjects.stream().map(Movable::getMovableID).toList();
+			chaptersExpanded = questScreen.chapterPanel.expanded;
+		}
 	}
 }
