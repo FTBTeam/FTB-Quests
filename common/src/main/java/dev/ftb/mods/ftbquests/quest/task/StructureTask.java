@@ -83,6 +83,12 @@ public class StructureTask extends BooleanTask {
 	}
 
 	@Override
+	public boolean checkOnLogin() {
+		// checking on login can cause server lag: https://github.com/FTBTeam/FTB-Mods-Issues/issues/799
+		return false;
+	}
+
+	@Override
 	public boolean canSubmit(TeamData teamData, ServerPlayer player) {
 		ServerLevel level = (ServerLevel) player.level;
 		return structure.map(
