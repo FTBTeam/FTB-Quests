@@ -470,76 +470,86 @@ public abstract class QuestFile extends QuestObject {
 	}
 
 	public final void writeDataFull(Path folder) {
-		SNBTCompoundTag fileNBT = new SNBTCompoundTag();
-		fileNBT.putInt("version", VERSION);
-		writeData(fileNBT);
-		SNBT.write(folder.resolve("data.snbt"), fileNBT);
+		boolean prev = false;
+		try {
+			// Sorting keys ensure consistent sort order in the saved quest file
+			// Since questbook data is commonly stored under version control, this minimizes extraneous
+			//  version control changes stemming from unpredictable hashmap key ordering
+			prev = SNBT.setShouldSortKeysOnWrite(true);
 
-		for (ChapterGroup group : chapterGroups) {
-			for (int ci = 0; ci < group.chapters.size(); ci++) {
-				Chapter chapter = group.chapters.get(ci);
-				SNBTCompoundTag chapterNBT = new SNBTCompoundTag();
-				chapterNBT.putString("id", chapter.getCodeString());
-				chapterNBT.putString("group", group.isDefaultGroup() ? "" : group.getCodeString());
-				chapterNBT.putInt("order_index", ci);
-				chapter.writeData(chapterNBT);
+			SNBTCompoundTag fileNBT = new SNBTCompoundTag();
+			fileNBT.putInt("version", VERSION);
+			writeData(fileNBT);
+			SNBT.write(folder.resolve("data.snbt"), fileNBT);
 
-				ListTag questList = new ListTag();
-				for (Quest quest : chapter.quests) {
-					if (!quest.invalid) {
-						SNBTCompoundTag questNBT = new SNBTCompoundTag();
-						quest.writeData(questNBT);
-						questNBT.putString("id", quest.getCodeString());
-						if (!quest.tasks.isEmpty()) {
-							quest.writeTasks(questNBT);
+			for (ChapterGroup group : chapterGroups) {
+				for (int ci = 0; ci < group.chapters.size(); ci++) {
+					Chapter chapter = group.chapters.get(ci);
+					SNBTCompoundTag chapterNBT = new SNBTCompoundTag();
+					chapterNBT.putString("id", chapter.getCodeString());
+					chapterNBT.putString("group", group.isDefaultGroup() ? "" : group.getCodeString());
+					chapterNBT.putInt("order_index", ci);
+					chapter.writeData(chapterNBT);
+
+					ListTag questList = new ListTag();
+					for (Quest quest : chapter.quests) {
+						if (!quest.invalid) {
+							SNBTCompoundTag questNBT = new SNBTCompoundTag();
+							quest.writeData(questNBT);
+							questNBT.putString("id", quest.getCodeString());
+							if (!quest.tasks.isEmpty()) {
+								quest.writeTasks(questNBT);
+							}
+							if (!quest.rewards.isEmpty()) {
+								quest.writeRewards(questNBT);
+							}
+							questList.add(questNBT);
 						}
-						if (!quest.rewards.isEmpty()) {
-							quest.writeRewards(questNBT);
+					}
+					chapterNBT.put("quests", questList);
+
+					ListTag linkList = new ListTag();
+					for (QuestLink link : chapter.questLinks) {
+						if (link.getQuest().isPresent()) {
+							SNBTCompoundTag linkNBT = new SNBTCompoundTag();
+							link.writeData(linkNBT);
+							linkNBT.putString("id", link.getCodeString());
+							linkList.add(linkNBT);
 						}
-						questList.add(questNBT);
 					}
+					chapterNBT.put("quest_links", linkList);
+
+					SNBT.write(folder.resolve("chapters/" + chapter.getFilename() + ".snbt"), chapterNBT);
 				}
-				chapterNBT.put("quests", questList);
+			}
 
-				ListTag linkList = new ListTag();
-				for (QuestLink link : chapter.questLinks) {
-					if (link.getQuest().isPresent()) {
-						SNBTCompoundTag linkNBT = new SNBTCompoundTag();
-						link.writeData(linkNBT);
-						linkNBT.putString("id", link.getCodeString());
-						linkList.add(linkNBT);
-					}
+			for (int ri = 0; ri < rewardTables.size(); ri++) {
+				RewardTable table = rewardTables.get(ri);
+				SNBTCompoundTag tableNBT = new SNBTCompoundTag();
+				tableNBT.putString("id", table.getCodeString());
+				tableNBT.putInt("order_index", ri);
+				table.writeData(tableNBT);
+				SNBT.write(folder.resolve("reward_tables/" + table.getFilename() + ".snbt"), tableNBT);
+			}
+
+			ListTag chapterGroupTag = new ListTag();
+
+			for (ChapterGroup group : chapterGroups) {
+				if (!group.isDefaultGroup()) {
+					SNBTCompoundTag groupTag = new SNBTCompoundTag();
+					groupTag.singleLine();
+					groupTag.putString("id", group.getCodeString());
+					group.writeData(groupTag);
+					chapterGroupTag.add(groupTag);
 				}
-				chapterNBT.put("quest_links", linkList);
-
-				SNBT.write(folder.resolve("chapters/" + chapter.getFilename() + ".snbt"), chapterNBT);
 			}
+
+			SNBTCompoundTag groupNBT = new SNBTCompoundTag();
+			groupNBT.put("chapter_groups", chapterGroupTag);
+			SNBT.write(folder.resolve("chapter_groups.snbt"), groupNBT);
+		} finally {
+			SNBT.setShouldSortKeysOnWrite(prev);
 		}
-
-		for (int ri = 0; ri < rewardTables.size(); ri++) {
-			RewardTable table = rewardTables.get(ri);
-			SNBTCompoundTag tableNBT = new SNBTCompoundTag();
-			tableNBT.putString("id", table.getCodeString());
-			tableNBT.putInt("order_index", ri);
-			table.writeData(tableNBT);
-			SNBT.write(folder.resolve("reward_tables/" + table.getFilename() + ".snbt"), tableNBT);
-		}
-
-		ListTag chapterGroupTag = new ListTag();
-
-		for (ChapterGroup group : chapterGroups) {
-			if (!group.isDefaultGroup()) {
-				SNBTCompoundTag groupTag = new SNBTCompoundTag();
-				groupTag.singleLine();
-				groupTag.putString("id", group.getCodeString());
-				group.writeData(groupTag);
-				chapterGroupTag.add(groupTag);
-			}
-		}
-
-		SNBTCompoundTag groupNBT = new SNBTCompoundTag();
-		groupNBT.put("chapter_groups", chapterGroupTag);
-		SNBT.write(folder.resolve("chapter_groups.snbt"), groupNBT);
 	}
 
 	public final void readDataFull(Path folder) {
@@ -708,7 +718,7 @@ public abstract class QuestFile extends QuestObject {
 		rewardTables.sort(Comparator.comparingInt(c -> objectOrderMap.get(c.id)));
 		updateLootCrates();
 
-		/*
+        /*
 		for (Chapter chapter : chapters)
 		{
 			for (Quest quest : chapter.quests)
