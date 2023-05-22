@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * Optional tasks don't need to be completed for their quest to be completed
   * Intended for use as informational tasks, e.g. if some item is involved in quest completion but not required to be turned in, this can be used as a way to show the item's recipe in the quest view panel
   * Typically used in addition to non-optional tasks (a quest with *only* optional tasks will autocomplete as soon as the player logs in!)
+* Biome and Structure tasks now allow selection from a list of known biomes/structures, including tags (instead of requiring the name to be typed in)
+* Saved quest book SNBT data is now sorted by key name
+  * This was done since default key sort order is unpredictable and led to seemingly random changes in key ordering, which caused annoying spurious updates for quest book data under version control (which it should be for any major project)
+  * This change will cause a one-time large version control change, but eliminate future unpredictability
 
 ### Fixed
 * Ensure that quest dependency loops are checked for when dependencies are edited via the large "Edit" screen
@@ -19,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Fixed issue where "Terrain Loading" or "Terrain Building" message sometimes briefly (or not so briefly) flashes up when closing FTB Quests GUI 
 * Added boolean "Hide Quests until Dependencies Visible" setting to chapter properties (default false)
   * This is a default for the corresponding tri-state quest property "Hide Quest until Dependencies Visible"
+* Fixed a server->client desync causing weird behaviour with repeatable quests which have multiple rewards
 
 ## [1902.4.15]
 
