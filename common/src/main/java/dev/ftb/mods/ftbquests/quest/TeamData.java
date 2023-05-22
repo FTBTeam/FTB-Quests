@@ -602,10 +602,6 @@ public class TeamData {
 	public void claimReward(ServerPlayer player, Reward reward, boolean notify) {
 		if (claimReward(player.getUUID(), reward, System.currentTimeMillis())) {
 			reward.claim(player, notify);
-
-			if (file.isServerSide()) {
-				new ClaimRewardResponseMessage(uuid, player.getUUID(), reward.id).sendToAll(((ServerQuestFile) file).server);
-			}
 		}
 	}
 
