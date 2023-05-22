@@ -40,9 +40,9 @@ public class ClaimRewardMessage extends BaseC2SMessage {
 	@Override
 	public void handle(NetworkManager.PacketContext context) {
 		Reward reward = ServerQuestFile.INSTANCE.getReward(id);
-		ServerPlayer player = (ServerPlayer) context.getPlayer();
 
 		if (reward != null) {
+			ServerPlayer player = (ServerPlayer) context.getPlayer();
 			TeamData teamData = ServerQuestFile.INSTANCE.getData(player);
 
 			if (teamData.isCompleted(reward.quest)) {
