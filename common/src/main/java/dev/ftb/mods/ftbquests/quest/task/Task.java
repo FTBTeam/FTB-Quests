@@ -8,6 +8,7 @@ import dev.ftb.mods.ftblibrary.util.ClientUtils;
 import dev.ftb.mods.ftblibrary.util.StringUtils;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftblibrary.util.WrappedIngredient;
+import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.events.CustomTaskEvent;
 import dev.ftb.mods.ftbquests.events.ObjectCompletedEvent;
 import dev.ftb.mods.ftbquests.events.ObjectStartedEvent;
@@ -21,10 +22,12 @@ import dev.ftb.mods.ftbquests.util.ProgressChange;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
+import net.minecraft.ResourceLocationException;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
@@ -315,5 +318,19 @@ public abstract class Task extends QuestObject {
 		super.getConfig(config);
 
 		config.addBool("optional_task", optionalTask, v -> optionalTask = v, false).setNameKey("ftbquests.quest.optional");
+	}
+
+	protected ResourceLocation safeResourceLocation(String str, ResourceLocation fallback) {
+		try {
+			return new ResourceLocation(str);
+		} catch (ResourceLocationException e) {
+			if (getQuestFile().isServerSide()) {
+				FTBQuests.LOGGER.warn("Ignoring bad resource location '{}' for task {}", str, id);
+			} else {
+				FTBQuests.PROXY.getClientPlayer().displayClientMessage(
+						Component.literal("Bad resource location: " + str).withStyle(ChatFormatting.RED), false);
+			}
+			return fallback;
+		}
 	}
 }
