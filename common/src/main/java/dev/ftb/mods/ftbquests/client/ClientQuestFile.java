@@ -9,6 +9,7 @@ import dev.ftb.mods.ftbquests.integration.FTBQuestsJEIHelper;
 import dev.ftb.mods.ftbquests.net.DeleteObjectMessage;
 import dev.ftb.mods.ftbquests.quest.QuestFile;
 import dev.ftb.mods.ftbquests.quest.TeamData;
+import dev.ftb.mods.ftbquests.quest.task.StructureTask;
 import dev.ftb.mods.ftbquests.quest.theme.QuestTheme;
 import dev.ftb.mods.ftbquests.util.TextUtils;
 import dev.ftb.mods.ftbteams.data.ClientTeamManager;
@@ -105,6 +106,9 @@ public class ClientQuestFile extends QuestFile {
 			} else if (self.isLocked()) {
 				Minecraft.getInstance().getToasts().addToast(new CustomToast(lockMessage.isEmpty() ? Component.literal("Quests locked!") : TextUtils.parseRawText(lockMessage), Icons.BARRIER, Component.empty()));
 			} else {
+				if (self.getCanEdit()) {
+					StructureTask.maybeRequestStructureSync();
+				}
 				questScreen = new QuestScreen(this, persistedData);
 				questScreen.openGui();
 				questScreen.refreshWidgets();

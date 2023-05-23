@@ -3,14 +3,13 @@ package dev.ftb.mods.ftbquests.quest.task;
 import com.mojang.datafixers.util.Either;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.NameMap;
-import dev.ftb.mods.ftbquests.FTBQuests;
+import dev.ftb.mods.ftbquests.net.SyncStructuresRequestMessage;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Registry;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -38,6 +37,12 @@ public class StructureTask extends BooleanTask {
 	public StructureTask(Quest quest) {
 		super(quest);
 		structure = Either.left(ResourceKey.create(Registry.STRUCTURE_REGISTRY, DEFAULT_STRUCTURE));
+	}
+
+	public static void syncKnownStructureList(List<String> data) {
+		// receive structure data from server (structure registry doesn't exist on client)
+		KNOWN_STRUCTURES.clear();
+		KNOWN_STRUCTURES.addAll(data);
 	}
 
 	@Override
@@ -73,8 +78,12 @@ public class StructureTask extends BooleanTask {
 	@Environment(EnvType.CLIENT)
 	public void getConfig(ConfigGroup config) {
 		super.getConfig(config);
-		config.addEnum("structure", getStructure(), this::setStructure, NameMap.of(DEFAULT_STRUCTURE.toString(), getKnownStructures()).create());
-//		config.addString("structure", getStructure(), this::setStructure, "minecraft:mineshaft");
+		if (KNOWN_STRUCTURES.isEmpty()) {
+			// should not normally be the case, but as a defensive fallback...
+			config.addString("structure", getStructure(), this::setStructure, "minecraft:mineshaft");
+		} else {
+			config.addEnum("structure", getStructure(), this::setStructure, NameMap.of(DEFAULT_STRUCTURE.toString(), KNOWN_STRUCTURES).create());
+		}
 	}
 
 	@Override
@@ -119,22 +128,9 @@ public class StructureTask extends BooleanTask {
 		);
 	}
 
-	private List<String> getKnownStructures() {
+	public static void maybeRequestStructureSync() {
 		if (KNOWN_STRUCTURES.isEmpty()) {
-			RegistryAccess registryAccess = FTBQuests.PROXY.getClientPlayer().level.registryAccess();
-			KNOWN_STRUCTURES.addAll(registryAccess
-					.registryOrThrow(Registry.STRUCTURE_REGISTRY).registryKeySet().stream()
-					.map(o -> o.location().toString())
-					.sorted(String::compareTo)
-					.toList()
-			);
-			KNOWN_STRUCTURES.addAll(registryAccess
-					.registryOrThrow(Registry.STRUCTURE_REGISTRY).getTagNames()
-					.map(o -> "#" + o.location())
-					.sorted(String::compareTo)
-					.toList()
-			);
+			new SyncStructuresRequestMessage().sendToServer();
 		}
-		return KNOWN_STRUCTURES;
 	}
 }
