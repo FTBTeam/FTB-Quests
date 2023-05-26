@@ -4,6 +4,7 @@ import dev.ftb.mods.ftblibrary.ui.Panel;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftbquests.net.ToggleEditingModeMessage;
 import dev.ftb.mods.ftbquests.quest.TeamData;
+import dev.ftb.mods.ftbquests.quest.task.StructureTask;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraft.network.chat.Component;
 
@@ -24,6 +25,11 @@ public class ToggleEditModeButton extends TabButton {
 	@Override
 	public void onClicked(MouseButton button) {
 		playClickSound();
+
+		if (!questScreen.file.self.getCanEdit()) {
+			StructureTask.maybeRequestStructureSync();
+		}
+
 		new ToggleEditingModeMessage().sendToServer();
 	}
 }

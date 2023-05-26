@@ -6,6 +6,7 @@ import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbteams.FTBTeamsAPI;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Mth;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerListener;
 import net.minecraft.world.item.ItemStack;
@@ -54,7 +55,12 @@ public class FTBQuestsInventoryListener implements ContainerListener {
 				// Only checking for items in the main inventory & hotbar
 				// Armor slots can contain items with rapidly changing NBT (especially powered modded armor)
 				//  which can trigger a lot of unnecessary inventory scans
-				DeferredInventoryDetection.scheduleInventoryCheck(player);
+				int delay = Mth.clamp(ServerQuestFile.INSTANCE.detectionDelay, 0, 200);
+				if (delay == 0) {
+					FTBQuestsInventoryListener.detect(player, ItemStack.EMPTY, 0);
+				} else {
+					DeferredInventoryDetection.scheduleInventoryCheck(player, delay);
+				}
 			}
 		}
 	}

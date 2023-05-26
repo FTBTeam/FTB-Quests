@@ -2,15 +2,14 @@ package dev.ftb.mods.ftbquests.client;
 
 import dev.architectury.utils.Env;
 import dev.ftb.mods.ftblibrary.icon.Icons;
-import dev.ftb.mods.ftblibrary.ui.BaseScreen;
 import dev.ftb.mods.ftblibrary.util.ClientUtils;
 import dev.ftb.mods.ftbquests.gui.CustomToast;
 import dev.ftb.mods.ftbquests.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.integration.FTBQuestsJEIHelper;
 import dev.ftb.mods.ftbquests.net.DeleteObjectMessage;
-import dev.ftb.mods.ftbquests.quest.Movable;
 import dev.ftb.mods.ftbquests.quest.QuestFile;
 import dev.ftb.mods.ftbquests.quest.TeamData;
+import dev.ftb.mods.ftbquests.quest.task.StructureTask;
 import dev.ftb.mods.ftbquests.quest.theme.QuestTheme;
 import dev.ftb.mods.ftbquests.util.TextUtils;
 import dev.ftb.mods.ftbteams.data.ClientTeamManager;
@@ -42,7 +41,7 @@ public class ClientQuestFile extends QuestFile {
 
 	public TeamData self;
 	public QuestScreen questScreen;
-	public BaseScreen questGui;
+	private QuestScreen.PersistedData persistedData;
 
 	@Override
 	public void load() {
@@ -70,66 +69,23 @@ public class ClientQuestFile extends QuestFile {
 	public void refreshGui() {
 		clearCachedData();
 
-		boolean hasPrev = false;
 		boolean guiOpen = false;
-		int zoom = 0;
-		double scrollX = 0, scrollY = 0;
-		long selectedChapter = 0L;
-		long[] selectedQuests = new long[0];
-		boolean chaptersExpanded = false;
-
 		if (questScreen != null) {
-			hasPrev = true;
-			zoom = questScreen.zoom;
-			scrollX = questScreen.questPanel.centerQuestX;
-			scrollY = questScreen.questPanel.centerQuestY;
-			selectedChapter = questScreen.selectedChapter == null ? 0L : questScreen.selectedChapter.id;
-			selectedQuests = new long[questScreen.selectedObjects.size()];
-			int i = 0;
-
-			for (Movable m : questScreen.selectedObjects) {
-				selectedQuests[i] = m.getMovableID();
-				i++;
-			}
-
+			persistedData = questScreen.getPersistedScreenData();
 			if (ClientUtils.getCurrentGuiAs(QuestScreen.class) != null) {
 				guiOpen = true;
 			}
-
-			chaptersExpanded = questScreen.chapterPanel.expanded;
 		}
 
 		if (guiOpen) {
 			Minecraft.getInstance().setScreen(null);  // ensures prevScreen is null, so we can close correctly
 		}
 
-		questScreen = new QuestScreen(this);
-		questGui = questScreen;
+		questScreen = new QuestScreen(this, persistedData);
 
-		if (hasPrev) {
-			questScreen.zoom = zoom;
-			questScreen.selectChapter(getChapter(selectedChapter));
-
-			for (long id : selectedQuests) {
-				if (get(id) instanceof Movable m) {
-					questScreen.selectedObjects.add(m);
-				}
-			}
-
-			if (guiOpen) {
-				questScreen.openGui();
-			}
+		if (guiOpen) {
+			questScreen.openGui();
 		}
-
-		questScreen.refreshWidgets();
-
-		if (hasPrev) {
-			questScreen.questPanel.scrollTo(scrollX, scrollY);
-			questScreen.questPanel.centerQuestX = scrollX;
-			questScreen.questPanel.centerQuestY = scrollY;
-		}
-
-		questScreen.chapterPanel.setExpanded(chaptersExpanded);
 	}
 
 	public static void openGui() {
@@ -143,14 +99,19 @@ public class ClientQuestFile extends QuestFile {
 		}
 	}
 
-	public void openQuestGui() {
+	private void openQuestGui() {
 		if (exists()) {
 			if (disableGui && !canEdit()) {
 				Minecraft.getInstance().getToasts().addToast(new CustomToast(Component.translatable("item.ftbquests.book.disabled"), Icons.BARRIER, Component.empty()));
 			} else if (self.isLocked()) {
 				Minecraft.getInstance().getToasts().addToast(new CustomToast(lockMessage.isEmpty() ? Component.literal("Quests locked!") : TextUtils.parseRawText(lockMessage), Icons.BARRIER, Component.empty()));
 			} else {
-				questGui.openGui();
+				if (self.getCanEdit()) {
+					StructureTask.maybeRequestStructureSync();
+				}
+				questScreen = new QuestScreen(this, persistedData);
+				questScreen.openGui();
+				questScreen.refreshWidgets();
 			}
 		}
 	}
@@ -174,5 +135,9 @@ public class ClientQuestFile extends QuestFile {
 	@Override
 	public TeamData getData(Entity player) {
 		return player == Minecraft.getInstance().player ? self : getData(Objects.requireNonNull(ClientTeamManager.INSTANCE.getKnownPlayer(player.getUUID()), "Non-null team required!").teamId);
+	}
+
+	public void setPersistedScreenInfo(QuestScreen.PersistedData persistedData) {
+		this.persistedData = persistedData;
 	}
 }

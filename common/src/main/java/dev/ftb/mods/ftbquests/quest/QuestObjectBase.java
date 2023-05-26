@@ -325,12 +325,16 @@ public abstract class QuestObjectBase {
 
 		group.savedCallback = accepted -> {
 			gui.run();
-			if (accepted) {
+			if (accepted && validateEditedConfig()) {
 				new EditObjectMessage(this).sendToServer();
 			}
 		};
 
 		new EditConfigScreen(group).openGui();
+	}
+
+	protected boolean validateEditedConfig() {
+		return true;
 	}
 
 	public int refreshJEI() {

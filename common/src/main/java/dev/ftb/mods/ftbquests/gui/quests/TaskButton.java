@@ -141,8 +141,10 @@ public class TaskButton extends Button {
 
 				}
 			}
-		} else {
-			//list.add(TextFormatting.DARK_GRAY + "[0%]");
+		}
+
+		if (task.isOptionalForProgression()) {
+			list.add(Component.translatable("ftbquests.quest.optional").withStyle(ChatFormatting.GRAY));
 		}
 
 		task.addMouseOverText(list, questScreen.file.self);

@@ -2,10 +2,7 @@ package dev.ftb.mods.ftbquests.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.architectury.event.EventResult;
-import dev.architectury.event.events.client.ClientGuiEvent;
-import dev.architectury.event.events.client.ClientLifecycleEvent;
-import dev.architectury.event.events.client.ClientTextureStitchEvent;
-import dev.architectury.event.events.client.ClientTickEvent;
+import dev.architectury.event.events.client.*;
 import dev.architectury.registry.client.rendering.BlockEntityRendererRegistry;
 import dev.architectury.registry.client.rendering.ColorHandlerRegistry;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
@@ -21,10 +18,12 @@ import dev.ftb.mods.ftbquests.net.SubmitTaskMessage;
 import dev.ftb.mods.ftbquests.quest.*;
 import dev.ftb.mods.ftbquests.quest.loot.LootCrate;
 import dev.ftb.mods.ftbquests.quest.task.ObservationTask;
+import dev.ftb.mods.ftbquests.quest.task.StructureTask;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.Component;
@@ -35,6 +34,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.phys.HitResult;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -71,6 +71,7 @@ public class FTBQuestsClientEventHandler {
 		ClientGuiEvent.RENDER_HUD.register(this::onScreenRender);
 		ClientTextureStitchEvent.PRE.register(this::onTextureStitchPre);
 		ClientTextureStitchEvent.POST.register(this::onTextureStitchPost);
+		ClientPlayerEvent.CLIENT_PLAYER_QUIT.register(this::onPlayerLogout);
 	}
 
 	private void onTextureStitchPre(TextureAtlas textureAtlas, Consumer<ResourceLocation> stitcher) {
@@ -126,7 +127,9 @@ public class FTBQuestsClientEventHandler {
 	}
 
 	private void onFileCacheClear(QuestFile file) {
-		observationTasks = null;
+		if (!file.isServerSide()) {
+			observationTasks = null;
+		}
 	}
 
 	private void onKeyEvent(Minecraft mc) {
@@ -182,6 +185,10 @@ public class FTBQuestsClientEventHandler {
 				currentlyObservingTicks = 0L;
 			}
 		}
+	}
+
+	private void onPlayerLogout(@Nullable LocalPlayer localPlayer) {
+		StructureTask.syncKnownStructureList(List.of());
 	}
 
 	private void collectPinnedQuests(ClientQuestFile file) {
