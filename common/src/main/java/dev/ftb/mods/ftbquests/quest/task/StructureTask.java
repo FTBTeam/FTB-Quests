@@ -2,13 +2,13 @@ package dev.ftb.mods.ftbquests.quest.task;
 
 import com.mojang.datafixers.util.Either;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
-import dev.ftb.mods.ftbquests.FTBQuests;
+import dev.ftb.mods.ftblibrary.config.NameMap;
+import dev.ftb.mods.ftbquests.net.SyncStructuresRequestMessage;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
-import net.minecraft.ResourceLocationException;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
@@ -21,17 +21,28 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.levelgen.structure.Structure;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author MaxNeedsSnacks
  */
 public class StructureTask extends BooleanTask {
 	private static final ResourceLocation DEFAULT_STRUCTURE = new ResourceLocation("minecraft:mineshaft");
 
+	private static final List<String> KNOWN_STRUCTURES = new ArrayList<>();
+
 	private Either<ResourceKey<Structure>, TagKey<Structure>> structure;
 
 	public StructureTask(Quest quest) {
 		super(quest);
 		structure = Either.left(ResourceKey.create(Registry.STRUCTURE_REGISTRY, DEFAULT_STRUCTURE));
+	}
+
+	public static void syncKnownStructureList(List<String> data) {
+		// receive structure data from server (structure registry doesn't exist on client)
+		KNOWN_STRUCTURES.clear();
+		KNOWN_STRUCTURES.addAll(data);
 	}
 
 	@Override
@@ -67,7 +78,12 @@ public class StructureTask extends BooleanTask {
 	@Environment(EnvType.CLIENT)
 	public void getConfig(ConfigGroup config) {
 		super.getConfig(config);
-		config.addString("structure", getStructure(), this::setStructure, "minecraft:mineshaft");
+		if (KNOWN_STRUCTURES.isEmpty()) {
+			// should not normally be the case, but as a defensive fallback...
+			config.addString("structure", getStructure(), this::setStructure, "minecraft:mineshaft");
+		} else {
+			config.addEnum("structure", getStructure(), this::setStructure, NameMap.of(DEFAULT_STRUCTURE.toString(), KNOWN_STRUCTURES).create());
+		}
 	}
 
 	@Override
@@ -83,44 +99,38 @@ public class StructureTask extends BooleanTask {
 	}
 
 	@Override
+	public boolean checkOnLogin() {
+		// checking on login can cause server lag: https://github.com/FTBTeam/FTB-Mods-Issues/issues/799
+		return false;
+	}
+
+	@Override
 	public boolean canSubmit(TeamData teamData, ServerPlayer player) {
+		if (player.isSpectator()) return false;
+
 		ServerLevel level = (ServerLevel) player.level;
 		return structure.map(
 				key -> level.structureManager().getStructureWithPieceAt(player.blockPosition(), key).isValid(),
-				tag -> {
-					var reg = level.registryAccess().registry(Registry.STRUCTURE_REGISTRY).orElseThrow();
-					for (var holder : reg.getTagOrEmpty(tag)) {
-						if (level.structureManager().getStructureWithPieceAt(player.blockPosition(), holder.value()).isValid()) {
-							return true;
-						}
-					}
-					return false;
-				}
+				tag -> level.structureManager().getStructureWithPieceAt(player.blockPosition(), tag).isValid()
 		);
 	}
 
 	private void setStructure(String resLoc) {
 		structure = resLoc.startsWith("#") ?
-				Either.right(TagKey.create(Registry.STRUCTURE_REGISTRY, safeResourceLocation(resLoc.substring(1)))) :
-				Either.left(ResourceKey.create(Registry.STRUCTURE_REGISTRY, safeResourceLocation(resLoc)));
+				Either.right(TagKey.create(Registry.STRUCTURE_REGISTRY, safeResourceLocation(resLoc.substring(1), DEFAULT_STRUCTURE))) :
+				Either.left(ResourceKey.create(Registry.STRUCTURE_REGISTRY, safeResourceLocation(resLoc, DEFAULT_STRUCTURE)));
 	}
 
 	private String getStructure() {
-		return structure.map(structure -> structure.location().toString(), tag -> "#" + tag.location().toString());
+		return structure.map(
+				key -> key.location().toString(),
+				tag -> "#" + tag.location()
+		);
 	}
 
-	private ResourceLocation safeResourceLocation(String str) {
-		try {
-			return new ResourceLocation(str);
-		} catch (ResourceLocationException e) {
-			if (getQuestFile().isServerSide()) {
-				FTBQuests.LOGGER.warn("Ignoring bad structure resource location '{}' for structure task {}", str, id);
-			} else {
-				FTBQuests.PROXY.getClientPlayer().displayClientMessage(
-						Component.literal("Ignoring bad structure resource location: " + str).withStyle(ChatFormatting.RED), false);
-			}
-			return DEFAULT_STRUCTURE;
+	public static void maybeRequestStructureSync() {
+		if (KNOWN_STRUCTURES.isEmpty()) {
+			new SyncStructuresRequestMessage().sendToServer();
 		}
 	}
-
 }

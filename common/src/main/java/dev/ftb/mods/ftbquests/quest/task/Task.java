@@ -8,6 +8,7 @@ import dev.ftb.mods.ftblibrary.util.ClientUtils;
 import dev.ftb.mods.ftblibrary.util.StringUtils;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftblibrary.util.WrappedIngredient;
+import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.events.CustomTaskEvent;
 import dev.ftb.mods.ftbquests.events.ObjectCompletedEvent;
 import dev.ftb.mods.ftbquests.events.ObjectStartedEvent;
@@ -21,8 +22,12 @@ import dev.ftb.mods.ftbquests.util.ProgressChange;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
+import net.minecraft.ResourceLocationException;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
@@ -32,9 +37,11 @@ import org.jetbrains.annotations.Nullable;
  */
 public abstract class Task extends QuestObject {
 	public final Quest quest;
+	private boolean optionalTask;
 
 	public Task(Quest q) {
 		quest = q;
+		optionalTask = false;
 	}
 
 	@Override
@@ -99,6 +106,11 @@ public abstract class Task extends QuestObject {
 		if (questCompleted) {
 			quest.onCompleted(data.withObject(quest));
 		}
+	}
+
+	@Override
+	public boolean isOptionalForProgression() {
+		return optionalTask;
 	}
 
 	public long getMaxProgress() {
@@ -272,5 +284,53 @@ public abstract class Task extends QuestObject {
 
 	public boolean checkOnLogin() {
 		return !consumesResources();
+	}
+
+	@Override
+	public void writeData(CompoundTag nbt) {
+		super.writeData(nbt);
+		if (optionalTask) nbt.putBoolean("optional_task", true);
+	}
+
+	@Override
+	public void readData(CompoundTag nbt) {
+		super.readData(nbt);
+
+		optionalTask = nbt.getBoolean("optional_task");
+	}
+
+	@Override
+	public void writeNetData(FriendlyByteBuf buffer) {
+		super.writeNetData(buffer);
+
+		buffer.writeBoolean(optionalTask);
+	}
+
+	@Override
+	public void readNetData(FriendlyByteBuf buffer) {
+		super.readNetData(buffer);
+
+		optionalTask = buffer.readBoolean();
+	}
+
+	@Override
+	public void getConfig(ConfigGroup config) {
+		super.getConfig(config);
+
+		config.addBool("optional_task", optionalTask, v -> optionalTask = v, false).setNameKey("ftbquests.quest.optional");
+	}
+
+	protected ResourceLocation safeResourceLocation(String str, ResourceLocation fallback) {
+		try {
+			return new ResourceLocation(str);
+		} catch (ResourceLocationException e) {
+			if (getQuestFile().isServerSide()) {
+				FTBQuests.LOGGER.warn("Ignoring bad resource location '{}' for task {}", str, id);
+			} else {
+				FTBQuests.PROXY.getClientPlayer().displayClientMessage(
+						Component.literal("Bad resource location: " + str).withStyle(ChatFormatting.RED), false);
+			}
+			return fallback;
+		}
 	}
 }
