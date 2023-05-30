@@ -9,12 +9,14 @@ import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.ChatFormatting;
 import net.minecraft.ResourceLocationException;
 import net.minecraft.commands.arguments.blocks.BlockInput;
 import net.minecraft.commands.arguments.blocks.BlockStateParser;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.TagKey;
@@ -91,6 +93,12 @@ public class ObservationTask extends BooleanTask {
 	}
 
 	@Override
+	public Component getAltTitle() {
+		return Component.translatable("ftbquests.task.ftbquests.observation").append(": ")
+				.append(Component.literal(toObserve).withStyle(ChatFormatting.DARK_GREEN));
+	}
+
+	@Override
 	@Environment(EnvType.CLIENT)
 	public void onButtonClicked(Button button, boolean canClick) {
 	}
@@ -164,7 +172,7 @@ public class ObservationTask extends BooleanTask {
 
 	private BlockInput tryMatchBlock(String string, boolean parseNbt) {
 		try {
-			BlockStateParser.BlockResult blockStateParser = (BlockStateParser.parseForBlock(Registry.BLOCK, new StringReader(string), false));
+			BlockStateParser.BlockResult blockStateParser = BlockStateParser.parseForBlock(Registry.BLOCK, new StringReader(string), false);
 			return new BlockInput(blockStateParser.blockState(), blockStateParser.properties().keySet(), parseNbt ? blockStateParser.nbt() : null);
 		} catch (Exception ex) {
 			return null;
