@@ -7,8 +7,10 @@ import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;
 import dev.ftb.mods.ftblibrary.math.Bits;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
+import dev.ftb.mods.ftblibrary.ui.BaseScreen;
 import dev.ftb.mods.ftblibrary.util.ClientUtils;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
+import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.gui.EditRewardTableScreen;
 import dev.ftb.mods.ftbquests.gui.RewardTablesScreen;
 import dev.ftb.mods.ftbquests.gui.quests.QuestScreen;
@@ -380,39 +382,37 @@ public final class RewardTable extends QuestObjectBase {
 	}
 
 	public void addMouseOverText(TooltipList list, boolean includeWeight, boolean includeEmpty) {
-		if (hideTooltip) {
-			return;
-		}
+		if (!hideTooltip) {
+			float totalWeight = getTotalWeight(includeEmpty);
 
-		float totalWeight = getTotalWeight(includeEmpty);
-
-		if (includeWeight && includeEmpty && emptyWeight > 0) {
-			list.add(Component.literal("").withStyle(ChatFormatting.GRAY).append("- ").append(Component.translatable("ftbquests.reward_table.nothing")).append(Component.literal(" [" + WeightedReward.chanceString(emptyWeight, totalWeight, true) + "]").withStyle(ChatFormatting.DARK_GRAY)));
-		}
-
-		List<WeightedReward> rewards1;
-
-		if (rewards.size() > 1) {
-			rewards1 = new ArrayList<>(rewards);
-			rewards1.sort(null);
-		} else {
-			rewards1 = rewards;
-		}
-
-		for (int i = 0; i < rewards1.size(); i++) {
-			if (i == 10) {
-				list.add(Component.literal("").withStyle(ChatFormatting.GRAY).append("- ").append(Component.translatable("ftbquests.reward_table.and_more", rewards1.size() - 10)));
-				return;
+			if (includeWeight && includeEmpty && emptyWeight > 0) {
+				addItem(list, Component.translatable("ftbquests.reward_table.nothing"), emptyWeight, totalWeight);
 			}
 
-			WeightedReward r = rewards1.get(i);
+			List<WeightedReward> sortedRewards = rewards.stream().sorted().toList();
 
-			if (includeWeight) {
-				list.add(Component.literal("").withStyle(ChatFormatting.GRAY).append("- ").append(r.reward.getTitle()).append(Component.literal(" [" + WeightedReward.chanceString(r.weight, totalWeight) + "]").withStyle(ChatFormatting.DARK_GRAY)));
-			} else {
-				list.add(Component.literal("").withStyle(ChatFormatting.GRAY).append("- ").append(r.reward.getTitle()));
+			BaseScreen gui = ClientUtils.getCurrentGuiAs(BaseScreen.class);
+			int maxLines = gui == null ? 12 : (gui.height - 20) / (gui.getTheme().getFontHeight() + 2);
+			int nRewards = sortedRewards.size();
+			int start = nRewards > maxLines ?
+					(int) ((FTBQuests.PROXY.getClientPlayer().getLevel().getGameTime() / 10) % nRewards) :
+					0;
+
+			int nLines = Math.min(maxLines, nRewards);
+			for (int idx = 0; idx < nLines; idx++) {
+				WeightedReward r = sortedRewards.get((start + idx) % nRewards);
+				if (includeWeight) {
+					addItem(list, r.reward.getTitle(), r.weight, totalWeight);
+				} else {
+					list.add(Component.literal("- ").withStyle(ChatFormatting.GRAY).append(r.reward.getTitle()));
+				}
 			}
 		}
+	}
+
+	private static void addItem(TooltipList list, Component text, float weight, float totalWeight) {
+		list.add(Component.literal("- ").withStyle(ChatFormatting.GRAY).append(text)
+				.append(Component.literal(" [" + WeightedReward.chanceString(weight, totalWeight) + "]").withStyle(ChatFormatting.DARK_GRAY)));
 	}
 
 	@Override
