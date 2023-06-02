@@ -222,6 +222,7 @@ public class MultilineTextEditorScreen extends BaseScreen {
 		} else {
 			textBox.insertText("&" + c.getChar());
 		}
+		textBox.setFocused(true);
 	}
 
 	private void resetFormatting() {
