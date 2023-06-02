@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Saved quest book SNBT data is now sorted by key name
   * This was done since default key sort order is unpredictable and led to seemingly random changes in key ordering, which caused annoying spurious updates for quest book data under version control (which it should be for any major project)
   * This change will cause a one-time large version control change, but eliminate future unpredictability
+* Very large reward table tooltips will now slowly scroll if too large to fit on screen (instead of cutting off at 10 entries)
+* Observation tasks now have a default "Observe: <block-or-entity>" title
 
 ### Fixed
 * Ensure that quest dependency loops are checked for when dependencies are edited via the large "Edit" screen
@@ -24,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Added boolean "Hide Quests until Dependencies Visible" setting to chapter properties (default false)
   * This is a default for the corresponding tri-state quest property "Hide Quest until Dependencies Visible"
 * Fixed a server->client desync causing weird behaviour with repeatable quests which have multiple rewards
+* Fixed a problem where the GUI could get stuck in an open-close loop with REI's recipe viewer (and possibly other mods which have a "back" behaviour)
 
 ## [1902.4.15]
 
