@@ -140,6 +140,7 @@ public class FTBQuestsClientEventHandler {
 
 	private EventResult onCustomClick(CustomClickEvent event) {
 		if (event.id().getNamespace().equals(FTBQuests.MOD_ID) && "open_gui".equals(event.id().getPath())) {
+			Minecraft.getInstance().setScreen(null); // to be safe & avoid potential gui open-close loops with other mods
 			ClientQuestFile.openGui();
 			return EventResult.interruptFalse();
 		}
@@ -255,7 +256,6 @@ public class FTBQuestsClientEventHandler {
 
 		ClientQuestFile file = ClientQuestFile.INSTANCE;
 
-//		GlStateManager._enableBlend();
 		Minecraft mc = Minecraft.getInstance();
 		int cy = mc.getWindow().getGuiScaledHeight() / 2;
 

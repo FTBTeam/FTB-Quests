@@ -69,22 +69,13 @@ public class ClientQuestFile extends QuestFile {
 	public void refreshGui() {
 		clearCachedData();
 
-		boolean guiOpen = false;
 		if (questScreen != null) {
 			persistedData = questScreen.getPersistedScreenData();
 			if (ClientUtils.getCurrentGuiAs(QuestScreen.class) != null) {
-				guiOpen = true;
+				Minecraft.getInstance().setScreen(null);  // ensures prevScreen is null, so we can close correctly
+				questScreen = new QuestScreen(this, persistedData);
+				questScreen.openGui();
 			}
-		}
-
-		if (guiOpen) {
-			Minecraft.getInstance().setScreen(null);  // ensures prevScreen is null, so we can close correctly
-		}
-
-		questScreen = new QuestScreen(this, persistedData);
-
-		if (guiOpen) {
-			questScreen.openGui();
 		}
 	}
 
