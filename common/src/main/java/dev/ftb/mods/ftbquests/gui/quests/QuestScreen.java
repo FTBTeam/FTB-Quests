@@ -58,8 +58,6 @@ public class QuestScreen extends BaseScreen {
 	private PersistedData pendingPersistedData;
 
 	public QuestScreen(ClientQuestFile q, @Nullable PersistedData persistedData) {
-		super();
-
 		file = q;
 		selectedObjects = new ArrayList<>();
 
