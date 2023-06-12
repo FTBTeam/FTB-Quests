@@ -7,7 +7,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -35,7 +34,8 @@ public class QuestBarrierBlock extends BaseEntityBlock {
 	protected QuestBarrierBlock() {
 		super(Properties.of(Material.BARRIER, MaterialColor.COLOR_LIGHT_BLUE)
 				.noOcclusion()
-				.isViewBlocking((a, b, c) -> false)
+				.isViewBlocking((blockState, blockGetter, blockPos) -> false)
+				.isSuffocating((blockState, blockGetter, blockPos) -> false)
 				.strength(-1, 6000000F)
 				.lightLevel(blockState -> 3)
 				.emissiveRendering((blockState, blockGetter, blockPos) -> true)
@@ -56,14 +56,10 @@ public class QuestBarrierBlock extends BaseEntityBlock {
 
 	@Override
 	public VoxelShape getCollisionShape(BlockState state, BlockGetter bg, BlockPos pos, CollisionContext ctx) {
-		Entity entity = EntityHooks.fromCollision(ctx);
-
-		if (entity instanceof Player) {
-			BlockEntity be = bg.getBlockEntity(pos);
-
-			if (be instanceof BarrierBlockEntity && ((BarrierBlockEntity) be).isOpen((Player) entity)) {
-				return Shapes.empty();
-			}
+		if (EntityHooks.fromCollision(ctx) instanceof Player player
+				&& bg.getBlockEntity(pos) instanceof BarrierBlockEntity barrier
+				&& barrier.isOpen(player)) {
+			return Shapes.empty();
 		}
 
 		return super.getCollisionShape(state, bg, pos, ctx);
@@ -96,10 +92,8 @@ public class QuestBarrierBlock extends BaseEntityBlock {
 		super.setPlacedBy(level, pos, state, entity, stack);
 
 		if (!level.isClientSide() && stack.hasCustomHoverName()) {
-			BlockEntity blockEntity = level.getBlockEntity(pos);
-
-			if (blockEntity instanceof BarrierBlockEntity) {
-				((BarrierBlockEntity) blockEntity).update(stack.getHoverName().getString());
+			if (level.getBlockEntity(pos) instanceof BarrierBlockEntity barrier) {
+				barrier.update(stack.getHoverName().getString());
 			}
 		}
 	}
