@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 * Open Quest & Stage Barrier Blocks no longer cause suffocation damage to players passing through them
+* Per-player data is now properly treated as such within the team data file, where previously it was all conflated into a single setting per team. This includes:
+  * Editing mode for each player
+  * Whether the chapter side panel is pinned open (via the pin on the chapter panel)
+  * Explicitly pinned quests (via the pin on the quest view panel)
+  * Quest auto-pinning (via the pin at the bottom right of the GUI)
+* Multiline quest editor: focus is now correctly returned to the editor after formatting code is inserted via the toolbar
+* Fixed a problem where the GUI could get stuck in an open-close loop with REI's recipe viewer (and possibly other mods which have a "back" behaviour)
 
 ## [1902.4.16]
 
@@ -31,7 +38,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Added boolean "Hide Quests until Dependencies Visible" setting to chapter properties (default false)
   * This is a default for the corresponding tri-state quest property "Hide Quest until Dependencies Visible"
 * Fixed a server->client desync causing weird behaviour with repeatable quests which have multiple rewards
-* Fixed a problem where the GUI could get stuck in an open-close loop with REI's recipe viewer (and possibly other mods which have a "back" behaviour)
 
 ## [1902.4.15]
 
