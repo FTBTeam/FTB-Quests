@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1902.4.18]
+
+### Fixed
+* Fixed issue with quest dependency validation (after adding a dependency via the quest edit screen) sometimes taking far, far too long
+  * Likely to be an issue with large complex quest trees with many interleaving dependencies
+
 ## [1902.4.17]
 
 ### Fixed
