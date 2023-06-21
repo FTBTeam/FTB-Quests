@@ -37,6 +37,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.Nullable;
@@ -346,23 +347,24 @@ public abstract class QuestFile extends QuestObject {
 
 	public QuestObjectBase create(QuestObjectType type, long parent, CompoundTag extra) {
 		switch (type) {
-			case CHAPTER:
+			case CHAPTER -> {
 				return new Chapter(this, getChapterGroup(extra.getLong("group")));
-			case QUEST: {
+			}
+			case QUEST -> {
 				Chapter chapter = getChapter(parent);
 				if (chapter != null) {
 					return new Quest(chapter);
 				}
 				throw new IllegalArgumentException("Parent chapter not found!");
 			}
-			case QUEST_LINK: {
+			case QUEST_LINK -> {
 				Chapter chapter = getChapter(parent);
 				if (chapter != null) {
 					return new QuestLink(chapter, 0L);
 				}
 				throw new IllegalArgumentException("Parent chapter not found!");
 			}
-			case TASK: {
+			case TASK -> {
 				Quest quest = getQuest(parent);
 				if (quest != null) {
 					Task task = TaskType.createTask(quest, extra.getString("type"));
@@ -373,9 +375,8 @@ public abstract class QuestFile extends QuestObject {
 				}
 				throw new IllegalArgumentException("Parent quest not found!");
 			}
-			case REWARD:
+			case REWARD -> {
 				Quest quest = getQuest(parent);
-
 				if (quest != null) {
 					Reward reward = RewardType.createReward(quest, extra.getString("type"));
 					if (reward != null) {
@@ -383,14 +384,15 @@ public abstract class QuestFile extends QuestObject {
 					}
 					throw new IllegalArgumentException("Unknown reward type!");
 				}
-
 				throw new IllegalArgumentException("Parent quest not found!");
-			case REWARD_TABLE:
+			}
+			case REWARD_TABLE -> {
 				return new RewardTable(this);
-			case CHAPTER_GROUP:
+			}
+			case CHAPTER_GROUP -> {
 				return new ChapterGroup(this);
-			default:
-				throw new IllegalArgumentException("Unknown type: " + type);
+			}
+			default -> throw new IllegalArgumentException("Unknown type: " + type);
 		}
 	}
 
@@ -1349,4 +1351,6 @@ public abstract class QuestFile extends QuestObject {
 	public ProgressionMode getProgressionMode() {
 		return progressionMode;
 	}
+
+	public abstract boolean isPlayerOnTeam(Player player, TeamData teamData);
 }

@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1902.4.17]
+
+### Fixed
+* Open Quest & Stage Barrier Blocks no longer cause suffocation damage to players passing through them
+* Per-player data is now properly treated as such within the team data file, where previously it was all conflated into a single setting per team. This includes:
+  * Editing mode for each player
+  * Whether the chapter side panel is pinned open (via the pin on the chapter panel)
+  * Explicitly pinned quests (via the pin on the quest view panel)
+  * Quest auto-pinning (via the pin at the bottom right of the GUI)
+* Multiline quest editor: focus is now correctly returned to the editor after formatting code is inserted via the toolbar
+* Fixed a problem where the GUI could get stuck in an open-close loop with REI's recipe viewer (and possibly other mods which have a "back" behaviour)
+
 ## [1902.4.16]
 
 ### Added
@@ -15,6 +27,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Saved quest book SNBT data is now sorted by key name
   * This was done since default key sort order is unpredictable and led to seemingly random changes in key ordering, which caused annoying spurious updates for quest book data under version control (which it should be for any major project)
   * This change will cause a one-time large version control change, but eliminate future unpredictability
+* Very large reward table tooltips will now slowly scroll if too large to fit on screen (instead of cutting off at 10 entries)
+* Observation tasks now have a default "Observe: <block-or-entity>" title
 
 ### Fixed
 * Ensure that quest dependency loops are checked for when dependencies are edited via the large "Edit" screen

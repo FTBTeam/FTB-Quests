@@ -3,6 +3,7 @@ package dev.ftb.mods.ftbquests.client;
 import dev.architectury.utils.Env;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.util.ClientUtils;
+import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.gui.CustomToast;
 import dev.ftb.mods.ftbquests.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.integration.FTBQuestsJEIHelper;
@@ -13,12 +14,13 @@ import dev.ftb.mods.ftbquests.quest.task.StructureTask;
 import dev.ftb.mods.ftbquests.quest.theme.QuestTheme;
 import dev.ftb.mods.ftbquests.util.TextUtils;
 import dev.ftb.mods.ftbteams.data.ClientTeamManager;
+import dev.ftb.mods.ftbteams.data.KnownClientPlayer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 
 import java.util.List;
 import java.util.Objects;
@@ -62,29 +64,20 @@ public class ClientQuestFile extends QuestFile {
 
 	@Override
 	public boolean canEdit() {
-		return self.getCanEdit();
+		return self.getCanEdit(Minecraft.getInstance().player);
 	}
 
 	@Override
 	public void refreshGui() {
 		clearCachedData();
 
-		boolean guiOpen = false;
 		if (questScreen != null) {
 			persistedData = questScreen.getPersistedScreenData();
 			if (ClientUtils.getCurrentGuiAs(QuestScreen.class) != null) {
-				guiOpen = true;
+				Minecraft.getInstance().setScreen(null);  // ensures prevScreen is null, so we can close correctly
+				questScreen = new QuestScreen(this, persistedData);
+				questScreen.openGui();
 			}
-		}
-
-		if (guiOpen) {
-			Minecraft.getInstance().setScreen(null);  // ensures prevScreen is null, so we can close correctly
-		}
-
-		questScreen = new QuestScreen(this, persistedData);
-
-		if (guiOpen) {
-			questScreen.openGui();
 		}
 	}
 
@@ -92,7 +85,7 @@ public class ClientQuestFile extends QuestFile {
 		if (INSTANCE != null) {
 			INSTANCE.openQuestGui();
 		} else {
-			LocalPlayer player = Minecraft.getInstance().player;
+			Player player = Minecraft.getInstance().player;
 			if (player != null) {
 				MISSING_DATA_ERR.forEach(s -> player.displayClientMessage(Component.literal(s).withStyle(ChatFormatting.RED), false));
 			}
@@ -106,7 +99,7 @@ public class ClientQuestFile extends QuestFile {
 			} else if (self.isLocked()) {
 				Minecraft.getInstance().getToasts().addToast(new CustomToast(lockMessage.isEmpty() ? Component.literal("Quests locked!") : TextUtils.parseRawText(lockMessage), Icons.BARRIER, Component.empty()));
 			} else {
-				if (self.getCanEdit()) {
+				if (canEdit()) {
 					StructureTask.maybeRequestStructureSync();
 				}
 				questScreen = new QuestScreen(this, persistedData);
@@ -139,5 +132,19 @@ public class ClientQuestFile extends QuestFile {
 
 	public void setPersistedScreenInfo(QuestScreen.PersistedData persistedData) {
 		this.persistedData = persistedData;
+	}
+
+	public static boolean canClientPlayerEdit() {
+		return exists() && INSTANCE.self.getCanEdit(FTBQuests.PROXY.getClientPlayer());
+	}
+
+	public static boolean isQuestPinned(long id) {
+		return exists() && INSTANCE.self.isQuestPinned(FTBQuests.PROXY.getClientPlayer(), id);
+	}
+
+	@Override
+	public boolean isPlayerOnTeam(Player player, TeamData teamData) {
+		KnownClientPlayer knownPlayer = ClientTeamManager.INSTANCE.getKnownPlayer(player.getUUID());
+		return knownPlayer != null && knownPlayer.teamId.equals(teamData.uuid);
 	}
 }

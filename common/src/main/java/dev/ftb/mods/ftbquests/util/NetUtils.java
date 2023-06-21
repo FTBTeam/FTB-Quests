@@ -17,8 +17,8 @@ import java.util.function.Function;
  */
 public class NetUtils {
 	public static boolean canEdit(NetworkManager.PacketContext context) {
-		Player playerEntity = context.getPlayer();
-		return playerEntity != null && ServerQuestFile.INSTANCE.getData(playerEntity).getCanEdit();
+		Player player = context.getPlayer();
+		return player != null && ServerQuestFile.INSTANCE.getData(player).getCanEdit(player);
 	}
 
 	public static <T> void write(FriendlyByteBuf buffer, Collection<T> list, BiConsumer<FriendlyByteBuf, T> writer) {

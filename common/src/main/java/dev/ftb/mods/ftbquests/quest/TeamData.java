@@ -1,6 +1,7 @@
 package dev.ftb.mods.ftbquests.quest;
 
 import com.mojang.util.UUIDTypeAdapter;
+import dev.ftb.mods.ftblibrary.snbt.SNBT;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
@@ -13,13 +14,11 @@ import dev.ftb.mods.ftbquests.util.FTBQuestsInventoryListener;
 import dev.ftb.mods.ftbquests.util.QuestKey;
 import dev.ftb.mods.ftbteams.FTBTeamsAPI;
 import dev.ftb.mods.ftbteams.data.Team;
-import it.unimi.dsi.fastutil.longs.Long2ByteOpenHashMap;
-import it.unimi.dsi.fastutil.longs.Long2LongMap;
-import it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap;
-import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
+import it.unimi.dsi.fastutil.longs.*;
 import it.unimi.dsi.fastutil.objects.Object2ByteOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -31,42 +30,32 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
+import java.nio.file.Path;
 import java.util.*;
-import java.util.stream.Collectors;
 
-/**
- * @author LatvianModder
- */
 public class TeamData {
-	public static int VERSION = 1;
+	public static final int VERSION = 1;
+	public static final int AUTO_PIN_ID = 1;
+
 	private static final byte BOOL_NONE = -1;
 	private static final byte BOOL_FALSE = 0;
 	private static final byte BOOL_TRUE = 1;
+
 	private static final Comparator<Long2LongMap.Entry> LONG2LONG_COMPARATOR = (e1, e2) -> Long.compareUnsigned(e1.getLongValue(), e2.getLongValue());
 	private static final Comparator<Object2LongMap.Entry<QuestKey>> OBJECT2LONG_COMPARATOR = (e1, e2) -> Long.compareUnsigned(e1.getLongValue(), e2.getLongValue());
-
-	public static TeamData get(Player player) {
-		return FTBQuests.PROXY.getQuestFile(player.getCommandSenderWorld().isClientSide()).getData(player);
-	}
 
 	public final UUID uuid;
 	public QuestFile file;
 	public String name;
-	public boolean shouldSave;
+	private boolean shouldSave;
 	private boolean locked;
-
 	private boolean rewardsBlocked;
 
 	private final Long2LongOpenHashMap taskProgress;
 	private final Object2LongOpenHashMap<QuestKey> claimedRewards;
 	private final Long2LongOpenHashMap started;
 	private final Long2LongOpenHashMap completed;
-
-	// TODO: Move these to player data
-	private boolean canEdit;
-	private boolean autoPin;
-	private boolean chapterPinned;
-	public final LongOpenHashSet pinnedQuests;
+	private final Object2ObjectOpenHashMap<UUID,PerPlayerData> perPlayerData;
 
 	private Long2ByteOpenHashMap areDependenciesCompleteCache;
 	private Object2ByteOpenHashMap<QuestKey> unclaimedRewardsCache;
@@ -84,14 +73,23 @@ public class TeamData {
 		started.defaultReturnValue(0L);
 		completed = new Long2LongOpenHashMap();
 		completed.defaultReturnValue(0L);
-
-		canEdit = false;
-		autoPin = false;
-		pinnedQuests = new LongOpenHashSet();
+		perPlayerData = new Object2ObjectOpenHashMap<>();
 	}
 
-	public void save() {
+	public static TeamData get(Player player) {
+		return FTBQuests.PROXY.getQuestFile(player.getCommandSenderWorld().isClientSide()).getData(player);
+	}
+
+	public void markDirty() {
 		shouldSave = true;
+	}
+
+	public void saveIfChanged() {
+		if (shouldSave && file instanceof ServerQuestFile sqf) {
+			Path path = sqf.server.getWorldPath(ServerQuestFile.FTBQUESTS_DATA);
+			SNBT.write(path.resolve(uuid + ".snbt"), serializeNBT());
+			shouldSave = false;
+		}
 	}
 
 	@Override
@@ -99,56 +97,52 @@ public class TeamData {
 		return name.isEmpty() ? uuid.toString() : name;
 	}
 
-	public long getProgress(long task) {
-		return taskProgress.get(task);
+	public long getProgress(long taskId) {
+		return taskProgress.get(taskId);
 	}
 
 	public long getProgress(Task task) {
 		return getProgress(task.id);
 	}
 
-	@Nullable
-	public Date getStartedTime(long id) {
-		long t = started.get(id);
-		return t == 0L ? null : new Date(t);
+	public Optional<Date> getStartedTime(long questId) {
+		long when = started.get(questId);
+		return when == 0L ? Optional.empty() : Optional.of(new Date(when));
 	}
 
-	public boolean setStarted(long id, @Nullable Date time) {
-		if (locked) {
-			return false;
-		}
+	public boolean setStarted(long questId, @Nullable Date time) {
+		if (!locked) {
+			if (time == null) {
+				if (started.remove(questId) >= 0L) {
+					clearCachedProgress();
+					markDirty();
 
-		if (time == null) {
-			if (started.remove(id) >= 0L) {
-				clearCachedProgress();
-				save();
+					if (file.isServerSide()) {
+						new ObjectStartedResetMessage(uuid, questId).sendTo(getOnlineMembers());
+					}
 
-				if (file.isServerSide()) {
-					new ObjectStartedResetMessage(uuid, id).sendTo(getOnlineMembers());
+					return true;
 				}
+			} else {
+				if (started.put(questId, time.getTime()) == 0L) {
+					clearCachedProgress();
+					markDirty();
 
-				return true;
-			}
-		} else {
-			if (started.put(id, time.getTime()) == 0L) {
-				clearCachedProgress();
-				save();
+					if (file.isServerSide()) {
+						new ObjectStartedMessage(uuid, questId).sendTo(getOnlineMembers());
+					}
 
-				if (file.isServerSide()) {
-					new ObjectStartedMessage(uuid, id).sendTo(getOnlineMembers());
+					return true;
 				}
-
-				return true;
 			}
-		}
 
+		}
 		return false;
 	}
 
-	@Nullable
-	public Date getCompletedTime(long id) {
-		long t = completed.get(id);
-		return t == 0L ? null : new Date(t);
+	public Optional<Date> getCompletedTime(long questId) {
+		long when = completed.get(questId);
+		return when == 0L ? Optional.empty() : Optional.of(new Date(when));
 	}
 
 	public boolean setCompleted(long id, @Nullable Date time) {
@@ -159,7 +153,7 @@ public class TeamData {
 		if (time == null) {
 			if (completed.remove(id) >= 0L) {
 				clearCachedProgress();
-				save();
+				markDirty();
 
 				if (file.isServerSide()) {
 					new ObjectCompletedResetMessage(uuid, id).sendTo(getOnlineMembers());
@@ -170,7 +164,7 @@ public class TeamData {
 		} else {
 			if (completed.put(id, time.getTime()) == 0L) {
 				clearCachedProgress();
-				save();
+				markDirty();
 
 				if (file.isServerSide()) {
 					new ObjectCompletedMessage(uuid, id).sendTo(getOnlineMembers());
@@ -183,11 +177,10 @@ public class TeamData {
 		return false;
 	}
 
-	@Nullable
-	public Date getRewardClaimTime(UUID player, Reward reward) {
+	public Optional<Date> getRewardClaimTime(UUID player, Reward reward) {
 		QuestKey key = QuestKey.of(reward.isTeamReward() ? Util.NIL_UUID : player, reward.id);
 		long t = claimedRewards.getLong(key);
-		return t == 0L ? null : new Date(t);
+		return t == 0L ? Optional.empty() : Optional.of(new Date(t));
 	}
 
 	public boolean areRewardsBlocked() {
@@ -202,7 +195,7 @@ public class TeamData {
 		if (rewardsBlocked != this.rewardsBlocked) {
 			this.rewardsBlocked = rewardsBlocked;
 			clearCachedProgress();
-			save();
+			markDirty();
 			if (file.isServerSide()) {
 				new SyncRewardBlockingMessage(uuid, rewardsBlocked).sendTo(getOnlineMembers());
 			}
@@ -212,7 +205,7 @@ public class TeamData {
 	}
 
 	public boolean isRewardClaimed(UUID player, Reward reward) {
-		return getRewardClaimTime(player, reward) != null;
+		return getRewardClaimTime(player, reward).isPresent();
 	}
 
 	public boolean hasUnclaimedRewards(UUID player, QuestObject object) {
@@ -224,7 +217,7 @@ public class TeamData {
 		QuestKey key = QuestKey.of(player, object.id);
 		byte b = unclaimedRewardsCache.getByte(key);
 
-		if (b == -1) {
+		if (b == BOOL_NONE) {
 			b = object.hasUnclaimedRewardsRaw(this, player) ? BOOL_TRUE : BOOL_FALSE;
 			unclaimedRewardsCache.put(key, b);
 		}
@@ -242,7 +235,7 @@ public class TeamData {
 		if (!claimedRewards.containsKey(key)) {
 			claimedRewards.put(key, date);
 			clearCachedProgress();
-			save();
+			markDirty();
 
 			if (file.isServerSide()) {
 				new ClaimRewardResponseMessage(uuid, player, reward.id).sendTo(getOnlineMembers());
@@ -259,14 +252,14 @@ public class TeamData {
 	public void deleteReward(Reward reward) {
 		if (!locked && claimedRewards.object2LongEntrySet().removeIf(e -> e.getKey().id == reward.id)) {
 			clearCachedProgress();
-			save();
+			markDirty();
 		}
 	}
 
 	public boolean resetReward(UUID player, Reward reward) {
 		if (!locked && claimedRewards.removeLong(QuestKey.of(reward.isTeamReward() ? Util.NIL_UUID : player, reward.id)) != 0L) {
 			clearCachedProgress();
-			save();
+			markDirty();
 
 			if (file.isServerSide()) {
 				new ResetRewardMessage(uuid, player, reward.id).sendTo(getOnlineMembers());
@@ -276,47 +269,6 @@ public class TeamData {
 		}
 
 		return false;
-	}
-
-	public boolean getCanEdit() {
-		return canEdit;
-	}
-
-	public boolean setCanEdit(boolean mode) {
-		if (canEdit != mode) {
-			canEdit = mode;
-			clearCachedProgress();
-			save();
-
-			if (file.isServerSide()) {
-				new SyncEditingModeMessage(uuid, canEdit).sendTo(getOnlineMembers());
-			}
-
-			return true;
-		}
-
-		return false;
-	}
-
-	public boolean getAutoPin() {
-		return isQuestPinned(1);
-	}
-
-	public void setAutoPin(boolean auto) {
-		if (autoPin != auto) {
-			autoPin = auto;
-			save();
-		}
-	}
-
-	public boolean isQuestPinned(long id) {
-		return pinnedQuests.contains(id);
-	}
-
-	public void setQuestPinned(long id, boolean pinned) {
-		if (pinned ? pinnedQuests.add(id) : pinnedQuests.remove(id)) {
-			save();
-		}
 	}
 
 	public void clearCachedProgress() {
@@ -329,14 +281,10 @@ public class TeamData {
 		nbt.putInt("version", VERSION);
 		nbt.putString("uuid", UUIDTypeAdapter.fromUUID(uuid));
 		nbt.putString("name", name);
-		nbt.putBoolean("can_edit", canEdit);
 		nbt.putBoolean("lock", locked);
-		nbt.putBoolean("auto_pin", autoPin);
-		nbt.putBoolean("chapter_pinned", chapterPinned);
 		nbt.putBoolean("rewards_blocked", rewardsBlocked);
 
 		SNBTCompoundTag taskProgressNBT = new SNBTCompoundTag();
-
 		for (Long2LongMap.Entry entry : taskProgress.long2LongEntrySet()) {
 			if (entry.getLongValue() <= Integer.MAX_VALUE) {
 				taskProgressNBT.putInt(QuestObjectBase.getCodeString(entry.getLongKey()), (int) entry.getLongValue());
@@ -344,42 +292,33 @@ public class TeamData {
 				taskProgressNBT.putLong(QuestObjectBase.getCodeString(entry.getLongKey()), entry.getLongValue());
 			}
 		}
-
 		nbt.put("task_progress", taskProgressNBT);
 
 		SNBTCompoundTag startedNBT = new SNBTCompoundTag();
-
-		for (Long2LongMap.Entry entry : started.long2LongEntrySet().stream().sorted(LONG2LONG_COMPARATOR).collect(Collectors.toList())) {
+		for (Long2LongMap.Entry entry : started.long2LongEntrySet().stream().sorted(LONG2LONG_COMPARATOR).toList()) {
 			startedNBT.putLong(QuestObjectBase.getCodeString(entry.getLongKey()), entry.getLongValue());
 		}
-
 		nbt.put("started", startedNBT);
 
 		SNBTCompoundTag completedNBT = new SNBTCompoundTag();
-
-		for (Long2LongMap.Entry entry : completed.long2LongEntrySet().stream().sorted(LONG2LONG_COMPARATOR).collect(Collectors.toList())) {
+		for (Long2LongMap.Entry entry : completed.long2LongEntrySet().stream().sorted(LONG2LONG_COMPARATOR).toList()) {
 			completedNBT.putLong(QuestObjectBase.getCodeString(entry.getLongKey()), entry.getLongValue());
 		}
-
 		nbt.put("completed", completedNBT);
 
 		SNBTCompoundTag claimedRewardsNBT = new SNBTCompoundTag();
-
-		for (Object2LongMap.Entry<QuestKey> entry : claimedRewards.object2LongEntrySet().stream().sorted(OBJECT2LONG_COMPARATOR).collect(Collectors.toList())) {
+		for (Object2LongMap.Entry<QuestKey> entry : claimedRewards.object2LongEntrySet().stream().sorted(OBJECT2LONG_COMPARATOR).toList()) {
 			claimedRewardsNBT.putLong(entry.getKey().toString(), entry.getLongValue());
 		}
-
 		nbt.put("claimed_rewards", claimedRewardsNBT);
 
-		long[] pinnedQuestsArray = pinnedQuests.toLongArray();
-		Arrays.sort(pinnedQuestsArray);
-		ListTag pinnedQuestsNBT = new ListTag();
-
-		for (long l : pinnedQuestsArray) {
-			pinnedQuestsNBT.add(StringTag.valueOf(QuestObjectBase.getCodeString(l)));
-		}
-
-		nbt.put("pinned_quests", pinnedQuestsNBT);
+		CompoundTag ppdTag = new CompoundTag();
+		perPlayerData.forEach((id, ppd) -> {
+			if (!ppd.hasDefaultValues()) {
+				ppdTag.put(UUIDTypeAdapter.fromUUID(id), ppd.writeNBT());
+			}
+		});
+		nbt.put("player_data", ppdTag);
 
 		return nbt;
 	}
@@ -388,48 +327,68 @@ public class TeamData {
 		int fileVersion = nbt.getInt("version");
 
 		if (fileVersion != VERSION) {
-			save();
+			markDirty();
 		}
 
 		name = nbt.getString("name");
-		canEdit = nbt.getBoolean("can_edit");
 		locked = nbt.getBoolean("lock");
-		autoPin = nbt.getBoolean("auto_pin");
-		chapterPinned = nbt.getBoolean("chapter_pinned");
 		rewardsBlocked = nbt.getBoolean("rewards_blocked");
 
 		taskProgress.clear();
 		claimedRewards.clear();
-		pinnedQuests.clear();
+		perPlayerData.clear();
 
 		CompoundTag claimedRewardsNBT = nbt.getCompound("claimed_rewards");
-
 		for (String s : claimedRewardsNBT.getAllKeys()) {
 			claimedRewards.put(QuestKey.of(s), claimedRewardsNBT.getLong(s));
 		}
 
-		ListTag pinnedQuestsNBT = nbt.getList("pinned_quests", Tag.TAG_STRING);
-
-		for (int i = 0; i < pinnedQuestsNBT.size(); i++) {
-			pinnedQuests.add(file.getID(pinnedQuestsNBT.getString(i)));
-		}
-
 		CompoundTag taskProgressNBT = nbt.getCompound("task_progress");
-
 		for (String s : taskProgressNBT.getAllKeys()) {
 			taskProgress.put(file.getID(s), taskProgressNBT.getLong(s));
 		}
 
 		CompoundTag startedNBT = nbt.getCompound("started");
-
 		for (String s : startedNBT.getAllKeys()) {
 			started.put(file.getID(s), startedNBT.getLong(s));
 		}
 
 		CompoundTag completedNBT = nbt.getCompound("completed");
-
 		for (String s : completedNBT.getAllKeys()) {
 			completed.put(file.getID(s), completedNBT.getLong(s));
+		}
+
+		if (!nbt.contains("player_data")) {
+			loadLegacyData(nbt);
+		} else {
+			CompoundTag ppdTag = nbt.getCompound("player_data");
+			for (String key : ppdTag.getAllKeys()) {
+				try {
+					UUID id = UUIDTypeAdapter.fromString(key);
+					perPlayerData.put(id, PerPlayerData.fromNBT(ppdTag.getCompound(key), file));
+				} catch (IllegalArgumentException e) {
+					FTBQuests.LOGGER.error("ignoring invalid player ID {} while loading per-player data for team {}", key, uuid);
+				}
+			}
+		}
+	}
+
+	// TODO remove in 1.20
+	private void loadLegacyData(SNBTCompoundTag nbt) {
+		FTBQuests.LOGGER.info("Converting per-team data to per-player data for {} ({}}", uuid, name);
+
+		boolean canEdit = nbt.getBoolean("can_edit");
+		boolean autoPin = nbt.getBoolean("auto_pin");
+		boolean chapterPinned = nbt.getBoolean("chapter_pinned");
+		ListTag pinnedQuestsNBT = nbt.getList("pinned_quests", Tag.TAG_STRING);
+		LongSet pinnedQuests = new LongOpenHashSet();
+		pinnedQuestsNBT.forEach(tag -> pinnedQuests.add(file.getID(tag.getAsString())));
+
+		if (canEdit || autoPin || chapterPinned || !pinnedQuests.isEmpty()) {
+			Team team = FTBTeamsAPI.getPlayerTeam(uuid);
+			if (team != null) {
+				team.getMembers().forEach(memberId -> perPlayerData.put(memberId, new PerPlayerData(canEdit, autoPin, chapterPinned, pinnedQuests)));
+			}
 		}
 	}
 
@@ -448,14 +407,14 @@ public class TeamData {
 
 		for (Long2LongOpenHashMap.Entry entry : started.long2LongEntrySet()) {
 			buffer.writeLong(entry.getLongKey());
-			buffer.writeVarLong(now - entry.getValue());
+			buffer.writeVarLong(now - entry.getLongValue());
 		}
 
 		buffer.writeVarInt(completed.size());
 
 		for (Long2LongOpenHashMap.Entry entry : completed.long2LongEntrySet()) {
 			buffer.writeLong(entry.getLongKey());
-			buffer.writeVarLong(now - entry.getValue());
+			buffer.writeVarLong(now - entry.getLongValue());
 		}
 
 		buffer.writeBoolean(locked);
@@ -463,21 +422,17 @@ public class TeamData {
 
 		if (self) {
 			buffer.writeVarInt(claimedRewards.size());
-
 			for (Object2LongMap.Entry<QuestKey> entry : claimedRewards.object2LongEntrySet()) {
 				entry.getKey().write(buffer);
 				buffer.writeVarLong(now - entry.getLongValue());
 			}
 
-			buffer.writeBoolean(canEdit);
-			buffer.writeBoolean(autoPin);
-			buffer.writeBoolean(chapterPinned);
+			buffer.writeVarInt(perPlayerData.size());
+			perPlayerData.forEach((id, ppd) -> {
+				buffer.writeUUID(id);
+				ppd.writeNet(buffer);
+			});
 
-			buffer.writeVarInt(pinnedQuests.size());
-
-			for (long reward : pinnedQuests) {
-				buffer.writeLong(reward);
-			}
 		}
 	}
 
@@ -486,7 +441,6 @@ public class TeamData {
 
 		taskProgress.clear();
 		int ts = buffer.readVarInt();
-
 		for (int i = 0; i < ts; i++) {
 			taskProgress.put(buffer.readLong(), buffer.readVarLong());
 		}
@@ -494,17 +448,13 @@ public class TeamData {
 		long now = System.currentTimeMillis();
 
 		started.clear();
-
 		int ss = buffer.readVarInt();
-
 		for (int i = 0; i < ss; i++) {
 			started.put(buffer.readLong(), now - buffer.readVarLong());
 		}
 
 		completed.clear();
-
 		int cs = buffer.readVarInt();
-
 		for (int i = 0; i < cs; i++) {
 			completed.put(buffer.readLong(), now - buffer.readVarLong());
 		}
@@ -513,9 +463,7 @@ public class TeamData {
 		rewardsBlocked = buffer.readBoolean();
 
 		claimedRewards.clear();
-		canEdit = false;
-		autoPin = false;
-		pinnedQuests.clear();
+		perPlayerData.clear();
 
 		if (self) {
 			int crs = buffer.readVarInt();
@@ -525,15 +473,12 @@ public class TeamData {
 				claimedRewards.put(key, now - buffer.readVarLong());
 			}
 
-			canEdit = buffer.readBoolean();
-			autoPin = buffer.readBoolean();
-			chapterPinned = buffer.readBoolean();
-
-			int pqs = buffer.readVarInt();
-
-			for (int i = 0; i < pqs; i++) {
-				pinnedQuests.add(buffer.readLong());
+			int ppdCount = buffer.readVarInt();
+			for (int i = 0; i < ppdCount; i++) {
+				UUID id = buffer.readUUID();
+				perPlayerData.put(id, PerPlayerData.fromNet(buffer));
 			}
+
 		}
 	}
 
@@ -650,7 +595,7 @@ public class TeamData {
 
 	public void resetProgress(Task task) {
 		if (taskProgress.remove(task.id) > 0L) {
-			save();
+			markDirty();
 		}
 	}
 
@@ -690,7 +635,7 @@ public class TeamData {
 				}
 			}
 
-			save();
+			markDirty();
 		}
 	}
 
@@ -711,7 +656,8 @@ public class TeamData {
 		}
 
 		if (isCompleted(task.quest)) {
-			setQuestPinned(task.quest.id, false);
+			perPlayerData.values().forEach(data -> data.pinnedQuests.remove(task.quest.id));
+			markDirty();
 			new TogglePinnedResponseMessage(task.quest.id, false).sendTo(onlineMembers);
 		}
 	}
@@ -728,7 +674,7 @@ public class TeamData {
 		if (locked != b) {
 			locked = b;
 			clearCachedProgress();
-			save();
+			markDirty();
 
 			if (file.isServerSide()) {
 				new SyncLockMessage(uuid, locked).sendTo(getOnlineMembers());
@@ -741,27 +687,13 @@ public class TeamData {
 	}
 
 	public void mergeData(TeamData from) {
-		for (Long2LongMap.Entry entry : from.taskProgress.long2LongEntrySet()) {
-			taskProgress.put(entry.getLongKey(), Long.max(entry.getLongValue(), taskProgress.getOrDefault(entry.getLongKey(), 0L)));
-		}
+		from.taskProgress.forEach((id, data) -> taskProgress.mergeLong(id, data, Long::max));
 
-		for (Object2LongMap.Entry<QuestKey> entry : from.claimedRewards.object2LongEntrySet()) {
-			if (!claimedRewards.containsKey(entry.getKey())) {
-				claimedRewards.put(entry.getKey(), entry.getLongValue());
-			}
-		}
+		from.started.forEach((id, data) -> started.mergeLong(id, data, (oldVal, newVal) -> oldVal));
+		from.completed.forEach((id, data) -> completed.mergeLong(id, data, (oldVal, newVal) -> oldVal));
+		from.claimedRewards.forEach((id, data) -> claimedRewards.mergeLong(id, data, (oldVal, newVal) -> oldVal));
 
-		for (Long2LongMap.Entry entry : from.started.long2LongEntrySet()) {
-			if (!started.containsKey(entry.getLongKey())) {
-				started.put(entry.getLongKey(), entry.getLongValue());
-			}
-		}
-
-		for (Long2LongMap.Entry entry : from.completed.long2LongEntrySet()) {
-			if (!completed.containsKey(entry.getLongKey())) {
-				completed.put(entry.getLongKey(), entry.getLongValue());
-			}
-		}
+		from.perPlayerData.forEach((id, data) -> perPlayerData.merge(id, data, (oldVal, newVal) -> oldVal));
 	}
 
 	public void copyData(TeamData from) {
@@ -770,18 +702,151 @@ public class TeamData {
 		claimedRewards.putAll(from.claimedRewards);
 		started.putAll(from.started);
 		completed.putAll(from.completed);
-		canEdit = from.canEdit;
-		autoPin = from.autoPin;
-		pinnedQuests.addAll(from.pinnedQuests);
+		perPlayerData.putAll(from.perPlayerData);
 		rewardsBlocked = from.rewardsBlocked;
 	}
 
-	public void setChapterPinned(boolean pinned) {
-		chapterPinned = pinned;
-		save();
+	/**
+	 * Get the per-player data for the given player, creating it if doesn't exist yet - but only if the player is a
+	 * member of this team!
+	 *
+	 * @param player the player
+	 * @return the player's per-player data, or {@code Optional.empty()} if the player isn't in this team
+	 */
+	private Optional<PerPlayerData> getOrCreatePlayerData(Player player) {
+		if (!perPlayerData.containsKey(player.getUUID()) && file.isPlayerOnTeam(player, this)) {
+			perPlayerData.put(player.getUUID(), new PerPlayerData());
+		}
+		return Optional.ofNullable(perPlayerData.get(player.getUUID()));
 	}
 
-	public boolean isChapterPinned() {
-		return chapterPinned;
+	public boolean getCanEdit(Player player) {
+		return getOrCreatePlayerData(player).map(d -> d.canEdit).orElse(false);
+	}
+
+	public boolean setCanEdit(Player player, boolean newCanEdit) {
+		return getOrCreatePlayerData(player).map(playerData -> {
+			if (playerData.canEdit != newCanEdit) {
+				playerData.canEdit = newCanEdit;
+				clearCachedProgress();
+				markDirty();
+				if (file.isServerSide() && player instanceof ServerPlayer sp) {
+					new SyncEditingModeMessage(uuid, newCanEdit).sendTo(sp);
+				}
+				return true;
+			}
+			return false;
+		}).orElse(false);
+	}
+
+	public boolean isQuestPinned(Player player, long id) {
+		return getOrCreatePlayerData(player).map(playerData -> playerData.pinnedQuests.contains(id)).orElse(false);
+	}
+
+	public void setQuestPinned(Player player, long id, boolean pinned) {
+		getOrCreatePlayerData(player).ifPresent(playerData -> {
+			if (pinned ? playerData.pinnedQuests.add(id) : playerData.pinnedQuests.remove(id)) {
+				markDirty();
+			}
+		});
+	}
+
+	public void setChapterPinned(Player player, boolean pinned) {
+		getOrCreatePlayerData(player).ifPresent(playerData -> {
+			if (playerData.chapterPinned != pinned) {
+				playerData.chapterPinned = pinned;
+				markDirty();
+			}
+		});
+	}
+
+	public boolean isChapterPinned(Player player) {
+		return getOrCreatePlayerData(player).map(playerData -> playerData.chapterPinned).orElse(false);
+	}
+
+	public LongSet getPinnedQuestIds(Player player) {
+		return getOrCreatePlayerData(player).map(playerData -> playerData.pinnedQuests).orElse(LongSet.of());
+	}
+
+	private static class PerPlayerData {
+		private boolean canEdit;
+		private boolean autoPin;
+		private boolean chapterPinned;
+		private final LongSet pinnedQuests;
+
+		PerPlayerData() {
+			canEdit = autoPin = chapterPinned = false;
+			pinnedQuests = new LongOpenHashSet();
+		}
+
+		PerPlayerData(boolean canEdit, boolean autoPin, boolean chapterPinned, LongSet pinnedQuests) {
+			this.canEdit = canEdit;
+			this.autoPin = autoPin;
+			this.chapterPinned = chapterPinned;
+			this.pinnedQuests = pinnedQuests;
+		}
+
+		public boolean hasDefaultValues() {
+			return !canEdit && !autoPin && !chapterPinned && pinnedQuests.isEmpty();
+		}
+
+		public static PerPlayerData fromNBT(CompoundTag nbt, QuestFile file) {
+			PerPlayerData ppd = new PerPlayerData();
+
+			ppd.canEdit = nbt.getBoolean("can_edit");
+			ppd.autoPin = nbt.getBoolean("auto_pin");
+			ppd.chapterPinned = nbt.getBoolean("chapter_pinned");
+			ListTag pinnedQuestsNBT = nbt.getList("pinned_quests", Tag.TAG_STRING);
+			for (int i = 0; i < pinnedQuestsNBT.size(); i++) {
+				ppd.pinnedQuests.add(file.getID(pinnedQuestsNBT.getString(i)));
+			}
+
+			return ppd;
+		}
+
+		public static PerPlayerData fromNet(FriendlyByteBuf buffer) {
+			PerPlayerData ppd = new PerPlayerData();
+
+			ppd.canEdit = buffer.readBoolean();
+			ppd.autoPin = buffer.readBoolean();
+			ppd.chapterPinned = buffer.readBoolean();
+			int pinnedCount = buffer.readVarInt();
+			for (int i = 0; i < pinnedCount; i++) {
+				ppd.pinnedQuests.add(buffer.readLong());
+			}
+
+			return ppd;
+		}
+
+		public CompoundTag writeNBT() {
+			CompoundTag nbt = new CompoundTag();
+
+			if (canEdit) nbt.putBoolean("can_edit", true);
+			if (autoPin) nbt.putBoolean("auto_pin", true);
+			if (chapterPinned) nbt.putBoolean("chapter_pinned", true);
+
+			if (!pinnedQuests.isEmpty()) {
+				long[] pinnedQuestsArray = pinnedQuests.toLongArray();
+				Arrays.sort(pinnedQuestsArray);
+				ListTag pinnedQuestsNBT = new ListTag();
+				for (long l : pinnedQuestsArray) {
+					pinnedQuestsNBT.add(StringTag.valueOf(QuestObjectBase.getCodeString(l)));
+				}
+				nbt.put("pinned_quests", pinnedQuestsNBT);
+			}
+
+			return nbt;
+		}
+
+		public void writeNet(FriendlyByteBuf buffer) {
+			buffer.writeBoolean(canEdit);
+			buffer.writeBoolean(autoPin);
+			buffer.writeBoolean(chapterPinned);
+
+			buffer.writeVarInt(pinnedQuests.size());
+			for (long reward : pinnedQuests) {
+				buffer.writeLong(reward);
+			}
+		}
 	}
 }

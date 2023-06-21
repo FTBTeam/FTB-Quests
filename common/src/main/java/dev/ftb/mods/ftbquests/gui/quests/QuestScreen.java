@@ -36,6 +36,7 @@ import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
+import java.text.DateFormat;
 import java.util.*;
 
 public class QuestScreen extends BaseScreen {
@@ -58,8 +59,6 @@ public class QuestScreen extends BaseScreen {
 	private PersistedData pendingPersistedData;
 
 	public QuestScreen(ClientQuestFile q, @Nullable PersistedData persistedData) {
-		super();
-
 		file = q;
 		selectedObjects = new ArrayList<>();
 
@@ -594,25 +593,22 @@ public class QuestScreen extends BaseScreen {
 			list.add(Component.literal(object.getCodeString()).withStyle(ChatFormatting.DARK_GRAY));
 
 			if (object instanceof QuestObject) {
-				Date s = file.self.getStartedTime(object.id);
-
-				if (s != null) {
-					list.add(Component.literal("Started: ").append(s.toLocaleString()).withStyle(ChatFormatting.DARK_GRAY));
-				}
-
-				Date c = file.self.getCompletedTime(object.id);
-
-				if (c != null) {
-					list.add(Component.literal("Completed: ").append(c.toLocaleString()).withStyle(ChatFormatting.DARK_GRAY));
-				}
-			} else if (object instanceof Reward) {
-				Date c = file.self.getRewardClaimTime(Minecraft.getInstance().player.getUUID(), (Reward) object);
-
-				if (c != null) {
-					list.add(Component.literal("Claimed: ").append(c.toLocaleString()).withStyle(ChatFormatting.DARK_GRAY));
-				}
+				file.self.getStartedTime(object.id)
+						.ifPresent(date -> list.add(formatDate("Started", date)));
+				file.self.getCompletedTime(object.id)
+						.ifPresent(date -> list.add(formatDate("Completed", date)));
+			} else if (object instanceof Reward r) {
+				file.self.getRewardClaimTime(FTBQuests.PROXY.getClientPlayer().getUUID(), r)
+						.ifPresent(date -> list.add(formatDate("Claimed", date)));
 			}
 		}
+	}
+
+	private static Component formatDate(String prefix, Date date) {
+		return Component.literal(prefix + ": ")
+				.append(Component.literal(DateFormat.getDateTimeInstance().format(date))
+						.withStyle(ChatFormatting.DARK_GRAY)
+				);
 	}
 
 	public Collection<Quest> getSelectedQuests() {

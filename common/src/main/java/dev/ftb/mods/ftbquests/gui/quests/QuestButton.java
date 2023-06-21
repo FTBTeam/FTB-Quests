@@ -23,6 +23,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentContents;
+import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -348,12 +349,13 @@ public class QuestButton extends Button implements QuestPositionableButton {
 		boolean isCompleted = teamData.isCompleted(quest);
 		boolean isStarted = isCompleted || teamData.isStarted(quest);
 		boolean canStart = isCompleted || isStarted || teamData.areDependenciesComplete(quest);
+		Player player = Minecraft.getInstance().player;
 
 		if (canStart) {
 			if (isCompleted) {
-				if (teamData.hasUnclaimedRewards(Minecraft.getInstance().player.getUUID(), quest)) {
+				if (teamData.hasUnclaimedRewards(player.getUUID(), quest)) {
 					questIcon = ThemeProperties.ALERT_ICON.get(quest);
-				} else if (teamData.isQuestPinned(quest.id)) {
+				} else if (teamData.isQuestPinned(player, quest.id)) {
 					questIcon = ThemeProperties.PIN_ICON_ON.get();
 				} else {
 					questIcon = ThemeProperties.CHECK_ICON.get(quest);
@@ -372,7 +374,7 @@ public class QuestButton extends Button implements QuestPositionableButton {
 			outlineColor = ThemeProperties.QUEST_LOCKED_COLOR.get(quest);
 		}
 
-		if (questIcon == Color4I.EMPTY && teamData.isQuestPinned(quest.id)) {
+		if (questIcon == Color4I.EMPTY && teamData.isQuestPinned(player, quest.id)) {
 			questIcon = ThemeProperties.PIN_ICON_ON.get();
 		}
 		if (questScreen.file.canEdit() && !quest.isVisible(teamData)) {

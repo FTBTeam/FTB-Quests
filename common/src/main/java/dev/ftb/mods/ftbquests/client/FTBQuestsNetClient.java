@@ -199,7 +199,7 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon {
 
 	@Override
 	public void syncEditingMode(UUID teamId, boolean editingMode) {
-		if (ClientQuestFile.INSTANCE.getData(teamId).setCanEdit(editingMode)) {
+		if (ClientQuestFile.INSTANCE.getData(teamId).setCanEdit(Minecraft.getInstance().player, editingMode)) {
 			ClientQuestFile.INSTANCE.refreshGui();
 		}
 	}
@@ -207,7 +207,7 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon {
 	@Override
 	public void togglePinned(long id, boolean pinned) {
 		TeamData data = FTBQuests.PROXY.getClientPlayerData();
-		data.setQuestPinned(id, pinned);
+		data.setQuestPinned(Minecraft.getInstance().player, id, pinned);
 
 		ClientQuestFile.INSTANCE.questScreen.otherButtonsBottomPanel.refreshWidgets();
 
@@ -337,13 +337,13 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon {
 
 	@Override
 	public void toggleChapterPinned(boolean pinned) {
-		ClientQuestFile.INSTANCE.self.setChapterPinned(pinned);
+		ClientQuestFile.INSTANCE.self.setChapterPinned(FTBQuests.PROXY.getClientPlayer(), pinned);
 		ClientQuestFile.INSTANCE.questScreen.chapterPanel.refreshWidgets();
 	}
 
 	@Override
-	public void syncRewardBlocking(UUID uuid, boolean rewardsBlocked) {
-		if (ClientQuestFile.INSTANCE.getData(uuid).setRewardsBlocked(rewardsBlocked)) {
+	public void syncRewardBlocking(UUID teamId, boolean rewardsBlocked) {
+		if (ClientQuestFile.INSTANCE.getData(teamId).setRewardsBlocked(rewardsBlocked)) {
 			ClientQuestFile.INSTANCE.refreshGui();
 		}
 	}
