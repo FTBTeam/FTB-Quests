@@ -205,7 +205,7 @@ public class TaskScreenBlockEntity extends BlockEntity implements ITaskScreen {
     }
 
     private boolean isSuitableTask(TeamData data, QuestObjectBase o) {
-        return o instanceof Task t && (data.getCanEdit() || data.canStartTasks(t.quest)) && t.consumesResources();
+        return o instanceof Task t && (data.getCanEdit(FTBQuests.PROXY.getClientPlayer()) || data.canStartTasks(t.quest)) && t.consumesResources();
     }
 
     public float[] getFakeTextureUV() {

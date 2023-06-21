@@ -229,10 +229,10 @@ public class FTBQuestsCommands {
 		TeamData data = ServerQuestFile.INSTANCE.getData(player);
 
 		if (canEdit == null) {
-			canEdit = !data.getCanEdit();
+			canEdit = !data.getCanEdit(player);
 		}
 
-		data.setCanEdit(canEdit);
+		data.setCanEdit(player, canEdit);
 
 		if (canEdit) {
 			source.sendSuccess(Component.translatable("commands.ftbquests.editing_mode.enabled", player.getDisplayName()), true);
@@ -377,11 +377,11 @@ public class FTBQuestsCommands {
 	}
 
 	private static final Set<UUID> warnedPlayers = new HashSet<>();
-	private static int doReload(CommandSourceStack source) throws CommandSyntaxException {
+	private static int doReload(CommandSourceStack source) {
 		ServerQuestFile instance = ServerQuestFile.INSTANCE;
 		ServerPlayer sender = source.getPlayer();
 
-		if (sender != null && !instance.getData(sender).getCanEdit()) {
+		if (sender != null && !instance.getData(sender).getCanEdit(sender)) {
 			source.sendFailure(Component.translatable("commands.ftbquests.command.error.not_editing"));
 			return 1;
 		}

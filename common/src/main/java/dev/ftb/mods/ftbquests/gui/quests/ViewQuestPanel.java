@@ -18,6 +18,7 @@ import dev.ftb.mods.ftblibrary.ui.misc.CompactGridLayout;
 import dev.ftb.mods.ftblibrary.util.ImageComponent;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.FTBQuests;
+import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.gui.ImageComponentWidget;
 import dev.ftb.mods.ftbquests.gui.MultilineTextEditorScreen;
 import dev.ftb.mods.ftbquests.net.EditObjectMessage;
@@ -1007,8 +1008,8 @@ public class ViewQuestPanel extends Panel {
 	 */
 	private class PinViewQuestButton extends AbstractPanelButton {
 		private PinViewQuestButton() {
-			super(Component.translatable(questScreen.file.self.pinnedQuests.contains(quest.id) ? "ftbquests.gui.unpin" : "ftbquests.gui.pin"),
-					questScreen.file.self.pinnedQuests.contains(quest.id) ? ThemeProperties.PIN_ICON_ON.get() : ThemeProperties.PIN_ICON_OFF.get());
+			super(Component.translatable(ClientQuestFile.isQuestPinned(quest.id) ? "ftbquests.gui.unpin" : "ftbquests.gui.pin"),
+					ClientQuestFile.isQuestPinned(quest.id) ? ThemeProperties.PIN_ICON_ON.get() : ThemeProperties.PIN_ICON_OFF.get());
 		}
 
 		@Override
