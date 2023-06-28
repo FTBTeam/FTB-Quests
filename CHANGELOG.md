@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 * Fixed issue with quest dependency validation (after adding a dependency via the quest edit screen) sometimes taking far, far too long
   * Likely to be an issue with large complex quest trees with many interleaving dependencies
+* Fixed the mouse pointer warping to the screen center when opening FTB Quests from the sidebar button
 
 ## [1902.4.17]
 
