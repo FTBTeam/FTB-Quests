@@ -54,7 +54,6 @@ public class QuestScreen extends BaseScreen {
 	public final ViewQuestPanel viewQuestPanel;
 	public boolean movingObjects = false;
 	public int zoom = 16;
-	public long lastShiftPress = 0L;
 	public static boolean grid = false;
 	private PersistedData pendingPersistedData;
 
@@ -345,46 +344,38 @@ public class QuestScreen extends BaseScreen {
 		}
 
 		if (key.modifiers.control() && selectedChapter != null && file.canEdit()) {
-			double step;
-
-			if (key.modifiers.shift()) {
-				step = 0.1D;
-			} else {
-				step = 0.5D;
-			}
+			double step = key.modifiers.shift() ? 0.1D : 0.5D;
 
 			switch (key.keyCode) {
-				case GLFW.GLFW_KEY_A:
+				case GLFW.GLFW_KEY_A -> {
 					selectedObjects.addAll(selectedChapter.quests);
 					selectedObjects.addAll(selectedChapter.questLinks);
 					return true;
-				case GLFW.GLFW_KEY_D:
+				}
+				case GLFW.GLFW_KEY_D -> {
 					selectedObjects.clear();
 					return true;
-				case GLFW.GLFW_KEY_DOWN:
+				}
+				case GLFW.GLFW_KEY_DOWN -> {
 					return moveSelectedQuests(0D, step);
-				case GLFW.GLFW_KEY_UP:
+				}
+				case GLFW.GLFW_KEY_UP -> {
 					return moveSelectedQuests(0D, -step);
-				case GLFW.GLFW_KEY_LEFT:
+				}
+				case GLFW.GLFW_KEY_LEFT -> {
 					return moveSelectedQuests(-step, 0D);
-				case GLFW.GLFW_KEY_RIGHT:
+				}
+				case GLFW.GLFW_KEY_RIGHT -> {
 					return moveSelectedQuests(step, 0D);
-				case GLFW.GLFW_KEY_0:
+				}
+				case GLFW.GLFW_KEY_0 -> {
 					addZoom((16 - zoom) / 4.0);
 					return true;
-				case GLFW.GLFW_KEY_F:
+				}
+				case GLFW.GLFW_KEY_F -> {
 					openQuestSelectionGUI();
 					return true;
-			}
-		}
-
-		if (key.keyCode == GLFW.GLFW_KEY_LEFT_SHIFT || key.keyCode == GLFW.GLFW_KEY_RIGHT_SHIFT) {
-			long now = System.currentTimeMillis();
-			if (now - lastShiftPress <= 400L) {
-				openQuestSelectionGUI();
-				lastShiftPress = 0L;
-			} else {
-				lastShiftPress = now;
+				}
 			}
 		}
 
