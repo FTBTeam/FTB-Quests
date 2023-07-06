@@ -10,6 +10,7 @@ import dev.ftb.mods.ftblibrary.math.MathUtils;
 import dev.ftb.mods.ftblibrary.ui.*;
 import dev.ftb.mods.ftblibrary.ui.input.Key;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
+import dev.ftb.mods.ftblibrary.util.ClientUtils;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
@@ -535,8 +536,8 @@ public class QuestScreen extends BaseScreen {
 		if (object instanceof Chapter chapter) {
 			selectChapter(chapter);
 		} else if (object instanceof Quest quest) {
-			viewQuestPanel.hidePanel = false;
 			selectChapter(quest.chapter);
+			viewQuestPanel.hidePanel = false;
 			viewQuest(quest);
 			if (focus) {
 				questPanel.scrollTo(quest.x + 0.5D, quest.y + 0.5D);
@@ -550,12 +551,17 @@ public class QuestScreen extends BaseScreen {
 				}
 			});
 		} else if (object instanceof Task task) {
-			viewQuestPanel.hidePanel = false;
 			selectChapter(task.quest.chapter);
+			viewQuestPanel.hidePanel = false;
 			viewQuest(task.quest);
 		}
 
-		openGui();
+		// in case we've just opened the gui; we don't want switch away from the view object on the next tick
+		pendingPersistedData = null;
+
+		if (ClientUtils.getCurrentGuiAs(QuestScreen.class) != this) {
+			openGui();
+		}
 	}
 
 	@Override

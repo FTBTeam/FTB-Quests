@@ -35,8 +35,8 @@ import java.util.Optional;
  * @author LatvianModder
  */
 public class QuestButton extends Button implements QuestPositionableButton {
-	public QuestScreen questScreen;
-	public Quest quest;
+	public final QuestScreen questScreen;
+	public final Quest quest;
 	private Collection<QuestButton> dependencies = null;
 
 	public QuestButton(Panel panel, Quest q) {
