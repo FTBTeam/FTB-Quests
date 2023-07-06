@@ -8,6 +8,7 @@ import dev.ftb.mods.ftbquests.gui.CustomToast;
 import dev.ftb.mods.ftbquests.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.integration.FTBQuestsJEIHelper;
 import dev.ftb.mods.ftbquests.net.DeleteObjectMessage;
+import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestFile;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.task.StructureTask;
@@ -81,18 +82,25 @@ public class ClientQuestFile extends QuestFile {
 		}
 	}
 
-	public static void openGui() {
+	public static QuestScreen openGui() {
 		if (INSTANCE != null) {
-			INSTANCE.openQuestGui();
+			return INSTANCE.openQuestGui();
 		} else {
 			Player player = Minecraft.getInstance().player;
 			if (player != null) {
 				MISSING_DATA_ERR.forEach(s -> player.displayClientMessage(Component.literal(s).withStyle(ChatFormatting.RED), false));
 			}
+			return null;
 		}
 	}
 
-	private void openQuestGui() {
+	public static QuestScreen openGui(Quest quest, boolean focused) {
+		QuestScreen screen = openGui();
+		if (screen != null) screen.open(quest, focused);
+		return screen;
+	}
+
+	private QuestScreen openQuestGui() {
 		if (exists()) {
 			if (disableGui && !canEdit()) {
 				Minecraft.getInstance().getToasts().addToast(new CustomToast(Component.translatable("item.ftbquests.book.disabled"), Icons.BARRIER, Component.empty()));
@@ -105,8 +113,10 @@ public class ClientQuestFile extends QuestFile {
 				questScreen = new QuestScreen(this, persistedData);
 				questScreen.openGui();
 				questScreen.refreshWidgets();
+				return questScreen;
 			}
 		}
+		return null;
 	}
 
 	@Override

@@ -132,6 +132,6 @@ public class WrappedQuest {
 	}
 
     void openQuestGui() {
-        ClientQuestFile.INSTANCE.questScreen.open(quest, true);
+        ClientQuestFile.openGui(quest, true);
     }
 }
