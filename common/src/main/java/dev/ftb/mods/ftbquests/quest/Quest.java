@@ -25,6 +25,8 @@ import dev.ftb.mods.ftbquests.util.ConfigQuestObject;
 import dev.ftb.mods.ftbquests.util.NetUtils;
 import dev.ftb.mods.ftbquests.util.ProgressChange;
 import dev.ftb.mods.ftbquests.util.TextUtils;
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
+import it.unimi.dsi.fastutil.longs.LongSet;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
@@ -744,16 +746,22 @@ public final class Quest extends QuestObject implements Movable {
 
 	@Override
 	protected void verifyDependenciesInternal(long original, int depth) {
-		if (depth >= 1000) {
-			throw new DependencyDepthException(this);
-		}
+		_verify(original, new LongOpenHashSet(), 0);
+	}
 
-		for (QuestObject dependency : dependencies) {
-			if (dependency.id == original) {
-				throw new DependencyLoopException(this);
+	private void _verify(long original, LongSet visited, int depth) {
+		if (visited.add(id)) {
+			if (depth >= 1000) {
+				throw new DependencyDepthException(this);
 			}
-
-			dependency.verifyDependenciesInternal(original, depth + 1);
+			for (QuestObject dependency : dependencies) {
+				if (dependency.id == original) {
+					throw new DependencyLoopException(this);
+				}
+				if (dependency instanceof Quest q) {
+					q._verify(original, visited, depth + 1);
+				}
+			}
 		}
 	}
 

@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1902.4.18]
+
+### Changed
+* Removed the feature whereby double-tapping Shift opens the quest search GUI
+  * This caused problems for player whose keyboards send multiple keyup/keydown events for modifier keys like Shift
+  * Use Ctrl+F to open the search GUI instead
+
+### Fixed
+* Fixed issue with quest dependency validation (after adding a dependency via the quest edit screen) sometimes taking far, far too long
+  * Likely to be an issue with large complex quest trees with many interleaving dependencies
+* Fixed the mouse pointer warping to the screen center when opening FTB Quests from the sidebar button
+* Fixed a client crash when opening a quest via JEI integration
+
 ## [1902.4.17]
 
 ### Fixed

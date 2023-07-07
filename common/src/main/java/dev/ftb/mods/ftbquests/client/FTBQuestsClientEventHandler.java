@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbquests.client;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.architectury.event.EventResult;
 import dev.architectury.event.events.client.*;
@@ -36,6 +37,7 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.phys.HitResult;
 import org.jetbrains.annotations.Nullable;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -142,8 +144,13 @@ public class FTBQuestsClientEventHandler {
 
 	private EventResult onCustomClick(CustomClickEvent event) {
 		if (event.id().getNamespace().equals(FTBQuests.MOD_ID) && "open_gui".equals(event.id().getPath())) {
-			Minecraft.getInstance().setScreen(null); // to be safe & avoid potential gui open-close loops with other mods
+			// to be safe, we close the current screen before opening Quests, to avoid potential gui open-close loops with other mods
+			// also save the cursor position and restore it after, since closing the screen will reset to the centre
+			double mx = Minecraft.getInstance().mouseHandler.xpos();
+			double my = Minecraft.getInstance().mouseHandler.ypos();
+			Minecraft.getInstance().setScreen(null);
 			ClientQuestFile.openGui();
+			InputConstants.grabOrReleaseMouse(Minecraft.getInstance().getWindow().getWindow(), GLFW.GLFW_CURSOR_NORMAL, mx, my);
 			return EventResult.interruptFalse();
 		}
 
