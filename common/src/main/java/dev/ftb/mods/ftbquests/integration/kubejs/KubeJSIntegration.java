@@ -48,19 +48,11 @@ public class KubeJSIntegration extends KubeJSPlugin {
 	}
 
 	public static EventResult onCustomTask(CustomTaskEvent event) {
-		if (FTBQuestsKubeJSEvents.CUSTOM_TASK.post(event.getTask(), new CustomTaskEventJS(event))) {
-			return EventResult.interruptTrue();
-		}
-
-		return EventResult.pass();
+		return FTBQuestsKubeJSEvents.CUSTOM_TASK.post(ScriptType.SERVER, event.getTask(), new CustomTaskEventJS(event)).arch();
 	}
 
 	public static EventResult onCustomReward(CustomRewardEvent event) {
-		if (FTBQuestsKubeJSEvents.CUSTOM_REWARD.post(event.getReward(), new CustomRewardEventJS(event))) {
-			return EventResult.interruptTrue();
-		}
-
-		return EventResult.pass();
+		return FTBQuestsKubeJSEvents.CUSTOM_REWARD.post(ScriptType.SERVER, event.getReward(), new CustomRewardEventJS(event)).arch();
 	}
 
 	public static EventResult onCompleted(ObjectCompletedEvent<?> event) {
@@ -68,9 +60,9 @@ public class KubeJSIntegration extends KubeJSPlugin {
 			var kjsEvent = new QuestObjectCompletedEventJS(event);
 			var object = event.getObject();
 
-			FTBQuestsKubeJSEvents.OBJECT_COMPLETED.post(event.getObject(), kjsEvent);
+			FTBQuestsKubeJSEvents.OBJECT_COMPLETED.post(ScriptType.SERVER, event.getObject(), kjsEvent);
 			for (String tag : object.getTags()) {
-				FTBQuestsKubeJSEvents.OBJECT_COMPLETED.post('#' + tag, kjsEvent);
+				FTBQuestsKubeJSEvents.OBJECT_COMPLETED.post(ScriptType.SERVER, '#' + tag, kjsEvent);
 			}
 		}
 
@@ -82,9 +74,9 @@ public class KubeJSIntegration extends KubeJSPlugin {
 			var kjsEvent = new QuestObjectStartedEventJS(event);
 			var object = event.getObject();
 
-			FTBQuestsKubeJSEvents.OBJECT_STARTED.post(event.getObject(), kjsEvent);
+			FTBQuestsKubeJSEvents.OBJECT_STARTED.post(ScriptType.SERVER, event.getObject(), kjsEvent);
 			for (String tag : object.getTags()) {
-				FTBQuestsKubeJSEvents.OBJECT_STARTED.post('#' + tag, kjsEvent);
+				FTBQuestsKubeJSEvents.OBJECT_STARTED.post(ScriptType.SERVER, '#' + tag, kjsEvent);
 			}
 		}
 
