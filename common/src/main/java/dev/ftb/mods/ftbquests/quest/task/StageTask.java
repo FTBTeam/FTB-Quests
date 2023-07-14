@@ -2,7 +2,7 @@ package dev.ftb.mods.ftbquests.quest.task;
 
 import dev.architectury.hooks.level.entity.PlayerHooks;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
-import dev.ftb.mods.ftbquests.integration.StageHelper;
+import dev.ftb.mods.ftblibrary.integration.stages.StageHelper;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.TeamData;
@@ -74,7 +74,7 @@ public class StageTask extends BooleanTask {
 
 	@Override
 	public boolean canSubmit(TeamData teamData, ServerPlayer player) {
-		return StageHelper.INSTANCE.get().has(player, stage);
+		return StageHelper.INSTANCE.getProvider().has(player, stage);
 	}
 
 	public static void checkStages(ServerPlayer player) {

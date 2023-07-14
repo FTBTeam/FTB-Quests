@@ -6,7 +6,6 @@ import dev.ftb.mods.ftblibrary.util.ClientUtils;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.gui.CustomToast;
 import dev.ftb.mods.ftbquests.gui.quests.QuestScreen;
-import dev.ftb.mods.ftbquests.integration.FTBQuestsJEIHelper;
 import dev.ftb.mods.ftbquests.net.DeleteObjectMessage;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestFile;
@@ -60,7 +59,7 @@ public class ClientQuestFile extends QuestFile {
 		INSTANCE = this;
 
 		refreshGui();
-		FTBQuestsJEIHelper.refresh(this);
+		FTBQuests.getRecipeModHelper().refreshRecipes(this);
 	}
 
 	@Override

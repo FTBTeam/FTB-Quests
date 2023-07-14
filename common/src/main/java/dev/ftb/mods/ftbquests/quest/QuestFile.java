@@ -9,7 +9,7 @@ import dev.ftb.mods.ftblibrary.snbt.SNBT;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.events.*;
-import dev.ftb.mods.ftbquests.integration.FTBQuestsJEIHelper;
+import dev.ftb.mods.ftbquests.integration.RecipeModHelper;
 import dev.ftb.mods.ftbquests.item.MissingItem;
 import dev.ftb.mods.ftbquests.net.DisplayCompletionToastMessage;
 import dev.ftb.mods.ftbquests.net.FTBQuestsNetHandler;
@@ -752,6 +752,10 @@ public abstract class QuestFile extends QuestObject {
 			}
 		}
 
+		if (!isServerSide()) {
+			FTBQuests.getRecipeModHelper().refreshAll(RecipeModHelper.Components.LOOT_CRATES);
+		}
+
 		FTBQuests.LOGGER.debug("Updated " + LootCrate.LOOT_CRATES.size() + " loot crates");
 	}
 
@@ -1213,9 +1217,9 @@ public abstract class QuestFile extends QuestObject {
 		return null;
 	}
 
-	@Override
-	public final int refreshJEI() {
-		return FTBQuestsJEIHelper.QUESTS | FTBQuestsJEIHelper.LOOTCRATES;
+    @Override
+	public Set<RecipeModHelper.Components> componentsToRefresh() {
+		return EnumSet.allOf(RecipeModHelper.Components.class);
 	}
 
 	public final Collection<QuestObjectBase> getAllObjects() {

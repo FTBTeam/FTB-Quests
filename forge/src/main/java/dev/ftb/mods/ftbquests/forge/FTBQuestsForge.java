@@ -1,13 +1,11 @@
 package dev.ftb.mods.ftbquests.forge;
 
-import dev.architectury.platform.Platform;
 import dev.architectury.platform.forge.EventBuses;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.FTBQuestsTags;
 import dev.ftb.mods.ftbquests.command.ChangeProgressArgument;
 import dev.ftb.mods.ftbquests.command.QuestObjectArgument;
-import dev.ftb.mods.ftbquests.integration.stages.GameStagesEventHandler;
 import dev.ftb.mods.ftbquests.item.FTBQuestsItems;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.loot.LootCrate;
@@ -50,12 +48,6 @@ public class FTBQuestsForge {
 		FTBQuests quests = new FTBQuests();
 
 		ForgeEnergyTask.TYPE = TaskTypes.register(new ResourceLocation(FTBQuests.MOD_ID, "forge_energy"), ForgeEnergyTask::new, () -> Icon.getIcon(ForgeEnergyTask.EMPTY_TEXTURE.toString()).combineWith(Icon.getIcon(ForgeEnergyTask.FULL_TEXTURE.toString())));
-
-		// KubeJS handles gamestage functionality when it's installed
-		// but this covers the case where Gamestages is present but KubeJS is not
-		if (Platform.isModLoaded("gamestages") && !Platform.isModLoaded("kubejs")) {
-			GameStagesEventHandler.register();
-		}
 
 		FMLJavaModLoadingContext.get().getModEventBus().<FMLCommonSetupEvent>addListener(event -> quests.setup());
 

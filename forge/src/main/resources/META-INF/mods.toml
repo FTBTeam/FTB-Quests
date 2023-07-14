@@ -1,5 +1,5 @@
 modLoader = "javafml"
-loaderVersion = "[39,)"
+loaderVersion = "[43,)"
 issueTrackerURL = "https://github.com/FTBTeam/FTB-Mods-Issues/issues"
 license = "All Rights Reserved"
 
@@ -7,7 +7,7 @@ license = "All Rights Reserved"
 modId = "ftbquests"
 version = "${version}"
 displayName = "FTB Quests"
-authors = "LatvianModder"
+authors = "FTB Team"
 description = '''
 Lets you easily create and play with quests
 '''
@@ -29,7 +29,7 @@ side = "BOTH"
 [[dependencies.ftbquests]]
 modId = "ftblibrary"
 mandatory = true
-versionRange = "[1902.3.19-build.214,)"
+versionRange = "[1902.4.0,)"
 ordering = "AFTER"
 side = "BOTH"
 
@@ -44,19 +44,5 @@ side = "BOTH"
 modId = "itemfilters"
 mandatory = true
 versionRange = "[1902.2.9-build.46,)"
-ordering = "AFTER"
-side = "BOTH"
-
-[[dependencies.ftbquests]]
-modId = "kubejs"
-mandatory = false
-versionRange = "[1902.6.0-build.107,)"
-ordering = "AFTER"
-side = "BOTH"
-
-[[dependencies.ftbquests]]
-modId = "jei"
-mandatory = false
-versionRange = "[9.7.0,)"
 ordering = "AFTER"
 side = "BOTH"
