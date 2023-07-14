@@ -10,6 +10,7 @@ import dev.ftb.mods.ftblibrary.ui.input.Key;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.ui.misc.ButtonListBaseScreen;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
+import dev.ftb.mods.ftblibrary.util.client.PositionedIngredient;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
 import dev.ftb.mods.ftbquests.quest.loot.WeightedReward;
@@ -18,10 +19,10 @@ import dev.ftb.mods.ftbquests.quest.reward.RewardTypes;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author LatvianModder
@@ -36,9 +37,8 @@ public class EditRewardTableScreen extends ButtonListBaseScreen {
 		@Override
 		public void onClicked(MouseButton button) {
 			playClickSound();
-			ConfigGroup group = new ConfigGroup(FTBQuests.MOD_ID);
-			rewardTable.getConfig(rewardTable.createSubGroup(group));
-			group.savedCallback = accepted -> run();
+			ConfigGroup group = new ConfigGroup(FTBQuests.MOD_ID, accepted -> run());
+			rewardTable.fillConfigGroup(rewardTable.createSubGroup(group));
 			new EditConfigScreen(group).openGui();
 		}
 	}
@@ -108,9 +108,8 @@ public class EditRewardTableScreen extends ButtonListBaseScreen {
 			playClickSound();
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
 			contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.edit"), Icons.SETTINGS, () -> {
-				ConfigGroup group = new ConfigGroup(FTBQuests.MOD_ID);
-				reward.reward.getConfig(reward.reward.createSubGroup(group));
-				group.savedCallback = accepted -> run();
+				ConfigGroup group = new ConfigGroup(FTBQuests.MOD_ID, accepted -> run());
+				reward.reward.fillConfigGroup(reward.reward.createSubGroup(group));
 				new EditConfigScreen(group).openGui();
 			}));
 
@@ -118,9 +117,8 @@ public class EditRewardTableScreen extends ButtonListBaseScreen {
 				DoubleConfig c = new DoubleConfig(0D, Double.POSITIVE_INFINITY);
 				EditConfigFromStringScreen.open(c, (double) reward.weight, 1D, accepted -> {
 					if (accepted) {
-						reward.weight = c.value.floatValue();
+						reward.weight = c.getValue().floatValue();
 					}
-
 					run();
 				});
 			}));
@@ -128,14 +126,13 @@ public class EditRewardTableScreen extends ButtonListBaseScreen {
 			contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.delete"), Icons.REMOVE, () -> {
 				rewardTable.rewards.remove(reward);
 				EditRewardTableScreen.this.refreshWidgets();
-			}).setYesNo(Component.translatable("delete_item", reward.reward.getTitle())));
+			}).setYesNoText(Component.translatable("delete_item", reward.reward.getTitle())));
 			EditRewardTableScreen.this.openContextMenu(contextMenu);
 		}
 
 		@Override
-		@Nullable
-		public Object getIngredientUnderMouse() {
-			return reward.reward.getIngredient();
+		public Optional<PositionedIngredient> getIngredientUnderMouse() {
+			return PositionedIngredient.of(reward.reward.getIngredient(this), this);
 		}
 	}
 

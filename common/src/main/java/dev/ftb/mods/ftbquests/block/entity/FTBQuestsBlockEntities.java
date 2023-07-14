@@ -6,7 +6,7 @@ import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.block.FTBQuestsBlocks;
 import dev.ftb.mods.ftbquests.block.LootCrateOpenerBlock;
 import dev.ftb.mods.ftbquests.block.TaskScreenBlock;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -19,7 +19,7 @@ import java.util.function.Supplier;
  * @author LatvianModder
  */
 public class FTBQuestsBlockEntities {
-	public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES = DeferredRegister.create(FTBQuests.MOD_ID, Registry.BLOCK_ENTITY_TYPE_REGISTRY);
+	public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES = DeferredRegister.create(FTBQuests.MOD_ID, Registries.BLOCK_ENTITY_TYPE);
 
 	public static <T extends BlockEntity> RegistrySupplier<BlockEntityType<T>> register(String id, BlockEntityType.BlockEntitySupplier<T> factory, Collection<RegistrySupplier<Block>> blocks) {
 		return BLOCK_ENTITIES.register(id, () -> BlockEntityType.Builder.of(factory, blocks.stream().map(Supplier::get).toArray(Block[]::new)).build(null));

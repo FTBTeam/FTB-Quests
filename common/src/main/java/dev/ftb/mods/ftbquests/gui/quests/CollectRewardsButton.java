@@ -1,6 +1,5 @@
 package dev.ftb.mods.ftbquests.gui.quests;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import dev.ftb.mods.ftblibrary.ui.GuiHelper;
 import dev.ftb.mods.ftblibrary.ui.Panel;
 import dev.ftb.mods.ftblibrary.ui.Theme;
@@ -10,6 +9,7 @@ import dev.ftb.mods.ftbquests.gui.RewardNotificationsScreen;
 import dev.ftb.mods.ftbquests.net.ClaimAllRewardsMessage;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 
 /**
@@ -36,16 +36,16 @@ public class CollectRewardsButton extends TabButton {
 	}
 
 	@Override
-	public void draw(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
-		super.draw(matrixStack, theme, x, y, w, h);
+	public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+		super.draw(graphics, theme, x, y, w, h);
 
 		if (questScreen.file.self.hasUnclaimedRewards(Minecraft.getInstance().player.getUUID(), questScreen.file)) {
 			GuiHelper.setupDrawing();
 			int s = w / 2;//(int) (treeGui.getZoom() / 2 * quest.size);
-			matrixStack.pushPose();
-			matrixStack.translate(x + w - s, y, 200);
-			ThemeProperties.ALERT_ICON.get(questScreen.file).draw(matrixStack, 0, 0, s, s);
-			matrixStack.popPose();
+			graphics.pose().pushPose();
+			graphics.pose().translate(x + w - s, y, 200);
+			ThemeProperties.ALERT_ICON.get(questScreen.file).draw(graphics, 0, 0, s, s);
+			graphics.pose().popPose();
 		}
 	}
 }

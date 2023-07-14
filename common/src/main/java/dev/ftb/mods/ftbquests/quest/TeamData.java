@@ -12,8 +12,8 @@ import dev.ftb.mods.ftbquests.quest.reward.RewardClaimType;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.util.FTBQuestsInventoryListener;
 import dev.ftb.mods.ftbquests.util.QuestKey;
-import dev.ftb.mods.ftbteams.FTBTeamsAPI;
-import dev.ftb.mods.ftbteams.data.Team;
+import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
+import dev.ftb.mods.ftbteams.api.Team;
 import it.unimi.dsi.fastutil.longs.*;
 import it.unimi.dsi.fastutil.objects.Object2ByteOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
@@ -358,36 +358,13 @@ public class TeamData {
 			completed.put(file.getID(s), completedNBT.getLong(s));
 		}
 
-		if (!nbt.contains("player_data")) {
-			loadLegacyData(nbt);
-		} else {
-			CompoundTag ppdTag = nbt.getCompound("player_data");
-			for (String key : ppdTag.getAllKeys()) {
-				try {
-					UUID id = UUIDTypeAdapter.fromString(key);
-					perPlayerData.put(id, PerPlayerData.fromNBT(ppdTag.getCompound(key), file));
-				} catch (IllegalArgumentException e) {
-					FTBQuests.LOGGER.error("ignoring invalid player ID {} while loading per-player data for team {}", key, uuid);
-				}
-			}
-		}
-	}
-
-	// TODO remove in 1.20
-	private void loadLegacyData(SNBTCompoundTag nbt) {
-		FTBQuests.LOGGER.info("Converting per-team data to per-player data for {} ({}}", uuid, name);
-
-		boolean canEdit = nbt.getBoolean("can_edit");
-		boolean autoPin = nbt.getBoolean("auto_pin");
-		boolean chapterPinned = nbt.getBoolean("chapter_pinned");
-		ListTag pinnedQuestsNBT = nbt.getList("pinned_quests", Tag.TAG_STRING);
-		LongSet pinnedQuests = new LongOpenHashSet();
-		pinnedQuestsNBT.forEach(tag -> pinnedQuests.add(file.getID(tag.getAsString())));
-
-		if (canEdit || autoPin || chapterPinned || !pinnedQuests.isEmpty()) {
-			Team team = FTBTeamsAPI.getPlayerTeam(uuid);
-			if (team != null) {
-				team.getMembers().forEach(memberId -> perPlayerData.put(memberId, new PerPlayerData(canEdit, autoPin, chapterPinned, pinnedQuests)));
+		CompoundTag ppdTag = nbt.getCompound("player_data");
+		for (String key : ppdTag.getAllKeys()) {
+			try {
+				UUID id = UUIDTypeAdapter.fromString(key);
+				perPlayerData.put(id, PerPlayerData.fromNBT(ppdTag.getCompound(key), file));
+			} catch (IllegalArgumentException e) {
+				FTBQuests.LOGGER.error("ignoring invalid player ID {} while loading per-player data for team {}", key, uuid);
 			}
 		}
 	}
@@ -550,9 +527,10 @@ public class TeamData {
 		}
 	}
 
-	public List<ServerPlayer> getOnlineMembers() {
-		Team team = FTBTeamsAPI.getManager().getTeamByID(uuid);
-		return team == null ? Collections.emptyList() : team.getOnlineMembers();
+	public Collection<ServerPlayer> getOnlineMembers() {
+		return FTBTeamsAPI.api().getManager().getTeamByID(uuid)
+				.map(Team::getOnlineMembers)
+				.orElse(List.of());
 	}
 
 	public void checkAutoCompletion(Quest quest) {
@@ -560,7 +538,7 @@ public class TeamData {
 			return;
 		}
 
-		List<ServerPlayer> online = null;
+		Collection<ServerPlayer> online = null;
 
 		for (Reward reward : quest.rewards) {
 			RewardAutoClaim auto = reward.getAutoClaimType();
@@ -621,7 +599,7 @@ public class TeamData {
 
 			if (file.isServerSide()) {
 				Date now = new Date();
-				List<ServerPlayer> onlineMembers = getOnlineMembers();
+				Collection<ServerPlayer> onlineMembers = getOnlineMembers();
 
 				new UpdateTaskProgressMessage(this, task.id, progress).sendTo(onlineMembers);
 
@@ -640,13 +618,13 @@ public class TeamData {
 	}
 
 	public void markTaskCompleted(Task task) {
-		List<ServerPlayer> onlineMembers = getOnlineMembers();
-		List<ServerPlayer> notifiedPlayers;
+		Collection<ServerPlayer> onlineMembers = getOnlineMembers();
+		Collection<ServerPlayer> notifiedPlayers;
 
 		if (!task.quest.chapter.alwaysInvisible && QuestObjectBase.sendNotifications.get(true)) {
 			notifiedPlayers = onlineMembers;
 		} else {
-			notifiedPlayers = Collections.emptyList();
+			notifiedPlayers = List.of();
 		}
 
 		task.onCompleted(new QuestProgressEventData<>(new Date(), this, task, onlineMembers, notifiedPlayers));

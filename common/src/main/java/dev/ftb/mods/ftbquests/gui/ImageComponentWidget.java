@@ -1,13 +1,13 @@
 package dev.ftb.mods.ftbquests.gui;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import dev.ftb.mods.ftblibrary.ui.Panel;
 import dev.ftb.mods.ftblibrary.ui.Theme;
 import dev.ftb.mods.ftblibrary.ui.Widget;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
-import dev.ftb.mods.ftblibrary.util.ImageComponent;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
+import dev.ftb.mods.ftblibrary.util.client.ImageComponent;
 import dev.ftb.mods.ftbquests.gui.quests.ViewQuestPanel;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 
@@ -32,8 +32,8 @@ public class ImageComponentWidget extends Widget {
 		}
 	}
 
-	public void draw(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
-		component.image.draw(matrixStack, x, y, w, h);
+	public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+		component.image.draw(graphics, x, y, w, h);
 	}
 
 	@Override

@@ -4,10 +4,12 @@ import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.Tristate;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.ui.Button;
-import dev.ftb.mods.ftblibrary.util.ClientUtils;
+import dev.ftb.mods.ftblibrary.ui.Widget;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
+import dev.ftb.mods.ftblibrary.util.client.ClientUtils;
+import dev.ftb.mods.ftblibrary.util.client.PositionedIngredient;
 import dev.ftb.mods.ftbquests.gui.quests.QuestScreen;
-import dev.ftb.mods.ftbquests.integration.FTBQuestsJEIHelper;
+import dev.ftb.mods.ftbquests.integration.RecipeModHelper;
 import dev.ftb.mods.ftbquests.net.ClaimRewardMessage;
 import dev.ftb.mods.ftbquests.quest.*;
 import dev.ftb.mods.ftbquests.util.ProgressChange;
@@ -22,8 +24,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * @author LatvianModder
@@ -112,8 +113,8 @@ public abstract class Reward extends QuestObjectBase {
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public void getConfig(ConfigGroup config) {
-		super.getConfig(config);
+	public void fillConfigGroup(ConfigGroup config) {
+		super.fillConfigGroup(config);
 		config.addEnum("team", team, v -> team = v, Tristate.NAME_MAP).setNameKey("ftbquests.reward.team_reward");
 		config.addEnum("autoclaim", autoclaim, v -> autoclaim = v, RewardAutoClaim.NAME_MAP).setNameKey("ftbquests.reward.autoclaim");
 		config.addBool("exclude_from_claim_all", getExcludeFromClaimAll(), v -> excludeFromClaimAll = v, excludeFromClaimAll)
@@ -234,7 +235,9 @@ public abstract class Reward extends QuestObjectBase {
 	@Override
 	public final ConfigGroup createSubGroup(ConfigGroup group) {
 		RewardType type = getType();
-		return group.getGroup(getObjectType().id).getGroup(type.id.getNamespace()).getGroup(type.id.getPath());
+		return group.getOrCreateSubgroup(getObjectType().id)
+				.getOrCreateSubgroup(type.id.getNamespace())
+				.getOrCreateSubgroup(type.id.getPath());
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -262,15 +265,14 @@ public abstract class Reward extends QuestObjectBase {
 		return false;
 	}
 
-	@Nullable
 	@Environment(EnvType.CLIENT)
-	public Object getIngredient() {
-		return getIcon().getIngredient();
+	public Optional<PositionedIngredient> getIngredient(Widget widget) {
+		return PositionedIngredient.of(getIcon().getIngredient(), widget);
 	}
 
 	@Override
-	public final int refreshJEI() {
-		return FTBQuestsJEIHelper.QUESTS;
+	public Set<RecipeModHelper.Components> componentsToRefresh() {
+		return EnumSet.of(RecipeModHelper.Components.QUESTS);
 	}
 
 	@Environment(EnvType.CLIENT)

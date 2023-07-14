@@ -83,7 +83,7 @@ public final class LootCrate {
 		config.addString("color", color.toString(), v -> color = Color4I.fromString(v), "#FFFFFF", Pattern.compile("^#[a-fA-F0-9]{6}$"));
 		config.addBool("glow", glow, v -> glow = v, true);
 
-		ConfigGroup d = config.getGroup("drops");
+		ConfigGroup d = config.getOrCreateSubgroup("drops");
 		d.setNameKey("ftbquests.loot.entitydrops");
 		d.addInt("passive", drops.passive, v -> drops.passive = v, 0, 0, Integer.MAX_VALUE).setNameKey("ftbquests.loot.entitytype.passive");
 		d.addInt("monster", drops.monster, v -> drops.monster = v, 0, 0, Integer.MAX_VALUE).setNameKey("ftbquests.loot.entitytype.monster");

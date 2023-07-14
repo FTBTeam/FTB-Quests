@@ -17,10 +17,10 @@ import dev.ftb.mods.ftbquests.quest.task.KillTask;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.util.DeferredInventoryDetection;
 import dev.ftb.mods.ftbquests.util.FTBQuestsInventoryListener;
-import dev.ftb.mods.ftbteams.event.PlayerChangedTeamEvent;
-import dev.ftb.mods.ftbteams.event.PlayerLoggedInAfterTeamEvent;
-import dev.ftb.mods.ftbteams.event.TeamCreatedEvent;
-import dev.ftb.mods.ftbteams.event.TeamEvent;
+import dev.ftb.mods.ftbteams.api.event.PlayerChangedTeamEvent;
+import dev.ftb.mods.ftbteams.api.event.PlayerLoggedInAfterTeamEvent;
+import dev.ftb.mods.ftbteams.api.event.TeamCreatedEvent;
+import dev.ftb.mods.ftbteams.api.event.TeamEvent;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -154,7 +154,7 @@ public class FTBQuestsEventHandler {
 				return;
 			}
 
-			long t = player.level.getGameTime();
+			long t = player.level().getGameTime();
 
 			file.withPlayerContext((ServerPlayer) player, () -> {
 				for (Task task : autoSubmitTasks) {
@@ -189,7 +189,7 @@ public class FTBQuestsEventHandler {
 			return;
 		}
 
-		if (PlayerHooks.isFake(newPlayer) || newPlayer.level.getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY)) {
+		if (PlayerHooks.isFake(newPlayer) || newPlayer.level().getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY)) {
 			return;
 		}
 

@@ -24,9 +24,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nonnull;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -40,7 +40,8 @@ public class TaskScreenBlockEntity extends BlockEntity implements ITaskScreen {
     private boolean textShadow = false;
     private ItemStack inputModeIcon = ItemStack.EMPTY;
     private ItemStack skin = ItemStack.EMPTY;
-    @Nonnull private UUID teamId = Util.NIL_UUID;
+    @NotNull
+    private UUID teamId = Util.NIL_UUID;
     public float[] fakeTextureUV = null;  // null for unknown, 0-array for no texture, 4-array for a texture
     private TeamData cachedTeamData = null;
 
@@ -109,13 +110,13 @@ public class TaskScreenBlockEntity extends BlockEntity implements ITaskScreen {
         this.textShadow = textShadow;
     }
 
-    public void setTeamId(@Nonnull UUID teamId) {
+    public void setTeamId(@NotNull UUID teamId) {
         this.teamId = teamId;
         cachedTeamData = null;
     }
 
     @Override
-    @Nonnull
+    @NotNull
     public UUID getTeamId() {
         return teamId;
     }
@@ -183,23 +184,21 @@ public class TaskScreenBlockEntity extends BlockEntity implements ITaskScreen {
         if (textShadow) compoundTag.putBoolean("TextShadow", true);
     }
 
-    public ConfigGroup getConfigGroup(TeamData data) {
-        ConfigGroup cg0 = new ConfigGroup("task_screen");
+    public ConfigGroup fillConfigGroup(TeamData data) {
+        ConfigGroup cg0 = new ConfigGroup("task_screen", accepted -> {
+            if (accepted) {
+                new TaskScreenConfigResponse(this).sendToServer();
+            }
+        });
 
         cg0.setNameKey(getBlockState().getBlock().getDescriptionId());
-        ConfigGroup cg = cg0.getGroup("screen");
+        ConfigGroup cg = cg0.getOrCreateSubgroup("screen");
         cg.add("task", new ConfigQuestObject<>(o -> isSuitableTask(data, o)), getTask(), this::setTask, null).setNameKey("ftbquests.task");
         cg.add("skin", new ItemStackConfig(true, true), getSkin(), this::setSkin, ItemStack.EMPTY).setNameKey("block.ftbquests.screen.skin");
         cg.add("text_shadow", new BooleanConfig(), isTextShadow(), this::setTextShadow, false).setNameKey("block.ftbquests.screen.text_shadow");
         cg.add("indestructible", new BooleanConfig(), isIndestructible(), this::setIndestructible, false).setNameKey("block.ftbquests.screen.indestructible");
         cg.add("input_only", new BooleanConfig(), isInputOnly(), this::setInputOnly, false).setNameKey("block.ftbquests.screen.input_only");
         cg.add("input_icon", new ItemStackConfig(true, true), getInputModeIcon(), this::setInputModeIcon, ItemStack.EMPTY).setNameKey("block.ftbquests.screen.input_mode_icon");
-
-        cg0.savedCallback = accepted -> {
-            if (accepted) {
-                new TaskScreenConfigResponse(this).sendToServer();
-            }
-        };
 
         return cg0;
     }

@@ -1,6 +1,5 @@
 package dev.ftb.mods.ftbquests.gui.quests;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Pair;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.ImageConfig;
@@ -15,8 +14,8 @@ import dev.ftb.mods.ftblibrary.ui.*;
 import dev.ftb.mods.ftblibrary.ui.input.Key;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.ui.misc.CompactGridLayout;
-import dev.ftb.mods.ftblibrary.util.ImageComponent;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
+import dev.ftb.mods.ftblibrary.util.client.ImageComponent;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.gui.ImageComponentWidget;
@@ -35,6 +34,7 @@ import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.ConfirmLinkScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.*;
@@ -46,10 +46,7 @@ import org.lwjgl.glfw.GLFW;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 import java.util.function.Consumer;
 
 /**
@@ -62,7 +59,7 @@ public class ViewQuestPanel extends Panel {
 	public final QuestScreen questScreen;
 	private Quest quest = null;
 	public boolean hidePanel = false;
-	private Icon icon = Color4I.EMPTY;
+	private Icon icon = Color4I.empty();
 	public Button buttonClose;
 	public Button buttonPin;
 	public Button buttonOpenDependencies;
@@ -176,7 +173,7 @@ public class ViewQuestPanel extends Panel {
 			b.setSize(bsize, bsize);
 		}
 
-		if (!canEdit && panelTasks.widgets.isEmpty()) {
+		if (!canEdit && panelTasks.getWidgets().isEmpty()) {
 			DisabledButtonTextField noTasks = new DisabledButtonTextField(panelTasks, Component.translatable("ftbquests.gui.no_tasks"));
 			noTasks.setSize(noTasks.width + 8, bsize);
 			noTasks.setColor(ThemeProperties.DISABLED_TEXT_COLOR.get(quest));
@@ -191,7 +188,7 @@ public class ViewQuestPanel extends Panel {
 			}
 		}
 
-		if (!canEdit && panelRewards.widgets.isEmpty()) {
+		if (!canEdit && panelRewards.getWidgets().isEmpty()) {
 			DisabledButtonTextField noRewards = new DisabledButtonTextField(panelRewards, Component.translatable("ftbquests.gui.no_rewards"));
 			noRewards.setSize(noRewards.width + 8, bsize);
 			noRewards.setColor(ThemeProperties.DISABLED_TEXT_COLOR.get(quest));
@@ -205,11 +202,11 @@ public class ViewQuestPanel extends Panel {
 
 		int ww = 0;
 
-		for (Widget widget : panelTasks.widgets) {
+		for (Widget widget : panelTasks.getWidgets()) {
 			ww = Math.max(ww, widget.width);
 		}
 
-		for (Widget widget : panelRewards.widgets) {
+		for (Widget widget : panelRewards.getWidgets()) {
 			ww = Math.max(ww, widget.width);
 		}
 
@@ -316,12 +313,12 @@ public class ViewQuestPanel extends Panel {
 		int toy = (panelTasks.height - panelTasks.getContentHeight()) / 2;
 		int roy = (panelRewards.height - panelRewards.getContentHeight()) / 2;
 
-		for (Widget widget : panelTasks.widgets) {
+		for (Widget widget : panelTasks.getWidgets()) {
 			widget.setX(widget.posX + tox);
 			widget.setY(widget.posY + toy);
 		}
 
-		for (Widget widget : panelRewards.widgets) {
+		for (Widget widget : panelRewards.getWidgets()) {
 			widget.setX(widget.posX + rox);
 			widget.setY(widget.posY + roy);
 		}
@@ -364,7 +361,7 @@ public class ViewQuestPanel extends Panel {
 			addButtonBar(canEdit);
 		}
 
-		if (panelText.widgets.isEmpty()) {
+		if (panelText.getWidgets().isEmpty()) {
 			panelContent.add(new ColorWidget(panelContent, borderColor, null).setPosAndSize(w2, 0, 1, h + 40));
 			panelText.setHeight(0);
 			setHeight(Math.min(panelContent.getContentHeight(), parent.height - 10));
@@ -523,7 +520,7 @@ public class ViewQuestPanel extends Panel {
 		if (dependencies && quest.minRequiredDependencies > 0) {
 			contextMenu.add(new ContextMenuItem(
 					Component.translatable("ftbquests.quest.min_required_header", quest.minRequiredDependencies)
-							.withStyle(ChatFormatting.UNDERLINE), Color4I.EMPTY, null).setEnabled(false)
+							.withStyle(ChatFormatting.UNDERLINE), Color4I.empty(), null).setEnabled(false)
 			);
 		}
 
@@ -534,7 +531,7 @@ public class ViewQuestPanel extends Panel {
 					Component suffix = Component.literal(" [").append(object.getQuestChapter().getTitle()).append("]").withStyle(ChatFormatting.GRAY);
 					title.append(suffix);
 				}
-				contextMenu.add(new ContextMenuItem(title, Color4I.EMPTY, () -> questScreen.open(object, true)));
+				contextMenu.add(new ContextMenuItem(title, Color4I.empty(), () -> questScreen.open(object, true)));
 			} else {
 				hidden++;
 			}
@@ -543,7 +540,7 @@ public class ViewQuestPanel extends Panel {
 		if (hidden > 0) {
 			MutableComponent prefix = hidden == c.size() ? Component.empty() : Component.literal("+ ");
 			contextMenu.add(new ContextMenuItem(
-					prefix.append(Component.translatable("ftbquests.quest.hidden_quests_footer", hidden)), Color4I.EMPTY, null).setEnabled(false)
+					prefix.append(Component.translatable("ftbquests.quest.hidden_quests_footer", hidden)), Color4I.empty(), null).setEnabled(false)
 			);
 		}
 
@@ -587,7 +584,7 @@ public class ViewQuestPanel extends Panel {
 		// pressing T while mousing over a task button allows editing the task title
 		QuestObject qo = quest;
 		String titleKey = "ftbquests.title";
-		for (Widget w : panelTasks.widgets) {
+		for (Widget w : panelTasks.getWidgets()) {
 			if (w instanceof TaskButton b && b.isMouseOver()) {
 				qo = b.task;
 				titleKey = "ftbquests.task_title";
@@ -598,7 +595,7 @@ public class ViewQuestPanel extends Panel {
 		final var qo1 = qo;
 		EditConfigFromStringScreen.open(c, qo1.title, "", Component.translatable(titleKey), accepted -> {
 			if (accepted) {
-				qo1.title = c.value;
+				qo1.title = c.getValue();
 				new EditObjectMessage(qo1).sendToServer();
 			}
 
@@ -611,7 +608,7 @@ public class ViewQuestPanel extends Panel {
 
 		EditConfigFromStringScreen.open(c, quest.subtitle, "", Component.translatable("ftbquests.quest.subtitle"), accepted -> {
 			if (accepted) {
-				quest.subtitle = c.value;
+				quest.subtitle = c.getValue();
 				new EditObjectMessage(quest).sendToServer();
 			}
 
@@ -621,7 +618,7 @@ public class ViewQuestPanel extends Panel {
 
 	private void editDescription() {
 		ListConfig<String, StringConfig> lc = new ListConfig<>(new StringConfig());
-		lc.value = quest.description;
+		lc.setValue(quest.description);
 		new MultilineTextEditorScreen(Component.translatable("ftbquests.gui.edit_description"), lc, accepted -> {
 			if (accepted) {
 				new EditObjectMessage(quest).sendToServer();
@@ -690,9 +687,9 @@ public class ViewQuestPanel extends Panel {
 		EditConfigFromStringScreen.open(c, line == -1 ? "" : quest.description.get(line), "", title, accepted -> {
 			if (accepted) {
 				if (line == -1) {
-					appendToPage(quest.description, List.of(c.value), currentPage);
+					appendToPage(quest.description, List.of(c.getValue()), currentPage);
 				} else {
-					quest.description.set(line, c.value);
+					quest.description.set(line, c.getValue());
 				}
 
 				new EditObjectMessage(quest).sendToServer();
@@ -704,16 +701,7 @@ public class ViewQuestPanel extends Panel {
 	}
 
 	private void editImage(int line, ImageComponent component) {
-		ConfigGroup group = new ConfigGroup(FTBQuests.MOD_ID);
-		//task.getConfig(task.createSubGroup(group));
-
-		group.add("image", new ImageConfig(), component.image.toString(), v -> component.image = Icon.getIcon(v), "");
-		group.addInt("width", component.width, v -> component.width = v, 0, 1, 1000);
-		group.addInt("height", component.height, v -> component.height = v, 0, 1, 1000);
-		group.addInt("align", component.align, v -> component.align = v, 0, 1, 2);
-		group.addBool("fit", component.fit, v -> component.fit = v, false);
-
-		group.savedCallback = accepted -> {
+		ConfigGroup group = new ConfigGroup(FTBQuests.MOD_ID, accepted -> {
 			openGui();
 			if (accepted) {
 				if (line == -1) {
@@ -725,7 +713,14 @@ public class ViewQuestPanel extends Panel {
 
 				refreshWidgets();
 			}
-		};
+		});
+		//task.getConfig(task.createSubGroup(group));
+
+		group.add("image", new ImageConfig(), component.image.toString(), v -> component.image = Icon.getIcon(v), "");
+		group.addInt("width", component.width, v -> component.width = v, 0, 1, 1000);
+		group.addInt("height", component.height, v -> component.height = v, 0, 1, 1000);
+		group.addInt("align", component.align, v -> component.align = v, 0, 1, 2);
+		group.addBool("fit", component.fit, v -> component.fit = v, false);
 
 		new EditConfigScreen(group).openGui();
 	}
@@ -761,27 +756,27 @@ public class ViewQuestPanel extends Panel {
 	}
 
 	@Override
-	public void draw(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
+	public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
 		if (quest != null && !hidePanel) {
 			QuestObjectBase prev = QuestTheme.currentObject;
 			QuestTheme.currentObject = quest;
-			matrixStack.pushPose();
-			matrixStack.translate(0, 0, 500);
-			super.draw(matrixStack, theme, x, y, w, h);
-			matrixStack.popPose();
+			graphics.pose().pushPose();
+			graphics.pose().translate(0, 0, 500);
+			super.draw(graphics, theme, x, y, w, h);
+			graphics.pose().popPose();
 			QuestTheme.currentObject = prev;
 		}
 	}
 
 	@Override
-	public void drawBackground(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
+	public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
 		Color4I borderColor = ThemeProperties.QUEST_VIEW_BORDER.get();
-		Color4I.DARK_GRAY.withAlpha(120).draw(matrixStack, questScreen.getX(), questScreen.getY(), questScreen.width, questScreen.height);
+		Color4I.DARK_GRAY.withAlpha(120).draw(graphics, questScreen.getX(), questScreen.getY(), questScreen.width, questScreen.height);
 		Icon background = ThemeProperties.QUEST_VIEW_BACKGROUND.get();
-		background.draw(matrixStack, x, y, w, h);
+		background.draw(graphics, x, y, w, h);
 		int iconSize = Math.min(16, titleField.height + 2);
-		icon.draw(matrixStack, x + 4, y + 4, iconSize, iconSize);
-		borderColor.draw(matrixStack, x + 1, panelContent.getY(), w - 2, 1);
+		icon.draw(graphics, x + 4, y + 4, iconSize, iconSize);
+		borderColor.draw(graphics, x + 1, panelContent.getY(), w - 2, 1);
 	}
 
 	@Override
@@ -832,9 +827,9 @@ public class ViewQuestPanel extends Panel {
 					editCallback.accept(true);
 					return true;
 				} else if (button.isLeft() && Minecraft.getInstance().screen != null) {
-					Style style = getComponentStyleAt(questScreen.getTheme(), getMouseX(), getMouseY());
-					if (style != null) {
-						return handleCustomClickEvent(style) || Minecraft.getInstance().screen.handleComponentClicked(style);
+					Optional<Style> style = getComponentStyleAt(questScreen.getTheme(), getMouseX(), getMouseY());
+					if (style.isPresent()) {
+						return handleCustomClickEvent(style.get()) || Minecraft.getInstance().screen.handleComponentClicked(style.get());
 					}
 				}
 			}
@@ -914,28 +909,29 @@ public class ViewQuestPanel extends Panel {
 
 			super.addMouseOverText(list);
 
-			Style style = getComponentStyleAt(questScreen.getTheme(), getMouseX(), getMouseY());
-			if (style != null && style.getHoverEvent() != null) {
-				HoverEvent hoverevent = style.getHoverEvent();
-				HoverEvent.ItemStackInfo stackInfo = hoverevent.getValue(HoverEvent.Action.SHOW_ITEM);
-				Minecraft mc = Minecraft.getInstance();
-				TooltipFlag flag = mc.options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL;
-				if (stackInfo != null) {
-					stackInfo.getItemStack().getTooltipLines(mc.player, flag).forEach(list::add);
-				} else {
-					HoverEvent.EntityTooltipInfo entityInfo = hoverevent.getValue(HoverEvent.Action.SHOW_ENTITY);
-					if (entityInfo != null) {
-						if (flag.isAdvanced()) {
-							entityInfo.getTooltipLines().forEach(list::add);
-						}
+			getComponentStyleAt(questScreen.getTheme(), getMouseX(), getMouseY()).ifPresent(style -> {
+				if (style.getHoverEvent() != null) {
+					HoverEvent hoverevent = style.getHoverEvent();
+					HoverEvent.ItemStackInfo stackInfo = hoverevent.getValue(HoverEvent.Action.SHOW_ITEM);
+					Minecraft mc = Minecraft.getInstance();
+					TooltipFlag flag = mc.options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL;
+					if (stackInfo != null) {
+						stackInfo.getItemStack().getTooltipLines(mc.player, flag).forEach(list::add);
 					} else {
-						Component component = hoverevent.getValue(HoverEvent.Action.SHOW_TEXT);
-						if (component != null) {
-							list.add(component);
+						HoverEvent.EntityTooltipInfo entityInfo = hoverevent.getValue(HoverEvent.Action.SHOW_ENTITY);
+						if (entityInfo != null) {
+							if (flag.isAdvanced()) {
+								entityInfo.getTooltipLines().forEach(list::add);
+							}
+						} else {
+							Component component = hoverevent.getValue(HoverEvent.Action.SHOW_TEXT);
+							if (component != null) {
+								list.add(component);
+							}
 						}
 					}
 				}
-			}
+			});
 		}
 	}
 
@@ -945,8 +941,8 @@ public class ViewQuestPanel extends Panel {
 		}
 
 		@Override
-		public void draw(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
-			drawIcon(matrixStack, theme, x + 1, y + 1, w - 2, h - 2);
+		public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+			drawIcon(graphics, theme, x + 1, y + 1, w - 2, h - 2);
 		}
 	}
 

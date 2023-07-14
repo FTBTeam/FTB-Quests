@@ -1,23 +1,21 @@
 package dev.ftb.mods.ftbquests.forge;
 
-import dev.architectury.platform.Platform;
 import dev.architectury.platform.forge.EventBuses;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.FTBQuestsTags;
 import dev.ftb.mods.ftbquests.command.ChangeProgressArgument;
 import dev.ftb.mods.ftbquests.command.QuestObjectArgument;
-import dev.ftb.mods.ftbquests.integration.stages.GameStagesEventHandler;
 import dev.ftb.mods.ftbquests.item.FTBQuestsItems;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.loot.LootCrate;
 import dev.ftb.mods.ftbquests.quest.task.TaskTypes;
 import dev.ftb.mods.ftbquests.quest.task.forge.ForgeEnergyTask;
-import dev.ftb.mods.ftbteams.FTBTeams;
+import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.commands.synchronization.ArgumentTypeInfos;
 import net.minecraft.commands.synchronization.SingletonArgumentInfo;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
@@ -39,7 +37,7 @@ import java.util.Iterator;
 
 @Mod(FTBQuests.MOD_ID)
 public class FTBQuestsForge {
-	private static final DeferredRegister<ArgumentTypeInfo<?, ?>> COMMAND_ARGUMENT_TYPES = DeferredRegister.create(Registry.COMMAND_ARGUMENT_TYPE_REGISTRY, FTBTeams.MOD_ID);
+	private static final DeferredRegister<ArgumentTypeInfo<?, ?>> COMMAND_ARGUMENT_TYPES = DeferredRegister.create(Registries.COMMAND_ARGUMENT_TYPE, FTBTeamsAPI.MOD_ID);
 	private static final RegistryObject<SingletonArgumentInfo<ChangeProgressArgument>> CHANGE_PROGRESS = COMMAND_ARGUMENT_TYPES.register("change_progress", () -> ArgumentTypeInfos.registerByClass(ChangeProgressArgument.class, SingletonArgumentInfo.contextFree(ChangeProgressArgument::changeProgress)));
 	private static final RegistryObject<SingletonArgumentInfo<QuestObjectArgument>> QUEST_OBJECT = COMMAND_ARGUMENT_TYPES.register("quest_object", () -> ArgumentTypeInfos.registerByClass(QuestObjectArgument.class, SingletonArgumentInfo.contextFree(QuestObjectArgument::new)));
 
@@ -51,12 +49,6 @@ public class FTBQuestsForge {
 
 		ForgeEnergyTask.TYPE = TaskTypes.register(new ResourceLocation(FTBQuests.MOD_ID, "forge_energy"), ForgeEnergyTask::new, () -> Icon.getIcon(ForgeEnergyTask.EMPTY_TEXTURE.toString()).combineWith(Icon.getIcon(ForgeEnergyTask.FULL_TEXTURE.toString())));
 
-		// KubeJS handles gamestage functionality when it's installed
-		// but this covers the case where Gamestages is present but KubeJS is not
-		if (Platform.isModLoaded("gamestages") && !Platform.isModLoaded("kubejs")) {
-			GameStagesEventHandler.register();
-		}
-
 		FMLJavaModLoadingContext.get().getModEventBus().<FMLCommonSetupEvent>addListener(event -> quests.setup());
 
 		MinecraftForge.EVENT_BUS.addListener(FTBQuestsForge::livingDrops);
@@ -66,7 +58,7 @@ public class FTBQuestsForge {
 	private static void livingDrops(LivingDropsEvent event) {
 		LivingEntity e = event.getEntity();
 
-		if (e.level.isClientSide || e instanceof Player || e.getType().is(FTBQuestsTags.EntityTypes.NO_LOOT_CRATES)) {
+		if (e.level().isClientSide || e instanceof Player || e.getType().is(FTBQuestsTags.EntityTypes.NO_LOOT_CRATES)) {
 			return;
 		}
 
@@ -74,10 +66,10 @@ public class FTBQuestsForge {
 			return;
 		}
 
-		LootCrate crate = ServerQuestFile.INSTANCE.getRandomLootCrate(e, e.level.random);
+		LootCrate crate = ServerQuestFile.INSTANCE.getRandomLootCrate(e, e.level().random);
 
 		if (crate != null) {
-			ItemEntity ei = new ItemEntity(e.level, e.getX(), e.getY(), e.getZ(), crate.createStack());
+			ItemEntity ei = new ItemEntity(e.level(), e.getX(), e.getY(), e.getZ(), crate.createStack());
 			ei.setPickUpDelay(10);
 			event.getDrops().add(ei);
 		}
@@ -88,7 +80,7 @@ public class FTBQuestsForge {
 			return;
 		}
 
-		if (player instanceof FakePlayer || player.level.getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY)) {
+		if (player instanceof FakePlayer || player.level().getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY)) {
 			return;
 		}
 

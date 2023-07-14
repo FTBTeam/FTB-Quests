@@ -31,7 +31,7 @@ public class EditSettingsButton extends TabButton {
 	public void onClicked(MouseButton button) {
 		playClickSound();
 
-		if (questScreen.contextMenu != null) {
+		if (questScreen.getContextMenu().isPresent()) {
 			questScreen.closeContextMenu();
 			return;
 		}
@@ -41,11 +41,11 @@ public class EditSettingsButton extends TabButton {
 
 		contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.reset_progress"), ThemeProperties.RELOAD_ICON.get(), () -> ChangeProgressMessage.send(questScreen.file.self, questScreen.file, progressChange -> {
 			progressChange.reset = true;
-		})).setYesNo(Component.translatable("ftbquests.gui.reset_progress_q")));
+		})).setYesNoText(Component.translatable("ftbquests.gui.reset_progress_q")));
 
 		contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.complete_instantly"), ThemeProperties.CHECK_ICON.get(), () -> ChangeProgressMessage.send(questScreen.file.self, questScreen.file, progressChange -> {
 			progressChange.reset = false;
-		})).setYesNo(Component.translatable("ftbquests.gui.complete_instantly_q")));
+		})).setYesNoText(Component.translatable("ftbquests.gui.complete_instantly_q")));
 
 		contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.reward_tables"), ThemeProperties.REWARD_TABLE_ICON.get(), () -> new RewardTablesScreen().openGui()));
 		contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.save_on_server"), ThemeProperties.SAVE_ICON.get(), () -> new ForceSaveMessage().sendToServer()));

@@ -4,7 +4,8 @@ import dev.architectury.hooks.item.ItemStackHooks;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;
-import dev.ftb.mods.ftblibrary.util.WrappedIngredient;
+import dev.ftb.mods.ftblibrary.ui.Widget;
+import dev.ftb.mods.ftblibrary.util.client.PositionedIngredient;
 import dev.ftb.mods.ftbquests.net.DisplayItemRewardToastMessage;
 import dev.ftb.mods.ftbquests.net.FTBQuestsNetHandler;
 import dev.ftb.mods.ftbquests.quest.Quest;
@@ -23,6 +24,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -105,8 +107,8 @@ public class ItemReward extends Reward {
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public void getConfig(ConfigGroup config) {
-		super.getConfig(config);
+	public void fillConfigGroup(ConfigGroup config) {
+		super.fillConfigGroup(config);
 		config.addItemStack("item", item, v -> item = v, ItemStack.EMPTY, true, false).setNameKey("ftbquests.reward.ftbquests.item");
 		config.addInt("count", count, v -> count = v, 1, 1, 8192);
 		config.addInt("random_bonus", randomBonus, v -> randomBonus = v, 0, 0, 8192).setNameKey("ftbquests.reward.random_bonus");
@@ -119,7 +121,7 @@ public class ItemReward extends Reward {
 			return;
 		}
 
-		int size = count + player.level.random.nextInt(randomBonus + 1);
+		int size = count + player.level().random.nextInt(randomBonus + 1);
 
 		while (size > 0) {
 			int s = Math.min(size, item.getMaxStackSize());
@@ -175,11 +177,10 @@ public class ItemReward extends Reward {
 		return !getTitle().getString().equals(getAltTitle().getString());
 	}
 
-	@Nullable
 	@Override
 	@Environment(EnvType.CLIENT)
-	public Object getIngredient() {
-		return new WrappedIngredient(item).tooltip();
+	public Optional<PositionedIngredient> getIngredient(Widget widget) {
+		return PositionedIngredient.of(item, widget, true);
 	}
 
 	@Override

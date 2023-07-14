@@ -8,7 +8,7 @@ import dev.ftb.mods.ftbquests.quest.TeamData;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -43,7 +43,7 @@ public class DimensionTask extends BooleanTask {
 	@Override
 	public void readData(CompoundTag nbt) {
 		super.readData(nbt);
-		dimension = ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(nbt.getString("dimension")));
+		dimension = ResourceKey.create(Registries.DIMENSION, new ResourceLocation(nbt.getString("dimension")));
 	}
 
 	@Override
@@ -55,18 +55,18 @@ public class DimensionTask extends BooleanTask {
 	@Override
 	public void readNetData(FriendlyByteBuf buffer) {
 		super.readNetData(buffer);
-		dimension = ResourceKey.create(Registry.DIMENSION_REGISTRY, buffer.readResourceLocation());
+		dimension = ResourceKey.create(Registries.DIMENSION, buffer.readResourceLocation());
 	}
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public void getConfig(ConfigGroup config) {
-		super.getConfig(config);
+	public void fillConfigGroup(ConfigGroup config) {
+		super.fillConfigGroup(config);
 
 		if (KnownServerRegistries.client != null && !KnownServerRegistries.client.dimensions.isEmpty()) {
-			config.addEnum("dim", dimension.location(), v -> dimension = ResourceKey.create(Registry.DIMENSION_REGISTRY, v), NameMap.of(KnownServerRegistries.client.dimensions.iterator().next(), KnownServerRegistries.client.dimensions.toArray(new ResourceLocation[0])).create());
+			config.addEnum("dim", dimension.location(), v -> dimension = ResourceKey.create(Registries.DIMENSION, v), NameMap.of(KnownServerRegistries.client.dimensions.iterator().next(), KnownServerRegistries.client.dimensions.toArray(new ResourceLocation[0])).create());
 		} else {
-			config.addString("dim", dimension.location().toString(), v -> dimension = ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(v)), "minecraft:the_nether");
+			config.addString("dim", dimension.location().toString(), v -> dimension = ResourceKey.create(Registries.DIMENSION, new ResourceLocation(v)), "minecraft:the_nether");
 		}
 	}
 
@@ -83,6 +83,6 @@ public class DimensionTask extends BooleanTask {
 
 	@Override
 	public boolean canSubmit(TeamData teamData, ServerPlayer player) {
-		return !player.isSpectator() && player.level.dimension() == dimension;
+		return !player.isSpectator() && player.level().dimension() == dimension;
 	}
 }

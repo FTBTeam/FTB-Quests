@@ -5,7 +5,7 @@ import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
@@ -52,7 +52,7 @@ public class LocationTask extends BooleanTask {
 	@Override
 	public void readData(CompoundTag nbt) {
 		super.readData(nbt);
-		dimension = ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(nbt.getString("dimension")));
+		dimension = ResourceKey.create(Registries.DIMENSION, new ResourceLocation(nbt.getString("dimension")));
 		ignoreDimension = nbt.getBoolean("ignore_dimension");
 
 		int[] pos = nbt.getIntArray("position");
@@ -88,7 +88,7 @@ public class LocationTask extends BooleanTask {
 	@Override
 	public void readNetData(FriendlyByteBuf buffer) {
 		super.readNetData(buffer);
-		dimension = ResourceKey.create(Registry.DIMENSION_REGISTRY, buffer.readResourceLocation());
+		dimension = ResourceKey.create(Registries.DIMENSION, buffer.readResourceLocation());
 		ignoreDimension = buffer.readBoolean();
 		x = buffer.readVarInt();
 		y = buffer.readVarInt();
@@ -100,9 +100,9 @@ public class LocationTask extends BooleanTask {
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public void getConfig(ConfigGroup config) {
-		super.getConfig(config);
-		config.addString("dim", dimension.location().toString(), v -> dimension = ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(v)), "minecraft:overworld");
+	public void fillConfigGroup(ConfigGroup config) {
+		super.fillConfigGroup(config);
+		config.addString("dim", dimension.location().toString(), v -> dimension = ResourceKey.create(Registries.DIMENSION, new ResourceLocation(v)), "minecraft:overworld");
 		config.addBool("ignore_dim", ignoreDimension, v -> ignoreDimension = v, false);
 		config.addInt("x", x, v -> x = v, 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
 		config.addInt("y", y, v -> y = v, 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
@@ -119,7 +119,7 @@ public class LocationTask extends BooleanTask {
 
 	@Override
 	public boolean canSubmit(TeamData teamData, ServerPlayer player) {
-		if (ignoreDimension || dimension == player.level.dimension()) {
+		if (ignoreDimension || dimension == player.level().dimension()) {
 			int py = Mth.floor(player.getY());
 
 			if (py >= y && py < y + h) {

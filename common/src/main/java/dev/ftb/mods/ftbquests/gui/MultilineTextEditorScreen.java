@@ -1,7 +1,6 @@
 package dev.ftb.mods.ftbquests.gui;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import com.mojang.blaze3d.vertex.PoseStack;
 import dev.ftb.mods.ftblibrary.config.*;
 import dev.ftb.mods.ftblibrary.config.ui.EditConfigScreen;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
@@ -12,18 +11,19 @@ import dev.ftb.mods.ftblibrary.ui.input.Key;
 import dev.ftb.mods.ftblibrary.ui.input.KeyModifiers;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.ui.misc.NordColors;
-import dev.ftb.mods.ftblibrary.util.ImageComponent;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
+import dev.ftb.mods.ftblibrary.util.client.ImageComponent;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.gui.quests.ViewQuestPanel;
 import joptsimple.internal.Strings;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Whence;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -65,7 +65,7 @@ public class MultilineTextEditorScreen extends BaseScreen {
 		textBoxPanel = new TextBoxPanel(outerPanel);
 
 		textBox = new MultilineTextBox(textBoxPanel);
-		textBox.setText(Strings.join(config.value, "\n"));
+		textBox.setText(Strings.join(config.getValue(), "\n"));
 		textBox.setFocused(true);
 		textBox.setValueListener(this::onValueChanged);
 		textBox.seekCursor(Whence.ABSOLUTE, 0);
@@ -124,7 +124,7 @@ public class MultilineTextEditorScreen extends BaseScreen {
 	}
 
 	@Override
-	public void drawBackground(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
+	public void drawBackground(GuiGraphics matrixStack, Theme theme, int x, int y, int w, int h) {
 		super.drawBackground(matrixStack, theme, x, y, w, h);
 
 		theme.drawString(matrixStack, title, x + (width - theme.getStringWidth(title)) / 2, y - theme.getFontHeight() - 2, Theme.SHADOW);
@@ -182,23 +182,22 @@ public class MultilineTextEditorScreen extends BaseScreen {
 	}
 
 	private void openImageSelector() {
+		int cursor = textBox.cursorPos();
+
 		ImageComponent component = new ImageComponent();
-		ConfigGroup group = new ConfigGroup(FTBQuests.MOD_ID);
+		ConfigGroup group = new ConfigGroup(FTBQuests.MOD_ID, accepted -> {
+			openGui();
+			if (accepted) {
+				textBox.seekCursor(Whence.ABSOLUTE, cursor);
+				insertAtEndOfLine("\n" + component);
+			}
+		});
 
 		group.add("image", new ImageConfig(), component.image.toString(), v -> component.image = Icon.getIcon(v), "");
 		group.addInt("width", component.width, v -> component.width = v, 0, 1, 1000);
 		group.addInt("height", component.height, v -> component.height = v, 0, 1, 1000);
 		group.addInt("align", component.align, v -> component.align = v, 0, 1, 2);
 		group.addBool("fit", component.fit, v -> component.fit = v, false);
-
-		int cursor = textBox.cursorPos();
-		group.savedCallback = accepted -> {
-			openGui();
-			if (accepted) {
-				textBox.seekCursor(Whence.ABSOLUTE, cursor);
-				insertAtEndOfLine("\n" + component);
-			}
-		};
 
 		new EditConfigScreen(group).openGui();
 	}
@@ -208,9 +207,9 @@ public class MultilineTextEditorScreen extends BaseScreen {
 	}
 
 	private void saveAndExit() {
-		config.value.clear();
+		config.getValue().clear();
 
-		Collections.addAll(config.value, textBox.getText().split("\n"));
+		Collections.addAll(config.getValue(), textBox.getText().split("\n"));
 
 		closeGui();
 		callback.save(true);
@@ -233,7 +232,7 @@ public class MultilineTextEditorScreen extends BaseScreen {
 		}
 	}
 
-	private static String stripFormatting(@Nonnull String selectedText) {
+	private static String stripFormatting(@NotNull String selectedText) {
 		return STRIP_FORMATTING_PATTERN.matcher(selectedText).replaceAll("");
 	}
 
@@ -261,8 +260,8 @@ public class MultilineTextEditorScreen extends BaseScreen {
 		}
 
 		@Override
-		public void drawBackground(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
-			theme.drawPanelBackground(matrixStack, x, y, w, h);
+		public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+			theme.drawPanelBackground(graphics, x, y, w, h);
 		}
 
 		@Override
@@ -288,7 +287,6 @@ public class MultilineTextEditorScreen extends BaseScreen {
 		@Override
 		public void alignWidgets() {
 			textBox.setWidth(width - 3);  // also forces height recalculation based on contents
-			scrollBar.setMaxValue(textBox.height);
 			setScrollY(0);
 			textBox.seekCursor(Whence.ABSOLUTE, 0);
 		}
@@ -408,9 +406,9 @@ public class MultilineTextEditorScreen extends BaseScreen {
 		}
 
 		@Override
-		public void drawBackground(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
-			NordColors.POLAR_NIGHT_0.draw(matrixStack, x, y, w, h);
-			theme.drawPanelBackground(matrixStack, x, y, w, h);
+		public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+			NordColors.POLAR_NIGHT_0.draw(graphics, x, y, w, h);
+			theme.drawPanelBackground(graphics, x, y, w, h);
 		}
 	}
 
@@ -425,7 +423,7 @@ public class MultilineTextEditorScreen extends BaseScreen {
 		}
 
 		public ToolbarButton(Panel panel, Component txt, Runnable onClick) {
-			this(panel, txt, Color4I.EMPTY, onClick);
+			this(panel, txt, Color4I.empty(), onClick);
 		}
 
 		public void setVisible(boolean visible) {
@@ -450,9 +448,9 @@ public class MultilineTextEditorScreen extends BaseScreen {
 		}
 
 		@Override
-		public void draw(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
+		public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
 			if (visible) {
-				super.draw(matrixStack, theme, x, y, w, h);
+				super.draw(graphics, theme, x, y, w, h);
 			}
 		}
 
@@ -462,6 +460,6 @@ public class MultilineTextEditorScreen extends BaseScreen {
 		}
 	}
 
-	private record HistoryElement(@Nonnull String text, int cursorPos) {
+	private record HistoryElement(@NotNull String text, int cursorPos) {
 	}
 }

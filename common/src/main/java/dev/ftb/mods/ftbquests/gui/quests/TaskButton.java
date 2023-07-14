@@ -9,6 +9,7 @@ import dev.ftb.mods.ftblibrary.ui.*;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.ui.misc.ButtonListBaseScreen;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
+import dev.ftb.mods.ftblibrary.util.client.PositionedIngredient;
 import dev.ftb.mods.ftbquests.net.EditObjectMessage;
 import dev.ftb.mods.ftbquests.quest.task.ItemTask;
 import dev.ftb.mods.ftbquests.quest.task.Task;
@@ -18,15 +19,16 @@ import dev.latvian.mods.itemfilters.api.ItemFiltersAPI;
 import dev.latvian.mods.itemfilters.api.ItemFiltersItems;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentContents;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author LatvianModder
@@ -110,9 +112,8 @@ public class TaskButton extends Button {
 	}
 
 	@Override
-	@Nullable
-	public Object getIngredientUnderMouse() {
-		return task.getIngredient();
+	public Optional<PositionedIngredient> getIngredientUnderMouse() {
+		return task.getIngredient(this);
 	}
 
 	@Override
@@ -151,46 +152,47 @@ public class TaskButton extends Button {
 	}
 
 	@Override
-	public void drawBackground(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
+	public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
 		if (isMouseOver()) {
-			super.drawBackground(matrixStack, theme, x, y, w, h);
+			super.drawBackground(graphics, theme, x, y, w, h);
 		}
 	}
 
 	@Override
-	public void drawIcon(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
-		task.drawGUI(questScreen.file.self, matrixStack, x, y, w, h);
+	public void drawIcon(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+		task.drawGUI(questScreen.file.self, graphics, x, y, w, h);
 	}
 
 	@Override
-	public void draw(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
+	public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
 		int bs = h >= 32 ? 32 : 16;
 		GuiHelper.setupDrawing();
-		drawBackground(matrixStack, theme, x, y, w, h);
-		drawIcon(matrixStack, theme, x + (w - bs) / 2, y + (h - bs) / 2, bs, bs);
+		drawBackground(graphics, theme, x, y, w, h);
+		drawIcon(graphics, theme, x + (w - bs) / 2, y + (h - bs) / 2, bs, bs);
 
 		if (questScreen.file.self == null) {
 			return;
-		} else if (questScreen.contextMenu != null) {
+		} else if (questScreen.getContextMenu().isPresent()) {
 			//return;
 		}
 
+		PoseStack poseStack = graphics.pose();
 		if (questScreen.file.self.isCompleted(task)) {
-			matrixStack.pushPose();
-			matrixStack.translate(0, 0, 200);
+			poseStack.pushPose();
+			poseStack.translate(0, 0, 200);
 			RenderSystem.enableBlend();
-			ThemeProperties.CHECK_ICON.get().draw(matrixStack, x + w - 9, y + 1, 8, 8);
-			matrixStack.popPose();
+			ThemeProperties.CHECK_ICON.get().draw(graphics, x + w - 9, y + 1, 8, 8);
+			poseStack.popPose();
 		} else {
 			MutableComponent s = task.getButtonText();
 
 			if (s.getContents() != ComponentContents.EMPTY) {
-				matrixStack.pushPose();
-				matrixStack.translate(x + 19F - theme.getStringWidth(s) / 2F, y + 15F, 200F);
-				matrixStack.scale(0.5F, 0.5F, 1F);
+				poseStack.pushPose();
+				poseStack.translate(x + 19F - theme.getStringWidth(s) / 2F, y + 15F, 200F);
+				poseStack.scale(0.5F, 0.5F, 1F);
 				RenderSystem.enableBlend();
-				theme.drawString(matrixStack, s, 0, 0, Color4I.WHITE, Theme.SHADOW);
-				matrixStack.popPose();
+				theme.drawString(graphics, s, 0, 0, Color4I.WHITE, Theme.SHADOW);
+				poseStack.popPose();
 			}
 		}
 	}
@@ -209,7 +211,7 @@ public class TaskButton extends Button {
 		@Override
 		public void addButtons(Panel panel) {
 			for (ResourceLocation tag : tags) {
-				panel.add(new SimpleTextButton(panel, Component.literal(tag.toString()), Color4I.EMPTY) {
+				panel.add(new SimpleTextButton(panel, Component.literal(tag.toString()), Color4I.empty()) {
 					@Override
 					public void onClicked(MouseButton button) {
 						questScreen.openGui();

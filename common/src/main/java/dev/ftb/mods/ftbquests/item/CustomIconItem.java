@@ -24,7 +24,7 @@ import java.util.List;
  */
 public class CustomIconItem extends Item {
 	public CustomIconItem() {
-		super(new Properties().stacksTo(1).tab(FTBQuests.ITEM_GROUP));
+		super(FTBQuestsItems.defaultProps().stacksTo(1));
 	}
 
 	@Override

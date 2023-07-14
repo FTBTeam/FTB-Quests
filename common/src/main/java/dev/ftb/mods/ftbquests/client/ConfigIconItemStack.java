@@ -25,9 +25,9 @@ public class ConfigIconItemStack extends ItemStackConfig {
 				ImageConfig imageConfig = new ImageConfig();
 				new SelectImageScreen(imageConfig, b -> {
 					if (b) {
-						if (!imageConfig.value.isEmpty()) {
+						if (!imageConfig.getValue().isEmpty()) {
 							ItemStack stack = new ItemStack(FTBQuestsItems.CUSTOM_ICON.get());
-							stack.addTagElement("Icon", StringTag.valueOf(imageConfig.value));
+							stack.addTagElement("Icon", StringTag.valueOf(imageConfig.getValue()));
 							setCurrentValue(stack);
 						} else {
 							setCurrentValue(ItemStack.EMPTY);

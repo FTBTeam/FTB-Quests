@@ -24,7 +24,7 @@ import java.util.List;
  */
 public class QuestBookItem extends Item {
 	public QuestBookItem() {
-		super(new Properties().stacksTo(1).tab(FTBQuests.ITEM_GROUP));
+		super(FTBQuestsItems.defaultProps().stacksTo(1));
 		((ItemFTBL) this).setCraftingRemainingItemFTBL(this);
 	}
 

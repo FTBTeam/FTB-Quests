@@ -78,7 +78,7 @@ public class QuestBarrierBlockEntity extends BlockEntity implements BarrierBlock
 
 	@Override
 	public boolean isOpen(Player player) {
-		TeamData data = FTBQuests.PROXY.getQuestFile(player.level.isClientSide()).getData(player);
+		TeamData data = FTBQuests.PROXY.getQuestFile(player.level().isClientSide()).getData(player);
 		QuestObject o = data.file.get(object);
 		return o != null && data.isCompleted(o);
 	}

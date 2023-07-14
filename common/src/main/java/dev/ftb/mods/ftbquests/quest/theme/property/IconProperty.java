@@ -10,12 +10,12 @@ public class IconProperty extends ThemeProperty<Icon> {
 	public final Icon builtin;
 
 	public IconProperty(String n, Icon b) {
-		super(n, Color4I.EMPTY);
+		super(n, Color4I.empty());
 		builtin = b;
 	}
 
 	public IconProperty(String n) {
-		this(n, Color4I.EMPTY);
+		this(n, Color4I.empty());
 	}
 
 	@Override

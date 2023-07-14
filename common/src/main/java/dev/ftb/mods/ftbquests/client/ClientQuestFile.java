@@ -2,11 +2,10 @@ package dev.ftb.mods.ftbquests.client;
 
 import dev.architectury.utils.Env;
 import dev.ftb.mods.ftblibrary.icon.Icons;
-import dev.ftb.mods.ftblibrary.util.ClientUtils;
+import dev.ftb.mods.ftblibrary.util.client.ClientUtils;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.gui.CustomToast;
 import dev.ftb.mods.ftbquests.gui.quests.QuestScreen;
-import dev.ftb.mods.ftbquests.integration.FTBQuestsJEIHelper;
 import dev.ftb.mods.ftbquests.net.DeleteObjectMessage;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestFile;
@@ -14,8 +13,8 @@ import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.task.StructureTask;
 import dev.ftb.mods.ftbquests.quest.theme.QuestTheme;
 import dev.ftb.mods.ftbquests.util.TextUtils;
-import dev.ftb.mods.ftbteams.data.ClientTeamManager;
-import dev.ftb.mods.ftbteams.data.KnownClientPlayer;
+import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
+import dev.ftb.mods.ftbteams.api.client.KnownClientPlayer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
@@ -24,7 +23,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 
 import java.util.List;
-import java.util.Objects;
 
 /**
  * @author LatvianModder
@@ -60,7 +58,7 @@ public class ClientQuestFile extends QuestFile {
 		INSTANCE = this;
 
 		refreshGui();
-		FTBQuestsJEIHelper.refresh(this);
+		FTBQuests.getRecipeModHelper().refreshRecipes(this);
 	}
 
 	@Override
@@ -137,7 +135,9 @@ public class ClientQuestFile extends QuestFile {
 
 	@Override
 	public TeamData getData(Entity player) {
-		return player == Minecraft.getInstance().player ? self : getData(Objects.requireNonNull(ClientTeamManager.INSTANCE.getKnownPlayer(player.getUUID()), "Non-null team required!").teamId);
+		KnownClientPlayer kcp = FTBTeamsAPI.api().getClientManager().getKnownPlayer(player.getUUID())
+				.orElseThrow(() -> new RuntimeException("Unknown client player " + player.getUUID()));
+		return kcp.id().equals(Minecraft.getInstance().player.getUUID()) ? self : getData(kcp.teamId());
 	}
 
 	public void setPersistedScreenInfo(QuestScreen.PersistedData persistedData) {
@@ -154,7 +154,8 @@ public class ClientQuestFile extends QuestFile {
 
 	@Override
 	public boolean isPlayerOnTeam(Player player, TeamData teamData) {
-		KnownClientPlayer knownPlayer = ClientTeamManager.INSTANCE.getKnownPlayer(player.getUUID());
-		return knownPlayer != null && knownPlayer.teamId.equals(teamData.uuid);
+		return FTBTeamsAPI.api().getClientManager().getKnownPlayer(player.getUUID())
+				.map(kcp -> kcp.teamId().equals(teamData.uuid))
+				.orElse(false);
 	}
 }

@@ -1,9 +1,11 @@
 package dev.ftb.mods.ftbquests.client;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import com.mojang.blaze3d.vertex.PoseStack;
 import dev.architectury.event.EventResult;
-import dev.architectury.event.events.client.*;
+import dev.architectury.event.events.client.ClientGuiEvent;
+import dev.architectury.event.events.client.ClientLifecycleEvent;
+import dev.architectury.event.events.client.ClientPlayerEvent;
+import dev.architectury.event.events.client.ClientTickEvent;
 import dev.architectury.registry.client.rendering.BlockEntityRendererRegistry;
 import dev.architectury.registry.client.rendering.ColorHandlerRegistry;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
@@ -25,6 +27,7 @@ import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -73,8 +76,8 @@ public class FTBQuestsClientEventHandler {
 		CustomClickEvent.EVENT.register(this::onCustomClick);
 		ClientTickEvent.CLIENT_PRE.register(this::onClientTick);
 		ClientGuiEvent.RENDER_HUD.register(this::onScreenRender);
-		ClientTextureStitchEvent.PRE.register(this::onTextureStitchPre);
-		ClientTextureStitchEvent.POST.register(this::onTextureStitchPost);
+//		ClientTextureStitchEvent.PRE.register(this::onTextureStitchPre);
+//		ClientTextureStitchEvent.POST.register(this::onTextureStitchPost);
 		ClientPlayerEvent.CLIENT_PLAYER_QUIT.register(this::onPlayerLogout);
 	}
 
@@ -88,6 +91,8 @@ public class FTBQuestsClientEventHandler {
 			stitcher.accept(TR_ENERGY_FULL_TEXTURE);
 		}
 	}
+
+	// FIXME where to initialise these now?
 
 	private void onTextureStitchPost(TextureAtlas textureAtlas) {
 		if (textureAtlas.location().equals(InventoryMenu.BLOCK_ATLAS)) {
@@ -112,7 +117,7 @@ public class FTBQuestsClientEventHandler {
 	}
 
 	private void onSidebarButtonCreated(SidebarButtonCreatedEvent event) {
-		if (event.getButton().id.equals(QUESTS_BUTTON)) {
+		if (event.getButton().getId().equals(QUESTS_BUTTON)) {
 			event.getButton().setCustomTextHandler(() ->
 			{
 				if (ClientQuestFile.exists()) {
@@ -260,7 +265,7 @@ public class FTBQuestsClientEventHandler {
 
 	}
 
-	private void onScreenRender(PoseStack matrixStack, float tickDelta) {
+	private void onScreenRender(GuiGraphics graphics, float tickDelta) {
 		if (!ClientQuestFile.exists()) {
 			return;
 		}
@@ -275,17 +280,17 @@ public class FTBQuestsClientEventHandler {
 			MutableComponent cot = currentlyObserving.getMutableTitle().withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE);
 			int sw = mc.font.width(cot);
 			int bw = Math.max(sw, 100);
-			Color4I.DARK_GRAY.withAlpha(130).draw(matrixStack, cx - bw / 2 - 3, cy - 63, bw + 6, 29);
-			GuiHelper.drawHollowRect(matrixStack, cx - bw / 2 - 3, cy - 63, bw + 6, 29, Color4I.DARK_GRAY, false);
+			Color4I.DARK_GRAY.withAlpha(130).draw(graphics, cx - bw / 2 - 3, cy - 63, bw + 6, 29);
+			GuiHelper.drawHollowRect(graphics, cx - bw / 2 - 3, cy - 63, bw + 6, 29, Color4I.DARK_GRAY, false);
 
-			mc.font.drawShadow(matrixStack, cot, cx - sw / 2F, cy - 60, 0xFFFFFF);
+			graphics.drawString(mc.font, cot, cx - sw / 2, cy - 60, 0xFFFFFF);
 			double completed = (currentlyObservingTicks + tickDelta) / (double) currentlyObserving.timer;
 
-			GuiHelper.drawHollowRect(matrixStack, cx - bw / 2, cy - 49, bw, 12, Color4I.DARK_GRAY, false);
-			Color4I.LIGHT_BLUE.withAlpha(130).draw(matrixStack, cx - bw / 2 + 1, cy - 48, (int) ((bw - 2D) * completed), 10);
+			GuiHelper.drawHollowRect(graphics, cx - bw / 2, cy - 49, bw, 12, Color4I.DARK_GRAY, false);
+			Color4I.LIGHT_BLUE.withAlpha(130).draw(graphics, cx - bw / 2 + 1, cy - 48, (int) ((bw - 2D) * completed), 10);
 
 			String cop = (currentlyObservingTicks * 100L / currentlyObserving.timer) + "%";
-			mc.font.drawShadow(matrixStack, cop, cx - mc.font.width(cop) / 2F, cy - 47, 0xFFFFFF);
+			graphics.drawString(mc.font, cop, cx - mc.font.width(cop) / 2, cy - 47, 0xFFFFFF);
 		}
 
 		if (!pinnedQuestText.isEmpty()) {
@@ -296,17 +301,17 @@ public class FTBQuestsClientEventHandler {
 
 			float scale = ThemeProperties.PINNED_QUEST_SIZE.get(file).floatValue();
 
-			matrixStack.pushPose();
-			matrixStack.translate(mc.getWindow().getGuiScaledWidth() - width * scale - 8D, cy - pinnedQuestText.size() * 4.5D * scale, 100);
-			matrixStack.scale(scale, scale, 1F);
+			graphics.pose().pushPose();
+			graphics.pose().translate(mc.getWindow().getGuiScaledWidth() - width * scale - 8D, cy - pinnedQuestText.size() * 4.5D * scale, 100);
+			graphics.pose().scale(scale, scale, 1F);
 
-			Color4I.BLACK.withAlpha(100).draw(matrixStack, 0, 0, width + 8, pinnedQuestText.size() * 9 + 8);
+			Color4I.BLACK.withAlpha(100).draw(graphics, 0, 0, width + 8, pinnedQuestText.size() * 9 + 8);
 
 			for (int i = 0; i < pinnedQuestText.size(); i++) {
-				mc.font.drawShadow(matrixStack, pinnedQuestText.get(i), 4, i * 9 + 4, 0xFFFFFFFF);
+				graphics.drawString(mc.font, pinnedQuestText.get(i), 4, i * mc.font.lineHeight + 4, 0xFFFFFFFF);
 			}
 
-			matrixStack.popPose();
+			graphics.pose().popPose();
 		}
 	}
 }

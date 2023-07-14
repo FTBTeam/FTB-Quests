@@ -1,22 +1,22 @@
 package dev.ftb.mods.ftbquests.gui;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.ui.*;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.util.StringUtils;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
-import dev.ftb.mods.ftblibrary.util.WrappedIngredient;
+import dev.ftb.mods.ftblibrary.util.client.PositionedIngredient;
 import dev.ftb.mods.ftbquests.quest.QuestShape;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.Mth;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author LatvianModder
@@ -39,26 +39,25 @@ public class RewardNotificationsScreen extends BaseScreen implements IRewardList
 		}
 
 		@Override
-		public void draw(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
+		public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
 			GuiHelper.setupDrawing();
-			QuestShape.get("rsquare").outline.draw(matrixStack, x, y, w, h);
-			key.icon.draw(matrixStack, x + 3, y + 3, 16, 16);
+			QuestShape.get("rsquare").outline.draw(graphics, x, y, w, h);
+			key.icon.draw(graphics, x + 3, y + 3, 16, 16);
 
 			int count = rewards.getInt(key);
 
 			if (count > 1) {
-				matrixStack.pushPose();
-				matrixStack.translate(0, 0, 600);
-				MutableComponent s = Component.literal(StringUtils.formatDouble(count, true)).withStyle(ChatFormatting.YELLOW);
-				theme.drawString(matrixStack, s, x + 22 - theme.getStringWidth(s), y + 12, Theme.SHADOW);
-				matrixStack.popPose();
+				graphics.pose().pushPose();
+				graphics.pose().translate(0, 0, 600);
+				Component s = Component.literal(StringUtils.formatDouble(count, true)).withStyle(ChatFormatting.YELLOW);
+				theme.drawString(graphics, s, x + 22 - theme.getStringWidth(s), y + 12, Theme.SHADOW);
+				graphics.pose().popPose();
 			}
 		}
 
 		@Override
-		@Nullable
-		public Object getIngredientUnderMouse() {
-			return new WrappedIngredient(key.icon.getIngredient()).tooltip();
+		public Optional<PositionedIngredient> getIngredientUnderMouse() {
+			return PositionedIngredient.of(key.icon.getIngredient(), this, true);
 		}
 	}
 
@@ -68,7 +67,7 @@ public class RewardNotificationsScreen extends BaseScreen implements IRewardList
 
 	public RewardNotificationsScreen() {
 		rewards = new Object2IntOpenHashMap<>();
-		closeButton = new SimpleTextButton(this, Component.translatable("gui.close"), Color4I.EMPTY) {
+		closeButton = new SimpleTextButton(this, Component.translatable("gui.close"), Color4I.empty()) {
 			@Override
 			public void onClicked(MouseButton button) {
 				playClickSound();
@@ -122,13 +121,13 @@ public class RewardNotificationsScreen extends BaseScreen implements IRewardList
 	}
 
 	@Override
-	public void drawBackground(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
-		matrixStack.pushPose();
-		matrixStack.translate((int) (w / 2D), (int) (h / 5D), 0);
-		matrixStack.scale(2, 2, 1);
+	public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+		graphics.pose().pushPose();
+		graphics.pose().translate((int) (w / 2D), (int) (h / 5D), 0);
+		graphics.pose().scale(2, 2, 1);
 		MutableComponent s = Component.translatable("ftbquests.rewards");
-		theme.drawString(matrixStack, s, -theme.getStringWidth(s) / 2F, 0, Color4I.WHITE, 0);
-		matrixStack.popPose();
+		theme.drawString(graphics, s, -theme.getStringWidth(s) / 2, 0, Color4I.WHITE, 0);
+		graphics.pose().popPose();
 	}
 
 	@Override

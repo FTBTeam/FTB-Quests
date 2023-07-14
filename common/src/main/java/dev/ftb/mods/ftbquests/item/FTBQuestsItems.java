@@ -1,13 +1,19 @@
 package dev.ftb.mods.ftbquests.item;
 
+import dev.architectury.registry.CreativeTabRegistry;
 import dev.architectury.registry.registries.DeferredRegister;
+import dev.architectury.registry.registries.RegistrarManager;
 import dev.architectury.registry.registries.RegistrySupplier;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.block.FTBQuestsBlocks;
 import dev.ftb.mods.ftbquests.item.ScreenBlockItem.ScreenSize;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 
 import java.util.function.Supplier;
@@ -16,7 +22,7 @@ import java.util.function.Supplier;
  * @author LatvianModder
  */
 public class FTBQuestsItems {
-	public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(FTBQuests.MOD_ID, Registry.ITEM_REGISTRY);
+	public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(FTBQuests.MOD_ID, Registries.ITEM);
 
 	public static final RegistrySupplier<Item> BOOK = ITEMS.register("book", QuestBookItem::new);
 	public static final RegistrySupplier<Item> LOOTCRATE = ITEMS.register("lootcrate", LootCrateItem::new);
@@ -24,7 +30,7 @@ public class FTBQuestsItems {
 	public static final RegistrySupplier<Item> CUSTOM_ICON = ITEMS.register("custom_icon", CustomIconItem::new);
 
 	private static RegistrySupplier<Item> blockItem(String id, Supplier<Block> b) {
-		return ITEMS.register(id, () -> new BlockItem(b.get(), new Item.Properties().tab(FTBQuests.ITEM_GROUP)));
+		return ITEMS.register(id, () -> new BlockItem(b.get(), defaultProps()));
 	}
 
 	private static RegistrySupplier<Item> blockItemFor(String id, Supplier<BlockItem> bi) {
@@ -48,5 +54,14 @@ public class FTBQuestsItems {
 
 	public static void register() {
 		ITEMS.register();
+	}
+
+	public static final RegistrySupplier<CreativeModeTab> CREATIVE_TAB = RegistrarManager.get(FTBQuests.MOD_ID)
+			.get(Registries.CREATIVE_MODE_TAB)
+			.register(new ResourceLocation(FTBQuests.MOD_ID, "default"),
+					() -> CreativeTabRegistry.create(Component.translatable("ftbquests"), () -> new ItemStack(BOOK.get())));;
+
+	public static Item.Properties defaultProps() {
+		return new Item.Properties().arch$tab(CREATIVE_TAB);
 	}
 }

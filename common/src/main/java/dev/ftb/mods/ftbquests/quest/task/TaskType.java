@@ -65,13 +65,12 @@ public final class TaskType {
 			public void openCreationGui(Runnable gui, Quest quest, Consumer<Task> callback) {
 				Task task = provider.create(quest);
 
-				if (task instanceof ISingleLongValueTask) {
-					ISingleLongValueTask t = (ISingleLongValueTask) task;
-					LongConfig c = new LongConfig(t.getMinConfigValue(), t.getMaxConfigValue());
+				if (task instanceof ISingleLongValueTask slvTask) {
+					LongConfig c = new LongConfig(slvTask.getMinConfigValue(), slvTask.getMaxConfigValue());
 
-					EditConfigFromStringScreen.open(c, t.getDefaultConfigValue(), t.getDefaultConfigValue(), accepted -> {
+					EditConfigFromStringScreen.open(c, slvTask.getDefaultConfigValue(), slvTask.getDefaultConfigValue(), accepted -> {
 						if (accepted) {
-							((ISingleLongValueTask) task).setValue(c.value);
+							slvTask.setValue(c.getValue());
 							callback.accept(task);
 						}
 						gui.run();
@@ -79,14 +78,13 @@ public final class TaskType {
 					return;
 				}
 
-				ConfigGroup group = new ConfigGroup(FTBQuests.MOD_ID);
-				task.getConfig(task.createSubGroup(group));
-				group.savedCallback = accepted -> {
+				ConfigGroup group = new ConfigGroup(FTBQuests.MOD_ID, accepted -> {
 					if (accepted) {
 						callback.accept(task);
 					}
 					gui.run();
-				};
+				});
+				task.fillConfigGroup(task.createSubGroup(group));
 				new EditConfigScreen(group).openGui();
 			}
 		};

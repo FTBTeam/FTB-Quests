@@ -9,7 +9,7 @@ import dev.ftb.mods.ftbquests.quest.TeamData;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -36,7 +36,7 @@ public class StructureTask extends BooleanTask {
 
 	public StructureTask(Quest quest) {
 		super(quest);
-		structure = Either.left(ResourceKey.create(Registry.STRUCTURE_REGISTRY, DEFAULT_STRUCTURE));
+		structure = Either.left(ResourceKey.create(Registries.STRUCTURE, DEFAULT_STRUCTURE));
 	}
 
 	public static void syncKnownStructureList(List<String> data) {
@@ -76,8 +76,8 @@ public class StructureTask extends BooleanTask {
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public void getConfig(ConfigGroup config) {
-		super.getConfig(config);
+	public void fillConfigGroup(ConfigGroup config) {
+		super.fillConfigGroup(config);
 		if (KNOWN_STRUCTURES.isEmpty()) {
 			// should not normally be the case, but as a defensive fallback...
 			config.addString("structure", getStructure(), this::setStructure, "minecraft:mineshaft");
@@ -108,7 +108,7 @@ public class StructureTask extends BooleanTask {
 	public boolean canSubmit(TeamData teamData, ServerPlayer player) {
 		if (player.isSpectator()) return false;
 
-		ServerLevel level = (ServerLevel) player.level;
+		ServerLevel level = (ServerLevel) player.level();
 		return structure.map(
 				key -> level.structureManager().getStructureWithPieceAt(player.blockPosition(), key).isValid(),
 				tag -> level.structureManager().getStructureWithPieceAt(player.blockPosition(), tag).isValid()
@@ -117,8 +117,8 @@ public class StructureTask extends BooleanTask {
 
 	private void setStructure(String resLoc) {
 		structure = resLoc.startsWith("#") ?
-				Either.right(TagKey.create(Registry.STRUCTURE_REGISTRY, safeResourceLocation(resLoc.substring(1), DEFAULT_STRUCTURE))) :
-				Either.left(ResourceKey.create(Registry.STRUCTURE_REGISTRY, safeResourceLocation(resLoc, DEFAULT_STRUCTURE)));
+				Either.right(TagKey.create(Registries.STRUCTURE, safeResourceLocation(resLoc.substring(1), DEFAULT_STRUCTURE))) :
+				Either.left(ResourceKey.create(Registries.STRUCTURE, safeResourceLocation(resLoc, DEFAULT_STRUCTURE)));
 	}
 
 	private String getStructure() {

@@ -36,7 +36,7 @@ public interface TaskTypes {
 	TaskType BIOME = register(new ResourceLocation(FTBQuests.MOD_ID, "biome"), BiomeTask::new, () -> Icon.getIcon("minecraft:block/oak_sapling"));
 	TaskType STRUCTURE = register(new ResourceLocation(FTBQuests.MOD_ID, "structure"), StructureTask::new, () -> Icon.getIcon("minecraft:item/filled_map"));
 	TaskType STAGE = TaskTypes.register(new ResourceLocation(FTBQuests.MOD_ID, "gamestage"), StageTask::new, () -> Icons.CONTROLLER);
-	TaskType FLUID = TaskTypes.register(new ResourceLocation(FTBQuests.MOD_ID, "fluid"), FluidTask::new, () -> Icon.getIcon(Optional.ofNullable(FluidStackHooks.getStillTexture(Fluids.WATER)).map(TextureAtlasSprite::getName).map(ResourceLocation::toString).orElse("missingno")).combineWith(Icon.getIcon(FluidTask.TANK_TEXTURE.toString())));
+	TaskType FLUID = TaskTypes.register(new ResourceLocation(FTBQuests.MOD_ID, "fluid"), FluidTask::new, () -> Icon.getIcon(Optional.ofNullable(FluidStackHooks.getStillTexture(Fluids.WATER)).map(TextureAtlasSprite::atlasLocation).map(ResourceLocation::toString).orElse("missingno")).combineWith(Icon.getIcon(FluidTask.TANK_TEXTURE.toString())));
 
 	static void init() {
 	}

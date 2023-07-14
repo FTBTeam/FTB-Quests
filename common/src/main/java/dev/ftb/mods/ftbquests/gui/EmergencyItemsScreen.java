@@ -6,16 +6,18 @@ import dev.ftb.mods.ftblibrary.ui.*;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.util.TimeUtils;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
+import dev.ftb.mods.ftblibrary.util.client.PositionedIngredient;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.net.GetEmergencyItemsMessage;
 import dev.ftb.mods.ftbquests.quest.QuestShape;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author LatvianModder
@@ -45,23 +47,22 @@ public class EmergencyItemsScreen extends BaseScreen {
 		}
 
 		@Override
-		public void draw(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
+		public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
 			GuiHelper.setupDrawing();
-			QuestShape.get("rsquare").outline.draw(matrixStack, x - 3, y - 3, w + 6, h + 6);
-			matrixStack.pushPose();
-			matrixStack.translate(x + w / 2D, y + h / 2D, 100);
-			GuiHelper.drawItem(matrixStack, stack, 0, true, null);
-			matrixStack.popPose();
+			QuestShape.get("rsquare").outline.draw(graphics, x - 3, y - 3, w + 6, h + 6);
+			graphics.pose().pushPose();
+			graphics.pose().translate(x + w / 2D, y + h / 2D, 100);
+			GuiHelper.drawItem(graphics, stack, 0, true, null);
+			graphics.pose().popPose();
 		}
 
 		@Override
-		@Nullable
-		public Object getIngredientUnderMouse() {
-			return stack;
+		public Optional<PositionedIngredient> getIngredientUnderMouse() {
+			return PositionedIngredient.of(stack, this);
 		}
 	}
 
-	private final SimpleTextButton cancelButton = new SimpleTextButton(this, Component.translatable("gui.cancel"), Color4I.EMPTY) {
+	private final SimpleTextButton cancelButton = new SimpleTextButton(this, Component.translatable("gui.cancel"), Color4I.empty()) {
 		@Override
 		public void onClicked(MouseButton button) {
 			playClickSound();
@@ -98,7 +99,7 @@ public class EmergencyItemsScreen extends BaseScreen {
 	}
 
 	@Override
-	public void drawBackground(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
+	public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
 		long left = endTime - System.currentTimeMillis();
 
 		if (left <= 0L) {
@@ -111,24 +112,26 @@ public class EmergencyItemsScreen extends BaseScreen {
 			left = 0L;
 		}
 
-		matrixStack.pushPose();
-		matrixStack.translate((int) (w / 2D), (int) (h / 5D), 0);
-		matrixStack.scale(2F, 2F, 1F);
-		String s = I18n.get("ftbquests.file.emergency_items");
-		theme.drawString(matrixStack, s, -theme.getStringWidth(s) / 2F, 0, Color4I.WHITE, 0);
-		matrixStack.popPose();
+		PoseStack poseStack = graphics.pose();
 
-		matrixStack.pushPose();
-		matrixStack.translate((int) (w / 2D), (int) (h / 2.5D), 0);
-		matrixStack.scale(4F, 4F, 1F);
+		poseStack.pushPose();
+		poseStack.translate((int) (w / 2D), (int) (h / 5D), 0);
+		poseStack.scale(2F, 2F, 1F);
+		String s = I18n.get("ftbquests.file.emergency_items");
+		theme.drawString(graphics, s, -theme.getStringWidth(s) / 2, 0, Color4I.WHITE, 0);
+		poseStack.popPose();
+
+		poseStack.pushPose();
+		poseStack.translate((int) (w / 2D), (int) (h / 2.5D), 0);
+		poseStack.scale(4F, 4F, 1F);
 		s = left <= 0L ? "00:00" : TimeUtils.getTimeString(left / 1000L * 1000L + 1000L);
 		int x1 = -theme.getStringWidth(s) / 2;
-		theme.drawString(matrixStack, s, x1 - 1, 0, Color4I.BLACK, 0);
-		theme.drawString(matrixStack, s, x1 + 1, 0, Color4I.BLACK, 0);
-		theme.drawString(matrixStack, s, x1, 1, Color4I.BLACK, 0);
-		theme.drawString(matrixStack, s, x1, -1, Color4I.BLACK, 0);
-		theme.drawString(matrixStack, s, x1, 0, Color4I.WHITE, 0);
-		matrixStack.popPose();
+		theme.drawString(graphics, s, x1 - 1, 0, Color4I.BLACK, 0);
+		theme.drawString(graphics, s, x1 + 1, 0, Color4I.BLACK, 0);
+		theme.drawString(graphics, s, x1, 1, Color4I.BLACK, 0);
+		theme.drawString(graphics, s, x1, -1, Color4I.BLACK, 0);
+		theme.drawString(graphics, s, x1, 0, Color4I.WHITE, 0);
+		poseStack.popPose();
 	}
 
 	@Override

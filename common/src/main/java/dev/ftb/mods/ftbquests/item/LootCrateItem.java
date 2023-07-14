@@ -1,6 +1,5 @@
 package dev.ftb.mods.ftbquests.item;
 
-import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.gui.RewardNotificationsScreen;
 import dev.ftb.mods.ftbquests.quest.loot.LootCrate;
@@ -8,7 +7,6 @@ import dev.ftb.mods.ftbquests.quest.loot.WeightedReward;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.NonNullList;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
@@ -19,7 +17,10 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.*;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Rarity;
+import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -31,7 +32,7 @@ import java.util.List;
  */
 public class LootCrateItem extends Item {
 	public LootCrateItem() {
-		super(new Properties().tab(FTBQuests.ITEM_GROUP));
+		super(FTBQuestsItems.defaultProps());
 	}
 
 	@Nullable
@@ -97,14 +98,14 @@ public class LootCrateItem extends Item {
 		return Rarity.UNCOMMON;
 	}
 
-	@Override
-	public void fillItemCategory(CreativeModeTab tab, NonNullList<ItemStack> items) {
-		if (allowedIn(tab)) {
-			for (LootCrate lootCrate : LootCrate.LOOT_CRATES.values()) {
-				items.add(lootCrate.createStack());
-			}
-		}
-	}
+//	@Override
+//	public void fillItemCategory(CreativeModeTab tab, NonNullList<ItemStack> items) {
+//		if (allowedIn(tab)) {
+//			for (LootCrate lootCrate : LootCrate.LOOT_CRATES.values()) {
+//				items.add(lootCrate.createStack());
+//			}
+//		}
+//	}
 
 	@Override
 	@Environment(EnvType.CLIENT)

@@ -59,8 +59,8 @@ public class XPLevelsReward extends Reward {
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public void getConfig(ConfigGroup config) {
-		super.getConfig(config);
+	public void fillConfigGroup(ConfigGroup config) {
+		super.fillConfigGroup(config);
 		config.addInt("xp_levels", xpLevels, v -> xpLevels = v, 1, 1, Integer.MAX_VALUE).setNameKey("ftbquests.reward.ftbquests.xp_levels");
 	}
 
@@ -69,7 +69,7 @@ public class XPLevelsReward extends Reward {
 		player.giveExperienceLevels(xpLevels);
 
 		if (notify) {
-			new DisplayRewardToastMessage(id, Component.translatable("ftbquests.reward.ftbquests.xp_levels").append(": ").append(Component.literal("+" + xpLevels).withStyle(ChatFormatting.GREEN)), Color4I.EMPTY).sendTo(player);
+			new DisplayRewardToastMessage(id, Component.translatable("ftbquests.reward.ftbquests.xp_levels").append(": ").append(Component.literal("+" + xpLevels).withStyle(ChatFormatting.GREEN)), Color4I.empty()).sendTo(player);
 		}
 	}
 

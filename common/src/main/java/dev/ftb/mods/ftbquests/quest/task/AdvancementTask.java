@@ -68,8 +68,8 @@ public class AdvancementTask extends BooleanTask {
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public void getConfig(ConfigGroup config) {
-		super.getConfig(config);
+	public void fillConfigGroup(ConfigGroup config) {
+		super.fillConfigGroup(config);
 
 		if (KnownServerRegistries.client != null && !KnownServerRegistries.client.advancements.isEmpty()) {
 			Map<ResourceLocation, KnownServerRegistries.AdvancementInfo> advancements = KnownServerRegistries.client.advancements;

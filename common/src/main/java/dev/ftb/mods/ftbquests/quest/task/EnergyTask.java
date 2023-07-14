@@ -81,8 +81,8 @@ public abstract class EnergyTask extends Task implements ISingleLongValueTask {
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public void getConfig(ConfigGroup config) {
-		super.getConfig(config);
+	public void fillConfigGroup(ConfigGroup config) {
+		super.fillConfigGroup(config);
 		config.addLong("value", value, v -> value = v, 1000L, 1L, Long.MAX_VALUE);
 		config.addLong("max_input", maxInput, v -> maxInput = v, 1000L, 0L, Integer.MAX_VALUE).setNameKey("ftbquests.task.max_input");
 	}

@@ -65,8 +65,8 @@ public class AdvancementReward extends Reward {
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public void getConfig(ConfigGroup config) {
-		super.getConfig(config);
+	public void fillConfigGroup(ConfigGroup config) {
+		super.fillConfigGroup(config);
 
 		if (KnownServerRegistries.client != null && !KnownServerRegistries.client.advancements.isEmpty()) {
 			config.addEnum("advancement", advancement, v -> advancement = v, NameMap.of(KnownServerRegistries.client.advancements.keySet().iterator().next(), KnownServerRegistries.client.advancements.keySet().toArray(new ResourceLocation[0]))

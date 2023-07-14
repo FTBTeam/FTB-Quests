@@ -1,8 +1,8 @@
 package dev.ftb.mods.ftbquests.gui.quests;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import dev.ftb.mods.ftblibrary.ui.Theme;
 import dev.ftb.mods.ftblibrary.ui.Widget;
+import net.minecraft.client.gui.GuiGraphics;
 
 public class ExpandChaptersButton extends Widget {
 	private final QuestScreen questScreen;
@@ -13,9 +13,9 @@ public class ExpandChaptersButton extends Widget {
 	}
 
 	@Override
-	public void draw(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
+	public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
 		if (!questScreen.chapterPanel.expanded) {
-			ChapterPanel.ARROW_COLLAPSED.draw(matrixStack, x + (w - 12) / 2, y + (h - 12) / 2, 12, 12);
+			ChapterPanel.ARROW_COLLAPSED.draw(graphics, x + (w - 12) / 2, y + (h - 12) / 2, 12, 12);
 		}
 	}
 

@@ -9,6 +9,7 @@ import dev.ftb.mods.ftblibrary.math.Bits;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.client.ConfigIconItemStack;
+import dev.ftb.mods.ftbquests.integration.RecipeModHelper;
 import dev.ftb.mods.ftbquests.item.CustomIconItem;
 import dev.ftb.mods.ftbquests.net.EditObjectMessage;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
@@ -226,7 +227,7 @@ public abstract class QuestObjectBase {
 	}
 
 	@Environment(EnvType.CLIENT)
-	public void getConfig(ConfigGroup config) {
+	public void fillConfigGroup(ConfigGroup config) {
 		if (hasTitleConfig()) {
 			config.addString("title", title, v -> title = v, "").setNameKey("ftbquests.title").setOrder(-127);
 		}
@@ -315,20 +316,18 @@ public abstract class QuestObjectBase {
 	}
 
 	public ConfigGroup createSubGroup(ConfigGroup group) {
-		return group.getGroup(getObjectType().id);
+		return group.getOrCreateSubgroup(getObjectType().id);
 	}
 
 	@Environment(EnvType.CLIENT)
 	public void onEditButtonClicked(Runnable gui) {
-		ConfigGroup group = new ConfigGroup(FTBQuests.MOD_ID);
-		getConfig(createSubGroup(group));
-
-		group.savedCallback = accepted -> {
+		ConfigGroup group = new ConfigGroup(FTBQuests.MOD_ID, accepted -> {
 			gui.run();
 			if (accepted && validateEditedConfig()) {
 				new EditObjectMessage(this).sendToServer();
 			}
-		};
+		});
+		fillConfigGroup(createSubGroup(group));
 
 		new EditConfigScreen(group).openGui();
 	}
@@ -337,7 +336,7 @@ public abstract class QuestObjectBase {
 		return true;
 	}
 
-	public int refreshJEI() {
-		return 0;
+	public Set<RecipeModHelper.Components> componentsToRefresh() {
+		return EnumSet.noneOf(RecipeModHelper.Components.class);
 	}
 }

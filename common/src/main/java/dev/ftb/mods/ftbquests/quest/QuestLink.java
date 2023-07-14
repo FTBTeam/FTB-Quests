@@ -2,7 +2,7 @@ package dev.ftb.mods.ftbquests.quest;
 
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.icon.Icon;
-import dev.ftb.mods.ftblibrary.util.ClientUtils;
+import dev.ftb.mods.ftblibrary.util.client.ClientUtils;
 import dev.ftb.mods.ftbquests.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.net.MoveMovableMessage;
 import net.fabricmc.api.EnvType;
@@ -76,8 +76,8 @@ public class QuestLink extends QuestObject implements Movable {
     }
 
     @Override
-    public void getConfig(ConfigGroup config) {
-        super.getConfig(config);
+    public void fillConfigGroup(ConfigGroup config) {
+        super.fillConfigGroup(config);
 
         config.addEnum("shape", shape.isEmpty() ? "default" : shape, v -> shape = v.equals("default") ? "" : v, QuestShape.idMapWithDefault);
         config.addDouble("size", size, v -> size = v, 1, 0.0625D, 8D);

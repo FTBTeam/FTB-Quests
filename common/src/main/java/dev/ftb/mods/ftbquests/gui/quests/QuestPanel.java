@@ -2,8 +2,7 @@ package dev.ftb.mods.ftbquests.gui.quests;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
-import com.mojang.math.Matrix4f;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import dev.ftb.mods.ftblibrary.config.ImageConfig;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
@@ -23,12 +22,14 @@ import dev.ftb.mods.ftbquests.quest.task.TaskType;
 import dev.ftb.mods.ftbquests.quest.task.TaskTypes;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix4f;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -151,7 +152,7 @@ public class QuestPanel extends Panel {
 	}
 
 	@Override
-	public void drawOffsetBackground(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
+	public void drawOffsetBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
 		if (questScreen.selectedChapter == null || questScreen.file.self == null) {
 			return;
 		}
@@ -161,7 +162,7 @@ public class QuestPanel extends Panel {
 		widgets.stream()
 				.filter(o -> o instanceof ChapterImageButton)
 				.sorted(Comparator.comparingInt(o -> ((ChapterImageButton) o).chapterImage.getOrder()))
-				.forEach(o -> o.draw(matrixStack, theme, o.getX(), o.getY(), o.width, o.height));
+				.forEach(o -> o.draw(graphics, theme, o.getX(), o.getY(), o.width, o.height));
 
 		Tesselator tesselator = Tesselator.getInstance();
 		BufferBuilder buffer = tesselator.getBuilder();
@@ -210,7 +211,7 @@ public class QuestPanel extends Panel {
 							b = c.bluei();
 							a = 180;
 						}
-						renderConnection(widget, button, matrixStack, buffer, lineWidth, r, g, b, a, a, mu, tesselator);
+						renderConnection(widget, button, graphics.pose(), buffer, lineWidth, r, g, b, a, a, mu, tesselator);
 					}
 				}
 			}
@@ -246,28 +247,28 @@ public class QuestPanel extends Panel {
 					} else {
 						continue;
 					}
-					renderConnection(widget, button, matrixStack, buffer, lineWidth, r, g, b, a2, a, ms, tesselator);
+					renderConnection(widget, button, graphics.pose(), buffer, lineWidth, r, g, b, a2, a, ms, tesselator);
 				}
 			}
 
 		}
 		toOutline.forEach(qb -> {
-			QuestShape.get(qb.quest.getShape()).shape.withColor(Color4I.BLACK.withAlpha(30)).draw(matrixStack, qb.getX(), qb.getY(), qb.width, qb.height);
-			QuestShape.get(qb.quest.getShape()).outline.withColor(Color4I.BLACK.withAlpha(90)).draw(matrixStack, qb.getX(), qb.getY(), qb.width, qb.height);
+			QuestShape.get(qb.quest.getShape()).shape.withColor(Color4I.BLACK.withAlpha(30)).draw(graphics, qb.getX(), qb.getY(), qb.width, qb.height);
+			QuestShape.get(qb.quest.getShape()).outline.withColor(Color4I.BLACK.withAlpha(90)).draw(graphics, qb.getX(), qb.getY(), qb.width, qb.height);
 		});
 	}
 
-	private void renderConnection(Widget widget, QuestButton button, PoseStack matrixStack, BufferBuilder buffer, float s, int r, int g, int b, int a, int a1, float mu, Tesselator tesselator) {
+	private void renderConnection(Widget widget, QuestButton button, PoseStack poseStack, BufferBuilder buffer, float s, int r, int g, int b, int a, int a1, float mu, Tesselator tesselator) {
 		int sx = widget.getX() + widget.width / 2;
 		int sy = widget.getY() + widget.height / 2;
 		int ex = button.getX() + button.width / 2;
 		int ey = button.getY() + button.height / 2;
 		float len = (float) MathUtils.dist(sx, sy, ex, ey);
 
-		matrixStack.pushPose();
-		matrixStack.translate(sx, sy, 0);
-		matrixStack.mulPose(Vector3f.ZP.rotation((float) Math.atan2(ey - sy, ex - sx)));
-		Matrix4f m = matrixStack.last().pose();
+		poseStack.pushPose();
+		poseStack.translate(sx, sy, 0);
+		poseStack.mulPose(Axis.ZP.rotation((float) Math.atan2(ey - sy, ex - sx)));
+		Matrix4f m = poseStack.last().pose();
 
 		buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_TEX);
 		buffer.vertex(m, 0, -s, 0).color(r, g, b, a).uv(len / s / 2F + mu, 0).endVertex();
@@ -276,12 +277,12 @@ public class QuestPanel extends Panel {
 		buffer.vertex(m, len, -s, 0).color(r * 3 / 4, g * 3 / 4, b * 3 / 4, a1).uv(mu, 0).endVertex();
 		tesselator.end();
 
-		matrixStack.popPose();
+		poseStack.popPose();
 	}
 
 	@Override
-	public void draw(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
-		super.draw(matrixStack, theme, x, y, w, h);
+	public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+		super.draw(graphics, theme, x, y, w, h);
 
 		if (questScreen.selectedChapter != null && isMouseOver()) {
 			//updateMinMax();
@@ -311,21 +312,23 @@ public class QuestPanel extends Panel {
 			}
 
 			if (questScreen.file.canEdit()) {
-				matrixStack.pushPose();
-				matrixStack.translate(0, 0, 600);
-				theme.drawString(matrixStack, "X:" + (questX < 0 ? "" : " ") + StringUtils.DOUBLE_FORMATTER_00.format(questX), x + 3, y + h - 18, Theme.SHADOW);
-				theme.drawString(matrixStack, "Y:" + (questY < 0 ? "" : " ") + StringUtils.DOUBLE_FORMATTER_00.format(questY), x + 3, y + h - 10, Theme.SHADOW);
+				PoseStack poseStack = graphics.pose();
+
+				poseStack.pushPose();
+				poseStack.translate(0, 0, 600);
+				theme.drawString(graphics, "X:" + (questX < 0 ? "" : " ") + StringUtils.DOUBLE_FORMATTER_00.format(questX), x + 3, y + h - 18, Theme.SHADOW);
+				theme.drawString(graphics, "Y:" + (questY < 0 ? "" : " ") + StringUtils.DOUBLE_FORMATTER_00.format(questY), x + 3, y + h - 10, Theme.SHADOW);
 
 				if (questScreen.movingObjects) {
-					theme.drawString(matrixStack, "Moving", x + 3, y + h - 34, Theme.SHADOW);
+					theme.drawString(graphics, "Moving", x + 3, y + h - 34, Theme.SHADOW);
 				}
 				if (!questScreen.selectedObjects.isEmpty()) {
-					theme.drawString(matrixStack, "Selected: " + questScreen.selectedObjects.size(), x + 3, y + h - 26, Theme.SHADOW);
+					theme.drawString(graphics, "Selected: " + questScreen.selectedObjects.size(), x + 3, y + h - 26, Theme.SHADOW);
 				}
 
-				theme.drawString(matrixStack, "CX:" + (centerQuestX < 0 ? "" : " ") + StringUtils.DOUBLE_FORMATTER_00.format(centerQuestX), x + w - 42, y + h - 18, Theme.SHADOW);
-				theme.drawString(matrixStack, "CY:" + (centerQuestY < 0 ? "" : " ") + StringUtils.DOUBLE_FORMATTER_00.format(centerQuestY), x + w - 42, y + h - 10, Theme.SHADOW);
-				matrixStack.popPose();
+				theme.drawString(graphics, "CX:" + (centerQuestX < 0 ? "" : " ") + StringUtils.DOUBLE_FORMATTER_00.format(centerQuestX), x + w - 42, y + h - 18, Theme.SHADOW);
+				theme.drawString(graphics, "CY:" + (centerQuestY < 0 ? "" : " ") + StringUtils.DOUBLE_FORMATTER_00.format(centerQuestY), x + w - 42, y + h - 10, Theme.SHADOW);
+				poseStack.popPose();
 
 				double bs = questScreen.getQuestButtonSize();
 
@@ -344,13 +347,13 @@ public class QuestPanel extends Panel {
 						double oy = m.getY() - ominY;
 						double sx = (questX + ox - questMinX) / dx * questScreen.scrollWidth + px;
 						double sy = (questY + oy - questMinY) / dy * questScreen.scrollHeight + py;
-						matrixStack.pushPose();
-						matrixStack.translate(sx - bs * m.getWidth() / 2D, sy - bs * m.getHeight() / 2D, 0D);
-						matrixStack.scale((float) (bs * m.getWidth()), (float) (bs * m.getHeight()), 1F);
+						poseStack.pushPose();
+						poseStack.translate(sx - bs * m.getWidth() / 2D, sy - bs * m.getHeight() / 2D, 0D);
+						poseStack.scale((float) (bs * m.getWidth()), (float) (bs * m.getHeight()), 1F);
 						GuiHelper.setupDrawing();
 						RenderSystem.enableDepthTest();
-						m.drawMoved(matrixStack);
-						matrixStack.popPose();
+						m.drawMoved(graphics);
+						poseStack.popPose();
 					}
 
 					if (QuestScreen.grid && !questScreen.viewQuestPanel.viewingQuest()) {
@@ -359,33 +362,33 @@ public class QuestPanel extends Panel {
 						double boxW = omaxX / dx * questScreen.scrollWidth + px - boxX;
 						double boxH = omaxY / dy * questScreen.scrollHeight + py - boxY;
 
-						matrixStack.pushPose();
-						matrixStack.translate(0, 0, 1000);
-						GuiHelper.drawHollowRect(matrixStack, (int) boxX, (int) boxY, (int) boxW, (int) boxH, Color4I.WHITE.withAlpha(30), false);
-						matrixStack.popPose();
+						poseStack.pushPose();
+						poseStack.translate(0, 0, 1000);
+						GuiHelper.drawHollowRect(graphics, (int) boxX, (int) boxY, (int) boxW, (int) boxH, Color4I.WHITE.withAlpha(30), false);
+						poseStack.popPose();
 					}
 				} else if (!questScreen.viewQuestPanel.viewingQuest() || !questScreen.viewQuestPanel.isMouseOver()) {
 					//int z = treeGui.getZoom();
 					double sx = (questX - questMinX) / dx * questScreen.scrollWidth + px;
 					double sy = (questY - questMinY) / dy * questScreen.scrollHeight + py;
-					matrixStack.pushPose();
-					matrixStack.translate(sx - bs / 2D, sy - bs / 2D, 0D);
-					matrixStack.scale((float) bs, (float) bs, 1F);
+					poseStack.pushPose();
+					poseStack.translate(sx - bs / 2D, sy - bs / 2D, 0D);
+					poseStack.scale((float) bs, (float) bs, 1F);
 					GuiHelper.setupDrawing();
 					RenderSystem.enableDepthTest();
 					// TODO: custom shader to implement alphaFunc? for now however, rendering outline at alpha 30 works well
 					//RenderSystem.alphaFunc(GL11.GL_GREATER, 0.01F);
-					QuestShape.get(questScreen.selectedChapter.getDefaultQuestShape()).outline.withColor(Color4I.WHITE.withAlpha(30)).draw(matrixStack, 0, 0, 1, 1);
+					QuestShape.get(questScreen.selectedChapter.getDefaultQuestShape()).outline.withColor(Color4I.WHITE.withAlpha(30)).draw(graphics, 0, 0, 1, 1);
 					//RenderSystem.defaultAlphaFunc();
-					matrixStack.popPose();
+					poseStack.popPose();
 
 					if (QuestScreen.grid && !questScreen.viewQuestPanel.viewingQuest()) {
-						matrixStack.pushPose();
-						matrixStack.translate(0, 0, 1000);
-						Color4I.WHITE.draw(matrixStack, (int) sx, (int) sy, 1, 1);
-						Color4I.WHITE.withAlpha(30).draw(matrixStack, getX(), (int) sy, width, 1);
-						Color4I.WHITE.withAlpha(30).draw(matrixStack, (int) sx, getY(), 1, height);
-						matrixStack.popPose();
+						poseStack.pushPose();
+						poseStack.translate(0, 0, 1000);
+						Color4I.WHITE.draw(graphics, (int) sx, (int) sy, 1, 1);
+						Color4I.WHITE.withAlpha(30).draw(graphics, getX(), (int) sy, width, 1);
+						Color4I.WHITE.withAlpha(30).draw(graphics, (int) sx, getY(), 1, height);
+						poseStack.popPose();
 					}
 				}
 			}
@@ -503,7 +506,7 @@ public class QuestPanel extends Panel {
 		new SelectImagePreScreen(imageConfig, accepted -> {
 			if (accepted) {
 				playClickSound();
-				ChapterImage image = new ChapterImage(questScreen.selectedChapter).setImage(Icon.getIcon(imageConfig.value));
+				ChapterImage image = new ChapterImage(questScreen.selectedChapter).setImage(Icon.getIcon(imageConfig.getValue()));
 				image.x = qx;
 				image.y = qy;
 				image.fixupAspectRatio(true);
