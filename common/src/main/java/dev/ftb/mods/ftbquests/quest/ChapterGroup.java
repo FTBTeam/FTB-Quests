@@ -3,7 +3,7 @@ package dev.ftb.mods.ftbquests.quest;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.IconAnimation;
-import dev.ftb.mods.ftblibrary.util.ClientUtils;
+import dev.ftb.mods.ftblibrary.util.client.ClientUtils;
 import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
 import dev.ftb.mods.ftbquests.gui.quests.QuestScreen;
 import net.fabricmc.api.EnvType;
@@ -78,7 +78,7 @@ public class ChapterGroup extends QuestObject {
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public void getConfig(ConfigGroup config) {
+	public void fillConfigGroup(ConfigGroup config) {
 		config.addString("title", title, v -> title = v, "").setNameKey("ftbquests.title").setOrder(-127);
 	}
 

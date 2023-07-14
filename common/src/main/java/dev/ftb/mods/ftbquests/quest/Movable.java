@@ -1,9 +1,9 @@
 package dev.ftb.mods.ftbquests.quest;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.GuiGraphics;
 
 /**
  * @author LatvianModder
@@ -44,7 +44,7 @@ public interface Movable {
 	void onMoved(double x, double y, long chapterId);
 
 	@Environment(EnvType.CLIENT)
-	default void drawMoved(PoseStack matrixStack) {
-		QuestShape.get(getShape()).shape.withColor(Color4I.WHITE.withAlpha(30)).draw(matrixStack, 0, 0, 1, 1);
+	default void drawMoved(GuiGraphics graphics) {
+		QuestShape.get(getShape()).shape.withColor(Color4I.WHITE.withAlpha(30)).draw(graphics, 0, 0, 1, 1);
 	}
 }

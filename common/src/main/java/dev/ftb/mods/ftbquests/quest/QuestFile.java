@@ -9,7 +9,7 @@ import dev.ftb.mods.ftblibrary.snbt.SNBT;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.events.*;
-import dev.ftb.mods.ftbquests.integration.FTBQuestsJEIHelper;
+import dev.ftb.mods.ftbquests.integration.RecipeModHelper;
 import dev.ftb.mods.ftbquests.item.MissingItem;
 import dev.ftb.mods.ftbquests.net.DisplayCompletionToastMessage;
 import dev.ftb.mods.ftbquests.net.FTBQuestsNetHandler;
@@ -23,8 +23,8 @@ import dev.ftb.mods.ftbquests.quest.task.TaskType;
 import dev.ftb.mods.ftbquests.quest.task.TaskTypes;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import dev.ftb.mods.ftbquests.util.NetUtils;
-import dev.ftb.mods.ftbteams.FTBTeamsAPI;
-import dev.ftb.mods.ftbteams.data.TeamBase;
+import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
+import dev.ftb.mods.ftbteams.api.Team;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
@@ -40,9 +40,9 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.apache.commons.lang3.mutable.MutableInt;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -259,7 +259,7 @@ public abstract class QuestFile extends QuestObject {
 		return object instanceof Chapter ? (Chapter) object : null;
 	}
 
-	@Nonnull
+	@NotNull
 	public Chapter getChapterOrThrow(long id) {
 		if (getBase(id) instanceof Chapter c) return c;
 		throw new IllegalArgumentException("Unknown chapter ID: c");
@@ -1052,12 +1052,14 @@ public abstract class QuestFile extends QuestObject {
 		return teamData;
 	}
 
-	public TeamData getData(TeamBase team) {
+	public TeamData getData(Team team) {
 		return getData(Objects.requireNonNull(team, "Non-null team required!").getId());
 	}
 
 	public TeamData getData(Entity player) {
-		return getData(FTBTeamsAPI.getPlayerTeamID(player.getUUID()));
+		return FTBTeamsAPI.api().getManager().getTeamForPlayerID(player.getUUID())
+				.map(this::getData)
+				.orElse(null);
 	}
 
 	public Collection<TeamData> getAllData() {
@@ -1080,8 +1082,8 @@ public abstract class QuestFile extends QuestObject {
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public void getConfig(ConfigGroup config) {
-		super.getConfig(config);
+	public void fillConfigGroup(ConfigGroup config) {
+		super.fillConfigGroup(config);
 		config.addList("emergency_items", emergencyItems, new ItemStackConfig(false, false), ItemStack.EMPTY);
 		config.addInt("emergency_items_cooldown", emergencyItemsCooldown, v -> emergencyItemsCooldown = v, 300, 0, Integer.MAX_VALUE);
 		config.addBool("drop_loot_crates", dropLootCrates, v -> dropLootCrates = v, false);
@@ -1091,14 +1093,14 @@ public abstract class QuestFile extends QuestObject {
 		config.addEnum("progression_mode", progressionMode, v -> progressionMode = v, ProgressionMode.NAME_MAP_NO_DEFAULT);
 		config.addInt("detection_delay", detectionDelay, v -> detectionDelay = v, 20, 0, 200);
 
-		ConfigGroup defaultsGroup = config.getGroup("defaults");
+		ConfigGroup defaultsGroup = config.getOrCreateSubgroup("defaults");
 		defaultsGroup.addBool("reward_team", defaultRewardTeam, v -> defaultRewardTeam = v, false);
 		defaultsGroup.addBool("consume_items", defaultTeamConsumeItems, v -> defaultTeamConsumeItems = v, false);
 		defaultsGroup.addEnum("autoclaim_rewards", defaultRewardAutoClaim, v -> defaultRewardAutoClaim = v, RewardAutoClaim.NAME_MAP_NO_DEFAULT);
 		defaultsGroup.addEnum("quest_shape", defaultQuestShape, v -> defaultQuestShape = v, QuestShape.idMap);
 		defaultsGroup.addBool("quest_disable_jei", defaultQuestDisableJEI, v -> defaultQuestDisableJEI = v, false);
 
-		ConfigGroup d = config.getGroup("loot_crate_no_drop");
+		ConfigGroup d = config.getOrCreateSubgroup("loot_crate_no_drop");
 		d.addInt("passive", lootCrateNoDrop.passive, v -> lootCrateNoDrop.passive = v, 0, 0, Integer.MAX_VALUE).setNameKey("ftbquests.loot.entitytype.passive");
 		d.addInt("monster", lootCrateNoDrop.monster, v -> lootCrateNoDrop.monster = v, 0, 0, Integer.MAX_VALUE).setNameKey("ftbquests.loot.entitytype.monster");
 		d.addInt("boss", lootCrateNoDrop.boss, v -> lootCrateNoDrop.boss = v, 0, 0, Integer.MAX_VALUE).setNameKey("ftbquests.loot.entitytype.boss");
@@ -1147,7 +1149,7 @@ public abstract class QuestFile extends QuestObject {
 			try {
 				String id = tag.getAsString();
 				return readID(Long.parseLong(id.charAt(0) == '#' ? id.substring(1) : id, 16));
-			} catch (Exception ex) {
+			} catch (Exception ignored) {
 			}
 		}
 
@@ -1214,8 +1216,8 @@ public abstract class QuestFile extends QuestObject {
 	}
 
 	@Override
-	public final int refreshJEI() {
-		return FTBQuestsJEIHelper.QUESTS | FTBQuestsJEIHelper.LOOTCRATES;
+	public Set<RecipeModHelper.Components> componentsToRefresh() {
+		return EnumSet.allOf(RecipeModHelper.Components.class);
 	}
 
 	public final Collection<QuestObjectBase> getAllObjects() {

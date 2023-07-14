@@ -1,6 +1,5 @@
 package dev.ftb.mods.ftbquests.gui.quests;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.ConfigValue;
 import dev.ftb.mods.ftblibrary.config.ConfigWithVariants;
@@ -10,8 +9,8 @@ import dev.ftb.mods.ftblibrary.math.MathUtils;
 import dev.ftb.mods.ftblibrary.ui.*;
 import dev.ftb.mods.ftblibrary.ui.input.Key;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
-import dev.ftb.mods.ftblibrary.util.ClientUtils;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
+import dev.ftb.mods.ftblibrary.util.client.ClientUtils;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
@@ -28,6 +27,7 @@ import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import dev.ftb.mods.ftbquests.util.ConfigQuestObject;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.Rect2i;
@@ -171,7 +171,7 @@ public class QuestScreen extends BaseScreen {
 	public void addObjectMenuItems(List<ContextMenuItem> contextMenu, Runnable gui, QuestObjectBase object, Movable deletionFocus) {
 		ConfigGroup group = new ConfigGroup(FTBQuests.MOD_ID);
 		ConfigGroup subGroup = object.createSubGroup(group);
-		object.getConfig(subGroup);
+		object.fillConfigGroup(subGroup);
 
 		contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.edit"),
 				ThemeProperties.EDIT_ICON.get(),
@@ -208,7 +208,7 @@ public class QuestScreen extends BaseScreen {
 					ThemeProperties.DELETE_ICON.get(),
 					() -> ClientQuestFile.INSTANCE.deleteObject(delId));
 			if (!isShiftKeyDown()) {
-				delete.setYesNo(Component.translatable("delete_item", delObject.getTitle()));
+				delete.setYesNoText(Component.translatable("delete_item", delObject.getTitle()));
 			}
 			contextMenu.add(delete);
 		}
@@ -216,12 +216,12 @@ public class QuestScreen extends BaseScreen {
 		contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.reset_progress"),
 				ThemeProperties.RELOAD_ICON.get(),
 				() -> ChangeProgressMessage.send(file.self, object, progressChange -> progressChange.reset = true)
-		).setYesNo(Component.translatable("ftbquests.gui.reset_progress_q")));
+		).setYesNoText(Component.translatable("ftbquests.gui.reset_progress_q")));
 
 		contextMenu.add(new ContextMenuItem(Component.translatable("ftbquests.gui.complete_instantly"),
 				ThemeProperties.CHECK_ICON.get(), () -> ChangeProgressMessage.send(file.self, object,
 				progressChange -> progressChange.reset = false)
-		).setYesNo(Component.translatable("ftbquests.gui.complete_instantly_q")));
+		).setYesNoText(Component.translatable("ftbquests.gui.complete_instantly_q")));
 
 		Component[] tooltip = object instanceof Quest ?
 				new Component[] {
@@ -241,9 +241,9 @@ public class QuestScreen extends BaseScreen {
 	private void openPropertiesSubMenu(QuestObjectBase object, ConfigGroup g) {
 		List<ContextMenuItem> subMenu = new ArrayList<>();
 
-		subMenu.add(new ContextMenuItem(object.getTitle(), Color4I.EMPTY, null).setCloseMenu(false));
+		subMenu.add(new ContextMenuItem(object.getTitle(), Color4I.empty(), null).setCloseMenu(false));
 		subMenu.add(ContextMenuItem.SEPARATOR);
-		for (ConfigValue c : g.getValues()) {
+		for (ConfigValue<?> c : g.getValues()) {
 			if (c instanceof ConfigWithVariants) {
 				MutableComponent name = Component.translatable(c.getNameKey());
 
@@ -254,22 +254,22 @@ public class QuestScreen extends BaseScreen {
 				subMenu.add(new ContextMenuItem(name, Icons.SETTINGS, null) {
 					@Override
 					public void addMouseOverText(TooltipList list) {
-						list.add(c.getStringForGUI(c.value));
+						list.add(c.getStringForGUI());
 					}
 
 					@Override
 					public void onClicked(Panel panel, MouseButton button) {
 						c.onClicked(button, accepted -> {
 							if (accepted) {
-								c.setter.accept(c.value);
+								c.applyValue();
 								new EditObjectMessage(object).sendToServer();
 							}
 						});
 					}
 
 					@Override
-					public void drawIcon(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
-						c.getIcon(c.value).draw(matrixStack, x, y, w, h);
+					public void drawIcon(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+						c.getIcon().draw(graphics, x, y, w, h);
 					}
 				});
 			}
@@ -296,8 +296,8 @@ public class QuestScreen extends BaseScreen {
 	public boolean keyPressed(Key key) {
 		if (key.esc()) {
 			// checking for open context menu first is important
-			if (contextMenu != null) {
-				openContextMenu((Panel) null);
+			if (getContextMenu().isPresent()) {
+				closeContextMenu();
 				return true;
 			} else if (isViewingQuest()) {
 				closeQuest();
@@ -387,14 +387,14 @@ public class QuestScreen extends BaseScreen {
 		ConfigQuestObject<QuestObject> c = new ConfigQuestObject<>(QuestObjectType.CHAPTER.or(QuestObjectType.QUEST).or(QuestObjectType.QUEST_LINK));
 		SelectQuestObjectScreen<?> gui = new SelectQuestObjectScreen<>(c, accepted -> {
 			if (accepted) {
-				if (c.value instanceof Chapter chapter) {
+				if (c.getValue() instanceof Chapter chapter) {
 					selectChapter(chapter);
-				} else if (c.value instanceof Quest quest) {
+				} else if (c.getValue() instanceof Quest quest) {
 					zoom = 20;
 					selectChapter(quest.chapter);
 					viewQuestPanel.hidePanel = false;
 					viewQuest(quest);
-				} else if (c.value instanceof QuestLink link) {
+				} else if (c.getValue() instanceof QuestLink link) {
 					zoom = 20;
 					selectChapter(link.getChapter());
 					viewQuestPanel.hidePanel = false;
@@ -454,20 +454,20 @@ public class QuestScreen extends BaseScreen {
 	}
 
 	@Override
-	public void drawBackground(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
+	public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
 		QuestTheme.currentObject = selectedChapter;
-		super.drawBackground(matrixStack, theme, x, y, w, h);
+		super.drawBackground(graphics, theme, x, y, w, h);
 
 		int pw = 20;
 
 		Color4I borderColor = ThemeProperties.WIDGET_BORDER.get(selectedChapter);
 		Color4I backgroundColor = ThemeProperties.WIDGET_BACKGROUND.get(selectedChapter);
 
-		borderColor.draw(matrixStack, x + pw - 1, y + 1, 1, h - 2);
-		backgroundColor.draw(matrixStack, x + 1, y + 1, pw - 2, h - 2);
+		borderColor.draw(graphics, x + pw - 1, y + 1, 1, h - 2);
+		backgroundColor.draw(graphics, x + 1, y + 1, pw - 2, h - 2);
 
-		borderColor.draw(matrixStack, x + w - pw, y + 1, 1, h - 2);
-		backgroundColor.draw(matrixStack, x + w - pw + 1, y + 1, pw - 2, h - 2);
+		borderColor.draw(graphics, x + w - pw, y + 1, 1, h - 2);
+		backgroundColor.draw(graphics, x + w - pw + 1, y + 1, pw - 2, h - 2);
 
 		if (grabbed != null) {
 			int mx = getMouseX();
@@ -493,8 +493,8 @@ public class QuestScreen extends BaseScreen {
 				int boxY = Math.min(prevMouseY, my);
 				int boxW = Math.abs(mx - prevMouseX);
 				int boxH = Math.abs(my - prevMouseY);
-				GuiHelper.drawHollowRect(matrixStack, boxX, boxY, boxW, boxH, Color4I.DARK_GRAY, false);
-				Color4I.DARK_GRAY.withAlpha(40).draw(matrixStack, boxX, boxY, boxW, boxH);
+				GuiHelper.drawHollowRect(graphics, boxX, boxY, boxW, boxH, Color4I.DARK_GRAY, false);
+				Color4I.DARK_GRAY.withAlpha(40).draw(graphics, boxX, boxY, boxW, boxH);
 			}
 		}
 	}
@@ -508,7 +508,7 @@ public class QuestScreen extends BaseScreen {
 
 		if (!Screen.hasControlDown()) selectedObjects.clear();
 
-		questPanel.widgets.forEach(w -> {
+		questPanel.getWidgets().forEach(w -> {
 			if (w instanceof QuestButton qb && rect.contains((int) (w.getX() - scrollX), (int) (w.getY() - scrollY))) {
 				toggleSelected(qb.moveAndDeleteFocus());
 			}
@@ -516,10 +516,10 @@ public class QuestScreen extends BaseScreen {
 	}
 
 	@Override
-	public void drawForeground(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
+	public void drawForeground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
 		Color4I borderColor = ThemeProperties.WIDGET_BORDER.get(selectedChapter);
-		GuiHelper.drawHollowRect(matrixStack, x, y, w, h, borderColor, false);
-		super.drawForeground(matrixStack, theme, x, y, w, h);
+		GuiHelper.drawHollowRect(graphics, x, y, w, h, borderColor, false);
+		super.drawForeground(graphics, theme, x, y, w, h);
 	}
 
 	@Override
@@ -528,7 +528,7 @@ public class QuestScreen extends BaseScreen {
 	}
 
 	@Override
-	public boolean drawDefaultBackground(PoseStack matrixStack) {
+	public boolean drawDefaultBackground(GuiGraphics graphics) {
 		return false;
 	}
 

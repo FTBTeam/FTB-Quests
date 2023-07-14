@@ -10,6 +10,7 @@ import dev.ftb.mods.ftblibrary.math.PixelBuffer;
 import dev.ftb.mods.ftblibrary.ui.*;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
+import dev.ftb.mods.ftblibrary.util.client.PositionedIngredient;
 import dev.ftb.mods.ftbquests.net.CreateObjectMessage;
 import dev.ftb.mods.ftbquests.net.DeleteObjectMessage;
 import dev.ftb.mods.ftbquests.net.EditObjectMessage;
@@ -20,11 +21,11 @@ import dev.ftb.mods.ftbquests.quest.reward.RewardTypes;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentContents;
 import net.minecraft.world.entity.player.Player;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -108,7 +109,7 @@ public class QuestButton extends Button implements QuestPositionableButton {
 			List<QuestButton> list = new ArrayList<>();
 			quest.getDependencies().forEach(dependency -> {
 				if (!dependency.invalid && dependency instanceof Quest) {
-					for (Widget widget : questScreen.questPanel.widgets) {
+					for (Widget widget : questScreen.questPanel.getWidgets()) {
 						if (widget instanceof QuestButton qb && dependency == qb.quest) {
 							list.add(qb);
 						}
@@ -163,7 +164,7 @@ public class QuestButton extends Button implements QuestPositionableButton {
 					contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.delete"),
 							ThemeProperties.DELETE_ICON.get(quest),
 							this::deleteSelectedObjects)
-							.setYesNo(Component.translatable("delete_item", Component.translatable("ftbquests.quests").append(" [" + questScreen.selectedObjects.size() + "]"))));
+							.setYesNoText(Component.translatable("delete_item", Component.translatable("ftbquests.quests").append(" [" + questScreen.selectedObjects.size() + "]"))));
 				}
 
 				contextMenu.add(ContextMenuItem.SEPARATOR);
@@ -225,7 +226,7 @@ public class QuestButton extends Button implements QuestPositionableButton {
 		EditConfigFromStringScreen.open(c, val, 1.0, Component.translatable("ftbquests.quest.size"), accepted -> {
 			if (accepted) {
 				quests.forEach(q -> {
-					q.size = c.value;
+					q.size = c.getValue();
 					new EditObjectMessage(q).sendToServer();
 				});
 			}
@@ -292,9 +293,8 @@ public class QuestButton extends Button implements QuestPositionableButton {
 	}
 
 	@Override
-	@Nullable
-	public Object getIngredientUnderMouse() {
-		return quest.tasks.size() == 1 ? quest.tasks.get(0).getIngredient() : null;
+	public Optional<PositionedIngredient> getIngredientUnderMouse() {
+		return quest.tasks.size() == 1 ? quest.tasks.get(0).getIngredient(this) : Optional.empty();
 	}
 
 	@Override
@@ -340,10 +340,10 @@ public class QuestButton extends Button implements QuestPositionableButton {
 	}
 
 	@Override
-	public void draw(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
+	public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
 		Color4I outlineColor = ThemeProperties.QUEST_NOT_STARTED_COLOR.get(quest);
-		Icon questIcon = Color4I.EMPTY;
-		Icon hiddenIcon = Color4I.EMPTY;
+		Icon questIcon = Color4I.empty() ;
+		Icon hiddenIcon = Color4I.empty();
 
 		TeamData teamData = questScreen.file.self;
 		boolean isCompleted = teamData.isCompleted(quest);
@@ -374,7 +374,7 @@ public class QuestButton extends Button implements QuestPositionableButton {
 			outlineColor = ThemeProperties.QUEST_LOCKED_COLOR.get(quest);
 		}
 
-		if (questIcon == Color4I.EMPTY && teamData.isQuestPinned(player, quest.id)) {
+		if (questIcon == Color4I.empty() && teamData.isQuestPinned(player, quest.id)) {
 			questIcon = ThemeProperties.PIN_ICON_ON.get();
 		}
 		if (questScreen.file.canEdit() && !quest.isVisible(teamData)) {
@@ -383,17 +383,19 @@ public class QuestButton extends Button implements QuestPositionableButton {
 
 		QuestShape shape = QuestShape.get(getShape());
 
-		shape.shape.withColor(Color4I.DARK_GRAY).draw(matrixStack, x, y, w, h);
-		shape.background.withColor(Color4I.WHITE.withAlpha(150)).draw(matrixStack, x, y, w, h);
-		shape.outline.withColor(outlineColor).draw(matrixStack, x, y, w, h);
+		shape.shape.withColor(Color4I.DARK_GRAY).draw(graphics, x, y, w, h);
+		shape.background.withColor(Color4I.WHITE.withAlpha(150)).draw(graphics, x, y, w, h);
+		shape.outline.withColor(outlineColor).draw(graphics, x, y, w, h);
+
+		PoseStack poseStack = graphics.pose();
 
 		if (!icon.isEmpty()) {
 			float s = w * 2F / 3F;
-			matrixStack.pushPose();
-			matrixStack.translate(x + (w - s) / 2D, y + (h - s) / 2D, 0);
-			matrixStack.scale(s, s, 1F);
-			icon.draw(matrixStack, 0, 0, 1, 1);
-			matrixStack.popPose();
+			poseStack.pushPose();
+			poseStack.translate(x + (w - s) / 2D, y + (h - s) / 2D, 0);
+			poseStack.scale(s, s, 1F);
+			icon.draw(graphics, 0, 0, 1, 1);
+			poseStack.popPose();
 		}
 
 		GuiHelper.setupDrawing();
@@ -401,44 +403,44 @@ public class QuestButton extends Button implements QuestPositionableButton {
 		//RenderSystem.alphaFunc(GL11.GL_GREATER, 0.1F);
 
 		if (questScreen.viewQuestPanel.viewingQuest(quest) || questScreen.selectedObjects.contains(moveAndDeleteFocus())) {
-			matrixStack.pushPose();
-			matrixStack.translate(0, 0, 200);
+			poseStack.pushPose();
+			poseStack.translate(0, 0, 200);
 			Color4I col = Color4I.WHITE.withAlpha((int) (190D + Math.sin(System.currentTimeMillis() * 0.003D) * 50D));
-			shape.outline.withColor(col).draw(matrixStack, x, y, w, h);
-			shape.background.withColor(col).draw(matrixStack, x, y, w, h);
-			matrixStack.popPose();
+			shape.outline.withColor(col).draw(graphics, x, y, w, h);
+			shape.background.withColor(col).draw(graphics, x, y, w, h);
+			poseStack.popPose();
 		}
 
 		if (!canStart || !teamData.areDependenciesComplete(quest)) {
-			matrixStack.pushPose();
-			matrixStack.translate(0, 0, 200);
-			shape.shape.withColor(Color4I.BLACK.withAlpha(100)).draw(matrixStack, x, y, w, h);
-			matrixStack.popPose();
+			poseStack.pushPose();
+			poseStack.translate(0, 0, 200);
+			shape.shape.withColor(Color4I.BLACK.withAlpha(100)).draw(graphics, x, y, w, h);
+			poseStack.popPose();
 		}
 
 		if (isMouseOver()) {
-			matrixStack.pushPose();
-			matrixStack.translate(0, 0, 200);
-			shape.shape.withColor(Color4I.WHITE.withAlpha(100)).draw(matrixStack, x, y, w, h);
-			matrixStack.popPose();
+			poseStack.pushPose();
+			poseStack.translate(0, 0, 200);
+			shape.shape.withColor(Color4I.WHITE.withAlpha(100)).draw(graphics, x, y, w, h);
+			poseStack.popPose();
 		}
 
 		if (!questIcon.isEmpty()) {
 			float s = w / 8F * 3F;//(int) (treeGui.getZoom() / 2 * quest.size);
-			matrixStack.pushPose();
-			matrixStack.translate(x + w - s, y, 200);
-			matrixStack.scale(s, s, 1F);
-			questIcon.draw(matrixStack, 0, 0, 1, 1);
-			matrixStack.popPose();
+			poseStack.pushPose();
+			poseStack.translate(x + w - s, y, 200);
+			poseStack.scale(s, s, 1F);
+			questIcon.draw(graphics, 0, 0, 1, 1);
+			poseStack.popPose();
 		}
 
 		if (!hiddenIcon.isEmpty()) {
 			float s = w / 8F * 3F;//(int) (treeGui.getZoom() / 2 * quest.size);
-			matrixStack.pushPose();
-			matrixStack.translate(x, y, 200);
-			matrixStack.scale(s, s, 1F);
-			hiddenIcon.draw(matrixStack, 0, 0, 1, 1);
-			matrixStack.popPose();
+			poseStack.pushPose();
+			poseStack.translate(x, y, 200);
+			poseStack.scale(s, s, 1F);
+			hiddenIcon.draw(graphics, 0, 0, 1, 1);
+			poseStack.popPose();
 		}
 	}
 

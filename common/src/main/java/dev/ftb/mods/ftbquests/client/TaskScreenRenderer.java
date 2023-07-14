@@ -2,7 +2,7 @@ package dev.ftb.mods.ftbquests.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import dev.architectury.hooks.fluid.FluidStackHooks;
 import dev.ftb.mods.ftblibrary.icon.AtlasSpriteIcon;
 import dev.ftb.mods.ftblibrary.icon.Icon;
@@ -20,7 +20,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -28,8 +27,10 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.level.block.WallSignBlock;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Matrix4f;
 
 public class TaskScreenRenderer implements BlockEntityRenderer<TaskScreenBlockEntity> {
     public static final ResourceLocation INPUT_ONLY_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "tasks/input_only");
@@ -67,8 +68,8 @@ public class TaskScreenRenderer implements BlockEntityRenderer<TaskScreenBlockEn
 
         poseStack.translate(0.5D, 0.5D, 0.5D);
         float rotation = taskScreen.getBlockState().getValue(WallSignBlock.FACING).toYRot() + 180f;
-        poseStack.mulPose(Vector3f.ZP.rotationDegrees(180f));
-        poseStack.mulPose(Vector3f.YP.rotationDegrees(rotation));
+        poseStack.mulPose(Axis.ZP.rotationDegrees(180f));
+        poseStack.mulPose(Axis.YP.rotationDegrees(rotation));
         poseStack.translate(-0.5D, -0.5D, -0.5D);
 
         int size = taskScreenBlock.getSize() / 2;
@@ -81,9 +82,9 @@ public class TaskScreenRenderer implements BlockEntityRenderer<TaskScreenBlockEn
         // render quest and task title at top of screen
         Component top1 = taskScreen.isInputOnly() ? Component.empty() : task.quest.getTitle();
         Component top2 = taskScreen.isInputOnly() ? Component.empty() : task.getTitle();
-        drawString(taskScreen, font, poseStack, top1, 0.02D, 0.15D);
+        drawString(taskScreen, font, multiBufferSource, poseStack, top1, 0.02D, 0.15D);
         if (!top2.equals(Component.empty())) {
-            drawString(taskScreen, font, poseStack, top2, 0.17D, 0.07D);
+            drawString(taskScreen, font, multiBufferSource, poseStack, top2, 0.17D, 0.07D);
             iconY = 0.54D;
         }
 
@@ -92,14 +93,14 @@ public class TaskScreenRenderer implements BlockEntityRenderer<TaskScreenBlockEn
             long progress = data.getProgress(task);
             ChatFormatting col = progress == 0 ? ChatFormatting.GOLD : (progress < task.getMaxProgress() ? ChatFormatting.YELLOW : ChatFormatting.GREEN);
             Component txt = Component.literal(task.formatProgress(data, progress) + " / " + task.formatMaxProgress()).withStyle(col);
-            drawString(taskScreen, font, poseStack, txt, 0.83D, 0.15D);
+            drawString(taskScreen, font, multiBufferSource, poseStack, txt, 0.83D, 0.15D);
         }
 
         // render icon for task item/fluid/energy
         poseStack.pushPose();
         poseStack.translate(0.5D, iconY, -0.01D);
         poseStack.scale(taskScreen.isInputOnly() ? 0.5f : 0.45f, taskScreen.isInputOnly() ? 0.5f : 0.45f, 0.2f * size);
-        poseStack.mulPose(Vector3f.ZP.rotationDegrees(180f));
+        poseStack.mulPose(Axis.ZP.rotationDegrees(180f));
         if (taskScreen.isInputOnly() && !taskScreen.getInputModeIcon().isEmpty()) {
             drawTaskIcon(taskScreen, data, ItemIcon.getItemIcon(taskScreen.getInputModeIcon()), poseStack, multiBufferSource);
         } else {
@@ -146,7 +147,7 @@ public class TaskScreenRenderer implements BlockEntityRenderer<TaskScreenBlockEn
         }
 
         if (task instanceof FluidTask fluidTask && fluidTask.getIcon() instanceof AtlasSpriteIcon as && FTBQuestsClientEventHandler.tankSprite != null) {
-            TextureAtlasSprite sprite = Minecraft.getInstance().getModelManager().getAtlas(InventoryMenu.BLOCK_ATLAS).getSprite(as.id);
+            TextureAtlasSprite sprite = Minecraft.getInstance().getModelManager().getAtlas(InventoryMenu.BLOCK_ATLAS).getSprite(as.getId());
             // fluid texture (interpolated according to task progress)
             if (progress > 0L) {
                 float heightInterpolated = 16f * (float) ((double) progress / task.getMaxProgress());
@@ -179,10 +180,10 @@ public class TaskScreenRenderer implements BlockEntityRenderer<TaskScreenBlockEn
         } else if (icon instanceof ItemIcon itemIcon) {
             // TODO a flat 3d-render (GUI style) would be better here
             poseStack.scale(16f, 16f, 16f);
-            Minecraft.getInstance().getItemRenderer().renderStatic(itemIcon.getStack(), ItemTransforms.TransformType.FIXED, RenderUtil.FULL_BRIGHT,
-                    OverlayTexture.NO_OVERLAY, poseStack, buffer, 0);
+            Minecraft.getInstance().getItemRenderer().renderStatic(itemIcon.getStack(), ItemDisplayContext.FIXED, RenderUtil.FULL_BRIGHT,
+                    OverlayTexture.NO_OVERLAY, poseStack, buffer, Minecraft.getInstance().level, 0);
         } else if (icon instanceof AtlasSpriteIcon spriteIcon) {
-            var sprite = Minecraft.getInstance().getModelManager().getAtlas(InventoryMenu.BLOCK_ATLAS).getSprite(spriteIcon.id);
+            var sprite = Minecraft.getInstance().getModelManager().getAtlas(InventoryMenu.BLOCK_ATLAS).getSprite(spriteIcon.getId());
             RenderUtil.create(poseStack, vertexConsumer, -8f, -8f)
                     .withUV(sprite.getU0(), sprite.getV0(), sprite.getU1(), sprite.getV1())
                     .draw();
@@ -191,8 +192,9 @@ public class TaskScreenRenderer implements BlockEntityRenderer<TaskScreenBlockEn
         poseStack.popPose();
     }
 
-    private void drawString(TaskScreenBlockEntity taskScreen, Font font, PoseStack poseStack, Component text, double y, double size) {
+    private void drawString(TaskScreenBlockEntity taskScreen, Font font, MultiBufferSource bufferSource, PoseStack poseStack, Component text, double y, double size) {
         if (!text.equals(Component.empty())) {
+            Matrix4f posMat = poseStack.last().pose();
             poseStack.pushPose();
             poseStack.translate(0.5D, y, 0D);
 
@@ -208,11 +210,7 @@ public class TaskScreenRenderer implements BlockEntityRenderer<TaskScreenBlockEn
             }
 
             poseStack.scale(scale, scale, 1F);
-            if (taskScreen.isTextShadow()) {
-                font.drawShadow(poseStack, text, -len / 2f, 0, 0xFFD8D8D8);
-            } else {
-                font.draw(poseStack, text, -len / 2f, 0, 0xFFD8D8D8);
-            }
+            font.drawInBatch(text, -len / 2f, 0, 0xFFD8D8D8, taskScreen.isTextShadow(), posMat, bufferSource, Font.DisplayMode.NORMAL, 0xFFFFFFFF, 0x00F000F0);
             poseStack.popPose();
         }
     }

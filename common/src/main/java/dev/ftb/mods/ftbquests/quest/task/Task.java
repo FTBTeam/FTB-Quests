@@ -1,20 +1,20 @@
 package dev.ftb.mods.ftbquests.quest.task;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.ui.Button;
-import dev.ftb.mods.ftblibrary.util.ClientUtils;
+import dev.ftb.mods.ftblibrary.ui.Widget;
 import dev.ftb.mods.ftblibrary.util.StringUtils;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
-import dev.ftb.mods.ftblibrary.util.WrappedIngredient;
+import dev.ftb.mods.ftblibrary.util.client.ClientUtils;
+import dev.ftb.mods.ftblibrary.util.client.PositionedIngredient;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.events.CustomTaskEvent;
 import dev.ftb.mods.ftbquests.events.ObjectCompletedEvent;
 import dev.ftb.mods.ftbquests.events.ObjectStartedEvent;
 import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
 import dev.ftb.mods.ftbquests.gui.quests.QuestScreen;
-import dev.ftb.mods.ftbquests.integration.FTBQuestsJEIHelper;
+import dev.ftb.mods.ftbquests.integration.RecipeModHelper;
 import dev.ftb.mods.ftbquests.net.DisplayCompletionToastMessage;
 import dev.ftb.mods.ftbquests.net.SubmitTaskMessage;
 import dev.ftb.mods.ftbquests.quest.*;
@@ -23,6 +23,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.ResourceLocationException;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -30,7 +31,10 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.Nullable;
+
+import java.util.EnumSet;
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * @author LatvianModder
@@ -185,12 +189,14 @@ public abstract class Task extends QuestObject {
 	@Override
 	public final ConfigGroup createSubGroup(ConfigGroup group) {
 		TaskType type = getType();
-		return group.getGroup(getObjectType().id).getGroup(type.id.getNamespace()).getGroup(type.id.getPath());
+		return group.getOrCreateSubgroup(getObjectType().id)
+				.getOrCreateSubgroup(type.id.getNamespace())
+				.getOrCreateSubgroup(type.id.getPath());
 	}
 
 	@Environment(EnvType.CLIENT)
-	public void drawGUI(TeamData teamData, PoseStack matrixStack, int x, int y, int w, int h) {
-		getIcon().draw(matrixStack, x, y, w, h);
+	public void drawGUI(TeamData teamData, GuiGraphics graphics, int x, int y, int w, int h) {
+		getIcon().draw(graphics, x, y, w, h);
 	}
 
 	public boolean canInsertItem() {
@@ -246,19 +252,17 @@ public abstract class Task extends QuestObject {
 		return false;
 	}
 
-	@Nullable
 	@Environment(EnvType.CLIENT)
-	public Object getIngredient() {
+	public Optional<PositionedIngredient> getIngredient(Widget widget) {
 		if (addTitleInMouseOverText()) {
-			return getIcon().getIngredient();
+			return PositionedIngredient.of(getIcon().getIngredient(), widget);
 		}
-
-		return new WrappedIngredient(getIcon().getIngredient()).tooltip();
+		return Optional.empty();
 	}
 
 	@Override
-	public final int refreshJEI() {
-		return FTBQuestsJEIHelper.QUESTS;
+	public Set<RecipeModHelper.Components> componentsToRefresh() {
+		return EnumSet.of(RecipeModHelper.Components.QUESTS);
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -314,8 +318,8 @@ public abstract class Task extends QuestObject {
 	}
 
 	@Override
-	public void getConfig(ConfigGroup config) {
-		super.getConfig(config);
+	public void fillConfigGroup(ConfigGroup config) {
+		super.fillConfigGroup(config);
 
 		config.addBool("optional_task", optionalTask, v -> optionalTask = v, false).setNameKey("ftbquests.quest.optional");
 	}

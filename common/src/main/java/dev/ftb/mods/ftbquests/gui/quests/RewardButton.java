@@ -6,18 +6,19 @@ import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.ui.*;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
-import dev.ftb.mods.ftblibrary.util.WrappedIngredient;
+import dev.ftb.mods.ftblibrary.util.client.PositionedIngredient;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author LatvianModder
@@ -51,17 +52,13 @@ public class RewardButton extends Button {
 		}
 
 		if (reward.isTeamReward() || questScreen.file.self.isRewardBlocked(reward)) {
-			Object object = getIngredientUnderMouse();
-
-			if (object instanceof WrappedIngredient wi && wi.tooltip) {
-				Object ingredient = WrappedIngredient.unwrap(object);
-
-				if (ingredient instanceof ItemStack stack && !stack.isEmpty()) {
+			getIngredientUnderMouse().ifPresent(ingredient -> {
+				if (ingredient.tooltip() && ingredient.ingredient() instanceof ItemStack stack && !stack.isEmpty()) {
 					List<Component> list1 = new ArrayList<>();
 					GuiHelper.addStackTooltip(stack, list1);
 					list1.forEach(list::add);
 				}
-			}
+			});
 
 			list.blankLine();
 			reward.addMouseOverText(list);
@@ -114,54 +111,55 @@ public class RewardButton extends Button {
 	}
 
 	@Override
-	@Nullable
-	public Object getIngredientUnderMouse() {
-		return reward.getIngredient();
+	public Optional<PositionedIngredient> getIngredientUnderMouse() {
+		return PositionedIngredient.of(reward.getIngredient(this), this);
 	}
 
 	@Override
-	public void drawBackground(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
+	public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
 		if (isMouseOver()) {
-			super.drawBackground(matrixStack, theme, x, y, w, h);
+			super.drawBackground(graphics, theme, x, y, w, h);
 		}
 	}
 
 	@Override
-	public void draw(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
+	public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
 		int bs = h >= 32 ? 32 : 16;
 		GuiHelper.setupDrawing();
-		drawBackground(matrixStack, theme, x, y, w, h);
-		drawIcon(matrixStack, theme, x + (w - bs) / 2, y + (h - bs) / 2, bs, bs);
+		drawBackground(graphics, theme, x, y, w, h);
+		drawIcon(graphics, theme, x + (w - bs) / 2, y + (h - bs) / 2, bs, bs);
 
 		if (questScreen.file.self == null) {
 			return;
-		} else if (questScreen.contextMenu != null) {
+		} else if (questScreen.getContextMenu().isEmpty()) {
 			//return;
 		}
 
-		matrixStack.pushPose();
-		matrixStack.translate(0, 0, 200);
+		PoseStack poseStack = graphics.pose();
+
+		poseStack.pushPose();
+		poseStack.translate(0, 0, 200);
 		RenderSystem.enableBlend();
 		boolean completed = false;
 
 		if (questScreen.file.self.getClaimType(Minecraft.getInstance().player.getUUID(), reward).isClaimed()) {
-			ThemeProperties.CHECK_ICON.get().draw(matrixStack, x + w - 9, y + 1, 8, 8);
+			ThemeProperties.CHECK_ICON.get().draw(graphics, x + w - 9, y + 1, 8, 8);
 			completed = true;
 		} else if (questScreen.file.self.isCompleted(reward.quest)) {
-			ThemeProperties.ALERT_ICON.get().draw(matrixStack, x + w - 9, y + 1, 8, 8);
+			ThemeProperties.ALERT_ICON.get().draw(graphics, x + w - 9, y + 1, 8, 8);
 		}
 
-		matrixStack.popPose();
+		poseStack.popPose();
 
 		if (!completed) {
 			String s = reward.getButtonText();
 
 			if (!s.isEmpty()) {
-				matrixStack.pushPose();
-				matrixStack.translate(x + 19 - theme.getStringWidth(s) / 2D, y + 15, 200);
-				matrixStack.scale(0.5F, 0.5F, 1F);
-				theme.drawString(matrixStack, s, 0, 0, Color4I.WHITE, Theme.SHADOW);
-				matrixStack.popPose();
+				poseStack.pushPose();
+				poseStack.translate(x + 19 - theme.getStringWidth(s) / 2D, y + 15, 200);
+				poseStack.scale(0.5F, 0.5F, 1F);
+				theme.drawString(graphics, s, 0, 0, Color4I.WHITE, Theme.SHADOW);
+				poseStack.popPose();
 			}
 		}
 	}

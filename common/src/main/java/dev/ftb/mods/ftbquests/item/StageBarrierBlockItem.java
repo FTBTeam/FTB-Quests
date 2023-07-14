@@ -1,6 +1,5 @@
 package dev.ftb.mods.ftbquests.item;
 
-import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.block.FTBQuestsBlocks;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -16,7 +15,7 @@ import java.util.List;
 
 public class StageBarrierBlockItem extends BlockItem {
 	public StageBarrierBlockItem() {
-		super(FTBQuestsBlocks.STAGE_BARRIER.get(), new Properties().tab(FTBQuests.ITEM_GROUP));
+		super(FTBQuestsBlocks.STAGE_BARRIER.get(), FTBQuestsItems.defaultProps());
 	}
 
 	@Override

@@ -1,6 +1,5 @@
 package dev.ftb.mods.ftbquests.gui;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import dev.ftb.mods.ftblibrary.config.StringConfig;
 import dev.ftb.mods.ftblibrary.config.ui.EditConfigFromStringScreen;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
@@ -25,6 +24,7 @@ import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
 import dev.ftb.mods.ftbquests.quest.reward.RandomReward;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 
 import java.util.List;
@@ -62,8 +62,8 @@ public class RewardTablesScreen extends ButtonListBaseScreen {
 							Icons.ACCEPT,
 							this::addLootCrate) {
 						@Override
-						public void drawIcon(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
-							(table.lootCrate != null ? Icons.ACCEPT : Icons.ACCEPT_GRAY).draw(matrixStack, x, y, w, h);
+						public void drawIcon(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+							(table.lootCrate != null ? Icons.ACCEPT : Icons.ACCEPT_GRAY).draw(graphics, x, y, w, h);
 						}
 					}))
 					.openContextMenu(RewardTablesScreen.this);
@@ -161,7 +161,7 @@ public class RewardTablesScreen extends ButtonListBaseScreen {
 				EditConfigFromStringScreen.open(c, "", "", accepted -> {
 					if (accepted) {
 						RewardTable table = new RewardTable(ClientQuestFile.INSTANCE);
-						table.title = c.value;
+						table.title = c.getValue();
 						new CreateObjectMessage(table, null).sendToServer();
 					}
 

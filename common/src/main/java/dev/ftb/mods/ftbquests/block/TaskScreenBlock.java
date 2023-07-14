@@ -10,8 +10,7 @@ import dev.ftb.mods.ftbquests.net.TaskScreenConfigRequest;
 import dev.ftb.mods.ftbquests.quest.QuestFile;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.task.Task;
-import dev.ftb.mods.ftbteams.FTBTeamsAPI;
-import dev.ftb.mods.ftbteams.data.Team;
+import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -38,7 +37,6 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
-import net.minecraft.world.level.material.Material;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
@@ -50,7 +48,7 @@ public class TaskScreenBlock extends BaseEntityBlock {
     private final int size;
 
     protected TaskScreenBlock(int size) {
-        super(Properties.of(Material.METAL, DyeColor.BLACK).strength(0.3f));
+        super(Properties.of().mapColor(DyeColor.BLACK).strength(0.3f));
         this.size = size;
 
         registerDefaultState(getStateDefinition().any().setValue(FACING, Direction.NORTH));
@@ -146,7 +144,7 @@ public class TaskScreenBlock extends BaseEntityBlock {
 
     @Override
     public float getDestroyProgress(BlockState blockState, Player player, BlockGetter blockGetter, BlockPos blockPos) {
-        if (player.level.getBlockEntity(blockPos) instanceof ITaskScreen taskScreen && taskScreen.isIndestructible()) {
+        if (player.level().getBlockEntity(blockPos) instanceof ITaskScreen taskScreen && taskScreen.isIndestructible()) {
             return 0f;
         }
         return super.getDestroyProgress(blockState, player, blockGetter, blockPos);
@@ -190,8 +188,9 @@ public class TaskScreenBlock extends BaseEntityBlock {
         }
 
         // ...or in the same team as the owner of the screen
-        Team team = FTBTeamsAPI.getManager().getTeamByID(screen.getTeamId());
-        return team != null && team.isMember(player.getUUID());
+        return FTBTeamsAPI.api().getManager().getTeamByID(screen.getTeamId())
+                .map(team -> team.getRankForPlayer(player.getUUID()).isMemberOrBetter())
+                .orElse(false);
     }
 
     /**

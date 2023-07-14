@@ -4,7 +4,7 @@ import dev.architectury.hooks.level.entity.PlayerHooks;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.task.Task;
-import dev.ftb.mods.ftbteams.FTBTeamsAPI;
+import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -28,17 +28,16 @@ public class FTBQuestsInventoryListener implements ContainerListener {
 			return;
 		}
 
-		TeamData data = file.getNullableTeamData(FTBTeamsAPI.getPlayerTeamID(player.getUUID()));
-
-		if (data == null || data.isLocked()) {
-			return;
-		}
-
-		file.withPlayerContext(player, () -> {
-			for (Task task : file.getSubmitTasks()) {
-				if (task.id != sourceTask && data.canStartTasks(task.quest)) {
-					task.submitTask(data, player, craftedItem);
-				}
+		FTBTeamsAPI.api().getManager().getTeamForPlayer(player).ifPresent(team -> {
+			TeamData data = file.getNullableTeamData(team.getId());
+			if (data != null && !data.isLocked()) {
+				file.withPlayerContext(player, () -> {
+					for (Task task : file.getSubmitTasks()) {
+						if (task.id != sourceTask && data.canStartTasks(task.quest)) {
+							task.submitTask(data, player, craftedItem);
+						}
+					}
+				});
 			}
 		});
 	}

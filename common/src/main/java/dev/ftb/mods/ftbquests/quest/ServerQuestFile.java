@@ -15,12 +15,12 @@ import dev.ftb.mods.ftbquests.quest.task.TaskType;
 import dev.ftb.mods.ftbquests.quest.task.TaskTypes;
 import dev.ftb.mods.ftbquests.util.FTBQuestsInventoryListener;
 import dev.ftb.mods.ftbquests.util.FileUtils;
-import dev.ftb.mods.ftbteams.FTBTeamsAPI;
+import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
+import dev.ftb.mods.ftbteams.api.event.PlayerChangedTeamEvent;
+import dev.ftb.mods.ftbteams.api.event.PlayerLoggedInAfterTeamEvent;
+import dev.ftb.mods.ftbteams.api.event.TeamCreatedEvent;
 import dev.ftb.mods.ftbteams.data.PartyTeam;
 import dev.ftb.mods.ftbteams.data.PlayerTeam;
-import dev.ftb.mods.ftbteams.event.PlayerChangedTeamEvent;
-import dev.ftb.mods.ftbteams.event.PlayerLoggedInAfterTeamEvent;
-import dev.ftb.mods.ftbteams.event.TeamCreatedEvent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
@@ -213,15 +213,14 @@ public class ServerQuestFile extends QuestFile {
 
 	public void teamCreated(TeamCreatedEvent event) {
 		UUID id = event.getTeam().getId();
-		TeamData data = teamDataMap.get(id);
 
-		if (data == null) {
-			data = new TeamData(id);
-			data.file = this;
-			data.markDirty();
-		}
-
-		String displayName = event.getTeam().getDisplayName();
+		TeamData data = teamDataMap.computeIfAbsent(id, k -> {
+			TeamData d1 = new TeamData(id);
+			d1.file = this;
+			d1.markDirty();
+			return d1;
+		});
+		String displayName = event.getTeam().getShortName();
 
 		if (!data.name.equals(displayName)) {
 			data.name = displayName;
@@ -231,9 +230,10 @@ public class ServerQuestFile extends QuestFile {
 		addData(data, false);
 
 		if (event.getTeam() instanceof PartyTeam) {
-			PlayerTeam pt = event.getTeam().manager.getInternalPlayerTeam(event.getCreator().getUUID());
-			TeamData oldTeamData = getData(pt);
-			data.copyData(oldTeamData);
+			FTBTeamsAPI.api().getManager().getPlayerTeamForPlayerID(event.getCreator().getUUID()).ifPresent(playerTeam -> {
+				TeamData oldTeamData = getData(playerTeam);
+				data.copyData(oldTeamData);
+			});
 		}
 
 		TeamDataUpdate self = new TeamDataUpdate(data);
@@ -257,6 +257,8 @@ public class ServerQuestFile extends QuestFile {
 
 	@Override
 	public boolean isPlayerOnTeam(Player player, TeamData teamData) {
-		return FTBTeamsAPI.getPlayerTeamID(player.getUUID()).equals(teamData.uuid);
+		return FTBTeamsAPI.api().getManager().getTeamForPlayerID(player.getUUID())
+				.map(team -> team.getTeamId().equals(teamData.uuid))
+				.orElse(false);
 	}
 }

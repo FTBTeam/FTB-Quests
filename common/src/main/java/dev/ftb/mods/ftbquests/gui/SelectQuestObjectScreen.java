@@ -94,7 +94,7 @@ public class SelectQuestObjectScreen<T extends QuestObjectBase> extends ButtonLi
 		public final T object;
 
 		public QuestObjectButton(Panel panel, @Nullable T o) {
-			super(panel, o == null ? Component.translatable("ftbquests.null") : o.getMutableTitle().withStyle(o.getObjectType().getColor()), o == null ? Color4I.EMPTY : o.getIcon());
+			super(panel, o == null ? Component.translatable("ftbquests.null") : o.getMutableTitle().withStyle(o.getObjectType().getColor()), o == null ? Color4I.empty() : o.getIcon());
 			object = o;
 			setSize(200, 14);
 		}

@@ -6,14 +6,14 @@ import dev.ftb.mods.ftblibrary.icon.IconAnimation;
 import dev.ftb.mods.ftblibrary.math.Bits;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
-import dev.ftb.mods.ftblibrary.util.ClientUtils;
+import dev.ftb.mods.ftblibrary.util.client.ClientUtils;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.events.ObjectCompletedEvent;
 import dev.ftb.mods.ftbquests.events.ObjectStartedEvent;
 import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
 import dev.ftb.mods.ftbquests.gui.MultilineTextEditorScreen;
 import dev.ftb.mods.ftbquests.gui.quests.QuestScreen;
-import dev.ftb.mods.ftbquests.integration.FTBQuestsJEIHelper;
+import dev.ftb.mods.ftbquests.integration.RecipeModHelper;
 import dev.ftb.mods.ftbquests.net.DisplayCompletionToastMessage;
 import dev.ftb.mods.ftbquests.net.MoveMovableMessage;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
@@ -391,7 +391,7 @@ public final class Quest extends QuestObject implements Movable {
 
 	@Override
 	public int getRelativeProgressFromChildren(TeamData data) {
-		/*if (data.getTimesCompleted(this) > 0)
+        /*if (data.getTimesCompleted(this) > 0)
 		{
 			return 100;
 		}*/
@@ -539,12 +539,11 @@ public final class Quest extends QuestObject implements Movable {
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public void getConfig(ConfigGroup config) {
-		super.getConfig(config);
+	public void fillConfigGroup(ConfigGroup config) {
+		super.fillConfigGroup(config);
 		config.addString("subtitle", subtitle, v -> subtitle = v, "");
 
 		StringConfig descType = new StringConfig();
-		descType.defaultValue = "";
 		config.add("description", new ListConfig<String, StringConfig>(descType) {
 			@Override
 			public void onClicked(MouseButton button, ConfigCallback callback) {
@@ -766,8 +765,8 @@ public final class Quest extends QuestObject implements Movable {
 	}
 
 	@Override
-	public int refreshJEI() {
-		return FTBQuestsJEIHelper.QUESTS;
+	public Set<RecipeModHelper.Components> componentsToRefresh() {
+		return EnumSet.of(RecipeModHelper.Components.QUESTS);
 	}
 
 	@Override

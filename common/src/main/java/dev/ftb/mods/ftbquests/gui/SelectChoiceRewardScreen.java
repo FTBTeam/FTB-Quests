@@ -6,11 +6,13 @@ import dev.ftb.mods.ftblibrary.ui.Theme;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.ui.misc.ButtonListBaseScreen;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
+import dev.ftb.mods.ftblibrary.util.client.PositionedIngredient;
 import dev.ftb.mods.ftbquests.net.ClaimChoiceRewardMessage;
 import dev.ftb.mods.ftbquests.quest.loot.WeightedReward;
 import dev.ftb.mods.ftbquests.quest.reward.ChoiceReward;
 import net.minecraft.network.chat.Component;
-import org.jetbrains.annotations.Nullable;
+
+import java.util.Optional;
 
 /**
  * @author LatvianModder
@@ -38,9 +40,8 @@ public class SelectChoiceRewardScreen extends ButtonListBaseScreen {
 		}
 
 		@Override
-		@Nullable
-		public Object getIngredientUnderMouse() {
-			return weightedReward.reward.getIngredient();
+		public Optional<PositionedIngredient> getIngredientUnderMouse() {
+			return PositionedIngredient.of(weightedReward.reward.getIngredient(this), this);
 		}
 	}
 

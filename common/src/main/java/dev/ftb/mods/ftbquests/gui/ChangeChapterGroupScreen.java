@@ -20,7 +20,7 @@ public class ChangeChapterGroupScreen extends ButtonListBaseScreen {
 		private final ChapterGroup chapterGroup;
 
 		public ChapterGroupButton(Panel panel, ChapterGroup t) {
-			super(panel, t.getTitle(), Color4I.EMPTY);
+			super(panel, t.getTitle(), Color4I.empty());
 			chapterGroup = t;
 			setHeight(14);
 		}

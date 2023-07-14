@@ -4,7 +4,7 @@ import dev.architectury.networking.NetworkManager;
 import dev.architectury.networking.simple.BaseS2CMessage;
 import dev.architectury.networking.simple.MessageType;
 import dev.ftb.mods.ftbquests.quest.task.StructureTask;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.MinecraftServer;
 
@@ -16,13 +16,13 @@ public class SyncStructuresResponseMessage extends BaseS2CMessage {
 
     public SyncStructuresResponseMessage(MinecraftServer server) {
         data.addAll(server.registryAccess()
-                .registryOrThrow(Registry.STRUCTURE_REGISTRY).registryKeySet().stream()
+                .registryOrThrow(Registries.STRUCTURE).registryKeySet().stream()
                 .map(o -> o.location().toString())
                 .sorted(String::compareTo)
                 .toList()
         );
         data.addAll(server.registryAccess()
-                .registryOrThrow(Registry.STRUCTURE_REGISTRY).getTagNames()
+                .registryOrThrow(Registries.STRUCTURE).getTagNames()
                 .map(o -> "#" + o.location())
                 .sorted(String::compareTo)
                 .toList()

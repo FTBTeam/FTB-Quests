@@ -1,6 +1,5 @@
 package dev.ftb.mods.ftbquests.quest;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import dev.ftb.mods.ftblibrary.config.NameMap;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.ImageIcon;
@@ -9,6 +8,7 @@ import dev.ftb.mods.ftbquests.FTBQuests;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 
@@ -59,9 +59,9 @@ public final class QuestShape extends Icon {
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public void draw(PoseStack matrixStack, int x, int y, int w, int h) {
-		background.draw(matrixStack, x, y, w, h);
-		outline.draw(matrixStack, x, y, w, h);
+	public void draw(GuiGraphics graphics, int x, int y, int w, int h) {
+		background.draw(graphics, x, y, w, h);
+		outline.draw(graphics, x, y, w, h);
 	}
 
 	public int hashCode() {

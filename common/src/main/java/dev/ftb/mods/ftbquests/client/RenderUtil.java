@@ -2,7 +2,7 @@ package dev.ftb.mods.ftbquests.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Matrix4f;
+import org.joml.Matrix4f;
 
 public class RenderUtil {
     public static final int FULL_BRIGHT = 0x00F000F0;

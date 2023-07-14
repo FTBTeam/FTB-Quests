@@ -334,8 +334,8 @@ public final class Chapter extends QuestObject {
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public void getConfig(ConfigGroup config) {
-		super.getConfig(config);
+	public void fillConfigGroup(ConfigGroup config) {
+		super.fillConfigGroup(config);
 		config.addList("subtitle", subtitle, new StringConfig(null), "");
 		config.addBool("always_invisible", alwaysInvisible, v -> alwaysInvisible = v, false);
 		config.addEnum("default_quest_shape", defaultQuestShape.isEmpty() ? "default" : defaultQuestShape, v -> defaultQuestShape = v.equals("default") ? "" : v, QuestShape.idMapWithDefault);

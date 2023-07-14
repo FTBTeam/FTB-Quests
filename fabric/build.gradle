@@ -36,9 +36,6 @@ dependencies {
 	modApi("dev.ftb.mods:ftb-teams-fabric:${rootProject.ftb_teams_version}") { transitive false }
 	modApi "dev.latvian.mods:item-filters-fabric:${rootProject.itemfilters_version}"
 
-	modImplementation "dev.latvian.mods:kubejs-fabric:${rootProject.kubejs_version}"
-	modImplementation "me.shedaniel:RoughlyEnoughItems-fabric:${rootProject.rei_version}"
-
 	common(project(path: ":common", configuration: "namedElements")) { transitive false }
 	shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }
 }
@@ -55,7 +52,7 @@ processResources {
 
 shadowJar {
 	configurations = [project.configurations.shadowCommon]
-	classifier "dev-shadow"
+	setArchiveClassifier("dev-shadow")
 }
 
 remapJar {
@@ -66,7 +63,7 @@ remapJar {
 }
 
 jar {
-	classifier "dev"
+	setArchiveClassifier("dev")
 }
 
 components.java {

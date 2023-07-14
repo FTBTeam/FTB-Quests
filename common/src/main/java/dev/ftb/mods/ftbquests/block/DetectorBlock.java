@@ -13,12 +13,11 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.material.Material;
 import org.jetbrains.annotations.Nullable;
 
 public class DetectorBlock extends BaseEntityBlock {
 	public DetectorBlock() {
-		super(BlockBehaviour.Properties.of(Material.STONE).strength(0.3F));
+		super(BlockBehaviour.Properties.of().strength(0.3F));
 		registerDefaultState(stateDefinition.any().setValue(BlockStateProperties.POWERED, false));
 	}
 

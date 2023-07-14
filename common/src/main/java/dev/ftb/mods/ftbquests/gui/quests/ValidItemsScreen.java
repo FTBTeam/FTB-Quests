@@ -1,6 +1,5 @@
 package dev.ftb.mods.ftbquests.gui.quests;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;
 import dev.ftb.mods.ftblibrary.ui.*;
@@ -8,16 +7,17 @@ import dev.ftb.mods.ftblibrary.ui.input.Key;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.ui.misc.CompactGridLayout;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
-import dev.ftb.mods.ftblibrary.util.WrappedIngredient;
+import dev.ftb.mods.ftblibrary.util.client.PositionedIngredient;
+import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.gui.FTBQuestsTheme;
-import dev.ftb.mods.ftbquests.integration.FTBQuestsJEIHelper;
 import dev.ftb.mods.ftbquests.net.SubmitTaskMessage;
 import dev.ftb.mods.ftbquests.quest.task.ItemTask;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author LatvianModder
@@ -33,28 +33,25 @@ public class ValidItemsScreen extends BaseScreen {
 
 		@Override
 		public void onClicked(MouseButton button) {
-			if (FTBQuestsJEIHelper.isRecipeModAvailable()) {
-				FTBQuestsJEIHelper.showRecipes(stack);
-			}
-		}
-
-		@Nullable
-		@Override
-		public Object getIngredientUnderMouse() {
-			return new WrappedIngredient(stack).tooltip();
+			FTBQuests.getRecipeModHelper().showRecipes(stack);
 		}
 
 		@Override
-		public void draw(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
+		public Optional<PositionedIngredient> getIngredientUnderMouse() {
+			return PositionedIngredient.of(stack, this, true);
+		}
+
+		@Override
+		public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
 			if (isMouseOver()) {
-				Color4I.WHITE.withAlpha(33).draw(matrixStack, x, y, w, h);
+				Color4I.WHITE.withAlpha(33).draw(graphics, x, y, w, h);
 			}
 
-			matrixStack.pushPose();
-			matrixStack.translate(x + w / 2D, y + h / 2D, 10);
-			matrixStack.scale(2F, 2F, 2F);
-			GuiHelper.drawItem(matrixStack, stack, 0, true, null);
-			matrixStack.popPose();
+			graphics.pose().pushPose();
+			graphics.pose().translate(x + w / 2D, y + h / 2D, 10);
+			graphics.pose().scale(2F, 2F, 2F);
+			GuiHelper.drawItem(graphics, stack, 0, true, null);
+			graphics.pose().popPose();
 		}
 	}
 
@@ -95,14 +92,14 @@ public class ValidItemsScreen extends BaseScreen {
 			}
 
 			@Override
-			public void drawBackground(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
-				theme.drawButton(matrixStack, x - 1, y - 1, w + 2, h + 2, WidgetType.NORMAL);
+			public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+				theme.drawButton(graphics, x - 1, y - 1, w + 2, h + 2, WidgetType.NORMAL);
 			}
 		};
 
 		itemPanel.setPosAndSize(0, 22, 144, 0);
 
-		backButton = new SimpleTextButton(this, Component.translatable("gui.back"), Color4I.EMPTY) {
+		backButton = new SimpleTextButton(this, Component.translatable("gui.back"), Color4I.empty()) {
 			@Override
 			public void onClicked(MouseButton button) {
 				playClickSound();
@@ -115,7 +112,7 @@ public class ValidItemsScreen extends BaseScreen {
 			}
 		};
 
-		submitButton = new SimpleTextButton(this, Component.literal("Submit"), Color4I.EMPTY) {
+		submitButton = new SimpleTextButton(this, Component.literal("Submit"), Color4I.empty()) {
 			@Override
 			public void onClicked(MouseButton button) {
 				playClickSound();
@@ -157,9 +154,9 @@ public class ValidItemsScreen extends BaseScreen {
 	}
 
 	@Override
-	public void drawBackground(PoseStack matrixStack, Theme theme, int x, int y, int w, int h) {
+	public void drawBackground(GuiGraphics matrixStack, Theme theme, int x, int y, int w, int h) {
 		super.drawBackground(matrixStack, theme, x, y, w, h);
-		theme.drawString(matrixStack, title, x + w / 2F, y + 6, Color4I.WHITE, Theme.CENTERED);
+		theme.drawString(matrixStack, title, x + w / 2, y + 6, Color4I.WHITE, Theme.CENTERED);
 	}
 
 	@Override

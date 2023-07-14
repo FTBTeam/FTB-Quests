@@ -11,12 +11,11 @@ import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.Material;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class BaseInputBlock extends BaseEntityBlock {
 	public BaseInputBlock() {
-		super(BlockBehaviour.Properties.of(Material.STONE).strength(0.3F));
+		super(BlockBehaviour.Properties.of().strength(0.3F));
 	}
 
 	@Override

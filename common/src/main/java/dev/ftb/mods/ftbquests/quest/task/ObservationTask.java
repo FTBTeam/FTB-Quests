@@ -1,7 +1,7 @@
 package dev.ftb.mods.ftbquests.quest.task;
 
 import com.mojang.brigadier.StringReader;
-import dev.architectury.registry.registries.Registries;
+import dev.architectury.registry.registries.RegistrarManager;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.NameMap;
 import dev.ftb.mods.ftblibrary.ui.Button;
@@ -13,7 +13,8 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.ResourceLocationException;
 import net.minecraft.commands.arguments.blocks.BlockInput;
 import net.minecraft.commands.arguments.blocks.BlockStateParser;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -85,8 +86,8 @@ public class ObservationTask extends BooleanTask {
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public void getConfig(ConfigGroup config) {
-		super.getConfig(config);
+	public void fillConfigGroup(ConfigGroup config) {
+		super.fillConfigGroup(config);
 		config.addLong("timer", timer, v -> timer = v, 0L, 0L, 1200L);
 		config.addEnum("observe_type", observeType, v -> observeType = v, ObserveType.NAME_MAP);
 		config.addString("to_observe", toObserve, v -> toObserve = v, "minecraft:dirt");
@@ -119,7 +120,7 @@ public class ObservationTask extends BooleanTask {
 		}
 
 		if (result instanceof BlockHitResult blockResult) {
-			BlockInWorld blockInWorld = new BlockInWorld(player.level, blockResult.getBlockPos(), false);
+			BlockInWorld blockInWorld = new BlockInWorld(player.level(), blockResult.getBlockPos(), false);
 
 			BlockState state = blockInWorld.getState();
 			Block block = state.getBlock();
@@ -127,11 +128,11 @@ public class ObservationTask extends BooleanTask {
 
 			switch (observeType) {
 				case BLOCK -> {
-					return String.valueOf(Registries.getId(block, Registry.BLOCK_REGISTRY)).equals(toObserve);
+					return String.valueOf(RegistrarManager.getId(block, Registries.BLOCK)).equals(toObserve);
 				}
 				case BLOCK_TAG -> {
 					return asTagRL(toObserve)
-							.map(rl -> state.is(TagKey.create(Registry.BLOCK_REGISTRY, rl)))
+							.map(rl -> state.is(TagKey.create(Registries.BLOCK, rl)))
 							.orElse(false);
 				}
 				case BLOCK_STATE -> {
@@ -143,7 +144,7 @@ public class ObservationTask extends BooleanTask {
 					return stateNbtMatch != null && stateNbtMatch.test(blockInWorld);
 				}
 				case BLOCK_ENTITY_TYPE -> {
-					return blockEntity != null && toObserve.equals(String.valueOf(Registries.getId(blockEntity.getType(), Registry.BLOCK_ENTITY_TYPE_REGISTRY)));
+					return blockEntity != null && toObserve.equals(String.valueOf(RegistrarManager.getId(blockEntity.getType(), Registries.BLOCK_ENTITY_TYPE)));
 				}
 				default -> {
 					return false;
@@ -151,10 +152,10 @@ public class ObservationTask extends BooleanTask {
 			}
 		} else if (result instanceof EntityHitResult entityResult) {
 			if (observeType == ObserveType.ENTITY_TYPE) {
-				return toObserve.equals(String.valueOf(Registries.getId(entityResult.getEntity().getType(), Registry.ENTITY_TYPE_REGISTRY)));
+				return toObserve.equals(String.valueOf(RegistrarManager.getId(entityResult.getEntity().getType(), Registries.ENTITY_TYPE)));
 			} else if (observeType == ObserveType.ENTITY_TYPE_TAG) {
 				return asTagRL(toObserve)
-						.map(rl -> entityResult.getEntity().getType().is(TagKey.create(Registry.ENTITY_TYPE_REGISTRY, rl)))
+						.map(rl -> entityResult.getEntity().getType().is(TagKey.create(Registries.ENTITY_TYPE, rl)))
 						.orElse(false);
 			}
 		}
@@ -172,7 +173,7 @@ public class ObservationTask extends BooleanTask {
 
 	private BlockInput tryMatchBlock(String string, boolean parseNbt) {
 		try {
-			BlockStateParser.BlockResult blockStateParser = BlockStateParser.parseForBlock(Registry.BLOCK, new StringReader(string), false);
+			BlockStateParser.BlockResult blockStateParser = BlockStateParser.parseForBlock(BuiltInRegistries.BLOCK.asLookup(), new StringReader(string), false);
 			return new BlockInput(blockStateParser.blockState(), blockStateParser.properties().keySet(), parseNbt ? blockStateParser.nbt() : null);
 		} catch (Exception ex) {
 			return null;

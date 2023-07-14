@@ -2,21 +2,19 @@ package dev.ftb.mods.ftbquests.fabric;
 
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftbquests.FTBQuests;
-import dev.ftb.mods.ftbquests.command.ChangeProgressArgument;
-import dev.ftb.mods.ftbquests.command.QuestObjectArgument;
-import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.command.v2.ArgumentTypeRegistry;
-import net.minecraft.commands.synchronization.SingletonArgumentInfo;
-import net.minecraft.resources.ResourceLocation;
 import dev.ftb.mods.ftbquests.block.entity.FTBQuestsBlockEntities;
 import dev.ftb.mods.ftbquests.block.fabric.FabricLootCrateOpenerBlockEntity;
 import dev.ftb.mods.ftbquests.block.fabric.FabricTaskScreenAuxBlockEntity;
 import dev.ftb.mods.ftbquests.block.fabric.FabricTaskScreenBlockEntity;
+import dev.ftb.mods.ftbquests.command.ChangeProgressArgument;
+import dev.ftb.mods.ftbquests.command.QuestObjectArgument;
 import dev.ftb.mods.ftbquests.quest.task.TaskTypes;
 import dev.ftb.mods.ftbquests.quest.task.TechRebornEnergyTask;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.command.v2.ArgumentTypeRegistry;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
+import net.minecraft.commands.synchronization.SingletonArgumentInfo;
 import net.minecraft.resources.ResourceLocation;
 import team.reborn.energy.api.EnergyStorage;
 

@@ -1,6 +1,5 @@
 package dev.ftb.mods.ftbquests.item;
 
-import dev.ftb.mods.ftbquests.FTBQuests;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
@@ -26,7 +25,7 @@ public class ScreenBlockItem extends BlockItem {
     private final ScreenSize size;
 
     public ScreenBlockItem(Block block, ScreenSize size) {
-        super(block, new Properties().tab(FTBQuests.ITEM_GROUP));
+        super(block, FTBQuestsItems.defaultProps());
 
         this.size = size;
     }

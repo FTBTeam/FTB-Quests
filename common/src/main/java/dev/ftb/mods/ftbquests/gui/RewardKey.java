@@ -24,6 +24,8 @@ public class RewardKey {
 		return this;
 	}
 
+	// FIXME hashCode and equals don't match here!
+
 	public int hashCode() {
 		return title.hashCode();
 	}

@@ -69,7 +69,7 @@ public final class RewardType {
 				ConfigQuestObject<RewardTable> config = new ConfigQuestObject<>(QuestObjectType.REWARD_TABLE);
 				SelectQuestObjectScreen<?> s = new SelectQuestObjectScreen<>(config, accepted -> {
 					if (accepted) {
-						rnd.table = config.value;
+						rnd.table = config.getValue();
 						callback.accept(reward);
 					}
 					gui.run();
@@ -78,14 +78,13 @@ public final class RewardType {
 				s.setHasSearchBox(true);
 				s.openGui();
 			} else {
-				ConfigGroup group = new ConfigGroup(FTBQuests.MOD_ID);
-				reward.getConfig(reward.createSubGroup(group));
-				group.savedCallback = accepted -> {
+				ConfigGroup group = new ConfigGroup(FTBQuests.MOD_ID, accepted -> {
 					if (accepted) {
 						callback.accept(reward);
 					}
 					gui.run();
-				};
+				});
+				reward.fillConfigGroup(reward.createSubGroup(group));
 				new EditConfigScreen(group).openGui();
 			}
 		};

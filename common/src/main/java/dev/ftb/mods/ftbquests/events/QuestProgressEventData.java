@@ -4,6 +4,8 @@ import dev.ftb.mods.ftbquests.quest.QuestObject;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import net.minecraft.server.level.ServerPlayer;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -14,12 +16,12 @@ public final class QuestProgressEventData<T extends QuestObject> {
 	public final List<ServerPlayer> onlineMembers;
 	public final List<ServerPlayer> notifiedPlayers;
 
-	public QuestProgressEventData(Date i, TeamData t, T o, List<ServerPlayer> om, List<ServerPlayer> n) {
+	public QuestProgressEventData(Date i, TeamData t, T o, Collection<ServerPlayer> om, Collection<ServerPlayer> n) {
 		time = i;
 		teamData = t;
 		object = o;
-		onlineMembers = om;
-		notifiedPlayers = n;
+		onlineMembers = new ArrayList<>(om);
+		notifiedPlayers = new ArrayList<>(n);
 	}
 
 	public <N extends QuestObject> QuestProgressEventData<N> withObject(N o) {

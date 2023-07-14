@@ -3,7 +3,9 @@ package dev.ftb.mods.ftbquests.quest.reward;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
+import dev.ftb.mods.ftblibrary.ui.Widget;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
+import dev.ftb.mods.ftblibrary.util.client.PositionedIngredient;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestFile;
 import dev.ftb.mods.ftbquests.quest.QuestObjectType;
@@ -22,6 +24,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -121,8 +124,8 @@ public class RandomReward extends Reward {
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public void getConfig(ConfigGroup config) {
-		super.getConfig(config);
+	public void fillConfigGroup(ConfigGroup config) {
+		super.fillConfigGroup(config);
 		config.add("table", new ConfigQuestObject<>(QuestObjectType.REWARD_TABLE), table, v -> table = v, getTable()).setNameKey("ftbquests.reward_table");
 	}
 
@@ -169,10 +172,11 @@ public class RandomReward extends Reward {
 	}
 
 	@Override
-	@Nullable
-	@Environment(EnvType.CLIENT)
-	public Object getIngredient() {
-		return getTable() != null && getTable().lootCrate != null ? getTable().lootCrate.createStack() : null;
+    @Environment(EnvType.CLIENT)
+	public Optional<PositionedIngredient> getIngredient(Widget widget) {
+		return getTable() != null && getTable().lootCrate != null ?
+				PositionedIngredient.of(getTable().lootCrate.createStack(), widget) :
+				Optional.empty();
 	}
 
 	@Override

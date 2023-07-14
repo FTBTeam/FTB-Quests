@@ -10,8 +10,8 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -71,8 +71,8 @@ public class BiomeTask extends BooleanTask {
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public void getConfig(ConfigGroup config) {
-		super.getConfig(config);
+	public void fillConfigGroup(ConfigGroup config) {
+		super.fillConfigGroup(config);
 		config.addEnum("biome", getBiome(), this::setBiome, NameMap.of(DEFAULT_BIOME.location().toString(), getKnownBiomes()).create());
 	}
 
@@ -98,11 +98,11 @@ public class BiomeTask extends BooleanTask {
 	public boolean canSubmit(TeamData teamData, ServerPlayer player) {
 		if (player.isSpectator()) return false;
 
-		Holder<Biome> biomeHolder = player.level.getBiome(player.blockPosition());
+		Holder<Biome> biomeHolder = player.level().getBiome(player.blockPosition());
 		return biome.map(
 				key -> biomeHolder.unwrapKey().map(k -> k == key).orElse(false),
 				tagKey -> {
-					var reg = player.level.registryAccess().registry(Registry.BIOME_REGISTRY).orElseThrow();
+					var reg = player.level().registryAccess().registry(Registries.BIOME).orElseThrow();
 					return reg.getTag(tagKey).map(holderSet -> holderSet.contains(biomeHolder)).orElse(false);
 				}
 		);
@@ -117,21 +117,21 @@ public class BiomeTask extends BooleanTask {
 
 	private void setBiome(String str) {
 		biome = str.startsWith("#") ?
-				Either.right(TagKey.create(Registry.BIOME_REGISTRY, safeResourceLocation(str.substring(1), DEFAULT_BIOME.location()))) :
-				Either.left(ResourceKey.create(Registry.BIOME_REGISTRY, safeResourceLocation(str, DEFAULT_BIOME.location())));
+				Either.right(TagKey.create(Registries.BIOME, safeResourceLocation(str.substring(1), DEFAULT_BIOME.location()))) :
+				Either.left(ResourceKey.create(Registries.BIOME, safeResourceLocation(str, DEFAULT_BIOME.location())));
 	}
 
 	private List<String> getKnownBiomes() {
 		if (KNOWN_BIOMES.isEmpty()) {
-			RegistryAccess registryAccess = FTBQuests.PROXY.getClientPlayer().level.registryAccess();
+			RegistryAccess registryAccess = FTBQuests.PROXY.getClientPlayer().level().registryAccess();
 			KNOWN_BIOMES.addAll(registryAccess
-					.registryOrThrow(Registry.BIOME_REGISTRY).registryKeySet().stream()
+					.registryOrThrow(Registries.BIOME).registryKeySet().stream()
 					.map(o -> o.location().toString())
 					.sorted(String::compareTo)
 					.toList()
 			);
 			KNOWN_BIOMES.addAll(registryAccess
-					.registryOrThrow(Registry.BIOME_REGISTRY).getTagNames()
+					.registryOrThrow(Registries.BIOME).getTagNames()
 					.map(o -> "#" + o.location())
 					.sorted(String::compareTo)
 					.toList()

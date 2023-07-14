@@ -6,7 +6,7 @@ import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import dev.architectury.registry.registries.Registries;
+import dev.architectury.registry.registries.RegistrarManager;
 import dev.ftb.mods.ftblibrary.config.Tristate;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.net.CreateObjectResponseMessage;
@@ -27,20 +27,18 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.NonNullList;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.Item;
+import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -162,7 +160,7 @@ public class FTBQuestsCommands {
 		ServerLevel level = source.getLevel();
 
 		if (pos == null) {
-			pos = new BlockPos(player.pick(10, 1F, false).getLocation());
+			pos = BlockPos.containing(player.pick(10, 1F, false).getLocation());
 		}
 
 		BlockEntity be = level.getBlockEntity(pos);
@@ -183,7 +181,7 @@ public class FTBQuestsCommands {
 			container.setItem(s++, ((ItemReward) reward.reward).item);
 		}
 
-		source.sendSuccess(Component.translatable("commands.ftbquests.command.feedback.table_imported", table.getTitle(), table.rewards.size()), false);
+		source.sendSuccess(() -> Component.translatable("commands.ftbquests.command.feedback.table_imported", table.getTitle(), table.rewards.size()), false);
 
 		return 1;
 	}
@@ -194,7 +192,7 @@ public class FTBQuestsCommands {
 		ServerQuestFile file = ServerQuestFile.INSTANCE;
 
 		if (pos == null) {
-			pos = new BlockPos(player.pick(10, 1F, false).getLocation());
+			pos = BlockPos.containing(player.pick(10, 1F, false).getLocation());
 		}
 
 		RewardTable table = new RewardTable(file);
@@ -220,7 +218,7 @@ public class FTBQuestsCommands {
 
 		new CreateObjectResponseMessage(table, null).sendToAll(level.getServer());
 
-		source.sendSuccess(Component.translatable("commands.ftbquests.command.feedback.table_imported", name, table.rewards.size()), false);
+		source.sendSuccess(() -> Component.translatable("commands.ftbquests.command.feedback.table_imported", name, table.rewards.size()), false);
 
 		return 1;
 	}
@@ -235,9 +233,9 @@ public class FTBQuestsCommands {
 		data.setCanEdit(player, canEdit);
 
 		if (canEdit) {
-			source.sendSuccess(Component.translatable("commands.ftbquests.editing_mode.enabled", player.getDisplayName()), true);
+			source.sendSuccess(() -> Component.translatable("commands.ftbquests.editing_mode.enabled", player.getDisplayName()), true);
 		} else {
-			source.sendSuccess(Component.translatable("commands.ftbquests.editing_mode.disabled", player.getDisplayName()), true);
+			source.sendSuccess(() -> Component.translatable("commands.ftbquests.editing_mode.disabled", player.getDisplayName()), true);
 		}
 
 		return 1;
@@ -253,9 +251,9 @@ public class FTBQuestsCommands {
 		data.setLocked(locked);
 
 		if (locked) {
-			source.sendSuccess(Component.translatable("commands.ftbquests.locked.enabled", player.getDisplayName()), true);
+			source.sendSuccess(() -> Component.translatable("commands.ftbquests.locked.enabled", player.getDisplayName()), true);
 		} else {
-			source.sendSuccess(Component.translatable("commands.ftbquests.locked.disabled", player.getDisplayName()), true);
+			source.sendSuccess(() -> Component.translatable("commands.ftbquests.locked.disabled", player.getDisplayName()), true);
 		}
 
 		return 1;
@@ -271,16 +269,16 @@ public class FTBQuestsCommands {
 			questObject.forceProgress(ServerQuestFile.INSTANCE.getData(player), progressChange);
 		}
 
-		source.sendSuccess(Component.translatable("commands.ftbquests.change_progress.text"), true);
+		source.sendSuccess(() -> Component.translatable("commands.ftbquests.change_progress.text"), true);
 		return Command.SINGLE_SUCCESS;
 	}
 
 	private static int deleteEmptyRewardTables(CommandSourceStack source) {
-		int del = 0;
+		MutableInt del = new MutableInt(0);
 
 		for (RewardTable table : ServerQuestFile.INSTANCE.rewardTables) {
 			if (table.rewards.isEmpty()) {
-				del++;
+				del.increment();
 				table.invalid = true;
 				FileUtils.delete(ServerQuestFile.INSTANCE.getFolder().resolve(table.getPath()).toFile());
 				new DeleteObjectResponseMessage(table.id).sendToAll(source.getServer());
@@ -291,42 +289,45 @@ public class FTBQuestsCommands {
 		ServerQuestFile.INSTANCE.refreshIDMap();
 		ServerQuestFile.INSTANCE.save();
 
-		source.sendSuccess(Component.literal("Deleted " + del + " empty tables"), false);
+		source.sendSuccess(() -> Component.translatable("commands.ftbquests.command.delete_empty_reward_tables.text", del.intValue()), false);
 		return 1;
 	}
 
 	private static int generateAllItemChapter(CommandSourceStack source) {
-		NonNullList<ItemStack> nonNullList = NonNullList.create();
+//		NonNullList<ItemStack> nonNullList = NonNullList.create();
+//
+//		for (Map.Entry<ResourceKey<Item>, Item> entry : BuiltInRegistries.ITEM.entrySet()) {
+//			Item item = entry.getValue();
+//			try {
+//				int s = nonNullList.size();
+//				item.fillItemCategory(CreativeModeTab.TAB_SEARCH, nonNullList);
+//
+//				if (s == nonNullList.size()) {
+//					nonNullList.add(new ItemStack(item));
+//				}
+//			} catch (Throwable ex) {
+//				FTBQuests.LOGGER.warn("Failed to get items from " + entry.getKey() + ": " + ex);
+//			}
+//		}
 
-		for (Map.Entry<ResourceKey<Item>, Item> entry : Registry.ITEM.entrySet()) {
-			Item item = entry.getValue();
-			try {
-				int s = nonNullList.size();
-				item.fillItemCategory(CreativeModeTab.TAB_SEARCH, nonNullList);
-
-				if (s == nonNullList.size()) {
-					nonNullList.add(new ItemStack(item));
-				}
-			} catch (Throwable ex) {
-				FTBQuests.LOGGER.warn("Failed to get items from " + entry.getKey() + ": " + ex);
-			}
-		}
+		Collection<ItemStack> allItems = CreativeModeTabs.searchTab().getSearchTabDisplayItems();
 
 		Chapter chapter = new Chapter(ServerQuestFile.INSTANCE, ServerQuestFile.INSTANCE.defaultChapterGroup);
 		chapter.id = chapter.file.newID();
 		chapter.onCreated();
 
-		chapter.title = "Generated chapter of all items in search creative tab [" + nonNullList.size() + "]";
+		chapter.title = "Generated chapter of all items in search creative tab [" + allItems.size() + "]";
 		chapter.icon = new ItemStack(Items.COMPASS);
 		chapter.defaultQuestShape = "rsquare";
 
 		new CreateObjectResponseMessage(chapter, null).sendToAll(source.getServer());
 
-		List<ItemStack> list = nonNullList.stream()
-				.filter(stack -> !stack.isEmpty() && Registries.getId(stack.getItem(), Registry.ITEM_REGISTRY) != null)
-				.sorted(Comparator.comparing(a -> Registries.getId(a.getItem(), Registry.ITEM_REGISTRY)))
+		//noinspection DataFlowIssue
+		List<ItemStack> list = allItems.stream()
+				.filter(stack -> !stack.isEmpty() && RegistrarManager.getId(stack.getItem(), Registries.ITEM) != null)
+				.sorted(Comparator.comparing(a -> RegistrarManager.getId(a.getItem(), Registries.ITEM)))
 				.toList();
-		FTBQuests.LOGGER.info("Found " + nonNullList.size() + " items in total, chapter ID: " + chapter);
+		FTBQuests.LOGGER.info("Found " + allItems.size() + " items in total, chapter ID: " + chapter);
 
 		if (list.isEmpty()) {
 			return 0;
@@ -334,10 +335,10 @@ public class FTBQuestsCommands {
 
 		int col = 0;
 		int row = 0;
-		String modid = Registries.getId(list.get(0).getItem(), Registry.ITEM_REGISTRY).getNamespace();
+		String modid = RegistrarManager.getId(list.get(0).getItem(), Registries.ITEM).getNamespace();
 
 		for (ItemStack stack : list) {
-			ResourceLocation id = Registries.getId(stack.getItem(), Registry.ITEM_REGISTRY);
+			ResourceLocation id = RegistrarManager.getId(stack.getItem(), Registries.ITEM);
 			if (!modid.equals(id.getNamespace())) {
 				modid = id.getNamespace();
 				col = 0;
@@ -372,7 +373,7 @@ public class FTBQuestsCommands {
 
 		ServerQuestFile.INSTANCE.save();
 		ServerQuestFile.INSTANCE.saveNow();
-		source.sendSuccess(Component.literal("Done!"), false);
+		source.sendSuccess(() -> Component.literal("Done!"), false);
 		return 1;
 	}
 
@@ -395,10 +396,10 @@ public class FTBQuestsCommands {
 			}
 		}
 
-		source.sendSuccess(Component.translatable("commands.ftbquests.command.feedback.reloaded"), false);
+		source.sendSuccess(() -> Component.translatable("commands.ftbquests.command.feedback.reloaded"), false);
 		UUID id = sender == null ? Util.NIL_UUID : sender.getUUID();
 		if (!warnedPlayers.contains(id)) {
-			source.sendSuccess(Component.translatable("commands.ftbquests.command.feedback.reloaded.disclaimer").withStyle(ChatFormatting.GOLD), false);
+			source.sendSuccess(() -> Component.translatable("commands.ftbquests.command.feedback.reloaded.disclaimer").withStyle(ChatFormatting.GOLD), false);
 			warnedPlayers.add(id);
 		}
 
@@ -414,7 +415,7 @@ public class FTBQuestsCommands {
 
 		data.setRewardsBlocked(doBlocking);
 
-		source.sendSuccess(Component.translatable("commands.ftbquests.command.feedback.rewards_blocked", data, data.areRewardsBlocked()), false);
+		source.sendSuccess(() -> Component.translatable("commands.ftbquests.command.feedback.rewards_blocked", data, data.areRewardsBlocked()), false);
 
 		return 1;
 	}

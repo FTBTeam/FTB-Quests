@@ -8,13 +8,13 @@ import dev.ftb.mods.ftblibrary.icon.ItemIcon;
 import dev.ftb.mods.ftblibrary.math.Bits;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
 import dev.ftb.mods.ftblibrary.ui.BaseScreen;
-import dev.ftb.mods.ftblibrary.util.ClientUtils;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
+import dev.ftb.mods.ftblibrary.util.client.ClientUtils;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.gui.EditRewardTableScreen;
 import dev.ftb.mods.ftbquests.gui.RewardTablesScreen;
 import dev.ftb.mods.ftbquests.gui.quests.QuestScreen;
-import dev.ftb.mods.ftbquests.integration.FTBQuestsJEIHelper;
+import dev.ftb.mods.ftbquests.integration.RecipeModHelper;
 import dev.ftb.mods.ftbquests.net.EditObjectMessage;
 import dev.ftb.mods.ftbquests.quest.*;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
@@ -31,10 +31,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -259,15 +256,15 @@ public final class RewardTable extends QuestObjectBase {
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public void getConfig(ConfigGroup config) {
-		super.getConfig(config);
+	public void fillConfigGroup(ConfigGroup config) {
+		super.fillConfigGroup(config);
 		config.addDouble("empty_weight", emptyWeight, v -> emptyWeight = v.floatValue(), 0, 0, Integer.MAX_VALUE);
 		config.addInt("loot_size", lootSize, v -> lootSize = v, 1, 1, Integer.MAX_VALUE);
 		config.addBool("hide_tooltip", hideTooltip, v -> hideTooltip = v, false);
 		config.addBool("use_title", useTitle, v -> useTitle = v, false);
 
 		if (lootCrate != null) {
-			lootCrate.getConfig(config.getGroup("loot_crate").setNameKey("item.ftbquests.lootcrate"));
+			lootCrate.getConfig(config.getOrCreateSubgroup("loot_crate").setNameKey("item.ftbquests.lootcrate"));
 		}
 
 		// TODO: Implement this: config.addString("loot_table_id", lootTableId == null ? "" : lootTableId.toString(), v -> lootTableId = v.isEmpty() ? null : new ResourceLocation(v), "");
@@ -395,7 +392,7 @@ public final class RewardTable extends QuestObjectBase {
 			int maxLines = gui == null ? 12 : (gui.height - 20) / (gui.getTheme().getFontHeight() + 2);
 			int nRewards = sortedRewards.size();
 			int start = nRewards > maxLines ?
-					(int) ((FTBQuests.PROXY.getClientPlayer().getLevel().getGameTime() / 10) % nRewards) :
+					(int) ((FTBQuests.PROXY.getClientPlayer().level().getGameTime() / 10) % nRewards) :
 					0;
 
 			int nLines = Math.min(maxLines, nRewards);
@@ -416,7 +413,7 @@ public final class RewardTable extends QuestObjectBase {
 	}
 
 	@Override
-	public int refreshJEI() {
-		return FTBQuestsJEIHelper.LOOTCRATES;
+	public Set<RecipeModHelper.Components> componentsToRefresh() {
+		return EnumSet.of(RecipeModHelper.Components.LOOT_CRATES);
 	}
 }

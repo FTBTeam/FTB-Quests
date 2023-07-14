@@ -55,7 +55,7 @@ public class ContextMenuBuilder {
             titleStr = titleStr.split("\n")[0];
             closeQuote = "\" ...";
         }
-        res.add(new ContextMenuItem(Component.literal("\"").append(titleStr).append(closeQuote), Color4I.EMPTY, null).setCloseMenu(false));
+        res.add(new ContextMenuItem(Component.literal("\"").append(titleStr).append(closeQuote), Color4I.empty(), null).setCloseMenu(false));
         res.add(ContextMenuItem.SEPARATOR);
         res.addAll(atTop);
         screen.addObjectMenuItems(res, gui, object, deletionFocus);

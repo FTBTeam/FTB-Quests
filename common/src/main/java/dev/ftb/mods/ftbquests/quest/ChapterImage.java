@@ -1,7 +1,7 @@
 package dev.ftb.mods.ftbquests.quest;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.ImageConfig;
 import dev.ftb.mods.ftblibrary.config.StringConfig;
@@ -13,6 +13,7 @@ import dev.ftb.mods.ftbquests.util.ConfigQuestObject;
 import dev.ftb.mods.ftbquests.util.NetUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
@@ -53,7 +54,7 @@ public final class ChapterImage implements Movable {
 		width = 1D;
 		height = 1D;
 		rotation = 0D;
-		image = Color4I.EMPTY; //getIcon("minecraft:textures/gui/presets/isles.png");
+		image = Color4I.empty();
 		color = Color4I.WHITE;
 		alpha = 255;
 		needAspectRecalc = true;
@@ -258,22 +259,24 @@ public final class ChapterImage implements Movable {
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public void drawMoved(PoseStack matrixStack) {
-		matrixStack.pushPose();
+	public void drawMoved(GuiGraphics graphics) {
+		PoseStack poseStack = graphics.pose();
+
+		poseStack.pushPose();
 
 		if (corner) {
-			matrixStack.mulPose(Vector3f.ZP.rotationDegrees((float) rotation));
-			image.withColor(Color4I.WHITE.withAlpha(50)).draw(matrixStack, 0, 0, 1, 1);
+			poseStack.mulPose(Axis.ZP.rotationDegrees((float) rotation));
+			image.withColor(Color4I.WHITE.withAlpha(50)).draw(graphics, 0, 0, 1, 1);
 		} else {
-			matrixStack.translate(0.5D, 0.5D, 0);
-			matrixStack.mulPose(Vector3f.ZP.rotationDegrees((float) rotation));
-			matrixStack.scale(0.5F, 0.5F, 1);
-			image.withColor(Color4I.WHITE.withAlpha(50)).draw(matrixStack, -1, -1, 2, 2);
+			poseStack.translate(0.5D, 0.5D, 0);
+			poseStack.mulPose(Axis.ZP.rotationDegrees((float) rotation));
+			poseStack.scale(0.5F, 0.5F, 1);
+			image.withColor(Color4I.WHITE.withAlpha(50)).draw(graphics, -1, -1, 2, 2);
 		}
 
-		matrixStack.popPose();
+		poseStack.popPose();
 
-		QuestShape.get(getShape()).outline.withColor(Color4I.WHITE.withAlpha(30)).draw(matrixStack, 0, 0, 1, 1);
+		QuestShape.get(getShape()).outline.withColor(Color4I.WHITE.withAlpha(30)).draw(graphics, 0, 0, 1, 1);
 	}
 
 	public boolean isAspectRatioOff() {
