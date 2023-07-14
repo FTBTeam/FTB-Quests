@@ -1,7 +1,7 @@
 package dev.ftb.mods.ftbquests.quest.reward;
 
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
-import dev.ftb.mods.ftbquests.integration.StageHelper;
+import dev.ftb.mods.ftblibrary.integration.stages.StageHelper;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -71,9 +71,9 @@ public class StageReward extends Reward {
 	@Override
 	public void claim(ServerPlayer player, boolean notify) {
 		if (remove) {
-			StageHelper.INSTANCE.get().remove(player, stage);
+			StageHelper.getInstance().getProvider().remove(player, stage);
 		} else {
-			StageHelper.INSTANCE.get().add(player, stage);
+			StageHelper.getInstance().getProvider().add(player, stage);
 		}
 
 		if (notify) {

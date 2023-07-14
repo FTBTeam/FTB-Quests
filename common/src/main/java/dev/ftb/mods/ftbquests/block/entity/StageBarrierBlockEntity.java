@@ -1,6 +1,6 @@
 package dev.ftb.mods.ftbquests.block.entity;
 
-import dev.ftb.mods.ftbquests.integration.StageHelper;
+import dev.ftb.mods.ftblibrary.integration.stages.StageHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
@@ -70,6 +70,6 @@ public class StageBarrierBlockEntity extends BlockEntity implements BarrierBlock
 
 	@Override
 	public boolean isOpen(Player player) {
-		return !stage.isEmpty() && StageHelper.INSTANCE.get().has(player, stage);
+		return !stage.isEmpty() && StageHelper.INSTANCE.getProvider().has(player, stage);
 	}
 }

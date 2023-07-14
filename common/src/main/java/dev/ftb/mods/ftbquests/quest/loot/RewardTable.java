@@ -14,7 +14,7 @@ import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.gui.EditRewardTableScreen;
 import dev.ftb.mods.ftbquests.gui.RewardTablesScreen;
 import dev.ftb.mods.ftbquests.gui.quests.QuestScreen;
-import dev.ftb.mods.ftbquests.integration.FTBQuestsJEIHelper;
+import dev.ftb.mods.ftbquests.integration.RecipeModHelper;
 import dev.ftb.mods.ftbquests.net.EditObjectMessage;
 import dev.ftb.mods.ftbquests.quest.*;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
@@ -31,10 +31,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -416,7 +413,7 @@ public final class RewardTable extends QuestObjectBase {
 	}
 
 	@Override
-	public int refreshJEI() {
-		return FTBQuestsJEIHelper.LOOTCRATES;
+	public Set<RecipeModHelper.Components> componentsToRefresh() {
+		return EnumSet.of(RecipeModHelper.Components.LOOT_CRATES);
 	}
 }

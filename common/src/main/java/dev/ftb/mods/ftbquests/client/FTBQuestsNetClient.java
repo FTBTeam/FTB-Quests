@@ -7,7 +7,6 @@ import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.FTBQuestsNetCommon;
 import dev.ftb.mods.ftbquests.gui.*;
 import dev.ftb.mods.ftbquests.gui.quests.QuestScreen;
-import dev.ftb.mods.ftbquests.integration.FTBQuestsJEIHelper;
 import dev.ftb.mods.ftbquests.net.TeamDataUpdate;
 import dev.ftb.mods.ftbquests.quest.*;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
@@ -62,7 +61,7 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon {
 		object.onCreated();
 		ClientQuestFile.INSTANCE.refreshIDMap();
 		object.editedFromGUI();
-		FTBQuestsJEIHelper.refresh(object);
+		FTBQuests.getRecipeModHelper().refreshRecipes(object);
 
 		if (object instanceof Chapter) {
 			ClientQuestFile.INSTANCE.questScreen.selectChapter((Chapter) object);
@@ -104,7 +103,7 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon {
 			object.deleteSelf();
 			ClientQuestFile.INSTANCE.refreshIDMap();
 			object.editedFromGUI();
-			FTBQuestsJEIHelper.refresh(object);
+			FTBQuests.getRecipeModHelper().refreshRecipes(object);
 		}
 	}
 
@@ -157,7 +156,7 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon {
 		if (object != null) {
 			object.readData(nbt);
 			object.editedFromGUI();
-			FTBQuestsJEIHelper.refresh(object);
+			FTBQuests.getRecipeModHelper().refreshRecipes(object);
 		}
 	}
 
@@ -302,7 +301,7 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon {
 			}
 		}
 
-		FTBQuestsJEIHelper.refresh(ClientQuestFile.INSTANCE.get(id));
+		FTBQuests.getRecipeModHelper().refreshRecipes(ClientQuestFile.INSTANCE.get(id));
 	}
 
 	@Override

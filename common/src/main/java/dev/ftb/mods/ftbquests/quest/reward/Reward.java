@@ -7,7 +7,7 @@ import dev.ftb.mods.ftblibrary.ui.Button;
 import dev.ftb.mods.ftblibrary.util.ClientUtils;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.gui.quests.QuestScreen;
-import dev.ftb.mods.ftbquests.integration.FTBQuestsJEIHelper;
+import dev.ftb.mods.ftbquests.integration.RecipeModHelper;
 import dev.ftb.mods.ftbquests.net.ClaimRewardMessage;
 import dev.ftb.mods.ftbquests.quest.*;
 import dev.ftb.mods.ftbquests.util.ProgressChange;
@@ -22,7 +22,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -268,9 +270,9 @@ public abstract class Reward extends QuestObjectBase {
 		return getIcon().getIngredient();
 	}
 
-	@Override
-	public final int refreshJEI() {
-		return FTBQuestsJEIHelper.QUESTS;
+    @Override
+	public Set<RecipeModHelper.Components> componentsToRefresh() {
+		return EnumSet.of(RecipeModHelper.Components.QUESTS);
 	}
 
 	@Environment(EnvType.CLIENT)
