@@ -32,6 +32,8 @@ import dev.ftb.mods.ftbquests.quest.reward.RewardAutoClaim;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.quest.theme.QuestTheme;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
+import it.unimi.dsi.fastutil.longs.Long2IntMap;
+import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
@@ -73,7 +75,7 @@ public class ViewQuestPanel extends Panel {
 	public BlankPanel panelText;
 	private TextField titleField;
 	private final List<Pair<Integer,Integer>> pageIndices = new ArrayList<>();
-	private int currentPage = 0;
+	private final Long2IntMap currentPages = new Long2IntOpenHashMap();
 	private long lastScrollTime = 0L;
 
 	public ViewQuestPanel(QuestScreen g) {
@@ -123,11 +125,23 @@ public class ViewQuestPanel extends Panel {
 			if (l1 < quest.description.size()) {
 				pageIndices.add(Pair.of(l1, quest.description.size() - 1));
 			}
-
-			if (currentPage < 0 || currentPage >= pageIndices.size()) {
-				currentPage = 0;
-			}
 		}
+	}
+
+	private int getCurrentPage() {
+		if (quest == null) {
+			return 0;
+		}
+		int page = currentPages.getOrDefault(quest.id, 0);
+		if (page < 0 || page >= pageIndices.size()) {
+			page = 0;
+			currentPages.put(quest.id, 0);
+		}
+		return page;
+	}
+
+	private void setCurrentPage(int page) {
+		currentPages.put(quest.id, page);
 	}
 
 	@Override
@@ -386,7 +400,7 @@ public class ViewQuestPanel extends Panel {
 	}
 
 	private void addDescriptionText(boolean canEdit, Component subtitle) {
-		Pair<Integer,Integer> pageSpan = pageIndices.get(currentPage);
+		Pair<Integer,Integer> pageSpan = pageIndices.get(getCurrentPage());
 		if (subtitle.getContents() != ComponentContents.EMPTY) {
 			panelText.add(new VerticalSpaceWidget(panelText, 7));
 		}
@@ -429,6 +443,8 @@ public class ViewQuestPanel extends Panel {
 		buttonPanel.setSize(panelText.width, 14);
 		panelText.add(buttonPanel);
 
+		int currentPage = getCurrentPage();
+
 		Component page = Component.literal((currentPage + 1) + "/" + pageIndices.size()).withStyle(ChatFormatting.GRAY);
 		int labelWidth = questScreen.getTheme().getStringWidth(page);
 
@@ -436,7 +452,7 @@ public class ViewQuestPanel extends Panel {
 			SimpleTextButton prevPage = new SimpleTextButton(buttonPanel, Component.empty(), ThemeProperties.LEFT_ARROW.get()) {
 				@Override
 				public void onClicked(MouseButton mouseButton) {
-					currentPage = Math.max(0, currentPage - 1);
+					setCurrentPage(Math.max(0, currentPage - 1));
 					refreshWidgets();
 				}
 
@@ -460,7 +476,7 @@ public class ViewQuestPanel extends Panel {
 			SimpleTextButton nextPage = new SimpleTextButton(buttonPanel, Component.empty(), ThemeProperties.RIGHT_ARROW.get()) {
 				@Override
 				public void onClicked(MouseButton mouseButton) {
-					currentPage = Math.min(pageIndices.size() + 1, currentPage + 1);
+					setCurrentPage(Math.min(pageIndices.size() + 1, currentPage + 1));
 					refreshWidgets();
 				}
 
@@ -573,10 +589,10 @@ public class ViewQuestPanel extends Panel {
 		}
 
 		if (key.is(GLFW.GLFW_KEY_PAGE_UP) || key.is(GLFW.GLFW_KEY_LEFT)) {
-			currentPage = Math.max(0, currentPage - 1);
+			setCurrentPage(Math.max(0, getCurrentPage() - 1));
 			refreshWidgets();
 		} else if (key.is(GLFW.GLFW_KEY_PAGE_DOWN) || key.is(GLFW.GLFW_KEY_RIGHT)) {
-			currentPage = Math.min(pageIndices.size() - 1, currentPage + 1);
+			setCurrentPage(Math.min(pageIndices.size() - 1, getCurrentPage() + 1));
 			refreshWidgets();
 		}
 	}
@@ -664,9 +680,9 @@ public class ViewQuestPanel extends Panel {
 	}
 
 	private void addPageBreak() {
-		appendToPage(quest.description, List.of(PAGEBREAK_CODE, "(new page placeholder text)"), currentPage);
+		appendToPage(quest.description, List.of(PAGEBREAK_CODE, "(new page placeholder text)"), getCurrentPage());
 		new EditObjectMessage(quest).sendToServer();
-		currentPage = Math.min(pageIndices.size() - 1, currentPage + 1);
+		setCurrentPage(Math.min(pageIndices.size() - 1, getCurrentPage() + 1));
 		refreshWidgets();
 	}
 
@@ -690,7 +706,7 @@ public class ViewQuestPanel extends Panel {
 		EditConfigFromStringScreen.open(c, line == -1 ? "" : quest.description.get(line), "", title, accepted -> {
 			if (accepted) {
 				if (line == -1) {
-					appendToPage(quest.description, List.of(c.value), currentPage);
+					appendToPage(quest.description, List.of(c.value), getCurrentPage());
 				} else {
 					quest.description.set(line, c.value);
 				}
@@ -717,7 +733,7 @@ public class ViewQuestPanel extends Panel {
 			openGui();
 			if (accepted) {
 				if (line == -1) {
-					appendToPage(quest.description, List.of(component.toString()), currentPage);
+					appendToPage(quest.description, List.of(component.toString()), getCurrentPage());
 				} else {
 					quest.description.set(line, component.toString());
 				}
@@ -799,13 +815,13 @@ public class ViewQuestPanel extends Panel {
 		}
 
 		if (now - lastScrollTime > 500L) {
-			if (scroll < 0 && currentPage < pageIndices.size() - 1) {
-				currentPage++;
+			if (scroll < 0 && getCurrentPage() < pageIndices.size() - 1) {
+				setCurrentPage(getCurrentPage() + 1);
 				refreshWidgets();
 				lastScrollTime = now;
 				return true;
-			} else if (scroll > 0 && currentPage > 0) {
-				currentPage--;
+			} else if (scroll > 0 && getCurrentPage() > 0) {
+				setCurrentPage(getCurrentPage() - 1);
 				refreshWidgets();
 				lastScrollTime = now;
 				return true;
