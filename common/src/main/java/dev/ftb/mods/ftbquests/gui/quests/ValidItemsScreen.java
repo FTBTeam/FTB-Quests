@@ -9,8 +9,8 @@ import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.ui.misc.CompactGridLayout;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftblibrary.util.WrappedIngredient;
+import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.gui.FTBQuestsTheme;
-import dev.ftb.mods.ftbquests.integration.FTBQuestsJEIHelper;
 import dev.ftb.mods.ftbquests.net.SubmitTaskMessage;
 import dev.ftb.mods.ftbquests.quest.task.ItemTask;
 import net.minecraft.network.chat.Component;
@@ -33,8 +33,8 @@ public class ValidItemsScreen extends BaseScreen {
 
 		@Override
 		public void onClicked(MouseButton button) {
-			if (FTBQuestsJEIHelper.isRecipeModAvailable()) {
-				FTBQuestsJEIHelper.showRecipes(stack);
+			if (FTBQuests.getRecipeModHelper().isRecipeModAvailable()) {
+				FTBQuests.getRecipeModHelper().showRecipes(stack);
 			}
 		}
 

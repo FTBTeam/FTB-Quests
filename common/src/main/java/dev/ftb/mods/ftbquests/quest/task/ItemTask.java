@@ -11,7 +11,6 @@ import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.gui.CustomToast;
 import dev.ftb.mods.ftbquests.gui.quests.ValidItemsScreen;
-import dev.ftb.mods.ftbquests.integration.FTBQuestsJEIHelper;
 import dev.ftb.mods.ftbquests.item.FTBQuestsItems;
 import dev.ftb.mods.ftbquests.item.MissingItem;
 import dev.ftb.mods.ftbquests.net.FTBQuestsNetHandler;
@@ -240,8 +239,8 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 
 		List<ItemStack> validItems = getValidDisplayItems();
 
-		if (!consumesResources() && validItems.size() == 1 && FTBQuestsJEIHelper.isRecipeModAvailable()) {
-			FTBQuestsJEIHelper.showRecipes(validItems.get(0));
+		if (!consumesResources() && validItems.size() == 1 && FTBQuests.getRecipeModHelper().isRecipeModAvailable()) {
+			FTBQuests.getRecipeModHelper().showRecipes(validItems.get(0));
 		} else if (validItems.isEmpty()) {
 			Minecraft.getInstance().getToasts().addToast(new CustomToast(Component.literal("No valid items!"), ItemIcon.getItemIcon(FTBQuestsItems.MISSING_ITEM.get()), Component.literal("Report this bug to modpack author!")));
 		} else {
@@ -278,7 +277,7 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 		} else if (getValidDisplayItems().size() > 1) {
 			list.blankLine();
 			list.add(Component.translatable("ftbquests.task.ftbquests.item.view_items").withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE));
-		} else if (FTBQuestsJEIHelper.isRecipeModAvailable()) {
+		} else if (FTBQuests.getRecipeModHelper().isRecipeModAvailable()) {
 			list.blankLine();
 			list.add(Component.translatable("ftbquests.task.ftbquests.item.click_recipe").withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE));
 		}

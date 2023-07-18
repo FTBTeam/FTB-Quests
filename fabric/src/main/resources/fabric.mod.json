@@ -5,7 +5,7 @@
 	"name": "FTB Quests",
 	"description": "Lets you easily create and play with quests",
 	"authors": [
-		"LatvianModder"
+		"FTB Team"
 	],
 	"contact": {
 		"sources": "https://github.com/FTBTeam/FTB-Quests",
@@ -15,9 +15,6 @@
 	"entrypoints": {
 		"main": [
 			"dev.ftb.mods.ftbquests.fabric.FTBQuestsFabric"
-		],
-		"rei_client": [
-			"dev.ftb.mods.ftbquests.integration.jei.FTBQuestsREIIntegration"
 		]
 	},
 	"mixins": [
@@ -26,11 +23,8 @@
 		"fabric": "*",
 		"minecraft": "~1.19.2",
 		"architectury": ">=6.3.49",
-		"ftblibrary": ">=1902.3.19-build.214",
+		"ftblibrary": ">=1902.4.0-build.232",
 		"ftbteams": ">=1902.2.9-build.61",
 		"itemfilters": ">=1902.2.9-build.46"
-	},
-	"breaks": {
-		"kubejs": "<1902.6.0-build.107"
 	}
 }
