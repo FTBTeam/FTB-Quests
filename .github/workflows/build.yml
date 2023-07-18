@@ -6,7 +6,6 @@ on:
       # main and dev versions for each mc ver here
       - "1.19/main"
       - "1.19/dev"
-      - "xmod-compat"
   workflow_dispatch:
     inputs:
       norelease:

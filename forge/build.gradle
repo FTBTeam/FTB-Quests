@@ -112,6 +112,7 @@ if (ENV.CURSEFORGE_KEY) {
 				requiredDependency 'ftb-library-forge'
 				requiredDependency 'ftb-teams-forge'
 				requiredDependency 'item-filters'
+				optionalDependency 'ftb-xmod-compat'
 			}
 			changelog = getGitChangelog
 			changelogType = 'markdown'
