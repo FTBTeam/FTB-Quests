@@ -141,7 +141,9 @@ public class ViewQuestPanel extends Panel {
 	}
 
 	private void setCurrentPage(int page) {
-		currentPages.put(quest.id, page);
+		if (quest != null) {
+			currentPages.put(quest.id, page);
+		}
 	}
 
 	@Override
