@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1902.5.0]
+
+### Changed
+
+* **IMPORTANT**: cross-mod integration for all soft dependencies has been removed from FTB Quests in this release!
+  * Install the **FTB XMod Compat** mod to reintroduce integration with the KubeJS, REI, JEI, and Game Stages mods
+  * Exception is Item Filters, which is a hard dependency
+  * The rationale behind this change is to move dependencies on external (non-FTB) mods into one place to minimise future disruption due to API-breaking changes (e.g. KubeJS 6.0 -> 6.1)
+
+### Fixed
+* View quest panel current page (for quests with multi-page description text) is now tracked per-quest
+
 ## [1902.4.18]
 
 ### Changed
