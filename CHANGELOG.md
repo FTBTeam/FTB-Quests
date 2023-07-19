@@ -4,10 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1902.5.1]
+
+### Fixed
+* Fixed occasional client NPE when zooming in/out immediately after closing quest view panel
+
 ## [1902.5.0]
 
 ### Changed
-
 * **IMPORTANT**: cross-mod integration for all soft dependencies has been removed from FTB Quests in this release!
   * Install the **FTB XMod Compat** mod to reintroduce integration with the KubeJS, REI, JEI, and Game Stages mods
   * Exception is Item Filters, which is a hard dependency
