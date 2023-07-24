@@ -149,8 +149,9 @@ public class FTBQuestsClientEventHandler {
 			double mx = Minecraft.getInstance().mouseHandler.xpos();
 			double my = Minecraft.getInstance().mouseHandler.ypos();
 			Minecraft.getInstance().setScreen(null);
-			ClientQuestFile.openGui();
-			InputConstants.grabOrReleaseMouse(Minecraft.getInstance().getWindow().getWindow(), GLFW.GLFW_CURSOR_NORMAL, mx, my);
+			if (ClientQuestFile.openGui() != null) {
+				InputConstants.grabOrReleaseMouse(Minecraft.getInstance().getWindow().getWindow(), GLFW.GLFW_CURSOR_NORMAL, mx, my);
+			}
 			return EventResult.interruptFalse();
 		}
 
