@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1902.5.2]
+
+### Fixed
+* Grid snapping now works better for scaled quest buttons
+  * E.g. quests with a size of 0.5 also have grid snap size of half as much
+  * When multiple quests with different size are selected, size of smallest button is used
+* Fixed occasional client NPE when drawing view quest panel
+* Fixed mouse point left ungrabbed when trying to open a locked quest book from the sidebar button
+
 ## [1902.5.1]
 
 ### Fixed
