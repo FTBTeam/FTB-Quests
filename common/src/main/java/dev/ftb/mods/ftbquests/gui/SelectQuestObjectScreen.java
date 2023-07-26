@@ -10,10 +10,7 @@ import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.ui.misc.ButtonListBaseScreen;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
-import dev.ftb.mods.ftbquests.quest.Quest;
-import dev.ftb.mods.ftbquests.quest.QuestLink;
-import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
-import dev.ftb.mods.ftbquests.quest.QuestObjectType;
+import dev.ftb.mods.ftbquests.quest.*;
 import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.task.Task;
@@ -65,8 +62,9 @@ public class SelectQuestObjectScreen<T extends QuestObjectBase> extends ButtonLi
 	public void addButtons(Panel panel) {
 		List<T> list = new ArrayList<>();
 
-		for (QuestObjectBase objectBase : ClientQuestFile.INSTANCE.getAllObjects()) {
-			if (config.predicate.test(objectBase)) {
+		ClientQuestFile file = ClientQuestFile.INSTANCE;
+		for (QuestObjectBase objectBase : file.getAllObjects()) {
+			if (config.predicate.test(objectBase) && (file.canEdit() || (!(objectBase instanceof QuestObject qo) || qo.isVisible(file.self)))) {
 				list.add((T) objectBase);
 			}
 		}
@@ -127,7 +125,6 @@ public class SelectQuestObjectScreen<T extends QuestObjectBase> extends ButtonLi
 			} else if (object instanceof QuestLink link) {
 				link.getQuest().ifPresent(quest -> {
 					addObject(list, link.getChapter());
-					list.add(Component.empty());
 					list.add(Component.translatable("ftbquests.gui.linked_quest_id", Component.literal(quest.getCodeString()).withStyle(ChatFormatting.DARK_GRAY)).withStyle(ChatFormatting.GRAY));
 					addObject(list, quest.chapter);
 				});

@@ -300,14 +300,15 @@ public class QuestPanel extends Panel {
 			if (isShiftKeyDown()) {
 				questX = qx;
 				questY = qy;
-			} else if (questScreen.selectedObjects.size() == 1 && questScreen.selectedObjects.get(0) instanceof Quest q) {
-				double s = (1D / questScreen.file.gridScale) / q.size;
-				questX = Mth.floor(qx * s + 0.5D) / s;
-				questY = Mth.floor(qy * s + 0.5D) / s;
 			} else {
-				double s = 1D / questScreen.file.gridScale;
-				questX = Mth.floor(qx * s + 0.5D) / s;
-				questY = Mth.floor(qy * s + 0.5D) / s;
+				// grid-snapping size is based on the smallest selected item
+				double minSize = questScreen.selectedObjects.stream()
+						.map(Movable::getWidth)
+						.min(Double::compare)
+						.orElse(1d);
+				double snap = 1D / (questScreen.file.gridScale * minSize);
+				questX = Mth.floor(qx * snap + 0.5D) / snap;
+				questY = Mth.floor(qy * snap + 0.5D) / snap;
 			}
 
 			if (questScreen.file.canEdit()) {

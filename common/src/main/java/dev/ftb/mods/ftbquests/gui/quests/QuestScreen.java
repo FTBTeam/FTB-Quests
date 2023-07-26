@@ -334,6 +334,16 @@ public class QuestScreen extends BaseScreen {
 			return true;
 		}
 
+		if (key.is(GLFW.GLFW_KEY_F) && key.modifiers.onlyControl()) {
+			openQuestSelectionGUI();
+			return true;
+		}
+
+		if (key.is(GLFW.GLFW_KEY_0)) {
+			addZoom((16 - zoom) / 4.0);
+			return true;
+		}
+
 		if (key.keyCode >= GLFW.GLFW_KEY_1 && key.keyCode <= GLFW.GLFW_KEY_9) {
 			int i = key.keyCode - GLFW.GLFW_KEY_1;
 
@@ -369,14 +379,6 @@ public class QuestScreen extends BaseScreen {
 				case GLFW.GLFW_KEY_RIGHT -> {
 					return moveSelectedQuests(step, 0D);
 				}
-				case GLFW.GLFW_KEY_0 -> {
-					addZoom((16 - zoom) / 4.0);
-					return true;
-				}
-				case GLFW.GLFW_KEY_F -> {
-					openQuestSelectionGUI();
-					return true;
-				}
 			}
 		}
 
@@ -393,11 +395,13 @@ public class QuestScreen extends BaseScreen {
 					zoom = 20;
 					selectChapter(quest.chapter);
 					viewQuestPanel.hidePanel = false;
+					questPanel.scrollTo(quest.x, quest.y);
 					viewQuest(quest);
 				} else if (c.value instanceof QuestLink link) {
 					zoom = 20;
 					selectChapter(link.getChapter());
 					viewQuestPanel.hidePanel = false;
+					questPanel.scrollTo(link.getX(), link.getY());
 					link.getQuest().ifPresent(this::viewQuest);
 				}
 			}
