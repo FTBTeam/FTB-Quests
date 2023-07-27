@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1902.5.3]
+
+### Fixed
+* Fixed another occasional client NPE when drawing view quest panel
+* Fixed an inaccurate tooltip on the Task editor screen
+  * The item tag checked when "Match NBT" is set to Default is `itemfilters:check_nbt`, not `itemfilters:match_nbt`
+
 ## [1902.5.2]
 
 ### Fixed
