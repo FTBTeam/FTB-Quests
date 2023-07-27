@@ -797,11 +797,11 @@ public class ViewQuestPanel extends Panel {
 		Color4I.DARK_GRAY.withAlpha(120).draw(matrixStack, questScreen.getX(), questScreen.getY(), questScreen.width, questScreen.height);
 		Icon background = ThemeProperties.QUEST_VIEW_BACKGROUND.get();
 		background.draw(matrixStack, x, y, w, h);
-		if (titleField != null) {
+		if (titleField != null && panelContent != null) {
 			int iconSize = Math.min(16, titleField.height + 2);
 			icon.draw(matrixStack, x + 4, y + 4, iconSize, iconSize);
+			borderColor.draw(matrixStack, x + 1, panelContent.getY(), w - 2, 1);
 		}
-		borderColor.draw(matrixStack, x + 1, panelContent.getY(), w - 2, 1);
 	}
 
 	@Override
