@@ -8,37 +8,36 @@ dependencies {
 	modApi "dev.latvian.mods:item-filters:${rootProject.itemfilters_version}"
 }
 
-def ENV = System.getenv()
-
 architectury {
 	common()
 }
 
 publishing {
 	publications {
-		mavenCommon(MavenPublication) {
-			artifactId = rootProject.archivesBaseName
+		mavenForge(MavenPublication) {
+			artifactId = "${rootProject.archives_base_name}"
+			version ftbPublishing.mavenVersion
 			from components.java
 		}
 	}
 
 	repositories {
-		if (ENV.FTB_MAVEN_TOKEN) {
+		if (ftbPublishing.ftbToken) {
 			maven {
-				url "https://maven.ftb.dev/release"
+				url ftbPublishing.ftbURL
 				credentials {
-					username = "ftb"
-					password = "${ENV.FTB_MAVEN_TOKEN}"
+					username = ftbPublishing.ftbUser
+					password = ftbPublishing.ftbToken
 				}
 			}
 		}
 
-		if (ENV.SAPS_TOKEN) {
+		if (ftbPublishing.sapsToken) {
 			maven {
-				url "https://maven.saps.dev/minecraft"
+				url ftbPublishing.sapsURL
 				credentials {
-					username = "ftb"
-					password = "${ENV.SAPS_TOKEN}"
+					username = ftbPublishing.sapsUser
+					password = ftbPublishing.sapsToken
 				}
 			}
 		}

@@ -80,15 +80,13 @@ if (ENV.CURSEFORGE_KEY) {
 			releaseType = project.curseforge_type
 			addGameVersion "Fabric"
 			addGameVersion "Java 17"
-			addGameVersion "1.19.2"
+			addGameVersion project.minecraft_version
 			mainArtifact(remapJar.archivePath)
 			relations {
 				requiredDependency 'architectury-api'
 				requiredDependency 'fabric-api'
 				requiredDependency 'ftb-library-fabric'
 				requiredDependency 'ftb-teams-fabric'
-				requiredDependency 'item-filters'
-				optionalDependency 'kubejs'
 			}
 			changelog = getGitChangelog
 			changelogType = 'markdown'
@@ -98,29 +96,30 @@ if (ENV.CURSEFORGE_KEY) {
 
 publishing {
 	publications {
-		mavenFabric(MavenPublication) {
+		mavenForge(MavenPublication) {
 			artifactId = "${rootProject.archives_base_name}-${project.name}"
+			version ftbPublishing.mavenVersion
 			from components.java
 		}
 	}
 
 	repositories {
-		if (ENV.FTB_MAVEN_TOKEN) {
+		if (ftbPublishing.ftbToken) {
 			maven {
-				url "https://maven.ftb.dev/release"
+				url ftbPublishing.ftbURL
 				credentials {
-					username = "ftb"
-					password = "${ENV.FTB_MAVEN_TOKEN}"
+					username = ftbPublishing.ftbUser
+					password = ftbPublishing.ftbToken
 				}
 			}
 		}
 
-		if (ENV.SAPS_TOKEN) {
+		if (ftbPublishing.sapsToken) {
 			maven {
-				url "https://maven.saps.dev/minecraft"
+				url ftbPublishing.sapsURL
 				credentials {
-					username = "ftb"
-					password = "${ENV.SAPS_TOKEN}"
+					username = ftbPublishing.sapsUser
+					password = ftbPublishing.sapsToken
 				}
 			}
 		}
