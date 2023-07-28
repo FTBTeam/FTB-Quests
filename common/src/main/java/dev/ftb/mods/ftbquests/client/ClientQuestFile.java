@@ -4,8 +4,8 @@ import dev.architectury.utils.Env;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.util.client.ClientUtils;
 import dev.ftb.mods.ftbquests.FTBQuests;
-import dev.ftb.mods.ftbquests.gui.CustomToast;
-import dev.ftb.mods.ftbquests.gui.quests.QuestScreen;
+import dev.ftb.mods.ftbquests.client.gui.CustomToast;
+import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.net.DeleteObjectMessage;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestFile;
@@ -23,10 +23,8 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 
 import java.util.List;
+import java.util.Optional;
 
-/**
- * @author LatvianModder
- */
 public class ClientQuestFile extends QuestFile {
 	private static final List<String> MISSING_DATA_ERR = List.of(
 			"Unable to open Quest GUI: no quest book data received from server!",
@@ -36,34 +34,41 @@ public class ClientQuestFile extends QuestFile {
 
 	public static ClientQuestFile INSTANCE;
 
+	public TeamData selfTeamData;  // TeamData for the player on this client
+
+	private QuestScreen questScreen;
+	private QuestScreen.PersistedData persistedData;
+
 	public static boolean exists() {
 		return INSTANCE != null && !INSTANCE.invalid;
 	}
 
-	public TeamData self;
-	public QuestScreen questScreen;
-	private QuestScreen.PersistedData persistedData;
+	public static void syncFromServer(QuestFile newInstance) {
+		if (!(newInstance instanceof ClientQuestFile clientInstance)) {
+			throw new IllegalArgumentException("need a client quest file instance!");
+		}
 
-	@Override
-	public void load() {
 		if (INSTANCE != null) {
+			// clean up the previous instance
 			INSTANCE.deleteChildren();
 			INSTANCE.deleteSelf();
 		}
 
-		self = new TeamData(Util.NIL_UUID);
-		self.file = this;
-		self.name = "Loading...";
-		self.setLocked(true);
-		INSTANCE = this;
+		INSTANCE = clientInstance;
+		INSTANCE.onReplaced();
+	}
+
+	private void onReplaced() {
+		selfTeamData = new TeamData(Util.NIL_UUID, INSTANCE, "Loading...");
+		selfTeamData.setLocked(true);
 
 		refreshGui();
-		FTBQuests.getRecipeModHelper().refreshRecipes(this);
+		FTBQuests.getRecipeModHelper().refreshRecipes(INSTANCE);
 	}
 
 	@Override
 	public boolean canEdit() {
-		return self.getCanEdit(Minecraft.getInstance().player);
+		return selfTeamData.getCanEdit(Minecraft.getInstance().player);
 	}
 
 	@Override
@@ -78,6 +83,10 @@ public class ClientQuestFile extends QuestFile {
 				questScreen.openGui();
 			}
 		}
+	}
+
+	public Optional<QuestScreen> getQuestScreen() {
+		return Optional.ofNullable(questScreen);
 	}
 
 	public static QuestScreen openGui() {
@@ -100,9 +109,9 @@ public class ClientQuestFile extends QuestFile {
 
 	private QuestScreen openQuestGui() {
 		if (exists()) {
-			if (disableGui && !canEdit()) {
+			if (isDisableGui() && !canEdit()) {
 				Minecraft.getInstance().getToasts().addToast(new CustomToast(Component.translatable("item.ftbquests.book.disabled"), Icons.BARRIER, Component.empty()));
-			} else if (self.isLocked()) {
+			} else if (selfTeamData.isLocked()) {
 				Minecraft.getInstance().getToasts().addToast(new CustomToast(lockMessage.isEmpty() ? Component.literal("Quests locked!") : TextUtils.parseRawText(lockMessage), Icons.BARRIER, Component.empty()));
 			} else {
 				if (canEdit()) {
@@ -137,7 +146,7 @@ public class ClientQuestFile extends QuestFile {
 	public TeamData getData(Entity player) {
 		KnownClientPlayer kcp = FTBTeamsAPI.api().getClientManager().getKnownPlayer(player.getUUID())
 				.orElseThrow(() -> new RuntimeException("Unknown client player " + player.getUUID()));
-		return kcp.id().equals(Minecraft.getInstance().player.getUUID()) ? self : getData(kcp.teamId());
+		return kcp.id().equals(Minecraft.getInstance().player.getUUID()) ? selfTeamData : getData(kcp.teamId());
 	}
 
 	public void setPersistedScreenInfo(QuestScreen.PersistedData persistedData) {
@@ -145,17 +154,30 @@ public class ClientQuestFile extends QuestFile {
 	}
 
 	public static boolean canClientPlayerEdit() {
-		return exists() && INSTANCE.self.getCanEdit(FTBQuests.PROXY.getClientPlayer());
+		return exists() && INSTANCE.selfTeamData.getCanEdit(FTBQuestsClient.getClientPlayer());
 	}
 
 	public static boolean isQuestPinned(long id) {
-		return exists() && INSTANCE.self.isQuestPinned(FTBQuests.PROXY.getClientPlayer(), id);
+		return exists() && INSTANCE.selfTeamData.isQuestPinned(FTBQuestsClient.getClientPlayer(), id);
 	}
 
 	@Override
 	public boolean isPlayerOnTeam(Player player, TeamData teamData) {
 		return FTBTeamsAPI.api().getClientManager().getKnownPlayer(player.getUUID())
-				.map(kcp -> kcp.teamId().equals(teamData.uuid))
+				.map(kcp -> kcp.teamId().equals(teamData.getTeamId()))
 				.orElse(false);
+	}
+
+	@Override
+	public boolean moveChapterGroup(long id, boolean movingUp) {
+		if (super.moveChapterGroup(id, movingUp)) {
+			clearCachedData();
+			QuestScreen gui = ClientUtils.getCurrentGuiAs(QuestScreen.class);
+			if (gui != null) {
+				gui.refreshChapterPanel();
+			}
+			return true;
+		}
+		return false;
 	}
 }

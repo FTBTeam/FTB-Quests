@@ -46,7 +46,7 @@ public class MoveMovableMessage extends BaseC2SMessage {
 	public void handle(NetworkManager.PacketContext context) {
 		if (ServerQuestFile.INSTANCE.get(id) instanceof Movable movable) {
 			movable.onMoved(x, y, chapterID);
-			ServerQuestFile.INSTANCE.save();
+			ServerQuestFile.INSTANCE.markDirty();
 			new MoveMovableResponseMessage(movable, chapterID, x, y).sendToAll(context.getPlayer().getServer());
 		}
 	}

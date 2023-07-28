@@ -12,15 +12,12 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
 
-/**
- * @author LatvianModder
- */
 public class StageReward extends Reward {
-	public String stage = "";
-	public boolean remove = false;
+	private String stage = "";
+	private boolean remove = false;
 
-	public StageReward(Quest quest) {
-		super(quest);
+	public StageReward(long id, Quest quest) {
+		super(id, quest);
 		autoclaim = RewardAutoClaim.INVISIBLE;
 	}
 

@@ -52,7 +52,7 @@ public class EditObjectMessage extends BaseC2SMessage {
 				object.readData(nbt);
 				object.editedFromGUIOnServer();
 				ServerQuestFile.INSTANCE.clearCachedData();
-				ServerQuestFile.INSTANCE.save();
+				ServerQuestFile.INSTANCE.markDirty();
 				new EditObjectResponseMessage(object).sendToAll(context.getPlayer().getServer());
 			}
 		}

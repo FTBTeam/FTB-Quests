@@ -18,11 +18,11 @@ import net.minecraft.server.level.ServerPlayer;
 /**
  * @author LatvianModder
  */
-public class StageTask extends BooleanTask {
-	public String stage = "";
+public class StageTask extends AbstractBooleanTask {
+	private String stage = "";
 
-	public StageTask(Quest quest) {
-		super(quest);
+	public StageTask(long id, Quest quest) {
+		super(id, quest);
 	}
 
 	@Override
@@ -77,7 +77,10 @@ public class StageTask extends BooleanTask {
 		return StageHelper.INSTANCE.getProvider().has(player, stage);
 	}
 
+	@SuppressWarnings("unused")
 	public static void checkStages(ServerPlayer player) {
+		// hook for FTB XMod Compat to call into
+
 		TeamData data = ServerQuestFile.INSTANCE == null || PlayerHooks.isFake(player) ? null : ServerQuestFile.INSTANCE.getData(player);
 
 		if (data == null || data.isLocked()) {
@@ -86,7 +89,7 @@ public class StageTask extends BooleanTask {
 
 		ServerQuestFile.INSTANCE.withPlayerContext(player, () -> {
 			for (Task task : ServerQuestFile.INSTANCE.getAllTasks()) {
-				if (task instanceof StageTask && data.canStartTasks(task.quest)) {
+				if (task instanceof StageTask && data.canStartTasks(task.getQuest())) {
 					task.submitTask(data, player);
 				}
 			}

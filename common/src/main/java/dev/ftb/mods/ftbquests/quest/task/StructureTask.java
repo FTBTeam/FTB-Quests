@@ -27,15 +27,15 @@ import java.util.List;
 /**
  * @author MaxNeedsSnacks
  */
-public class StructureTask extends BooleanTask {
+public class StructureTask extends AbstractBooleanTask {
 	private static final ResourceLocation DEFAULT_STRUCTURE = new ResourceLocation("minecraft:mineshaft");
 
 	private static final List<String> KNOWN_STRUCTURES = new ArrayList<>();
 
 	private Either<ResourceKey<Structure>, TagKey<Structure>> structure;
 
-	public StructureTask(Quest quest) {
-		super(quest);
+	public StructureTask(long id, Quest quest) {
+		super(id, quest);
 		structure = Either.left(ResourceKey.create(Registries.STRUCTURE, DEFAULT_STRUCTURE));
 	}
 

@@ -16,68 +16,34 @@ import org.jetbrains.annotations.Nullable;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-/**
- * @author LatvianModder
- */
 public final class TaskType {
-	@Nullable
-	public static Task createTask(Quest quest, String id) {
-		if (id.isEmpty()) {
-			id = FTBQuests.MOD_ID + ":item";
-		} else if (id.indexOf(':') == -1) {
-			id = FTBQuests.MOD_ID + ':' + id;
-		}
-
-		TaskType type = TaskTypes.TYPES.get(new ResourceLocation(id));
-
-		if (type == null) {
-			return null;
-		}
-
-		return type.provider.create(quest);
-	}
-
-	@FunctionalInterface
-	public interface Provider {
-		Task create(Quest quest);
-	}
-
-	public interface GuiProvider {
-		@Environment(EnvType.CLIENT)
-		void openCreationGui(Runnable gui, Quest quest, Consumer<Task> callback);
-	}
-
-	public final ResourceLocation id;
-	public final Provider provider;
-	private final Supplier<Icon> icon;
+	private final ResourceLocation typeId;
+	private final Provider provider;
+	private final Supplier<Icon> iconSupplier;
 	private Component displayName;
 	private GuiProvider guiProvider;
-	public int intId;
+	public int internalId;
 
-	TaskType(ResourceLocation i, Provider p, Supplier<Icon> ic) {
-		id = i;
-		provider = p;
-		icon = ic;
+	TaskType(ResourceLocation typeId, Provider provider, Supplier<Icon> iconSupplier) {
+		this.typeId = typeId;
+		this.provider = provider;
+		this.iconSupplier = iconSupplier;
+
 		displayName = null;
-		guiProvider = new GuiProvider() {
-			@Override
-			@Environment(EnvType.CLIENT)
-			public void openCreationGui(Runnable gui, Quest quest, Consumer<Task> callback) {
-				Task task = provider.create(quest);
+		guiProvider = (gui, quest, callback) -> {
+			Task task = TaskType.this.provider.create(0L, quest);
 
-				if (task instanceof ISingleLongValueTask slvTask) {
-					LongConfig c = new LongConfig(slvTask.getMinConfigValue(), slvTask.getMaxConfigValue());
+			if (task instanceof ISingleLongValueTask slvTask) {
+				LongConfig c = new LongConfig(slvTask.getMinConfigValue(), slvTask.getMaxConfigValue());
 
-					EditConfigFromStringScreen.open(c, slvTask.getDefaultConfigValue(), slvTask.getDefaultConfigValue(), accepted -> {
-						if (accepted) {
-							slvTask.setValue(c.getValue());
-							callback.accept(task);
-						}
-						gui.run();
-					});
-					return;
-				}
-
+				EditConfigFromStringScreen.open(c, slvTask.getDefaultConfigValue(), slvTask.getDefaultConfigValue(), accepted -> {
+					if (accepted) {
+						slvTask.setValue(c.getValue());
+						callback.accept(task);
+					}
+					gui.run();
+				});
+			} else {
 				ConfigGroup group = new ConfigGroup(FTBQuests.MOD_ID, accepted -> {
 					if (accepted) {
 						callback.accept(task);
@@ -90,8 +56,33 @@ public final class TaskType {
 		};
 	}
 
+	public ResourceLocation getTypeId() {
+		return typeId;
+	}
+
+	@Nullable
+	public static Task createTask(long id, Quest quest, String typeId) {
+		if (typeId.isEmpty()) {
+			typeId = FTBQuests.MOD_ID + ":item";
+		} else if (typeId.indexOf(':') == -1) {
+			typeId = FTBQuests.MOD_ID + ':' + typeId;
+		}
+
+		TaskType type = TaskTypes.TYPES.get(new ResourceLocation(typeId));
+
+		if (type == null) {
+			return null;
+		}
+
+		return type.provider.create(id, quest);
+	}
+
+	public Task createTask(long id, Quest quest) {
+		return provider.create(id, quest);
+	}
+
 	public String getTypeForNBT() {
-		return id.getNamespace().equals(FTBQuests.MOD_ID) ? id.getPath() : id.toString();
+		return typeId.getNamespace().equals(FTBQuests.MOD_ID) ? typeId.getPath() : typeId.toString();
 	}
 
 	public TaskType setDisplayName(Component name) {
@@ -101,14 +92,14 @@ public final class TaskType {
 
 	public Component getDisplayName() {
 		if (displayName == null) {
-			displayName = Component.translatable("ftbquests.task." + id.getNamespace() + '.' + id.getPath());
+			displayName = Component.translatable("ftbquests.task." + typeId.getNamespace() + '.' + typeId.getPath());
 		}
 
 		return displayName;
 	}
 
-	public Icon getIcon() {
-		return icon.get();
+	public Icon getIconSupplier() {
+		return iconSupplier.get();
 	}
 
 	public TaskType setGuiProvider(GuiProvider p) {
@@ -119,4 +110,16 @@ public final class TaskType {
 	public GuiProvider getGuiProvider() {
 		return guiProvider;
 	}
+
+	@FunctionalInterface
+	public interface Provider {
+		Task create(long id, Quest quest);
+	}
+
+	@FunctionalInterface
+	public interface GuiProvider {
+		@Environment(EnvType.CLIENT)
+		void openCreationGui(Runnable gui, Quest quest, Consumer<Task> callback);
+	}
+
 }

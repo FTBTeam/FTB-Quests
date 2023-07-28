@@ -9,8 +9,9 @@ import dev.ftb.mods.ftblibrary.math.Bits;
 import dev.ftb.mods.ftblibrary.ui.Button;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.FTBQuests;
-import dev.ftb.mods.ftbquests.gui.CustomToast;
-import dev.ftb.mods.ftbquests.gui.quests.ValidItemsScreen;
+import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
+import dev.ftb.mods.ftbquests.client.gui.CustomToast;
+import dev.ftb.mods.ftbquests.client.gui.quests.ValidItemsScreen;
 import dev.ftb.mods.ftbquests.item.FTBQuestsItems;
 import dev.ftb.mods.ftbquests.item.MissingItem;
 import dev.ftb.mods.ftbquests.net.FTBQuestsNetHandler;
@@ -35,21 +36,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
-/**
- * @author LatvianModder
- */
 public class ItemTask extends Task implements Predicate<ItemStack> {
-	public ItemStack item;
-	public long count;
-	public Tristate consumeItems;
-	public Tristate onlyFromCrafting;
-	public Tristate matchNBT;
-	public boolean weakNBTmatch;
-	public boolean taskScreenOnly;
+	private ItemStack itemStack;
+	private long count;
+	private Tristate consumeItems;
+	private Tristate onlyFromCrafting;
+	private Tristate matchNBT;
+	private boolean weakNBTmatch;
+	private boolean taskScreenOnly;
 
-	public ItemTask(Quest quest) {
-		super(quest);
-		item = ItemStack.EMPTY;
+	public ItemTask(long id, Quest quest) {
+		super(id, quest);
+		itemStack = ItemStack.EMPTY;
 		count = 1;
 		consumeItems = Tristate.DEFAULT;
 		onlyFromCrafting = Tristate.DEFAULT;
@@ -68,10 +66,24 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 		return count;
 	}
 
+	public ItemTask setStackAndCount(ItemStack stack, int count) {
+		itemStack = stack.copy();
+		this.count = count;
+		return this;
+	}
+
+	public ItemStack getItemStack() {
+		return itemStack;
+	}
+
+	public void setConsumeItems(Tristate consumeItems) {
+		this.consumeItems = consumeItems;
+	}
+
 	@Override
 	public void writeData(CompoundTag nbt) {
 		super.writeData(nbt);
-		NBTUtils.write(nbt, "item", item);
+		NBTUtils.write(nbt, "item", itemStack);
 
 		if (count > 1) {
 			nbt.putLong("count", count);
@@ -91,7 +103,7 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 	@Override
 	public void readData(CompoundTag nbt) {
 		super.readData(nbt);
-		item = NBTUtils.read(nbt, "item");
+		itemStack = NBTUtils.read(nbt, "item");
 		count = Math.max(nbt.getLong("count"), 1L);
 		consumeItems = Tristate.read(nbt, "consume_items");
 		onlyFromCrafting = Tristate.read(nbt, "only_from_crafting");
@@ -115,7 +127,7 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 		flags = Bits.setFlag(flags, 0x100, taskScreenOnly);
 		buffer.writeVarInt(flags);
 
-		FTBQuestsNetHandler.writeItemType(buffer, item);
+		FTBQuestsNetHandler.writeItemType(buffer, itemStack);
 
 		if (count > 1L) {
 			buffer.writeVarLong(count);
@@ -127,7 +139,7 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 		super.readNetData(buffer);
 		int flags = buffer.readVarInt();
 
-		item = FTBQuestsNetHandler.readItemType(buffer);
+		itemStack = FTBQuestsNetHandler.readItemType(buffer);
 		count = Bits.getFlag(flags, 0x01) ? buffer.readVarLong() : 1L;
 		consumeItems = Bits.getFlag(flags, 0x02) ? Bits.getFlag(flags, 0x04) ? Tristate.TRUE : Tristate.FALSE : Tristate.DEFAULT;
 		onlyFromCrafting = Bits.getFlag(flags, 0x08) ? Bits.getFlag(flags, 0x10) ? Tristate.TRUE : Tristate.FALSE : Tristate.DEFAULT;
@@ -138,7 +150,7 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 
 	public List<ItemStack> getValidDisplayItems() {
 		List<ItemStack> list = new ArrayList<>();
-		ItemFiltersAPI.getDisplayItemStacks(item, list);
+		ItemFiltersAPI.getDisplayItemStacks(itemStack, list);
 		return list;
 	}
 
@@ -146,10 +158,10 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 	@Environment(EnvType.CLIENT)
 	public MutableComponent getAltTitle() {
 		if (count > 1) {
-			return Component.literal(count + "x ").append(item.getHoverName());
+			return Component.literal(count + "x ").append(itemStack.getHoverName());
 		}
 
-		return Component.literal("").append(item.getHoverName());
+		return Component.literal("").append(itemStack.getHoverName());
 	}
 
 	@Override
@@ -176,12 +188,12 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 
 	@Override
 	public boolean test(ItemStack stack) {
-		if (item.isEmpty()) {
+		if (itemStack.isEmpty()) {
 			return true;
 		}
 
-		IItemFilter f = ItemFiltersAPI.getFilter(item);
-		return f != null ? f.filter(item, stack) : areItemStacksEqual(item, stack);
+		IItemFilter f = ItemFiltersAPI.getFilter(itemStack);
+		return f != null ? f.filter(itemStack, stack) : areItemStacksEqual(itemStack, stack);
 	}
 
 	private boolean areItemStacksEqual(ItemStack stackA, ItemStack stackB) {
@@ -200,7 +212,7 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 		return switch (matchNBT) {
 			case TRUE -> true;
 			case FALSE -> false;
-			case DEFAULT -> item.getItem().builtInRegistryHolder().is(ItemFiltersAPI.CHECK_NBT_ITEM_TAG);
+			case DEFAULT -> itemStack.getItem().builtInRegistryHolder().is(ItemFiltersAPI.CHECK_NBT_ITEM_TAG);
 		};
 	}
 
@@ -208,7 +220,7 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 	@Environment(EnvType.CLIENT)
 	public void fillConfigGroup(ConfigGroup config) {
 		super.fillConfigGroup(config);
-		config.addItemStack("item", item, v -> item = v, ItemStack.EMPTY, true, false).setNameKey("ftbquests.task.ftbquests.item");
+		config.addItemStack("item", itemStack, v -> itemStack = v, ItemStack.EMPTY, true, false).setNameKey("ftbquests.task.ftbquests.item");
 		config.addLong("count", count, v -> count = v, 1, 1, Long.MAX_VALUE);
 		config.addEnum("consume_items", consumeItems, v -> consumeItems = v, Tristate.NAME_MAP);
 		config.addEnum("only_from_crafting", onlyFromCrafting, v -> onlyFromCrafting = v, Tristate.NAME_MAP);
@@ -219,7 +231,7 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 
 	@Override
 	public boolean consumesResources() {
-		return consumeItems.get(quest.chapter.file.defaultTeamConsumeItems);
+		return consumeItems.get(getQuestFile().isDefaultTeamConsumeItems());
 	}
 
 	@Override
@@ -250,12 +262,12 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 
 	@Override
 	public void addMouseOverHeader(TooltipList list, TeamData teamData, boolean advanced) {
-		if (!title.isEmpty()) {
+		if (!rawTitle.isEmpty()) {
 			// task has had a custom title set, use that in preference to the item's tooltip
 			list.add(getTitle());
 		} else {
 			// use item's tooltip, but include a count with the item name (e.g. "3 x Stick") if appropriate
-			List<Component> lines = item.getTooltipLines(FTBQuests.PROXY.getClientPlayer(), advanced ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL);
+			List<Component> lines = itemStack.getTooltipLines(FTBQuestsClient.getClientPlayer(), advanced ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL);
 			if (!lines.isEmpty()) {
 				lines.set(0, getTitle());
 			} else {
@@ -288,7 +300,7 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 			long add = Math.min(stack.getCount(), count - teamData.getProgress(this));
 
 			if (add > 0L) {
-				if (!simulate && teamData.file.isServerSide()) {
+				if (!simulate && teamData.getFile().isServerSide()) {
 					teamData.addProgress(this, add);
 				}
 
@@ -303,7 +315,7 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 
 	@Override
 	public void submitTask(TeamData teamData, ServerPlayer player, ItemStack craftedItem) {
-		if (taskScreenOnly || teamData.isCompleted(this) || item.getItem() instanceof MissingItem || craftedItem.getItem() instanceof MissingItem) {
+		if (taskScreenOnly || teamData.isCompleted(this) || itemStack.getItem() instanceof MissingItem || craftedItem.getItem() instanceof MissingItem) {
 			return;
 		}
 

@@ -40,14 +40,13 @@ import net.minecraft.world.level.Level;
 
 import java.util.List;
 
-/**
- * @author LatvianModder
- */
-public class FTBQuestsEventHandler {
+public enum FTBQuestsEventHandler {
+	INSTANCE;
+
 	private List<KillTask> killTasks = null;
 	private List<Task> autoSubmitTasks = null;
 
-	public void init() {
+	void init() {
 		LifecycleEvent.SERVER_BEFORE_START.register(this::serverAboutToStart);
 		CommandRegistrationEvent.EVENT.register(this::registerCommands);
 		LifecycleEvent.SERVER_STARTED.register(this::serverStarted);
@@ -126,7 +125,7 @@ public class FTBQuestsEventHandler {
 			TeamData data = ServerQuestFile.INSTANCE.getData(player);
 
 			for (KillTask task : killTasks) {
-				if (data.getProgress(task) < task.getMaxProgress() && data.canStartTasks(task.quest)) {
+				if (data.getProgress(task) < task.getMaxProgress() && data.canStartTasks(task.getQuest())) {
 					task.kill(data, entity);
 				}
 			}
@@ -161,7 +160,7 @@ public class FTBQuestsEventHandler {
 					long d = task.autoSubmitOnPlayerTick();
 
 					if (d > 0L && t % d == 0L) {
-						if (!data.isCompleted(task) && data.canStartTasks(task.quest)) {
+						if (!data.isCompleted(task) && data.canStartTasks(task.getQuest())) {
 							task.submitTask(data, (ServerPlayer) player);
 						}
 					}
@@ -213,7 +212,7 @@ public class FTBQuestsEventHandler {
 
 			file.withPlayerContext(player, () -> {
 				for (DimensionTask task : file.collect(DimensionTask.class)) {
-					if (data.canStartTasks(task.quest)) {
+					if (data.canStartTasks(task.getQuest())) {
 						task.submitTask(data, player);
 					}
 				}

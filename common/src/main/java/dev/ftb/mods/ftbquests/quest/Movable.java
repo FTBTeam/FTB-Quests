@@ -45,6 +45,6 @@ public interface Movable {
 
 	@Environment(EnvType.CLIENT)
 	default void drawMoved(GuiGraphics graphics) {
-		QuestShape.get(getShape()).shape.withColor(Color4I.WHITE.withAlpha(30)).draw(graphics, 0, 0, 1, 1);
+		QuestShape.get(getShape()).getShape().withColor(Color4I.WHITE.withAlpha(30)).draw(graphics, 0, 0, 1, 1);
 	}
 }

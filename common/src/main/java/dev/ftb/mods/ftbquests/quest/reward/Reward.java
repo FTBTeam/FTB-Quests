@@ -8,7 +8,7 @@ import dev.ftb.mods.ftblibrary.ui.Widget;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftblibrary.util.client.ClientUtils;
 import dev.ftb.mods.ftblibrary.util.client.PositionedIngredient;
-import dev.ftb.mods.ftbquests.gui.quests.QuestScreen;
+import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.integration.RecipeModHelper;
 import dev.ftb.mods.ftbquests.net.ClaimRewardMessage;
 import dev.ftb.mods.ftbquests.quest.*;
@@ -30,19 +30,25 @@ import java.util.*;
  * @author LatvianModder
  */
 public abstract class Reward extends QuestObjectBase {
-	public final Quest quest;
+	protected final Quest quest;
 
 	private Tristate team;
 	protected RewardAutoClaim autoclaim;
 	private boolean excludeFromClaimAll;
 	private boolean ignoreRewardBlocking;
 
-	public Reward(Quest q) {
+	public Reward(long id, Quest q) {
+		super(id);
+
 		quest = q;
 		team = Tristate.DEFAULT;
 		autoclaim = RewardAutoClaim.DEFAULT;
 		excludeFromClaimAll = getType().getExcludeFromListRewards();
 		ignoreRewardBlocking = false;
+	}
+
+	public Quest getQuest() {
+		return quest;
 	}
 
 	@Override
@@ -52,13 +58,13 @@ public abstract class Reward extends QuestObjectBase {
 
 	@Override
 	public final QuestFile getQuestFile() {
-		return quest.chapter.file;
+		return quest.getChapter().file;
 	}
 
 	@Override
 	@Nullable
 	public final Chapter getQuestChapter() {
-		return quest.chapter;
+		return quest.getChapter();
 	}
 
 	@Override
@@ -115,12 +121,16 @@ public abstract class Reward extends QuestObjectBase {
 	@Environment(EnvType.CLIENT)
 	public void fillConfigGroup(ConfigGroup config) {
 		super.fillConfigGroup(config);
-		config.addEnum("team", team, v -> team = v, Tristate.NAME_MAP).setNameKey("ftbquests.reward.team_reward");
-		config.addEnum("autoclaim", autoclaim, v -> autoclaim = v, RewardAutoClaim.NAME_MAP).setNameKey("ftbquests.reward.autoclaim");
+		config.addEnum("team", team, v -> team = v, Tristate.NAME_MAP)
+				.setNameKey("ftbquests.reward.team_reward");
+		config.addEnum("autoclaim", autoclaim, v -> autoclaim = v, RewardAutoClaim.NAME_MAP)
+				.setNameKey("ftbquests.reward.autoclaim");
 		config.addBool("exclude_from_claim_all", getExcludeFromClaimAll(), v -> excludeFromClaimAll = v, excludeFromClaimAll)
-				.setNameKey("ftbquests.reward.exclude_from_claim_all").setCanEdit(!isClaimAllHardcoded());
+				.setNameKey("ftbquests.reward.exclude_from_claim_all")
+				.setCanEdit(!isClaimAllHardcoded());
 		config.addBool("ignore_reward_blocking", ignoreRewardBlocking(), v -> ignoreRewardBlocking = v, ignoreRewardBlocking)
-				.setNameKey("ftbquests.quest.ignore_reward_blocking").setCanEdit(!isIgnoreRewardBlockingHardcoded());
+				.setNameKey("ftbquests.quest.ignore_reward_blocking")
+				.setCanEdit(!isIgnoreRewardBlockingHardcoded());
 	}
 
 	public abstract void claim(ServerPlayer player, boolean notify);
@@ -158,7 +168,7 @@ public abstract class Reward extends QuestObjectBase {
 
 	@Override
 	public final void deleteSelf() {
-		quest.rewards.remove(this);
+		quest.removeReward(this);
 
 		for (TeamData data : getQuestFile().getAllData()) {
 			data.deleteReward(this);
@@ -180,32 +190,28 @@ public abstract class Reward extends QuestObjectBase {
 	@Environment(EnvType.CLIENT)
 	public void editedFromGUI() {
 		QuestScreen gui = ClientUtils.getCurrentGuiAs(QuestScreen.class);
-
-		if (gui != null && gui.isViewingQuest()) {
-			gui.viewQuestPanel.refreshWidgets();
-		}
-
 		if (gui != null) {
-			gui.questPanel.refreshWidgets();
+			gui.refreshQuestPanel();
+			if (gui.isViewingQuest()) gui.refreshViewQuestPanel();
 		}
 	}
 
 	@Override
 	public void onCreated() {
-		quest.rewards.add(this);
+		quest.addReward(this);
 	}
 
 	public final boolean isTeamReward() {
-		return team.get(quest.chapter.file.defaultRewardTeam);
+		return team.get(quest.getQuestFile().isDefaultPerTeamReward());
 	}
 
 	public final RewardAutoClaim getAutoClaimType() {
-		if (quest.chapter.alwaysInvisible && (autoclaim == RewardAutoClaim.DEFAULT || autoclaim == RewardAutoClaim.DISABLED)) {
+		if (quest.getChapter().isAlwaysInvisible() && (autoclaim == RewardAutoClaim.DEFAULT || autoclaim == RewardAutoClaim.DISABLED)) {
 			return RewardAutoClaim.ENABLED;
 		}
 
 		if (autoclaim == RewardAutoClaim.DEFAULT) {
-			return quest.chapter.file.defaultRewardAutoClaim;
+			return quest.getQuestFile().getDefaultRewardAutoClaim();
 		}
 
 		return autoclaim;
@@ -213,17 +219,17 @@ public abstract class Reward extends QuestObjectBase {
 
 	@Override
 	public final void forceProgress(TeamData teamData, ProgressChange progressChange) {
-		if (progressChange.reset) {
-			teamData.resetReward(progressChange.player, this);
+		if (progressChange.shouldReset()) {
+			teamData.resetReward(progressChange.getPlayerId(), this);
 		} else {
-			teamData.claimReward(progressChange.player, this, progressChange.time.getTime());
+			teamData.claimReward(progressChange.getPlayerId(), this, progressChange.getDate().getTime());
 		}
 	}
 
 	@Override
 	@Environment(EnvType.CLIENT)
 	public Icon getAltIcon() {
-		return getType().getIcon();
+		return getType().getIconSupplier();
 	}
 
 	@Override
@@ -235,9 +241,9 @@ public abstract class Reward extends QuestObjectBase {
 	@Override
 	public final ConfigGroup createSubGroup(ConfigGroup group) {
 		RewardType type = getType();
-		return group.getOrCreateSubgroup(getObjectType().id)
-				.getOrCreateSubgroup(type.id.getNamespace())
-				.getOrCreateSubgroup(type.id.getPath());
+		return group.getOrCreateSubgroup(getObjectType().getId())
+				.getOrCreateSubgroup(type.getTypeId().getNamespace())
+				.getOrCreateSubgroup(type.getTypeId().getPath());
 	}
 
 	@Environment(EnvType.CLIENT)

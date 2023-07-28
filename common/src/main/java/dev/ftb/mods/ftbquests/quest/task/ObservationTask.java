@@ -35,16 +35,25 @@ import java.util.Optional;
 /**
  * @author LatvianModder
  */
-public class ObservationTask extends BooleanTask {
-	public long timer;
-	public ObserveType observeType;
-	public String toObserve;
+public class ObservationTask extends AbstractBooleanTask {
+	private long timer;
+	private ObserveType observeType;
+	private String toObserve;
 
-	public ObservationTask(Quest quest) {
-		super(quest);
+	public ObservationTask(long id, Quest quest) {
+		super(id, quest);
+
 		timer = 0L;
 		observeType = ObserveType.BLOCK;
 		toObserve = "minecraft:dirt";
+	}
+
+	public void setToObserve(String toObserve) {
+		this.toObserve = toObserve;
+	}
+
+	public long getTimer() {
+		return timer;
 	}
 
 	@Override

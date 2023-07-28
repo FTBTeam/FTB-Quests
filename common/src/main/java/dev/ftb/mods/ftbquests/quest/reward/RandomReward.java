@@ -27,14 +27,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-/**
- * @author LatvianModder
- */
 public class RandomReward extends Reward {
-	public RewardTable table;
+	private RewardTable table;
 
-	public RandomReward(Quest parent) {
-		super(parent);
+	public RandomReward(long id, Quest parent) {
+		super(id, parent);
 		table = null;
 	}
 
@@ -65,32 +62,28 @@ public class RandomReward extends Reward {
 		QuestFile file = getQuestFile();
 
 		long id = nbt.getLong("table_id");
-
 		if (id != 0L) {
 			table = file.getRewardTable(id);
-		} else {
-			int index = nbt.contains("table") ? nbt.getInt("table") : -1;
-
-			if (index >= 0 && index < file.rewardTables.size()) {
-				table = file.rewardTables.get(index);
-			}
 		}
 
 		if (table == null && nbt.contains("table_data")) {
-			table = new RewardTable(file);
+			table = new RewardTable(-1L, file);
 			table.readData(nbt.getCompound("table_data"));
-			table.id = -1L;
-			table.title = "Internal";
+			table.setRawTitle("Internal");
 		}
 	}
 
 	@Nullable
 	public RewardTable getTable() {
-		if (table != null && table.invalid) {
+		if (table != null && !table.isValid()) {
 			table = null;
 		}
 
 		return table;
+	}
+
+	public void setTable(RewardTable table) {
+		this.table = table;
 	}
 
 	@Override
@@ -113,10 +106,9 @@ public class RandomReward extends Reward {
 		long t = buffer.readLong();
 
 		if (t == -1L) {
-			table = new RewardTable(file);
+			table = new RewardTable(-1L, file);
 			table.readNetData(buffer);
-			table.id = -1L;
-			table.title = "Internal";
+			table.setRawTitle("Internal");
 		} else {
 			table = file.getRewardTable(t);
 		}
@@ -134,8 +126,8 @@ public class RandomReward extends Reward {
 		RewardTable table = getTable();
 
 		if (table != null) {
-			for (WeightedReward reward : table.generateWeightedRandomRewards(player.getRandom(), 1, false)) {
-				reward.reward.claim(player, notify);
+			for (WeightedReward wr : table.generateWeightedRandomRewards(player.getRandom(), 1, false)) {
+				wr.getReward().claim(player, notify);
 			}
 		}
 
@@ -144,7 +136,7 @@ public class RandomReward extends Reward {
 	@Override
 	@Environment(EnvType.CLIENT)
 	public Component getAltTitle() {
-		return getTable() == null ? super.getAltTitle() : getTable().useTitle ? getTable().getTitle() : super.getAltTitle();
+		return getTable() == null ? super.getAltTitle() : getTable().getTitleOrElse(super.getAltTitle());
 	}
 
 	@Override
@@ -174,8 +166,8 @@ public class RandomReward extends Reward {
 	@Override
     @Environment(EnvType.CLIENT)
 	public Optional<PositionedIngredient> getIngredient(Widget widget) {
-		return getTable() != null && getTable().lootCrate != null ?
-				PositionedIngredient.of(getTable().lootCrate.createStack(), widget) :
+		return getTable() != null && getTable().getLootCrate() != null ?
+				PositionedIngredient.of(getTable().getLootCrate().createStack(), widget) :
 				Optional.empty();
 	}
 

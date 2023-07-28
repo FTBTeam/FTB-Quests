@@ -49,9 +49,6 @@ import java.util.function.Consumer;
 
 import static dev.ftb.mods.ftbquests.client.TaskScreenRenderer.*;
 
-/**
- * @author LatvianModder
- */
 public class FTBQuestsClientEventHandler {
 	private static final ResourceLocation QUESTS_BUTTON = new ResourceLocation(FTBQuests.MOD_ID, "quests");
 
@@ -76,25 +73,12 @@ public class FTBQuestsClientEventHandler {
 		CustomClickEvent.EVENT.register(this::onCustomClick);
 		ClientTickEvent.CLIENT_PRE.register(this::onClientTick);
 		ClientGuiEvent.RENDER_HUD.register(this::onScreenRender);
-//		ClientTextureStitchEvent.PRE.register(this::onTextureStitchPre);
-//		ClientTextureStitchEvent.POST.register(this::onTextureStitchPost);
 		ClientPlayerEvent.CLIENT_PLAYER_QUIT.register(this::onPlayerLogout);
 	}
 
-	private void onTextureStitchPre(TextureAtlas textureAtlas, Consumer<ResourceLocation> stitcher) {
-		if (textureAtlas.location().equals(InventoryMenu.BLOCK_ATLAS)) {
-			stitcher.accept(INPUT_ONLY_TEXTURE);
-			stitcher.accept(TANK_TEXTURE);
-			stitcher.accept(FE_ENERGY_EMPTY_TEXTURE);
-			stitcher.accept(FE_ENERGY_FULL_TEXTURE);
-			stitcher.accept(TR_ENERGY_EMPTY_TEXTURE);
-			stitcher.accept(TR_ENERGY_FULL_TEXTURE);
-		}
-	}
-
-	// FIXME where to initialise these now?
-
-	private void onTextureStitchPost(TextureAtlas textureAtlas) {
+	// Note: Architectury doesn't have a texture stitch post event anymore,
+	// so this is handled by the Forge event, and a mixin on Fabric
+	public static void onTextureStitchPost(TextureAtlas textureAtlas) {
 		if (textureAtlas.location().equals(InventoryMenu.BLOCK_ATLAS)) {
 			inputOnlySprite = textureAtlas.getSprite(INPUT_ONLY_TEXTURE);
 			tankSprite = textureAtlas.getSprite(TANK_TEXTURE);
@@ -112,7 +96,7 @@ public class FTBQuestsClientEventHandler {
 	private void registerItemColors(Minecraft minecraft) {
 		ColorHandlerRegistry.registerItemColors((stack, tintIndex) -> {
 			LootCrate crate = LootCrateItem.getCrate(stack);
-			return crate == null ? 0xFFFFFFFF : (0xFF000000 | crate.color.rgb());
+			return crate == null ? 0xFFFFFFFF : (0xFF000000 | crate.getColor().rgb());
 		}, FTBQuestsItems.LOOTCRATE.get());
 	}
 
@@ -121,11 +105,11 @@ public class FTBQuestsClientEventHandler {
 			event.getButton().setCustomTextHandler(() ->
 			{
 				if (ClientQuestFile.exists()) {
-					if (ClientQuestFile.INSTANCE.disableGui && !ClientQuestFile.INSTANCE.canEdit()) {
+					if (ClientQuestFile.INSTANCE.isDisableGui() && !ClientQuestFile.INSTANCE.canEdit()) {
 						return "[X]";
-					} else if (ClientQuestFile.INSTANCE.self.isLocked()) {
+					} else if (ClientQuestFile.INSTANCE.selfTeamData.isLocked()) {
 						return "[X]";
-					} else if (ClientQuestFile.INSTANCE.self.hasUnclaimedRewards(Minecraft.getInstance().player.getUUID(), ClientQuestFile.INSTANCE)) {
+					} else if (ClientQuestFile.INSTANCE.selfTeamData.hasUnclaimedRewards(Minecraft.getInstance().player.getUUID(), ClientQuestFile.INSTANCE)) {
 						return "[!]";
 					}
 				}
@@ -142,7 +126,10 @@ public class FTBQuestsClientEventHandler {
 	}
 
 	private void onKeyEvent(Minecraft mc) {
-		if (FTBQuestsClient.KEY_QUESTS.consumeClick()) {
+		if (ClientQuestFile.exists()
+				&& (!ClientQuestFile.INSTANCE.isDisableGui() || ClientQuestFile.INSTANCE.canEdit())
+				&& FTBQuestsClient.KEY_QUESTS.consumeClick())
+		{
 			ClientQuestFile.openGui();
 		}
 	}
@@ -154,8 +141,9 @@ public class FTBQuestsClientEventHandler {
 			double mx = Minecraft.getInstance().mouseHandler.xpos();
 			double my = Minecraft.getInstance().mouseHandler.ypos();
 			Minecraft.getInstance().setScreen(null);
-			ClientQuestFile.openGui();
-			InputConstants.grabOrReleaseMouse(Minecraft.getInstance().getWindow().getWindow(), GLFW.GLFW_CURSOR_NORMAL, mx, my);
+			if (ClientQuestFile.openGui() != null) {
+				InputConstants.grabOrReleaseMouse(Minecraft.getInstance().getWindow().getWindow(), GLFW.GLFW_CURSOR_NORMAL, mx, my);
+			}
 			return EventResult.interruptFalse();
 		}
 
@@ -176,9 +164,11 @@ public class FTBQuestsClientEventHandler {
 
 			currentlyObserving = null;
 
+			TeamData selfTeamData = ClientQuestFile.INSTANCE.selfTeamData;
 			if (mc.hitResult != null && mc.hitResult.getType() != HitResult.Type.MISS) {
 				for (ObservationTask task : observationTasks) {
-					if (!ClientQuestFile.INSTANCE.self.isCompleted(task) && task.observe(mc.player, mc.hitResult) && ClientQuestFile.INSTANCE.self.canStartTasks(task.quest)) {
+					if (!selfTeamData.isCompleted(task) && task.observe(mc.player, mc.hitResult)
+							&& selfTeamData.canStartTasks(task.getQuest())) {
 						currentlyObserving = task;
 						break;
 					}
@@ -190,9 +180,9 @@ public class FTBQuestsClientEventHandler {
 					currentlyObservingTicks++;
 				}
 
-				if (currentlyObservingTicks >= currentlyObserving.timer) {
+				if (currentlyObservingTicks >= currentlyObserving.getTimer()) {
 					new SubmitTaskMessage(currentlyObserving.id).sendToServer();
-					ClientQuestFile.INSTANCE.self.addProgress(currentlyObserving, 1L);
+					selfTeamData.addProgress(currentlyObserving, 1L);
 					currentlyObserving = null;
 					currentlyObservingTicks = 0L;
 				}
@@ -207,29 +197,23 @@ public class FTBQuestsClientEventHandler {
 	}
 
 	private void collectPinnedQuests(ClientQuestFile file) {
-		TeamData data = file.self;
+		TeamData data = file.selfTeamData;
 
 		List<Quest> pinnedQuests = new ArrayList<>();
-
-		LongSet pinnedIds = data.getPinnedQuestIds(FTBQuests.PROXY.getClientPlayer());
-
+		LongSet pinnedIds = data.getPinnedQuestIds(FTBQuestsClient.getClientPlayer());
 		if (!pinnedIds.isEmpty()) {
 			if (pinnedIds.contains(TeamData.AUTO_PIN_ID)) {
 				// special auto-pin value: collect all quests which can be done now
-				for (ChapterGroup group : file.chapterGroups) {
-					for (Chapter chapter : group.chapters) {
-						for (Quest quest : chapter.quests) {
-							if (!data.isCompleted(quest) && data.canStartTasks(quest)) {
-								pinnedQuests.add(quest);
-							}
-						}
+				file.forAllQuests(quest -> {
+					if (!data.isCompleted(quest) && data.canStartTasks(quest)) {
+						pinnedQuests.add(quest);
 					}
-				}
+				});
 			} else {
-				pinnedQuests = pinnedIds.longStream()
+				pinnedIds.longStream()
 						.mapToObj(file::getQuest)
 						.filter(Objects::nonNull)
-						.toList();
+						.forEach(pinnedQuests::add);
 			}
 		}
 
@@ -249,7 +233,7 @@ public class FTBQuestsClientEventHandler {
 							.append(data.getRelativeProgress(quest) + "%")
 			), 500));
 
-			for (Task task : quest.tasks) {
+			for (Task task : quest.getTasks()) {
 				if (!data.isCompleted(task)) {
 					pinnedQuestText.addAll(mc.font.split(FormattedText.composite(
 							mc.font.getSplitter().headByWidth(task.getMutableTitle().withStyle(ChatFormatting.GRAY), 160, Style.EMPTY.applyFormat(ChatFormatting.GRAY)),
@@ -284,12 +268,12 @@ public class FTBQuestsClientEventHandler {
 			GuiHelper.drawHollowRect(graphics, cx - bw / 2 - 3, cy - 63, bw + 6, 29, Color4I.DARK_GRAY, false);
 
 			graphics.drawString(mc.font, cot, cx - sw / 2, cy - 60, 0xFFFFFF);
-			double completed = (currentlyObservingTicks + tickDelta) / (double) currentlyObserving.timer;
+			double completed = (currentlyObservingTicks + tickDelta) / (double) currentlyObserving.getTimer();
 
 			GuiHelper.drawHollowRect(graphics, cx - bw / 2, cy - 49, bw, 12, Color4I.DARK_GRAY, false);
 			Color4I.LIGHT_BLUE.withAlpha(130).draw(graphics, cx - bw / 2 + 1, cy - 48, (int) ((bw - 2D) * completed), 10);
 
-			String cop = (currentlyObservingTicks * 100L / currentlyObserving.timer) + "%";
+			String cop = (currentlyObservingTicks * 100L / currentlyObserving.getTimer()) + "%";
 			graphics.drawString(mc.font, cop, cx - mc.font.width(cop) / 2, cy - 47, 0xFFFFFF);
 		}
 

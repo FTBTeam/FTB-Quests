@@ -3,7 +3,7 @@ package dev.ftb.mods.ftbquests.quest;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.util.client.ClientUtils;
-import dev.ftb.mods.ftbquests.gui.quests.QuestScreen;
+import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.net.MoveMovableMessage;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -22,7 +22,9 @@ public class QuestLink extends QuestObject implements Movable {
     private String shape;
     private double size;
 
-    public QuestLink(Chapter chapter, long linkId) {
+    public QuestLink(long id, Chapter chapter, long linkId) {
+        super(id);
+
         this.chapter = chapter;
         this.linkId = linkId;
 
@@ -66,13 +68,13 @@ public class QuestLink extends QuestObject implements Movable {
 
     @Override
     public void onCreated() {
-        chapter.questLinks.add(this);
+        chapter.addQuestLink(this);
     }
 
     @Override
     public void deleteSelf() {
         super.deleteSelf();
-        chapter.questLinks.remove(this);
+        chapter.removeQuestLink(this);
     }
 
     @Override
@@ -89,10 +91,9 @@ public class QuestLink extends QuestObject implements Movable {
     @Environment(EnvType.CLIENT)
     public void editedFromGUI() {
         QuestScreen gui = ClientUtils.getCurrentGuiAs(QuestScreen.class);
-
         if (gui != null) {
-            gui.questPanel.refreshWidgets();
-            gui.viewQuestPanel.refreshWidgets();
+            gui.refreshQuestPanel();
+            gui.refreshViewQuestPanel();
         }
     }
 
@@ -193,17 +194,17 @@ public class QuestLink extends QuestObject implements Movable {
     }
 
     @Override
-    public void onMoved(double x, double y, long chapterId) {
-        this.x = x;
-        this.y = y;
+    public void onMoved(double newX, double newY, long newChapterId) {
+        this.x = newX;
+        this.y = newY;
 
-        if (chapterId != chapter.id) {
+        if (newChapterId != chapter.id) {
             QuestFile f = getQuestFile();
-            Chapter newChapter = f.getChapter(chapterId);
+            Chapter newChapter = f.getChapter(newChapterId);
 
             if (newChapter != null) {
-                chapter.questLinks.remove(this);
-                newChapter.questLinks.add(this);
+                chapter.removeQuestLink(this);
+                newChapter.addQuestLink(this);
                 chapter = newChapter;
             }
         }

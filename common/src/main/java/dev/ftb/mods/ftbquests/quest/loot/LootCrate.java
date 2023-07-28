@@ -1,6 +1,7 @@
 package dev.ftb.mods.ftbquests.quest.loot;
 
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
+import dev.ftb.mods.ftblibrary.config.NameMap;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftbquests.item.FTBQuestsItems;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
@@ -11,28 +12,68 @@ import net.minecraft.world.item.ItemStack;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * @author LatvianModder
- */
 public final class LootCrate {
+	private static final Pattern NON_ALPHANUM = Pattern.compile("[^a-z0-9_]");
+	private static final Pattern MULTI_UNDERSCORE = Pattern.compile("_{2,}");
+
 	public static Map<String, LootCrate> LOOT_CRATES = new LinkedHashMap<>();
 
-	public final RewardTable table;
-	public String stringID;
-	public String itemName;
-	public Color4I color;
-	public boolean glow;
-	public EntityWeight drops;
+	private final RewardTable table;
+	private String stringID;
+	private String itemName = "";
+	private Color4I color = Color4I.WHITE;
+	private boolean glow = false;
+	private EntityWeight drops = new EntityWeight();
 
-	public LootCrate(RewardTable t) {
-		table = t;
-		stringID = t.toString();
-		itemName = "";
-		color = Color4I.WHITE;
-		glow = false;
-		drops = new EntityWeight();
+	public LootCrate(RewardTable table, boolean initFromTable) {
+		this.table = table;
+
+		if (initFromTable) {
+			initFromTable();
+		} else {
+			stringID = table.toString();
+		}
+	}
+
+	public void initFromTable() {
+		stringID = buildStringID(table);
+		Defaults def = Defaults.NAME_MAP.getNullable(stringID);
+		if (def != null) {
+			color = Color4I.rgb(def.color);
+			glow = def.glow;
+			drops.passive = def.passive;
+			drops.monster = def.monster;
+			drops.boss = def.boss;
+		}
+	}
+
+	private static String buildStringID(RewardTable table) {
+		Matcher matcher = NON_ALPHANUM.matcher(table.getTitle().getString().toLowerCase());
+		Matcher matcher1 = MULTI_UNDERSCORE.matcher(matcher.replaceAll("_"));
+		return matcher1.replaceAll("_");
+	}
+
+	public RewardTable getTable() {
+		return table;
+	}
+
+	public String getItemName() {
+		return itemName;
+	}
+
+	public Color4I getColor() {
+		return color;
+	}
+
+	public boolean isGlow() {
+		return glow;
+	}
+
+	public EntityWeight getDrops() {
+		return drops;
 	}
 
 	public void writeData(CompoundTag nbt) {
@@ -77,7 +118,7 @@ public final class LootCrate {
 		drops.readNetData(data);
 	}
 
-	public void getConfig(ConfigGroup config) {
+	public void fillConfigGroup(ConfigGroup config) {
 		config.addString("id", stringID, v -> stringID = v, "", Pattern.compile("[a-z0-9_]+"));
 		config.addString("item_name", itemName, v -> itemName = v, "");
 		config.addString("color", color.toString(), v -> color = Color4I.fromString(v), "#FFFFFF", Pattern.compile("^#[a-fA-F0-9]{6}$"));
@@ -98,5 +139,33 @@ public final class LootCrate {
 		ItemStack stack = new ItemStack(FTBQuestsItems.LOOTCRATE.get());
 		stack.addTagElement("type", StringTag.valueOf(getStringID()));
 		return stack;
+	}
+
+
+	private enum Defaults {
+		COMMON("common", 0x92999A, 350, 10, 0, false),
+		UNCOMMON("uncommon", 0x37AA69, 200, 90, 0, false),
+		RARE("rare", 0x0094FF, 50, 200, 0, false),
+		EPIC("epic", 0x8000FF, 9, 10, 10, false),
+		LEGENDARY("legendary", 0xFFC147, 1, 1, 190, true),
+		;
+
+		private final String name;
+		private final int color;
+		private final int passive;
+		private final int monster;
+		private final int boss;
+		private final boolean glow;
+
+		static final NameMap<Defaults> NAME_MAP = NameMap.of(COMMON, values()).create();
+
+		Defaults(String name, int color, int passive, int monster, int boss, boolean glow) {
+			this.name = name;
+			this.color = color;
+			this.passive = passive;
+			this.monster = monster;
+			this.boss = boss;
+			this.glow = glow;
+		}
 	}
 }

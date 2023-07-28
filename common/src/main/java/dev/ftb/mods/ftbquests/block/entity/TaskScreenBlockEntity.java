@@ -6,6 +6,7 @@ import dev.ftb.mods.ftblibrary.config.ItemStackConfig;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.block.FTBQuestsBlocks;
 import dev.ftb.mods.ftbquests.block.TaskScreenBlock;
+import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.net.TaskScreenConfigResponse;
 import dev.ftb.mods.ftbquests.quest.QuestFile;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
@@ -51,7 +52,7 @@ public class TaskScreenBlockEntity extends BlockEntity implements ITaskScreen {
 
     public Task getTask() {
         if (task == null && taskId != 0L || task != null && task.id != taskId) {
-            task = FTBQuests.PROXY.getQuestFile(level.isClientSide).getTask(taskId);
+            task = FTBQuests.getQuestFile(level.isClientSide).getTask(taskId);
         }
 
         return task;
@@ -123,7 +124,7 @@ public class TaskScreenBlockEntity extends BlockEntity implements ITaskScreen {
 
     public TeamData getCachedTeamData() {
         if (cachedTeamData == null) {
-            QuestFile f = FTBQuests.PROXY.getQuestFile(level.isClientSide);
+            QuestFile f = FTBQuests.getQuestFile(level.isClientSide);
             cachedTeamData = f.getNullableTeamData(getTeamId());
         }
         return cachedTeamData;
@@ -204,7 +205,7 @@ public class TaskScreenBlockEntity extends BlockEntity implements ITaskScreen {
     }
 
     private boolean isSuitableTask(TeamData data, QuestObjectBase o) {
-        return o instanceof Task t && (data.getCanEdit(FTBQuests.PROXY.getClientPlayer()) || data.canStartTasks(t.quest)) && t.consumesResources();
+        return o instanceof Task t && (data.getCanEdit(FTBQuestsClient.getClientPlayer()) || data.canStartTasks(t.getQuest())) && t.consumesResources();
     }
 
     public float[] getFakeTextureUV() {
@@ -217,7 +218,7 @@ public class TaskScreenBlockEntity extends BlockEntity implements ITaskScreen {
                 } else if (state.hasProperty(BlockStateProperties.FACING)) {
                     state = state.setValue(BlockStateProperties.FACING, facing);
                 }
-                fakeTextureUV = FTBQuests.PROXY.getTextureUV(state, facing);
+                fakeTextureUV = FTBQuestsClient.getTextureUV(state, facing);
             } else {
                 fakeTextureUV = new float[0];
             }

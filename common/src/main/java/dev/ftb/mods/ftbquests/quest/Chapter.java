@@ -8,7 +8,6 @@ import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
 import dev.ftb.mods.ftbquests.events.ObjectCompletedEvent;
 import dev.ftb.mods.ftbquests.events.ObjectStartedEvent;
 import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
-import dev.ftb.mods.ftbquests.net.DisplayCompletionToastMessage;
 import dev.ftb.mods.ftbquests.util.NetUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -19,37 +18,40 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.server.level.ServerPlayer;
 
 import java.util.*;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-/**
- * @author LatvianModder
- */
 public final class Chapter extends QuestObject {
 	public final QuestFile file;
-	public ChapterGroup group;
-	public String filename;
-	public final List<Quest> quests;
-	public final List<QuestLink> questLinks;
-	public final List<String> subtitle;
-	public boolean alwaysInvisible;
-	public String defaultQuestShape;
-	public final List<ChapterImage> images;
-	public boolean defaultHideDependencyLines;
-	public int defaultMinWidth = 0;
+
+	private ChapterGroup group;
+	private String filename;
+	private final List<Quest> quests;
+	private final List<QuestLink> questLinks;
+	private final List<String> rawSubtitle;
+	boolean alwaysInvisible;
+	private String defaultQuestShape;
+	private final List<ChapterImage> images;
+	boolean defaultHideDependencyLines;
+	private int defaultMinWidth = 0;
 	private ProgressionMode progressionMode;
 	private boolean hideQuestDetailsUntilStartable;
 	private boolean hideQuestUntilDepsVisible;
 
-	public Chapter(QuestFile f, ChapterGroup g) {
-		file = f;
-		group = g;
-		filename = "";
+	public Chapter(long id, QuestFile file, ChapterGroup group) {
+		this(id, file, group, "");
+	}
+
+	public Chapter(long id, QuestFile file, ChapterGroup group, String filename) {
+		super(id);
+
+		this.file = file;
+		this.group = group;
+		this.filename = filename;
 		quests = new ArrayList<>();
 		questLinks = new ArrayList<>();
-		subtitle = new ArrayList<>(0);
+		rawSubtitle = new ArrayList<>(0);
 		alwaysInvisible = false;
 		defaultQuestShape = "";
 		images = new ArrayList<>();
@@ -59,6 +61,18 @@ public final class Chapter extends QuestObject {
 		hideQuestDetailsUntilStartable = false;
 	}
 
+	public void setDefaultQuestShape(String defaultQuestShape) {
+		this.defaultQuestShape = defaultQuestShape;
+	}
+
+	public ChapterGroup getGroup() {
+		return group;
+	}
+
+	void setGroup(ChapterGroup group) {
+		this.group = group;
+	}
+
 	@Override
 	public QuestObjectType getObjectType() {
 		return QuestObjectType.CHAPTER;
@@ -66,7 +80,7 @@ public final class Chapter extends QuestObject {
 
 	@Override
 	public QuestFile getQuestFile() {
-		return group.file;
+		return group.getFile();
 	}
 
 	@Override
@@ -74,15 +88,39 @@ public final class Chapter extends QuestObject {
 		return this;
 	}
 
+	public int getDefaultMinWidth() {
+		return defaultMinWidth;
+	}
+
+	public boolean isAlwaysInvisible() {
+		return alwaysInvisible;
+	}
+
+	public List<Quest> getQuests() {
+		return Collections.unmodifiableList(quests);
+	}
+
+	public List<QuestLink> getQuestLinks() {
+		return Collections.unmodifiableList(questLinks);
+	}
+
+	public void addQuest(Quest quest) {
+		quests.add(quest);
+	}
+
+	public void removeQuest(Quest quest) {
+		quests.remove(quest);
+	}
+
 	@Override
 	public void writeData(CompoundTag nbt) {
 		nbt.putString("filename", filename);
 		super.writeData(nbt);
 
-		if (!subtitle.isEmpty()) {
+		if (!rawSubtitle.isEmpty()) {
 			ListTag list = new ListTag();
 
-			for (String v : subtitle) {
+			for (String v : rawSubtitle) {
 				list.add(StringTag.valueOf(v));
 			}
 
@@ -124,12 +162,12 @@ public final class Chapter extends QuestObject {
 	public void readData(CompoundTag nbt) {
 		filename = nbt.getString("filename");
 		super.readData(nbt);
-		subtitle.clear();
+		rawSubtitle.clear();
 
 		ListTag subtitleNBT = nbt.getList("subtitle", Tag.TAG_STRING);
 
 		for (int i = 0; i < subtitleNBT.size(); i++) {
-			subtitle.add(subtitleNBT.getString(i));
+			rawSubtitle.add(subtitleNBT.getString(i));
 		}
 
 		alwaysInvisible = nbt.getBoolean("always_invisible");
@@ -161,7 +199,7 @@ public final class Chapter extends QuestObject {
 	public void writeNetData(FriendlyByteBuf buffer) {
 		super.writeNetData(buffer);
 		buffer.writeUtf(filename, Short.MAX_VALUE);
-		NetUtils.writeStrings(buffer, subtitle);
+		NetUtils.writeStrings(buffer, rawSubtitle);
 		buffer.writeBoolean(alwaysInvisible);
 		buffer.writeUtf(defaultQuestShape, Short.MAX_VALUE);
 		NetUtils.write(buffer, images, (d, img) -> img.writeNetData(d));
@@ -176,7 +214,7 @@ public final class Chapter extends QuestObject {
 	public void readNetData(FriendlyByteBuf buffer) {
 		super.readNetData(buffer);
 		filename = buffer.readUtf(Short.MAX_VALUE);
-		NetUtils.readStrings(buffer, subtitle);
+		NetUtils.readStrings(buffer, rawSubtitle);
 		alwaysInvisible = buffer.readBoolean();
 		defaultQuestShape = buffer.readUtf(Short.MAX_VALUE);
 		NetUtils.read(buffer, images, d -> {
@@ -192,7 +230,7 @@ public final class Chapter extends QuestObject {
 	}
 
 	public int getIndex() {
-		return group.chapters.indexOf(this);
+		return group.getChapters().indexOf(this);
 	}
 
 	@Override
@@ -224,36 +262,30 @@ public final class Chapter extends QuestObject {
 
 	@Override
 	public void onStarted(QuestProgressEventData<?> data) {
-		data.teamData.setStarted(id, data.time);
+		data.setStarted(id);
 		ObjectStartedEvent.CHAPTER.invoker().act(new ObjectStartedEvent.ChapterEvent(data.withObject(this)));
 
-		if (!data.teamData.isStarted(file)) {
+		if (!data.getTeamData().isStarted(file)) {
 			file.onStarted(data.withObject(file));
 		}
 	}
 
 	@Override
 	public void onCompleted(QuestProgressEventData<?> data) {
-		data.teamData.setCompleted(id, data.time);
+		data.setCompleted(id);
 		ObjectCompletedEvent.CHAPTER.invoker().act(new ObjectCompletedEvent.ChapterEvent(data.withObject(this)));
 
 		if (!disableToast) {
-			for (ServerPlayer player : data.notifiedPlayers) {
-				new DisplayCompletionToastMessage(id).sendTo(player);
-			}
+			data.notifyPlayers(id);
 		}
 
-		for (ChapterGroup g : file.chapterGroups) {
-			for (Chapter chapter : g.chapters) {
-				for (Quest quest : chapter.quests) {
-					if (quest.hasDependency(this)) {
-						data.teamData.checkAutoCompletion(quest);
-					}
-				}
+		file.forAllQuests(quest -> {
+			if (quest.hasDependency(this)) {
+				data.getTeamData().checkAutoCompletion(quest);
 			}
-		}
+		});
 
-		if (group.isCompletedRaw(data.teamData)) {
+		if (group.isCompletedRaw(data.getTeamData())) {
 			group.onCompleted(data.withObject(group));
 		}
 	}
@@ -279,7 +311,7 @@ public final class Chapter extends QuestObject {
 	@Override
 	public void deleteSelf() {
 		super.deleteSelf();
-		group.chapters.remove(this);
+		group.removeChapter(this);
 	}
 
 	@Override
@@ -295,20 +327,18 @@ public final class Chapter extends QuestObject {
 	@Override
 	public void onCreated() {
 		if (filename.isEmpty()) {
-			String s = titleToID(title).orElse(toString());
-			filename = s;
+			String basename = titleToID(rawTitle).orElse(toString());
+			filename = basename;
 
-			Set<String> existingNames = group.file.chapterGroups.stream()
-					.flatMap(g -> g.chapters.stream())
-					.map(ch -> ch.filename)
-					.collect(Collectors.toSet());
+			Set<String> existingNames = new HashSet<>();
+			getQuestFile().forAllChapters(ch -> existingNames.add(ch.filename));
 
 			for (int i = 2; existingNames.contains(filename); i++) {
-				filename = s + "_" + i;
+				filename = basename + "_" + i;
 			}
 		}
 
-		group.chapters.add(this);
+		group.addChapter(this);
 
 		if (!quests.isEmpty()) {
 			List<Quest> l = new ArrayList<>(quests);
@@ -328,15 +358,15 @@ public final class Chapter extends QuestObject {
 	}
 
 	@Override
-	public String getPath() {
-		return "chapters/" + getFilename() + ".snbt";
+	public Optional<String> getPath() {
+		return Optional.of("chapters/" + getFilename() + ".snbt");
 	}
 
 	@Override
 	@Environment(EnvType.CLIENT)
 	public void fillConfigGroup(ConfigGroup config) {
 		super.fillConfigGroup(config);
-		config.addList("subtitle", subtitle, new StringConfig(null), "");
+		config.addList("subtitle", rawSubtitle, new StringConfig(null), "");
 		config.addBool("always_invisible", alwaysInvisible, v -> alwaysInvisible = v, false);
 		config.addEnum("default_quest_shape", defaultQuestShape.isEmpty() ? "default" : defaultQuestShape, v -> defaultQuestShape = v.equals("default") ? "" : v, QuestShape.idMapWithDefault);
 		config.addBool("default_hide_dependency_lines", defaultHideDependencyLines, v -> defaultHideDependencyLines = v, false);
@@ -348,17 +378,7 @@ public final class Chapter extends QuestObject {
 
 	@Override
 	public boolean isVisible(TeamData data) {
-		if (alwaysInvisible) {
-			return false;
-		}
-
-		for (Quest quest : quests) {
-			if (quest.isVisible(data)) {
-				return true;
-			}
-		}
-
-		return false;
+		return !alwaysInvisible && quests.stream().anyMatch(quest -> quest.isVisible(data));
 	}
 
 	@Override
@@ -419,5 +439,29 @@ public final class Chapter extends QuestObject {
 
 	public boolean hideQuestUntilDepsVisible() {
 		return hideQuestUntilDepsVisible;
+	}
+
+	public void addImage(ChapterImage image) {
+		images.add(image);
+	}
+
+	public void removeImage(ChapterImage image) {
+		images.remove(image);
+	}
+
+	public Stream<ChapterImage> images() {
+		return images.stream();
+	}
+
+	public void addQuestLink(QuestLink link) {
+		questLinks.add(link);
+	}
+
+	public void removeQuestLink(QuestLink link) {
+		questLinks.remove(link);
+	}
+
+	public List<String> getRawSubtitle() {
+		return Collections.unmodifiableList(rawSubtitle);
 	}
 }

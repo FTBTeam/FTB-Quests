@@ -7,8 +7,10 @@ public enum ProgressionMode {
     LINEAR("linear"),
     FLEXIBLE("flexible");
 
-    public static final NameMap<ProgressionMode> NAME_MAP = NameMap.of(DEFAULT, values()).baseNameKey("ftbquests.file.progression_mode").create();
-    public static final NameMap<ProgressionMode> NAME_MAP_NO_DEFAULT = NameMap.of(LINEAR, values()).baseNameKey("ftbquests.file.progression_mode").create();
+    public static final NameMap<ProgressionMode> NAME_MAP = NameMap.of(DEFAULT, values())
+            .baseNameKey("ftbquests.file.progression_mode").create();
+    public static final NameMap<ProgressionMode> NAME_MAP_NO_DEFAULT = NameMap.of(LINEAR, values())
+            .baseNameKey("ftbquests.file.progression_mode").create();
 
     private final String id;
 

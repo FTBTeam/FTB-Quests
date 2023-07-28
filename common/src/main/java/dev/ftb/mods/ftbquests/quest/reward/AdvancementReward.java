@@ -17,15 +17,12 @@ import net.minecraft.network.chat.ComponentContents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 
-/**
- * @author LatvianModder
- */
 public class AdvancementReward extends Reward {
-	public ResourceLocation advancement;
-	public String criterion;
+	private ResourceLocation advancement;
+	private String criterion;
 
-	public AdvancementReward(Quest quest) {
-		super(quest);
+	public AdvancementReward(long id, Quest quest) {
+		super(id, quest);
 		advancement = new ResourceLocation("minecraft:story/root");
 		criterion = "";
 	}

@@ -10,7 +10,6 @@ import dev.architectury.registry.registries.RegistrarManager;
 import dev.ftb.mods.ftblibrary.config.Tristate;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.net.CreateObjectResponseMessage;
-import dev.ftb.mods.ftbquests.net.DeleteObjectResponseMessage;
 import dev.ftb.mods.ftbquests.net.SyncQuestsMessage;
 import dev.ftb.mods.ftbquests.net.SyncTeamDataMessage;
 import dev.ftb.mods.ftbquests.quest.*;
@@ -18,7 +17,6 @@ import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
 import dev.ftb.mods.ftbquests.quest.loot.WeightedReward;
 import dev.ftb.mods.ftbquests.quest.reward.ItemReward;
 import dev.ftb.mods.ftbquests.quest.task.ItemTask;
-import dev.ftb.mods.ftbquests.util.FileUtils;
 import dev.ftb.mods.ftbquests.util.ProgressChange;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
@@ -33,12 +31,12 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -171,17 +169,16 @@ public class FTBQuestsCommands {
 		container.clearContent();
 
 		int s = 0;
-		for (WeightedReward reward : table.rewards) {
+		for (WeightedReward wr : table.getWeightedRewards()) {
 			if (s >= container.getContainerSize()) {
 				source.sendFailure(Component.translatable("commands.ftbquests.command.feedback.table_too_many_items", table.getTitle()));
 				return 0;
-			} else if (!(reward.reward instanceof ItemReward)) {
-				continue;
+			} else if (wr.getReward() instanceof ItemReward itemReward) {
+				container.setItem(s++, itemReward.getItem());
 			}
-			container.setItem(s++, ((ItemReward) reward.reward).item);
 		}
 
-		source.sendSuccess(() -> Component.translatable("commands.ftbquests.command.feedback.table_imported", table.getTitle(), table.rewards.size()), false);
+		source.sendSuccess(() -> Component.translatable("commands.ftbquests.command.feedback.table_imported", table.getTitle(), table.getWeightedRewards().size()), false);
 
 		return 1;
 	}
@@ -195,10 +192,9 @@ public class FTBQuestsCommands {
 			pos = BlockPos.containing(player.pick(10, 1F, false).getLocation());
 		}
 
-		RewardTable table = new RewardTable(file);
-		table.id = file.newID();
-		table.title = name;
-		table.icon = Items.CHEST.getDefaultInstance();
+		RewardTable table = new RewardTable(file.newID(), file);
+		table.setRawTitle(name);
+		table.setRawIcon(Items.CHEST.getDefaultInstance());
 
 		BlockEntity be = level.getBlockEntity(pos);
 		if (!(be instanceof BaseContainerBlockEntity container)) {
@@ -208,17 +204,15 @@ public class FTBQuestsCommands {
 		for (int i = 0; i < container.getContainerSize(); i++) {
 			ItemStack stack = container.getItem(i);
 			if (!stack.isEmpty()) {
-				table.rewards.add(new WeightedReward(new ItemReward(table.fakeQuest, stack), 1f));
+				table.addReward(table.makeWeightedItemReward(stack, 1f));
 			}
 		}
 
-
-		file.rewardTables.add(table);
-		file.save();
+		file.addRewardTable(table);
 
 		new CreateObjectResponseMessage(table, null).sendToAll(level.getServer());
 
-		source.sendSuccess(() -> Component.translatable("commands.ftbquests.command.feedback.table_imported", name, table.rewards.size()), false);
+		source.sendSuccess(() -> Component.translatable("commands.ftbquests.command.feedback.table_imported", name, table.getWeightedRewards().size()), false);
 
 		return 1;
 	}
@@ -260,12 +254,8 @@ public class FTBQuestsCommands {
 	}
 
 	private static int changeProgress(CommandSourceStack source, Collection<ServerPlayer> players, boolean reset, QuestObjectBase questObject) {
-		ProgressChange progressChange = new ProgressChange(ServerQuestFile.INSTANCE);
-		progressChange.origin = questObject;
-		progressChange.reset = reset;
-
 		for (ServerPlayer player : players) {
-			progressChange.player = player.getUUID();
+			ProgressChange progressChange = new ProgressChange(ServerQuestFile.INSTANCE, questObject, player.getUUID()).setReset(reset);
 			questObject.forceProgress(ServerQuestFile.INSTANCE.getData(player), progressChange);
 		}
 
@@ -274,51 +264,26 @@ public class FTBQuestsCommands {
 	}
 
 	private static int deleteEmptyRewardTables(CommandSourceStack source) {
-		MutableInt del = new MutableInt(0);
+		int removed = ServerQuestFile.INSTANCE.removeEmptyRewardTables(source);
 
-		for (RewardTable table : ServerQuestFile.INSTANCE.rewardTables) {
-			if (table.rewards.isEmpty()) {
-				del.increment();
-				table.invalid = true;
-				FileUtils.delete(ServerQuestFile.INSTANCE.getFolder().resolve(table.getPath()).toFile());
-				new DeleteObjectResponseMessage(table.id).sendToAll(source.getServer());
-			}
-		}
+		source.sendSuccess(() -> Component.translatable("commands.ftbquests.command.delete_empty_reward_tables.text", removed), false);
 
-		ServerQuestFile.INSTANCE.rewardTables.removeIf(rewardTable -> rewardTable.invalid);
-		ServerQuestFile.INSTANCE.refreshIDMap();
-		ServerQuestFile.INSTANCE.save();
-
-		source.sendSuccess(() -> Component.translatable("commands.ftbquests.command.delete_empty_reward_tables.text", del.intValue()), false);
 		return 1;
 	}
 
 	private static int generateAllItemChapter(CommandSourceStack source) {
-//		NonNullList<ItemStack> nonNullList = NonNullList.create();
-//
-//		for (Map.Entry<ResourceKey<Item>, Item> entry : BuiltInRegistries.ITEM.entrySet()) {
-//			Item item = entry.getValue();
-//			try {
-//				int s = nonNullList.size();
-//				item.fillItemCategory(CreativeModeTab.TAB_SEARCH, nonNullList);
-//
-//				if (s == nonNullList.size()) {
-//					nonNullList.add(new ItemStack(item));
-//				}
-//			} catch (Throwable ex) {
-//				FTBQuests.LOGGER.warn("Failed to get items from " + entry.getKey() + ": " + ex);
-//			}
-//		}
-
+		if (!CreativeModeTabs.searchTab().hasAnyItems()) {
+			CreativeModeTabs.tryRebuildTabContents(FeatureFlags.DEFAULT_FLAGS, true, source.getLevel().registryAccess());
+		}
 		Collection<ItemStack> allItems = CreativeModeTabs.searchTab().getSearchTabDisplayItems();
 
-		Chapter chapter = new Chapter(ServerQuestFile.INSTANCE, ServerQuestFile.INSTANCE.defaultChapterGroup);
-		chapter.id = chapter.file.newID();
+		long newId = ServerQuestFile.INSTANCE.newID();
+		Chapter chapter = new Chapter(newId, ServerQuestFile.INSTANCE, ServerQuestFile.INSTANCE.getDefaultChapterGroup());
 		chapter.onCreated();
 
-		chapter.title = "Generated chapter of all items in search creative tab [" + allItems.size() + "]";
-		chapter.icon = new ItemStack(Items.COMPASS);
-		chapter.defaultQuestShape = "rsquare";
+		chapter.setRawTitle("Generated chapter of all items in search creative tab [" + allItems.size() + "]");
+		chapter.setRawIcon(new ItemStack(Items.COMPASS));
+		chapter.setDefaultQuestShape("rsquare");
 
 		new CreateObjectResponseMessage(chapter, null).sendToAll(source.getServer());
 
@@ -348,21 +313,17 @@ public class FTBQuestsCommands {
 				row++;
 			}
 
-			Quest quest = new Quest(chapter);
-			quest.id = chapter.file.newID();
+			Quest quest = new Quest(chapter.file.newID(), chapter);
 			quest.onCreated();
-			quest.x = col;
-			quest.y = row;
-			quest.subtitle = stack.save(new CompoundTag()).toString();
+			quest.setX(col);
+			quest.setY(row);
+			quest.setRawSubtitle(stack.save(new CompoundTag()).toString());
 
 			new CreateObjectResponseMessage(quest, null).sendToAll(source.getServer());
 
-			ItemTask task = new ItemTask(quest);
-			task.id = chapter.file.newID();
+			ItemTask task = new ItemTask(chapter.file.newID(), quest);
 			task.onCreated();
-
-			task.consumeItems = Tristate.TRUE;
-			task.item = stack;
+			task.setStackAndCount(stack, 1).setConsumeItems(Tristate.TRUE);
 
 			CompoundTag extra = new CompoundTag();
 			extra.putString("type", task.getType().getTypeForNBT());
@@ -371,13 +332,14 @@ public class FTBQuestsCommands {
 			col++;
 		}
 
-		ServerQuestFile.INSTANCE.save();
+		ServerQuestFile.INSTANCE.markDirty();
 		ServerQuestFile.INSTANCE.saveNow();
 		source.sendSuccess(() -> Component.literal("Done!"), false);
 		return 1;
 	}
 
 	private static final Set<UUID> warnedPlayers = new HashSet<>();
+
 	private static int doReload(CommandSourceStack source) {
 		ServerQuestFile instance = ServerQuestFile.INSTANCE;
 		ServerPlayer sender = source.getPlayer();

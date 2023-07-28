@@ -6,7 +6,9 @@ import dev.architectury.registry.registries.RegistrarManager;
 import dev.architectury.registry.registries.RegistrySupplier;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.block.FTBQuestsBlocks;
+import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.item.ScreenBlockItem.ScreenSize;
+import dev.ftb.mods.ftbquests.quest.QuestFile;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -16,11 +18,12 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
-/**
- * @author LatvianModder
- */
 public class FTBQuestsItems {
 	public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(FTBQuests.MOD_ID, Registries.ITEM);
 
@@ -58,10 +61,39 @@ public class FTBQuestsItems {
 
 	public static final RegistrySupplier<CreativeModeTab> CREATIVE_TAB = RegistrarManager.get(FTBQuests.MOD_ID)
 			.get(Registries.CREATIVE_MODE_TAB)
-			.register(new ResourceLocation(FTBQuests.MOD_ID, "default"),
-					() -> CreativeTabRegistry.create(Component.translatable("ftbquests"), () -> new ItemStack(BOOK.get())));;
+			.register(new ResourceLocation(FTBQuests.MOD_ID, "default"), FTBQuestsItems::buildDefaultTab);
 
 	public static Item.Properties defaultProps() {
-		return new Item.Properties().arch$tab(CREATIVE_TAB);
+		return new Item.Properties();
+	}
+
+	private static CreativeModeTab buildDefaultTab() {
+		List<ItemStack> baseItems = Stream.of(
+				BOOK,
+				BARRIER,
+				STAGE_BARRIER,
+				DETECTOR,
+				LOOT_CRATE_OPENER,
+				TASK_SCREEN_1,
+				TASK_SCREEN_3,
+				TASK_SCREEN_5,
+				TASK_SCREEN_7
+		).map(item -> new ItemStack(item.get())).toList();
+
+		return CreativeTabRegistry.create(builder -> builder.title(Component.translatable("ftbquests"))
+				.icon(() -> new ItemStack(BOOK.get()))
+				.displayItems((params, output) -> {
+					// base items, always present
+					output.acceptAll(baseItems);
+					// dynamically add loot crates based on current reward tables
+					if (ClientQuestFile.exists()) {
+						ClientQuestFile.INSTANCE.getRewardTables().forEach(table -> {
+							if (table.getLootCrate() != null) {
+								output.accept(table.getLootCrate().createStack());
+							}
+						});
+					}
+				})
+		);
 	}
 }

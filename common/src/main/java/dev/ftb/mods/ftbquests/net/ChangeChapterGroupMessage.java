@@ -9,21 +9,18 @@ import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.util.NetUtils;
 import net.minecraft.network.FriendlyByteBuf;
 
-/**
- * @author LatvianModder
- */
 public class ChangeChapterGroupMessage extends BaseC2SMessage {
-	private final long id;
-	private final long group;
+	private final long chapterId;
+	private final long groupId;
 
 	public ChangeChapterGroupMessage(FriendlyByteBuf buffer) {
-		id = buffer.readLong();
-		group = buffer.readLong();
+		chapterId = buffer.readLong();
+		groupId = buffer.readLong();
 	}
 
-	public ChangeChapterGroupMessage(long i, long g) {
-		id = i;
-		group = g;
+	public ChangeChapterGroupMessage(long chapterId, long groupId) {
+		this.chapterId = chapterId;
+		this.groupId = groupId;
 	}
 
 	@Override
@@ -33,25 +30,23 @@ public class ChangeChapterGroupMessage extends BaseC2SMessage {
 
 	@Override
 	public void write(FriendlyByteBuf buffer) {
-		buffer.writeLong(id);
-		buffer.writeLong(group);
+		buffer.writeLong(chapterId);
+		buffer.writeLong(groupId);
 	}
 
 	@Override
 	public void handle(NetworkManager.PacketContext context) {
 		if (NetUtils.canEdit(context)) {
-			Chapter chapter = ServerQuestFile.INSTANCE.getChapter(id);
+			Chapter chapter = ServerQuestFile.INSTANCE.getChapter(chapterId);
 
 			if (chapter != null) {
-				ChapterGroup g = ServerQuestFile.INSTANCE.getChapterGroup(group);
-
-				if (chapter.group != g) {
-					chapter.group.chapters.remove(chapter);
-					chapter.group = g;
-					g.chapters.add(chapter);
+				ChapterGroup group = ServerQuestFile.INSTANCE.getChapterGroup(groupId);
+				if (chapter.getGroup() != group) {
+					chapter.getGroup().removeChapter(chapter);
+					group.addChapter(chapter);
 					chapter.file.clearCachedData();
-					chapter.file.save();
-					new ChangeChapterGroupResponseMessage(id, group).sendToAll(context.getPlayer().getServer());
+					chapter.file.markDirty();
+					new ChangeChapterGroupResponseMessage(chapterId, groupId).sendToAll(context.getPlayer().getServer());
 				}
 			}
 		}

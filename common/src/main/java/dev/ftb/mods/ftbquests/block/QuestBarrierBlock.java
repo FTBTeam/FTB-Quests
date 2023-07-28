@@ -93,10 +93,8 @@ public class QuestBarrierBlock extends BaseEntityBlock {
 	public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity entity, ItemStack stack) {
 		super.setPlacedBy(level, pos, state, entity, stack);
 
-		if (!level.isClientSide() && stack.hasCustomHoverName()) {
-			if (level.getBlockEntity(pos) instanceof BarrierBlockEntity barrier) {
-				barrier.update(stack.getHoverName().getString());
-			}
+		if (!level.isClientSide() && stack.hasCustomHoverName() && level.getBlockEntity(pos) instanceof BarrierBlockEntity barrier) {
+			barrier.update(stack.getHoverName().getString());
 		}
 	}
 

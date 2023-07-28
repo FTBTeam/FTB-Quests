@@ -43,8 +43,9 @@ public class QuestObjectArgument implements ArgumentType<QuestObjectBase> {
 		QuestFile file = findQuestFile();
 		if (file != null) {
 			if (id.startsWith("#")) {
+				String val = id.substring(1);
 				for (QuestObjectBase object : file.getAllObjects()) {
-					if (object.hasTag(id.substring(1))) {
+					if (object.hasTag(val)) {
 						return object;
 					}
 				}

@@ -10,9 +10,6 @@ import dev.ftb.mods.ftbquests.item.FTBQuestsItems;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.world.item.ItemStack;
 
-/**
- * @author LatvianModder
- */
 public class ConfigIconItemStack extends ItemStackConfig {
 	public ConfigIconItemStack() {
 		super(false, true);
@@ -23,8 +20,8 @@ public class ConfigIconItemStack extends ItemStackConfig {
 		if (getCanEdit()) {
 			if (button.isRight()) {
 				ImageConfig imageConfig = new ImageConfig();
-				new SelectImageScreen(imageConfig, b -> {
-					if (b) {
+				new SelectImageScreen(imageConfig, accepted -> {
+					if (accepted) {
 						if (!imageConfig.getValue().isEmpty()) {
 							ItemStack stack = new ItemStack(FTBQuestsItems.CUSTOM_ICON.get());
 							stack.addTagElement("Icon", StringTag.valueOf(imageConfig.getValue()));
@@ -33,8 +30,7 @@ public class ConfigIconItemStack extends ItemStackConfig {
 							setCurrentValue(ItemStack.EMPTY);
 						}
 					}
-
-					callback.save(b);
+					callback.save(accepted);
 				}).openGui();
 			} else {
 				new SelectItemStackScreen(this, callback).openGui();

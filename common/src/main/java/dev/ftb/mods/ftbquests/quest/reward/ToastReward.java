@@ -8,14 +8,11 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 
-/**
- * @author LatvianModder
- */
 public class ToastReward extends Reward {
-	public String description;
+	private String description;
 
-	public ToastReward(Quest quest) {
-		super(quest);
+	public ToastReward(long id, Quest quest) {
+		super(id, quest);
 		description = "";
 	}
 

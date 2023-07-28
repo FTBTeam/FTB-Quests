@@ -116,10 +116,10 @@ public class LootCrateOpenerBlockEntity extends BlockEntity {
         ServerPlayer player = owner == null ? null : level.getServer().getPlayerList().getPlayer(owner);
         boolean update = false;
 
-        int nAttempts = stack.getCount() * crate.table.lootSize;
-        for (WeightedReward reward : crate.table.generateWeightedRandomRewards(level.getRandom(), nAttempts, true)) {
+        int nAttempts = stack.getCount();
+        for (WeightedReward wr : crate.getTable().generateWeightedRandomRewards(level.getRandom(), nAttempts, true)) {
             List<ItemStack> stacks = new ArrayList<>();
-            if (reward.reward.automatedClaimPre(this, stacks, level.random, owner, player)) {
+            if (wr.getReward().automatedClaimPre(this, stacks, level.random, owner, player)) {
                 update = true;
 
                 if (!simulate) {
@@ -129,7 +129,7 @@ public class LootCrateOpenerBlockEntity extends BlockEntity {
                         outputs.put(entry, newAmount);
 
                     }
-                    reward.reward.automatedClaimPost(this, owner, player);
+                    wr.getReward().automatedClaimPost(this, owner, player);
                 }
             }
         }

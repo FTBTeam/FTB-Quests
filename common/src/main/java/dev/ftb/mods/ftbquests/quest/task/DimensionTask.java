@@ -18,15 +18,18 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 
-/**
- * @author LatvianModder
- */
-public class DimensionTask extends BooleanTask {
-	public ResourceKey<Level> dimension;
+public class DimensionTask extends AbstractBooleanTask {
+	private ResourceKey<Level> dimension;
 
-	public DimensionTask(Quest quest) {
-		super(quest);
+	public DimensionTask(long id, Quest quest) {
+		super(id, quest);
+
 		dimension = Level.NETHER;
+	}
+
+	public DimensionTask withDimension(ResourceKey<Level> dimension) {
+		this.dimension = dimension;
+		return this;
 	}
 
 	@Override

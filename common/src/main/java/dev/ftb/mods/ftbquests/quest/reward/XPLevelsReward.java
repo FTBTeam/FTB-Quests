@@ -13,19 +13,16 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
 
-/**
- * @author LatvianModder
- */
 public class XPLevelsReward extends Reward {
-	public int xpLevels;
+	private int xpLevels;
 
-	public XPLevelsReward(Quest quest, int x) {
-		super(quest);
+	public XPLevelsReward(long id, Quest quest, int x) {
+		super(id, quest);
 		xpLevels = x;
 	}
 
-	public XPLevelsReward(Quest quest) {
-		this(quest, 5);
+	public XPLevelsReward(long id, Quest quest) {
+		this(id, quest, 5);
 	}
 
 	@Override

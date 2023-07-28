@@ -9,9 +9,6 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 
-/**
- * @author LatvianModder
- */
 public class GetEmergencyItemsMessage extends BaseC2SMessage {
 	GetEmergencyItemsMessage(FriendlyByteBuf buffer) {
 	}
@@ -30,11 +27,8 @@ public class GetEmergencyItemsMessage extends BaseC2SMessage {
 
 	@Override
 	public void handle(NetworkManager.PacketContext context) {
-		//TODO: Verify on server side
 		ServerPlayer player = (ServerPlayer) context.getPlayer();
-
-		for (ItemStack stack : ServerQuestFile.INSTANCE.emergencyItems) {
-			ItemStackHooks.giveItem(player, stack.copy());
-		}
+		ServerQuestFile.INSTANCE.getEmergencyItems()
+				.forEach(stack -> ItemStackHooks.giveItem(player, stack.copy()));
 	}
 }

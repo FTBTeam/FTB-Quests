@@ -3,7 +3,7 @@ package dev.ftb.mods.ftbquests.quest.task;
 import com.mojang.datafixers.util.Either;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.NameMap;
-import dev.ftb.mods.ftbquests.FTBQuests;
+import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import net.fabricmc.api.EnvType;
@@ -25,18 +25,15 @@ import net.minecraft.world.level.biome.Biomes;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @author LatvianModder
- */
-public class BiomeTask extends BooleanTask {
+public class BiomeTask extends AbstractBooleanTask {
 	private static final ResourceKey<Biome> DEFAULT_BIOME = Biomes.PLAINS;
 
 	private static final List<String> KNOWN_BIOMES = new ArrayList<>();
 
 	private Either<ResourceKey<Biome>, TagKey<Biome>> biome;
 
-	public BiomeTask(Quest quest) {
-		super(quest);
+	public BiomeTask(long id, Quest quest) {
+		super(id, quest);
 		biome = Either.left(DEFAULT_BIOME);
 	}
 
@@ -122,8 +119,9 @@ public class BiomeTask extends BooleanTask {
 	}
 
 	private List<String> getKnownBiomes() {
+		// only called client-side to fill the config screen options
 		if (KNOWN_BIOMES.isEmpty()) {
-			RegistryAccess registryAccess = FTBQuests.PROXY.getClientPlayer().level().registryAccess();
+			RegistryAccess registryAccess = FTBQuestsClient.getClientPlayer().level().registryAccess();
 			KNOWN_BIOMES.addAll(registryAccess
 					.registryOrThrow(Registries.BIOME).registryKeySet().stream()
 					.map(o -> o.location().toString())

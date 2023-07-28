@@ -11,15 +11,12 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 
-/**
- * @author LatvianModder
- */
 public abstract class EnergyTask extends Task implements ISingleLongValueTask {
-	public long value = 1000L;
-	public long maxInput = 1000L;
+	private long value = 1000L;
+	private long maxInput = 1000L;
 
-	public EnergyTask(Quest quest) {
-		super(quest);
+	public EnergyTask(long id, Quest quest) {
+		super(id, quest);
 	}
 
 	@Override
@@ -63,6 +60,10 @@ public abstract class EnergyTask extends Task implements ISingleLongValueTask {
 		maxInput = buffer.readVarLong();
 	}
 
+	public long getValue() {
+		return value;
+	}
+
 	@Override
 	public void setValue(long v) {
 		value = v;
@@ -88,4 +89,8 @@ public abstract class EnergyTask extends Task implements ISingleLongValueTask {
 	}
 
 	public abstract EnergyTaskClientData getClientData();
+
+	public long getMaxInput() {
+		return maxInput;
+	}
 }

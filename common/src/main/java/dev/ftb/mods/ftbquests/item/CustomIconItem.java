@@ -3,6 +3,7 @@ package dev.ftb.mods.ftbquests.item;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;
 import dev.ftb.mods.ftbquests.FTBQuests;
+import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
@@ -19,9 +20,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-/**
- * @author LatvianModder
- */
 public class CustomIconItem extends Item {
 	public CustomIconItem() {
 		super(FTBQuestsItems.defaultProps().stacksTo(1));
@@ -30,7 +28,7 @@ public class CustomIconItem extends Item {
 	@Override
 	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand) {
 		if (level.isClientSide()) {
-			FTBQuests.PROXY.openCustomIconGui(player, interactionHand);
+			FTBQuestsClient.openCustomIconGui(player, interactionHand);
 		}
 
 		return new InteractionResultHolder<>(InteractionResult.SUCCESS, player.getItemInHand(interactionHand));

@@ -8,9 +8,6 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
-/**
- * @author desht
- */
 public class ForceSaveMessage extends BaseC2SMessage {
 	public ForceSaveMessage() {
 	}
@@ -31,7 +28,7 @@ public class ForceSaveMessage extends BaseC2SMessage {
 	public void handle(NetworkManager.PacketContext context) {
 		ServerPlayer player = (ServerPlayer) context.getPlayer();
 		if (player.hasPermissions(2)) {
-			ServerQuestFile.INSTANCE.save();
+			ServerQuestFile.INSTANCE.markDirty();
 			ServerQuestFile.INSTANCE.saveNow();
 			player.displayClientMessage(Component.translatable("ftbquests.gui.saved_on_server"), false);
 		}

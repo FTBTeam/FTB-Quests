@@ -8,21 +8,18 @@ import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.util.NetUtils;
 import net.minecraft.network.FriendlyByteBuf;
 
-/**
- * @author LatvianModder
- */
 public class MoveChapterMessage extends BaseC2SMessage {
 	private final long id;
-	private final boolean up;
+	private final boolean movingUp;
 
 	public MoveChapterMessage(FriendlyByteBuf buffer) {
 		id = buffer.readLong();
-		up = buffer.readBoolean();
+		movingUp = buffer.readBoolean();
 	}
 
-	public MoveChapterMessage(long i, boolean u) {
-		id = i;
-		up = u;
+	public MoveChapterMessage(long id, boolean movingUp) {
+		this.id = id;
+		this.movingUp = movingUp;
 	}
 
 	@Override
@@ -33,7 +30,7 @@ public class MoveChapterMessage extends BaseC2SMessage {
 	@Override
 	public void write(FriendlyByteBuf buffer) {
 		buffer.writeLong(id);
-		buffer.writeBoolean(up);
+		buffer.writeBoolean(movingUp);
 	}
 
 	@Override
@@ -41,16 +38,10 @@ public class MoveChapterMessage extends BaseC2SMessage {
 		if (NetUtils.canEdit(context)) {
 			Chapter chapter = ServerQuestFile.INSTANCE.getChapter(id);
 
-			if (chapter != null) {
-				int index = chapter.group.chapters.indexOf(chapter);
-
-				if (index != -1 && up ? (index > 0) : (index < chapter.group.chapters.size() - 1)) {
-					chapter.group.chapters.remove(index);
-					chapter.group.chapters.add(up ? index - 1 : index + 1, chapter);
-					chapter.file.clearCachedData();
-					new MoveChapterResponseMessage(id, up).sendToAll(context.getPlayer().getServer());
-					chapter.file.save();
-				}
+			if (chapter != null && chapter.getGroup().moveChapterWithinGroup(chapter, movingUp)) {
+				chapter.file.clearCachedData();
+				new MoveChapterResponseMessage(id, movingUp).sendToAll(ServerQuestFile.INSTANCE.server);
+				chapter.file.markDirty();
 			}
 		}
 	}

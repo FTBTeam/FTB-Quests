@@ -15,8 +15,8 @@ public class TeamDataUpdate {
 	}
 
 	public TeamDataUpdate(TeamData data) {
-		uuid = data.uuid;
-		name = data.name;
+		uuid = data.getTeamId();
+		name = data.getName();
 	}
 
 	public void write(FriendlyByteBuf buffer) {

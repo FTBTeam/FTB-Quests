@@ -8,6 +8,7 @@ import dev.ftb.mods.ftblibrary.config.StringConfig;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.math.PixelBuffer;
+import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftbquests.net.EditObjectMessage;
 import dev.ftb.mods.ftbquests.util.ConfigQuestObject;
 import dev.ftb.mods.ftbquests.util.NetUtils;
@@ -26,24 +27,21 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
-/**
- * @author LatvianModder
- */
 public final class ChapterImage implements Movable {
 	private static final Pattern COLOR_PATTERN = Pattern.compile("^#[a-fA-F0-9]{6}$");
 
-	public Chapter chapter;
-	public double x, y;
-	public double width, height;
-	public double rotation;
+	private Chapter chapter;
+	private double x, y;
+	private double width, height;
+	private double rotation;
 	private Icon image;
 	private Color4I color;
 	private int alpha;
-	public List<String> hover;
-	public String click;
-	public boolean dev;
-	public boolean corner;
-	public Quest dependency;
+	private final List<String> hover;
+	private String click;
+	private boolean editorsOnly;
+	private boolean alignToCorner;
+	private Quest dependency;
 	private double aspectRatio;
 	private boolean needAspectRecalc;
 	private int order;
@@ -60,8 +58,8 @@ public final class ChapterImage implements Movable {
 		needAspectRecalc = true;
 		hover = new ArrayList<>();
 		click = "";
-		dev = false;
-		corner = false;
+		editorsOnly = false;
+		alignToCorner = false;
 		dependency = null;
 		order = 0;
 	}
@@ -73,6 +71,12 @@ public final class ChapterImage implements Movable {
 	public ChapterImage setImage(Icon image) {
 		this.image = image;
 		needAspectRecalc = true;
+		return this;
+	}
+
+	public ChapterImage setPosition(double x, double y) {
+		this.x = x;
+		this.y = y;
 		return this;
 	}
 
@@ -88,7 +92,23 @@ public final class ChapterImage implements Movable {
 		return order;
 	}
 
-	public void writeData(CompoundTag nbt) {
+	public double getRotation() {
+		return rotation;
+	}
+
+	public boolean isAlignToCorner() {
+		return alignToCorner;
+	}
+
+	public String getClick() {
+		return click;
+	}
+
+	public void addHoverText(TooltipList list) {
+		hover.forEach(list::string);
+	}
+
+	public CompoundTag writeData(CompoundTag nbt) {
 		nbt.putDouble("x", x);
 		nbt.putDouble("y", y);
 		nbt.putDouble("width", width);
@@ -113,12 +133,14 @@ public final class ChapterImage implements Movable {
 
 		nbt.put("hover", hoverTag);
 		nbt.putString("click", click);
-		nbt.putBoolean("dev", dev);
-		nbt.putBoolean("corner", corner);
+		nbt.putBoolean("dev", editorsOnly);
+		nbt.putBoolean("corner", alignToCorner);
 
 		if (dependency != null) {
 			nbt.putString("dependency", dependency.getCodeString());
 		}
+
+		return nbt;
 	}
 
 	public void readData(CompoundTag nbt) {
@@ -140,8 +162,8 @@ public final class ChapterImage implements Movable {
 		}
 
 		click = nbt.getString("click");
-		dev = nbt.getBoolean("dev");
-		corner = nbt.getBoolean("corner");
+		editorsOnly = nbt.getBoolean("dev");
+		alignToCorner = nbt.getBoolean("corner");
 
 		dependency = nbt.contains("dependency") ? chapter.file.getQuest(chapter.file.getID(nbt.get("dependency"))) : null;
 	}
@@ -158,8 +180,8 @@ public final class ChapterImage implements Movable {
 		buffer.writeInt(order);
 		NetUtils.writeStrings(buffer, hover);
 		buffer.writeUtf(click, Short.MAX_VALUE);
-		buffer.writeBoolean(dev);
-		buffer.writeBoolean(corner);
+		buffer.writeBoolean(editorsOnly);
+		buffer.writeBoolean(alignToCorner);
 		buffer.writeLong(dependency == null ? 0L : dependency.id);
 	}
 
@@ -175,13 +197,13 @@ public final class ChapterImage implements Movable {
 		order = buffer.readInt();
 		NetUtils.readStrings(buffer, hover);
 		click = buffer.readUtf(Short.MAX_VALUE);
-		dev = buffer.readBoolean();
-		corner = buffer.readBoolean();
+		editorsOnly = buffer.readBoolean();
+		alignToCorner = buffer.readBoolean();
 		dependency = chapter.file.getQuest(buffer.readLong());
 	}
 
 	@Environment(EnvType.CLIENT)
-	public void getConfig(ConfigGroup config) {
+	public void fillConfigGroup(ConfigGroup config) {
 		config.addDouble("x", x, v -> x = v, 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
 		config.addDouble("y", y, v -> y = v, 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
 		config.addDouble("width", width, v -> width = v, 1, 0, Double.POSITIVE_INFINITY);
@@ -193,8 +215,8 @@ public final class ChapterImage implements Movable {
 		config.addInt("alpha", alpha, v -> alpha = v, 255, 0, 255);
 		config.addList("hover", hover, new StringConfig(), "");
 		config.addString("click", click, v -> click = v, "");
-		config.addBool("dev", dev, v -> dev = v, false);
-		config.addBool("corner", corner, v -> corner = v, false);
+		config.addBool("dev", editorsOnly, v -> editorsOnly = v, false);
+		config.addBool("corner", alignToCorner, v -> alignToCorner = v, false);
 
 		Predicate<QuestObjectBase> depTypes = object -> object == null || object instanceof Quest;
 		config.add("dependency", new ConfigQuestObject<>(depTypes), dependency, v -> dependency = v, null).setNameKey("ftbquests.dependency");
@@ -242,11 +264,11 @@ public final class ChapterImage implements Movable {
 		y = _y;
 
 		if (to != chapter) {
-			chapter.images.remove(this);
+			chapter.removeImage(this);
 			new EditObjectMessage(chapter).sendToServer();
 
 			chapter = to;
-			chapter.images.add(this);
+			chapter.addImage(this);
 		}
 
 		new EditObjectMessage(chapter).sendToServer();
@@ -264,7 +286,7 @@ public final class ChapterImage implements Movable {
 
 		poseStack.pushPose();
 
-		if (corner) {
+		if (alignToCorner) {
 			poseStack.mulPose(Axis.ZP.rotationDegrees((float) rotation));
 			image.withColor(Color4I.WHITE.withAlpha(50)).draw(graphics, 0, 0, 1, 1);
 		} else {
@@ -276,7 +298,9 @@ public final class ChapterImage implements Movable {
 
 		poseStack.popPose();
 
-		QuestShape.get(getShape()).outline.withColor(Color4I.WHITE.withAlpha(30)).draw(graphics, 0, 0, 1, 1);
+		QuestShape.get(getShape()).getOutline()
+				.withColor(Color4I.WHITE.withAlpha(30))
+				.draw(graphics, 0, 0, 1, 1);
 	}
 
 	public boolean isAspectRatioOff() {
@@ -305,5 +329,16 @@ public final class ChapterImage implements Movable {
 			needAspectRecalc = false;
 		}
 		return aspectRatio;
+	}
+
+	public ChapterImage copy(Chapter newChapter, double newX, double newY) {
+		ChapterImage copy = new ChapterImage(newChapter);
+		copy.readData(writeData(new CompoundTag()));
+		copy.setPosition(newX, newY);
+		return copy;
+	}
+
+	public boolean shouldShowImage(TeamData teamData) {
+		return !editorsOnly && (dependency == null || teamData.isCompleted(dependency));
 	}
 }

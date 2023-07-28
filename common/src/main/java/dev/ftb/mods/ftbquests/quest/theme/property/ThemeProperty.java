@@ -8,12 +8,20 @@ import org.jetbrains.annotations.Nullable;
  * @author LatvianModder
  */
 public abstract class ThemeProperty<T> {
-	public final String name;
-	public final T defaultValue;
+	private final String name;
+	private final T defaultValue;
 
-	public ThemeProperty(String n, T def) {
-		name = n;
-		defaultValue = def;
+	public ThemeProperty(String name, T defaultValue) {
+		this.name = name;
+		this.defaultValue = defaultValue;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public T getDefaultValue() {
+		return defaultValue;
 	}
 
 	@Nullable
