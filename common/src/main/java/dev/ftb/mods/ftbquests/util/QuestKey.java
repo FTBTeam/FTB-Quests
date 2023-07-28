@@ -9,8 +9,8 @@ import java.util.Objects;
 import java.util.UUID;
 
 public final class QuestKey implements Comparable<QuestKey> {
-	public final UUID uuid;
-	public final long id;
+	private final UUID uuid;
+	private final long id;
 
 	public static QuestKey of(UUID uuid, long reward) {
 		return new QuestKey(uuid, reward);
@@ -24,9 +24,13 @@ public final class QuestKey implements Comparable<QuestKey> {
 		return of(UUIDTypeAdapter.fromString(string.substring(0, 32)), QuestObjectBase.parseCodeString(string.substring(33)));
 	}
 
-	private QuestKey(UUID i, long r) {
-		uuid = i;
-		id = r;
+	private QuestKey(UUID uuid, long id) {
+		this.uuid = uuid;
+		this.id = id;
+	}
+
+	public long getId() {
+		return id;
 	}
 
 	@Override

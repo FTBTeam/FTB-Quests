@@ -2,16 +2,25 @@ package dev.ftb.mods.ftbquests.quest.loot;
 
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 
-/**
- * @author LatvianModder
- */
 public class WeightedReward implements Comparable<WeightedReward> {
-	public final Reward reward;
-	public float weight;
+	private final Reward reward;
+	private float weight;
 
 	public WeightedReward(Reward reward, float weight) {
 		this.reward = reward;
 		this.weight = Math.max(weight, 0f);
+	}
+
+	public Reward getReward() {
+		return reward;
+	}
+
+	public float getWeight() {
+		return weight;
+	}
+
+	public void setWeight(float weight) {
+		this.weight = weight;
 	}
 
 	public static String chanceString(float weight, float totalWeight, boolean empty) {

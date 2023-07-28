@@ -81,7 +81,7 @@ public class ForgeTaskScreenBlockEntity extends TaskScreenBlockEntity {
         public ItemStack getStackInSlot(int slot) {
             // slot 1 is always empty - see above
             return getTask() instanceof ItemTask t && slot == 0 ?
-                    ItemHandlerHelper.copyStackWithSize(t.item, (int) Math.min(getCachedTeamData().getProgress(t), t.item.getMaxStackSize())) :
+                    ItemHandlerHelper.copyStackWithSize(t.getItemStack(), (int) Math.min(getCachedTeamData().getProgress(t), t.getItemStack().getMaxStackSize())) :
                     ItemStack.EMPTY;
         }
 
@@ -89,7 +89,7 @@ public class ForgeTaskScreenBlockEntity extends TaskScreenBlockEntity {
         @Override
         public ItemStack insertItem(int slot, @NotNull ItemStack stack, boolean simulate) {
             TeamData data = getCachedTeamData();
-            if (getTask() instanceof ItemTask task && data.canStartTasks(task.quest)) {
+            if (getTask() instanceof ItemTask task && data.canStartTasks(task.getQuest())) {
                 // task.insert() handles testing the item is valid and the task isn't already completed
                 return task.insert(data, stack, simulate);
             }
@@ -99,14 +99,14 @@ public class ForgeTaskScreenBlockEntity extends TaskScreenBlockEntity {
         @NotNull
         @Override
         public ItemStack extractItem(int slot, int count, boolean simulate) {
-            if (!isInputOnly() && getTask() instanceof ItemTask task && !ItemFiltersAPI.isFilter(task.item)) {
+            if (!isInputOnly() && getTask() instanceof ItemTask task && !ItemFiltersAPI.isFilter(task.getItemStack())) {
                 TeamData data = getCachedTeamData();
-                if (data != null && data.canStartTasks(task.quest) && !data.isCompleted(task)) {
+                if (data != null && data.canStartTasks(task.getQuest()) && !data.isCompleted(task)) {
                     int itemsRemoved = (int) Math.min(data.getProgress(task), count);
                     if (!simulate) {
                         data.addProgress(task, -itemsRemoved);
                     }
-                    return ItemHandlerHelper.copyStackWithSize(task.item, itemsRemoved);
+                    return ItemHandlerHelper.copyStackWithSize(task.getItemStack(), itemsRemoved);
                 }
             }
             return ItemStack.EMPTY;
@@ -114,7 +114,7 @@ public class ForgeTaskScreenBlockEntity extends TaskScreenBlockEntity {
 
         @Override
         public int getSlotLimit(int slot) {
-            return getTask() instanceof ItemTask itemTask ? itemTask.item.getMaxStackSize() : 0;
+            return getTask() instanceof ItemTask itemTask ? itemTask.getItemStack().getMaxStackSize() : 0;
         }
 
         @Override
@@ -132,7 +132,7 @@ public class ForgeTaskScreenBlockEntity extends TaskScreenBlockEntity {
         @NotNull
         @Override
         public FluidStack getFluidInTank(int tank) {
-            return tank == 0 && getTask() instanceof FluidTask task ? new FluidStack(task.fluid, (int) getCachedTeamData().getProgress(task)) : FluidStack.EMPTY;
+            return tank == 0 && getTask() instanceof FluidTask task ? new FluidStack(task.getFluid(), (int) getCachedTeamData().getProgress(task)) : FluidStack.EMPTY;
         }
 
         @Override
@@ -143,15 +143,15 @@ public class ForgeTaskScreenBlockEntity extends TaskScreenBlockEntity {
         @Override
         public boolean isFluidValid(int tank, @NotNull FluidStack fluidStack) {
             return tank == 0 && getTask() instanceof FluidTask task
-                    && task.fluid == fluidStack.getFluid()
-                    && (task.fluidNBT == null || task.fluidNBT.equals(fluidStack.getTag()));
+                    && task.getFluid() == fluidStack.getFluid()
+                    && (task.getFluidNBT() == null || task.getFluidNBT().equals(fluidStack.getTag()));
         }
 
         @Override
         public int fill(FluidStack fluidStack, FluidAction fluidAction) {
             if (getTask() instanceof FluidTask task && isFluidValid(0, fluidStack)) {
                 TeamData data = getCachedTeamData();
-                if (data != null && data.canStartTasks(task.quest) && !data.isCompleted(task)) {
+                if (data != null && data.canStartTasks(task.getQuest()) && !data.isCompleted(task)) {
                     long space = task.getMaxProgress() - data.getProgress(task);
                     long toAdd = Math.min(fluidStack.getAmount(), space);
                     if (fluidAction.execute()) {
@@ -166,7 +166,7 @@ public class ForgeTaskScreenBlockEntity extends TaskScreenBlockEntity {
         @NotNull
         @Override
         public FluidStack drain(FluidStack fluidStack, FluidAction fluidAction) {
-            return getTask() instanceof FluidTask task && fluidStack.getFluid() == task.fluid ?
+            return getTask() instanceof FluidTask task && fluidStack.getFluid() == task.getFluid() ?
                     drain(fluidStack.getAmount(), fluidAction) :
                     FluidStack.EMPTY;
         }
@@ -176,13 +176,13 @@ public class ForgeTaskScreenBlockEntity extends TaskScreenBlockEntity {
         public FluidStack drain(int maxDrain, FluidAction fluidAction) {
             if (getTask() instanceof FluidTask task) {
                 TeamData data = getCachedTeamData();
-                if (data != null && data.canStartTasks(task.quest) && !data.isCompleted(task)) {
+                if (data != null && data.canStartTasks(task.getQuest()) && !data.isCompleted(task)) {
                     long toTake = Math.min(maxDrain, data.getProgress(task));
                     if (fluidAction.execute()) {
                         data.addProgress(task, -toTake);
                     }
-                    FluidStack result = new FluidStack(task.fluid, (int) toTake);
-                    if (task.fluidNBT != null) result.setTag(task.fluidNBT.copy());
+                    FluidStack result = new FluidStack(task.getFluid(), (int) toTake);
+                    if (task.getFluidNBT() != null) result.setTag(task.getFluidNBT().copy());
                     return result;
                 }
             }
@@ -195,9 +195,9 @@ public class ForgeTaskScreenBlockEntity extends TaskScreenBlockEntity {
         public int receiveEnergy(int amount, boolean simulate) {
             if (getTask() instanceof ForgeEnergyTask task) {
                 TeamData data = getCachedTeamData();
-                if (data != null && data.canStartTasks(task.quest) && !data.isCompleted(task)) {
+                if (data != null && data.canStartTasks(task.getQuest()) && !data.isCompleted(task)) {
                     long space = task.getMaxProgress() - data.getProgress(task);
-                    long toAdd = Math.min(task.maxInput, Math.min(amount, space));
+                    long toAdd = Math.min(task.getMaxInput(), Math.min(amount, space));
                     if (!simulate) {
                         data.addProgress(task, toAdd);
                     }
@@ -219,7 +219,7 @@ public class ForgeTaskScreenBlockEntity extends TaskScreenBlockEntity {
 
         @Override
         public int getMaxEnergyStored() {
-            return getTask() instanceof ForgeEnergyTask task ? (int) task.value : 0;
+            return getTask() instanceof ForgeEnergyTask task ? (int) task.getValue() : 0;
         }
 
         @Override

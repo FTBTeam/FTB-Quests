@@ -55,8 +55,8 @@ public class ServerQuestFile extends QuestFile {
 		int taskTypeId = 0;
 
 		for (TaskType type : TaskTypes.TYPES.values()) {
-			type.intId = ++taskTypeId;
-			taskTypeIds.put(type.intId, type);
+			type.internalId = ++taskTypeId;
+			taskTypeIds.put(type.internalId, type);
 		}
 
 		int rewardTypeId = 0;
@@ -87,8 +87,7 @@ public class ServerQuestFile extends QuestFile {
 					if (nbt != null) {
 						try {
 							UUID uuid = UUIDTypeAdapter.fromString(nbt.getString("uuid"));
-							TeamData data = new TeamData(uuid);
-							data.file = this;
+							TeamData data = new TeamData(uuid, this);
 							addData(data, true);
 							data.deserializeNBT(nbt);
 						} catch (Exception ex) {
@@ -122,23 +121,19 @@ public class ServerQuestFile extends QuestFile {
 		QuestObjectBase object = getBase(id);
 
 		if (object != null) {
-			String file = object.getPath();
-
 			object.deleteChildren();
 			object.deleteSelf();
 			refreshIDMap();
-			save();
+			markDirty();
 
-			if (file != null) {
-				FileUtils.delete(getFolder().resolve(file).toFile());
-			}
+			getPath().ifPresent(path -> FileUtils.delete(getFolder().resolve(path).toFile()));
 		}
 
 		new DeleteObjectResponseMessage(id).sendToAll(server);
 	}
 
 	@Override
-	public void save() {
+	public void markDirty() {
 		shouldSave = true;
 	}
 
@@ -183,31 +178,21 @@ public class ServerQuestFile extends QuestFile {
 		player.inventoryMenu.addSlotListener(new FTBQuestsInventoryListener(player));
 
 		if (!data.isLocked()) {
-			withPlayerContext(player, () -> {
-				for (ChapterGroup group : chapterGroups) {
-					for (Chapter chapter : group.chapters) {
-						for (Quest quest : chapter.quests) {
-							if (!data.isCompleted(quest) && quest.isCompletedRaw(data)) {
-								// Handles possible situation where quest book has been modified to remove a task from a quest
-								// It can leave a player having completed all the other tasks, but unable to complete the quest
-								//   since quests are normally marked completed when the last task in that quest is completed
-								// https://github.com/FTBBeta/Beta-Testing-Issues/issues/755
-								quest.onCompleted(new QuestProgressEventData<>(new Date(), data, quest, data.getOnlineMembers(), Collections.singletonList(player)));
-							}
-
-							data.checkAutoCompletion(quest);
-
-							if (data.canStartTasks(quest)) {
-								for (Task task : quest.tasks) {
-									if (task.checkOnLogin()) {
-										task.submitTask(data, player);
-									}
-								}
-							}
-						}
-					}
+			withPlayerContext(player, () -> forAllQuests(quest -> {
+				if (!data.isCompleted(quest) && quest.isCompletedRaw(data)) {
+					// Handles possible situation where quest book has been modified to remove a task from a quest
+					// It can leave a player having completed all the other tasks, but unable to complete the quest
+					//   since quests are normally marked completed when the last task in that quest is completed
+					// https://github.com/FTBBeta/Beta-Testing-Issues/issues/755
+					quest.onCompleted(new QuestProgressEventData<>(new Date(), data, quest, data.getOnlineMembers(), Collections.singletonList(player)));
 				}
-			});
+
+				data.checkAutoCompletion(quest);
+
+				if (data.canStartTasks(quest)) {
+					quest.getTasks().stream().filter(Task::checkOnLogin).forEach(task -> task.submitTask(data, player));
+				}
+			}));
 		}
 	}
 
@@ -215,17 +200,12 @@ public class ServerQuestFile extends QuestFile {
 		UUID id = event.getTeam().getId();
 
 		TeamData data = teamDataMap.computeIfAbsent(id, k -> {
-			TeamData d1 = new TeamData(id);
-			d1.file = this;
-			d1.markDirty();
-			return d1;
+			TeamData newTeamData = new TeamData(id, this);
+			newTeamData.markDirty();
+			return newTeamData;
 		});
-		String displayName = event.getTeam().getShortName();
 
-		if (!data.name.equals(displayName)) {
-			data.name = displayName;
-			data.markDirty();
-		}
+		data.setName(event.getTeam().getShortName());
 
 		addData(data, false);
 
@@ -258,7 +238,18 @@ public class ServerQuestFile extends QuestFile {
 	@Override
 	public boolean isPlayerOnTeam(Player player, TeamData teamData) {
 		return FTBTeamsAPI.api().getManager().getTeamForPlayerID(player.getUUID())
-				.map(team -> team.getTeamId().equals(teamData.uuid))
+				.map(team -> team.getTeamId().equals(teamData.getTeamId()))
 				.orElse(false);
+	}
+
+	@Override
+	public boolean moveChapterGroup(long id, boolean movingUp) {
+		if (super.moveChapterGroup(id, movingUp)) {
+			markDirty();
+			clearCachedData();
+			new MoveChapterGroupResponseMessage(id, movingUp).sendToAll(server);
+			return true;
+		}
+		return false;
 	}
 }

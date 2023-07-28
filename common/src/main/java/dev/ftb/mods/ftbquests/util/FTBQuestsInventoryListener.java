@@ -33,7 +33,7 @@ public class FTBQuestsInventoryListener implements ContainerListener {
 			if (data != null && !data.isLocked()) {
 				file.withPlayerContext(player, () -> {
 					for (Task task : file.getSubmitTasks()) {
-						if (task.id != sourceTask && data.canStartTasks(task.quest)) {
+						if (task.id != sourceTask && data.canStartTasks(task.getQuest())) {
 							task.submitTask(data, player, craftedItem);
 						}
 					}
@@ -54,7 +54,7 @@ public class FTBQuestsInventoryListener implements ContainerListener {
 				// Only checking for items in the main inventory & hotbar
 				// Armor slots can contain items with rapidly changing NBT (especially powered modded armor)
 				//  which can trigger a lot of unnecessary inventory scans
-				int delay = Mth.clamp(ServerQuestFile.INSTANCE.detectionDelay, 0, 200);
+				int delay = Mth.clamp(ServerQuestFile.INSTANCE.getDetectionDelay(), 0, 200);
 				if (delay == 0) {
 					FTBQuestsInventoryListener.detect(player, ItemStack.EMPTY, 0);
 				} else {

@@ -2,7 +2,7 @@ package dev.ftb.mods.ftbquests.quest.reward;
 
 import dev.ftb.mods.ftblibrary.ui.Button;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
-import dev.ftb.mods.ftbquests.gui.RewardNotificationsScreen;
+import dev.ftb.mods.ftbquests.client.gui.RewardNotificationsScreen;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
 import dev.ftb.mods.ftbquests.quest.loot.WeightedReward;
@@ -17,12 +17,9 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * @author LatvianModder
- */
 public class LootReward extends RandomReward {
-	public LootReward(Quest quest) {
-		super(quest);
+	public LootReward(long id, Quest quest) {
+		super(id, quest);
 	}
 
 	@Override
@@ -35,8 +32,8 @@ public class LootReward extends RandomReward {
 		RewardTable table = getTable();
 
 		if (table != null) {
-			for (WeightedReward reward : table.generateWeightedRandomRewards(player.getRandom(), table.lootSize, true)) {
-				reward.reward.claim(player, notify);
+			for (WeightedReward wr : table.generateWeightedRandomRewards(player.getRandom(), 1, true)) {
+				wr.getReward().claim(player, notify);
 			}
 		}
 	}

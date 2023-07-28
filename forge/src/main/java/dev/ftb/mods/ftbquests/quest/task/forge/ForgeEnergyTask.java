@@ -20,8 +20,8 @@ public class ForgeEnergyTask extends EnergyTask {
 	public static final ResourceLocation EMPTY_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "textures/tasks/fe_empty.png");
 	public static final ResourceLocation FULL_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "textures/tasks/fe_full.png");
 
-	public ForgeEnergyTask(Quest quest) {
-		super(quest);
+	public ForgeEnergyTask(long id, Quest quest) {
+		super(id, quest);
 	}
 
 	@Override
@@ -32,7 +32,7 @@ public class ForgeEnergyTask extends EnergyTask {
 	@Override
 	@OnlyIn(Dist.CLIENT)
 	public MutableComponent getAltTitle() {
-		return Component.translatable("ftbquests.task.ftbquests.forge_energy.text", StringUtils.formatDouble(value, true));
+		return Component.translatable("ftbquests.task.ftbquests.forge_energy.text", StringUtils.formatDouble(getValue(), true));
 	}
 
 	@Override

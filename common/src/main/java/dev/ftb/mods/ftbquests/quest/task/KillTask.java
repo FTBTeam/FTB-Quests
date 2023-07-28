@@ -24,16 +24,14 @@ import net.minecraft.world.item.SpawnEggItem;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @author LatvianModder
- */
 public class KillTask extends Task {
-	public static final ResourceLocation ZOMBIE = new ResourceLocation("minecraft:zombie");
-	public ResourceLocation entity = ZOMBIE;
-	public long value = 100L;
+	private static final ResourceLocation ZOMBIE = new ResourceLocation("minecraft:zombie");
 
-	public KillTask(Quest quest) {
-		super(quest);
+	private ResourceLocation entity = ZOMBIE;
+	private long value = 100L;
+
+	public KillTask(long id, Quest quest) {
+		super(id, quest);
 	}
 
 	@Override

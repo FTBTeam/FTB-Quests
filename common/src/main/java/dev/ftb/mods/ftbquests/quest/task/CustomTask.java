@@ -13,28 +13,25 @@ import net.minecraft.world.item.ItemStack;
 
 import java.util.function.Predicate;
 
-/**
- * @author LatvianModder
- */
 public class CustomTask extends Task {
 	public static final Predicate<QuestObjectBase> PREDICATE = object -> object instanceof CustomTask;
 
-	@FunctionalInterface
-	public interface Check {
-		void check(CustomTask.Data taskData, ServerPlayer player);
-	}
+	private Check check;
+	private int checkTimer;
+	private long maxProgress;
+	private boolean enableButton;
 
-	public Check check;
-	public int checkTimer;
-	public long maxProgress;
-	public boolean enableButton;
+	public CustomTask(long id, Quest quest) {
+		super(id, quest);
 
-	public CustomTask(Quest quest) {
-		super(quest);
 		check = null;
 		checkTimer = 1;
 		maxProgress = 1L;
 		enableButton = false;
+	}
+
+	public void setCheck(Check check) {
+		this.check = check;
 	}
 
 	@Override
@@ -89,15 +86,7 @@ public class CustomTask extends Task {
 		return false;
 	}
 
-	public static class Data {
-		public final CustomTask task;
-		public final TeamData teamData;
-
-		public Data(CustomTask t, TeamData d) {
-			task = t;
-			teamData = d;
-		}
-
+	public record Data(CustomTask task, TeamData teamData) {
 		public long getProgress() {
 			return teamData.getProgress(task);
 		}
@@ -110,4 +99,10 @@ public class CustomTask extends Task {
 			teamData.addProgress(task, l);
 		}
 	}
+
+	@FunctionalInterface
+	public interface Check {
+		void check(CustomTask.Data taskData, ServerPlayer player);
+	}
+
 }

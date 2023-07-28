@@ -80,7 +80,7 @@ public class TaskScreenRenderer implements BlockEntityRenderer<TaskScreenBlockEn
         double iconY = 0.5D;
 
         // render quest and task title at top of screen
-        Component top1 = taskScreen.isInputOnly() ? Component.empty() : task.quest.getTitle();
+        Component top1 = taskScreen.isInputOnly() ? Component.empty() : task.getQuest().getTitle();
         Component top2 = taskScreen.isInputOnly() ? Component.empty() : task.getTitle();
         drawString(taskScreen, font, multiBufferSource, poseStack, top1, 0.02D, 0.15D);
         if (!top2.equals(Component.empty())) {
@@ -152,7 +152,7 @@ public class TaskScreenRenderer implements BlockEntityRenderer<TaskScreenBlockEn
             if (progress > 0L) {
                 float heightInterpolated = 16f * (float) ((double) progress / task.getMaxProgress());
                 RenderUtil.create(poseStack, vertexConsumer, -8f, -8f)
-                        .withColor(FluidStackHooks.getColor(fluidTask.fluid) | 0xFF000000)
+                        .withColor(FluidStackHooks.getColor(fluidTask.getFluid()) | 0xFF000000)
                         .withSize(16f, heightInterpolated)
                         .withUV(sprite.getU0(), sprite.getV0(), sprite.getU1(), sprite.getV(heightInterpolated))
                         .draw();
@@ -194,7 +194,6 @@ public class TaskScreenRenderer implements BlockEntityRenderer<TaskScreenBlockEn
 
     private void drawString(TaskScreenBlockEntity taskScreen, Font font, MultiBufferSource bufferSource, PoseStack poseStack, Component text, double y, double size) {
         if (!text.equals(Component.empty())) {
-            Matrix4f posMat = poseStack.last().pose();
             poseStack.pushPose();
             poseStack.translate(0.5D, y, 0D);
 
@@ -210,7 +209,8 @@ public class TaskScreenRenderer implements BlockEntityRenderer<TaskScreenBlockEn
             }
 
             poseStack.scale(scale, scale, 1F);
-            font.drawInBatch(text, -len / 2f, 0, 0xFFD8D8D8, taskScreen.isTextShadow(), posMat, bufferSource, Font.DisplayMode.NORMAL, 0xFFFFFFFF, 0x00F000F0);
+            Matrix4f posMat = poseStack.last().pose();
+            font.drawInBatch(text, -len / 2f, 0, 0xFFD8D8D8, taskScreen.isTextShadow(), posMat, bufferSource, Font.DisplayMode.NORMAL, 0x0, 0x00F000F0);
             poseStack.popPose();
         }
     }

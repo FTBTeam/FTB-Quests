@@ -8,12 +8,9 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.server.level.ServerPlayer;
 
-/**
- * @author LatvianModder
- */
-public class CheckmarkTask extends BooleanTask {
-	public CheckmarkTask(Quest quest) {
-		super(quest);
+public class CheckmarkTask extends AbstractBooleanTask {
+	public CheckmarkTask(long id, Quest quest) {
+		super(id, quest);
 	}
 
 	@Override

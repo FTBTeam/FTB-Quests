@@ -32,18 +32,12 @@ public class ClaimAllRewardsMessage extends BaseC2SMessage {
 		ServerPlayer player = (ServerPlayer) context.getPlayer();
 		TeamData data = TeamData.get(player);
 
-		for (ChapterGroup group : ServerQuestFile.INSTANCE.chapterGroups) {
-			for (Chapter chapter : group.chapters) {
-				for (Quest quest : chapter.quests) {
-					if (data.isCompleted(quest)) {
-						for (Reward reward : quest.rewards) {
-							if (!reward.getExcludeFromClaimAll()) {
-								data.claimReward(player, reward, true);
-							}
-						}
-					}
-				}
+		ServerQuestFile.INSTANCE.forAllQuests(quest -> {
+			if (data.isCompleted(quest)) {
+				quest.getRewards().stream()
+						.filter(reward -> !reward.getExcludeFromClaimAll())
+						.forEach(reward -> data.claimReward(player, reward, true));
 			}
-		}
+		});
 	}
 }

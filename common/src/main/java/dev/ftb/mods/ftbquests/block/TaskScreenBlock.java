@@ -1,10 +1,10 @@
 package dev.ftb.mods.ftbquests.block;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
-import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.block.entity.ITaskScreen;
 import dev.ftb.mods.ftbquests.block.entity.TaskScreenAuxBlockEntity;
 import dev.ftb.mods.ftbquests.block.entity.TaskScreenBlockEntity;
+import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.item.ScreenBlockItem;
 import dev.ftb.mods.ftbquests.net.TaskScreenConfigRequest;
 import dev.ftb.mods.ftbquests.quest.QuestFile;
@@ -42,6 +42,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Objects;
 
 public class TaskScreenBlock extends BaseEntityBlock {
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
@@ -111,7 +112,7 @@ public class TaskScreenBlock extends BaseEntityBlock {
 
         if (level.getBlockEntity(blockPos) instanceof TaskScreenBlockEntity coreScreen) {
             if (livingEntity instanceof ServerPlayer sp) {
-                coreScreen.setTeamId(ServerQuestFile.INSTANCE.getData(sp).uuid);
+                coreScreen.setTeamId(ServerQuestFile.INSTANCE.getData(sp).getTeamId());
             }
 
             Direction facing = blockState.getValue(FACING);
@@ -168,14 +169,15 @@ public class TaskScreenBlock extends BaseEntityBlock {
         super.appendHoverText(itemStack, blockGetter, list, tooltipFlag);
 
         if (itemStack.getTag() != null && itemStack.getTag().contains("BlockEntityTag", Tag.TAG_COMPOUND)) {
-            CompoundTag subTag = itemStack.getTagElement("BlockEntityTag");
-            QuestFile questFile = FTBQuests.PROXY.getQuestFile(true);
+            CompoundTag subTag = Objects.requireNonNull(itemStack.getTagElement("BlockEntityTag"));
+            QuestFile questFile = FTBQuestsClient.getClientQuestFile();
             if (questFile != null) {
                 Task task = questFile.getTask(subTag.getLong("TaskID"));
                 if (task != null) {
-                    list.add(Component.translatable("ftbquests.chapter").append(": ").append(task.quest.chapter.getTitle().copy().withStyle(ChatFormatting.YELLOW)));
-                    list.add(Component.translatable("ftbquests.quest").append(": ").append(task.quest.getTitle().copy().withStyle(ChatFormatting.YELLOW)));
-                    list.add(Component.translatable("ftbquests.task").append(": ").append(task.getTitle().copy().withStyle(ChatFormatting.YELLOW)));
+                    list.add(Component.translatable("ftbquests.chapter").append(": ")
+                            .append(task.getQuest().getChapter().getTitle().copy().withStyle(ChatFormatting.YELLOW)));
+                    list.add(Component.translatable("ftbquests.quest").append(": ").append(task.getQuest().getMutableTitle().withStyle(ChatFormatting.YELLOW)));
+                    list.add(Component.translatable("ftbquests.task").append(": ").append(task.getMutableTitle().withStyle(ChatFormatting.YELLOW)));
                 }
             }
         }

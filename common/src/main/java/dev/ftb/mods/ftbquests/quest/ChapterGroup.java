@@ -5,31 +5,54 @@ import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.IconAnimation;
 import dev.ftb.mods.ftblibrary.util.client.ClientUtils;
 import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
-import dev.ftb.mods.ftbquests.gui.quests.QuestScreen;
+import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * @author LatvianModder
  */
 public class ChapterGroup extends QuestObject {
-	public final QuestFile file;
-	public final List<Chapter> chapters;
+	protected final QuestFile file;
+	private final List<Chapter> chapters;
 
-	public boolean guiCollapsed;
+	private boolean guiCollapsed;
 
-	public ChapterGroup(QuestFile f) {
-		file = f;
+	public ChapterGroup(long id, QuestFile file) {
+		super(id);
+
+		this.file = file;
 		chapters = new ArrayList<>();
-
 		guiCollapsed = false;
+	}
+
+	public QuestFile getFile() {
+		return file;
+	}
+
+	public List<Chapter> getChapters() {
+		return Collections.unmodifiableList(chapters);
+	}
+
+	public void addChapter(Chapter chapter) {
+		chapters.add(chapter);
+		chapter.setGroup(this);
+	}
+	
+	public void removeChapter(Chapter chapter) {
+		chapters.remove(chapter);
+	}
+
+	public void clearChapters() {
+		chapters.clear();
+	}
+
+	public void sortChapters(Comparator<? super Chapter> c) {
+		chapters.sort(c);
 	}
 
 	@Override
@@ -42,12 +65,16 @@ public class ChapterGroup extends QuestObject {
 		return file;
 	}
 
-	public int getIndex() {
-		return file.chapterGroups.indexOf(this);
+	public boolean isFirstGroup() {
+		return !file.chapterGroups.isEmpty() && this == file.chapterGroups.get(0);
+	}
+
+	public boolean isLastGroup() {
+		return !file.chapterGroups.isEmpty() && this == file.chapterGroups.get(file.chapterGroups.size() - 1);
 	}
 
 	public boolean isDefaultGroup() {
-		return this == file.defaultChapterGroup;
+		return this == file.getDefaultChapterGroup();
 	}
 
 	@Override
@@ -69,8 +96,7 @@ public class ChapterGroup extends QuestObject {
 		file.chapterGroups.remove(this);
 
 		for (Chapter chapter : chapters) {
-			chapter.group = file.defaultChapterGroup;
-			file.defaultChapterGroup.chapters.add(chapter);
+			file.getDefaultChapterGroup().addChapter(chapter);
 		}
 
 		super.deleteSelf();
@@ -79,7 +105,7 @@ public class ChapterGroup extends QuestObject {
 	@Override
 	@Environment(EnvType.CLIENT)
 	public void fillConfigGroup(ConfigGroup config) {
-		config.addString("title", title, v -> title = v, "").setNameKey("ftbquests.title").setOrder(-127);
+		config.addString("title", rawTitle, v -> rawTitle = v, "").setNameKey("ftbquests.title").setOrder(-127);
 	}
 
 	@Override
@@ -88,7 +114,7 @@ public class ChapterGroup extends QuestObject {
 		QuestScreen gui = ClientUtils.getCurrentGuiAs(QuestScreen.class);
 
 		if (gui != null) {
-			gui.chapterPanel.refreshWidgets();
+			gui.refreshChapterPanel();
 		}
 	}
 
@@ -111,13 +137,7 @@ public class ChapterGroup extends QuestObject {
 	}
 
 	public boolean isVisible(TeamData data) {
-		for (Chapter chapter : chapters) {
-			if (chapter.isVisible(data)) {
-				return true;
-			}
-		}
-
-		return false;
+		return chapters.stream().anyMatch(chapter -> chapter.isVisible(data));
 	}
 
 	@Override
@@ -137,9 +157,9 @@ public class ChapterGroup extends QuestObject {
 
 	@Override
 	public void onCompleted(QuestProgressEventData<?> data) {
-		data.teamData.setCompleted(id, data.time);
+		data.setCompleted(id);
 
-		if (file.isCompletedRaw(data.teamData)) {
+		if (file.isCompletedRaw(data.getTeamData())) {
 			file.onCompleted(data.withObject(file));
 		}
 	}
@@ -152,7 +172,7 @@ public class ChapterGroup extends QuestObject {
 		List<Chapter> list = new ArrayList<>();
 
 		for (Chapter chapter : chapters) {
-			if (!chapter.quests.isEmpty() && chapter.isVisible(data)) {
+			if (!chapter.getQuests().isEmpty() && chapter.isVisible(data)) {
 				list.add(chapter);
 			}
 		}
@@ -168,13 +188,11 @@ public class ChapterGroup extends QuestObject {
 			return chapters.get(0);
 		}
 
-		for (Chapter chapter : chapters) {
-			if (!chapter.quests.isEmpty() && chapter.isVisible(data)) {
-				return chapter;
-			}
-		}
+		return chapters.stream()
+				.filter(chapter -> !chapter.getQuests().isEmpty() && chapter.isVisible(data))
+				.findFirst()
+				.orElse(null);
 
-		return null;
 	}
 
 	@Override
@@ -184,12 +202,25 @@ public class ChapterGroup extends QuestObject {
 
 	@Override
 	public boolean hasUnclaimedRewardsRaw(TeamData teamData, UUID player) {
-		for (Chapter chapter : chapters) {
-			if (teamData.hasUnclaimedRewards(player, chapter)) {
-				return true;
-			}
-		}
+		return chapters.stream().anyMatch(chapter -> teamData.hasUnclaimedRewards(player, chapter));
+	}
 
+	public boolean moveChapterWithinGroup(Chapter chapter, boolean movingUp) {
+		int index = chapters.indexOf(chapter);
+
+		if (index != -1 && movingUp ? (index > 0) : (index < chapters.size() - 1)) {
+			chapters.remove(index);
+			chapters.add(movingUp ? index - 1 : index + 1, chapter);
+			return true;
+		}
 		return false;
+	}
+
+	public void toggleCollapsed() {
+		guiCollapsed = !guiCollapsed;
+	}
+
+	public boolean isGuiCollapsed() {
+		return guiCollapsed;
 	}
 }

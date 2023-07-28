@@ -13,26 +13,36 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.StructureBlockEntity;
 
 /**
  * @author LatvianModder
  */
-public class LocationTask extends BooleanTask {
-	public ResourceKey<Level> dimension;
-	public boolean ignoreDimension;
-	public int x, y, z;
-	public int w, h, d;
+public class LocationTask extends AbstractBooleanTask {
+	private ResourceKey<Level> dimension;
+	private boolean ignoreDimension;
+	private int x, y, z;
+	private int w, h, d;
 
-	public LocationTask(Quest quest) {
-		super(quest);
+	public LocationTask(long id, Quest quest) {
+		super(id, quest);
+
 		dimension = Level.OVERWORLD;
 		ignoreDimension = false;
-		x = 0;
-		y = 0;
-		z = 0;
-		w = 1;
-		h = 1;
-		d = 1;
+		x = y = z = 0;
+		w = h = d =  1;
+	}
+
+	public void initFromStructure(StructureBlockEntity structure) {
+		var pos = structure.getStructurePos();
+		var size = structure.getStructureSize();
+		dimension = structure.getLevel().dimension();
+		x = pos.getX() + structure.getBlockPos().getX();
+		y = pos.getY() + structure.getBlockPos().getY();
+		z = pos.getZ() + structure.getBlockPos().getZ();
+		w = Math.max(1, size.getX());
+		h = Math.max(1, size.getY());
+		d = Math.max(1, size.getZ());
 	}
 
 	@Override

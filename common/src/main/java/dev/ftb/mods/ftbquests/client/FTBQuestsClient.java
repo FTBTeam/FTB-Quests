@@ -12,12 +12,11 @@ import dev.ftb.mods.ftblibrary.config.ui.SelectFluidScreen;
 import dev.ftb.mods.ftblibrary.config.ui.SelectItemStackScreen;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftbquests.FTBQuests;
-import dev.ftb.mods.ftbquests.FTBQuestsCommon;
 import dev.ftb.mods.ftbquests.block.FTBQuestsBlocks;
 import dev.ftb.mods.ftbquests.block.entity.TaskScreenBlockEntity;
+import dev.ftb.mods.ftbquests.item.FTBQuestsItems;
 import dev.ftb.mods.ftbquests.net.SetCustomImageMessage;
 import dev.ftb.mods.ftbquests.quest.QuestFile;
-import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.reward.ItemReward;
 import dev.ftb.mods.ftbquests.quest.reward.RewardTypes;
@@ -27,6 +26,7 @@ import dev.ftb.mods.ftbquests.quest.task.*;
 import dev.ftb.mods.ftbquests.quest.theme.ThemeLoader;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -39,7 +39,10 @@ import net.minecraft.server.packs.PackType;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.StructureBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -49,19 +52,18 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class FTBQuestsClient extends FTBQuestsCommon {
+public class FTBQuestsClient {
 	public static KeyMapping KEY_QUESTS;
 
-	@Override
-	public void init() {
-		ClientLifecycleEvent.CLIENT_SETUP.register(this::setup);
+	public static void init() {
+		ClientLifecycleEvent.CLIENT_SETUP.register(FTBQuestsClient::onClientSetup);
 		ReloadListenerRegistry.register(PackType.CLIENT_RESOURCES, new QuestFileCacheReloader());
 		ReloadListenerRegistry.register(PackType.CLIENT_RESOURCES, new ThemeLoader());
 		KeyMappingRegistry.register(KEY_QUESTS = new KeyMapping("key.ftbquests.quests", InputConstants.Type.KEYSYM, -1, "key.categories.ftbquests"));
 		new FTBQuestsClientEventHandler().init();
 	}
 
-	private void setup(Minecraft minecraft) {
+	private static void onClientSetup(Minecraft minecraft) {
 		RenderTypeRegistry.register(RenderType.translucent(), FTBQuestsBlocks.BARRIER.get());
 		RenderTypeRegistry.register(RenderType.translucent(), FTBQuestsBlocks.STAGE_BARRIER.get());
 		RenderTypeRegistry.register(RenderType.solid(), FTBQuestsBlocks.TASK_SCREEN_1.get());
@@ -73,39 +75,19 @@ public class FTBQuestsClient extends FTBQuestsCommon {
 		setRewardGuiProviders();
 	}
 
-	@Override
 	@Nullable
-	public QuestFile getClientQuestFile() {
+	public static QuestFile getClientQuestFile() {
 		return ClientQuestFile.INSTANCE;
 	}
 
-	@Override
-	public QuestFile getQuestFile(boolean isClient) {
-		if (isClient) {
-			QuestFile f = getClientQuestFile();
-
-			if (f == null) {
-				throw new NullPointerException("Client quest file not loaded!");
-			}
-
-			return f;
-		}
-
-		return ServerQuestFile.INSTANCE;
-	}
-
-	@Override
-	public void setTaskGuiProviders() {
+	public static void setTaskGuiProviders() {
 		TaskTypes.ITEM.setGuiProvider((gui, quest, callback) -> {
 			ItemStackConfig c = new ItemStackConfig(false, false);
 
 			new SelectItemStackScreen(c, accepted -> {
 				gui.run();
 				if (accepted) {
-					ItemTask itemTask = new ItemTask(quest);
-					itemTask.item = c.getValue().copy();
-					itemTask.item.setCount(1);
-					itemTask.count = c.getValue().getCount();
+					ItemTask itemTask = new ItemTask(0L, quest).setStackAndCount(c.getValue(), c.getValue().getCount());
 					callback.accept(itemTask);
 				}
 			}).openGui();
@@ -116,8 +98,8 @@ public class FTBQuestsClient extends FTBQuestsCommon {
 
 			EditConfigFromStringScreen.open(c, "", "", accepted -> {
 				if (accepted) {
-					CheckmarkTask checkmarkTask = new CheckmarkTask(quest);
-					checkmarkTask.title = c.getValue();
+					CheckmarkTask checkmarkTask = new CheckmarkTask(0L, quest);
+					checkmarkTask.setRawTitle(c.getValue());
 					callback.accept(checkmarkTask);
 				}
 
@@ -131,45 +113,36 @@ public class FTBQuestsClient extends FTBQuestsCommon {
 			new SelectFluidScreen(c, accepted -> {
 				gui.run();
 				if (accepted) {
-					FluidTask fluidTask = new FluidTask(quest);
-					fluidTask.fluid = c.getValue().getFluid();
+					FluidTask fluidTask = new FluidTask(0L, quest).setFluid(c.getValue().getFluid());
 					callback.accept(fluidTask);
 				}
 			}).openGui();
 		});
 
 		TaskTypes.DIMENSION.setGuiProvider((gui, quest, callback) -> {
-			DimensionTask task = new DimensionTask(quest);
-			task.dimension = Minecraft.getInstance().level.dimension();
+			DimensionTask task = new DimensionTask(0L, quest)
+					.withDimension(Minecraft.getInstance().level.dimension());
 			openSetupGui(gui, callback, task);
 		});
 
 		TaskTypes.OBSERVATION.setGuiProvider((gui, quest, callback) -> {
-			ObservationTask task = new ObservationTask(quest);
+			ObservationTask task = new ObservationTask(0L, quest);
 			if (Minecraft.getInstance().hitResult instanceof BlockHitResult bhr) {
 				Block block = Minecraft.getInstance().level.getBlockState(bhr.getBlockPos()).getBlock();
-				task.toObserve = BuiltInRegistries.BLOCK.getKey(block).toString();
+				task.setToObserve(BuiltInRegistries.BLOCK.getKey(block).toString());
 			}
 			openSetupGui(gui, callback, task);
 		});
 
 		TaskTypes.LOCATION.setGuiProvider((gui, quest, callback) -> {
-			LocationTask task = new LocationTask(quest);
+			LocationTask task = new LocationTask(0L, quest);
 			Minecraft mc = Minecraft.getInstance();
 
 			if (mc.hitResult instanceof BlockHitResult bhr) {
 				var blockEntity = mc.level.getBlockEntity(bhr.getBlockPos());
 
 				if (blockEntity instanceof StructureBlockEntity structure) {
-					var pos = structure.getStructurePos();
-					var size = structure.getStructureSize();
-					task.dimension = mc.level.dimension();
-					task.x = pos.getX() + blockEntity.getBlockPos().getX();
-					task.y = pos.getY() + blockEntity.getBlockPos().getY();
-					task.z = pos.getZ() + blockEntity.getBlockPos().getZ();
-					task.w = Math.max(1, size.getX());
-					task.h = Math.max(1, size.getY());
-					task.d = Math.max(1, size.getZ());
+					task.initFromStructure(structure);
 					callback.accept(task);
 					return;
 				}
@@ -191,8 +164,7 @@ public class FTBQuestsClient extends FTBQuestsCommon {
 		new EditConfigScreen(group).openGui();
 	}
 
-	@Override
-	public void setRewardGuiProviders() {
+	public static void setRewardGuiProviders() {
 		RewardTypes.ITEM.setGuiProvider((gui, quest, callback) -> {
 			ItemStackConfig c = new ItemStackConfig(false, false);
 
@@ -200,8 +172,7 @@ public class FTBQuestsClient extends FTBQuestsCommon {
 				if (accepted) {
 					ItemStack copy = c.getValue().copy();
 					copy.setCount(1);
-					ItemReward reward = new ItemReward(quest, copy);
-					reward.count = c.getValue().getCount();
+					ItemReward reward = new ItemReward(0L, quest, copy, c.getValue().getCount());
 					callback.accept(reward);
 				}
 				gui.run();
@@ -213,7 +184,7 @@ public class FTBQuestsClient extends FTBQuestsCommon {
 
 			EditConfigFromStringScreen.open(c, 100, 100, accepted -> {
 				if (accepted) {
-					callback.accept(new XPReward(quest, c.getValue()));
+					callback.accept(new XPReward(0L, quest, c.getValue()));
 				}
 
 				gui.run();
@@ -225,7 +196,7 @@ public class FTBQuestsClient extends FTBQuestsCommon {
 
 			EditConfigFromStringScreen.open(c, 5, 5, accepted -> {
 				if (accepted) {
-					callback.accept(new XPLevelsReward(quest, c.getValue()));
+					callback.accept(new XPLevelsReward(0L, quest, c.getValue()));
 				}
 
 				gui.run();
@@ -233,33 +204,31 @@ public class FTBQuestsClient extends FTBQuestsCommon {
 		});
 	}
 
-	@Override
-	public Player getClientPlayer() {
+	public static Player getClientPlayer() {
 		return Minecraft.getInstance().player;
 	}
 
-	@Override
-	public boolean isClientDataLoaded() {
-		return ClientQuestFile.INSTANCE != null;
+	public static Level getClientLevel() {
+		return Minecraft.getInstance().level;
 	}
 
-	@Override
-	public TeamData getClientPlayerData() {
-		return ClientQuestFile.INSTANCE.self;
+	public static boolean isClientDataLoaded() {
+		return ClientQuestFile.exists();
 	}
 
-	@Override
-	public QuestFile createClientQuestFile() {
+	public static TeamData getClientPlayerData() {
+		return ClientQuestFile.INSTANCE.selfTeamData;
+	}
+
+	public static QuestFile createClientQuestFile() {
 		return new ClientQuestFile();
 	}
 
-	@Override
-	public void openGui() {
+	public static void openGui() {
 		ClientQuestFile.openGui();
 	}
 
-	@Override
-	public void openCustomIconGui(Player player, InteractionHand hand) {
+	public static void openCustomIconGui(Player player, InteractionHand hand) {
 		ImageConfig config = new ImageConfig();
 		config.onClicked(MouseButton.LEFT, b -> {
 			if (b) {
@@ -276,15 +245,13 @@ public class FTBQuestsClient extends FTBQuestsCommon {
 		});
 	}
 
-	@Override
-	public void openScreenConfigGui(BlockPos pos) {
+	public static void openScreenConfigGui(BlockPos pos) {
 		if (Minecraft.getInstance().level.getBlockEntity(pos) instanceof TaskScreenBlockEntity coreScreen) {
 			new EditConfigScreen(coreScreen.fillConfigGroup(ClientQuestFile.INSTANCE.getData(coreScreen.getTeamId()))).setAutoclose(true).openGui();
 		}
 	}
 
-	@Override
-	public float[] getTextureUV(BlockState state, Direction face) {
+	public static float[] getTextureUV(BlockState state, Direction face) {
 		if (state == null) return null;
 		BakedModel model = Minecraft.getInstance().getBlockRenderer().getBlockModel(state);
 		List<BakedQuad> quads = model.getQuads(state, face, RandomSource.create());
@@ -294,5 +261,20 @@ public class FTBQuestsClient extends FTBQuestsCommon {
 		} else {
 			return new float[0];
 		}
+	}
+
+	/**
+	 * Called to ensure the right loot crates are shown; call when a loot crate is toggled via GUI, or when a
+	 * quest book sync is done from the server.
+	 */
+	public static void rebuildCreativeTabs() {
+		LocalPlayer player = Minecraft.getInstance().player;
+		CreativeModeTab.ItemDisplayParameters params = new CreativeModeTab.ItemDisplayParameters(
+				player.connection.enabledFeatures(),
+				player.canUseGameMasterBlocks(),
+				player.level().registryAccess()
+		);
+		FTBQuestsItems.CREATIVE_TAB.get().buildContents(params);
+		CreativeModeTabs.searchTab().buildContents(params);
 	}
 }

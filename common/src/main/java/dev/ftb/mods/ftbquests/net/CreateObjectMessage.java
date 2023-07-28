@@ -51,13 +51,12 @@ public class CreateObjectMessage extends BaseC2SMessage {
 	@Override
 	public void handle(NetworkManager.PacketContext context) {
 		if (NetUtils.canEdit(context)) {
-			QuestObjectBase object = ServerQuestFile.INSTANCE.create(type, parent, extra == null ? new CompoundTag() : extra);
+			QuestObjectBase object = ServerQuestFile.INSTANCE.create(ServerQuestFile.INSTANCE.newID(), type, parent, extra == null ? new CompoundTag() : extra);
 			object.readData(nbt);
-			object.id = ServerQuestFile.INSTANCE.newID();
 			object.onCreated();
 			object.getQuestFile().refreshIDMap();
 			object.getQuestFile().clearCachedData();
-			object.getQuestFile().save();
+			object.getQuestFile().markDirty();
 
 			new CreateObjectResponseMessage(object, extra).sendToAll(context.getPlayer().getServer());
 		}

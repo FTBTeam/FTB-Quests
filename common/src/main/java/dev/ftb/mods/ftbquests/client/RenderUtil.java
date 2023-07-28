@@ -57,32 +57,23 @@ public class RenderUtil {
     }
 
     public void draw() {
-//        float r = ((color & 0xFF000000) >> 24) / 255F;
-//        float g = ((color & 0x00FF0000) >> 16) / 255F;
-//        float b = ((color & 0x0000FF00) >> 8) / 255F;
-//        float a =  (color & 0x000000FF) / 255F;
-        
         Matrix4f posMat = matrixStack.last().pose();
         builder.vertex(posMat, x, y + h, 0)
-//                .color(r, g, b, a)
                 .color(color)
                 .uv(u1, v2)
                 .uv2(packedLightIn)
                 .endVertex();
         builder.vertex(posMat, x + w, y + h, 0)
-//                .color(r, g, b, a)
                 .color(color)
                 .uv(u2, v2)
                 .uv2(packedLightIn)
                 .endVertex();
         builder.vertex(posMat, x + w, y, 0)
-//                .color(r, g, b, a)
                 .color(color)
                 .uv(u2, v1)
                 .uv2(packedLightIn)
                 .endVertex();
         builder.vertex(posMat, x, y, 0)
-//                .color(r, g, b, a)
                 .color(color)
                 .uv(u1, v1)
                 .uv2(packedLightIn)

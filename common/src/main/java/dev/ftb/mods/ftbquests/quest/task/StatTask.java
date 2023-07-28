@@ -23,11 +23,11 @@ import java.util.List;
  * @author LatvianModder
  */
 public class StatTask extends Task {
-	public ResourceLocation stat;
-	public int value = 1;
+	private ResourceLocation stat;
+	private int value = 1;
 
-	public StatTask(Quest quest) {
-		super(quest);
+	public StatTask(long id, Quest quest) {
+		super(id, quest);
 		stat = Stats.MOB_KILLS;
 	}
 

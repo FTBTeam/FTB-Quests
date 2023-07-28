@@ -13,7 +13,7 @@ import java.util.List;
 /**
  * @author LatvianModder
  */
-public class ObjectCompletedEvent<T extends QuestObject> {
+public class ObjectCompletedEvent<T extends QuestObject> extends ObjectProgressEvent<T> {
 	public static final Event<EventActor<ObjectCompletedEvent<?>>> GENERIC = EventFactory.createEventActorLoop();
 	public static final Event<EventActor<FileEvent>> FILE = EventFactory.createEventActorLoop();
 	public static final Event<EventActor<ChapterEvent>> CHAPTER = EventFactory.createEventActorLoop();
@@ -27,39 +27,8 @@ public class ObjectCompletedEvent<T extends QuestObject> {
 		TASK.register(event -> GENERIC.invoker().act(event));
 	}
 
-	private final QuestProgressEventData<T> data;
-
 	private ObjectCompletedEvent(QuestProgressEventData<T> d) {
-		data = d;
-	}
-
-	public boolean isCancelable() {
-		return true;
-	}
-
-	public Date getTime() {
-		return data.time;
-	}
-
-	public TeamData getData() {
-		return data.teamData;
-	}
-
-	public T getObject() {
-		return data.object;
-	}
-
-	public List<ServerPlayer> getOnlineMembers() {
-		return data.onlineMembers;
-	}
-
-	public List<ServerPlayer> getNotifiedPlayers() {
-		return data.notifiedPlayers;
-	}
-
-	@Deprecated
-	public TeamData getTeam() {
-		return getData();
+		super(d);
 	}
 
 	public static class FileEvent extends ObjectCompletedEvent<QuestFile> {

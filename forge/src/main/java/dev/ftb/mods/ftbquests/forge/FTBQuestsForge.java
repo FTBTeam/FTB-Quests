@@ -23,10 +23,12 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameRules;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
+import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -47,32 +49,32 @@ public class FTBQuestsForge {
 
 		FTBQuests quests = new FTBQuests();
 
-		ForgeEnergyTask.TYPE = TaskTypes.register(new ResourceLocation(FTBQuests.MOD_ID, "forge_energy"), ForgeEnergyTask::new, () -> Icon.getIcon(ForgeEnergyTask.EMPTY_TEXTURE.toString()).combineWith(Icon.getIcon(ForgeEnergyTask.FULL_TEXTURE.toString())));
+		ForgeEnergyTask.TYPE = TaskTypes.register(new ResourceLocation(FTBQuests.MOD_ID, "forge_energy"), ForgeEnergyTask::new,
+				() -> Icon.getIcon(ForgeEnergyTask.EMPTY_TEXTURE.toString()).combineWith(Icon.getIcon(ForgeEnergyTask.FULL_TEXTURE.toString())));
 
 		FMLJavaModLoadingContext.get().getModEventBus().<FMLCommonSetupEvent>addListener(event -> quests.setup());
+
+		DistExecutor.safeRunWhenOn(Dist.CLIENT, () -> ClientSetup::init);
 
 		MinecraftForge.EVENT_BUS.addListener(FTBQuestsForge::livingDrops);
 		MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGH, FTBQuestsForge::dropsEvent);
 	}
 
 	private static void livingDrops(LivingDropsEvent event) {
-		LivingEntity e = event.getEntity();
+		LivingEntity living = event.getEntity();
 
-		if (e.level().isClientSide || e instanceof Player || e.getType().is(FTBQuestsTags.EntityTypes.NO_LOOT_CRATES)) {
+		if (living.level().isClientSide || living instanceof Player || living.getType().is(FTBQuestsTags.EntityTypes.NO_LOOT_CRATES)) {
+			return;
+		}
+		if (ServerQuestFile.INSTANCE == null || !ServerQuestFile.INSTANCE.isDropLootCrates()) {
 			return;
 		}
 
-		if (ServerQuestFile.INSTANCE == null || !ServerQuestFile.INSTANCE.dropLootCrates) {
-			return;
-		}
-
-		LootCrate crate = ServerQuestFile.INSTANCE.getRandomLootCrate(e, e.level().random);
-
-		if (crate != null) {
-			ItemEntity ei = new ItemEntity(e.level(), e.getX(), e.getY(), e.getZ(), crate.createStack());
-			ei.setPickUpDelay(10);
-			event.getDrops().add(ei);
-		}
+		ServerQuestFile.INSTANCE.makeRandomLootCrate(living, living.level().random).ifPresent(crate -> {
+			ItemEntity itemEntity = new ItemEntity(living.level(), living.getX(), living.getY(), living.getZ(), crate.createStack());
+			itemEntity.setPickUpDelay(10);
+			event.getDrops().add(itemEntity);
+		});
 	}
 
 	private static void dropsEvent(LivingDropsEvent event) {
