@@ -238,7 +238,7 @@ public abstract class QuestFile extends QuestObject {
 			if (object instanceof QuestObject qo) {
 				for (ChapterGroup group : chapterGroups) {
 					for (Chapter chapter : group.chapters) {
-						for (Quest quest : chapter.quests) {
+						for (Quest quest : chapter.getQuests()) {
 							quest.removeDependency(qo);
 						}
 					}
@@ -324,7 +324,7 @@ public abstract class QuestFile extends QuestObject {
 			for (Chapter chapter : group.chapters) {
 				map.put(chapter.id, chapter);
 
-				for (Quest quest : chapter.quests) {
+				for (Quest quest : chapter.getQuests()) {
 					map.put(quest.id, quest);
 
 					for (Task task : quest.tasks) {
@@ -336,7 +336,7 @@ public abstract class QuestFile extends QuestObject {
 					}
 				}
 
-				for (QuestLink link : chapter.questLinks) {
+				for (QuestLink link : chapter.getQuestLinks()) {
 					map.put(link.id, link);
 				}
 			}
@@ -494,7 +494,7 @@ public abstract class QuestFile extends QuestObject {
 					chapter.writeData(chapterNBT);
 
 					ListTag questList = new ListTag();
-					for (Quest quest : chapter.quests) {
+					for (Quest quest : chapter.getQuests()) {
 						if (!quest.invalid) {
 							SNBTCompoundTag questNBT = new SNBTCompoundTag();
 							quest.writeData(questNBT);
@@ -511,7 +511,7 @@ public abstract class QuestFile extends QuestObject {
 					chapterNBT.put("quests", questList);
 
 					ListTag linkList = new ListTag();
-					for (QuestLink link : chapter.questLinks) {
+					for (QuestLink link : chapter.getQuestLinks()) {
 						if (link.getQuest().isPresent()) {
 							SNBTCompoundTag linkNBT = new SNBTCompoundTag();
 							link.writeData(linkNBT);
@@ -620,7 +620,7 @@ public abstract class QuestFile extends QuestObject {
 							quest.id = readID(questNBT.get("id"));
 							map.put(quest.id, quest);
 							dataCache.put(quest.id, questNBT);
-							chapter.quests.add(quest);
+							chapter.getQuests().add(quest);
 
 							ListTag taskList = questNBT.getList("tasks", Tag.TAG_COMPOUND);
 
@@ -664,7 +664,7 @@ public abstract class QuestFile extends QuestObject {
 							CompoundTag linkNBT = questLinks.getCompound(i);
 							QuestLink link = new QuestLink(chapter, readID(linkNBT.get("linked_quest")));
 							link.id = readID(linkNBT.get("id"));
-							chapter.questLinks.add(link);
+							chapter.getQuestLinks().add(link);
 							map.put(link.id, link);
 							dataCache.put(link.id, linkNBT);
 						}
@@ -711,7 +711,7 @@ public abstract class QuestFile extends QuestObject {
 			group.chapters.sort(Comparator.comparingInt(c -> objectOrderMap.get(c.id)));
 
 			for (Chapter chapter : group.chapters) {
-				for (Quest quest : chapter.quests) {
+				for (Quest quest : chapter.getQuests()) {
 					quest.removeInvalidDependencies();
 				}
 			}
@@ -836,9 +836,9 @@ public abstract class QuestFile extends QuestObject {
 
 			for (Chapter chapter : group.chapters) {
 				buffer.writeLong(chapter.id);
-				buffer.writeVarInt(chapter.quests.size());
+				buffer.writeVarInt(chapter.getQuests().size());
 
-				for (Quest quest : chapter.quests) {
+				for (Quest quest : chapter.getQuests()) {
 					buffer.writeLong(quest.id);
 
 					buffer.writeVarInt(quest.tasks.size());
@@ -854,8 +854,8 @@ public abstract class QuestFile extends QuestObject {
 					}
 				}
 
-				buffer.writeVarInt(chapter.questLinks.size());
-				for (QuestLink questLink : chapter.questLinks) {
+				buffer.writeVarInt(chapter.getQuestLinks().size());
+				for (QuestLink questLink : chapter.getQuestLinks()) {
 					buffer.writeLong(questLink.id);
 				}
 			}
@@ -875,7 +875,7 @@ public abstract class QuestFile extends QuestObject {
 			for (Chapter chapter : group.chapters) {
 				chapter.writeNetData(buffer);
 
-				for (Quest quest : chapter.quests) {
+				for (Quest quest : chapter.getQuests()) {
 					quest.writeNetData(buffer);
 
 					for (Task task : quest.tasks) {
@@ -887,7 +887,7 @@ public abstract class QuestFile extends QuestObject {
 					}
 				}
 
-				for (QuestLink questLink : chapter.questLinks) {
+				for (QuestLink questLink : chapter.getQuestLinks()) {
 					questLink.writeNetData(buffer);
 				}
 			}
@@ -965,7 +965,7 @@ public abstract class QuestFile extends QuestObject {
 				for (int j = 0; j < questCount; j++) {
 					Quest quest = new Quest(chapter);
 					quest.id = buffer.readLong();
-					chapter.quests.add(quest);
+					chapter.getQuests().add(quest);
 
 					int t = buffer.readVarInt();
 
@@ -990,7 +990,7 @@ public abstract class QuestFile extends QuestObject {
 				for (int j = 0; j < questLinkCount; j++) {
 					QuestLink questLink = new QuestLink(chapter, 0L);
 					questLink.id = buffer.readLong();
-					chapter.questLinks.add(questLink);
+					chapter.getQuestLinks().add(questLink);
 				}
 			}
 		}
@@ -1011,7 +1011,7 @@ public abstract class QuestFile extends QuestObject {
 			for (Chapter chapter : group.chapters) {
 				chapter.readNetData(buffer);
 
-				for (Quest quest : chapter.quests) {
+				for (Quest quest : chapter.getQuests()) {
 					quest.readNetData(buffer);
 
 					for (Task task : quest.tasks) {
@@ -1023,7 +1023,7 @@ public abstract class QuestFile extends QuestObject {
 					}
 				}
 
-				for (QuestLink questLink : chapter.questLinks) {
+				for (QuestLink questLink : chapter.getQuestLinks()) {
 					questLink.readNetData(buffer);
 				}
 			}
@@ -1253,7 +1253,7 @@ public abstract class QuestFile extends QuestObject {
 
 			for (ChapterGroup g : chapterGroups) {
 				for (Chapter c : g.chapters) {
-					for (Quest q : c.quests) {
+					for (Quest q : c.getQuests()) {
 						allTasks.addAll(q.tasks);
 					}
 				}

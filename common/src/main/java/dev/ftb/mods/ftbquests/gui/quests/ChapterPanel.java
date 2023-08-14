@@ -260,7 +260,7 @@ public class ChapterPanel extends Panel {
 
 		@Override
 		public void onClicked(MouseButton button) {
-			if (chapterPanel.questScreen.file.canEdit() || !chapter.quests.isEmpty()) {
+			if (chapterPanel.questScreen.file.canEdit() || chapter.hasVisibleQuestLazy()) {
 				playClickSound();
 
 				if (chapterPanel.questScreen.selectedChapter != chapter) {
@@ -297,7 +297,7 @@ public class ChapterPanel extends Panel {
 
 			GuiHelper.setupDrawing();
 
-			if (chapter.quests.isEmpty()) {
+			if (chapter.hasVisibleQuestLazy()) {
 				ThemeProperties.CLOSE_ICON.get().draw(matrixStack, x + w - 12, y + 3, 8, 8);
 			} else if (chapterPanel.questScreen.file.self.hasUnclaimedRewards(Minecraft.getInstance().player.getUUID(), chapter)) {
 				ThemeProperties.ALERT_ICON.get().draw(matrixStack, x + w - 12, y + 3, 8, 8);
@@ -317,7 +317,7 @@ public class ChapterPanel extends Panel {
 		public int getActualWidth(QuestScreen screen) {
 			int o = chapter.group.isDefaultGroup() ? 0 : 7;
 
-			if (chapter.quests.isEmpty() || chapterPanel.questScreen.file.self.hasUnclaimedRewards(Minecraft.getInstance().player.getUUID(), chapter)) {
+			if (!chapter.hasVisibleQuestLazy() || chapterPanel.questScreen.file.self.hasUnclaimedRewards(Minecraft.getInstance().player.getUUID(), chapter)) {
 				o += 16;
 			}
 

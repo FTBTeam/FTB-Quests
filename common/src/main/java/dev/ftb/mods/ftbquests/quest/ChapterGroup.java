@@ -152,7 +152,7 @@ public class ChapterGroup extends QuestObject {
 		List<Chapter> list = new ArrayList<>();
 
 		for (Chapter chapter : chapters) {
-			if (!chapter.quests.isEmpty() && chapter.isVisible(data)) {
+			if (chapter.hasVisibleQuestLazy() && chapter.isVisible(data)) {
 				list.add(chapter);
 			}
 		}
@@ -169,7 +169,7 @@ public class ChapterGroup extends QuestObject {
 		}
 
 		for (Chapter chapter : chapters) {
-			if (!chapter.quests.isEmpty() && chapter.isVisible(data)) {
+			if (chapter.hasVisibleQuest(data)) {
 				return chapter;
 			}
 		}

@@ -499,10 +499,10 @@ public final class Quest extends QuestObject implements Movable {
 	@Override
 	public void deleteSelf() {
 		super.deleteSelf();
-		chapter.quests.remove(this);
+		chapter.getQuests().remove(this);
 
 		List<QuestLink> linksToDel = new ArrayList<>();
-		chapter.file.chapterGroups.forEach(cg -> cg.chapters.forEach(c -> c.questLinks.forEach(l -> {
+		chapter.file.chapterGroups.forEach(cg -> cg.chapters.forEach(c -> c.getQuestLinks().forEach(l -> {
 			if (l.linksTo(this)) linksToDel.add(l);
 		})));
 		linksToDel.forEach(l -> chapter.file.deleteObject(l.id));
@@ -526,7 +526,7 @@ public final class Quest extends QuestObject implements Movable {
 
 	@Override
 	public void onCreated() {
-		chapter.quests.add(this);
+		chapter.getQuests().add(this);
 
 		if (!tasks.isEmpty()) {
 			List<Task> l = new ArrayList<>(tasks);
@@ -791,8 +791,8 @@ public final class Quest extends QuestObject implements Movable {
 			Chapter c = f.getChapter(nc);
 
 			if (c != null) {
-				chapter.quests.remove(this);
-				c.quests.add(this);
+				chapter.getQuests().remove(this);
+				c.getQuests().add(this);
 				chapter = c;
 			}
 		}

@@ -110,9 +110,9 @@ public class QuestPanel extends Panel {
 				.sorted(Comparator.comparingInt(ChapterImage::getOrder))
 				.forEach(image -> add(new ChapterImageButton(this, image)));
 
-		questScreen.selectedChapter.quests.forEach(quest -> add(new QuestButton(this, quest)));
+		questScreen.selectedChapter.getQuests().forEach(quest -> add(new QuestButton(this, quest)));
 
-		questScreen.selectedChapter.questLinks.forEach(link -> link.getQuest().ifPresent(quest -> add(new QuestLinkButton(this, link, quest))));
+		questScreen.selectedChapter.getQuestLinks().forEach(link -> link.getQuest().ifPresent(quest -> add(new QuestLinkButton(this, link, quest))));
 
 		alignWidgets();
 	}

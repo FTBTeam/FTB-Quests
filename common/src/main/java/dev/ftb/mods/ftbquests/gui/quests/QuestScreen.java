@@ -359,8 +359,8 @@ public class QuestScreen extends BaseScreen {
 
 			switch (key.keyCode) {
 				case GLFW.GLFW_KEY_A -> {
-					selectedObjects.addAll(selectedChapter.quests);
-					selectedObjects.addAll(selectedChapter.questLinks);
+					selectedObjects.addAll(selectedChapter.getQuests());
+					selectedObjects.addAll(selectedChapter.getQuestLinks());
 					return true;
 				}
 				case GLFW.GLFW_KEY_D -> {

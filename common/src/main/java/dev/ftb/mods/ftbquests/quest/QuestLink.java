@@ -66,13 +66,13 @@ public class QuestLink extends QuestObject implements Movable {
 
     @Override
     public void onCreated() {
-        chapter.questLinks.add(this);
+        chapter.getQuestLinks().add(this);
     }
 
     @Override
     public void deleteSelf() {
         super.deleteSelf();
-        chapter.questLinks.remove(this);
+        chapter.getQuestLinks().remove(this);
     }
 
     @Override
@@ -202,8 +202,8 @@ public class QuestLink extends QuestObject implements Movable {
             Chapter newChapter = f.getChapter(chapterId);
 
             if (newChapter != null) {
-                chapter.questLinks.remove(this);
-                newChapter.questLinks.add(this);
+                chapter.getQuestLinks().remove(this);
+                newChapter.getQuestLinks().add(this);
                 chapter = newChapter;
             }
         }

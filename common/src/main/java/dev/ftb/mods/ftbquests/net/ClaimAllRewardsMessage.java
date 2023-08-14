@@ -34,7 +34,7 @@ public class ClaimAllRewardsMessage extends BaseC2SMessage {
 
 		for (ChapterGroup group : ServerQuestFile.INSTANCE.chapterGroups) {
 			for (Chapter chapter : group.chapters) {
-				for (Quest quest : chapter.quests) {
+				for (Quest quest : chapter.getQuests()) {
 					if (data.isCompleted(quest)) {
 						for (Reward reward : quest.rewards) {
 							if (!reward.getExcludeFromClaimAll()) {

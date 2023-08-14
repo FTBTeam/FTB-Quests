@@ -214,7 +214,7 @@ public class FTBQuestsClientEventHandler {
 				// special auto-pin value: collect all quests which can be done now
 				for (ChapterGroup group : file.chapterGroups) {
 					for (Chapter chapter : group.chapters) {
-						for (Quest quest : chapter.quests) {
+						for (Quest quest : chapter.getQuests()) {
 							if (!data.isCompleted(quest) && data.canStartTasks(quest)) {
 								pinnedQuests.add(quest);
 							}

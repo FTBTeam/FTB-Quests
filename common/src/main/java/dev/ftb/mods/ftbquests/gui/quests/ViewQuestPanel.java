@@ -261,7 +261,7 @@ public class ViewQuestPanel extends Panel {
 
 		List<QuestLink> links = new ArrayList<>();
 		questScreen.file.chapterGroups.forEach(group -> group.chapters
-				.forEach(chapter -> chapter.questLinks.stream()
+				.forEach(chapter -> chapter.getQuestLinks().stream()
 						.filter(link -> chapter != questScreen.selectedChapter && link.linksTo(quest))
 						.forEach(links::add)
 				)
@@ -437,7 +437,7 @@ public class ViewQuestPanel extends Panel {
 	}
 
 	private void addButtonBar(boolean canEdit) {
-		// button bar has page navigation buttons for multi-page text, and the Add button in edit mode
+		// button bar hasVisibleQuest page navigation buttons for multi-page text, and the Add button in edit mode
 
 		panelText.add(new VerticalSpaceWidget(panelText, 3));
 

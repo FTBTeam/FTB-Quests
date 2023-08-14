@@ -127,7 +127,7 @@ public class RewardTablesScreen extends ButtonListBaseScreen {
 
 			for (ChapterGroup group : table.file.chapterGroups) {
 				for (Chapter chapter : group.chapters) {
-					for (Quest quest : chapter.quests) {
+					for (Quest quest : chapter.getQuests()) {
 						for (Reward reward : quest.rewards) {
 							if (reward instanceof RandomReward && ((RandomReward) reward).table == table) {
 								usedIn++;

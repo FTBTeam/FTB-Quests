@@ -31,8 +31,8 @@ public final class Chapter extends QuestObject {
 	public final QuestFile file;
 	public ChapterGroup group;
 	public String filename;
-	public final List<Quest> quests;
-	public final List<QuestLink> questLinks;
+	private final List<Quest> quests;
+	private final List<QuestLink> questLinks;
 	public final List<String> subtitle;
 	public boolean alwaysInvisible;
 	public String defaultQuestShape;
@@ -352,13 +352,7 @@ public final class Chapter extends QuestObject {
 			return false;
 		}
 
-		for (Quest quest : quests) {
-			if (quest.isVisible(data)) {
-				return true;
-			}
-		}
-
-		return false;
+		return hasVisibleQuest(data);
 	}
 
 	@Override
@@ -419,5 +413,34 @@ public final class Chapter extends QuestObject {
 
 	public boolean hideQuestUntilDepsVisible() {
 		return hideQuestUntilDepsVisible;
+	}
+
+	public boolean hasVisibleQuestLazy() {
+		return !quests.isEmpty() || !questLinks.isEmpty();
+	}
+
+	public boolean hasVisibleQuest(TeamData data) {
+		for (QuestObject object : getAllQuests()) {
+			if (object.isVisible(data)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	public List<QuestObject> getAllQuests() {
+		List<QuestObject> list = new ArrayList<>();
+		list.addAll(quests);
+		list.addAll(questLinks);
+		return list;
+	}
+
+	public List<Quest> getQuests() {
+		return quests;
+	}
+
+	public List<QuestLink> getQuestLinks() {
+		return questLinks;
 	}
 }
