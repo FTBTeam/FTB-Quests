@@ -35,9 +35,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
-/**
- * @author LatvianModder
- */
 public class ItemTask extends Task implements Predicate<ItemStack> {
 	public ItemStack item;
 	public long count;

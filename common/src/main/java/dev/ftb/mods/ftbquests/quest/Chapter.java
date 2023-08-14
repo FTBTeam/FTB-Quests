@@ -24,9 +24,6 @@ import net.minecraft.server.level.ServerPlayer;
 import java.util.*;
 import java.util.stream.Collectors;
 
-/**
- * @author LatvianModder
- */
 public final class Chapter extends QuestObject {
 	public final QuestFile file;
 	public ChapterGroup group;

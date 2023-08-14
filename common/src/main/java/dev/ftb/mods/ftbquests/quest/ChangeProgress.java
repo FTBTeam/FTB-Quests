@@ -2,9 +2,6 @@ package dev.ftb.mods.ftbquests.quest;
 
 import dev.ftb.mods.ftblibrary.config.NameMap;
 
-/**
- * @author LatvianModder
- */
 public enum ChangeProgress {
 	RESET("reset", true),
 	COMPLETE("complete", false);

@@ -12,9 +12,6 @@ import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 
-/**
- * @author LatvianModder
- */
 public class CollectRewardsButton extends TabButton {
 	public CollectRewardsButton(Panel panel) {
 		super(panel, Component.empty(), ThemeProperties.COLLECT_REWARDS_ICON.get());

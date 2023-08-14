@@ -8,9 +8,6 @@ import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 
-/**
- * @author LatvianModder
- */
 public class ClaimAllRewardsMessage extends BaseC2SMessage {
 	public ClaimAllRewardsMessage() {
 	}

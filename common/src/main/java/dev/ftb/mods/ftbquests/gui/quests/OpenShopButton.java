@@ -8,9 +8,6 @@ import dev.ftb.mods.ftbteams.data.ClientTeamManager;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 
-/**
- * @author LatvianModder
- */
 public class OpenShopButton extends TabButton {
 	public OpenShopButton(Panel panel) {
 		super(panel, Component.translatable("sidebar_button.ftbmoney.shop"), ThemeProperties.SHOP_ICON.get());

@@ -12,9 +12,6 @@ import dev.ftb.mods.ftbquests.quest.reward.ChoiceReward;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 
-/**
- * @author LatvianModder
- */
 public class SelectChoiceRewardScreen extends ButtonListBaseScreen {
 	private class ChoiceRewardButton extends SimpleTextButton {
 		private final WeightedReward weightedReward;

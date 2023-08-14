@@ -6,9 +6,6 @@ import dev.architectury.networking.simple.MessageType;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import net.minecraft.network.FriendlyByteBuf;
 
-/**
- * @author LatvianModder
- */
 public class ChangeChapterGroupResponseMessage extends BaseS2CMessage {
 	private final long id;
 	private final long group;

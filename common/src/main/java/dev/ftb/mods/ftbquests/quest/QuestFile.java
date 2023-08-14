@@ -50,9 +50,6 @@ import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-/**
- * @author LatvianModder
- */
 public abstract class QuestFile extends QuestObject {
 	public static int VERSION = 13;
 

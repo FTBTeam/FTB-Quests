@@ -5,9 +5,6 @@ import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraft.network.chat.Component;
 
-/**
- * @author LatvianModder
- */
 public class OpenGuidesButton extends TabButton {
 	public OpenGuidesButton(Panel panel) {
 		super(panel, Component.translatable("sidebar_button.ftbguides.guides"), ThemeProperties.GUIDE_ICON.get());

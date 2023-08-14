@@ -6,9 +6,6 @@ import dev.ftb.mods.ftbquests.gui.EmergencyItemsScreen;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraft.network.chat.Component;
 
-/**
- * @author LatvianModder
- */
 public class EmergencyItemsButton extends TabButton {
 	public EmergencyItemsButton(Panel panel) {
 		super(panel, Component.translatable("ftbquests.file.emergency_items"), ThemeProperties.EMERGENCY_ITEMS_ICON.get());

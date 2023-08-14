@@ -36,9 +36,6 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 
-/**
- * @author LatvianModder
- */
 public class QuestPanel extends Panel {
 	private static final ImageIcon DEFAULT_DEPENDENCY_LINE_TEXTURE = (ImageIcon) Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/dependency.png");
 	public final QuestScreen questScreen;

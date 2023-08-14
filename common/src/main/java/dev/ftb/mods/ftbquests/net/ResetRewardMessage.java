@@ -8,9 +8,6 @@ import net.minecraft.network.FriendlyByteBuf;
 
 import java.util.UUID;
 
-/**
- * @author LatvianModder
- */
 public class ResetRewardMessage extends BaseS2CMessage {
 	private final UUID team;
 	private final UUID player;

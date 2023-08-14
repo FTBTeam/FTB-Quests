@@ -31,9 +31,6 @@ import net.minecraft.world.phys.HitResult;
 
 import java.util.Optional;
 
-/**
- * @author LatvianModder
- */
 public class ObservationTask extends BooleanTask {
 	public long timer;
 	public ObserveType observeType;

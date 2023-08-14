@@ -33,9 +33,6 @@ import java.util.Date;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-/**
- * @author LatvianModder
- */
 public class ServerQuestFile extends QuestFile {
 	public static final LevelResource FTBQUESTS_DATA = new LevelResource("ftbquests");
 

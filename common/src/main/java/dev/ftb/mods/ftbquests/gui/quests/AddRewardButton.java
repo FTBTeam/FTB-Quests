@@ -17,9 +17,6 @@ import net.minecraft.network.chat.Component;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @author LatvianModder
- */
 public class AddRewardButton extends Button {
 	private final Quest quest;
 

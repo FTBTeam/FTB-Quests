@@ -32,9 +32,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.regex.Pattern;
 
-/**
- * @author LatvianModder
- */
 public abstract class QuestObjectBase {
 	private static final Pattern TAG_PATTERN = Pattern.compile("^[a-z0-9_]*$");
 	public static Tristate sendNotifications = Tristate.DEFAULT;

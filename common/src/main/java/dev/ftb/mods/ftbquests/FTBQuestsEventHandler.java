@@ -40,9 +40,6 @@ import net.minecraft.world.level.Level;
 
 import java.util.List;
 
-/**
- * @author LatvianModder
- */
 public class FTBQuestsEventHandler {
 	private List<KillTask> killTasks = null;
 	private List<Task> autoSubmitTasks = null;

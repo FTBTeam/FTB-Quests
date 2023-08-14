@@ -16,9 +16,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * @author LatvianModder
- */
 public class ChapterGroup extends QuestObject {
 	public final QuestFile file;
 	public final List<Chapter> chapters;

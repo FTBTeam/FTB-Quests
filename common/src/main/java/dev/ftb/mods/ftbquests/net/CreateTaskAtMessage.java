@@ -12,9 +12,6 @@ import dev.ftb.mods.ftbquests.util.NetUtils;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 
-/**
- * @author LatvianModder
- */
 public class CreateTaskAtMessage extends BaseC2SMessage {
 	private final long chapter;
 	private final double x, y;

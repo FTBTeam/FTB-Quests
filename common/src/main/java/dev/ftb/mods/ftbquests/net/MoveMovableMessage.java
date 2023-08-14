@@ -7,9 +7,6 @@ import dev.ftb.mods.ftbquests.quest.Movable;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import net.minecraft.network.FriendlyByteBuf;
 
-/**
- * @author LatvianModder
- */
 public class MoveMovableMessage extends BaseC2SMessage {
 	private final long id;
 	private final long chapterID;

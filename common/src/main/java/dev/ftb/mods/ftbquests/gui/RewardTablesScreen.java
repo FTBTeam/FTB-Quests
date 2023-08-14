@@ -31,9 +31,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * @author LatvianModder
- */
 public class RewardTablesScreen extends ButtonListBaseScreen {
 	private class RewardTableButton extends SimpleTextButton {
 		private final RewardTable table;

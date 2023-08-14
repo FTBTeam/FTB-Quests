@@ -14,9 +14,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.UUID;
 
-/**
- * @author LatvianModder
- */
 public abstract class QuestObject extends QuestObjectBase {
 	public boolean disableToast = false;
 

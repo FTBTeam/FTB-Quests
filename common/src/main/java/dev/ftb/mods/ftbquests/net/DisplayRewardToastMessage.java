@@ -9,9 +9,6 @@ import dev.ftb.mods.ftbquests.util.NetUtils;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 
-/**
- * @author LatvianModder
- */
 public class DisplayRewardToastMessage extends BaseS2CMessage {
 	private final long id;
 	private final Component text;

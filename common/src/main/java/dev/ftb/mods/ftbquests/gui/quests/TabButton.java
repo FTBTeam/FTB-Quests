@@ -9,9 +9,6 @@ import dev.ftb.mods.ftblibrary.ui.Theme;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraft.network.chat.Component;
 
-/**
- * @author LatvianModder
- */
 public abstract class TabButton extends Button {
 	public final QuestScreen questScreen;
 

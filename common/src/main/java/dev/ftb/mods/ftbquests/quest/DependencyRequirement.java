@@ -2,9 +2,6 @@ package dev.ftb.mods.ftbquests.quest;
 
 import dev.ftb.mods.ftblibrary.config.NameMap;
 
-/**
- * @author LatvianModder
- */
 public enum DependencyRequirement {
 	ALL_COMPLETED("all_completed", false, true),
 	ONE_COMPLETED("one_completed", true, true),

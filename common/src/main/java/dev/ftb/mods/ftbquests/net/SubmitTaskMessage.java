@@ -9,9 +9,6 @@ import dev.ftb.mods.ftbquests.quest.task.Task;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 
-/**
- * @author LatvianModder
- */
 public class SubmitTaskMessage extends BaseC2SMessage {
 	private final long task;
 

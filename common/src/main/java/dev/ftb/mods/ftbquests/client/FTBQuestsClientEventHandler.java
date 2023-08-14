@@ -46,9 +46,6 @@ import java.util.function.Consumer;
 
 import static dev.ftb.mods.ftbquests.client.TaskScreenRenderer.*;
 
-/**
- * @author LatvianModder
- */
 public class FTBQuestsClientEventHandler {
 	private static final ResourceLocation QUESTS_BUTTON = new ResourceLocation(FTBQuests.MOD_ID, "quests");
 
