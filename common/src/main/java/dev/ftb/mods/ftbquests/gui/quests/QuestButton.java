@@ -195,7 +195,7 @@ public class QuestButton extends Button implements QuestPositionableButton {
 			} else if (!quest.guidePage.isEmpty() && quest.tasks.isEmpty() && quest.rewards.isEmpty() && quest.getDescription().length == 0) {
 				handleClick("guide", quest.guidePage);
 			} else if (questScreen.file.canEdit() || !quest.hideDetailsUntilStartable() || questScreen.file.self.canStartTasks(quest)) {
-				questScreen.open(theQuestObject(), false);
+				toggleQuestViewPanel();
 			}
 		} else if (questScreen.file.canEdit() && button.isMiddle()) {
 			if (!questScreen.selectedObjects.contains(moveAndDeleteFocus())) {
@@ -205,13 +205,15 @@ public class QuestButton extends Button implements QuestPositionableButton {
 			questScreen.movingObjects = true;
 		} else if (button.isRight()) {
 			questScreen.movingObjects = false;
+			toggleQuestViewPanel();
+		}
+	}
 
-			if (questScreen.getViewedQuest() != quest) {
-				questScreen.viewQuestPanel.hidePanel = true;
-				questScreen.viewQuest(quest);
-			} else {
-				questScreen.closeQuest();
-			}
+	private void toggleQuestViewPanel() {
+		if (questScreen.getViewedQuest() != quest) {
+			questScreen.open(theQuestObject(), false);
+		} else {
+			questScreen.closeQuest();
 		}
 	}
 
