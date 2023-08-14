@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 * Open Quest & Stage Barrier Blocks no longer cause suffocation damage to players passing through them
+* Fixed server->client desync with repeatable quests which have multiple rewards
 
 ## [1802.3.14]
 
