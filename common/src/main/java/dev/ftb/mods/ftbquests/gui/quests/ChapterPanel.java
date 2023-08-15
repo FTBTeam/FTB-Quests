@@ -294,7 +294,7 @@ public class ChapterPanel extends Panel {
 
 			GuiHelper.setupDrawing();
 
-			if (chapter.hasVisibleQuestLazy()) {
+			if (!chapter.hasVisibleQuestLazy()) {
 				ThemeProperties.CLOSE_ICON.get().draw(matrixStack, x + w - 12, y + 3, 8, 8);
 			} else if (chapterPanel.questScreen.file.self.hasUnclaimedRewards(Minecraft.getInstance().player.getUUID(), chapter)) {
 				ThemeProperties.ALERT_ICON.get().draw(matrixStack, x + w - 12, y + 3, 8, 8);
