@@ -434,7 +434,7 @@ public class ViewQuestPanel extends Panel {
 	}
 
 	private void addButtonBar(boolean canEdit) {
-		// button bar hasVisibleQuest page navigation buttons for multi-page text, and the Add button in edit mode
+		// button bar has page navigation buttons for multi-page text, and the Add button in edit mode
 
 		panelText.add(new VerticalSpaceWidget(panelText, 3));
 
