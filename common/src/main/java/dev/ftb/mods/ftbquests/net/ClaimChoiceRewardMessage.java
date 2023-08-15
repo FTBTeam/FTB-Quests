@@ -11,9 +11,6 @@ import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 
-/**
- * @author LatvianModder
- */
 public class ClaimChoiceRewardMessage extends BaseC2SMessage {
 	private final long id;
 	private final int index;

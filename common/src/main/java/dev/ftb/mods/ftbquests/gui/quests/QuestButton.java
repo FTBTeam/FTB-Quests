@@ -31,9 +31,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * @author LatvianModder
- */
 public class QuestButton extends Button implements QuestPositionableButton {
 	public final QuestScreen questScreen;
 	public final Quest quest;

@@ -8,9 +8,6 @@ import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 import net.minecraft.network.chat.Component;
 
-/**
- * @author LatvianModder
- */
 public class AutopinButton extends TabButton {
 	public AutopinButton(Panel panel) {
 		super(panel,

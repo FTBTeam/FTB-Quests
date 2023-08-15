@@ -25,9 +25,6 @@ import net.minecraft.world.level.biome.Biomes;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @author LatvianModder
- */
 public class BiomeTask extends BooleanTask {
 	private static final ResourceKey<Biome> DEFAULT_BIOME = Biomes.PLAINS;
 

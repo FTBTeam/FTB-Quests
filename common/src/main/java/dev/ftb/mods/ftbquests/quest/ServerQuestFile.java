@@ -33,9 +33,6 @@ import java.util.Date;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-/**
- * @author LatvianModder
- */
 public class ServerQuestFile extends QuestFile {
 	public static final LevelResource FTBQUESTS_DATA = new LevelResource("ftbquests");
 
@@ -186,7 +183,7 @@ public class ServerQuestFile extends QuestFile {
 			withPlayerContext(player, () -> {
 				for (ChapterGroup group : chapterGroups) {
 					for (Chapter chapter : group.chapters) {
-						for (Quest quest : chapter.quests) {
+						for (Quest quest : chapter.getQuests()) {
 							if (!data.isCompleted(quest) && quest.isCompletedRaw(data)) {
 								// Handles possible situation where quest book has been modified to remove a task from a quest
 								// It can leave a player having completed all the other tasks, but unable to complete the quest

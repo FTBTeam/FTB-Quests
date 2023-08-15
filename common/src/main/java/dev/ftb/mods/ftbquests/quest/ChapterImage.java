@@ -25,9 +25,6 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
-/**
- * @author LatvianModder
- */
 public final class ChapterImage implements Movable {
 	private static final Pattern COLOR_PATTERN = Pattern.compile("^#[a-fA-F0-9]{6}$");
 

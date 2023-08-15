@@ -10,9 +10,6 @@ import dev.ftb.mods.ftbquests.quest.Quest;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Items;
 
-/**
- * @author LatvianModder
- */
 public class OpenInGuideButton extends SimpleTextButton {
 	private final Quest quest;
 

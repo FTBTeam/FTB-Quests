@@ -19,9 +19,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-/**
- * @author LatvianModder
- */
 public class ValidItemsScreen extends BaseScreen {
 	public static class ValidItemButton extends Button {
 		public final ItemStack stack;

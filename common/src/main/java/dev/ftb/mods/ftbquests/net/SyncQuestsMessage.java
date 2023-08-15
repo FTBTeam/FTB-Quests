@@ -7,9 +7,6 @@ import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.quest.QuestFile;
 import net.minecraft.network.FriendlyByteBuf;
 
-/**
- * @author LatvianModder
- */
 public class SyncQuestsMessage extends BaseS2CMessage {
 	private final QuestFile file;
 

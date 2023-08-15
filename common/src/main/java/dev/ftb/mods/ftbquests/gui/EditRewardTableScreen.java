@@ -23,9 +23,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @author LatvianModder
- */
 public class EditRewardTableScreen extends ButtonListBaseScreen {
 	private class RewardTableSettingsButton extends SimpleTextButton {
 		private RewardTableSettingsButton(Panel panel) {

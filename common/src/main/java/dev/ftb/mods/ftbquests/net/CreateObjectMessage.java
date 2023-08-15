@@ -11,9 +11,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import org.jetbrains.annotations.Nullable;
 
-/**
- * @author LatvianModder
- */
 public class CreateObjectMessage extends BaseC2SMessage {
 	private final long parent;
 	private final QuestObjectType type;

@@ -6,9 +6,6 @@ import dev.ftb.mods.ftblibrary.ui.TextField;
 import dev.ftb.mods.ftblibrary.ui.Theme;
 import net.minecraft.network.chat.Component;
 
-/**
- * @author LatvianModder
- */
 public class DisabledButtonTextField extends TextField {
 	public DisabledButtonTextField(Panel panel, Component text) {
 		super(panel);

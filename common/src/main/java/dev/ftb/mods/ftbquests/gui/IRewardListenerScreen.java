@@ -2,9 +2,6 @@ package dev.ftb.mods.ftbquests.gui;
 
 import dev.ftb.mods.ftblibrary.util.ClientUtils;
 
-/**
- * @author LatvianModder
- */
 public interface IRewardListenerScreen {
 	void rewardReceived(RewardKey key, int count);
 

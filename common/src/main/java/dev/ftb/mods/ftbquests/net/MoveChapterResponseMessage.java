@@ -6,9 +6,6 @@ import dev.architectury.networking.simple.MessageType;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import net.minecraft.network.FriendlyByteBuf;
 
-/**
- * @author LatvianModder
- */
 public class MoveChapterResponseMessage extends BaseS2CMessage {
 	private final long id;
 	private final boolean up;

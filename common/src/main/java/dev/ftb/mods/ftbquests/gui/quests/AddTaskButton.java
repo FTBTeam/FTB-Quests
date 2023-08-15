@@ -23,9 +23,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @author LatvianModder
- */
 public class AddTaskButton extends Button {
 	public final Quest quest;
 

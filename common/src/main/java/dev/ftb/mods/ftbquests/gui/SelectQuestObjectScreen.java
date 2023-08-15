@@ -22,9 +22,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @author LatvianModder
- */
 public class SelectQuestObjectScreen<T extends QuestObjectBase> extends ButtonListBaseScreen {
 	private final ConfigQuestObject<T> config;
 	private final ConfigCallback callback;

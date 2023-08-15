@@ -4,9 +4,6 @@ import dev.ftb.mods.ftblibrary.ui.Panel;
 import dev.ftb.mods.ftblibrary.ui.WidgetLayout;
 import dev.ftb.mods.ftbquests.FTBQuests;
 
-/**
- * @author LatvianModder
- */
 public class OtherButtonsPanelBottom extends OtherButtonsPanel {
 	public OtherButtonsPanelBottom(Panel panel) {
 		super(panel);

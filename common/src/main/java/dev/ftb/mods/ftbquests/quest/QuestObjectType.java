@@ -5,9 +5,6 @@ import net.minecraft.ChatFormatting;
 
 import java.util.function.Predicate;
 
-/**
- * @author LatvianModder
- */
 public enum QuestObjectType implements Predicate<QuestObjectBase> {
 	NULL("null", ChatFormatting.BLACK),
 	FILE("file", ChatFormatting.RED),

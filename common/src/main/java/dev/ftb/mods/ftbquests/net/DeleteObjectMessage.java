@@ -7,9 +7,6 @@ import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.util.NetUtils;
 import net.minecraft.network.FriendlyByteBuf;
 
-/**
- * @author LatvianModder
- */
 public class DeleteObjectMessage extends BaseC2SMessage {
 	private final long id;
 

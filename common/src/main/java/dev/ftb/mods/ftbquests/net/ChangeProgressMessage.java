@@ -16,9 +16,6 @@ import net.minecraft.network.FriendlyByteBuf;
 import java.util.UUID;
 import java.util.function.Consumer;
 
-/**
- * @author LatvianModder
- */
 public class ChangeProgressMessage extends BaseC2SMessage {
 	private final UUID team;
 	private final ProgressChange progressChange;

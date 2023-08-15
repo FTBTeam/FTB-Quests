@@ -8,9 +8,6 @@ import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 
-/**
- * @author LatvianModder
- */
 public class ClaimAllRewardsMessage extends BaseC2SMessage {
 	public ClaimAllRewardsMessage() {
 	}
@@ -34,7 +31,7 @@ public class ClaimAllRewardsMessage extends BaseC2SMessage {
 
 		for (ChapterGroup group : ServerQuestFile.INSTANCE.chapterGroups) {
 			for (Chapter chapter : group.chapters) {
-				for (Quest quest : chapter.quests) {
+				for (Quest quest : chapter.getQuests()) {
 					if (data.isCompleted(quest)) {
 						for (Reward reward : quest.rewards) {
 							if (!reward.getExcludeFromClaimAll()) {

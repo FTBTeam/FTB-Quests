@@ -4,9 +4,6 @@ import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.ui.misc.SimpleToast;
 import net.minecraft.network.chat.Component;
 
-/**
- * @author LatvianModder
- */
 public class RewardToast extends SimpleToast {
 	private final Component text;
 	private final Icon icon;
