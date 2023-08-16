@@ -5,9 +5,6 @@ import net.minecraft.world.item.ItemStack;
 
 import java.util.Objects;
 
-/**
- * @author LatvianModder
- */
 public class RewardKey {
 	public final String title;
 	public final Icon icon;

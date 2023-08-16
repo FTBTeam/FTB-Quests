@@ -11,9 +11,6 @@ import dev.ftb.mods.ftbquests.util.NetUtils;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 
-/**
- * @author LatvianModder
- */
 public class EditObjectMessage extends BaseC2SMessage {
 	private final long id;
 	private final CompoundTag nbt;

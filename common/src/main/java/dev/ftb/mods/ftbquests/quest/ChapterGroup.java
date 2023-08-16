@@ -16,9 +16,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * @author LatvianModder
- */
 public class ChapterGroup extends QuestObject {
 	public final QuestFile file;
 	public final List<Chapter> chapters;
@@ -152,7 +149,7 @@ public class ChapterGroup extends QuestObject {
 		List<Chapter> list = new ArrayList<>();
 
 		for (Chapter chapter : chapters) {
-			if (!chapter.quests.isEmpty() && chapter.isVisible(data)) {
+			if (chapter.hasVisibleQuestLazy() && chapter.isVisible(data)) {
 				list.add(chapter);
 			}
 		}
@@ -169,7 +166,7 @@ public class ChapterGroup extends QuestObject {
 		}
 
 		for (Chapter chapter : chapters) {
-			if (!chapter.quests.isEmpty() && chapter.isVisible(data)) {
+			if (chapter.hasVisibleQuest(data)) {
 				return chapter;
 			}
 		}

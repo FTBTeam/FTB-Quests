@@ -5,9 +5,6 @@ import dev.ftb.mods.ftblibrary.ui.Panel;
 import dev.ftb.mods.ftblibrary.ui.WidgetLayout;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 
-/**
- * @author LatvianModder
- */
 public class OtherButtonsPanelTop extends OtherButtonsPanel {
 	public OtherButtonsPanelTop(Panel panel) {
 		super(panel);

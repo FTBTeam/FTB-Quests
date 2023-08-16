@@ -9,9 +9,6 @@ import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 
-/**
- * @author LatvianModder
- */
 public class ToastQuestObject extends SimpleToast {
 	private final QuestObject object;
 

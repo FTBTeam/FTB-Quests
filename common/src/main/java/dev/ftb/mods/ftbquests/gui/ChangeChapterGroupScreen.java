@@ -12,9 +12,6 @@ import dev.ftb.mods.ftbquests.quest.Chapter;
 import dev.ftb.mods.ftbquests.quest.ChapterGroup;
 import net.minecraft.network.chat.Component;
 
-/**
- * @author LatvianModder
- */
 public class ChangeChapterGroupScreen extends ButtonListBaseScreen {
 	private class ChapterGroupButton extends SimpleTextButton {
 		private final ChapterGroup chapterGroup;

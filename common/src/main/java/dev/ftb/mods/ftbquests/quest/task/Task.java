@@ -35,9 +35,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.EnumSet;
 import java.util.Set;
 
-/**
- * @author LatvianModder
- */
 public abstract class Task extends QuestObject {
 	public final Quest quest;
 	private boolean optionalTask;

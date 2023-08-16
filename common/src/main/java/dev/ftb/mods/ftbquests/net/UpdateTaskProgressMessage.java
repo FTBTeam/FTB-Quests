@@ -9,9 +9,6 @@ import net.minecraft.network.FriendlyByteBuf;
 
 import java.util.UUID;
 
-/**
- * @author LatvianModder
- */
 public class UpdateTaskProgressMessage extends BaseS2CMessage {
 	private final UUID team;
 	private final long task;

@@ -8,9 +8,6 @@ import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 
-/**
- * @author LatvianModder
- */
 public class EditObjectResponseMessage extends BaseS2CMessage {
 	private final long id;
 	private final CompoundTag nbt;

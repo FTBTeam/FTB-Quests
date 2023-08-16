@@ -19,9 +19,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-/**
- * @author LatvianModder
- */
 public class EditSettingsButton extends TabButton {
 	public EditSettingsButton(Panel panel) {
 		super(panel, Component.translatable("gui.settings"), ThemeProperties.SETTINGS_ICON.get());

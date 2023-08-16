@@ -46,9 +46,6 @@ import java.util.function.Consumer;
 
 import static dev.ftb.mods.ftbquests.client.TaskScreenRenderer.*;
 
-/**
- * @author LatvianModder
- */
 public class FTBQuestsClientEventHandler {
 	private static final ResourceLocation QUESTS_BUTTON = new ResourceLocation(FTBQuests.MOD_ID, "quests");
 
@@ -214,7 +211,7 @@ public class FTBQuestsClientEventHandler {
 				// special auto-pin value: collect all quests which can be done now
 				for (ChapterGroup group : file.chapterGroups) {
 					for (Chapter chapter : group.chapters) {
-						for (Quest quest : chapter.quests) {
+						for (Quest quest : chapter.getQuests()) {
 							if (!data.isCompleted(quest) && data.canStartTasks(quest)) {
 								pinnedQuests.add(quest);
 							}

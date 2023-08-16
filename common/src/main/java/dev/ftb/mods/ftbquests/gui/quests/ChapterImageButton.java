@@ -23,9 +23,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * @author LatvianModder
- */
 public class ChapterImageButton extends Button implements QuestPositionableButton {
 	private static WeakReference<ChapterImage> clipboard = new WeakReference<>(null);
 

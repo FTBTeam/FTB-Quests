@@ -6,9 +6,6 @@ import dev.ftb.mods.ftblibrary.ui.Theme;
 import dev.ftb.mods.ftblibrary.ui.WidgetType;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
 
-/**
- * @author LatvianModder
- */
 public class FTBQuestsTheme extends Theme {
 	public static final FTBQuestsTheme INSTANCE = new FTBQuestsTheme();
 

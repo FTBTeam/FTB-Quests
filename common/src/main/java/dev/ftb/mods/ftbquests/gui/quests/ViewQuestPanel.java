@@ -54,9 +54,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.function.Consumer;
 
-/**
- * @author LatvianModder
- */
 public class ViewQuestPanel extends Panel {
 	public static final String PAGEBREAK_CODE = "{@pagebreak}";
 	public static final Icon PAGEBREAK_ICON = Icon.getIcon(new ResourceLocation(FTBQuests.MOD_ID, "textures/gui/pagebreak.png"));
@@ -261,7 +258,7 @@ public class ViewQuestPanel extends Panel {
 
 		List<QuestLink> links = new ArrayList<>();
 		questScreen.file.chapterGroups.forEach(group -> group.chapters
-				.forEach(chapter -> chapter.questLinks.stream()
+				.forEach(chapter -> chapter.getQuestLinks().stream()
 						.filter(link -> chapter != questScreen.selectedChapter && link.linksTo(quest))
 						.forEach(links::add)
 				)
@@ -1023,9 +1020,6 @@ public class ViewQuestPanel extends Panel {
 		}
 	}
 
-	/**
-	 * @author LatvianModder
-	 */
 	private class PinViewQuestButton extends AbstractPanelButton {
 		private PinViewQuestButton() {
 			super(Component.translatable(ClientQuestFile.isQuestPinned(quest.id) ? "ftbquests.gui.unpin" : "ftbquests.gui.pin"),
@@ -1039,9 +1033,6 @@ public class ViewQuestPanel extends Panel {
 		}
 	}
 
-	/**
-	 * @author LatvianModder
-	 */
 	private class CloseViewQuestButton extends AbstractPanelButton {
 		private CloseViewQuestButton() {
 			super(Component.translatable("gui.close"), ThemeProperties.CLOSE_ICON.get(quest));

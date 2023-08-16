@@ -31,9 +31,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * @author LatvianModder
- */
 public class RewardTablesScreen extends ButtonListBaseScreen {
 	private class RewardTableButton extends SimpleTextButton {
 		private final RewardTable table;
@@ -127,7 +124,7 @@ public class RewardTablesScreen extends ButtonListBaseScreen {
 
 			for (ChapterGroup group : table.file.chapterGroups) {
 				for (Chapter chapter : group.chapters) {
-					for (Quest quest : chapter.quests) {
+					for (Quest quest : chapter.getQuests()) {
 						for (Reward reward : quest.rewards) {
 							if (reward instanceof RandomReward && ((RandomReward) reward).table == table) {
 								usedIn++;

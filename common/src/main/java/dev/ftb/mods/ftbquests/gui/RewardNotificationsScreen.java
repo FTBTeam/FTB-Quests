@@ -18,9 +18,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @author LatvianModder
- */
 public class RewardNotificationsScreen extends BaseScreen implements IRewardListenerScreen {
 	private class RewardNotification extends Widget {
 		private final RewardKey key;

@@ -16,9 +16,6 @@ import java.io.InputStream;
 import java.util.*;
 import java.util.regex.Pattern;
 
-/**
- * @author LatvianModder
- */
 public class ThemeLoader implements ResourceManagerReloadListener {
 	@Override
 	public void onResourceManagerReload(ResourceManager resourceManager) {

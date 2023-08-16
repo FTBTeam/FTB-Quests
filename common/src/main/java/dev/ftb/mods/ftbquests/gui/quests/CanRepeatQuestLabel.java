@@ -7,9 +7,6 @@ import dev.ftb.mods.ftblibrary.ui.Theme;
 import dev.ftb.mods.ftblibrary.ui.Widget;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 
-/**
- * @author LatvianModder
- */
 public class CanRepeatQuestLabel extends Widget {
 	public CanRepeatQuestLabel(Panel panel) {
 		super(panel);

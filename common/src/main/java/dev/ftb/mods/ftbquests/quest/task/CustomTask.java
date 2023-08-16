@@ -13,9 +13,6 @@ import net.minecraft.world.item.ItemStack;
 
 import java.util.function.Predicate;
 
-/**
- * @author LatvianModder
- */
 public class CustomTask extends Task {
 	public static final Predicate<QuestObjectBase> PREDICATE = object -> object instanceof CustomTask;
 

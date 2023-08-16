@@ -8,9 +8,6 @@ import net.minecraft.nbt.StringTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.InteractionHand;
 
-/**
- * @author LatvianModder
- */
 public class SetCustomImageMessage extends BaseC2SMessage {
 	private final InteractionHand hand;
 	private final String texture;

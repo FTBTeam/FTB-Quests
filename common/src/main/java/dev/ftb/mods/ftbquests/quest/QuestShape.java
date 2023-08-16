@@ -17,9 +17,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * @author LatvianModder
- */
 public final class QuestShape extends Icon {
 	public static final Map<String, QuestShape> MAP = new LinkedHashMap<>();
 	private static QuestShape defaultShape;

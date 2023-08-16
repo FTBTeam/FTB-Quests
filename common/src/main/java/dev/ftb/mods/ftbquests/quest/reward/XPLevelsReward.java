@@ -13,9 +13,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
 
-/**
- * @author LatvianModder
- */
 public class XPLevelsReward extends Reward {
 	public int xpLevels;
 

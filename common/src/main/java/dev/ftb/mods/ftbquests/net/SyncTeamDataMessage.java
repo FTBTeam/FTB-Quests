@@ -7,9 +7,6 @@ import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import net.minecraft.network.FriendlyByteBuf;
 
-/**
- * @author LatvianModder
- */
 public class SyncTeamDataMessage extends BaseS2CMessage {
 	private final boolean self;
 	private final TeamData teamData;

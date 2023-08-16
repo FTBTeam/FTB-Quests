@@ -7,9 +7,6 @@ import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.quest.Movable;
 import net.minecraft.network.FriendlyByteBuf;
 
-/**
- * @author LatvianModder
- */
 public class MoveMovableResponseMessage extends BaseS2CMessage {
 	private final long id;
 	private final long chapter;
