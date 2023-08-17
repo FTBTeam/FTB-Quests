@@ -63,6 +63,7 @@ public interface FTBQuestsNetHandler {
 	MessageType COPY_CHAPTER_IMAGE = NET.registerC2S("copy_chapter_image", CopyChapterImageMessage::new);
 	MessageType SYNC_STRUCTURES_REQUEST = NET.registerC2S("sync_structures_request", SyncStructuresRequestMessage::new);
 	MessageType SYNC_STRUCTURES_RESPONSE = NET.registerS2C("sync_structures_response", SyncStructuresResponseMessage::new);
+	MessageType REQUEST_TEAM_DATA = NET.registerC2S("request_team_data", RequestTeamDataMessage::new);
 
 	static void init() {
 	}

@@ -169,11 +169,10 @@ public class ServerQuestFile extends QuestFile {
 		ServerPlayer player = event.getPlayer();
 		TeamData data = getData(event.getTeam());
 
+		// Sync the quest book data
+		// - client will respond to this with a RequestTeamData message
+		// - server will only then send a SyncTeamData message to the client
 		new SyncQuestsMessage(this).sendTo(player);
-
-		for (TeamData teamData : teamDataMap.values()) {
-			new SyncTeamDataMessage(teamData, teamData == data).sendTo(player);
-		}
 
 		player.inventoryMenu.addSlotListener(new FTBQuestsInventoryListener(player));
 
