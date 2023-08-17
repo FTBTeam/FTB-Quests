@@ -11,7 +11,6 @@ import dev.ftb.mods.ftblibrary.config.Tristate;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.net.CreateObjectResponseMessage;
 import dev.ftb.mods.ftbquests.net.SyncQuestsMessage;
-import dev.ftb.mods.ftbquests.net.SyncTeamDataMessage;
 import dev.ftb.mods.ftbquests.quest.*;
 import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
 import dev.ftb.mods.ftbquests.quest.loot.WeightedReward;
@@ -351,12 +350,6 @@ public class FTBQuestsCommands {
 
 		instance.load();
 		new SyncQuestsMessage(instance).sendToAll(source.getServer());
-		for (ServerPlayer player : source.getServer().getPlayerList().getPlayers()) {
-			TeamData data = instance.getData(player);
-			for (TeamData teamData: instance.getAllData()) {
-				new SyncTeamDataMessage(teamData, teamData == data).sendTo(player);
-			}
-		}
 
 		source.sendSuccess(() -> Component.translatable("commands.ftbquests.command.feedback.reloaded"), false);
 		UUID id = sender == null ? Util.NIL_UUID : sender.getUUID();
