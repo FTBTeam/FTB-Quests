@@ -1410,4 +1410,8 @@ public abstract class QuestFile extends QuestObject {
 		}
 		return false;
 	}
+
+	public EntityWeight getLootCrateNoDrop() {
+		return lootCrateNoDrop;
+	}
 }
