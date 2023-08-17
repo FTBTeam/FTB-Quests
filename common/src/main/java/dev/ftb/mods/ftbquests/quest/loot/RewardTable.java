@@ -1,7 +1,10 @@
 package dev.ftb.mods.ftbquests.quest.loot;
 
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
-import dev.ftb.mods.ftblibrary.icon.*;
+import dev.ftb.mods.ftblibrary.icon.Icon;
+import dev.ftb.mods.ftblibrary.icon.IconAnimation;
+import dev.ftb.mods.ftblibrary.icon.Icons;
+import dev.ftb.mods.ftblibrary.icon.ItemIcon;
 import dev.ftb.mods.ftblibrary.math.Bits;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
 import dev.ftb.mods.ftblibrary.ui.BaseScreen;
@@ -436,5 +439,9 @@ public final class RewardTable extends QuestObjectBase {
 			lootCrate = null;
 		}
 		return lootCrate;
+	}
+
+	public boolean shouldShowTooltip() {
+		return !hideTooltip;
 	}
 }
