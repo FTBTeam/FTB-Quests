@@ -28,7 +28,7 @@ allprojects {
 	apply from: "https://raw.githubusercontent.com/FTBTeam/mods-meta/main/gradle/git-md-changelog.gradle"
 
 	def ENV = System.getenv()
-	version = "${mod_version}-build.${ENV.GITHUB_RUN_NUMBER ?: 9999}"
+	version = mod_version
 	group = project.maven_group
 	archivesBaseName = project.archives_base_name
 
