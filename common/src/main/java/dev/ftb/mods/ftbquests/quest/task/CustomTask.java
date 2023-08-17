@@ -44,6 +44,18 @@ public class CustomTask extends Task {
 		return maxProgress;
 	}
 
+	public void setCheckTimer(int checkTimer) {
+		this.checkTimer = checkTimer;
+	}
+
+	public void setMaxProgress(long maxProgress) {
+		this.maxProgress = maxProgress;
+	}
+
+	public void setEnableButton(boolean enableButton) {
+		this.enableButton = enableButton;
+	}
+
 	@Override
 	@Environment(EnvType.CLIENT)
 	public void onButtonClicked(Button button, boolean canClick) {
