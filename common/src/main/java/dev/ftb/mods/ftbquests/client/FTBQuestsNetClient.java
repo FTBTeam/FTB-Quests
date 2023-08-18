@@ -109,15 +109,18 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon {
 
 	@Override
 	public void displayCompletionToast(long id) {
-		QuestObject object = ClientQuestFile.INSTANCE.get(id);
+		if (ClientQuestFile.exists()) {
+			QuestObject object = ClientQuestFile.INSTANCE.get(id);
+			if (object != null) {
+				Minecraft.getInstance().getToasts().addToast(new ToastQuestObject(object));
+			}
 
-		if (object != null) {
-			Minecraft.getInstance().getToasts().addToast(new ToastQuestObject(object));
+			if (ClientQuestFile.INSTANCE.questScreen != null) {
+				ClientQuestFile.INSTANCE.questScreen.questPanel.refreshWidgets();
+				ClientQuestFile.INSTANCE.questScreen.chapterPanel.refreshWidgets();
+				ClientQuestFile.INSTANCE.questScreen.viewQuestPanel.refreshWidgets();
+			}
 		}
-
-		ClientQuestFile.INSTANCE.questScreen.questPanel.refreshWidgets();
-		ClientQuestFile.INSTANCE.questScreen.chapterPanel.refreshWidgets();
-		ClientQuestFile.INSTANCE.questScreen.viewQuestPanel.refreshWidgets();
 	}
 
 	@Override
