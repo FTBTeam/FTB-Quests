@@ -151,7 +151,7 @@ public final class Quest extends QuestObject implements Movable {
 	}
 
 	public boolean showInRecipeMod() {
-		return disableJEI.get(getQuestFile().isDefaultQuestDisableJEI());
+		return disableJEI.get(!getQuestFile().isDefaultQuestDisableJEI());
 	}
 
 	public String getRawSubtitle() {
