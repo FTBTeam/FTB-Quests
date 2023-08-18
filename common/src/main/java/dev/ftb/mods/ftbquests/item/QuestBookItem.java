@@ -1,7 +1,6 @@
 package dev.ftb.mods.ftbquests.item;
 
 import dev.ftb.mods.ftblibrary.core.ItemFTBL;
-import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import net.fabricmc.api.EnvType;
