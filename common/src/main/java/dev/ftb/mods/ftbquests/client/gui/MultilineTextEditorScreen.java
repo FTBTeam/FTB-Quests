@@ -13,7 +13,7 @@ import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.ui.misc.NordColors;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftblibrary.util.client.ImageComponent;
-import dev.ftb.mods.ftbquests.FTBQuests;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.gui.quests.ViewQuestPanel;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import joptsimple.internal.Strings;
@@ -186,7 +186,7 @@ public class MultilineTextEditorScreen extends BaseScreen {
 		int cursor = textBox.cursorPos();
 
 		ImageComponent component = new ImageComponent();
-		ConfigGroup group = new ConfigGroup(FTBQuests.MOD_ID, accepted -> {
+		ConfigGroup group = new ConfigGroup(FTBQuestsAPI.MOD_ID, accepted -> {
 			openGui();
 			if (accepted) {
 				textBox.seekCursor(Whence.ABSOLUTE, cursor);

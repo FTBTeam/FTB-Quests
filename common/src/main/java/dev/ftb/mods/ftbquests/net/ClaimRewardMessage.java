@@ -43,7 +43,7 @@ public class ClaimRewardMessage extends BaseC2SMessage {
 
 		if (reward != null) {
 			ServerPlayer player = (ServerPlayer) context.getPlayer();
-			TeamData teamData = ServerQuestFile.INSTANCE.getData(player);
+			TeamData teamData = ServerQuestFile.INSTANCE.getOrCreateTeamData(player);
 
 			if (teamData.isCompleted(reward.getQuest())) {
 				teamData.claimReward(player, reward, notify);

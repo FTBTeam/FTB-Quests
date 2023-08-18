@@ -81,7 +81,7 @@ public class StageTask extends AbstractBooleanTask {
 	public static void checkStages(ServerPlayer player) {
 		// hook for FTB XMod Compat to call into
 
-		TeamData data = ServerQuestFile.INSTANCE == null || PlayerHooks.isFake(player) ? null : ServerQuestFile.INSTANCE.getData(player);
+		TeamData data = ServerQuestFile.INSTANCE == null || PlayerHooks.isFake(player) ? null : ServerQuestFile.INSTANCE.getOrCreateTeamData(player);
 
 		if (data == null || data.isLocked()) {
 			return;

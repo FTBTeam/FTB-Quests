@@ -38,7 +38,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public final class RewardTable extends QuestObjectBase {
-	private final QuestFile file;
+	private final BaseQuestFile file;
 	private final List<WeightedReward> weightedRewards;
 	private final Quest fakeQuest;
 	private float emptyWeight;
@@ -49,11 +49,11 @@ public final class RewardTable extends QuestObjectBase {
 	private ResourceLocation lootTableId;
 	private String filename;
 
-	public RewardTable(long id, QuestFile file) {
+	public RewardTable(long id, BaseQuestFile file) {
 		this(id, file, "");
 	}
 
-	public RewardTable(long id, QuestFile file, String filename) {
+	public RewardTable(long id, BaseQuestFile file, String filename) {
 		super(id);
 
 		this.file = file;
@@ -73,7 +73,7 @@ public final class RewardTable extends QuestObjectBase {
 		return useTitle ? getTitle() : def;
 	}
 
-	public QuestFile getFile() {
+	public BaseQuestFile getFile() {
 		return file;
 	}
 
@@ -96,7 +96,7 @@ public final class RewardTable extends QuestObjectBase {
 	}
 
 	@Override
-	public QuestFile getQuestFile() {
+	public BaseQuestFile getQuestFile() {
 		return file;
 	}
 

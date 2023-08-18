@@ -3,12 +3,12 @@ package dev.ftb.mods.ftbquests.block.entity;
 import dev.ftb.mods.ftblibrary.config.BooleanConfig;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.ItemStackConfig;
-import dev.ftb.mods.ftbquests.FTBQuests;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.block.FTBQuestsBlocks;
 import dev.ftb.mods.ftbquests.block.TaskScreenBlock;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.net.TaskScreenConfigResponse;
-import dev.ftb.mods.ftbquests.quest.QuestFile;
+import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.task.Task;
@@ -52,7 +52,7 @@ public class TaskScreenBlockEntity extends BlockEntity implements ITaskScreen {
 
     public Task getTask() {
         if (task == null && taskId != 0L || task != null && task.id != taskId) {
-            task = FTBQuests.getQuestFile(level.isClientSide).getTask(taskId);
+            task = FTBQuestsAPI.api().getQuestFile(level.isClientSide).getTask(taskId);
         }
 
         return task;
@@ -124,7 +124,7 @@ public class TaskScreenBlockEntity extends BlockEntity implements ITaskScreen {
 
     public TeamData getCachedTeamData() {
         if (cachedTeamData == null) {
-            QuestFile f = FTBQuests.getQuestFile(level.isClientSide);
+            BaseQuestFile f = FTBQuestsAPI.api().getQuestFile(level.isClientSide);
             cachedTeamData = f.getNullableTeamData(getTeamId());
         }
         return cachedTeamData;

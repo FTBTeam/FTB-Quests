@@ -11,7 +11,7 @@ import dev.ftb.mods.ftblibrary.ui.input.Key;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftblibrary.util.client.ClientUtils;
-import dev.ftb.mods.ftbquests.FTBQuests;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.client.gui.FTBQuestsTheme;
@@ -188,7 +188,7 @@ public class QuestScreen extends BaseScreen {
 	 * @param deletionFocus the object to be deleted by the delete operation (which could be different from the quest object...)
 	 */
 	public void addObjectMenuItems(List<ContextMenuItem> contextMenu, Runnable gui, QuestObjectBase object, Movable deletionFocus) {
-		ConfigGroup group = new ConfigGroup(FTBQuests.MOD_ID);
+		ConfigGroup group = new ConfigGroup(FTBQuestsAPI.MOD_ID);
 		ConfigGroup subGroup = object.createSubGroup(group);
 		object.fillConfigGroup(subGroup);
 
@@ -644,7 +644,7 @@ public class QuestScreen extends BaseScreen {
 		return new PersistedData(this);
 	}
 
-	private void restorePersistedScreenData(QuestFile file, PersistedData persistedData) {
+	private void restorePersistedScreenData(BaseQuestFile file, PersistedData persistedData) {
 		zoom = persistedData.zoom;
 		selectChapter(file.getChapter(persistedData.selectedChapter));
 

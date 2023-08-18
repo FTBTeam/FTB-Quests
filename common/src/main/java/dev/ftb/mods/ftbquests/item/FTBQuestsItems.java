@@ -4,7 +4,7 @@ import dev.architectury.registry.CreativeTabRegistry;
 import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrarManager;
 import dev.architectury.registry.registries.RegistrySupplier;
-import dev.ftb.mods.ftbquests.FTBQuests;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.block.FTBQuestsBlocks;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.item.ScreenBlockItem.ScreenSize;
@@ -22,7 +22,7 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 public class FTBQuestsItems {
-	public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(FTBQuests.MOD_ID, Registries.ITEM);
+	public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(FTBQuestsAPI.MOD_ID, Registries.ITEM);
 
 	public static final RegistrySupplier<Item> BOOK = ITEMS.register("book", QuestBookItem::new);
 	public static final RegistrySupplier<Item> LOOTCRATE = ITEMS.register("lootcrate", LootCrateItem::new);
@@ -56,9 +56,9 @@ public class FTBQuestsItems {
 		ITEMS.register();
 	}
 
-	public static final RegistrySupplier<CreativeModeTab> CREATIVE_TAB = RegistrarManager.get(FTBQuests.MOD_ID)
+	public static final RegistrySupplier<CreativeModeTab> CREATIVE_TAB = RegistrarManager.get(FTBQuestsAPI.MOD_ID)
 			.get(Registries.CREATIVE_MODE_TAB)
-			.register(new ResourceLocation(FTBQuests.MOD_ID, "default"), FTBQuestsItems::buildDefaultTab);
+			.register(new ResourceLocation(FTBQuestsAPI.MOD_ID, "default"), FTBQuestsItems::buildDefaultTab);
 
 	public static Item.Properties defaultProps() {
 		return new Item.Properties();

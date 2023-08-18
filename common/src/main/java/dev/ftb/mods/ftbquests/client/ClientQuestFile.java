@@ -7,8 +7,8 @@ import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.client.gui.CustomToast;
 import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.net.DeleteObjectMessage;
+import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
 import dev.ftb.mods.ftbquests.quest.Quest;
-import dev.ftb.mods.ftbquests.quest.QuestFile;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.task.StructureTask;
 import dev.ftb.mods.ftbquests.quest.theme.QuestTheme;
@@ -25,7 +25,7 @@ import net.minecraft.world.entity.player.Player;
 import java.util.List;
 import java.util.Optional;
 
-public class ClientQuestFile extends QuestFile {
+public class ClientQuestFile extends BaseQuestFile {
 	private static final List<String> MISSING_DATA_ERR = List.of(
 			"Unable to open Quest GUI: no quest book data received from server!",
 			"- Check that FTB Quests and FTB Teams are installed on the server",
@@ -43,7 +43,7 @@ public class ClientQuestFile extends QuestFile {
 		return INSTANCE != null && !INSTANCE.invalid;
 	}
 
-	public static void syncFromServer(QuestFile newInstance) {
+	public static void syncFromServer(BaseQuestFile newInstance) {
 		if (!(newInstance instanceof ClientQuestFile clientInstance)) {
 			throw new IllegalArgumentException("need a client quest file instance!");
 		}
@@ -143,10 +143,10 @@ public class ClientQuestFile extends QuestFile {
 	}
 
 	@Override
-	public TeamData getData(Entity player) {
+	public TeamData getOrCreateTeamData(Entity player) {
 		KnownClientPlayer kcp = FTBTeamsAPI.api().getClientManager().getKnownPlayer(player.getUUID())
 				.orElseThrow(() -> new RuntimeException("Unknown client player " + player.getUUID()));
-		return kcp.id().equals(Minecraft.getInstance().player.getUUID()) ? selfTeamData : getData(kcp.teamId());
+		return kcp.id().equals(Minecraft.getInstance().player.getUUID()) ? selfTeamData : getOrCreateTeamData(kcp.teamId());
 	}
 
 	public void setPersistedScreenInfo(QuestScreen.PersistedData persistedData) {

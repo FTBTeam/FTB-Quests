@@ -10,7 +10,7 @@ import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.ui.*;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
-import dev.ftb.mods.ftbquests.FTBQuests;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.net.EditObjectMessage;
 import dev.ftb.mods.ftbquests.quest.ChapterImage;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
@@ -81,7 +81,7 @@ public class ChapterImageButton extends Button implements QuestPositionableButto
 
 			contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.edit"), ThemeProperties.EDIT_ICON.get(), () -> {
 				String name = chapterImage.getImage() instanceof Color4I ? chapterImage.getColor().toString() : chapterImage.getImage().toString();
-				ConfigGroup group = new ConfigGroup(FTBQuests.MOD_ID, accepted -> {
+				ConfigGroup group = new ConfigGroup(FTBQuestsAPI.MOD_ID, accepted -> {
 					if (accepted) {
 						new EditObjectMessage(chapterImage.getChapter()).sendToServer();
 					}

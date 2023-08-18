@@ -1,7 +1,7 @@
 package dev.ftb.mods.ftbquests.block.entity;
 
-import dev.ftb.mods.ftbquests.FTBQuests;
-import dev.ftb.mods.ftbquests.quest.QuestFile;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
+import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
 import dev.ftb.mods.ftbquests.quest.QuestObject;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
@@ -62,8 +62,8 @@ public class QuestBarrierBlockEntity extends BlockEntity implements BarrierBlock
 
 	@Override
 	public boolean isOpen(Player player) {
-		QuestFile file = FTBQuests.getQuestFile(player.level().isClientSide());
+		BaseQuestFile file = FTBQuestsAPI.api().getQuestFile(player.level().isClientSide());
 		QuestObject qo = file.get(objId);
-		return qo != null && file.getData(player).isCompleted(qo);
+		return qo != null && file.getOrCreateTeamData(player).isCompleted(qo);
 	}
 }

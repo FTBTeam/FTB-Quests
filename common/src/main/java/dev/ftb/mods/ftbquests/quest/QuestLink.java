@@ -38,7 +38,7 @@ public class QuestLink extends QuestObject implements Movable {
     }
 
     @Override
-    public QuestFile getQuestFile() {
+    public BaseQuestFile getQuestFile() {
         return chapter.file;
     }
 
@@ -199,7 +199,7 @@ public class QuestLink extends QuestObject implements Movable {
         this.y = newY;
 
         if (newChapterId != chapter.id) {
-            QuestFile f = getQuestFile();
+            BaseQuestFile f = getQuestFile();
             Chapter newChapter = f.getChapter(newChapterId);
 
             if (newChapter != null) {

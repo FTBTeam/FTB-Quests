@@ -6,7 +6,7 @@ import dev.ftb.mods.ftblibrary.config.Tristate;
 import dev.ftb.mods.ftblibrary.config.ui.EditConfigScreen;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.math.Bits;
-import dev.ftb.mods.ftbquests.FTBQuests;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.client.ConfigIconItemStack;
 import dev.ftb.mods.ftbquests.integration.RecipeModHelper;
@@ -132,7 +132,7 @@ public abstract class QuestObjectBase {
 
 	public abstract QuestObjectType getObjectType();
 
-	public abstract QuestFile getQuestFile();
+	public abstract BaseQuestFile getQuestFile();
 
 	public Set<String> getTags() {
 		if (tags.isEmpty()) {
@@ -338,7 +338,7 @@ public abstract class QuestObjectBase {
 
 	@Environment(EnvType.CLIENT)
 	public void onEditButtonClicked(Runnable gui) {
-		ConfigGroup group = new ConfigGroup(FTBQuests.MOD_ID, accepted -> {
+		ConfigGroup group = new ConfigGroup(FTBQuestsAPI.MOD_ID, accepted -> {
 			gui.run();
 			if (accepted && validateEditedConfig()) {
 				new EditObjectMessage(this).sendToServer();

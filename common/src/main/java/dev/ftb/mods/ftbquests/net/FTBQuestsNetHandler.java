@@ -3,12 +3,12 @@ package dev.ftb.mods.ftbquests.net;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import dev.architectury.networking.simple.MessageType;
 import dev.architectury.networking.simple.SimpleNetworkManager;
-import dev.ftb.mods.ftbquests.FTBQuests;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.item.ItemStack;
 
 public interface FTBQuestsNetHandler {
-	SimpleNetworkManager NET = SimpleNetworkManager.create(FTBQuests.MOD_ID);
+	SimpleNetworkManager NET = SimpleNetworkManager.create(FTBQuestsAPI.MOD_ID);
 
 	MessageType SYNC_QUESTS = NET.registerS2C("sync_quests", SyncQuestsMessage::new);
 	MessageType SYNC_TEAM_DATA = NET.registerS2C("sync_team_data", SyncTeamDataMessage::new);

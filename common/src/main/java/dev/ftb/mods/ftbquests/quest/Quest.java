@@ -112,7 +112,7 @@ public final class Quest extends QuestObject implements Movable {
 	}
 
 	@Override
-	public QuestFile getQuestFile() {
+	public BaseQuestFile getQuestFile() {
 		return chapter.file;
 	}
 

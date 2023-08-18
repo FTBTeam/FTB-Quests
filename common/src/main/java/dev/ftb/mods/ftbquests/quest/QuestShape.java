@@ -4,7 +4,7 @@ import dev.ftb.mods.ftblibrary.config.NameMap;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.ImageIcon;
 import dev.ftb.mods.ftblibrary.math.PixelBuffer;
-import dev.ftb.mods.ftbquests.FTBQuests;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -31,9 +31,9 @@ public final class QuestShape extends Icon {
 
 	public QuestShape(String id) {
 		this.id = id;
-		background = new ImageIcon(new ResourceLocation(FTBQuests.MOD_ID, "textures/shapes/" + this.id + "/background.png"));
-		outline = new ImageIcon(new ResourceLocation(FTBQuests.MOD_ID, "textures/shapes/" + this.id + "/outline.png"));
-		shape = new ImageIcon(new ResourceLocation(FTBQuests.MOD_ID, "textures/shapes/" + this.id + "/shape.png"));
+		background = new ImageIcon(new ResourceLocation(FTBQuestsAPI.MOD_ID, "textures/shapes/" + this.id + "/background.png"));
+		outline = new ImageIcon(new ResourceLocation(FTBQuestsAPI.MOD_ID, "textures/shapes/" + this.id + "/outline.png"));
+		shape = new ImageIcon(new ResourceLocation(FTBQuestsAPI.MOD_ID, "textures/shapes/" + this.id + "/shape.png"));
 	}
 
 	public static void reload(List<String> list) {
@@ -85,7 +85,7 @@ public final class QuestShape extends Icon {
 	public PixelBuffer getShapePixels() {
 		if (shapePixels == null) {
 			try {
-				ResourceLocation shapeLoc = new ResourceLocation(FTBQuests.MOD_ID, "textures/shapes/" + id + "/shape.png");
+				ResourceLocation shapeLoc = new ResourceLocation(FTBQuestsAPI.MOD_ID, "textures/shapes/" + id + "/shape.png");
 				Resource resource = Minecraft.getInstance().getResourceManager().getResource(shapeLoc).get();
 				try (InputStream stream = resource.open()) {
 					shapePixels = PixelBuffer.from(stream);

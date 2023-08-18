@@ -28,7 +28,7 @@ public class ToggleEditingModeMessage extends BaseC2SMessage {
     public void handle(NetworkManager.PacketContext context) {
         ServerPlayer player = (ServerPlayer) context.getPlayer();
         if (player.hasPermissions(2) || player.getServer() != null && player.getServer().isSingleplayerOwner(player.getGameProfile())) {
-            TeamData data = ServerQuestFile.INSTANCE.getData(player);
+            TeamData data = ServerQuestFile.INSTANCE.getOrCreateTeamData(player);
             data.setCanEdit(player, !data.getCanEdit(player));  // will send a response to the client, causing GUI refresh
         }
     }

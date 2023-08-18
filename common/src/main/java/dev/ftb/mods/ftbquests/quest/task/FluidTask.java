@@ -11,7 +11,7 @@ import dev.ftb.mods.ftblibrary.ui.Widget;
 import dev.ftb.mods.ftblibrary.util.StringUtils;
 import dev.ftb.mods.ftblibrary.util.client.ClientUtils;
 import dev.ftb.mods.ftblibrary.util.client.PositionedIngredient;
-import dev.ftb.mods.ftbquests.FTBQuests;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -28,7 +28,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Optional;
 
 public class FluidTask extends Task {
-	public static final ResourceLocation TANK_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "textures/tasks/tank.png");
+	public static final ResourceLocation TANK_TEXTURE = new ResourceLocation(FTBQuestsAPI.MOD_ID, "textures/tasks/tank.png");
 
 	private Fluid fluid = Fluids.WATER;
 	private CompoundTag fluidNBT = null;

@@ -23,7 +23,7 @@ import java.util.*;
 import java.util.stream.Stream;
 
 public final class Chapter extends QuestObject {
-	public final QuestFile file;
+	public final BaseQuestFile file;
 
 	private ChapterGroup group;
 	private String filename;
@@ -39,11 +39,11 @@ public final class Chapter extends QuestObject {
 	private boolean hideQuestDetailsUntilStartable;
 	private boolean hideQuestUntilDepsVisible;
 
-	public Chapter(long id, QuestFile file, ChapterGroup group) {
+	public Chapter(long id, BaseQuestFile file, ChapterGroup group) {
 		this(id, file, group, "");
 	}
 
-	public Chapter(long id, QuestFile file, ChapterGroup group, String filename) {
+	public Chapter(long id, BaseQuestFile file, ChapterGroup group, String filename) {
 		super(id);
 
 		this.file = file;
@@ -79,7 +79,7 @@ public final class Chapter extends QuestObject {
 	}
 
 	@Override
-	public QuestFile getQuestFile() {
+	public BaseQuestFile getQuestFile() {
 		return group.getFile();
 	}
 

@@ -11,12 +11,12 @@ import dev.ftb.mods.ftblibrary.config.ui.EditConfigScreen;
 import dev.ftb.mods.ftblibrary.config.ui.SelectFluidScreen;
 import dev.ftb.mods.ftblibrary.config.ui.SelectItemStackScreen;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
-import dev.ftb.mods.ftbquests.FTBQuests;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.block.FTBQuestsBlocks;
 import dev.ftb.mods.ftbquests.block.entity.TaskScreenBlockEntity;
 import dev.ftb.mods.ftbquests.item.FTBQuestsItems;
 import dev.ftb.mods.ftbquests.net.SetCustomImageMessage;
-import dev.ftb.mods.ftbquests.quest.QuestFile;
+import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.reward.ItemReward;
 import dev.ftb.mods.ftbquests.quest.reward.RewardTypes;
@@ -76,7 +76,7 @@ public class FTBQuestsClient {
 	}
 
 	@Nullable
-	public static QuestFile getClientQuestFile() {
+	public static BaseQuestFile getClientQuestFile() {
 		return ClientQuestFile.INSTANCE;
 	}
 
@@ -153,7 +153,7 @@ public class FTBQuestsClient {
 	}
 
 	private static void openSetupGui(Runnable gui, Consumer<Task> callback, Task task) {
-		ConfigGroup group = new ConfigGroup(FTBQuests.MOD_ID, accepted -> {
+		ConfigGroup group = new ConfigGroup(FTBQuestsAPI.MOD_ID, accepted -> {
 			gui.run();
 			if (accepted) {
 				callback.accept(task);
@@ -220,7 +220,7 @@ public class FTBQuestsClient {
 		return ClientQuestFile.INSTANCE.selfTeamData;
 	}
 
-	public static QuestFile createClientQuestFile() {
+	public static BaseQuestFile createClientQuestFile() {
 		return new ClientQuestFile();
 	}
 
@@ -247,7 +247,7 @@ public class FTBQuestsClient {
 
 	public static void openScreenConfigGui(BlockPos pos) {
 		if (Minecraft.getInstance().level.getBlockEntity(pos) instanceof TaskScreenBlockEntity coreScreen) {
-			new EditConfigScreen(coreScreen.fillConfigGroup(ClientQuestFile.INSTANCE.getData(coreScreen.getTeamId()))).setAutoclose(true).openGui();
+			new EditConfigScreen(coreScreen.fillConfigGroup(ClientQuestFile.INSTANCE.getOrCreateTeamData(coreScreen.getTeamId()))).setAutoclose(true).openGui();
 		}
 	}
 

@@ -4,6 +4,7 @@ import com.mojang.util.UUIDTypeAdapter;
 import dev.ftb.mods.ftblibrary.snbt.SNBT;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
 import dev.ftb.mods.ftbquests.FTBQuests;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
 import dev.ftb.mods.ftbquests.net.*;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
@@ -46,7 +47,7 @@ public class TeamData {
 	private static final Comparator<Object2LongMap.Entry<QuestKey>> OBJECT2LONG_COMPARATOR = (e1, e2) -> Long.compareUnsigned(e1.getLongValue(), e2.getLongValue());
 
 	private final UUID teamId;
-	private final QuestFile file;
+	private final BaseQuestFile file;
 
 	private String name;
 	private boolean shouldSave;
@@ -62,11 +63,11 @@ public class TeamData {
 	private Long2ByteOpenHashMap areDependenciesCompleteCache;
 	private Object2ByteOpenHashMap<QuestKey> unclaimedRewardsCache;
 
-	public TeamData(UUID teamId, QuestFile file) {
+	public TeamData(UUID teamId, BaseQuestFile file) {
 		this(teamId, file, "");
 	}
 
-	public TeamData(UUID teamId, QuestFile file, String name) {
+	public TeamData(UUID teamId, BaseQuestFile file, String name) {
 		this.teamId = teamId;
 		this.file = file;
 		this.name = name;
@@ -88,12 +89,12 @@ public class TeamData {
 		return teamId;
 	}
 
-	public QuestFile getFile() {
+	public BaseQuestFile getFile() {
 		return file;
 	}
 
 	public static TeamData get(Player player) {
-		return FTBQuests.getQuestFile(player.getCommandSenderWorld().isClientSide()).getData(player);
+		return FTBQuestsAPI.api().getQuestFile(player.getCommandSenderWorld().isClientSide()).getOrCreateTeamData(player);
 	}
 
 	public void markDirty() {
@@ -780,7 +781,7 @@ public class TeamData {
 			return !canEdit && !autoPin && !chapterPinned && pinnedQuests.isEmpty();
 		}
 
-		public static PerPlayerData fromNBT(CompoundTag nbt, QuestFile file) {
+		public static PerPlayerData fromNBT(CompoundTag nbt, BaseQuestFile file) {
 			PerPlayerData ppd = new PerPlayerData();
 
 			boolean canEdit = nbt.getBoolean("can_edit");

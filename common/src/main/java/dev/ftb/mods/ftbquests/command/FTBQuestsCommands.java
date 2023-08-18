@@ -217,7 +217,7 @@ public class FTBQuestsCommands {
 	}
 
 	private static int editingMode(CommandSourceStack source, ServerPlayer player, @Nullable Boolean canEdit) {
-		TeamData data = ServerQuestFile.INSTANCE.getData(player);
+		TeamData data = ServerQuestFile.INSTANCE.getOrCreateTeamData(player);
 
 		if (canEdit == null) {
 			canEdit = !data.getCanEdit(player);
@@ -235,7 +235,7 @@ public class FTBQuestsCommands {
 	}
 
 	private static int locked(CommandSourceStack source, ServerPlayer player, @Nullable Boolean locked) {
-		TeamData data = ServerQuestFile.INSTANCE.getData(player);
+		TeamData data = ServerQuestFile.INSTANCE.getOrCreateTeamData(player);
 
 		if (locked == null) {
 			locked = !data.isLocked();
@@ -255,7 +255,7 @@ public class FTBQuestsCommands {
 	private static int changeProgress(CommandSourceStack source, Collection<ServerPlayer> players, boolean reset, QuestObjectBase questObject) {
 		for (ServerPlayer player : players) {
 			ProgressChange progressChange = new ProgressChange(ServerQuestFile.INSTANCE, questObject, player.getUUID()).setReset(reset);
-			questObject.forceProgress(ServerQuestFile.INSTANCE.getData(player), progressChange);
+			questObject.forceProgress(ServerQuestFile.INSTANCE.getOrCreateTeamData(player), progressChange);
 		}
 
 		source.sendSuccess(() -> Component.translatable("commands.ftbquests.change_progress.text"), true);
@@ -343,7 +343,7 @@ public class FTBQuestsCommands {
 		ServerQuestFile instance = ServerQuestFile.INSTANCE;
 		ServerPlayer sender = source.getPlayer();
 
-		if (sender != null && !instance.getData(sender).getCanEdit(sender)) {
+		if (sender != null && !instance.getOrCreateTeamData(sender).getCanEdit(sender)) {
 			source.sendFailure(Component.translatable("commands.ftbquests.command.error.not_editing"));
 			return 1;
 		}
@@ -362,7 +362,7 @@ public class FTBQuestsCommands {
 	}
 
 	private static int toggleRewardBlocking(CommandSourceStack source, ServerPlayer player, Boolean doBlocking) {
-		TeamData data = ServerQuestFile.INSTANCE.getData(player);
+		TeamData data = ServerQuestFile.INSTANCE.getOrCreateTeamData(player);
 
 		if (doBlocking == null) {
 			doBlocking = !data.areRewardsBlocked();

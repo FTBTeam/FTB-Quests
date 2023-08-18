@@ -8,6 +8,7 @@ import dev.ftb.mods.ftblibrary.math.MathUtils;
 import dev.ftb.mods.ftblibrary.snbt.SNBT;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
 import dev.ftb.mods.ftbquests.FTBQuests;
+import dev.ftb.mods.ftbquests.api.QuestFile;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.events.*;
 import dev.ftb.mods.ftbquests.integration.RecipeModHelper;
@@ -54,10 +55,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-/**
- * @author LatvianModder
- */
-public abstract class QuestFile extends QuestObject {
+public abstract class BaseQuestFile extends QuestObject implements QuestFile {
 	public static int VERSION = 13;
 
 	private final DefaultChapterGroup defaultChapterGroup;
@@ -92,7 +90,7 @@ public abstract class QuestFile extends QuestObject {
 	private List<Task> allTasks;
 	private List<Task> submitTasks;
 
-	public QuestFile() {
+	public BaseQuestFile() {
 		super(1L);
 
 		fileVersion = 0;
@@ -131,12 +129,12 @@ public abstract class QuestFile extends QuestObject {
 
 	public abstract Env getSide();
 
-	public final boolean isServerSide() {
+	public boolean isServerSide() {
 		return getSide() == Env.SERVER;
 	}
 
 	@Override
-	public QuestFile getQuestFile() {
+	public BaseQuestFile getQuestFile() {
 		return this;
 	}
 
@@ -149,6 +147,7 @@ public abstract class QuestFile extends QuestObject {
 		return false;
 	}
 
+	@Override
 	public boolean canEdit() {
 		return false;
 	}
@@ -983,34 +982,32 @@ public abstract class QuestFile extends QuestObject {
 		return 0L;
 	}
 
+	@Override
 	@Nullable
 	public TeamData getNullableTeamData(UUID id) {
 		return teamDataMap.get(id);
 	}
 
-	public TeamData getData(UUID teamId) {
-		TeamData teamData = teamDataMap.get(teamId);
-
-		if (teamData == null) {
-			teamData = new TeamData(teamId, this);
-			teamDataMap.put(teamData.getTeamId(), teamData);
-		}
-
-		return teamData;
+	@Override
+	public TeamData getOrCreateTeamData(UUID teamId) {
+		return teamDataMap.computeIfAbsent(teamId, k -> new TeamData(teamId, this));
 	}
 
-	public TeamData getData(Team team) {
-		return getData(Objects.requireNonNull(team, "Non-null team required!").getId());
+	@Override
+	public TeamData getOrCreateTeamData(Team team) {
+		return getOrCreateTeamData(Objects.requireNonNull(team, "Non-null team required!").getId());
 	}
 
-	public TeamData getData(Entity player) {
+	@Override
+	public TeamData getOrCreateTeamData(Entity player) {
 		return FTBTeamsAPI.api().getManager().getTeamForPlayerID(player.getUUID())
-				.map(this::getData)
+				.map(this::getOrCreateTeamData)
 				.orElse(null);
 	}
 
-	public Collection<TeamData> getAllData() {
-		return teamDataMap.values();
+	@Override
+	public Collection<TeamData> getAllTeamData() {
+		return Collections.unmodifiableCollection(teamDataMap.values());
 	}
 
 	public abstract void deleteObject(long id);
@@ -1070,9 +1067,7 @@ public abstract class QuestFile extends QuestObject {
 	}
 
 	public void clearCachedProgress() {
-		for (TeamData data : getAllData()) {
-			data.clearCachedProgress();
-		}
+		getAllTeamData().forEach(TeamData::clearCachedProgress);
 	}
 
 	public long newID() {
@@ -1385,14 +1380,17 @@ public abstract class QuestFile extends QuestObject {
 		chapterGroups.forEach(consumer);
 	}
 
+	@Override
 	public void forAllChapters(Consumer<Chapter> consumer) {
 		forAllChapterGroups(g -> g.getChapters().forEach(consumer));
 	}
 
+	@Override
 	public void forAllQuests(Consumer<Quest> consumer) {
 		forAllChapters(c -> c.getQuests().forEach(consumer));
 	}
 
+	@Override
 	public void forAllQuestLinks(Consumer<QuestLink> consumer) {
 		forAllChapters(c -> c.getQuestLinks().forEach(consumer));
 	}

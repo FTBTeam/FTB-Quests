@@ -17,12 +17,12 @@ import java.util.*;
  * @author LatvianModder
  */
 public class ChapterGroup extends QuestObject {
-	protected final QuestFile file;
+	protected final BaseQuestFile file;
 	private final List<Chapter> chapters;
 
 	private boolean guiCollapsed;
 
-	public ChapterGroup(long id, QuestFile file) {
+	public ChapterGroup(long id, BaseQuestFile file) {
 		super(id);
 
 		this.file = file;
@@ -30,7 +30,7 @@ public class ChapterGroup extends QuestObject {
 		guiCollapsed = false;
 	}
 
-	public QuestFile getFile() {
+	public BaseQuestFile getFile() {
 		return file;
 	}
 
@@ -61,7 +61,7 @@ public class ChapterGroup extends QuestObject {
 	}
 
 	@Override
-	public QuestFile getQuestFile() {
+	public BaseQuestFile getQuestFile() {
 		return file;
 	}
 

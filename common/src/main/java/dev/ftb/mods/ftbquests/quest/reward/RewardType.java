@@ -3,7 +3,7 @@ package dev.ftb.mods.ftbquests.quest.reward;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.ui.EditConfigScreen;
 import dev.ftb.mods.ftblibrary.icon.Icon;
-import dev.ftb.mods.ftbquests.FTBQuests;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.gui.SelectQuestObjectScreen;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestObjectType;
@@ -52,7 +52,7 @@ public final class RewardType {
 				s.setHasSearchBox(true);
 				s.openGui();
 			} else {
-				ConfigGroup group = new ConfigGroup(FTBQuests.MOD_ID, accepted -> {
+				ConfigGroup group = new ConfigGroup(FTBQuestsAPI.MOD_ID, accepted -> {
 					if (accepted) {
 						callback.accept(reward);
 					}
@@ -67,9 +67,9 @@ public final class RewardType {
 	@Nullable
 	public static Reward createReward(long id, Quest quest, String typeId) {
 		if (typeId.isEmpty()) {
-			typeId = FTBQuests.MOD_ID + ":item";
+			typeId = FTBQuestsAPI.MOD_ID + ":item";
 		} else if (typeId.indexOf(':') == -1) {
-			typeId = FTBQuests.MOD_ID + ':' + typeId;
+			typeId = FTBQuestsAPI.MOD_ID + ':' + typeId;
 		}
 
 		RewardType type = RewardTypes.TYPES.get(new ResourceLocation(typeId));
@@ -90,7 +90,7 @@ public final class RewardType {
 	}
 
 	public String getTypeForNBT() {
-		return typeId.getNamespace().equals(FTBQuests.MOD_ID) ? typeId.getPath() : typeId.toString();
+		return typeId.getNamespace().equals(FTBQuestsAPI.MOD_ID) ? typeId.getPath() : typeId.toString();
 	}
 
 	public RewardType setDisplayName(Component name) {

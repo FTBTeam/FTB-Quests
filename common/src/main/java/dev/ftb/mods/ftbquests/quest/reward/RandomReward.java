@@ -6,8 +6,8 @@ import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
 import dev.ftb.mods.ftblibrary.ui.Widget;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftblibrary.util.client.PositionedIngredient;
+import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
 import dev.ftb.mods.ftbquests.quest.Quest;
-import dev.ftb.mods.ftbquests.quest.QuestFile;
 import dev.ftb.mods.ftbquests.quest.QuestObjectType;
 import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
 import dev.ftb.mods.ftbquests.quest.loot.WeightedReward;
@@ -59,7 +59,7 @@ public class RandomReward extends Reward {
 	public void readData(CompoundTag nbt) {
 		super.readData(nbt);
 		table = null;
-		QuestFile file = getQuestFile();
+		BaseQuestFile file = getQuestFile();
 
 		long id = nbt.getLong("table_id");
 		if (id != 0L) {
@@ -101,7 +101,7 @@ public class RandomReward extends Reward {
 	@Override
 	public void readNetData(FriendlyByteBuf buffer) {
 		super.readNetData(buffer);
-		QuestFile file = getQuestFile();
+		BaseQuestFile file = getQuestFile();
 
 		long t = buffer.readLong();
 

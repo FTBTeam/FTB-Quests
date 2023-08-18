@@ -11,7 +11,7 @@ import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.ui.misc.ButtonListBaseScreen;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftblibrary.util.client.PositionedIngredient;
-import dev.ftb.mods.ftbquests.FTBQuests;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
 import dev.ftb.mods.ftbquests.quest.loot.WeightedReward;
@@ -82,7 +82,7 @@ public class EditRewardTableScreen extends ButtonListBaseScreen {
 		@Override
 		public void onClicked(MouseButton button) {
 			playClickSound();
-			ConfigGroup group = new ConfigGroup(FTBQuests.MOD_ID, accepted -> run());
+			ConfigGroup group = new ConfigGroup(FTBQuestsAPI.MOD_ID, accepted -> run());
 			rewardTable.fillConfigGroup(rewardTable.createSubGroup(group));
 			new EditConfigScreen(group).openGui();
 		}
@@ -155,7 +155,7 @@ public class EditRewardTableScreen extends ButtonListBaseScreen {
 			playClickSound();
 			List<ContextMenuItem> contextMenu = new ArrayList<>();
 			contextMenu.add(new ContextMenuItem(Component.translatable("selectServer.edit"), Icons.SETTINGS, () -> {
-				ConfigGroup group = new ConfigGroup(FTBQuests.MOD_ID, accepted -> run());
+				ConfigGroup group = new ConfigGroup(FTBQuestsAPI.MOD_ID, accepted -> run());
 				wr.getReward().fillConfigGroup(wr.getReward().createSubGroup(group));
 				new EditConfigScreen(group).openGui();
 			}));
