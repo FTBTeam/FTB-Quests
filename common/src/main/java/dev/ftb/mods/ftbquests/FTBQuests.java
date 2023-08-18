@@ -3,7 +3,6 @@ package dev.ftb.mods.ftbquests;
 import dev.architectury.utils.Env;
 import dev.architectury.utils.EnvExecutor;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
-import dev.ftb.mods.ftbquests.client.FTBQuestsNetClient;
 import dev.ftb.mods.ftbquests.integration.RecipeModHelper;
 import dev.ftb.mods.ftbquests.net.FTBQuestsNetHandler;
 import dev.ftb.mods.ftbquests.quest.QuestFile;

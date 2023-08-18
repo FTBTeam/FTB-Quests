@@ -8,7 +8,6 @@ import dev.ftb.mods.ftbquests.command.ChangeProgressArgument;
 import dev.ftb.mods.ftbquests.command.QuestObjectArgument;
 import dev.ftb.mods.ftbquests.item.FTBQuestsItems;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
-import dev.ftb.mods.ftbquests.quest.loot.LootCrate;
 import dev.ftb.mods.ftbquests.quest.task.TaskTypes;
 import dev.ftb.mods.ftbquests.quest.task.forge.ForgeEnergyTask;
 import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;

@@ -6,7 +6,6 @@ import dev.architectury.networking.simple.MessageType;
 import dev.ftb.mods.ftbquests.quest.Chapter;
 import dev.ftb.mods.ftbquests.quest.ChapterImage;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 
 public class CopyChapterImageMessage extends BaseC2SMessage {
