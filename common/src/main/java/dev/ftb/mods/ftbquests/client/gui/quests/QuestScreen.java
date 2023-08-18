@@ -48,7 +48,7 @@ public class QuestScreen extends BaseScreen {
 	MouseButton grabbed = null;
 	Chapter selectedChapter;
 	final List<Movable> selectedObjects;
-	private final ExpandChaptersButton expandChaptersButton;
+	final ExpandChaptersButton expandChaptersButton;
 	final ChapterPanel chapterPanel;
 	boolean movingObjects = false;
 	int zoom = 16;
