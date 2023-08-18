@@ -17,7 +17,7 @@ import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.ui.misc.CompactGridLayout;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import dev.ftb.mods.ftblibrary.util.client.ImageComponent;
-import dev.ftb.mods.ftbquests.FTBQuests;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.client.gui.ImageComponentWidget;
 import dev.ftb.mods.ftbquests.client.gui.MultilineTextEditorScreen;
@@ -53,7 +53,7 @@ import java.util.*;
 import java.util.function.Consumer;
 
 public class ViewQuestPanel extends Panel {
-	public static final Icon PAGEBREAK_ICON = Icon.getIcon(new ResourceLocation(FTBQuests.MOD_ID, "textures/gui/pagebreak.png"));
+	public static final Icon PAGEBREAK_ICON = Icon.getIcon(new ResourceLocation(FTBQuestsAPI.MOD_ID, "textures/gui/pagebreak.png"));
 
 	private final QuestScreen questScreen;
 	private Quest quest = null;
@@ -251,18 +251,18 @@ public class ViewQuestPanel extends Panel {
 		linksButton.setPosAndSize(w - iconSize * 3 - 4, 0, iconSize, iconSize);
 
 		if (!quest.hasDependencies()) {
-			add(buttonOpenDependencies = new SimpleButton(this, Component.translatable("ftbquests.gui.no_dependencies"), Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/arrow_left.png").withTint(borderColor), (widget, button) -> {
+			add(buttonOpenDependencies = new SimpleButton(this, Component.translatable("ftbquests.gui.no_dependencies"), Icon.getIcon(FTBQuestsAPI.MOD_ID + ":textures/gui/arrow_left.png").withTint(borderColor), (widget, button) -> {
 			}));
 		} else {
-			add(buttonOpenDependencies = new SimpleButton(this, Component.translatable("ftbquests.gui.view_dependencies"), Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/arrow_left.png").withTint(ThemeProperties.QUEST_VIEW_TITLE.get()), (widget, button) -> showList(quest.streamDependencies().toList(), true)));
+			add(buttonOpenDependencies = new SimpleButton(this, Component.translatable("ftbquests.gui.view_dependencies"), Icon.getIcon(FTBQuestsAPI.MOD_ID + ":textures/gui/arrow_left.png").withTint(ThemeProperties.QUEST_VIEW_TITLE.get()), (widget, button) -> showList(quest.streamDependencies().toList(), true)));
 		}
 
 		Button buttonOpenDependants;
 		if (quest.getDependants().isEmpty()) {
-			add(buttonOpenDependants = new SimpleButton(this, Component.translatable("ftbquests.gui.no_dependants"), Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/arrow_right.png").withTint(borderColor), (widget, button) -> {
+			add(buttonOpenDependants = new SimpleButton(this, Component.translatable("ftbquests.gui.no_dependants"), Icon.getIcon(FTBQuestsAPI.MOD_ID + ":textures/gui/arrow_right.png").withTint(borderColor), (widget, button) -> {
 			}));
 		} else {
-			add(buttonOpenDependants = new SimpleButton(this, Component.translatable("ftbquests.gui.view_dependants"), Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/arrow_right.png").withTint(ThemeProperties.QUEST_VIEW_TITLE.get()), (widget, button) -> showList(quest.getDependants(), false)));
+			add(buttonOpenDependants = new SimpleButton(this, Component.translatable("ftbquests.gui.view_dependants"), Icon.getIcon(FTBQuestsAPI.MOD_ID + ":textures/gui/arrow_right.png").withTint(ThemeProperties.QUEST_VIEW_TITLE.get()), (widget, button) -> showList(quest.getDependants(), false)));
 		}
 
 		buttonOpenDependencies.setPosAndSize(0, panelContent.posY + 2, 13, 13);
@@ -509,7 +509,7 @@ public class ViewQuestPanel extends Panel {
 		if (quest != null && quest.hasDependencies() && !questScreen.file.selfTeamData.canStartTasks(quest) && buttonOpenDependencies != null) {
 			float red = Mth.sin((System.currentTimeMillis() % 1200) * (3.1415927f / 1200f));
 			Color4I col = Color4I.rgb((int) (red * 127 + 63), 0, 0);
-			buttonOpenDependencies.setIcon(Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/arrow_left.png").withTint(col));
+			buttonOpenDependencies.setIcon(Icon.getIcon(FTBQuestsAPI.MOD_ID + ":textures/gui/arrow_left.png").withTint(col));
 		}
 	}
 
@@ -703,7 +703,7 @@ public class ViewQuestPanel extends Panel {
 	}
 
 	private void editImage(int line, ImageComponent component) {
-		ConfigGroup group = new ConfigGroup(FTBQuests.MOD_ID, accepted -> {
+		ConfigGroup group = new ConfigGroup(FTBQuestsAPI.MOD_ID, accepted -> {
 			openGui();
 			if (accepted) {
 				if (line == -1) {
@@ -850,7 +850,7 @@ public class ViewQuestPanel extends Panel {
 			if (clickEvent.getAction() == ClickEvent.Action.CHANGE_PAGE) {
 				try {
 					long questId = Long.valueOf(clickEvent.getValue(), 16);
-					QuestObject qo = FTBQuests.getQuestFile(true).get(questId);
+					QuestObject qo = quest.getQuestFile().get(questId);
 					if (qo != null) {
 						questScreen.open(qo, false);
 					} else {

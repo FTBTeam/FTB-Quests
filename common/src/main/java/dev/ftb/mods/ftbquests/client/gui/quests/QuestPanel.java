@@ -14,7 +14,7 @@ import dev.ftb.mods.ftblibrary.ui.input.Key;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.ui.misc.SelectImagePreScreen;
 import dev.ftb.mods.ftblibrary.util.StringUtils;
-import dev.ftb.mods.ftbquests.FTBQuests;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.net.*;
 import dev.ftb.mods.ftbquests.quest.*;
 import dev.ftb.mods.ftbquests.quest.task.Task;
@@ -42,7 +42,7 @@ import java.util.function.Consumer;
  * @author LatvianModder
  */
 public class QuestPanel extends Panel {
-	private static final ImageIcon DEFAULT_DEPENDENCY_LINE_TEXTURE = (ImageIcon) Icon.getIcon(FTBQuests.MOD_ID + ":textures/gui/dependency.png");
+	private static final ImageIcon DEFAULT_DEPENDENCY_LINE_TEXTURE = (ImageIcon) Icon.getIcon(FTBQuestsAPI.MOD_ID + ":textures/gui/dependency.png");
 
 	private final QuestScreen questScreen;
 	private double questX = 0;
@@ -474,7 +474,7 @@ public class QuestPanel extends Panel {
 			if (!clip.isEmpty()) {
 				try {
 					long questId = Long.valueOf(clip, 16);
-					QuestObject qo = FTBQuests.getQuestFile(true).get(questId);
+					QuestObject qo = questScreen.file.get(questId);
 					if (qo instanceof Quest quest) {
 						contextMenu.add(ContextMenuItem.SEPARATOR);
 						addedSeparator.setTrue();

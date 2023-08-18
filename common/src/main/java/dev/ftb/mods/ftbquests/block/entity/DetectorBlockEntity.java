@@ -48,7 +48,7 @@ public class DetectorBlockEntity extends BlockEntity {
 		if (qo != null) {
 			AABB box = new AABB(pos).inflate(radius);
 			for (ServerPlayer player : level.getEntitiesOfClass(ServerPlayer.class, box, DetectorBlockEntity::isRealPlayer)) {
-				TeamData data = ServerQuestFile.INSTANCE.getData(player);
+				TeamData data = ServerQuestFile.INSTANCE.getOrCreateTeamData(player);
 				qo.forceProgressRaw(data, new ProgressChange(ServerQuestFile.INSTANCE, qo, player.getUUID()).setReset(false).withNotifications());
 			}
 		}

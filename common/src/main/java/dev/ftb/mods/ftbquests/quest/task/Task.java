@@ -57,7 +57,7 @@ public abstract class Task extends QuestObject {
 	}
 
 	@Override
-	public final QuestFile getQuestFile() {
+	public final BaseQuestFile getQuestFile() {
 		return quest.getChapter().file;
 	}
 
@@ -141,7 +141,7 @@ public abstract class Task extends QuestObject {
 	public final void deleteSelf() {
 		quest.removeTask(this);
 
-		for (TeamData data : quest.getChapter().file.getAllData()) {
+		for (TeamData data : quest.getChapter().file.getAllTeamData()) {
 			data.resetProgress(this);
 		}
 
@@ -150,7 +150,7 @@ public abstract class Task extends QuestObject {
 
 	@Override
 	public final void deleteChildren() {
-		for (TeamData data : quest.getChapter().file.getAllData()) {
+		for (TeamData data : quest.getChapter().file.getAllTeamData()) {
 			data.resetProgress(this);
 		}
 

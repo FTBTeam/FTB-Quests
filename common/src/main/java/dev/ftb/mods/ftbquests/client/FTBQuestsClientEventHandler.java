@@ -12,14 +12,14 @@ import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.sidebar.SidebarButtonCreatedEvent;
 import dev.ftb.mods.ftblibrary.ui.CustomClickEvent;
 import dev.ftb.mods.ftblibrary.ui.GuiHelper;
-import dev.ftb.mods.ftbquests.FTBQuests;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.block.entity.FTBQuestsBlockEntities;
 import dev.ftb.mods.ftbquests.events.ClearFileCacheEvent;
 import dev.ftb.mods.ftbquests.item.FTBQuestsItems;
 import dev.ftb.mods.ftbquests.item.LootCrateItem;
 import dev.ftb.mods.ftbquests.net.SubmitTaskMessage;
+import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
 import dev.ftb.mods.ftbquests.quest.Quest;
-import dev.ftb.mods.ftbquests.quest.QuestFile;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.loot.LootCrate;
 import dev.ftb.mods.ftbquests.quest.task.ObservationTask;
@@ -51,7 +51,7 @@ import java.util.Objects;
 import static dev.ftb.mods.ftbquests.client.TaskScreenRenderer.*;
 
 public class FTBQuestsClientEventHandler {
-	private static final ResourceLocation QUESTS_BUTTON = new ResourceLocation(FTBQuests.MOD_ID, "quests");
+	private static final ResourceLocation QUESTS_BUTTON = new ResourceLocation(FTBQuestsAPI.MOD_ID, "quests");
 
 	private List<ObservationTask> observationTasks = null;
 	private ObservationTask currentlyObserving = null;
@@ -120,7 +120,7 @@ public class FTBQuestsClientEventHandler {
 		}
 	}
 
-	private void onFileCacheClear(QuestFile file) {
+	private void onFileCacheClear(BaseQuestFile file) {
 		if (!file.isServerSide()) {
 			observationTasks = null;
 		}
@@ -136,7 +136,7 @@ public class FTBQuestsClientEventHandler {
 	}
 
 	private EventResult onCustomClick(CustomClickEvent event) {
-		if (event.id().getNamespace().equals(FTBQuests.MOD_ID) && "open_gui".equals(event.id().getPath())) {
+		if (event.id().getNamespace().equals(FTBQuestsAPI.MOD_ID) && "open_gui".equals(event.id().getPath())) {
 			// to be safe, we close the current screen before opening Quests, to avoid potential gui open-close loops with other mods
 			// also save the cursor position and restore it after, since closing the screen will reset to the centre
 			double mx = Minecraft.getInstance().mouseHandler.xpos();

@@ -6,7 +6,7 @@ import dev.ftb.mods.ftblibrary.ui.ContextMenuItem;
 import dev.ftb.mods.ftblibrary.ui.Panel;
 import dev.ftb.mods.ftblibrary.ui.Theme;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
-import dev.ftb.mods.ftbquests.FTBQuests;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.net.CreateObjectMessage;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
@@ -52,7 +52,7 @@ public class AddTaskButton extends Button {
 		if (!clip.isEmpty()) {
 			try {
 				long taskId = Long.valueOf(clip, 16);
-				if (FTBQuests.getQuestFile(true).get(taskId) instanceof Task task) {
+				if (FTBQuestsAPI.api().getQuestFile(true).get(taskId) instanceof Task task) {
 					contextMenu.add(ContextMenuItem.SEPARATOR);
 					contextMenu.add(new PasteTaskMenuItem(task, () -> copyAndCreateTask(task)));
 				}

@@ -57,7 +57,7 @@ public abstract class Reward extends QuestObjectBase {
 	}
 
 	@Override
-	public final QuestFile getQuestFile() {
+	public final BaseQuestFile getQuestFile() {
 		return quest.getChapter().file;
 	}
 
@@ -170,7 +170,7 @@ public abstract class Reward extends QuestObjectBase {
 	public final void deleteSelf() {
 		quest.removeReward(this);
 
-		for (TeamData data : getQuestFile().getAllData()) {
+		for (TeamData data : getQuestFile().getAllTeamData()) {
 			data.deleteReward(this);
 		}
 
@@ -179,7 +179,7 @@ public abstract class Reward extends QuestObjectBase {
 
 	@Override
 	public final void deleteChildren() {
-		for (TeamData data : getQuestFile().getAllData()) {
+		for (TeamData data : getQuestFile().getAllTeamData()) {
 			data.deleteReward(this);
 		}
 

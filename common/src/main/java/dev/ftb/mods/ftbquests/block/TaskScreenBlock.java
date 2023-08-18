@@ -7,7 +7,7 @@ import dev.ftb.mods.ftbquests.block.entity.TaskScreenBlockEntity;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.item.ScreenBlockItem;
 import dev.ftb.mods.ftbquests.net.TaskScreenConfigRequest;
-import dev.ftb.mods.ftbquests.quest.QuestFile;
+import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
@@ -112,7 +112,7 @@ public class TaskScreenBlock extends BaseEntityBlock {
 
         if (level.getBlockEntity(blockPos) instanceof TaskScreenBlockEntity coreScreen) {
             if (livingEntity instanceof ServerPlayer sp) {
-                coreScreen.setTeamId(ServerQuestFile.INSTANCE.getData(sp).getTeamId());
+                coreScreen.setTeamId(ServerQuestFile.INSTANCE.getOrCreateTeamData(sp).getTeamId());
             }
 
             Direction facing = blockState.getValue(FACING);
@@ -170,7 +170,7 @@ public class TaskScreenBlock extends BaseEntityBlock {
 
         if (itemStack.getTag() != null && itemStack.getTag().contains("BlockEntityTag", Tag.TAG_COMPOUND)) {
             CompoundTag subTag = Objects.requireNonNull(itemStack.getTagElement("BlockEntityTag"));
-            QuestFile questFile = FTBQuestsClient.getClientQuestFile();
+            BaseQuestFile questFile = FTBQuestsClient.getClientQuestFile();
             if (questFile != null) {
                 Task task = questFile.getTask(subTag.getLong("TaskID"));
                 if (task != null) {

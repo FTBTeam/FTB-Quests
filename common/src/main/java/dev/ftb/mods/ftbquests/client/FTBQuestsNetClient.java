@@ -38,7 +38,7 @@ public class FTBQuestsNetClient {
 			return;
 		}
 
-		TeamData data = ClientQuestFile.INSTANCE.getData(teamId);
+		TeamData data = ClientQuestFile.INSTANCE.getOrCreateTeamData(teamId);
 		data.claimReward(player, reward, System.currentTimeMillis());
 
 		if (data == ClientQuestFile.INSTANCE.selfTeamData) {
@@ -165,7 +165,7 @@ public class FTBQuestsNetClient {
 	}
 
 	public static void syncEditingMode(UUID teamId, boolean editingMode) {
-		if (ClientQuestFile.INSTANCE.getData(teamId).setCanEdit(Minecraft.getInstance().player, editingMode)) {
+		if (ClientQuestFile.INSTANCE.getOrCreateTeamData(teamId).setCanEdit(Minecraft.getInstance().player, editingMode)) {
 			ClientQuestFile.INSTANCE.refreshGui();
 		}
 	}
@@ -181,7 +181,7 @@ public class FTBQuestsNetClient {
 	}
 
 	public static void updateTeamData(UUID teamId, String name) {
-		TeamData data = ClientQuestFile.INSTANCE.getData(teamId);
+		TeamData data = ClientQuestFile.INSTANCE.getOrCreateTeamData(teamId);
 		data.setName(name);
 	}
 
@@ -189,7 +189,7 @@ public class FTBQuestsNetClient {
 		Task t = ClientQuestFile.INSTANCE.getTask(task);
 
 		if (t != null) {
-			TeamData data = ClientQuestFile.INSTANCE.getData(teamId);
+			TeamData data = ClientQuestFile.INSTANCE.getOrCreateTeamData(teamId);
 			ClientQuestFile.INSTANCE.clearCachedProgress();
 			data.setProgress(t, progress);
 		}
@@ -215,7 +215,7 @@ public class FTBQuestsNetClient {
 	}
 
 	public static void objectStarted(UUID teamId, long id, @Nullable Date time) {
-		TeamData teamData = ClientQuestFile.INSTANCE.getData(teamId);
+		TeamData teamData = ClientQuestFile.INSTANCE.getOrCreateTeamData(teamId);
 		teamData.setStarted(id, time);
 
 		QuestScreen gui = ClientUtils.getCurrentGuiAs(QuestScreen.class);
@@ -230,7 +230,7 @@ public class FTBQuestsNetClient {
 	}
 
 	public static void objectCompleted(UUID teamId, long id, @Nullable Date time) {
-		TeamData teamData = ClientQuestFile.INSTANCE.getData(teamId);
+		TeamData teamData = ClientQuestFile.INSTANCE.getOrCreateTeamData(teamId);
 		teamData.setCompleted(id, time);
 
 		QuestScreen gui = ClientUtils.getCurrentGuiAs(QuestScreen.class);
@@ -247,7 +247,7 @@ public class FTBQuestsNetClient {
 	}
 
 	public static void syncLock(UUID id, boolean lock) {
-		if (ClientQuestFile.INSTANCE.getData(id).setLocked(lock)) {
+		if (ClientQuestFile.INSTANCE.getOrCreateTeamData(id).setLocked(lock)) {
 			ClientQuestFile.INSTANCE.refreshGui();
 		}
 	}
@@ -259,7 +259,7 @@ public class FTBQuestsNetClient {
 			return;
 		}
 
-		TeamData teamData = ClientQuestFile.INSTANCE.getData(teamId);
+		TeamData teamData = ClientQuestFile.INSTANCE.getOrCreateTeamData(teamId);
 
 		if (teamData.resetReward(player, reward)) {
 			QuestScreen gui = ClientUtils.getCurrentGuiAs(QuestScreen.class);
@@ -280,7 +280,7 @@ public class FTBQuestsNetClient {
 	}
 
 	public static void syncRewardBlocking(UUID teamId, boolean rewardsBlocked) {
-		if (ClientQuestFile.INSTANCE.getData(teamId).setRewardsBlocked(rewardsBlocked)) {
+		if (ClientQuestFile.INSTANCE.getOrCreateTeamData(teamId).setRewardsBlocked(rewardsBlocked)) {
 			ClientQuestFile.INSTANCE.refreshGui();
 		}
 	}

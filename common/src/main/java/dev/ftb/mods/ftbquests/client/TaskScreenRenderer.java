@@ -8,7 +8,7 @@ import dev.ftb.mods.ftblibrary.icon.AtlasSpriteIcon;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.IconAnimation;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;
-import dev.ftb.mods.ftbquests.FTBQuests;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.block.TaskScreenBlock;
 import dev.ftb.mods.ftbquests.block.entity.TaskScreenBlockEntity;
 import dev.ftb.mods.ftbquests.quest.TeamData;
@@ -33,12 +33,12 @@ import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
 
 public class TaskScreenRenderer implements BlockEntityRenderer<TaskScreenBlockEntity> {
-    public static final ResourceLocation INPUT_ONLY_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "tasks/input_only");
-    public static final ResourceLocation TANK_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "tasks/tank");
-    public static final ResourceLocation FE_ENERGY_EMPTY_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "tasks/fe_empty");
-    public static final ResourceLocation FE_ENERGY_FULL_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "tasks/fe_full");
-    public static final ResourceLocation TR_ENERGY_EMPTY_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "tasks/ic2_empty");
-    public static final ResourceLocation TR_ENERGY_FULL_TEXTURE = new ResourceLocation(FTBQuests.MOD_ID, "tasks/ic2_full");
+    public static final ResourceLocation INPUT_ONLY_TEXTURE = new ResourceLocation(FTBQuestsAPI.MOD_ID, "tasks/input_only");
+    public static final ResourceLocation TANK_TEXTURE = new ResourceLocation(FTBQuestsAPI.MOD_ID, "tasks/tank");
+    public static final ResourceLocation FE_ENERGY_EMPTY_TEXTURE = new ResourceLocation(FTBQuestsAPI.MOD_ID, "tasks/fe_empty");
+    public static final ResourceLocation FE_ENERGY_FULL_TEXTURE = new ResourceLocation(FTBQuestsAPI.MOD_ID, "tasks/fe_full");
+    public static final ResourceLocation TR_ENERGY_EMPTY_TEXTURE = new ResourceLocation(FTBQuestsAPI.MOD_ID, "tasks/ic2_empty");
+    public static final ResourceLocation TR_ENERGY_FULL_TEXTURE = new ResourceLocation(FTBQuestsAPI.MOD_ID, "tasks/ic2_full");
 
     private final BlockEntityRendererProvider.Context context;
 

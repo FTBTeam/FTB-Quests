@@ -3,9 +3,9 @@ package dev.ftb.mods.ftbquests.events;
 import dev.architectury.event.Event;
 import dev.architectury.event.EventActor;
 import dev.architectury.event.EventFactory;
+import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
 import dev.ftb.mods.ftbquests.quest.Chapter;
 import dev.ftb.mods.ftbquests.quest.Quest;
-import dev.ftb.mods.ftbquests.quest.QuestFile;
 import dev.ftb.mods.ftbquests.quest.QuestObject;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 
@@ -30,12 +30,12 @@ public class ObjectStartedEvent<T extends QuestObject> extends ObjectProgressEve
 		super(d);
 	}
 
-	public static class FileEvent extends ObjectStartedEvent<QuestFile> {
-		public FileEvent(QuestProgressEventData<QuestFile> d) {
+	public static class FileEvent extends ObjectStartedEvent<BaseQuestFile> {
+		public FileEvent(QuestProgressEventData<BaseQuestFile> d) {
 			super(d);
 		}
 
-		public QuestFile getFile() {
+		public BaseQuestFile getFile() {
 			return getObject();
 		}
 	}

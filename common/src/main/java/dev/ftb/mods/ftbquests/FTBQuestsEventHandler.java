@@ -9,7 +9,7 @@ import dev.ftb.mods.ftbquests.block.entity.FTBQuestsBlockEntities;
 import dev.ftb.mods.ftbquests.command.FTBQuestsCommands;
 import dev.ftb.mods.ftbquests.events.ClearFileCacheEvent;
 import dev.ftb.mods.ftbquests.item.FTBQuestsItems;
-import dev.ftb.mods.ftbquests.quest.QuestFile;
+import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.task.DimensionTask;
@@ -93,7 +93,7 @@ public enum FTBQuestsEventHandler {
 		}
 	}
 
-	private void fileCacheClear(QuestFile file) {
+	private void fileCacheClear(BaseQuestFile file) {
 		if (file.isServerSide()) {
 			killTasks = null;
 			autoSubmitTasks = null;
@@ -122,7 +122,7 @@ public enum FTBQuestsEventHandler {
 				return EventResult.pass();
 			}
 
-			TeamData data = ServerQuestFile.INSTANCE.getData(player);
+			TeamData data = ServerQuestFile.INSTANCE.getOrCreateTeamData(player);
 
 			for (KillTask task : killTasks) {
 				if (data.getProgress(task) < task.getMaxProgress() && data.canStartTasks(task.getQuest())) {
@@ -147,7 +147,7 @@ public enum FTBQuestsEventHandler {
 				return;
 			}
 
-			TeamData data = file.getData(player);
+			TeamData data = file.getOrCreateTeamData(player);
 
 			if (data.isLocked()) {
 				return;
@@ -204,7 +204,7 @@ public enum FTBQuestsEventHandler {
 	private void changedDimension(ServerPlayer player, ResourceKey<Level> oldLevel, ResourceKey<Level> newLevel) {
 		if (!PlayerHooks.isFake(player)) {
 			ServerQuestFile file = ServerQuestFile.INSTANCE;
-			TeamData data = file.getData(player);
+			TeamData data = file.getOrCreateTeamData(player);
 
 			if (data.isLocked()) {
 				return;

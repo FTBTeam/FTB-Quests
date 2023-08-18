@@ -33,10 +33,7 @@ import java.util.Date;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-/**
- * @author LatvianModder
- */
-public class ServerQuestFile extends QuestFile {
+public class ServerQuestFile extends BaseQuestFile {
 	public static final LevelResource FTBQUESTS_DATA = new LevelResource("ftbquests");
 
 	public static ServerQuestFile INSTANCE;
@@ -143,7 +140,7 @@ public class ServerQuestFile extends QuestFile {
 			shouldSave = false;
 		}
 
-		getAllData().forEach(TeamData::saveIfChanged);
+		getAllTeamData().forEach(TeamData::saveIfChanged);
 	}
 
 	public void unload() {
@@ -167,7 +164,7 @@ public class ServerQuestFile extends QuestFile {
 
 	public void playerLoggedIn(PlayerLoggedInAfterTeamEvent event) {
 		ServerPlayer player = event.getPlayer();
-		TeamData data = getData(event.getTeam());
+		TeamData data = getOrCreateTeamData(event.getTeam());
 
 		// Sync the quest book data
 		// - client will respond to this with a RequestTeamData message
@@ -210,7 +207,7 @@ public class ServerQuestFile extends QuestFile {
 
 		if (event.getTeam() instanceof PartyTeam) {
 			FTBTeamsAPI.api().getManager().getPlayerTeamForPlayerID(event.getCreator().getUUID()).ifPresent(playerTeam -> {
-				TeamData oldTeamData = getData(playerTeam);
+				TeamData oldTeamData = getOrCreateTeamData(playerTeam);
 				data.copyData(oldTeamData);
 			});
 		}
@@ -222,8 +219,8 @@ public class ServerQuestFile extends QuestFile {
 
 	public void playerChangedTeam(PlayerChangedTeamEvent event) {
 		if (event.getPreviousTeam().isPresent()) {
-			TeamData oldTeamData = getData(event.getPreviousTeam().get());
-			TeamData newTeamData = getData(event.getTeam());
+			TeamData oldTeamData = getOrCreateTeamData(event.getPreviousTeam().get());
+			TeamData newTeamData = getOrCreateTeamData(event.getTeam());
 
 			if (event.getPreviousTeam().get() instanceof PlayerTeam && event.getTeam() instanceof PartyTeam && !((PartyTeam) event.getTeam()).isOwner(event.getPlayerId())) {
 				newTeamData.mergeData(oldTeamData);

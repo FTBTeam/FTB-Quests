@@ -6,7 +6,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Component;
 
 public class DefaultChapterGroup extends ChapterGroup {
-	public DefaultChapterGroup(QuestFile f) {
+	public DefaultChapterGroup(BaseQuestFile f) {
 		super(0L, f);
 	}
 

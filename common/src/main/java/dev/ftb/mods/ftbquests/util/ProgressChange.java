@@ -1,6 +1,6 @@
 package dev.ftb.mods.ftbquests.util;
 
-import dev.ftb.mods.ftbquests.quest.QuestFile;
+import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.TeamData;
@@ -10,14 +10,14 @@ import java.util.Date;
 import java.util.UUID;
 
 public class ProgressChange {
-	private final QuestFile file;
+	private final BaseQuestFile file;
 	private final Date date;
 	private final QuestObjectBase origin;
 	private final UUID playerId;
 	private boolean reset;
 	private boolean notifications;
 
-	public ProgressChange(QuestFile file, QuestObjectBase origin, UUID playerId) {
+	public ProgressChange(BaseQuestFile file, QuestObjectBase origin, UUID playerId) {
 		this.file = file;
 		this.origin = origin;
 		this.playerId = playerId;
@@ -27,7 +27,7 @@ public class ProgressChange {
 		notifications = false;
 	}
 
-	public ProgressChange(QuestFile f, FriendlyByteBuf buffer) {
+	public ProgressChange(BaseQuestFile f, FriendlyByteBuf buffer) {
 		file = f;
 		date = new Date();
 		origin = file.getBase(buffer.readLong());
@@ -45,7 +45,7 @@ public class ProgressChange {
 
 	public void maybeForceProgress(UUID teamId) {
 		if (origin != null) {
-			TeamData t = ServerQuestFile.INSTANCE.getData(teamId);
+			TeamData t = ServerQuestFile.INSTANCE.getOrCreateTeamData(teamId);
 			origin.forceProgressRaw(t, this);
 		}
 	}

@@ -5,21 +5,21 @@ import dev.architectury.networking.simple.BaseS2CMessage;
 import dev.architectury.networking.simple.MessageType;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
-import dev.ftb.mods.ftbquests.quest.QuestFile;
+import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
 import net.minecraft.network.FriendlyByteBuf;
 
 /**
  * @author LatvianModder
  */
 public class SyncQuestsMessage extends BaseS2CMessage {
-	private final QuestFile file;
+	private final BaseQuestFile file;
 
 	SyncQuestsMessage(FriendlyByteBuf buffer) {
 		file = FTBQuestsClient.createClientQuestFile();
 		file.readNetDataFull(buffer);
 	}
 
-	public SyncQuestsMessage(QuestFile f) {
+	public SyncQuestsMessage(BaseQuestFile f) {
 		file = f;
 	}
 
