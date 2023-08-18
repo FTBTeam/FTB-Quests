@@ -13,7 +13,6 @@ import dev.ftb.mods.ftblibrary.ui.*;
 import dev.ftb.mods.ftblibrary.ui.input.Key;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.ui.misc.SelectImagePreScreen;
-import dev.ftb.mods.ftblibrary.util.StringUtils;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.net.*;
 import dev.ftb.mods.ftbquests.quest.*;
@@ -326,21 +325,7 @@ public class QuestPanel extends Panel {
 			if (questScreen.file.canEdit()) {
 				PoseStack poseStack = graphics.pose();
 
-				poseStack.pushPose();
-				poseStack.translate(0, 0, 600);
-				theme.drawString(graphics, "X:" + (questX < 0 ? "" : " ") + StringUtils.DOUBLE_FORMATTER_00.format(questX), x + 3, y + h - 18, Theme.SHADOW);
-				theme.drawString(graphics, "Y:" + (questY < 0 ? "" : " ") + StringUtils.DOUBLE_FORMATTER_00.format(questY), x + 3, y + h - 10, Theme.SHADOW);
-
-				if (questScreen.movingObjects) {
-					theme.drawString(graphics, "Moving", x + 3, y + h - 34, Theme.SHADOW);
-				}
-				if (!questScreen.selectedObjects.isEmpty()) {
-					theme.drawString(graphics, "Selected: " + questScreen.selectedObjects.size(), x + 3, y + h - 26, Theme.SHADOW);
-				}
-
-				theme.drawString(graphics, "CX:" + (centerQuestX < 0 ? "" : " ") + StringUtils.DOUBLE_FORMATTER_00.format(centerQuestX), x + w - 42, y + h - 18, Theme.SHADOW);
-				theme.drawString(graphics, "CY:" + (centerQuestY < 0 ? "" : " ") + StringUtils.DOUBLE_FORMATTER_00.format(centerQuestY), x + w - 42, y + h - 10, Theme.SHADOW);
-				poseStack.popPose();
+				drawStatusBar(graphics, theme, poseStack);
 
 				double bs = questScreen.getQuestButtonSize();
 
@@ -375,7 +360,7 @@ public class QuestPanel extends Panel {
 						double boxH = omaxY / dy * questScreen.scrollHeight + py - boxY;
 
 						poseStack.pushPose();
-						poseStack.translate(0, 0, 1000);
+						poseStack.translate(0, 0, 200);
 						GuiHelper.drawHollowRect(graphics, (int) boxX, (int) boxY, (int) boxW, (int) boxH, Color4I.WHITE.withAlpha(30), false);
 						poseStack.popPose();
 					}
@@ -405,6 +390,34 @@ public class QuestPanel extends Panel {
 				}
 			}
 		}
+	}
+
+	private void drawStatusBar(GuiGraphics graphics, Theme theme, PoseStack poseStack) {
+		poseStack.pushPose();
+
+		int statusX = questScreen.chapterPanel.expanded ? questScreen.chapterPanel.width : questScreen.expandChaptersButton.width;
+		int statusWidth = questScreen.chapterPanel.expanded ? width - statusX + questScreen.expandChaptersButton.width : width;
+		Color4I statPanelBg = ThemeProperties.WIDGET_BACKGROUND.get();
+		Color4I.DARK_GRAY.draw(graphics, statusX, height - 9, statusWidth, 1);
+		statPanelBg.draw(graphics, statusX, height - 9, statusWidth, 10);
+
+		poseStack.translate(statusX, height - 6, 600);
+		poseStack.scale(0.5f, 0.5f, 0.5f);
+
+		String curStr = String.format("Cursor: [%+.2f, %+.2f]", questX, questY);
+		theme.drawString(graphics, curStr, 6, 0, Theme.SHADOW);
+
+		String cStr = String.format("Center: [%.2f, %.2f]", centerQuestX, centerQuestY);
+		theme.drawString(graphics, cStr, statusWidth * 2 - theme.getStringWidth(cStr) - 6, 0, Theme.SHADOW);
+
+		int total = questScreen.selectedChapter.getQuests().size() + questScreen.selectedChapter.getQuestLinks().size();
+		String sStr = String.format("Selected: %d / %d", questScreen.selectedObjects.size(), total);
+		theme.drawString(graphics, sStr, statusWidth / 2, 0, Theme.SHADOW);
+
+		if (questScreen.movingObjects) {
+			theme.drawString(graphics, "Moving", statusWidth, 0, Theme.SHADOW);
+		}
+		poseStack.popPose();
 	}
 
 	@Override
