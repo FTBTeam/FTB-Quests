@@ -175,7 +175,7 @@ public class FTBQuestsNetClient {
 		data.setQuestPinned(Minecraft.getInstance().player, id, pinned);
 
 		ClientQuestFile.INSTANCE.getQuestScreen().ifPresent(questScreen -> {
-			questScreen.otherButtonsBottomPanel.refreshWidgets();
+			questScreen.otherButtonsTopPanel.refreshWidgets();
 			questScreen.refreshViewQuestPanel();
 		});
 	}

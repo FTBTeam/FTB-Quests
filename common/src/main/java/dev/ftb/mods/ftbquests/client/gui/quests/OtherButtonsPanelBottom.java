@@ -11,8 +11,6 @@ import dev.ftb.mods.ftbquests.client.gui.RewardTablesScreen;
 import dev.ftb.mods.ftbquests.net.ChangeProgressMessage;
 import dev.ftb.mods.ftbquests.net.ForceSaveMessage;
 import dev.ftb.mods.ftbquests.net.ToggleEditingModeMessage;
-import dev.ftb.mods.ftbquests.net.TogglePinnedMessage;
-import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.task.StructureTask;
 import dev.ftb.mods.ftbquests.quest.theme.ThemeLoader;
 import dev.ftb.mods.ftbquests.quest.theme.property.ThemeProperties;
@@ -32,8 +30,6 @@ public class OtherButtonsPanelBottom extends OtherButtonsPanel {
 
 	@Override
 	public void addWidgets() {
-		add(new AutopinButton(this));
-
 		if (questScreen.file.canEdit()) {
 			add(new EditSettingsButton(this));
 		}
@@ -49,28 +45,6 @@ public class OtherButtonsPanelBottom extends OtherButtonsPanel {
 	public void alignWidgets() {
 		setHeight(align(WidgetLayout.VERTICAL));
 		setPos(questScreen.width - width, questScreen.height - height - 1);
-	}
-
-	/**
-	 * Autopin button
-	 */
-	public static class AutopinButton extends TabButton {
-		public AutopinButton(Panel panel) {
-			super(panel,
-					Component.translatable(isAutoPin() ? "ftbquests.gui.autopin.on" : "ftbquests.gui.autopin.off"),
-					isAutoPin() ? ThemeProperties.PIN_ICON_ON.get() : ThemeProperties.PIN_ICON_OFF.get()
-			);
-		}
-
-		private static boolean isAutoPin() {
-			return ClientQuestFile.isQuestPinned(TeamData.AUTO_PIN_ID);
-		}
-
-		@Override
-		public void onClicked(MouseButton button) {
-			playClickSound();
-			new TogglePinnedMessage(TeamData.AUTO_PIN_ID).sendToServer();
-		}
 	}
 
 	/**
