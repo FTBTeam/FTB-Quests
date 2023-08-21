@@ -37,9 +37,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.function.Consumer;
 
-/**
- * @author LatvianModder
- */
 public class QuestPanel extends Panel {
 	private static final ImageIcon DEFAULT_DEPENDENCY_LINE_TEXTURE = (ImageIcon) Icon.getIcon(FTBQuestsAPI.MOD_ID + ":textures/gui/dependency.png");
 
@@ -599,7 +596,13 @@ public class QuestPanel extends Panel {
 	@Override
 	public boolean scrollPanel(double scroll) {
 		if (questScreen.selectedChapter != null && !questScreen.isViewingQuest() && isMouseOver()) {
-			questScreen.addZoom(scroll);
+			if (isShiftKeyDown()) {
+				setScrollX(getScrollX() - scroll * 15);
+			} else if (isCtrlKeyDown()) {
+				questScreen.addZoom(scroll);
+			} else {
+				setScrollY(getScrollY() - scroll * 15);
+			}
 			return true;
 		}
 
