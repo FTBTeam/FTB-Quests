@@ -2,8 +2,10 @@ package dev.ftb.mods.ftbquests.quest;
 
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.StringConfig;
+import dev.ftb.mods.ftblibrary.config.Tristate;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.IconAnimation;
+import dev.ftb.mods.ftblibrary.math.Bits;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
 import dev.ftb.mods.ftbquests.events.ObjectCompletedEvent;
 import dev.ftb.mods.ftbquests.events.ObjectStartedEvent;
@@ -32,12 +34,15 @@ public final class Chapter extends QuestObject {
 	private final List<String> rawSubtitle;
 	boolean alwaysInvisible;
 	private String defaultQuestShape;
+	private double defaultQuestSize;
 	private final List<ChapterImage> images;
 	boolean defaultHideDependencyLines;
 	private int defaultMinWidth = 0;
 	private ProgressionMode progressionMode;
 	private boolean hideQuestDetailsUntilStartable;
 	private boolean hideQuestUntilDepsVisible;
+	private boolean defaultRepeatable;
+	private Tristate consumeItems;
 
 	public Chapter(long id, BaseQuestFile file, ChapterGroup group) {
 		this(id, file, group, "");
@@ -54,11 +59,14 @@ public final class Chapter extends QuestObject {
 		rawSubtitle = new ArrayList<>(0);
 		alwaysInvisible = false;
 		defaultQuestShape = "";
+		defaultQuestSize = 1D;
 		images = new ArrayList<>();
 		defaultHideDependencyLines = false;
 		progressionMode = ProgressionMode.DEFAULT;
 		hideQuestUntilDepsVisible = false;
 		hideQuestDetailsUntilStartable = false;
+		defaultRepeatable = false;
+		consumeItems = Tristate.DEFAULT;
 	}
 
 	public void setDefaultQuestShape(String defaultQuestShape) {
@@ -94,6 +102,10 @@ public final class Chapter extends QuestObject {
 
 	public boolean isAlwaysInvisible() {
 		return alwaysInvisible;
+	}
+
+	public boolean isDefaultRepeatable() {
+		return defaultRepeatable;
 	}
 
 	public List<Quest> getQuests() {
@@ -132,6 +144,9 @@ public final class Chapter extends QuestObject {
 		}
 
 		nbt.putString("default_quest_shape", defaultQuestShape);
+		if (defaultQuestSize != 1D) {
+			nbt.putDouble("default_quest_size", defaultQuestSize);
+		}
 		nbt.putBoolean("default_hide_dependency_lines", defaultHideDependencyLines);
 
 		if (!images.isEmpty()) {
@@ -154,8 +169,11 @@ public final class Chapter extends QuestObject {
 			nbt.putString("progression_mode", progressionMode.getId());
 		}
 
+		consumeItems.write(nbt, "consume_items");
+
 		if (hideQuestDetailsUntilStartable) nbt.putBoolean("hide_quest_details_until_startable", true);
 		if (hideQuestUntilDepsVisible) nbt.putBoolean("hide_quest_until_deps_visible", true);
+		if (defaultRepeatable) nbt.putBoolean("default_repeatable_quest", true);
 	}
 
 	@Override
@@ -177,6 +195,10 @@ public final class Chapter extends QuestObject {
 			defaultQuestShape = "";
 		}
 
+		defaultQuestSize = nbt.contains("default_quest_size", SNBTCompoundTag.TAG_DOUBLE) ?
+				nbt.getDouble("default_quest_size") :
+				1D;
+
 		defaultHideDependencyLines = nbt.getBoolean("default_hide_dependency_lines");
 
 		ListTag imgs = nbt.getList("images", Tag.TAG_COMPOUND);
@@ -191,8 +213,10 @@ public final class Chapter extends QuestObject {
 
 		defaultMinWidth = nbt.getInt("default_min_width");
 		progressionMode = ProgressionMode.NAME_MAP.get(nbt.getString("progression_mode"));
+		consumeItems = Tristate.read(nbt, "consume_items");
 		hideQuestDetailsUntilStartable = nbt.getBoolean("hide_quest_details_until_startable");
 		hideQuestUntilDepsVisible = nbt.getBoolean("hide_quest_until_deps_visible");
+		defaultRepeatable = nbt.getBoolean("default_repeatable_quest");
 	}
 
 	@Override
@@ -200,14 +224,21 @@ public final class Chapter extends QuestObject {
 		super.writeNetData(buffer);
 		buffer.writeUtf(filename, Short.MAX_VALUE);
 		NetUtils.writeStrings(buffer, rawSubtitle);
-		buffer.writeBoolean(alwaysInvisible);
 		buffer.writeUtf(defaultQuestShape, Short.MAX_VALUE);
+		buffer.writeDouble(defaultQuestSize);
 		NetUtils.write(buffer, images, (d, img) -> img.writeNetData(d));
-		buffer.writeBoolean(defaultHideDependencyLines);
 		buffer.writeInt(defaultMinWidth);
 		ProgressionMode.NAME_MAP.write(buffer, progressionMode);
-		buffer.writeBoolean(hideQuestDetailsUntilStartable);
-		buffer.writeBoolean(hideQuestUntilDepsVisible);
+
+		int flags = 0;
+		flags = Bits.setFlag(flags, 0x01, alwaysInvisible);
+		flags = Bits.setFlag(flags, 0x02, defaultHideDependencyLines);
+		flags = Bits.setFlag(flags, 0x08, hideQuestDetailsUntilStartable);
+		flags = Bits.setFlag(flags, 0x04, hideQuestUntilDepsVisible);
+		flags = Bits.setFlag(flags, 0x10, defaultRepeatable);
+		flags = Bits.setFlag(flags, 0x20, consumeItems != Tristate.DEFAULT);
+		flags = Bits.setFlag(flags, 0x40, consumeItems == Tristate.TRUE);
+		buffer.writeVarInt(flags);
 	}
 
 	@Override
@@ -215,18 +246,23 @@ public final class Chapter extends QuestObject {
 		super.readNetData(buffer);
 		filename = buffer.readUtf(Short.MAX_VALUE);
 		NetUtils.readStrings(buffer, rawSubtitle);
-		alwaysInvisible = buffer.readBoolean();
 		defaultQuestShape = buffer.readUtf(Short.MAX_VALUE);
+		defaultQuestSize = buffer.readDouble();
 		NetUtils.read(buffer, images, d -> {
 			ChapterImage image = new ChapterImage(this);
 			image.readNetData(d);
 			return image;
 		});
-		defaultHideDependencyLines = buffer.readBoolean();
 		defaultMinWidth = buffer.readInt();
 		progressionMode = ProgressionMode.NAME_MAP.read(buffer);
-		hideQuestDetailsUntilStartable = buffer.readBoolean();
-		hideQuestUntilDepsVisible = buffer.readBoolean();
+
+		int flags = buffer.readVarInt();
+		alwaysInvisible = Bits.getFlag(flags, 0x01);
+		defaultHideDependencyLines = Bits.getFlag(flags, 0x02);
+		hideQuestDetailsUntilStartable = Bits.getFlag(flags, 0x04);
+		hideQuestUntilDepsVisible = Bits.getFlag(flags, 0x08);
+		defaultRepeatable = Bits.getFlag(flags, 0x10);
+		consumeItems = Bits.getFlag(flags, 0x20) ? Bits.getFlag(flags, 0x40) ? Tristate.TRUE : Tristate.FALSE : Tristate.DEFAULT;
 	}
 
 	public int getIndex() {
@@ -371,6 +407,7 @@ public final class Chapter extends QuestObject {
 
 		ConfigGroup appearance = config.getOrCreateSubgroup("appearance").setNameKey("ftbquests.quest.appearance");
 		appearance.addEnum("default_quest_shape", defaultQuestShape.isEmpty() ? "default" : defaultQuestShape, v -> defaultQuestShape = v.equals("default") ? "" : v, QuestShape.idMapWithDefault);
+		appearance.addDouble("default_quest_size", defaultQuestSize, v -> defaultQuestSize = v, 1, 0.0625D, 8D);
 		appearance.addInt("default_min_width", defaultMinWidth, v -> defaultMinWidth = v, 0, 0, 3000);
 
 		ConfigGroup visibility = config.getOrCreateSubgroup("visibility").setNameKey("ftbquests.quest.visibility");
@@ -381,6 +418,8 @@ public final class Chapter extends QuestObject {
 
 		ConfigGroup misc = config.getOrCreateSubgroup("misc").setNameKey("ftbquests.quest.misc");
 		misc.addEnum("progression_mode", progressionMode, v -> progressionMode = v, ProgressionMode.NAME_MAP);
+		misc.addBool("default_repeatable", defaultRepeatable, v -> defaultRepeatable = v, false);
+		misc.addTristate("consume_items", consumeItems, v -> consumeItems = v);
 	}
 
 	@Override
@@ -470,5 +509,13 @@ public final class Chapter extends QuestObject {
 
 	public List<String> getRawSubtitle() {
 		return Collections.unmodifiableList(rawSubtitle);
+	}
+
+	public boolean consumeItems() {
+		return consumeItems.get(file.isDefaultTeamConsumeItems());
+	}
+
+	public double getDefaultQuestSize() {
+		return defaultQuestSize;
 	}
 }

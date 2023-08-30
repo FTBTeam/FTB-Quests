@@ -63,7 +63,7 @@ public final class Quest extends QuestObject implements Movable {
 	private double size;
 	private boolean optional;
 	private int minWidth;
-	private boolean canRepeat;
+	private Tristate canRepeat;
 	private boolean invisible;  // invisible to players (not the same as hidden!)
 	private int invisibleUntilTasks;  // invisible until at least X number of tasks have been completed
 
@@ -95,10 +95,10 @@ public final class Quest extends QuestObject implements Movable {
 		hideTextUntilComplete = Tristate.DEFAULT;
 		disableJEI = Tristate.DEFAULT;
 		hideDetailsUntilStartable = Tristate.DEFAULT;
-		size = 1D;
+		size = 0D;
 		optional = false;
 		minWidth = 0;
-		canRepeat = false;
+		canRepeat = Tristate.DEFAULT;
 		invisible = false;
 		invisibleUntilTasks = 0;
 		ignoreRewardBlocking = false;
@@ -171,7 +171,7 @@ public final class Quest extends QuestObject implements Movable {
 	}
 
 	public double getSize() {
-		return size;
+		return size == 0D ? chapter.getDefaultQuestSize() : size;
 	}
 
 	public void setSize(double size) {
@@ -187,7 +187,7 @@ public final class Quest extends QuestObject implements Movable {
 	}
 
 	public boolean canBeRepeated() {
-		return canRepeat;
+		return canRepeat.get(chapter.isDefaultRepeatable());
 	}
 
 	public List<String> getRawDescription() {
@@ -250,7 +250,7 @@ public final class Quest extends QuestObject implements Movable {
 
 		hideTextUntilComplete.write(nbt,"hide_text_until_complete");
 
-		if (size != 1D) {
+		if (size != 0D) {
 			nbt.putDouble("size", size);
 		}
 
@@ -262,9 +262,7 @@ public final class Quest extends QuestObject implements Movable {
 			nbt.putInt("min_width", minWidth);
 		}
 
-		if (canRepeat) {
-			nbt.putBoolean("can_repeat", true);
-		}
+		canRepeat.write(nbt, "can_repeat");
 
 		if (invisible) {
 			nbt.putBoolean("invisible", true);
@@ -334,10 +332,10 @@ public final class Quest extends QuestObject implements Movable {
 		hideUntilDepsVisible = Tristate.read(nbt, "hide");
 		dependencyRequirement = DependencyRequirement.NAME_MAP.get(nbt.getString("dependency_requirement"));
 		hideTextUntilComplete = Tristate.read(nbt, "hide_text_until_complete");
-		size = nbt.contains("size") ? nbt.getDouble("size") : 1D;
+		size = nbt.getDouble("size");
 		optional = nbt.getBoolean("optional");
 		minWidth = nbt.getInt("min_width");
-		canRepeat = nbt.getBoolean("can_repeat");
+		canRepeat = Tristate.read(nbt, "can_repeat");
 		invisible = nbt.getBoolean("invisible");
 		invisibleUntilTasks = nbt.getInt("invisible_until_tasks");
 		ignoreRewardBlocking = nbt.getBoolean("ignore_reward_blocking");
@@ -351,19 +349,20 @@ public final class Quest extends QuestObject implements Movable {
 		int flags = 0;
 		flags = Bits.setFlag(flags, 0x01, !rawSubtitle.isEmpty());
 		flags = Bits.setFlag(flags, 0x02, !rawDescription.isEmpty());
-		flags = Bits.setFlag(flags, 0x04, size != 1D);
+		flags = Bits.setFlag(flags, 0x04, size != 0D);
 		flags = Bits.setFlag(flags, 0x08, !guidePage.isEmpty());
 		flags = Bits.setFlag(flags, 0x10, ignoreRewardBlocking);
 		flags = Bits.setFlag(flags, 0x20, hideDependentLines);
 		//implement others
 		//flags = Bits.setFlag(flags, 32, !customClick.isEmpty());
-		flags = Bits.setFlag(flags, 0x40, canRepeat);
 		flags = Bits.setFlag(flags, 0x80, invisible);
 		flags = Bits.setFlag(flags, 0x100, optional);
 		flags = Bits.setFlag(flags, 0x200, minWidth > 0);
 		flags = Bits.setFlag(flags, 0x400, invisibleUntilTasks > 0);
 		flags = Bits.setFlag(flags, 0x800, hideDetailsUntilStartable != Tristate.DEFAULT);
 		flags = Bits.setFlag(flags, 0x1000, hideDetailsUntilStartable == Tristate.TRUE);
+		flags = Bits.setFlag(flags, 0x2000, canRepeat != Tristate.DEFAULT);
+		flags = Bits.setFlag(flags, 0x4000, canRepeat == Tristate.TRUE);
 		buffer.writeVarInt(flags);
 
 		hideUntilDepsVisible.write(buffer);
@@ -394,7 +393,7 @@ public final class Quest extends QuestObject implements Movable {
 			buffer.writeLong(d.invalid ? 0L : d.id);
 		}
 
-		if (size != 1D) {
+		if (size != 0D) {
 			buffer.writeDouble(size);
 		}
 
@@ -444,11 +443,11 @@ public final class Quest extends QuestObject implements Movable {
 			}
 		}
 
-		size = Bits.getFlag(flags, 0x04) ? buffer.readDouble() : 1D;
+		size = Bits.getFlag(flags, 0x04) ? buffer.readDouble() : 0D;
 		minWidth = Bits.getFlag(flags, 0x200) ? buffer.readVarInt() : 0;
 		ignoreRewardBlocking = Bits.getFlag(flags, 0x10);
 		hideDependentLines = Bits.getFlag(flags, 0x20);
-		canRepeat = Bits.getFlag(flags, 0x40);
+		canRepeat = Bits.getFlag(flags, 0x2000) ? Bits.getFlag(flags, 0x4000) ? Tristate.TRUE : Tristate.FALSE : Tristate.DEFAULT;
 		invisible = Bits.getFlag(flags, 0x80);
 		optional = Bits.getFlag(flags, 0x100);
 		invisibleUntilTasks = Bits.getFlag(flags, 0x400) ? buffer.readVarInt() : 0;
@@ -624,7 +623,7 @@ public final class Quest extends QuestObject implements Movable {
 
 		ConfigGroup appearance = config.getOrCreateSubgroup("appearance");
 		appearance.addEnum("shape", shape.isEmpty() ? "default" : shape, v -> shape = v.equals("default") ? "" : v, QuestShape.idMapWithDefault);
-		appearance.addDouble("size", size, v -> size = v, 1, 0.0625D, 8D);
+		appearance.addDouble("size", size, v -> size = v, 0, 0, 8D);
 		appearance.addDouble("x", x, v -> x = v, 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
 		appearance.addDouble("y", y, v -> y = v, 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
 		appearance.addInt("min_width", minWidth, v -> minWidth = v, 0, 0, 3000);
@@ -648,7 +647,7 @@ public final class Quest extends QuestObject implements Movable {
 		ConfigGroup misc = config.getOrCreateSubgroup("misc");
 		misc.addString("guide_page", guidePage, v -> guidePage = v, "");
 		misc.addEnum("disable_jei", disableJEI, v -> disableJEI = v, Tristate.NAME_MAP);
-		misc.addBool("can_repeat", canRepeat, v -> canRepeat = v, false);
+		misc.addTristate("can_repeat", canRepeat, v -> canRepeat = v);
 		misc.addBool("optional", optional, v -> optional = v, false);
 		misc.addBool("ignore_reward_blocking", ignoreRewardBlocking, v -> ignoreRewardBlocking = v, false);
 		misc.addEnum("progression_mode", progressionMode, v -> progressionMode = v, ProgressionMode.NAME_MAP);
@@ -680,12 +679,12 @@ public final class Quest extends QuestObject implements Movable {
 
 	@Override
 	public double getWidth() {
-		return size;
+		return getSize();
 	}
 
 	@Override
 	public double getHeight() {
-		return size;
+		return getSize();
 	}
 
 	@Override
@@ -858,7 +857,7 @@ public final class Quest extends QuestObject implements Movable {
 	}
 
 	public boolean isProgressionIgnored() {
-		return canRepeat || optional;
+		return canBeRepeated() || optional;
 	}
 
 	/**
@@ -873,7 +872,7 @@ public final class Quest extends QuestObject implements Movable {
 	}
 
 	public void checkRepeatable(TeamData data, UUID player) {
-		if (canRepeat && rewards.stream().allMatch(r -> data.isRewardClaimed(player, r))) {
+		if (canBeRepeated() && rewards.stream().allMatch(r -> data.isRewardClaimed(player, r))) {
 			forceProgress(data, new ProgressChange(data.getFile(), this, player));
 		}
 	}
