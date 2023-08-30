@@ -609,8 +609,8 @@ public final class Quest extends QuestObject implements Movable {
 	@Environment(EnvType.CLIENT)
 	public void fillConfigGroup(ConfigGroup config) {
 		super.fillConfigGroup(config);
-		config.addString("subtitle", rawSubtitle, v -> rawSubtitle = v, "");
 
+		config.addString("subtitle", rawSubtitle, v -> rawSubtitle = v, "");
 		StringConfig descType = new StringConfig();
 		config.add("description", new ListConfig<String, StringConfig>(descType) {
 			@Override
@@ -622,32 +622,36 @@ public final class Quest extends QuestObject implements Movable {
 			rawDescription.addAll(t);
 		}, Collections.emptyList());
 
-		config.addEnum("shape", shape.isEmpty() ? "default" : shape, v -> shape = v.equals("default") ? "" : v, QuestShape.idMapWithDefault);
-		config.addTristate("hide", hideUntilDepsVisible, v -> hideUntilDepsVisible = v);
-		config.addDouble("size", size, v -> size = v, 1, 0.0625D, 8D);
-		config.addDouble("x", x, v -> x = v, 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
-		config.addDouble("y", y, v -> y = v, 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+		ConfigGroup appearance = config.getOrCreateSubgroup("appearance");
+		appearance.addEnum("shape", shape.isEmpty() ? "default" : shape, v -> shape = v.equals("default") ? "" : v, QuestShape.idMapWithDefault);
+		appearance.addDouble("size", size, v -> size = v, 1, 0.0625D, 8D);
+		appearance.addDouble("x", x, v -> x = v, 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+		appearance.addDouble("y", y, v -> y = v, 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+		appearance.addInt("min_width", minWidth, v -> minWidth = v, 0, 0, 3000);
+
+		ConfigGroup visibility = config.getOrCreateSubgroup("visibility");
+		visibility.addTristate("hide", hideUntilDepsVisible, v -> hideUntilDepsVisible = v);
+		visibility.addBool("invisible", invisible, v -> invisible = v, false);
+		visibility.addInt("invisible_until_tasks", invisibleUntilTasks, v -> invisibleUntilTasks = v, 0, 0, Integer.MAX_VALUE).setCanEdit(invisible);
+		visibility.addTristate("hide_details_until_startable", hideDetailsUntilStartable, v -> hideDetailsUntilStartable = v);
+		visibility.addTristate("hide_text_until_complete", hideTextUntilComplete, v -> hideTextUntilComplete = v);
 
 		Predicate<QuestObjectBase> depTypes = object -> object != chapter.file && object != chapter && object instanceof QuestObject;// && !(object instanceof Task);
-
 		removeInvalidDependencies();
+		ConfigGroup deps = config.getOrCreateSubgroup("dependencies");
+		deps.addList("dependencies", dependencies, new ConfigQuestObject<>(depTypes), null).setNameKey("ftbquests.dependencies");
+		deps.addEnum("dependency_requirement", dependencyRequirement, v -> dependencyRequirement = v, DependencyRequirement.NAME_MAP);
+		deps.addInt("min_required_dependencies", minRequiredDependencies, v -> minRequiredDependencies = v, 0, 0, Integer.MAX_VALUE);
+		deps.addTristate("hide_dependency_lines", hideDependencyLines, v -> hideDependencyLines = v);
+		deps.addBool("hide_dependent_lines", hideDependentLines, v -> hideDependentLines = v, false);
 
-		config.addBool("can_repeat", canRepeat, v -> canRepeat = v, false);
-		config.addList("dependencies", dependencies, new ConfigQuestObject<>(depTypes), null).setNameKey("ftbquests.dependencies");
-		config.addEnum("dependency_requirement", dependencyRequirement, v -> dependencyRequirement = v, DependencyRequirement.NAME_MAP);
-		config.addInt("min_required_dependencies", minRequiredDependencies, v -> minRequiredDependencies = v, 0, 0, Integer.MAX_VALUE);
-		config.addTristate("hide_dependency_lines", hideDependencyLines, v -> hideDependencyLines = v);
-		config.addBool("hide_dependent_lines", hideDependentLines, v -> hideDependentLines = v, false);
-		config.addString("guide_page", guidePage, v -> guidePage = v, "");
-		config.addTristate("hide_text_until_complete", hideTextUntilComplete, v -> hideTextUntilComplete = v);
-		config.addEnum("disable_jei", disableJEI, v -> disableJEI = v, Tristate.NAME_MAP);
-		config.addBool("optional", optional, v -> optional = v, false);
-		config.addInt("min_width", minWidth, v -> minWidth = v, 0, 0, 3000);
-		config.addBool("invisible", invisible, v -> invisible = v, false);
-		config.addInt("invisible_until_tasks", invisibleUntilTasks, v -> invisibleUntilTasks = v, 0, 0, Integer.MAX_VALUE);
-		config.addBool("ignore_reward_blocking", ignoreRewardBlocking, v -> ignoreRewardBlocking = v, false);
-		config.addEnum("progression_mode", progressionMode, v -> progressionMode = v, ProgressionMode.NAME_MAP);
-		config.addTristate("hide_details_until_startable", hideDetailsUntilStartable, v -> hideDetailsUntilStartable = v);
+		ConfigGroup misc = config.getOrCreateSubgroup("misc");
+		misc.addString("guide_page", guidePage, v -> guidePage = v, "");
+		misc.addEnum("disable_jei", disableJEI, v -> disableJEI = v, Tristate.NAME_MAP);
+		misc.addBool("can_repeat", canRepeat, v -> canRepeat = v, false);
+		misc.addBool("optional", optional, v -> optional = v, false);
+		misc.addBool("ignore_reward_blocking", ignoreRewardBlocking, v -> ignoreRewardBlocking = v, false);
+		misc.addEnum("progression_mode", progressionMode, v -> progressionMode = v, ProgressionMode.NAME_MAP);
 	}
 
 	public boolean shouldHideDependencyLines() {
