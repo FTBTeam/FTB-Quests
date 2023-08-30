@@ -325,7 +325,7 @@ public class QuestButton extends Button implements QuestPositionableButton {
 			list.add(Component.literal("[").withStyle(ChatFormatting.GRAY).append(Component.translatable("ftbquests.quest.optional")).append("]"));
 		}
 		if (quest.canBeRepeated()) {
-			list.add(Component.translatable("ftbquests.quest.can_repeat").withStyle(ChatFormatting.GRAY));
+			list.add(Component.translatable("ftbquests.quest.misc.can_repeat").withStyle(ChatFormatting.GRAY));
 		}
 		if (!questScreen.file.selfTeamData.canStartTasks(quest)) {
 			list.add(Component.literal("[").withStyle(ChatFormatting.DARK_GRAY).append(Component.translatable("ftbquests.quest.locked")).append("]"));

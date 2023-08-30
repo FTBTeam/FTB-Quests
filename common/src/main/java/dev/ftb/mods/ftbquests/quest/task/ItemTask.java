@@ -231,7 +231,7 @@ public class ItemTask extends Task implements Predicate<ItemStack> {
 
 	@Override
 	public boolean consumesResources() {
-		return consumeItems.get(getQuestFile().isDefaultTeamConsumeItems());
+		return consumeItems.get(getQuest().getChapter().consumeItems());
 	}
 
 	@Override
