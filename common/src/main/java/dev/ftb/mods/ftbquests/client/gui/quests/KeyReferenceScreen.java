@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
+import dev.ftb.mods.ftblibrary.config.ui.EditConfigScreen;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.ui.*;
@@ -41,6 +42,11 @@ public class KeyReferenceScreen extends BaseScreen {
     @Override
     public boolean onInit() {
         return setSizeProportional(0.7f, 0.8f);
+    }
+
+    @Override
+    public Theme getTheme() {
+        return EditConfigScreen.THEME;
     }
 
     @Override
