@@ -257,30 +257,25 @@ public class QuestScreen extends BaseScreen {
 		);
 	}
 
-	private void openPropertiesSubMenu(QuestObjectBase object, ConfigGroup g) {
-		List<ContextMenuItem> subMenu = new ArrayList<>();
-
-		subMenu.add(new ContextMenuItem(object.getTitle(), Color4I.empty(), null).setCloseMenu(false));
-		subMenu.add(ContextMenuItem.SEPARATOR);
-		for (ConfigValue<?> c : g.getValues()) {
-			if (c instanceof ConfigWithVariants) {
-				MutableComponent name = Component.translatable(c.getNameKey());
-
-				if (!c.getCanEdit()) {
+	private List<ContextMenuItem> scanForConfigEntries(List<ContextMenuItem> res, QuestObjectBase object, ConfigGroup g) {
+		for (ConfigValue<?> value : g.getValues()) {
+			if (value instanceof ConfigWithVariants) {
+				MutableComponent name = Component.translatable(value.getNameKey());
+				if (!value.getCanEdit()) {
 					name = name.withStyle(ChatFormatting.GRAY);
 				}
 
-				subMenu.add(new ContextMenuItem(name, Icons.SETTINGS, null) {
+				res.add(new ContextMenuItem(name, Icons.SETTINGS, null) {
 					@Override
 					public void addMouseOverText(TooltipList list) {
-						list.add(c.getStringForGUI());
+						list.add(value.getStringForGUI());
 					}
 
 					@Override
 					public void onClicked(Panel panel, MouseButton button) {
-						c.onClicked(button, accepted -> {
+						value.onClicked(button, accepted -> {
 							if (accepted) {
-								c.applyValue();
+								value.applyValue();
 								new EditObjectMessage(object).sendToServer();
 							}
 						});
@@ -288,11 +283,23 @@ public class QuestScreen extends BaseScreen {
 
 					@Override
 					public void drawIcon(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
-						c.getIcon().draw(graphics, x, y, w, h);
+						value.getIcon().draw(graphics, x, y, w, h);
 					}
 				});
 			}
 		}
+		for (ConfigGroup sub : g.getSubgroups()) {
+			scanForConfigEntries(res, object, sub);
+		}
+		return res;
+	}
+
+	private void openPropertiesSubMenu(QuestObjectBase object, ConfigGroup g) {
+		List<ContextMenuItem> subMenu = new ArrayList<>();
+
+		subMenu.add(new ContextMenuItem(object.getTitle(), Color4I.empty(), null).setCloseMenu(false));
+		subMenu.add(ContextMenuItem.SEPARATOR);
+		subMenu.addAll(scanForConfigEntries(new ArrayList<>(), object, g));
 
 		getGui().openContextMenu(subMenu);
 	}

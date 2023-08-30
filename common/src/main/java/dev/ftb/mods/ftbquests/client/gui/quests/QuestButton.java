@@ -217,7 +217,7 @@ public class QuestButton extends Button implements QuestPositionableButton {
 		double val = quests.stream().findFirst().map(Quest::getSize).orElse(1.0);
 		var c = new DoubleConfig(0.0625D, 8D);
 
-		EditConfigFromStringScreen.open(c, val, 1.0, Component.translatable("ftbquests.quest.size"), accepted -> {
+		EditConfigFromStringScreen.open(c, val, 1.0, Component.translatable("ftbquests.quest.appearance.size"), accepted -> {
 			if (accepted) {
 				quests.forEach(q -> {
 					q.setSize(c.getValue());
@@ -447,7 +447,7 @@ public class QuestButton extends Button implements QuestPositionableButton {
 	 */
 	@Override
 	public Position getPosition() {
-		return new Position(quest.getX(), quest.getY(), quest.getSize(), quest.getSize());
+		return new Position(quest.getX(), quest.getY(), quest.getWidth(), quest.getHeight());
 	}
 
 	/**
