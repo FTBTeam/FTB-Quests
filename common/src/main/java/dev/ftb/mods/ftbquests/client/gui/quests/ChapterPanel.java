@@ -348,13 +348,13 @@ public class ChapterPanel extends Panel {
 	}
 
 	public static class ChapterButton extends ListButton {
-		public final Chapter chapter;
-		public List<? extends Component> description;
+		private final Chapter chapter;
+		private final List<? extends Component> description;
 
 		public ChapterButton(ChapterPanel panel, Chapter c) {
 			super(panel, c.getTitle(), c.getIcon());
-			chapter = c;
 
+			chapter = c;
 			description = chapter.getRawSubtitle().stream()
 					.map(line -> TextUtils.parseRawText(line).copy().withStyle(ChatFormatting.GRAY))
 					.toList();
