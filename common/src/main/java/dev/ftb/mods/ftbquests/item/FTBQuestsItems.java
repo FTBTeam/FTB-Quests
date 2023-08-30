@@ -19,15 +19,9 @@ import net.minecraft.world.level.block.Block;
 
 import java.util.List;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 public class FTBQuestsItems {
 	public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(FTBQuestsAPI.MOD_ID, Registries.ITEM);
-
-	public static final RegistrySupplier<Item> BOOK = ITEMS.register("book", QuestBookItem::new);
-	public static final RegistrySupplier<Item> LOOTCRATE = ITEMS.register("lootcrate", LootCrateItem::new);
-	public static final RegistrySupplier<Item> MISSING_ITEM = ITEMS.register("missing_item", MissingItem::new);
-	public static final RegistrySupplier<Item> CUSTOM_ICON = ITEMS.register("custom_icon", CustomIconItem::new);
 
 	private static RegistrySupplier<Item> blockItem(String id, Supplier<Block> b) {
 		return ITEMS.register(id, () -> new BlockItem(b.get(), defaultProps()));
@@ -37,8 +31,14 @@ public class FTBQuestsItems {
 		return ITEMS.register(id, bi);
 	}
 
-	public static final RegistrySupplier<Item> BARRIER = ITEMS.register("barrier", QuestBarrierBlockItem::new);
-	public static final RegistrySupplier<Item> STAGE_BARRIER = ITEMS.register("stage_barrier", StageBarrierBlockItem::new);
+	public static final RegistrySupplier<Item> BOOK = ITEMS.register("book", QuestBookItem::new);
+	public static final RegistrySupplier<Item> LOOTCRATE = ITEMS.register("lootcrate", LootCrateItem::new);
+
+	public static final RegistrySupplier<Item> MISSING_ITEM = ITEMS.register("missing_item", MissingItem::new);
+	public static final RegistrySupplier<Item> CUSTOM_ICON = ITEMS.register("custom_icon", CustomIconItem::new);
+
+	public static final RegistrySupplier<Item> BARRIER = blockItemFor("barrier", QuestBarrierBlockItem::new);
+	public static final RegistrySupplier<Item> STAGE_BARRIER = blockItemFor("stage_barrier", StageBarrierBlockItem::new);
 	public static final RegistrySupplier<Item> DETECTOR = blockItem("detector", FTBQuestsBlocks.DETECTOR);
 	public static final RegistrySupplier<Item> LOOT_CRATE_OPENER = blockItem("loot_crate_opener", FTBQuestsBlocks.LOOT_CRATE_OPENER);
 
@@ -51,6 +51,17 @@ public class FTBQuestsItems {
 	public static final RegistrySupplier<Item> TASK_SCREEN_7 = blockItemFor("screen_7",
 			() -> new ScreenBlockItem(FTBQuestsBlocks.TASK_SCREEN_7.get(), ScreenSize.SEVEN_X_SEVEN));
 
+	public static final List<RegistrySupplier<Item>> BASE_ITEMS = List.of(
+			BOOK,
+			BARRIER,
+			STAGE_BARRIER,
+			DETECTOR,
+			LOOT_CRATE_OPENER,
+			TASK_SCREEN_1,
+			TASK_SCREEN_3,
+			TASK_SCREEN_5,
+			TASK_SCREEN_7
+	);
 
 	public static void register() {
 		ITEMS.register();
@@ -65,23 +76,11 @@ public class FTBQuestsItems {
 	}
 
 	private static CreativeModeTab buildDefaultTab() {
-		List<ItemStack> baseItems = Stream.of(
-				BOOK,
-				BARRIER,
-				STAGE_BARRIER,
-				DETECTOR,
-				LOOT_CRATE_OPENER,
-				TASK_SCREEN_1,
-				TASK_SCREEN_3,
-				TASK_SCREEN_5,
-				TASK_SCREEN_7
-		).map(item -> new ItemStack(item.get())).toList();
-
 		return CreativeTabRegistry.create(builder -> builder.title(Component.translatable("ftbquests"))
 				.icon(() -> new ItemStack(BOOK.get()))
 				.displayItems((params, output) -> {
 					// base items, always present
-					output.acceptAll(baseItems);
+					output.acceptAll(BASE_ITEMS.stream().map(item -> new ItemStack(item.get())).toList());
 					// dynamically add loot crates based on current reward tables
 					if (ClientQuestFile.exists()) {
 						ClientQuestFile.INSTANCE.getRewardTables().forEach(table -> {
