@@ -7,6 +7,7 @@ import dev.ftb.mods.ftblibrary.ui.WidgetLayout;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
+import dev.ftb.mods.ftbquests.client.gui.CustomToast;
 import dev.ftb.mods.ftbquests.client.gui.RewardTablesScreen;
 import dev.ftb.mods.ftbquests.net.ChangeProgressMessage;
 import dev.ftb.mods.ftbquests.net.ForceSaveMessage;
@@ -120,6 +121,7 @@ public class OtherButtonsPanelBottom extends OtherButtonsPanel {
 			//FIXME: mc.getTextureManager().onResourceManagerReload(mc.getResourceManager());
 			ThemeLoader.loadTheme(mc.getResourceManager());
 			ClientQuestFile.INSTANCE.refreshGui();
+			Minecraft.getInstance().getToasts().addToast(new CustomToast(Component.translatable("ftbquests.gui.reload_theme"), Icons.ACCEPT, Component.translatable("gui.done")));
 		}
 
 		private void saveLocally() {
