@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbquests.client;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import dev.architectury.utils.Env;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.util.client.ClientUtils;
@@ -21,6 +22,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
 import java.util.Optional;
@@ -78,9 +80,12 @@ public class ClientQuestFile extends BaseQuestFile {
 		if (questScreen != null) {
 			persistedData = questScreen.getPersistedScreenData();
 			if (ClientUtils.getCurrentGuiAs(QuestScreen.class) != null) {
+				double mx = Minecraft.getInstance().mouseHandler.xpos();
+				double my = Minecraft.getInstance().mouseHandler.ypos();
 				Minecraft.getInstance().setScreen(null);  // ensures prevScreen is null, so we can close correctly
 				questScreen = new QuestScreen(this, persistedData);
 				questScreen.openGui();
+				InputConstants.grabOrReleaseMouse(Minecraft.getInstance().getWindow().getWindow(), GLFW.GLFW_CURSOR_NORMAL, mx, my);
 			}
 		}
 	}
