@@ -101,7 +101,6 @@ public class TaskButton extends Button {
 		String tag = tags.iterator().next().toString();
 		((IStringValueFilter) tagFilter.getItem()).setValue(tagFilter, tag);
 		itemTask.setStackAndCount(tagFilter, 1);
-//		itemTask.item = tagFilter;
 
 		if (itemTask.getRawTitle().isEmpty()) {
 			itemTask.setRawTitle("Any #" + tag);
