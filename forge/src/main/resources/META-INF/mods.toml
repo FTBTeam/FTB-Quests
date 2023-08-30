@@ -43,6 +43,6 @@ side = "BOTH"
 [[dependencies.ftbquests]]
 modId = "itemfilters"
 mandatory = true
-versionRange = "[2001.1.0,)"
+versionRange = "[2001.1.0-build.55,)"
 ordering = "AFTER"
 side = "BOTH"

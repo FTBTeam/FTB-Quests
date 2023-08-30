@@ -28,7 +28,7 @@
 		"architectury": ">=9.0.8",
 		"ftblibrary": ">=2001.1.3-build.1",
 		"ftbteams": ">=2001.1.4-build.1",
-		"itemfilters": ">=2001.1.0-build.1"
+		"itemfilters": ">=2001.1.0-build.55"
 	},
 	"breaks": {
 	}
