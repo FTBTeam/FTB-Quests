@@ -35,7 +35,7 @@ public class OtherButtonsPanelBottom extends OtherButtonsPanel {
 			add(new EditSettingsButton(this));
 		}
 
-		if (FTBQuestsClient.getClientPlayer().hasPermissions(2)) {
+		if (FTBQuestsClient.getClientPlayer().hasPermissions(2) || ClientQuestFile.INSTANCE.hasEditorPermission()) {
 			// note: single player owner can't use the GUI button but can use the /ftbquests editing_mode command
 			// this is intentional, since there should not be an obvious "cheat" button for single player questing
 			add(new ToggleEditModeButton(this));

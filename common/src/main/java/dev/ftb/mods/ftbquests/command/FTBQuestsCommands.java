@@ -9,7 +9,9 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import dev.architectury.registry.registries.RegistrarManager;
 import dev.ftb.mods.ftblibrary.config.Tristate;
 import dev.ftb.mods.ftbquests.FTBQuests;
+import dev.ftb.mods.ftbquests.integration.PermissionsHelper;
 import dev.ftb.mods.ftbquests.net.CreateObjectResponseMessage;
+import dev.ftb.mods.ftbquests.net.SyncEditorPermissionMessage;
 import dev.ftb.mods.ftbquests.net.SyncQuestsMessage;
 import dev.ftb.mods.ftbquests.quest.*;
 import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
@@ -48,8 +50,10 @@ public class FTBQuestsCommands {
 	private static final SimpleCommandExceptionType NO_INVENTORY = new SimpleCommandExceptionType(Component.translatable("commands.ftbquests.command.error.no_inventory"));
 
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
+		//noinspection ConstantValue
 		dispatcher.register(Commands.literal("ftbquests")
-				.requires(s -> s.getServer() != null && s.getServer().isSingleplayer() || s.hasPermission(2))
+				// s.getServer() *can* be null here, whatever the IDE thinks!
+				.requires(s -> s.getServer() != null && s.getServer().isSingleplayer() || hasEditorPermission(s))
 				.then(Commands.literal("editing_mode")
 						.executes(c -> editingMode(c.getSource(), c.getSource().getPlayerOrException(), null))
 						.then(Commands.argument("enabled", BoolArgumentType.bool())
@@ -72,7 +76,7 @@ public class FTBQuestsCommands {
 						.executes(context -> deleteEmptyRewardTables(context.getSource()))
 				)
 				.then(Commands.literal("change_progress")
-						.requires(s -> s.hasPermission(2))
+						.requires(FTBQuestsCommands::hasEditorPermission)
 						.then(Commands.argument("players", EntityArgument.players())
 								.then(Commands.literal("reset")
 										.then(Commands.argument("quest_object", QuestObjectArgument.questObject())
@@ -95,7 +99,7 @@ public class FTBQuestsCommands {
 						)
 				)
 				.then(Commands.literal("export_reward_table_to_chest")
-						.requires(s -> s.hasPermission(2))
+						.requires(FTBQuestsCommands::hasEditorPermission)
 						.then(Commands.argument("reward_table", QuestObjectArgument.questObject())
 								.executes(ctx -> {
 									QuestObjectBase table = ctx.getArgument("reward_table", QuestObjectBase.class);
@@ -117,7 +121,7 @@ public class FTBQuestsCommands {
 						)
 				)
 				.then(Commands.literal("import_reward_table_from_chest")
-						.requires(s -> s.hasPermission(2))
+						.requires(FTBQuestsCommands::hasEditorPermission)
 						.then(Commands.argument("name", StringArgumentType.string())
 								.executes(ctx -> {
 									String name = StringArgumentType.getString(ctx, "name");
@@ -136,7 +140,7 @@ public class FTBQuestsCommands {
 						.executes(context -> generateAllItemChapter(context.getSource()))
 				)
 				.then(Commands.literal("reload")
-						.requires(s -> s.hasPermission(2))
+						.requires(FTBQuestsCommands::hasEditorPermission)
 						.executes(context -> doReload(context.getSource()))
 				)
 				.then(Commands.literal("block_rewards")
@@ -144,12 +148,18 @@ public class FTBQuestsCommands {
 						.then(Commands.argument("enabled", BoolArgumentType.bool())
 								.executes(c -> toggleRewardBlocking(c.getSource(), c.getSource().getPlayerOrException(), BoolArgumentType.getBool(c, "enabled")))
 								.then(Commands.argument("player", EntityArgument.player())
-										.requires(s -> s.hasPermission(2))
+										.requires(FTBQuestsCommands::hasEditorPermission)
 										.executes(c -> toggleRewardBlocking(c.getSource(), EntityArgument.getPlayer(c, "player"), BoolArgumentType.getBool(c, "enabled")))
 								)
 						)
 				)
 		);
+	}
+
+	private static boolean hasEditorPermission(CommandSourceStack stack) {
+		//noinspection DataFlowIssue
+		return stack.hasPermission(2)
+				|| stack.isPlayer() && PermissionsHelper.hasEditorPermission(stack.getPlayer(), false);
 	}
 
 	private static int exportRewards(CommandSourceStack source, RewardTable table, BlockPos pos) throws CommandSyntaxException {
@@ -350,6 +360,8 @@ public class FTBQuestsCommands {
 
 		instance.load();
 		new SyncQuestsMessage(instance).sendToAll(source.getServer());
+		source.getServer().getPlayerList().getPlayers()
+				.forEach(p -> new SyncEditorPermissionMessage(PermissionsHelper.hasEditorPermission(p, false)).sendTo(p));
 
 		source.sendSuccess(() -> Component.translatable("commands.ftbquests.command.feedback.reloaded"), false);
 		UUID id = sender == null ? Util.NIL_UUID : sender.getUUID();

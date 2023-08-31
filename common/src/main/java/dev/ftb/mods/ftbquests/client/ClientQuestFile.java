@@ -40,6 +40,7 @@ public class ClientQuestFile extends BaseQuestFile {
 
 	private QuestScreen questScreen;
 	private QuestScreen.PersistedData persistedData;
+	private boolean editorPermission;
 
 	public static boolean exists() {
 		return INSTANCE != null && !INSTANCE.invalid;
@@ -70,7 +71,7 @@ public class ClientQuestFile extends BaseQuestFile {
 
 	@Override
 	public boolean canEdit() {
-		return selfTeamData.getCanEdit(Minecraft.getInstance().player);
+		return hasEditorPermission() && selfTeamData.getCanEdit(Minecraft.getInstance().player);
 	}
 
 	@Override
@@ -184,5 +185,13 @@ public class ClientQuestFile extends BaseQuestFile {
 			return true;
 		}
 		return false;
+	}
+
+	public void setEditorPermission(boolean hasPermission) {
+		editorPermission = hasPermission;
+	}
+
+	public boolean hasEditorPermission() {
+		return editorPermission;
 	}
 }
