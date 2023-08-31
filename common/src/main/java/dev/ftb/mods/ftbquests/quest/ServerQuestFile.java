@@ -7,6 +7,7 @@ import dev.ftb.mods.ftblibrary.snbt.SNBT;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
 import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
+import dev.ftb.mods.ftbquests.integration.PermissionsHelper;
 import dev.ftb.mods.ftbquests.net.*;
 import dev.ftb.mods.ftbquests.quest.reward.RewardType;
 import dev.ftb.mods.ftbquests.quest.reward.RewardTypes;
@@ -170,6 +171,8 @@ public class ServerQuestFile extends BaseQuestFile {
 		// - client will respond to this with a RequestTeamData message
 		// - server will only then send a SyncTeamData message to the client
 		new SyncQuestsMessage(this).sendTo(player);
+
+		new SyncEditorPermissionMessage(PermissionsHelper.hasEditorPermission(player, false)).sendTo(player);
 
 		player.inventoryMenu.addSlotListener(new FTBQuestsInventoryListener(player));
 

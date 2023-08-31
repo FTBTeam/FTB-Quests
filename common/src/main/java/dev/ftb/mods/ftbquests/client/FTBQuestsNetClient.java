@@ -284,4 +284,10 @@ public class FTBQuestsNetClient {
 			ClientQuestFile.INSTANCE.refreshGui();
 		}
 	}
+
+	public static void setEditorPermission(boolean hasPermission) {
+		if (ClientQuestFile.exists()) {
+			ClientQuestFile.INSTANCE.setEditorPermission(hasPermission);
+		}
+	}
 }

@@ -782,8 +782,6 @@ public class TeamData {
 		}
 
 		public static PerPlayerData fromNBT(CompoundTag nbt, BaseQuestFile file) {
-			PerPlayerData ppd = new PerPlayerData();
-
 			boolean canEdit = nbt.getBoolean("can_edit");
 			boolean autoPin = nbt.getBoolean("auto_pin");
 			boolean chapterPinned = nbt.getBoolean("chapter_pinned");
