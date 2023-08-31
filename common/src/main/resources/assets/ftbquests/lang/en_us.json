@@ -209,6 +209,7 @@
 	"ftbquests.chapter_group": "Chapter Group",
 	"ftbquests.quest_link": "Quest Link",
 	"ftbquests.chapter_groups": "Chapter Groups",
+	"ftbquests.gui.preferences": "Player Preferences",
 	"ftbquests.gui.line": "Add Text Line",
 	"ftbquests.gui.image": "Add Image",
 	"ftbquests.gui.edit": "Edit",
@@ -492,5 +493,7 @@
 	"commands.ftbquests.weigh_from_emc.invalid_id": "Invalid Reward Table ID!",
 	"commands.ftbquests.weigh_from_emc.text": "Changed item reward weight based on EMC in %s",
 	"commands.ftbquests.export_rewards_to_chest.usage": "/ftbquests export_rewards_to_chest <reward_table>",
-	"commands.ftbquests.export_rewards_to_chest.text": "Exported %s / %s items from '%s'"
+	"commands.ftbquests.export_rewards_to_chest.text": "Exported %s / %s items from '%s'",
+	"ftbquests.ui.old_scroll_wheel": "Old-style Scroll Wheel Behavior",
+	"ftbquests.ui.old_scroll_wheel.tooltip": "When false, scroll wheel scrolls up & down; hold Shift to pan, Ctrl to zoom\nWhen true, scroll wheel only zooms (1.19 and earlier behavior)"
 }

@@ -114,6 +114,7 @@ public interface ThemeProperties {
 	IconProperty LINK_ICON = new IconProperty("link_icon");
 	IconProperty SAVE_ICON = new IconProperty("save_icon");
 	IconProperty SETTINGS_ICON = new IconProperty("settings_icon");
+	IconProperty PREFS_ICON = new IconProperty("prefs_icon");
 	IconProperty CLOSE_ICON = new IconProperty("close_icon");
 	IconProperty EMERGENCY_ITEMS_ICON = new IconProperty("emergency_items_icon");
 	IconProperty GUIDE_ICON = new IconProperty("guide_icon");
