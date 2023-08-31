@@ -14,6 +14,7 @@ import dev.ftb.mods.ftblibrary.ui.input.Key;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.ui.misc.SelectImagePreScreen;
 import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
+import dev.ftb.mods.ftbquests.client.FTBQuestsClientConfig;
 import dev.ftb.mods.ftbquests.net.*;
 import dev.ftb.mods.ftbquests.quest.*;
 import dev.ftb.mods.ftbquests.quest.task.Task;
@@ -596,12 +597,16 @@ public class QuestPanel extends Panel {
 	@Override
 	public boolean scrollPanel(double scroll) {
 		if (questScreen.selectedChapter != null && !questScreen.isViewingQuest() && isMouseOver()) {
-			if (isShiftKeyDown()) {
-				setScrollX(getScrollX() - scroll * 15);
-			} else if (isCtrlKeyDown()) {
+			if (FTBQuestsClientConfig.OLD_SCROLL_WHEEL.get()) {
 				questScreen.addZoom(scroll);
 			} else {
-				setScrollY(getScrollY() - scroll * 15);
+				if (isShiftKeyDown()) {
+					setScrollX(getScrollX() - scroll * 15);
+				} else if (isCtrlKeyDown()) {
+					questScreen.addZoom(scroll);
+				} else {
+					setScrollY(getScrollY() - scroll * 15);
+				}
 			}
 			return true;
 		}

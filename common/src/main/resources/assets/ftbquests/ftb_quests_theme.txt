@@ -36,6 +36,7 @@ hidden_icon:          ftbquests:textures/gui/hidden.png; color=#DBDBDB
 link_icon:            ftbquests:textures/gui/link.png; color=#DBDBDB
 save_icon:            ftbquests:textures/gui/save.png
 settings_icon:        ftbquests:textures/gui/settings.png
+prefs_icon:           ftblibrary:icons/player
 close_icon:           ftbquests:textures/gui/close.png
 emergency_items_icon: ftbquests:textures/gui/emergency_items.png; color=#F3D9FF
 guide_icon:           ftbquests:textures/gui/guide.png; color=#EF9E1A

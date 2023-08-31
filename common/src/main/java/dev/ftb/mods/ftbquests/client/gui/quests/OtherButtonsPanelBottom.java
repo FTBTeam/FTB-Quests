@@ -1,12 +1,12 @@
 package dev.ftb.mods.ftbquests.client.gui.quests;
 
+import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icons;
-import dev.ftb.mods.ftblibrary.ui.ContextMenuItem;
-import dev.ftb.mods.ftblibrary.ui.Panel;
-import dev.ftb.mods.ftblibrary.ui.WidgetLayout;
+import dev.ftb.mods.ftblibrary.ui.*;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
+import dev.ftb.mods.ftbquests.client.FTBQuestsClientConfig;
 import dev.ftb.mods.ftbquests.client.gui.CustomToast;
 import dev.ftb.mods.ftbquests.client.gui.RewardTablesScreen;
 import dev.ftb.mods.ftbquests.net.ChangeProgressMessage;
@@ -40,6 +40,8 @@ public class OtherButtonsPanelBottom extends OtherButtonsPanel {
 			// this is intentional, since there should not be an obvious "cheat" button for single player questing
 			add(new ToggleEditModeButton(this));
 		}
+
+		add(new EditPlayerPrefsButton(this));
 	}
 
 	@Override
@@ -70,6 +72,18 @@ public class OtherButtonsPanelBottom extends OtherButtonsPanel {
 			}
 
 			new ToggleEditingModeMessage().sendToServer();
+		}
+	}
+
+
+	private static class EditPlayerPrefsButton extends TabButton {
+		public EditPlayerPrefsButton(OtherButtonsPanelBottom panel) {
+			super(panel, Component.translatable("ftbquests.gui.preferences"), ThemeProperties.PREFS_ICON.get());
+		}
+
+		@Override
+		public void onClicked(MouseButton button) {
+			FTBQuestsClientConfig.openSettings(new ScreenWrapper(questScreen));
 		}
 	}
 
@@ -154,4 +168,5 @@ public class OtherButtonsPanelBottom extends OtherButtonsPanel {
 			}
 		}
 	}
+
 }
