@@ -3,12 +3,12 @@ package dev.ftb.mods.ftbquests.net;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import dev.architectury.networking.simple.MessageType;
 import dev.architectury.networking.simple.SimpleNetworkManager;
-import dev.ftb.mods.ftbquests.FTBQuests;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.item.ItemStack;
 
 public interface FTBQuestsNetHandler {
-	SimpleNetworkManager NET = SimpleNetworkManager.create(FTBQuests.MOD_ID);
+	SimpleNetworkManager NET = SimpleNetworkManager.create(FTBQuestsAPI.MOD_ID);
 
 	MessageType SYNC_QUESTS = NET.registerS2C("sync_quests", SyncQuestsMessage::new);
 	MessageType SYNC_TEAM_DATA = NET.registerS2C("sync_team_data", SyncTeamDataMessage::new);
@@ -63,6 +63,8 @@ public interface FTBQuestsNetHandler {
 	MessageType COPY_CHAPTER_IMAGE = NET.registerC2S("copy_chapter_image", CopyChapterImageMessage::new);
 	MessageType SYNC_STRUCTURES_REQUEST = NET.registerC2S("sync_structures_request", SyncStructuresRequestMessage::new);
 	MessageType SYNC_STRUCTURES_RESPONSE = NET.registerS2C("sync_structures_response", SyncStructuresResponseMessage::new);
+	MessageType REQUEST_TEAM_DATA = NET.registerC2S("request_team_data", RequestTeamDataMessage::new);
+	MessageType SYNC_EDITOR_PERMISSION = NET.registerS2C("sync_editor_permission", SyncEditorPermissionMessage::new);
 
 	static void init() {
 	}

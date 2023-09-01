@@ -17,13 +17,7 @@ public class AndSelector extends ThemeSelector {
 
 	@Override
 	public boolean matches(QuestObjectBase object) {
-		for (ThemeSelector selector : selectors) {
-			if (!selector.matches(object)) {
-				return true;
-			}
-		}
-
-		return true;
+		return selectors.stream().allMatch(selector -> selector.matches(object));
 	}
 
 	@Override
@@ -33,11 +27,9 @@ public class AndSelector extends ThemeSelector {
 
 	@Override
 	public int compareTo(ThemeSelector o) {
-		if (o instanceof AndSelector) {
-			return Integer.compare(((AndSelector) o).selectors.size(), selectors.size());
-		}
-
-		return super.compareTo(o);
+		return o instanceof AndSelector a ?
+				Integer.compare(a.selectors.size(), selectors.size()) :
+				super.compareTo(o);
 	}
 
 	@Override

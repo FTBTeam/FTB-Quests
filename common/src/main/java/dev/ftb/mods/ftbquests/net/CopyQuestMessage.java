@@ -3,11 +3,7 @@ package dev.ftb.mods.ftbquests.net;
 import dev.architectury.networking.NetworkManager;
 import dev.architectury.networking.simple.BaseC2SMessage;
 import dev.architectury.networking.simple.MessageType;
-import dev.ftb.mods.ftbquests.FTBQuests;
-import dev.ftb.mods.ftbquests.quest.Chapter;
-import dev.ftb.mods.ftbquests.quest.Quest;
-import dev.ftb.mods.ftbquests.quest.QuestFile;
-import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
+import dev.ftb.mods.ftbquests.quest.*;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import dev.ftb.mods.ftbquests.quest.reward.RewardType;
 import dev.ftb.mods.ftbquests.quest.task.Task;
@@ -15,6 +11,8 @@ import dev.ftb.mods.ftbquests.quest.task.TaskType;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.MinecraftServer;
+
+import java.util.Objects;
 
 public class CopyQuestMessage extends BaseC2SMessage {
     private final long id;
@@ -55,39 +53,27 @@ public class CopyQuestMessage extends BaseC2SMessage {
 
     @Override
     public void handle(NetworkManager.PacketContext context) {
-        QuestFile file = FTBQuests.PROXY.getQuestFile(false);
+        BaseQuestFile file = ServerQuestFile.INSTANCE;
         if (file.get(id) instanceof Quest toCopy && file.get(chapterId) instanceof Chapter chapter) {
             // deep copy of the quest
-            CompoundTag tag = new CompoundTag();
-            toCopy.writeData(tag);
-            Quest newQuest = new Quest(chapter);
-            newQuest.readData(tag);
+            Quest newQuest = Objects.requireNonNull(QuestObjectBase.copy(toCopy, () -> new Quest(file.newID(), chapter)));
             if (!copyDeps) {
                 newQuest.clearDependencies();
             }
-            newQuest.id = file.newID();
-            newQuest.x = qx;
-            newQuest.y = qy;
+            newQuest.setX(qx);
+            newQuest.setY(qy);
             newQuest.onCreated();
 
             // deep copy of all tasks and rewards
-            for (Task task : toCopy.tasks) {
-                Task newTask = TaskType.createTask(newQuest, task.getType().getTypeForNBT());
+            toCopy.getTasks().forEach(task -> {
+                Task newTask = QuestObjectBase.copy(task, () -> TaskType.createTask(file.newID(), newQuest, task.getType().getTypeForNBT()));
                 if (newTask != null) {
-                    CompoundTag tag1 = new CompoundTag();
-                    task.writeData(tag1);
-                    newTask.readData(tag1);
-                    newTask.id = file.newID();
                     newTask.onCreated();
                 }
-            }
-            for (Reward reward : toCopy.rewards) {
-                Reward newReward = RewardType.createReward(newQuest, reward.getType().getTypeForNBT());
+            });
+            for (Reward reward : toCopy.getRewards()) {
+                Reward newReward = QuestObjectBase.copy(reward, () -> RewardType.createReward(file.newID(), newQuest, reward.getType().getTypeForNBT()));
                 if (newReward != null) {
-                    CompoundTag tag1 = new CompoundTag();
-                    reward.writeData(tag1);
-                    newReward.readData(tag1);
-                    newReward.id = file.newID();
                     newReward.onCreated();
                 }
             }
@@ -95,12 +81,12 @@ public class CopyQuestMessage extends BaseC2SMessage {
             // sync new objects to clients
             MinecraftServer server = context.getPlayer().getServer();
             new CreateObjectResponseMessage(newQuest, null).sendToAll(server);
-            newQuest.tasks.forEach(task -> {
+            newQuest.getTasks().forEach(task -> {
                 CompoundTag extra = new CompoundTag();
                 extra.putString("type", task.getType().getTypeForNBT());
                 new CreateObjectResponseMessage(task, extra).sendToAll(server);
             });
-            newQuest.rewards.forEach(reward -> {
+            newQuest.getRewards().forEach(reward -> {
                 CompoundTag extra = new CompoundTag();
                 extra.putString("type", reward.getType().getTypeForNBT());
                 new CreateObjectResponseMessage(reward, extra).sendToAll(server);
@@ -109,7 +95,7 @@ public class CopyQuestMessage extends BaseC2SMessage {
             // and update the server quest map etc.
             ServerQuestFile.INSTANCE.refreshIDMap();
             ServerQuestFile.INSTANCE.clearCachedData();
-            ServerQuestFile.INSTANCE.save();
+            ServerQuestFile.INSTANCE.markDirty();
         }
     }
 }

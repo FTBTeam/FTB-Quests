@@ -32,8 +32,7 @@ public class QuestTheme {
 
 		@Override
 		public boolean equals(Object o) {
-			if (o instanceof QuestObjectPropertyKey) {
-				QuestObjectPropertyKey key = (QuestObjectPropertyKey) o;
+			if (o instanceof QuestObjectPropertyKey key) {
 				return object == key.object && property.equals(key.property);
 			}
 
@@ -57,30 +56,27 @@ public class QuestTheme {
 		defaultCache.clear();
 	}
 
-	@SuppressWarnings("unchecked")
 	public <T> T get(ThemeProperty<T> property) {
-		T cachedValue = (T) defaultCache.get(property.name);
+		@SuppressWarnings("unchecked") T cachedValue = (T) defaultCache.get(property.getName());
 
 		if (cachedValue != null) {
 			return cachedValue;
 		}
 
-		String value = defaults.properties.get(property.name);
+		String value = defaults.properties.get(property.getName());
 
 		if (value != null) {
 			cachedValue = property.parse(replaceVariables(value, 0));
 
 			if (cachedValue != null) {
-				defaultCache.put(property.name, cachedValue);
+				defaultCache.put(property.getName(), cachedValue);
 				return cachedValue;
 			}
 		}
 
-		return property.defaultValue;
-		// throw new NullPointerException("Property " + property.name + " doesn't have a default value!");
+		return property.getDefaultValue();
 	}
 
-	@SuppressWarnings("unchecked")
 	public <T> T get(ThemeProperty<T> property, @Nullable QuestObjectBase object) {
 		if (object == null) {
 			object = currentObject;
@@ -90,8 +86,8 @@ public class QuestTheme {
 			return get(property);
 		}
 
-		QuestObjectPropertyKey key = new QuestObjectPropertyKey(property.name, object.id);
-		T cachedValue = (T) cache.get(key);
+		QuestObjectPropertyKey key = new QuestObjectPropertyKey(property.getName(), object.id);
+		@SuppressWarnings("unchecked") T cachedValue = (T) cache.get(key);
 
 		if (cachedValue != null) {
 			return cachedValue;
@@ -102,7 +98,7 @@ public class QuestTheme {
 		do {
 			for (SelectorProperties selectorProperties : selectors) {
 				if (selectorProperties.selector.matches(o)) {
-					String value = selectorProperties.properties.get(property.name);
+					String value = selectorProperties.properties.get(property.getName());
 
 					if (value != null) {
 						cachedValue = property.parse(replaceVariables(value, 0));

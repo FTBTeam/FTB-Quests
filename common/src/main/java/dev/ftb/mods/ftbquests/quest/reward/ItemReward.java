@@ -4,7 +4,8 @@ import dev.architectury.hooks.item.ItemStackHooks;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;
-import dev.ftb.mods.ftblibrary.util.WrappedIngredient;
+import dev.ftb.mods.ftblibrary.ui.Widget;
+import dev.ftb.mods.ftblibrary.util.client.PositionedIngredient;
 import dev.ftb.mods.ftbquests.net.DisplayItemRewardToastMessage;
 import dev.ftb.mods.ftbquests.net.FTBQuestsNetHandler;
 import dev.ftb.mods.ftbquests.quest.Quest;
@@ -23,27 +24,37 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
-/**
- * @author LatvianModder
- */
 public class ItemReward extends Reward {
-	public ItemStack item;
-	public int count;
-	public int randomBonus;
-	public boolean onlyOne;
+	private ItemStack item;
+	private int count;
+	private int randomBonus;
+	private boolean onlyOne;
 
-	public ItemReward(Quest quest, ItemStack is) {
-		super(quest);
+	public ItemReward(long id, Quest quest, ItemStack is) {
+		this(id, quest, is, 1);
+	}
+
+	public ItemReward(long id, Quest quest, ItemStack is, int count) {
+		super(id, quest);
 		item = is;
-		count = 1;
+		this.count = count;
 		randomBonus = 0;
 		onlyOne = false;
 	}
 
-	public ItemReward(Quest quest) {
-		this(quest, new ItemStack(Items.APPLE));
+	public ItemReward(long id, Quest quest) {
+		this(id, quest, new ItemStack(Items.APPLE));
+	}
+
+	public ItemStack getItem() {
+		return item;
+	}
+
+	public int getCount() {
+		return count;
 	}
 
 	@Override
@@ -59,11 +70,9 @@ public class ItemReward extends Reward {
 		if (count > 1) {
 			nbt.putInt("count", count);
 		}
-
 		if (randomBonus > 0) {
 			nbt.putInt("random_bonus", randomBonus);
 		}
-
 		if (onlyOne) {
 			nbt.putBoolean("only_one", true);
 		}
@@ -75,7 +84,6 @@ public class ItemReward extends Reward {
 		item = NBTUtils.read(nbt, "item");
 
 		count = nbt.getInt("count");
-
 		if (count == 0) {
 			count = item.getCount();
 			item.setCount(1);
@@ -105,8 +113,9 @@ public class ItemReward extends Reward {
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public void getConfig(ConfigGroup config) {
-		super.getConfig(config);
+	public void fillConfigGroup(ConfigGroup config) {
+		super.fillConfigGroup(config);
+
 		config.addItemStack("item", item, v -> item = v, ItemStack.EMPTY, true, false).setNameKey("ftbquests.reward.ftbquests.item");
 		config.addInt("count", count, v -> count = v, 1, 1, 8192);
 		config.addInt("random_bonus", randomBonus, v -> randomBonus = v, 0, 0, 8192).setNameKey("ftbquests.reward.random_bonus");
@@ -119,8 +128,7 @@ public class ItemReward extends Reward {
 			return;
 		}
 
-		int size = count + player.level.random.nextInt(randomBonus + 1);
-
+		int size = count + player.level().random.nextInt(randomBonus + 1);
 		while (size > 0) {
 			int s = Math.min(size, item.getMaxStackSize());
 			ItemStackHooks.giveItem(player, ItemStackHooks.copyWithCount(item, s));
@@ -138,9 +146,7 @@ public class ItemReward extends Reward {
 
 		while (size > 0) {
 			int s = Math.min(size, item.getMaxStackSize());
-			ItemStack copy = item.copy();
-			copy.setCount(s);
-			items.add(copy);
+			items.add(ItemStackHooks.copyWithCount(item, s));
 			size -= s;
 		}
 
@@ -160,13 +166,7 @@ public class ItemReward extends Reward {
 	@Override
 	@Environment(EnvType.CLIENT)
 	public Icon getAltIcon() {
-		if (item.isEmpty()) {
-			return super.getAltIcon();
-		}
-
-		ItemStack copy = item.copy();
-		copy.setCount(1);
-		return ItemIcon.getItemIcon(copy);
+		return item.isEmpty() ? super.getAltIcon() : ItemIcon.getItemIcon(ItemStackHooks.copyWithCount(item, 1));
 	}
 
 	@Override
@@ -175,20 +175,15 @@ public class ItemReward extends Reward {
 		return !getTitle().getString().equals(getAltTitle().getString());
 	}
 
-	@Nullable
 	@Override
 	@Environment(EnvType.CLIENT)
-	public Object getIngredient() {
-		return new WrappedIngredient(item).tooltip();
+	public Optional<PositionedIngredient> getIngredient(Widget widget) {
+		return PositionedIngredient.of(item, widget, true);
 	}
 
 	@Override
 	@Environment(EnvType.CLIENT)
 	public String getButtonText() {
-		if (randomBonus > 0) {
-			return count + "-" + (count + randomBonus);
-		}
-
-		return Integer.toString(count);
+		return randomBonus > 0 ? count + "-" + (count + randomBonus) : Integer.toString(count);
 	}
 }

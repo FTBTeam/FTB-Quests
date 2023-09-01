@@ -1,21 +1,21 @@
 package dev.ftb.mods.ftbquests.quest.task;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.ui.Button;
-import dev.ftb.mods.ftblibrary.util.ClientUtils;
+import dev.ftb.mods.ftblibrary.ui.Widget;
 import dev.ftb.mods.ftblibrary.util.StringUtils;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
-import dev.ftb.mods.ftblibrary.util.WrappedIngredient;
+import dev.ftb.mods.ftblibrary.util.client.ClientUtils;
+import dev.ftb.mods.ftblibrary.util.client.PositionedIngredient;
 import dev.ftb.mods.ftbquests.FTBQuests;
+import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
+import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.events.CustomTaskEvent;
 import dev.ftb.mods.ftbquests.events.ObjectCompletedEvent;
 import dev.ftb.mods.ftbquests.events.ObjectStartedEvent;
 import dev.ftb.mods.ftbquests.events.QuestProgressEventData;
-import dev.ftb.mods.ftbquests.gui.quests.QuestScreen;
-import dev.ftb.mods.ftbquests.integration.FTBQuestsJEIHelper;
-import dev.ftb.mods.ftbquests.net.DisplayCompletionToastMessage;
+import dev.ftb.mods.ftbquests.integration.RecipeModHelper;
 import dev.ftb.mods.ftbquests.net.SubmitTaskMessage;
 import dev.ftb.mods.ftbquests.quest.*;
 import dev.ftb.mods.ftbquests.util.ProgressChange;
@@ -23,6 +23,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.ResourceLocationException;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -30,18 +31,24 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.Nullable;
 
-/**
- * @author LatvianModder
- */
+import java.util.EnumSet;
+import java.util.Optional;
+import java.util.Set;
+
 public abstract class Task extends QuestObject {
-	public final Quest quest;
+	private final Quest quest;
 	private boolean optionalTask;
 
-	public Task(Quest q) {
-		quest = q;
+	public Task(long id, Quest quest) {
+		super(id);
+
+		this.quest = quest;
 		optionalTask = false;
+	}
+
+	public Quest getQuest() {
+		return quest;
 	}
 
 	@Override
@@ -50,13 +57,13 @@ public abstract class Task extends QuestObject {
 	}
 
 	@Override
-	public final QuestFile getQuestFile() {
-		return quest.chapter.file;
+	public final BaseQuestFile getQuestFile() {
+		return quest.getChapter().file;
 	}
 
 	@Override
 	public final Chapter getQuestChapter() {
-		return quest.chapter;
+		return quest.getChapter();
 	}
 
 	@Override
@@ -87,20 +94,20 @@ public abstract class Task extends QuestObject {
 
 	@Override
 	public void onStarted(QuestProgressEventData<?> data) {
-		data.teamData.setStarted(id, data.time);
+		data.setStarted(id);
 		ObjectStartedEvent.TASK.invoker().act(new ObjectStartedEvent.TaskEvent(data.withObject(this)));
 		quest.onStarted(data.withObject(quest));
 	}
 
 	@Override
 	public final void onCompleted(QuestProgressEventData<?> data) {
-		data.teamData.setCompleted(id, data.time);
+		data.setCompleted(id);
 		ObjectCompletedEvent.TASK.invoker().act(new ObjectCompletedEvent.TaskEvent(data.withObject(this)));
 
-		boolean questCompleted = quest.isCompletedRaw(data.teamData);
+		boolean questCompleted = quest.isCompletedRaw(data.getTeamData());
 
-		if (quest.tasks.size() > 1 && !questCompleted && !disableToast) {
-			new DisplayCompletionToastMessage(id).sendTo(data.notifiedPlayers);
+		if (quest.getTasks().size() > 1 && !questCompleted && !disableToast) {
+			data.notifyPlayers(id);
 		}
 
 		if (questCompleted) {
@@ -127,14 +134,14 @@ public abstract class Task extends QuestObject {
 
 	@Override
 	public final void forceProgress(TeamData teamData, ProgressChange progressChange) {
-		teamData.setProgress(this, progressChange.reset ? 0L : getMaxProgress());
+		teamData.setProgress(this, progressChange.shouldReset() ? 0L : getMaxProgress());
 	}
 
 	@Override
 	public final void deleteSelf() {
-		quest.tasks.remove(this);
+		quest.removeTask(this);
 
-		for (TeamData data : quest.chapter.file.getAllData()) {
+		for (TeamData data : quest.getChapter().file.getAllTeamData()) {
 			data.resetProgress(this);
 		}
 
@@ -143,7 +150,7 @@ public abstract class Task extends QuestObject {
 
 	@Override
 	public final void deleteChildren() {
-		for (TeamData data : quest.chapter.file.getAllData()) {
+		for (TeamData data : quest.getChapter().file.getAllTeamData()) {
 			data.resetProgress(this);
 		}
 
@@ -154,18 +161,17 @@ public abstract class Task extends QuestObject {
 	@Environment(EnvType.CLIENT)
 	public void editedFromGUI() {
 		QuestScreen gui = ClientUtils.getCurrentGuiAs(QuestScreen.class);
-
 		if (gui != null) {
-			gui.questPanel.refreshWidgets();
-			gui.viewQuestPanel.refreshWidgets();
+			gui.refreshQuestPanel();
+			gui.refreshViewQuestPanel();
 		}
 	}
 
 	@Override
 	public final void onCreated() {
-		quest.tasks.add(this);
+		quest.addTask(this);
 
-		if (this instanceof CustomTask && quest.chapter.file.isServerSide()) {
+		if (this instanceof CustomTask && getQuestFile().isServerSide()) {
 			CustomTaskEvent.EVENT.invoker().act(new CustomTaskEvent((CustomTask) this));
 		}
 	}
@@ -179,18 +185,20 @@ public abstract class Task extends QuestObject {
 	@Override
 	@Environment(EnvType.CLIENT)
 	public Icon getAltIcon() {
-		return getType().getIcon();
+		return getType().getIconSupplier();
 	}
 
 	@Override
 	public final ConfigGroup createSubGroup(ConfigGroup group) {
 		TaskType type = getType();
-		return group.getGroup(getObjectType().id).getGroup(type.id.getNamespace()).getGroup(type.id.getPath());
+		return group.getOrCreateSubgroup(getObjectType().getId())
+				.getOrCreateSubgroup(type.getTypeId().getNamespace())
+				.getOrCreateSubgroup(type.getTypeId().getPath());
 	}
 
 	@Environment(EnvType.CLIENT)
-	public void drawGUI(TeamData teamData, PoseStack matrixStack, int x, int y, int w, int h) {
-		getIcon().draw(matrixStack, x, y, w, h);
+	public void drawGUI(TeamData teamData, GuiGraphics graphics, int x, int y, int w, int h) {
+		getIcon().draw(graphics, x, y, w, h);
 	}
 
 	public boolean canInsertItem() {
@@ -246,19 +254,17 @@ public abstract class Task extends QuestObject {
 		return false;
 	}
 
-	@Nullable
 	@Environment(EnvType.CLIENT)
-	public Object getIngredient() {
+	public Optional<PositionedIngredient> getIngredient(Widget widget) {
 		if (addTitleInMouseOverText()) {
-			return getIcon().getIngredient();
+			return PositionedIngredient.of(getIcon().getIngredient(), widget);
 		}
-
-		return new WrappedIngredient(getIcon().getIngredient()).tooltip();
+		return Optional.empty();
 	}
 
 	@Override
-	public final int refreshJEI() {
-		return FTBQuestsJEIHelper.QUESTS;
+	public Set<RecipeModHelper.Components> componentsToRefresh() {
+		return EnumSet.of(RecipeModHelper.Components.QUESTS);
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -314,10 +320,10 @@ public abstract class Task extends QuestObject {
 	}
 
 	@Override
-	public void getConfig(ConfigGroup config) {
-		super.getConfig(config);
+	public void fillConfigGroup(ConfigGroup config) {
+		super.fillConfigGroup(config);
 
-		config.addBool("optional_task", optionalTask, v -> optionalTask = v, false).setNameKey("ftbquests.quest.optional");
+		config.addBool("optional_task", optionalTask, v -> optionalTask = v, false).setNameKey("ftbquests.quest.misc.optional");
 	}
 
 	protected ResourceLocation safeResourceLocation(String str, ResourceLocation fallback) {
@@ -327,7 +333,7 @@ public abstract class Task extends QuestObject {
 			if (getQuestFile().isServerSide()) {
 				FTBQuests.LOGGER.warn("Ignoring bad resource location '{}' for task {}", str, id);
 			} else {
-				FTBQuests.PROXY.getClientPlayer().displayClientMessage(
+				FTBQuestsClient.getClientPlayer().displayClientMessage(
 						Component.literal("Bad resource location: " + str).withStyle(ChatFormatting.RED), false);
 			}
 			return fallback;

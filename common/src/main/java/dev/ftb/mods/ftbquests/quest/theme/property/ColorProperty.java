@@ -7,7 +7,7 @@ import dev.ftb.mods.ftblibrary.icon.Color4I;
  */
 public class ColorProperty extends ThemeProperty<Color4I> {
 	public ColorProperty(String n) {
-		super(n, Color4I.EMPTY);
+		super(n, Color4I.empty());
 	}
 
 	@Override

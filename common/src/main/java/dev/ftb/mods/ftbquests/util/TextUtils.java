@@ -1,7 +1,7 @@
 package dev.ftb.mods.ftbquests.util;
 
 import com.google.gson.JsonParseException;
-import dev.ftb.mods.ftblibrary.util.ClientTextComponentUtils;
+import dev.ftb.mods.ftblibrary.util.client.ClientTextComponentUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 

@@ -1,6 +1,6 @@
 plugins {
 	id "architectury-plugin" version "3.4-SNAPSHOT"
-	id "dev.architectury.loom" version "0.12.0-SNAPSHOT" apply false
+	id "dev.architectury.loom" version "1.2-SNAPSHOT" apply false
 	id "com.matthewprenger.cursegradle" version "1.4.0" apply false
 }
 
@@ -28,9 +28,12 @@ allprojects {
 	apply from: "https://raw.githubusercontent.com/FTBTeam/mods-meta/main/gradle/git-md-changelog.gradle"
 
 	def ENV = System.getenv()
-	version = "${mod_version}-build.${ENV.GITHUB_RUN_NUMBER ?: 9999}"
+	version = mod_version
 	group = project.maven_group
 	archivesBaseName = project.archives_base_name
+
+	// needs to be done AFTER version is set
+	apply from: "https://raw.githubusercontent.com/FTBTeam/mods-meta/main/gradle/publishing.gradle"
 
 	sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = 17
 
@@ -45,11 +48,7 @@ allprojects {
 		}
 
 		maven {
-			url "https://maven.blamejared.com/"
-		}
-
-		maven {
-			url "https://maven.saps.dev/minecraft"
+			url "https://maven.saps.dev/releases"
 			content {
 				includeGroup "dev.latvian.mods"
 				includeGroup "dev.ftb.mods"
@@ -57,9 +56,10 @@ allprojects {
 		}
 
 		maven {
-			url "https://maven.blamejared.com"
+			url "https://maven.saps.dev/snapshots"
 			content {
-				includeGroup "net.darkhax.gamestages"
+				includeGroup "dev.latvian.mods"
+				includeGroup "dev.ftb.mods"
 			}
 		}
 	}

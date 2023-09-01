@@ -6,19 +6,18 @@ import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import dev.architectury.registry.registries.Registries;
+import dev.architectury.registry.registries.RegistrarManager;
 import dev.ftb.mods.ftblibrary.config.Tristate;
 import dev.ftb.mods.ftbquests.FTBQuests;
+import dev.ftb.mods.ftbquests.integration.PermissionsHelper;
 import dev.ftb.mods.ftbquests.net.CreateObjectResponseMessage;
-import dev.ftb.mods.ftbquests.net.DeleteObjectResponseMessage;
+import dev.ftb.mods.ftbquests.net.SyncEditorPermissionMessage;
 import dev.ftb.mods.ftbquests.net.SyncQuestsMessage;
-import dev.ftb.mods.ftbquests.net.SyncTeamDataMessage;
 import dev.ftb.mods.ftbquests.quest.*;
 import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
 import dev.ftb.mods.ftbquests.quest.loot.WeightedReward;
 import dev.ftb.mods.ftbquests.quest.reward.ItemReward;
 import dev.ftb.mods.ftbquests.quest.task.ItemTask;
-import dev.ftb.mods.ftbquests.util.FileUtils;
 import dev.ftb.mods.ftbquests.util.ProgressChange;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
@@ -27,16 +26,14 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.NonNullList;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.Item;
+import net.minecraft.world.flag.FeatureFlags;
+import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
@@ -53,8 +50,10 @@ public class FTBQuestsCommands {
 	private static final SimpleCommandExceptionType NO_INVENTORY = new SimpleCommandExceptionType(Component.translatable("commands.ftbquests.command.error.no_inventory"));
 
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
+		//noinspection ConstantValue
 		dispatcher.register(Commands.literal("ftbquests")
-				.requires(s -> s.getServer() != null && s.getServer().isSingleplayer() || s.hasPermission(2))
+				// s.getServer() *can* be null here, whatever the IDE thinks!
+				.requires(s -> s.getServer() != null && s.getServer().isSingleplayer() || hasEditorPermission(s))
 				.then(Commands.literal("editing_mode")
 						.executes(c -> editingMode(c.getSource(), c.getSource().getPlayerOrException(), null))
 						.then(Commands.argument("enabled", BoolArgumentType.bool())
@@ -77,7 +76,7 @@ public class FTBQuestsCommands {
 						.executes(context -> deleteEmptyRewardTables(context.getSource()))
 				)
 				.then(Commands.literal("change_progress")
-						.requires(s -> s.hasPermission(2))
+						.requires(FTBQuestsCommands::hasEditorPermission)
 						.then(Commands.argument("players", EntityArgument.players())
 								.then(Commands.literal("reset")
 										.then(Commands.argument("quest_object", QuestObjectArgument.questObject())
@@ -100,7 +99,7 @@ public class FTBQuestsCommands {
 						)
 				)
 				.then(Commands.literal("export_reward_table_to_chest")
-						.requires(s -> s.hasPermission(2))
+						.requires(FTBQuestsCommands::hasEditorPermission)
 						.then(Commands.argument("reward_table", QuestObjectArgument.questObject())
 								.executes(ctx -> {
 									QuestObjectBase table = ctx.getArgument("reward_table", QuestObjectBase.class);
@@ -122,7 +121,7 @@ public class FTBQuestsCommands {
 						)
 				)
 				.then(Commands.literal("import_reward_table_from_chest")
-						.requires(s -> s.hasPermission(2))
+						.requires(FTBQuestsCommands::hasEditorPermission)
 						.then(Commands.argument("name", StringArgumentType.string())
 								.executes(ctx -> {
 									String name = StringArgumentType.getString(ctx, "name");
@@ -141,7 +140,7 @@ public class FTBQuestsCommands {
 						.executes(context -> generateAllItemChapter(context.getSource()))
 				)
 				.then(Commands.literal("reload")
-						.requires(s -> s.hasPermission(2))
+						.requires(FTBQuestsCommands::hasEditorPermission)
 						.executes(context -> doReload(context.getSource()))
 				)
 				.then(Commands.literal("block_rewards")
@@ -149,7 +148,7 @@ public class FTBQuestsCommands {
 						.then(Commands.argument("enabled", BoolArgumentType.bool())
 								.executes(c -> toggleRewardBlocking(c.getSource(), c.getSource().getPlayerOrException(), BoolArgumentType.getBool(c, "enabled")))
 								.then(Commands.argument("player", EntityArgument.player())
-										.requires(s -> s.hasPermission(2))
+										.requires(FTBQuestsCommands::hasEditorPermission)
 										.executes(c -> toggleRewardBlocking(c.getSource(), EntityArgument.getPlayer(c, "player"), BoolArgumentType.getBool(c, "enabled")))
 								)
 						)
@@ -157,12 +156,18 @@ public class FTBQuestsCommands {
 		);
 	}
 
+	private static boolean hasEditorPermission(CommandSourceStack stack) {
+		//noinspection DataFlowIssue
+		return stack.hasPermission(2)
+				|| stack.isPlayer() && PermissionsHelper.hasEditorPermission(stack.getPlayer(), false);
+	}
+
 	private static int exportRewards(CommandSourceStack source, RewardTable table, BlockPos pos) throws CommandSyntaxException {
 		ServerPlayer player = source.getPlayerOrException();
 		ServerLevel level = source.getLevel();
 
 		if (pos == null) {
-			pos = new BlockPos(player.pick(10, 1F, false).getLocation());
+			pos = BlockPos.containing(player.pick(10, 1F, false).getLocation());
 		}
 
 		BlockEntity be = level.getBlockEntity(pos);
@@ -173,17 +178,16 @@ public class FTBQuestsCommands {
 		container.clearContent();
 
 		int s = 0;
-		for (WeightedReward reward : table.rewards) {
+		for (WeightedReward wr : table.getWeightedRewards()) {
 			if (s >= container.getContainerSize()) {
 				source.sendFailure(Component.translatable("commands.ftbquests.command.feedback.table_too_many_items", table.getTitle()));
 				return 0;
-			} else if (!(reward.reward instanceof ItemReward)) {
-				continue;
+			} else if (wr.getReward() instanceof ItemReward itemReward) {
+				container.setItem(s++, itemReward.getItem());
 			}
-			container.setItem(s++, ((ItemReward) reward.reward).item);
 		}
 
-		source.sendSuccess(Component.translatable("commands.ftbquests.command.feedback.table_imported", table.getTitle(), table.rewards.size()), false);
+		source.sendSuccess(() -> Component.translatable("commands.ftbquests.command.feedback.table_imported", table.getTitle(), table.getWeightedRewards().size()), false);
 
 		return 1;
 	}
@@ -194,13 +198,12 @@ public class FTBQuestsCommands {
 		ServerQuestFile file = ServerQuestFile.INSTANCE;
 
 		if (pos == null) {
-			pos = new BlockPos(player.pick(10, 1F, false).getLocation());
+			pos = BlockPos.containing(player.pick(10, 1F, false).getLocation());
 		}
 
-		RewardTable table = new RewardTable(file);
-		table.id = file.newID();
-		table.title = name;
-		table.icon = Items.CHEST.getDefaultInstance();
+		RewardTable table = new RewardTable(file.newID(), file);
+		table.setRawTitle(name);
+		table.setRawIcon(Items.CHEST.getDefaultInstance());
 
 		BlockEntity be = level.getBlockEntity(pos);
 		if (!(be instanceof BaseContainerBlockEntity container)) {
@@ -210,23 +213,21 @@ public class FTBQuestsCommands {
 		for (int i = 0; i < container.getContainerSize(); i++) {
 			ItemStack stack = container.getItem(i);
 			if (!stack.isEmpty()) {
-				table.rewards.add(new WeightedReward(new ItemReward(table.fakeQuest, stack), 1f));
+				table.addReward(table.makeWeightedItemReward(stack, 1f));
 			}
 		}
 
-
-		file.rewardTables.add(table);
-		file.save();
+		file.addRewardTable(table);
 
 		new CreateObjectResponseMessage(table, null).sendToAll(level.getServer());
 
-		source.sendSuccess(Component.translatable("commands.ftbquests.command.feedback.table_imported", name, table.rewards.size()), false);
+		source.sendSuccess(() -> Component.translatable("commands.ftbquests.command.feedback.table_imported", name, table.getWeightedRewards().size()), false);
 
 		return 1;
 	}
 
 	private static int editingMode(CommandSourceStack source, ServerPlayer player, @Nullable Boolean canEdit) {
-		TeamData data = ServerQuestFile.INSTANCE.getData(player);
+		TeamData data = ServerQuestFile.INSTANCE.getOrCreateTeamData(player);
 
 		if (canEdit == null) {
 			canEdit = !data.getCanEdit(player);
@@ -235,16 +236,16 @@ public class FTBQuestsCommands {
 		data.setCanEdit(player, canEdit);
 
 		if (canEdit) {
-			source.sendSuccess(Component.translatable("commands.ftbquests.editing_mode.enabled", player.getDisplayName()), true);
+			source.sendSuccess(() -> Component.translatable("commands.ftbquests.editing_mode.enabled", player.getDisplayName()), true);
 		} else {
-			source.sendSuccess(Component.translatable("commands.ftbquests.editing_mode.disabled", player.getDisplayName()), true);
+			source.sendSuccess(() -> Component.translatable("commands.ftbquests.editing_mode.disabled", player.getDisplayName()), true);
 		}
 
 		return 1;
 	}
 
 	private static int locked(CommandSourceStack source, ServerPlayer player, @Nullable Boolean locked) {
-		TeamData data = ServerQuestFile.INSTANCE.getData(player);
+		TeamData data = ServerQuestFile.INSTANCE.getOrCreateTeamData(player);
 
 		if (locked == null) {
 			locked = !data.isLocked();
@@ -253,80 +254,54 @@ public class FTBQuestsCommands {
 		data.setLocked(locked);
 
 		if (locked) {
-			source.sendSuccess(Component.translatable("commands.ftbquests.locked.enabled", player.getDisplayName()), true);
+			source.sendSuccess(() -> Component.translatable("commands.ftbquests.locked.enabled", player.getDisplayName()), true);
 		} else {
-			source.sendSuccess(Component.translatable("commands.ftbquests.locked.disabled", player.getDisplayName()), true);
+			source.sendSuccess(() -> Component.translatable("commands.ftbquests.locked.disabled", player.getDisplayName()), true);
 		}
 
 		return 1;
 	}
 
 	private static int changeProgress(CommandSourceStack source, Collection<ServerPlayer> players, boolean reset, QuestObjectBase questObject) {
-		ProgressChange progressChange = new ProgressChange(ServerQuestFile.INSTANCE);
-		progressChange.origin = questObject;
-		progressChange.reset = reset;
-
 		for (ServerPlayer player : players) {
-			progressChange.player = player.getUUID();
-			questObject.forceProgress(ServerQuestFile.INSTANCE.getData(player), progressChange);
+			ProgressChange progressChange = new ProgressChange(ServerQuestFile.INSTANCE, questObject, player.getUUID()).setReset(reset);
+			questObject.forceProgress(ServerQuestFile.INSTANCE.getOrCreateTeamData(player), progressChange);
 		}
 
-		source.sendSuccess(Component.translatable("commands.ftbquests.change_progress.text"), true);
+		source.sendSuccess(() -> Component.translatable("commands.ftbquests.change_progress.text"), true);
 		return Command.SINGLE_SUCCESS;
 	}
 
 	private static int deleteEmptyRewardTables(CommandSourceStack source) {
-		int del = 0;
+		int removed = ServerQuestFile.INSTANCE.removeEmptyRewardTables(source);
 
-		for (RewardTable table : ServerQuestFile.INSTANCE.rewardTables) {
-			if (table.rewards.isEmpty()) {
-				del++;
-				table.invalid = true;
-				FileUtils.delete(ServerQuestFile.INSTANCE.getFolder().resolve(table.getPath()).toFile());
-				new DeleteObjectResponseMessage(table.id).sendToAll(source.getServer());
-			}
-		}
+		source.sendSuccess(() -> Component.translatable("commands.ftbquests.command.delete_empty_reward_tables.text", removed), false);
 
-		ServerQuestFile.INSTANCE.rewardTables.removeIf(rewardTable -> rewardTable.invalid);
-		ServerQuestFile.INSTANCE.refreshIDMap();
-		ServerQuestFile.INSTANCE.save();
-
-		source.sendSuccess(Component.literal("Deleted " + del + " empty tables"), false);
 		return 1;
 	}
 
 	private static int generateAllItemChapter(CommandSourceStack source) {
-		NonNullList<ItemStack> nonNullList = NonNullList.create();
-
-		for (Map.Entry<ResourceKey<Item>, Item> entry : Registry.ITEM.entrySet()) {
-			Item item = entry.getValue();
-			try {
-				int s = nonNullList.size();
-				item.fillItemCategory(CreativeModeTab.TAB_SEARCH, nonNullList);
-
-				if (s == nonNullList.size()) {
-					nonNullList.add(new ItemStack(item));
-				}
-			} catch (Throwable ex) {
-				FTBQuests.LOGGER.warn("Failed to get items from " + entry.getKey() + ": " + ex);
-			}
+		if (!CreativeModeTabs.searchTab().hasAnyItems()) {
+			CreativeModeTabs.tryRebuildTabContents(FeatureFlags.DEFAULT_FLAGS, true, source.getLevel().registryAccess());
 		}
+		Collection<ItemStack> allItems = CreativeModeTabs.searchTab().getSearchTabDisplayItems();
 
-		Chapter chapter = new Chapter(ServerQuestFile.INSTANCE, ServerQuestFile.INSTANCE.defaultChapterGroup);
-		chapter.id = chapter.file.newID();
+		long newId = ServerQuestFile.INSTANCE.newID();
+		Chapter chapter = new Chapter(newId, ServerQuestFile.INSTANCE, ServerQuestFile.INSTANCE.getDefaultChapterGroup());
 		chapter.onCreated();
 
-		chapter.title = "Generated chapter of all items in search creative tab [" + nonNullList.size() + "]";
-		chapter.icon = new ItemStack(Items.COMPASS);
-		chapter.defaultQuestShape = "rsquare";
+		chapter.setRawTitle("Generated chapter of all items in search creative tab [" + allItems.size() + "]");
+		chapter.setRawIcon(new ItemStack(Items.COMPASS));
+		chapter.setDefaultQuestShape("rsquare");
 
 		new CreateObjectResponseMessage(chapter, null).sendToAll(source.getServer());
 
-		List<ItemStack> list = nonNullList.stream()
-				.filter(stack -> !stack.isEmpty() && Registries.getId(stack.getItem(), Registry.ITEM_REGISTRY) != null)
-				.sorted(Comparator.comparing(a -> Registries.getId(a.getItem(), Registry.ITEM_REGISTRY)))
+		//noinspection DataFlowIssue
+		List<ItemStack> list = allItems.stream()
+				.filter(stack -> !stack.isEmpty() && RegistrarManager.getId(stack.getItem(), Registries.ITEM) != null)
+				.sorted(Comparator.comparing(a -> RegistrarManager.getId(a.getItem(), Registries.ITEM)))
 				.toList();
-		FTBQuests.LOGGER.info("Found " + nonNullList.size() + " items in total, chapter ID: " + chapter);
+		FTBQuests.LOGGER.info("Found " + allItems.size() + " items in total, chapter ID: " + chapter);
 
 		if (list.isEmpty()) {
 			return 0;
@@ -334,10 +309,10 @@ public class FTBQuestsCommands {
 
 		int col = 0;
 		int row = 0;
-		String modid = Registries.getId(list.get(0).getItem(), Registry.ITEM_REGISTRY).getNamespace();
+		String modid = RegistrarManager.getId(list.get(0).getItem(), Registries.ITEM).getNamespace();
 
 		for (ItemStack stack : list) {
-			ResourceLocation id = Registries.getId(stack.getItem(), Registry.ITEM_REGISTRY);
+			ResourceLocation id = RegistrarManager.getId(stack.getItem(), Registries.ITEM);
 			if (!modid.equals(id.getNamespace())) {
 				modid = id.getNamespace();
 				col = 0;
@@ -347,21 +322,17 @@ public class FTBQuestsCommands {
 				row++;
 			}
 
-			Quest quest = new Quest(chapter);
-			quest.id = chapter.file.newID();
+			Quest quest = new Quest(chapter.file.newID(), chapter);
 			quest.onCreated();
-			quest.x = col;
-			quest.y = row;
-			quest.subtitle = stack.save(new CompoundTag()).toString();
+			quest.setX(col);
+			quest.setY(row);
+			quest.setRawSubtitle(stack.save(new CompoundTag()).toString());
 
 			new CreateObjectResponseMessage(quest, null).sendToAll(source.getServer());
 
-			ItemTask task = new ItemTask(quest);
-			task.id = chapter.file.newID();
+			ItemTask task = new ItemTask(chapter.file.newID(), quest);
 			task.onCreated();
-
-			task.consumeItems = Tristate.TRUE;
-			task.item = stack;
+			task.setStackAndCount(stack, 1).setConsumeItems(Tristate.TRUE);
 
 			CompoundTag extra = new CompoundTag();
 			extra.putString("type", task.getType().getTypeForNBT());
@@ -370,35 +341,32 @@ public class FTBQuestsCommands {
 			col++;
 		}
 
-		ServerQuestFile.INSTANCE.save();
+		ServerQuestFile.INSTANCE.markDirty();
 		ServerQuestFile.INSTANCE.saveNow();
-		source.sendSuccess(Component.literal("Done!"), false);
+		source.sendSuccess(() -> Component.literal("Done!"), false);
 		return 1;
 	}
 
 	private static final Set<UUID> warnedPlayers = new HashSet<>();
+
 	private static int doReload(CommandSourceStack source) {
 		ServerQuestFile instance = ServerQuestFile.INSTANCE;
 		ServerPlayer sender = source.getPlayer();
 
-		if (sender != null && !instance.getData(sender).getCanEdit(sender)) {
+		if (sender != null && !instance.getOrCreateTeamData(sender).getCanEdit(sender)) {
 			source.sendFailure(Component.translatable("commands.ftbquests.command.error.not_editing"));
 			return 1;
 		}
 
 		instance.load();
 		new SyncQuestsMessage(instance).sendToAll(source.getServer());
-		for (ServerPlayer player : source.getServer().getPlayerList().getPlayers()) {
-			TeamData data = instance.getData(player);
-			for (TeamData teamData: instance.getAllData()) {
-				new SyncTeamDataMessage(teamData, teamData == data).sendTo(player);
-			}
-		}
+		source.getServer().getPlayerList().getPlayers()
+				.forEach(p -> new SyncEditorPermissionMessage(PermissionsHelper.hasEditorPermission(p, false)).sendTo(p));
 
-		source.sendSuccess(Component.translatable("commands.ftbquests.command.feedback.reloaded"), false);
+		source.sendSuccess(() -> Component.translatable("commands.ftbquests.command.feedback.reloaded"), false);
 		UUID id = sender == null ? Util.NIL_UUID : sender.getUUID();
 		if (!warnedPlayers.contains(id)) {
-			source.sendSuccess(Component.translatable("commands.ftbquests.command.feedback.reloaded.disclaimer").withStyle(ChatFormatting.GOLD), false);
+			source.sendSuccess(() -> Component.translatable("commands.ftbquests.command.feedback.reloaded.disclaimer").withStyle(ChatFormatting.GOLD), false);
 			warnedPlayers.add(id);
 		}
 
@@ -406,7 +374,7 @@ public class FTBQuestsCommands {
 	}
 
 	private static int toggleRewardBlocking(CommandSourceStack source, ServerPlayer player, Boolean doBlocking) {
-		TeamData data = ServerQuestFile.INSTANCE.getData(player);
+		TeamData data = ServerQuestFile.INSTANCE.getOrCreateTeamData(player);
 
 		if (doBlocking == null) {
 			doBlocking = !data.areRewardsBlocked();
@@ -414,7 +382,7 @@ public class FTBQuestsCommands {
 
 		data.setRewardsBlocked(doBlocking);
 
-		source.sendSuccess(Component.translatable("commands.ftbquests.command.feedback.rewards_blocked", data, data.areRewardsBlocked()), false);
+		source.sendSuccess(() -> Component.translatable("commands.ftbquests.command.feedback.rewards_blocked", data, data.areRewardsBlocked()), false);
 
 		return 1;
 	}

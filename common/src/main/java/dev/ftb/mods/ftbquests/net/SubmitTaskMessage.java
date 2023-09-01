@@ -13,14 +13,14 @@ import net.minecraft.server.level.ServerPlayer;
  * @author LatvianModder
  */
 public class SubmitTaskMessage extends BaseC2SMessage {
-	private final long task;
+	private final long taskId;
 
 	SubmitTaskMessage(FriendlyByteBuf buffer) {
-		task = buffer.readLong();
+		taskId = buffer.readLong();
 	}
 
-	public SubmitTaskMessage(long t) {
-		task = t;
+	public SubmitTaskMessage(long taskId) {
+		this.taskId = taskId;
 	}
 
 	@Override
@@ -30,22 +30,19 @@ public class SubmitTaskMessage extends BaseC2SMessage {
 
 	@Override
 	public void write(FriendlyByteBuf buffer) {
-		buffer.writeLong(task);
+		buffer.writeLong(taskId);
 	}
 
 	@Override
 	public void handle(NetworkManager.PacketContext context) {
 		ServerPlayer player = (ServerPlayer) context.getPlayer();
+
 		TeamData data = TeamData.get(player);
-
-		if (data.isLocked()) {
-			return;
-		}
-
-		Task t = data.file.getTask(task);
-
-		if (t != null && data.canStartTasks(t.quest)) {
-			((ServerQuestFile) data.file).withPlayerContext(player, () -> t.submitTask(data, player));
+		if (!data.isLocked()) {
+			Task task = data.getFile().getTask(taskId);
+			if (task != null && data.getFile() instanceof ServerQuestFile sqf && data.canStartTasks(task.getQuest())) {
+				sqf.withPlayerContext(player, () -> task.submitTask(data, player));
+			}
 		}
 	}
 }

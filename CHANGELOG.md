@@ -4,6 +4,41 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2001.1.1]
+
+### Changed
+* Ported to Minecraft 1.20.1
+  * Note that **FTB XMod Compat** is recommended for cross-mod integration (FTB Ranks / Luckperms, JEI / REI, Game Stages)
+  * No KubeJS support in this release (KubeJS is not available on 1.20.1)
+* Scroll wheel behaviour changed; scrolling now scrolls up and down; hold Shift to pan left and right; hold Ctrl to zoom in and out
+  * Old behaviour can be restored via local preferences (see below)
+* Quest and Chapter edit screens have been reorganised into subsections to reduce the "wall of text" effect
+* Editing mode status information has been cleaned up into a status bar at the bottom of the screen
+
+### Added
+* New clientside local preferences are stored; can be accessed via the player head icon in bottom right of the GUI
+  * Currently only stores scroll-wheel behaviour, but likely to expanded in the future
+* Now supports a `ftbquests.editor` permission node (via FTB Ranks or Luckperms; FTB XMod Compat also required)
+  * Allows players to be quest book editors without requiring full admin permissions
+* Several quest settings now have chapter defaults
+  * Quest Size (note that the quest size is now 0 by default in quests instead of 1; 0 means "use chapter default")
+  * Repeatable flag
+  * Consume Items flag for Item Tasks (in addition to the existing global "Consume Items" flag settable via "Edit File")
+* There is a new in-game "Key Reference" screen, available via the grey "Info" icon on the right-hand toolbar
+
+## [1902.4.18]
+
+### Changed
+* Removed the feature whereby double-tapping Shift opens the quest search GUI
+  * This caused problems for player whose keyboards send multiple keyup/keydown events for modifier keys like Shift
+  * Use Ctrl+F to open the search GUI instead
+
+### Fixed
+* Fixed issue with quest dependency validation (after adding a dependency via the quest edit screen) sometimes taking far, far too long
+  * Likely to be an issue with large complex quest trees with many interleaving dependencies
+* Fixed the mouse pointer warping to the screen center when opening FTB Quests from the sidebar button
+* Fixed a client crash when opening a quest via JEI integration
+
 ## [1902.4.17]
 
 ### Fixed

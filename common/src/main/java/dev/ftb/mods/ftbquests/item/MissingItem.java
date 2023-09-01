@@ -1,11 +1,10 @@
 package dev.ftb.mods.ftbquests.item;
 
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
-import dev.ftb.mods.ftbquests.FTBQuests;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -35,7 +34,7 @@ public class MissingItem extends Item {
 			return ItemStack.EMPTY;
 		}
 
-		Item item = Registry.ITEM.get(id);
+		Item item = BuiltInRegistries.ITEM.get(id);
 
 		if (item == Items.AIR) {
 			ItemStack stack = new ItemStack(FTBQuestsItems.MISSING_ITEM.get());
@@ -62,7 +61,7 @@ public class MissingItem extends Item {
 	}
 
 	public MissingItem() {
-		super(new Properties().stacksTo(1).tab(FTBQuests.ITEM_GROUP));
+		super(FTBQuestsItems.defaultProps().stacksTo(1));
 	}
 
 	@Override

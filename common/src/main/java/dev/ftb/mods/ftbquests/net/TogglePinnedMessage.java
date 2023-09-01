@@ -35,7 +35,7 @@ public class TogglePinnedMessage extends BaseC2SMessage {
 	@Override
 	public void handle(NetworkManager.PacketContext context) {
 		ServerPlayer player = (ServerPlayer) context.getPlayer();
-		TeamData data = ServerQuestFile.INSTANCE.getData(player);
+		TeamData data = ServerQuestFile.INSTANCE.getOrCreateTeamData(player);
 		boolean newPinned = !data.isQuestPinned(player, id);
 		data.setQuestPinned(player, id, newPinned);
 		new TogglePinnedResponseMessage(id, newPinned).sendTo(player);

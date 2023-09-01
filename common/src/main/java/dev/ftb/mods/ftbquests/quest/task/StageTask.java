@@ -2,7 +2,7 @@ package dev.ftb.mods.ftbquests.quest.task;
 
 import dev.architectury.hooks.level.entity.PlayerHooks;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
-import dev.ftb.mods.ftbquests.integration.StageHelper;
+import dev.ftb.mods.ftblibrary.integration.stages.StageHelper;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.TeamData;
@@ -18,11 +18,11 @@ import net.minecraft.server.level.ServerPlayer;
 /**
  * @author LatvianModder
  */
-public class StageTask extends BooleanTask {
-	public String stage = "";
+public class StageTask extends AbstractBooleanTask {
+	private String stage = "";
 
-	public StageTask(Quest quest) {
-		super(quest);
+	public StageTask(long id, Quest quest) {
+		super(id, quest);
 	}
 
 	@Override
@@ -56,8 +56,8 @@ public class StageTask extends BooleanTask {
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public void getConfig(ConfigGroup config) {
-		super.getConfig(config);
+	public void fillConfigGroup(ConfigGroup config) {
+		super.fillConfigGroup(config);
 		config.addString("stage", stage, v -> stage = v, "").setNameKey("ftbquests.task.ftbquests.gamestage");
 	}
 
@@ -74,11 +74,14 @@ public class StageTask extends BooleanTask {
 
 	@Override
 	public boolean canSubmit(TeamData teamData, ServerPlayer player) {
-		return StageHelper.INSTANCE.get().has(player, stage);
+		return StageHelper.INSTANCE.getProvider().has(player, stage);
 	}
 
+	@SuppressWarnings("unused")
 	public static void checkStages(ServerPlayer player) {
-		TeamData data = ServerQuestFile.INSTANCE == null || PlayerHooks.isFake(player) ? null : ServerQuestFile.INSTANCE.getData(player);
+		// hook for FTB XMod Compat to call into
+
+		TeamData data = ServerQuestFile.INSTANCE == null || PlayerHooks.isFake(player) ? null : ServerQuestFile.INSTANCE.getOrCreateTeamData(player);
 
 		if (data == null || data.isLocked()) {
 			return;
@@ -86,7 +89,7 @@ public class StageTask extends BooleanTask {
 
 		ServerQuestFile.INSTANCE.withPlayerContext(player, () -> {
 			for (Task task : ServerQuestFile.INSTANCE.getAllTasks()) {
-				if (task instanceof StageTask && data.canStartTasks(task.quest)) {
+				if (task instanceof StageTask && data.canStartTasks(task.getQuest())) {
 					task.submitTask(data, player);
 				}
 			}

@@ -3,22 +3,23 @@ package dev.ftb.mods.ftbquests.net;
 import dev.architectury.networking.NetworkManager;
 import dev.architectury.networking.simple.BaseS2CMessage;
 import dev.architectury.networking.simple.MessageType;
-import dev.ftb.mods.ftbquests.FTBQuests;
-import dev.ftb.mods.ftbquests.quest.QuestFile;
+import dev.ftb.mods.ftbquests.client.ClientQuestFile;
+import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
+import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
 import net.minecraft.network.FriendlyByteBuf;
 
 /**
  * @author LatvianModder
  */
 public class SyncQuestsMessage extends BaseS2CMessage {
-	private final QuestFile file;
+	private final BaseQuestFile file;
 
 	SyncQuestsMessage(FriendlyByteBuf buffer) {
-		file = FTBQuests.PROXY.createClientQuestFile();
+		file = FTBQuestsClient.createClientQuestFile();
 		file.readNetDataFull(buffer);
 	}
 
-	public SyncQuestsMessage(QuestFile f) {
+	public SyncQuestsMessage(BaseQuestFile f) {
 		file = f;
 	}
 
@@ -34,6 +35,8 @@ public class SyncQuestsMessage extends BaseS2CMessage {
 
 	@Override
 	public void handle(NetworkManager.PacketContext context) {
-		file.load();
+		ClientQuestFile.syncFromServer(file);
+
+		new RequestTeamDataMessage().sendToServer();
 	}
 }

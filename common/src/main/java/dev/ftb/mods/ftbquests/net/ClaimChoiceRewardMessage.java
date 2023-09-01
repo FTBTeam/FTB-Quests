@@ -47,9 +47,9 @@ public class ClaimChoiceRewardMessage extends BaseC2SMessage {
 			TeamData data = TeamData.get(serverPlayer);
 			RewardTable table = choiceReward.getTable();
 
-			if (table != null && data.isCompleted(reward.quest)) {
-				if (index >= 0 && index < table.rewards.size()) {
-					table.rewards.get(index).reward.claim(serverPlayer, true);
+			if (table != null && data.isCompleted(reward.getQuest())) {
+				if (index >= 0 && index < table.getWeightedRewards().size()) {
+					table.getWeightedRewards().get(index).getReward().claim(serverPlayer, true);
 					data.claimReward(serverPlayer, reward, true);
 				}
 			}

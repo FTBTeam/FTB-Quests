@@ -5,9 +5,6 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.monster.Enemy;
 
-/**
- * @author LatvianModder
- */
 public class EntityWeight {
 	public int passive = 0;
 	public int monster = 0;

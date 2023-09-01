@@ -1,13 +1,13 @@
 package dev.ftb.mods.ftbquests.client;
 
+import dev.architectury.hooks.item.ItemStackHooks;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;
-import dev.ftb.mods.ftblibrary.util.ClientUtils;
+import dev.ftb.mods.ftblibrary.ui.Panel;
+import dev.ftb.mods.ftblibrary.util.client.ClientUtils;
 import dev.ftb.mods.ftbquests.FTBQuests;
-import dev.ftb.mods.ftbquests.FTBQuestsNetCommon;
-import dev.ftb.mods.ftbquests.gui.*;
-import dev.ftb.mods.ftbquests.gui.quests.QuestScreen;
-import dev.ftb.mods.ftbquests.integration.FTBQuestsJEIHelper;
+import dev.ftb.mods.ftbquests.client.gui.*;
+import dev.ftb.mods.ftbquests.client.gui.quests.QuestScreen;
 import dev.ftb.mods.ftbquests.net.TeamDataUpdate;
 import dev.ftb.mods.ftbquests.quest.*;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
@@ -22,50 +22,45 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Date;
 import java.util.UUID;
 
-public class FTBQuestsNetClient extends FTBQuestsNetCommon {
-	@Override
-	public void syncTeamData(boolean self, TeamData data) {
-		data.file = ClientQuestFile.INSTANCE;
-		data.file.addData(data, true);
+public class FTBQuestsNetClient {
+	public static void syncTeamData(boolean self, TeamData data) {
+		ClientQuestFile.INSTANCE.addData(data, true);
 
 		if (self) {
-			ClientQuestFile.INSTANCE.self = data;
+			ClientQuestFile.INSTANCE.selfTeamData = data;
 		}
 	}
 
-	@Override
-	public void claimReward(UUID teamId, UUID player, long rewardId) {
+	public static void claimReward(UUID teamId, UUID player, long rewardId) {
 		Reward reward = ClientQuestFile.INSTANCE.getReward(rewardId);
 
 		if (reward == null) {
 			return;
 		}
 
-		TeamData data = ClientQuestFile.INSTANCE.getData(teamId);
+		TeamData data = ClientQuestFile.INSTANCE.getOrCreateTeamData(teamId);
 		data.claimReward(player, reward, System.currentTimeMillis());
 
-		if (data == ClientQuestFile.INSTANCE.self) {
+		if (data == ClientQuestFile.INSTANCE.selfTeamData) {
 			QuestScreen treeGui = ClientUtils.getCurrentGuiAs(QuestScreen.class);
-
 			if (treeGui != null) {
-				treeGui.viewQuestPanel.refreshWidgets();
+				treeGui.refreshViewQuestPanel();
 				treeGui.otherButtonsTopPanel.refreshWidgets();
 			}
 		}
 	}
 
-	@Override
-	public void createObject(long id, long parent, QuestObjectType type, CompoundTag nbt, @Nullable CompoundTag extra) {
-		QuestObjectBase object = ClientQuestFile.INSTANCE.create(type, parent, extra == null ? new CompoundTag() : extra);
+	public static void createObject(long id, long parent, QuestObjectType type, CompoundTag nbt, @Nullable CompoundTag extra) {
+		QuestObjectBase object = ClientQuestFile.INSTANCE.create(id, type, parent, extra == null ? new CompoundTag() : extra);
 		object.readData(nbt);
-		object.id = id;
 		object.onCreated();
 		ClientQuestFile.INSTANCE.refreshIDMap();
 		object.editedFromGUI();
-		FTBQuestsJEIHelper.refresh(object);
+		FTBQuests.getRecipeModHelper().refreshRecipes(object);
 
-		if (object instanceof Chapter) {
-			ClientQuestFile.INSTANCE.questScreen.selectChapter((Chapter) object);
+		if (object instanceof Chapter chapter) {
+			ClientQuestFile.INSTANCE.getQuestScreen()
+					.ifPresent(questScreen -> questScreen.selectChapter(chapter));
 		}
 
 		QuestObjectUpdateListener listener = ClientUtils.getCurrentGuiAs(QuestObjectUpdateListener.class);
@@ -75,28 +70,21 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon {
 		}
 	}
 
-	@Override
-	public void createOtherTeamData(TeamDataUpdate dataUpdate) {
+	public static void createOtherTeamData(TeamDataUpdate dataUpdate) {
 		if (ClientQuestFile.INSTANCE != null) {
-			TeamData data = new TeamData(dataUpdate.uuid);
-			data.file = ClientQuestFile.INSTANCE;
-			data.name = dataUpdate.name;
-			data.file.addData(data, true);
+			TeamData data = new TeamData(dataUpdate.uuid, ClientQuestFile.INSTANCE, dataUpdate.name);
+			ClientQuestFile.INSTANCE.addData(data, true);
 		}
 	}
 
-	@Override
-	public void teamDataChanged(TeamDataUpdate oldDataUpdate, TeamDataUpdate newDataUpdate) {
+	public static void teamDataChanged(TeamDataUpdate oldDataUpdate, TeamDataUpdate newDataUpdate) {
 		if (ClientQuestFile.INSTANCE != null) {
-			TeamData data = new TeamData(newDataUpdate.uuid);
-			data.file = ClientQuestFile.INSTANCE;
-			data.name = newDataUpdate.name;
-			data.file.addData(data, false);
+			TeamData data = new TeamData(newDataUpdate.uuid, ClientQuestFile.INSTANCE, newDataUpdate.name);
+			ClientQuestFile.INSTANCE.addData(data, false);
 		}
 	}
 
-	@Override
-	public void deleteObject(long id) {
+	public static void deleteObject(long id) {
 		QuestObjectBase object = ClientQuestFile.INSTANCE.getBase(id);
 
 		if (object != null) {
@@ -104,44 +92,38 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon {
 			object.deleteSelf();
 			ClientQuestFile.INSTANCE.refreshIDMap();
 			object.editedFromGUI();
-			FTBQuestsJEIHelper.refresh(object);
+			FTBQuests.getRecipeModHelper().refreshRecipes(object);
 		}
 	}
 
-	@Override
-	public void displayCompletionToast(long id) {
+	public static void displayCompletionToast(long id) {
 		QuestObject object = ClientQuestFile.INSTANCE.get(id);
 
 		if (object != null) {
 			Minecraft.getInstance().getToasts().addToast(new ToastQuestObject(object));
 		}
 
-		ClientQuestFile.INSTANCE.questScreen.questPanel.refreshWidgets();
-		ClientQuestFile.INSTANCE.questScreen.chapterPanel.refreshWidgets();
-		ClientQuestFile.INSTANCE.questScreen.viewQuestPanel.refreshWidgets();
-	}
-
-	@Override
-	public void displayItemRewardToast(ItemStack stack, int count) {
-		ItemStack stack1 = stack.copy();
-		stack1.setCount(1);
-		Icon icon = ItemIcon.getItemIcon(stack1);
-
-		if (!IRewardListenerScreen.add(new RewardKey(stack.getHoverName().getString(), icon).setStack(stack1), count)) {
-			MutableComponent s = stack.getHoverName().copy();
-
-			if (count > 1) {
-				s = Component.literal(count + "x ").append(s);
-			}
-
-			s.withStyle(stack.getRarity().color);
-
-			Minecraft.getInstance().getToasts().addToast(new RewardToast(s, icon));
+		QuestScreen questScreen = ClientUtils.getCurrentGuiAs(QuestScreen.class);
+		if (questScreen != null) {
+			questScreen.refreshQuestPanel();
+			questScreen.refreshChapterPanel();
+			questScreen.refreshViewQuestPanel();
 		}
 	}
 
-	@Override
-	public void displayRewardToast(long id, Component text, Icon icon) {
+	public static void displayItemRewardToast(ItemStack stack, int count) {
+		ItemStack stack1 = ItemStackHooks.copyWithCount(stack, 1);
+		Icon icon = ItemIcon.getItemIcon(stack1);
+
+		if (!IRewardListenerScreen.add(new RewardKey(stack.getHoverName().getString(), icon, stack1), count)) {
+			MutableComponent comp = count > 1 ?
+					Component.literal(count + "x ").append(stack.getHoverName()) :
+					stack.getHoverName().copy();
+			Minecraft.getInstance().getToasts().addToast(new RewardToast(comp.withStyle(stack.getRarity().color), icon));
+		}
+	}
+
+	public static void displayRewardToast(long id, Component text, Icon icon) {
 		Icon i = icon.isEmpty() ? ClientQuestFile.INSTANCE.getBase(id).getIcon() : icon;
 
 		if (!IRewardListenerScreen.add(new RewardKey(text.getString(), i), 1)) {
@@ -149,137 +131,97 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon {
 		}
 	}
 
-	@Override
-	public void editObject(long id, CompoundTag nbt) {
+	public static void editObject(long id, CompoundTag nbt) {
 		ClientQuestFile.INSTANCE.clearCachedData();
 		QuestObjectBase object = ClientQuestFile.INSTANCE.getBase(id);
 
 		if (object != null) {
 			object.readData(nbt);
 			object.editedFromGUI();
-			FTBQuestsJEIHelper.refresh(object);
+			FTBQuests.getRecipeModHelper().refreshRecipes(object);
 		}
 	}
 
-	@Override
-	public void moveChapter(long id, boolean up) {
+	public static void moveChapter(long id, boolean movingUp) {
 		Chapter chapter = ClientQuestFile.INSTANCE.getChapter(id);
 
-		if (chapter != null) {
-			int index = chapter.group.chapters.indexOf(chapter);
-
-			if (index != -1 && up ? (index > 0) : (index < chapter.group.chapters.size() - 1)) {
-				chapter.group.chapters.remove(index);
-				chapter.group.chapters.add(up ? index - 1 : index + 1, chapter);
-				ClientQuestFile.INSTANCE.clearCachedData();
-
-				QuestScreen gui = ClientUtils.getCurrentGuiAs(QuestScreen.class);
-
-				if (gui != null) {
-					gui.chapterPanel.refreshWidgets();
-				}
+		if (chapter != null && chapter.getGroup().moveChapterWithinGroup(chapter, movingUp)) {
+			ClientQuestFile.INSTANCE.clearCachedData();
+			QuestScreen gui = ClientUtils.getCurrentGuiAs(QuestScreen.class);
+			if (gui != null) {
+				gui.refreshChapterPanel();
 			}
 		}
 	}
 
-	@Override
-	public void moveQuest(long id, long chapter, double x, double y) {
+	public static void moveQuest(long id, long chapter, double x, double y) {
 		if (ClientQuestFile.INSTANCE.get(id) instanceof Movable movable) {
 			movable.onMoved(x, y, chapter);
 			QuestScreen gui = ClientUtils.getCurrentGuiAs(QuestScreen.class);
-
 			if (gui != null) {
-				double sx = gui.questPanel.centerQuestX;
-				double sy = gui.questPanel.centerQuestY;
-				gui.questPanel.refreshWidgets();
-				gui.questPanel.scrollTo(sx, sy);
+				gui.questPanel.withPreservedPos(Panel::refreshWidgets);
 			}
 		}
 	}
 
-	@Override
-	public void syncEditingMode(UUID teamId, boolean editingMode) {
-		if (ClientQuestFile.INSTANCE.getData(teamId).setCanEdit(Minecraft.getInstance().player, editingMode)) {
+	public static void syncEditingMode(UUID teamId, boolean editingMode) {
+		if (ClientQuestFile.INSTANCE.getOrCreateTeamData(teamId).setCanEdit(Minecraft.getInstance().player, editingMode)) {
 			ClientQuestFile.INSTANCE.refreshGui();
 		}
 	}
 
-	@Override
-	public void togglePinned(long id, boolean pinned) {
-		TeamData data = FTBQuests.PROXY.getClientPlayerData();
+	public static void togglePinned(long id, boolean pinned) {
+		TeamData data = FTBQuestsClient.getClientPlayerData();
 		data.setQuestPinned(Minecraft.getInstance().player, id, pinned);
 
-		ClientQuestFile.INSTANCE.questScreen.otherButtonsBottomPanel.refreshWidgets();
-
-		if (ClientQuestFile.INSTANCE.questScreen.viewQuestPanel != null) {
-			ClientQuestFile.INSTANCE.questScreen.viewQuestPanel.refreshWidgets();
-		}
+		ClientQuestFile.INSTANCE.getQuestScreen().ifPresent(questScreen -> {
+			questScreen.otherButtonsTopPanel.refreshWidgets();
+			questScreen.refreshViewQuestPanel();
+		});
 	}
 
-	@Override
-	public void updateTeamData(UUID teamId, String name) {
-		TeamData data = ClientQuestFile.INSTANCE.getData(teamId);
-		data.name = name;
+	public static void updateTeamData(UUID teamId, String name) {
+		TeamData data = ClientQuestFile.INSTANCE.getOrCreateTeamData(teamId);
+		data.setName(name);
 	}
 
-	@Override
-	public void updateTaskProgress(UUID teamId, long task, long progress) {
+	public static void updateTaskProgress(UUID teamId, long task, long progress) {
 		Task t = ClientQuestFile.INSTANCE.getTask(task);
 
 		if (t != null) {
-			TeamData data = ClientQuestFile.INSTANCE.getData(teamId);
+			TeamData data = ClientQuestFile.INSTANCE.getOrCreateTeamData(teamId);
 			ClientQuestFile.INSTANCE.clearCachedProgress();
 			data.setProgress(t, progress);
 		}
 	}
 
-	@Override
-	public void changeChapterGroup(long id, long group) {
+	public static void changeChapterGroup(long id, long newGroupId) {
 		Chapter chapter = ClientQuestFile.INSTANCE.getChapter(id);
 
 		if (chapter != null) {
-			ChapterGroup g = ClientQuestFile.INSTANCE.getChapterGroup(group);
+			ChapterGroup newGroup = ClientQuestFile.INSTANCE.getChapterGroup(newGroupId);
 
-			if (chapter.group != g) {
-				chapter.group.chapters.remove(chapter);
-				chapter.group = g;
-				g.chapters.add(chapter);
+			if (chapter.getGroup() != newGroup) {
+				chapter.getGroup().removeChapter(chapter);
+				newGroup.addChapter(chapter);
 				chapter.file.clearCachedData();
 				chapter.editedFromGUI();
 			}
 		}
 	}
 
-	@Override
-	public void moveChapterGroup(long id, boolean up) {
-		ChapterGroup group = ClientQuestFile.INSTANCE.getChapterGroup(id);
-
-		if (!group.isDefaultGroup()) {
-			int index = group.file.chapterGroups.indexOf(group);
-
-			if (index != -1 && up ? (index > 1) : (index < group.file.chapterGroups.size() - 1)) {
-				group.file.chapterGroups.remove(index);
-				group.file.chapterGroups.add(up ? index - 1 : index + 1, group);
-				ClientQuestFile.INSTANCE.clearCachedData();
-
-				QuestScreen gui = ClientUtils.getCurrentGuiAs(QuestScreen.class);
-
-				if (gui != null) {
-					gui.chapterPanel.refreshWidgets();
-				}
-			}
-		}
+	public static void moveChapterGroup(long id, boolean movingUp) {
+		ClientQuestFile.INSTANCE.moveChapterGroup(id, movingUp);
 	}
 
-	@Override
-	public void objectStarted(UUID teamId, long id, @Nullable Date time) {
-		TeamData teamData = ClientQuestFile.INSTANCE.getData(teamId);
+	public static void objectStarted(UUID teamId, long id, @Nullable Date time) {
+		TeamData teamData = ClientQuestFile.INSTANCE.getOrCreateTeamData(teamId);
 		teamData.setStarted(id, time);
 
 		QuestScreen gui = ClientUtils.getCurrentGuiAs(QuestScreen.class);
 
 		if (gui != null) {
-			gui.chapterPanel.refreshWidgets();
+			gui.refreshChapterPanel();
 
 			if (gui.viewQuestPanel != null) {
 				gui.viewQuestPanel.refreshWidgets();
@@ -287,46 +229,43 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon {
 		}
 	}
 
-	@Override
-	public void objectCompleted(UUID teamId, long id, @Nullable Date time) {
-		TeamData teamData = ClientQuestFile.INSTANCE.getData(teamId);
+	public static void objectCompleted(UUID teamId, long id, @Nullable Date time) {
+		TeamData teamData = ClientQuestFile.INSTANCE.getOrCreateTeamData(teamId);
 		teamData.setCompleted(id, time);
 
 		QuestScreen gui = ClientUtils.getCurrentGuiAs(QuestScreen.class);
 
 		if (gui != null) {
-			gui.chapterPanel.refreshWidgets();
+			gui.refreshChapterPanel();
 
 			if (gui.viewQuestPanel != null) {
 				gui.viewQuestPanel.refreshWidgets();
 			}
 		}
 
-		FTBQuestsJEIHelper.refresh(ClientQuestFile.INSTANCE.get(id));
+		FTBQuests.getRecipeModHelper().refreshRecipes(ClientQuestFile.INSTANCE.get(id));
 	}
 
-	@Override
-	public void syncLock(UUID id, boolean lock) {
-		if (ClientQuestFile.INSTANCE.getData(id).setLocked(lock)) {
+	public static void syncLock(UUID id, boolean lock) {
+		if (ClientQuestFile.INSTANCE.getOrCreateTeamData(id).setLocked(lock)) {
 			ClientQuestFile.INSTANCE.refreshGui();
 		}
 	}
 
-	@Override
-	public void resetReward(UUID teamId, UUID player, long rewardId) {
+	public static void resetReward(UUID teamId, UUID player, long rewardId) {
 		Reward reward = ClientQuestFile.INSTANCE.getReward(rewardId);
 
 		if (reward == null) {
 			return;
 		}
 
-		TeamData teamData = ClientQuestFile.INSTANCE.getData(teamId);
+		TeamData teamData = ClientQuestFile.INSTANCE.getOrCreateTeamData(teamId);
 
 		if (teamData.resetReward(player, reward)) {
 			QuestScreen gui = ClientUtils.getCurrentGuiAs(QuestScreen.class);
 
 			if (gui != null) {
-				gui.chapterPanel.refreshWidgets();
+				gui.refreshChapterPanel();
 
 				if (gui.viewQuestPanel != null) {
 					gui.viewQuestPanel.refreshWidgets();
@@ -335,16 +274,20 @@ public class FTBQuestsNetClient extends FTBQuestsNetCommon {
 		}
 	}
 
-	@Override
-	public void toggleChapterPinned(boolean pinned) {
-		ClientQuestFile.INSTANCE.self.setChapterPinned(FTBQuests.PROXY.getClientPlayer(), pinned);
-		ClientQuestFile.INSTANCE.questScreen.chapterPanel.refreshWidgets();
+	public static void toggleChapterPinned(boolean pinned) {
+		ClientQuestFile.INSTANCE.selfTeamData.setChapterPinned(FTBQuestsClient.getClientPlayer(), pinned);
+		ClientQuestFile.INSTANCE.getQuestScreen().ifPresent(QuestScreen::refreshChapterPanel);
 	}
 
-	@Override
-	public void syncRewardBlocking(UUID teamId, boolean rewardsBlocked) {
-		if (ClientQuestFile.INSTANCE.getData(teamId).setRewardsBlocked(rewardsBlocked)) {
+	public static void syncRewardBlocking(UUID teamId, boolean rewardsBlocked) {
+		if (ClientQuestFile.INSTANCE.getOrCreateTeamData(teamId).setRewardsBlocked(rewardsBlocked)) {
 			ClientQuestFile.INSTANCE.refreshGui();
+		}
+	}
+
+	public static void setEditorPermission(boolean hasPermission) {
+		if (ClientQuestFile.exists()) {
+			ClientQuestFile.INSTANCE.setEditorPermission(hasPermission);
 		}
 	}
 }

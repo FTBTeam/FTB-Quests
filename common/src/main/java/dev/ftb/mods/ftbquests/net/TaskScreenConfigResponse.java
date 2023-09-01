@@ -39,10 +39,10 @@ public class TaskScreenConfigResponse extends BaseC2SMessage {
     @Override
     public void handle(NetworkManager.PacketContext context) {
         if (context.getPlayer() instanceof ServerPlayer serverPlayer
-                && serverPlayer.getLevel().getBlockEntity(pos) instanceof TaskScreenBlockEntity taskScreen
+                && serverPlayer.level().getBlockEntity(pos) instanceof TaskScreenBlockEntity taskScreen
                 && TaskScreenBlock.hasPermissionToEdit(serverPlayer, taskScreen)) {
             taskScreen.load(payload);
-            serverPlayer.getLevel().sendBlockUpdated(taskScreen.getBlockPos(), taskScreen.getBlockState(), taskScreen.getBlockState(), Block.UPDATE_ALL);
+            serverPlayer.level().sendBlockUpdated(taskScreen.getBlockPos(), taskScreen.getBlockState(), taskScreen.getBlockState(), Block.UPDATE_ALL);
             taskScreen.setChanged();
         }
     }

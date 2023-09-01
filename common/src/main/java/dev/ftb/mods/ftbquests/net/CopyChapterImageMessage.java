@@ -6,20 +6,14 @@ import dev.architectury.networking.simple.MessageType;
 import dev.ftb.mods.ftbquests.quest.Chapter;
 import dev.ftb.mods.ftbquests.quest.ChapterImage;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 
 public class CopyChapterImageMessage extends BaseC2SMessage {
     private final ChapterImage img;
     private final long chapterId;
 
-    public CopyChapterImageMessage(ChapterImage toCopy, Chapter chapter, double x, double y) {
-        this.img = new ChapterImage(chapter);
-        CompoundTag tag = new CompoundTag();
-        toCopy.writeData(tag);
-        this.img.readData(tag);
-        img.x = x;
-        img.y = y;
+    public CopyChapterImageMessage(ChapterImage toCopy, Chapter chapter, double newX, double newY) {
+        img = toCopy.copy(chapter, newX, newY);
         this.chapterId = chapter.id;
     }
 
@@ -42,9 +36,9 @@ public class CopyChapterImageMessage extends BaseC2SMessage {
 
     @Override
     public void handle(NetworkManager.PacketContext context) {
-        img.chapter.images.add(img);
-        img.chapter.file.save();
-
-        new EditObjectResponseMessage(img.chapter).sendToAll(context.getPlayer().getServer());
+        Chapter chapter = img.getChapter();
+        chapter.addImage(img);
+        chapter.file.markDirty();
+        new EditObjectResponseMessage(chapter).sendToAll(context.getPlayer().getServer());
     }
 }

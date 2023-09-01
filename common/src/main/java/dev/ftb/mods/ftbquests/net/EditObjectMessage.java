@@ -3,8 +3,8 @@ package dev.ftb.mods.ftbquests.net;
 import dev.architectury.networking.NetworkManager;
 import dev.architectury.networking.simple.BaseC2SMessage;
 import dev.architectury.networking.simple.MessageType;
+import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
-import dev.ftb.mods.ftbquests.integration.FTBQuestsJEIHelper;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.util.NetUtils;
@@ -27,7 +27,7 @@ public class EditObjectMessage extends BaseC2SMessage {
 		id = o.id;
 		nbt = new CompoundTag();
 		o.writeData(nbt);
-		FTBQuestsJEIHelper.refresh(o);
+		FTBQuests.getRecipeModHelper().refreshRecipes(o);
 		ClientQuestFile.INSTANCE.clearCachedData();
 		o.editedFromGUI();
 	}
@@ -52,7 +52,7 @@ public class EditObjectMessage extends BaseC2SMessage {
 				object.readData(nbt);
 				object.editedFromGUIOnServer();
 				ServerQuestFile.INSTANCE.clearCachedData();
-				ServerQuestFile.INSTANCE.save();
+				ServerQuestFile.INSTANCE.markDirty();
 				new EditObjectResponseMessage(object).sendToAll(context.getPlayer().getServer());
 			}
 		}

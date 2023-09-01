@@ -3,9 +3,11 @@ package dev.ftb.mods.ftbquests.quest.reward;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
+import dev.ftb.mods.ftblibrary.ui.Widget;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
+import dev.ftb.mods.ftblibrary.util.client.PositionedIngredient;
+import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
 import dev.ftb.mods.ftbquests.quest.Quest;
-import dev.ftb.mods.ftbquests.quest.QuestFile;
 import dev.ftb.mods.ftbquests.quest.QuestObjectType;
 import dev.ftb.mods.ftbquests.quest.loot.RewardTable;
 import dev.ftb.mods.ftbquests.quest.loot.WeightedReward;
@@ -22,16 +24,14 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
-/**
- * @author LatvianModder
- */
 public class RandomReward extends Reward {
-	public RewardTable table;
+	private RewardTable table;
 
-	public RandomReward(Quest parent) {
-		super(parent);
+	public RandomReward(long id, Quest parent) {
+		super(id, parent);
 		table = null;
 	}
 
@@ -59,35 +59,31 @@ public class RandomReward extends Reward {
 	public void readData(CompoundTag nbt) {
 		super.readData(nbt);
 		table = null;
-		QuestFile file = getQuestFile();
+		BaseQuestFile file = getQuestFile();
 
 		long id = nbt.getLong("table_id");
-
 		if (id != 0L) {
 			table = file.getRewardTable(id);
-		} else {
-			int index = nbt.contains("table") ? nbt.getInt("table") : -1;
-
-			if (index >= 0 && index < file.rewardTables.size()) {
-				table = file.rewardTables.get(index);
-			}
 		}
 
 		if (table == null && nbt.contains("table_data")) {
-			table = new RewardTable(file);
+			table = new RewardTable(-1L, file);
 			table.readData(nbt.getCompound("table_data"));
-			table.id = -1L;
-			table.title = "Internal";
+			table.setRawTitle("Internal");
 		}
 	}
 
 	@Nullable
 	public RewardTable getTable() {
-		if (table != null && table.invalid) {
+		if (table != null && !table.isValid()) {
 			table = null;
 		}
 
 		return table;
+	}
+
+	public void setTable(RewardTable table) {
+		this.table = table;
 	}
 
 	@Override
@@ -105,15 +101,14 @@ public class RandomReward extends Reward {
 	@Override
 	public void readNetData(FriendlyByteBuf buffer) {
 		super.readNetData(buffer);
-		QuestFile file = getQuestFile();
+		BaseQuestFile file = getQuestFile();
 
 		long t = buffer.readLong();
 
 		if (t == -1L) {
-			table = new RewardTable(file);
+			table = new RewardTable(-1L, file);
 			table.readNetData(buffer);
-			table.id = -1L;
-			table.title = "Internal";
+			table.setRawTitle("Internal");
 		} else {
 			table = file.getRewardTable(t);
 		}
@@ -121,8 +116,8 @@ public class RandomReward extends Reward {
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public void getConfig(ConfigGroup config) {
-		super.getConfig(config);
+	public void fillConfigGroup(ConfigGroup config) {
+		super.fillConfigGroup(config);
 		config.add("table", new ConfigQuestObject<>(QuestObjectType.REWARD_TABLE), table, v -> table = v, getTable()).setNameKey("ftbquests.reward_table");
 	}
 
@@ -131,8 +126,8 @@ public class RandomReward extends Reward {
 		RewardTable table = getTable();
 
 		if (table != null) {
-			for (WeightedReward reward : table.generateWeightedRandomRewards(player.getRandom(), 1, false)) {
-				reward.reward.claim(player, notify);
+			for (WeightedReward wr : table.generateWeightedRandomRewards(player.getRandom(), 1, false)) {
+				wr.getReward().claim(player, notify);
 			}
 		}
 
@@ -141,7 +136,7 @@ public class RandomReward extends Reward {
 	@Override
 	@Environment(EnvType.CLIENT)
 	public Component getAltTitle() {
-		return getTable() == null ? super.getAltTitle() : getTable().useTitle ? getTable().getTitle() : super.getAltTitle();
+		return getTable() == null ? super.getAltTitle() : getTable().getTitleOrElse(super.getAltTitle());
 	}
 
 	@Override
@@ -169,10 +164,11 @@ public class RandomReward extends Reward {
 	}
 
 	@Override
-	@Nullable
-	@Environment(EnvType.CLIENT)
-	public Object getIngredient() {
-		return getTable() != null && getTable().lootCrate != null ? getTable().lootCrate.createStack() : null;
+    @Environment(EnvType.CLIENT)
+	public Optional<PositionedIngredient> getIngredient(Widget widget) {
+		return getTable() != null && getTable().getLootCrate() != null ?
+				PositionedIngredient.of(getTable().getLootCrate().createStack(), widget) :
+				Optional.empty();
 	}
 
 	@Override

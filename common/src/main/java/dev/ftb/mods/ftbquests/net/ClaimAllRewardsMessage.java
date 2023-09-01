@@ -3,8 +3,8 @@ package dev.ftb.mods.ftbquests.net;
 import dev.architectury.networking.NetworkManager;
 import dev.architectury.networking.simple.BaseC2SMessage;
 import dev.architectury.networking.simple.MessageType;
-import dev.ftb.mods.ftbquests.quest.*;
-import dev.ftb.mods.ftbquests.quest.reward.Reward;
+import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
+import dev.ftb.mods.ftbquests.quest.TeamData;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -32,18 +32,12 @@ public class ClaimAllRewardsMessage extends BaseC2SMessage {
 		ServerPlayer player = (ServerPlayer) context.getPlayer();
 		TeamData data = TeamData.get(player);
 
-		for (ChapterGroup group : ServerQuestFile.INSTANCE.chapterGroups) {
-			for (Chapter chapter : group.chapters) {
-				for (Quest quest : chapter.quests) {
-					if (data.isCompleted(quest)) {
-						for (Reward reward : quest.rewards) {
-							if (!reward.getExcludeFromClaimAll()) {
-								data.claimReward(player, reward, true);
-							}
-						}
-					}
-				}
+		ServerQuestFile.INSTANCE.forAllQuests(quest -> {
+			if (data.isCompleted(quest)) {
+				quest.getRewards().stream()
+						.filter(reward -> !reward.getExcludeFromClaimAll())
+						.forEach(reward -> data.claimReward(player, reward, true));
 			}
-		}
+		});
 	}
 }

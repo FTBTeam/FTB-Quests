@@ -9,7 +9,7 @@ import dev.ftb.mods.ftbquests.block.entity.FTBQuestsBlockEntities;
 import dev.ftb.mods.ftbquests.command.FTBQuestsCommands;
 import dev.ftb.mods.ftbquests.events.ClearFileCacheEvent;
 import dev.ftb.mods.ftbquests.item.FTBQuestsItems;
-import dev.ftb.mods.ftbquests.quest.QuestFile;
+import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.task.DimensionTask;
@@ -17,10 +17,10 @@ import dev.ftb.mods.ftbquests.quest.task.KillTask;
 import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.util.DeferredInventoryDetection;
 import dev.ftb.mods.ftbquests.util.FTBQuestsInventoryListener;
-import dev.ftb.mods.ftbteams.event.PlayerChangedTeamEvent;
-import dev.ftb.mods.ftbteams.event.PlayerLoggedInAfterTeamEvent;
-import dev.ftb.mods.ftbteams.event.TeamCreatedEvent;
-import dev.ftb.mods.ftbteams.event.TeamEvent;
+import dev.ftb.mods.ftbteams.api.event.PlayerChangedTeamEvent;
+import dev.ftb.mods.ftbteams.api.event.PlayerLoggedInAfterTeamEvent;
+import dev.ftb.mods.ftbteams.api.event.TeamCreatedEvent;
+import dev.ftb.mods.ftbteams.api.event.TeamEvent;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -40,14 +40,13 @@ import net.minecraft.world.level.Level;
 
 import java.util.List;
 
-/**
- * @author LatvianModder
- */
-public class FTBQuestsEventHandler {
+public enum FTBQuestsEventHandler {
+	INSTANCE;
+
 	private List<KillTask> killTasks = null;
 	private List<Task> autoSubmitTasks = null;
 
-	public void init() {
+	void init() {
 		LifecycleEvent.SERVER_BEFORE_START.register(this::serverAboutToStart);
 		CommandRegistrationEvent.EVENT.register(this::registerCommands);
 		LifecycleEvent.SERVER_STARTED.register(this::serverStarted);
@@ -94,7 +93,7 @@ public class FTBQuestsEventHandler {
 		}
 	}
 
-	private void fileCacheClear(QuestFile file) {
+	private void fileCacheClear(BaseQuestFile file) {
 		if (file.isServerSide()) {
 			killTasks = null;
 			autoSubmitTasks = null;
@@ -123,10 +122,10 @@ public class FTBQuestsEventHandler {
 				return EventResult.pass();
 			}
 
-			TeamData data = ServerQuestFile.INSTANCE.getData(player);
+			TeamData data = ServerQuestFile.INSTANCE.getOrCreateTeamData(player);
 
 			for (KillTask task : killTasks) {
-				if (data.getProgress(task) < task.getMaxProgress() && data.canStartTasks(task.quest)) {
+				if (data.getProgress(task) < task.getMaxProgress() && data.canStartTasks(task.getQuest())) {
 					task.kill(data, entity);
 				}
 			}
@@ -148,20 +147,20 @@ public class FTBQuestsEventHandler {
 				return;
 			}
 
-			TeamData data = file.getData(player);
+			TeamData data = file.getOrCreateTeamData(player);
 
 			if (data.isLocked()) {
 				return;
 			}
 
-			long t = player.level.getGameTime();
+			long t = player.level().getGameTime();
 
 			file.withPlayerContext((ServerPlayer) player, () -> {
 				for (Task task : autoSubmitTasks) {
 					long d = task.autoSubmitOnPlayerTick();
 
 					if (d > 0L && t % d == 0L) {
-						if (!data.isCompleted(task) && data.canStartTasks(task.quest)) {
+						if (!data.isCompleted(task) && data.canStartTasks(task.getQuest())) {
 							task.submitTask(data, (ServerPlayer) player);
 						}
 					}
@@ -189,7 +188,7 @@ public class FTBQuestsEventHandler {
 			return;
 		}
 
-		if (PlayerHooks.isFake(newPlayer) || newPlayer.level.getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY)) {
+		if (PlayerHooks.isFake(newPlayer) || newPlayer.level().getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY)) {
 			return;
 		}
 
@@ -205,7 +204,7 @@ public class FTBQuestsEventHandler {
 	private void changedDimension(ServerPlayer player, ResourceKey<Level> oldLevel, ResourceKey<Level> newLevel) {
 		if (!PlayerHooks.isFake(player)) {
 			ServerQuestFile file = ServerQuestFile.INSTANCE;
-			TeamData data = file.getData(player);
+			TeamData data = file.getOrCreateTeamData(player);
 
 			if (data.isLocked()) {
 				return;
@@ -213,7 +212,7 @@ public class FTBQuestsEventHandler {
 
 			file.withPlayerContext(player, () -> {
 				for (DimensionTask task : file.collect(DimensionTask.class)) {
-					if (data.canStartTasks(task.quest)) {
+					if (data.canStartTasks(task.getQuest())) {
 						task.submitTask(data, player);
 					}
 				}

@@ -1,6 +1,6 @@
 package dev.ftb.mods.ftbquests.block.entity;
 
-import dev.ftb.mods.ftbquests.integration.StageHelper;
+import dev.ftb.mods.ftblibrary.integration.stages.StageHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
@@ -16,31 +16,22 @@ import org.jetbrains.annotations.Nullable;
  * @author LatvianModder
  */
 public class StageBarrierBlockEntity extends BlockEntity implements BarrierBlockEntity {
-	public String stage = "";
+	private String stage = "";
 
 	public StageBarrierBlockEntity(BlockPos blockPos, BlockState blockState) {
 		super(FTBQuestsBlockEntities.STAGE_BARRIER.get(), blockPos, blockState);
 	}
 
-	public void readBarrier(CompoundTag tag) {
-		stage = tag.getString("Stage");
-	}
-
-	public CompoundTag writeBarrier(CompoundTag tag) {
-		tag.putString("Stage", stage);
-		return tag;
-	}
-
 	@Override
 	public void load(CompoundTag tag) {
 		super.load(tag);
-		readBarrier(tag);
+		stage = tag.getString("Stage");
 	}
 
 	@Override
 	public void saveAdditional(CompoundTag tag) {
 		super.saveAdditional(tag);
-		writeBarrier(tag);
+		tag.putString("Stage", stage);
 	}
 
 	@Nullable
@@ -57,19 +48,20 @@ public class StageBarrierBlockEntity extends BlockEntity implements BarrierBlock
 	@Override
 	public void setChanged() {
 		super.setChanged();
-		if (level != null && !level.isClientSide) {
-			((ServerLevel) level).getChunkSource().blockChanged(getBlockPos());
+
+		if (level instanceof ServerLevel serverLevel) {
+			serverLevel.getChunkSource().blockChanged(getBlockPos());
 		}
 	}
 
 	@Override
-	public void update(String s) {
-		stage = s;
+	public void update(String stage) {
+		this.stage = stage;
 		setChanged();
 	}
 
 	@Override
 	public boolean isOpen(Player player) {
-		return !stage.isEmpty() && StageHelper.INSTANCE.get().has(player, stage);
+		return !stage.isEmpty() && StageHelper.INSTANCE.getProvider().has(player, stage);
 	}
 }

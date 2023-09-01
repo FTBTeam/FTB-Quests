@@ -1,56 +1,54 @@
 package dev.ftb.mods.ftbquests.quest;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import dev.ftb.mods.ftblibrary.config.NameMap;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.ImageIcon;
 import dev.ftb.mods.ftblibrary.math.PixelBuffer;
-import dev.ftb.mods.ftbquests.FTBQuests;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * @author LatvianModder
- */
 public final class QuestShape extends Icon {
-	public static final Map<String, QuestShape> MAP = new LinkedHashMap<>();
+	private static final Map<String, QuestShape> MAP = new LinkedHashMap<>();
 	private static QuestShape defaultShape;
-	public static NameMap<String> idMap, idMapWithDefault;
+
+	public static NameMap<String> idMap;
+	public static NameMap<String> idMapWithDefault;
+
+	private final String id;
+	private final ImageIcon background, outline, shape;
+	private PixelBuffer shapePixels;
+
+	public QuestShape(String id) {
+		this.id = id;
+		background = new ImageIcon(new ResourceLocation(FTBQuestsAPI.MOD_ID, "textures/shapes/" + this.id + "/background.png"));
+		outline = new ImageIcon(new ResourceLocation(FTBQuestsAPI.MOD_ID, "textures/shapes/" + this.id + "/outline.png"));
+		shape = new ImageIcon(new ResourceLocation(FTBQuestsAPI.MOD_ID, "textures/shapes/" + this.id + "/shape.png"));
+	}
 
 	public static void reload(List<String> list) {
 		MAP.clear();
 
-		for (String s : list) {
-			MAP.put(s, new QuestShape(s));
-		}
+		list.forEach(s -> MAP.put(s, new QuestShape(s)));
 
 		defaultShape = MAP.values().iterator().next();
-		idMap = NameMap.of(list.get(0), list.toArray(new String[0])).baseNameKey("ftbquests.quest.shape").create();
+		idMap = NameMap.of(list.get(0), list).baseNameKey("ftbquests.quest.shape").create();
 		list.add(0, "default");
-		idMapWithDefault = NameMap.of(list.get(0), list.toArray(new String[0])).baseNameKey("ftbquests.quest.shape").create();
+		idMapWithDefault = NameMap.of(list.get(0), list).baseNameKey("ftbquests.quest.shape").create();
 	}
 
 	public static QuestShape get(String id) {
 		return MAP.getOrDefault(id, defaultShape);
-	}
-
-	public final String id;
-	public final ImageIcon background, outline, shape;
-	private PixelBuffer shapePixels;
-
-	public QuestShape(String i) {
-		id = i;
-		background = new ImageIcon(new ResourceLocation(FTBQuests.MOD_ID, "textures/shapes/" + id + "/background.png"));
-		outline = new ImageIcon(new ResourceLocation(FTBQuests.MOD_ID, "textures/shapes/" + id + "/outline.png"));
-		shape = new ImageIcon(new ResourceLocation(FTBQuests.MOD_ID, "textures/shapes/" + id + "/shape.png"));
 	}
 
 	public String toString() {
@@ -59,9 +57,21 @@ public final class QuestShape extends Icon {
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public void draw(PoseStack matrixStack, int x, int y, int w, int h) {
-		background.draw(matrixStack, x, y, w, h);
-		outline.draw(matrixStack, x, y, w, h);
+	public void draw(GuiGraphics graphics, int x, int y, int w, int h) {
+		background.draw(graphics, x, y, w, h);
+		outline.draw(graphics, x, y, w, h);
+	}
+
+	public ImageIcon getBackground() {
+		return background;
+	}
+
+	public ImageIcon getOutline() {
+		return outline;
+	}
+
+	public ImageIcon getShape() {
+		return shape;
 	}
 
 	public int hashCode() {
@@ -75,8 +85,8 @@ public final class QuestShape extends Icon {
 	public PixelBuffer getShapePixels() {
 		if (shapePixels == null) {
 			try {
-				Resource resource = Minecraft.getInstance().getResourceManager().getResource(new ResourceLocation(FTBQuests.MOD_ID, "textures/shapes/" + id + "/shape.png")).get();
-
+				ResourceLocation shapeLoc = new ResourceLocation(FTBQuestsAPI.MOD_ID, "textures/shapes/" + id + "/shape.png");
+				Resource resource = Minecraft.getInstance().getResourceManager().getResource(shapeLoc).get();
 				try (InputStream stream = resource.open()) {
 					shapePixels = PixelBuffer.from(stream);
 				}
@@ -84,9 +94,12 @@ public final class QuestShape extends Icon {
 				shapePixels = new PixelBuffer(1, 1);
 				shapePixels.setRGB(0, 0, 0xFFFFFFFF);
 			}
-
 		}
 
 		return shapePixels;
+	}
+
+	public static Map<String,QuestShape> map() {
+		return Collections.unmodifiableMap(MAP);
 	}
 }

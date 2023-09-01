@@ -22,15 +22,12 @@ import net.minecraft.server.level.ServerPlayer;
 
 import java.util.Map;
 
-/**
- * @author LatvianModder
- */
-public class AdvancementTask extends BooleanTask {
-	public ResourceLocation advancement = new ResourceLocation("minecraft:story/root");
-	public String criterion = "";
+public class AdvancementTask extends AbstractBooleanTask {
+	private ResourceLocation advancement = new ResourceLocation("minecraft:story/root");
+	private String criterion = "";
 
-	public AdvancementTask(Quest quest) {
-		super(quest);
+	public AdvancementTask(long id, Quest quest) {
+		super(id, quest);
 	}
 
 	@Override
@@ -68,8 +65,8 @@ public class AdvancementTask extends BooleanTask {
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public void getConfig(ConfigGroup config) {
-		super.getConfig(config);
+	public void fillConfigGroup(ConfigGroup config) {
+		super.fillConfigGroup(config);
 
 		if (KnownServerRegistries.client != null && !KnownServerRegistries.client.advancements.isEmpty()) {
 			Map<ResourceLocation, KnownServerRegistries.AdvancementInfo> advancements = KnownServerRegistries.client.advancements;

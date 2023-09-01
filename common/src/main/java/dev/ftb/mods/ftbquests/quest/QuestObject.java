@@ -11,14 +11,15 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
-/**
- * @author LatvianModder
- */
 public abstract class QuestObject extends QuestObjectBase {
-	public boolean disableToast = false;
+	protected boolean disableToast = false;
+
+	public QuestObject(long id) {
+		super(id);
+	}
 
 	@Override
 	public void writeData(CompoundTag nbt) {
@@ -49,19 +50,19 @@ public abstract class QuestObject extends QuestObjectBase {
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public void getConfig(ConfigGroup config) {
-		super.getConfig(config);
+	public void fillConfigGroup(ConfigGroup config) {
+		super.fillConfigGroup(config);
 		config.addBool("disable_toast", disableToast, v -> disableToast = v, false).setNameKey("ftbquests.disable_completion_toast").setCanEdit(getQuestChapter() == null || !getQuestChapter().alwaysInvisible).setOrder(127);
 	}
 
 	@Override
 	public void forceProgress(TeamData teamData, ProgressChange progressChange) {
-		if (progressChange.reset) {
+		if (progressChange.shouldReset()) {
 			teamData.setStarted(id, null);
 			teamData.setCompleted(id, null);
 		} else {
-			teamData.setStarted(id, progressChange.time);
-			teamData.setCompleted(id, progressChange.time);
+			teamData.setStarted(id, progressChange.getDate());
+			teamData.setCompleted(id, progressChange.getDate());
 		}
 
 		for (QuestObject child : getChildren()) {
@@ -112,26 +113,15 @@ public abstract class QuestObject extends QuestObjectBase {
 	@Environment(EnvType.CLIENT)
 	public Color4I getProgressColor(TeamData data, boolean dim) {
 		Color4I c = getProgressColor(data);
-
-		if (dim) {
-			return c.addBrightness(-0.35F);
-		}
-
-		return c;
+		return dim ? c.addBrightness(-0.35F) : c;
 	}
 
 	public Collection<? extends QuestObject> getChildren() {
-		return Collections.emptyList();
+		return List.of();
 	}
 
 	public boolean isCompletedRaw(TeamData data) {
-		for (QuestObject child : getChildren()) {
-			if (!child.isOptionalForProgression() && !data.isCompleted(child)) {
-				return false;
-			}
-		}
-
-		return true;
+		return getChildren().stream().noneMatch(child -> !child.isOptionalForProgression() && !data.isCompleted(child));
 	}
 
 	public boolean isOptionalForProgression() {

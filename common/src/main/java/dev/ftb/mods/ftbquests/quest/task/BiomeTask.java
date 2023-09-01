@@ -3,15 +3,15 @@ package dev.ftb.mods.ftbquests.quest.task;
 import com.mojang.datafixers.util.Either;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.NameMap;
-import dev.ftb.mods.ftbquests.FTBQuests;
+import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -25,18 +25,15 @@ import net.minecraft.world.level.biome.Biomes;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @author LatvianModder
- */
-public class BiomeTask extends BooleanTask {
+public class BiomeTask extends AbstractBooleanTask {
 	private static final ResourceKey<Biome> DEFAULT_BIOME = Biomes.PLAINS;
 
 	private static final List<String> KNOWN_BIOMES = new ArrayList<>();
 
 	private Either<ResourceKey<Biome>, TagKey<Biome>> biome;
 
-	public BiomeTask(Quest quest) {
-		super(quest);
+	public BiomeTask(long id, Quest quest) {
+		super(id, quest);
 		biome = Either.left(DEFAULT_BIOME);
 	}
 
@@ -71,8 +68,8 @@ public class BiomeTask extends BooleanTask {
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public void getConfig(ConfigGroup config) {
-		super.getConfig(config);
+	public void fillConfigGroup(ConfigGroup config) {
+		super.fillConfigGroup(config);
 		config.addEnum("biome", getBiome(), this::setBiome, NameMap.of(DEFAULT_BIOME.location().toString(), getKnownBiomes()).create());
 	}
 
@@ -98,11 +95,11 @@ public class BiomeTask extends BooleanTask {
 	public boolean canSubmit(TeamData teamData, ServerPlayer player) {
 		if (player.isSpectator()) return false;
 
-		Holder<Biome> biomeHolder = player.level.getBiome(player.blockPosition());
+		Holder<Biome> biomeHolder = player.level().getBiome(player.blockPosition());
 		return biome.map(
 				key -> biomeHolder.unwrapKey().map(k -> k == key).orElse(false),
 				tagKey -> {
-					var reg = player.level.registryAccess().registry(Registry.BIOME_REGISTRY).orElseThrow();
+					var reg = player.level().registryAccess().registry(Registries.BIOME).orElseThrow();
 					return reg.getTag(tagKey).map(holderSet -> holderSet.contains(biomeHolder)).orElse(false);
 				}
 		);
@@ -117,21 +114,22 @@ public class BiomeTask extends BooleanTask {
 
 	private void setBiome(String str) {
 		biome = str.startsWith("#") ?
-				Either.right(TagKey.create(Registry.BIOME_REGISTRY, safeResourceLocation(str.substring(1), DEFAULT_BIOME.location()))) :
-				Either.left(ResourceKey.create(Registry.BIOME_REGISTRY, safeResourceLocation(str, DEFAULT_BIOME.location())));
+				Either.right(TagKey.create(Registries.BIOME, safeResourceLocation(str.substring(1), DEFAULT_BIOME.location()))) :
+				Either.left(ResourceKey.create(Registries.BIOME, safeResourceLocation(str, DEFAULT_BIOME.location())));
 	}
 
 	private List<String> getKnownBiomes() {
+		// only called client-side to fill the config screen options
 		if (KNOWN_BIOMES.isEmpty()) {
-			RegistryAccess registryAccess = FTBQuests.PROXY.getClientPlayer().level.registryAccess();
+			RegistryAccess registryAccess = FTBQuestsClient.getClientPlayer().level().registryAccess();
 			KNOWN_BIOMES.addAll(registryAccess
-					.registryOrThrow(Registry.BIOME_REGISTRY).registryKeySet().stream()
+					.registryOrThrow(Registries.BIOME).registryKeySet().stream()
 					.map(o -> o.location().toString())
 					.sorted(String::compareTo)
 					.toList()
 			);
 			KNOWN_BIOMES.addAll(registryAccess
-					.registryOrThrow(Registry.BIOME_REGISTRY).getTagNames()
+					.registryOrThrow(Registries.BIOME).getTagNames()
 					.map(o -> "#" + o.location())
 					.sorted(String::compareTo)
 					.toList()

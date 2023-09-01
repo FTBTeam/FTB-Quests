@@ -3,11 +3,12 @@ package dev.ftb.mods.ftbquests.block.entity;
 import dev.ftb.mods.ftblibrary.config.BooleanConfig;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.ItemStackConfig;
-import dev.ftb.mods.ftbquests.FTBQuests;
+import dev.ftb.mods.ftbquests.api.FTBQuestsAPI;
 import dev.ftb.mods.ftbquests.block.FTBQuestsBlocks;
 import dev.ftb.mods.ftbquests.block.TaskScreenBlock;
+import dev.ftb.mods.ftbquests.client.FTBQuestsClient;
 import dev.ftb.mods.ftbquests.net.TaskScreenConfigResponse;
-import dev.ftb.mods.ftbquests.quest.QuestFile;
+import dev.ftb.mods.ftbquests.quest.BaseQuestFile;
 import dev.ftb.mods.ftbquests.quest.QuestObjectBase;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.task.Task;
@@ -24,9 +25,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nonnull;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -40,7 +41,8 @@ public class TaskScreenBlockEntity extends BlockEntity implements ITaskScreen {
     private boolean textShadow = false;
     private ItemStack inputModeIcon = ItemStack.EMPTY;
     private ItemStack skin = ItemStack.EMPTY;
-    @Nonnull private UUID teamId = Util.NIL_UUID;
+    @NotNull
+    private UUID teamId = Util.NIL_UUID;
     public float[] fakeTextureUV = null;  // null for unknown, 0-array for no texture, 4-array for a texture
     private TeamData cachedTeamData = null;
 
@@ -50,7 +52,7 @@ public class TaskScreenBlockEntity extends BlockEntity implements ITaskScreen {
 
     public Task getTask() {
         if (task == null && taskId != 0L || task != null && task.id != taskId) {
-            task = FTBQuests.PROXY.getQuestFile(level.isClientSide).getTask(taskId);
+            task = FTBQuestsAPI.api().getQuestFile(level.isClientSide).getTask(taskId);
         }
 
         return task;
@@ -109,20 +111,20 @@ public class TaskScreenBlockEntity extends BlockEntity implements ITaskScreen {
         this.textShadow = textShadow;
     }
 
-    public void setTeamId(@Nonnull UUID teamId) {
+    public void setTeamId(@NotNull UUID teamId) {
         this.teamId = teamId;
         cachedTeamData = null;
     }
 
     @Override
-    @Nonnull
+    @NotNull
     public UUID getTeamId() {
         return teamId;
     }
 
     public TeamData getCachedTeamData() {
         if (cachedTeamData == null) {
-            QuestFile f = FTBQuests.PROXY.getQuestFile(level.isClientSide);
+            BaseQuestFile f = FTBQuestsAPI.api().getQuestFile(level.isClientSide);
             cachedTeamData = f.getNullableTeamData(getTeamId());
         }
         return cachedTeamData;
@@ -183,11 +185,15 @@ public class TaskScreenBlockEntity extends BlockEntity implements ITaskScreen {
         if (textShadow) compoundTag.putBoolean("TextShadow", true);
     }
 
-    public ConfigGroup getConfigGroup(TeamData data) {
-        ConfigGroup cg0 = new ConfigGroup("task_screen");
+    public ConfigGroup fillConfigGroup(TeamData data) {
+        ConfigGroup cg0 = new ConfigGroup("task_screen", accepted -> {
+            if (accepted) {
+                new TaskScreenConfigResponse(this).sendToServer();
+            }
+        });
 
         cg0.setNameKey(getBlockState().getBlock().getDescriptionId());
-        ConfigGroup cg = cg0.getGroup("screen");
+        ConfigGroup cg = cg0.getOrCreateSubgroup("screen");
         cg.add("task", new ConfigQuestObject<>(o -> isSuitableTask(data, o)), getTask(), this::setTask, null).setNameKey("ftbquests.task");
         cg.add("skin", new ItemStackConfig(true, true), getSkin(), this::setSkin, ItemStack.EMPTY).setNameKey("block.ftbquests.screen.skin");
         cg.add("text_shadow", new BooleanConfig(), isTextShadow(), this::setTextShadow, false).setNameKey("block.ftbquests.screen.text_shadow");
@@ -195,17 +201,11 @@ public class TaskScreenBlockEntity extends BlockEntity implements ITaskScreen {
         cg.add("input_only", new BooleanConfig(), isInputOnly(), this::setInputOnly, false).setNameKey("block.ftbquests.screen.input_only");
         cg.add("input_icon", new ItemStackConfig(true, true), getInputModeIcon(), this::setInputModeIcon, ItemStack.EMPTY).setNameKey("block.ftbquests.screen.input_mode_icon");
 
-        cg0.savedCallback = accepted -> {
-            if (accepted) {
-                new TaskScreenConfigResponse(this).sendToServer();
-            }
-        };
-
         return cg0;
     }
 
     private boolean isSuitableTask(TeamData data, QuestObjectBase o) {
-        return o instanceof Task t && (data.getCanEdit(FTBQuests.PROXY.getClientPlayer()) || data.canStartTasks(t.quest)) && t.consumesResources();
+        return o instanceof Task t && (data.getCanEdit(FTBQuestsClient.getClientPlayer()) || data.canStartTasks(t.getQuest())) && t.consumesResources();
     }
 
     public float[] getFakeTextureUV() {
@@ -218,7 +218,7 @@ public class TaskScreenBlockEntity extends BlockEntity implements ITaskScreen {
                 } else if (state.hasProperty(BlockStateProperties.FACING)) {
                     state = state.setValue(BlockStateProperties.FACING, facing);
                 }
-                fakeTextureUV = FTBQuests.PROXY.getTextureUV(state, facing);
+                fakeTextureUV = FTBQuestsClient.getTextureUV(state, facing);
             } else {
                 fakeTextureUV = new float[0];
             }

@@ -1,6 +1,5 @@
 package dev.ftb.mods.ftbquests.item;
 
-import dev.ftb.mods.ftbquests.FTBQuests;
 import dev.ftb.mods.ftbquests.block.FTBQuestsBlocks;
 import dev.ftb.mods.ftbquests.client.ClientQuestFile;
 import net.fabricmc.api.EnvType;
@@ -17,7 +16,7 @@ import java.util.List;
 
 public class QuestBarrierBlockItem extends BlockItem {
 	public QuestBarrierBlockItem() {
-		super(FTBQuestsBlocks.BARRIER.get(), new Properties().tab(FTBQuests.ITEM_GROUP));
+		super(FTBQuestsBlocks.BARRIER.get(), FTBQuestsItems.defaultProps());
 	}
 
 	@Override
